@@ -20,6 +20,7 @@ import { initFavorites } from './_favorites.js';
 import { initSupport } from './_support.js';
 import { initNetwork } from './_network.js';
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
+import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
 import { initEntryEdit } from './_entry_edit.js';
 import { initToolbar, bar_ } from './_bar.js';   // Redaktions-Werkzeugleiste: Menüs, Status, Modus, Abbrechen
 import { initAi } from './_ai.js';   // KI-Assistent (Core\AI) – ohne Konfiguration #cms-ai wirkungslos
@@ -71,6 +72,7 @@ initSupport(csrf);
 initNetwork();
 // Eingereicht: Sammelauswahl (_review.js)
 initReview();
+initRedirects();
 // Konto → Akzentfarbe (_accent.js)
 initAccent();
 // Grundeinstellungen → Schriften (_fonts.js)

@@ -181,6 +181,10 @@ final class App
                 return Http\Controllers\ApiController::fail(new Api\ApiError($e->getCode() ?: 404,
                     $e->getCode() === 405 ? 'Methode nicht erlaubt.' : 'Unbekannter API-Endpunkt. Übersicht: ' . absolute_url('/api/v1/openapi.json')));
             }
+            // Keine Seite, keine Route: Weiterleitungen (Core\Redirects) – echte Seiten gehen damit immer vor
+            if ($e->getCode() === 404 && ($to = Redirects\Redirects::handle404($request))) {
+                return $to;
+            }
             return (new Http\Controllers\SiteController())->error($e->getCode(), $e->getMessage());
         } catch (\Throwable $e) {
             error_log((string) $e);

@@ -93,6 +93,7 @@ jobs:
           printf "<?php\nreturn ['theme' => 'basis'];\n" > config/sites/default.php
           php bin/console migrate
           php bin/console health   # Warnungen (!) sind erlaubt, Fehler (✗) brechen ab
+          php bin/console redirects:selftest   # Weiterleitungen: Normalisieren und Vergleichen (Core\Redirects\SelfTest)
           php -S 127.0.0.1:8000 -t public public/index.php > /tmp/php-server.log 2>&1 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8000/ && break; sleep 0.5; done
           fail=0

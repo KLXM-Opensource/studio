@@ -70,6 +70,12 @@ final class OpenApi
                     'get' => $op('Einstellungen', 'Landingpages mit eigenen Domains (Funktion „landings“): Domains, zugeordnete Seite, Unterseiten, Canonical-Modus (own|mirror), Weiterleitungen, Suche, Layout, Marke (Name, Logo, Favicon, Vorschaubild, Design-Überschreibungen) und die Seiten mit ihren Adressen. Nur lesen; 404, wenn die Funktion aus ist.',
                         ['responses' => ['200' => $ok(['type' => 'object'])] + $err]),
                 ],
+                '/redirects' => [
+                    'get' => $op('Einstellungen', 'Weiterleitungen (Funktion „redirects“): alte Adresse (source, * am Ende = Präfix), Ziel (page:ID[#anker], /pfad oder https://…), Code 301/302/410, Treffer. Mit ?test=/pfad zusätzlich: wohin führt die Adresse? Nur lesen; 404, wenn die Funktion aus ist.', [
+                        'parameters' => [['name' => 'q', 'in' => 'query', 'schema' => ['type' => 'string'], 'description' => 'Suche in Quelle, Ziel und Notiz'],
+                            ['name' => 'test', 'in' => 'query', 'schema' => ['type' => 'string'], 'description' => 'Adresse testen, z. B. /alte-seite/']],
+                        'responses' => ['200' => $ok(['type' => 'object'])] + $err]),
+                ],
                 '/hours' => [
                     'get' => $op('Einstellungen', $hl . ' (nur wenn das Kit sie anbietet, sonst 404)', ['responses' => ['200' => $ok(['type' => 'array', 'items' => $ref('Hours')])] + $err]),
                     'put' => $op('Einstellungen', $hl . ' vollständig ersetzen', [

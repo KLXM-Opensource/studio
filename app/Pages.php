@@ -182,11 +182,15 @@ final class Pages
         return null;
     }
 
-    /** Pfade aller Seiten aus Slugs und Eltern neu berechnen */
+    /**
+     * Pfade aller Seiten aus Slugs und Eltern neu berechnen. Geänderte Pfade veröffentlichter Seiten legen eine
+     * Weiterleitung alter Pfad → page:ID an (Core\Redirects\Redirects::pathsChanged, Funktion „redirects“).
+     */
     public static function rebuildPaths(): void
     {
-        $rows = self::db()->fetchAll('SELECT id, parent_id, slug, is_home, path FROM pages');
+        $rows = self::db()->fetchAll('SELECT id, parent_id, slug, is_home, path, type, status, published_at, lang FROM pages');
         $by = array_column($rows, null, 'id');
+        $changes = [];
         foreach ($rows as $r) {
             $parts = [];
             $cur = $r;
@@ -198,6 +202,15 @@ final class Pages
             $path = $r['is_home'] ? '' : implode('/', $parts);
             if ($r['path'] === null || $path !== (string) $r['path']) {
                 self::db()->update('pages', ['path' => $path], 'id = :id', ['id' => (int) $r['id']]);
+                $changes[] = ['id' => (int) $r['id'], 'old' => $r['path'], 'new' => $r['is_home'] ? null : $path, 'lang' => $r['lang'],
+                    'type' => $r['type'], 'published' => $r['status'] === 'published' || $r['published_at'] !== null];
+            }
+        }
+        if ($changes) {
+            try {
+                Redirects\Redirects::pathsChanged($changes);
+            } catch (\Throwable $e) {
+                error_log('[redirects] ' . $e->getMessage());   // Speichern der Seite geht vor
             }
         }
     }

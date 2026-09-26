@@ -21,6 +21,8 @@ final class Permissions
                 'pages.publish' => __('Seiten veröffentlichen'),
                 'pages.manage' => __('Seiten anlegen, verschieben, löschen, Seiteneinstellungen'),
                 'settings.edit' => __('{title} ändern', ['title' => app()->theme->settingsTitle()]),
+                // Weiterleitungen und 404-Protokoll (Core\Redirects) – zusätzlich Funktion „redirects“
+                'redirects.manage' => __('Weiterleitungen und 404-Protokoll verwalten'),
             ],
             __('Medien') => [
                 'media.upload' => __('Dateien hochladen und bearbeiten'),

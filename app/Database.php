@@ -220,6 +220,8 @@ final class Database
         Blocks\Custom::ensureTable($this);
         // Externe Quellen (Core\Sources): Feeds/APIs/OpenImmo → Datentabellen, Herkunft je Eintrag, Protokoll
         Sources\Sources::ensureTable($this);
+        // Weiterleitungen und 404-Protokoll (Core\Redirects)
+        Redirects\Redirects::ensureTable($this);
 
         // Datentabellen (YForm-ähnlich): Definition; die Einträge liegen in eigenen Tabellen data_{handle}
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS data_tables (id $pk, handle VARCHAR(64) NOT NULL UNIQUE, name $str NOT NULL,

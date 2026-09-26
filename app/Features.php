@@ -62,6 +62,8 @@ final class Features
             'search' => ['Website-Suche für Besucher (optional semantisch mit KI)', []],
             // Landingpages mit eigenen Domains (Core\Landings): weitere Domains zeigen eine Seite bzw. einen Seitenzweig
             'landings' => ['Landingpages mit eigenen Domains', []],
+            // Weiterleitungen (Core\Redirects): alte Adressen → Seiten/Pfade/URLs, 410, automatisch beim Umbenennen, 404-Protokoll
+            'redirects' => ['Weiterleitungen und 404-Protokoll', ['redirects.manage']],
             // KI-Funktionen (Symfony AI, Core\AI\Ai): Texte, Übersetzung, SEO, Alt-Texte, semantische Suche – je Website zusätzlich einzuschalten
             'ai' => ['KI-Funktionen (Symfony AI): Texte, Übersetzung, SEO, Alt-Texte, semantische Suche', ['ai.use']],
             // KI-Chats (Core\AI\VisitorChat, Core\AI\Assistant): Besucher-Chat auf der Website (Standard AUS – erst die Agentur

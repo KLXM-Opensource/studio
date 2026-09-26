@@ -344,6 +344,23 @@ final class CmsService
             'hint' => 'Nur lesen. Anlegen/Ändern: Verwaltung → Landingpages (Recht system.manage). Neue Domains: php bin/console site:hosts <site> add <domain>.'];
     }
 
+    /** Weiterleitungen (Core\Redirects) – nur lesen; optional Suche und „Wohin führt …?“ */
+    public function redirectsGet(?string $q = null, ?string $test = null): array
+    {
+        if (!\Core\Redirects\Redirects::enabled()) {
+            throw new ApiError(404, 'Weiterleitungen sind auf dieser Website nicht eingeschaltet (Funktion „redirects“).');
+        }
+        $l = \Core\Redirects\Redirects::list(['q' => (string) $q, 'per' => 500]);
+        $out = ['total' => $l['total'], 'redirects' => array_map([\Core\Redirects\Redirects::class, 'toArray'], $l['rows']),
+            'hint' => 'Nur lesen (höchstens 500, neueste zuerst). Anlegen/Import: Verwaltung → Administration → Weiterleitungen oder php bin/console redirects:import <datei> --site=<key>.'];
+        if ($test !== null && trim($test) !== '') {
+            $x = \Core\Redirects\Redirects::explain($test);
+            $out['test'] = ['path' => $x['path'], 'status' => $x['status'], 'code' => $x['code'], 'location' => $x['location'],
+                'rule' => $x['rule'] ? (int) $x['rule']['id'] : null, 'text' => $x['text']];
+        }
+        return $out;
+    }
+
     public function hoursGet(): array
     {
         if (!self::hasHours()) {

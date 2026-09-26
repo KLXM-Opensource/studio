@@ -62,6 +62,19 @@ return function (Router $r): void {
     $r->post('/admin/landingpages/{id}', [Admin\LandingController::class, 'save']);
     $r->post('/admin/landingpages/{id}/delete', [Admin\LandingController::class, 'delete']);
     $r->post('/admin/landingpages/{id}/check', [Admin\LandingController::class, 'check']);
+    // Weiterleitungen und 404-Protokoll (Core\Redirects, Funktion „redirects“, Recht redirects.manage)
+    $r->get('/admin/weiterleitungen', [Admin\RedirectController::class, 'index']);
+    $r->get('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'edit']);
+    $r->post('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'save']);
+    $r->get('/admin/weiterleitungen/404', [Admin\RedirectController::class, 'notFound']);
+    $r->post('/admin/weiterleitungen/404', [Admin\RedirectController::class, 'notFoundAction']);
+    $r->post('/admin/weiterleitungen/bulk', [Admin\RedirectController::class, 'bulk']);
+    $r->post('/admin/weiterleitungen/import', [Admin\RedirectController::class, 'import']);
+    $r->get('/admin/weiterleitungen/export', [Admin\RedirectController::class, 'export']);
+    $r->post('/admin/weiterleitungen/einstellungen', [Admin\RedirectController::class, 'settings']);
+    $r->get('/admin/weiterleitungen/{id}', [Admin\RedirectController::class, 'edit']);
+    $r->post('/admin/weiterleitungen/{id}', [Admin\RedirectController::class, 'save']);
+    $r->post('/admin/weiterleitungen/{id}/delete', [Admin\RedirectController::class, 'delete']);
 
     $r->get('/admin/pages', [Admin\PageController::class, 'index']);
     $r->get('/admin/pages/new', [Admin\PageController::class, 'create']);
@@ -377,6 +390,7 @@ return function (Router $r): void {
     $r->patch('/api/v1/design', [Api::class, 'designUpdate']);
     $r->get('/api/v1/hours', [Api::class, 'hours']);
     $r->get('/api/v1/landings', [Api::class, 'landings']);   // Landingpages mit eigenen Domains (nur lesen)
+    $r->get('/api/v1/redirects', [Api::class, 'redirects']);   // Weiterleitungen (Core\Redirects, nur lesen)
     $r->put('/api/v1/hours', [Api::class, 'hoursUpdate']);
     $r->put('/api/v1/notice', [Api::class, 'notice']);
     $r->get('/api/v1/block-types', [Api::class, 'blockTypes']);

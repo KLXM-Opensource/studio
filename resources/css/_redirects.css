@@ -1,0 +1,43 @@
+/* ==========================================================================
+   Weiterleitungen und 404-Protokoll (Core\Redirects, app/Admin/views/redirects/*, resources/js/_redirects.js)
+   Nur Farb-Tokens der Verwaltung (hell/dunkel). Status nie nur über Farbe: Code als Zahl, Hinweise als Text.
+   ========================================================================== */
+.rd-grid{align-items:start}
+.rd-main{min-width:0}
+.rd-side{display:grid;gap:20px;min-width:0}
+.rd-side .adm-card{margin:0}
+.rd-side h2{margin-top:0}
+.rd-bulk__btns{display:inline-flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.rd-tablewrap{overflow-x:auto}
+.rd-table{width:100%}
+.rd-table td{vertical-align:top}
+.rd-table tr.is-selected td{background:var(--adm-accent-bg)}
+.rd-table code{word-break:normal;overflow-wrap:anywhere}
+.rd-src{min-width:200px}
+.rd-src > a{text-decoration:none}
+.rd-src > a:hover code,.rd-src > a:focus-visible code{text-decoration:underline}
+.rd-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:6px}
+.rd-note{display:block;font-size:13px;color:var(--adm-t2);margin-top:4px}
+.rd-target{min-width:170px;overflow-wrap:anywhere}
+.rd-target__label{font-weight:600}
+.rd-target__href{display:block;font-size:12.5px;color:var(--adm-t3)}
+.rd-code{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;margin-right:6px;border-radius:5px;font:700 11.5px var(--adm-font);font-variant-numeric:tabular-nums;background:var(--adm-fill);color:var(--adm-t2)}
+.rd-code--302{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
+.rd-code--410{background:var(--adm-warn-bg);color:var(--adm-warn)}
+.rd-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rd-last{display:block;font-size:12px;color:var(--adm-t3);font-weight:400}
+td.rd-num .rd-last{margin-top:2px}
+.rd-row--off td:not(.rv-table__sel){opacity:.62}
+.rd-actions{display:flex;flex-wrap:wrap;gap:6px}
+.rd-codes{border:0;padding:0;margin:0 0 16px;display:grid;gap:8px}
+.rd-codes legend{margin-bottom:6px;padding:0;font-weight:600;font-size:14px}
+.rd-codes .rv-check input{flex:none}
+.rd-active{margin-bottom:16px}
+.rd-result{margin-top:14px;padding:12px 14px;border-radius:8px;border:1px solid var(--adm-line);background:var(--adm-fill)}
+.rd-result p{margin:.25em 0;overflow-wrap:anywhere}
+.rd-result--redirect,.rd-result--page{background:var(--adm-ok-bg)}
+.rd-result--broken,.rd-result--gone{background:var(--adm-warn-bg)}
+.rd-pre{margin:0 0 12px;padding:8px 10px;border-radius:6px;background:var(--adm-fill);overflow-x:auto;font-size:12.5px}
+.rd-pre code{background:none;padding:0}
+.rd-errors{margin:.4em 0 0;padding-left:1.2em;font-size:13px}
+.rd-export{margin:14px 0 0}

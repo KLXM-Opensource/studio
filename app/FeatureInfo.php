@@ -77,6 +77,10 @@ final class FeatureInfo
                 'effects' => ['menu' => __('Administration → Blöcke'), 'frontend' => __('Freigegebene eigene Blöcke erscheinen im Editor der Redaktion')]],
             'landings' => ['group' => 'content', 'desc' => __('Weitere Domains zeigen eine Seite bzw. einen Seitenzweig dieser Website.'),
                 'effects' => ['menu' => __('Administration → Landingpages'), 'frontend' => __('Zusätzliche Domains mit eigener Marke, Canonical und Sitemap')]],
+            'redirects' => ['group' => 'content', 'desc' => __('Alte Adressen weiterleiten (301/302) oder als entfernt melden (410); beim Umbenennen und Verschieben von Seiten automatisch.'),
+                'effects' => ['menu' => __('Administration → Weiterleitungen (mit 404-Protokoll, Import und Export)'), 'frontend' => __('Nur Adressen ohne Seite werden weitergeleitet – bestehende Seiten gehen immer vor'),
+                    'data' => __('Weiterleitungen mit Trefferzahl; die letzten 200 nicht gefundenen Pfade mit Anzahl (ohne IP-Adressen)')],
+                'caution' => __('Ausgeschaltet greifen auch vorhandene Weiterleitungen nicht mehr – alte Adressen enden dann mit 404.')],
             'pwa' => ['group' => 'content', 'desc' => __('App-Icon und installierbare Web-App (Manifest, Service-Worker).'),
                 'effects' => ['frontend' => __('Manifest /manifest.webmanifest und Service-Worker /sw.js (speichert Seiten im Browser zwischen)')]],
 

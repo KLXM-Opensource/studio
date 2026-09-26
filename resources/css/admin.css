@@ -7,6 +7,7 @@
 @import "./_sources.css";
 @import "./image-fx.css";   /* Bild anpassen: Filter-Klassen wie auf der Website (Core\ImageFx) */
 @import "./_imagefx.css";   /* Bild anpassen: Dialog und Badge (resources/js/_imagefx.js) */
+@import "./_redirects.css";   /* Weiterleitungen und 404-Protokoll (Core\Redirects) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 /* ==========================================================================
    Admin-Oberfläche (Core). Nutzt dieselbe Schrift und Farbwelt wie das Theme.

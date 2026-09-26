@@ -50,6 +50,12 @@ $__cmds = [
         ['inbox:migrate [--all]', 'Alte Online-Anfragen → Eingangs-Tabellen (idempotent, läuft sonst automatisch)'],
         ['inbox:purge [--all]', 'Aufbewahrungsfristen anwenden (Cron, täglich)'],
     ],
+    'Weiterleitungen' => [
+        ['redirects:import <datei.json|csv> [--dry-run] [--overwrite] [--keep-paths]', 'Weiterleitungen importieren: JSON [{"from","to"}] oder CSV quelle;ziel;code;notiz – interne Pfade mit Seite werden zu page:ID (--keep-paths: nicht)'],
+        ['redirects:list [--q=text] [--limit=N]', 'Weiterleitungen mit Code, Ziel, Treffern und Herkunft'],
+        ['redirects:test <pfad>', 'Wohin führt eine Adresse? (Seite, Weiterleitung, 410 oder 404)'],
+        ['redirects:selftest', 'Selbsttest: Normalisieren und Vergleichen (ohne Datenbank, Exit-Code 1 bei Fehlern)'],
+    ],
     'Suche & KI' => [
         ['search:index [--all] [--full] [--no-vectors] [--kb]', 'Suchindex abgleichen (Cron alle 15 min; --full nachts; --kb Wissensdatenbank)'],
         ['search:status [--all]', 'Stand des Suchindex und des KI-Anbieters'],

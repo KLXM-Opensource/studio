@@ -217,6 +217,10 @@ final class McpController
             $add('list_landings', 'Landingpages lesen', 'Landingpages mit eigenen Domains: Domains, zugeordnete Seite (mit Unterseiten?), Canonical-Modus own (Landing-Domain maßgeblich) oder mirror (Hauptdomain maßgeblich), Weiterleitungen, Suche, Marke und die Seiten mit ihren Adressen. Nur lesen – Inhalte der Landingpages sind normale Seiten (get_page/update_page).',
                 $schema([]), $ro, false, fn() => $s->landingsGet());
         }
+        if (\Core\Redirects\Redirects::enabled()) {
+            $add('list_redirects', 'Weiterleitungen lesen', 'Weiterleitungen der Website: alte Adresse (source, * am Ende = alle Adressen mit diesem Anfang) → Ziel (page:ID, /pfad oder https://…), Code 301/302/410, Treffer. Mit test="/pfad": wohin führt diese Adresse (Seite, Weiterleitung oder 404)? Nur lesen – anlegen in der Verwaltung.',
+                $schema(['q' => $str('Suche in Quelle, Ziel und Notiz'), 'test' => $str('Adresse testen, z. B. /alte-seite/')]), $ro, false, fn($a) => $s->redirectsGet($a['q'] ?? null, $a['test'] ?? null));
+        }
         $hl = (string) project('hours.label', 'Öffnungszeiten');
         if (CmsService::hasHours()) {
             $add('get_opening_hours', $hl . ' lesen', 'Aktuelle ' . $hl . ' je Wochentag inkl. formatierter Anzeige.', $schema([]), $ro, false, fn() => ['hours' => $s->hoursGet()]);

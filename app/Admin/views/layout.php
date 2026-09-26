@@ -31,6 +31,8 @@ $adminNav = array_values(array_filter([
     ['/admin/blocks', __('Blöcke'), 'blocks', $user && \Core\Features::on('blocks.custom') && can('blocks.build')],
     // Landingpages mit eigenen Domains (Core\Landings)
     ['/admin/landingpages', __('Landingpages'), 'landings', $user && \Core\Features::on('landings') && can('system.manage')],
+    // Weiterleitungen und 404-Protokoll (Core\Redirects)
+    ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', $user && \Core\Features::on('redirects') && can('redirects.manage')],
     ['/admin/users', __('Benutzer & Rollen'), 'users', $user && can('users.manage')],
     // Chat-Einstellungen: Ein/Aus (Netzwerk/Integratoren), Kanäle (chat.manage)
     ['/admin/chat/einstellungen', __('Chat'), 'chatcfg', $user && \Core\Chat\Chat::settingsVisible()],

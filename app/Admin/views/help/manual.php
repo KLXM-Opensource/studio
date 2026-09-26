@@ -44,6 +44,7 @@ $core = [
     'ki' => 'KI-Assistenten über MCP & Freigabe',
     'suche' => 'Website-Suche',
     'landingpages' => 'Landingpages mit eigener Domain',
+    'weiterleitungen' => 'Weiterleitungen & 404-Protokoll',
     'cookies' => 'Cookie-Einwilligung (falls eingeschaltet)',
     'regeln' => 'Regeln für gute Inhalte',
     'support' => 'Hilfe & Support',

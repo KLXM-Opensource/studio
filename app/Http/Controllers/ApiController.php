@@ -131,6 +131,12 @@ final class ApiController
         return $this->run($r, false, fn(CmsService $s) => $s->landingsGet());
     }
 
+    /** Weiterleitungen (Core\Redirects) – nur lesen, ?q=…, ?test=/pfad */
+    public function redirects(Request $r): Response
+    {
+        return $this->run($r, false, fn(CmsService $s) => $s->redirectsGet(isset($r->query['q']) ? (string) $r->query['q'] : null, isset($r->query['test']) ? (string) $r->query['test'] : null));
+    }
+
     public function hours(Request $r): Response
     {
         return $this->run($r, false, fn(CmsService $s) => $s->hoursGet());

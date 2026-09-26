@@ -232,7 +232,9 @@ final class SiteController
 
     public function error(int $code, string $message = ''): Response
     {
-        $code = in_array($code, [403, 404, 405, 419, 500], true) ? $code : 500;
+        $code = in_array($code, [403, 404, 405, 410, 419, 500], true) ? $code : 500;
+        // 410 (Weiterleitungen: „entfernt“, Core\Redirects): Kits kennen nur 404 – gleiche Seite, anderer Status
+        $shown = $code === 410 ? 404 : $code;
         if (app()->request?->isAdminPath() || app()->request?->wantsJson()) {
             if (app()->request?->wantsJson()) {
                 return Response::json(['ok' => false, 'error' => $message ?: 'Fehler ' . $code], $code);
@@ -240,9 +242,9 @@ final class SiteController
         }
         try {
             $html = app()->theme->render(Landings::template(), [
-                'page' => ['id' => 0, 'title' => $code === 404 ? 'Seite nicht gefunden' : 'Fehler', 'slug' => '', 'is_home' => 0, 'meta_description' => '', 'noindex' => 1],
-                'content' => app()->theme->render('error', ['code' => $code, 'message' => $message]),
-                'seo' => Seo::forError($code),
+                'page' => ['id' => 0, 'title' => $shown === 404 ? 'Seite nicht gefunden' : 'Fehler', 'slug' => '', 'is_home' => 0, 'meta_description' => '', 'noindex' => 1],
+                'content' => app()->theme->render('error', ['code' => $shown, 'message' => $message]),
+                'seo' => Seo::forError($shown),
                 'editor' => null, 'toolbar' => null,
             ]);
         } catch (\Throwable $e) {
