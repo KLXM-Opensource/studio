@@ -49,7 +49,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .bg-muted{--n-sec-bg:var(--n-surface)}
 .bg-tint{--n-sec-bg:var(--n-a-soft);--n-surface:color-mix(in srgb,var(--n-panel) 55%,transparent)}
 .bg-muted .sec-bg-note{color:inherit}
-.bg-accent{--n-sec-bg:var(--n-a);--n-fg:var(--n-a-on);--n-muted:color-mix(in srgb,var(--n-a-on) 92%,var(--n-a));--n-btn-bg:var(--n-a-on);--n-btn-ink:var(--n-a);--n-ui:var(--n-a-on);--n-mark:var(--n-a-on)}
+/* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (92 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
+.bg-accent{--n-sec-bg:var(--n-a);--n-fg:var(--n-a-on);--n-muted:var(--n-a-on);--n-btn-bg:var(--n-a-on);--n-btn-ink:var(--n-a);--n-ui:var(--n-a-on);--n-mark:var(--n-a-on)}
 /* Waldnacht: Akzent aufgehellt (≥ 3:1 als Bedienelement auf der dunklen Fläche, auch im hellen Schema) */
 .bg-dark{--n-sec-bg:var(--n-dark);--n-fg:var(--n-on-dark);--n-muted:color-mix(in srgb,var(--n-on-dark) 78%,var(--n-dark));--n-ui:color-mix(in srgb,var(--n-a) 45%,var(--n-on-dark));--n-btn-bg:var(--n-ui);--n-btn-ink:var(--n-dark);--n-mark:color-mix(in srgb,var(--n-earth) 55%,var(--n-on-dark))}
 .bg-accent,.bg-dark,.sec--ov-dark{
@@ -58,6 +59,9 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
   --n-link:var(--n-fg);--n-focus:var(--n-fg);--n-a-soft:color-mix(in srgb,var(--n-fg) 12%,transparent);--n-a2:color-mix(in srgb,var(--n-fg) 18%,transparent);
   --n-btn2-bg:transparent;--n-btn2-ink:var(--n-fg);--n-hi:rgb(255 255 255/.06)
 }
+/* Akzent: Schrift auf Akzent hat oft nur knapp 4,5:1 (Voreinstellungen) – jede helle Tönung darunter senkt das.
+   Karten (Rahmen bleibt) daher ohne, Flächen mit Text (Kalender, Tabellenkopf, Plaketten) nur leicht getönt. */
+.bg-accent{--n-card:transparent;--n-surface:color-mix(in srgb,var(--n-fg) 4%,transparent);--n-a-soft:color-mix(in srgb,var(--n-fg) 4%,transparent)}
 .sec--ov-dark{--n-fg:var(--n-on-dark);--n-muted:color-mix(in srgb,var(--n-on-dark) 88%,transparent)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
 .bg-white:not(.sec--has-bg,.sec--screen)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen),.bg-muted:not(.sec--has-bg,.sec--screen)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}

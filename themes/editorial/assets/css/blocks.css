@@ -10,7 +10,7 @@
 .feats--cards{gap:var(--e-gap)}
 .feats--cards .feat{padding:24px 24px 28px;border-radius:var(--e-radius);background:var(--e-box)}
 .feats--plain{gap:28px var(--e-gap)}
-.feat__num{color:var(--e-a);font:var(--e-hw) clamp(2.5rem,1.8rem + 2.4vw,4rem)/.9 var(--e-font-display);font-variant-numeric:lining-nums;letter-spacing:-.02em}
+.feat__num{color:var(--e-kick);font:var(--e-hw) clamp(2.5rem,1.8rem + 2.4vw,4rem)/.9 var(--e-font-display);font-variant-numeric:lining-nums;letter-spacing:-.02em}
 .feat__ico{width:2.4rem;height:2.4rem;color:var(--e-a);--ico-2-opacity:.22}
 .feat__media{margin-bottom:6px}
 .feat__title{color:var(--e-ink);font:var(--e-hw) calc(var(--e-ratio) * 1.05rem)/1.22 var(--e-font-display);letter-spacing:calc(var(--e-track) * -.01em);text-wrap:balance;hyphens:auto}

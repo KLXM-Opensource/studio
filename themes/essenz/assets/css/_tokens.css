@@ -48,6 +48,9 @@
 
   /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karte) lesen diese Namen */
   --b-a:var(--e-a-ink);--b-a-on:var(--e-a-on);--b-ink:var(--e-ink);--b-muted:var(--e-muted);--b-line:var(--e-line);--b-surface:var(--e-surface);--b-bg:var(--e-panel);--b-radius:var(--e-radius);
+  /* Seitenwerte unter zweitem Namen: am :root berechnet, behalten sie in dunklen Abschnitten (die --e-ink … umstellen)
+     die Farben der Seite – für Flächen in Seitenfarbe wie die Stapelkarte (--e-bg) */
+  --e0-ink:var(--e-ink);--e0-text:var(--e-text);--e0-muted:var(--e-muted);--e0-link:var(--e-link);
 }
 @media (min-width:60em){:root{--e-r:var(--e-ratio)}}
 .depth-flat{--e-card-sh:none;--e-key-sh:none;--e-well:none}

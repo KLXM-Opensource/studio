@@ -7,7 +7,7 @@
 @container (min-width:32rem){.tile--wide,.tile--big{grid-column:span 2}.tile--tall,.tile--big{grid-row:span 2}}
 .tile{position:relative;isolation:isolate;container-type:inline-size;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card);box-shadow:var(--f-card-sh);color:var(--f-text)}
 .tile:is(.bg-tint,.bg-accent,.bg-dark){border-color:transparent;background:var(--f-sec-bg);box-shadow:none}
-.tile--highlight{border-color:transparent;background:var(--f-a2);--f-muted:var(--f-text);--f-link:var(--f-ink);--f-ico-bg:color-mix(in srgb,var(--f-ink) 10%,transparent);--f-ico:var(--f-ink)}
+.tile--highlight{border-color:transparent;background:var(--f-a2);--f-ink:var(--f0-ink);--f-text:var(--f0-text);--f-muted:var(--f-text);--f-link:var(--f-ink);--f-ico-bg:color-mix(in srgb,var(--f-ink) 10%,transparent);--f-ico:var(--f-ink)}
 .tile__img{position:relative;flex:1 1 min(8rem,100%);min-height:8rem;background:var(--f-surface-2)}
 .tile__img picture{display:contents}
 .tile__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:scale .6s cubic-bezier(.2,.7,.2,1)}

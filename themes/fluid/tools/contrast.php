@@ -6,7 +6,7 @@
  * Geprüft werden die Farbpaare, die das Theme-CSS tatsächlich verwendet – auch abgeleitete Farben, genau wie in
  * assets/css/_tokens.css berechnet (color-mix in sRGB):
  *   --f-a-soft   = Akzent 14 % in den Hintergrund gemischt (Abschnitt „Akzent hell“, Etiketten, Hinweise)
- *   Nebentext in dunklen Abschnitten = Weiß 80 % über der Fläche, im Abschnitt „Akzentfarbe“ = Schrift auf Akzent 86 %
+ *   Nebentext in dunklen Abschnitten = Weiß 80 % über der Fläche, im Abschnitt „Akzentfarbe“ = Schrift auf Akzent (auf Karten: 7 % getönt)
  */
 declare(strict_types=1);
 
@@ -59,7 +59,7 @@ foreach ($design['presets'] as $key => $p) {
             'Abschnitt Akzent hell: Nebentext' => [$v('muted'), $soft, 4.5],
             'Zweitfarbe: Überschrift' => [$v('ink'), $v('highlight'), 4.5],
             'Zweitfarbe: Fließtext' => [$v('text'), $v('highlight'), 4.5],
-            'Abschnitt Akzent: Nebentext (86 %)' => [mix($v('on_accent'), 86, $v('accent')), $v('accent'), 4.5],
+            'Abschnitt Akzent: Nebentext auf Karte (7 %)' => [$v('on_accent'), mix($v('on_accent'), 7, $v('accent')), 4.5],
             'Abschnitt Dunkel: Weiß / Fläche' => [$white, $v('dark_section'), 7],
             'Abschnitt Dunkel: Nebentext (80 % Weiß)' => [mix($white, 80, $v('dark_section')), $v('dark_section'), 4.5],
             'Formularrahmen (Nebentext) / Hintergrund' => [$v('muted'), $v('background'), 3],

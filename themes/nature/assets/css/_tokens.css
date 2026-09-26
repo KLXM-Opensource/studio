@@ -51,6 +51,9 @@
 
   /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karte, Chat) lesen diese Namen */
   --b-a:var(--n-a-ink);--b-a-on:var(--n-a-on);--b-ink:var(--n-ink);--b-muted:var(--n-muted);--b-line:var(--n-line);--b-surface:var(--n-surface);--b-bg:var(--n-panel);--b-radius:var(--n-radius);
+  /* Seitenwerte unter zweitem Namen: am :root berechnet, behalten sie in dunklen Abschnitten (die --n-ink … umstellen)
+     die Farben der Seite – für Flächen in Seitenfarbe wie die Stapelkarte (--n-bg) */
+  --n0-ink:var(--n-ink);--n0-text:var(--n-text);--n0-muted:var(--n-muted);--n0-link:var(--n-link);
 }
 @media (min-width:60em){:root{--n-r:var(--n-ratio)}}
 .lb-caps{--n-label:max(.75rem,calc(var(--n-t0)*.74));--n-lb-style:normal;--n-lb-case:uppercase;--n-lb-track:.1em;--n-font-label:var(--n-font)}

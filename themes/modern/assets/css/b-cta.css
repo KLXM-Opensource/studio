@@ -12,4 +12,4 @@
 .cta--big .cta__text{max-width:none}
 .cta__big{font-size:calc(var(--m-t6) * 1.2);line-height:.96;max-width:16ch}
 @media (max-width:48em){.cta__big{font-size:min(calc(var(--m-t6) * 1.1),12.5vw)}}
-.bg-accent .btn--secondary,.bg-dark .btn--secondary{color:var(--m-fg)}
+.bg-accent .btn--secondary,.bg-dark .btn--secondary{color:var(--m-ink)}   /* --m-ink: im Kasten (.cta--box) Schrift der Farbfläche */

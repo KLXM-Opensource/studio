@@ -7,7 +7,7 @@
 .tabs__list[hidden]{display:none}
 .tabs__tab{flex:none;min-height:2.75rem;padding:0 1.1rem;border:0;border-radius:var(--m-btn-r);background:none;color:var(--m-muted);font-weight:600;white-space:nowrap;cursor:pointer}
 .tabs__tab:hover{color:var(--m-ink)}
-.tabs__tab[aria-selected=true]{background:var(--m-bg);color:var(--m-ink);box-shadow:0 1px 3px var(--m-sh1),0 0 0 1px var(--m-line)}
+.tabs__tab[aria-selected=true]{background:var(--m-bg);color:var(--m0-ink);box-shadow:0 1px 3px var(--m-sh1),0 0 0 1px var(--m-line)}
 .tabs__panel{display:flex;flex-wrap:wrap;align-items:center;gap:var(--m-s-l) var(--m-s-2xl)}
 .tabs__panel[hidden]{display:none}
 .tabs__panel:focus-visible{outline-offset:6px}

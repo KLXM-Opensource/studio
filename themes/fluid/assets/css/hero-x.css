@@ -24,7 +24,7 @@
 .hero-cards__list{display:grid;gap:.6rem;margin:var(--f-s-s) 0 0;padding:0;list-style:none}
 .hero-card{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card);box-shadow:0 18px 40px -18px var(--f-sh2);-webkit-backdrop-filter:var(--f-card-blur);backdrop-filter:var(--f-card-blur)}
 .hero-card__ico{display:grid;place-items:center;flex:none;width:2.6rem;height:2.6rem;border-radius:calc(var(--f-radius) * .8);background:var(--f-ico-bg);color:var(--f-ico);font-size:1.35rem}
-.hero-card:nth-child(2) .hero-card__ico{background:var(--f-a2);color:var(--f-ink)}
+.hero-card:nth-child(2) .hero-card__ico{background:var(--f-a2);color:var(--f0-ink)}
 .hero-card__body{display:grid;gap:.1rem;min-width:0}
 .hero-card__title{color:var(--f-ink);font-size:var(--f-t0);line-height:1.25}
 .hero-card__text{color:var(--f-muted);font-size:var(--f-t-1);line-height:1.35}

@@ -19,7 +19,7 @@
 .tile__title{color:var(--m-ink);font:var(--m-hw) clamp(var(--m-t1),7cqi,var(--m-t3))/1.12 var(--m-font-head);letter-spacing:-.02em;text-wrap:balance}
 .tile__text{max-width:42ch;color:var(--m-muted)}
 .tile__go{position:absolute;inset:var(--m-pad) var(--m-pad) auto auto;display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:8px;background:var(--m-ink);color:var(--m-bg);font-size:1.1rem;transition:rotate .3s,background-color .2s}
-.tile:is(.bg-accent,.bg-dark,.on-media) .tile__go{background:var(--m-a2);color:var(--m-pop-ink)}
+:is(.bg-accent,.bg-dark,.on-media,.sec--ov-dark) .tile__go{background:var(--m-a2);color:var(--m-pop-ink)}
 .tile:hover .tile__go{rotate:45deg}
 .tile:hover .tile__img img{scale:1.04}
 @container (min-width:30rem){.tile__text{font-size:var(--m-t1)}}

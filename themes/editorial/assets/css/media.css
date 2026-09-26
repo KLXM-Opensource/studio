@@ -11,7 +11,7 @@
 .img-duotone .cms-gallery__link img{filter:grayscale(1) contrast(1.12) brightness(1.06);mix-blend-mode:multiply}
 .cms-stack{--cms-card-bg:var(--e-box)}
 .cms-stack__inner{border-radius:var(--e-radius);border-color:var(--e-line)}
-.cms-stack__num{color:var(--e-a);font:500 .8125rem var(--e-font-mono)}
+.cms-stack__num{color:var(--e-kick);font:500 .8125rem var(--e-font-mono)}
 .cms-stack__eyebrow{font-family:var(--e-font-mono);font-weight:500;letter-spacing:.06em}
 .cms-stack__title{color:var(--e-ink);font:var(--e-hw) var(--e-h2)/1.1 var(--e-font-display);letter-spacing:calc(var(--e-track) * -.018em)}
 .cms-stack__link{color:var(--e-ink);text-decoration-color:var(--e-a)}

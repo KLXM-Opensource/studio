@@ -6,7 +6,7 @@
  * Geprüft werden die Farbpaare, die das Theme-CSS tatsächlich verwendet – auch abgeleitete Farben, genau wie in
  * assets/css/_tokens.css berechnet (color-mix in sRGB):
  *   --e-a-soft  = Signal 16 % in den Hintergrund gemischt (Abschnitt „Signal hell“, Etiketten)
- *   Nebentext im Nachtpaneel = Nachtschrift 78 % über der Fläche; im Abschnitt „Signalfarbe“ = Schrift auf Signal 92 %
+ *   Nebentext im Nachtpaneel = Nachtschrift 78 % über der Fläche; im Abschnitt „Signalfarbe“ = Schrift auf Signal (Flächen darin nur 4 % getönt)
  *   Signal als Bedienelement (Tasten, Skalen, Fokusring) braucht 3:1 (WCAG 1.4.11 Nicht-Text-Kontrast).
  */
 declare(strict_types=1);
@@ -62,7 +62,7 @@ foreach ($design['presets'] as $key => $p) {
             'Signal als Bedienelement / Hintergrund' => [$v('accent'), $v('background'), 3],
             'Signal als Bedienelement / Paneel' => [$v('accent'), $v('panel'), 3],
             'Signal als Bedienelement / getönt' => [$v('accent'), $v('surface'), 3],
-            'Abschnitt Signal: Nebentext (92 %)' => [mix($v('on_accent'), 92, $v('accent')), $v('accent'), 4.5],
+            'Abschnitt Signal: Schrift auf Fläche (4 %)' => [$v('on_accent'), mix($v('on_accent'), 4, $v('accent')), 4.5],
             'Nachtpaneel: Schrift / Fläche' => [$night, $v('dark_section'), 7],
             'Nachtpaneel: Nebentext (78 %)' => [mix($night, 78, $v('dark_section')), $v('dark_section'), 4.5],
             'Nachtpaneel: Signal als Bedienelement' => [$v('accent'), $v('dark_section'), 3],

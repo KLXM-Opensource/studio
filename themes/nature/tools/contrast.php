@@ -6,7 +6,7 @@
  * Geprüft werden die Farbpaare, die das Kit-CSS tatsächlich verwendet – auch abgeleitete Farben, genau wie in
  * assets/css/_tokens.css berechnet (color-mix in sRGB):
  *   --n-a-soft  = Akzent 16 % in den Hintergrund gemischt (Abschnitt „Moos hell“, Etiketten)
- *   Nebentext in Waldnacht = helle Schrift 78 % über der Fläche; im Abschnitt „Akzentfarbe“ = Schrift auf Akzent 92 %
+ *   Nebentext in Waldnacht = helle Schrift 78 % über der Fläche; im Abschnitt „Akzentfarbe“ = Schrift auf Akzent (Flächen darin nur 4 % getönt)
  *   Akzent in Waldnacht = Akzent 45 % in die helle Schrift gemischt (Buttons dort mit dunkler Schrift)
  *   Akzent als Bedienelement (Buttons, Skalen, Marken) und „Erde“ als Markierung brauchen 3:1 (WCAG 1.4.11).
  */
@@ -67,7 +67,7 @@ foreach ($design['presets'] as $key => $p) {
             'Akzent als Bedienelement / Sand' => [$v('accent'), $v('surface'), 3],
             'Erde als Markierung / Hintergrund' => [$v('earth'), $v('background'), 3],
             'Erde als Markierung / Sand' => [$v('earth'), $v('surface'), 3],
-            'Abschnitt Akzent: Nebentext (92 %)' => [mix($v('on_accent'), 92, $v('accent')), $v('accent'), 4.5],
+            'Abschnitt Akzent: Schrift auf Fläche (4 %)' => [$v('on_accent'), mix($v('on_accent'), 4, $v('accent')), 4.5],
             'Waldnacht: Schrift / Fläche' => [$night, $v('dark_section'), 7],
             'Waldnacht: Nebentext (78 %)' => [mix($night, 78, $v('dark_section')), $v('dark_section'), 4.5],
             'Waldnacht: Akzent als Bedienelement' => [$ui, $v('dark_section'), 3],

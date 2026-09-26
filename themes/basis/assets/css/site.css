@@ -82,6 +82,8 @@ main:focus{outline:none}
   --b-link:var(--b-fg);--b-focus:var(--b-fg);--b-icon-bg:color-mix(in srgb,var(--b-fg) 14%,transparent);--b-icon-ink:var(--b-fg);
   --b-btn-bg:var(--b-fg);--b-btn-bg-hover:color-mix(in srgb,var(--b-fg) 86%,var(--b-sec-bg));--b-a-soft:color-mix(in srgb,var(--b-fg) 12%,transparent)
 }
+/* Akzent: Schrift darauf oft nur knapp über 4,5:1 – helle Tönungen (übereinander: Raster + Termin, Leiste + Reiter) senken das */
+.bg-accent{--b-card:transparent;--b-surface:color-mix(in srgb,var(--b-fg) 4%,transparent);--b-a-soft:color-mix(in srgb,var(--b-fg) 4%,transparent)}
 .sec--ov-dark{--b-fg:var(--b-on-dark);--b-muted:color-mix(in srgb,var(--b-fg) 90%,transparent);--b-btn-ink:var(--b-dark-sec)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
 .bg-white:not(.sec--has-bg)+.bg-white:not(.sec--divider,.sec--has-bg),.bg-muted:not(.sec--has-bg)+.bg-muted:not(.sec--divider,.sec--has-bg){padding-top:0}

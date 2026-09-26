@@ -29,7 +29,8 @@ main:focus{outline:none}
 .pb-small{padding-bottom:calc(var(--s-space) / 2)}.pb-none{padding-bottom:0}
 .sec--divider{border-top:1px solid var(--s-line)}
 .bg-muted{--s-sec-bg:var(--s-surface);--s-card:var(--s-bg)}
-.bg-accent{--s-sec-bg:var(--s-a);--s-fg:var(--s-a-on);--s-head:var(--s-a-on);--s-link:var(--s-a-on);--s-mut:color-mix(in srgb,var(--s-a-on) 88%,var(--s-a));
+/* Nebentext auf Akzent = volle Schriftfarbe: gemischt (88 %) fiel er auf Karten (--s-card, 10 % heller) unter 4,5:1 */
+.bg-accent{--s-sec-bg:var(--s-a);--s-fg:var(--s-a-on);--s-head:var(--s-a-on);--s-link:var(--s-a-on);--s-mut:var(--s-a-on);
   --s-card:color-mix(in srgb,var(--s-a-on) 10%,transparent);--s-btn-bg:var(--s-a-on);--s-btn-fg:var(--s-a);--rt-accent:currentColor;--rt-muted:var(--s-mut)}
 .bg-dark{--s-sec-bg:var(--s-dark);--s-fg:#DDE2E9;--s-head:#F5F7FA;--s-link:#F5F7FA;--s-mut:#AEB6C2;--s-card:rgb(255 255 255/.06);
   --s-btn-bg:#F5F7FA;--s-btn-fg:var(--s-dark);--rt-accent:#F5F7FA;--rt-muted:#AEB6C2;--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F;color-scheme:dark}

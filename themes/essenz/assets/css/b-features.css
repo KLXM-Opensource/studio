@@ -8,11 +8,12 @@
 .feat__text{color:var(--e-muted);text-wrap:pretty}
 .feat__more{margin-top:var(--e-s-2xs)}
 .feat__img{border-radius:var(--e-r-s)}
-/* Bedienfeld */
+/* Bedienfeld – Zellen über der Abschnittsfarbe deckend, sonst scheint die Linienfarbe des Rasters (--e-line) durch die
+   halbtransparente Karte dunkler Abschnitte und senkt den Kontrast */
 .feats--panel{gap:1px;overflow:hidden;background:var(--e-line)}
-.feats--panel .feat{padding:var(--e-s-m);background:var(--e-card)}
+.feats--panel .feat{padding:var(--e-s-m);background:linear-gradient(var(--e-card) 0 0),var(--e-sec-bg,transparent)}
 .feats--panel .feat__n{top:var(--e-s-m);right:var(--e-s-m)}
-.feats--panel .feat:hover{background:color-mix(in srgb,var(--e-card) 70%,var(--e-surface))}
+.feats--panel .feat:hover{background:linear-gradient(color-mix(in srgb,var(--e-card) 70%,var(--e-surface)) 0 0),var(--e-sec-bg,transparent)}
 .feats--panel .feat:has(.cover-link:focus-visible){outline-offset:-3px}
 /* Karten */
 .feats--cards .feat{padding:var(--e-s-m)}

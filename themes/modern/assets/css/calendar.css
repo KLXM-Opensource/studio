@@ -50,7 +50,7 @@
 .cal-aday{display:flex;flex-wrap:wrap;gap:.25rem var(--m-s-l);padding:var(--m-s-s) 0;border-bottom:1px solid var(--cal-line)}
 .cal-adate{flex:1 1 min(10rem,100%);margin:0;font-size:var(--m-t0);line-height:1.4}
 .cal-aday.is-today .cal-adate{color:var(--m-link)}
-.cal-badge{display:inline-block;margin-left:.4rem;padding:0 .5rem;border-radius:6px;background:var(--m-a2);color:var(--m-ink);font-size:.75rem;vertical-align:1px}
+.cal-badge{display:inline-block;margin-left:.4rem;padding:0 .5rem;border-radius:6px;background:var(--m-a2);color:var(--m-pop-ink);font-size:.75rem;vertical-align:1px}
 .cal-alist{flex:999 1 0;min-width:min(100%,60%);display:grid;gap:.6rem;margin:0;padding:0;list-style:none}
 .cal-aev{display:flex;flex-wrap:wrap;gap:.1rem 1rem}
 .cal-atime{flex:0 0 min(8rem,100%);color:var(--cal-muted);font-variant-numeric:tabular-nums}

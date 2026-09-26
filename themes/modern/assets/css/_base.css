@@ -44,9 +44,10 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 /* ---------------------------------------------------------------- Abschnitte und Farbflächen (Rollen je Fläche) */
 .sec{padding-block:var(--m-sec);background:var(--m-sec-bg,transparent);color:var(--m-text)}
 .bg-muted{--m-sec-bg:var(--m-surface);--m-card:var(--m-bg)}
-.bg-tint{--m-sec-bg:var(--m-a-soft);--m-card:var(--m-bg);--m-ico-bg:var(--m-bg);--m-surface:color-mix(in srgb,var(--m-bg) 60%,transparent)}
-.bg-pop{--m-sec-bg:var(--m-a2);--m-card:var(--m-bg);--m-ico-bg:var(--m-bg);--m-ico:var(--m-ink);--m-link:var(--m-ink);--m-mark:var(--m-ink);--m-muted:var(--m-text);--m-line:color-mix(in srgb,var(--m-ink) 16%,transparent);--m-surface:color-mix(in srgb,var(--m-bg) 55%,transparent)}
-.bg-accent{--m-sec-bg:var(--m-a);--m-fg:var(--m-a-on);--m-muted:color-mix(in srgb,var(--m-a-on) 86%,var(--m-a));--m-btn-ink:var(--m-a);--m-btn-hover-ink:var(--m-a)}
+.bg-tint{--m-sec-bg:var(--m-a-soft);--m-card:var(--m-bg);--m-ico-bg:var(--m-bg);--m-ico:var(--m-a);--m-surface:color-mix(in srgb,var(--m-bg) 60%,transparent)}
+.bg-pop{--m-sec-bg:var(--m-a2);--m-ink:var(--m-pop-ink);--m-text:var(--m-pop-text);--m-card:var(--m-bg);--m-ico-bg:var(--m-bg);--m-ico:var(--m-ink);--m-link:var(--m-ink);--m-mark:var(--m-ink);--m-muted:var(--m-text);--m-line:color-mix(in srgb,var(--m-ink) 16%,transparent);--m-surface:color-mix(in srgb,var(--m-bg) 55%,transparent)}
+/* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (86 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
+.bg-accent{--m-sec-bg:var(--m-a);--m-fg:var(--m-a-on);--m-muted:var(--m-a-on);--m-btn-ink:var(--m-a);--m-btn-hover-ink:var(--m-a)}
 .bg-dark,.on-media{--m-sec-bg:var(--m-dark);--m-fg:var(--m-on-dark);--m-muted:color-mix(in srgb,var(--m-on-dark) 80%,var(--m-dark));--m-btn-ink:var(--m-dark);--m-btn-hover-ink:var(--m-dark)}
 .on-media{--m-muted:color-mix(in srgb,var(--m-on-dark) 88%,transparent)}
 .bg-accent,.bg-dark,.on-media,.sec--ov-dark{
@@ -90,7 +91,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 }
 .sec-head--center{margin-inline:auto;justify-items:center;text-align:center}
 .sec-head--center .lead{margin-inline:auto}
-.badge{display:inline-flex;align-items:center;width:fit-content;padding:.3em .7em;border-radius:6px;background:var(--m-a2);color:var(--m-ink);font:600 var(--m-t-2)/1.3 var(--m-font-label);letter-spacing:.02em}
+.badge{display:inline-flex;align-items:center;width:fit-content;padding:.3em .7em;border-radius:6px;background:var(--m-a2);color:var(--m-pop-ink);font:600 var(--m-t-2)/1.3 var(--m-font-label);letter-spacing:.02em}
 .checks{display:grid;gap:var(--m-s-xs);margin:0;padding:0;list-style:none}
 .checks li{display:flex;gap:.6em;align-items:flex-start}
 .checks__ico{margin-top:.25em;color:var(--m-link);font-size:1.1em}
@@ -120,7 +121,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 :is(.feat--link,.tcard--link.card,.tile,.member--link):hover{border-color:var(--m-line-strong)}
 
 /* ---------------------------------------------------------------- Hinweisbalken */
-.topnote{padding:.6rem 0;background:var(--m-a2);color:var(--m-ink);font-size:var(--m-t-1);font-weight:600;text-align:center}
+.topnote{padding:.6rem 0;background:var(--m-a2);color:var(--m-pop-ink);font-size:var(--m-t-1);font-weight:600;text-align:center}
 .topnote a{color:inherit}
 
 /* ---------------------------------------------------------------- Bewegung (Design → Übergänge; nie bei „Bewegung reduzieren“) */

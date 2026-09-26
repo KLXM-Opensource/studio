@@ -156,7 +156,14 @@ section[id],[id="anfahrt"]{scroll-margin-top:90px}
 .bg-bordeaux .dot,.bg-dark .dot{color:var(--c-apricot)}
 .bg-bordeaux .h2 .light,.bg-dark .h2 .light{color:inherit}
 .bg-bordeaux .muted,.bg-dark .muted{color:var(--c-on-dark)}
-.bg-bordeaux a:not(.btn),.bg-dark a:not(.btn){color:#fff}
+.bg-bordeaux a:not(.btn,.tile,.pill),.bg-dark a:not(.btn,.tile,.pill){color:#fff}
+/* Dunkle Abschnitte: gedämpfte Schrift hell. Eigene helle Flächen darin (Karten, Kacheln, Hinweise …) bekommen die
+   Seitenwerte zurück – --c0-* wird am :root berechnet und behält dort die Farben der Seite. */
+:root{--c0-text-2:var(--c-text-2);--c0-text-3:var(--c-text-3);--c0-sep:var(--c-sep)}
+.bg-bordeaux,.bg-dark{--c-text-2:var(--c-on-dark);--c-text-3:var(--c-on-dark);--c-sep:rgba(255,255,255,.2)}
+:is(.bg-bordeaux,.bg-dark) :is(.card,.doctor,.contact__card:not(.contact__card--primary),.notice--important,.notice--info,.steps li,.person,.tag:not(.tag--accent),.formpage__card,.ph){--c-text-2:var(--c0-text-2);--c-text-3:var(--c0-text-3);--c-sep:var(--c0-sep);color:var(--c-ink)}
+:is(.bg-bordeaux,.bg-dark) :is(.card,.doctor,.contact__card:not(.contact__card--primary),.notice,.steps li,.person,.formpage__card) :is(a:not([class]),.card__phone){color:var(--c-bordeaux)}
+:is(.bg-bordeaux,.bg-dark) .service__no{color:var(--c-apricot)}
 
 .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:32px var(--gap-split)}
 .split--compact{gap:24px var(--gap-split)}

@@ -13,6 +13,10 @@
 .cms-stack{--cms-card-bg:var(--b-bg)}
 .cards-flat .cms-stack,.bg-muted .cms-stack{--cms-card-bg:var(--b-surface)}
 .bg-muted.sec .cms-stack{--cms-card-bg:var(--b-bg)}
+/* Stapelkarten bleiben auch in dunklen Abschnitten deckend in Seitenfarbe (--b-bg) → Schrift der Seite statt der des
+   Abschnitts. --b0-* wird am :root berechnet und behält dort die Seitenwerte (hell bzw. dunkles Farbschema). */
+:root{--b0-ink:var(--b-ink);--b0-text:var(--b-text);--b0-muted:var(--b-muted);--b0-link:var(--b-link);--b0-line:var(--b-line)}
+:is(.bg-dark,.bg-accent,.sec--ov-dark) .cms-stack__inner{--b-ink:var(--b0-ink);--b-text:var(--b0-text);--b-muted:var(--b0-muted);--b-link:var(--b0-link);--cms-muted:var(--b-muted);--cms-card-ink:var(--b-text);--cms-card-line:var(--b0-line);--_accent:var(--b-link)}
 .cms-lb{--cms-lb-bg:color-mix(in srgb,var(--b-dark-sec) 96%,transparent)}
 .cms-gallery__link{border-radius:var(--b-radius-l)}
 .cms-gallery__cap{color:var(--b-muted)}

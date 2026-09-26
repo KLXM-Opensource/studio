@@ -49,8 +49,9 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 /* ---------------------------------------------------------------- Abschnitte und Hintergründe (Rollen je Fläche) */
 .sec{container-type:inline-size;padding-block:var(--f-sec);background:var(--f-sec-bg,transparent);color:var(--f-text)}
 .bg-muted{--f-sec-bg:var(--f-surface);--f-card:var(--f-bg)}
-.bg-tint{--f-sec-bg:var(--f-a-soft);--f-card:var(--f-bg);--f-ico-bg:var(--f-bg);--f-surface:color-mix(in srgb,var(--f-bg) 60%,transparent)}
-.bg-accent{--f-sec-bg:var(--f-a);--f-fg:var(--f-a-on);--f-muted:color-mix(in srgb,var(--f-a-on) 86%,var(--f-a));--f-btn-ink:var(--f-a)}
+.bg-tint{--f-sec-bg:var(--f-a-soft);--f-card:var(--f-bg);--f-ico-bg:var(--f-bg);--f-ico:var(--f-a);--f-surface:color-mix(in srgb,var(--f-bg) 60%,transparent)}
+/* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (86 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
+.bg-accent{--f-sec-bg:var(--f-a);--f-fg:var(--f-a-on);--f-muted:var(--f-a-on);--f-btn-ink:var(--f-a)}
 .bg-dark,.on-media{--f-sec-bg:var(--f-dark);--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 80%,var(--f-dark));--f-btn-ink:var(--f-dark)}
 .on-media{--f-muted:color-mix(in srgb,var(--f-on-dark) 88%,transparent)}
 .bg-accent,.bg-dark,.on-media,.sec--ov-dark{
@@ -79,7 +80,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .sec-head{display:flex;flex-direction:column;gap:var(--f-s-s);max-width:52rem;margin-bottom:var(--f-s-2xl)}
 .sec-head--center{margin-inline:auto;align-items:center;text-align:center}
 .sec-head--center .lead{margin-inline:auto}
-.badge{display:inline-flex;align-items:center;width:fit-content;padding:.25em .75em;border-radius:999px;background:var(--f-a2);color:var(--f-ink);font:600 var(--f-t-2)/1.4 var(--f-font-label);letter-spacing:.02em}
+.badge{display:inline-flex;align-items:center;width:fit-content;padding:.25em .75em;border-radius:999px;background:var(--f-a2);color:var(--f0-ink);font:600 var(--f-t-2)/1.4 var(--f-font-label);letter-spacing:.02em}
 .checks{display:grid;gap:var(--f-s-xs);margin:0;padding:0;list-style:none}
 .checks li{display:flex;gap:.6em;align-items:flex-start}
 .checks__ico{margin-top:.2em;color:var(--f-link);font-size:1.15em}
@@ -116,7 +117,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 :is(.feat--link,.tcard--link.card,.tile):hover{border-color:var(--f-line-strong)}
 
 /* ---------------------------------------------------------------- Hinweisbalken */
-.topnote{padding:.6rem 0;background:var(--f-a2);color:var(--f-ink);font-size:var(--f-t-1);text-align:center}
+.topnote{padding:.6rem 0;background:var(--f-a2);color:var(--f0-ink);font-size:var(--f-t-1);text-align:center}
 .topnote a{color:inherit}
 
 /* ---------------------------------------------------------------- Bewegung (Design → Animationen; nie bei „Bewegung reduzieren“) */

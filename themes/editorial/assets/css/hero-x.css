@@ -46,7 +46,7 @@ a.issue__link::after{content:"";position:absolute;inset:0}
 .agd__date{grid-row:1/span 3;margin:0}
 .agd__date time{display:block}
 .agd__day{display:block;color:var(--e-ink);font:var(--e-hw) 3rem/.82 var(--e-font-display);font-variant-numeric:lining-nums;letter-spacing:-.02em}
-.agd__mon{display:block;margin-top:8px;color:var(--e-a);font:500 .75rem/1 var(--e-font-mono);letter-spacing:.08em;text-transform:uppercase}
+.agd__mon{display:block;margin-top:8px;color:var(--e-kick);font:500 .75rem/1 var(--e-font-mono);letter-spacing:.08em;text-transform:uppercase}
 .agd__name{grid-column:2;margin:0;color:var(--e-ink);font:var(--e-hw) 1.25rem/1.22 var(--e-font-display);text-wrap:balance;hyphens:auto}
 .agd__link{color:inherit;text-decoration:none}
 .agd__link::after{content:"";position:absolute;inset:0}

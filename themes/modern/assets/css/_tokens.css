@@ -9,7 +9,7 @@
   --m-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--m-font-label:var(--m-font-head);
   --m-fs:17;--m-ratio:1.3;--m-display:1;--m-hw:600;--m-track:-3.5;
   --m-radius:14px;--m-space:1;--m-wrap:80rem;
-  --m-on-dark:#FFFFFF;--m-pop-ink:var(--m-ink);--m-sh1:rgb(10 13 18/.06);--m-sh2:rgb(10 13 18/.18);
+  --m-on-dark:#FFFFFF;--m-pop-ink:var(--m-ink);--m-pop-text:var(--m-text);--m-sh1:rgb(10 13 18/.06);--m-sh2:rgb(10 13 18/.18);
 
   /* Schriftstufen: Grundgröße × Verhältnis^n; --m-r ist das wirksame Verhältnis der aktuellen Stufe */
   --m-r:calc(1 + (var(--m-ratio) - 1) * .55);
@@ -43,6 +43,9 @@
 
   /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karten) lesen diese Namen */
   --b-a:var(--m-a);--b-a-on:var(--m-a-on);--b-ink:var(--m-ink);--b-muted:var(--m-muted);--b-line:var(--m-line);--b-surface:var(--m-surface);--b-bg:var(--m-bg);--b-radius:var(--m-r-s);
+  /* Seitenwerte unter zweitem Namen: am :root berechnet, behalten sie in dunklen Abschnitten (die --m-ink … umstellen)
+     die Farben der Seite – für Flächen in Seitenfarbe wie die Stapelkarte (--m-bg) */
+  --m0-ink:var(--m-ink);--m0-text:var(--m-text);--m0-muted:var(--m-muted);--m0-link:var(--m-link);
 }
 @media (min-width:48em){:root{--m-r:calc(1 + (var(--m-ratio) - 1) * .8);--m-sec:calc(6rem * var(--m-space));--m-gutter:2rem;--m-pad:1.75rem;--m-s-2xl:3.5rem;--m-s-3xl:5.5rem}}
 @media (min-width:64em){:root{--m-r:var(--m-ratio);--m-sec:calc(8rem * var(--m-space));--m-gutter:2.5rem;--m-pad:2rem;--m-s-2xl:4rem;--m-s-3xl:6.5rem}}

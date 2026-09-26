@@ -69,6 +69,9 @@
 
   /* Kern-Stylesheets (Suchvorschläge, Karte) lesen diese Namen; Skalen (--dial-*): b-stats.css */
   --b-a:var(--g-a-ink);--b-a-on:var(--g-a-on);--b-ink:var(--g-ink);--b-muted:var(--g-muted);--b-line:var(--g-line);--b-surface:var(--g-surface);--b-bg:var(--g-panel-strong);--b-radius:var(--g-radius);
+  /* Seitenwerte unter zweitem Namen: am :root berechnet, behalten sie in dunklen Abschnitten (die --g-ink … umstellen)
+     die Farben der Seite – für Flächen in Seitenfarbe wie die Stapelkarte (--g-bg) */
+  --g0-ink:var(--g-ink);--g0-text:var(--g-text);--g0-muted:var(--g-muted);--g0-link:var(--g-link);
 }
 @media (min-width:60em){:root{--g-r:var(--g-ratio)}}
 /* backdrop-filter nur mit feinem Zeiger und genug Breite – dort ist die Tönung etwas lichter; auf Touch-Geräten ist das

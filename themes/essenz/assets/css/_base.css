@@ -47,7 +47,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .sec{container-type:inline-size;padding-block:var(--e-sec);background:var(--e-sec-bg,transparent);color:var(--e-text)}
 .bg-muted{--e-sec-bg:var(--e-surface)}
 .bg-tint{--e-sec-bg:var(--e-a-soft);--e-surface:color-mix(in srgb,var(--e-panel) 55%,transparent)}
-.bg-accent{--e-sec-bg:var(--e-a);--e-fg:var(--e-a-on);--e-muted:color-mix(in srgb,var(--e-a-on) 92%,var(--e-a));--e-btn-bg:var(--e-a-on);--e-btn-ink:var(--e-a);--e-ui:var(--e-a-on)}
+/* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (92 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
+.bg-accent{--e-sec-bg:var(--e-a);--e-fg:var(--e-a-on);--e-muted:var(--e-a-on);--e-btn-bg:var(--e-a-on);--e-btn-ink:var(--e-a);--e-ui:var(--e-a-on)}
 .bg-dark{--e-sec-bg:var(--e-dark);--e-fg:var(--e-on-dark);--e-muted:color-mix(in srgb,var(--e-on-dark) 78%,var(--e-dark));--e-ui:var(--e-a)}
 .bg-accent,.bg-dark,.sec--ov-dark{
   --e-ink:var(--e-fg);--e-text:var(--e-fg);--e-line:color-mix(in srgb,var(--e-fg) 18%,transparent);--e-line-strong:color-mix(in srgb,var(--e-fg) 50%,transparent);
@@ -55,6 +56,9 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
   --e-link:var(--e-fg);--e-focus:var(--e-fg);--e-a-soft:color-mix(in srgb,var(--e-fg) 12%,transparent);--e-a2:color-mix(in srgb,var(--e-fg) 18%,transparent);
   --e-btn2-bg:transparent;--e-btn2-ink:var(--e-fg);--e-hi:rgb(255 255 255/.06)
 }
+/* Akzent: Schrift auf Akzent hat oft nur knapp 4,5:1 (Voreinstellungen) – jede helle Tönung darunter senkt das.
+   Karten (Rahmen bleibt) daher ohne, Flächen mit Text (Kalender, Tabellenkopf, Plaketten) nur leicht getönt. */
+.bg-accent{--e-card:transparent;--e-surface:color-mix(in srgb,var(--e-fg) 4%,transparent);--e-a-soft:color-mix(in srgb,var(--e-fg) 4%,transparent)}
 .sec--ov-dark{--e-fg:var(--e-on-dark);--e-muted:color-mix(in srgb,var(--e-on-dark) 88%,transparent)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
 .bg-white:not(.sec--has-bg,.sec--screen)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen),.bg-muted:not(.sec--has-bg,.sec--screen)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}

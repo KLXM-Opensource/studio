@@ -24,11 +24,13 @@
 .cal-upitem{gap:clamp(16px,2.4vw,28px);padding:16px 0;border-radius:0;background:none;border-bottom:1px solid var(--e-line)}
 .cal-upcal{width:auto;min-width:3.6rem;height:auto;border-radius:0;background:none;color:var(--e-ink);justify-items:start;gap:4px}
 .cal-upday{font:var(--e-hw) 2.6rem/.85 var(--e-font-display)}
-.cal-upmon{color:var(--e-a);font:500 .75rem/1 var(--e-font-mono)}
+.cal-upmon{color:var(--e-kick);font:500 .75rem/1 var(--e-font-mono)}
 .cal-upname{font-size:calc(var(--e-ratio) * 1.05rem);line-height:1.25}
 .cal-upmeta{font:400 .8125rem/1.5 var(--e-font-mono)}
 .cal-up--compact .cal-upitem{padding:12px 0}
 .cal-sublink{color:var(--e-ink);text-decoration-color:var(--e-a)}
 .cal-empty{border-radius:var(--e-radius)}
 .cal-grid{background:var(--e-bg)}
+/* Dunkle Abschnitte: Raster in Abschnittsfarbe statt Papier – sonst helle Schrift auf hellem Grund */
+:is(.bg-accent,.bg-dark,.sec--ov-dark) .cal-grid{--e-bg:var(--e-sec-bg)}
 .cal-day.is-other{background:color-mix(in srgb,var(--e-ink) 5%,var(--e-bg))}

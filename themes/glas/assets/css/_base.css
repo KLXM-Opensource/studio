@@ -71,13 +71,16 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .sec:has(>.aurora){position:relative;isolation:isolate;overflow:clip}
 .bg-muted{--g-sec-bg:var(--g-surface);border-block:1px solid var(--g-edge)}
 .bg-tint{--g-sec-bg:color-mix(in srgb,var(--g-a) 8%,var(--g-surface))}
-.bg-accent{--g-sec-bg:var(--g-a);--g-fg:var(--g-a-on);--g-muted:color-mix(in srgb,var(--g-a-on) 90%,var(--g-a));--g-btn-bg:var(--g-a-on);--g-btn-ink:var(--g-a);--g-key-sh:none}
+/* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (90 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
+.bg-accent{--g-sec-bg:var(--g-a);--g-fg:var(--g-a-on);--g-muted:var(--g-a-on);--g-btn-bg:var(--g-a-on);--g-btn-ink:var(--g-a);--g-key-sh:none}
 .bg-dark{--g-sec-bg:radial-gradient(60% 80% at 92% 0%,color-mix(in srgb,var(--g-f1) 25%,transparent),transparent 70%),radial-gradient(50% 70% at 0% 100%,color-mix(in srgb,var(--g-f2) 18%,transparent),transparent 70%),var(--g-dark);--g-fg:var(--g-on-dark);--g-muted:color-mix(in srgb,var(--g-on-dark) 80%,var(--g-dark));color-scheme:dark}
 .bg-accent,.bg-dark,.sec--ov-dark{
   --g-ink:var(--g-fg);--g-text:var(--g-fg);--g-line:color-mix(in srgb,var(--g-fg) 18%,transparent);--g-line-strong:color-mix(in srgb,var(--g-fg) 50%,transparent);
   --g-card:color-mix(in srgb,#fff 8%,transparent);--g-card-bd:rgb(255 255 255/.16);--g-edge:rgb(255 255 255/.16);--g-card-sh:inset 0 1px 0 rgb(255 255 255/.14),0 18px 40px -22px rgb(0 0 0/.5);--g-surface:color-mix(in srgb,#fff 6%,transparent);--g-surface-2:color-mix(in srgb,var(--g-fg) 12%,transparent);
   --g-link:var(--g-fg);--g-focus:var(--g-fg);--g-a-soft:color-mix(in srgb,var(--g-fg) 12%,transparent);--g-a2:color-mix(in srgb,var(--g-fg) 18%,transparent);
-  --g-btn2-bg:color-mix(in srgb,#fff 8%,transparent);--g-btn2-ink:var(--g-fg);--g-sheen:rgb(255 255 255/.06);--g-hi:rgb(255 255 255/.14)
+  --g-btn2-bg:color-mix(in srgb,#fff 8%,transparent);--g-btn2-ink:var(--g-fg);--g-sheen:rgb(255 255 255/.06);--g-hi:rgb(255 255 255/.14);
+  /* Glas der Seite (--g-glass, hell) hier aus der Abschnittsfarbe: FAQ, Team, Downloads, Felder, .glass--strong … */
+  --g-panel:var(--g-card);--g-panel-strong:color-mix(in srgb,var(--g-fg) 12%,transparent)
 }
 .bg-accent{--g-card:color-mix(in srgb,var(--g-a-on) 6%,transparent);--g-sheen:transparent}
 .sec--ov-dark{--g-fg:var(--g-on-dark);--g-muted:color-mix(in srgb,var(--g-on-dark) 88%,transparent)}

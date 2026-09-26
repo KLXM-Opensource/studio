@@ -49,6 +49,10 @@
   --f-link:var(--f-a);--f-focus:var(--f-a);--f-ico-bg:var(--f-a-soft);--f-ico:var(--f-a);
   --f-btn-bg:var(--f-a);--f-btn-ink:var(--f-a-on);--f-btn-hover:var(--f-a-strong);--f-btn-r:var(--f-radius);
 
+  /* Seitenwerte unter zweitem Namen: am :root berechnet, behalten sie in dunklen Abschnitten (die --f-ink … umstellen)
+     die Farben der Seite – für Flächen in Seitenfarbe wie Badge, Hervorhebung (--f-a2) oder Stapelkarte (--f-bg) */
+  --f0-ink:var(--f-ink);--f0-text:var(--f-text);--f0-muted:var(--f-muted);--f0-link:var(--f-link);
+
   /* Kompatibilität: Kern-Stylesheets (Suchvorschläge) lesen diese Namen */
   --b-a:var(--f-a);--b-a-on:var(--f-a-on);--b-ink:var(--f-ink);--b-muted:var(--f-muted);--b-line:var(--f-line);--b-surface:var(--f-surface);--b-bg:var(--f-bg);--b-radius:var(--f-radius);
 }

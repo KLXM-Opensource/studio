@@ -11,6 +11,9 @@
   radial-gradient(50% 80% at 10% 10%,color-mix(in srgb,var(--g-f1) 90%,transparent),transparent 70%),
   radial-gradient(45% 80% at 90% 20%,color-mix(in srgb,var(--g-f2) 90%,transparent),transparent 70%),
   radial-gradient(60% 90% at 60% 100%,color-mix(in srgb,var(--g-f3) 90%,transparent),transparent 70%),var(--g-bg)}
+/* Dunkle Abschnitte: Farbfeld (Seitenfarbe, hell) weglassen – der Abschnitt bringt sein eigenes Leuchten mit, das Glas
+   darüber folgt der hellen Schrift des Abschnitts */
+:is(.bg-accent,.bg-dark,.sec--ov-dark) .cta__field{display:none}
 .has-grain .cta__field::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--g-grain) 0 0/180px 180px;opacity:.06}
 .cta--band .cta__inner{padding-block:var(--g-s-s)}
 .cta--minimal .cta__inner{flex-direction:column;align-items:center;text-align:center}

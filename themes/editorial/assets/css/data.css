@@ -30,7 +30,7 @@
 .tz__f{color:var(--e-muted);font-size:.9375rem;line-height:1.45}
 .tz__f a{position:relative;z-index:2}
 .tz__more{font-weight:650}
-.tz__num{color:var(--e-a);font:var(--e-hw) 2.6rem/.9 var(--e-font-display);font-variant-numeric:lining-nums}
+.tz__num{color:var(--e-kick);font:var(--e-hw) 2.6rem/.9 var(--e-font-display);font-variant-numeric:lining-nums}
 
 /* Aufmacher + Raster: erster Eintrag über die volle Breite */
 .tz--lead{grid-column:1/-1;display:grid;gap:18px var(--e-gap);padding:0 0 clamp(24px,3vw,40px);border-top:0;border-bottom:var(--e-rule-w) var(--e-rule-s) var(--e-ink);margin-bottom:0}
@@ -100,7 +100,7 @@
 .agenda__date{display:grid;justify-items:start;align-content:start;gap:4px;margin:0}
 .agenda__day{color:var(--e-ink);font:var(--e-hw) 2.75rem/.85 var(--e-font-display);font-variant-numeric:lining-nums}
 .agenda__mon,.agenda__wd{color:var(--e-muted);font:500 .75rem/1 var(--e-font-mono);letter-spacing:.06em;text-transform:uppercase}
-.agenda__mon{color:var(--e-a)}
+.agenda__mon{color:var(--e-kick)}
 .agenda__body{display:grid;gap:6px;align-content:start}
 .agenda__body .kicker{margin:0}
 .agenda__title{color:var(--e-ink);font:var(--e-hw) calc(var(--e-ratio) * 1.05rem)/1.2 var(--e-font-display)}

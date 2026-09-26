@@ -124,8 +124,8 @@ foreach ($design['presets'] as $key => $p) {
         $dark = $c('dark_section');
         $check('Schrift in „Nacht“', rgb(ON_DARK), $dark, 7);
         $check('Nebentext in „Nacht“', over(rgb(ON_DARK), .8, $dark), over([1, 1, 1], .08, $dark), 4.5);
-        // 6. Abschnitt „Akzentfarbe“: Schrift auf Akzent, Nebentext 90 %
-        $check('Nebentext auf Akzent', over($c('on_accent'), .9, $c('accent')), $c('accent'), 4.5);
+        // 6. Abschnitt „Akzentfarbe“: Nebentext = Schrift auf Akzent, auf Glas darin (Schrift auf Akzent 6 %)
+        $check('Nebentext auf Glas in Akzent', $c('on_accent'), over($c('on_accent'), .06, $c('accent')), 4.5);
         $report[$key][$mode] = $min;
     }
 }
