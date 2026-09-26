@@ -63,7 +63,7 @@ deploy/content-push.sh production default              # übernimmt als Entwurf 
 deploy/content-push.sh production default --publish    # übernimmt und veröffentlicht sofort
 ```
 
-- **Konfliktschutz:** Beim Holen merkt sich `content:snapshot` je Seite einen Fingerabdruck (Blöcke, Titel, SEO-Felder).
+- **Konfliktschutz:** Beim Holen merkt sich `content:snapshot` je Seite einen Fingerabdruck (Blöcke, Titel, SEO-Felder, im Menü).
   `content:import` übernimmt eine Seite nur, wenn sie live noch genau so aussieht und dort kein offener Entwurf liegt –
   sonst wird **nichts** übernommen. Dann neu holen und die Änderung wiederholen (oder bewusst `--force`).
 - **Rückgängig:** Jede übernommene Seite erhält eine Version „Content-Sync (…)“ – über *Versionen* wiederherstellbar.
