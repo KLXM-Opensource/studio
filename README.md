@@ -1,8 +1,11 @@
 # KLXM Studio
 
+[![CI](https://github.com/klxm/studio/actions/workflows/ci.yml/badge.svg)](https://github.com/klxm/studio/actions/workflows/ci.yml)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
+
 **Schlankes Multi-Site-CMS ohne Framework – PHP 8.4, Kits, Datentabellen, KLXM Ai, REST-API und MCP-Server.**
 
-Quellcode: [github.com/klxm/studio](https://github.com/klxm/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Fehler und Wünsche: [Issues](https://github.com/klxm/studio/issues)
+Quellcode: [github.com/klxm/studio](https://github.com/klxm/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Tutorials: [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) · Downloads: [Releases](https://github.com/klxm/studio/releases) · Fehler und Wünsche: [Issues](https://github.com/klxm/studio/issues)
 
 KLXM Studio (früher „MyCMS.dev light“) betreibt eine oder viele Websites aus einer Installation. Redaktionen
 bearbeiten direkt auf der Website (Blockeditor, Inline-Editing), pflegen zentrale Angaben, eigene Datentabellen,
@@ -34,21 +37,30 @@ Aktuelle Version: siehe `CMS_VERSION` in `app/bootstrap.php` (derzeit 1.0.0) · 
 
 ## Anforderungen
 
-- **PHP ≥ 8.4** (FPM) mit `pdo_sqlite` (SQLite ≥ 3.35), `sodium`, `gd`, `mbstring`, `dom`, `fileinfo`, `intl`, `phar`, `zlib`;
+- **PHP ≥ 8.4.1** (FPM; getestet mit 8.4 und 8.5) mit `pdo_sqlite` (SQLite ≥ 3.35), `sodium`, `gd`, `mbstring`, `dom`, `fileinfo`, `intl`, `phar`, `zlib`;
   optional `curl`, `exif`, `pdo_mysql`. `proc_open` für Hintergrundprozesse (Sicherungen aus der Netzwerk-Übersicht, KI-Aufträge).
 - Apache oder nginx mit Front-Controller, HTTPS.
 - Datenbank: SQLite (Standard) oder MySQL/MariaDB je Website.
-- Entwicklung/Build: **Composer 2**, **Node 22 + pnpm 10** (auf dem Server nicht nötig – gebaute Dateien liegen in `public/`).
+- Installation aus dem Git-Repository: **Composer 2** (`vendor/` ist nicht eingecheckt). Das Installations-ZIP enthält `vendor/` bereits.
+- Nur zum Ändern von CSS/JS-Quellen: **Node 22 + pnpm 10** – die gebauten Dateien liegen versioniert in `public/`.
 - Optional: **Ollama** (lokale KI, z. B. `gemma3` für Text/Bilder, `bge-m3` als mehrsprachiges Embedding-Modell) oder
   ein EU-/OpenAI-kompatibler Anbieter; **ffmpeg** und **whisper.cpp** (`whisper-cli`) für lokale Transkription; Cron.
 
 ## Schnellstart (lokal)
 
 ```bash
+git clone https://github.com/klxm/studio.git klxm-studio && cd klxm-studio
 composer install
-cd tools && pnpm install && pnpm build && cd ..
 php -S localhost:8000 -t public public/index.php
 ```
+
+Die gebauten Assets (Verwaltung, Editor, Vendoren, Kits) sind im Repository enthalten – **pnpm ist nur nötig, wenn Sie
+CSS/JS-Quellen ändern** (`resources/`, `themes/*/assets`, `extensions/*/assets`):
+`cd tools && pnpm install && pnpm run build` (danach `public/` mit einchecken; die CI prüft das).
+
+**Installation auf einem Server ohne Git/Composer:** das fertige Paket `klxm-studio-<version>.zip` (mit `vendor/` und
+gebauten Assets, Prüfsumme `.sha256`) von [GitHub Releases](https://github.com/klxm/studio/releases) laden, entpacken,
+Dokumentstamm auf `public/` setzen.
 
 Beim ersten Aufruf entstehen Datenbank und `config/config.local.php` (mit `app_key` und `setup_token`) und das Kit
 spielt seine Startinhalte ein. Danach `/admin/setup` mit dem Setup-Token öffnen (oder
@@ -84,11 +96,12 @@ httpdocs/
 | `/admin/hilfe/tutorials` | Tutorials für Redaktion, Administration und Agenturen als Text (DE/EN, offline) – mit Links zu den Videos |
 | [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) | **Tutorial-Videos und Trailer** (ohne Ton, Untertitel DE/EN). Sie werden nicht mit dem CMS ausgeliefert; die Verwaltung verlinkt dorthin (`config/config.php` → `docs_url`, eigene Adresse oder `''` für White-Label) |
 | `/api/v1/openapi.json` | Maschinenlesbare OpenAPI-3.1-Beschreibung |
-| [deploy/README.md](deploy/README.md) | Staging & Deploy mit Releases und Rollback |
+| [deploy/README.md](deploy/README.md) | Staging & Deploy mit Releases und Rollback; Vorlage für GitHub Actions im Projekt-Repository (`deploy/github-actions/`) |
 | [themes/starter/README.md](themes/starter/README.md) | Start-Kit: eigenes Kit entwickeln (`php bin/console kit:create meinkit`), Schritt für Schritt |
 | [themes/basis/README.md](themes/basis/README.md) | Referenz-Kit: Design-Tokens, Navigationen, Baukasten |
 | [extensions/dav/README.md](extensions/dav/README.md) | CalDAV/CardDAV-Erweiterung |
 | [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) | Mitgelieferte Drittsoftware und Lizenzen |
+| [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) | Mitwirken · Sicherheitslücken vertraulich melden |
 
 ## REST-API & MCP in Kürze
 

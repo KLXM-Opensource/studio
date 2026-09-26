@@ -1,7 +1,7 @@
 <?php
 /*
  * Startinhalte – werden beim ersten Aufruf eingespielt.
- * Inhalte in [eckigen Klammern] sind Platzhalter und müssen von der Praxis geliefert werden.
+ * Alle Angaben sind fiktiv („Praxis Beispiel“, Musterstadt). Inhalte in [eckigen Klammern] sind Platzhalter und müssen von der Praxis geliefert werden.
  * (Platzhalter erscheinen NICHT im JSON-LD.)
  */
 
@@ -12,12 +12,12 @@ $morning = fn(string $tag) => ['tag' => $tag, 'von' => '07:30', 'bis' => '11:00'
 
 return [
     'settings' => [
-        'praxis_name' => '[Praxisname]',
-        'wortmarke_1' => 'Gemeinschaftspraxis',
-        'wortmarke_2' => 'Moers',
+        'praxis_name' => '[Praxis Beispiel (fiktiv)]',
+        'wortmarke_1' => 'Praxis Beispiel',
+        'wortmarke_2' => 'Musterstadt',
         'strasse' => '',
         'plz' => '',
-        'ort' => 'Moers',
+        'ort' => 'Musterstadt',
         'telefon' => '',
         'telefon_anzeige' => '[Telefonnummer]',
         'fax' => '',
@@ -64,7 +64,7 @@ return [
             ['typ' => 'topic', 'aktiv' => true, 'eyebrow' => 'Aktuelles Thema', 'titel' => 'Jetzt an die Grippe­impfung denken',
                 'text' => 'Die beste Zeit für die Impfung ist der Herbst. Wir beraten Sie gern, ob die Impfung für Sie empfohlen ist. [Aktuelles Thema – im Backend pflegbar]',
                 'button_label' => 'Impftermin vereinbaren', 'button_link' => '#kontakt', 'button2_label' => '', 'button2_link' => '', 'von_datum' => '', 'bis_datum' => ''],
-            ['typ' => 'main', 'aktiv' => true, 'eyebrow' => 'Hausärztliche Gemeinschaftspraxis in Moers', 'titel' => 'Gemeinsam für Ihre Gesundheit',
+            ['typ' => 'main', 'aktiv' => true, 'eyebrow' => 'Hausärztliche Praxis in Musterstadt (Beispiel)', 'titel' => 'Gemeinsam für Ihre Gesundheit',
                 'text' => 'Hausärztliche Medizin, die den ganzen Menschen im Blick behält.',
                 'button_label' => 'Praxis kennenlernen', 'button_link' => '#praxis', 'button2_label' => 'Kontakt und Sprechzeiten', 'button2_link' => '#kontakt',
                 'von_datum' => '', 'bis_datum' => ''],
@@ -75,9 +75,9 @@ return [
         'routenplaner_url' => '',
         'karte_aktiv' => true,
         'karte_geo' => '',
-        'site_title' => 'Hausärztliche Gemeinschaftspraxis in Moers',
+        'site_title' => 'Hausärztliche Praxis in Musterstadt (Beispiel)',
         'site_title_suffix' => '',
-        'default_meta_description' => 'Persönliche hausärztliche Betreuung in Moers: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
+        'default_meta_description' => 'Persönliche hausärztliche Betreuung in Musterstadt: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
     ],
 
     'page_refs' => [
@@ -90,12 +90,12 @@ return [
         // ------------------------------------------------------------------ One-Pager
         [
             'slug' => 'home', 'title' => 'Startseite', 'is_home' => true,
-            'meta_description' => 'Persönliche hausärztliche Betreuung in Moers: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
+            'meta_description' => 'Persönliche hausärztliche Betreuung in Musterstadt: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
             'blocks' => [
                 ['type' => 'hero', 'data' => ['show_card' => true], 'tunes' => ['anchor' => 'top', 'background' => 'bordeaux']],
                 ['type' => 'teaser_tiles', 'data' => [
                     'variant' => 'plain',
-                    'intro' => 'In unserer Gemeinschaftspraxis verbinden wir medizinische Erfahrung mit persönlicher Betreuung. Wir nehmen uns Zeit, hören zu und betrachten Gesundheit nicht als einzelne Momentaufnahme. Gemeinsam mit unserem Praxisteam begleiten wir Sie verlässlich – bei akuten Beschwerden, in der Vorsorge und bei chronischen Erkrankungen.',
+                    'intro' => 'In unserer Praxis verbinden wir medizinische Erfahrung mit persönlicher Betreuung. Wir nehmen uns Zeit, hören zu und betrachten Gesundheit nicht als einzelne Momentaufnahme. Gemeinsam mit unserem Praxisteam begleiten wir Sie verlässlich – bei akuten Beschwerden, in der Vorsorge und bei chronischen Erkrankungen.',
                     'items' => [
                         ['title' => 'Praxis', 'sub' => 'Medizin beginnt mit Zuhören', 'link' => '#praxis'],
                         ['title' => 'Leistungen', 'sub' => 'Vorsorge, Diagnostik, DMP', 'link' => '#leistungen'],
@@ -119,7 +119,7 @@ return [
                 ], 'tunes' => ['spaceTop' => 'none']],
                 ['type' => 'doctors', 'data' => [
                     'title_strong' => 'Ärztinnen und Ärzte', 'title_light' => 'Persönlich für Sie da.',
-                    'intro' => 'In einer Gemeinschaftspraxis verbinden sich unterschiedliche Erfahrungen und fachliche Perspektiven. Zugleich bleiben der persönliche Kontakt und eine kontinuierliche hausärztliche Begleitung erhalten.',
+                    'intro' => 'In unserem ärztlichen Team verbinden sich unterschiedliche Erfahrungen und fachliche Perspektiven. Zugleich bleiben der persönliche Kontakt und eine kontinuierliche hausärztliche Begleitung erhalten.',
                     'link_label' => 'Termin anfragen', 'link' => '#kontakt',
                     'items' => array_fill(0, 3, [
                         'fach' => '[Fachbezeichnung]', 'titel' => '[Akad. Titel]', 'name' => '[Name Ärztin/Arzt]',
@@ -129,7 +129,7 @@ return [
                 ], 'tunes' => ['anchor' => 'aerzte', 'showInNav' => true, 'navLabel' => 'Ärztinnen und Ärzte', 'background' => 'gray']],
                 ['type' => 'services', 'data' => [
                     'title_strong' => 'Leistungen', 'title_light' => 'Gut versorgt – in jeder Lebensphase.',
-                    'intro' => 'Als hausärztliche Gemeinschaftspraxis sind wir für viele gesundheitliche Fragen die erste Anlaufstelle. Unser Angebot reicht von der Vorsorge über die moderne Diagnostik bis zur langfristigen Betreuung chronischer Erkrankungen.',
+                    'intro' => 'Als hausärztliche Praxis sind wir für viele gesundheitliche Fragen die erste Anlaufstelle. Unser Angebot reicht von der Vorsorge über die moderne Diagnostik bis zur langfristigen Betreuung chronischer Erkrankungen.',
                     'items' => [
                         ['title' => 'Hausärztliche Versorgung', 'text' => 'Bei akuten Beschwerden, neuen gesundheitlichen Fragen oder länger bestehenden Erkrankungen sind wir persönlich für Sie da. Wir untersuchen sorgfältig, ordnen Beschwerden ein und koordinieren bei Bedarf die weitere fachärztliche Behandlung. Auch Hausbesuche können nach medizinischer Notwendigkeit und vorheriger Abstimmung erfolgen.'],
                         ['title' => 'Vorsorge und Prävention', 'text' => 'Viele Erkrankungen lassen sich frühzeitig erkennen oder durch gezielte Vorsorge vermeiden. Wir bieten Gesundheits-Check-ups, Krebsvorsorgeuntersuchungen sowie eine individuelle Impfberatung mit den empfohlenen Impfungen an. Auch Jugendarbeitsschutzuntersuchungen gehören zu unserem Angebot.'],

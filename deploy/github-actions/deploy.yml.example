@@ -1,3 +1,17 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BEISPIEL – GitHub-Actions-Workflow für das Repository EINES PROJEKTS (Agentur/Kundenwebsite),
+# nicht für das öffentliche KLXM-Studio-Repository. Er ruft deploy/deploy.sh auf (Releases, Rollback).
+#
+# Einrichten im eigenen Website-Repository:
+#   1. Datei nach .github/workflows/deploy.yml kopieren (Endung .example entfernen).
+#   2. Settings → Environments: „staging“ und „production“ anlegen; bei „production“
+#      „Required reviewers“ setzen (Freigabe durch eine Person).
+#   3. Secrets je Umgebung anlegen (siehe unten). DEPLOY_ENV = Inhalt von deploy/targets/<ziel>.env
+#      (Vorlage deploy/targets/example.env) – mindestens SSH_TARGET, BASE und URL, sonst bricht deploy.sh ab.
+#   4. Optional: Push-Trigger anpassen (z. B. nur Tags) oder entfernen, wenn nur manuell deployt werden soll.
+# Details: deploy/README.md bzw. Entwicklerhandbuch → „Staging & Deploy“.
+# ─────────────────────────────────────────────────────────────────────────────
+#
 # Deploy: jeder Push auf main → Staging. Production nur manuell (Actions → Deploy → Run workflow)
 # und mit Freigabe über die GitHub-Umgebung „production“ (Settings → Environments → Required reviewers).
 #

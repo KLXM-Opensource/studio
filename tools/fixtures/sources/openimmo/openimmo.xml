@@ -12,15 +12,15 @@
         <objektart><wohnung wohnungtyp="ETAGE"/></objektart>
       </objektkategorie>
       <geo>
-        <plz>47441</plz><ort>Moers</ort><strasse>Musterweg</strasse><hausnummer>12</hausnummer>
+        <plz>12345</plz><ort>Musterstadt</ort><strasse>Musterweg</strasse><hausnummer>12</hausnummer>
         <land iso_land="DEU"/>
-        <geokoordinaten breitengrad="51.4510" laengengrad="6.6260"/>
+        <geokoordinaten breitengrad="51.1634" laengengrad="10.4477"/>
         <etage>2</etage>
       </geo>
       <kontaktperson>
         <name>Muster</name><vorname>Maria</vorname>
         <email_zentrale>info@example.org</email_zentrale><email_direkt>maria.muster@example.org</email_direkt>
-        <tel_zentrale>02841 000000</tel_zentrale>
+        <tel_zentrale>01234 000000</tel_zentrale>
       </kontaktperson>
       <preise><kaltmiete>850.00</kaltmiete><nebenkosten>210.50</nebenkosten><kaution>2550</kaution></preise>
       <flaechen><wohnflaeche>78.5</wohnflaeche><anzahl_zimmer>3</anzahl_zimmer></flaechen>
@@ -51,11 +51,11 @@ Zweiter Absatz der Beschreibung.</objektbeschreibung>
         <objektart><haus haustyp="EINFAMILIENHAUS"/></objektart>
       </objektkategorie>
       <geo>
-        <plz>47445</plz><ort>Moers-Repelen</ort><strasse>Geheimgasse</strasse><hausnummer>7</hausnummer>
+        <plz>12347</plz><ort>Musterstadt-Nord</ort><strasse>Geheimgasse</strasse><hausnummer>7</hausnummer>
         <land iso_land="DEU"/>
-        <geokoordinaten breitengrad="51.4700" laengengrad="6.6000"/>
+        <geokoordinaten breitengrad="51.1700" laengengrad="10.4400"/>
       </geo>
-      <kontaktperson><name>Beispiel</name><vorname>Bernd</vorname><email_zentrale>info@example.org</email_zentrale><tel_zentrale>02841 000000</tel_zentrale></kontaktperson>
+      <kontaktperson><name>Beispiel</name><vorname>Bernd</vorname><email_zentrale>info@example.org</email_zentrale><tel_zentrale>01234 000000</tel_zentrale></kontaktperson>
       <preise><kaufpreis>389000</kaufpreis></preise>
       <flaechen><wohnflaeche>142</wohnflaeche><anzahl_zimmer>5</anzahl_zimmer><grundstuecksflaeche>520</grundstuecksflaeche></flaechen>
       <zustand_angaben>
@@ -79,7 +79,7 @@ Zweiter Absatz der Beschreibung.</objektbeschreibung>
         <vermarktungsart KAUF="false" MIETE_PACHT="true"/>
         <objektart><buero_praxen buero_praxen_typ="PRAXISFLAECHE"/></objektart>
       </objektkategorie>
-      <geo><plz>47441</plz><ort>Moers</ort><strasse>Praxisallee</strasse><hausnummer>3</hausnummer><land iso_land="DEU"/></geo>
+      <geo><plz>12345</plz><ort>Musterstadt</ort><strasse>Praxisallee</strasse><hausnummer>3</hausnummer><land iso_land="DEU"/></geo>
       <kontaktperson><name>Muster</name><vorname>Maria</vorname><email_zentrale>info@example.org</email_zentrale></kontaktperson>
       <preise><kaltmiete>1.450,00</kaltmiete></preise>
       <flaechen><nutzflaeche>120</nutzflaeche><anzahl_zimmer>4</anzahl_zimmer></flaechen>

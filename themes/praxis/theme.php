@@ -1,6 +1,6 @@
 <?php
 /*
- * Theme „praxis“ – Gemeinschaftspraxis Moers
+ * Theme „praxis“ – Kit für Arzt- und Fachpraxen (Demo-Inhalte fiktiv: „Praxis Beispiel“, Musterstadt)
  *
  * Diese Datei definiert alles Projektspezifische:
  *  - blocks     Blocktypen (= Editor.js-Tools) mit Feld-Schema
@@ -50,7 +50,7 @@ $slideFields = [
 $days = ['1' => 'Montag', '2' => 'Dienstag', '3' => 'Mittwoch', '4' => 'Donnerstag', '5' => 'Freitag', '6' => 'Samstag', '0' => 'Sonntag'];
 
 return [
-    'label' => 'Gemeinschaftspraxis (Bordeaux)',
+    'label' => 'Praxis – Arzt- und Fachpraxen',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',   // benötigte Core-Version
 
@@ -246,13 +246,13 @@ return [
         'groups' => [
             ['id' => 'stammdaten', 'label' => 'Stammdaten', 'fields' => [
                 ['name' => 'praxis_name', 'label' => 'Name der Praxis', 'type' => 'text', 'required' => true],
-                ['name' => 'wortmarke_1', 'label' => 'Wortmarke Zeile 1 (fett)', 'type' => 'text', 'width' => 'half', 'default' => 'Gemeinschaftspraxis'],
-                ['name' => 'wortmarke_2', 'label' => 'Wortmarke Zeile 2 (leicht)', 'type' => 'text', 'width' => 'half', 'default' => 'Moers'],
+                ['name' => 'wortmarke_1', 'label' => 'Wortmarke Zeile 1 (fett)', 'type' => 'text', 'width' => 'half', 'default' => 'Praxis Beispiel'],
+                ['name' => 'wortmarke_2', 'label' => 'Wortmarke Zeile 2 (leicht)', 'type' => 'text', 'width' => 'half', 'default' => 'Musterstadt'],
                 ['name' => 'strasse', 'translate' => false, 'label' => 'Straße und Hausnummer', 'type' => 'text'],
                 ['name' => 'plz', 'translate' => false, 'label' => 'PLZ', 'type' => 'text', 'width' => 'half'],
-                ['name' => 'ort', 'translate' => false, 'label' => 'Ort', 'type' => 'text', 'width' => 'half', 'default' => 'Moers'],
+                ['name' => 'ort', 'translate' => false, 'label' => 'Ort', 'type' => 'text', 'width' => 'half', 'default' => 'Musterstadt'],
                 ['name' => 'telefon', 'label' => 'Telefon (für Wähl-Link)', 'type' => 'tel', 'width' => 'half', 'help' => 'Wird automatisch zu tel:+49… normalisiert.'],
-                ['name' => 'telefon_anzeige', 'translate' => false, 'label' => 'Telefon (Anzeige)', 'type' => 'text', 'width' => 'half', 'help' => 'z. B. 02841 12 34 56'],
+                ['name' => 'telefon_anzeige', 'translate' => false, 'label' => 'Telefon (Anzeige)', 'type' => 'text', 'width' => 'half', 'help' => 'z. B. 01234 56 78 90'],
                 ['name' => 'fax', 'translate' => false, 'label' => 'Fax', 'type' => 'text', 'width' => 'half'],
                 ['name' => 'email', 'translate' => false, 'label' => 'E-Mail', 'type' => 'text', 'width' => 'half'],
             ]],
@@ -325,7 +325,7 @@ return [
                 ['name' => 'barrierefreiheit_seite', 'label' => 'Erklärung zur Barrierefreiheit', 'type' => 'page', 'width' => 'half'],
             ]],
             ['id' => 'seo', 'label' => 'SEO', 'fields' => [
-                ['name' => 'site_title', 'label' => 'Seitentitel der Startseite', 'type' => 'text', 'default' => 'Hausärztliche Gemeinschaftspraxis in Moers'],
+                ['name' => 'site_title', 'label' => 'Seitentitel der Startseite', 'type' => 'text', 'default' => 'Hausärztliche Praxis in Musterstadt (Beispiel)'],
                 ['name' => 'site_title_suffix', 'label' => 'Titel-Zusatz', 'type' => 'text', 'help' => 'Wird mit „|“ angehängt. Leer = Praxisname.'],
                 ['name' => 'default_meta_description', 'label' => 'Standard-Beschreibung', 'type' => 'textarea', 'rows' => 3, 'max' => 160],
                 ['name' => 'og_default_image', 'label' => 'Vorschaubild für soziale Netzwerke', 'type' => 'media'],

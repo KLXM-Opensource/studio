@@ -1,5 +1,5 @@
 <?php /** Handbuch · Kapitel „Landingpages mit eigener Domain“ (Variablen: siehe help/manual.php) */ ?>
-  <p class="lead">Eine Kampagne oder ein Angebot unter eigener Domain – z. B. <code>reisemedizin-moers.de</code> – ohne zweite Website: Die Domain zeigt eine Seite Ihrer Website (auf Wunsch mit Unterseiten). Sie pflegen die Inhalte wie gewohnt; Formulare und Anfragen landen in Ihrer Verwaltung.</p>
+  <p class="lead">Eine Kampagne oder ein Angebot unter eigener Domain – z. B. <code>reisemedizin-musterstadt.de</code> – ohne zweite Website: Die Domain zeigt eine Seite Ihrer Website (auf Wunsch mit Unterseiten). Sie pflegen die Inhalte wie gewohnt; Formulare und Anfragen landen in Ihrer Verwaltung.</p>
   <ol class="doc-steps">
     <li><b>Domain einrichten lassen:</b> Ihre Agentur registriert die Domain, richtet sie im Hosting ein und trägt sie für Ihre Website ein.</li>
     <li><b>Seite vorbereiten:</b> z. B. „Reisemedizin“ mit Unterseiten „Impfungen“ und „Reiseapotheke“ unter <b>Seiten</b> anlegen.</li>

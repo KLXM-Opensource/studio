@@ -12,7 +12,7 @@ license each one is distributed under. Licenses were taken from the packages' ow
 `tools/pnpm-lock.yaml` and `themes/*/pnpm-lock.yaml`. No bundled component is under a copyleft license that would
 extend to KLXM Studio's own code: everything shipped is permissive (MIT, BSD, Apache-2.0, ISC, CC0, OFL fonts), with
 the single exception of the Liberation fonts inside PDF.js (GPL-2.0 with font exception, separate font files, see
-1.3). Copyleft tools (Piper TTS, ffmpeg, lightningcss) are build-only and not distributed. `joomla/string`
+1.3). Copyleft tools (Piper TTS, ffmpeg) are build-only and not distributed. `joomla/string`
 (GPL-2.0-or-later) is no longer installed (see section 3). `node tools/licenses.mjs` re-checks the Composer and npm
 dependencies (see section 9).
 
@@ -24,7 +24,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn, Bootstrap/Tailwind/UIkit (lab kit) | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper) | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
@@ -35,7 +35,6 @@ not part of the distribution. **Service**: an online service contacted at runtim
 | SIL Open Font License 1.1 | Lato (admin) and all kit fonts | Bundled |
 | CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube in kit demo content | Service / demo |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
-| MPL-2.0 | lightningcss (Tailwind CSS build, lab kit) | Build-only |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
 | GPL-3.0-or-later | Piper TTS (`piper-tts` 1.8, optional tutorial narration tooling – videos currently silent) | Build-only |
 | MIT / BSD-style / public domain | Piper voice models and their training data (section 5) | Build-only (not shipped; videos are silent) |
@@ -175,9 +174,9 @@ All packages from `composer.lock` (there are no dev packages). “via” names t
 
 | Package | Version | License | Required | URL |
 |---|---|---|---|---|
-| chillerlan/php-qrcode | 5.0.5 | MIT OR Apache-2.0 | direct | https://github.com/chillerlan/php-qrcode |
+| chillerlan/php-qrcode | 6.0.1 | MIT OR Apache-2.0 | direct | https://github.com/chillerlan/php-qrcode |
 | chillerlan/php-settings-container | 3.3.0 | MIT | via chillerlan/php-qrcode | https://github.com/chillerlan/php-settings-container |
-| doctrine/dbal | 4.4.4 | MIT | direct | https://www.doctrine-project.org/projects/dbal.html |
+| doctrine/dbal | 4.5.0 | MIT | direct | https://www.doctrine-project.org/projects/dbal.html |
 | doctrine/deprecations | 1.1.6 | MIT | via doctrine/dbal, phpdocumentor/reflection-docblock | https://www.doctrine-project.org/ |
 | doctrine/lexer | 3.0.2 | MIT | via egulias/email-validator, loupe/loupe | https://www.doctrine-project.org/projects/lexer.html |
 | egulias/email-validator | 4.0.4 | MIT | via symfony/mailer | https://github.com/egulias/EmailValidator |
@@ -209,14 +208,14 @@ All packages from `composer.lock` (there are no dev packages). “via” names t
 | symfony/ai-open-responses-platform | 0.14.0 | MIT | via symfony/ai-open-ai-platform | https://github.com/symfony/ai-open-responses-platform |
 | symfony/ai-platform | 0.14.0 | MIT | direct | https://github.com/symfony/ai-platform |
 | symfony/ai-store | 0.14.0 | MIT | direct | https://github.com/symfony/ai-store |
-| symfony/clock | 8.0.8 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
+| symfony/clock | 8.1.0 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
 | symfony/deprecation-contracts | 3.7.1 | MIT | via symfony/service-contracts | https://symfony.com |
-| symfony/event-dispatcher | 8.0.15 | MIT | via symfony/ai-platform, symfony/mailer | https://symfony.com |
+| symfony/event-dispatcher | 8.1.5 | MIT | via symfony/ai-platform, symfony/mailer | https://symfony.com |
 | symfony/event-dispatcher-contracts | 3.7.1 | MIT | via symfony/ai-store, symfony/event-dispatcher | https://symfony.com |
-| symfony/http-client | 8.0.16 | MIT | direct | https://symfony.com |
+| symfony/http-client | 8.1.7 | MIT | direct | https://symfony.com |
 | symfony/http-client-contracts | 3.7.3 | MIT | via symfony/http-client | https://symfony.com |
-| symfony/mailer | 8.0.15 | MIT | direct | https://symfony.com |
-| symfony/mime | 8.0.15 | MIT | via symfony/mailer | https://symfony.com |
+| symfony/mailer | 8.1.7 | MIT | direct | https://symfony.com |
+| symfony/mime | 8.1.7 | MIT | via symfony/mailer | https://symfony.com |
 | symfony/polyfill-ctype | 1.37.0 | MIT | via symfony/serializer, symfony/string | https://symfony.com |
 | symfony/polyfill-intl-grapheme | 1.41.0 | MIT | via symfony/string | https://symfony.com |
 | symfony/polyfill-intl-idn | 1.42.0 | MIT | via egulias/email-validator, symfony/mime | https://symfony.com |
@@ -224,13 +223,13 @@ All packages from `composer.lock` (there are no dev packages). “via” names t
 | symfony/polyfill-mbstring | 1.38.2 | MIT | via symfony/mime | https://symfony.com |
 | symfony/polyfill-php83 | 1.41.0 | MIT | via symfony/ai-store | https://symfony.com |
 | symfony/polyfill-uuid | 1.37.0 | MIT | via symfony/uid | https://symfony.com |
-| symfony/property-access | 8.0.8 | MIT | via symfony/ai-platform | https://symfony.com |
-| symfony/property-info | 8.0.15 | MIT | via symfony/ai-platform, symfony/property-access | https://symfony.com |
-| symfony/serializer | 8.0.15 | MIT | via symfony/ai-platform | https://symfony.com |
+| symfony/property-access | 8.1.4 | MIT | via symfony/ai-platform | https://symfony.com |
+| symfony/property-info | 8.1.7 | MIT | via symfony/ai-platform, symfony/property-access | https://symfony.com |
+| symfony/serializer | 8.1.7 | MIT | via symfony/ai-platform | https://symfony.com |
 | symfony/service-contracts | 3.7.3 | MIT | via symfony/ai-store, symfony/http-client | https://symfony.com |
-| symfony/string | 8.0.15 | MIT | via symfony/property-info | https://symfony.com |
-| symfony/type-info | 8.0.9 | MIT | via symfony/ai-platform, symfony/property-info | https://symfony.com |
-| symfony/uid | 8.0.9 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
+| symfony/string | 8.1.7 | MIT | via symfony/property-info | https://symfony.com |
+| symfony/type-info | 8.1.5 | MIT | via symfony/ai-platform, symfony/property-info | https://symfony.com |
+| symfony/uid | 8.1.5 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
 | toflar/fast-set | 1.0.1 | MIT | via loupe/matcher | https://github.com/Toflar/FastSet |
 | toflar/state-set-index | 3.3.0 | MIT | via loupe/loupe | https://github.com/Toflar/state-set-index |
 | wamania/php-stemmer | 4.0.0 | MIT | via loupe/loupe | https://github.com/wamania/php-stemmer |
@@ -258,16 +257,9 @@ Notes:
 | esbuild | 0.25.12 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
 | Playwright / playwright-core, © Microsoft Corporation | 1.62.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
 | @napi-rs/canvas | 1.0.9 | MIT | Optional dependency of pdfjs-dist, not used at runtime |
-| Tailwind CSS + @tailwindcss/cli | 4.3.3 | MIT | Lab kit CSS build (test-only) |
-| lightningcss | 1.32.0 | MPL-2.0 | Used by Tailwind CSS 4 during the lab build; not shipped |
-| @parcel/watcher, jiti, enhanced-resolve, magic-string, micromatch, … | – | MIT / ISC / Apache-2.0 / BSD-3-Clause | Tailwind CLI helpers (lab kit) |
 | Piper TTS (`piper-tts`, OHF-Voice/piper1-gpl), incl. espeak-ng phonemizer | 1.8.0 | GPL-3.0-or-later | Tutorial narration (section 5), run locally via pipx |
 | ffmpeg | operator's system | LGPL-2.1+/GPL-2.0+ depending on build | Encoding tutorial videos (build-only, output goes to the product website); also optional for transcription (section 6) |
 | pnpm, Node.js | – | MIT | Package management/build |
-
-**Lab kit (`themes/lab`, test-only, not for customer projects)** bundles into its own `public/themes/lab` build,
-when built: Bootstrap 5.3.8 (MIT, © 2011-2025 The Bootstrap Authors; `bootstrap.bundle.js` includes Popper 2.11.8, MIT), UIkit
-3.25.25 (MIT, © 2013-2020 YOOtheme GmbH) and CSS generated by Tailwind CSS 4.3.3 (MIT, © Tailwind Labs, Inc.).
 
 ## 5. Tutorial narration and videos
 
@@ -394,9 +386,9 @@ KLXM Ai features are off unless the operator configures a provider. Nothing belo
 
 `node tools/licenses.mjs` (or `pnpm --dir tools licenses`) reads `composer.lock` and the installed npm packages of
 `tools/` and every `themes/*` package. It separates **bundled** packages (Composer `require`, npm packages built
-into `public/`) from **build-only** tools (`esbuild`, `playwright`, `@tailwindcss/cli` and their dependencies) and
+into `public/`) from **build-only** tools (`esbuild`, `playwright` and their dependencies) and
 fails on bundled strong copyleft (GPL, AGPL, LGPL, EUPL, OSL, CC-BY-SA – incompatible with shipping the project under
 MIT), on non-free licenses anywhere (SSPL, `*-NC`, `*-ND`, proprietary/UNLICENSED or missing license) and on missing
 license files in `public/`. Bundled weak/file-level copyleft (MPL, EPL, CDDL) and unknown identifiers are reported
-for review; copyleft build-only tools (currently lightningcss, MPL-2.0) are listed as notes.
+for review; copyleft build-only tools are listed as notes.
 `--list` prints every package, `--json` the full inventory.

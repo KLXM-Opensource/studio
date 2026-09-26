@@ -1,6 +1,6 @@
 <?php /** Handbuch „praxis“ · Kapitel „Praxisdaten“ (ersetzt die zentralen Angaben des Kerns) · @var string $settingsTitle  @var callable $img */ ?>
   <p class="lead">Hier stehen alle Angaben, die an mehreren Stellen erscheinen. Einmal ändern – überall aktuell: Kopfzeile, Kontaktkarte, Kontaktbereich, Fußzeile und die Daten für Google. Änderungen gelten sofort nach <b>Speichern</b>.</p>
-  <?= $img('praxisdaten.webp', 'Praxisdaten mit Reiter Erreichbarkeit', '<b>' . e($settingsTitle) . ':</b> nach Reitern gegliedert, Änderungen sind nach „Speichern“ sofort sichtbar.') ?>
+  <?= $img('website-daten.webp', 'Praxisdaten mit Reiter Erreichbarkeit', '<b>' . e($settingsTitle) . ':</b> nach Reitern gegliedert, Änderungen sind nach „Speichern“ sofort sichtbar.') ?>
   <table class="doc-table">
     <tr><th>Reiter</th><th>Was Sie hier pflegen</th></tr>
     <tr><td>Stammdaten</td><td>Praxisname, Wortmarke im Kopf (zwei Zeilen), Adresse, Telefon (für den Wähl-Link und zur Anzeige), Fax, E-Mail.</td></tr>

@@ -8,7 +8,7 @@ namespace Core;
 /**
  * Landingpages mit eigenen Domains innerhalb einer Website (Funktion „landings“).
  *
- * Eine weitere Domain (z. B. reisemedizin-moers.de) zeigt eine Seite der Website – auf Wunsch mit ihren Unterseiten –
+ * Eine weitere Domain (z. B. reisemedizin-musterstadt.de) zeigt eine Seite der Website – auf Wunsch mit ihren Unterseiten –
  * ohne eigene Website, Benutzer oder Datenbank. Die Zuordnung Domain → Seite liegt in der Tabelle „landings“ der Website;
  * die Domain selbst steht in config/sites/{key}.php → 'landing_hosts' (oder 'hosts'; site:hosts … --landing, Netzwerk-Übersicht)
  * und im Hosting (Plesk: Alias bzw. zusätzliche Domain) auf dieselbe Installation zeigen.

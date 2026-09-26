@@ -222,9 +222,9 @@ final class OpenApi
                         'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['lang'], 'properties' => ['lang' => ['type' => 'string', 'enum' => array_keys(\Core\Lang::all())]]]),
                         'responses' => ['201' => $ok(['type' => 'object'])] + $err])],
                 '/geocode' => ['get' => $op('Karten', 'Adresse → Koordinaten (OpenStreetMap, serverseitig). „value“ passt direkt in Felder vom Typ geo.', [
-                    'parameters' => [['name' => 'q', 'in' => 'query', 'required' => true, 'schema' => ['type' => 'string'], 'example' => 'Hauptstraße 1, 47441 Moers']],
+                    'parameters' => [['name' => 'q', 'in' => 'query', 'required' => true, 'schema' => ['type' => 'string'], 'example' => 'Hauptstraße 1, 12345 Musterstadt']],
                     'responses' => ['200' => $ok(['type' => 'array', 'items' => ['type' => 'object', 'properties' => [
-                        'label' => ['type' => 'string'], 'lat' => ['type' => 'number'], 'lng' => ['type' => 'number'], 'value' => ['type' => 'string', 'example' => '51.451646, 6.626294']]]])] + $err])],
+                        'label' => ['type' => 'string'], 'lat' => ['type' => 'number'], 'lng' => ['type' => 'number'], 'value' => ['type' => 'string', 'example' => '51.163400, 10.447700']]]])] + $err])],
                 '/media-meta' => ['get' => $op('Medien', 'Sammlungen, Tags und Bildformate', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
                 '/search' => ['get' => $op('Suche', 'Website-Suche wie für Besucher: veröffentlichte Seiten, Einträge mit Detailseite (inkl. geteilter), ggf. PDF-Dokumente. Tippfehlertolerant; semantisch (KI), wenn eingeschaltet – mode: keyword | hybrid, fallback: true, wenn der KI-Anbieter nicht antwortete.', [
                     'parameters' => [['name' => 'q', 'in' => 'query', 'required' => true, 'schema' => ['type' => 'string', 'maxLength' => 200], 'example' => 'Öffnungszeiten'],

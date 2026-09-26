@@ -49,7 +49,7 @@ const WEAK = [
 // Bekannt unproblematisch (permissiv)
 const OK = /^(MIT|MIT-0|ISC|0BSD|BSD-2-Clause|BSD-3-Clause|Apache-2\.0|OFL-1\.1|CC0-1\.0|CC-BY-3\.0|CC-BY-4\.0|Unlicense|Zlib|BlueOak-1\.0\.0|Python-2\.0|Artistic-2\.0|WTFPL)$/i;
 // Reine Build-Werkzeuge (npm-Wurzeln): sie und ihre Abhängigkeiten landen nicht in der Auslieferung
-const BUILD_ONLY = new Set(['esbuild', 'playwright', '@tailwindcss/cli']);
+const BUILD_ONLY = new Set(['esbuild', 'playwright']);
 // Ausnahmen: 'paket' => Begründung (nur mit Begründung und Verweis auf THIRD-PARTY-NOTICES.md eintragen)
 const ALLOW = {};
 

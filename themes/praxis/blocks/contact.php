@@ -26,7 +26,7 @@ $c = $b->central();
     </div>
     <div class="contact__card" id="anfahrt" data-reveal="up" data-delay="160"<?= $c ?>>
       <h3 class="eyebrow-h eyebrow-h--accent"><?= e(lt('Anfahrt')) ?></h3>
-      <address class="contact__address"><?= e(setting('praxis_name') ?: lt('[Name der Gemeinschaftspraxis]')) ?><br>
+      <address class="contact__address"><?= e(setting('praxis_name') ?: lt('[Name der Praxis]')) ?><br>
         <span><?= e(setting('strasse') ?: lt('[Straße und Hausnummer]')) ?><br><?= e(filled(setting('plz')) ? trim(setting('plz') . ' ' . setting('ort')) : lt('[PLZ {city}]', ['city' => setting('ort') ?: lt('Ort')])) ?></span></address>
       <dl class="contact__list contact__list--plain">
         <div><dt><?= e(lt('Bus und Bahn')) ?></dt><dd><?= e(setting('oepnv_text') ?: lt('[Haltestelle und Linien]')) ?></dd></div>

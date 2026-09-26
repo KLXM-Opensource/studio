@@ -990,7 +990,7 @@ return [
     '{n} Einträge' => '{n} entries',
 
     // Maps & proxy
-    'Adresse suchen, z. B. Hauptstraße 1, Moers' => 'Search an address, e.g. 1 Main Street, Moers',
+    'Adresse suchen, z. B. Hauptstraße 1, Musterstadt' => 'Search an address, e.g. 1 Main Street, Springfield',
     'Adresse suchen' => 'Search address',
     'Karte: klicken, um den Ort zu setzen' => 'Map: click to set the location',
     'Ort gesetzt: {p}' => 'Location set: {p}',
@@ -1062,7 +1062,7 @@ return [
     '„{label}“: ungültiges Datum.' => '“{label}”: invalid date.',
     '„{label}“: Uhrzeit im Format HH:MM.' => '“{label}”: time in the format HH:MM.',
     '„{label}“: Farbe im Format #RRGGBB.' => '“{label}”: colour in the format #RRGGBB.',
-    '„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.4512, 6.6263).' => '“{label}”: coordinates as latitude, longitude (e.g. 51.4512, 6.6263).',
+    '„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.1634, 10.4477).' => '“{label}”: coordinates as latitude, longitude (e.g. 51.1634, 10.4477).',
     '„{label}“: ungültige Auswahl.' => '“{label}”: invalid choice.',
 
     // Kalender (Datentabellen, Feldtypen „Datum & Uhrzeit“ und „Wiederholung“)

@@ -496,7 +496,7 @@ ${m}
         <p class="f-help lp__msg" id="cms-lp-mail-msg" data-lp-msg="mail" aria-live="polite"></p>
       </div>
       <div class="lp__panel" role="tabpanel" id="cms-lp-p-tel" aria-labelledby="cms-lp-tab-tel" data-lp-panel="tel" hidden>
-        <label class="f"><span>${le(i("Telefonnummer"))}</span><input type="tel" data-lp-tel autocomplete="off" placeholder="02841 12 34 56" aria-describedby="cms-lp-tel-msg"></label>
+        <label class="f"><span>${le(i("Telefonnummer"))}</span><input type="tel" data-lp-tel autocomplete="off" placeholder="01234 56 78 90" aria-describedby="cms-lp-tel-msg"></label>
         <p class="f-help lp__msg" id="cms-lp-tel-msg" data-lp-msg="tel" aria-live="polite"></p>
       </div>
       <div class="lp__opts">

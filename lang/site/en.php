@@ -56,7 +56,7 @@ return [
     '„{label}“: ungültiges Datum.' => '“{label}”: invalid date.',
     '„{label}“: Uhrzeit im Format HH:MM.' => '“{label}”: time in the format HH:MM.',
     '„{label}“: Farbe im Format #RRGGBB.' => '“{label}”: colour in the format #RRGGBB.',
-    '„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.4512, 6.6263).' => '“{label}”: coordinates as latitude, longitude (e.g. 51.4512, 6.6263).',
+    '„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.1634, 10.4477).' => '“{label}”: coordinates as latitude, longitude (e.g. 51.1634, 10.4477).',
     '„{label}“: ungültige Auswahl.' => '“{label}”: invalid choice.',
     // Bildergalerie, Lightbox, Slider (app/Blocks, Core\MediaBlocks)
     'Bildansicht' => 'Image viewer',

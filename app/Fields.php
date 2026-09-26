@@ -279,7 +279,7 @@ final class Fields
             case 'geo':
                 if ($s === '') return ['', null];
                 $p = Maps::parse($s);
-                return [$p ? Maps::format($p) : $s, $p ? null : self::msg('„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.4512, 6.6263).', ['label' => $label])];
+                return [$p ? Maps::format($p) : $s, $p ? null : self::msg('„{label}“: Koordinaten im Format Breite, Länge (z. B. 51.1634, 10.4477).', ['label' => $label])];
             case 'select':
                 $opts = self::options($f);
                 if ($s === '') return ['', null];   // leer: Pflichtprüfung meldet „Bitte … ausfüllen“
@@ -500,9 +500,9 @@ final class Fields
             'geocode' => url('/admin/api/geocode'), 'address' => array_values((array) ($f['address_fields'] ?? [])),
         ];
         return '<div class="geo" data-geo="' . e(json_encode($cfg, JSON_UNESCAPED_SLASHES)) . '">'
-            . '<div class="geo-row"><input type="text" id="' . $id . '" name="' . $name . '" value="' . e($v) . '" placeholder="51.4512, 6.6263" inputmode="decimal" spellcheck="false" autocomplete="off"' . $aria . '>'
+            . '<div class="geo-row"><input type="text" id="' . $id . '" name="' . $name . '" value="' . e($v) . '" placeholder="51.1634, 10.4477" inputmode="decimal" spellcheck="false" autocomplete="off"' . $aria . '>'
             . '<button type="button" class="btn btn--small" data-geo-clear>' . e(__('Entfernen')) . '</button></div>'
-            . '<div class="geo-row geo-search"><input type="search" data-geo-q placeholder="' . e(__('Adresse suchen, z. B. Hauptstraße 1, Moers')) . '" aria-label="' . e(__('Adresse suchen')) . '">'
+            . '<div class="geo-row geo-search"><input type="search" data-geo-q placeholder="' . e(__('Adresse suchen, z. B. Hauptstraße 1, Musterstadt')) . '" aria-label="' . e(__('Adresse suchen')) . '">'
             . '<button type="button" class="btn btn--small" data-geo-find>' . e(__('Suchen')) . '</button></div>'
             . '<ul class="geo-results" data-geo-results hidden></ul>'
             . '<div class="geo-map" data-geo-map role="application" aria-label="' . e(__('Karte: klicken, um den Ort zu setzen')) . '"></div>'

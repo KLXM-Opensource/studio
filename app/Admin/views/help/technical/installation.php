@@ -2,7 +2,7 @@
   <h3>Anforderungen</h3>
   <table class="doc-table">
     <tr><th>Bereich</th><th>Voraussetzung</th></tr>
-    <tr><td>PHP</td><td>≥ 8.4 als FPM (8.5 wird unterstützt). Erweiterungen: <code>pdo_sqlite</code> (SQLite ≥ 3.35, auch für den Suchindex), <code>sodium</code>, <code>gd</code> (WebP, optional AVIF), <code>mbstring</code>, <code>dom</code>, <code>fileinfo</code>, <code>intl</code> (Datumsangaben im Kalender), <code>phar</code> + <code>zlib</code> (Sicherungen). Optional: <code>curl</code>, <code>exif</code> (automatisches Drehen von Fotos), <code>pdo_mysql</code> für MySQL/MariaDB.</td></tr>
+    <tr><td>PHP</td><td>≥ 8.4.1 als FPM (8.5 wird unterstützt). Erweiterungen: <code>pdo_sqlite</code> (SQLite ≥ 3.35, auch für den Suchindex), <code>sodium</code>, <code>gd</code> (WebP, optional AVIF), <code>mbstring</code>, <code>dom</code>, <code>fileinfo</code>, <code>intl</code> (Datumsangaben im Kalender), <code>phar</code> + <code>zlib</code> (Sicherungen). Optional: <code>curl</code>, <code>exif</code> (automatisches Drehen von Fotos), <code>pdo_mysql</code> für MySQL/MariaDB.</td></tr>
     <tr><td>PHP-Funktionen</td><td><code>proc_open</code> für „Sicherung jetzt“ in der Netzwerk-Übersicht, KI-Aufträge im Hintergrund und Transkription (Plesk → PHP-Einstellungen → <code>disable_functions</code>); <code>open_basedir</code> muss die Installation und – falls genutzt – Programmpfade zulassen.</td></tr>
     <tr><td>Datenbank</td><td>SQLite (Standard, eine Datei je Website) oder MySQL/MariaDB je Website (<code>'db'</code>).</td></tr>
     <tr><td>SQLite-Version</td><td>PHP nutzt die SQLite-Bibliothek des Betriebssystems – auch bei Plesk-PHP. Nötig sind ≥ 3.35 (Suche, Loupe nutzt <code>RETURNING</code>) bzw. ≥ 3.27 (<code>site:backup</code>, <code>VACUUM INTO</code>); <code>php bin/console health</code> zeigt die Version. Stand der Distributionen: Debian 12 → 3.40, Debian 13 → 3.46, Ubuntu 22.04 → 3.37, Ubuntu 24.04 → 3.45 (alle geeignet); <b>AlmaLinux/Rocky/RHEL 9 → 3.34 und 8 → 3.26 sind zu alt</b> – dort eine neuere SQLite-Bibliothek bereitstellen oder einen Debian-/Ubuntu-Server wählen.</td></tr>
@@ -12,10 +12,10 @@
   </table>
   <h3>Installation auf Plesk</h3>
   <ol class="doc-steps">
-    <li><b>Code holen:</b> <code>git clone https://github.com/klxm/studio.git</code> (oder ZIP eines Releases von <a href="https://github.com/klxm/studio">github.com/klxm/studio</a>), dann <code>composer install --no-dev</code> und – nur für den Build – <code>cd tools &amp;&amp; pnpm install &amp;&amp; pnpm build</code>.</li>
+    <li><b>Code holen:</b> entweder das Installationspaket <code>klxm-studio-&lt;version&gt;.zip</code> von <a href="https://github.com/klxm/studio/releases">GitHub Releases</a> (mit <code>vendor/</code> und gebauten Assets, Prüfsumme <code>.sha256</code>) – oder <code>git clone https://github.com/klxm/studio.git</code>, dann <code>composer install --no-dev</code>. Die gebauten Assets liegen versioniert in <code>public/</code>; <code>cd tools &amp;&amp; pnpm install &amp;&amp; pnpm build</code> ist nur nach Änderungen an CSS/JS-Quellen nötig.</li>
     <li><b>Hochladen:</b> Inhalt des Projektordners nach <code>httpdocs/</code> (ohne <code>tools/node_modules</code>, <code>themes/*/node_modules</code>, <code>config/config.local.php</code>, <code>config/sites/</code>, <code>storage/</code>-Inhalte, <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>). Für Releases mit Rollback: <a href="#deploy">Staging &amp; Deploy</a>.</li>
     <li><b>Document Root:</b> Hosting-Einstellungen → <code>httpdocs/public</code> (bei Deploy-Releases <code>current/public</code>).</li>
-    <li><b>PHP:</b> 8.4 oder neuer als FPM mit den Erweiterungen oben; <code>upload_max_filesize</code> ≥ 2 MB (Uploads laufen in 1-MB-Stücken), <code>display_errors = Off</code>.</li>
+    <li><b>PHP:</b> 8.4.1 oder neuer als FPM mit den Erweiterungen oben; <code>upload_max_filesize</code> ≥ 2 MB (Uploads laufen in 1-MB-Stücken), <code>display_errors = Off</code>.</li>
     <li><b>Saubere URLs</b> (Apache &amp; nginx Settings → zusätzliche Apache-Anweisungen, HTTP und HTTPS):
       <pre><code>FallbackResource /index.php
 # Authorization-Header an PHP-FPM durchreichen (für API/MCP):

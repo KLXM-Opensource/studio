@@ -150,7 +150,7 @@ function praxis_weekend_closed(): bool
     return !in_array(6, $days, true) && !in_array(0, $days, true);
 }
 
-/** Daten für das Live-Badge „Jetzt geöffnet“ (wird im Browser nach Ortszeit Moers berechnet) */
+/** Daten für das Live-Badge „Jetzt geöffnet“ (wird im Browser nach der Ortszeit der Praxis berechnet – Zeitzone der Website) */
 function praxis_open_data(): array
 {
     $days = [];

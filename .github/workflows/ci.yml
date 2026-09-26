@@ -1,0 +1,117 @@
+# CI für KLXM Studio: Syntax, Build (gebaute Assets müssen eingecheckt sein), Lizenzen, Übersetzungen und ein
+# Rauchtest mit frischer Installation. Läuft auf Pushes nach main und auf Pull Requests.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, sodium, pdo_sqlite, mbstring, intl, zip, exif
+          tools: composer:v2
+          coverage: none
+
+      - name: Composer-Cache ermitteln
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Composer-Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php${{ matrix.php }}-
+
+      - name: Composer install
+        run: composer install --no-progress --no-interaction
+
+      - name: PHP-Syntaxprüfung
+        run: |
+          set -euo pipefail
+          { find . -name '*.php' -not -path './vendor/*' -not -path '*/node_modules/*' -print0; printf 'bin/console\0'; } \
+            | xargs -0 -n1 -P4 php -l > /tmp/lint.log 2>&1 || { grep -v '^No syntax errors' /tmp/lint.log; exit 1; }
+          echo "$(grep -c '^No syntax errors' /tmp/lint.log) Dateien ohne Syntaxfehler."
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          # Version aus "packageManager" (pnpm 10)
+          package_json_file: tools/package.json
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            tools/pnpm-lock.yaml
+            themes/*/pnpm-lock.yaml
+
+      - name: Build
+        run: cd tools && pnpm install --frozen-lockfile && pnpm run build
+
+      - name: Gebaute Dateien eingecheckt?
+        run: |
+          if ! git diff --exit-code --stat -- public/ || [ -n "$(git status --porcelain --untracked-files=all -- public/)" ]; then
+            git status --short -- public/
+            echo "::error::Die gebauten Dateien in public/ weichen vom Repository ab. Lokal 'cd tools && pnpm run build' ausführen und public/ mit einchecken."
+            exit 1
+          fi
+
+      - name: Lizenzprüfung
+        run: node tools/licenses.mjs
+
+      - name: Rauchtest (frische Installation)
+        run: |
+          set -euo pipefail
+          # Wie eine Neuinstallation: config.local.php (app_key, setup_token) und Datenbank entstehen beim ersten Aufruf.
+          # Website "default" fest auf das neutrale Kit "basis" legen.
+          mkdir -p config/sites
+          printf "<?php\nreturn ['theme' => 'basis'];\n" > config/sites/default.php
+          php bin/console migrate
+          php bin/console health   # Warnungen (!) sind erlaubt, Fehler (✗) brechen ab
+          php -S 127.0.0.1:8000 -t public public/index.php > /tmp/php-server.log 2>&1 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8000/ && break; sleep 0.5; done
+          fail=0
+          for path in / /admin/login; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8000$path")
+            echo "GET $path → $code"
+            case "$code" in 200|303) ;; *) fail=1 ;; esac
+          done
+          if [ "$fail" != 0 ]; then
+            echo "::error::Rauchtest fehlgeschlagen"; cat /tmp/php-server.log; tail -n 50 storage/logs/*.log 2>/dev/null || true; exit 1
+          fi
+
+      - name: Übersetzungen vollständig (en)
+        run: |
+          set -uo pipefail
+          php bin/console i18n:missing en > /tmp/i18n.out 2> /tmp/i18n.err
+          cat /tmp/i18n.err
+          if ! grep -q '^0 von ' /tmp/i18n.err; then
+            cat /tmp/i18n.out
+            echo "::error::Fehlende englische Übersetzungen (lang/en.php) – siehe oben."
+            exit 1
+          fi

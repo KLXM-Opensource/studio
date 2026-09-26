@@ -669,11 +669,11 @@ add({ id: 'adm-network', section: 'admin', kind: 'app', speed: 1.5, xfade: 0.4,
   voice: ['Im Netzwerk: alle Websites auf einen Blick.', 'Across the network: every website at a glance.'],
   async prep(s) {
     await s.go(A('network', '/admin/network'));
-    // Name der Hauptwebsite (echte Praxis in der Testkopie) nicht zeigen: Markenzeile unscharf, Liste vorab auf die Demo-Websites gefiltert
+    // Name der Hauptwebsite (Kundenprojekt in der Testkopie) nicht zeigen: Markenzeile unscharf, Liste vorab auf die Demo-Websites gefiltert
     await s.page.evaluate(() => window.__trBlur?.('.adm-brand'));
     await s.page.locator('main input[placeholder*="Domain"], main input[type=search]').first().fill('localhost');
     await s.wait(500);
-    await s.page.locator('main article, main [class*=card]').filter({ hasText: /Gemeinschaftspraxis|Hauptwebsite/ }).evaluateAll((els) => els.forEach((el) => { el.style.filter = 'blur(8px)'; }));
+    await s.page.locator('main article, main [class*=card]').filter({ hasText: /praxis|Hauptwebsite/i }).evaluateAll((els) => els.forEach((el) => { el.style.filter = 'blur(8px)'; }));
   },
   async run(s) {
     await s.label('Netzwerk <small style="font-weight:400;opacity:.75">Alle Websites</small>');

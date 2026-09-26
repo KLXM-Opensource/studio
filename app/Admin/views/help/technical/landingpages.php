@@ -1,8 +1,8 @@
 <?php /** Entwicklerhandbuch · Landingpages mit eigenen Domains (Core\Landings, Core\Landing) */ ?>
-  <p class="lead">Eine weitere Domain zeigt eine Seite der Website – auf Wunsch mit ihren Unterseiten – ohne eigene Website, Benutzer oder Datenbank. Beispiel: <code>reisemedizin-moers.de</code> zeigt den Zweig „Reisemedizin“ der Praxis-Website. Inhalte, Medien, Formulare und Anfragen bleiben im Projekt; Besucher erhalten auch hier keine Cookies und keine Analyse.</p>
+  <p class="lead">Eine weitere Domain zeigt eine Seite der Website – auf Wunsch mit ihren Unterseiten – ohne eigene Website, Benutzer oder Datenbank. Beispiel: <code>reisemedizin-musterstadt.de</code> zeigt den Zweig „Reisemedizin“ der Praxis-Website. Inhalte, Medien, Formulare und Anfragen bleiben im Projekt; Besucher erhalten auch hier keine Cookies und keine Analyse.</p>
   <table class="doc-table">
     <tr><th>Baustein</th><th>Ort</th></tr>
-    <tr><td>Domain gehört zur Website</td><td><code>config/sites/{key}.php</code> → <code>'landing_hosts' =&gt; ['reisemedizin-moers.de', 'www.reisemedizin-moers.de']</code> (Agentur; <code>Sites::resolve</code> prüft <code>hosts</code> und <code>landing_hosts</code>). Hauptadresse der Website bleibt <code>hosts[0]</code>.</td></tr>
+    <tr><td>Domain gehört zur Website</td><td><code>config/sites/{key}.php</code> → <code>'landing_hosts' =&gt; ['reisemedizin-musterstadt.de', 'www.reisemedizin-musterstadt.de']</code> (Agentur; <code>Sites::resolve</code> prüft <code>hosts</code> und <code>landing_hosts</code>). Hauptadresse der Website bleibt <code>hosts[0]</code>.</td></tr>
     <tr><td>Zuordnung Domain → Seite</td><td>Tabelle <code>landings</code> der Website (id, label, hosts JSON, page_id, include_subpages, mode, options_json, active) – Verwaltung → Administration → <b>Landingpages</b> (Recht <code>system.manage</code>, Funktion <code>landings</code>)</td></tr>
     <tr><td>Funktion</td><td><code>landings</code> (Core\Features) – an in <code>full</code>, aus in den Presets <code>content</code>/<code>minimal</code>; Integratoren und Netzwerk-Konten sehen sie immer. Ohne Funktion werden Landing-Domains wie normale Domains der Website behandelt.</td></tr>
     <tr><td>Kits</td><td><code>landing()</code> → <code>?Core\Landing</code> (null auf der Hauptdomain): <code>-&gt;name</code>, <code>-&gt;tagline</code>, <code>-&gt;logo</code> (Medien-ID), <code>-&gt;layout</code>; Klassen <code>is-landing</code> / <code>is-landing--reduced</code> am <code>&lt;html&gt;</code> (über <code>design_classes()</code>); optionales Template <code>templates/landing.php</code> für das reduzierte Layout</td></tr>
@@ -12,11 +12,11 @@
   <ol class="doc-steps">
     <li><b>DNS:</b> A/AAAA (oder CNAME) der neuen Domain auf den Server.</li>
     <li><b>Plesk:</b> die Domain als <b>Alias</b> der Hauptdomain anlegen (Websites &amp; Domains → Alias hinzufügen; „Umleitung mit HTTP 301“ und „Mail-Dienst“ <b>aus</b>, damit der Alias die Inhalte selbst ausliefert) – oder als zusätzliche Domain im selben Abonnement mit <b>Dokumentstamm <code>httpdocs/public</code></b> und denselben Apache-/nginx-Anweisungen. SSL-Zertifikat (Let’s Encrypt) für die Domain ausstellen bzw. den Alias ins Zertifikat aufnehmen.</li>
-    <li><b>Domain der Website zuordnen:</b> <code>php bin/console site:hosts &lt;key&gt; add reisemedizin-moers.de --landing</code> – oder in der Netzwerk-Übersicht bei der Website „Domains bearbeiten“. Der Befehl ändert nur den Eintrag <code>landing_hosts</code> (Kommentare und übrige Werte bleiben; Prüfung vor dem Ersetzen, Sicherung <code>{key}.php.bak</code>). <code>site:hosts &lt;key&gt;</code> zeigt die Domains, <code>remove</code> entfernt eine.</li>
+    <li><b>Domain der Website zuordnen:</b> <code>php bin/console site:hosts &lt;key&gt; add reisemedizin-musterstadt.de --landing</code> – oder in der Netzwerk-Übersicht bei der Website „Domains bearbeiten“. Der Befehl ändert nur den Eintrag <code>landing_hosts</code> (Kommentare und übrige Werte bleiben; Prüfung vor dem Ersetzen, Sicherung <code>{key}.php.bak</code>). <code>site:hosts &lt;key&gt;</code> zeigt die Domains, <code>remove</code> entfernt eine.</li>
     <li><b>Verwaltung → Landingpages:</b> Domain und Seite wählen, Modus festlegen, „Status prüfen“ (DNS + Anfrage an <code>https://domain/health?landing=…</code> mit Prüf-Token – bestätigt, dass die Domain auf <em>diese</em> Installation und Landingpage zeigt).</li>
   </ol>
-  <pre><code>php bin/console site:hosts default add reisemedizin-moers.de --landing
-php bin/console site:hosts default add www.reisemedizin-moers.de --landing
+  <pre><code>php bin/console site:hosts default add reisemedizin-musterstadt.de --landing
+php bin/console site:hosts default add www.reisemedizin-musterstadt.de --landing
 php bin/console site:hosts default                # Domains + Landing-Domains anzeigen</code></pre>
 
   <h3>Routing auf einer Landing-Domain</h3>

@@ -18,7 +18,7 @@ $img = function (string $file, int $w, int $h, array $rgb, string $label) {
 // JPEG + EXIF-Block (APP1) mit Kennung – nach dem Import darf sie nicht mehr in der Datei stehen
 $withExif = function (string $file) {
     $jpg = file_get_contents($file);
-    $payload = "Exif\0\0" . 'II*' . "\0" . str_repeat("\0", 8) . 'GPS-GEHEIM-51.4510N-6.6260E';
+    $payload = "Exif\0\0" . 'II*' . "\0" . str_repeat("\0", 8) . 'GPS-GEHEIM-51.1634N-10.4477E';
     $app1 = "\xFF\xE1" . pack('n', strlen($payload) + 2) . $payload;
     file_put_contents($file, substr($jpg, 0, 2) . $app1 . substr($jpg, 2));
 };

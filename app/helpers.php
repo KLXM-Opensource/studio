@@ -259,8 +259,8 @@ function country_code(): string
 }
 
 /**
- * Telefonnummer für die Anzeige: In der Standardsprache wie eingegeben (z. B. „02841 12 34 56“),
- * in allen anderen Sprachen automatisch international („+49 2841 12 34 56“) – die Gliederung bleibt erhalten.
+ * Telefonnummer für die Anzeige: In der Standardsprache wie eingegeben (z. B. „01234 56 78 90“),
+ * in allen anderen Sprachen automatisch international („+49 1234 56 78 90“) – die Gliederung bleibt erhalten.
  */
 function phone_display(?string $number, ?string $lang = null): string
 {

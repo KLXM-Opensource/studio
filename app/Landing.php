@@ -68,7 +68,7 @@ final class Landing
         return $this->hosts[0] ?? '';
     }
 
-    /** Ursprung ohne Pfad, z. B. https://reisemedizin-moers.de – Schema wie die aktuelle Anfrage (Kommandozeile: https) */
+    /** Ursprung ohne Pfad, z. B. https://reisemedizin-musterstadt.de – Schema wie die aktuelle Anfrage (Kommandozeile: https) */
     public function origin(): string
     {
         $r = app()->request ?? null;

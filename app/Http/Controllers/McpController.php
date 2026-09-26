@@ -284,7 +284,7 @@ final class McpController
                 fn($a) => $s->search((string) $a['q'], $a));
         }
         $add('geocode_address', 'Adresse → Koordinaten', 'Findet Koordinaten zu einer Adresse (OpenStreetMap). Ergebnis „value“ direkt für Felder vom Typ geo verwenden (z. B. Standort der Karte in update_settings oder Block „map“ → point).',
-            $schema(['address' => $str('Adresse, z. B. „Hauptstraße 1, 47441 Moers“')], ['address']), $ro + ['openWorldHint' => true], false,
+            $schema(['address' => $str('Adresse, z. B. „Hauptstraße 1, 12345 Musterstadt“')], ['address']), $ro + ['openWorldHint' => true], false,
             fn($a) => ['results' => $s->geocode((string) $a['address'])]);
         $add('list_requests', 'Anfragen (Eingang)', 'Eingegangene Anfragen aller Eingangs-Tabellen (z. B. ' . term('requests') . ') – nur Metadaten: Tabelle, Vorgangsnummer, Status, Zeitpunkt. Inhalte bleiben Ende-zu-Ende verschlüsselt und sind nur in der Verwaltung mit dem Schlüssel lesbar.',
             $schema(['status' => $str('neu (Standard), in_bearbeitung, erledigt oder alle', ['enum' => ['neu', 'in_bearbeitung', 'erledigt', 'alle']]),
@@ -299,7 +299,7 @@ final class McpController
 
         // Ändern
         $add('update_settings', $st . ' ändern', 'Zentrale Einstellungen teilweise ändern – nur übergebene Felder. Wird sofort auf der Website wirksam. Schema: get_settings_schema.',
-            $schema(['values' => $obj('Feldname → Wert, z. B. {"telefon": "02841 123456", "doctolib_url": "https://…"}')], ['values']), $rw, true,
+            $schema(['values' => $obj('Feldname → Wert, z. B. {"telefon": "01234 123456", "doctolib_url": "https://…"}')], ['values']), $rw, true,
             fn($a) => ['saved' => $s->settingsUpdate((array) $a['values'])]);
         if ($design) $add('set_design', 'Design ändern', 'Design-Werte ändern und sofort veröffentlichen (mit Verlauf, in der Verwaltung wiederherstellbar). values = nur zu ändernde Werte (Farben #RRGGBB, dunkle Werte „name@dark“), preset = Vorlage als Grundlage, reset = Kit-Standard als Grundlage. Kontrastwerte im Ergebnis prüfen. Braucht einen Token-Benutzer mit Recht „Design“.',
             $schema(['values' => $obj('Token-Name → Wert, z. B. {"accent": "#0F5E63", "buttons": "soft"}'), 'preset' => $str('Schlüssel einer Vorlage aus get_design → presets'),

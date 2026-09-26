@@ -49,7 +49,7 @@ final class Maps
 
     // ------------------------------------------------------------------ Koordinaten
 
-    /** "51.45, 6.62" | ['lat'=>…, 'lng'=>…] → [lat, lng] oder null */
+    /** "51.16, 10.45" | ['lat'=>…, 'lng'=>…] → [lat, lng] oder null */
     public static function parse(mixed $v): ?array
     {
         if (is_array($v)) {

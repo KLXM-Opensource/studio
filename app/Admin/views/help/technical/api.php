@@ -40,7 +40,7 @@ curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/js
   -d '{"data":{"title":"Welcome"}}' "<?= e($api) ?>/pages/home/blocks/BLOCK_ID?lang=en"
 
 # Standort für die Karte ermitteln
-curl -H "Authorization: Bearer $TOKEN" "<?= e($api) ?>/geocode?q=Hauptstra%C3%9Fe%201%2C%20Moers"
+curl -H "Authorization: Bearer $TOKEN" "<?= e($api) ?>/geocode?q=Hauptstra%C3%9Fe%201%2C%20Musterstadt"
 
 # Öffnungszeiten lesen (nur wenn das Kit sie anbietet)
 curl -H "Authorization: Bearer $TOKEN" <?= e($api) ?>/hours

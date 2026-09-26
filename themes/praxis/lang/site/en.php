@@ -142,7 +142,7 @@ return [
     '[Telefonische Erreichbarkeit]' => '[Phone availability]',
     '[Terminlink]' => '[Booking link]',
     '[Praxis-URL]' => '[Practice URL]',
-    '[Name der Gemeinschaftspraxis]' => '[Name of the group practice]',
+    '[Name der Praxis]' => '[Name of the practice]',
     '[Straße und Hausnummer]' => '[Street and house number]',
     '[PLZ {city}]' => '[Postcode {city}]',
     'Ort' => 'Town',

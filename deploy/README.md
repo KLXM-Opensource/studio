@@ -52,9 +52,18 @@ auch das vorherige Release nach einem Rollback weiter.
 
 ## GitHub Actions
 
-`.github/workflows/deploy.yml`: Push auf `main` → Staging (mit PHP-Syntaxprüfung; PHP 8.4, Node 22, pnpm 10). Production über „Run workflow“ mit Ziel `production`;
-in den Repository-Einstellungen unter *Environments → production* Freigabe durch eine Person verlangen.
-Secrets je Umgebung: `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_ENV` (Inhalt der .env-Datei).
+Vorlage: [`deploy/github-actions/deploy.yml.example`](github-actions/deploy.yml.example) – gedacht für das
+**Repository eines Projekts** (Agentur/Kundenwebsite), nicht für das öffentliche KLXM-Studio-Repository, das nur prüft
+(`.github/workflows/ci.yml`) und bei Tags `v*` das Installations-ZIP baut (`release.yml`).
+
+1. Datei im eigenen Repository als `.github/workflows/deploy.yml` ablegen.
+2. *Settings → Environments*: `staging` und `production` anlegen, bei `production` Freigabe durch eine Person
+   verlangen (*Required reviewers*).
+3. Secrets je Umgebung: `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_ENV` (Inhalt der .env-Datei – mindestens
+   `SSH_TARGET`, `BASE`, `URL`, sonst bricht `deploy.sh` ab).
+
+Ablauf: Push auf `main` → Staging (mit PHP-Syntaxprüfung; PHP 8.4, Node 22, pnpm 10). Production über „Run workflow“
+mit Ziel `production`.
 
 Alternative ohne CI: `deploy/deploy.sh` lokal ausführen, oder Plesk-Git mit „Zusätzliche Bereitstellungsaktionen“
 (`php bin/console migrate --all && php bin/console health --all`) – dann ohne Releases/Rollback.

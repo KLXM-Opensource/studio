@@ -3,7 +3,7 @@
   <h3>Urlaub oder Vertretung ankündigen</h3>
   <ol class="doc-steps">
     <li><?= e($settingsTitle) ?> → Reiter <b>Hinweise</b>.</li>
-    <li>Text bei <b>Aktueller Hinweis</b> eingeben, z. B. „Urlaub vom 21.–25.10. · Vertretung: Praxis Muster, Tel. 02841 1111“.</li>
+    <li>Text bei <b>Aktueller Hinweis</b> eingeben, z. B. „Urlaub vom 21.–25.10. · Vertretung: Praxis Muster, Tel. 01234 1111“.</li>
     <li>Haken bei <b>Aktuellen Hinweis oben anzeigen</b> setzen. Nach dem Urlaub den Haken wieder entfernen.</li>
     <li>Darunter bei <b>Praxis geschlossen von / bis</b> die Urlaubstage eintragen → <b>Speichern</b>. Das Status-Badge zeigt dann „Praxis geschlossen bis …“ und nach dem Urlaub automatisch wieder die normalen Zeiten.</li>
     <li>Optional auf der Startseite im Block „Hinweise“ den Eintrag „Vertretung und Urlaubszeiten“ aktualisieren und veröffentlichen.</li>

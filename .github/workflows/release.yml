@@ -1,0 +1,117 @@
+# Release: Tag v* (z. B. v1.0.1) → Installations-ZIP mit vendor/ und gebauten Assets, SHA-256-Prüfsumme und
+# GitHub-Release mit dem passenden Abschnitt aus CHANGELOG.md („## 1.0.1“ bzw. „## [1.0.1] – Datum“).
+#
+#   git tag v1.0.1 && git push origin v1.0.1
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version aus dem Tag
+        id: v
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          CORE=$(sed -n "s/.*define('CMS_VERSION', '\([^']*\)').*/\1/p" app/bootstrap.php)
+          if [ "$VERSION" != "$CORE" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME passt nicht zu CMS_VERSION ($CORE) in app/bootstrap.php."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=klxm-studio-$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, sodium, pdo_sqlite, mbstring, intl, zip, exif
+          tools: composer:v2
+          coverage: none
+
+      - name: Composer install (ohne Dev-Pakete)
+        run: composer install --no-dev --optimize-autoloader --no-progress --no-interaction
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: tools/package.json
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            tools/pnpm-lock.yaml
+            themes/*/pnpm-lock.yaml
+
+      - name: Build
+        run: cd tools && pnpm install --frozen-lockfile && pnpm run build
+
+      - name: Lizenzprüfung
+        run: node tools/licenses.mjs
+
+      - name: Paket schnüren
+        run: |
+          set -euo pipefail
+          NAME="${{ steps.v.outputs.name }}"
+          mkdir -p "dist/$NAME"
+          # Code + vendor/ + gebaute Assets; ohne Git, CI, node_modules, Laufzeitdaten, Geheimnisse und Website-Konfigurationen.
+          # tools/ bleibt als Entwicklungswerkzeug enthalten (ohne node_modules und lokale Aufnahme-/Sprecherdaten).
+          rsync -a ./ "dist/$NAME/" \
+            --exclude '/.git' --exclude '/.github' --exclude '/dist' \
+            --exclude 'node_modules/' \
+            --exclude '/config/config.local.php' --exclude '/config/sites/*.php' \
+            --include 'deploy/targets/example.env' --exclude 'deploy/targets/*.env' \
+            --exclude '/tests/fixtures' \
+            --exclude '/tools/tutorials/.venv-chatterbox' --exclude '/tools/tutorials/.raw' \
+            --exclude '/tools/tutorials/.narration' --exclude '/tools/tutorials/__pycache__' \
+            --exclude '/tools/tutorials/accounts.local.json' --exclude '/tools/trailer/.work' \
+            --exclude '/public/media' --exclude '/public/sites' --exclude '/public/pools' --exclude '/public/fonts' \
+            --exclude '/public/assets/tutorials' --exclude '/public/assets/trailer' --exclude '/public/assets/ha' \
+            --exclude '/public/assets/icons/sites'
+          # storage/ und public/media/: nur die Ordnerstruktur mit .gitkeep
+          rm -rf "dist/$NAME/storage"
+          git ls-files -z storage public/media | while IFS= read -r -d '' f; do
+            mkdir -p "dist/$NAME/$(dirname "$f")" && cp "$f" "dist/$NAME/$f"
+          done
+          # Stimmen der Tutorial-Sprecher (nur SHA256SUMS ist versioniert)
+          find "dist/$NAME/tools/tutorials/voices" -type f ! -name SHA256SUMS -delete 2>/dev/null || true
+          (cd dist && zip -qr -X "$NAME.zip" "$NAME" && sha256sum "$NAME.zip" > "$NAME.zip.sha256")
+          ls -la dist
+          unzip -l "dist/$NAME.zip" | tail -1
+
+      - name: Release-Notizen aus CHANGELOG.md
+        run: |
+          set -euo pipefail
+          awk -v v="${{ steps.v.outputs.version }}" '
+            /^## / { if (found) exit; h = $0; sub(/^## +/, "", h); gsub(/[][]/, "", h); sub(/^v/, "", h);
+                     split(h, a, /[ \t]/); if (a[1] == v) { found = 1; next } }
+            found { print }' CHANGELOG.md > dist/notes.md
+          if [ ! -s dist/notes.md ]; then
+            echo "::warning::Kein Abschnitt „## ${{ steps.v.outputs.version }}“ in CHANGELOG.md gefunden."
+            echo "Änderungen: siehe [CHANGELOG.md](CHANGELOG.md)." > dist/notes.md
+          fi
+          printf '\n---\nInstallation: ZIP entpacken, Dokumentstamm auf `public/` setzen, `/admin/setup` öffnen – Einzelheiten im README. Prüfsumme: `%s.zip.sha256`.\n' \
+            "${{ steps.v.outputs.name }}" >> dist/notes.md
+
+      - name: GitHub-Release anlegen
+        uses: softprops/action-gh-release@v2
+        with:
+          name: KLXM Studio ${{ steps.v.outputs.version }}
+          body_path: dist/notes.md
+          prerelease: ${{ contains(steps.v.outputs.version, '-') }}
+          files: |
+            dist/${{ steps.v.outputs.name }}.zip
+            dist/${{ steps.v.outputs.name }}.zip.sha256

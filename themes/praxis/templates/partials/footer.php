@@ -5,7 +5,7 @@
         <span class="wordmark__1"><?= e(setting('wortmarke_1')) ?><span class="dot">.</span></span>
         <span class="wordmark__2"><?= e(setting('wortmarke_2')) ?></span>
       </span>
-      <span><?= e(praxis_address_line() ?: lt('[Straße und Hausnummer]') . ' · ' . lt('[PLZ {city}]', ['city' => 'Moers'])) ?></span>
+      <span><?= e(praxis_address_line() ?: lt('[Straße und Hausnummer]') . ' · ' . lt('[PLZ {city}]', ['city' => setting('ort') ?: lt('Ort')])) ?></span>
     </div>
     <nav aria-label="<?= e(lt('Rechtliches')) ?>">
       <ul>
