@@ -57,7 +57,7 @@
  * Sicherungen (storage/backups; --keep=N: nur die neuesten N behalten, Standard config 'backup_keep' = 14, 0 = alle)
  *   site:backup [--out=dir] [--keep=N] [--all]        Datenbank + Medien sichern
  *   site:restore <datei> --force                      Sicherung einspielen (z. B. Live-Inhalte auf Staging)
- *   content:snapshot [--working]                      Live-Stand der Seiten merken (nach dem Holen, deploy/content-pull.sh)
+ *   content:snapshot [--pushed=datei --publish]       Live-Stand der Seiten merken (nach dem Holen, deploy/content-pull.sh)
  *   content:export [--out=datei.json] [--all]        Seit dem Holen geänderte Seiten exportieren (Core\ContentSync)
  *   content:import <datei.json> [--dry-run] [--publish] [--force]
  *                                                     Geänderte Seiten übernehmen – nur ohne Konflikt, als Entwurf mit Version

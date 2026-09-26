@@ -34,7 +34,7 @@ if [[ -n "$DRY" ]]; then $SSH ${SSH_OPTS:-} "$SSH_TARGET" "rm -f '$REMOTE'"; rm 
 if [[ -z "$YES" ]]; then read -r -p "Übernehmen? [j/N] " ok; [[ "$ok" == [jJyY]* ]] || { $SSH ${SSH_OPTS:-} "$SSH_TARGET" "rm -f '$REMOTE'"; rm -f "$OUT"; exit 1; }; fi
 echo "▸ Übernehmen auf $TARGET"
 $SSH ${SSH_OPTS:-} "$SSH_TARGET" "cd '$APP' && $RPHP bin/console content:import '$REMOTE' $PUBLISH --site='$SITE'; rc=\$?; rm -f '$REMOTE'; exit \$rc"
-rm -f "$OUT"
 # Nächster Abgleich baut auf dem neuen Live-Stand auf
-$LPHP bin/console content:snapshot --working --site="$LSITE" >/dev/null
+$LPHP bin/console content:snapshot --pushed="$OUT" $PUBLISH --site="$LSITE" >/dev/null
+rm -f "$OUT"
 echo "✓ Fertig."

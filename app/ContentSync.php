@@ -30,7 +30,7 @@ final class ContentSync
         };
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         return match ($cmd) {
-            'content:snapshot' => self::snapshot($opt('working')),
+            'content:snapshot' => self::snapshot($val('pushed'), $opt('publish')),
             'content:export' => self::export($val('out'), $opt('all')),
             'content:import' => self::import($pos[0] ?? '', $opt('publish'), $opt('dry-run'), $opt('force')),
             default => 1,
@@ -56,26 +56,61 @@ final class ContentSync
         return site()->storage('content-sync.json');
     }
 
-    /** $working: lokalen Arbeitsstand merken (nach dem Zurückspielen – live entspricht ihm, sobald veröffentlicht ist) */
-    private static function snapshot(bool $working = false): int
+    /**
+     * Stand merken: je Seite Fingerabdruck der veröffentlichten Fassung ('pub') und des Arbeitsstands ('work', Entwurf).
+     * $pushed (nach dem Zurückspielen, deploy/content-push.sh): nur die übertragenen Seiten nachführen – live ist ihr
+     * Arbeitsstand jetzt der lokale, veröffentlicht nur mit $published.
+     */
+    private static function snapshot(?string $pushed = null, bool $published = false): int
     {
-        $base = [];
-        foreach (Pages::all() as $p) $base[self::key($p)] = self::fingerprint($p, $working);
-        @mkdir(dirname(self::baseFile()), 0775, true);
-        file_put_contents(self::baseFile(), json_encode(['site' => site()->key, 'created' => now(), 'pages' => $base], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-        echo 'Stand gemerkt: ' . count($base) . ' Seiten (' . site()->key . ") – Änderungen ab jetzt gehen mit content:export zurück.\n";
+        if ($pushed !== null) {
+            $base = self::base();
+            $data = json_decode((string) @file_get_contents($pushed), true);
+            if (!$base || !is_array($data['pages'] ?? null)) { fwrite(STDERR, "content:snapshot --pushed: Stand oder Exportdatei fehlt.\n"); return 1; }
+            $local = [];
+            foreach (Pages::all() as $p) $local[self::key($p)] = $p;
+            foreach ($data['pages'] as $in) {
+                $k = (string) $in['key'];
+                if (!isset($local[$k])) continue;
+                $work = self::fingerprint($local[$k], true);
+                $base['pages'][$k] = ['pub' => $published ? $work : $base['pages'][$k]['pub'], 'work' => $work];
+            }
+            self::saveBase($base['pages'], $base['created']);
+            echo 'Stand nachgeführt: ' . count($data['pages']) . " Seite(n).\n";
+            return 0;
+        }
+        $pages = [];
+        foreach (Pages::all() as $p) $pages[self::key($p)] = ['pub' => self::fingerprint($p), 'work' => self::fingerprint($p, true)];
+        self::saveBase($pages, now());
+        echo 'Stand gemerkt: ' . count($pages) . ' Seiten (' . site()->key . ") – Änderungen ab jetzt gehen mit content:export zurück.\n";
         return 0;
+    }
+
+    /** Gemerkter Stand ['created', 'pages' => [key => ['pub', 'work']]] oder null */
+    private static function base(): ?array
+    {
+        $b = json_decode((string) @file_get_contents(self::baseFile()), true);
+        if (!is_array($b) || !is_array($b['pages'] ?? null)) return null;
+        foreach ($b['pages'] as $k => $v) if (is_string($v)) $b['pages'][$k] = ['pub' => $v, 'work' => $v];
+        return $b;
+    }
+
+    private static function saveBase(array $pages, string $created): void
+    {
+        @mkdir(dirname(self::baseFile()), 0775, true);
+        file_put_contents(self::baseFile(), json_encode(['site' => site()->key, 'created' => $created, 'updated' => now(), 'pages' => $pages],
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 
     private static function export(?string $out, bool $all): int
     {
-        $base = json_decode((string) @file_get_contents(self::baseFile()), true);
-        if (!is_array($base)) { fwrite(STDERR, "Kein gemerkter Stand – zuerst holen (deploy/content-pull.sh) bzw. content:snapshot.\n"); return 1; }
+        $base = self::base();
+        if (!$base) { fwrite(STDERR, "Kein gemerkter Stand – zuerst holen (deploy/content-pull.sh) bzw. content:snapshot.\n"); return 1; }
         $pages = [];
         foreach (Pages::all() as $p) {
             $k = self::key($p);
             if (!isset($base['pages'][$k])) { echo "  übersprungen (neu, nicht live): $k\n"; continue; }
-            if (!$all && self::fingerprint($p, true) === $base['pages'][$k]) continue;
+            if (!$all && self::fingerprint($p, true) === $base['pages'][$k]['work']) continue;
             $json = $p['content_draft'] ?? $p['content_published'];
             $pages[] = ['key' => $k, 'base' => $base['pages'][$k], 'blocks' => json_decode((string) $json, true)['blocks'] ?? []]
                 + array_intersect_key($p, array_flip(self::FIELDS));
@@ -105,8 +140,10 @@ final class ContentSync
             $p = $live[$k] ?? null;
             if (!$p) { echo "  ✗ $k – gibt es live nicht (neue Seiten überträgt der Abgleich nicht)\n"; $blocked++; continue; }
             $problems = [];
-            if (self::fingerprint($p) !== ($in['base'] ?? '')) $problems[] = 'live seit dem Holen geändert';
-            if (self::fingerprint($p, true) !== self::fingerprint($p)) $problems[] = 'live liegt ein unveröffentlichter Entwurf';
+            // Live muss noch so aussehen wie beim Holen – veröffentlichte Fassung UND Entwurf (auf dem lokal weitergearbeitet wurde)
+            $b = is_array($in['base'] ?? null) ? $in['base'] : ['pub' => (string) ($in['base'] ?? ''), 'work' => (string) ($in['base'] ?? '')];
+            if (self::fingerprint($p) !== $b['pub']) $problems[] = 'live seit dem Holen veröffentlicht';
+            elseif (self::fingerprint($p, true) !== $b['work']) $problems[] = 'live seit dem Holen bearbeitet (Entwurf)';
             if ($missing = array_diff(self::mediaRefs($in['blocks'] ?? []), array_keys($mediaIds))) $problems[] = 'Medien fehlen live: #' . implode(', #', array_slice($missing, 0, 5));
             if ($problems && !$force) { echo "  ✗ $k – {$p['title']}: " . implode('; ', $problems) . "\n"; $blocked++; continue; }
             echo '  ' . ($problems ? '! ' : '✓ ') . "$k – {$p['title']}" . ($problems ? ' (übergangen: ' . implode('; ', $problems) . ')' : '') . "\n";
