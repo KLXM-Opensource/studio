@@ -16,6 +16,7 @@ return function (Router $r): void {
     $r->get('/admin', [Admin\DashboardController::class, 'index']);
     // Übersicht: persönliche Anordnung der Karten, nachgeladene Statistiken (Core\Dashboard, resources/js/dashboard.js)
     $r->post('/admin/api/dashboard/prefs', [Admin\DashboardController::class, 'prefs']);
+    $r->post('/admin/api/dashboard/placeholder-ok', [Admin\DashboardController::class, 'placeholderOk']);
     $r->get('/admin/api/dashboard/{card}', [Admin\DashboardController::class, 'card']);
     $r->get('/admin/login', [Admin\AuthController::class, 'loginForm']);
     $r->post('/admin/login', [Admin\AuthController::class, 'login']);

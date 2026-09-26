@@ -67,6 +67,18 @@ final class DashboardController extends AdminController
         return $this->back('/admin' . ($do === 'reset' ? '' : '?anpassen=1') . ($card !== '' && $do !== 'reset' ? '#dash-' . $card : ''), 'success', $msg);
     }
 
+    /** Klammer-Text als gewollt bestätigen (POST /admin/api/dashboard/placeholder-ok, text) – Einrichtungs-Prüfung meldet ihn nicht mehr */
+    public function placeholderOk(Request $r): Response
+    {
+        $this->auth($r);
+        if (!can('settings.edit') && !can('system.manage')) throw new HttpException(403);
+        $text = trim($r->str('text'));
+        if (!preg_match('~^\[[A-ZÄÖÜ][^\]\[]{2,}\]$~u', $text) || mb_strlen($text) > 200) throw new HttpException(422, __('Ungültige Angabe.'));
+        $ok = Metrics::placeholdersOk();
+        if (!in_array($text, $ok, true)) app()->settings->set('sys.placeholders_ok', array_slice([...$ok, $text], -100));
+        return $this->back('/admin', 'success', __('{text} wird nicht mehr als Platzhalter gemeldet.', ['text' => $text]));
+    }
+
     /** Schnellaktionen der Kopfzeile – nur, was die Rolle darf */
     private function actions(): array
     {

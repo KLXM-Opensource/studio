@@ -4132,4 +4132,11 @@ return [
     'ffmpeg ist nicht installiert: apt install ffmpeg (bzw. dnf install ffmpeg), oder ein statisches Build nach storage/video/bin/ legen bzw. ffmpeg_path setzen.' => 'ffmpeg is not installed: apt install ffmpeg (or dnf install ffmpeg), or put a static build into storage/video/bin/ or set ffmpeg_path.',
     'open_basedir ist gesetzt (Plesk: PHP-Einstellungen) und enthält /usr/bin meist nicht – die Erkennung ruft ffmpeg deshalb direkt auf (PATH, /usr/bin, /usr/local/bin). Wird trotzdem nichts gefunden, ist ffmpeg nicht installiert: apt install ffmpeg, oder ein statisches Build nach storage/video/bin/ legen bzw. ffmpeg_path setzen.' => 'open_basedir is set (Plesk: PHP settings) and usually does not include /usr/bin – detection therefore runs ffmpeg directly (PATH, /usr/bin, /usr/local/bin). If nothing is found anyway, ffmpeg is not installed: apt install ffmpeg, or put a static build into storage/video/bin/ or set ffmpeg_path.',
     'proc_open ist gesperrt (disable_functions) – ffmpeg lässt sich nicht starten. Plesk: PHP-Einstellungen → disable_functions.' => 'proc_open is blocked (disable_functions) – ffmpeg cannot be started. Plesk: PHP settings → disable_functions.',
+    'Ist gewollt' => 'Intentional',
+    'Platzhalter {text} auf der Seite „{page}“ ersetzen' => 'Replace placeholder {text} on the page “{page}”',
+    '{text} ist kein Platzhalter, sondern Absicht – nicht mehr melden' => '{text} is not a placeholder but intentional – stop reporting it',
+    '{text} wird nicht mehr als Platzhalter gemeldet.' => '{text} is no longer reported as a placeholder.',
+    'Platzhalter {text} ersetzen' => 'Replace placeholder {text}',
+    'Gefunden auf der Seite „{page}“. Ist die Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.' => 'Found on the page “{page}”. If the brackets are intentional (e.g. in a guide), confirm it.',
+    'Seite öffnen' => 'Open page',
 ];

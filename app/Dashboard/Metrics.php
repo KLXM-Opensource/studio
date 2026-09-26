@@ -175,10 +175,17 @@ final class Metrics
         }
         // Einrichtung (Kit-Prüfungen wie „Impressum zugeordnet“, E-Mail-Versand, Schlüssel, Platzhalter)
         if (can('settings.edit') || $admin) {
-            $open = array_values(array_filter($checks, fn($c) => !$c['ok'] && ($admin || !($c['admin'] ?? false))));
+            $open = array_values(array_filter($checks, fn($c) => !$c['ok'] && !isset($c['placeholder']) && ($admin || !($c['admin'] ?? false))));
             if ($open) {
                 $add('setup', 1, 'warn', 'list-checks', count($open), __('Einrichtung abschließen'),
                     implode(' · ', array_map(fn($c) => $c['label'], array_slice($open, 0, 3))) . (count($open) > 3 ? ' …' : ''), $open[0]['link'], __('Weiter einrichten'));
+            }
+            // Platzhalter als eigener Punkt: Fundstelle, direkt zur Seite, gewollte Klammern bestätigen (DashboardController::placeholderOk)
+            foreach ($checks as $c) {
+                if ($c['ok'] || !isset($c['placeholder'])) continue;
+                $add('placeholder', 2, 'warn', 'brackets-curly', 1, __('Platzhalter {text} ersetzen', ['text' => $c['placeholder']]),
+                    __('Gefunden auf der Seite „{page}“. Ist die Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.', ['page' => $c['page']]), $c['link'], __('Seite öffnen'));
+                $out[count($out) - 1]['dismiss'] = ['url' => '/admin/api/dashboard/placeholder-ok', 'value' => $c['placeholder'], 'label' => __('Ist gewollt')];
             }
         }
         if (can('pages.edit')) {
@@ -245,16 +252,31 @@ final class Metrics
             $checks[] = ['ok' => filled($s->get($c['setting'])) || (!empty($c['when']) && !$s->get($c['when'])), 'label' => __((string) $c['label']), 'link' => $c['link'] ?? '/admin/settings'];
         }
         $checks[] = ['ok' => (string) $s->get('sys.site_url') !== '', 'label' => __('Kanonische Domain festgelegt'), 'link' => '/admin/system#website', 'admin' => true];
-        $checks[] = ['ok' => !self::hasPlaceholders(), 'label' => __('Alle [Platzhalter] in den Seiten ersetzt'), 'link' => '/admin/pages'];
+        // Platzhalter: nennt Fundstelle und Seite, führt direkt dorthin; gewollte Klammern („[Musik]“) lassen sich bestätigen
+        $ph = self::placeholder();
+        $checks[] = $ph
+            ? ['ok' => false, 'label' => __('Platzhalter {text} auf der Seite „{page}“ ersetzen', ['text' => $ph['text'], 'page' => $ph['title']]), 'link' => '/admin/pages/' . $ph['id'], 'placeholder' => $ph['text'], 'page' => $ph['title']]
+            : ['ok' => true, 'label' => __('Alle [Platzhalter] in den Seiten ersetzt'), 'link' => '/admin/pages'];
         return $checks;
     }
 
-    private static function hasPlaceholders(): bool
+    /** Als gewollt bestätigte Klammer-Texte (Einstellung sys.placeholders_ok, z. B. „[Musik]“ in einer Anleitung) */
+    public static function placeholdersOk(): array
     {
+        return array_values(array_filter((array) app()->settings->get('sys.placeholders_ok', []), 'is_string'));
+    }
+
+    /** Erster [Platzhalter] in veröffentlichten Seiten (ohne bestätigte): ['id', 'title', 'text'] oder null */
+    public static function placeholder(): ?array
+    {
+        $ok = self::placeholdersOk();
         foreach (Pages::all() as $p) {
-            if (preg_match('~\[[A-ZÄÖÜ][^\]]{2,}\]~u', (string) $p['content_published'])) return true;
+            if (!preg_match_all('~\[[A-ZÄÖÜ][^\]\[]{2,}\]~u', (string) $p['content_published'], $m)) continue;
+            foreach ($m[0] as $hit) {
+                if (!in_array($hit, $ok, true)) return ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit];
+            }
         }
-        return false;
+        return null;
     }
 
     // ================================================================= Zuletzt bearbeitet

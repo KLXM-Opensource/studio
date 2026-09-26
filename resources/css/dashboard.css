@@ -116,7 +116,8 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-todo__tag{display:inline-block;padding:0 6px;border-radius:6px;background:var(--adm-err-bg);color:var(--adm-err);font-size:12px}
 .dash-todo__text{font-size:13.5px;color:var(--adm-t3)}
 .dash-todo .adm-btn{border-radius:8px}
-@media (max-width:560px){.dash-todo__item{grid-template-columns:auto minmax(0,1fr)}.dash-todo__item .adm-btn{grid-column:2;justify-self:start}}
+.dash-todo__item:has(.dash-todo__alt){grid-template-columns:auto minmax(0,1fr) auto auto}.dash-todo__alt{margin:0}
+@media (max-width:560px){.dash-todo__item,.dash-todo__item:has(.dash-todo__alt){grid-template-columns:auto minmax(0,1fr)}.dash-todo__item .adm-btn,.dash-todo__alt{grid-column:2;justify-self:start}}
 .dash-more{margin-top:8px}
 .dash-more>summary,.dash-table>summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--adm-a-ink);padding:6px 0}
 .dash-more>.dash-todo{margin-top:6px}

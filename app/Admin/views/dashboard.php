@@ -106,6 +106,7 @@ $fmtTrend = function (?array $t): string {
               <p class="dash-todo__text"><?= e($t['text']) ?></p>
             </div>
             <a class="adm-btn adm-btn--small<?= $n === 0 ? ' adm-btn--primary' : '' ?>" href="<?= e(url($t['href'])) ?>"><?= e($t['action']) ?><span class="sr-only">: <?= e($t['title']) ?></span></a>
+            <?php if (!empty($t['dismiss'])): ?><form method="post" action="<?= e(url($t['dismiss']['url'])) ?>" class="dash-todo__alt"><?= csrf_field() ?><input type="hidden" name="text" value="<?= e($t['dismiss']['value']) ?>"><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('{text} ist kein Platzhalter, sondern Absicht – nicht mehr melden', ['text' => $t['dismiss']['value']])) ?>"><?= e($t['dismiss']['label']) ?></button></form><?php endif; ?>
           </li>
           <?php endforeach; ?>
         </ol>
