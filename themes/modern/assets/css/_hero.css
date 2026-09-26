@@ -1,0 +1,22 @@
+/* ---------------------------------------------------------------- Einstieg (Hero): split, compact (+ mosaic-Grundraster)
+   „Große Aussage“ und „Mosaik“-Details: css/hero-x.css (lädt nur mit diesen Varianten) */
+.sec--hero{padding-block:calc(var(--m-sec) * .55) var(--m-sec)}
+.hero{display:grid;gap:var(--m-s-2xl) var(--m-s-3xl);align-items:center}
+.hero__text{display:flex;flex-direction:column;align-items:flex-start;gap:var(--m-s-l);min-width:0}
+.hero__title{max-width:14ch}
+.hero__lead{max-width:34em;color:var(--m-muted);font-size:var(--m-t1);line-height:1.5;text-wrap:pretty}
+.hero__actions{margin-top:var(--m-s-2xs)}
+.hero__points{display:flex;flex-wrap:wrap;gap:var(--m-s-2xs) var(--m-s-l);color:var(--m-muted);font-size:var(--m-t-1)}
+@media (min-width:64em){.hero--media,.hero--mosaic{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
+.hero__media{position:relative;margin:0 0 var(--m-s-l) var(--m-s-l)}
+.hero__media::before{content:"";position:absolute;inset:var(--m-s-l) var(--m-s-l) calc(-1 * var(--m-s-l)) calc(-1 * var(--m-s-l));border-radius:var(--m-r-l);background:var(--m-a2)}
+.hero__img{position:relative}
+.hstat{display:grid;gap:.15rem;margin:0;padding:var(--m-s-m) var(--m-s-l);border:1px solid var(--m-line);border-radius:12px;background:var(--m-bg);box-shadow:0 18px 40px -22px var(--m-sh2)}
+.hstat__value{color:var(--m-ink);font:var(--m-hw) var(--m-t3)/1 var(--m-font-head);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.hstat__label{color:var(--m-muted);font-size:var(--m-t-1);line-height:1.35}
+.hero__stat{position:absolute;left:calc(-1 * var(--m-s-l));bottom:var(--m-s-xl);max-width:14rem}
+.sec--hero.v-compact{padding-block:calc(var(--m-sec) * .5) calc(var(--m-sec) * .45)}
+.hero--compact .hero__title{max-width:18ch;font-size:calc(var(--m-t5) * var(--m-display))}
+.hero--compact .hero__lead{max-width:40em}
+@media (max-width:30em){.hero--compact .hero__title{font-size:min(calc(var(--m-t5) * var(--m-display)),11.5vw)}}
+.mosaic{display:grid;grid-template-columns:1.1fr 1fr;grid-template-areas:"a b" "a s" "c c";gap:var(--m-s-s)}

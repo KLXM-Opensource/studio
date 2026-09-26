@@ -1,0 +1,71 @@
+/* Kit „nature“ – Einstieg „Termine am Ast“ (nur bei hero:dates geladen, theme.php → conditional_css).
+   Die nächsten Termine (Core\Blocks\Hero::dates) hängen als Anhänger aus Packpapier an Schnüren unter einem Ast.
+   Anhänger: abgeschrägte Ecken (clip-path) + gestanztes Loch (mask), Schnur läuft durch das Loch; Schatten am <li>
+   (drop-shadow), Fokus ebenfalls am <li> – clip-path würde beides abschneiden. Schmal: Anhänger quer, Loch links. */
+.hd{--hd-paper:color-mix(in srgb,var(--n-earth) 13%,var(--n-card));--hd-twine:color-mix(in srgb,var(--n-earth) 55%,var(--n-ink));--hd-wood:color-mix(in srgb,var(--n-earth) 40%,var(--n-ink));
+  --hd-hole:.45rem;--hd-cut:1.1rem}
+.hd__text .hero__title{max-width:14ch}
+.hd__board{container-type:inline-size;display:grid;gap:var(--n-s-s);min-width:0}
+.hd__head{margin:0;font-size:var(--n-label)}
+.hd__line{position:relative}
+.hd__branch{display:none}
+.hd__tags{display:grid;gap:var(--n-s-s);margin:0;padding:0;list-style:none}
+.hd__item{position:relative;filter:drop-shadow(0 1px 1px var(--n-sh1)) drop-shadow(0 10px 14px var(--n-sh1));border-radius:var(--n-r-s)}
+.hd__item:nth-child(odd){rotate:-.6deg}.hd__item:nth-child(even){rotate:.5deg}
+/* Anhänger quer (schmal): Loch links, abgeschrägte Ecken links */
+.hd__tag{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto;column-gap:var(--n-s-s);align-items:center;min-height:100%;padding:var(--n-s-s) var(--n-s-m) var(--n-s-s) calc(var(--n-s-s) + 1.9rem);background:var(--hd-paper);color:var(--n-text);
+  clip-path:polygon(var(--hd-cut) 0,100% 0,100% 100%,var(--hd-cut) 100%,0 calc(100% - var(--hd-cut)),0 var(--hd-cut));
+  -webkit-mask:radial-gradient(circle at 1.1rem 50%,#0000 var(--hd-hole),#000 calc(var(--hd-hole) + .5px));mask:radial-gradient(circle at 1.1rem 50%,#0000 var(--hd-hole),#000 calc(var(--hd-hole) + .5px))}
+/* Öse um das Loch */
+.hd__tag::before{content:"";position:absolute;top:50%;left:1.1rem;width:calc(var(--hd-hole) * 2 + 6px);aspect-ratio:1;border:3px solid color-mix(in srgb,var(--hd-twine) 45%,var(--hd-paper));border-radius:50%;translate:-50% -50%}
+/* Schnur: vom Loch nach außen */
+.hd__item::before{content:"";position:absolute;z-index:-1;top:50%;left:-.35rem;width:1.5rem;height:2px;background:var(--hd-twine);rotate:-14deg}
+.hd__date{grid-row:1/span 3;display:grid;justify-items:center;margin:0;padding-right:var(--n-s-s);border-right:2px dashed color-mix(in srgb,var(--hd-twine) 35%,transparent);line-height:1}
+.hd__date time{display:grid;justify-items:center;gap:.15em}
+.hd__day{color:var(--n-ink);font:var(--n-hw) var(--n-t4)/1 var(--n-font-head);font-variant-numeric:lining-nums}
+.hd__mon{color:var(--n-muted);font:var(--n-lb-style) 500 var(--n-label)/1 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.hd__title{grid-column:2;margin:0;hyphens:auto;overflow-wrap:break-word;color:var(--n-ink);font:var(--n-hw) var(--n-t1)/1.25 var(--n-font-head);text-wrap:balance}
+.hd__title a{color:inherit}
+.hd__title a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em}
+.hd__when,.hd__place{grid-column:2;margin:.25rem 0 0;color:var(--n-muted);font-size:var(--n-t-1)}
+.hd__place{display:flex;gap:.35em;align-items:baseline;margin-top:.1rem}
+.hd__pin{flex:none;translate:0 .12em}
+.hd__item:has(.cover-link:focus-visible){outline:2px solid var(--n-focus);outline-offset:4px}
+.hd__more{margin:var(--n-s-2xs) 0 0}
+.hd__empty{padding:var(--n-s-l);border:1px dashed var(--n-line-strong);border-radius:var(--n-radius);color:var(--n-muted)}
+@media (prefers-reduced-motion:no-preference){
+  .hd__item{transition:rotate .5s cubic-bezier(.3,1.6,.5,1)}
+  .hd__item:hover{rotate:0deg}
+}
+
+/* Breit genug für Anhänger nebeneinander: Ast oben, Anhänger hängen an unterschiedlich langen Schnüren (Loch oben) */
+@container (min-width:34rem){
+  .hd__branch{display:block;width:100%;height:3rem;overflow:visible}
+  .hd__wood{fill:none;stroke:var(--hd-wood);stroke-width:7;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .hd__twig{fill:none;stroke:var(--hd-wood);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .hd__leaves{fill:color-mix(in srgb,var(--n-a) 80%,var(--n-card))}
+  .hd__knots{fill:var(--hd-twine)}
+  .hd__tags{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--n-s-m);margin-top:-1.4rem}
+  .hd__item{padding-top:2.2rem}
+  .hd__item:nth-child(3n+2){padding-top:3.6rem}
+  .hd__item:nth-child(3n){padding-top:2.8rem}
+  .hd__item{transform-origin:50% 0}
+  .hd__item:nth-child(odd){rotate:-1.6deg}.hd__item:nth-child(even){rotate:1.3deg}
+  .hd__item::before{top:0;left:calc(50% - 1px);width:2px;height:calc(2.2rem + 1.35rem);rotate:none}
+  .hd__item:nth-child(3n+2)::before{height:calc(3.6rem + 1.35rem)}
+  .hd__item:nth-child(3n)::before{height:calc(2.8rem + 1.35rem)}
+  .hd__tag{grid-template-columns:minmax(0,1fr);row-gap:var(--n-s-2xs);align-content:start;justify-items:start;height:100%;padding:calc(1.35rem + var(--hd-hole) + var(--n-s-s)) var(--n-s-m) var(--n-s-m);
+    clip-path:polygon(var(--hd-cut) 0,calc(100% - var(--hd-cut)) 0,100% var(--hd-cut),100% 100%,0 100%,0 var(--hd-cut));
+    -webkit-mask:radial-gradient(circle at 50% 1.35rem,#0000 var(--hd-hole),#000 calc(var(--hd-hole) + .5px));mask:radial-gradient(circle at 50% 1.35rem,#0000 var(--hd-hole),#000 calc(var(--hd-hole) + .5px))}
+  .hd__tag::before{top:1.35rem;left:50%}
+  .hd__date{grid-row:auto;justify-items:start;width:100%;margin-bottom:var(--n-s-2xs);padding:0 0 var(--n-s-s);border-right:0;border-bottom:2px dashed color-mix(in srgb,var(--hd-twine) 35%,transparent)}
+  .hd__date time{display:flex;align-items:baseline;gap:.4em}
+  .hd__day{font-size:var(--n-t5)}
+  .hd__title,.hd__when,.hd__place{grid-column:1}
+}
+@container (min-width:52rem){.hd__day{font-size:var(--n-t6)}}
+/* Seite: Text neben dem Ast, sobald der Einstieg breit genug ist */
+@container (min-width:62rem){
+  .hd{grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:var(--n-s-2xl);align-items:start}
+  .hd__board{padding-top:var(--n-s-s)}
+}

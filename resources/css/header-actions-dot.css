@@ -1,0 +1,7 @@
+/* Kopfbereich-Aktionen – Teil „Statuspunkt“: Punkt am Chip-Button und am Kontakt-Chip (grün = geöffnet, header-actions.js) (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--ha-closed);box-shadow:0 0 0 3px color-mix(in srgb,currentColor 10%,transparent)}
+.ha-dot--static{background:var(--ha-accent)}
+.is-open .ha-dot{background:var(--ha-open);box-shadow:0 0 0 3px color-mix(in srgb,var(--ha-open) 22%,transparent)}
+@media (prefers-reduced-motion:no-preference){.is-open .ha-dot{animation:ha-pulse 2.4s ease-in-out 3}}
+@keyframes ha-pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ha-open) 0%,transparent)}}
+@media (forced-colors:active){.ha-dot{forced-color-adjust:none;border:1px solid CanvasText}}

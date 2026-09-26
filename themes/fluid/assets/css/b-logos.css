@@ -1,0 +1,20 @@
+/* Theme „fluid“ – Logos (nur wenn verwendet). Raster: umbrechende, zentrierte Reihe. Laufband: reines CSS – die Liste
+   steht doppelt (zweite Hälfte aria-hidden) und läuft endlos; bei Maus/Fokus hält sie an. Ohne Bewegung (Design-Einstellung
+   oder „Bewegung reduzieren“) steht das Band still und bricht wie das Raster um – nichts wird abgeschnitten. */
+.logos,.marquee__track{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--f-s-l) clamp(1.5rem,5cqi,3.5rem);margin:0;padding:0;list-style:none}
+.logos__item{display:flex;align-items:center;justify-content:center;min-height:3rem}
+.logos__item img{width:auto;max-width:9rem;height:2.5rem;object-fit:contain;filter:grayscale(1);opacity:.75;transition:filter .2s,opacity .2s}
+.logos__item a:hover img,.logos__item img:hover{filter:none;opacity:1}
+.logos__name{color:var(--f-muted);font:var(--f-hw) var(--f-t1)/1 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);white-space:nowrap}
+.logos__link{text-decoration:none}
+.logos__link:hover .logos__name{color:var(--f-ink)}
+.marquee{display:flex;overflow:hidden}
+.marquee__track--dup{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .has-motion .marquee__track{flex:none;flex-wrap:nowrap;padding-inline-end:clamp(1.5rem,5cqi,3.5rem);animation:f-marquee 40s linear infinite}
+  .has-motion .marquee__track--dup{display:flex}
+  .has-motion .marquee:is(:hover,:focus-within) .marquee__track{animation-play-state:paused}
+  .has-motion .marquee{mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+}
+@keyframes f-marquee{to{translate:-100% 0}}
+.sec--logos .sec-head{margin-bottom:var(--f-s-l)}.sec--logos .h2{color:var(--f-muted);font:600 var(--f-t0)/1.4 var(--f-font);letter-spacing:0}

@@ -1,0 +1,10 @@
+/* Fußbereich „Mit Band“: ein Band in Waldnacht mit Satz und Button über den Spalten; eine Blattranke als Schmuck */
+.ftr--panel{padding-top:var(--n-s-xl)}
+.ftr__panel{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--n-s-l);margin-bottom:var(--n-s-2xl);padding:var(--n-s-xl);overflow:hidden;border-radius:var(--n-r-xl) var(--n-r-xl) var(--n-r-xl) calc(var(--n-r-xl) * 3);background:var(--n-dark);color:var(--n-on-dark);--n-ui:color-mix(in srgb,var(--n-a) 45%,var(--n-on-dark));--n-btn-bg:var(--n-ui);--n-btn-ink:var(--n-dark);--n-focus:var(--n-on-dark)}
+.ftr__big{position:relative;z-index:1;max-width:18ch;color:var(--n-on-dark);font:var(--n-hw) max(var(--n-t3),min(var(--n-t5),7cqi))/1.08 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:calc(var(--n-track) * .01em);text-wrap:balance}
+.ftr__panel .ftr__cta{position:relative;z-index:1}
+.ftr .ftr__panel a.btn{color:var(--n-btn-ink)}
+.ftr .ftr__panel a.btn:hover{text-decoration:none}
+.ftr__sprout{position:absolute;top:-2rem;right:8%;width:9rem;height:9rem;border-radius:0 72% 0 72%;background:color-mix(in srgb,var(--n-on-dark) 7%,transparent);rotate:24deg}
+.ftr__sprout::after{content:"";position:absolute;inset:auto auto -1.5rem -2.5rem;width:5rem;height:5rem;border-radius:72% 0 72% 0;background:color-mix(in srgb,var(--n-on-dark) 5%,transparent)}
+html:not(.has-motifs) .ftr__sprout{display:none}

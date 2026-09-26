@@ -1,0 +1,70 @@
+/* KLXM Studio – Consent-Kit, Verwaltung (MIT). Baut auf admin.css auf (Tokens --adm-*). */
+.ck-nav { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 16px; }
+.ck-nav a { display: inline-flex; align-items: center; min-height: 38px; padding: 0 14px; border-radius: 6px; color: var(--adm-t2); font-weight: 600; text-decoration: none; }
+.ck-nav a:hover { background: var(--adm-fill-2); }
+.ck-nav a[aria-current=page] { background: var(--adm-ink); color: var(--adm-on-ink); }
+.ck-nav .ck-nav__help { margin-left: auto; font-weight: 400; }
+
+.ck-status ul { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 6px; }
+.ck-status li { display: flex; gap: 10px; align-items: baseline; }
+.ck-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--adm-t3); transform: translateY(1px); }
+.ck-status__ok .ck-dot { background: var(--adm-ok); }
+.ck-status__warn .ck-dot { background: var(--adm-warn); }
+
+.ck-services .ck-grouprow th { background: var(--adm-fill); text-transform: uppercase; letter-spacing: .04em; font-size: 12px; color: var(--adm-t2); }
+.ck-services td, .ck-services th { vertical-align: middle; }
+.ck-dom { text-align: center; font-size: 12px; }
+.ck-dom input { width: 20px; height: 20px; }
+.ck-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.ck-move { display: inline-flex; gap: 2px; }
+.ck-matrix-save { padding: 10px 16px; margin: 0; }
+.ck-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--adm-t2); font: inherit; cursor: pointer; }
+.ck-toggle__track { position: relative; width: 40px; height: 24px; border-radius: 12px; border: 2px solid var(--adm-t3); }
+.ck-toggle__track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--adm-t3); }
+.ck-toggle[aria-checked=true] .ck-toggle__track { background: var(--adm-a); border-color: var(--adm-a); }
+.ck-toggle[aria-checked=true] .ck-toggle__track::after { left: 18px; background: #fff; }
+.ck-toggle:focus-visible { outline: 3px solid var(--adm-a); outline-offset: 2px; border-radius: 6px; }
+
+.ck-filter { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; }
+.ck-filter input[type=search] { flex: 1 1 18rem; min-height: 40px; }
+.ck-presets { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 12px; }
+.ck-presets li { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 14px 16px; border-radius: 10px; box-shadow: 0 0 0 1px var(--adm-line); background: var(--adm-surface); }
+.ck-presets li[hidden] { display: none; }
+.ck-presets p { margin: 6px 0 0; }
+
+.ck-form .ck-code textarea, .ck-form textarea[name*="[html_"], .ck-form textarea[name*="[js_"], .ck-form textarea[name*="[csp]"], .ck-form textarea[name*="[embed_hosts]"] { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.ck-form input[readonly] { background: var(--adm-fill); }
+.ck-origin { margin-top: 12px; }
+.ck-origin summary { cursor: pointer; color: var(--adm-t2); }
+.ck-danger { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 24px; }
+.ck-list li { margin: 4px 0; }
+
+.ck-design { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .ck-design { grid-template-columns: 1fr; } }
+.ck-colors td { white-space: nowrap; }
+.ck-colors { table-layout: auto; width: 100%; }
+.ck-colors th, .ck-colors td { padding-inline: 6px; }
+.ck-colors .f-color { display: inline-flex; gap: 4px; }
+.ck-colors input[type=color] { width: 32px; min-width: 32px; padding: 0; }
+.ck-colors input[type=text] { width: 6.2em; font-family: ui-monospace, Menlo, monospace; }
+.ck-colors input.is-set { box-shadow: 0 0 0 2px var(--adm-a); }
+.ck-contrast td { font-size: 13px; }
+.ck-css pre { overflow: auto; max-height: 20rem; padding: 12px; border-radius: 8px; background: var(--adm-fill); font-size: 12px; }
+.ck-preview { position: sticky; top: 12px; }
+.ck-preview__tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+.ck-preview__tools [aria-pressed=true] { background: var(--adm-ink); color: var(--adm-on-ink); }
+.ck-sep { width: 1px; height: 24px; background: var(--adm-line); margin: 0 4px; }
+.ck-stage { display: grid; gap: 16px; padding: 20px; border-radius: 10px; background: repeating-linear-gradient(45deg, var(--adm-fill), var(--adm-fill) 10px, var(--adm-surface) 10px, var(--adm-surface) 20px); min-height: 22rem; }
+.ck-stage[data-theme=dark] { background: #0e1115; }
+.ck-stage > * { min-width: 0; max-width: 100%; }
+.ck-stage.is-mobile { width: 390px; max-width: 100%; margin-inline: auto; }
+
+.ck-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ck-bars li { display: grid; grid-template-columns: 12rem 1fr 7rem; gap: 10px; align-items: center; }
+.ck-bars meter { width: 100%; height: 14px; }
+.ck-logfilter { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.ck-logfilter .f { margin: 0; }
+.ck-logfilter__btns { display: flex; gap: 8px; margin: 0; }
+.ck-pager { display: flex; gap: 16px; justify-content: center; padding: 12px; }
+.ck-snap { padding: 10px 0; border-top: 1px solid var(--adm-line); }
+.ck-caption { text-align: left; padding: 12px 16px; font-weight: 700; }

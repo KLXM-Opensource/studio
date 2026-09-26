@@ -1,0 +1,3 @@
+/* Kit „glas“ – Hinweisbalken (lädt nur, wenn er eingeschaltet ist) */
+.topnote{padding:.6rem 0;background:var(--g-ink);color:var(--g-bg);font-size:var(--g-t-1);text-align:center}
+.topnote a{color:inherit}

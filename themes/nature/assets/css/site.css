@@ -1,0 +1,15 @@
+/* ==========================================================================
+   Kit „nature“ – organisch, warm, ruhig. Erdige Palette, weiche Serif, Blattmarken – alles über Design-Tokens.
+   Werte: Verwaltung → Design → /media/…/design/design-nature-*.css (nach diesem Stylesheet geladen).
+   Klassen am <html>: hdr-{bar|centered|split|index} hdr-sticky btn-{soft|pill|outline} img-{soft|leaf|pebble}
+   depth-{flat|relief|deep} mk-{leaf|dot|plain} lb-{italic|caps} ft-{index|panel|simple} pagebg-{plain|grain|contours|leaves}
+   dv-{wave|hills|straight} sz-is-{fruehling|sommer|herbst|winter|none} has-motifs has-motion has-drift has-dark is-darkbase.
+   Blöcke laden ihr CSS nur bei Bedarf (theme.php → conditional_css); Muster/Übergänge: opt-*.css (nur die gewählte Option);
+   Menü, Aufklappmenüs, Suche: overlay.css am Seitenende.
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+@import "_header.css";
+@import "_footer.css";
+@import "_hero.css";
+@media print{[data-reveal]{opacity:1!important;translate:none!important}.hdr,.mnav,.skip,.menu-btn,.hsearch__btn,.ftr__top{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}.panel,.card{box-shadow:none}body::before{display:none}}

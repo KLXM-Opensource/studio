@@ -1,0 +1,64 @@
+/* ---------------------------------------------------------------- Tokens (Standardwerte = Vorlage „Signalorange“, design.php)
+   Die Design-Datei (Verwaltung → Design) überschreibt nur die Grundwerte; Stufen, Rollen und Mischfarben leiten sich hier
+   ab und folgen damit automatisch – hell wie dunkel. */
+:root{
+  --e-a:#D85B19;--e-a-ink:#A3400A;--e-a-on:#111111;
+  --e-ink:#1B1B19;--e-text:#393835;--e-muted:#5E5C57;--e-bg:#F2F1ED;--e-surface:#E7E5E0;--e-panel:#FBFAF8;--e-line:#D6D3CC;--e-dark:#232427;
+  --e-font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--e-font-head:var(--e-font);
+  --e-font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--e-font-label:var(--e-font-mono);
+  --e-fs-min:16;--e-fs-max:18;--e-ratio:1.25;--e-hw:600;--e-track:-2.5;
+  --e-radius:12px;--e-u:.5rem;--e-space:1;--e-wrap:76rem;
+  --e-on-dark:#F2F1EE;--e-danger:#B42318;
+
+  /* Schriftstufen: Grundschrift fließt zwischen 360 und 1280 px Fensterbreite; Stufen = Grundschrift × Verhältnisⁿ.
+     Unter 60 em gilt ein flacheres Verhältnis (große Überschriften skalieren zusätzlich mit dem Container, cqi). */
+  --e-t0:clamp(var(--e-fs-min)*.0625rem,var(--e-fs-min)*.0625rem + (var(--e-fs-max) - var(--e-fs-min))*(100vw - 360px)/920,var(--e-fs-max)*.0625rem);
+  --e-r:calc(1 + (var(--e-ratio) - 1)*.72);
+  --e-t1:calc(var(--e-t0)*var(--e-r));--e-t2:calc(var(--e-t0)*pow(var(--e-r),2));--e-t3:calc(var(--e-t0)*pow(var(--e-r),3));
+  --e-t4:calc(var(--e-t0)*pow(var(--e-r),4));--e-t5:calc(var(--e-t0)*pow(var(--e-r),5));--e-t6:calc(var(--e-t0)*pow(var(--e-r),6));
+  --e-t-1:calc(var(--e-t0)*.875);--e-t-2:calc(var(--e-t0)*.75);
+  --e-label:max(.75rem,calc(var(--e-t0)*.72));
+
+  /* 8-Punkt-Raster: alle Abstände sind Vielfache von --e-u (Design → Rasterdichte) */
+  --e-s-2xs:calc(var(--e-u)*.5);--e-s-xs:var(--e-u);--e-s-s:calc(var(--e-u)*2);--e-s-m:calc(var(--e-u)*3);
+  --e-s-l:calc(var(--e-u)*4);--e-s-xl:calc(var(--e-u)*6);--e-s-2xl:calc(var(--e-u)*8);--e-s-3xl:calc(var(--e-u)*12);
+  --e-sec:calc(clamp(var(--e-u)*8,var(--e-u)*4 + 6vw,var(--e-u)*16)*var(--e-space));
+  --e-gutter:clamp(1rem,.5rem + 2.4vw,3rem);
+  --e-pad:var(--e-s-m);
+
+  /* Abgeleitete Farben */
+  --e-a-soft:color-mix(in srgb,var(--e-a) 16%,var(--e-bg));
+  --e-a2:color-mix(in srgb,var(--e-a) 26%,var(--e-panel));
+  --e-surface-2:color-mix(in srgb,var(--e-ink) 6%,var(--e-surface));
+  --e-line-strong:color-mix(in srgb,var(--e-ink) 55%,var(--e-panel));
+  --e-hdr-bg:color-mix(in srgb,var(--e-bg) 88%,transparent);
+  --e-r-s:calc(var(--e-radius)*.5);--e-r-l:var(--e-radius);--e-r-xl:calc(var(--e-radius)*1.5);
+
+  /* Tiefe (Design → Tiefe: depth-flat | depth-relief | depth-deep): Kante oben hell, Schatten weich */
+  --e-hi:rgb(255 255 255/.75);--e-sh1:rgb(20 18 14/.06);--e-sh2:rgb(20 18 14/.16);
+  --e-card-sh:inset 0 1px 0 var(--e-hi),0 1px 2px var(--e-sh1),0 12px 28px -18px var(--e-sh2);
+  --e-key-sh:inset 0 1px 0 rgb(255 255 255/.28),inset 0 -2px 0 rgb(0 0 0/.16),0 1px 2px var(--e-sh1);
+  --e-well:inset 0 1px 2px var(--e-sh2);
+
+  /* Rollen – Abschnitte mit dunklem Hintergrund stellen sie um */
+  --e-card:var(--e-panel);--e-card-bd:var(--e-line);
+  --e-link:var(--e-a-ink);--e-focus:var(--e-a-ink);
+  --e-btn-bg:var(--e-a);--e-btn-ink:var(--e-a-on);--e-btn-hover:var(--e-a);--e-btn-r:min(var(--e-radius),.5rem);
+  --e-btn2-bg:var(--e-panel);--e-btn2-ink:var(--e-ink);
+
+  /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karte) lesen diese Namen */
+  --b-a:var(--e-a-ink);--b-a-on:var(--e-a-on);--b-ink:var(--e-ink);--b-muted:var(--e-muted);--b-line:var(--e-line);--b-surface:var(--e-surface);--b-bg:var(--e-panel);--b-radius:var(--e-radius);
+}
+@media (min-width:60em){:root{--e-r:var(--e-ratio)}}
+.depth-flat{--e-card-sh:none;--e-key-sh:none;--e-well:none}
+.depth-deep{--e-card-sh:inset 0 1px 0 var(--e-hi),0 2px 4px var(--e-sh1),0 24px 48px -20px var(--e-sh2);--e-key-sh:inset 0 1px 0 rgb(255 255 255/.3),inset 0 -3px 0 rgb(0 0 0/.2),0 2px 6px var(--e-sh2)}
+.btn-pill{--e-btn-r:999px}
+.btn-outline{--e-btn-bg:transparent;--e-btn-ink:var(--e-ink);--e-key-sh:none}
+.is-darkbase{color-scheme:dark;--e-hi:rgb(255 255 255/.05);--e-sh1:rgb(0 0 0/.3);--e-sh2:rgb(0 0 0/.55)}
+/* Nachtpaneel (dunkles Farbschema): nur Farbwerte wechseln (Standardwerte hier, eigene in der Design-Datei); Vorschau: css/preview.css */
+@media (prefers-color-scheme:dark){
+  html.has-dark{--e-a:#F0782F;--e-a-ink:#FF9C5C;--e-a-on:#141414;--e-ink:#F2F1EE;--e-text:#D3D1CC;--e-muted:#A19F99;--e-bg:#1A1B1D;--e-surface:#222326;--e-panel:#26272A;--e-line:#35363A;--e-dark:#2A2B2F}
+  html.has-dark{color-scheme:dark;--e-hi:rgb(255 255 255/.05);--e-sh1:rgb(0 0 0/.3);--e-sh2:rgb(0 0 0/.55);--e-danger:#FF8A80}
+  html.has-dark .brand__logo--light{display:none}
+  html.has-dark .brand__logo--dark{display:block}
+}

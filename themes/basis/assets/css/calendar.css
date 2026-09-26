@@ -1,0 +1,14 @@
+/* Theme „basis“: Kalender-Blöcke (Monatsübersicht, Terminliste, Nächste Termine) mit den Design-Tokens */
+@import "../../../../resources/css/calendar.css";
+.cal{--cal-accent:var(--b-btn-bg);--cal-accent-ink:var(--b-btn-ink);--cal-muted:var(--b-muted);--cal-line:var(--b-line);
+  --cal-surface:var(--b-surface);--cal-ev-bg:var(--b-a-soft);--cal-ev-ink:var(--b-ink);--cal-today-bg:var(--b-a-soft);--cal-radius:var(--b-radius-l);--cal-focus:var(--b-focus)}
+.bg-muted .cal{--cal-surface:var(--b-bg)}
+.cal-month,.cal-upname,.cal-adate{color:var(--b-ink);font-family:var(--b-font-head);font-weight:var(--b-hw);letter-spacing:calc(var(--b-track) * -.015em)}
+.cal-link{color:var(--b-ink);text-decoration:none}
+.cal-link:hover{color:var(--b-link);text-decoration:underline}
+.cal-grid{background:var(--b-card)}
+.cal-upitem{border:1px solid var(--b-card-bd);background:var(--b-card);box-shadow:var(--b-card-sh)}
+.cal-upcal{border-radius:var(--b-radius)}
+.cal-up--compact .cal-upitem{border-width:0 0 1px;box-shadow:none}
+.cal-navlink,.cal-chip{border-radius:var(--b-btn-r);border-color:var(--b-line-strong)}
+.cal-sublink{color:var(--b-link)}

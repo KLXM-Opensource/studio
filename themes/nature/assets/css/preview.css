@@ -1,0 +1,7 @@
+/* Kit „nature“ – nur in der Vorschau des Style-Editors (Verwaltung → Design → „Dunkel“): dieselben Regeln wie in
+   _tokens.css, ausgelöst über die Klasse is-dark statt über prefers-color-scheme (design.php → dark.force).
+   Die dunklen Farbwerte setzt der Editor selbst; hier nur das, was keine Farbe ist. */
+html.is-dark{color-scheme:dark;--n-hi:rgb(255 255 255/.05);--n-sh1:rgb(0 0 0/.3);--n-sh2:rgb(0 0 0/.55);--n-danger:#FF8A80}
+html.is-dark .brand__logo--light{display:none}
+html.is-dark .brand__logo--dark{display:block}
+html.is-dark.pagebg-grain body::before{background:#000;opacity:.35}

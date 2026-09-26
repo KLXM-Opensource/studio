@@ -1,0 +1,104 @@
+{
+ "_comment": "Aussprache-Lexikon (Deutsch) für die Sprecher: Begriff → gesprochene Umschrift. Gilt NUR für den gesprochenen Text (speech.mjs speakable), die Untertitel behalten die echte Schreibweise. Ganze Wörter, Groß/Klein wie hier; längere Einträge gewinnen. Aktiv für TUT_TTS=chatterbox (Piper unverändert, außer TUT_LEXICON=1).",
+ "terms": {
+  "KLXM Studio": "Kah, El, Ix, Emm Studio",
+  "KLXM Ai": "Kah, El, Ix, Emm ei ei",
+  "KLXM": "Kah, El, Ix, Emm",
+  "Open Source": "Oupen Sors",
+  "Multi-Site": "Malti-Seit",
+  "Multisite": "Malti-Seit",
+  "Landingpages": "Lendingpejtschis",
+  "Landingpage": "Lendingpejtsch",
+  "Landing Pages": "Lendingpejtschis",
+  "Block-Builder": "Block-Bilder",
+  "Style-Editor": "Steil-Editor",
+  "Dashboard": "Däschbord",
+  "Kits": "Kitts",
+  "Kit": "Kitt",
+  "Themes": "Thiems",
+  "Theme": "Thiem",
+  "Passkeys": "Paskies",
+  "Passkey": "Paskie",
+  "Consent": "Konsent",
+  "Websites": "Webseits",
+  "Website": "Webseit",
+  "Live-Vorschau": "Leif-Vorschau",
+  "Live": "Leif",
+  "Team": "Tiem",
+  "Domain": "Domäin",
+  "Domains": "Domäins",
+  "Feed": "Fied",
+  "Feeds": "Fieds",
+  "Upload": "Aplod",
+  "Download": "Daunlod",
+  "Login": "Login",
+  "Deploy": "Diploi",
+  "Staging": "Steidsching",
+  "Tracker": "Träcker",
+  "Cookies": "Kuckies",
+  "Cookiefrei": "Kuckiefrei",
+  "Newsletter": "Njusletter",
+  "Content": "Kontent",
+  "Tags": "Tägs",
+  "Mediathek": "Mediatek",
+  "Slider": "Sleider",
+  "Layout": "Leiaut",
+  "Header": "Hedder",
+  "Footer": "Futer",
+  "Blog": "Blog",
+  "Browser": "Brauser",
+  "Chat": "Tschätt",
+  "Prompt": "Prompt",
+  "KI": "Ka I",
+  "AI": "ei ei",
+  "MCP": "em zeh peh",
+  "API": "a peh i",
+  "APIs": "a peh is",
+  "CSS": "zeh es es",
+  "JS": "jott es",
+  "PHP": "peh ha peh",
+  "SEO": "es i o",
+  "SSO": "es es o",
+  "PDF": "peh deh eff",
+  "PDFs": "peh deh effs",
+  "HTML": "ha teh em el",
+  "URL": "u er el",
+  "JSON": "Dschäisen",
+  "RSS": "er es es",
+  "2FA": "Zwei-Faktor",
+  "E-Mail": "Imeil"
+ },
+ "_heard": "Nur für voice-check.mjs: Schreibweisen, mit denen Whisper einen richtig ausgesprochenen Begriff wiedergibt (zählen als Treffer). „Kids“ = „Kits“: im Deutschen gleich gesprochen (Auslautverhärtung), Whisper wählt das häufigere Wort.",
+ "heard": {
+  "Landingpages": [
+   "Landing Pages",
+   "Lending Pages",
+   "Landingpages"
+  ],
+  "Passkeys": [
+   "Pass Keys",
+   "Paskies",
+   "Paskis",
+   "Passkis"
+  ],
+  "Kits": [
+   "Kitts",
+   "Kids"
+  ],
+  "KLXM": [
+   "K L X M",
+   "KLXM"
+  ],
+  "Live-Vorschau": [
+   "Live Vorschau",
+   "Leif-Vorschau"
+  ],
+  "Websites": [
+   "Web Sites",
+   "Webseits"
+  ],
+  "Mediathek": [
+   "Mediatek"
+  ]
+ }
+}

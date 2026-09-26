@@ -1,0 +1,13 @@
+/* Theme „essenz“ – Zitat: große, ruhige Typografie mit Signal-Linie; Stimmen als Paneele */
+.q{display:grid;gap:var(--e-s-m);margin:0}
+.q--single{max-width:52rem;padding-inline-start:var(--e-s-l);border-inline-start:3px solid var(--e-ui,var(--e-a))}
+.q--single .q__text{color:var(--e-ink);font:var(--e-hw) max(var(--e-t2),min(var(--e-t4),5.5cqi))/1.18 var(--e-font-head);letter-spacing:calc(var(--e-track) * .01em);text-wrap:balance}
+.q--single .q__text p::before{content:"„"}.q--single .q__text p::after{content:"“"}
+.qs .card{padding:var(--e-s-m)}
+.q--card{height:100%;align-content:space-between}
+.q--card .q__text{color:var(--e-text);font-size:var(--e-t1);line-height:1.45}
+.q__who{display:flex;align-items:center;gap:var(--e-s-s);padding-top:var(--e-s-s);border-top:1px solid var(--e-line)}
+.q--single .q__who{border-top:0;padding-top:0}
+.q__img{width:3rem;height:3rem;border-radius:50%;object-fit:cover}
+.q__name{display:block;color:var(--e-ink);font-weight:600}
+.q__role{display:block;color:var(--e-muted);font:500 var(--e-label)/1.4 var(--e-font-label);letter-spacing:.08em;text-transform:uppercase}

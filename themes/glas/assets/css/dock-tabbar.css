@@ -1,0 +1,21 @@
+/* Kit „glas“ – Tab-Leiste des Glas-Docks (nur Telefone: layout.php bindet die Datei mit media="(max-width: 47.99em)" ein) */
+.hdr--dock .hdr__nav,.hdr--dock .menu-btn{display:none!important}
+/* Kopfbereich-Aktionen (Suche, Handlungsaufruf …): auf Telefonen im Glasblatt „Mehr“ statt im Dock */
+.hdr--dock :is(.ha,.ha-below){display:none}
+.hdr--dock .dock{width:calc(100% - 2 * var(--g-gutter))}
+.hdr--dock .hdr__brand{margin-inline-end:auto}
+.tabbar{display:block;position:fixed;left:.5rem;right:.5rem;bottom:calc(.5rem + env(safe-area-inset-bottom,0px));z-index:70;border:1px solid var(--g-edge);border-radius:1.25rem;
+  background:linear-gradient(112deg,color-mix(in srgb,var(--g-hi) 45%,transparent),transparent 40%) border-box,var(--g-panel-hdr);background-clip:padding-box;box-shadow:inset 0 1px 0 var(--g-hi),0 -6px 30px -14px var(--g-sh2);
+  -webkit-backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);transition:translate .3s cubic-bezier(.2,.7,.2,1)}
+.tabbar.is-hidden{translate:0 calc(100% + 1rem + env(safe-area-inset-bottom,0px))}
+html.hdr-dock body{padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
+html.hdr-dock{--cms-chat-lift:calc(4.75rem + env(safe-area-inset-bottom,0px));scroll-padding-bottom:5.5rem}
+.tabbar__list{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;margin:0;padding:.3125rem;list-style:none}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1875rem;width:100%;min-height:3.25rem;padding:.25rem .125rem;border:0;border-radius:8px;background:none;color:var(--g-text);font:600 .75rem/1.1 var(--g-font);text-decoration:none;cursor:pointer}
+.tab__ico{font-size:1.375rem;--ico-2-opacity:.28}
+.tab__lbl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab[aria-current=page],.tab--more[aria-expanded=true]{color:var(--g-ink);background:linear-gradient(180deg,var(--g-sheen),transparent 60%),color-mix(in srgb,var(--g-glass) 72%,transparent);box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-edge)}
+.tab[aria-current=page] .tab__ico,.tab.is-active .tab__ico{color:var(--g-a-ink);--ico-2-opacity:.4}
+.tab:focus-visible{outline-offset:-2px}
+@media (prefers-reduced-transparency:reduce){.tabbar{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+@media (prefers-reduced-motion:reduce){.tabbar{transition:none}.tabbar.is-hidden{translate:none}}

@@ -1,0 +1,13 @@
+/* ==========================================================================
+   Theme „essenz“ – weniger, aber besser. Funktionaler Minimalismus über Design-Tokens.
+   Werte: Verwaltung → Design → /media/…/design/design-essenz-*.css (nach diesem Stylesheet geladen).
+   Klassen am <html>: hdr-{bar|centered|split|index} hdr-sticky btn-{key|pill|outline} depth-{flat|relief|deep}
+   mk-{dot|number|plain} ft-{index|panel|simple} pagebg-{plain|dots|lines} has-motifs has-motion has-dark is-darkbase.
+   Blöcke laden ihr CSS nur bei Bedarf (theme.php → conditional_css); Menü, Aufklappmenüs, Suche: overlay.css am Seitenende.
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+@import "_header.css";
+@import "_footer.css";
+@import "_hero.css";
+@media print{[data-reveal]{opacity:1!important;translate:none!important}.hdr,.mnav,.skip,.menu-btn,.hsearch__btn,.ftr__top{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}.panel,.card{box-shadow:none}}

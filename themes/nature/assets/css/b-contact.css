@@ -1,0 +1,26 @@
+/* Kit „nature“ – Kontakt und Karte (nur wenn verwendet). Angaben in EINEM Paneel (Abschnitte durch Linien getrennt,
+   Öffnungszeiten mit Betriebsanzeige); Formular/Karte daneben, sobald Platz ist, sonst darunter. */
+.contact{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--n-s-l) var(--n-s-xl)}
+.contact__info{flex:1 1 min(19rem,100%);display:grid;padding:var(--n-s-2xs) var(--n-s-m)}
+.contact:not(.contact--aside) .contact__info{flex-basis:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));column-gap:var(--n-s-l)}
+.contact__sec{display:grid;gap:var(--n-s-xs);padding-block:var(--n-s-m);border-top:1px solid var(--n-line)}
+.contact__sec:first-child{border-top:0}
+.contact:not(.contact--aside) .contact__sec{border-top:0}
+.contact__address strong{font-weight:600}
+.contact__list{display:grid;gap:.25rem;margin:0;padding:0;list-style:none}
+.contact__list a{display:inline-flex;align-items:center;gap:.625rem;min-height:2.5rem;color:var(--n-ink);font-weight:500;text-decoration:none;overflow-wrap:anywhere}
+.contact__list a:hover{color:var(--n-link);text-decoration:underline}
+.contact__list .ico{color:var(--n-muted)}
+.contact__note{color:var(--n-muted);font-size:var(--n-t-1)}
+.contact__main{flex:999 1 0;min-width:min(100%,55%);display:grid;gap:var(--n-s-l)}
+.contact__form{padding:var(--n-s-l)}
+.contact__formtitle{margin-bottom:var(--n-s-m)}
+.contact__foot{margin-top:var(--n-s-l);color:var(--n-muted);font-size:var(--n-t-1)}
+/* Karte (Kern: css/map.css) – Farben aus den Tokens */
+.cms-map{--cms-map-accent:var(--n-a);--cms-map-radius:var(--n-r-l);--cms-map-bg:var(--n-surface-2);--cms-map-line:var(--n-line);color:var(--n-muted)}
+.sec .cms-map__route{color:var(--n-link)}
+.sec .cms-map__cap strong{color:var(--n-ink)}
+.cms-map__load{border-radius:var(--n-btn-r)}
+.contact__dir{display:flex;gap:.625rem;align-items:flex-start;margin-top:var(--n-s-xs);color:var(--n-muted);font-size:var(--n-t-1)}
+.contact__dir .ico{flex:none;margin-top:.2em;color:var(--n-a-ink)}
+.contact__seasons{margin-top:0}

@@ -1,0 +1,1 @@
+html.is-dark{color-scheme:dark;--n-hi:rgb(255 255 255/.05);--n-sh1:rgb(0 0 0/.3);--n-sh2:rgb(0 0 0/.55);--n-danger:#FF8A80}html.is-dark .brand__logo--light{display:none}html.is-dark .brand__logo--dark{display:block}html.is-dark.pagebg-grain body:before{background:#000;opacity:.35}

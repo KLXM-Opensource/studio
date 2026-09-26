@@ -1,0 +1,21 @@
+/* Theme „editorial“: öffentliche Formulare (Kern-Block „Formular“, Newsletter im Handlungsaufruf) – Felder mit Unterstrich,
+   Beschriftung in Mono, Fehlerfarbe aus einem festen Rotton gemischt mit der Überschriftenfarbe (hell auf dunkel, dunkel auf hell ≥ 4.5:1). */
+@import "../../../../resources/css/dataform.css";
+.dff-wrap{--e-danger:color-mix(in srgb,#E5484D 66%,var(--e-ink));
+  --dff-accent:var(--e-a);--dff-line:var(--e-muted);--dff-bg:var(--e-sec-bg,var(--e-bg));--dff-ink:var(--e-ink);--dff-muted:var(--e-muted);--dff-radius:var(--e-radius);--dff-focus:var(--e-focus);
+  --dff-err:var(--e-danger);--dff-err-bg:color-mix(in srgb,var(--e-danger) 10%,var(--e-sec-bg,var(--e-bg)))}
+.dff-head{max-width:none;padding-top:clamp(12px,1.4vw,18px);border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+.dff-title{margin:0;color:var(--e-ink);font:var(--e-hw) var(--e-h2)/1.1 var(--e-font-display)}
+.dff-intro{color:var(--e-muted)}
+.dff-f>label,.dff-f>legend{color:var(--e-ink);font:500 .75rem/1.5 var(--e-font-mono);letter-spacing:.05em;text-transform:uppercase}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]),.dff select,.dff textarea{border-width:0 0 1.5px;border-radius:0;background:color-mix(in srgb,var(--e-ink) 4%,var(--dff-bg));transition:border-color .15s,box-shadow .15s}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):hover,.dff select:hover,.dff textarea:hover{border-color:var(--e-ink)}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.dff select:focus,.dff textarea:focus{border-color:var(--e-a);outline:none;box-shadow:0 1.5px 0 var(--e-a)}
+.dff-check{font:400 1rem var(--e-font);text-transform:none;letter-spacing:0}
+.dff button[type=submit]{min-height:50px;padding:0 24px;border:0;border-radius:var(--e-radius);background:var(--e-btn-bg);color:var(--e-btn-ink);font:650 .9375rem var(--e-font);cursor:pointer}
+.dff button[type=submit]:hover{background:var(--e-btn-bg-hover)}
+.dff-row,.dff-row__rm,.dff-row__add{border-radius:var(--e-radius)}
+.dff-summary{color:var(--e-ink)}
+.dff-done{border:0;border-top:3px solid var(--e-a);border-radius:0;background:var(--e-box);color:var(--e-ink)}
+.bg-muted .dff-wrap{--dff-bg:var(--e-bg)}
+:is(.bg-accent,.bg-dark) .dff-wrap{--dff-bg:transparent}

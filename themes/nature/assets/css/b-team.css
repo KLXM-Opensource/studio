@@ -1,0 +1,19 @@
+/* Kit „nature“ – Team / Menschen: Foto oder Monogramm in einer Kieselform; Karten im Raster oder Liste */
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min,15rem)),1fr));gap:var(--n-s-m);margin:0;padding:0;list-style:none}
+.team__item{display:grid;align-content:start;gap:var(--n-s-s);min-width:0}
+.team--grid .team__item{padding:var(--n-s-m);justify-items:start}
+.team__pic{display:grid;place-items:center;width:6.5rem;aspect-ratio:1;overflow:hidden;border-radius:58% 42% 52% 48%/48% 56% 44% 52%;background:var(--n-a-soft)}
+.team__pic--1{border-radius:44% 56% 46% 54%/55% 45% 55% 45%;background:color-mix(in srgb,var(--n-earth) 18%,var(--n-bg))}
+.team__pic--2{border-radius:52% 48% 60% 40%/42% 58% 42% 58%;background:color-mix(in srgb,var(--n-a) 10%,var(--n-surface))}
+.team__pic picture{display:contents}
+.team__img{width:100%;height:100%;object-fit:cover}
+.team__mono{color:var(--n-ink);font:var(--n-hw) 1.75rem/1 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:.02em}
+.team__body{display:grid;gap:var(--n-s-2xs)}
+.team__name{color:var(--n-ink);font:var(--n-hw) var(--n-t1)/1.25 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0}
+.team__role{color:var(--n-link);font:var(--n-lb-style) 500 var(--n-label)/1.35 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.team__text{margin-top:var(--n-s-2xs);color:var(--n-muted);font-size:var(--n-t-1);text-wrap:pretty}
+.team__mail{display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;color:var(--n-ink);font-size:var(--n-t-1);font-weight:600;overflow-wrap:anywhere}
+.team__mail .ico{color:var(--n-muted)}
+.team--list{grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr));gap:0 var(--n-s-l)}
+.team--list .team__item{grid-template-columns:auto 1fr;align-items:center;column-gap:var(--n-s-m);padding-block:var(--n-s-m);border-bottom:1px solid var(--n-line)}
+.team--list .team__pic{width:5rem}

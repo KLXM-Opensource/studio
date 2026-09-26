@@ -1,0 +1,3 @@
+<?php /** Handbuch „praxis“ · Ergänzung zu „Inhalte bearbeiten“ */ ?>
+  <div class="doc-note doc-note--info"><strong>Der Knopf „Kontakt“</strong><p>Der Abschnitt mit der Sprungmarke <code>kontakt</code> erscheint im Menü oben rechts als hervorgehobener Knopf statt als Textlink. Im Handy-Menü steht er als normaler Menüpunkt.</p></div>
+  <div class="doc-note doc-note--info"><strong>Leiste „Anrufen / Termin“ beim Bearbeiten</strong><p>Auf dem Handy liegen beim Bearbeiten <b>Abbrechen · Speichern · Veröffentlichen</b> am unteren Rand. Die Schnellkontakt-Leiste „Anrufen / Termin“ ist so lange ausgeblendet und erscheint nach „Abbrechen“ bzw. beim Ansehen wieder.</p></div>

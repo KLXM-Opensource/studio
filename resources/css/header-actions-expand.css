@@ -1,0 +1,10 @@
+/* Kopfbereich-Aktionen – Teil „Aufziehen“: Lupe, die sich im Kopf zum Feld aufzieht (ohne JavaScript über :focus-within) (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-search--expand{width:var(--ha-h);height:var(--ha-h)}
+.ha-field--expand{position:absolute;right:0;top:0;z-index:5}
+.ha-field--expand .ha-field__in{width:var(--ha-h);padding:0;border-color:var(--ha-line);background:transparent;color:transparent;cursor:pointer;transition:width .22s ease,padding .22s ease,background-color .22s}
+.ha-field--expand .ha-field__in::placeholder{color:transparent}
+.ha-field--expand .ha-field__go{right:0;width:var(--ha-h);pointer-events:none;color:var(--ha-ink)}
+.ha-field--expand:focus-within .ha-field__in{width:var(--ha-field-w,17rem);padding:0 44px 0 12px;background:var(--ha-bg);color:var(--ha-ink);cursor:text;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.ha-field--expand:focus-within .ha-field__in::placeholder{color:var(--ha-muted)}
+.ha-field--expand:focus-within .ha-field__go{pointer-events:auto}
+@media (prefers-reduced-motion:reduce){.ha-field--expand .ha-field__in{transition:none}}

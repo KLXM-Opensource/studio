@@ -1,0 +1,8 @@
+/* Kopfbereich-Aktionen – Teil „Befehlsfeld“: „Suchen … ⌘K“ öffnet das Popover der Kern-Suche; mobil nur die Lupe (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-cmd{position:relative;display:inline-flex;align-items:center;gap:.55em;min-width:11rem;min-height:var(--ha-h);padding:0 8px 0 12px;border:1px solid var(--ha-line);background:var(--ha-field-bg,var(--ha-surface));color:var(--ha-muted);font:inherit;font-size:var(--ha-fs);text-align:left;cursor:pointer}
+.ha-cmd:hover{border-color:var(--ha-ink);color:var(--ha-ink)}
+.ha-cmd .ha-kbd{margin-left:auto;padding:1px 6px;border:1px solid var(--ha-line);border-radius:5px;background:var(--ha-bg);color:var(--ha-muted);font:600 .72rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+.ha-cmd__txt{flex:1}
+@supports (anchor-name:--a){.ha-cmd{anchor-name:var(--ha-anchor,--hs)}}
+@media (max-width:47.99em){.ha-cmd{min-width:44px;min-height:44px;padding:0;justify-content:center}.ha-cmd__txt,.ha-cmd .ha-kbd{display:none}}
+@media (forced-colors:active){.ha-cmd{border:1px solid ButtonText}}

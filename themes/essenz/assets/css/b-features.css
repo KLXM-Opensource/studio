@@ -1,0 +1,24 @@
+@import "_knob.css";
+/* Theme „essenz“ – Merkmale. „Bedienfeld“: ein Paneel, Zellen durch 1-px-Linien getrennt (Rasterlücke auf Linienfarbe) */
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min,17rem)),1fr));gap:var(--e-s-m);margin:0;padding:0;list-style:none}
+.feat{position:relative;display:grid;align-content:start;gap:var(--e-s-s);min-width:0}
+.feat__n{position:absolute;top:0;right:0;color:var(--e-muted);font:500 var(--e-label)/1 var(--e-font-mono);font-variant-numeric:tabular-nums}
+.feat__body{display:grid;gap:var(--e-s-xs)}
+.feat__title{color:var(--e-ink);font:var(--e-hw) var(--e-t1)/1.25 var(--e-font-head);letter-spacing:calc(var(--e-track) * .005em);text-wrap:balance}
+.feat__text{color:var(--e-muted);text-wrap:pretty}
+.feat__more{margin-top:var(--e-s-2xs)}
+.feat__img{border-radius:var(--e-r-s)}
+/* Bedienfeld */
+.feats--panel{gap:1px;overflow:hidden;background:var(--e-line)}
+.feats--panel .feat{padding:var(--e-s-m);background:var(--e-card)}
+.feats--panel .feat__n{top:var(--e-s-m);right:var(--e-s-m)}
+.feats--panel .feat:hover{background:color-mix(in srgb,var(--e-card) 70%,var(--e-surface))}
+.feats--panel .feat:has(.cover-link:focus-visible){outline-offset:-3px}
+/* Karten */
+.feats--cards .feat{padding:var(--e-s-m)}
+.feats--cards .feat__n{top:var(--e-s-m);right:var(--e-s-m)}
+.feats--cards .feat:has(.cover-link):hover{border-color:var(--e-line-strong)}
+/* Liste */
+.feats--list{gap:0 var(--e-s-l);border-top:1px solid var(--e-line)}
+.feats--list .feat{grid-template-columns:auto 1fr;align-items:start;padding-block:var(--e-s-m);border-bottom:1px solid var(--e-line)}
+.feats--list .feat__img{width:6rem}

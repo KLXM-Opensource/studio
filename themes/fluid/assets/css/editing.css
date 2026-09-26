@@ -1,0 +1,3 @@
+/* Theme „fluid“ – nur im Bearbeiten-Modus (Platzhalter für leere Bilder und Listen) */
+.frame--empty{display:grid;place-items:center;min-height:10rem;border:1px dashed var(--f-line-strong);background:var(--f-surface);color:var(--f-muted);font-size:.875rem}
+.empty-hint{padding:var(--f-s-l);border:1px dashed var(--f-line-strong);border-radius:var(--f-radius);color:var(--f-muted);text-align:center}

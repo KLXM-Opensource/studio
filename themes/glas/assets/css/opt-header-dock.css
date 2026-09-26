@@ -1,0 +1,34 @@
+/* Kopfbereich „Glas-Dock“ (Standard): mittig schwebende Glasinsel mit Lichtbrechung, gleitende Glaslinse im Menü,
+   Marke als Glasperle, Aktionen rechts (.dock__actions – Suche, Button, Menü; Platz für künftige Kopfbereich-Aktionen).
+   Verdichtet sich beim Scrollen (is-condensed, site.js) – die Höhe des Kopfs bleibt fest, nichts verschiebt sich.
+   Ab 48 em: Menü mit Glaslinse – css/dock-desktop.css; Telefone (< 48 em): Tab-Leiste – css/dock-tabbar.css (beide per
+   media-Attribut, blockieren die jeweils anderen Bildschirme nicht). Aufklappmenü (Glaspanel mit Symbolen): overlay.css. */
+.hdr--dock{height:var(--g-hdr-h);--g-hdr-h:4.75rem}
+.hdr--dock .dock{position:relative;isolation:isolate;width:fit-content;max-width:calc(100% - 2 * var(--g-gutter));min-height:3.75rem;padding:.3125rem;gap:.25rem .375rem;border-radius:1.375rem;
+  border-color:transparent;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;transition:min-height .3s cubic-bezier(.2,.7,.2,1),padding .3s}
+/* Das Glas des Docks liegt auf ::before – so ist das Dock selbst keine „Backdrop Root“ und das Aufklappmenü darin kann den
+   Seiteninhalt weichzeichnen (verschachteltes backdrop-filter sähe sonst nur das Dock). */
+.hdr--dock .dock::before{content:"";position:absolute;inset:0;z-index:-1;border:1px solid var(--g-edge);border-radius:inherit;
+  background:linear-gradient(112deg,color-mix(in srgb,var(--g-hi) 60%,transparent),transparent 24% 68%,color-mix(in srgb,var(--g-hi) 25%,transparent)) border-box,linear-gradient(180deg,var(--g-sheen),transparent 60%),var(--g-panel-hdr);background-clip:padding-box;
+  box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-rim),0 14px 36px -20px var(--g-sh2);
+  -webkit-backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);transition:box-shadow .3s,-webkit-backdrop-filter .3s,backdrop-filter .3s}
+.hdr--dock .dock.is-condensed{min-height:3.25rem;padding-block:.125rem}
+.hdr--dock .dock.is-condensed::before{box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-rim),0 20px 44px -18px var(--g-sh2);-webkit-backdrop-filter:blur(calc(var(--g-blur-now) * 1.5)) saturate(1.6);backdrop-filter:blur(calc(var(--g-blur-now) * 1.5)) saturate(1.6)}
+.dock-sentinel{position:absolute;top:5rem;width:1px;height:1px}
+/* Marke als Glasperle */
+.hdr--dock .hdr__brand{margin-inline-end:.5rem;padding-inline-end:.25rem}
+.hdr--dock .brand__mark{width:2.5rem;height:2.5rem;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgb(255 255 255/.95),transparent 38%),radial-gradient(circle at 70% 78%,var(--g-f3),transparent 60%),linear-gradient(145deg,var(--g-f2),var(--g-f1) 55%,var(--g-a))}
+.hdr--dock .brand__mark::before{inset:2px;border-radius:50%;background:linear-gradient(180deg,rgb(255 255 255/.4),transparent 55%)}
+.hdr--dock .brand__dot{display:none}
+/* Aktionen: Suche und Button als Glastasten (44 px) */
+.dock__actions{gap:.3125rem;margin-inline-start:.5rem}
+.hdr--dock .hsearch__btn,.hdr--dock .menu-btn{border-radius:8px;background:color-mix(in srgb,var(--g-glass) 55%,transparent)}
+.dock__cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-width:2.75rem;min-height:2.75rem;padding:0 1rem 0 .8rem;border-radius:8px;
+  background:linear-gradient(180deg,rgb(255 255 255/.22),transparent 60%),var(--g-a);color:var(--g-a-on);font:650 .9375rem/1 var(--g-font);text-decoration:none;box-shadow:inset 0 1px 0 rgb(255 255 255/.35),var(--g-key-sh);transition:box-shadow .2s}
+.dock__cta:hover{color:var(--g-a-on);box-shadow:inset 0 1px 0 rgb(255 255 255/.35),0 0 0 4px color-mix(in srgb,var(--g-a) 22%,transparent)}
+.dock__cta-ico{font-size:1.125rem;--ico-2-opacity:.35}
+@container hdr (max-width:64rem){.dock__cta{padding:0}.dock__cta-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}}
+@container hdr (max-width:34rem){.hdr--dock .hdr__cta{display:inline-flex}}
+.tabbar{display:none}
+@media (prefers-reduced-transparency:reduce){.hdr--dock .dock::before{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+@media (prefers-reduced-motion:reduce){.hdr--dock .dock,.hdr--dock .dock::before{transition:none}}

@@ -1,0 +1,296 @@
+<?php
+declare(strict_types=1);
+
+namespace Core\Http\Controllers;
+
+use Core\Http\HttpException;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Data\Entries;
+use Core\Data\Tables;
+use Core\Landings;
+use Core\Lang;
+use Core\Pages;
+use Core\PageCache;
+use Core\Seo;
+
+final class SiteController
+{
+    public function home(Request $r): Response
+    {
+        // Landing-Domain (Core\Landings): „/“ zeigt die Einstiegsseite der Landingpage
+        if ($l = Landings::current()) return $this->landing($r, $l, '');
+        $page = Pages::home() ?? throw new HttpException(404);
+        return $this->render($r, $page);
+    }
+
+    /** Seiten nach vollständigem Pfad, Detailseiten von Datentabellen, Weiterleitung alter Kurz-Adressen */
+    public function page(Request $r, string $path): Response
+    {
+        $path = trim($path, '/');
+        if ($l = Landings::current()) return $this->landing($r, $l, $path);
+        // Sprachpräfix /en/…: weitere Sprachen; die Standardsprache hat kein Präfix
+        $first = explode('/', $path)[0];
+        if (Lang::multi() && $first !== Lang::default() && Lang::valid($first)) {
+            app()->lang = $first;
+            $path = trim(substr($path, strlen($first)), '/');
+            if ($path === '') {
+                $home = Pages::home($first);
+                if (!$home || Lang::norm($home['lang']) !== $first) throw new HttpException(404);
+                return $this->render($r, $home);
+            }
+        }
+        $page = Pages::byPath($path);
+        if ($page) {
+            return $page['is_home'] ? Response::redirect(Pages::url($page), 301) : $this->render($r, $page);
+        }
+        // Detailseite: /{URL-Basis der Tabelle}/{slug}
+        if (preg_match('~^(.+)/([^/]+)$~', $path, $m) && ($t = Tables::byRoute($m[1])) && !empty($t['settings']['detail_page_id'])) {
+            $tpl = Pages::find((int) $t['settings']['detail_page_id']);
+            if ($tpl && Lang::multi()) {
+                $tpl = Pages::translations($tpl)[Lang::current()] ?? $tpl;   // übersetzte Vorlage, sonst Standard
+            }
+            // Geteilte Tabellen: nur Einträge, die diese Website zeigt (eigene + gewählte Quellen)
+            $entry = Entries::bySlug($t, $m[2], !app()->auth->check(), Lang::current(), 'site');
+            if ($tpl && $entry) {
+                app()->entry = ['table' => $t, 'entry' => $entry];
+                return $this->render($r, $tpl);
+            }
+        }
+        // Alte Adresse einer inzwischen verschachtelten Seite → dauerhaft weiterleiten
+        if (!app()->lang && !str_contains($path, '/') && ($p = Pages::bySlug($path)) && $p['type'] === 'page' && ($p['path'] ?? '') !== $path) {
+            return Response::redirect(Pages::url($p), 301);
+        }
+        throw new HttpException(404);
+    }
+
+    /**
+     * Anfrage auf einer Landing-Domain: Einstiegsseite, Unterseiten (falls eingeschaltet), Übersetzungen unter /en/…;
+     * alles andere → Hauptdomain (302) oder 404.
+     */
+    private function landing(Request $r, \Core\Landing $l, string $path): Response
+    {
+        $first = explode('/', $path)[0];
+        if (Lang::multi() && $first !== Lang::default() && Lang::valid($first)) {
+            app()->lang = $first;
+            $path = trim(substr($path, strlen($first)), '/');
+        }
+        $page = $l->resolve($path, Lang::current());
+        if ($page) return $this->render($r, $page);
+        if ($l->redirectOther) {
+            $qs = (string) parse_url((string) ($r->server['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
+            return Response::redirect(Landings::mainOrigin() . url($r->path) . ($qs !== '' ? '?' . $qs : ''), 302);
+        }
+        throw new HttpException(404);
+    }
+
+    /** Blocktypen der Seite für conditional_css (Stylesheets und Skripte): „typ“ und „typ:variante“ */
+    private static function types(array $blocks): array
+    {
+        return array_merge(array_column($blocks, 'type'), array_map(fn($b) => $b['type'] . ':' . ($b['data']['variant'] ?? ''), $blocks));
+    }
+
+    /** HTML einer Seite für Vorschauen in der Verwaltung: veröffentlichte Fassung, ohne Editor-Leiste und Cache */
+    public function previewHtml(array $page): string
+    {
+        $app = app();
+        $app->currentPage = $page;
+        \Core\StructuredData::reset();
+        $blocks = Pages::blocks($page, $page['content_published'] === null);
+        $theme = $app->theme;
+        return $theme->render('layout', [
+            'page' => $page,
+            'content' => $theme->renderBlocks($blocks),
+            'seo' => ['noindex' => true] + Seo::forPage($page),
+            'editor' => null,
+            'extraCss' => $theme->conditionalCss(self::types($blocks)),
+            'extraJs' => $theme->conditionalJs(self::types($blocks)),
+            'toolbar' => null,
+        ]);
+    }
+
+    private function render(Request $r, array $page): Response
+    {
+        $app = app();
+        $loggedIn = $app->auth->check();
+
+        $ctx = $app->entry;
+        if ($page['status'] !== 'published' && !$loggedIn && !$ctx) {
+            throw new HttpException(404);
+        }
+        if ($app->settings->get('sys.maintenance') && !$loggedIn) {
+            return $this->maintenance();
+        }
+
+        // Hauptdomain → Landing-Domain (Modus „Eigene Domain“ mit Weiterleitung) – nur für Besucher
+        if (!$ctx && !$loggedIn && ($to = Landings::redirectFor($page, $r))) {
+            return Response::redirect($to, 301);
+        }
+
+        $cacheKey = $ctx ? 'entry:' . $ctx['table']['handle'] . ':' . $ctx['entry']['id'] : 'page:' . $page['id'];
+        $cacheable = !$loggedIn && $r->method === 'GET' && !$r->query;
+        if ($cacheable && ($html = PageCache::get($cacheKey)) !== null) {
+            return $this->respond($html, false)->header('X-Cache', 'HIT');
+        }
+
+        $app->currentPage = $page;
+        \Core\StructuredData::reset();
+        $app->editing = $loggedIn && isset($r->query['edit']) && can('pages.edit');
+        // Eingeloggte sehen den Arbeitsstand (Entwurf) – mit ?live=1 die veröffentlichte Fassung wie Besucher
+        $live = $loggedIn && isset($r->query['live']) && !$app->editing;
+        $showDraft = $loggedIn && !$live;
+        // Redaktion: Einträge direkt bearbeiten (Stifte in Datenlisten; auf Detailseiten Felder im Text) – nie für Besucher
+        $app->dataEdit = $loggedIn && !$live;
+        $app->entryEdit = $loggedIn && !$live && !$app->editing && $ctx !== null && \Core\Data\EntryEdit::canEdit($ctx['table'], $ctx['entry']);
+        $blocks = Pages::blocks($page, $showDraft);
+        $theme = $app->theme;
+
+        $editor = null;
+        if ($app->editing) {
+            $previews = [];
+            foreach ($blocks as $b) {
+                $block = $theme->makeBlock($b);
+                if ($block) {
+                    $previews[$b['id']] = $theme->renderBlock($block);
+                }
+            }
+            $editor = ['page' => $page, 'blocks' => $blocks, 'previews' => $previews];
+            $content = '';
+        } else {
+            $content = $theme->renderBlocks($blocks);
+        }
+
+        $html = $theme->render(Landings::template(), [
+            'page' => $page,
+            'content' => $content,
+            'seo' => $ctx ? Seo::forEntry($page, $ctx['table'], $ctx['entry']) : Seo::forPage($page),
+            'editor' => $editor,
+            'extraCss' => $theme->conditionalCss($app->editing ? null : self::types($blocks)),
+            'extraJs' => $app->editing ? [] : $theme->conditionalJs(self::types($blocks)),
+            'toolbar' => $loggedIn ? ['page' => $page, 'editing' => $app->editing, 'dirty' => Pages::hasUnpublished($page), 'live' => $live] : null,
+        ]);
+
+        // Besucher: ein Sprite der Website mit nur den verwendeten Symbolen statt mehrerer Themen-Sprites (Core\Icons)
+        if (!$loggedIn) {
+            $html = \Core\Icons::siteSprite($html);
+        }
+        // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
+        $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => 200]);
+        if ($cacheable) {
+            PageCache::put($cacheKey, $html);
+        }
+        return $this->respond($html, $loggedIn);
+    }
+
+    public function respond(string $html, bool $loggedIn, int $status = 200): Response
+    {
+        $res = new Response($html, $status);
+        $res->header('Content-Security-Policy', self::csp($loggedIn));
+        $res->header('Cache-Control', $loggedIn ? 'no-store, private' : 'public, max-age=0, must-revalidate');
+        if (noindex_site() || Landings::current()?->noindex) {
+            $res->header('X-Robots-Tag', 'noindex, nofollow');
+        }
+        return $res;
+    }
+
+    public static function csp(bool $loggedIn = false): string
+    {
+        $frames = ["'self'", 'https://www.youtube-nocookie.com', 'https://player.vimeo.com'];
+        foreach ((array) (app()->theme->def['frame_hosts'] ?? []) as $settingKey) {
+            $host = parse_url((string) setting($settingKey, ''), PHP_URL_HOST);
+            if ($host) {
+                $frames[] = 'https://' . $host;
+            }
+        }
+        // Erweiterungen ergänzen einzelne Hosts je Website/Anfrage (z. B. consent_kit: nur nach Einwilligung), nie 'unsafe-inline'
+        $x = \Core\Extensions::cspSources();
+        $add = fn(string $dir) => isset($x[$dir]) ? ' ' . implode(' ', $x[$dir]) : '';
+        return implode('; ', [
+            "default-src 'self'",
+            "img-src 'self' data: blob:" . $add('img-src'),
+            "font-src 'self'" . $add('font-src'),
+            // Editor.js injiziert Styles → nur für eingeloggte Nutzer
+            "style-src 'self'" . ($loggedIn ? " 'unsafe-inline'" : '') . $add('style-src'),
+            "script-src 'self'" . $add('script-src'),
+            "connect-src 'self'" . $add('connect-src'),
+            // MapLibre startet seinen Worker über eine blob:-Adresse (Kacheln kommen trotzdem nur von /proxy)
+            "worker-src 'self' blob:",
+            'frame-src ' . implode(' ', array_unique(array_merge($frames, $x['frame-src'] ?? []))),
+            "media-src 'self'" . $add('media-src'),
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self' https:",
+            "frame-ancestors 'self'",
+        ]);
+    }
+
+    private function maintenance(): Response
+    {
+        $html = app()->theme->render('maintenance', ['text' => setting('sys.maintenance_text')]);
+        return $this->respond($html, false, 503)->header('Retry-After', '3600');
+    }
+
+    public function error(int $code, string $message = ''): Response
+    {
+        $code = in_array($code, [403, 404, 405, 419, 500], true) ? $code : 500;
+        if (app()->request?->isAdminPath() || app()->request?->wantsJson()) {
+            if (app()->request?->wantsJson()) {
+                return Response::json(['ok' => false, 'error' => $message ?: 'Fehler ' . $code], $code);
+            }
+        }
+        try {
+            $html = app()->theme->render(Landings::template(), [
+                'page' => ['id' => 0, 'title' => $code === 404 ? 'Seite nicht gefunden' : 'Fehler', 'slug' => '', 'is_home' => 0, 'meta_description' => '', 'noindex' => 1],
+                'content' => app()->theme->render('error', ['code' => $code, 'message' => $message]),
+                'seo' => Seo::forError($code),
+                'editor' => null, 'toolbar' => null,
+            ]);
+        } catch (\Throwable $e) {
+            error_log((string) $e);
+            $html = '<!doctype html><meta charset="utf-8"><title>Fehler</title><p>Fehler ' . $code . '</p>';
+        }
+        $html = \Core\Extensions::filterHtml($html, ['page' => null, 'editing' => false, 'loggedIn' => false, 'status' => $code]);
+        return $this->respond(\Core\Icons::siteSprite($html), false, $code);
+    }
+
+    public function sitemap(Request $r): Response
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        // Landing-Domain: nur ihre Seiten (Modus „Eigene Domain“; Spiegel und „nicht in Suchmaschinen“ → leer)
+        if ($l = Landings::current()) {
+            foreach ($l->mode === 'own' && !$l->noindex ? $l->pages() : [] as $p) {
+                if ($p['noindex']) continue;
+                $mod = substr((string) ($p['published_at'] ?? $p['updated_at']), 0, 10);
+                $xml .= '  <url><loc>' . e((string) $l->absUrl($p)) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+            }
+            return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        }
+        foreach (Pages::published() as $p) {
+            // Seiten einer Landingpage mit eigener Domain stehen in deren Sitemap
+            if ($p['noindex'] || Landings::owner($p)) {
+                continue;
+            }
+            $loc = abs_url(Pages::url($p));
+            $mod = substr((string) ($p['published_at'] ?? $p['updated_at']), 0, 10);
+            $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+        }
+        foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
+            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id'])) continue;
+            // Geteilte Tabellen: nur eigene Einträge (fremde haben ihre Adresse auf der Ursprungs-Website)
+            foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => 'own']) as $e) {
+                $mod = substr((string) ($e['updated_at'] ?? $e['published_at']), 0, 10);
+                $xml .= '  <url><loc>' . e(site_url() . Entries::url($t, $e)) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+            }
+        }
+        $xml .= '</urlset>' . "\n";
+        return new Response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+    }
+
+    public function robots(Request $r): Response
+    {
+        $txt = noindex_site() || Landings::current()?->noindex
+            ? "User-agent: *\nDisallow: /\n"
+            : "User-agent: *\nDisallow: /admin\nDisallow: /anfrage/\nDisallow: /api/\nDisallow: /mcp\n\nSitemap: " . absolute_url('/sitemap.xml') . "\n";
+        return new Response($txt, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+    }
+}

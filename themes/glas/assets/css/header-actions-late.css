@@ -1,0 +1,7 @@
+/* Kit „glas“ – Paneel des Kontakt-Menüs (Core\HeaderActions): lädt spät über header_actions_late() (theme.php → 'kit_css_late') */
+/* Kontakt-Menü (Standard im Glas-Dock): Glastaste wie Lupe und Menü, Glaspaneel mit Lichtkante und weicher Unschärfe */
+.ha-menu__panel{--ha-panel-bg:linear-gradient(180deg,var(--g-sheen),transparent 40%),var(--g-panel-hdr);--ha-panel-shadow:var(--g-card-sh),0 24px 60px -24px var(--g-sh2);border-color:var(--g-edge);border-radius:var(--g-r-l);-webkit-backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);backdrop-filter:blur(var(--g-blur-now)) saturate(1.5)}
+.ha-menu__panel{background:var(--ha-panel-bg);background-clip:padding-box}
+.ha-menu__list a:hover{background:color-mix(in srgb,var(--g-glass) 60%,transparent)}
+.ha-menu__list .ha-ico{color:var(--g-a-ink);--ico-2-opacity:.35}
+@media (prefers-reduced-transparency:reduce){.ha-menu__panel{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--g-panel-strong)}}

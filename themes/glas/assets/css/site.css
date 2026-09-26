@@ -1,0 +1,14 @@
+/* ==========================================================================
+   Kit „glas“ – Mattglas über Farbfeldern. Glasflächen, Lichtkanten und ein weiches Farbfeld über Design-Tokens.
+   Werte: Verwaltung → Design → /media/…/design/design-glas-*.css (nach diesem Stylesheet geladen).
+   Klassen am <html>: hdr-{floating|bar|centered|index} hdr-sticky gd-{light|standard|dense} ff-{soft|rich|plain}
+   btn-{soft|pill} ft-{glass|panel|simple} has-grain is-solid has-motion has-dark is-darkbase.
+   Blöcke laden ihr CSS nur bei Bedarf (theme.php → conditional_css); Fußbereich, Menü, Aufklappmenüs, Suche: overlay.css
+   am Seitenende (nach dem Fußbereich im Dokument, blockiert den ersten Bildschirm nicht).
+   Lesbarkeit: jede Glasfläche ≥ 4,5:1 (tools/contrast.php); deckend bei prefers-reduced-transparency, prefers-contrast:
+   more, „Ohne Transparenz“ und ohne backdrop-filter.
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+@import "_header.css";
+@import "_hero.css";

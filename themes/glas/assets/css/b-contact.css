@@ -1,0 +1,30 @@
+/* Kit „glas“ – Kontakt und Karte (nur wenn verwendet). Angaben in EINEM Paneel (Abschnitte durch Linien getrennt,
+   Öffnungszeiten mit Betriebsanzeige); Formular/Karte daneben, sobald Platz ist, sonst darunter. */
+.contact{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--g-s-l) var(--g-s-xl)}
+.contact__info{flex:1 1 min(19rem,100%);display:grid;padding:var(--g-s-2xs) var(--g-s-m)}
+.contact:not(.contact--aside) .contact__info{flex-basis:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));column-gap:var(--g-s-l)}
+.contact__sec{display:grid;gap:var(--g-s-xs);padding-block:var(--g-s-m);border-top:1px solid var(--g-line)}
+.contact__sec:first-child{border-top:0}
+.contact:not(.contact--aside) .contact__sec{border-top:0}
+.contact__address strong{font-weight:600}
+.contact__list{display:grid;gap:.25rem;margin:0;padding:0;list-style:none}
+.contact__list a{display:inline-flex;align-items:center;gap:.625rem;min-height:2.5rem;color:var(--g-ink);font-weight:500;text-decoration:none;overflow-wrap:anywhere}
+.contact__list a:hover{color:var(--g-link);text-decoration:underline}
+.contact__list .ico{color:var(--g-muted)}
+.contact__note{color:var(--g-muted);font-size:var(--g-t-1)}
+.contact__main{flex:999 1 0;min-width:min(100%,55%);display:grid;gap:var(--g-s-l)}
+.contact__form{padding:var(--g-s-l)}
+.contact__formtitle{margin-bottom:var(--g-s-m)}
+.contact__foot{margin-top:var(--g-s-l);color:var(--g-muted);font-size:var(--g-t-1)}
+/* Karte (Kern: css/map.css) – Farben aus den Tokens */
+.cms-map{--cms-map-accent:var(--g-a);--cms-map-radius:var(--g-r-l);--cms-map-bg:var(--g-surface-2);--cms-map-line:var(--g-line);color:var(--g-muted)}
+.sec .cms-map__route{color:var(--g-link)}
+.sec .cms-map__cap strong{color:var(--g-ink)}
+.cms-map__load{border-radius:var(--g-btn-r)}
+/* Glasrahmen für Bilder, Karten, Video: das Bild liegt in einer schmalen Glaskante */
+.gframe{padding:6px;border:1px solid var(--g-edge);border-radius:calc(var(--g-r-l) + 6px);background:var(--g-surface);box-shadow:var(--g-card-sh);background-clip:padding-box}
+.gframe.frame{overflow:hidden}
+.gframe.frame picture,.gframe.frame img{border-radius:var(--g-r-l)}
+.gframe.frame img{inset:6px;width:calc(100% - 12px);height:calc(100% - 12px)}
+.gframe--map{padding:6px}
+.gframe--map .cms-map{margin:0}

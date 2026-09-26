@@ -1,0 +1,14 @@
+{
+  "name": "mycms-theme-nature",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „nature“ (selbst gehostete Schriften: Fraunces, Nunito Sans, Young Serif, Source Sans 3 – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über themes/nature/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/fraunces": "^0.4.1",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/nunito-sans": "^5.3.0",
+    "@fontsource-variable/source-sans-3": "^5.3.0",
+    "@fontsource/young-serif": "^5.3.0"
+  }
+}

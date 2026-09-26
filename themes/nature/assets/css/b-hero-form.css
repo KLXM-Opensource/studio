@@ -1,0 +1,24 @@
+/* Kit „nature“ – Einstieg „Papierkarte mit Formular“ (nur bei hero:form geladen, theme.php → conditional_css).
+   Formular: Core\Blocks\Hero::form in .dff-wrap – Feldstile aus css/dataform.css des Kits (über 'uses' → data_form).
+   Die Karte liegt gerade (Formularfelder nie gedreht), dahinter ein schräges zweites Blatt, oben zwei Klebestreifen. */
+.hf__text .hero__title{max-width:14ch}
+.hf__points{display:grid;gap:var(--n-s-xs);margin-top:var(--n-s-2xs);color:var(--n-text)}
+.hf__paper{position:relative;isolation:isolate;margin:var(--n-s-s) var(--n-s-2xs) 0;padding:calc(var(--n-s-l) + .5rem) clamp(var(--n-s-s),4cqi,var(--n-s-xl)) var(--n-s-l);
+  border:1px solid var(--n-card-bd);border-radius:var(--n-r-s) var(--n-r-s) var(--n-r-l) var(--n-r-s);background:var(--n-card);box-shadow:var(--n-card-sh);--dff-gap:var(--n-s-s)}
+/* zweites Blatt dahinter */
+.hf__paper::before{content:"";position:absolute;z-index:-1;inset:.5rem -.25rem -.4rem .4rem;border:1px solid var(--n-card-bd);border-radius:inherit;background:color-mix(in srgb,var(--n-earth) 10%,var(--n-surface));rotate:2.2deg;box-shadow:var(--n-card-sh)}
+/* Rand links: feine Doppellinie wie auf Briefpapier (nur mit Ornamenten) */
+.has-motifs .hf__paper{background:linear-gradient(90deg,transparent calc(var(--n-s-s) - 1px),color-mix(in srgb,var(--n-earth) 22%,transparent) calc(var(--n-s-s) - 1px) var(--n-s-s),transparent var(--n-s-s)) 0 0/100% 100% no-repeat,var(--n-card)}
+.hf__tape{position:absolute;z-index:1;top:-.8rem;width:5.5rem;height:1.6rem;background:color-mix(in srgb,var(--n-earth) 26%,color-mix(in srgb,var(--n-panel) 60%,transparent));
+  clip-path:polygon(0 8%,6% 0,12% 10%,18% 0,24% 8%,30% 0,70% 0,76% 9%,82% 0,88% 10%,94% 0,100% 8%,100% 92%,94% 100%,88% 90%,82% 100%,76% 91%,70% 100%,30% 100%,24% 92%,18% 100%,12% 90%,6% 100%,0 92%)}
+.hf__tape--l{left:1.5rem;rotate:-6deg}
+.hf__tape--r{right:1.5rem;rotate:5deg}
+.hf__title{margin:0 0 var(--n-s-m);color:var(--n-ink);font:var(--n-hw) var(--n-t3)/1.15 var(--n-font-head);letter-spacing:calc(var(--n-track) * .01em);text-wrap:balance}
+.hf__paper .dff{max-width:none}
+.hf__paper .dff button[type=submit]{width:100%}
+.hf__note{display:flex;gap:.6em;align-items:baseline;margin:var(--n-s-s) 0 0;color:var(--n-muted);font-size:var(--n-t-1)}
+.hf__note::before{content:"";flex:none;width:.55em;height:.55em;border-radius:0 70% 0 70%;background:var(--n-mark);rotate:-8deg}
+@container (min-width:60rem){
+  .hf{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:var(--n-s-2xl);align-items:start}
+  .hf__paper{margin-top:0}
+}

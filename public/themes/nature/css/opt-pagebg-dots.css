@@ -1,0 +1,1 @@
+body{background-image:radial-gradient(circle,color-mix(in srgb,var(--n-ink) 13%,transparent) .9px,transparent 1.2px);background-size:calc(var(--n-u) * 2) calc(var(--n-u) * 2)}

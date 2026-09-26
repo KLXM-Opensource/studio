@@ -1,0 +1,16 @@
+{
+  "name": "mycms-theme-basis",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „basis“ (Schriften für den Style-Editor: Inter, Manrope, IBM Plex Sans, Source Serif 4, Lora, Fraunces). Wird von tools/build.mjs automatisch installiert und über themes/basis/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@fontsource/fraunces": "^5.2.0",
+    "@fontsource/ibm-plex-sans": "^5.2.0",
+    "@fontsource/inter": "^5.2.0",
+    "@fontsource/lora": "^5.2.0",
+    "@fontsource/manrope": "^5.2.0",
+    "@fontsource/source-serif-4": "^5.2.0"
+  }
+}

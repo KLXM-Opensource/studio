@@ -1,0 +1,52 @@
+/config/config.local.php
+/storage/database/*
+/storage/cache/pages/*
+/storage/sessions/*
+/storage/logs/*
+/public/media/*
+!/public/media/cache/
+/public/media/cache/*
+!.gitkeep
+/tools/node_modules/
+.DS_Store
+/public/media/embeds/*
+/themes/*/node_modules/
+/config/sites/*.php
+/storage/sites/
+/public/sites/
+/storage/backups/
+deploy/targets/*.env
+!deploy/targets/example.env
+/public/pools/
+# Laufzeitdaten der neueren Module (Inhalte, Schlüssel, Modelle – nie versionieren)
+/storage/ai/
+/storage/pools/
+/storage/shared/
+/storage/support/
+/storage/search/
+/storage/cache/*
+!/storage/cache/.gitkeep
+# Tutorial-Aufnahmen: Zugänge der Testkopie und Rohvideos (tools/tutorials/record.mjs)
+/tools/tutorials/accounts.local.json
+/tools/tutorials/.raw/
+# Tutorial-Sprecher: Piper-Stimmen (sh tools/tutorials/fetch-voices.sh) und Cache der gesprochenen Schritte
+/tools/tutorials/voices/*
+!/tools/tutorials/voices/SHA256SUMS
+/tools/tutorials/.narration/
+# Trailer: Zwischenstand der Aufnahme (tools/trailer/trailer.mjs)
+/tools/trailer/.work/
+# Installierte Schriften (Core\Fonts, Grundeinstellungen → Schriften) – Laufzeitdaten wie public/media
+/public/fonts/
+/tools/tutorials/__pycache__/
+# Chatterbox-TTS (Kandidat, nur Entwicklungswerkzeug): Python-venv, Modelle im Hugging-Face-Cache
+/tools/tutorials/.venv-chatterbox/
+# Kopfbereich-Aktionen: gebündelte CSS/JS-Teile je Auswahl (Core\HeaderActions::head(), entstehen zur Laufzeit)
+/public/assets/ha/
+# Tutorial-Videos und Trailer gehören zur Produkt-Website studio.klxm.de (config 'docs_url') und werden nicht ausgeliefert.
+# Aufnahme mit tools/tutorials/record.mjs bzw. tools/trailer/trailer.mjs → TUT_OUT/TRAILER_OUT (Standard: ../klxm-studio-website/site-tools/)
+/public/assets/tutorials/
+/public/assets/trailer/
+# Abhängigkeiten: composer install (vendor/ entsteht beim Einrichten, siehe README)
+/vendor/
+# Symbol-Sprites je Website (Core\Icons::siteSprite, entstehen zur Laufzeit)
+/public/assets/icons/sites/

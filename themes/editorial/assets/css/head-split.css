@@ -1,0 +1,21 @@
+/* Kopfbereich „Geteilt“: oben Wortmarke, darunter die Rubriken als Reiter mit Suche/Sprache/Button rechts.
+   Mobil: Menü-Schaltfläche + waagerecht wischbare Reiterleiste unter der Wortmarke. */
+.site-header--split{border-bottom:1px solid var(--e-ink)}
+.strip__list{display:flex;margin:0;padding:0;list-style:none;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;font:600 .75rem/1 var(--e-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.strip__list::-webkit-scrollbar{display:none}
+.strip__list a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px 0 0;margin-right:4px;color:var(--e-muted);text-decoration:none;white-space:nowrap;border-bottom:3px solid transparent}
+.strip__list a:hover{color:var(--e-ink)}
+.strip__list a[aria-current],.strip__list a[data-active]{color:var(--e-ink);border-bottom-color:var(--e-a)}
+@media (min-width:960px){
+  .site-header--split .site-header__inner{flex-wrap:wrap;gap:0 20px;min-height:0}
+  .site-header--split .brand{min-height:84px}
+  .site-header--split .brand__name{font-size:clamp(2rem,1.2rem + 1.6vw,2.75rem)}
+  .site-header--split .site-nav{order:3;flex:1 1 100%;justify-content:space-between;min-height:50px;border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+  .site-header--split .nav{gap:2px}
+  .site-header--split .nav__link{min-height:50px;padding:0 16px 0 0;margin-right:10px;font:600 .8125rem/1 var(--e-font);letter-spacing:.08em;text-transform:uppercase;border-bottom:3px solid transparent;text-decoration:none!important}
+  .site-header--split .nav__link[aria-current=page],.site-header--split .nav__link[data-active],.site-header--split .nav__sub[data-active]>.nav__link{border-bottom-color:var(--e-a);color:var(--e-ink)}
+}
+@media (max-width:959.98px){
+  .strip--tabs{display:block;border-top:1px solid var(--e-line)}
+}
+@media (max-width:419.98px){.dateline__ed,.dateline__text>.dateline__sep{display:none}}

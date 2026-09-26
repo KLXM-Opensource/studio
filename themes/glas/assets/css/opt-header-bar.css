@@ -1,0 +1,4 @@
+/* Kopfbereich „Leiste“: Glas über die volle Breite, Lichtkante unten */
+.hdr{padding-top:0;--g-hdr-h:4rem;background:linear-gradient(180deg,var(--g-sheen),transparent 70%),var(--g-panel-hdr);border-bottom:1px solid var(--g-edge);box-shadow:0 1px 0 var(--g-rim),0 10px 30px -24px var(--g-sh2);-webkit-backdrop-filter:blur(var(--g-blur-now)) saturate(1.5);backdrop-filter:blur(var(--g-blur-now)) saturate(1.5)}
+.hdr__bar{width:min(100% - 2 * var(--g-gutter),var(--g-wrap));padding:0;border:0;border-radius:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+@media (prefers-reduced-transparency:reduce){.hdr{-webkit-backdrop-filter:none;backdrop-filter:none}}

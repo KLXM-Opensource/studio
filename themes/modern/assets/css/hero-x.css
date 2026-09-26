@@ -1,0 +1,22 @@
+/* Kit „modern“ – Einstieg „Große Aussage“ (hero-type) und „Mosaik“ (lädt nur mit diesen Varianten) */
+.hero-type{display:grid;gap:var(--m-s-xl)}
+.hero-type__title{max-width:18ch;font-size:calc(var(--m-t6) * 1.3 * var(--m-display));line-height:.95}
+@media (max-width:48em){.hero-type__title{font-size:min(calc(var(--m-t6) * 1.2 * var(--m-display)),14vw)}}
+.hero-type__foot{display:grid;gap:var(--m-s-l);padding-top:var(--m-s-xl);border-top:1px solid var(--m-line)}
+@media (min-width:64em){.hero-type__foot{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start}.hero-type__side{justify-self:end}}
+.hero-type__side{display:grid;gap:var(--m-s-m)}
+.hero-type__media{margin-top:var(--m-s-l)}
+.mosaic__a{grid-area:a;min-height:16rem}
+.mosaic__b{grid-area:b;aspect-ratio:4/3}
+.mosaic__c{grid-area:c;aspect-ratio:21/9}
+.mosaic--two{grid-template-areas:"a b" "a s"}
+.mosaic__s{grid-area:s;align-content:end;min-height:8rem;border:0;background:var(--m-a2);box-shadow:none}
+.mosaic__s .hstat__value{color:var(--m-pop-ink);font-size:var(--m-t4)}
+.mosaic__s .hstat__label{color:var(--m-pop-ink)}
+.mosaic .frame{border-radius:calc(var(--m-r-l) * .85)}
+@media (min-width:64em){.mosaic{gap:var(--m-s-m)}.mosaic__a{min-height:22rem}}
+@media (prefers-reduced-motion:no-preference){
+  .has-motion.js .mosaic>*{animation:m-rise .8s cubic-bezier(.2,.7,.2,1) both}
+  .has-motion.js .mosaic>:nth-child(2){animation-delay:.08s}.has-motion.js .mosaic>:nth-child(3){animation-delay:.16s}.has-motion.js .mosaic>:nth-child(4){animation-delay:.24s}
+}
+@keyframes m-rise{from{opacity:0;translate:0 1.25rem}}

@@ -1,0 +1,30 @@
+{
+  "name": "klxm-studio-build",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-System für KLXM Studio: Core-Vendoren (Editor.js, PDF.js, MapLibre) nach /public kopieren, Theme-Vendoren über themes/{name}/build.mjs, Assets minifizieren. Auf dem Server nicht erforderlich.",
+  "type": "module",
+  "packageManager": "pnpm@10.29.2",
+  "scripts": {
+    "build": "node build.mjs",
+    "vendor": "node build.mjs --vendor-only",
+    "watch": "node build.mjs --watch",
+    "tutorials": "node tutorials/record.mjs",
+    "licenses": "node licenses.mjs"
+  },
+  "devDependencies": {
+    "@editorjs/editorjs": "^2.31.0",
+    "@fontsource/lato": "^5.3.0",
+    "@phosphor-icons/core": "^2.1.1",
+    "editorjs-drag-drop": "^1.1.16",
+    "esbuild": "^0.25.0",
+    "maplibre-gl": "^6.11.2",
+    "pdfjs-dist": "^6.3.289",
+    "playwright": "1.62.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

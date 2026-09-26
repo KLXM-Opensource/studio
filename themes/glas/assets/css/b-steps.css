@@ -1,0 +1,32 @@
+/* Kit „glas“ – Ablauf: Glasperlen auf einer leuchtenden Linie (nebeneinander) oder senkrechte Zeitleiste */
+.st{display:grid;margin:0;padding:0;list-style:none}
+.st__title{color:var(--g-ink);font:var(--g-hw) var(--g-t1)/1.25 var(--g-font-head);letter-spacing:calc(var(--g-track) * .005em);text-wrap:balance}
+.st__text{margin-top:var(--g-s-xs);color:var(--g-muted);text-wrap:pretty}
+.st__meta{color:var(--g-link)}
+.st__node{position:relative;z-index:1;display:inline-grid;place-items:center;width:3rem;height:3rem;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgb(255 255 255/.7),transparent 45%),var(--g-panel-strong);box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-edge),0 8px 18px -10px var(--g-sh2)}
+.st__n{color:var(--g-ink);font:650 .9375rem/1 var(--g-font-head);font-variant-numeric:tabular-nums}
+.st__item:first-child .st__node{background:radial-gradient(circle at 34% 28%,rgb(255 255 255/.45),transparent 45%),var(--g-a)}
+.st__item:first-child .st__n{color:var(--g-a-on)}
+.bg-accent .st__item:first-child .st__node{background:var(--g-a-on)}
+.bg-accent .st__item:first-child .st__n{color:var(--g-a)}
+/* Schritte: Linie hinter den Perlen, Inhalt auf Glas */
+.st--steps{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:var(--g-s-l) var(--g-s-m);overflow-x:clip}
+.st--steps .st__item{position:relative;display:grid;align-content:start;gap:var(--g-s-s)}
+.st--steps .st__item::before{content:"";position:absolute;top:calc(1.5rem - 1px);left:0;right:calc(-1 * var(--g-s-m));height:2px;border-radius:1px;background:linear-gradient(90deg,var(--g-a),color-mix(in srgb,var(--g-f2) 70%,var(--g-a)));opacity:.55}
+.st--steps .st__item:last-child::before{right:0;background:linear-gradient(90deg,var(--g-a),transparent)}
+/* Zeitleiste */
+.st--timeline{max-width:56rem}
+.st--timeline .st__item{position:relative;display:grid;grid-template-columns:3rem 1fr;column-gap:var(--g-s-m);padding-bottom:var(--g-s-xl)}
+.st--timeline .st__item::before{content:"";position:absolute;top:3rem;bottom:0;left:calc(1.5rem - 1px);width:2px;background:linear-gradient(var(--g-a),color-mix(in srgb,var(--g-f2) 60%,transparent));opacity:.45}
+.st--timeline .st__item:last-child{padding-bottom:0}
+.st--timeline .st__item:last-child::before{display:none}
+.st--timeline .st__node{grid-row:1/span 2}
+.st--timeline .st__meta{padding-top:.25rem}
+.st--timeline .st__body{grid-column:2}
+@container (min-width:48rem){
+  .st--timeline .st__item{grid-template-columns:10rem 3rem 1fr}
+  .st--timeline .st__item::before{left:calc(10rem + var(--g-s-m) + 1.5rem - 1px)}
+  .st--timeline .st__meta{grid-column:1;grid-row:1;padding-top:.875rem;text-align:end}
+  .st--timeline .st__node{grid-column:2;grid-row:1/span 2}
+  .st--timeline .st__body{grid-column:3;grid-row:1/span 2;padding-top:.5rem}
+}

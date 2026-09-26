@@ -1,0 +1,7 @@
+/* Nur in der Vorschau des Style-Editors (Verwaltung → Design → „Dunkel“): gleiche Nachtausgabe-Regeln wie in site.css,
+   ausgelöst über die Klasse is-dark statt über prefers-color-scheme (design.php → dark.force). */
+html.is-dark{color-scheme:dark;--e-soft-mix:16%;--e-line-strong:color-mix(in srgb,var(--e-ink) 34%,var(--e-bg));--e-duo:color-mix(in srgb,var(--e-a) 70%,var(--e-bg))}
+html.is-dark :is(.bg-accent,.bg-dark){--e-ink:inherit;--e-text:inherit;--e-muted:inherit;--e-line:inherit;--e-line-strong:inherit;--e-surface:inherit;--e-surface-2:inherit;--e-box:inherit;--e-link:inherit;--e-kick:inherit;--e-focus:inherit;--e-btn-bg:inherit;--e-btn-ink:inherit;--e-btn-bg-hover:inherit;--e-a-soft:inherit}
+html.is-dark .bg-accent{--e-sec-bg:var(--e-a-soft)}
+html.is-dark .brand__logo--light{display:none}html.is-dark .brand__logo--dark{display:block}
+html.is-dark .dateline__night{display:inline}

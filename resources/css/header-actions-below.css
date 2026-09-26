@@ -1,0 +1,7 @@
+/* Kopfbereich-Aktionen – Teil „Suchleiste“: Feld über die ganze Breite bzw. in eigener Zeile unter dem Kopf (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-below{padding:10px 0;border-top:1px solid var(--ha-line)}
+.ha-below--band{background:var(--ha-surface);border-bottom:1px solid var(--ha-line)}
+.ha-below .ha-search,.ha-below .ha-field{width:100%}
+.ha-below .ha-field__in{width:100%;min-height:46px;background:var(--ha-bg);font-size:1rem}
+.ha-below:not(.ha-below--band) .ha-field{max-width:40rem}
+@media (max-width:47.99em){.ha-below .ha-field__in{min-height:48px}}

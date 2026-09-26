@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Grundlagen: Reset, Typografie, Raster, Abschnitte (Rollen je Hintergrund), Buttons, Rich-Text, Hilfsklassen.
+   ========================================================================== */
+*,::before,::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:5rem}
+body{margin:0;background:var(--s-bg);color:var(--s-text);font:400 calc(var(--s-fs) / 16 * 1rem)/1.6 var(--s-font);overflow-wrap:break-word}
+img,svg,video{max-width:100%;height:auto}
+h1,h2,h3,h4{margin:0 0 .5em;color:var(--s-head);font-family:var(--s-font-head);font-weight:var(--s-hw);line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:clamp(2.1rem,1.5rem + 2.8vw,3.4rem)}
+h2{font-size:clamp(1.6rem,1.25rem + 1.5vw,2.3rem)}
+h3{font-size:1.25rem}
+p,ul,ol,dl,address{margin:0 0 1em}
+address{font-style:normal}
+a{color:var(--s-link);text-decoration-thickness:1px;text-underline-offset:.2em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--s-link);outline-offset:2px}
+main:focus{outline:none}
+.ico{width:1em;height:1em;flex:none;fill:currentColor;vertical-align:-.125em}
+
+/* Raster */
+.wrap{width:min(100% - 2 * var(--s-gutter),var(--s-wrap));margin-inline:auto}
+.wrap--text{--s-wrap:46rem}
+.stack>*+*{margin-top:1rem}
+
+/* Abschnitte (partials/section.php): Abstand, Hintergrund, Rollen */
+.sec{padding-block:var(--s-space);background:var(--s-sec-bg);color:var(--s-fg)}
+.bg-white+.bg-white,.bg-muted+.bg-muted{padding-top:0}   /* gleiche Hintergründe nacheinander: kein doppelter Abstand */
+.pt-small{padding-top:calc(var(--s-space) / 2)!important}.pt-none{padding-top:0!important}
+.pb-small{padding-bottom:calc(var(--s-space) / 2)}.pb-none{padding-bottom:0}
+.sec--divider{border-top:1px solid var(--s-line)}
+.bg-muted{--s-sec-bg:var(--s-surface);--s-card:var(--s-bg)}
+.bg-accent{--s-sec-bg:var(--s-a);--s-fg:var(--s-a-on);--s-head:var(--s-a-on);--s-link:var(--s-a-on);--s-mut:color-mix(in srgb,var(--s-a-on) 88%,var(--s-a));
+  --s-card:color-mix(in srgb,var(--s-a-on) 10%,transparent);--s-btn-bg:var(--s-a-on);--s-btn-fg:var(--s-a);--rt-accent:currentColor;--rt-muted:var(--s-mut)}
+.bg-dark{--s-sec-bg:var(--s-dark);--s-fg:#DDE2E9;--s-head:#F5F7FA;--s-link:#F5F7FA;--s-mut:#AEB6C2;--s-card:rgb(255 255 255/.06);
+  --s-btn-bg:#F5F7FA;--s-btn-fg:var(--s-dark);--rt-accent:#F5F7FA;--rt-muted:#AEB6C2;--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F;color-scheme:dark}
+.is-hidden-block{opacity:.45}
+
+/* Kopf eines Abschnitts (starter_head) und Textstile */
+.sec-head{max-width:44rem;margin-bottom:clamp(1.5rem,3vw,2.5rem)}
+.sec-head>:last-child{margin-bottom:0}
+.eyebrow{margin:0 0 .75rem;color:var(--s-link);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.lead{color:var(--s-mut);font-size:1.15em}
+
+/* Buttons – Rollen --s-btn-* stellen sich je Abschnitt um; Rahmen bleibt im Kontrastmodus sichtbar */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.75rem;padding:.55rem 1.25rem;border:2px solid transparent;border-radius:var(--s-btn-r);
+  font:inherit;font-weight:600;line-height:1.2;text-decoration:none;cursor:pointer}
+.btn:hover{text-decoration:underline;text-underline-offset:.2em}
+.btn--primary{background:var(--s-btn-bg);color:var(--s-btn-fg)}
+.btn--secondary{border-color:currentColor;background:transparent;color:var(--s-link)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+
+/* Rich-Text (rich()): Klassenvertrag der Formatierungsleiste – t-lead, t-small, t-note, c-*, mark */
+.prose>:last-child{margin-bottom:0}
+.prose h2,.prose h3{margin-top:1.4em}
+.prose ul,.prose ol{padding-left:1.25em}
+.prose li+li{margin-top:.25em}
+.prose blockquote{margin:1.5em 0;padding-left:1em;border-left:3px solid var(--s-link);font-size:1.1em}
+.t-lead{color:var(--s-head);font-size:1.2em}
+.t-small{font-size:.875em}
+.t-note{padding:.75em 1em;border-left:3px solid var(--s-link);border-radius:0 var(--s-radius) var(--s-radius) 0;background:var(--s-card)}
+.c-accent{color:var(--rt-accent)}.c-muted{color:var(--rt-muted)}.c-success{color:var(--rt-success)}.c-warning{color:var(--rt-warning)}.c-danger{color:var(--rt-danger)}
+mark{padding:0 .15em;border-radius:3px;background:#FFE58A;color:#111418}
+
+/* Bilder in festem Format (starter_image) – Fokuspunkt aus der Mediathek: Klassen fx{0–100} fy{0–100} */
+.media{overflow:hidden;border-radius:var(--s-radius);background:var(--s-card)}
+.media picture{display:contents}
+.media img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--fx,50%) var(--fy,50%)}
+.r-16-9{aspect-ratio:16/9}.r-3-2{aspect-ratio:3/2}.r-4-3{aspect-ratio:4/3}.r-1-1{aspect-ratio:1}.r-4-5{aspect-ratio:4/5}
+.media--empty{display:grid;place-items:center;min-height:12rem;border:2px dashed var(--s-line-strong);color:var(--s-mut)}
+.fx0{--fx:0%}.fx10{--fx:10%}.fx20{--fx:20%}.fx30{--fx:30%}.fx40{--fx:40%}.fx60{--fx:60%}.fx70{--fx:70%}.fx80{--fx:80%}.fx90{--fx:90%}.fx100{--fx:100%}
+.fy0{--fy:0%}.fy10{--fy:10%}.fy20{--fy:20%}.fy30{--fy:30%}.fy40{--fy:40%}.fy60{--fy:60%}.fy70{--fy:70%}.fy80{--fy:80%}.fy90{--fy:90%}.fy100{--fy:100%}
+
+/* Hilfsklassen */
+.sr-only,.sf-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.skip{position:absolute;z-index:100;left:1rem;top:-10rem;padding:.75rem 1rem;border-radius:var(--s-btn-r);background:var(--s-ink);color:var(--s-bg)}
+.skip:focus{top:1rem}
+.empty-hint{padding:1rem;border:1px dashed currentColor;border-radius:var(--s-radius);opacity:.8}
+@media (prefers-reduced-motion:no-preference){html:focus-within{scroll-behavior:smooth}}

@@ -1,0 +1,2 @@
+<?php /** Handbuch „glas“ · Demo-Inhalte · @var string $settingsTitle */ ?>
+  <div class="doc-note doc-note--info"><strong>Demo-Inhalte ersetzen</strong><p>Eine neue Website startet mit dem fiktiven Studio „Lumen Labs“ und den Musterseiten <b>Labor</b>, die jeden Block zeigen. Ersetzen Sie Namen, Texte, Zahlen und Stimmen durch eigene Angaben; Texte in [eckigen Klammern] sind Platzhalter. Die Musterseiten löschen Sie in der Seitenliste (samt Tabellen „… (Labor)“) – oder lassen sie unveröffentlicht als Vorlage stehen.</p></div>

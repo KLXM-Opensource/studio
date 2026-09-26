@@ -1,0 +1,1 @@
+(()=>{var e=document;e.documentElement.classList.replace("no-js","js");var s=e.querySelector("[data-nav]");s?.addEventListener("click",t=>{t.target.closest('a[href*="#"]')&&s.matches?.(":popover-open")&&s.hidePopover()});var n=!1;e.addEventListener("focusin",t=>{let a=t.target.dataset?.suggestJs;!a||n||(n=!0,e.head.append(Object.assign(e.createElement("script"),{src:a})))});})();

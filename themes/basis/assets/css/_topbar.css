@@ -1,0 +1,10 @@
+/* Infoleiste (Klassisch/Ausführlich): Öffnungsstatus, Telefon, E-Mail, Sprache */
+.topbar{background:var(--b-surface);border-bottom:1px solid var(--b-line);color:var(--b-muted);font-size:.875rem}
+.topbar__inner{display:flex;align-items:center;justify-content:space-between;gap:8px 24px;min-height:44px}
+.topbar__info{display:flex;flex-wrap:wrap;align-items:center;gap:4px 24px;margin:0;padding:0;list-style:none}
+.topbar a{display:inline-flex;align-items:center;gap:8px;min-height:32px;color:var(--b-text);text-decoration:none}
+.topbar a:hover{color:var(--b-ink);text-decoration:underline}
+.topbar .icon{width:16px;height:16px;flex:none;color:var(--b-link)}
+.topbar .langswitch{padding:2px;background:var(--b-bg)}
+.topbar .langswitch a{min-height:28px}
+@media (max-width:959.98px){.topbar__mail,.topbar .langswitch{display:none}.topbar__info{gap:0 16px}}

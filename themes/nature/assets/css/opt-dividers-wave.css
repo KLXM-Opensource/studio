@@ -1,0 +1,7 @@
+/* Kit „nature“ – Übergang „Welle“. Erzeugt mit tools/patterns.php (nicht von Hand ändern). */
+:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):not(.sec--has-bg,.sec--screen){--n-dv:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C140 4 300 2 460 16S760 38 920 24S1110 6 1200 14V40Z'/%3E%3C/svg%3E")}
+:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):not(.sec--has-bg,.sec--screen)::before,:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):not(.sec--has-bg,.sec--screen)::after{content:"";position:absolute;left:0;right:0;height:clamp(1rem,3vw,2.25rem);background:var(--n-sec-bg);mask:var(--n-dv) 0 0/100% 100% no-repeat;pointer-events:none}
+:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):not(.sec--has-bg,.sec--screen)::before{bottom:calc(100% - 1px)}
+:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):not(.sec--has-bg,.sec--screen)::after{top:calc(100% - 1px);scale:-1 -1}
+.bg-muted+.bg-muted::before,.bg-tint+.bg-tint::before,.bg-dark+.bg-dark::before,.bg-accent+.bg-accent::before{display:none}
+:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):has(+.ftr)::after,:is(.bg-muted,.bg-tint,.bg-accent,.bg-dark):last-child::after{display:none}

@@ -1,0 +1,59 @@
+/* Kit „nature“ – Einstieg „Mit Bildtafel“ und „Große Aussage“ (nur wenn verwendet): Bildtafel, Landschaft mit
+   Jahreszeiten (nature_landscape), Eckdaten, große Aussage, Treiben. Grundlagen aller Varianten: _hero.css (site.css). */
+/* Bildtafel: Bild oder Landschaft, darüber eine Aufschrift, darunter Eckdaten */
+.tafel{display:grid;gap:var(--n-s-s);padding:var(--n-s-s);border-radius:var(--n-r-xl)}
+.tafel__top{display:flex;align-items:center;justify-content:space-between;gap:var(--n-s-s);padding:var(--n-s-2xs) var(--n-s-2xs) 0}
+.tafel__leaf{width:.8rem;height:.8rem;border-radius:0 70% 0 70%;background:var(--n-mark);rotate:-8deg}
+.tafel__motif{overflow:hidden;border-radius:var(--n-img-r);background:var(--n-surface)}
+html:not(.has-motifs) .tafel__motif{display:none}
+/* Landschaft (nature_landscape) – Farben nur aus Tokens; Jahreszeit über html.sz-is-* */
+.scape{display:block;width:100%;height:auto;aspect-ratio:5/4}
+.scape__sky{fill:color-mix(in srgb,var(--n-a) 8%,var(--n-surface))}
+.scape__sun{fill:var(--n-earth);opacity:.85}
+.scape__rays{stroke:var(--n-earth);stroke-width:3;stroke-linecap:round;opacity:.6}
+.scape__birds{fill:none;stroke:var(--n-ink);stroke-width:1.6;stroke-linecap:round;opacity:.55}
+.scape__contours{fill:none;stroke:color-mix(in srgb,var(--n-ink) 12%,transparent);stroke-width:1}
+.scape__h3{fill:color-mix(in srgb,var(--n-a) 34%,var(--n-surface))}
+.scape__h2{fill:color-mix(in srgb,var(--n-a) 62%,var(--n-surface))}
+.scape__h1{fill:var(--n-a)}
+.scape__trees{fill:color-mix(in srgb,var(--n-a) 55%,var(--n-ink))}
+.scape__crowns{fill:color-mix(in srgb,var(--n-a) 80%,var(--n-ink))}
+.scape__path{fill:none;stroke:var(--n-surface);stroke-width:7;stroke-linecap:round;opacity:.75}
+.scape__lines{fill:none;stroke:color-mix(in srgb,var(--n-surface) 40%,transparent);stroke-width:1.2}
+.scape__blossom{fill:var(--n-earth)}
+.scape__fall{fill:var(--n-earth)}
+.scape__snow,.scape__flakes{fill:var(--n-panel)}
+.ls-spring,.ls-summer,.ls-autumn,.ls-winter{display:none}
+.sz-is-fruehling .ls-spring,.sz-is-sommer .ls-summer,.sz-is-herbst .ls-autumn,.sz-is-winter .ls-winter{display:inline}
+.sz-is-herbst .scape__crowns{fill:color-mix(in srgb,var(--n-earth) 70%,var(--n-a))}
+.sz-is-winter .scape__sun{opacity:.4}
+.sz-is-winter .scape__h1{fill:color-mix(in srgb,var(--n-a) 70%,var(--n-panel))}
+.sz-is-fruehling .scape__fall{fill:color-mix(in srgb,var(--n-earth) 45%,var(--n-panel))}
+.tafel__media{box-shadow:var(--n-card-sh)}
+/* Eckdaten */
+.rd{display:grid;margin:0;padding:0;list-style:none;font-size:var(--n-t-1)}
+.rd li{display:grid;grid-template-columns:1.25rem 1fr auto;gap:var(--n-s-xs);align-items:baseline;padding:.625rem var(--n-s-2xs);border-top:1px solid var(--n-line)}
+.rd__n{font-size:0}
+.rd__n::before{content:"";display:inline-block;width:.5rem;height:.5rem;border-radius:0 70% 0 70%;background:var(--n-ui,var(--n-a));rotate:-8deg}
+.rd__k{color:var(--n-text)}
+.rd__v{color:var(--n-ink);font-weight:700;font-variant-numeric:tabular-nums;text-align:end}
+/* Große Aussage */
+.hero--statement{gap:var(--n-s-l)}
+.hero--statement .hero__title{max-width:15ch;font-size:max(var(--n-t4),min(calc(var(--n-t6) * 1.2),12cqi));line-height:1}
+.hero__rule{display:flex;align-items:center;gap:var(--n-s-s)}
+.hero__scale{flex:1;height:.75rem;background:radial-gradient(circle,var(--n-line-strong) 1.2px,transparent 1.6px) 0 50%/12px 12px repeat-x;opacity:.7}
+html:not(.has-motifs) .hero__scale{background:linear-gradient(var(--n-line),var(--n-line)) 0 50%/100% 1px no-repeat;opacity:1}
+.hero__foot{display:grid;gap:var(--n-s-l);align-items:start;padding-top:var(--n-s-s)}
+.hero__col{display:grid;gap:var(--n-s-m);justify-items:start}
+@container (min-width:52rem){.hero__foot{grid-template-columns:1.2fr 1fr;gap:var(--n-s-2xl)}}
+.hero__index{border-bottom:1px solid var(--n-line)}
+.hero__wide{margin-top:var(--n-s-s)}
+/* Treiben: fallende Blätter, Blüten, Schnee – kaum merklich, nur mit „Bewegung“ und ohne „Bewegung reduzieren“ */
+@media (prefers-reduced-motion:no-preference){
+  .has-drift .scape__drift{transform-box:fill-box;transform-origin:center;animation:n-drift 14s ease-in-out infinite alternate}
+  .has-drift .scape__drift--1{animation-duration:18s;animation-delay:-6s}
+  .has-drift .scape__drift--2{animation-duration:23s;animation-delay:-11s}
+  .has-drift .scape__crowns{transform-box:fill-box;transform-origin:50% 100%;animation:n-sway 9s ease-in-out infinite alternate}
+}
+@keyframes n-drift{to{translate:6px 14px;rotate:24deg}}
+@keyframes n-sway{to{rotate:1.5deg}}

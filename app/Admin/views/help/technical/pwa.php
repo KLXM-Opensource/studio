@@ -1,0 +1,10 @@
+<?php /** Entwicklerhandbuch · Favicon & PWA (Core\AppIcons) */ ?>
+  <p><code>Core\AppIcons</code> erzeugt mit GD/FreeType (Hausschrift als TTF aus dem Kit, <code>theme.php → fonts → icon</code>) aus Buchstaben oder einem Mediathek-Bild: <code>favicon.ico</code> (PNG-ICO 16/32/48), <code>icon-32/180/192/512.png</code> und <code>icon-maskable-512.png</code> im Ordner <code>icons/</code> des Medienordners der Website. Neu erzeugt wird beim Speichern der Grundeinstellungen → App-Icon &amp; PWA (Live-Vorschau: <code>POST /admin/system/icon-preview</code>); dort auch Name, Kurzname, Farben, Darstellung (<code>sys.pwa_display</code>) und Offline-Modus (<code>sys.pwa_offline</code>). Funktion <code>pwa</code>.</p>
+  <table class="doc-table">
+    <tr><th>Route</th><th>Zweck</th></tr>
+    <tr><td><code>/favicon.ico</code>, <code>/apple-touch-icon.png</code></td><td>Icons im Wurzelverzeichnis (Browser-Standard)</td></tr>
+    <tr><td><code>/manifest.webmanifest</code></td><td>Name, Kurzname, Farben, Icons, Kurzbefehle; <code>start_url = /?pwa=1</code></td></tr>
+    <tr><td><code>/sw.js</code></td><td>Service Worker aus <code>resources/sw/sw.js</code>; bei ausgeschaltetem Offline-Modus ein Abschalter, der sich selbst entfernt</td></tr>
+    <tr><td><code>/offline</code></td><td>Offline-Seite (Kit-Template <code>offline.php</code>)</td></tr>
+  </table>
+  <p>Registriert wird der Service Worker nur beim Start der installierten App (<code>?pwa=1</code> lädt <code>assets/js/pwa.js</code>) – Besucher im Browser erhalten keinen Speicher auf dem Gerät. Nie zwischengespeichert: <code>/admin</code>, <code>/api</code>, <code>/mcp</code>, <code>/anfrage</code>, Antworten mit <code>private</code>/<code>no-store</code>.</p>

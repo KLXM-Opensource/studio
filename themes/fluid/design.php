@@ -1,0 +1,213 @@
+<?php
+/*
+ * Design-Tokens des Themes „fluid“ für den Style-Editor (Verwaltung → Design) – siehe Core\Design.
+ *
+ * Jeder Token wird eine CSS-Variable (--f-…) oder eine Klasse am <html> (hdr-inline, btn-pill, cards-glass, has-dark …).
+ * Typografie und Abstände sind fließend: Schriftgrößen entstehen aus Grundgröße (min/max), Verhältnis der Stufen und
+ * Bereich der Bildschirmbreite per clamp() (Utopia-Prinzip) – keine Breakpoints, keine Media-Queries.
+ * Voreinstellungen sind mit tools/contrast.php auf WCAG 2.2 AA geprüft (hell und dunkel):
+ *   php themes/fluid/tools/contrast.php
+ * Standardwerte müssen mit :root in assets/css/_tokens.css übereinstimmen (Voreinstellung „Fluid Standard“).
+ */
+
+// Reihenfolge der Farbwerte in den Voreinstellungen
+$colorKeys = ['accent', 'accent_strong', 'on_accent', 'highlight', 'ink', 'text', 'muted', 'background', 'surface', 'line', 'dark_section'];
+
+/** Voreinstellung: Farben hell + dunkel (je 11 Werte in obiger Reihenfolge) und übrige Werte */
+$preset = function (string $label, string $desc, array $light, array $dark, array $rest) use ($colorKeys): array {
+    $values = [];
+    foreach ($colorKeys as $i => $k) {
+        $values[$k] = $light[$i];
+        $values[$k . '@dark'] = $dark[$i];
+    }
+    return ['label' => $label, 'description' => $desc, 'values' => $values + $rest];
+};
+
+$color = fn(string $name, string $label, string $var, string $light, string $dark, ?array $contrast = null, string $help = '') => array_filter([
+    'name' => $name, 'label' => $label, 'type' => 'color', 'var' => $var, 'default' => $light, 'dark' => $dark,
+    'contrast' => $contrast, 'help' => $help,
+], fn($v) => $v !== null && $v !== '');
+
+// Gemeinsame Werte der Voreinstellungen (werden je Vorlage überschrieben)
+$base = [
+    'font_body' => 'inter', 'font_head' => 'inter', 'font_mono' => 'system-mono', 'label_font' => 'body',
+    'fs_min' => 16, 'fs_max' => 18.5, 'ratio' => 1.25, 'vw_min' => 360, 'vw_max' => 1280,
+    'heading_weight' => 650, 'heading_tracking' => -2,
+    'radius' => 10, 'buttons' => 'solid', 'cards' => 'outlined', 'shadow' => 'soft', 'density' => 'normal', 'space' => 'normal', 'wrap' => 76,
+    'eyebrow' => 'line', 'header' => 'inline', 'header_sticky' => true, 'footer' => 'columns', 'pagebg' => 'plain',
+    'motion' => true, 'dark' => true,
+];
+
+return [
+    'groups' => [
+        ['id' => 'farben', 'label' => 'Farben', 'tokens' => [
+            $color('accent', 'Akzent', '--f-a', '#4338CA', '#A5B4FC', ['with' => 'background', 'min' => 4.5],
+                'Buttons, Links, Symbole und Abschnitte „Akzentfarbe“. Muss auf dem Hintergrund als Linkfarbe lesbar sein.'),
+            $color('accent_strong', 'Akzent kräftig', '--f-a-strong', '#3730A3', '#C7D2FE', ['with' => 'background', 'min' => 4.5],
+                'Hover-Zustand; hell etwas dunkler als der Akzent, dunkel etwas heller.'),
+            $color('on_accent', 'Schrift auf Akzent', '--f-a-on', '#FFFFFF', '#14123A', ['with' => 'accent', 'min' => 4.5],
+                'Text auf Buttons und im Abschnitt „Akzentfarbe“.'),
+            $color('highlight', 'Zweitfarbe (Flächen)', '--f-a2', '#FDE68A', '#3A3470', ['with' => 'ink', 'min' => 4.5],
+                'Hervorgehobene Kacheln, Markierungen und Etiketten – Überschriftenfarbe muss darauf lesbar sein.'),
+            $color('ink', 'Überschriften', '--f-ink', '#0B0D17', '#F3F4F8', ['with' => 'background', 'min' => 7]),
+            $color('text', 'Fließtext', '--f-text', '#2B2F3A', '#D2D5DE', ['with' => 'background', 'min' => 4.5]),
+            $color('muted', 'Nebentext', '--f-muted', '#565C6B', '#9EA3B2', ['with' => 'surface', 'min' => 4.5],
+                'Einleitungen, Bildunterschriften, Metadaten – auch auf getönten Flächen lesbar.'),
+            $color('background', 'Hintergrund', '--f-bg', '#FFFFFF', '#0B0C14'),
+            $color('surface', 'Getönte Fläche', '--f-surface', '#F4F5F8', '#141621', ['with' => 'text', 'min' => 4.5],
+                'Abschnitte „Getönt“, Fußbereich, Karten im Stil „Fläche“.'),
+            $color('line', 'Linien', '--f-line', '#E2E4EB', '#272B3A', null, 'Trennlinien und Rahmen (dekorativ).'),
+            $color('dark_section', 'Dunkle Abschnitte', '--f-dark', '#0E1022', '#1A1D33', ['with' => '#FFFFFF', 'min' => 7, 'dark_with' => '#FFFFFF'],
+                'Hintergrund der Abschnitte „Dunkel“ (Schrift weiß). Im dunklen Farbschema etwas heller als der Hintergrund, damit das Band sichtbar bleibt.'),
+        ]],
+        ['id' => 'typo', 'label' => 'Typografie', 'tokens' => [
+            ['name' => 'font_body', 'label' => 'Schrift Fließtext', 'type' => 'font', 'var' => '--f-font', 'default' => 'inter'],
+            ['name' => 'font_head', 'label' => 'Schrift Überschriften', 'type' => 'font', 'var' => '--f-font-head', 'default' => 'inter'],
+            ['name' => 'font_mono', 'label' => 'Schrift für Code und Kennzeichnungen', 'type' => 'font', 'var' => '--f-font-mono', 'default' => 'system-mono',
+                'help' => 'Für Code und – wenn unten gewählt – Dachzeilen, Etiketten und Zahlen. Die Datei lädt nur, wenn sie auf der Seite gebraucht wird.'],
+            ['name' => 'label_font', 'label' => 'Dachzeilen und Etiketten', 'type' => 'choice', 'var' => '--f-font-label', 'default' => 'body',
+                'options' => ['body' => 'Wie Fließtext', 'head' => 'Wie Überschriften', 'mono' => 'Monospace (technisch)'],
+                'values' => ['body' => 'var(--f-font)', 'head' => 'var(--f-font-head)', 'mono' => 'var(--f-font-mono)']],
+            ['name' => 'fs_min', 'label' => 'Grundschrift auf kleinen Bildschirmen (px)', 'type' => 'range', 'var' => '--f-fs-min', 'unit' => '',
+                'min' => 14, 'max' => 19, 'step' => 0.5, 'default' => 16, 'help' => 'Bezogen auf die Standardgröße des Browsers (16 px); Besucher können weiter zoomen.'],
+            ['name' => 'fs_max', 'label' => 'Grundschrift auf großen Bildschirmen (px)', 'type' => 'range', 'var' => '--f-fs-max', 'unit' => '',
+                'min' => 15, 'max' => 23, 'step' => 0.5, 'default' => 18.5],
+            ['name' => 'ratio', 'label' => 'Verhältnis der Schriftstufen', 'type' => 'range', 'var' => '--f-ratio', 'unit' => '',
+                'min' => 1.125, 'max' => 1.6, 'step' => 0.025, 'default' => 1.25,
+                'help' => '1,125 = ruhig (Texte, Behörden) · 1,25 = ausgewogen · 1,414 = kräftig · 1,5+ = plakativ (Agentur, Kultur). Auf kleinen Bildschirmen automatisch flacher.'],
+            ['name' => 'vw_min', 'label' => 'Fließend ab Bildschirmbreite (px)', 'type' => 'range', 'var' => '--f-vw-min', 'unit' => '',
+                'min' => 320, 'max' => 480, 'step' => 10, 'default' => 360, 'help' => 'Unterhalb gelten die kleinen Werte.'],
+            ['name' => 'vw_max', 'label' => 'Fließend bis Bildschirmbreite (px)', 'type' => 'range', 'var' => '--f-vw-max', 'unit' => '',
+                'min' => 960, 'max' => 1800, 'step' => 20, 'default' => 1280, 'help' => 'Oberhalb gelten die großen Werte.'],
+            ['name' => 'heading_weight', 'label' => 'Stärke der Überschriften', 'type' => 'range', 'var' => '--f-hw', 'unit' => '',
+                'min' => 300, 'max' => 900, 'step' => 50, 'default' => 650, 'help' => 'Stufenlos bei variablen Schriften (Inter, Bricolage, Fraunces …).'],
+            ['name' => 'heading_tracking', 'label' => 'Laufweite der Überschriften (1/100 em)', 'type' => 'range', 'var' => '--f-track', 'unit' => '',
+                'min' => -6, 'max' => 3, 'step' => 0.5, 'default' => -2, 'help' => 'Negativ = enger (große Grotesk-Überschriften), 0 = normal (Serifen).'],
+        ]],
+        ['id' => 'form', 'label' => 'Form & Raum', 'tokens' => [
+            ['name' => 'radius', 'label' => 'Eckenradius', 'type' => 'range', 'var' => '--f-radius', 'unit' => 'px', 'min' => 0, 'max' => 32, 'step' => 1, 'default' => 10],
+            ['name' => 'buttons', 'label' => 'Buttons', 'type' => 'choice', 'class' => 'btn-{value}', 'default' => 'solid', 'preview' => 'radius',
+                'options' => ['solid' => 'Gefüllt', 'pill' => 'Gefüllt, rund (Pille)', 'outline' => 'Kontur', 'soft' => 'Getönt', 'sharp' => 'Eckig mit Pfeil'],
+                'values' => ['solid' => '8px', 'pill' => '999px', 'outline' => '8px', 'soft' => '12px', 'sharp' => '0']],
+            ['name' => 'cards', 'label' => 'Karten', 'type' => 'choice', 'class' => 'cards-{value}', 'default' => 'outlined',
+                'options' => ['flat' => 'Fläche (ohne Rahmen)', 'outlined' => 'Mit Rahmen', 'elevated' => 'Mit Schatten', 'glass' => 'Glas (durchscheinend)']],
+            ['name' => 'shadow', 'label' => 'Schatten', 'type' => 'choice', 'var' => '--f-shadow', 'default' => 'soft',
+                'options' => ['none' => 'Keine', 'soft' => 'Weich', 'crisp' => 'Knapp (grafisch)', 'layered' => 'Tief, mehrschichtig'],
+                'values' => [
+                    'none' => 'none',
+                    'soft' => '0 1px 2px var(--f-sh1),0 12px 32px -12px var(--f-sh2)',
+                    'crisp' => '4px 4px 0 var(--f-ink)',
+                    'layered' => '0 1px 1px var(--f-sh1),0 4px 8px -2px var(--f-sh1),0 24px 48px -16px var(--f-sh2)',
+                ]],
+            ['name' => 'density', 'label' => 'Dichte (Innenabstände)', 'type' => 'choice', 'var' => '--f-density', 'default' => 'normal',
+                'options' => ['compact' => 'Kompakt', 'normal' => 'Normal', 'relaxed' => 'Luftig'], 'values' => ['compact' => '.8', 'normal' => '1', 'relaxed' => '1.2']],
+            ['name' => 'space', 'label' => 'Abstand zwischen Abschnitten', 'type' => 'choice', 'var' => '--f-space', 'default' => 'normal',
+                'options' => ['compact' => 'Kompakt', 'normal' => 'Normal', 'airy' => 'Großzügig'], 'values' => ['compact' => '.72', 'normal' => '1', 'airy' => '1.32']],
+            ['name' => 'wrap', 'label' => 'Maximale Inhaltsbreite (rem)', 'type' => 'range', 'var' => '--f-wrap', 'unit' => 'rem', 'min' => 56, 'max' => 100, 'step' => 2, 'default' => 76,
+                'help' => '1 rem = 16 px. Breite Werte für Bildwelten, schmale für textlastige Websites.'],
+            ['name' => 'eyebrow', 'label' => 'Dachzeilen', 'type' => 'choice', 'class' => 'eb-{value}', 'default' => 'line',
+                'options' => ['line' => 'Mit Strich', 'pill' => 'Als Etikett', 'dot' => 'Mit Punkt', 'plain' => 'Schlicht']],
+        ]],
+        ['id' => 'navigation', 'label' => 'Kopf & Fuß', 'tokens' => [
+            ['name' => 'header', 'label' => 'Kopfbereich', 'type' => 'choice', 'class' => 'hdr-{value}', 'default' => 'inline', 'preview' => 'nav',
+                'thumbs' => ['inline' => 'left', 'centered' => 'center', 'split' => 'split', 'floating' => 'floating', 'rail' => 'sidebar'],
+                'options' => [
+                    'inline' => 'Leiste – Logo links, Menü rechts',
+                    'centered' => 'Zentriert – Logo über dem Menü',
+                    'split' => 'Geteilt – Menü in der Mitte',
+                    'floating' => 'Schwebend – abgerundete Leiste',
+                    'rail' => 'Seitenleiste – Menü links (breite Fenster)',
+                ],
+                'help' => 'Das Menü steht in der Leiste, solange es hineinpasst – sonst öffnet eine Menü-Schaltfläche ein Seitenblatt. Ganz ohne feste Bildschirmbreiten.'],
+            ['name' => 'header_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'hdr-sticky', 'default' => true],
+            ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'columns',
+                'options' => ['columns' => 'Spalten (Kontakt, Seiten, Social)', 'simple' => 'Schlicht in einer Zeile', 'statement' => 'Großer Schriftzug mit Handlungsaufruf']],
+            ['name' => 'pagebg', 'label' => 'Seitenhintergrund', 'type' => 'choice', 'class' => 'pagebg-{value}', 'default' => 'plain',
+                'options' => ['plain' => 'Einfarbig', 'grid' => 'Feines Raster', 'dots' => 'Punktraster', 'glow' => 'Sanfter Farbverlauf oben']],
+        ]],
+        // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Suchfeld in der Leiste + Textlink
+        \Core\HeaderActions::designGroup(['ha_cta_style' => 'link', 'ha_search' => 'inline']),
+        ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
+            ['name' => 'motion', 'label' => 'Dezente Animationen beim Scrollen (Einblenden, Laufband)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
+                'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],
+            ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
+        ]],
+    ],
+
+    // Selbst gehostete Schriften (themes/fluid/build.mjs erzeugt css/font-*.css) – variable Schriften: ein Download für alle Stärken
+    'fonts' => [
+        'inter' => ['label' => 'Inter (Grotesk, neutral · variabel)', 'stack' => 'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-inter.css'],
+        'instrument-sans' => ['label' => 'Instrument Sans (Grotesk, freundlich · variabel)', 'stack' => '"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-instrument-sans.css'],
+        'bricolage' => ['label' => 'Bricolage Grotesque (markant, eigenwillig · variabel)', 'stack' => '"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-bricolage.css'],
+        'dm-sans' => ['label' => 'DM Sans (geometrisch, rund · variabel)', 'stack' => '"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-dm-sans.css'],
+        'space-grotesk' => ['label' => 'Space Grotesk (technisch · variabel)', 'stack' => '"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-space-grotesk.css'],
+        'fraunces' => ['label' => 'Fraunces (Serifen, weich, optische Größen · variabel)', 'stack' => 'Fraunces,ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-fraunces.css'],
+        'newsreader' => ['label' => 'Newsreader (Serifen, sachlich · variabel)', 'stack' => 'Newsreader,ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-newsreader.css'],
+        'instrument-serif' => ['label' => 'Instrument Serif (Display-Serife, nur große Überschriften)', 'stack' => '"Instrument Serif",ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-instrument-serif.css'],
+        'jetbrains-mono' => ['label' => 'JetBrains Mono (Monospace · variabel)', 'stack' => '"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace', 'css' => 'css/font-jetbrains-mono.css'],
+        'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
+        'system-mono' => ['label' => 'System-Monospace (ohne Download)', 'stack' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace'],
+    ],
+
+    // Neun Vorlagen für unterschiedliche Projekte – alle hell und dunkel AA-geprüft (tools/contrast.php)
+    'presets' => [
+        'standard' => $preset('Fluid Standard', 'Neutral und klar: Indigo, Inter, ausgewogene Stufen – der Standard des Kits.',
+            ['#4338CA', '#3730A3', '#FFFFFF', '#FDE68A', '#0B0D17', '#2B2F3A', '#565C6B', '#FFFFFF', '#F4F5F8', '#E2E4EB', '#0E1022'],
+            ['#A5B4FC', '#C7D2FE', '#14123A', '#3A3470', '#F3F4F8', '#D2D5DE', '#9EA3B2', '#0B0C14', '#141621', '#272B3A', '#1A1D33'],
+            $base),
+        'kanzlei' => $preset('Kanzlei · Nachtblau & Serife', 'Seriös und ruhig: Newsreader-Überschriften, eckige Formen, zentrierter Kopf, flache Stufen.',
+            ['#1D3A66', '#142B4D', '#FFFFFF', '#EDE3CC', '#0C1526', '#2A3242', '#565F70', '#FFFFFF', '#F5F4F0', '#E4E1D8', '#0F1F38'],
+            ['#9BB8EA', '#BED0F2', '#0B1A33', '#3A3322', '#EEF2F8', '#CFD6E2', '#9AA4B5', '#0A0F18', '#121A27', '#253247', '#18263D'],
+            ['font_body' => 'inter', 'font_head' => 'newsreader', 'ratio' => 1.2, 'fs_max' => 18, 'heading_weight' => 500, 'heading_tracking' => -1,
+             'radius' => 2, 'buttons' => 'sharp', 'cards' => 'outlined', 'shadow' => 'none', 'space' => 'normal', 'wrap' => 72, 'eyebrow' => 'plain',
+             'header' => 'centered', 'footer' => 'columns', 'pagebg' => 'plain'] + $base),
+        'handwerk' => $preset('Handwerk · Terrakotta', 'Kräftig und nahbar: Bricolage Grotesque, runde Buttons, schwebender Kopf, Punktraster.',
+            ['#A3380F', '#842C0A', '#FFFFFF', '#F6D46B', '#1E140E', '#3A2E25', '#63554A', '#FFFCF7', '#F6EEE3', '#E8DBC9', '#2A1B12'],
+            ['#F4A57E', '#F8C3A6', '#2A1206', '#4A3A12', '#F8F1EA', '#E2D6C9', '#B2A291', '#15100C', '#211912', '#3A2D22', '#2B1F17'],
+            ['font_body' => 'dm-sans', 'font_head' => 'bricolage', 'ratio' => 1.3, 'heading_weight' => 750, 'heading_tracking' => -3,
+             'radius' => 16, 'buttons' => 'pill', 'cards' => 'flat', 'shadow' => 'soft', 'wrap' => 78, 'eyebrow' => 'pill',
+             'header' => 'floating', 'footer' => 'statement', 'pagebg' => 'dots'] + $base),
+        'praxis' => $preset('Praxis · Salbei', 'Beruhigend und freundlich: Salbeigrün, Instrument Sans, weiche Karten mit Schatten, sanfter Verlauf.',
+            ['#2C6A5C', '#215347', '#FFFFFF', '#D5ECDD', '#0E1D19', '#2B3935', '#56655F', '#FFFFFF', '#F2F7F4', '#DEE8E3', '#0F2922'],
+            ['#86D1BC', '#A9E0D0', '#06231B', '#1F3D33', '#EEF6F2', '#CCDCD5', '#96AAA2', '#0A110F', '#111B18', '#22322D', '#17302A'],
+            ['font_body' => 'instrument-sans', 'font_head' => 'instrument-sans', 'ratio' => 1.2, 'fs_max' => 19, 'heading_weight' => 600, 'heading_tracking' => -1.5,
+             'radius' => 20, 'buttons' => 'pill', 'cards' => 'elevated', 'shadow' => 'soft', 'density' => 'relaxed', 'eyebrow' => 'dot',
+             'header' => 'inline', 'footer' => 'columns', 'pagebg' => 'glow'] + $base),
+        'agentur' => $preset('Agentur · Kontrast', 'Laut und selbstbewusst: sehr große Stufen, Bricolage 800, Violett und Limette, Raster-Hintergrund.',
+            ['#5B21D6', '#4A18B3', '#FFFFFF', '#D9F95B', '#0A0A0F', '#26262E', '#55555F', '#FFFFFF', '#F4F3F7', '#E3E1EA', '#120A26'],
+            ['#C4AEFF', '#DACDFF', '#1A0B45', '#2F3A0C', '#F6F5FA', '#D6D4DE', '#A09EAB', '#09090D', '#13121A', '#2A2833', '#1E1438'],
+            ['font_body' => 'inter', 'font_head' => 'bricolage', 'font_mono' => 'jetbrains-mono', 'label_font' => 'mono', 'ratio' => 1.45, 'fs_max' => 19, 'heading_weight' => 800, 'heading_tracking' => -4.5,
+             'radius' => 24, 'buttons' => 'pill', 'cards' => 'outlined', 'shadow' => 'crisp', 'wrap' => 84, 'eyebrow' => 'pill',
+             'header' => 'split', 'footer' => 'statement', 'pagebg' => 'grid'] + $base),
+        'verein' => $preset('Verein · Frisch', 'Offen und fröhlich: Blau und Sonnengelb, DM Sans fett, Schatten-Karten, Etiketten.',
+            ['#0B5CAD', '#084A8C', '#FFFFFF', '#FFD84A', '#0A1626', '#283445', '#566273', '#FFFFFF', '#F2F6FB', '#DCE5F0', '#0A2540'],
+            ['#8CC2FF', '#B4D7FF', '#04203F', '#3F3510', '#EEF4FB', '#CFDAE7', '#98A7BA', '#09101A', '#111A26', '#233247', '#152B47'],
+            ['font_body' => 'dm-sans', 'font_head' => 'dm-sans', 'ratio' => 1.28, 'heading_weight' => 800, 'heading_tracking' => -2.5,
+             'radius' => 14, 'buttons' => 'solid', 'cards' => 'elevated', 'shadow' => 'layered', 'eyebrow' => 'pill',
+             'header' => 'inline', 'footer' => 'columns', 'pagebg' => 'plain'] + $base),
+        'restaurant' => $preset('Restaurant · Bordeaux & Creme', 'Warm und genussvoll: Fraunces mit optischen Größen, Cremetöne, Kontur-Buttons, zentrierter Kopf.',
+            ['#8A1C32', '#6E1627', '#FFFFFF', '#EBCB98', '#26140F', '#3E2A24', '#6A544B', '#FBF6EE', '#F3E9DA', '#E6D6C0', '#2A1113'],
+            ['#F0A2B0', '#F6C3CC', '#34060F', '#4A3515', '#F8EEE6', '#E5D5CA', '#B6A195', '#140D0B', '#1F1512', '#382823', '#2E1A1B'],
+            ['font_body' => 'instrument-sans', 'font_head' => 'fraunces', 'ratio' => 1.333, 'fs_max' => 19, 'heading_weight' => 450, 'heading_tracking' => -1,
+             'radius' => 6, 'buttons' => 'outline', 'cards' => 'flat', 'shadow' => 'none', 'space' => 'airy', 'wrap' => 72, 'eyebrow' => 'plain',
+             'header' => 'centered', 'footer' => 'statement', 'pagebg' => 'plain'] + $base),
+        'startup' => $preset('Tech-Startup · Nacht', 'Dunkel von Anfang an: Space Grotesk, Monospace-Etiketten, Glas-Karten, Raster und leuchtendes Blau.',
+            ['#8BA6FF', '#B0C3FF', '#070A16', '#1E2B5C', '#F4F6FB', '#C9D0DD', '#939CAE', '#0A0C13', '#121622', '#242B3C', '#1B1542'],
+            ['#8BA6FF', '#B0C3FF', '#070A16', '#1E2B5C', '#F4F6FB', '#C9D0DD', '#939CAE', '#07090F', '#10131D', '#212838', '#1B1542'],
+            ['font_body' => 'inter', 'font_head' => 'space-grotesk', 'font_mono' => 'jetbrains-mono', 'label_font' => 'mono', 'ratio' => 1.333, 'heading_weight' => 600, 'heading_tracking' => -3,
+             'radius' => 12, 'buttons' => 'pill', 'cards' => 'glass', 'shadow' => 'layered', 'wrap' => 80, 'eyebrow' => 'dot',
+             'header' => 'floating', 'footer' => 'simple', 'pagebg' => 'grid'] + $base),
+        'kultur' => $preset('Kultur · Museum', 'Plakativ und reduziert: Instrument Serif in sehr großen Stufen, Signalrot, keine Rundungen, Seitenleiste.',
+            ['#C8102E', '#A00D25', '#FFFFFF', '#FF6A3D', '#0A0A0A', '#262626', '#595959', '#FFFFFF', '#F4F4F2', '#E2E2DE', '#111111'],
+            ['#FF8A8A', '#FFB0B0', '#2A0508', '#5A1A0C', '#F6F6F4', '#D9D9D6', '#A3A3A0', '#0B0B0B', '#161616', '#2C2C2C', '#1F1F1F'],
+            ['font_body' => 'inter', 'font_head' => 'instrument-serif', 'font_mono' => 'jetbrains-mono', 'label_font' => 'mono', 'ratio' => 1.5, 'fs_max' => 18, 'heading_weight' => 400, 'heading_tracking' => -1,
+             'radius' => 0, 'buttons' => 'sharp', 'cards' => 'flat', 'shadow' => 'none', 'space' => 'airy', 'wrap' => 88, 'eyebrow' => 'plain',
+             'header' => 'rail', 'footer' => 'statement', 'pagebg' => 'plain'] + $base),
+    ],
+
+    // Dunkle Werte bei „Dunkles Farbschema“ (Klasse has-dark) und Geräte-Einstellung; Vorschau im Editor setzt is-dark
+    'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark'],
+
+    // Musterseite für die Vorschau im Editor (Showcase, siehe tools/demo.php)
+    'sample' => 'showcase',
+];

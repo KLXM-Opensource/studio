@@ -1,0 +1,65 @@
+/* ---------------------------------------------------------------- Kopfbereich (Design → Navigation: nav-modern | nav-classic | nav-minimal | nav-extended)
+   Bis 64 em: Marke + Button + Menü-Schaltfläche (Seitenblatt). Ab 64 em: Menü in der Leiste (außer „Minimal“).
+   .is-overflow (site.js) erzwingt die Schaltfläche, wenn das Menü trotzdem nicht passt. */
+.hdr{position:relative;z-index:60;--m-hdr-bg:color-mix(in srgb,var(--m-bg) 84%,transparent)}
+.nav-sticky .hdr{position:sticky;top:0}
+.hdr__bar{display:flex;align-items:center;gap:var(--m-s-s) var(--m-s-l);width:min(100% - 2 * var(--m-gutter),var(--m-wrap));min-height:4.5rem;margin-inline:auto}
+.hdr__brand{margin-inline-end:auto}
+.hdr__nav{display:none;align-items:center;gap:var(--m-s-s)}
+.hdr__tools{display:flex;align-items:center;gap:.5rem}
+@media (min-width:64em){
+  .hdr:not(.hdr--minimal,.is-overflow) .hdr__nav{display:flex}
+  .hdr:not(.hdr--minimal,.is-overflow) .menu-btn{display:none}
+}
+@media (max-width:26em){.hdr__cta{display:none}.menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{padding-inline:.8rem}}
+.hdr--classic,.hdr--minimal,.hdr--extended{background:var(--m-hdr-bg);border-bottom:1px solid var(--m-line);backdrop-filter:saturate(1.5) blur(14px)}
+/* Modern: schwebende Leiste mit feiner Kante */
+.hdr--modern{padding-top:.75rem}
+.hdr--modern .hdr__bar{min-height:4rem;padding-inline:1rem .5rem;border:1px solid var(--m-line);border-radius:12px;background:var(--m-hdr-bg);backdrop-filter:saturate(1.5) blur(14px);box-shadow:0 1px 2px var(--m-sh1)}
+@media (min-width:48em){.hdr--modern .hdr__bar{padding-inline:1.25rem .625rem}}
+/* Beim Scrollen leichter Schatten – Scroll-Timeline ohne JavaScript, wo unterstützt */
+@supports (animation-timeline:scroll()){.nav-sticky .hdr:not(.hdr--modern){animation:m-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}.nav-sticky .hdr--modern .hdr__bar{animation:m-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}}
+@keyframes m-hdr{to{box-shadow:0 12px 32px -20px var(--m-sh2)}}
+
+/* Marke: Monogramm-Quadrat mit Blockfarben-Ecke */
+.brand{display:inline-flex;align-items:center;gap:.65rem;min-height:2.75rem;color:var(--m-ink);text-decoration:none}
+.brand__mark{position:relative;display:grid;place-items:center;flex:none;width:2.25rem;height:2.25rem;border-radius:8px;background:var(--m-ink);color:var(--m-bg);font:700 1.1rem/1 var(--m-font-head);letter-spacing:-.04em;overflow:hidden}
+.brand__mark::after{content:"";position:absolute;right:0;bottom:0;width:.7rem;height:.7rem;border-top-left-radius:4px;background:var(--m-a2)}
+.brand__name{font:700 1.125rem/1.1 var(--m-font-head);letter-spacing:-.03em;white-space:nowrap}
+.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+.brand__logo--dark{display:none}
+@media (max-width:22em){.brand__name{font-size:1rem}}
+
+/* Menü in der Leiste (Aufklappmenüs mit <details>) */
+.hnav__list{display:flex;align-items:center;gap:.125rem;margin:0;padding:0;list-style:none}
+.hnav__item{position:relative}
+.hnav__link{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;padding:0 .8rem;border-radius:var(--m-r-s);color:var(--m-text);font:500 .9375rem/1.1 var(--m-font);text-decoration:none;white-space:nowrap;cursor:pointer;list-style:none;transition:background-color .15s,color .15s}
+.hnav__link::-webkit-details-marker{display:none}
+.hnav__link:hover{background:var(--m-surface);color:var(--m-ink)}
+.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link{color:var(--m-ink);font-weight:650;box-shadow:inset 0 -2px 0 var(--m-mark)}
+.hnav__chev{font-size:.85em;transition:rotate .2s}
+.hnav__sub[open]>.hnav__link .hnav__chev{rotate:180deg}
+
+/* Sprache */
+.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:10px;background:var(--m-surface)}
+.langswitch a{display:grid;place-items:center;min-width:2.25rem;min-height:2rem;padding:0 .5rem;border-radius:7px;color:var(--m-muted);font:600 .8125rem/1 var(--m-font);letter-spacing:.04em;text-decoration:none}
+.langswitch a:hover{color:var(--m-ink)}
+.langswitch a[aria-current]{background:var(--m-bg);color:var(--m-ink);box-shadow:0 0 0 1px var(--m-line)}
+.langswitch--wide a{min-height:2.75rem;padding-inline:1rem;font-size:.9375rem;letter-spacing:0}
+
+/* Menü-Schaltfläche und Lupe */
+.menu-btn{display:inline-flex;align-items:center;gap:.6rem;min-height:2.75rem;padding:0 1rem 0 .9rem;border:1px solid var(--m-line-strong);border-radius:var(--m-btn-r);background:transparent;color:var(--m-ink);font:600 .9375rem/1 var(--m-font);cursor:pointer}
+.menu-btn:hover{border-color:var(--m-ink)}
+.menu-btn__bars,.menu-btn__bars::before{display:block;width:1.1rem;height:2px;border-radius:2px;background:currentColor}
+.menu-btn__bars{position:relative;translate:0 -3px}
+.menu-btn__bars::before{content:"";position:absolute;top:6px;width:.7rem}
+.hsearch__btn{display:inline-grid;place-items:center;width:2.75rem;height:2.75rem;padding:0;border:1px solid var(--m-line-strong);border-radius:var(--m-btn-r);background:transparent;color:var(--m-ink);cursor:pointer}
+.hsearch__btn:hover{border-color:var(--m-ink)}
+/* Kopfbereich-Aktionen (Core\HeaderActions) – Look „modern“: geteilte Aktion (Anfrage + Anruf) als ein Block, aufziehende
+   Lupe in der schwebenden Leiste. Standard: Geteilt + Aufziehen. */
+.ha,.ha-below{--ha-accent:var(--m-a);--ha-on:var(--m-a-on);--ha-ink:var(--m-ink);--ha-muted:var(--m-muted);--ha-line:var(--m-line-strong);--ha-bg:var(--m-bg);--ha-surface:var(--m-surface);--ha-open:var(--m-link);--ha-h:2.75rem;--ha-gap:.5rem}
+.hdr .ha-split{box-shadow:0 6px 16px -8px color-mix(in srgb,var(--m-a) 70%,transparent)}
+.hdr .ha-split__mini{background:color-mix(in srgb,var(--m-a) 86%,#000)}
+.hdr .ha-field--expand .ha-field__in{border-radius:8px}
+.hdr .ha-center{margin-inline:auto}
+.hdr__below{width:min(100% - 2 * var(--m-gutter),var(--m-wrap));margin-inline:auto}

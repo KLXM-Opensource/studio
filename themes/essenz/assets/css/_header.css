@@ -1,0 +1,64 @@
+/* ---------------------------------------------------------------- Kopfbereich
+   Der Kopf ist ein Container (hdr). Die Klasse fit-NN (essenz_nav_fit) nennt die Breite in rem, die das Menü in einer Zeile
+   braucht. Standard ist die kompakte Leiste mit Menü-Schaltfläche; ab fit-NN zeigt die Container-Query das Menü in der
+   Leiste. .is-overflow (site.js) erzwingt die Schaltfläche, falls die Schätzung zu knapp war. Höhe: 8 × 8 px. */
+.hdr{container:hdr/inline-size;position:relative;z-index:60;background:var(--e-hdr-bg);border-bottom:1px solid var(--e-line);-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px)}
+.hdr-sticky .hdr{position:sticky;top:0}
+.hdr__bar{display:flex;align-items:center;gap:var(--e-s-xs) var(--e-s-m);width:min(100% - 2 * var(--e-gutter),var(--e-wrap));min-height:4rem;margin-inline:auto}
+.hdr__brand{margin-inline-end:auto;min-width:0}
+.hdr__brand .brand__name{overflow:hidden;text-overflow:ellipsis}
+.hdr__nav{display:none;align-items:center;gap:var(--e-s-s)}
+.hdr__tools{display:flex;align-items:center;gap:var(--e-s-xs)}
+.hdr.is-overflow .hdr__nav{display:none}.hdr.is-overflow .menu-btn{display:inline-flex}
+@container hdr (max-width:34rem){.hdr__cta{display:none}}
+@container hdr (min-width:30rem){.fit-30 .hdr__nav{display:flex}.fit-30 .menu-btn{display:none}}
+@container hdr (min-width:36rem){.fit-36 .hdr__nav{display:flex}.fit-36 .menu-btn{display:none}}
+@container hdr (min-width:42rem){.fit-42 .hdr__nav{display:flex}.fit-42 .menu-btn{display:none}}
+@container hdr (min-width:48rem){.fit-48 .hdr__nav{display:flex}.fit-48 .menu-btn{display:none}}
+@container hdr (min-width:54rem){.fit-54 .hdr__nav{display:flex}.fit-54 .menu-btn{display:none}}
+@container hdr (min-width:60rem){.fit-60 .hdr__nav{display:flex}.fit-60 .menu-btn{display:none}}
+@container hdr (min-width:66rem){.fit-66 .hdr__nav{display:flex}.fit-66 .menu-btn{display:none}}
+@container hdr (min-width:72rem){.fit-72 .hdr__nav{display:flex}.fit-72 .menu-btn{display:none}}
+@container hdr (min-width:78rem){.fit-78 .hdr__nav{display:flex}.fit-78 .menu-btn{display:none}}
+@container hdr (min-width:84rem){.fit-84 .hdr__nav{display:flex}.fit-84 .menu-btn{display:none}}
+@container hdr (min-width:90rem){.fit-90 .hdr__nav{display:flex}.fit-90 .menu-btn{display:none}}
+@container hdr (min-width:96rem){.fit-96 .hdr__nav{display:flex}.fit-96 .menu-btn{display:none}}
+@container hdr (min-width:102rem){.fit-102 .hdr__nav{display:flex}.fit-102 .menu-btn{display:none}}
+@container hdr (max-width:22rem){.menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{padding-inline:.75rem}.brand__name{font-size:1rem}}
+@supports (animation-timeline:scroll()){.hdr-sticky .hdr{animation:e-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}}
+@keyframes e-hdr{to{box-shadow:0 8px 24px -18px var(--e-sh2)}}
+
+/* Marke: Monogramm-Feld mit Signalpunkt (Betriebsanzeige) */
+.brand{display:inline-flex;align-items:center;gap:.75rem;min-height:2.75rem;color:var(--e-ink);text-decoration:none}
+.brand__mark{position:relative;display:block;flex:none;width:2rem;height:2rem;border-radius:calc(var(--e-r-s) + 2px);background:var(--e-ink);box-shadow:var(--e-key-sh)}
+.brand__dot{position:absolute;right:.4375rem;top:.4375rem;width:.5rem;height:.5rem;border-radius:50%;background:var(--e-a);box-shadow:0 0 0 2px color-mix(in srgb,var(--e-a) 30%,transparent)}
+.brand__name{font:var(--e-hw) 1.0625rem/1.15 var(--e-font-head);letter-spacing:-.01em;white-space:nowrap}
+.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+.brand__logo--dark{display:none}
+
+/* Menü in der Leiste (Aufklappmenüs mit <details>) */
+.hnav__list{display:flex;align-items:center;gap:var(--e-s-2xs);margin:0;padding:0;list-style:none}
+.hnav__item{position:relative}
+.hnav__link{position:relative;display:inline-flex;align-items:center;gap:.375rem;min-height:2.75rem;padding:0 .75rem;border-radius:var(--e-btn-r);color:var(--e-text);font:500 .9375rem/1.1 var(--e-font);text-decoration:none;white-space:nowrap;cursor:pointer;list-style:none;transition:background-color .15s,color .15s}
+.hnav__link::-webkit-details-marker{display:none}
+.hnav__link:hover{background:var(--e-surface);color:var(--e-ink)}
+.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link{color:var(--e-ink)}
+.hnav__link[aria-current=page]::after,.hnav__link[data-active]::after,.hnav__sub[data-active]>.hnav__link::after{content:"";position:absolute;left:50%;bottom:.25rem;width:.3125rem;height:.3125rem;margin-left:-.15625rem;border-radius:50%;background:var(--e-a)}
+.hnav__chev{font-size:.85em;transition:rotate .2s}
+.hnav__sub[open]>.hnav__link .hnav__chev{rotate:180deg}
+
+/* Sprache: Kippschalter-Leiste */
+.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(var(--e-btn-r) + 3px);background:var(--e-surface);box-shadow:var(--e-well)}
+.langswitch a{display:grid;place-items:center;min-width:2.25rem;min-height:2rem;padding:0 .5rem;border-radius:var(--e-btn-r);color:var(--e-muted);font:500 .75rem/1 var(--e-font-mono);letter-spacing:.06em;text-decoration:none}
+.langswitch a:hover{color:var(--e-ink)}
+.langswitch a[aria-current]{background:var(--e-panel);color:var(--e-ink);box-shadow:var(--e-key-sh),0 0 0 1px var(--e-line)}
+.langswitch--wide a{min-height:2.75rem;padding-inline:1rem;font:500 .9375rem/1 var(--e-font);letter-spacing:0}
+
+/* Menü-Schaltfläche und Lupe: Tasten mit Kontur */
+.menu-btn,.hsearch__btn{display:inline-flex;align-items:center;justify-content:center;gap:.625rem;min-width:2.75rem;height:2.75rem;padding:0 1rem;border:1px solid var(--e-line-strong);border-radius:var(--e-btn-r);background:var(--e-panel);color:var(--e-ink);font:500 .8125rem/1 var(--e-font-label);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:var(--e-key-sh)}
+.menu-btn:hover,.hsearch__btn:hover{border-color:var(--e-ink)}
+.menu-btn:active,.hsearch__btn:active{translate:0 1px;box-shadow:none}
+.hsearch__btn{padding:0}
+.menu-btn__bars,.menu-btn__bars::before{display:block;width:1rem;height:2px;border-radius:1px;background:currentColor}
+.menu-btn__bars{position:relative;translate:0 -3px}
+.menu-btn__bars::before{content:"";position:absolute;top:6px;width:.625rem}

@@ -1,0 +1,32 @@
+/* Kit „nature“ – Grundsätze/Versprechen: Nummer (Serif, Akzent) · Titel · Erläuterung */
+.pr{display:grid;margin:0;padding:0;list-style:none}
+.pr__n{color:var(--n-link);font:italic 400 var(--n-t2)/1 var(--n-font-head);font-variant-numeric:lining-nums}
+.pr__title{color:var(--n-ink);font:var(--n-hw) var(--n-t2)/1.2 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:calc(var(--n-track) * .008em);text-wrap:balance}
+.pr__text{color:var(--n-muted);max-width:40em;text-wrap:pretty}
+/* Liste */
+.pr--list{border-top:1px solid var(--n-line)}
+.pr--list .pr__item{display:grid;gap:var(--n-s-xs) var(--n-s-l);padding-block:var(--n-s-m);border-bottom:1px solid var(--n-line)}
+@container (min-width:48rem){
+  .pr--list .pr__item{grid-template-columns:minmax(4rem,1fr) 4fr 5fr;align-items:baseline;padding-block:var(--n-s-l)}
+}
+.pr--list .pr__item:hover .pr__n{color:var(--n-ink)}
+/* Raster */
+.pr--grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:var(--n-s-m)}
+.pr--grid .pr__item{display:grid;align-content:start;gap:var(--n-s-s);padding:var(--n-s-m)}
+.pr--grid .pr__n{display:block;padding-bottom:var(--n-s-s);border-bottom:1px solid var(--n-line);font-size:var(--n-t2)}
+.pr--grid .pr__title{font-size:var(--n-t1)}
+/* Aufklappbar */
+.pr--accordion{border-top:1px solid var(--n-line)}
+.pr--accordion .pr__item{border-bottom:1px solid var(--n-line)}
+.pr__sum{display:grid;grid-template-columns:3rem 1fr auto;align-items:center;gap:var(--n-s-s);min-height:3.5rem;padding-block:var(--n-s-s);cursor:pointer;list-style:none}
+.pr__sum::-webkit-details-marker{display:none}
+.pr--accordion .pr__n{font-size:var(--n-t0)}
+.pr--accordion .pr__title{font-size:var(--n-t1)}
+.pr__sum:hover .pr__title{color:var(--n-link)}
+.pr--accordion .pr__text{padding:0 0 var(--n-s-m) calc(3rem + var(--n-s-s))}
+.pr__pm{position:relative;width:1.75rem;height:1.75rem;border-radius:58% 42% 52% 48%/48% 56% 44% 52%;box-shadow:inset 0 0 0 1px var(--n-line-strong)}
+.pr__pm::before,.pr__pm::after{content:"";position:absolute;left:50%;top:50%;width:.625rem;height:1.5px;margin:-.75px 0 0 -.3125rem;background:var(--n-ink);transition:rotate .2s}
+.pr__pm::after{rotate:90deg}
+.pr__det[open] .pr__pm::after{rotate:0deg}
+.pr__det[open] .pr__pm{background:var(--n-a);box-shadow:none}
+.pr__det[open] .pr__pm::before,.pr__det[open] .pr__pm::after{background:var(--n-a-on)}

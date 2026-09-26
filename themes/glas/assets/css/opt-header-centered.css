@@ -1,0 +1,8 @@
+/* Kopfbereich „Zentriert“: Marke in der Mitte, Menü darunter (sobald es passt), Werkzeuge rechts – schwebende Glasleiste */
+.hdr{--g-hdr-h:4.75rem}
+.hdr--centered .hdr__bar{display:grid;grid-template-columns:1fr auto 1fr;column-gap:var(--g-s-s)}
+.hdr--centered .hdr__brand{grid-column:2;grid-row:1;margin:0}
+.hdr--centered .hdr__tools{grid-column:3;grid-row:1;justify-self:end}
+.hdr--centered .hdr__nav{grid-column:1/-1;grid-row:2;justify-self:center;padding-bottom:var(--g-s-2xs)}
+.hdr--centered .hdr__nav .hnav__list{gap:var(--g-s-2xs)}
+@container hdr (min-width:30rem){.hdr--centered:not(.fit-no,.is-overflow) .hdr__bar{padding-top:.5rem}}

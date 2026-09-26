@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openimmo>
+  <uebertragung art="OFFLINE" umfang="VOLL" modus="CHANGE" version="1.2.7" sendersoftware="Testdaten" techn_email="test@example.org" timestamp="2026-09-24T10:00:00"/>
+  <anbieter>
+    <anbieternr>BSP-001</anbieternr>
+    <firma>Beispiel Immobilien GmbH (Testdaten)</firma>
+    <openimmo_anid>ANID-BEISPIEL</openimmo_anid>
+    <immobilie>
+      <objektkategorie>
+        <nutzungsart WOHNEN="true" GEWERBE="false"/>
+        <vermarktungsart KAUF="false" MIETE_PACHT="true"/>
+        <objektart><wohnung wohnungtyp="ETAGE"/></objektart>
+      </objektkategorie>
+      <geo>
+        <plz>47441</plz><ort>Moers</ort><strasse>Musterweg</strasse><hausnummer>12</hausnummer>
+        <land iso_land="DEU"/>
+        <geokoordinaten breitengrad="51.4510" laengengrad="6.6260"/>
+        <etage>2</etage>
+      </geo>
+      <kontaktperson>
+        <name>Muster</name><vorname>Maria</vorname>
+        <email_zentrale>info@example.org</email_zentrale><email_direkt>maria.muster@example.org</email_direkt>
+        <tel_zentrale>02841 000000</tel_zentrale>
+      </kontaktperson>
+      <preise><kaltmiete>850.00</kaltmiete><nebenkosten>210.50</nebenkosten><kaution>2550</kaution></preise>
+      <flaechen><wohnflaeche>78.5</wohnflaeche><anzahl_zimmer>3</anzahl_zimmer></flaechen>
+      <ausstattung><balkon_terrasse>true</balkon_terrasse><kueche EBK="true"/></ausstattung>
+      <zustand_angaben>
+        <baujahr>1998</baujahr>
+        <energiepass><epart>VERBRAUCH</epart><gueltig_bis>2031-05-31</gueltig_bis><energieverbrauchkennwert>112.4</energieverbrauchkennwert><primaerenergietraeger>GAS</primaerenergietraeger><wertklasse>D</wertklasse><ausstelldatum>2021-06-01</ausstelldatum></energiepass>
+      </zustand_angaben>
+      <freitexte>
+        <objekttitel>Helle 3-Zimmer-Wohnung mit Balkon (Beispiel)</objekttitel>
+        <lage>Ruhige Seitenstraße, Bäcker und Bus in 5 Minuten.</lage>
+        <ausstatt_beschr>&lt;p&gt;Einbauküche, Balkon nach Süden, Kellerraum.&lt;/p&gt;</ausstatt_beschr>
+        <objektbeschreibung>Diese erfundene Wohnung dient nur als Testdatensatz.
+Zweiter Absatz der Beschreibung.</objektbeschreibung>
+      </freitexte>
+      <anhaenge>
+        <anhang location="EXTERN" gruppe="BILD"><anhangtitel>Wohnzimmer</anhangtitel><format>jpg</format><daten><pfad>wohnung-wohnzimmer.jpg</pfad></daten></anhang>
+        <anhang location="EXTERN" gruppe="TITELBILD"><anhangtitel>Außenansicht Wohnhaus</anhangtitel><format>jpg</format><daten><pfad>wohnung-aussen.jpg</pfad></daten></anhang>
+        <anhang location="EXTERN" gruppe="GRUNDRISS"><anhangtitel>Grundriss</anhangtitel><format>png</format><daten><pfad>wohnung-grundriss.png</pfad></daten></anhang>
+      </anhaenge>
+      <verwaltung_objekt><objektadresse_freigeben>true</objektadresse_freigeben><verfuegbar_ab>01.11.2026</verfuegbar_ab></verwaltung_objekt>
+      <verwaltung_techn><objektnr_intern>W-12</objektnr_intern><objektnr_extern>BSP-W-12</objektnr_extern><aktion aktionart="CHANGE"/><openimmo_obid>OBID-BSP-W-12</openimmo_obid><stand_vom>2026-09-24</stand_vom></verwaltung_techn>
+    </immobilie>
+    <immobilie>
+      <objektkategorie>
+        <nutzungsart WOHNEN="true" GEWERBE="false"/>
+        <vermarktungsart KAUF="true" MIETE_PACHT="false"/>
+        <objektart><haus haustyp="EINFAMILIENHAUS"/></objektart>
+      </objektkategorie>
+      <geo>
+        <plz>47445</plz><ort>Moers-Repelen</ort><strasse>Geheimgasse</strasse><hausnummer>7</hausnummer>
+        <land iso_land="DEU"/>
+        <geokoordinaten breitengrad="51.4700" laengengrad="6.6000"/>
+      </geo>
+      <kontaktperson><name>Beispiel</name><vorname>Bernd</vorname><email_zentrale>info@example.org</email_zentrale><tel_zentrale>02841 000000</tel_zentrale></kontaktperson>
+      <preise><kaufpreis>389000</kaufpreis></preise>
+      <flaechen><wohnflaeche>142</wohnflaeche><anzahl_zimmer>5</anzahl_zimmer><grundstuecksflaeche>520</grundstuecksflaeche></flaechen>
+      <zustand_angaben>
+        <baujahr>1975</baujahr>
+        <energiepass><epart>BEDARF</epart><gueltig_bis>2032-01-15</gueltig_bis><endenergiebedarf>168</endenergiebedarf><primaerenergietraeger>OEL</primaerenergietraeger><wertklasse>F</wertklasse></energiepass>
+      </zustand_angaben>
+      <freitexte>
+        <objekttitel>Einfamilienhaus mit Garten (Beispiel)</objekttitel>
+        <lage>Wohngebiet am Stadtrand.</lage>
+        <objektbeschreibung>Erfundenes Haus. Die Adresse ist NICHT zur Veröffentlichung freigegeben.</objektbeschreibung>
+      </freitexte>
+      <anhaenge>
+        <anhang location="EXTERN" gruppe="TITELBILD"><anhangtitel>Haus mit Garten</anhangtitel><format>jpg</format><daten><pfad>haus-aussen.jpg</pfad></daten></anhang>
+      </anhaenge>
+      <verwaltung_objekt><objektadresse_freigeben>false</objektadresse_freigeben></verwaltung_objekt>
+      <verwaltung_techn><objektnr_intern>H-7</objektnr_intern><objektnr_extern>BSP-H-7</objektnr_extern><aktion aktionart="CHANGE"/><openimmo_obid>OBID-BSP-H-7</openimmo_obid></verwaltung_techn>
+    </immobilie>
+    <immobilie>
+      <objektkategorie>
+        <nutzungsart WOHNEN="false" GEWERBE="true"/>
+        <vermarktungsart KAUF="false" MIETE_PACHT="true"/>
+        <objektart><buero_praxen buero_praxen_typ="PRAXISFLAECHE"/></objektart>
+      </objektkategorie>
+      <geo><plz>47441</plz><ort>Moers</ort><strasse>Praxisallee</strasse><hausnummer>3</hausnummer><land iso_land="DEU"/></geo>
+      <kontaktperson><name>Muster</name><vorname>Maria</vorname><email_zentrale>info@example.org</email_zentrale></kontaktperson>
+      <preise><kaltmiete>1.450,00</kaltmiete></preise>
+      <flaechen><nutzflaeche>120</nutzflaeche><anzahl_zimmer>4</anzahl_zimmer></flaechen>
+      <freitexte><objekttitel>Praxisfläche im Zentrum (Beispiel)</objekttitel><objektbeschreibung>Erfundene Gewerbefläche.</objektbeschreibung></freitexte>
+      <verwaltung_objekt><objektadresse_freigeben>1</objektadresse_freigeben></verwaltung_objekt>
+      <verwaltung_techn><objektnr_intern>P-3</objektnr_intern><aktion aktionart="CHANGE"/><openimmo_obid>OBID-BSP-P-3</openimmo_obid></verwaltung_techn>
+    </immobilie>
+  </anbieter>
+</openimmo>

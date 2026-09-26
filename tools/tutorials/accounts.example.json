@@ -1,0 +1,7 @@
+{
+  "_hinweis": "Kopieren nach accounts.local.json (nicht versionieren) – nur Zugänge einer TESTKOPIE eintragen, nie Live-Zugänge. In den Videos dürfen keine echten Fotos erscheinen: Mediathek-, Bild- und Upload-Abläufe laufen auf „fluid“ (nur erzeugte Beispielbilder).",
+  "praxis": { "url": "http://127.0.0.1:8089", "email": "admin@example.test", "password": "…", "requestKey": "Schlüssel der Testkopie für Anfragen (optional)" },
+  "demo": { "url": "http://demo.localhost:8089", "email": "demo@example.test", "password": "…" },
+  "fluid": { "url": "http://fluid.localhost:8089", "email": "admin@fluid.test", "password": "…" },
+  "network": { "url": "http://127.0.0.1:8089", "email": "netzwerk@example.test", "password": "…", "root": "/pfad/zur/testkopie (optional, zum Aufräumen von n-website-anlegen)" }
+}

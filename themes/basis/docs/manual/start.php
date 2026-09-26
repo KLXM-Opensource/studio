@@ -1,0 +1,2 @@
+<?php /** Handbuch „basis“ · Hinweis zu den Demo-Inhalten (nach dem Kern-Überblick) · @var string $settingsTitle */ ?>
+  <div class="doc-note doc-note--info"><strong>Demo-Inhalte ersetzen</strong><p>Eine neue Website startet mit der fiktiven „Musterfirma (Demo)“. Ersetzen Sie Namen, Texte, Zahlen und Zitate durch eigene Angaben; Texte in [eckigen Klammern] sind Platzhalter. Impressum und Datenschutzerklärung müssen Sie selbst einfügen.</p></div>

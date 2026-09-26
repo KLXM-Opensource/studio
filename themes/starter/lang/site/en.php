@@ -1,0 +1,52 @@
+<?php
+// SPDX-License-Identifier: MIT
+/**
+ * Feste Website-Texte des Start-Kits auf Englisch – alles, was Templates und Blöcke mit lt('…') ausgeben.
+ * Schlüssel = deutscher Quelltext. Texte aus lang/site/en.php des Cores (z. B. „Schließen“, „Seiten“) nicht wiederholen.
+ * Prüfen: php bin/console i18n:missing en --site-texts --site=<website>
+ */
+return [
+    '(öffnet in neuem Tab)' => '(opens in a new tab)',
+    '1 Seite' => '1 page',
+    '{n} Seiten' => '{n} pages',
+    '{provider}-Videos künftig direkt laden' => 'Always load {provider} videos directly',
+    '{provider}-Videos werden auf dieser Website direkt geladen.' => '{provider} videos are loaded directly on this website.',
+    'Ansehen' => 'View',
+    'Auf {provider} ansehen' => 'Watch on {provider}',
+    'Barrierefreiheit' => 'Accessibility',
+    'Beim Abspielen lädt {provider} ({company}) das Video. Dabei werden Daten wie Ihre IP-Adresse an {provider} übertragen.' => 'When you play the video, {provider} ({company}) loads it. Data such as your IP address is transmitted to {provider}.',
+    'Bitte versuchen Sie es in einigen Minuten erneut.' => 'Please try again in a few minutes.',
+    'Da ist etwas schiefgelaufen.' => 'Something went wrong.',
+    'Datenschutz' => 'Privacy',
+    'Die Website wird gerade aktualisiert. Bitte schauen Sie in Kürze wieder vorbei.' => 'We are updating the website. Please check back shortly.',
+    'Diese Seite gibt es nicht (mehr).' => 'This page does not exist (any more).',
+    'Fehler {code}' => 'Error {code}',
+    'Freigabe widerrufen' => 'Revoke consent',
+    'Gerade keine Internetverbindung.' => 'No internet connection right now.',
+    'Hauptnavigation' => 'Main navigation',
+    'Herunterladen' => 'Download',
+    'Impressum' => 'Legal notice',
+    'Kontakt' => 'Contact',
+    'Menü' => 'Menu',
+    'Offline' => 'Offline',
+    'Rechtliches' => 'Legal',
+    'Sobald Sie wieder online sind, lädt die Seite wie gewohnt.' => 'As soon as you are back online, the page will load as usual.',
+    'Social Media' => 'Social media',
+    'Sprache' => 'Language',
+    'Startseite' => 'Home',
+    'Video' => 'Video',
+    'Video abspielen' => 'Play video',
+    'Vielleicht hat sich die Adresse geändert. Über die Startseite, das Menü oder die Suche finden Sie weiter.' => 'The address may have changed. The home page, the menu or the search will help you find your way.',
+    'Wir sind gleich wieder da.' => 'We will be right back.',
+    'Zum Inhalt springen' => 'Skip to content',
+    'Zur Startseite' => 'Go to home page',
+    // Texte, die der Core auf Seiten dieses Kits ausgibt (Formular, Fehlerseite, Suche, Karte) – fehlen in lang/site/en.php des Cores
+    '(optional)' => '(optional)',
+    'Anfahrt' => 'Directions',
+    'Datenschutzhinweise' => 'Privacy notice',
+    'Fehler' => 'Error',
+    'Seite nicht gefunden' => 'Page not found',
+    'Zurück' => 'Back',
+    // Einstieg „Such-Einstieg“
+    'Häufig gesucht' => 'Frequently searched',
+];

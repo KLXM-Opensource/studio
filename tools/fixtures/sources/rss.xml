@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>Testfeed Stadtnachrichten (Beispiel)</title>
+    <link>https://example.org/</link>
+    <description>Erfundene Beispielmeldungen für Tests von KLXM Studio</description>
+    <item>
+      <title>Neue Öffnungszeiten der Stadtbücherei</title>
+      <link>https://example.org/meldungen/oeffnungszeiten</link>
+      <guid isPermaLink="false">meldung-1001</guid>
+      <pubDate>Tue, 22 Sep 2026 09:30:00 +0200</pubDate>
+      <dc:creator>Redaktion Beispiel</dc:creator>
+      <category>Kultur</category>
+      <description><![CDATA[<p>Ab Oktober hat die Bücherei auch <b>samstags</b> geöffnet.</p>]]></description>
+      <content:encoded><![CDATA[<p>Ab Oktober hat die Stadtbücherei auch <strong>samstags von 10 bis 14 Uhr</strong> geöffnet.</p><script>alert('x')</script><p onclick="evil()">Weitere Infos <a href="javascript:alert(1)">hier</a> und <a href="https://example.org/info">dort</a>.</p>]]></content:encoded>
+      <enclosure url="http://127.0.0.1:8097/img/rss1.jpg" type="image/jpeg" length="1234"/>
+    </item>
+    <item>
+      <title>Baustelle an der Hauptstraße &amp; Umleitung</title>
+      <link>https://example.org/meldungen/baustelle</link>
+      <guid isPermaLink="false">meldung-1002</guid>
+      <pubDate>Mon, 21 Sep 2026 14:00:00 +0200</pubDate>
+      <dc:creator>Tiefbauamt</dc:creator>
+      <category>Verkehr</category>
+      <description>Vom 1. bis 15. Oktober ist die Hauptstraße einspurig.</description>
+    </item>
+    <item>
+      <title>Herbstmarkt am Rathausplatz</title>
+      <link>https://example.org/meldungen/herbstmarkt</link>
+      <guid isPermaLink="false">meldung-1003</guid>
+      <pubDate>Sun, 20 Sep 2026 08:00:00 +0200</pubDate>
+      <category>Veranstaltungen</category>
+      <description>Regionale Händler, Musik und Kinderprogramm am 10. Oktober.</description>
+      <media:content url="http://127.0.0.1:8097/img/rss2.png" medium="image"/>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,14 @@
+/* Kit „nature“ – Zitat: große Serif, kursiv, mit Blattzeichen; Stimmen als Karten */
+.q{display:grid;gap:var(--n-s-m);margin:0}
+.q--single{position:relative;max-width:52rem;padding-top:var(--n-s-xl)}
+.q--single::before{content:"";position:absolute;top:0;left:0;width:2.25rem;height:2.25rem;border-radius:0 72% 0 72%;background:var(--n-mark);rotate:-8deg;opacity:.9}
+.q--single .q__text{color:var(--n-ink);font:italic 440 max(var(--n-t2),min(var(--n-t4),5.5cqi))/1.22 var(--n-font-head);letter-spacing:calc(var(--n-track) * .01em);text-wrap:balance}
+.q--single .q__text p::before{content:"„"}.q--single .q__text p::after{content:"“"}
+.qs .card{padding:var(--n-s-m)}
+.q--card{height:100%;align-content:space-between}
+.q--card .q__text{color:var(--n-text);font-size:var(--n-t1);line-height:1.45}
+.q__who{display:flex;align-items:center;gap:var(--n-s-s);padding-top:var(--n-s-s);border-top:1px solid var(--n-line)}
+.q--single .q__who{border-top:0;padding-top:0}
+.q__img{width:3rem;height:3rem;border-radius:50%;object-fit:cover}
+.q__name{display:block;color:var(--n-ink);font-weight:600}
+.q__role{display:block;color:var(--n-muted);font:var(--n-lb-style) 500 var(--n-label)/1.4 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}

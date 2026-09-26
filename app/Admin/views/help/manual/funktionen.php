@@ -1,0 +1,24 @@
+<?php /** Handbuch · Kapitel „Funktionen & Erweiterungen“ (Core\Features, Core\Extensions) – für den Haupt-Admin bzw. die Agentur */ ?>
+  <p class="lead">Unter <b>Administration → Funktionen &amp; Erweiterungen</b> legen Sie fest, was diese Website kann – von der REST-API über KI-Funktionen bis zu Erweiterungen wie den Video-Werkzeugen. Die Seite sehen nur Personen mit dem Recht <i>Funktionen &amp; Erweiterungen ein- und ausschalten</i> (in einer Einzel-Installation hat die Rolle „Administration“ es; weitere Rollen bekommen es unter <b>Benutzer &amp; Rollen</b>).</p>
+  <div class="doc-note doc-note--warn"><strong>Nur einschalten, was die Website wirklich braucht</strong><p>Jede Funktion ist zusätzliche Angriffsfläche, Pflege und ggf. Datenverarbeitung. Abgeschaltete Funktionen sperren ihre Rechte, Menüpunkte, API- und MCP-Werkzeuge automatisch – auch für die Administration. Im Zweifel aus lassen und erst einschalten, wenn es konkret gebraucht wird.</p></div>
+  <h3>Funktionen</h3>
+  <ul>
+    <li><b>Gruppen:</b> Inhalte, Daten, Medien, KI, Schnittstellen, Kommunikation, Sicherheit &amp; Betrieb. Jede Zeile hat einen Schalter, eine Kurzbeschreibung und den Status <i>an</i>, <i>aus</i> oder <i>per Konfiguration festgelegt</i>.</li>
+    <li><b>„Was passiert beim Einschalten“</b> zeigt neue Menüpunkte und Rechte, Anfragen an fremde Dienste (z. B. an einen KI-Anbieter), Hintergrund-Aufgaben (Cron), Auswirkungen auf der Website (Skripte, Cookies) und welche Daten gespeichert werden.</li>
+    <li><b>Abhängigkeiten:</b> Manche Funktionen bauen aufeinander auf – z. B. brauchen Kalender und Formulare die Datentabellen, der KI-Assistent und der Besucher-Chat die KI-Funktionen. Fehlt die Voraussetzung, „ruht“ die Funktion und der Schalter bleibt gesperrt.</li>
+    <li><b>Sicherheitsrelevant</b> (REST-API, MCP, KI, Besucher-Chat, Externe Quellen, Erweiterungen mit Server-Prozessen wie die Video-Werkzeuge): Beim Einschalten erscheint der konkrete Risiko-Hinweis; Sie bestätigen ihn und geben Ihr Passwort ein.</li>
+    <li><b>Vorsicht bei „Benutzer und Rollen“ und „Grundeinstellungen“:</b> Aus bedeutet gesperrt für alle – bis Sie den Schalter hier wieder einschalten.</li>
+  </ul>
+  <h3>Erweiterungen</h3>
+  <ul>
+    <li>Die Liste zeigt alle installierten Erweiterungen mit Version, Autor, Lizenz, Beschreibung und Voraussetzungen. Die Prüfungen laufen live – bei den Video-Werkzeugen z. B. „ffmpeg gefunden?“ und „proc_open erlaubt?“.</li>
+    <li><b>Aktivieren</b> startet die Erweiterung sofort und richtet ihre Datenbank ein; Menüpunkte erscheinen ab dem nächsten Seitenaufruf. Eigene Funktionen der Erweiterung (z. B. „Video-Werkzeuge“) werden mit eingeschaltet.</li>
+    <li><b>Deaktivieren</b> löscht nichts: Daten und Einstellungen bleiben, die Erweiterung wird nur nicht mehr gestartet – ihre Menüpunkte, Adressen, Befehle und Skripte auf der Website entfallen.</li>
+    <li>„Fester Bestandteil“ kennzeichnet Erweiterungen, ohne die diese Website nicht funktioniert; sie lassen sich hier nicht abschalten.</li>
+  </ul>
+  <h3>„Per Konfiguration festgelegt“</h3>
+  <p>Hat die Agentur eine Funktion oder Erweiterung in der Konfigurationsdatei der Website festgelegt, gilt dieser Wert und der Schalter ist gesperrt (der Hinweis nennt die Datei). Zum Freigeben entfernt die Agentur den Eintrag oder führt auf dem Server <code>php bin/console features:release</code> aus – danach steuern Sie den Schalter hier.</p>
+  <h3>Netzwerk mit mehreren Websites</h3>
+  <p>Betreibt eine Agentur mehrere Websites in einer Installation, schaltet die <b>Netzwerk-Administration</b> je Website. Die Administration einer Website sieht die Seite dann nur lesend („Freischaltung durch die Agentur“), bis die Netzwerk-Administration ihr das Schalten ausdrücklich freigibt.</p>
+  <h3>Protokoll</h3>
+  <p>Jede Änderung wird mit Zeit, Person und altem/neuem Stand protokolliert; die letzten zehn stehen unten auf der Seite.</p>

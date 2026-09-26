@@ -1,0 +1,1 @@
+(()=>{if("serviceWorker"in navigator){let e=document.currentScript;navigator.serviceWorker.register(e.dataset.sw,{scope:e.dataset.scope}).catch(()=>{})}location.search.includes("pwa=1")&&history.replaceState(null,"",location.pathname+location.hash);})();

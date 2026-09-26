@@ -1,0 +1,15 @@
+/* Theme „fluid“: Abschnitts-Optionen „Vollbild“ und „Hintergrundbild“ – ersetzt das Kern-Stylesheet css/sections.css
+   (lädt nur, wenn ein Abschnitt der Seite sie nutzt). Farben aus den Tokens, Abdunkelung aus der Farbe „Dunkle Abschnitte“. */
+.sec--has-bg{position:relative;isolation:isolate;overflow:clip}
+.sec--has-bg.bg-white,.sec--has-bg.bg-muted,.sec--has-bg.bg-tint{--f-sec-bg:var(--f-bg)}
+.sec__bg{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.sec__bg picture{display:contents}
+.sec__bg img{width:100%;height:100%;max-width:none;object-fit:cover}
+.sec__bg::after{content:"";position:absolute;inset:0}
+.sec--ov-dark .sec__bg::after{background:linear-gradient(180deg,color-mix(in srgb,var(--f-dark) 58%,transparent),color-mix(in srgb,var(--f-dark) 78%,transparent))}
+.sec--ov-light .sec__bg::after{background:color-mix(in srgb,var(--f-bg) 86%,transparent)}
+.sec--screen{display:flex;flex-direction:column;justify-content:center;min-height:100vh;min-height:100svh}
+.sec--screen>:not(.sec__bg){width:min(100% - 2 * var(--f-gutter),var(--f-wrap))}
+.sec--screen>.mt-split,.sec--screen>.hero-bleed{width:100%}
+.sec--align-top{justify-content:flex-start}.sec--align-bottom{justify-content:flex-end}
+

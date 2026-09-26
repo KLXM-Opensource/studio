@@ -1,0 +1,8 @@
+/* Kopfbereich-Aktionen – Teil „Menüpunkt“: Handlungsaufruf als abgesetzter letzter Punkt der Navigation – Trennlinie davor,
+   Akzent (Pfeil, Unterstrich) statt Button; das Kit bestimmt den Akzent. Mobil: hervorgehobener letzter Menüpunkt (Kit). */
+.ha-cta--navitem{position:relative;display:inline-flex;align-items:center;gap:.4em;min-height:var(--ha-h);white-space:nowrap;margin-inline-start:12px;padding:0 10px;border:0;background:none;color:var(--ha-accent);font-weight:650;text-decoration:none}
+.ha-cta--navitem::before{content:"";position:absolute;inset-inline-start:-12px;top:22%;bottom:22%;border-inline-start:1px solid var(--ha-line)}
+.ha-cta--navitem .ha-arrow{font-weight:400;transition:transform .18s ease}
+.ha-cta--navitem:hover .ha-cta__txt,.ha-cta--navitem[aria-current] .ha-cta__txt{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.45em}
+.ha-cta--navitem:hover .ha-arrow{transform:translateX(3px)}
+@media (prefers-reduced-motion:reduce){.ha-cta--navitem .ha-arrow{transition:none}}

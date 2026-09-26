@@ -1,0 +1,2 @@
+<?php /** Handbuch „fluid“ · Demo-Inhalte · @var string $settingsTitle */ ?>
+  <div class="doc-note doc-note--info"><strong>Demo-Inhalte ersetzen</strong><p>Eine neue Website startet mit dem fiktiven „Studio Beispiel (Demo)“ und dem Seitenbaum <b>Showcase</b>, der jeden Block zeigt. Ersetzen Sie Namen, Texte, Zahlen und Zitate durch eigene Angaben; Texte in [eckigen Klammern] sind Platzhalter. Den Showcase löschen Sie in der Seitenliste (samt Tabellen „… (Showcase)“) – oder lassen ihn als Vorlage unveröffentlicht stehen.</p></div>

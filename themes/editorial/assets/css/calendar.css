@@ -1,0 +1,34 @@
+/* Theme „editorial“: Kalender (Monat, Terminliste) und „Nächste Termine“ – Linien statt Kästen, große Ziffern, Mono-Auszeichnungen. */
+@import "../../../../resources/css/calendar.css";
+.cal{--cal-accent:var(--e-a);--cal-accent-ink:var(--e-a-on);--cal-muted:var(--e-muted);--cal-line:var(--e-line);--cal-surface:var(--e-box);
+  --cal-ev-bg:var(--e-a-soft);--cal-ev-ink:var(--e-ink);--cal-today-bg:var(--e-a-soft);--cal-radius:var(--e-radius);--cal-focus:var(--e-focus)}
+.cal-head{max-width:none;padding-top:clamp(12px,1.4vw,18px);border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+.cal-heading{margin:0;color:var(--e-ink);font:var(--e-hw) var(--e-h2)/1.1 var(--e-font-display);letter-spacing:calc(var(--e-track) * -.016em)}
+.cal-intro{color:var(--e-muted)}
+.cal-month,.cal-upname,.cal-adate{color:var(--e-ink);font-family:var(--e-font-display);font-weight:var(--e-hw)}
+.cal-month{font-size:var(--e-h3)}
+.cal-navlink,.cal-chip{border-radius:var(--e-radius);border-color:var(--e-line-strong);color:var(--e-ink);font:500 .8125rem var(--e-font-mono)}
+.cal-chip[aria-current=true]{background:var(--e-ink);border-color:var(--e-ink);color:var(--e-sec-bg,var(--e-bg))}
+.cal-grid th{font-family:var(--e-font-mono);font-weight:500;border-bottom-color:var(--e-ink)}
+.cal-day{border-color:var(--e-line)}
+.cal-num{font-family:var(--e-font-mono);font-weight:500;border-radius:var(--e-radius)}
+.cal-ev{border-radius:var(--e-radius);border-left:2px solid var(--e-a)}
+.cal-link{color:var(--e-ink);text-decoration:none}
+.cal-link:hover{color:var(--e-link);text-decoration:underline}
+.cal-aday{border-top-color:var(--e-line)}
+.cal-agenda{border-bottom:1px solid var(--e-line)}
+.cal-atime,.cal-time{font-family:var(--e-font-mono);font-size:.8125rem}
+.cal-badge{border-radius:var(--e-radius);font-family:var(--e-font-mono)}
+/* Nächste Termine: Datum groß in der Überschriftenschrift, Linien */
+.cal-uplist{gap:0;border-top:1px solid var(--e-ink)}
+.cal-upitem{gap:clamp(16px,2.4vw,28px);padding:16px 0;border-radius:0;background:none;border-bottom:1px solid var(--e-line)}
+.cal-upcal{width:auto;min-width:3.6rem;height:auto;border-radius:0;background:none;color:var(--e-ink);justify-items:start;gap:4px}
+.cal-upday{font:var(--e-hw) 2.6rem/.85 var(--e-font-display)}
+.cal-upmon{color:var(--e-a);font:500 .75rem/1 var(--e-font-mono)}
+.cal-upname{font-size:calc(var(--e-ratio) * 1.05rem);line-height:1.25}
+.cal-upmeta{font:400 .8125rem/1.5 var(--e-font-mono)}
+.cal-up--compact .cal-upitem{padding:12px 0}
+.cal-sublink{color:var(--e-ink);text-decoration-color:var(--e-a)}
+.cal-empty{border-radius:var(--e-radius)}
+.cal-grid{background:var(--e-bg)}
+.cal-day.is-other{background:color-mix(in srgb,var(--e-ink) 5%,var(--e-bg))}

@@ -1,0 +1,4 @@
+/* Kopfbereich-Aktionen – Teil „Zweite Aktion“: zurückhaltender Link mit Symbol (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-cta2{display:inline-flex;align-items:center;gap:.45em;min-height:var(--ha-h);padding:0 10px;color:var(--ha-ink);font-size:var(--ha-fs);font-weight:500;text-decoration:none;white-space:nowrap}
+.ha-cta2:hover{background:var(--ha-surface)}
+@media (max-width:29.99em){.ha--compact .ha-cta2{min-width:44px;min-height:44px;padding:0;justify-content:center}.ha--compact .ha-cta2__txt{display:none}}

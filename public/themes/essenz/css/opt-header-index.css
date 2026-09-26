@@ -1,0 +1,1 @@
+.hdr--index{border-bottom-color:transparent}.hdr--index .menu-btn{display:inline-flex;background:var(--e-ink);border-color:var(--e-ink);color:var(--e-bg)}.hdr--index .menu-btn:hover{background:color-mix(in srgb,var(--e-ink) 88%,var(--e-a))}.hdr--index .menu-btn__bars,.hdr--index .menu-btn__bars:before{background:var(--e-a)}

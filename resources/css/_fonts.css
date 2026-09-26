@@ -1,0 +1,29 @@
+/* ==========================================================================
+   Grundeinstellungen → Schriften (Core\Fonts, views/system/fonts.php, resources/js/_fonts.js)
+   ========================================================================== */
+.fo-text{max-width:640px}
+.fo-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,220px) auto;gap:12px;align-items:end;margin-bottom:12px}
+.fo-search .f{margin-bottom:0}
+@media (max-width:640px){.fo-search{grid-template-columns:1fr}}
+.fo-grid{list-style:none;margin:0 0 16px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.fo-card{display:grid;gap:8px;align-content:start;padding:14px 16px;border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line)}
+.fo-card h3{margin:0;font-size:15px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fo-card .adm-btn{justify-self:start}
+.fo-meta{margin:0;font-size:12.5px;color:var(--adm-t3)}
+.fo-sample{margin:4px 0 0;font-size:22px;line-height:1.3;color:var(--adm-ink);overflow-wrap:anywhere;min-height:1.3em}
+.fo-sample--big{font-size:34px;margin:0 0 8px}
+.fo-sample[aria-busy=true]{opacity:.45}
+.fo-sample.is-failed{opacity:.6;font-style:italic}
+.fo-table-wrap{overflow-x:auto}
+.fo-table td{vertical-align:top}
+.fo-table .fo-sample{font-size:19px;margin-top:6px}
+.fo-copy{display:block;max-width:34ch;font-size:11.5px;line-height:1.35}
+.fo-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.fo-actions form{margin:0}
+.fo-actions [aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--adm-a);color:var(--adm-a-ink)}
+.fo-install{box-shadow:0 0 0 2px var(--adm-a)}
+.fo-set{margin:0 0 14px;padding:0;border:0}
+.fo-set legend{font-weight:600;font-size:14px;margin-bottom:6px}
+.fo-checks{display:flex;flex-wrap:wrap;gap:6px 16px}
+/* Style-Editor: Hinweis bei großen installierten Schriften */
+.ds-fontwarn{margin:6px 0 0;padding:8px 12px;border-radius:8px;background:var(--adm-warn-bg);color:var(--adm-warn);font-size:13px;font-weight:600}

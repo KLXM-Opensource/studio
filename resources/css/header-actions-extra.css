@@ -1,0 +1,19 @@
+/* Kopfbereich-Aktionen – Teil „Extras“: Anmelden, Social-Symbole, Sprachen als Aufklappliste (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-acct{display:inline-flex;align-items:center;gap:.4em;min-height:var(--ha-h);padding:0 10px;color:var(--ha-ink);font-size:var(--ha-fs);text-decoration:none}
+.ha-acct:hover{background:var(--ha-surface)}
+.ha-social{display:flex;gap:2px;margin:0;padding:0;list-style:none}
+.ha-social a{display:inline-grid;place-items:center;width:var(--ha-h);height:var(--ha-h);border-radius:var(--ha-r);color:var(--ha-muted)}
+.ha-social a:hover{background:var(--ha-surface);color:var(--ha-ink)}
+.ha-lang--dropdown{position:relative}
+.ha-lang__btn{display:inline-flex;align-items:center;gap:.35em;min-height:var(--ha-h);padding:0 8px 0 10px;color:var(--ha-ink);font-size:.875rem;font-weight:600;letter-spacing:.03em;list-style:none;cursor:pointer}
+.ha-lang__btn::-webkit-details-marker{display:none}
+.ha-lang__btn:hover{background:var(--ha-surface)}
+.ha-caret{width:.8em;height:.8em;transition:transform .15s}
+.ha-lang--dropdown[open] .ha-caret{transform:rotate(180deg)}
+.ha-lang__list{position:absolute;z-index:40;top:calc(100% + 6px);right:0;min-width:11rem;margin:0;padding:6px;list-style:none;border:1px solid var(--ha-line);border-radius:var(--ha-r);background:var(--ha-bg);box-shadow:0 12px 32px rgba(0,0,0,.14)}
+.ha-lang__list a{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:calc(var(--ha-r) - 3px);color:var(--ha-ink);text-decoration:none}
+.ha-lang__list a:hover{background:var(--ha-surface)}
+.ha-lang__list a[aria-current]{font-weight:700}
+.ha-lang__list a[aria-current]::after{content:"✓";margin-left:auto;padding-left:12px;color:var(--ha-accent)}
+@media (max-width:29.99em){.ha--compact :is(.ha-social,.ha-acct){display:none}}
+@media (prefers-reduced-motion:reduce){.ha-caret{transition:none}}

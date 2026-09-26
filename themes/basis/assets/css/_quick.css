@@ -1,0 +1,6 @@
+/* Direktkontakt (Mega-Menü, Vollbild-Menü) */
+.quick__list{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:0 0 16px;padding:0;list-style:none}
+.quick__list a{display:inline-flex;align-items:center;gap:8px;min-height:32px;color:var(--b-text);text-decoration:none}
+.quick__list a:hover{color:var(--b-ink);text-decoration:underline}
+.quick__list .icon{width:16px;height:16px;flex:none;color:var(--b-link)}
+.quick__title{margin-bottom:8px;color:var(--b-muted);font-size:.8125rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}

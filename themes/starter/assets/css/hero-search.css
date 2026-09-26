@@ -1,0 +1,14 @@
+/* Einstieg, Variante „Such-Einstieg“ (blocks/hero.php) – lädt nur auf Seiten mit 'hero:search' (theme.php → conditional_css).
+   Das Suchfeld selbst (.sf, .sf__row, .sf__input, .sf__btn) ist in site.css schon gestaltet (Kopf-Suche) – hier nur größer. */
+.hero--search{max-width:48rem}
+.hero--search .sf{margin-top:1.75rem}
+.hero--search .sf__label{display:block;margin-bottom:.5rem;color:var(--s-ink);font-weight:600}
+.hero--search .sf__row{position:relative;min-height:3.5rem}
+.hero--search .sf__input{flex:1;min-width:0;padding:0 1rem;border:0;background:transparent;color:var(--s-ink);font:inherit;font-size:1.125rem}
+.hero--search .sf__input:focus{outline:none}   /* Fokus zeigt .sf__row:focus-within (site.css) */
+.hero--search .sf__btn span{font-size:1rem}
+.hero__chips ul{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 0;padding:0;list-style:none}
+.hero__chips a{display:inline-flex;align-items:center;min-height:2.25rem;padding:0 .9rem;border:1px solid var(--s-line-strong);border-radius:999px;color:var(--s-ink);text-decoration:none}
+.hero__chips a:hover{border-color:var(--s-a);color:var(--s-a)}
+.hero__chips a:focus-visible{outline:3px solid var(--s-a);outline-offset:2px}
+@media (max-width:30em){.hero--search .sf__btn span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}

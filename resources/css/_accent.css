@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Persönliche Akzentfarbe der Verwaltung (Konto → Darstellung, Core\Accent)
+   html.adm-ui[data-accent=…] (+ [data-side=tint]: Seitenleiste mitfärben). Nur kuratierte Vorlagen –
+   jede Vorlage ist für Hell und Dunkel auf WCAG 2.2 AA geprüft (Text 4,5:1, Bedienelemente/Fokus 3:1):
+   Weiß auf --adm-a / --adm-a-d, --adm-a-ink auf Hintergrund, Karte und --adm-accent-bg,
+   --adm-a gegen Hintergründe (Fokusring), Seitenleiste: Text, Symbole und Markierung gegen die Leistenfarbe.
+   „navy“ = Standard (keine Regeln). Die Werte stehen auch in Core\Accent::PRESETS (Prüfung: accent:check).
+   Wird per @import vor admin.css eingebunden: höhere Spezifität statt Reihenfolge. admin.shadow.css übernimmt
+   alles automatisch (:host(.adm-ui[data-accent=…])); die Werkzeugleiste steht in editor.shadow.css.
+   ========================================================================== */
+/* petrol */
+html.adm-ui[data-accent=petrol]{--adm-a:#0E6470;--adm-a-d:#0A4D56;--adm-a-ink:#0B5A65;--adm-accent-bg:#DDEFF0;--adm-a-rgb:14 100 112;--adm-hover:rgb(14 100 112 / .06);--adm-press:rgb(14 100 112 / .11);--adm-info-line:rgb(14 100 112 / .28);--acc-side:#143C43;--acc-side-a:#9ED8DF;--acc-mark:#5FE0CF}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=petrol]:not([data-theme=light]){--adm-a:#2D7F8B;--adm-a-d:#236A74;--adm-a-ink:#8FD3DC;--adm-accent-bg:#17363B;--adm-a-rgb:45 127 139;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(45 127 139 / .45)}}
+html.adm-ui[data-accent=petrol][data-theme=dark]{--adm-a:#2D7F8B;--adm-a-d:#236A74;--adm-a-ink:#8FD3DC;--adm-accent-bg:#17363B;--adm-a-rgb:45 127 139;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(45 127 139 / .45)}
+/* gruen */
+html.adm-ui[data-accent=gruen]{--adm-a:#2E6B3F;--adm-a-d:#235232;--adm-a-ink:#2A6139;--adm-accent-bg:#E1F0E4;--adm-a-rgb:46 107 63;--adm-hover:rgb(46 107 63 / .06);--adm-press:rgb(46 107 63 / .11);--adm-info-line:rgb(46 107 63 / .28);--acc-side:#1C3D28;--acc-side-a:#A9DDB5;--acc-mark:#7FE39A}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=gruen]:not([data-theme=light]){--adm-a:#408351;--adm-a-d:#336B42;--adm-a-ink:#9ED6AB;--adm-accent-bg:#1B3322;--adm-a-rgb:64 131 81;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(64 131 81 / .45)}}
+html.adm-ui[data-accent=gruen][data-theme=dark]{--adm-a:#408351;--adm-a-d:#336B42;--adm-a-ink:#9ED6AB;--adm-accent-bg:#1B3322;--adm-a-rgb:64 131 81;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(64 131 81 / .45)}
+/* violett */
+html.adm-ui[data-accent=violett]{--adm-a:#5B3F95;--adm-a-d:#48317A;--adm-a-ink:#553A8C;--adm-accent-bg:#ECE6F7;--adm-a-rgb:91 63 149;--adm-hover:rgb(91 63 149 / .06);--adm-press:rgb(91 63 149 / .11);--adm-info-line:rgb(91 63 149 / .28);--acc-side:#312651;--acc-side-a:#CBBDF2;--acc-mark:#C9A8FF}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=violett]:not([data-theme=light]){--adm-a:#7F67BA;--adm-a-d:#6750A3;--adm-a-ink:#C8B8F0;--adm-accent-bg:#2C2442;--adm-a-rgb:127 103 186;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(127 103 186 / .45)}}
+html.adm-ui[data-accent=violett][data-theme=dark]{--adm-a:#7F67BA;--adm-a-d:#6750A3;--adm-a-ink:#C8B8F0;--adm-accent-bg:#2C2442;--adm-a-rgb:127 103 186;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(127 103 186 / .45)}
+/* bordeaux */
+html.adm-ui[data-accent=bordeaux]{--adm-a:#8A2E45;--adm-a-d:#6F2337;--adm-a-ink:#822A41;--adm-accent-bg:#F6E4E8;--adm-a-rgb:138 46 69;--adm-hover:rgb(138 46 69 / .06);--adm-press:rgb(138 46 69 / .11);--adm-info-line:rgb(138 46 69 / .28);--acc-side:#4A1E2B;--acc-side-a:#F2B8C6;--acc-mark:#FF9EB5}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=bordeaux]:not([data-theme=light]){--adm-a:#B8556E;--adm-a-d:#963D54;--adm-a-ink:#F0AFC0;--adm-accent-bg:#3A1F27;--adm-a-rgb:184 85 110;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(184 85 110 / .45)}}
+html.adm-ui[data-accent=bordeaux][data-theme=dark]{--adm-a:#B8556E;--adm-a-d:#963D54;--adm-a-ink:#F0AFC0;--adm-accent-bg:#3A1F27;--adm-a-rgb:184 85 110;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(184 85 110 / .45)}
+/* orange */
+html.adm-ui[data-accent=orange]{--adm-a:#A34A0B;--adm-a-d:#853C08;--adm-a-ink:#963F05;--adm-accent-bg:#FBE9DC;--adm-a-rgb:163 74 11;--adm-hover:rgb(163 74 11 / .06);--adm-press:rgb(163 74 11 / .11);--adm-info-line:rgb(163 74 11 / .28);--acc-side:#4A2812;--acc-side-a:#F7C39B;--acc-mark:#FFB36B}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=orange]:not([data-theme=light]){--adm-a:#B75C1D;--adm-a-d:#984A14;--adm-a-ink:#F6B98A;--adm-accent-bg:#3B2718;--adm-a-rgb:183 92 29;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(183 92 29 / .45)}}
+html.adm-ui[data-accent=orange][data-theme=dark]{--adm-a:#B75C1D;--adm-a-d:#984A14;--adm-a-ink:#F6B98A;--adm-accent-bg:#3B2718;--adm-a-rgb:183 92 29;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(183 92 29 / .45)}
+/* graphit */
+html.adm-ui[data-accent=graphit]{--adm-a:#3D434D;--adm-a-d:#2E333B;--adm-a-ink:#3D434D;--adm-accent-bg:#E6E8EB;--adm-a-rgb:61 67 77;--adm-hover:rgb(61 67 77 / .06);--adm-press:rgb(61 67 77 / .11);--adm-info-line:rgb(61 67 77 / .28);--acc-side:#2A2D33;--acc-side-a:#C3C8D1;--acc-mark:#9FE0C8}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=graphit]:not([data-theme=light]){--adm-a:#6E7684;--adm-a-d:#5A606C;--adm-a-ink:#C3C8D1;--adm-accent-bg:#2A2D33;--adm-a-rgb:110 118 132;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(110 118 132 / .45)}}
+html.adm-ui[data-accent=graphit][data-theme=dark]{--adm-a:#6E7684;--adm-a-d:#5A606C;--adm-a-ink:#C3C8D1;--adm-accent-bg:#2A2D33;--adm-a-rgb:110 118 132;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(110 118 132 / .45)}
+/* Seitenleiste: Symbole und Markierung des aktiven Punkts in der Akzentfarbe; „mitfärben“: Leiste (und Kopfleiste
+   auf schmalen Bildschirmen) in einem dunklen Ton der Vorlage – Text bleibt ≥ 11:1 */
+html.adm-ui[data-accent] .adm-side{--adm-a:var(--acc-side-a);--adm-mint:var(--acc-mark)}
+html.adm-ui[data-accent][data-side=tint] :is(.adm-side,.adm-top){background:var(--acc-side)}
+/* Gemeinsam: Auswahl in der Mediathek, Fokusringe und Schatten mit Akzent-RGB (Standard: Navy in admin.css) */
+html.adm-ui[data-accent] .fx{--fx-sel:var(--adm-a);--fx-selbg:rgb(var(--adm-a-rgb) / .1)}
+/* Konto → Akzentfarbe: Auswahl mit Farbmustern (hell | dunkel | Seitenleiste) und Live-Vorschau (resources/js/_accent.js) */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0 0 14px;padding:0;border:0}
+.acc-grid legend{font-weight:600;font-size:14px;margin-bottom:8px}
+.acc-opt{position:relative;display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border-radius:8px;background:var(--adm-surface);box-shadow:inset 0 0 0 1.5px var(--adm-line);cursor:pointer;font-weight:600;font-size:14px}
+.acc-opt:hover{box-shadow:inset 0 0 0 1.5px var(--adm-in)}
+.acc-opt input{position:absolute;opacity:0;width:1px;height:1px}
+.acc-opt:has(input:checked){box-shadow:inset 0 0 0 2px var(--adm-a);background:var(--adm-accent-bg)}
+.acc-opt:has(input:focus-visible){outline:2px solid var(--adm-a);outline-offset:2px}
+.acc-opt:has(input:checked)::after{content:"✓";margin-left:auto;color:var(--adm-a-ink);font-weight:800}
+.acc-opt:has(input:disabled){opacity:.5;cursor:not-allowed}
+.acc-sw{flex:none;display:inline-grid;grid-template-columns:1fr 1fr 1fr;width:42px;height:24px;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.acc-sw i{display:block}
+.acc-sw i:nth-child(1){background:var(--sw-l)}.acc-sw i:nth-child(2){background:var(--sw-d)}.acc-sw i:nth-child(3){background:var(--sw-s)}
+.acc-sw[data-sw=navy]{--sw-l:#314164;--sw-d:#5B73AD;--sw-s:#24314B}
+.acc-sw[data-sw=petrol]{--sw-l:#0E6470;--sw-d:#2D7F8B;--sw-s:#143C43}
+.acc-sw[data-sw=gruen]{--sw-l:#2E6B3F;--sw-d:#408351;--sw-s:#1C3D28}
+.acc-sw[data-sw=violett]{--sw-l:#5B3F95;--sw-d:#7F67BA;--sw-s:#312651}
+.acc-sw[data-sw=bordeaux]{--sw-l:#8A2E45;--sw-d:#B8556E;--sw-s:#4A1E2B}
+.acc-sw[data-sw=orange]{--sw-l:#A34A0B;--sw-d:#B75C1D;--sw-s:#4A2812}
+.acc-sw[data-sw=graphit]{--sw-l:#3D434D;--sw-d:#6E7684;--sw-s:#2A2D33}
+.acc-pv{display:grid;grid-template-columns:120px 1fr;margin:4px 0 16px;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--adm-line);background:var(--adm-bg)}
+.acc-pv__side{--adm-a:var(--acc-side-a,#B4C4E8);display:grid;align-content:start;gap:4px;padding:12px 0;background:#24314B;color:#F4F6FA;font-size:13px}
+html.adm-ui[data-accent][data-side=tint] .acc-pv__side{background:var(--acc-side)}
+.acc-pv__side span{display:flex;align-items:center;gap:8px;padding:6px 12px}
+.acc-pv__side span::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--adm-a)}
+.acc-pv__side .is-on{background:rgba(255,255,255,.14);font-weight:700;box-shadow:inset 2px 0 0 var(--acc-mark,#3DD9A0)}
+.acc-pv__main{display:grid;gap:10px;align-content:start;padding:14px 16px}
+.acc-pv__main p{margin:0;font-size:14px}
+.acc-pv__row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acc-pv__chip{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:6px;background:var(--adm-accent-bg);color:var(--adm-a-ink);font-size:12px;font-weight:700}
+.acc-pv__focus{min-height:32px;padding:0 12px;border-radius:6px;border:1.5px solid var(--adm-a);background:var(--adm-surface);color:var(--adm-ink);font:inherit;font-size:13px;box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .22)}
+@media (max-width:560px){.acc-pv{grid-template-columns:1fr}.acc-pv__side{display:none}}
+/* Flächen, die in admin.css mit festem Navy-Verlauf gezeichnet sind: Hauptschaltflächen, Tabellen- und Symbolkacheln
+   (.cr = eigene helle Schaltfläche auf dunkler Karte – bleibt) */
+html.adm-ui[data-accent] .adm-btn--primary:not(.cr *){background:linear-gradient(var(--adm-a),var(--adm-a-d) 140%);color:#fff}
+html.adm-ui[data-accent] .adm-btn--primary:not(.cr *):hover{background:var(--adm-a-d);color:#fff}
+html.adm-ui[data-accent] :is(.dt-icon,.dt-h1icon,.icp__cur){background:linear-gradient(145deg,var(--adm-a),var(--adm-a-d))}

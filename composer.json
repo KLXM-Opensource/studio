@@ -1,0 +1,54 @@
+{
+    "name": "klxm/studio",
+    "description": "KLXM Studio – schlankes Block-CMS mit Theme-System, REST-API und MCP-Server",
+    "type": "project",
+    "license": "MIT",
+    "homepage": "https://studio.klxm.de",
+    "support": {
+        "source": "https://github.com/klxm/studio",
+        "issues": "https://github.com/klxm/studio/issues"
+    },
+    "require": {
+        "php": ">=8.4",
+        "ext-dom": "*",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-sodium": "*",
+        "chillerlan/php-qrcode": "^5.0",
+        "doctrine/dbal": "^4",
+        "lbuchs/webauthn": "^2.2",
+        "loupe/loupe": "^1.1",
+        "rlanvin/php-rrule": "^3.0",
+        "sabre/dav": "^4.7",
+        "symfony/ai-generic-platform": "^0.14",
+        "symfony/ai-mistral-platform": "^0.14",
+        "symfony/ai-ollama-platform": "^0.14",
+        "symfony/ai-open-ai-platform": "^0.14",
+        "symfony/ai-platform": "^0.14",
+        "symfony/ai-store": "^0.14",
+        "symfony/http-client": "^8.0",
+        "symfony/mailer": "^8.0"
+    },
+    "replace": {
+        "nitotm/efficient-language-detector": "*",
+        "joomla/string": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Core\\": "app/",
+            "Joomla\\String\\": "lib/compat/joomla-string/"
+        },
+        "files": [
+            "app/helpers.php"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "platform": {
+            "php": "8.4.0"
+        }
+    }
+}

@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Start-Kit – site.css: lädt auf JEDER Seite (layout.php). Budget der Startseite: < 30 KB – hier ein Bruchteil davon.
+   Block-CSS lädt nur bei Bedarf (theme.php → conditional_css: blocks.css, core.css).
+   Alle Farben über Rollen/Tokens (_tokens.css) – keine festen Werte in Komponenten.
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+
+/* ---------------------------------------------------------------- Hinweisbalken (Website → Hinweisbalken) */
+.notice{padding-block:.6rem;background:var(--s-a);color:var(--s-a-on);font-size:.95rem;text-align:center}
+.notice a{color:inherit}
+
+/* ---------------------------------------------------------------- Kopf (partials/header.php)
+   Reihenfolge im Markup: Marke · Werkzeuge (Suche, Menü-Knopf) · Navigation. Anordnung je Variante per CSS. */
+.hdr{position:relative;z-index:20;border-bottom:1px solid var(--s-line);background:var(--s-bg)}
+.has-sticky .hdr{position:sticky;top:0}
+.hdr__bar{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.5rem;min-height:4rem;padding-block:.5rem}
+.brand{display:inline-flex;align-items:center;margin-right:auto;color:var(--s-ink);font-size:1.15rem;font-weight:800;letter-spacing:-.01em;text-decoration:none}
+.brand__img{display:block;width:auto;height:2.5rem}
+.brand__logo--dark{display:none}
+@media (prefers-color-scheme:dark){.has-dark .brand__logo--dark{display:block}.has-dark .brand__logo:has(+.brand__logo--dark){display:none}}
+.hdr__tools{display:flex;align-items:center;gap:.5rem;order:2}
+.nav{order:1}
+
+/* Navigation (Desktop): Liste in der Leiste, Unterseiten als Aufklappliste bei Hover/Tastaturfokus */
+.nav__list{display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;margin:0;padding:0;list-style:none}
+.nav__link{display:block;padding:.5rem 0;color:var(--s-ink);font-weight:500;text-decoration:none}
+.nav__link:hover,.nav__link[aria-current=page],.nav__link[data-active]{color:var(--s-a);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.45em}
+.has-sub{position:relative}
+.nav__sub{display:none;position:absolute;z-index:5;top:100%;left:-1rem;min-width:14rem;margin:0;padding:.5rem 1rem;list-style:none;border:1px solid var(--s-line);border-radius:var(--s-radius);background:var(--s-bg);box-shadow:var(--s-shadow)}
+.has-sub:hover>.nav__sub,.has-sub:focus-within>.nav__sub{display:block}
+.langs{display:flex;gap:.75rem;margin:0;padding:0;list-style:none;font-size:.9rem;font-weight:600}
+.langs a{color:var(--s-mut);text-decoration:none}
+.langs a[aria-current]{color:var(--s-ink);text-decoration:underline}
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.5rem}
+.nav__close,.nav-toggle{display:none}
+@media (min-width:48em){   /* Desktop: popover-Voreinstellungen des Browsers aufheben – das Menü steht in der Leiste */
+  .nav[popover]{position:static;inset:auto;width:auto;height:auto;margin:0;padding:0;overflow:visible;border:0;background:none;color:inherit}
+}
+
+/* Variante „Zentriert“ (design nav=center): Marke mittig, Werkzeuge rechts, Menü darunter */
+.nav-center .hdr__bar{display:grid;grid-template-columns:1fr auto 1fr}
+.nav-center .brand{grid-column:2;margin:0}
+.nav-center .hdr__tools{grid-column:3;justify-self:end}
+.nav-center .nav{grid-column:1/-1;justify-self:center}
+
+/* Mobil: Menü als HTML-popover (öffnet ohne JavaScript, Escape/Klick daneben schließt). Browser ohne popover:
+   Attribut und diese Regeln wirkungslos → Menü steht umbrechend unter der Marke. */
+@supports selector(:popover-open){@media (max-width:47.99em){
+  .nav-toggle{display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;padding:0 .9rem;border:1px solid var(--s-line-strong);border-radius:var(--s-btn-r);background:var(--s-bg);color:var(--s-ink);font:inherit;font-weight:600;cursor:pointer}
+  .nav-toggle__bars,.nav-toggle__bars::before,.nav-toggle__bars::after{display:block;width:1.1rem;height:2px;border-radius:1px;background:currentColor}
+  .nav-toggle__bars{position:relative}
+  .nav-toggle__bars::before,.nav-toggle__bars::after{content:"";position:absolute;left:0}
+  .nav-toggle__bars::before{top:-6px}.nav-toggle__bars::after{top:6px}
+  .nav[popover]{position:fixed;inset:0 0 auto auto;width:min(22rem,100%);height:100dvh;margin:0;padding:4.5rem var(--s-gutter) 2rem;overflow:auto;
+    flex-direction:column;align-items:stretch;border:0;border-left:1px solid var(--s-line);background:var(--s-bg);color:var(--s-text);box-shadow:var(--s-shadow)}
+  .nav[popover]:not(:popover-open){display:none}
+  .nav[popover]::backdrop{background:rgb(0 0 0/.45)}
+  .nav:popover-open .nav__close{display:inline-flex;position:absolute;top:.75rem;right:var(--s-gutter)}
+  .nav__list{flex-direction:column;gap:0}
+  .nav__link{padding:.7rem 0;border-bottom:1px solid var(--s-line);font-size:1.1rem}
+  .nav__sub{display:block;position:static;min-width:0;padding:0 0 0 1rem;border:0;background:none;box-shadow:none}
+  .langs{margin-top:1rem}
+  .nav-center .hdr__bar{grid-template-columns:auto 1fr}
+  .nav-center .brand{grid-column:1}
+  .nav-center .hdr__tools{grid-column:2}
+}}
+
+/* ---------------------------------------------------------------- Suche im Kopf (Kern: Search::form('header'))
+   Lupe öffnet ein popover; Vorschläge und Ergebnisseite gestaltet public/assets/css/search.css über --se-*. */
+.hsearch__btn{display:inline-grid;place-items:center;width:2.75rem;height:2.75rem;border:1px solid var(--s-line-strong);border-radius:var(--s-btn-r);background:var(--s-bg);color:var(--s-ink);cursor:pointer}
+.hsearch__panel{position:fixed;inset:4.5rem var(--s-gutter) auto auto;width:min(30rem,100vw - 2 * var(--s-gutter));margin:0;padding:.75rem 3.25rem .75rem .75rem;overflow:visible;
+  border:1px solid var(--s-line);border-radius:var(--s-radius);background:var(--s-bg);color:var(--s-text);box-shadow:var(--s-shadow)}
+.hsearch__close{position:absolute;top:.75rem;right:.4rem;width:2.5rem;height:2.75rem;border:0;background:none;color:inherit;font-size:1.6rem;cursor:pointer}
+.sf__row{display:flex;border:1.5px solid var(--s-line-strong);border-radius:var(--s-btn-r);background:var(--s-bg)}
+.sf__input{flex:1;min-width:0;min-height:2.75rem;padding:.5rem .75rem;border:0;background:none;color:inherit;font:inherit}
+.sf__input:focus{outline:none}
+.sf__row:focus-within{outline:3px solid var(--s-a);outline-offset:1px}
+.sf__btn{display:inline-flex;align-items:center;gap:.4rem;padding:0 1rem;border:0;border-radius:0 calc(var(--s-btn-r) - 2px) calc(var(--s-btn-r) - 2px) 0;background:var(--s-a);color:var(--s-a-on);font:inherit;font-weight:600;cursor:pointer}
+:root .sf,:root .srch,:root .ssug{--se-accent:var(--s-a);--se-muted:var(--s-muted);--se-line:var(--s-line);--se-surface:var(--s-surface);--se-bg:var(--s-bg);--se-radius:var(--s-radius)}
+
+/* ---------------------------------------------------------------- Kopfbereich-Aktionen (Core\HeaderActions)
+   Grundgerüst: /assets/css/header-actions*.css (lädt vor diesem Stylesheet, nur benötigte Teile). Das Kit setzt nur die
+   Farben (--ha-*) und bei Bedarf eigene Regeln – gleiche Spezifität genügt, weil diese Datei danach lädt. */
+.ha,.ha-below{--ha-accent:var(--s-a);--ha-on:var(--s-a-on);--ha-ink:var(--s-ink);--ha-muted:var(--s-muted);--ha-line:var(--s-line-strong);--ha-bg:var(--s-bg);--ha-surface:var(--s-surface);--ha-open:var(--s-a);--ha-h:2.75rem}
+.ha{display:flex;align-items:center;gap:.5rem}   /* schlichte Auswahl ohne Kern-Datei ('base_css' => false in theme.php) */
+.ha .btn{min-height:2.75rem;padding-block:0;border-radius:8px}
+.nav__cta{display:none}
+@media (max-width:29.99em){.nav__cta{display:inline-flex;justify-content:center;margin-top:1.25rem}.ha--compact .ha-cta{display:none}}

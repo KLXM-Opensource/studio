@@ -1,0 +1,288 @@
+{
+ "chatterbox-mtl-default-c0.5-t0.8-e0.5": {
+  "Webseits, Inhalte und Verwaltung: in einem System.": {
+   "seed": 1,
+   "trim": 2.84,
+   "match": 100,
+   "heard": "Websites, Inhalte und Verwaltung in einem System."
+  },
+  "Mehrere Kitts, ein gemeinsamer Kern.": {
+   "seed": 1,
+   "trim": 2.06,
+   "match": 100,
+   "heard": "Mehrere Kids. Ein gemeinsamer Kern."
+  },
+  "Fluid passt sich jeder Breite an.": {
+   "seed": 1,
+   "trim": 2.11,
+   "match": 100,
+   "heard": "Fluid passt sich jeder Breite an!"
+  },
+  "Vom Magazin.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "vom Magazin."
+  },
+  "bis zur Werkstatt.": {
+   "seed": 1,
+   "trim": 1.03,
+   "match": 100,
+   "heard": "bis zur Werkstatt"
+  },
+  "Lendingpejtschis mit eigener Domäin.": {
+   "seed": 1,
+   "trim": 2.35,
+   "match": 100,
+   "heard": "Lending Pages mit eigener Domain."
+  },
+  "Hell oder dunkel, auf jedem Gerät.": {
+   "seed": 1,
+   "trim": 2.01,
+   "match": 100,
+   "heard": "hell oder dunkel, auf jedem Gerät,"
+  },
+  "Bearbeitet wird direkt auf der Seite.": {
+   "seed": 2,
+   "trim": 2.37,
+   "match": 100,
+   "heard": "bearbeitet wird direkt auf der Seite."
+  },
+  "Texte formatieren: mit Marker und Farben.": {
+   "seed": 2,
+   "trim": 2.33,
+   "match": 100,
+   "heard": "Texte Formatieren mit Marker und Farben."
+  },
+  "Bilder kommen aus der Mediathek.": {
+   "seed": 1,
+   "trim": 2.48,
+   "match": 73,
+   "heard": "Bilder kommen aus der Mediatek, Maths."
+  },
+  "Die Ka I schlägt vor, Sie entscheiden.": {
+   "seed": 2,
+   "trim": 2.02,
+   "match": 100,
+   "heard": "Die KI schlägt vor, sie entscheiden,"
+  },
+  "Neue Blöcke per Klick, etwa Kennzahlen.": {
+   "seed": 1,
+   "trim": 2.36,
+   "match": 100,
+   "heard": "Neue Blöcke per Klick etwa Kennzahlen."
+  },
+  "Veröffentlichen. Fertig.": {
+   "seed": 3,
+   "trim": 1.66,
+   "match": 100,
+   "heard": "Veröffentlichen, fertig."
+  },
+  "Die Verwaltung behält alles im Blick.": {
+   "seed": 2,
+   "trim": 1.66,
+   "match": 100,
+   "heard": "Die Verwaltung behält alles im Blick."
+  },
+  "Medien mit Sammlungen und Schlagworten.": {
+   "seed": 1,
+   "trim": 1.99,
+   "match": 100,
+   "heard": "Medien mit Sammlungen und Schlagworten."
+  },
+  "Datentabellen für Projekte, Termine, Tiem.": {
+   "seed": 1,
+   "trim": 2.51,
+   "match": 100,
+   "heard": "Datentabellen für Projekte, Termine, Team."
+  },
+  "Eigene Blöcke bauen, mit Leif-Vorschau.": {
+   "seed": 3,
+   "trim": null,
+   "match": 100,
+   "heard": "eigene Blöcke bauen mit live Vorschau"
+  },
+  "Farben, Schrift und Navigation.": {
+   "seed": 2,
+   "trim": null,
+   "match": 100,
+   "heard": "Farben, Schrift und Navigation."
+  },
+  "Dazu eine eigene Akzentfarbe.": {
+   "seed": 1,
+   "trim": 1.77,
+   "match": 100,
+   "heard": "Dazu eine eigene Akzentfarbe."
+  },
+  "Rollen, Zwei-Faktor und Paskies.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Rollen, Zweifaktor und Paskis."
+  },
+  "Die Ka I entwirft ganze Seiten und Tabellen.": {
+   "seed": 4,
+   "trim": 2.21,
+   "match": 100,
+   "heard": "Die KI entwirft ganze Seiten und Tabellen."
+  },
+  "Eingereichte Änderungen prüfen und freigeben.": {
+   "seed": 1,
+   "trim": 2.34,
+   "match": 100,
+   "heard": "Eingereichte Änderungen prüfen und freigeben."
+  },
+  "Im Netzwerk: alle Webseits auf einen Blick.": {
+   "seed": 5,
+   "trim": null,
+   "match": 100,
+   "heard": "im Netzwerk alle Websites auf einen Blick."
+  },
+  "ka el ix em Studio. Oupen Sors.": {
+   "seed": 2,
+   "trim": 2.23,
+   "match": 75,
+   "heard": "HLXM Studio, Open Source."
+  },
+  "Bilder kommen aus der Mediatek.": {
+   "seed": 1,
+   "trim": 1.96,
+   "match": 100,
+   "heard": "Bilder kommen aus der Mediatek,"
+  },
+  "Kah, El, Ix, Emm Studio. Oupen Sors.": {
+   "seed": 3,
+   "trim": 2.63,
+   "match": 100,
+   "heard": "KLXM Studio Open Source."
+  }
+ },
+ "chatterbox-mtl-ref-thorsten-c0.3-t0.8-e0.35": {
+  "Rollen, Zwei-Faktor und Paskies.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Rollen, Zwei-Faktor und Pass-Keys"
+  },
+  "Kah, El, Ix, Emm Studio. Oupen Sors.": {
+   "seed": 2,
+   "trim": null,
+   "match": 100,
+   "heard": "KLXM Studio Open Source"
+  },
+  "Lendingpejtschis mit eigener Domäin.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Landing Pages mit eigener Domain."
+  },
+  "Veröffentlichen. Fertig.": {
+   "seed": 3,
+   "trim": null,
+   "match": 100,
+   "heard": "Veröffentlichen, fertig."
+  },
+  "Webseits, Inhalte und Verwaltung: in einem System.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Websites, Inhalte und Verwaltung in einem System."
+  }
+ },
+ "chatterbox-mtl-ref-thorsten-c0.3-t0.8-e0.5": {
+  "Rollen, Zwei-Faktor und Paskies.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Rollen, Zwei-Faktor und Pass-Keys"
+  },
+  "Kah, El, Ix, Emm Studio. Oupen Sors.": {
+   "seed": 1,
+   "trim": 3.14,
+   "match": 75,
+   "heard": "HLXM Studio Open Source"
+  },
+  "Lendingpejtschis mit eigener Domäin.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Landing Pages mit eigener Domain."
+  },
+  "Veröffentlichen. Fertig.": {
+   "seed": 3,
+   "trim": null,
+   "match": 100,
+   "heard": "Veröffentlichen, fertig."
+  },
+  "Webseits, Inhalte und Verwaltung: in einem System.": {
+   "seed": 1,
+   "trim": 4.16,
+   "match": 100,
+   "heard": "Websites, Inhalte und Verwaltung in einem System."
+  }
+ },
+ "chatterbox-mtl-ref-thorsten-c0.5-t0.8-e0.35": {
+  "Rollen, Zwei-Faktor und Paskies.": {
+   "seed": 2,
+   "trim": 3.14,
+   "match": 100,
+   "heard": "\"Rollen\", \"Zwei-Faktor\" und \"Pass-Keys\"."
+  },
+  "Kah, El, Ix, Emm Studio. Oupen Sors.": {
+   "seed": 2,
+   "trim": 3.6,
+   "match": 100,
+   "heard": "KLXM Studio Open Source"
+  },
+  "Lendingpejtschis mit eigener Domäin.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Landing Pages mit eigener Domain."
+  },
+  "Veröffentlichen. Fertig.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Veröffentlichen. Fertig."
+  },
+  "Webseits, Inhalte und Verwaltung: in einem System.": {
+   "seed": 1,
+   "trim": 4.14,
+   "match": 100,
+   "heard": "Websites, Inhalte und Verwaltung in einem System."
+  }
+ },
+ "chatterbox-mtl-ref-thorsten-c0.5-t0.8-e0.5": {
+  "Rollen, Zwei-Faktor und Paskies.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Rollen, Zwei-Faktor und Pass-Keys"
+  },
+  "Kah, El, Ix, Emm Studio. Oupen Sors.": {
+   "seed": 2,
+   "trim": 3.6,
+   "match": 100,
+   "heard": "KLXM Studio Open Source"
+  },
+  "Lendingpejtschis mit eigener Domäin.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Landing Pages mit eigener Domain"
+  },
+  "Veröffentlichen. Fertig.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "veröffentlichen. Fertig"
+  },
+  "Webseits, Inhalte und Verwaltung: in einem System.": {
+   "seed": 1,
+   "trim": null,
+   "match": 100,
+   "heard": "Websites, Inhalte und Verwaltung in einem System."
+  }
+ }
+}

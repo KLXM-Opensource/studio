@@ -1,0 +1,2 @@
+<?php /** Handbuch „essenz“ · Demo-Inhalte · @var string $settingsTitle */ ?>
+  <div class="doc-note doc-note--info"><strong>Demo-Inhalte ersetzen</strong><p>Eine neue Website startet mit der fiktiven „Werkstatt Beispiel“ und den Musterseiten <b>Werkstatt</b>, die jeden Block zeigen. Ersetzen Sie Namen, Texte, Zahlen und Stimmen durch eigene Angaben; Texte in [eckigen Klammern] sind Platzhalter. Die Musterseiten löschen Sie in der Seitenliste (samt Tabellen „… (Werkstatt)“) – oder lassen sie unveröffentlicht als Vorlage stehen.</p></div>

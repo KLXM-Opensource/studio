@@ -1,0 +1,15 @@
+/* Theme „basis“: Kern-Block „Formular (Datentabelle)“ mit den Design-Tokens (hell und dunkel ohne eigene Regeln).
+   Fehlerfarbe: fester Rotton, mit der Überschriftenfarbe gemischt – dunkel auf hellem, hell auf dunklem Grund (≥ 4.5:1). */
+@import "../../../../resources/css/dataform.css";
+.dff-wrap{--b-danger:color-mix(in srgb,#E5484D 68%,var(--b-ink));
+  --dff-accent:var(--b-a);--dff-line:var(--b-muted);--dff-bg:var(--b-bg);--dff-ink:var(--b-ink);--dff-muted:var(--b-muted);--dff-radius:var(--b-radius);--dff-focus:var(--b-focus);
+  --dff-err:var(--b-danger);--dff-err-bg:color-mix(in srgb,var(--b-danger) 10%,var(--b-bg))}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]),.dff select,.dff textarea{transition:border-color .15s,box-shadow .15s}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):hover,.dff select:hover,.dff textarea:hover{border-color:var(--b-ink)}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.dff select:focus,.dff textarea:focus{border-color:var(--b-a);outline:none;box-shadow:0 0 0 3px var(--b-a-soft)}
+.dff-f>label,.dff-f>legend{font-size:.9375rem}
+.dff-summary{color:var(--b-ink)}
+.dff button[type=submit]{min-width:12rem}
+.dff-done{border:0;border-left:4px solid var(--b-a);background:var(--b-a-soft);color:var(--b-ink)}
+.bg-muted .dff-wrap{--dff-bg:var(--b-bg)}
+:is(.bg-accent,.bg-dark) .dff-wrap{--dff-bg:transparent}

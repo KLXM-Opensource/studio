@@ -1,0 +1,20 @@
+/* Kit „glas“ – Kopfbereich-Aktionen (Core\HeaderActions; Grundgerüst /assets/css/header-actions*.css).
+   Nicht in site.css (Budget): layout.php bindet die Datei im Glas-Dock mit media="(min-width: 48em)" ein – auf Telefonen
+   liegen Suche und Aktion im Glasblatt „Mehr“ (dock-tabbar.css blendet .ha im Dock aus). Standard: Befehlsfeld aus Glas
+   „Suchen … ⌘K“ + Glastaste mit Symbol (Beschriftung ab 64 em). Ecken 8 px wie Linse und Tasten des Docks. */
+.ha,.ha-below{--ha-accent:var(--g-a);--ha-on:var(--g-a-on);--ha-ink:var(--g-ink);--ha-muted:var(--g-muted);--ha-line:var(--g-edge);--ha-bg:var(--g-panel-strong);--ha-surface:color-mix(in srgb,var(--g-glass) 55%,transparent);--ha-open:var(--g-a-ink);--ha-h:2.75rem;--ha-gap:.3125rem;--ha-field-bg:color-mix(in srgb,var(--g-glass) 55%,transparent)}
+.hdr .ha-cmd,.hdr .ha-field__in,.hdr .ha-chip{border-color:var(--g-edge);box-shadow:inset 0 1px 0 var(--g-hi);-webkit-backdrop-filter:blur(8px) saturate(1.4);backdrop-filter:blur(8px) saturate(1.4)}
+.hdr .ha-cmd{min-width:10.5rem;color:var(--g-text);font-family:var(--g-font)}
+.hdr .ha-cmd:hover{background:var(--g-panel-strong);border-color:var(--g-line-strong)}
+.hdr .ha-kbd{border-color:var(--g-edge);background:color-mix(in srgb,var(--g-glass) 70%,transparent);color:var(--g-muted);font-family:var(--g-font-mono)}
+/* Glastaste (Stil „Symbol + Beschriftung“, Klasse dock__cta aus theme.php) – Symbol größer, Beschriftung ab 64 em */
+.dock__cta .ha-ico{width:1.125rem;height:1.125rem;--ico-2-opacity:.35}
+.hdr .dock__cta.ha-cta--icon{padding:0 1rem 0 .8rem}
+@container hdr (max-width:64rem){.hdr .dock__cta.ha-cta--icon{padding:0}.dock__cta .ha-cta__txt{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.hdr--dock .ha-cmd{min-width:2.75rem;padding:0;justify-content:center}.hdr--dock .ha-cmd__txt,.hdr--dock .ha-cmd .ha-kbd{display:none}}
+.hdr .ha-center{margin-inline:auto}
+.hdr__below{width:min(100% - 2 * var(--g-gutter),var(--g-wrap));margin-inline:auto}
+.ha-below--band{background:var(--g-panel-hdr);-webkit-backdrop-filter:blur(var(--g-blur-now));backdrop-filter:blur(var(--g-blur-now))}
+@media (prefers-reduced-transparency:reduce){.hdr .ha-cmd,.hdr .ha-field__in,.hdr .ha-chip,.ha-below--band{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--g-panel-strong)}}
+.hdr .ha-menu__btn{border-color:var(--g-edge);border-radius:8px;background:color-mix(in srgb,var(--g-glass) 55%,transparent);box-shadow:inset 0 1px 0 var(--g-hi)}
+.hdr .ha-menu__btn:hover,.hdr .ha-menu[open]>.ha-menu__btn{background:var(--g-panel-strong);border-color:var(--g-line-strong)}
+.hdr .ha-menu__btn .ha-ico{--ico-2-opacity:.35;color:var(--g-a-ink)}

@@ -1,0 +1,97 @@
+{
+  "_comment": "KLXM Studio: CSP-Hosts je Vorlage (script-src, connect-src, img-src, frame-src). Sie gelangen erst nach Einwilligung in den Dienst in die Content-Security-Policy der Antwort. Hosts aus dem Code (https://… bzw. //…) und aus URL-Angaben (z. B. Matomo-URL) kommen automatisch dazu. Nach bestem Wissen aus den CSP-Hinweisen der Anbieter; Anbieter ändern Hosts ohne Ankündigung – bei Bedarf im Dienst unter „Erweitert“ ergänzen.",
+  "google_tag_manager": {
+    "script": ["https://www.googletagmanager.com", "https://*.googletagmanager.com"],
+    "connect": ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://*.g.doubleclick.net", "https://www.google.com"],
+    "img": ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.g.doubleclick.net", "https://www.google.com"],
+    "frame": ["https://www.googletagmanager.com", "https://td.doubleclick.net"]
+  },
+  "google_analytics": {
+    "script": ["https://www.googletagmanager.com", "https://*.googletagmanager.com"],
+    "connect": ["https://*.google-analytics.com", "https://*.analytics.google.com", "https://*.googletagmanager.com"],
+    "img": ["https://*.google-analytics.com", "https://*.googletagmanager.com"]
+  },
+  "google_ads": {
+    "script": ["https://www.googletagmanager.com", "https://www.googleadservices.com", "https://googleads.g.doubleclick.net", "https://www.google.com"],
+    "connect": ["https://www.google.com", "https://googleads.g.doubleclick.net", "https://www.googleadservices.com", "https://*.g.doubleclick.net"],
+    "img": ["https://www.google.com", "https://googleads.g.doubleclick.net", "https://www.googleadservices.com", "https://*.g.doubleclick.net"],
+    "frame": ["https://td.doubleclick.net", "https://www.googletagmanager.com"]
+  },
+  "meta_pixel": {
+    "script": ["https://connect.facebook.net"],
+    "connect": ["https://www.facebook.com", "https://connect.facebook.net"],
+    "img": ["https://www.facebook.com"]
+  },
+  "linkedin_insight": {
+    "script": ["https://snap.licdn.com"],
+    "connect": ["https://px.ads.linkedin.com"],
+    "img": ["https://px.ads.linkedin.com"]
+  },
+  "tiktok_pixel": {
+    "script": ["https://analytics.tiktok.com"],
+    "connect": ["https://analytics.tiktok.com"],
+    "img": ["https://analytics.tiktok.com"]
+  },
+  "pinterest_tag": {
+    "script": ["https://s.pinimg.com"],
+    "connect": ["https://ct.pinterest.com"],
+    "img": ["https://ct.pinterest.com"]
+  },
+  "microsoft_uet": {
+    "script": ["https://bat.bing.com"],
+    "connect": ["https://bat.bing.com"],
+    "img": ["https://bat.bing.com"]
+  },
+  "hubspot": {
+    "script": ["https://*.hs-scripts.com", "https://*.hs-analytics.net", "https://*.hs-banner.com", "https://*.hscollectedforms.net", "https://*.hsadspixel.net", "https://*.usemessages.com"],
+    "connect": ["https://*.hubspot.com", "https://*.hs-banner.com", "https://*.hscollectedforms.net", "https://*.hubapi.com"],
+    "img": ["https://*.hubspot.com", "https://*.hsforms.com"],
+    "frame": ["https://app.hubspot.com"]
+  },
+  "openai_pixel": {
+    "script": ["https://bzrcdn.openai.com"],
+    "connect": ["https://*.openai.com"],
+    "img": ["https://*.openai.com"]
+  },
+  "microsoft_clarity": {
+    "script": ["https://*.clarity.ms"],
+    "connect": ["https://*.clarity.ms", "https://c.bing.com"],
+    "img": ["https://*.clarity.ms", "https://c.bing.com"]
+  },
+  "hotjar": {
+    "script": ["https://*.hotjar.com"],
+    "connect": ["https://*.hotjar.com", "https://*.hotjar.io"],
+    "img": ["https://*.hotjar.com"],
+    "frame": ["https://vars.hotjar.com"]
+  },
+  "etracker": {
+    "script": ["https://code.etracker.com"],
+    "connect": ["https://*.etracker.com", "https://*.etracker.de"],
+    "img": ["https://*.etracker.com"]
+  },
+  "plausible": {
+    "script": ["https://plausible.io"],
+    "connect": ["https://plausible.io"]
+  },
+  "instagram": {
+    "script": ["https://www.instagram.com"],
+    "frame": ["https://www.instagram.com"]
+  },
+  "x_twitter": {
+    "script": ["https://platform.x.com", "https://platform.twitter.com"],
+    "frame": ["https://platform.twitter.com", "https://syndication.twitter.com"]
+  },
+  "tiktok": {
+    "script": ["https://www.tiktok.com"],
+    "frame": ["https://www.tiktok.com"]
+  },
+  "userlike": {
+    "script": ["https://userlike-cdn-widgets.s3-eu-west-1.amazonaws.com"],
+    "connect": ["https://*.userlike.com"]
+  },
+  "tawk_to": {
+    "script": ["https://embed.tawk.to", "https://*.tawk.to"],
+    "connect": ["https://*.tawk.to"],
+    "frame": ["https://*.tawk.to"]
+  }
+}

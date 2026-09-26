@@ -1,0 +1,17 @@
+/* Kit „nature“ – Handlungsaufruf */
+.cta{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--n-s-l) var(--n-s-2xl)}
+.cta__text{display:grid;gap:var(--n-s-s);flex:1 1 min(100%,32rem);min-width:0}
+.cta__title{max-width:20ch}
+.cta__lead{max-width:36em;color:var(--n-muted);font-size:var(--n-t1);line-height:1.5}
+.cta__actions{position:relative;z-index:1}
+.cta--panel{padding:var(--n-s-xl);border-radius:var(--n-r-xl);overflow:hidden}
+.cta--panel{background:linear-gradient(135deg,var(--n-card),color-mix(in srgb,var(--n-a) 8%,var(--n-card)))}
+.cta__leaf{position:absolute;right:-1.5rem;bottom:-2rem;width:11rem;height:11rem;rotate:-12deg;pointer-events:none}
+.cta__leaf-blade{fill:color-mix(in srgb,var(--n-a) 16%,transparent)}
+.cta__leaf-vein{fill:none;stroke:color-mix(in srgb,var(--n-a) 30%,transparent);stroke-width:1.5;stroke-linecap:round}
+html:not(.has-motifs) .cta__leaf{display:none}
+@container (max-width:40rem){.cta__leaf{width:7rem;height:7rem;opacity:.7}}
+.cta--band{padding-block:var(--n-s-s)}
+.cta--minimal{flex-direction:column;align-items:center;text-align:center}
+.cta--minimal .cta__text{justify-items:center;flex:none}
+.cta--minimal .cta__title{max-width:24ch}

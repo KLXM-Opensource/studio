@@ -1,0 +1,12 @@
+<?php
+// Vorlage – die echte config.local.php wird beim ersten Aufruf automatisch erzeugt.
+return [
+    'app_key'     => 'mind. 64 zufällige Hex-Zeichen (php -r "echo bin2hex(random_bytes(32));")',
+    'setup_token' => 'zufälliger Einmal-Token für /admin/setup',
+    'debug'       => false,
+
+    // optional
+    // 'url_rewrite' => false,                       // ohne FallbackResource/try_files
+    // 'base_url'    => 'https://www.ihre-domain.de',
+    // 'db' => ['driver' => 'mysql', 'host' => 'localhost', 'name' => 'website', 'user' => '…', 'pass' => '…'],
+];

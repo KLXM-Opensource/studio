@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<katalog xmlns="urn:beispiel:katalog">
+  <produkt sku="A-100"><name>Regenschirm „Stadt“</name><preis waehrung="EUR">19.90</preis><kategorie>Zubehör</kategorie><beschreibung>Robust &amp; leicht.</beschreibung></produkt>
+  <produkt sku="A-200"><name>Thermobecher</name><preis waehrung="EUR">12.50</preis><kategorie>Küche</kategorie><beschreibung>Hält 6 Stunden warm.</beschreibung></produkt>
+  <info>kein Produkt</info>
+</katalog>

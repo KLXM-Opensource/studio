@@ -1,0 +1,5 @@
+/* Symbol in einem Kiesel (weiche, unregelmäßige Rundung) – Merkmale, Angebote */
+.knob{display:inline-grid;place-items:center;flex:none;width:3rem;height:3rem;border-radius:58% 42% 52% 48%/48% 56% 44% 52%;background:var(--n-a-soft);color:var(--n-a-ink);font-size:1.375rem}
+.knob .ico{--ico-2-opacity:.28}
+.bg-tint .knob{background:var(--n-card)}
+:is(.bg-dark,.bg-accent) .knob{background:var(--n-a2);color:var(--n-fg)}

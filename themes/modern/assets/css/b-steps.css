@@ -1,0 +1,37 @@
+/* Kit „modern“ – Ablauf / Zeitleiste / Prozess (nur wenn verwendet).
+   Zeitleiste: senkrechte Linie; ab 40 rem Containerbreite steht Datum/Phase links neben dem Text (@container).
+   Prozess: Flex-Umbruch – nebeneinander mit Pfeil nach rechts; ist die Liste nur eine Spalte breit (Container ≤ 28 rem),
+   zeigt der Pfeil nach unten. */
+.steps{margin:0;padding:0;list-style:none}
+.step{position:relative;display:flex;flex-direction:column;gap:var(--m-s-s)}
+.step__num{display:grid;place-items:center;width:3rem;height:3rem;border-radius:10px;background:var(--m-ink);color:var(--m-bg);font:650 var(--m-t0)/1 var(--m-font-label);font-variant-numeric:tabular-nums;font-size:1rem}
+.step__num .ico{font-size:1.4rem}
+.step__body{display:flex;flex-direction:column;gap:var(--m-s-2xs)}
+.step__meta{color:var(--m-link);font:600 var(--m-t-2)/1.3 var(--m-font-label);letter-spacing:.1em;text-transform:uppercase}
+.step__title{color:var(--m-ink);font:var(--m-hw) var(--m-t1)/1.25 var(--m-font-head);letter-spacing:calc(var(--m-track) * .006em)}
+.step__text{color:var(--m-muted)}
+.steps--numbers{--min:14rem;counter-reset:s}
+.steps--numbers .step{padding-top:var(--m-s-m);border-top:1px solid var(--m-line-strong)}
+.steps--numbers .step__num{width:auto;height:auto;place-items:start;align-self:flex-start;background:none;color:var(--m-link);font:var(--m-hw) var(--m-t4)/1 var(--m-font-head);letter-spacing:calc(var(--m-track) * .015em)}
+/* Zeitleiste */
+.steps--timeline{container-type:inline-size;display:grid;gap:0;max-width:56rem}
+.steps--timeline .step{flex-direction:row;gap:var(--m-s-m);padding-bottom:var(--m-s-xl)}
+.steps--timeline .step::before{content:"";position:absolute;top:3rem;bottom:0;left:1.5rem;border-left:2px solid var(--m-line)}
+.steps--timeline .step:last-child::before{display:none}
+.steps--timeline .step__num{flex:none;position:relative;z-index:1;box-shadow:0 0 0 6px var(--m-sec-bg,var(--m-bg))}
+.steps--timeline .step__body{padding-top:.5rem}
+@container (min-width:40rem){
+  .steps--timeline .step{display:grid;grid-template-columns:9rem 3rem 1fr;gap:.2rem var(--m-s-l);align-content:start}
+  .steps--timeline .step::before{left:calc(9rem + var(--m-s-l) + 1.5rem)}
+  .steps--timeline .step__num{grid-column:2;grid-row:1}
+  .steps--timeline .step__body{display:contents}
+  .steps--timeline .step__meta{grid-column:1;grid-row:1;padding-top:.9rem;text-align:end}
+  .steps--timeline .step__title,.steps--timeline .step__text{grid-column:3}
+  .steps--timeline .step__title{padding-top:.6rem}
+}
+/* Prozess */
+.steps--process{container-type:inline-size;display:flex;flex-wrap:wrap;gap:var(--m-s-l)}
+.steps--process .step{flex:1 1 min(13rem,100%);padding:var(--m-pad);border:1px solid var(--m-card-bd);border-radius:var(--m-r-l);background:var(--m-card)}
+.steps--process .step__num{background:var(--m-a);color:var(--m-a-on)}
+.steps--process .step:not(:last-child)::after{content:"";position:absolute;top:calc(var(--m-pad) + 1.1rem);right:calc(var(--m-s-l) * -.5 - .45rem);z-index:1;width:.9rem;height:.9rem;border:solid var(--m-line-strong);border-width:2px 2px 0 0;rotate:45deg;background:none}
+@container (max-width:28rem){.steps--process .step:not(:last-child)::after{top:auto;right:auto;bottom:calc(var(--m-s-l) * -.5 - .45rem);left:2.6rem;rotate:135deg}}

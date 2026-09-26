@@ -1,0 +1,19 @@
+/* Kit „glas“ – Text + Bild (Bild im Glasrahmen): nebeneinander ab 52 rem Abschnittsbreite, Bildseite wählbar/abwechselnd */
+.mt{display:grid;gap:var(--g-s-xl);align-items:center}
+.mt__text{display:grid;gap:var(--g-s-m);min-width:0}
+.mt .sec-head{margin-bottom:0}
+.mt__list{padding-top:var(--g-s-s);border-top:1px solid var(--g-line)}
+@container (min-width:52rem){
+  .mt--has-media{grid-template-columns:1fr 1fr;gap:var(--g-s-3xl)}
+  .mt--left .mt__media{order:-1}
+}
+/* Glasrahmen für Bilder, Karten, Video: das Bild liegt in einer schmalen Glaskante */
+.gframe{padding:6px;border:1px solid var(--g-edge);border-radius:calc(var(--g-r-l) + 6px);background:var(--g-surface);box-shadow:var(--g-card-sh);background-clip:padding-box}
+.gframe.frame{overflow:hidden}
+.gframe.frame picture,.gframe.frame img{border-radius:var(--g-r-l)}
+.gframe.frame img{inset:6px;width:calc(100% - 12px);height:calc(100% - 12px)}
+.gframe--map{padding:6px}
+.gframe--map .cms-map{margin:0}
+.checks{display:grid;gap:var(--g-s-xs);margin:0;padding:0;list-style:none}
+.checks li{display:flex;gap:.7em;align-items:baseline}
+.checks li::before{content:"";flex:none;width:.6em;height:.6em;border-radius:50%;background:linear-gradient(135deg,var(--g-f2),var(--g-a));box-shadow:0 0 0 2px color-mix(in srgb,var(--g-a) 14%,transparent);translate:0 -.08em}

@@ -1,0 +1,60 @@
+/* Kit „glas“ – Kern-Block „Formular (Datentabelle)“ (ersetzt resources/css/dataform.css; nur wenn verwendet).
+   Intrinsisch: Felder „halbe Breite“ stehen per auto-fit nebeneinander, solange jedes ≥ 15 rem breit ist – sonst voll.
+   Fehler-, Erfolgs- und Pflichtfeld-Zustände aus den Tokens; Fehlerfarbe: festes Rot, mit der Überschriftenfarbe gemischt
+   (dunkel auf hellem, hell auf dunklem Grund, ≥ 4.5:1). Bedingungen, IBAN, Gruppen: resources/js/dataform.js. */
+.dff-wrap{--g-danger:color-mix(in srgb,#E5484D 66%,var(--g-ink));--dff-gap:var(--g-s-m)}
+.dff-head{display:flex;flex-direction:column;gap:var(--g-s-s);max-width:48rem;margin-bottom:var(--g-s-xl)}
+.dff-intro{color:var(--g-muted);font-size:var(--g-t1)}
+.dff{display:grid;gap:var(--dff-gap);max-width:46rem}
+.dff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:var(--dff-gap)}
+.dff-f{grid-column:1/-1;display:grid;gap:.4rem;align-content:start;min-width:0;margin:0;padding:0;border:0}
+.dff-f--half{grid-column:auto}
+.dff-group{gap:.6rem}
+.dff-f>label,.dff-f>legend{padding:0;color:var(--g-ink);font-size:var(--g-t-1);font-weight:600}
+.dff-row__t,.dff-summary__title{font-family:var(--g-font-label);letter-spacing:.04em;font-size:var(--g-label)!important}
+.dff-req{display:none;color:var(--g-danger)}
+.dff-f--req .dff-req,.dff-f.is-req .dff-req{display:inline}
+.dff-help,.dff-note{margin:0;color:var(--g-muted);font-size:var(--g-t-1)}
+.dff input:not([type=checkbox],[type=radio],[type=color]),.dff select,.dff textarea{width:100%;min-height:3rem;padding:.65rem .875rem;border:1px solid var(--g-line-strong);border-radius:var(--g-btn-r);background:var(--g-panel-strong);box-shadow:var(--g-well);color:var(--g-ink);font:inherit;line-height:1.4;transition:border-color .15s,box-shadow .15s}
+.bg-muted .dff :is(input,select,textarea),.contact__form .dff :is(input,select,textarea){background:var(--g-panel-strong)}
+:is(.bg-accent,.bg-dark) .dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea){background:transparent}
+.dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea):hover{border-color:var(--g-ink)}
+.dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea):focus{border-color:var(--g-ink);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--g-a) 32%,transparent)}
+.dff select{height:3rem;padding-block:0}
+.dff textarea{min-height:8rem;resize:vertical}
+.dff input[type=color]{width:4rem;height:2.75rem;padding:2px;border:1px solid var(--g-line-strong);border-radius:var(--g-btn-r);background:var(--g-panel-strong)}
+.dff input[type=file]{padding:.55rem .75rem}
+.dff [data-iban]{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.dff :is(input,select,textarea,button):focus-visible,.dff-summary:focus-visible,.dff-done:focus-visible{outline:3px solid var(--g-focus);outline-offset:2px}
+.dff [aria-invalid=true]{border-color:var(--g-danger)!important;box-shadow:0 0 0 1px var(--g-danger)}
+.dff-check{display:flex;align-items:flex-start;gap:.6rem;font-weight:400;cursor:pointer}
+.dff-check input{flex:none;width:1.35rem;height:1.35rem;margin:.1rem 0 0;accent-color:var(--g-a)}
+.dff-options{display:grid;gap:.5rem}
+.dff-err{margin:0;color:var(--g-danger);font-size:var(--g-t-1);font-weight:600}
+.dff-err::before{content:"! ";font-weight:800}
+.dff-summary{padding:var(--g-s-s) var(--g-s-m);border-left:4px solid var(--g-danger);border-radius:var(--g-radius);background:color-mix(in srgb,var(--g-danger) 10%,var(--g-bg));color:var(--g-ink)}
+.dff-summary__title{margin:0;font-weight:700}
+.dff-summary ul{margin:.4rem 0 0;padding-left:1.2em}
+.dff-summary ul:empty{display:none}
+.dff-summary a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.dff-actions{margin:0}
+.dff button[type=submit]{min-width:min(100%,12rem)}
+.dff button[type=submit][aria-busy=true]{opacity:.7;cursor:progress}
+.dff-hp{position:absolute!important;left:-10000px;width:1px;height:1px;overflow:hidden}
+.dff-done{display:flex;align-items:center;gap:.75rem;max-width:46rem;padding:var(--g-s-m) var(--g-s-l);border-left:4px solid var(--g-a);border-radius:var(--g-radius);background:var(--g-a-soft);color:var(--g-ink)}
+.dff-done p{margin:0;font-weight:600}
+.dff-done p::before{content:"✓  ";color:var(--g-link)}
+.dff-off{padding:var(--g-s-m);border-radius:var(--g-radius);background:var(--g-surface)}
+/* Wiederholbare Gruppe: je Zeile ein Rahmen, Unterfelder im auto-fit-Raster */
+.dff-rows{display:grid;gap:.75rem}
+.dff-row{display:grid;gap:.6rem;min-width:0;margin:0;padding:.6rem 1rem 1rem;border:1px solid var(--g-line);border-radius:var(--g-r-l);background:var(--g-surface)}
+.dff-row__t{margin-left:-.4rem;padding:0 .4rem;color:var(--g-muted);font-size:var(--g-t-1);font-weight:700}
+.dff-row__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:.75rem var(--dff-gap)}
+.dff-row__rm,.dff-row__add{min-height:2.75rem;padding:.5rem 1rem;border:1.5px solid var(--g-line-strong);border-radius:var(--g-btn-r);background:transparent;color:var(--g-ink);font:inherit;font-weight:600;cursor:pointer}
+.dff-row__rm{justify-self:end;min-height:2.5rem;font-size:var(--g-t-1)}
+.dff-row__add{justify-self:start;border-color:currentColor;color:var(--g-link)}
+.dff-row__rm:hover,.dff-row__add:hover{border-color:var(--g-a)}
+.dff-wrap .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dff [hidden],.dff-wrap [hidden]{display:none!important}
+/* Formular unter einem zweispaltigen Abschnittskopf: bündig mit der Überschrift */
+.dff-intro{max-width:40em}

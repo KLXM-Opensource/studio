@@ -1,0 +1,232 @@
+<?php
+declare(strict_types=1);
+
+namespace Core\Http\Controllers\Admin;
+
+use Core\Http\HttpException;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Pages;
+
+final class PageController extends AdminController
+{
+    public function index(Request $r): Response
+    {
+        $this->auth($r, 'pages.edit');
+        $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
+        return $this->view('pages/index', ['tree' => Pages::tree(false, $lang), 'lang' => $lang,
+            'templates' => app()->db->fetchAll("SELECT * FROM pages WHERE type = 'template' ORDER BY title")]);
+    }
+
+    public function create(Request $r): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $parent = ctype_digit($r->str('parent')) ? (int) $r->str('parent') : null;
+        $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
+        return $this->view('pages/form', ['page' => null, 'errors' => [], 'old' => ['status' => 'draft', 'parent_id' => $parent, 'menu' => 0, 'lang' => $lang], 'revisions' => []]);
+    }
+
+    public function store(Request $r): Response
+    {
+        $this->auth($r, 'pages.manage');
+        [$data, $errors] = $this->validate($r, null);
+        if ($errors) {
+            return $this->view('pages/form', ['page' => null, 'errors' => $errors, 'old' => $data, 'revisions' => []], 422);
+        }
+        $blocks = Pages::sanitizeBlocks([[
+            'type' => 'richtext', 'data' => ['title_strong' => $data['title'], 'text' => '<p>Neuer Inhalt.</p>'], 'tunes' => ['section' => []],
+        ]]);
+        $sort = (int) app()->db->fetchValue('SELECT COALESCE(MAX(sort), 0) + 10 FROM pages WHERE ' . ($data['parent_id'] ? 'parent_id = ?' : 'parent_id IS NULL'), $data['parent_id'] ? [$data['parent_id']] : []);
+        $id = Pages::create($data + ['sort' => $sort], $blocks);
+        $this->changed();
+        app()->session->flash('success', 'Seite angelegt. Jetzt Inhalte im Bearbeitungsmodus hinzufügen.');
+        return Response::redirect(Pages::url(Pages::find($id)) . '?edit=1');
+    }
+
+    public function edit(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        return $this->view('pages/form', ['page' => $page, 'errors' => [], 'old' => $page, 'revisions' => Pages::revisions((int) $id)]);
+    }
+
+    public function update(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        [$data, $errors] = $this->validate($r, $page);
+        if ($errors) {
+            return $this->view('pages/form', ['page' => $page, 'errors' => $errors, 'old' => $data + $page, 'revisions' => Pages::revisions((int) $id)], 422);
+        }
+        if ($page['is_home']) {
+            $data['slug'] = $page['slug'];
+            $data['status'] = 'published';
+        }
+        if ($data['status'] === 'published' && $page['status'] !== 'published' && ($open = Pages::openMarkers($page['content_draft'] . ' ' . $data['title'] . ' ' . $data['meta_description']))) {
+            $data['status'] = 'draft';   // offene Platzhalter „[bitte ergänzen: …]“ – nicht online stellen
+            app()->session->flash('error', __('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]));
+        }
+        if ($data['status'] === 'published' && $page['content_published'] === null) {
+            $data['content_published'] = $page['content_draft'];
+            $data['published_at'] = now();
+        }
+        $data['updated_at'] = now();
+        if ($page['is_home']) {
+            $data['parent_id'] = null;
+        }
+        app()->db->update('pages', $data, 'id = :id', ['id' => (int) $id]);
+        Pages::rebuildPaths();
+        $this->changed();
+        return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
+    }
+
+    private function validate(Request $r, ?array $page): array
+    {
+        $title = mb_substr(strip_tags($r->str('title')), 0, 120);
+        $slug = Pages::slugify($r->str('slug') ?: $title);
+        $parentId = ctype_digit($r->str('parent_id')) && (int) $r->str('parent_id') > 0 ? (int) $r->str('parent_id') : null;
+        if ($page && $parentId && ($parentId === (int) $page['id'] || in_array($parentId, Pages::descendantIds((int) $page['id']), true))) {
+            $parentId = $page['parent_id'] ? (int) $page['parent_id'] : null;
+        }
+        $data = [
+            'title' => $title,
+            'slug' => $slug,
+            'meta_description' => mb_substr(strip_tags($r->str('meta_description')), 0, 300),
+            'meta_title' => mb_substr(strip_tags($r->str('meta_title')), 0, 120) ?: null,
+            'status' => $r->str('status') === 'published' ? 'published' : 'draft',
+            'noindex' => $r->str('noindex') === '1' ? 1 : 0,
+            'og_image' => ctype_digit($og = (string) ($r->post['x']['og_image'] ?? '')) ? (int) $og : null,
+            'parent_id' => $parentId,
+            'menu' => $r->str('menu') === '1' ? 1 : 0,
+            'nav_title' => mb_substr(strip_tags($r->str('nav_title')), 0, 60),
+        ];
+        if (!$page) {
+            $l = $r->str('lang');
+            $data['lang'] = \Core\Lang::valid($l) && $l !== \Core\Lang::default() ? $l : null;
+        }
+        $errors = [];
+        if ($title === '') {
+            $errors['title'] = 'Bitte einen Titel angeben.';
+        }
+        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
+        if (!$page || !$page['is_home']) {
+            if (in_array($slug, $reserved, true)) {
+                $errors['slug'] = 'Diese Adresse ist reserviert.';
+            } elseif (Pages::slugTaken($slug, $parentId, $page ? (int) $page['id'] : null, $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null))) {
+                $errors['slug'] = 'Auf dieser Ebene gibt es schon eine Seite mit dieser Adresse.';
+            }
+        }
+        return [$data, $errors];
+    }
+
+    public function delete(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if ($page['is_home']) {
+            return $this->back('/admin/pages', 'error', 'Die Startseite kann nicht gelöscht werden.');
+        }
+        app()->db->query('DELETE FROM revisions WHERE page_id = ?', [(int) $id]);
+        app()->db->query('DELETE FROM pages WHERE id = ?', [(int) $id]);
+        // Unterseiten rücken eine Ebene nach oben
+        app()->db->query('UPDATE pages SET parent_id = ? WHERE parent_id = ?', [$page['parent_id'], (int) $id]);
+        Pages::rebuildPaths();
+        $this->changed();
+        if ($r->wantsJson()) {
+            return Response::json(['ok' => true]);
+        }
+        return $this->back('/admin/pages', 'success', '„' . $page['title'] . '“ wurde gelöscht.');
+    }
+
+    public function publish(Request $r, string $id): Response
+    {
+        $user = $this->auth($r, 'pages.publish');
+        try {
+            Pages::publish((int) $id, (int) $user['id']);
+        } catch (\RuntimeException $e) {   // offene Platzhalter „[bitte ergänzen: …]“
+            if ($r->wantsJson()) return Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+            return $this->back('/admin/pages', 'error', $e->getMessage());
+        }
+        if ($r->wantsJson()) {
+            return Response::json(['ok' => true]);
+        }
+        return $this->back('/admin/pages', 'success', 'Seite veröffentlicht.');
+    }
+
+    public function discard(Request $r, string $id): Response
+    {
+        $user = $this->auth($r, 'pages.edit');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (!Pages::discardDraft((int) $id, (int) $user['id'])) {
+            return $this->back('/admin/pages/' . $id, 'error', 'Diese Seite wurde noch nie veröffentlicht – es gibt keine Fassung, auf die zurückgesetzt werden kann.');
+        }
+        $this->changed();
+        $to = match ($r->str('back')) { 'list' => '/admin/pages', 'page' => Pages::url($page), default => '/admin/pages/' . $id };
+        if ($r->str('back') === 'page') {
+            app()->session->flash('success', 'Entwurf verworfen.');
+            return Response::redirect($to);
+        }
+        return $this->back($to, 'success', 'Entwurf von „' . $page['title'] . '“ verworfen. Der verworfene Stand ist unter „Versionen“ gesichert.');
+    }
+
+    public function restore(Request $r, string $id, string $rev): Response
+    {
+        $user = $this->auth($r, 'pages.edit');
+        $row = app()->db->fetch('SELECT * FROM revisions WHERE id = ? AND page_id = ?', [(int) $rev, (int) $id]) ?? throw new HttpException(404);
+        $blocks = json_decode((string) $row['blocks_json'], true)['blocks'] ?? [];
+        Pages::saveDraft((int) $id, Pages::sanitizeBlocks($blocks), (int) $user['id'], 'Wiederhergestellt (Stand ' . $row['created_at'] . ')');
+        return $this->back('/admin/pages/' . $id, 'success', 'Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.');
+    }
+
+    // ------------------------------------------------------------------ Seitenbaum (JSON)
+
+    /** Verschieben: {parent_id: ?int, index: int} */
+    public function move(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $parent = isset($r->post['parent_id']) && $r->post['parent_id'] !== null && $r->post['parent_id'] !== '' ? (int) $r->post['parent_id'] : null;
+        $err = Pages::move((int) $id, $parent, (int) ($r->post['index'] ?? 0));
+        return $err ? Response::json(['ok' => false, 'error' => $err], 422) : Response::json(['ok' => true, 'url' => Pages::url(Pages::find((int) $id))]);
+    }
+
+    /** Schnelländerungen: menu (bool), status */
+    public function quick(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        $upd = [];
+        if (array_key_exists('menu', $r->post)) $upd['menu'] = !empty($r->post['menu']) ? 1 : 0;
+        if ($upd) {
+            app()->db->update('pages', $upd, 'id = :id', ['id' => (int) $id]);
+            $this->changed();
+        }
+        return Response::json(['ok' => true]);
+    }
+
+    /** Seite duplizieren (als Entwurf, direkt dahinter) */
+    public function duplicate(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $p = Pages::find((int) $id) ?? throw new HttpException(404);
+        $slug = $p['slug'] . '-kopie';
+        for ($n = 2; Pages::slugTaken($slug, $p['parent_id'] ? (int) $p['parent_id'] : null); $n++) $slug = $p['slug'] . '-kopie-' . $n;
+        $blocks = Pages::blocks($p, true);
+        $newId = Pages::create(['slug' => $slug, 'title' => $p['title'] . ' (Kopie)', 'status' => 'draft', 'parent_id' => $p['parent_id'],
+            'meta_description' => $p['meta_description'], 'sort' => (int) $p['sort'] + 5, 'noindex' => $p['noindex']], $blocks);
+        $this->changed();
+        return Response::json(['ok' => true, 'id' => $newId]);
+    }
+
+    /** Übersetzung anlegen (JSON): {lang} → neue Seite als Entwurf */
+    public function translate(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        try {
+            $p = Pages::translate((int) $id, (string) ($r->post['lang'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
+        $this->changed();
+        return Response::json(['ok' => true, 'id' => (int) $p['id'], 'url' => Pages::url($p) . '?edit=1']);
+    }
+}

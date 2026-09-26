@@ -1,0 +1,10 @@
+{
+  "meta": {"count": 3, "generated": "2026-09-24T10:00:00Z"},
+  "data": {
+    "items": [
+      {"id": 501, "name": "Kurs: Erste Hilfe", "start": "2026-10-05", "price": "49,90 €", "tags": ["Gesundheit", "Kurs"], "url": "https://example.org/kurse/501", "image": {"src": "http://127.0.0.1:8097/img/rss2.png", "alt": "Verbandskasten"}, "text": "Grundlagen der Ersten Hilfe.\nFür alle Altersgruppen."},
+      {"id": 502, "name": "Kurs: Yoga am Morgen", "start": "12.10.2026", "price": "1.234,50", "tags": ["Sport"], "url": "https://example.org/kurse/502", "text": "Sanftes Yoga."},
+      {"id": 503, "name": "Vortrag: Ernährung", "start": "2026-10-20T19:00:00+02:00", "price": 0, "tags": [], "url": "https://example.org/kurse/503", "text": "Gesund essen im Alltag."}
+    ]
+  }
+}

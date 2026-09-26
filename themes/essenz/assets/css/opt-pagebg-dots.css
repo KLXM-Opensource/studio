@@ -1,0 +1,2 @@
+/* Seitenhintergrund „Punktraster“: sehr feines 16-px-Raster – nur hinter dem Inhalt, nicht in getönten Abschnitten */
+body{background-image:radial-gradient(circle,color-mix(in srgb,var(--e-ink) 13%,transparent) .9px,transparent 1.2px);background-size:calc(var(--e-u) * 2) calc(var(--e-u) * 2)}

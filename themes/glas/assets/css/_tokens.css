@@ -1,0 +1,94 @@
+/* ---------------------------------------------------------------- Tokens (Standardwerte = Vorlage „Aurora“, design.php)
+   Die Design-Datei (Verwaltung → Design) überschreibt nur Grundwerte; Glas, Farbfeld, Stufen und Rollen leiten sich hier ab.
+   Glas-Modell (identisch mit tools/contrast.php – dort geprüft, hier umgesetzt):
+     --g-ga     Deckkraft der Glastönung je Farbschema und Glasdichte (gd-light | gd-standard | gd-dense)
+     --g-ha     Deckkraft im Kopf, im Glasblatt, in Aufklappmenüs und Such-Popover (über beliebigem Inhalt geprüft)
+     --g-ff     Stärke des Farbfelds hinter der Seite: hell ff-soft .58 | ff-rich .78, dunkel .42 | .6, ff-plain 0; Aurora .9
+     --g-boost  +.1 Deckkraft, wo kein backdrop-filter läuft (Touch, schmale Fenster) – dort ist Glas nur getönt
+     --g-floor  Mindestdeckkraft: 1 bei „Transparenz reduzieren“, „Mehr Kontrast“, „Ohne Transparenz“ (is-solid) und ohne
+                backdrop-filter-Unterstützung (Fallback .94) */
+:root{
+  --g-a:#6D28D9;--g-a-ink:#5B21B6;--g-a-on:#FFFFFF;
+  --g-ink:#12142B;--g-text:#2A2D48;--g-muted:#44475F;--g-bg:#F3F1FB;--g-glass:#FFFFFF;
+  --g-f1:#B9A6FF;--g-f2:#8FE3F0;--g-f3:#FFB3D9;--g-dark:#15123A;
+  --g-font:Figtree,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --g-font-head:Outfit,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --g-font-mono:var(--g-font-head);--g-font-label:var(--g-font);
+  --g-fs-min:16;--g-fs-max:18;--g-ratio:1.25;--g-hw:600;--g-track:-2;
+  --g-radius:20px;--g-blur:20px;--g-u:.5rem;--g-space:1;--g-wrap:76rem;
+  --g-on-dark:#F4F3FF;--g-danger:#B42318;
+
+  /* Glas */
+  --g-ga:.72;--g-ha:.8;--g-ff:.58;--g-boost:.1;--g-floor:0;
+  --g-alpha:min(1,max(var(--g-floor),var(--g-ga) + var(--g-boost)));
+  --g-alpha-strong:min(1,max(var(--g-floor),var(--g-ga) + var(--g-boost) + .06));
+  --g-alpha-hdr:min(1,max(var(--g-floor),var(--g-ha)));
+  --g-blur-now:calc(var(--g-blur) * .6);
+  --g-sheen:rgb(255 255 255/.38);--g-hi:rgb(255 255 255/.9);--g-edge:rgb(255 255 255/.62);--g-rim:rgb(18 20 43/.07);
+  --g-sh1:rgb(40 28 110/.08);--g-sh2:rgb(40 28 110/.22);
+  /* Körnung: SVG-Rauschen als data:-URI (CSP img-src erlaubt data:) – eine Kachel, vom Browser einmal gerastert */
+  --g-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Schriftstufen: Grundschrift fließt zwischen 360 und 1280 px Fensterbreite; Stufen = Grundschrift × Verhältnisⁿ */
+  --g-t0:clamp(var(--g-fs-min)*.0625rem,var(--g-fs-min)*.0625rem + (var(--g-fs-max) - var(--g-fs-min))*(100vw - 360px)/920,var(--g-fs-max)*.0625rem);
+  --g-r:calc(1 + (var(--g-ratio) - 1)*.72);
+  --g-t1:calc(var(--g-t0)*var(--g-r));--g-t2:calc(var(--g-t0)*pow(var(--g-r),2));--g-t3:calc(var(--g-t0)*pow(var(--g-r),3));
+  --g-t4:calc(var(--g-t0)*pow(var(--g-r),4));--g-t5:calc(var(--g-t0)*pow(var(--g-r),5));--g-t6:calc(var(--g-t0)*pow(var(--g-r),6));
+  --g-t-1:calc(var(--g-t0)*.875);--g-t-2:calc(var(--g-t0)*.8);
+  --g-label:max(.8125rem,calc(var(--g-t0)*.8));
+
+  /* Abstände: Vielfache von --g-u (8 px) */
+  --g-s-2xs:calc(var(--g-u)*.5);--g-s-xs:var(--g-u);--g-s-s:calc(var(--g-u)*2);--g-s-m:calc(var(--g-u)*3);
+  --g-s-l:calc(var(--g-u)*4);--g-s-xl:calc(var(--g-u)*6);--g-s-2xl:calc(var(--g-u)*8);--g-s-3xl:calc(var(--g-u)*12);
+  --g-sec:calc(clamp(var(--g-u)*8,var(--g-u)*4 + 6vw,var(--g-u)*15)*var(--g-space));
+  --g-gutter:clamp(1rem,.5rem + 2.4vw,3rem);
+  --g-pad:var(--g-s-m);
+
+  /* Abgeleitete Farben */
+  --g-panel:color-mix(in srgb,var(--g-glass) calc(var(--g-alpha)*100%),transparent);
+  --g-panel-strong:color-mix(in srgb,var(--g-glass) calc(var(--g-alpha-strong)*100%),transparent);
+  --g-panel-hdr:color-mix(in srgb,var(--g-glass) calc(var(--g-alpha-hdr)*100%),transparent);
+  --g-surface:color-mix(in srgb,var(--g-glass) calc(var(--g-alpha)*55%),transparent);
+  --g-surface-2:color-mix(in srgb,var(--g-ink) 7%,transparent);
+  --g-line:color-mix(in srgb,var(--g-ink) 12%,transparent);
+  --g-line-strong:color-mix(in srgb,var(--g-ink) 46%,transparent);
+  --g-a-soft:color-mix(in srgb,var(--g-a) 12%,transparent);
+  --g-a2:color-mix(in srgb,var(--g-a) 22%,var(--g-glass));
+  --g-r-s:8px;--g-r-l:var(--g-radius);--g-r-xl:calc(var(--g-radius) * 1.4);
+
+  /* Tiefe: Lichtkante oben (inset), Außenkante, weicher, getönter Schatten */
+  --g-card-sh:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-rim),0 18px 44px -22px var(--g-sh2);
+  --g-key-sh:inset 0 1px 0 rgb(255 255 255/.35),0 6px 16px -8px color-mix(in srgb,var(--g-a) 70%,transparent);
+  --g-well:inset 0 1px 2px var(--g-sh1);
+
+  /* Rollen – Abschnitte mit dunklem Hintergrund stellen sie um */
+  --g-card:var(--g-panel);--g-card-bd:var(--g-edge);
+  --g-link:var(--g-a-ink);--g-focus:var(--g-a-ink);
+  --g-btn-bg:var(--g-a);--g-btn-ink:var(--g-a-on);--g-btn-r:8px;
+  --g-btn2-bg:var(--g-panel);--g-btn2-ink:var(--g-ink);
+
+  /* Kern-Stylesheets (Suchvorschläge, Karte) lesen diese Namen; Skalen (--dial-*): b-stats.css */
+  --b-a:var(--g-a-ink);--b-a-on:var(--g-a-on);--b-ink:var(--g-ink);--b-muted:var(--g-muted);--b-line:var(--g-line);--b-surface:var(--g-surface);--b-bg:var(--g-panel-strong);--b-radius:var(--g-radius);
+}
+@media (min-width:60em){:root{--g-r:var(--g-ratio)}}
+/* backdrop-filter nur mit feinem Zeiger und genug Breite – dort ist die Tönung etwas lichter; auf Touch-Geräten ist das
+   Glas nur getönt (kein Nachzeichnen beim Scrollen), Kopf und Blätter behalten eine geringere Unschärfe */
+@media (hover:hover) and (pointer:fine) and (min-width:48em){:root{--g-boost:0;--g-blur-now:var(--g-blur)}}
+.gd-light{--g-ga:.62}.gd-dense{--g-ga:.84}
+.ff-rich{--g-ff:.78}.ff-plain{--g-ff:0}
+.btn-pill{--g-btn-r:999px}
+/* Dunkles Schema – Nicht-Farbwerte (Farbwerte: Design-Datei bzw. unten). is-darkbase: Vorlage ist schon hell dunkel. */
+.is-darkbase{color-scheme:dark;--g-ff:.42;--g-ga:.76;--g-ha:.82;--g-sheen:rgb(255 255 255/.05);--g-hi:rgb(255 255 255/.14);--g-edge:rgb(255 255 255/.11);--g-rim:rgb(0 0 0/.35);--g-sh1:rgb(0 0 0/.3);--g-sh2:rgb(0 0 0/.62);--g-danger:#FF8A80}
+.is-darkbase.gd-light{--g-ga:.68}.is-darkbase.gd-dense{--g-ga:.86}.is-darkbase.ff-rich{--g-ff:.6}.is-darkbase.ff-plain{--g-ff:0}
+@media (prefers-color-scheme:dark){
+  html.has-dark{--g-a:#A78BFA;--g-a-ink:#C4B5FD;--g-a-on:#140A33;--g-ink:#F4F3FF;--g-text:#DCDCF2;--g-muted:#BEBFDD;--g-bg:#0B0D1C;--g-glass:#161A33;--g-f1:#5B2BB5;--g-f2:#0E6A86;--g-f3:#8C1F66;--g-dark:#1B1840}
+  html.has-dark{color-scheme:dark;--g-ff:.42;--g-ga:.76;--g-ha:.82;--g-sheen:rgb(255 255 255/.05);--g-hi:rgb(255 255 255/.14);--g-edge:rgb(255 255 255/.11);--g-rim:rgb(0 0 0/.35);--g-sh1:rgb(0 0 0/.3);--g-sh2:rgb(0 0 0/.62);--g-danger:#FF8A80}
+  html.has-dark.gd-light{--g-ga:.68}html.has-dark.gd-dense{--g-ga:.86}html.has-dark.ff-rich{--g-ff:.6}html.has-dark.ff-plain{--g-ff:0}
+  html.has-dark .brand__logo--light{display:none}
+  html.has-dark .brand__logo--dark{display:block}
+}
+/* Lesbarkeit vor Effekt: deckende Flächen, kein Farbfeld, keine Unschärfe */
+@media (prefers-reduced-transparency:reduce){:root{--g-floor:1;--g-ff:0}}
+.is-solid{--g-floor:1}
+@media (prefers-contrast:more){:root{--g-floor:1;--g-ff:0;--g-muted:var(--g-text);--g-line:color-mix(in srgb,var(--g-ink) 40%,transparent);--g-edge:var(--g-line-strong)}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--g-floor:.94}}

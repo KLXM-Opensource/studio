@@ -1,0 +1,7 @@
+/* Kopfbereich „Kompakt“: eine schmale Leiste – Wortmarke links, Rubriken und Suche rechts, Linie darunter. */
+.site-header--compact{border-bottom:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+@media (min-width:960px){
+  .site-header--compact .site-header__inner{min-height:68px}
+  .site-header--compact .brand__name{font-size:1.75rem}
+  .site-header--compact .site-nav{margin-left:auto}
+}

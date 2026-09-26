@@ -1,0 +1,11 @@
+/* Praxis-Theme: Kern-Block „Formular (Datentabelle)“ im Stil der Anfrage-Formulare (Bordeaux, runde Felder) */
+@import "../../../../resources/css/dataform.css";
+.dff-wrap{--dff-accent:var(--c-bordeaux);--dff-line:#8A9290;--dff-bg:#fff;--dff-ink:var(--c-ink);--dff-muted:var(--c-text-2);--dff-radius:12px;--dff-focus:var(--c-bordeaux);--dff-err:#A3201A}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.dff select:focus,.dff textarea:focus{border-color:var(--c-bordeaux);outline:none;box-shadow:0 0 0 3px rgba(122,31,53,.22)}
+.dff-f>label,.dff-f>legend{font-size:15px}
+.dff-summary{border-radius:14px}
+.dff-done{border-radius:22px;background:var(--c-gray-50);border:0}
+.dff-done p::before{color:var(--c-bordeaux)}
+.bg-bordeaux .dff-wrap,.bg-dark .dff-wrap{--dff-accent:var(--c-apricot);--dff-focus:var(--c-apricot);--dff-ink:#fff;--dff-muted:var(--c-on-dark);--dff-err:#FFB4AB;--dff-err-bg:rgba(255,180,171,.14)}
+.bg-bordeaux .dff-summary,.bg-dark .dff-summary{color:#fff}
+.bg-bordeaux .dff .btn--primary,.bg-dark .dff .btn--primary{background:#fff;color:var(--c-bordeaux-hero)}

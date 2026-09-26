@@ -1,0 +1,58 @@
+/* ---------------------------------------------------------------- Tokens (Standardwerte = Vorlage „Nordlicht“, design.php)
+   Die Design-Datei (Verwaltung → Design) überschreibt nur die Grundwerte; Stufen, Rollen und Mischfarben leiten sich hier ab.
+   Responsiv in drei Stufen: bis 48 em flaches Stufenverhältnis, ab 48 em mittel, ab 64 em volles Verhältnis. */
+:root{
+  --m-a:#086B4B;--m-a-strong:#05533A;--m-a-on:#FFFFFF;--m-a2:#C9F25E;
+  --m-ink:#0A0D12;--m-text:#2A303A;--m-muted:#565E6B;--m-bg:#FFFFFF;--m-surface:#F3F4F6;--m-line:#E2E5EA;--m-dark:#0B1320;
+  --m-font:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --m-font-head:"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --m-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--m-font-label:var(--m-font-head);
+  --m-fs:17;--m-ratio:1.3;--m-display:1;--m-hw:600;--m-track:-3.5;
+  --m-radius:14px;--m-space:1;--m-wrap:80rem;
+  --m-on-dark:#FFFFFF;--m-pop-ink:var(--m-ink);--m-sh1:rgb(10 13 18/.06);--m-sh2:rgb(10 13 18/.18);
+
+  /* Schriftstufen: Grundgröße × Verhältnis^n; --m-r ist das wirksame Verhältnis der aktuellen Stufe */
+  --m-r:calc(1 + (var(--m-ratio) - 1) * .55);
+  --m-t0:calc(var(--m-fs) * .0625rem);
+  --m-t1:calc(var(--m-t0) * var(--m-r));
+  --m-t2:calc(var(--m-t0) * pow(var(--m-r),2));
+  --m-t3:calc(var(--m-t0) * pow(var(--m-r),3));
+  --m-t4:calc(var(--m-t0) * pow(var(--m-r),4));
+  --m-t5:calc(var(--m-t0) * pow(var(--m-r),5));
+  --m-t6:calc(var(--m-t0) * pow(var(--m-r),6));
+  --m-t-1:max(.875rem,calc(var(--m-t0) * .875));--m-t-2:max(.8125rem,calc(var(--m-t0) * .78));
+
+  /* Abstände (rem – unabhängig von der Grundschrift); Abschnitte, Seitenrand und Innenabstand je Stufe */
+  --m-s-2xs:.25rem;--m-s-xs:.5rem;--m-s-s:.75rem;--m-s-m:1rem;--m-s-l:1.5rem;--m-s-xl:2rem;--m-s-2xl:3rem;--m-s-3xl:4.5rem;
+  --m-sec:calc(4.5rem * var(--m-space));--m-gutter:1.25rem;--m-pad:1.375rem;
+
+  /* Abgeleitete Farben (color-mix) */
+  --m-a-soft:color-mix(in srgb,var(--m-a) 14%,var(--m-bg));
+  --m-surface-2:color-mix(in srgb,var(--m-ink) 5%,var(--m-surface));
+  --m-line-strong:color-mix(in srgb,var(--m-ink) 30%,var(--m-bg));
+  --m-r-s:8px;--m-r-l:var(--m-radius);--m-btn-r:8px;
+
+  /* Rollen – Abschnitte mit dunklem Hintergrund und Bildflächen stellen sie um */
+  --m-card:var(--m-bg);--m-card-bd:var(--m-line);--m-card-sh:none;
+  --m-link:var(--m-a);--m-focus:var(--m-a);--m-ico-bg:var(--m-a-soft);--m-ico:var(--m-a);--m-mark:var(--m-a);
+  --m-btn-bg:var(--m-ink);--m-btn-ink:var(--m-bg);--m-btn-hover:var(--m-a);--m-btn-hover-ink:var(--m-a-on);
+
+  /* Kennzahlen mit Skala (Kern-Block dials) */
+  --dial-accent:var(--m-link);--dial-track:var(--m-surface-2);--dial-tick:var(--m-line-strong);--dial-surface:var(--m-card);
+  --dial-line:var(--m-line);--dial-ink:var(--m-ink);--dial-muted:var(--m-muted);--dial-font:var(--m-font-head);
+
+  /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karten) lesen diese Namen */
+  --b-a:var(--m-a);--b-a-on:var(--m-a-on);--b-ink:var(--m-ink);--b-muted:var(--m-muted);--b-line:var(--m-line);--b-surface:var(--m-surface);--b-bg:var(--m-bg);--b-radius:var(--m-r-s);
+}
+@media (min-width:48em){:root{--m-r:calc(1 + (var(--m-ratio) - 1) * .8);--m-sec:calc(6rem * var(--m-space));--m-gutter:2rem;--m-pad:1.75rem;--m-s-2xl:3.5rem;--m-s-3xl:5.5rem}}
+@media (min-width:64em){:root{--m-r:var(--m-ratio);--m-sec:calc(8rem * var(--m-space));--m-gutter:2.5rem;--m-pad:2rem;--m-s-2xl:4rem;--m-s-3xl:6.5rem}}
+.cards-flat{--m-card:var(--m-surface);--m-card-bd:transparent}
+.cards-elevated{--m-card-sh:0 1px 2px var(--m-sh1),0 16px 40px -20px var(--m-sh2)}
+.is-darkbase{color-scheme:dark;--m-sh1:rgb(0 0 0/.3);--m-sh2:rgb(0 0 0/.6)}
+/* Dunkles Farbschema: nur Farbwerte wechseln (Standardwerte hier, eigene in der Design-Datei); Vorschau: css/preview.css */
+@media (prefers-color-scheme:dark){
+  html.has-dark{--m-a:#4FD69C;--m-a-strong:#8AE6BD;--m-a-on:#03281A;--m-a2:#1E3B2C;--m-ink:#F2F4F7;--m-text:#CDD3DB;--m-muted:#98A1AD;--m-bg:#090C11;--m-surface:#121720;--m-line:#252C37;--m-dark:#152033}
+  html.has-dark{color-scheme:dark;--m-sh1:rgb(0 0 0/.3);--m-sh2:rgb(0 0 0/.6);--m-btn-bg:var(--m-a);--m-btn-ink:var(--m-a-on);--m-btn-hover:var(--m-a-strong)}
+  html.has-dark .brand__logo--light{display:none}
+  html.has-dark .brand__logo--dark{display:block}
+}

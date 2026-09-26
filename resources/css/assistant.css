@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Assistent-Chat der Redaktion (Core\AI\Assistant, resources/js/assistant.mjs) – wird erst beim Öffnen geladen.
+   Farben aus den Tokens der Verwaltung (--adm-a, --adm-surface …): persönliche Akzentfarbe (Core\Accent) und
+   Hell/Dunkel wirken automatisch. Fenster rechts (nicht modal), ≤ 900 px Vollbild; im KI-Bereich im Hauptbereich.
+   ========================================================================== */
+.kas { --kas-w: 420px; display: flex; flex-direction: column; min-height: 0; background: var(--adm-surface, #fff); color: var(--adm-ink, #1a1a1a); font-family: var(--adm-font, system-ui, sans-serif); }
+.kas[hidden] { display: none; }
+.kas--drawer { position: fixed; z-index: 900; top: 0; right: 0; bottom: 0; width: min(var(--kas-w), 100vw); border-left: 1px solid var(--adm-line, #ddd); box-shadow: -18px 0 48px rgb(0 0 0 / .14); }
+.kas--page { height: min(72vh, 760px); border: 1px solid var(--adm-line, #ddd); border-radius: 14px; overflow: hidden; }
+.kas-host { padding: 0; overflow: hidden; }
+.kas-host > [data-assistant-page] > .kas--page { border: 0; border-radius: 0; }
+@media (min-width: 1200px) { html.kas-is-open .adm-main { margin-right: var(--kas-w, 420px); } }
+@media (max-width: 900px) { .kas--drawer { width: 100vw; border-left: 0; } }
+
+.kas__h { display: flex; align-items: center; gap: 4px; padding: 10px 10px 10px 16px; border-bottom: 1px solid var(--adm-line, #ddd); }
+.kas__logo { width: 20px; height: 20px; flex: none; color: var(--adm-a-ink, currentColor); margin-right: 6px; }
+.kas__h h2 { flex: 1; margin: 0; font-size: 1rem; line-height: 1.3; }
+.kas__h h2 span { font-weight: 400; color: var(--adm-t2, inherit); }
+.kas__ib { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 10px; background: none; color: inherit; cursor: pointer; text-decoration: none; }
+.kas__ib svg { width: 20px; height: 20px; }
+.kas__ib:hover { background: var(--adm-hover, rgba(0,0,0,.05)); }
+.kas__ib.is-on, .kas__ib[aria-expanded=true] { background: var(--adm-accent-bg, #e8eefc); color: var(--adm-a-ink, currentColor); }
+.kas :is(button, a, textarea, input, [tabindex]):focus-visible { outline: 3px solid var(--adm-a, #1d4ed8); outline-offset: 2px; }
+
+.kas__hist { max-height: 45%; overflow-y: auto; padding: 10px 16px; border-bottom: 1px solid var(--adm-line, #ddd); background: var(--adm-fill, #f6f7f9); }
+.kas__hist ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.kas-hist__h { margin: 0 0 6px; font-weight: 700; font-size: .875rem; }
+.kas-hist__o { border: 0; background: none; padding: 6px 0; color: var(--adm-a-ink, inherit); font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.kas__hist small, .kas-muted { color: var(--adm-t2, #555); font-size: .8125rem; }
+
+.kas__log { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.kas-m { display: flex; }
+.kas-m--me { justify-content: flex-end; }
+.kas-m__b { max-width: 92%; padding: 10px 14px; border-radius: 14px; background: var(--adm-fill, #f3f4f6); line-height: 1.5; overflow-wrap: anywhere; }
+.kas-m--me .kas-m__b { background: var(--adm-a, #1d4ed8); color: #fff; border-bottom-right-radius: 4px; }
+.kas-m--bot .kas-m__b { border-bottom-left-radius: 4px; }
+.kas-m__b p { margin: 0 0 .5em; }
+.kas-m__b > :last-child { margin-bottom: 0; }
+.kas-m__b ul, .kas-m__b ol { margin: 0 0 .5em; padding-left: 1.3em; }
+.kas-m__b a { color: var(--adm-a-ink, inherit); }
+.kas-m--me .kas-m__b a { color: inherit; }
+.kas-m__b code { font-size: .875em; padding: 1px 4px; border-radius: 4px; background: var(--adm-fill-2, rgba(0,0,0,.06)); }
+.kas-m__b .cite { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35em; height: 1.35em; margin: 0 1px; padding: 0 4px; border-radius: 99px; background: var(--adm-a, #1d4ed8); color: #fff; font-size: .72em; font-weight: 700; text-decoration: none; vertical-align: .15em; }
+.kas-m__status { font-size: .8125rem; color: var(--adm-t2, #555); }
+.kas-m__err { color: var(--adm-err, #b42318); font-weight: 600; }
+.kas-src { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--adm-line, #ddd); font-size: .875rem; }
+.kas-src p { margin: 0 0 4px; font-weight: 700; }
+.kas-src ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.kas-src a { display: inline-flex; gap: 6px; align-items: baseline; }
+.kas-src span { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35em; height: 1.35em; border-radius: 99px; background: var(--adm-a, #1d4ed8); color: #fff; font-size: .75em; font-weight: 700; }
+.kas-wait { display: flex; gap: 5px; align-items: center; min-height: 22px; }
+.kas-wait span:not(.sr-only) { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .3; animation: kas-dot 1.2s infinite ease-in-out; }
+.kas-wait span:nth-child(2) { animation-delay: .15s; }
+.kas-wait span:nth-child(3) { animation-delay: .3s; }
+@keyframes kas-dot { 0%, 80%, 100% { opacity: .25; } 40% { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .kas-wait span:not(.sr-only) { animation: none; opacity: .6; } }
+.kas-sg { display: flex; flex-wrap: wrap; gap: 8px; }
+.kas-sg__b { min-height: 40px; padding: 6px 12px; border: 1px solid var(--adm-line, #ccc); border-radius: 99px; background: var(--adm-surface, #fff); color: inherit; font: inherit; font-size: .875rem; text-align: left; cursor: pointer; }
+.kas-sg__b:hover { background: var(--adm-hover, rgba(0,0,0,.05)); border-color: var(--adm-a, #1d4ed8); }
+
+/* Aktions-Karten: Vorschau vorher/nachher, Ausführen/Verwerfen */
+.kas-card { margin-top: 12px; padding: 12px; border: 1px solid var(--adm-line, #ddd); border-left: 4px solid var(--adm-a, #1d4ed8); border-radius: 10px; background: var(--adm-surface, #fff); color: var(--adm-ink, inherit); }
+.kas-card.is-denied { border-left-color: var(--adm-t3, #999); }
+.kas-card header { margin-bottom: 8px; }
+.kas-card__t { margin: 0; font-weight: 700; }
+.kas-card__g { margin: 0; font-size: .8125rem; color: var(--adm-t2, #555); }
+.kas-card__f { margin: 8px 0; }
+.kas-card__l { margin: 0 0 4px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--adm-t2, #555); }
+.kas-card__v { padding: 6px 10px; border-radius: 6px; font-size: .875rem; max-height: 220px; overflow: auto; }
+.kas-card__v--old { background: var(--adm-err-bg, #fdecec); text-decoration: line-through; text-decoration-color: var(--adm-err, #b42318); margin-bottom: 4px; }
+.kas-card__v--new { background: var(--adm-ok-bg, #e7f6ec); }
+.kas-card__v p:last-child { margin-bottom: 0; }
+.kas-card__n { margin: 8px 0 0; padding-left: 1.2em; font-size: .8125rem; color: var(--adm-t2, #555); }
+.kas-card__btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.kas-card__ok { margin: 10px 0 0 !important; color: var(--adm-ok, #146c2e); font-weight: 600; }
+.kas-card__ok a { margin-left: 6px; }
+.kas-card__no, .kas-card__muted { margin: 10px 0 0 !important; font-size: .875rem; color: var(--adm-t2, #555); }
+
+/* Eingabe */
+.kas__f { padding: 10px 12px 12px; border-top: 1px solid var(--adm-line, #ddd); }
+.kas__ctx { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: .8125rem; color: var(--adm-t2, #555); }
+.kas__ctx small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.kas__row { display: flex; gap: 8px; align-items: flex-end; }
+.kas__row textarea { flex: 1; min-height: 48px; max-height: 180px; padding: 10px 12px; border: 1px solid var(--adm-in, #ccc); border-radius: 12px; background: var(--adm-card, #fff); color: inherit; font: inherit; line-height: 1.4; resize: vertical; }
+.kas__send { flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--adm-a, #1d4ed8); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.kas__send svg { width: 20px; height: 20px; }
+.kas__send.is-stop svg { display: none; }
+.kas__send.is-stop::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: currentColor; }
+.kas__foot { margin: 8px 0 0; font-size: .75rem; color: var(--adm-t2, #555); }
+
+/* Seitenleiste: Knopf „Assistent fragen“; Liste im KI-Bereich */
+.kas-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.kas-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.kas-list__open { font-weight: 600; }
+@media (forced-colors: active) { .kas-m__b, .kas-card, .kas__send { border: 1px solid CanvasText; } }

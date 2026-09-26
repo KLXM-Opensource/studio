@@ -1,0 +1,81 @@
+/* Kit „nature“ – Einstieg „Jahreszeiten-Bühne“ (nur bei hero:season geladen, theme.php → conditional_css).
+   Panorama als Inline-SVG (blocks/hero.php), Farben ausschließlich aus den Tokens; je Jahreszeit (.hs--{fruehling|sommer|
+   herbst|winter}) andere Mischungen. Breit: Text liegt im Himmel, das Panorama unten (Platz reserviert: 20cqi ≈ Hügel);
+   schmal: Text, Hofschild, darunter das Panorama (16:9-Ausschnitt). Hofschild: „Jetzt geöffnet“ rechnet site.js aus. */
+.hs{display:block;
+  --hs-sky:color-mix(in srgb,var(--n-a) 13%,var(--n-card));--hs-sky2:color-mix(in srgb,var(--n-earth) 6%,var(--n-card));
+  --hs-far:color-mix(in srgb,var(--n-a) 32%,var(--n-surface));--hs-mid:color-mix(in srgb,var(--n-a) 60%,var(--n-surface));--hs-near:var(--n-a);
+  --hs-trunk:color-mix(in srgb,var(--n-earth) 45%,var(--n-ink));--hs-fir:color-mix(in srgb,var(--n-a) 50%,var(--n-ink));--hs-crown:color-mix(in srgb,var(--n-a) 80%,var(--n-ink));
+  --hs-bloom:color-mix(in srgb,var(--n-earth) 42%,var(--n-panel));--hs-sun:var(--n-earth);--hs-snow:var(--n-panel);
+  --hs-barn:color-mix(in srgb,var(--n-earth) 82%,var(--n-ink));--hs-roof:color-mix(in srgb,var(--n-ink) 72%,var(--n-earth));--hs-silo:color-mix(in srgb,var(--n-ink) 14%,var(--n-panel));
+  --hs-fence:color-mix(in srgb,var(--n-earth) 50%,var(--n-ink));--hs-line:color-mix(in srgb,var(--n-ink) 16%,transparent)}
+.hs--fruehling{--hs-crown:color-mix(in srgb,var(--n-a) 72%,var(--n-panel));--hs-near:color-mix(in srgb,var(--n-a) 86%,var(--n-panel))}
+.hs--sommer{--hs-sky:color-mix(in srgb,var(--n-earth) 11%,var(--n-card));--hs-sky2:color-mix(in srgb,var(--n-earth) 5%,var(--n-card));
+  --hs-near:color-mix(in srgb,var(--n-earth) 34%,color-mix(in srgb,var(--n-a) 22%,var(--n-panel)));--hs-wheat:color-mix(in srgb,var(--n-earth) 62%,var(--n-panel))}
+.hs--herbst{--hs-sky:color-mix(in srgb,var(--n-earth) 15%,var(--n-card));--hs-sky2:color-mix(in srgb,var(--n-earth) 8%,var(--n-card));--hs-sun:color-mix(in srgb,var(--n-earth) 80%,var(--n-panel));
+  --hs-far:color-mix(in srgb,var(--n-earth) 22%,color-mix(in srgb,var(--n-a) 30%,var(--n-surface)));--hs-mid:color-mix(in srgb,var(--n-earth) 30%,color-mix(in srgb,var(--n-a) 58%,var(--n-surface)));
+  --hs-near:color-mix(in srgb,var(--n-earth) 28%,var(--n-a));--hs-crown:color-mix(in srgb,var(--n-earth) 78%,var(--n-a));--hs-bloom:color-mix(in srgb,var(--n-earth) 55%,var(--n-panel))}
+.hs--winter{--hs-sky:color-mix(in srgb,var(--n-ink) 11%,var(--n-card));--hs-sky2:color-mix(in srgb,var(--n-ink) 4%,var(--n-card));--hs-sun:color-mix(in srgb,var(--n-earth) 40%,var(--hs-snow));
+  --hs-far:color-mix(in srgb,var(--n-a) 22%,var(--hs-snow));--hs-mid:color-mix(in srgb,var(--n-a) 9%,var(--hs-snow));--hs-near:var(--hs-snow);--hs-line:color-mix(in srgb,var(--n-ink) 9%,transparent)}
+/* Waldnacht: Hügel gedämpft, Schnee hell */
+@media (prefers-color-scheme:dark){html.has-dark .hs{--hs-far:color-mix(in srgb,var(--n-a) 24%,var(--n-bg));--hs-mid:color-mix(in srgb,var(--n-a) 38%,var(--n-bg));--hs-near:color-mix(in srgb,var(--n-a) 56%,var(--n-bg));--hs-snow:color-mix(in srgb,var(--n-ink) 86%,var(--n-bg));--hs-silo:color-mix(in srgb,var(--n-ink) 60%,var(--n-bg))}}
+.is-darkbase .hs{--hs-far:color-mix(in srgb,var(--n-a) 24%,var(--n-bg));--hs-mid:color-mix(in srgb,var(--n-a) 38%,var(--n-bg));--hs-near:color-mix(in srgb,var(--n-a) 56%,var(--n-bg));--hs-snow:color-mix(in srgb,var(--n-ink) 86%,var(--n-bg));--hs-silo:color-mix(in srgb,var(--n-ink) 60%,var(--n-bg))}
+@media (prefers-color-scheme:dark){html.has-dark .hs--winter{--hs-far:color-mix(in srgb,var(--hs-snow) 26%,color-mix(in srgb,var(--n-a) 22%,var(--n-bg)));--hs-mid:color-mix(in srgb,var(--hs-snow) 42%,var(--n-bg));--hs-near:color-mix(in srgb,var(--hs-snow) 62%,var(--n-bg))}}
+.is-darkbase .hs--winter{--hs-far:color-mix(in srgb,var(--hs-snow) 26%,color-mix(in srgb,var(--n-a) 22%,var(--n-bg)));--hs-mid:color-mix(in srgb,var(--hs-snow) 42%,var(--n-bg));--hs-near:color-mix(in srgb,var(--hs-snow) 62%,var(--n-bg))}
+
+/* Bühne: Blattform (zwei weite, zwei enge Ecken), Himmel als Verlauf */
+.hs__stage{container-type:inline-size;position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--n-img-r);background:linear-gradient(180deg,var(--hs-sky),var(--hs-sky2) 70%);box-shadow:var(--n-card-sh)}
+.hs__body{position:relative;z-index:1;display:grid;gap:var(--n-s-l);align-items:start;padding:var(--n-s-xl) clamp(var(--n-s-s),5cqi,var(--n-s-2xl)) var(--n-s-m)}
+.hs__text .hero__title{max-width:15ch}
+.hs__scene{order:2;display:block;width:100%;height:auto;aspect-ratio:16/9}
+@container (min-width:36rem){.hs__scene{aspect-ratio:2/1}}
+@container (min-width:52rem){
+  .hs__scene{position:absolute;inset:auto 0 0;aspect-ratio:1200/440}
+  .hs__body{padding-block:var(--n-s-2xl) calc(20cqi + var(--n-s-l))}
+  .hs__body--sign{grid-template-columns:minmax(0,1fr) minmax(15rem,20rem);column-gap:var(--n-s-xl)}
+  .hs__text .hero__lead{max-width:30em}
+  /* Schild hängt an zwei Schnüren vom oberen Rand */
+  .hs__sign::before,.hs__sign::after{content:"";position:absolute;bottom:calc(100% - .5rem);left:16%;width:2px;height:calc(var(--n-s-2xl) + var(--n-s-l));background:var(--hs-fence);rotate:4deg;transform-origin:bottom}
+  .hs__sign::after{left:auto;right:16%;rotate:-4deg}
+  .hs__sign{margin-top:var(--n-s-m);rotate:-.8deg}
+}
+/* Panorama */
+.hs__sun{fill:var(--hs-sun);opacity:.9}
+.hs__rays{fill:none;stroke:var(--hs-sun);stroke-width:4;stroke-linecap:round;opacity:.55}
+.hs__clouds{fill:var(--hs-snow);opacity:.75}
+.hs__birds{fill:none;stroke:var(--n-ink);stroke-width:2;stroke-linecap:round;opacity:.5}
+.hs__h3{fill:var(--hs-far)}.hs__h2{fill:var(--hs-mid)}.hs__h1{fill:var(--hs-near)}
+.hs__fir{fill:var(--hs-fir)}.hs__trunk{fill:var(--hs-trunk)}.hs__crown{fill:var(--hs-crown)}.hs__bloom{fill:var(--hs-bloom)}
+.hs__bare{fill:none;stroke:var(--hs-trunk);stroke-width:3;stroke-linecap:round}
+.hs__barn{fill:var(--hs-barn)}.hs__roof,.hs__chimney{fill:var(--hs-roof)}.hs__silo{fill:var(--hs-silo)}
+.hs__door{fill:color-mix(in srgb,var(--n-ink) 35%,var(--hs-barn));stroke:color-mix(in srgb,var(--hs-snow) 80%,transparent);stroke-width:2}
+.hs__snowcap{fill:var(--hs-snow)}
+.hs__smoke{fill:none;stroke:color-mix(in srgb,var(--n-ink) 22%,transparent);stroke-width:4;stroke-linecap:round}
+.hs__furrow{fill:none;stroke:var(--hs-line);stroke-width:2}
+.hs__fence{fill:var(--hs-fence)}.hs__rail{fill:none;stroke:var(--hs-fence);stroke-width:3;stroke-linecap:round}
+.hs__flowers{fill:var(--hs-snow)}.hs__flowers--b{fill:var(--hs-bloom)}
+.hs__wheat{fill:none;stroke:var(--hs-wheat,var(--n-earth));stroke-width:2;stroke-linecap:round;opacity:.8}
+.hs__bale{fill:var(--hs-bloom)}.hs__bale-line{fill:none;stroke:var(--hs-trunk);stroke-width:1.5;opacity:.6}
+.hs__pumpkin{fill:var(--n-earth)}.hs__pumpkin-rib{fill:none;stroke:color-mix(in srgb,var(--n-ink) 30%,var(--n-earth));stroke-width:1.5}
+.hs__stem{fill:none;stroke:var(--hs-fir);stroke-width:3;stroke-linecap:round}
+.hs__drift{fill:var(--hs-bloom)}
+.hs--winter .hs__drift{fill:var(--hs-snow);stroke:var(--hs-line);stroke-width:.6}
+/* Blätter bzw. Schnee sinken beim Laden einmal herab (≤ 5 s, danach Ruhe) – nur mit „Bewegung“ und ohne „Bewegung reduzieren“ */
+@media (prefers-reduced-motion:no-preference){
+  .has-drift .hs__fall{transform-box:fill-box;transform-origin:center;animation:hs-fall 4.2s cubic-bezier(.3,.6,.4,1) both}
+  .has-drift .hs__fall--1{animation-duration:3.6s;animation-delay:.2s}
+  .has-drift .hs__fall--2{animation-duration:4.6s;animation-delay:.1s}
+}
+@keyframes hs-fall{from{translate:-10px -60px;opacity:0}30%{opacity:1}}
+html:not(.has-motifs) .hs__stage{background:var(--hs-sky2)}
+
+/* Hofschild: Holzbrett mit feiner Maserung, Öffnungszeiten */
+.hs__sign{position:relative;display:grid;gap:var(--n-s-xs);padding:var(--n-s-m);border:1px solid var(--n-card-bd);border-radius:var(--n-r-l);
+  background:repeating-linear-gradient(176deg,transparent 0 22px,color-mix(in srgb,var(--n-earth) 7%,transparent) 22px 23px),linear-gradient(color-mix(in srgb,var(--n-earth) 9%,var(--n-card)) 0 0),var(--n-sec-bg,var(--n-bg));box-shadow:var(--n-card-sh);color:var(--n-text)}
+.hs__sign-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--n-s-2xs) var(--n-s-s);margin:0}
+.hs__sign-name{color:var(--n-ink);font:var(--n-hw) var(--n-t2)/1.15 var(--n-font-head)}
+.hs__season{padding:.15em .7em;border-radius:999px;background:var(--n-a-soft);color:var(--n-ink);font:var(--n-lb-style) 500 var(--n-t-1)/1.4 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.hs__sign .openstate{margin:var(--n-s-2xs) 0 0;font-size:var(--n-t1)}
+.hs__sign .hours{font-size:var(--n-t-1)}
+.hs__sign .hours__row:last-child{border-bottom:0}
+.hs__sign--empty{border-style:dashed;background:var(--n-card);color:var(--n-muted);font-size:var(--n-t-1)}

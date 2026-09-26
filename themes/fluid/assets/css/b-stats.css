@@ -1,0 +1,14 @@
+/* Theme „fluid“ – Kennzahlen (nur wenn verwendet). Zahlen in Container-Einheiten: werden mit der Zelle größer/kleiner. */
+.stats{--min:11rem;--gap:var(--f-s-l) var(--f-s-xl)}
+.stat{display:flex;flex-direction:column;gap:.35rem;container-type:inline-size}
+.stat__label{order:2;color:var(--f-ink);font-weight:650;line-height:1.3}
+.stat__value{order:1;margin:0;color:var(--f-ink);font:var(--f-hw) max(var(--f-t3),min(var(--f-t5),28cqi))/1 var(--f-font-head);letter-spacing:calc(var(--f-track) * .015em);font-variant-numeric:tabular-nums}
+.stat__text{order:3;margin:0;color:var(--f-muted);font-size:var(--f-t-1)}
+.stats--row .stat{padding-top:var(--f-s-s);border-top:2px solid var(--f-ink)}
+.stats--row .stat__value{color:var(--f-link)}
+.stats--cards .stat{padding:var(--f-pad)}
+.stats-split{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--f-s-xl) var(--f-s-3xl)}
+.stats-split>.sec-head{flex:1 1 min(20rem,100%);margin:0}
+.stats-split .h2{font-size:max(var(--f-t2),min(var(--f-t4),7cqi))}
+.stats-split>.stats{flex:999 1 0;min-width:min(100%,55%)}
+.stats--split .stat{padding-left:var(--f-s-m);border-left:3px solid var(--f-a)}

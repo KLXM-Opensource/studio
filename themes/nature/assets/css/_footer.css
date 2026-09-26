@@ -1,0 +1,45 @@
+/* ---------------------------------------------------------------- Fußbereich (Standard „Index“; panel/simple: opt-footer-*.css) */
+.ftr{position:relative;margin-top:clamp(1.5rem,4vw,3.5rem);padding-block:var(--n-s-2xl) var(--n-s-l);background:var(--n-surface);color:var(--n-text);font-size:var(--n-t-1)}
+/* Hügelkante über dem Fuß (Inline-SVG, Farben aus den Tokens) */
+.ftr__hills{position:absolute;left:0;bottom:calc(100% - 1px);width:100%;height:clamp(1.5rem,4vw,3.5rem);fill:var(--n-surface);pointer-events:none}
+.ftr__hills-2{fill:color-mix(in srgb,var(--n-a) 14%,var(--n-surface))}
+html:not(.has-motifs) .ftr__hills-2{display:none}
+.ftr a{color:var(--n-ink);text-decoration:none}
+.ftr a:hover{color:var(--n-link);text-decoration:underline}
+.ftr__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:var(--n-s-xl) var(--n-s-l)}
+.ftr__about{display:grid;gap:var(--n-s-s);align-content:start}
+@container (min-width:56rem){.ftr__about{grid-column:span 1;padding-right:var(--n-s-l)}}
+.ftr__tagline{color:var(--n-ink);font-weight:500}
+.ftr__text{color:var(--n-muted)}
+.ftr__h{margin-bottom:var(--n-s-s);color:var(--n-muted);font:var(--n-lb-style) 500 var(--n-label)/1.3 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.ftr__index{display:grid;margin:0;padding:0;list-style:none}
+.ftr__index a{display:flex;gap:var(--n-s-xs);align-items:center;min-height:2.5rem;padding:.25rem 0}
+.ftr__index a::before{content:"";flex:none;width:.45rem;height:.45rem;border-radius:0 70% 0 70%;background:var(--n-line-strong);opacity:.6}
+.ftr__index a:hover::before,.ftr__index a[aria-current]::before{background:var(--n-a);opacity:1}
+.ftr__index a[aria-current]{color:var(--n-link)}
+.ftr__address{margin-bottom:var(--n-s-xs)}
+.ftr__list{display:grid;gap:.25rem;margin:0;padding:0;list-style:none}
+.ftr__list a{display:inline-flex;align-items:center;gap:.5rem;min-height:2rem;overflow-wrap:anywhere}
+.ftr__list .ico{color:var(--n-muted)}
+.ftr__social{--gap:.25rem 1rem}
+.ftr .hours{font-size:inherit}
+.ftr__bottom{display:flex;flex-wrap:wrap;align-items:center;gap:var(--n-s-xs) var(--n-s-l);margin-top:var(--n-s-2xl);padding-top:var(--n-s-m);border-top:1px solid var(--n-line);color:var(--n-muted)}
+.ftr__copy{margin-inline-end:auto}
+.ftr__legal{--gap:.25rem 1.25rem}
+.ftr__top{font:var(--n-lb-style) 500 var(--n-label)/1 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+/* Öffnungszeiten (auch im Kontakt-Block) */
+.hours{display:grid;margin:0;font-variant-numeric:tabular-nums}
+.hours__row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 var(--n-s-s);padding-block:.4375rem;border-bottom:1px solid var(--n-line)}
+.hours dt{color:var(--n-ink);font-weight:500}
+.hours dd{margin:0}
+.hours__row.is-today dt::before{content:"";display:inline-block;width:.55rem;height:.55rem;margin-right:.5em;border-radius:0 70% 0 70%;background:var(--n-mark);vertical-align:.05em}
+.hours__row.is-today dt{font-weight:800}
+.openstate{display:inline-flex;align-items:center;gap:.6em;margin-bottom:var(--n-s-xs);font:var(--n-lb-style) 500 var(--n-label)/1.3 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case);color:var(--n-ink)}
+.openstate__led{width:.625rem;height:.625rem;border-radius:50%;background:var(--n-muted)}
+.openstate.is-open .openstate__led{background:var(--n-a);box-shadow:0 0 0 4px color-mix(in srgb,var(--n-a) 22%,transparent)}
+/* Saisonzeiten (Website → Saison) */
+.seasons{display:grid;gap:var(--n-s-xs);margin:var(--n-s-s) 0 0;padding:0;list-style:none}
+.seasons li{display:grid;padding-left:1.1rem;border-left:2px solid color-mix(in srgb,var(--n-a) 45%,transparent)}
+.seasons__name{color:var(--n-ink);font-weight:700}
+.seasons__period{color:var(--n-muted);font:var(--n-lb-style) 500 var(--n-label)/1.3 var(--n-font-label)}
+.seasons__text{color:var(--n-text)}

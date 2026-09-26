@@ -1,0 +1,13 @@
+/* Kit „nature“ – Steckbrief: ruhige Tabelle; zweispaltig ab 56 rem Platz (ohne Bild), mit Bild daneben ab 52 rem */
+.specs{display:grid;gap:var(--n-s-xl);align-items:start}
+.specs__media{border-radius:var(--n-img-r);box-shadow:var(--n-card-sh)}
+.specs__sheet{container-type:inline-size;min-width:0}
+.specs__group{margin:var(--n-s-l) 0 var(--n-s-xs)}
+.specs__group:first-child{margin-top:0}
+.specs__list{display:grid;margin:0;border-top:1px solid var(--n-line)}
+.specs__row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--n-s-s);align-items:baseline;padding:.75rem 0;border-bottom:1px solid var(--n-line)}
+.specs__row dt{color:var(--n-muted);font:var(--n-lb-style) 500 var(--n-label)/1.5 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.specs__row dd{margin:0;color:var(--n-ink);font-variant-numeric:tabular-nums}
+.specs__note{margin-top:var(--n-s-s);color:var(--n-muted);font-size:var(--n-t-1)}
+@container (min-width:56rem){.specs--table .specs__list{grid-template-columns:1fr 1fr;column-gap:var(--n-s-xl)}}
+@container (min-width:52rem){.specs--has-media{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--n-s-2xl)}}

@@ -1,0 +1,5 @@
+<?php /** Handbuch „basis“ · Fragen zum Kit (nach den allgemeinen Fragen) · @var string $settingsTitle */ ?>
+  <details><summary>Die Karte erscheint nicht.</summary><div>Es fehlt der Standort: <?= e($settingsTitle) ?> → Stammdaten → Standort auf der Karte. Im Kontakt-Block muss „Karte anzeigen“ eingeschaltet sein.</div></details>
+  <details><summary>Das Logo ist im dunklen Farbschema kaum zu sehen.</summary><div>Unter Darstellung eine helle Fassung als „Logo für dunkles Farbschema“ hinterlegen oder das dunkle Schema unter Design → Farbschema abschalten.</div></details>
+  <details><summary>Die Leiste „Modern“ ist nicht transparent.</summary><div>Transparent wird sie nur, wenn die Option eingeschaltet ist, und nicht im Bearbeitungsmodus. Am besten wirkt sie über einem ersten Abschnitt mit Hintergrundbild und Abdunkelung (Abschnitt-Optionen).</div></details>
+  <details><summary>„Jetzt geöffnet“ erscheint nicht.</summary><div>Die Infoleiste gibt es bei „Klassisch“ und „Ausführlich“ (Design → Navigation → Infoleiste). Der Status braucht eingetragene Öffnungszeiten.</div></details>

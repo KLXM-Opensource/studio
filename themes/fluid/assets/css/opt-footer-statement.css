@@ -1,0 +1,7 @@
+/* Theme „fluid“ – Fußbereich „Großer Schriftzug“ (lädt nur, wenn unter Design gewählt) */
+/* Großer Schriftzug: Satz in Container-Einheiten (füllt die Breite, ohne überzulaufen) */
+.ftr--statement{background:var(--f-dark);border:0;--f-fg:var(--f-on-dark);--f-ink:var(--f-fg);--f-text:color-mix(in srgb,var(--f-fg) 88%,var(--f-dark));--f-muted:color-mix(in srgb,var(--f-fg) 80%,var(--f-dark));--f-line:color-mix(in srgb,var(--f-fg) 18%,transparent);--f-line-strong:color-mix(in srgb,var(--f-fg) 45%,transparent);--f-surface:color-mix(in srgb,var(--f-fg) 8%,transparent);--f-surface-2:color-mix(in srgb,var(--f-fg) 12%,transparent);--f-link:var(--f-fg);--f-focus:var(--f-fg);--f-btn-bg:var(--f-fg);--f-btn-ink:var(--f-dark);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-dark));--f-a-soft:color-mix(in srgb,var(--f-fg) 12%,transparent)}
+.ftr--statement .brand__mark{background:var(--f-fg);color:var(--f-dark)}
+.ftr__statement{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--f-s-l) var(--f-s-2xl);margin-bottom:var(--f-s-3xl);padding-bottom:var(--f-s-2xl);border-bottom:1px solid var(--f-line)}
+.ftr__big{flex:1 1 min(20rem,100%);max-width:16ch;color:var(--f-ink);font-size:max(var(--f-t4),min(calc(var(--f-t6)*1.3),11cqi));line-height:.98;text-wrap:balance}
+.ftr__cta{flex:none}

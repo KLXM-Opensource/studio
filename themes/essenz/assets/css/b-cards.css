@@ -1,0 +1,22 @@
+@import "_knob.css";
+/* Theme „essenz“ – Produkte/Leistungen: Paneel-Karten; „Produkt“ zeigt das Bild vertieft auf ruhiger Fläche */
+.pcards{--gap:var(--e-s-m)}
+.pcard{display:flex;flex-direction:column;gap:var(--e-s-s);padding:var(--e-s-s);min-width:0;transition:border-color .2s,translate .25s cubic-bezier(.2,.7,.2,1)}
+.pcard__media{border-radius:calc(var(--e-r-l) - 4px)}
+.pcards--product .pcard__media{background:var(--e-surface);box-shadow:var(--e-well)}
+.pcards--product .pcard__media img{object-fit:contain;padding:8%}
+.pcards--image .pcard{padding:0;overflow:hidden}
+.pcards--image .pcard__media{border-radius:0}
+.pcards--image .pcard__body,.pcards--image .pcard__foot{padding-inline:var(--e-s-m)}
+.pcards--image .pcard__foot{padding-bottom:var(--e-s-m)}
+.pcards--service .pcard{padding:var(--e-s-m)}
+.pcard__body{display:grid;gap:var(--e-s-xs);padding:var(--e-s-2xs) var(--e-s-2xs) 0}
+.pcard__title{color:var(--e-ink);font:var(--e-hw) var(--e-t1)/1.25 var(--e-font-head);letter-spacing:calc(var(--e-track) * .005em);text-wrap:balance}
+.pcard__text{color:var(--e-muted);font-size:var(--e-t-1);text-wrap:pretty}
+.pcard__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--e-s-s);margin-top:auto;padding:var(--e-s-s) var(--e-s-2xs) 0;border-top:1px solid var(--e-line)}
+.pcard__meta{color:var(--e-ink);font:500 var(--e-t-1)/1.3 var(--e-font-mono);font-variant-numeric:tabular-nums}
+.pcard__go{display:inline-flex;align-items:center;gap:.5rem;color:var(--e-link);font:500 var(--e-label)/1 var(--e-font-label);letter-spacing:.08em;text-transform:uppercase}
+.pcard__go .ico{box-sizing:content-box;padding:.5rem;border-radius:50%;background:var(--e-surface);color:var(--e-ink);font-size:.875rem;transition:background-color .15s,color .15s,translate .2s}
+.pcard--link:hover{border-color:var(--e-line-strong)}
+.pcard--link:hover .pcard__go .ico{background:var(--e-ui,var(--e-a));color:var(--e-a-on);translate:.125rem 0}
+@media (prefers-reduced-motion:no-preference){.has-motion .pcard--link:hover{translate:0 -2px}}

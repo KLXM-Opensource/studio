@@ -1,0 +1,21 @@
+/* Kit „modern“ – nur auf Seiten mit diesem Block (theme.php → conditional_css) */
+/* ---------------------------------------------------------------- Text + Bild (Switcher: nebeneinander, solange beide Hälften passen) */
+.mt{display:flex;flex-wrap:wrap;align-items:center;gap:var(--m-s-2xl) clamp(2rem,7cqi,6.5rem)}
+.mt__text{container-type:inline-size;flex:1 1 min(24rem,100%);display:flex;flex-direction:column;gap:var(--m-s-l)}
+.mt__media{flex:1 1 min(19rem,100%)}
+.mt--left .mt__media{order:-1}
+.mt__head,.mt-split .sec-head,.mt-over .sec-head{margin:0}
+.mt .btn-row,.mt-split .btn-row,.mt-over .btn-row{margin-top:var(--m-s-xs)}
+.sec--media-text.v-split{padding-block:0}
+.mt-split{display:flex;flex-wrap:wrap}
+.mt-split__media{flex:1 1 min(24rem,100%);min-height:min(24rem,70vh);border-radius:0}
+.mt-split__text{flex:1 1 min(24rem,100%);display:flex;align-items:center;padding:var(--m-sec) var(--m-gutter)}
+.mt-split__inner{display:flex;flex-direction:column;gap:var(--m-s-l);width:100%;max-width:calc(var(--m-wrap) / 2)}
+.mt-split--flip .mt-split__media{order:1}
+.mt-split--screen{min-height:100vh;min-height:100svh}
+.mt-over{display:grid}
+.mt-over__media{grid-area:1/1}
+.mt-over__card{position:relative;display:flex;flex-direction:column;gap:var(--m-s-l);margin:calc(var(--m-s-2xl) * -1) var(--m-s-s) 0;padding:var(--m-pad);border-radius:var(--m-r-l);background:var(--m-bg);color:var(--m-text);box-shadow:0 30px 60px -30px var(--m-sh2);--m-card:var(--m-surface)}
+@container (min-width:52rem){.mt-over__card{grid-area:1/1;align-self:end;justify-self:end;width:min(34rem,55%);margin:var(--m-s-xl)}}
+
+.mt-over>*{min-width:0}

@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Externe Quellen (Core\Sources, app/Admin/views/data/source*.php, external_entry.php)
+   Nur Farb-Tokens der Verwaltung (hell/dunkel). Status nie nur über Farbe: immer Symbol + Text.
+   ========================================================================== */
+.src-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+@media (max-width:1100px){.src-grid{grid-template-columns:minmax(0,1fr)}}
+.src-form{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;min-width:0}
+.src-form > .adm-card{margin:0}
+.src-side{display:grid;gap:16px;min-width:0}
+.src-side .adm-card{margin:0}
+.src-side h2 .ico,.src-preview h2 .ico{width:18px;height:18px;vertical-align:-3px}
+.src-switch{margin-bottom:20px}
+.src-switch .adm-row{align-items:center;gap:14px}
+.src-table td{vertical-align:top}
+.src-err{display:block;font-size:12.5px;max-width:34ch}
+.src-steps{margin:0 0 10px}
+.src-auth{margin-top:4px;border-top:1px solid var(--adm-line);padding-top:12px}
+.src-auth summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:center}
+.src-auth summary .ico{width:18px;height:18px}
+.src-auth[open] summary{margin-bottom:12px}
+.src-actions{flex-wrap:wrap;justify-content:flex-end;padding:0 4px}
+.src-actions .adm-btn .ico{width:18px;height:18px}
+.src-fresh{margin-right:auto;font-size:13.5px}
+
+/* Zuordnung */
+.src-map-wrap{overflow-x:auto;margin:6px -4px 0;padding:0 4px}
+.src-map{min-width:720px}
+.src-map td:nth-child(4),.src-map td:nth-child(5){min-width:110px}
+.src-map th[scope=row]{font-size:14px;text-transform:none;letter-spacing:0;color:var(--adm-ink);font-weight:600;padding:10px 12px 10px 0;vertical-align:top;border-bottom:1px solid var(--adm-line);min-width:140px}
+.src-map th[scope=row] small{font-weight:400}
+.src-map td{padding:8px 6px;vertical-align:top}
+.src-map input,.src-map select,.src-map textarea{width:100%;min-height:36px;padding:6px 9px;border-radius:6px;border:1.5px solid var(--adm-in);background:var(--adm-surface,var(--adm-card));color:var(--adm-ink);font:400 14px var(--adm-font)}
+.src-map input:focus,.src-map select:focus,.src-map textarea:focus{border-color:var(--adm-a);outline:none;box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .15)}
+.src-map td:nth-child(2){min-width:220px}
+.src-map td:nth-child(3){min-width:170px}
+.src-sub{display:block;font-size:12px;color:var(--adm-t3);margin:6px 0 2px}
+.src-lookup{margin-top:4px;font-size:12.5px}
+.src-lookup summary{cursor:pointer;color:var(--adm-t3)}
+.src-lookup textarea{margin-top:4px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+
+/* Vorschau */
+.src-preview{scroll-margin-top:16px}
+.src-preview .adm-flash{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.src-preview .adm-flash .ico{width:18px;height:18px;flex:none;margin-top:2px}
+.src-item{border:1px solid var(--adm-line);border-radius:10px;padding:14px 16px;margin:0 0 12px;background:var(--adm-card)}
+.src-item h3{margin:0 0 10px;font-size:15px}
+.src-item code{font-size:12px;overflow-wrap:anywhere}
+.src-item .sh-fields{font-size:13.5px}
+.src-item .sh-fields .ico{width:16px;height:16px;vertical-align:-3px}
+.src-warn{margin:10px 0 0;padding:8px 12px;list-style:none;border-radius:8px;background:var(--adm-warn-bg);color:var(--adm-warn);font-size:13px;display:grid;gap:4px}
+.src-warn .ico{width:15px;height:15px;vertical-align:-2px}
+.src-raw summary{cursor:pointer;font-weight:600;margin:6px 0}
+.src-paths td{font-size:13px;padding:6px 10px;vertical-align:top;overflow-wrap:anywhere}
+.src-paths code{font-size:12.5px}
+
+/* Protokoll */
+.src-log{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.src-log li{border-left:3px solid var(--adm-line);padding:2px 0 2px 10px;font-size:13px}
+.src-log li.is-ok{border-left-color:var(--adm-ok)}
+.src-log li.is-warn{border-left-color:var(--adm-warn)}
+.src-log li.is-err{border-left-color:var(--adm-err)}
+.src-log__head{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.src-log__head .ico{width:16px;height:16px}
+.src-log li.is-err .src-log__head .ico{color:var(--adm-err)}
+.src-log li.is-warn .src-log__head .ico{color:var(--adm-warn)}
+.src-log li.is-ok .src-log__head .ico{color:var(--adm-ok)}
+.src-log__msg{display:block;color:var(--adm-t2);margin-top:2px;overflow-wrap:anywhere}
+.src-log details{margin-top:4px}
+.src-log details summary{cursor:pointer;color:var(--adm-t3)}
+.src-log details ul{margin:4px 0 0;padding-left:18px;color:var(--adm-t2)}
+.src-tips{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--adm-t2);font-size:14px}
+
+/* Herkunft „aus Quelle …“ (Eintragsliste, Eintrag) */
+.src-badge{display:inline-flex;align-items:center;gap:4px;min-height:20px;padding:0 7px;margin-left:6px;border-radius:5px;background:var(--adm-accent-bg,var(--adm-fill));color:var(--adm-a-ink,var(--adm-t2));font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
+.src-badge .ico{width:13px;height:13px}
+.src-badge--l{font-size:12.5px;min-height:24px;margin:0 8px 0 0}
+.src-badge--l .ico{width:15px;height:15px}
+.src-note{display:block;line-height:1.55;background:var(--adm-fill);color:var(--adm-ink);font-weight:500}
+
+/* Daten-Navigation: Externe Quellen abgesetzt */
+.dt-nav__list--extra{margin-top:10px;padding-top:10px;border-top:1px solid var(--adm-line);list-style:none;padding-left:0}
+.adm-main > .dt-nav .dt-nav__list--extra{margin:0;padding:0;border:0}
+
+@media (max-width:700px){
+  .src-actions{justify-content:stretch}
+  .src-actions .adm-btn{flex:1 1 auto}
+  .src-fresh{width:100%;order:3}
+}

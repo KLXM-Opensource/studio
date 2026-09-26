@@ -1,0 +1,70 @@
+/* ---------------------------------------------------------------- Tokens (Standardwerte = Vorlage „Moos“, design.php)
+   Die Design-Datei (Verwaltung → Design) überschreibt nur die Grundwerte; Stufen, Rollen und Mischfarben leiten sich hier
+   ab und folgen damit automatisch – hell wie dunkel (Waldnacht). */
+:root{
+  --n-a:#52703A;--n-a-ink:#3F5B28;--n-a-on:#FFFFFF;
+  --n-ink:#1F281D;--n-text:#3A4034;--n-muted:#5A5F4F;--n-bg:#F6F2E8;--n-surface:#ECE5D3;--n-panel:#FCFAF4;--n-line:#DCD3BE;--n-dark:#1F2B22;--n-earth:#A85A32;
+  --n-font:"Nunito Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--n-font-head:Fraunces,"Iowan Old Style",Georgia,ui-serif,serif;
+  --n-font-mono:var(--n-font);--n-font-label:var(--n-font-head);
+  --n-fs-min:16;--n-fs-max:18.5;--n-ratio:1.25;--n-hw:560;--n-soft:100;--n-track:-1.5;
+  --n-radius:16px;--n-u:.5rem;--n-space:1;--n-wrap:74rem;
+  --n-on-dark:#F1EEE3;--n-danger:#B42318;
+
+  /* Schriftstufen: Grundschrift fließt zwischen 360 und 1280 px Fensterbreite; Stufen = Grundschrift × Verhältnisⁿ.
+     Unter 60 em gilt ein flacheres Verhältnis (große Überschriften skalieren zusätzlich mit dem Container, cqi). */
+  --n-t0:clamp(var(--n-fs-min)*.0625rem,var(--n-fs-min)*.0625rem + (var(--n-fs-max) - var(--n-fs-min))*(100vw - 360px)/920,var(--n-fs-max)*.0625rem);
+  --n-r:calc(1 + (var(--n-ratio) - 1)*.72);
+  --n-t1:calc(var(--n-t0)*var(--n-r));--n-t2:calc(var(--n-t0)*pow(var(--n-r),2));--n-t3:calc(var(--n-t0)*pow(var(--n-r),3));
+  --n-t4:calc(var(--n-t0)*pow(var(--n-r),4));--n-t5:calc(var(--n-t0)*pow(var(--n-r),5));--n-t6:calc(var(--n-t0)*pow(var(--n-r),6));
+  --n-t-1:calc(var(--n-t0)*.875);--n-t-2:calc(var(--n-t0)*.75);
+  /* Etiketten (Design → Dachzeilen): kursiv in der Überschriftenschrift (Standard) oder kleine Versalien */
+  --n-label:calc(var(--n-t0)*.95);--n-lb-style:italic;--n-lb-case:none;--n-lb-track:0em;
+
+  /* Abstände: Vielfache von --n-u (Design → Dichte) */
+  --n-s-2xs:calc(var(--n-u)*.5);--n-s-xs:var(--n-u);--n-s-s:calc(var(--n-u)*2);--n-s-m:calc(var(--n-u)*3);
+  --n-s-l:calc(var(--n-u)*4);--n-s-xl:calc(var(--n-u)*6);--n-s-2xl:calc(var(--n-u)*8);--n-s-3xl:calc(var(--n-u)*12);
+  --n-sec:calc(clamp(var(--n-u)*8,var(--n-u)*4 + 6vw,var(--n-u)*16)*var(--n-space));
+  --n-gutter:clamp(1rem,.5rem + 2.4vw,3rem);
+  --n-pad:var(--n-s-m);
+
+  /* Abgeleitete Farben */
+  --n-a-soft:color-mix(in srgb,var(--n-a) 16%,var(--n-bg));
+  --n-a2:color-mix(in srgb,var(--n-a) 26%,var(--n-panel));
+  --n-surface-2:color-mix(in srgb,var(--n-ink) 6%,var(--n-surface));
+  --n-line-strong:color-mix(in srgb,var(--n-ink) 55%,var(--n-panel));
+  --n-hdr-bg:color-mix(in srgb,var(--n-bg) 86%,transparent);
+  --n-r-s:calc(var(--n-radius)*.5);--n-r-l:var(--n-radius);--n-r-xl:calc(var(--n-radius)*1.5);
+  /* Bildform (Design → Bildform): Blatt = zwei weite, zwei enge Ecken */
+  --n-img-r:calc(var(--n-radius)*3) calc(var(--n-radius)*.5);
+
+  /* Tiefe (Design → Tiefe): weiche, warme Schatten */
+  --n-hi:rgb(255 255 255/.7);--n-sh1:rgb(52 40 20/.06);--n-sh2:rgb(52 40 20/.16);
+  --n-card-sh:0 1px 2px var(--n-sh1),0 14px 32px -20px var(--n-sh2);
+  --n-key-sh:0 1px 0 rgb(0 0 0/.08),0 4px 12px -6px var(--n-sh2);
+  --n-well:inset 0 1px 3px var(--n-sh1);
+
+  /* Rollen – Abschnitte mit dunklem Hintergrund stellen sie um */
+  --n-card:var(--n-panel);--n-card-bd:color-mix(in srgb,var(--n-line) 70%,transparent);
+  --n-link:var(--n-a-ink);--n-focus:var(--n-a-ink);--n-mark:var(--n-earth);
+  --n-btn-bg:var(--n-a);--n-btn-ink:var(--n-a-on);--n-btn-r:.5rem;
+  --n-btn2-bg:transparent;--n-btn2-ink:var(--n-ink);
+
+  /* Kompatibilität: Kern-Stylesheets (Suchvorschläge, Karte, Chat) lesen diese Namen */
+  --b-a:var(--n-a-ink);--b-a-on:var(--n-a-on);--b-ink:var(--n-ink);--b-muted:var(--n-muted);--b-line:var(--n-line);--b-surface:var(--n-surface);--b-bg:var(--n-panel);--b-radius:var(--n-radius);
+}
+@media (min-width:60em){:root{--n-r:var(--n-ratio)}}
+.lb-caps{--n-label:max(.75rem,calc(var(--n-t0)*.74));--n-lb-style:normal;--n-lb-case:uppercase;--n-lb-track:.1em;--n-font-label:var(--n-font)}
+.depth-flat{--n-card-sh:none;--n-key-sh:none;--n-well:none;--n-card-bd:var(--n-line)}
+.depth-deep{--n-card-sh:0 2px 4px var(--n-sh1),0 26px 50px -22px var(--n-sh2);--n-key-sh:0 2px 0 rgb(0 0 0/.12),0 8px 18px -8px var(--n-sh2)}
+.btn-pill{--n-btn-r:999px}
+.btn-outline{--n-btn-bg:transparent;--n-btn-ink:var(--n-ink);--n-key-sh:none}
+.img-soft{--n-img-r:var(--n-r-l)}
+.img-pebble{--n-img-r:46% 54% 42% 58%/52% 44% 56% 48%}
+.is-darkbase{color-scheme:dark;--n-hi:rgb(255 255 255/.04);--n-sh1:rgb(0 0 0/.3);--n-sh2:rgb(0 0 0/.55)}
+/* Waldnacht (dunkles Farbschema): nur Farbwerte wechseln (Standardwerte hier, eigene in der Design-Datei); Vorschau: css/preview.css */
+@media (prefers-color-scheme:dark){
+  html.has-dark{--n-a:#9BC27A;--n-a-ink:#B3D493;--n-a-on:#122009;--n-ink:#EFF1E7;--n-text:#D0D5C6;--n-muted:#A4AC9A;--n-bg:#111913;--n-surface:#172019;--n-panel:#1C261F;--n-line:#2D3A30;--n-dark:#1A241D;--n-earth:#E0976A}
+  html.has-dark{color-scheme:dark;--n-hi:rgb(255 255 255/.04);--n-sh1:rgb(0 0 0/.3);--n-sh2:rgb(0 0 0/.55);--n-danger:#FF8A80}
+  html.has-dark .brand__logo--light{display:none}
+  html.has-dark .brand__logo--dark{display:block}
+}

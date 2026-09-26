@@ -1,0 +1,16 @@
+/* Theme „editorial“ – Rich-Text-Stile (Klassenvertrag Core\Sanitizer: t-lead, t-small, t-note, c-*, mark, sup/sub).
+   Lädt nur, wenn die Seite sie ausgibt (theme.php → conditional_css „@rich“). Farben als --rt-* (Kontrastprüfung der Leiste).
+   Hell ≥ 4,5:1 auf Papier/Fläche, dunkel in der Nachtausgabe und auf dunklen Flächen, blass auf der Akzentfläche. */
+:root,.bg-white,.bg-muted,.bg-accent,.bg-dark,.sec--ov-dark{--rt-accent:var(--e-link);--rt-muted:var(--e-muted)}
+:root{--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318}
+.bg-dark,.sec--ov-dark{--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
+.bg-accent{--rt-success:#D5F5E0;--rt-warning:#FFF1C2;--rt-danger:#FFE0DC}
+@media (prefers-color-scheme:dark){html.has-dark,html.has-dark :is(.bg-accent,.bg-dark){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}}
+html.is-dark,html.is-dark :is(.bg-accent,.bg-dark){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
+.t-lead{font:400 1.3em/1.45 var(--e-font-display);color:var(--e-ink)}
+.t-small{font-size:.875em;line-height:1.55}
+.t-note{padding:.85em 1.1em;border-left:3px solid var(--rt-accent);background:var(--e-surface)}
+.bg-muted .t-note{background:var(--e-bg)}
+mark{padding:0 .12em;background:#FFE58A;color:#1B1B19}
+.c-accent{color:var(--rt-accent)}.c-muted{color:var(--rt-muted)}.c-success{color:var(--rt-success)}.c-warning{color:var(--rt-warning)}.c-danger{color:var(--rt-danger)}
+sup,sub{font-size:.72em;line-height:0}

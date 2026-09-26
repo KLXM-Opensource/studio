@@ -1,0 +1,1 @@
+.frame--empty{display:grid;place-items:center;min-height:10rem;border:1px dashed var(--m-line-strong);background:var(--m-surface);color:var(--m-muted);font-size:.875rem}.empty-hint{padding:var(--m-s-l);border:1px dashed var(--m-line-strong);border-radius:var(--m-radius);color:var(--m-muted);text-align:center}

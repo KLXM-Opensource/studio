@@ -1,0 +1,12 @@
+/* Kit „glas“ – Downloads: Zeilen auf Glas – Typ als kleines Glasschild, Aktionen als Tasten */
+.downloads{display:grid;gap:var(--g-s-xs);margin:0;padding:0;list-style:none}
+.download{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:var(--g-s-s) var(--g-s-m);padding:var(--g-s-s) var(--g-s-s) var(--g-s-s) var(--g-s-m);border:1px solid var(--g-edge);border-radius:var(--g-r-l);background:linear-gradient(180deg,var(--g-sheen),transparent 60%),var(--g-panel);background-clip:padding-box;box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-rim)}
+.download__type{display:grid;place-items:center;flex:none;min-width:3.5rem;height:2.25rem;padding:0 .5rem;border-radius:var(--g-r-s);background:linear-gradient(135deg,color-mix(in srgb,var(--g-f1) 60%,var(--g-glass)),color-mix(in srgb,var(--g-f2) 60%,var(--g-glass)));color:#12142B;font:700 var(--g-label)/1 var(--g-font-head);letter-spacing:.04em;box-shadow:inset 0 1px 0 rgb(255 255 255/.6)}
+.download__main{flex:1 1 min(14rem,100%);display:grid;gap:.125rem;min-width:0}
+.download__name{color:var(--g-ink);font-weight:650;overflow-wrap:anywhere}
+.download__meta{color:var(--g-muted);font:400 var(--g-t-1)/1.4 var(--g-font);font-variant-numeric:tabular-nums}
+.download__actions{display:flex;align-items:center;gap:var(--g-s-xs);margin-left:auto}
+.download__view{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 1rem;border:1px solid var(--g-line-strong);border-radius:var(--g-btn-r);background:var(--g-btn2-bg);color:var(--g-ink);font-weight:600;text-decoration:none;box-shadow:inset 0 1px 0 var(--g-hi)}
+.download__view:hover{border-color:var(--g-ink)}
+.download__dl{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:var(--g-btn-r);background:var(--g-btn-bg);color:var(--g-btn-ink);font-size:1.2rem;box-shadow:var(--g-key-sh)}
+.download__dl:active,.download__view:active{translate:0 1px}

@@ -1,0 +1,14 @@
+/* ==========================================================================
+   Kit „modern“ – zeitgemäß, selbstbewusst, klar. Vollständig über Design-Tokens gesteuert.
+   Werte: Verwaltung → Design → /media/…/design/design-modern-*.css (nach diesem Stylesheet geladen).
+   Klassen am <html>: nav-{modern|classic|minimal|extended} nav-sticky btn-{solid|outline|arrow} cards-{outlined|flat|elevated}
+   eb-{square|index|plain} ft-{big|columns|simple} has-motion has-dark is-darkbase.
+   Responsiv in Stufen: 30 em (klein), 48 em (Tablet), 64 em (Desktop) – plus prefers-color-scheme und prefers-reduced-motion.
+   Blöcke außerhalb dieser Datei laden nur bei Bedarf (theme.php → conditional_css); Menüs/Suche/Seitenblatt: overlay.css.
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+@import "_header.css";
+@import "_footer.css";
+@import "_hero.css";
+@media print{[data-reveal]{opacity:1!important;translate:none!important}.hdr,.mnav,.ftr__statement,.skip,.menu-btn,.hsearch__btn{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}}

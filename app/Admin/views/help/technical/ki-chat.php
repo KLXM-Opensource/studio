@@ -1,0 +1,44 @@
+<?php /** Entwicklerhandbuch · KI-Chats: Redaktions-Assistent (Core\AI\Assistant) und Besucher-Chat (Core\AI\VisitorChat), SSE */ ?>
+  <p class="lead">Zwei Chats auf Basis von <code>Core\AI\Ai</code>: der <b>Assistent der Redaktion</b> (Funktion <code>chat.assistant</code>, Standard an) und der <b>Besucher-Chat</b> (Funktion <code>chat.visitor</code>, Standard <b>aus</b> – <code>Features::OFF_BY_DEFAULT</code>). Beide antworten per Retrieval nur aus eigenen Texten, streamen per Server-Sent Events und speichern keine Inhalte, solange niemand es ausdrücklich will.</p>
+
+  <h3>Architektur</h3>
+  <table class="doc-table">
+    <tr><th>Teil</th><th>Besucher-Chat</th><th>Assistent</th></tr>
+    <tr><td>Freigabe</td><td><code>'features' =&gt; ['chat.visitor' =&gt; true]</code> (Agentur) + <code>sys.chat_enabled</code> (Grundeinstellungen → KI → Besucher-Chat) + <code>Ai::enabled('text')</code> + <code>Search::enabled()</code> (Landing-Domain mit Suche „aus“ → kein Chat)</td><td><code>chat.assistant</code> + <code>ai</code>, Recht <code>ai.use</code>, <code>Ai::enabled('text')</code>, <code>sys.ai_assistant</code> (Standard an)</td></tr>
+    <tr><td>Endpunkte</td><td><code>GET /api/chat/config?lang=</code>, <code>POST /api/chat</code> (<code>VisitorChatController</code>, ohne Sitzung/Cookies, Origin-Prüfung)</td><td><code>POST /admin/api/assistant/ask|execute|save</code>, <code>GET …/history[/{id}]</code>, <code>POST …/history/{id}/delete</code>, Seite <code>/admin/ai/assistent</code> (<code>AssistantController</code>, CSRF)</td></tr>
+    <tr><td>Retrieval</td><td><code>Search::query()</code> (hybrid Loupe + Vektoren, Landing-Umfang, Sprache der Seite) → beste Textstelle je Treffer aus dem gespeicherten Loupe-Dokument (<code>LoupeIndex::document()</code>, Abschnitte à ~180 Wörter), höchstens 5 Quellen + <code>CmsService::publicInfo()</code> (Kit <code>project.public_info</code>: Kontakt, Öffnungszeiten, Hinweis)</td><td><code>Core\AI\HelpIndex</code>: Handbuch, Technik, Tutorials (inkl. Kit-Kapitel) als Abschnitte je <code>&lt;h3&gt;</code> in <code>{storage}/ai/help.sqlite</code> (FTS5 + optional Vektoren, RRF) + Wissensdatenbank (<code>Knowledge::search</code>, Rechte des Supports)</td></tr>
+    <tr><td>Prompt</td><td><code>Prompts::visitorChat()</code> + Kit-Zusatz <code>theme.php 'ai' =&gt; ['chat' =&gt; ['system' =&gt; '…']]</code> (z. B. Praxis: keine medizinische Beratung, Notfall 112)</td><td><code>Prompts::assistant()</code> mit Kontext des Bildschirms und den erlaubten Aktionen</td></tr>
+    <tr><td>Oberfläche</td><td><code>cms_chat_launcher($page, $editor)</code> im Kit-Layout → <code>visitor-chat-start.js</code> (0,6 KB) + <code>visitor-chat-start.css</code> (0,7 KB); nach dem Klick <code>visitor-chat.mjs</code> + <code>visitor-chat.css</code> im Shadow DOM</td><td><code>_assistant.js</code> in <code>admin.js</code> (Knopf <code>[data-assistant]</code>, <kbd>Alt</kbd>+<kbd>Umschalt</kbd>+<kbd>K</kbd>, Spotlight <code>cmd: 'assistant'</code>) → <code>assistant.mjs</code> + <code>assistant.css</code> beim ersten Öffnen</td></tr>
+    <tr><td>Zähler</td><td><code>Ai::track('chat', …)</code> – eigenes Tageslimit <code>sys.chat_daily</code> (Standard 300), nicht im Limit der Redaktion; je IP-HMAC 8/min, 80/Tag (<code>RateLimiter</code>)</td><td>wie KLXM Ai: Zählname <code>text</code>, Tageslimit <code>sys.ai_daily_cap</code>, Verlauf <code>Assist::log('assistant', …)</code></td></tr>
+  </table>
+
+  <h3>Streaming (SSE) auf Plesk/PHP-FPM</h3>
+  <ul>
+    <li><code>Core\Http\Sse::stream(fn(Sse $s) =&gt; …)</code>: schließt die Sitzung (<code>session_write_close</code>), leert alle Ausgabepuffer, sendet <code>text/event-stream</code> mit <code>Cache-Control: no-cache, no-transform</code> und <code>X-Accel-Buffering: no</code> (nginx vor PHP-FPM puffert sonst), 2 KB Füllkommentar, danach <code>event:</code>/<code>data:</code> (JSON). <code>connection_aborted()</code> nach jedem <code>flush</code> bricht die Erzeugung ab, wenn der Browser schließt.</li>
+    <li>Ereignisse: <code>sources</code> (Quellen vorab), <code>delta</code> (Textstück), <code>status</code>, <code>done</code> (bereinigter Text, zitierte Quellen, Aktionen bzw. Kontakt), <code>error</code>. Ohne <code>Accept: text/event-stream</code> antworten beide Endpunkte mit einer normalen JSON-Antwort (Rückfall). Anbieter ohne Streaming liefern die Antwort in einem Stück (<code>Ai::stream()</code>).</li>
+    <li>Jeder offene Stream belegt einen PHP-Worker, bis die Antwort fertig ist (einige Sekunden). Bei vielen gleichzeitigen Besuchern <code>pm.max_children</code> des FPM-Pools prüfen; Streams sind kurzlebig (eine Antwort), es gibt keine Dauerverbindungen. gzip/Brotli für <code>text/event-stream</code> abschalten, falls der Proxy es trotz <code>no-transform</code> komprimiert.</li>
+    <li>Der PHP-Entwicklungsserver (<code>php -S</code>) bedient nur eine Anfrage gleichzeitig: Während eine Antwort läuft, warten andere Seitenaufrufe – nur lokal relevant.</li>
+    <li>Browser lesen den Stream per <code>fetch</code> (<code>resources/js/_sse.js</code>, POST mit CSRF-Kopfzeile) – EventSource kann kein POST.</li>
+  </ul>
+
+  <h3>Schutz vor erfundenen Antworten und Missbrauch (Besucher-Chat)</h3>
+  <ul>
+    <li>Ohne Quellen kein KI-Aufruf: Die Antwort ist dann sofort „weiß ich nicht“ + Kontakt. Die KI antwortet mit dem Marker <code>[[WEISS_NICHT]]</code>, wenn die Quellen die Frage nicht beantworten; der Server hält den Anfang des Streams zurück, bis klar ist, dass kein Marker kommt.</li>
+    <li>Belege <code>[n]</code> werden geprüft; Links oder Adressen, die die KI selbst schreibt, werden entfernt – verlinkt werden nur Quellen. Zahlen (Zeiten, Preise, Nummern), die weder in den Quellen noch in der Frage oder im Kit-Zusatz stehen, führen zu „Bitte sehen Sie direkt auf diesen Seiten nach“.</li>
+    <li>Anweisungs-Angriffe (<code>VisitorChat::injection()</code>: „ignoriere …“, „zeige deinen Prompt“, Rollenspiele, Steuerzeichen) werden ohne KI-Aufruf abgelehnt; zusätzlich verbietet der Prompt, Anweisungen aus Quellen oder Fragen zu befolgen (Marker <code>[[ABGELEHNT]]</code>).</li>
+    <li>Vor dem Senden an den Anbieter werden E-Mail-Adressen, lange Nummern und IBANs unkenntlich gemacht (<code>VisitorChat::scrub()</code>). Frühere Nachrichten schickt der Browser mit (höchstens 6, gekürzt); der Server speichert sie nicht.</li>
+  </ul>
+
+  <h3>Aktionen des Assistenten (Werkzeug-Schicht wie MCP)</h3>
+  <ul>
+    <li>Die KI schlägt anbieterunabhängig JSON nach der Zeile <code>@@AKTIONEN@@</code> vor: <code>[{"action": "…", "args": {…}}]</code> (Rückfall: JSON-Codeblock). Erlaubt: <code>search_content</code> (läuft sofort, Treffer gehen in eine zweite Runde), <code>create_page</code>, <code>update_page</code>, <code>add_text</code>, <code>update_block</code>, <code>create_entry</code>, <code>update_entry</code>, <code>translate_page</code>, <code>translate_entry</code>, <code>set_alt_text</code>, <code>set_notice</code>. Kein Löschen, kein Veröffentlichen.</li>
+    <li><code>Assistant::prepare()</code> prüft Recht (<code>pages.manage</code>, <code>pages.edit</code>, <code>data.edit</code> je Tabelle, <code>data.publish</code> wenn die Änderung sofort öffentlich wäre, <code>media.upload</code>, <code>settings.edit</code>), Ziel und Werte (Sanitizer), berechnet vorher/nachher und signiert die Aktion (HMAC mit <code>app_key</code>, Person, Website). <code>execute()</code> prüft Signatur und Rechte erneut und ruft <code>CmsService</code> auf – Kanal <code>ai</code>, Funktion <code>chat</code>; mit <code>sys.review_ai</code> über <code>CmsService::forAi('chat')</code> als Einreichung unter „Eingereicht“.</li>
+    <li>Textabschnitte nutzen den Blocktyp <code>richtext</code> des Kits bzw. den ersten Block mit einem richtext-Feld (<code>Assistant::textBlock()</code>).</li>
+  </ul>
+
+  <h3>Verlauf, Index, Befehle</h3>
+  <ul>
+    <li><code>{storage}/ai/chat.sqlite</code>, Tabelle <code>conversations</code>: je Frage nur Metadaten (Zeit, Anzahl, Aktionen, Bildschirm; nach 90 Tagen gelöscht). Inhalte (<code>messages</code>) nur nach „Speichern“; löschbar in der Oberfläche. Der Browser hält den laufenden Chat in <code>sessionStorage</code> (nur dieser Tab).</li>
+    <li>Hilfe-Index: baut seinen Stichwort-Teil selbst neu, sobald sich Hilfe-Dateien ändern; Vektoren mit <code>php bin/console search:index --help [--all]</code> (z. B. nach jedem Deploy oder nachts per Cron).</li>
+    <li>Kit-Layouts: <code>&lt;?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) ?&gt;</code> vor <code>&lt;/body&gt;</code>. Eigene feste Leisten am unteren Rand: CSS-Variable <code>--cms-chat-lift</code> (Praxis: 76px auf schmalen Bildschirmen). Farben kommen aus <code>--cb-theme-accent</code> bzw. den Design-Variablen der mitgelieferten Kits, Fläche und Schrift aus der Seite (hell/dunkel automatisch).</li>
+  </ul>

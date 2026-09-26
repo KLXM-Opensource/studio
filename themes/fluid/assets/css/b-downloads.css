@@ -1,0 +1,12 @@
+/* Theme „fluid“ – Downloads (nur wenn verwendet). Zeile bricht um: Aktionen rutschen unter den Namen, wenn es eng wird. */
+.downloads{display:grid;gap:.6rem;margin:0;padding:0;list-style:none}
+.download{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1rem;padding:.9rem 1rem;border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card)}
+.download__type{display:grid;place-items:center;flex:none;min-width:3.25rem;height:3.25rem;padding:0 .4rem;border-radius:calc(var(--f-radius) * .8);background:var(--f-a2);color:var(--f-ink);font:700 .75rem/1 var(--f-font-label);letter-spacing:.06em}
+.download__main{flex:1 1 min(14rem,100%);display:grid;gap:.15rem;min-width:0}
+.download__name{color:var(--f-ink);font-weight:650;overflow-wrap:anywhere}
+.download__meta{color:var(--f-muted);font-size:var(--f-t-1)}
+.download__actions{display:flex;align-items:center;gap:.5rem;margin-left:auto}
+.download__view{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 1rem;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);color:var(--f-ink);font-weight:600;text-decoration:none}
+.download__view:hover{border-color:var(--f-ink)}
+.download__dl{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:var(--f-btn-r);background:var(--f-btn-bg);color:var(--f-btn-ink);font-size:1.2rem}
+.download__dl:hover{background:var(--f-btn-hover)}

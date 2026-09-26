@@ -1,0 +1,11 @@
+{
+  "name": "mycms-theme-praxis",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „praxis“ (Hausschrift). Wird von tools/build.mjs automatisch installiert und über themes/praxis/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/hanken-grotesk": "^0.4.3",
+    "@fontsource/hanken-grotesk": "^5.2.0"
+  }
+}

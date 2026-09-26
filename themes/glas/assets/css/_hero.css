@@ -1,0 +1,19 @@
+/* ---------------------------------------------------------------- Einstieg (Hero) – alle Varianten (steht auf fast jeder Seite) */
+.sec--hero{padding-top:calc(var(--g-sec) * .7)}
+.hero{display:grid;gap:var(--g-s-xl);align-items:center}
+.hero__text{display:grid;gap:var(--g-s-m);justify-items:start;min-width:0}
+.hero__title{max-width:17ch}
+.hero__lead{max-width:34em;color:var(--g-muted);font-size:var(--g-t1);line-height:1.5;text-wrap:pretty}
+.hero__actions{margin-top:var(--g-s-xs)}
+
+
+/* Seitenkopf: Text, rechts eine kleine Glasperle (Gestaltung, nie hinter Text) */
+.sec--hero:has(.hero--compact){padding-bottom:calc(var(--g-sec) * .55)}
+.hero--compact{grid-template-columns:minmax(0,1fr)}
+.hero--compact .hero__title{max-width:22ch;font-size:max(var(--g-t3),min(var(--g-t5),8.5cqi))}
+.hero--compact .hero__text{gap:var(--g-s-s)}
+.hero__orb{display:none}
+@container (min-width:48rem){
+  .hero--compact{grid-template-columns:minmax(0,1fr) 9rem}
+  .hero__orb{display:block;width:9rem;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgb(255 255 255/.9),transparent 32%),radial-gradient(circle at 70% 75%,var(--g-f3),transparent 60%),linear-gradient(145deg,var(--g-f2),var(--g-f1) 60%,var(--g-a));box-shadow:inset 0 -12px 24px -10px color-mix(in srgb,var(--g-a) 60%,transparent),0 24px 50px -24px color-mix(in srgb,var(--g-a) 70%,transparent)}
+}

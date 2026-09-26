@@ -1,0 +1,19 @@
+/* Kopfbereich-Aktionen – Teil „Suchfeld“: Feld mit Vorschlägen (Leiste, mittig, darunter); mobil (< 48 em) Lupe mit Popover bzw. Feld im Menü (Core\HeaderActions bündelt nur benötigte Teile; siehe header-actions.css) */
+.ha-field{position:relative;display:flex;align-items:center;min-width:0;margin:0}
+.ha-field__in{width:var(--ha-field-w,15rem);max-width:100%;min-height:var(--ha-h);padding:0 44px 0 12px;border:1px solid var(--ha-line);background:var(--ha-field-bg,var(--ha-surface));color:var(--ha-ink);font:inherit;font-size:var(--ha-fs);-webkit-appearance:none;appearance:none}
+.ha-field__in::placeholder{color:var(--ha-muted);opacity:1}
+.ha-field__in:focus{outline:2px solid var(--ha-accent);outline-offset:1px;background:var(--ha-bg)}
+.ha-field__in::-webkit-search-cancel-button{cursor:pointer}
+.ha-field__go{position:absolute;right:2px;top:50%;display:grid;place-items:center;width:40px;height:calc(var(--ha-h) - 4px);padding:0;border:0;border-radius:calc(var(--ha-r) - 2px);background:none;color:var(--ha-muted);transform:translateY(-50%);cursor:pointer}
+.ha-field__go:hover{color:var(--ha-accent)}
+.ha-kbd{position:absolute;right:44px;top:50%;transform:translateY(-50%);pointer-events:none;padding:1px 6px;border:1px solid var(--ha-line);border-radius:5px;background:var(--ha-bg);color:var(--ha-muted);font:600 .72rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+.ha-field__in:focus~.ha-kbd,.ha-field__in:not(:placeholder-shown)~.ha-kbd{display:none}
+.ha-field .ssug{min-width:min(24rem,calc(100vw - 24px))}
+.ha-center{flex:0 1 28rem;min-width:0;justify-content:center}
+.ha-center .ha-search--inline,.ha-center .ha-field,.ha-center .ha-search--command,.ha-center .ha-cmd{flex:1;max-width:28rem}
+.ha-center .ha-field__in{width:100%}
+.ha-search--fallback{display:none}
+@media (max-width:99.99em){.ha-field--inline{--ha-field-w:12rem}}
+@media (max-width:74.99em){.ha-center .ha-search--inline{display:none}.ha-center .ha-search--fallback{display:flex}.ha-center{flex:none}}
+@media (max-width:47.99em){.ha-search--inline:not(.ha-below *):not(.ha-center *),.ha-search--expand,.ha-center,.ha-kbd{display:none}.ha-search--fallback{display:flex}}
+@media (forced-colors:active){.ha-field__in{border:1px solid ButtonText}}

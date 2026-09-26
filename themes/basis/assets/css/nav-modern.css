@@ -1,0 +1,29 @@
+/* Navigation „Modern“: schwebende, abgerundete Leiste; optional transparent über dem ersten Abschnitt (.is-over),
+   beim Scrollen deckend (.is-stuck, gesetzt von site.js). */
+.site-header--modern{padding-top:12px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;pointer-events:none}
+.site-header--modern .site-header__inner{min-height:64px;padding:0 8px 0 20px;border:1px solid var(--b-line);border-radius:calc(var(--b-radius) * 2 + 4px);background:var(--b-header-bg);box-shadow:var(--b-shadow);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);pointer-events:auto;transition:background-color .25s,border-color .25s,box-shadow .25s}
+.site-header--modern .brand{margin-right:0}
+.site-header--modern .site-nav{flex:1}
+.site-header--modern .nav{margin-inline:auto}
+.site-header--modern .nav__link{border-radius:999px}
+.site-header--modern .btn{border-radius:var(--b-btn-r)}
+/* Über dem ersten Abschnitt: liegt über dem Inhalt; beim Scrollen fest und deckend */
+.site-header--modern.is-over{position:absolute;left:0;right:0}
+.nav-sticky .site-header--modern.is-over.is-stuck{position:fixed;top:0;animation:b-drop .3s ease-out}
+.is-over:not(.is-stuck,.is-open) .site-header__inner{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.is-over-dark:not(.is-stuck,.is-open) :is(.brand,.nav--dropdown>.nav__item>.nav__link,.nav--dropdown>.nav__item>.nav__sub>.nav__link,.menu-btn,.site-nav__end>.langswitch){--b-ink:var(--b-on-dark);--b-text:var(--b-on-dark);--b-muted:var(--b-on-dark);--b-line-strong:color-mix(in srgb,var(--b-on-dark) 55%,transparent);--b-surface:color-mix(in srgb,var(--b-on-dark) 14%,transparent);--b-bg:color-mix(in srgb,var(--b-on-dark) 22%,transparent);--b-line:transparent}
+.has-over main>.sec:first-child{padding-top:calc(clamp(56px,8vw,112px) + 76px)}
+@keyframes b-drop{from{transform:translateY(-100%)}}
+@media (min-width:960px){.site-header--modern .nav__sub>.subnav{top:calc(100% + 14px)}}
+@media (max-width:959.98px){
+  .site-header--modern{padding-top:8px}
+  .site-header--modern .site-header__inner{min-height:60px;padding-left:16px}
+  .site-header--modern .brand{margin-right:auto}
+  /* Mobilmenü als schwebende Karte unter der Leiste (Grundlagen in site.css) */
+  .js .site-header--modern .site-header__inner{z-index:2;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .js .site-header.site-header--modern::after{top:0}
+  .js .site-header--modern .site-nav{top:calc(var(--b-hb,72px) + 8px);right:var(--b-gutter);bottom:auto;width:min(26rem,calc(100% - 2 * var(--b-gutter)));max-height:calc(100dvh - var(--b-hb,72px) - 16px - env(safe-area-inset-bottom));padding:12px 20px 24px;border:1px solid var(--b-line);border-radius:calc(var(--b-radius) * 2 + 4px);box-shadow:var(--b-shadow);opacity:0;transform:translateY(-8px) scale(.98);transform-origin:top right;transition:opacity .2s,transform .28s cubic-bezier(.2,.7,.2,1),visibility 0s .28s}
+  .js .site-header--modern.is-open .site-nav{opacity:1;transform:none;transition:opacity .2s,transform .28s cubic-bezier(.2,.7,.2,1)}
+  .site-header--modern .nav{margin:0}
+  .site-header--modern .nav__link{border-radius:0}
+}

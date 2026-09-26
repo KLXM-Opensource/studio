@@ -1,0 +1,12 @@
+/* Hero: Hintergrundbild, -video oder ruhige Farbfläche (nur geladen, wenn die Variante genutzt wird) */
+.hero__bg{position:absolute;inset:0;z-index:-1;overflow:hidden;background:var(--c-bordeaux-hero)}
+.hero__bgimg{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.hero__bgimg.is-active{opacity:1}
+.hero__bgimg picture,.hero__bgimg img,.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero__video{z-index:1}
+/* Abdunklung: links stärker (Text), zur Karte hin leichter */
+.hero__bg:not(.hero__bg--color)::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(100deg,rgba(38,8,20,.86) 0%,rgba(38,8,20,.7) 45%,rgba(38,8,20,.45) 100%)}
+.hero__bg--medium::after{background:linear-gradient(100deg,rgba(38,8,20,.74) 0%,rgba(38,8,20,.52) 45%,rgba(38,8,20,.28) 100%)!important}
+.hero__bg--light::after{background:linear-gradient(100deg,rgba(38,8,20,.6) 0%,rgba(38,8,20,.36) 50%,rgba(38,8,20,.12) 100%)!important}
+@media (max-width:760px){.hero__bg:not(.hero__bg--color)::after{background:linear-gradient(180deg,rgba(38,8,20,.8),rgba(38,8,20,.66))!important}}
+@media (prefers-reduced-motion:reduce){.hero__bgimg{transition:none}.hero__video{display:none}}

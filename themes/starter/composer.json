@@ -1,0 +1,16 @@
+{
+    "_comment": "Stub – Paket-Installation von Kits ist GEPLANT, aber noch nicht umgesetzt: Der Core erkennt Kits nur unter themes/{name}/ (Core\\Theme::available). Erweiterungen gehen schon per Composer (type klxm-studio-extension bzw. mycms-extension). Bis dahin: Ordner nach themes/{name}/ kopieren.",
+    "name": "klxm-studio/kit-starter",
+    "description": "Start-Kit für KLXM Studio – das kleinste vollständige Kit als Ausgangspunkt für eigene Kits",
+    "type": "klxm-studio-kit",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.4"
+    },
+    "extra": {
+        "klxm-studio": {
+            "kit": "starter",
+            "requires-core": ">=1.0.0"
+        }
+    }
+}

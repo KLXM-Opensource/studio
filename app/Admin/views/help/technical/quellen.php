@@ -1,0 +1,51 @@
+<?php /** Entwicklerhandbuch · Externe Quellen (Core\Sources) */ ?>
+  <p class="lead">Feeds und Schnittstellen werden <b>serverseitig</b> abgerufen, per Zuordnung in Einträge einer Datentabelle übersetzt und per Prüfsumme abgeglichen. Alles danach – Datenliste, Detailseiten, Suche, REST-API, MCP, JSON-LD, Sitemap – arbeitet mit normalen Einträgen; Besucher stellen nie Anfragen an die Quelle.</p>
+  <table class="doc-table">
+    <tr><th>Baustein</th><th>Ort</th></tr>
+    <tr><td>Funktion &amp; Recht</td><td>Funktion <code>sources</code> (<code>Core\Features</code>, <b>Standard aus</b>, braucht <code>data</code>): <code>'features' =&gt; ['sources' =&gt; true|false]</code> in der Website-Konfiguration hat Vorrang, sonst Schalter <code>sys.sources_enabled</code> unter Daten → Externe Quellen (nur Netzwerk-Administration/Integratoren). Recht <code>sources.manage</code> (Gruppe Daten); Ein-/Ausblenden übernommener Einträge: <code>data.publish</code>.</td></tr>
+    <tr><td>Klassen</td><td><code>app/Sources/</code>: <code>Sources</code> (Tabellen, Vorlagen, Zeitplan, Health), <code>Fetcher</code> (HTTP mit SSRF-Schutz), <code>Parser</code> (Formate, Pfade), <code>OpenImmo</code> (Anreicherung, ZIP), <code>Mapper</code> (Zuordnung, Umwandlungen), <code>Sync</code> (Laden, Cache, Abgleich, Bilder, Protokoll), <code>Console</code>; Verwaltung <code>SourceController</code>, Views <code>data/sources.php</code>, <code>data/source.php</code>, <code>data/external_entry.php</code>.</td></tr>
+    <tr><td>Tabellen (je Website)</td><td><code>ext_sources</code> (Adresse, Format, <code>auth_json</code> mit Geheimnis via <code>Settings::encrypt()</code> – libsodium secretbox aus <code>app_key</code> wie das SMTP-Passwort, <code>options_json</code>, <code>mapping_json</code>, <code>table_handle</code>, Stand, <code>next_due</code>), <code>ext_source_items</code> (source_id, ext_id, table_handle, entry_id, hash, state active|missing, hidden_by_sync), <code>ext_source_log</code> (letzte 20 je Quelle), <code>ext_source_media</code> (Verweis-Hash → Medien-ID). Dateien: <code>{storage}/sources/{id}/</code> (Cache, Upload, gefundene Pfade, Sperre).</td></tr>
+    <tr><td>Schreibschutz</td><td><code>Entries::save()</code> lehnt Änderungen übernommener Einträge ab (Verwaltung, Website-Bearbeitung, REST-API, MCP, DAV), außer während <code>Sync::$writing</code>. <code>setStatus</code> (Ausblenden) und Löschen bleiben möglich – ein gelöschter Eintrag entsteht beim nächsten Abruf neu.</td></tr>
+  </table>
+
+  <h3>Formate</h3>
+  <ul class="doc-list">
+    <li><b>RSS 2.0 / RSS 1.0 (RDF)</b> und <b>Atom</b>: Einträge = <code>item</code> bzw. <code>entry</code>. XML wird zu Arrays: Text-Elemente → Wert, Attribute → <code>@name</code>, gemischte Elemente → <code>#text</code>, gleichnamige Kinder → Liste, Präfixe bleiben (<code>content:encoded</code>, <code>dc:creator</code>, <code>media:content</code>).</li>
+    <li><b>JSON</b>: Pfad zur Liste (<code>data.items[*]</code>, <code>$.results</code>); leer = erste Liste von Objekten.</li>
+    <li><b>XML (XPath)</b>: Einträge per XPath (Standard: Kinder des Wurzelelements); ein Standard-Namensraum wird entfernt, <code>document()</code>/<code>php:</code> sind gesperrt.</li>
+    <li><b>OpenImmo 1.2.x</b>: Einträge = <code>immobilie</code>; berechnete Pfade <code>_id</code> (openimmo_obid → objektnr_extern → objektnr_intern), <code>_objektnummer</code>, <code>_objektart</code>/<code>_objekttyp</code>, <code>_vermarktungsart</code> (kauf|miete|erbpacht|leasing), <code>_preis</code>, <code>_adresse</code>, <code>_adresse_frei</code>, <code>_geo</code>, <code>_kontakt</code>, <code>_bilder[n].pfad|titel|gruppe</code> (Titelbild zuerst). Ohne <code>verwaltung_objekt.objektadresse_freigeben</code> = true/1 entfernt der Parser Straße, Hausnummer und Koordinaten. <code>uebertragung@umfang="TEIL"</code> = Teilabgleich (fehlende Objekte bleiben), <code>aktion@aktionart="DELETE"</code> = Objekt entfernen (ausblenden bzw. löschen). Upload: ZIP mit XML + Bildern oder XML; Abholung per Adresse (XML oder ZIP).</li>
+  </ul>
+
+  <h3>Zuordnung</h3>
+  <pre><code>{"id_path": "guid | link", "slug_path": "",
+ "rows": {"titel":  {"path": "title", "tx": "text"},
+          "datum":  {"path": "pubDate | dc:date", "tx": "date", "opt": "d.m.Y|Y-m-d"},
+          "bild":   {"path": "enclosure@url | media:content@url", "alt": "title"},
+          "strasse":{"tx": "template", "opt": "{geo.strasse} {geo.hausnummer}"},
+          "energieausweis": {"path": "zustand_angaben.energiepass.epart", "lookup": "VERBRAUCH=Verbrauchsausweis", "default": "–"}}}</code></pre>
+  <p>Pfade: Punkt-Schreibweise, <code>[n]</code> Index, <code>[*]</code> alle, <code>[@attr=wert]</code>/<code>[@attr!=wert]</code> Filter, <code>@attr</code> Attribut; mehrere Pfade mit <code>|</code> (erster nicht leerer). Umwandlungen (<code>tx</code>): <code>text</code>, <code>html</code> (<code>Sanitizer::block</code>), <code>date</code> (feste Formate oder automatisch; Ausgabe je Feldtyp date/datetime/time, bei Textfeldern TT.MM.JJJJ), <code>number</code> (de|en|automatisch), <code>bool</code>, <code>slug</code>, <code>template</code>, <code>raw</code>; leer = passend zum Feldtyp. Auswahlfelder akzeptieren Schlüssel oder Bezeichnung. Jeder Wert läuft durch <code>Fields::clean()</code>; ungültige Werte entfallen mit Hinweis im Protokoll statt den Eintrag zu verwerfen. Nicht zuordenbar: Verknüpfungen, Gruppen, Wiederholungen, IBAN. Eindeutige ID fehlt → Link bzw. SHA-256 des Eintrags.</p>
+
+  <h3>Abgleich</h3>
+  <ul class="doc-list">
+    <li>Laden mit Zwischenspeicher (<code>ttl</code> Minuten; „Jetzt abrufen“, CLI <code>--source</code>/<code>--force</code> laden neu), lesen (max. Einträge), zuordnen, Prüfsumme (Werte + Bildverweise + Slug) vergleichen: nur Neues/Geändertes wird gespeichert; Status übernommener Einträge bleibt (Ausblenden der Redaktion bleibt bestehen).</li>
+    <li>Fehlende Einträge: <code>hide</code> (Entwurf, <code>hidden_by_sync</code> → beim Wiederauftauchen wieder online), <code>delete</code> oder <code>keep</code>. Nie bei leerer Antwort oder Teilabgleich.</li>
+    <li>Bilder: Adresse (gleicher SSRF-Schutz, max. 15 MB, nur JPG/PNG/WebP/GIF per finfo) bzw. Dateiname aus dem ZIP → <code>Media::import()</code> (GD neu kodiert, EXIF/GPS entfernt, Varianten), Tags <code>quelle</code>/<code>quelle-{id}</code>, Sammlung „Quelle: {Name}“, höchstens 150 neue Bilder je Lauf; fehlgeschlagene Bilder werden beim nächsten Lauf erneut versucht.</li>
+    <li>Sperrdatei je Quelle; Protokoll der letzten 20 Läufe; wiederholte Fehler verlängern den Abstand (bis 24 h).</li>
+  </ul>
+
+  <h3>Zeitplan &amp; Kommandozeile</h3>
+  <pre><code>*/15 * * * * php bin/console sources:sync --all        # fällige Quellen aller Websites
+php bin/console sources:sync --source=3 --site=demo        # eine Quelle sofort (ohne Cache)
+php bin/console sources:sync --force --site=demo           # alle aktiven Quellen sofort
+php bin/console sources:list [--all]                       # Stand je Quelle
+php bin/console health [--all]                             # „!“ = Quelle mit Fehler (Warnung, kein Deploy-Abbruch)</code></pre>
+  <p>Ohne Cron erledigt die Verwaltung fällige Abrufe nebenbei nach der Antwort (<code>Sources::maybeRun()</code> in <code>AdminController::auth</code>, billige Prüfung über <code>sys.sources_due</code>).</p>
+
+  <h3>Sicherheit</h3>
+  <ul class="doc-list">
+    <li><b>SSRF:</b> nur http/https, keine Zugangsdaten in der Adresse, Ports 80/443/8080/8443; Hostname wird selbst aufgelöst (A + AAAA), <em>alle</em> Adressen müssen öffentlich sein (keine privaten, Loopback-, Link-local-, CGNAT-, Benchmark-, Multicast-, reservierten, ULA- oder IPv4-in-IPv6-Adressen; <code>localhost</code>, <code>*.local</code>, <code>*.internal</code> gesperrt). curl verbindet fest mit der geprüften IP (<code>CURLOPT_RESOLVE</code>, kein DNS-Rebinding), kein Proxy aus der Umgebung, Weiterleitungen (max. 3) werden einzeln geprüft, Zugangsdaten gehen nie an andere Hosts. Nur Entwicklung: <code>'environment' =&gt; 'development'</code> + <code>'sources_allow_private' =&gt; ['127.0.0.1:8097']</code>.</li>
+    <li><b>Grenzen:</b> Antwortgröße je Quelle (Standard 5 MB, höchstens <code>sources_max_mb</code> = 20) während des Empfangs – auch nach gzip-Entpacken; Zeitlimit 2–60 s; Content-Type-Prüfung je Format; max. 5000 Einträge; Rate-Limits für Vorschau (40/10 min je Konto) und „Jetzt abrufen“ (30/h je Quelle).</li>
+    <li><b>XML:</b> Dokumente mit <code>&lt;!ENTITY</code> werden abgelehnt (XXE, Billion Laughs), Laden mit <code>LIBXML_NONET</code>, ohne Entity-Ersetzung/DTD-Laden, externer Entity-Loader liefert nichts, kein XInclude.</li>
+    <li><b>ZIP:</b> nur <code>*.xml</code> (erste Datei) und Bilder, flach unter eigenem Namen entpackt; Pfade mit <code>..</code>, absolute Pfade, Laufwerke, Steuerzeichen → Abbruch (Zip-Slip); symbolische Links übersprungen; max. 800 Dateien, 300 MB entpackt, Kompressionsrate begrenzt; Upload max. <code>sources_upload_mb</code> (100) bzw. Upload-Limit der Mediathek. Nur eine erfolgreich gelesene Datei ersetzt den letzten Upload.</li>
+    <li><b>Inhalte:</b> formatierte Texte über <code>Sanitizer::block</code> (Skripte, Event-Handler, <code>javascript:</code> entfernt), alle übrigen Werte über <code>Fields::clean</code>; Webadressen nur https.</li>
+  </ul>

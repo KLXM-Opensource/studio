@@ -1,0 +1,60 @@
+/* Spotlight-Suche (Verwaltung und Editor) */
+.sl{width:min(680px,calc(100vw - 24px));max-height:none;margin:14vh auto auto;padding:0;border:0;background:transparent;overflow:visible;font:400 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#1D1D1F}
+.sl::backdrop{background:rgba(0,0,0,.18)}
+.sl-box{border-radius:12px;background:rgba(246,246,248,.86);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);box-shadow:0 0 0 .5px rgba(0,0,0,.25),0 24px 70px rgba(0,0,0,.35);overflow:hidden}
+.sl-field{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.08)}
+.sl-field svg{width:22px;height:22px;color:#86868B;flex:none}
+.sl-field input{flex:1;min-width:0;border:0;background:none;font-family:inherit;font-size:22px;font-weight:400;line-height:1.2;color:inherit;outline:none}
+.sl-field input::-webkit-search-cancel-button{display:none}
+.sl-list{max-height:min(460px,56vh);overflow:auto;padding:6px 8px 8px}
+.sl-group{padding:10px 10px 4px;font-size:11.5px;font-weight:600;color:#86868B}
+.sl-item{display:flex;align-items:center;gap:12px;min-height:42px;padding:5px 10px;border-radius:7px;color:inherit;text-decoration:none}
+.sl-item.is-active{background:#314164;color:#fff}
+.sl-icon{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:6px;background:rgba(0,0,0,.06);color:#6E6E73;overflow:hidden}
+.sl-icon svg{width:16px;height:16px}
+.sl-icon img{width:100%;height:100%;object-fit:cover}
+.sl-icon b{font-size:14px}
+.sl-item.is-active .sl-icon{background:rgba(255,255,255,.2);color:#fff}
+.sl-text{display:flex;flex-direction:column;min-width:0;flex:1}
+.sl-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.sl-title mark{background:none;color:inherit;font-weight:700}
+.sl-sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#86868B}
+.sl-item.is-active .sl-sub{color:rgba(255,255,255,.8)}
+.sl-hint{display:none;gap:4px;flex:none}
+.sl-item.is-active .sl-hint{display:inline-flex}
+.sl kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:4px;background:rgba(0,0,0,.07);font:500 11px -apple-system,system-ui,sans-serif;color:inherit}
+.sl-item.is-active kbd{background:rgba(255,255,255,.22)}
+.sl-empty{padding:26px;text-align:center;color:#86868B}
+.sl-foot{display:flex;flex-wrap:wrap;gap:14px;padding:8px 16px;border-top:1px solid rgba(0,0,0,.08);font-size:11.5px;color:#86868B}
+.sl-foot kbd{margin-right:2px}
+@media (prefers-reduced-transparency:reduce){.sl-box{background:#F6F6F8}}
+/* Dunkle Darstellung (nur Verwaltung) */
+@media (prefers-color-scheme: dark){
+html.adm-ui:not([data-theme=light]) .sl{color:#F2F2F4}
+html.adm-ui:not([data-theme=light]) .sl-box{background:rgba(40,40,43,.86);box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 24px 70px rgba(0,0,0,.6)}
+html.adm-ui:not([data-theme=light]) .sl-field{border-bottom-color:rgba(255,255,255,.1)}
+html.adm-ui:not([data-theme=light]) .sl-icon{background:rgba(255,255,255,.08);color:#C9C9CE}
+html.adm-ui:not([data-theme=light]) .sl::backdrop{background:rgba(0,0,0,.4)}
+}
+html.adm-ui[data-theme=dark] .sl{color:#F2F2F4}
+html.adm-ui[data-theme=dark] .sl-box{background:rgba(40,40,43,.86);box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 24px 70px rgba(0,0,0,.6)}
+html.adm-ui[data-theme=dark] .sl-field{border-bottom-color:rgba(255,255,255,.1)}
+html.adm-ui[data-theme=dark] .sl-icon{background:rgba(255,255,255,.08);color:#C9C9CE}
+html.adm-ui[data-theme=dark] .sl::backdrop{background:rgba(0,0,0,.4)}
+
+/* Kontrast-Durchgang: Glas war auf heller Website-Seite zu durchsichtig (Grau #86868B nur 2,6:1) –
+   Flächen und Nebentexte aus den Tokens der Verwaltung (hell/dunkel, auch im Shadow DOM der Website).
+   Mehrfache Klasse: schlägt die älteren Dunkel-Regeln html.adm-ui[data-theme=dark] .sl-… (0,3,1). */
+.sl.sl.sl.sl{color:var(--adm-ink,#1D1D1F)}
+.sl-box.sl-box.sl-box.sl-box{background:var(--adm-card,#fff)}
+.sl-group,.sl-sub,.sl-empty,.sl-foot,.sl-field svg{color:var(--adm-t3,#5C5C5B)}
+.sl-field.sl-field.sl-field.sl-field{border-bottom-color:var(--adm-in,#7B8190)}
+.sl-icon.sl-icon.sl-icon.sl-icon{color:var(--adm-t2,#474746)}
+.sl-item.is-active{background:var(--adm-a,#314164);color:#fff}
+.sl-item.is-active .sl-sub{color:rgba(255,255,255,.9)}
+.sl-item.is-active .sl-icon.sl-icon.sl-icon{color:#fff}
+/* aktive Zeile: Nebentext und Tastenkürzel weiß auf Akzent (≥ 4,5:1) */
+.sl-item.is-active .sl-sub.sl-sub{color:#fff}
+.sl-item.is-active kbd.sl-kbd,.sl-item.is-active .sl-hint kbd{background:rgba(0,0,0,.28);color:#fff}
+/* Maus über einem Treffer: Linkfarbe (a:hover) nicht übernehmen */
+.sl .sl-item:not(.is-active):hover{color:inherit}

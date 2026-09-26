@@ -1,0 +1,2879 @@
+{
+  "_comment": "Kuratierte Symbole (Phosphor Icons, Stil duotone, MIT). Je Symbol: Phosphor-Name → [Bezeichnung (de), label (en), Suchbegriffe]. Build: tools/icons.mjs → public/assets/icons/{core,thema}.svg, icons.svg (alle), icons-map.json, catalog.json. „core“: Symbole der Verwaltung/Bedienung (zusätzlich zum Thema „ui“) im kleinen Kern-Sprite. Neues Symbol: Namen von phosphoricons.com in ein Thema eintragen, pnpm run build.",
+  "core": [
+    "squares-four",
+    "files",
+    "file-text",
+    "house",
+    "sliders-horizontal",
+    "images",
+    "database",
+    "tray",
+    "calendar-dots",
+    "gear-six",
+    "palette",
+    "users",
+    "user-circle",
+    "user",
+    "code",
+    "network",
+    "globe",
+    "lifebuoy",
+    "chats",
+    "question",
+    "clipboard-text",
+    "star",
+    "puzzle-piece",
+    "table",
+    "image",
+    "file",
+    "plus",
+    "upload-simple",
+    "package",
+    "key",
+    "magnifying-glass",
+    "check",
+    "sparkle",
+    "music-notes",
+    "article",
+    "text-t",
+    "translate",
+    "dots-three",
+    "sidebar-simple",
+    "info",
+    "warning",
+    "video-camera",
+    "folders",
+    "list-bullets",
+    "folder",
+    "file-pdf",
+    "crop",
+    "phone",
+    "at",
+    "arrow-right",
+    "link",
+    "pencil-simple",
+    "caret-down",
+    "x",
+    "lock",
+    "envelope-simple",
+    "clock",
+    "arrow-square-out",
+    "quotes",
+    "play-circle",
+    "lock-key",
+    "list",
+    "eye",
+    "check-circle",
+    "chat-circle-text",
+    "calendar",
+    "download-simple",
+    "device-mobile",
+    "arrow-up-right",
+    "arrow-counter-clockwise"
+  ],
+  "topics": [
+    {
+      "key": "general",
+      "de": "Allgemein",
+      "en": "General",
+      "icons": {
+        "house": [
+          "Haus",
+          "House",
+          "startseite home zuhause"
+        ],
+        "star": [
+          "Stern",
+          "Star",
+          "favorit bewertung wichtig sterne hotelsterne"
+        ],
+        "heart": [
+          "Herz",
+          "Heart",
+          "liebe gefällt favorit like"
+        ],
+        "bookmark-simple": [
+          "Lesezeichen",
+          "Bookmark",
+          "merken markieren"
+        ],
+        "tag": [
+          "Schlagwort",
+          "Tag",
+          "etikett kategorie label preis"
+        ],
+        "hash": [
+          "Raute",
+          "Hash",
+          "nummer hashtag zahl"
+        ],
+        "flag": [
+          "Fahne",
+          "Flag",
+          "markierung meilenstein ziel"
+        ],
+        "bell": [
+          "Glocke",
+          "Bell",
+          "benachrichtigung hinweis erinnerung"
+        ],
+        "info": [
+          "Information",
+          "Info",
+          "hinweis details"
+        ],
+        "question": [
+          "Frage",
+          "Question",
+          "hilfe faq fragen antworten"
+        ],
+        "warning": [
+          "Warnung",
+          "Warning",
+          "achtung hinweis gefahr"
+        ],
+        "check-circle": [
+          "Erledigt",
+          "Done",
+          "haken fertig ok bestätigt"
+        ],
+        "lightbulb": [
+          "Idee",
+          "Idea",
+          "glühbirne tipp vorschlag"
+        ],
+        "sparkle": [
+          "Funkeln",
+          "Sparkle",
+          "neu besonders ki magie"
+        ],
+        "push-pin": [
+          "Pinnnadel",
+          "Pin",
+          "anheften oben fixiert"
+        ],
+        "lock": [
+          "Schloss",
+          "Lock",
+          "gesperrt privat sicher verschlüsselung"
+        ],
+        "key": [
+          "Schlüssel",
+          "Key",
+          "zugang passwort schlüssel zimmerschlüssel schlüsselkarte check-in"
+        ],
+        "gift": [
+          "Geschenk",
+          "Gift",
+          "gutschein präsent überraschung geburtstag"
+        ],
+        "puzzle-piece": [
+          "Puzzleteil",
+          "Puzzle piece",
+          "erweiterung modul baustein"
+        ],
+        "thumbs-up": [
+          "Daumen hoch",
+          "Thumbs up",
+          "gut gefällt zustimmung like"
+        ],
+        "smiley": [
+          "Smiley",
+          "Smiley",
+          "gesicht freude zufrieden"
+        ]
+      }
+    },
+    {
+      "key": "ui",
+      "de": "Bedienung",
+      "en": "Interface",
+      "icons": {
+        "squares-four": [
+          "Übersicht",
+          "Dashboard",
+          "kacheln raster start"
+        ],
+        "table": [
+          "Tabelle",
+          "Table",
+          "daten liste raster zeilen spalten"
+        ],
+        "database": [
+          "Datenbank",
+          "Database",
+          "daten speicher tabellen sql"
+        ],
+        "list-bullets": [
+          "Liste",
+          "List",
+          "aufzählung punkte"
+        ],
+        "list-checks": [
+          "Checkliste",
+          "Checklist",
+          "aufgaben todo prüfliste"
+        ],
+        "plus": [
+          "Plus",
+          "Plus",
+          "neu hinzufügen anlegen"
+        ],
+        "x": [
+          "Schließen",
+          "Close",
+          "kreuz entfernen abbrechen"
+        ],
+        "check": [
+          "Haken",
+          "Check",
+          "ok bestätigen"
+        ],
+        "pencil-simple": [
+          "Bearbeiten",
+          "Edit",
+          "stift schreiben ändern blog beitrag"
+        ],
+        "trash": [
+          "Papierkorb",
+          "Trash",
+          "löschen entfernen müll"
+        ],
+        "copy": [
+          "Kopieren",
+          "Copy",
+          "duplizieren doppelt"
+        ],
+        "link": [
+          "Link",
+          "Link",
+          "verknüpfung kette verbindung verlinken"
+        ],
+        "arrows-clockwise": [
+          "Aktualisieren",
+          "Refresh",
+          "neu laden wiederholen synchronisieren"
+        ],
+        "arrow-up-right": [
+          "Pfeil schräg",
+          "Arrow up right",
+          "extern überweisung weiterleiten"
+        ],
+        "arrow-square-out": [
+          "Extern öffnen",
+          "Open external",
+          "neues fenster link"
+        ],
+        "download-simple": [
+          "Herunterladen",
+          "Download",
+          "speichern export"
+        ],
+        "upload-simple": [
+          "Hochladen",
+          "Upload",
+          "import datei"
+        ],
+        "magnifying-glass": [
+          "Suche",
+          "Search",
+          "suchen lupe finden"
+        ],
+        "funnel": [
+          "Filter",
+          "Filter",
+          "trichter eingrenzen"
+        ],
+        "sliders-horizontal": [
+          "Einstellungen",
+          "Settings",
+          "regler optionen"
+        ],
+        "gear-six": [
+          "Zahnrad",
+          "Gear",
+          "system einstellungen konfiguration zahnrad"
+        ],
+        "dots-three": [
+          "Mehr",
+          "More",
+          "punkte menü optionen"
+        ],
+        "dots-six-vertical": [
+          "Ziehen",
+          "Drag",
+          "verschieben sortieren griff"
+        ],
+        "list": [
+          "Menü",
+          "Menu",
+          "hamburger navigation"
+        ],
+        "eye": [
+          "Ansehen",
+          "View",
+          "auge sichtbar vorschau augenarzt augenheilkunde sehen"
+        ],
+        "share-network": [
+          "Teilen",
+          "Share",
+          "geteilt netzwerk weitergeben social media teilen"
+        ],
+        "tray": [
+          "Eingang",
+          "Inbox",
+          "anfragen posteingang ablage"
+        ],
+        "files": [
+          "Seiten",
+          "Pages",
+          "dokumente mehrere dateien"
+        ],
+        "code": [
+          "API",
+          "API",
+          "code schnittstelle entwickler programmieren entwicklung quellcode"
+        ],
+        "minus": [
+          "Minus",
+          "Minus",
+          "entfernen weniger"
+        ],
+        "arrow-right": [
+          "Pfeil rechts",
+          "Arrow right",
+          "weiter nächste"
+        ],
+        "eye-slash": [
+          "Verborgen",
+          "Hidden",
+          "unsichtbar ausblenden"
+        ],
+        "caret-down": [
+          "Aufklappen",
+          "Expand",
+          "pfeil unten mehr"
+        ],
+        "sign-out": [
+          "Abmelden",
+          "Sign out",
+          "logout verlassen"
+        ],
+        "arrow-counter-clockwise": [
+          "Rückgängig",
+          "Undo",
+          "zurück wiederherstellen"
+        ],
+        "sidebar-simple": [
+          "Seitenleiste",
+          "Sidebar",
+          "panel spalte leiste"
+        ],
+        "crop": [
+          "Zuschneiden",
+          "Crop",
+          "schneiden ausschnitt bildausschnitt"
+        ],
+        "text-t": [
+          "Text",
+          "Text",
+          "schrift buchstabe textfeld"
+        ],
+        "text-b": [
+          "Fett",
+          "Bold",
+          "formatiert fettschrift"
+        ],
+        "toggle-left": [
+          "Schalter",
+          "Toggle",
+          "ja nein an aus"
+        ],
+        "arrow-left": [
+          "Pfeil links",
+          "Arrow left",
+          "zurück vorher"
+        ]
+      }
+    },
+    {
+      "key": "communication",
+      "de": "Kommunikation",
+      "en": "Communication",
+      "icons": {
+        "envelope-simple": [
+          "Brief",
+          "Envelope",
+          "e-mail mail nachricht post kontakt"
+        ],
+        "at": [
+          "At-Zeichen",
+          "At sign",
+          "e-mail adresse erwähnung mention"
+        ],
+        "phone": [
+          "Telefon",
+          "Phone",
+          "anruf telefonnummer kontakt"
+        ],
+        "device-mobile": [
+          "Handy",
+          "Mobile phone",
+          "smartphone mobil"
+        ],
+        "chat-circle": [
+          "Sprechblase",
+          "Chat",
+          "kommentar gespräch"
+        ],
+        "chat-circle-text": [
+          "Nachricht",
+          "Message",
+          "kommentar text chat"
+        ],
+        "chats": [
+          "Unterhaltung",
+          "Conversation",
+          "chat forum diskussion"
+        ],
+        "megaphone": [
+          "Megafon",
+          "Megaphone",
+          "ankündigung ansage werbung"
+        ],
+        "paper-plane-tilt": [
+          "Senden",
+          "Send",
+          "papierflieger versand"
+        ],
+        "newspaper": [
+          "Zeitung",
+          "Newspaper",
+          "news aktuelles presse nachrichten"
+        ],
+        "quotes": [
+          "Zitat",
+          "Quote",
+          "anführungszeichen stimme meinung"
+        ],
+        "address-book": [
+          "Adressbuch",
+          "Address book",
+          "kontakte verzeichnis"
+        ],
+        "translate": [
+          "Übersetzen",
+          "Translate",
+          "sprache mehrsprachig"
+        ],
+        "envelope-open": [
+          "Offener Brief",
+          "Open envelope",
+          "gelesen mail nachricht"
+        ],
+        "rss": [
+          "RSS",
+          "RSS",
+          "feed abonnieren nachrichten"
+        ]
+      }
+    },
+    {
+      "key": "socialweb",
+      "de": "Social Web",
+      "en": "Social web",
+      "icons": {
+        "facebook-logo": [
+          "Facebook",
+          "Facebook",
+          "social media meta"
+        ],
+        "instagram-logo": [
+          "Instagram",
+          "Instagram",
+          "social media fotos meta"
+        ],
+        "linkedin-logo": [
+          "LinkedIn",
+          "LinkedIn",
+          "social media karriere business netzwerk"
+        ],
+        "x-logo": [
+          "X",
+          "X",
+          "social media twitter"
+        ],
+        "twitter-logo": [
+          "Twitter",
+          "Twitter",
+          "social media x vogel"
+        ],
+        "mastodon-logo": [
+          "Mastodon",
+          "Mastodon",
+          "social media fediverse"
+        ],
+        "fediverse-logo": [
+          "Fediverse",
+          "Fediverse",
+          "social media mastodon dezentral"
+        ],
+        "threads-logo": [
+          "Threads",
+          "Threads",
+          "social media meta"
+        ],
+        "youtube-logo": [
+          "YouTube",
+          "YouTube",
+          "social media video kanal"
+        ],
+        "tiktok-logo": [
+          "TikTok",
+          "TikTok",
+          "social media video"
+        ],
+        "whatsapp-logo": [
+          "WhatsApp",
+          "WhatsApp",
+          "messenger chat nachricht"
+        ],
+        "telegram-logo": [
+          "Telegram",
+          "Telegram",
+          "messenger chat nachricht"
+        ],
+        "messenger-logo": [
+          "Messenger",
+          "Messenger",
+          "chat nachricht facebook"
+        ],
+        "pinterest-logo": [
+          "Pinterest",
+          "Pinterest",
+          "social media pinnwand ideen"
+        ],
+        "github-logo": [
+          "GitHub",
+          "GitHub",
+          "code entwicklung git"
+        ],
+        "gitlab-logo": [
+          "GitLab",
+          "GitLab",
+          "code entwicklung git"
+        ],
+        "discord-logo": [
+          "Discord",
+          "Discord",
+          "community chat gaming"
+        ],
+        "snapchat-logo": [
+          "Snapchat",
+          "Snapchat",
+          "social media"
+        ],
+        "reddit-logo": [
+          "Reddit",
+          "Reddit",
+          "community forum"
+        ],
+        "twitch-logo": [
+          "Twitch",
+          "Twitch",
+          "livestream gaming"
+        ],
+        "spotify-logo": [
+          "Spotify",
+          "Spotify",
+          "musik podcast streaming"
+        ],
+        "soundcloud-logo": [
+          "SoundCloud",
+          "SoundCloud",
+          "musik audio"
+        ],
+        "apple-podcasts-logo": [
+          "Apple Podcasts",
+          "Apple Podcasts",
+          "podcast audio"
+        ],
+        "medium-logo": [
+          "Medium",
+          "Medium",
+          "blog artikel"
+        ],
+        "behance-logo": [
+          "Behance",
+          "Behance",
+          "portfolio design"
+        ],
+        "dribbble-logo": [
+          "Dribbble",
+          "Dribbble",
+          "portfolio design"
+        ],
+        "patreon-logo": [
+          "Patreon",
+          "Patreon",
+          "unterstützen crowdfunding"
+        ],
+        "linktree-logo": [
+          "Linktree",
+          "Linktree",
+          "links linkliste"
+        ],
+        "share-fat": [
+          "Teilen",
+          "Share",
+          "weiterleiten posten social media"
+        ],
+        "broadcast": [
+          "Livestream",
+          "Live stream",
+          "senden übertragung live"
+        ],
+        "bell-ringing": [
+          "Abonnieren",
+          "Subscribe",
+          "benachrichtigung glocke follow"
+        ],
+        "share-network": null,
+        "rss": null,
+        "chat-circle": null,
+        "hash": null,
+        "thumbs-up": null,
+        "heart": null,
+        "at": null,
+        "link": null,
+        "users-three": null
+      }
+    },
+    {
+      "key": "time",
+      "de": "Kalender & Zeit",
+      "en": "Calendar & time",
+      "icons": {
+        "calendar": [
+          "Kalender",
+          "Calendar",
+          "termin datum monat veranstaltung"
+        ],
+        "calendar-check": [
+          "Termin bestätigt",
+          "Confirmed",
+          "termin kalender erledigt sprechstunde buchung reservierung verfügbar"
+        ],
+        "calendar-dots": [
+          "Termine",
+          "Events",
+          "kalender monat übersicht"
+        ],
+        "calendar-plus": [
+          "Termin anlegen",
+          "Add event",
+          "kalender neu"
+        ],
+        "calendar-star": [
+          "Besonderer Termin",
+          "Special date",
+          "event highlight feiertag"
+        ],
+        "clock": [
+          "Uhr",
+          "Clock",
+          "zeit uhrzeit öffnungszeiten termin"
+        ],
+        "clock-clockwise": [
+          "Verlauf",
+          "History",
+          "chronik protokoll zeit"
+        ],
+        "timer": [
+          "Stoppuhr",
+          "Timer",
+          "dauer messen"
+        ],
+        "hourglass": [
+          "Sanduhr",
+          "Hourglass",
+          "warten dauer frist"
+        ],
+        "repeat": [
+          "Wiederholung",
+          "Repeat",
+          "regelmäßig serie wöchentlich"
+        ],
+        "calendar-blank": [
+          "Kalender leer",
+          "Blank calendar",
+          "datum termin"
+        ],
+        "clock-countdown": [
+          "Countdown",
+          "Countdown",
+          "frist ablauf"
+        ],
+        "alarm": [
+          "Wecker",
+          "Alarm",
+          "erinnerung weckzeit"
+        ]
+      }
+    },
+    {
+      "key": "people",
+      "de": "Personen & Team",
+      "en": "People & team",
+      "icons": {
+        "user": [
+          "Person",
+          "Person",
+          "benutzer mitarbeiter profil kontakt"
+        ],
+        "users": [
+          "Personen",
+          "People",
+          "team gruppe mitglieder"
+        ],
+        "users-three": [
+          "Team",
+          "Team",
+          "gruppe mitarbeiter mannschaft mandanten community follower"
+        ],
+        "user-circle": [
+          "Profil",
+          "Profile",
+          "konto benutzer avatar"
+        ],
+        "user-plus": [
+          "Person hinzufügen",
+          "Add person",
+          "mitglied neu anmeldung"
+        ],
+        "user-check": [
+          "Person bestätigt",
+          "Verified person",
+          "freigabe mitglied"
+        ],
+        "user-gear": [
+          "Verwaltung",
+          "Admin",
+          "benutzer rechte rollen"
+        ],
+        "identification-badge": [
+          "Ausweis",
+          "Badge",
+          "mitarbeiter namensschild dienstausweis"
+        ],
+        "baby": [
+          "Baby",
+          "Baby",
+          "kind säugling geburt hebamme kinderarzt"
+        ],
+        "crown": [
+          "Krone",
+          "Crown",
+          "vorstand chef leitung"
+        ],
+        "student": [
+          "Schüler",
+          "Student",
+          "lernende studierende"
+        ],
+        "chalkboard-teacher": [
+          "Lehrkraft",
+          "Teacher",
+          "dozent trainer kurs"
+        ],
+        "user-list": [
+          "Personenliste",
+          "People list",
+          "verzeichnis mitglieder"
+        ]
+      }
+    },
+    {
+      "key": "places",
+      "de": "Orte & Karten",
+      "en": "Places & maps",
+      "icons": {
+        "map-pin": [
+          "Ort",
+          "Location",
+          "standort adresse karte stecknadel"
+        ],
+        "map-trifold": [
+          "Karte",
+          "Map",
+          "stadtplan landkarte"
+        ],
+        "compass": [
+          "Kompass",
+          "Compass",
+          "richtung orientierung"
+        ],
+        "signpost": [
+          "Wegweiser",
+          "Signpost",
+          "richtung schild weg"
+        ],
+        "globe": [
+          "Globus",
+          "Globe",
+          "website internet netzwerk sprache"
+        ],
+        "building": [
+          "Gebäude",
+          "Building",
+          "haus standort"
+        ],
+        "buildings": [
+          "Stadt",
+          "City",
+          "gebäude viertel"
+        ],
+        "park": [
+          "Park",
+          "Park",
+          "grünanlage erholung"
+        ],
+        "map-pin-area": [
+          "Gebiet",
+          "Area",
+          "bereich einzugsgebiet"
+        ],
+        "path": [
+          "Route",
+          "Path",
+          "weg strecke"
+        ],
+        "tent": [
+          "Zelt",
+          "Tent",
+          "camping lager festival zelt"
+        ],
+        "island": [
+          "Insel",
+          "Island",
+          "urlaub strand reise"
+        ]
+      }
+    },
+    {
+      "key": "health",
+      "de": "Gesundheit & Medizin",
+      "en": "Health & medicine",
+      "icons": {
+        "first-aid": [
+          "Erste Hilfe",
+          "First aid",
+          "kreuz medizin notfall arzt ärztin praxis klinik"
+        ],
+        "first-aid-kit": [
+          "Verbandskasten",
+          "First aid kit",
+          "notfall koffer patienten"
+        ],
+        "stethoscope": [
+          "Stethoskop",
+          "Stethoscope",
+          "arzt ärztin praxis untersuchung hausarzt allgemeinmedizin sprechstunde patient patienten"
+        ],
+        "heartbeat": [
+          "Herzschlag",
+          "Heartbeat",
+          "puls ekg kardiologie"
+        ],
+        "pill": [
+          "Tablette",
+          "Pill",
+          "medikament arznei"
+        ],
+        "syringe": [
+          "Spritze",
+          "Syringe",
+          "impfung injektion"
+        ],
+        "prescription": [
+          "Rezept",
+          "Prescription",
+          "rezeptanfrage medikament verordnung"
+        ],
+        "hospital": [
+          "Krankenhaus",
+          "Hospital",
+          "klinik station patienten stationär"
+        ],
+        "ambulance": [
+          "Krankenwagen",
+          "Ambulance",
+          "notfall rettung"
+        ],
+        "tooth": [
+          "Zahn",
+          "Tooth",
+          "zahnarzt zahnmedizin"
+        ],
+        "bandaids": [
+          "Pflaster",
+          "Band-aid",
+          "wunde verletzung"
+        ],
+        "thermometer": [
+          "Thermometer",
+          "Thermometer",
+          "fieber temperatur"
+        ],
+        "eyeglasses": [
+          "Brille",
+          "Glasses",
+          "augen sehen optiker"
+        ],
+        "wheelchair": [
+          "Rollstuhl",
+          "Wheelchair",
+          "barrierefrei zugänglich rollstuhlgerecht"
+        ],
+        "test-tube": [
+          "Reagenzglas",
+          "Test tube",
+          "labor probe befund"
+        ],
+        "microscope": [
+          "Mikroskop",
+          "Microscope",
+          "labor forschung"
+        ],
+        "hand-heart": [
+          "Pflege",
+          "Care",
+          "fürsorge hilfe herz hand"
+        ],
+        "dna": [
+          "DNA",
+          "DNA",
+          "genetik labor"
+        ],
+        "ear": [
+          "Ohr",
+          "Ear",
+          "hören hno"
+        ],
+        "brain": [
+          "Gehirn",
+          "Brain",
+          "neurologie kopf psychologie psychotherapie psychiatrie"
+        ],
+        "virus": [
+          "Virus",
+          "Virus",
+          "infektion erreger grippe corona impfung"
+        ],
+        "pulse": [
+          "Puls",
+          "Pulse",
+          "vitalwerte ekg messung kreislauf"
+        ],
+        "face-mask": [
+          "Mundschutz",
+          "Face mask",
+          "maske hygiene infektion op"
+        ],
+        "eyedropper": [
+          "Pipette",
+          "Dropper",
+          "tropfen augentropfen labor"
+        ],
+        "bone": [
+          "Knochen",
+          "Bone",
+          "orthopädie röntgen skelett chirurgie"
+        ],
+        "asclepius": [
+          "Äskulapstab",
+          "Rod of Asclepius",
+          "medizin arzt ärztin praxis klinik"
+        ],
+        "wheelchair-motion": [
+          "Rollstuhlfahrer",
+          "Wheelchair user",
+          "rollstuhl barrierefrei inklusion mobilität"
+        ],
+        "ear-slash": [
+          "Hörbeeinträchtigung",
+          "Hearing loss",
+          "schwerhörig gehörlos hörgerät hno"
+        ],
+        "person-arms-spread": [
+          "Körper",
+          "Body",
+          "physiotherapie gesundheit mensch haltung"
+        ],
+        "person-simple-walk": [
+          "Gehen",
+          "Walking",
+          "physiotherapie bewegung reha spaziergang"
+        ],
+        "flask": [
+          "Kolben",
+          "Flask",
+          "labor chemie apotheke"
+        ],
+        "biohazard": [
+          "Biogefährdung",
+          "Biohazard",
+          "infektion gefahr labor"
+        ],
+        "radioactive": [
+          "Strahlung",
+          "Radiation",
+          "radiologie röntgen nuklearmedizin"
+        ],
+        "baby": null,
+        "eye": null,
+        "drop": null,
+        "hand-soap": null,
+        "bed": null,
+        "calendar-check": null
+      }
+    },
+    {
+      "key": "education",
+      "de": "Bildung",
+      "en": "Education",
+      "icons": {
+        "graduation-cap": [
+          "Abschluss",
+          "Graduation",
+          "studium schule bildung"
+        ],
+        "book": [
+          "Buch",
+          "Book",
+          "lesen literatur"
+        ],
+        "book-open": [
+          "Offenes Buch",
+          "Open book",
+          "lesen lernen"
+        ],
+        "book-open-text": [
+          "Handbuch",
+          "Manual",
+          "anleitung dokumentation"
+        ],
+        "books": [
+          "Bücher",
+          "Books",
+          "bibliothek bücherei"
+        ],
+        "chalkboard": [
+          "Tafel",
+          "Chalkboard",
+          "unterricht schule"
+        ],
+        "exam": [
+          "Prüfung",
+          "Exam",
+          "test klausur note"
+        ],
+        "certificate": [
+          "Zertifikat",
+          "Certificate",
+          "urkunde zeugnis"
+        ],
+        "pencil-ruler": [
+          "Werkzeug Schule",
+          "Stationery",
+          "lineal stift zeichnen"
+        ],
+        "calculator": [
+          "Rechner",
+          "Calculator",
+          "mathe rechnen kosten"
+        ],
+        "presentation": [
+          "Präsentation",
+          "Presentation",
+          "vortrag folien schulung konferenz"
+        ],
+        "notebook": [
+          "Heft",
+          "Notebook",
+          "notizen schreiben"
+        ],
+        "backpack": [
+          "Rucksack",
+          "Backpack",
+          "schule ausflug wandern"
+        ]
+      }
+    },
+    {
+      "key": "sport",
+      "de": "Sport & Verein",
+      "en": "Sports & clubs",
+      "icons": {
+        "soccer-ball": [
+          "Fußball",
+          "Soccer",
+          "sport verein ball"
+        ],
+        "basketball": [
+          "Basketball",
+          "Basketball",
+          "sport ball"
+        ],
+        "volleyball": [
+          "Volleyball",
+          "Volleyball",
+          "sport ball beach"
+        ],
+        "tennis-ball": [
+          "Tennis",
+          "Tennis",
+          "sport ball"
+        ],
+        "barbell": [
+          "Hantel",
+          "Barbell",
+          "fitness training kraft"
+        ],
+        "person-simple-run": [
+          "Laufen",
+          "Running",
+          "joggen lauftreff"
+        ],
+        "person-simple-swim": [
+          "Schwimmen",
+          "Swimming",
+          "bad wasser"
+        ],
+        "person-simple-hike": [
+          "Wandern",
+          "Hiking",
+          "wanderung ausflug"
+        ],
+        "person-simple-bike": [
+          "Radfahren",
+          "Cycling",
+          "fahrrad radsport"
+        ],
+        "trophy": [
+          "Pokal",
+          "Trophy",
+          "sieg meisterschaft preis"
+        ],
+        "medal": [
+          "Medaille",
+          "Medal",
+          "auszeichnung ehrung"
+        ],
+        "horse": [
+          "Pferd",
+          "Horse",
+          "reiten reitverein"
+        ],
+        "sneaker": [
+          "Turnschuh",
+          "Sneaker",
+          "sport schuh schuhe"
+        ],
+        "golf": [
+          "Golf",
+          "Golf",
+          "sport"
+        ]
+      }
+    },
+    {
+      "key": "business",
+      "de": "Business & Finanzen",
+      "en": "Business & finance",
+      "icons": {
+        "briefcase": [
+          "Aktentasche",
+          "Briefcase",
+          "job beruf arbeit stellen anwalt anwältin mandat mandate kanzlei"
+        ],
+        "building-office": [
+          "Büro",
+          "Office",
+          "firma unternehmen"
+        ],
+        "bank": [
+          "Bank",
+          "Bank",
+          "finanzen institut behörde amt gericht rathaus"
+        ],
+        "money": [
+          "Geld",
+          "Money",
+          "bargeld zahlung"
+        ],
+        "currency-eur": [
+          "Euro",
+          "Euro",
+          "preis kosten geld währung preise"
+        ],
+        "credit-card": [
+          "Kreditkarte",
+          "Credit card",
+          "zahlung karte bezahlen kartenzahlung"
+        ],
+        "receipt": [
+          "Beleg",
+          "Receipt",
+          "quittung kassenbon"
+        ],
+        "invoice": [
+          "Rechnung",
+          "Invoice",
+          "faktura abrechnung"
+        ],
+        "chart-bar": [
+          "Balkendiagramm",
+          "Bar chart",
+          "statistik auswertung"
+        ],
+        "chart-line-up": [
+          "Wachstum",
+          "Growth",
+          "diagramm kurve steigend"
+        ],
+        "gauge": [
+          "Skala",
+          "Gauge",
+          "kennzahl tacho anzeige messgerät druck"
+        ],
+        "hand-coins": [
+          "Spende",
+          "Donation",
+          "geld geben beitrag"
+        ],
+        "handshake": [
+          "Handschlag",
+          "Handshake",
+          "partner vertrag vereinbarung kooperation vergleich einigung mandat mandate"
+        ],
+        "wallet": [
+          "Geldbörse",
+          "Wallet",
+          "portemonnaie geld"
+        ],
+        "percent": [
+          "Prozent",
+          "Percent",
+          "rabatt anteil angebot sale"
+        ],
+        "suitcase": [
+          "Koffer",
+          "Suitcase",
+          "geschäftsreise reise"
+        ]
+      }
+    },
+    {
+      "key": "realestate",
+      "de": "Immobilien",
+      "en": "Real estate",
+      "icons": {
+        "house-line": [
+          "Wohnhaus",
+          "Home",
+          "immobilie haus objekt"
+        ],
+        "building-apartment": [
+          "Wohnung",
+          "Apartment",
+          "mehrfamilienhaus miete"
+        ],
+        "door": [
+          "Tür",
+          "Door",
+          "eingang zimmer"
+        ],
+        "door-open": [
+          "Offene Tür",
+          "Open door",
+          "eingang willkommen tag der offenen tür"
+        ],
+        "bed": [
+          "Bett",
+          "Bed",
+          "schlafzimmer übernachtung hotel zimmer doppelzimmer einzelzimmer station pflegebett"
+        ],
+        "bathtub": [
+          "Badewanne",
+          "Bathtub",
+          "bad badezimmer"
+        ],
+        "couch": [
+          "Sofa",
+          "Couch",
+          "wohnzimmer möbel"
+        ],
+        "stairs": [
+          "Treppe",
+          "Stairs",
+          "etage stockwerk"
+        ],
+        "ruler": [
+          "Lineal",
+          "Ruler",
+          "fläche maße quadratmeter messen"
+        ],
+        "hammer": [
+          "Hammer",
+          "Hammer",
+          "handwerk renovierung werkzeug"
+        ],
+        "key": null,
+        "map-pin": null,
+        "garage": [
+          "Garage",
+          "Garage",
+          "stellplatz auto"
+        ],
+        "lamp": [
+          "Lampe",
+          "Lamp",
+          "licht beleuchtung"
+        ],
+        "warehouse": [
+          "Lager",
+          "Warehouse",
+          "halle gewerbe logistik lagerbestand"
+        ]
+      }
+    },
+    {
+      "key": "industry",
+      "de": "Maschinenbau & Industrie",
+      "en": "Engineering & industry",
+      "icons": {
+        "factory": [
+          "Fabrik",
+          "Factory",
+          "werk produktion industrie fertigung"
+        ],
+        "gear": [
+          "Zahnrad",
+          "Gear",
+          "maschine maschinen technik mechanik maschinenbau"
+        ],
+        "gear-fine": [
+          "Feinzahnrad",
+          "Fine gear",
+          "getriebe präzision mechanik"
+        ],
+        "gear-six": null,
+        "wrench": [
+          "Schraubenschlüssel",
+          "Wrench",
+          "werkzeug reparatur werkstatt wartung"
+        ],
+        "hammer": null,
+        "screwdriver": [
+          "Schraubendreher",
+          "Screwdriver",
+          "werkzeug montage schraube"
+        ],
+        "pipe-wrench": [
+          "Rohrzange",
+          "Pipe wrench",
+          "sanitär installateur werkzeug"
+        ],
+        "pipe": [
+          "Rohr",
+          "Pipe",
+          "leitung sanitär installation"
+        ],
+        "toolbox": [
+          "Werkzeugkasten",
+          "Toolbox",
+          "werkzeug handwerk service"
+        ],
+        "nut": [
+          "Mutter",
+          "Nut",
+          "schraube befestigung maschinenbau"
+        ],
+        "ruler": null,
+        "compass-tool": [
+          "Zirkel",
+          "Compass (drawing)",
+          "konstruktion zeichnung geometrie"
+        ],
+        "blueprint": [
+          "Bauplan",
+          "Blueprint",
+          "konstruktion zeichnung planung cad"
+        ],
+        "cube": [
+          "Würfel",
+          "Cube",
+          "3d bauteil modell produkt produkte artikel"
+        ],
+        "cube-transparent": [
+          "3D-Modell",
+          "3D model",
+          "cad konstruktion bauteil"
+        ],
+        "engine": [
+          "Motor",
+          "Engine",
+          "antrieb maschine kfz"
+        ],
+        "robot": null,
+        "circuitry": [
+          "Platine",
+          "Circuit board",
+          "elektronik leiterplatte steuerung"
+        ],
+        "crane": [
+          "Kran",
+          "Crane",
+          "bau baustelle heben"
+        ],
+        "crane-tower": [
+          "Baukran",
+          "Tower crane",
+          "baustelle hochbau"
+        ],
+        "bulldozer": [
+          "Planierraupe",
+          "Bulldozer",
+          "baumaschine bau erdarbeiten"
+        ],
+        "tractor": [
+          "Traktor",
+          "Tractor",
+          "landwirtschaft landmaschine"
+        ],
+        "hard-hat": [
+          "Schutzhelm",
+          "Hard hat",
+          "bauarbeiter arbeitsschutz sicherheit baustelle"
+        ],
+        "fire-extinguisher": [
+          "Feuerlöscher",
+          "Fire extinguisher",
+          "brandschutz sicherheit"
+        ],
+        "barricade": [
+          "Absperrung",
+          "Barricade",
+          "baustelle sperrung"
+        ],
+        "ladder": [
+          "Leiter",
+          "Ladder",
+          "montage handwerk"
+        ],
+        "magnet": [
+          "Magnet",
+          "Magnet",
+          "physik anziehung"
+        ],
+        "fan": [
+          "Ventilator",
+          "Fan",
+          "lüftung klima kühlung"
+        ],
+        "shipping-container": [
+          "Container",
+          "Shipping container",
+          "logistik fracht hafen"
+        ],
+        "nuclear-plant": [
+          "Kraftwerk",
+          "Power plant",
+          "energie strom"
+        ],
+        "lightning": null,
+        "gauge": null,
+        "warehouse": null,
+        "traffic-cone": null
+      }
+    },
+    {
+      "key": "food",
+      "de": "Gastronomie",
+      "en": "Food & drink",
+      "icons": {
+        "fork-knife": [
+          "Besteck",
+          "Cutlery",
+          "restaurant essen speisekarte halbpension vollpension"
+        ],
+        "coffee": [
+          "Kaffee",
+          "Coffee",
+          "café tasse pause frühstück"
+        ],
+        "cooking-pot": [
+          "Kochtopf",
+          "Cooking pot",
+          "kochen küche rezept"
+        ],
+        "pizza": [
+          "Pizza",
+          "Pizza",
+          "essen italienisch"
+        ],
+        "bowl-food": [
+          "Schüssel",
+          "Bowl",
+          "essen salat suppe"
+        ],
+        "wine": [
+          "Wein",
+          "Wine",
+          "glas getränk weinkarte"
+        ],
+        "beer-stein": [
+          "Bier",
+          "Beer",
+          "krug getränk fest"
+        ],
+        "cake": [
+          "Kuchen",
+          "Cake",
+          "geburtstag torte feier"
+        ],
+        "bread": [
+          "Brot",
+          "Bread",
+          "bäckerei backen"
+        ],
+        "carrot": [
+          "Karotte",
+          "Carrot",
+          "gemüse vegetarisch"
+        ],
+        "fish": [
+          "Fisch",
+          "Fish",
+          "meeresfrüchte essen"
+        ],
+        "call-bell": [
+          "Service",
+          "Service bell",
+          "rezeption klingel hotel concierge zimmerservice"
+        ],
+        "egg": [
+          "Ei",
+          "Egg",
+          "frühstück ostern"
+        ],
+        "cookie": [
+          "Keks",
+          "Cookie",
+          "gebäck süß"
+        ],
+        "champagne": [
+          "Sekt",
+          "Champagne",
+          "anstoßen feier"
+        ]
+      }
+    },
+    {
+      "key": "hospitality",
+      "de": "Hotellerie & Gastgewerbe",
+      "en": "Hospitality",
+      "icons": {
+        "bed": null,
+        "bathtub": null,
+        "shower": [
+          "Dusche",
+          "Shower",
+          "bad badezimmer sanitär"
+        ],
+        "towel": [
+          "Handtuch",
+          "Towel",
+          "bad wellness sauna spa"
+        ],
+        "key": null,
+        "door": null,
+        "door-open": null,
+        "desk": [
+          "Rezeption",
+          "Reception",
+          "empfang check-in lobby schreibtisch hotel"
+        ],
+        "call-bell": null,
+        "bowl-steam": [
+          "Zimmerservice",
+          "Room service",
+          "essen warm frühstück aufs zimmer"
+        ],
+        "chef-hat": [
+          "Kochmütze",
+          "Chef hat",
+          "koch köchin küche restaurant küchenchef"
+        ],
+        "fork-knife": null,
+        "coffee": null,
+        "tea-bag": [
+          "Tee",
+          "Tea",
+          "teebeutel heißgetränk"
+        ],
+        "wine": null,
+        "martini": [
+          "Cocktail",
+          "Cocktail",
+          "bar drink aperitif"
+        ],
+        "beer-bottle": [
+          "Bierflasche",
+          "Beer bottle",
+          "getränk bar minibar"
+        ],
+        "pint-glass": [
+          "Glas",
+          "Pint glass",
+          "bier getränk kneipe"
+        ],
+        "cheers": [
+          "Anstoßen",
+          "Cheers",
+          "prost feier gläser"
+        ],
+        "hamburger": [
+          "Burger",
+          "Burger",
+          "imbiss fast food essen"
+        ],
+        "ice-cream": [
+          "Eis",
+          "Ice cream",
+          "eisdiele dessert sommer"
+        ],
+        "swimming-pool": [
+          "Schwimmbad",
+          "Swimming pool",
+          "pool baden wellness hallenbad hotel therme"
+        ],
+        "wifi-high": null,
+        "suitcase-rolling": [
+          "Rollkoffer",
+          "Rolling suitcase",
+          "gepäck reise anreise hotel"
+        ],
+        "trolley-suitcase": [
+          "Gepäckwagen",
+          "Luggage trolley",
+          "gepäck hotel flughafen"
+        ],
+        "calendar-check": null,
+        "star": null,
+        "elevator": [
+          "Aufzug",
+          "Elevator",
+          "lift fahrstuhl barrierefrei hotel"
+        ],
+        "television": [
+          "Fernseher",
+          "Television",
+          "tv zimmer ausstattung"
+        ],
+        "hair-dryer": [
+          "Föhn",
+          "Hair dryer",
+          "bad ausstattung friseur"
+        ],
+        "broom": [
+          "Reinigung",
+          "Cleaning",
+          "housekeeping putzen besen zimmerreinigung"
+        ],
+        "coat-hanger": [
+          "Garderobe",
+          "Coat hanger",
+          "kleiderbügel mantel"
+        ],
+        "lockers": [
+          "Schließfach",
+          "Lockers",
+          "spind aufbewahrung safe"
+        ],
+        "armchair": [
+          "Sessel",
+          "Armchair",
+          "lounge lobby wohnen"
+        ],
+        "umbrella": [
+          "Schirm",
+          "Umbrella",
+          "regenschirm sonnenschirm"
+        ],
+        "beach-ball": [
+          "Wasserball",
+          "Beach ball",
+          "strand urlaub ferien"
+        ],
+        "sun-horizon": [
+          "Sonnenaufgang",
+          "Sunrise",
+          "morgen frühstück aussicht"
+        ],
+        "cigarette-slash": [
+          "Nichtraucher",
+          "Non-smoking",
+          "rauchen verboten rauchfrei"
+        ],
+        "paw-print": null,
+        "letter-circle-p": null
+      }
+    },
+    {
+      "key": "commerce",
+      "de": "Handel & Produkte",
+      "en": "Commerce & products",
+      "icons": {
+        "storefront": [
+          "Laden",
+          "Shop",
+          "geschäft einzelhandel filiale"
+        ],
+        "shopping-cart": [
+          "Warenkorb",
+          "Shopping cart",
+          "einkaufen shop bestellen"
+        ],
+        "shopping-bag": [
+          "Einkaufstasche",
+          "Shopping bag",
+          "einkauf produkte"
+        ],
+        "package": [
+          "Paket",
+          "Package",
+          "produkt versand lieferung"
+        ],
+        "barcode": [
+          "Strichcode",
+          "Barcode",
+          "artikel ean"
+        ],
+        "qr-code": [
+          "QR-Code",
+          "QR code",
+          "scannen code"
+        ],
+        "t-shirt": [
+          "T-Shirt",
+          "T-shirt",
+          "kleidung mode merchandise"
+        ],
+        "tag-chevron": [
+          "Preisschild",
+          "Price tag",
+          "angebot preis"
+        ],
+        "sparkle": null,
+        "tag": null,
+        "gift": null,
+        "truck": null,
+        "receipt": null,
+        "basket": [
+          "Korb",
+          "Basket",
+          "einkaufen markt"
+        ],
+        "truck-trailer": [
+          "Lieferung",
+          "Delivery",
+          "lkw spedition"
+        ],
+        "cash-register": [
+          "Kasse",
+          "Cash register",
+          "bezahlen verkauf kassensystem"
+        ],
+        "shopping-cart-simple": [
+          "Einkaufswagen",
+          "Shopping trolley",
+          "supermarkt einkaufen"
+        ],
+        "shopping-bag-open": [
+          "Offene Tüte",
+          "Open bag",
+          "einkauf tüte"
+        ],
+        "tote": [
+          "Tragetasche",
+          "Tote bag",
+          "stoffbeutel einkauf"
+        ],
+        "receipt-x": [
+          "Storno",
+          "Void receipt",
+          "stornierung rückerstattung retoure"
+        ],
+        "contactless-payment": [
+          "Kontaktlos zahlen",
+          "Contactless payment",
+          "nfc karte bezahlen"
+        ],
+        "coins": [
+          "Münzen",
+          "Coins",
+          "geld kleingeld"
+        ],
+        "seal-percent": [
+          "Rabatt",
+          "Discount",
+          "sale angebot aktion prozente"
+        ],
+        "scan": [
+          "Scannen",
+          "Scan",
+          "scanner erfassen"
+        ],
+        "piggy-bank": [
+          "Sparschwein",
+          "Piggy bank",
+          "sparen geld"
+        ],
+        "tip-jar": [
+          "Trinkgeld",
+          "Tip jar",
+          "spende kasse"
+        ],
+        "dress": [
+          "Kleid",
+          "Dress",
+          "mode kleidung boutique"
+        ],
+        "high-heel": [
+          "Schuhe",
+          "Shoes",
+          "mode schuhgeschäft"
+        ],
+        "diamond": [
+          "Schmuck",
+          "Jewellery",
+          "diamant juwelier premium"
+        ],
+        "trolley": [
+          "Sackkarre",
+          "Hand truck",
+          "transport lager lieferung"
+        ],
+        "credit-card": null,
+        "money": null,
+        "currency-eur": null,
+        "percent": null,
+        "wallet": null,
+        "warehouse": null,
+        "sneaker": null,
+        "cube": null
+      }
+    },
+    {
+      "key": "tech",
+      "de": "Technik & IT",
+      "en": "Tech & IT",
+      "icons": {
+        "desktop": [
+          "Computer",
+          "Desktop",
+          "pc rechner bildschirm"
+        ],
+        "laptop": [
+          "Laptop",
+          "Laptop",
+          "notebook computer"
+        ],
+        "device-tablet": [
+          "Tablet",
+          "Tablet",
+          "ipad mobil"
+        ],
+        "monitor": [
+          "Bildschirm",
+          "Monitor",
+          "display anzeige"
+        ],
+        "hard-drives": [
+          "Server",
+          "Server",
+          "festplatten rechenzentrum hosting serverraum"
+        ],
+        "cloud": [
+          "Cloud",
+          "Cloud",
+          "wolke online speicher"
+        ],
+        "wifi-high": [
+          "WLAN",
+          "Wi-Fi",
+          "internet funk netz gratis wlan"
+        ],
+        "terminal-window": [
+          "Konsole",
+          "Terminal",
+          "kommandozeile shell"
+        ],
+        "bug": [
+          "Fehler",
+          "Bug",
+          "problem käfer"
+        ],
+        "robot": [
+          "Roboter",
+          "Robot",
+          "ki automatisierung bot industrieroboter"
+        ],
+        "plug": [
+          "Stecker",
+          "Plug",
+          "strom anschluss"
+        ],
+        "printer": [
+          "Drucker",
+          "Printer",
+          "drucken"
+        ],
+        "headset": [
+          "Headset",
+          "Headset",
+          "support hotline"
+        ],
+        "shield-check": [
+          "Sicherheit",
+          "Security",
+          "schutz geprüft datenschutz"
+        ],
+        "network": [
+          "Netzwerk",
+          "Network",
+          "verbindung knoten websites"
+        ],
+        "tree-structure": [
+          "Struktur",
+          "Structure",
+          "hierarchie baum organigramm"
+        ],
+        "browser": [
+          "Browser",
+          "Browser",
+          "website webseite"
+        ],
+        "lightning": [
+          "Blitz",
+          "Lightning",
+          "schnell strom energie elektro elektrik"
+        ],
+        "lifebuoy": [
+          "Support",
+          "Support",
+          "hilfe rettungsring"
+        ],
+        "keyboard": [
+          "Tastatur",
+          "Keyboard",
+          "eingabe tippen"
+        ],
+        "cloud-arrow-up": [
+          "Cloud-Upload",
+          "Cloud upload",
+          "sichern backup"
+        ],
+        "battery-full": [
+          "Akku",
+          "Battery",
+          "batterie energie"
+        ],
+        "cpu": [
+          "Prozessor",
+          "CPU",
+          "chip rechner hardware"
+        ],
+        "memory": [
+          "Arbeitsspeicher",
+          "Memory",
+          "ram hardware"
+        ],
+        "hard-drive": [
+          "Festplatte",
+          "Hard drive",
+          "speicher hdd ssd"
+        ],
+        "computer-tower": [
+          "PC",
+          "Computer tower",
+          "rechner hardware"
+        ],
+        "code-block": [
+          "Codeblock",
+          "Code block",
+          "quelltext snippet entwicklung"
+        ],
+        "brackets-curly": [
+          "Geschweifte Klammern",
+          "Curly brackets",
+          "json code programmierung"
+        ],
+        "file-code": [
+          "Quellcode-Datei",
+          "Code file",
+          "programm datei"
+        ],
+        "git-branch": [
+          "Branch",
+          "Branch",
+          "git versionierung zweig"
+        ],
+        "git-merge": [
+          "Merge",
+          "Merge",
+          "git zusammenführen"
+        ],
+        "git-commit": [
+          "Commit",
+          "Commit",
+          "git version änderung"
+        ],
+        "git-pull-request": [
+          "Pull-Request",
+          "Pull request",
+          "git review änderung"
+        ],
+        "browsers": [
+          "Browserfenster",
+          "Browser windows",
+          "tabs websites"
+        ],
+        "devices": [
+          "Geräte",
+          "Devices",
+          "responsive mobil desktop"
+        ],
+        "app-window": [
+          "App",
+          "App window",
+          "anwendung fenster software"
+        ],
+        "cloud-check": [
+          "Cloud synchronisiert",
+          "Cloud synced",
+          "sicherung gespeichert"
+        ],
+        "head-circuit": [
+          "Künstliche Intelligenz",
+          "Artificial intelligence",
+          "ki ai gehirn machine learning"
+        ],
+        "binary": [
+          "Binärcode",
+          "Binary",
+          "daten bits"
+        ],
+        "usb": [
+          "USB",
+          "USB",
+          "anschluss stick"
+        ],
+        "bluetooth": [
+          "Bluetooth",
+          "Bluetooth",
+          "funk verbindung"
+        ],
+        "sim-card": [
+          "SIM-Karte",
+          "SIM card",
+          "mobilfunk handy"
+        ],
+        "plugs-connected": [
+          "Verbunden",
+          "Connected",
+          "schnittstelle integration api"
+        ],
+        "security-camera": [
+          "Überwachungskamera",
+          "Security camera",
+          "video überwachung sicherheit"
+        ],
+        "game-controller": [
+          "Controller",
+          "Game controller",
+          "spielen gaming konsole"
+        ],
+        "code": null,
+        "database": null,
+        "lock": null,
+        "qr-code": null,
+        "circuitry": null,
+        "fingerprint": null
+      }
+    },
+    {
+      "key": "media",
+      "de": "Medien & Dateien",
+      "en": "Media & files",
+      "icons": {
+        "image": [
+          "Bild",
+          "Image",
+          "foto grafik"
+        ],
+        "images": [
+          "Bilder",
+          "Images",
+          "galerie fotos medien"
+        ],
+        "camera": [
+          "Kamera",
+          "Camera",
+          "fotografie foto"
+        ],
+        "play-circle": [
+          "Abspielen",
+          "Play",
+          "video start"
+        ],
+        "music-notes": [
+          "Musik",
+          "Music",
+          "noten lied chor"
+        ],
+        "headphones": [
+          "Kopfhörer",
+          "Headphones",
+          "audio hören podcast"
+        ],
+        "file": [
+          "Datei",
+          "File",
+          "dokument"
+        ],
+        "file-text": [
+          "Textdokument",
+          "Document",
+          "seite text datei"
+        ],
+        "file-pdf": [
+          "PDF",
+          "PDF",
+          "dokument download"
+        ],
+        "file-doc": [
+          "Word-Dokument",
+          "Word document",
+          "doc text"
+        ],
+        "file-xls": [
+          "Tabelle (Excel)",
+          "Spreadsheet",
+          "excel xls"
+        ],
+        "folder": [
+          "Ordner",
+          "Folder",
+          "ablage verzeichnis"
+        ],
+        "paperclip": [
+          "Anhang",
+          "Attachment",
+          "büroklammer datei"
+        ],
+        "article": [
+          "Artikel",
+          "Article",
+          "beitrag text blog"
+        ],
+        "paragraph": [
+          "Absatz",
+          "Paragraph",
+          "fließtext paragraf gesetz recht"
+        ],
+        "palette": [
+          "Palette",
+          "Palette",
+          "farben design gestaltung kunst"
+        ],
+        "paint-brush": [
+          "Pinsel",
+          "Brush",
+          "malen kunst design"
+        ],
+        "slideshow": [
+          "Diashow",
+          "Slideshow",
+          "slider präsentation"
+        ],
+        "square-half": [
+          "Text + Bild",
+          "Split",
+          "hälfte spalten"
+        ],
+        "video-camera": [
+          "Videokamera",
+          "Video camera",
+          "film aufnahme"
+        ],
+        "microphone": [
+          "Mikrofon",
+          "Microphone",
+          "podcast aufnahme rede sprecher"
+        ],
+        "file-zip": [
+          "Archiv",
+          "ZIP archive",
+          "zip gepackt"
+        ],
+        "folder-open": [
+          "Offener Ordner",
+          "Open folder",
+          "verzeichnis"
+        ]
+      }
+    },
+    {
+      "key": "nature",
+      "de": "Natur & Umwelt",
+      "en": "Nature & environment",
+      "icons": {
+        "tree": [
+          "Baum",
+          "Tree",
+          "wald natur"
+        ],
+        "leaf": [
+          "Blatt",
+          "Leaf",
+          "natur bio öko"
+        ],
+        "plant": [
+          "Pflanze",
+          "Plant",
+          "wachstum garten"
+        ],
+        "potted-plant": [
+          "Topfpflanze",
+          "Potted plant",
+          "zimmerpflanze garten"
+        ],
+        "flower-tulip": [
+          "Tulpe",
+          "Tulip",
+          "frühling blume"
+        ],
+        "sun": [
+          "Sonne",
+          "Sun",
+          "sommer wetter hell"
+        ],
+        "cloud-sun": [
+          "Wetter",
+          "Weather",
+          "wolke sonne"
+        ],
+        "drop": [
+          "Tropfen",
+          "Drop",
+          "wasser flüssigkeit blut blutspende blutabnahme"
+        ],
+        "fire": [
+          "Feuer",
+          "Fire",
+          "flamme brand osterfeuer"
+        ],
+        "mountains": [
+          "Berge",
+          "Mountains",
+          "landschaft gebirge"
+        ],
+        "waves": [
+          "Wellen",
+          "Waves",
+          "wasser meer see"
+        ],
+        "recycle": [
+          "Recycling",
+          "Recycling",
+          "umwelt nachhaltig müll"
+        ],
+        "paw-print": [
+          "Pfote",
+          "Paw",
+          "tier haustier haustiere erlaubt"
+        ],
+        "dog": [
+          "Hund",
+          "Dog",
+          "tier haustier"
+        ],
+        "solar-panel": [
+          "Solarmodul",
+          "Solar panel",
+          "energie photovoltaik"
+        ],
+        "snowflake": [
+          "Schneeflocke",
+          "Snowflake",
+          "winter kalt"
+        ],
+        "cloud-rain": [
+          "Regen",
+          "Rain",
+          "wetter nass"
+        ],
+        "bird": [
+          "Vogel",
+          "Bird",
+          "tier natur"
+        ],
+        "tree-evergreen": [
+          "Tanne",
+          "Fir tree",
+          "wald weihnachten"
+        ]
+      }
+    },
+    {
+      "key": "transport",
+      "de": "Mobilität & Verkehr",
+      "en": "Mobility & transport",
+      "icons": {
+        "car": [
+          "Auto",
+          "Car",
+          "pkw fahrzeug anfahrt auto kfz autohaus"
+        ],
+        "bus": [
+          "Bus",
+          "Bus",
+          "öpnv haltestelle"
+        ],
+        "train": [
+          "Zug",
+          "Train",
+          "bahn öpnv"
+        ],
+        "bicycle": [
+          "Fahrrad",
+          "Bicycle",
+          "rad radweg"
+        ],
+        "airplane": [
+          "Flugzeug",
+          "Airplane",
+          "flug reise"
+        ],
+        "boat": [
+          "Boot",
+          "Boat",
+          "schiff fähre"
+        ],
+        "truck": [
+          "LKW",
+          "Truck",
+          "transport lieferung umzug"
+        ],
+        "charging-station": [
+          "Ladestation",
+          "Charging station",
+          "e-auto strom ladesäule wallbox elektroauto laden"
+        ],
+        "traffic-cone": [
+          "Baustelle",
+          "Construction",
+          "hütchen sperrung"
+        ],
+        "road-horizon": [
+          "Straße",
+          "Road",
+          "weg strecke"
+        ],
+        "anchor": [
+          "Anker",
+          "Anchor",
+          "hafen see"
+        ],
+        "taxi": [
+          "Taxi",
+          "Taxi",
+          "fahrdienst"
+        ],
+        "motorcycle": [
+          "Motorrad",
+          "Motorcycle",
+          "fahrzeug"
+        ],
+        "rocket": [
+          "Rakete",
+          "Rocket",
+          "start launch schnell"
+        ],
+        "car-profile": [
+          "Auto (Seite)",
+          "Car (side)",
+          "pkw fahrzeug autohaus kfz"
+        ],
+        "car-simple": [
+          "Fahrzeug",
+          "Vehicle",
+          "auto pkw kfz fahrzeuge fuhrpark"
+        ],
+        "car-battery": [
+          "Autobatterie",
+          "Car battery",
+          "kfz werkstatt starthilfe"
+        ],
+        "plug-charging": [
+          "Ladesäule",
+          "Charging point",
+          "e-auto laden elektroauto wallbox ladestation strom"
+        ],
+        "gas-pump": [
+          "Tankstelle",
+          "Gas station",
+          "tanken benzin diesel kraftstoff"
+        ],
+        "scooter": [
+          "Tretroller",
+          "Scooter",
+          "e-scooter roller mikromobilität"
+        ],
+        "moped": [
+          "Motorroller",
+          "Moped",
+          "roller vespa zweirad"
+        ],
+        "tram": [
+          "Straßenbahn",
+          "Tram",
+          "bahn öpnv haltestelle"
+        ],
+        "train-regional": [
+          "Regionalbahn",
+          "Regional train",
+          "nahverkehr s-bahn zug"
+        ],
+        "subway": [
+          "U-Bahn",
+          "Subway",
+          "metro öpnv"
+        ],
+        "airplane-takeoff": [
+          "Abflug",
+          "Departure",
+          "flughafen start reise"
+        ],
+        "airplane-landing": [
+          "Ankunft",
+          "Arrival",
+          "flughafen landung reise"
+        ],
+        "letter-circle-p": [
+          "Parkplatz",
+          "Parking",
+          "parken stellplatz parkhaus"
+        ],
+        "traffic-sign": [
+          "Verkehrsschild",
+          "Traffic sign",
+          "schild straßenverkehr umleitung"
+        ],
+        "traffic-signal": [
+          "Ampel",
+          "Traffic light",
+          "kreuzung verkehr signal"
+        ],
+        "steering-wheel": [
+          "Lenkrad",
+          "Steering wheel",
+          "fahren fahrschule auto"
+        ],
+        "tire": [
+          "Reifen",
+          "Tire",
+          "werkstatt reifenwechsel rad felge"
+        ],
+        "speedometer": [
+          "Tacho",
+          "Speedometer",
+          "geschwindigkeit kilometer"
+        ],
+        "seatbelt": [
+          "Sicherheitsgurt",
+          "Seatbelt",
+          "sicherheit fahrzeug anschnallen"
+        ],
+        "van": [
+          "Transporter",
+          "Van",
+          "kleinbus lieferwagen"
+        ],
+        "jeep": [
+          "Geländewagen",
+          "Off-road vehicle",
+          "suv allrad"
+        ],
+        "sailboat": [
+          "Segelboot",
+          "Sailboat",
+          "segeln yacht hafen"
+        ],
+        "cable-car": [
+          "Seilbahn",
+          "Cable car",
+          "gondel berg lift"
+        ],
+        "fire-truck": [
+          "Feuerwehr",
+          "Fire truck",
+          "feuerwehrauto einsatz rettung"
+        ],
+        "police-car": [
+          "Polizei",
+          "Police car",
+          "streifenwagen einsatz"
+        ],
+        "gps": [
+          "GPS",
+          "GPS",
+          "ortung navigation standort"
+        ],
+        "navigation-arrow": [
+          "Navigation",
+          "Navigation",
+          "route richtung wegbeschreibung"
+        ],
+        "footprints": [
+          "Fußweg",
+          "Footpath",
+          "zu fuß gehen spaziergang"
+        ],
+        "map-pin-area": null,
+        "wheelchair": null
+      }
+    },
+    {
+      "key": "law",
+      "de": "Recht & Verwaltung",
+      "en": "Law & administration",
+      "icons": {
+        "scales": [
+          "Waage",
+          "Scales",
+          "recht justiz gerechtigkeit paragraf anwalt anwältin kanzlei rechtsanwalt"
+        ],
+        "gavel": [
+          "Richterhammer",
+          "Gavel",
+          "gericht urteil auktion richter justiz"
+        ],
+        "stamp": [
+          "Stempel",
+          "Stamp",
+          "genehmigung amt beglaubigung behörde"
+        ],
+        "signature": [
+          "Unterschrift",
+          "Signature",
+          "vertrag unterschreiben"
+        ],
+        "shield": [
+          "Schild",
+          "Shield",
+          "schutz sicherheit"
+        ],
+        "clipboard-text": [
+          "Klemmbrett",
+          "Clipboard",
+          "formular antrag protokoll"
+        ],
+        "archive": [
+          "Archiv",
+          "Archive",
+          "ablage aufbewahrung"
+        ],
+        "check-square-offset": [
+          "Antrag",
+          "Application",
+          "formular ankreuzen"
+        ],
+        "prohibit": [
+          "Verbot",
+          "Prohibited",
+          "gesperrt nicht erlaubt"
+        ],
+        "lock-key": [
+          "Datenschutz",
+          "Privacy",
+          "verschlüsselt sicher"
+        ],
+        "certificate": null,
+        "identification-card": [
+          "Personalausweis",
+          "ID card",
+          "ausweis identität"
+        ],
+        "folders": [
+          "Akten",
+          "Files",
+          "ordner ablage"
+        ],
+        "siren": [
+          "Sirene",
+          "Siren",
+          "alarm notfall"
+        ],
+        "password": [
+          "Passwort",
+          "Password",
+          "kennwort zugang"
+        ],
+        "seal-check": [
+          "Geprüft",
+          "Verified",
+          "siegel zertifiziert bestätigt"
+        ],
+        "seal": [
+          "Siegel",
+          "Seal",
+          "beglaubigung amtlich"
+        ],
+        "file-lock": [
+          "Vertrauliche Akte",
+          "Confidential file",
+          "datenschutz geheim verschlossen mandat"
+        ],
+        "scroll": [
+          "Urkunde",
+          "Scroll",
+          "dokument vertrag erlass"
+        ],
+        "book-bookmark": [
+          "Gesetzbuch",
+          "Law book",
+          "gesetz gesetze paragraf bgb nachschlagen"
+        ],
+        "copyright": [
+          "Urheberrecht",
+          "Copyright",
+          "lizenz rechte"
+        ],
+        "trademark-registered": [
+          "Eingetragene Marke",
+          "Registered trademark",
+          "marke markenrecht"
+        ],
+        "fingerprint": [
+          "Fingerabdruck",
+          "Fingerprint",
+          "identität biometrie kriminalistik"
+        ],
+        "detective": [
+          "Ermittlung",
+          "Investigation",
+          "detektiv privat inkognito"
+        ],
+        "vault": [
+          "Tresor",
+          "Vault",
+          "safe sicher aufbewahren"
+        ],
+        "pen-nib": [
+          "Füller",
+          "Fountain pen",
+          "unterschreiben vertrag schreiben"
+        ],
+        "handshake": null,
+        "bank": null,
+        "briefcase": null,
+        "paragraph": null,
+        "shield-check": null,
+        "police-car": null,
+        "identification-badge": null,
+        "users-three": null
+      }
+    },
+    {
+      "key": "events",
+      "de": "Veranstaltungen",
+      "en": "Events",
+      "icons": {
+        "ticket": [
+          "Ticket",
+          "Ticket",
+          "eintritt karte veranstaltung tickets eintrittskarte vorverkauf"
+        ],
+        "confetti": [
+          "Konfetti",
+          "Confetti",
+          "feier party fest"
+        ],
+        "microphone-stage": [
+          "Bühne",
+          "Stage",
+          "auftritt konzert"
+        ],
+        "projector-screen": [
+          "Leinwand",
+          "Projector",
+          "vortrag vorführung"
+        ],
+        "campfire": [
+          "Lagerfeuer",
+          "Campfire",
+          "zeltlager ferien"
+        ],
+        "picnic-table": [
+          "Picknick",
+          "Picnic",
+          "sommerfest draußen"
+        ],
+        "calendar-plus": null,
+        "calendar-star": null,
+        "music-notes": null,
+        "cake": null,
+        "trophy": null,
+        "balloon": [
+          "Luftballon",
+          "Balloon",
+          "party geburtstag"
+        ],
+        "film-reel": [
+          "Kino",
+          "Cinema",
+          "filmabend"
+        ],
+        "flag-pennant": [
+          "Wimpel",
+          "Pennant",
+          "fest verein"
+        ],
+        "mask-happy": [
+          "Theater",
+          "Theatre",
+          "maske schauspiel bühne kultur"
+        ],
+        "users-four": [
+          "Gruppe",
+          "Group",
+          "teilnehmer gäste publikum veranstaltung events"
+        ],
+        "flag-banner": [
+          "Banner",
+          "Banner",
+          "fahne fest werbung"
+        ],
+        "guitar": [
+          "Gitarre",
+          "Guitar",
+          "musik konzert band"
+        ],
+        "piano-keys": [
+          "Klavier",
+          "Piano",
+          "musik konzert tasten"
+        ],
+        "disco-ball": [
+          "Disco",
+          "Disco ball",
+          "party tanzen feier"
+        ],
+        "vinyl-record": [
+          "Schallplatte",
+          "Vinyl record",
+          "musik dj platte"
+        ],
+        "popcorn": [
+          "Popcorn",
+          "Popcorn",
+          "kino film snack"
+        ],
+        "film-slate": [
+          "Filmklappe",
+          "Clapperboard",
+          "dreh video kino"
+        ],
+        "speaker-high": [
+          "Lautsprecher",
+          "Speaker",
+          "ton musik beschallung lautstärke"
+        ],
+        "lectern": [
+          "Rednerpult",
+          "Lectern",
+          "vortrag rede konferenz"
+        ],
+        "seat": [
+          "Sitzplatz",
+          "Seat",
+          "platz bestuhlung reservierung"
+        ],
+        "ranking": [
+          "Siegertreppchen",
+          "Podium",
+          "rangliste siegerehrung platzierung"
+        ],
+        "champagne": null,
+        "cheers": null,
+        "presentation": null,
+        "microphone": null,
+        "fire": null,
+        "tent": null,
+        "gift": null
+      }
+    },
+    {
+      "key": "social",
+      "de": "Soziales",
+      "en": "Social",
+      "icons": {
+        "hands-praying": [
+          "Gebet",
+          "Prayer",
+          "glaube kirche"
+        ],
+        "church": [
+          "Kirche",
+          "Church",
+          "gemeinde gottesdienst"
+        ],
+        "baby-carriage": [
+          "Kinderwagen",
+          "Stroller",
+          "familie kinder eltern"
+        ],
+        "hand-soap": [
+          "Hygiene",
+          "Hygiene",
+          "hände waschen desinfektion"
+        ],
+        "users-three": null,
+        "chat-teardrop-dots": [
+          "Beratung",
+          "Counselling",
+          "gespräch hilfe"
+        ],
+        "house-line": null,
+        "hand-heart": null,
+        "handshake": null,
+        "hand-coins": null,
+        "peace": [
+          "Frieden",
+          "Peace",
+          "friedenszeichen"
+        ],
+        "toilet": [
+          "WC",
+          "Toilet",
+          "toilette sanitär"
+        ]
+      }
+    }
+  ]
+}

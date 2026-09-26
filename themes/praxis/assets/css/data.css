@@ -1,0 +1,19 @@
+/* Praxis-Theme: Kern-Blöcke „Datenliste“/„Datensatz-Felder“ im Stil der Kacheln */
+@import "../../../../resources/css/data.css";
+.dl,.df{--dl-accent:var(--c-bordeaux);--dl-surface:var(--c-gray-50);--dl-radius:22px;--dl-muted:var(--c-text-2)}
+.bg-gray .dl-item{background:var(--c-white)}
+.bg-bordeaux .dl,.bg-dark .dl{--dl-accent:var(--c-apricot);--dl-surface:rgba(255,255,255,.08);--dl-muted:var(--c-on-dark)}
+.dl-name{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.dl-item{transition:background .3s,transform .3s}
+.dl--cards .dl-item:hover{transform:translateY(-3px)}
+.dl-ph{background:var(--c-ph)}
+.df-title{font-size:clamp(38px,4.8vw,64px)}
+.df-prose .prose{font-size:18px}
+
+/* Video/Audio in Datei-Feldern von Einträgen (Core\MediaTracks::player) */
+.dt-media{margin:0}
+.dt-media video{display:block;width:100%;height:auto;border-radius:12px;background:#000}
+.dt-media audio{display:block;width:100%}
+.dt-media .media-transcript{margin-top:10px}
+.dt-media .media-transcript summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.dt-media .media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

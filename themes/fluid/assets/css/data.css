@@ -1,0 +1,93 @@
+/* Theme „fluid“ – Kern-Blöcke „Datenliste“ und „Datensatz-Felder“ (ersetzt resources/css/data.css; nur wenn verwendet).
+   Intrinsisch: Karten im auto-fill-Raster (Mindestbreite aus der Spaltenwahl), „Liste mit Bild“ als Container-Query je
+   Eintrag (Bild daneben ab 34 rem Eintragsbreite), Tabelle scrollt waagerecht. Hervorgehobene Einträge geteilter
+   Tabellen (dl-item--featured) tragen ein Etikett-Band. Hochformat-/Quadratbilder in Listen werden zu Porträts (Team). */
+.dl,.df{--dl-gap:var(--f-s-l)}
+.dl-head{display:flex;flex-direction:column;gap:var(--f-s-s);max-width:52rem;margin-bottom:var(--f-s-2xl)}
+.dl-head .eyebrow,.dl-head .h2{margin:0}
+.dl-intro{color:var(--f-muted);font-size:var(--f-t1);line-height:1.5}
+.dl-items{display:grid;gap:var(--dl-gap);margin:0;padding:0;list-style:none}
+.dl--cards .dl-items{grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min,17rem)),1fr))}
+.dl-cols-2{--min:22rem}.dl-cols-3{--min:17rem}.dl-cols-4{--min:13rem}
+.dl-item{position:relative;container-type:inline-size;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card);box-shadow:var(--f-card-sh);transition:border-color .2s,translate .25s cubic-bezier(.2,.7,.2,1)}
+.dl-item:has(.dl-link):hover{border-color:var(--f-line-strong)}
+.has-motion .dl-item:has(.dl-link):hover{translate:0 -3px}
+.dl-item:focus-within{outline:2px solid var(--f-focus);outline-offset:3px}
+.dl-img{position:relative;overflow:hidden;background:var(--f-surface-2)}
+.dl-img picture{display:contents}
+.dl-img img{display:block;width:100%;height:100%;object-fit:cover;transition:scale .6s cubic-bezier(.2,.7,.2,1)}
+.dl-item:hover .dl-img img{scale:1.04}
+.dl-img.ratio-16-9{aspect-ratio:16/9}.dl-img.ratio-16-10{aspect-ratio:16/10}.dl-img.ratio-4-3{aspect-ratio:4/3}.dl-img.ratio-1-1{aspect-ratio:1}.dl-img.ratio-3-4{aspect-ratio:3/4}
+.dl-ph{position:absolute;inset:0}
+.dl-body{display:flex;flex-direction:column;gap:.5rem;padding:var(--f-pad)}
+.dl-name{margin:0;color:var(--f-ink);font:var(--f-hw) var(--f-t1)/1.25 var(--f-font-head);letter-spacing:calc(var(--f-track) * .006em);text-wrap:balance}
+.dl-link{color:inherit;text-decoration:none}
+.dl-link::after{content:"";position:absolute;inset:0}
+.dl-link:hover{color:var(--f-link)}
+.dl-link:focus-visible{outline:0}
+.dl-f{color:var(--f-muted);font-size:var(--f-t-1)}
+.dl-meta{margin:0;color:var(--f-link);font:600 var(--f-t-2)/1.4 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.dl-more-link{font-weight:600}
+/* Liste mit Bild: Bild neben dem Text, sobald der Eintrag selbst breit genug ist */
+.dl--list .dl-items{gap:var(--f-s-m)}
+@container (min-width:34rem){
+  .dl--list .dl-item{flex-direction:row}
+  .dl--list .dl-img{flex:0 0 min(36%,20rem);aspect-ratio:auto}
+  .dl--list .dl-body{justify-content:center;padding:var(--f-s-l) var(--f-s-xl)}
+  .dl--list .dl-name{font-size:var(--f-t2)}
+}
+.dl--list .dl-item:has(:is(.ratio-1-1,.ratio-3-4)){flex-direction:row;flex-wrap:wrap;align-items:center;border:0;background:none;box-shadow:none;overflow:visible}
+.dl--list .dl-item:has(:is(.ratio-1-1,.ratio-3-4)) .dl-img{flex:0 0 min(5.5rem,100%);aspect-ratio:1;border-radius:50%}
+.dl--list .dl-item:has(:is(.ratio-1-1,.ratio-3-4)) .dl-body{flex:1 1 min(12rem,100%);padding:0 var(--f-s-m)}
+/* Kompakt */
+.dl--compact .dl-items{gap:0;border-top:1px solid var(--f-line-strong)}
+.dl--compact .dl-item{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:.25rem 1rem;padding:var(--f-s-s) 0;border:0;border-bottom:1px solid var(--f-line);border-radius:0;background:none;box-shadow:none}
+.dl--compact .dl-item:hover{translate:none}
+.dl--compact .dl-body{flex:1;flex-flow:row wrap;align-items:baseline;gap:.25rem 1rem;padding:0}
+.dl--compact .dl-name{flex:1 1 min(14rem,100%);font-size:var(--f-t0)}
+/* Tabelle */
+.dl-tablewrap{position:relative;overflow-x:auto;border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card)}
+.dl-table{width:100%;border-collapse:collapse;font-size:var(--f-t-1)}
+.dl-table :is(th,td){padding:.75rem 1rem;border-bottom:1px solid var(--f-line);text-align:start;vertical-align:top}
+.dl-table th{color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.dl-table tbody tr:last-child td{border-bottom:0}
+.dl-table tbody tr:hover{background:var(--f-surface)}
+.dl-table a{font-weight:600}
+.dl-empty{padding:var(--f-s-l);border:1px dashed var(--f-line-strong);border-radius:var(--f-r-l);color:var(--f-muted)}
+.dl-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem 1.5rem;margin-top:var(--f-s-xl)}
+.dl-pager a{font-weight:600}
+.dl-more{margin-top:var(--f-s-xl)}
+/* Geteilte Tabellen: hervorgehobene Einträge (Verband) */
+.dl-item--featured{border:2px solid var(--f-a)}
+.dl-item--featured .dl-body::before{content:"★";position:absolute;top:.75rem;right:.75rem;z-index:1;display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--f-a2);color:var(--f-ink);font-size:.9rem}
+.dl-chips{display:inline-flex;flex-wrap:wrap;gap:.4rem}
+.dl-chip{position:relative;z-index:1;display:inline-flex;align-items:center;min-height:1.75rem;padding:0 .75rem;border-radius:999px;background:var(--f-a-soft);color:var(--f-ink);font-size:var(--f-t-2);font-weight:600;text-decoration:none}
+a.dl-chip:hover{background:var(--f-a2)}
+.dt-swatch{display:inline-block;width:1em;height:1em;margin-right:.4em;border-radius:4px;vertical-align:-2px;box-shadow:inset 0 0 0 1px var(--f-line-strong)}
+
+/* ---------------------------------------------------------------- Datensatz-Felder (Detailseiten, Artikelkopf) */
+.df{display:grid;gap:var(--f-s-l)}
+.df-back a{display:inline-flex;align-items:center;gap:.4rem;color:var(--f-link);font-weight:600;text-decoration:none}
+.df-back a:hover{text-decoration:underline}
+.df-head{display:grid;gap:var(--f-s-m)}
+.df-title{margin:0;color:var(--f-ink);font-family:var(--f-font-head);font-weight:var(--f-hw);font-size:max(var(--f-t3),min(var(--f-t6),12cqi));line-height:1.02;letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance;hyphens:auto}
+.df-title .dot{color:var(--f-link)}
+.df-meta{display:flex;flex-wrap:wrap;gap:.25rem .75rem;color:var(--f-link);font:600 var(--f-t-1)/1.4 var(--f-font-label);letter-spacing:.06em;text-transform:uppercase}
+.df-img{overflow:hidden;border-radius:var(--f-r-l);background:var(--f-surface-2)}
+.df-img img{display:block;width:100%;height:100%;object-fit:cover}
+.df-img picture{display:contents}
+.df-img.ratio-16-9{aspect-ratio:16/9}.df-img.ratio-21-9{aspect-ratio:21/9}.df-img.ratio-4-3{aspect-ratio:4/3}.df-img.ratio-1-1{aspect-ratio:1}.df-img.ratio-3-4{aspect-ratio:3/4}
+.df-prose{display:grid;gap:var(--f-s-m);max-width:44rem;font-size:calc(var(--f-t0) * 1.04)}
+.df-label{margin-bottom:.25rem;color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.df-f--textarea p{color:var(--f-ink);font-size:var(--f-t1);line-height:1.5}
+.df-dl{display:grid;max-width:44rem;margin:0;border-top:1px solid var(--f-line-strong)}
+.df-dl div{display:flex;flex-wrap:wrap;gap:.25rem var(--f-s-l);padding:var(--f-s-s) 0;border-bottom:1px solid var(--f-line)}
+.df-dl dt{flex:1 1 min(10rem,100%);color:var(--f-ink);font-weight:600}
+.df-dl dd{flex:999 1 0;min-width:min(100%,60%);margin:0;color:var(--f-text)}
+/* Video/Audio in Datei-Feldern (Core\MediaTracks::player) */
+.dt-media{margin:0}
+.dt-media video{display:block;width:100%;height:auto;border-radius:var(--f-r-l);background:#000}
+.dt-media audio{display:block;width:100%}
+.dt-media .media-transcript{margin-top:.6rem}
+.dt-media .media-transcript summary{display:flex;align-items:center;min-height:2.75rem;font-weight:600;cursor:pointer}
+.dt-media .media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

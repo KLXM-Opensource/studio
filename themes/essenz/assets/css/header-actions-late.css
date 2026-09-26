@@ -1,0 +1,6 @@
+/* Kit „essenz“ – Paneel des Kontakt-Menüs (Core\HeaderActions): lädt spät über header_actions_late() (theme.php → 'kit_css_late') */
+/* Kontakt-Menü als Geräte-Paneel: Hairline, Innenkante, Beschriftung in Mono wie auf einem Typenschild */
+.ha-menu__panel{--ha-panel-bg:var(--e-panel,var(--e-bg));--ha-panel-shadow:inset 0 1px 0 rgb(255 255 255/.5),0 1px 0 var(--e-line),0 18px 40px -18px rgb(0 0 0/.35);border-color:var(--e-line-strong)}
+.ha-menu__title,.ha-menu__hours dt{font-family:var(--e-font-label);letter-spacing:.1em}
+.ha-menu__sub,.ha-menu__hours dd{font-family:var(--e-font-mono);letter-spacing:.01em}
+.ha-menu__list .ha-ico{color:var(--e-ink)}

@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Design-Tokens des Start-Kits – die EINZIGE Stelle mit festen Farbwerten.
+   Die Werte entsprechen den Standardwerten in theme.php § 6 (hell 'default', dunkel 'dark'). Ändert ein Admin etwas
+   im Style-Editor, liefert design_head() eine kleine Datei mit denselben Variablen nach diesem CSS aus.
+   Datei beginnt mit „_“: wird nicht einzeln gebaut, sondern per @import in site.css gebündelt (tools/build.mjs, esbuild).
+   ========================================================================== */
+:root{
+  /* Farben (Style-Editor → Farben) */
+  --s-a:#1F5BC4;          /* accent – Links, Buttons, Fokus */
+  --s-a-on:#FFFFFF;       /* on_accent – Schrift auf der Akzentfarbe */
+  --s-ink:#111418;        /* ink – Überschriften */
+  --s-text:#2B3038;       /* text – Fließtext */
+  --s-muted:#525A66;      /* muted – Nebentext */
+  --s-bg:#FFFFFF;         /* background */
+  --s-surface:#F2F4F7;    /* surface – getönte Flächen */
+  --s-line:#D9DEE5;       /* line – Linien */
+  --s-dark:#15181D;       /* dark_section – Abschnitt „Dunkel“ */
+  /* Schrift und Form (Style-Editor → Schrift, Form) */
+  --s-font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --s-font-head:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --s-fs:17;              /* Grundgröße in px (ohne Einheit, umgerechnet in rem: _base.css) */
+  --s-hw:700;
+  --s-radius:10px;
+  --s-btn-r:8px;
+  --s-wrap:72rem;
+
+  /* Abgeleitet (nicht im Editor) */
+  --s-a-soft:color-mix(in srgb,var(--s-a) 12%,var(--s-bg));
+  --s-line-strong:color-mix(in srgb,var(--s-text) 55%,var(--s-bg));
+  --s-gutter:clamp(1rem,4vw,2rem);
+  --s-space:clamp(3rem,7vw,6rem);
+  --s-shadow:0 12px 32px -12px rgb(0 0 0/.25);
+
+  /* Rollen – je Abschnitt umgestellt (_base.css: .bg-muted, .bg-accent, .bg-dark). Komponenten nutzen NUR Rollen. */
+  --s-sec-bg:var(--s-bg);
+  --s-fg:var(--s-text);
+  --s-head:var(--s-ink);
+  --s-mut:var(--s-muted);
+  --s-link:var(--s-a);
+  --s-card:var(--s-surface);
+  --s-btn-bg:var(--s-a);
+  --s-btn-fg:var(--s-a-on);
+
+  /* Rich-Text-Farben (Klassenvertrag c-accent … c-danger, Formatierungsleiste liest sie) */
+  --rt-accent:var(--s-link);--rt-muted:var(--s-mut);--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318;
+
+  /* Besucher-Chat-Knopf (Kern, Shadow DOM) übernimmt die Akzentfarbe */
+  --cb-theme-accent:var(--s-a);
+  --cb-theme-on-accent:var(--s-a-on);
+}
+
+/* Dunkles Farbschema: nur mit Design-Option „has-dark“ und Geräte-Einstellung (theme.php → design.dark) */
+@media (prefers-color-scheme:dark){
+  html.has-dark{
+    --s-a:#8AB0F5;--s-a-on:#0B1428;--s-ink:#F2F4F7;--s-text:#D3D8E0;--s-muted:#A3ACB8;
+    --s-bg:#121418;--s-surface:#1B1E23;--s-line:#2D323A;--s-dark:#20242B;
+    --s-shadow:0 12px 32px -12px rgb(0 0 0/.7);
+    --rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F;
+    color-scheme:dark;
+  }
+}
+/* Vorschau „Dunkel“ im Style-Editor: Farbwerte setzt der Core, hier nur Formularelemente & Scrollbalken */
+html.is-dark{color-scheme:dark}

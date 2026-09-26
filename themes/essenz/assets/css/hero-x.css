@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Theme „essenz“ – Einstieg als Gerät (Block „hero“, Varianten console · dials · monitor).
+   Nur auf Seiten mit diesen Varianten geladen (theme.php → conditional_css „hero:…“). Farben nur aus den Tokens –
+   hell, dunkel und auf allen Abschnitts-Hintergründen. Anzeigen, LEDs, Regler und Raster sind Dekor (aria-hidden),
+   Bewegung nur ohne „Bewegung reduzieren“. Container-Queries auf .wrap (container-type: inline-size).
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- Bedienfeld (console) */
+.hz-cn{align-items:start}
+@container (min-width:52rem){.hz-cn{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--e-s-2xl);align-items:center}}
+.hz-cn__dev{container-type:inline-size;display:grid;gap:var(--e-s-s);padding:var(--e-s-s);border-radius:var(--e-r-xl)}
+.hz-cn__top{display:flex;align-items:center;justify-content:space-between;gap:var(--e-s-s);padding:var(--e-s-2xs) var(--e-s-2xs) 0}
+.hz-cn__leds{display:flex;gap:.5rem}
+.hz-cn__leds i{width:.5rem;height:.5rem;border-radius:50%;background:var(--e-surface-2);box-shadow:var(--e-well)}
+.hz-cn__leds .is-on{background:var(--e-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--e-a) 20%,transparent),0 0 12px color-mix(in srgb,var(--e-a) 60%,transparent)}
+
+/* Anzeige: dunkles Fenster, Ziffern in Signalfarbe über blassen „8“-Segmenten */
+.hz-cn__disp{--_well:color-mix(in srgb,var(--e-dark) 72%,#000);display:grid;gap:var(--e-s-xs);padding:var(--e-s-s) var(--e-s-m) var(--e-s-m);border-radius:var(--e-r-l);background:var(--_well);box-shadow:inset 0 2px 6px rgb(0 0 0/.45),0 0 0 1px var(--e-line)}
+.hz-cn__dlabel{color:color-mix(in srgb,var(--e-on-dark) 78%,var(--_well));font:500 var(--e-label)/1.3 var(--e-font-label);letter-spacing:.1em;text-transform:uppercase}
+.hz-cn__dlabel:empty{display:none}
+.hz-cn__dval{display:grid;justify-items:end;min-width:0;font:500 clamp(2.5rem,1.6rem + 3.6cqi,4.25rem)/1 var(--e-font-mono);font-variant-numeric:tabular-nums slashed-zero;letter-spacing:-.02em;white-space:nowrap}
+.hz-cn__dval>*{grid-area:1/1}
+.hz-cn__ghost{color:color-mix(in srgb,var(--e-a) 13%,transparent)}
+.hz-cn__dnum{color:var(--e-a);text-shadow:0 0 18px color-mix(in srgb,var(--e-a) 45%,transparent)}
+.hz-cn__dnum:empty::before{content:"—"}
+
+/* Kanäle: Streifen mit Pegel (10 Segmente) oder Drehregler, Wert in Mono, Bezeichnung darunter */
+.hz-cn__ch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--e-s-xs);margin:0}
+.hz-cn__ch--1{grid-template-columns:1fr}.hz-cn__ch--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@container (min-width:30rem){.hz-cn__ch--4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@container (max-width:22rem){.hz-cn__ch--4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hz-ch{position:relative;display:grid;grid-template-rows:auto 1fr;gap:var(--e-s-xs);min-width:0;padding:var(--e-s-s) var(--e-s-xs);border-radius:var(--e-r-s);background:var(--e-surface);text-align:center}
+.hz-ch__d{display:grid;grid-template-rows:5.25rem auto;justify-items:center;align-items:center;gap:var(--e-s-xs);grid-row:1;margin:0}
+.hz-ch__k{grid-row:2;color:var(--e-text);font-size:var(--e-t-1);line-height:1.3;text-wrap:balance;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+.hz-ch__n{position:absolute;top:.5rem;left:.5rem;color:var(--e-link);font:500 var(--e-label)/1 var(--e-font-mono);font-variant-numeric:tabular-nums}
+.hz-ch__v{color:var(--e-ink);font:500 var(--e-t0)/1.2 var(--e-font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em;overflow-wrap:anywhere}
+.hz-meter{display:flex;flex-direction:column-reverse;gap:3px;width:1.375rem}
+.hz-meter i{height:5px;border-radius:1px;background:var(--e-surface-2);box-shadow:var(--e-well)}
+.hz-meter .is-on{background:color-mix(in srgb,var(--e-ink) 72%,transparent);box-shadow:none}
+.hz-meter .is-on:nth-child(n+8){background:var(--e-a)}
+.hz-knob{position:relative;display:grid;place-items:center;width:4.25rem;aspect-ratio:1;border-radius:50%}
+.hz-knob::before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(var(--e-line-strong) 0 1.6deg,transparent 1.6deg 30deg);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%);opacity:.8}
+.hz-knob i{position:relative;width:2.875rem;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 32%,var(--e-panel),var(--e-surface) 72%);box-shadow:0 0 0 1px var(--e-line),0 4px 8px var(--e-sh2)}
+.hz-knob i::after{content:"";position:absolute;left:calc(50% - 1.5px);top:.3rem;width:3px;height:36%;border-radius:2px;background:var(--e-a)}
+.hz-knob--0 i{rotate:-50deg}.hz-knob--1 i{rotate:35deg}.hz-knob--2 i{rotate:110deg}.hz-knob--3 i{rotate:-120deg}.hz-knob--4 i{rotate:10deg}.hz-knob--5 i{rotate:75deg}
+@media (prefers-reduced-motion:no-preference){
+  .has-motion .hz-knob i{animation:hz-knob 1.4s cubic-bezier(.2,.7,.2,1) both .25s}
+  .has-motion .hz-meter .is-on{animation:hz-seg .5s ease-out both}
+  .has-motion .hz-meter .is-on:nth-child(2){animation-delay:.05s}.has-motion .hz-meter .is-on:nth-child(3){animation-delay:.1s}
+  .has-motion .hz-meter .is-on:nth-child(4){animation-delay:.15s}.has-motion .hz-meter .is-on:nth-child(5){animation-delay:.2s}
+  .has-motion .hz-meter .is-on:nth-child(6){animation-delay:.25s}.has-motion .hz-meter .is-on:nth-child(7){animation-delay:.3s}
+  .has-motion .hz-meter .is-on:nth-child(8){animation-delay:.35s}.has-motion .hz-meter .is-on:nth-child(9){animation-delay:.4s}
+  .has-motion .hz-meter .is-on:nth-child(10){animation-delay:.45s}
+}
+@keyframes hz-knob{from{rotate:-150deg}}
+@keyframes hz-seg{from{background:var(--e-surface-2)}}
+.hz-cn__foot{display:flex;align-items:center;gap:var(--e-s-m);padding:0 var(--e-s-2xs) var(--e-s-2xs)}
+.hz-cn__grille{flex:1;height:1.25rem;background:radial-gradient(circle,color-mix(in srgb,var(--e-ink) 30%,transparent) 1.5px,transparent 2px) 0 50%/9px 9px repeat}
+html:not(.has-motifs) .hz-cn__grille{visibility:hidden}
+.hz-cn__fader{position:relative;width:7rem;height:4px;border-radius:2px;background:var(--e-surface-2);box-shadow:var(--e-well)}
+.hz-cn__fader::before{content:"";position:absolute;inset:0 38% 0 0;border-radius:inherit;background:var(--e-a)}
+.hz-cn__fader i{position:absolute;left:62%;top:50%;width:1.25rem;height:1.25rem;translate:-50% -50%;border-radius:50%;background:var(--e-panel);box-shadow:0 0 0 1px var(--e-line-strong),0 2px 3px var(--e-sh2)}
+.hz-cn__empty,.hz-mon__empty{padding:var(--e-s-s);border:1px dashed var(--e-line-strong);border-radius:var(--e-r-s);color:var(--e-muted);font-size:var(--e-t-1)}
+
+/* ---------------------------------------------------------------- Kennzahlen (dials) – Kern-Rundinstrumente im Paneel */
+.hz-dl{gap:var(--e-s-l);align-items:stretch}
+.hz-dl__head{display:grid;gap:var(--e-s-m);align-items:end}
+.hz-dl .hero__title{max-width:16ch;font-size:max(var(--e-t4),min(var(--e-t6),9cqi));line-height:1}
+@container (min-width:52rem){.hz-dl__head{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:var(--e-s-2xl)}}
+.hz-dl__panel{display:grid;gap:var(--e-s-s);margin-top:var(--e-s-xs);padding:var(--e-s-s);border-radius:var(--e-r-xl)}
+.hz-dl__panel .cms-dials{--dial-track:var(--e-surface-2);--dial-surface:var(--e-panel);counter-reset:hzd;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e-s-l) 0;padding:var(--e-s-m) 0 var(--e-s-s);border-top:1px solid var(--e-line)}
+.hz-dl__panel .cms-dial{padding-inline:var(--e-s-xs)}
+.hz-dl__panel .cms-dial::before{counter-increment:hzd;content:counter(hzd,decimal-leading-zero);content:counter(hzd,decimal-leading-zero)/"";margin-bottom:var(--e-s-xs);color:var(--e-link);font:500 var(--e-label)/1 var(--e-font-mono);font-variant-numeric:tabular-nums}
+@container (min-width:40rem){
+  .hz-dl__panel .cms-dials{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+  .hz-dl__panel .cms-dial+.cms-dial{border-inline-start:1px solid var(--e-line)}
+}
+
+/* ---------------------------------------------------------------- Monitor (monitor) – Video im Geräterahmen
+   Das Gehäuse ist immer dunkel (Graphit): Rollen wie auf „Dunkel“, Text darin hell. Schmal: Bild, Text, Leiste untereinander;
+   breit: Text liegt mit Abdunkelung (Scrim) im Bild. */
+.hz-mon{
+  --_bz:color-mix(in srgb,var(--e-dark) 88%,#000);--e-fg:var(--e-on-dark);
+  --e-ink:var(--e-fg);--e-text:var(--e-fg);--e-muted:color-mix(in srgb,var(--e-fg) 80%,var(--_bz));--e-link:var(--e-fg);--e-focus:var(--e-fg);
+  --e-line:color-mix(in srgb,var(--e-fg) 16%,transparent);--e-line-strong:color-mix(in srgb,var(--e-fg) 50%,transparent);
+  --e-btn2-bg:transparent;--e-btn2-ink:var(--e-fg);--e-ui:var(--e-a);
+  grid-template-areas:"screen" "text" "chin";gap:0;align-items:stretch;padding:var(--e-s-s);border-radius:calc(var(--e-r-xl) * 1.25);background:var(--_bz);color:var(--e-fg);
+  box-shadow:inset 0 1px 0 rgb(255 255 255/.08),0 0 0 1px color-mix(in srgb,var(--e-ink) 10%,transparent),0 30px 60px -30px var(--e-sh2)
+}
+.hz-mon__screen{grid-area:screen;position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:var(--e-r-l);background:#0b0b0c;box-shadow:inset 0 0 0 1px rgb(255 255 255/.06)}
+.hz-mon__screen picture{display:contents}
+.hz-mon__still,.hz-mon__el{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hz-mon__el{opacity:0;transition:opacity .6s}
+.hz-mon.is-playing .hz-mon__el{opacity:1}
+.hz-mon__screen--blank{background:radial-gradient(circle,rgb(255 255 255/.14) 1.4px,transparent 1.8px) 0 0/14px 14px,radial-gradient(ellipse at 50% 40%,#232427,#0b0b0c 75%)}
+.hz-mon__scrim{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgb(0 0 0/.35))}
+.hz-mon__marks{position:absolute;inset:var(--e-s-s);pointer-events:none;--_c:rgb(255 255 255/.6);
+  background:linear-gradient(var(--_c) 0 0) 0 0/1.25rem 2px,linear-gradient(var(--_c) 0 0) 0 0/2px 1.25rem,linear-gradient(var(--_c) 0 0) 100% 0/1.25rem 2px,linear-gradient(var(--_c) 0 0) 100% 0/2px 1.25rem,
+    linear-gradient(var(--_c) 0 0) 0 100%/1.25rem 2px,linear-gradient(var(--_c) 0 0) 0 100%/2px 1.25rem,linear-gradient(var(--_c) 0 0) 100% 100%/1.25rem 2px,linear-gradient(var(--_c) 0 0) 100% 100%/2px 1.25rem;background-repeat:no-repeat}
+html:not(.has-motifs) .hz-mon__marks{display:none}
+.hz-mon__empty{position:absolute;inset:auto var(--e-s-l) var(--e-s-l);background:rgb(0 0 0/.6)}
+.hz-mon__text{grid-area:text;position:relative;z-index:1;padding:var(--e-s-l) var(--e-s-xs) var(--e-s-m)}
+.hz-mon .hero__title{max-width:16ch}
+.hz-mon .hl{color:inherit;text-decoration:underline .08em var(--e-a);text-underline-offset:.1em;text-decoration-skip-ink:none}
+.hz-mon__chin{grid-area:chin;display:flex;align-items:center;gap:var(--e-s-s);min-height:3.5rem;padding:var(--e-s-s) var(--e-s-2xs) 0}
+.hz-mon__chin .label{color:var(--e-muted)}
+.hz-mon__grille{flex:1;min-width:2rem;height:.75rem;background:radial-gradient(circle,color-mix(in srgb,var(--e-fg) 26%,transparent) 1.3px,transparent 1.7px) 0 50%/8px 8px repeat-x}
+.hz-mon__led{flex:none;width:.5rem;height:.5rem;border-radius:50%;background:color-mix(in srgb,var(--e-fg) 22%,transparent)}
+.hz-mon.is-playing:has(.hx-toggle:not(.is-paused)) .hz-mon__led{background:var(--e-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--e-a) 25%,transparent),0 0 12px var(--e-a)}
+/* Pause als Geräte-Taste (hell auf Graphit, 44 × 44 px) */
+.hz-mon__toggle{flex:none;display:inline-grid;place-items:center;width:2.75rem;height:2.75rem;padding:0;border:0;border-radius:var(--e-r-s);background:linear-gradient(var(--e-on-dark),color-mix(in srgb,var(--e-on-dark) 84%,#000));color:#1B1B19;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgb(255 255 255/.7),inset 0 -3px 0 rgb(0 0 0/.22),0 2px 4px rgb(0 0 0/.5);transition:translate .08s,box-shadow .08s}
+.hz-mon__toggle[hidden]{display:none}
+.hz-mon__toggle:hover{background:var(--e-on-dark)}
+.hz-mon__toggle:active{translate:0 1px;box-shadow:inset 0 1px 0 rgb(255 255 255/.5),inset 0 -1px 0 rgb(0 0 0/.22),0 1px 1px rgb(0 0 0/.5)}
+.hz-mon__toggle:focus-visible{outline:2px solid var(--e-on-dark);outline-offset:3px}
+.hz-mon__toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hx-toggle .hx-ico--play{display:none}
+.hx-toggle.is-paused .hx-ico--pause{display:none}
+.hx-toggle.is-paused .hx-ico--play{display:block}
+@container (min-width:40rem){.hz-mon__screen{aspect-ratio:16/9}}
+@container (min-width:62rem){
+  .hz-mon{grid-template-areas:"screen" "chin"}
+  .hz-mon__text{--e-muted:var(--e-fg);grid-area:screen;align-self:end;max-width:44rem;padding:var(--e-s-2xl) var(--e-s-2xl) var(--e-s-xl);text-shadow:0 1px 2px rgb(0 0 0/.35)}
+  .hz-mon .hero__title{font-size:max(var(--e-t4),min(var(--e-t6),6.6cqi))}
+  .hz-mon .hero__lead{max-width:30em}
+  /* Abdunkelung: „Stark“ gleichmäßig + links mehr, „Mittel“ leichter, „Verlauf“ von unten – Text bleibt ≥ 4,5 : 1 auch vor hellen Stellen */
+  .hz-mon--strong .hz-mon__scrim{background:linear-gradient(90deg,rgb(0 0 0/.5),rgb(0 0 0/.1) 75%,transparent),rgb(0 0 0/.55)}
+  .hz-mon--medium .hz-mon__scrim{background:linear-gradient(90deg,rgb(0 0 0/.5),rgb(0 0 0/.12) 70%,transparent),rgb(0 0 0/.45)}
+  .hz-mon--gradient .hz-mon__scrim{background:linear-gradient(0deg,rgb(0 0 0/.86),rgb(0 0 0/.66) 60%,rgb(0 0 0/.3))}
+  .hz-mon__empty{inset:var(--e-s-l) var(--e-s-l) auto}
+}
+@media (prefers-reduced-motion:reduce){.hz-mon__el{display:none}}
+@media (forced-colors:active){.hz-mon__toggle{border:1px solid ButtonText}.hz-cn__disp{border:1px solid CanvasText}}
+@media print{.hz-mon__el,.hz-mon__toggle,.hz-mon__marks{display:none}.hz-mon{background:none;color:inherit}}

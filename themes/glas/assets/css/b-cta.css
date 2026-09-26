@@ -1,0 +1,18 @@
+/* Kit „glas“ – Handlungsaufruf: Glas über einer kleinen, ruhenden Aurora · Band · zurückhaltend */
+.cta{position:relative;isolation:isolate}
+.cta__inner{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--g-s-l) var(--g-s-2xl)}
+.cta__text{display:grid;gap:var(--g-s-s);flex:1 1 min(100%,32rem);min-width:0}
+.cta__title{max-width:20ch}
+.cta__lead{max-width:36em;color:var(--g-muted);font-size:var(--g-t1);line-height:1.5}
+.cta__actions{position:relative;z-index:1}
+.cta--aurora{padding:clamp(1rem,.5rem + 3cqi,2.5rem)}
+.cta--aurora .cta__inner{padding:clamp(1.5rem,1rem + 3cqi,3rem);border-radius:var(--g-r-xl)}
+.cta__field{position:absolute;inset:0;z-index:-1;border-radius:calc(var(--g-r-xl) + 12px);background:
+  radial-gradient(50% 80% at 10% 10%,color-mix(in srgb,var(--g-f1) 90%,transparent),transparent 70%),
+  radial-gradient(45% 80% at 90% 20%,color-mix(in srgb,var(--g-f2) 90%,transparent),transparent 70%),
+  radial-gradient(60% 90% at 60% 100%,color-mix(in srgb,var(--g-f3) 90%,transparent),transparent 70%),var(--g-bg)}
+.has-grain .cta__field::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--g-grain) 0 0/180px 180px;opacity:.06}
+.cta--band .cta__inner{padding-block:var(--g-s-s)}
+.cta--minimal .cta__inner{flex-direction:column;align-items:center;text-align:center}
+.cta--minimal .cta__text{justify-items:center;flex:none}
+.cta--minimal .cta__title{max-width:24ch}

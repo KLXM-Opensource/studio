@@ -1,0 +1,25 @@
+/* Theme „essenz“ – Kennzahlen: Rundinstrumente (SVG, Farben aus Tokens) oder große Zahlen in einer Reihe */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:var(--e-s-l) var(--e-s-m);margin:0;padding:0;list-style:none}
+.stat{display:grid;align-content:start;gap:var(--e-s-xs);min-width:0}
+.stat__label{color:var(--e-ink);font-weight:600}
+.stat__text{color:var(--e-muted);font-size:var(--e-t-1)}
+/* Rundinstrument */
+.stats--dials{grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr))}
+.stats--dials .stat{justify-items:center;text-align:center}
+.dial{position:relative;display:grid;place-items:center;width:min(100%,11rem);aspect-ratio:1;margin-bottom:var(--e-s-xs)}
+.dial__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dial__ticks{fill:none;stroke:var(--e-line-strong);stroke-width:4;stroke-dasharray:.35 2.15;opacity:.7}
+.dial__track{fill:none;stroke:var(--e-surface-2);stroke-width:7;stroke-dasharray:75 100;stroke-linecap:round;rotate:135deg;transform-origin:60px 60px}
+.dial__val{fill:none;stroke:var(--e-ui,var(--e-a));stroke-width:7;stroke-linecap:round;rotate:135deg;transform-origin:60px 60px;transition:stroke-dasharray 1.2s cubic-bezier(.2,.7,.2,1) .1s}
+.dial__hub{fill:var(--e-card);stroke:var(--e-line);filter:drop-shadow(0 4px 6px var(--e-sh1))}
+html:not(.has-motifs) .dial__ticks,html:not(.has-motifs) .dial__hub{display:none}
+.dial__value{position:relative;color:var(--e-ink);font:500 clamp(1.5rem,1.1rem + 1.6vw,2.25rem)/1 var(--e-font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+@media (prefers-reduced-motion:no-preference){.has-motion.js .stat:not(.is-in) .dial__val{stroke-dasharray:0 100}}
+/* Reihe */
+.stats--row{gap:1px;border-block:1px solid var(--e-line-strong);background:var(--e-line)}
+.stats--row .stat{padding:var(--e-s-m) var(--e-s-m) var(--e-s-l);background:var(--e-sec-bg,var(--e-bg))}
+.bg-white .stats--row .stat{background:var(--e-bg)}
+.stat__value{color:var(--e-ink);font:var(--e-hw) max(var(--e-t4),min(var(--e-t5),7cqi))/1 var(--e-font-head);font-variant-numeric:tabular-nums;letter-spacing:calc(var(--e-track) * .012em)}
+.stat__bar{width:100%;height:4px;margin-block:var(--e-s-2xs)}
+.stat__track{fill:var(--e-surface-2)}
+.stat__fill{fill:var(--e-ui,var(--e-a))}

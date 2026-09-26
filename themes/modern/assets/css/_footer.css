@@ -1,0 +1,30 @@
+/* ---------------------------------------------------------------- Fußbereich (Design → „Fußbereich“: ft-big | ft-columns | ft-simple) */
+.ftr{padding-block:var(--m-s-3xl) var(--m-s-l);background:var(--m-sec-bg,var(--m-surface));border-top:1px solid var(--m-line);color:var(--m-muted);font-size:var(--m-t-1);--m-card:var(--m-bg)}
+.ftr a:not(.btn){color:var(--m-text);text-decoration:none}
+.ftr a:not(.btn):hover,.ftr a[aria-current]{color:var(--m-ink);text-decoration:underline}
+.ftr__statement{display:grid;gap:var(--m-s-l);align-items:end;padding-bottom:var(--m-s-2xl);margin-bottom:var(--m-s-2xl);border-bottom:1px solid var(--m-line)}
+@media (min-width:64em){.ftr__statement{grid-template-columns:1fr auto}}
+.ftr__big{max-width:16ch;font-size:calc(var(--m-t6) * .92);line-height:.98}
+@media (max-width:30em){.ftr__big{font-size:min(var(--m-t5),11vw)}}
+.ftr__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:var(--m-s-2xl) var(--m-s-xl)}
+@media (min-width:64em){.ftr__grid{grid-template-columns:2fr repeat(3,1fr)}}
+.ftr__about{display:flex;flex-direction:column;gap:var(--m-s-s);max-width:26rem}
+.ftr__tagline{color:var(--m-text)}
+.ftr__h{margin-bottom:var(--m-s-s);color:var(--m-ink);font:600 var(--m-t-2)/1.2 var(--m-font-label);letter-spacing:.08em;text-transform:uppercase}
+.ftr__address{margin-bottom:.5rem}
+.ftr__list{display:grid;gap:.1rem;margin:0;padding:0;list-style:none}
+.ftr__list a{display:inline-flex;align-items:center;gap:.5rem;min-height:2.25rem}
+.ftr__list .ico{color:var(--m-link)}
+.ftr__bottom{display:flex;flex-wrap:wrap;align-items:center;gap:var(--m-s-s) var(--m-s-xl);margin-top:var(--m-s-2xl);padding-top:var(--m-s-l);border-top:1px solid var(--m-line)}
+.ftr__copy{margin-inline-end:auto}
+.ftr__legal{--gap:.25rem 1.5rem}
+.ftr__legal a,.ftr__legal button{display:inline-flex;align-items:center;min-height:2.25rem}
+.ftr .langswitch{background:var(--m-surface-2)}
+.ftr--simple{padding-top:var(--m-s-2xl)}
+.ftr__row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--m-s-m) var(--m-s-xl)}
+.ftr__row .ftr__tagline{flex:1 1 min(16rem,100%)}
+.ftr__inline .cluster{--gap:.25rem 1.25rem}
+.ftr--simple .ftr__text{margin-top:var(--m-s-l);max-width:60rem}
+.ftr--big{border-top:0}
+.ftr--big .brand__mark{background:var(--m-a2);color:var(--m-pop-ink)}
+.ftr--big .brand__mark::after{background:var(--m-dark)}

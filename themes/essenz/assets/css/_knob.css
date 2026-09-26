@@ -1,0 +1,4 @@
+/* Symbol im runden „Knopf“ – vertieft wie ein Drehknopf */
+.knob{display:inline-grid;place-items:center;flex:none;width:2.75rem;height:2.75rem;border-radius:50%;background:var(--e-surface);color:var(--e-ink);font-size:1.25rem;box-shadow:var(--e-well),0 0 0 1px var(--e-line)}
+.knob .ico{--ico-2-opacity:.25}
+.has-motifs .knob{background:radial-gradient(circle at 50% 35%,var(--e-panel),var(--e-surface) 70%)}

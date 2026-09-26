@@ -1,0 +1,32 @@
+/* Theme „basis“: Kern-Blöcke „Datenliste“ / „Datensatz-Felder“ im Stil des Themes (Karten-Stil aus dem Design) */
+@import "../../../../resources/css/data.css";
+.dl,.df{--dl-accent:var(--b-link);--dl-surface:var(--b-card);--dl-radius:var(--b-radius-l);--dl-muted:var(--b-muted)}
+.dl-head{max-width:48rem}
+.dl-head .eyebrow,.dl-head .h2{margin:0}
+.dl-item{border:1px solid var(--b-card-bd);box-shadow:var(--b-card-sh);transition:border-color .2s,box-shadow .2s,transform .2s}
+.dl--cards .dl-item:hover,.dl--list .dl-item:hover{border-color:var(--b-line-strong);box-shadow:var(--b-shadow)}
+.dl--compact .dl-item{border:0;border-bottom:1px solid var(--b-line);box-shadow:none;background:none}
+.dl-img,.df-img,.dl-ph{background:var(--b-surface-2)}
+.dl-name{color:var(--b-ink);font:var(--b-hw) 1.1875rem/1.3 var(--b-font-head);letter-spacing:calc(var(--b-track) * -.015em)}
+.dl-link:hover{color:var(--b-link)}
+.dl-table{font-size:.9375rem}
+.dl-table th,.dl-table td,.df-dl div,.dl--compact .dl-item{border-bottom-color:var(--b-line)}
+.dl-table th{color:var(--b-muted)}
+.dl-table tbody tr:hover{background:var(--b-surface)}
+.dl-chip,.dl-item .dl-chip{background:var(--b-a-soft);color:var(--b-ink)}
+.btn-pill .dl-chip{border-radius:999px}
+.dl-empty{border:1px dashed var(--b-line-strong);background:none}
+.dl-pager a{color:var(--b-link);font-weight:600}
+.df-title{font-family:var(--b-font-head);font-weight:var(--b-hw);color:var(--b-ink);font-size:calc(clamp(2.25rem,1.6rem + 2.6vw,3.5rem) * var(--b-hs));line-height:1.05;letter-spacing:calc(var(--b-track) * -.035em)}
+.df-meta{color:var(--b-link)}
+.df-dl dt{color:var(--b-ink)}
+.df-dl dd{color:var(--b-text)}
+.dt-swatch{box-shadow:inset 0 0 0 1px var(--b-line-strong)}
+
+/* Video/Audio in Datei-Feldern von Einträgen (Core\MediaTracks::player) */
+.dt-media{margin:0}
+.dt-media video{display:block;width:100%;height:auto;border-radius:12px;background:#000}
+.dt-media audio{display:block;width:100%}
+.dt-media .media-transcript{margin-top:10px}
+.dt-media .media-transcript summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.dt-media .media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

@@ -1,0 +1,11 @@
+<?php /** Handbuch · Kapitel „Online-Anfragen“ (verschlüsselte Eingänge) */ ?>
+  <p class="lead"><?= e(term('requests')) ?> enthalten <?= e(term('requests_data')) ?>. Sie landen in einem <b>Eingang</b> – einer besonderen Tabelle, die alles <b>verschlüsselt</b> speichert. Lesbar sind die Anfragen nur mit dem geheimen <b><?= e(term('key')) ?></b> – selbst der Webhoster kann sie nicht lesen.</p>
+  <ol class="doc-steps">
+    <li>Sie erhalten eine E-Mail „Neue Anfrage“ – ohne Inhalte, aus Datenschutzgründen. Neue Anfragen zeigt auch die Zahl neben <b>Anfragen</b> im Menü.</li>
+    <li><a href="<?= e(url('/admin/requests')) ?>">Anfragen</a> öffnen, oben den Eingang wählen (z. B. Rezepte oder Überweisungen), den <b>geheimen <?= e(term('key')) ?></b> aus dem Passwortmanager einfügen, <b>Entschlüsseln</b>. Die Inhalte sind nur in dieser Ansicht lesbar – nach dem Neuladen wieder verschlossen.</li>
+    <li>Status setzen: <b>In Bearbeitung</b> oder <b>Als erledigt markieren</b>. Mit <b>Zuweisen</b> sehen alle, wer sich kümmert. <b>Drucken</b> und <b>Kopieren</b> helfen beim Übertragen in <?= e(term('records_system')) ?>.</li>
+    <li>Erledigte Anfragen werden nach der eingestellten Frist (Standard 90 Tage) automatisch gelöscht.</li>
+  </ol>
+  <p><b>Formularfelder ändern:</b> Daten → Eingang → <b>Felder &amp; Einstellungen</b> (Recht „Tabellen und Felder ändern“, Standard: Administration). Dort stehen auch Titel, Einleitung, Text nach dem Absenden, Benachrichtigung und die Löschfrist. Auf einer Seite fügen Sie ein solches Formular mit dem Block <b>Formular (Datentabelle)</b> ein. Einen neuen Eingang legen Sie unter Daten → <b>Neue Tabelle</b> mit der Vorlage „Anfragen“ an. Eingänge nehmen keine Datei-Uploads an und erscheinen nie auf der Website, in der Suche oder über Schnittstellen im Klartext.</p>
+  <p>Wer Anfragen lesen darf, legen Sie unter Benutzer &amp; Rollen fest – auf Wunsch nur für einzelne Eingänge. Jedes Entschlüsseln, Ändern und Löschen wird ohne Inhalte protokolliert (Anfragen → Protokoll, nur Administration).</p>
+  <div class="doc-note doc-note--important"><strong>Den <?= e(term('key')) ?> nie verlieren</strong><p>Er wird bei der Einrichtung genau einmal angezeigt und nirgends auf dem Server gespeichert. Ohne ihn sind die Anfragen nicht mehr lesbar.</p></div>

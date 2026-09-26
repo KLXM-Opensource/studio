@@ -1,0 +1,29 @@
+/* Theme „editorial“ – Galerie, Slider, Stapelkarten, Lightbox (Kern: css/media.css) mit den Design-Tokens; ersetzt die Kern-Datei. */
+@import "../../../../resources/css/media.css";
+.cms-gallery,.cms-slider,.cms-stack,.cms-lb{--cms-accent:var(--e-a);--cms-on-accent:var(--e-a-on);--cms-radius:var(--e-radius);--cms-surface:var(--e-surface-2);--cms-muted:var(--e-muted);--cms-line:var(--e-line-strong);--cms-card-bg:var(--e-bg);--cms-card-line:var(--e-line);--cms-card-ink:var(--e-text);--cms-shadow:0 30px 60px -36px color-mix(in srgb,var(--e-shade) 50%,transparent);--cms-gallery-gap:clamp(10px,1.6vw,20px);--cms-stack-top:calc(var(--e-header-h) + 32px);--cms-light-ink:var(--e-ink)}
+.cms-head{max-width:none;padding-top:clamp(12px,1.4vw,18px);border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+.cms-head .h2{font-size:var(--e-h2)}
+.cms-lb{--cms-lb-bg:color-mix(in srgb,var(--e-night) 97%,transparent)}
+.cms-gallery__cap{color:var(--e-muted);font:400 .8125rem/1.5 var(--e-font-mono)}
+.img-gray .cms-gallery__link img{filter:grayscale(1)}
+.img-gray .cms-gallery__link:hover img{filter:none}
+.img-duotone .cms-gallery__link{background:var(--e-duo);isolation:isolate}
+.img-duotone .cms-gallery__link img{filter:grayscale(1) contrast(1.12) brightness(1.06);mix-blend-mode:multiply}
+.cms-stack{--cms-card-bg:var(--e-box)}
+.cms-stack__inner{border-radius:var(--e-radius);border-color:var(--e-line)}
+.cms-stack__num{color:var(--e-a);font:500 .8125rem var(--e-font-mono)}
+.cms-stack__eyebrow{font-family:var(--e-font-mono);font-weight:500;letter-spacing:.06em}
+.cms-stack__title{color:var(--e-ink);font:var(--e-hw) var(--e-h2)/1.1 var(--e-font-display);letter-spacing:calc(var(--e-track) * -.018em)}
+.cms-stack__link{color:var(--e-ink);text-decoration-color:var(--e-a)}
+.cms-slide{background:var(--e-night);color:var(--e-on-dark)}
+.cms-slide__eyebrow{font-family:var(--e-font-mono);font-weight:500;letter-spacing:.07em}
+.cms-slide__title{font-family:var(--e-font-display);font-weight:var(--e-hw);letter-spacing:calc(var(--e-track) * -.022em)}
+.cms-slide--ov-box .cms-slide__box{border-radius:var(--e-radius);background:var(--e-bg);color:var(--e-text);border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+.cms-slide--ov-box .cms-slide__title{color:var(--e-ink)}
+.cms-slide--ov-light{color:var(--e-ink)}
+.cms-slide--ov-light::before{background:color-mix(in srgb,var(--e-bg) 84%,transparent)}
+:is(.cms-slide--ov-dark,.cms-slide--ov-none) .cms-slide__cta{--e-btn-bg:var(--e-on-dark);--e-btn-ink:var(--e-night);--e-btn-bg-hover:color-mix(in srgb,var(--e-on-dark) 86%,var(--e-night))}
+.cms-slider__arrow{border-radius:var(--e-radius)}
+.cms-slider__dot::before{border-radius:0;height:3px;width:14px}
+.cms-slider__dot[aria-current=true]::before{height:3px;width:28px}
+.cms-slider__play{border-radius:var(--e-radius);background:color-mix(in srgb,var(--e-night) 60%,transparent);color:var(--e-on-dark)}

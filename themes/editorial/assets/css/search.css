@@ -1,0 +1,29 @@
+/* Theme „editorial“: Ergebnisseite der Website-Suche und Vorschläge (ersetzt /assets/css/search.css des Kerns) */
+@import "../../../../resources/css/search.css";
+.srch,.sf,.ssug{--se-accent:var(--e-a);--se-muted:var(--e-muted);--se-line:var(--e-line);--se-surface:var(--e-surface);--se-bg:var(--e-bg);--se-radius:var(--e-radius);--se-mark:var(--e-a-soft)}
+.srch{padding-top:clamp(32px,5vw,64px)}
+.srch__wrap{max-width:56rem}
+.srch__head{padding-top:14px;border-top:var(--e-rule-w) var(--e-rule-s) var(--e-ink)}
+.srch__eyebrow{display:block;color:var(--e-kick);font:650 .75rem/1.35 var(--e-font);letter-spacing:.13em;text-transform:uppercase}
+.srch__title{color:var(--e-ink);font:var(--e-hw) var(--e-h1)/1.06 var(--e-font-display);letter-spacing:calc(var(--e-track) * -.02em)}
+.srch__status{font:400 .8125rem var(--e-font-mono)}
+.sf--page .sf__row{border:0;border-bottom:2px solid var(--e-ink);border-radius:0;box-shadow:none}
+.sf--page .sf__row:focus-within{border-color:var(--e-a)}
+.sf--page .sf__input{font:400 clamp(1.25rem,1.1rem + .6vw,1.6rem) var(--e-font-display)}
+.sf--page .sf__btn{margin:6px 0;border-radius:var(--e-radius);background:var(--e-btn-bg);color:var(--e-btn-ink)}
+.srch__types a{border-radius:var(--e-radius);font:500 .8125rem var(--e-font-mono)}
+.srch__types a[aria-current]{background:var(--e-ink);border-color:var(--e-ink);color:var(--e-bg)}
+.srch__list{border-top-color:var(--e-ink)}
+.srch-badge{border-radius:var(--e-radius);background:none;color:var(--e-kick);padding:0;font:500 .75rem var(--e-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.srch-hit__meta{font-family:var(--e-font-mono)}
+.srch-hit__title{color:var(--e-ink);font:var(--e-hw) calc(var(--e-ratio) * 1.1rem)/1.25 var(--e-font-display)}
+.srch-hit__title a:hover{text-decoration-color:var(--e-a)}
+.srch-hit__url{font-family:var(--e-font-mono)}
+.srch-hit__img{border-radius:var(--e-radius)}
+.srch-pager a{border-radius:var(--e-radius);font-family:var(--e-font-mono)}
+.srch-pager a[aria-current]{background:var(--e-ink);border-color:var(--e-ink);color:var(--e-bg)}
+.ssug{border-radius:var(--e-radius);border-top:2px solid var(--e-ink);color:var(--e-ink)}
+.ssug a{border-radius:0}
+.ssug__all a{color:var(--e-link)}
+.srch__head{grid-template-columns:minmax(0,1fr)}
+.sf--page .sf__btn{flex:none}

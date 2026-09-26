@@ -1,0 +1,12 @@
+/* Kit „basis“ – Kopfbereich-Aktionen (Core\HeaderActions): lädt nur, wenn die Einstellung Kern-Teile braucht (theme.php →
+   'header_actions' → 'kit_css'), direkt nach dem Kern-Bündel und vor site.css. Farben des Kits, Textlink, Suchleiste,
+   Mobilmenü (< 960 px: Aktionen volle Breite, Suche über das Feld im Menü). */
+.ha,.ha-below{--ha-accent:var(--b-btn-bg);--ha-on:var(--b-btn-ink);--ha-ink:var(--b-ink);--ha-muted:var(--b-muted);--ha-line:var(--b-line-strong);--ha-bg:var(--b-bg);--ha-surface:var(--b-surface);--ha-open:var(--b-link)}
+.ha .ha-cta--link{color:var(--b-link)}
+.ha-below:not(.ha-below--band){background:var(--b-header-bg,var(--b-bg))}
+@media (max-width:959.98px){.site-nav__end .ha-search,.site-header .ha-center{display:none}.site-nav__end .ha :is(.ha-cta,.ha-split,.ha-contact){flex:1 1 100%;min-height:48px}.site-nav__end .ha-split .ha-cta{flex:1}}
+/* Für alle übrigen Optionen: Anordnung, 8-px-Ecken, lange Menüs ohne Umbruch */
+.ha{align-items:center}
+.site-header__cta .ha{display:flex;gap:12px}
+.ha .ha-cta{border-radius:8px}
+.site-header .nav__link{white-space:nowrap}

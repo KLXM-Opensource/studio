@@ -1,0 +1,5 @@
+/* Kit „nature“ – Paneel des Kontakt-Menüs (Core\HeaderActions): lädt spät über header_actions_late() (theme.php → 'kit_css_late') */
+/* Kontakt-Menü als Papierkarte (falls gewählt): warmes Papier, weiche Kante, Überschrift in der Serifenschrift */
+.ha-menu__panel{--ha-panel-bg:var(--n-panel);--ha-panel-shadow:0 1px 0 var(--n-line),0 20px 40px -20px rgb(40 30 10/.35);border-width:1.5px}
+.ha-menu__title{font:600 1rem/1.2 var(--n-font-head);letter-spacing:0;text-transform:none;color:var(--n-ink)}
+.ha-menu__list .ha-ico{color:var(--n-a-ink)}

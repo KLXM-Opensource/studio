@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Beispiel-Blog (Atom)</title>
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <updated>2026-09-22T18:30:02Z</updated>
+  <entry>
+    <title>Erster Beitrag</title>
+    <link rel="alternate" href="https://example.org/blog/erster-beitrag"/>
+    <link rel="enclosure" type="image/jpeg" href="http://127.0.0.1:8097/img/rss1.jpg"/>
+    <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    <published>2026-09-20T10:00:00Z</published>
+    <updated>2026-09-21T11:00:00Z</updated>
+    <author><name>Anna Beispiel</name></author>
+    <summary>Kurzfassung des ersten Beitrags.</summary>
+    <content type="html">&lt;p&gt;Langer &lt;em&gt;Text&lt;/em&gt; des ersten Beitrags.&lt;/p&gt;</content>
+  </entry>
+  <entry>
+    <title>Zweiter Beitrag</title>
+    <link href="https://example.org/blog/zweiter-beitrag"/>
+    <id>urn:uuid:1225c695-cfb8-4ebb-bbbb-80da344efa6b</id>
+    <updated>2026-09-22T12:00:00Z</updated>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Mit <b>XHTML</b>-Inhalt.</div></summary>
+  </entry>
+</feed>

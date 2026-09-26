@@ -1,0 +1,30 @@
+/* Kit „modern“ – Pakete / Vergleich (nur wenn verwendet). Karten: auto-fit-Raster. Vergleichstabelle: scrollt bei wenig
+   Platz waagerecht (Tastatur: der Bereich ist fokussierbar), erste Spalte bleibt stehen (position: sticky). */
+.plans{--min:16rem;align-items:stretch}
+.plan{position:relative;display:flex;flex-direction:column;gap:var(--m-s-m);padding:var(--m-pad)}
+.plan--hl{border:2px solid var(--m-a);box-shadow:0 30px 60px -30px color-mix(in srgb,var(--m-a) 45%,transparent)}
+.plan__top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
+.plan__name{color:var(--m-ink);font:var(--m-hw) var(--m-t2)/1.2 var(--m-font-head);letter-spacing:calc(var(--m-track) * .008em)}
+.plan__price{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .5rem}
+.plan__amount{color:var(--m-ink);font:var(--m-hw) var(--m-t4)/1 var(--m-font-head);letter-spacing:calc(var(--m-track) * .015em);font-variant-numeric:tabular-nums}
+.plan__period{color:var(--m-muted);font-size:var(--m-t-1)}
+.plan__text{color:var(--m-muted)}
+.plan__list{padding-top:var(--m-s-m);border-top:1px solid var(--m-line)}
+.plan__btn{margin-top:auto}
+.plans__note{margin-top:var(--m-s-l);color:var(--m-muted);font-size:var(--m-t-1);text-align:center}
+.cmp-wrap{position:relative;overflow-x:auto;border:1px solid var(--m-card-bd);border-radius:var(--m-r-l);background:var(--m-card);scrollbar-width:thin}
+.cmp{width:100%;min-width:40rem;border-collapse:separate;border-spacing:0;font-size:var(--m-t-1)}
+.cmp :is(th,td){padding:.85rem 1rem;border-bottom:1px solid var(--m-line);text-align:center;vertical-align:middle}
+.cmp tbody th{position:sticky;left:0;z-index:1;background:var(--m-card);color:var(--m-ink);font-weight:600;text-align:start;box-shadow:1px 0 0 var(--m-line)}
+.cmp thead th,.cmp__corner{padding-block:1.25rem;vertical-align:bottom}
+.cmp__corner{position:sticky;left:0;background:var(--m-card)}
+.cmp__plan{display:table-cell}
+.cmp__plan .badge{margin:0 auto .5rem}
+.cmp__name{display:block;color:var(--m-ink);font:var(--m-hw) var(--m-t1)/1.2 var(--m-font-head)}
+.cmp__price{display:block;margin-top:.35rem;color:var(--m-ink);font-weight:650}
+.cmp__price small{color:var(--m-muted);font-weight:400}
+.cmp .is-hl{background:color-mix(in srgb,var(--m-a) 7%,var(--m-card))}
+.cmp thead .is-hl{border-top:3px solid var(--m-a)}
+.cmp__yes{margin-inline:auto;color:var(--m-link);font-size:1.3em}
+.cmp__no{color:var(--m-muted)}
+.cmp tfoot td{border-bottom:0}

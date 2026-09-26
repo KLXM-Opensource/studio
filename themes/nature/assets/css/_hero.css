@@ -1,0 +1,16 @@
+/* ---------------------------------------------------------------- Einstieg (Hero) – alle Varianten (steht auf fast jeder Seite) */
+.sec--hero{padding-top:calc(var(--n-sec) * .7)}
+.hero{display:grid;gap:var(--n-s-xl);align-items:center}
+.hero__text{display:grid;gap:var(--n-s-m);justify-items:start;min-width:0}
+.hero__title{max-width:17ch}
+.hero__lead{max-width:34em;color:var(--n-muted);font-size:var(--n-t1);line-height:1.5;text-wrap:pretty}
+.hero__actions{margin-top:var(--n-s-xs)}
+.hero__points{margin-top:var(--n-s-xs);color:var(--n-muted)}
+@container (min-width:52rem){
+  .hero--panel,.hero--media{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:var(--n-s-2xl)}
+}
+/* Seitenkopf */
+.sec--hero:has(.hero--compact){padding-bottom:calc(var(--n-sec) * .6)}
+.hero--compact .hero__title{max-width:22ch;font-size:max(var(--n-t3),min(var(--n-t5),9cqi))}
+.hero--compact .hero__text{gap:var(--n-s-s)}
+.hero__media{box-shadow:var(--n-card-sh)}

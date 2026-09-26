@@ -1,0 +1,24 @@
+@import "_knob.css";
+/* Kit „nature“ – Merkmale. „Beet“: eine gemeinsame Fläche, Zellen durch feine Linien getrennt (Rasterlücke auf Linienfarbe) */
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min,17rem)),1fr));gap:var(--n-s-m);margin:0;padding:0;list-style:none}
+.feat{position:relative;display:grid;align-content:start;gap:var(--n-s-s);min-width:0}
+.feat__n{display:none}
+.feat__body{display:grid;gap:var(--n-s-xs)}
+.feat__title{color:var(--n-ink);font:var(--n-hw) var(--n-t1)/1.25 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:calc(var(--n-track) * .005em);text-wrap:balance}
+.feat__text{color:var(--n-muted);text-wrap:pretty}
+.feat__more{margin-top:var(--n-s-2xs)}
+.feat__img{border-radius:var(--n-r-l)}
+/* Bedienfeld */
+.feats--panel{gap:1px;overflow:hidden;background:var(--n-line);border-radius:var(--n-r-xl)}
+.feats--panel .feat{padding:var(--n-s-l) var(--n-s-m);background:var(--n-card)}
+.feats--panel .feat__n{top:var(--n-s-m);right:var(--n-s-m)}
+.feats--panel .feat:hover{background:color-mix(in srgb,var(--n-card) 70%,var(--n-surface))}
+.feats--panel .feat:has(.cover-link:focus-visible){outline-offset:-3px}
+/* Karten */
+.feats--cards .feat{padding:var(--n-s-m)}
+.feats--cards .feat__n{top:var(--n-s-m);right:var(--n-s-m)}
+.feats--cards .feat:has(.cover-link):hover{border-color:var(--n-line-strong)}
+/* Liste */
+.feats--list{gap:0 var(--n-s-l);border-top:1px solid var(--n-line)}
+.feats--list .feat{grid-template-columns:auto 1fr;align-items:start;padding-block:var(--n-s-m);border-bottom:1px solid var(--n-line)}
+.feats--list .feat__img{width:6rem}

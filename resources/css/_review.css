@@ -1,0 +1,115 @@
+/* ==========================================================================
+   Prüf-Ebene „Eingereicht“ (Core\Review, app/Admin/views/review/*, resources/js/_review.js)
+   Nutzt nur die Farb-Tokens der Verwaltung (hell/dunkel). Unterschiede nie nur über Farbe:
+   <del> durchgestrichen, <ins> unterstrichen, Status zusätzlich als Text.
+   ========================================================================== */
+.rv-tabs .rv-tabs__n{font-weight:500;opacity:.8;margin-left:2px}
+.rv-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 12px;margin:0 0 16px}
+.rv-toolbar .f{margin:0;min-width:140px}
+.rv-toolbar .rv-toolbar__q{flex:1 1 220px}
+.rv-toolbar .f input,.rv-toolbar .f select{width:100%}
+.rv-empty{text-align:center;padding:32px 20px}
+.rv-empty p{margin:.3em 0}
+
+.rv-bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px;padding:8px 12px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-card)}
+.rv-bulk__reject{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;margin-left:auto}
+.rv-bulk__reject input{min-width:220px;min-height:32px}
+.rv-check{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.rv-check input{width:18px;height:18px;margin:0;accent-color:var(--adm-a)}
+
+.rv-tablewrap{overflow-x:auto}
+.rv-table{width:100%}
+.rv-table td{vertical-align:top}
+.rv-table__sel{width:44px;text-align:center}
+.rv-table__sel input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--adm-a)}
+.rv-row.is-selected td{background:var(--adm-accent-bg)}
+.rv-row__title{display:block;font-weight:700;color:var(--adm-ink);text-decoration:none}
+.rv-row__title:hover,.rv-row__title:focus-visible{text-decoration:underline}
+.rv-row__type{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--adm-t3);margin-right:4px}
+.rv-row__sum{display:block;font-size:13px;color:var(--adm-t2);margin-top:2px}
+.rv-row__no{color:var(--adm-t3);font-variant-numeric:tabular-nums}
+.rv-row__err{display:block;font-size:12.5px;color:var(--adm-err);margin-top:2px}
+.rv-row--applied .rv-row__title,.rv-row--rejected .rv-row__title{font-weight:600}
+.rv-when{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--adm-t2)}
+.rv-src{min-width:150px}
+.rv-src__name{font-weight:600}
+.rv-src__client{display:block;font-size:12px;color:var(--adm-t3)}
+
+/* Kanal und Status */
+.rv-ch{display:inline-flex;align-items:center;min-height:20px;padding:0 7px;border-radius:5px;font-size:11.5px;font-weight:700;letter-spacing:.02em;background:var(--adm-fill);color:var(--adm-t2)}
+.rv-ch--mcp{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
+.rv-ch--ai{background:var(--adm-info-bg);color:var(--adm-ink)}
+.rv-st{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap}
+.rv-st--pending{background:var(--adm-warn-bg);color:var(--adm-warn)}
+.rv-st--applied{background:var(--adm-ok-bg);color:var(--adm-ok)}
+.rv-st--rejected{background:var(--adm-err-bg);color:var(--adm-err)}
+.rv-st--pending::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px}
+
+.rv-settings{margin-top:24px}
+.rv-settings h2{margin-top:0}
+.rv-settings .adm-checks{display:grid;gap:4px;margin:0 0 12px}
+.rv-settings .f-help{margin:0 0 10px 26px}
+
+/* Detail */
+.rv-head__sum{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:.3em 0 0;color:var(--adm-t2)}
+.rv-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.rv-side{display:grid;gap:16px;position:sticky;top:16px}
+.rv-side .adm-card h2{margin-top:0}
+@media (max-width:1000px){.rv-layout{grid-template-columns:1fr}.rv-side{position:static}}
+.rv-dl{grid-template-columns:auto 1fr}
+.rv-dl dd{overflow-wrap:anywhere}
+.rv-changes__head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.rv-changes__head h2{margin:0}
+
+.rv-diff{padding:14px 0;border-top:1px solid var(--adm-line)}
+.rv-diff:first-of-type{border-top:0}
+.rv-diff__field{font-size:14px;margin:0 0 8px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.rv-diff__key{font-size:11.5px;color:var(--adm-t3);background:none;padding:0}
+.rv-diff__pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.rv-diff__pair{grid-template-columns:1fr}}
+.rv-diff__pair--one{grid-template-columns:1fr}
+.rv-diff__col{min-width:0;border:1px solid var(--adm-line);border-radius:8px;padding:8px 10px;background:var(--adm-fill)}
+.rv-diff__col--new{background:var(--adm-card);border-color:var(--adm-in)}
+.rv-diff__lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--adm-t3);margin-bottom:4px}
+.rv-diff__val{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px;line-height:1.55;max-height:22em;overflow:auto}
+.rv-diff__val--empty{color:var(--adm-t3);font-style:italic}
+.rv-diff__val del{background:var(--adm-err-bg);color:var(--adm-err);text-decoration:line-through;text-decoration-thickness:1px;border-radius:3px;padding:0 1px}
+.rv-diff__val ins{background:var(--adm-ok-bg);color:var(--adm-ok);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;border-radius:3px;padding:0 1px}
+
+.rv-blocks{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rv-block{border:1px solid var(--adm-line);border-left-width:4px;border-radius:8px;padding:10px 12px}
+.rv-block--added{border-left-color:var(--adm-ok)}
+.rv-block--removed{border-left-color:var(--adm-err)}
+.rv-block--changed{border-left-color:var(--adm-warn)}
+.rv-block--moved{border-left-color:var(--adm-in)}
+.rv-block__head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:0}
+.rv-block__fields{margin:10px 0 0;display:grid;gap:8px}
+.rv-block__fields dt{font-size:12.5px;font-weight:700;color:var(--adm-t2)}
+.rv-block__fields dd{margin:0}
+.rv-op{display:inline-flex;min-height:20px;align-items:center;padding:0 7px;border-radius:5px;font-size:11.5px;font-weight:700;background:var(--adm-fill);color:var(--adm-t2)}
+.rv-op--added{background:var(--adm-ok-bg);color:var(--adm-ok)}
+.rv-op--removed{background:var(--adm-err-bg);color:var(--adm-err)}
+.rv-op--changed{background:var(--adm-warn-bg);color:var(--adm-warn)}
+
+.rv-alert{border-radius:10px;padding:12px 14px;margin:0 0 16px}
+.rv-alert h2{margin:0 0 6px;font-size:16px}
+.rv-alert--warn{background:var(--adm-warn-bg);border:1px solid var(--adm-warn)}
+.rv-alert--danger{background:var(--adm-err-bg);color:var(--adm-err);font-weight:600}
+.rv-3way{margin:10px 0 12px;background:var(--adm-card);border-radius:8px}
+.rv-3way th[scope=row]{white-space:nowrap}
+.rv-3way td{font-size:13px;overflow-wrap:anywhere}
+.rv-3way__now{font-weight:700}
+
+.rv-actions form{margin:0 0 8px}
+.rv-actions .adm-btn--block{width:100%;justify-content:center}
+.rv-actions > .adm-btn--block{margin:0 0 8px}
+.rv-reject{margin-top:14px!important;padding-top:12px;border-top:1px solid var(--adm-line)}
+.rv-reject textarea{width:100%}
+.rv-edit textarea,.rv-edit input{width:100%}
+.rv-actions__row{display:flex;flex-wrap:wrap;gap:8px}
+
+/* API & MCP: Modus je Token */
+.rv-tokmode{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;margin:8px 0 0}
+.rv-tokmode__l{flex-basis:100%;font-size:11.5px;font-weight:700;color:var(--adm-t3)}
+.rv-tokmode select{min-height:30px;font-size:13px;max-width:100%}
+.rv-tokhint{padding:10px 16px 14px;margin:0;font-size:13px}

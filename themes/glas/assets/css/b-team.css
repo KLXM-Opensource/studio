@@ -1,0 +1,23 @@
+/* Kit „glas“ – Team: Glaskarten mit Porträt oder Initialen in einer Glasperle; „Kompakt“: Liste */
+.team{margin:0;padding:0;list-style:none}
+.person{display:grid;align-content:start;gap:var(--g-s-s);min-width:0}
+.team--cards .person{padding:var(--g-s-m)}
+.person__avatar{position:relative;display:grid;place-items:center;flex:none;width:4.5rem;height:4.5rem;overflow:hidden;border-radius:50%;
+  background:radial-gradient(circle at 32% 26%,rgb(255 255 255/.85),transparent 40%),linear-gradient(145deg,var(--g-f1),var(--g-f2));box-shadow:inset 0 1px 0 var(--g-hi),inset 0 -10px 18px -10px color-mix(in srgb,var(--g-a) 50%,transparent),0 0 0 1px var(--g-edge),0 10px 22px -12px var(--g-sh2)}
+.person__avatar--2{background:radial-gradient(circle at 32% 26%,rgb(255 255 255/.85),transparent 40%),linear-gradient(145deg,var(--g-f2),var(--g-f3))}
+.person__avatar--3{background:radial-gradient(circle at 32% 26%,rgb(255 255 255/.85),transparent 40%),linear-gradient(145deg,var(--g-f3),var(--g-f1))}
+.person__avatar picture{display:contents}
+.person__img{width:100%;height:100%;object-fit:cover}
+.person__initials{color:#12142B;font:700 1.375rem/1 var(--g-font-head);letter-spacing:.02em}
+.person__body{display:grid;gap:.25rem;min-width:0}
+.person__name{color:var(--g-ink);font:var(--g-hw) var(--g-t1)/1.25 var(--g-font-head)}
+.person__role{color:var(--g-link);font-weight:600;font-size:var(--g-t-1)}
+.person__text{margin-top:var(--g-s-2xs);color:var(--g-muted);font-size:var(--g-t-1);text-wrap:pretty}
+.person__mail{display:inline-flex;align-items:center;gap:.5rem;min-height:2.5rem;margin-top:var(--g-s-2xs);color:var(--g-ink);font-size:var(--g-t-1);text-decoration:none;overflow-wrap:anywhere}
+.person__mail:hover{color:var(--g-link);text-decoration:underline}
+.person__mail .ico{color:var(--g-link)}
+/* Kompakt: Zeilen auf einer Glasfläche */
+.team--compact{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:2px;overflow:hidden;border:1px solid var(--g-edge);border-radius:var(--g-r-xl);background:var(--g-panel);background-clip:padding-box;box-shadow:var(--g-card-sh)}
+.team--compact .person{grid-template-columns:auto 1fr;align-items:center;padding:var(--g-s-s) var(--g-s-m);box-shadow:0 1px 0 var(--g-line)}
+.team--compact .person__avatar{width:3rem;height:3rem}
+.team--compact .person__initials{font-size:1rem}

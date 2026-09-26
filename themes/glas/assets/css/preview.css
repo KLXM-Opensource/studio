@@ -1,0 +1,7 @@
+/* Kit „glas“ – nur in der Vorschau des Style-Editors (Verwaltung → Design → „Dunkel“, design.php → dark.force = is-dark):
+   die Nicht-Farbwerte des dunklen Schemas wie unter prefers-color-scheme; die Farbwerte setzt der Editor selbst. */
+html.is-dark{color-scheme:dark;--g-ff:.42;--g-ga:.76;--g-ha:.82;--g-sheen:rgb(255 255 255/.05);--g-hi:rgb(255 255 255/.14);--g-edge:rgb(255 255 255/.11);--g-rim:rgb(0 0 0/.35);--g-sh1:rgb(0 0 0/.3);--g-sh2:rgb(0 0 0/.62);--g-danger:#FF8A80}
+html.is-dark.gd-light{--g-ga:.68}html.is-dark.gd-dense{--g-ga:.86}html.is-dark.ff-rich{--g-ff:.6}html.is-dark.ff-plain{--g-ff:0}
+html.is-dark.has-grain body::after{opacity:.07}
+html.is-dark .brand__logo--light{display:none}
+html.is-dark .brand__logo--dark{display:block}

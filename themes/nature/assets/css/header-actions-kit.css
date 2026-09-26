@@ -1,0 +1,12 @@
+/* Kit „nature“ – Kopfbereich-Aktionen (Core\HeaderActions): lädt nur zusammen mit dem Kern-Bündel (theme.php → 'header_actions'
+   → 'kit_css'), vor site.css – hält das renderblockierende site.css klein. */
+/* Kopfbereich-Aktionen (Core\HeaderActions) – Look „nature“: warmer Kontakt-Chip auf Papier mit Öffnungsstatus
+   („Hofladen geöffnet“), Textlink mit geschwungener Unterstreichung. Standard: Kontakt-Chip + Textlink + Lupe. */
+.ha,.ha-below{--ha-accent:var(--n-a);--ha-on:var(--n-a-on);--ha-ink:var(--n-ink);--ha-muted:var(--n-muted);--ha-line:var(--n-line);--ha-bg:var(--n-panel);--ha-surface:var(--n-surface);--ha-open:var(--n-a);--ha-h:2.75rem;--ha-gap:.5rem}
+.hdr .ha-chip{border-width:1.5px;background:var(--n-panel);font-weight:600}
+.hdr .ha-chip.is-open .ha-chip__state{color:var(--n-a-ink)}
+.hdr .ha-cta--link{color:var(--n-a-ink);font-family:var(--n-font-head);font-size:1rem;font-weight:600;text-decoration-style:wavy;text-decoration-color:color-mix(in srgb,var(--n-a) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:.35em}
+.hdr .ha-center{margin-inline:auto}
+.hdr__below{width:min(100% - 2 * var(--n-gutter),var(--n-wrap));margin-inline:auto}
+@container hdr (max-width:48rem){.hdr .ha-search--inline,.hdr .ha-search--expand,.hdr .ha-center{display:none}.hdr .ha-search--fallback{display:flex}}
+@container hdr (max-width:60rem){.hdr .ha-chip{min-width:2.75rem;padding:0;justify-content:center;position:relative}.hdr .ha-chip :is(.ha-chip__state,.ha-chip__txt){display:none}.hdr .ha-chip>.ha-dot{position:absolute;top:.45rem;right:.45rem}}

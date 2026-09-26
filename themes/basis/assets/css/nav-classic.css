@@ -1,0 +1,6 @@
+@import "_topbar.css";
+/* Navigation „Klassisch“: Logo links, Menü rechts, Aufklappmenüs (Grundlagen in site.css) */
+@media (min-width:960px){
+  .site-header--classic .site-header__inner{min-height:76px}
+  .site-header--classic .site-nav__end{margin-left:8px}
+}

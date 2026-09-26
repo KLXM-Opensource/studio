@@ -1,0 +1,883 @@
+#!/usr/bin/env php
+<?php
+// SPDX-License-Identifier: MIT
+// KLXM Studio – Copyright (C) 2026 KLXM and contributors (see LICENSE, COPYRIGHT)
+/**
+ * Kommandozeile (optional – alles geht auch über den Browser).
+ * Aufruf: php bin/console <befehl> [--site=<key>]   (ohne Befehl: diese Übersicht)
+ *
+ * Konten & Einrichtung
+ *   user:create <email> [admin|editor]                Benutzer anlegen (Passwort wird abgefragt)
+ *   user:password <email>                             Passwort neu setzen – bestehende Sitzungen enden
+ *   user:2fa-reset <email>                            Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (Sitzungen enden)
+ *   setup:token                                       Setup-Token für /admin/setup anzeigen
+ *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
+ *
+ * Websites & Netzwerk
+ *   site:list                                         Websites dieser Installation
+ *   site:create <key> <domain,…> [kit]                Neue Website (eigene Datenbank, Medien, Benutzer)
+ *   site:hosts <key> [add|remove <domain>] [--landing]
+ *                                                     Domains einer Website anzeigen/ändern (--landing: Domain für Landingpages)
+ *   network:list                                      Netzwerk-Administration: Konten (Netzwerk-Website) und Websites
+ *   network:user <email> [--create|--disable|--enable|--reset-2fa|--password] [--name="…"]
+ *                                                     Netzwerk-Konto anlegen/sperren/2FA zurücksetzen (Passwort wird abgefragt)
+ *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
+ *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
+ *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
+ *
+ * Kits & Erweiterungen (Kits liegen technisch unter themes/{name}/ – daher theme:*; kit:* geht ebenso)
+ *   theme:list | kit:list                             Installierte Kits
+ *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
+ *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
+ *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung)
+ *   features:list                                     Funktionen dieser Website: an/aus, Quelle (Konfiguration, Verwaltung, Standard)
+ *   features:release [--dry-run] [--only=features|extensions]
+ *                                                     In der Konfiguration festgelegte Funktionen/Erweiterungen an die Verwaltung
+ *                                                     übergeben (Administration → Funktionen & Erweiterungen); Sicherung .bak + Diff
+ *   extensions:publish                                Öffentliche Dateien der Erweiterungen nach public/extensions kopieren
+ *   reseed --force                                    ALLE Inhalte löschen und Startinhalte neu einspielen
+ *   fonts:search <name> [--category=serif]            Google-Fonts-Katalog durchsuchen (Fontsource, nur freie Lizenzen)
+ *   fonts:install <familie> [--weights=400,700] [--subsets=latin,latin-ext] [--variable] [--italic] [--preload]
+ *                                                     Schrift laden und selbst ausliefern (public/fonts, alle Websites)
+ *   fonts:list                                        Installierte Schriften mit Größe, Lizenz und Verwendung
+ *   fonts:remove <familie> [--force]                  Schrift entfernen (--force: auch wenn noch verwendet)
+ *   accent:check                                      Akzentfarben der Verwaltung auf Kontrast prüfen (WCAG AA)
+ *
+ * Betrieb & Deploy
+ *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
+ *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Baukasten) auflisten | Sicherheits-Selbsttest der Vorlagensprache
+ *   health [--all]                                    Prüfung für Deploys (Exit-Code 1 bei Fehlern)
+ *   maintenance on|off [--all]                        Wartungsmodus
+ *   cache:clear [--all]                               Seiten-Cache leeren (--all: aller Websites)
+ *   i18n:missing en [--site-texts] [--extension=name] Fehlende Übersetzungen (Verwaltung bzw. feste Website-Texte lt(); einer Erweiterung)
+ *   tutorials:export [--out=datei.json] [--videos=ordner]
+ *                                                     Tutorial-Katalog als JSON für die Produkt-Website (Schritte DE/EN, Dauer, Dateien);
+ *                                                     Standard: Ordner aus TUT_OUT bzw. ../klxm-studio-website/site-tools/tutorials
+ *
+ * Sicherungen (storage/backups; --keep=N: nur die neuesten N behalten, Standard config 'backup_keep' = 14, 0 = alle)
+ *   site:backup [--out=dir] [--keep=N] [--all]        Datenbank + Medien sichern
+ *   site:restore <datei> --force                      Sicherung einspielen (z. B. Live-Inhalte auf Staging)
+ *   pool:backup [key|--all] [--keep=N]                Geteilte Medien-Pools sichern
+ *   pool:restore <datei> --force                      Pool-Sicherung einspielen
+ *   shared:backup [key|--all] [--keep=N]              Geteilte Tabellen sichern (Bilder: pool:backup data-…)
+ *   shared:restore <datei> --force                    Sicherung einer geteilten Tabelle einspielen
+ *
+ * Medien & Daten
+ *   pool:create <key> "Name"                          Geteilten Medien-Pool anlegen (Websites: 'media_pools' => [...])
+ *   pool:list                                         Pools und nutzende Websites
+ *   data:share <handle> --members=a,b [--see-members] [--merge]
+ *                                                     Tabelle dieser Website teilen (diese Website = Eigentümer, --site=…)
+ *   data:unshare <handle> [--all-entries]             Freigabe beenden: wieder eigene Tabelle des Eigentümers
+ *   shared:list                                       Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website
+ *   inbox:migrate [--all]                             Online-Anfragen → Eingangs-Tabellen (idempotent, sonst automatisch)
+ *   inbox:purge [--all]                               Erledigte Anfragen nach Aufbewahrungsfrist löschen (z. B. täglich per Cron)
+ *   sources:sync [--all] [--source=ID] [--force]      Externe Quellen abgleichen: fällige (Cron, z. B. alle 15 min) bzw. eine/alle sofort
+ *   sources:list [--all]                              Externe Quellen mit Stand (letzter Abruf, Einträge, Fehler)
+ *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
+ *                                                     --all: alle neu)
+ *
+ * Suche & KI
+ *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
+ *                                                     Suchindex abgleichen (Cron: alle 15 min; --full nachts; --kb Wissensdatenbank; --help Hilfe-Index des Assistenten)
+ *   search:status [--all]                             Stand des Suchindex und des KI-Anbieters
+ *   search:query "<text>" [--lang=en]                 Testsuche wie Besucher
+ *   ai:test [--cap=text|embed|vision|transcribe]      KI-Anbieter je Fähigkeit prüfen (Symfony AI, Core\AI\Ai)
+ *   ai:transcribe <medien-id> [--lang=de|auto] [--pool=key]
+ *                                                     Video/Audio transkribieren → Untertitel-Entwurf (Core\AI\MediaJobs)
+ *   ai:jobs [--all]                                   Wartende Medien-Aufträge (Transkription, Übersetzung) abarbeiten
+ *
+ * Multi-Site: jedes Kommando wirkt auf die Website --site=<key> (Standard: default), z. B.
+ *   php bin/console user:create chefin@kunde.de admin --site=kunde
+ */
+declare(strict_types=1);
+
+if (PHP_SAPI !== 'cli') {
+    exit(1);
+}
+$app = require dirname(__DIR__) . '/app/bootstrap.php';
+[$_, $cmd] = $argv + [null, 'help'];
+$args = array_slice($argv, 2);
+
+$ask = function (string $q, bool $hidden = false): string {
+    echo $q;
+    if ($hidden && DIRECTORY_SEPARATOR === '/') system('stty -echo');
+    $v = trim((string) fgets(STDIN));
+    if ($hidden && DIRECTORY_SEPARATOR === '/') { system('stty echo'); echo "\n"; }
+    return $v;
+};
+
+// Sicherungen rotieren: nach erfolgreicher Sicherung nur die neuesten N desselben Präfixes behalten (--keep=N, config 'backup_keep', 0 = alle)
+$rotate = function (string $dir, string $prefix, int $default) use ($args): void {
+    $keep = $default;
+    foreach ($args as $a) if (preg_match('~^--keep=(\d+)$~', $a, $m)) $keep = (int) $m[1];
+    if ($keep < 1) return;
+    $files = array_values(array_filter((array) glob($dir . '/' . $prefix . '-*.tar*'),
+        fn($f) => preg_match('~^' . preg_quote($prefix, '~') . '-\d{8}-\d{6}\.tar(\.gz)?$~', basename($f)) === 1));   // .tar = Rückfall ohne System-tar
+    usort($files, fn($a, $b) => strcmp(basename($b), basename($a)));   // Zeitstempel im Namen → neueste zuerst
+    foreach (array_slice($files, $keep) as $old) if (@unlink($old)) fwrite(STDERR, "  gelöscht (älter als die neuesten $keep): " . basename($old) . "\n");   // STDERR: letzte Ausgabezeile bleibt der Dateiname (deploy/sync-content.sh)
+};
+
+switch ($cmd) {
+    case 'user:create':
+        $email = $args[0] ?? $ask('E-Mail: ');
+        $role = $args[1] ?? 'admin';
+        $pw = $ask('Passwort (mind. 12 Zeichen): ', true);
+        if ($p = Core\Auth::passwordProblem($pw)) { fwrite(STDERR, "$p\n"); exit(1); }
+        $app->auth->createUser($email, $pw, $role);
+        echo "Benutzer $email ($role) angelegt.\n";
+        break;
+
+    case 'user:password':
+        $email = $args[0] ?? $ask('E-Mail: ');
+        $pw = $ask('Neues Passwort: ', true);
+        if ($p = Core\Auth::passwordProblem($pw)) { fwrite(STDERR, "$p\n"); exit(1); }
+        $u = $app->db->fetch('SELECT id, role, network_uid FROM users WHERE LOWER(email) = LOWER(?)', [$email]);
+        if (!$u) { fwrite(STDERR, "Kein Benutzer $email auf " . site()->key . ".\n"); exit(1); }
+        if ($u['role'] === 'network' || !empty($u['network_uid'])) { fwrite(STDERR, "$email ist ein Netzwerk-Konto – Passwort mit network:user $email --password setzen.\n"); exit(1); }
+        // auth_ver erhöhen: alle bestehenden Sitzungen des Kontos enden
+        $app->db->query('UPDATE users SET password_hash = ?, auth_ver = auth_ver + 1 WHERE id = ?', [password_hash($pw, PASSWORD_DEFAULT), (int) $u['id']]);
+        echo "Passwort gesetzt – alle Sitzungen des Kontos beendet.\n";
+        break;
+
+    case 'user:2fa-reset':
+        // Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (z. B. Telefon verloren) – wird bei der nächsten Anmeldung neu eingerichtet
+        $email = $args[0] ?? '';
+        if ($email === '' || str_starts_with($email, '--')) { fwrite(STDERR, "Aufruf: user:2fa-reset <email> [--site=key]\n"); exit(1); }
+        $u = $app->db->fetch('SELECT id, role, network_uid FROM users WHERE LOWER(email) = LOWER(?)', [$email]);
+        if (!$u) { fwrite(STDERR, "Kein Benutzer $email auf " . site()->key . ".\n"); exit(1); }
+        if ($u['role'] === 'network' || !empty($u['network_uid'])) { fwrite(STDERR, "$email ist ein Netzwerk-Konto – network:user $email --reset-2fa verwenden.\n"); exit(1); }
+        Core\Totp::reset((int) $u['id']);
+        Core\Network\Network::log('user.reset-2fa', site()->key, 'cli', strtolower($email));
+        echo "Zwei-Faktor-Anmeldung (App und Passkeys) von $email zurückgesetzt – alle Sitzungen beendet.\n";
+        break;
+
+    case 'keys:generate':
+        if (Core\FormCrypto::ready() && !in_array('--force', $args, true)) {
+            fwrite(STDERR, "Es existiert bereits ein Schlüssel. Mit --force ersetzen (alte Anfragen bleiben nur mit altem Schlüssel lesbar).\n");
+            exit(1);
+        }
+        $k = Core\FormCrypto::generate();
+        $app->settings->set('sys.form_public_key', $k['public']);
+        $app->settings->set('sys.form_key_created', now());
+        echo "Öffentlicher Schlüssel gespeichert.\n\nGEHEIMER SCHLÜSSEL (sicher aufbewahren, wird nicht gespeichert):\n\n  {$k['secret']}\n\n";
+        break;
+
+    case 'i18n:missing':
+        // Fehlende Übersetzungen der Verwaltung: __('…') in PHP und t('…') in JS gegen lang/{locale}.php
+        // Mit --site-texts: feste Website-Texte lt('…') gegen lang/site/{locale}.php + themes/{theme}/lang/site/{locale}.php
+        // Mit --extension=name: Texte einer Erweiterung (extensions/{name} bzw. Composer-Paket) gegen ihr lang/{locale}.php
+        $siteTexts = in_array('--site-texts', $args, true);
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $loc = $pos[0] ?? 'en';
+        $theme = app()->theme;
+        $extName = '';
+        foreach ($args as $a) if (str_starts_with($a, '--extension=')) $extName = substr($a, 12);
+        $extDir = $extName !== '' ? (Core\Extensions::available()[$extName]['dir'] ?? null) : null;
+        if ($extName !== '' && !$extDir) { fwrite(STDERR, "Erweiterung „{$extName}“ ist nicht installiert.\n"); exit(1); }
+        $files = $siteTexts ? [ROOT . "/lang/site/$loc.php", $theme->path . "/lang/site/$loc.php"] : [ROOT . "/lang/$loc.php", $theme->path . "/lang/$loc.php"];
+        if ($extDir) $files = $siteTexts ? ["$extDir/lang/site/$loc.php"] : ["$extDir/lang/$loc.php"];
+        $have = [];
+        foreach ($files as $file) if (is_file($file)) $have += (array) require $file;
+        $found = [];
+        $scan = $siteTexts ? '~/(app|themes/' . preg_quote($theme->name, '~') . ')/.*\.php$~' : '~/(app|themes|resources/js)/.*\.(php|js|mjs)$~';
+        $pattern = $siteTexts ? "~\\blt\\('((?:[^'\\\\]|\\\\.)*)'~" : "~(?:__|\\bt)\\('((?:[^'\\\\]|\\\\.)*)'~";
+        if ($extDir) $scan = $siteTexts ? '~/(src|views|blocks)/.*\.php$|/extension\.php$~' : '~/(src|views|assets/js)/.*\.(php|js|mjs)$|/extension\.php$~';
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extDir ?: ROOT, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $f) {
+            $path = $f->getPathname();
+            if (str_contains($path, '/node_modules/') || !preg_match($scan, $path)) continue;
+            preg_match_all($pattern, (string) file_get_contents($path), $m);
+            foreach ($m[1] as $str) $found[stripslashes($str)] = true;
+        }
+        $missing = array_diff(array_keys($found), array_keys($have));
+        sort($missing);
+        foreach ($missing as $str) echo "    " . var_export($str, true) . " => '',\n";
+        fwrite(STDERR, count($missing) . " von " . count($found) . " Texten fehlen in " . implode(' + ', array_map(fn($f) => str_replace(ROOT . '/', '', $f), $files)) . "\n");
+        break;
+
+    case 'tutorials:export':
+        // Katalog (app/Admin/tutorials.php + tutorials.en.php) + Aufnahmen (videos.json aus tools/tutorials/record.mjs) → JSON für die
+        // Produkt-Website (extensions/klxm-site/seed.php liest {ordner}/tutorials.json). Ordner der Videos wie bei record.mjs: TUT_OUT,
+        // sonst die Website-Installation neben dem Projektordner (../klxm-studio-website/site-tools/tutorials).
+        $videos = getenv('TUT_OUT') ?: dirname(ROOT, 2) . '/klxm-studio-website/site-tools/tutorials';
+        $out = '';
+        foreach ($args as $a) {
+            if (str_starts_with($a, '--videos=')) $videos = substr($a, 9);
+            if (str_starts_with($a, '--out=')) $out = substr($a, 6);
+        }
+        $videos = rtrim($videos, '/');
+        $out = $out !== '' ? $out : $videos . '/tutorials.json';
+        if (!is_dir($videos)) fwrite(STDERR, "Hinweis: Ordner der Videos fehlt ($videos) – Export ohne Dauer und Dateinamen.\n");
+        $data = Core\Tutorials::export(is_dir($videos) ? $videos : '');
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($out === '-') { echo $json, "\n"; break; }
+        if (!is_dir(dirname($out)) && !@mkdir(dirname($out), 0775, true)) { fwrite(STDERR, "Ordner für $out nicht anlegbar.\n"); exit(1); }
+        if (file_put_contents($out, $json . "\n") === false) { fwrite(STDERR, "Schreiben fehlgeschlagen: $out\n"); exit(1); }
+        $withVideo = count(array_filter($data['tutorials'], fn($t) => !empty($t['video']['mp4'])));
+        echo count($data['tutorials']) . " Tutorials ($withVideo mit Video) → $out\n";
+        break;
+
+    case 'cache:clear':
+        if (in_array('--all', $args, true)) {
+            foreach (array_keys(Core\Sites::all()) as $k) {
+                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --site=' . escapeshellarg($k));
+            }
+            break;
+        }
+        Core\PageCache::clear();
+        echo "Seiten-Cache geleert (" . site()->key . ").\n";
+        break;
+
+    case 'site:list':
+        foreach (Core\Sites::all() as $k => $c) {
+            $s = new Core\Site($k, $c);
+            printf("%-14s %-40s kit: %-12s daten: %s\n", $k, implode(', ', $s->hosts()) ?: '(alle übrigen Domains)',
+                $c['theme'] ?? '–', str_replace(ROOT . '/', '', $s->storage()));
+        }
+        break;
+
+    case 'site:create':
+        [$key, $hosts, $theme] = [$args[0] ?? '', $args[1] ?? '', $args[2] ?? ''];
+        if ($key === '' || $hosts === '') { fwrite(STDERR, "Aufruf: site:create <key> <domain[,domain2]> [kit]\n"); exit(1); }
+        try {
+            $r = Core\Sites::create($key, explode(',', $hosts), $theme);
+        } catch (InvalidArgumentException $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        Core\Network\Network::ensureKey();   // Installationsschlüssel für die Netzwerk-Anmeldung (config.local.php)
+        $first = explode(',', $hosts)[0];
+        echo "Website „{$key}“ angelegt: " . str_replace(ROOT . '/', '', $r['file']) . "\n\n"
+           . "1. Domain im Hosting auf denselben Ordner zeigen lassen (Plesk: Dokumentstamm = httpdocs/public).\n"
+           . "2. Erstes Konto anlegen: https://{$first}/admin/setup  –  Setup-Token: {$r['setup_token']}\n"
+           . "   oder: php bin/console user:create <email> admin --site={$key}\n"
+           . "Datenbank, Medienordner und Startinhalte des Kits entstehen beim ersten Aufruf.\n";
+        break;
+
+    case 'site:hosts':
+        // Domains einer Website (config/sites/{key}.php → 'hosts'): nur dieser Eintrag wird geändert, Sicherung als .bak
+        $landingFlag = in_array('--landing', $args, true);
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        [$key, $action, $host] = [$pos[0] ?? '', $pos[1] ?? '', $pos[2] ?? ''];
+        if ($key === '' || ($action !== '' && $host === '')) { fwrite(STDERR, "Aufruf: site:hosts <key> [add|remove <domain>] [--landing]\n"); exit(1); }
+        if (!isset(Core\Sites::all()[$key])) { fwrite(STDERR, "Unbekannte Website „{$key}“.\n"); exit(1); }
+        if ($action !== '') {
+            try {
+                Core\Sites::setHosts($key, $action, $host, $landingFlag);
+            } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+            echo ($action === 'add' ? "Domain hinzugefügt" : "Domain entfernt") . " ({$key}): " . Core\Sites::normalizeHost($host) . "\n";
+            if ($action === 'add') {
+                echo "Nächste Schritte: DNS auf diesen Server, im Hosting als Alias/zusätzliche Domain (Plesk: Dokumentstamm httpdocs/public) + SSL,\n"
+                   . "dann in der Verwaltung der Website unter Administration → Landingpages eine Seite zuordnen.\n";
+            } else {
+                echo "Hinweis: Eine Landingpage mit dieser Domain bleibt gespeichert, ist aber erst nach erneutem Hinzufügen wieder erreichbar.\n";
+            }
+        }
+        $cfgK = Core\Sites::all()[$key] ?? [];
+        $list = array_values((array) ($cfgK['hosts'] ?? []));
+        echo "Domains:\n" . ($list ? implode("\n", array_map(fn($h) => "  $h", $list)) . "\n" : "  (keine – Website „{$key}“ gilt für alle übrigen Domains)\n");
+        if ($lh = array_values((array) ($cfgK['landing_hosts'] ?? []))) echo "Landing-Domains:\n" . implode("\n", array_map(fn($h) => "  $h", $lh)) . "\n";
+        break;
+
+    case 'network:list':
+        // Netzwerk-Konten (Tabelle users der Netzwerk-Website, Rolle network) und Websites
+        echo "Netzwerk-Website: " . Core\Network\Network::siteKey() . "\n\nKonten:\n";
+        foreach (Core\Network\Network::accounts() as $a) {
+            printf("  %-34s %-9s %-14s letzte Anmeldung: %s\n", $a['email'], (int) $a['disabled'] ? 'gesperrt' : 'aktiv',
+                (int) $a['totp_enabled'] ? '2FA aktiv' : '2FA ausstehend', $a['last_login'] ?: 'nie');
+        }
+        if (!Core\Network\Network::accounts()) echo "  (keine) – anlegen: php bin/console network:user <email> --create\n";
+        echo "\nWebsites:\n";
+        foreach (array_keys(Core\Sites::all()) as $k) echo "  $k  " . Core\Network\Network::siteUrl($k) . "\n";
+        break;
+
+    case 'network:user':
+        // Netzwerk-Konto verwalten – wirkt immer auf die Netzwerk-Website, unabhängig von --site
+        $email = strtolower(trim((string) ($args[0] ?? '')));
+        $flags = array_slice($args, 1);
+        $name = '';
+        foreach ($flags as $f) if (str_starts_with($f, '--name=')) $name = substr($f, 7);
+        if ($email === '' || str_starts_with($email, '--')) { fwrite(STDERR, "Aufruf: network:user <email> [--create|--disable|--enable|--reset-2fa|--password] [--name=\"…\"]\n"); exit(1); }
+        $N = Core\Network\Network::class;
+        try {
+            if (in_array('--create', $flags, true)) {
+                $pw = $ask('Passwort (mind. 12 Zeichen): ', true);
+                $id = $N::createAccount($email, $pw, $name);
+                $N::log('account.create', null, 'cli', $email);
+                echo "Netzwerk-Konto $email angelegt (ID $id). Bei der ersten Anmeldung auf " . $N::siteUrl($N::siteKey()) . "/admin wird die Zwei-Faktor-Anmeldung eingerichtet.\n";
+                break;
+            }
+            $acc = $N::account($email);
+            if (!$acc) { fwrite(STDERR, "Kein Netzwerk-Konto $email. Anlegen mit --create.\n"); exit(1); }
+            if (in_array('--disable', $flags, true) || in_array('--enable', $flags, true)) {
+                $off = in_array('--disable', $flags, true);
+                $N::setDisabled((int) $acc['id'], $off);
+                $N::log($off ? 'account.disable' : 'account.enable', null, 'cli', $email);
+                echo $off ? "$email gesperrt – alle Sitzungen auf allen Websites beendet.\n" : "$email entsperrt.\n";
+            } elseif (in_array('--reset-2fa', $flags, true)) {
+                $N::resetTwoFactor((int) $acc['id']);
+                $N::log('account.reset-2fa', null, 'cli', $email);
+                echo "Zwei-Faktor-Anmeldung von $email zurückgesetzt – wird bei der nächsten Anmeldung neu eingerichtet.\n";
+            } elseif (in_array('--password', $flags, true)) {
+                $pw = $ask('Neues Passwort: ', true);
+                if ($p = Core\Auth::passwordProblem($pw)) { fwrite(STDERR, "$p\n"); exit(1); }
+                $N::db()->query('UPDATE users SET password_hash = ?, auth_ver = auth_ver + 1 WHERE id = ?', [password_hash($pw, PASSWORD_DEFAULT), (int) $acc['id']]);
+                $N::log('password', null, 'cli', $email);
+                echo "Passwort gesetzt – alle Sitzungen des Kontos beendet.\n";
+            } else {
+                printf("%s  %s  %s  %s  letzte Anmeldung: %s\n", $acc['email'], $acc['name'] ?: '–', (int) $acc['disabled'] ? 'gesperrt' : 'aktiv',
+                    (int) $acc['totp_enabled'] ? '2FA aktiv' : '2FA ausstehend', $acc['last_login'] ?: 'nie');
+            }
+        } catch (InvalidArgumentException $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        break;
+
+    case 'theme:list':
+    case 'kit:list':
+        foreach (Core\Theme::available() as $n => $l) {
+            $def = ROOT . "/themes/$n/theme.php";
+            $v = preg_match("~'version'\s*=>\s*'([^']+)'~", (string) file_get_contents($def), $m) ? $m[1] : '–';
+            printf("%-14s %-30s %s\n", $n, $l, $v);
+        }
+        break;
+
+    case 'setup:token':
+        echo $app->config->get('setup_token') . "\n";
+        break;
+
+    case 'theme:create':
+    case 'kit:create':
+        // kit:create <name> [--from=vorlage] – Standard: Start-Kit „starter“; alte Form theme:create <name> <vorlage> geht weiter
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $name = strtolower(preg_replace('~[^a-z0-9_\-]~i', '', $pos[0] ?? ''));
+        $from = $pos[1] ?? 'starter';
+        foreach ($args as $a) if (str_starts_with($a, '--from=')) $from = substr($a, 7);
+        if ($name === '' || is_dir(ROOT . "/themes/$name")) { fwrite(STDERR, "Aufruf: kit:create <name> [--from=starter]. Name fehlt oder Kit existiert bereits.\n"); exit(1); }
+        if (!isset(Core\Theme::available()[$from])) { fwrite(STDERR, "Vorlage „{$from}“ nicht gefunden. Installiert: " . implode(', ', array_keys(Core\Theme::available())) . "\n"); exit(1); }
+        $copy = function (string $src, string $dst) use (&$copy) {
+            if (!is_dir($src)) return;
+            @mkdir($dst, 0775, true);
+            foreach (scandir($src) as $f) {
+                if ($f === '.' || $f === '..' || $f === 'node_modules') continue;
+                is_dir("$src/$f") ? $copy("$src/$f", "$dst/$f") : copy("$src/$f", "$dst/$f");
+            }
+        };
+        $copy(ROOT . "/themes/$from", ROOT . "/themes/$name");
+        $copy(ROOT . "/public/themes/$from", ROOT . "/public/themes/$name");
+        $def = ROOT . "/themes/$name/theme.php";
+        // Bezeichnung und Beschreibung (Kit-Auswahl) – Zeilen mit 4 Leerzeichen Einzug, wie Core\Theme::available() sie liest
+        $src = (string) file_get_contents($def);
+        $src = preg_replace("~^    'label' => '[^']*'~m", "    'label' => '" . ucfirst($name) . "'", $src, 1);
+        $src = preg_replace("~^    'description' => '[^']*'~m", "    'description' => 'Eigenes Kit „{$name}“ (Grundlage: {$from}).'", $src, 1);
+        $src = preg_replace("~^    'version' => '[^']*'~m", "    'version' => '0.1.0'", $src, 1);
+        file_put_contents($def, $src);
+        // Präfix der Kit-Funktionen und -Einstellungen umbenennen (vorlage_* → name_*), dazu Paket- und Kit-Namen
+        $prefix = str_replace('-', '_', $name) . '_';
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ROOT . "/themes/$name", FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $f) {
+            if (!in_array($f->getExtension(), ['php', 'mjs', 'js', 'css', 'json', 'md'], true)) continue;
+            $src = (string) file_get_contents($f->getPathname());
+            $new = preg_replace('~\b' . preg_quote($from, '~') . '_~', $prefix, $src);
+            $new = str_replace(["mycms-theme-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "Kit „{$from}“", "Theme „{$from}“"],
+                ["mycms-theme-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "themes/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
+            if ($new !== $src) file_put_contents($f->getPathname(), $new);
+        }
+        echo "Kit „{$name}“ angelegt – Kopie von „{$from}“, Präfix {$from}_ → {$prefix}\n"
+           . "  themes/$name/          theme.php, Blöcke, Templates, Startinhalte, lang/, tools/\n"
+           . "  themes/$name/assets/   CSS/JS-Quellen\n"
+           . "  public/themes/$name/   gebaute Assets (Kopie – nach Änderungen neu bauen)\n\n"
+           . "Nächste Schritte:\n"
+           . "  1. themes/$name/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css\n"
+           . "  2. Bauen:      cd tools && pnpm run build\n"
+           . "  3. Testen:     php bin/console site:create <key> <domain> $name   (oder Verwaltung → Grundeinstellungen → Aktives Kit)\n"
+           . "  4. Prüfen:     php bin/console health --site=<key> · php themes/$name/tools/contrast.php (falls vorhanden)\n"
+           . "                 php bin/console i18n:missing en --site-texts --site=<key> · node tools/licenses.mjs\n"
+           . "  Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“; themes/$name/README.md\n";
+        break;
+
+    case 'reseed':
+        if (!in_array('--force', $args, true)) { fwrite(STDERR, "Achtung: löscht Seiten und Einstellungen. Mit --force bestätigen.\n"); exit(1); }
+        $keep = ['sys.form_public_key', 'sys.form_key_created'];
+        $app->db->query('DELETE FROM revisions');
+        $app->db->query('DELETE FROM pages');
+        $app->db->query('DELETE FROM settings WHERE skey NOT IN (' . implode(',', array_fill(0, count($keep), '?')) . ')', $keep);
+        (new Core\Seeder($app))->run();
+        Core\PageCache::clear();
+        echo "Startinhalte neu eingespielt.\n";
+        break;
+
+    case 'sources:sync':
+    case 'sources:list':
+        // Externe Quellen (Core\Sources): Feeds, JSON-APIs, XML, OpenImmo → Datentabellen
+        exit(Core\Sources\Console::run($cmd, $args, __FILE__));
+
+    case 'search:index':
+    case 'search:status':
+    case 'search:query':
+    case 'ai:test':
+        // Website-Suche und KI (Core\Search\Console)
+        exit(Core\Search\Console::run($cmd, $args, __FILE__));
+
+    case 'media:thumbs':
+        // Vorschaubilder für Videos nachträglich erzeugen (Core\VideoThumbs, nur mit ffmpeg); --all: alle neu, --pool=key: Pool
+        exit(Core\VideoThumbs::console($args));
+
+    case 'ai:jobs':
+    case 'ai:transcribe':
+        // Untertitel: KI-Transkription und Übersetzung im Hintergrund (Core\AI\MediaJobs) – eine Sperre für die ganze Installation
+        if ($cmd === 'ai:jobs' && in_array('--all', $args, true)) {
+            foreach (array_keys(Core\Sites::all()) as $k) {
+                echo "── $k\n";
+                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' ai:jobs --site=' . escapeshellarg($k));
+            }
+            break;
+        }
+        exit(Core\AI\MediaJobs::console($cmd, $args));
+
+    case 'chat:purge':
+    case 'chat:digest':
+        // Chat zwischen Benutzern (Core\Chat): zentrale Datenbank storage/chat/chat.sqlite – wirkt für alle Websites
+        if ($cmd === 'chat:digest') {
+            echo "Chat: " . Core\Chat\Messages::digest() . " E-Mail(s) zu Erwähnungen versendet.\n";
+            break;
+        }
+        $days = null;
+        foreach ($args as $a) if (preg_match('~^--days=(\d+)$~', $a, $m)) $days = (int) $m[1];
+        $n = Core\Chat\Chat::purge($days);
+        $d = $days ?? Core\Chat\Chat::retentionDays();
+        echo "Chat: $n Nachricht(en) gelöscht (Aufbewahrung: " . ($d > 0 ? "$d Tage" : 'unbegrenzt') . ").\n";
+        break;
+
+    case 'support:stats':
+        // Kennzahlen der zentralen Support-Datenbank (Core\Support\Tickets::stats)
+        $st = Core\Support\Tickets::stats(($args[0] ?? '') !== '' && !str_starts_with($args[0], '--') ? $args[0] : null);
+        foreach ($st as $k => $v) echo str_pad($k, 10) . $v . "\n";
+        break;
+
+    case 'migrate':
+    case 'maintenance':
+    case 'health':
+    case 'site:backup':
+    case 'inbox:migrate':
+    case 'inbox:purge':
+        // --all: Befehl für jede Website der Installation ausführen
+        if (in_array('--all', $args, true)) {
+            $rest = array_values(array_filter($args, fn($a) => $a !== '--all'));
+            $fail = 0;
+            foreach (array_keys(Core\Sites::all()) as $k) {
+                echo "── $k\n";
+                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' ' . $cmd . ' ' . implode(' ', array_map('escapeshellarg', $rest)) . ' --site=' . escapeshellarg($k), $code);
+                $fail = $fail ?: $code;
+            }
+            exit($fail);
+        }
+        if ($cmd === 'migrate') {
+            // Schema-Anpassungen laufen beim Start (Database::migrate, Erweiterungen) – hier bewusst und mit Ausgabe
+            $app->db->migrate();
+            Core\Extensions::boot();
+            if (Core\Data\Inbox::needsMigration()) {
+                foreach (Core\Data\Inbox::migrate() as $line) echo "  $line\n";
+            }
+            // Geteilte Datentabellen (storage/shared): Datenbanken anlegen, Spalten abgleichen, Medien-Pool – idempotent
+            foreach (Core\Data\Shared::migrate() as $line) echo "  $line\n";
+            // Symbole der Datentabellen: alte Unicode-Zeichen → Symbolnamen (Core\Icons) – idempotent
+            foreach (Core\Icons::migrateTables() as $line) echo "  $line\n";
+            if (Core\Icons::catalog()['icons']) $app->settings->set('sys.icons', 1);
+            // Geheimnisse (SMTP-Passwort) verschlüsselt speichern – ältere Klartext-Werte einmalig umstellen
+            foreach ($app->settings->sealSecrets() as $k) echo "  $k verschlüsselt gespeichert\n";
+            // Favoriten: altes Handbuch-Kapitel des Themes „basis“ (#daten → #einstellungen), einmalig
+            if ($n = Core\Favorites::migrateBasisAnchors()) echo "  Favoriten: $n Verweis(e) auf /admin/hilfe#einstellungen umgestellt\n";
+            // Netzwerk-Administration: Installationsschlüssel (config.local.php) und Tabellen der Netzwerk-Website
+            if (!Core\Network\Network::ensureKey()) echo "  Hinweis: network_key konnte nicht in config/config.local.php ergänzt werden (Datei nicht beschreibbar).\n";
+            if (Core\Network\Network::isNetworkSite()) Core\Network\Network::ensureSchema($app->db);
+            // Zentrale Support-Datenbank (storage/support/support.sqlite, für alle Websites) anlegen/aktualisieren
+            try { Core\Support\Support::db(); } catch (Throwable $e) { fwrite(STDERR, "  Support: " . $e->getMessage() . "\n"); }
+            echo "Datenbank aktuell (" . site()->key . ", Core " . CMS_VERSION . ", Kit " . app()->theme->name . ").\n";
+            break;
+        }
+        if ($cmd === 'inbox:migrate') {
+            // Online-Anfragen → Eingangs-Tabellen (idempotent; läuft sonst beim ersten Webaufruf automatisch)
+            foreach (Core\Data\Inbox::migrate() as $line) echo "  $line\n";
+            echo "Eingangs-Tabellen aktuell (" . site()->key . "). Die alte Tabelle „requests“ bleibt unverändert – nach Prüfung entfernbar: DROP TABLE requests;\n";
+            break;
+        }
+        if ($cmd === 'inbox:purge') {
+            // Aufbewahrung: erledigte Anfragen nach N Tagen (je Eingangs-Tabelle) und alte Protokolleinträge löschen
+            $n = Core\Data\Inbox::purge();
+            foreach ($n as $h => $c) echo "  $h: $c gelöscht\n";
+            echo "Aufbewahrung angewendet (" . site()->key . ", " . array_sum($n) . " Anfragen gelöscht).\n";
+            break;
+        }
+        if ($cmd === 'maintenance') {
+            $on = ($args[0] ?? '') === 'on';
+            if (!in_array($args[0] ?? '', ['on', 'off'], true)) { fwrite(STDERR, "Aufruf: maintenance on|off [--all]\n"); exit(1); }
+            $app->settings->set('sys.maintenance', $on);
+            Core\PageCache::clear();
+            echo "Wartungsmodus " . ($on ? 'AN' : 'aus') . " (" . site()->key . ").\n";
+            break;
+        }
+        if ($cmd === 'health') {
+            Core\Ffmpeg::refresh();   // ffmpeg frisch erkennen (per Aufruf) und den Zwischenspeicher erneuern
+            $checks = [
+                'PHP >= 8.4' => version_compare(PHP_VERSION, '8.4.0', '>='),
+                'Datenbank' => (function () use ($app) { try { return $app->db->fetchValue('SELECT 1') == 1; } catch (Throwable) { return false; } })(),
+                'Datenordner beschreibbar' => is_writable(site()->storage()),
+                'Medienordner beschreibbar' => is_writable(site()->mediaDir()),
+                'Erweiterungen gd, sodium, pdo, mbstring' => extension_loaded('gd') && extension_loaded('sodium') && extension_loaded('pdo') && extension_loaded('mbstring'),
+                // pdo_sqlite immer nötig (Suche, Chat, Pools, Support …); ≥ 3.35 für die Suche (RETURNING), ≥ 3.27 für site:backup (VACUUM INTO).
+                // PHP nutzt die SQLite-Bibliothek des Betriebssystems – z. B. AlmaLinux/RHEL 8: 3.26 → zu alt
+                'pdo_sqlite mit SQLite >= 3.35 (' . (function () { try { return (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(); } catch (Throwable) { return 'fehlt'; } })() . ')'
+                    => (function () { try { return version_compare((string) (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(), '3.35.0', '>='); } catch (Throwable) { return false; } })(),
+                'app_key gesetzt' => strlen((string) $app->config->get('app_key')) >= 32,
+                'network_key gesetzt (Netzwerk-Anmeldung)' => !Core\Sites::multi() || strlen((string) (Core\Network\Network::install()['network_key'] ?? '')) >= 32,
+                'Kit kompatibel' => app()->theme->compatible(),
+            ] + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
+                + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
+                + Core\Extensions::health();   // Prüfungen aktiver Erweiterungen (Extension::health)
+            $bad = 0;
+            // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
+            foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
+            echo $bad ? "FEHLER ($bad)\n" : "OK – " . site()->key . ', ' . environment() . "\n";
+            exit($bad ? 1 : 0);
+        }
+        // site:backup – Datenbank + Medien + Website-Konfiguration als .tar.gz unter storage/backups
+        $outDir = ROOT . '/storage/backups';
+        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        @mkdir($outDir, 0770, true);
+        $name = site()->key . '-' . date('Ymd-His');
+        $tmp = sys_get_temp_dir() . "/$name";
+        @mkdir($tmp, 0700, true);
+        $cfg = $app->config->get('db');
+        if (($cfg['driver'] ?? 'sqlite') === 'sqlite') {
+            $app->db->pdo->exec('VACUUM INTO ' . $app->db->pdo->quote("$tmp/database.sqlite"));
+        } else {
+            $cmdline = sprintf('mysqldump --single-transaction --no-tablespaces -h %s -P %d -u %s %s > %s',
+                escapeshellarg((string) $cfg['host']), (int) $cfg['port'], escapeshellarg((string) $cfg['user']), escapeshellarg((string) $cfg['name']), escapeshellarg("$tmp/database.sql"));
+            putenv('MYSQL_PWD=' . $cfg['pass']);
+            exec($cmdline, $o, $code);
+            putenv('MYSQL_PWD');
+            if ($code !== 0) { fwrite(STDERR, "mysqldump fehlgeschlagen.\n"); exit(1); }
+        }
+        file_put_contents("$tmp/manifest.json", json_encode(['site' => site()->key, 'created' => date('c'), 'core' => CMS_VERSION,
+            'theme' => app()->theme->name, 'driver' => $cfg['driver'] ?? 'sqlite'], JSON_PRETTY_PRINT));
+        $siteFile = site()->isDefault() ? null : ROOT . '/config/sites/' . site()->key . '.php';
+        if ($siteFile && is_file($siteFile)) copy($siteFile, "$tmp/site-config.php");
+        echo cms_backup_pack($tmp, $outDir, $name, site()->mediaDir()) . "\n";
+        $rotate($outDir, site()->key, (int) $app->config->get('backup_keep', 14));
+        break;
+
+    case 'pool:backup':
+        // Geteilte Medien-Pools sichern (Datenbank + Dateien) – gehören zur Installation, nicht zu einer Website
+        $keys = in_array('--all', $args, true) || !array_filter($args, fn($a) => !str_starts_with($a, '--'))
+            ? array_keys(Core\MediaPools::all()) : array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $outDir = ROOT . '/storage/backups';
+        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        @mkdir($outDir, 0770, true);
+        foreach ($keys as $pk) {
+            if (!isset(Core\MediaPools::all()[$pk])) { fwrite(STDERR, "Unbekannter Pool: $pk\n"); exit(1); }
+            $name = 'pool-' . $pk . '-' . date('Ymd-His');
+            $tmp = sys_get_temp_dir() . "/$name";
+            @mkdir($tmp, 0700, true);
+            Core\MediaPools::db($pk)->pdo->exec('VACUUM INTO ' . Core\MediaPools::db($pk)->pdo->quote("$tmp/pool.sqlite"));
+            copy(Core\MediaPools::dir($pk) . '/pool.json', "$tmp/pool.json");
+            file_put_contents("$tmp/manifest.json", json_encode(['pool' => $pk, 'created' => date('c'), 'core' => CMS_VERSION], JSON_PRETTY_PRINT));
+            echo cms_backup_pack($tmp, $outDir, $name, Core\MediaPools::mediaDir($pk)) . "\n";
+            $rotate($outDir, 'pool-' . $pk, (int) (Core\Network\Network::install()['backup_keep'] ?? 14));
+        }
+        if (!$keys) echo "Keine Pools vorhanden.\n";
+        break;
+
+    case 'pool:restore':
+        $file = $args[0] ?? '';
+        if (!is_file($file) || !in_array('--force', $args, true)) { fwrite(STDERR, "Aufruf: pool:restore <pool-sicherung.tar.gz> --force  (ÜBERSCHREIBT Pool-Datenbank und -Dateien)\n"); exit(1); }
+        $tmp = sys_get_temp_dir() . '/pool-restore-' . bin2hex(random_bytes(4));
+        cms_backup_unpack($file, $tmp);
+        $man = json_decode((string) @file_get_contents("$tmp/manifest.json"), true) ?: [];
+        $pk = (string) ($man['pool'] ?? '');
+        if (!preg_match('~^[a-z][a-z0-9-]{1,31}$~', $pk) || !is_file("$tmp/pool.sqlite")) { fwrite(STDERR, "Keine gültige Pool-Sicherung.\n"); exit(1); }
+        @mkdir(Core\MediaPools::dir($pk), 0770, true);
+        copy("$tmp/pool.sqlite", Core\MediaPools::dir($pk) . '/pool.sqlite');
+        copy("$tmp/pool.json", Core\MediaPools::dir($pk) . '/pool.json');
+        $copy = function (string $src, string $dst) use (&$copy) {
+            @mkdir($dst, 0775, true);
+            foreach (scandir($src) as $f) {
+                if ($f === '.' || $f === '..') continue;
+                is_dir("$src/$f") ? $copy("$src/$f", "$dst/$f") : copy("$src/$f", "$dst/$f");
+            }
+        };
+        if (is_dir("$tmp/media")) $copy("$tmp/media", Core\MediaPools::mediaDir($pk));
+        exec('rm -rf ' . escapeshellarg($tmp));
+        passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --all');
+        echo "Pool „{$pk}“ eingespielt (" . ($man['created'] ?? '?') . ").\n";
+        break;
+
+    case 'site:restore':
+        // Sicherung einspielen: Datenbank + Medien (z. B. Live-Inhalte auf Staging). Website-Konfiguration bleibt unangetastet.
+        $file = $args[0] ?? '';
+        if (!is_file($file) || !in_array('--force', $args, true)) { fwrite(STDERR, "Aufruf: site:restore <sicherung.tar.gz> --force [--site=key]  (ÜBERSCHREIBT Inhalte und Medien)\n"); exit(1); }
+        $tmp = sys_get_temp_dir() . '/restore-' . bin2hex(random_bytes(4));
+        cms_backup_unpack($file, $tmp);
+        $man = json_decode((string) @file_get_contents("$tmp/manifest.json"), true) ?: [];
+        $cfg = $app->config->get('db');
+        if (is_file("$tmp/database.sqlite") && ($cfg['driver'] ?? 'sqlite') === 'sqlite') {
+            copy("$tmp/database.sqlite", $cfg['path']);
+        } elseif (is_file("$tmp/database.sql") && ($cfg['driver'] ?? '') === 'mysql') {
+            putenv('MYSQL_PWD=' . $cfg['pass']);
+            exec(sprintf('mysql -h %s -P %d -u %s %s < %s', escapeshellarg((string) $cfg['host']), (int) $cfg['port'], escapeshellarg((string) $cfg['user']), escapeshellarg((string) $cfg['name']), escapeshellarg("$tmp/database.sql")), $o, $code);
+            putenv('MYSQL_PWD');
+            if ($code !== 0) { fwrite(STDERR, "Einspielen der Datenbank fehlgeschlagen.\n"); exit(1); }
+        } else { fwrite(STDERR, "Sicherung passt nicht zum Datenbanktyp dieser Website.\n"); exit(1); }
+        if (is_dir("$tmp/media")) {
+            $copy = function (string $src, string $dst) use (&$copy) {
+                @mkdir($dst, 0775, true);
+                foreach (scandir($src) as $f) {
+                    if ($f === '.' || $f === '..') continue;
+                    is_dir("$src/$f") ? $copy("$src/$f", "$dst/$f") : copy("$src/$f", "$dst/$f");
+                }
+            };
+            $copy("$tmp/media", site()->mediaDir());
+        }
+        exec('rm -rf ' . escapeshellarg($tmp));
+        Core\PageCache::clear();
+        echo "Eingespielt: " . basename($file) . " (von " . ($man['site'] ?? '?') . ", " . ($man['created'] ?? '?') . ") → " . site()->key . "\n"
+           . "Hinweis: Benutzerkonten stammen aus der Sicherung. Auf Staging ggf. Passwörter/Schlüssel prüfen.\n";
+        break;
+
+    case 'pool:create':
+        // Geteilten Medien-Pool anlegen; nutzen: 'media_pools' => ['key'] in der Konfiguration der Websites
+        try {
+            Core\MediaPools::create((string) ($args[0] ?? ''), (string) ($args[1] ?? ($args[0] ?? '')));
+        } catch (InvalidArgumentException $e) { fwrite(STDERR, $e->getMessage() . "\nAufruf: pool:create <key> \"Bezeichnung\"\n"); exit(1); }
+        echo "Pool „{$args[0]}“ angelegt. Freigeben je Website: 'media_pools' => ['{$args[0]}'] in config/sites/<key>.php bzw. config/config.local.php\n";
+        break;
+
+    case 'pool:list':
+        foreach (Core\MediaPools::all() as $k => $l) {
+            $n = (int) Core\MediaPools::db($k)->fetchValue('SELECT COUNT(*) FROM media');
+            $users = array_keys(array_filter(Core\Sites::all(), fn($c, $key) => in_array($k, (array) ($c['media_pools'] ?? ($key === 'default' ? (array) $app->config->get('media_pools', []) : [])), true), ARRAY_FILTER_USE_BOTH));
+            $users = array_unique(array_merge($users, (array) Core\MediaPools::meta($k)['sites']));
+            $editors = array_unique(array_merge([Core\Network\Network::siteKey()], (array) Core\MediaPools::meta($k)['editors']));
+            printf("%-14s %-28s %4d Dateien   genutzt von: %s   pflegen: %s\n", $k, $l, $n, implode(', ', $users) ?: '–', implode(', ', $editors));
+        }
+        if (!Core\MediaPools::all()) echo "Keine Pools. Anlegen: php bin/console pool:create marke \"Markenbilder\"\n";
+        break;
+
+    case 'data:share':
+        // Lokale Tabelle dieser Website (--site=…) teilen: diese Website wird Eigentümer, Einträge behalten ihre IDs (origin = Eigentümer),
+        // Bilder wandern in den Pool data-…; mit --merge in eine bestehende geteilte Tabelle gleichen Kurznamens (neue IDs, Verweise werden umgeschrieben)
+        $handle = (string) ($args[0] ?? '');
+        $members = [];
+        foreach ($args as $a) {
+            if (str_starts_with($a, '--members=')) $members = array_filter(array_map('trim', explode(',', substr($a, 10))));
+            if (str_starts_with($a, '--owner=') && substr($a, 8) !== site()->key) {
+                fwrite(STDERR, "Der Eigentümer ist die Website, auf der das Kommando läuft – bitte mit --site=" . substr($a, 8) . " aufrufen.\n"); exit(1);
+            }
+        }
+        if ($handle === '') { fwrite(STDERR, "Aufruf: data:share <handle> --members=a,b [--see-members] [--merge] [--site=eigentuemer]\n"); exit(1); }
+        try {
+            foreach (Core\Data\Shared::shareLocal($handle, $members, in_array('--merge', $args, true), ['members_see_members' => in_array('--see-members', $args, true)]) as $line) echo "  $line\n";
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        echo "Geteilt: {$handle} (Eigentümer " . site()->key . ", Mitglieder: " . (implode(', ', Core\Data\Shared::meta($handle)['members'] ?? []) ?: '–') . ").\n";
+        break;
+
+    case 'data:unshare':
+        $handle = (string) ($args[0] ?? '');
+        if ($handle === '') { fwrite(STDERR, "Aufruf: data:unshare <handle> [--all-entries] [--site=eigentuemer]\n"); exit(1); }
+        try {
+            foreach (Core\Data\Shared::unshare($handle, in_array('--all-entries', $args, true)) as $line) echo "  $line\n";
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        break;
+
+    case 'shared:list':
+        foreach (Core\Data\Shared::all() as $k => $m) {
+            $counts = [];
+            try {
+                foreach (Core\Data\Shared::db($k)->fetchAll("SELECT origin_site, COUNT(*) AS n FROM data_{$k} GROUP BY origin_site") as $r) $counts[] = $r['origin_site'] . ': ' . $r['n'];
+            } catch (Throwable) { $counts[] = '(Tabelle fehlt)'; }
+            printf("%-20s %-26s Eigentümer: %-10s Mitglieder: %-24s %s  Einträge: %s\n", $k, mb_strimwidth($m['label'], 0, 26, '…'), $m['owner'],
+                implode(', ', $m['members']) ?: '–', $m['members_see_members'] ? '[gegenseitig]' : '', implode(', ', $counts) ?: '0');
+        }
+        if (!Core\Data\Shared::all()) echo "Keine geteilten Tabellen. Teilen: php bin/console data:share <handle> --members=a,b --site=<eigentuemer>\n";
+        break;
+
+    case 'shared:backup':
+        $keys = in_array('--all', $args, true) || !array_filter($args, fn($a) => !str_starts_with($a, '--'))
+            ? array_keys(Core\Data\Shared::all()) : array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $outDir = ROOT . '/storage/backups';
+        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        @mkdir($outDir, 0770, true);
+        foreach ($keys as $sk) {
+            if (!Core\Data\Shared::meta($sk)) { fwrite(STDERR, "Unbekannte geteilte Tabelle: $sk\n"); exit(1); }
+            $name = 'shared-' . $sk . '-' . date('Ymd-His');
+            $tmp = sys_get_temp_dir() . "/$name";
+            @mkdir($tmp, 0700, true);
+            Core\Data\Shared::db($sk)->pdo->exec('VACUUM INTO ' . Core\Data\Shared::db($sk)->pdo->quote("$tmp/share.sqlite"));
+            copy(Core\Data\Shared::dir($sk) . '/share.json', "$tmp/share.json");
+            file_put_contents("$tmp/manifest.json", json_encode(['shared' => $sk, 'pool' => Core\Data\Shared::poolKey($sk), 'created' => date('c'), 'core' => CMS_VERSION], JSON_PRETTY_PRINT));
+            echo cms_backup_pack($tmp, $outDir, $name) . "   (Bilder: php bin/console pool:backup " . Core\Data\Shared::poolKey($sk) . ")\n";
+            $rotate($outDir, 'shared-' . $sk, (int) (Core\Network\Network::install()['backup_keep'] ?? 14));
+        }
+        if (!$keys) echo "Keine geteilten Tabellen vorhanden.\n";
+        break;
+
+    case 'shared:restore':
+        $file = $args[0] ?? '';
+        if (!is_file($file) || !in_array('--force', $args, true)) { fwrite(STDERR, "Aufruf: shared:restore <shared-sicherung.tar.gz> --force  (ÜBERSCHREIBT Einträge und Einstellungen der geteilten Tabelle)\n"); exit(1); }
+        $tmp = sys_get_temp_dir() . '/shared-restore-' . bin2hex(random_bytes(4));
+        cms_backup_unpack($file, $tmp);
+        $man = json_decode((string) @file_get_contents("$tmp/manifest.json"), true) ?: [];
+        $sk = (string) ($man['shared'] ?? '');
+        if (!Core\Data\Shared::validKey($sk) || !is_file("$tmp/share.sqlite") || !is_file("$tmp/share.json")) { fwrite(STDERR, "Keine gültige Sicherung einer geteilten Tabelle.\n"); exit(1); }
+        @mkdir(Core\Data\Shared::dir($sk), 0770, true);
+        foreach (['-wal', '-shm'] as $x) @unlink(Core\Data\Shared::dir($sk) . '/share.sqlite' . $x);
+        copy("$tmp/share.sqlite", Core\Data\Shared::dir($sk) . '/share.sqlite');
+        copy("$tmp/share.json", Core\Data\Shared::dir($sk) . '/share.json');
+        exec('rm -rf ' . escapeshellarg($tmp));
+        passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --all');
+        echo "Geteilte Tabelle „{$sk}“ eingespielt (" . ($man['created'] ?? '?') . ").\n";
+        break;
+
+    case 'fonts:search':
+    case 'fonts:install':
+    case 'fonts:list':
+    case 'fonts:remove':
+        // Schriften aus Google Fonts selbst hosten (Core\Fonts) – installationsweit, für alle Websites
+        exit(Core\Fonts::console($cmd, $args));
+
+    case 'accent:check':
+        // Kontrastprüfung der Akzentfarben der Verwaltung (Core\Accent)
+        $bad = 0;
+        foreach (Core\Accent::checks() as $c) {
+            if (!$c['ok']) $bad++;
+            printf("%-9s %-46s %5.2f:1  (min %.1f)  %s\n", $c['preset'], $c['check'], $c['ratio'], $c['min'], $c['ok'] ? 'ok' : 'FEHLER');
+        }
+        echo $bad ? "$bad Prüfungen nicht bestanden.\n" : "Alle Vorlagen bestehen WCAG AA.\n";
+        exit($bad ? 1 : 0);
+
+    case 'blocks:selftest':
+        // Block-Baukasten (Core\Blocks): Escaping/XSS, Ablehnung unsicherer Vorlagen und CSS, Gleichheit mit dem Theme-Export
+        $res = Core\Blocks\SelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'blocks:list':
+        // Eigene Blöcke dieser Website (Verwaltung → Blöcke)
+        foreach (Core\Blocks\Custom::all() as $b) {
+            printf("  %-28s %-12s v%-3d %s\n", 'cblk_' . $b['key'], $b['status'] . ($b['changed'] ? '*' : ''), $b['version'], $b['label']);
+        }
+        break;
+
+    case 'extensions:list':
+        $active = Core\Extensions::enabled();
+        foreach (Core\Extensions::available() as $n => $m) {
+            $src = Core\Extensions::lock($n) ? 'config' : (array_key_exists($n, Core\Extensions::ui()) ? 'verwaltung' : '');
+            printf("%-16s %-8s %-9s %-11s %-24s %s\n", $n, $m['version'] ?: '–', in_array($n, $active, true) ? 'aktiv' : '–', $src, $m['source'], $m['label']);
+        }
+        if (!Core\Extensions::available()) echo "Keine Erweiterungen installiert (extensions/{name}/extension.php oder Composer-Pakete vom Typ mycms-extension).\n";
+        break;
+
+    case 'features:list':
+        // Wirksamer Stand je Funktion und woher er kommt (Konfiguration sperrt den Schalter der Verwaltung)
+        $ui = Core\Features::ui();
+        foreach (Core\Features::all() as $k => $on) {
+            $l = Core\Features::lock($k);
+            $src = $l ? ($l['via'] === 'preset' ? 'preset ' . $l['preset'] : 'config') . ' (' . $l['file'] . ')'
+                : (array_key_exists($k, $ui) || isset(Core\Features::SWITCH_KEYS[$k]) ? 'verwaltung' : 'standard');
+            printf("  %-3s %-18s %s%s\n", $on ? 'an' : 'aus', $k, $src, Core\Features::dormant($k) ? ' – ruht, braucht ' . Core\Features::REQUIRES[$k] : '');
+        }
+        echo "Schalten: Administration → Funktionen & Erweiterungen" . (Core\Features::networked() ? ' (Netzwerk: Freigabe ' . (Core\Features::delegated() ? 'erteilt' : 'nicht erteilt') . ')' : '') . "\n";
+        break;
+
+    case 'features:release':
+        exit(Core\FeatureRelease::run($args, fn(string $l) => print($l . "\n")));
+
+    case 'extensions:publish':
+        // Öffentliche Dateien der Erweiterungen nach public/extensions/{name} kopieren (auch ohne pnpm auf dem Server)
+        foreach (Core\Extensions::available() as $n => $m) {
+            // public/ (fertig gebaut) – sonst assets/ unverändert, aber nur wenn noch nichts veröffentlicht ist (z. B. Composer-Paket
+            // ohne pnpm auf dem Server; Skripte/Stile müssen dafür ohne Bündeln laufen) – ein pnpm-Build wird nie überschrieben
+            $src = $m['dir'] . '/public';
+            if (!is_dir($src) && is_dir($m['dir'] . '/assets') && !is_dir(ROOT . '/public/extensions/' . $n)) $src = $m['dir'] . '/assets';
+            if (!is_dir($src)) continue;
+            $dst = ROOT . '/public/extensions/' . $n;
+            $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+            foreach ($it as $f) {
+                $target = $dst . '/' . substr($f->getPathname(), strlen($src) + 1);
+                $f->isDir() ? @mkdir($target, 0775, true) : (@mkdir(dirname($target), 0775, true) && false) || copy($f->getPathname(), $target);
+            }
+            echo "public/extensions/$n aktualisiert.\n";
+        }
+        break;
+
+    default:
+        // Befehle aktiver Erweiterungen
+        if ($cmd !== null && isset(Core\Extensions::commands()[$cmd])) {
+            exit((int) (Core\Extensions::commands()[$cmd][1]($args) ?? 0));
+        }
+        // Befehl einer installierten, auf dieser Website abgeschalteten Erweiterung (z. B. Cron video:work): ruhig beenden
+        if ($cmd !== null && ($ext = Core\Extensions::inactiveCommand($cmd))) {
+            echo "Erweiterung „{$ext}“ ist auf Website „" . site()->key . "“ nicht aktiv – nichts zu tun ($cmd).\n";
+            exit(0);
+        }
+        // Übersicht: der vollständige Kommentarblock oben (gruppiert wie Technik → Kommandozeile) plus Befehle aktiver Erweiterungen
+        if ($cmd !== null && $cmd !== 'help' && $cmd !== '--help' && $cmd !== '-h') fwrite(STDERR, "Unbekannter Befehl: $cmd\n\n");
+        preg_match('~/\*\*(.*?)\*/~s', (string) file_get_contents(__FILE__), $m);
+        echo preg_replace('~^ ?\* ?~m', '', trim($m[1] ?? '')) . "\n";
+        if ($ext = Core\Extensions::commands()) {
+            echo "\nBefehle aktiver Erweiterungen (" . site()->key . ")\n";
+            foreach ($ext as $c => $def) printf("  %-48s %s\n", $c, (string) ($def[0] ?? ''));
+        }
+        if ($cmd !== null && !in_array($cmd, ['help', '--help', '-h'], true)) exit(1);
+}
+
+/**
+ * Sicherungsarchiv {outDir}/{name}.tar.gz aus dem Arbeitsordner $tmp bauen (Medien unter media/) und $tmp leeren.
+ * Bevorzugt das System-tar: streamt, braucht kaum Arbeitsspeicher. PharData::compress() lädt das ganze Archiv in den
+ * Speicher und scheitert bei großen Mediatheken (memory_limit) – daher im Rückfall ein unkomprimiertes .tar.
+ */
+function cms_backup_pack(string $tmp, string $outDir, string $name, ?string $mediaDir = null): string
+{
+    $link = "$tmp/media";
+    if ($mediaDir && is_dir($mediaDir)) @symlink($mediaDir, $link);
+    $bin = null;
+    if (function_exists('proc_open')) foreach (['/usr/bin/tar', '/bin/tar', '/usr/local/bin/tar'] as $b) if (is_executable($b)) { $bin = $b; break; }
+    $out = "$outDir/$name.tar.gz";
+    if ($bin) {
+        // -h: Symlink media/ auflösen; Argumente als Liste – keine Shell
+        $p = proc_open([$bin, '-czhf', $out, '-C', $tmp, '.'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        stream_get_contents($pipes[1]); $err = trim((string) stream_get_contents($pipes[2]));
+        fclose($pipes[1]); fclose($pipes[2]);
+        if (proc_close($p) === 0 && is_file($out)) { cms_backup_clean($tmp); return $out; }
+        fwrite(STDERR, "tar fehlgeschlagen" . ($err !== '' ? ": $err" : '') . " – Rückfall auf unkomprimiertes .tar\n");
+        @unlink($out);
+    }
+    $out = "$outDir/$name.tar";
+    $tar = new PharData($out);
+    foreach (glob("$tmp/*") ?: [] as $f) if (is_file($f) && !is_link($f)) $tar->addFile($f, basename($f));
+    if ($mediaDir && is_dir($mediaDir)) {
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($mediaDir, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $f) $tar->addFile($f->getPathname(), 'media/' . substr($f->getPathname(), strlen($mediaDir) + 1));
+    }
+    unset($tar);
+    cms_backup_clean($tmp);
+    return $out;
+}
+
+/** Arbeitsordner einer Sicherung leeren (Symlink media/ nur entfernen, nie folgen) */
+function cms_backup_clean(string $tmp): void
+{
+    if (is_link("$tmp/media")) unlink("$tmp/media");
+    foreach (glob("$tmp/*") ?: [] as $f) if (is_file($f)) unlink($f);
+    @rmdir($tmp);
+}
+
+/** Sicherung (.tar.gz oder .tar) nach $tmp entpacken – System-tar bevorzugt (streamt), sonst PharData */
+function cms_backup_unpack(string $file, string $tmp): void
+{
+    @mkdir($tmp, 0700, true);
+    if (function_exists('proc_open')) foreach (['/usr/bin/tar', '/bin/tar', '/usr/local/bin/tar'] as $b) {
+        if (!is_executable($b)) continue;
+        $p = proc_open([$b, str_ends_with($file, '.gz') ? '-xzf' : '-xf', $file, '-C', $tmp], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        stream_get_contents($pipes[1]); stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
+        if (proc_close($p) === 0) return;
+        break;
+    }
+    (new PharData($file))->extractTo($tmp, null, true);
+}

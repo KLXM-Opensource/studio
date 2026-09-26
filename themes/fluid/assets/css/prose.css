@@ -1,0 +1,23 @@
+/* Theme „fluid“ – nur auf Seiten mit diesem Block (theme.php → conditional_css) */
+/* Fließtext-Extras: Tabellen, Code, Trennlinie, Initiale, kleinere Überschriften */
+.prose hr{border:0;border-top:1px solid var(--f-line);margin:2em 0}
+.prose table{inline-size:100%;border-collapse:collapse;font-size:.9375em}
+.prose :is(th,td){padding:.6em .75em;border-bottom:1px solid var(--f-line);text-align:start;vertical-align:top}
+.prose th{color:var(--f-ink)}
+.prose code{padding:.1em .35em;border-radius:4px;background:var(--f-surface)}
+.prose--dropcap>p:first-of-type::first-letter{float:inline-start;margin:.06em .12em 0 0;color:var(--f-link);font:var(--f-hw) 3.4em/.8 var(--f-font-head)}
+/* Rich-Text-Stile (Klassenvertrag Core\Sanitizer: t-lead, t-small, t-note, c-*, mark, sup/sub) – auch per „@rich“ geladen.
+   Farben als --rt-* (Kontrastprüfung der Leiste): hell ≥ 4,5:1 auf Hintergrund/Fläche/Tönung, dunkel auf dunklen Flächen, blass auf Akzent. */
+:root,.bg-white,.bg-muted,.bg-tint,.bg-accent,.bg-dark,.on-media,.sec--ov-dark{--rt-accent:var(--f-link);--rt-muted:var(--f-muted)}
+:root{--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318}
+.bg-dark,.on-media,.sec--ov-dark,html.is-darkbase{--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
+.bg-accent{--rt-success:#D5F5E0;--rt-warning:#FFF1C2;--rt-danger:#FFE0DC}
+@media (prefers-color-scheme:dark){html.has-dark,html.has-dark :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}html.has-dark .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}}
+html.is-dark,html.is-dark :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
+:is(html.is-dark,html.is-darkbase) .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}
+.t-lead{font-size:var(--f-t1);line-height:1.45;color:var(--f-ink)}
+.t-small{font-size:var(--f-t-1);line-height:1.55}
+.t-note{padding:var(--f-s-s) var(--f-s-m);border-left:3px solid var(--rt-accent);border-radius:var(--f-r-s);background:var(--f-surface)}
+mark{padding:0 .12em;border-radius:2px;background:#FFE58A;color:#1B1B19}
+.c-accent{color:var(--rt-accent)}.c-muted{color:var(--rt-muted)}.c-success{color:var(--rt-success)}.c-warning{color:var(--rt-warning)}.c-danger{color:var(--rt-danger)}
+sup,sub{font-size:.72em;line-height:0}

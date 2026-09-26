@@ -1,0 +1,1 @@
+body{background-image:linear-gradient(color-mix(in srgb,var(--n-ink) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--n-ink) 5%,transparent) 1px,transparent 1px);background-size:calc(var(--n-u) * 4) calc(var(--n-u) * 4)}

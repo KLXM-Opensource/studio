@@ -1,0 +1,14 @@
+{
+  "name": "mycms-theme-glas",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „glas“ (selbst gehostete Schriften: Outfit, Figtree, Sora, Urbanist – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über themes/glas/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/outfit": "^0.4.3",
+    "@fontsource-variable/figtree": "^5.2.0",
+    "@fontsource-variable/outfit": "^5.2.0",
+    "@fontsource-variable/sora": "^5.2.0",
+    "@fontsource-variable/urbanist": "^5.2.0"
+  }
+}

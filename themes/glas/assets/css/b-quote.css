@@ -1,0 +1,13 @@
+/* Kit „glas“ – Zitat: große Glasfläche mit leuchtendem Anführungszeichen; Stimmen als Glaskarten */
+.q{display:grid;gap:var(--g-s-m);margin:0}
+.q--single{position:relative;max-width:56rem;margin-inline:auto;padding:clamp(1.5rem,1rem + 4cqi,3.5rem);padding-top:clamp(3rem,2rem + 4cqi,4.5rem)}
+.q--single::before{content:"“";position:absolute;top:-.1em;left:clamp(1.25rem,1rem + 3cqi,3rem);background:linear-gradient(135deg,var(--g-f2),var(--g-a));-webkit-background-clip:text;background-clip:text;color:transparent;font:700 clamp(5rem,4rem + 6cqi,8rem)/1 var(--g-font-head)}
+.q--single .q__text{color:var(--g-ink);font:var(--g-hw) max(var(--g-t2),min(var(--g-t4),5cqi))/1.2 var(--g-font-head);letter-spacing:calc(var(--g-track) * .01em);text-wrap:balance}
+.qs .card{padding:var(--g-s-m)}
+.q--card{height:100%;align-content:space-between}
+.q--card .q__text{color:var(--g-text);font-size:var(--g-t1);line-height:1.45}
+.q__who{display:flex;align-items:center;gap:var(--g-s-s);padding-top:var(--g-s-s);border-top:1px solid var(--g-line)}
+.q--single .q__who{border-top:0;padding-top:0}
+.q__img{width:3rem;height:3rem;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--g-edge)}
+.q__name{display:block;color:var(--g-ink);font-weight:650}
+.q__role{display:block;color:var(--g-muted);font-size:var(--g-t-1)}

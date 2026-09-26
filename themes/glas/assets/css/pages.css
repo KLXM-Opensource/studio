@@ -1,0 +1,9 @@
+@import "_footer.css";
+/* Kit „glas“ – Fehlerseite, Wartung, offline (lädt nur dort; Öffnungszeiten aus _footer.css) */
+.hero-err{padding-block:var(--g-sec)}
+.err{display:flex;flex-wrap:wrap;align-items:center;gap:var(--g-s-xl) var(--g-s-3xl)}
+.err__code{flex:1 1 min(14rem,100%);background:linear-gradient(135deg,var(--g-f1),var(--g-f2) 45%,var(--g-a));-webkit-background-clip:text;background-clip:text;color:transparent;font:700 clamp(6rem,28cqi,15rem)/.85 var(--g-font-head);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.err__text{min-width:0;flex:3 1 min(26rem,100%);--stack:var(--g-s-m)}
+.err__search{max-width:32rem}
+.standalone__main{display:grid;place-items:center;min-height:100vh;min-height:100dvh;padding-block:var(--g-sec)}
+.standalone__box{max-width:40rem;padding:var(--g-s-xl);border:1px solid var(--g-edge);border-radius:var(--g-r-xl);background:linear-gradient(180deg,var(--g-sheen),transparent 44%),var(--g-panel-strong);background-clip:padding-box;box-shadow:var(--g-card-sh);-webkit-backdrop-filter:blur(var(--g-blur-now)) saturate(1.4);backdrop-filter:blur(var(--g-blur-now)) saturate(1.4)}

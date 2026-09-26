@@ -1,0 +1,160 @@
+<?php
+declare(strict_types=1);
+
+namespace Core;
+
+use Core\Data\Entries;
+use Core\Data\EntryEdit;
+use Core\Data\Shared;
+
+/**
+ * Redaktions-Werkzeugleiste auf der Website (nur angemeldet) – ein Aufbau für alle Themes und Modi.
+ *
+ *   links   Marke (→ Verwaltung) + Kontext: Symbol, Art, Titel, EIN Status-Chip (mit Erklärung)
+ *   Mitte   Modus-Umschalter „Ansehen · Bearbeiten (· Vorlage)“
+ *   rechts  Aktionen des Modus (Bearbeiten | Abbrechen · Speichern · Veröffentlichen) + Suche + Menü „⋯“
+ *
+ * Arten: page (Seite), entry (Detailseite eines Eintrags, Bearbeiten direkt im Text ohne Neuladen),
+ * template (Detailseiten-Vorlage im Seiten-Editor, ?edit=1 auf einer Detailseite).
+ * Themes rufen im Partial templates/partials/toolbar.php nur cms_toolbar(get_defined_vars()) auf; fehlt das Partial,
+ * rendert Core\Theme::partial() die Leiste trotzdem. Verhalten: resources/js/_bar.js, Aussehen: editor.shadow.css.
+ */
+final class Toolbar
+{
+    public static function render(array $vars): string
+    {
+        if (!app()->auth->check() || empty($vars['page'])) return '';
+        return Theme::capture(ROOT . '/app/Views/toolbar.php', ['bar' => self::context($vars)]);
+    }
+
+    /** Alles, was die Ansicht braucht (Rechte, Adressen, Zustände) */
+    public static function context(array $v): array
+    {
+        $page = $v['page'];
+        $editing = !empty($v['editing']);
+        $live = !empty($v['live']);
+        $dirty = !empty($v['dirty']);
+        $ctx = app()->entry;
+        $kind = $ctx ? ($editing ? 'template' : 'entry') : 'page';
+        $hasPage = !empty($page['id']);
+        $b = [
+            'kind' => $kind, 'editing' => $editing, 'live' => $live, 'page' => $page, 'hasPage' => $hasPage,
+            'canEditPages' => can('pages.edit'), 'canPublish' => can('pages.publish'), 'canManage' => can('pages.manage'),
+            'canSettings' => can('settings.edit'), 'settingsTitle' => app()->theme->settingsTitle(),
+            'ai' => \Core\AI\Assist::client(), 'aiBrand' => \Core\AI\Assist::brand(),
+            'help' => url('/admin/hilfe') . '#' . ($kind === 'page' ? 'bearbeiten' : 'daten'),
+            'origin' => null, 'site' => '', 'others' => [],
+        ];
+
+        if ($ctx) {
+            $t = $ctx['table'];
+            $e = $ctx['entry'];
+            $url = (string) Entries::url($t, $e);
+            $foreign = Shared::isForeign($t, $e);
+            $canTable = EntryEdit::canTable($t);
+            $b += [
+                'table' => $t, 'entry' => $e, 'entryUrl' => $url, 'entryTitle' => Entries::title($t, $e),
+                'entryDraft' => ($e['status'] ?? '') !== 'published', 'foreign' => $foreign,
+                'canTable' => $canTable, 'adminUrl' => EntryEdit::adminUrl($t, $e),
+                // Direkt bearbeiten: im Vorlagen-Editor ist app()->entryEdit aus – das Recht zählt trotzdem (Umschalter)
+                'entryEditable' => $kind === 'entry' ? app()->entryEdit : EntryEdit::canEdit($t, $e),
+                'panel' => EntryEdit::canEdit($t, $e) ? EntryEdit::endpoint($t, $e) : null,
+            ];
+            $b['entryPub'] = $b['entryEditable'] && $t['settings']['workflow'] && can('data.publish', $t['handle']);
+            if ($foreign) {
+                $b['origin'] = $canTable ? EntryEdit::originEdit($t, $e) : null;
+                $b['site'] = Shared::siteInfo((string) $e['origin_site'], $t['shared']['key'])['name'];
+            }
+            if ($kind === 'template') {
+                foreach (Entries::query($t, ['status' => 'all', 'limit' => 50]) as $o) {
+                    if ($u = Entries::url($t, $o)) {
+                        $b['others'][] = ['url' => $u . '?edit=1', 'title' => Entries::title($t, $o), 'current' => (int) $o['id'] === (int) $e['id']];
+                    }
+                }
+            }
+        }
+
+        // Adressen der Modi
+        $pageUrl = $hasPage ? Pages::url($page) : url('/');
+        $viewUrl = $ctx ? $b['entryUrl'] : $pageUrl;
+        $b['viewUrl'] = $viewUrl;
+        $b['pageEditUrl'] = $viewUrl . '?edit=1';
+        $b['canDiscard'] = $hasPage && ($page['content_published'] ?? null) !== null;
+
+        // Modus und EIN Status
+        $b['mode'] = $kind === 'template' ? 'template' : ($editing ? 'edit' : 'view');
+        if ($live) {
+            $status = 'live';
+        } elseif ($kind === 'entry') {
+            $status = $b['entryDraft'] ? 'draft' : 'published';
+        } elseif (!$hasPage) {
+            $status = '';
+        } elseif (($page['status'] ?? '') !== 'published') {
+            $status = 'draft';
+        } else {
+            $status = $dirty ? 'changed' : 'published';
+        }
+        $b['status'] = $status;
+        $b['dirtyDraft'] = $dirty;
+
+        // Umschalter: [key, Beschriftung, Symbol, Adresse|null (= ohne Neuladen), aktiv]
+        $modes = [];
+        if ($kind === 'page') {
+            if ($hasPage) {
+                $modes[] = ['view', __('Ansehen'), 'eye', $pageUrl, !$editing];
+                if ($b['canEditPages']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $pageUrl . '?edit=1', $editing];
+            }
+        } else {
+            $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry'];
+            if ($b['entryEditable']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten', false];
+            if ($b['canEditPages'] && !$live) $modes[] = ['template', __('Vorlage'), 'squares-four', $viewUrl . '?edit=1', $kind === 'template'];
+        }
+        $b['modes'] = count($modes) > 1 ? $modes : [];
+
+        $b['config'] = [
+            'kind' => $kind, 'mode' => $b['mode'], 'status' => $status, 'viewUrl' => $viewUrl,
+            'hasPublished' => $b['canDiscard'], 'texts' => self::texts($kind),
+        ];
+        return $b;
+    }
+
+    /** Texte für _bar.js (Sprache der Verwaltung) */
+    public static function texts(string $kind = 'page'): array
+    {
+        $entry = $kind === 'entry';
+        return [
+            'chip' => [
+                'published' => [__('Veröffentlicht'), $entry
+                    ? __('Besucher sehen diesen Eintrag genau so. Änderungen sind nach dem Speichern sofort online.')
+                    : __('Besucher sehen genau diesen Stand. Neue Änderungen werden erst mit „Veröffentlichen“ sichtbar.')],
+                'draft' => [__('Entwurf'), $entry
+                    ? __('Nur für die angemeldete Redaktion sichtbar. Besucher sehen diesen Eintrag erst nach dem Veröffentlichen.')
+                    : __('Nur für die angemeldete Redaktion sichtbar. Besucher sehen diese Seite erst nach dem Veröffentlichen.')],
+                'changed' => [__('Geändert – nicht veröffentlicht'),
+                    __('Es gibt einen gespeicherten Entwurf mit Änderungen. Besucher sehen noch die zuletzt veröffentlichte Fassung – „Veröffentlichen“ bringt die Änderungen online.')],
+                'unsaved' => [__('Ungespeichert'),
+                    __('Es gibt Änderungen, die noch nicht gespeichert sind. „Speichern“ (⌘S / Strg+S) sichert sie, „Abbrechen“ verwirft sie.')],
+                'live' => [__('Live-Fassung'), __('Sie sehen die veröffentlichte Fassung – so, wie Besucher die Seite gerade sehen.')],
+            ],
+            'status' => __('Status: {status}'),
+            'save' => __('Speichern'), 'saving' => __('Speichere …'), 'publishing' => __('Veröffentliche …'),
+            'savedOk' => __('Gespeichert ✓'), 'dirty' => __('Ungespeicherte Änderungen'),
+            'saved' => __('Entwurf gespeichert {time}'), 'published' => __('Veröffentlicht {time}'), 'error' => __('Fehler beim Speichern'),
+            'discardTitle' => __('Änderungen verwerfen?'),
+            'discardBody' => $entry
+                ? __('Sie haben Änderungen, die noch nicht gespeichert sind. „Verwerfen“ stellt den zuletzt gespeicherten Stand des Eintrags wieder her.')
+                : __('Sie haben Änderungen, die noch nicht gespeichert sind. „Verwerfen“ stellt den zuletzt gespeicherten Stand wieder her.'),
+            'discardNote' => $entry ? '' : __('Ein bereits gespeicherter Entwurf bleibt erhalten, veröffentlicht wird nichts.'),
+            'keep' => __('Weiter bearbeiten'), 'discard' => __('Verwerfen'), 'saveExit' => __('Speichern & beenden'),
+            'blockTitle' => __('Änderungen an diesem Block verwerfen?'),
+            'blockBody' => __('Der Block wird auf den Stand beim Öffnen der Seitenleiste zurückgesetzt. Andere Änderungen an der Seite bleiben erhalten.'),
+            'done' => __('Fertig'), 'close' => __('Schließen'), 'cancel' => __('Abbrechen'), 'ok' => __('Bestätigen'),
+            'publishTitle' => __('Änderungen jetzt veröffentlichen?'),
+            'publishBody' => __('Besucher sehen danach den aktuellen Stand dieser Seite.'),
+            'publishOk' => __('Veröffentlichen'),
+            'dropTitle' => __('Entwurf verwerfen?'),
+            'dropBody' => __('Alle Änderungen seit der letzten Veröffentlichung werden verworfen. Der bisherige Entwurf wird als Version gesichert.'),
+            'dropOk' => __('Entwurf verwerfen'),
+        ];
+    }
+}

@@ -1,0 +1,22 @@
+@import "_knob.css";
+/* Kit „nature“ – Produkte/Leistungen: Paneel-Karten; „Produkt“ zeigt das Bild vertieft auf ruhiger Fläche */
+.pcards{--gap:var(--n-s-m)}
+.pcard{display:flex;flex-direction:column;gap:var(--n-s-s);padding:var(--n-s-s);min-width:0;transition:border-color .2s,translate .25s cubic-bezier(.2,.7,.2,1)}
+.pcard__media{border-radius:calc(var(--n-r-l) - 4px)}
+.pcards--product .pcard__media{background:radial-gradient(ellipse at 50% 85%,color-mix(in srgb,var(--n-a) 14%,var(--n-surface)),var(--n-surface) 70%)}
+.pcards--product .pcard__media img{object-fit:contain;padding:8%}
+.pcards--image .pcard{padding:0;overflow:hidden}
+.pcards--image .pcard__media{border-radius:0}
+.pcards--image .pcard__body,.pcards--image .pcard__foot{padding-inline:var(--n-s-m)}
+.pcards--image .pcard__foot{padding-bottom:var(--n-s-m)}
+.pcards--service .pcard{padding:var(--n-s-m)}
+.pcard__body{display:grid;gap:var(--n-s-xs);padding:var(--n-s-2xs) var(--n-s-2xs) 0}
+.pcard__title{color:var(--n-ink);font:var(--n-hw) var(--n-t1)/1.25 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:calc(var(--n-track) * .005em);text-wrap:balance}
+.pcard__text{color:var(--n-muted);font-size:var(--n-t-1);text-wrap:pretty}
+.pcard__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--n-s-s);margin-top:auto;padding:var(--n-s-s) var(--n-s-2xs) 0;border-top:1px solid var(--n-line)}
+.pcard__meta{color:var(--n-ink);font:700 var(--n-t-1)/1.3 var(--n-font);font-variant-numeric:tabular-nums}
+.pcard__go{display:inline-flex;align-items:center;gap:.5rem;color:var(--n-link);font:var(--n-lb-style) 500 var(--n-label)/1 var(--n-font-label);letter-spacing:var(--n-lb-track);text-transform:var(--n-lb-case)}
+.pcard__go .ico{box-sizing:content-box;padding:.5rem;border-radius:50%;background:var(--n-surface);color:var(--n-ink);font-size:.875rem;transition:background-color .15s,color .15s,translate .2s}
+.pcard--link:hover{border-color:var(--n-line-strong)}
+.pcard--link:hover .pcard__go .ico{background:var(--n-ui,var(--n-a));color:var(--n-a-on);translate:.125rem 0}
+@media (prefers-reduced-motion:no-preference){.has-motion .pcard--link:hover{translate:0 -2px}}

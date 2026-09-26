@@ -1,0 +1,16 @@
+/* Kit „modern“ – Zitat / Stimmen (nur wenn verwendet): großes Zitat mit Anführungszeichen in Blockfarbe · Mauerwerk */
+.pull{display:grid;gap:var(--m-s-l);max-width:64rem;margin-inline:auto}
+.pull__mark{width:3.5rem;height:3.5rem;padding:.7rem;border-radius:10px;background:var(--m-a2);color:var(--m-pop-ink);--ico-2-opacity:.4}
+.pull__text{color:var(--m-ink);font:var(--m-hw) var(--m-t4)/1.12 var(--m-font-head);letter-spacing:-.025em;text-wrap:balance}
+@media (max-width:30em){.pull__text{font-size:var(--m-t3)}}
+.pull .quote__by{padding-top:var(--m-s-m);border-top:1px solid var(--m-line)}
+.quotes{columns:21rem;column-gap:var(--m-s-m);margin:0;padding:0;list-style:none}
+.quote{display:flex;break-inside:avoid;margin-bottom:var(--m-s-m);padding:var(--m-pad)}
+.quote figure{display:flex;flex-direction:column;gap:var(--m-s-m)}
+.quote__mark{color:var(--m-link);font-size:1.75rem}
+.quote__text{color:var(--m-ink);font-size:var(--m-t1);line-height:1.5}
+.quote__by{display:flex;align-items:center;gap:.75rem;text-align:start}
+.quote__avatar{flex:none;width:3rem;height:3rem;overflow:hidden;border-radius:10px;background:var(--m-surface-2)}
+.quote__avatar img{width:100%;height:100%;object-fit:cover}
+.quote__name{display:block;color:var(--m-ink);font-weight:700}
+.quote__role{display:block;color:var(--m-muted);font-size:var(--m-t-1)}

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Redaktion auf der Website (nur für eingeloggte Nutzer geladen) – nur was in der Seite selbst liegen muss.
+   Werkzeugleiste, Block-Leisten, Seitenleiste, Dialoge, Formatierungsleiste und Meldungen leben in Shadow-DOM-Wurzeln
+   (resources/js/_shadow.js, Stylesheets editor.shadow.css + admin.shadow.css) – Theme-CSS wirkt dort nicht hinein,
+   und diese Datei enthält keine Regeln für bloße Elemente des Themes.
+   ========================================================================== */
+
+/* Schrift der CMS-Oberfläche (@font-face gilt nur im Dokument, nicht in Schatten-Wurzeln) */
+@font-face{font-family:Lato;font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/lato-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/lato-latin-ext-400-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Lato;font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+/* Werkzeugleiste: Host (Inhalt im Shadow DOM, Core\Theme::toolbarHost). Hintergrund schon vor dem Laden des Schatten-Stylesheets */
+.cms-bar-host.cms-bar-host{all:initial;display:block;position:sticky;top:0;z-index:2147483300;min-height:52px;background:#1E2840;color:#fff;font:500 14px/1.3 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif}
+.cms-bar-host~.site-header{top:var(--cms-bar-h,48px)}
+@media (max-width:800px){.cms-bar-host.cms-bar-host{position:relative}.cms-bar-host~.site-header{top:0}}
+
+/* Editor-Hülle */
+.is-editing main{padding-bottom:120px}
+.cms-editor .codex-editor__redactor{padding-bottom:160px!important}
+.cms-editor .ce-block__content,.cms-editor .ce-toolbar__content{max-width:none;margin:0}
+.cms-editor .ce-toolbar__actions{right:auto;left:10px;top:10px;z-index:2147483000;background:#fff;border-radius:10px;padding:2px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.cms-editor .ce-toolbar__plus,.cms-editor .ce-toolbar__settings-btn{color:#16201E;width:30px;height:30px}
+/* Editor.js-Bedienelemente liegen in der Seite (Editor.js bringt eigenes CSS mit): Schrift/Größen nicht vom Theme erben */
+.cms-editor :is(.ce-toolbar,.ce-popover,.ce-inline-toolbar){font:400 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:normal;text-transform:none}
+.cms-editor :is(.ce-toolbar,.ce-popover,.ce-inline-toolbar) svg{display:inline-block;max-width:none}
+.cms-editor .ce-toolbar__plus:hover,.cms-editor .ce-toolbar__settings-btn:hover{background:#F0F0F2}
+.cms-editor .ce-block--selected .ce-block__content{background:none}
+.cms-editor .ce-popover{--color-background-item-focus:#F0F0F2;font-family:Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif}
+.cms-tool-icon{display:inline-flex;width:20px;justify-content:center;font-weight:800;color:#314164}
+.ce-block[data-cms-drop]{outline:3px solid #314164}
+
+/* Block-Rahmen */
+.cms-block{position:relative;outline:1px dashed transparent;outline-offset:-1px;transition:outline-color .15s}
+.cms-block:hover{outline-color:rgba(49,65,100,.55)}
+.cms-block.is-active{outline:2px solid #314164}
+.cms-block.is-hidden .cms-block__preview{opacity:.4;filter:grayscale(.6)}
+.cms-block.is-hidden .is-hidden-block{display:block}
+/* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
+.cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
+.cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
+.cms-block__preview{cursor:pointer}
+.cms-block__preview a{cursor:pointer}
+.cms-error{padding:24px;color:#B3261E;font-weight:600}
+
+/* Direkt editierbare Texte */
+[data-edit]{cursor:text;border-radius:4px;transition:box-shadow .15s}
+[data-edit]:hover{box-shadow:0 0 0 2px rgba(49,65,100,.35)}
+[data-edit]:focus{outline:none;box-shadow:0 0 0 2px #314164;background:rgba(246,201,168,.18)}
+[data-edit]:empty::before{content:"…";opacity:.4}
+.bg-bordeaux [data-edit]:focus,.bg-dark [data-edit]:focus,.hero [data-edit]:focus{box-shadow:0 0 0 2px #EDE9E3}
+
+/* Zentral gepflegte Inhalte (Einstellungen des Themes) */
+[data-central]{position:relative}
+[data-central]::after{content:"Zentral gepflegt → " attr(data-central);position:absolute;top:-10px;left:16px;z-index:2147482990;padding:3px 8px;border-radius:6px;background:#EDE9E3;color:#16201E;font:700 11px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:0;text-transform:none;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.cms-block:hover [data-central]::after,.cms-block.is-active [data-central]::after{opacity:1}
+[data-central]:hover{outline:2px dashed #EDE9E3;outline-offset:3px}
+
+/* In der Vorschau: Hero-Slides statisch, Reveal aus */
+.is-editing [data-reveal]{opacity:1!important;transform:none!important}
+.is-editing .hero__controls{display:none}
+.is-editing .card--back{display:none!important}
+
+/* Seitenleiste „Block“: lebt im Shadow DOM der Ebene (editor.shadow.css) – hier nur Platz für den Inhalt */
+.has-drawer .cms-editor{margin-right:min(460px,100vw)}
+@media (max-width:1100px){.has-drawer .cms-editor{margin-right:0}}
+
+/* Editor.js unterstreicht Links – im WYSIWYG das Frontend-Verhalten wiederherstellen */
+.cms-editor :is(.btn,.btn-wide,.svc,.tile,.pill,.wordmark,.contact__phone,.doctor__foot a,.downloads a,.navlist a){text-decoration:none}
+.ce-popover-item[data-item-name="paragraph"]{display:none!important}
+.cms-empty{margin:0;padding:48px 24px;text-align:center;font:600 15px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#5A6461;background:repeating-linear-gradient(45deg,#FAFAFA 0 12px,#F4F4F5 12px 24px)}
+
+/* Verschieben ohne Drag & Drop, Einklappen, Kompaktansicht */
+.cms-block.is-collapsed .cms-block__preview,.is-compact .cms-block__preview{display:none}
+.cms-block.is-collapsed>.cms-block__bar.cms-block__bar,.is-compact .cms-block__bar.cms-block__bar{position:static;opacity:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:58px;padding:10px 14px 10px 92px;background:#FAFAFA;border-bottom:1px solid #E6E6E9;--cms-bb-row:block}
+.is-compact .cms-block__bar.cms-block__bar{--cms-bb-collapse:none}
+.is-compact{max-width:1100px;margin:24px auto;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #E6E6E9}
+.is-compact .cms-block{outline:0}
+.is-compact .cms-block:hover>.cms-block__bar.cms-block__bar{background:#F4EEF0}
+.cms-block.is-moved{animation:cms-moved 1s ease}
+@keyframes cms-moved{0%{box-shadow:inset 0 0 0 3px #EDE9E3}100%{box-shadow:inset 0 0 0 3px rgba(246,201,168,0)}}
+@media (prefers-reduced-motion:reduce){.cms-block.is-moved{animation:none}}
+
+/* Formatierungsleiste: Shadow DOM der Ebene (editor.shadow.css) */
+[data-edit].is-rich{min-height:1.6em;outline-offset:6px}
+[data-edit].is-rich:focus{box-shadow:0 0 0 2px #314164;background:rgba(246,201,168,.12);border-radius:6px}
+
+/* Aus dem Datensatz gebundene Stellen in der Vorlage */
+.cms-editor [data-bound]{outline:1.5px dashed #6F86C0;outline-offset:3px;border-radius:3px;cursor:default}
+
+/* ==========================================================================
+   Einträge auf der Website bearbeiten (Core\Data\EntryEdit, resources/js/_entry_edit.js)
+   ========================================================================== */
+.cms-entry-note.cms-entry-note{all:unset;display:block;box-sizing:border-box;padding:8px 16px;background:#FFF4E5;color:#5C3A00;border-bottom:1px solid #F2D3A6;font:500 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif}
+.cms-entry-note strong{font-weight:800}
+.cms-entry-note.cms-entry-note:not(.cms-entry-note--draft){background:#EEF1F8;color:#1E2840;border-bottom-color:#C9D2E6}
+
+/* Felder des Eintrags direkt im Text – nur im Modus „Bearbeiten“ der Werkzeugleiste (html.cms-entry-editing, _entry_edit.js) */
+.cms-entry-editing [data-entry-field]{cursor:text;border-radius:4px;outline:1.5px dashed rgba(49,65,100,.28);outline-offset:3px;transition:outline-color .15s,box-shadow .15s}
+@media (prefers-reduced-motion:reduce){.cms-entry-editing [data-entry-field]{transition:none}}
+.cms-entry-editing [data-entry-field]:hover{outline-color:rgba(49,65,100,.55)}
+[data-entry-field]:focus{outline:2px solid #314164;outline-offset:3px;background:rgba(246,201,168,.18)}
+[data-entry-field].is-changed{outline:2px dashed #9A5B00;outline-offset:3px}
+[data-entry-field][aria-invalid=true]{outline:2px solid #B3261E;outline-offset:3px}
+.cms-entry-editing [data-entry-field]:empty::before{content:"…";opacity:.4}
+.cms-entry-editing :is(.bg-bordeaux,.bg-dark,.hero) [data-entry-field]:is(:hover,:focus){outline-color:#EDE9E3}
+.cms-entry-editing [data-entry-field] a{cursor:text}
+
+/* Telefone: Aktionen des Bearbeiten-Modus als Leiste unten (Werkzeugleiste, _bar.js) – Platz für den Seitenschluss */
+@media (max-width:767px){html.cms-has-actionbar body{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}}
+/* Theme-Hook: eigene klebende Leisten unten („Anrufen / Termin“, Cookie-Hinweis …) mit [data-cms-hide-editing] markieren –
+   sie verschwinden, solange die Aktionsleiste des Editors unten steht. Wer lieber verschiebt:
+   bottom:calc(12px + var(--cms-bottom-bar-h,0px)) (0px außerhalb des Bearbeitens, von _bar.js gesetzt).
+   html.cms-editing gilt in jedem Bearbeiten-Modus (auch Desktop). */
+@media (max-width:767px){html.cms-has-actionbar [data-cms-hide-editing]{display:none!important}}
+
+/* Datenlisten: Stift je Eintrag, „+ Neuer Eintrag“ – eigene Wurzeln mit Reset (all: unset) und doppelter Klasse,
+   damit Theme-Regeln für Links (Farbe, Unterstreichung, ::after-Flächen) nicht hineinwirken */
+.dl-item:has(>.cms-entry-pencil){position:relative}
+.cms-entry-pencil.cms-entry-pencil{all:unset;box-sizing:border-box;position:absolute;top:10px;right:10px;z-index:2147482990;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;background:#1E2840;color:#fff;box-shadow:0 0 0 2px #fff,0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .15s;cursor:pointer}
+.cms-entry-pencil.cms-entry-pencil::before,.cms-entry-pencil.cms-entry-pencil::after{content:none}
+.cms-entry-pencil.cms-entry-pencil svg{all:unset;display:block;width:14px;height:14px}
+.dl-item:hover>.cms-entry-pencil.cms-entry-pencil,.dl-item:focus-within>.cms-entry-pencil.cms-entry-pencil,.cms-entry-pencil.cms-entry-pencil:focus-visible,.is-editing .cms-entry-pencil.cms-entry-pencil{opacity:1}
+.cms-entry-pencil.cms-entry-pencil:hover{background:#314164}
+.cms-entry-pencil.cms-entry-pencil:focus-visible{outline:3px solid #EDE9E3;outline-offset:2px}
+@media (hover:none){.cms-entry-pencil.cms-entry-pencil{opacity:1}}
+td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;width:28px;height:28px;margin-left:8px;vertical-align:middle;opacity:1}
+.cms-entry-new.cms-entry-new{all:unset;display:block;margin:18px 0 0}
+.cms-entry-newbtn.cms-entry-newbtn{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 16px;border-radius:999px;border:1.5px dashed #314164;background:#fff;color:#314164;font:700 14px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:0;text-transform:none;cursor:pointer}
+.cms-entry-newbtn.cms-entry-newbtn::before,.cms-entry-newbtn.cms-entry-newbtn::after{content:none}
+.cms-entry-newbtn.cms-entry-newbtn:hover{background:#EEF1F8;color:#1E2840}
+.cms-entry-newbtn.cms-entry-newbtn:focus-visible{outline:3px solid #314164;outline-offset:2px}
+.cms-entry-newbtn__t.cms-entry-newbtn__t{all:unset;font-weight:500;color:#3F4A47}
+
+/* Seitenleiste „Eintrag bearbeiten“: eigenes Shadow DOM (resources/css/entry-panel.css) – hier nur Platz für den Inhalt */
+@media (min-width:1100px){.has-epanel main,.has-epanel .site-footer{margin-right:min(520px,100vw)}}
+
+/* Meldungen, Fehlerhinweise: Shadow DOM der Ebene (editor.shadow.css) */
+/* Editor.js-Suche (Block einfügen/Optionen): Feldrahmen ≥ 3:1 */
+.cdx-search-field{border:1px solid #7B8190}
+
+/* ==========================================================================
+   Frameworks in Themes (Bootstrap, UIkit, Tailwind …) – Hilfe „Technik › Frameworks in Themes“
+   Z-Skala der CMS-Ebenen (geordnet, oberhalb aller üblichen Framework-Werte: Bootstrap 1000–1090, UIkit 980–1040, Tailwind z-50):
+     2147482990  Markierungen in der Seite (Stift je Eintrag, „Zentral gepflegt“)
+     2147483000  Bedienelemente in der Seite (Block-Leisten, Editor.js-Werkzeugleiste/Popover/Inline-Leiste)
+     2147483100  Seitenleiste „Eintrag bearbeiten“ (#cms-epanel-host, entry-panel.css)
+     2147483200  Gemeinsame Ebene (#cms-layer-host: Seitenleiste „Block“, Formatierungsleiste, Meldungen; _shadow.js)
+     2147483300  Werkzeugleiste (.cms-bar-host) inkl. Menüs und Aktionsleiste unten (Telefon)
+     Top Layer   Modale Dialoge (showModal: Rückfragen, Mediathek, Suche) – immer ganz oben, ohne z-index
+   ========================================================================== */
+/* Editor.js legt .codex-editor mit z-index:1 als Stapelkontext an – Inhalte bleiben so unter klebenden Theme-Köpfen,
+   aber auch Werkzeugleiste/Popover. Ohne eigenen Kontext steigen nur die Bedienelemente über den Theme-Kopf. */
+.cms-editor .codex-editor.codex-editor{z-index:auto}
+.cms-editor :is(.ce-toolbar,.ce-inline-toolbar,.ce-popover--opened,.ce-conversion-toolbar,.ce-settings){z-index:2147483000}
+
+/* Klebende/feste Köpfe des Themes unter die Werkzeugleiste schieben (nur mit Leiste; html.cms-has-bar setzt _shadow.js).
+   --cms-bar-offset = sichtbare Unterkante der Leiste (Desktop: ihre Höhe; Telefon: scrollt mit, bis 0).
+   Eigene Köpfe markieren Themes mit data-cms-sticky (Attribut ohne Wert genügt). !important: Frameworks setzen top teils inline (UIkit). */
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,header[data-cms-sticky],[data-cms-sticky]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}

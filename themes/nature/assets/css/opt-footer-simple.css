@@ -1,0 +1,5 @@
+/* Fußbereich „Schlicht“: eine umbrechende Zeile */
+.ftr--simple{padding-top:var(--n-s-xl)}
+.ftr__row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--n-s-s) var(--n-s-l)}
+.ftr__inline{--gap:.25rem var(--n-s-m)}
+.ftr--simple .ftr__bottom{margin-top:var(--n-s-l)}
