@@ -355,12 +355,14 @@ final class Extensions
         }
     }
 
-    /** Zusätzliche Einträge der Admin-Navigation: [href, label, key, sichtbar] */
-    public static function adminNav(): array
+    /** Zusätzliche Einträge der Admin-Navigation: [href, label, key, sichtbar]; $place 'main' (Hauptmenü) oder 'admin' (Abschnitt Administration) */
+    public static function adminNav(string $place = 'main'): array
     {
         $out = [];
         foreach (self::$active as $x) {
-            foreach ($x->nav as [$href, $label, $icon, $perm]) {
+            foreach ($x->nav as $n) {
+                [$href, $label, $icon, $perm] = $n;
+                if (($n[4] ?? 'main') !== $place) continue;
                 $out[] = [$href, __($label), $icon, $perm === null || can($perm)];   // Beschriftung übersetzbar (lang/{locale}.php der Erweiterung)
             }
         }

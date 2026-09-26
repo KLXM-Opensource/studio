@@ -60,7 +60,7 @@ return [
         $x->feature(VideoTools::FEATURE, 'Video-Werkzeuge: Videos optimieren, schneiden, Poster (ffmpeg)', [VideoTools::PERM], false);
         $x->permissions('Medien', [VideoTools::PERM => 'Videos optimieren, schneiden und Poster setzen (Original ersetzen/löschen zusätzlich mit „Medien löschen“)']);
         $x->migration(1, fn(Core\Database $db) => Repo::migrate($db));
-        $x->nav('/admin/video-tools', 'Video-Werkzeuge', 'video-camera', VideoTools::PERM);
+        $x->nav('/admin/video-tools', 'Video-Werkzeuge', 'video-camera', VideoTools::PERM, 'admin');
 
         // Mediathek: Oberfläche (Info-Panel, Trimmer, Aufträge) nur in der Medienverwaltung, nur mit Recht
         $x->adminAssets(fn(string $view) => str_starts_with($view, 'media') && VideoTools::allowed() ? ['css/video-tools.css', 'js/video-tools.js'] : []);

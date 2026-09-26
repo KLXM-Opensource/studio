@@ -62,7 +62,7 @@ return [
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
         $x->permissions('Cookie-Einwilligung', ['consent.manage' => 'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten']);
         $x->migration(1, fn(Core\Database $db) => MyCms\Consent\Repository::migrate($db));
-        $x->nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage');
+        $x->nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 'admin');
 
         // Website: Konfiguration + Skript nur auf Websites mit aktivem, einwilligungspflichtigem Dienst
         $x->htmlFilter(fn(string $html, array $ctx) => MyCms\Consent\Consent::filterHtml($html, $ctx));

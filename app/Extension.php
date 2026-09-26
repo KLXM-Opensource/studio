@@ -82,9 +82,13 @@ final class Extension
         return $this;
     }
 
-    public function nav(string $href, string $label, string $icon = 'ext', ?string $perm = null): self
+    /**
+     * Eintrag in der Seitenleiste der Verwaltung. $place: 'main' = Hauptmenü (Arbeitsbereiche der Redaktion),
+     * 'admin' = Abschnitt „Administration“ (Werkzeuge, Einstellungen, Technik)
+     */
+    public function nav(string $href, string $label, string $icon = 'ext', ?string $perm = null, string $place = 'main'): self
     {
-        $this->nav[] = [$href, $label, $icon, $perm];
+        $this->nav[] = [$href, $label, $icon, $perm, $place === 'admin' ? 'admin' : 'main'];
         return $this;
     }
 

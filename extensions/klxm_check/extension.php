@@ -65,7 +65,7 @@ return [
             $r->get('/admin/klxm-check', [AdminController::class, 'index']);
             $r->post('/admin/klxm-check', [AdminController::class, 'save']);
         });
-        $x->nav('/admin/klxm-check', 'KLXM Check', 'shield-check', 'system.manage');
+        $x->nav('/admin/klxm-check', 'KLXM Check', 'shield-check', 'system.manage', 'admin');
 
         $x->health(fn() => Check::health());
         $x->dashboard(function (array $user): array {

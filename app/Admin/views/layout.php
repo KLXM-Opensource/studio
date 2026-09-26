@@ -37,6 +37,8 @@ $adminNav = array_values(array_filter([
     // Chat-Einstellungen: Ein/Aus (Netzwerk/Integratoren), Kanäle (chat.manage)
     ['/admin/chat/einstellungen', __('Chat'), 'chatcfg', $user && \Core\Chat\Chat::settingsVisible()],
     ['/admin/api-tokens', __('API & MCP'), 'api', $user && can('api.manage')],
+    // Erweiterungen mit Platz „admin“ (Werkzeuge, Einstellungen – z. B. Video-Werkzeuge, KLXM Check)
+    ...($user ? \Core\Extensions::adminNav('admin') : []),
 ], fn($n) => $n[3]));
 $section = explode('/', $view)[0];
 $newReq = 0;
