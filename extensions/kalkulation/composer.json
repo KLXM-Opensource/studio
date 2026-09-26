@@ -1,0 +1,23 @@
+{
+    "name": "klxm/studio-kalkulation",
+    "description": "KLXM Studio – Kalkulation & Angebote: Preise intern kalkulieren (Stundensätze, Aufschläge, Leistungskatalog, Marge) und Angebote drucken/als PDF speichern",
+    "type": "klxm-studio-extension",
+    "license": "MIT",
+    "keywords": ["klxm-studio", "klxm-studio-extension", "mycms-extension", "kalkulation", "angebot", "preise", "quote", "pricing"],
+    "homepage": "https://studio.klxm.de",
+    "authors": [{ "name": "KLXM Crossmedia GmbH and contributors" }],
+    "require": {
+        "php": ">=8.4",
+        "ext-sodium": "*"
+    },
+    "extra": {
+        "klxm-studio": {
+            "entry": "extension.php",
+            "requires-core": ">=1.0.0"
+        },
+        "mycms": {
+            "entry": "extension.php",
+            "requires-core": ">=1.0.0"
+        }
+    }
+}
