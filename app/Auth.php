@@ -18,6 +18,9 @@ final class Auth
     public function user(): ?array
     {
         if (!$this->loaded) {
+            // Vor dem Start der Sitzung (z. B. can() im boot einer Erweiterung) nichts merken – sonst gälte die ganze
+            // Anfrage als „nicht angemeldet“
+            if (!$this->session->started() && PHP_SAPI !== 'cli') return null;
             $this->loaded = true;
             $id = $this->session->get('uid');
             // Multi-Site: Sitzung gilt nur für die Website, auf der angemeldet wurde

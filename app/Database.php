@@ -69,6 +69,18 @@ final class Database
 
     public function update(string $table, array $data, string $where, array $params = []): void
     {
+        // Positionale Platzhalter („id = ?“) in benannte umschreiben: PDO mischt beide Arten nicht – SQLite änderte
+        // sonst stillschweigend keine Zeile (z. B. consent_kit „id = ?“)
+        if ($params && array_is_list($params) && str_contains($where, '?')) {
+            $n = 0;
+            $named = [];
+            $where = (string) preg_replace_callback('~\?~', function () use (&$n, &$named, $params) {
+                $k = '__w' . $n;
+                $named[$k] = $params[$n++] ?? null;
+                return ':' . $k;
+            }, $where);
+            $params = $named;
+        }
         $set = implode(',', array_map(fn($c) => "$c = :$c", array_keys($data)));
         $this->query("UPDATE $table SET $set WHERE $where", array_merge($data, $params));
     }
