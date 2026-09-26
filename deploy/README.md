@@ -67,8 +67,10 @@ deploy/content-push.sh production default --publish    # übernimmt und veröffe
   `content:import` übernimmt eine Seite nur, wenn sie live noch genau so aussieht und dort kein offener Entwurf liegt –
   sonst wird **nichts** übernommen. Dann neu holen und die Änderung wiederholen (oder bewusst `--force`).
 - **Rückgängig:** Jede übernommene Seite erhält eine Version „Content-Sync (…)“ – über *Versionen* wiederherstellbar.
-- **Grenzen:** Zuordnung über Pfad + Sprache. Neue Seiten, gelöschte Seiten, neu hochgeladene Medien und Grundeinstellungen
-  gehen nicht mit (Medien-Verweise werden geprüft: fehlt ein Bild live, bricht die Übernahme ab).
+- **Neue Seiten und Medien:** gehen mit – mit übergeordneter Seite, Übersetzungsgruppe und Menü; neu hochgeladene Bilder,
+  auf die übertragene Seiten verweisen, samt Alt-Text, Fokus und Übersetzungen. Live entstehen neue IDs; Medien-IDs und
+  `page:ID`-Verweise werden umgeschrieben. Danach **zuerst neu holen**, bevor weiter bearbeitet wird (der Export verweigert sonst).
+- **Grenzen:** Zuordnung über Pfad + Sprache. Gelöschte oder verschobene Seiten und Grundeinstellungen gehen nicht mit.
 - **Ohne Releases** (Installation direkt im Web-Ordner): in `targets/<ziel>.env` `APP_DIR` setzen; bei Passwort-Anmeldung
   `SSH_CMD="sshpass -e ssh"` und `SCP_CMD="sshpass -e scp"` (Passwort in der Umgebungsvariable `SSHPASS`).
   Anderer Website-Key lokal: `LOCAL_SITE=kopie deploy/content-pull.sh production default`.
