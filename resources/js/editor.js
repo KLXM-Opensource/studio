@@ -7,6 +7,8 @@
  *  - Seitenleiste: alle Felder (Formular vom Server, gleicher Renderer wie im Admin).
  *  - Block-Tune „Abschnitt“: Hintergrund, Anker, Sichtbarkeit, Navigation, Abstände.
  *  - Drag & Drop über editorjs-drag-drop.
+ *  - Bild anpassen je Einbindung (Core\ImageFx): data._fx = {feldpfad: anpassung}; Knopf am Bild (_media.js) und je Bild-Feld
+ *    in der Seitenleiste. Gespeichert wird mit dem normalen Entwurf.
  */
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
@@ -364,13 +366,94 @@ function makeTool(type, def) {
       byVariant();
       const onChange = () => {
         byVariant();
+        const fx = this.data._fx;   // Bildanpassungen stehen nicht im Formular
         this.data = formToObject(form);
+        if (fx) this.data._fx = fx;
         markDirty(); drawerTouched(); this.refresh();
+        fxFieldButtons(form, this);
       };
       form.oninput = onChange; form.onchange = onChange;
+      fxFieldButtons(form, this);
       if (!focusSection) $('input:not([type=hidden]),select,textarea,[contenteditable]', form)?.focus({ preventScroll: true });
     }
   };
+}
+
+// ------------------------------------------------------------------ Bild anpassen je Einbindung (Core\ImageFx)
+/** Feldpfade im Block, deren Bild-Feld (Typ „media“) die Medien-ID enthält – auch in Listen: „items.2.image“ */
+function mediaPaths(fields, data, id, prefix = '') {
+  const out = [];
+  for (const f of fields || []) {
+    const v = data?.[f.name], p = prefix + f.name;
+    if (f.type === 'media' && v != null && v !== '' && +v === id) out.push(p);
+    if ((f.type === 'repeater' || f.type === 'group') && Array.isArray(v)) v.forEach((item, i) => out.push(...mediaPaths(f.fields, item, id, `${p}.${i}.`)));
+  }
+  return out;
+}
+/** Anpassung an Pfaden setzen (null = wie in der Mediathek → Eintrag entfernen), Vorschau neu laden */
+function setFx(tool, paths, v) {
+  const fx = { ...(tool.data._fx || {}) };
+  paths.forEach(p => { if (v == null || v === '') delete fx[p]; else fx[p] = v; });
+  if (Object.keys(fx).length) tool.data._fx = fx; else delete tool.data._fx;
+  markDirty();
+  if (drawerFor === tool) drawerTouched();
+  tool.loadPreview();
+}
+/** Dialog für eine Einbindung öffnen (gleicher Dialog wie in der Mediathek, window.CMSMedia.adjust aus _media.js) */
+async function openFx(tool, paths, id) {
+  const M = window.CMSMedia;
+  if (!M?.adjust) return;
+  const m = await M.api.detail(id);
+  const cur = paths.map(p => tool.data._fx?.[p]).find(v => v != null) ?? null;
+  return M.adjust({
+    src: m.large || m.url, thumb: m.thumb, name: m.display, scope: 'place', value: cur, global: m.adjust,
+    note: paths.length > 1 ? CMSAdmin.t('Das Bild kommt in diesem Block mehrfach vor – die Einstellung gilt für alle diese Stellen.') : '',
+    onApply: async v => setFx(tool, paths, v),
+  });
+}
+// Schnittstelle für den Knopf „Anpassen“ am Bild (_media.js): Block und Feldpfade zu einem <img data-media-id>
+window.CMSEditor = Object.assign(window.CMSEditor || {}, {
+  fx: {
+    target(img) {
+      const el = img.closest('.cms-block');
+      const tool = [...tools.values()].find(x => x.el === el);
+      const id = +img.dataset.mediaId;
+      const paths = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
+      if (!paths.length) return null;
+      return { paths, value: paths.map(p => tool.data._fx?.[p]).find(v => v != null) ?? null, set: v => setFx(tool, paths, v) };
+    },
+  },
+});
+/** Seitenleiste: Knopf „Anpassen …“ an jedem Bild-Feld mit gewähltem Bild (Tastatur-Zugang, gleiche Einstellung wie am Bild) */
+function fxFieldButtons(form, tool) {
+  if (!window.CMSMedia?.adjust) return;
+  $$('.media-field[data-accept="image"]', form).forEach(mf => {
+    const inp = $('input[type=hidden]', mf);
+    const m = inp?.name.match(/^f\[(.+)\]$/);
+    if (!m) return;
+    // Pfad aus dem Feldnamen; Listen-Positionen (auch neue „n123“) nach Reihenfolge im Formular
+    const reps = []; for (let n = mf.parentElement; n && n !== form; n = n.parentElement) if (n.classList?.contains('rep-item')) reps.unshift(n);
+    let ri = 0;
+    const path = m[1].split('][').map(k => /^(\d+|n\d+)$/.test(k) ? (reps[ri] ? [...reps[ri].parentElement.children].filter(c => c.classList.contains('rep-item')).indexOf(reps[ri++]) : k) : k).join('.');
+    let btn = $('[data-media-fx]', mf);
+    if (!btn) {
+      btn = d.createElement('button');
+      btn.type = 'button'; btn.className = 'btn btn--small btn--ghost'; btn.dataset.mediaFx = '';
+      mf.append(' ', btn);
+      btn.addEventListener('click', () => {
+        const id = +$('input[type=hidden]', mf).value;
+        if (!id) return;
+        // Wie am Bild: alle Stellen dieses Blocks mit demselben Bild (die Anzeige unterscheidet sie nicht)
+        const all = mediaPaths(tool.def.fields, tool.data, id);
+        openFx(tool, all.includes(btn.dataset.path) ? all : [btn.dataset.path], id).then(() => fxFieldButtons(form, tool));
+      });
+    }
+    btn.dataset.path = path;
+    btn.hidden = !inp.value;
+    const cur = tool.data._fx?.[path];
+    btn.textContent = cur ? CMSAdmin.t('Angepasst: {label}', { label: window.CMSMedia.fxLabel(cur) }) + ' …' : CMSAdmin.t('Anpassen …');
+    btn.setAttribute('aria-label', CMSAdmin.t('Bild anpassen – nur an dieser Stelle'));
+  });
 }
 
 // ------------------------------------------------------------------ Abschnitt-Formular in der Seitenleiste

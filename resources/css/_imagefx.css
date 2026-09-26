@@ -1,0 +1,34 @@
+/* Bild anpassen (Core\ImageFx, resources/js/_imagefx.js): Dialog, Badge in der Mediathek */
+.ifx-dlg{width:min(940px,calc(100vw - 32px))}
+.ifx-head h2{margin:0 0 4px}
+.ifx-head h2 span{font-weight:400;color:var(--adm-t3)}
+.ifx-scope{margin:0 0 14px;color:var(--adm-t2);font-size:14px}
+.ifx-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.ifx-prev{position:relative;display:grid;place-items:center;min-height:220px;border-radius:8px;background:var(--adm-fill,#EEE);overflow:hidden}
+.ifx-prev img{display:block;max-width:100%;max-height:min(58vh,520px);object-fit:contain}
+.ifx-cmp{position:absolute;right:8px;bottom:8px;background:var(--adm-card)!important}
+.ifx-cmp[aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--adm-a)}
+.ifx-ctrls{display:grid;gap:14px}
+.ifx-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;padding:0;border:0}
+.ifx-presets legend{margin-bottom:6px;padding:0;font-weight:700;font-size:14px}
+.ifx-pre{position:relative;display:grid;gap:4px;justify-items:center;padding:4px;border-radius:8px;cursor:pointer;font-size:12.5px;text-align:center}
+.ifx-pre input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.ifx-pre__img{display:block;width:100%;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--adm-fill,#EEE);box-shadow:inset 0 0 0 1px var(--adm-line)}
+.ifx-pre__img img{display:block;width:100%;height:100%;object-fit:cover}
+.ifx-pre:hover .ifx-pre__img{box-shadow:0 0 0 2px var(--adm-in)}
+.ifx-pre:has(input:checked) .ifx-pre__img{box-shadow:0 0 0 3px var(--adm-a)}
+.ifx-pre:has(input:checked) .ifx-pre__l{font-weight:700}
+.ifx-pre:has(input:focus-visible){outline:2px solid var(--adm-a);outline-offset:2px}
+.ifx-range{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.ifx-range label{font-weight:600;font-size:14px}
+.ifx-range output{font:600 13px/1 var(--adm-font);font-variant-numeric:tabular-nums;color:var(--adm-t2)}
+.ifx-range input{grid-column:1/-1;width:100%;accent-color:var(--adm-a)}
+.ifx-range input:focus-visible,.ifx-dlg button:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.ifx-tools{display:flex;flex-wrap:wrap;gap:8px}
+.ifx-state{margin:0;min-height:1.4em;font-size:13px;color:var(--adm-t2)}
+.ifx-err{margin:12px 0 0}
+.ifx-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+@media (max-width:720px){.ifx-body{grid-template-columns:1fr}.ifx-presets{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ifx-badge{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--adm-accent-bg,var(--adm-fill));color:var(--adm-a-ink,var(--adm-a));font:700 11.5px/1.6 var(--adm-font);letter-spacing:.02em;vertical-align:1px}
+.fx-i-adj{margin:4px 0 0;font-size:13px;color:var(--adm-t2)}
+.md-adjust{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}

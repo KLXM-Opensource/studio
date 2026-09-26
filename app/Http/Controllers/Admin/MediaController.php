@@ -196,6 +196,14 @@ final class MediaController extends AdminController
             $upd['focus_x'] = max(0, min(100, (int) $p['focus']['x']));
             $upd['focus_y'] = max(0, min(100, (int) $p['focus']['y']));
         }
+        // Bild anpassen (Core\ImageFx): nur wenn mitgeschickt – leer = Original
+        if (array_key_exists('adjust', $p) && str_starts_with((string) $m['mime'], 'image/')) {
+            $adj = \Core\ImageFx::normalize($p['adjust']);
+            if ($adj === null || $adj === \Core\ImageFx::NONE) {
+                return Response::json(['ok' => false, 'error' => __('Ungültige Bildanpassung.')], 422);
+            }
+            $upd['adjust'] = $adj !== '' ? $adj : null;
+        }
         Media::db()->update('media', $upd, 'id = :id', ['id' => (int) $id]);
         if (isset($p['collections']) && is_array($p['collections'])) {
             Media::setCollections((int) $id, $p['collections']);
@@ -203,6 +211,27 @@ final class MediaController extends AdminController
         Media::forget((int) $id);
         $this->changed();
         return Response::json(['ok' => true, 'item' => Media::toJson(Media::find((int) $id))]);
+    }
+
+    /** Bild anpassen für alle Verwendungen ({adjust: "sepia s120"} – leer = Original), Core\ImageFx */
+    public function adjust(Request $r, string $id): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($e = $this->scope($r, true)) return $e;
+        $t = $this->target((int) $id, true);
+        if ($t instanceof Response) return $t;
+        $m = Media::find((int) $t) ?? throw new HttpException(404);
+        if (!str_starts_with((string) $m['mime'], 'image/')) {
+            return Response::json(['ok' => false, 'error' => __('Nur Bilder lassen sich anpassen.')], 422);
+        }
+        $adj = \Core\ImageFx::normalize($r->post['adjust'] ?? '');
+        if ($adj === null || $adj === \Core\ImageFx::NONE) {
+            return Response::json(['ok' => false, 'error' => __('Ungültige Bildanpassung.')], 422);
+        }
+        Media::db()->update('media', ['adjust' => $adj !== '' ? $adj : null, 'updated_at' => now()], 'id = :id', ['id' => (int) $t]);
+        Media::forget((int) $t);
+        $this->changed();
+        return Response::json(['ok' => true, 'item' => Media::toJson(Media::find((int) $t))]);
     }
 
     /** Zuschnitt für ein Bildformat festlegen ({ratio, rect: {x,y,w,h}} – rect null = entfernen) */

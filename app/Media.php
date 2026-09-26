@@ -14,6 +14,7 @@ namespace Core;
  *  - Dateien lassen sich ersetzen: ID, Alt-Text und alle Verwendungen bleiben erhalten.
  *  - Fokuspunkt (x/y in %) steuert den Bildausschnitt bei object-fit: cover.
  *  - Tags (Freitext) und Sammlungen zum Ordnen.
+ *  - Bild anpassen (Effekte, Sättigung …): zerstörungsfrei per CSS-Klassen, Spalte adjust (Core\ImageFx).
  */
 final class Media
 {
@@ -534,11 +535,12 @@ final class Media
         $ratio = isset($opt['ratio']) ? str_replace('-', ':', (string) $opt['ratio']) : null;
         $src = self::sources($m, $ratio);
         $alt = $opt['alt'] ?? self::alt($m);
-        $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] ? '' : self::focusClass($m)));
+        // Bild anpassen (Core\ImageFx): Einbindung im Block vor globaler Einstellung – als Klassen (CSP, keine Inline-Styles)
+        $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] ? '' : self::focusClass($m)) . ' ' . ImageFx::classFor($m));
         $class = $classes !== '' ? ' class="' . e($classes) . '"' : '';
         $loading = !empty($opt['eager']) ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
-        // Im Bearbeiten-Modus: Kennung für den Inline-Zuschnitt
-        $edit = $ratio && app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '" data-ratio="' . e($ratio) . '"' : '';
+        // Im Bearbeiten-Modus: Kennung für „Anpassen“ und (mit Bildformat) den Inline-Zuschnitt
+        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"' . ($ratio ? ' data-ratio="' . e($ratio) . '"' : '') : '';
         $sources = '';
         foreach (['avif', 'webp'] as $fmt) {
             if ($src[$fmt] !== '') {
@@ -970,6 +972,8 @@ final class Media
             'pages' => self::pages($m), 'viewer' => self::viewerUrl($m),
             'credit' => (string) ($m['credit'] ?? ''), 'tags' => self::tagList($m['tags'] ?? ''),
             'focus' => ['x' => (int) ($m['focus_x'] ?? 50), 'y' => (int) ($m['focus_y'] ?? 50)],
+            // Bild anpassen (Core\ImageFx): gespeicherte Einstellung, Klassen für die Vorschau, Kurzbeschreibung
+            'adjust' => $isImg ? (string) ($m['adjust'] ?? '') : '', 'adjust_label' => $isImg ? ImageFx::label((string) ($m['adjust'] ?? '')) : '',
             'created_at' => $m['created_at'], 'updated_at' => $m['updated_at'] ?? null,
             'missing_alt' => $isImg && trim((string) $m['alt']) === '' && empty($m['decorative']),
             'i18n' => (object) self::translations($m),

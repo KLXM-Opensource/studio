@@ -310,6 +310,8 @@ final class Pages
                 if (in_array($k, $names, true) && is_string($v) && preg_match('~^[a-z_][a-z0-9_]{0,40}$~', $v)) $bind[$k] = $v;
             }
             if ($bind) $data['_bind'] = $bind;
+            // Bild anpassen je Einbindung: {feldpfad: anpassung} – nur Bild-Felder des Schemas (auch in Listen), Core\ImageFx
+            if (!empty($b['data']['_fx']) && ($fx = ImageFx::sanitize($b['data']['_fx'], $def['fields'] ?? [], $data))) $data['_fx'] = $fx;
             if (!empty($def['variants'])) {
                 $variant = (string) ($b['data']['variant'] ?? '');
                 $data['variant'] = array_key_exists($variant, $def['variants']) ? $variant : array_key_first($def['variants']);

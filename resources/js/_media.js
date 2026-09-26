@@ -4,6 +4,7 @@ import { layerBox, inPath } from './_shadow.js';
 import { ico } from './_icons.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
+import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
  *  - Seitenleiste: Mediathek, Sammlungen (Dateien per Drag & Drop hineinziehen), Tags
@@ -11,6 +12,8 @@ import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertit
  *  - Informationen rechts: Alt-Text (Pflicht), Titel, Tags, Sammlungen, Fokuspunkt, Zuschnitte, Verwendung – speichert automatisch
  *  - Upload per Drag & Drop, mehrere Dateien, in 1-MB-Stücken; Alt-Text verbindlich
  *  - Zuschneiden je Bildformat mit Zoom und Verschieben – auch direkt auf der Seite im Bearbeiten-Modus
+ *  - Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast; zerstörungsfrei): global in „Alle Details“ bzw. rechts,
+ *    im Bearbeiten-Modus je Einbindung im Block (window.CMSEditor.fx, resources/js/editor.js)
  *  - Auswahldialog für Bild-/Datei-Felder: window.CMSMedia.pick(kind)
  */
 (() => {
@@ -66,6 +69,7 @@ const api = {
   save: (id, body) => http(`${BASE}/api/media/${id}`, { method: 'POST', json: body }),
   del: id => http(`${BASE}/api/media/${id}/delete`, { method: 'POST', json: {} }),
   crop: (id, ratio, rect) => http(`${BASE}/api/media/${id}/crop`, { method: 'POST', json: { ratio, rect } }),
+  adjust: (id, adjust) => http(`${BASE}/api/media/${id}/adjust`, { method: 'POST', json: { adjust } }),
   bulk: body => http(BASE + '/api/media-bulk', { method: 'POST', json: body }),
   collection: name => http(BASE + '/api/collections', { method: 'POST', json: { name } }),
   renameCollection: (id, name) => http(`${BASE}/api/collections/${id}`, { method: 'POST', json: { name } }),
@@ -965,6 +969,7 @@ class Finder {
       <form class="fx-i-form" novalidate>
         <input class="fx-i-title" name="title" value="${esc(m.title)}" placeholder="${esc(m.display)}" aria-label="Titel / Anzeigename" maxlength="180" title="Titel – klicken zum Ändern">
         <p class="fx-i-meta">${esc(m.type)} · ${esc(m.size)}${m.width ? ` · ${m.width} × ${m.height} px` : ''}${m.pages ? ` · ${m.pages} Seiten` : ''}</p>
+        ${isImg && m.adjust ? `<p class="fx-i-adj"><span class="ifx-badge" title="${esc(t('Bild angepasst (überall, wo es verwendet wird)'))}">${esc(t('Angepasst'))}</span> ${esc(m.adjust_label)}</p>` : ''}
         ${isImg ? `<section class="fx-i-sec"><h3><label for="fx-alt">Alt-Text <span class="req">*</span></label></h3>
           <textarea id="fx-alt" name="alt" rows="2" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen?">${esc(m.alt)}</textarea>
           <label class="fx-check"><input type="checkbox" name="decorative" ${m.decorative ? 'checked' : ''}> Dekorativ (ohne Aussage)</label></section>`
@@ -976,10 +981,13 @@ class Finder {
         <p class="fx-i-state" aria-live="polite"></p>
       </form>
       <button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-edit>Alle Details, Fokus &amp; Zuschnitt …</button>
+      ${isImg && this.mode === 'library' && !this.ro ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-adjust>${esc(t('Bild anpassen …'))}</button>` : ''}
       ${m.collections.length ? `<section class="fx-i-sec"><h3>Sammlungen</h3><p>${this.meta.collections.filter(c => m.collections.includes(c.id)).map(c => esc(c.name)).join(', ')}</p></section>` : ''}
       <section class="fx-i-sec"><h3>Verwendet auf</h3>${m.usages.length ? '<ul class="fx-usage">' + m.usages.map(u => `<li>${u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.label)}</a>` : esc(u.label)}</li>`).join('') + '</ul>' : '<p class="fx-i-hint">Noch nirgends.</p>'}</section>
       <dl class="fx-i-dl"><dt>Datei</dt><dd>${esc(m.name)}</dd><dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}</dd>${m.updated_at && m.updated_at !== m.created_at ? `<dt>Geändert</dt><dd>${fmtDate(m.updated_at)}</dd>` : ''}</dl>`;
     $('[data-edit]', this.$info).onclick = () => this.edit(m.id);
+    if (isImg) applyFx($('.fx-i-img', this.$info), m.adjust);
+    $('[data-adjust]', this.$info)?.addEventListener('click', () => this.adjust(m));
     $('[data-pick]', this.$info)?.addEventListener('click', () => this.opts.onPick?.(this.byId(m.id) || m));
     if (this.ro) $$('.fx-i-form input, .fx-i-form textarea, .fx-i-form select, .fx-i-form button', this.$info).forEach(x => { x.disabled = true; });
     this.inlineEdit(m);
@@ -1046,6 +1054,9 @@ class Finder {
       return `<button type="button" data-crop="${r}" class="${c ? 'is-set' : ''}" title="${esc(ratios[r])} – ${c ? 'eigener Zuschnitt' : 'automatisch nach Fokuspunkt'}. Klicken zum Zuschneiden">
         <span style="aspect-ratio:${r.replace(':', '/')}"><img src="${esc(c ? c.thumb : m.thumb)}" alt="" style="${c ? '' : `object-position:${focus.x}% ${focus.y}%`}"></span><small>${r}${c ? ' ✂' : ''}</small></button>`;
     }).join('');
+    // Bild anpassen: Stand (Badge) + Knopf; Vorschau und Zuschnitt-Kacheln zeigen die Anpassung
+    const adjBox = () => `${m.adjust ? `<span class="ifx-badge">${esc(t('Angepasst'))}</span> <span>${esc(fxLabel(m.adjust))}</span>` : `<span class="adm-muted">${esc(t('Original (ohne Anpassung)'))}</span>`}
+      <button type="button" class="adm-btn adm-btn--small" data-adjust>${esc(t('Anpassen …'))}</button>`;
     const tagHtml = () => tags.map(t => `<span class="fx-tag"><span class="fx-dot" style="background:${tagColor(t)}"></span>${esc(t)}<button type="button" data-untag="${esc(t)}" aria-label="Tag ${esc(t)} entfernen">✕</button></span>`).join('');
     dlg.innerHTML = `
       <div class="md-head"><h2 id="md-title">${esc(m.display)}</h2>
@@ -1056,7 +1067,9 @@ class Finder {
           ${isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
-            <div class="md-crops" data-crops>${cropTiles()}</div>`
+            <div class="md-crops" data-crops>${cropTiles()}</div>
+            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
+            <div class="md-adjust" data-adjbox>${adjBox()}</div>`
           : m.kind === 'pdf' ? `<iframe class="md-pdf" src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
           : m.kind === 'video' ? `<video class="md-video" src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>`
           : m.kind === 'audio' ? `<audio class="md-video" src="${esc(m.url)}" controls preload="metadata"></audio>` : ''}
@@ -1128,10 +1141,19 @@ class Finder {
       dirty = true;
     });
     // Zuschneiden (speichert sofort je Format)
+    const fxPreview = () => $$('.md-focus img, [data-crops] img', dlg).forEach(im => applyFx(im, m.adjust));
     $('[data-crops]', dlg)?.addEventListener('click', e => {
       const b = e.target.closest('[data-crop]'); if (!b) return;
-      crop({ ...m, focus }, b.dataset.crop, (r, res) => { m.crops = res.item.crops; $('[data-crops]', dlg).innerHTML = cropTiles(); this.load(m.id); });
+      crop({ ...m, focus }, b.dataset.crop, (r, res) => { m.crops = res.item.crops; $('[data-crops]', dlg).innerHTML = cropTiles(); fxPreview(); this.load(m.id); });
     });
+    // Bild anpassen (speichert sofort, wie der Zuschnitt)
+    $('[data-adjbox]', dlg)?.addEventListener('click', async e => {
+      if (!e.target.closest('[data-adjust]')) return;
+      if ((await this.adjust(m)) === undefined) return;
+      $('[data-adjbox]', dlg).innerHTML = adjBox(); fxPreview();
+      $('[data-adjust]', dlg)?.focus();
+    });
+    if (isImg) fxPreview();
     form.onsubmit = async e => {
       e.preventDefault(); err.hidden = true;
       const body = { title: form.title.value, alt: form.alt?.value || '', decorative: form.decorative?.checked ? 1 : 0, credit: form.credit.value, tags: tags.join(','), focus, collections: $$('input[name=collections]:checked', form).map(c => +c.value), i18n: readTrans(form) };
@@ -1146,6 +1168,20 @@ class Finder {
     });
     if (!dlg.open) dlg.showModal();
     (isImg && !m.alt && !m.decorative ? form.alt : form.title).focus();
+  }
+
+  /** Dialog „Bild anpassen“ (global); speichert sofort. Ergebnis: neuer Wert oder undefined (Abbruch) */
+  async adjust(m) {
+    const v = await adjustDialog({
+      src: m.large || m.url, thumb: m.thumb, name: m.display, scope: 'global', value: m.adjust,
+      onApply: async val => { const res = await api.adjust(m.id, val); m.adjust = res.item.adjust; m.adjust_label = res.item.adjust_label; },
+    });
+    if (v === undefined) return undefined;
+    toast(v ? t('Anpassung gespeichert') : t('Anpassung entfernt – Original'));
+    const it = this.byId?.(m.id);
+    if (it && it !== m) { it.adjust = m.adjust; it.adjust_label = m.adjust_label; }
+    if (this.sel?.size === 1 && this.sel.has(m.id)) this.renderInfo();   // Informationen rechts: Badge, Vorschau
+    return v;
   }
 
   patchItem(m) {
@@ -1188,32 +1224,74 @@ function pick(kind = 'image') {
   });
 }
 
-// ============================================================ Zuschneiden direkt auf der Seite (Bearbeiten-Modus)
+// ============================================================ Zuschneiden & Anpassen direkt auf der Seite (Bearbeiten-Modus)
+/*
+ * Knöpfe oben rechts am Bild (Shadow-DOM-Ebene): „Zuschneiden“ für Bilder mit Bildformat (data-ratio), „Anpassen“ für Bilder
+ * in Blöcken. Anpassen gilt für diese Einbindung (data._fx des Blocks über window.CMSEditor.fx, resources/js/editor.js);
+ * lässt sich das Bild keinem Bild-Feld des Blocks zuordnen (z. B. aus einer Datentabelle oder zentral gepflegt), wirkt die
+ * Anpassung global wie in der Mediathek.
+ */
 function initInlineCrop() {
   if (!$('#cms-editor')) return;
-  const btn = d.createElement('button');
-  btn.type = 'button'; btn.className = 'cms-cropbtn'; btn.hidden = true;
-  btn.innerHTML = ico('crop') + ' Zuschneiden';
-  box().append(btn);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
+  const bar = d.createElement('div');
+  bar.className = 'cms-imgtools'; bar.hidden = true;
+  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
+  box().append(bar);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
+  const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar);
   let target = null, hideT;
   const place = () => {
     const r = target.getBoundingClientRect();
-    btn.style.left = (r.right + scrollX - btn.offsetWidth - 12) + 'px';
-    btn.style.top = (r.top + scrollY + 12) + 'px';
+    bar.style.left = (r.right + scrollX - bar.offsetWidth - 12) + 'px';
+    bar.style.top = (r.top + scrollY + 12) + 'px';
   };
+  const show = im => {
+    clearTimeout(hideT); target = im;
+    cropBtn.hidden = !im.dataset.ratio;
+    fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
+    if (cropBtn.hidden && fxBtn.hidden) { bar.hidden = true; return; }
+    cropBtn.setAttribute('aria-label', t('Bild zuschneiden ({ratio})', { ratio: im.dataset.ratio || '' }));
+    fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast)'));
+    bar.hidden = false; place();
+  };
+  const hide = () => { bar.hidden = true; target = null; };
   d.addEventListener('mouseover', e => {
     const im = e.target.closest?.('img[data-media-id]');
-    if (im) { clearTimeout(hideT); target = im; btn.hidden = false; btn.setAttribute('aria-label', `Bild zuschneiden (${im.dataset.ratio})`); place(); }
-    else if (inPath(e, btn)) clearTimeout(hideT);
-    else if (target) { clearTimeout(hideT); hideT = setTimeout(() => { btn.hidden = true; target = null; }, 250); }
+    if (im) show(im);
+    else if (inPath(e, bar)) clearTimeout(hideT);
+    else if (target) { clearTimeout(hideT); hideT = setTimeout(hide, 250); }
   });
-  addEventListener('scroll', () => { if (target && !btn.hidden) place(); }, { passive: true });
-  btn.addEventListener('click', e => {
+  // Tastatur: Knöpfe erscheinen, sobald der Fokus in einem Block mit Bild liegt (Tab führt dann in die Leiste)
+  bar.addEventListener('focusout', e => { if (!bar.contains(e.relatedTarget)) hideT = setTimeout(hide, 250); });
+  addEventListener('scroll', () => { if (target && !bar.hidden) place(); }, { passive: true });
+  cropBtn.addEventListener('click', e => {
     e.preventDefault(); e.stopPropagation();
     if (!target) return;
     const id = +target.dataset.mediaId, ratio = target.dataset.ratio;
-    btn.hidden = true;
+    bar.hidden = true;
     crop(id, ratio, (r, res) => refreshPictures(id, r, res.sources), { only: ratio });
+  });
+  fxBtn.addEventListener('click', async e => {
+    e.preventDefault(); e.stopPropagation();
+    if (!target) return;
+    const im = target, id = +im.dataset.mediaId;
+    bar.hidden = true;
+    let m;
+    try { m = await api.detail(id); } catch (ex) { toast(ex.message); return; }
+    const place = window.CMSEditor?.fx?.target(im);
+    if (!place) {
+      // Keine Einbindung im Block zuordenbar → global (Mediathek)
+      const v = await adjustDialog({ src: m.large || m.url, thumb: m.thumb, name: m.display, scope: 'global', value: m.adjust,
+        note: t('Dieses Bild lässt sich hier keinem Bild-Feld des Blocks zuordnen – die Anpassung gilt deshalb für alle Verwendungen.'),
+        onApply: async val => { await api.adjust(m.id, val); } });
+      if (v !== undefined) { $$(`img[data-media-id="${id}"]`).forEach(x => applyFx(x, v)); toast(v ? t('Anpassung gespeichert') : t('Anpassung entfernt – Original')); }
+      return;
+    }
+    const v = await adjustDialog({
+      src: m.large || m.url, thumb: m.thumb, name: m.display, scope: 'place', value: place.value, global: m.adjust,
+      note: place.paths.length > 1 ? t('Das Bild kommt in diesem Block mehrfach vor – die Einstellung gilt für alle diese Stellen.') : '',
+      onApply: async val => { place.set(val); },
+    });
+    if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
   });
 }
 
@@ -1229,7 +1307,7 @@ d.addEventListener('paste', e => {
   f.pasteFiles(files);
 });
 
-window.CMSMedia = { pick, crop, Finder, Uploader, api, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml };
+window.CMSMedia = { pick, crop, Finder, Uploader, api, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml, adjust: adjustDialog, fxLabel };
 const root = $('[data-media-library]');
 if (root) {
   const f = new Finder(root, { mode: 'library' });

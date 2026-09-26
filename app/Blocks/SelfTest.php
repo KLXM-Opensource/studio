@@ -9,6 +9,7 @@ use Core\Block;
  * Selbsttest des Block-Baukastens: php bin/console blocks:selftest
  * Prüft Escaping und XSS-Abwehr der Vorlagensprache (Text, Attribute, Links, Rich-Text, Symbole), Übersetzungsfehler,
  * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer.
+ * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx).
  */
 final class SelfTest
 {
@@ -25,10 +26,37 @@ final class SelfTest
             $t->rejects();
             $t->css();
             $t->export();
+            $t->imageFx();
         } finally {
             app()->editing = $prev;
         }
         return ['ok' => $t->ok, 'fails' => $t->fails];
+    }
+
+    /** Bild anpassen (Core\ImageFx): Format, Klassen, erlaubte Feldpfade, Bereinigung von data._fx */
+    private function imageFx(): void
+    {
+        $fx = \Core\ImageFx::class;
+        $this->assert($fx::normalize('c110 SEPIA s120') === 'sepia s120 c110', 'ImageFx: kanonische Schreibweise');
+        $this->assert($fx::normalize('s100 b100') === '', 'ImageFx: Standardwerte entfallen');
+        $this->assert($fx::normalize('s125') === null && $fx::normalize('b40') === null && $fx::normalize('gray sepia') === null, 'ImageFx: ungültige Werte abgelehnt');
+        $this->assert($fx::normalize('none') === 'none' && $fx::normalize('none s120') === null, 'ImageFx: „none“ nur allein');
+        $this->assert($fx::normalize(['preset' => 'gray', 'contrast' => 130]) === 'gray c130', 'ImageFx: Angabe als Objekt');
+        $this->assert($fx::classes('warm s80 b120') === 'ifx ifx-warm ifx-s8 ifx-b12' && $fx::classes('none') === '', 'ImageFx: Klassen');
+        $fields = [['name' => 'image', 'type' => 'media'], ['name' => 'file', 'type' => 'file'], ['name' => 'title', 'type' => 'text'],
+            ['name' => 'items', 'type' => 'repeater', 'fields' => [['name' => 'image', 'type' => 'media']]]];
+        $this->assert($fx::isMediaPath($fields, 'image') && $fx::isMediaPath($fields, 'items.2.image'), 'ImageFx: Bild-Feldpfade erkannt');
+        $this->assert(!$fx::isMediaPath($fields, 'file') && !$fx::isMediaPath($fields, 'title') && !$fx::isMediaPath($fields, 'items.image')
+            && !$fx::isMediaPath($fields, 'items.2') && !$fx::isMediaPath($fields, 'nope'), 'ImageFx: andere Pfade abgelehnt');
+        $data = ['image' => 7, 'title' => 'x', 'items' => [['image' => 8], ['image' => null]]];
+        $clean = $fx::sanitize(['image' => 'gray', 'items.0.image' => 's120', 'items.1.image' => 'sepia', 'title' => 'gray', 'items.0.image.x' => 'gray', 'image2' => 'bogus'], $fields, $data);
+        $this->assert($clean === ['image' => 'gray', 'items.0.image' => 's120'], 'ImageFx: data._fx bereinigt (nur Bild-Felder mit Bild)');
+        $fx::enter(['_fx' => ['items.0.image' => 'sepia', 'image' => 'gray'], 'image' => 7, 'items' => [['image' => 7]]]);
+        $ok = $fx::classFor(['id' => 7, 'adjust' => 'vivid']) === 'ifx ifx-gray' && $fx::classFor(['id' => 9, 'adjust' => 'vivid']) === 'ifx ifx-vivid';
+        $fx::leave();
+        $this->assert($ok && $fx::classFor(['id' => 7, 'adjust' => '']) === '', 'ImageFx: Einbindung vor global, erster Pfad gewinnt');
+        $html = $fx::inject('<html><head><title>x</title></head><body><img class="a ifx ifx-gray"></body></html>');
+        $this->assert(substr_count($html, 'data-ifx-css') === 1 && $fx::inject('<head></head><img class="fx50">') === '<head></head><img class="fx50">', 'ImageFx: Stylesheet nur bei Bedarf');
     }
 
     private function assert(bool $cond, string $label): void

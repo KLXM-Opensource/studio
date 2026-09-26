@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Bild anpassen (Core\ImageFx) – zerstörungsfrei per CSS-Filter, nur über Klassen (CSP: keine Inline-Styles).
+   Auf der Website nur eingebunden, wenn die Seite angepasste Bilder enthält (Core\ImageFx::inject); in der Verwaltung
+   Teil von admin.css. EIN Filter aus Variablen: Effekt (--ifx-g/-p/-ps/-pc/-pb/-h) und Regler (--ifx-s/-b/-c) multiplizieren sich.
+   Kühl dreht den Farbton vor und nach sepia() um 180° (--ifx-h) – so wird aus dem warmen ein kühler Ton.
+   !important: eine ausdrückliche Anpassung gilt auch gegen Bildeffekte des Kits (z. B. Logos grau, .img-gray).
+   ========================================================================== */
+img.ifx{filter:grayscale(var(--ifx-g,0)) hue-rotate(var(--ifx-h,0deg)) sepia(var(--ifx-p,0)) hue-rotate(var(--ifx-h,0deg)) saturate(var(--ifx-ps,1)) contrast(var(--ifx-pc,1)) brightness(var(--ifx-pb,1)) saturate(var(--ifx-s,1)) brightness(var(--ifx-b,1)) contrast(var(--ifx-c,1))!important}
+/* Effekte */
+.ifx-gray{--ifx-g:1}
+.ifx-sepia{--ifx-p:.8}
+.ifx-warm{--ifx-p:.3;--ifx-ps:1.25}
+/* Kühl: Bild um 180° drehen, Sepia-Ton mischen, zurückdrehen → bläulicher statt bräunlicher Ton, Farben bleiben */
+.ifx-cool{--ifx-h:180deg;--ifx-p:.35;--ifx-pb:1.03}
+.ifx-muted{--ifx-ps:.45;--ifx-pb:1.03}
+.ifx-vivid{--ifx-ps:1.6;--ifx-pc:1.08}
+.ifx-contrast{--ifx-pc:1.35}
+/* Sättigung 0–200 % */
+.ifx-s0{--ifx-s:0}.ifx-s1{--ifx-s:.1}.ifx-s2{--ifx-s:.2}.ifx-s3{--ifx-s:.3}.ifx-s4{--ifx-s:.4}.ifx-s5{--ifx-s:.5}.ifx-s6{--ifx-s:.6}.ifx-s7{--ifx-s:.7}.ifx-s8{--ifx-s:.8}.ifx-s9{--ifx-s:.9}
+.ifx-s11{--ifx-s:1.1}.ifx-s12{--ifx-s:1.2}.ifx-s13{--ifx-s:1.3}.ifx-s14{--ifx-s:1.4}.ifx-s15{--ifx-s:1.5}.ifx-s16{--ifx-s:1.6}.ifx-s17{--ifx-s:1.7}.ifx-s18{--ifx-s:1.8}.ifx-s19{--ifx-s:1.9}.ifx-s20{--ifx-s:2}
+/* Helligkeit 50–150 % */
+.ifx-b5{--ifx-b:.5}.ifx-b6{--ifx-b:.6}.ifx-b7{--ifx-b:.7}.ifx-b8{--ifx-b:.8}.ifx-b9{--ifx-b:.9}.ifx-b11{--ifx-b:1.1}.ifx-b12{--ifx-b:1.2}.ifx-b13{--ifx-b:1.3}.ifx-b14{--ifx-b:1.4}.ifx-b15{--ifx-b:1.5}
+/* Kontrast 50–150 % */
+.ifx-c5{--ifx-c:.5}.ifx-c6{--ifx-c:.6}.ifx-c7{--ifx-c:.7}.ifx-c8{--ifx-c:.8}.ifx-c9{--ifx-c:.9}.ifx-c11{--ifx-c:1.1}.ifx-c12{--ifx-c:1.2}.ifx-c13{--ifx-c:1.3}.ifx-c14{--ifx-c:1.4}.ifx-c15{--ifx-c:1.5}
+/* Erzwungene Farben (Windows-Kontrastmodus): Bilder unverändert */
+@media (forced-colors:active){img.ifx{filter:none!important}}

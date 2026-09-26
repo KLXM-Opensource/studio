@@ -163,7 +163,9 @@ final class Theme
         if (!is_file($file)) {
             throw new \RuntimeException("Template '$template' fehlt im Kit '{$this->name}'");
         }
-        return self::capture($file, $vars);
+        $html = self::capture($file, $vars);
+        // Ganze Seite (Layout): Stylesheet für angepasste Bilder nur bei Bedarf einbinden, im Bearbeiten-Modus immer (Core\ImageFx)
+        return str_contains($html, '</head>') ? ImageFx::inject($html, app()->editing) : $html;
     }
 
     public static function capture(string $__file, array $__vars): string
@@ -289,7 +291,13 @@ final class Theme
         if ($block->tunes['height'] === 'screen' || $block->tunes['bgImage']) {
             $this->sectionCss = true;
         }
-        $inner = $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
+        // Bild anpassen je Einbindung (data._fx, Core\ImageFx): gilt für Bilder, die dieser Block selbst ausgibt
+        ImageFx::enter($block->data);
+        try {
+            $inner = $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
+        } finally {
+            ImageFx::leave();
+        }
         if (!empty($block->def['raw'])) {
             return $inner; // Block rendert seinen Abschnitt selbst
         }
