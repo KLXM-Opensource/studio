@@ -438,6 +438,8 @@ return function (Router $r): void {
     $r->get('/offline', [PwaController::class, 'offline']);
     $r->get('/proxy/{source}/{path*}', [ProxyController::class, 'handle']);
     $r->get('/sitemap.xml', [SiteController::class, 'sitemap']);
+    // Rechtstexte im Dialog (Datenschutzhinweise an Formularen, Core\LegalDialog)
+    $r->get('/_legal/{kind}', fn(\Core\Http\Request $req, string $kind) => \Core\LegalDialog::handle($req, $kind));
     $r->get('/robots.txt', [SiteController::class, 'robots']);
     // Theme-Formulare (z. B. /anfrage/rezept) – dahinter die Eingangs-Tabelle des Formulars
     $r->get('/api/form/{form}', [FormController::class, 'challenge']);

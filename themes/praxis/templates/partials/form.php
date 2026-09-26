@@ -59,7 +59,7 @@ $ready = FormCrypto::ready();
   <?php $pid = $uid . '-' . Forms::PRIVACY_FIELD; $perr = $errors[Forms::PRIVACY_FIELD] ?? null; ?>
   <div class="pfield pfield--check">
     <label class="pcheck"><input type="checkbox" id="<?= $pid ?>" name="<?= Forms::PRIVACY_FIELD ?>" value="1" required aria-required="true" aria-describedby="<?= $pid ?>-e"<?= $perr ? ' aria-invalid="true"' : '' ?><?= !empty($values[Forms::PRIVACY_FIELD]) ? ' checked' : '' ?>>
-      <span><?= praxis_fill(lt('Ich habe die {link} gelesen. Bitte keine Beschwerden oder Diagnosen eingeben.'), ['link' => '<a href="' . e(praxis_privacy_url()) . '">' . e(lt('Datenschutzhinweise')) . '</a>']) ?></span></label>
+      <span><?= praxis_fill(lt('Ich habe die {link} gelesen. Bitte keine Beschwerden oder Diagnosen eingeben.'), ['link' => '<a href="' . e(praxis_privacy_url()) . '"' . \Core\LegalDialog::attrs() . '>' . e(lt('Datenschutzhinweise')) . '</a>']) ?></span></label>
     <p class="perr" id="<?= $pid ?>-e"<?= $perr ? '' : ' hidden' ?>><?= e($perr ?? '') ?></p>
   </div>
 
@@ -82,3 +82,4 @@ $ready = FormCrypto::ready();
   <?php if (!empty($compact)): ?><button type="button" class="btn-back" data-flip-back><?= e(lt('Zur Übersicht')) ?></button><?php endif; ?>
 </div>
 <?php endif; ?>
+<?php if (!app()->editing): ?><script src="<?= e(asset('js/legal-dialog.js')) ?>" defer></script><?php endif; /* Datenschutzhinweise im Dialog (Core\LegalDialog) */ ?>

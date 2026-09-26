@@ -239,4 +239,5 @@ return [
     'Anfahrt planen' => 'Plan your route',
     'Kontaktformular' => 'Contact form',
     'Kontaktmöglichkeiten' => 'Ways to contact us',
+    'Als Seite öffnen' => 'Open as page',
 ];

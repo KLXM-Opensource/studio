@@ -5,6 +5,9 @@
  */
 import { conditions } from './_conditions.js';
 import { groups } from './_group.js';
+import { legalDialogs } from './_legal.js';
+
+legalDialogs();   // „Datenschutzhinweise“ im Dialog statt neuem Tab
 
 const enc = new TextEncoder();
 async function solve(token, bits) {

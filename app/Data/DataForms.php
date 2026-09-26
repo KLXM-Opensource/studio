@@ -115,15 +115,23 @@ final class DataForms
     /** Datenschutzseite: Einstellung des Themes (privacy_page / datenschutz_seite) oder Seite „datenschutz“ */
     public static function privacyUrl(): string
     {
+        $p = self::privacyPage();
+        return $p ? Pages::url($p) : '';
+    }
+
+    /** Datenschutzseite (in der Sprache $lang bzw. der aktuellen) oder null – auch für den Dialog (Core\LegalDialog) */
+    public static function privacyPage(?string $lang = null): ?array
+    {
+        $lang ??= Lang::current();
         foreach ((array) (app()->theme->def['privacy_settings'] ?? ['privacy_page', 'datenschutz_seite']) as $k) {
             $id = (int) setting($k);
             if ($id && ($p = Pages::find($id))) {
-                if (Lang::multi()) $p = Pages::translations($p)[Lang::current()] ?? $p;
-                return Pages::url($p);
+                return Lang::multi() ? (Pages::translations($p)[$lang] ?? $p) : $p;
             }
         }
         $p = app()->db->fetch("SELECT * FROM pages WHERE slug IN ('datenschutz', 'datenschutzerklaerung', 'privacy') AND status = 'published' ORDER BY id LIMIT 1");
-        return $p ? Pages::url($p) : '';
+        if ($p && Lang::multi()) $p = Pages::translations($p)[$lang] ?? $p;
+        return $p ?: null;
     }
 
     /**
@@ -174,7 +182,7 @@ final class DataForms
         $perr = $errors[self::PRIVACY] ?? null;
         $purl = self::privacyUrl();
         $ptext = e(lt('Ich habe die {link} gelesen.'));
-        $plink = $purl !== '' ? '<a href="' . e($purl) . '" target="_blank" rel="noopener">' . e(lt('Datenschutzhinweise')) . '<span class="sr-only"> ' . e(lt('(öffnet in neuem Tab)')) . '</span></a>' : e(lt('Datenschutzhinweise'));
+        $plink = $purl !== '' ? '<a href="' . e($purl) . '" target="_blank" rel="noopener"' . \Core\LegalDialog::attrs() . '>' . e(lt('Datenschutzhinweise')) . '<span class="sr-only"> ' . e(lt('(öffnet in neuem Tab)')) . '</span></a>' : e(lt('Datenschutzhinweise'));
         $h .= '<div class="dff-f dff-f--check dff-f--req" data-cf="' . self::PRIVACY . '"><label class="dff-check"><input type="checkbox" id="' . $pid . '" name="' . self::PRIVACY . '" value="1" required aria-required="true" aria-describedby="' . $pid . '-e"'
             . ($perr ? ' aria-invalid="true"' : '') . (!empty($values[self::PRIVACY]) ? ' checked' : '') . '> <span>' . str_replace('{link}', $plink, $ptext) . ' <span class="dff-req" aria-hidden="true">*</span></span></label>'
             . '<p class="dff-err" id="' . $pid . '-e"' . ($perr ? '' : ' hidden') . '>' . e($perr ?? '') . '</p></div>';
