@@ -57,6 +57,10 @@
  * Sicherungen (storage/backups; --keep=N: nur die neuesten N behalten, Standard config 'backup_keep' = 14, 0 = alle)
  *   site:backup [--out=dir] [--keep=N] [--all]        Datenbank + Medien sichern
  *   site:restore <datei> --force                      Sicherung einspielen (z. B. Live-Inhalte auf Staging)
+ *   content:snapshot [--working]                      Live-Stand der Seiten merken (nach dem Holen, deploy/content-pull.sh)
+ *   content:export [--out=datei.json] [--all]        Seit dem Holen geänderte Seiten exportieren (Core\ContentSync)
+ *   content:import <datei.json> [--dry-run] [--publish] [--force]
+ *                                                     Geänderte Seiten übernehmen – nur ohne Konflikt, als Entwurf mit Version
  *   pool:backup [key|--all] [--keep=N]                Geteilte Medien-Pools sichern
  *   pool:restore <datei> --force                      Pool-Sicherung einspielen
  *   shared:backup [key|--all] [--keep=N]              Geteilte Tabellen sichern (Bilder: pool:backup data-…)
@@ -607,6 +611,12 @@ switch ($cmd) {
         echo "Pool „{$pk}“ eingespielt (" . ($man['created'] ?? '?') . ").\n";
         break;
 
+    case 'content:snapshot':
+    case 'content:export':
+    case 'content:import':
+        // Inhalte hin und zurück: live holen, lokal bearbeiten, geänderte Seiten ohne Überschreiben fremder Änderungen zurück (Core\ContentSync)
+        exit(Core\ContentSync::console($cmd, $args));
+
     case 'site:restore':
         // Sicherung einspielen: Datenbank + Medien (z. B. Live-Inhalte auf Staging). Website-Konfiguration bleibt unangetastet.
         $file = $args[0] ?? '';
@@ -616,7 +626,12 @@ switch ($cmd) {
         $man = json_decode((string) @file_get_contents("$tmp/manifest.json"), true) ?: [];
         $cfg = $app->config->get('db');
         if (is_file("$tmp/database.sqlite") && ($cfg['driver'] ?? 'sqlite') === 'sqlite') {
+            // Offene Verbindung dieses Aufrufs: WAL zurückschreiben und abschalten – sonst schreibt SQLite beim Beenden
+            // den alten Stand (z. B. frisch angelegte Startinhalte) über die eingespielte Datei
+            $app->db->query('PRAGMA wal_checkpoint(TRUNCATE)');
+            $app->db->query('PRAGMA journal_mode = DELETE');
             copy("$tmp/database.sqlite", $cfg['path']);
+            foreach (['-wal', '-shm'] as $x) @unlink($cfg['path'] . $x);
         } elseif (is_file("$tmp/database.sql") && ($cfg['driver'] ?? '') === 'mysql') {
             putenv('MYSQL_PWD=' . $cfg['pass']);
             exec(sprintf('mysql -h %s -P %d -u %s %s < %s', escapeshellarg((string) $cfg['host']), (int) $cfg['port'], escapeshellarg((string) $cfg['user']), escapeshellarg((string) $cfg['name']), escapeshellarg("$tmp/database.sql")), $o, $code);

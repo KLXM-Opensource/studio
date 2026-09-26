@@ -50,6 +50,29 @@ Weitere Werte in `targets/*.env`: `PHP`, `SITES` (Standard `--all`), `SSH_OPTS`,
 Erweiterungen sind deshalb **additiv** (neue Tabellen/Spalten, nichts umbenennen oder löschen) – so funktioniert
 auch das vorherige Release nach einem Rollback weiter.
 
+## Inhalte holen, lokal bearbeiten, zurückspielen
+
+Für Korrekturen an vielen Stellen oder mit Werkzeugen, die nur lokal laufen: Live-Stand holen, lokal (oder auf Staging)
+bearbeiten, nur die geänderten Seiten zurückspielen – ohne Änderungen zu überschreiben, die live inzwischen gemacht wurden.
+
+```bash
+deploy/content-pull.sh production default              # Live-Inhalte + Medien holen (überschreibt die lokalen!) und Stand merken
+#   … lokal in der Verwaltung bearbeiten (Entwurf oder veröffentlicht) …
+deploy/content-push.sh production default --dry-run    # zeigt, welche Seiten zurückgehen und ob es Konflikte gibt
+deploy/content-push.sh production default              # übernimmt als Entwurf (live prüfen, dann veröffentlichen)
+deploy/content-push.sh production default --publish    # übernimmt und veröffentlicht sofort
+```
+
+- **Konfliktschutz:** Beim Holen merkt sich `content:snapshot` je Seite einen Fingerabdruck (Blöcke, Titel, SEO-Felder).
+  `content:import` übernimmt eine Seite nur, wenn sie live noch genau so aussieht und dort kein offener Entwurf liegt –
+  sonst wird **nichts** übernommen. Dann neu holen und die Änderung wiederholen (oder bewusst `--force`).
+- **Rückgängig:** Jede übernommene Seite erhält eine Version „Content-Sync (…)“ – über *Versionen* wiederherstellbar.
+- **Grenzen:** Zuordnung über Pfad + Sprache. Neue Seiten, gelöschte Seiten, neu hochgeladene Medien und Grundeinstellungen
+  gehen nicht mit (Medien-Verweise werden geprüft: fehlt ein Bild live, bricht die Übernahme ab).
+- **Ohne Releases** (Installation direkt im Web-Ordner): in `targets/<ziel>.env` `APP_DIR` setzen; bei Passwort-Anmeldung
+  `SSH_CMD="sshpass -e ssh"` und `SCP_CMD="sshpass -e scp"` (Passwort in der Umgebungsvariable `SSHPASS`).
+  Anderer Website-Key lokal: `LOCAL_SITE=kopie deploy/content-pull.sh production default`.
+
 ## GitHub Actions
 
 Vorlage: [`deploy/github-actions/deploy.yml.example`](github-actions/deploy.yml.example) – gedacht für das
