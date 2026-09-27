@@ -44,9 +44,15 @@ final class NetworkController extends AdminController
         foreach ($stats as $k => $s) $warn[$k] = Stats::warnings($s);
         $newSite = app()->session->get('_net_newsite');
         app()->session->forget('_net_newsite');
+        // Einladungslink einmal anzeigen, wenn die E-Mail nicht zugestellt wurde (wie Benutzer & Rollen)
+        $inviteLink = app()->session->get('_net_invite_link');
+        app()->session->forget('_net_invite_link');
+        $old = app()->session->get('_net_invite_old');
+        app()->session->forget('_net_invite_old');
         return $this->view('network/index', ['stats' => $stats, 'warn' => $warn, 'accounts' => Network::accounts(),
+            'invites' => \Core\Invites::open(true), 'inviteLink' => is_array($inviteLink) ? $inviteLink : null, 'inviteOld' => is_array($old) ? $old : null,
             'log' => Network::recentLog(20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
-            'css' => ['css/passkey.css', 'css/network.css']]);
+            'css' => ['css/passkey.css', 'css/invite.css', 'css/network.css']]);
     }
 
     // ================================================================= Anmeldung auf anderen Websites
@@ -179,6 +185,80 @@ final class NetworkController extends AdminController
         }
         Network::log('account.create', null, (string) $user['email'], strtolower($r->str('email')));
         return $this->back('/admin/network#konten', 'success', __('Netzwerk-Konto {email} angelegt. Bei der ersten Anmeldung wird die Zwei-Faktor-Anmeldung eingerichtet.', ['email' => strtolower($r->str('email'))]));
+    }
+
+    // ================================================================= Netzwerk-Administratoren einladen (Core\Invites)
+
+    /** „Netzwerk-Admin einladen“: E-Mail mit Link (7 Tage), Konto entsteht erst beim Annehmen – nur durch aktive Netzwerk-Konten */
+    public function inviteStore(Request $r): Response
+    {
+        $user = $this->inviter($r);
+        $limiter = Network::limiter();
+        $key = 'net-invite:' . (int) $user['id'];
+        $old = ['email' => $r->str('email'), 'name' => $r->str('name'), 'message' => (string) ($r->post['message'] ?? '')];
+        if ($limiter->tooMany($key, 20, 3600)) return $this->inviteError($old, ['email' => __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.')]);
+        $res = \Core\Invites::createNetwork($old + ['locale' => $r->str('locale')], $user);
+        if (!isset($res['token'])) return $this->inviteError($old, $res);
+        $limiter->hit($key);
+        $inv = \Core\Invites::get((int) $res['id']);
+        $sent = \Core\Invites::send($inv, $res['token']);
+        Network::log('network.invite', null, (string) $user['email'], $inv['email'] . ($sent['delivered'] ? '' : ' · ohne E-Mail'));
+        return $this->afterInvite($inv, $res['token'], $sent, __('Einladung an {email} gesendet.', ['email' => $inv['email']]));
+    }
+
+    public function inviteResend(Request $r, string $id): Response
+    {
+        $user = $this->inviter($r);
+        $inv = \Core\Invites::get((int) $id);
+        if (!$inv || !\Core\Invites::isNetwork($inv)) return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+        $limiter = Network::limiter();
+        $key = 'net-invite:' . (int) $user['id'];
+        if ($limiter->tooMany($key, 20, 3600)) return $this->back('/admin/network#konten', 'error', __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
+        if (app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [strtolower((string) $inv['email'])])) {
+            return $this->back('/admin/network#konten', 'error', __('Diese E-Mail-Adresse ist auf der Netzwerk-Website bereits registriert.'));
+        }
+        $token = \Core\Invites::renew((int) $id);
+        if ($token === null) return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+        // Wer erneut sendet, lädt ein (das ursprünglich einladende Konto kann inzwischen gesperrt sein)
+        app()->db->update('user_invites', ['invited_by' => (int) $user['id'], 'invited_by_name' => (string) ($user['name'] ?: $user['email'])], 'id = :id', ['id' => (int) $id]);
+        $limiter->hit($key);
+        $inv = \Core\Invites::get((int) $id);
+        $sent = \Core\Invites::send($inv, $token);
+        Network::log('network.invite-resend', null, (string) $user['email'], $inv['email'] . ($sent['delivered'] ? '' : ' · ohne E-Mail'));
+        return $this->afterInvite($inv, $token, $sent, __('Einladung an {email} erneut gesendet – der vorige Link gilt nicht mehr.', ['email' => $inv['email']]));
+    }
+
+    public function inviteRevoke(Request $r, string $id): Response
+    {
+        $user = $this->inviter($r);
+        $inv = \Core\Invites::get((int) $id);
+        if (!$inv || !\Core\Invites::isNetwork($inv) || !\Core\Invites::revoke((int) $id)) {
+            return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+        }
+        Network::log('network.invite-revoke', null, (string) $user['email'], (string) $inv['email']);
+        return $this->back('/admin/network#konten', 'success', __('Einladung an {email} zurückgezogen – der Link gilt nicht mehr.', ['email' => $inv['email']]));
+    }
+
+    /** Netzwerk-Konto auf der Netzwerk-Website, das einladen darf (aktiv, kein Schatten-Konto) */
+    private function inviter(Request $r): array
+    {
+        $user = $this->network($r);
+        if (!\Core\Invites::networkInviter((int) $user['id'])) throw new HttpException(403, __('Nur Netzwerk-Administratoren können weitere einladen.'));
+        return $user;
+    }
+
+    private function inviteError(array $old, array $errors): Response
+    {
+        app()->session->set('_net_invite_old', $old + ['errors' => $errors]);
+        return $this->back('/admin/network#net-invite', 'error', (string) reset($errors));
+    }
+
+    /** Nach dem Versand: Erfolg – oder den Link einmal anzeigen (E-Mail nicht zugestellt) */
+    private function afterInvite(array $inv, string $token, array $sent, string $ok): Response
+    {
+        if ($sent['delivered']) return $this->back('/admin/network#konten', 'success', $ok);
+        app()->session->set('_net_invite_link', ['email' => (string) $inv['email'], 'url' => \Core\Invites::url($token), 'error' => $sent['error']]);
+        return $this->back('/admin/network#net-invite-link');
     }
 
     /** Anmelde-Richtlinie der Netzwerk-Konten: erlaubte Verfahren, „nur Passkey“ (Core\Mfa, Einstellung sys.net_auth) */

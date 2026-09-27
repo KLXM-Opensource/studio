@@ -349,7 +349,7 @@ final class EmailChange
     // ================================================================= E-Mail
 
     /**
-     * E-Mail zu einem Ereignis ($kind confirm|notice|taken|changed|admin|password) in der Sprache des Kontos.
+     * E-Mail zu einem Ereignis ($kind confirm|notice|taken|changed|admin|password|reset|reset-network|reset-done) in der Sprache des Kontos.
      * @return array{delivered:bool, error:?string}
      */
     public static function mail(string $to, array $user, string $kind, array $v): array
@@ -426,6 +426,33 @@ final class EmailChange
                         ? __('Für Ihr Konto bei {site} wurde am {date} ein Passwort festgelegt. Sie können sich jetzt auch mit E-Mail-Adresse und Passwort anmelden; Ihre Passkeys gelten weiter.', ['site' => $site, 'date' => $date(time())])
                         : (!empty($v['by']) ? __('Das Passwort Ihres Kontos bei {site} wurde am {date} von der Administration neu gesetzt. Andere Sitzungen Ihres Kontos wurden beendet.', ['site' => $site, 'date' => $date(time())])
                             : __('Das Passwort Ihres Kontos bei {site} wurde am {date} geändert. Andere Sitzungen Ihres Kontos wurden beendet.', ['site' => $site, 'date' => $date(time())]))];
+                    $facts = [__('Konto') => (string) $user['email']];
+                    $after[] = __('Waren Sie das nicht? Wenden Sie sich bitte sofort an die Administration der Website.');
+                    break;
+                // „Passwort vergessen“ (Core\PasswordReset)
+                case 'reset':
+                    $subject = __('Passwort zurücksetzen – {site}', ['site' => $site]);
+                    $title = __('Neues Passwort festlegen');
+                    $paras = [__('Für Ihr Konto bei {site} wurde ein neues Passwort angefordert. Über die Schaltfläche legen Sie es fest.', ['site' => $site]),
+                        __('Haben Sie die Zwei-Faktor-Anmeldung oder Passkeys eingerichtet, bleiben sie unverändert – nach dem Passwort fragt die Anmeldung wie gewohnt nach dem zweiten Faktor.')];
+                    $facts = [__('Konto') => (string) ($user['email'] ?? '')];
+                    $cta = ['label' => __('Neues Passwort festlegen'), 'url' => $v['url'],
+                        'note' => __('Der Link gilt {n} Minuten (bis {date}) und nur einmal.', ['n' => (int) ($v['minutes'] ?? 60), 'date' => $date((int) $v['expires'])])];
+                    $foot = __('Sie haben das nicht angefordert? Dann ignorieren Sie diese E-Mail – Ihr Passwort bleibt unverändert.');
+                    break;
+                case 'reset-network':
+                    $subject = __('Passwort zurücksetzen – {site}', ['site' => $site]);
+                    $title = __('Ihr Konto ist ein Netzwerk-Konto');
+                    $paras = [__('Für Ihre Adresse wurde bei {site} ein neues Passwort angefordert. Sie melden sich hier mit einem zentralen Netzwerk-Konto an – dessen Passwort setzen Sie auf der Netzwerk-Website zurück.', ['site' => $site]),
+                        __('Öffnen Sie dort „Passwort vergessen?“ und fordern Sie den Link noch einmal an. Das neue Passwort gilt danach auf allen Websites.')];
+                    $facts = [__('Netzwerk-Website') => (string) ($v['network'] ?? '')];
+                    $cta = ['label' => __('Zur Netzwerk-Website'), 'url' => $v['url'], 'note' => ''];
+                    $foot = __('Sie haben das nicht angefordert? Dann ignorieren Sie diese E-Mail – Ihr Passwort bleibt unverändert.');
+                    break;
+                case 'reset-done':
+                    $subject = !empty($v['first']) ? __('Passwort festgelegt – {site}', ['site' => $site]) : __('Passwort geändert – {site}', ['site' => $site]);
+                    $title = !empty($v['first']) ? __('Sie haben ein Passwort festgelegt') : __('Ihr Passwort wurde geändert');
+                    $paras = [__('Das Passwort Ihres Kontos bei {site} wurde am {date} über „Passwort vergessen“ neu festgelegt. Alle Sitzungen Ihres Kontos wurden beendet; Zwei-Faktor-Anmeldung und Passkeys gelten unverändert weiter.', ['site' => $site, 'date' => $date(time())])];
                     $facts = [__('Konto') => (string) $user['email']];
                     $after[] = __('Waren Sie das nicht? Wenden Sie sich bitte sofort an die Administration der Website.');
                     break;

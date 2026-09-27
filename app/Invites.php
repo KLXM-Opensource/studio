@@ -16,6 +16,10 @@ namespace Core;
  * - E-Mail: HTML + Text (Core\Mailer), Vorlage app/Admin/views/mail/invitation(.txt).php, im Kit überschreibbar unter
  *   kits/{kit}/templates/mail/invitation(.txt).php. Sprache der Einladung (de/en), App-Icon als eingebettetes Bild (CID).
  * - Annehmen: /admin/einladung/{token} (InviteController) – Passkey und/oder Passwort, dann Anmeldung.
+ * - Netzwerk-Administration (createNetwork, NetworkController, CLI network:user --invite): Rolle „network“, nur auf der
+ *   Netzwerk-Website und nur von einem aktiven Netzwerk-Konto (bzw. der Kommandozeile). Zwei-Faktor-Anmeldung Pflicht –
+ *   nach dem Annehmen direkt zur Einrichtung (ein Passkey erfüllt sie schon), dann die Netzwerk-Übersicht. Diese Einladungen
+ *   erscheinen nur in der Netzwerk-Übersicht, nie unter Benutzer & Rollen.
  */
 final class Invites
 {
@@ -163,6 +167,57 @@ final class Invites
         return $token;
     }
 
+    /**
+     * Einladung als Netzwerk-Administration anlegen (ohne Versand) – nur auf der Netzwerk-Website, nur durch ein aktives
+     * Netzwerk-Konto oder die Kommandozeile ($by = null).
+     * @param array{email:string, name?:string, message?:string, locale?:string} $in
+     * @return array{id:int, token:string}|array<string,string> Einladung oder Fehler je Feld
+     */
+    public static function createNetwork(array $in, ?array $by): array
+    {
+        if (!Network\Network::isNetworkSite()) return ['email' => __('Netzwerk-Administratoren werden auf der Netzwerk-Website eingeladen.')];
+        if ($by !== null && !self::networkInviter((int) $by['id'])) return ['email' => __('Nur Netzwerk-Administratoren können weitere einladen.')];
+        $db = app()->db;
+        $email = strtolower(trim((string) ($in['email'] ?? '')));
+        $name = self::clean((string) ($in['name'] ?? ''), self::NAME_MAX);
+        $message = self::cleanMessage((string) ($in['message'] ?? ''));
+        $errors = [];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 191) {
+            $errors['email'] = __('Ungültige E-Mail-Adresse.');
+        } elseif ($db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [$email])) {
+            $errors['email'] = __('Diese E-Mail-Adresse ist auf der Netzwerk-Website bereits registriert.');
+        } elseif ($db->fetchValue('SELECT COUNT(*) FROM user_invites WHERE email = ? AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at > ?', [$email, time()])) {
+            $errors['email'] = __('Für diese Adresse gibt es bereits eine offene Einladung – dort „Erneut senden“ wählen.');
+        }
+        if (mb_strlen(trim((string) ($in['message'] ?? ''))) > self::MESSAGE_MAX) {
+            $errors['message'] = __('Die Nachricht darf höchstens {n} Zeichen lang sein.', ['n' => self::MESSAGE_MAX]);
+        }
+        if ($errors) return $errors;
+        $locale = (string) ($in['locale'] ?? '');
+        if (!array_key_exists($locale, I18n::available())) $locale = (string) (($by['locale'] ?? null) ?: (app()->settings->get('sys.admin_locale') ?: I18n::SOURCE));
+        $db->query('DELETE FROM user_invites WHERE email = ? AND accepted_at IS NULL', [$email]);
+        $token = self::newToken();
+        $id = $db->insert('user_invites', ['token_hash' => self::hash($token), 'email' => $email, 'name' => $name !== '' ? $name : null,
+            'role' => 'network', 'message' => $message !== '' ? $message : null, 'locale' => $locale,
+            'invited_by' => $by ? (int) $by['id'] : null, 'invited_by_name' => $by ? (string) ($by['name'] ?: $by['email']) : null,
+            'created_at' => now(), 'expires_at' => time() + self::days() * 86400]);
+        return ['id' => $id, 'token' => $token];
+    }
+
+    /** Aktives Netzwerk-Konto auf der Netzwerk-Website? (darf Netzwerk-Administratoren einladen) */
+    public static function networkInviter(int $uid): bool
+    {
+        if (!Network\Network::isNetworkSite()) return false;
+        $u = app()->db->fetch("SELECT disabled, network_uid FROM users WHERE id = ? AND role = 'network'", [$uid]);
+        return $u && !(int) $u['disabled'] && empty($u['network_uid']);
+    }
+
+    /** Einladung als Netzwerk-Administration? */
+    public static function isNetwork(array $inv): bool
+    {
+        return ($inv['role'] ?? '') === 'network';
+    }
+
     /** Zurückziehen: Token ungültig (Zeile bleibt für das Protokoll bis zur nächsten Einladung derselben Adresse) */
     public static function revoke(int $id): ?array
     {
@@ -181,11 +236,15 @@ final class Invites
         }
     }
 
-    /** Offene Einladungen (auch abgelaufene, bis sie erneut gesendet oder zurückgezogen werden), neueste zuerst */
-    public static function open(): array
+    /**
+     * Offene Einladungen (auch abgelaufene, bis sie erneut gesendet oder zurückgezogen werden), neueste zuerst.
+     * $network: false = Konten dieser Website (Benutzer & Rollen), true = Netzwerk-Administration (Netzwerk-Übersicht).
+     */
+    public static function open(bool $network = false): array
     {
         try {
-            $rows = app()->db->fetchAll('SELECT * FROM user_invites WHERE accepted_at IS NULL AND revoked_at IS NULL ORDER BY id DESC');
+            $rows = app()->db->fetchAll('SELECT * FROM user_invites WHERE accepted_at IS NULL AND revoked_at IS NULL AND role ' . ($network ? '=' : '!=')
+                . " 'network' ORDER BY id DESC");
         } catch (\Throwable) {
             return [];   // Tabelle fehlt (noch nicht migriert)
         }
@@ -211,9 +270,15 @@ final class Invites
     public static function usable(array $inv): bool
     {
         if ($inv['accepted_at'] || $inv['revoked_at'] || (int) $inv['expires_at'] <= time()) return false;
+        $db = app()->db;
+        if (self::isNetwork($inv)) {
+            // Netzwerk-Administration: nur auf der Netzwerk-Website, einladendes Netzwerk-Konto noch aktiv
+            if (!Network\Network::isNetworkSite()) return false;
+            if ($db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [strtolower((string) $inv['email'])])) return false;
+            return $inv['invited_by'] === null || self::networkInviter((int) $inv['invited_by']);
+        }
         $role = Permissions::role((string) $inv['role']);
         if (!$role || $role['key'] === 'network') return false;
-        $db = app()->db;
         if ($db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [strtolower((string) $inv['email'])])) return false;
         if ($inv['invited_by'] !== null) {
             $by = $db->fetch('SELECT disabled FROM users WHERE id = ?', [(int) $inv['invited_by']]);
@@ -314,7 +379,8 @@ final class Invites
             }
             $brand = self::brand();
             $role = Permissions::role((string) $inv['role']);
-            $pol = Mfa::policy();
+            $network = self::isNetwork($inv);
+            $pol = Mfa::allowed(['role' => (string) $inv['role']]);
             $vars = [
                 'lang' => $lang,
                 'site' => site_name(),
@@ -332,9 +398,13 @@ final class Invites
                 'expires' => self::date((int) $inv['expires_at'], $lang),
                 'passkeys' => $pol['passkey'],
                 'passwordless' => $pol['passwordless'],
+                // Netzwerk-Administration: Zugriff auf ALLE Websites, Zwei-Faktor-Anmeldung Pflicht (Hinweis in der E-Mail)
+                'network' => $network,
+                'sites' => $network ? count(Sites::all()) : 0,
             ];
             $vars['siteHost'] = (string) (parse_url($vars['siteUrl'], PHP_URL_HOST) ?: $vars['siteUrl']);
-            $subject = __('Einladung zu {site}', ['site' => $vars['site']]);
+            $subject = $network ? __('Einladung zur Netzwerk-Administration – {site}', ['site' => $vars['site']])
+                : __('Einladung zu {site}', ['site' => $vars['site']]);
             $html = Theme::capture(self::template('invitation.php'), $vars + ['subject' => $subject]);
             $text = Theme::capture(self::template('invitation.txt.php'), $vars + ['subject' => $subject]);
             return [$subject, trim($text) . "\n", $html, $inline];
@@ -413,7 +483,10 @@ final class Invites
 
     // ================================================================= Selbsttest
 
-    /** Selbsttest (Konsole invites:selftest): Token, Hash, Form, Rollenprüfung, Nachricht – ohne Datenbankänderung */
+    /**
+     * Selbsttest (Konsole invites:selftest): Token, Hash, Form, Rollenprüfung, Nachricht; Netzwerk-Administration einladen
+     * (Umfang, Liste, Annehmen, Ablauf) in einer Transaktion, die zurückgerollt wird.
+     */
     public static function selftest(): array
     {
         $ok = 0;
@@ -454,6 +527,63 @@ final class Invites
         $eq('Nachricht: Länge', mb_strlen(self::cleanMessage(str_repeat('ä', 900))), self::MESSAGE_MAX);
         $eq('Name: eine Zeile', self::clean("Anna\nMüller", self::NAME_MAX), 'Anna Müller');
         $eq('Gültigkeit 1–60 Tage', self::days() >= 1 && self::days() <= 60, true);
+        $eq('Netzwerk-Rolle nie über Benutzer & Rollen', self::create(['email' => 'x@example.invalid', 'role' => 'network'], null, null)['role'] ?? null,
+            __('Netzwerk-Konten werden in der Netzwerk-Verwaltung angelegt.'));
+
+        // Netzwerk-Administration einladen: Umfang (nur Netzwerk-Website, nur Netzwerk-Konten), Liste, Annehmen – zurückgerollt
+        $db = app()->db;
+        $db->pdo->beginTransaction();
+        try {
+            $sfx = bin2hex(random_bytes(4));
+            if (!Network\Network::isNetworkSite()) {
+                $eq('Netzwerk-Einladung nur auf der Netzwerk-Website', isset(self::createNetwork(['email' => "net-$sfx@example.invalid"], null)['token']), false);
+            } else {
+                $ed = $db->insert('users', ['email' => "ed-$sfx@example.invalid", 'name' => 'Ed', 'password_hash' => '!passkey', 'role' => 'editor', 'created_at' => now()]);
+                $na = $db->insert('users', ['email' => "na-$sfx@example.invalid", 'name' => 'Na', 'password_hash' => '!passkey', 'role' => 'network', 'created_at' => now()]);
+                $edRow = $db->fetch('SELECT * FROM users WHERE id = ?', [$ed]);
+                $naRow = $db->fetch('SELECT * FROM users WHERE id = ?', [$na]);
+                $eq('Redaktion darf keine Netzwerk-Admins einladen', isset(self::createNetwork(['email' => "net-$sfx@example.invalid"], $edRow)['token']), false);
+                $res = self::createNetwork(['email' => "NET-$sfx@example.invalid", 'name' => 'Neu', 'message' => "Hallo\x07"], $naRow);
+                $eq('Netzwerk-Konto lädt ein', isset($res['token']), true);
+                $eq('Adresse vergeben → Fehler', isset(self::createNetwork(['email' => "na-$sfx@example.invalid"], $naRow)['email']), true);
+                $eq('Offene Einladung → kein zweites Mal', isset(self::createNetwork(['email' => "net-$sfx@example.invalid"], $naRow)['email']), true);
+                $inv = self::find((string) ($res['token'] ?? ''));
+                $eq('Einladung gefunden, Rolle network', ($inv['role'] ?? ''), 'network');
+                $eq('Nicht unter Benutzer & Rollen', in_array((int) ($res['id'] ?? 0), array_map('intval', array_column(self::open(), 'id')), true), false);
+                $eq('In der Netzwerk-Übersicht', in_array((int) ($res['id'] ?? 0), array_map('intval', array_column(self::open(true), 'id')), true), true);
+                $eq('Benutzer & Rollen kann sie nicht erneut senden/zurückziehen', self::assignable(Permissions::role('network'), null), false);
+                // Einladendes Konto gesperrt → Link ungültig; wieder aktiv → gültig
+                $db->query('UPDATE users SET disabled = 1 WHERE id = ?', [$na]);
+                $eq('Einladendes Konto gesperrt → ungültig', self::find((string) $res['token']), null);
+                $db->query('UPDATE users SET disabled = 0 WHERE id = ?', [$na]);
+                // E-Mail nennt den Umfang und die 2FA-Pflicht
+                [$subj, $txt] = self::mail($inv, (string) $res['token']);
+                $eq('E-Mail: Netzwerk im Betreff', str_contains($subj, __('Netzwerk-Administration')), true);
+                $eq('E-Mail: alle Websites', str_contains($txt, __('Netzwerk-Konto: Zugriff auf ALLE Websites')), true);
+                $eq('E-Mail: 2FA Pflicht', str_contains($txt, __('Die Zwei-Faktor-Anmeldung ist Pflicht: Sie richten sie direkt beim Annehmen ein.')), true);
+                // Annehmen: Konto mit Rolle network, 2FA noch offen (Einrichtung wird danach verlangt)
+                $uid = self::accept($inv, 'Neu', 'ein-sicheres-passwort-1', 'password');
+                $eq('Angenommen', is_int($uid), true);
+                $row = is_int($uid) ? $db->fetch('SELECT * FROM users WHERE id = ?', [$uid]) : null;
+                $eq('Neues Konto ist Netzwerk-Konto', ($row['role'] ?? ''), 'network');
+                if (Totp::required('network')) $eq('2FA-Pflicht noch offen → Einrichtung', $row ? Mfa::satisfied($row) : true, false);
+                $eq('Link einmal verwendbar', self::find((string) $res['token']), null);
+                // Zurückziehen
+                $r2 = self::createNetwork(['email' => "net2-$sfx@example.invalid"], null);
+                $eq('Kommandozeile lädt ein', isset($r2['token']), true);
+                self::revoke((int) $r2['id']);
+                $eq('Zurückgezogen → ungültig', self::find((string) $r2['token']), null);
+                // Abgelaufen
+                $r3 = self::createNetwork(['email' => "net3-$sfx@example.invalid"], $naRow);
+                $db->update('user_invites', ['expires_at' => time() - 1], 'id = :id', ['id' => (int) $r3['id']]);
+                $eq('Abgelaufen → ungültig', self::find((string) $r3['token']), null);
+                $eq('Abgelaufen bleibt in der Liste', (bool) array_filter(self::open(true), fn($r) => (int) $r['id'] === (int) $r3['id'] && $r['expired']), true);
+            }
+        } catch (\Throwable $e) {
+            $fails[] = 'Netzwerk-Einladung · Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
+        } finally {
+            if ($db->pdo->inTransaction()) $db->pdo->rollBack();
+        }
         return ['ok' => $ok, 'fails' => $fails];
     }
 }

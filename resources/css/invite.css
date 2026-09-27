@@ -24,6 +24,10 @@
 .inv-meter span{display:block;height:100%;width:0;border-radius:3px;background:var(--adm-err);transition:width .2s ease,background-color .2s ease}
 .inv-meter[data-level="1"] span{background:var(--adm-warn)}
 .inv-meter[data-level="2"] span,.inv-meter[data-level="3"] span,.inv-meter[data-level="4"] span{background:var(--adm-ok)}
+/* Netzwerk-Administration: deutlicher Hinweis (alle Websites, 2FA Pflicht) */
+.inv-net{margin:0 0 18px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--adm-warn);background:var(--adm-warn-bg)}
+.inv-net p{margin:0 0 4px;font-size:14.5px}
+.inv-net p:last-child{margin:0}
 .inv-note{margin:14px 0 0;font-size:13px;color:var(--adm-t2)}
 .inv-hint{margin:14px 0;padding:10px 14px;border-radius:8px;background:var(--adm-info-bg);font-weight:600}
 @media (prefers-reduced-motion:reduce){.inv-meter span{transition:none}}
@@ -39,3 +43,4 @@
 .inv-form textarea{min-height:76px}
 .us-side .inv-form > .adm-muted{margin:-4px 0 16px}
 .inv-link code{overflow-wrap:anywhere;word-break:break-all}
+.net-invite .inv-form > .adm-muted{margin:0 0 14px}

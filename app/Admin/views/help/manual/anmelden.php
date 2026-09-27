@@ -6,6 +6,16 @@
   </ol>
   <div class="doc-note doc-note--info"><strong>Rollen</strong><p>Was Sie sehen, hängt von Ihrer Rolle ab. Die Vorlagen: <b>Redaktion</b> pflegt Seiten, <?= e($settingsTitle) ?>, Medien, Einträge und Anfragen und nutzt die KI-Funktionen; <b>Autorin/Autor</b> schreibt Entwürfe, veröffentlicht aber nichts; <b>Anfragen bearbeiten</b> liest nur Anfragen; <b>Administration</b> darf zusätzlich Grundeinstellungen, Design, Benutzer &amp; Rollen, Tabellen-Baukasten, API &amp; MCP und die Freigabe von Einreichungen. Die Administration kann unter <b>Benutzer &amp; Rollen</b> eigene Rollen zusammenstellen – fehlt ein Menüpunkt oder der Knopf „Veröffentlichen“, ist das so gewollt.</p></div>
   <div class="doc-note doc-note--warn"><strong>Sicherheit</strong><p>Nach 8 falschen Anmeldeversuchen von einem Anschluss ist die Anmeldung dort 15 Minuten gesperrt. Eine Sitzung endet spätestens nach 12 Stunden. Melden Sie sich an gemeinsam genutzten Rechnern immer ab.</p></div>
+  <h3 id="passwort-vergessen">Passwort vergessen</h3>
+  <ol class="doc-steps">
+    <li>Auf der Anmeldeseite neben „Passwort“ <b>Passwort vergessen?</b> wählen und die E-Mail-Adresse Ihres Kontos eingeben.</li>
+    <li>Die Seite antwortet immer gleich: „Wenn ein Konto zu dieser Adresse existiert, haben wir Ihnen einen Link geschickt.“ – so erfährt niemand, welche Adressen ein Konto haben.</li>
+    <li>In der E-Mail „Passwort zurücksetzen“ <b>Neues Passwort festlegen</b> wählen. Der Link gilt <b>60 Minuten</b> und nur einmal; fordern Sie einen neuen an, gilt nur noch der neueste.</li>
+    <li>Das neue Passwort zweimal eingeben (mindestens 12 Zeichen, mit „Anzeigen“ prüfen) und <b>Passwort speichern</b>. Alle Sitzungen Ihres Kontos enden, und Sie erhalten eine Bestätigung per E-Mail.</li>
+    <li>Danach wie gewohnt anmelden. Haben Sie die <b>Zwei-Faktor-Anmeldung</b> oder einen Passkey eingerichtet, fragt die Anmeldung nach dem Passwort weiter danach – das Zurücksetzen umgeht den zweiten Faktor nicht. Passkeys bleiben erhalten.</li>
+  </ol>
+  <p>Melden Sie sich bisher nur mit Passkey an, legen Sie auf diesem Weg zusätzlich ein Passwort fest. Aus Sicherheitsgründen sind höchstens 5 Anfragen je Anschluss in 15 Minuten und 3 E-Mails je Adresse und Stunde möglich. Gesperrte Konten bekommen keine E-Mail.</p>
+  <div class="doc-note doc-note--info"><strong>Netzwerk-Konten und fehlender E-Mail-Versand</strong><p>Netzwerk-Konten setzen ihr Passwort auf der Hauptwebsite (Netzwerk-Website) zurück; fordern sie den Link auf einer anderen Website an, führt die E-Mail dorthin. Ist der E-Mail-Versand nicht eingerichtet, sieht die Seite gleich aus, es kommt aber keine E-Mail – das Netzwerk-Protokoll vermerkt eine Warnung. Dann hilft die Administration unter <b>Benutzer &amp; Rollen</b> bzw. auf dem Server <code>php bin/console user:password &lt;email&gt;</code>.</p></div>
   <h3 id="anmeldedaten">Anmeldedaten ändern</h3>
   <p>Unter <b>Konto › Anmeldedaten</b> sehen Sie auf einen Blick, womit Sie sich anmelden: E-Mail-Adresse, ob ein Passwort festgelegt ist, Ihre Passkeys und die Zwei-Faktor-Anmeldung. Bei jeder Änderung erhalten Sie eine E-Mail.</p>
   <ol class="doc-steps">

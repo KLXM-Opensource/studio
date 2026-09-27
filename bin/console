@@ -13,6 +13,7 @@
  *   user:email <alt> <neu>                            E-Mail-Adresse eines lokalen Kontos direkt ändern (ohne Bestätigung;
  *                                                     Hinweis an beide Adressen, Sitzungen enden)
  *   account:selftest                                  Selbsttest der Anmeldedaten (Tokens, Ablauf, Abbrechen, vergebene Adresse, auth_ver)
+ *                                                     und von „Passwort vergessen“ (Frist, einmalig, keine Rückschlüsse, 2FA bleibt)
  *   user:invite <email> [rolle] [--name="…"] [--lang=de|en]
  *                                                     Person einladen (E-Mail mit Link, 7 Tage gültig; ohne Versand wird der Link angezeigt)
  *   invites:selftest                                  Selbsttest der Einladungen (Token, Hash, Rollenprüfung)
@@ -25,8 +26,9 @@
  *   site:hosts <key> [add|remove <domain>] [--landing]
  *                                                     Domains einer Website anzeigen/ändern (--landing: Domain für Landingpages)
  *   network:list                                      Netzwerk-Administration: Konten (Netzwerk-Website) und Websites
- *   network:user <email> [--create|--disable|--enable|--reset-2fa|--password] [--name="…"]
- *                                                     Netzwerk-Konto anlegen/sperren/2FA zurücksetzen (Passwort wird abgefragt)
+ *   network:user <email> [--invite|--create|--disable|--enable|--reset-2fa|--password] [--name="…"] [--lang=de|en]
+ *                                                     Netzwerk-Konto einladen (E-Mail mit Link, 7 Tage, 2FA beim Annehmen) bzw.
+ *                                                     anlegen/sperren/2FA zurücksetzen (Passwort wird abgefragt)
  *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
@@ -183,7 +185,10 @@ switch ($cmd) {
 
     case 'account:selftest':
         // Anmeldedaten (Core\EmailChange): Tokens, Ablauf, Abbrechen, vergebene Adresse, auth_ver – in einer Transaktion, zurückgerollt
+        // dazu „Passwort vergessen“ (Core\PasswordReset): Token, Frist, einmalig, keine Rückschlüsse, 2FA bleibt Pflicht
         $res = Core\EmailChange::selftest();
+        $pr = Core\PasswordReset::selftest();
+        $res = ['ok' => $res['ok'] + $pr['ok'], 'fails' => [...$res['fails'], ...$pr['fails']]];
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
@@ -370,9 +375,33 @@ switch ($cmd) {
         $flags = array_slice($args, 1);
         $name = '';
         foreach ($flags as $f) if (str_starts_with($f, '--name=')) $name = substr($f, 7);
-        if ($email === '' || str_starts_with($email, '--')) { fwrite(STDERR, "Aufruf: network:user <email> [--create|--disable|--enable|--reset-2fa|--password] [--name=\"…\"]\n"); exit(1); }
+        if ($email === '' || str_starts_with($email, '--')) { fwrite(STDERR, "Aufruf: network:user <email> [--invite|--create|--disable|--enable|--reset-2fa|--password] [--name=\"…\"] [--lang=de|en]\n"); exit(1); }
         $N = Core\Network\Network::class;
         try {
+            if (in_array('--invite', $flags, true)) {
+                // Einladung als Netzwerk-Administration (Core\Invites::createNetwork) – Token gilt nur auf der Netzwerk-Website
+                if (!$N::isNetworkSite()) {
+                    passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' network:user ' . implode(' ', array_map('escapeshellarg', $args))
+                        . ' --site=' . escapeshellarg($N::siteKey()), $code);
+                    exit($code);
+                }
+                $lang = '';
+                foreach ($flags as $f) if (str_starts_with($f, '--lang=')) $lang = substr($f, 7);
+                $res = Core\Invites::createNetwork(['email' => $email, 'name' => $name, 'locale' => $lang], null);
+                if (!isset($res['token'])) { foreach ($res as $k => $msg) fwrite(STDERR, "  $k: $msg\n"); exit(1); }
+                $inv = Core\Invites::get((int) $res['id']);
+                $sent = Core\Invites::send($inv, $res['token']);
+                $N::log('network.invite', null, 'cli', $email . ($sent['delivered'] ? '' : ' · ohne E-Mail'));
+                echo "Einladung zur Netzwerk-Administration für $email angelegt – gültig bis " . date('d.m.Y H:i', (int) $inv['expires_at']) . ".\n"
+                    . "Beim Annehmen: Passkey und/oder Passwort, danach sofort die Zwei-Faktor-Anmeldung.\n";
+                if ($sent['delivered']) {
+                    echo "E-Mail versendet.\n";
+                } else {
+                    echo ($sent['error'] ? "E-Mail NICHT versendet: {$sent['error']}\n" : "E-Mail nicht zugestellt (" . environment() . ": nur protokolliert, umgeleitet oder als Datei abgelegt).\n")
+                        . "Link (nur jetzt sichtbar, einmal gültig):\n  " . Core\Invites::url($res['token']) . "\n";
+                }
+                break;
+            }
             if (in_array('--create', $flags, true)) {
                 $pw = $ask('Passwort (mind. 12 Zeichen): ', true);
                 $id = $N::createAccount($email, $pw, $name);

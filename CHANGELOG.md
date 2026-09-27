@@ -6,6 +6,28 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anmeldung: „Passwort vergessen“ (`Core\PasswordReset`)
+- **Link auf der Anmeldeseite** → `/admin/passwort-vergessen`: E-Mail-Adresse eingeben, Antwort immer gleich („Wenn ein Konto
+  zu dieser Adresse existiert, haben wir Ihnen einen Link geschickt.“) – unbekannte, gesperrte und Schatten-Konten, Begrenzung
+  je Adresse und fehlender E-Mail-Versand verraten nichts; die E-Mail geht nach der Antwort hinaus (gleiche Antwortzeit).
+- **Einmal-Link** (32 Zufallsbytes, nur als SHA-256 an Zweck und Website gebunden), 60 Minuten gültig (`'password_reset_minutes'`),
+  nur der neueste gilt; Link-Adresse nie aus einem beliebigen Host-Header. Seite `/admin/passwort/{token}`: GET zeigt das
+  Formular, POST setzt das Passwort (Richtlinie, Anzeigen/Verbergen, Stärke-Hinweis).
+- Danach enden alle Sitzungen (`auth_ver`), Hinweis-E-Mail, Protokoll. **Der zweite Faktor wird nicht umgangen:** keine
+  Anmeldung nach dem Zurücksetzen, TOTP und Passkeys bleiben. Konten nur mit Passkey können so ein Passwort ergänzen.
+- Netzwerk-Konten setzen auf der Netzwerk-Website zurück; andere Websites schicken einen Hinweis dorthin (ohne Token).
+  Ohne E-Mail-Versand (`Mailer::ready()`): gleiche Antwort, Warnung im Netzwerk-Protokoll. Begrenzung 5/15 min je Anschluss,
+  3/h je Adresse. `user:password` bleibt; `account:selftest` prüft Tokens, Ablauf, keine Rückschlüsse und die 2FA-Pflicht.
+
+### Netzwerk: weitere Netzwerk-Admins einladen
+- **„+ Netzwerk-Admin einladen“** in der Netzwerk-Übersicht (E-Mail, Name, Nachricht) statt Startpasswort; die E-Mail im Stil
+  der Einladungen nennt deutlich „Zugriff auf ALLE Websites“ und die Pflicht zur Zwei-Faktor-Anmeldung. Link 7 Tage, einmal.
+- Annehmen mit Passkey und/oder Passwort, danach sofort die Pflicht-Einrichtung des zweiten Faktors (Passkey erfüllt sie),
+  dann die Netzwerk-Übersicht. Offene Einladungen in der Kontenliste mit „Erneut senden“ und „Zurückziehen“.
+- Nur aktive Netzwerk-Konten auf der Netzwerk-Website laden ein (einladendes Konto gesperrt → Link ungültig); nie über
+  Benutzer & Rollen. Alles im Netzwerk-Protokoll (`network.invite*`). „Mit Startpasswort anlegen“ bleibt zugeklappt für
+  Installationen ohne E-Mail. CLI `network:user <email> --invite [--name=…]`; `invites:selftest` prüft den Umfang.
+
 ### Anmeldung: Farbhimmel nach Tageszeit (`Core\AuthScreen`)
 - **Neuer Rahmen für alle Seiten vor der Anmeldung** (Anmelden, Passkey, Zwei-Faktor/Wiederherstellungscode, Einladung,
   Links aus E-Mails, Einrichtung): ruhig bewegter Farbhimmel aus drei weichen Farbflächen (reines CSS, nur `transform`),

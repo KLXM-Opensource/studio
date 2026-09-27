@@ -23,6 +23,22 @@ final class Mailer
         };
     }
 
+    /**
+     * Versand eingerichtet? Gültiger Absender und SMTP-Server (bzw. sendmail/native); lokal genügt config 'mail_dump'.
+     * Versandart „Deaktiviert“ (null) gilt als nicht eingerichtet. Ohne Verbindungstest – z. B. für „Passwort vergessen“.
+     */
+    public static function ready(): bool
+    {
+        if (app()->config->get('mail_dump')) return true;
+        $s = app()->settings;
+        if (!filter_var((string) $s->get('sys.mail_from', ''), FILTER_VALIDATE_EMAIL)) return false;
+        return match ((string) $s->get('sys.mail_transport', 'smtp')) {
+            'null' => false,
+            'sendmail', 'native' => true,
+            default => (string) $s->get('sys.mail_host', '') !== '',
+        };
+    }
+
     private static function smtpDsn(): string
     {
         $s = app()->settings;

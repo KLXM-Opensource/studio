@@ -104,12 +104,12 @@ final class InviteController extends AdminController
             return $this->page('invite/invalid', ['limited' => false], 410);
         }
         $this->locale($inv);
-        $pol = Mfa::policy();
+        $pol = Mfa::allowed(['role' => (string) $inv['role']]);   // Netzwerk-Administration: Richtlinie der Netzwerk-Konten
         $role = Permissions::role((string) $inv['role']);
         return $this->page('invite/accept', ['inv' => $inv, 'token' => $token, 'role' => $role, 'errors' => $errors, 'old' => $old,
             // Passkey anbieten: erlaubt und unter dieser Adresse möglich; ohne Passwort nur, wenn die Anmeldung ohne Passwort erlaubt ist
             'passkey' => $pol['passkey'] && Passkeys::available(), 'passwordless' => $pol['passwordless'],
-            'twofa' => Mfa::requirement(['role' => (string) $inv['role']]), 'me' => app()->auth->user()], $errors ? 422 : 200);
+            'twofa' => Mfa::requirement(['role' => (string) $inv['role']]), 'me' => app()->auth->user(), 'network' => Invites::isNetwork($inv)], $errors ? 422 : 200);
     }
 
     /** Annehmen mit Passwort (Formular ohne JavaScript bzw. „Mit Passwort fortfahren“) */
@@ -127,7 +127,7 @@ final class InviteController extends AdminController
             return $this->page('invite/invalid', ['limited' => false], 410);
         }
         $this->locale($inv);
-        $errors = $this->validate($r, true);
+        $errors = $this->validate($r, true, $inv);
         if ($errors) {
             $limiter->hit($key);
             return $this->show($r, $token, $errors, $old);
@@ -146,7 +146,7 @@ final class InviteController extends AdminController
     {
         [$inv, $fail] = $this->jsonGuard($r, $token);
         if ($fail) return $fail;
-        if ($errors = $this->validate($r, false)) return Response::json(['error' => reset($errors), 'field' => key($errors)], 422);
+        if ($errors = $this->validate($r, false, $inv)) return Response::json(['error' => reset($errors), 'field' => key($errors)], 422);
         $uid = Invites::nextUserId(app()->db);
         $name = Invites::clean($r->str('name'), Invites::NAME_MAX);
         $handle = Mfa::handle(['id' => $uid, 'role' => (string) $inv['role']]);
@@ -161,7 +161,7 @@ final class InviteController extends AdminController
         if ($fail) return $fail;
         $limiter = new RateLimiter(app()->db);
         $key = $this->limitKey($r);
-        if ($errors = $this->validate($r, false)) return Response::json(['error' => reset($errors), 'field' => key($errors)], 422);
+        if ($errors = $this->validate($r, false, $inv)) return Response::json(['error' => reset($errors), 'field' => key($errors)], 422);
         $p = Passkeys::pending();
         if (!$p || (int) ($p['invite'] ?? 0) !== (int) $inv['id'] || empty($p['uid'])) {
             $limiter->hit($key);
@@ -187,11 +187,22 @@ final class InviteController extends AdminController
 
     // ================================================================= Hilfen
 
-    /** Neues Konto anmelden, protokollieren, begrüßen; mit Passkey und Passwort einmal die Wiederherstellungscodes zeigen */
+    /**
+     * Neues Konto anmelden, protokollieren, begrüßen; mit Passkey und Passwort einmal die Wiederherstellungscodes zeigen.
+     * Netzwerk-Administration: ohne Passkey direkt zur Pflicht-Einrichtung der Zwei-Faktor-Anmeldung, danach die Netzwerk-Übersicht.
+     */
     private function welcome(array $inv, int $uid, string $name, string $method, bool $codes = false): Response
     {
+        $network = Invites::isNetwork($inv);
         app()->auth->login($uid);
-        Invites::log('user.invite-accept', (string) $inv['email'], $inv['role'] . ' · ' . $method);
+        Invites::log($network ? 'network.invite-accept' : 'user.invite-accept', (string) $inv['email'], $inv['role'] . ' · ' . $method);
+        if ($network) {
+            $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$uid]);
+            if ($row && !Mfa::satisfied($row)) {
+                app()->session->flash('success', __('Willkommen! Ihr Netzwerk-Konto ist angelegt. Richten Sie jetzt die Zwei-Faktor-Anmeldung ein – ohne sie geht es nicht weiter.'));
+                return Response::redirect(url(Mfa::setupPath($row)) . '?next=' . rawurlencode('/admin/network'));
+            }
+        }
         app()->session->flash('success', $name !== '' ? __('Willkommen, {name}! Ihr Konto ist eingerichtet.', ['name' => $name])
             : __('Willkommen! Ihr Konto ist eingerichtet.'));
         if ($codes) {
@@ -200,21 +211,21 @@ final class InviteController extends AdminController
             app()->session->set('_pk_codes', $list);
             return Response::redirect(url('/admin/account/2fa/codes'));
         }
-        return Response::redirect(url('/admin'));
+        return Response::redirect(url($network ? '/admin/network' : '/admin'));
     }
 
     /**
      * Name und Passwort prüfen. Passwort: Pflicht ohne Passkey bzw. wenn die Anmeldung ohne Passwort nicht erlaubt ist;
      * sonst freiwillig (dann Richtlinie + Wiederholung). @return array<string,string> Fehler je Feld
      */
-    private function validate(Request $r, bool $passwordOnly): array
+    private function validate(Request $r, bool $passwordOnly, array $inv): array
     {
         $errors = [];
         $name = $r->str('name');
         if ($name === '') $errors['name'] = __('Bitte geben Sie Ihren Namen an.');
         elseif (mb_strlen($name) > Invites::NAME_MAX) $errors['name'] = __('Der Name ist zu lang.');
         $pw = (string) ($r->post['password'] ?? '');
-        $required = $passwordOnly || !Mfa::policy()['passwordless'];
+        $required = $passwordOnly || !Mfa::allowed(['role' => (string) $inv['role']])['passwordless'];
         if ($pw === '' && $required) {
             $errors['password'] = __('Bitte legen Sie ein Passwort fest.');
         } elseif ($pw !== '') {
@@ -238,7 +249,7 @@ final class InviteController extends AdminController
             return [null, Response::json(['error' => __('Diese Einladung ist nicht mehr gültig.'), 'redirect' => url('/admin/einladung/' . $token)], 410)];
         }
         $this->locale($inv);
-        if (!Mfa::policy()['passkey'] || !Passkeys::available()) {
+        if (!Mfa::allowed(['role' => (string) $inv['role']])['passkey'] || !Passkeys::available()) {
             return [null, Response::json(['error' => __('Passkeys sind auf dieser Website nicht freigegeben.')], 403)];
         }
         return [$inv, null];

@@ -21,6 +21,11 @@ return function (Router $r): void {
     $r->get('/admin/login', [Admin\AuthController::class, 'loginForm']);
     $r->post('/admin/login', [Admin\AuthController::class, 'login']);
     $r->post('/admin/logout', [Admin\AuthController::class, 'logout']);
+    // „Passwort vergessen“ (Core\PasswordReset): Anfrage mit immer gleicher Antwort; Link aus der E-Mail (GET = Formular, POST = setzen)
+    $r->get('/admin/passwort-vergessen', [Admin\PasswordController::class, 'forgotForm']);
+    $r->post('/admin/passwort-vergessen', [Admin\PasswordController::class, 'forgot']);
+    $r->get('/admin/passwort/{token}', [Admin\PasswordController::class, 'resetForm']);
+    $r->post('/admin/passwort/{token}', [Admin\PasswordController::class, 'reset']);
     $r->get('/admin/setup', [Admin\AuthController::class, 'setupForm']);
     $r->post('/admin/setup', [Admin\AuthController::class, 'setup']);
     $r->get('/admin/account', [Admin\UserController::class, 'account']);
@@ -63,6 +68,10 @@ return function (Router $r): void {
     $r->post('/admin/network/open', [Admin\NetworkController::class, 'open']);
     $r->post('/admin/network/sites', [Admin\NetworkController::class, 'createSite']);
     $r->post('/admin/network/accounts', [Admin\NetworkController::class, 'accountCreate']);
+    // Weitere Netzwerk-Administratoren einladen (Core\Invites, Rolle network – nur Netzwerk-Website, nur Netzwerk-Konten)
+    $r->post('/admin/network/invite', [Admin\NetworkController::class, 'inviteStore']);
+    $r->post('/admin/network/invites/{id}/resend', [Admin\NetworkController::class, 'inviteResend']);
+    $r->post('/admin/network/invites/{id}/revoke', [Admin\NetworkController::class, 'inviteRevoke']);
     $r->post('/admin/network/accounts/{id}/{action}', [Admin\NetworkController::class, 'accountAction']);
     $r->post('/admin/network/site/{key}/{action}', [Admin\NetworkController::class, 'action']);
     // Landingpages mit eigenen Domains (Core\Landings, Funktion „landings“)

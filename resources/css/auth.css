@@ -96,6 +96,10 @@ body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-heigh
 .auth-greet::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;
   background:conic-gradient(hsl(var(--auth-h) var(--auth-s) 55%),hsl(var(--auth-h2) var(--auth-s) 50%),hsl(28 90% 60%),hsl(var(--auth-h) var(--auth-s) 55%))}
 
+/* „Passwort vergessen?“ neben der Beschriftung des Passwortfelds */
+.auth-pwlabel{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.auth-forgot{font-size:13.5px;font-weight:600;color:var(--adm-a-ink);text-underline-offset:3px}
+
 /* Unter der Karte: Zur Website, KLXM Studio – Text direkt auf dem Himmel immer in --adm-ink (Kontrast ≥ 4,5:1 auf allen Farbflächen) */
 .auth-screen .adm-auth>.adm-muted{margin:18px 0 8px;color:var(--adm-ink)}
 .auth-screen .adm-auth>.adm-muted a{color:var(--adm-ink);text-underline-offset:3px}

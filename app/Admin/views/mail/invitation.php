@@ -7,10 +7,21 @@
  * @var string $lang  @var string $subject  @var string $site  @var string $siteUrl  @var string $siteHost  @var ?string $logo (cid:logo)
  * @var string $brand  @var string $brandDark  @var string $onBrand  @var string $onBrandDark  @var string $inviter  @var string $role
  * @var string $name  @var string $message  @var string $url  @var string $expires  @var bool $passkeys  @var bool $passwordless
+ * @var bool $network  Einladung als Netzwerk-Administration (Zugriff auf alle Websites, Zwei-Faktor-Anmeldung Pflicht)  @var int $sites
  */
+$network ??= false;   // ältere Fassungen im Kit kennen die Variable nicht
+$sites ??= 0;
 $font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 $cta = __('Einladung annehmen');
-$pre = __('{name} hat Sie als {role} zu {site} eingeladen.', ['name' => $inviter, 'role' => $role, 'site' => $site]);
+$pre = $network ? __('{name} hat Sie zur Netzwerk-Administration eingeladen – Zugriff auf alle Websites.', ['name' => $inviter])
+    : __('{name} hat Sie als {role} zu {site} eingeladen.', ['name' => $inviter, 'role' => $role, 'site' => $site]);
+$steps = $network
+    ? ($passkeys ? __('Nach dem Klick geben Sie Ihren Namen ein und legen einen Passkey und/oder ein Passwort fest (mindestens 12 Zeichen). Direkt danach richten Sie die Zwei-Faktor-Anmeldung ein – ein Passkey erfüllt sie bereits, sonst die Authenticator-App. Danach öffnet sich die Netzwerk-Übersicht.')
+        : __('Nach dem Klick geben Sie Ihren Namen ein und legen ein Passwort fest (mindestens 12 Zeichen). Direkt danach richten Sie die Zwei-Faktor-Anmeldung mit einer Authenticator-App ein. Danach öffnet sich die Netzwerk-Übersicht.'))
+    : ($passkeys && $passwordless
+        ? __('Nach dem Klick geben Sie Ihren Namen ein und wählen, wie Sie sich künftig anmelden: am einfachsten mit einem Passkey – bestätigt per Fingerabdruck, Gesicht oder Geräte-PIN, ohne Passwort – oder mit einem eigenen Passwort (mindestens 12 Zeichen).')
+        : ($passkeys ? __('Nach dem Klick geben Sie Ihren Namen ein und legen ein Passwort fest (mindestens 12 Zeichen). Zusätzlich können Sie einen Passkey einrichten – bestätigt per Fingerabdruck, Gesicht oder Geräte-PIN.')
+            : __('Nach dem Klick geben Sie Ihren Namen ein und legen ein Passwort fest (mindestens 12 Zeichen).')));
 ?>
 <!DOCTYPE html>
 <html lang="<?= e($lang) ?>" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
@@ -80,12 +91,34 @@ $pre = __('{name} hat Sie als {role} zu {site} eingeladen.', ['name' => $inviter
               <tr><td class="brand-bar" height="5" bgcolor="<?= e($brand) ?>" style="height:5px; line-height:5px; font-size:5px; background-color:<?= e($brand) ?>; border-radius:12px 12px 0 0;">&nbsp;</td></tr>
               <tr>
                 <td class="px" style="padding:34px 40px 8px; font-family:<?= $font ?>;">
-                  <h1 class="h1 t-ink" style="margin:0 0 16px; font-size:26px; line-height:33px; font-weight:800; color:#1F2430;"><?= e(__('Sie wurden zu {site} eingeladen', ['site' => $site])) ?></h1>
+                  <h1 class="h1 t-ink" style="margin:0 0 16px; font-size:26px; line-height:33px; font-weight:800; color:#1F2430;"><?= e($network ? __('Einladung zur Netzwerk-Administration') : __('Sie wurden zu {site} eingeladen', ['site' => $site])) ?></h1>
                   <p class="t-ink" style="margin:0 0 14px; font-size:16px; line-height:25px; color:#1F2430;"><?= e($name !== '' ? __('Guten Tag {name},', ['name' => $name]) : __('Guten Tag,')) ?></p>
+                  <?php if ($network): ?>
+                  <p class="t-ink" style="margin:0 0 20px; font-size:16px; line-height:25px; color:#1F2430;"><?= __('{name} lädt Sie ein, als {role} alle Websites dieser Installation zu betreuen.', [
+                      'name' => '<strong>' . e($inviter) . '</strong>', 'role' => '<strong>' . e($role) . '</strong>']) ?></p>
+                  <?php else: ?>
                   <p class="t-ink" style="margin:0 0 20px; font-size:16px; line-height:25px; color:#1F2430;"><?= __('{name} lädt Sie ein, als {role} an der Website {site} mitzuarbeiten.', [
                       'name' => '<strong>' . e($inviter) . '</strong>', 'role' => '<strong>' . e($role) . '</strong>', 'site' => e($site)]) ?></p>
+                  <?php endif; ?>
                 </td>
               </tr>
+              <?php if ($network): // Deutlicher Hinweis: zentrales Konto mit Zugriff auf ALLE Websites, 2FA Pflicht ?>
+              <tr>
+                <td class="px" style="padding:0 40px 20px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td class="bg-soft" style="border:2px solid #B54708; background-color:#FFFAEB; padding:14px 18px; border-radius:8px; font-family:<?= $font ?>;">
+                        <p class="t-ink" style="margin:0 0 6px; font-size:15px; line-height:21px; font-weight:800; color:#1F2430;"><?= e(__('Netzwerk-Konto: Zugriff auf ALLE Websites')) ?></p>
+                        <p class="t-ink" style="margin:0 0 6px; font-size:14.5px; line-height:22px; color:#1F2430;"><?= e($sites > 1
+                            ? __('Mit diesem Konto verwalten Sie alle {n} Websites dieser Installation mit allen Inhalten, Daten und Konten.', ['n' => $sites])
+                            : __('Mit diesem Konto verwalten Sie alle Websites dieser Installation mit allen Inhalten, Daten und Konten.')) ?></p>
+                        <p class="t-ink" style="margin:0; font-size:14.5px; line-height:22px; font-weight:700; color:#1F2430;"><?= e(__('Die Zwei-Faktor-Anmeldung ist Pflicht: Sie richten sie direkt beim Annehmen ein.')) ?></p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <?php endif; ?>
               <?php if ($message !== ''): ?>
               <tr>
                 <td class="px" style="padding:0 40px 20px;">
@@ -128,10 +161,7 @@ $pre = __('{name} hat Sie als {role} zu {site} eingeladen.', ['name' => $inviter
                     <tr>
                       <td class="bg-soft" style="background-color:#F5F6F9; border-radius:8px; padding:16px 18px; font-family:<?= $font ?>;">
                         <p class="t-ink" style="margin:0 0 6px; font-size:15px; line-height:21px; font-weight:700; color:#1F2430;"><?= e(__('So geht es weiter')) ?></p>
-                        <p class="t-ink" style="margin:0; font-size:14.5px; line-height:22px; color:#1F2430;"><?= e($passkeys && $passwordless
-                            ? __('Nach dem Klick geben Sie Ihren Namen ein und wählen, wie Sie sich künftig anmelden: am einfachsten mit einem Passkey – bestätigt per Fingerabdruck, Gesicht oder Geräte-PIN, ohne Passwort – oder mit einem eigenen Passwort (mindestens 12 Zeichen).')
-                            : ($passkeys ? __('Nach dem Klick geben Sie Ihren Namen ein und legen ein Passwort fest (mindestens 12 Zeichen). Zusätzlich können Sie einen Passkey einrichten – bestätigt per Fingerabdruck, Gesicht oder Geräte-PIN.')
-                                : __('Nach dem Klick geben Sie Ihren Namen ein und legen ein Passwort fest (mindestens 12 Zeichen).'))) ?></p>
+                        <p class="t-ink" style="margin:0; font-size:14.5px; line-height:22px; color:#1F2430;"><?= e($steps) ?></p>
                       </td>
                     </tr>
                   </table>

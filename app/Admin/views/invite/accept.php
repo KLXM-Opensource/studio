@@ -3,7 +3,9 @@
  * Einladung annehmen (öffentlich, Stil der Anmeldung): Name, dann Passkey (bevorzugt, wenn der Browser es kann) und/oder Passwort.
  * @var array $inv  @var string $token  @var ?array $role  @var array $errors  @var array $old  @var bool $passkey  @var bool $passwordless
  * @var ?string $twofa Pflicht der Rolle (any|passkey|null)  @var ?array $me angemeldetes Konto
+ * @var bool $network Einladung als Netzwerk-Administration (Zugriff auf alle Websites, 2FA Pflicht, danach Netzwerk-Übersicht)
  */
+$network ??= false;
 $title = __('Einladung annehmen');
 $err = fn($k) => isset($errors[$k]) ? '<p class="f-error" id="inv-err-' . e($k) . '">' . e($errors[$k]) . '</p>' : '';
 $site = site_name();
@@ -17,9 +19,19 @@ $pwRequired = !$passwordless || !$passkey;
 <div class="adm-auth inv-auth">
   <?php include __DIR__ . '/_brand.php'; ?>
   <section class="adm-card inv-card" aria-labelledby="inv-h">
-    <p class="inv-eyebrow"><?= e(__('Einladung')) ?></p>
+    <p class="inv-eyebrow"><?= e($network ? __('Einladung · Netzwerk-Administration') : __('Einladung')) ?></p>
+    <?php if ($network): ?>
+    <h1 id="inv-h"><?= e(__('Willkommen in der Netzwerk-Administration')) ?></h1>
+    <p class="inv-lead"><?= e(__('{name} hat Sie zur Netzwerk-Administration eingeladen.', ['name' => $inviter])) ?></p>
+    <div class="inv-net" role="note">
+      <p><strong><?= e(__('Netzwerk-Konto: Zugriff auf ALLE Websites')) ?></strong></p>
+      <p><?= e(__('Mit diesem Konto verwalten Sie alle Websites dieser Installation mit allen Inhalten, Daten und Konten.')) ?></p>
+      <p><strong><?= e(__('Die Zwei-Faktor-Anmeldung ist Pflicht: Sie richten sie direkt beim Annehmen ein.')) ?></strong></p>
+    </div>
+    <?php else: ?>
     <h1 id="inv-h"><?= e(__('Willkommen bei {site}', ['site' => $site])) ?></h1>
     <p class="inv-lead"><?= e(__('{name} hat Sie als {role} eingeladen.', ['name' => $inviter, 'role' => $roleName])) ?></p>
+    <?php endif; ?>
     <?php if (!empty($inv['message'])): ?>
     <blockquote class="inv-quote"><p><?= nl2br(e($inv['message'])) ?></p><footer>– <?= e($inviter) ?></footer></blockquote>
     <?php endif; ?>
@@ -65,7 +77,9 @@ $pwRequired = !$passwordless || !$passkey;
       </div>
       <?php endif; ?>
     </form>
-    <?php if ($twofa): ?><p class="inv-note"><?= e($twofa === 'passkey' ? __('Für Ihre Rolle ist ein Passkey vorgeschrieben. Legen Sie ihn hier an – oder direkt nach der ersten Anmeldung.')
+    <?php if ($network && $twofa): ?><p class="inv-note"><?= e($twofa === 'passkey' ? __('Für Netzwerk-Konten ist ein Passkey vorgeschrieben. Legen Sie ihn hier an – sonst direkt im nächsten Schritt.')
+      : __('Ein Passkey erfüllt den zweiten Faktor bereits. Mit Passwort richten Sie im nächsten Schritt die Authenticator-App ein.')) ?></p>
+    <?php elseif ($twofa): ?><p class="inv-note"><?= e($twofa === 'passkey' ? __('Für Ihre Rolle ist ein Passkey vorgeschrieben. Legen Sie ihn hier an – oder direkt nach der ersten Anmeldung.')
       : __('Für Ihre Rolle ist ein zweiter Faktor vorgeschrieben. Ein Passkey erfüllt ihn; mit Passwort richten Sie ihn nach der ersten Anmeldung ein.')) ?></p><?php endif; ?>
     <p class="inv-note"><?= e(__('Die Einladung gilt bis {date}.', ['date' => \Core\Invites::date((int) $inv['expires_at'], \Core\I18n::locale())])) ?></p>
     <?php endif; ?>

@@ -29,5 +29,14 @@
     <li><b>Kennzahlen in drei Gruppen:</b> Inhalte (Seiten, Konten, letzte Änderung), Aktivität (neue Anfragen, Freigaben, Support – hervorgehoben nur, wenn etwas offen ist) und Betrieb (Kit, Funktionen, Speicher, letzte Sicherung). Nutzt eine Website einen <b>geteilten Medien-Pool</b>, steht er mit Größe und Zahl der beteiligten Websites dabei; der Gesamtspeicher zählt jeden Pool einmal.</li>
   </ul>
   <p>Links in der Seitenleiste steht für Netzwerk-Konten auf <b>jeder</b> Website – auch auf der Hauptwebsite – der Umschalter <b>Website wechseln</b> mit „Netzwerk-Übersicht“ und allen Websites; ein Klick meldet Sie dort ohne erneute Eingabe an.</p>
+  <h3 id="netzwerk-admins-einladen">Weitere Netzwerk-Admins einladen</h3>
+  <p>Netzwerk-Konten laden weitere Netzwerk-Administratoren selbst ein – niemand muss ein Passwort weitergeben. Nur aktive Netzwerk-Konten können einladen, und nur auf der Hauptwebsite.</p>
+  <ol class="doc-steps">
+    <li>In der <b>Netzwerk-Übersicht</b> unter „Netzwerk-Administratoren“ <b>+ Netzwerk-Admin einladen</b> öffnen, E-Mail-Adresse, optional Name und eine kurze Nachricht eintragen und <b>Einladung senden</b>.</li>
+    <li>Die E-Mail „Einladung zur Netzwerk-Administration“ weist deutlich darauf hin: Das Konto hat Zugriff auf <b>alle</b> Websites, und die Zwei-Faktor-Anmeldung ist Pflicht. Der Link gilt 7 Tage und nur einmal.</li>
+    <li>Die eingeladene Person legt einen Passkey und/oder ein Passwort fest und richtet direkt danach den zweiten Faktor ein (ein Passkey erfüllt ihn bereits, sonst die Authenticator-App mit Wiederherstellungscodes). Erst dann öffnet sich die Netzwerk-Übersicht.</li>
+  </ol>
+  <p>Offene Einladungen stehen in der Liste der Netzwerk-Administratoren mit „Eingeladen – wartet“ bzw. „Einladung abgelaufen“. <b>Erneut senden</b> verschickt einen neuen Link (der alte gilt nicht mehr, die Frist beginnt neu), <b>Zurückziehen</b> macht ihn sofort ungültig. Wird das einladende Konto gesperrt, gilt seine Einladung nicht mehr. Kommt die E-Mail nicht an, zeigt die Übersicht den Link einmal zum Kopieren. Alles steht im Netzwerk-Protokoll.</p>
+  <p>Ohne E-Mail-Versand gibt es weiterhin <b>Ohne E-Mail: mit Startpasswort anlegen</b> (zugeklappt). Auf dem Server: <code>php bin/console network:user &lt;email&gt; --invite [--name="…"]</code>.</p>
   <h3>Protokoll</h3>
   <p>Jede Änderung wird mit Zeit, Person und altem/neuem Stand protokolliert; die letzten zehn stehen unten auf der Seite.</p>
