@@ -73,7 +73,7 @@ html:has(.cms-lb[open]){overflow:hidden}
 .cms-slider--h-4-3 .cms-slide{aspect-ratio:4/3}
 .cms-slider--h-screen .cms-slide{aspect-ratio:auto;height:100vh;height:100svh}
 .cms-slide__media{position:absolute;inset:0}
-.cms-slide__media picture{display:contents}
+.cms-slide__media picture{display:block;width:100%;height:100%}   /* <picture> ist inline – sonst füllt das Bild die Folie nicht (wie resources/css/media.css) */
 .cms-slide__media img{display:block;width:100%;height:100%;max-width:none;object-fit:cover}
 .cms-slide::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none}
 .cms-slide--ov-dark::before{background:linear-gradient(0deg,color-mix(in srgb,var(--e-dark) 82%,transparent),color-mix(in srgb,var(--e-dark) 30%,transparent) 55%,color-mix(in srgb,var(--e-dark) 5%,transparent))}
