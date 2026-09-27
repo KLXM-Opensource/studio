@@ -523,8 +523,14 @@ final class Fields
             if (!empty($f['system'])) {
                 $opts += ['sort' => 'Manuelle Reihenfolge', 'published_at' => 'Veröffentlicht am', 'created_at' => 'Angelegt am'];
             }
+            // 'types' => ['media', 'text', '_title', '_url', …]: nur Felder dieser Typen (Zuordnung, z. B. Block „Partner & Logos“)
+            $types = isset($f['types']) ? (array) $f['types'] : null;
+            if ($types !== null) {
+                if (in_array('_title', $types, true)) $opts['_title'] = 'Titel des Eintrags';
+                if (in_array('_url', $types, true) && ($t['settings']['route'] ?? '') !== '') $opts['_url'] = 'Adresse der Detailseite';
+            }
             foreach ($t['fields'] as $tf) {
-                if (!in_array($tf['type'], ['richtext', 'textarea', 'media', 'file'], true)) $opts[$tf['name']] = $tf['label'];
+                if ($types !== null ? in_array($tf['type'], $types, true) : !in_array($tf['type'], ['richtext', 'textarea', 'media', 'file'], true)) $opts[$tf['name']] = $tf['label'];
             }
             $h .= '<optgroup label="' . e($t['name']) . '" data-table="' . e($t['handle']) . '">';
             foreach ($opts as $k => $l) {

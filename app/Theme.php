@@ -368,6 +368,10 @@ final class Theme
         if (($types === null || in_array('dials', $types, true)) && !empty($this->blocks['dials']['core'])) {
             $out[] = $this->coreCss('dials.css');
         }
+        // Partner & Logos – Variablen --partners-* aus dem Kit, oder eigene css/partners.css
+        if (($types === null || in_array('partners', $types, true)) && !empty($this->blocks['partners']['core'])) {
+            $out[] = $this->coreCss('partners.css');
+        }
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
         }

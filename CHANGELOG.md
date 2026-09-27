@@ -6,6 +6,25 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kern-Block „Partner & Logos“ (alle Kits)
+- Neuer Kern-Block `partners` für Logos von Partnern, Kunden oder Förderern – jedes Kit bekommt ihn automatisch
+  (`app/Blocks/blocks.php`, Renderer `app/Blocks/partners.php`, abschaltbar mit `core_blocks => false`, überschreibbar je Kit).
+- **Optisch gleich groß:** Logos erhalten in einer einheitlichen Kachel (3:2, 1:1 oder 2:1) dieselbe Fläche statt derselben
+  Höhe – serverseitig aus Breite/Höhe berechnet (`Core\Blocks\PartnerLogos::width()`), ausgegeben als Klasse `pl-w-{n}`
+  (keine Inline-Styles), Grenzen volle Breite und 90 % der Höhe; Logogröße klein/mittel/groß und Feinjustierung je Logo.
+- **Quellen:** Logos im Block pflegen (Logo inkl. SVG, Name = Alternativtext, Kurzinfo, Link mit Beschriftung, Kategorie)
+  oder aus einer Datentabelle mit Feldzuordnung (Logo, Name, Kurzinfo, Link, Kategorie, „einfarbig“), Filter und Anzahl;
+  nur veröffentlichte Einträge. Feldtyp `datafield` kennt dafür `'types' => [...]` (auch Bild-, Text- und Rich-Text-Felder).
+- **Sortierung:** wie angelegt, Name A–Z, Kategorie + Name (optional mit Überschrift je Kategorie), Tabellenfeld auf-/absteigend,
+  zufällig je Seitenaufruf.
+- **Darstellung:** 3–6 Spalten (Tablet 3, Smartphone 2), Kachel dezent/immer hell/ohne, Graustufen mit Farbe bei Maus/Fokus,
+  einfarbige Logos auf dunklen Abschnitten und im Dunkelschema hell (gemessene Hintergrundhelligkeit).
+- **Details erst nach Klick:** Logo = Schaltfläche mit `aria-expanded`/`aria-controls`, Angaben unter der Reihe (eine offen)
+  oder im Dialog; Esc schließt, der Fokus kehrt zum Logo zurück; ohne JavaScript alle Angaben als Liste. Skript
+  `js/partners.mjs` (ca. 3 KB) und `css/partners.css` nur auf Seiten mit dem Block; Bilder mit `loading="lazy"`,
+  Breite/Höhe, kein Layoutsprung. Farben je Kit über `--partners-*` bzw. die Kit-Variablen (Doku: Technik → Kits).
+- Selbsttest `blocks:selftest` prüft die Flächen-Normalisierung und die Sortierung.
+
 ### Bild im Rahmen: füllen, einpassen, Originalformat
 - Je Einbindung (Knopf **Rahmen** am Bild im Editor, **Rahmen …** am Bild-Feld) oder als Standard des Bildes (Mediathek):
   **Füllen (zuschneiden)** wie bisher, **Einpassen** (ganzes Bild, Hintergrund transparent, Farbe des Kits, eigene Farbe

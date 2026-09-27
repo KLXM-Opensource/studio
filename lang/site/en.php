@@ -165,6 +165,9 @@ return [
     // Kern-Block „Kennzahlen mit Skala“ (app/Blocks/dials.php)
     'Kennzahlen' => 'Key figures',
     'von {max}' => 'of {max}',
+    // Kern-Block „Partner & Logos“ (app/Blocks/partners.php)
+    'Partner' => 'Partners',
+    'Website besuchen' => 'Visit website',
 
     // Besucher-Chat (Core\AI\VisitorChat)
     'Adresse' => 'Address',

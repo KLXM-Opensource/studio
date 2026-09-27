@@ -8,7 +8,7 @@ use Core\Block;
 /**
  * Selbsttest des Block-Baukastens: php bin/console blocks:selftest
  * Prüft Escaping und XSS-Abwehr der Vorlagensprache (Text, Attribute, Links, Rich-Text, Symbole), Übersetzungsfehler,
- * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer.
+ * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer. Dazu die Logo-Normalisierung des Blocks „Partner & Logos“.
  * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx) und Bild im Rahmen
  * (Core\ImageFit: Format, Vorrang Einbindung → Mediathek → automatisch, Klassen, Regeln, transparenter Rand).
  */
@@ -27,12 +27,32 @@ final class SelfTest
             $t->rejects();
             $t->css();
             $t->export();
+            $t->partnerLogos();
             $t->imageFx();
             $t->imageFit();
         } finally {
             app()->editing = $prev;
         }
         return ['ok' => $t->ok, 'fails' => $t->fails];
+    }
+
+    /** Block „Partner & Logos“ (Core\Blocks\PartnerLogos): flächengleiche Logo-Breite, Grenzen, Sortierung */
+    private function partnerLogos(): void
+    {
+        $pl = PartnerLogos::class;   // gleicher Namensraum
+        $sq = $pl::width(400, 400);
+        $wide = $pl::width(640, 120);
+        $tall = $pl::width(120, 260);
+        $this->assert($sq > $tall && $wide > $sq && $wide <= 100, "PartnerLogos: Breite folgt dem Format (quadratisch $sq, breit $wide, hoch $tall)");
+        // gleiche Fläche: Breite × Höhe (in Anteilen der Innenfläche) für quadratisch und 3:1 nahezu gleich
+        $a = fn(int $w, int $h) => ($x = $pl::width($w, $h) / 100) * $x * $h / $w;
+        $this->assert(abs($a(400, 400) - $a(600, 200)) < .02, 'PartnerLogos: gleiche Fläche statt gleicher Höhe');
+        $this->assert($pl::width(4000, 100) === 100 && $pl::width(1, 1, '3:2', 'l') <= 100, 'PartnerLogos: höchstens volle Breite');
+        $this->assert($pl::width(100, 1000) >= 6 && $pl::width(100, 1000) % 2 === 0 && $pl::width(0, 0) > 0, 'PartnerLogos: Mindestbreite, gerade Stufen, ohne Maße');
+        $this->assert($pl::width(400, 400, '3:2', 'm', 1) > $sq && $pl::width(400, 400, '3:2', 'm', -1) < $sq && $pl::width(400, 400, '3:2', 's') < $sq, 'PartnerLogos: Feinjustierung und Logogröße');
+        $it = fn(string $n, string $c = '') => ['name' => $n, 'category' => $c];
+        $sorted = array_column($pl::sort([$it('Zebra', 'B'), $it('Äpfel'), $it('alpha', 'B'), $it('Mitte', 'A')], 'category'), 'name');
+        $this->assert($sorted === ['Mitte', 'alpha', 'Zebra', 'Äpfel'], 'PartnerLogos: Kategorie, dann Name (ohne Kategorie am Ende): ' . implode(', ', $sorted));
     }
 
     /** Bild anpassen (Core\ImageFx): Format, Klassen, erlaubte Feldpfade, Bereinigung von data._fx */

@@ -36,3 +36,30 @@
   </ul>
   <p>Größe (klein/mittel/groß) und Skala (Bogen mit Strichen, nur Striche, schlichter Ring) stellen Sie in der Seitenleiste ein. „Hochzählen“ lässt Bogen und ganze Zahlen beim ersten Erscheinen einmal anlaufen – nicht bei „Bewegung reduzieren“. Screenreader lesen jede Kennzahl als Satz vor, z. B. „92 % – Weiterempfehlung, Beispielumfrage“. Farben und Schrift kommen aus dem Design. Bitte nur belegbare Zahlen verwenden.</p>
   <?php endif; ?>
+  <?php if (isset($blocks['partners'])): ?>
+  <h3 id="partner-logos">Partner &amp; Logos</h3>
+  <p>Zeigt Logos von Partnern, Kunden oder Förderern in gleich großen Kacheln. Breite Schriftzüge, quadratische Zeichen und hohe Logos wirken dabei gleich schwer: Das System gibt jedem Logo ungefähr dieselbe Fläche – nicht dieselbe Höhe. Kurzinfo und Link erscheinen erst, wenn jemand auf ein Logo klickt (oder es mit der Tastatur auswählt). Bitte nur Logos verwenden, für die eine Freigabe vorliegt.</p>
+  <h4>Logos pflegen</h4>
+  <ul>
+    <li><b>Quelle „Logos hier pflegen“:</b> je Logo eine Datei (am besten SVG oder PNG mit transparentem Hintergrund), den <b>Namen</b> (er dient auch als Alternativtext), eine <b>Kurzinfo</b> (ein bis zwei Sätze), optional <b>Link</b> mit eigener Beschriftung und eine <b>Kategorie</b>.</li>
+    <li><b>Größe feinjustieren:</b> nur nötig, wenn eine Datei viel leeren Rand hat oder ein Logo sehr fein ist („etwas größer“ bzw. „etwas kleiner“).</li>
+    <li><b>Einfarbiges Logo:</b> anhaken, wenn das Logo nur aus einer dunklen Farbe besteht – dann erscheint es auf dunklen Abschnitten und im dunklen Farbschema hell. Bereits weiße Logos nicht anhaken.</li>
+  </ul>
+  <h4>Tabelle anbinden</h4>
+  <p>Mit „Aus einer Datentabelle“ kommen die Logos aus einer Tabelle unter <b>Daten</b> (z. B. „Partner“ mit Name, Logo, Beschreibung, Website, Bereich). Unter „Datentabelle“ wählen Sie die Tabelle und ordnen die Felder zu: Logo, Name, Kurzinfo, Link, Kategorie und – falls vorhanden – ein Ja/Nein-Feld „einfarbig“. Leere Zuordnungen nehmen sinnvolle Vorgaben (Bildfeld, Titel, Beschreibung, erstes Link-Feld). Es erscheinen nur <b>veröffentlichte</b> Einträge; mit „Nur Einträge, bei denen …“ filtern Sie zusätzlich, z. B. nach einem Bereich oder einem Ja/Nein-Feld (Wert 1). „Höchstens“ begrenzt die Anzahl.</p>
+  <h4>Sortierung</h4>
+  <ul>
+    <li><b>Wie angelegt:</b> Reihenfolge der Liste bzw. wie in der Tabelle eingestellt.</li>
+    <li><b>Name A–Z</b> oder <b>Kategorie, dann Name</b> – mit „Überschrift je Kategorie“ entsteht je Kategorie eine eigene Gruppe.</li>
+    <li><b>Nach Tabellenfeld:</b> ein Feld der Tabelle auf- oder absteigend.</li>
+    <li><b>Zufällig:</b> bei jedem Seitenaufruf neu gemischt (ohne JavaScript einmal am Tag).</li>
+  </ul>
+  <h4>Darstellung</h4>
+  <ul>
+    <li><b>Spalten</b> (3–6) gelten für große Bildschirme; auf Tablets stehen 3, auf Smartphones 2 Logos nebeneinander. <b>Format der Kachel:</b> 3:2, 1:1 oder 2:1. <b>Logogröße:</b> klein, mittel oder groß.</li>
+    <li><b>Kachel:</b> dezente Fläche (passt sich dem Abschnitt an), immer hell (für farbige Logos auf dunklem Grund) oder ohne Fläche.</li>
+    <li><b>Graustufen:</b> Logos erscheinen grau und werden farbig, sobald die Maus darüber steht oder sie den Tastaturfokus haben.</li>
+    <li><b>Details:</b> „Aufklappen unter der Reihe“ öffnet die Angaben direkt unter den Logos (immer eines), „Dialog“ in einem Fenster; „Keine Details“ macht aus jedem Logo direkt einen Link. Esc oder „Schließen“ schließt und springt zurück zum Logo. Ohne JavaScript stehen alle Angaben als Liste unter den Logos.</li>
+    <li>Überschrift und Einleitung wie bei anderen Blöcken; den Hintergrund des Abschnitts wählen Sie wie gewohnt – auf dunklen Abschnitten passen sich Kacheln und Texte an.</li>
+  </ul>
+  <?php endif; ?>
