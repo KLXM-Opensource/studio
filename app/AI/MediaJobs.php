@@ -189,7 +189,7 @@ final class MediaJobs
     {
         if (!Ai::enabled('transcribe')) throw new AiException(__('Die Transkription ist für diese Website nicht eingeschaltet (Grundeinstellungen → KI).'));
         $m = self::media($j);
-        $file = rtrim(Media::dir(), '/') . '/' . $m['file'];
+        $file = Media::path($m);
         $lang = (string) ($j['lang'] ?: 'auto');
         $id = (int) $j['id'];
         $res = Transcriber::transcribe(Ai::config(), $file, $lang, fn(int $p) => self::progress($id, $p),

@@ -252,7 +252,7 @@ final class AppIcons
 
     private static function loadImage(array $m): ?\GdImage
     {
-        $file = Media::dir() . '/' . $m['file'];
+        $file = Media::path($m);
         $data = @file_get_contents($file);
         $img = $data !== false ? @imagecreatefromstring($data) : false;
         return $img ?: null;

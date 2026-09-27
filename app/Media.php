@@ -52,6 +52,13 @@ final class Media
         return self::$pool !== null ? MediaPools::mediaDir(self::$pool) : site()->mediaDir();
     }
 
+    /** Absoluter Pfad der Originaldatei – auch für Verweise auf geteilte Pools (_pool aus find()) */
+    public static function path(array $m): string
+    {
+        $pool = $m['_pool'] ?? self::$pool;
+        return ($pool !== null ? MediaPools::mediaDir($pool) : site()->mediaDir()) . '/' . $m['file'];
+    }
+
     /** Öffentliche Adresse einer Datei relativ zum Medienordner des Datensatzes (Website oder Pool) */
     private static function publicUrl(array $m, string $rel): string
     {
