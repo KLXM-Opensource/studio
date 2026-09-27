@@ -1,0 +1,82 @@
+{
+ "_comment": "Englischer Sprecher des Trailers (tools/trailer/voice.mjs). Stimme wechseln = nur die Zeile \"voice\" ändern, dann: node tools/trailer/trailer.mjs --cut. Nur lokale Engines, kein Cloud-TTS.",
+ "voice": "chatterbox-cori",
+ "voices": {
+  "chatterbox-cori": {
+   "engine": "chatterbox",
+   "ref": "tools/tutorials/voices/ref-cori.wav",
+   "cfg": 0.5,
+   "exaggeration": 0.4,
+   "temperature": 0.7,
+   "credit": "Chatterbox Multilingual (Resemble AI, MIT), Stimme geklont aus einer Piper-Aufnahme „cori“ (en_GB, LibriVox, gemeinfrei), PerTh-Wasserzeichen",
+   "refFrom": {
+    "piper": "en_GB-cori-high",
+    "text": "The morning was calm and clear, and the old harbour lay quiet under a pale sky. We walked along the water, talking about the work ahead, and about the small things that make a day feel good. Later, the light changed, and the town slowly came to life."
+   }
+  },
+  "chatterbox-default": {
+   "engine": "chatterbox",
+   "cfg": 0.5,
+   "exaggeration": 0.4,
+   "temperature": 0.7,
+   "credit": "Chatterbox Multilingual (Resemble AI, MIT), eingebaute Standardstimme, PerTh-Wasserzeichen"
+  },
+  "piper-cori": {
+   "engine": "piper",
+   "model": "en_GB-cori-high",
+   "length": 1,
+   "credit": "Piper TTS, Stimme en_GB-cori-high (LibriVox, gemeinfrei)"
+  },
+  "say-daniel": {
+   "engine": "say",
+   "say": "Daniel",
+   "rate": 185,
+   "credit": "macOS-Sprachausgabe, Stimme Daniel (en_GB)"
+  }
+ },
+ "samples": [
+  "chatterbox-cori",
+  "chatterbox-default",
+  "piper-cori",
+  "say-daniel"
+ ],
+ "sampleText": [
+  "KLXM Studio runs many websites from a single installation.",
+  "You edit right on the page, and KLXM Ai only makes suggestions: you decide.",
+  "Open source, by KLXM Crossmedia in Moers."
+ ],
+ "picks": {
+  "chatterbox-cori": {
+   "Kay El Ex Em Studio: websites, content and data, in one open-source system.": 1,
+   "kits give every website its own look.": 1,
+   "One suits a cultural magazine,.": 2,
+   "another a small workshop.": 2,
+   "Nine kits are included, from modern to nature.": 1,
+   "Every kit adapts to any screen width,.": 2,
+   "in light and in dark mode.": 1,
+   "Landing pages can run on a domain of their own.": 1,
+   "Editing happens right on the page.": 1,
+   "Format text with highlights and colours.": 1,
+   "Images come from the media library.": 1,
+   "Kay El Ex Em, Ay Eye makes suggestions.": 1,
+   "You compare them, then decide.": 1,
+   "Pages are built from blocks, like these key figures.": 1,
+   "Publish when you’re ready.": 1,
+   "The media library has collections, tags and a quick preview.": 1,
+   "Shared pools serve several websites at once.": 1,
+   "Alt texts are required, and videos without subtitles get flagged.": 1,
+   "Build your own data tables and forms, without writing code.": 1,
+   "The site search forgives typos.": 2,
+   "Admins can build custom blocks, with a live preview.": 1,
+   "Kay El Ex Em, Ay Eye is optional, and can run locally, on your own server.": 1,
+   "Features and extensions are switched on per website.": 1,
+   "One installation runs many websites, each with its own domain and users.": 1,
+   "Content sync brings changed pages back to the live site,.": 2,
+   "as a draft, and only when there is no conflict.": 2,
+   "Kay El Ex Em Studio. Open source, under the M I T licence.": 1,
+   "By Kay El Ex Em Crossmedia, in Mœrs.": 1,
+   "The site search tolerates typos.": 1,
+   "Features and extensions are switched on for each website.": 1
+  }
+ }
+}

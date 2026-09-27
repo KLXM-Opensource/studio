@@ -3871,7 +3871,7 @@ return [
     // Tutorials: Videos auf der Produkt-Website (config docs_url)
     'Alle Videos auf {host}' => 'All videos on {host}',
     'Das Video zu diesem Tutorial' => 'The video for this tutorial',
-    'Der Trailer zeigt Kits, Bearbeiten und Verwalten in wenigen Minuten – ohne Ton, mit Untertiteln (Deutsch, Englisch).' => 'The trailer shows kits, editing and admin in a few minutes – without sound, with subtitles (German, English).',
+    'Der Trailer zeigt Kits, Bearbeiten und Verwalten in rund zwei Minuten – mit englischem Sprecher und Untertiteln (Deutsch, Englisch, Slowenisch).' => 'The trailer shows kits, editing and admin in about two minutes – with English narration and subtitles (German, English, Slovenian).',
     'Die Videos (ohne Ton, mit Untertiteln Deutsch/Englisch) stehen auf {host} – hier finden Sie dieselben Schritte als Text, auch ohne Internet.' => 'The videos (without sound, with German/English subtitles) are on {host} – here you find the same steps as text, even offline.',
     'Die Videos werden nicht mit dem CMS ausgeliefert – so bleibt die Installation klein. Die Verwaltung lädt nichts von {host}; die Links öffnen einen neuen Tab.' => 'The videos are not shipped with the CMS – this keeps the installation small. The admin loads nothing from {host}; the links open a new tab.',
     'Die wichtigsten Aufgaben für die Redaktion, die Administration einer Website und für Agenturen. Jedes Tutorial nennt Ziel, Voraussetzungen und alle Schritte mit den genauen Bezeichnungen.' => 'The key tasks for editors, website admins and agencies. Every tutorial names the goal, the prerequisites and all steps with the exact labels.',

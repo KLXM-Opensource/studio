@@ -24,7 +24,7 @@ final class MediaTracks
     private const NAMES = ['de' => 'Deutsch', 'en' => 'English', 'fr' => 'Français', 'es' => 'Español', 'it' => 'Italiano', 'nl' => 'Nederlands',
         'pl' => 'Polski', 'tr' => 'Türkçe', 'ar' => 'العربية', 'ru' => 'Русский', 'uk' => 'Українська', 'pt' => 'Português', 'el' => 'Ελληνικά',
         'sv' => 'Svenska', 'da' => 'Dansk', 'fi' => 'Suomi', 'no' => 'Norsk', 'cs' => 'Čeština', 'hu' => 'Magyar', 'ro' => 'Română', 'bg' => 'Български',
-        'hr' => 'Hrvatski', 'sr' => 'Srpski', 'fa' => 'فارسی', 'zh' => '中文', 'ja' => '日本語', 'ko' => '한국어', 'ku' => 'Kurdî', 'sq' => 'Shqip'];
+        'hr' => 'Hrvatski', 'sr' => 'Srpski', 'fa' => 'فارسی', 'zh' => '中文', 'ja' => '日本語', 'ko' => '한국어', 'ku' => 'Kurdî', 'sq' => 'Shqip', 'sl' => 'Slovenščina', 'sk' => 'Slovenčina'];
 
     public static function enabled(): bool
     {

@@ -35,7 +35,7 @@ $ext = fn(string $href, string $label, string $class = '') => '<a class="' . e($
     <span class="tut-track__icon" aria-hidden="true"><?= icon('play-circle') ?></span>
     <div class="tut-trailer__text">
       <h2 id="tut-trailer-h"><?= e(__('KLXM Studio im Überblick')) ?></h2>
-      <p><?= e(__('Der Trailer zeigt Kits, Bearbeiten und Verwalten in wenigen Minuten – ohne Ton, mit Untertiteln (Deutsch, Englisch).')) ?></p>
+      <p><?= e(__('Der Trailer zeigt Kits, Bearbeiten und Verwalten in rund zwei Minuten – mit englischem Sprecher und Untertiteln (Deutsch, Englisch, Slowenisch).')) ?></p>
     </div>
     <?= $ext($trailerUrl, __('KLXM Studio im Überblick'), 'adm-btn adm-btn--small tut-trailer__link') ?>
   </section>

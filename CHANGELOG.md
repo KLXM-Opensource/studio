@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Trailer mit englischem Sprecher und Untertiteln EN/DE/SL
+- **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM Ai, Mediathek mit
+  geteilten Pools, Barrierefreiheit (Alt-Texte, Videos ohne Untertitel), Datentabellen und Formulare, Website-Suche,
+  Block-Baukasten, KI optional/lokal, Funktionen & Erweiterungen, Netzwerk, Content-Sync. Wortwahl zeitlos, keine
+  Ankündigungs-Formulierungen; Titelkarten und Einblendungen auf Englisch.
+- **Sprecher Englisch, nur lokale TTS** (`tools/trailer/voice.mjs`): Stimme in einer Zeile von `tools/trailer/voice.json`
+  (Standard Chatterbox mit britisch klingender Referenz aus der gemeinfreien Piper-Stimme `en_GB-cori-high`; Alternativen
+  Chatterbox-Standard, Piper, macOS `say`), Takes per whisper.cpp geprüft, Aussprache-Lexikon `lexicon.en.json`,
+  Hörproben mit `--samples`; Lautheit −16 LUFS. Drehbuch je Satz `vo: [[en, de, sl]]` → ein Untertitel je Satz,
+  Zeiten aus der Sprechdauer; `--silent` erzeugt wie bisher eine stumme Fassung.
+- Untertitelspuren: Bezeichnung „Slovenščina“ (und „Slovenčina“) für `sl`/`sk` in `Core\MediaTracks`.
+
 ### Hinweise zu diesem Projekt (Ergänzung zum Handbuch)
 - **Kits bringen projektbezogene Hinweise für die Redaktion mit:** Markdown-Dateien in `themes/{kit}/guide/NN-name.md`
   (`Core\Guide`), sortiert nach Dateinamen, Titel aus der ersten Überschrift `# …`, optional Front Matter `bereich:`,

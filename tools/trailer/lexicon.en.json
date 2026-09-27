@@ -1,0 +1,28 @@
+{
+ "_comment": "Aussprache-Lexikon (Englisch) für den Trailer-Sprecher (tools/trailer/voice.mjs): Begriff → gesprochene Umschrift, je Engine möglich ({\"chatterbox\": …, \"piper\": …, \"*\": …}). Gilt NUR für den gesprochenen Text; Untertitel behalten die Schreibweise. Ganze Wörter, längere Begriffe zuerst.",
+ "terms": {
+  "KLXM Ai": {
+   "*": "K L X M, A I",
+   "chatterbox": "Kay El Ex Em, Ay Eye"
+  },
+  "KLXM": {
+   "*": "K L X M",
+   "chatterbox": "Kay El Ex Em"
+  },
+  "REDAXO": {
+   "*": "reh-DAX-oh",
+   "chatterbox": "Reh-dax-oh"
+  },
+  "Moers": {
+   "*": "Murrs",
+   "chatterbox": "Mœrs",
+   "say": "Murs"
+  },
+  "Kits": "kits",
+  "Kit": "kit",
+  "MIT": "M I T",
+  "WCAG": "W C A G",
+  "Ollama": "oh-LAH-mah",
+  "Nextcloud": "Next Cloud"
+ }
+}
