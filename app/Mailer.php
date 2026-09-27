@@ -54,8 +54,9 @@ final class Mailer
 
     /**
      * E-Mail senden – reiner Text oder zusätzlich HTML (multipart/alternative).
-     * @param array{html?:string, inline?:array<string,array{path:string, type?:string}>} $o
+     * @param array{html?:string, inline?:array<string,array{path:string, type?:string}>, attach?:list<array{name:string, data:string, type?:string}>} $o
      *        inline: eingebettete Bilder, im HTML als „cid:{name}“ (z. B. App-Icon als Logo)
+     *        attach: Anhänge aus dem Speicher (z. B. Termin als .ics, type text/calendar) – klein halten
      * @return string|null Fehlermeldung oder null bei Erfolg
      */
     public static function send(string $subject, string $text, ?array $to = null, array $o = []): ?string
@@ -112,6 +113,10 @@ final class Mailer
             foreach ((array) ($o['inline'] ?? []) as $cid => $img) {
                 if (is_file((string) ($img['path'] ?? ''))) $email->embedFromPath((string) $img['path'], (string) $cid, $img['type'] ?? null);
             }
+        }
+        foreach ((array) ($o['attach'] ?? []) as $a) {
+            $name = basename((string) ($a['name'] ?? ''));
+            if ($name !== '' && isset($a['data'])) $email->attach((string) $a['data'], $name, (string) ($a['type'] ?? 'application/octet-stream'));
         }
         foreach ($to as $addr) {
             $email->addTo($addr);

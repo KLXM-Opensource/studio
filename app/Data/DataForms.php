@@ -44,9 +44,13 @@ final class DataForms
         return Features::on('forms.data', false) && Features::on('data', false);
     }
 
-    public static function enabled(array $t): bool
+    /**
+     * Nimmt die Tabelle Einsendungen an? $direct = true: über /formular/{handle} bzw. den Block „data_form“ – Eingänge einer Erweiterung
+     * mit 'direct_form' => false (z. B. Buchungen) nur über deren eigenes Formular (submit mit 'store').
+     */
+    public static function enabled(array $t, bool $direct = true): bool
     {
-        if (Inbox::is($t)) return Inbox::available() && !empty($t['settings']['form']['enabled']);
+        if (Inbox::is($t)) return Inbox::available() && !empty($t['settings']['form']['enabled']) && (!$direct || Inbox::directForm($t));
         return self::available() && !empty($t['settings']['form']['enabled']);
     }
 
@@ -137,6 +141,10 @@ final class DataForms
     /**
      * Formular-HTML (theme-neutral, Klassen dff-*). $o: uid, submit (Beschriftung), success (Text nach dem Absenden),
      * values, errors, message, sent, challenge (Token direkt einbetten – nur auf der nicht zwischengespeicherten Formularseite).
+     * Für Erweiterungen (eigenes Formular auf Basis der Tabelle, z. B. Buchungen): action (Adresse statt /formular/{handle}; das Skript
+     * holt das Token unter {action}/challenge), prepend (fertiges HTML vor den Feldern, z. B. Terminauswahl; Fehler unter data-cf),
+     * hidden ([name => wert]), server_message (true: nach dem Absenden die Meldung des Servers zeigen statt des festen Textes),
+     * fields_legend (Felder als <fieldset class="dff-set"> mit dieser Überschrift, z. B. „Ihre Angaben“ neben einer eigenen Auswahl).
      */
     public static function render(array $t, array $o = []): string
     {
@@ -158,10 +166,11 @@ final class DataForms
         $upload = $s['uploads'] && array_filter($fields, fn($f) => in_array($f['type'], self::UPLOAD_TYPES, true));
         $cond = Rules::client($fields);
 
-        $h = '<form class="dff" method="post" action="' . e(url('/formular/' . $t['handle'])) . '" data-dff novalidate'
+        $action = (string) ($o['action'] ?? '') !== '' ? (string) $o['action'] : url('/formular/' . $t['handle']);
+        $h = '<form class="dff" method="post" action="' . e($action) . '" data-dff novalidate'
             . ($upload ? ' enctype="multipart/form-data"' : '')
             . ($cond ? ' data-cond="' . e(json_encode($cond, JSON_UNESCAPED_UNICODE)) . '"' : '')
-            . ' data-success="' . e($success) . '" data-failed="' . e(lt('Senden fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.')) . '"'
+            . ' data-success="' . e(!empty($o['server_message']) ? '' : $success) . '" data-failed="' . e(lt('Senden fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.')) . '"'
             . ' data-check="' . e(lt('Bitte prüfen Sie die markierten Felder.')) . '">';
         // Fehlerübersicht (auch ohne JavaScript): Links zu den Feldern
         $h .= '<div class="dff-summary" role="alert" tabindex="-1" data-dff-summary' . ($errors || !empty($o['message']) ? '' : ' hidden') . '>'
@@ -170,13 +179,19 @@ final class DataForms
             $h .= '<li><a href="#' . e($uid . '-' . str_replace('.', '-', (string) $n)) . '">' . e($msg) . '</a></li>';
         }
         $h .= '</ul></div>';
-        $h .= '<p class="dff-note">' . e(lt('Felder mit * sind Pflichtfelder.')) . '</p><div class="dff-grid">';
+        $h .= '<p class="dff-note">' . e(lt('Felder mit * sind Pflichtfelder.')) . '</p>';
+        $h .= (string) ($o['prepend'] ?? '');
+        foreach ((array) ($o['hidden'] ?? []) as $hn => $hv) {
+            if (preg_match('~^[a-z_][a-z0-9_]{0,40}$~i', (string) $hn)) $h .= '<input type="hidden" name="' . e((string) $hn) . '" value="' . e((string) $hv) . '">';
+        }
+        $legend = trim((string) ($o['fields_legend'] ?? ''));
+        $h .= ($legend !== '' ? '<fieldset class="dff-set"><legend class="dff-set__legend">' . e($legend) . '</legend>' : '') . '<div class="dff-grid">';
         foreach ($fields as $f) {
             $h .= $f['type'] === 'group'
                 ? self::group(Entries::groupSchema($f, true) + ['label' => Tables::label($f)] + $f, $uid, $values[$f['name']] ?? null, $errors)
                 : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s);
         }
-        $h .= '</div>';
+        $h .= '</div>' . ($legend !== '' ? '</fieldset>' : '');
         // Datenschutz (Pflicht)
         $pid = $uid . '-' . self::PRIVACY;
         $perr = $errors[self::PRIVACY] ?? null;
@@ -347,11 +362,16 @@ final class DataForms
 
     /**
      * Einsendung prüfen und als Eintrag speichern.
-     * @return array{ok: bool, message?: string, errors?: array, id?: int}
+     * $o (Erweiterungen mit eigenem Formular auf Basis einer Eingangs-Tabelle, z. B. Buchungen):
+     *   check  => fn(array $values): array   weitere Fehler [name => Text] nach der Feldprüfung, vor dem Spamschutz (Token bleibt gültig)
+     *   store  => fn(array $values): array   speichert statt Inbox::store (selbst versiegeln, z. B. in einer Transaktion mit Inbox::store) –
+     *                                        Rückgabe ['id' => …, 'message' => …] bzw. ['error' => Text] (abgelehnt, ohne Feldfehler)
+     *   notify => false                      keine Benachrichtigung des Cores (die Erweiterung schickt eigene E-Mails)
+     * @return array{ok: bool, message?: string, errors?: array, id?: int, stored?: array}
      */
-    public static function submit(array $t, array $post, array $files, string $ip): array
+    public static function submit(array $t, array $post, array $files, string $ip, array $o = []): array
     {
-        if (!self::enabled($t)) {
+        if (!self::enabled($t, !isset($o['store']))) {
             return ['ok' => false, 'message' => lt('Dieses Formular ist derzeit nicht verfügbar.')];
         }
         $inbox = Inbox::is($t);
@@ -393,6 +413,11 @@ final class DataForms
             Fields::$site = false;
         }
         $errors += $err2;
+        if (is_callable($o['check'] ?? null)) {
+            $values2 = $values;
+            unset($values2[self::PRIVACY]);
+            $errors += (array) ($o['check'])($values2);
+        }
         foreach ($uploads as $n => $_) {
             if (!array_key_exists($n, $values) || $values[$n] === null) unset($uploads[$n]);   // Feld ausgeblendet → Datei verwerfen
         }
@@ -401,7 +426,7 @@ final class DataForms
             foreach ($uploads as $n => $_) $errors[$n] ??= lt('Bitte wählen Sie die Datei erneut aus.');
             // Reihenfolge wie im Formular (Fehlerübersicht)
             $order = array_flip([...array_column($fields, 'name'), self::PRIVACY]);
-            $pos = fn($k) => $order[explode('.', (string) $k)[0]] ?? 999;          // Zeilen einer Gruppe („feld.1.unterfeld“) beim Feld
+            $pos = fn($k) => $order[explode('.', (string) $k)[0]] ?? -1;           // Zeilen einer Gruppe („feld.1.unterfeld“) beim Feld; Fehler aus 'check' (prepend) zuerst
             uksort($errors, fn($a, $b) => $pos($a) <=> $pos($b));
             return ['ok' => false, 'errors' => $errors, 'message' => lt('Bitte prüfen Sie die markierten Felder.')];
         }
@@ -415,7 +440,15 @@ final class DataForms
         unset($values[self::PRIVACY]);
         if ($inbox) {
             // Eingang: Werte (nach Prüfung und Bedingungen) versiegeln – Klartext erreicht die Datenbank nie
-            ['id' => $id] = Inbox::store($t, $values);
+            if (is_callable($o['store'] ?? null)) {
+                $stored = (array) ($o['store'])($values);
+                if (!empty($stored['error'])) return ['ok' => false, 'message' => (string) $stored['error']];
+                $id = (int) ($stored['id'] ?? 0);
+            } else {
+                ['id' => $id] = Inbox::store($t, $values);
+                $stored = ['id' => $id];
+            }
+            if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => (int) $id, 'stored' => $stored];
             $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;
             Mailer::send('Neue Anfrage: ' . $t['name'],
                 "Guten Tag,\n\nüber die Website ist eine neue Anfrage in „{$t['name']}“ eingegangen.\n"

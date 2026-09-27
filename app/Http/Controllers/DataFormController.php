@@ -64,7 +64,7 @@ final class DataFormController
         (new FormController())->useLang($r);
         $result = DataForms::submit($t, $r->post, $r->files, $r->ip());
         if ($r->wantsJson()) {
-            return Response::json(array_diff_key($result, ['id' => 1]), $result['ok'] ? 200 : 422)->header('Cache-Control', 'no-store');
+            return Response::json(array_diff_key($result, ['id' => 1, 'stored' => 1]), $result['ok'] ? 200 : 422)->header('Cache-Control', 'no-store');
         }
         $values = array_filter($r->post, fn($k) => !str_starts_with((string) $k, '_') || $k === DataForms::PRIVACY, ARRAY_FILTER_USE_KEY);
         DataForms::$state[$t['handle']] = [

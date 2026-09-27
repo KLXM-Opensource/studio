@@ -2,6 +2,7 @@
  * Formular (Datentabelle) auf der Website – ohne Abhängigkeiten.
  * Bedingungen (anzeigen / Pflicht wenn), Proof-of-Work des Spamschutzes (wie die Online-Anfragen), Absenden ohne Neuladen
  * mit Fehlerübersicht und Fehlern am Feld. Ohne JavaScript sendet das Formular klassisch an /formular/{tabelle}.
+ * Nach dem Absenden: Ereignis „dff:sent“ (detail = Antwort des Servers) am Formular – für Erweiterungen mit eigenem Formular.
  */
 import { conditions } from './_conditions.js';
 import { groups } from './_group.js';
@@ -69,6 +70,7 @@ document.querySelectorAll('form[data-dff]').forEach(form => {
         form.hidden = true;
         done.firstChild.textContent = form.dataset.success || res.message;
         done.hidden = false; done.focus();
+        form.dispatchEvent(new CustomEvent('dff:sent', { bubbles: true, detail: res }));   // z. B. Buchungskalender: Verfügbarkeit neu laden
         return;
       }
       show(res.message || form.dataset.check, res.errors);
