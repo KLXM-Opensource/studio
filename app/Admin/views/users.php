@@ -51,6 +51,15 @@ $defLocale = (string) (setting('sys.admin_locale') ?: \Core\I18n::SOURCE);
             </select><noscript><button class="adm-btn adm-btn--small"><?= e(__('Ändern')) ?></button></noscript></form></td>
           <td class="adm-muted"><?= $u['last_login'] ? e(date('d.m.Y H:i', strtotime($u['last_login']))) : e(__('nie')) ?></td>
           <td class="adm-actions"><?php if ((int) $u['id'] !== (int) $user['id']): ?>
+            <?php if (\Core\Invites::assignable($roles[$u['role']] ?? null, app()->auth->role())): // E-Mail-Adresse direkt ändern (Core\EmailChange::adminChange) ?>
+            <details class="us-mail"><summary class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('E-Mail ändern')) ?></summary>
+              <form class="us-mail__form" method="post" action="<?= e(url('/admin/users/' . $u['id'] . '/email')) ?>"><?= csrf_field() ?>
+                <div class="f"><label for="us-mail-<?= (int) $u['id'] ?>"><?= e(__('Neue E-Mail-Adresse für {name}', ['name' => $u['name'] ?: $u['email']])) ?></label>
+                  <input id="us-mail-<?= (int) $u['id'] ?>" name="email" type="email" required maxlength="191" autocomplete="off" value="<?= e($u['email']) ?>"></div>
+                <p class="f-help"><?= e(__('Gilt sofort, ohne Bestätigung. Beide Adressen erhalten einen Hinweis, die Sitzungen des Kontos enden. Personen ändern ihre Adresse sonst selbst unter „Konto“.')) ?></p>
+                <button class="adm-btn adm-btn--small adm-btn--primary" type="submit"><?= e(__('Adresse ändern')) ?></button>
+              </form></details>
+            <?php endif; ?>
             <?php if ($uMfa): ?><form method="post" action="<?= e(url('/admin/users/' . $u['id'] . '/2fa-reset')) ?>" data-confirm="<?= e(__('Zwei-Faktor-Anmeldung von {email} zurücksetzen (App-Code und alle Passkeys)? Alle Sitzungen des Kontos enden; verlangt die Rolle 2FA, wird sie bei der nächsten Anmeldung neu eingerichtet.', ['email' => $u['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('2FA zurücksetzen')) ?></button></form><?php endif; ?>
             <form method="post" action="<?= e(url('/admin/users/' . $u['id'] . '/delete')) ?>" data-confirm="<?= e(__('Benutzer {email} löschen?', ['email' => $u['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Löschen')) ?></button></form>
             <?php else: ?><span class="adm-badge"><?= e(__('Sie')) ?></span><?php endif; ?></td></tr>

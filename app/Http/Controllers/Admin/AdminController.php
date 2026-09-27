@@ -55,7 +55,8 @@ abstract class AdminController
 
     protected function view(string $view, array $vars = [], int $status = 200): Response
     {
-        $vars['user'] ??= app()->auth->user();
+        // 'user' => null (Anmeldung, Einladung, Links aus E-Mails): Seite ohne Seitenleiste – auch wenn jemand angemeldet ist
+        if (!array_key_exists('user', $vars)) $vars['user'] = app()->auth->user();
         $vars['flash'] = app()->session->takeFlash();
         $vars['css'] ??= [];
         $content = Theme::capture(ROOT . '/app/Admin/views/' . $view . '.php', $vars);

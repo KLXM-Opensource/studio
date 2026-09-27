@@ -10,6 +10,9 @@
  *   user:create <email> [admin|editor]                Benutzer anlegen (Passwort wird abgefragt)
  *   user:password <email>                             Passwort neu setzen – bestehende Sitzungen enden
  *   user:2fa-reset <email>                            Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (Sitzungen enden)
+ *   user:email <alt> <neu>                            E-Mail-Adresse eines lokalen Kontos direkt ändern (ohne Bestätigung;
+ *                                                     Hinweis an beide Adressen, Sitzungen enden)
+ *   account:selftest                                  Selbsttest der Anmeldedaten (Tokens, Ablauf, Abbrechen, vergebene Adresse, auth_ver)
  *   user:invite <email> [rolle] [--name="…"] [--lang=de|en]
  *                                                     Person einladen (E-Mail mit Link, 7 Tage gültig; ohne Versand wird der Link angezeigt)
  *   invites:selftest                                  Selbsttest der Einladungen (Token, Hash, Rollenprüfung)
@@ -156,8 +159,34 @@ switch ($cmd) {
         if ($u['role'] === 'network' || !empty($u['network_uid'])) { fwrite(STDERR, "$email ist ein Netzwerk-Konto – Passwort mit network:user $email --password setzen.\n"); exit(1); }
         // auth_ver erhöhen: alle bestehenden Sitzungen des Kontos enden
         $app->db->query('UPDATE users SET password_hash = ?, auth_ver = auth_ver + 1 WHERE id = ?', [password_hash($pw, PASSWORD_DEFAULT), (int) $u['id']]);
-        echo "Passwort gesetzt – alle Sitzungen des Kontos beendet.\n";
+        Core\EmailChange::log('user.password', 'cli', strtolower($email) . ' · neu gesetzt');
+        // Hinweis-E-Mail an das Konto (Core\EmailChange)
+        Core\EmailChange::passwordChanged($app->db->fetch('SELECT * FROM users WHERE id = ?', [(int) $u['id']]), false, 'cli');
+        echo "Passwort gesetzt – alle Sitzungen des Kontos beendet, Hinweis-E-Mail an $email.\n";
         break;
+
+    case 'user:email':
+        // E-Mail-Adresse direkt ändern (Core\EmailChange::adminChange): ohne Bestätigung, Hinweis an beide Adressen, Sitzungen enden
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        [$from, $to] = [$pos[0] ?? '', $pos[1] ?? ''];
+        if ($from === '' || $to === '') { fwrite(STDERR, "Aufruf: user:email <alte-adresse> <neue-adresse> [--site=key]\n"); exit(1); }
+        $u = $app->db->fetch('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [$from]);
+        if (!$u) { fwrite(STDERR, "Kein Benutzer $from auf " . site()->key . ".\n"); exit(1); }
+        if (!empty($u['network_uid']) || ($u['role'] === 'network' && !Core\Network\Network::isNetworkSite())) {
+            fwrite(STDERR, "$from ist ein Netzwerk-Konto – die Adresse ändert es selbst in der Netzwerk-Verwaltung (Konto › Anmeldedaten) bzw. mit --site=" . Core\Network\Network::siteKey() . ".\n");
+            exit(1);
+        }
+        if ($err = Core\EmailChange::adminChange($u, $to, null)) { fwrite(STDERR, "$err\n"); exit(1); }
+        echo "E-Mail-Adresse von " . strtolower($from) . " auf " . strtolower(trim($to)) . " geändert (" . site()->key . ") – Hinweis an beide Adressen, Sitzungen beendet.\n";
+        if ($u['role'] === 'network') echo "Netzwerk-Konto: Schatten-Konten der anderen Websites wurden nachgezogen (sonst bei der nächsten Anmeldung).\n";
+        break;
+
+    case 'account:selftest':
+        // Anmeldedaten (Core\EmailChange): Tokens, Ablauf, Abbrechen, vergebene Adresse, auth_ver – in einer Transaktion, zurückgerollt
+        $res = Core\EmailChange::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'user:2fa-reset':
         // Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (z. B. Telefon verloren) – wird bei der nächsten Anmeldung neu eingerichtet

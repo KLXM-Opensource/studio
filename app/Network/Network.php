@@ -243,6 +243,42 @@ final class Network
         if ($n) \Core\Passkeys::deleteAll(self::db(), $id);   // Passkeys aller Domains
     }
 
+    /**
+     * Neue E-Mail-Adresse eines Netzwerk-Kontos sofort in die Schatten-Konten der anderen Websites übernehmen
+     * (Core\EmailChange). Hat dort ein lokales Konto schon diese Adresse, bleibt die alte stehen – wie bei loginShadow().
+     * Nicht erreichbare Websites holen es bei der nächsten Anmeldung nach (loginShadow schreibt die Adresse).
+     * @return array{0:list<string>, 1:list<string>} [geänderte Websites, übersprungene Websites]
+     */
+    public static function syncShadowEmail(int $nid, string $email): array
+    {
+        $email = strtolower(trim($email));
+        $done = $skipped = [];
+        foreach (array_keys(Sites::all()) as $key) {
+            if ($key === self::siteKey()) continue;
+            try {
+                if ($key === site()->key) {
+                    $db = app()->db;
+                } else {
+                    $cfg = (array) self::config($key)->get('db');
+                    if (($cfg['driver'] ?? 'sqlite') === 'sqlite' && !is_file((string) ($cfg['path'] ?? ''))) continue;
+                    $db = new Database($cfg);
+                }
+                $id = (int) $db->fetchValue('SELECT id FROM users WHERE network_uid = ?', [$nid]);
+                if (!$id) continue;
+                if ($db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ? AND id != ?', [$email, $id])) {
+                    $skipped[] = $key;
+                    continue;
+                }
+                $db->update('users', ['email' => $email], 'id = :id', ['id' => $id]);
+                $done[] = $key;
+            } catch (\Throwable $e) {
+                error_log('[network] syncShadowEmail ' . $key . ': ' . $e->getMessage());
+                $skipped[] = $key;
+            }
+        }
+        return [$done, $skipped];
+    }
+
     // ================================================================= Adressen
 
     /** Basisadresse einer Website (config base_url → erste Domain; http nur für lokale Test-Domains ohne HTTPS) */

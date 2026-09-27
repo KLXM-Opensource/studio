@@ -232,6 +232,8 @@ final class Database
         Passkeys::ensureTable($this);
         // Einladungen neuer Konten (Core\Invites): Token nur als Hash, einmal verwendbar
         Invites::ensureTable($this);
+        // Anmeldedaten selbst ändern (Core\EmailChange): offene Änderungen der E-Mail-Adresse, Tokens nur als Hash
+        EmailChange::ensureTable($this);
         // Eigene Blöcke (Block-Baukasten, Core\Blocks\Custom): Definitionen und Verlauf je Website
         Blocks\Custom::ensureTable($this);
         // Externe Quellen (Core\Sources): Feeds/APIs/OpenImmo → Datentabellen, Herkunft je Eintrag, Protokoll

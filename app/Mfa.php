@@ -25,7 +25,8 @@ final class Mfa
     public const REAUTH = 900;
     /** Pfade, die bei ausstehender Pflicht-Einrichtung erreichbar bleiben */
     public const SETUP_PATHS = ['/admin/account/2fa', '/admin/account/2fa/enable', '/admin/account/2fa/choose', '/admin/account/2fa/codes',
-        '/admin/account/passkeys/options', '/admin/account/passkeys', '/admin/account/reauth', '/admin/logout'];
+        '/admin/account/passkeys/options', '/admin/account/passkeys', '/admin/account/reauth',
+        '/admin/account/reauth/passkey/options', '/admin/account/reauth/passkey', '/admin/logout'];
 
     private static ?array $net = null;
 

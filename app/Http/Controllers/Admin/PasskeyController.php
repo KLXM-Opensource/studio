@@ -186,7 +186,7 @@ final class PasskeyController extends AdminController
     public function reauth(Request $r): Response
     {
         $o = $this->owner($r);
-        $to = $r->str('back') === 'choose' ? '/admin/account/2fa/choose' : '/admin/account#passkeys';
+        $to = self::reauthBack($r->str('back'));
         $limiter = new RateLimiter(app()->db);
         $key = 'reauth:' . $o['uid'] . ':' . ($o['local'] ? 'l' : 'n');
         if ($limiter->tooMany($key, 5, 900)) return $this->back($to, 'error', __('Zu viele Versuche. Bitte warten Sie 15 Minuten.'));
@@ -196,7 +196,53 @@ final class PasskeyController extends AdminController
         }
         $limiter->clear($key);
         app()->session->set('reauth_at', time());
-        return $this->back($to, 'success', __('Passwort bestätigt – Sie können jetzt Passkeys verwalten.'));
+        return $this->back($to, 'success', $r->str('back') === 'anmeldedaten' ? __('Passwort bestätigt – für 15 Minuten.') : __('Passwort bestätigt – Sie können jetzt Passkeys verwalten.'));
+    }
+
+    /** Ziel nach der Bestätigung (nur feste Anker im Konto bzw. die Einrichtung) */
+    private static function reauthBack(string $back): string
+    {
+        return match ($back) {
+            'choose' => '/admin/account/2fa/choose',
+            'anmeldedaten' => '/admin/account#anmeldedaten',
+            default => '/admin/account#passkeys',
+        };
+    }
+
+    /**
+     * Mit Passkey bestätigen statt mit dem Passwort (z. B. Konten ohne Passwort aus einer Einladung): Optionen für
+     * navigator.credentials.get() mit den Passkeys dieses Kontos für diese Domain, Benutzerprüfung verlangt.
+     */
+    public function reauthOptions(Request $r): Response
+    {
+        $o = $this->owner($r);
+        if (!Passkeys::available()) return $this->json($r, __('Passkeys brauchen eine sichere Verbindung (HTTPS) und einen Domainnamen.'));
+        $key = 'reauth:' . $o['uid'] . ':' . ($o['local'] ? 'l' : 'n');
+        if ((new RateLimiter(app()->db))->tooMany($key, 5, 900)) return $this->json($r, __('Zu viele Versuche. Bitte warten Sie 15 Minuten.'), 429);
+        $creds = $o['db']->fetchAll('SELECT credential_id, transports FROM user_passkeys WHERE user_id = ? AND rp_id = ?', [$o['uid'], Passkeys::rpId()]);
+        if (!$creds) return $this->json($r, __('Für dieses Konto ist hier kein Passkey eingerichtet.'));
+        return Response::json(['publicKey' => Passkeys::requestOptions('reauth', $creds, true)]);
+    }
+
+    /** Antwort prüfen → Bestätigung gilt 15 Minuten (reauth_at, Mfa::recentAuth) */
+    public function reauthPasskey(Request $r): Response
+    {
+        $o = $this->owner($r);
+        $limiter = new RateLimiter(app()->db);
+        $key = 'reauth:' . $o['uid'] . ':' . ($o['local'] ? 'l' : 'n');
+        if ($limiter->tooMany($key, 5, 900)) return $this->json($r, __('Zu viele Versuche. Bitte warten Sie 15 Minuten.'), 429);
+        $in = (array) ($r->post['credential'] ?? []);
+        $hash = Passkeys::credentialHash($in);
+        $err = Passkeys::verify($o['db'], 'reauth', $in, $hash ? Passkeys::find($o['db'], $hash, $o['uid']) : null, Mfa::handle($o['user']));
+        if ($err !== null) {
+            $limiter->hit($key);
+            return $this->json($r, $err);
+        }
+        $limiter->clear($key);
+        Mfa::remember($o['db'], $o['uid'], 'passkey');
+        app()->session->set('reauth_at', time());
+        app()->session->flash('success', __('Mit Passkey bestätigt – für 15 Minuten.'));
+        return Response::json(['ok' => true, 'redirect' => url(self::reauthBack($r->str('back')))]);
     }
 
     // ================================================================= Einrichtung (verlangt), Wiederherstellungscodes

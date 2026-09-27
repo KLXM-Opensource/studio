@@ -26,6 +26,15 @@ return function (Router $r): void {
     $r->get('/admin/account', [Admin\UserController::class, 'account']);
     $r->post('/admin/account', [Admin\UserController::class, 'saveAccount']);
     $r->post('/admin/account/accent', [Admin\UserController::class, 'saveAccent']);   // Akzentfarbe (Core\Accent)
+    // Anmeldedaten (Core\EmailChange): Name, E-Mail-Adresse mit Bestätigung (Links aus den E-Mails öffentlich, Token allein genügt)
+    $r->post('/admin/account/profile', [Admin\AccountController::class, 'saveProfile']);
+    $r->post('/admin/account/email', [Admin\AccountController::class, 'requestEmail']);
+    $r->post('/admin/account/email/resend', [Admin\AccountController::class, 'resendEmail']);
+    $r->post('/admin/account/email/cancel', [Admin\AccountController::class, 'cancelEmail']);
+    $r->get('/admin/konto/email/{token}', [Admin\AccountController::class, 'confirmPage']);
+    $r->post('/admin/konto/email/{token}', [Admin\AccountController::class, 'confirm']);
+    $r->get('/admin/konto/email-abbrechen/{token}', [Admin\AccountController::class, 'cancelPage']);
+    $r->post('/admin/konto/email-abbrechen/{token}', [Admin\AccountController::class, 'cancel']);
     // Zwei-Faktor-Anmeldung (Core\Totp) und Netzwerk-Administration (Core\Network)
     $r->get('/admin/login/2fa', [Admin\TwoFactorController::class, 'challengeForm']);
     $r->post('/admin/login/2fa', [Admin\TwoFactorController::class, 'challenge']);
@@ -42,6 +51,8 @@ return function (Router $r): void {
     $r->get('/admin/account/2fa/choose', [Admin\PasskeyController::class, 'choose']);
     $r->get('/admin/account/2fa/codes', [Admin\PasskeyController::class, 'codes']);
     $r->post('/admin/account/reauth', [Admin\PasskeyController::class, 'reauth']);
+    $r->post('/admin/account/reauth/passkey/options', [Admin\PasskeyController::class, 'reauthOptions']);
+    $r->post('/admin/account/reauth/passkey', [Admin\PasskeyController::class, 'reauthPasskey']);
     $r->post('/admin/account/passkeys/options', [Admin\PasskeyController::class, 'options']);
     $r->post('/admin/account/passkeys', [Admin\PasskeyController::class, 'store']);
     $r->post('/admin/account/passkeys/{id}/rename', [Admin\PasskeyController::class, 'rename']);
@@ -283,6 +294,7 @@ return function (Router $r): void {
     $r->post('/admin/users', [Admin\UserController::class, 'store']);
     $r->post('/admin/users/{id}/delete', [Admin\UserController::class, 'delete']);
     $r->post('/admin/users/{id}/2fa-reset', [Admin\UserController::class, 'resetTwoFactor']);
+    $r->post('/admin/users/{id}/email', [Admin\UserController::class, 'changeEmail']);   // ohne Bestätigung, Hinweis an beide Adressen
     // Einladungen (Core\Invites): Person einladen, erneut senden, zurückziehen; öffentlich annehmen (Passkey und/oder Passwort)
     $r->post('/admin/users/invite', [Admin\InviteController::class, 'store']);
     $r->post('/admin/users/invites/{id}/resend', [Admin\InviteController::class, 'resend']);

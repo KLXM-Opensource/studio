@@ -2,8 +2,10 @@
 $__cmds = [
     'Konten & Einrichtung' => [
         ['user:create <email> [admin|editor]', 'Benutzer anlegen (Passwort wird abgefragt); Rolle = Schlüssel einer Rolle'],
-        ['user:password <email>', 'Passwort neu setzen – alle bestehenden Sitzungen des Kontos enden (auth_ver)'],
+        ['user:password <email>', 'Passwort neu setzen – alle bestehenden Sitzungen des Kontos enden (auth_ver), Hinweis-E-Mail an das Konto'],
         ['user:2fa-reset <email>', 'Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (Sitzungen enden; Netzwerk-Konten: network:user --reset-2fa)'],
+        ['user:email <alt> <neu>', 'E-Mail-Adresse eines Kontos direkt ändern – ohne Bestätigung, Hinweis-E-Mail an beide Adressen, Sitzungen enden (auth_ver), offene Änderungen verfallen. Netzwerk-Konten nur auf der Netzwerk-Website (Schatten-Konten werden nachgezogen)'],
+        ['account:selftest', 'Selbsttest der Anmeldedaten: Tokens, Ablauf, Abbrechen, vergebene Adresse (keine Rückschlüsse), auth_ver – in einer Transaktion, zurückgerollt (Exit-Code 1 bei Fehlern)'],
         ['user:invite <email> [rolle] [--name="…"] [--lang=de|en]', 'Person einladen: E-Mail mit Link (einmalig, invite_days Tage gültig); ohne zugestellte E-Mail wird der Link ausgegeben. Rolle nie „network“'],
         ['invites:selftest', 'Selbsttest der Einladungen (Token, Hash, Rollenprüfung; Exit-Code 1 bei Fehlern)'],
         ['setup:token', 'Setup-Token für /admin/setup anzeigen'],

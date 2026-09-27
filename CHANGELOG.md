@@ -6,6 +6,30 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anmeldedaten selbst ändern (`Core\EmailChange`)
+- **Konto → Anmeldedaten:** Übersicht (E-Mail-Adresse, Passwort festgelegt?, Passkeys, Zwei-Faktor) mit den Aktionen
+  „E-Mail-Adresse ändern“ und „Passwort ändern/festlegen“; Name unter „Profil“ getrennt vom Passwort.
+- **E-Mail-Adresse mit Bestätigung:** Anfrage mit aktuellem Passwort (Konten ohne Passwort: Passkey-Bestätigung bzw. frische
+  Anmeldung, 15 min). Link an die neue Adresse (32 Zufallsbytes, nur SHA-256 mit Zweck und Website gespeichert, `hash_equals`,
+  24 h, einmalig, `email_change_hours`), Hinweis mit „Das war ich nicht – Änderung abbrechen“ an die bisherige Adresse
+  (bricht ab und beendet alle Sitzungen). Wirksam erst mit dem Link (Token allein genügt, Änderung muss noch gelten, Adresse wird
+  erneut geprüft); danach `auth_ver` + 1 (eigene Sitzung bleibt), Protokoll `user.email`, Bestätigung an beide Adressen.
+  Offene Änderung im Konto mit „Erneut senden“ und „Abbrechen“. Vergebene Adresse: gleiche Antwort, Hinweis an die Inhaberin,
+  kein Bestätigungslink (keine Rückschlüsse auf Konten). Link-Seiten `/admin/konto/email/{token}` und
+  `/admin/konto/email-abbrechen/{token}`: GET ändert nichts, POST mit CSRF, `Referrer-Policy: no-referrer`, Begrenzung je IP.
+  Ohne zugestellte E-Mail ein deutlicher Hinweis – ohne Bestätigung keine Änderung. Tabelle `user_email_changes`.
+- Passkeys bleiben gültig (an die Konto-ID gebunden, `Passkeys::userHandle`).
+- **Passwort:** Konten nur mit Passkey (z. B. aus Einladungen) legen nach Passkey-Bestätigung ein erstes Passwort fest;
+  Fehlversuche beim aktuellen Passwort begrenzt; Hinweis-E-Mail nach jeder Passwortänderung (auch `user:password`).
+- **Mit Passkey bestätigen** statt Passwort (`/admin/account/reauth/passkey`, Benutzerprüfung verlangt) – auch beim Hinzufügen
+  und Löschen von Passkeys; vorher waren Konten ohne Passwort nach 15 Minuten ausgesperrt.
+- **Benutzer & Rollen → „E-Mail ändern“:** direkt ohne Bestätigung, Hinweis an beide Adressen, Sitzungen enden, Protokoll
+  `user.email-admin`; nicht für das eigene Konto, Netzwerk-Konten oder Rollen mit mehr Rechten. CLI `user:email <alt> <neu>`.
+- **Netzwerk-Konten:** auf anderen Websites nur Hinweis mit Link zur Netzwerk-Verwaltung; auf der Netzwerk-Website gleicher Ablauf,
+  Schatten-Konten werden sofort nachgezogen (`Network::syncShadowEmail`), sonst bei der nächsten Anmeldung.
+- E-Mail-Vorlage `mail/account(.txt).php` (Layout der Einladung, hell/dunkel, im Kit überschreibbar). Öffentliche Seiten ohne
+  `user` (Anmeldung, Einladung, Links) erscheinen jetzt auch für Angemeldete ohne Seitenleiste. Selbsttest `account:selftest`.
+
 ### Redaktionsnotizen `[# … #]` (`Core\EditorNotes`)
 - Versteckte Hinweise der Redaktion in jedem Text: `[# bitte ergänzen: Seminartermine #]` – mehrzeilig, mehrere je Text, auch in
   Rich Text, verschachtelten Blockdaten und Einträgen von Datentabellen. In `<code>`/`<pre>` und `` `Backticks` `` bleibt die

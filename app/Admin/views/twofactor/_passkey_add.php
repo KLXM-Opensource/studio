@@ -4,12 +4,14 @@ $pkId ??= 'pk';
 ?>
 <?php if (!$pkAvail): ?>
 <p class="adm-flash adm-flash--error"><?= e(__('Passkeys brauchen eine sichere Verbindung (HTTPS) und einen Domainnamen.')) ?></p>
-<?php elseif (!$pkRecent): ?>
-<form method="post" action="<?= e(url('/admin/account/reauth')) ?>" class="tf-inline pk-reauth"><?= csrf_field() ?><input type="hidden" name="back" value="<?= e($pkBack) ?>">
-  <label class="adm-sr" for="<?= e($pkId) ?>-pw"><?= e(__('Passwort zur Bestätigung')) ?></label><input id="<?= e($pkId) ?>-pw" name="password" type="password" autocomplete="current-password" required placeholder="<?= e(__('Passwort zur Bestätigung')) ?>" aria-describedby="<?= e($pkId) ?>-pw-h">
-  <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Passwort bestätigen')) ?></button>
-</form>
-<p class="f-help" id="<?= e($pkId) ?>-pw-h"><?= e(__('Zum Hinzufügen oder Löschen von Passkeys bestätigen Sie bitte zuerst Ihr Passwort (gilt 15 Minuten).')) ?></p>
+<?php elseif (!$pkRecent): // Passwort bestätigen – oder mit einem vorhandenen Passkey (Konten ohne Passwort: nur so)
+  $raRow = \Core\Mfa::row($user) ?? [];
+  $raId = $pkId; $raBack = $pkBack; $raHasPw = \Core\EmailChange::hasPassword($raRow);
+  [$raDb, $raUid] = \Core\Mfa::store($user);
+  $raPasskey = $raRow && \Core\Passkeys::count($raDb, $raUid, \Core\Passkeys::rpId()) > 0; ?>
+<?php include __DIR__ . '/../account/_reauth.php'; ?>
+<p class="f-help" id="<?= e($pkId) ?>-pw-h"><?= e($raHasPw ? __('Zum Hinzufügen oder Löschen von Passkeys bestätigen Sie bitte zuerst Ihr Passwort (gilt 15 Minuten).')
+  : __('Zum Hinzufügen oder Löschen von Passkeys bestätigen Sie bitte zuerst mit einem Passkey (gilt 15 Minuten).')) ?></p>
 <?php else: ?>
 <form class="pk-add" data-pk-add="<?= e(url('/admin/account/passkeys')) ?>" novalidate>
   <?= csrf_field() ?>

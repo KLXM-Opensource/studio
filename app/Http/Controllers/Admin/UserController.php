@@ -22,7 +22,7 @@ final class UserController extends AdminController
         app()->session->forget('_invite_link');
         return $this->view('users', ['users' => $users, 'errors' => $errors, 'old' => $old, 'policy' => \Core\Mfa::policy(),
             'invites' => \Core\Invites::open(), 'inviteRoles' => \Core\Invites::roleOptions(app()->auth->role()), 'inviteLink' => is_array($link) ? $link : null,
-            'css' => ['css/passkey.css', 'css/invite.css']], $errors ? 422 : 200);
+            'css' => ['css/passkey.css', 'css/invite.css', 'css/account.css']], $errors ? 422 : 200);
     }
 
     public function store(Request $r): Response
@@ -113,10 +113,12 @@ final class UserController extends AdminController
         return $this->back('/admin/users#zwei-faktor', 'success', __('Einstellung zur Zwei-Faktor-Anmeldung gespeichert.'));
     }
 
-    public function account(Request $r, array $errors = []): Response
+    public function account(Request $r, array $errors = [], array $old = []): Response
     {
-        $this->auth($r);
-        return $this->view('account', ['errors' => $errors, 'css' => ['css/passkey.css']], $errors ? 422 : 200);
+        $user = $this->auth($r);
+        // Anmeldedaten (Core\EmailChange): offene Änderung der E-Mail-Adresse, Passwort vorhanden?
+        return $this->view('account', ['errors' => $errors, 'old' => $old, 'pendingEmail' => \Core\EmailChange::pending((int) $user['id']),
+            'css' => ['css/passkey.css', 'css/account.css']], $errors ? 422 : 200);
     }
 
     /** Oberflächensprache des eigenen Kontos */
@@ -138,32 +140,72 @@ final class UserController extends AdminController
         return $this->back('/admin/account#akzent', 'success', __('Akzentfarbe gespeichert.'));
     }
 
+    /**
+     * Passwort ändern – oder als erstes Passwort festlegen (Konten nur mit Passkey, z. B. aus einer Einladung: statt des
+     * aktuellen Passworts eine frische Anmeldung bzw. Passkey-Bestätigung). Andere Sitzungen enden, Hinweis-E-Mail an das Konto.
+     */
     public function saveAccount(Request $r): Response
     {
         $user = $this->auth($r);
         if (!empty($user['network_uid'])) {
-            return $this->back('/admin/account', 'error', __('Netzwerk-Konten ändern Passwort und Namen in der Netzwerk-Verwaltung.'));
+            return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwalten Sie in der Netzwerk-Verwaltung.'));
         }
         $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]);
+        $first = !\Core\EmailChange::hasPassword($row);
         $errors = [];
-        if (!password_verify((string) ($r->post['current'] ?? ''), (string) $row['password_hash'])) {
-            $errors['current'] = 'Das aktuelle Passwort ist falsch.';
+        if ($err = AccountController::confirmIdentity($r, $row)) {
+            $errors['current'] = $err;
         }
         $pw = (string) ($r->post['password'] ?? '');
         if ($p = Auth::passwordProblem($pw)) {
-            $errors['password'] = $p;
+            $errors['password'] = __($p);
         } elseif ($pw !== (string) ($r->post['password2'] ?? '')) {
-            $errors['password2'] = 'Die Passwörter stimmen nicht überein.';
+            $errors['password2'] = __('Die Passwörter stimmen nicht überein.');
         }
         if ($errors) {
             return $this->account($r, $errors);
         }
-        app()->db->update('users', ['password_hash' => password_hash($pw, PASSWORD_DEFAULT), 'name' => $r->str('name') ?: $row['name']], 'id = :id', ['id' => $user['id']]);
+        $data = ['password_hash' => password_hash($pw, PASSWORD_DEFAULT)];
+        // Ältere Formulare schickten den Namen mit dem Passwort
+        if (isset($r->post['name']) && $r->str('name') !== '') $data['name'] = \Core\Invites::clean($r->str('name'), \Core\Invites::NAME_MAX);
+        app()->db->update('users', $data, 'id = :id', ['id' => $user['id']]);
         // Andere Sitzungen des Kontos beenden (auth_ver) – bei Netzwerk-Konten auf allen Websites; diese Sitzung bleibt
         app()->db->query('UPDATE users SET auth_ver = auth_ver + 1 WHERE id = ?', [$user['id']]);
         app()->session->regenerate();
         app()->session->set('auth_ver', (int) app()->db->fetchValue('SELECT auth_ver FROM users WHERE id = ?', [$user['id']]));
         if (\Core\Network\Network::isNetworkUser()) \Core\Network\Network::log('password', site()->key);
-        return $this->back('/admin/account', 'success', 'Passwort geändert.');
+        else \Core\EmailChange::log('user.password', (string) $row['email'], $first ? 'festgelegt' : 'geändert');
+        \Core\EmailChange::passwordChanged($row, $first);
+        return $this->back('/admin/account#anmeldedaten', 'success', $first ? __('Passwort festgelegt – Sie können sich jetzt auch mit Passwort anmelden.') : __('Passwort geändert.'));
+    }
+
+    /**
+     * E-Mail-Adresse eines Kontos direkt ändern (Benutzer & Rollen) – ohne Bestätigung; Hinweis an beide Adressen, Protokoll.
+     * Nicht für das eigene Konto (dort mit Bestätigung), nicht für Netzwerk-Konten, nicht für Rollen mit mehr Rechten.
+     */
+    public function changeEmail(Request $r, string $id): Response
+    {
+        $me = $this->auth($r, 'users.manage');
+        $back = '/admin/users';
+        if ((int) $id === (int) $me['id']) {
+            return $this->back($back, 'error', __('Ihre eigene Adresse ändern Sie unter „Konto › Anmeldedaten“ – mit Bestätigung.'));
+        }
+        if (self::isNetworkAccount((int) $id)) {
+            return $this->back($back, 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
+        }
+        $target = app()->db->fetch('SELECT * FROM users WHERE id = ?', [(int) $id]);
+        if (!$target) return $this->back($back, 'error', __('Benutzer nicht gefunden.'));
+        if (!\Core\Invites::assignable(\Core\Permissions::role((string) $target['role']), app()->auth->role())) {
+            return $this->back($back, 'error', __('Dieses Konto hat mehr Rechte als Ihres – die Adresse kann nur eine Administration mit allen Rechten ändern.'));
+        }
+        $limiter = new \Core\RateLimiter(app()->db);
+        $key = 'email-admin:' . (int) $me['id'];
+        if ($limiter->tooMany($key, 30, 3600)) return $this->back($back, 'error', __('Zu viele Änderungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
+        $new = strtolower(trim($r->str('email')));
+        if ($err = \Core\EmailChange::adminChange($target, $new, (string) $me['email'])) {
+            return $this->back($back, 'error', $err);
+        }
+        $limiter->hit($key);
+        return $this->back($back, 'success', __('E-Mail-Adresse von {old} auf {new} geändert – beide Adressen wurden benachrichtigt, Sitzungen des Kontos beendet.', ['old' => $target['email'], 'new' => $new]));
     }
 }
