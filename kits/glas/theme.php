@@ -103,6 +103,10 @@ return [
     'image_ratios' => $ratios,
 
     // Stylesheets und Skripte je Blocktyp (bzw. Typ:Variante) – nur auf Seiten, die sie brauchen
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['brand' => ['mark' => 'dot']],
     'conditional_css' => [
         'css/h-aurora.css' => ['hero:aurora', 'hero:', 'hero:command'],         // Einstieg „Aurora“ (auch ohne gespeicherte Variante = Standard); Befehlssuche nutzt die Aurora mit
         'css/h-command.css' => ['hero:command'],                                // Befehlssuche (Suchfeld als Glasfenster, Chips, Pause-Schalter)
@@ -125,7 +129,6 @@ return [
         'css/b-downloads.css' => ['downloads'],
         'css/b-video.css' => ['video'],
         'css/dataform.css' => ['contact'],
-        'js/video.js' => ['video'],
     ],
 
     // ------------------------------------------------------------ Design (Style-Editor: Verwaltung → Design)

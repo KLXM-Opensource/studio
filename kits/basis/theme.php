@@ -94,10 +94,14 @@ return [
     ],
 
     // Selten genutzte Blöcke: eigenes Stylesheet, nur auf Seiten mit diesen Blöcken
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    // Optionen je Fragment: 'fragments' => ['brand' => ['mark' => 'dot'], 'video-embed' => ['ratio_class' => 'ratio-']]
     'conditional_css' => [
         'css/blocks.css' => ['stats', 'quote', 'faq', 'logos', 'downloads', 'contact', 'pricing', 'steps', 'tabs', 'video'],
         'css/extra.css' => ['gallery', 'slideshow', 'stack_cards', 'contact', 'map'],
-        'js/blocks.js' => ['tabs', 'video'],
+        'js/blocks.js' => ['tabs'],
         'css/rich.css' => ['@rich'],   // Rich-Text-Stile (t-lead, t-small, t-note, c-*, mark) – nur wenn die Seite sie ausgibt (Core\Sanitizer::styled)
         'css/hero-x.css' => ['hero:search', 'hero:form', 'hero:map'],   // Einstieg mit Werkzeug (Suche, Formular, Standort)
     ],

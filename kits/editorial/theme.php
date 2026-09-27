@@ -121,6 +121,10 @@ return [
 
     // Nur geladen, wo die Blöcke stehen (Kern ergänzt data.css, media.css, calendar.css, dataform.css, sections.css).
     // „typ:variante“ ist erlaubt (z. B. Handlungsaufruf als Newsletter mit Formular).
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['brand' => ['mark' => 'none', 'logo_width' => '320px']],
     'conditional_css' => [
         'css/hero.css' => ['hero'],
         'css/hero-x.css' => ['hero:issue', 'hero:agenda', 'hero:voice'],   // Titelgeschichte, Aktuell/Termine, Stimme
@@ -129,7 +133,7 @@ return [
         'css/blocks.css' => ['features', 'stats', 'faq', 'cta', 'logos', 'downloads', 'contact', 'video', 'map'],
         'css/data.css' => ['teasers'],
         'css/dataform.css' => ['cta:newsletter'],
-        'js/blocks.js' => ['video', 'article', 'richtext'],
+        'js/blocks.js' => ['article', 'richtext'],
     ],
 
     // ------------------------------------------------------------ Design (Style-Editor: Verwaltung → Design)

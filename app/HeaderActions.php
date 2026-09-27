@@ -537,11 +537,8 @@ final class HeaderActions
     public static function render(string $slot = 'bar', array $opt = []): string
     {
         $ha = self::model();
-        $theme = app()->theme;
-        $vars = ['ha' => $ha, 'slot' => $slot, 'opt' => $opt];
-        return is_file($theme->path . '/templates/partials/header-actions.php')
-            ? $theme->partial('header-actions', $vars)
-            : Theme::capture(ROOT . '/app/Views/header-actions.php', $vars);
+        // Kern-Fragment: Projekt/Kit dürfen es ersetzen (Core\Fragments – Suchreihenfolge bis app/Views/header-actions.php)
+        return app()->theme->partial('header-actions', ['ha' => $ha, 'slot' => $slot, 'opt' => $opt]);
     }
 
     /**

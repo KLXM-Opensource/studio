@@ -19,6 +19,21 @@ final class Embeds
         'vimeo' => ['label' => 'Vimeo', 'company' => 'Vimeo.com, Inc.'],
     ];
 
+    /** Wurde das Skript der Zwei-Klick-Lösung in dieser Anfrage schon ausgegeben? */
+    private static bool $scriptDone = false;
+
+    /**
+     * <script> der Zwei-Klick-Lösung (resources/js/embed.js → public/assets/js/embed.js) – einmal je Seite, direkt nach dem
+     * ersten Video (Kern-Fragment video-embed). Nicht im Bearbeiten-Modus (dort bleibt der Player aus, wie bisher).
+     * Ersetzt die früheren Kit-Skripte js/video.js, js/embed.js und den Video-Teil von js/blocks.js.
+     */
+    public static function script(): string
+    {
+        if (self::$scriptDone || (function_exists('is_editing') && is_editing())) return '';
+        self::$scriptDone = true;
+        return '<script src="' . e(asset('js/embed.js')) . '" defer></script>';
+    }
+
     /** @return array{provider: string, id: string}|null */
     public static function parse(?string $url): ?array
     {

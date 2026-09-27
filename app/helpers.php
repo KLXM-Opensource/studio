@@ -379,6 +379,33 @@ function footer_links(): array
     return \Core\Extensions::footerLinks();
 }
 
+/** Adresse der Datenschutzerklärung (Core\Legal) – für Kern-Fragmente und Kits statt kit-eigener Helfer */
+function privacy_url(): string
+{
+    return \Core\Legal::privacyUrl();
+}
+
+/** Impressum / Datenschutz / Barrierefreiheit in der Sprache der Seite: [['key', 'type', 'label', 'href'], …] (Core\Legal) */
+function legal_links(): array
+{
+    return \Core\Legal::links();
+}
+
+/** Name der Organisation aus den zentralen Angaben (org_name, mit $short: short_name), sonst Name der Website */
+function org_name(bool $short = false): string
+{
+    return \Core\Legal::orgName($short);
+}
+
+/**
+ * Kern-Fragment bzw. die Fassung von Projekt/Kit (Core\Fragments, Suchreihenfolge project/overrides → Kit → Kern):
+ * <?= fragment('langswitch', ['langs' => language_links()]) ?> – gleichbedeutend mit app()->theme->partial(…).
+ */
+function fragment(string $name, array $vars = []): string
+{
+    return app()->theme->partial($name, $vars);
+}
+
 /** Logo von KLXM Studio (Kreis mit KLXM-Kreuz, übernimmt die Textfarbe) */
 function cms_logo(): string
 {

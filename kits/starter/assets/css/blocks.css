@@ -40,6 +40,7 @@
 .vembed__poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
 .vembed__gate{position:relative;display:grid;align-content:end;justify-items:start;gap:.75rem;min-height:inherit;padding:clamp(1rem,4vw,2.25rem);font-size:.95rem}
 .vembed__gate p{margin:0;max-width:40rem}
+.vembed__info{display:grid;justify-items:start;gap:.75rem}   /* Kern-Fragment video-embed: Hinweis + Zeile vor der Schaltfläche */
 .vembed__gate a{color:inherit}
 .vembed__row{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
 .vembed__revoke{margin-top:.5rem;font-size:.875rem}

@@ -112,6 +112,7 @@
 .vembed__remember{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600}
 .vembed__remember input{width:17px;height:17px;margin:0;accent-color:var(--c-apricot)}
 .vembed__ext{font-weight:600}
+.vembed__ext::after{content:"\00a0\2197"}   /* ↗ – der Kern gibt „(öffnet in neuem Tab)“ für Screenreader aus */
 /* Zwei-Klick-Hinweis im Fluss: Der Kasten wächst mit dem Text (Seitenverhältnis = Mindesthöhe, overflow:clip statt hidden), nichts wird abgeschnitten oder ausgeblendet; die Schaltfläche steht nach dem Hinweis. */
 .vembed[data-embed]:not(.is-loaded){display:flex;flex-direction:column;overflow:clip}
 .vembed[data-embed]:not(.is-loaded) .vembed__gate{position:relative;inset:auto;flex:1 0 auto}

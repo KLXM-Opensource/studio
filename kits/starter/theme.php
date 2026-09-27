@@ -137,11 +137,14 @@ return [
     'image_ratios' => $ratios,
     // Stylesheets/Skripte nur auf Seiten, die einen dieser Blocktypen enthalten (Typ oder „Typ:Variante“).
     // „@rich“ = die Seite gibt Rich-Text-Formatierungen aus (Core\Sanitizer::styled). site.css + site.js laden immer (layout.php).
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['video-embed' => ['play_class' => 'btn btn--primary', 'play_icon' => 'play-circle', 'empty' => 'none']],
     'conditional_css' => [
         'css/blocks.css' => ['text_image', 'cards', 'cta', 'faq', 'video', 'downloads'],
         // Kern-Blöcke: nur Variablen setzen, die neutralen Kern-Stylesheets bleiben (siehe css/core.css)
         'css/core.css' => ['data_list', 'data_fields', 'data_form', 'calendar', 'upcoming', 'dials', 'map', 'gallery', 'slideshow', 'stack_cards'],
-        'js/video.js' => ['video'],   // Zwei-Klick-Lösung für YouTube/Vimeo
         'css/hero-search.css' => ['hero:search'],   // nur die Variante „Such-Einstieg“ des Blocks hero (Typ:Variante)
     ],
     // Weitere Möglichkeiten (hier nicht genutzt):

@@ -126,10 +126,8 @@ final class Search
             'panelOnly' => !empty($opt['panelOnly']),
             // $opt['label'], $opt['placeholder']: eigene Texte (z. B. Such-Einstieg, Core\Blocks\Hero::search; $variant 'hero')
             'label' => trim((string) ($opt['label'] ?? '')), 'placeholder' => trim((string) ($opt['placeholder'] ?? ''))];
-        $theme = app()->theme;
-        return is_file($theme->path . '/templates/partials/search-form.php')
-            ? $theme->partial('search-form', $vars)
-            : \Core\Theme::capture(ROOT . '/app/Views/search-form.php', $vars);
+        // Kern-Fragment: Projekt/Kit dürfen es ersetzen (Core\Fragments – Suchreihenfolge bis app/Views/search-form.php)
+        return app()->theme->partial('search-form', $vars);
     }
 
     /** id des Popovers der Kopf-Suche (Ziel eines eigenen Auslösers mit popovertarget) */

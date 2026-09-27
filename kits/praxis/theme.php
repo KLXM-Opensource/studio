@@ -146,11 +146,14 @@ return [
     ],
 
     // Zusätzliche Stylesheets/Skripte, die nur geladen werden, wenn die Seite einen der Blocktypen enthält
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['video-embed' => ['ratio_class' => 'ratio-', 'notice' => 'detailed', 'title' => true, 'empty' => 'placeholder', 'icon_size' => 26, 'poster_crop' => true]],
     'conditional_css' => [
         'css/blocks.css' => ['text_image', 'text_video', 'image_wide', 'steps', 'cta', 'downloads', 'people', 'job', 'richtext', 'notice',
             'teaser_tiles:image', 'quote:full', 'video', 'text_columns:columns', 'quick_contact'],
         'css/media-blocks.css' => ['gallery', 'slideshow', 'stack_cards'],   // Aussehen der Kern-Blöcke (Variablen + Feinschliff)   // „typ:variante“ = nur bei dieser Variante
-        'js/embed.js' => ['text_video', 'video'],
         'css/hero-media.css' => ['hero:image', 'hero:video', 'hero:color'],
         // Formulare: Formularseite /anfrage/… sowie die Rückseite der Flip-Kontaktkarte (Hero, Schnellkontakt)
         'css/form.css' => ['form', 'hero', 'quick_contact'],

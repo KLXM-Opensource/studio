@@ -185,12 +185,15 @@ final class Theme
         return (string) ob_get_clean();
     }
 
+    /**
+     * Fragment rendern (Core\Fragments): Nur-Kern-Fragmente (video-embed, editor, toolbar) immer aus dem Kern,
+     * überschreibbare nach der Suchreihenfolge project/overrides/kits/{kit}/fragments → kits/{kit}/fragments →
+     * kits/{kit}/templates/partials → app/Views/fragments. Kit-eigene Partials (header, footer, section …) wie bisher.
+     */
     public function partial(string $name, array $vars = []): string
     {
-        // Redaktions-Werkzeugleiste: rendert der Kern (Core\Toolbar), auch wenn das Theme kein eigenes Partial mitbringt
-        $html = $name === 'toolbar' && !is_file($this->path . '/templates/partials/toolbar.php')
-            ? Toolbar::render($vars) : $this->render('partials/' . $name, $vars);
-        // Redaktions-Werkzeugleiste (nur angemeldet): in ein eigenes Shadow DOM, damit Theme-CSS nicht hineinwirkt
+        $html = Fragments::render($name, $vars, $this->name);
+        // Redaktions-Werkzeugleiste (nur angemeldet): in ein eigenes Shadow DOM, damit Kit-CSS nicht hineinwirkt
         return $name === 'toolbar' ? self::toolbarHost($html) : $html;
     }
 

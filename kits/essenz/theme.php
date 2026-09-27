@@ -105,6 +105,10 @@ return [
     'image_ratios' => $ratios,
 
     // Stylesheets und Skripte je Blocktyp (bzw. Typ:Variante) – nur auf Seiten, die sie brauchen
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['brand' => ['mark' => 'dot']],
     'conditional_css' => [
         'css/b-prose.css' => ['richtext', 'faq', 'media_text', 'video', '@rich'],   // @rich: Rich-Text-Stile in anderen Blöcken (Core\Sanitizer::styled)
         'css/b-media-text.css' => ['media_text'],
@@ -121,7 +125,6 @@ return [
         'css/b-downloads.css' => ['downloads'],
         'css/b-video.css' => ['video'],
         'css/dataform.css' => ['contact'],
-        'js/video.js' => ['video'],
         'css/hero-x.css' => ['hero:console', 'hero:dials', 'hero:monitor'],   // Einstieg „Bedienfeld“, „Kennzahlen“, „Monitor“
     ],
 

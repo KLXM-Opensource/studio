@@ -105,6 +105,10 @@ return [
     'image_ratios' => $ratios,
 
     // Stylesheets und Skripte je Blocktyp (bzw. Typ:Variante) – nur auf Seiten, die sie brauchen
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    'fragments' => ['brand' => ['mark' => 'empty']],
     'conditional_css' => [
         'css/b-hero.css' => ['hero:panel', 'hero:statement'],
         'css/b-hero-season.css' => ['hero:season'],   // Einstieg „Jahreszeiten-Bühne“ (Panorama + Hofschild)
@@ -126,7 +130,6 @@ return [
         'css/b-downloads.css' => ['downloads'],
         'css/b-video.css' => ['video'],
         'css/dataform.css' => ['contact'],
-        'js/video.js' => ['video'],
     ],
 
     // ------------------------------------------------------------ Design (Style-Editor: Verwaltung → Design)

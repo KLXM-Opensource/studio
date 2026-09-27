@@ -101,6 +101,10 @@ return [
     ],
 
     // Stylesheets und Skripte je Blocktyp (bzw. Typ:Variante) – nur auf Seiten, die sie brauchen
+    // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
+    // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
+    // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
+    // Optionen je Fragment: 'fragments' => ['brand' => ['mark' => 'dot'], 'video-embed' => ['ratio_class' => 'ratio-']]
     'conditional_css' => [
         'css/hero-x.css' => ['hero:fullbleed', 'hero:cards', 'hero:type'],
         'css/hx-scale.css' => ['hero:scale'], 'css/hx-collage.css' => ['hero:collage'], 'css/hx-compare.css' => ['hero:compare'],   // neue Einstiege
@@ -125,7 +129,6 @@ return [
         'css/b-downloads.css' => ['downloads'],
         'css/dataform.css' => ['contact'],
         'js/tabs.js' => ['tabs'],
-        'js/video.js' => ['video'],
         'js/reel.js' => ['quote', 'cards'],
         'js/scrolly.js' => ['scrolly'],
     ],
