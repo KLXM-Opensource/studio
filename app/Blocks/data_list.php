@@ -53,17 +53,25 @@ if (!empty($d['sort_dir'])) $o['dir'] = $d['sort_dir'];
 if (!empty($d['source'])) $o['source'] = (string) $d['source'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
 $rows = Entries::query($t, $o);
-if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, (string) ($d['title'] ?? ''));   // schema.org ItemList
+if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, strip_emphasis((string) ($d['title'] ?? '')));   // schema.org ItemList
 $pages = !empty($d['paginate']) && $limit ? (int) ceil(Entries::count($t, $o) / $limit) : 1;
 $layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table'], true) ? $d['layout'] : 'cards';
 $link = fn(array $e) => !empty($d['link_detail']) ? Entries::href($t, $e) : null;
 $hTag = !empty($d['title']) ? 'h3' : 'h2';
+// Spaltenköpfe der Tabelle: Titel-Feld, Sonderfelder „_when“ (Termin) und „published_at“ wie im Block „Datensatz-Felder“
+$colLabel = fn(string $f) => match (true) {
+    $f === '_title' => ($tf = Tables::field($t, $t['settings']['title_field'])) ? Tables::label($tf) : lt('Titel'),
+    ($ff = Tables::field($t, $f)) !== null => Tables::label($ff),
+    $f === '_when' => lt('Termin'),
+    $f === 'published_at' => lt('Datum'),
+    default => $f,
+};
 ?>
 <div class="<?= e($wrap) ?> dl dl--<?= e($layout) ?>">
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="dl-head">
     <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-    <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m dl-title"><span<?= $b->edit('title') ?>><?= e($d['title']) ?></span></h2><?php endif; ?>
+    <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m dl-title"><span<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></span></h2><?php endif; ?>
     <?php if (!empty($d['intro'])): ?><p class="muted dl-intro"<?= $b->edit('intro') ?>><?= e($d['intro']) ?></p><?php endif; ?>
   </header>
   <?php endif; ?>
@@ -72,7 +80,7 @@ $hTag = !empty($d['title']) ? 'h3' : 'h2';
   <p class="dl-empty"><?= e($d['empty_text'] ?: lt('Zurzeit gibt es hier keine Einträge.')) ?><?= is_editing() ? ' <small>(nur veröffentlichte Einträge erscheinen)</small>' : '' ?></p>
   <?php elseif ($layout === 'table'): ?>
   <div class="dl-tablewrap"><table class="dl-table">
-    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"><?= e($f === '_title' ? (($tf = Tables::field($t, $t['settings']['title_field'])) ? Tables::label($tf) : lt('Titel')) : (($ff = Tables::field($t, $f)) ? Tables::label($ff) : ($f === 'published_at' ? lt('Datum') : $f))) ?></th><?php endforeach; ?></tr></thead>
+    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"><?= e($colLabel($f)) ?></th><?php endforeach; ?></tr></thead>
     <tbody>
     <?php foreach ($rows as $e): $url = $link($e); ?>
       <tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?>
