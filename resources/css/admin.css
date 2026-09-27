@@ -333,6 +333,10 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .fx-search:focus-within{background:var(--adm-surface);box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .25)}
 .fx-search input{flex:1;min-width:0;border:0;background:none;font:400 13px var(--adm-font);color:var(--adm-ink);outline:none}
 .fx-upbtn{min-height:32px;padding:0 14px}
+/* „Importieren aus …“ (Quellen der Erweiterungen, CMSMedia-Hook sources) */
+.fx-sources{display:contents}
+.fx-srcbtn{min-height:32px;padding:0 12px;white-space:nowrap}
+.fx-srcbtn svg{width:14px;height:14px}
 .fx-upbtn svg{width:14px;height:14px}
 
 .fx-items{flex:1;overflow:auto;padding:16px;outline:none;align-content:start}
@@ -621,7 +625,7 @@ img.media-vthumb{object-fit:cover}
   .fx-side{position:absolute;left:0;top:0;bottom:0;width:240px;z-index:16;display:none;box-shadow:12px 0 30px rgba(0,0,0,.15)}
   .fx.is-side-open .fx-side{display:block}
   .fx-sidetoggle{display:grid}
-  .fx-size,.fx-upbtn span{display:none}
+  .fx-size,.fx-upbtn span,.fx-srcbtn span{display:none}
   .fx-search{width:auto;flex:1}
   .fx-title{display:none}
   [data-view=list] .fx-listhead,[data-view=list] .fx-row{grid-template-columns:minmax(0,1fr) 70px}

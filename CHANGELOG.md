@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: „Importieren aus …“ für Erweiterungen
+- Neuer Browser-Haken `CMSMedia.extend({ sources(finder) })`: Erweiterungen tragen Quellen in den Knopf „Importieren aus …“
+  neben „Hochladen“ ein – in der Mediathek und im Auswahldialog der Bild-/Datei-Felder (Verwaltung und Bearbeiten-Modus der
+  Website), nur mit Schreibrecht am aktuellen Ort (Website bzw. Pool). Knopf mit Menü, Tastatur wie das Kontextmenü; der
+  Knopf bleibt beim Neuladen der Liste erhalten (Fokus). Doku: Technik → Funktionen & Erweiterungen → Mediathek im Browser.
+- Genutzt von der Erweiterung `assets_connect` (Nextcloud, Pexels, Pixabay – Paket `klxm/studio-assets-connect`).
+
 ### Haken für Erweiterungen: Eingänge und eigene Formulare (z. B. Buchungskalender)
 - `Extension::inbox()` – eigene Status je Eingang (Beschriftung, Knopf, Ton, „done“ für die Aufbewahrung, „manual“),
   Zusatzzeile je Anfrage, Prüfung vor Statuswechseln (Verwaltung, API, MCP) in derselben Transaktion, `direct_form => false`.

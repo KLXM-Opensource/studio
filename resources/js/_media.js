@@ -111,6 +111,9 @@ const CAP_HELPERS = { http: (...a) => http(...a), base: BASE, box: () => box(), 
  *   summary(finder, el, ui)          Informationen rechts ohne Auswahl (z. B. Sammelaktion für einen Prüf-Filter)
  *   menu(finder, ids, one) → [[label, fn, danger]]   Einträge im Kontextmenü
  *   quickLook(finder, m, dialog)     nach dem Aufbau der Quick-Look-Ansicht
+ *   sources(finder) → [{ label, icon, run(finder) }]   Einträge im Knopf „Importieren aus …“ neben „Hochladen“ (Mediathek und
+ *                                    Auswahldialog, nur mit Schreibrecht) – run() öffnet z. B. einen eigenen Dialog und ruft danach
+ *                                    finder.load(id) auf; Ziel-Pool finder.pool, Sammlungen finder.meta.collections, Ort finder.src
  * ui = { t, ico, ask, esc, http, toast, box, inBox, base } – gleiche Anfragen (CSRF, Pool) und Dialog-Ebene wie die Mediathek.
  */
 const PLUGINS = [];
@@ -123,7 +126,7 @@ function extend(plugin) {
   if (!plugin || PLUGINS.includes(plugin)) return;
   PLUGINS.push(plugin);
   // bereits geöffnete Mediatheken neu zeichnen (Erweiterungs-Skripte laden nach admin.js)
-  FINDERS.forEach(f => { if (f.meta && f.root.isConnected) { plugin.loaded?.(f, f.meta); f.renderSide(); f.render(); } });
+  FINDERS.forEach(f => { if (f.meta && f.root.isConnected) { plugin.loaded?.(f, f.meta); f.renderSide(); f.render(); f.renderSources(); } });
 }
 
 function toast(text) {
@@ -507,6 +510,7 @@ class Finder {
           <input type="range" class="fx-size" min="88" max="220" step="4" value="${this.size}" aria-label="Symbolgröße" data-size>
           <label class="fx-search">${SVG.search}<input type="search" placeholder="Suchen" aria-label="Medien durchsuchen" data-q></label>
           <button type="button" class="fx-tbtn fx-infotoggle" data-infotoggle aria-label="Informationen ein-/ausblenden">${SVG.info}</button>
+          <span class="fx-sources" data-sources hidden></span>
           <button type="button" class="adm-btn adm-btn--primary adm-btn--small fx-upbtn" data-upload>${SVG.up}<span>Hochladen</span></button>
         </header>
         <div class="fx-listhead" aria-hidden="true"></div>
@@ -531,6 +535,18 @@ class Finder {
     this.applyView();
   }
 
+  /** Knopf „Importieren aus …“: Quellen der Erweiterungen (Hook sources) – nur mit Schreibrecht im aktuellen Ort */
+  renderSources() {
+    const el = $('[data-sources]', this.root);
+    if (!el) return;
+    this.sources = this.ro ? [] : hook('sources', this).flat().filter(s => s && s.label && typeof s.run === 'function');
+    const key = this.sources.map(s => s.label).join('\n');
+    if (el.dataset.key === key) return;   // unverändert: Knopf behalten (Fokus bleibt nach dem Neuladen erhalten)
+    el.dataset.key = key;
+    el.hidden = !this.sources.length;
+    el.innerHTML = this.sources.length ? `<button type="button" class="adm-btn adm-btn--small fx-srcbtn" data-srcmenu aria-haspopup="menu">${ico('download-simple')}<span>${esc(t('Importieren aus …'))}</span></button>` : '';
+  }
+
   updateUploadDest() {
     const el = $('[data-updest]', this.root);
     const c = this.src.type === 'collection' ? this.meta?.collections.find(c => String(c.id) === String(this.src.value)) : null;
@@ -540,6 +556,13 @@ class Finder {
   bind() {
     const r = this.root;
     $('[data-upload]', r).addEventListener('click', () => this.uploader.choose());
+    // Importieren aus externen Quellen (Erweiterungen, Hook sources): Menü unter dem Knopf, Fokus danach zurück
+    $('[data-sources]', r).addEventListener('click', e => {
+      const b = e.target.closest('[data-srcmenu]');
+      if (!b || !this.sources?.length) return;
+      const rc = b.getBoundingClientRect();
+      this.menu(rc.left, rc.bottom + 4, this.sources.map(s => [s.label, () => { try { s.run(this, b); } catch (ex) { console.error(ex); toast(ex.message); } }]));
+    });
     $('[data-upclose]', r).addEventListener('click', () => { this.uploader.items = this.uploader.items.filter(i => i.status === 'up'); this.uploader.render(); $('.fx-uploads', r).hidden = !this.uploader.items.length; });
     // Mediathek: Orte/Sammlungen stehen in der Seitenleiste (Drill-down) – schmal öffnet der Knopf die Schublade (_drawer.js)
     const inDrawer = () => !!this.$side.closest('.adm-side');
@@ -669,7 +692,7 @@ class Finder {
     this.sel = new Set([...this.sel].filter(id => ids.has(id)));
     if (selectId && ids.has(selectId)) { this.sel = new Set([selectId]); this.anchor = this.active = selectId; }
     hook('loaded', this, data);
-    this.renderSide(); this.render(); this.updateUploadDest();
+    this.renderSide(); this.render(); this.updateUploadDest(); this.renderSources();
   }
   sorted(items) {
     const { key, dir } = this.sort;
