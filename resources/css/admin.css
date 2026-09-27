@@ -1447,7 +1447,7 @@ a.adm-drill__back{text-decoration:none}
 @media (min-width:901px){.is-drill .adm-side > nav{display:none}}
 .is-drill.is-drill-nav .adm-side > nav{display:block}
 .is-drill.is-drill-nav .adm-drill > :not(.adm-drill__back){display:none}
-.is-drill .fx{grid-template-columns:minmax(0,1fr) 320px;height:calc(100vh - 52px)}
+.is-drill .fx--library{grid-template-columns:minmax(0,1fr) 320px;height:calc(100vh - 52px)}   /* nur die Mediathek selbst – nicht der Auswahldialog (fx--pick) */
 .is-drill .fx.is-info-hidden{grid-template-columns:minmax(0,1fr) 0}
 .is-drill .adm-main:has(.fx--library){padding-top:26px}
 @media (max-width:1180px){.is-drill .fx,.is-drill .fx.is-info-hidden{grid-template-columns:minmax(0,1fr)}}
