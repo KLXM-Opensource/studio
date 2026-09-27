@@ -333,6 +333,28 @@ function is_editing(): bool
 }
 
 /**
+ * *Betonung* in kurzen Texten (Überschriften der Kern-Blöcke) wie in den Kits: Bringt das Kit eine Funktion {kit}_title()
+ * mit (klxm_title, klxm_agentur_title, fluid_title … – Bindestrich im Namen → „_“), wird sie benutzt, damit Kern-Blöcke
+ * aussehen wie die Blöcke des Kits (<strong> bzw. <em class="hl">). Sonst *…* → <em>…</em>. Ergebnis ist HTML, der Text
+ * wird immer escaped; im Bearbeiten-Modus Rohtext (die Sternchen bleiben sichtbar und editierbar).
+ */
+function emphasis(string $text): string
+{
+    if (is_editing() || !str_contains($text, '*')) return e($text);
+    static $fn = [];
+    $kit = app()->theme->name;
+    $fn[$kit] ??= function_exists($f = str_replace('-', '_', $kit) . '_title') ? $f : '';
+    if ($fn[$kit] !== '') return (string) ($fn[$kit])($text);
+    return preg_replace('~\*([^*]+)\*~u', '<em>$1</em>', e($text)) ?? e($text);
+}
+
+/** Text ohne *Betonung*-Sternchen (für aria-label, title, Meta-Angaben) */
+function strip_emphasis(string $text): string
+{
+    return str_contains($text, '*') ? (string) preg_replace('~\*([^*]+)\*~u', '$1', $text) : $text;
+}
+
+/**
  * Eigene Detailvorlagen: macht das Element mit dem Wert eines Feldes für die angemeldete Redaktion direkt editierbar.
  * <h1<?= entry_edit_attr($table, $entry, 'titel') ?>><?= e(…) ?></h1> – für Besucher leer (keine Markup-Änderung).
  * $mode: null = nach Feldtyp (Text → plain, Mehrzeilig → lines, Formatierter Text → rich)

@@ -62,7 +62,7 @@ $event = function (array $o, bool $withLoc) use ($t, $c, $link) {
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="cal-head">
     <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-    <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m cal-heading"><span<?= $b->edit('title') ?>><?= e($d['title']) ?></span></h2><?php endif; ?>
+    <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m cal-heading"><span<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></span></h2><?php endif; ?>
     <?php if (!empty($d['intro'])): ?><p class="muted cal-intro"<?= $b->edit('intro') ?>><?= e($d['intro']) ?></p><?php endif; ?>
   </header>
   <?php endif; ?>

@@ -26,7 +26,7 @@ final class MediaBlocks
         ];
     }
 
-    /** Kopf des Abschnitts (Klassen, die beide Themes kennen: eyebrow, h2, lead) */
+    /** Kopf des Abschnitts (Klassen, die beide Themes kennen: eyebrow, h2, lead); *Betonung* in der Überschrift wie im Kit (emphasis()) */
     public static function head(Block $b): string
     {
         $d = $b->data;
