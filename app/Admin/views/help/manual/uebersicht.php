@@ -18,7 +18,20 @@
   <p>Erweiterungen (z. B. eine spätere Besucherstatistik) können hier eigene Kacheln und Karten ergänzen.</p>
 
   <h3>Was ist zu tun?</h3>
-  <p>Eine Liste nach Dringlichkeit – jeder Punkt mit Anzahl, kurzer Erklärung und einem Knopf, der direkt an die richtige Stelle führt: neue Anfragen, eingereichte Änderungen, Support-Antworten, ungelesene Chat-Nachrichten, offene Punkte der Einrichtung (z. B. „Impressum zugeordnet“), Entwürfe, die seit über 14 Tagen liegen, Bilder ohne Alt-Text (auch je Sprache), Videos ohne Untertitel, Seiten ohne SEO-Beschreibung und externe Quellen mit Fehler. Ist alles erledigt, sagt die Karte das auch: <b>Alles erledigt</b>.</p>
+  <p>Eine Liste nach Dringlichkeit – jeder Punkt mit Anzahl, kurzer Erklärung und einem Knopf, der direkt an die richtige Stelle führt: neue Anfragen, eingereichte Änderungen, Support-Antworten, ungelesene Chat-Nachrichten, offene Punkte der Einrichtung (z. B. „Impressum zugeordnet“), Entwürfe, die seit über 14 Tagen liegen, Bilder ohne Alt-Text (auch je Sprache), Videos ohne Untertitel, Seiten ohne SEO-Beschreibung, offene <a href="#platzhalter">[Platzhalter]</a> in veröffentlichten Seiten und externe Quellen mit Fehler. Ist alles erledigt, sagt die Karte das auch: <b>Alles erledigt</b>.</p>
+
+  <h3 id="platzhalter">Platzhalter finden und ersetzen</h3>
+  <p>Texte in eckigen Klammern wie <code>[Telefonnummer ergänzen]</code> oder <code>[bitte ergänzen: Öffnungszeiten]</code> sind <b>Platzhalter</b> – aus der Vorlage eines Kits oder als Lücke in einem Vorschlag von <?= e(\Core\AI\Assist::brand()) ?>. Solange welche auf veröffentlichten Seiten stehen, meldet „Was ist zu tun?“ sie mit Anzahl und betroffenen Seiten – auch für die Redaktion, nicht nur für die Administration.</p>
+  <ol class="doc-steps">
+    <li>Unter dem Punkt <b>Alle … Fundstellen anzeigen</b> aufklappen. Die Liste ist nach Seiten geordnet; jede Fundstelle nennt den <b>Block</b> und den Klammertext (lange Texte lassen sich mit „ganz anzeigen“ aufklappen).</li>
+    <li><b>Im Frontend bearbeiten</b> öffnet die Seite im Bearbeitungsmodus direkt am richtigen Block: Er wird aufgeklappt, in die Mitte gescrollt, kurz hervorgehoben, die Klammer ist farbig markiert – und auf breiten Bildschirmen öffnen sich gleich die Felder des Blocks in der Seitenleiste.</li>
+    <li>Text ersetzen, speichern und <b>veröffentlichen</b>. Danach verschwindet die Fundstelle aus der Liste.</li>
+  </ol>
+  <ul>
+    <li><b>In der Verwaltung</b> (Administration) führt zu den Seiteneinstellungen; dort stehen oben alle Platzhalter dieser Seite, ebenfalls mit Sprung in den Editor.</li>
+    <li><b>Ist gewollt:</b> Manche Klammern sind Absicht, etwa <code>[Musik]</code> in einer Anleitung zu Untertiteln. Ein Klick darauf meldet genau diesen Text auf keiner Seite mehr.</li>
+    <li>Gezählt werden veröffentlichte Seiten; Links in der Form <code>[Text](Adresse)</code> gelten nicht als Platzhalter. Eine Seite, deren Entwurf noch <code>[bitte ergänzen: …]</code> enthält, lässt sich nicht veröffentlichen (siehe <a href="#<?= e($anchor('assistent')) ?>"><?= e(\Core\AI\Assist::brand()) ?></a>).</li>
+  </ul>
 
   <h3>Statistiken</h3>
   <ul>

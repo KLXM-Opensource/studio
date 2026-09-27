@@ -28,3 +28,19 @@
     <li><b>Seiten</b> → Rechtsklick auf die übergeordnete Seite → <b>Neue Unterseite</b>.</li>
     <li>Inhalte eintragen, veröffentlichen und in der Seitenübersicht den Schalter <b>Menü</b> einschalten.</li>
   </ol>
+  <h3 id="app-icon">App-Icon (Favicon) ändern</h3>
+  <ol class="doc-steps">
+    <li><b>Grundeinstellungen → App-Icon &amp; PWA</b> (Administration): <b>Icon aus …</b> Buchstaben in der Hausschrift oder einem Bild bzw. Logo aus der Mediathek (quadratisch, mindestens 512 × 512 px) – auch aus geteilten Medien.</li>
+    <li>Form, <b>Hintergrund</b> und Schriftfarbe wählen. Mit <b>Transparent</b> neben der Hintergrundfarbe bleibt die Fläche durchsichtig, etwa für ein freigestelltes Logo. Das gilt für Browser-Tab und Android; das iPhone-Icon und das „maskable“-Icon brauchen eine Fläche und werden weiß hinterlegt.</li>
+    <li>Die Vorschau zeigt das Ergebnis sofort; <b>Speichern</b> erzeugt alle Größen neu. Browser zeigen das neue Icon manchmal erst nach einem Neuladen.</li>
+  </ol>
+  <h3>Neue Kollegin oder neuen Kollegen einladen</h3>
+  <ol class="doc-steps">
+    <li><b>Benutzer &amp; Rollen → Person einladen</b>: E-Mail-Adresse und Rolle eintragen → <b>Einladung senden</b>.</li>
+    <li>Die Person wählt beim Annehmen selbst Passkey und/oder Passwort. Einzelheiten: <a href="#einladen">Personen einladen</a>.</li>
+  </ol>
+  <h3>Schief fotografiertes Bild gerade rücken</h3>
+  <ol class="doc-steps">
+    <li><b>Medien</b> → Bild doppelklicken → in der Werkzeugleiste <b>Ausrichten</b> (Horizont) oder <b>Entzerren</b> (Schild, Gebäude, Dokument).</li>
+    <li><b>Speichern</b> – das Original bleibt erhalten. Einzelheiten: <a href="#bild-bearbeiten">Bild bearbeiten</a>.</li>
+  </ol>

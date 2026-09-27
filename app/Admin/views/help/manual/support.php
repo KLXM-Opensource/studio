@@ -6,6 +6,13 @@
     <a class="doc-card" href="<?= e(url('/admin/support/fragen')) ?>"><span class="doc-card__icon"><?= icon('question') ?></span><span class="doc-card__title">Fragen &amp; Antworten</span><span class="doc-card__sub">Redaktionen helfen sich gegenseitig; die beste Antwort wird zur Lösung.</span></a>
     <a class="doc-card" href="<?= e(url('/admin/support/neu')) ?>"><span class="doc-card__icon"><?= icon('warning') ?></span><span class="doc-card__title">Problem melden</span><span class="doc-card__sub">Fehler, Fragen oder Wünsche direkt an das Support-Team.</span></a>
   </div>
+  <h3 id="projekt-hinweise">Hinweise zu diesem Projekt</h3>
+  <p>Was nur für diese Website gilt – eigene Blöcke, Bildformate, Abläufe wie „Sondermeldungen so planen“ –, steht im Kapitel <b>Hinweise zu diesem Projekt</b> gleich nach dem Überblick<?php if ($has('projekt')): ?> (<a href="#projekt">zum Kapitel</a>)<?php endif; ?>. Das Kapitel erscheint nur, wenn das Kit oder die Website solche Hinweise mitbringt; es ist außerdem über die Übersicht („Neu hier?“), die Suche (<kbd>⌘</kbd> <kbd>K</kbd>) und kleine Links „Hinweis zum Projekt“ in den betroffenen Bereichen erreichbar.</p>
+  <ol class="doc-steps">
+    <li>Die Administration öffnet <b>Handbuch → Projekt-Hinweise</b> (<a href="<?= e(url('/admin/hilfe/projekt')) ?>">/admin/hilfe/projekt</a>). Die Liste zeigt alle Hinweise mit Herkunft (Kit oder Website) und Bezug.</li>
+    <li><b>Neuer Hinweis</b> legt einen eigenen Hinweis dieser Website an: Text in Markdown (erste Zeile <code># Titel</code>, dann Absätze, Listen, <code>**fett**</code>, Links; kein HTML). Die Zahl vorn im Dateinamen (<code>10-…</code>, <code>20-…</code>) bestimmt die Reihenfolge. Optional verknüpfen Sie ihn in den Kopfzeilen mit einem Bereich der Verwaltung oder einem Block.</li>
+    <li>Hinweise aus dem Kit passen Sie mit <b>Für diese Website anpassen</b> an oder blenden sie für diese Website aus (Kopfzeile <code>ausblenden: ja</code>); <b>Anpassung entfernen</b> stellt den Hinweis des Kits wieder her.</li>
+  </ol>
   <h3>Problem melden</h3>
   <ol class="doc-steps">
     <li>Links unten in der Seitenleiste auf <b>Problem melden</b> klicken (oder <kbd>⌘</kbd> <kbd>K</kbd> → „Problem melden“). Die Seite, auf der Sie gerade waren, wird als Kontext mitgenommen.</li>

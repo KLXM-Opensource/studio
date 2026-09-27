@@ -78,6 +78,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Suche mit Symbol, Filter wie bisher, neue **Ansicht Kacheln/Liste** (im Browser gemerkt). Stile in
   `resources/css/network.css` (nur auf dieser Seite geladen), hell/dunkel, 1 Spalte auf dem Telefon.
 - `Core\Network\Stats` liefert zusätzlich `noindex`, `icon_version`, `icon_bg`, `icon_text`, `pools` und `Stats::cached()`.
+- **Website-Umschalter** („Website wechseln“ in der Seitenleiste) für Netzwerk-Konten jetzt auch auf der Netzwerk-Website;
+  „Netzwerk-Übersicht“ führt dort direkt zu `/admin/network`, auf allen anderen Websites weiter per Einmal-Token.
+- Offene `[Platzhalter]` in veröffentlichten Seiten einer Website erscheinen als Hinweis auf ihrer Karte.
 
 ### Personen einladen (Benutzer & Rollen)
 - **Benutzer & Rollen → Person einladen** (`Core\Invites`, `InviteController`, Recht `users.manage`): E-Mail, Name
@@ -130,6 +133,35 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Je Website anpassen:** Handbuch → Projekt-Hinweise (`/admin/hilfe/projekt`, Recht `system.manage`, CSRF) – eigene
   Hinweise in `{storage}/guide/*.md`, Kit-Hinweise mit gleichem Dateinamen ersetzen oder ausblenden, Anpassung entfernen.
 - Konsole `guide:list` und `guide:selftest`; Entwicklerhandbuch „Kits & Design → Hinweise zu diesem Projekt“.
+
+### Platzhalter: alle Fundstellen mit Sprung in den Editor
+- **„Was ist zu tun?“** in der Übersicht meldet alle `[Platzhalter]` veröffentlichter Seiten mit Anzahl und Seiten – auch
+  für die Redaktion (`pages.edit`), nicht nur für die Administration. Erkannt werden auch kleingeschriebene wie
+  `[bitte ergänzen: …]` (`Metrics::PLACEHOLDER_RX`), Markdown-Links `[Text](url)` nicht.
+- **Aufklappbare Liste je Seite und Block** (`app/Admin/views/pages/_placeholders.php`): Blocktyp, Text (lange Texte
+  aufklappbar), „Im Frontend bearbeiten“, „In der Verwaltung“ (Seiteneinstellungen zeigen die Platzhalter der Seite oben,
+  `#platzhalter`) und „Ist gewollt“ (bis 1000 Zeichen, gilt für alle Seiten). `Metrics::placeholders()` sucht je Block in
+  allen Texten, auch verschachtelt und ohne HTML.
+- **Sprung in den Editor:** `?edit=1#b-{blockId}` (oder `?block=`) klappt den Block auf, scrollt hin, hebt ihn kurz hervor,
+  markiert die Klammern (CSS Custom Highlight API) und öffnet auf breiten Bildschirmen die Felder in der Seitenleiste.
+
+### Farbfelder: Option „Transparent“
+- Feldtyp `color` mit `'transparent' => true` zeigt neben dem Farbwähler „Transparent“ und speichert dann `transparent`.
+- Genutzt für den Hintergrund des App-Icons (Grundeinstellungen → App-Icon & PWA): Browser-Tab- und Android-Icons werden
+  durchsichtig erzeugt, das iPhone- und das maskable-Icon brauchen eine Fläche und werden weiß hinterlegt.
+
+### Fix: Dateien aus geteilten Pools
+- Favicon/App-Icons aus einem Bild eines geteilten Pools wurden leer erzeugt, und KI-Medienaufträge fanden Pool-Dateien
+  nicht, weil der Pfad immer im Medienordner der Website gesucht wurde. Neu `Media::path($m)` beachtet `_pool`.
+
+### Dokumentation zu diesen Funktionen
+- Handbuch: „Die Übersicht → Platzhalter finden und ersetzen“, „Funktionen & Erweiterungen → Netzwerk-Übersicht und
+  Website-Umschalter“ sowie der Hinweis auf Erweiterungen als Pakete (z. B. „Entwurf teilen & freigeben“), „Hilfe &
+  Support → Hinweise zu diesem Projekt“, „Häufige Aufgaben“ (App-Icon mit „Transparent“, Person einladen, Bild gerade rücken).
+- Entwicklerhandbuch: Netzwerk-Übersicht (Karten, Icons, Pools, Umschalter), Sprung zum Block und Platzhalter-Suche
+  (Editor), `transparent` bei Farbfeldern, `Media::path()` für Pools, Einladungs-Vorlage im Kit (`templates/mail/`,
+  Variablen), Kommandozeile (`user:invite`, `invites:selftest`, `guide:list`, `guide:selftest`, `media:selftest`,
+  `svg:selftest`); README-Übersicht ergänzt.
 
 ### Weiterleitungen & 404-Protokoll
 - **Administration → Weiterleitungen** (`Core\Redirects`, Funktion `redirects`, Recht `redirects.manage`): alte Adresse →
