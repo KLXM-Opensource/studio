@@ -107,7 +107,7 @@ html:has(.cms-lb[open]){overflow:hidden}
 .cms-slider__nav[hidden]{display:none}
 .cms-slider__arrow,.cms-slider__play{display:grid;place-items:center;width:44px;height:44px;padding:0;border-radius:50%;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
 .cms-slider__arrow{border:1px solid var(--cms-line,rgba(128,128,128,.4));background:var(--cms-card-bg,transparent);color:inherit}
-.cms-slider__arrow:hover{border-color:var(--_accent);background:var(--_accent);color:var(--cms-on-accent,#fff)}
+.cms-slider__arrow:hover{border-color:var(--_accent);background:color-mix(in srgb,var(--_accent) 16%,transparent);color:inherit}   /* ohne Kit-Akzent ist --_accent = currentColor – gefüllte Fläche + #fff wäre im Dunkeln unsichtbar */
 .cms-slider__arrow[aria-disabled=true]{opacity:.4;pointer-events:none}
 .cms-slider__arrow svg,.cms-slider__play svg{fill:currentColor}
 .cms-slider__dots{display:flex;flex-wrap:wrap;justify-content:center;margin-inline:8px}
