@@ -266,8 +266,8 @@ final class Tables
             $fname = self::normName((string) ($f['name'] ?? '') ?: $label);
             $type = (string) ($f['type'] ?? 'text');
             if (!isset(self::TYPES[$type])) $type = 'text';
-            if ($inbox && !in_array($type, DataForms::TYPES, true)) {
-                $errors["fields.$i"] = "Feld „{$label}“: Der Feldtyp „" . self::TYPES[$type][0] . '“ ist in Eingangs-Tabellen nicht möglich (keine Uploads, Verknüpfungen, Karten oder formatierten Texte).';
+            if ($inbox && !in_array($type, [...DataForms::TYPES, 'file'], true)) {
+                $errors["fields.$i"] = "Feld „{$label}“: Der Feldtyp „" . self::TYPES[$type][0] . '“ ist in Eingangs-Tabellen nicht möglich (keine Bilder, Verknüpfungen, Karten oder formatierten Texte; Dateien nur bei Zustellung per E-Mail).';
                 continue;
             }
             if ($fname === '' || in_array($fname, array_merge(self::SYSTEM, $inbox ? Inbox::META : [], $sharedOwner !== null ? Shared::COLUMNS : []), true)) {
@@ -349,6 +349,15 @@ final class Tables
         }
         $names = array_column($fields, 'name');
         $pick = fn($k) => in_array((string) ($s[$k] ?? ''), $names, true) ? (string) $s[$k] : '';
+        // Eingang: Dateifelder nur bei Zustellung per E-Mail (Core\Data\Delivery) – dann nimmt das Formular Dateien an
+        $inboxFiles = $inbox && array_filter($fields, fn($f) => $f['type'] === 'file');
+        if ($inbox) {
+            $dmode = (string) ($s['inbox']['delivery']['mode'] ?? ($existing['settings']['inbox']['delivery']['mode'] ?? 'system'));
+            if ($inboxFiles && $dmode === 'system') {
+                $errors['fields'] = __('Dateifelder gibt es in Eingangs-Tabellen nur mit Zustellung per E-Mail (Einstellung „Zustellung der Anfragen“) – die Datei geht als Anhang hinaus und wird nie in der Mediathek gespeichert.');
+            }
+            if (isset($s['form']) && is_array($s['form'])) $s['form']['uploads'] = $inboxFiles && $dmode !== 'system';
+        }
         $settings = [
             'route' => $route,
             'title_field' => $pick('title_field'),
@@ -375,9 +384,12 @@ final class Tables
             // Eingang: keine Detailseiten, keine strukturierten Daten, kein Kalender, keine Uploads; Einträge nur über das Formular
             $settings = array_merge($settings, ['route' => '', 'image_field' => '', 'description_field' => '', 'schema_type' => '', 'detail_page_id' => null,
                 'workflow' => false, 'sort_field' => 'created_at', 'sort_dir' => 'desc', 'list_image' => 'none', 'calendar' => Calendar::DEFAULTS]);
-            $settings['form']['uploads'] = false;
-            $settings['form']['status'] = 'draft';
             $settings['inbox'] = Inbox::validateSettings((array) ($s['inbox'] ?? []), $existing['settings']['inbox'] ?? null);
+            // Zustellung der Anfragen (System / System + E-Mail / nur E-Mail) – braucht die Felder (Weiterleitung nach Auswahlfeld)
+            $settings['inbox']['delivery'] = Delivery::validateSettings((array) ($s['inbox']['delivery'] ?? []), $fields, $errors,
+                $existing['settings']['inbox']['delivery'] ?? null, $existing);
+            $settings['form']['uploads'] = $inboxFiles && $settings['inbox']['delivery']['mode'] !== 'system';
+            $settings['form']['status'] = 'draft';
             unset($errors['settings.route'], $errors['settings.calendar']);
         }
         return [[

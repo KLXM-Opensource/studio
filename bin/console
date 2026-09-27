@@ -90,6 +90,7 @@
  *   shared:list                                       Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website
  *   inbox:migrate [--all]                             Online-Anfragen → Eingangs-Tabellen (idempotent, sonst automatisch)
  *   inbox:purge [--all]                               Erledigte Anfragen nach Aufbewahrungsfrist löschen (z. B. täglich per Cron)
+ *   inbox:selftest                                    Selbsttest der Zustellung per E-Mail (Modi, Rückfall, S/MIME, keine Inhalte in DB/Protokoll)
  *   sources:sync [--all] [--source=ID] [--force]      Externe Quellen abgleichen: fällige (Cron, z. B. alle 15 min) bzw. eine/alle sofort
  *   sources:list [--all]                              Externe Quellen mit Stand (letzter Abruf, Einträge, Fehler)
  *   redirects:import <datei.json|csv> [--dry-run] [--overwrite] [--keep-paths]
@@ -224,6 +225,13 @@ switch ($cmd) {
                 . "Link (nur jetzt sichtbar, einmal gültig):\n  " . Core\Invites::url($res['token']) . "\n";
         }
         break;
+
+    case 'inbox:selftest':
+        // Zustellung der Anfragen (Core\Data\Delivery): vorübergehende Tabelle, Test-Schlüssel, Ablage statt Versand – danach aufgeräumt
+        $res = Core\Data\DeliverySelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'invites:selftest':
         // Einladungen (Core\Invites): Token, Hash, Form, Rollenprüfung, Nachricht – ohne Datenbankänderung

@@ -166,6 +166,7 @@ return function (Router $r): void {
     $r->get('/admin/data/{handle}/schema', [Admin\DataController::class, 'schema']);
     $r->post('/admin/data/{handle}/schema', [Admin\DataController::class, 'update']);
     $r->post('/admin/data/{handle}/destroy', [Admin\DataController::class, 'destroy']);
+    $r->post('/admin/data/{handle}/delivery-test', [Admin\DataController::class, 'deliveryTest']);
     $r->post('/admin/data/{handle}/template', [Admin\DataController::class, 'template']);
     $r->post('/admin/data/{handle}/bulk', [Admin\DataController::class, 'bulk']);
     $r->post('/admin/data/{handle}/quick', [Admin\DataController::class, 'quick']);
@@ -295,6 +296,7 @@ return function (Router $r): void {
     $r->get('/admin/requests', [Admin\InboxController::class, 'index']);
     $r->post('/admin/requests', [Admin\InboxController::class, 'index']);
     $r->get('/admin/requests/log', [Admin\InboxController::class, 'log']);
+    $r->post('/admin/requests/alerts/clear', [Admin\InboxController::class, 'clearAlerts']);
     $r->post('/admin/requests/{table}/{id}/status', [Admin\InboxController::class, 'status']);
     $r->post('/admin/requests/{table}/{id}/assign', [Admin\InboxController::class, 'assign']);
     $r->post('/admin/requests/{table}/{id}/delete', [Admin\InboxController::class, 'delete']);

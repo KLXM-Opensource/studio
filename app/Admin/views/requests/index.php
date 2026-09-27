@@ -35,6 +35,23 @@ $userNames = array_column($users ?? [], null, 'id');
 <p class="adm-flash adm-flash--error" role="note"><?= e(__('Es ist kein öffentlicher Schlüssel hinterlegt – die Formulare nehmen keine Anfragen an.')) ?> <a href="<?= e(url('/admin/system#keys')) ?>"><?= e(__('Schlüssel erzeugen')) ?></a></p>
 <?php endif; ?>
 
+<?php $tableNames = array_column($tables, 'name', 'handle'); if (!empty($deliveryAlerts)): ?>
+<div class="adm-flash adm-flash--error" role="alert">
+  <p><b><?= e(__('Zustellung fehlgeschlagen – Anfrage verschlüsselt gesichert')) ?></b></p>
+  <ul><?php foreach (array_slice($deliveryAlerts, 0, 5) as $a): ?>
+    <li><?= e(date('d.m.Y H:i', strtotime((string) $a['at']))) ?> · <?= e($tableNames[$a['table']] ?? $a['table']) ?> · <span class="adm-mono"><?= e((string) $a['ref']) ?></span> – <?= e((string) $a['reason']) ?><?= empty($a['stored']) ? ' – <b>' . e(__('NICHT gesichert')) . '</b>' : '' ?></li>
+  <?php endforeach; ?></ul>
+  <?php if ($canManage): ?><form method="post" action="<?= e(url('/admin/requests/alerts/clear')) ?>"><?= csrf_field() ?><input type="hidden" name="table" value="<?= e($t['handle']) ?>">
+    <button class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('Gelesen – Hinweise ausblenden')) ?></button></form><?php endif; ?>
+</div>
+<?php endif; ?>
+<?php if (($delivery ?? 'system') !== 'system'): ?>
+<p class="adm-flash adm-flash--info" role="note"><?= e(\Core\Data\Delivery::modeLabel($delivery)) ?>: <?= e($delivery === 'mail'
+    ? __('Anfragen dieses Eingangs gehen nur per E-Mail hinaus. Hier erscheinen nur Anfragen, deren Zustellung fehlgeschlagen ist (verschlüsselt gesichert).')
+    : __('Anfragen werden hier gespeichert und zusätzlich mit vollem Inhalt per E-Mail zugestellt.')) ?>
+  <?php foreach (array_filter($deliveryProblems ?? [], fn($p) => $p['level'] === 'error') as $p): ?><br><b><?= e($p['text']) ?></b><?php endforeach; ?></p>
+<?php endif; ?>
+
 <form class="adm-card adm-unlock" method="post" action="<?= e($qs(['seite' => $page > 1 ? $page : null])) ?>" autocomplete="off">
   <?= csrf_field() ?>
   <input type="hidden" name="table" value="<?= e($t['handle']) ?>">
@@ -64,8 +81,11 @@ $userNames = array_column($users ?? [], null, 'id');
     </header>
     <?php if (($info = Inbox::info($t, $row)) !== ''): /* Zusatzzeile der Erweiterung (z. B. Buchung: Objekt, Zeitraum) */ ?><p class="adm-muted adm-request__info"><?= e($info) ?></p><?php endif; ?>
     <?php if ($data): ?>
+      <?php if (($data['delivery'] ?? '') === 'fallback'): ?><p class="adm-badge adm-badge--adm-warn"><?= e(__('Zustellung per E-Mail fehlgeschlagen – hier gesichert')) ?></p><?php endif; ?>
       <dl class="adm-dl adm-dl--request">
-        <?php foreach ($data['fields'] as $f): ?><dt><?= e($f['label']) ?></dt><dd><?php if (!empty($f['table'])): /* Wiederholbare Gruppe */ ?>
+        <?php foreach ($data['fields'] as $f): ?><dt><?= e($f['label']) ?></dt><dd><?php if (!empty($f['file'])): /* Datei (Zustellung per E-Mail, versiegelt) */ ?>
+          <a href="data:<?= e(preg_match('~^[a-z]+/[a-z0-9.+-]+$~', (string) $f['file']['type']) ? (string) $f['file']['type'] : 'application/octet-stream') ?>;base64,<?= e((string) $f['file']['data']) ?>" download="<?= e((string) $f['file']['file']) ?>"><?= e($f['value']) ?></a>
+        <?php elseif (!empty($f['table'])): /* Wiederholbare Gruppe */ ?>
           <table class="adm-inbox-group"><thead><tr><th scope="col"><span class="sr-only"><?= e(__('Nr.')) ?></span></th><?php foreach ($f['table']['cols'] as $c): ?><th scope="col"><?= e($c) ?></th><?php endforeach; ?></tr></thead>
             <tbody><?php foreach ($f['table']['rows'] as $ri => $cells): ?><tr><th scope="row"><?= $ri + 1 ?></th><?php foreach ($cells as $cell): ?><td><?= e($cell) ?></td><?php endforeach; ?></tr><?php endforeach; ?></tbody></table>
         <?php else: ?><?= nl2br(e($f['value']), false) ?><?php endif; ?></dd><?php endforeach; ?>

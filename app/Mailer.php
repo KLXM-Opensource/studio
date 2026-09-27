@@ -11,7 +11,8 @@ use Symfony\Component\Mime\Email;
 /** E-Mail-Versand über Symfony Mailer, konfiguriert aus den Grundeinstellungen. */
 final class Mailer
 {
-    public static function dsn(): string
+    /** $requireTls: SMTP mit STARTTLS nur verschlüsselt (bricht ab, wenn der Server kein TLS anbietet) – für Inhalte (Core\Data\Delivery) */
+    public static function dsn(bool $requireTls = false): string
     {
         $s = app()->settings;
         $t = (string) $s->get('sys.mail_transport', 'smtp');
@@ -19,7 +20,7 @@ final class Mailer
             'sendmail' => 'sendmail://default',
             'native' => 'native://default',
             'null' => 'null://null',
-            default => self::smtpDsn(),
+            default => self::smtpDsn($requireTls),
         };
     }
 
@@ -29,7 +30,7 @@ final class Mailer
      */
     public static function ready(): bool
     {
-        if (app()->config->get('mail_dump')) return true;
+        if (self::$testDump !== null || app()->config->get('mail_dump')) return true;
         $s = app()->settings;
         if (!filter_var((string) $s->get('sys.mail_from', ''), FILTER_VALIDATE_EMAIL)) return false;
         return match ((string) $s->get('sys.mail_transport', 'smtp')) {
@@ -39,7 +40,7 @@ final class Mailer
         };
     }
 
-    private static function smtpDsn(): string
+    private static function smtpDsn(bool $requireTls = false): string
     {
         $s = app()->settings;
         $host = (string) $s->get('sys.mail_host', '');
@@ -58,6 +59,8 @@ final class Mailer
         }
         if ($enc === 'none') {
             $q[] = 'auto_tls=false';
+        } elseif ($enc === 'tls' && $requireTls) {
+            $q[] = 'require_tls=true';
         }
         return "$scheme://$auth$host:$port" . ($q ? '?' . implode('&', $q) : '');
     }
@@ -68,16 +71,30 @@ final class Mailer
      */
     public static bool $delivered = false;
 
+    /** Nur Selbsttests (z. B. Core\Data\Delivery::selftest): wie config 'mail_dump', Ablage in diesen Ordner statt Versand */
+    public static ?string $testDump = null;
+
+    /**
+     * Ergebnis des letzten Versands: sent (übergeben), redirected (außerhalb der Produktion umgeleitet), dumped (config 'mail_dump'),
+     * logged (außerhalb der Produktion nur protokolliert – NICHT zugestellt), failed. Für Inhalte (Core\Data\Delivery) zählt „logged“ als Fehlschlag.
+     */
+    public static string $outcome = '';
+
     /**
      * E-Mail senden – reiner Text oder zusätzlich HTML (multipart/alternative).
      * @param array{html?:string, inline?:array<string,array{path:string, type?:string}>, attach?:list<array{name:string, data:string, type?:string}>} $o
      *        inline: eingebettete Bilder, im HTML als „cid:{name}“ (z. B. App-Icon als Logo)
      *        attach: Anhänge aus dem Speicher (z. B. Termin als .ics, type text/calendar) – klein halten
+     *        reply_to: Antwortadresse; message_id: eigene Message-ID (ohne < >), z. B. für das Zustellprotokoll
+     *        smime: Zertifikat(e) der Empfänger (PEM) – die ganze Nachricht (Text, HTML, Anhänge) wird mit S/MIME verschlüsselt
+     *               (openssl_pkcs7_encrypt über Symfony SMimeEncrypter, AES-256-CBC); unverschlüsselt bleiben nur Kopfzeilen wie der Betreff
+     *        require_tls: SMTP nur mit TLS (siehe dsn())
      * @return string|null Fehlermeldung oder null bei Erfolg
      */
     public static function send(string $subject, string $text, ?array $to = null, array $o = []): ?string
     {
         self::$delivered = false;
+        self::$outcome = 'failed';
         $s = app()->settings;
         $to ??= array_filter(array_map('trim', explode(',', (string) $s->get('sys.mail_to', ''))));
         $from = (string) $s->get('sys.mail_from', '');
@@ -85,7 +102,7 @@ final class Mailer
             return 'Kein Empfänger eingetragen (System → E-Mail-Versand).';
         }
         // Lokale Tests: als Datei ablegen statt versenden (config 'mail_dump' => true bzw. Ordner) – nie an echte Empfänger
-        if ($dump = app()->config->get('mail_dump')) {
+        if ($dump = self::$testDump ?? app()->config->get('mail_dump')) {
             return self::dump($dump === true ? site()->storage('mail') : (string) $dump, $subject, $text, $to,
                 filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o);
         }
@@ -97,7 +114,7 @@ final class Mailer
         if (environment() !== 'production') {
             $redirect = array_filter(array_map('trim', explode(',', (string) app()->config->get('mail_redirect', ''))));
             error_log('[Mailer] ' . environment() . ': „' . $subject . '“ an ' . implode(', ', $to) . ($redirect ? ' → umgeleitet an ' . implode(', ', $redirect) : ' → nicht versendet'));
-            if (!$redirect) return null;
+            if (!$redirect) { self::$outcome = 'logged'; return null; }
             $note = 'Ursprüngliche Empfänger: ' . implode(', ', $to);
             $subject = '[' . strtoupper(environment()) . '] ' . $subject;
             $text = $note . "\n\n" . $text;
@@ -108,9 +125,11 @@ final class Mailer
             $redirected = true;
         }
         try {
-            $mailer = new SymfonyMailer(Transport::fromDsn(self::dsn()));
+            $mailer = new SymfonyMailer(Transport::fromDsn(self::dsn(!empty($o['require_tls']))));
             $mailer->send(self::build($from, $subject, $text, $to, $o));
-            self::$delivered = !$redirected && (string) $s->get('sys.mail_transport', 'smtp') !== 'null';
+            $null = (string) $s->get('sys.mail_transport', 'smtp') === 'null';
+            self::$delivered = !$redirected && !$null;
+            self::$outcome = $null ? 'logged' : ($redirected ? 'redirected' : 'sent');
             return null;
         } catch (\Throwable $e) {
             error_log('[Mailer] ' . $e->getMessage());
@@ -118,7 +137,7 @@ final class Mailer
         }
     }
 
-    private static function build(string $from, string $subject, string $text, array $to, array $o): Email
+    private static function build(string $from, string $subject, string $text, array $to, array $o): \Symfony\Component\Mime\Message
     {
         $email = (new Email())
             ->from(new Address($from, (string) app()->settings->get('sys.mail_from_name', 'Website')))
@@ -137,7 +156,32 @@ final class Mailer
         foreach ($to as $addr) {
             $email->addTo($addr);
         }
+        if (!empty($o['reply_to']) && filter_var((string) $o['reply_to'], FILTER_VALIDATE_EMAIL)) $email->replyTo((string) $o['reply_to']);
+        if (!empty($o['message_id'])) $email->getHeaders()->addIdHeader('Message-ID', (string) $o['message_id']);
+        if (!empty($o['smime'])) return self::encrypt($email, (string) $o['smime']);
         return $email;
+    }
+
+    /**
+     * S/MIME-Verschlüsselung (RFC 5751, enveloped-data) mit den Zertifikaten der Empfänger (PEM, ein oder mehrere Blöcke).
+     * Die Zertifikate liegen nur für den Aufruf in einer temporären Datei (0600) – Symfony erwartet Dateipfade.
+     */
+    private static function encrypt(Email $email, string $pem): \Symfony\Component\Mime\Message
+    {
+        preg_match_all('~-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----~s', $pem, $m);
+        if (!$m[0]) throw new \RuntimeException('Kein S/MIME-Zertifikat für die Verschlüsselung.');
+        $files = [];
+        try {
+            foreach ($m[0] as $cert) {
+                $f = tempnam(sys_get_temp_dir(), 'smime');
+                if ($f === false || file_put_contents($f, $cert . "\n") === false) throw new \RuntimeException('Temporäre Datei für S/MIME nicht beschreibbar.');
+                chmod($f, 0600);
+                $files[] = $f;
+            }
+            return (new \Symfony\Component\Mime\Crypto\SMimeEncrypter(count($files) === 1 ? $files[0] : $files, OPENSSL_CIPHER_AES_256_CBC))->encrypt($email);
+        } finally {
+            foreach ($files as $f) @unlink($f);
+        }
     }
 
     /**
@@ -150,7 +194,8 @@ final class Mailer
             if (!is_dir($dir) && !@mkdir($dir, 0770, true)) return 'Ordner für mail_dump ist nicht beschreibbar: ' . $dir;
             $base = $dir . '/' . date('Ymd-His') . '-' . substr(trim((string) preg_replace('~[^a-z0-9]+~', '-', strtolower($subject)), '-'), 0, 40) . '-' . bin2hex(random_bytes(2));
             file_put_contents($base . '.eml', self::build($from, $subject, $text, $to, $o)->toString());
-            if (isset($o['html']) && $o['html'] !== '') {
+            self::$outcome = 'dumped';
+            if (isset($o['html']) && $o['html'] !== '' && empty($o['smime'])) {          // verschlüsselt: keine Klartext-Vorschau
                 $html = (string) $o['html'];
                 foreach ((array) ($o['inline'] ?? []) as $cid => $img) {
                     if (is_file((string) ($img['path'] ?? ''))) {

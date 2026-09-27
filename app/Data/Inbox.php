@@ -30,7 +30,8 @@ use Doctrine\DBAL\Schema\Table;
 final class Inbox
 {
     public const STATUSES = ['neu', 'in_bearbeitung', 'erledigt'];
-    public const DEFAULTS = ['form' => '', 'title' => '', 'intro' => '', 'retention_days' => 90, 'i18n' => []];
+    /** delivery: Zustellung der Anfragen (System, System + E-Mail, nur E-Mail) – siehe Core\Data\Delivery */
+    public const DEFAULTS = ['form' => '', 'title' => '', 'intro' => '', 'retention_days' => 90, 'i18n' => [], 'delivery' => []];
     /** Metadaten-Spalten (alles andere steckt verschlüsselt im payload) */
     public const META = ['id', 'status', 'ref', 'lang', 'assignee', 'legacy', 'created_at', 'updated_at'];
 
@@ -161,6 +162,7 @@ final class Inbox
             'intro' => $clean($s['intro'] ?? $existing['intro'], 600),
             'retention_days' => max(0, min(3650, (int) ($s['retention_days'] ?? $existing['retention_days']))),
             'i18n' => $i18n,
+            'delivery' => (array) $existing['delivery'],          // prüft Tables::validate über Delivery::validateSettings (braucht die Felder)
         ];
     }
 
@@ -228,10 +230,12 @@ final class Inbox
     // ================================================================= Speichern (nur über das öffentliche Formular)
 
     /**
-     * Einsendung versiegeln und speichern. $values: bereinigte Feldwerte (ohne Datenschutz-Checkbox).
+     * Einsendung versiegeln und speichern. $values: bereinigte Feldwerte (ohne Datenschutz-Checkbox); Dateifelder (nur bei Zustellung
+     * per E-Mail, Delivery::sealFiles) als ['file', 'type', 'size', 'sha256', 'data' (Base64)] – ebenfalls nur versiegelt.
+     * $ref: vorgegebene Vorgangsnummer (Rückfall der Zustellung „nur per E-Mail“), $meta: Zusatz im versiegelten Payload (z. B. delivery).
      * @return array{id: int, ref: string}
      */
-    public static function store(array $t, array $values): array
+    public static function store(array $t, array $values, ?string $ref = null, array $meta = []): array
     {
         $labels = [];
         $clean = [];
@@ -243,16 +247,16 @@ final class Inbox
             $labels[$f['name']] = Tables::label($f, Lang::default());
         }
         $lang = Lang::multi() && Lang::current() !== Lang::default() ? Lang::current() : null;
-        $payload = ['v' => 2, 'table' => $t['handle'], 'submitted_at' => date('c'), 'lang' => $lang ?? Lang::default(), 'values' => $clean, 'labels' => $labels];
+        $payload = ['v' => 2, 'table' => $t['handle'], 'submitted_at' => date('c'), 'lang' => $lang ?? Lang::default(), 'values' => $clean, 'labels' => $labels] + $meta;
         $sealed = FormCrypto::seal($payload);                            // wirft ohne öffentlichen Schlüssel – nie Klartext speichern
-        $ref = self::newRef($t);
+        $ref = $ref !== null && preg_match('~^[A-Z0-9]{4}-[A-Z0-9]{4}$~', $ref) ? $ref : self::newRef($t);
         $id = app()->db->insert($t['table'], ['status' => 'neu', 'ref' => $ref, 'lang' => $lang, 'payload' => $sealed,
             'created_at' => now(), 'updated_at' => now()]);
         return ['id' => $id, 'ref' => $ref];
     }
 
     /** Vorgangsnummer wie „K7QX-9MZA“ (zufällig, ohne Bezug zu Inhalten) */
-    private static function newRef(array $t): string
+    public static function newRef(array $t): string
     {
         $abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         do {
@@ -333,7 +337,8 @@ final class Inbox
     {
         $d = FormCrypto::open((string) ($row['payload'] ?? ''), $secret);
         if ($d === null) return null;
-        $out = ['legacy' => !isset($d['values']), 'submitted_at' => $d['submitted_at'] ?? null, 'lang' => $d['lang'] ?? null, 'fields' => []];
+        $out = ['legacy' => !isset($d['values']), 'submitted_at' => $d['submitted_at'] ?? null, 'lang' => $d['lang'] ?? null, 'fields' => [],
+            'delivery' => (string) ($d['delivery'] ?? '')];                             // „fallback“: Zustellung per E-Mail fehlgeschlagen
         if (!isset($d['values'])) {                                                  // Alt-Anfrage: Beschriftung/Wert-Paare
             foreach ((array) ($d['fields'] ?? []) as $f) {
                 $out['fields'][] = ['label' => (string) ($f['label'] ?? ''), 'value' => (string) ($f['value'] ?? '')];
@@ -345,6 +350,11 @@ final class Inbox
         foreach ($t['fields'] as $f) {                                               // Reihenfolge und Beschriftung wie im Schema
             if (!array_key_exists($f['name'], $values)) continue;
             $v = $values[$f['name']];
+            if (is_array($v) && isset($v['file'], $v['data'])) {                   // Datei (nur bei Zustellung per E-Mail, versiegelt)
+                $out['fields'][] = ['label' => Tables::label($f, Lang::default()), 'value' => self::fileLabel($v), 'file' => $v];
+                unset($values[$f['name']]);
+                continue;
+            }
             $out['fields'][] = $f['type'] === 'group' && is_array($v)
                 ? self::groupTable(Tables::label($f, Lang::default()), array_map(fn($sf) => [$sf['name'], Tables::label($sf, Lang::default()), $sf], (array) ($f['fields'] ?? [])), $v)
                 : ['label' => Tables::label($f, Lang::default()), 'value' => self::display($f, $v)];   // auch alte Einzelwerte eines heutigen Gruppenfeldes
@@ -365,7 +375,7 @@ final class Inbox
      * Gruppe als Tabelle für die Anzeige: ['label', 'value' (Klartext für Kopieren), 'table' => ['cols' => [...], 'rows' => [[...], …]]].
      * $cols: [[name, beschriftung, unterfeld-definition], …]; leere Spalten entfallen.
      */
-    private static function groupTable(string $label, array $cols, array $rows): array
+    public static function groupTable(string $label, array $cols, array $rows): array
     {
         $lang = Lang::default();
         $rows = array_values(array_filter($rows, 'is_array'));
@@ -382,8 +392,15 @@ final class Inbox
         return ['label' => $label, 'value' => implode("\n", $text), 'table' => ['cols' => array_column($cols, 1), 'rows' => $cells]];
     }
 
+    /** Datei als Text: „befund.pdf (120 KB)“ */
+    public static function fileLabel(array $v): string
+    {
+        $kb = max(1, (int) round(((int) ($v['size'] ?? 0)) / 1024));
+        return (string) ($v['file'] ?? '') . ' (' . ($kb >= 1024 ? number_format($kb / 1024, 1, ',', '.') . ' MB' : $kb . ' KB') . ')';
+    }
+
     /** Wert als Klartext (Verwaltung, Standardsprache) */
-    private static function display(array $f, mixed $v): string
+    public static function display(array $f, mixed $v): string
     {
         $lang = Lang::default();
         return match ($f['type']) {
@@ -393,6 +410,7 @@ final class Inbox
             'select' => Tables::optionLabel($f, (string) $v, $lang),
             'multiselect' => implode(', ', array_map(fn($k) => Tables::optionLabel($f, (string) $k, $lang), (array) $v)),
             'iban' => \Core\Iban::format((string) $v),
+            'file', 'media' => is_array($v) ? self::fileLabel($v) : (string) $v,
             'number' => rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ','),
             default => is_array($v) ? implode(', ', array_map('strval', $v)) : (string) $v,
         };

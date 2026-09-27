@@ -6,6 +6,33 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anfragen per E-Mail zustellen (`Core\Data\Delivery`, Funktion `requests.mail`)
+- **Zustellung je Eingang** (Daten → Eingang → Einstellungen → „Zustellung der Anfragen“, Recht `requests.manage`):
+  „Im System (verschlüsselt)“ (Standard, wie bisher), „Im System und per E-Mail“, „Nur per E-Mail – nicht im System
+  speichern“. Im Modus „nur per E-Mail“ bleibt nichts vom Inhalt in der Datenbank – nur ein Zustellprotokoll in `inbox_log`
+  (Zeit, Tabelle, Empfänger als HMAC-Hash, Status, Vorgangsnummer, Message-ID; ohne IP, nie Inhalte).
+- **Nichts geht verloren**: Scheitert der Versand (kein Empfänger, kein TLS, Zertifikat abgelaufen, SMTP-Fehler, Testumgebung
+  ohne Zustellung), wird die Anfrage verschlüsselt gesichert (gleiche Vorgangsnummer, markiert), die Administration gewarnt
+  („Zustellung fehlgeschlagen – Anfrage verschlüsselt gesichert“ unter Anfragen und in den Einstellungen, inhaltsfreie E-Mail,
+  Fehlerprotokoll). Erfolgsmeldung für Besucher nur, wenn Versand oder Sicherung geklappt hat.
+- **E-Mail**: HTML + Text, archivtauglich (`app/Admin/views/mail/request.php`, im Kit überschreibbar), alle Felder in
+  Formular-Reihenfolge, Eingangszeit, Formular, Vorgangsnummer; Dateien als Anhang bis zur Gesamtgrenze (darüber Hinweis);
+  optional JSON/XML-Anhang zum Import (`klxm-studio-request` v1); Betreff mit Platzhaltern (Standard `[{form}] {ref}` ohne
+  Inhalte); Reply-To = E-Mail-Feld der Anfrage (abschaltbar); Weiterleitung nach Auswahlfeld (z. B. „Rezept“ → rezept@…);
+  bis 10 Empfänger. „Testmail senden“ mit erfundener Anfrage.
+- **Sicherheit**: Inhalte nur über SMTP mit TLS (`require_tls` für STARTTLS; ohne Verschlüsselung kein Versand, sendmail =
+  Warnung). **S/MIME** Ende-zu-Ende mit dem Zertifikat der Empfänger (PEM, bis 5 RSA-Zertifikate, Prüfung von Ablauf und
+  Schlüsselverwendung, Warnung 30 Tage vorher, private Schlüssel werden abgelehnt): `Mailer::send(…, ['smime' => …])`
+  verschlüsselt die ganze Nachricht inkl. Anhängen (`openssl_pkcs7_encrypt`, AES-256-CBC), keine Klartext-Vorschau im
+  `mail_dump`. PGP bewusst nicht (keine MIT-kompatible Umsetzung ohne externes Programm).
+- **Dateifelder in Eingängen** – nur bei Zustellung per E-Mail: als Anhang bzw. versiegelt im Payload (Download nach dem
+  Entschlüsseln unter Anfragen), nie in der Mediathek.
+- **Buchungen** und andere Eingänge einer Erweiterung (`Extension::inbox`) brauchen gespeicherte Einträge: „nur per E-Mail“
+  ist dort gesperrt, „System und E-Mail“ schickt nach dem `store`-Callback zusätzlich die Inhalts-E-Mail.
+- `Mailer`: Optionen `reply_to`, `message_id`, `smime`, `require_tls`; `Mailer::$outcome` (sent|redirected|dumped|logged|failed).
+  API `GET /data`: Eingänge mit `delivery`. Selbsttest `php bin/console inbox:selftest` (alle Modi, Rückfall, S/MIME mit
+  selbst signiertem Test-Zertifikat inkl. Entschlüsseln, keine Inhalte in Datenbank/Protokoll, Weiterleitung, Anhang-Grenzen).
+
 ### Bild anpassen: Schärfe / Unschärfe (`Core\ImageFx`)
 - **Neuer Regler „Schärfe“** von −100 (weicher) über 0 bis +100 (schärfer) im Dialog „Bild anpassen“ – in der Mediathek
   (global je Bild, `media.adjust`) und je Einbindung (`data._fx`), mit Live-Vorschau und „Schärfe zurücksetzen“.

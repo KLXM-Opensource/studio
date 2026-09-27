@@ -1017,6 +1017,15 @@ html.adm-ui[data-theme=dark]{--ico-2-opacity:.3}
 .dt-steps p{margin-top:4px;font-size:13px;color:var(--adm-t2)}
 .dt-step{position:absolute;left:14px;top:14px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--adm-a);color:#fff;font-weight:700;font-size:13px}
 .dt-note{display:grid;gap:6px;margin-bottom:14px;padding:10px 12px;border-radius:8px;background:var(--adm-warn-bg);font-size:13px;color:var(--adm-t2)}
+/* Eingang → Zustellung der Anfragen (Core\Data\Delivery) */
+.dt-modes{border:0;margin:0 0 14px;padding:0;display:grid;gap:10px}
+.dt-modes legend{font-weight:600;margin-bottom:6px;padding:0}
+.dt-delivery .f-check small{display:block;margin-top:2px;line-height:1.4;font-weight:400}
+.dt-certs small{word-break:break-all}
+.dt-routes{margin:0 0 12px;padding-left:12px;border-left:3px solid var(--adm-line,#DADDE2)}
+.dt-certs{margin:0 0 10px;padding-left:18px;font-size:13px;line-height:1.5}
+.dt-certs li+li{margin-top:8px}
+.dt-smime textarea{font-size:12px}
 
 /* Benutzer & Rollen */
 .us-role{display:flex;gap:6px;align-items:center;margin:0}

@@ -99,6 +99,10 @@ final class FeatureInfo
             'requests' => ['group' => 'data', 'desc' => __('Online-Anfragen: verschlüsselte Eingangs-Tabellen und ihre Formulare.'),
                 'effects' => ['menu' => __('Menüpunkt „Anfragen“'), 'frontend' => __('Anfrage-Formulare (/anfrage/…, /api/form/…)'), 'cron' => __('Aufbewahrungsfrist: inbox:purge (täglich empfohlen)'),
                     'data' => __('Anfragen verschlüsselt (libsodium) – lesbar nur mit dem geheimen Schlüssel')]],
+            'requests.mail' => ['group' => 'data', 'desc' => __('Anfragen je Eingang zusätzlich oder ausschließlich per E-Mail zustellen – mit vollem Inhalt, Anhängen und optional S/MIME-Verschlüsselung.'),
+                'effects' => ['menu' => __('Abschnitt „Zustellung der Anfragen“ in den Einstellungen eines Eingangs'), 'external' => __('Inhalte der Anfragen gehen per E-Mail an die eingetragenen Empfänger (SMTP mit TLS; mit Zertifikat Ende-zu-Ende per S/MIME)'),
+                    'data' => __('Modus „nur per E-Mail“: keine Inhalte in der Datenbank, nur ein Zustellprotokoll (ohne Inhalte)')],
+                'caution' => __('Gesundheitsdaten nur mit S/MIME-Zertifikat der Empfänger per E-Mail zustellen.')],
 
             // ------------------------------------------------------------------ Medien
             'media' => ['group' => 'media', 'desc' => __('Mediathek: Bilder und Dateien hochladen, zuschneiden, beschriften.'),

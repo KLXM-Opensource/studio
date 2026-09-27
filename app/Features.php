@@ -47,6 +47,8 @@ final class Features
             'data.schema' => ['Tabellen und Felder selbst anlegen (Baukasten)', ['data.schema']],
             'data.shared' => ['Geteilte Daten verwalten (Tabellen mehrerer Websites)', ['data.shared.manage']],
             'requests' => ['Anfragen: verschlüsselte Eingangs-Tabellen und ihre Formulare', ['requests.read', 'requests.manage']],
+            // Anfragen je Eingang auch per E-Mail zustellen – mit vollem Inhalt, optional S/MIME (Core\Data\Delivery); Standard je Tabelle: nur im System
+            'requests.mail' => ['Anfragen per E-Mail zustellen (mit Inhalt, optional S/MIME-verschlüsselt)', []],
             'forms.data' => ['Formulare für Datentabellen (Inhaltstabellen)', []],
             'users' => ['Benutzer und Rollen verwalten', ['users.manage']],
             'system' => ['Grundeinstellungen', ['system.manage']],
@@ -98,7 +100,7 @@ final class Features
     /** Hart voneinander abhängige Funktionen: Funktion => Voraussetzung (ohne sie wirkungslos) */
     public const REQUIRES = [
         'data.schema' => 'data', 'data.shared' => 'data', 'calendar' => 'data', 'forms.data' => 'data', 'sources' => 'data',
-        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media',
+        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media', 'requests.mail' => 'requests',
     ];
 
     /** Voreinstellungen für typische Projekte */

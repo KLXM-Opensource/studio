@@ -207,6 +207,24 @@ final class DataController extends AdminController
         return $this->back('/admin/data/' . $handle . '/schema', 'success', 'Tabelle gespeichert.');
     }
 
+    /** Eingang → Zustellung: Testmail mit erfundener Anfrage an die gespeicherten Empfänger (Core\Data\Delivery::test) */
+    public function deliveryTest(Request $r, string $handle): Response
+    {
+        $this->auth($r, 'data.schema');
+        $t = $this->table($handle);
+        if (!Tables::isInbox($t)) throw new HttpException(404);
+        $this->auth($r, 'requests.manage', $t['handle']);
+        $back = '/admin/data/' . $handle . '/schema#zustellung';
+        if (!\Core\Data\Delivery::mails($t)) {
+            return $this->back($back, 'error', __('Die gespeicherte Einstellung stellt nicht per E-Mail zu – bitte zuerst „Im System und per E-Mail“ oder „Nur per E-Mail“ wählen und speichern.'));
+        }
+        $res = \Core\Data\Delivery::test($t);
+        return $res['ok']
+            ? $this->back($back, 'success', __('Testmail an {to} gesendet{smime} (Message-ID {id}).', ['to' => implode(', ', $res['to']),
+                'smime' => $res['smime'] ? ' – ' . __('S/MIME-verschlüsselt') : '', 'id' => '<' . $res['message_id'] . '>']))
+            : $this->back($back, 'error', __('Testmail nicht gesendet: {error}', ['error' => (string) $res['error']]));
+    }
+
     public function destroy(Request $r, string $handle): Response
     {
         $this->auth($r, 'data.schema');

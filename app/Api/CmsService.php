@@ -954,6 +954,8 @@ final class CmsService
             'handle' => $t['handle'], 'name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'kind' => 'inbox',
             'entries' => \Core\Data\Inbox::count($t), 'new' => \Core\Data\Inbox::count($t, 'neu'),
             'form' => \Core\Data\Inbox::config($t)['form'] ?: null,
+            // Zustellung: system | both | mail – bei „mail“ entstehen keine Einträge (Inhalte nur per E-Mail, Core\Data\Delivery)
+            'delivery' => \Core\Data\Delivery::mode($t),
             'fields' => array_map(fn($f) => array_filter(['name' => $f['name'], 'label' => $f['label'], 'type' => $f['type'], 'required' => $f['required'],
                 'group' => self::groupInfo($f)], fn($v) => $v !== null), $t['fields']),
             'public_form' => \Core\Data\DataForms::enabled($t) ? site_url() . url('/formular/' . $t['handle']) : null,

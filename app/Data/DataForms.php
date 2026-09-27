@@ -19,7 +19,9 @@ use Core\SpamGuard;
  * Rate-Limit je IP-Hash, Link-/Sperrwortfilter), keine Cookies, keine Session. Prüfung serverseitig mit Fields (Besuchersprache)
  * und den Bedingungen der Felder (Core\Data\Rules). Benachrichtigung ohne Inhalte.
  * Inhaltstabellen: Einträge werden NICHT verschlüsselt gespeichert. Eingangs-Tabellen (settings.kind = inbox, Funktion „requests“):
- * gleiche Prüfung, danach Ende-zu-Ende verschlüsselt über Core\Data\Inbox::store (ohne öffentlichen Schlüssel kein Formular), keine Uploads.
+ * gleiche Prüfung, danach je nach Zustellung (Core\Data\Delivery) Ende-zu-Ende verschlüsselt über Core\Data\Inbox::store und/oder
+ * mit vollem Inhalt per E-Mail (ohne öffentlichen Schlüssel kein Formular – er sichert auch den Rückfall). Dateifelder nur bei Zustellung
+ * per E-Mail: die Datei geht als Anhang hinaus bzw. versiegelt in den Payload – nie in die Mediathek.
  */
 final class DataForms
 {
@@ -73,8 +75,10 @@ final class DataForms
     {
         $s = $t['settings']['form'];
         $sel = (array) ($s['fields'] ?? []);
-        $uploads = !empty($s['uploads']) && !Inbox::is($t);         // Eingang: nie Uploads (Gesundheitsdaten dürfen nicht in die öffentliche Mediathek)
-        return array_values(array_filter($t['fields'], fn($f) => self::eligible($f, $uploads)
+        // Eingang: Dateien nur bei Zustellung per E-Mail (Anhang bzw. versiegelt) – Gesundheitsdaten nie in die öffentliche Mediathek
+        $inbox = Inbox::is($t);
+        $uploads = !empty($s['uploads']) && (!$inbox || Delivery::mails($t));
+        return array_values(array_filter($t['fields'], fn($f) => self::eligible($f, $uploads) && (!$inbox || $f['type'] !== 'media')
             && (!$sel || in_array($f['name'], $sel, true) || !empty($f['required']))));
     }
 
@@ -210,7 +214,8 @@ final class DataForms
             . (Lang::multi() ? '<input type="hidden" name="_lang" value="' . e(Lang::current()) . '">' : '');
         $submit = trim((string) ($o['submit'] ?? '')) ?: ($inbox ? Inbox::text($t, 'submit') : ($s['submit'] !== '' ? $s['submit'] : ''));
         $h .= '<p class="dff-actions"><button type="submit" class="' . e($btn) . '">' . e($submit !== '' ? $submit : lt('Absenden')) . '</button></p>';
-        if ($inbox) $h .= '<p class="dff-note dff-note--secure">' . e(lt('Ihre Angaben werden verschlüsselt gespeichert und sind nur für uns lesbar.')) . '</p>';
+        if ($inbox) $h .= '<p class="dff-note dff-note--secure">' . e(Delivery::mode($t) === 'mail' ? lt('Ihre Angaben werden verschlüsselt übertragen und nicht auf der Website gespeichert.')
+            : lt('Ihre Angaben werden verschlüsselt gespeichert und sind nur für uns lesbar.')) . '</p>';
         if (SpamGuard::difficulty() > 0) {
             $h .= '<noscript><p class="dff-note">' . e(lt('Hinweis: Für die Sicherheitsprüfung wird JavaScript benötigt.')) . '</p></noscript>';
         }
@@ -366,7 +371,8 @@ final class DataForms
      *   check  => fn(array $values): array   weitere Fehler [name => Text] nach der Feldprüfung, vor dem Spamschutz (Token bleibt gültig)
      *   store  => fn(array $values): array   speichert statt Inbox::store (selbst versiegeln, z. B. in einer Transaktion mit Inbox::store) –
      *                                        Rückgabe ['id' => …, 'message' => …] bzw. ['error' => Text] (abgelehnt, ohne Feldfehler)
-     *   notify => false                      keine Benachrichtigung des Cores (die Erweiterung schickt eigene E-Mails)
+     *   notify => false                      keine Benachrichtigung des Cores (die Erweiterung schickt eigene E-Mails) – die Zustellung
+     *                                        mit Inhalt (Delivery, Modus „System und E-Mail“) läuft trotzdem
      * @return array{ok: bool, message?: string, errors?: array, id?: int, stored?: array}
      */
     public static function submit(array $t, array $post, array $files, string $ip, array $o = []): array
@@ -421,6 +427,17 @@ final class DataForms
         foreach ($uploads as $n => $_) {
             if (!array_key_exists($n, $values) || $values[$n] === null) unset($uploads[$n]);   // Feld ausgeblendet → Datei verwerfen
         }
+        $mailFiles = [];
+        if ($inbox && $uploads && !$errors) {
+            // Eingang mit Zustellung per E-Mail: Dateien nur im Speicher (Anhang bzw. versiegelt), Gesamtgrenze der E-Mail
+            foreach ($uploads as $n => $file) {
+                $mailFiles[$n] = ['name' => (string) ($file['name'] ?? 'datei'), 'size' => (int) ($file['size'] ?? 0),
+                    'type' => (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: 'application/octet-stream', 'data' => (string) file_get_contents($file['tmp_name'])];
+            }
+            if ($msg = Delivery::tooLarge($t, $mailFiles)) {
+                foreach ($uploads as $n => $_) $errors[$n] = $msg;
+            }
+        }
         if ($errors) {
             if (isset($errors[self::PRIVACY])) $errors[self::PRIVACY] = lt('Bitte bestätigen Sie, dass Sie die Datenschutzhinweise gelesen haben.');
             foreach ($uploads as $n => $_) $errors[$n] ??= lt('Bitte wählen Sie die Datei erneut aus.');
@@ -439,16 +456,15 @@ final class DataForms
 
         unset($values[self::PRIVACY]);
         if ($inbox) {
-            // Eingang: Werte (nach Prüfung und Bedingungen) versiegeln – Klartext erreicht die Datenbank nie
-            if (is_callable($o['store'] ?? null)) {
-                $stored = (array) ($o['store'])($values);
-                if (!empty($stored['error'])) return ['ok' => false, 'message' => (string) $stored['error']];
-                $id = (int) ($stored['id'] ?? 0);
-            } else {
-                ['id' => $id] = Inbox::store($t, $values);
-                $stored = ['id' => $id];
-            }
-            if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => (int) $id, 'stored' => $stored];
+            // Eingang: Werte (nach Prüfung und Bedingungen) versiegeln – Klartext erreicht die Datenbank nie – und/oder mit vollem Inhalt
+            // per E-Mail zustellen (Core\Data\Delivery: Modus system | both | mail, Rückfall = verschlüsselt sichern)
+            $acc = Delivery::accept($t, $values, $mailFiles, is_callable($o['store'] ?? null) ? $o['store'] : null);
+            if (!$acc['ok']) return ['ok' => false, 'message' => (string) ($acc['error'] ?? lt('Senden fehlgeschlagen.'))];
+            $stored = (array) ($acc['stored'] ?? []);
+            $id = (int) $acc['id'];
+            if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => $id, 'stored' => $stored];
+            // Inhalt per E-Mail zugestellt (bzw. Rückfall mit eigener Warnung) → keine zusätzliche inhaltsfreie Benachrichtigung
+            if (Delivery::mode($t) !== 'system') return ['ok' => true, 'message' => $success, 'id' => $id];
             $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;
             Mailer::send('Neue Anfrage: ' . $t['name'],
                 "Guten Tag,\n\nüber die Website ist eine neue Anfrage in „{$t['name']}“ eingegangen.\n"

@@ -32,7 +32,8 @@ import { initFonts } from './_fonts.js';   // Grundeinstellungen → Schriften: 
 import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöcke: Block-Baukasten (Core\Blocks\Custom)
 import { Rich } from './_rte.js';   // Formatierungsleiste: Stile, Farben, Marker, Link, Menüs, Tastatur
 import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Linkauswahl (Rich-Text und Feldtyp „link“)
-import { initAssistant } from './_assistant.js';   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
+import { initAssistant } from './_assistant.js';
+import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
@@ -78,6 +79,7 @@ initAccent();
 // Grundeinstellungen → Schriften (_fonts.js)
 initFonts();
 initFeatures();
+initDelivery();
 
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {

@@ -72,6 +72,9 @@ final class InboxController extends AdminController
             'unlocked' => $decrypted !== [], 'status' => $status, 'page' => $page, 'pages' => (int) ceil($total / self::PER_PAGE),
             'counts' => $counts, 'newCounts' => $newCounts, 'users' => $this->assignees($t), 'canManage' => can('requests.manage', $t['handle']),
             'canLog' => self::canLog(), 'keyReady' => FormCrypto::ready(),
+            // Zustellung per E-Mail (Core\Data\Delivery): Modus, Einrichtungshinweise, fehlgeschlagene Zustellungen, Rückfall-Einträge
+            'delivery' => \Core\Data\Delivery::mode($t), 'deliveryProblems' => \Core\Data\Delivery::problems($t),
+            'deliveryAlerts' => \Core\Data\Delivery::alerts(array_column($tables, 'handle')),
         ]);
     }
 
@@ -88,6 +91,15 @@ final class InboxController extends AdminController
         $t = \Core\Data\Tables::find($handle);
         $status = in_array($r->str('back'), [...($t ? Inbox::statusKeys($t) : Inbox::STATUSES), 'alle'], true) ? $r->str('back') : 'neu';
         return $this->back('/admin/requests?table=' . rawurlencode($handle) . '&status=' . $status, $type, $msg);
+    }
+
+    /** Hinweise „Zustellung fehlgeschlagen“ (Core\Data\Delivery::alert) für die Tabellen des Benutzers ausblenden */
+    public function clearAlerts(Request $r): Response
+    {
+        $this->auth($r, 'requests.manage');
+        $handles = array_column(Inbox::readable('requests.manage'), 'handle');
+        \Core\Data\Delivery::clearAlerts($handles);
+        return $this->back('/admin/requests' . ($r->str('table') !== '' ? '?table=' . rawurlencode($r->str('table')) : ''), 'success', __('Hinweise ausgeblendet.'));
     }
 
     public function status(Request $r, string $table, string $id): Response

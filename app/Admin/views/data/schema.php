@@ -12,7 +12,7 @@ $err = fn(string $k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$
 $allTables = array_column(Tables::content(), 'name', 'handle');
 // Eingang (verschlüsselte Anfragen): eingeschränkte Feldtypen, keine Website-/Kalender-/Verwaltungs-Einstellungen
 $inbox = ($s['kind'] ?? 'content') === 'inbox';
-$types = $inbox ? \Core\Data\DataForms::TYPES : array_keys(Tables::TYPES);
+$types = $inbox ? [...\Core\Data\DataForms::TYPES, 'file'] : array_keys(Tables::TYPES);   // Eingang: Datei nur bei Zustellung per E-Mail (Tables::validate)
 $empty = $isNew || !(int) Tables::db($table)->fetchValue("SELECT COUNT(*) FROM {$table['table']}");
 // Geteilte Tabelle: gilt für alle beteiligten Websites; Verknüpfungen nur zu geteilten Tabellen derselben Website
 $sharedT = !$isNew && Tables::isShared($table);
@@ -42,7 +42,7 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
     <section class="adm-card">
       <h2>Felder</h2>
       <?php if ($inbox): ?>
-      <p class="adm-muted"><?= e(__('Die Felder bilden das Formular. Eingänge speichern alle Angaben gemeinsam Ende-zu-Ende verschlüsselt (keine Spalte je Feld) – Felder lassen sich daher jederzeit ändern, ohne dass Anfragen verloren gehen. Keine Uploads, Verknüpfungen oder Karten.')) ?></p>
+      <p class="adm-muted"><?= e(__('Die Felder bilden das Formular. Eingänge speichern alle Angaben gemeinsam Ende-zu-Ende verschlüsselt (keine Spalte je Feld) – Felder lassen sich daher jederzeit ändern, ohne dass Anfragen verloren gehen. Keine Bilder, Verknüpfungen oder Karten; Dateifelder nur bei Zustellung per E-Mail.')) ?></p>
       <?php else: ?>
       <p class="adm-muted">Jedes Feld wird eine Spalte der Tabelle. Reihenfolge mit ↑ ↓ ändern. Den <b>Kurznamen</b> brauchen Sie für Platzhalter wie <code>{{titel}}</code>.</p>
       <?php endif; ?>
