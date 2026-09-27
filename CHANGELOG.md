@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Haken für Erweiterungen: Eingänge und eigene Formulare (z. B. Buchungskalender)
+- `Extension::inbox()` – eigene Status je Eingang (Beschriftung, Knopf, Ton, „done“ für die Aufbewahrung, „manual“),
+  Zusatzzeile je Anfrage, Prüfung vor Statuswechseln (Verwaltung, API, MCP) in derselben Transaktion, `direct_form => false`.
+  Ereignisse `inbox.status` und `inbox.deleted` (auch beim automatischen Löschen). Anfragen-Ansicht und API folgen dem Status-Satz.
+- `DataForms::render/submit` für Formulare von Erweiterungen: `action`, `prepend`, `hidden`, `fields_legend`, `server_message`,
+  `check`, `store`, `notify => false`; `dataform.js` meldet `dff:sent`. `Core\Mailer` kann kleine Anhänge (`attach`, z. B. .ics).
+- Doku: Entwurf einer zentralen Zahlungs-Erweiterung `payments` (Technik → Funktionen & Erweiterungen → Zahlungen).
+- Genutzt von der Erweiterung `booking` (Buchungskalender, Paket `klxm/studio-booking`).
+
 ### Kern-Block „Partner & Logos“ (alle Kits)
 - Neuer Kern-Block `partners` für Logos von Partnern, Kunden oder Förderern – jedes Kit bekommt ihn automatisch
   (`app/Blocks/blocks.php`, Renderer `app/Blocks/partners.php`, abschaltbar mit `core_blocks => false`, überschreibbar je Kit).
