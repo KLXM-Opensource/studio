@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Erweiterungs-Haken für Seiten: Seitenbaum, Seiteneinstellungen, Werkzeugleiste, Entwurfs-Vorschau
+- `Extension::pageList(fn($page))`: Hinweise in der Spalte „Status“ des Seitenbaums und Einträge im Kontextmenü.
+- `Extension::pagePanel(fn($page))`: eigene Karten in der Seitenleiste der Seiteneinstellungen.
+- `Extension::toolbar(fn($bar))`: Einträge im Menü „⋯“ der Werkzeugleiste (Link oder Button mit `data-…`), Skripte nach der
+  Leiste (nur `'self'`) und ein Zusatz im Dialog „Änderungen jetzt veröffentlichen?“.
+- `SiteController::previewHtml($page, true)` rendert den aktuellen Entwurf im Kit-Layout (ohne Werkzeugleiste, ohne
+  Seiten-Cache, noindex). Genutzt von der Erweiterung „Entwurf teilen & freigeben“ (`klxm/studio-freigabe`).
+
 ### SVG-Grafiken in der Mediathek (bereinigt und optimiert)
 - **SVG-Upload** (Verwaltung, REST, MCP, `content:import`) nur über den eigenen Bereiniger `Core\Svg` (Positivliste auf
   DOMDocument, keine GPL-Bibliothek): Skripte, Ereignisse (`on…`), `foreignObject`/`iframe`/`embed`/`object`,

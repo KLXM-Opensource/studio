@@ -609,6 +609,75 @@ final class Extensions
         return ['tiles' => $tiles, 'cards' => $cards];
     }
 
+    /**
+     * Seitenbaum: Hinweise und Kontextmenü-Einträge aktiver Erweiterungen für eine Seite (Extension::pageList).
+     * @return array{badges: list<array{label:string, title:string, tone:string}>, actions: list<array{label:string, href:string}>}
+     */
+    public static function pageList(array $page): array
+    {
+        $badges = $actions = [];
+        foreach (self::$active as $x) {
+            foreach ($x->pageListProviders as $fn) {
+                $d = (array) self::safe($x, 'pageList', fn() => $fn($page), []);
+                foreach ((array) ($d['badges'] ?? []) as $b) {
+                    if (!is_array($b) || trim((string) ($b['label'] ?? '')) === '') continue;
+                    $badges[] = ['label' => (string) $b['label'], 'title' => (string) ($b['title'] ?? ''),
+                        'tone' => in_array($b['tone'] ?? '', ['ok', 'warn', 'info', 'muted'], true) ? (string) $b['tone'] : 'info'];
+                }
+                foreach ((array) ($d['actions'] ?? []) as $a) {
+                    $href = (string) ($a['href'] ?? '');
+                    // nur Adressen dieser Installation (relativ), kein javascript:
+                    if (!is_array($a) || trim((string) ($a['label'] ?? '')) === '' || !str_starts_with($href, '/') || str_starts_with($href, '//')) continue;
+                    $actions[] = ['label' => (string) $a['label'], 'href' => $href];
+                }
+            }
+        }
+        return ['badges' => $badges, 'actions' => $actions];
+    }
+
+    /** Seiteneinstellungen: Karten aktiver Erweiterungen für die Seitenleiste (Extension::pagePanel) – fertiges HTML */
+    public static function pagePanels(array $page): string
+    {
+        $out = '';
+        foreach (self::$active as $x) {
+            foreach ($x->pagePanelProviders as $fn) $out .= (string) self::safe($x, 'pagePanel', fn() => $fn($page), '');
+        }
+        return $out;
+    }
+
+    /**
+     * Werkzeugleiste der Website: Menüeinträge, Skripte und Hinweis zum Veröffentlichen aktiver Erweiterungen (Extension::toolbar).
+     * @return array{items: list<array{label:string, hint:string, icon:string, href:?string, data:array<string,string>}>, scripts: list<array{src:string, module:bool}>, notes: list<string>}
+     */
+    public static function toolbar(array $bar): array
+    {
+        $items = $scripts = $notes = [];
+        foreach (self::$active as $x) {
+            foreach ($x->toolbarProviders as $fn) {
+                $d = (array) self::safe($x, 'toolbar', fn() => $fn($bar), []);
+                foreach ((array) ($d['items'] ?? []) as $it) {
+                    if (!is_array($it) || trim((string) ($it['label'] ?? '')) === '') continue;
+                    $href = isset($it['href']) ? (string) $it['href'] : null;
+                    if ($href !== null && (!str_starts_with($href, '/') || str_starts_with($href, '//'))) continue;
+                    $data = [];
+                    foreach ((array) ($it['data'] ?? []) as $k => $v) {
+                        if (preg_match('~^[a-z][a-z0-9-]{0,40}$~', (string) $k)) $data[(string) $k] = (string) $v;
+                    }
+                    $items[] = ['label' => (string) $it['label'], 'hint' => (string) ($it['hint'] ?? ''), 'icon' => (string) ($it['icon'] ?? 'puzzle-piece'),
+                        'href' => $href, 'data' => $data];
+                }
+                foreach ((array) ($d['scripts'] ?? []) as $path) {
+                    $path = ltrim((string) $path, '/');
+                    if (preg_match('~^[a-z0-9_./-]+\.(js|mjs)$~i', $path) && !str_contains($path, '..')) {
+                        $scripts[] = ['src' => $x->asset($path), 'module' => str_ends_with($path, '.mjs')];
+                    }
+                }
+                if (trim((string) ($d['publishNote'] ?? '')) !== '') $notes[] = trim((string) $d['publishNote']);
+            }
+        }
+        return ['items' => $items, 'scripts' => $scripts, 'notes' => $notes];
+    }
+
     /** CLI-Befehle: [name => [beschreibung, callable]] */
     public static function commands(): array
     {

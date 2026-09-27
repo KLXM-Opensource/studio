@@ -115,6 +115,11 @@ final class Toolbar
             'kind' => $kind, 'mode' => $b['mode'], 'status' => $status, 'viewUrl' => $viewUrl,
             'hasPublished' => $b['canDiscard'], 'texts' => self::texts($kind),
         ];
+        // Erweiterungen (Extension::toolbar): Einträge im Menü „⋯“, Skripte nach der Leiste, Zusatz im Veröffentlichen-Dialog
+        $b['ext'] = Extensions::toolbar($b);
+        if ($b['ext']['notes']) {
+            $b['config']['texts']['publishBody'] = trim($b['config']['texts']['publishBody'] . "\n\n" . implode("\n", $b['ext']['notes']));
+        }
         return $b;
     }
 

@@ -151,6 +151,10 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
         <?php endif; ?>
         <?= $sep ?>
         <?php if ($kind !== 'page' && $b['canTable'] && !$b['foreign']): ?><?= $item(e(__('In der Verwaltung öffnen')), 'arrow-square-out', $b['adminUrl']) ?><?php endif; ?>
+        <?php foreach ($b['ext']['items'] ?? [] as $xi): // Erweiterungen (Extension::toolbar) ?>
+          <?= $item(e($xi['label']) . ($xi['hint'] !== '' ? '<small>' . e($xi['hint']) . '</small>' : ''), $xi['icon'], $xi['href'] !== null ? url($xi['href']) : null,
+              implode('', array_map(fn($k, $v) => ' data-' . e($k) . '="' . e($v) . '"', array_keys($xi['data']), $xi['data']))) ?>
+        <?php endforeach; ?>
         <?php if ($b['hasPage'] && $b['canManage']): ?><?= $item(e($kind === 'page' ? __('Seiteneinstellungen') : __('Einstellungen der Vorlagen-Seite')), 'gear-six', url('/admin/pages/' . $page['id'])) ?><?php endif; ?>
         <?php if ($b['canSettings']): ?><?= $item(e($b['settingsTitle']), 'sliders-horizontal', url('/admin/settings')) ?><?php endif; ?>
         <?= $sep ?>
@@ -162,6 +166,8 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
   </div>
 </div>
 <!--cms-bar-end-->
+<?php foreach ($b['ext']['scripts'] ?? [] as $xs): // Skripte der Erweiterungen (Extension::toolbar) – nur 'self' ?><script src="<?= e($xs['src']) ?>"<?= $xs['module'] ? ' type="module"' : ' defer' ?>></script>
+<?php endforeach; ?>
 <?php if ($kind === 'entry'): $reason = $b['canTable'] && !$b['foreign'] ? EntryEdit::reason($b['table'], $b['entry']) : null; ?>
 <?php if ($b['entryDraft'] || $b['foreign'] || $reason): ?>
 <div class="cms-entry-note<?= $b['entryDraft'] ? ' cms-entry-note--draft' : '' ?>" role="note">

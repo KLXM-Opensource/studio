@@ -30,6 +30,10 @@ namespace Core;
  *   $x->mediaPoster(fn(array $m): ?int => …)                           Vorschaubild (Bild-ID) für Videos ohne eigenes Poster (Themes, Player)
  *   $x->docs('manual'|'technical', ['key' => ['title' => …, 'file' => …, 'after' => 'medien']])   Kapitel im Handbuch/Entwicklerhandbuch
  *   $x->dashboard(fn(array $user) => ['tiles' => [...], 'cards' => [...]])   Kennzahlen-Kacheln und Karten der Übersicht (/admin)
+ * Seiten (Verwaltung und Werkzeugleiste der Website):
+ *   $x->pageList(fn(array $page) => ['badges' => [['label' => …]], 'actions' => [['label' => …, 'href' => …]]])   Seitenbaum: Hinweis + Kontextmenü
+ *   $x->pagePanel(fn(array $page) => '<section class="adm-card">…</section>')   Karte in der Seitenleiste der Seiteneinstellungen
+ *   $x->toolbar(fn(array $bar) => ['items' => [...], 'scripts' => ['js/x.js'], 'publishNote' => '…'])   Menü „⋯“ der Werkzeugleiste
  * Übersetzungen: {dir}/lang/{locale}.php (Verwaltung, __()) und {dir}/lang/site/{lang}.php (Website, lt()) werden automatisch geladen.
  */
 final class Extension
@@ -66,6 +70,12 @@ final class Extension
     public array $docChapters = [];
     /** @var list<callable(array): array> */
     public array $dashboardProviders = [];
+    /** @var list<callable(array): array> */
+    public array $pageListProviders = [];
+    /** @var list<callable(array): string> */
+    public array $pagePanelProviders = [];
+    /** @var list<callable(array): array> */
+    public array $toolbarProviders = [];
     private array $migrations = [];
 
     public function __construct(public readonly string $name, public readonly string $dir, public readonly array $manifest) {}
@@ -232,6 +242,38 @@ final class Extension
     public function dashboard(callable $fn): self
     {
         $this->dashboardProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Seitenbaum (Verwaltung → Seiten) je Seite: fn(array $page): [
+     *   'badges'  => [['label' => 'Freigegeben', 'title' => 'Tooltip (optional)', 'tone' => 'ok'|'warn'|'info'|'muted']],   Hinweis in der Spalte „Status“
+     *   'actions' => [['label' => 'Entwurf teilen …', 'href' => '/admin/…']],                                         Einträge im Kontextmenü (Link)
+     * ]. Läuft für JEDE Seite des Baums – Daten einmal vorab laden (statischer Zwischenspeicher), Rechte selbst prüfen (can()).
+     */
+    public function pageList(callable $fn): self
+    {
+        $this->pageListProviders[] = $fn;
+        return $this;
+    }
+
+    /** Seiteneinstellungen (Verwaltung → Seiten → Seite): fn(array $page): string – fertiges, selbst escaptes HTML (z. B. <section class="adm-card">) in der Seitenleiste */
+    public function pagePanel(callable $fn): self
+    {
+        $this->pagePanelProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Redaktions-Werkzeugleiste auf der Website (Core\Toolbar, nur angemeldet): fn(array $bar): [
+     *   'items'       => [['label' => …, 'hint' => 'kleine Zeile (optional)', 'icon' => Symbolname, 'href' => Adresse ODER 'data' => ['fg-open' => '1'] (→ data-…-Attribute an einem <button>)]],
+     *   'scripts'     => ['js/panel.js'],     Skripte aus {dir}/assets (gebaut nach /extensions/{name}/), im Dokument nach der Leiste – nur 'self'
+     *   'publishNote' => 'Freigegeben von …', Zusatz im Dialog „Änderungen jetzt veröffentlichen?“
+     * ]. $bar = Core\Toolbar::context() (kind, mode, page, editing, canEditPages …). Rechte prüft die Erweiterung (can()).
+     */
+    public function toolbar(callable $fn): self
+    {
+        $this->toolbarProviders[] = $fn;
         return $this;
     }
 

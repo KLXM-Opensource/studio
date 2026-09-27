@@ -90,13 +90,17 @@ final class SiteController
         return array_merge(array_column($blocks, 'type'), array_map(fn($b) => $b['type'] . ':' . ($b['data']['variant'] ?? ''), $blocks));
     }
 
-    /** HTML einer Seite für Vorschauen in der Verwaltung: veröffentlichte Fassung, ohne Editor-Leiste und Cache */
-    public function previewHtml(array $page): string
+    /**
+     * HTML einer Seite für Vorschauen: veröffentlichte Fassung (bzw. Entwurf, solange nie veröffentlicht), mit $draft = true
+     * immer der aktuelle Entwurf (z. B. Erweiterungen, die einen Entwurf zur Abstimmung zeigen). Ohne Editor-Leiste,
+     * ohne Seiten-Cache, noindex. Header (CSP, Cache-Control) setzt der Aufrufer – z. B. respond() bzw. csp().
+     */
+    public function previewHtml(array $page, bool $draft = false): string
     {
         $app = app();
         $app->currentPage = $page;
         \Core\StructuredData::reset();
-        $blocks = Pages::blocks($page, $page['content_published'] === null);
+        $blocks = Pages::blocks($page, $draft || $page['content_published'] === null);
         $theme = $app->theme;
         return $theme->render('layout', [
             'page' => $page,

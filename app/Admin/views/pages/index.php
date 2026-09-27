@@ -17,9 +17,11 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
     $kids = $n['children'];
     $id = (int) $p['id'];
     $trans = $multi ? array_keys(Pages::translations($p)) : [];
+    $ext = \Core\Extensions::pageList($p);   // Erweiterungen (Extension::pageList): Hinweise + Kontextmenü
     $h = '<li class="pt-node" role="treeitem" id="pt-' . $id . '" data-id="' . $id . '" data-parent="' . (int) ($p['parent_id'] ?? 0) . '"'
         . ' data-url="' . e($url) . '" data-title="' . e($p['title']) . '" data-home="' . (int) $p['is_home'] . '" data-dirty="' . (int) $dirty . '"'
         . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-langs="' . e(implode(',', $trans)) . '" aria-level="' . ($n['depth'] + 1) . '"'
+        . ($ext['actions'] ? ' data-ext-actions="' . json_attr(array_map(fn($a) => [$a['label'], url($a['href'])], $ext['actions'])) . '"' : '')
         . ($kids ? ' aria-expanded="true"' : '') . ' aria-selected="false">'
         . '<div class="pt-row" draggable="' . ($p['is_home'] ? 'false' : 'true') . '">'
         . '<span class="pt-name" style="--depth:' . $n['depth'] . '">'
@@ -30,7 +32,8 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
         . '<span class="pt-status"><span class="dt-status dt-status--' . ($p['status'] === 'published' ? 'published' : 'draft') . '">' . ($p['status'] === 'published' ? 'Online' : 'Entwurf') . '</span>'
-        . ($dirty ? ' <span class="pt-dirty" title="Unveröffentlichte Änderungen">●</span>' : '') . '</span>'
+        . ($dirty ? ' <span class="pt-dirty" title="Unveröffentlichte Änderungen">●</span>' : '')
+        . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'
         . '<span class="pt-more"><button type="button" class="pt-morebtn" data-more aria-label="Aktionen für „' . e($p['title']) . '“">' . icon('dots-three') . '</button></span>'

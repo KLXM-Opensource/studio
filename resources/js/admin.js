@@ -546,6 +546,8 @@ if (pt) {
         }]),
       ...(home ? [] : [['Duplizieren', async () => { await post(`${base}/${id}/duplicate`); location.reload(); }]]),
       ...(n.dataset.dirty === '1' ? [['Änderungen veröffentlichen', async () => { await post(`${base}/${id}/publish`); location.reload(); }]] : []),
+      // Erweiterungen (Extension::pageList): [Beschriftung, Adresse]
+      ...(n.dataset.extActions ? [['-'], ...JSON.parse(n.dataset.extActions).map(([l, href]) => [l, () => { location.href = href; }])] : []),
       ...(home ? [] : [['-'], ['Löschen …', async () => {
         const kids = $$('.pt-node', n).length;
         if (!(await bar_.ask({ title: `„${n.dataset.title}“ löschen?${kids ? `\n\n${kids} Unterseite(n) rücken eine Ebene nach oben.` : ''}`, ok: t('Löschen') }))) return;

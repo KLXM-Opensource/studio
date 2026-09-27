@@ -58,6 +58,7 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
   <?php if (!$isNew): ?>
   <div>
     <?= /* KI-Assistent & SEO-Check (Core\AI) */ \Core\Theme::capture(ROOT . '/app/Admin/views/ai/_page.php', ['page' => $page]) ?>
+    <?= /* Erweiterungen (Extension::pagePanel), z. B. Feedback & Freigabe */ \Core\Extensions::pagePanels($page) ?>
     <?php if (\Core\Features::on('landings') && can('system.manage')): $lps = \Core\Landings::forPage($page); // Landingpages mit eigenen Domains (Core\Landings) ?>
     <section class="adm-card" aria-labelledby="pg-landing-h">
       <h2 id="pg-landing-h"><?= e(__('Landingpage-Domain')) ?></h2>
