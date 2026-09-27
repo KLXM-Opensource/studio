@@ -201,6 +201,9 @@ final class SiteController
 
     public function respond(string $html, bool $loggedIn, int $status = 200): Response
     {
+        // Redaktionsnotizen [# … #] auch aus Seiten außerhalb von render() entfernen (Formularseiten /anfrage/…, Datenformulare,
+        // Suche, Fehler-/Wartungsseite): dort kommen Notizen aus Einstellungen und Kit-Vorlagen (z. B. fehlende Praxisdaten)
+        if (!\Core\EditorNotes::$show) $html = \Core\EditorNotes::publicHtml($html);
         $res = new Response($html, $status);
         $res->header('Content-Security-Policy', self::csp($loggedIn));
         $res->header('Cache-Control', $loggedIn ? 'no-store, private' : 'public, max-age=0, must-revalidate');

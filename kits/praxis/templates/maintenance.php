@@ -14,7 +14,7 @@
   <div class="wrap">
     <p class="wordmark wordmark--footer"><span class="wordmark__1"><?= e(setting('wortmarke_1')) ?><span class="dot">.</span></span><span class="wordmark__2"><?= e(setting('wortmarke_2')) ?></span></p>
     <h1 class="h2"><?= e($text) ?></h1>
-    <p><a class="btn btn--light" href="<?= e(praxis_phone_href()) ?>"><?= e(praxis_phone()) ?></a></p>
+    <?php if (praxis_has_phone()): ?><p><a class="btn btn--light" href="<?= e(praxis_phone_href()) ?>"><?= e(praxis_phone()) ?></a></p><?php endif; ?>
   </div>
 </main>
 </body>

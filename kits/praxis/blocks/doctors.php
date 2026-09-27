@@ -5,7 +5,9 @@
     <?php if ($d['intro']): ?><p class="muted" data-reveal="up" data-delay="80"<?= $b->edit('intro') ?>><?= e($d['intro']) ?></p><?php endif; ?>
   </div>
   <div class="doctors">
-    <?php foreach ($d['items'] as $i => $p): ?>
+    <?php foreach ($d['items'] as $i => $p):
+      // Ohne Namen (z. B. nur Redaktionsnotiz „[# … #]“) keine leere Karte für Besucher – im Bearbeiten-Modus sichtbar
+      if (!is_editing() && trim((string) ($p['name'] ?? '')) === '') continue; ?>
     <article class="doctor" data-reveal="up">
       <div class="doctor__photo ph">
         <?= praxis_image($p['foto'] ?? null, '(min-width: 1280px) 400px, (min-width: 700px) 50vw, 100vw', lt('Porträt folgt · 1:1, min. 1200 × 1200 px'), '', ['ratio' => '1:1']) ?>

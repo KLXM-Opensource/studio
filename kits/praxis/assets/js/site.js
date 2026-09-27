@@ -1,14 +1,20 @@
 /*
  * Frontend-JS „praxis“ (Vanilla, ohne Abhängigkeiten, < 8 KB minifiziert)
- * Reveal · Hero-Themen · Flip-Kontaktkarte · Formulare (Proof-of-Work) · Menü · Scroll-Spy · Zwei-Klick-Embeds
+ * Reveal · Hero-Themen · Flip-Kontaktkarte · Menü · Scroll-Spy · Karte nach Klick
+ * Nachgeladen erst bei Bedarf: Formulare (form.js + css/form.css + Datenschutz-Dialog) beim Umdrehen der Kontaktkarte,
+ * Mobilmenü-Stile (css/mnav.css) beim ersten Öffnen, Karten-Modul (map.mjs) beim Klick auf „Karte anzeigen“.
  */
 
 const d = document, root = d.documentElement;
-// Wiederholbare Gruppen: eigenes Skript, erst bei Bedarf geladen
-const groupSrc = d.currentScript?.src.replace('site.js', 'group.js');
-let groupsLoaded = false;
-const loadGroups = () => { if (groupsLoaded || !groupSrc) return; groupsLoaded = true; d.head.append(Object.assign(d.createElement('script'), { src: groupSrc })); };
 root.classList.replace('no-js', 'js');
+// Stylesheet bzw. Skript einmalig nachladen → Promise (löst auch bei Fehlern/Zeitüberschreitung, damit nichts hängt)
+const got = {};
+const load = u => got[u] ||= new Promise(r => {
+  const css = /\.css(\?|$)/.test(u), el = d.createElement(css ? 'link' : 'script');
+  css ? (el.rel = 'stylesheet', el.href = u) : el.src = u;
+  el.onload = el.onerror = r; setTimeout(r, 2500);
+  d.head.append(el);
+});
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
@@ -89,7 +95,8 @@ $$('[data-hero]').forEach(hero => {
       const on = n === i;
       s.classList.toggle('is-active', on);
       s.classList.toggle('is-before', !on && (n < i || (i === 0 && n === slides.length - 1)));
-      s.setAttribute('aria-hidden', on ? 'false' : 'true');
+      // Das Hauptthema (H1) bleibt immer lesbar – nur die übrigen Themen werden für Screenreader aus-/eingeblendet
+      if (!('main' in s.dataset)) s.setAttribute('aria-hidden', on ? 'false' : 'true');
     });
     btns.forEach((b, n) => n === i ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current'));
     bgs.forEach(g => g.classList.toggle('is-active', +g.dataset.bg === i));
@@ -125,18 +132,24 @@ if (card) {
   const front = $('.card--front', card), back = $('.card--back', card), title = $('[data-flip-title]', card);
   back.hidden = false; back.inert = true; back.setAttribute('aria-hidden', 'true');
   let opener = null;
+  // Formular-Stile/-Skripte der Rückseite: vorladen, sobald jemand auf die Karte zeigt oder hineintabbt
+  const assets = () => Promise.all(JSON.parse(card.dataset.assets || '[]').map(load));
+  card.addEventListener('pointerover', assets, { once: true });
+  card.addEventListener('focusin', assets, { once: true });
   const flip = (key, from) => {
     const panel = $(`[data-panel="${key}"]`, card);
     if (!panel) return false;
-    $$('[data-panel]', card).forEach(p => p.hidden = p !== panel);
-    title.textContent = panel.dataset.title;
-    opener = from;
-    card.classList.add('is-flipped');
-    front.inert = true; front.setAttribute('aria-hidden', 'true');
-    back.inert = false; back.removeAttribute('aria-hidden');
-    const form = $('form', panel);
-    if (form) { prepareForm(form); if ($('[data-group]', form)) loadGroups(); }
-    setTimeout(() => $('#flip-title').focus({ preventScroll: true }), still ? 0 : 450);
+    assets().then(() => {
+      $$('[data-panel]', card).forEach(p => p.hidden = p !== panel);
+      title.textContent = panel.dataset.title;
+      opener = from;
+      card.classList.add('is-flipped');
+      front.inert = true; front.setAttribute('aria-hidden', 'true');
+      back.inert = false; back.removeAttribute('aria-hidden');
+      const form = $('form', panel);
+      if (form) window.praxisForm?.(form, true);
+      setTimeout(() => $('#flip-title').focus({ preventScroll: true }), still ? 0 : 450);
+    });
     return true;
   };
   const unflip = () => {
@@ -162,97 +175,17 @@ if (card) {
 // Popover „Alle Öffnungszeiten“ bei Klick außerhalb schließen
 d.addEventListener('click', e => $$('details.popover[open]').forEach(p => { if (!p.contains(e.target)) p.open = false; }));
 
-// ------------------------------------------------------------ Formulare mit Proof-of-Work
-const enc = new TextEncoder();
-async function solve(token, bits) {
-  if (!bits || !crypto.subtle) return '';
-  const full = bits >> 3, rest = bits & 7, mask = rest ? 0xff << (8 - rest) & 0xff : 0;
-  for (let n = 0; ; n += 256) {
-    const batch = [];
-    for (let i = 0; i < 256; i++) batch.push(crypto.subtle.digest('SHA-256', enc.encode(token + ':' + (n + i))));
-    const res = await Promise.all(batch);
-    for (let i = 0; i < 256; i++) {
-      const b = new Uint8Array(res[i]);
-      let ok = true;
-      for (let j = 0; j < full; j++) if (b[j]) { ok = false; break; }
-      if (ok && (!rest || !(b[full] & mask))) return String(n + i);
-    }
-  }
-}
-
-function prepareForm(form) {
-  if (form._ready) return form._ready;
-  const key = form.dataset.form, tokenEl = form.elements._token, powEl = form.elements._pow;
-  const inline = form.elements._difficulty;
-  form._ready = (async () => {
-    let token = tokenEl.value, diff = inline ? +inline.value : 0;
-    if (!token) {
-      const r = await fetch(form.action.replace(/\/anfrage\//, '/api/form/'), { headers: { Accept: 'application/json' }, credentials: 'omit' });
-      const c = await r.json();
-      token = tokenEl.value = c.token; diff = c.difficulty;
-    }
-    powEl.value = await solve(token, diff);
-  })();
-  return form._ready;
-}
-
-function setError(form, name, msg) {
-  // Gruppen: „medikamente.1.medikament“ → Feld medikamente[1][medikament]; „medikamente“ → Fieldset der Gruppe
-  const input = form.elements[name.replace(/\.(\w+)/g, '[$1]')] || $(`[data-cf="${name}"]`, form);
-  const el = input && d.getElementById(input.id + '-e');
-  if (!el) return;
-  el.textContent = msg || ''; el.hidden = !msg;
-  msg ? input.setAttribute('aria-invalid', 'true') : input.removeAttribute('aria-invalid');
-}
-
-$$('form[data-form]').forEach(form => {
-  const msg = $('.pform__msg', form), btn = $('[type=submit]', form);
-  // Gruppen: auf Formularseiten sofort, in der Flip-Karte erst beim Umdrehen (Startseite bleibt schlank)
-  if ($('[data-group]', form)) form.closest('[data-flipcard]') ? form.addEventListener('focusin', loadGroups, { once: true }) : loadGroups();
-  form.addEventListener('focusin', () => prepareForm(form), { once: true });
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    msg.hidden = true;
-    // Clientseitige Prüfung: Fehlermeldung je Feld, Fokus auf erstes fehlerhaftes Feld
-    let first = null;
-    $$('[data-group]', form).forEach(g => setError(form, g.dataset.group, ''));
-    $$('input,select', form).forEach(i => {
-      if (!i.name || i.name[0] === '_' || i.closest('.hp')) return;
-      const bad = !i.checkValidity();
-      setError(form, i.name, bad ? (i.type === 'checkbox' ? L.confirm : L.fill) : '');
-      if (bad && !first) first = i;
-    });
-    if (first) { first.focus(); return; }
-    btn.setAttribute('aria-busy', 'true'); btn.disabled = true;
-    try {
-      await prepareForm(form);
-      const r = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }, credentials: 'omit' });
-      const res = await r.json();
-      if (res.ok) {
-        form.hidden = true;
-        const done = form.nextElementSibling;
-        done.hidden = false; done.setAttribute('tabindex', '-1'); done.focus();
-        return;
-      }
-      Object.entries(res.errors || {}).forEach(([n, m]) => setError(form, n, m));
-      const bad = $('[aria-invalid=true]', form);
-      msg.textContent = res.message || L.check; msg.hidden = false;
-      (bad || msg).focus?.();
-      if (!res.errors) { form._ready = null; form.elements._token.value = ''; } // Token verbraucht/abgelaufen → neues holen
-    } catch {
-      msg.textContent = L.failed;
-      msg.hidden = false;
-    } finally { btn.removeAttribute('aria-busy'); btn.disabled = false; }
-  });
-});
-
 // ------------------------------------------------------------ Mobilmenü
 // Modaler <dialog>, geöffnet per command/commandfor (ohne JS). Hier: Fallback für Browser ohne Invoker Commands,
 // aria-expanded, Schließen bei Klick auf einen Link (Sprungmarken) und beim Wechsel zur Desktop-Breite.
+// Stile (css/mnav.css, data-css) erst beim ersten Öffnen – vorgeladen beim Zeigen/Fokussieren; ohne JS: <noscript>-Link.
 const menu = $('#mobilmenu'), closeMenu = () => menu?.open && menu.close();
 if (menu) {
-  const btn = $('.menu-btn');
-  if (!('commandForElement' in btn)) { btn.onclick = () => menu.showModal(); $('.mnav__close').onclick = () => menu.close(); }
+  const btn = $('.menu-btn'), css = () => menu.dataset.css ? load(menu.dataset.css) : Promise.resolve();
+  btn.addEventListener('pointerover', css, { once: true });
+  btn.addEventListener('focus', css, { once: true });
+  btn.addEventListener('click', e => { e.preventDefault(); css().then(() => menu.open || menu.showModal()); });
+  if (!('commandForElement' in btn)) $('.mnav__close').onclick = () => menu.close();
   menu.ontoggle = e => btn.setAttribute('aria-expanded', e.newState == 'open');
   menu.onclick = e => e.target.closest('a') && menu.close();
   matchMedia('(min-width:1080px)').addEventListener('change', closeMenu);
@@ -283,3 +216,9 @@ if (spy.length) {
 // ------------------------------------------------------------ Website-Suche: Vorschläge (search.js) erst beim ersten Fokus laden
 let suggestJs;
 d.addEventListener('focusin', e => { const s = e.target.dataset?.suggestJs; s && !suggestJs && (suggestJs = d.head.append(Object.assign(d.createElement('script'), { src: s })) || 1); });
+
+// ------------------------------------------------------------ Karte erst nach Klick (Core\Maps, Zwei-Klick mit Kit-Lader)
+d.addEventListener('click', e => {
+  const b = e.target.closest('[data-cms-map-load]'), m = b?.closest('[data-cms-map-js]');
+  if (m && !b.dataset.bound) { b.dataset.bound = m.dataset.go = 1; m.classList.add('is-started'); import(m.dataset.cmsMapJs); }
+});

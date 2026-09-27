@@ -18,6 +18,7 @@ return [
     'Nein' => 'No',
     'Karte' => 'Map',
     'Karte anzeigen' => 'Show map',
+    'Die Karte lädt erst nach Klick. Die Kartendaten (OpenStreetMap) holt unser Server – Ihr Browser verbindet sich dabei nicht mit Dritten.' => 'The map only loads after you click. Our server fetches the map data (OpenStreetMap) – your browser does not connect to third parties.',
     'Karte: {label}' => 'Map: {label}',
     'Mehr' => 'More',
     'Mit zwei Fingern verschieben' => 'Use two fingers to move the map',

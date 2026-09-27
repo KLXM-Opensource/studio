@@ -8,11 +8,42 @@ use Core\Pages;
 
 const PRAXIS_DAYS = [1 => 'Montag', 2 => 'Dienstag', 3 => 'Mittwoch', 4 => 'Donnerstag', 5 => 'Freitag', 6 => 'Samstag', 0 => 'Sonntag'];
 
-/** Telefonnummer zur Anzeige */
+/**
+ * Fehlende Angabe als Redaktionsnotiz „[# … #]“ (Core\EditorNotes): Besucher sehen nichts, die Redaktion sieht im
+ * Bearbeiten-Modus „Notiz: …“. $label darf in eckigen Klammern stehen (bisherige Platzhalter, übersetzt über lt()).
+ */
+function praxis_note(string $label): string
+{
+    return '[# ' . trim($label, "[] \t\n") . ' #]';
+}
+
+/** Ist eine Telefonnummer hinterlegt? (Notizen „[# … #]“ zählen nicht) */
+function praxis_has_phone(): bool
+{
+    return filled((string) setting('telefon')) || filled(\Core\EditorNotes::strip((string) setting('telefon_anzeige')));
+}
+
+/** Telefonnummer zur Anzeige – ohne Nummer eine Redaktionsnotiz (für Besucher leer) */
 function praxis_phone(): string
 {
+    if (!praxis_has_phone()) return praxis_note(lt('[Telefonnummer]'));
     // In weiteren Sprachen automatisch international (+49 …), siehe phone_display()
-    return phone_display((string) (setting('telefon_anzeige') ?: setting('telefon') ?: lt('[Telefonnummer]')));
+    return phone_display((string) (\Core\EditorNotes::strip((string) setting('telefon_anzeige')) ?: setting('telefon')));
+}
+
+/** Satz nach dem Absenden eines Formulars: Bearbeitungsfrist aus den Praxisdaten – fehlt sie, nur der Rückfrage-Hinweis (+ Notiz) */
+function praxis_done_text(): string
+{
+    $frist = trim(\Core\EditorNotes::strip((string) setting('bearbeitungsfrist_text')));
+    return $frist !== '' ? lt('Bearbeitung: {time}. Bei Rückfragen melden wir uns telefonisch.', ['time' => $frist])
+        : lt('Bei Rückfragen melden wir uns telefonisch.') . ' ' . praxis_note(lt('[Frist – noch zu bestätigen]'));
+}
+
+/** Telefon als Link (HTML) – ohne Nummer nur die Redaktionsnotiz, kein leerer Link */
+function praxis_phone_link(string $class = ''): string
+{
+    if (!praxis_has_phone()) return e(praxis_phone());
+    return '<a' . ($class !== '' ? ' class="' . e($class) . '"' : '') . ' href="' . e(praxis_phone_href()) . '">' . e(praxis_phone()) . '</a>';
 }
 
 /** tel:-Link oder Fallback-Anker */
@@ -256,7 +287,7 @@ function praxis_slides(?array $override = null): array
 function praxis_address_line(): string
 {
     if (!filled(setting('strasse'))) {
-        return lt('[Straße und Hausnummer]') . ' · ' . lt('[PLZ {city}]', ['city' => setting('ort') ?: lt('Ort')]);
+        return praxis_note(trim(lt('[Straße und Hausnummer]'), '[]') . ', ' . trim(lt('[PLZ {city}]', ['city' => setting('ort') ?: lt('Ort')]), '[]'));
     }
     return implode(' · ', array_filter([(string) setting('strasse'), trim(setting('plz') . ' ' . setting('ort'))]));
 }

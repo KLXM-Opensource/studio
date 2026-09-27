@@ -9,7 +9,7 @@
         <div class="pform__done" role="status">
           <span aria-hidden="true" class="pform__check">✓</span>
           <p class="pform__done-title"><?= e($message) ?></p>
-          <p class="pform__done-text"><?= e(lt('Bearbeitung: {time}. Bei Rückfragen melden wir uns telefonisch.', ['time' => setting('bearbeitungsfrist_text') ?: lt('[Frist – noch zu bestätigen]')])) ?></p>
+          <p class="pform__done-text"><?= e(praxis_done_text()) ?></p>
           <a class="btn btn--primary" href="<?= e(url('/')) ?>"><?= e(lt('Zur Startseite')) ?></a>
         </div>
       <?php else: ?>
@@ -17,6 +17,6 @@
         <?= app()->theme->partial('form', ['form' => $form, 'compact' => false, 'values' => $values, 'errors' => $errors, 'challenge' => $challenge]) ?>
       <?php endif; ?>
     </div>
-    <p class="formpage__alt"><?= praxis_fill(lt('Lieber persönlich? Rufen Sie uns an: {phone}'), ['phone' => '<a href="' . e(praxis_phone_href()) . '">' . e(praxis_phone()) . '</a>']) ?></p>
+    <?php if (praxis_has_phone()): ?><p class="formpage__alt"><?= praxis_fill(lt('Lieber persönlich? Rufen Sie uns an: {phone}'), ['phone' => praxis_phone_link()]) ?></p><?php endif; ?>
   </div>
 </section>

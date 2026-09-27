@@ -46,10 +46,12 @@ $home = url('/');
       </ul>
       <div class="site-nav__actions">
         <?= \Core\Search\Search::form('header') /* Website-Suche (Funktion „search“): Lupe → Popover mit Suchfeld */ ?>
+        <?php if (praxis_has_phone() || is_editing()): ?>
         <a class="pill" href="<?= e(praxis_phone_href()) ?>">
           <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
           <?= e($phone) ?>
         </a>
+        <?php endif; ?>
         <a class="pill pill--primary" href="<?= e($cta['href'] ?? link_href('#kontakt')) ?>"<?= $cta ? ' data-spy="' . e($cta['id']) . '"' : '' ?>><?= e($cta['label'] ?? lt('Kontakt')) ?></a>
         <?php if ($langs = language_links()): ?>
         <ul class="langswitch" aria-label="Sprache / Language">
@@ -64,7 +66,8 @@ $home = url('/');
   /* Mobilmenü: modaler <dialog> (Vollbild, oberste Ebene – liegt über Kopf und Schnellkontakt-Leiste). Öffnen/Schließen über
      Invoker Commands (command/commandfor) – ohne JavaScript nutzbar; Rest der Seite inert, Escape schließt, Fokus kehrt zur
      Menü-Schaltfläche zurück. site.js: Fallback für ältere Browser, aria-expanded, Schließen beim Klick auf einen Link.
-     Aussehen: css/mnav.css (nur < 1080 px, am Ende der Seite geladen – blockiert das erste Rendern nicht). */
+     Aussehen: css/mnav.css – lädt site.js erst beim ersten Öffnen (data-css, vorgeladen beim Zeigen/Fokussieren der
+     Schaltfläche); ohne JavaScript bindet layout.php sie per <noscript> ein. */
   $ico = fn(string $d) => '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' . $d . '</svg>';
   $icons = [
       'tel' => '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
@@ -90,7 +93,7 @@ $home = url('/');
   };
   $mail = (string) setting('email');
   ?>
-  <dialog id="mobilmenu" class="mnav" aria-label="<?= e(lt('Menü')) ?>">
+  <dialog id="mobilmenu" class="mnav" aria-label="<?= e(lt('Menü')) ?>" data-css="<?= e(theme_asset('css/mnav.css')) ?>">
     <div class="mnav__head">
       <a class="wordmark" href="<?= e(app()->currentPage['is_home'] ?? false ? '#top' : $home) ?>">
         <span class="wordmark__1"><?= e(setting('wortmarke_1')) ?><span class="dot">.</span></span>
@@ -117,7 +120,7 @@ $home = url('/');
       <div class="mnav__contact">
         <h2 class="mnav__h"><?= e(lt('Kontakt')) ?></h2>
         <?= praxis_open_badge('openb--menu') ?>
-        <a class="mnav__phone" href="<?= e(praxis_phone_href()) ?>"><?= e($phone) ?></a>
+        <?= praxis_phone_link('mnav__phone') ?>
         <?php if (filled($mail)): ?><a class="mnav__mail" href="mailto:<?= e($mail) ?>"><?= e($mail) ?></a><?php endif; ?>
         <?php if (($addr = praxis_address_line()) !== ''): ?><p class="mnav__addr"><?= e($addr) ?></p><?php endif; ?>
       </div>

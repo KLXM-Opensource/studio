@@ -1,0 +1,12 @@
+/* Praxis-Theme: Kern-Block „Datensatz-Felder“ (Detailseiten der Datentabellen) – nur dort geladen (theme.php → conditional_css) */
+@import "../../../../resources/css/_data-fields.css";
+.df-title{font-size:clamp(38px,4.8vw,64px)}
+.df-prose .prose{font-size:18px}
+
+/* Video/Audio in Datei-Feldern von Einträgen (Core\MediaTracks::player) */
+.dt-media{margin:0}
+.dt-media video{display:block;width:100%;height:auto;border-radius:12px;background:#000}
+.dt-media audio{display:block;width:100%}
+.dt-media .media-transcript{margin-top:10px}
+.dt-media .media-transcript summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.dt-media .media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

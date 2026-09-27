@@ -41,7 +41,7 @@ $labels = ['greeting' => lt('Begrüßung'), 'topic' => lt('Aktuelles Thema'), 'm
           <?php $focus = preview_focus('hero_slides'); $startAt = $focus !== null && in_array($focus, array_column($slides, '_idx'), true) ? $focus : null; ?>
           <?php foreach ($slides as $i => $s): $main = !empty($s['is_main']); $greet = ($s['typ'] ?? '') === 'greeting';
             $active = $startAt !== null ? ($s['_idx'] ?? -1) === $startAt : $main; ?>
-          <div class="slide<?= $active ? ' is-active' : '' ?>" data-slide="<?= $i ?>"<?= $main ? ' data-main' : '' ?><?= $active ? '' : ' aria-hidden="true"' ?>
+          <div class="slide<?= $active ? ' is-active' : '' ?>" data-slide="<?= $i ?>"<?= $main ? ' data-main' : '' ?><?= $active || $main ? '' : ' aria-hidden="true"' /* H1 (Hauptthema) nie verstecken */ ?>
                data-label="<?= e($labels[$s['typ'] ?? 'topic'] ?? lt('Thema')) ?>">
             <?php if (!empty($s['eyebrow'])): ?><p class="eyebrow eyebrow--line"><?= e($s['eyebrow']) ?></p><?php endif; ?>
             <?php $title = $greet && trim((string) ($s['titel'] ?? '')) === '' ? '<span data-greeting="' . e(lt('Guten Morgen') . '|' . lt('Guten Tag') . '|' . lt('Guten Abend')) . '">' . e(praxis_greeting()) . '</span>' : e($s['titel'] ?? ''); ?>

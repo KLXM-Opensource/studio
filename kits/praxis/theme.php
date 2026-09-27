@@ -59,6 +59,8 @@ return [
 
     // Einstellungen, deren Host für iframes (nach Einwilligung) erlaubt wird – Karten laufen über den Proxy, daher leer
     'frame_hosts' => [],
+    // Karten im Zwei-Klick-Modus: site.js lädt das Karten-Modul (map.mjs) erst beim Klick – kein Skript vor dem Klick (JS-Budget)
+    'map_loader' => 'kit',
 
     'seo' => [
         'home_title' => 'site_title',
@@ -75,7 +77,8 @@ return [
     // Projekt: sichtbare Begriffe und branchenspezifische Funktionen (der Core ist neutral)
     'project' => [
         // Karten (Core\Maps): welche Einstellungen Standort, Beschriftung, Adresse und Routenlink liefern
-        'map' => ['location' => 'karte_geo', 'label' => 'praxis_name', 'address' => ['strasse', 'plz', 'ort'], 'route' => 'routenplaner_url'],
+        // click: Karte erst nach Klick (Zwei-Klick, Handoff) – Grundeinstellungen → Karten kann das je Website ändern
+        'map' => ['location' => 'karte_geo', 'label' => 'praxis_name', 'address' => ['strasse', 'plz', 'ort'], 'route' => 'routenplaner_url', 'click' => true],
         'terms' => [
             'org' => 'Praxis',
             'key' => 'Praxisschlüssel',
@@ -155,8 +158,10 @@ return [
             'teaser_tiles:image', 'quote:full', 'video', 'text_columns:columns', 'quick_contact'],
         'css/media-blocks.css' => ['gallery', 'slideshow', 'stack_cards'],   // Aussehen der Kern-Blöcke (Variablen + Feinschliff)   // „typ:variante“ = nur bei dieser Variante
         'css/hero-media.css' => ['hero:image', 'hero:video', 'hero:color'],
-        // Formulare: Formularseite /anfrage/… sowie die Rückseite der Flip-Kontaktkarte (Hero, Schnellkontakt)
-        'css/form.css' => ['form', 'hero', 'quick_contact'],
+        // Detailseiten der Datentabellen (Kern-Block „Datensatz-Felder“) – die Liste steckt in css/data.css
+        'css/data-fields.css' => ['data_fields'],
+        // Formulare: Formularseite /anfrage/…; die Rückseite der Flip-Kontaktkarte (Hero, Schnellkontakt) lädt site.js erst beim Umdrehen
+        'css/form.css' => ['form'],
         // Rich-Text: H2/Zitat im Fließtext + Rich-Text-Stile (t-lead, t-small, t-note, c-*, mark) – „@rich“ = sobald die Seite
         // solche Formatierungen ausgibt (Core\Sanitizer::styled), unabhängig vom Block; die Startseite bleibt ohne sie schlank
         'css/prose.css' => ['@rich'],

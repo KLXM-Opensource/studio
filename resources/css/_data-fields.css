@@ -1,0 +1,17 @@
+/* Kern-Block „Datensatz-Felder“ (Detailseiten) – Teil von data.css; Kits können ihn getrennt laden (theme.php → conditional_css ['data_fields']) */
+.df{display:grid;gap:clamp(18px,2.4vw,28px)}
+.df-back a{color:var(--dl-accent);font-weight:600;text-decoration:none}
+.df-head{display:grid;gap:14px}
+.df-title{margin:0}
+.df-meta{font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dl-accent)}
+.df-img{overflow:hidden;border-radius:var(--dl-radius);background:rgba(0,0,0,.06)}
+.df-img img{width:100%;height:100%;object-fit:cover;display:block}
+.df-img picture{display:contents}
+.df-img.ratio-16-9{aspect-ratio:16/9}.df-img.ratio-21-9{aspect-ratio:21/9}.df-img.ratio-4-3{aspect-ratio:4/3}.df-img.ratio-1-1{aspect-ratio:1}.df-img.ratio-3-4{aspect-ratio:3/4}
+.df-prose{display:grid;gap:18px;max-width:46em}
+.df-label{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dl-muted);margin-bottom:4px}
+.df-f--textarea p{font-size:1.15rem;line-height:1.5}
+.df-dl{display:grid;gap:0;max-width:46em;margin:0}
+.df-dl div{display:grid;grid-template-columns:minmax(120px,30%) 1fr;gap:16px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.1)}
+.df-dl dt{font-weight:600}
+.df-dl dd{margin:0}

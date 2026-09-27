@@ -17,14 +17,16 @@ $uid = 'f' . substr(md5($form . ($compact ? 'c' : 'p')), 0, 5);
 $ready = FormCrypto::ready();
 ?>
 <?php if (!$ready): ?>
-<p class="form-off" role="note"><?= praxis_fill(lt('Das Online-Formular wird gerade eingerichtet. Bitte rufen Sie uns an: {phone}.'), ['phone' => '<a href="' . e(praxis_phone_href()) . '">' . e(praxis_phone()) . '</a>']) ?></p>
+<p class="form-off" role="note"><?= praxis_has_phone() ? praxis_fill(lt('Das Online-Formular wird gerade eingerichtet. Bitte rufen Sie uns an: {phone}.'), ['phone' => praxis_phone_link()]) : e(lt('Das Online-Formular wird gerade eingerichtet.')) ?></p>
 <?php else: ?>
 <form class="pform" method="post" action="<?= e(url('/anfrage/' . $form)) ?>" data-form="<?= e($form) ?>" novalidate>
+  <?php /* Pflichtfelder: sichtbares Sternchen (für Screenreader genügt required/aria-required) + Legende */ $star = ' <span class="req" aria-hidden="true">*</span>'; ?>
+  <p class="pform__legend" aria-hidden="true"><span class="req">*</span> <?= e(lt('Pflichtfeld')) ?></p>
   <div class="pform__grid">
     <?php foreach ($fields as $f):
         if ($f['type'] === 'group') {   // Wiederholbare Gruppe (z. B. mehrere Medikamente) – Markup aus dem Kern, Klassen des Kits
             echo \Core\Data\DataForms::group($f, $uid, $values[$f['name']] ?? null, $errors,
-                ['f' => 'pfield', 'half' => '', 'full' => 'pfield--full', 'req' => '', 'err' => 'perr', 'help' => 'pform__hint', 'check' => 'pcheck', 'opt' => 'opt']);
+                ['f' => 'pfield', 'half' => '', 'full' => 'pfield--full', 'req' => '', 'err' => 'perr', 'help' => 'pform__hint', 'check' => 'pcheck', 'opt' => '']);
             continue;
         }
         $id = $uid . '-' . $f['name'];
@@ -36,9 +38,9 @@ $ready = FormCrypto::ready();
     ?>
     <div class="pfield<?= $full ? ' pfield--full' : '' ?><?= $f['type'] === 'bool' ? ' pfield--check' : '' ?>">
       <?php if ($f['type'] === 'bool'): ?>
-        <label class="pcheck"><input type="checkbox" id="<?= $id ?>" name="<?= e($f['name']) ?>" value="1"<?= $val ? ' checked' : '' ?><?= $req . $aria ?>> <?= e($f['label']) ?></label>
+        <label class="pcheck"><input type="checkbox" id="<?= $id ?>" name="<?= e($f['name']) ?>" value="1"<?= $val ? ' checked' : '' ?><?= $req . $aria ?>> <span><?= e($f['label']) ?><?= $f['required'] ? $star : '' ?></span></label>
       <?php else: ?>
-        <label for="<?= $id ?>"><?= e($f['label']) ?><?= $f['required'] ? '' : ' <span class="opt">' . e(lt('(optional)')) . '</span>' ?></label>
+        <label for="<?= $id ?>"><?= e($f['label']) ?><?= $f['required'] ? $star : '' ?></label>
         <?php if ($f['type'] === 'select'): ?>
         <select id="<?= $id ?>" name="<?= e($f['name']) ?>"<?= $req . $aria ?>>
           <?php if (!$f['required']): ?><option value=""></option><?php endif; ?>
@@ -59,7 +61,7 @@ $ready = FormCrypto::ready();
   <?php $pid = $uid . '-' . Forms::PRIVACY_FIELD; $perr = $errors[Forms::PRIVACY_FIELD] ?? null; ?>
   <div class="pfield pfield--check">
     <label class="pcheck"><input type="checkbox" id="<?= $pid ?>" name="<?= Forms::PRIVACY_FIELD ?>" value="1" required aria-required="true" aria-describedby="<?= $pid ?>-e"<?= $perr ? ' aria-invalid="true"' : '' ?><?= !empty($values[Forms::PRIVACY_FIELD]) ? ' checked' : '' ?>>
-      <span><?= praxis_fill(lt('Ich habe die {link} gelesen. Bitte keine Beschwerden oder Diagnosen eingeben.'), ['link' => '<a href="' . e(praxis_privacy_url()) . '"' . \Core\LegalDialog::attrs() . '>' . e(lt('Datenschutzhinweise')) . '</a>']) ?></span></label>
+      <span><?= praxis_fill(lt('Ich habe die {link} gelesen. Bitte keine Beschwerden oder Diagnosen eingeben.'), ['link' => '<a href="' . e(praxis_privacy_url()) . '"' . \Core\LegalDialog::attrs() . '>' . e(lt('Datenschutzhinweise')) . '</a>']) ?><?= $star ?></span></label>
     <p class="perr" id="<?= $pid ?>-e"<?= $perr ? '' : ' hidden' ?>><?= e($perr ?? '') ?></p>
   </div>
 
@@ -78,8 +80,11 @@ $ready = FormCrypto::ready();
 <div class="pform__done" role="status" hidden>
   <span aria-hidden="true" class="pform__check">✓</span>
   <p class="pform__done-title"><?= e(lt(Forms::def($form)['success'] ?? lt('Vielen Dank.'))) ?></p>
-  <p class="pform__done-text"><?= e(lt('Bearbeitung: {time}. Bei Rückfragen melden wir uns telefonisch.', ['time' => setting('bearbeitungsfrist_text') ?: lt('[Frist – noch zu bestätigen]')])) ?></p>
+  <p class="pform__done-text"><?= e(praxis_done_text()) ?></p>
   <?php if (!empty($compact)): ?><button type="button" class="btn-back" data-flip-back><?= e(lt('Zur Übersicht')) ?></button><?php endif; ?>
 </div>
 <?php endif; ?>
-<?php if (!app()->editing): ?><script src="<?= e(asset('js/legal-dialog.js')) ?>" defer></script><?php endif; /* Datenschutzhinweise im Dialog (Core\LegalDialog) */ ?>
+<?php /* Formularseite: Formular-Skript und Datenschutzhinweise im Dialog (Core\LegalDialog) direkt; in der Kontaktkarte
+   (compact) lädt site.js beides erst beim Umdrehen (partials/contact-card.php → data-assets) */ ?>
+<?php if (!app()->editing && empty($compact)): ?><script src="<?= e(theme_asset('js/form.js')) ?>" defer></script>
+<script src="<?= e(asset('js/legal-dialog.js')) ?>" defer></script><?php endif; ?>

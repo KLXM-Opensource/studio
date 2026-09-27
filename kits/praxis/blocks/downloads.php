@@ -9,7 +9,7 @@ if (($d['source'] ?? 'manual') === 'collection' && !empty($d['collection'])) {
 } else {
     foreach ($d['files'] as $i => $f) {
         $m = media($f['file'] ?? null);
-        $rows[] = ['m' => $m, 'label' => trim((string) ($f['label'] ?? '')) ?: ($m ? Media::displayName($m) : lt('[Datei]')),
+        $rows[] = ['m' => $m, 'label' => trim((string) ($f['label'] ?? '')) ?: ($m ? Media::displayName($m) : praxis_note(lt('[Datei]'))),
             'note' => (string) ($f['note'] ?? ''), 'path' => "files.$i.label"];
     }
 }
@@ -25,7 +25,7 @@ if (($d['source'] ?? 'manual') === 'collection' && !empty($d['collection'])) {
       <span class="downloads__icon" aria-hidden="true"><?= e($m ? Media::typeLabel($m['mime']) : 'PDF') ?></span>
       <span class="downloads__main">
         <span class="downloads__name"<?= $row['path'] ? $b->edit($row['path']) : '' ?>><?= e($row['label']) ?></span>
-        <span class="downloads__meta"><?= $m ? e(Media::typeLabel($m['mime'])) . ($pages ? ' · ' . e($pages === 1 ? lt('1 Seite') : lt('{n} Seiten', ['n' => $pages])) : '') . ' · ' . e(Media::humanSize((int) $m['size'])) : 'PDF · ' . e(lt('[Größe]')) ?><?= $row['note'] !== '' ? ' · ' . e($row['note']) : '' ?></span>
+        <span class="downloads__meta"><?= $m ? e(Media::typeLabel($m['mime'])) . ($pages ? ' · ' . e($pages === 1 ? lt('1 Seite') : lt('{n} Seiten', ['n' => $pages])) : '') . ' · ' . e(Media::humanSize((int) $m['size'])) : 'PDF' . e(praxis_note(lt('[Größe]'))) ?><?= $row['note'] !== '' ? ' · ' . e($row['note']) : '' ?></span>
       </span>
       <?php if ($m): ?>
       <span class="downloads__actions">

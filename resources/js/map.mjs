@@ -1,7 +1,8 @@
 /*
  * Karten (Kern): MapLibre GL + OpenFreeMap über den eigenen Proxy (/proxy/ofm/…).
  * MapLibre (~800 KB) wird erst geladen, wenn eine Karte in Sichtweite kommt.
- * Bei „Datensparen“ (Save-Data) erst nach Klick auf „Karte anzeigen“.
+ * Erst nach Klick auf „Karte anzeigen“: bei „Datensparen“ (Save-Data) und im Zwei-Klick-Modus (data-click, Core\Maps).
+ * Kits mit eigenem Lader importieren dieses Modul erst beim Klick und setzen vorher data-go – diese Karten starten sofort.
  */
 const maps = [...document.querySelectorAll('[data-cms-map]:not([data-ready])')];
 let lib = null;
@@ -62,14 +63,14 @@ async function init(el) {
 }
 
 const saveData = navigator.connection?.saveData === true;
-if (saveData || !('IntersectionObserver' in window)) {
-  for (const el of maps) {
+const start = el => { el.classList.add('is-started'); init(el); };
+const io = 'IntersectionObserver' in window && new IntersectionObserver(entries => {
+  for (const en of entries) if (en.isIntersecting) { io.unobserve(en.target); init(en.target); }
+}, { rootMargin: '300px 0px' });
+for (const el of maps) {
+  if (el.dataset.go) { start(el); continue; }
+  if (saveData || el.dataset.click !== undefined || !io) {
     const b = el.querySelector('[data-cms-map-load]');
-    if (b) { b.hidden = false; b.addEventListener('click', () => { b.hidden = true; init(el); }, { once: true }); }
-  }
-} else {
-  const io = new IntersectionObserver(entries => {
-    for (const en of entries) if (en.isIntersecting) { io.unobserve(en.target); init(en.target); }
-  }, { rootMargin: '300px 0px' });
-  maps.forEach(el => io.observe(el));
+    if (b && !b.dataset.bound) { b.dataset.bound = '1'; b.hidden = false; b.addEventListener('click', () => start(el), { once: true }); }
+  } else io.observe(el);
 }

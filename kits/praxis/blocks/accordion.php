@@ -1,6 +1,8 @@
 <?php /** Akkordeon / FAQ (Hinweise). @var \Core\Block $b  @var array $d */
 use Core\Forms;
-$items = array_filter($d['items'], fn($i) => empty($i['service']) || Forms::enabled($i['service']));
+$items = array_filter($d['items'], fn($i) => (empty($i['service']) || Forms::enabled($i['service']))
+    // Ohne Antwort (z. B. nur Redaktionsnotiz „[# … #]“) kein leeres Aufklappfeld für Besucher – im Bearbeiten-Modus sichtbar
+    && (is_editing() || trim(html_entity_decode(strip_tags((string) ($i['a'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8')) !== ''));
 ?>
 <div class="wrap split split--start">
   <div>

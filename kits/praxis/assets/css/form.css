@@ -1,4 +1,5 @@
-/* Formularseite (/anfrage/…) – nur dort geladen (theme.php → conditional_css „form“) */
+/* Formulare Rezept/Überweisung: Formularseite /anfrage/… (theme.php → conditional_css „form“) und Rückseite der
+   Kontaktkarte (dort lädt site.js die Datei erst beim Umdrehen – partials/contact-card.php → data-assets) */
 .pform{display:flex;flex-direction:column;gap:12px}
 .pform__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .pfield{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:600;min-width:0}
@@ -29,3 +30,6 @@
 .pform .dff-row__rm:focus-visible,.pform .dff-row__add:focus-visible{outline:3px solid var(--c-bordeaux);outline-offset:2px}
 .pform .dff-group [hidden]{display:none!important}
 @media (max-width:420px){.pform .dff-row__grid{grid-template-columns:1fr}}
+/* Pflichtfelder: Sternchen hinter der Beschriftung (auch Gruppen aus dem Kern: .dff-req) + Legende „* Pflichtfeld“ */
+.req,.pform .dff-req{margin-left:2px;color:var(--c-bordeaux);font-weight:700}
+.pform__legend{margin:0;font-size:13px;font-weight:500;color:var(--c-text-3)}

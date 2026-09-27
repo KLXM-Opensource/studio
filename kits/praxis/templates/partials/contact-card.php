@@ -8,12 +8,17 @@ $hours = praxis_hours();
 $services = praxis_services();
 $central = is_editing() ? ' data-central="Praxisdaten"' : '';
 ?>
-<div class="flip" data-flipcard>
+<?php
+// Formular-Stile und -Skripte der Rückseite lädt site.js erst beim Umdrehen (Startseite bleibt schlank)
+$lazy = array_filter(['rezept', 'ueberweisung'], fn($k) => isset($services[$k]) && empty($services[$k]['external']))
+    ? [theme_asset('css/form.css'), theme_asset('js/form.js'), asset('js/legal-dialog.js')] : [];
+?>
+<div class="flip" data-flipcard<?= $lazy ? ' data-assets="' . json_attr($lazy) . '"' : '' ?>>
   <div class="flip__inner">
     <aside class="card card--front" aria-label="<?= e(lt('Schnellkontakt')) ?>"<?= $central ?>>
       <div class="card__top">
         <span class="card__today"><?= e(lt('Heute')) ?> · <span data-today><?= e($today['name']) ?></span></span>
-        <a class="card__phone" href="<?= e(praxis_phone_href()) ?>"><?= e(praxis_phone()) ?></a>
+        <?= praxis_phone_link('card__phone') ?>
       </div>
       <div>
         <?= praxis_open_badge('openb--card') ?>
@@ -48,7 +53,7 @@ $central = is_editing() ? ' data-central="Praxisdaten"' : '';
       <div class="card__panel" data-panel="termin" data-title="<?= e($services['termin']['title']) ?>" hidden>
         <p class="card__text"><?= e(setting('termin_hinweis') ?: lt('Wählen Sie Ärztin oder Arzt, Terminart und einen freien Termin – rund um die Uhr über Doctolib.')) ?></p>
         <a class="btn-wide" href="<?= e($services['termin']['href']) ?>"<?= ext_attrs($services['termin']['href']) ?>><?= e(lt('Termin bei Doctolib buchen')) ?> <span aria-hidden="true">↗</span></a>
-        <p class="card__small"><?= e(lt('Externer Link zu Doctolib{url}. Akute Beschwerden bitte telefonisch.', ['url' => filled(setting('doctolib_url')) ? '' : ' ' . lt('[Praxis-URL]')])) ?></p>
+        <p class="card__small"><?= e(lt('Externer Link zu Doctolib{url}. Akute Beschwerden bitte telefonisch.', ['url' => filled(setting('doctolib_url')) ? '' : ' ' . praxis_note(lt('[Praxis-URL]'))])) ?></p>
       </div>
       <?php endif; ?>
       <?php foreach (['rezept', 'ueberweisung'] as $key): if (!isset($services[$key]) || !empty($services[$key]['external'])) continue; ?>

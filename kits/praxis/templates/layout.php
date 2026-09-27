@@ -31,6 +31,8 @@ $phone = praxis_phone();
 <?php endif; ?>
 <?= \Core\AppIcons::headTags() ?><?= app()->theme->fontPreloads() ?>
 <link rel="stylesheet" href="<?= e(theme_asset('css/site.css')) ?>">
+<?php if (\Core\Features::on('search')): ?><link rel="stylesheet" href="<?= e(theme_asset('css/hsearch.css')) ?>">
+<?php endif; ?>
 <?php if (\Core\Lang::multi() || array_filter(\Core\Pages::menu(app()->auth->check()), fn($m) => $m['children'])): ?><link rel="stylesheet" href="<?= e(theme_asset('css/nav.css')) ?>">
 <?php endif; ?>
 <?php foreach ($extraCss ?? [] as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
@@ -60,6 +62,10 @@ $phone = praxis_phone();
 <?= $theme->partial('header', ['phone' => $phone]) ?>
 
 <main id="main" tabindex="-1">
+<?php if (!$editor && !str_contains($content, '<h1')): /* Seiten ohne Hero/eigene H1 (Rechtstexte, Übersichten, Detailseiten): Seitentitel als H1 für Screenreader und Gliederung */
+    $h1 = app()->entry ? \Core\Data\Entries::title(app()->entry['table'], app()->entry['entry']) : (string) ($page['title'] ?? ''); ?>
+<?php if (trim($h1) !== ''): ?><h1 class="sr-only"><?= e($h1) ?></h1>
+<?php endif; endif; ?>
 <?php if ($editor): ?>
 <?= $theme->partial('editor', $editor) ?>
 <?php else: ?>
@@ -80,8 +86,10 @@ $phone = praxis_phone();
     <?= e(lt('Termin')) ?>
   </a>
 </div>
-<?php /* Mobilmenü: erst nach dem Inhalt und nur für schmale Bildschirme – blockiert das erste Rendern nicht */ ?>
-<link rel="stylesheet" href="<?= e(theme_asset('css/mnav.css')) ?>" media="(max-width:1079.98px)">
+<?php /* Mobilmenü-Stile lädt site.js beim ersten Öffnen (partials/header.php → data-css); ohne JavaScript hier */ ?>
+<?php if ($editor): ?><link rel="stylesheet" href="<?= e(theme_asset('css/mnav.css')) ?>" media="(max-width:1079.98px)">
+<?php else: ?><noscript><link rel="stylesheet" href="<?= e(theme_asset('css/mnav.css')) ?>" media="(max-width:1079.98px)"></noscript>
+<?php endif; ?>
 <?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange aus */ ?>
 </body>
 </html>

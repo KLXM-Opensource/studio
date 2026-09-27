@@ -6,6 +6,24 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit „praxis“: Budget, Platzhalter als Notizen, Barrierefreiheit (Handoff Praxis Moers)
+- **Karten im Zwei-Klick-Modus** (`Core\Maps`): Einstellung `sys.map_click` (Grundeinstellungen → Karten; leer = Vorgabe des
+  Kits `project.map.click`) – Hinweis mit Link zur Datenschutzerklärung und Knopf „Karte anzeigen“, MapLibre und Kacheln
+  (weiter über den eigenen Proxy) erst nach Klick. Kits mit `'map_loader' => 'kit'` laden `map.mjs` selbst beim Klick.
+- **Redaktionsnotizen auf allen öffentlichen Seiten entfernt**: `SiteController::respond()` filtert `[# … #]` auch auf
+  Formularseiten `/anfrage/…`, Datenformularen, Suche, Fehler- und Wartungsseiten (dort stammen Notizen aus Einstellungen).
+- `resources/css/data.css` in `_data-list.css` und `_data-fields.css` geteilt (gleiche Ausgabe); ein Kit kann die Teile
+  einzeln laden – praxis lädt „Datensatz-Felder“ nur auf Detailseiten (`css/data-fields.css`).
+- **praxis**: Startseite CSS 48 → 35 KB, JS 11,5 → 6,4 KB (minifiziert): Formulare der Kontaktkarte (`form.js`,
+  `css/form.css`, Datenschutz-Dialog) laden erst beim Umdrehen, Mobilmenü-Stile beim ersten Öffnen (ohne JS per
+  `<noscript>`), Suche in `css/hsearch.css` nur mit Funktion „search“, Karten-Modul erst beim Klick.
+- **praxis**: Fehlende Praxisdaten erscheinen als Redaktionsnotiz statt als sichtbarer „[Platzhalter]“ (`praxis_note()`);
+  Telefon-/E-Mail-Links nur mit Wert (kein leeres `tel:`/`mailto:`), leere Ärzt:innen-Karten und Akkordeon-Einträge nur im
+  Bearbeiten-Modus. Pflichtfelder der Formulare mit Sternchen und Legende „* Pflichtfeld“.
+- **praxis**: H1 auf Seiten ohne Hero (Übersichten, Rechtstexte, Detailseiten) als Seitentitel für Screenreader; die H1 im
+  Hero bleibt beim Themenwechsel lesbar. Kein Layout-Sprung durch den Öffnungsstatus (Platz reserviert, CLS 0); Honeypot
+  ohne −10 000-px-Versatz (auf der gespiegelten Kartenrückseite machte er die Seite mobil 10 000 px breit).
+
 ### Anmeldung: „Passwort vergessen“ (`Core\PasswordReset`)
 - **Link auf der Anmeldeseite** → `/admin/passwort-vergessen`: E-Mail-Adresse eingeben, Antwort immer gleich („Wenn ein Konto
   zu dieser Adresse existiert, haben wir Ihnen einen Link geschickt.“) – unbekannte, gesperrte und Schatten-Konten, Begrenzung

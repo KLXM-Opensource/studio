@@ -12,6 +12,12 @@
 @keyframes cms-map-pulse{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){.cms-map.is-loading .cms-map__pin{animation:none}}
 .cms-map__load{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 18px;border:0;border-radius:999px;background:#fff;color:#16201E;font:inherit;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.18);cursor:pointer}
+/* Zwei-Klick (data-click): Hinweis mit Link zur Datenschutzerklärung + Knopf; nach dem Klick (is-started) ausgeblendet */
+.cms-map__consent{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(92%,30rem);display:grid;justify-items:center;gap:10px;padding:14px 16px;border-radius:14px;background:#fff;color:#16201E;box-shadow:0 2px 12px rgba(0,0,0,.18);text-align:center}
+.cms-map__note{margin:0;font-size:.9rem;line-height:1.4}
+.cms-map__note a{color:inherit}
+.cms-map__consent .cms-map__load{position:static;transform:none;background:var(--_acc);color:#fff;box-shadow:none;min-height:44px}
+.cms-map.is-started .cms-map__consent{display:none}
 .cms-map__load:focus-visible{outline:3px solid var(--_acc);outline-offset:2px}
 .cms-map__marker{width:30px;height:30px;border-radius:50% 50% 50% 0;background:var(--_acc);transform:rotate(-45deg);box-shadow:0 3px 8px rgba(0,0,0,.3);border:2px solid #fff;margin-bottom:6px}
 .cms-map__marker::after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}

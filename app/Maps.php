@@ -8,7 +8,10 @@ namespace Core;
  *
  *  - Stil, Kacheln, Schriften und Symbole kommen von /proxy/ofm/… (siehe Core\Proxy).
  *    Besucher haben keinen Kontakt zu Dritten → keine Einwilligung nötig, keine Cookies.
- *  - MapLibre (~800 KB) wird erst geladen, wenn die Karte in Sichtweite kommt.
+ *  - MapLibre (~800 KB) wird erst geladen, wenn die Karte in Sichtweite kommt – oder erst nach Klick auf „Karte anzeigen“
+ *    (Zwei-Klick: Grundeinstellungen → Karten „sys.map_click“, Vorgabe des Kits theme.php → project → map → click),
+ *    dann mit Hinweis und Link zur Datenschutzerklärung. Kits mit eigenem Lader (theme.php 'map_loader' => 'kit')
+ *    laden resources/js/map.mjs im Zwei-Klick-Modus selbst (Adresse in data-cms-map-js) – kein Skript vor dem Klick.
  *  - Kartengebiet: Detailkacheln (ab Zoom 9) liefert der Proxy nur rund um Orte, die auf
  *    der Website tatsächlich als Karte ausgegeben werden – kein freier Kachelserver für Dritte.
  *  - Geokodierung (Adresse → Koordinaten) nur in der Verwaltung, serverseitig über Nominatim.
@@ -185,6 +188,7 @@ final class Maps
         $routeUrl = is_string($route) && $route !== '' ? $route
             : 'https://www.openstreetmap.org/directions?to=' . rawurlencode($p[0] . ',' . $p[1]) . '#map=' . $zoom . '/' . $p[0] . '/' . $p[1];
         $t = self::texts();
+        $click = (bool) ($o['click'] ?? self::clickToLoad());
 
         $cfg = [
             'style' => self::styleUrl($o['style'] ?? null),
@@ -198,26 +202,42 @@ final class Maps
             'css' => asset('vendor/maplibre/maplibre-gl.css'),
             'i18n' => $t['maplibre'],
         ];
-        $h = '<figure class="cms-map cms-map--' . $height . (!empty($o['class']) ? ' ' . e($o['class']) : '') . '" data-cms-map="'
-            . e(json_encode($cfg, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '">'
+        $kitLoader = $click && (app()->theme->def['map_loader'] ?? 'core') === 'kit';
+        $h = '<figure class="cms-map cms-map--' . $height . ($click ? ' cms-map--click' : '') . (!empty($o['class']) ? ' ' . e($o['class']) : '') . '" data-cms-map="'
+            . e(json_encode($cfg, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '"'
+            . ($click ? ' data-click' : '') . ($kitLoader ? ' data-cms-map-js="' . e(asset('js/map.mjs')) . '"' : '') . '>'
             . '<div class="cms-map__canvas" role="region" aria-label="' . e(str_replace('{label}', $label ?: self::format($p), $t['region'])) . '">'
             . '<span class="cms-map__pin" aria-hidden="true"></span>'
-            . '<button type="button" class="cms-map__load" data-cms-map-load hidden>' . e($t['load']) . '</button></div>'
+            . ($click
+                // Zwei-Klick: Hinweis + Link zur Datenschutzerklärung, Knopf sichtbar (lädt MapLibre und die Kacheln erst jetzt)
+                ? '<div class="cms-map__consent"><p class="cms-map__note">' . e($t['note']) . ' <a href="' . e(Legal::privacyUrl()) . '">' . e($t['privacy']) . '</a></p>'
+                    . '<button type="button" class="cms-map__load" data-cms-map-load>' . e($t['load']) . '</button></div></div>'
+                : '<button type="button" class="cms-map__load" data-cms-map-load hidden>' . e($t['load']) . '</button></div>')
             . '<figcaption class="cms-map__cap"><span>' . ($label !== '' ? '<strong>' . e($label) . '</strong>' : '')
             . ($address !== '' ? ($label !== '' ? ' · ' : '') . e($address) : '') . '</span>'
             . ($route ? '<a class="cms-map__route" href="' . e($routeUrl) . '" target="_blank" rel="noopener">' . e($t['route']) . '<span class="sr-only"> ' . e($t['newtab']) . '</span></a>' : '')
             . '</figcaption></figure>';
         if (!self::$assets) {
             self::$assets = true;
-            $h .= '<link rel="stylesheet" href="' . e(asset('css/map.css')) . '"><script type="module" src="' . e(asset('js/map.mjs')) . '"></script>';
+            $h .= '<link rel="stylesheet" href="' . e(asset('css/map.css')) . '">'
+                . ($kitLoader ? '' : '<script type="module" src="' . e(asset('js/map.mjs')) . '"></script>');
         }
         return $h;
+    }
+
+    /** Zwei-Klick für Karten: Einstellung sys.map_click, sonst Vorgabe des Kits (theme.php → project → map → click) */
+    public static function clickToLoad(): bool
+    {
+        $v = setting('sys.map_click');
+        return $v === null || $v === '' ? (bool) project('map.click', false) : (bool) $v;
     }
 
     private static function texts(): array
     {
         return [
             'region' => lt('Karte: {label}'), 'load' => lt('Karte anzeigen'), 'route' => lt('Route planen'), 'newtab' => lt('(öffnet in neuem Tab)'),
+            'note' => lt('Die Karte lädt erst nach Klick. Die Kartendaten (OpenStreetMap) holt unser Server – Ihr Browser verbindet sich dabei nicht mit Dritten.'),
+            'privacy' => lt('Datenschutzerklärung'),
             'maplibre' => [
                 'NavigationControl.ZoomIn' => lt('Vergrößern'), 'NavigationControl.ZoomOut' => lt('Verkleinern'),
                 'NavigationControl.ResetBearing' => lt('Nach Norden ausrichten'), 'FullscreenControl.Enter' => lt('Vollbild'),
