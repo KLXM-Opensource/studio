@@ -24,6 +24,8 @@ use Doctrine\DBAL\Schema\Table;
  * Gesperrt für Eingangs-Tabellen (zentral über Tables::isInbox / Entries-Schutz): Detailseiten, Datenliste/Datensatz-Felder,
  * Kalender, Karte, Sitemap, Spotlight-Inhalte, strukturierte Daten, CalDAV/CardDAV, Feldbindung, Uploads, API-Schreibzugriffe.
  * Protokoll (inbox_log): jedes Entschlüsseln, jede Status-/Zuweisungsänderung und jedes Löschen – nie Inhalte.
+ * Erweiterungen (Extension::inbox) können für ihre Eingänge eigene Status, eine Zusatzzeile und eine Prüfung vor Statuswechseln
+ * liefern; Ereignisse inbox.status und inbox.deleted (Extensions::emit) melden Änderungen – z. B. Erweiterung „booking“ (Buchungen).
  */
 final class Inbox
 {
@@ -56,9 +58,80 @@ final class Inbox
         return array_values(array_filter(self::tables(), fn($t) => app()->auth->can($perm, $t['handle'])));
     }
 
-    public static function statusLabel(string $s): string
+    /** Bezeichnung eines Status – mit $t auch für eigene Status einer Erweiterung (Extension::inbox) */
+    public static function statusLabel(string $s, ?array $t = null): string
     {
+        if ($t && isset(self::statuses($t)[$s])) return self::statuses($t)[$s]['label'];
         return match ($s) { 'neu' => __('Neu'), 'in_bearbeitung' => __('In Bearbeitung'), 'erledigt' => __('Erledigt'), default => $s };
+    }
+
+    // ================================================================= Status-Satz (Standard oder von einer Erweiterung)
+
+    /** @var array<string, array> je Tabelle (Anfrage) */
+    private static array $ext = [];
+
+    /** Einstellungen der zuständigen Erweiterung (Extension::inbox) – [] = keine */
+    public static function ext(array $t): array
+    {
+        return self::$ext[$t['handle']] ??= \Core\Extensions::inbox($t);
+    }
+
+    /**
+     * Status der Tabelle: [schlüssel => ['label', 'action', 'tone', 'done', 'manual' (false = kein Knopf in „Anfragen“, nur per Code/API)]]. Standard neu|in_bearbeitung|erledigt; eine Erweiterung kann
+     * einen eigenen Satz liefern (z. B. Buchungen: neu = „Anfrage“, bestaetigt, abgelehnt, storniert) – „neu“ bleibt immer der offene Status.
+     */
+    public static function statuses(array $t): array
+    {
+        $std = [
+            'neu' => ['label' => __('Neu'), 'action' => __('Wieder öffnen'), 'tone' => 'warn', 'done' => false, 'manual' => true],
+            'in_bearbeitung' => ['label' => __('In Bearbeitung'), 'action' => __('In Bearbeitung'), 'tone' => 'info', 'done' => false, 'manual' => true],
+            'erledigt' => ['label' => __('Erledigt'), 'action' => __('Als erledigt markieren'), 'tone' => 'muted', 'done' => true, 'manual' => true],
+        ];
+        $own = (array) (self::ext($t)['statuses'] ?? []);
+        if (!$own || !isset($own['neu'])) return $std;
+        $out = [];
+        foreach ($own as $k => $d) {
+            if (!is_string($k) || !preg_match('~^[a-z][a-z0-9_]{1,19}$~', $k)) continue;
+            $d = is_array($d) ? $d : ['label' => (string) $d];
+            $label = (string) ($d['label'] ?? $k);
+            $out[$k] = ['label' => $label, 'action' => (string) ($d['action'] ?? $label),
+                'tone' => in_array($d['tone'] ?? '', ['warn', 'ok', 'info', 'muted'], true) ? $d['tone'] : 'info', 'done' => !empty($d['done']),
+                'manual' => ($d['manual'] ?? true) !== false];
+        }
+        return $out;
+    }
+
+    /** Schlüssel der Status (für Prüfungen) */
+    public static function statusKeys(array $t): array
+    {
+        return array_keys(self::statuses($t));
+    }
+
+    /** Alle bekannten Status aller Eingänge (Filter über mehrere Tabellen, z. B. API) */
+    public static function allStatusKeys(): array
+    {
+        $keys = self::STATUSES;
+        foreach (self::tables() as $t) $keys = array_merge($keys, self::statusKeys($t));
+        return array_values(array_unique($keys));
+    }
+
+    /** Zusatzzeile der Erweiterung zu einer Anfrage (Klartext) oder '' */
+    public static function info(array $t, array $row): string
+    {
+        $fn = self::ext($t)['info'] ?? null;
+        if (!is_callable($fn)) return '';
+        try {
+            return trim((string) $fn($row));
+        } catch (\Throwable $e) {
+            error_log('[inbox] info: ' . $e->getMessage());
+            return '';
+        }
+    }
+
+    /** Nimmt die Tabelle Einsendungen über /formular/{handle} bzw. den Block „data_form“ an? (Erweiterung: 'direct_form' => false) */
+    public static function directForm(array $t): bool
+    {
+        return (self::ext($t)['direct_form'] ?? true) !== false;
     }
 
     // ================================================================= Einstellungen
@@ -195,7 +268,7 @@ final class Inbox
     /** $o: status (neu|in_bearbeitung|erledigt|alle), ids, limit, offset, payload (bool) */
     public static function query(array $t, array $o = []): array
     {
-        [$where, $params] = self::where($o);
+        [$where, $params] = self::where($o, $t);
         $cols = implode(', ', array_merge(self::META, !empty($o['payload']) ? ['payload'] : []));
         $sql = "SELECT $cols FROM {$t['table']}" . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY id DESC';
         if (!empty($o['limit'])) $sql .= ' LIMIT ' . max(1, (int) $o['limit']) . ' OFFSET ' . max(0, (int) ($o['offset'] ?? 0));
@@ -205,16 +278,16 @@ final class Inbox
 
     public static function count(array $t, string $status = 'alle'): int
     {
-        [$where, $params] = self::where(['status' => $status]);
+        [$where, $params] = self::where(['status' => $status], $t);
         return (int) app()->db->fetchValue("SELECT COUNT(*) FROM {$t['table']}" . ($where ? ' WHERE ' . implode(' AND ', $where) : ''), $params);
     }
 
-    private static function where(array $o): array
+    private static function where(array $o, array $t): array
     {
         $where = [];
         $params = [];
         $status = (string) ($o['status'] ?? 'alle');
-        if (in_array($status, self::STATUSES, true)) {
+        if (in_array($status, self::statusKeys($t), true)) {
             $where[] = 'status = ?';
             $params[] = $status;
         }
@@ -244,7 +317,7 @@ final class Inbox
         $c = self::config($t);
         return [
             'id' => (int) $row['id'], 'table' => $t['handle'], 'table_name' => $t['name'], 'form' => $c['form'] !== '' ? $c['form'] : $t['handle'],
-            'label' => self::text($t, 'title', Lang::default()), 'ref' => $row['ref'], 'status' => $row['status'],
+            'label' => self::text($t, 'title', Lang::default()), 'ref' => $row['ref'], 'status' => $row['status'], 'status_label' => self::statusLabel((string) $row['status'], $t),
             'created_at' => $row['created_at'], 'updated_at' => $row['updated_at'], 'lang' => Lang::norm($row['lang'] ?? null),
             'assignee' => $row['assignee'], 'legacy' => $row['legacy'] !== null,
         ] + ($ciphertext && isset($row['payload']) ? ['ciphertext' => $row['payload'], 'encryption' => 'libsodium crypto_box_seal (X25519, XSalsa20-Poly1305), Base64'] : []);
@@ -327,13 +400,26 @@ final class Inbox
 
     // ================================================================= Ändern (mit Protokoll)
 
+    /**
+     * Status setzen. Eigene Status einer Erweiterung sind erlaubt; deren 'guard' kann ablehnen (InvalidArgumentException mit Meldung).
+     * Prüfung und Änderung laufen in einer Transaktion; danach Ereignis inbox.status ($t, $ids, $status, [id => alter Status]).
+     */
     public static function setStatus(array $t, array $ids, string $status, string $via = ''): int
     {
-        if (!in_array($status, self::STATUSES, true)) throw new \InvalidArgumentException('Unbekannter Status.');
+        if (!in_array($status, self::statusKeys($t), true)) throw new \InvalidArgumentException(__('Unbekannter Status.'));
         $ids = array_values(array_filter(array_map('intval', $ids)));
         if (!$ids) return 0;
-        app()->db->query("UPDATE {$t['table']} SET status = ?, updated_at = ? WHERE id IN (" . implode(',', $ids) . ')', [$status, now()]);
+        $in = implode(',', $ids);
+        $old = app()->db->transaction(function ($db) use ($t, $ids, $in, $status) {
+            $guard = self::ext($t)['guard'] ?? null;
+            if (is_callable($guard) && ($msg = $guard($ids, $status)) !== null && $msg !== '') throw new \InvalidArgumentException((string) $msg);
+            $old = [];
+            foreach ($db->fetchAll("SELECT id, status FROM {$t['table']} WHERE id IN ($in)") as $r) $old[(int) $r['id']] = (string) $r['status'];
+            $db->query("UPDATE {$t['table']} SET status = ?, updated_at = ? WHERE id IN ($in)", [$status, now()]);
+            return $old;
+        });
         self::log($t['handle'], $ids, 'status', trim($status . ' ' . $via));
+        \Core\Extensions::emit('inbox.status', $t, $ids, $status, $old);
         return count($ids);
     }
 
@@ -349,6 +435,7 @@ final class Inbox
         if (!$ids) return 0;
         app()->db->query("DELETE FROM {$t['table']} WHERE id IN (" . implode(',', $ids) . ')');
         self::log($t['handle'], $ids, 'delete', $via);
+        \Core\Extensions::emit('inbox.deleted', $t, $ids);
         return count($ids);
     }
 
@@ -395,10 +482,15 @@ final class Inbox
             $days = (int) self::config($t)['retention_days'];
             if ($days <= 0) continue;
             $cut = date('Y-m-d H:i:s', time() - $days * 86400);
-            $n = (int) app()->db->fetchValue("SELECT COUNT(*) FROM {$t['table']} WHERE status = 'erledigt' AND COALESCE(updated_at, created_at) < ?", [$cut]);
+            // Abgeschlossene Status: „erledigt“ bzw. die mit done markierten Status einer Erweiterung (z. B. abgelehnt, storniert)
+            $done = array_keys(array_filter(self::statuses($t), fn($d) => $d['done']));
+            $ids = $done ? array_map('intval', array_column(app()->db->fetchAll("SELECT id FROM {$t['table']} WHERE status IN ("
+                . implode(',', array_fill(0, count($done), '?')) . ') AND COALESCE(updated_at, created_at) < ?', [...$done, $cut]), 'id')) : [];
+            $n = count($ids);
             if ($n > 0) {
-                app()->db->query("DELETE FROM {$t['table']} WHERE status = 'erledigt' AND COALESCE(updated_at, created_at) < ?", [$cut]);
+                app()->db->query("DELETE FROM {$t['table']} WHERE id IN (" . implode(',', $ids) . ')');
                 self::log($t['handle'], [], 'purge', $n . ' ' . ($n === 1 ? 'Anfrage' : 'Anfragen') . " (> $days Tage erledigt)");
+                \Core\Extensions::emit('inbox.deleted', $t, $ids);
             }
             $out[$t['handle']] = $n;
         }

@@ -1014,7 +1014,7 @@ final class CmsService
         $t = $this->dataTable($handle);
         if (\Core\Data\Inbox::is($t)) {
             // Eingang: Metadaten (Status, Vorgangsnummer, Zeitpunkte) – Chiffretext nur mit ciphertext=1
-            $status = in_array($o['status'] ?? '', [...\Core\Data\Inbox::STATUSES, 'alle'], true) ? (string) $o['status'] : 'alle';
+            $status = in_array($o['status'] ?? '', [...\Core\Data\Inbox::statusKeys($t), 'alle'], true) ? (string) $o['status'] : 'alle';
             $rows = \Core\Data\Inbox::query($t, ['status' => $status, 'limit' => max(1, min(500, (int) ($o['limit'] ?? 50))), 'offset' => max(0, (int) ($o['offset'] ?? 0)),
                 'payload' => !empty($o['ciphertext'])]);
             return ['kind' => 'inbox', 'total' => \Core\Data\Inbox::count($t, $status), 'entries' => array_map(fn($r) => \Core\Data\Inbox::meta($t, $r, !empty($o['ciphertext'])), $rows)];
@@ -1250,7 +1250,7 @@ final class CmsService
      */
     public function requestsList(string $status = 'neu', bool $withCiphertext = false, ?string $table = null): array
     {
-        if (!in_array($status, [...\Core\Data\Inbox::STATUSES, 'alle'], true)) $status = 'alle';
+        if (!in_array($status, [...\Core\Data\Inbox::allStatusKeys(), 'alle'], true)) $status = 'alle';
         $out = [];
         foreach ($this->inboxTables($table) as $t) {
             foreach (\Core\Data\Inbox::query($t, ['status' => $status, 'limit' => 500, 'payload' => $withCiphertext]) as $r) {
@@ -1264,15 +1264,22 @@ final class CmsService
     /** Status setzen; ohne table wird die ID in allen Eingangs-Tabellen gesucht (mehrdeutig → 409) */
     public function requestStatus(int $id, string $status, ?string $table = null): array
     {
-        if (!in_array($status, \Core\Data\Inbox::STATUSES, true)) {
-            throw new ApiError(422, 'status muss „neu“, „in_bearbeitung“ oder „erledigt“ sein.');
+        if (!in_array($status, \Core\Data\Inbox::allStatusKeys(), true)) {
+            throw new ApiError(422, 'status muss „neu“, „in_bearbeitung“ oder „erledigt“ sein (bzw. ein Status des Eingangs).');
         }
         $hits = array_values(array_filter($this->inboxTables($table), fn($t) => \Core\Data\Inbox::find($t, $id) !== null));
         if (!$hits) throw new ApiError(404, 'Anfrage nicht gefunden.');
         if (count($hits) > 1) {
             throw new ApiError(409, 'Die ID kommt in mehreren Eingangs-Tabellen vor – bitte table angeben: ' . implode(', ', array_column($hits, 'handle')) . '.');
         }
-        \Core\Data\Inbox::setStatus($hits[0], [$id], $status, $this->note('Status'));
+        if (!in_array($status, \Core\Data\Inbox::statusKeys($hits[0]), true)) {
+            throw new ApiError(422, 'status muss einer von ' . implode(', ', \Core\Data\Inbox::statusKeys($hits[0])) . ' sein.');
+        }
+        try {
+            \Core\Data\Inbox::setStatus($hits[0], [$id], $status, $this->note('Status'));
+        } catch (\InvalidArgumentException $e) {
+            throw new ApiError(409, $e->getMessage());
+        }
         return ['id' => $id, 'table' => $hits[0]['handle'], 'status' => $status];
     }
 }

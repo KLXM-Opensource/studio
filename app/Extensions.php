@@ -678,6 +678,21 @@ final class Extensions
         return ['items' => $items, 'scripts' => $scripts, 'notes' => $notes];
     }
 
+    /**
+     * Einstellungen einer Erweiterung für eine Eingangs-Tabelle (Extension::inbox) – erste zuständige Erweiterung gewinnt.
+     * @return array{statuses?: array, info?: callable, guard?: callable, direct_form?: bool, extension?: string}
+     */
+    public static function inbox(array $t): array
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->inboxProviders as $fn) {
+                $c = self::safe($x, 'inbox', fn() => $fn($t));
+                if (is_array($c)) return $c + ['extension' => $x->name];
+            }
+        }
+        return [];
+    }
+
     /** CLI-Befehle: [name => [beschreibung, callable]] */
     public static function commands(): array
     {

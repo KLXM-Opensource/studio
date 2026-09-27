@@ -38,7 +38,7 @@ final class InboxController extends AdminController
         }
         $handle = $r->str('table') ?: (string) ($r->post['table'] ?? '');
         $t = $handle !== '' ? $this->table($handle, $tables) : $tables[0];
-        $status = in_array($r->str('status'), [...Inbox::STATUSES, 'alle'], true) ? $r->str('status') : 'neu';
+        $status = in_array($r->str('status'), [...Inbox::statusKeys($t), 'alle'], true) ? $r->str('status') : 'neu';
         $page = max(1, (int) $r->str('seite'));
         $total = Inbox::count($t, $status);
         $rows = Inbox::query($t, ['status' => $status, 'limit' => self::PER_PAGE, 'offset' => ($page - 1) * self::PER_PAGE, 'payload' => true]);
@@ -64,7 +64,7 @@ final class InboxController extends AdminController
         unset($row);
 
         $counts = [];
-        foreach ([...Inbox::STATUSES, 'alle'] as $st) $counts[$st] = Inbox::count($t, $st);
+        foreach ([...Inbox::statusKeys($t), 'alle'] as $st) $counts[$st] = Inbox::count($t, $st);
         $newCounts = [];
         foreach ($tables as $x) $newCounts[$x['handle']] = Inbox::count($x, 'neu');
         return $this->view('requests/index', [
@@ -83,10 +83,11 @@ final class InboxController extends AdminController
             fn($u) => Permissions::allows($roles[$u['role']] ?? null, 'requests.read', $t['handle'])));
     }
 
-    private function back2(Request $r, string $handle, string $msg): Response
+    private function back2(Request $r, string $handle, string $msg, string $type = 'success'): Response
     {
-        $status = in_array($r->str('back'), [...Inbox::STATUSES, 'alle'], true) ? $r->str('back') : 'neu';
-        return $this->back('/admin/requests?table=' . rawurlencode($handle) . '&status=' . $status, 'success', $msg);
+        $t = \Core\Data\Tables::find($handle);
+        $status = in_array($r->str('back'), [...($t ? Inbox::statusKeys($t) : Inbox::STATUSES), 'alle'], true) ? $r->str('back') : 'neu';
+        return $this->back('/admin/requests?table=' . rawurlencode($handle) . '&status=' . $status, $type, $msg);
     }
 
     public function status(Request $r, string $table, string $id): Response
@@ -94,10 +95,14 @@ final class InboxController extends AdminController
         $this->auth($r, 'requests.manage', $table);
         $t = $this->table($table, Inbox::readable('requests.manage'));
         $st = $r->str('status');
-        if (!in_array($st, Inbox::STATUSES, true)) throw new HttpException(422, __('Unbekannter Status.'));
+        if (!in_array($st, Inbox::statusKeys($t), true)) throw new HttpException(422, __('Unbekannter Status.'));
         Inbox::find($t, (int) $id) ?? throw new HttpException(404);
-        Inbox::setStatus($t, [(int) $id], $st);
-        return $this->back2($r, $t['handle'], __('Status: {status}.', ['status' => Inbox::statusLabel($st)]));
+        try {
+            Inbox::setStatus($t, [(int) $id], $st);
+        } catch (\InvalidArgumentException $e) {
+            return $this->back2($r, $t['handle'], $e->getMessage(), 'error');   // Prüfung der Erweiterung (z. B. Zeitraum inzwischen belegt)
+        }
+        return $this->back2($r, $t['handle'], __('Status: {status}.', ['status' => Inbox::statusLabel($st, $t)]));
     }
 
     public function assign(Request $r, string $table, string $id): Response

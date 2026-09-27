@@ -46,8 +46,8 @@ $userNames = array_column($users ?? [], null, 'id');
 </form>
 
 <p class="adm-filter" aria-label="<?= e(__('Status')) ?>">
-  <?php foreach ([...Inbox::STATUSES, 'alle'] as $k): ?>
-  <a href="<?= e($qs(['status' => $k, 'seite' => null])) ?>"<?= $status === $k ? ' aria-current="true"' : '' ?>><?= e($k === 'alle' ? __('Alle') : Inbox::statusLabel($k)) ?> <small><?= (int) ($counts[$k] ?? 0) ?></small></a>
+  <?php $statuses = Inbox::statuses($t); foreach ([...array_keys($statuses), 'alle'] as $k): ?>
+  <a href="<?= e($qs(['status' => $k, 'seite' => null])) ?>"<?= $status === $k ? ' aria-current="true"' : '' ?>><?= e($k === 'alle' ? __('Alle') : Inbox::statusLabel($k, $t)) ?> <small><?= (int) ($counts[$k] ?? 0) ?></small></a>
   <?php endforeach; ?>
 </p>
 
@@ -57,11 +57,12 @@ $userNames = array_column($users ?? [], null, 'id');
     <header>
       <strong><?= e($t['singular']) ?> <span class="adm-mono"><?= e((string) $row['ref']) ?></span></strong>
       <span class="adm-muted"><?= e(date('d.m.Y H:i', strtotime((string) $row['created_at']))) ?> · #<?= (int) $row['id'] ?></span>
-      <span class="adm-badge<?= $row['status'] === 'neu' ? ' adm-badge--adm-warn' : ($row['status'] === 'erledigt' ? ' adm-badge--muted' : '') ?>"><?= e(Inbox::statusLabel($row['status'])) ?></span>
+      <?php $tone = $statuses[$row['status']]['tone'] ?? ''; ?><span class="adm-badge<?= $tone === 'warn' ? ' adm-badge--adm-warn' : ($tone === 'muted' ? ' adm-badge--muted' : '') ?>"><?= e(Inbox::statusLabel($row['status'], $t)) ?></span>
       <?php if ($row['legacy']): ?><span class="adm-badge adm-badge--draft" title="<?= e(__('Aus den früheren Online-Anfragen übernommen')) ?>"><?= e(__('übernommen')) ?></span><?php endif; ?>
       <?php if (!empty($row['lang'])): ?><span class="adm-badge adm-badge--draft"><?= e(strtoupper((string) $row['lang'])) ?></span><?php endif; ?>
       <?php if ($row['assignee']): $au = $userNames[$row['assignee']] ?? null; ?><span class="adm-muted">→ <?= e($au ? ($au['name'] ?: $au['email']) : '#' . $row['assignee']) ?></span><?php endif; ?>
     </header>
+    <?php if (($info = Inbox::info($t, $row)) !== ''): /* Zusatzzeile der Erweiterung (z. B. Buchung: Objekt, Zeitraum) */ ?><p class="adm-muted adm-request__info"><?= e($info) ?></p><?php endif; ?>
     <?php if ($data): ?>
       <dl class="adm-dl adm-dl--request">
         <?php foreach ($data['fields'] as $f): ?><dt><?= e($f['label']) ?></dt><dd><?php if (!empty($f['table'])): /* Wiederholbare Gruppe */ ?>
@@ -81,10 +82,10 @@ $userNames = array_column($users ?? [], null, 'id');
     <?php endif; ?>
     <?php if ($canManage): ?>
     <div class="adm-row adm-inbox-actions">
-      <?php foreach (Inbox::STATUSES as $st): if ($st === $row['status']) continue; ?>
+      <?php foreach ($statuses as $st => $sd): if ($st === $row['status'] || !$sd['manual']) continue; ?>
       <form method="post" action="<?= e(url('/admin/requests/' . $t['handle'] . '/' . $row['id'] . '/status')) ?>"><?= csrf_field() ?>
         <input type="hidden" name="status" value="<?= e($st) ?>"><input type="hidden" name="back" value="<?= e($status) ?>">
-        <button class="adm-btn adm-btn--small"><?= e(match ($st) { 'neu' => __('Wieder öffnen'), 'in_bearbeitung' => __('In Bearbeitung'), default => __('Als erledigt markieren') }) ?></button></form>
+        <button class="adm-btn adm-btn--small"><?= e($sd['action']) ?></button></form>
       <?php endforeach; ?>
       <?php if (count($users) > 0): ?>
       <form method="post" action="<?= e(url('/admin/requests/' . $t['handle'] . '/' . $row['id'] . '/assign')) ?>" class="adm-inbox-assign"><?= csrf_field() ?>

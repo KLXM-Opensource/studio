@@ -34,6 +34,9 @@ namespace Core;
  *   $x->pageList(fn(array $page) => ['badges' => [['label' => …]], 'actions' => [['label' => …, 'href' => …]]])   Seitenbaum: Hinweis + Kontextmenü
  *   $x->pagePanel(fn(array $page) => '<section class="adm-card">…</section>')   Karte in der Seitenleiste der Seiteneinstellungen
  *   $x->toolbar(fn(array $bar) => ['items' => [...], 'scripts' => ['js/x.js'], 'publishNote' => '…'])   Menü „⋯“ der Werkzeugleiste
+ * Eingangs-Tabellen (Anfragen, Core\Data\Inbox):
+ *   $x->inbox(fn(array $t) => $t['handle'] === 'buchungen' ? ['statuses' => [...], 'info' => fn(array $row) => '…'] : null)   eigene Status, Zusatzzeile, Prüfung
+ *   $x->on('inbox.status', fn(array $t, array $ids, string $status, array $old) => …)   Ereignisse inbox.status / inbox.deleted
  * Übersetzungen: {dir}/lang/{locale}.php (Verwaltung, __()) und {dir}/lang/site/{lang}.php (Website, lt()) werden automatisch geladen.
  */
 final class Extension
@@ -76,6 +79,8 @@ final class Extension
     public array $pagePanelProviders = [];
     /** @var list<callable(array): array> */
     public array $toolbarProviders = [];
+    /** @var list<callable(array): ?array> */
+    public array $inboxProviders = [];
     private array $migrations = [];
 
     public function __construct(public readonly string $name, public readonly string $dir, public readonly array $manifest) {}
@@ -274,6 +279,22 @@ final class Extension
     public function toolbar(callable $fn): self
     {
         $this->toolbarProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Eingangs-Tabellen, die die Erweiterung verantwortet (z. B. Buchungen): fn(array $t): ?array – null = nicht zuständig, sonst [
+     *   'statuses' => ['neu' => ['label' => 'Anfrage', 'action' => 'Wieder öffnen', 'tone' => 'warn'|'ok'|'muted'|'info', 'done' => false, 'manual' => true], …]
+     *                 eigener Status-Satz (Schlüssel a–z/0–9/_, max. 20 Zeichen; „neu“ muss vorkommen = offen/Badge; done = true → wird nach
+     *                 retention_days gelöscht wie „erledigt“),
+     *   'info'     => fn(array $row): string   Zusatzzeile je Anfrage in der Liste (Klartext, nie personenbezogene Inhalte),
+     *   'guard'    => fn(array $ids, string $status): ?string   vor jeder Statusänderung (Verwaltung, API, MCP) – Text = Abbruch mit dieser Meldung,
+     *   'direct_form' => false   Formular nur über die Erweiterung (kein /formular/{handle}, nicht im Block „data_form“).
+     * ]. Ereignisse danach: on('inbox.status', fn($t, $ids, $status, $old)) und on('inbox.deleted', fn($t, $ids)) – auch beim automatischen Löschen.
+     */
+    public function inbox(callable $fn): self
+    {
+        $this->inboxProviders[] = $fn;
         return $this;
     }
 
