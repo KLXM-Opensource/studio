@@ -7,11 +7,29 @@ $catalog = Permissions::catalog();
 $labels = array_merge(...array_values($catalog));
 $count = array_count_values(array_column($users, 'role'));
 $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '</p>' : '';
+// Einladungen (Core\Invites): offene Einladungen, Rollen zur Auswahl, Formularwerte nach Fehlern
+$invites ??= [];
+$inviteRoles ??= [];
+$inv = !empty($old['_invite']) ? $old : [];
+$createOld = $inv ? [] : $old;
+$locales = \Core\I18n::available();
+$defLocale = (string) (setting('sys.admin_locale') ?: \Core\I18n::SOURCE);
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Benutzer & Rollen')) ?></h1>
     <p class="adm-muted"><?= e(__('Jede Person bekommt ein eigenes Konto. Was sie darf, bestimmt ihre Rolle – Rollen lassen sich frei zusammenstellen.')) ?></p></div>
 </header>
+
+<?php if (!empty($inviteLink)): // E-Mail nicht zugestellt: Link einmal anzeigen (nur jetzt sichtbar, gespeichert ist nur ein Hash) ?>
+<section class="adm-card adm-card--secret inv-link" id="einladung-link" role="alert">
+  <h2><?= e(__('Einladung angelegt – E-Mail nicht zugestellt')) ?></h2>
+  <p><?= e($inviteLink['error'] ? __('Die E-Mail an {email} konnte nicht gesendet werden: {error}', ['email' => $inviteLink['email'], 'error' => $inviteLink['error']])
+    : __('Die E-Mail an {email} wurde nicht zugestellt (Testumgebung oder Versand deaktiviert – nur protokolliert bzw. umgeleitet).', ['email' => $inviteLink['email']])) ?></p>
+  <p><?= e(__('Geben Sie den Link selbst weiter, z. B. per Messenger. Er ist nur jetzt sichtbar, gilt einmal und bis zum Ablauf der Einladung.')) ?>
+    <?php if (can('system.manage')): ?><a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('E-Mail-Versand einrichten')) ?> →</a><?php endif; ?></p>
+  <div class="adm-secret"><code id="inv-url"><?= e($inviteLink['url']) ?></code><button type="button" class="adm-btn adm-btn--small" data-copy="#inv-url"><?= e(__('Kopieren')) ?></button></div>
+</section>
+<?php endif; ?>
 
 <div class="adm-grid2 adm-grid2--wide">
   <div class="adm-card adm-card--flush">
@@ -38,17 +56,52 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '
             <?php else: ?><span class="adm-badge"><?= e(__('Sie')) ?></span><?php endif; ?></td></tr>
       <?php endforeach; ?>
       </tbody>
+      <?php if ($invites): ?>
+      <tbody id="einladungen" class="inv-rows">
+      <?php foreach ($invites as $iv): $ivRole = $roles[$iv['role']]['name'] ?? $iv['role']; ?>
+        <tr class="inv-row<?= $iv['expired'] ? ' is-expired' : '' ?>"><td><strong><?= e($iv['name'] ?: '–') ?></strong>
+            <?php if ($iv['expired']): ?><span class="adm-badge adm-badge--muted inv-badge is-expired"><?= e(__('Einladung abgelaufen')) ?></span>
+            <?php else: ?><span class="adm-badge inv-badge"><?= e(__('Eingeladen – wartet')) ?></span><?php endif; ?><br><span class="adm-muted"><?= e($iv['email']) ?></span></td>
+          <td><?= e($ivRole) ?></td>
+          <td class="adm-muted inv-meta"><?= e(date('d.m.Y', strtotime((string) $iv['created_at']))) ?><?php if ($iv['invited_by_name']): ?> · <?= e(__('von {name}', ['name' => $iv['invited_by_name']])) ?><?php endif; ?>
+            <br><?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])])) ?></td>
+          <td class="adm-actions"><?php if (isset($inviteRoles[$iv['role']])): ?>
+            <form method="post" action="<?= e(url('/admin/users/invites/' . $iv['id'] . '/resend')) ?>" data-confirm="<?= e(__('Einladung an {email} erneut senden? Der bisherige Link gilt dann nicht mehr.', ['email' => $iv['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('Erneut senden')) ?></button></form>
+            <form method="post" action="<?= e(url('/admin/users/invites/' . $iv['id'] . '/revoke')) ?>" data-confirm="<?= e(__('Einladung an {email} zurückziehen? Der Link gilt dann nicht mehr.', ['email' => $iv['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Zurückziehen')) ?></button></form>
+            <?php else: ?><span class="adm-muted us-readonly"><?= e(__('höhere Rolle')) ?></span><?php endif; ?></td></tr>
+      <?php endforeach; ?>
+      </tbody>
+      <?php endif; ?>
     </table>
   </div>
+  <div class="us-side">
+  <?php if ($inviteRoles): // Person einladen (Core\Invites) – E-Mail mit Link, Passkey und/oder Passwort legt die Person selbst fest ?>
+  <form class="adm-card inv-form" id="einladen" method="post" action="<?= e(url('/admin/users/invite')) ?>" novalidate>
+    <?= csrf_field() ?>
+    <h2><?= e(__('Person einladen')) ?></h2>
+    <p class="adm-muted"><?= e(__('Die Person bekommt eine E-Mail mit einem Link ({n} Tage gültig) und richtet ihr Konto selbst ein – mit Passkey oder Passwort.', ['n' => \Core\Invites::days()])) ?></p>
+    <?= $err('inv_invite') ?>
+    <div class="f<?= isset($errors['inv_email']) ? ' f--error' : '' ?>"><label for="inv-email"><?= e(__('E-Mail-Adresse')) ?> <span class="req">*</span></label><input id="inv-email" name="email" type="email" required autocomplete="off" value="<?= e($inv['email'] ?? '') ?>"><?= $err('inv_email') ?></div>
+    <div class="f<?= isset($errors['inv_name']) ? ' f--error' : '' ?>"><label for="inv-name"><?= e(__('Name (optional)')) ?></label><input id="inv-name" name="name" maxlength="<?= \Core\Invites::NAME_MAX ?>" autocomplete="off" value="<?= e($inv['name'] ?? '') ?>"><?= $err('inv_name') ?></div>
+    <div class="f<?= isset($errors['inv_role']) ? ' f--error' : '' ?>"><label for="inv-role"><?= e(__('Rolle')) ?></label><select id="inv-role" name="role"><?php foreach ($inviteRoles as $k => $label): ?><option value="<?= e($k) ?>"<?= ($inv['role'] ?? (isset($inviteRoles['editor']) ? 'editor' : '')) === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select><?= $err('inv_role') ?></div>
+    <?php if (count($locales) > 1): ?>
+    <div class="f"><label for="inv-locale"><?= e(__('Sprache der Einladung')) ?></label><select id="inv-locale" name="locale"><?php foreach ($locales as $k => $label): ?><option value="<?= e($k) ?>"<?= ($inv['locale'] ?? $defLocale) === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select></div>
+    <?php endif; ?>
+    <div class="f<?= isset($errors['inv_message']) ? ' f--error' : '' ?>"><label for="inv-msg"><?= e(__('Persönliche Nachricht (optional)')) ?></label><textarea id="inv-msg" name="message" rows="3" maxlength="<?= \Core\Invites::MESSAGE_MAX ?>" aria-describedby="inv-msg-h"><?= e($inv['message'] ?? '') ?></textarea>
+      <p class="f-help" id="inv-msg-h"><?= e(__('Reiner Text, höchstens {n} Zeichen. Erscheint als Zitat in der E-Mail.', ['n' => \Core\Invites::MESSAGE_MAX])) ?></p><?= $err('inv_message') ?></div>
+    <button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Einladung senden')) ?></button>
+  </form>
+  <?php endif; ?>
   <form class="adm-card" method="post" action="<?= e(url('/admin/users')) ?>" novalidate>
     <?= csrf_field() ?>
     <h2><?= e(__('Neuen Benutzer anlegen')) ?></h2>
-    <div class="f"><label for="u-name"><?= e(__('Name')) ?></label><input id="u-name" name="name" value="<?= e($old['name'] ?? '') ?>"></div>
-    <div class="f<?= isset($errors['email']) ? ' f--error' : '' ?>"><label for="u-email"><?= e(__('E-Mail-Adresse')) ?> <span class="req">*</span></label><input id="u-email" name="email" type="email" required value="<?= e($old['email'] ?? '') ?>"><?= $err('email') ?></div>
+    <div class="f"><label for="u-name"><?= e(__('Name')) ?></label><input id="u-name" name="name" value="<?= e($createOld['name'] ?? '') ?>"></div>
+    <div class="f<?= isset($errors['email']) ? ' f--error' : '' ?>"><label for="u-email"><?= e(__('E-Mail-Adresse')) ?> <span class="req">*</span></label><input id="u-email" name="email" type="email" required value="<?= e($createOld['email'] ?? '') ?>"><?= $err('email') ?></div>
     <div class="f<?= isset($errors['password']) ? ' f--error' : '' ?>"><label for="u-pw"><?= e(__('Startpasswort (mind. 12 Zeichen)')) ?> <span class="req">*</span></label><input id="u-pw" name="password" type="text" autocomplete="off" required><?= $err('password') ?></div>
-    <div class="f"><label for="u-role"><?= e(__('Rolle')) ?></label><select id="u-role" name="role"><?php foreach ($roles as $k => $ro): if ($k === 'network') continue; ?><option value="<?= e($k) ?>"<?= ($old['role'] ?? 'editor') === $k ? ' selected' : '' ?>><?= e($ro['name']) ?></option><?php endforeach; ?></select></div>
+    <div class="f"><label for="u-role"><?= e(__('Rolle')) ?></label><select id="u-role" name="role"><?php foreach ($roles as $k => $ro): if ($k === 'network') continue; ?><option value="<?= e($k) ?>"<?= ($createOld['role'] ?? 'editor') === $k ? ' selected' : '' ?>><?= e($ro['name']) ?></option><?php endforeach; ?></select></div>
     <button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Anlegen')) ?></button>
   </form>
+  </div>
 </div>
 
 <?php // Anmeldung & Sicherheit (Core\Mfa): erlaubte Verfahren, zweiter Faktor je Rolle, Übergangsfrist

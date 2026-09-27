@@ -6,6 +6,31 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Personen einladen (Benutzer & Rollen)
+- **Benutzer & Rollen → Person einladen** (`Core\Invites`, `InviteController`, Recht `users.manage`): E-Mail, Name
+  (optional), Rolle, Sprache der Einladung (de/en) und persönliche Nachricht (reiner Text, höchstens 500 Zeichen).
+  Zur Wahl stehen nur Rollen, die nicht mehr dürfen als die eigene (Rechte und Tabellenauswahl); nie „network“.
+- **Offene Einladungen in der Benutzerliste:** „Eingeladen – wartet“ bzw. „Einladung abgelaufen“, Datum, wer eingeladen
+  hat, Frist; **Erneut senden** (neuer Link, alte ungültig, neue Frist) und **Zurückziehen**.
+- **Token:** 32 Zufallsbytes, gespeichert nur als SHA-256 mit dem Kürzel der Website, einmal verwendbar, 7 Tage gültig
+  (config `invite_days`). Neue Tabelle `user_invites` (`Database::migrate` → nach dem Deploy `php bin/console migrate`).
+  Das Konto entsteht erst beim Annehmen.
+- **Annehmen unter `/admin/einladung/{token}`** (Stil der Anmeldung, App-Icon und Name der Website): Name, dann Passkey
+  (angeboten, wenn der Browser es kann und die Richtlinie ihn erlaubt; Registrierung über `Core\Passkeys`) und/oder
+  Passwort (Richtlinie, Anzeigen/Verbergen, Stärke-Hinweis). Danach Anmeldung und Begrüßung; verlangt die Rolle einen
+  zweiten Faktor, folgt die bekannte Einrichtung. Ungültige, abgelaufene, benutzte und unbekannte Links sehen gleich aus
+  („Bitten Sie um eine neue Einladung“). `Referrer-Policy: no-referrer`, CSRF auf allen Formularen und JSON-Aufrufen,
+  Begrenzung je Anschluss, Protokoll `user.invite`, `user.invite-resend`, `user.invite-revoke`, `user.invite-accept`.
+- **E-Mail „Einladung zu {Website}“** als HTML + Text (multipart): Tabellen-Layout für Outlook (VML-Schaltfläche), Gmail
+  und Apple Mail, hell/dunkel (`color-scheme`, `prefers-color-scheme`, Outlook.com), App-Icon als eingebettetes Bild (CID),
+  Markenfarbe aus dem Kit (Token `accent`, dunkel `accent@dark`), Nachricht als Zitat, Ersatz-Link, Frist, kurze
+  Erklärung Passkey/Passwort. Vorlage `app/Admin/views/mail/invitation(.txt).php`, im Kit überschreibbar unter
+  `templates/mail/`. Ohne zugestellte E-Mail zeigt die Verwaltung den Link einmal zum Kopieren.
+- **`Core\Mailer::send()`** kann HTML mit eingebetteten Bildern (`['html' => …, 'inline' => …]`), meldet über
+  `Mailer::$delivered`, ob die E-Mail wirklich an die Empfänger ging, und legt E-Mails für lokale Tests als Datei ab
+  (config `mail_dump`). WebAuthn-Hilfen für Passkeys in `resources/js/_webauthn.js` (von `passkey.js` und `invite.js` genutzt).
+- Konsole `user:invite <email> [rolle] [--name=…] [--lang=de|en]` (Status, Link bei fehlendem Versand) und `invites:selftest`.
+
 ### Trailer mit englischem Sprecher und Untertiteln EN/DE/SL
 - **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM Ai, Mediathek mit
   geteilten Pools, Barrierefreiheit (Alt-Texte, Videos ohne Untertitel), Datentabellen und Formulare, Website-Suche,

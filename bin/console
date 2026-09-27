@@ -10,6 +10,9 @@
  *   user:create <email> [admin|editor]                Benutzer anlegen (Passwort wird abgefragt)
  *   user:password <email>                             Passwort neu setzen – bestehende Sitzungen enden
  *   user:2fa-reset <email>                            Zwei-Faktor-Anmeldung eines lokalen Kontos zurücksetzen (Sitzungen enden)
+ *   user:invite <email> [rolle] [--name="…"] [--lang=de|en]
+ *                                                     Person einladen (E-Mail mit Link, 7 Tage gültig; ohne Versand wird der Link angezeigt)
+ *   invites:selftest                                  Selbsttest der Einladungen (Token, Hash, Rollenprüfung)
  *   setup:token                                       Setup-Token für /admin/setup anzeigen
  *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
  *
@@ -159,6 +162,33 @@ switch ($cmd) {
         Core\Network\Network::log('user.reset-2fa', site()->key, 'cli', strtolower($email));
         echo "Zwei-Faktor-Anmeldung (App und Passkeys) von $email zurückgesetzt – alle Sitzungen beendet.\n";
         break;
+
+    case 'user:invite':
+        // Einladung (Core\Invites): E-Mail mit Link; Konto entsteht erst beim Annehmen (Passkey und/oder Passwort)
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $opt = fn(string $k) => ($m = preg_grep('~^--' . $k . '=~', $args)) ? substr((string) reset($m), strlen($k) + 3) : '';
+        $email = $pos[0] ?? '';
+        if ($email === '') { fwrite(STDERR, "Aufruf: user:invite <email> [rolle] [--name=\"…\"] [--lang=de|en] [--site=key]\n"); exit(1); }
+        $res = Core\Invites::create(['email' => $email, 'role' => $pos[1] ?? 'editor', 'name' => $opt('name'), 'locale' => $opt('lang')], null, null);
+        if (!isset($res['token'])) { foreach ($res as $k => $msg) fwrite(STDERR, "  $k: $msg\n"); exit(1); }
+        $inv = Core\Invites::get((int) $res['id']);
+        $sent = Core\Invites::send($inv, $res['token']);
+        Core\Invites::log('user.invite', 'cli', $inv['email'] . ' · ' . $inv['role'] . ($sent['delivered'] ? '' : ' · ohne E-Mail'));
+        echo "Einladung für {$inv['email']} ({$inv['role']}) auf " . site()->key . " angelegt – gültig bis " . date('d.m.Y H:i', (int) $inv['expires_at']) . ".\n";
+        if ($sent['delivered']) {
+            echo "E-Mail versendet.\n";
+        } else {
+            echo ($sent['error'] ? "E-Mail NICHT versendet: {$sent['error']}\n" : "E-Mail nicht zugestellt (" . environment() . ": nur protokolliert, umgeleitet oder als Datei abgelegt).\n")
+                . "Link (nur jetzt sichtbar, einmal gültig):\n  " . Core\Invites::url($res['token']) . "\n";
+        }
+        break;
+
+    case 'invites:selftest':
+        // Einladungen (Core\Invites): Token, Hash, Form, Rollenprüfung, Nachricht – ohne Datenbankänderung
+        $res = Core\Invites::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'keys:generate':
         if (Core\FormCrypto::ready() && !in_array('--force', $args, true)) {

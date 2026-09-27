@@ -17,7 +17,12 @@ final class UserController extends AdminController
         $pk = \Core\Passkeys::counts(app()->db);
         foreach ($users as &$u) $u['passkeys'] = $pk[(int) $u['id']] ?? 0;
         unset($u);
-        return $this->view('users', ['users' => $users, 'errors' => $errors, 'old' => $old, 'policy' => \Core\Mfa::policy(), 'css' => ['css/passkey.css']], $errors ? 422 : 200);
+        // Einladungen (Core\Invites): offene Einladungen, erlaubte Rollen, Link einmal anzeigen, wenn die E-Mail nicht zugestellt wurde
+        $link = app()->session->get('_invite_link');
+        app()->session->forget('_invite_link');
+        return $this->view('users', ['users' => $users, 'errors' => $errors, 'old' => $old, 'policy' => \Core\Mfa::policy(),
+            'invites' => \Core\Invites::open(), 'inviteRoles' => \Core\Invites::roleOptions(app()->auth->role()), 'inviteLink' => is_array($link) ? $link : null,
+            'css' => ['css/passkey.css', 'css/invite.css']], $errors ? 422 : 200);
     }
 
     public function store(Request $r): Response

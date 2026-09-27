@@ -228,6 +228,8 @@ final class Database
         $this->ensureColumns('users', Network\Network::USER_COLUMNS);
         // Passkeys (WebAuthn) je Konto und Domain (Core\Passkeys)
         Passkeys::ensureTable($this);
+        // Einladungen neuer Konten (Core\Invites): Token nur als Hash, einmal verwendbar
+        Invites::ensureTable($this);
         // Eigene Blöcke (Block-Baukasten, Core\Blocks\Custom): Definitionen und Verlauf je Website
         Blocks\Custom::ensureTable($this);
         // Externe Quellen (Core\Sources): Feeds/APIs/OpenImmo → Datentabellen, Herkunft je Eintrag, Protokoll

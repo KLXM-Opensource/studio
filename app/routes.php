@@ -280,6 +280,14 @@ return function (Router $r): void {
     $r->post('/admin/users', [Admin\UserController::class, 'store']);
     $r->post('/admin/users/{id}/delete', [Admin\UserController::class, 'delete']);
     $r->post('/admin/users/{id}/2fa-reset', [Admin\UserController::class, 'resetTwoFactor']);
+    // Einladungen (Core\Invites): Person einladen, erneut senden, zurückziehen; öffentlich annehmen (Passkey und/oder Passwort)
+    $r->post('/admin/users/invite', [Admin\InviteController::class, 'store']);
+    $r->post('/admin/users/invites/{id}/resend', [Admin\InviteController::class, 'resend']);
+    $r->post('/admin/users/invites/{id}/revoke', [Admin\InviteController::class, 'revoke']);
+    $r->get('/admin/einladung/{token}', [Admin\InviteController::class, 'show']);
+    $r->post('/admin/einladung/{token}', [Admin\InviteController::class, 'accept']);
+    $r->post('/admin/einladung/{token}/passkey/options', [Admin\InviteController::class, 'passkeyOptions']);
+    $r->post('/admin/einladung/{token}/passkey', [Admin\InviteController::class, 'passkeyStore']);
     $r->post('/admin/account/locale', [Admin\UserController::class, 'saveLocale']);
     // Favoriten je Benutzer (Core\Favorites): Stern, Seitenleiste, Konto-Seite
     $r->post('/admin/api/favorites', [Admin\FavoriteController::class, 'add']);
