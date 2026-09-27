@@ -180,12 +180,20 @@ final class Metrics
                 $add('setup', 1, 'warn', 'list-checks', count($open), __('Einrichtung abschließen'),
                     implode(' · ', array_map(fn($c) => $c['label'], array_slice($open, 0, 3))) . (count($open) > 3 ? ' …' : ''), $open[0]['link'], __('Weiter einrichten'));
             }
-            // Platzhalter als eigener Punkt: Fundstelle, direkt zur Seite, gewollte Klammern bestätigen (DashboardController::placeholderOk)
-            foreach ($checks as $c) {
-                if ($c['ok'] || !isset($c['placeholder'])) continue;
-                $add('placeholder', 2, 'warn', 'brackets-curly', 1, __('Platzhalter {text} ersetzen', ['text' => $c['placeholder']]),
-                    __('Gefunden auf der Seite „{page}“. Ist die Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.', ['page' => $c['page']]), $c['link'], __('Seite öffnen'));
-                $out[count($out) - 1]['dismiss'] = ['url' => '/admin/api/dashboard/placeholder-ok', 'value' => $c['placeholder'], 'label' => __('Ist gewollt')];
+        }
+        // Platzhalter (Inhalt, daher auch für die Redaktion): Anzahl aller Fundstellen, erste Seite direkt öffnen, gewollte Klammern bestätigen
+        if (can('pages.edit') || can('settings.edit') || $admin) {
+            $all = self::placeholders(app()->db, self::placeholdersOk());
+            if ($all) {
+                $first = $all[0];
+                $pages = array_values(array_unique(array_map(fn($h) => $h['title'], $all)));
+                $add('placeholder', 2, 'warn', 'brackets-curly', count($all),
+                    count($all) === 1 ? __('Platzhalter {text} ersetzen', ['text' => $first['text']]) : __('{n} Platzhalter in Seiten ersetzen', ['n' => count($all)]),
+                    __('Zuerst: {text} auf „{page}“.', ['text' => mb_strimwidth($first['text'], 0, 90, '…]'), 'page' => $first['title']])
+                        . (count($pages) > 1 ? ' ' . __('Weitere Seiten: {pages}', ['pages' => implode(', ', array_slice(array_diff($pages, [$first['title']]), 0, 4)) . (count($pages) > 5 ? ' …' : '')]) : '')
+                        . ' ' . __('Ist eine Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.'),
+                    '/admin/pages/' . $first['id'], __('Seite öffnen'));
+                $out[count($out) - 1]['dismiss'] = ['url' => '/admin/api/dashboard/placeholder-ok', 'value' => $first['text'], 'label' => __('Ist gewollt')];
             }
         }
         if (can('pages.edit')) {
