@@ -2,7 +2,7 @@
   <p class="lead">Eine Installation, beliebig viele Websites und Domains. Code, Kits und Updates teilen sich alle; Inhalte, Benutzer, Medien und Schlüssel sind je Website vollständig getrennt.</p>
   <table class="doc-table">
     <tr><th>Gemeinsam (einmal je Installation)</th><th>Getrennt (je Website)</th></tr>
-    <tr><td><code>app/</code>, <code>vendor/</code>, <code>themes/</code>, <code>public/assets</code>, <code>public/themes</code>, Proxy-Cache, Sitzungsdateien, Netzwerk-Konten, Medien-Pools, geteilte Tabellen, Support-Datenbank, KI-Anbieter (<code>storage/ai/config.json</code>)</td>
+    <tr><td><code>app/</code>, <code>vendor/</code>, <code>kits/</code>, <code>public/assets</code>, <code>public/kits</code>, Proxy-Cache, Sitzungsdateien, Netzwerk-Konten, Medien-Pools, geteilte Tabellen, Support-Datenbank, KI-Anbieter (<code>storage/ai/config.json</code>)</td>
         <td>Datenbank (Seiten, Daten, Benutzer, Rollen, API-Tokens, Einstellungen, Anfragen), Medien, Seiten-Cache, Uploads, Spam-Log, <code>app_key</code>, <code>setup_token</code>, Session-Cookie, App-Icons, Suchindex, KI-Schalter und -Zähler, Design-Werte</td></tr>
   </table>
   <h3>Neue Website anlegen</h3>
@@ -17,7 +17,7 @@ php bin/console user:create chefin@kunde.de admin --site=kunde   # oder /admin/s
   </ol>
   <table class="doc-table">
     <tr><th>Datei / Ordner</th><th>Inhalt</th></tr>
-    <tr><td><code>config/sites/{key}.php</code></td><td><code>hosts</code>, <code>label</code>, <code>theme</code> (Vorgabe beim Erststart), optional <code>themes</code> (erlaubte Kits), eigene <code>app_key</code>/<code>setup_token</code>, optional <code>db</code> (z. B. eigene MySQL-Datenbank) und jeder andere Wert aus <code>config.php</code> – außer den Installationswerten <code>network_site</code>, <code>network_key</code>, <code>fallback_site</code> (nur config.php/config.local.php; in Website-Dateien wirkungslos). Nicht versionieren.</td></tr>
+    <tr><td><code>config/sites/{key}.php</code></td><td><code>hosts</code>, <code>label</code>, <code>theme</code> (Vorgabe beim Erststart), optional <code>themes</code> (erlaubte Kits; Aliase <code>kit</code>/<code>kits</code>), eigene <code>app_key</code>/<code>setup_token</code>, optional <code>db</code> (z. B. eigene MySQL-Datenbank) und jeder andere Wert aus <code>config.php</code> – außer den Installationswerten <code>network_site</code>, <code>network_key</code>, <code>fallback_site</code> (nur config.php/config.local.php; in Website-Dateien wirkungslos). Nicht versionieren.</td></tr>
     <tr><td><code>storage/sites/{key}/</code></td><td>SQLite-Datenbank, Seiten-Cache, Uploads, Logs</td></tr>
     <tr><td><code>public/sites/{key}/media/</code></td><td>Medien (Adresse <code>/sites/{key}/media/…</code>)</td></tr>
     <tr><td>Website <code>default</code></td><td>nutzt die bisherigen Pfade <code>storage/</code> und <code>public/media</code> – Einzel-Installationen laufen unverändert; Domains optional in <code>config/sites/default.php</code>.</td></tr>

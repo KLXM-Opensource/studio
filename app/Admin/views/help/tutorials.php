@@ -72,5 +72,5 @@ $ext = fn(string $href, string $label, string $class = '') => '<a class="' . e($
   <?php endforeach; ?>
 
   <p class="doc-foot"><?php if ($web): ?><?= e(__('Die Videos werden nicht mit dem CMS ausgeliefert – so bleibt die Installation klein. Die Verwaltung lädt nichts von {host}; die Links öffnen einen neuen Tab.', ['host' => $docsHost])) ?><br><?php endif; ?>
-    <?= e(__('Eigene Tutorials für ein Kit:')) ?> <code>themes/{name}/docs/tutorials.php</code> · <a href="<?= e(url('/admin/hilfe/technik#tutorials')) ?>"><?= e(__('Technische Dokumentation')) ?></a></p>
+    <?= e(__('Eigene Tutorials für ein Kit:')) ?> <code>kits/{name}/docs/tutorials.php</code> · <a href="<?= e(url('/admin/hilfe/technik#tutorials')) ?>"><?= e(__('Technische Dokumentation')) ?></a></p>
 </div>

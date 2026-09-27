@@ -3,14 +3,14 @@
   <div class="doc-tree">
     <div class="doc-tree__box doc-tree__box--public"><strong>public/ · Document Root</strong><ul>
       <li><code>index.php</code> – Front-Controller (einzige PHP-Datei)</li><li><code>assets/</code> – Verwaltung, Editor, Schrift Lato, Symbole, Vendoren (Editor.js, PDF.js, MapLibre)</li>
-      <li><code>themes/{name}/</code>, <code>extensions/{name}/</code> – gebaute Assets</li><li><code>media/</code> (Website <code>default</code>), <code>sites/{key}/media/</code>, <code>pools/{key}/</code> – Uploads, Bildgrößen, Untertitel</li></ul></div>
+      <li><code>kits/{name}/</code>, <code>extensions/{name}/</code> – gebaute Assets</li><li><code>media/</code> (Website <code>default</code>), <code>sites/{key}/media/</code>, <code>pools/{key}/</code> – Uploads, Bildgrößen, Untertitel</li></ul></div>
     <div class="doc-tree__box"><strong>app/ · Core (Namespace <code>Core\</code>)</strong><ul>
       <li><code>Http/</code> Router, Controller (Website, Formulare, API, MCP, Verwaltung) · <code>Api/</code> CmsService, Tokens, OpenApi</li>
       <li><code>Data/</code> Tabellen, Einträge, Regeln, Formulare, Eingänge, Kalender, Geteilte Daten · <code>Blocks/</code> Kern-Blöcke</li>
       <li><code>Network/</code> Netzwerk &amp; SSO · <code>Search/</code> Website-Suche · <code>AI/</code> <?= e($aiBrand) ?> · <code>Review/</code> Freigabe · <code>Support/</code> Support &amp; Wissen</li>
       <li>Pages, Media, MediaPools, MediaTracks, Fields, Settings, Auth, Totp, Passkeys, Mfa, SpamGuard, FormCrypto, Mailer, Seo, StructuredData, Design, Icons, Proxy, Maps, PageCache, AppIcons</li></ul></div>
-    <div class="doc-tree__box"><strong>themes/ · extensions/</strong><ul>
-      <li><code>themes/{name}/theme.php</code> Blöcke, Einstellungs-Schema, Formular-Vorlagen, Design-Tokens</li><li><code>blocks/</code>, <code>templates/</code>, <code>functions.php</code>, <code>seed.php</code>, <code>docs/manual.php</code></li>
+    <div class="doc-tree__box"><strong>kits/ · extensions/</strong><ul>
+      <li><code>kits/{name}/theme.php</code> Blöcke, Einstellungs-Schema, Formular-Vorlagen, Design-Tokens (Rückfall: <code>themes/{name}</code>, Pfade über <code>Core\Kit</code>)</li><li><code>app/Views/fragments/</code> Kern-Fragmente (<code>Core\Fragments</code>): Video, Editor, Werkzeugleiste nur Kern; Marke, Sprachumschalter, Öffnungszeiten … überschreibbar</li><li><code>blocks/</code>, <code>templates/</code>, <code>functions.php</code>, <code>seed.php</code>, <code>docs/manual.php</code></li>
       <li><code>extensions/{name}/extension.php</code> – optionale Funktionen (z. B. <code>dav</code>)</li></ul></div>
     <div class="doc-tree__box"><strong>Außerhalb des Webroots</strong><ul>
       <li><code>config/</code> config.php, config.local.php (Geheimnisse), <code>sites/{key}.php</code></li><li><code>storage/</code> Datenbanken, Caches, Sitzungen, Logs, Suchindex, Sicherungen, <code>pools/</code>, <code>shared/</code>, <code>support/</code>, <code>ai/</code></li>
@@ -21,7 +21,7 @@
     <li><code>public/index.php</code> lädt <code>app/bootstrap.php</code>: Website anhand des Hosts wählen (<code>Core\Sites</code>), Konfiguration zusammenführen, Datenbank-Migration, Kit und Erweiterungen laden, beim ersten Start <code>seed.php</code>.</li>
     <li>Router (<code>app/routes.php</code>) → Controller. Sitzungen nur für <code>/admin</code> bzw. angemeldete Nutzer – Besucher bekommen kein Cookie.</li>
     <li>Routing <code>/{pfad*}</code>: Seitenbaum (<code>pages.path</code>) → Detailseite einer Datentabelle (<code>/{url-basis}/{slug}</code>) → Weiterleitung alter Adressen → 404. Eine Seite mit gleichem Pfad hat Vorrang vor Kern-Routen wie <code>/suche</code>.</li>
-    <li>Seiten: Editor.js-JSON (<code>pages.content_draft</code> / <code>content_published</code>) → je Block <code>themes/{name}/blocks/{type}.php</code> (Kern-Blöcke: <code>app/Blocks/</code>) → <code>templates/layout.php</code>.</li>
+    <li>Seiten: Editor.js-JSON (<code>pages.content_draft</code> / <code>content_published</code>) → je Block <code>kits/{name}/blocks/{type}.php</code> (Kern-Blöcke: <code>app/Blocks/</code>) → <code>templates/layout.php</code>.</li>
     <li>Ganzseiten-Cache für Besucher (<code>{storage}/cache/pages</code>), wird bei jeder Änderung geleert; danach gleicht der Suchindex im Hintergrund ab.</li>
   </ol>
   <h3>Datenmodell (je Website)</h3>

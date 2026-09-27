@@ -50,7 +50,6 @@ kits/starter/
 │       ├── header.php        Marke, Navigation (popover mobil), Sprachen, Suche
 │       ├── footer.php        Kontakt, Seiten, Rechtliches + footer_links()
 │       ├── section.php       Hülle je Block (Abschnitts-Optionen)
-│       ├── video-embed.php   Zwei-Klick-Video, MP4 mit Untertiteln, Media::posterFor()
 │       └── editor.php        Editor-Mount (unverändert übernehmen)
 ├── assets/
 │   ├── css/
@@ -61,7 +60,7 @@ kits/starter/
 │   │   └── core.css          nur bei Kern-Blöcken: Variablen für die Kern-Stylesheets
 │   └── js/
 │       ├── site.js           Progressive Enhancement (Menü, Suchvorschläge)
-│       └── video.js          Zwei-Klick-Lösung (nur mit Block „Video“)
+│       └── (Video-Skript: Kern, resources/js/embed.js – lädt das Kern-Fragment video-embed selbst)
 ├── lang/
 │   ├── en.php                Verwaltung: Beschriftungen aus theme.php
 │   └── site/en.php           Website: Texte aus lt('…')
@@ -134,7 +133,7 @@ im Style-Editor zur Auswahl. Mit dem Kit ausliefern: `build.mjs` + `package.json
 | `css/core.css` | ≈ 1,2 KB | bei Kern-Blöcken |
 | `css/hero-search.css` | ≈ 1,0 KB | nur bei Einstieg „Such-Einstieg“ |
 | `js/site.js` | ≈ 0,4 KB | immer |
-| `js/video.js` | ≈ 1,3 KB | bei Block „Video“ |
+| `assets/js/embed.js` (Kern) | ≈ 1,2 KB | bei Block „Video“ |
 
 Startseite der Demo: ≈ 15,7 KB CSS, 0,4 KB JS (Richtwerte des Cores: CSS < 30 KB, JS < 8 KB). Keine Schriftdatei.
 

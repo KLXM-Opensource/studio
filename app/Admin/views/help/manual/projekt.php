@@ -1,7 +1,7 @@
 <?php
 /**
  * Handbuch · Kapitel „Hinweise zu diesem Projekt“ (Core\Guide) – eingebunden von help/manual.php nur, wenn Hinweise da sind.
- * Quellen: themes/{kit}/guide/*.md (Kit) und {storage}/guide/*.md (Website, Handbuch → Projekt-Hinweise).
+ * Quellen: kits/{kit}/guide/*.md (Kit) und {storage}/guide/*.md (Website, Handbuch → Projekt-Hinweise).
  */
 $__notes = \Core\Guide::notes();
 $__author = \Core\Guide::author();

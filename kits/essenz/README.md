@@ -28,12 +28,12 @@ kits/essenz/
 ├── functions.php    Helfer essenz_* (Kontakt, Zeiten inkl. Daten für „Jetzt geöffnet“, Menü + Fit-Schätzung, Index-Nummern, Abschnittskopf, JSON-LD)
 ├── seed.php         Startinhalte „Werkstatt Beispiel“ + 'after' → Musterseiten (tools/demo-content.php)
 ├── blocks/          hero, richtext, media_text, features, principles, specs, stats, steps, cards, quote, faq, cta, contact, downloads, video, map
-├── templates/       layout, error, maintenance, offline; partials/: header, sheet (Menü/Index), brand, footer, hours, langswitch,
-│                    section, video-embed, editor, toolbar (nur cms_toolbar())
+├── templates/       layout, error, maintenance, offline; partials/: header, sheet (Menü/Index), footer, section
+│                    (Marke, Sprachen, Öffnungszeiten, Video, Editor, Werkzeugleiste: Kern-Fragmente, app/Views/fragments)
 ├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero) · overlay.css (Aufklappmenüs, Such-Popover, Seitenblatt – am
 │                    Ende von <body>) · opt-{header,footer,pagebg}-*.css (nur gewählte Option) · b-*.css (je Block) · data, media,
 │                    calendar, dataform, sections, search (ersetzen die Kern-Stylesheets) · pages, editing, preview
-├── assets/js/       site.js (≈ 4,7 KB) · video.js (nur mit Video-Block, ≈ 1,1 KB)
+├── assets/js/       site.js (≈ 4,7 KB) (2-Klick-Video: Skript des Kerns, resources/js/embed.js)
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Musterseiten; --heroes: nur /werkstatt/hero-varianten inkl. Demo-Video per ffmpeg)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, Beschreibung aller Blöcke)

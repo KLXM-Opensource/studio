@@ -16,8 +16,8 @@ use Core\Data\Shared;
  *
  * Arten: page (Seite), entry (Detailseite eines Eintrags, Bearbeiten direkt im Text ohne Neuladen),
  * template (Detailseiten-Vorlage im Seiten-Editor, ?edit=1 auf einer Detailseite).
- * Themes rufen im Partial templates/partials/toolbar.php nur cms_toolbar(get_defined_vars()) auf; fehlt das Partial,
- * rendert Core\Theme::partial() die Leiste trotzdem. Verhalten: resources/js/_bar.js, Aussehen: editor.shadow.css.
+ * Kern-Fragment „toolbar“ (nur Kern, app/Views/fragments/toolbar.php): Kits rufen im Layout $theme->partial('toolbar', $toolbar)
+ * auf; eigene Kit-Dateien dafür werden ignoriert (Core\Fragments). Verhalten: resources/js/_bar.js, Aussehen: editor.shadow.css.
  */
 final class Toolbar
 {

@@ -6,6 +6,39 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kits unter `kits/` statt `themes/` – zentrale Pfad-API `Core\Kit`
+- Ordner `themes/` → `kits/`, `public/themes/` → `public/kits/`. Alle Pfade über `Core\Kit`: `Kit::dir($name)`,
+  `Kit::publicDir($name)`, `Kit::url($name, $pfad)`, `Kit::all()`, `Kit::definitionFile()`, `Kit::fragment($name)` –
+  genutzt von `Core\Theme`, Netzwerk-Kennzahlen, Suchseite, Kit-Layouts, `bin/console` (`kit:list` zeigt den Ordner,
+  `kit:create` legt unter `kits/` an), `tools/build.mjs`, `tools/licenses.mjs`, Service Worker, reservierten Adressen.
+- **Rückfall:** Kits unter `themes/{name}` und Assets unter `public/themes/{name}` (ältere Installationen, Kits von Dritten)
+  werden weiter erkannt; alte Adressen `/themes/…` leitet `public/index.php` mit 301 auf `/kits/…` um (ohne App-Start).
+  nginx: `location ^~ /themes/ { try_files $uri /index.php$is_args$args; }` (Installationsanleitung).
+- **Aliase:** `kit.php` statt `theme.php`, Konfiguration `'kit'`/`'kits'` neben `'theme'`/`'themes'`, `app()->kit`.
+  Unverändert aus Kompatibilitätsgründen: `theme.php`, `Core\Theme`, `app()->theme`, `sys.theme`, API-/MCP-Feld `theme`, `theme:*`.
+- Umstellung bestehender Server ohne Releases: `deploy/migrate-kits.sh <ziel>` (Sicherung, Verschieben, Übergangs-Links,
+  `cache:clear --all`, `health`); mit `deploy/deploy.sh` ist nichts zu tun.
+
+### Kern-Fragmente statt Kopien in jedem Kit (`Core\Fragments`, `app/Views/fragments/`)
+- Kits bleiben eigenständige Projekte ohne Vererbung; zentrale Bausteine liegen einmal im Kern (wie REDAXO-Fragmente).
+- **Nur Kern:** `video-embed` (2-Klick-Video inkl. Hinweis, Datenschutz-Link, „künftig direkt laden“, Skript
+  `resources/js/embed.js` mit `window.cmsConsent`/`cms:consent`), `editor`, `toolbar`. Kit-Dateien dafür werden ignoriert
+  (Entwicklermodus: Warnung); Gestaltung nur per CSS (`.vembed`, `.vembed__gate`, `.vembed__info`, `.vembed__row`, `.vembed__play` …).
+  Die 2-Klick-Hülle entspricht exakt dem Stand aus 0e01716 (Screenshots aller 9 Kits pixelgleich).
+- **Überschreibbar:** `brand`, `langswitch`, `hours`, `legal`, `cookie-settings`, `breadcrumb`, `pagination`, `search-form`,
+  `header-actions`. Suchreihenfolge `project/overrides/kits/{kit}/fragments` → `kits/{kit}/fragments` →
+  `kits/{kit}/templates/partials` → `app/Views/fragments`. Optionen je Kit in `theme.php → 'fragments'`.
+- Überschriebene Kern-Fragmente: Prüfsumme des Originals wird gemerkt (`storage/fragments.json`); ändert es sich, Hinweis in
+  der Übersicht (Technik & Betrieb) und in `health`; `php bin/console fragments:list [--all] [--accept]`.
+- Entwicklermodus (`debug`): HTML-Kommentar mit der Herkunft jedes Fragments (Projekt, Kit, Kern).
+- Zentrale Helfer `privacy_url()`, `legal_links()`, `org_name()`, `fragment()` (`Core\Legal`) statt `{kit}_privacy_url()`.
+- Aus den Kits gelöscht: `video-embed.php` (9), `editor.php` (9), `toolbar.php` (8), `brand.php` (7), `langswitch.php` (7),
+  `hours.php` (6), `js/video.js` (6), praxis `js/embed.js`, Video-Teil von basis/editorial `js/blocks.js`.
+
+### Formulare im Dunkelmodus lesbar
+- `resources/css/dataform.css` folgt dem Farbschema des Kits (Canvas/CanvasText, Fehlerfarben per `light-dark()`); hell
+  unverändert. Kits ohne eigene `css/dataform.css` (z. B. eigene Kits) brauchen keine Umgehung mehr.
+
 ### Mediathek: „Importieren aus …“ für Erweiterungen
 - Neuer Browser-Haken `CMSMedia.extend({ sources(finder) })`: Erweiterungen tragen Quellen in den Knopf „Importieren aus …“
   neben „Hochladen“ ein – in der Mediathek und im Auswahldialog der Bild-/Datei-Felder (Verwaltung und Bearbeiten-Modus der

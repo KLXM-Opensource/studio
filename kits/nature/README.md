@@ -27,11 +27,11 @@ kits/nature/
 ├── functions.php    Helfer nature_* (Kontakt, Zeiten, Saison, Menü + Fit-Schätzung, Abschnittskopf, JSON-LD, Landschaft, Monogramm)
 ├── seed.php         Startinhalte „Hofgut Wiesengrund (fiktiv)“ + 'after' → tools/demo-content.php
 ├── blocks/          hero, richtext, media_text, features, principles, specs, stats, steps, cards, team, quote, faq, cta, contact, downloads, video, map
-├── templates/       layout, error, maintenance, offline; partials/: header, sheet, brand, footer (Hügelkante), hours, langswitch, section, video-embed, editor, toolbar
+├── templates/       layout, error, maintenance, offline; partials/: header, sheet, footer (Hügelkante), section – Marke (Option mark: empty), Sprachen, Öffnungszeiten, Video, Editor: Kern-Fragmente
 ├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero) · overlay.css (am Ende von <body>) · opt-{header,footer,pagebg,dividers}-*.css
 │                    (nur die gewählte Option) · b-*.css (je Block; b-hero.css nur für „Bildtafel“/„Große Aussage“, b-hero-{season,dates,form}.css nur für die gleichnamige Einstiegs-Variante) · data, media, calendar,
 │                    dataform, sections, search (ersetzen die Kern-Stylesheets) · pages, editing, preview
-├── assets/js/       site.js (≈ 4,7 KB) · video.js (nur mit Video-Block, Consent-Kit-Einwilligung über window.cmsConsent)
+├── assets/js/       site.js (≈ 4,7 KB) (2-Klick-Video: Skript des Kerns, resources/js/embed.js)
 ├── tools/           contrast.php (WCAG aller Vorlagen, --table) · patterns.php (SVG-Muster → opt-*.css) · demo.php + demo-content.php (--heroes: Musterseite „Hero-Varianten“)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, alle Blöcke)

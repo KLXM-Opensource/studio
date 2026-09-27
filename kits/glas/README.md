@@ -32,13 +32,13 @@ kits/glas/
 ├── functions.php    Helfer glas_* (Kontakt, Zeiten inkl. „Jetzt geöffnet“, Menü + Fit-Schätzung, Abschnittskopf, JSON-LD, App-Info)
 ├── seed.php         Startinhalte „Lumen Labs – App-Entwicklung & UX (fiktiv)“ + 'after' → Musterseiten (tools/demo-content.php)
 ├── blocks/          hero, richtext, text_image, features, cards, stats, steps, team, quote, faq, cta, contact, downloads, video, map
-├── templates/       layout, error, maintenance, offline; partials/: header (Glas-Dock u. a.), tabbar, sheet (Glasblatt), brand, footer, hours, langswitch,
-│                    section, video-embed (Zwei-Klick + window.cmsConsent + Media::posterFor), editor, toolbar
+├── templates/       layout, error, maintenance, offline; partials/: header (Glas-Dock u. a.), tabbar, sheet (Glasblatt), footer,
+│                    section (Marke, Sprachen, Öffnungszeiten, 2-Klick-Video, Editor, Werkzeugleiste: Kern-Fragmente)
 ├── assets/css/      site.css (_tokens, _base, _header, _hero – renderblockierend) · overlay.css (+ _footer: Fußbereich,
 │                    Aufklappmenüs, Such-Popover, Glasblatt – am Ende von <body>) · h-aurora/h-statement/h-split/h-command/h-video/h-stack (Einstiegs-Varianten)
 │                    · opt-header-*/opt-footer-* (nur gewählte Option) · b-*.css, orb.css (je Block) · data, media, calendar,
 │                    dataform, sections, search (ersetzen die Kern-Stylesheets) · pages, editing, preview
-├── assets/js/       site.js (≈ 5 KB) · video.js (nur mit Video-Block, ≈ 1,3 KB)
+├── assets/js/       site.js (≈ 5 KB) (2-Klick-Video: Skript des Kerns, resources/js/embed.js)
 ├── tools/           contrast.php (Glas-Kontrastmodell) · demo.php + demo-content.php (Musterseiten, GD-Bilder)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, Beschreibung aller Blöcke)

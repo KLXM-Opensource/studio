@@ -25,6 +25,7 @@ $__cmds = [
         ['features:release [--dry-run] [--only=features|extensions]', 'In der Konfiguration festgelegte preset/features/extensions an Administration → Funktionen & Erweiterungen übergeben: Schalter setzen, Einträge aus config/sites/{key}.php (Einzel-Installation auch config.local.php) entfernen, Sicherung {datei}.{zeit}.bak, Diff – wirksamer Stand bleibt gleich'],
         ['extensions:publish', 'Öffentliche Dateien der Erweiterungen nach public/extensions kopieren'],
         ['guide:list | guide:selftest', 'Hinweise zu diesem Projekt (Kit + Website, guide/*.md) mit Herkunft und Bezug auflisten | Selbsttest des Einlesens'],
+        ['fragments:list [--all] [--accept]', 'Kern-Fragmente: Herkunft je Fragment (Projekt, Kit, Kern) für das aktive Kit bzw. alle; überschriebene mit geändertem Original; --accept markiert geänderte Originale als geprüft'],
         ['reseed --force', 'ALLE Inhalte löschen und Startinhalte des Kits neu einspielen (Schlüssel bleiben)'],
     ],
     'Betrieb & Deploy' => [

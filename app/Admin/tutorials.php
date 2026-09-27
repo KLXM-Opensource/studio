@@ -534,7 +534,7 @@ return [
             'commands' => "php bin/console kit:create meinprojekt            # Kopie des Start-Kits (--from=basis für eine andere Vorlage)\npnpm --dir tools build                            # Assets des Kits bauen\n# Website auf das Kit umstellen: config/sites/{website}.php → 'kit' => 'meinprojekt'",
             'tips' => ['Tutorials für Ihr Kit: <code>kits/{name}/docs/tutorials.php</code> ergänzt diese Seite; eigene Videos mit <code>node tools/tutorials/record.mjs</code>.', 'Schritt für Schritt mit dem Start-Kit: Tutorial „Eigenes Kit mit dem Start-Kit“.'],
             'pitfalls' => ['Kit-Namen nie im Core verwenden – projektspezifisches gehört ins Kit.'],
-            'manual' => [['Kits & Design (Technik)', '/admin/hilfe/technik#themes'], ['Build & Entwicklung (Technik)', '/admin/hilfe/technik#build']],
+            'manual' => [['Kits & Design (Technik)', '/admin/hilfe/technik#kits'], ['Build & Entwicklung (Technik)', '/admin/hilfe/technik#build']],
         ],
 
         'n-kit-starter' => [
@@ -552,7 +552,7 @@ return [
             'commands' => "php bin/console kit:create kanzlei                 # Kopie von kits/starter, Präfix starter_ → kanzlei_\ncd tools && pnpm run build\nphp bin/console site:create kunde www.kunde.de kanzlei\nphp bin/console health --site=kunde\nphp kits/kanzlei/tools/contrast.php",
             'tips' => ['<code>kit:create name --from=basis</code> nimmt ein anderes Kit als Vorlage.', 'Budget der Startseite prüfen: CSS &lt; 30 KB, JS &lt; 8 KB (Start-Kit ≈ 15,7 KB / 0,4 KB).'],
             'pitfalls' => ['Nach Änderungen an <code>assets/</code> neu bauen – <code>public/kits/{name}/</code> enthält nur die gebauten Dateien.', 'Das Start-Kit selbst nicht ändern – es ist die Vorlage für <code>kit:create</code> und wird mit Updates ersetzt.'],
-            'manual' => [['Eigenes Kit entwickeln (Technik)', '/admin/hilfe/technik#start-kit'], ['Kits & Design (Technik)', '/admin/hilfe/technik#themes'], ['Kommandozeile', '/admin/hilfe/technik#cli']],
+            'manual' => [['Eigenes Kit entwickeln (Technik)', '/admin/hilfe/technik#start-kit'], ['Kits & Design (Technik)', '/admin/hilfe/technik#kits'], ['Kommandozeile', '/admin/hilfe/technik#cli']],
         ],
     ],
 ];

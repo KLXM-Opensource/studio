@@ -47,12 +47,12 @@ kits/fluid/
 ├── seed.php         Startinhalte „Studio Beispiel (Demo)“ + 'after' → Showcase (tools/demo-content.php)
 ├── blocks/          Renderer je Block
 ├── templates/       layout, error, maintenance, offline; partials/: header, sheet (Seitenblatt), brand, footer, langswitch,
-│                    section, hours, video-embed, editor, toolbar (nur cms_toolbar() – Werkzeugleiste des Kerns)
+│                    section (Öffnungszeiten, Video, Editor, Werkzeugleiste: Kern-Fragmente, app/Views/fragments)
 ├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero) · overlay.css (Aufklappmenüs, Such-Popover, Seitenblatt –
 │                    am Ende von <body>, nicht renderblockierend) · opt-{token}-{wert}.css (nur gewählte Design-Optionen) ·
 │                    b-*.css / hero-x.css / prose.css / reel.css (je Block bzw. Variante) · data, media, calendar, dataform,
 │                    sections, search (ersetzen die Kern-Stylesheets – intrinsisch, ohne Breiten-Queries) · pages.css · editing.css · preview.css
-├── assets/js/       site.js (≈ 4,1 KB) · tabs.js, video.js, reel.js, scrolly.js (je Block, < 1,2 KB)
+├── assets/js/       site.js (≈ 4,1 KB) · tabs.js, reel.js, scrolly.js (je Block, < 1,2 KB; Video-Skript kommt aus dem Kern)
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Showcase)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Kapitel: Breakpointlos, Design/Kopf/Fuß, Seiten-Tipps, Beschreibung aller Blöcke)

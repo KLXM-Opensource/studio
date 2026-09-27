@@ -16,7 +16,7 @@ kits/basis/
 ├── blocks/            Renderer je Block ($b = Core\Block, $d = Daten)
 ├── templates/         layout, error, maintenance, offline, partials/
 │                      header.php → header-modern | header-bar (klassisch/ausführlich) | header-minimal, topbar, menu-btn,
-│                      footer (Spalten/schlicht), brand, langswitch, hours, section, video-embed, editor, toolbar
+│                      footer (Spalten/schlicht), section (Marke, Sprachen, Öffnungszeiten, Video, Editor, Werkzeugleiste: Kern-Fragmente)
 ├── assets/css/        site.css (immer) · nav-{modern,classic,minimal,extended}.css (je nach Navigation) ·
 │                      blocks.css, extra.css, data.css, calendar.css, dataform.css, hero-x.css (nur bei passenden Blöcken/Varianten) ·
 │                      preview.css (nur Vorschau im Style-Editor) · _topbar.css/_quick.css (Teile, per @import)

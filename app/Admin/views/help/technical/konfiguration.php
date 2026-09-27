@@ -19,7 +19,7 @@
   </table>
   <table class="doc-table">
     <tr><th>Weitere Schlüssel (config.local.php bzw. config/sites/{key}.php)</th><th>Bedeutung</th></tr>
-    <tr><td><code>hosts</code>, <code>label</code>, <code>theme</code>, <code>themes</code></td><td>Nur Website-Dateien: Domains, Bezeichnung, Kit beim Erststart, erlaubte Kits.</td></tr>
+    <tr><td><code>hosts</code>, <code>label</code>, <code>theme</code>, <code>themes</code></td><td>Nur Website-Dateien: Domains, Bezeichnung, Kit beim Erststart, erlaubte Kits (gleichwertig: <code>kit</code>, <code>kits</code>).</td></tr>
     <tr><td><code>environment</code></td><td><code>production</code> (Standard) | <code>staging</code> | <code>development</code> – siehe <a href="#deploy">Staging</a>.</td></tr>
     <tr><td><code>mail_redirect</code>, <code>staging_auth</code></td><td>Außerhalb der Produktion: E-Mails an diese Adresse(n) statt an Empfänger (Betreff „[STAGING]“; ohne Angabe nur protokolliert); HTTP-Basic-Schutz <code>['user' =&gt; …, 'pass' =&gt; …]</code>.</td></tr>
     <tr><td><code>mail_dump</code></td><td>Nur für lokale Tests: E-Mails nicht versenden, sondern als <code>.eml</code> (und bei HTML-Mails als <code>.html</code>-Vorschau) ablegen – <code>true</code> = <code>{storage}/mail</code> der Website oder ein Ordner. <code>Core\Mailer::$delivered</code> ist dann <code>false</code> (Einladungen zeigen den Link an).</td></tr>

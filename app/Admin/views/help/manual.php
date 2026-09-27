@@ -3,7 +3,7 @@
  * Handbuch für die Redaktion. Die Kern-Kapitel liegen in help/manual/{schlüssel}.php und werden in der Reihenfolge
  * von $core ausgegeben (Nummern und Inhaltsverzeichnis entstehen automatisch).
  *
- * Ein Theme ergänzt das Handbuch mit themes/{name}/docs/manual.php – die Datei gibt ein Array zurück:
+ * Ein Theme ergänzt das Handbuch mit kits/{name}/docs/manual.php – die Datei gibt ein Array zurück:
  *   'hero'     => ['eyebrow' => …, 'title' => … (HTML), 'lead' => …]          Kopf des Handbuchs
  *   'chapters' => ['schlüssel' => [                                           Kapitel des Themes
  *                     'title' => …, 'file' => __DIR__ . '/manual/x.php',
@@ -57,7 +57,7 @@ foreach ($core as $__key => $__title) {
     $chapters[$__key] = ['id' => $__key, 'title' => $__title, 'files' => [__DIR__ . '/manual/' . $__key . '.php']];
 }
 $chapters['faq']['class'] = 'doc-faq';
-// Hinweise zu diesem Projekt (Core\Guide: themes/{kit}/guide/*.md, {storage}/guide/*.md) – nur wenn es welche gibt, gleich nach dem Überblick
+// Hinweise zu diesem Projekt (Core\Guide: kits/{kit}/guide/*.md, {storage}/guide/*.md) – nur wenn es welche gibt, gleich nach dem Überblick
 $guide = \Core\Guide::exists();
 if ($guide) {
     $chapters = array_slice($chapters, 0, 1, true) + ['projekt' => ['id' => 'projekt', 'title' => \Core\Guide::title(), 'files' => [__DIR__ . '/manual/projekt.php'], 'class' => 'doc-guide']]

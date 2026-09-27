@@ -33,11 +33,11 @@ kits/modern/
 ├── blocks/          hero, richtext, media_text, features, bento, cards, logos, stats, quote, steps, team, pricing, faq,
 │                    cta, tabs, video, contact, downloads, map
 ├── templates/       layout, error, maintenance, offline; partials/: header (4 Navigationen), sheet (Mobilmenü), brand,
-│                    footer, hours, langswitch, section, video-embed (Zwei-Klick + Consent Kit), editor, toolbar
+│                    footer, section (Marke, Sprachen, Öffnungszeiten, 2-Klick-Video, Editor, Werkzeugleiste: Kern-Fragmente)
 ├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero) · overlay.css (Aufklappmenüs, Such-Popover,
 │                    Seitenblatt – am Ende von <body>) · nav-extended.css · hero-x.css · hero-product|marquee|figures.css · b-*.css (je Block) · prose.css ·
 │                    data, media, calendar, dataform, sections, search (ersetzen die Kern-Stylesheets) · pages, editing, preview
-├── assets/js/       site.js · video.js (nur mit Video-Block) · tabs.js (nur mit Reitern)
+├── assets/js/       site.js (2-Klick-Video: Skript des Kerns, resources/js/embed.js) · tabs.js (nur mit Reitern)
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Demo mit erzeugten Bildern)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Demo, Design & Navigation, Tipps, alle Blöcke)

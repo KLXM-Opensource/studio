@@ -343,8 +343,8 @@ function entry_edit_attr(array $table, array $entry, string $field, ?string $mod
 }
 
 /**
- * Redaktions-Werkzeugleiste der Website (Core\Toolbar, alle Modi): im Theme-Partial templates/partials/toolbar.php
- * genügt <?= cms_toolbar(get_defined_vars()) ?> – fehlt das Partial, rendert der Kern sie trotzdem.
+ * Redaktions-Werkzeugleiste der Website (Core\Toolbar, alle Modi). Kits rufen $theme->partial('toolbar', $toolbar) auf –
+ * das Kern-Fragment rendert sie (nur Kern); cms_toolbar() bleibt für ältere Kit-Dateien und eigene Aufrufe.
  */
 function cms_toolbar(array $vars): string
 {

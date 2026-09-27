@@ -55,7 +55,7 @@ php -S localhost:8000 -t public public/index.php
 ```
 
 Die gebauten Assets (Verwaltung, Editor, Vendoren, Kits) sind im Repository enthalten – **pnpm ist nur nötig, wenn Sie
-CSS/JS-Quellen ändern** (`resources/`, `themes/*/assets`, `extensions/*/assets`):
+CSS/JS-Quellen ändern** (`resources/`, `kits/*/assets`, `extensions/*/assets`):
 `cd tools && pnpm install && pnpm run build` (danach `public/` mit einchecken; die CI prüft das).
 
 **Installation auf einem Server ohne Git/Composer:** das fertige Paket `klxm-studio-<version>.zip` (mit `vendor/` und
@@ -74,9 +74,9 @@ Entwicklerhandbuch → „Installation & Anforderungen“, „Betrieb“, „Sta
 ```
 httpdocs/
 ├── public/            DOCUMENT ROOT: index.php, assets/ (Verwaltung, Editor, Vendoren, Symbole, Schrift Lato),
-│                      themes/ + extensions/ (gebaute Assets), media/, sites/{key}/media/, pools/{key}/
+│                      kits/ + extensions/ (gebaute Assets), media/, sites/{key}/media/, pools/{key}/
 ├── app/               Core (Namespace Core\): Http/, Api/, Data/, Network/, Search/, AI/, Review/, Support/, Blocks/, Admin/views/ …
-├── themes/            starter (Start-Kit für eigene Kits) · basis (neutrales Business-Kit, Baukasten) · praxis (Arztpraxis) …
+├── kits/              starter (Start-Kit für eigene Kits) · basis (neutrales Business-Kit, Baukasten) · praxis (Arztpraxis) …
 ├── extensions/        optionale Erweiterungen, z. B. dav (CalDAV/CardDAV)
 ├── config/            config.php (Standard) · config.local.php (Geheimnisse) · sites/{key}.php (weitere Websites)
 ├── storage/           Datenbanken, Caches, Sitzungen, Logs, Suchindex, Sicherungen, pools/, shared/, support/, ai/
@@ -97,8 +97,8 @@ httpdocs/
 | [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) | **Tutorial-Videos und Trailer** (ohne Ton, Untertitel DE/EN). Sie werden nicht mit dem CMS ausgeliefert; die Verwaltung verlinkt dorthin (`config/config.php` → `docs_url`, eigene Adresse oder `''` für White-Label) |
 | `/api/v1/openapi.json` | Maschinenlesbare OpenAPI-3.1-Beschreibung |
 | [deploy/README.md](deploy/README.md) | Staging & Deploy mit Releases und Rollback; Vorlage für GitHub Actions im Projekt-Repository (`deploy/github-actions/`) |
-| [themes/starter/README.md](themes/starter/README.md) | Start-Kit: eigenes Kit entwickeln (`php bin/console kit:create meinkit`), Schritt für Schritt |
-| [themes/basis/README.md](themes/basis/README.md) | Referenz-Kit: Design-Tokens, Navigationen, Baukasten |
+| [kits/starter/README.md](kits/starter/README.md) | Start-Kit: eigenes Kit entwickeln (`php bin/console kit:create meinkit`), Schritt für Schritt |
+| [kits/basis/README.md](kits/basis/README.md) | Referenz-Kit: Design-Tokens, Navigationen, Baukasten |
 | [extensions/dav/README.md](extensions/dav/README.md) | CalDAV/CardDAV-Erweiterung |
 | [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) | Mitgelieferte Drittsoftware und Lizenzen |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) | Mitwirken · Sicherheitslücken vertraulich melden |
@@ -120,7 +120,7 @@ Inhaltsänderungen entstehen als Entwurf mit Revision; Zugänge „Zur Freigabe�
 
 KLXM Studio – Copyright (c) 2026 KLXM Crossmedia GmbH and contributors – **MIT-Lizenz**
 (`MIT`, Volltext: [LICENSE](LICENSE), Hinweis: [COPYRIGHT](COPYRIGHT)). Das gilt für den Kern, die mitgelieferten
-Kits (`themes/*`) und Erweiterungen (`extensions/*`), soweit dort nichts anderes steht.
+Kits (`kits/*`) und Erweiterungen (`extensions/*`), soweit dort nichts anderes steht.
 Quelltext: <https://github.com/klxm/studio>.
 
 Was das für Agenturen und Betreiber bedeutet (Kurzfassung, keine Rechtsberatung):

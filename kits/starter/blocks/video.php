@@ -1,7 +1,8 @@
 <?php
 /**
- * Video – die Arbeit macht der Kern (siehe partials/video-embed.php); js/video.js lädt nur auf Seiten mit diesem Block
- * (theme.php → conditional_css). JSON-LD VideoObject: 'jsonld' in der Blockdefinition.
+ * Video – die Arbeit macht der Kern: Kern-Fragment video-embed (app/Views/fragments/video-embed.php, Optionen in
+ * theme.php → 'fragments'), Skript resources/js/embed.js lädt es selbst nur auf Seiten mit Video
+ * (das Fragment gibt es aus). JSON-LD VideoObject: 'jsonld' in der Blockdefinition.
  * @var \Core\Block $b  @var array $d
  */
 ?>
