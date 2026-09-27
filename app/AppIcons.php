@@ -9,6 +9,8 @@ namespace Core;
  * Erzeugt aus Buchstaben (Theme-Schrift) oder einem Bild der Mediathek alle nötigen Größen:
  *   favicon.ico (16/32/48), icon-32.png, icon-180.png (Apple), icon-192.png, icon-512.png, icon-maskable-512.png
  * Gespeichert unter public/media/icons (beschreibbar). Rendering mit GD, 4-fach überabgetastet für glatte Kanten.
+ * SVG als Quelle: GD liest kein SVG – mit Imagick (SVG-Unterstützung) wird gerastert (Core\Svg::rasterize), sonst
+ * meldet generate() einen Hinweis und die bisherigen Icons bleiben.
  */
 final class AppIcons
 {
@@ -74,6 +76,9 @@ final class AppIcons
             return 'GD mit FreeType fehlt – Icons können nicht erzeugt werden.';
         }
         $cfg = self::config();
+        if (($why = self::svgProblem($cfg)) !== null) {
+            return $why;
+        }
         $dir = self::dir();
         if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
             return 'Ordner public/media/icons ist nicht beschreibbar.';
@@ -253,8 +258,20 @@ final class AppIcons
         }
     }
 
+    /** Hinweis, wenn das gewählte Bild eine SVG ist, die dieser Server nicht rastern kann (sonst null) */
+    public static function svgProblem(?array $cfg = null): ?string
+    {
+        $cfg ??= self::config();
+        $m = $cfg['mode'] === 'image' && $cfg['image'] ? Media::find($cfg['image']) : null;
+        if (!$m || $m['mime'] !== Svg::MIME || Svg::canRasterize()) return null;
+        return __('Das App-Icon kann nicht aus einer SVG erzeugt werden: Auf diesem Server fehlt Imagick mit SVG-Unterstützung. Bitte das Logo als PNG (mind. 512 × 512 px) wählen.');
+    }
+
     private static function loadImage(array $m): ?\GdImage
     {
+        if (($m['mime'] ?? '') === Svg::MIME) {
+            return Svg::rasterize(Media::path($m), 1024);
+        }
         $file = Media::path($m);
         $data = @file_get_contents($file);
         $img = $data !== false ? @imagecreatefromstring($data) : false;

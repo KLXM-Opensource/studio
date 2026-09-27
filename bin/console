@@ -88,6 +88,7 @@
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
  *                                                     --all: alle neu)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
+ *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
  *
  * Suche & KI
  *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
@@ -820,6 +821,16 @@ switch ($cmd) {
         $res = Core\ImageEdit::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Entzerren: " . Core\ImageEdit::engine() . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'svg:selftest':
+        // SVG-Uploads (Core\Svg): Schadcode-Proben müssen sauber enden oder abgelehnt werden, Exporte bleiben erhalten
+        $dump = null;
+        foreach ($args as $a) if (str_starts_with($a, '--dump=')) $dump = substr($a, 7);
+        $res = Core\Svg::selftest($dump);
+        if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'guide:selftest':

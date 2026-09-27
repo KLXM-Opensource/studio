@@ -456,6 +456,17 @@ final class Ai
         if (is_int($image) || ctype_digit((string) $image)) {
             $m = \Core\Media::find((int) $image) ?? throw new AiException(__('Bild nicht gefunden.'));
             if (!str_starts_with((string) $m['mime'], 'image/')) throw new AiException(__('Nur Bilder können beschrieben werden.'));
+            if ($m['mime'] === \Core\Svg::MIME) {
+                // SVG (Core\Svg): nur mit Imagick in Pixel umwandelbar
+                $img = \Core\Svg::rasterize(\Core\Media::path($m), self::VISION_MAX)
+                    ?? throw new AiException(__('SVG-Grafiken kann die KI auf diesem Server nicht ansehen – bitte den Alt-Text selbst eingeben.'));
+                $bg = imagecreatetruecolor(imagesx($img), imagesy($img));
+                imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                imagecopy($bg, $img, 0, 0, 0, 0, imagesx($img), imagesy($img));
+                ob_start();
+                imagejpeg($bg, null, 82);
+                return [(string) ob_get_clean(), 'image/jpeg'];
+            }
             $dir = !empty($m['_pool']) ? \Core\MediaPools::mediaDir((string) $m['_pool']) : site()->mediaDir();
             $v = json_decode((string) ($m['variants_json'] ?? ''), true) ?: [];
             foreach ($v['sizes'] ?? [] as $s) {

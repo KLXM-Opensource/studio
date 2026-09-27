@@ -635,7 +635,11 @@ function initOverview(sec) {
 // ================================================================== 4. Medien
 /** Bild im Browser verkleinern (max. 1024 px) → data:-URL (JPEG) für /alt */
 async function downscale(file) {
-  const bmp = await createImageBitmap(file);
+  // SVG: createImageBitmap kann kein SVG – über <img> (Skripte laufen dort nicht) auf die Zeichenfläche
+  const bmp = file.type === 'image/svg+xml' || /\.svg$/i.test(file.name)
+    ? await new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = URL.createObjectURL(file); })
+    : await createImageBitmap(file);
+  if (!bmp.width || !bmp.height) { bmp.width = 1024; bmp.height = 1024; }
   const f = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
   const c = d.createElement('canvas');
   c.width = Math.max(1, Math.round(bmp.width * f)); c.height = Math.max(1, Math.round(bmp.height * f));

@@ -1,5 +1,5 @@
 <?php /** Handbuch · Kapitel „Bilder & Dateien“ · @var array $vars ($vars['image_sizes'] = [[Verwendung, Format, Mindestgröße], …]) */ ?>
-  <p class="lead">Die <a href="<?= e(url('/admin/media')) ?>">Mediathek</a> funktioniert wie der Finder auf dem Mac: links Orte, Sammlungen und Tags, in der Mitte die Dateien, rechts die Informationen. Erlaubt sind Bilder (JPG, PNG, WebP, GIF), PDF-Dokumente, MP4-Videos und Audio (MP3, M4A). Die Website erzeugt aus jedem Bild automatisch alle Größen für Handy, Tablet und Bildschirm; Fotos werden dabei neu gespeichert, Kamera-Angaben wie der Aufnahmeort entfernt.</p>
+  <p class="lead">Die <a href="<?= e(url('/admin/media')) ?>">Mediathek</a> funktioniert wie der Finder auf dem Mac: links Orte, Sammlungen und Tags, in der Mitte die Dateien, rechts die Informationen. Erlaubt sind Bilder (JPG, PNG, WebP, GIF), SVG-Grafiken (<a href="#svg">bereinigt</a>), PDF-Dokumente, MP4-Videos und Audio (MP3, M4A). Die Website erzeugt aus jedem Bild automatisch alle Größen für Handy, Tablet und Bildschirm; Fotos werden dabei neu gespeichert, Kamera-Angaben wie der Aufnahmeort entfernt.</p>
 
   <h3>Hochladen</h3>
   <ol class="doc-steps">
@@ -39,6 +39,19 @@
 
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
   <p>Datei auswählen → <b>Datei ersetzen …</b> (im Bearbeitungsfenster oder per Rechtsklick) → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
+
+  <h3 id="svg">SVG-Grafiken</h3>
+  <p>Logos, Icons und Illustrationen laden Sie am besten als <b>SVG</b> hoch: Sie sind klein und in jeder Größe gestochen scharf. Eine SVG ist aber kein Bild wie ein Foto, sondern ein kleines Programm aus Text – darin könnten Skripte oder Verweise auf fremde Server stecken. Deshalb <b>bereinigt und optimiert</b> die Mediathek jede SVG beim Hochladen und speichert nur das Ergebnis (nie die Originaldatei). Die Meldung nach dem Hochladen zeigt, was passiert ist, z. B. „SVG bereinigt und optimiert: 48 KB → 12 KB, 3 unsichere Elemente entfernt“.</p>
+  <ul>
+    <li><b>Entfernt, weil unsicher:</b> Skripte, Ereignisse (<code>onclick</code>, <code>onload</code> …), eingebettete Webseiten (<code>foreignObject</code>, <code>iframe</code>), Animationen, Links und Verweise auf andere Dateien oder Server, nachgeladene Stile und Schriften (<code>@import</code>, <code>url(https://…)</code>), gefährliche CSS-Tricks, Entity- und DOCTYPE-Angaben.</li>
+    <li><b>Entfernt, weil überflüssig:</b> Kommentare, Metadaten und Daten der Grafikprogramme (Illustrator, Inkscape, Figma, Sketch, Affinity), leere Gruppen, ungenutzte Verläufe und Kennungen, Leerraum. Zahlen in Pfaden werden auf drei Nachkommastellen gerundet – sichtbar ändert sich nichts.</li>
+    <li><b>Bleibt erhalten:</b> Formen, Farben, Verläufe, Masken, Filter, Texte, Titel und Beschreibung (<code>title</code>, <code>desc</code>) sowie Angaben für Screenreader.</li>
+    <li><b>Abgelehnt</b> werden SVGs mit <b>eingebetteten Bilddaten</b> (z. B. ein Bildschirmfoto, das als „.svg“ gespeichert wurde) oder eingebetteten Schriften: Sie wären nach dem Bereinigen leer. Bildschirmfotos bitte als PNG, JPG oder WebP hochladen; Texte im Grafikprogramm vorher in Pfade umwandeln. Ebenso abgelehnt: Dateien über 2 MB und ungültige Dateien.</li>
+    <li>Wie bei Fotos braucht jede SVG einen <b>Alt-Text</b> – oder die Markierung „dekorativ“.</li>
+    <li>Fokuspunkt, Zuschnitte und „Bild bearbeiten“ gibt es für SVG nicht: Die Grafik wird immer vollständig gezeigt. „Anpassen“ (Effekte) geht.</li>
+    <li>Als <b>App-Icon</b> lässt sich eine SVG nur nutzen, wenn der Server sie umwandeln kann (Imagick) – sonst weist die Seite darauf hin; dann ein PNG wählen. Als Vorschaubild für soziale Netzwerke wird eine SVG nicht verwendet.</li>
+    <li>Wer keine SVGs möchte, schaltet sie unter <b>Funktionen &amp; Erweiterungen → „SVG-Grafiken hochladen“</b> ab.</li>
+  </ul>
 
   <h3>PDFs und Downloads</h3>
   <p>PDFs öffnen sich auf der Website in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch.</p>

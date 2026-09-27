@@ -471,6 +471,8 @@ img.media-vthumb{object-fit:cover}
 .md-focus{position:relative;display:grid;place-items:center;border-radius:8px;background:var(--adm-fill);cursor:crosshair;line-height:0;overflow:hidden}
 .md-focus img{max-width:100%;max-height:52vh;user-select:none}
 .md-focus > span{position:absolute}
+.fx-thumb img.is-svg,.fx-mini img.is-svg{width:100%;height:100%;object-fit:contain}
+.md-focus--svg{cursor:default}.md-focus--svg img{min-width:min(100%,320px)}
 .md-dot{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--adm-a),0 2px 8px rgba(0,0,0,.4);background:rgb(var(--adm-a-rgb,49 65 100) / .3);pointer-events:none;transition:left .15s,top .15s}
 .md-preview .f-help{margin:8px 0 0}
 .md-h3{margin:18px 0 8px;font-size:14px}

@@ -103,6 +103,8 @@ final class FeatureInfo
             // ------------------------------------------------------------------ Medien
             'media' => ['group' => 'media', 'desc' => __('Mediathek: Bilder und Dateien hochladen, zuschneiden, beschriften.'),
                 'effects' => ['menu' => __('Menüpunkt „Medien“'), 'data' => __('Dateien unter public/media bzw. public/sites/{website}/media')]],
+            'media.svg' => ['group' => 'media', 'desc' => __('SVG-Grafiken (Logos, Icons, Illustrationen) hochladen – nur bereinigt und optimiert.'),
+                'effects' => ['menu' => __('Mediathek nimmt .svg an'), 'data' => __('Gespeichert wird nur die bereinigte Fassung (ohne Skripte, externe Verweise, eingebettete Bilder)')]],
             'media.captions' => ['group' => 'media', 'desc' => __('Untertitel, Kapitel und Transkripte für Videos und Audio.'),
                 'effects' => ['menu' => __('Untertitel & Transkripte in der Mediathek'), 'frontend' => __('Untertitel (WebVTT) im Video-Player'), 'external' => __('Nur mit KI-Transkription: Tonspur geht an den eingestellten Dienst (z. B. whisper.cpp lokal)')]],
 

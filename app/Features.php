@@ -41,6 +41,8 @@ final class Features
             'media' => ['Mediathek', ['media.upload', 'media.delete']],
             // Untertitel, Kapitel und Transkripte für Video/Audio (Core\MediaTracks); KI-Transkription zusätzlich über „ai“
             'media.captions' => ['Untertitel & Transkripte für Videos und Audio', []],
+            // SVG-Grafiken hochladen – nur bereinigt und optimiert (Core\Svg); abschaltbar, falls eine Website keine SVG möchte
+            'media.svg' => ['SVG-Grafiken hochladen (bereinigt)', []],
             'data' => ['Datentabellen (Collections)', ['data.edit', 'data.publish', 'data.delete', 'data.schema']],
             'data.schema' => ['Tabellen und Felder selbst anlegen (Baukasten)', ['data.schema']],
             'data.shared' => ['Geteilte Daten verwalten (Tabellen mehrerer Websites)', ['data.shared.manage']],
@@ -96,7 +98,7 @@ final class Features
     /** Hart voneinander abhängige Funktionen: Funktion => Voraussetzung (ohne sie wirkungslos) */
     public const REQUIRES = [
         'data.schema' => 'data', 'data.shared' => 'data', 'calendar' => 'data', 'forms.data' => 'data', 'sources' => 'data',
-        'chat.visitor' => 'ai', 'chat.assistant' => 'ai',
+        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media',
     ];
 
     /** Voreinstellungen für typische Projekte */

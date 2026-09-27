@@ -41,8 +41,10 @@ const csrf = () => $('#adm-csrf')?.value || '';
 const BASE = ($('[data-media-base]')?.dataset.mediaBase || '') + '/admin';
 const CHUNK = 1024 * 1024;
 const MAX_MB = +($('[data-media-max]')?.dataset.mediaMax || 50);
-const ACCEPT = { image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], pdf: ['application/pdf'], video: ['video/mp4'], audio: ['audio/mpeg', 'audio/mp4', 'audio/x-m4a'] };
+// SVG: nimmt der Server nur bereinigt an (Core\Svg) – ist die Funktion aus, kommt eine klare Meldung zurück
+const ACCEPT = { image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'], pdf: ['application/pdf'], video: ['video/mp4'], audio: ['audio/mpeg', 'audio/mp4', 'audio/x-m4a'] };
 const ALL_TYPES = [...ACCEPT.image, ...ACCEPT.pdf, ...ACCEPT.video, ...ACCEPT.audio];
+const ftype = f => f.type || (/\.svg$/i.test(f.name) ? 'image/svg+xml' : '');
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const store = {
   get(k, def) { try { const v = localStorage.getItem('mycms-media-' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
@@ -170,9 +172,9 @@ class Uploader {
   add(files) {
     for (const file of files) {
       const item = { file, key: Math.random().toString(36).slice(2), alt: '', decorative: false, title: '', status: 'wait', progress: 0, error: '' };
-      if (!this.types().includes(file.type)) item.error = 'Dateityp nicht erlaubt';
+      if (!this.types().includes(ftype(file))) item.error = 'Dateityp nicht erlaubt';
       else if (file.size > MAX_MB * 1048576) item.error = `Größer als ${MAX_MB} MB`;
-      item.isImage = file.type.startsWith('image/');
+      item.isImage = ftype(file).startsWith('image/');
       if (item.isImage && !item.error) item.preview = URL.createObjectURL(file);
       this.items.push(item);
     }
@@ -195,7 +197,7 @@ class Uploader {
           : i.status === 'wait' ? `<label class="mu-alt"><span>Titel (optional)</span><input type="text" data-title value="${esc(i.title)}" maxlength="180" placeholder="z. B. Anamnesebogen"></label>${i.file.type.startsWith('video/') ? `
             <label class="mu-deco" title="${esc(t(DECO_VIDEO_HINT))}"><input type="checkbox" data-deco ${i.decorative ? 'checked' : ''}> ${esc(t('dekorativ (ohne Aussage)'))}</label>` : ''}` : ''}
           ${i.status !== 'wait' ? `<span class="mu-bar"><span style="width:${Math.round(i.progress * 100)}%"></span></span>` : ''}
-          ${i.status === 'done' ? '<span class="mu-ok">✓ Hochgeladen</span>' : ''}
+          ${i.status === 'done' ? `<span class="mu-ok">✓ ${esc(i.note || 'Hochgeladen')}</span>` : ''}
           ${i.status === 'failed' ? `<span class="mu-err" role="alert">${esc(i.error)}</span>` : ''}
         </span>
         ${i.status === 'wait' || i.status === 'failed' ? `<button type="button" class="mu-x" data-remove aria-label="${esc(i.file.name)} aus der Liste entfernen">✕</button>` : ''}
@@ -231,11 +233,12 @@ class Uploader {
         const media = await uploadFile(i.file, { alt: i.alt, decorative: i.decorative ? 1 : 0, title: i.title, tags, collection },
           p => { i.progress = p; const bar = $(`[data-key="${i.key}"] .mu-bar span`, this.root); if (bar) bar.style.width = Math.round(p * 100) + '%'; });
         i.status = 'done'; i.progress = 1;
+        if (media?.note) { i.note = media.note; toast(media.note); }   // SVG: bereinigt und optimiert (Größe vorher → nachher)
         this.opts.onDone?.(media);
       } catch (e) { i.status = 'failed'; i.error = e.message; }
       this.render();
     }
-    setTimeout(() => { this.items = this.items.filter(i => i.status !== 'done'); this.render(); this.opts.onChange?.(this.items.length); }, 2000);
+    setTimeout(() => { this.items = this.items.filter(i => i.status !== 'done'); this.render(); this.opts.onChange?.(this.items.length); }, queue.some(i => i.note) ? 6000 : 2000);
   }
 }
 
@@ -749,7 +752,7 @@ class Finder {
     return 'Alle Medien';
   }
   thumb(m) {
-    if (m.thumb) return `<img src="${esc(m.thumb)}" alt="" loading="lazy" draggable="false" style="object-position:${m.focus.x}% ${m.focus.y}%">`;
+    if (m.thumb) return `<img src="${esc(m.thumb)}" alt="" loading="lazy" draggable="false"${m.svg ? ' class="is-svg"' : ''} style="object-position:${m.focus.x}% ${m.focus.y}%">`;
     if (m.kind === 'video' && m.thumb_gen) return vthumbHtml(m);   // Vorschaubild wird beim Sichtbarwerden erzeugt (ffmpeg)
     return `<span class="fx-doc fx-doc--${m.kind}"><b>${esc(m.type)}</b>${m.pages ? `<small>${m.pages} S.</small>` : ''}</span>`;
   }
@@ -872,7 +875,7 @@ class Finder {
       return;
     }
     if (one) e.push(['Bearbeiten …', () => this.edit(one.id)], ['Quick Look', () => this.quickLook(one.id)]);
-    if (one?.kind === 'image') e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
+    if (one?.kind === 'image' && !one.svg) e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
     if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
     if (this.src.type === 'collection') e.push(['Aus Sammlung entfernen', async () => { await api.bulk({ ids, action: 'uncollect', collection: +this.src.value }); this.load(); }]);
@@ -1079,7 +1082,12 @@ class Finder {
         <button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>Schließen</button></div>
       <div class="md-grid">
         <div class="md-preview">
-          ${isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
+          ${isImg && m.svg ? `<div class="md-focus md-focus--svg"><img src="${esc(m.url)}" alt="" draggable="false"></div>
+            <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
+            <p class="f-help">${esc(t('SVG-Grafik: wird immer vollständig und in jeder Größe scharf gezeigt – Fokuspunkt und Zuschnitte entfallen.'))}${m.note ? ` ${esc(m.note)}.` : ''}</p>
+            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
+            <div class="md-adjust" data-adjbox>${adjBox()}</div>`
+          : isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>

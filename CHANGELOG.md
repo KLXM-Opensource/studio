@@ -6,6 +6,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### SVG-Grafiken in der Mediathek (bereinigt und optimiert)
+- **SVG-Upload** (Verwaltung, REST, MCP, `content:import`) nur über den eigenen Bereiniger `Core\Svg` (Positivliste auf
+  DOMDocument, keine GPL-Bibliothek): Skripte, Ereignisse (`on…`), `foreignObject`/`iframe`/`embed`/`object`,
+  `image`/`feImage`, SMIL-Animationen, externe Verweise (`href` nur `#id`, `url()` nur `url(#id)`), `@import`,
+  `expression()`, `behavior`, `-moz-binding`, Kommentare, Processing Instructions, DOCTYPE/Entities, Metadaten und
+  Editor-Daten (Inkscape, Illustrator, Figma, Sketch, Serif) fallen weg. Gespeichert wird nur das Ergebnis.
+- **Abgelehnt** mit klarer Meldung: eingebettete Pixelbilder (z. B. „Bildschirmfoto … .svg“ mit `data:image/png`) und
+  eingebettete Schriften, Dateien über 2 MB, Entity- und use-Bomben, ungültige oder nach dem Bereinigen leere Dateien.
+- **Optimiert:** ungenutzte ids/Definitionen, leere Gruppen, Leerraum, Zahlen in Pfaden/Koordinaten auf 3 Nachkommastellen;
+  title/desc/aria bleiben. Upload-Meldung „SVG bereinigt und optimiert: 48 KB → 12 KB, 3 unsichere Elemente entfernt“.
+- Maße aus der viewBox, keine Größen: `Media::url()` liefert immer die SVG. Kein Fokuspunkt, keine Zuschnitte, kein
+  Bildeditor; Alt-Text-Regeln wie bei Bildern; kein `og:image` aus SVG. App-Icon aus SVG nur mit Imagick (sonst Hinweis).
+- Abschaltbar als Funktion `media.svg` („SVG-Grafiken hochladen“, Standard an). Direkt aufgerufene SVGs: `.htaccess` mit
+  CSP (`sandbox`) und `nosniff` im Medienordner (Apache), nginx-Zeile im Handbuch (Technik → Medien, Installation).
+- Selbsttest `php bin/console svg:selftest` (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma).
+
 ### Videos als „dekorativ (ohne Aussage)“ markieren
 - Das Merkmal `media.decorative` gibt es jetzt auch für **Videos** (stumme Hintergrund-Schleifen, Bühnen-Clips,
   Stimmungs-Animationen): Checkbox beim Hochladen, rechts in der Mediathek und unter „Alle Details“ mit Hinweis

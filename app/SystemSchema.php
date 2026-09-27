@@ -65,7 +65,8 @@ final class SystemSchema
                 ['name' => 'sys.icon_dot', 'label' => 'Akzentpunkt wie in der Wortmarke', 'type' => 'bool', 'default' => $app['icon_dot_enabled'] ?? true],
                 ['name' => 'sys.icon_dot_color', 'label' => 'Farbe des Punkts', 'type' => 'color', 'width' => 'half', 'default' => $app['icon_dot'] ?? '#F6C9A8'],
                 ['name' => 'sys.icon_image', 'label' => 'Bild oder Logo', 'type' => 'media',
-                    'help' => 'Quadratisch, mindestens 512 × 512 px. Genutzt wird der 1:1-Zuschnitt bzw. der Fokuspunkt; der Rand füllt sich mit der Hintergrundfarbe.'],
+                    'help' => 'Quadratisch, mindestens 512 × 512 px. Genutzt wird der 1:1-Zuschnitt bzw. der Fokuspunkt; der Rand füllt sich mit der Hintergrundfarbe.'
+                        . (\Core\Svg::canRasterize() ? ' SVG-Logos werden ganz eingepasst.' : ' SVG-Logos gehen hier nicht (dem Server fehlt Imagick mit SVG) – bitte ein PNG wählen.')],
                 ['type' => 'heading', 'label' => 'Installierbare Web-App (PWA)',
                     'help' => 'Besucher können die Website auf dem Handy „Zum Home-Bildschirm“ hinzufügen – mit eigenem Icon, Namen und Kurzbefehlen (z. B. Kontakt). Für normale Besucher im Browser wird nichts gespeichert.'],
                 ['name' => 'sys.pwa', 'label' => 'Als App installierbar machen (Web-App-Manifest)', 'type' => 'bool', 'default' => true],

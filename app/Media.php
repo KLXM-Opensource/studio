@@ -8,6 +8,7 @@ namespace Core;
  *
  *  - Bilder werden mit GD neu kodiert (entfernt eingebetteten Schadcode/EXIF) und in
  *    480/800/1200/1600/2400 px als WebP (+ AVIF, falls verfügbar) erzeugt.
+ *  - SVG (Funktion media.svg): nur bereinigt und optimiert gespeichert (Core\Svg), ohne Größen – Media::url() liefert immer die SVG.
  *  - Dateinamen sind zufällig, Endungen fest vorgegeben – in /public/media kann nie
  *    ausführbarer Code landen (wichtig, da wir auf .htaccess verzichten).
  *  - Alt-Text ist bei Bildern Pflicht, außer das Bild ist ausdrücklich „dekorativ“.
@@ -267,6 +268,7 @@ final class Media
             return [null, 'Medium nicht gefunden.'];
         }
         $newMime = (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: '';
+        if (Svg::detect($path, $newMime, $originalName)) $newMime = Svg::MIME;   // .svg mit text/xml o. Ä.
         if (self::kind($newMime) !== self::kind($old['mime'])) {
             return [null, 'Bitte eine Datei der gleichen Art hochladen (' . self::typeLabel($old['mime']) . ').'];
         }
@@ -299,7 +301,11 @@ final class Media
         if (filesize($path) > self::maxBytes()) {
             return [null, 'Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).'];
         }
-        if (isset(self::IMAGE_MIMES[$mime]) && ($opt['require_alt'] ?? true) && empty($opt['decorative']) && mb_strlen(trim($alt)) < 3) {
+        $svg = Svg::detect($path, $mime, $originalName);
+        if ($svg && !Features::on('media.svg', false)) {
+            return [null, __('SVG-Uploads sind auf dieser Website ausgeschaltet (Funktionen & Erweiterungen → „SVG-Grafiken hochladen“).')];
+        }
+        if ((isset(self::IMAGE_MIMES[$mime]) || $svg) && ($opt['require_alt'] ?? true) && empty($opt['decorative']) && mb_strlen(trim($alt)) < 3) {
             return [null, 'Bitte einen Alt-Text (Bildbeschreibung) angeben oder das Bild als „dekorativ“ markieren.'];
         }
         $sub = date('Y/m');
@@ -311,7 +317,21 @@ final class Media
         $width = $height = null;
         $variants = [];
 
-        if (isset(self::IMAGE_MIMES[$mime])) {
+        if ($svg) {
+            // Nur die bereinigte Fassung wird gespeichert, nie das Original (Core\Svg)
+            try {
+                $r = Svg::clean((string) file_get_contents($path));
+            } catch (\RuntimeException $e) {
+                return [null, $e->getMessage()];
+            }
+            $rel = "$sub/$base.svg";
+            if (file_put_contents(self::dir() . "/$rel", $r['svg']) === false) {
+                return [null, 'Datei konnte nicht gespeichert werden.'];
+            }
+            Svg::guard(self::dir());
+            [$width, $height, $mime] = [$r['width'], $r['height'], Svg::MIME];
+            $variants = ['svg' => ['in' => $r['in'], 'out' => $r['out'], 'unsafe' => $r['unsafe']]];
+        } elseif (isset(self::IMAGE_MIMES[$mime])) {
             $info = @getimagesize($path);
             if (!$info) {
                 return [null, 'Bild konnte nicht gelesen werden.'];
@@ -361,7 +381,7 @@ final class Media
                 $variants = ['pages' => self::pdfPageCount(self::dir() . "/$rel")];
             }
         } else {
-            return [null, 'Dateityp nicht erlaubt. Erlaubt: JPG, PNG, WebP, GIF, PDF, MP4, MP3, M4A' . implode('', array_map(fn($d) => ', ' . ($d['label'] ?? strtoupper((string) $d['ext'])), Extensions::mediaTypes())) . '.'];
+            return [null, 'Dateityp nicht erlaubt. Erlaubt: JPG, PNG, WebP, GIF, ' . (Features::on('media.svg', false) ? 'SVG, ' : '') . 'PDF, MP4, MP3, M4A' . implode('', array_map(fn($d) => ', ' . ($d['label'] ?? strtoupper((string) $d['ext'])), Extensions::mediaTypes())) . '.'];
         }
 
         $clean = preg_replace('~[^\w.\- äöüÄÖÜß()]+~u', '', basename($originalName)) ?: 'datei';
@@ -562,7 +582,7 @@ final class Media
         $class = $classes !== '' ? ' class="' . e($classes) . '"' : '';
         $loading = !empty($opt['eager']) ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
         // Im Bearbeiten-Modus: Kennung für „Anpassen“ und (mit Bildformat) den Inline-Zuschnitt
-        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"' . ($ratio ? ' data-ratio="' . e($ratio) . '"' : '') : '';
+        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"' . ($ratio && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '') : '';
         $sources = '';
         foreach (['avif', 'webp'] as $fmt) {
             if ($src[$fmt] !== '') {
@@ -658,6 +678,9 @@ final class Media
         $m = self::find($id);
         if (!$m || !str_starts_with($m['mime'], 'image/')) {
             return [null, 'Nur Bilder lassen sich zuschneiden.'];
+        }
+        if ($m['mime'] === Svg::MIME) {
+            return [null, __('SVG-Grafiken werden immer vollständig gezeigt – ein Zuschnitt ist nicht nötig.')];
         }
         if (!preg_match('~^(\d{1,2}):(\d{1,2})$~', $ratio, $rm) || !isset(self::ratios()[$ratio]) || !(int) $rm[1] || !(int) $rm[2]) {
             return [null, 'Unbekanntes Bildformat.'];
@@ -823,6 +846,7 @@ final class Media
             @mkdir(dirname("$dst/$rel"), 0775, true);
             if (!copy("$src/$rel", "$dst/$rel")) throw new \RuntimeException('Datei konnte nicht kopiert werden.');
         }
+        if ($m['mime'] === Svg::MIME) Svg::guard($dst);
         $row = array_filter($m, fn($k) => is_string($k) && $k !== 'id' && $k[0] !== '_' && $k !== 'pool_ref', ARRAY_FILTER_USE_KEY);
         $pid = (int) MediaPools::db($pool)->insert('media', $row + ['updated_at' => now()]);
         self::db()->update('media', ['pool_ref' => "$pool:$pid", 'updated_at' => now()], 'id = :id', ['id' => $id]);
@@ -1040,6 +1064,7 @@ final class Media
             $mime === 'video/mp4' => 'MP4',
             $mime === 'audio/mpeg' => 'MP3',
             $mime === 'audio/mp4' => 'M4A',
+            $mime === Svg::MIME => 'SVG',
             str_starts_with($mime, 'image/') => strtoupper(substr($mime, 6)) === 'JPEG' ? 'JPG' : strtoupper(substr($mime, 6)),
             isset(Extensions::mediaTypes()[$mime]) => (string) (Extensions::mediaTypes()[$mime]['label'] ?? strtoupper((string) Extensions::mediaTypes()[$mime]['ext'])),
             default => 'Datei',
@@ -1090,6 +1115,9 @@ final class Media
             'pool' => $m['_pool'] ?? null,
             'missing_translations' => $isImg && empty($m['decorative']) && Lang::multi()
                 ? array_values(array_filter(array_keys(Lang::all()), fn($l) => $l !== Lang::default() && empty(self::translations($m)[$l]['alt']))) : [],
+            // SVG (Core\Svg): keine Größen, kein Fokus/Zuschnitt; Ergebnis der Bereinigung für die Upload-Meldung
+            'svg' => $m['mime'] === Svg::MIME,
+            'note' => $m['mime'] === Svg::MIME && ($st = json_decode((string) $m['variants_json'], true)['svg'] ?? null) ? Svg::note($st) : null,
             'crops' => $isImg ? array_map(fn($c) => [
                 'x' => $c['x'], 'y' => $c['y'], 'w' => $c['w'], 'h' => $c['h'], 'width' => $c['W'], 'height' => $c['H'],
                 'thumb' => self::publicUrl($m, 'cache/' . $c['base'] . '-' . $c['sizes'][0]['w'] . '.webp'),
