@@ -181,18 +181,28 @@ final class Metrics
                     implode(' · ', array_map(fn($c) => $c['label'], array_slice($open, 0, 3))) . (count($open) > 3 ? ' …' : ''), $open[0]['link'], __('Weiter einrichten'));
             }
         }
-        // Platzhalter (Inhalt, daher auch für die Redaktion): alle Fundstellen je Seite und Block aufklappbar (View: pages/_placeholders.php)
-        // mit „Im Frontend bearbeiten“ (Editor springt zum Block), „In der Verwaltung“ und „Ist gewollt“ je Fundstelle
+        // Platzhalter und Redaktionsnotizen (Inhalt, daher auch für die Redaktion): alle Fundstellen je Seite/Eintrag und Block
+        // aufklappbar (View: pages/_placeholders.php) mit „Im Frontend bearbeiten“ (Editor springt zum Block), „In der Verwaltung“
+        // und – nur bei Platzhaltern – „Ist gewollt“ je Fundstelle. Notizen sind öffentlich unsichtbar, daher nur Hinweis (info).
         if (can('pages.edit') || can('settings.edit') || $admin) {
-            $all = self::placeholders(app()->db, self::placeholdersOk());
+            $all = self::placeholders(app()->db, self::placeholdersOk(), 200);
             if ($all) {
                 $first = $all[0];
+                $nPh = count(array_filter($all, fn($h) => $h['kind'] === 'placeholder'));
+                $nNote = count($all) - $nPh;
                 $pages = array_values(array_unique(array_map(fn($h) => $h['title'], $all)));
-                $add('placeholder', 2, 'warn', 'brackets-curly', count($all),
-                    count($all) === 1 ? __('Platzhalter {text} ersetzen', ['text' => mb_strimwidth($first['text'], 0, 90, '…]')]) : __('{n} Platzhalter in Seiten ersetzen', ['n' => count($all)]),
-                    (count($pages) === 1 ? __('Auf der Seite „{page}“.', ['page' => $first['title']]) : __('Auf {n} Seiten: {pages}', ['n' => count($pages), 'pages' => implode(', ', array_slice($pages, 0, 4)) . (count($pages) > 4 ? ' …' : '')]))
-                        . ' ' . __('Ist eine Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.'),
-                    self::placeholderEditUrl($first), __('Im Frontend bearbeiten'));
+                $title = match (true) {
+                    count($all) === 1 && $nPh === 1 => __('Platzhalter {text} ersetzen', ['text' => mb_strimwidth($first['text'], 0, 90, '…]')]),
+                    count($all) === 1 => __('Notiz: {text}', ['text' => mb_strimwidth($first['text'], 0, 90, '…')]),
+                    $nNote === 0 => __('{n} Platzhalter in Seiten ersetzen', ['n' => $nPh]),
+                    $nPh === 0 => __('{n} Redaktionsnotizen offen', ['n' => $nNote]),
+                    default => __('{n} Platzhalter und {m} Notizen offen', ['n' => $nPh, 'm' => $nNote]),
+                };
+                $add('placeholder', 2, $nPh ? 'warn' : 'info', 'brackets-curly', count($all), $title,
+                    (count($pages) === 1 ? __('Auf der Seite „{page}“.', ['page' => $first['title']])
+                        : __(array_filter($all, fn($h) => $h['entry'] !== '') ? 'An {n} Stellen (Seiten und Einträge): {pages}' : 'Auf {n} Seiten: {pages}', ['n' => count($pages), 'pages' => implode(', ', array_slice($pages, 0, 4)) . (count($pages) > 4 ? ' …' : '')]))
+                        . ' ' . ($nPh ? __('Ist eine Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.') : __('Notizen [# … #] sehen nur Angemeldete – erledigt? Im Editor löschen.')),
+                    self::placeholderEditUrl($first), $first['entry'] !== '' ? __('Eintrag bearbeiten') : __('Im Frontend bearbeiten'));
                 $out[count($out) - 1]['hits'] = $all;
             }
         }
@@ -277,23 +287,30 @@ final class Metrics
     /** [Platzhalter]: Klammer mit Buchstabe am Anfang – auch klein („[bitte ergänzen: …]“), aber keine Markdown-Links „[Text](url)“ */
     public const PLACEHOLDER_RX = '~\[\p{L}[^\]\[]{2,}\](?!\()~u';
 
-    /** Erster [Platzhalter] in veröffentlichten Seiten (ohne bestätigte): ['id', 'title', 'text'] oder null */
+    /** Erster [Platzhalter] in veröffentlichten Seiten (ohne bestätigte, ohne Redaktionsnotizen): ['id', 'title', 'text'] oder null */
     public static function placeholder(): ?array
     {
-        return self::placeholders(app()->db, self::placeholdersOk(), 1)[0] ?? null;
+        foreach (self::placeholders(app()->db, self::placeholdersOk(), 100) as $h) {
+            if ($h['kind'] === 'placeholder') return $h;
+        }
+        return null;
     }
 
-    /** Frontend-Editor direkt am Block der Fundstelle (resources/js/editor.js: #b-{id} scrollt hin, markiert und öffnet die Felder) */
+    /** Sprung zur Fundstelle: Frontend-Editor am Block (resources/js/editor.js: #b-{id} scrollt hin, markiert und öffnet die Felder), Einträge in der Verwaltung */
     public static function placeholderEditUrl(array $hit): string
     {
+        if (($hit['entry'] ?? '') !== '') return $hit['url'];
         return $hit['url'] . '?edit=1' . ($hit['block'] !== '' ? '#b-' . rawurlencode($hit['block']) : '');
     }
 
     /**
-     * [Platzhalter] in den Seiten einer Website (auch für die Netzwerk-Übersicht mit fremder Datenbank), je Block:
-     * gesucht wird in allen Texten eines Blocks (auch verschachtelt, z. B. Listen-Einträge), ohne HTML-Tags.
-     * url und label (Blocktyp) nur für die eigene Website (Adresse und Kit der fremden Website sind hier unbekannt).
-     * @return list<array{id:int,title:string,text:string,block:string,type:string,label:string,url:string}>
+     * Offene Stellen in den Seiten einer Website (auch für die Netzwerk-Übersicht mit fremder Datenbank), je Block:
+     *   kind „placeholder“: [Platzhalter] in der veröffentlichten Fassung (öffentlich sichtbar!) – ohne „Ist gewollt“-Klammern;
+     *   kind „note“:        Redaktionsnotizen [# … #] (Core\EditorNotes, öffentlich unsichtbar) im Arbeitsstand (Entwurf) –
+     *                       auch in Einträgen der Inhalts-Tabellen (entry = Tabelle, Sprung in die Verwaltung).
+     * Gesucht wird in allen Texten eines Blocks (auch verschachtelt, z. B. Listen-Einträge). url und label (Blocktyp) nur für
+     * die eigene Website (Adresse und Kit der fremden Website sind hier unbekannt). $page: nur diese Seite (ohne Einträge).
+     * @return list<array{id:int,title:string,text:string,block:string,type:string,label:string,url:string,kind:string,entry:string}>
      */
     public static function placeholders(\Core\Database $db, array $ok, int $max = 100, ?int $page = null): array
     {
@@ -301,23 +318,60 @@ final class Metrics
         $own = $db === app()->db;
         $where = $page === null ? '' : ' AND id = ' . $page;
         foreach ($db->fetchAll("SELECT * FROM pages WHERE type = 'page'{$where} ORDER BY is_home DESC, sort, title") as $p) {
-            $raw = (string) $p['content_published'];
-            if ($raw === '' || !str_contains($raw, '[')) continue;
-            $blocks = json_decode($raw, true)['blocks'] ?? null;
-            if (!is_array($blocks)) continue;
+            $pub = (string) $p['content_published'];
+            $work = (string) ($p['content_draft'] ?? '') ?: $pub;
+            if (!str_contains($pub, '[') && !str_contains($work, '[#')) continue;
             $url = null;
-            foreach ($blocks as $b) {
-                if (!is_array($b) || !isset($b['data'])) continue;
-                $seen = [];
-                foreach (self::texts($b['data']) as $s) {
-                    if (!str_contains($s, '[') || !preg_match_all(self::PLACEHOLDER_RX, $s, $m)) continue;
-                    foreach ($m[0] as $hit) {
-                        if (isset($seen[$hit]) || in_array($hit, $ok, true)) continue;
+            foreach (['note' => $work, 'placeholder' => $pub] as $kind => $raw) {
+                if ($raw === '' || !str_contains($raw, $kind === 'note' ? '[#' : '[')) continue;
+                $blocks = json_decode($raw, true)['blocks'] ?? null;
+                if (!is_array($blocks)) continue;
+                foreach ($blocks as $b) {
+                    if (!is_array($b) || !isset($b['data'])) continue;
+                    $seen = [];
+                    $found = [];
+                    if ($kind === 'note') {
+                        foreach (self::texts($b['data'], false) as $s) foreach (\Core\EditorNotes::find($s) as $n) $found[] = $n;
+                    } else {
+                        // Notizen zuerst entfernen – Klammern darin („[# siehe [Quelle] #]“) sind keine Platzhalter
+                        foreach (self::texts($b['data']) as $s) {
+                            $s = \Core\EditorNotes::strip($s);
+                            if (str_contains($s, '[') && preg_match_all(self::PLACEHOLDER_RX, $s, $m)) array_push($found, ...$m[0]);
+                        }
+                    }
+                    foreach ($found as $hit) {
+                        if (isset($seen[$hit]) || ($kind === 'placeholder' && in_array($hit, $ok, true))) continue;
                         $seen[$hit] = true;
                         $type = (string) ($b['type'] ?? '');
                         $url ??= $own ? Pages::plainUrl($p) : '';
                         $out[] = ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit, 'block' => (string) ($b['id'] ?? ''), 'type' => $type,
-                            'label' => $own ? (string) (app()->theme->block($type)['label'] ?? $type) : $type, 'url' => $url];
+                            'label' => $own ? (string) (app()->theme->block($type)['label'] ?? $type) : $type, 'url' => $url, 'kind' => $kind, 'entry' => ''];
+                        if (count($out) >= $max) return $out;
+                    }
+                }
+            }
+        }
+        if ($page !== null) return $out;
+        // Redaktionsnotizen in Einträgen (Inhalts-Tabellen; Eingänge nie – verschlüsselt, Angaben von Besuchern)
+        foreach ($db->fetchAll('SELECT handle, name, settings_json FROM data_tables ORDER BY id') as $t) {
+            $set = json_decode((string) $t['settings_json'], true) ?: [];
+            if (($set['kind'] ?? 'content') === 'inbox' || !preg_match('~^[a-z0-9_]+$~', (string) $t['handle'])) continue;
+            try {
+                $rows = $db->fetchAll("SELECT * FROM data_{$t['handle']} ORDER BY id");
+            } catch (\Throwable) {
+                continue;   // geteilte Tabelle einer anderen Website
+            }
+            $tf = (string) ($set['title_field'] ?? '');
+            foreach ($rows as $e) {
+                $seen = [];
+                foreach ($e as $col => $v) {
+                    if (!is_string($v) || !str_contains($v, '[#')) continue;
+                    foreach (\Core\EditorNotes::find($v) as $hit) {
+                        if (isset($seen[$hit])) continue;
+                        $seen[$hit] = true;
+                        $title = \Core\EditorNotes::strip(strip_tags((string) ($e[$tf] ?? ''))) ?: '#' . $e['id'];
+                        $out[] = ['id' => (int) $e['id'], 'title' => (string) $t['name'] . ': ' . $title, 'text' => $hit, 'block' => (string) $col, 'type' => 'entry',
+                            'label' => (string) $t['name'], 'url' => $own ? url('/admin/data/' . $t['handle'] . '/' . (int) $e['id']) : '', 'kind' => 'note', 'entry' => (string) $t['handle']];
                         if (count($out) >= $max) return $out;
                     }
                 }
@@ -326,13 +380,13 @@ final class Metrics
         return $out;
     }
 
-    /** Alle Texte eines Block-Inhalts (rekursiv), HTML ohne Tags und Entities – Klammern über Formatierungen hinweg werden so gefunden */
-    private static function texts(mixed $v): \Generator
+    /** Alle Texte eines Block-Inhalts (rekursiv); $plain: HTML ohne Tags und Entities – Klammern über Formatierungen hinweg werden so gefunden */
+    private static function texts(mixed $v, bool $plain = true): \Generator
     {
         if (is_string($v)) {
-            yield str_contains($v, '<') || str_contains($v, '&') ? html_entity_decode(strip_tags($v), ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
+            yield $plain && (str_contains($v, '<') || str_contains($v, '&')) ? html_entity_decode(strip_tags($v), ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
         } elseif (is_array($v)) {
-            foreach ($v as $k => $x) if ($k !== '_fx' && $k !== '_fit') yield from self::texts($x);
+            foreach ($v as $k => $x) if ($k !== '_fx' && $k !== '_fit') yield from self::texts($x, $plain);
         }
     }
 

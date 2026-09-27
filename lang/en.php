@@ -4699,4 +4699,16 @@ return [
     'transparent' => 'transparent',
     'transparenter Rand' => 'transparent edge',
     'unscharf' => 'blurred',
+    // Redaktionsnotizen [# … #] (Core\EditorNotes, Übersicht, Netzwerk)
+    'Redaktionsnotiz – für Besucher unsichtbar' => 'Editorial note – invisible to visitors',
+    'Platzhalter' => 'Placeholder',
+    'Notiz: {text}' => 'Note: {text}',
+    'Notiz „{text}“' => 'Note “{text}”',
+    'Notiz „{text}“ im Eintrag „{page}“' => 'Note “{text}” in entry “{page}”',
+    '{n} Redaktionsnotizen offen' => '{n} editorial notes open',
+    '{n} Platzhalter und {m} Notizen offen' => '{n} placeholders and {m} notes open',
+    'Notizen [# … #] sehen nur Angemeldete – erledigt? Im Editor löschen.' => 'Notes [# … #] are only visible when signed in – done? Delete them in the editor.',
+    'An {n} Stellen (Seiten und Einträge): {pages}' => 'In {n} places (pages and entries): {pages}',
+    'Redaktionsnotiz „{text}“ auf „{page}“' => 'Editorial note “{text}” on “{page}”',
+    '{n} Redaktionsnotizen [# … #] offen (z. B. „{text}“ auf „{page}“)' => '{n} editorial notes [# … #] open (e.g. “{text}” on “{page}”)',
 ];

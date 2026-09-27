@@ -120,9 +120,14 @@ final class Stats
             $d['pages'] = (int) $db->fetchValue("SELECT COUNT(*) FROM pages WHERE type = 'page'");
             // [Platzhalter] in Seiten (wie die Übersicht der Website; bestätigte „Ist gewollt“-Klammern zählen nicht)
             $okPh = array_values(array_filter((array) (json_decode((string) $db->fetchValue('SELECT value_json FROM settings WHERE skey = ?', ['sys.placeholders_ok']), true) ?: []), 'is_string'));
-            $ph = \Core\Dashboard\Metrics::placeholders($db, $okPh);
+            // Redaktionsnotizen [# … #] (öffentlich unsichtbar) getrennt zählen – gleiche Warnung, eigene Beschriftung
+            $all = \Core\Dashboard\Metrics::placeholders($db, $okPh, 200);
+            $ph = array_values(array_filter($all, fn($h) => ($h['kind'] ?? 'placeholder') === 'placeholder'));
+            $notes = array_values(array_filter($all, fn($h) => ($h['kind'] ?? '') === 'note'));
             $d['placeholders'] = count($ph);
             $d['placeholder_first'] = $ph[0] ?? null;
+            $d['notes'] = count($notes);
+            $d['note_first'] = $notes[0] ?? null;
             $last = [(string) $db->fetchValue('SELECT MAX(updated_at) FROM pages')];
             $d['inbox_new'] = 0;
             $d['entries'] = 0;
@@ -273,6 +278,9 @@ final class Stats
         if (!empty($s['placeholders'])) $w[] = $s['placeholders'] === 1
             ? __('Platzhalter {text} auf „{page}“', ['text' => $s['placeholder_first']['text'] ?? '', 'page' => $s['placeholder_first']['title'] ?? ''])
             : __('{n} Platzhalter in Seiten (z. B. {text} auf „{page}“)', ['n' => $s['placeholders'], 'text' => $s['placeholder_first']['text'] ?? '', 'page' => $s['placeholder_first']['title'] ?? '']);
+        if (!empty($s['notes'])) $w[] = $s['notes'] === 1
+            ? __('Redaktionsnotiz „{text}“ auf „{page}“', ['text' => mb_strimwidth((string) ($s['note_first']['text'] ?? ''), 0, 80, '…'), 'page' => $s['note_first']['title'] ?? ''])
+            : __('{n} Redaktionsnotizen [# … #] offen (z. B. „{text}“ auf „{page}“)', ['n' => $s['notes'], 'text' => mb_strimwidth((string) ($s['note_first']['text'] ?? ''), 0, 80, '…'), 'page' => $s['note_first']['title'] ?? '']);
         if (($s['environment'] ?? 'production') === 'production' && !empty($s['initialized'])
             && (empty($s['backup']) || $s['backup']['at'] < time() - 7 * 86400)) $w[] = __('Keine Sicherung in den letzten 7 Tagen');
         return $w;
