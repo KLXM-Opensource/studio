@@ -81,6 +81,11 @@
 .cms-block.is-moved{animation:cms-moved 1s ease}
 @keyframes cms-moved{0%{box-shadow:inset 0 0 0 3px #EDE9E3}100%{box-shadow:inset 0 0 0 3px rgba(246,201,168,0)}}
 @media (prefers-reduced-motion:reduce){.cms-block.is-moved{animation:none}}
+/* Sprung zu einem Block (?edit=1#b-{id}, editor.js jumpToBlock): kurz hervorheben, [Platzhalter] darin markieren */
+.cms-block.is-target{animation:cms-target 2.6s ease}
+@keyframes cms-target{0%,55%{box-shadow:inset 0 0 0 4px #E8A33D}100%{box-shadow:inset 0 0 0 4px rgba(232,163,61,0)}}
+@media (prefers-reduced-motion:reduce){.cms-block.is-target{animation:none;box-shadow:inset 0 0 0 4px #E8A33D}}
+::highlight(cms-placeholder){background-color:#FBD38D;color:#1A1A1A;text-decoration:underline wavy #B45309}
 
 /* Formatierungsleiste: Shadow DOM der Ebene (editor.shadow.css) */
 [data-edit].is-rich{min-height:1.6em;outline-offset:6px}

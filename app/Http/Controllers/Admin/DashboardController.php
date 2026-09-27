@@ -24,7 +24,7 @@ final class DashboardController extends AdminController
         $checks = Metrics::setupChecks();
         $ext = Dashboard::extensions($user);
         return $this->view('dashboard', [
-            'css' => ['css/dashboard.css'],
+            'css' => ['css/dashboard.css', 'css/placeholders.css'],
             'cards' => $cards,
             'figures' => [...Metrics::figures($user), ...$ext['tiles']],
             'todos' => Metrics::todos($user, $checks),
@@ -67,16 +67,22 @@ final class DashboardController extends AdminController
         return $this->back('/admin' . ($do === 'reset' ? '' : '?anpassen=1') . ($card !== '' && $do !== 'reset' ? '#dash-' . $card : ''), 'success', $msg);
     }
 
-    /** Klammer-Text als gewollt bestätigen (POST /admin/api/dashboard/placeholder-ok, text) – Einrichtungs-Prüfung meldet ihn nicht mehr */
+    /**
+     * Klammer-Text als gewollt bestätigen (POST /admin/api/dashboard/placeholder-ok, text, back) – wird auf keiner Seite mehr gemeldet.
+     * Gleiche Erkennung wie Metrics::placeholders (auch klein geschrieben, z. B. „[bitte ergänzen: …]“), bis 1000 Zeichen.
+     */
     public function placeholderOk(Request $r): Response
     {
         $this->auth($r);
-        if (!can('settings.edit') && !can('system.manage')) throw new HttpException(403);
+        if (!can('pages.edit') && !can('settings.edit') && !can('system.manage')) throw new HttpException(403);
         $text = trim($r->str('text'));
-        if (!preg_match('~^\[[A-ZÄÖÜ][^\]\[]{2,}\]$~u', $text) || mb_strlen($text) > 200) throw new HttpException(422, __('Ungültige Angabe.'));
+        if (mb_strlen($text) > 1000 || !preg_match('~^' . substr(Metrics::PLACEHOLDER_RX, 1, -2) . '$~u', $text)) throw new HttpException(422, __('Ungültige Angabe.'));
         $ok = Metrics::placeholdersOk();
         if (!in_array($text, $ok, true)) app()->settings->set('sys.placeholders_ok', array_slice([...$ok, $text], -100));
-        return $this->back('/admin', 'success', __('{text} wird nicht mehr als Platzhalter gemeldet.', ['text' => $text]));
+        // Rücksprung: Übersicht oder Seiteneinstellungen (nur diese internen Ziele)
+        $back = $r->str('back');
+        $to = preg_match('~^/admin(?:/pages/\d+)?(?:\?ph=1)?(?:#platzhalter)?$~', $back) ? $back : '/admin';
+        return $this->back($to, 'success', __('{text} wird nicht mehr als Platzhalter gemeldet.', ['text' => mb_strimwidth($text, 0, 120, '…]')]));
     }
 
     /** Schnellaktionen der Kopfzeile – nur, was die Rolle darf */

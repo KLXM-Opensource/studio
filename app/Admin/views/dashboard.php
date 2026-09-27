@@ -104,8 +104,14 @@ $fmtTrend = function (?array $t): string {
             <div class="dash-todo__main">
               <p class="dash-todo__title"><span class="dash-todo__count"><?= (int) $t['count'] ?></span> <?= e($t['title']) ?><?php if ($t['tone'] === 'err'): ?> <span class="dash-todo__tag"><?= e(__('dringend')) ?></span><?php endif; ?></p>
               <p class="dash-todo__text"><?= e($t['text']) ?></p>
+              <?php if (!empty($t['hits'])): // Platzhalter: alle Fundstellen je Seite und Block ?>
+              <details class="dash-ph" id="platzhalter"<?= ($_GET['ph'] ?? '') === '1' ? ' open' : '' ?>>
+                <summary><?= e(count($t['hits']) === 1 ? __('Fundstelle anzeigen') : __('Alle {n} Fundstellen anzeigen', ['n' => count($t['hits'])])) ?></summary>
+                <?= \Core\Theme::capture(ROOT . '/app/Admin/views/pages/_placeholders.php', ['hits' => $t['hits'], 'back' => '/admin?ph=1#platzhalter', 'showPage' => true, 'backend' => true, 'hTag' => 'h3']) ?>
+              </details>
+              <?php endif; ?>
             </div>
-            <a class="adm-btn adm-btn--small<?= $n === 0 ? ' adm-btn--primary' : '' ?>" href="<?= e(url($t['href'])) ?>"><?= e($t['action']) ?><span class="sr-only">: <?= e($t['title']) ?></span></a>
+            <a class="adm-btn adm-btn--small<?= $n === 0 ? ' adm-btn--primary' : '' ?>" href="<?= e(!empty($t['hits']) ? $t['href'] : url($t['href'])) ?>"><?= e($t['action']) ?><span class="sr-only">: <?= e($t['title']) ?></span></a>
             <?php if (!empty($t['dismiss'])): ?><form method="post" action="<?= e(url($t['dismiss']['url'])) ?>" class="dash-todo__alt"><?= csrf_field() ?><input type="hidden" name="text" value="<?= e($t['dismiss']['value']) ?>"><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('{text} ist kein Platzhalter, sondern Absicht – nicht mehr melden', ['text' => $t['dismiss']['value']])) ?>"><?= e($t['dismiss']['label']) ?></button></form><?php endif; ?>
           </li>
           <?php endforeach; ?>

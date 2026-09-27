@@ -9,6 +9,14 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
   <?php if (!$isNew): ?><a class="adm-btn adm-btn--primary" href="<?= e(\Core\Pages::url($page)) ?>?edit=1">Inhalte bearbeiten</a><?php endif; ?>
 </header>
 
+<?php if (!empty($placeholders)): // [Platzhalter] dieser Seite (Core\Dashboard\Metrics) – Inhalte bearbeitet der Frontend-Editor, daher dorthin je Block ?>
+<section class="adm-card ph-card" id="platzhalter" aria-labelledby="ph-h">
+  <h2 id="ph-h"><?= icon('brackets-curly') ?> <?= e(count($placeholders) === 1 ? __('1 Platzhalter auf dieser Seite') : __('{n} Platzhalter auf dieser Seite', ['n' => count($placeholders)])) ?></h2>
+  <p class="adm-muted"><?= e(__('Die Texte der Blöcke bearbeiten Sie direkt auf der Website: „Im Frontend bearbeiten“ öffnet den Editor am passenden Block.')) ?></p>
+  <?= \Core\Theme::capture(ROOT . '/app/Admin/views/pages/_placeholders.php', ['hits' => $placeholders, 'back' => '/admin/pages/' . (int) $page['id'] . '#platzhalter', 'showPage' => false, 'backend' => false]) ?>
+</section>
+<?php endif; ?>
+
 <div class="adm-grid2 adm-grid2--wide">
   <form class="adm-card" method="post" action="<?= e(url($isNew ? '/admin/pages/new' : '/admin/pages/' . $page['id'])) ?>" novalidate>
     <?= csrf_field() ?>

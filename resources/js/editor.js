@@ -563,8 +563,52 @@ editor = new EditorJS({
     refreshMoveButtons();
     dirty = false;
     Bar?.state('clean');
+    requestAnimationFrame(() => jumpToBlock());
   },
 });
+
+// ------------------------------------------------------------------ Sprung zu einem Block (z. B. aus „Platzhalter ersetzen“ der Übersicht)
+// ?edit=1#b-{blockId} (oder ?block={blockId}, auch die eigene Sprungmarke des Blocks): Block aufklappen, in die Mitte scrollen,
+// kurz hervorheben, [Platzhalter] darin markieren und – wenn neben dem Block Platz ist – die Felder in der Seitenleiste öffnen
+const PLACEHOLDER_RX = /\[\p{L}[^\][]{2,}\](?!\()/gu;   // wie Core\Dashboard\Metrics::PLACEHOLDER_RX
+function jumpToBlock() {
+  let hash = '';
+  try { hash = decodeURIComponent(location.hash.slice(1)); } catch {}
+  const id = new URLSearchParams(location.search).get('block') || (hash.startsWith('b-') ? hash.slice(2) : '');
+  const tool = (id && tools.get(id)) || (hash && [...tools.values()].find(t => t.tuneData.anchor && t.tuneData.anchor === hash));
+  if (!tool?.el) return;
+  const el = tool.el, calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (el.classList.contains('is-collapsed')) tool.toggleCollapse(false, false);
+  markPlaceholders(el);
+  const go = () => el.scrollIntoView({ block: 'center', behavior: calm ? 'auto' : 'smooth' });
+  go();
+  // Bilder darüber verschieben die Lage noch – nach dem Laden erneut ausrichten, solange niemand selbst gescrollt hat
+  if (d.readyState !== 'complete') {
+    let moved = false;
+    const stop = () => { moved = true; };
+    addEventListener('wheel', stop, { once: true, passive: true }); addEventListener('touchmove', stop, { once: true, passive: true });
+    addEventListener('load', () => { if (!moved) el.scrollIntoView({ block: 'center' }); }, { once: true });
+  }
+  el.classList.add('is-target');
+  setTimeout(() => el.classList.remove('is-target'), calm ? 4000 : 2600);
+  // Seitenleiste nur, wenn sie den Block nicht verdeckt (ab 1100 px rückt die Seite zur Seite, siehe editor.css)
+  if (matchMedia('(min-width: 1101px)').matches) tool.openDrawer();
+}
+/** [Platzhalter] im Block farbig markieren (CSS Custom Highlight API, ändert das DOM nicht – bearbeitbare Texte bleiben unberührt) */
+function markPlaceholders(el) {
+  if (!window.Highlight || !CSS.highlights) return;
+  const ranges = [];
+  const walk = d.createTreeWalker(el.querySelector('.cms-block__preview') || el, NodeFilter.SHOW_TEXT);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    if (!n.data.includes('[')) continue;
+    for (const m of n.data.matchAll(PLACEHOLDER_RX)) {
+      const r = new Range();
+      r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length);
+      ranges.push(r);
+    }
+  }
+  if (ranges.length) CSS.highlights.set('cms-placeholder', new Highlight(...ranges));
+}
 
 async function save(publish = false) {
   Bar?.state(publish ? 'publishing' : 'saving');

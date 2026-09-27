@@ -181,19 +181,19 @@ final class Metrics
                     implode(' · ', array_map(fn($c) => $c['label'], array_slice($open, 0, 3))) . (count($open) > 3 ? ' …' : ''), $open[0]['link'], __('Weiter einrichten'));
             }
         }
-        // Platzhalter (Inhalt, daher auch für die Redaktion): Anzahl aller Fundstellen, erste Seite direkt öffnen, gewollte Klammern bestätigen
+        // Platzhalter (Inhalt, daher auch für die Redaktion): alle Fundstellen je Seite und Block aufklappbar (View: pages/_placeholders.php)
+        // mit „Im Frontend bearbeiten“ (Editor springt zum Block), „In der Verwaltung“ und „Ist gewollt“ je Fundstelle
         if (can('pages.edit') || can('settings.edit') || $admin) {
             $all = self::placeholders(app()->db, self::placeholdersOk());
             if ($all) {
                 $first = $all[0];
                 $pages = array_values(array_unique(array_map(fn($h) => $h['title'], $all)));
                 $add('placeholder', 2, 'warn', 'brackets-curly', count($all),
-                    count($all) === 1 ? __('Platzhalter {text} ersetzen', ['text' => $first['text']]) : __('{n} Platzhalter in Seiten ersetzen', ['n' => count($all)]),
-                    __('Zuerst: {text} auf „{page}“.', ['text' => mb_strimwidth($first['text'], 0, 90, '…]'), 'page' => $first['title']])
-                        . (count($pages) > 1 ? ' ' . __('Weitere Seiten: {pages}', ['pages' => implode(', ', array_slice(array_diff($pages, [$first['title']]), 0, 4)) . (count($pages) > 5 ? ' …' : '')]) : '')
+                    count($all) === 1 ? __('Platzhalter {text} ersetzen', ['text' => mb_strimwidth($first['text'], 0, 90, '…]')]) : __('{n} Platzhalter in Seiten ersetzen', ['n' => count($all)]),
+                    (count($pages) === 1 ? __('Auf der Seite „{page}“.', ['page' => $first['title']]) : __('Auf {n} Seiten: {pages}', ['n' => count($pages), 'pages' => implode(', ', array_slice($pages, 0, 4)) . (count($pages) > 4 ? ' …' : '')]))
                         . ' ' . __('Ist eine Klammer Absicht (z. B. in einer Anleitung), bestätigen Sie sie.'),
-                    '/admin/pages/' . $first['id'], __('Seite öffnen'));
-                $out[count($out) - 1]['dismiss'] = ['url' => '/admin/api/dashboard/placeholder-ok', 'value' => $first['text'], 'label' => __('Ist gewollt')];
+                    self::placeholderEditUrl($first), __('Im Frontend bearbeiten'));
+                $out[count($out) - 1]['hits'] = $all;
             }
         }
         if (can('pages.edit')) {
@@ -283,22 +283,57 @@ final class Metrics
         return self::placeholders(app()->db, self::placeholdersOk(), 1)[0] ?? null;
     }
 
+    /** Frontend-Editor direkt am Block der Fundstelle (resources/js/editor.js: #b-{id} scrollt hin, markiert und öffnet die Felder) */
+    public static function placeholderEditUrl(array $hit): string
+    {
+        return $hit['url'] . '?edit=1' . ($hit['block'] !== '' ? '#b-' . rawurlencode($hit['block']) : '');
+    }
+
     /**
-     * [Platzhalter] in den Seiten einer Website (auch für die Netzwerk-Übersicht mit fremder Datenbank)
-     * @return list<array{id:int,title:string,text:string}>
+     * [Platzhalter] in den Seiten einer Website (auch für die Netzwerk-Übersicht mit fremder Datenbank), je Block:
+     * gesucht wird in allen Texten eines Blocks (auch verschachtelt, z. B. Listen-Einträge), ohne HTML-Tags.
+     * url und label (Blocktyp) nur für die eigene Website (Adresse und Kit der fremden Website sind hier unbekannt).
+     * @return list<array{id:int,title:string,text:string,block:string,type:string,label:string,url:string}>
      */
-    public static function placeholders(\Core\Database $db, array $ok, int $max = 50): array
+    public static function placeholders(\Core\Database $db, array $ok, int $max = 100, ?int $page = null): array
     {
         $out = [];
-        foreach ($db->fetchAll("SELECT id, title, content_published FROM pages WHERE type = 'page' ORDER BY is_home DESC, sort, title") as $p) {
-            if (!preg_match_all(self::PLACEHOLDER_RX, (string) $p['content_published'], $m)) continue;
-            foreach (array_unique($m[0]) as $hit) {
-                if (in_array($hit, $ok, true)) continue;
-                $out[] = ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit];
-                if (count($out) >= $max) return $out;
+        $own = $db === app()->db;
+        $where = $page === null ? '' : ' AND id = ' . $page;
+        foreach ($db->fetchAll("SELECT * FROM pages WHERE type = 'page'{$where} ORDER BY is_home DESC, sort, title") as $p) {
+            $raw = (string) $p['content_published'];
+            if ($raw === '' || !str_contains($raw, '[')) continue;
+            $blocks = json_decode($raw, true)['blocks'] ?? null;
+            if (!is_array($blocks)) continue;
+            $url = null;
+            foreach ($blocks as $b) {
+                if (!is_array($b) || !isset($b['data'])) continue;
+                $seen = [];
+                foreach (self::texts($b['data']) as $s) {
+                    if (!str_contains($s, '[') || !preg_match_all(self::PLACEHOLDER_RX, $s, $m)) continue;
+                    foreach ($m[0] as $hit) {
+                        if (isset($seen[$hit]) || in_array($hit, $ok, true)) continue;
+                        $seen[$hit] = true;
+                        $type = (string) ($b['type'] ?? '');
+                        $url ??= $own ? Pages::plainUrl($p) : '';
+                        $out[] = ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit, 'block' => (string) ($b['id'] ?? ''), 'type' => $type,
+                            'label' => $own ? (string) (app()->theme->block($type)['label'] ?? $type) : $type, 'url' => $url];
+                        if (count($out) >= $max) return $out;
+                    }
+                }
             }
         }
         return $out;
+    }
+
+    /** Alle Texte eines Block-Inhalts (rekursiv), HTML ohne Tags und Entities – Klammern über Formatierungen hinweg werden so gefunden */
+    private static function texts(mixed $v): \Generator
+    {
+        if (is_string($v)) {
+            yield str_contains($v, '<') || str_contains($v, '&') ? html_entity_decode(strip_tags($v), ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
+        } elseif (is_array($v)) {
+            foreach ($v as $k => $x) if ($k !== '_fx') yield from self::texts($x);
+        }
     }
 
     // ================================================================= Zuletzt bearbeitet

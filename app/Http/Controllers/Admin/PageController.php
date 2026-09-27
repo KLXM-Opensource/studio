@@ -47,7 +47,10 @@ final class PageController extends AdminController
     {
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
-        return $this->view('pages/form', ['page' => $page, 'errors' => [], 'old' => $page, 'revisions' => Pages::revisions((int) $id)]);
+        // [Platzhalter] dieser Seite oben zeigen (Sprungziel „In der Verwaltung“ aus der Übersicht) – bearbeitet wird im Frontend-Editor
+        $ph = \Core\Dashboard\Metrics::placeholders(app()->db, \Core\Dashboard\Metrics::placeholdersOk(), 500, (int) $page['id']);
+        return $this->view('pages/form', ['page' => $page, 'errors' => [], 'old' => $page, 'revisions' => Pages::revisions((int) $id),
+            'placeholders' => $ph, 'css' => $ph ? ['css/placeholders.css'] : []]);
     }
 
     public function update(Request $r, string $id): Response
