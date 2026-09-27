@@ -106,7 +106,11 @@ if ($user && ($req = app()->request)) {
 <aside class="adm-side" id="adm-side" aria-label="<?= e(__('Menü')) ?>">
   <a class="adm-side__close" href="#main" aria-label="<?= e(__('Menü schließen')) ?>" data-drawer-close><?= icon('x') ?></a>
   <div class="adm-brand-row">
+  <?php if ($netUser): // Netzwerk-Konten: der Website-Name steht im Umschalter darunter – hier kein doppelter Titel ?>
+  <a class="adm-brand adm-brand--net" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><small><?= e(__('Verwaltung')) ?></small></a>
+  <?php else: ?>
   <a class="adm-brand" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></a>
+  <?php endif; ?>
     <div class="adm-brand-tools">
       <button type="button" class="adm-site-open adm-site-open--search" data-spotlight aria-keyshortcuts="Meta+K Control+K" title="<?= e(__('Suchen')) ?> (⌘K)" aria-label="<?= e(__('Suchen')) ?>"><?= icon('magnifying-glass') ?></button>
       <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM Ai) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
@@ -117,7 +121,7 @@ if ($user && ($req = app()->request)) {
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
-    <summary><?php // Name der aktuellen Website steht schon in der Marke darüber – hier nur die Aktion ?><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(__('Website wechseln')) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('aktuell: {site}', ['site' => site()->label()])) ?></span></summary>
+    <summary><?php // Für Netzwerk-Konten ersetzt der Umschalter den Titel der Marke ?><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(site()->label()) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('Website wechseln')) ?></span></summary>
     <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netswitch__menu">
       <?= csrf_field() ?>
       <p class="adm-netswitch__h"><?= e(__('Website wechseln')) ?></p>

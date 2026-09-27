@@ -38,6 +38,7 @@ body.adm--bare{display:block}
 .adm-brand span{font-size:19px;font-weight:800;letter-spacing:-.035em}
 .adm-brand i{font-style:normal;color:#EDE9E3}
 .adm-brand small{font-size:12px;color:#A9B0AD;margin-top:4px}
+.adm-brand--net{justify-content:center}.adm-brand--net small{margin-top:0}
 .adm-brand--auth{color:var(--adm-ink);align-items:center;margin-bottom:20px}
 .adm-brand--auth i{color:var(--adm-a-ink)}
 .adm-brand--auth small{color:var(--adm-t3)}
