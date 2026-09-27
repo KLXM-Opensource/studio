@@ -51,3 +51,4 @@ deploy/targets/*.env
 /vendor/
 # Symbol-Sprites je Website (Core\Icons::siteSprite, entstehen zur Laufzeit)
 /public/assets/icons/sites/
+/storage/fragments.json

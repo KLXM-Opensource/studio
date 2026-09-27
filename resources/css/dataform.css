@@ -1,5 +1,16 @@
-/* Kern-Block „Formular (Datentabelle)“ – neutral; Themes überschreiben über Variablen oder eine eigene css/dataform.css */
-.dff-wrap{--dff-accent:currentColor;--dff-line:rgba(0,0,0,.45);--dff-bg:#fff;--dff-ink:inherit;--dff-muted:rgba(0,0,0,.66);--dff-err:#B3261E;--dff-err-bg:#FBEAEA;--dff-radius:8px;--dff-gap:18px;--dff-focus:currentColor}
+/* Kern-Block „Formular (Datentabelle)“ – neutral; Kits überschreiben über Variablen oder eine eigene css/dataform.css.
+   Hell und dunkel ohne eigene Regeln: Flächen und Linien folgen dem Farbschema (color-scheme) des Kits über die
+   Systemfarben Canvas/CanvasText – hell exakt wie bisher (#fff, Schwarz 45 %/66 %), dunkel (Kit setzt color-scheme:dark,
+   z. B. :root im Dunkelmodus oder dunkle Abschnitte) dunkle Felder mit heller Schrift. Fehlerfarben per light-dark(). */
+.dff-wrap{--dff-accent:currentColor;--dff-line:rgba(0,0,0,.45);--dff-bg:#fff;--dff-ink:inherit;--dff-muted:rgba(0,0,0,.66);--dff-err:#B3261E;--dff-err-bg:#FBEAEA;--dff-err-ink:#3b0d0a;--dff-radius:8px;--dff-gap:18px;--dff-focus:currentColor}
+@supports (color:color-mix(in srgb,CanvasText 45%,transparent)){
+  .dff-wrap{--dff-line:color-mix(in srgb,CanvasText 45%,transparent);--dff-bg:Canvas;--dff-muted:color-mix(in srgb,CanvasText 66%,transparent)}
+}
+@supports (color:light-dark(#000,#fff)){
+  .dff-wrap{--dff-err:light-dark(#B3261E,#FFB4AB);--dff-err-bg:light-dark(#FBEAEA,color-mix(in srgb,#B3261E 24%,Canvas));--dff-err-ink:light-dark(#3b0d0a,#FFDAD6)}
+}
+/* Dunkelmodus der Kits, die kein color-scheme setzen (Klassen/Attribute): Formular übernimmt das dunkle Schema */
+:is(.is-dark,.dark,[data-scheme=dark],[data-theme=dark],[data-mode=dark]) .dff-wrap{color-scheme:dark}
 .dff-head{margin-bottom:clamp(20px,3vw,36px);max-width:46em}
 .dff-intro{margin-top:12px}
 .dff{display:grid;gap:var(--dff-gap);max-width:46rem}
@@ -27,7 +38,7 @@
 .dff-options{display:grid;gap:8px}
 .dff-err{margin:0;font-size:.92em;font-weight:600;color:var(--dff-err)}
 .dff-err::before{content:"! ";font-weight:800}
-.dff-summary{padding:14px 18px;border-left:4px solid var(--dff-err);border-radius:var(--dff-radius);background:var(--dff-err-bg);color:#3b0d0a}
+.dff-summary{padding:14px 18px;border-left:4px solid var(--dff-err);border-radius:var(--dff-radius);background:var(--dff-err-bg);color:var(--dff-err-ink)}
 .dff-summary__title{margin:0;font-weight:700}
 .dff-summary ul{margin:6px 0 0;padding-left:1.2em}
 .dff-summary ul:empty{display:none}
