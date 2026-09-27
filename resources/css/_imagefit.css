@@ -1,0 +1,34 @@
+/* Bild im Rahmen (Core\ImageFit, resources/js/_imagefit.js): Dialog mit Vorschau im Rahmen der Stelle */
+.ifit-stage{display:grid;gap:8px;align-content:start}
+.ifit-frame{position:relative;width:100%;justify-self:center;border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--adm-line);
+  background:repeating-conic-gradient(var(--adm-fill,#EEE) 0 25%,var(--adm-card,#fff) 0 50%) 0 0/18px 18px}
+.ifit-frame picture{display:block;width:100%;height:100%}
+.ifit-frame img{display:block;width:100%;height:100%;object-fit:cover}
+.ifit-ratio{margin:0}
+.ifit-frame>.img-fit--original>img{max-height:56vh}
+.ifit-modes,.ifit-bgs{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
+.ifit-modes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ifit-modes legend{grid-column:1/-1}
+.ifit-modes legend,.ifit-bgs legend{margin-bottom:6px;padding:0;font-weight:700;font-size:14px}
+.ifit-mode{position:relative;display:grid;align-content:start;gap:2px;padding:9px 12px 9px 36px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--adm-line);cursor:pointer}
+.ifit-mode input{position:absolute;left:12px;top:12px;margin:0;accent-color:var(--adm-a)}
+.ifit-mode__l{font-weight:600;font-size:14px}
+.ifit-mode__h{font-size:12.5px;color:var(--adm-t2)}
+.ifit-mode__h:empty{display:none}
+.ifit-mode:hover{box-shadow:inset 0 0 0 1px var(--adm-in)}
+.ifit-mode:has(input:checked){box-shadow:inset 0 0 0 2px var(--adm-a)}
+.ifit-mode:has(input:focus-visible),.ifit-bg:has(input:focus-visible){outline:2px solid var(--adm-a);outline-offset:2px}
+.ifit-bgs{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
+.ifit-bg__l{hyphens:auto;overflow-wrap:anywhere}
+.ifit-bgs legend{grid-column:1/-1}
+.ifit-bg{position:relative;display:grid;gap:4px;justify-items:center;padding:4px;border-radius:8px;cursor:pointer;font-size:12px;text-align:center;line-height:1.25}
+.ifit-bg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.ifit-bg__sw{display:block;width:100%;height:34px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--adm-line);background-size:cover;background-position:center}
+.ifit-bg__sw--none{background:repeating-conic-gradient(var(--adm-fill,#EEE) 0 25%,var(--adm-card,#fff) 0 50%) 0 0/10px 10px}
+.ifit-bg__sw--blur{filter:blur(3px);transform:scale(.94)}
+.ifit-bg:hover .ifit-bg__sw{box-shadow:0 0 0 2px var(--adm-in)}
+.ifit-bg:has(input:checked) .ifit-bg__sw{box-shadow:0 0 0 3px var(--adm-a)}
+.ifit-bg:has(input:checked) .ifit-bg__l{font-weight:700}
+.ifit-color{align-self:start;width:100%;height:34px;margin-top:4px;padding:2px;border:1px solid var(--adm-in);border-radius:6px;background:var(--adm-card);cursor:pointer}
+.md-fit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
+@media (max-width:720px){.ifit-modes{grid-template-columns:1fr}}

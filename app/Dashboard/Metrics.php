@@ -332,7 +332,7 @@ final class Metrics
         if (is_string($v)) {
             yield str_contains($v, '<') || str_contains($v, '&') ? html_entity_decode(strip_tags($v), ENT_QUOTES | ENT_HTML5, 'UTF-8') : $v;
         } elseif (is_array($v)) {
-            foreach ($v as $k => $x) if ($k !== '_fx') yield from self::texts($x);
+            foreach ($v as $k => $x) if ($k !== '_fx' && $k !== '_fit') yield from self::texts($x);
         }
     }
 

@@ -9,7 +9,8 @@ use Core\Block;
  * Selbsttest des Block-Baukastens: php bin/console blocks:selftest
  * Prüft Escaping und XSS-Abwehr der Vorlagensprache (Text, Attribute, Links, Rich-Text, Symbole), Übersetzungsfehler,
  * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer.
- * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx).
+ * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx) und Bild im Rahmen
+ * (Core\ImageFit: Format, Vorrang Einbindung → Mediathek → automatisch, Klassen, Regeln, transparenter Rand).
  */
 final class SelfTest
 {
@@ -27,6 +28,7 @@ final class SelfTest
             $t->css();
             $t->export();
             $t->imageFx();
+            $t->imageFit();
         } finally {
             app()->editing = $prev;
         }
@@ -57,6 +59,55 @@ final class SelfTest
         $this->assert($ok && $fx::classFor(['id' => 7, 'adjust' => '']) === '', 'ImageFx: Einbindung vor global, erster Pfad gewinnt');
         $html = $fx::inject('<html><head><title>x</title></head><body><img class="a ifx ifx-gray"></body></html>');
         $this->assert(substr_count($html, 'data-ifx-css') === 1 && $fx::inject('<head></head><img class="fx50">') === '<head></head><img class="fx50">', 'ImageFx: Stylesheet nur bei Bedarf');
+    }
+
+    /** Bild im Rahmen (Core\ImageFit): Format, Vorrang, Klassen am <picture>, erzeugte Regeln, Bereinigung, Transparenz */
+    private function imageFit(): void
+    {
+        $f = \Core\ImageFit::class;
+        $f::reset();
+        $this->assert($f::normalize('CONTAIN  #1E2638') === 'contain #1e2638' && $f::normalize('contain transparent') === 'contain'
+            && $f::normalize('contain #abc') === 'contain #aabbcc' && $f::normalize('') === '', 'ImageFit: kanonische Schreibweise');
+        $this->assert($f::normalize('original blur') === null && $f::normalize('cover #fff') === null && $f::normalize('stretch') === null
+            && $f::normalize('contain red') === null && $f::normalize('contain url(x)') === null && $f::normalize('contain kit:Sur-face') === null, 'ImageFit: ungültige Werte abgelehnt');
+        $this->assert($f::normalize(['mode' => 'contain', 'bg' => 'blur']) === 'contain blur' && $f::normalize(['mode' => 'original']) === 'original', 'ImageFit: Angabe als Objekt');
+        $fields = [['name' => 'image', 'type' => 'media'], ['name' => 'items', 'type' => 'repeater', 'fields' => [['name' => 'image', 'type' => 'media']]]];
+        $clean = $f::sanitize(['image' => 'contain blur', 'items.0.image' => 'original', 'items.1.image' => 'contain', 'image2' => 'contain', 'items.0.image.x' => 'cover'],
+            $fields, ['image' => 7, 'items' => [['image' => 8], ['image' => null]]]);
+        $this->assert($clean === ['image' => 'contain blur', 'items.0.image' => 'original'], 'ImageFit: data._fit bereinigt (nur Bild-Felder mit Bild)');
+        $jpg = ['id' => 7, 'mime' => 'image/jpeg', 'variants_json' => '{}', 'fit' => ''];
+        $svg = ['id' => 9, 'mime' => \Core\Svg::MIME, 'variants_json' => '{}', 'fit' => ''];
+        $png = ['id' => 11, 'mime' => 'image/png', 'variants_json' => '{"alpha":true}', 'fit' => '', 'crops' => ''];
+        $this->assert($f::resolve($jpg) === null && $f::resolve($svg)['mode'] === 'contain' && $f::resolve($svg)['auto'] === true
+            && $f::resolve($png)['mode'] === 'contain', 'ImageFit: automatisch – Foto füllt, SVG und transparenter Rand passen ein');
+        $f::enter(['_fit' => ['image' => 'original', 'items.0.image' => 'contain'], 'image' => 7, 'items' => [['image' => 9]]]);
+        $r1 = $f::resolve(['fit' => 'contain blur'] + $jpg);
+        $r2 = $f::resolve($svg);
+        $f::leave();
+        $f::enter(['_fit' => ['image' => 'cover'], 'image' => 9]);
+        $r3 = $f::resolve($svg);
+        $f::leave();
+        $this->assert($r1['mode'] === 'original' && $r2['mode'] === 'contain' && $r2['auto'] === false && $r3 === null
+            && $f::resolve(['fit' => 'contain blur'] + $jpg)['bg'] === 'blur', 'ImageFit: Einbindung vor Mediathek vor automatisch, „Füllen“ hebt auf');
+        $cls = $f::pictureClass(['mode' => 'contain', 'bg' => '#1e2638', 'auto' => false], $jpg);
+        $this->assert($cls === 'img-fit img-fit--contain img-fit-c-1e2638' && str_contains($f::css(), '.img-fit-c-1e2638{--img-fit-bg:#1e2638}'), 'ImageFit: Klassen und Regel für Farbe');
+        $this->assert($f::pictureClass(['mode' => 'original', 'bg' => '', 'auto' => true], $jpg) === 'img-fit img-fit--original img-fit--auto', 'ImageFit: Originalformat');
+        $file = site()->mediaDir('fit') . '/fit-' . substr(sha1($f::css()), 0, 12) . '.css';
+        $had = is_file($file);
+        $html = $f::inject('<html><head></head><body><picture class="img-fit img-fit--contain img-fit-c-1e2638"><img></picture></body></html>');
+        if (!$had) @unlink($file);   // Testdatei nicht liegen lassen
+        $this->assert(substr_count($html, 'data-img-fit-css') === 1 && str_contains($html, '/fit/fit-') && $f::css() === ''
+            && $f::inject('<head></head><picture><img></picture>') === '<head></head><picture><img></picture>', 'ImageFit: Stylesheet und Regeln nur bei Bedarf');
+        // Transparenter Rand: Logo auf durchsichtigem Grund ja, deckendes Bild nein
+        $logo = imagecreatetruecolor(60, 40);
+        imagealphablending($logo, false);
+        imagesavealpha($logo, true);
+        imagefill($logo, 0, 0, imagecolorallocatealpha($logo, 0, 0, 0, 127));
+        imagefilledrectangle($logo, 15, 10, 45, 30, imagecolorallocatealpha($logo, 200, 30, 30, 0));
+        $photo = imagecreatetruecolor(60, 40);
+        imagefill($photo, 0, 0, imagecolorallocate($photo, 90, 120, 150));
+        $this->assert($f::edgeAlpha($logo) && !$f::edgeAlpha($photo), 'ImageFit: transparenter Rand erkannt');
+        $f::reset();
     }
 
     private function assert(bool $cond, string $label): void

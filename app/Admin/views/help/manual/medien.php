@@ -37,6 +37,16 @@
   </ul>
   <p><b>Vorher/Nachher</b> zeigt das Original zum Vergleich, jedes Werkzeug hat ein eigenes „… zurücksetzen“. Mit <b>Speichern</b> entstehen die neuen Bildgrößen (kann einige Sekunden dauern); überall, wo das Bild verwendet wird, erscheint die neue Fassung. <b>Eigene Zuschnitte je Format</b> (siehe oben) werden dabei zurückgesetzt, weil sich das Bild geändert hat – bitte kurz prüfen. Bei Bildern aus <b>geteilten Medien</b> wirkt die Bearbeitung auf allen Websites, die das Bild nutzen. Bedienung auch mit Tastatur: Ecken bzw. Ausschnitt auswählen (<kbd>Tab</kbd>) und mit den Pfeiltasten verschieben, mit <kbd>⇧</kbd> in großen Schritten. Nicht bearbeitbar sind GIF-Dateien und Videos; Handy-Fotos werden schon beim Hochladen richtig herum gedreht.</p>
 
+  <h3 id="bild-im-rahmen">Bild im Rahmen: füllen, einpassen, Originalformat</h3>
+  <p>Viele Blöcke zeigen Bilder in einem <b>Rahmen mit festem Format</b>, z. B. 16:10 bei Karten oder 4:3 in der Galerie. Normalerweise füllt das Bild den Rahmen und wird am Rand beschnitten – Fokuspunkt und Zuschnitt bestimmen, was sichtbar bleibt. Passt das nicht (Hochformat im Querformat-Rahmen, Logo, Grafik mit Schrift), wählen Sie im Bearbeitungsmodus am Bild <b>Rahmen</b> (oder in der Seitenleiste am Bild-Feld <b>Rahmen …</b>):</p>
+  <ul>
+    <li><b>Füllen (zuschneiden):</b> wie bisher – der Rahmen ist ganz gefüllt, Ränder werden abgeschnitten.</li>
+    <li><b>Einpassen:</b> das ganze Bild ist im Rahmen zu sehen, nichts wird abgeschnitten. Die freie Fläche bekommt einen <b>Hintergrund</b>: <b>Transparent</b> (die Fläche des Kits scheint durch), eine <b>Farbe des Kits</b> (z. B. „Fläche“ oder „Band“), eine <b>eigene Farbe</b> oder <b>Unscharf</b> – eine vergrößerte, weichgezeichnete Kopie des Bildes, wie man es von Fotos im Hochformat kennt.</li>
+    <li><b>Originalformat:</b> der Rahmen übernimmt das Seitenverhältnis des Bildes – ein Hochformat bleibt hoch, nichts wird abgeschnitten. Die Karte wird dadurch höher oder niedriger.</li>
+  </ul>
+  <p>Die Vorschau im Fenster zeigt das Bild im Rahmen genau dieser Stelle. Die Einstellung gilt <b>nur für diese Stelle</b> und wird mit dem Entwurf gespeichert (<b>Speichern</b>/<b>Veröffentlichen</b>). Kommt dasselbe Bild in einem Block mehrmals vor, gilt die Einstellung für alle diese Stellen des Blocks.</p>
+  <p><b>Standard des Bildes:</b> Im großen Bearbeitungsfenster der Mediathek legen Sie unter <b>Darstellung im Rahmen</b> fest, wie das Bild überall dort erscheint, wo keine eigene Einstellung gewählt ist. Ohne Angabe gilt <b>Automatisch</b>: Fotos füllen den Rahmen, <b>SVG-Grafiken und PNG-Logos mit transparentem Rand</b> werden eingepasst (transparent) – so werden Logos in Galerien und Karten nicht mehr abgeschnitten. Ist für das Format ein eigener Zuschnitt gesetzt, bleibt es beim Füllen. Der Alt-Text bleibt unverändert; der unscharfe Hintergrund ist reine Dekoration und wird nicht vorgelesen.</p>
+
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
   <p>Datei auswählen → <b>Datei ersetzen …</b> (im Bearbeitungsfenster oder per Rechtsklick) → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
 
@@ -48,7 +58,7 @@
     <li><b>Bleibt erhalten:</b> Formen, Farben, Verläufe, Masken, Filter, Texte, Titel und Beschreibung (<code>title</code>, <code>desc</code>) sowie Angaben für Screenreader.</li>
     <li><b>Abgelehnt</b> werden SVGs mit <b>eingebetteten Bilddaten</b> (z. B. ein Bildschirmfoto, das als „.svg“ gespeichert wurde) oder eingebetteten Schriften: Sie wären nach dem Bereinigen leer. Bildschirmfotos bitte als PNG, JPG oder WebP hochladen; Texte im Grafikprogramm vorher in Pfade umwandeln. Ebenso abgelehnt: Dateien über 2 MB und ungültige Dateien.</li>
     <li>Wie bei Fotos braucht jede SVG einen <b>Alt-Text</b> – oder die Markierung „dekorativ“.</li>
-    <li>Fokuspunkt, Zuschnitte und „Bild bearbeiten“ gibt es für SVG nicht: Die Grafik wird immer vollständig gezeigt. „Anpassen“ (Effekte) geht.</li>
+    <li>Fokuspunkt, Zuschnitte und „Bild bearbeiten“ gibt es für SVG nicht: Die Grafik wird immer vollständig gezeigt – in Rahmen mit festem Format automatisch eingepasst (siehe <a href="#bild-im-rahmen">Bild im Rahmen</a>). „Anpassen“ (Effekte) geht.</li>
     <li>Als <b>App-Icon</b> lässt sich eine SVG nur nutzen, wenn der Server sie umwandeln kann (Imagick) – sonst weist die Seite darauf hin; dann ein PNG wählen. Als Vorschaubild für soziale Netzwerke wird eine SVG nicht verwendet.</li>
     <li>Wer keine SVGs möchte, schaltet sie unter <b>Funktionen &amp; Erweiterungen → „SVG-Grafiken hochladen“</b> ab.</li>
   </ul>

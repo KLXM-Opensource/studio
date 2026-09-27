@@ -9,6 +9,7 @@
  *  - Drag & Drop über editorjs-drag-drop.
  *  - Bild anpassen je Einbindung (Core\ImageFx): data._fx = {feldpfad: anpassung}; Knopf am Bild (_media.js) und je Bild-Feld
  *    in der Seitenleiste. Gespeichert wird mit dem normalen Entwurf.
+ *  - Bild im Rahmen je Einbindung (Core\ImageFit): data._fit = {feldpfad: „contain blur“ | „original“ | …}, gleiche Stellen.
  */
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
@@ -366,9 +367,10 @@ function makeTool(type, def) {
       byVariant();
       const onChange = () => {
         byVariant();
-        const fx = this.data._fx;   // Bildanpassungen stehen nicht im Formular
+        const fx = this.data._fx, fit = this.data._fit;   // Bildanpassungen und Rahmen stehen nicht im Formular
         this.data = formToObject(form);
         if (fx) this.data._fx = fx;
+        if (fit) this.data._fit = fit;
         markDirty(); drawerTouched(); this.refresh();
         fxFieldButtons(form, this);
       };
@@ -424,6 +426,46 @@ window.CMSEditor = Object.assign(window.CMSEditor || {}, {
     },
   },
 });
+// ------------------------------------------------------------------ Bild im Rahmen je Einbindung (Core\ImageFit)
+/** Einstellung an Pfaden setzen (null = wie in der Mediathek → Eintrag entfernen), Vorschau neu laden */
+function setFit(tool, paths, v) {
+  const fit = { ...(tool.data._fit || {}) };
+  paths.forEach(p => { if (v == null || v === '') delete fit[p]; else fit[p] = v; });
+  if (Object.keys(fit).length) tool.data._fit = fit; else delete tool.data._fit;
+  markDirty();
+  if (drawerFor === tool) drawerTouched();
+  tool.loadPreview();
+}
+/** Seitenverhältnis des Rahmens an dieser Stelle: Bildformat des Kits (data-frame) oder gemessen */
+function frameRatio(img) {
+  if (!img) return 0;
+  if (img.dataset.frame) return img.dataset.frame;
+  const r = img.getBoundingClientRect();
+  return r.width && r.height ? r.width / r.height : 0;
+}
+/** Dialog „Darstellung im Rahmen“ für eine Einbindung (window.CMSMedia.fit aus _media.js) */
+async function openFit(tool, paths, id, img) {
+  const M = window.CMSMedia;
+  if (!M?.fit) return;
+  const m = await M.api.detail(id);
+  img ||= tool.el?.querySelector(`img[data-media-id="${id}"]`);
+  return M.fit({
+    src: m.large || m.url, thumb: m.thumb || m.url, name: m.display, scope: 'place', svg: m.svg,
+    value: paths.map(p => tool.data._fit?.[p]).find(v => v != null) ?? null, global: m.fit, auto: m.fit_auto, ratio: frameRatio(img),
+    note: paths.length > 1 ? CMSAdmin.t('Das Bild kommt in diesem Block mehrfach vor – die Einstellung gilt für alle diese Stellen.') : '',
+    onApply: async v => setFit(tool, paths, v),
+  });
+}
+window.CMSEditor.fit = {
+  target(img) {
+    const el = img.closest('.cms-block');
+    const tool = [...tools.values()].find(x => x.el === el);
+    const id = +img.dataset.mediaId;
+    const paths = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
+    return paths.length ? { paths, open: () => openFit(tool, paths, id, img) } : null;
+  },
+};
+
 /** Seitenleiste: Knopf „Anpassen …“ an jedem Bild-Feld mit gewähltem Bild (Tastatur-Zugang, gleiche Einstellung wie am Bild) */
 function fxFieldButtons(form, tool) {
   if (!window.CMSMedia?.adjust) return;
@@ -453,6 +495,25 @@ function fxFieldButtons(form, tool) {
     const cur = tool.data._fx?.[path];
     btn.textContent = cur ? CMSAdmin.t('Angepasst: {label}', { label: window.CMSMedia.fxLabel(cur) }) + ' …' : CMSAdmin.t('Anpassen …');
     btn.setAttribute('aria-label', CMSAdmin.t('Bild anpassen – nur an dieser Stelle'));
+    // Darstellung im Rahmen (füllen, einpassen, Originalformat) – nur an dieser Stelle
+    if (!window.CMSMedia.fit) return;
+    let fb = $('[data-media-fit]', mf);
+    if (!fb) {
+      fb = d.createElement('button');
+      fb.type = 'button'; fb.className = 'btn btn--small btn--ghost'; fb.dataset.mediaFit = '';
+      btn.after(' ', fb);
+      fb.addEventListener('click', () => {
+        const id = +$('input[type=hidden]', mf).value;
+        if (!id) return;
+        const all = mediaPaths(tool.def.fields, tool.data, id);
+        openFit(tool, all.includes(fb.dataset.path) ? all : [fb.dataset.path], id).then(() => fxFieldButtons(form, tool));
+      });
+    }
+    fb.dataset.path = path;
+    fb.hidden = !inp.value;
+    const fc = tool.data._fit?.[path];
+    fb.textContent = fc ? CMSAdmin.t('Rahmen: {label}', { label: window.CMSMedia.fitLabel(fc) }) + ' …' : CMSAdmin.t('Rahmen …');
+    fb.setAttribute('aria-label', CMSAdmin.t('Darstellung im Rahmen (füllen, einpassen, Originalformat) – nur an dieser Stelle'));
   });
 }
 

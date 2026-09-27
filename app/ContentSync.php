@@ -143,7 +143,7 @@ final class ContentSync
             $path = Media::dir() . '/' . $m['file'];
             if (!is_file($path)) { fwrite(STDERR, "Datei zu Medium #$mid fehlt: $path\n"); return 1; }
             $media[] = ['id' => $mid, 'name' => $m['original_name'] ?: $m['file'], 'data' => base64_encode((string) file_get_contents($path))]
-                + array_intersect_key($m, array_flip(['alt', 'title', 'credit', 'tags', 'decorative', 'focus_x', 'focus_y', 'i18n', 'crops', 'adjust']));
+                + array_intersect_key($m, array_flip(['alt', 'title', 'credit', 'tags', 'decorative', 'focus_x', 'focus_y', 'i18n', 'crops', 'adjust', 'fit']));
             echo "  neues Medium: #$mid " . ($m['original_name'] ?: $m['file']) . "\n";
         }
         $out ??= site()->storage('content-sync-export.json');
@@ -205,7 +205,7 @@ final class ContentSync
             [$row, $err] = Media::import($tmp, (string) $m['name'], (string) ($m['alt'] ?? ''), ['title' => $m['title'] ?? '', 'credit' => $m['credit'] ?? '', 'tags' => $m['tags'] ?? '', 'decorative' => !empty($m['decorative'])]);
             @unlink($tmp);
             if (!$row) { fwrite(STDERR, "Medium {$m['name']}: $err – abgebrochen.\n"); return 1; }
-            Pages::db()->update('media', array_intersect_key($m, array_flip(['focus_x', 'focus_y', 'i18n', 'crops', 'adjust'])), 'id = :id', ['id' => (int) $row['id']]);
+            Pages::db()->update('media', array_intersect_key($m, array_flip(['focus_x', 'focus_y', 'i18n', 'crops', 'adjust', 'fit'])), 'id = :id', ['id' => (int) $row['id']]);
             $mediaMap[(int) $m['id']] = (int) $row['id'];
         }
         // 2. Neue Seiten: Eltern zuerst, je Gruppe die Hauptsprache zuerst

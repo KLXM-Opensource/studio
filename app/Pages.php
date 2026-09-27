@@ -325,6 +325,8 @@ final class Pages
             if ($bind) $data['_bind'] = $bind;
             // Bild anpassen je Einbindung: {feldpfad: anpassung} – nur Bild-Felder des Schemas (auch in Listen), Core\ImageFx
             if (!empty($b['data']['_fx']) && ($fx = ImageFx::sanitize($b['data']['_fx'], $def['fields'] ?? [], $data))) $data['_fx'] = $fx;
+            // Bild im Rahmen je Einbindung (füllen/einpassen/Originalformat): {feldpfad: einstellung}, Core\ImageFit
+            if (!empty($b['data']['_fit']) && ($fit = ImageFit::sanitize($b['data']['_fit'], $def['fields'] ?? [], $data))) $data['_fit'] = $fit;
             if (!empty($def['variants'])) {
                 $variant = (string) ($b['data']['variant'] ?? '');
                 $data['variant'] = array_key_exists($variant, $def['variants']) ? $variant : array_key_first($def['variants']);

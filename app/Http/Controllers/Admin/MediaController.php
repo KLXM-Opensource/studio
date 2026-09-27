@@ -235,6 +235,34 @@ final class MediaController extends AdminController
         return Response::json(['ok' => true, 'item' => Media::toJson(Media::find((int) $t))]);
     }
 
+    /** Bild im Rahmen: Standard für alle Verwendungen ({fit: "contain blur"} – leer = automatisch), Core\ImageFit */
+    public function fit(Request $r, string $id): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($e = $this->scope($r, true)) return $e;
+        $t = $this->target((int) $id, true);
+        if ($t instanceof Response) return $t;
+        $m = Media::find((int) $t) ?? throw new HttpException(404);
+        if (!str_starts_with((string) $m['mime'], 'image/')) {
+            return Response::json(['ok' => false, 'error' => __('Nur für Bilder.')], 422);
+        }
+        $fit = \Core\ImageFit::normalize($r->post['fit'] ?? '');
+        if ($fit === null) {
+            return Response::json(['ok' => false, 'error' => __('Ungültige Einstellung für „Darstellung im Rahmen“.')], 422);
+        }
+        Media::db()->update('media', ['fit' => $fit !== '' ? $fit : null, 'updated_at' => now()], 'id = :id', ['id' => (int) $t]);
+        Media::forget((int) $t);
+        $this->changed();
+        return Response::json(['ok' => true, 'item' => Media::toJson(Media::find((int) $t))]);
+    }
+
+    /** Bild im Rahmen: Farben des Kits als Vorschläge für den Hintergrund beim Einpassen */
+    public function fitOptions(Request $r): Response
+    {
+        $this->auth($r);
+        return Response::json(['ok' => true, 'presets' => \Core\ImageFit::presets()]);
+    }
+
     /** Zuschnitt für ein Bildformat festlegen ({ratio, rect: {x,y,w,h}} – rect null = entfernen) */
     public function crop(Request $r, string $id): Response
     {

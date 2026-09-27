@@ -5,6 +5,7 @@ import { ico } from './_icons.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
+import { fitDialog, fitLabel } from './_imagefit.js';   // Bild im Rahmen: füllen, einpassen, Originalformat (Core\ImageFit)
 import { editImage, editToolbar } from './_imageedit.js';   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
@@ -74,6 +75,7 @@ const api = {
   del: id => http(`${BASE}/api/media/${id}/delete`, { method: 'POST', json: {} }),
   crop: (id, ratio, rect) => http(`${BASE}/api/media/${id}/crop`, { method: 'POST', json: { ratio, rect } }),
   adjust: (id, adjust) => http(`${BASE}/api/media/${id}/adjust`, { method: 'POST', json: { adjust } }),
+  fit: (id, fit) => http(`${BASE}/api/media/${id}/fit`, { method: 'POST', json: { fit } }),
   edit: (id, edit) => http(`${BASE}/api/media/${id}/edit`, { method: 'POST', json: { edit } }),
   bulk: body => http(BASE + '/api/media-bulk', { method: 'POST', json: body }),
   collection: name => http(BASE + '/api/collections', { method: 'POST', json: { name } }),
@@ -1075,6 +1077,12 @@ class Finder {
     // Bild anpassen: Stand (Badge) + Knopf; Vorschau und Zuschnitt-Kacheln zeigen die Anpassung
     const adjBox = () => `${m.adjust ? `<span class="ifx-badge">${esc(t('Angepasst'))}</span> <span>${esc(fxLabel(m.adjust))}</span>` : `<span class="adm-muted">${esc(t('Original (ohne Anpassung)'))}</span>`}
       <button type="button" class="adm-btn adm-btn--small" data-adjust>${esc(t('Anpassen …'))}</button>`;
+    // Bild im Rahmen: Standard des Bildes (leer = automatisch; SVG/transparenter Rand → einpassen)
+    const fitBox = () => `${m.fit ? `<span class="ifx-badge">${esc(t('Eigener Standard'))}</span> <span>${esc(fitLabel(m.fit))}</span>`
+        : `<span class="adm-muted">${esc(m.fit_auto ? t('Automatisch: {label}', { label: fitLabel(m.fit_auto) }) : t('Automatisch: Füllen (zuschneiden) – wie im Kit'))}</span>`}
+      <button type="button" class="adm-btn adm-btn--small" data-fit>${esc(t('Rahmen …'))}</button>`;
+    const fitSection = () => this.ro ? '' : `<h3 class="md-h3">${esc(t('Darstellung im Rahmen'))} <small>– ${esc(t('füllen, einpassen oder Originalformat'))}</small></h3>
+            <div class="md-fit" data-fitbox>${fitBox()}</div>`;
     const tagHtml = () => tags.map(t => `<span class="fx-tag"><span class="fx-dot" style="background:${tagColor(t)}"></span>${esc(t)}<button type="button" data-untag="${esc(t)}" aria-label="Tag ${esc(t)} entfernen">✕</button></span>`).join('');
     dlg.innerHTML = `
       <div class="md-head"><h2 id="md-title">${esc(m.display)}</h2>
@@ -1086,14 +1094,14 @@ class Finder {
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">${esc(t('SVG-Grafik: wird immer vollständig und in jeder Größe scharf gezeigt – Fokuspunkt und Zuschnitte entfallen.'))}${m.note ? ` ${esc(m.note)}.` : ''}</p>
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
-            <div class="md-adjust" data-adjbox>${adjBox()}</div>`
+            <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
             <div class="md-crops" data-crops>${cropTiles()}</div>
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
-            <div class="md-adjust" data-adjbox>${adjBox()}</div>`
+            <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : m.kind === 'pdf' ? `<iframe class="md-pdf" src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
           : m.kind === 'video' ? `<video class="md-video" src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>
             <div class="md-iebar">${editToolbar(m, this.ro)}</div>`
@@ -1188,6 +1196,15 @@ class Finder {
       if ((await this.adjust(m)) === undefined) return;
       $('[data-adjbox]', dlg).innerHTML = adjBox(); fxPreview();
       $('[data-adjust]', dlg)?.focus();
+    });
+    // Bild im Rahmen (Standard des Bildes, speichert sofort)
+    $('[data-fitbox]', dlg)?.addEventListener('click', async e => {
+      if (!e.target.closest('[data-fit]')) return;
+      const v = await fitDialog({ base: BASE, src: m.large || m.url, thumb: m.thumb || m.url, name: m.display, scope: 'global', value: m.fit, auto: m.fit_auto, svg: m.svg,
+        onApply: async val => { const r = await api.fit(m.id, val); Object.assign(m, { fit: r.item.fit, fit_label: r.item.fit_label, fit_auto: r.item.fit_auto }); } });
+      if (v === undefined) return;
+      $('[data-fitbox]', dlg).innerHTML = fitBox();
+      $('[data-fit]', dlg)?.focus();
     });
     if (isImg) fxPreview();
     form.onsubmit = async e => {
@@ -1286,9 +1303,9 @@ function initInlineCrop() {
   if (!$('#cms-editor')) return;
   const bar = d.createElement('div');
   bar.className = 'cms-imgtools'; bar.hidden = true;
-  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
+  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
   box().append(bar);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
-  const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar);
+  const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar), fitBtn = $('[data-fit]', bar);
   let target = null, hideT;
   const place = () => {
     const r = target.getBoundingClientRect();
@@ -1299,7 +1316,9 @@ function initInlineCrop() {
     clearTimeout(hideT); target = im;
     cropBtn.hidden = !im.dataset.ratio;
     fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
+    fitBtn.hidden = fxBtn.hidden || !window.CMSEditor?.fit;
     if (cropBtn.hidden && fxBtn.hidden) { bar.hidden = true; return; }
+    fitBtn.setAttribute('aria-label', t('Darstellung im Rahmen: füllen, einpassen oder Originalformat'));
     cropBtn.setAttribute('aria-label', t('Bild zuschneiden ({ratio})', { ratio: im.dataset.ratio || '' }));
     fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast)'));
     bar.hidden = false; place();
@@ -1344,6 +1363,17 @@ function initInlineCrop() {
     });
     if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
   });
+  // Bild im Rahmen je Einbindung (data._fit des Blocks über window.CMSEditor.fit, resources/js/editor.js)
+  fitBtn.addEventListener('click', async e => {
+    e.preventDefault(); e.stopPropagation();
+    if (!target) return;
+    const im = target;
+    bar.hidden = true;
+    const place = window.CMSEditor?.fit?.target(im);
+    if (!place) { toast(t('Dieses Bild lässt sich hier keinem Bild-Feld des Blocks zuordnen – den Standard bitte in der Mediathek festlegen.')); return; }
+    const v = await place.open();
+    if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
+  });
 }
 
 // Einfügen aus der Zwischenablage – nicht in Eingabefeldern (dort bleibt normales Einfügen von Text)
@@ -1358,7 +1388,8 @@ d.addEventListener('paste', e => {
   f.pasteFiles(files);
 });
 
-window.CMSMedia = { pick, crop, Finder, Uploader, api, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml, adjust: adjustDialog, fxLabel };
+window.CMSMedia = { pick, crop, Finder, Uploader, api, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml, adjust: adjustDialog, fxLabel,
+  fit: o => fitDialog({ base: BASE, ...o }), fitLabel };
 const root = $('[data-media-library]');
 if (root) {
   const f = new Finder(root, { mode: 'library' });

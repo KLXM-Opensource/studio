@@ -351,6 +351,8 @@ final class Media
             $rel = "$sub/$base.$ext";
             $ext === 'png' ? imagepng($orig, self::dir() . "/$rel", 8) : imagejpeg($orig, self::dir() . "/$rel", 88);
             $variants = self::makeVariants($img, $base, $width);
+            // Transparenter Rand (Logos, Freisteller): Standard „Einpassen“ im Rahmen (Core\ImageFit)
+            if ($ext === 'png') $variants['alpha'] = ImageFit::edgeAlpha($img);
             $mime = $ext === 'png' ? 'image/png' : 'image/jpeg';
         } elseif (isset(self::fileMimes()[$mime])) {
             $head = (string) file_get_contents($path, false, null, 0, 12);
@@ -575,21 +577,26 @@ final class Media
             return '';
         }
         $ratio = isset($opt['ratio']) ? str_replace('-', ':', (string) $opt['ratio']) : null;
-        $src = self::sources($m, $ratio);
+        // Bild im Rahmen (Core\ImageFit): Einpassen/Originalformat zeigen das ganze Bild – ohne Zuschnitt und Fokuspunkt
+        $fit = ($opt['fit'] ?? true) !== false ? ImageFit::resolve($m, $ratio) : null;
+        $src = self::sources($m, $fit ? null : $ratio);
         $alt = $opt['alt'] ?? self::alt($m);
         // Bild anpassen (Core\ImageFx): Einbindung im Block vor globaler Einstellung – als Klassen (CSP, keine Inline-Styles)
-        $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] ? '' : self::focusClass($m)) . ' ' . ImageFx::classFor($m));
+        $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] || $fit ? '' : self::focusClass($m)) . ' ' . ImageFx::classFor($m));
         $class = $classes !== '' ? ' class="' . e($classes) . '"' : '';
         $loading = !empty($opt['eager']) ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
-        // Im Bearbeiten-Modus: Kennung für „Anpassen“ und (mit Bildformat) den Inline-Zuschnitt
-        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"' . ($ratio && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '') : '';
+        // Im Bearbeiten-Modus: Kennung für „Anpassen“/„Rahmen“ und (mit Bildformat, beim Füllen) den Inline-Zuschnitt
+        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"'
+            . ($ratio && !$fit && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '')
+            . ($ratio ? ' data-frame="' . e($ratio) . '"' : '') : '';
+        $pic = $fit ? '<picture class="' . e(ImageFit::pictureClass($fit, $m)) . '">' : '<picture>';
         $sources = '';
         foreach (['avif', 'webp'] as $fmt) {
             if ($src[$fmt] !== '') {
                 $sources .= '<source type="image/' . $fmt . '" srcset="' . e($src[$fmt]) . '" sizes="' . e($sizes) . '">';
             }
         }
-        return '<picture>' . $sources . '<img src="' . e($src['src']) . '" alt="' . e($alt) . '" width="' . $src['width']
+        return $pic . $sources . '<img src="' . e($src['src']) . '" alt="' . e($alt) . '" width="' . $src['width']
             . '" height="' . $src['height'] . '"' . $class . $loading . $edit . '></picture>';
     }
 
@@ -1104,6 +1111,9 @@ final class Media
             'focus' => ['x' => (int) ($m['focus_x'] ?? 50), 'y' => (int) ($m['focus_y'] ?? 50)],
             // Bild anpassen (Core\ImageFx): gespeicherte Einstellung, Klassen für die Vorschau, Kurzbeschreibung
             'adjust' => $isImg ? (string) ($m['adjust'] ?? '') : '', 'adjust_label' => $isImg ? ImageFx::label((string) ($m['adjust'] ?? '')) : '',
+            // Bild im Rahmen (Core\ImageFit): Standard des Bildes, Kurzbeschreibung, automatischer Standard (SVG, transparenter Rand)
+            'fit' => $isImg ? (string) ($m['fit'] ?? '') : '', 'fit_label' => $isImg ? ImageFit::label((string) ($m['fit'] ?? '')) : '',
+            'fit_auto' => $isImg ? ($m['mime'] === Svg::MIME || ImageFit::hasAlpha($m, false) ? 'contain' : '') : '',
             // Bild bearbeiten (Core\ImageEdit): Schritte, Hinweis falls nicht bearbeitbar, Original für Vorher/Nachher
             'edit' => $isImg && ($ops = ImageEdit::ops($m)) ? $ops : null,
             'editable' => ImageEdit::editable($m),

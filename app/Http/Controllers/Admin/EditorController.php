@@ -62,7 +62,11 @@ final class EditorController extends AdminController
             return Response::json(['ok' => false, 'error' => 'Unbekannter Blocktyp'], 422);
         }
         $block = app()->theme->makeBlock($blocks[0]);
-        return Response::json(['ok' => true, 'html' => app()->theme->renderBlock($block), 'block' => $blocks[0]]);
+        $html = app()->theme->renderBlock($block);
+        // Bild im Rahmen (Core\ImageFit): erzeugte Regeln (Farbe, unscharfer Hintergrund) für die Vorschau mitliefern
+        $html .= \Core\ImageFit::rulesLink();
+        \Core\ImageFit::reset();
+        return Response::json(['ok' => true, 'html' => $html, 'block' => $blocks[0]]);
     }
 
     /** Feldformular eines Blocks für die Seitenleiste (gleicher Renderer wie im Admin). */

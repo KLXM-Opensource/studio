@@ -6,6 +6,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bild im Rahmen: füllen, einpassen, Originalformat
+- Je Einbindung (Knopf **Rahmen** am Bild im Editor, **Rahmen …** am Bild-Feld) oder als Standard des Bildes (Mediathek):
+  **Füllen (zuschneiden)** wie bisher, **Einpassen** (ganzes Bild, Hintergrund transparent, Farbe des Kits, eigene Farbe
+  oder **unscharf** aus der kleinsten Bildgröße) oder **Originalformat** (Rahmen im Seitenverhältnis des Bildes).
+  Dialog mit Vorschau im Rahmen der Stelle.
+- Gespeichert als `data._fit` je Feldpfad (wie `_fx`) bzw. Spalte `media.fit` (additiv); Format `contain blur`,
+  `contain #1e2638`, `contain kit:surface`, `original`, `cover` (`Core\ImageFit`).
+- Automatisch: **SVG und PNG-Logos mit transparentem Rand** werden in festen Rahmen eingepasst statt beschnitten (auch in
+  Galerie-Rastern), außer es gibt einen eigenen Zuschnitt für das Format.
+- Für alle Kits ohne Kit-Änderung: Klassen am `<picture>` (`img-fit`, `img-fit--contain|original|blur|auto`), Kern-CSS
+  `image-fit.css` nur auf Seiten mit solchen Bildern, Variablen `--img-fit-bg`, `--img-fit-src`, `--img-fit-blur`; Werte je
+  Bild ohne Inline-Styles (kleine erzeugte CSS-Datei, strenge CSP). Getestet mit basis, klxm, klxm-agentur.
+- Handbuch (Bilder & Dateien → „Bild im Rahmen“), Entwicklerhandbuch (Medien), 9 neue Selbsttests in `blocks:selftest`.
+
 ### Erweiterungs-Haken für Seiten: Seitenbaum, Seiteneinstellungen, Werkzeugleiste, Entwurfs-Vorschau
 - `Extension::pageList(fn($page))`: Hinweise in der Spalte „Status“ des Seitenbaums und Einträge im Kontextmenü.
 - `Extension::pagePanel(fn($page))`: eigene Karten in der Seitenleiste der Seiteneinstellungen.

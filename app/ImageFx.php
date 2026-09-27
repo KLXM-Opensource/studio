@@ -162,14 +162,14 @@ final class ImageFx
         array_pop(self::$stack);
     }
 
-    /** Medien-ID am Feldpfad („image“, „items.2.image“) – 0, wenn keine */
-    private static function valueAt(array $data, string $path): int
+    /** Medien-ID am Feldpfad („image“, „items.2.image“) – 0, wenn keine (auch für Core\ImageFit) */
+    public static function valueAt(array $data, string $path): int
     {
         $v = self::rawAt($data, $path);
         return is_int($v) || (is_string($v) && ctype_digit($v)) ? (int) $v : 0;
     }
 
-    private static function rawAt(array $data, string $path): mixed
+    public static function rawAt(array $data, string $path): mixed
     {
         $v = $data;
         foreach (explode('.', $path) as $k) {

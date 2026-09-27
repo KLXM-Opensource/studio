@@ -165,7 +165,8 @@ final class Theme
         }
         $html = self::capture($file, $vars);
         // Ganze Seite (Layout): Stylesheet für angepasste Bilder nur bei Bedarf einbinden, im Bearbeiten-Modus immer (Core\ImageFx)
-        return str_contains($html, '</head>') ? ImageFx::inject($html, app()->editing) : $html;
+        // Bild im Rahmen (Core\ImageFit): Stylesheet + erzeugte Regeln (Farben, unscharfer Hintergrund) ebenso
+        return str_contains($html, '</head>') ? ImageFit::inject(ImageFx::inject($html, app()->editing), app()->editing) : $html;
     }
 
     public static function capture(string $__file, array $__vars): string
@@ -293,9 +294,11 @@ final class Theme
         }
         // Bild anpassen je Einbindung (data._fx, Core\ImageFx): gilt für Bilder, die dieser Block selbst ausgibt
         ImageFx::enter($block->data);
+        ImageFit::enter($block->data);   // Bild im Rahmen je Einbindung (data._fit, Core\ImageFit)
         try {
             $inner = $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
         } finally {
+            ImageFit::leave();
             ImageFx::leave();
         }
         if (!empty($block->def['raw'])) {
