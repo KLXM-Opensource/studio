@@ -26,5 +26,13 @@
     <tr><td>Versionen</td><td>Die letzten <?= (int) app()->config->get('revisions', 20) ?> gespeicherten Stände – „Wiederherstellen“ legt einen Entwurf an.</td></tr>
   </table>
   <div class="doc-note doc-note--important"><strong>Rechtstexte</strong><p>Impressum, Datenschutz und Barrierefreiheit enthalten Platzhalter. Bitte ausschließlich mit geprüften Texten (z. B. von Kammer, Verband, Rechtsberatung oder Datenschutzbeauftragten) füllen.</p></div>
+  <h3 id="notizen">Redaktionsnotizen <code>[# … #]</code></h3>
+  <p>Hinweise für das Team lassen sich direkt in jeden Text schreiben – in Überschriften, Absätze, Listen, Bildunterschriften, auch in Einträge von Datentabellen: <code>[# bitte ergänzen: Seminartermine #]</code>. Eckige Klammer, Raute, Leerzeichen am Anfang, Raute und Klammer am Ende; mehrere Zeilen und mehrere Notizen je Text sind möglich.</p>
+  <ul>
+    <li><b>Besucher sehen Notizen nie</b> – auch nicht in der Suche, in Vorschautexten für Suchmaschinen und soziale Netzwerke, in Kalender-Abos, im KI-Chat der Website oder in einer geteilten Vorschau. Eine Seite mit Notizen lässt sich also veröffentlichen.</li>
+    <li><b>Angemeldet</b> erscheinen sie im Bearbeitungsmodus und in der Entwurfsansicht als gelber Hinweis <b>„Notiz: …“</b>. Der Hinweis ist nicht wie Text bearbeitbar: <b>Erledigt?</b> Hinweis anklicken und mit <kbd>Entf</kbd> bzw. <kbd>⌫</kbd> löschen – oder den Text in der Seitenleiste ändern, dort steht die Notiz als <code>[# … #]</code>. In der <b>Live-Fassung</b> (<code>?live=1</code>) sehen Sie die Seite wie Besucher – ohne Notizen.</li>
+    <li>Alle offenen Notizen stehen in der <a href="#<?= e($anchor('uebersicht')) ?>">Übersicht</a> unter „Was ist zu tun?“ – mit Sprung an die Stelle.</li>
+    <li>In einer Anleitung, die die Schreibweise zeigen soll, bleibt sie stehen, wenn sie als Code formatiert oder in <code>`Backticks`</code> steht.</li>
+  </ul>
   <h3 id="sprachen">Mehrere Sprachen</h3>
   <p>Sind in den Grundeinstellungen weitere Sprachen aktiviert, zeigt die Seitenübersicht oben Reiter je Sprache. Rechtsklick auf eine Seite → <b>Übersetzung anlegen: English</b> erstellt eine verknüpfte Kopie als Entwurf unter <code>/en/…</code> – Texte übersetzen, veröffentlichen, fertig. Die Kürzel <b>DE EN</b> neben dem Titel zeigen, welche Fassungen es gibt. Einträge unter <b>Daten</b> übersetzen Sie im Eintrag rechts über „+ English“. Feste Texte des Designs (z. B. „Kontakt“, Wochentage) übersetzt die Website selbst, sofern das Kit sie mitbringt; die übersetzbaren Angaben der zentralen Einstellungen pflegen Sie je Sprache. Mit eingeschalteter KI hilft <b>✦ Aus Deutsch übersetzen</b> (siehe <a href="#<?= e($anchor('assistent')) ?>">KI-Kapitel</a>).</p>

@@ -6,6 +6,34 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Redaktionsnotizen `[# … #]` (`Core\EditorNotes`)
+- Versteckte Hinweise der Redaktion in jedem Text: `[# bitte ergänzen: Seminartermine #]` – mehrzeilig, mehrere je Text, auch in
+  Rich Text, verschachtelten Blockdaten und Einträgen von Datentabellen. In `<code>`/`<pre>` und `` `Backticks` `` bleibt die
+  Schreibweise stehen (Anleitungen).
+- **Öffentlich nie sichtbar**, ohne Zutun der Kits: Blockdaten vor dem Rendern (`Theme::makeBlock`), ganze Seite vor dem
+  Seiten-Cache (Einträge, Meta-/OG-Angaben, JSON-LD, Daten-Skripte), `previewHtml()` (Freigabe), Suchindex (`Documents::doc`,
+  `Text::plain`) und damit Besucher-Chat, KI-Kontexte (Assist, Assistent), iCal-Abos, öffentliche API-Lesezugriffe
+  (veröffentlichte Fassung, `publicInfo`). Entwürfe, Verwaltung, API/MCP-Entwurfszugriffe und Content-Sync behalten sie.
+- **Redaktion:** im Bearbeitungsmodus und in der Entwurfsansicht als Hinweis „Notiz: …“ (`.cms-note`, `editor.css`, CSP-sicher,
+  `role="note"`, nicht als HTML bearbeitbar); Editor und Einträge-Bearbeitung speichern ihn wieder als `[# … #]`.
+- **Übersicht „Was ist zu tun?“:** Notizen neben den [Platzhaltern] in derselben Liste, gekennzeichnet „Notiz“, aus dem Entwurf der
+  Seiten und aus Einträgen („Eintrag bearbeiten“), ohne „Ist gewollt“. Netzwerk-Übersicht zählt Notizen getrennt.
+- `php bin/console notes:convert [--site=…] [--dry-run]`: alte Marker (`[bitte ergänzen: …]`, `[bitte prüfen: …]`,
+  `[bitte rechtlich prüfen: …]`, `[bitte ergänzen nach Prüfung: …]`, `[Platzhalter]`, „NEU (bitte prüfen)“) in Seiten
+  (veröffentlicht und Entwurf, an Ort und Stelle, Version „Notizen umgestellt“, nichts wird veröffentlicht) und Einträgen umstellen.
+  Selbsttest `notes:selftest`. API für Erweiterungen: `EditorNotes::strip()`, `stripData()`, `publicHtml()`, `find()`, `has()`.
+
+### Korrekturen
+- Kalender/Nächste Termine: Akzentflächen ohne Kit-Farben kontrastsicher (getönte Fläche + Textfarbe statt currentColor + Canvas);
+  `--cal-accent`/`--cal-accent-ink` weiter als Paar; Ort in „Nächste Termine“ nicht doppelt gedämpft.
+- Slider: Region heißt „Bildfolge: {Überschrift}“ (vorher gleicher Name wie der Abschnitt, axe landmark-unique).
+- Datenliste (Tabelle): Spaltenkopf „Termin“ statt „_when“.
+- Kern-Blöcke: `*Betonung*` in Überschriften wie im Kit – neuer Helfer `emphasis()` (nutzt `{kit}_title()`), `strip_emphasis()`.
+- Bild im Rahmen je Feldpfad statt je Medien-ID: dasselbe Bild kann in einem Block verschieden eingepasst sein
+  (`img(…, ['path' => …])`, sonst n-tes Vorkommen); Editor stellt nur die angeklickte Stelle ein.
+- Content-Sync: Export mit Pool-Medien brach ab (`Media::dir()` statt `Media::path()`); Pool-Verweise gehen als Verweis mit
+  (live `MediaPools::mirror`, Kopie nur ohne Pool).
+
 ### Kits unter `kits/` statt `themes/` – zentrale Pfad-API `Core\Kit`
 - Ordner `themes/` → `kits/`, `public/themes/` → `public/kits/`. Alle Pfade über `Core\Kit`: `Kit::dir($name)`,
   `Kit::publicDir($name)`, `Kit::url($name, $pfad)`, `Kit::all()`, `Kit::definitionFile()`, `Kit::fragment($name)` –
