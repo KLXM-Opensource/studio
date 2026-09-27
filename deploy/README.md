@@ -112,7 +112,7 @@ leitet `public/index.php` mit 301 auf `/kits/…` um, sobald die Datei dort lieg
   dann selbst (301 auf `/kits/`, danach 403), die Seite wäre nicht mehr erreichbar. Die Seite behält ihre Adresse
   (Speichern bleibt möglich), braucht aber eine Server-Regel, die genau diese Adresse an PHP gibt – vor der Umstellung eintragen:
   Apache (Plesk: „Zusätzliche Apache-Anweisungen“, HTTP und HTTPS):
-  `<Directory "/var/www/vhosts/<domain>/httpdocs/public/kits">` `DirectorySlash Off` `DirectoryIndex /index.php` `</Directory>`;
+  `RewriteEngine On` und `RewriteRule ^/kits/?$ /index.php [L]` (im vHost-Kontext, vor der Zuordnung zum Ordner);
   nur nginx: `location = /kits { rewrite ^ /index.php last; }`. Alternative: die Seite umbenennen (Weiterleitung anlegen).
 - Wer beim Hochladen per rsync `--delete` nutzt: `themes/` und `public/themes/` bis zur Umstellung ausnehmen, sonst
   verschwinden eigene Kits, die nicht im hochgeladenen Stand liegen.
