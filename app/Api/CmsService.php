@@ -809,6 +809,7 @@ final class CmsService
      * Medien-Infos ändern: alt, decorative, title, credit, tags (Liste oder Komma-Text), focus {x,y} (0–100), collections (IDs),
      * adjust (Bild anpassen, Core\ImageFx).
      * Bilder brauchen einen Alt-Text (mind. 3 Zeichen) oder decorative = true.
+     * decorative gilt auch für Videos (Hintergrund-/Stimmungsvideo): keine Untertitel nötig, auf der Website aria-hidden.
      */
     public function mediaUpdate(int $id, array $in): array
     {

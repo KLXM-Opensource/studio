@@ -464,9 +464,14 @@ final class MediaTracks
             . '<div class="' . e($class) . '__text"' . ($lang !== $cur ? ' lang="' . e($lang) . '"' : '') . '>' . $paras . '</div></details>';
     }
 
-    /** Video bzw. Audio mit Textspuren und Transkript (z. B. Datei-Felder von Einträgen) */
+    /**
+     * Video bzw. Audio mit Textspuren und Transkript (z. B. Datei-Felder von Einträgen).
+     * Dekorative Videos (media.decorative) laufen ohne Bedienelemente als stumme Schleife – siehe decorativeVideo();
+     * $opt['controls'] = true erzwingt trotzdem den normalen Player.
+     */
     public static function player(array $m, array $opt = []): string
     {
+        if (self::isDecorative($m) && empty($opt['controls'])) return self::decorativeVideo($m, $opt);
         $isAudio = str_starts_with((string) $m['mime'], 'audio/');
         $tag = $isAudio ? 'audio' : 'video';
         $title = Media::title($m);
@@ -476,6 +481,30 @@ final class MediaTracks
             . '<source src="' . e(Media::url($m)) . '" type="' . e((string) $m['mime']) . '">' . self::trackTags($m) . '</' . $tag . '>'
             . ($title !== '' && !empty($opt['caption']) ? '<figcaption>' . e($title) . '</figcaption>' : '')
             . self::transcriptHtml($m) . '</figure>';
+    }
+
+    /** Dekoratives Video (Hintergrund-/Stimmungsvideo ohne Informationsgehalt): keine Untertitel nötig, für Screenreader ausgeblendet */
+    public static function isDecorative(?array $m): bool
+    {
+        return $m && !empty($m['decorative']) && str_starts_with((string) ($m['mime'] ?? ''), 'video/');
+    }
+
+    /**
+     * Dekoratives Video: <video muted loop playsinline aria-hidden="true" tabindex="-1"> ohne Bedienelemente, ohne Textspuren.
+     * Abgespielt wird nur mit Skript, sichtbar und ohne „Bewegung reduzieren“ (public/assets/js/hero.mjs); dann erscheint eine
+     * beschriftete Pause-Schaltfläche (WCAG 2.2.2). Ohne Skript bleibt das Standbild (Poster) stehen.
+     * $opt: class (Rahmen, Standard „media-player“; dazu immer „media-player--decorative“)
+     */
+    public static function decorativeVideo(array $m, array $opt = []): string
+    {
+        $poster = Media::posterFor($m);
+        return '<figure class="' . e($opt['class'] ?? 'media-player') . ' media-player--decorative" data-hero-video-box>'
+            . '<video data-hero-video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true" tabindex="-1"'
+            . ($poster ? ' poster="' . e(Media::url($poster, 1200)) . '"' : '') . '>'
+            . '<source src="' . e(Media::url($m)) . '" type="' . e((string) $m['mime']) . '"></video>'
+            . '<button type="button" class="hx-toggle" data-hero-video-toggle hidden>'
+            . '<span data-l-pause="' . e(lt('Hintergrundvideo anhalten')) . '" data-l-play="' . e(lt('Hintergrundvideo abspielen')) . '">'
+            . e(lt('Hintergrundvideo anhalten')) . '</span></button></figure>' . \Core\Blocks\Hero::script();
     }
 
     // ================================================================= Verwaltung (JSON)

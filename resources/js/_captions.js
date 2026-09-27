@@ -73,7 +73,7 @@ export function captionsPanel(finder, m, helpers) {
     const last = (st.jobs || []).find(j => j.status === 'failed');
     const badge = s => s === 'published' ? `<span class="adm-badge">${esc(t('veröffentlicht'))}</span>` : `<span class="adm-badge adm-badge--adm-warn">${esc(t('Entwurf'))}</span>`;
     sec.innerHTML = `<h3 id="cap-h-${m.id}">${esc(m.kind === 'audio' ? t('Transkript & Textspuren') : t('Untertitel & Transkript'))}</h3>
-      ${!tracks.length && !trs.length ? `<p class="fx-i-warn cap-miss">${esc(m.kind === 'audio' ? t('Noch kein Transkript – nötig für Barrierefreiheit.') : t('Noch keine Untertitel – nötig für Barrierefreiheit.'))}</p>` : ''}
+      ${!tracks.length && !trs.length ? `<p class="fx-i-warn cap-miss"${m.kind === 'video' && finder.$info.querySelector('input[name=decorative]')?.checked ? ' hidden' : ''}>${esc(m.kind === 'audio' ? t('Noch kein Transkript – nötig für Barrierefreiheit.') : t('Noch keine Untertitel – nötig für Barrierefreiheit.'))}</p>` : ''}
       ${tracks.length ? `<ul class="cap-list">${tracks.map(x => `<li class="cap-row${x.status !== 'published' ? ' is-draft' : ''}">
           <span class="cap-lang" aria-hidden="true">${esc(x.lang.toUpperCase())}</span>
           <span class="cap-main"><b>${esc(x.display)}</b><small>${esc(kindName(x.kind, st))} · ${x.cue_count} ${esc(t('Einträge'))}${x.note ? ` · ${esc(x.note)}` : ''}</small>${badge(x.status)}</span>

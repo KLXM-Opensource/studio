@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Videos als „dekorativ (ohne Aussage)“ markieren
+- Das Merkmal `media.decorative` gibt es jetzt auch für **Videos** (stumme Hintergrund-Schleifen, Bühnen-Clips,
+  Stimmungs-Animationen): Checkbox beim Hochladen, rechts in der Mediathek und unter „Alle Details“ mit Hinweis
+  „Hintergrund- oder Stimmungsvideo ohne Informationsgehalt – braucht keine Untertitel und wird für Screenreader ausgeblendet.“
+- Dekorative Videos zählen nicht mehr als „Videos ohne Untertitel“ (Prüf-Filter `nocaptions` in Mediathek, Übersicht,
+  KLXM Ai → Untertitel, API/MCP); der Hinweis „Noch keine Untertitel“ entfällt.
+- Website: `MediaTracks::player()` gibt dekorative Videos als `MediaTracks::decorativeVideo()` aus – `aria-hidden="true"`,
+  `tabindex="-1"`, ohne `controls`/Spuren, stumme Schleife nur sichtbar und ohne „Bewegung reduzieren“, beschriftete
+  Pause-Schaltfläche (WCAG 2.2.2). `['controls' => true]` erzwingt den normalen Player. Neu: `MediaTracks::isDecorative($m)`.
+- Kits mit eigenem Video-Markup (`partials/video-embed.php`) können `$m['decorative']` auswerten – beschrieben im
+  Entwicklerhandbuch (Medien → Untertitel).
+
 ### Bild bearbeiten: Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 - **Zerstörungsfreier Bildeditor** in der Mediathek (Alle Details → Werkzeugleiste, Rechtsklick „Bild bearbeiten …“,
   `Core\ImageEdit`, `resources/js/_imageedit.js`): Zuschneiden mit Seitenverhältnissen (frei, 1:1, 4:3, 3:2, 16:9, 16:10,

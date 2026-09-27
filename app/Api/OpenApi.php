@@ -15,7 +15,7 @@ final class OpenApi
         $pageParam = ['name' => 'page', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'string'],
             'description' => 'Seiten-ID, Slug (z. B. „impressum“) oder „home“'];
         $blockParam = ['name' => 'block', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'string'], 'description' => 'Block-ID'];
-        $upOpt = ['alt' => ['type' => 'string', 'description' => 'Alt-Text – Pflicht bei Bildern (mind. 3 Zeichen)'], 'decorative' => ['type' => 'boolean'],
+        $upOpt = ['alt' => ['type' => 'string', 'description' => 'Alt-Text – Pflicht bei Bildern (mind. 3 Zeichen)'], 'decorative' => ['type' => 'boolean', 'description' => 'Bild ohne Aussage bzw. Hintergrundvideo ohne Informationsgehalt (keine Untertitel nötig)'],
             'title' => ['type' => 'string'], 'tags' => ['type' => 'string', 'description' => 'Komma-getrennt'], 'collection' => ['type' => 'integer']];
         $publish = ['publish' => ['type' => 'boolean', 'default' => false, 'description' => 'Nach dem Speichern sofort veröffentlichen']];
         $op = fn(string $tag, string $summary, array $extra = []) => ['tags' => [$tag], 'summary' => $summary] + $extra;

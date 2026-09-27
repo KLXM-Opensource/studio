@@ -372,11 +372,11 @@ final class McpController
             fn($a) => $s->restore($a['page'], (int) $a['revision_id']));
         $add('upload_media', 'Datei hochladen', 'Bild (JPG/PNG/WebP/GIF), PDF, Video (MP4) oder Audio (MP3/M4A) per Base64 hochladen. Bilder brauchen einen aussagekräftigen Alt-Text (Pflicht, mind. 3 Zeichen) – nur rein schmückende Bilder mit decorative = true.',
             $schema(['filename' => $str('Dateiname mit Endung'), 'base64' => $str('Dateiinhalt Base64'), 'alt' => $str('Alt-Text (Bildbeschreibung) – Pflicht bei Bildern'),
-                'decorative' => ['type' => 'boolean', 'description' => 'Bild ist rein dekorativ (dann ohne Alt-Text)'], 'title' => $str('Anzeigename, z. B. für Downloads'),
+                'decorative' => ['type' => 'boolean', 'description' => 'Rein dekorativ: Bild ohne Aussage (dann ohne Alt-Text) bzw. Hintergrund-/Stimmungsvideo ohne Informationsgehalt (braucht keine Untertitel, wird für Screenreader ausgeblendet)'], 'title' => $str('Anzeigename, z. B. für Downloads'),
                 'tags' => $str('Tags, mit Komma getrennt'), 'collection' => $int('in diese Sammlung legen (ID)')], ['filename', 'base64']),
             $rw, true, fn($a) => $s->mediaUploadBase64($a['filename'], $a['base64'], (string) ($a['alt'] ?? ''), $a));
         $add('update_media', 'Medien-Infos ändern', 'Alt-Text, Titel, Fotonachweis, Tags, Sammlungen, Fokuspunkt oder Bildanpassung einer Datei ändern.',
-            $schema(['id' => $int('Medien-ID'), 'alt' => $str('Alt-Text'), 'decorative' => ['type' => 'boolean'], 'title' => $str('Anzeigename'), 'credit' => $str('Fotonachweis'),
+            $schema(['id' => $int('Medien-ID'), 'alt' => $str('Alt-Text'), 'decorative' => ['type' => 'boolean', 'description' => 'Rein dekorativ: Bild ohne Aussage (dann ohne Alt-Text) bzw. Hintergrund-/Stimmungsvideo ohne Informationsgehalt (braucht keine Untertitel, wird für Screenreader ausgeblendet)'], 'title' => $str('Anzeigename'), 'credit' => $str('Fotonachweis'),
                 'tags' => $str('Tags, mit Komma getrennt (ersetzt alle)'), 'collections' => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Sammlungs-IDs (ersetzt alle)'],
                 'focus' => ['type' => 'object', 'properties' => ['x' => ['type' => 'integer'], 'y' => ['type' => 'integer']], 'description' => 'Fokuspunkt in Prozent (0–100), z. B. Gesicht'],
                 'i18n' => $obj('Übersetzungen von Alt-Text/Titel je Sprache, z. B. {"en": {"alt": "…", "title": "…"}} – leer = Standardsprache'),

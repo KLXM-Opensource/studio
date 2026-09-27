@@ -60,7 +60,7 @@
     <li><b>Ohne Alt-Text</b> – Bilder ohne Beschreibung (außer als „dekorativ“ markierte).</li>
     <li><b>Alt-Text fehlt in English</b> (je weiterer Sprache der Website) – die Übersetzung der Bildbeschreibung fehlt.</li>
     <li><b>Ohne Titel</b> – Dateien, die nur ihren Dateinamen zeigen.</li>
-    <li><b>Videos ohne Untertitel</b> bzw. <b>Audio ohne Transkript</b> (siehe unten).</li>
+    <li><b>Videos ohne Untertitel</b> bzw. <b>Audio ohne Transkript</b> (siehe unten; als „dekorativ“ markierte Videos zählen nicht mit).</li>
   </ul>
   <p>Ist die KI eingeschaltet, führen <b>„Mit KI ergänzen“</b> und <b>„Untertitel mit KI“</b> direkt zu den Sammel-Vorschlägen im Bereich <?= e(\Core\AI\Assist::brand()) ?>. Die Zahlen gelten jeweils für die gerade gewählte Mediathek (diese Website oder ein geteilter Pool).</p>
 
@@ -83,3 +83,4 @@
   </ul>
   <div class="doc-note doc-note--warn"><strong>Prüfpflicht bei KI-Untertiteln</strong><p>Entwürfe erscheinen <b>nicht</b> auf der Website. Bitte das Video vollständig ansehen und die Untertitel korrigieren – vor allem Namen, Fachbegriffe, Medikamente, Zahlen und Uhrzeiten –, dann <b>„Geprüft – veröffentlichen“</b>. Erst damit gehen Untertitel und Transkript online. Gut lesbar: höchstens zwei Zeilen à etwa 42 Zeichen, jeder Untertitel mindestens eine Sekunde sichtbar.</p></div>
   <p>Auf der Website schalten Besucher die Untertitel im Player ein; in der Sprache der Seite sind sie schon eingeschaltet. Hintergrundvideos im Kopfbereich (stumm, nur Stimmung) brauchen keine Untertitel. Im Bereich <b><?= e(\Core\AI\Assist::brand()) ?> → Untertitel</b> sehen Sie alle Videos ohne Untertitel, offene Entwürfe und den Stand laufender KI-Aufträge.</p>
+  <p id="video-dekorativ"><b>Dekorative Videos:</b> Stumme Hintergrund-Schleifen, Bühnen-Clips oder Stimmungs-Animationen ohne eigene Aussage markieren Sie wie Bilder als <b>„Dekorativ (ohne Aussage)“</b> – beim Hochladen, rechts in der Mediathek oder unter „Alle Details“. Solche Videos brauchen keine Untertitel und kein Transkript, erscheinen nicht mehr unter „Videos ohne Untertitel“ (Mediathek, Übersicht, <?= e(\Core\AI\Assist::brand()) ?>) und werden auf der Website für Screenreader ausgeblendet. Wo der Kern das Video ausgibt (z. B. Datei-Felder von Einträgen), läuft es ohne Bedienelemente als stumme Schleife – nur wenn es sichtbar ist und niemand „Bewegung reduzieren“ eingestellt hat – und hat immer eine beschriftete Schaltfläche zum Anhalten. Spricht jemand im Video, zeigt es Text oder Informationen, ist es <b>nicht</b> dekorativ.</p>

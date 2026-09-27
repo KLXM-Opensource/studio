@@ -89,6 +89,12 @@ const inBox = (id, html) => {
   return el;
 };
 
+// Dekoratives Video (media.decorative): keine Untertitel nötig, auf der Website aria-hidden und ohne Bedienelemente
+const DECO_VIDEO_HINT = 'Hintergrund- oder Stimmungsvideo ohne Informationsgehalt – braucht keine Untertitel und wird für Screenreader ausgeblendet.';
+const decoVideo = (m, cls) => m.kind === 'video' ? `<label class="${cls}"><input type="checkbox" name="decorative" aria-describedby="deco-h-${m.id}-${cls}" ${m.decorative ? 'checked' : ''}> <span>${esc(t('Dekorativ (ohne Aussage)'))}</span></label>
+  <p class="${cls === 'f-check' ? 'f-help' : 'fx-i-hint'}" id="deco-h-${m.id}-${cls}">${esc(t(DECO_VIDEO_HINT))}</p>` : '';
+const decoCaptionHint = (root, on) => $$('.cap-miss', root).forEach(p => { p.hidden = on; });
+
 // Helfer für Untertitel & Transkripte (_captions.js): gleiche Anfragen (Pool, CSRF), Dialog-Ebene, Meldungen
 const CAP_HELPERS = { http: (...a) => http(...a), base: BASE, box: () => box(), toast: s => toast(s) };
 
@@ -186,7 +192,8 @@ class Uploader {
             <label class="mu-alt"><span>Alt-Text <b aria-hidden="true">*</b></span>
               <input type="text" data-alt value="${esc(i.alt)}" maxlength="250" placeholder="Was ist auf dem Bild zu sehen?" ${i.decorative ? 'disabled' : ''} aria-required="${!i.decorative}"></label>
             <label class="mu-deco"><input type="checkbox" data-deco ${i.decorative ? 'checked' : ''}> dekorativ (ohne Aussage)</label>${window.CMSAi?.uploadSlot?.(i) || '' /* KI: Alt-Text vorschlagen */}`
-          : i.status === 'wait' ? `<label class="mu-alt"><span>Titel (optional)</span><input type="text" data-title value="${esc(i.title)}" maxlength="180" placeholder="z. B. Anamnesebogen"></label>` : ''}
+          : i.status === 'wait' ? `<label class="mu-alt"><span>Titel (optional)</span><input type="text" data-title value="${esc(i.title)}" maxlength="180" placeholder="z. B. Anamnesebogen"></label>${i.file.type.startsWith('video/') ? `
+            <label class="mu-deco" title="${esc(t(DECO_VIDEO_HINT))}"><input type="checkbox" data-deco ${i.decorative ? 'checked' : ''}> ${esc(t('dekorativ (ohne Aussage)'))}</label>` : ''}` : ''}
           ${i.status !== 'wait' ? `<span class="mu-bar"><span style="width:${Math.round(i.progress * 100)}%"></span></span>` : ''}
           ${i.status === 'done' ? '<span class="mu-ok">✓ Hochgeladen</span>' : ''}
           ${i.status === 'failed' ? `<span class="mu-err" role="alert">${esc(i.error)}</span>` : ''}
@@ -198,7 +205,7 @@ class Uploader {
       $('[data-alt]', li)?.addEventListener('input', e => { i.alt = e.target.value; this.updateActions(); });
       $('[data-alt]', li)?.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('[data-mu-start]', this.root).disabled) this.start(); });
       $('[data-title]', li)?.addEventListener('input', e => { i.title = e.target.value; });
-      $('[data-deco]', li)?.addEventListener('change', e => { i.decorative = e.target.checked; $('[data-alt]', li).disabled = i.decorative; this.updateActions(); });
+      $('[data-deco]', li)?.addEventListener('change', e => { i.decorative = e.target.checked; const a = $('[data-alt]', li); if (a) a.disabled = i.decorative; this.updateActions(); });
       $('[data-remove]', li)?.addEventListener('click', () => { this.items = this.items.filter(x => x !== i); this.render(); this.opts.onChange?.(this.items.length); });
       window.CMSAi?.uploadBind?.(this, i, li);   // KI-Assistent (_ai.js)
     });
@@ -977,7 +984,7 @@ class Finder {
         ${isImg ? `<section class="fx-i-sec"><h3><label for="fx-alt">Alt-Text <span class="req">*</span></label></h3>
           <textarea id="fx-alt" name="alt" rows="2" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen?">${esc(m.alt)}</textarea>
           <label class="fx-check"><input type="checkbox" name="decorative" ${m.decorative ? 'checked' : ''}> Dekorativ (ohne Aussage)</label></section>`
-        : `<section class="fx-i-sec"><h3><label for="fx-alt">Beschreibung</label></h3><textarea id="fx-alt" name="alt" rows="2" maxlength="250" placeholder="optional">${esc(m.alt)}</textarea></section>`}
+        : `<section class="fx-i-sec"><h3><label for="fx-alt">Beschreibung</label></h3><textarea id="fx-alt" name="alt" rows="2" maxlength="250" placeholder="optional">${esc(m.alt)}</textarea>${decoVideo(m, 'fx-check')}</section>`}
         ${this.meta?.languages && Object.keys(this.meta.languages).length ? `<section class="fx-i-sec"><h3>${esc(t('Übersetzungen'))}</h3>${transHtml(m, this.meta, isImg)}</section>` : ''}
         <section class="fx-i-sec"><h3><label for="fx-tagin">Tags</label></h3>
           <div class="fx-tags" data-tags><input id="fx-tagin" data-tagin list="fx-taglist1" placeholder="Tag + Enter" autocomplete="off"></div>
@@ -1028,7 +1035,11 @@ class Finder {
     [form.title, form.alt].forEach(f => f.addEventListener('blur', () => { if (timer) save(); }));
     form.querySelectorAll('[name^="i18n."]').forEach(f => { f.addEventListener('input', later); f.addEventListener('blur', () => { if (timer) save(); }); });
     form.title.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); form.title.blur(); } });
-    form.decorative?.addEventListener('change', () => { form.alt.disabled = form.decorative.checked; save(); });
+    form.decorative?.addEventListener('change', () => {
+      if (m.kind === 'image') form.alt.disabled = form.decorative.checked;
+      else decoCaptionHint(i, form.decorative.checked);   // Video: Hinweis „Noch keine Untertitel“ passend ein-/ausblenden
+      save();
+    });
     const addTag = v => {
       v = v.trim().toLowerCase().replace(/,/g, ''); tagIn.value = '';
       if (!v || tags.includes(v)) return;
@@ -1086,7 +1097,7 @@ class Finder {
           <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen? z. B. „Dr. Muster im Gespräch mit einer Patientin“">${esc(m.alt)}</textarea>
             <p class="f-help">Wird vorgelesen, wenn jemand das Bild nicht sehen kann. Kurz und konkret, ohne „Bild von …“.</p></div>
           <label class="f-check"><input type="checkbox" name="decorative" ${m.decorative ? 'checked' : ''}> <span>Dekoratives Bild (trägt keine Information)</span></label>`
-          : `<div class="f"><label for="md-alt">Beschreibung</label><input id="md-alt" name="alt" value="${esc(m.alt)}" maxlength="250"></div>`}
+          : `<div class="f"><label for="md-alt">Beschreibung</label><input id="md-alt" name="alt" value="${esc(m.alt)}" maxlength="250"></div>${decoVideo(m, 'f-check')}`}
           ${this.meta?.languages && Object.keys(this.meta.languages).length ? `<fieldset class="md-trans"><legend>${esc(t('Übersetzungen'))}</legend>${transHtml(m, this.meta, isImg)}</fieldset>` : ''}
           <div class="f"><label for="md-tagin">Tags</label>
             <div class="fx-tags" data-tags>${tagHtml()}<input id="md-tagin" data-tagin list="md-taglist" placeholder="Tag eingeben, Enter" autocomplete="off"></div>
@@ -1117,7 +1128,7 @@ class Finder {
     dlg.oncancel = e => { e.preventDefault(); close(); };
     dlg.onclose = () => this.$items.focus();
     form.addEventListener('input', e => { if (!e.target.matches('[data-tagin],[data-newcol]')) dirty = true; });
-    form.decorative?.addEventListener('change', () => { form.alt.disabled = form.decorative.checked; });
+    form.decorative?.addEventListener('change', () => { if (isImg) form.alt.disabled = form.decorative.checked; });
     // Tags
     const tagBox = $('[data-tags]', dlg), tagIn = $('[data-tagin]', dlg);
     const redrawTags = () => { $$('.fx-tag', tagBox).forEach(t => t.remove()); tagIn.insertAdjacentHTML('beforebegin', tagHtml()); };

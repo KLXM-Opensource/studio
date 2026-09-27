@@ -28,7 +28,8 @@ final class Media
     private static ?string $pool = null;
     /** Prüf-Filter (Mediathek „Prüfen“, API/MCP) – Parameter von MISSING_LANG_SQL: JSON-Pfad '$."en".alt' */
     private const MISSING_LANG_SQL = "m.mime LIKE 'image/%' AND m.decorative = 0 AND COALESCE(json_extract(m.i18n, ?), '') IN ('', '\"\"')";
-    private const NOCAPTIONS_SQL = "m.mime LIKE 'video/%' AND NOT EXISTS (SELECT 1 FROM media_tracks t WHERE t.media_id = m.id AND t.status = 'published' AND t.kind IN ('subtitles', 'captions'))";
+    // Dekorative Videos (Hintergrund-/Stimmungsvideo ohne Informationsgehalt) brauchen keine Untertitel
+    private const NOCAPTIONS_SQL = "m.mime LIKE 'video/%' AND m.decorative = 0 AND NOT EXISTS (SELECT 1 FROM media_tracks t WHERE t.media_id = m.id AND t.status = 'published' AND t.kind IN ('subtitles', 'captions'))";
     private const NOTRANSCRIPT_SQL = "m.mime LIKE 'audio/%' AND (m.transcripts IS NULL OR m.transcripts NOT LIKE '%\"status\":\"published\"%')";
 
     /** Ab jetzt im Pool (bzw. mit null wieder in der Website) arbeiten – gilt für die laufende Anfrage */
@@ -140,7 +141,7 @@ final class Media
     /**
      * Mediathek mit Filtern.
      * Prüf-Filter (Seitenleiste „Prüfen“, API/MCP): noalt, missing_lang (Sprachkürzel: Bild ohne Alt-Text in dieser Sprache),
-     * notitle, nocaptions (Videos ohne veröffentlichte Untertitel), notranscript (Audio ohne veröffentlichtes Transkript),
+     * notitle, nocaptions (nicht dekorative Videos ohne veröffentlichte Untertitel), notranscript (Audio ohne veröffentlichtes Transkript),
      * check (Schlüssel eines Prüf-Filters einer Erweiterung, Extension::mediaChecks).
      * @param array{q?: string, kind?: string, tag?: string, collection?: int, noalt?: bool, missing_lang?: string, notitle?: bool, nocaptions?: bool, notranscript?: bool} $f
      */
