@@ -157,7 +157,8 @@ final class Assistant
         $mediaId = (int) ($in['media'] ?? $query['media'] ?? $query['m'] ?? 0);
         $out = ['text' => '', 'route' => $path, 'page' => null, 'entry' => null, 'table' => null, 'media' => null];
         $lines = ['Adresse in der Verwaltung: ' . ($path ?: '/admin') . (($t = trim(mb_substr((string) ($in['title'] ?? ''), 0, 120))) !== '' ? ' („' . $t . '“)' : '')];
-        $clip = fn($v, int $n = 160) => mb_strimwidth(trim((string) preg_replace('~\s+~u', ' ', html_entity_decode(strip_tags((string) $v), ENT_QUOTES | ENT_HTML5))), 0, $n, '…');
+        // Kontext für die KI ohne Redaktionsnotizen [# … #] (Core\EditorNotes)
+        $clip = fn($v, int $n = 160) => mb_strimwidth(trim((string) preg_replace('~\s+~u', ' ', html_entity_decode(strip_tags(\Core\EditorNotes::strip((string) $v)), ENT_QUOTES | ENT_HTML5))), 0, $n, '…');
         if ($pageId && can('pages.edit') && ($p = Pages::find($pageId))) {
             $out['page'] = $p;
             $lines[] = 'Seite #' . $p['id'] . ' „' . $p['title'] . '“ (Status: ' . $p['status'] . ', Sprache: ' . Lang::norm($p['lang'] ?? null) . ', Adresse: ' . Pages::url($p) . ')';

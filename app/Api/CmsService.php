@@ -174,7 +174,7 @@ final class CmsService
             $out['opening_hours'] = $svc->hoursGet();
         }
         if (self::hasNotice() && setting(project('notice.active'))) {
-            $out['notice'] = strip_tags((string) setting(project('notice.text')));
+            $out['notice'] = \Core\EditorNotes::strip(strip_tags((string) setting(project('notice.text'))));
         }
         return array_filter($out, fn($v) => $v !== null && $v !== [] && $v !== '');
     }
@@ -480,7 +480,8 @@ final class CmsService
         $p = $this->page($ref);
         return $this->pageMeta($p) + [
             'version' => $published ? 'published' : 'draft',
-            'blocks' => array_map([self::class, 'exportBlock'], Pages::blocks($p, !$published)),
+            // Veröffentlichte Fassung = was Besucher sehen: ohne Redaktionsnotizen [# … #]; der Entwurf behält sie
+            'blocks' => array_map([self::class, 'exportBlock'], $published ? \Core\EditorNotes::stripData(Pages::blocks($p)) : Pages::blocks($p, true)),
         ];
     }
 

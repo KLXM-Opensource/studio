@@ -68,6 +68,9 @@
  *   content:export [--out=datei.json] [--all]        Seit dem Holen geänderte Seiten exportieren (Core\ContentSync)
  *   content:import <datei.json> [--dry-run] [--publish] [--force]
  *                                                     Geänderte Seiten übernehmen – nur ohne Konflikt, als Entwurf mit Version
+ *   notes:convert [--dry-run]                         Alte Marker („[bitte ergänzen: …]“, „[Platzhalter]“, „NEU (bitte prüfen)“) in Seiten und
+ *                                                     Einträgen in Redaktionsnotizen „[# … #]“ umstellen (Version „Notizen umgestellt“)
+ *   notes:selftest                                    Selbsttest der Redaktionsnotizen (Entfernen, Hinweis, Umstellung, Suchindex)
  *   pool:backup [key|--all] [--keep=N]                Geteilte Medien-Pools sichern
  *   pool:restore <datei> --force                      Pool-Sicherung einspielen
  *   shared:backup [key|--all] [--keep=N]              Geteilte Tabellen sichern (Bilder: pool:backup data-…)
@@ -837,6 +840,23 @@ switch ($cmd) {
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'notes:selftest':
+        // Redaktionsnotizen [# … #] (Core\EditorNotes): Entfernen in Text/Rich Text/Blockdaten, Hinweis der Redaktion, Umstellung, Suchindex
+        $res = Core\EditorNotes::selftest();
+        $res = Core\Search\Documents::notesSelftest($res);
+        foreach ($res['fail'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fail']) . " fehlgeschlagen\n";
+        exit($res['fail'] ? 1 : 0);
+
+    case 'notes:convert':
+        // Alte Marker → [# … #] (Core\NotesConvert); --dry-run zählt nur
+        $dry = in_array('--dry-run', $args, true);
+        $res = Core\NotesConvert::run($dry);
+        foreach ($res['log'] as $l) echo $l, "\n";
+        echo ($dry ? 'Probelauf – nichts geändert. ' : '') . 'Website „' . site()->key . '“: ' . $res['pages'] . ' Seite(n) (' . $res['versions'] . ' Fassungen, '
+            . $res['texts'] . ' Texte), ' . $res['entries'] . ' Einträge (' . $res['entry_texts'] . ' Felder), ' . $res['notes'] . " Notizen.\n";
+        exit(0);
 
     case 'guide:selftest':
         // Hinweise zu diesem Projekt (Core\Guide): Front Matter, Titel, Escaping, Links, Bilder, Bereiche

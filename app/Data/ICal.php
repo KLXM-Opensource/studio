@@ -124,6 +124,7 @@ final class ICal
     /** TEXT-Wert maskieren (RFC 5545 §3.3.11) */
     public static function text(string $s): string
     {
+        $s = \Core\EditorNotes::strip($s);   // Redaktionsnotizen [# … #] nie in Kalender-Abos
         return str_replace(["\\", ';', ',', "\r\n", "\n", "\r"], ["\\\\", '\;', '\,', '\n', '\n', ''], $s);
     }
 

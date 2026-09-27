@@ -34,6 +34,8 @@ final class Documents
     public static function build(string $lang): array
     {
         $prev = app()->lang;
+        $notes = \Core\EditorNotes::$show;
+        \Core\EditorNotes::$show = false;   // Redaktionsnotizen [# … #] nie in den Index (auch beim Neuaufbau aus der Verwaltung)
         app()->lang = $lang === Lang::default() ? null : $lang;
         try {
             $docs = [];
@@ -50,12 +52,14 @@ final class Documents
             return $docs;
         } finally {
             app()->lang = $prev;
+            \Core\EditorNotes::$show = $notes;
         }
     }
 
+    /** Dokument mit allen Feldern als Text – Redaktionsnotizen [# … #] entfernt (Titel, Überschriften, Text, Auszug …) */
     private static function doc(array $d): array
     {
-        return array_map(fn($v) => (string) $v, $d + ['type' => 'page', 'table' => '', 'badge' => '', 'title' => '', 'headings' => '', 'keywords' => '',
+        return array_map(fn($v) => \Core\EditorNotes::strip((string) $v), $d + ['type' => 'page', 'table' => '', 'badge' => '', 'title' => '', 'headings' => '', 'keywords' => '',
             'text' => '', 'extra' => '', 'summary' => '', 'image' => '', 'facets' => '', 'url' => '', 'date' => '', 'date_label' => '', 'origin' => '']);
     }
 
@@ -323,5 +327,23 @@ final class Documents
             if ($hit) foreach ($g as $term) $add[$term] = true;
         }
         return implode(' ', array_keys($add));
+    }
+
+    /** Selbsttest (notes:selftest): Redaktionsnotizen landen nicht im Suchindex */
+    public static function notesSelftest(array $res): array
+    {
+        $fields = [['name' => 'title', 'type' => 'text'], ['name' => 'text', 'type' => 'richtext'],
+            ['name' => 'items', 'type' => 'repeater', 'fields' => [['name' => 'q', 'type' => 'text'], ['name' => 'a', 'type' => 'textarea']]]];
+        $data = ['title' => 'Seminare [# Platzhalter #]', 'text' => '<h3>Termine [# prüfen #]</h3><p>Ab März.[# bitte ergänzen:\nOrt #]</p>',
+            'items' => [['q' => 'Frage', 'a' => "Antwort [# geheim #]"]]];
+        $head = $text = [];
+        self::fieldsText($fields, $data, $head, $text);
+        $d = self::doc(['id' => 'p-1', 'title' => 'Kurs [# Titel prüfen #]', 'headings' => implode(' · ', $head), 'text' => implode(' ', $text), 'summary' => 'x [# y #]']);
+        $all = implode(' | ', $d);
+        $check = function (string $name, bool $ok) use (&$res) { if ($ok) $res['ok']++; else $res['fail'][] = $name; };
+        $check('Suchindex ohne Notizen: ' . $all, !str_contains($all, '[#') && !str_contains($all, 'geheim') && !str_contains($all, 'Platzhalter'));
+        $check('Suchindex behält Text', str_contains($all, 'Seminare') && str_contains($all, 'Termine') && str_contains($all, 'Ab März.') && str_contains($all, 'Antwort'));
+        $check('Text::plain ohne Notizen', Text::plain('<p>A [# b #]</p><p>C</p>') === 'A C');
+        return $res;
     }
 }

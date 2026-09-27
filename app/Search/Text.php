@@ -25,10 +25,10 @@ final class Text
         return self::STOP[substr($lang, 0, 2)] ?? [];
     }
 
-    /** HTML → Klartext mit Leerzeichen an Blockgrenzen */
+    /** HTML → Klartext mit Leerzeichen an Blockgrenzen – ohne Redaktionsnotizen [# … #] (Core\EditorNotes) */
     public static function plain(?string $html): string
     {
-        $s = (string) $html;
+        $s = \Core\EditorNotes::strip((string) $html);
         if ($s === '') return '';
         $s = preg_replace('~<(br|/p|/li|/h\d|/div|/td|/th|/tr|/blockquote)[^>]*>~i', "$0 ", $s);
         $s = html_entity_decode(strip_tags((string) $s), ENT_QUOTES | ENT_HTML5, 'UTF-8');

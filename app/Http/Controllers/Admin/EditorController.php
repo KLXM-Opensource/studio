@@ -55,6 +55,7 @@ final class EditorController extends AdminController
         app()->currentPage = $pageId ? Pages::find($pageId) : Pages::home();
         app()->editing = true;
         app()->dataEdit = true;   // Datenlisten: Stift je Eintrag wie in der ersten Vorschau
+        \Core\EditorNotes::$show = true;   // Redaktionsnotizen [# … #] als Hinweis
         $this->entryContext($r);
         $raw = (array) ($r->post['block'] ?? []);
         $blocks = Pages::sanitizeBlocks([$raw]);

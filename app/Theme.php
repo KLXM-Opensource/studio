@@ -243,6 +243,10 @@ final class Theme
         if (app()->entry) {
             $data = self::bindEntry($data, $def['fields']);
         }
+        // Redaktionsnotizen [# … #] (Core\EditorNotes): für Besucher vor dem Rendern entfernen – kein Kit muss etwas tun
+        if (!EditorNotes::$show) {
+            $data = EditorNotes::stripData($data);
+        }
         if (!empty($def['variants']) && empty($data['variant'])) {
             $data['variant'] = array_key_first($def['variants']);
         }
@@ -307,10 +311,10 @@ final class Theme
             ImageFit::leave();
             ImageFx::leave();
         }
-        if (!empty($block->def['raw'])) {
-            return $inner; // Block rendert seinen Abschnitt selbst
-        }
-        return $this->render('partials/section', ['b' => $block, 'inner' => $inner]);
+        $html = !empty($block->def['raw']) ? $inner   // Block rendert seinen Abschnitt selbst
+            : $this->render('partials/section', ['b' => $block, 'inner' => $inner]);
+        // Redaktion (Bearbeiten-Modus, Entwurfsansicht): Notizen als Hinweis „Notiz: …“ (Core\EditorNotes)
+        return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
     }
 
     /** Öffentliche Adresse einer Theme-Schrift ohne Versions-Parameter (muss exakt der URL im CSS entsprechen) */

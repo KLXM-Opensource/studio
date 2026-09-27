@@ -102,15 +102,22 @@ final class SiteController
         \Core\StructuredData::reset();
         $blocks = Pages::blocks($page, $draft || $page['content_published'] === null);
         $theme = $app->theme;
-        return $theme->render('layout', [
-            'page' => $page,
-            'content' => $theme->renderBlocks($blocks),
-            'seo' => ['noindex' => true] + Seo::forPage($page),
-            'editor' => null,
-            'extraCss' => $theme->conditionalCss(self::types($blocks)),
-            'extraJs' => $theme->conditionalJs(self::types($blocks)),
-            'toolbar' => null,
-        ]);
+        $show = \Core\EditorNotes::$show;
+        \Core\EditorNotes::$show = false;   // Vorschau/Freigabe für Dritte: Redaktionsnotizen nie zeigen
+        try {
+            $html = $theme->render('layout', [
+                'page' => $page,
+                'content' => $theme->renderBlocks($blocks),
+                'seo' => ['noindex' => true] + Seo::forPage($page),
+                'editor' => null,
+                'extraCss' => $theme->conditionalCss(self::types($blocks)),
+                'extraJs' => $theme->conditionalJs(self::types($blocks)),
+                'toolbar' => null,
+            ]);
+        } finally {
+            \Core\EditorNotes::$show = $show;
+        }
+        return \Core\EditorNotes::publicHtml($html);
     }
 
     private function render(Request $r, array $page): Response
@@ -142,6 +149,8 @@ final class SiteController
         $app->editing = $loggedIn && isset($r->query['edit']) && can('pages.edit');
         // Eingeloggte sehen den Arbeitsstand (Entwurf) – mit ?live=1 die veröffentlichte Fassung wie Besucher
         $live = $loggedIn && isset($r->query['live']) && !$app->editing;
+        // Redaktionsnotizen [# … #]: Redaktion sieht sie als Hinweis (nicht in der Ansicht „wie Besucher“), sonst entfernt
+        \Core\EditorNotes::$show = $loggedIn && !$live && can('pages.edit');
         $showDraft = $loggedIn && !$live;
         // Redaktion: Einträge direkt bearbeiten (Stifte in Datenlisten; auf Detailseiten Felder im Text) – nie für Besucher
         $app->dataEdit = $loggedIn && !$live;
@@ -180,6 +189,10 @@ final class SiteController
         }
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => 200]);
+        // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);
+        // Entwurfsansicht der Redaktion: als Hinweis. Im Bearbeiten-Modus nicht – die Editor-Daten brauchen den Rohtext.
+        if (!\Core\EditorNotes::$show) $html = \Core\EditorNotes::publicHtml($html);
+        elseif (!$app->editing) $html = \Core\EditorNotes::decorate($html);
         if ($cacheable) {
             PageCache::put($cacheKey, $html);
         }
