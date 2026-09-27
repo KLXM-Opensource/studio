@@ -5,8 +5,8 @@
     "license": "MIT",
     "homepage": "https://studio.klxm.de",
     "support": {
-        "source": "https://github.com/klxm/studio",
-        "issues": "https://github.com/klxm/studio/issues"
+        "source": "https://github.com/KLXM-Opensource/studio",
+        "issues": "https://github.com/KLXM-Opensource/studio/issues"
     },
     "require": {
         "php": ">=8.4.1",

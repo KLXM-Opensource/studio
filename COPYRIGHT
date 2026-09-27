@@ -4,7 +4,7 @@ SPDX-License-Identifier: MIT
 
 KLXM Studio (core, bundled themes in themes/* and bundled extensions in
 extensions/*) is released under the MIT License; the full text is in the file
-LICENSE. Source code: https://github.com/klxm/studio
+LICENSE. Source code: https://github.com/KLXM-Opensource/studio
 
 Short file headers name the holder as "KLXM and contributors"; this refers to
 KLXM Crossmedia GmbH and the contributors named above.

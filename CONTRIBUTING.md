@@ -4,7 +4,7 @@ Danke für Ihr Interesse! Fehlerberichte, Verbesserungsvorschläge und Pull Requ
 
 ## Fehler und Wünsche
 
-- **Issues:** <https://github.com/klxm/studio/issues> – mit Version (`CMS_VERSION` in `app/bootstrap.php`), PHP-Version,
+- **Issues:** <https://github.com/KLXM-Opensource/studio/issues> – mit Version (`CMS_VERSION` in `app/bootstrap.php`), PHP-Version,
   Schritten zum Nachvollziehen und erwartetem bzw. tatsächlichem Verhalten.
 - **Sicherheitslücken** bitte nicht öffentlich melden, sondern wie in [SECURITY.md](SECURITY.md) beschrieben.
 

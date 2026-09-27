@@ -17,7 +17,7 @@ Ihnen ab. Auf Wunsch nennen wir Sie im Changelog. Ein Bug-Bounty-Programm oder e
 ## Unterstützte Versionen
 
 Sicherheitskorrekturen erscheinen für die jeweils aktuelle Version (neuester Release unter
-[GitHub Releases](https://github.com/klxm/studio/releases)). Bitte aktualisieren Sie vor einer Meldung, wenn möglich.
+[GitHub Releases](https://github.com/KLXM-Opensource/studio/releases)). Bitte aktualisieren Sie vor einer Meldung, wenn möglich.
 
 ---
 
