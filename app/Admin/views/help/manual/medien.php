@@ -26,6 +26,17 @@
     <li><b>Direkt auf der Seite:</b> Im Bearbeitungsmodus erscheint beim Überfahren eines Bildes der Knopf <b>Zuschneiden</b> – das Format der Stelle ist schon gewählt, das Ergebnis sehen Sie sofort.</li>
   </ul>
 
+  <h3 id="bild-bearbeiten">Bild bearbeiten: Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren</h3>
+  <p>Im großen Bearbeitungsfenster (Doppelklick auf ein Bild) steht unter der Vorschau die Werkzeugleiste <b>Zuschneiden · Drehen · Spiegeln · Ausrichten · Entzerren</b>; per Rechtsklick geht es auch mit <b>Bild bearbeiten …</b>. Das <b>Original bleibt immer unverändert</b> – gespeichert werden nur Ihre Einstellungen, die Website erzeugt daraus alle Größen neu. Jede Bearbeitung lässt sich deshalb jederzeit ändern oder mit <b>Alles zurücksetzen</b> rückgängig machen.</p>
+  <ul>
+    <li><b>Zuschneiden:</b> Rahmen verschieben oder an den Ecken ziehen; Seitenverhältnis frei oder 1:1, 4:3, 3:2, 16:9, 16:10, 4:5, 9:16. Der Zuschnitt gilt für das gedrehte und entzerrte Bild. Der Fokuspunkt bleibt erhalten.</li>
+    <li><b>Drehen:</b> in 90°-Schritten oder frei von −45° bis +45° (in 0,1°-Schritten, Regler oder Pfeiltasten). Damit keine leeren Ecken entstehen, wird automatisch auf das größte passende Rechteck zugeschnitten – oder Sie wählen <b>Mit Farbe füllen</b>.</li>
+    <li><b>Spiegeln:</b> horizontal oder vertikal. Vorsicht bei Schrift und Logos.</li>
+    <li><b>Ausrichten:</b> Ein Raster hilft, schiefe Horizonte gerade zu stellen. Mit <b>Horizont ziehen</b> ziehen Sie eine Linie entlang des Horizonts oder einer Hauswand – der Winkel wird daraus berechnet.</li>
+    <li><b>Entzerren:</b> Die vier gelben Ecken auf die Ecken einer schräg fotografierten Fläche ziehen (Gebäude, Schild, Bildschirm, Dokument) – sie wird gerade gerückt. Die kleine Vorschau rechts zeigt das Ergebnis.</li>
+  </ul>
+  <p><b>Vorher/Nachher</b> zeigt das Original zum Vergleich, jedes Werkzeug hat ein eigenes „… zurücksetzen“. Mit <b>Speichern</b> entstehen die neuen Bildgrößen (kann einige Sekunden dauern); überall, wo das Bild verwendet wird, erscheint die neue Fassung. <b>Eigene Zuschnitte je Format</b> (siehe oben) werden dabei zurückgesetzt, weil sich das Bild geändert hat – bitte kurz prüfen. Bei Bildern aus <b>geteilten Medien</b> wirkt die Bearbeitung auf allen Websites, die das Bild nutzen. Bedienung auch mit Tastatur: Ecken bzw. Ausschnitt auswählen (<kbd>Tab</kbd>) und mit den Pfeiltasten verschieben, mit <kbd>⇧</kbd> in großen Schritten. Nicht bearbeitbar sind GIF-Dateien und Videos; Handy-Fotos werden schon beim Hochladen richtig herum gedreht.</p>
+
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
   <p>Datei auswählen → <b>Datei ersetzen …</b> (im Bearbeitungsfenster oder per Rechtsklick) → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
 

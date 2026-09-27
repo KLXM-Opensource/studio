@@ -251,6 +251,7 @@ return function (Router $r): void {
     $r->post('/admin/api/media/{id}/delete', [Admin\MediaController::class, 'delete']);
     $r->post('/admin/api/media/{id}/crop', [Admin\MediaController::class, 'crop']);
     $r->post('/admin/api/media/{id}/adjust', [Admin\MediaController::class, 'adjust']);   // Bild anpassen (Core\ImageFx)
+    $r->post('/admin/api/media/{id}/edit', [Admin\MediaController::class, 'edit']);   // Bild bearbeiten (Core\ImageEdit)
     // Untertitel, Kapitel, Transkripte für Video/Audio (Core\MediaTracks) + KI-Transkription/Übersetzung (Core\AI\MediaJobs)
     $mt = Admin\MediaTrackController::class;
     $r->get('/admin/api/media/{id}/tracks', [$mt, 'index']);

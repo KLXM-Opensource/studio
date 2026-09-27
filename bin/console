@@ -87,6 +87,7 @@
  *   redirects:selftest                                Selbsttest: Normalisieren und Vergleichen der Weiterleitungen
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
  *                                                     --all: alle neu)
+ *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *
  * Suche & KI
  *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
@@ -812,6 +813,13 @@ switch ($cmd) {
         $res = Core\Blocks\SelfTest::run();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'media:selftest':
+        // Bild bearbeiten (Core\ImageEdit): Rechnung (Drehen, einbeschriebenes Rechteck, Entzerren), Format, Reihenfolge, GD
+        $res = Core\ImageEdit::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Entzerren: " . Core\ImageEdit::engine() . ")\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'guide:selftest':

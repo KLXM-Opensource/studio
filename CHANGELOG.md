@@ -6,6 +6,23 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bild bearbeiten: Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
+- **Zerstörungsfreier Bildeditor** in der Mediathek (Alle Details → Werkzeugleiste, Rechtsklick „Bild bearbeiten …“,
+  `Core\ImageEdit`, `resources/js/_imageedit.js`): Zuschneiden mit Seitenverhältnissen (frei, 1:1, 4:3, 3:2, 16:9, 16:10,
+  4:5, 9:16), Drehen in 90°-Schritten und frei (−45° bis +45°, 0,1°) mit Zuschnitt aufs größte einbeschriebene Rechteck
+  oder Füllfarbe, Spiegeln, Ausrichten mit Raster und „Horizont ziehen“, Entzerren über vier Eckpunkte. Live-Vorschau im
+  Canvas, Vorher/Nachher, Zurücksetzen je Werkzeug und „Alles zurücksetzen“; Tastatur (Pfeiltasten für Ecken, Ausschnitt
+  und Winkel), Anfasser 32 px, hell/dunkel, Tablet.
+- **Original bleibt unverändert:** Parameter in `media.edit_json` (neue Spalte, additiv), daraus bearbeitete Fassung und
+  neue Größen mit neuem Namen (Cache-Busting), Seiten-Cache wird geleert. Reihenfolge: EXIF → Entzerren → Spiegeln/Drehen
+  → Zuschnitt → Größen → CSS-Anpassung. Zuschnitte je Format arbeiten danach auf dem bearbeiteten Bild.
+- **Entzerren** mit Imagick (`distortImage`, Perspektive), sonst GD (eigene Projektion, bis 2400 px, Zeitlimit);
+  Arbeitskopie passend zum Speicherlimit. Pool-Dateien werden im Pool bearbeitet („Wirkt auf alle Websites, die dieses
+  Bild nutzen“). SVG, GIF und Videos: Werkzeuge gesperrt mit Hinweis.
+- EXIF-Ausrichtung beim Hochladen jetzt für alle acht Werte (auch gespiegelte 2, 4, 5, 7).
+- Endpunkt `POST /admin/api/media/{id}/edit`, Konsole `media:selftest` (einbeschriebenes Rechteck, Entzerren, Format,
+  Reihenfolge, GD), Handbuch „Bilder & Dateien → Bild bearbeiten“, Entwicklerhandbuch „Medien“.
+
 ### Netzwerk-Übersicht neu gestaltet (Netzwerk-Administration → Alle Websites)
 - **App-Icon je Website** in der Kartenkopfzeile (44 px, Platz reserviert – kein Springen beim Laden) und im
   Website-Umschalter der Seitenleiste (16 px). Neu `Core\Network\SiteIcon`: liest `icons/icon-192.png` bzw. `icon-32.png`

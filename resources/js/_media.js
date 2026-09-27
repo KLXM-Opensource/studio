@@ -5,6 +5,7 @@ import { ico } from './_icons.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
+import { editImage, editToolbar } from './_imageedit.js';   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
  *  - Seitenleiste: Mediathek, Sammlungen (Dateien per Drag & Drop hineinziehen), Tags
@@ -12,6 +13,7 @@ import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpass
  *  - Informationen rechts: Alt-Text (Pflicht), Titel, Tags, Sammlungen, Fokuspunkt, Zuschnitte, Verwendung – speichert automatisch
  *  - Upload per Drag & Drop, mehrere Dateien, in 1-MB-Stücken; Alt-Text verbindlich
  *  - Zuschneiden je Bildformat mit Zoom und Verschieben – auch direkt auf der Seite im Bearbeiten-Modus
+ *  - Bild bearbeiten (Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren; zerstörungsfrei): Werkzeugleiste in „Alle Details“
  *  - Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast; zerstörungsfrei): global in „Alle Details“ bzw. rechts,
  *    im Bearbeiten-Modus je Einbindung im Block (window.CMSEditor.fx, resources/js/editor.js)
  *  - Auswahldialog für Bild-/Datei-Felder: window.CMSMedia.pick(kind)
@@ -70,6 +72,7 @@ const api = {
   del: id => http(`${BASE}/api/media/${id}/delete`, { method: 'POST', json: {} }),
   crop: (id, ratio, rect) => http(`${BASE}/api/media/${id}/crop`, { method: 'POST', json: { ratio, rect } }),
   adjust: (id, adjust) => http(`${BASE}/api/media/${id}/adjust`, { method: 'POST', json: { adjust } }),
+  edit: (id, edit) => http(`${BASE}/api/media/${id}/edit`, { method: 'POST', json: { edit } }),
   bulk: body => http(BASE + '/api/media-bulk', { method: 'POST', json: body }),
   collection: name => http(BASE + '/api/collections', { method: 'POST', json: { name } }),
   renameCollection: (id, name) => http(`${BASE}/api/collections/${id}`, { method: 'POST', json: { name } }),
@@ -863,6 +866,7 @@ class Finder {
     }
     if (one) e.push(['Bearbeiten …', () => this.edit(one.id)], ['Quick Look', () => this.quickLook(one.id)]);
     if (one?.kind === 'image') e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
+    if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
     if (this.src.type === 'collection') e.push(['Aus Sammlung entfernen', async () => { await api.bulk({ ids, action: 'uncollect', collection: +this.src.value }); this.load(); }]);
     // Vorhandene Dateien der Website in einen geteilten Pool verschieben (Verwendungen bleiben erhalten)
@@ -1065,13 +1069,15 @@ class Finder {
       <div class="md-grid">
         <div class="md-preview">
           ${isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
+            <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
             <div class="md-crops" data-crops>${cropTiles()}</div>
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>`
           : m.kind === 'pdf' ? `<iframe class="md-pdf" src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
-          : m.kind === 'video' ? `<video class="md-video" src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>`
+          : m.kind === 'video' ? `<video class="md-video" src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>
+            <div class="md-iebar">${editToolbar(m, this.ro)}</div>`
           : m.kind === 'audio' ? `<audio class="md-video" src="${esc(m.url)}" controls preload="metadata"></audio>` : ''}
         </div>
         <form class="md-form" novalidate>
@@ -1146,6 +1152,17 @@ class Finder {
       const b = e.target.closest('[data-crop]'); if (!b) return;
       crop({ ...m, focus }, b.dataset.crop, (r, res) => { m.crops = res.item.crops; $('[data-crops]', dlg).innerHTML = cropTiles(); fxPreview(); this.load(m.id); });
     });
+    // Bild bearbeiten (speichert sofort; neue Größen, eigene Zuschnitte je Format werden zurückgesetzt)
+    $('[data-iebar]', dlg)?.addEventListener('click', async e => {
+      const b = e.target.closest('[data-ie-tool]'); if (!b) return;
+      const item = await this.editImage(m, b.dataset.ieTool);
+      if (!item) { b.focus(); return; }
+      $('.md-focus img', dlg).src = m.large;
+      $('.md-meta', dlg).textContent = `${m.type} · ${m.size}${m.width ? ` · ${m.width} × ${m.height} px` : ''}`;
+      $('[data-crops]', dlg).innerHTML = cropTiles(); fxPreview();
+      $('[data-iebar]', dlg).innerHTML = editToolbar(m, this.ro);
+      $(`[data-ie-tool="${b.dataset.ieTool}"]`, dlg)?.focus();
+    });
     // Bild anpassen (speichert sofort, wie der Zuschnitt)
     $('[data-adjbox]', dlg)?.addEventListener('click', async e => {
       if (!e.target.closest('[data-adjust]')) return;
@@ -1168,6 +1185,21 @@ class Finder {
     });
     if (!dlg.open) dlg.showModal();
     (isImg && !m.alt && !m.decorative ? form.alt : form.title).focus();
+  }
+
+  /**
+   * Bildeditor (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren – speichert sofort.
+   * Übernimmt das Ergebnis in m (Adressen, Maße, Zuschnitte) und lädt die Liste neu. Ergebnis: item oder undefined.
+   */
+  async editImage(m, tool = 'crop') {
+    if (m.original_size === undefined || m.edit_engine === undefined) Object.assign(m, await api.detail(m.id));
+    if (m.editable) { toast(m.editable); return undefined; }
+    const item = await editImage(m, { tool, engine: m.edit_engine, save: edit => api.edit(m.id, edit) });
+    if (!item) return undefined;
+    for (const k of ['url', 'thumb', 'large', 'width', 'height', 'size', 'bytes', 'crops', 'edit', 'original', 'original_size', 'updated_at']) m[k] = item[k];
+    toast(item.edit ? t('Bearbeitung gespeichert') : t('Bearbeitung entfernt – Original'));
+    this.load(m.id);
+    return item;
   }
 
   /** Dialog „Bild anpassen“ (global); speichert sofort. Ergebnis: neuer Wert oder undefined (Abbruch) */

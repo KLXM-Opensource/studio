@@ -199,6 +199,7 @@ final class Database
             'pool_ref' => 'VARCHAR(80) NULL',   // Verweis auf eine geteilte Pool-Datei „pool:id“ (MediaPools)
             'transcripts' => 'TEXT NULL',   // Transkripte je Sprache (Video/Audio): {"de": {"text": "…", "status": "published"}} – Core\MediaTracks
             'adjust' => 'VARCHAR(80) NULL',   // Bild anpassen (Core\ImageFx): „sepia s120 c110“ – zerstörungsfrei per CSS-Filter
+            'edit_json' => 'TEXT NULL',   // Bild bearbeiten (Core\ImageEdit): {"ops": {…}, "orig": {"w","h"}, "master": "cache/…-e.jpg"}
         ]);
 
         // Seitenbaum: Eltern, Pfad, Menü, Seitentyp (page | template für Detailseiten von Datentabellen)

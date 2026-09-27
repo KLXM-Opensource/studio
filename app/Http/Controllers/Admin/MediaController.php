@@ -141,6 +141,7 @@ final class MediaController extends AdminController
         return Response::json(Media::toJson($m) + [
             'collections' => Media::collectionIds((int) $id),
             'usages' => Media::usages((int) $id),
+            'edit_engine' => \Core\ImageEdit::engine(),   // Entzerren mit Imagick oder GD (Hinweis im Bildeditor)
         ]);
     }
 
@@ -251,6 +252,29 @@ final class MediaController extends AdminController
         $this->changed();
         $src = Media::sources($m, $ratio);
         return Response::json(['ok' => true, 'item' => Media::toJson($m), 'sources' => $src]);
+    }
+
+    /**
+     * Bild bearbeiten ({edit: {quad, quad_fit, flip_h, flip_v, rot, angle, fill, crop}} – leer/null = Original), Core\ImageEdit.
+     * Pool-Dateien werden im Pool bearbeitet (wirkt auf allen Websites, die sie nutzen).
+     */
+    public function edit(Request $r, string $id): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($e = $this->scope($r, true)) return $e;
+        $t = $this->target((int) $id, true);
+        if ($t instanceof Response) return $t;
+        [$m, $err] = Media::setEdit((int) $t, $r->post['edit'] ?? null);
+        if (!$m) {
+            return Response::json(['ok' => false, 'error' => $err], 422);
+        }
+        $this->changed();
+        if ((int) $t !== (int) $id) {
+            // Verweis auf eine Pool-Datei: Antwort mit der ID dieser Website (Oberfläche arbeitet mit ihr weiter)
+            Media::usePool(null);
+            $m = Media::find((int) $id) ?? $m;
+        }
+        return Response::json(['ok' => true, 'item' => Media::toJson($m)]);
     }
 
     public function delete(Request $r, string $id): Response

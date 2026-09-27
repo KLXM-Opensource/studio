@@ -15,6 +15,8 @@ namespace Core;
  *  - Fokuspunkt (x/y in %) steuert den Bildausschnitt bei object-fit: cover.
  *  - Tags (Freitext) und Sammlungen zum Ordnen.
  *  - Bild anpassen (Effekte, Sättigung …): zerstörungsfrei per CSS-Klassen, Spalte adjust (Core\ImageFx).
+ *  - Bild bearbeiten (Entzerren, Drehen, Spiegeln, Ausrichten, Zuschneiden): zerstörungsfrei, Spalte edit_json –
+ *    bearbeitete Fassung und Größen werden aus dem unveränderten Original erzeugt (Core\ImageEdit, setEdit()).
  */
 final class Media
 {
@@ -275,6 +277,7 @@ final class Media
         self::deleteFiles($old);
         $data['updated_at'] = now();
         $data['crops'] = null;          // neues Motiv → Zuschnitte neu festlegen
+        $data['edit_json'] = null;      // … und nicht bearbeitet (Core\ImageEdit)
         $data['alt'] = trim($alt);
         if (!empty($opt['reset_focus'])) {
             $data['focus_x'] = 50;
@@ -404,9 +407,12 @@ final class Media
         if ($mime !== 'image/jpeg' || !function_exists('exif_read_data')) {
             return $img;
         }
-        $o = (int) (@exif_read_data($path)['Orientation'] ?? 1);
-        $r = match ($o) { 3 => imagerotate($img, 180, 0), 6 => imagerotate($img, -90, 0), 8 => imagerotate($img, 90, 0), default => $img };
-        return $r ?: $img;
+        // alle acht Werte, auch gespiegelte (2, 4, 5, 7) – Core\ImageEdit::exifOps()
+        try {
+            return ImageEdit::orient($img, (int) (@exif_read_data($path)['Orientation'] ?? 1));
+        } catch (\RuntimeException) {
+            return $img;
+        }
     }
 
     private static function resize(\GdImage $img, int $w): \GdImage
@@ -465,6 +471,14 @@ final class Media
             $pick ??= end($v['sizes'])['w'];
             return self::publicUrl($m, 'cache/' . $v['base'] . '-' . $pick . '.' . $format);
         }
+        // Bearbeitetes Bild (Core\ImageEdit): die bearbeitete Fassung statt des Originals
+        $master = ImageEdit::stored($m)['master'] ?? null;
+        return self::publicUrl($m, $master ?: $m['file']);
+    }
+
+    /** Adresse der unveränderten Originaldatei (Vorher/Nachher im Bildeditor) */
+    public static function originalUrl(array $m): string
+    {
         return self::publicUrl($m, $m['file']);
     }
 
@@ -653,7 +667,9 @@ final class Media
             unset($crops[$ratio]);
         }
         if ($rect !== null) {
-            $img = self::load(self::dir() . '/' . $m['file'], $m['mime']);
+            // Zuschnitt je Format auf dem bearbeiteten Bild (Core\ImageEdit), sonst auf dem Original
+            [$src, $srcMime] = self::editedSource($m);
+            $img = self::load($src, $srcMime);
             if (!$img) {
                 return [null, 'Bild konnte nicht gelesen werden.'];
             }
@@ -685,6 +701,85 @@ final class Media
         return [self::find($id), null];
     }
 
+    // ================================================================= Bild bearbeiten (Core\ImageEdit)
+
+    /** Quelle für Zuschnitte: bearbeitete Fassung, sonst Original. @return array{0: string, 1: string} [Pfad, MIME] */
+    private static function editedSource(array $m): array
+    {
+        $master = ImageEdit::stored($m)['master'] ?? null;
+        $dir = substr(self::path($m), 0, -strlen((string) $m['file']));   // Medienordner der Datei (Website oder Pool) mit „/“
+        if ($master && is_file($dir . $master)) {
+            return [$dir . $master, str_ends_with($master, '.png') ? 'image/png' : 'image/jpeg'];
+        }
+        return [self::path($m), (string) $m['mime']];
+    }
+
+    /**
+     * Bearbeitung festlegen (oder mit leerem $edit zurücksetzen) – zerstörungsfrei: aus dem Original entstehen eine
+     * bearbeitete Fassung und neue Größen (neue Dateinamen = neue Adressen). Eigene Zuschnitte je Format werden
+     * zurückgesetzt (anderes Motiv), Fokuspunkt und Anpassung (CSS) bleiben.
+     * @return array{0: ?array, 1: ?string}
+     */
+    public static function setEdit(int $id, mixed $edit): array
+    {
+        $m = self::find($id);
+        if (!$m || !str_starts_with((string) $m['mime'], 'image/')) {
+            return [null, __('Nur Bilder lassen sich bearbeiten.')];
+        }
+        if ($why = ImageEdit::editable($m)) {
+            return [null, $why];
+        }
+        $ops = ImageEdit::normalize($edit);
+        if ($ops === null) {
+            return [null, __('Ungültige Bildbearbeitung.')];
+        }
+        $stored = ImageEdit::stored($m);
+        $orig = $stored['orig'] ?? ['w' => (int) $m['width'], 'h' => (int) $m['height']];
+        if ($ops === ImageEdit::ops($m) && ($ops === [] || !empty($stored['master']))) {
+            return [$m, null];   // unverändert
+        }
+        $img = self::load(self::path($m), (string) $m['mime']);
+        if (!$img) {
+            return [null, __('Bild konnte nicht gelesen werden.')];
+        }
+        @set_time_limit(120);
+        $fw = imagesx($img);   // gespeichertes Original (höchstens 3200 px) – Maße der Spalten beziehen sich aufs Hochgeladene
+        $fh = imagesy($img);
+        $scale = $orig['w'] > 0 ? $orig['w'] / $fw : 1.0;
+        $master = null;
+        try {
+            if ($ops) {
+                $img = ImageEdit::apply($img, $ops);
+                $ext = str_ends_with((string) $m['file'], '.png') ? 'png' : 'jpg';
+                $master = 'cache/' . bin2hex(random_bytes(8)) . '-e.' . $ext;
+                @mkdir(self::dir() . '/cache', 0775, true);
+                $ok = $ext === 'png' ? imagepng($img, self::dir() . '/' . $master, 8) : imagejpeg($img, self::dir() . '/' . $master, 90);
+                if (!$ok) throw new \RuntimeException(__('Bearbeitetes Bild konnte nicht gespeichert werden.'));
+            }
+            $variants = self::makeVariants($img, bin2hex(random_bytes(8)), imagesx($img));
+        } catch (\RuntimeException $e) {
+            if ($master) @unlink(self::dir() . '/' . $master);
+            return [null, $e->getMessage()];
+        }
+        // Alte Größen, alte bearbeitete Fassung und Zuschnitte je Format entfernen – das Original bleibt
+        self::deleteVariantFiles(json_decode((string) $m['variants_json'], true) ?: []);
+        foreach (self::crops($m) as $c) self::deleteVariantFiles($c);
+        if (!empty($stored['master'])) @unlink(self::dir() . '/' . $stored['master']);
+        // Maße wie beim Hochladen (Original kann größer sein als die gespeicherte Datei), Seitenverhältnis vom Ergebnis
+        $w = $ops ? max(1, (int) round(ImageEdit::outputSize($fw, $fh, $ops)[0] * $scale)) : $orig['w'];
+        $h = $ops ? max(1, (int) round($w * imagesy($img) / max(1, imagesx($img)))) : $orig['h'];
+        self::db()->update('media', [
+            'variants_json' => json_encode($variants), 'width' => $w, 'height' => $h, 'crops' => null,
+            'edit_json' => $ops ? json_encode(['ops' => $ops, 'orig' => $orig, 'master' => $master], JSON_UNESCAPED_SLASHES) : null,
+            'updated_at' => now(),
+        ], 'id = :id', ['id' => $id]);
+        self::forget($id);
+        MediaPools::forget();
+        PageCache::clear();
+        Extensions::emit('media.edited', self::find($id), $m);
+        return [self::find($id), null];
+    }
+
     // ================================================================= Löschen
 
     /** Alle Dateien eines Mediums relativ zu seinem Medienordner (z. B. zum Kopieren zwischen Pools, siehe Core\Data\Shared) */
@@ -693,10 +788,11 @@ final class Media
         return self::files($m);
     }
 
-    /** Alle Dateien eines Mediums relativ zum Medienordner (Original, Größen, Zuschnitte) */
+    /** Alle Dateien eines Mediums relativ zum Medienordner (Original, bearbeitete Fassung, Größen, Zuschnitte) */
     private static function files(array $m): array
     {
         $out = [$m['file']];
+        if ($master = ImageEdit::stored($m)['master'] ?? null) $out[] = $master;
         $v = json_decode((string) $m['variants_json'], true) ?: [];
         foreach ([$v, ...self::crops($m)] as $set) {
             foreach ($set['sizes'] ?? [] as $sz) {
@@ -740,6 +836,7 @@ final class Media
     private static function deleteFiles(array $m): void
     {
         @unlink(self::dir() . '/' . $m['file']);
+        if ($master = ImageEdit::stored($m)['master'] ?? null) @unlink(self::dir() . '/' . $master);
         $v = json_decode((string) $m['variants_json'], true) ?: [];
         foreach ($v['sizes'] ?? [] as $s) {
             foreach ($s['f'] as $f) {
@@ -981,6 +1078,11 @@ final class Media
             'focus' => ['x' => (int) ($m['focus_x'] ?? 50), 'y' => (int) ($m['focus_y'] ?? 50)],
             // Bild anpassen (Core\ImageFx): gespeicherte Einstellung, Klassen für die Vorschau, Kurzbeschreibung
             'adjust' => $isImg ? (string) ($m['adjust'] ?? '') : '', 'adjust_label' => $isImg ? ImageFx::label((string) ($m['adjust'] ?? '')) : '',
+            // Bild bearbeiten (Core\ImageEdit): Schritte, Hinweis falls nicht bearbeitbar, Original für Vorher/Nachher
+            'edit' => $isImg && ($ops = ImageEdit::ops($m)) ? $ops : null,
+            'editable' => ImageEdit::editable($m),
+            'original' => $isImg ? self::originalUrl($m) : null,
+            'original_size' => $isImg ? ImageEdit::stored($m)['orig'] ?? ['w' => (int) $m['width'], 'h' => (int) $m['height']] : null,
             'created_at' => $m['created_at'], 'updated_at' => $m['updated_at'] ?? null,
             'missing_alt' => $isImg && trim((string) $m['alt']) === '' && empty($m['decorative']),
             'i18n' => (object) self::translations($m),
