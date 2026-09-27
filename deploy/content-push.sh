@@ -7,7 +7,7 @@
 # Nur Seiten, die sich seit dem Holen lokal geändert haben. Live wird je Seite geprüft: Hat dort seitdem jemand
 # gearbeitet (oder liegt ein Entwurf), wird NICHTS übernommen (Konflikt) – neu holen und wiederholen.
 # Übernahme als Entwurf mit Version „Content-Sync“ (rückgängig über Versionen); --publish veröffentlicht sofort.
-# Neue Seiten und neu hochgeladene Medien überträgt der Abgleich nicht.
+# Neue Seiten und neu hochgeladene Medien gehen mit (live neue IDs); Pool-Dateien als Verweis, wenn der Pool live existiert.
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 cd "$(dirname "$0")/.."

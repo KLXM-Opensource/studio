@@ -70,6 +70,9 @@ deploy/content-push.sh production default --publish    # übernimmt und veröffe
 - **Neue Seiten und Medien:** gehen mit – mit übergeordneter Seite, Übersetzungsgruppe und Menü; neu hochgeladene Bilder,
   auf die übertragene Seiten verweisen, samt Alt-Text, Fokus und Übersetzungen. Live entstehen neue IDs; Medien-IDs und
   `page:ID`-Verweise werden umgeschrieben. Danach **zuerst neu holen**, bevor weiter bearbeitet wird (der Export verweigert sonst).
+- **Geteilte Medien (Pools):** Verweise auf Pool-Dateien gehen als Verweis mit. Gibt es den Pool live (mit derselben Datei –
+  gesucht über den Dateinamen, falls die IDs im Pool abweichen), entsteht dort nur ein Verweis-Eintrag; fehlt er, wird die
+  Datei als eigene Datei der Website kopiert (sie liegt dem Export dafür bei).
 - **Grenzen:** Zuordnung über Pfad + Sprache. Gelöschte oder verschobene Seiten und Grundeinstellungen gehen nicht mit.
 - **Ohne Releases** (Installation direkt im Web-Ordner): in `targets/<ziel>.env` `APP_DIR` setzen; bei Passwort-Anmeldung
   `SSH_CMD="sshpass -e ssh"` und `SCP_CMD="sshpass -e scp"` (Passwort in der Umgebungsvariable `SSHPASS`).

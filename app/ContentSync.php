@@ -16,7 +16,9 @@ namespace Core;
  * gearbeitet, und die Seite wird nicht angefasst (Konflikt). Übernommen wird als Entwurf mit Version („Content-Sync“);
  * erst --publish veröffentlicht. Zuordnung über Pfad + Sprache.
  * Neue Seiten (mit Eltern, Übersetzungsgruppe, Menü) und neue Medien, auf die sie verweisen, gehen mit – live entstehen
- * dabei neue IDs; Verweise (Medien-IDs, page:ID) werden umgeschrieben. Danach ist der gemerkte Stand veraltet: vor der
+ * dabei neue IDs; Verweise (Medien-IDs, page:ID) werden umgeschrieben. Verweise auf Dateien geteilter Pools (media.pool_ref)
+ * gehen als Verweis mit: Gibt es den Pool live (gleiche Datei), entsteht dort nur ein Verweis-Eintrag (MediaPools::mirror),
+ * sonst wird die Datei als eigene Datei der Website kopiert (die Datei liegt dem Export dafür bei). Danach ist der gemerkte Stand veraltet: vor der
  * nächsten Änderung neu holen (content:export verweigert sonst).
  */
 final class ContentSync
@@ -140,11 +142,19 @@ final class ContentSync
         $max = (int) ($base['media_max'] ?? PHP_INT_MAX);
         foreach (array_unique(array_merge(...array_map(fn($x) => self::mediaRefs($x['blocks']), $pages))) as $mid) {
             if ($mid <= $max || !($m = Media::find($mid))) continue;
-            $path = Media::dir() . '/' . $m['file'];
+            // Media::path() kennt auch Verweise auf geteilte Pools (_pool) – Media::dir() wäre der Ordner der Website
+            $path = Media::path($m);
             if (!is_file($path)) { fwrite(STDERR, "Datei zu Medium #$mid fehlt: $path\n"); return 1; }
-            $media[] = ['id' => $mid, 'name' => $m['original_name'] ?: $m['file'], 'data' => base64_encode((string) file_get_contents($path))]
-                + array_intersect_key($m, array_flip(['alt', 'title', 'credit', 'tags', 'decorative', 'focus_x', 'focus_y', 'i18n', 'crops', 'adjust', 'fit']));
-            echo "  neues Medium: #$mid " . ($m['original_name'] ?: $m['file']) . "\n";
+            $row = ['id' => $mid, 'name' => $m['original_name'] ?: $m['file'], 'data' => base64_encode((string) file_get_contents($path))];
+            if (!empty($m['pool_ref'])) {
+                // Verweis auf eine Pool-Datei: live als Verweis anlegen, wenn es den Pool dort gibt (Datei mit gleichem Namen),
+                // sonst aus 'data' als eigene Datei der Website – daher geht die Datei trotzdem mit
+                $row += ['pool_ref' => (string) $m['pool_ref'], 'pool_file' => (string) $m['file']];
+            } else {
+                $row += array_intersect_key($m, array_flip(['alt', 'title', 'credit', 'tags', 'decorative', 'focus_x', 'focus_y', 'i18n', 'crops', 'adjust', 'fit']));
+            }
+            $media[] = $row;
+            echo '  neues Medium: #' . $mid . ' ' . ($m['original_name'] ?: $m['file']) . (!empty($m['pool_ref']) ? " (Verweis auf Pool {$m['_pool']})" : '') . "\n";
         }
         $out ??= site()->storage('content-sync-export.json');
         file_put_contents($out, json_encode(['site' => site()->key, 'base_created' => $base['created'], 'created' => now(), 'pages' => $pages, 'media' => $media],
@@ -190,7 +200,9 @@ final class ContentSync
             echo '  ' . ($problems ? '! ' : '✓ ') . (!empty($in['new']) ? 'neu ' : '') . "$k – $title" . ($problems ? ' (übergangen: ' . implode('; ', $problems) . ')' : '') . "\n";
             $plan[] = [$p, $in];
         }
-        foreach ((array) ($data['media'] ?? []) as $m) echo "  ✓ neues Medium: {$m['name']}\n";
+        foreach ((array) ($data['media'] ?? []) as $m) {
+            echo "  ✓ neues Medium: {$m['name']}" . (!empty($m['pool_ref']) ? (self::poolRef($m) ? ' – Verweis auf den Pool' : ' – Pool fehlt live, wird als Datei der Website kopiert') : '') . "\n";
+        }
         if ($blocked && !$force) {
             fwrite(STDERR, "Nichts übernommen: $blocked Seite(n) mit Konflikt. Neu holen und Änderung wiederholen – oder bewusst --force.\n");
             return 2;
@@ -200,6 +212,10 @@ final class ContentSync
         // 1. Neue Medien anlegen → ID-Zuordnung lokal → live
         $mediaMap = [];
         foreach ((array) ($data['media'] ?? []) as $m) {
+            if (($ref = self::poolRef($m)) !== null) {
+                $mediaMap[(int) $m['id']] = MediaPools::mirror($ref[0], $ref[1]);
+                continue;
+            }
             $tmp = tempnam(sys_get_temp_dir(), 'csm');
             file_put_contents($tmp, base64_decode((string) $m['data']));
             [$row, $err] = Media::import($tmp, (string) $m['name'], (string) ($m['alt'] ?? ''), ['title' => $m['title'] ?? '', 'credit' => $m['credit'] ?? '', 'tags' => $m['tags'] ?? '', 'decorative' => !empty($m['decorative'])]);
@@ -234,6 +250,24 @@ final class ContentSync
         echo count($plan) . ' Seite(n)' . ($mediaMap ? ', ' . count($mediaMap) . ' Medien' : '') . ' übernommen'
             . ($publish ? ' und veröffentlicht.' : ' – als Entwurf; in der Verwaltung prüfen und veröffentlichen.') . "\n";
         return 0;
+    }
+
+    /**
+     * Pool-Verweis eines exportierten Mediums auf diesem Server: [pool, id im Pool] – nur, wenn der Pool dieser Website
+     * zugeordnet ist und dort dieselbe Datei liegt (gleicher Dateiname; Pool-IDs können sich zwischen Servern unterscheiden,
+     * dann wird nach dem Dateinamen gesucht). null = als eigene Datei der Website kopieren.
+     */
+    private static function poolRef(array $m): ?array
+    {
+        if (empty($m['pool_ref']) || !str_contains((string) $m['pool_ref'], ':')) return null;
+        [$key, $pid] = explode(':', (string) $m['pool_ref'], 2);
+        if (!MediaPools::available($key)) return null;
+        $file = (string) ($m['pool_file'] ?? '');
+        $row = MediaPools::row($key, (int) $pid);
+        if ($row && ($file === '' || $row['file'] === $file)) return [$key, (int) $pid];
+        if ($file === '') return null;
+        $id = MediaPools::db($key)->fetchValue('SELECT id FROM media WHERE file = ?', [$file]);
+        return $id ? [$key, (int) $id] : null;
     }
 
     /** Medien-IDs und page:ID-Verweise auf neu angelegte Einträge umschreiben (lokale → live-IDs) */
