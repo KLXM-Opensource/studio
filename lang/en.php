@@ -776,6 +776,7 @@ return [
     'Ungültige E-Mail-Adresse.' => 'Invalid email address.',
     'Wartung' => 'Maintenance',
     'Wartungsmodus an' => 'Maintenance mode on',
+    'aktuell: {site}' => 'current: {site}',
     'Platzhalter {text} auf „{page}“' => 'Placeholder {text} on “{page}”',
     '{n} Platzhalter in Seiten ersetzen' => 'Replace {n} placeholders in pages',
     'Zuerst: {text} auf „{page}“.' => 'First: {text} on “{page}”.',

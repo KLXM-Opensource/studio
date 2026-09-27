@@ -117,7 +117,7 @@ if ($user && ($req = app()->request)) {
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
-    <summary><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(site()->label()) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('Website wechseln')) ?></span></summary>
+    <summary><?php // Name der aktuellen Website steht schon in der Marke darüber – hier nur die Aktion ?><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(__('Website wechseln')) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('aktuell: {site}', ['site' => site()->label()])) ?></span></summary>
     <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netswitch__menu">
       <?= csrf_field() ?>
       <p class="adm-netswitch__h"><?= e(__('Website wechseln')) ?></p>
