@@ -158,30 +158,34 @@ import { t } from './_i18n.js';
 })();
 
 // ------------------------------------------------------------ Mauerwerk: Karten rücken lückenlos nach oben
-// Raster in 4-px-Zeilen; jede Karte belegt so viele Zeilen, wie sie hoch ist (+ Abstand). DOM- und Tab-Reihenfolge
-// bleiben unverändert. Ohne JavaScript bzw. auf schmalen Bildschirmen (eine Spalte) gilt das normale Raster.
+// Raster in 4-px-Zeilen; jede Karte belegt so viele Zeilen, wie sie hoch ist (+ Abstand). Spalten und Spannen legt allein das
+// CSS fest (Container-Abfrage, dashboard.css) – hier ändern sich nur die Zeilen, daher kein seitliches Springen. DOM- und
+// Tab-Reihenfolge bleiben unverändert. Ohne JavaScript bzw. bei einer Spalte gilt das normale Raster (Zeilenhöhe = Inhalt).
+// Das Skript läuft ohne defer direkt nach dem Raster, damit schon das erste Bild gepackt ist.
 (() => {
   const grid = document.querySelector('[data-dash]');
   if (!grid || !('ResizeObserver' in window)) return;
   const ROW = 4;
-  const gapOf = () => parseFloat(getComputedStyle(grid).columnGap) || 20;
-  const single = () => getComputedStyle(grid).gridTemplateColumns.split(' ').length < 2;
   const cards = () => [...grid.children].filter(c => c.matches('.dash-card'));
-  const fit = card => {
-    if (single()) { card.style.gridRowEnd = ''; return; }
-    const h = card.hidden ? 0 : card.getBoundingClientRect().height;
-    card.style.gridRowEnd = h ? 'span ' + Math.ceil((h + gapOf()) / ROW) : '';
-  };
   let on = false;
   const layout = () => {
-    const want = !single();
-    if (want !== on) { grid.classList.toggle('is-packed', want); on = want; }
-    cards().forEach(fit);
+    const cs = getComputedStyle(grid);
+    const multi = cs.gridTemplateColumns.split(' ').length > 1;
+    if (multi !== on) { grid.classList.toggle('is-packed', multi); on = multi; }
+    const gap = parseFloat(cs.columnGap) || 20;
+    const list = cards();
+    // erst alle Höhen lesen, dann schreiben (kein Layout-Flattern)
+    const spans = list.map(c => {
+      const h = multi && !c.hidden ? c.getBoundingClientRect().height : 0;
+      return h ? 'span ' + Math.ceil((h + gap) / ROW) : '';
+    });
+    list.forEach((c, i) => { if (c.style.gridRowEnd !== spans[i]) c.style.gridRowEnd = spans[i]; });
   };
-  const ro = new ResizeObserver(entries => { if (!on) return layout(); entries.forEach(e => fit(e.target)); });
+  // Größe einer Karte (Nachladen, Auf-/Zuklappen, Fundstellen, Schriften) oder des Rasters (Fenster, Seitenleiste) ändert sich
+  const ro = new ResizeObserver(layout);
+  ro.observe(grid);
   cards().forEach(c => ro.observe(c));
   // neu eingefügte/verschobene Karten (Anpassen-Modus) mitnehmen
   new MutationObserver(() => { cards().forEach(c => ro.observe(c)); layout(); }).observe(grid, { childList: true });
-  window.addEventListener('resize', layout);
   layout();
 })();

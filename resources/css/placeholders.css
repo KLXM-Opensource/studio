@@ -6,14 +6,20 @@
 .dash-ph>summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--adm-a-ink);padding:4px 0;width:fit-content}
 .dash-ph>summary:focus-visible,.ph-hit__text--long>summary:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px;border-radius:4px}
 .dash-ph>.ph-list{margin-top:8px}
+/* Übersicht: Fundstellen nebeneinander, so viele die Breite hergibt (Karte „Was ist zu tun?“ ist breit) – Seiten mit einer
+   Fundstelle als Kachel im Raster, Seiten mit mehreren über die ganze Breite (ihre Fundstellen wieder nebeneinander) */
+.dash-ph .ph-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:14px 8px}
+.dash-ph .ph-page:has(.ph-hit+.ph-hit){grid-column:1/-1}
+.dash-ph .ph-page{display:grid;grid-template-rows:auto 1fr;min-width:0}
+.dash-ph .ph-hits{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
 
-.ph-list{display:grid;gap:14px}
-.ph-page__title{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 6px;font-size:14px;font-weight:700;color:var(--adm-ink)}
+.ph-list{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.ph-page__title{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;overflow-wrap:anywhere;hyphens:auto;margin:0 0 6px;font-size:14px;font-weight:700;color:var(--adm-ink)}
 .ph-page__n{font-size:12.5px;font-weight:500;color:var(--adm-t3)}
-.ph-hits{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.ph-hit{display:grid;gap:6px;padding:10px 12px;border-radius:8px;background:var(--adm-card);box-shadow:0 0 0 1px var(--adm-line)}
+.ph-hits{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.ph-hit{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:6px;padding:10px 12px;border-radius:8px;background:var(--adm-card);box-shadow:0 0 0 1px var(--adm-line)}
 .ph-card .ph-hit{background:var(--adm-fill)}
-.ph-hit__type{display:flex;align-items:center;gap:6px;margin:0;font-size:12.5px;font-weight:600;color:var(--adm-t2)}
+.ph-hit__type{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:0;font-size:12.5px;font-weight:600;color:var(--adm-t2)}
 .ph-hit__type svg{width:15px;height:15px;flex:none}
 .ph-hit__text{margin:0;font-size:13.5px;min-width:0}
 .ph-hit__q{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;padding:1px 5px;border-radius:4px;background:var(--adm-warn-bg);color:var(--adm-ink);overflow-wrap:anywhere;-webkit-box-decoration-break:clone;box-decoration-break:clone}

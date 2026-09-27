@@ -5,7 +5,7 @@
 
 /* Kopf: Begrüßung + Schnellaktionen */
 .dash-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:14px}
-.dash-hero__text{min-width:0}
+.dash-hero__text{min-width:0;overflow-wrap:anywhere;hyphens:auto;hyphenate-limit-chars:10 4 4}
 .dash-hero h1{margin-bottom:6px}
 .dash-actions{display:flex;flex-wrap:wrap;gap:8px}
 .dash-actions .adm-btn{border-radius:8px}
@@ -20,31 +20,25 @@
 .dash-bar__btn[aria-pressed=true]{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
 .dash-bar__hint{font-size:13px;margin:0}
 
-/* Raster */
-.dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start}
-.dash-card{grid-column:span 6;min-width:0;background:var(--adm-card);border-radius:10px;box-shadow:0 1px 0 var(--adm-line),0 0 0 1px var(--adm-line);scroll-margin-top:16px}
-.dash-card--third{grid-column:span 4}
-.dash-card--two-thirds{grid-column:span 8}
+/* Raster (Bento): Spaltenzahl nach der Breite des Inhaltsbereichs (Container-Abfrage, nicht des Fensters – die Seitenleiste
+   nimmt Platz weg), gleich mit und ohne JavaScript – das Mauerwerk (dashboard.js) ändert nur die Zeilen, nie die Spalten,
+   daher springt beim Laden nichts zur Seite. Feste Spannen je Kartengröße: „Drittel“/„Hälfte“ 1 Spalte, „zwei Drittel“
+   2 Spalten (z. B. „Was ist zu tun?“), „voll“ alle (Kennzahlen). Zeilenhöhe = Inhalt (align-items:start), nie fest. */
+.dash-wrap{container:dash/inline-size}
+.dash-grid{--dash-cols:1;display:grid;grid-template-columns:repeat(var(--dash-cols),minmax(0,1fr));gap:20px;align-items:start}
+.dash-card{grid-column:span 1;min-width:0;background:var(--adm-card);border-radius:10px;box-shadow:0 1px 0 var(--adm-line),0 0 0 1px var(--adm-line);scroll-margin-top:16px;container-type:inline-size}
+.dash-card--two-thirds{grid-column:1/-1}
 .dash-card--full{grid-column:1/-1}
-/* Mauerwerk (dashboard.js): feine Zeilen, Höhe je Karte per grid-row-end, Abstand steckt in der Spanne */
-.dash-grid.is-packed{grid-auto-rows:4px;row-gap:0;align-items:start}
-/* Breite Bildschirme: drei gleich breite Spalten – Karten 1 Spalte, „zwei Drittel“ 2 Spalten, „voll“ alle;
-   dense füllt Lücken mit kleineren Karten (Tab-Reihenfolge bleibt die der Einstellung) */
-@media (min-width:1101px){
-  .dash-grid.is-packed{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:row dense}
-  .dash-grid.is-packed .dash-card,.dash-grid.is-packed .dash-card--third{grid-column:span 1}
-  .dash-grid.is-packed .dash-card--two-thirds{grid-column:span 2}
-  .dash-grid.is-packed .dash-card--full{grid-column:1/-1}
-}
-@media (max-width:1100px){
-  .dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .dash-card,.dash-card--third{grid-column:span 1}
-  .dash-card--two-thirds,.dash-card--full{grid-column:1/-1}
-}
-@media (max-width:700px){
-  .dash-grid{grid-template-columns:minmax(0,1fr);gap:14px}
-  .dash-card,.dash-card--third,.dash-card--two-thirds{grid-column:1/-1}
-}
+@container dash (min-width:640px){.dash-grid{--dash-cols:2}.dash-card--two-thirds{grid-column:1/-1}}
+@container dash (min-width:1000px){.dash-grid{--dash-cols:3}.dash-card--two-thirds{grid-column:span 2}}
+@container dash (min-width:1560px){.dash-grid{--dash-cols:4}}
+@container dash (max-width:639px){.dash-grid{gap:14px}}
+/* Mauerwerk (dashboard.js): feine Zeilen, Höhe je Karte per grid-row-end, Abstand steckt in der Spanne; dense füllt Lücken
+   (Tab-Reihenfolge = DOM = Reihenfolge der Einstellung) */
+.dash-grid.is-packed{grid-auto-rows:4px;row-gap:0;grid-auto-flow:row dense}
+/* Kein Text ragt aus einer Karte: lange Wörter trennen (lang der Seite), notfalls an beliebiger Stelle umbrechen */
+.dash-card__body,.dash-card__toggle{overflow-wrap:anywhere;hyphens:auto;hyphenate-limit-chars:10 4 4}
+.dash-card__body :is(.adm-btn,.dash-tile__value,.dash-todo__count,.dash-bars,.dash-axis){hyphens:manual}
 
 /* Kartenkopf: Titel = Auf-/Zuklappen, Werkzeuge nur im Anpassen-Modus */
 .dash-card__head{display:flex;align-items:center;gap:6px;padding:10px 12px 0 10px}
@@ -83,28 +77,31 @@
 @keyframes dash-pulse{50%{opacity:.5}}
 
 /* Kennzahlen: Rundinstrumente wie der Block „Kennzahlen mit Skala“ */
-.dash-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
-.dash-tile__in{display:flex;align-items:center;gap:14px;height:100%;padding:12px 14px 12px 10px;border-radius:10px;background:var(--adm-fill);color:var(--adm-ink);text-decoration:none}
+/* Kacheln: mindestens 236 px breit (Instrument + gut 130 px Text), gleich hoch je Reihe (stretch + height:100 %) */
+.dash-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,236px),1fr));gap:10px}
+.dash-tile__in{display:flex;align-items:center;gap:12px;height:100%;min-height:96px;padding:12px 14px 12px 10px;border-radius:10px;background:var(--adm-fill);color:var(--adm-ink);text-decoration:none}
 a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-ink)}
-.dash-tile__gauge{position:relative;flex:none;width:84px;height:84px}
+.dash-tile__gauge{position:relative;flex:none;width:76px;height:76px}
 .dash-gauge{display:block;width:100%;height:100%}
 .dash-gauge__track{fill:none;stroke:var(--adm-line);stroke-width:9;stroke-linecap:round}
 .dash-gauge__arc{fill:none;stroke:var(--adm-a);stroke-width:9;stroke-linecap:round}
 .dash-tile.is-neutral .dash-gauge__track{stroke-dasharray:1.2 2.2;stroke-linecap:butt;stroke-width:7}
 .dash-tile.is-hot .dash-tile__in{background:var(--adm-accent-bg)}
 .dash-tile.is-hot .dash-gauge__track{stroke:var(--adm-a);stroke-dasharray:none;stroke-linecap:round;stroke-width:9}
-.dash-tile__value{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
-.dash-tile__value.is-long{font-size:17px}
-.dash-tile__text{display:flex;flex-direction:column;gap:2px;min-width:0}
-.dash-tile__label{font-weight:700;font-size:15px}
+.dash-tile__value{position:absolute;inset:0;display:grid;place-items:center;font-size:22px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.dash-tile__value.is-long{font-size:15px}
+.dash-tile__text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.dash-tile__label{font-weight:700;font-size:15px;line-height:1.25}
 .dash-tile__sub{font-size:13px;color:var(--adm-t3)}
 .dash-tile__trend{font-size:12px;color:var(--adm-t3);margin-top:2px}
 .dash-tile__trend b{display:inline-block;margin-left:2px;padding:0 6px;border-radius:6px;background:var(--adm-card);color:var(--adm-t2);font-weight:700;white-space:nowrap}
 .dash-tile__trend.is-up b{color:var(--adm-ok);background:var(--adm-ok-bg)}
 .dash-note{margin-top:10px!important;font-size:12.5px}
+/* schmale Karte (Handy): zwei Kacheln nebeneinander, Instrument über dem Text */
+@container (max-width:520px){.dash-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dash-tile__in{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 12px}.dash-tile__gauge{width:66px;height:66px}.dash-tile__value{font-size:19px}.dash-tile__value.is-long{font-size:13px}.dash-tile__label{font-size:14px}}
 
 /* Was ist zu tun? */
-.dash-todo{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.dash-todo{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .dash-todo__item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--adm-fill);box-shadow:inset 3px 0 0 var(--dash-tone,var(--adm-in))}
 .dash-todo__item.is-err{--dash-tone:var(--adm-err)}
 .dash-todo__item.is-warn{--dash-tone:var(--adm-warn)}
@@ -115,9 +112,12 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-todo__count{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 6px;margin-right:4px;border-radius:999px;background:var(--adm-card);font-size:12.5px;font-variant-numeric:tabular-nums}
 .dash-todo__tag{display:inline-block;padding:0 6px;border-radius:6px;background:var(--adm-err-bg);color:var(--adm-err);font-size:12px}
 .dash-todo__text{font-size:13.5px;color:var(--adm-t3)}
-.dash-todo .adm-btn{border-radius:8px}
+.dash-todo .adm-btn{border-radius:8px;white-space:normal;text-align:center}
 .dash-todo__item:has(.dash-todo__alt){grid-template-columns:auto minmax(0,1fr) auto auto}.dash-todo__alt{margin:0}
-@media (max-width:560px){.dash-todo__item,.dash-todo__item:has(.dash-todo__alt){grid-template-columns:auto minmax(0,1fr)}.dash-todo__item .adm-btn,.dash-todo__alt{grid-column:2;justify-self:start}}
+/* Platzhalter-Fundstellen: unter Text und Knöpfen über die ganze Breite der Aufgabe */
+.dash-todo__item>.dash-ph{grid-column:2/-1;margin-top:0}
+/* schmale Karte (nicht Fenster): Knöpfe unter den Text */
+@container (max-width:560px){.dash-todo__item,.dash-todo__item:has(.dash-todo__alt){grid-template-columns:auto minmax(0,1fr)}.dash-todo__item .adm-btn,.dash-todo__alt{grid-column:2;justify-self:start}.dash-todo__item>.dash-ph{grid-column:1/-1}}
 .dash-more{margin-top:8px}
 .dash-more>summary,.dash-table>summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--adm-a-ink);padding:6px 0}
 .dash-more>.dash-todo{margin-top:6px}
@@ -130,19 +130,19 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-h3{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--adm-t3);margin:14px 0 6px}
 .dash-h3:first-child{margin-top:4px}
 .dash-h3 .adm-muted{font-weight:600;letter-spacing:0;text-transform:none}
-.dash-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.dash-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
 .dash-list a{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 8px;margin:0 -8px;border-radius:8px;color:var(--adm-ink);text-decoration:none}
 .dash-list a:hover{background:var(--adm-fill)}
 .dash-list__ico{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:7px;background:var(--adm-fill);color:var(--adm-t2)}
 .dash-list__ico svg{width:16px;height:16px}
 .dash-list__main{display:flex;flex-direction:column;min-width:0;flex:1}
-.dash-list__title{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dash-list small{color:var(--adm-t3);font-size:12.5px}
+.dash-list__title{font-weight:600;line-height:1.3}
+.dash-list small{color:var(--adm-t3);font-size:12.5px;line-height:1.35}
 .dash-list--tight a{min-height:40px}
 .dash-links{margin-top:10px!important;font-size:13.5px}
 .dash-tip{display:flex;gap:8px;margin-top:12px!important;padding:10px 12px;border-radius:8px;background:var(--adm-info-bg,var(--adm-fill));font-size:13px;color:var(--adm-t2)}
 .dash-tip svg{flex:none;width:18px;height:18px;color:var(--adm-a-ink)}
-.dash-news{margin:0;padding-left:18px;display:grid;gap:4px;font-size:13.5px;color:var(--adm-t2)}
+.dash-news{margin:0;padding-left:18px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:13.5px;color:var(--adm-t2)}
 
 /* Assistent fragen */
 .dash-ask{margin-bottom:6px}
@@ -174,10 +174,10 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-mini{font-size:13.5px}
 
 /* Rangliste */
-.dash-rank{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:r}
+.dash-rank{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;counter-reset:r}
 .dash-rank a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:6px 8px;margin:0 -8px;border-radius:8px;color:var(--adm-ink);text-decoration:none}
 .dash-rank a:hover{background:var(--adm-fill)}
-.dash-rank__title{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-rank__title{font-weight:600;line-height:1.3}
 .dash-rank__n{font-size:12.5px;color:var(--adm-t3);font-variant-numeric:tabular-nums}
 .dash-rank__bar{grid-column:1/-1;height:6px;border-radius:4px;background:var(--adm-fill)}
 .dash-rank__bar span{display:block;height:100%;border-radius:4px;background:var(--adm-a)}
@@ -188,8 +188,8 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-state.is-ok{color:var(--adm-ok)}
 .dash-state.is-warn{color:var(--adm-warn)}
 .dash-state.is-err{color:var(--adm-err)}
-.dash-checks{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13.5px}
-.dash-checks li{display:flex;gap:8px;align-items:flex-start}
+.dash-checks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:13.5px}
+.dash-checks li{display:flex;gap:8px;align-items:flex-start;min-width:0}
 .dash-checks svg{flex:none;width:17px;height:17px;margin-top:2px}
 .dash-checks .is-ok svg{color:var(--adm-ok)}
 .dash-checks .is-warn svg{color:var(--adm-warn)}

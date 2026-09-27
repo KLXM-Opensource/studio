@@ -45,6 +45,7 @@ $fmtTrend = function (?array $t): string {
   <p class="dash-bar__hint adm-muted" data-dash-hint<?= $customize ? '' : ' hidden' ?>><?= e(__('Karten mit den Pfeilen oder per Ziehen am Griff verschieben, mit dem Auge aus- und einblenden.')) ?></p>
 </div>
 
+<div class="dash-wrap">
 <div class="dash-grid<?= $customize ? ' is-customizing' : '' ?>" id="dash" data-dash data-endpoint="<?= e(url('/admin/api/dashboard')) ?>">
 <?php foreach ($cards as $key => $c):
   $hid = $c['hidden'];
@@ -104,15 +105,15 @@ $fmtTrend = function (?array $t): string {
             <div class="dash-todo__main">
               <p class="dash-todo__title"><span class="dash-todo__count"><?= (int) $t['count'] ?></span> <?= e($t['title']) ?><?php if ($t['tone'] === 'err'): ?> <span class="dash-todo__tag"><?= e(__('dringend')) ?></span><?php endif; ?></p>
               <p class="dash-todo__text"><?= e($t['text']) ?></p>
-              <?php if (!empty($t['hits'])): // Platzhalter: alle Fundstellen je Seite und Block ?>
-              <details class="dash-ph" id="platzhalter"<?= ($_GET['ph'] ?? '') === '1' ? ' open' : '' ?>>
-                <summary><?= e(count($t['hits']) === 1 ? __('Fundstelle anzeigen') : __('Alle {n} Fundstellen anzeigen', ['n' => count($t['hits'])])) ?></summary>
-                <?= \Core\Theme::capture(ROOT . '/app/Admin/views/pages/_placeholders.php', ['hits' => $t['hits'], 'back' => '/admin?ph=1#platzhalter', 'showPage' => true, 'backend' => true, 'hTag' => 'h3']) ?>
-              </details>
-              <?php endif; ?>
             </div>
             <a class="adm-btn adm-btn--small<?= $n === 0 ? ' adm-btn--primary' : '' ?>" href="<?= e(!empty($t['hits']) ? $t['href'] : url($t['href'])) ?>"><?= e($t['action']) ?><span class="sr-only">: <?= e($t['title']) ?></span></a>
             <?php if (!empty($t['dismiss'])): ?><form method="post" action="<?= e(url($t['dismiss']['url'])) ?>" class="dash-todo__alt"><?= csrf_field() ?><input type="hidden" name="text" value="<?= e($t['dismiss']['value']) ?>"><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('{text} ist kein Platzhalter, sondern Absicht – nicht mehr melden', ['text' => $t['dismiss']['value']])) ?>"><?= e($t['dismiss']['label']) ?></button></form><?php endif; ?>
+            <?php if (!empty($t['hits'])): // Platzhalter: alle Fundstellen je Seite und Block – eigene Zeile unter Text und Knöpfen, volle Breite ?>
+            <details class="dash-ph" id="platzhalter"<?= ($_GET['ph'] ?? '') === '1' ? ' open' : '' ?>>
+              <summary><?= e(count($t['hits']) === 1 ? __('Fundstelle anzeigen') : __('Alle {n} Fundstellen anzeigen', ['n' => count($t['hits'])])) ?></summary>
+              <?= \Core\Theme::capture(ROOT . '/app/Admin/views/pages/_placeholders.php', ['hits' => $t['hits'], 'back' => '/admin?ph=1#platzhalter', 'showPage' => true, 'backend' => true, 'hTag' => 'h3']) ?>
+            </details>
+            <?php endif; ?>
           </li>
           <?php endforeach; ?>
         </ol>
@@ -135,5 +136,7 @@ $fmtTrend = function (?array $t): string {
   </section>
 <?php endforeach; ?>
 </div>
+</div>
 <div class="sr-only" role="status" aria-live="polite" data-dash-live></div>
-<script src="<?= e(asset('js/dashboard.js')) ?>" defer></script>
+<?php // ohne defer: das Mauerwerk (dashboard.js) packt die Karten vor dem ersten Bild – kein Springen beim Laden ?>
+<script src="<?= e(asset('js/dashboard.js')) ?>"></script>
