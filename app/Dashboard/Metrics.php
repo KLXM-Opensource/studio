@@ -266,17 +266,31 @@ final class Metrics
         return array_values(array_filter((array) app()->settings->get('sys.placeholders_ok', []), 'is_string'));
     }
 
+    /** [Platzhalter]: Klammer mit Buchstabe am Anfang – auch klein („[bitte ergänzen: …]“), aber keine Markdown-Links „[Text](url)“ */
+    public const PLACEHOLDER_RX = '~\[\p{L}[^\]\[]{2,}\](?!\()~u';
+
     /** Erster [Platzhalter] in veröffentlichten Seiten (ohne bestätigte): ['id', 'title', 'text'] oder null */
     public static function placeholder(): ?array
     {
-        $ok = self::placeholdersOk();
-        foreach (Pages::all() as $p) {
-            if (!preg_match_all('~\[[A-ZÄÖÜ][^\]\[]{2,}\]~u', (string) $p['content_published'], $m)) continue;
-            foreach ($m[0] as $hit) {
-                if (!in_array($hit, $ok, true)) return ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit];
+        return self::placeholders(app()->db, self::placeholdersOk(), 1)[0] ?? null;
+    }
+
+    /**
+     * [Platzhalter] in den Seiten einer Website (auch für die Netzwerk-Übersicht mit fremder Datenbank)
+     * @return list<array{id:int,title:string,text:string}>
+     */
+    public static function placeholders(\Core\Database $db, array $ok, int $max = 50): array
+    {
+        $out = [];
+        foreach ($db->fetchAll("SELECT id, title, content_published FROM pages WHERE type = 'page' ORDER BY is_home DESC, sort, title") as $p) {
+            if (!preg_match_all(self::PLACEHOLDER_RX, (string) $p['content_published'], $m)) continue;
+            foreach (array_unique($m[0]) as $hit) {
+                if (in_array($hit, $ok, true)) continue;
+                $out[] = ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'text' => $hit];
+                if (count($out) >= $max) return $out;
             }
         }
-        return null;
+        return $out;
     }
 
     // ================================================================= Zuletzt bearbeitet

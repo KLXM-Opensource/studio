@@ -118,6 +118,11 @@ final class Stats
             $hasNet = in_array('network_uid', $cols, true);
             $d['editors'] = (int) $db->fetchValue('SELECT COUNT(*) FROM users' . ($hasNet ? " WHERE network_uid IS NULL AND role != 'network'" : ''));
             $d['pages'] = (int) $db->fetchValue("SELECT COUNT(*) FROM pages WHERE type = 'page'");
+            // [Platzhalter] in Seiten (wie die Übersicht der Website; bestätigte „Ist gewollt“-Klammern zählen nicht)
+            $okPh = array_values(array_filter((array) (json_decode((string) $db->fetchValue('SELECT value_json FROM settings WHERE skey = ?', ['sys.placeholders_ok']), true) ?: []), 'is_string'));
+            $ph = \Core\Dashboard\Metrics::placeholders($db, $okPh);
+            $d['placeholders'] = count($ph);
+            $d['placeholder_first'] = $ph[0] ?? null;
             $last = [(string) $db->fetchValue('SELECT MAX(updated_at) FROM pages')];
             $d['inbox_new'] = 0;
             $d['entries'] = 0;
@@ -265,6 +270,9 @@ final class Stats
         }
         if (!empty($s['migrate'])) $w[] = __('Datenbank-Aktualisierung ausstehend (migrate)');
         if (!empty($s['maintenance'])) $w[] = __('Wartungsmodus an');
+        if (!empty($s['placeholders'])) $w[] = $s['placeholders'] === 1
+            ? __('Platzhalter {text} auf „{page}“', ['text' => $s['placeholder_first']['text'] ?? '', 'page' => $s['placeholder_first']['title'] ?? ''])
+            : __('{n} Platzhalter in Seiten (z. B. {text} auf „{page}“)', ['n' => $s['placeholders'], 'text' => $s['placeholder_first']['text'] ?? '', 'page' => $s['placeholder_first']['title'] ?? '']);
         if (($s['environment'] ?? 'production') === 'production' && !empty($s['initialized'])
             && (empty($s['backup']) || $s['backup']['at'] < time() - 7 * 86400)) $w[] = __('Keine Sicherung in den letzten 7 Tagen');
         return $w;

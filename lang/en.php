@@ -776,6 +776,8 @@ return [
     'Ungültige E-Mail-Adresse.' => 'Invalid email address.',
     'Wartung' => 'Maintenance',
     'Wartungsmodus an' => 'Maintenance mode on',
+    'Platzhalter {text} auf „{page}“' => 'Placeholder {text} on “{page}”',
+    '{n} Platzhalter in Seiten (z. B. {text} auf „{page}“)' => '{n} placeholders in pages (e.g. {text} on “{page}”)',
     'Wartungsmodus aus' => 'Maintenance mode off',
     'Wartungsmodus für {site} ausgeschaltet.' => 'Maintenance mode for {site} turned off.',
     'Wartungsmodus für {site} eingeschaltet.' => 'Maintenance mode for {site} turned on.',
