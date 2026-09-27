@@ -235,11 +235,11 @@ final class Fragments
         $out = [];
         foreach (self::overrides($kit) as $o) {
             if ($o['changed']) {
-                $out['Kern-Fragment „' . $o['name'] . '“ hat sich geändert, seit Kit „' . $kit . '“ es überschreibt (' . Kit::relative($o['file']) . ' prüfen, dann php bin/console fragments:list --accept)'] = null;
+                $out[__('Kern-Fragment „{name}“ hat sich geändert, seit Kit „{kit}“ es überschreibt ({file} prüfen, dann php bin/console fragments:list --accept)', ['name' => $o['name'], 'kit' => $kit, 'file' => Kit::relative($o['file'])])] = null;
             }
         }
         foreach (self::ignored($kit) as $name => $file) {
-            $out['Kit „' . $kit . '“: ' . Kit::relative($file) . ' wird ignoriert („' . $name . '“ ist ein Kern-Fragment)'] = null;
+            $out[__('Kit „{kit}“: {file} wird ignoriert („{name}“ ist ein Kern-Fragment)', ['kit' => $kit, 'file' => Kit::relative($file), 'name' => $name])] = null;
         }
         return $out;
     }

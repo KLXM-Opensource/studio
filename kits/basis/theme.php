@@ -97,7 +97,7 @@ return [
     // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
     // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
     // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
-    // Optionen je Fragment: 'fragments' => ['brand' => ['mark' => 'dot'], 'video-embed' => ['ratio_class' => 'ratio-']]
+    'fragments' => ['langswitch' => ['role_list' => false]],   // Kit-CSS: ul[role=list] setzt padding:0 (Sprach-Pille behält ihr Polster)
     'conditional_css' => [
         'css/blocks.css' => ['stats', 'quote', 'faq', 'logos', 'downloads', 'contact', 'pricing', 'steps', 'tabs', 'video'],
         'css/extra.css' => ['gallery', 'slideshow', 'stack_cards', 'contact', 'map'],

@@ -50,6 +50,9 @@
  *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
  *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Baukasten) auflisten | Sicherheits-Selbsttest der Vorlagensprache
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
+ *   fragments:list [--all] [--accept]                 Kern-Fragmente: Herkunft je Fragment (Projekt/Kit/Kern) für das aktive Kit
+ *                                                     (--all: alle Kits), überschriebene mit geändertem Original;
+ *                                                     --accept: geänderte Originale als geprüft markieren
  *   health [--all]                                    Prüfung für Deploys (Exit-Code 1 bei Fehlern)
  *   maintenance on|off [--all]                        Wartungsmodus
  *   cache:clear [--all]                               Seiten-Cache leeren (--all: aller Websites)
@@ -578,7 +581,8 @@ switch ($cmd) {
                 'Kit kompatibel' => app()->theme->compatible(),
             ] + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
-                + Core\Extensions::health();   // Prüfungen aktiver Erweiterungen (Extension::health)
+                + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
+                + Core\Fragments::health();    // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
@@ -840,6 +844,28 @@ switch ($cmd) {
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'fragments:list':
+        // Kern-Fragmente (Core\Fragments): woher kommt welches Fragment, wo hat sich das Original seit dem Überschreiben geändert?
+        $kits = in_array('--all', $args, true) ? array_keys(Core\Kit::all()) : [app()->theme->name];
+        if (in_array('--accept', $args, true)) {
+            $n = 0;
+            foreach ($kits as $k) $n += Core\Fragments::accept($k);
+            echo "$n Prüfsumme(n) aktualisiert.\n";
+        }
+        foreach ($kits as $k) {
+            echo "── Kit $k (" . Core\Kit::relative(Core\Kit::dir($k)) . ")\n";
+            $over = [];
+            foreach (Core\Fragments::overrides($k) as $o) $over[$o['name']] = $o;
+            foreach (Core\Fragments::coreFragments() as $name => $core) {
+                $f = Core\Fragments::find($name, $k);
+                $o = $over[$name] ?? null;
+                printf("  %-16s %-26s %s%s\n", $name, Core\Fragments::isCoreOnly($name) ? 'Kern (nur Kern)' : (Core\Fragments::LAYERS[$f['layer']] ?? $f['layer']),
+                    Core\Kit::relative($f['file']), $o && $o['changed'] ? '   ! Original geändert seit ' . $o['since'] : '');
+            }
+            foreach (Core\Fragments::ignored($k) as $name => $file) echo "  ! ignoriert: " . Core\Kit::relative($file) . " („{$name}“ ist ein Kern-Fragment)\n";
+        }
+        break;
 
     case 'guide:list':
         // Hinweise zu diesem Projekt (Core\Guide): kits/{kit}/guide/*.md und {storage}/guide/*.md dieser Website

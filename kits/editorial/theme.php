@@ -124,7 +124,7 @@ return [
     // Kern-Fragmente (app/Views/fragments, Core\Fragments): Video-Zwei-Klick, Editor und Werkzeugleiste kommen nur aus dem Kern
     // (Skript resources/js/embed.js lädt das Fragment selbst); Marke, Sprachumschalter, Öffnungszeiten … ebenso, solange das Kit
     // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
-    'fragments' => ['brand' => ['mark' => 'none', 'logo_width' => '320px']],
+    'fragments' => ['brand' => ['mark' => 'none', 'logo_width' => '320px'], 'langswitch' => ['role_list' => false]],
     'conditional_css' => [
         'css/hero.css' => ['hero'],
         'css/hero-x.css' => ['hero:issue', 'hero:agenda', 'hero:voice'],   // Titelgeschichte, Aktuell/Termine, Stimme
