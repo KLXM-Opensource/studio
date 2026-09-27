@@ -69,7 +69,7 @@ if ($user && ($req = app()->request)) {
         : (['role' => 'users', 'account' => 'account', 'help' => 'help'][$section] ?? $section);
 }
 ?><!doctype html>
-<html lang="<?= e(\Core\I18n::locale()) ?>" class="adm-ui" data-icons="<?= e(\Core\Icons::sprite()) ?>"<?= ($icoTopics = \Core\Icons::enabledTopics()) ? ' data-icons-topics="' . e(implode(' ', $icoTopics)) . '"' /* Symbolbereiche (Grundeinstellungen) */ : '' ?><?= in_array($user['appearance'] ?? '', ['light', 'dark'], true) ? ' data-theme="' . e($user['appearance']) . '"' : '' ?><?= $user ? \Core\Accent::attrs($user) /* persönliche Akzentfarbe (Konto) */ : '' ?>>
+<html lang="<?= e(\Core\I18n::locale()) ?>" class="adm-ui" data-icons="<?= e(\Core\Icons::sprite()) ?>"<?= ($icoTopics = \Core\Icons::enabledTopics()) ? ' data-icons-topics="' . e(implode(' ', $icoTopics)) . '"' /* Symbolbereiche (Grundeinstellungen) */ : '' ?><?= in_array($user['appearance'] ?? '', ['light', 'dark'], true) ? ' data-theme="' . e($user['appearance']) . '"' : '' ?><?= !$user && \Core\AuthScreen::forceDark() ? ' data-theme="dark"' /* Anmeldung nachts immer dunkel */ : '' ?><?= $user ? \Core\Accent::attrs($user) /* persönliche Akzentfarbe (Konto) */ : '' ?>>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -78,6 +78,7 @@ if ($user && ($req = app()->request)) {
 <link rel="stylesheet" href="<?= e(asset('css/admin.css')) ?>">
 <?php foreach ($css ?? [] as $c): ?><link rel="stylesheet" href="<?= e(asset($c)) ?>">
 <?php endforeach; ?>
+<?= $user ? '' : \Core\AuthScreen::head() /* Bildschirme vor der Anmeldung: Farbhimmel nach Tageszeit + Markenfarbe (resources/css/auth.css) */ ?>
 <link rel="icon" href="<?= e(base_path()) ?>/favicon.ico?v=<?= e(\Core\AppIcons::version()) ?>" sizes="48x48">
 <script type="application/json" id="cms-i18n"><?= json_encode(\Core\I18n::dictionary(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <?= $user ? \Core\AI\Assist::clientScript() /* KI-Assistent (resources/js/_ai.js) – leer ohne Recht/KI */ : '' ?>
@@ -88,7 +89,8 @@ if ($user && ($req = app()->request)) {
 <?= $user ? \Core\Extensions::adminHead((string) ($view ?? '')) /* CSS/JS aktiver Erweiterungen für diese Ansicht (Extension::adminAssets) – nach admin.js */ : '' ?>
 </head>
 <?php $drill = $user && !empty($drill) ? $drill : ''; ?>
-<body class="adm<?= $user ? '' : ' adm--bare' ?><?= $drill ? ' is-drill' : '' ?>">
+<body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $drill ? ' is-drill' : '' ?>">
+<?= $user ? '' : \Core\AuthScreen::sky() ?>
 <?php if (environment() !== 'production'): ?><div class="adm-env adm-env--<?= e(environment()) ?>" role="note"><?= e(strtoupper(environment())) ?> · <?= e(__('Testumgebung – Änderungen hier gehen nicht auf die Live-Website. E-Mails werden umgeleitet, Suchmaschinen ausgesperrt.')) ?></div><?php endif; ?>
 <?php if ($user):
   // Schmale Bildschirme (≤ 900 px): schlanke Kopfleiste, Seitenleiste als Schublade (resources/js/_drawer.js; ohne JavaScript per #adm-side)

@@ -10,7 +10,7 @@ $codeHelp = $hasTotp ? __('Geben Sie den 6-stelligen Code aus Ihrer Authenticato
     : __('Kein Zugriff auf Ihren Passkey? Geben Sie einen Ihrer Wiederherstellungscodes ein.');
 ?>
 <div class="adm-auth">
-  <p class="adm-brand adm-brand--auth"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></p>
+  <?php include __DIR__ . '/../invite/_brand.php'; // App-Icon und Name der Website ?>
   <?php if ($hasPk): ob_start(); // Passkey (Core\Passkeys) – resources/js/passkey.js ?>
   <section class="adm-card pk-2fa" data-pk-2fa="<?= e(url('/admin/login/2fa/passkey')) ?>" aria-labelledby="pk2-h">
     <?= csrf_field() ?>
@@ -27,10 +27,10 @@ $codeHelp = $hasTotp ? __('Geben Sie den 6-stelligen Code aus Ihrer Authenticato
   <form class="<?= $pkFirst ? 'pk-alt__form' : 'adm-card' ?>" method="post" action="<?= e(url('/admin/login/2fa')) ?>" novalidate>
     <?php if (!$pkFirst): ?><h1><?= e($hasTotp || !$hasPk && !$recovery ? __('Bestätigungscode') : __('Wiederherstellungscode')) ?></h1><?php endif; ?>
     <?= csrf_field() ?>
-    <?php if ($error && !$pkFirst): ?><p class="adm-flash adm-flash--error" role="alert"><?= e($error) ?></p><?php endif; ?>
+    <?php if ($error): // mit Passkey zuerst meldet die Passkey-Karte den Fehler (role=alert), hier nur die Beschreibung des Felds ?><p class="adm-flash adm-flash--error" id="code-err"<?= $pkFirst ? '' : ' role="alert"' ?>><?= e($error) ?></p><?php endif; ?>
     <?php if (!$hasTotp && !$hasPk): ?><p class="adm-muted"><?= e(__('Für diese Adresse ist kein Passkey eingerichtet.')) ?></p><?php endif; ?>
-    <p class="adm-muted"><?= e($codeHelp) ?></p>
-    <div class="f"><label for="code"><?= e($hasTotp ? __('Code') : __('Wiederherstellungscode')) ?></label><input id="code" name="code"<?= $hasTotp ? ' inputmode="numeric"' : '' ?> autocomplete="one-time-code" required<?= $pkFirst ? '' : ' autofocus' ?> maxlength="24" class="tf-code"></div>
+    <p class="adm-muted" id="code-help"><?= e($codeHelp) ?></p>
+    <div class="f"><label for="code"><?= e($hasTotp ? __('Code') : __('Wiederherstellungscode')) ?></label><input id="code" name="code" aria-describedby="<?= $error ? 'code-err ' : '' ?>code-help"<?= $error ? ' aria-invalid="true"' : '' ?><?= $hasTotp ? ' inputmode="numeric"' : '' ?> autocomplete="one-time-code" required<?= $pkFirst ? '' : ' autofocus' ?> maxlength="24" class="tf-code"></div>
     <button class="adm-btn adm-btn--primary adm-btn--block" type="submit"><?= e(__('Bestätigen')) ?></button>
   </form>
   <?php if ($pkFirst): ?></details><?php endif; ?>

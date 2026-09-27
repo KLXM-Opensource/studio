@@ -3749,6 +3749,10 @@ return [
     'Guten Abend' => 'Good evening',
     'Guten Morgen' => 'Good morning',
     'Guten Tag' => 'Good afternoon',
+    // Anmeldung: Gruß zur Tageszeit (Core\AuthScreen)
+    'Schönes Wochenende' => 'Happy weekend',
+    'Schönen Abend' => 'Good evening',
+    'Hallo, Nachteule' => 'Hello, night owl',
     'Hilfe & Einstieg' => 'Help & getting started',
     'Hinweis:' => 'Notice:',
     'Im Team' => 'In the team',

@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anmeldung: Farbhimmel nach Tageszeit (`Core\AuthScreen`)
+- **Neuer Rahmen für alle Seiten vor der Anmeldung** (Anmelden, Passkey, Zwei-Faktor/Wiederherstellungscode, Einladung,
+  Links aus E-Mails, Einrichtung): ruhig bewegter Farbhimmel aus drei weichen Farbflächen (reines CSS, nur `transform`),
+  Karte aus Milchglas, oben App-Icon und Name der Website, auf der Anmeldung ein kurzer Gruß („Guten Morgen“, „Schönen Abend“ …).
+- **Tageszeit** serverseitig in der Zeitzone der Website: `auth--morning|day|evening|night` + `is-weekend` am `<body>` –
+  morgens warm und hell, mittags hell, abends warm/violett, nachts tiefblau mit ein paar Sternen (immer dunkel). Ohne JavaScript.
+- **Markenfarbe:** Farbton und Sättigung der App-Designfarbe (`sys.pwa_theme`, sonst Kit) fließen in die Farbflächen –
+  erzeugte Datei `media/auth/auth-<hash>.css` (strenge CSP); Rückfall KLXM-Palette. Anpassbar über `--auth-*`-Variablen.
+- Hell/Dunkel nach Gerät, `prefers-reduced-motion` (stiller Verlauf), `prefers-reduced-transparency`, `forced-colors`,
+  deckende Karte ohne `backdrop-filter`; Fehler per `aria-describedby` an den Feldern (Anmelden, Zwei-Faktor, Einrichtung).
+  `resources/css/auth.css` ≈ 7,5 KB (gzip ≈ 2 KB), nur auf diesen Seiten. Testen: `?tod=…` (nur debug/localhost).
+
 ### Bearbeiten-Modus: Kopf des Kits bleibt an seinem Platz
 - **Kopfmenü verrutschte:** Die Werkzeugleiste schob jeden markierten Kit-Kopf (`data-cms-sticky`, `.cms-bar-host ~ .site-header`)
   per `top` um ihre Höhe nach unten – auch Köpfe, die das Kit im Bearbeiten nicht kleben lässt (klxm, klxm-agentur, basis
