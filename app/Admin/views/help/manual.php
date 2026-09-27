@@ -36,6 +36,7 @@ $core = [
     'daten' => 'Eigene Daten (Aktuelles, Team …)',
     'quellen' => 'Externe Quellen: Feeds, APIs, OpenImmo',
     'anfragen' => 'Online-Anfragen',
+    'smime' => 'S/MIME einrichten: verschlüsselte Anfragen per E-Mail',
     'bloecke' => 'Alle Blöcke',
     'baukasten' => 'Eigene Blöcke bauen (Administration)',
     'funktionen' => 'Funktionen & Erweiterungen (Haupt-Admin)',
