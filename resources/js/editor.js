@@ -461,7 +461,15 @@ window.CMSEditor.fit = {
     const el = img.closest('.cms-block');
     const tool = [...tools.values()].find(x => x.el === el);
     const id = +img.dataset.mediaId;
-    const paths = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
+    const all = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
+    // Bild im Rahmen gilt je Feldpfad (Core\ImageFit): Pfad am Bild (data-media-path) oder n-tes Vorkommen im Block
+    let paths = all;
+    const own = img.dataset.mediaPath;
+    if (own && all.includes(own)) paths = [own];
+    else if (all.length > 1) {
+      const imgs = [...el.querySelectorAll(`img[data-media-id="${id}"]`)];
+      if (imgs.length === all.length) paths = [all[imgs.indexOf(img)]];
+    }
     return paths.length ? { paths, open: () => openFit(tool, paths, id, img) } : null;
   },
 };
@@ -505,8 +513,8 @@ function fxFieldButtons(form, tool) {
       fb.addEventListener('click', () => {
         const id = +$('input[type=hidden]', mf).value;
         if (!id) return;
-        const all = mediaPaths(tool.def.fields, tool.data, id);
-        openFit(tool, all.includes(fb.dataset.path) ? all : [fb.dataset.path], id).then(() => fxFieldButtons(form, tool));
+        // Nur diese Stelle – Bild im Rahmen unterscheidet Feldpfade (dasselbe Bild zweimal, verschieden eingepasst)
+        openFit(tool, [fb.dataset.path], id).then(() => fxFieldButtons(form, tool));
       });
     }
     fb.dataset.path = path;

@@ -578,7 +578,7 @@ final class Media
         }
         $ratio = isset($opt['ratio']) ? str_replace('-', ':', (string) $opt['ratio']) : null;
         // Bild im Rahmen (Core\ImageFit): Einpassen/Originalformat zeigen das ganze Bild – ohne Zuschnitt und Fokuspunkt
-        $fit = ($opt['fit'] ?? true) !== false ? ImageFit::resolve($m, $ratio) : null;
+        $fit = ($opt['fit'] ?? true) !== false ? ImageFit::resolve($m, $ratio, isset($opt['path']) ? (string) $opt['path'] : null) : null;
         $src = self::sources($m, $fit ? null : $ratio);
         $alt = $opt['alt'] ?? self::alt($m);
         // Bild anpassen (Core\ImageFx): Einbindung im Block vor globaler Einstellung – als Klassen (CSP, keine Inline-Styles)
@@ -587,6 +587,7 @@ final class Media
         $loading = !empty($opt['eager']) ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
         // Im Bearbeiten-Modus: Kennung für „Anpassen“/„Rahmen“ und (mit Bildformat, beim Füllen) den Inline-Zuschnitt
         $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"'
+            . (isset($opt['path']) ? ' data-media-path="' . e((string) $opt['path']) . '"' : '')
             . ($ratio && !$fit && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '')
             . ($ratio ? ' data-frame="' . e($ratio) . '"' : '') : '';
         $pic = $fit ? '<picture class="' . e(ImageFit::pictureClass($fit, $m)) . '">' : '<picture>';

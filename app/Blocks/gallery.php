@@ -27,7 +27,7 @@ if ($layout === 'justified') $sizes = '(min-width: 860px) 40vw, 100vw';
   <ul class="cms-gallery cms-gallery--<?= e($layout) ?> cols-<?= e($cols) ?>" role="list"<?= $lightbox ? ' data-cms-lightbox' : '' ?>>
     <?php foreach ($items as $n => $it):
         $m = $it['m'];
-        $pic = img((int) $m['id'], $sizes, $layout === 'grid' ? ['ratio' => $ratio] : []);
+        $pic = img((int) $m['id'], $sizes, ($layout === 'grid' ? ['ratio' => $ratio] : []) + ($it['path'] ? ['path' => $it['path'] . '.image'] : []));
         $cap = !empty($d['captions']) ? $it['caption'] : '';
         $alt = \Core\Media::alt($m);
     ?>

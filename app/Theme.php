@@ -300,7 +300,7 @@ final class Theme
         }
         // Bild anpassen je Einbindung (data._fx, Core\ImageFx): gilt für Bilder, die dieser Block selbst ausgibt
         ImageFx::enter($block->data);
-        ImageFit::enter($block->data);   // Bild im Rahmen je Einbindung (data._fit, Core\ImageFit)
+        ImageFit::enter($block->data, $block->def['fields'] ?? []);   // Bild im Rahmen je Einbindung (data._fit je Feldpfad, Core\ImageFit)
         try {
             $inner = $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
         } finally {

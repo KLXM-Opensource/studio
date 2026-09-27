@@ -30,7 +30,11 @@ final class ImageFit
     /** Farb-Tokens, die als Hintergrund nicht passen (Schrift, Linien, Knöpfe) */
     private const TOKEN_SKIP = '~(ink|text|muted|line|button|btn|on_|_on|border|focus|link)~';
 
-    /** Stapel der Block-Zuordnungen [Medien-ID => Einstellung] */
+    /**
+     * Stapel der Block-Zuordnungen: ['paths' => [feldpfad => einstellung], 'queue' => [medien-id => [einstellung je Vorkommen]],
+     * 'pos' => [medien-id => nächstes Vorkommen]]. Früher [medien-id => einstellung] (erste gewann) – dasselbe Bild ließ sich
+     * in einem Block nicht an zwei Stellen verschieden einpassen.
+     */
     private static array $stack = [];
     /** Regeln für die erzeugte CSS-Datei: Klasse => Deklaration */
     private static array $rules = [];
@@ -116,23 +120,56 @@ final class ImageFit
 
     // ================================================================= Block-Kontext (Einbindung)
 
-    /** Zuordnung eines Blocks setzen (Core\Theme::renderBlock) – wie ImageFx::enter(), mit leave() beenden */
-    public static function enter(array $data): void
+    /**
+     * Zuordnung eines Blocks setzen (Core\Theme::renderBlock) – wie ImageFx::enter(), mit leave() beenden.
+     * Schlüssel ist der Feldpfad (so wird data._fit gespeichert). Bilder ohne Pfadangabe (img() in Kit-Vorlagen) bekommen die
+     * Einstellung ihres n-ten Vorkommens im Block: $fields (Schema des Blocks) liefert alle Bild-Felder in Dokument-Reihenfolge
+     * (auch in Listen). Ohne $fields (ältere Aufrufer) zählen nur die Pfade aus _fit – wie bisher.
+     */
+    public static function enter(array $data, array $fields = []): void
     {
         $fit = is_array($data['_fit'] ?? null) ? $data['_fit'] : [];
         if (!$fit) {
-            self::$stack[] = end(self::$stack) ?: [];
+            self::$stack[] = ['paths' => [], 'queue' => [], 'pos' => []];
             return;
         }
-        $keys = array_keys($fit);
-        natsort($keys);
-        $map = [];
-        foreach ($keys as $path) {
-            $id = ImageFx::valueAt($data, (string) $path);
-            $v = self::normalize($fit[$path]);
-            if ($id > 0 && $v !== null && $v !== '' && !isset($map[$id])) $map[$id] = $v;
+        $paths = [];
+        foreach ($fit as $path => $v) {
+            $v = self::normalize($v);
+            if ($v !== null && $v !== '') $paths[(string) $path] = $v;
         }
-        self::$stack[] = $map;
+        $order = $fields ? self::mediaPaths($fields, $data) : array_keys($paths);
+        if (!$fields) natsort($order);
+        $queue = [];
+        foreach ($order as $path) {
+            $id = ImageFx::valueAt($data, (string) $path);
+            if ($id > 0) $queue[$id][] = $paths[$path] ?? '';
+        }
+        // Bilder, deren Pfad im Schema fehlt (z. B. geänderte Felder), wenigstens über die ID
+        foreach ($paths as $path => $v) {
+            $id = ImageFx::valueAt($data, (string) $path);
+            if ($id > 0 && !isset($queue[$id])) $queue[$id][] = $v;
+        }
+        self::$stack[] = ['paths' => $paths, 'queue' => $queue, 'pos' => []];
+    }
+
+    /** Pfade aller Bild-Felder eines Blocks in Dokument-Reihenfolge (auch in Listen/Gruppen), z. B. image, items.0.image */
+    public static function mediaPaths(array $fields, array $data, string $prefix = '', int $depth = 0): array
+    {
+        $out = [];
+        foreach ($fields as $f) {
+            $name = (string) ($f['name'] ?? '');
+            if ($name === '') continue;
+            $type = $f['type'] ?? 'text';
+            if ($type === 'media') {
+                $out[] = $prefix . $name;
+            } elseif (in_array($type, ['repeater', 'group'], true) && $depth < 4 && is_array($data[$name] ?? null)) {
+                foreach ($data[$name] as $i => $item) {
+                    if (is_array($item) && is_int($i)) array_push($out, ...self::mediaPaths((array) ($f['fields'] ?? []), $item, "$prefix$name.$i.", $depth + 1));
+                }
+            }
+        }
+        return $out;
     }
 
     public static function leave(): void
@@ -140,15 +177,33 @@ final class ImageFit
         array_pop(self::$stack);
     }
 
+    /** Einstellung der Einbindung im aktuellen Block: nach Feldpfad, sonst nach Vorkommen der Medien-ID ('' = keine) */
+    private static function bound(int $id, ?string $path): string
+    {
+        $i = array_key_last(self::$stack);
+        if ($i === null || $id <= 0) return '';
+        $top = &self::$stack[$i];
+        if ($path !== null && $path !== '') {
+            return $top['paths'][$path] ?? '';
+        }
+        $list = $top['queue'][$id] ?? [];
+        if (!$list) return '';
+        $n = $top['pos'][$id] ?? 0;
+        $top['pos'][$id] = $n + 1;
+        // Mehr Ausgaben als Vorkommen (Kit gibt ein Bild doppelt aus): wie früher die erste Einstellung
+        return $list[$n] ?? $list[0];
+    }
+
     /**
      * Wirksame Einstellung für ein Bild: Einbindung → Standard des Bildes → automatisch (SVG, transparenter Rand).
+     * $path: Feldpfad im Block (img(…, ['path' => 'items.2.image'])) – ohne Pfad zählt das Vorkommen der Medien-ID.
      * @return ?array{mode: string, bg: string, auto: bool} null = Verhalten des Kits (füllen)
      */
-    public static function resolve(array $m, ?string $ratio = null): ?array
+    public static function resolve(array $m, ?string $ratio = null, ?string $path = null): ?array
     {
         $id = (int) ($m['id'] ?? 0);
-        $map = end(self::$stack) ?: [];
-        $v = $id > 0 && isset($map[$id]) ? $map[$id] : (string) ($m['fit'] ?? '');
+        $v = self::bound($id, $path);
+        if ($v === '') $v = (string) ($m['fit'] ?? '');
         $auto = false;
         if ($v === '') {
             $v = self::auto($m, $ratio);
