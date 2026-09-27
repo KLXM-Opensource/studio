@@ -55,6 +55,17 @@ function refreshMoveButtons() {
   });
 }
 
+/**
+ * Wert eines direkt bearbeitbaren Felds. Redaktionsnotizen erscheinen als Hinweis „Notiz: …“ (Core\EditorNotes::decorate,
+ * .cms-note, nicht bearbeitbar) – beim Auslesen werden sie wieder zu „[# … #]“, damit sie gespeichert bleiben.
+ */
+function fieldValue(n, rich) {
+  if (!n.querySelector('[data-cms-note]')) return rich ? n.innerHTML : n.textContent;
+  const c = n.cloneNode(true);
+  c.querySelectorAll('[data-cms-note]').forEach(x => x.replaceWith(d.createTextNode(`[# ${x.dataset.cmsNote} #]`)));
+  return rich ? c.innerHTML : c.textContent;
+}
+
 // Werkzeugleiste (_bar.js): EIN Status-Chip, „Gespeichert ✓“, Live-Region, Abbrechen
 const Bar = CMSAdmin.bar;
 const BT = k => Bar?.texts?.[k] || { close: 'Schließen', cancel: 'Abbrechen', done: 'Fertig' }[k] || k;
@@ -261,9 +272,10 @@ function makeTool(type, def) {
           if (n.contentEditable !== 'plaintext-only') n.contentEditable = 'true';
           n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); n.blur(); } });
           n.addEventListener('input', () => {
-            setPath(this.data, n.dataset.edit, n.textContent);
+            const v = fieldValue(n, false);
+            setPath(this.data, n.dataset.edit, v);
             markDirty();
-            if (drawerFor === this) { this.syncDrawerField(n.dataset.edit, n.textContent); drawerTouched(); }
+            if (drawerFor === this) { this.syncDrawerField(n.dataset.edit, v); drawerTouched(); }
           });
           n.addEventListener('paste', e => { e.preventDefault(); d.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
           n.addEventListener('focus', () => InlineBar.hide());
@@ -273,7 +285,7 @@ function makeTool(type, def) {
           if (!n.innerHTML.trim()) n.innerHTML = mode === 'rich' ? '<p><br></p>' : '';
           CMSAdmin.Rich.bindKeys(n, mode);
           n.addEventListener('input', () => {
-            const html = n.innerHTML.replace(/^<p><br><\/p>$/, '');
+            const html = fieldValue(n, true).replace(/^<p><br><\/p>$/, '');
             setPath(this.data, n.dataset.edit, html);
             markDirty();
             if (drawerFor === this) { this.syncDrawerField(n.dataset.edit, html, true); drawerTouched(); }

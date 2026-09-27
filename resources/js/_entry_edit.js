@@ -248,9 +248,16 @@ const Inline = (() => {
   const nodes = [];
   let dirty = false, bar = null, barTarget = null, barTimer;
 
-  const read = n => n.dataset.entryMode === 'plain' ? n.textContent.replace(/\s+/g, ' ').trim()
-    : n.dataset.entryMode === 'lines' ? n.innerText.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
-    : n.innerHTML.trim().replace(/^<p><br><\/p>$/, '');
+  // Redaktionsnotizen: Hinweise „Notiz: …“ (Core\EditorNotes::decorate, .cms-note) wieder als „[# … #]“ auslesen
+  const unnote = n => {
+    if (!n.querySelector('[data-cms-note]')) return n;
+    const c = n.cloneNode(true);
+    c.querySelectorAll('[data-cms-note]').forEach(x => x.replaceWith(document.createTextNode(`[# ${x.dataset.cmsNote} #]`)));
+    return c;
+  };
+  const read = n => n.dataset.entryMode === 'plain' ? unnote(n).textContent.replace(/\s+/g, ' ').trim()
+    : n.dataset.entryMode === 'lines' ? (n.querySelector('[data-cms-note]') ? unnote(n).textContent : n.innerText).replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+    : unnote(n).innerHTML.trim().replace(/^<p><br><\/p>$/, '');
 
   function changed() { return nodes.filter(n => read(n) !== n._orig); }
 

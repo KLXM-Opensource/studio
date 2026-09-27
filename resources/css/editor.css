@@ -164,3 +164,14 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    --cms-bar-offset = sichtbare Unterkante der Leiste (Desktop: ihre Höhe; Telefon: scrollt mit, bis 0).
    Eigene Köpfe markieren Themes mit data-cms-sticky (Attribut ohne Wert genügt). !important: Frameworks setzen top teils inline (UIkit). */
 :is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,header[data-cms-sticky],[data-cms-sticky]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}
+
+/* Redaktionsnotizen [# … #] (Core\EditorNotes::decorate) – nur für angemeldete Redaktion (Bearbeiten-Modus, Entwurfsansicht);
+   Besucher sehen sie nie. Eigene feste Farben (Notizzettel), damit sie in jedem Kit, hell und dunkel, lesbar sind (≥ 7:1). */
+.cms-note{display:inline;margin:0 .15em;padding:.1em .45em;border:1px dashed #8a6500;border-radius:5px;background:#fff4c2;color:#3a2a00;
+  font:600 max(13px,.72em)/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:0;text-transform:none;font-style:normal;
+  vertical-align:.08em;white-space:normal;overflow-wrap:anywhere;hyphens:manual;-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:default;user-select:all}
+.cms-note__label{font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.86em}
+.cms-note::selection,.cms-note *::selection{background:#3a2a00;color:#fff4c2}
+[data-edit] .cms-note{cursor:pointer}
+@media (forced-colors:active){.cms-note{border:1px solid CanvasText;background:Canvas;color:CanvasText}}
+@media print{.cms-note{display:none}}
