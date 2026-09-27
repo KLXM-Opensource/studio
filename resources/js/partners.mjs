@@ -48,7 +48,6 @@ d.querySelectorAll('[data-cms-partners]').forEach(root => {
     const li = open.btn.closest('li'); let last = li;
     for (let n = li.nextElementSibling; n && n.offsetTop === li.offsetTop; n = n.nextElementSibling) last = n;
     slot ??= Object.assign(d.createElement('li'), { className: 'cms-partners__slot' });
-    slot.setAttribute('role', 'none');
     slot.append(open.panel); last.after(slot);
   };
   const hide = focus => {
