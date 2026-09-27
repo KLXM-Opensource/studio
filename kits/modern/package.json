@@ -1,0 +1,14 @@
+{
+  "name": "mycms-theme-modern",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „modern“ (selbst gehostete Schriften: Plus Jakarta Sans, Space Grotesk, Inter Tight, Manrope – alle SIL OFL 1.1; Space Grotesk als TTF für App-Icons). Wird von tools/build.mjs automatisch installiert und über kits/modern/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/space-grotesk": "^0.4.1",
+    "@fontsource-variable/inter-tight": "^5.2.0",
+    "@fontsource-variable/manrope": "^5.2.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.0",
+    "@fontsource-variable/space-grotesk": "^5.2.0"
+  }
+}

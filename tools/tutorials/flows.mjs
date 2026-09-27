@@ -1102,15 +1102,15 @@ add({
 
 /** Ausgabe von „php bin/console kit:create kanzlei“ (Testkopie, 25.09.2026) */
 const KIT_CREATE = `Kit „kanzlei“ angelegt – Kopie von „starter“, Präfix starter_ → kanzlei_
-  themes/kanzlei/          theme.php, Blöcke, Templates, Startinhalte, lang/, tools/
-  themes/kanzlei/assets/   CSS/JS-Quellen
-  public/themes/kanzlei/   gebaute Assets (Kopie – nach Änderungen neu bauen)
+  kits/kanzlei/          theme.php, Blöcke, Templates, Fragmente, Startinhalte, lang/, tools/
+  kits/kanzlei/assets/   CSS/JS-Quellen
+  public/kits/kanzlei/   gebaute Assets (Kopie – nach Änderungen neu bauen)
 
 Nächste Schritte:
-  1. themes/kanzlei/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css
+  1. kits/kanzlei/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css
   2. Bauen:      cd tools && pnpm run build
   3. Testen:     php bin/console site:create <key> <domain> kanzlei
-  4. Prüfen:     php bin/console health --site=<key> · php themes/kanzlei/tools/contrast.php
+  4. Prüfen:     php bin/console health --site=<key> · php kits/kanzlei/tools/contrast.php
   Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“`;
 
 /** Terminal-Karte (nur in der Aufnahme): Befehl wird getippt, dann erscheint die Ausgabe */

@@ -4,15 +4,17 @@ declare(strict_types=1);
 namespace Core;
 
 /**
- * Theme-System.
+ * Kit-System (Klassenname „Theme“ bleibt aus Kompatibilitätsgründen; Pfade liefert Core\Kit).
  *
- *   themes/{name}/theme.php        Definition (Blöcke, Einstellungs-Schema, Formulare, Hintergründe)
- *   themes/{name}/templates/       layout.php, page.php, form-page.php, error.php, partials/
- *   themes/{name}/blocks/{type}.php Renderer je Blocktyp
- *   themes/{name}/seed.php         Startinhalte (Seiten + Einstellungen)
- *   public/themes/{name}/          öffentliche Assets (CSS, JS, Bilder)
+ *   kits/{name}/theme.php          Definition (Blöcke, Einstellungs-Schema, Formulare, Hintergründe); kit.php geht ebenso
+ *   kits/{name}/templates/         layout.php, page.php, form-page.php, error.php, partials/
+ *   kits/{name}/fragments/         eigene Fassungen überschreibbarer Kern-Fragmente (Core\Fragments)
+ *   kits/{name}/blocks/{type}.php  Renderer je Blocktyp
+ *   kits/{name}/seed.php           Startinhalte (Seiten + Einstellungen)
+ *   public/kits/{name}/            öffentliche Assets (CSS, JS, Bilder)
+ *   Rückfall: themes/{name}/ und public/themes/{name}/ (ältere Installationen, Kits von Dritten)
  *
- * Der Core kennt keine praxisspezifischen Inhalte – ein neues Projekt = neues Theme.
+ * Der Core kennt keine praxisspezifischen Inhalte – ein neues Projekt = neues Kit.
  */
 final class Theme
 {
@@ -33,14 +35,15 @@ final class Theme
 
     public function __construct(string $name)
     {
-        $name = preg_replace('~[^a-z0-9_\-]~i', '', $name) ?: (string) array_key_first(self::available());
-        $path = ROOT . '/themes/' . $name;
-        if (!is_file($path . '/theme.php')) {
+        $name = Kit::clean($name) ?: (string) array_key_first(self::available());
+        $path = Kit::dir($name);
+        $def = Kit::definitionFile($path);
+        if ($def === null) {
             throw new \RuntimeException("Kit '$name' nicht gefunden");
         }
         $this->name = $name;
         $this->path = $path;
-        $this->def = require $path . '/theme.php';
+        $this->def = require $def;
 
         foreach ($this->def['blocks'] ?? [] as $type => $b) {
             $this->blocks[$type] = $b + ['type' => $type, 'fields' => [], 'label' => $type];
@@ -71,9 +74,9 @@ final class Theme
     public static function available(): array
     {
         $out = [];
-        // Label ohne Ausführen der Datei lesen (Themes können gleichnamige Helfer definieren)
-        foreach (glob(ROOT . '/themes/*/theme.php') ?: [] as $f) {
-            $name = basename(dirname($f));
+        // Label ohne Ausführen der Datei lesen (Kits können gleichnamige Helfer definieren); kits/ vor themes/ (Core\Kit)
+        foreach (Kit::all() as $name => $dir) {
+            $f = (string) Kit::definitionFile($dir);
             $out[$name] = preg_match("~^    'label'\s*=>\s*'([^']+)'~m", (string) file_get_contents($f), $m) ? $m[1] : $name;
         }
         return $out;
@@ -310,7 +313,7 @@ final class Theme
     /** Öffentliche Adresse einer Theme-Schrift ohne Versions-Parameter (muss exakt der URL im CSS entsprechen) */
     public function fontUrl(string $path): string
     {
-        return base_path() . '/themes/' . $this->name . '/' . ltrim($path, '/');
+        return Kit::url($this->name, $path);
     }
 
     /** <link rel="preload"> für die wichtigsten Schnitte (theme.php → 'fonts' → 'preload') */
@@ -327,15 +330,21 @@ final class Theme
     public function iconFont(): ?string
     {
         $f = (string) ($this->def['fonts']['icon'] ?? '');
-        $path = $f !== '' ? ROOT . '/themes/' . $this->name . '/' . ltrim($f, '/') : '';
+        $path = $f !== '' ? $this->path . '/' . ltrim($f, '/') : '';
         return $path !== '' && is_file($path) ? $path : null;
     }
 
     public function asset(string $path): string
     {
-        $file = ROOT . '/public/themes/' . $this->name . '/' . ltrim($path, '/');
+        $file = Kit::publicDir($this->name) . '/' . ltrim($path, '/');
         $v = is_file($file) ? substr(md5((string) filemtime($file)), 0, 8) : CMS_VERSION;
-        return base_path() . '/themes/' . $this->name . '/' . ltrim($path, '/') . '?v=' . $v;
+        return Kit::url($this->name, $path) . '?v=' . $v;
+    }
+
+    /** Bringt das Kit die öffentliche Datei mit (public/kits/{name}/…)? */
+    public function hasAsset(string $path): bool
+    {
+        return is_file(Kit::publicDir($this->name) . '/' . ltrim($path, '/'));
     }
 
     /**
@@ -350,7 +359,7 @@ final class Theme
         $out = [];
         // Kern-Blöcke: Theme-Stylesheet css/data.css bevorzugt, sonst das neutrale aus dem Kern
         if ($types === null || array_intersect(['data_list', 'data_fields'], $types)) {
-            $out[] = is_file(ROOT . '/public/themes/' . $this->name . '/css/data.css') ? $this->asset('css/data.css') : asset('css/data.css');
+            $out[] = $this->hasAsset('css/data.css') ? $this->asset('css/data.css') : asset('css/data.css');
         }
         // Medien-Blöcke (Galerie, Slider, Stapelkarten) und Abschnitte mit Vollbild/Hintergrundbild – ebenso überschreibbar
         if ($types === null || array_intersect(['gallery', 'slideshow', 'stack_cards'], $types)) {
@@ -400,10 +409,10 @@ final class Theme
         return array_values(array_unique($types));
     }
 
-    /** Kern-Stylesheet – oder die gleichnamige Datei des Themes (public/themes/{name}/css/…), falls vorhanden */
+    /** Kern-Stylesheet – oder die gleichnamige Datei des Kits (public/kits/{name}/css/…), falls vorhanden */
     private function coreCss(string $file): string
     {
-        return is_file(ROOT . '/public/themes/' . $this->name . '/css/' . $file) ? $this->asset('css/' . $file) : asset('css/' . $file);
+        return $this->hasAsset('css/' . $file) ? $this->asset('css/' . $file) : asset('css/' . $file);
     }
 
     /** Skripte, die nur für bestimmte Blocktypen geladen werden */

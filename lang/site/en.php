@@ -1,7 +1,7 @@
 <?php
 /**
  * Englische Website-Texte des Cores (lt()) – Schlüssel = deutscher Quelltext.
- * Themes ergänzen/überschreiben in themes/{name}/lang/site/en.php. Fehlende finden: php bin/console i18n:missing en --site-texts
+ * Themes ergänzen/überschreiben in kits/{name}/lang/site/en.php. Fehlende finden: php bin/console i18n:missing en --site-texts
  */
 return [
     '(öffnet in neuem Tab)' => '(opens in a new tab)',

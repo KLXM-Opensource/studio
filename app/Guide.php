@@ -12,7 +12,7 @@ use Core\Support\Markdown;
  * sichtbar nur, wenn es welche gibt (Kapitel im Handbuch, Übersicht, Suche, Hinweis in Blöcken und Bereichen).
  *
  * Quellen (gleicher Dateiname: die Website gewinnt):
- *   themes/{kit}/guide/*.md          mit dem Kit ausgeliefert (Ordner per theme.php → 'guide' => ['dir' => …] änderbar)
+ *   kits/{kit}/guide/*.md          mit dem Kit ausgeliefert (Ordner per theme.php → 'guide' => ['dir' => …] änderbar)
  *   {storage}/guide/*.md             je Website, in der Verwaltung bearbeitbar (Handbuch → Projekt-Hinweise, Recht system.manage)
  *
  * Datei: NN-name.md (Reihenfolge nach Dateiname, natürlich sortiert). Optional Front Matter:

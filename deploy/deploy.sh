@@ -57,7 +57,7 @@ remote "mkdir -p releases shared/config/sites shared/storage shared/storage/shar
 RSH=(); [[ "$SSH_TARGET" != "local" ]] && RSH=(-e "ssh ${SSH_OPTS:-}")
 rsync -az --delete ${RSYNC_OPTS:-} ${RSH[@]+"${RSH[@]}"} \
   --exclude '.git' --exclude '.github' --exclude 'deploy/targets/*.env' \
-  --exclude '/tools' --exclude 'themes/*/node_modules' --exclude 'extensions/*/node_modules' \
+  --exclude '/tools' --exclude 'kits/*/node_modules' --exclude 'themes/*/node_modules' --exclude 'extensions/*/node_modules' \
   --exclude '/storage' --exclude '/config/config.local.php' --exclude '/config/sites' \
   --exclude '/public/media' --exclude '/public/sites' --exclude '/public/pools' --exclude '/public/fonts' \
   --exclude '/public/assets/tutorials' --exclude '/public/assets/trailer' \

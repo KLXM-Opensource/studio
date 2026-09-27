@@ -1,6 +1,6 @@
 <?php
 /**
- * Bildergalerie (Kern-Block, vom Theme überschreibbar: themes/{name}/blocks/gallery.php).
+ * Bildergalerie (Kern-Block, vom Theme überschreibbar: kits/{name}/blocks/gallery.php).
  * Raster (einheitliches Format mit Zuschnitt), Mosaik (CSS-Spalten) oder bündige Zeilen; Lightbox über js/media.mjs –
  * ohne JavaScript führen die Bilder als normale Links zur großen Fassung.
  * @var \Core\Block $b  @var array $d

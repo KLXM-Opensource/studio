@@ -73,7 +73,7 @@ final class Pages
     /** Slug auf gleicher Ebene schon vergeben? */
     public static function slugTaken(string $slug, ?int $parentId, ?int $exceptId = null, ?string $lang = null): bool
     {
-        // Oberste Ebene: Namen von Ordnern/Dateien in public/ (themes, assets, media …) liefert der Webserver selbst aus –
+        // Oberste Ebene: Namen von Ordnern/Dateien in public/ (kits, assets, media …) liefert der Webserver selbst aus –
         // eine Seite dort wäre nie erreichbar (Apache/nginx antworten mit 301/403). Solche Adressen gelten als vergeben.
         if (!$parentId && $slug !== '' && file_exists(ROOT . '/public/' . $slug)) return true;
         $sql = 'SELECT id FROM pages WHERE slug = ? AND ' . ($parentId ? 'parent_id = ?' : 'parent_id IS NULL') . ' AND ' . Lang::sql();

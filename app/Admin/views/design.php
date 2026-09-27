@@ -33,7 +33,7 @@ foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $ke
   <p><?= e(__('Das aktive Kit „{theme}“ beschreibt keine einstellbaren Farben, Formen oder Schriften. Wenden Sie sich an die Agentur bzw. die Kit-Entwicklung, wenn Sie das Aussehen anpassen möchten.', ['theme' => $themeLabel])) ?></p>
   <details class="ds-empty__dev">
     <summary><?= e(__('Hinweis für die Kit-Entwicklung')) ?></summary>
-    <p><?= e(__('Ergänzen Sie in themes/{name}/theme.php den Schlüssel „design“ mit Gruppen und Tokens, die auf die CSS-Variablen des Kits zeigen, und rufen Sie im Layout design_head() nach dem Kit-CSS sowie design_classes() am <html>-Element auf.', ['name' => $themeName])) ?></p>
+    <p><?= e(__('Ergänzen Sie in kits/{name}/theme.php den Schlüssel „design“ mit Gruppen und Tokens, die auf die CSS-Variablen des Kits zeigen, und rufen Sie im Layout design_head() nach dem Kit-CSS sowie design_classes() am <html>-Element auf.', ['name' => $themeName])) ?></p>
 <pre><code>'design' => [
   'groups' => [
     ['id' => 'farben', 'label' => 'Farben', 'tokens' => [

@@ -103,7 +103,7 @@ final class Stats
             foreach (\Core\Extensions::configured($cfg) as $en => $on) $ext[$en] = $on;
             $d['extensions'] = array_keys(array_filter($ext));
             $d['features_delegated'] = (bool) ($set[Features::DELEGATE_KEY] ?? false);
-            $d['theme'] = (string) ($set['sys.theme'] ?? '') ?: (string) ($cfg->get('theme') ?: $site->defaultTheme());
+            $d['theme'] = (string) ($set['sys.theme'] ?? '') ?: (string) ($cfg->get('kit') ?: $cfg->get('theme') ?: $site->defaultTheme());
             $d['maintenance'] = (bool) ($set['sys.maintenance'] ?? false);
             // Website ausgeblendet für Suchmaschinen (Grundeinstellung) – außerhalb von production ohnehin (noindex_site())
             $d['noindex'] = (bool) ($set['sys.noindex'] ?? false) || $d['environment'] !== 'production';
@@ -150,7 +150,7 @@ final class Stats
             }
             $d['db_size'] = $sqlite ? (int) @filesize((string) $dbCfg['path']) + (int) @filesize($dbCfg['path'] . '-wal') : null;
         } else {
-            $d['theme'] = (string) ($cfg->get('theme') ?: $site->defaultTheme());
+            $d['theme'] = (string) ($cfg->get('kit') ?: $cfg->get('theme') ?: $site->defaultTheme());
             $d['maintenance'] = false;
             $d['noindex'] = $d['environment'] !== 'production';
             $d['editors'] = 0;
@@ -201,7 +201,7 @@ final class Stats
     /** Einfacher Vorgabewert aus theme.php (z. B. 'icon_bg' => '#0F6E68') – ohne die Datei auszuführen */
     private static function themeValue(string $theme, string $name): string
     {
-        $f = ROOT . '/themes/' . preg_replace('~[^a-z0-9_\-]~i', '', $theme) . '/theme.php';
+        $f = (string) \Core\Kit::definitionFile(\Core\Kit::dir($theme));
         return is_file($f) && preg_match("~'" . preg_quote($name, '~') . "'\s*=>\s*'([^']*)'~", (string) file_get_contents($f), $m) ? $m[1] : '';
     }
 
@@ -225,7 +225,7 @@ final class Stats
 
     private static function themeRequires(string $theme): string
     {
-        $f = ROOT . '/themes/' . preg_replace('~[^a-z0-9_\-]~i', '', $theme) . '/theme.php';
+        $f = (string) \Core\Kit::definitionFile(\Core\Kit::dir($theme));
         return is_file($f) && preg_match("~'requires'\s*=>\s*'([^']*)'~", (string) file_get_contents($f), $m) ? trim($m[1]) : '';
     }
 

@@ -6,7 +6,7 @@ namespace Core;
 /**
  * Eine Website der Installation (Multi-Site).
  *
- * Eine Installation = ein Code-Stand (app/, themes/, vendor/, public/assets) für beliebig viele Websites.
+ * Eine Installation = ein Code-Stand (app/, kits/, vendor/, public/assets) für beliebig viele Websites.
  * Jede Website hat eigene Domains, eine eigene Datenbank (SQLite-Datei oder eigene MySQL-Datenbank),
  * eigene Medien, eigene Benutzer, eigenen Cache und eigene Schlüssel – Inhalte sind vollständig getrennt.
  *
@@ -14,8 +14,8 @@ namespace Core;
  *   return [
  *     'hosts'       => ['www.kunde.de', 'kunde.de'],   // Domains (optional mit :port für lokale Tests)
  *     'landing_hosts' => ['kampagne.de'],               // optional: Domains für Landingpages (Core\Landings, site:hosts --landing)
- *     'theme'       => 'praxis',                        // Theme beim Erststart (danach: Grundeinstellungen)
- *     'themes'      => ['praxis'],                      // optional: erlaubte Themes dieser Website
+ *     'theme'       => 'praxis',                        // Kit beim Erststart (danach: Grundeinstellungen); 'kit' geht ebenso
+ *     'themes'      => ['praxis'],                      // optional: erlaubte Kits dieser Website; 'kits' geht ebenso
  *     'app_key'     => '…', 'setup_token' => '…',      // eigene Schlüssel (legt site:create an)
  *     'db'          => [...],                           // optional, Standard: storage/sites/{key}/database/site.sqlite
  *   ] + beliebige Werte aus config/config.php, die für diese Website abweichen.
@@ -75,7 +75,7 @@ final class Site
     /** Theme beim Erststart bzw. wenn keines gewählt ist */
     public function defaultTheme(): string
     {
-        $t = (string) ($this->cfg['theme'] ?? '');
+        $t = (string) (($this->cfg['kit'] ?? '') ?: ($this->cfg['theme'] ?? ''));   // 'kit' (neu) oder 'theme'
         $allowed = $this->allowedThemes();
         if ($t !== '' && isset($allowed[$t])) return $t;
         return (string) (array_key_first($allowed) ?? '');
@@ -85,7 +85,7 @@ final class Site
     public function allowedThemes(): array
     {
         $all = Theme::available();
-        $only = (array) ($this->cfg['themes'] ?? []);
+        $only = (array) (($this->cfg['kits'] ?? []) ?: ($this->cfg['themes'] ?? []));   // 'kits' (neu) oder 'themes'
         return $only ? array_intersect_key($all, array_flip($only)) : $all;
     }
 }

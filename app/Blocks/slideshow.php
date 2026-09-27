@@ -1,6 +1,6 @@
 <?php
 /**
- * Slider (Kern-Block, vom Theme überschreibbar: themes/{name}/blocks/slideshow.php).
+ * Slider (Kern-Block, vom Theme überschreibbar: kits/{name}/blocks/slideshow.php).
  * Grundlage ist CSS-Scroll-Snap (funktioniert ohne JavaScript: wischen/scrollen); js/media.mjs ergänzt Pfeile, Punkte,
  * Tastatur, Überblenden und – nur wenn eingeschaltet – automatisches Weiterblättern mit Pause-Schaltfläche.
  * Muster: WAI-ARIA APG „Carousel“ (region + aria-roledescription, Folien als group „n von m“).

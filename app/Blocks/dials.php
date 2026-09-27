@@ -1,6 +1,6 @@
 <?php
 /**
- * Kennzahlen mit Skala (Kern-Block, vom Theme überschreibbar: themes/{name}/blocks/dials.php).
+ * Kennzahlen mit Skala (Kern-Block, vom Theme überschreibbar: kits/{name}/blocks/dials.php).
  * Je Kennzahl ein Rundinstrument über 270° als Inline-SVG – alle Maße als SVG-Attribute (CSP: keine Inline-Styles).
  * Felder wie „essenz“ (stats/dials): value, label, text, level – dazu unit, number, max.
  * Füllstand: level (0–100), sonst Zahl ÷ Höchstwert, sonst Prozentwert (Wert oder Einheit „%“), sonst neutrale Skala.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Partner & Logos (Kern-Block, vom Kit überschreibbar: themes/{name}/blocks/partners.php).
+ * Partner & Logos (Kern-Block, vom Kit überschreibbar: kits/{name}/blocks/partners.php).
  * Logos in gleich großen Kacheln, flächengleich skaliert (Core\Blocks\PartnerLogos::width → Klasse pl-w-{n}).
  * Details (Kurzinfo, Link) erst nach Klick: js/partners.mjs macht aus den Sprung-Links Schaltflächen
  * (aria-expanded/aria-controls) und zeigt die Angaben unter der Reihe oder im Dialog. Ohne JavaScript und im

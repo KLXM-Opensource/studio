@@ -880,7 +880,7 @@ final class Template
 
     // ================================================================== PHP-Export (Theme-Block)
 
-    /** PHP-Renderer für themes/{name}/blocks/{typ}.php – Ausgabe identisch zum Interpreter (gleiche Runtime) */
+    /** PHP-Renderer für kits/{name}/blocks/{typ}.php – Ausgabe identisch zum Interpreter (gleiche Runtime) */
     public function toPhp(string $label = ''): string
     {
         $this->phpOut = '';

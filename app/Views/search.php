@@ -2,7 +2,7 @@
 /**
  * Ergebnisseite der Website-Suche (im Grundlayout des Themes). Themes können templates/search.php mitbringen.
  * Klassen: .srch (Seite), .srch-hit (Treffer), .srch-badge, .srch-pager – Stil: public/assets/css/search.css
- * (bzw. public/themes/{theme}/css/search.css).
+ * (bzw. public/kits/{theme}/css/search.css).
  * @var array $result  @var string $q  @var bool $limited  @var string $form  @var callable $url  fn(array $extra): string
  */
 $r = $result;

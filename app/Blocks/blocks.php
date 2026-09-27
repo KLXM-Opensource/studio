@@ -1,7 +1,7 @@
 <?php
 /**
  * Kern-Blöcke, die jedes Theme erhält (abschaltbar mit 'core_blocks' => false in theme.php).
- * Ein Theme kann die Ausgabe überschreiben: themes/{name}/blocks/{typ}.php und assets/css/data.css.
+ * Ein Theme kann die Ausgabe überschreiben: kits/{name}/blocks/{typ}.php und assets/css/data.css.
  */
 return [
     'data_list' => [

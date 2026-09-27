@@ -510,7 +510,7 @@ final class CmsService
 
     private function assertSlug(string $slug, ?int $ownId, ?int $parentId = null, ?string $lang = null): void
     {
-        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'themes', 'mcp', 'home', 'sitemap-xml', 'robots-txt', 'index-php'];
+        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'mcp', 'home', 'sitemap-xml', 'robots-txt', 'index-php'];
         if (in_array($slug, $reserved, true)) {
             throw new ApiError(422, "Die Adresse „{$slug}“ ist reserviert.");
         }

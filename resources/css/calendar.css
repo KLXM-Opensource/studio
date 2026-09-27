@@ -1,5 +1,5 @@
 /* Kern-Blöcke „Kalender“ und „Nächste Termine“ – neutral, hell/dunkel über currentColor.
-   Themes setzen die Variablen (z. B. in themes/{name}/assets/css/calendar.css mit @import dieser Datei). */
+   Themes setzen die Variablen (z. B. in kits/{name}/assets/css/calendar.css mit @import dieser Datei). */
 .cal{
   --cal-accent:currentColor;
   --cal-accent-ink:Canvas;

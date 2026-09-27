@@ -23,8 +23,8 @@ return [
     // false = /index.php/impressum – funktioniert ohne jede Server-Konfiguration.
     'url_rewrite' => true,
 
-    // Theme-Vorgabe, falls in den Grundeinstellungen keines gewählt ist (leer = Vorgabe der Website bzw. erstes installiertes).
-    // Je Website überschreibbar in config/sites/{key}.php
+    // Kit-Vorgabe, falls in den Grundeinstellungen keines gewählt ist (leer = Vorgabe der Website bzw. erstes installiertes).
+    // Je Website überschreibbar in config/sites/{key}.php. Schlüssel 'kit' geht ebenso (hat Vorrang); 'theme' bleibt gültig.
     'theme' => '',
 
     // Multi-Site: Website für Domains, die in keiner config/sites/*.php stehen.

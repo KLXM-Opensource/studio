@@ -165,7 +165,7 @@ final class AiController extends AdminController
                     for ($n = 2; Pages::slugTaken($s['slug'], $parent, (int) $p['id']); $n++) $s['slug'] = $base . '-' . $n;
                     $warn[] = __('Die Adresse „{slug}“ ist auf dieser Ebene schon vergeben – vorgeschlagen ist „{alt}“.', ['slug' => $base, 'alt' => $s['slug']]);
                 }
-                if (in_array($s['slug'], ['admin', 'api', 'anfrage', 'assets', 'media', 'themes', 'home'], true)) $s['slug'] = $p['slug'];
+                if (in_array($s['slug'], ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'home'], true)) $s['slug'] = $p['slug'];
                 if ($p['content_published'] !== null && $s['slug'] !== $p['slug']) {
                     $warn[] = __('Die Seite ist online: Eine neue Adresse macht alte Links und Lesezeichen ungültig (keine automatische Weiterleitung).');
                 }

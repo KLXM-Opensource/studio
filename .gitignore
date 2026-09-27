@@ -10,6 +10,7 @@
 /tools/node_modules/
 .DS_Store
 /public/media/embeds/*
+/kits/*/node_modules/
 /themes/*/node_modules/
 /config/sites/*.php
 /storage/sites/

@@ -9,7 +9,7 @@ const PRECACHE = __PRECACHE__;
 const OFFLINE = __OFFLINE__;
 const BASE = __BASE__;
 const SKIP = /^\/(admin|api|mcp|anfrage|sw\.js|manifest\.webmanifest)(\/|$|\?)/;
-const STATIC = /^\/(assets|themes|media)\//;
+const STATIC = /^\/(assets|kits|themes|media)\//;
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));

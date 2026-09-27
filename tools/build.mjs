@@ -5,11 +5,12 @@
  *   pnpm watch         Assets bei Änderungen neu bauen
  *
  * Quellen:  resources/{css,js}          → public/assets/{css,js}          (Core: Admin + Editor)
- *           themes/{name}/assets/…      → public/themes/{name}/…          (je Theme)
+ *           kits/{name}/assets/…        → public/kits/{name}/…            (je Kit; Rückfall themes/{name}/assets)
  * Vendoren: node_modules                → public/assets/vendor              (Core: Editor.js, PDF.js, MapLibre)
  * Symbole:  resources/icons/icons.json    → public/assets/icons/{core,thema}.svg, icons.svg, icons-map.json, catalog.json (Phosphor duotone, tools/icons.mjs)
- * Themes:   themes/{name}/build.mjs     → eigene Vendoren des Themes (z. B. Schriften), Pakete aus
- *           themes/{name}/package.json  (wird bei Bedarf automatisch installiert)
+ * Kits:     kits/{name}/build.mjs       → eigene Vendoren des Kits (z. B. Schriften), Pakete aus
+ *           kits/{name}/package.json    (wird bei Bedarf automatisch installiert)
+ *           Ältere Kits unter themes/{name}/ werden ebenso gebaut (Ausgabe immer nach public/kits/{name})
  *
  * Auf dem Server wird weder Node noch pnpm benötigt – die gebauten Dateien liegen in /public.
  */
@@ -110,19 +111,35 @@ async function vendors() {
 
 
 /**
- * Theme-Vendoren: themes/{name}/build.mjs exportiert `vendors(ctx)`.
- * Pakete kommen aus themes/{name}/node_modules (eigene package.json), sonst aus tools/node_modules.
- * ctx = { copy, pkg(...pfad), theme, themeDir, publicDir, root }
+ * Kits (Core\Kit): kits/{name} vor dem alten Ordner themes/{name}; gleiche Namen nur einmal. [name, ordner]
+ */
+function kits() {
+  const out = new Map();
+  for (const root of ['kits', 'themes']) {
+    const base = path.join(ROOT, root);
+    if (!fs.existsSync(base)) continue;
+    for (const name of fs.readdirSync(base).sort()) {
+      const dir = path.join(base, name);
+      if (out.has(name) || !fs.statSync(dir).isDirectory()) continue;
+      if (fs.existsSync(path.join(dir, 'theme.php')) || fs.existsSync(path.join(dir, 'kit.php'))) out.set(name, dir);
+    }
+  }
+  return [...out];
+}
+
+/**
+ * Kit-Vendoren: kits/{name}/build.mjs exportiert `vendors(ctx)`.
+ * Pakete kommen aus kits/{name}/node_modules (eigene package.json), sonst aus tools/node_modules.
+ * ctx = { copy, pkg(...pfad), theme, themeDir, publicDir, root } (Namen theme/themeDir bleiben für bestehende build.mjs)
  */
 async function themeVendors() {
-  for (const theme of fs.readdirSync(path.join(ROOT, 'themes'))) {
-    const dir = path.join(ROOT, 'themes', theme);
+  for (const [theme, dir] of kits()) {
     const hook = path.join(dir, 'build.mjs');
     if (!fs.existsSync(hook)) continue;
     // Installieren, wenn node_modules fehlt oder package.json neuer ist (z. B. zusätzliche Schriften)
     const pj = path.join(dir, 'package.json'), marker = path.join(dir, 'node_modules', '.modules.yaml');
     if (fs.existsSync(pj) && (!fs.existsSync(marker) || fs.statSync(pj).mtimeMs > fs.statSync(marker).mtimeMs)) {
-      console.log(`  pnpm install (themes/${theme})`);
+      console.log(`  pnpm install (${path.relative(ROOT, dir)})`);
       execSync('pnpm install --silent', { cwd: dir, stdio: 'inherit' });
       if (fs.existsSync(marker)) fs.utimesSync(marker, new Date(), new Date());
     }
@@ -132,7 +149,7 @@ async function themeVendors() {
     };
     console.log(`Kit ${theme}:`);
     const mod = await import(pathToFileURL(hook).href);
-    await mod.vendors?.({ copy, pkg, theme, themeDir: dir, publicDir: path.join(PUB, 'themes', theme), root: ROOT });
+    await mod.vendors?.({ copy, pkg, theme, themeDir: dir, publicDir: path.join(PUB, 'kits', theme), root: ROOT });
   }
 }
 
@@ -153,9 +170,9 @@ function entries() {
     if (fs.existsSync(img)) fs.cpSync(img, path.join(outDir, 'img'), { recursive: true });
   };
   add(path.join(ROOT, 'resources'), path.join(PUB, 'assets'));
-  for (const theme of fs.readdirSync(path.join(ROOT, 'themes'))) {
-    const src = path.join(ROOT, 'themes', theme, 'assets');
-    if (fs.existsSync(src)) add(src, path.join(PUB, 'themes', theme));
+  for (const [theme, dir] of kits()) {
+    const src = path.join(dir, 'assets');
+    if (fs.existsSync(src)) add(src, path.join(PUB, 'kits', theme));
   }
   // Erweiterungen: extensions/{name}/assets → public/extensions/{name}
   const extDir = path.join(ROOT, 'extensions');

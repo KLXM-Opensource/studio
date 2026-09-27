@@ -52,7 +52,7 @@ jobs:
         with:
           node-version: 22
       - name: Syntaxprüfung
-        run: find app bin themes extensions -name '*.php' -not -path '*/node_modules/*' -print0 2>/dev/null | xargs -0 -n1 -P4 php -l > /dev/null
+        run: find app bin kits extensions -name '*.php' -not -path '*/node_modules/*' -print0 2>/dev/null | xargs -0 -n1 -P4 php -l > /dev/null
       - name: SSH vorbereiten
         run: |
           mkdir -p ~/.ssh

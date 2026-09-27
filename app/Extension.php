@@ -227,7 +227,7 @@ final class Extension
     }
 
     /**
-     * Kapitel im Handbuch ('manual', Format wie themes/{name}/docs/manual.php → 'chapters') bzw. im Entwicklerhandbuch
+     * Kapitel im Handbuch ('manual', Format wie kits/{name}/docs/manual.php → 'chapters') bzw. im Entwicklerhandbuch
      * ('technical': ['key' => ['title' => …, 'file' => …, 'part' => 0–4, 'after' => 'medien']])
      */
     public function docs(string $book, array $chapters): self

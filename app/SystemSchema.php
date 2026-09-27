@@ -28,7 +28,7 @@ final class SystemSchema
             ['id' => 'website', 'label' => 'Website', 'fields' => [
                 ['name' => 'sys.theme', 'label' => 'Aktives Kit', 'type' => 'select', 'required' => true,
                     'options' => site()->allowedThemes(), 'default' => site()->defaultTheme(),
-                    'help' => 'Kits liegen unter /themes/{name} (Templates, Blöcke) und /public/themes/{name} (Assets).'],
+                    'help' => 'Kits liegen unter /kits/{name} (Templates, Blöcke, Fragmente) und /public/kits/{name} (Assets); ältere Kits unter /themes/{name} werden weiter erkannt.'],
                 ['name' => 'sys.site_url', 'label' => 'Kanonische Adresse (Domain)', 'type' => 'url',
                     'placeholder' => 'https://www.ihre-domain.de',
                     'help' => 'Für Canonical-Links, Sitemap und E-Mail-Links. Leer = aktuelle Domain.'],

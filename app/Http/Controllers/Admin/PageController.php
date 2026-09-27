@@ -111,7 +111,7 @@ final class PageController extends AdminController
         if ($title === '') {
             $errors['title'] = 'Bitte einen Titel angeben.';
         }
-        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
+        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
         if (!$page || !$page['is_home']) {
             if (in_array($slug, $reserved, true)) {
                 $errors['slug'] = 'Diese Adresse ist reserviert.';

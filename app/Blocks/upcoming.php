@@ -1,7 +1,7 @@
 <?php
 /**
  * Nächste Termine: Vorkommen ab heute (Wiederholungen einzeln), optional nur in den nächsten N Tagen.
- * Kern-Block, vom Theme überschreibbar (themes/{name}/blocks/upcoming.php).
+ * Kern-Block, vom Theme überschreibbar (kits/{name}/blocks/upcoming.php).
  * @var \Core\Block $b  @var array $d
  */
 use Core\Data\Calendar;

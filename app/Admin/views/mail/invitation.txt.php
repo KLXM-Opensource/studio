@@ -1,5 +1,5 @@
 <?php
-/** E-Mail „Einladung“ (Text-Teil) – Core\Invites::mail(). Im Kit überschreibbar: themes/{kit}/templates/mail/invitation.txt.php. Reiner Text, kein Escaping nötig.
+/** E-Mail „Einladung“ (Text-Teil) – Core\Invites::mail(). Im Kit überschreibbar: kits/{kit}/templates/mail/invitation.txt.php. Reiner Text, kein Escaping nötig.
  * @var string $site  @var string $siteUrl  @var string $name  @var string $inviter  @var string $role  @var string $message  @var string $url
  * @var string $expires  @var bool $passkeys  @var bool $passwordless */
 $blocks = [

@@ -2,7 +2,7 @@
   "name": "klxm-studio-build",
   "private": true,
   "license": "MIT",
-  "description": "Build-System für KLXM Studio: Core-Vendoren (Editor.js, PDF.js, MapLibre) nach /public kopieren, Theme-Vendoren über themes/{name}/build.mjs, Assets minifizieren. Auf dem Server nicht erforderlich.",
+  "description": "Build-System für KLXM Studio: Core-Vendoren (Editor.js, PDF.js, MapLibre) nach /public kopieren, Kit-Vendoren über kits/{name}/build.mjs, Assets minifizieren. Auf dem Server nicht erforderlich.",
   "type": "module",
   "packageManager": "pnpm@10.29.2",
   "scripts": {

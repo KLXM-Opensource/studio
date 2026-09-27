@@ -21,7 +21,7 @@ use Core\Search\Search;
  *                     <?= header_actions('bar', ['compact' => true]) ?>   Aktionen in der Leiste (compact: mobil verkleinern)
  *                     <?= header_actions('below', ['wrap' => 'wrap']) ?>  Suchleiste unter dem Kopf („Suchleiste“ / „unter der Navigation“)
  *                     <?= header_actions_lang($langs, 'hdr__lang') ?>     Sprachumschalter im gewählten Stil
- * Eigenes Markup:     themes/{kit}/templates/partials/header-actions.php (bekommt $ha = model(), $slot, $opt) statt app/Views/header-actions.php
+ * Eigenes Markup:     kits/{kit}/templates/partials/header-actions.php (bekommt $ha = model(), $slot, $opt) statt app/Views/header-actions.php
  */
 final class HeaderActions
 {

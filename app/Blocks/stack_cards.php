@@ -1,6 +1,6 @@
 <?php
 /**
- * Stapelkarten (Kern-Block, vom Theme überschreibbar: themes/{name}/blocks/stack_cards.php).
+ * Stapelkarten (Kern-Block, vom Theme überschreibbar: kits/{name}/blocks/stack_cards.php).
  * Reines CSS: position: sticky mit wachsendem Abstand oben, leichte Verkleinerung per Scroll-Timeline (wo unterstützt).
  * Kleine Bildschirme und „Bewegung reduzieren“: einfache Liste.
  * @var \Core\Block $b  @var array $d

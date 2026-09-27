@@ -7,7 +7,7 @@ namespace Core;
  * Übersetzungen der Oberfläche (Verwaltung, Editor, Core-Texte).
  *
  * Quellsprache ist Deutsch: Der deutsche Text ist zugleich der Schlüssel – __('Speichern').
- * Übersetzungen liegen in lang/{locale}.php (Core) und themes/{name}/lang/{locale}.php (Theme, überschreibt).
+ * Übersetzungen liegen in lang/{locale}.php (Core) und kits/{name}/lang/{locale}.php (Theme, überschreibt).
  * Platzhalter: __('{n} Einträge', ['n' => 3]).
  */
 final class I18n
@@ -68,7 +68,7 @@ final class I18n
     /**
      * Feste Texte der Website (Templates, Blöcke, Core-Ausgaben) in der Sprache der aufgerufenen Seite – lt('Anfahrt').
      * Quelle: Sprache des Themes (theme.php → 'source_lang', Standard de). Übersetzungen:
-     *   lang/site/{lang}.php (Core) und themes/{name}/lang/site/{lang}.php (Theme, überschreibt).
+     *   lang/site/{lang}.php (Core) und kits/{name}/lang/site/{lang}.php (Theme, überschreibt).
      * Fehlt eine Übersetzung, bleibt der Quelltext stehen (php bin/console i18n:missing en --site-texts).
      */
     public static function site(string $text, array $params = []): string

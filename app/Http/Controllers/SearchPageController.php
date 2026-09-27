@@ -62,7 +62,7 @@ final class SearchPageController
         $seo = Seo::forError(200);
         $seo['title'] = $title . (($s = self::suffix()) !== '' ? ' | ' . $s : '');
         $seo['noindex'] = true;
-        $css = is_file(ROOT . '/public/themes/' . $theme->name . '/css/search.css') ? $theme->asset('css/search.css') : asset('css/search.css');
+        $css = $theme->hasAsset('css/search.css') ? $theme->asset('css/search.css') : asset('css/search.css');
         $html = $theme->render('layout', [
             'page' => $pseudo, 'content' => $content, 'seo' => $seo, 'editor' => null, 'toolbar' => null,
             'extraCss' => [$css], 'extraJs' => [],

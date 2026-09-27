@@ -3,7 +3,7 @@
 /**
  * Lizenzprüfung für CI – KLXM Studio steht unter der MIT-Lizenz.
  *
- *   node tools/licenses.mjs            Prüfen: Composer (composer.lock) + npm (tools/, themes/*), Lizenzdateien in public/
+ *   node tools/licenses.mjs            Prüfen: Composer (composer.lock) + npm (tools/, kits/*), Lizenzdateien in public/
  *   node tools/licenses.mjs --list     zusätzlich alle Pakete mit Version und Lizenz ausgeben
  *   node tools/licenses.mjs --json     vollständiges Ergebnis als JSON (z. B. für THIRD-PARTY-NOTICES.md)
  *   pnpm --dir tools licenses          dasselbe über package.json
@@ -109,9 +109,11 @@ function composer() {
 // ------------------------------------------------------------------ npm (pnpm)
 function pnpmProjects() {
   const dirs = [path.join(ROOT, 'tools')];
-  const themes = path.join(ROOT, 'themes');
-  for (const t of fs.existsSync(themes) ? fs.readdirSync(themes).sort() : []) {
-    if (fs.existsSync(path.join(themes, t, 'package.json'))) dirs.push(path.join(themes, t));
+  for (const root of ['kits', 'themes']) {   // themes/ = alter Ordner (Rückfall)
+    const themes = path.join(ROOT, root);
+    for (const t of fs.existsSync(themes) ? fs.readdirSync(themes).sort() : []) {
+      if (fs.existsSync(path.join(themes, t, 'package.json'))) dirs.push(path.join(themes, t));
+    }
   }
   return dirs;
 }
@@ -190,13 +192,15 @@ for (const p of all) {
 
 if (fs.existsSync(path.join(ROOT, 'public/assets/vendor'))) {
   for (const f of REQUIRED_FILES) if (!fs.existsSync(path.join(ROOT, f))) problems.push(`Lizenzdatei fehlt: ${f} (pnpm --dir tools build)`);
-  // Schriften der Themes: jede ausgelieferte Schrift braucht eine OFL-Datei
-  const pubThemes = path.join(ROOT, 'public/themes');
-  for (const t of fs.existsSync(pubThemes) ? fs.readdirSync(pubThemes) : []) {
-    const fonts = path.join(pubThemes, t, 'fonts');
-    if (!fs.existsSync(fonts)) continue;
-    const files = fs.readdirSync(fonts);
-    if (files.some((f) => /\.(woff2?|ttf|otf)$/i.test(f)) && !files.some((f) => /^(OFL|LICENSE)/i.test(f))) problems.push(`public/themes/${t}/fonts: Schriften ohne Lizenzdatei`);
+  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/kits, Rückfall public/themes)
+  for (const root of ['public/kits', 'public/themes']) {
+    const pubThemes = path.join(ROOT, root);
+    for (const t of fs.existsSync(pubThemes) ? fs.readdirSync(pubThemes) : []) {
+      const fonts = path.join(pubThemes, t, 'fonts');
+      if (!fs.existsSync(fonts)) continue;
+      const files = fs.readdirSync(fonts);
+      if (files.some((f) => /\.(woff2?|ttf|otf)$/i.test(f)) && !files.some((f) => /^(OFL|LICENSE)/i.test(f))) problems.push(`${root}/${t}/fonts: Schriften ohne Lizenzdatei`);
+    }
   }
 } else {
   warnings.push('public/assets/vendor fehlt – Lizenzdateien nicht geprüft (pnpm --dir tools build)');

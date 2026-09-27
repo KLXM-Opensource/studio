@@ -1,6 +1,6 @@
 /* ==========================================================================
    Abschnitts-Optionen „Vollbild“ und „Hintergrundbild“ (Block-Tunes height, bgImage, overlay, align)
-   Nur geladen, wenn ein Abschnitt der Seite sie nutzt. Theme-Datei public/themes/{name}/css/sections.css ersetzt sie.
+   Nur geladen, wenn ein Abschnitt der Seite sie nutzt. Theme-Datei public/kits/{name}/css/sections.css ersetzt sie.
    Anpassbar: --cms-overlay-dark, --cms-overlay-light
    ========================================================================== */
 .sec--has-bg{position:relative;isolation:isolate;overflow:clip}

@@ -1,0 +1,118 @@
+<?php
+declare(strict_types=1);
+
+namespace Core;
+
+/**
+ * Zentrale Pfad-API für Kits – die einzige Stelle, die weiß, wo Kits liegen.
+ *
+ *   kits/{name}/                 Kit (theme.php bzw. kit.php, Templates, Blöcke, Fragmente, Startinhalte, lang/)
+ *   public/kits/{name}/          öffentliche Assets (gebaut von tools/build.mjs aus kits/{name}/assets)
+ *   themes/{name}/               Rückfall: ältere Installationen und Kits von Dritten (vor der Umbenennung in kits/)
+ *   public/themes/{name}/        Rückfall für die Assets solcher Kits; alte Adressen /themes/… leitet public/index.php
+ *                                mit 301 auf /kits/… um, sobald die Datei dort liegt
+ *
+ * Technische Namen bleiben aus Kompatibilitätsgründen: Klasse Core\Theme, Datei theme.php (kit.php geht ebenso),
+ * Konfiguration 'theme' (Alias 'kit'), app()->theme (Alias app()->kit), Einstellung sys.theme.
+ *
+ *   Kit::dir('praxis')            → /…/kits/praxis (oder /…/themes/praxis) · Kit::dir() → /…/kits
+ *   Kit::publicDir('praxis')      → /…/public/kits/praxis (oder public/themes/praxis, falls nur dort vorhanden)
+ *   Kit::url('praxis', 'css/x')   → /kits/praxis/css/x (ohne Versions-Parameter; Theme::asset() hängt ?v= an)
+ *   Kit::fragment('brand')        → Datei des Fragments nach der Suchreihenfolge (Core\Fragments)
+ */
+final class Kit
+{
+    /** Ordner der Kits, in dieser Reihenfolge durchsucht (themes = Rückfall für ältere Installationen) */
+    public const ROOTS = ['kits', 'themes'];
+    /** Dateiname der Kit-Definition (kit.php als gleichwertige Alternative) */
+    public const DEFINITIONS = ['theme.php', 'kit.php'];
+
+    /** Gültiger Kit-Name (Ordnername) */
+    public static function clean(string $name): string
+    {
+        return (string) preg_replace('~[^a-z0-9_\-]~i', '', $name);
+    }
+
+    /**
+     * Ordner eines Kits (erster Treffer in kits/, dann themes/) – ohne Namen der Hauptordner kits/.
+     * Gibt es das Kit nicht, der Pfad unter kits/ (für Neuanlage und Fehlermeldungen).
+     */
+    public static function dir(string $name = ''): string
+    {
+        $name = self::clean($name);
+        if ($name === '') return ROOT . '/' . self::ROOTS[0];
+        foreach (self::ROOTS as $root) {
+            $dir = ROOT . '/' . $root . '/' . $name;
+            if (self::definitionFile($dir) !== null) return $dir;
+        }
+        return ROOT . '/' . self::ROOTS[0] . '/' . $name;
+    }
+
+    /** Gibt es das Kit (mit theme.php bzw. kit.php)? */
+    public static function exists(string $name): bool
+    {
+        return self::clean($name) !== '' && self::definitionFile(self::dir($name)) !== null;
+    }
+
+    /** Definitionsdatei im Kit-Ordner: theme.php, sonst kit.php, sonst null */
+    public static function definitionFile(string $dir): ?string
+    {
+        foreach (self::DEFINITIONS as $f) {
+            if (is_file($dir . '/' . $f)) return $dir . '/' . $f;
+        }
+        return null;
+    }
+
+    /** Alle installierten Kits: [name => ordner] (kits/ vor themes/, gleiche Namen nur einmal), alphabetisch */
+    public static function all(): array
+    {
+        $out = [];
+        foreach (self::ROOTS as $root) {
+            foreach (glob(ROOT . '/' . $root . '/*', GLOB_ONLYDIR) ?: [] as $dir) {
+                $name = basename($dir);
+                if (!isset($out[$name]) && self::clean($name) === $name && self::definitionFile($dir) !== null) $out[$name] = $dir;
+            }
+        }
+        ksort($out);
+        return $out;
+    }
+
+    /** Liegt das Kit noch im alten Ordner themes/? (für Hinweise, bin/console kit:list) */
+    public static function isLegacy(string $name): bool
+    {
+        return str_starts_with(self::dir($name), ROOT . '/themes/');
+    }
+
+    /**
+     * Öffentlicher Asset-Ordner eines Kits: public/kits/{name}, Rückfall public/themes/{name} (nur wenn allein dort vorhanden).
+     * Ohne Namen der Hauptordner public/kits.
+     */
+    public static function publicDir(string $name = ''): string
+    {
+        $name = self::clean($name);
+        if ($name === '') return ROOT . '/public/' . self::ROOTS[0];
+        $new = ROOT . '/public/kits/' . $name;
+        $old = ROOT . '/public/themes/' . $name;
+        return !is_dir($new) && is_dir($old) ? $old : $new;
+    }
+
+    /** Öffentliche Adresse (ohne Versions-Parameter) einer Datei des Kits, z. B. für Schriften, die exakt der URL im CSS entsprechen müssen */
+    public static function url(string $name, string $path = ''): string
+    {
+        $name = self::clean($name);
+        $seg = str_starts_with(self::publicDir($name), ROOT . '/public/themes/') ? 'themes' : 'kits';
+        return base_path() . '/' . $seg . '/' . $name . ($path !== '' ? '/' . ltrim($path, '/') : '');
+    }
+
+    /** Datei eines Fragments für das aktive (bzw. angegebene) Kit nach der Suchreihenfolge – siehe Core\Fragments::find() */
+    public static function fragment(string $name, ?string $kit = null): ?string
+    {
+        return Fragments::find($name, $kit)['file'] ?? null;
+    }
+
+    /** Pfad relativ zur Installation (für Meldungen, Kommentare im Entwicklermodus) */
+    public static function relative(string $path): string
+    {
+        return str_starts_with($path, ROOT . '/') ? substr($path, strlen(ROOT) + 1) : $path;
+    }
+}

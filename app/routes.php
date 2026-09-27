@@ -325,7 +325,7 @@ return function (Router $r): void {
     // Tutorials als Text (app/Admin/tutorials.php, Core\Tutorials); Videos auf der Produkt-Website (config docs_url, Aufnahme tools/tutorials/record.mjs)
     $r->get('/admin/hilfe/tutorials', [Admin\HelpController::class, 'tutorials']);
     $r->get('/admin/hilfe/tutorials/{slug}', [Admin\HelpController::class, 'tutorial']);
-    // Hinweise zu diesem Projekt (Core\Guide): Kit themes/{kit}/guide/*.md + Website {storage}/guide/*.md – Bearbeiten mit system.manage
+    // Hinweise zu diesem Projekt (Core\Guide): Kit kits/{kit}/guide/*.md + Website {storage}/guide/*.md – Bearbeiten mit system.manage
     $gd = Admin\GuideController::class;
     $r->get('/admin/hilfe/projekt', [$gd, 'index']);
     $r->get('/admin/hilfe/projekt/neu', [$gd, 'edit']);

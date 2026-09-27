@@ -28,7 +28,7 @@
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
  *
- * Kits & Erweiterungen (Kits liegen technisch unter themes/{name}/ – daher theme:*; kit:* geht ebenso)
+ * Kits & Erweiterungen (Kits liegen unter kits/{name}/, Rückfall themes/{name}/ – theme:* und kit:* gehen gleichermaßen)
  *   theme:list | kit:list                             Installierte Kits
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
@@ -205,7 +205,7 @@ switch ($cmd) {
 
     case 'i18n:missing':
         // Fehlende Übersetzungen der Verwaltung: __('…') in PHP und t('…') in JS gegen lang/{locale}.php
-        // Mit --site-texts: feste Website-Texte lt('…') gegen lang/site/{locale}.php + themes/{theme}/lang/site/{locale}.php
+        // Mit --site-texts: feste Website-Texte lt('…') gegen lang/site/{locale}.php + kits/{kit}/lang/site/{locale}.php
         // Mit --extension=name: Texte einer Erweiterung (extensions/{name} bzw. Composer-Paket) gegen ihr lang/{locale}.php
         $siteTexts = in_array('--site-texts', $args, true);
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
@@ -220,7 +220,7 @@ switch ($cmd) {
         $have = [];
         foreach ($files as $file) if (is_file($file)) $have += (array) require $file;
         $found = [];
-        $scan = $siteTexts ? '~/(app|themes/' . preg_quote($theme->name, '~') . ')/.*\.php$~' : '~/(app|themes|resources/js)/.*\.(php|js|mjs)$~';
+        $scan = $siteTexts ? '~/(app|(?:kits|themes)/' . preg_quote($theme->name, '~') . ')/.*\.php$~' : '~/(app|kits|themes|resources/js)/.*\.(php|js|mjs)$~';
         $pattern = $siteTexts ? "~\\blt\\('((?:[^'\\\\]|\\\\.)*)'~" : "~(?:__|\\bt)\\('((?:[^'\\\\]|\\\\.)*)'~";
         if ($extDir) $scan = $siteTexts ? '~/(src|views|blocks)/.*\.php$|/extension\.php$~' : '~/(src|views|assets/js)/.*\.(php|js|mjs)$|/extension\.php$~';
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extDir ?: ROOT, FilesystemIterator::SKIP_DOTS));
@@ -372,9 +372,9 @@ switch ($cmd) {
     case 'theme:list':
     case 'kit:list':
         foreach (Core\Theme::available() as $n => $l) {
-            $def = ROOT . "/themes/$n/theme.php";
+            $def = (string) Core\Kit::definitionFile(Core\Kit::dir($n));
             $v = preg_match("~'version'\s*=>\s*'([^']+)'~", (string) file_get_contents($def), $m) ? $m[1] : '–';
-            printf("%-14s %-30s %s\n", $n, $l, $v);
+            printf("%-14s %-30s %-8s %s\n", $n, $l, $v, Core\Kit::relative(Core\Kit::dir($n)) . (Core\Kit::isLegacy($n) ? '  (alter Ordner – nach kits/ verschieben)' : ''));
         }
         break;
 
@@ -389,7 +389,7 @@ switch ($cmd) {
         $name = strtolower(preg_replace('~[^a-z0-9_\-]~i', '', $pos[0] ?? ''));
         $from = $pos[1] ?? 'starter';
         foreach ($args as $a) if (str_starts_with($a, '--from=')) $from = substr($a, 7);
-        if ($name === '' || is_dir(ROOT . "/themes/$name")) { fwrite(STDERR, "Aufruf: kit:create <name> [--from=starter]. Name fehlt oder Kit existiert bereits.\n"); exit(1); }
+        if ($name === '' || Core\Kit::exists($name) || is_dir(Core\Kit::dir($name))) { fwrite(STDERR, "Aufruf: kit:create <name> [--from=starter]. Name fehlt oder Kit existiert bereits.\n"); exit(1); }
         if (!isset(Core\Theme::available()[$from])) { fwrite(STDERR, "Vorlage „{$from}“ nicht gefunden. Installiert: " . implode(', ', array_keys(Core\Theme::available())) . "\n"); exit(1); }
         $copy = function (string $src, string $dst) use (&$copy) {
             if (!is_dir($src)) return;
@@ -399,9 +399,10 @@ switch ($cmd) {
                 is_dir("$src/$f") ? $copy("$src/$f", "$dst/$f") : copy("$src/$f", "$dst/$f");
             }
         };
-        $copy(ROOT . "/themes/$from", ROOT . "/themes/$name");
-        $copy(ROOT . "/public/themes/$from", ROOT . "/public/themes/$name");
-        $def = ROOT . "/themes/$name/theme.php";
+        // Neue Kits immer unter kits/ und public/kits/ – auch wenn die Vorlage noch im alten Ordner themes/ liegt
+        $copy(Core\Kit::dir($from), ROOT . "/kits/$name");
+        $copy(Core\Kit::publicDir($from), ROOT . "/public/kits/$name");
+        $def = (string) Core\Kit::definitionFile(ROOT . "/kits/$name");
         // Bezeichnung und Beschreibung (Kit-Auswahl) – Zeilen mit 4 Leerzeichen Einzug, wie Core\Theme::available() sie liest
         $src = (string) file_get_contents($def);
         $src = preg_replace("~^    'label' => '[^']*'~m", "    'label' => '" . ucfirst($name) . "'", $src, 1);
@@ -410,26 +411,26 @@ switch ($cmd) {
         file_put_contents($def, $src);
         // Präfix der Kit-Funktionen und -Einstellungen umbenennen (vorlage_* → name_*), dazu Paket- und Kit-Namen
         $prefix = str_replace('-', '_', $name) . '_';
-        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ROOT . "/themes/$name", FilesystemIterator::SKIP_DOTS));
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ROOT . "/kits/$name", FilesystemIterator::SKIP_DOTS));
         foreach ($it as $f) {
             if (!in_array($f->getExtension(), ['php', 'mjs', 'js', 'css', 'json', 'md'], true)) continue;
             $src = (string) file_get_contents($f->getPathname());
             $new = preg_replace('~\b' . preg_quote($from, '~') . '_~', $prefix, $src);
-            $new = str_replace(["mycms-theme-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "Kit „{$from}“", "Theme „{$from}“"],
-                ["mycms-theme-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "themes/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
+            $new = str_replace(["mycms-theme-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "kits/$from/", "Kit „{$from}“", "Theme „{$from}“"],
+                ["mycms-theme-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "kits/$name/", "kits/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
             if ($new !== $src) file_put_contents($f->getPathname(), $new);
         }
         echo "Kit „{$name}“ angelegt – Kopie von „{$from}“, Präfix {$from}_ → {$prefix}\n"
-           . "  themes/$name/          theme.php, Blöcke, Templates, Startinhalte, lang/, tools/\n"
-           . "  themes/$name/assets/   CSS/JS-Quellen\n"
-           . "  public/themes/$name/   gebaute Assets (Kopie – nach Änderungen neu bauen)\n\n"
+           . "  kits/$name/          theme.php, Blöcke, Templates, Fragmente, Startinhalte, lang/, tools/\n"
+           . "  kits/$name/assets/   CSS/JS-Quellen\n"
+           . "  public/kits/$name/   gebaute Assets (Kopie – nach Änderungen neu bauen)\n\n"
            . "Nächste Schritte:\n"
-           . "  1. themes/$name/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css\n"
+           . "  1. kits/$name/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css\n"
            . "  2. Bauen:      cd tools && pnpm run build\n"
            . "  3. Testen:     php bin/console site:create <key> <domain> $name   (oder Verwaltung → Grundeinstellungen → Aktives Kit)\n"
-           . "  4. Prüfen:     php bin/console health --site=<key> · php themes/$name/tools/contrast.php (falls vorhanden)\n"
+           . "  4. Prüfen:     php bin/console health --site=<key> · php kits/$name/tools/contrast.php (falls vorhanden)\n"
            . "                 php bin/console i18n:missing en --site-texts --site=<key> · node tools/licenses.mjs\n"
-           . "  Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“; themes/$name/README.md\n";
+           . "  Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“; kits/$name/README.md\n";
         break;
 
     case 'reseed':
@@ -841,7 +842,7 @@ switch ($cmd) {
         exit($res['fails'] ? 1 : 0);
 
     case 'guide:list':
-        // Hinweise zu diesem Projekt (Core\Guide): themes/{kit}/guide/*.md und {storage}/guide/*.md dieser Website
+        // Hinweise zu diesem Projekt (Core\Guide): kits/{kit}/guide/*.md und {storage}/guide/*.md dieser Website
         $notes = Core\Guide::all();
         if (!$notes) echo "  Keine Projekt-Hinweise (Kit „{$app->theme->label()}“, Website „" . site()->key . "“).\n";
         foreach ($notes as $n) {

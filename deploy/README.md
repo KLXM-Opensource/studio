@@ -93,6 +93,24 @@ mit Ziel `production`.
 Alternative ohne CI: `deploy/deploy.sh` lokal ausführen, oder Plesk-Git mit „Zusätzliche Bereitstellungsaktionen“
 (`php bin/console migrate --all && php bin/console health --all`) – dann ohne Releases/Rollback.
 
+## Umstellung themes/ → kits/ (einmalig, bestehende Installationen)
+
+Kits liegen seit 1.0.0 unter `kits/{name}/`, ihre gebauten Assets unter `public/kits/{name}/` (vorher `themes/`,
+`public/themes/`). Der Kern liest beide Orte (`Core\Kit`: erst `kits/`, dann `themes/`), alte Asset-Adressen `/themes/…`
+leitet `public/index.php` mit 301 auf `/kits/…` um, sobald die Datei dort liegt – Apache (`FallbackResource`) und nginx
+(`try_files … /index.php`) brauchen dafür keine eigene Regel.
+
+- **Deploy mit Releases** (`deploy/deploy.sh`): nichts zu tun – jedes Release bringt `kits/` aus dem Repository mit.
+  Eigene Kits, die nur auf dem Server lagen, gehören ins Repository bzw. in `kits/`.
+- **Code direkt im Installationsordner** (ohne Releases, `APP_DIR` – z. B. Plesk-Upload): nach dem Hochladen des neuen
+  Codes einmal `deploy/migrate-kits.sh <ziel>` (vorher gern mit `--dry-run`). Das Skript sichert `themes/` und
+  `public/themes/` nach `storage/backups/themes-<zeit>.tar.gz`, verschiebt sie nach `kits/` bzw. `public/kits/`
+  (nur wenn dort noch nichts liegt; sonst nur fehlende Kits), legt Übergangs-Links `themes → kits` an
+  (`--no-symlink` ohne) und leert den Seiten-Cache (`cache:clear --all`, danach `health --all`).
+  Lokal: `deploy/migrate-kits.sh --local [ordner]`. Mehrfaches Ausführen ändert nichts.
+- Wer beim Hochladen per rsync `--delete` nutzt: `themes/` und `public/themes/` bis zur Umstellung ausnehmen, sonst
+  verschwinden eigene Kits, die nicht im hochgeladenen Stand liegen.
+
 ## Nützliche Befehle auf dem Server
 
 ```bash

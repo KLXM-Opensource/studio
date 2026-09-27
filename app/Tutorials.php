@@ -7,11 +7,11 @@ namespace Core;
  * Tutorials (Handbuch & Hilfe › Tutorials, Übersicht „Hilfe & Einstieg“, php bin/console tutorials:export).
  *
  * Inhalte: app/Admin/tutorials.php (Deutsch) + app/Admin/tutorials.en.php (Englisch, gleiche Kurznamen) + optional
- * themes/{name}/docs/tutorials.php (gleicher Kurzname ersetzt, false entfernt).
+ * kits/{name}/docs/tutorials.php (gleicher Kurzname ersetzt, false entfernt).
  * Die Videos des Kerns werden NICHT mit dem CMS ausgeliefert: Sie liegen auf der Produkt-Website (config 'docs_url',
  * Standard https://studio.klxm.de → /tutorials/{kurzname}, Englisch /en/tutorials/{kurzname}). Die Verwaltung setzt dorthin
  * nur Links (neuer Tab) – keine Einbettung, kein Vorladen, keine Anfrage nach außen. Die Schritte bleiben als Text offline verfügbar.
- * Kits können eigene Videos lokal mitbringen ('video' => '/themes/{name}/tutorials/datei', ohne Endung, unter public/).
+ * Kits können eigene Videos lokal mitbringen ('video' => '/kits/{name}/tutorials/datei', ohne Endung, unter public/).
  */
 final class Tutorials
 {

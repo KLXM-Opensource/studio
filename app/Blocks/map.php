@@ -1,6 +1,6 @@
 <?php
 /**
- * Karte (Kern-Block, vom Theme überschreibbar: themes/{name}/blocks/map.php).
+ * Karte (Kern-Block, vom Theme überschreibbar: kits/{name}/blocks/map.php).
  * @var \Core\Block $b  @var array $d
  */
 $wrap = app()->theme->def['container_class'] ?? 'wrap';

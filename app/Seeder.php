@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Core;
 
-/** Spielt die Startinhalte des aktiven Themes ein (themes/{name}/seed.php). */
+/** Spielt die Startinhalte des aktiven Themes ein (kits/{name}/seed.php). */
 final class Seeder
 {
     public function __construct(private App $app) {}

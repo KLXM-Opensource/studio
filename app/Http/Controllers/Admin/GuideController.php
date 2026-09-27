@@ -65,7 +65,7 @@ final class GuideController extends AdminController
         return $this->back('/admin/hilfe/projekt', 'success', $kit ? __('Anpassung entfernt – es gilt wieder der Hinweis aus dem Kit.') : __('Projekt-Hinweis gelöscht.'));
     }
 
-    /** Bild aus themes/{kit}/guide bzw. {storage}/guide (nur Bildformate, nur Dateiname) */
+    /** Bild aus kits/{kit}/guide bzw. {storage}/guide (nur Bildformate, nur Dateiname) */
     public function image(Request $r, string $file): Response
     {
         $this->auth($r);

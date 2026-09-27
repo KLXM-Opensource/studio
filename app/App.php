@@ -19,6 +19,8 @@ final class App
     public Database $db;
     public Settings $settings;
     public Theme $theme;
+    /** Alias für app()->theme – das aktive Kit (Klasse und Eigenschaft heißen aus Kompatibilitätsgründen weiter „theme“) */
+    public Theme $kit { get => $this->theme; }
     public Session $session;
     public Auth $auth;
     public ?Request $request = null;
@@ -56,7 +58,8 @@ final class App
         // Theme: Grundeinstellung → Vorgabe der Website → erstes installiertes (der Core kennt keine Theme-Namen)
         $theme = (string) $app->settings->get('sys.theme');
         $allowed = $app->site->allowedThemes();
-        $app->theme = new Theme(isset($allowed[$theme]) ? $theme : ($config->get('theme') && isset($allowed[$config->get('theme')]) ? $config->get('theme') : $app->site->defaultTheme()));
+        $cfgKit = (string) ($config->get('kit') ?: $config->get('theme'));   // Konfiguration: 'kit' (neu) oder 'theme'
+        $app->theme = new Theme(isset($allowed[$theme]) ? $theme : ($cfgKit !== '' && isset($allowed[$cfgKit]) ? $cfgKit : $app->site->defaultTheme()));
         $app->session = new Session($config->get('session'));
         $app->auth = new Auth($app->db, $app->session);
         // Erweiterungen dieser Website (config: 'extensions')

@@ -15,8 +15,8 @@
  * Videos: NICHT im CMS – sie liegen auf der Produkt-Website (config 'docs_url', Standard https://studio.klxm.de/tutorials/{kurzname}),
  * aufgenommen mit tools/tutorials/record.mjs (gleiche Kurznamen, Ausgabe TUT_OUT) und von dort mit php bin/console tutorials:export beschrieben.
  *
- * Agenturen ergänzen oder ersetzen Tutorials im Theme: themes/{name}/docs/tutorials.php gibt dasselbe Format zurück
- * (gleicher Kurzname = ersetzen, false = entfernen; eigene Videos mit 'video' => '/themes/{name}/tutorials/datei' ohne Endung).
+ * Agenturen ergänzen oder ersetzen Tutorials im Theme: kits/{name}/docs/tutorials.php gibt dasselbe Format zurück
+ * (gleicher Kurzname = ersetzen, false = entfernen; eigene Videos mit 'video' => '/kits/{name}/tutorials/datei' ohne Endung).
  */
 return [
     'tracks' => [
@@ -524,7 +524,7 @@ return [
             'track' => 'agentur', 'title' => 'Eigenes Kit: Design-Tokens & Export', 'icon' => 'paint-brush', 'level' => 'Fortgeschritten',
             'summary' => 'Design-Tokens im Style-Editor, Export – und wann ein eigenes Kit sinnvoll ist.',
             'goal' => 'Sie wissen, wann der Style-Editor genügt und wann ein eigenes Kit sinnvoll ist – und wie Sie es anlegen.',
-            'prerequisites' => ['Für eigene Kits: Node/pnpm für den Build (nur lokal), Zugriff auf den Ordner <code>themes/</code>.'],
+            'prerequisites' => ['Für eigene Kits: Node/pnpm für den Build (nur lokal), Zugriff auf den Ordner <code>kits/</code>.'],
             'steps' => [
                 'Jeder Wert im Style-Editor ist ein Design-Token (CSS-Variable) aus dem Kit – <code>theme.php → \'design\'</code>.',
                 '<b>Export</b> sichert die Werte als Datei – z. B. um sie in ein eigenes Kit oder eine andere Website zu übernehmen.',
@@ -532,7 +532,7 @@ return [
                 'Aufbau, Tokens, Blöcke und Vorlagen beschreibt die <b>Technische Dokumentation › Kits &amp; Design</b>.',
             ],
             'commands' => "php bin/console kit:create meinprojekt            # Kopie des Start-Kits (--from=basis für eine andere Vorlage)\npnpm --dir tools build                            # Assets des Kits bauen\n# Website auf das Kit umstellen: config/sites/{website}.php → 'kit' => 'meinprojekt'",
-            'tips' => ['Tutorials für Ihr Kit: <code>themes/{name}/docs/tutorials.php</code> ergänzt diese Seite; eigene Videos mit <code>node tools/tutorials/record.mjs</code>.', 'Schritt für Schritt mit dem Start-Kit: Tutorial „Eigenes Kit mit dem Start-Kit“.'],
+            'tips' => ['Tutorials für Ihr Kit: <code>kits/{name}/docs/tutorials.php</code> ergänzt diese Seite; eigene Videos mit <code>node tools/tutorials/record.mjs</code>.', 'Schritt für Schritt mit dem Start-Kit: Tutorial „Eigenes Kit mit dem Start-Kit“.'],
             'pitfalls' => ['Kit-Namen nie im Core verwenden – projektspezifisches gehört ins Kit.'],
             'manual' => [['Kits & Design (Technik)', '/admin/hilfe/technik#themes'], ['Build & Entwicklung (Technik)', '/admin/hilfe/technik#build']],
         ],
@@ -541,7 +541,7 @@ return [
             'track' => 'agentur', 'title' => 'Eigenes Kit mit dem Start-Kit', 'icon' => 'package', 'level' => 'Fortgeschritten',
             'summary' => 'kit:create kopiert das Start-Kit „starter“ – danach anpassen, bauen, testen.',
             'goal' => 'Sie legen für ein Projekt ein eigenes Kit an, das auf dem kleinsten vollständigen Kit aufbaut, und wissen, welche Schritte danach folgen.',
-            'prerequisites' => ['Zugriff auf die Kommandozeile und den Ordner <code>themes/</code> (lokal oder auf dem Server).', 'Node/pnpm für den Build (nur lokal).'],
+            'prerequisites' => ['Zugriff auf die Kommandozeile und den Ordner <code>kits/</code> (lokal oder auf dem Server).', 'Node/pnpm für den Build (nur lokal).'],
             'steps' => [
                 'Eigenes Kit für ein Projekt: <code>kit:create</code> kopiert das Start-Kit und benennt alles um.',
                 'Die Ausgabe nennt die neuen Ordner und die nächsten Schritte: anpassen, bauen, testen, prüfen.',
@@ -549,9 +549,9 @@ return [
                 'Farben, Schrift und Navigation stellen Sie wie gewohnt unter <b>Design</b> ein – die Werte sind Design-Tokens des Kits.',
                 '<code>theme.php</code> ist in Abschnitte § 1–11 gegliedert. Die Anleitung: <b>Technische Dokumentation › Kits &amp; Design</b>.',
             ],
-            'commands' => "php bin/console kit:create kanzlei                 # Kopie von themes/starter, Präfix starter_ → kanzlei_\ncd tools && pnpm run build\nphp bin/console site:create kunde www.kunde.de kanzlei\nphp bin/console health --site=kunde\nphp themes/kanzlei/tools/contrast.php",
+            'commands' => "php bin/console kit:create kanzlei                 # Kopie von kits/starter, Präfix starter_ → kanzlei_\ncd tools && pnpm run build\nphp bin/console site:create kunde www.kunde.de kanzlei\nphp bin/console health --site=kunde\nphp kits/kanzlei/tools/contrast.php",
             'tips' => ['<code>kit:create name --from=basis</code> nimmt ein anderes Kit als Vorlage.', 'Budget der Startseite prüfen: CSS &lt; 30 KB, JS &lt; 8 KB (Start-Kit ≈ 15,7 KB / 0,4 KB).'],
-            'pitfalls' => ['Nach Änderungen an <code>assets/</code> neu bauen – <code>public/themes/{name}/</code> enthält nur die gebauten Dateien.', 'Das Start-Kit selbst nicht ändern – es ist die Vorlage für <code>kit:create</code> und wird mit Updates ersetzt.'],
+            'pitfalls' => ['Nach Änderungen an <code>assets/</code> neu bauen – <code>public/kits/{name}/</code> enthält nur die gebauten Dateien.', 'Das Start-Kit selbst nicht ändern – es ist die Vorlage für <code>kit:create</code> und wird mit Updates ersetzt.'],
             'manual' => [['Eigenes Kit entwickeln (Technik)', '/admin/hilfe/technik#start-kit'], ['Kits & Design (Technik)', '/admin/hilfe/technik#themes'], ['Kommandozeile', '/admin/hilfe/technik#cli']],
         ],
     ],

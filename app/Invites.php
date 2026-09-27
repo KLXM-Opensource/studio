@@ -14,7 +14,7 @@ namespace Core;
  *   oder das einladende Konto gesperrt bzw. gelöscht ist.
  * - Rollen: nie „network“; niemand lädt in eine Rolle ein, die mehr darf als die eigene (assignable()).
  * - E-Mail: HTML + Text (Core\Mailer), Vorlage app/Admin/views/mail/invitation(.txt).php, im Kit überschreibbar unter
- *   themes/{kit}/templates/mail/invitation(.txt).php. Sprache der Einladung (de/en), App-Icon als eingebettetes Bild (CID).
+ *   kits/{kit}/templates/mail/invitation(.txt).php. Sprache der Einladung (de/en), App-Icon als eingebettetes Bild (CID).
  * - Annehmen: /admin/einladung/{token} (InviteController) – Passkey und/oder Passwort, dann Anmeldung.
  */
 final class Invites
@@ -343,7 +343,7 @@ final class Invites
         }
     }
 
-    /** Vorlage: Kit (themes/{kit}/templates/mail/…) vor Core (app/Admin/views/mail/…) */
+    /** Vorlage: Kit (kits/{kit}/templates/mail/…) vor Core (app/Admin/views/mail/…) */
     public static function template(string $file): string
     {
         $kit = app()->theme->path . '/templates/mail/' . $file;

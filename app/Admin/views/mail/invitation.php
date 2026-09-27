@@ -1,6 +1,6 @@
 <?php
 /**
- * E-Mail „Einladung“ (HTML) – Core\Invites::mail(). Im Kit überschreibbar: themes/{kit}/templates/mail/invitation.php
+ * E-Mail „Einladung“ (HTML) – Core\Invites::mail(). Im Kit überschreibbar: kits/{kit}/templates/mail/invitation.php
  * (Text: invitation.txt.php). Tabellen-Layout für Outlook (VML-Schaltfläche), Gmail, Apple Mail; hell/dunkel (color-scheme,
  * prefers-color-scheme, [data-ogsc] für Outlook.com); keine Hintergrundbilder. Alle Werte escaped.
  *

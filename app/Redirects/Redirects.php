@@ -38,7 +38,7 @@ final class Redirects
     public const SET_AUTO = 'sys.redirects_auto';
     public const SET_LOG = 'sys.redirects_log404';
     /** Anfragen, die nie ins 404-Protokoll kommen (Angriffs-Scans, Dateien des Systems) */
-    private const NO_LOG = '~^/(wp-|wordpress|xmlrpc|\.env|\.git|\.well-known|cgi-bin|phpmyadmin|pma|vendor/|assets/|themes/|apple-touch-icon|browserconfig\.xml)|\.(map|php\d?|asp|aspx|jsp|cgi|sql|bak|zip|gz|ini|log)$~i';
+    private const NO_LOG = '~^/(wp-|wordpress|xmlrpc|\.env|\.git|\.well-known|cgi-bin|phpmyadmin|pma|vendor/|assets/|kits/|themes/|apple-touch-icon|browserconfig\.xml)|\.(map|php\d?|asp|aspx|jsp|cgi|sql|bak|zip|gz|ini|log)$~i';
 
     public static function enabled(): bool
     {

@@ -867,7 +867,7 @@ return [
     'Dieses Kit bietet keine Design-Einstellungen an' => 'This kit offers no design settings',
     'Dunkle Farbe wählen: {name}' => 'Choose dark colour: {name}',
     'Dunkler Wert: {name}' => 'Dark value: {name}',
-    'Ergänzen Sie in themes/{name}/theme.php den Schlüssel „design“ mit Gruppen und Tokens, die auf die CSS-Variablen des Kits zeigen, und rufen Sie im Layout design_head() nach dem Kit-CSS sowie design_classes() am <html>-Element auf.' => 'Add the key “design” to themes/{name}/theme.php with groups and tokens pointing to the kit’s CSS variables, and call design_head() after the kit CSS and design_classes() on the <html> element in the layout.',
+    'Ergänzen Sie in kits/{name}/theme.php den Schlüssel „design“ mit Gruppen und Tokens, die auf die CSS-Variablen des Kits zeigen, und rufen Sie im Layout design_head() nach dem Kit-CSS sowie design_classes() am <html>-Element auf.' => 'Add the key “design” to kits/{name}/theme.php with groups and tokens pointing to the kit’s CSS variables, and call design_head() after the kit CSS and design_classes() on the <html> element in the layout.',
     'Export' => 'Export',
     'Import' => 'Import',
     'Farbe wählen: {name}' => 'Choose colour: {name}',

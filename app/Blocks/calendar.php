@@ -1,7 +1,7 @@
 <?php
 /**
  * Kalender: Monatsübersicht (Tabelle mit Wochentagen als Spaltenköpfen) oder Terminliste des Monats (Tage als Überschriften).
- * Blättern über ?monat=JJJJ-MM – funktioniert ohne JavaScript. Kern-Block, vom Theme überschreibbar (themes/{name}/blocks/calendar.php).
+ * Blättern über ?monat=JJJJ-MM – funktioniert ohne JavaScript. Kern-Block, vom Theme überschreibbar (kits/{name}/blocks/calendar.php).
  * @var \Core\Block $b  @var array $d
  */
 use Core\Data\Calendar;
