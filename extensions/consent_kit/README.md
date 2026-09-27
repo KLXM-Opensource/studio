@@ -68,6 +68,9 @@ strengen CSP nur eingeschränkt (bewusst kein `unsafe-inline`).
   Einwilligung in den Dienst und umgekehrt (Ereignis `cms:consent`). Ohne Dienst bleibt das bisherige Verhalten.
 - **Andere Einbettungen**: Block „Externer Inhalt (mit Einwilligung)“ oder
   `<?= consent_embed('google_maps', '<iframe src="https://www.google.com/maps/embed?…" title="Anfahrt"></iframe>', ['title' => 'Anfahrt', 'ratio' => '4/3']) ?>`.
+  Ist der Dienst nicht angelegt oder inaktiv, zeigt der Platzhalter „Dieser Inhalt ist derzeit nicht verfügbar“ ohne
+  Schaltflächen (Name aus der gleichnamigen Vorlage; angemeldete Redakteure sehen, welcher Dienst fehlt). Im Platzhaltertext
+  werden `{privacy}`, `{imprint}` und `{service_privacy}` zu Links.
 - **Eigene Skripte**: `<script type="text/plain" data-consent="matomo" data-src="/pfad/datei.js"></script>` –
   Inline-Inhalt wird wegen der CSP nicht ausgeführt.
 - **Karten** des Kerns (MapLibre über den eigenen Proxy) brauchen keine Einwilligung.
@@ -75,7 +78,8 @@ strengen CSP nur eingeschränkt (bewusst kein `unsafe-inline`).
 
 ## JavaScript
 
-`window.cmsConsent` (Alias `window.ConsentKit` wie im AddOn): `has(key)`, `accepted()`, `open()`, `withdraw()`,
+`window.cmsConsent` (Alias `window.ConsentKit` wie im AddOn): `has(key)`, `accepted()`, `accept(key|keys)` (Einwilligung für
+einzelne Dienste wie „… immer erlauben“, für eigene 2-Klick-Lösungen), `open()`, `withdraw()`,
 `reset()`, `onChange(fn)`, `embed(provider)`, `allowEmbed(provider, on)`. Ereignisse auf `document`:
 `consentkit:ready`, `consentkit:change` (`detail: {accepted, rejected, action}`), `cms:consent`. Mit Consent Mode
 zusätzlich `consentkit_ready`/`consentkit_change` im `dataLayer`.

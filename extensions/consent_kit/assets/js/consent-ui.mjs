@@ -10,6 +10,13 @@ const d = document;
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const safeUrl = u => (/^https?:\/\//i.test(u) || /^[/?#]/.test(u) ? u : '#');
 const fill = (t, v) => String(t ?? '').replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m));
+/** Wie fill(), aber als HTML: Text maskiert, Platzhalter aus links ({label, url, external}) werden zu <a> – ohne url nur die Beschriftung */
+const fillHtml = (t, v, links) => String(t ?? '').split(/(\{\w+\})/).map(part => {
+  const l = /^\{\w+\}$/.test(part) ? links[part.slice(1, -1)] : null;
+  if (!l) return esc(fill(part, v));
+  if (!l.url) return esc(l.label);
+  return `<a href="${esc(safeUrl(l.url))}"${l.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(l.label)}</a>`;
+}).join('');
 const cookieIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12.3A9 9 0 1 1 11.7 3a4 4 0 0 0 4.6 4.7A4 4 0 0 0 21 12.3Z"/><path d="M8.5 9.5h.01M8 14.5h.01M12.5 12.5h.01M13 17h.01M16.5 14h.01"/></svg>';
 const closeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
@@ -301,19 +308,29 @@ export function mount(api) {
       if (this.shadowRoot) return;
       const key = this.getAttribute('service') || '';
       const s = services.get(key);
-      const name = s?.name || key;
+      const name = s?.name || this.getAttribute('name') || key;
       const label = this.getAttribute('label');
       const ratio = (this.getAttribute('ratio') || '').match(/^(\d{1,2})\s*\/\s*(\d{1,2})$/);
       if (ratio) this.style.setProperty('--ck-embed-ratio', ratio[1] + ' / ' + ratio[2]);   // CSSOM – kein style-Attribut
-      const once = !s?.x;   // Dienste mit fremden Skript-Hosts brauchen die Einwilligung (CSP) – kein „einmal laden“
-      const root = shadow(this, `<div class="placeholder" part="placeholder" role="group" aria-labelledby="ck-e">
-          <h3 id="ck-e">${esc(fill(t.embed_title, { name }))}${label ? ': ' + esc(label) : ''}</h3>
-          <p>${esc(fill(t.embed_text, { name }))}</p>
+      const heading = `<h3 id="ck-e">${esc(fill(t.embed_title, { name }))}${label ? ': ' + esc(label) : ''}</h3>`;
+      let body;
+      if (s) {
+        const links = { privacy: { label: t.privacy_policy }, imprint: { label: t.imprint } };
+        for (const l of cfg.links) if (l.key) links[l.key] = l;
+        links.service_privacy = { label: fill(t.privacy_policy_of, { name }), url: s.privacyUrl, external: true };
+        const once = !s.x;   // Dienste mit fremden Skript-Hosts brauchen die Einwilligung (CSP) – kein „einmal laden“
+        body = `<p>${fillHtml(t.embed_text, { name }, links)}</p>
           <div class="buttons${once ? '' : ' two'}">
             ${once ? `<button type="button" class="btn" part="button" data-action="once">${esc(t.embed_once)}</button>` : ''}
-            ${s && !s.required ? `<button type="button" class="btn" part="button" data-action="always">${esc(fill(t.embed_always, { name }))}</button>` : ''}
+            ${!s.required ? `<button type="button" class="btn" part="button" data-action="always">${esc(fill(t.embed_always, { name }))}</button>` : ''}
             <button type="button" class="btn" part="button" data-action="settings">${esc(t.embed_settings)}</button>
-          </div></div><slot></slot>`);
+          </div>`;
+      } else {
+        // Nicht angelegt oder inaktiv: ohne Dienst fehlen die Angaben im Hinweis und in der Datenschutzerklärung – nichts ladbar
+        console.warn(`[consent-kit] <consent-embed service="${key}">: Dienst fehlt oder ist auf dieser Domain inaktiv`);
+        body = `<p>${esc(t.embed_unavailable)}</p>${cfg.editorHint ? `<p class="notice">${esc(cfg.editorHint.replace('{0}', key))}</p>` : ''}`;
+      }
+      const root = shadow(this, `<div class="placeholder" part="placeholder" role="group" aria-labelledby="ck-e">${heading}${body}</div><slot></slot>`);
       root.addEventListener('click', e => {
         const a = e.target.closest('button')?.dataset.action;
         if (a === 'once') this.load(true);
@@ -326,7 +343,7 @@ export function mount(api) {
     }
     disconnectedCallback() { d.removeEventListener('consentkit:change', this.listener); }
     load(focus) {
-      if (this.hasAttribute('loaded')) return;
+      if (this.hasAttribute('loaded') || !services.get(this.getAttribute('service') || '')) return;
       const tpl = this.querySelector(':scope > template');
       if (!tpl) return;
       this.setAttribute('loaded', '');

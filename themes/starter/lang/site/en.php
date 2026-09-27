@@ -36,6 +36,7 @@ return [
     'Startseite' => 'Home',
     'Video' => 'Video',
     'Video abspielen' => 'Play video',
+    '{provider}-Video laden' => 'Load {provider} video',
     'Vielleicht hat sich die Adresse geändert. Über die Startseite, das Menü oder die Suche finden Sie weiter.' => 'The address may have changed. The home page, the menu or the search will help you find your way.',
     'Wir sind gleich wieder da.' => 'We will be right back.',
     'Zum Inhalt springen' => 'Skip to content',

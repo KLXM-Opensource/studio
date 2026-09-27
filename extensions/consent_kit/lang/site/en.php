@@ -17,6 +17,8 @@ return [
     'Cookie' => 'Cookie',
     'Cookie-Einstellungen' => 'Cookie settings',
     'Cookie-Einstellungen öffnen' => 'Open cookie settings',
+    'Dieser Inhalt ist derzeit nicht verfügbar.' => 'This content is currently unavailable.',
+    'Nur für Redaktion sichtbar: Der Dienst „{0}“ ist nicht angelegt oder auf dieser Domain inaktiv. Anlegen bzw. aktivieren unter Verwaltung → Cookie-Einwilligung.' => 'Visible to editors only: the service “{0}” does not exist or is inactive on this domain. Create or activate it under Administration → Cookie consent.',
     'Cookie-Einwilligung' => 'Cookie consent',
     'Cookies und Speichereinträge' => 'Cookies and storage entries',
     'Datenschutz-Einstellungen' => 'Privacy settings',

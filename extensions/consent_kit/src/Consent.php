@@ -54,6 +54,10 @@ final class Consent
         $b = Compiler::build();
         if (!self::needed($b)) return $html;
         $cfg = self::config($b, $ctx['page'] ?? null);
+        // Nur für Angemeldete (deren Seiten nie im Cache landen): Platzhalter nennen Dienste, die fehlen oder inaktiv sind
+        if (!empty($ctx['loggedIn']) && can('consent.manage')) {
+            $cfg['editorHint'] = Compiler::t('Nur für Redaktion sichtbar: Der Dienst „{0}“ ist nicht angelegt oder auf dieser Domain inaktiv. Anlegen bzw. aktivieren unter Verwaltung → Cookie-Einwilligung.', $b['lang']);
+        }
         $tags = '<script type="application/json" id="cms-consent-config">'
             . json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . "</script>\n"
             . '<script src="' . e(self::asset('js/consent.js')) . '" defer></script>' . "\n";
@@ -78,7 +82,7 @@ final class Consent
         $quiet = false;
         foreach (['privacy' => 'Datenschutzerklärung', 'imprint' => 'Impressum'] as $k => $label) {
             [$href, $pageId] = self::legal($k);
-            if ($href) $links[] = ['label' => $t($label), 'url' => $href];
+            if ($href) $links[] = ['key' => $k, 'label' => $t($label), 'url' => $href];
             if ($pageId && $page && (int) ($page['id'] ?? 0) === $pageId) $quiet = true;
         }
         $groups = array_map(function ($g) {
@@ -145,6 +149,7 @@ final class Consent
             'embed_title' => $t('Externer Inhalt von {name}'),
             'embed_text' => $t('Zum Anzeigen dieses Inhalts werden Daten an {name} übertragen. Details finden Sie in den Cookie-Einstellungen.'),
             'embed_once' => $t('Inhalt einmal laden'), 'embed_always' => $t('{name} immer erlauben'), 'embed_settings' => $t('Cookie-Einstellungen öffnen'),
+            'embed_unavailable' => $t('Dieser Inhalt ist derzeit nicht verfügbar.'), 'imprint' => $t('Impressum'),
             'new_tab' => $t('(öffnet in neuem Tab)'),
         ];
     }
@@ -231,7 +236,8 @@ final class Consent
         if (!self::enabled()) return '';
         $b = Compiler::build();
         $c = $b['services'][$service] ?? null;
-        if (!$c) return '';
+        // Nicht angelegt oder inaktiv: Platzhalter „nicht verfügbar“ ohne Inhalt – Name aus der gleichnamigen Vorlage
+        if (!$c) return '<consent-embed service="' . e($service) . '"' . (($p = Presets::get($service)) ? ' name="' . e((string) $p['name']) . '"' : '') . '></consent-embed>';
         $title = trim((string) ($o['title'] ?? ''));
         $ratio = preg_match('~^\d{1,2}\s*/\s*\d{1,2}$~', (string) ($o['ratio'] ?? '')) ? (string) $o['ratio'] : '16/9';
         $link = trim((string) ($o['link'] ?? ''));

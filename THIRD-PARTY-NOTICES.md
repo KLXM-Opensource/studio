@@ -42,7 +42,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 ## 0. Ported code in extensions (Bundled)
 
-- **FriendsOfREDAXO/consent_kit** (https://github.com/FriendsOfREDAXO/consent_kit, 1.0.0-beta3) – MIT,
+- **FriendsOfREDAXO/consent_kit** (https://github.com/FriendsOfREDAXO/consent_kit, 1.0.0-beta3, Korrekturen bis 1.0.0) – MIT,
   © 2026 Friends Of REDAXO, KLXM Crossmedia GmbH. Service templates (`extensions/consent_kit/presets/*.json`), the web
   component and parts of the PHP logic are ported into `extensions/consent_kit` (MIT as a whole). The MIT
   license text and the list of ported parts are in `extensions/consent_kit/LICENSE` and

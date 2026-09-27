@@ -71,6 +71,7 @@ return [
     'Übersicht' => 'Overview',
     'Video' => 'Video',
     'Video abspielen' => 'Play video',
+    '{provider}-Video laden' => 'Load {provider} video',
     'Vielleicht hat sich die Adresse geändert oder der Beitrag ist ins Archiv gewandert. Über die Startseite, die Suche oder eine Rubrik finden Sie weiter.' => 'The address may have changed or the article may have moved to the archive. The home page, the search or a section will help you find your way.',
     'Von' => 'By',
     'von' => 'from',

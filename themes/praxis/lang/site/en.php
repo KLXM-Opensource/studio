@@ -126,6 +126,7 @@ return [
     'Bild · {ratio} · min. {px} px' => 'Image · {ratio} · min. {px} px',
     'Video' => 'Video',
     'Video abspielen' => 'Play video',
+    '{provider}-Video laden' => 'Load {provider} video',
     '{title} – Video von {provider} laden und abspielen' => '{title} – load and play video from {provider}',
     'Das Video wird von {provider} ({company}) bereitgestellt. Erst beim Abspielen werden Daten wie Ihre IP-Adresse an {provider} übertragen und dort ggf. auch außerhalb der EU verarbeitet.' => 'This video is provided by {provider} ({company}). Only when you play it is data such as your IP address transferred to {provider}, where it may also be processed outside the EU.',
     'Mehr in der {link}.' => 'Find out more in our {link}.',

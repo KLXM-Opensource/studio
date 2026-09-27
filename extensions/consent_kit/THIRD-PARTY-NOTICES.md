@@ -2,7 +2,7 @@
 
 ## FriendsOfREDAXO/consent_kit (MIT) – ported
 
-- Source: https://github.com/FriendsOfREDAXO/consent_kit (1.0.0-beta3, commit f4777e7), developed by KLXM Crossmedia
+- Source: https://github.com/FriendsOfREDAXO/consent_kit (1.0.0-beta3, commit f4777e7; fixes up to 1.0.0, commit c5f31ce), developed by KLXM Crossmedia
   GmbH for Friends Of REDAXO.
 - License: MIT – © 2026 Friends Of REDAXO, KLXM Crossmedia GmbH. Full text in `LICENSE` of this extension.
 - Ported and adapted: 38 service templates (`presets/*.json`, unchanged except that they are loaded by

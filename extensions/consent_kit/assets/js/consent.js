@@ -136,6 +136,14 @@
   const embedKey = p => (cfg.embeds || {})[p] || null;
   const api = {
     has, accepted,
+    /** Einwilligung für einzelne Dienste erteilen wie „… immer erlauben“ am Platzhalter (Protokoll: embed) – für eigene
+     *  2-Klick-Lösungen ohne <consent-embed>. Unbekannte und notwendige Schlüssel werden ignoriert; false, wenn keiner bleibt. */
+    accept(keys) {
+      const add = [].concat(keys).filter(k => optional.some(s => s.key === k));
+      if (!add.length) return false;
+      if (add.some(k => !has(k))) ui().then(u => u && u.decide([...new Set([...accepted(), ...add])], 'embed'));
+      return true;
+    },
     open: (view = 'settings') => ui().then(u => u && u.open(view)),
     withdraw: () => ui().then(u => u && u.withdraw()),
     reset: () => ui().then(u => u && u.reset()),

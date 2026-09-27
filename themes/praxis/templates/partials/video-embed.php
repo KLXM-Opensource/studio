@@ -36,10 +36,6 @@ $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) :
          sizes="(min-width: 1080px) 1200px, 100vw" width="<?= $meta['width'] ?>" height="<?= $meta['height'] ?>" alt="" loading="lazy" decoding="async">
   <?php endif; ?>
   <div class="vembed__gate">
-    <button type="button" class="vembed__play" data-embed-play aria-label="<?= e(lt('{title} – Video von {provider} laden und abspielen', ['title' => $title, 'provider' => $prov['label']])) ?>">
-      <span class="vembed__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
-      <span><?= e(lt('Video abspielen')) ?></span>
-    </button>
     <div class="vembed__info">
       <?php if ($meta['title'] || $label): ?><p class="vembed__title"><?= e($title) ?></p><?php endif; ?>
       <p class="vembed__text"><?= e(!empty($note) ? $note : lt('Das Video wird von {provider} ({company}) bereitgestellt. Erst beim Abspielen werden Daten wie Ihre IP-Adresse an {provider} übertragen und dort ggf. auch außerhalb der EU verarbeitet.', ['provider' => $prov['label'], 'company' => $prov['company']])) ?>
@@ -49,6 +45,10 @@ $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) :
         <a class="vembed__ext" href="<?= e(Embeds::watchUrl($v)) ?>" target="_blank" rel="noopener"><?= e(lt('Auf {provider} ansehen', ['provider' => $prov['label']])) ?> ↗</a>
       </div>
     </div>
+    <button type="button" class="vembed__play" data-embed-play>
+      <span class="vembed__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+      <span><?= e(lt('{provider}-Video laden', ['provider' => $prov['label']])) ?><span class="sr-only">: <?= e($title) ?></span></span>
+    </button>
   </div>
 </div>
 <?php else: ?>

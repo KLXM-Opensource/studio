@@ -6,7 +6,7 @@
     <tr><td>Daten (je Website)</td><td><code>consent_services</code> (Code-Felder, items/events/variants/hosts/csp als JSON), <code>consent_revisions</code> (Stand + Schnappschuss je Domain), <code>consent_log</code>; Einstellungen <code>consent.settings</code>, <code>consent.design</code>, <code>consent.epoch</code></td></tr>
     <tr><td>Domains</td><td><code>main</code> und <code>landing:{id}</code> (Core\Landings) – Matrix je Dienst, Varianten je Domain/Sprache, Protokoll und Stand je Domain</td></tr>
     <tr><td>Kern-Schnittstellen</td><td><code>Extension::htmlFilter()</code> (Konfiguration + Skript vor dem Seiten-Cache), <code>Extension::csp()</code> → <code>Extensions::cspSources()</code> → <code>SiteController::csp()</code> (je Anfrage, auch bei Cache-Treffern; nur Hosts, nie Schlüsselwörter), <code>Extension::footerLinks()</code> → <code>footer_links()</code> in den Fußbereichen der Kits</td></tr>
-    <tr><td>Helfer</td><td><code>consent_settings_link()</code>, <code>consent_embed($dienst, $html, ['title' =&gt; …, 'ratio' =&gt; '4/3'])</code>, <code>consent_has($dienst)</code>; Block <code>consent_embed</code>; CLI <code>consent:purge [--days=N]</code>, <code>consent:status</code></td></tr>
+    <tr><td>Helfer</td><td><code>consent_settings_link()</code>, <code>consent_embed($dienst, $html, ['title' =&gt; …, 'ratio' =&gt; '4/3'])</code>, <code>consent_has($dienst)</code>; JS <code>cmsConsent.accept(dienst)</code> für eigene 2-Klick-Lösungen; Block <code>consent_embed</code>; CLI <code>consent:purge [--days=N]</code>, <code>consent:status</code></td></tr>
   </table>
 
   <h3>CSP ohne Inline-Code</h3>

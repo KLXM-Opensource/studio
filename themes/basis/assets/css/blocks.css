@@ -157,8 +157,8 @@
 .vembed video,.vembed__frame,.vembed__poster{position:absolute;inset:0;width:100%;height:100%;max-width:none;border:0;object-fit:cover}
 .vembed picture{display:contents}
 .vembed__gate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:clamp(16px,3vw,28px);background:linear-gradient(180deg,color-mix(in srgb,var(--b-dark-sec) 10%,transparent),color-mix(in srgb,var(--b-dark-sec) 40%,transparent) 45%,color-mix(in srgb,var(--b-dark-sec) 92%,transparent))}
-.vembed__play{position:absolute;left:50%;top:42%;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 24px 0 8px;border:0;border-radius:999px;background:var(--b-on-dark);color:var(--b-dark-sec);font-weight:700;cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 20px 40px -18px var(--b-shade);transition:transform .2s}
-.vembed__play:hover{transform:translate(-50%,-50%) scale(1.03)}
+.vembed__play{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 24px 0 8px;border:0;border-radius:999px;background:var(--b-on-dark);color:var(--b-dark-sec);font-weight:700;cursor:pointer;box-shadow:0 20px 40px -18px var(--b-shade);transition:transform .2s}
+.vembed__play:hover{transform:scale(1.03)}
 .vembed__play:focus-visible{outline:3px solid var(--b-on-dark);outline-offset:3px}
 .vembed__icon{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--b-a);color:var(--b-a-on)}
 .vembed__info{max-width:48em;font-size:.8125rem;line-height:1.5}
@@ -166,6 +166,9 @@
 .vembed__row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;margin-top:8px}
 .vembed__remember{display:inline-flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
 .vembed__remember input{width:18px;height:18px;margin:0;accent-color:var(--b-a)}
+/* Zwei-Klick-Hinweis im Fluss: Der Kasten wächst mit dem Text (Seitenverhältnis = Mindesthöhe, overflow:clip statt hidden), nichts wird abgeschnitten oder ausgeblendet; die Schaltfläche steht nach dem Hinweis. */
+.vembed[data-embed]:not(.is-loaded){display:flex;flex-direction:column;overflow:clip}
+.vembed[data-embed]:not(.is-loaded) .vembed__gate{position:relative;inset:auto;flex:1 0 auto}
 .vembed--empty{display:grid;place-items:center;padding:24px;background:var(--b-surface);color:var(--b-muted);text-align:center}
 .vembed__revoke{margin-top:10px;color:var(--b-muted);font-size:.8125rem}
 .vembed__revoke button{padding:0;border:0;background:none;color:var(--b-link);font-weight:600;text-decoration:underline;cursor:pointer}
@@ -173,8 +176,6 @@
   .vembed:not(.is-loaded,.vembed--empty){display:flex;flex-direction:column;aspect-ratio:auto}
   .vembed:not(.is-loaded) .vembed__poster{position:relative;aspect-ratio:16/9;height:auto}
   .vembed__gate{position:relative;inset:auto;background:var(--b-dark-sec)}
-  .vembed__play{position:relative;left:auto;top:auto;align-self:flex-start;transform:none}
-  .vembed__play:hover{transform:none}
 }
 
 /* ---------------------------------------------------------------- Öffnungszeiten (Kontakt, Offline-Seite) */

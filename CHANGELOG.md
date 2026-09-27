@@ -63,6 +63,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   CSP (`sandbox`) und `nosniff` im Medienordner (Apache), nginx-Zeile im Handbuch (Technik → Medien, Installation).
 - Selbsttest `php bin/console svg:selftest` (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma).
 
+### Videos (YouTube/Vimeo): 2-Klick-Hinweis immer vollständig lesbar
+- In allen Kits steht der Datenschutzhinweis im Fluss vor der Schaltfläche; der Kasten wächst mit (Seitenverhältnis als
+  Mindesthöhe, `overflow:clip`), statt Text abzuschneiden. Hinweis, „künftig direkt laden“ und „Auf … ansehen“ werden bei
+  schmalen Spalten nicht mehr ausgeblendet (vorher: Fluid/Modern nur noch Play-Button). Schaltfläche sichtbar
+  „YouTube-Video laden“ statt „Video abspielen“.
+- Erweiterung consent_kit 1.0.1: Korrekturen aus FriendsOfREDAXO/consent_kit 1.0.0 übernommen (Platzhalter auf schmalen
+  Schirmen, fehlende Dienste nicht mehr ladbar, Links im Platzhaltertext, `cmsConsent.accept()`).
+
 ### Videos als „dekorativ (ohne Aussage)“ markieren
 - Das Merkmal `media.decorative` gibt es jetzt auch für **Videos** (stumme Hintergrund-Schleifen, Bühnen-Clips,
   Stimmungs-Animationen): Checkbox beim Hochladen, rechts in der Mediathek und unter „Alle Details“ mit Hinweis

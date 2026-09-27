@@ -28,10 +28,6 @@ $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) :
   <?php elseif ($meta['poster']): ?><img class="vembed__poster" src="<?= e($meta['poster']) ?>" srcset="<?= e($meta['poster_small']) ?> 640w, <?= e($meta['poster']) ?> 1280w" sizes="(min-width: 1080px) 1200px, 100vw" width="<?= (int) $meta['width'] ?>" height="<?= (int) $meta['height'] ?>" alt="" loading="lazy" decoding="async">
   <?php endif; ?>
   <div class="vembed__gate">
-    <button type="button" class="vembed__play" data-embed-play>
-      <span class="vembed__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
-      <span><?= e(lt('Video abspielen')) ?><span class="sr-only">: <?= e($title) ?> (<?= e($prov['label']) ?>)</span></span>
-    </button>
     <div class="vembed__info">
       <p><?= e(lt('Beim Abspielen lädt {provider} ({company}) das Video. Dabei werden Daten wie Ihre IP-Adresse an {provider} übertragen.', ['provider' => $prov['label'], 'company' => $prov['company']])) ?>
         <a href="<?= e(editorial_privacy_url()) ?>"><?= e(lt('Datenschutz')) ?></a></p>
@@ -40,6 +36,10 @@ $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) :
         <a class="vembed__ext" href="<?= e(Embeds::watchUrl($v)) ?>" target="_blank" rel="noopener"><?= e(lt('Auf {provider} ansehen', ['provider' => $prov['label']])) ?><span class="sr-only"> <?= e(lt('(öffnet in neuem Tab)')) ?></span></a>
       </p>
     </div>
+    <button type="button" class="vembed__play" data-embed-play>
+      <span class="vembed__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+      <span><?= e(lt('{provider}-Video laden', ['provider' => $prov['label']])) ?><span class="sr-only">: <?= e($title) ?> (<?= e($prov['label']) ?>)</span></span>
+    </button>
   </div>
 </div>
 <?php else: ?>

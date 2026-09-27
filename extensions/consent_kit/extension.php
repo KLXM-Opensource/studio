@@ -51,7 +51,7 @@ if (!function_exists('consent_has')) {
 return [
     'name' => 'consent_kit',
     'label' => 'Consent-Kit (Cookie-Einwilligung)',
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'requires' => '>=1.0.0',
     'description' => 'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).',
     'author' => 'KLXM Crossmedia GmbH and contributors',

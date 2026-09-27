@@ -50,6 +50,7 @@ return [
     'Schritt {nr}:' => 'Step {nr}:',
     'Video' => 'Video',
     'Video abspielen' => 'Play video',
+    '{provider}-Video laden' => 'Load {provider} video',
     'bis {zeit} Uhr' => 'until {zeit}',
     'heute' => 'today',
     'morgen' => 'tomorrow',

@@ -21,8 +21,11 @@
 .vembed__remember{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 .vembed__revoke{margin-top:.5rem;color:var(--f-muted);font-size:var(--f-t-2)}
 .vembed__revoke button{padding:0;border:0;background:none;color:var(--f-link);text-decoration:underline;cursor:pointer}
+/* Zwei-Klick-Hinweis im Fluss: Der Kasten wächst mit dem Text (Seitenverhältnis = Mindesthöhe, overflow:clip statt hidden), nichts wird abgeschnitten oder ausgeblendet; die Schaltfläche steht nach dem Hinweis. */
+.vembed[data-embed]:not(.is-loaded){display:flex;flex-direction:column;overflow:clip}
+.vembed[data-embed]:not(.is-loaded) .vembed__gate{position:relative;inset:auto;flex:1 0 auto}
 .vembed--empty{display:grid;place-items:center;border:1px dashed var(--f-line-strong);background:var(--f-surface);color:var(--f-muted)}
-@container (max-width:30rem){.vembed__info{display:none}}
+@container (max-width:30rem){.vembed__info{font-size:.75rem}}
 /* Transkript und Untertitel aus der Mediathek (Core\MediaTracks) */
 .media-transcript{margin-top:var(--f-s-s);border:1px solid var(--f-line);border-radius:var(--f-radius);background:var(--f-card)}
 .media-transcript summary{display:flex;align-items:center;min-height:2.75rem;padding:0 1rem;color:var(--f-ink);font-weight:600;cursor:pointer}

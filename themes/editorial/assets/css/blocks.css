@@ -105,7 +105,7 @@
 .vembed picture{display:contents}
 .img-gray .vembed__poster{filter:grayscale(1)}
 .vembed__gate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:clamp(16px,3vw,28px);background:linear-gradient(180deg,transparent 30%,color-mix(in srgb,var(--e-night) 92%,transparent))}
-.vembed__play{position:absolute;left:50%;top:42%;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 22px 0 8px;border:0;border-radius:var(--e-radius);background:var(--e-on-dark);color:var(--e-night);font:650 1rem var(--e-font);cursor:pointer;transform:translate(-50%,-50%)}
+.vembed__play{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 22px 0 8px;border:0;border-radius:var(--e-radius);background:var(--e-on-dark);color:var(--e-night);font:650 1rem var(--e-font);cursor:pointer}
 .vembed__play:focus-visible{outline:3px solid var(--e-on-dark);outline-offset:3px}
 .vembed__icon{display:grid;place-items:center;width:40px;height:40px;border-radius:var(--e-radius);background:var(--e-a);color:var(--e-a-on)}
 .vembed__info{max-width:48em;font-size:.8125rem;line-height:1.5}
@@ -113,6 +113,9 @@
 .vembed__row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;margin-top:8px}
 .vembed__remember{display:inline-flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
 .vembed__remember input{width:18px;height:18px;margin:0;accent-color:var(--e-a)}
+/* Zwei-Klick-Hinweis im Fluss: Der Kasten wächst mit dem Text (Seitenverhältnis = Mindesthöhe, overflow:clip statt hidden), nichts wird abgeschnitten oder ausgeblendet; die Schaltfläche steht nach dem Hinweis. */
+.vembed[data-embed]:not(.is-loaded){display:flex;flex-direction:column;overflow:clip}
+.vembed[data-embed]:not(.is-loaded) .vembed__gate{position:relative;inset:auto;flex:1 0 auto}
 .vembed--empty{display:grid;place-items:center;padding:24px;background:var(--e-surface);color:var(--e-muted);text-align:center}
 .vembed__revoke{margin-top:10px;color:var(--e-muted);font-size:.8125rem}
 .vembed__revoke button{padding:0;border:0;background:none;color:var(--e-link);font-weight:600;text-decoration:underline;cursor:pointer}
@@ -120,7 +123,6 @@
   .vembed:not(.is-loaded,.vembed--empty){display:flex;flex-direction:column;aspect-ratio:auto}
   .vembed:not(.is-loaded) .vembed__poster{position:relative;aspect-ratio:16/9;height:auto}
   .vembed__gate{position:relative;inset:auto;background:var(--e-night)}
-  .vembed__play{position:relative;left:auto;top:auto;align-self:flex-start;transform:none}
 }
 .media-transcript{margin-top:12px;border-top:1px solid var(--e-ink);border-bottom:1px solid var(--e-line);color:var(--e-ink)}
 .media-transcript summary{display:flex;align-items:center;gap:10px;min-height:48px;font:500 .8125rem var(--e-font-mono);letter-spacing:.04em;text-transform:uppercase;cursor:pointer;list-style:none}

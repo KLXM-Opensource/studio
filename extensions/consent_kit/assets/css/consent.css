@@ -161,14 +161,21 @@ input:focus-visible + .track { outline: 3px solid var(--_accent); outline-offset
 .trigger svg { width: 1.4rem; height: 1.4rem; }
 
 /* <consent-embed> */
+/* Mindesthöhe am Host, nicht am Platzhalter: dort würde sie über aspect-ratio zur Mindestbreite (14rem × 16/9 ≈ 398px)
+   und schöbe den Platzhalter auf schmalen Schirmen über den Rand. Ohne overflow wächst der Platzhalter mit seinem Inhalt,
+   statt ihn oben abzuschneiden. */
+:host(consent-embed:not([loaded])) { display: flex; flex-direction: column; min-height: var(--ck-embed-min-height, 14rem); }
 .placeholder {
+  flex: 1 0 auto; min-width: 0;
   display: flex; flex-direction: column; justify-content: center; gap: var(--_gap);
-  aspect-ratio: var(--ck-embed-ratio, 16 / 9); min-height: var(--ck-embed-min-height, 14rem); padding: var(--_space);
-  color: var(--_text); background: var(--_bg); border: var(--_bw) solid var(--_border); border-radius: var(--_radius); overflow: auto;
+  aspect-ratio: var(--ck-embed-ratio, 16 / 9); padding: var(--_space);
+  color: var(--_text); background: var(--_bg); border: var(--_bw) solid var(--_border); border-radius: var(--_radius);
 }
+.placeholder a { color: var(--_accent); text-underline-offset: .15em; }
 .placeholder > * { width: min(36rem, 100%); margin-inline: auto; }
 .placeholder h3 { font-size: 1.05em; }
 .placeholder p { margin: 0; font-size: .925em; color: var(--_muted); }
+.placeholder .notice { border-style: dashed; }
 :host([loaded]) .placeholder { display: none; }
 :host(consent-embed) { display: block; }
 /* Geladener Inhalt (light DOM): iframe im Format des Platzhalters */
