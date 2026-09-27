@@ -67,6 +67,7 @@ return [
     'Bild {n} vergrößern' => 'Enlarge image {n}',
     'Bilder' => 'Images',
     'Karussell' => 'carousel',
+    'Bildfolge: {title}' => 'Slideshow: {title}',
     'Folie' => 'slide',
     '{n} von {total}' => '{n} of {total}',
     'Folie {n}' => 'Slide {n}',

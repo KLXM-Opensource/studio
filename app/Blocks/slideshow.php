@@ -4,6 +4,8 @@
  * Grundlage ist CSS-Scroll-Snap (funktioniert ohne JavaScript: wischen/scrollen); js/media.mjs ergänzt Pfeile, Punkte,
  * Tastatur, Überblenden und – nur wenn eingeschaltet – automatisches Weiterblättern mit Pause-Schaltfläche.
  * Muster: WAI-ARIA APG „Carousel“ (region + aria-roledescription, Folien als group „n von m“).
+ * Name der Region: „Bildfolge: {Überschrift}“ – nicht die Überschrift selbst, denn der Abschnitt trägt sie schon als Namen
+ * (axe landmark-unique: zwei Regionen mit gleichem Namen).
  * @var \Core\Block $b  @var array $d
  */
 use Core\MediaBlocks;
@@ -39,7 +41,7 @@ $icon = fn(string $p) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-h
 <?php endif; ?>
   <?php if ($slides): ?>
   <div class="cms-slider cms-slider--<?= $fade ? 'fade' : 'slide' ?> cms-slider--h-<?= e(str_replace(':', '-', $height)) ?><?= $bleed ? ' cms-slider--bleed' : '' ?>"
-       role="region" aria-roledescription="<?= e(lt('Karussell')) ?>" aria-label="<?= e($title !== '' ? $title : lt('Bilder')) ?>"
+       role="region" aria-roledescription="<?= e(lt('Karussell')) ?>" aria-label="<?= e($title !== '' ? lt('Bildfolge: {title}', ['title' => strip_emphasis($title)]) : lt('Bilder')) ?>"
        <?= is_editing() ? '' : 'data-cms-slider="' . e((string) json_encode($cfg + $texts, JSON_UNESCAPED_UNICODE)) . '"' ?>>
     <?php if ($cfg['autoplay']): ?>
     <button type="button" class="cms-slider__play" aria-controls="<?= e($id) ?>" hidden>
@@ -51,7 +53,7 @@ $icon = fn(string $p) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-h
       <?php foreach ($slides as $n => $s): $hasText = $s['eyebrow'] !== '' || $s['title'] !== '' || $s['text'] !== '' || $s['button_label'] !== ''; ?>
       <div class="cms-slide cms-slide--<?= e($s['position']) ?> cms-slide--ov-<?= e($hasText ? $s['overlay'] : 'none') ?>" id="<?= e($id . '-' . ($n + 1)) ?>"
            role="group" aria-roledescription="<?= e(lt('Folie')) ?>" aria-label="<?= e(lt('{n} von {total}', ['n' => $n + 1, 'total' => $total])) ?>">
-        <div class="cms-slide__media"><?= img((int) $s['m']['id'], $sizes, ['ratio' => $height === 'screen' ? null : $height, 'eager' => $n === 0 && $b->prev === null]) ?></div>
+        <div class="cms-slide__media"><?= img((int) $s['m']['id'], $sizes, ['ratio' => $height === 'screen' ? null : $height, 'eager' => $n === 0 && $b->prev === null] + ($s['path'] ? ['path' => $s['path'] . '.image'] : [])) ?></div>
         <?php if ($hasText): $p = $s['path']; ?>
         <div class="cms-slide__body<?= $bleed ? ' ' . e($wrap) : '' ?>"><div class="cms-slide__box">
           <?php if ($s['eyebrow'] !== ''): ?><p class="cms-slide__eyebrow"<?= $p ? $b->edit("$p.eyebrow") : '' ?>><?= e($s['eyebrow']) ?></p><?php endif; ?>
