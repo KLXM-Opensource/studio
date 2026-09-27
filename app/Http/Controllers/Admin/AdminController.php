@@ -21,7 +21,9 @@ abstract class AdminController
     {
         $user = app()->auth->user();
         if (!$user) {
-            throw new RedirectException(url('/admin/login') . '?next=' . rawurlencode($r->path));
+            // Vorschau der Tageszeit (?tod=…&weekend=1, nur lokal/Debug – Core\AuthScreen) auf die Anmeldeseite mitnehmen
+            $keep = array_filter(['tod' => $r->str('tod'), 'weekend' => $r->str('weekend')], fn($v) => $v !== '' && preg_match('~^[a-z0-9]{1,10}$~', $v));
+            throw new RedirectException(url('/admin/login') . '?next=' . rawurlencode($r->path) . ($keep ? '&' . http_build_query($keep) : ''));
         }
         // Zweiter Faktor ist für die Rolle verlangt, aber noch nicht eingerichtet → erst einrichten; während einer
         // Übergangsfrist einmal je Anmeldung daran erinnern (Core\Mfa, Core\Totp, Core\Passkeys)
