@@ -6,6 +6,10 @@
 .ifit-frame img{display:block;width:100%;height:100%;object-fit:cover}
 .ifit-ratio{margin:0}
 .ifit-frame>.img-fit--original>img{max-height:56vh}
+/* „Unscharf“ in der Vorschau: per CSS weichgezeichnet (auf der Website: erzeugte Kopie als Hintergrund des <img>) */
+.ifit-frame>.img-fit--blur{position:relative}
+.ifit-frame>.img-fit--blur::before{content:"";position:absolute;inset:0;background:var(--ifit-thumb,none) center/cover no-repeat;filter:blur(22px) saturate(1.1);transform:scale(1.2);pointer-events:none}
+.ifit-frame>.img-fit--blur>img{position:relative;background:none!important}
 .ifit-modes,.ifit-bgs{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
 .ifit-modes{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ifit-modes legend{grid-column:1/-1}

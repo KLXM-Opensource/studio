@@ -21,8 +21,9 @@ namespace Core;
  *    Kern-Stylesheet resources/css/image-fit.css (Vorrang per !important vor object-fit: cover der Kits). Werte je Bild
  *    (Farbe, Adresse der kleinsten Größe für „unscharf“) stehen – strenge CSP, keine style-Attribute – in einer kleinen
  *    erzeugten CSS-Datei je Satz Regeln (media/fit/fit-<hash>.css), die inject() zusammen mit dem Stylesheet einbindet.
- *  - CSS-Variablen für Kits: --img-fit-bg (Hintergrundfarbe beim Einpassen), --img-fit-src (Bild für „unscharf“),
- *    --img-fit-blur (Stärke, Standard 22px).
+ *  - „unscharf“: vorab weichgezeichnete kleine Kopie (blurUrl(), fit/blur-<hash>.webp) als Hintergrund des <img> selbst –
+ *    funktioniert unabhängig davon, ob das Kit dem <picture> eine Box gibt (display:contents, absolut positioniertes Bild).
+ *  - CSS-Variablen für Kits: --img-fit-bg (Hintergrundfarbe beim Einpassen), --img-fit-src (weichgezeichnetes Bild für „unscharf“).
  */
 final class ImageFit
 {
@@ -229,11 +230,13 @@ final class ImageFit
         $c = ['img-fit', 'img-fit--' . $a['mode']];
         $bg = $a['mode'] === 'contain' ? $a['bg'] : '';
         if ($bg === 'blur') {
-            $src = Media::url($m, 480, 'webp');   // kleinste Größe (SVG: die Datei selbst)
-            $key = 'img-fit-src-' . substr(sha1($src), 0, 10);
-            self::$rules[$key] = '--img-fit-src:url("' . str_replace(['\\', '"', "\n", "\r"], ['%5C', '%22', '', ''], $src) . '")';
             $c[] = 'img-fit--blur';
-            $c[] = $key;
+            $src = self::blurUrl($m);   // vorab weichgezeichnet (null: SVG, Fehler → wie transparent)
+            if ($src !== null) {
+                $key = 'img-fit-src-' . substr(sha1($src), 0, 10);
+                self::$rules[$key] = '--img-fit-src:url("' . str_replace(['\\', '"', "\n", "\r"], ['%5C', '%22', '', ''], $src) . '")';
+                $c[] = $key;
+            }
         } elseif (str_starts_with($bg, '#')) {
             $key = 'img-fit-c-' . substr($bg, 1);
             self::$rules[$key] = '--img-fit-bg:' . $bg;
@@ -249,6 +252,73 @@ final class ImageFit
         }
         if (!empty($a['auto'])) $c[] = 'img-fit--auto';
         return implode(' ', $c);
+    }
+
+    // ================================================================= Unscharfer Hintergrund
+
+    /**
+     * Weichgezeichnete Kopie des Bildes für „Einpassen · unscharf“ (URL im Medienordner der Website, fit/blur-<hash>.webp).
+     * Der Hintergrund liegt als background-image auf dem <img> selbst (image-fit.css) – so braucht es kein Pseudo-Element
+     * am <picture>, das in Kits mit „picture{display:contents}“ (Bild absolut im Rahmen) gar nicht erzeugt würde. Weil
+     * sich ein Hintergrund per CSS nicht getrennt vom Bild weichzeichnen lässt, wird er hier einmal je Bildfassung
+     * erzeugt: aus der kleinsten Größe, klein gerechnet und weichgezeichnet (wenige KB). null bei SVG oder Fehler.
+     */
+    public static function blurUrl(array $m): ?string
+    {
+        if ((string) ($m['mime'] ?? '') === Svg::MIME || !function_exists('imagecreatefromstring')) return null;
+        $file = Media::localFile($m, 480, 'webp');
+        if (!is_file($file)) $file = Media::path($m);
+        if (!is_file($file)) return null;
+        $fmt = function_exists('imagewebp') ? 'webp' : 'jpg';
+        $name = 'blur-' . substr(sha1($file . '|' . filemtime($file) . '|' . filesize($file)), 0, 12) . '.' . $fmt;
+        $dir = site()->mediaDir('fit');
+        if (!is_file("$dir/$name")) {
+            try {
+                if (!self::writeBlur($file, "$dir/$name", $fmt)) return null;
+            } catch (\Throwable $e) {
+                error_log('[media] blur: ' . $e->getMessage());
+                return null;
+            }
+        }
+        return site()->mediaUrl('fit/' . $name);
+    }
+
+    /** Klein rechnen, weichzeichnen, wieder etwas vergrößern und nochmals weichzeichnen – Ränder wegschneiden */
+    private static function writeBlur(string $src, string $dest, string $fmt): bool
+    {
+        $img = @imagecreatefromstring((string) file_get_contents($src));
+        if (!$img) return false;
+        $w = imagesx($img);
+        $h = imagesy($img);
+        // 1. sehr klein (längste Seite 40 px): grobe Farbflächen
+        $k = 40 / max($w, $h, 1);
+        $sw = max(2, (int) round($w * $k));
+        $sh = max(2, (int) round($h * $k));
+        $small = imagecreatetruecolor($sw, $sh);
+        imagefill($small, 0, 0, imagecolorallocate($small, 255, 255, 255));   // transparente Bilder: auf Weiß
+        imagecopyresampled($small, $img, 0, 0, 0, 0, $sw, $sh, $w, $h);
+        imagedestroy($img);
+        for ($i = 0; $i < 4; $i++) imagefilter($small, IMG_FILTER_GAUSSIAN_BLUR);
+        // 2. auf längste Seite 160 px vergrößern (weiche Übergänge) und nochmals weichzeichnen; Rand (Unschärfe-Artefakte) weg
+        $bw = max(2, (int) round($sw * 4));
+        $bh = max(2, (int) round($sh * 4));
+        $big = imagecreatetruecolor($bw, $bh);
+        imagecopyresampled($big, $small, 0, 0, 0, 0, $bw, $bh, $sw, $sh);
+        imagedestroy($small);
+        for ($i = 0; $i < 6; $i++) imagefilter($big, IMG_FILTER_GAUSSIAN_BLUR);
+        $cx = (int) round($bw * 0.06);
+        $cy = (int) round($bh * 0.06);
+        $out = imagecrop($big, ['x' => $cx, 'y' => $cy, 'width' => $bw - 2 * $cx, 'height' => $bh - 2 * $cy]) ?: $big;
+        @mkdir(dirname($dest), 0775, true);
+        $tmp = $dest . '.' . bin2hex(random_bytes(4)) . '.tmp';
+        $ok = $fmt === 'webp' ? @imagewebp($out, $tmp, 70) : @imagejpeg($out, $tmp, 75);
+        if ($out !== $big) imagedestroy($out);
+        imagedestroy($big);
+        if (!$ok || !@rename($tmp, $dest)) {
+            @unlink($tmp);
+            return false;
+        }
+        return true;
     }
 
     // ================================================================= Transparenz (PNG, GIF)

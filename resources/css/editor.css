@@ -13,8 +13,7 @@
 
 /* Werkzeugleiste: Host (Inhalt im Shadow DOM, Core\Theme::toolbarHost). Hintergrund schon vor dem Laden des Schatten-Stylesheets */
 .cms-bar-host.cms-bar-host{all:initial;display:block;position:sticky;top:0;z-index:2147483300;min-height:52px;background:#1E2840;color:#fff;font:500 14px/1.3 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif}
-.cms-bar-host~.site-header{top:var(--cms-bar-h,48px)}
-@media (max-width:800px){.cms-bar-host.cms-bar-host{position:relative}.cms-bar-host~.site-header{top:0}}
+@media (max-width:800px){.cms-bar-host.cms-bar-host{position:relative}}
 
 /* Editor-Hülle */
 .is-editing main{padding-bottom:120px}
@@ -149,7 +148,9 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    Frameworks in Themes (Bootstrap, UIkit, Tailwind …) – Hilfe „Technik › Frameworks in Themes“
    Z-Skala der CMS-Ebenen (geordnet, oberhalb aller üblichen Framework-Werte: Bootstrap 1000–1090, UIkit 980–1040, Tailwind z-50):
      2147482990  Markierungen in der Seite (Stift je Eintrag, „Zentral gepflegt“)
-     2147483000  Bedienelemente in der Seite (Block-Leisten, Editor.js-Werkzeugleiste/Popover/Inline-Leiste)
+     2147483000  Bedienelemente in der Seite (Block-Leisten, „+“/Ziehgriff der Editor.js-Werkzeugleiste)
+     2147483050  Kopf des Kits ([data-cms-header], [data-cms-sticky]) mit seinen Menüs – über den Bedienelementen der Blöcke
+     2147483060  Geöffnete Editor.js-Menüs (Block einfügen/Optionen, Inline-Leiste) – über dem Kopf, solange sie offen sind
      2147483100  Seitenleiste „Eintrag bearbeiten“ (#cms-epanel-host, entry-panel.css)
      2147483200  Gemeinsame Ebene (#cms-layer-host: Seitenleiste „Block“, Formatierungsleiste, Meldungen; _shadow.js)
      2147483300  Werkzeugleiste (.cms-bar-host) inkl. Menüs und Aktionsleiste unten (Telefon)
@@ -159,11 +160,20 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    aber auch Werkzeugleiste/Popover. Ohne eigenen Kontext steigen nur die Bedienelemente über den Theme-Kopf. */
 .cms-editor .codex-editor.codex-editor{z-index:auto}
 .cms-editor :is(.ce-toolbar,.ce-inline-toolbar,.ce-popover--opened,.ce-conversion-toolbar,.ce-settings){z-index:2147483000}
+.cms-editor :is(.ce-toolbar:has(.ce-popover--opened),.ce-inline-toolbar,.ce-conversion-toolbar){z-index:2147483060}
 
-/* Klebende/feste Köpfe des Themes unter die Werkzeugleiste schieben (nur mit Leiste; html.cms-has-bar setzt _shadow.js).
-   --cms-bar-offset = sichtbare Unterkante der Leiste (Desktop: ihre Höhe; Telefon: scrollt mit, bis 0).
-   Eigene Köpfe markieren Themes mit data-cms-sticky (Attribut ohne Wert genügt). !important: Frameworks setzen top teils inline (UIkit). */
-:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,header[data-cms-sticky],[data-cms-sticky]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}
+/* Klebende/feste Köpfe unter die Werkzeugleiste schieben (nur mit Leiste; html.cms-has-bar setzt _shadow.js).
+   --cms-bar-h = Höhe der Leiste · --cms-bar-offset = sichtbare Unterkante (Desktop: ihre Höhe; Telefon: scrollt mit, bis 0)
+   --cms-toolbar-h = Kurzform für Kits: top:var(--cms-toolbar-h,0) im eigenen sticky-Kopf (0 ohne Leiste).
+   Framework-Klassen sind immer klebend/fest → Versatz sofort. Kit-Köpfe (header außerhalb von main …, .site-header,
+   [role=banner], data-cms-sticky) nur mit [data-cms-pinned] (_shadow.js: nur solange position sticky/fixed) – ein Kopf,
+   den das Kit im Bearbeiten nicht kleben lässt, bleibt an seinem Platz (sonst rutschte er um die Leistenhöhe nach unten).
+   !important: Frameworks setzen top teils inline (UIkit). */
+:is(html.cms-has-bar,html:has(.cms-bar-host)){--cms-toolbar-h:var(--cms-bar-offset,var(--cms-bar-h,52px))}
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,[data-cms-pinned]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}
+/* Kopf des Kits mit Menüs über den Bedienelementen der Blöcke (Leisten, „+“, Knöpfe am Bild) – Z-Skala oben.
+   Ohne Werkzeugleiste (Besucher) greift nichts davon. */
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is([data-cms-header],[data-cms-sticky],body>header,body>.site-header):not(.cms-bar-host){z-index:2147483050!important}
 
 /* Redaktionsnotizen [# … #] (Core\EditorNotes::decorate) – nur für angemeldete Redaktion (Bearbeiten-Modus, Entwurfsansicht);
    Besucher sehen sie nie. Eigene feste Farben (Notizzettel), damit sie in jedem Kit, hell und dunkel, lesbar sind (≥ 7:1). */

@@ -150,12 +150,51 @@ export function initBar() {
   // --cms-bar-h: Höhe der Leiste · --cms-bar-offset: sichtbare Unterkante (Desktop = Höhe, da klebend;
   // Telefon: Leiste scrollt mit → schrumpft bis 0). Klebende/feste Theme-Köpfe: top: var(--cms-bar-offset) (editor.css)
   let raf = 0;
-  const offset = () => { raf = 0; html.style.setProperty('--cms-bar-offset', Math.max(0, Math.round(host.getBoundingClientRect().bottom)) + 'px'); };
+  const offset = () => { raf = 0; html.style.setProperty('--cms-bar-offset', Math.max(0, Math.round(host.getBoundingClientRect().bottom)) + 'px'); pinHeads(); };
   const set = () => { html.style.setProperty('--cms-bar-h', host.offsetHeight + 'px'); offset(); };
   set();
   if ('ResizeObserver' in window) new ResizeObserver(set).observe(host);
   window.addEventListener('scroll', () => { raf ||= requestAnimationFrame(offset); }, { passive: true });
   window.addEventListener('resize', () => { raf ||= requestAnimationFrame(offset); }, { passive: true });
+  // Kits schalten klebende Köpfe per Klasse um (is-stuck, nav-sticky …): Lage neu prüfen
+  if ('MutationObserver' in window) {
+    const mo = new MutationObserver(() => { raf ||= requestAnimationFrame(offset); });
+    [html, d.body, ...siteHeads()].forEach(n => n && mo.observe(n, { attributes: true, attributeFilter: ['class'] }));
+  }
+}
+
+/*
+ * Kopf des Kits neben der Werkzeugleiste (editor.css, „Z-Skala“):
+ *  - data-cms-header: Kopf der Website (header außerhalb von main/article/section …, .site-header, [role=banner],
+ *    [data-cms-sticky]) – liegt im Bearbeiten über den Bedienelementen der Blöcke, seine Menüs damit auch.
+ *  - data-cms-pinned: nur solange der Kopf wirklich klebt/fest steht (position sticky/fixed) – nur dann schiebt ihn
+ *    editor.css unter die Leiste (top: --cms-bar-offset). Ein Kit, das seinen Kopf im Bearbeiten nicht kleben lässt
+ *    (z. B. .is-editing .hdr{position:relative}), wird so nicht mehr um die Höhe der Leiste verschoben.
+ */
+const HEAD_SEL = '[data-cms-sticky],[data-cms-header],.site-header,[role=banner],header';
+const HEAD_SKIP = 'main,article,section,aside,footer,nav,dialog,[popover],.cms-editor,.cms-block,.cms-bar-host';
+function siteHeads() {
+  return [...d.querySelectorAll(HEAD_SEL)].filter(el => el.matches('[data-cms-sticky],[data-cms-header]') || !el.parentElement?.closest(HEAD_SKIP));
+}
+function pinHeads() {
+  for (const el of siteHeads()) {
+    if (!el.hasAttribute('data-cms-header')) el.setAttribute('data-cms-header', '');
+    const p = getComputedStyle(el).position;
+    el.toggleAttribute('data-cms-pinned', p === 'sticky' || p === 'fixed');
+  }
+}
+
+/**
+ * Oberkante des frei sichtbaren Bereichs (Viewport-Pixel): Unterkante der Werkzeugleiste bzw. eines oben klebenden
+ * Kit-Kopfs. Schwebende Bedienelemente (Knöpfe am Bild …) rücken darunter, statt den Kopf zu verdecken.
+ */
+export function topInset() {
+  let y = Math.max(0, barHost()?.getBoundingClientRect().bottom || 0);
+  for (const el of d.querySelectorAll('[data-cms-pinned]')) {
+    const r = el.getBoundingClientRect();
+    if (r.height && r.top <= y + 2 && r.bottom > y) y = r.bottom;
+  }
+  return y;
 }
 
 // Polyfill sofort (vor allen anderen Modulen, die die Werkzeugleiste abfragen)

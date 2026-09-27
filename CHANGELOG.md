@@ -6,6 +6,17 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bearbeiten-Modus: Kopf des Kits bleibt an seinem Platz
+- **Kopfmenü verrutschte:** Die Werkzeugleiste schob jeden markierten Kit-Kopf (`data-cms-sticky`, `.cms-bar-host ~ .site-header`)
+  per `top` um ihre Höhe nach unten – auch Köpfe, die das Kit im Bearbeiten nicht kleben lässt (klxm, klxm-agentur, basis
+  800–960 px, editorial, essenz/glas/nature/starter ohne „Kopf mitlaufen lassen“). Diese standen dann 52–54 px tiefer und
+  überdeckten den Anfang der Seite. Jetzt markiert `_shadow.js` den Kopf (`data-cms-header`) und nur solange er wirklich
+  klebt/fest steht `data-cms-pinned` – nur dann gilt der Versatz. Kits ohne Markierung (modern, fluid) werden ebenfalls erkannt.
+- **Ebenen:** Kopf des Kits samt Menüs (Untermenüs, Mega-Menü) liegt im Bearbeiten über Block-Leisten und „+“; geöffnete
+  Editor.js-Menüs darüber, Werkzeugleiste ganz oben. Die Knöpfe am Bild („Anpassen“, „Rahmen“, „Zuschneiden“) rücken unter
+  einen klebenden Kopf statt ihn zu verdecken.
+- `--cms-toolbar-h` am `<html>` (sichtbare Unterkante der Leiste) für eigene Kit-Regeln, z. B. `top: var(--cms-toolbar-h, 0)`.
+
 ### Anmeldedaten selbst ändern (`Core\EmailChange`)
 - **Konto → Anmeldedaten:** Übersicht (E-Mail-Adresse, Passwort festgelegt?, Passkeys, Zwei-Faktor) mit den Aktionen
   „E-Mail-Adresse ändern“ und „Passwort ändern/festlegen“; Name unter „Profil“ getrennt vom Passwort.

@@ -482,6 +482,19 @@ final class Media
 
     public static function url(array $m, ?int $width = null, string $format = 'webp'): string
     {
+        return self::publicUrl($m, self::rel($m, $width, $format));
+    }
+
+    /** Absoluter Pfad der Datei, die url() mit denselben Angaben liefert (Website oder Pool) */
+    public static function localFile(array $m, ?int $width = null, string $format = 'webp'): string
+    {
+        $pool = $m['_pool'] ?? self::$pool;
+        return ($pool !== null ? MediaPools::mediaDir($pool) : site()->mediaDir()) . '/' . self::rel($m, $width, $format);
+    }
+
+    /** Datei relativ zum Medienordner: kleinste Größe ≥ $width im Format, sonst Original bzw. bearbeitete Fassung */
+    private static function rel(array $m, ?int $width, string $format): string
+    {
         $v = json_decode((string) $m['variants_json'], true) ?: [];
         if ($width && !empty($v['sizes'])) {
             $pick = null;
@@ -492,11 +505,11 @@ final class Media
                 }
             }
             $pick ??= end($v['sizes'])['w'];
-            return self::publicUrl($m, 'cache/' . $v['base'] . '-' . $pick . '.' . $format);
+            return 'cache/' . $v['base'] . '-' . $pick . '.' . $format;
         }
         // Bearbeitetes Bild (Core\ImageEdit): die bearbeitete Fassung statt des Originals
         $master = ImageEdit::stored($m)['master'] ?? null;
-        return self::publicUrl($m, $master ?: $m['file']);
+        return (string) ($master ?: $m['file']);
     }
 
     /** Adresse der unveränderten Originaldatei (Vorher/Nachher im Bildeditor) */

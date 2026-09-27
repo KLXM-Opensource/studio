@@ -1,6 +1,6 @@
 import { t } from './_i18n.js';
 import { drill } from './_drill.js';
-import { layerBox, inPath } from './_shadow.js';
+import { layerBox, inPath, topInset } from './_shadow.js';
 import { ico } from './_icons.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
@@ -1332,8 +1332,11 @@ function initInlineCrop() {
   let target = null, hideT;
   const place = () => {
     const r = target.getBoundingClientRect();
+    // Nicht über Werkzeugleiste oder klebenden Kit-Kopf legen: unter deren Unterkante rücken, sonst ausblenden
+    const top = Math.max(r.top + 12, topInset() + 8);
+    bar.style.visibility = top + bar.offsetHeight > r.bottom - 8 ? 'hidden' : '';
     bar.style.left = (r.right + scrollX - bar.offsetWidth - 12) + 'px';
-    bar.style.top = (r.top + scrollY + 12) + 'px';
+    bar.style.top = (top + scrollY) + 'px';
   };
   const show = im => {
     clearTimeout(hideT); target = im;

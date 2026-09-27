@@ -43,14 +43,15 @@ export async function fitPresets(base) {
   return presetCache;
 }
 
-/** Vorschau: Klassen und Variablen wie auf der Website an <picture> setzen */
+/** Vorschau: Klassen und Variablen wie auf der Website an <picture> setzen – „unscharf“ zeichnet hier CSS weich
+ *  (--ifit-thumb, _imagefit.css), auf der Website ist es eine erzeugte Kopie (ImageFit::blurUrl) */
 export function applyFit(pic, o, { thumb, presets = presetCache || [] } = {}) {
   [...pic.classList].filter(c => c.startsWith('img-fit')).forEach(c => pic.classList.remove(c));
-  pic.style.removeProperty('--img-fit-bg'); pic.style.removeProperty('--img-fit-src');
+  pic.style.removeProperty('--img-fit-bg'); pic.style.removeProperty('--ifit-thumb');
   if (o.mode !== 'contain' && o.mode !== 'original') return;
   pic.classList.add('img-fit', 'img-fit--' + o.mode);
   if (o.mode !== 'contain') return;
-  if (o.bg === 'blur') { pic.classList.add('img-fit--blur'); pic.style.setProperty('--img-fit-src', `url("${String(thumb || '').replace(/["\\\n]/g, encodeURIComponent)}")`); }
+  if (o.bg === 'blur') { pic.classList.add('img-fit--blur'); pic.style.setProperty('--ifit-thumb', `url("${String(thumb || '').replace(/["\\\n]/g, encodeURIComponent)}")`); }
   else if (o.bg.startsWith('#')) pic.style.setProperty('--img-fit-bg', o.bg);
   else if (o.bg.startsWith('kit:')) { const p = presets.find(x => 'kit:' + x.name === o.bg); if (p?.value) pic.style.setProperty('--img-fit-bg', p.value); }
 }

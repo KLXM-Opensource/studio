@@ -5,8 +5,7 @@
    admin.css. Werte je Bild (Farbe, Bild für „unscharf“) kommen aus einer erzeugten CSS-Datei (CSP: keine Inline-Styles).
 
    Variablen für Kits:  --img-fit-bg    Hintergrund beim Einpassen (Standard: transparent – Fläche des Rahmens scheint durch)
-                        --img-fit-src   Bild für den unscharfen Hintergrund (kleinste Größe, url(…))
-                        --img-fit-blur  Stärke der Unschärfe (Standard 22px)
+                        --img-fit-src   weichgezeichnetes Bild für „unscharf“ (erzeugt, url(…)) – Hintergrund des <img>
    Klassen:             .img-fit .img-fit--contain | .img-fit--original, .img-fit--blur, .img-fit--auto (automatisch:
                         SVG, transparenter Rand) – Kits können damit z. B. Innenabstände für Logos ergänzen.
    ========================================================================== */
@@ -14,19 +13,15 @@
 /* Einpassen: ganzes Bild im Rahmen, Rest in der gewählten Farbe (Vorrang vor object-fit: cover der Kits) */
 .img-fit>img{object-fit:contain!important;background-color:var(--img-fit-bg,transparent)}
 
-/* Unscharf: vergrößerte, weichgezeichnete Kopie der kleinsten Bildgröße dahinter – rein dekorativ (Pseudo-Element,
-   nicht im Barrierefreiheitsbaum). Ohne z-index: das <img> liegt als späteres positioniertes Element darüber – auch in Kits,
-   die das Bild absolut in den Rahmen legen (picture mit display:contents). :where() lässt Kit-Regeln gewinnen. */
-:where(.img-fit--blur){position:relative;display:block;width:100%;height:100%}
-:where(.img-fit--blur)>img{position:relative}
-.img-fit--blur{overflow:hidden}
-.img-fit--blur::before{content:"";position:absolute;inset:0;background:var(--img-fit-src,none) center/cover no-repeat;filter:blur(var(--img-fit-blur,22px)) saturate(1.1);transform:scale(1.2);pointer-events:none}
-.img-fit--blur>img{background-color:transparent}
+/* Unscharf: vorab weichgezeichnete kleine Kopie (ImageFit::blurUrl) als Hintergrund des <img> selbst – liegt genau in der
+   Fläche, die object-fit: contain frei lässt. Kein Pseudo-Element am <picture>: viele Kits setzen picture{display:contents}
+   und legen das Bild absolut in den Rahmen, dann hätte ein ::before keine Box. Rein dekorativ (nicht im Barrierefreiheitsbaum). */
+.img-fit--blur>img{background:var(--img-fit-src,none) center/cover no-repeat!important}
 
 /* Originalformat: der Rahmen übernimmt das Seitenverhältnis des Bildes (width/height am <img>), nichts wird beschnitten */
 .img-fit--original{display:block!important;position:static!important;inset:auto!important;width:100%!important;height:auto!important}
 .img-fit--original>img{position:static!important;width:100%!important;height:auto!important;aspect-ratio:auto!important}
 :has(>.img-fit--original),:has(>a>.img-fit--original){aspect-ratio:auto!important;height:auto!important;min-height:0!important}
 
-@media (forced-colors:active){.img-fit--blur::before{display:none}}
-@media print{.img-fit--blur::before{filter:none;opacity:.25}}
+@media (forced-colors:active){.img-fit--blur>img{background:none!important}}
+@media print{.img-fit--blur>img{background:none!important}}

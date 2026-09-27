@@ -112,6 +112,37 @@ final class SelfTest
         $cls = $f::pictureClass(['mode' => 'contain', 'bg' => '#1e2638', 'auto' => false], $jpg);
         $this->assert($cls === 'img-fit img-fit--contain img-fit-c-1e2638' && str_contains($f::css(), '.img-fit-c-1e2638{--img-fit-bg:#1e2638}'), 'ImageFit: Klassen und Regel für Farbe');
         $this->assert($f::pictureClass(['mode' => 'original', 'bg' => '', 'auto' => true], $jpg) === 'img-fit img-fit--original img-fit--auto', 'ImageFit: Originalformat');
+        // „Unscharf“: vorab weichgezeichnete Kopie als Hintergrund des <img> (kein ::before am <picture> – Kits mit
+        // picture{display:contents} legten die Ebene sonst neben, über oder hinter den Rahmen)
+        $f::reset();
+        $dir = site()->mediaDir('fit');
+        @mkdir($dir, 0775, true);
+        $srcRel = 'fit/_selftest-' . bin2hex(random_bytes(4)) . '.jpg';
+        $pic = imagecreatetruecolor(90, 160);
+        imagefilledrectangle($pic, 0, 0, 44, 159, imagecolorallocate($pic, 200, 40, 40));
+        imagefilledrectangle($pic, 45, 0, 89, 159, imagecolorallocate($pic, 30, 90, 200));
+        imagejpeg($pic, site()->mediaDir() . '/' . $srcRel, 90);
+        imagedestroy($pic);
+        $port = ['id' => 0, 'mime' => 'image/jpeg', 'file' => $srcRel, 'width' => 90, 'height' => 160, 'variants_json' => '{}', 'fit' => 'contain blur', 'alt' => 'x', 'decorative' => 0];
+        $blurCls = $f::pictureClass(['mode' => 'contain', 'bg' => 'blur', 'auto' => false], $port);
+        preg_match('~url\("([^"]+/fit/(blur-[0-9a-f]{12}\.(?:webp|jpg)))"\)~', $f::css(), $bm);
+        $blurFile = $bm ? $dir . '/' . $bm[2] : '';
+        $bi = $blurFile && is_file($blurFile) ? @getimagesize($blurFile) : false;
+        $markup = \Core\Media::pictureOf($port, '50vw');
+        $this->assert((bool) preg_match('~^img-fit img-fit--contain img-fit--blur img-fit-src-[0-9a-f]{10}$~', $blurCls) && $bi && $bi[1] > $bi[0]
+            && filesize($blurFile) < 20000 && str_contains($f::css(), '.' . substr($blurCls, strrpos($blurCls, ' ') + 1) . '{--img-fit-src:url("'),
+            'ImageFit: unscharf – Klassen, Regel und erzeugte weichgezeichnete Kopie (Hochformat, klein)');
+        $this->assert((bool) preg_match('~^<picture class="img-fit img-fit--contain img-fit--blur img-fit-src-[0-9a-f]{10}">.*<img [^>]*></picture>$~s', $markup),
+            'ImageFit: unscharf – Markup von Media::pictureOf()');
+        $this->assert($f::pictureClass(['mode' => 'contain', 'bg' => 'blur', 'auto' => false], $svg) === 'img-fit img-fit--contain img-fit--blur',
+            'ImageFit: unscharf bei SVG ohne erzeugte Kopie (wie transparent)');
+        $fitCss = (string) @file_get_contents(ROOT . '/resources/css/image-fit.css');
+        $this->assert(str_contains($fitCss, '.img-fit--blur>img{background:var(--img-fit-src') && !str_contains($fitCss, '.img-fit--blur::before'),
+            'ImageFit: unscharf liegt am <img>, nicht als ::before am <picture>');
+        @unlink(site()->mediaDir() . '/' . $srcRel);
+        if ($blurFile) @unlink($blurFile);
+        $f::reset();
+        $f::pictureClass(['mode' => 'contain', 'bg' => '#1e2638', 'auto' => false], $jpg);
         $file = site()->mediaDir('fit') . '/fit-' . substr(sha1($f::css()), 0, 12) . '.css';
         $had = is_file($file);
         $html = $f::inject('<html><head></head><body><picture class="img-fit img-fit--contain img-fit-c-1e2638"><img></picture></body></html>');
