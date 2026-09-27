@@ -1100,7 +1100,11 @@ final class Media
 
     public static function viewerUrl(array $m): ?string
     {
-        return $m['mime'] === 'application/pdf' ? url('/pdf/' . $m['id']) : null;
+        if ($m['mime'] !== 'application/pdf') return null;
+        // Datei aus einem geteilten Pool (Ansicht „Geteilt“ – id ist die Pool-ID): Pool in der Adresse, sonst findet /pdf/{id} sie nicht
+        $pool = $m['_pool'] ?? self::$pool;
+        if ($pool !== null && empty($m['pool_ref'])) return url('/pdf/pool/' . rawurlencode((string) $pool) . '/' . (int) ($m['_pool_id'] ?? $m['id']));
+        return url('/pdf/' . $m['id']);
     }
 
     public static function toJson(array $m): array

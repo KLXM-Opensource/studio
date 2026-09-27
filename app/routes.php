@@ -487,6 +487,7 @@ return function (Router $r): void {
     $r->get('/api/chat/config', [\Core\Http\Controllers\VisitorChatController::class, 'config']);
     $r->post('/api/chat', [\Core\Http\Controllers\VisitorChatController::class, 'ask']);
     $r->get('/pdf/{id}', [PdfController::class, 'show']);
+    $r->get('/pdf/pool/{pool}/{id}', [PdfController::class, 'showPool']);
     $r->get('/favicon.ico', [PwaController::class, 'icon']);
     $r->get('/apple-touch-icon.png', [PwaController::class, 'icon']);
     $r->get('/manifest.webmanifest', [PwaController::class, 'manifest']);

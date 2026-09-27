@@ -12,9 +12,22 @@ use Core\Theme;
 /** PDF-Anzeige im Browser mit Mozilla PDF.js (lokal ausgeliefert, keine Dritten). */
 final class PdfController
 {
+    /** PDF aus einem geteilten Pool, den diese Website nutzen darf (Mediathek-Ansicht „Geteilt“) */
+    public function showPool(Request $r, string $pool, string $id): Response
+    {
+        if (!isset(\Core\MediaPools::forSite()[$pool]) || !ctype_digit($id)) throw new HttpException(404);
+        Media::usePool($pool);
+        try { $m = Media::find((int) $id); } finally { Media::usePool(null); }
+        return $this->render($r, $m);
+    }
+
     public function show(Request $r, string $id): Response
     {
-        $m = ctype_digit($id) ? Media::find((int) $id) : null;
+        return $this->render($r, ctype_digit($id) ? Media::find((int) $id) : null);
+    }
+
+    private function render(Request $r, ?array $m): Response
+    {
         if (!$m || $m['mime'] !== 'application/pdf') {
             throw new HttpException(404);
         }
