@@ -224,11 +224,25 @@ final class ImageFit
         return self::hasAlpha($m) ? 'contain' : '';
     }
 
-    /** Klassen am <picture> (und Regeln für die erzeugte CSS-Datei) */
-    public static function pictureClass(array $a, array $m): string
+    /**
+     * Klassen am <picture> (und Regeln für die erzeugte CSS-Datei).
+     * $ratio: Bildformat der Stelle (z. B. „3:4“). Beim Einpassen bekommt das <img> dieses Seitenverhältnis (img-fit--framed,
+     * --img-fit-ratio): Viele Kits geben dem Bild keine feste Höhe (height:100% in einem Rahmen ohne feste Höhe, z. B. über
+     * einen Zoom-Link) und verlassen sich auf den Zuschnitt, der schon das richtige Format hat. Beim Einpassen wird das ganze
+     * Bild geladen – ohne diese Angabe hätte das <img> sein eigenes Format, Hintergrund und Einpassen blieben unsichtbar.
+     * Hat das <img> im Kit eine feste Breite und Höhe, bleibt aspect-ratio wirkungslos. Nicht beim automatischen Einpassen
+     * (SVG, transparenter Rand): dann gibt es keinen Zuschnitt, das Bild erscheint wie bisher im eigenen Format.
+     */
+    public static function pictureClass(array $a, array $m, ?string $ratio = null): string
     {
         $c = ['img-fit', 'img-fit--' . $a['mode']];
         $bg = $a['mode'] === 'contain' ? $a['bg'] : '';
+        if ($a['mode'] === 'contain' && empty($a['auto']) && $ratio !== null && preg_match('~^(\d{1,4})[:/x](\d{1,4})$~', $ratio, $r) && (int) $r[1] > 0 && (int) $r[2] > 0) {
+            $key = 'img-fit-r-' . (int) $r[1] . 'x' . (int) $r[2];
+            self::$rules[$key] = '--img-fit-ratio:' . (int) $r[1] . '/' . (int) $r[2];
+            $c[] = 'img-fit--framed';
+            $c[] = $key;
+        }
         if ($bg === 'blur') {
             $c[] = 'img-fit--blur';
             $src = self::blurUrl($m);   // vorab weichgezeichnet (null: SVG, Fehler → wie transparent)

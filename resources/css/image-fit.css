@@ -6,12 +6,18 @@
 
    Variablen für Kits:  --img-fit-bg    Hintergrund beim Einpassen (Standard: transparent – Fläche des Rahmens scheint durch)
                         --img-fit-src   weichgezeichnetes Bild für „unscharf“ (erzeugt, url(…)) – Hintergrund des <img>
+                        --img-fit-ratio Format der Stelle beim Einpassen (z. B. 3/4, Klasse .img-fit--framed)
    Klassen:             .img-fit .img-fit--contain | .img-fit--original, .img-fit--blur, .img-fit--auto (automatisch:
                         SVG, transparenter Rand) – Kits können damit z. B. Innenabstände für Logos ergänzen.
    ========================================================================== */
 
 /* Einpassen: ganzes Bild im Rahmen, Rest in der gewählten Farbe (Vorrang vor object-fit: cover der Kits) */
 .img-fit>img{object-fit:contain!important;background-color:var(--img-fit-bg,transparent)}
+
+/* Einpassen in einer Stelle mit Bildformat: das <img> behält das Format des Rahmens (--img-fit-ratio, z. B. 3/4), auch wenn
+   das Kit ihm keine feste Höhe gibt (height:100% in einem Rahmen ohne feste Höhe, Bild in einem Link) und sich sonst auf den
+   Zuschnitt verlässt. Mit fester Breite und Höhe im Kit bleibt aspect-ratio ohne Wirkung. */
+.img-fit--framed>img{aspect-ratio:var(--img-fit-ratio)!important}
 
 /* Unscharf: vorab weichgezeichnete kleine Kopie (ImageFit::blurUrl) als Hintergrund des <img> selbst – liegt genau in der
    Fläche, die object-fit: contain frei lässt. Kein Pseudo-Element am <picture>: viele Kits setzen picture{display:contents}

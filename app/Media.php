@@ -603,7 +603,7 @@ final class Media
             . (isset($opt['path']) ? ' data-media-path="' . e((string) $opt['path']) . '"' : '')
             . ($ratio && !$fit && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '')
             . ($ratio ? ' data-frame="' . e($ratio) . '"' : '') : '';
-        $pic = $fit ? '<picture class="' . e(ImageFit::pictureClass($fit, $m)) . '">' : '<picture>';
+        $pic = $fit ? '<picture class="' . e(ImageFit::pictureClass($fit, $m, $ratio)) . '">' : '<picture>';
         $sources = '';
         foreach (['avif', 'webp'] as $fmt) {
             if ($src[$fmt] !== '') {

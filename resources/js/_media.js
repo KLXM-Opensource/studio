@@ -1329,7 +1329,7 @@ function initInlineCrop() {
   bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
   box().append(bar);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
   const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar), fitBtn = $('[data-fit]', bar);
-  let target = null, hideT;
+  let target = null, hideT, leaving = false;
   const place = () => {
     const r = target.getBoundingClientRect();
     // Nicht über Werkzeugleiste oder klebenden Kit-Kopf legen: unter deren Unterkante rücken, sonst ausblenden
@@ -1339,7 +1339,7 @@ function initInlineCrop() {
     bar.style.top = (top + scrollY) + 'px';
   };
   const show = im => {
-    clearTimeout(hideT); target = im;
+    clearTimeout(hideT); leaving = false; target = im;
     cropBtn.hidden = !im.dataset.ratio;
     fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
     fitBtn.hidden = fxBtn.hidden || !window.CMSEditor?.fit;
@@ -1350,12 +1350,33 @@ function initInlineCrop() {
     bar.hidden = false; place();
   };
   const hide = () => { bar.hidden = true; target = null; };
-  d.addEventListener('mouseover', e => {
-    const im = e.target.closest?.('img[data-media-id]');
-    if (im) show(im);
-    else if (inPath(e, bar)) clearTimeout(hideT);
+  // Bild unter dem Zeiger – auch wenn eine Ebene des Kits darüber liegt (ganze Karte klickbar: Link mit ::after über
+  // dem Porträt, Verläufe, Beschriftungen). Dann trifft mouseover nie das <img>, „Rahmen“/„Anpassen“ blieben unerreichbar.
+  const imgAt = e => {
+    const own = e.target.closest?.('img[data-media-id]');
+    if (own) return own;
+    if (!e.target.closest?.('.cms-block__preview')) return null;
+    return d.elementsFromPoint(e.clientX, e.clientY).find(x => x.matches?.('img[data-media-id]') && x.closest('.cms-block__preview')) || null;
+  };
+  let raf = 0;
+  const track = e => {
+    if (inPath(e, bar)) { clearTimeout(hideT); return; }
+    const im = imgAt(e);
+    if (im) { leaving = false; if (im !== target || bar.hidden) show(im); else clearTimeout(hideT); }
     else if (target) { clearTimeout(hideT); hideT = setTimeout(hide, 250); }
-  });
+  };
+  d.addEventListener('mouseover', track);
+  // Innerhalb einer darüberliegenden Ebene gibt es kein neues mouseover – Bewegung verfolgen (einmal je Bild)
+  d.addEventListener('mousemove', e => {
+    if (raf || e.target.closest?.('img[data-media-id]') || !e.target.closest?.('.cms-block__preview')) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const im = imgAt(e);
+      if (im && (im !== target || bar.hidden)) show(im);
+      else if (im) { leaving = false; clearTimeout(hideT); }
+      else if (target && !bar.hidden && !leaving) { leaving = true; clearTimeout(hideT); hideT = setTimeout(() => { leaving = false; hide(); }, 250); }
+    });
+  }, { passive: true });
   // Tastatur: Knöpfe erscheinen, sobald der Fokus in einem Block mit Bild liegt (Tab führt dann in die Leiste)
   bar.addEventListener('focusout', e => { if (!bar.contains(e.relatedTarget)) hideT = setTimeout(hide, 250); });
   addEventListener('scroll', () => { if (target && !bar.hidden) place(); }, { passive: true });

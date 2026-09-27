@@ -112,6 +112,12 @@ final class SelfTest
         $cls = $f::pictureClass(['mode' => 'contain', 'bg' => '#1e2638', 'auto' => false], $jpg);
         $this->assert($cls === 'img-fit img-fit--contain img-fit-c-1e2638' && str_contains($f::css(), '.img-fit-c-1e2638{--img-fit-bg:#1e2638}'), 'ImageFit: Klassen und Regel für Farbe');
         $this->assert($f::pictureClass(['mode' => 'original', 'bg' => '', 'auto' => true], $jpg) === 'img-fit img-fit--original img-fit--auto', 'ImageFit: Originalformat');
+        // Einpassen in einer Stelle mit Bildformat: <img> im Format des Rahmens (Kits ohne feste Bildhöhe, z. B. Porträt im Zoom-Link)
+        $this->assert($f::pictureClass(['mode' => 'contain', 'bg' => '', 'auto' => false], $jpg, '3:4') === 'img-fit img-fit--contain img-fit--framed img-fit-r-3x4'
+            && str_contains($f::css(), '.img-fit-r-3x4{--img-fit-ratio:3/4}')
+            && $f::pictureClass(['mode' => 'contain', 'bg' => '', 'auto' => true], $jpg, '3:4') === 'img-fit img-fit--contain img-fit--auto'
+            && $f::pictureClass(['mode' => 'original', 'bg' => '', 'auto' => false], $jpg, '3:4') === 'img-fit img-fit--original'
+            && str_contains((string) file_get_contents(dirname(__DIR__, 2) . '/resources/css/image-fit.css'), '.img-fit--framed>img{aspect-ratio:var(--img-fit-ratio)'), 'ImageFit: Format der Stelle beim Einpassen');
         // „Unscharf“: vorab weichgezeichnete Kopie als Hintergrund des <img> (kein ::before am <picture> – Kits mit
         // picture{display:contents} legten die Ebene sonst neben, über oder hinter den Rahmen)
         $f::reset();
