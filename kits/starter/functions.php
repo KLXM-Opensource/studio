@@ -78,12 +78,6 @@ function starter_legal_links(): array
     return $out;
 }
 
-function starter_privacy_url(): string
-{
-    foreach (starter_legal_links() as $l) if ($l['key'] === 'privacy_page') return $l['href'];
-    return url('/');
-}
-
 /**
  * Hauptmenü: Seiten mit „Im Menü“ (Pages::menu, Baum mit 'children') + Abschnitte der Startseite mit
  * „In Navigation zeigen“ (Theme::navigation, Sprunganker). Einträge: id, label, href, active, children.

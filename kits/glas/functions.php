@@ -238,14 +238,6 @@ function glas_legal_links(): array
     return $out;
 }
 
-function glas_privacy_url(): string
-{
-    foreach (glas_legal_links() as $l) {
-        if ($l['key'] === 'privacy_page') return $l['href'];
-    }
-    return url('/');
-}
-
 /** Social-Media-Profile mit gültiger Adresse */
 function glas_social(): array
 {

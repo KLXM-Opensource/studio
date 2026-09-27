@@ -253,14 +253,6 @@ function nature_legal_links(): array
     return $out;
 }
 
-function nature_privacy_url(): string
-{
-    foreach (nature_legal_links() as $l) {
-        if ($l['key'] === 'privacy_page') return $l['href'];
-    }
-    return url('/');
-}
-
 /** Social-Media-Profile mit gültiger Adresse */
 function nature_social(): array
 {

@@ -371,15 +371,6 @@ function basis_hours_ranges(): array
     return $out;
 }
 
-/** Adresse der Datenschutzerklärung (für Hinweise bei eingebetteten Videos) */
-function basis_privacy_url(): string
-{
-    foreach (basis_legal_links() as $l) {
-        if ($l['label'] === lt('Datenschutz')) return $l['href'];
-    }
-    return url('/');
-}
-
 // ------------------------------------------------------------------ Ausgabe-Bausteine
 
 /**

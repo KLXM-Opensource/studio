@@ -239,14 +239,6 @@ function essenz_legal_links(): array
     return $out;
 }
 
-function essenz_privacy_url(): string
-{
-    foreach (essenz_legal_links() as $l) {
-        if ($l['key'] === 'privacy_page') return $l['href'];
-    }
-    return url('/');
-}
-
 /** Social-Media-Profile mit gültiger Adresse */
 function essenz_social(): array
 {

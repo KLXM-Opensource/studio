@@ -180,14 +180,6 @@ function editorial_legal_links(): array
     return $out;
 }
 
-function editorial_privacy_url(): string
-{
-    foreach (editorial_legal_links() as $l) {
-        if ($l['label'] === lt('Datenschutz')) return $l['href'];
-    }
-    return url('/');
-}
-
 /** Social-Media-Profile mit gültiger Adresse */
 function editorial_social(): array
 {
