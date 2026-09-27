@@ -11,7 +11,8 @@
 # Ablauf (idempotent – ein zweiter Aufruf ändert nichts):
 #   1. Sicherung: storage/backups/themes-<zeit>.tar.gz mit themes/ und public/themes/ (nur echte Ordner, keine Links)
 #   2. Verschieben, wenn kits/ noch fehlt: themes → kits, public/themes → public/kits.
-#      Gibt es kits/ schon (neuer Code ausgerollt), werden nur Kits verschoben, die dort fehlen (z. B. eigene Kits).
+#      Gibt es kits/ schon (neuer Code ausgerollt), werden nur Kits verschoben, die dort fehlen (z. B. eigene Kits);
+#      ältere Fassungen gleichnamiger Kits landen in storage/backups/kits-alt-<zeit>/ (außerhalb des Webroots).
 #   3. Übergangs-Links themes → kits und public/themes → kits, damit ein älterer Code-Stand bis zum Deploy weiterläuft.
 #      Der neue Kern braucht sie nicht (Rückfall in Core\Kit, alte Adressen /themes/… leitet public/index.php um).
 #   4. php bin/console cache:clear --all und health
@@ -55,10 +56,11 @@ move() {   # move <alt> <neu>: ganzen Ordner verschieben oder – wenn <neu> sch
   if [ ! -e "$new" ]; then
     echo "▸ $old → $new"; run "mv '$old' '$new'"
   else
+    local alt="storage/backups/kits-alt-$TS/$(echo "$old" | tr '/' '-')"   # außerhalb des Webroots
     for d in "$old"/*/; do
-      [ -d "$d" ] || continue; n=$(basename "$d")
-      if [ -e "$new/$n" ]; then echo "  $old/$n: liegt schon in $new/ – bleibt als Sicherung in $old.alt-$TS/"; run "mkdir -p '$old.alt-$TS' && mv '$d' '$old.alt-$TS/'";
-      else echo "▸ $old/$n → $new/$n"; run "mv '$d' '$new/$n'"; fi
+      d="${d%/}"; [ -d "$d" ] || continue; n=$(basename "$d")
+      if [ -e "$new/$n" ]; then echo "  $d: liegt schon in $new/ – alte Fassung nach $alt/"; run "mkdir -p '$alt' && mv '$d' '$alt/'";
+      else echo "▸ $d → $new/$n"; run "mv '$d' '$new/$n'"; fi
     done
     run "rmdir '$old' 2>/dev/null || true"
   fi

@@ -108,6 +108,12 @@ leitet `public/index.php` mit 301 auf `/kits/…` um, sobald die Datei dort lieg
   (nur wenn dort noch nichts liegt; sonst nur fehlende Kits), legt Übergangs-Links `themes → kits` an
   (`--no-symlink` ohne) und leert den Seiten-Cache (`cache:clear --all`, danach `health --all`).
   Lokal: `deploy/migrate-kits.sh --local [ordner]`. Mehrfaches Ausführen ändert nichts.
+- **Seite mit der Adresse `/kits`?** Der Ordner `public/kits/` liegt im Webroot – Apache und nginx beantworten `/kits`
+  dann selbst (301 auf `/kits/`, danach 403), die Seite wäre nicht mehr erreichbar. Die Seite behält ihre Adresse
+  (Speichern bleibt möglich), braucht aber eine Server-Regel, die genau diese Adresse an PHP gibt – vor der Umstellung eintragen:
+  Apache (Plesk: „Zusätzliche Apache-Anweisungen“, HTTP und HTTPS):
+  `<Directory "/var/www/vhosts/<domain>/httpdocs/public/kits">` `DirectorySlash Off` `DirectoryIndex /index.php` `</Directory>`;
+  nur nginx: `location = /kits { rewrite ^ /index.php last; }`. Alternative: die Seite umbenennen (Weiterleitung anlegen).
 - Wer beim Hochladen per rsync `--delete` nutzt: `themes/` und `public/themes/` bis zur Umstellung ausnehmen, sonst
   verschwinden eigene Kits, die nicht im hochgeladenen Stand liegen.
 

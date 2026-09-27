@@ -113,7 +113,7 @@ final class PageController extends AdminController
         }
         $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
         if (!$page || !$page['is_home']) {
-            if (in_array($slug, $reserved, true)) {
+            if (in_array($slug, $reserved, true) && $slug !== ($page['slug'] ?? null)) {   // bestehende Seiten behalten ihre Adresse
                 $errors['slug'] = 'Diese Adresse ist reserviert.';
             } elseif (Pages::slugTaken($slug, $parentId, $page ? (int) $page['id'] : null, $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null))) {
                 $errors['slug'] = 'Auf dieser Ebene gibt es schon eine Seite mit dieser Adresse.';

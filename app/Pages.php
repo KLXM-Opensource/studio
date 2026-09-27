@@ -75,7 +75,10 @@ final class Pages
     {
         // Oberste Ebene: Namen von Ordnern/Dateien in public/ (kits, assets, media …) liefert der Webserver selbst aus –
         // eine Seite dort wäre nie erreichbar (Apache/nginx antworten mit 301/403). Solche Adressen gelten als vergeben.
-        if (!$parentId && $slug !== '' && file_exists(ROOT . '/public/' . $slug)) return true;
+        // Ausnahme: eine bestehende Seite behält ihre Adresse (z. B. Seite „kits“ vor dem Ordner public/kits) – Server-Regel nötig,
+        // siehe Entwicklerhandbuch → Staging & Deploy → Umstellung themes/ → kits/
+        if (!$parentId && $slug !== '' && file_exists(ROOT . '/public/' . $slug)
+            && !($exceptId && ($own = self::find($exceptId)) && $own['slug'] === $slug && !$own['parent_id'])) return true;
         $sql = 'SELECT id FROM pages WHERE slug = ? AND ' . ($parentId ? 'parent_id = ?' : 'parent_id IS NULL') . ' AND ' . Lang::sql();
         $params = $parentId ? [$slug, $parentId, Lang::norm($lang)] : [$slug, Lang::norm($lang)];
         if ($lang === null && $exceptId && ($own = self::find($exceptId))) {
