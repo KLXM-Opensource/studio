@@ -205,6 +205,8 @@ function initMedia(scope = d) {
 d.addEventListener('input', e => {
   const t = pathTarget(e);   // auch in Schatten-Wurzeln (Seitenleisten auf der Website)
   if (!t) return;
+  if (t.matches('[data-color-none]')) { const txt = t.getRootNode().getElementById(t.dataset.colorNone), sw = t.closest('.f-color'); const pick = sw.querySelector('[data-color-for]'); txt.value = t.checked ? 'transparent' : pick.value.toUpperCase(); sw.classList.toggle('is-transparent', t.checked); txt.dispatchEvent(new Event('input', { bubbles: true })); }
+  if (t.matches('[data-color-for]')) { const none = t.closest('.f-color').querySelector('[data-color-none]'); if (none) { none.checked = false; t.closest('.f-color').classList.remove('is-transparent'); } }
   if (t.matches('[data-color-for]')) { const txt = t.getRootNode().getElementById(t.dataset.colorFor); txt.value = t.value.toUpperCase(); txt.dispatchEvent(new Event('input', { bubbles: true })); }
   else if (t.matches('.f-color input[type=text]') && /^#[0-9a-f]{6}$/i.test(t.value)) t.previousElementSibling.value = t.value;
 });

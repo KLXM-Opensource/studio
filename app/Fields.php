@@ -267,6 +267,7 @@ final class Fields
                 return [$vals, null];
             case 'color':
                 if ($s === '') return [$f['default'] ?? '', null];
+                if (!empty($f['transparent']) && strtolower($s) === 'transparent') return ['transparent', null];   // 'transparent' => true erlaubt „durchsichtig“
                 if (preg_match('~^#?([0-9a-f]{3})$~i', $s, $m3)) $s = '#' . $m3[1][0] . $m3[1][0] . $m3[1][1] . $m3[1][1] . $m3[1][2] . $m3[1][2];
                 if ($s[0] !== '#') $s = '#' . $s;
                 return [strtoupper($s), preg_match('~^#[0-9A-F]{6}$~i', $s) ? null : self::msg('„{label}“: Farbe im Format #RRGGBB.', ['label' => $label])];
@@ -432,8 +433,12 @@ final class Fields
             'select' => !empty($f['relation'])
                 ? '<span class="f-relselect" data-relation="' . e($f['relation']['create']) . '" data-singular="' . e($f['relation']['singular']) . '">' . self::renderSelect($id, $inputName, self::options($f), $v, $aria, !$req) . '</span>'
                 : self::renderSelect($id, $inputName, self::options($f), $v, $aria, !$req),
-            'color' => '<span class="f-color"><input type="color" value="' . e($v ?: '#000000') . '" aria-hidden="true" tabindex="-1" data-color-for="' . $id . '">'
-                . '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '" maxlength="7" pattern="#[0-9A-Fa-f]{6}" spellcheck="false"' . $aria . '></span>',
+            'color' => !empty($f['transparent'])
+                ? '<span class="f-color' . ($v === 'transparent' ? ' is-transparent' : '') . '"><input type="color" value="' . e($v && $v !== 'transparent' ? $v : '#FFFFFF') . '" aria-hidden="true" tabindex="-1" data-color-for="' . $id . '">'
+                    . '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '" maxlength="11" pattern="#[0-9A-Fa-f]{6}|transparent" spellcheck="false"' . $aria . '>'
+                    . '<label class="f-color__none"><input type="checkbox" data-color-none="' . $id . '"' . ($v === 'transparent' ? ' checked' : '') . '> ' . e(__('Transparent')) . '</label></span>'
+                : '<span class="f-color"><input type="color" value="' . e($v ?: '#000000') . '" aria-hidden="true" tabindex="-1" data-color-for="' . $id . '">'
+                    . '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '" maxlength="7" pattern="#[0-9A-Fa-f]{6}" spellcheck="false"' . $aria . '></span>',
             'icon' => Icons::picker($id, $inputName, $v, ['optional' => !$req, 'attrs' => $aria]),
             'geo' => self::renderGeo($id, $inputName, $v, $aria, $f),
             'iban' => '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v !== '' ? Iban::format($v) : '') . '" maxlength="42" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="DE00 0000 0000 0000 0000 00" data-iban' . $aria . '>',

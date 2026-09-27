@@ -129,7 +129,10 @@ final class AppIcons
         imagefill($img, 0, 0, imagecolorallocatealpha($img, 0, 0, 0, 127));
         imagealphablending($img, true);
         imagesavealpha($img, true);
-        $bg = self::color($img, $cfg['bg']);
+        // Transparent nur, wo Plattformen es zeigen: Browser-Tab/Android („any“); iOS und „maskable“ brauchen eine Fläche
+        $bg = $cfg['bg'] === 'transparent'
+            ? ($purpose === 'any' ? imagecolorallocatealpha($img, 0, 0, 0, 127) : self::color($img, '#FFFFFF'))
+            : self::color($img, $cfg['bg']);
 
         $content = $purpose === 'maskable' ? 0.8 : ($purpose === 'apple' ? 0.9 : 1.0);
         $source = $cfg['mode'] === 'image' && $cfg['image'] ? Media::find($cfg['image']) : null;

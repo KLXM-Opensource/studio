@@ -630,6 +630,10 @@ img.media-vthumb{object-fit:cover}
 .f .f-color input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 .f .f-color input[type=color]::-webkit-color-swatch{border:0;border-radius:6px}
 .f .f-color input[type=text]{width:140px;font-family:ui-monospace,Menlo,monospace;text-transform:uppercase}
+.f-color__none{display:inline-flex;gap:6px;align-items:center;font-size:.9em;white-space:nowrap}
+.f .f-color.is-transparent input[type=color]{background:repeating-conic-gradient(#c9ccd3 0 25%,#fff 0 50%) 50%/12px 12px}
+.f .f-color.is-transparent input[type=color]::-webkit-color-swatch{opacity:0}
+.f .f-color.is-transparent input[type=text]{text-transform:none}
 
 /* App-Icon-Vorschau */
 .ai-preview{margin-top:22px;padding:18px;border-radius:10px;background:#F6F6F7}
