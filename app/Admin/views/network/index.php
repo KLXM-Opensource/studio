@@ -1,6 +1,8 @@
 <?php
 /**
  * Netzwerk-Übersicht: alle Websites der Installation (Core\Network\Stats), Netzwerk-Konten, geteilte Ressourcen, Protokoll.
+ * Karten je Website mit App-Icon (Core\Network\SiteIcon), Status, Inhalten, Aktivität und Betrieb; Stile in resources/css/network.css,
+ * Filter/Suche/Ansicht in resources/js/_network.js.
  * @var array $stats  @var array $warn  @var array $accounts  @var array $log  @var array $shared  @var array $themes  @var array $me  @var ?array $newSite
  */
 $title = __('Netzwerk');
@@ -11,12 +13,31 @@ $size = function (?int $b): string {
     }
     return (string) $b;
 };
-$when = fn($t) => $t ? date('d.m.Y H:i', is_int($t) ? $t : (int) strtotime((string) $t)) : '–';
+$ts = fn($t): int => is_int($t) ? $t : (int) strtotime((string) $t);
+$when = fn($t) => $t ? date('d.m.Y H:i', $ts($t)) : '–';
+// Relative Zeitangabe („vor 3 Std.“) mit genauem Datum als <time> + title
+$ago = function ($t) use ($ts, $when): string {
+    if (!$t) return '–';
+    $d = time() - $ts($t);
+    $txt = match (true) {
+        $d < 90 => __('gerade eben'),
+        $d < 3600 => __('vor {n} Min.', ['n' => (int) round($d / 60)]),
+        $d < 86400 => __('vor {n} Std.', ['n' => (int) round($d / 3600)]),
+        $d < 2 * 86400 => __('gestern'),
+        $d < 45 * 86400 => __('vor {n} Tagen', ['n' => (int) floor($d / 86400)]),
+        default => date('d.m.Y', $ts($t)),
+    };
+    return '<time datetime="' . e(date('c', $ts($t))) . '" title="' . e($when($t)) . '">' . e($txt) . '</time>';
+};
 $envLabel = ['production' => __('Live'), 'staging' => __('Staging'), 'development' => __('Entwicklung')];
 $nWarn = count(array_filter($warn));
 $nMaint = count(array_filter($stats, fn($s) => !empty($s['maintenance'])));
+$nOff = count(array_filter($stats, fn($s) => ($s['environment'] ?? 'production') !== 'production' || !empty($s['noindex'])));
 $inbox = array_sum(array_map(fn($s) => (int) ($s['inbox_new'] ?? 0), $stats));
-$bytes = array_sum(array_map(fn($s) => (int) ($s['db_size'] ?? 0) + (int) ($s['media_size'] ?? 0), $stats));
+$review = array_sum(array_map(fn($s) => (int) ($s['review_pending'] ?? 0), $stats));
+$pools = array_column($shared['pools'], null, 'key');
+$poolBytes = array_sum(array_map(fn($p) => (int) ($p['size'] ?? 0), $pools));
+$bytes = array_sum(array_map(fn($s) => (int) ($s['db_size'] ?? 0) + (int) ($s['media_size'] ?? 0), $stats)) + $poolBytes;
 $oldest = min(array_map(fn($s) => (int) ($s['at'] ?? time()), $stats) ?: [time()]);
 $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' . $a);
 ?>
@@ -26,79 +47,127 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
   <a class="adm-btn adm-btn--ghost adm-btn--small" href="<?= e(url('/admin/network?refresh=1')) ?>" title="<?= e(__('Stand: {time}', ['time' => date('H:i:s', $oldest)])) ?>"><?= e(__('Aktualisieren')) ?></a>
 </header>
 
-<div class="adm-stats net-sum">
-  <div class="adm-stat"><strong><?= count($stats) ?></strong><span><?= e(__('Websites')) ?></span></div>
-  <a class="adm-stat<?= $nWarn ? ' net-stat--warn' : '' ?>" href="#websites" data-net-show="warn"><strong><?= $nWarn ?></strong><span><?= e(__('mit Hinweisen')) ?></span></a>
-  <div class="adm-stat"><strong><?= $nMaint ?></strong><span><?= e(__('im Wartungsmodus')) ?></span></div>
-  <div class="adm-stat"><strong><?= $inbox ?></strong><span><?= e(__('neue Anfragen (alle Websites)')) ?></span></div>
-  <div class="adm-stat"><strong><?= array_sum(array_map(fn($s) => (int) ($s['review_pending'] ?? 0), $stats)) ?></strong><span><?= e(__('Änderungen zur Freigabe (API, MCP, KI)')) ?></span></div>
-  <div class="adm-stat"><strong><?= e($size($bytes)) ?></strong><span><?= e(__('Speicher (Datenbanken + Medien)')) ?></span></div>
-</div>
+<?php // Zusammenfassung: eine Zeile, Nullen ruhig; Hinweise/Wartung/Nicht live filtern die Karten ?>
+<ul class="net-strip" aria-label="<?= e(__('Zusammenfassung')) ?>">
+  <li class="net-strip__item net-strip__item--lead"><strong><?= count($stats) ?></strong> <span><?= e(__('Websites')) ?></span></li>
+  <li class="net-strip__item<?= $nWarn ? ' is-warn' : ' is-calm' ?>"><a href="#websites" data-net-show="warn"><strong><?= $nWarn ?></strong> <span><?= e(__('mit Hinweisen')) ?></span></a></li>
+  <li class="net-strip__item<?= $nMaint ? ' is-warn' : ' is-calm' ?>"><a href="#websites" data-net-show="maintenance"><strong><?= $nMaint ?></strong> <span><?= e(__('im Wartungsmodus')) ?></span></a></li>
+  <li class="net-strip__item<?= $nOff ? '' : ' is-calm' ?>"><a href="#websites" data-net-show="staging"><strong><?= $nOff ?></strong> <span><?= e(__('nicht live')) ?></span></a></li>
+  <li class="net-strip__item<?= $inbox ? ' is-hot' : ' is-calm' ?>"><strong><?= $inbox ?></strong> <span><?= e(__('neue Anfragen')) ?></span></li>
+  <li class="net-strip__item<?= $review ? ' is-hot' : ' is-calm' ?>"><strong><?= $review ?></strong> <span title="<?= e(__('Änderungen zur Freigabe (API, MCP, KI)')) ?>"><?= e(__('zur Freigabe')) ?></span></li>
+  <li class="net-strip__item net-strip__item--end"><strong><?= e($size($bytes)) ?></strong> <span title="<?= e(__('Datenbanken, Medien der Websites und geteilte Pools')) ?>"><?= e(__('Speicher gesamt')) ?></span></li>
+</ul>
 
 <section id="websites" aria-labelledby="net-sites-h">
   <div class="net-bar">
     <h2 id="net-sites-h" class="adm-sr"><?= e(__('Websites')) ?></h2>
-    <label class="net-search"><span class="adm-sr"><?= e(__('Websites durchsuchen')) ?></span><input type="search" data-net-q placeholder="<?= e(__('Name, Domain, Kit …')) ?>" autocomplete="off"></label>
+    <label class="net-search"><span class="adm-sr"><?= e(__('Websites durchsuchen')) ?></span><?= icon('magnifying-glass', ['class' => 'net-search__ico']) ?><input type="search" data-net-q placeholder="<?= e(__('Name, Domain, Kit …')) ?>" autocomplete="off"></label>
     <div class="net-seg" role="group" aria-label="<?= e(__('Filter')) ?>">
       <?php foreach (['all' => __('Alle'), 'warn' => __('Mit Hinweisen'), 'maintenance' => __('Wartung'), 'staging' => __('Nicht live')] as $fk => $fl): ?>
       <button type="button" data-net-filter="<?= e($fk) ?>" aria-pressed="<?= $fk === 'all' ? 'true' : 'false' ?>"><?= e($fl) ?></button>
       <?php endforeach; ?>
     </div>
     <p class="adm-muted net-count" data-net-count aria-live="polite"></p>
+    <div class="net-seg net-view" role="group" aria-label="<?= e(__('Ansicht')) ?>" data-net-views hidden>
+      <button type="button" data-net-view="grid" aria-pressed="true" title="<?= e(__('Kacheln')) ?>"><?= icon('squares-four') ?><span class="adm-sr"><?= e(__('Kacheln')) ?></span></button>
+      <button type="button" data-net-view="list" aria-pressed="false" title="<?= e(__('Liste')) ?>"><?= icon('list-bullets') ?><span class="adm-sr"><?= e(__('Liste')) ?></span></button>
+    </div>
   </div>
 
   <div class="net-grid" data-net-grid>
-  <?php foreach ($stats as $k => $s): $w = $warn[$k] ?? []; $env = $s['environment'] ?? 'production'; $hosts = $s['hosts'] ?? [];
-    $search = mb_strtolower(implode(' ', [$k, $s['label'] ?? '', implode(' ', $hosts), $s['theme'] ?? '', $s['theme_label'] ?? '', $s['preset'] ?? ''])); ?>
-    <article class="net-card<?= $w ? ' has-warn' : '' ?><?= !empty($s['maintenance']) ? ' is-maint' : '' ?>" id="site-<?= e($k) ?>" data-net-card
-      data-q="<?= e($search) ?>" data-warn="<?= $w ? '1' : '0' ?>" data-maintenance="<?= !empty($s['maintenance']) ? '1' : '0' ?>" data-staging="<?= $env !== 'production' ? '1' : '0' ?>" aria-labelledby="net-h-<?= e($k) ?>">
+  <?php foreach ($stats as $k => $s):
+    $w = $warn[$k] ?? []; $env = $s['environment'] ?? 'production'; $hosts = $s['hosts'] ?? []; $name = $s['label'] ?? $k;
+    $maint = !empty($s['maintenance']); $noindex = !empty($s['noindex']); $offline = $env !== 'production' || $noindex;
+    $broken = isset($s['error']) || (isset($s['checks']) && in_array(false, $s['checks'], true));
+    // Status: Störung > Wartung > Hinweise > Nicht live > in Ordnung (Wartung steht auch in den Hinweisen – dort nicht doppelt zählen)
+    $wOther = array_values(array_filter($w, fn($m) => $m !== __('Wartungsmodus an')));
+    [$pill, $pillText] = match (true) {
+        $broken => ['err', __('Störung')],
+        $maint => ['warn', __('Wartung')],
+        (bool) $wOther => ['warn', count($wOther) === 1 ? __('1 Hinweis') : __('{n} Hinweise', ['n' => count($wOther)])],
+        $offline => ['off', __('Nicht live')],
+        default => ['ok', __('Alles in Ordnung')],
+    };
+    $pub = rtrim((string) ($s['public_url'] ?? $s['url'] ?? ''), '/');
+    $pu = parse_url($pub) ?: [];
+    $primary = isset($pu['host']) ? strtolower($pu['host'] . (isset($pu['port']) ? ':' . $pu['port'] : '')) : ($hosts[0] ?? '');
+    $landingHosts = array_values((array) (\Core\Sites::all()[$k]['landing_hosts'] ?? []));
+    $others = array_values(array_filter(array_merge($hosts, $landingHosts), fn($h) => $h !== $primary));
+    $ico = \Core\Network\SiteIcon::for($k, $s);
+    $ni = (int) ($s['inbox_new'] ?? 0); $rp = isset($s['review_pending']) ? (int) $s['review_pending'] : null; $so = isset($s['support_open']) ? (int) $s['support_open'] : null;
+    $bk = !empty($s['backup']) ? (int) $s['backup']['at'] : null; $bkOld = $bk === null || $bk < time() - 2 * 86400;
+    $search = mb_strtolower(implode(' ', [$k, $name, implode(' ', $hosts), implode(' ', $landingHosts), $s['theme'] ?? '', $s['theme_label'] ?? '', $s['preset'] ?? ''])); ?>
+    <article class="net-card net-card--<?= e($pill) ?>" id="site-<?= e($k) ?>" data-net-card
+      data-q="<?= e($search) ?>" data-warn="<?= $w ? '1' : '0' ?>" data-maintenance="<?= $maint ? '1' : '0' ?>" data-staging="<?= $offline ? '1' : '0' ?>" aria-labelledby="net-h-<?= e($k) ?>">
       <header class="net-card__head">
-        <span class="net-dot<?= $w ? ' is-warn' : '' ?><?= isset($s['error']) || (isset($s['checks']) && in_array(false, $s['checks'], true)) ? ' is-err' : '' ?>" aria-hidden="true"></span>
+        <img class="net-ico<?= $ico['fallback'] ? ' net-ico--letters' : '' ?>" src="<?= e($ico['src']) ?>" width="44" height="44" alt="" decoding="async">
         <div class="net-card__title">
-          <h3 id="net-h-<?= e($k) ?>"><?= e($s['label'] ?? $k) ?></h3>
-          <p><code><?= e($k) ?></code>
-            <?php if (!empty($s['network'])): ?><span class="adm-badge us-net"><?= e(__('Netzwerk-Website')) ?></span><?php endif; ?>
-            <?php if ($env !== 'production'): ?><span class="adm-badge adm-badge--adm-warn"><?= e($envLabel[$env] ?? $env) ?></span><?php endif; ?>
-            <?php if (!empty($s['maintenance'])): ?><span class="adm-badge adm-badge--adm-warn"><?= e(__('Wartung')) ?></span><?php endif; ?></p>
+          <h3 id="net-h-<?= e($k) ?>"><?= e($name) ?></h3>
+          <?php if ($primary !== ''): ?>
+          <a class="net-card__host" href="<?= e($pub . '/') ?>" target="_blank" rel="noopener noreferrer"><?= e($primary) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
+          <?php else: ?><span class="net-card__host adm-muted"><?= e(__('alle übrigen Domains')) ?></span><?php endif; ?>
         </div>
+        <span class="net-pill net-pill--<?= e($pill) ?>"><?= icon($pill === 'ok' ? 'check-circle' : ($pill === 'off' ? 'eye' : 'warning')) ?><?= e($pillText) ?></span>
       </header>
-      <p class="net-hosts"><?php if ($hosts): ?><?php foreach ($hosts as $i => $h): ?><?= $i ? ', ' : '' ?><?= e($h) ?><?php endforeach; ?><?php else: ?><span class="adm-muted"><?= e(__('alle übrigen Domains')) ?></span><?php endif; ?></p>
-      <details class="net-hostsedit">
-        <summary class="adm-link"><?= e(__('Domains bearbeiten')) ?><span class="sr-only"> – <?= e($s['label'] ?? $k) ?></span></summary>
-        <?php $landingHosts = array_values((array) (\Core\Sites::all()[$k]['landing_hosts'] ?? [])); ?>
+      <p class="net-tags">
+        <code class="net-key" title="<?= e(__('Kurzname der Website')) ?>"><?= e($k) ?></code>
+        <?php if (!empty($s['network'])): ?><span class="net-tag net-tag--net"><?= e(__('Netzwerk-Website')) ?></span><?php endif; ?>
+        <span class="net-tag<?= $env === 'production' ? ' net-tag--live' : ' net-tag--warn' ?>"><?= e($envLabel[$env] ?? $env) ?></span>
+        <?php if ($noindex): ?><span class="net-tag net-tag--muted" title="<?= e(__('Suchmaschinen sollen die Website nicht aufnehmen')) ?>">noindex</span><?php endif; ?>
+        <?php if ($maint): ?><span class="net-tag net-tag--warn"><?= e(__('Wartungsmodus')) ?></span><?php endif; ?>
+      </p>
+      <?php if ($wOther || $broken): ?>
+      <ul class="net-warn"><?php foreach ($wOther ?: $w as $msg): ?><li><?= icon('warning') ?><?= e($msg) ?></li><?php endforeach; ?></ul>
+      <?php endif; ?>
+
+      <div class="net-facts">
+        <section class="net-fact" aria-labelledby="net-f1-<?= e($k) ?>">
+          <h4 id="net-f1-<?= e($k) ?>" class="net-fact__h"><?= icon('files') ?><?= e(__('Inhalte')) ?></h4>
+          <p class="net-fact__big"><strong><?= (int) ($s['pages'] ?? 0) ?></strong> <?= e(__('Seiten')) ?></p>
+          <p class="net-fact__sub"><?= (int) ($s['editors'] ?? 0) === 1 ? e(__('1 Konto')) : e(__('{n} Konten', ['n' => (int) ($s['editors'] ?? 0)])) ?> · <?= e(__('geändert')) ?> <?= $ago($s['last_change'] ?? null) ?></p>
+        </section>
+        <section class="net-fact" aria-labelledby="net-f2-<?= e($k) ?>">
+          <h4 id="net-f2-<?= e($k) ?>" class="net-fact__h"><?= icon('tray') ?><?= e(__('Aktivität')) ?></h4>
+          <?php if ($ni): ?><p class="net-fact__big is-hot"><strong><?= $ni ?></strong> <?= e($ni === 1 ? __('neue Anfrage') : __('neue Anfragen')) ?></p>
+          <?php else: ?><p class="net-fact__calm"><?= e(__('Keine neuen Anfragen')) ?></p><?php endif; ?>
+          <p class="net-fact__sub"><?php if ($rp !== null): ?><?= $rp ? '<b class="is-hot">' . e(__('{n} zur Freigabe', ['n' => $rp])) . '</b>' : e(__('nichts zur Freigabe')) ?><?php endif; ?><?php if ($so !== null): ?><?= $rp !== null ? ' · ' : '' ?><?= $so ? '<b>' . e(__('Support: {n} offen', ['n' => $so])) . '</b>' : e(__('Support: nichts offen')) ?><?php endif; ?></p>
+        </section>
+        <section class="net-fact net-fact--wide" aria-labelledby="net-f3-<?= e($k) ?>">
+          <h4 id="net-f3-<?= e($k) ?>" class="net-fact__h"><?= icon('gear-six') ?><?= e(__('Betrieb')) ?></h4>
+          <dl class="net-ops">
+            <dt><?= e(__('Kit')) ?></dt><dd><?= e($s['theme_label'] ?? ($s['theme'] ?? '–')) ?></dd>
+            <dt><?= e(__('Funktionen')) ?></dt><dd title="<?= e(implode(', ', $s['features_off'] ?? [])) ?>"><?= e(ucfirst((string) ($s['preset'] ?? 'full'))) ?><?= !empty($s['features_off']) ? ' · ' . e(__('{n} aus', ['n' => count($s['features_off'])])) : '' ?><?= !empty($s['extensions']) ? ' · ' . e(implode(', ', $s['extensions'])) : '' ?><?= !empty($s['features_delegated']) ? ' · ' . e(__('Website schaltet selbst')) : '' ?></dd>
+            <dt><?= e(__('Speicher')) ?></dt><dd><?= e($size(isset($s['db_size']) ? (int) $s['db_size'] : null)) ?> <?= e(__('DB')) ?> · <?= e($size((int) ($s['media_size'] ?? 0))) ?> <?= e(__('eigene Medien')) ?>
+              <?php foreach ((array) ($s['pools'] ?? []) as $pk): $p = $pools[$pk] ?? null; if (!$p) continue; $pn = count($p['sites']); ?>
+              <span class="net-pool"><?= icon('images') ?><span><?= e(__('Pool „{pool}“', ['pool' => $p['label']])) ?> <?= e($size((int) ($p['size'] ?? 0))) ?> · <?= e($pn > 1 ? __('geteilt mit {n} Websites', ['n' => $pn]) : __('nur diese Website')) ?></span></span>
+              <?php endforeach; ?></dd>
+            <dt><?= e(__('Sicherung')) ?></dt><dd<?= $bkOld && $env === 'production' ? ' class="is-warn"' : '' ?>><?= $bk ? $ago($bk) : e(__('keine')) ?><?= $bkOld && $env === 'production' ? ' ' . icon('warning', ['label' => __('Älter als 2 Tage')]) : '' ?></dd>
+          </dl>
+        </section>
+      </div>
+
+      <details class="net-domains">
+        <summary class="adm-link"><?= $others ? e(__('+{n} weitere Adressen', ['n' => count($others)])) : e(__('Domains bearbeiten')) ?><span class="adm-sr"> – <?= e($name) ?></span></summary>
+        <ul class="net-domains__list">
         <?php foreach (array_merge($hosts, $landingHosts) as $h): ?>
-        <form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" data-confirm="<?= e(__('Domain {host} von {site} entfernen?', ['host' => $h, 'site' => $s['label'] ?? $k])) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="remove"><input type="hidden" name="host" value="<?= e($h) ?>"><code><?= e($h) ?></code><?= in_array($h, $landingHosts, true) ? ' <span class="adm-badge adm-badge--muted">' . e(__('Landing')) . '</span>' : '' ?> <button type="submit" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Entfernen')) ?><span class="sr-only"> <?= e($h) ?></span></button></form>
+          <li><form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" data-confirm="<?= e(__('Domain {host} von {site} entfernen?', ['host' => $h, 'site' => $name])) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="remove"><input type="hidden" name="host" value="<?= e($h) ?>"><code><?= e($h) ?></code><?= $h === $primary ? ' <span class="net-tag net-tag--muted">' . e(__('Hauptadresse')) . '</span>' : '' ?><?= in_array($h, $landingHosts, true) ? ' <span class="net-tag net-tag--muted">' . e(__('Landing')) . '</span>' : '' ?> <button type="submit" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Entfernen')) ?><span class="adm-sr"> <?= e($h) ?></span></button></form></li>
         <?php endforeach; ?>
-        <form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="add">
+        </ul>
+        <form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" class="net-domains__add"><?= csrf_field() ?><input type="hidden" name="op" value="add">
           <label for="net-host-<?= e($k) ?>"><?= e(__('Weitere Domain (z. B. für eine Landingpage)')) ?></label>
           <input id="net-host-<?= e($k) ?>" name="host" required placeholder="kampagne.beispiel.de" autocomplete="off" spellcheck="false">
           <label class="f-check"><input type="checkbox" name="landing" value="1" checked> <span><?= e(__('Als Landing-Domain (Hauptadresse der Website bleibt)')) ?></span></label>
           <button type="submit" class="adm-btn adm-btn--small"><?= e(__('Hinzufügen')) ?></button></form>
         <p class="adm-muted"><?= e(__('Ändert config/sites/{site}.php (Sicherung .bak). DNS und Hosting (Plesk: Alias bzw. zusätzliche Domain) richtet die Agentur ein.', ['site' => $k])) ?></p>
       </details>
-      <?php if ($w): ?>
-      <ul class="net-warn"><?php foreach ($w as $msg): ?><li><?= e($msg) ?></li><?php endforeach; ?></ul>
-      <?php else: ?>
-      <p class="net-ok"><?= e(__('Alles in Ordnung')) ?></p>
-      <?php endif; ?>
-      <dl class="net-dl">
-        <dt><?= e(__('Kit')) ?></dt><dd><?= e($s['theme_label'] ?? ($s['theme'] ?? '–')) ?></dd>
-        <dt><?= e(__('Funktionsumfang')) ?></dt><dd title="<?= e(implode(', ', $s['features_off'] ?? [])) ?>"><?= e(ucfirst((string) ($s['preset'] ?? 'full'))) ?><?= !empty($s['features_off']) ? ' · ' . e(__('{n} aus', ['n' => count($s['features_off'])])) : '' ?><?= !empty($s['extensions']) ? ' · ' . e(implode(', ', $s['extensions'])) : '' ?><?= !empty($s['features_delegated']) ? ' · ' . e(__('Website schaltet selbst')) : '' ?></dd>
-        <dt><?= e(__('Letzte Änderung')) ?></dt><dd><?= e($when($s['last_change'] ?? null)) ?></dd>
-        <dt><?= e(__('Redaktion')) ?></dt><dd><?= (int) ($s['editors'] ?? 0) ?> <?= e(__('Konten')) ?> · <?= (int) ($s['pages'] ?? 0) ?> <?= e(__('Seiten')) ?></dd>
-        <dt><?= e(__('Neue Anfragen')) ?></dt><dd><?php $ni = (int) ($s['inbox_new'] ?? 0); ?><?= $ni ? '<strong>' . $ni . '</strong>' : '0' ?></dd>
-        <?php if (isset($s['review_pending'])): $rp = (int) $s['review_pending']; ?><dt><?= e(__('Eingereicht')) ?></dt><dd><?= $rp ? '<strong>' . e(__('{n} zur Freigabe', ['n' => $rp])) . '</strong>' : e(__('nichts offen')) ?></dd><?php endif; ?>
-        <?php if (isset($s['support_open'])): ?><dt><?= e(__('Support')) ?></dt><dd><?= e(__('{n} offen', ['n' => (int) $s['support_open']])) ?></dd><?php endif; ?>
-        <dt><?= e(__('Speicher')) ?></dt><dd><?= e($size(isset($s['db_size']) ? (int) $s['db_size'] : null)) ?> <?= e(__('DB')) ?> · <?= e($size((int) ($s['media_size'] ?? 0))) ?> <?= e(__('Medien')) ?></dd>
-        <dt><?= e(__('Sicherung')) ?></dt><dd><?= !empty($s['backup']) ? e($when((int) $s['backup']['at'])) : '<span class="adm-muted">' . e(__('keine')) . '</span>' ?></dd>
-      </dl>
+
       <div class="net-actions">
-        <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><button class="adm-btn adm-btn--primary adm-btn--small" type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(__('Öffnen')) ?></button></form>
-        <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(($s['public_url'] ?? $s['url'] ?? '') . '/') ?>" target="_blank" rel="noopener noreferrer"><?= e(__('Website ansehen')) ?> ↗</a>
+        <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><button class="adm-btn adm-btn--primary adm-btn--small" type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(__('Öffnen')) ?><span class="adm-sr"> – <?= e($name) ?></span></button></form>
+        <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e($pub . '/') ?>" target="_blank" rel="noopener noreferrer"><?= e(__('Website ansehen')) ?> <?= icon('arrow-square-out') ?><span class="adm-sr"> – <?= e($name) ?> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
         <details class="net-more">
-          <summary class="adm-btn adm-btn--small adm-btn--ghost" aria-label="<?= e(__('Weitere Aktionen für {site}', ['site' => $s['label'] ?? $k])) ?>"><?= e(__('Wartung')) ?> ▾</summary>
+          <summary class="adm-btn adm-btn--small adm-btn--ghost" aria-label="<?= e(__('Weitere Aktionen für {site}', ['site' => $name])) ?>"><?= e(__('Wartung')) ?> <?= icon('caret-down') ?></summary>
           <div class="net-more__menu">
-            <form method="post" action="<?= e($actionUrl($k, 'maintenance')) ?>"<?= empty($s['maintenance']) ? ' data-confirm="' . e(__('Wartungsmodus für {site} einschalten? Besucher sehen dann nur den Wartungshinweis.', ['site' => $s['label'] ?? $k])) . '"' : '' ?>><?= csrf_field() ?><input type="hidden" name="on" value="<?= empty($s['maintenance']) ? '1' : '0' ?>"><button type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(empty($s['maintenance']) ? __('Wartungsmodus an') : __('Wartungsmodus aus')) ?></button></form>
+            <form method="post" action="<?= e($actionUrl($k, 'maintenance')) ?>"<?= !$maint ? ' data-confirm="' . e(__('Wartungsmodus für {site} einschalten? Besucher sehen dann nur den Wartungshinweis.', ['site' => $name])) . '"' : '' ?>><?= csrf_field() ?><input type="hidden" name="on" value="<?= !$maint ? '1' : '0' ?>"><button type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(!$maint ? __('Wartungsmodus an') : __('Wartungsmodus aus')) ?></button></form>
             <form method="post" action="<?= e($actionUrl($k, 'backup')) ?>"><?= csrf_field() ?><button type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(__('Sicherung jetzt')) ?></button></form>
             <form method="post" action="<?= e($actionUrl($k, 'cache')) ?>"><?= csrf_field() ?><button type="submit"><?= e(__('Seiten-Cache leeren')) ?></button></form>
             <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><input type="hidden" name="path" value="/admin/funktionen"><button type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(__('Funktionen & Erweiterungen')) ?></button></form>
@@ -185,7 +254,7 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
     <?php if (!$shared['pools'] && !$shared['tables']): ?><p class="adm-muted"><?= e(__('Keine geteilten Medien oder Daten.')) ?></p><?php endif; ?>
     <?php if ($shared['pools']): ?>
     <h3 class="net-h3"><?= e(__('Geteilte Medien')) ?></h3>
-    <ul class="adm-list net-list"><?php foreach ($shared['pools'] as $p): ?><li><strong><?= e($p['label']) ?></strong> <code><?= e($p['key']) ?></code><span class="adm-muted"><?= $p['files'] === null ? '–' : e(__('{n} Dateien', ['n' => $p['files']])) ?><?= $p['sites'] ? ' · ' . e(implode(', ', $p['sites'])) : '' ?></span></li><?php endforeach; ?></ul>
+    <ul class="adm-list net-list"><?php foreach ($shared['pools'] as $p): ?><li><strong><?= e($p['label']) ?></strong> <code><?= e($p['key']) ?></code><span class="adm-muted"><?= $p['files'] === null ? '–' : e(__('{n} Dateien', ['n' => $p['files']])) ?><?= isset($p['size']) ? ' · ' . e($size((int) $p['size'])) : '' ?><?= $p['sites'] ? ' · ' . e(__('genutzt von {sites}', ['sites' => implode(', ', $p['sites'])])) : '' ?></span></li><?php endforeach; ?></ul>
     <?php endif; ?>
     <?php if ($shared['tables']): ?>
     <h3 class="net-h3"><?= e(__('Geteilte Daten')) ?></h3>

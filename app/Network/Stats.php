@@ -93,7 +93,8 @@ final class Stats
         if ($d['initialized']) {
             $db = $key === site()->key ? app()->db : new Database($dbCfg);
             $checks['db'] = (int) $db->fetchValue('SELECT 1') === 1;
-            $set = self::settings($db, ['sys.theme', 'sys.maintenance', 'sys.site_url', Features::UI_KEY, \Core\Extensions::UI_KEY, Features::DELEGATE_KEY]);
+            $set = self::settings($db, ['sys.theme', 'sys.maintenance', 'sys.site_url', Features::UI_KEY, \Core\Extensions::UI_KEY, Features::DELEGATE_KEY,
+                'sys.noindex', 'sys.icon_version', 'sys.icon_bg', 'sys.icon_text']);
             // Schalter der Verwaltung (Funktionen & Erweiterungen) – Preset und 'features' der Konfiguration gehen vor
             $cfgF = array_merge(Features::PRESETS[$preset] ?? [], (array) $cfg->get('features', []));
             foreach ((array) ($set[Features::UI_KEY] ?? []) as $fk => $on) if (!array_key_exists($fk, $cfgF)) $state[$fk] = (bool) $on;
@@ -104,6 +105,12 @@ final class Stats
             $d['features_delegated'] = (bool) ($set[Features::DELEGATE_KEY] ?? false);
             $d['theme'] = (string) ($set['sys.theme'] ?? '') ?: (string) ($cfg->get('theme') ?: $site->defaultTheme());
             $d['maintenance'] = (bool) ($set['sys.maintenance'] ?? false);
+            // Website ausgeblendet für Suchmaschinen (Grundeinstellung) – außerhalb von production ohnehin (noindex_site())
+            $d['noindex'] = (bool) ($set['sys.noindex'] ?? false) || $d['environment'] !== 'production';
+            // App-Icon (Core\AppIcons): Version für Cache-Busting, Farbe und Buchstaben für den Ersatz (SiteIcon)
+            $d['icon_version'] = (string) ($set['sys.icon_version'] ?? '');
+            $d['icon_bg'] = (string) ($set['sys.icon_bg'] ?? '');
+            $d['icon_text'] = (string) ($set['sys.icon_text'] ?? '');
             if (!empty($set['sys.site_url']) && empty((Sites::all()[$key] ?? [])['base_url'])) $d['public_url'] = rtrim((string) $set['sys.site_url'], '/');
             $cols = self::columns($db, 'users');
             // Schema älter als der Code? (neueste Spalten fehlen → php bin/console migrate --all)
@@ -140,8 +147,13 @@ final class Stats
         } else {
             $d['theme'] = (string) ($cfg->get('theme') ?: $site->defaultTheme());
             $d['maintenance'] = false;
+            $d['noindex'] = $d['environment'] !== 'production';
             $d['editors'] = 0;
         }
+        if (($d['icon_bg'] ?? '') === '') $d['icon_bg'] = self::themeValue($d['theme'], 'icon_bg');
+        if (($d['icon_text'] ?? '') === '') $d['icon_text'] = self::themeValue($d['theme'], 'icon_text');
+        // Geteilte Medien-Pools dieser Website (Konfiguration 'media_pools' oder Zuordnung in pool.json)
+        $d['pools'] = self::sitePools($key, (array) $cfg->get('media_pools', []));
         $req = self::themeRequires($d['theme']);
         $checks['theme'] = $req === '' || !preg_match('~^(>=|>|<=|<|=|==)?\s*([\d.]+)$~', $req, $m) || version_compare(CMS_VERSION, $m[2], ($m[1] ?? '') ?: '>=');
         $d['theme_label'] = Theme::available()[$d['theme']] ?? $d['theme'];
@@ -179,6 +191,31 @@ final class Stats
     {
         return $db->driver === 'mysql' ? array_column($db->fetchAll("SHOW COLUMNS FROM $table"), 'Field')
             : array_column($db->fetchAll("PRAGMA table_info($table)"), 'name');
+    }
+
+    /** Einfacher Vorgabewert aus theme.php (z. B. 'icon_bg' => '#0F6E68') – ohne die Datei auszuführen */
+    private static function themeValue(string $theme, string $name): string
+    {
+        $f = ROOT . '/themes/' . preg_replace('~[^a-z0-9_\-]~i', '', $theme) . '/theme.php';
+        return is_file($f) && preg_match("~'" . preg_quote($name, '~') . "'\s*=>\s*'([^']*)'~", (string) file_get_contents($f), $m) ? $m[1] : '';
+    }
+
+    /** @return list<string> Pools, die eine Website nutzt */
+    private static function sitePools(string $key, array $configured): array
+    {
+        $out = [];
+        foreach (array_keys(MediaPools::all()) as $p) {
+            if (in_array($p, $configured, true) || in_array($key, (array) (MediaPools::meta($p)['sites'] ?? []), true)) $out[] = $p;
+        }
+        return $out;
+    }
+
+    /** Zuletzt gespeicherte Kennzahlen ohne Neuberechnung (z. B. für Symbole im Website-Umschalter) */
+    public static function cached(string $key): ?array
+    {
+        $f = self::cacheFile($key);
+        $d = is_file($f) ? json_decode((string) @file_get_contents($f), true) : null;
+        return is_array($d) ? $d : null;
     }
 
     private static function themeRequires(string $theme): string
@@ -322,15 +359,37 @@ final class Stats
 
     // ================================================================= Geteilte Ressourcen (nur Anzahlen)
 
+    /** @return array{0:int,1:int} Bytes und Dateien eines Pool-Ordners (public/pools/{key}), SIZE_TTL zwischengespeichert */
+    public static function poolSize(string $key): array
+    {
+        $f = ROOT . '/storage/cache/network/pool-' . preg_replace('~[^a-z0-9_\-]~i', '', $key) . '.json';
+        $c = is_file($f) ? json_decode((string) @file_get_contents($f), true) : null;
+        if (is_array($c) && ($c['at'] ?? 0) > time() - self::SIZE_TTL) return [(int) $c['bytes'], (int) $c['files']];
+        [$bytes, $files] = self::dirSize(MediaPools::mediaDir($key));
+        if (!is_dir(dirname($f))) @mkdir(dirname($f), 0770, true);
+        @file_put_contents($f, json_encode(['bytes' => $bytes, 'files' => $files, 'at' => time()]), LOCK_EX);
+        return [$bytes, $files];
+    }
+
     public static function shared(): array
     {
         $pools = [];
+        // Welche Websites nutzen den Pool? Zuordnung in pool.json und 'media_pools' der Konfigurationen
+        $users = [];
+        foreach (array_keys(Sites::all()) as $sk) {
+            try {
+                foreach ((array) Network::config($sk)->get('media_pools', []) as $p) $users[(string) $p][] = $sk;
+            } catch (\Throwable) {
+            }
+        }
         foreach (MediaPools::all() as $k => $label) {
+            $sites = array_values(array_unique(array_merge((array) (MediaPools::meta($k)['sites'] ?? []), $users[$k] ?? [])));
+            [$bytes, $count] = self::poolSize($k);
             try {
                 $pools[] = ['key' => $k, 'label' => $label, 'files' => (int) MediaPools::db($k)->fetchValue('SELECT COUNT(*) FROM media'),
-                    'sites' => (array) (MediaPools::meta($k)['sites'] ?? [])];
+                    'sites' => $sites, 'size' => $bytes, 'disk_files' => $count];
             } catch (\Throwable) {
-                $pools[] = ['key' => $k, 'label' => $label, 'files' => null, 'sites' => []];
+                $pools[] = ['key' => $k, 'label' => $label, 'files' => null, 'sites' => $sites, 'size' => $bytes, 'disk_files' => $count];
             }
         }
         $tables = [];

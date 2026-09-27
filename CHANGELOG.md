@@ -6,6 +6,26 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Netzwerk-Übersicht neu gestaltet (Netzwerk-Administration → Alle Websites)
+- **App-Icon je Website** in der Kartenkopfzeile (44 px, Platz reserviert – kein Springen beim Laden) und im
+  Website-Umschalter der Seitenleiste (16 px). Neu `Core\Network\SiteIcon`: liest `icons/icon-192.png` bzw. `icon-32.png`
+  aus dem Medienordner der Website (von `Core\AppIcons` erzeugt). Weil sich alle Websites `public/` teilen, ist die
+  Adresse auf jeder Domain der Installation gültig (`/media/icons/…`, `/sites/{key}/media/icons/…`); Cache-Busting über
+  `sys.icon_version` der Website. Ohne Icon: Buchstaben-Kachel in der Markenfarbe (`sys.icon_bg` bzw. Vorgabe des Kits)
+  als SVG-data-URI – ohne Inline-Styles.
+- **Klarere Karten:** Name, Hauptadresse als Link (weitere Domains eingeklappt unter „+n weitere Adressen“, dort auch
+  bearbeiten), Kurzname, Umgebung (Live/Staging), `noindex` und ein Status mit Farbe und Text („Alles in Ordnung“,
+  „Hinweise“, „Wartung“, „Nicht live“, „Störung“). Kennzahlen in drei Gruppen: **Inhalte** (Seiten, Konten, letzte
+  Änderung relativ), **Aktivität** (neue Anfragen, Freigaben, Support – große Zahlen nur, wenn etwas offen ist),
+  **Betrieb** (Kit, Funktionen, Speicher, Sicherung mit Warnung ab 2 Tagen).
+- **Geteilte Medien-Pools** erscheinen je Website mit Größe und Zahl der nutzenden Websites („Pool „KLXM“ 172,9 MB ·
+  geteilt mit 2 Websites“) statt nur der eigenen Medien; Pool-Größe 15 min zwischengespeichert (`Stats::poolSize`),
+  „Geteilte Ressourcen“ zeigt die Größe ebenfalls. Gesamtspeicher = Datenbanken + Medien der Websites + Pools.
+- **Zusammenfassung als eine Zeile** statt sechs Kacheln; Nullen ruhig, Hinweise/Wartung/Nicht live filtern die Karten.
+  Suche mit Symbol, Filter wie bisher, neue **Ansicht Kacheln/Liste** (im Browser gemerkt). Stile in
+  `resources/css/network.css` (nur auf dieser Seite geladen), hell/dunkel, 1 Spalte auf dem Telefon.
+- `Core\Network\Stats` liefert zusätzlich `noindex`, `icon_version`, `icon_bg`, `icon_text`, `pools` und `Stats::cached()`.
+
 ### Personen einladen (Benutzer & Rollen)
 - **Benutzer & Rollen → Person einladen** (`Core\Invites`, `InviteController`, Recht `users.manage`): E-Mail, Name
   (optional), Rolle, Sprache der Einladung (de/en) und persönliche Nachricht (reiner Text, höchstens 500 Zeichen).

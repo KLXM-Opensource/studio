@@ -125,7 +125,8 @@ if ($user && ($req = app()->request)) {
       <button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>" class="is-home"><?= e(__('Netzwerk-Übersicht')) ?></button>
       <?php endif; ?>
       <?php foreach (\Core\Sites::all() as $sk => $sc): if ($sk === site()->key) continue; $st = new \Core\Site($sk, $sc); ?>
-      <button type="submit" name="site" value="<?= e($sk) ?>"><?= e($sk === 'default' && empty($sc['label']) ? __('Hauptwebsite') : $st->label()) ?><small><?= e($sk) ?></small></button>
+      <?php $sIco = \Core\Network\SiteIcon::for($sk, \Core\Network\Stats::cached($sk)); // App-Icon wie in der Netzwerk-Übersicht ?>
+      <button type="submit" name="site" value="<?= e($sk) ?>"><span class="adm-netswitch__site"><img class="adm-netswitch__ico" src="<?= e($sIco['src']) ?>" width="16" height="16" alt="" loading="lazy" decoding="async"><?= e($sk === 'default' && empty($sc['label']) ? __('Hauptwebsite') : $st->label()) ?></span><small><?= e($sk) ?></small></button>
       <?php endforeach; ?>
     </form>
   </details>

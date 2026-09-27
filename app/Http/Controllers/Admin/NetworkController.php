@@ -46,7 +46,7 @@ final class NetworkController extends AdminController
         app()->session->forget('_net_newsite');
         return $this->view('network/index', ['stats' => $stats, 'warn' => $warn, 'accounts' => Network::accounts(),
             'log' => Network::recentLog(20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
-            'css' => ['css/passkey.css']]);
+            'css' => ['css/passkey.css', 'css/network.css']]);
     }
 
     // ================================================================= Anmeldung auf anderen Websites

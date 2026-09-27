@@ -1659,6 +1659,8 @@ html.adm-ui[data-theme=dark]{--adm-star:#F2C14E}
 .adm-netswitch__menu button small{color:var(--adm-t3);font-size:11px}
 .adm-netswitch__menu button:hover,.adm-netswitch__menu button:focus-visible,.adm-netswitch__menu a:hover,.adm-netswitch__menu a:focus-visible{background:var(--adm-hover)}
 .adm-netswitch__menu .is-home{font-weight:700;text-decoration:none}
+.adm-netswitch__site{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.adm-netswitch__ico{flex:none;width:16px;height:16px;border-radius:4px;object-fit:contain}
 
 /* Zwei-Faktor-Anmeldung */
 .tf-code{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em;text-align:center}

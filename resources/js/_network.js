@@ -1,6 +1,7 @@
 /*
  * Netzwerk-Übersicht (/admin/network): Websites filtern und durchsuchen – ohne JavaScript sind alle Karten sichtbar.
  * Karten: [data-net-card] mit data-q (Suchtext), data-warn, data-maintenance, data-staging.
+ * Ansicht Kacheln/Liste ([data-net-view]) wird im Browser gemerkt (localStorage, ohne Speicher einfach Kacheln).
  */
 import { t } from './_i18n.js';
 
@@ -37,5 +38,20 @@ export function initNetwork() {
     const open = menus.find(m => m.open);
     if (open) { open.open = false; open.querySelector('summary')?.focus(); }
   });
+  // Ansicht: Kacheln oder Liste
+  const views = document.querySelector('[data-net-views]');
+  if (views) {
+    const KEY = 'cms.net.view';
+    const setView = (v, save) => {
+      grid.classList.toggle('is-list', v === 'list');
+      views.querySelectorAll('[data-net-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.netView === v)));
+      if (save) try { localStorage.setItem(KEY, v); } catch { /* ohne Speicher */ }
+    };
+    let saved = 'grid';
+    try { saved = localStorage.getItem(KEY) === 'list' ? 'list' : 'grid'; } catch { /* ohne Speicher */ }
+    setView(saved, false);
+    views.hidden = false;
+    views.querySelectorAll('[data-net-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.netView, true)));
+  }
   apply();
 }
