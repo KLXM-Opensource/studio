@@ -1655,10 +1655,10 @@ html.adm-ui[data-theme=dark]{--adm-star:#F2C14E}
 .adm-netswitch[open] .adm-netswitch__chev{transform:rotate(-135deg)}
 .adm-netswitch__menu{margin:6px 0 0;padding:4px;border-radius:8px;background:rgba(0,0,0,.18);display:grid;gap:1px;max-height:50vh;overflow:auto}
 .adm-netswitch__h{margin:4px 8px 4px;font-size:11px;color:var(--adm-t3)}
-.adm-netswitch__menu button{display:flex;justify-content:space-between;gap:8px;width:100%;padding:6px 8px;border:0;border-radius:5px;background:none;color:var(--adm-ink);font:500 13px var(--adm-font);text-align:left;cursor:pointer}
+.adm-netswitch__menu button,.adm-netswitch__menu a{display:flex;justify-content:space-between;gap:8px;width:100%;padding:6px 8px;border:0;border-radius:5px;background:none;color:var(--adm-ink);font:500 13px var(--adm-font);text-align:left;cursor:pointer}
 .adm-netswitch__menu button small{color:var(--adm-t3);font-size:11px}
-.adm-netswitch__menu button:hover,.adm-netswitch__menu button:focus-visible{background:var(--adm-hover)}
-.adm-netswitch__menu .is-home{font-weight:700}
+.adm-netswitch__menu button:hover,.adm-netswitch__menu button:focus-visible,.adm-netswitch__menu a:hover,.adm-netswitch__menu a:focus-visible{background:var(--adm-hover)}
+.adm-netswitch__menu .is-home{font-weight:700;text-decoration:none}
 
 /* Zwei-Faktor-Anmeldung */
 .tf-code{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em;text-align:center}

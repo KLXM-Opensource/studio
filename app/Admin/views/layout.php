@@ -113,13 +113,17 @@ if ($user && ($req = app()->request)) {
       <a class="adm-site-open" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?>" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?></a>
     </div>
   </div>
-  <?php if ($netUser && !\Core\Network\Network::isNetworkSite()): // Website wechseln: Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
+  <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
     <summary><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(site()->label()) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('Website wechseln')) ?></span></summary>
     <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netswitch__menu">
       <?= csrf_field() ?>
       <p class="adm-netswitch__h"><?= e(__('Website wechseln')) ?></p>
+      <?php if (\Core\Network\Network::isNetworkSite()): ?>
+      <a href="<?= e(url('/admin/network')) ?>" class="is-home"><?= e(__('Netzwerk-Übersicht')) ?></a>
+      <?php else: ?>
       <button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>" class="is-home"><?= e(__('Netzwerk-Übersicht')) ?></button>
+      <?php endif; ?>
       <?php foreach (\Core\Sites::all() as $sk => $sc): if ($sk === site()->key) continue; $st = new \Core\Site($sk, $sc); ?>
       <button type="submit" name="site" value="<?= e($sk) ?>"><?= e($sk === 'default' && empty($sc['label']) ? __('Hauptwebsite') : $st->label()) ?><small><?= e($sk) ?></small></button>
       <?php endforeach; ?>
