@@ -166,3 +166,11 @@ html.adm-ui[data-theme=dark] .doc{--tip:#1E3129;--tip-mark:#2F6A5C}
 html.adm-ui[data-theme=dark] .tag--read{background:#1E3129;color:#7FD1A8}
 /* Code im Kopf (Navy): nicht die helle Code-Fläche erben */
 .doc-hero code{background:rgba(255,255,255,.15);color:#fff}
+/* Hinweise zu diesem Projekt (Core\Guide, Kapitel „projekt“) */
+.doc-guide__intro{max-width:none}
+.doc-guide__body{max-width:56em}
+.doc-guide__body ul,.doc-guide__body ol{padding-left:1.4em}
+.doc-guide__body pre{overflow:auto;padding:12px 14px;border-radius:12px;background:var(--g);font-size:14px}
+.doc-guide__fig img{width:auto;max-width:100%}
+.doc-guide__edit{margin-top:22px}
+@media print{.doc-guide__edit{display:none}}

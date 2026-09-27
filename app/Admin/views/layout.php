@@ -177,6 +177,9 @@ if ($user && ($req = app()->request)) {
       <a class="adm-help-link<?= $section === 'support' && $view !== 'support/new' ? ' is-current' : '' ?>" href="<?= e(url('/admin/support')) ?>"><?= icon('lifebuoy', ['class' => 'adm-help-link__ico']) ?> <?= e(__('Support')) ?><?php if ($supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?></a>
       <?php endif; ?>
       <a class="adm-help-link<?= $section === 'help' ? ' is-current' : '' ?>" href="<?= e(url('/admin/hilfe')) ?>"><?= icon('question', ['class' => 'adm-help-link__ico']) ?> <?= e(__('Handbuch & Hilfe')) ?></a>
+      <?php if (\Core\Guide::exists()): // Hinweise zu diesem Projekt (Core\Guide) – nur wenn Kit oder Website welche mitbringen ?>
+      <a class="adm-help-link" href="<?= e(url('/admin/hilfe')) ?>#projekt"><?= icon('lightbulb', ['class' => 'adm-help-link__ico']) ?> <?= e(__('Projekt-Hinweise')) ?></a>
+      <?php endif; ?>
       <?php if (\Core\AI\Assistant::available()): // Assistent-Chat (Core\AI\Assistant) – öffnet das Chat-Fenster, ohne JavaScript die Seite im KI-Bereich ?>
       <a class="adm-help-link adm-help-link--assistant" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K"><?= icon('chat-teardrop-dots', ['class' => 'adm-help-link__ico']) ?> <?= e(__('Assistent fragen')) ?></a>
       <?php endif; ?>
@@ -194,6 +197,12 @@ if ($user && ($req = app()->request)) {
   <?php foreach ($flash as [$type, $msg]): ?>
   <div class="adm-flash adm-flash--<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($msg) ?></div>
   <?php endforeach; ?>
+  <?php // Hinweise zu diesem Projekt für diesen Bereich (Core\Guide, Front Matter „bereich:“) – kleiner Link über dem Inhalt
+  $guideT = isset($t) && is_array($t) ? $t : (isset($table) && is_array($table) ? $table : null);
+  if ($user && $section !== 'help' && ($guideHere = \Core\Guide::forArea($section, $guideT['handle'] ?? null))): ?>
+  <p class="adm-guidehint"><?= icon('lightbulb') ?><span><?= e(count($guideHere) > 1 ? __('Hinweise zum Projekt:') : __('Hinweis zum Projekt:')) ?>
+    <?php foreach ($guideHere as $gi => $gn): ?><?= $gi ? ' · ' : '' ?><a href="<?= e(\Core\Guide::url($gn)) ?>"><?= e($gn['title']) ?></a><?php endforeach; ?></span></p>
+  <?php endif; ?>
   <?= $content ?>
 </main>
 <?php if ($user): ?>

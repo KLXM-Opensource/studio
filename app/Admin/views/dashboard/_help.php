@@ -1,5 +1,5 @@
 <?php
-/** Übersicht · „Hilfe & Einstieg“: Assistent fragen, Tutorials (Top 3 der Rolle), Trailer, Hinweis des Kits, „Was ist neu“. @var array $help */
+/** Übersicht · „Hilfe & Einstieg“: Assistent fragen, Tutorials (Top 3 der Rolle), Trailer, Projekt-Hinweise (Core\Guide), Hinweis des Kits, „Was ist neu“. @var array $help */
 ?>
 <?php if ($help['ai']): ?>
 <form class="dash-ask" method="get" action="<?= e(url('/admin/ai/assistent')) ?>" data-dash-ask role="search" aria-label="<?= e(__('Assistent fragen')) ?>">
@@ -22,6 +22,9 @@ $__ext = fn(string $host) => '<span aria-hidden="true">↗</span><span class="sr
   <?php endforeach; ?>
 </ul>
 <p class="dash-links"><a href="<?= e(url('/admin/hilfe/tutorials')) ?>"><?= e(__('Alle Tutorials')) ?></a> · <a href="<?= e(url('/admin/hilfe')) ?>"><?= e(__('Handbuch')) ?></a></p>
+<?php if ($__guide = \Core\Guide::notes()): // Hinweise zu diesem Projekt (Core\Guide) – Ergänzung zum Handbuch, nur wenn vorhanden ?>
+<ul class="dash-list dash-list--tight dash-guide" role="list"><li><a href="<?= e(url('/admin/hilfe')) ?>#projekt"><span class="dash-list__ico"><?= icon('lightbulb') ?></span><span class="dash-list__main"><span class="dash-list__title"><?= e(__('Projekt-Hinweise')) ?></span><small><?= e(__('{n} Hinweise zu dieser Website – Ergänzung zum Handbuch', ['n' => count($__guide)])) ?>: <?= e(implode(' · ', array_slice(array_column($__guide, 'title'), 0, 3))) ?><?= count($__guide) > 3 ? ' …' : '' ?></small></span></a></li></ul>
+<?php endif; ?>
 <?php if (($hint = (string) project('dashboard_hint', '')) !== ''): ?>
 <p class="dash-tip"><?= icon('lightbulb') ?><span><b><?= e(app()->theme->settingsTitle()) ?>:</b> <?= e(__($hint)) ?></span></p>
 <?php endif; ?>

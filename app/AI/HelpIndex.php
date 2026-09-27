@@ -71,6 +71,7 @@ final class HelpIndex
         if (is_dir($theme)) {
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($theme, \FilesystemIterator::SKIP_DOTS)) as $f) if ($f->isFile()) $files[] = $f->getPathname();
         }
+        $files = [...$files, ...\Core\Guide::files()];   // Hinweise zu diesem Projekt (Kit + Website)
         $sig = CMS_VERSION . '|' . self::VERSION . '|' . app()->theme->name;
         foreach ($files as $f) $sig .= '|' . basename((string) $f) . ':' . (is_file($f) ? filemtime($f) . ':' . filesize($f) : 0);
         return md5($sig);

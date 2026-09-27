@@ -314,6 +314,15 @@ return function (Router $r): void {
     // Tutorials als Text (app/Admin/tutorials.php, Core\Tutorials); Videos auf der Produkt-Website (config docs_url, Aufnahme tools/tutorials/record.mjs)
     $r->get('/admin/hilfe/tutorials', [Admin\HelpController::class, 'tutorials']);
     $r->get('/admin/hilfe/tutorials/{slug}', [Admin\HelpController::class, 'tutorial']);
+    // Hinweise zu diesem Projekt (Core\Guide): Kit themes/{kit}/guide/*.md + Website {storage}/guide/*.md – Bearbeiten mit system.manage
+    $gd = Admin\GuideController::class;
+    $r->get('/admin/hilfe/projekt', [$gd, 'index']);
+    $r->get('/admin/hilfe/projekt/neu', [$gd, 'edit']);
+    $r->post('/admin/hilfe/projekt/neu', [$gd, 'save']);
+    $r->get('/admin/hilfe/projekt/bild/{file}', [$gd, 'image']);
+    $r->get('/admin/hilfe/projekt/{key}', [$gd, 'edit']);
+    $r->post('/admin/hilfe/projekt/{key}', [$gd, 'save']);
+    $r->post('/admin/hilfe/projekt/{key}/loeschen', [$gd, 'delete']);
 
     // Support & Wissensdatenbank (zentral für alle Websites der Installation – Core\Support)
     $sp = Admin\SupportController::class;

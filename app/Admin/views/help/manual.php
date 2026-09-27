@@ -17,6 +17,7 @@
  *   'figures'  => false                                                      Bildschirmfotos des Kerns ausblenden
  * Kapitel-Dateien sehen $settingsTitle, $img, $blocks, $blockInfo, $vars, $anchor('schlüssel') (Anker eines Kapitels)
  * und $has('schlüssel'). Ältere Themes, deren docs/manual.php eine vollständige Ansicht ist, zeigt help/theme-manual.php.
+ * Kapitel „projekt“ (Hinweise zu diesem Projekt, Core\Guide) erscheint nur, wenn Kit oder Website Hinweise mitbringen.
  * @var array $blocks  @var array $themeDoc
  */
 $themeDoc ??= [];
@@ -56,6 +57,12 @@ foreach ($core as $__key => $__title) {
     $chapters[$__key] = ['id' => $__key, 'title' => $__title, 'files' => [__DIR__ . '/manual/' . $__key . '.php']];
 }
 $chapters['faq']['class'] = 'doc-faq';
+// Hinweise zu diesem Projekt (Core\Guide: themes/{kit}/guide/*.md, {storage}/guide/*.md) – nur wenn es welche gibt, gleich nach dem Überblick
+$guide = \Core\Guide::exists();
+if ($guide) {
+    $chapters = array_slice($chapters, 0, 1, true) + ['projekt' => ['id' => 'projekt', 'title' => \Core\Guide::title(), 'files' => [__DIR__ . '/manual/projekt.php'], 'class' => 'doc-guide']]
+        + array_slice($chapters, 1, null, true);
+}
 // Kapitel aktiver Erweiterungen (Extension::docs('manual', …), gleiches Format wie 'chapters') – vor denen des Themes
 foreach ([...\Core\Extensions::docs('manual'), ...(array) ($themeDoc['chapters'] ?? [])] as $__key => $__spec) {
     if ($__spec === false) { unset($chapters[$__key]); continue; }
@@ -92,7 +99,8 @@ $tutorials = $__router->match('GET', '/admin/hilfe/tutorials') === '/admin/hilfe
     <h1><?= $hero['title'] ?? 'Die Website pflegen<i>.</i><br>Einfach und sicher.' ?></h1>
     <p><?= e($hero['lead'] ?? 'Alles, was Sie für die tägliche Arbeit brauchen: Texte ändern, Bilder hochladen, Seiten und Einträge pflegen und Online-Anfragen lesen – Schritt für Schritt erklärt.') ?></p>
     <div class="doc-hero__links">
-      <a href="#<?= e($anchor('aufgaben')) ?>">Häufige Aufgaben →</a>
+      <?php if ($guide): ?><a href="#projekt"><?= e(\Core\Guide::title()) ?> →</a><?php endif; ?>
+      <a href="#<?= e($anchor('aufgaben')) ?>"<?= $guide ? ' class="ghost"' : '' ?>>Häufige Aufgaben<?= $guide ? '' : ' →' ?></a>
       <?php if ($tutorials): ?><a href="<?= e($tutorials) ?>" class="ghost">Tutorials</a><?php endif; ?>
       <a href="<?= e(url('/')) ?>?edit=1" class="ghost">Startseite bearbeiten</a>
       <a href="<?= e(url('/admin/hilfe/technik')) ?>" class="ghost">Technische Dokumentation</a>
@@ -109,7 +117,7 @@ $tutorials = $__router->match('GET', '/admin/hilfe/tutorials') === '/admin/hilfe
 </section>
 
 <?php endforeach; ?>
-      <p class="doc-foot">Handbuch · Stand <?= e(date('d.m.Y')) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · Kit „<?= e(app()->theme->label()) ?>“</p>
+      <p class="doc-foot">Handbuch · Stand <?= e(date('d.m.Y')) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · Kit „<?= e(app()->theme->label()) ?>“<?php if (!$guide && \Core\Guide::canEdit()): ?> · <a href="<?= e(url('/admin/hilfe/projekt')) ?>">Projekt-Hinweise anlegen</a><?php endif; ?></p>
     </div>
 
     <nav class="doc-toc" aria-label="Inhalt" data-doc-toc>

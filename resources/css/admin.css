@@ -978,6 +978,12 @@ html.adm-ui[data-theme=dark]{--ico-2-opacity:.3}
 .f-bindwrap{position:relative}
 .adm-fields>.f-bindwrap,.adm-fields>.cms-bindnote{grid-column:1/-1}
 .adm-fields>.f-bindwrap--half{grid-column:auto}
+/* Hinweise zu diesem Projekt (Core\Guide): Link im Block-Formular (.cms-guidenote) und über dem Inhalt eines Bereichs */
+.adm-fields>.cms-guidenote{grid-column:1/-1}
+.adm-guidehint{display:flex;align-items:flex-start;gap:8px;margin:0 0 16px;padding:9px 12px;border-radius:8px;background:var(--adm-info-bg);color:var(--adm-ink);font-size:13.5px;line-height:1.45;max-width:max-content}
+.adm-guidehint svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--adm-a-ink)}
+.gd-src{width:100%;min-height:24em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;line-height:1.55}
+.gd-file code{white-space:nowrap}
 .f-bindwrap > .f > label:first-child,.f-bindwrap > .f > legend{padding-right:30px}
 .f-bindbtn{position:absolute;right:0;top:-2px;z-index:1;display:grid;place-items:center;width:24px;height:22px;padding:0;border:0;border-radius:5px;background:var(--adm-hover);color:#3B4A6B;cursor:pointer}
 .f-bindbtn svg{width:14px;height:14px}

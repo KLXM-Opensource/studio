@@ -51,6 +51,7 @@ final class SearchController extends AdminController
             ...(can('requests.read') && \Core\Data\Inbox::readable() ? [[__('Anfragen'), term('requests'), '/admin/requests', 'inbox', 'anfrage formular eingang ' . mb_strtolower(term('requests'))]] : []),
             [__('Website ansehen'), __('Startseite öffnen'), url('/'), 'globe', 'website live ansehen'],
             [__('Handbuch'), __('Hilfe & Anleitungen'), '/admin/hilfe', 'help', 'hilfe handbuch anleitung'],
+            ...(\Core\Guide::exists() ? [[__('Projekt-Hinweise'), __('Hinweise zu diesem Projekt'), '/admin/hilfe#projekt', 'lightbulb', 'projekt hinweise agentur anleitung kit']] : []),
         ];
         foreach (Tables::content() as $t) {
             $actions[] = [__('Neu: {name}', ['name' => $t['singular']]), $t['name'], '/admin/data/' . $t['handle'] . '/new', 'plus', 'neu anlegen ' . $t['name'] . ' ' . $t['singular']];
@@ -126,6 +127,16 @@ final class SearchController extends AdminController
                 }
             }
             $groups[] = ['label' => __('Einstellungen'), 'items' => self::top($items, 6)];
+        }
+
+        // Hinweise zu diesem Projekt (Core\Guide) – Titel und Text, nur mit Suchbegriff
+        if ($q !== '') {
+            $items = [];
+            foreach (\Core\Guide::notes() as $n) {
+                $s = self::score($q, $n['title']) * 2 + self::score($q, $n['title'] . ' ' . \Core\Guide::plain($n));
+                if ($s) $items[] = ['title' => $n['title'], 'sub' => __('Hinweis zum Projekt'), 'url' => \Core\Guide::url($n), 'icon' => 'lightbulb', 's' => $s];
+            }
+            $groups[] = ['label' => __('Projekt-Hinweise'), 'items' => self::top($items, 4)];
         }
 
         // Support & Wissensdatenbank (Core\Support): „Problem melden“, Wissensartikel, beantwortete Fragen

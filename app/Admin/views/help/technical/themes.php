@@ -9,6 +9,7 @@
 ├── seed.php          Startinhalte: settings, pages[blocks], page_refs, after (callable für weitere Inhalte)
 ├── design.php        optional: Design-Tokens (oder inline unter theme.php → design)
 ├── docs/manual.php   optional: Kapitel für das Handbuch der Redaktion (siehe unten)
+├── guide/*.md        optional: Hinweise zu diesem Projekt für die Redaktion (Markdown, siehe unten)
 ├── lang/             {locale}.php (Verwaltung) · site/{lang}.php (feste Website-Texte, lt())
 ├── templates/        layout.php · error.php · maintenance.php · offline.php (PWA) · form-page.php (optional, /anfrage/{form})
 │                     search.php (optional) · partials/ (toolbar, editor, section, video-embed, search-form …)
@@ -36,6 +37,29 @@
     <tr><td><code>assets/css/data.css</code></td><td>Überschreibt die neutrale Kern-CSS der Datenblöcke (per <code>@import "../../../../resources/css/data.css";</code> erweiterbar).</td></tr>
     <tr><td><code>Pages::menu()</code></td><td>Menübaum aus Seiten mit „Im Menü“ – das Kit entscheidet über Darstellung (z. B. Aufklappmenü, <code>css/nav.css</code> nur bei Unterseiten).</td></tr>
   </table>
+  <h3 id="projekt-hinweise">Hinweise zu diesem Projekt – <code>guide/*.md</code></h3>
+  <p>Für projektbezogene Anleitungen, die über das allgemeine Handbuch hinausgehen („Screenshots von Websites im Format 16:10“, „Sondermeldungen so planen“), legt die Agentur Markdown-Dateien in <code>themes/{name}/guide/</code> ab. Gibt es mindestens einen Hinweis, zeigt das Handbuch der Redaktion gleich nach dem Überblick das Kapitel <b>„Hinweise zu diesem Projekt“</b> (mit Namen der Website und des Kits und einem Satz, dass die Hinweise das Handbuch ergänzen); dazu kommen ein Eintrag „Projekt-Hinweise“ in der Übersicht („Neu hier?“) und unter „Hilfe &amp; Support“, Treffer in der Suche (⌘K) und im Hilfe-Index des Assistenten. Ohne Hinweise erscheint nichts davon. Code: <code>Core\Guide</code>.</p>
+  <table class="doc-table">
+    <tr><th>Thema</th><th>Regel</th></tr>
+    <tr><td>Dateien &amp; Reihenfolge</td><td><code>NN-name.md</code>, nur Kleinbuchstaben, Ziffern, <code>-</code> und <code>_</code> (z. B. <code>10-startseite.md</code>, <code>20-sondermeldungen.md</code>); sortiert natürlich nach Dateinamen – die Zahl vorn bestimmt die Reihenfolge. Andere Namen und Dateien über 100 KB werden übergangen.</td></tr>
+    <tr><td>Titel</td><td>Die erste Zeile <code># Titel</code> (vor anderem Text); sonst <code>titel:</code> im Kopf, sonst der Dateiname ohne Nummer.</td></tr>
+    <tr><td>Kopf (Front Matter, optional)</td><td>Zwischen zwei Zeilen <code>---</code> ganz oben: <code>bereich: medien, daten/arbeiten</code> (Link „Hinweis zum Projekt“ über dem Inhalt dieses Verwaltungsbereichs – <code>uebersicht</code>, <code>seiten</code>, <code>einstellungen</code>, <code>medien</code>, <code>daten</code> bzw. <code>daten/{tabelle}</code>, <code>anfragen</code>, <code>design</code>, <code>bloecke</code>, <code>benutzer</code>, <code>weiterleitungen</code>), <code>block: stage, hero</code> (Link im Formular dieser Blocktypen), <code>titel: …</code>, <code>ausblenden: ja</code>.</td></tr>
+    <tr><td>Inhalt</td><td>Markdown-lite wie im Support (<code>Core\Support\Markdown</code>): Absätze, Listen (<code>-</code>, <code>1.</code>), Zwischentitel (<code>##</code> – im Handbuch als kleine Überschrift), <code>**fett**</code>, <code>*kursiv*</code>, <code>`Code`</code>, Code-Blöcke, Links <code>[Text](https://…)</code> oder <code>[Text](/admin/media)</code>. HTML wird nie ausgeführt, Links laufen durch <code>Sanitizer::safeHref</code> (kein <code>javascript:</code>).</td></tr>
+    <tr><td>Bilder</td><td>Eine eigene Zeile <code>![Alternativtext](bild.png "Bildunterschrift")</code>; die Datei liegt direkt im <code>guide</code>-Ordner (PNG, JPG, WebP, GIF, AVIF – kein SVG) und wird nur angemeldeten Benutzern ausgeliefert (<code>/admin/hilfe/projekt/bild/{datei}</code>).</td></tr>
+    <tr><td>Je Website</td><td>Administration (Recht <code>system.manage</code>) legt unter <b>Handbuch → Projekt-Hinweise</b> (<code>/admin/hilfe/projekt</code>) eigene Hinweise an; sie liegen in <code>{storage}/guide/*.md</code> (<code>storage/sites/{key}/guide/</code>, Website „default“: <code>storage/guide/</code>). Gleicher Dateiname wie im Kit ersetzt den Kit-Hinweis für diese Website („Für diese Website anpassen“), <code>ausblenden: ja</code> blendet ihn aus; „Anpassung entfernen“ stellt das Kit wieder her.</td></tr>
+    <tr><td><code>theme.php → 'guide'</code></td><td>Optional: <code>['title' =&gt; 'Hinweise zu diesem Projekt', 'author' =&gt; 'KLXM Crossmedia', 'lead' =&gt; '…', 'dir' =&gt; 'guide']</code> – Kapitelname, Absender im Einleitungssatz, eigener Einleitungssatz, anderer Ordner. <code>'guide' =&gt; false</code> schaltet die Kit-Hinweise ab (die der Website bleiben).</td></tr>
+    <tr><td>Prüfen</td><td><code>php bin/console guide:list --site=…</code> (Hinweise mit Herkunft und Bezug) · <code>guide:selftest</code>.</td></tr>
+  </table>
+  <pre><code>---
+bereich: daten/arbeiten
+block: data_list
+---
+# Referenzen pflegen
+
+Bilder im Format **16:10**. Website-Screenshots …
+
+## Schlagworte
+- Hashtag ohne #, Leistungen als Filter</code></pre>
   <h3 id="design">Design (Style-Editor) – <code>theme.php → 'design'</code></h3>
   <p>Unter <b>Verwaltung → Design</b> ändern Admins Farben, Formen und Schriften, ohne das Kit anzufassen. Das Kit beschreibt, <em>was</em> einstellbar ist; jeder Wert ist eine CSS-Variable (oder eine Klasse am <code>&lt;html&gt;</code>). Werte gelten je Website <b>und</b> je Kit (Einstellung <code>design.{theme}</code>, Verlauf der letzten 10 Stände in <code>design.{theme}.history</code> mit Zeitpunkt und Benutzer). Recht <code>design.edit</code> (Standard: nur Administration), Funktion <code>design</code> im Funktionsumfang.</p>
   <pre><code>'design' => [

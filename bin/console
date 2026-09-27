@@ -46,6 +46,7 @@
  * Betrieb & Deploy
  *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
  *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Baukasten) auflisten | Sicherheits-Selbsttest der Vorlagensprache
+ *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
  *   health [--all]                                    Prüfung für Deploys (Exit-Code 1 bei Fehlern)
  *   maintenance on|off [--all]                        Wartungsmodus
  *   cache:clear [--all]                               Seiten-Cache leeren (--all: aller Websites)
@@ -782,6 +783,23 @@ switch ($cmd) {
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'guide:selftest':
+        // Hinweise zu diesem Projekt (Core\Guide): Front Matter, Titel, Escaping, Links, Bilder, Bereiche
+        $res = Core\Guide::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'guide:list':
+        // Hinweise zu diesem Projekt (Core\Guide): themes/{kit}/guide/*.md und {storage}/guide/*.md dieser Website
+        $notes = Core\Guide::all();
+        if (!$notes) echo "  Keine Projekt-Hinweise (Kit „{$app->theme->label()}“, Website „" . site()->key . "“).\n";
+        foreach ($notes as $n) {
+            printf("  %-28s %-6s %-40s %s\n", $n['key'], $n['source'] . ($n['overrides'] ? '*' : ''), mb_strimwidth($n['title'], 0, 40, '…'),
+                trim(($n['hidden'] ? 'ausgeblendet ' : '') . ($n['areas'] ? 'bereich=' . implode(',', $n['areas']) . ' ' : '') . ($n['blocks'] ? 'block=' . implode(',', $n['blocks']) : '')));
+        }
+        break;
 
     case 'blocks:list':
         // Eigene Blöcke dieser Website (Verwaltung → Blöcke)

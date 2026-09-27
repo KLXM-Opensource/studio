@@ -88,6 +88,11 @@ final class EditorController extends AdminController
             \Core\Fields::$binding = ['table' => $ctx['table'], 'bound' => (array) ($data['_bind'] ?? [])];
             $html = '<div class="cms-bindnote"><b>Vorlage für alle Einträge von „' . e($ctx['table']['name']) . '“.</b> Mit dem Ketten-Symbol <b>' . icon('link') . '</b> neben einem Feld nimmt es seinen Inhalt aus dem jeweiligen Eintrag – z. B. Bild, Überschrift, Text oder Datum.</div>' . $html;
         }
+        // Hinweise zu diesem Projekt für diesen Blocktyp (Core\Guide, Front Matter „block:“)
+        if ($guide = \Core\Guide::forBlock($type)) {
+            $html = '<p class="cms-bindnote cms-guidenote">' . e(count($guide) > 1 ? __('Hinweise zum Projekt:') : __('Hinweis zum Projekt:')) . ' '
+                . implode(' · ', array_map(fn($n) => '<a href="' . e(\Core\Guide::url($n)) . '" target="_blank" rel="noopener">' . e($n['title']) . '</a>', $guide)) . '</p>' . $html;
+        }
         $html .= \Core\Fields::renderForm($def['fields'], $data, [], 'f');
         \Core\Fields::$binding = null;
         return Response::json(['ok' => true, 'html' => $html]);
