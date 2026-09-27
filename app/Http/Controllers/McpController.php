@@ -380,7 +380,7 @@ final class McpController
                 'tags' => $str('Tags, mit Komma getrennt (ersetzt alle)'), 'collections' => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Sammlungs-IDs (ersetzt alle)'],
                 'focus' => ['type' => 'object', 'properties' => ['x' => ['type' => 'integer'], 'y' => ['type' => 'integer']], 'description' => 'Fokuspunkt in Prozent (0–100), z. B. Gesicht'],
                 'i18n' => $obj('Übersetzungen von Alt-Text/Titel je Sprache, z. B. {"en": {"alt": "…", "title": "…"}} – leer = Standardsprache'),
-                'adjust' => $str('Bild anpassen, zerstörungsfrei (überall, wo das Bild erscheint): Effekt gray|sepia|warm|cool|muted|vivid|contrast und s/b/c in Prozent (Sättigung 0–200, Helligkeit/Kontrast 50–150, 10er-Schritte), z. B. "sepia s120 c110"; leer = Original')], ['id']),
+                'adjust' => $str('Bild anpassen, zerstörungsfrei (überall, wo das Bild erscheint): Effekt gray|sepia|warm|cool|muted|vivid|contrast und s/b/c in Prozent (Sättigung 0–200, Helligkeit/Kontrast 50–150, 10er-Schritte) und Schärfe sharp{-100…100} (negativ = weichzeichnen, positiv = schärfen), z. B. "sepia s120 c110 sharp40"; leer = Original')], ['id']),
             $rw + ['idempotentHint' => true], true,
             fn($a) => $s->mediaUpdate((int) $a['id'], array_intersect_key($a, ['alt' => 1, 'decorative' => 1, 'title' => 1, 'credit' => 1, 'tags' => 1, 'collections' => 1, 'focus' => 1, 'i18n' => 1, 'adjust' => 1])));
         $add('crop_media', 'Bild zuschneiden', 'Eigenen Bildausschnitt für ein Format festlegen (Formate: siehe list_media → ratios). rect in Anteilen des Originals (0–1), das Seitenverhältnis wird erzwungen. Ohne rect wird der Zuschnitt entfernt (dann gilt der Fokuspunkt).',

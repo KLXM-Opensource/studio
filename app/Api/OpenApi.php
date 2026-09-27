@@ -312,7 +312,7 @@ final class OpenApi
                         'name' => ['type' => 'string'], 'mime' => ['type' => 'string'], 'width' => ['type' => 'integer'], 'height' => ['type' => 'integer'], 'size' => ['type' => 'string'],
                         'decorative' => ['type' => 'boolean'], 'title' => ['type' => 'string'], 'display' => ['type' => 'string'], 'kind' => ['type' => 'string'],
                         'tags' => ['type' => 'array', 'items' => ['type' => 'string']], 'focus' => ['type' => 'object'], 'crops' => ['type' => 'object'],
-                        'adjust' => ['type' => 'string', 'description' => 'Bild anpassen (zerstörungsfrei, CSS-Filter): Effekt gray|sepia|warm|cool|muted|vivid|contrast und s/b/c in Prozent, z. B. "sepia s120 c110"; leer = Original'],
+                        'adjust' => ['type' => 'string', 'description' => 'Bild anpassen (zerstörungsfrei, CSS-Filter): Effekt gray|sepia|warm|cool|muted|vivid|contrast und s/b/c in Prozent, dazu Schärfe sharp{-100…100} (negativ = weichzeichnen), z. B. "sepia s120 c110 sharp40"; leer = Original'],
                         'pages' => ['type' => ['integer', 'null']], 'viewer' => ['type' => ['string', 'null']], 'missing_alt' => ['type' => 'boolean'],
                         'i18n' => ['type' => 'object', 'description' => 'Übersetzungen: {"en": {"alt": "…", "title": "…"}}'],
                         'missing_translations' => ['type' => 'array', 'items' => ['type' => 'string']]]],

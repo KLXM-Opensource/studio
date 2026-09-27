@@ -24,6 +24,9 @@
 .ifx-range output{font:600 13px/1 var(--adm-font);font-variant-numeric:tabular-nums;color:var(--adm-t2)}
 .ifx-range input{grid-column:1/-1;width:100%;accent-color:var(--adm-a)}
 .ifx-range input:focus-visible,.ifx-dlg button:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.ifx-range__ends{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--adm-t3)}
+.ifx-range__ends .ifx-k0{font-size:12px}
+.ifx-range__ends .ifx-k0:disabled{visibility:hidden}
 .ifx-tools{display:flex;flex-wrap:wrap;gap:8px}
 .ifx-state{margin:0;min-height:1.4em;font-size:13px;color:var(--adm-t2)}
 .ifx-err{margin:12px 0 0}

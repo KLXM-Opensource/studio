@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Core;
 
 /**
- * Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast) – zerstörungsfrei per CSS-Filter.
+ * Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast, Schärfe/Unschärfe) – zerstörungsfrei per CSS-Filter.
  *
  *  - Original und Größen bleiben unverändert; die Anpassung wirkt beim Anzeigen über Klassen am <img>
  *    (strenge CSP: keine style-Attribute). Stylesheet: resources/css/image-fx.css → public/assets/css/image-fx.css,
@@ -13,8 +13,14 @@ namespace Core;
  *      1. global je Bild (Mediathek): Spalte media.adjust
  *      2. je Einbindung im Block: data._fx = {"image": "…", "items.2.image": "…"} (Feldpfad → Anpassung)
  *    Die Einbindung ersetzt die globale Einstellung vollständig (kein Addieren). „none“ = an dieser Stelle ohne Anpassung.
- *  - Speicherformat (kompakt, kanonisch): Effekt zuerst, dann s/b/c in Prozent, Standardwerte (100 %) entfallen,
- *    z. B. „sepia s120 c110“, „s80“, „gray“. Leer = keine Anpassung.
+ *  - Speicherformat (kompakt, kanonisch): Effekt zuerst, dann s/b/c in Prozent, zuletzt die Schärfe „sharp{-100…100}“
+ *    (negativ = weichzeichnen, positiv = schärfen), Standardwerte (100 % bzw. Schärfe 0) entfallen,
+ *    z. B. „sepia s120 c110“, „s80 sharp40“, „gray sharp-60“. Leer = keine Anpassung.
+ *  - Schärfe/Unschärfe: SVG-Filter (feGaussianBlur bzw. feConvolveMatrix) in einem versteckten <svg> im Dokument (defs()),
+ *    per filter:url(#ifx-sharp-p4) am Ende derselben Filterkette. Bewusst kein externes „fx-filters.svg#…“ (Safari/WebKit
+ *    und Chrome ignorieren externe Filter-Verweise) und kein CSS-blur(): dessen Rand läuft halbtransparent aus bzw. wirkt in
+ *    WebKit fleckig; der SVG-Filter setzt die Deckkraft wieder auf 1 und bleibt im Bildrahmen (Filterbereich = Bild).
+ *    Das <svg> ist Markup, kein Stil – CSP-konform. Nur in Seiten, die es brauchen (inject()).
  *  - Blöcke kennen keine Feldpfade: Core\Theme::renderBlock() setzt je Block eine Zuordnung Medien-ID → Anpassung
  *    (enter()/leave()), Media::pictureOf() fragt sie ab (classFor()). Kommt dasselbe Bild in einem Block mehrfach vor,
  *    gilt an allen Stellen dieses Blocks die Anpassung des ersten Pfads (sortiert: „image“ vor „items.0.image“).
@@ -29,6 +35,11 @@ final class ImageFx
     /** Regler in Prozent: [min, max], Schrittweite STEP */
     public const RANGES = ['s' => [0, 200], 'b' => [50, 150], 'c' => [50, 150]];
     public const STEP = 10;
+    /** Schärfe: -100 (weich) … 0 … +100 (scharf), Schrittweite STEP → Klassen ifx-sharp-m1…m10 / ifx-sharp-p1…p10 */
+    public const SHARP = [-100, 100];
+    /** Weichzeichnen je Stufe in px (Stufe 10 = 4 px) und Schärfen je Stufe (Gewicht der Nachbarn im 3×3-Kern) */
+    public const BLUR_PX = 0.4;
+    public const SHARPEN = 0.06;
     /** Ausdrücklich ohne Anpassung (nur für Einbindungen sinnvoll: hebt die globale Einstellung auf) */
     public const NONE = 'none';
 
@@ -36,11 +47,12 @@ final class ImageFx
     private static array $stack = [];
 
     /**
-     * Anpassung zerlegen. @return ?array{p: ?string, s: int, b: int, c: int, none: bool} null = ungültig
+     * Anpassung zerlegen. @return ?array{p: ?string, s: int, b: int, c: int, k: int, none: bool} null = ungültig
+     * (k = Schärfe, -100 … 100)
      */
     public static function parse(?string $v): ?array
     {
-        $out = ['p' => null, 's' => 100, 'b' => 100, 'c' => 100, 'none' => false];
+        $out = ['p' => null, 's' => 100, 'b' => 100, 'c' => 100, 'k' => 0, 'none' => false];
         $v = trim((string) $v);
         if ($v === '') return $out;
         if (strlen($v) > 60) return null;
@@ -56,6 +68,10 @@ final class ImageFx
                 $n = (int) $m[2];
                 [$min, $max] = self::RANGES[$key];
                 if ($n < $min || $n > $max || $n % self::STEP !== 0) return null;
+            } elseif (preg_match('~^sharp([+-]?\d{1,3})$~', $tok, $m)) {
+                $key = 'k';
+                $n = (int) $m[1];
+                if ($n < self::SHARP[0] || $n > self::SHARP[1] || $n % self::STEP !== 0) return null;
             } else {
                 return null;
             }
@@ -72,7 +88,7 @@ final class ImageFx
 
     /**
      * Kanonische Schreibweise (oder null = ungültig). Leer = keine Anpassung.
-     * Nimmt auch ein Array {p|preset, s|saturation, b|brightness, c|contrast} (z. B. aus der API).
+     * Nimmt auch ein Array {p|preset, s|saturation, b|brightness, c|contrast, k|sharpness} (z. B. aus der API).
      */
     public static function normalize(mixed $in): ?string
     {
@@ -84,6 +100,8 @@ final class ImageFx
                 $n = $in[$k] ?? $in[$long] ?? null;
                 if ($n !== null && $n !== '') $parts[] = $k . (int) $n;
             }
+            $n = $in['k'] ?? $in['sharpness'] ?? $in['sharp'] ?? null;
+            if ($n !== null && $n !== '') $parts[] = 'sharp' . (int) $n;
             $in = implode(' ', $parts);
         }
         if ($in !== null && !is_string($in)) return null;
@@ -94,6 +112,7 @@ final class ImageFx
         foreach (['s', 'b', 'c'] as $k) {
             if ($a[$k] !== 100) $parts[] = $k . $a[$k];
         }
+        if ($a['k'] !== 0) $parts[] = 'sharp' . $a['k'];
         return implode(' ', $parts);
     }
 
@@ -107,6 +126,7 @@ final class ImageFx
         foreach (['s', 'b', 'c'] as $k) {
             if ($a[$k] !== 100) $c[] = 'ifx-' . $k . intdiv($a[$k], self::STEP);
         }
+        if ($a['k'] !== 0) $c[] = self::sharpClass($a['k']);
         return $c ? 'ifx ' . implode(' ', $c) : '';
     }
 
@@ -120,7 +140,14 @@ final class ImageFx
         foreach (['s' => __('Sättigung'), 'b' => __('Helligkeit'), 'c' => __('Kontrast')] as $k => $l) {
             if ($a[$k] !== 100) $out[] = $l . ' ' . $a[$k] . ' %';
         }
+        if ($a['k'] !== 0) $out[] = __('Schärfe') . ' ' . ($a['k'] > 0 ? '+' : '−') . abs($a['k']);
         return implode(' · ', $out);
+    }
+
+    /** Klasse der Schärfe-Stufe: 40 → „ifx-sharp-p4“, -60 → „ifx-sharp-m6“ (zugleich id des SVG-Filters) */
+    public static function sharpClass(int $k): string
+    {
+        return 'ifx-sharp-' . ($k < 0 ? 'm' : 'p') . intdiv(abs($k), self::STEP);
     }
 
     /** Bezeichnung eines Effekts in der Sprache der Verwaltung */
@@ -245,13 +272,45 @@ final class ImageFx
     /**
      * Fügt das Stylesheet vor </head> ein, wenn die Ausgabe angepasste Bilder enthält (oder $force, z. B. im
      * Bearbeiten-Modus, wo Anpassungen live dazukommen). Kits müssen dafür nichts ändern.
+     * Schärfe/Unschärfe: die SVG-Filter (defs()) kommen vor </body> – nur wenn ein Bild sie nutzt (oder $force).
      */
     public static function inject(string $html, bool $force = false): string
     {
-        $need = $force || preg_match('~<img\b[^>]*\bclass="[^"]*\bifx\b~', $html);
-        if (!$need || str_contains($html, 'data-ifx-css')) return $html;
-        $link = '<link rel="stylesheet" href="' . e(self::cssUrl()) . '" data-ifx-css>';
-        $pos = stripos($html, '</head>');
-        return $pos === false ? $html : substr_replace($html, $link . "\n", $pos, 0);
+        if (($force || preg_match('~<img\b[^>]*\bclass="[^"]*\bifx\b~', $html)) && !str_contains($html, 'data-ifx-css')) {
+            $pos = stripos($html, '</head>');
+            if ($pos !== false) {
+                $html = substr_replace($html, '<link rel="stylesheet" href="' . e(self::cssUrl()) . '" data-ifx-css>' . "\n", $pos, 0);
+            }
+        }
+        if (($force || preg_match('~<img\b[^>]*\bclass="[^"]*\bifx-sharp-[mp]~', $html)) && !str_contains($html, 'id="ifx-defs"')) {
+            $pos = strripos($html, '</body>');
+            if ($pos !== false) $html = substr_replace($html, self::defs() . "\n", $pos, 0);
+        }
+        return $html;
+    }
+
+    /**
+     * Verstecktes <svg> mit den Filtern für Schärfe/Unschärfe (ids = Klassen, ifx-sharp-m1…m10, ifx-sharp-p1…p10).
+     * Gleiches Markup erzeugt resources/js/_imagefx.js (fxDefs) für die Vorschau in Schatten-Bäumen der Verwaltung.
+     *  - Weich: Gauß-Unschärfe; Farben mit Deckkraft 1 (feFuncA – am Bildrand = Mittelwert der Bildpunkte im Bild, kein
+     *    dunkler oder durchscheinender Saum), Deckkraft aus Original ∪ Unschärfe (feMerge): Fotos bleiben randscharf
+     *    deckend, transparente PNG/SVG behalten ihre Freifläche, ihre Kontur wird weich.
+     *  - Scharf: 3×3-Kern (Mitte 1 + 4a, Nachbarn −a), Rand dupliziert, Alpha bleibt.
+     *  - Filterbereich = Bild (x/y 0, 100 %), sRGB (wie die übrigen CSS-Filter).
+     */
+    public static function defs(): string
+    {
+        $f = '';
+        for ($i = 1, $n = intdiv(self::SHARP[1], self::STEP); $i <= $n; $i++) {
+            $px = rtrim(rtrim(number_format($i * self::BLUR_PX, 2, '.', ''), '0'), '.');
+            $f .= '<filter id="ifx-sharp-m' . $i . '" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">'
+                . '<feGaussianBlur stdDeviation="' . $px . '" result="b"/><feComponentTransfer in="b" result="o"><feFuncA type="table" tableValues="1 1"/></feComponentTransfer>'
+                . '<feMerge result="a"><feMergeNode in="SourceAlpha"/><feMergeNode in="b"/></feMerge><feComposite in="o" in2="a" operator="in"/></filter>';
+            $a = round($i * self::SHARPEN, 2);
+            $c = round(1 + 4 * $a, 2);
+            $f .= '<filter id="ifx-sharp-p' . $i . '" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">'
+                . '<feConvolveMatrix order="3" kernelMatrix="0 -' . $a . ' 0 -' . $a . ' ' . $c . ' -' . $a . ' 0 -' . $a . ' 0" edgeMode="duplicate" preserveAlpha="true"/></filter>';
+        }
+        return '<svg id="ifx-defs" class="ifx-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>' . $f . '</defs></svg>';
     }
 }

@@ -15,7 +15,7 @@ import { editImage, editToolbar } from './_imageedit.js';   // Bild bearbeiten (
  *  - Upload per Drag & Drop, mehrere Dateien, in 1-MB-Stücken; Alt-Text verbindlich
  *  - Zuschneiden je Bildformat mit Zoom und Verschieben – auch direkt auf der Seite im Bearbeiten-Modus
  *  - Bild bearbeiten (Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren; zerstörungsfrei): Werkzeugleiste in „Alle Details“
- *  - Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast; zerstörungsfrei): global in „Alle Details“ bzw. rechts,
+ *  - Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast, Schärfe; zerstörungsfrei): global in „Alle Details“ bzw. rechts,
  *    im Bearbeiten-Modus je Einbindung im Block (window.CMSEditor.fx, resources/js/editor.js)
  *  - Auswahldialog für Bild-/Datei-Felder: window.CMSMedia.pick(kind)
  */
@@ -1116,14 +1116,14 @@ class Finder {
           ${isImg && m.svg ? `<div class="md-focus md-focus--svg"><img src="${esc(m.url)}" alt="" draggable="false"></div>
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">${esc(t('SVG-Grafik: wird immer vollständig und in jeder Größe scharf gezeigt – Fokuspunkt und Zuschnitte entfallen.'))}${m.note ? ` ${esc(m.note)}.` : ''}</p>
-            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
+            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast, Schärfe'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
             <div class="md-crops" data-crops>${cropTiles()}</div>
-            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast'))}</small></h3>
+            <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast, Schärfe'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : m.kind === 'pdf' ? `<iframe class="md-pdf" src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
           : m.kind === 'video' ? `<video class="md-video" src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>
@@ -1346,7 +1346,7 @@ function initInlineCrop() {
     if (cropBtn.hidden && fxBtn.hidden) { bar.hidden = true; return; }
     fitBtn.setAttribute('aria-label', t('Darstellung im Rahmen: füllen, einpassen oder Originalformat'));
     cropBtn.setAttribute('aria-label', t('Bild zuschneiden ({ratio})', { ratio: im.dataset.ratio || '' }));
-    fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast)'));
+    fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast, Schärfe)'));
     bar.hidden = false; place();
   };
   const hide = () => { bar.hidden = true; target = null; };

@@ -37,6 +37,15 @@
   </ul>
   <p><b>Vorher/Nachher</b> zeigt das Original zum Vergleich, jedes Werkzeug hat ein eigenes „… zurücksetzen“. Mit <b>Speichern</b> entstehen die neuen Bildgrößen (kann einige Sekunden dauern); überall, wo das Bild verwendet wird, erscheint die neue Fassung. <b>Eigene Zuschnitte je Format</b> (siehe oben) werden dabei zurückgesetzt, weil sich das Bild geändert hat – bitte kurz prüfen. Bei Bildern aus <b>geteilten Medien</b> wirkt die Bearbeitung auf allen Websites, die das Bild nutzen. Bedienung auch mit Tastatur: Ecken bzw. Ausschnitt auswählen (<kbd>Tab</kbd>) und mit den Pfeiltasten verschieben, mit <kbd>⇧</kbd> in großen Schritten. Nicht bearbeitbar sind GIF-Dateien und Videos; Handy-Fotos werden schon beim Hochladen richtig herum gedreht.</p>
 
+  <h3 id="bild-anpassen">Bild anpassen: Effekte, Farbe, Schärfe</h3>
+  <p><b>Anpassen</b> ändert, wie ein Bild auf der Website erscheint – ohne die Datei zu verändern. Im großen Bearbeitungsfenster der Mediathek gilt die Anpassung <b>überall</b>, wo das Bild verwendet wird; im Bearbeitungsmodus am Bild (Knopf <b>Anpassen</b>) bzw. in der Seitenleiste am Bild-Feld gilt sie <b>nur für diese Stelle</b>. Die Vorschau im Fenster zeigt jede Änderung sofort, <b>Original zeigen</b> vergleicht mit dem unveränderten Bild.</p>
+  <ul>
+    <li><b>Effekt:</b> S/W, Sepia, Warm, Kühl, Entsättigt, Kräftig oder Kontrast.</li>
+    <li><b>Sättigung, Helligkeit, Kontrast:</b> Regler in 10-%-Schritten.</li>
+    <li><b>Schärfe:</b> ein Regler von <b>−100</b> (weicher) über <b>0</b> bis <b>+100</b> (schärfer). Nach links wird das Bild weichgezeichnet – z. B. für ein ruhiges Hintergrundbild hinter Text; die Ränder bleiben dabei sauber im Bildrahmen. Nach rechts wird es nachgeschärft – für leicht weiche Fotos. Sanfte Werte (−20 … +40) wirken meist am natürlichsten. <b>Schärfe zurücksetzen</b> stellt nur diesen Regler auf 0, <b>Zurücksetzen</b> alle Einstellungen.</li>
+  </ul>
+  <p>Gut zu wissen: Die Schärfe wirkt nur in der Anzeige des Browsers, sie ersetzt keine echte Bildbearbeitung. Für Druck oder stark verwackelte Fotos schärfen Sie das Bild vor dem Hochladen in einem Bildprogramm. Der Alt-Text bleibt unverändert. Im Kontrastmodus von Windows werden Bilder ohne Anpassungen gezeigt.</p>
+
   <h3 id="bild-im-rahmen">Bild im Rahmen: füllen, einpassen, Originalformat</h3>
   <p>Viele Blöcke zeigen Bilder in einem <b>Rahmen mit festem Format</b>, z. B. 16:10 bei Karten oder 4:3 in der Galerie. Normalerweise füllt das Bild den Rahmen und wird am Rand beschnitten – Fokuspunkt und Zuschnitt bestimmen, was sichtbar bleibt. Passt das nicht (Hochformat im Querformat-Rahmen, Logo, Grafik mit Schrift), wählen Sie im Bearbeitungsmodus am Bild <b>Rahmen</b> (oder in der Seitenleiste am Bild-Feld <b>Rahmen …</b>):</p>
   <ul>

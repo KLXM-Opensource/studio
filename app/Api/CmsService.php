@@ -831,10 +831,10 @@ final class CmsService
             $upd['focus_x'] = max(0, min(100, (int) $in['focus']['x']));
             $upd['focus_y'] = max(0, min(100, (int) $in['focus']['y']));
         }
-        // Bild anpassen (Core\ImageFx): „sepia s120 c110“ oder {"preset": "sepia", "saturation": 120, …}; leer = Original
+        // Bild anpassen (Core\ImageFx): „sepia s120 c110 sharp40“ oder {"preset": "sepia", "saturation": 120, "sharpness": 40, …}; leer = Original
         if (array_key_exists('adjust', $in) && str_starts_with((string) $m['mime'], 'image/')) {
             $adj = \Core\ImageFx::normalize($in['adjust']);
-            if ($adj === null || $adj === \Core\ImageFx::NONE) throw new ApiError(422, 'Ungültige Bildanpassung (Effekt gray|sepia|warm|cool|muted|vivid|contrast, s 0–200, b/c 50–150 in 10er-Schritten).');
+            if ($adj === null || $adj === \Core\ImageFx::NONE) throw new ApiError(422, 'Ungültige Bildanpassung (Effekt gray|sepia|warm|cool|muted|vivid|contrast, s 0–200, b/c 50–150, Schärfe sharp-100…sharp100 in 10er-Schritten).');
             $upd['adjust'] = $adj !== '' ? $adj : null;
         }
         $alt = $upd['alt'] ?? (string) $m['alt'];

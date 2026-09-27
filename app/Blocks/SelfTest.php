@@ -79,6 +79,20 @@ final class SelfTest
         $this->assert($ok && $fx::classFor(['id' => 7, 'adjust' => '']) === '', 'ImageFx: Einbindung vor global, erster Pfad gewinnt');
         $html = $fx::inject('<html><head><title>x</title></head><body><img class="a ifx ifx-gray"></body></html>');
         $this->assert(substr_count($html, 'data-ifx-css') === 1 && $fx::inject('<head></head><img class="fx50">') === '<head></head><img class="fx50">', 'ImageFx: Stylesheet nur bei Bedarf');
+        // Schärfe/Unschärfe: Format, Klassen, SVG-Filter nur bei Bedarf
+        $this->assert($fx::normalize('sharp+40 sepia') === 'sepia sharp40' && $fx::normalize('sharp0') === '' && $fx::normalize('gray sharp-60 s120') === 'gray s120 sharp-60', 'ImageFx: Schärfe kanonisch');
+        $this->assert($fx::normalize('sharp45') === null && $fx::normalize('sharp110') === null && $fx::normalize('sharp-110') === null && $fx::normalize('sharp20 sharp30') === null, 'ImageFx: ungültige Schärfe abgelehnt');
+        $this->assert($fx::normalize(['sharpness' => -20]) === 'sharp-20' && $fx::normalize(['preset' => 'warm', 'k' => 80]) === 'warm sharp80', 'ImageFx: Schärfe als Objekt');
+        $this->assert($fx::classes('sharp40') === 'ifx ifx-sharp-p4' && $fx::classes('c120 sharp-60') === 'ifx ifx-c12 ifx-sharp-m6'
+            && $fx::classes('sharp-100') === 'ifx ifx-sharp-m10' && $fx::classes('sharp10') === 'ifx ifx-sharp-p1', 'ImageFx: Schärfe-Klassen');
+        $defs = $fx::defs();
+        $this->assert(substr_count($defs, '<filter id="ifx-sharp-') === 20 && str_contains($defs, 'id="ifx-sharp-m10"') && str_contains($defs, 'id="ifx-sharp-p10"')
+            && !str_contains($defs, 'style='), 'ImageFx: SVG-Filter m1–m10/p1–p10 ohne style-Attribut');
+        $page = '<html><head></head><body><img class="ifx ifx-sharp-p4"></body></html>';
+        $out = $fx::inject($fx::inject($page));
+        $this->assert(substr_count($out, 'id="ifx-defs"') === 1 && strpos($out, 'id="ifx-defs"') < strpos($out, '</body>')
+            && !str_contains($fx::inject('<html><head></head><body><img class="ifx ifx-gray"></body></html>'), 'ifx-defs')
+            && str_contains($fx::inject('<html><head></head><body></body></html>', true), 'id="ifx-defs"'), 'ImageFx: SVG-Filter nur bei Bedarf (und im Bearbeiten-Modus)');
     }
 
     /** Bild im Rahmen (Core\ImageFit): Format, Vorrang, Klassen am <picture>, erzeugte Regeln, Bereinigung, Transparenz */

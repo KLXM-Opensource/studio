@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bild anpassen: Schärfe / Unschärfe (`Core\ImageFx`)
+- **Neuer Regler „Schärfe“** von −100 (weicher) über 0 bis +100 (schärfer) im Dialog „Bild anpassen“ – in der Mediathek
+  (global je Bild, `media.adjust`) und je Einbindung (`data._fx`), mit Live-Vorschau und „Schärfe zurücksetzen“.
+  Speicherformat `sharp-60` / `sharp40` (10er-Schritte, nach Effekt und s/b/c), API/MCP auch `{"sharpness": 40}`.
+- Klassen `ifx-sharp-m1…m10` / `ifx-sharp-p1…p10` am Ende derselben Filterkette; die SVG-Filter (Gauß-Unschärfe bis 4 px
+  mit sauberem Rand, 3×3-Schärfekern) stehen in einem versteckten `<svg id="ifx-defs">`, das nur Seiten mit
+  geschärften/weichgezeichneten Bildern bekommen (`ImageFx::inject()`) – CSP-konform, geprüft in Chromium und WebKit.
+- Nur Darstellung im Browser, keine echte Bildbearbeitung; Kontrastmodus (`forced-colors`) zeigt Bilder ohne Filter.
+  Selbsttest `blocks:selftest` um Format, Klassen und bedarfsweises Einbinden erweitert.
+
 ### Kit „praxis“: Budget, Platzhalter als Notizen, Barrierefreiheit (Handoff Praxis Moers)
 - **Karten im Zwei-Klick-Modus** (`Core\Maps`): Einstellung `sys.map_click` (Grundeinstellungen → Karten; leer = Vorgabe des
   Kits `project.map.click`) – Hinweis mit Link zur Datenschutzerklärung und Knopf „Karte anzeigen“, MapLibre und Kacheln
