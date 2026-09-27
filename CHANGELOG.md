@@ -312,7 +312,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   (config `mail_dump`). WebAuthn-Hilfen für Passkeys in `resources/js/_webauthn.js` (von `passkey.js` und `invite.js` genutzt).
 - Konsole `user:invite <email> [rolle] [--name=…] [--lang=de|en]` (Status, Link bei fehlendem Versand) und `invites:selftest`.
 
-### Trailer mit englischem Sprecher und Untertiteln EN/DE/SL
+### Trailer ohne Ton, Untertitel EN/DE/SL (Sprecher optional)
+- **Standard ohne Ton** (`tools/trailer/voice.json` `"audio": false`): `trailer.mjs` erzeugt MP4/WebM ohne Tonspur;
+  `--voice` (oder `"audio": true`) mit englischem Sprecher, `--voice-timing` stumm im Takt des Sprechers, `--silent` wie bisher.
+  Die veröffentlichten Trailer-Dateien sind stumm (Videospur unverändert, Untertitel-Zeiten gelten weiter).
 - **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM Ai, Mediathek mit
   geteilten Pools, Barrierefreiheit (Alt-Texte, Videos ohne Untertitel), Datentabellen und Formulare, Website-Suche,
   Block-Baukasten, KI optional/lokal, Funktionen & Erweiterungen, Netzwerk, Content-Sync. Wortwahl zeitlos, keine

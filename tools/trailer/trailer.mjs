@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 /**
- * Produkt-Trailer „KLXM Studio im Überblick“ (Produkt-Website, Startseite #trailer) – englischer Sprecher, Untertitel EN/DE/SL.
+ * Produkt-Trailer „KLXM Studio im Überblick“ (Produkt-Website, Startseite #trailer) – ohne Ton, Untertitel EN/DE/SL.
  *
- *   node tools/trailer/trailer.mjs                 Sprecher erzeugen, alles aufnehmen und schneiden
+ *   node tools/trailer/trailer.mjs                 alles aufnehmen und schneiden (Standard: ohne Ton, s. u. „Ton“)
  *   node tools/trailer/trailer.mjs --list          Einstellungen (Shots) mit Kurznamen und Sprechertext
  *   node tools/trailer/trailer.mjs --only=theme-,adm-media  nur diese Shots neu aufnehmen („theme-“ = Präfix), Rest aus dem
  *                                                    Zwischenstand; die edit-Shots bauen aufeinander auf → nur gemeinsam (--only=edit-)
  *   node tools/trailer/trailer.mjs --cut           nur neu schneiden (alle Shots aus tools/trailer/.work/), z. B. nach Stimmenwechsel
- *   Optionen: --silent (ohne Ton, Untertitel nach Lesezeit), --headed, --keep (Einzelbilder behalten)
+ *   Optionen: --voice (mit englischem Sprecher), --voice-timing (Sprecher nur für den Takt, Video ohne Ton),
+ *             --silent (ohne Ton, Untertitel nach Lesezeit – auch wenn voice.json "audio": true), --headed, --keep (Einzelbilder behalten)
+ *
+ * Ton: Standard ist OHNE Ton ("audio": false in tools/trailer/voice.json). Ohne Tonspur richten sich Shot-Längen und Untertitel nach
+ * der Lesezeit; --voice-timing übernimmt stattdessen die Zeiten des Sprechers (gleicher Schnitt wie die Fassung mit Ton, nur stumm).
+ * Mit Ton: --voice oder "audio": true – der Sprecher-Werkzeugkasten (voice.mjs, voice.json, lexicon.en.json) bleibt dafür erhalten.
  *
  * Drehbuch: je Shot vo: [[en, de, sl], …] – ein Satz je Eintrag. Gesprochen wird en (tools/trailer/voice.mjs, Stimme = EINE Zeile in
  * tools/trailer/voice.json, Aussprache tools/trailer/lexicon.en.json, nur lokale TTS); en-Untertitel = gesprochener Text, de/sl =
@@ -28,7 +33,7 @@
  *
  * Ergebnis in TRAILER_OUT (Standard: ../klxm-studio-website/site-tools/trailer neben dem Projektordner – der Trailer gehört zur
  * Produkt-Website studio.klxm.de und wird nicht mit dem CMS ausgeliefert; lokal einbinden mit php site-tools/trailer-replace.php
- * bzw. klxm:seed): klxm-studio-trailer.mp4 (1080p, H.264 + AAC, faststart), .webm (VP9 + Opus), -720.mp4, .jpg (Vorschaubild),
+ * bzw. klxm:seed): klxm-studio-trailer.mp4 (1080p, H.264, faststart; AAC nur mit Ton), .webm (VP9; Opus nur mit Ton), -720.mp4, .jpg (Vorschaubild),
  * .en.vtt / .de.vtt / .sl.vtt, trailer.json (Dauer, Größen, Sprecher, Schnittliste).
  */
 import fs from 'node:fs';
@@ -755,9 +760,12 @@ const clips = fs.existsSync(clipsFile) ? JSON.parse(fs.readFileSync(clipsFile, '
 const failed = [];
 const toRecord = flag('--cut') ? [] : shots.filter((s) => (only.length ? only.some((o) => s.id === o || (o.endsWith('-') && s.id.startsWith(o))) : true));
 
-// Sprecher Englisch (Standard; --silent = ohne Ton): alle Sätze vorab erzeugen (tools/trailer/voice.mjs, Stimme aus voice.json),
-// Mindestlänge je Shot = Sprechdauer. Ohne Ton: Lesezeit der Untertitel (≈ 15 Zeichen/s, 2,2–6 s je Satz).
-const SILENT = flag('--silent');
+// Ton: Standard aus voice.json "audio" (false = ohne Ton); --voice = mit Sprecher, --silent = ohne. Mit Sprecher (oder --voice-timing)
+// werden alle Sätze vorab erzeugt (tools/trailer/voice.mjs, Stimme aus voice.json), Mindestlänge je Shot = Sprechdauer.
+// Sonst: Lesezeit der Untertitel (≈ 15 Zeichen/s, 2,2–6 s je Satz).
+const AUDIO_DEFAULT = JSON.parse(fs.readFileSync(path.join(DIR, 'voice.json'), 'utf8')).audio === true;
+const AUDIO = !flag('--silent') && (flag('--voice') || AUDIO_DEFAULT);
+const SILENT = !AUDIO && !flag('--voice-timing');
 const GAP = 0.3;                                               // Pause zwischen zwei Sätzen eines Shots
 const voice = {};                                              // id → [{ file, dur }] je Satz
 let VO = null;
@@ -974,7 +982,7 @@ const wrap = (txt) => {
 for (const lang of Object.keys(LANGS)) fs.writeFileSync(path.join(OUT, `${NAME}.${lang}.vtt`), 'WEBVTT\n\n' + cues.map((c, i) => `${i + 1}\n${ts(c.t)} --> ${ts(c.end)}\n${wrap(c[lang])}\n`).join('\n'));
 
 let audio = null;
-if (VO && cues.every((c) => c.file)) {
+if (AUDIO && VO && cues.every((c) => c.file)) {
   const { buildTrack } = await import('./voice.mjs');
   audio = path.join(WORK, 'voice.en.wav');
   buildTrack(cues.map((c) => ({ t: c.t, file: c.file })), total, audio);

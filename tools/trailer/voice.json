@@ -1,5 +1,6 @@
 {
- "_comment": "Englischer Sprecher des Trailers (tools/trailer/voice.mjs). Stimme wechseln = nur die Zeile \"voice\" ändern, dann: node tools/trailer/trailer.mjs --cut. Nur lokale Engines, kein Cloud-TTS.",
+ "_comment": "Englischer Sprecher des Trailers (tools/trailer/voice.mjs). \"audio\": false = Trailer ohne Ton (Standard); true oder node tools/trailer/trailer.mjs --voice = mit Sprecher. Stimme wechseln = nur die Zeile \"voice\" ändern, dann: node tools/trailer/trailer.mjs --cut. Nur lokale Engines, kein Cloud-TTS.",
+ "audio": false,
  "voice": "chatterbox-cori",
  "voices": {
   "chatterbox-cori": {
