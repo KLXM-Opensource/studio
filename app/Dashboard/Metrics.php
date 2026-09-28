@@ -267,7 +267,11 @@ final class Metrics
         foreach ((array) project('setup_checks', [['setting' => (string) project('name_setting', 'site_name'), 'label' => term('site_name') . ' eingetragen', 'link' => '/admin/settings']]) as $c) {
             $checks[] = ['ok' => filled($s->get($c['setting'])) || (!empty($c['when']) && !$s->get($c['when'])), 'label' => __((string) $c['label']), 'link' => $c['link'] ?? '/admin/settings'];
         }
-        $checks[] = ['ok' => (string) $s->get('sys.site_url') !== '', 'label' => __('Kanonische Domain festgelegt'), 'link' => '/admin/system#website', 'admin' => true];
+        // Nur nötig, wenn die Adresse nicht eindeutig ist: mehrere Domains in der Website-Konfiguration und keine base_url
+        // (www/ohne www leitet meist schon der Server um; E-Mails, Sitemap und Cron brauchen dann trotzdem eine feste Adresse)
+        $hosts = array_filter(site()->hosts(), fn($h) => !str_contains($h, 'localhost') && !preg_match('~^[\d.:]+$~', $h));
+        $checks[] = ['ok' => (string) $s->get('sys.site_url') !== '' || (string) app()->config->get('base_url', '') !== '' || count($hosts) <= 1,
+            'label' => __('Kanonische Domain festgelegt'), 'link' => '/admin/system#website', 'admin' => true];
         // Platzhalter: nennt Fundstelle und Seite, führt direkt dorthin; gewollte Klammern („[Musik]“) lassen sich bestätigen
         $ph = self::placeholder();
         $checks[] = $ph

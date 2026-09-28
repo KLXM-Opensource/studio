@@ -31,7 +31,7 @@ final class SystemSchema
                     'help' => 'Kits liegen unter /kits/{name} (Templates, Blöcke, Fragmente) und /public/kits/{name} (Assets); ältere Kits unter /themes/{name} werden weiter erkannt.'],
                 ['name' => 'sys.site_url', 'label' => 'Kanonische Adresse (Domain)', 'type' => 'url',
                     'placeholder' => 'https://www.ihre-domain.de',
-                    'help' => 'Für Canonical-Links, Sitemap und E-Mail-Links. Leer = aktuelle Domain.'],
+                    'help' => 'Für Canonical-Links, Sitemap und E-Mail-Links (auch aus Cron/Kommandozeile). Nur nötig, wenn die Website unter mehreren Domains erreichbar ist; leer = Domain aus der Konfiguration bzw. die aufgerufene.'],
                 ['name' => 'sys.admin_locale', 'label' => 'Sprache der Verwaltung (Standard)', 'type' => 'select', 'required' => true, 'default' => 'de',
                     'options' => I18n::available(), 'help' => 'Jede Person kann unter „Konto“ eine eigene Sprache wählen.'],
                 // Persönliche Akzentfarbe der Verwaltung (Core\Accent): welche Vorlagen die Personen unter „Konto“ wählen dürfen
