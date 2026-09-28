@@ -42,6 +42,12 @@ document.querySelectorAll('form[data-dff]').forEach(form => {
   form.addEventListener('change', e => {
     const t = e.target;
     if (t.hasAttribute('data-iban')) t.value = t.value.replace(/\s+/g, '').toUpperCase().replace(/(.{4})(?!$)/g, '$1 ');
+    // Datei: Größe sofort prüfen (Typ und Größe prüft der Server ohnehin am Inhalt)
+    if (t.type === 'file' && t.dataset.maxBytes) {
+      const p = t.closest('[data-cf]')?.querySelector('.dff-err'), big = [...t.files].some(f => f.size > +t.dataset.maxBytes);
+      if (p) { p.textContent = big ? t.dataset.tooLarge : ''; p.hidden = !big; }
+      big ? t.setAttribute('aria-invalid', 'true') : t.removeAttribute('aria-invalid');
+    }
   });
   const show = (msg, errors = {}) => {
     form.querySelectorAll('.dff-err').forEach(p => { p.hidden = true; p.textContent = ''; });

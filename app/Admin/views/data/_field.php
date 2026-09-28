@@ -69,6 +69,24 @@ $type = $f['type'] ?? 'text';
       </div>
       <p class="f-help"><?= e(__('Besucher können im Formular Zeilen hinzufügen und entfernen. Leere Zeilen werden ignoriert. Bedingungen anderer Felder können nur prüfen, ob die Gruppe ausgefüllt ist.')) ?></p>
     </div>
+    <?php
+    // Datei: erlaubte Dateitypen (geprüft am Inhalt, nicht nur an der Endung) und eigene Höchstgröße – DOCX/ODT nur im Eingang (per E-Mail)
+    $kindLabels = ['pdf' => __('PDF'), 'image' => __('Bilder (JPG, PNG, WebP)'), 'docx' => __('Word (DOCX)'), 'odt' => __('OpenDocument-Text (ODT)')];
+    $acc = (array) ($f['accept'] ?? \Core\Data\DataForms::FILE_KINDS_DEFAULT);
+    $fid = 'dtf-' . preg_replace('~[^a-z0-9_]~i', '', (string) $i);
+    ?>
+    <div class="dt-field__extra" data-show-for="file">
+      <fieldset class="dt-kinds"><legend><?= e(__('Erlaubte Dateitypen')) ?></legend>
+        <input type="hidden" name="<?= $n ?>[accept][]" value="">
+        <?php foreach ($kindLabels as $k => $l): if (!$inbox && in_array($k, \Core\Data\DataForms::FILE_KINDS_INBOX, true)) continue; ?>
+        <label class="f-check"><input type="checkbox" name="<?= $n ?>[accept][]" value="<?= $k ?>"<?= in_array($k, $acc, true) ? ' checked' : '' ?>> <span><?= e($l) ?></span></label>
+        <?php endforeach; ?>
+      </fieldset>
+      <label class="dt-in dt-in--mb"><span><?= e(__('Höchstgröße (MB, optional)')) ?></span><input type="number" name="<?= $n ?>[max_mb]" min="1" max="<?= \Core\Data\DataForms::MAX_MB ?>" value="<?= !empty($f['max_mb']) ? (int) $f['max_mb'] : '' ?>" placeholder="<?= e(__('wie Tabelle')) ?>" aria-describedby="<?= $fid ?>-kh"></label>
+      <p class="f-help" id="<?= $fid ?>-kh"><?= e($inbox
+          ? __('Geprüft wird der Inhalt der Datei, nicht nur die Endung; Word-Dateien mit Makros (DOCM) werden abgelehnt. Leer = Grenze der Tabelle; mehr als die Tabelle erlaubt, geht nicht. Dateien werden nur bei Zustellung per E-Mail angenommen – als Anhang bzw. versiegelt.')
+          : __('Gilt für Uploads über das öffentliche Formular; geprüft wird der Inhalt der Datei, nicht nur die Endung. Leer = Grenze der Tabelle; mehr als die Tabelle erlaubt, geht nicht. Word und OpenDocument gibt es nur in Eingangs-Tabellen (Zustellung per E-Mail) – die Mediathek speichert sie nicht.')) ?></p>
+    </div>
     <div class="dt-field__extra" data-show-for="iban">
       <input type="hidden" name="<?= $n ?>[mask]" value="0">
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[mask]" value="1"<?= ($f['mask'] ?? true) ? ' checked' : '' ?>> <span><?= e(__('In Listen maskieren')) ?></span></label>

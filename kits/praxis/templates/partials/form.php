@@ -19,7 +19,7 @@ $ready = FormCrypto::ready();
 <?php if (!$ready): ?>
 <p class="form-off" role="note"><?= praxis_has_phone() ? praxis_fill(lt('Das Online-Formular wird gerade eingerichtet. Bitte rufen Sie uns an: {phone}.'), ['phone' => praxis_phone_link()]) : e(lt('Das Online-Formular wird gerade eingerichtet.')) ?></p>
 <?php else: ?>
-<form class="pform" method="post" action="<?= e(url('/anfrage/' . $form)) ?>" data-form="<?= e($form) ?>" novalidate>
+<form class="pform" method="post" action="<?= e(url('/anfrage/' . $form)) ?>" data-form="<?= e($form) ?>"<?= array_filter($fields, fn($f) => $f['type'] === 'file') ? ' enctype="multipart/form-data"' : '' ?> novalidate>
   <?php /* Pflichtfelder: sichtbares Sternchen (für Screenreader genügt required/aria-required) + Legende */ $star = ' <span class="req" aria-hidden="true">*</span>'; ?>
   <p class="pform__legend" aria-hidden="true"><span class="req">*</span> <?= e(lt('Pflichtfeld')) ?></p>
   <div class="pform__grid">
@@ -46,6 +46,9 @@ $ready = FormCrypto::ready();
           <?php if (!$f['required']): ?><option value=""></option><?php endif; ?>
           <?php foreach ($f['options'] as $k => $l): ?><option value="<?= e((string) $k) ?>"<?= (string) $k === $val ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
         </select>
+        <?php elseif ($f['type'] === 'file'): // Datei (nur bei Zustellung per E-Mail): Typ und Größe prüft der Server am Inhalt ?>
+        <p class="pform__hint" id="<?= $id ?>-h"><?= e($f['file_hint']) ?></p>
+        <input id="<?= $id ?>" name="<?= e($f['name']) ?>" type="file" accept="<?= e($f['accept']) ?>" data-max-bytes="<?= (int) $f['max_bytes'] ?>"<?= $req ?> aria-describedby="<?= $id ?>-h <?= $id ?>-e"<?= $err ? ' aria-invalid="true"' : '' ?>>
         <?php elseif ($f['type'] === 'textarea'): ?>
         <textarea id="<?= $id ?>" name="<?= e($f['name']) ?>" rows="4" maxlength="5000"<?= $req . $aria ?>><?= e($val) ?></textarea>
         <?php else: ?>

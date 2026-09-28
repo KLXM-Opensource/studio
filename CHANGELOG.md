@@ -6,6 +6,30 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: Dateifeld fehlte im Eingangs-Formular; erlaubte Dateitypen je Dateifeld
+- **Behoben:** In Eingangs-Tabellen (Anfragen) mit Zustellung per E-Mail fehlte ein Dateifeld im Formular, wenn es nach
+  dem ersten Speichern der Auswahl „Felder im Formular“ angelegt wurde – die Auswahl war dann eine feste Liste ohne das
+  neue Feld, und die Einstellungen zeigten es erst nach dem Speichern (nicht angehakt). Jetzt merkt die Tabelle, welche
+  Felder zur Wahl standen (`settings.form.known`); neu angelegte Felder sind im Formular, bis sie abgewählt werden.
+  Bestehende Tabellen ohne diesen Merker: nicht gewählte Dateifelder sind automatisch dabei (`DataForms::selected`).
+  `Tables::validate` übergibt den aus der Zustellung abgeleiteten Upload-Schalter jetzt direkt an
+  `DataForms::validateSettings` – ein angehaktes Dateifeld wird nie verworfen, egal welche Werte das Formular schickt.
+  Einstellungen: Hinweis „Datei – nur bei Zustellung per E-Mail“ in der Auswahl, Warnung bei Zustellung „Im System“.
+- **Neu: Erlaubte Dateitypen je Dateifeld** (Feld-Einstellung `accept`): PDF, Bilder (JPG, PNG, WebP), Word (DOCX),
+  OpenDocument-Text (ODT) – Standard PDF + Bilder (wie bisher). DOCX/ODT nur in Eingangs-Tabellen (Zustellung per E-Mail),
+  weil die Mediathek sie nicht speichert; Inhaltstabellen wählen PDF und/oder Bilder. Optional **Höchstgröße je Feld**
+  (`max_mb`, höchstens die Grenze der Tabelle).
+- **Prüfung am Inhalt** (`DataForms::sniff`): finfo und Dateiendung müssen passen; PDF-Kopf, `getimagesize`; DOCX/ODT als
+  ZIP mit `[Content_Types].xml` bzw. `mimetype`, Makros (DOCM, `vbaProject.bin`, `Basic/`, `Scripts/`) abgelehnt. Ein
+  umbenanntes Programm („rechnung.pdf“) wird abgelehnt. Der Anhang der E-Mail trägt den erkannten Typ.
+- **Formular:** `accept` passend zu den erlaubten Typen, sichtbarer Hinweis unter dem Feld („PDF oder Bild (JPG, PNG,
+  WebP), höchstens 5 MB.“, per `aria-describedby`), Größenprüfung schon bei der Auswahl (`dataform.js`). Kit praxis:
+  `partials/form.php` stellt Dateifelder dar (`multipart/form-data`; `Core\Forms::fields` liefert `accept`, `file_hint`).
+- Selbsttest `inbox:selftest`: Auswahl mit Dateifeld, neue Felder, ältere Auswahl, Dateitypen (PDF, umbenanntes Programm,
+  DOCX, DOCM, ODT mit Makros, Bild), E-Mail mit gewählten Feldern + DOCX-Anhang, nur per E-Mail mit S/MIME.
+- Handbuch „Daten → Formular“ und „Anfragen → Dateien annehmen“, Entwicklerhandbuch „Formulare“, `lang/en.php`.
+- Möglicher nächster Schritt: mehrere Dateien je Feld.
+
 ### Formular (Datentabelle): Breite und Ausrichtung; Kit praxis: Block „Fließtext“, engere Text-/Formular-Abschnitte
 - **Kern-Block „Formular (Datentabelle)“** (`app/Blocks/blocks.php`, `app/Blocks/data_form.php`): neue Optionen unter
   „Darstellung“ – **Breite** Textbreite (Standard; auch für bestehende Blöcke ohne Angabe: in der Spalte der Fließtexte) /

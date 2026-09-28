@@ -226,6 +226,90 @@ final class DeliverySelfTest
             $r = Delivery::accept($with(['mode' => 'mail', 'smime' => "-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----"]), $values, $files);
             $eq('S/MIME ungültig: nichts im Klartext versendet, gesichert', [$r['mailed'], count($mails()), $rows()], [false, 0, $before + 1]);
 
+            // ---------------------------------------------------------- Auswahl „Felder im Formular“ + Dateifeld (nur per E-Mail)
+            array_map('unlink', glob($dir . '/*') ?: []);
+            $in = ['name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'],
+                'fields' => [...array_map(fn($f) => isset($f['options']) ? ['options' => implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys($f['options']), $f['options']))] + $f : $f, $t['fields']),
+                    ['label' => 'Lebenslauf', 'name' => 'lebenslauf', 'type' => 'file', 'accept' => ['', 'pdf', 'docx'], 'max_mb' => '3']],
+                // wie das Formular der Verwaltung: Schalter „uploads“ = 0 (gibt es im Eingang nicht), Auswahl mit Dateifeld; neues Feld stand nicht zur Wahl
+                'settings' => ['kind' => 'inbox', 'form' => ['enabled' => 1, 'uploads' => '0', 'fields' => ['', 'name', 'befund'], 'upload_mb' => 5],
+                    'inbox' => ['delivery' => ['mode' => 'mail']]]];
+            [$d2, $e2] = Tables::validate($in, $t);
+            $eq('Auswahl mit Dateifeld: gültig', $e2, []);
+            $eq('Auswahl: angehaktes Dateifeld bleibt (unabhängig vom Schalter „uploads“)', $d2['settings']['form']['fields'] ?? null, ['name', 'befund']);
+            $eq('Zustellung nur per E-Mail: Formular nimmt Dateien an', $d2['settings']['form']['uploads'] ?? null, true);
+            $lf = Tables::field(['fields' => $d2['fields']], 'lebenslauf') ?? [];
+            $eq('Dateifeld: erlaubte Typen und eigene Höchstgröße', [$lf['accept'] ?? null, $lf['max_mb'] ?? null], [['pdf', 'docx'], 3]);
+            $t2 = ['fields' => $d2['fields'], 'settings' => $d2['settings']] + $t;
+            $eq('Formularfelder: gewählt + Pflicht + neu angelegtes Feld', array_column(DataForms::fields($t2), 'name'), ['name', 'befund', 'lebenslauf']);
+            $legacy = $t2;
+            unset($legacy['settings']['form']['known']);
+            $legacy['settings']['form']['fields'] = ['name'];
+            $eq('Ältere Auswahl ohne Dateifeld: Dateifelder trotzdem dabei', array_column(DataForms::fields($legacy), 'name'), ['name', 'befund', 'lebenslauf']);
+            $sys = $t2;
+            $sys['settings']['inbox']['delivery']['mode'] = 'system';
+            $eq('Ohne Zustellung per E-Mail: keine Dateifelder', array_column(DataForms::fields($sys), 'name'), ['name']);
+            [, $e3] = Tables::validate(['settings' => ['kind' => 'inbox', 'inbox' => ['delivery' => ['mode' => 'mail']]], 'fields' => [['label' => 'D', 'name' => 'd', 'type' => 'file', 'accept' => ['']]]] + $in, $t);
+            $true('Dateifeld ohne erlaubten Typ abgelehnt', (bool) array_filter(array_keys($e3), fn($k) => str_starts_with((string) $k, 'fields.')));
+            [$d4] = Tables::validate(['name' => 'Inhalt', 'handle' => $handle . 'c', 'fields' => [['label' => 'Anhang', 'name' => 'anhang', 'type' => 'file', 'accept' => ['pdf', 'docx', 'odt']]]]);
+            $eq('Inhaltstabelle: kein DOCX/ODT (Mediathek)', $d4['fields'][0]['accept'] ?? null, ['pdf']);
+            $eq('Höchstgröße: Feld ≤ Tabelle', [DataForms::fileMb($lf, ['upload_mb' => 5]), DataForms::fileMb($lf, ['upload_mb' => 2]), DataForms::fileMb(['type' => 'file'], ['upload_mb' => 4])], [3, 2, 4]);
+            $html = DataForms::render($t2 + ['handle' => $handle], ['uid' => 'st']);
+            $true('Formular: multipart, accept, Hinweis mit aria-describedby', str_contains($html, 'enctype="multipart/form-data"')
+                && str_contains($html, 'accept=".pdf,application/pdf,.docx,') && str_contains($html, 'PDF oder Word (DOCX), höchstens 3 MB.')
+                && (bool) preg_match('~id="st-lebenslauf-h"[^>]*>[^<]*DOCX~', $html) && str_contains($html, 'aria-describedby="st-lebenslauf-h st-lebenslauf-e"'));
+
+            // Dateityp am Inhalt (nicht an der Endung)
+            $tmp = sys_get_temp_dir() . '/klxm-upload-selftest-' . bin2hex(random_bytes(3));
+            @mkdir($tmp);
+            $put = function (string $name, string $data) use ($tmp): string { file_put_contents("$tmp/$name", $data); return "$tmp/$name"; };
+            $zip = function (string $name, array $entries) use ($tmp): string {
+                $z = new \ZipArchive();
+                $z->open("$tmp/$name", \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+                foreach ($entries as $n => $v) { $z->addFromString($n, $v); if ($n === 'mimetype') $z->setCompressionName($n, \ZipArchive::CM_STORE); }
+                $z->close();
+                return "$tmp/$name";
+            };
+            $ct = fn(string $main) => '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/word/document.xml" ContentType="' . $main . '"/></Types>';
+            $docx = $zip('cv.docx', ['[Content_Types].xml' => $ct('application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml'), 'word/document.xml' => '<w:document/>']);
+            $docm = $zip('makro.docx', ['[Content_Types].xml' => $ct('application/vnd.ms-word.document.macroEnabled.main+xml'), 'word/document.xml' => '<w:document/>', 'word/vbaProject.bin' => 'x']);
+            $odt = $zip('cv.odt', ['mimetype' => 'application/vnd.oasis.opendocument.text', 'content.xml' => '<office:document-content/>']);
+            $odtM = $zip('makro.odt', ['mimetype' => 'application/vnd.oasis.opendocument.text', 'content.xml' => '<x/>', 'Basic/Standard/Module1.xml' => 'x']);
+            $pdfF = $put('cv.pdf', $pdf);
+            $exe = $put('rechnung.pdf', "MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff" . str_repeat("\x00", 50) . 'This program cannot be run in DOS mode.');
+            $png = $put('bild.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='));
+            $all = array_keys(DataForms::FILE_KINDS);
+            $eq('PDF erkannt', DataForms::sniff($pdfF, 'cv.pdf', ['pdf']), 'application/pdf');
+            $eq('Programm mit Endung .pdf abgelehnt', DataForms::sniff($exe, 'rechnung.pdf', $all), null);
+            $eq('DOCX erkannt, wenn erlaubt', DataForms::sniff($docx, 'cv.docx', ['pdf', 'docx']), DataForms::FILE_KINDS['docx']['mimes'][0]);
+            $eq('DOCX abgelehnt, wenn nicht erlaubt', DataForms::sniff($docx, 'cv.docx', ['pdf', 'image']), null);
+            $eq('DOCX mit Makros (DOCM umbenannt) abgelehnt', DataForms::sniff($docm, 'makro.docx', $all), null);
+            $eq('ODT erkannt', DataForms::sniff($odt, 'cv.odt', ['odt']), DataForms::FILE_KINDS['odt']['mimes'][0]);
+            $eq('ODT mit Basic-Makros abgelehnt', DataForms::sniff($odtM, 'makro.odt', $all), null);
+            $eq('DOCX mit Endung .pdf abgelehnt', DataForms::sniff($docx, 'cv.pdf', $all), null);
+            $eq('Bild erkannt', DataForms::sniff($png, 'bild.png', ['image']), 'image/png');
+            $eq('Bild nur mit erlaubtem Typ', DataForms::sniff($png, 'bild.png', ['pdf']), null);
+
+            // E-Mail mit gewählten Feldern + Datei: Anhang mit erkanntem Typ, auch S/MIME
+            $v2 = ['name' => 'Erika ' . self::MARK, 'befund' => 0, 'lebenslauf' => 0];
+            $f2 = ['lebenslauf' => ['name' => 'cv.docx', 'type' => DataForms::FILE_KINDS['docx']['mimes'][0], 'data' => (string) file_get_contents($docx)]];
+            $t2['settings']['inbox']['delivery'] = ['mode' => 'mail', 'machine' => '', 'smime' => ''] + $t2['settings']['inbox']['delivery'];
+            $m2 = Delivery::message($t2, $v2, $f2, 'WXYZ-2345', now(), 'mail');
+            $eq('E-Mail: nur gewählte Felder + Datei', array_column($m2['rows'], 'name'), ['name', 'lebenslauf']);
+            $eq('E-Mail: DOCX als Anhang mit Typ', array_map(fn($a) => [$a['name'], $a['type']], $m2['attach']), [['cv.docx', DataForms::FILE_KINDS['docx']['mimes'][0]]]);
+            $t2['settings']['inbox']['delivery']['smime'] = $norm;
+            $r = Delivery::accept($t2, $v2, $f2);
+            $eml = $mails();
+            $raw = $eml ? (string) file_get_contents($eml[0]) : '';
+            $out = tempnam(sys_get_temp_dir(), 'smime-out');
+            $dec = $eml && $out && openssl_pkcs7_decrypt($eml[0], $out, $certPem, $keyPem);
+            $plain = $dec ? (string) file_get_contents($out) : '';
+            if ($out) @unlink($out);
+            $true('Nur E-Mail + S/MIME: Datei versiegelt zugestellt, nichts gespeichert', $r['ok'] && $r['mailed'] && !str_contains($raw, 'cv.docx') && str_contains($plain, 'cv.docx') && $r['id'] === 0);
+            array_map('unlink', $mails());
+            array_map('unlink', glob("$tmp/*") ?: []);
+            @rmdir($tmp);
+
             // ---------------------------------------------------------- Nie Inhalte im Protokoll
             $logs = app()->db->fetchAll('SELECT detail FROM inbox_log WHERE table_handle = ?', [$handle]);
             $true('Protokoll: Einträge vorhanden', count($logs) >= 5);

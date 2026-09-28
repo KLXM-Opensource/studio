@@ -64,13 +64,22 @@ final class Forms
         return $d && !empty($d['external_url']) ? (string) app()->settings->get($d['external_url'], '') : '';
     }
 
-    /** Felder im Format der Theme-Vorlagen: name, label, type, required, options (Schlüssel => Text), width (half|full) */
+    /**
+     * Felder im Format der Theme-Vorlagen: name, label, type, required, options (Schlüssel => Text), width (half|full).
+     * Dateifelder (nur bei Zustellung per E-Mail): zusätzlich accept (Attribut), file_hint („PDF oder Bild …, höchstens 5 MB.“), max_bytes –
+     * das Formular braucht dann enctype="multipart/form-data".
+     */
     public static function fields(string $key): array
     {
         $t = self::table($key);
         if (!$t) return [];
+        $file = fn(array $f) => $f['type'] === 'file' ? [
+            'accept' => DataForms::acceptAttr(DataForms::fileKinds($f, true)),
+            'file_hint' => DataForms::fileHint(DataForms::fileKinds($f, true), DataForms::fileMb($f, $t['settings']['form'])),
+            'max_bytes' => DataForms::fileMb($f, $t['settings']['form']) * 1048576,
+        ] : [];
         // Wiederholbare Gruppe: zusätzlich fields (Unterfelder), min, max, item_label, add_label – Ausgabe mit DataForms::group()
-        return array_map(fn($f) => ($f['type'] === 'group' ? \Core\Data\Entries::groupSchema($f, true) : []) + [
+        return array_map(fn($f) => $file($f) + ($f['type'] === 'group' ? \Core\Data\Entries::groupSchema($f, true) : []) + [
             'name' => $f['name'], 'label' => Tables::label($f), 'type' => $f['type'], 'required' => !empty($f['required']),
             'options' => in_array($f['type'], ['select', 'multiselect'], true)
                 ? array_combine(array_map('strval', array_keys((array) ($f['options'] ?? []))), array_map(fn($k) => Tables::optionLabel($f, (string) $k), array_keys((array) ($f['options'] ?? []))))

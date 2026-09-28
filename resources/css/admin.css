@@ -711,6 +711,11 @@ img.media-vthumb{object-fit:cover}
 .dt-in--name input{font-family:ui-monospace,Menlo,monospace;font-size:13px}
 .dt-in--help input{min-height:32px;font-size:13px}
 .dt-field__tools{display:flex;flex-direction:column;gap:4px}
+/* Dateifeld: erlaubte Dateitypen und Höchstgröße */
+.dt-kinds{margin:0 0 8px;padding:8px 12px 10px;border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface);display:flex;flex-wrap:wrap;gap:6px 16px;min-width:0}
+.dt-kinds legend{padding:0 6px;font-size:12px;font-weight:700;color:var(--adm-t2)}
+.dt-kinds .f-check{font-size:13px}
+.dt-in--mb{max-width:220px}
 /* Wiederholbare Gruppe: Unterfelder im Tabellen-Designer */
 .dt-group{display:grid;gap:10px}
 .dt-group__subs{margin:0;padding:10px 12px 12px;border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface);min-width:0}

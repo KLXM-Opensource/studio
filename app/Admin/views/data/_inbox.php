@@ -39,11 +39,12 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
       <fieldset class="f dt-form__fields"><legend><?= e(__('Felder im Formular')) ?></legend>
         <input type="hidden" name="settings[form][fields][]" value="">
         <?php if (!$fmAll): ?><p class="f-help"><?= e(__('Neue Felder erscheinen hier nach dem Speichern.')) ?></p><?php endif; ?>
-        <?php foreach ($fmAll as $f): ?>
-        <label class="f-check"><input type="checkbox" name="settings[form][fields][]" value="<?= e($f['name']) ?>"<?= !$fm['fields'] || in_array($f['name'], $fm['fields'], true) || !empty($f['required']) ? ' checked' : '' ?><?= !empty($f['required']) ? ' disabled' : '' ?>><?php if (!empty($f['required'])): ?><input type="hidden" name="settings[form][fields][]" value="<?= e($f['name']) ?>"><?php endif; ?>
-          <span><?= e($f['label']) ?><?= !empty($f['required']) ? ' <small class="adm-muted">(' . e(__('Pflichtfeld – immer dabei')) . ')</small>' : '' ?></span></label>
+        <?php $selT = ['settings' => ['kind' => 'inbox', 'form' => $fm]];
+          foreach ($fmAll as $f): $isFile = ($f['type'] ?? '') === 'file'; ?>
+        <label class="f-check"><input type="checkbox" name="settings[form][fields][]" value="<?= e($f['name']) ?>"<?= DataForms::selected($selT, $f) ? ' checked' : '' ?><?= !empty($f['required']) ? ' disabled' : '' ?>><?php if (!empty($f['required'])): ?><input type="hidden" name="settings[form][fields][]" value="<?= e($f['name']) ?>"><?php endif; ?>
+          <span><?= e($f['label']) ?><?= !empty($f['required']) ? ' <small class="adm-muted">(' . e(__('Pflichtfeld – immer dabei')) . ')</small>' : '' ?><?= $isFile ? ' <small class="adm-muted">(' . e(__('Datei – nur bei Zustellung per E-Mail')) . ')</small>' : '' ?></span></label>
         <?php endforeach; ?>
-        <p class="f-help"><?= e(__('Nichts angehakt = alle Felder. Die Checkbox „Datenschutzhinweise gelesen“ wird immer ergänzt.')) ?></p>
+        <p class="f-help"><?= e(__('Nichts angehakt = alle Felder. Neu angelegte Felder sind automatisch dabei. Die Checkbox „Datenschutzhinweise gelesen“ wird immer ergänzt.')) ?></p>
       </fieldset>
       <div class="f"><label for="t-ib-title"><?= e(__('Titel des Formulars')) ?></label>
         <input id="t-ib-title" name="settings[inbox][title]" value="<?= e($ib['title']) ?>" placeholder="<?= e($def['name'] ?? '') ?>" maxlength="120"></div>
@@ -67,8 +68,9 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
         <p class="f-help"><?= e(__('Die E-Mail enthält keine Inhalte – nur den Hinweis auf eine neue Anfrage und einen Link.')) ?></p></div>
       <?php if ($hasFiles): ?>
       <div class="f"><label for="t-form-mb"><?= e(__('Dateien: höchstens (MB je Datei)')) ?></label>
-        <input type="number" id="t-form-mb" name="settings[form][upload_mb]" min="1" max="10" value="<?= (int) $fm['upload_mb'] ?>">
-        <p class="f-help"><?= e(__('Dateifelder nehmen PDF, JPG, PNG und WebP an – nur bei Zustellung per E-Mail, nie in die Mediathek.')) ?></p></div>
+        <input type="number" id="t-form-mb" name="settings[form][upload_mb]" min="1" max="<?= DataForms::MAX_MB ?>" value="<?= (int) $fm['upload_mb'] ?>">
+        <p class="f-help"><?= e(__('Dateien werden nur bei Zustellung per E-Mail angenommen – als Anhang bzw. versiegelt, nie in der Mediathek. Mehr ist nicht einzustellen: Dateifeld anlegen, unter „Felder im Formular“ anhaken, Zustellung „per E-Mail“ wählen. Welche Dateitypen erlaubt sind, legen Sie beim Dateifeld fest (Standard: PDF und Bilder).')) ?></p>
+        <?php if (($dv['mode'] ?? 'system') === 'system'): ?><p class="f-error"><?= e(__('Die Zustellung steht auf „Im System“ – so nimmt das Formular keine Dateien an. Bitte unten „Im System und per E-Mail“ oder „Nur per E-Mail“ wählen.')) ?></p><?php endif; ?></div>
       <?php endif; ?>
       <?= $err('settings.form') ?>
     </section>

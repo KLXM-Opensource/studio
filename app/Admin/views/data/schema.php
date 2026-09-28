@@ -195,8 +195,8 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
         <input type="hidden" name="settings[form][uploads]" value="0">
         <label class="f-check"><input type="checkbox" name="settings[form][uploads]" value="1"<?= $fm['uploads'] ? ' checked' : '' ?>> <span><?= e(__('Datei-Uploads erlauben (Bild- und Datei-Felder)')) ?></span></label>
         <div class="f"><label for="t-form-mb"><?= e(__('Höchstgröße je Datei (MB)')) ?></label>
-          <input type="number" id="t-form-mb" name="settings[form][upload_mb]" min="1" max="10" value="<?= (int) $fm['upload_mb'] ?>">
-          <p class="f-help"><?= e(__('Nur JPG, PNG, WebP und PDF. Hochgeladene Dateien landen in der Mediathek (Tag „formular“) und sind über ihre Adresse erreichbar.')) ?></p></div>
+          <input type="number" id="t-form-mb" name="settings[form][upload_mb]" min="1" max="<?= \Core\Data\DataForms::MAX_MB ?>" value="<?= (int) $fm['upload_mb'] ?>">
+          <p class="f-help"><?= e(__('Bildfelder: JPG, PNG, WebP. Dateifelder: PDF und/oder Bilder – einstellbar beim Feld. Hochgeladene Dateien landen in der Mediathek (Tag „formular“) und sind über ihre Adresse erreichbar.')) ?></p></div>
         <p class="dt-note"><?= e(__('Einträge werden nicht verschlüsselt gespeichert. Für vertrauliche Angaben (z. B. Gesundheitsdaten) einen verschlüsselten Eingang (Vorlage „Anfragen“) nutzen.')) ?></p>
       </div>
       <?= $err('settings.form') ?>

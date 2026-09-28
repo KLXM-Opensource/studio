@@ -322,6 +322,14 @@ final class Tables
                 }
                 $def['target'] = $target;
             }
+            // Datei: erlaubte Dateitypen (DataForms::FILE_KINDS; DOCX/ODT nur im Eingang) und eigene Höchstgröße (0 = Grenze der Tabelle)
+            if ($type === 'file') {
+                $allowed = $inbox ? array_keys(DataForms::FILE_KINDS) : array_diff(array_keys(DataForms::FILE_KINDS), DataForms::FILE_KINDS_INBOX);
+                $acc = array_key_exists('accept', $f) ? array_values(array_intersect($allowed, array_map('strval', (array) $f['accept']))) : DataForms::FILE_KINDS_DEFAULT;
+                if (!$acc) $errors["fields.$i"] = __('Feld „{label}“: Bitte mindestens einen erlaubten Dateityp wählen.', ['label' => $label]);
+                $def['accept'] = $acc ?: DataForms::FILE_KINDS_DEFAULT;
+                $def['max_mb'] = max(0, min(DataForms::MAX_MB, (int) ($f['max_mb'] ?? 0)));
+            }
             // IBAN: in Listen und Ausgaben maskieren (Standard: an)
             if ($type === 'iban') $def['mask'] = !array_key_exists('mask', $f) || !empty($f['mask']);
             // Wiederholbare Gruppe: Unterfelder, Anzahl, Beschriftungen
@@ -358,6 +366,10 @@ final class Tables
             }
             if (isset($s['form']) && is_array($s['form'])) $s['form']['uploads'] = $inboxFiles && $dmode !== 'system';
         }
+        // Formular: im Eingang bestimmt die Zustellung, ob Dateien angenommen werden (nicht der Schalter aus dem Formular) – so bleibt ein
+        // angehaktes Dateifeld in der Auswahl. Zur Wahl standen die Felder der gespeicherten Tabelle (neue sind dabei: DataForms::selected).
+        $formUploads = $inbox ? ($inboxFiles && $dmode !== 'system') : null;
+        $formKnown = $inbox ? array_column((array) ($existing['fields'] ?? []), 'name') : null;
         $settings = [
             'route' => $route,
             'title_field' => $pick('title_field'),
@@ -375,7 +387,7 @@ final class Tables
             // Kalender: Feldzuordnung (Beginn, Ende, ganztägig, Wiederholung, Ort …) – siehe Core\Data\Calendar
             'calendar' => Calendar::validateSettings((array) ($s['calendar'] ?? []), $fields, $errors, $existing['settings']['calendar'] ?? null),
             // Öffentliches Formular (Besucher legen Einträge an) – siehe Core\Data\DataForms
-            'form' => DataForms::validateSettings((array) ($s['form'] ?? []), $fields, $errors, $existing['settings']['form'] ?? null),
+            'form' => DataForms::validateSettings((array) ($s['form'] ?? []), $fields, $errors, $existing['settings']['form'] ?? null, $formUploads, $formKnown),
         ];
         $settings['kind'] = $kind;
         // Website-Suche je Tabelle (Core\Search\TableSearch) – ohne Formularabschnitt bleibt die bisherige Einstellung

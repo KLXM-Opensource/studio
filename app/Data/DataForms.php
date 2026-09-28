@@ -31,7 +31,22 @@ final class DataForms
     public const TYPES = ['text', 'textarea', 'number', 'bool', 'date', 'datetime', 'time', 'select', 'multiselect', 'email', 'tel', 'color', 'iban', 'group'];
     public const UPLOAD_TYPES = ['media', 'file'];
     public const PRIVACY = '_privacy';
-    private const UPLOAD_MIMES = ['media' => ['image/jpeg', 'image/png', 'image/webp'], 'file' => ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']];
+    /**
+     * Dateitypen der Dateifelder (Feld-Einstellung accept): MIME-Typen (erkannt am Inhalt mit finfo) und Dateiendungen.
+     * Standard PDF + Bilder. DOCX/ODT nur in Eingangs-Tabellen (Zustellung per E-Mail) – die Mediathek speichert sie nicht.
+     * DOCX/ODT sind ZIP-Container: geprüft werden [Content_Types].xml bzw. mimetype; Makros (docm, vbaProject.bin, Basic/, Scripts/) werden abgelehnt.
+     */
+    public const FILE_KINDS = [
+        'pdf' => ['mimes' => ['application/pdf'], 'ext' => ['pdf']],
+        'image' => ['mimes' => ['image/jpeg', 'image/png', 'image/webp'], 'ext' => ['jpg', 'jpeg', 'png', 'webp']],
+        'docx' => ['mimes' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'], 'ext' => ['docx']],
+        'odt' => ['mimes' => ['application/vnd.oasis.opendocument.text'], 'ext' => ['odt']],
+    ];
+    public const FILE_KINDS_DEFAULT = ['pdf', 'image'];
+    /** Nur mit Zustellung per E-Mail (Eingang) – nicht in der Mediathek speicherbar */
+    public const FILE_KINDS_INBOX = ['docx', 'odt'];
+    /** Höchstgröße je Datei (MB) – Grenze der Tabelle und der Felder */
+    public const MAX_MB = 10;
 
     /** Zustand nach dem Absenden ohne JavaScript (Fehler, Werte, Meldung) je Tabelle – liest der Block */
     public static array $state = [];
@@ -74,21 +89,79 @@ final class DataForms
     public static function fields(array $t): array
     {
         $s = $t['settings']['form'];
-        $sel = (array) ($s['fields'] ?? []);
         // Eingang: Dateien nur bei Zustellung per E-Mail (Anhang bzw. versiegelt) – Gesundheitsdaten nie in die öffentliche Mediathek
         $inbox = Inbox::is($t);
         $uploads = !empty($s['uploads']) && (!$inbox || Delivery::mails($t));
         return array_values(array_filter($t['fields'], fn($f) => self::eligible($f, $uploads) && (!$inbox || $f['type'] !== 'media')
-            && (!$sel || in_array($f['name'], $sel, true) || !empty($f['required']))));
+            && self::selected($t, $f)));
+    }
+
+    /**
+     * Steht das Feld in der Auswahl „Felder im Formular“? Nichts gewählt = alle; Pflichtfelder immer.
+     * Eingang (die Felder bilden das Formular): Felder, die bei der letzten Auswahl noch nicht zur Wahl standen (settings.form.known –
+     * z. B. im selben Schritt neu angelegt), sind dabei, bis jemand sie abwählt. Ältere Einstellungen ohne known: nicht gewählte
+     * Dateifelder sind dabei – sie wurden nach der Auswahl angelegt und gingen sonst still verloren.
+     */
+    public static function selected(array $t, array $f): bool
+    {
+        $s = (array) ($t['settings']['form'] ?? []);
+        $sel = (array) ($s['fields'] ?? []);
+        if (!$sel || in_array($f['name'], $sel, true) || !empty($f['required'])) return true;
+        if (!Inbox::is($t)) return false;
+        $known = $s['known'] ?? null;
+        return is_array($known) ? !in_array($f['name'], $known, true) : ($f['type'] ?? '') === 'file';
+    }
+
+    /** Erlaubte Dateitypen eines Upload-Feldes (Schlüssel aus FILE_KINDS); Bildfeld: nur Bilder, ohne Eingang kein DOCX/ODT */
+    public static function fileKinds(array $f, bool $inbox): array
+    {
+        if (($f['type'] ?? '') === 'media') return ['image'];
+        $k = array_values(array_intersect(array_keys(self::FILE_KINDS), (array) ($f['accept'] ?? self::FILE_KINDS_DEFAULT)));
+        if (!$inbox) $k = array_values(array_diff($k, self::FILE_KINDS_INBOX));
+        return $k ?: self::FILE_KINDS_DEFAULT;
+    }
+
+    /** Höchstgröße (MB) je Datei für das Feld: eigene Grenze des Feldes, höchstens die der Tabelle */
+    public static function fileMb(array $f, array $s): int
+    {
+        $table = max(1, min(self::MAX_MB, (int) ($s['upload_mb'] ?? 5)));
+        $own = (int) ($f['max_mb'] ?? 0);
+        return $own > 0 ? min($own, $table) : $table;
+    }
+
+    /** Sichtbarer Hinweis unter dem Dateifeld: „PDF oder Bild (JPG, PNG, WebP), höchstens 5 MB.“ (Sprache der Website) */
+    public static function fileHint(array $kinds, int $mb): string
+    {
+        $names = array_map(fn($k) => match ($k) {
+            'pdf' => 'PDF', 'image' => lt('Bild (JPG, PNG, WebP)'), 'docx' => 'Word (DOCX)', 'odt' => lt('OpenDocument-Text (ODT)'), default => $k,
+        }, $kinds);
+        $last = array_pop($names);
+        $types = $names ? implode(', ', $names) . ' ' . lt('oder') . ' ' . $last : (string) $last;
+        return lt('{types}, höchstens {mb} MB.', ['types' => $types, 'mb' => $mb]);
+    }
+
+    /** accept-Attribut: MIME-Typen und Endungen (Auswahldialog – geprüft wird serverseitig am Inhalt) */
+    public static function acceptAttr(array $kinds): string
+    {
+        $a = [];
+        foreach ($kinds as $k) {
+            foreach (self::FILE_KINDS[$k]['ext'] ?? [] as $x) $a[] = '.' . $x;
+            foreach (self::FILE_KINDS[$k]['mimes'] ?? [] as $m) $a[] = $m;
+        }
+        return implode(',', array_unique($a));
     }
 
     // ================================================================= Einstellungen (Tables::validate)
 
-    public static function validateSettings(array $s, array $fields, array &$errors, ?array $existing): array
+    /**
+     * settings.form prüfen. $uploads: wirksamer Schalter „Datei-Uploads“ (Eingang: aus der Zustellung abgeleitet – Tables::validate),
+     * null = aus $s. $known: Eingang – Felder, die in der Auswahl zur Wahl standen (Felder der gespeicherten Tabelle); siehe selected().
+     */
+    public static function validateSettings(array $s, array $fields, array &$errors, ?array $existing, ?bool $uploads = null, ?array $known = null): array
     {
         $existing = ($existing ?? []) + self::DEFAULTS;
         if (!$s) return $existing;                                 // z. B. API ohne Formular-Angaben: unverändert
-        $uploads = !empty($s['uploads']);
+        $uploads ??= !empty($s['uploads']);
         $eligible = array_column(array_filter($fields, fn($f) => self::eligible($f, $uploads)), 'name');
         $sel = array_key_exists('fields', $s)
             ? array_values(array_intersect($eligible, array_map('strval', (array) $s['fields'])))
@@ -101,8 +174,11 @@ final class DataForms
             'success' => mb_substr(trim(strip_tags((string) ($s['success'] ?? ''))), 0, 500),
             'submit' => mb_substr(trim(strip_tags((string) ($s['submit'] ?? ''))), 0, 60),
             'uploads' => $uploads,
-            'upload_mb' => max(1, min(10, (int) ($s['upload_mb'] ?? 5))),
+            'upload_mb' => max(1, min(self::MAX_MB, (int) ($s['upload_mb'] ?? $existing['upload_mb']))),
         ];
+        // Eingang: welche Felder standen zur Wahl? (neue Felder sind im Formular, bis jemand sie abwählt – selected())
+        if ($known !== null) $out['known'] = array_key_exists('fields', $s) ? array_values(array_map('strval', $known)) : ($existing['known'] ?? null);
+        if (($out['known'] ?? 0) === null) unset($out['known']);
         $mails = array_values(array_filter(array_map('trim', preg_split('~[,;\s]+~', (string) ($s['notify'] ?? '')))));
         foreach ($mails as $m) {
             if (!filter_var($m, FILTER_VALIDATE_EMAIL)) $errors['settings.form'] = __('Benachrichtigung: „{mail}“ ist keine gültige E-Mail-Adresse.', ['mail' => $m]);
@@ -193,7 +269,7 @@ final class DataForms
         foreach ($fields as $f) {
             $h .= $f['type'] === 'group'
                 ? self::group(Entries::groupSchema($f, true) + ['label' => Tables::label($f)] + $f, $uid, $values[$f['name']] ?? null, $errors)
-                : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s);
+                : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s, $inbox);
         }
         $h .= '</div>' . ($legend !== '' ? '</fieldset>' : '');
         // Datenschutz (Pflicht)
@@ -233,7 +309,7 @@ final class DataForms
         return '<script type="module" src="' . e(asset('js/dataform.js')) . '"></script>';
     }
 
-    private static function field(array $f, string $uid, mixed $v, ?string $err, array $s): string
+    private static function field(array $f, string $uid, mixed $v, ?string $err, array $s, bool $inbox = false): string
     {
         $n = $f['name'];
         $id = $uid . '-' . $n;
@@ -243,9 +319,8 @@ final class DataForms
         $mark = $req || !empty($f['required_if']) ? ' <span class="dff-req" aria-hidden="true">*</span>' : '';
         $help = trim((string) ($f['help'] ?? ''));
         if ($type === 'iban' && $help === '') $help = lt('z. B. DE89 3704 0044 0532 0130 00');
-        if (in_array($type, self::UPLOAD_TYPES, true)) {
-            $help = trim($help . ' ' . lt('{types}, höchstens {mb} MB.', ['types' => $type === 'media' ? 'JPG, PNG, WebP' : 'PDF, JPG, PNG, WebP', 'mb' => $s['upload_mb']]));
-        }
+        $kinds = in_array($type, self::UPLOAD_TYPES, true) ? self::fileKinds($f, $inbox) : [];
+        if ($kinds) $help = trim($help . ' ' . self::fileHint($kinds, self::fileMb($f, $s)));
         $desc = ($help !== '' ? "$id-h " : '') . "$id-e";
         $aria = ' aria-describedby="' . $desc . '"' . ($err ? ' aria-invalid="true"' : '') . ($req ? ' required aria-required="true"' : '');
         $helpHtml = $help !== '' ? '<p class="dff-help" id="' . $id . '-h">' . e($help) . '</p>' : '';
@@ -287,7 +362,8 @@ final class DataForms
                 }
                 return $h . '</select>';
             })(),
-            'media', 'file' => '<input type="file" id="' . $id . '" name="' . e($n) . '" accept="' . e(implode(',', self::UPLOAD_MIMES[$type])) . '"' . $aria . '>',
+            'media', 'file' => '<input type="file" id="' . $id . '" name="' . e($n) . '" accept="' . e(self::acceptAttr($kinds)) . '" data-max-bytes="' . (self::fileMb($f, $s) * 1048576) . '"'
+                . ' data-too-large="' . e(lt('„{label}“: Die Datei ist größer als {mb} MB.', ['label' => Tables::label($f), 'mb' => self::fileMb($f, $s)])) . '"' . $aria . '>',
             'iban' => '<input type="text" id="' . $id . '" name="' . e($n) . '" value="' . e($sv !== '' ? \Core\Iban::format($sv) : '') . '" maxlength="42" autocomplete="off" spellcheck="false" autocapitalize="characters" data-iban' . $aria . '>',
             'datetime' => '<input type="datetime-local" id="' . $id . '" name="' . e($n) . '" value="' . e(str_replace(' ', 'T', $sv)) . '"' . $aria . '>',
             'color' => '<input type="color" id="' . $id . '" name="' . e($n) . '" value="' . e($sv ?: '#000000') . '"' . $aria . '>',
@@ -396,7 +472,7 @@ final class DataForms
         $uploads = [];
         foreach ($fields as $f) {
             if (!in_array($f['type'], self::UPLOAD_TYPES, true)) continue;
-            [$file, $err] = self::checkUpload($f, $files[$f['name']] ?? null, (int) $s['upload_mb']);
+            [$file, $err] = self::checkUpload($f, $files[$f['name']] ?? null, self::fileMb($f, $s), self::fileKinds($f, $inbox));
             if ($err) $errors[$f['name']] = $err;
             if ($file) { $uploads[$f['name']] = $file; $in[$f['name']] = '0'; }   // Platzhalter für die Pflichtprüfung
         }
@@ -432,7 +508,7 @@ final class DataForms
             // Eingang mit Zustellung per E-Mail: Dateien nur im Speicher (Anhang bzw. versiegelt), Gesamtgrenze der E-Mail
             foreach ($uploads as $n => $file) {
                 $mailFiles[$n] = ['name' => (string) ($file['name'] ?? 'datei'), 'size' => (int) ($file['size'] ?? 0),
-                    'type' => (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: 'application/octet-stream', 'data' => (string) file_get_contents($file['tmp_name'])];
+                    'type' => (string) $file['mime'], 'data' => (string) file_get_contents($file['tmp_name'])];
             }
             if ($msg = Delivery::tooLarge($t, $mailFiles)) {
                 foreach ($uploads as $n => $_) $errors[$n] = $msg;
@@ -500,8 +576,11 @@ final class DataForms
         return ['ok' => true, 'message' => $success, 'id' => (int) $id];
     }
 
-    /** @return array{0: ?array, 1: ?string} [Datei, Fehler] – nichts gewählt = [null, null] */
-    private static function checkUpload(array $f, mixed $file, int $mb): array
+    /**
+     * @param list<string> $kinds erlaubte Dateitypen (FILE_KINDS)
+     * @return array{0: ?array, 1: ?string} [Datei (+ mime: erkannter Typ), Fehler] – nichts gewählt = [null, null]
+     */
+    private static function checkUpload(array $f, mixed $file, int $mb, array $kinds): array
     {
         if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE || ($file['name'] ?? '') === '') return [null, null];
         $label = Tables::label($f);
@@ -511,10 +590,60 @@ final class DataForms
         if (($file['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
             return [null, lt('„{label}“: Die Datei konnte nicht hochgeladen werden.', ['label' => $label])];
         }
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: '';
-        if (!in_array($mime, self::UPLOAD_MIMES[$f['type']], true)) {
-            return [null, lt('„{label}“: Dieser Dateityp ist nicht erlaubt.', ['label' => $label])];
+        if (filesize($file['tmp_name']) > $mb * 1024 * 1024) {
+            return [null, lt('„{label}“: Die Datei ist größer als {mb} MB.', ['label' => $label, 'mb' => $mb])];
         }
-        return [$file, null];
+        $mime = self::sniff((string) $file['tmp_name'], (string) $file['name'], $kinds);
+        if ($mime === null) {
+            return [null, lt('„{label}“: Dieser Dateityp ist nicht erlaubt.', ['label' => $label]) . ' ' . self::fileHint($kinds, $mb)];
+        }
+        return [$file + ['mime' => $mime], null];
+    }
+
+    /**
+     * Dateityp am Inhalt erkennen (finfo) und mit der Endung abgleichen – das accept-Attribut ist nur ein Hinweis für den Dialog.
+     * DOCX/ODT: ZIP mit [Content_Types].xml (Word-Dokument, keine Makros, kein vbaProject.bin) bzw. mimetype
+     * „application/vnd.oasis.opendocument.text“ (keine Basic-/Scripts-Makros). Rückgabe: MIME-Typ für den Anhang oder null (abgelehnt).
+     */
+    public static function sniff(string $path, string $name, array $kinds): ?string
+    {
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: '';
+        foreach ($kinds as $k) {
+            $def = self::FILE_KINDS[$k] ?? null;
+            if (!$def || !in_array($ext, $def['ext'], true)) continue;
+            $ok = match ($k) {
+                'pdf' => $mime === 'application/pdf' && str_starts_with(ltrim((string) file_get_contents($path, false, null, 0, 1024)), '%PDF-'),
+                'image' => in_array($mime, $def['mimes'], true) && @getimagesize($path) !== false,
+                'docx', 'odt' => in_array($mime, [...$def['mimes'], 'application/zip', 'application/octet-stream'], true) && self::officeOk($path, $k),
+                default => false,
+            };
+            if ($ok) return $k === 'image' ? $mime : $def['mimes'][0];
+        }
+        return null;
+    }
+
+    /** ZIP-Container eines Office-Dokuments prüfen (ohne zu entpacken; nur kleine Steuerdateien werden gelesen) */
+    private static function officeOk(string $path, string $kind): bool
+    {
+        if (!class_exists(\ZipArchive::class)) return false;
+        $z = new \ZipArchive();
+        if ($z->open($path, \ZipArchive::RDONLY) !== true) return false;
+        try {
+            if ($z->numFiles < 1 || $z->numFiles > 5000) return false;
+            for ($i = 0; $i < $z->numFiles; $i++) {
+                $n = strtolower((string) $z->getNameIndex($i));
+                // Makros: Word (vbaProject.bin, auch umbenannte .docm), OpenDocument (Basic/, Scripts/)
+                if (str_ends_with($n, 'vbaproject.bin') || str_starts_with($n, 'basic/') || str_starts_with($n, 'scripts/')) return false;
+            }
+            if ($kind === 'odt') {
+                return trim((string) $z->getFromName('mimetype', 200)) === 'application/vnd.oasis.opendocument.text';
+            }
+            $ct = (string) $z->getFromName('[Content_Types].xml', 256 * 1024);
+            return str_contains($ct, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml')
+                && !preg_match('~macroEnabled|vbaProject~i', $ct);
+        } finally {
+            $z->close();
+        }
     }
 }
