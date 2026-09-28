@@ -35,6 +35,14 @@ $labels = ['greeting' => lt('Begrüßung'), 'topic' => lt('Aktuelles Thema'), 'm
     <?php else: ?>
     <div class="silk" aria-hidden="true"><span class="silk__a"></span><span class="silk__b"></span><span class="silk__c"></span><span class="silk__sheen"></span></div>
     <?php endif; ?>
+    <?php if (in_array($variant, ['silk', 'color'], true) && array_filter(array_column($slides, 'bild'))): ?>
+    <?php // Eigenes Bild je Thema auch bei Verlauf/Farbfläche: liegt darüber, nur solange ein Thema mit Bild aktiv ist ?>
+    <div class="hero__bg hero__bg--slides hero__bg--<?= e($overlay) ?>" aria-hidden="true">
+      <?php foreach ($slides as $i => $s): if (!($img = (int) ($s['bild'] ?? 0))) continue; ?>
+      <div class="hero__bgimg<?= $i === $activeAt ? ' is-active' : '' ?>" data-bg="<?= $i ?>"><?= img($img, '100vw', ['eager' => $i === $activeAt]) ?></div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
     <div class="hero__grid<?= $d['show_card'] ? '' : ' hero__grid--solo' ?>">
       <div class="hero__topics" data-hero data-reveal="up">
         <div class="hero__slides">

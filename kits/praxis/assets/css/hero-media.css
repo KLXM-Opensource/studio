@@ -10,3 +10,7 @@
 .hero__bg--light::after{background:linear-gradient(100deg,rgba(38,8,20,.6) 0%,rgba(38,8,20,.36) 50%,rgba(38,8,20,.12) 100%)!important}
 @media (max-width:760px){.hero__bg:not(.hero__bg--color)::after{background:linear-gradient(180deg,rgba(38,8,20,.8),rgba(38,8,20,.66))!important}}
 @media (prefers-reduced-motion:reduce){.hero__bgimg{transition:none}.hero__video{display:none}}
+/* Eigene Bilder je Thema über Verlauf/Farbfläche: Fläche und Abdunklung nur, solange ein Thema mit Bild aktiv ist */
+.hero__bg--slides{background:none}
+.hero__bg--slides::after{opacity:0;transition:opacity .9s ease}
+.hero__bg--slides:has(.is-active)::after{opacity:1}

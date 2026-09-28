@@ -157,7 +157,7 @@ return [
         'css/blocks.css' => ['text_image', 'text_video', 'image_wide', 'steps', 'cta', 'downloads', 'people', 'job', 'richtext', 'notice',
             'teaser_tiles:image', 'quote:full', 'video', 'text_columns:columns', 'quick_contact'],
         'css/media-blocks.css' => ['gallery', 'slideshow', 'stack_cards'],   // Aussehen der Kern-Blöcke (Variablen + Feinschliff)   // „typ:variante“ = nur bei dieser Variante
-        'css/hero-media.css' => ['hero:image', 'hero:video', 'hero:color'],
+        'css/hero-media.css' => ['hero'],   // auch Verlauf: eigene Bilder je Thema (hero__bg--slides)
         // Detailseiten der Datentabellen (Kern-Block „Datensatz-Felder“) – die Liste steckt in css/data.css
         'css/data-fields.css' => ['data_fields'],
         // Formulare: Formularseite /anfrage/…; die Rückseite der Flip-Kontaktkarte (Hero, Schnellkontakt) lädt site.js erst beim Umdrehen
