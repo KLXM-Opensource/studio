@@ -38,9 +38,19 @@
 .cms-block.is-hidden .is-hidden-block{display:block}
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
 .cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
-.cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
-.cms-block__preview{cursor:pointer}
-.cms-block__preview a{cursor:pointer}
+.cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block.is-selected>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
+/* Klick in den Block wählt ihn nur aus (.is-selected, editor.js selectBlock) – die Seitenleiste öffnet „Bearbeiten“ */
+.cms-block.is-selected:not(.is-active){outline:1px dashed rgba(49,65,100,.75)}
+.cms-block__preview,.cms-block__preview :is(a,button):not([data-entry-edit]){cursor:default}
+.cms-block__preview [data-edit]{cursor:text}
+/* „+ Block einfügen“ mittig auf der Unterkante (Naht zum nächsten Block), Knopf im Shadow DOM (editor.shadow.css).
+   Nur sichtbar und klickbar bei Hover/Auswahl/Fokus des Blocks – sonst fängt er keine Klicks im Block darunter ab. */
+.cms-block__add.cms-block__add{all:initial;position:absolute;left:50%;bottom:0;z-index:2147483000;display:block;transform:translate(-50%,50%);opacity:0;pointer-events:none;transition:opacity .15s}
+.cms-block:hover>.cms-block__add,.cms-block.is-selected>.cms-block__add,.cms-block:focus-within>.cms-block__add{opacity:1;pointer-events:auto}
+/* Schmale Bildschirme: ganz im eigenen Block (die Block-Leiste darunter reicht dort fast über die ganze Breite) */
+@media (max-width:600px){.cms-block__add.cms-block__add{transform:translate(-50%,-10px)}}
+.cms-block.is-collapsed>.cms-block__add,.is-compact .cms-block__add.cms-block__add{transform:translate(-50%,50%) scale(.9)}
+@media (prefers-reduced-motion:reduce){.cms-block__add.cms-block__add{transition:none}}
 .cms-error{padding:24px;color:#B3261E;font-weight:600}
 
 /* Direkt editierbare Texte */
@@ -69,6 +79,9 @@
 .cms-editor :is(.btn,.btn-wide,.svc,.tile,.pill,.wordmark,.contact__phone,.doctor__foot a,.downloads a,.navlist a){text-decoration:none}
 .ce-popover-item[data-item-name="paragraph"]{display:none!important}
 .cms-empty{margin:0;padding:48px 24px;text-align:center;font:600 15px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#5A6461;background:repeating-linear-gradient(45deg,#FAFAFA 0 12px,#F4F4F5 12px 24px)}
+.cms-empty__btn.cms-empty__btn{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;min-height:36px;margin:0 0 0 8px;padding:0 16px;border-radius:999px;background:#314164;color:#fff;font:700 14px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
+.cms-empty__btn.cms-empty__btn:hover{background:#243150}
+.cms-empty__btn.cms-empty__btn:focus-visible{outline:3px solid #314164;outline-offset:2px}
 
 /* Verschieben ohne Drag & Drop, Einklappen, Kompaktansicht */
 .cms-block.is-collapsed .cms-block__preview,.is-compact .cms-block__preview{display:none}

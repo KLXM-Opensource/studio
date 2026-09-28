@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seiten-Editor: Seitenleiste nur über „Bearbeiten“, „+ Block einfügen“ unten am Block (`resources/js/editor.js`)
+- **Klick wählt nur aus:** Ein Klick/Tipp in einen Block öffnet die Seitenleiste nicht mehr, sondern markiert den Block
+  (`.is-selected`: Leiste und Einfügen-Knopf bleiben sichtbar – auch auf Touch-Geräten). Texte bleiben direkt bearbeitbar.
+  Die Seitenleiste öffnen „Bearbeiten“ (Tastatur: Tab + Enter), „Inhalte eingeben“ in leeren Blöcken, „Abschnitt &
+  Navigation …“ und der Sprung `?edit=1#b-{id}` / `&block=`. Klick auf nicht direkt bearbeitbare Inhalte (Symbole,
+  Bilder, Listen, zentral gepflegte Angaben) zeigt einen kurzen Hinweis an „Bearbeiten“. Knöpfe am Bild (Anpassen, Rahmen,
+  Zuschneiden) und der Stift je Eintrag funktionieren unverändert.
+- **„+ Block einfügen“ unten mittig an jedem Block** (auf der Kante zum nächsten; bis 600 px im Block): sichtbar bei Hover,
+  Auswahl oder Tastaturfokus, sonst ohne Klickfläche; beim letzten Block Einfügen am Seitenende. Auswahl der Blocktypen
+  mit Suche, ↑/↓, Enter und Esc (Fokus zurück), gleiche Typen wie „+“ von Editor.js.
+- **Neue Blöcke:** Schreibmarke im ersten direkt bearbeitbaren Text; ohne solchen öffnet sich die Seitenleiste.
+- Handbuch „Inhalte bearbeiten“, Entwicklerhandbuch „Editor“, Texte in `lang/en.php`.
+
 ### Markdown einfügen und importieren (`resources/js/_markdown.js`, Seiten-Editor)
 - **Einfügen in Rich-Text-Felder:** eindeutig als Markdown erkennbarer reiner Text (Überschriften, Listen, Aufgabenlisten,
   Zitate, **fett**, *kursiv*, Links) wird beim Einfügen in Rich-Text umgewandelt – Hinweis „Als Text einfügen“ bzw.

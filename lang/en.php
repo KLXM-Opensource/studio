@@ -5148,4 +5148,15 @@ return [
     'Dieses Kit hat keinen Textblock mit formatiertem Text – Markdown lässt sich hier nicht importieren.' => 'This kit has no text block with formatted text – Markdown cannot be imported here.',
     '1 Textblock eingefügt – noch nicht gespeichert.' => '1 text block inserted – not saved yet.',
     '{n} Textblöcke eingefügt – noch nicht gespeichert.' => '{n} text blocks inserted – not saved yet.',
+    // Seiten-Editor: Klick wählt Block aus, „+ Block einfügen“ unten am Block
+    'Neuen Block unter diesem Block einfügen' => 'Insert a new block below this block',
+    'Block einfügen nach „{label}“' => 'Insert block after “{label}”',
+    '{label} – noch leer.' => '{label} – still empty.',
+    'Inhalte eingeben' => 'Enter content',
+    'Zentral gepflegt – ändern unter „{title}“' => 'Managed centrally – change in “{title}”',
+    'Felder ändern: „Bearbeiten“' => 'Change fields: “Edit”',
+    'Blocktyp suchen …' => 'Search block type …',
+    'Blocktyp suchen' => 'Search block type',
+    'Blocktypen' => 'Block types',
+    'Block „{label}“ eingefügt – noch nicht gespeichert.' => 'Block “{label}” inserted – not saved yet.',
 ];

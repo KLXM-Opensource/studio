@@ -9,7 +9,8 @@ $__sample = $vars['blocks_page'] ?? null;
   <ol class="doc-steps">
     <li>Seite aufrufen (z. B. die Startseite) und in der Leiste oben auf <b>Bearbeiten</b> klicken (oder im Umschalter <b>Ansehen · Bearbeiten</b> auf „Bearbeiten“).</li>
     <li>Fahren Sie mit der Maus über die Seite: Jeder <b>Block</b> (Abschnitt) bekommt einen Rahmen, oben rechts seinen Namen und den Knopf <b>Bearbeiten</b>. Kleine Hinweise zeigen Besonderheiten wie „ausgeblendet“, die Sprungmarke oder „Navigation“.</li>
-    <li>Links im Block erscheinen <b>+</b> (Block einfügen) und <b>⋮⋮</b> (Menü und Verschieben).</li>
+    <li>Links im Block erscheinen <b>+</b> (Block einfügen) und <b>⋮⋮</b> (Menü und Verschieben), unten mittig auf der Kante zum nächsten Block <b>+ Block einfügen</b>.</li>
+    <li>Ein <b>Klick in den Block</b> wählt ihn nur aus – Texte schreiben Sie direkt an Ort und Stelle. Die <b>Seitenleiste</b> mit allen Feldern öffnet sich erst mit <b>Bearbeiten</b>. Auf Handy und Tablet zeigt ein Tipp auf den Block seine Knöpfe.</li>
   </ol>
   <?= $img('editor.webp', 'Editor mit geöffneter Seitenleiste', '<b>Editor:</b> links die Live-Vorschau, rechts die Seitenleiste mit allen Feldern des gewählten Blocks.') ?>
 
@@ -27,7 +28,7 @@ $__sample = $vars['blocks_page'] ?? null;
   <ul>
     <li><b>Direkt im Text:</b> Überschriften und kurze Texte mit gestricheltem Rahmen können Sie anklicken und sofort überschreiben. <kbd>Enter</kbd> beendet die Eingabe. Eingefügter Text verliert seine fremde Formatierung.</li>
     <li><b>Fließtexte direkt formatieren:</b> In längeren Texten erscheint beim Hineinklicken eine dunkle <b>Formatierungsleiste</b> über dem Text. Einfach Text markieren und Knopf drücken.</li>
-    <li><b>In der Seitenleiste:</b> Klick auf den Block oder <b>Bearbeiten</b> öffnet alle Felder – auch Links, Bilder, Listen und Varianten. Die Vorschau aktualisiert sich automatisch; <kbd>Esc</kbd> schließt die Seitenleiste.</li>
+    <li><b>In der Seitenleiste:</b> <b>Bearbeiten</b> oben rechts im Block öffnet alle Felder – auch Links, Bilder, Listen und Varianten. Ein Klick auf Inhalte, die sich nicht direkt im Text ändern lassen (Symbole, Bilder, Listen), öffnet nichts, sondern weist kurz auf <b>Bearbeiten</b> hin. Leere Blöcke haben dafür den Knopf <b>Inhalte eingeben</b>. Mit der Tastatur: <kbd>Tab</kbd> bis <b>Bearbeiten</b>, dann <kbd>Enter</kbd>. Die Vorschau aktualisiert sich automatisch; <kbd>Esc</kbd> schließt die Seitenleiste.</li>
     <li><b>Formatierung:</b> Die Leiste hat von links nach rechts: <b>Stil ▾</b> (Absatzart), <b>B</b> Fett, <i>I</i> Kursiv, <b>ab</b> Textmarker, <b>A ▾</b> Textfarbe, <b>Link</b>, drei Listenarten (<b>– Liste</b>, <b>1. Liste</b>, <b>✓ Liste</b>) und <b>⋯</b> für Seltenes. Ist die KI eingeschaltet, steht dort zusätzlich <b>✦ KI</b>. Gedrückte Knöpfe und Häkchen im Menü zeigen, was an der Schreibmarke gilt; erneut wählen hebt ein Format auf. Details im Abschnitt <a href="#formatieren">Text formatieren</a>.</li>
     <li><b>Listen</b> (z. B. Leistungen, Fragen, Personen) bestehen aus Einträgen: mit <b>+ … hinzufügen</b> erweitern, mit ↑ ↓ sortieren, mit ✕ entfernen.</li>
   </ul>
@@ -63,7 +64,7 @@ $__sample = $vars['blocks_page'] ?? null;
 
   <h3>Blöcke einfügen, verschieben, löschen</h3>
   <ol class="doc-steps">
-    <li><b>Einfügen:</b> Auf <b>+</b> klicken, Blocktyp wählen (Suche möglich). Der neue Block erscheint unterhalb, die Seitenleiste öffnet sich direkt.</li>
+    <li><b>Einfügen:</b> Unten am Block auf <b>+ Block einfügen</b> klicken (erscheint beim Überfahren oder Antippen des Blocks, per <kbd>Tab</kbd> erreichbar) und den Blocktyp wählen – Tippen filtert die Liste, <kbd>↑</kbd>/<kbd>↓</kbd> und <kbd>Enter</kbd> wählen, <kbd>Esc</kbd> bricht ab. Der neue Block steht direkt <b>unter</b> diesem Block; beim letzten Block also am Ende der Seite. Alternativ fügt <b>+</b> oben links im Block ein. Im neuen Block steht die Schreibmarke im ersten Text; Blöcke ohne direkt bearbeitbaren Text (z. B. Bild) öffnen gleich die Seitenleiste.</li>
     <li><b>Verschieben:</b> Mit den Pfeilen <b>↑ ↓</b> oben rechts im Block eine Position nach oben oder unten – oder <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>, während die Seitenleiste des Blocks offen ist. Alternativ den Griff <b>⋮⋮</b> ziehen.</li>
     <li><b>Übersicht behalten:</b> <b>Kompakt</b> im Menü <b>⋯</b> der Leiste oben klappt alle Blöcke zu schmalen Zeilen zusammen (mit Farbe, Titel, Sprungmarke) – ideal zum Umsortieren langer Seiten. Einzelne Blöcke klappt <b>▾</b> ein und aus. Der Browser merkt sich beides für die Seite.</li>
     <li><b>Löschen:</b> Menü ⋮⋮ → <b>Löschen</b> (zweimal klicken zur Bestätigung). Wiederherstellen lässt sich ein gelöschter Block über die <b>Versionen</b> der Seite.</li>

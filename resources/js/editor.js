@@ -4,7 +4,9 @@
  *  - Jeder Blocktyp des Themes wird automatisch ein Editor.js-Tool (aus dem Feld-Schema).
  *  - WYSIWYG: Blöcke zeigen die serverseitig gerenderte Vorschau mit den Frontend-Styles.
  *  - Texte mit [data-edit] sind direkt im Frontend editierbar.
- *  - Seitenleiste: alle Felder (Formular vom Server, gleicher Renderer wie im Admin).
+ *  - Seitenleiste: alle Felder (Formular vom Server, gleicher Renderer wie im Admin) – nur über „Bearbeiten“ (Klick in den
+ *    Block wählt ihn bloß aus, .is-selected), „Inhalte eingeben“, Block-Tune oder Sprung zum Block.
+ *  - „+ Block einfügen“ unten mittig an jedem Block (BlockPicker): fügt nach diesem Block ein.
  *  - Block-Tune „Abschnitt“: Hintergrund, Anker, Sichtbarkeit, Navigation, Abstände.
  *  - Drag & Drop über editorjs-drag-drop.
  *  - Bild anpassen je Einbindung (Core\ImageFx): data._fx = {feldpfad: anpassung}; Knopf am Bild (_media.js) und je Bild-Feld
@@ -168,6 +170,105 @@ const InlineBar = (() => {
   return api_;
 })();
 
+// ------------------------------------------------------------------ Block auswählen (Klick/Tipp, Fokus)
+/**
+ * Ein Klick in einen Block wählt ihn nur aus (.is-selected): Leiste und „+ Block einfügen“ bleiben sichtbar – auf
+ * Touch-Geräten ohne Hover der einzige Weg dorthin. Die Seitenleiste öffnet ausschließlich „Bearbeiten“.
+ */
+function selectBlock(el) {
+  $$('.cms-block.is-selected', holder()).forEach(b => { if (b !== el) b.classList.remove('is-selected'); });
+  el?.classList.add('is-selected');
+}
+// Ereignisse aus Schatten-Bäumen (Block-Leiste, „+“) kommen hier mit dem Host als target an; Klicks in Werkzeugleiste,
+// Ebene (Seitenleiste, Dialoge) und Eintrags-Seitenleiste lassen die Auswahl stehen
+d.addEventListener('pointerdown', e => {
+  const t = e.target;
+  if (!(t instanceof Element) || t.closest('.cms-bar-host,#cms-layer-host,#cms-epanel-host')) return;
+  selectBlock(t.closest('.cms-block'));
+}, true);
+d.addEventListener('focusin', e => { const b = e.target.closest?.('.cms-block'); if (b) selectBlock(b); });
+
+// ------------------------------------------------------------------ „+ Block einfügen“ unter einem Block: Auswahl der Blocktypen
+/**
+ * Gleiche Blocktypen wie das „+“ von Editor.js (einfügbare Typen des Kits, gleiche Reihenfolge), eingefügt über
+ * editor.blocks.insert() direkt nach dem Block. Tastatur: Tippen filtert, ↑/↓ wählen, Enter fügt ein, Esc schließt.
+ */
+const BlockPicker = (() => {
+  const T = CMSAdmin.t;
+  const el = d.createElement('div');
+  el.className = 'cms-addpop'; el.hidden = true;
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', T('Block einfügen'));
+  el.innerHTML = `<input type="search" class="cms-addpop__q" placeholder="${CMSAdmin.esc(T('Blocktyp suchen …'))}" aria-label="${CMSAdmin.esc(T('Blocktyp suchen'))}" autocomplete="off">
+    <div class="cms-addpop__list" role="listbox" aria-label="${CMSAdmin.esc(T('Blocktypen'))}"></div>
+    <p class="cms-addpop__none" hidden>${CMSAdmin.esc(T('Nichts gefunden.'))}</p>`;
+  layerBox().append(el);
+  const q = $('.cms-addpop__q', el), list = $('.cms-addpop__list', el), none = $('.cms-addpop__none', el);
+  const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false);
+  list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
+  const items = () => $$('.cms-addpop__item:not([hidden])', list);
+  let tool = null, opener = null;
+  const place = () => {
+    if (el.hidden || !opener) return;
+    const r = opener.getBoundingClientRect(), h = el.offsetHeight, w = el.offsetWidth;
+    const top = r.bottom + 8 + h <= innerHeight - 8 ? r.bottom + 8 : Math.max(8, r.top - 8 - h);
+    el.style.top = top + 'px';
+    el.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8)) + 'px';
+  };
+  const mark = btn => items().forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
+  const filter = () => {
+    const v = q.value.trim().toLowerCase();
+    $$('.cms-addpop__item', list).forEach(b => { b.hidden = !!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v); });
+    none.hidden = items().length > 0;
+    mark(items()[0]);
+    place();
+  };
+  const close = (back = true) => {
+    if (el.hidden) return;
+    el.hidden = true;
+    if (back) opener?.focus({ preventScroll: true });
+    opener = null; tool = null;
+  };
+  const insert = type => {
+    const t = tool;
+    close(false);
+    const idx = blockEls().indexOf(t?.el.closest('.ce-block'));
+    if (!type || idx < 0) return;
+    editor.blocks.insert(type, {}, undefined, idx + 1, false);
+    markDirty();
+    requestAnimationFrame(refreshMoveButtons);
+    const st = S.ui('[data-editor-status]');
+    if (st) st.textContent = T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type });
+  };
+  list.addEventListener('click', e => { const b = e.target.closest('.cms-addpop__item'); if (b) insert(b.dataset.type); });
+  q.addEventListener('input', filter);
+  el.addEventListener('keydown', e => {
+    e.stopPropagation();
+    const all = items(), cur = all.findIndex(b => b.getAttribute('aria-selected') === 'true');
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const n = all[(cur + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length];
+      if (n) { mark(n); n.scrollIntoView({ block: 'nearest' }); }
+    } else if (e.key === 'Enter') { e.preventDefault(); insert(all[Math.max(0, cur)]?.dataset.type); }
+    else if (e.key === 'Tab') close(false);
+  });
+  // Klick außerhalb schließt
+  d.addEventListener('pointerdown', e => { if (!el.hidden && !e.composedPath().includes(el) && !e.composedPath().includes(opener)) close(false); }, true);
+  addEventListener('resize', place);
+  addEventListener('scroll', place, { passive: true });
+  return {
+    open(btn, t) {
+      if (!el.hidden && opener === btn) { close(); return; }
+      opener = btn; tool = t;
+      q.value = ''; filter();
+      el.hidden = false; place();
+      q.focus({ preventScroll: true });
+    },
+    close,
+  };
+})();
+
 // ------------------------------------------------------------------ Block-Tune „Abschnitt“
 class SectionTune {
   static get isTune() { return true; }
@@ -222,8 +323,18 @@ function makeTool(type, def) {
             <button type="button" class="cms-iconbtn" data-move="down" aria-label="Block nach unten" title="Nach unten (Alt+↓)">↓</button>
             <button type="button" class="cms-iconbtn" data-collapse aria-expanded="true" aria-label="Block einklappen" title="Einklappen / Ausklappen">▾</button>
           </span>
+          <span class="cms-block__hint" hidden></span>
           <button type="button" class="cms-block__edit">Bearbeiten</button>`);
       this.el = el;
+      // „+ Block einfügen“ an der Unterkante (eigenes Shadow DOM): fügt nach diesem Block ein – beim letzten am Seitenende
+      const addEl = d.createElement('div');
+      addEl.className = 'cms-block__add'; addEl.contentEditable = 'false';
+      el.append(addEl);
+      const addSr = S.shadowFor(addEl, `<button type="button" class="cms-addbtn" aria-haspopup="dialog" title="${CMSAdmin.esc(CMSAdmin.t('Neuen Block unter diesem Block einfügen'))}"><span aria-hidden="true">+</span> ${CMSAdmin.esc(CMSAdmin.t('Block einfügen'))}</button>`);
+      const addBtn = addSr.querySelector('button');
+      addBtn.setAttribute('aria-label', CMSAdmin.t('Block einfügen nach „{label}“', { label: def.label }));
+      addBtn.addEventListener('click', e => { e.stopPropagation(); BlockPicker.open(addBtn, this); });
+      addEl.addEventListener('keydown', e => e.stopPropagation());
       sr.querySelector('.cms-block__edit').addEventListener('click', e => { e.stopPropagation(); this.openDrawer(); });
       sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
       sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
@@ -234,12 +345,14 @@ function makeTool(type, def) {
       barEl.addEventListener('keydown', e => e.stopPropagation());
       if (collapsed.has(this.blockId)) this.toggleCollapse(true, false);
       const pv = el.querySelector('.cms-block__preview');
-      // Links/Formulare in der Vorschau nicht auslösen; Klick öffnet die Felder
+      // Links/Formulare in der Vorschau nicht auslösen. Ein Klick wählt den Block nur aus (Leiste und „+ Block einfügen“
+      // erscheinen, Texte bleiben direkt bearbeitbar) – die Seitenleiste öffnet nur „Bearbeiten“ (bzw. „Inhalte eingeben“
+      // in leeren Blöcken). Klick auf nicht direkt bearbeitbare Inhalte: Hinweis am Knopf „Bearbeiten“.
       pv.addEventListener('click', e => {
         if (e.target.closest('[data-edit]') || e.target.closest('summary')) return;
         e.preventDefault();
-        if (e.target.closest('[data-central]')) { this.showCentral(); return; }
-        this.openDrawer();
+        if (e.target.closest('[data-cms-open]')) { this.openDrawer(); return; }
+        this.hintEdit(!!e.target.closest('[data-central]'));
       });
       pv.addEventListener('submit', e => e.preventDefault());
       if (previews[this.blockId]) this.setPreview(previews[this.blockId]);
@@ -303,8 +416,16 @@ function makeTool(type, def) {
         if (!Object.keys(this.data).length) this.data = res.block.data; // neuer Block → Standardwerte übernehmen
         this.setPreview(res.html);
         const pv = this.el.querySelector('.cms-block__preview');
-        if (!pv.textContent.trim()) pv.insertAdjacentHTML('beforeend', `<p class="cms-empty">${CMSAdmin.esc(def.label)} – noch leer. Klicken Sie hier, um Inhalte einzugeben.</p>`);
-        if (this.isNew) { this.isNew = false; markDirty(); this.openDrawer(); }
+        if (!pv.textContent.trim()) pv.insertAdjacentHTML('beforeend', `<p class="cms-empty">${CMSAdmin.esc(CMSAdmin.t('{label} – noch leer.', { label: def.label }))} <button type="button" class="cms-empty__btn" data-cms-open>${CMSAdmin.esc(CMSAdmin.t('Inhalte eingeben'))}</button></p>`);
+        if (this.isNew) {
+          // Neuer Block: direkt in den ersten Text schreiben; ohne direkt bearbeitbaren Text (Bild, Liste …) die Seitenleiste
+          this.isNew = false; markDirty(); selectBlock(this.el);
+          const first = $('[data-edit]', pv);
+          if (first) {
+            this.el.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+            first.focus({ preventScroll: true });
+          } else this.openDrawer();
+        }
       } catch (e) { this.el.querySelector('.cms-block__preview').innerHTML = `<p class="cms-error">Vorschau fehlgeschlagen: ${CMSAdmin.esc(e.message)}</p>`; }
     }
 
@@ -337,8 +458,15 @@ function makeTool(type, def) {
 
     save() { return this.data; }
 
-    showCentral() {
-      this.openDrawer();
+    /** Klick auf Inhalte ohne Direktbearbeitung: Block auswählen und kurz auf „Bearbeiten“ hinweisen (öffnet nichts) */
+    hintEdit(central = false) {
+      selectBlock(this.el);
+      const hint = this.bar.querySelector('.cms-block__hint'), btn = this.bar.querySelector('.cms-block__edit');
+      hint.textContent = central ? CMSAdmin.t('Zentral gepflegt – ändern unter „{title}“', { title: cfg.settingsTitle || CMSAdmin.t('Einstellungen') }) : CMSAdmin.t('Felder ändern: „Bearbeiten“');
+      hint.hidden = false; this.bar.host.classList.add('is-hinting');
+      btn.classList.remove('is-hint'); void btn.offsetWidth; btn.classList.add('is-hint');
+      clearTimeout(this.hintT);
+      this.hintT = setTimeout(() => { hint.hidden = true; this.bar.host.classList.remove('is-hinting'); btn.classList.remove('is-hint'); }, 2600);
     }
 
     syncDrawerField(path, value, rich = false) {
@@ -365,6 +493,7 @@ function makeTool(type, def) {
       drawer.hidden = false; d.body.classList.add('has-drawer');
       $$('.cms-block.is-active').forEach(b => b.classList.remove('is-active'));
       this.el.classList.add('is-active');
+      selectBlock(this.el);
       renderTuneForm(this);
       if (focusSection) { const s = $('.cms-drawer__section', drawer); s.open = true; s.scrollIntoView(); }
       const res = await api(cfg.endpoints.form, { type: this.type, data: this.data, entry: cfg.entry });
