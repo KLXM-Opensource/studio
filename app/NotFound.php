@@ -110,7 +110,7 @@ final class NotFound
     /**
      * „Vielleicht meinten Sie …“: Seiten und Einträge (mit Detailseite) der aktuellen Sprache, deren Adressteil dem letzten Teil
      * der aufgerufenen Adresse ähnelt (Levenshtein, enthalten zählt als sehr ähnlich), dazu der Vorschlag des 404-Protokolls
-     * (Redirects::suggest – gleicher Slug an anderer Stelle) zuerst. Ohne aufgerufene Adresse leer.
+     * (Redirects::suggest – gleicher Slug an anderer Stelle) nach den sehr ähnlichen. Ohne aufgerufene Adresse leer.
      * @return list<array{title: string, href: string}>
      */
     public static function suggestions(?string $path = null, int $max = 3): array
@@ -127,7 +127,8 @@ final class NotFound
         try {
             $s = Redirects\Redirects::suggest($path);
             if ($s && Lang::norm($s['page']['lang']) === $lang && empty($s['page']['noindex'])) {
-                $out[Pages::url($s['page'])] = [0, (string) ($s['page']['nav_title'] ?: $s['page']['title'])];
+                // Rang wie Abstand 2: sehr ähnliche Adressen (Tippfehler im letzten Teil) gehen vor, sonst dieser Vorschlag
+                $out[Pages::url($s['page'])] = [3, (string) ($s['page']['nav_title'] ?: $s['page']['title'])];
             }
             $cand = [];
             foreach (Pages::published() as $p) {

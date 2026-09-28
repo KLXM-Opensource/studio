@@ -18,7 +18,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   (404) „404-Seite anlegen/bearbeiten“; Startinhalte vom Kit (`theme.php → 'not_found_blocks'`), sonst ein Block
   „404-Vorschläge“. Konsole: `notfound:create [--lang=…] [--publish]`, `notfound:selftest`.
 - **Kern-Block „404-Vorschläge“** (`not_found`): Dachzeile, Überschrift (H1), Text, „Vielleicht meinten Sie …“ (ähnliche Seiten und
-  Einträge mit Detailseite zur aufgerufenen Adresse, Vorschlag des 404-Protokolls zuerst – `NotFound::suggestions()`),
+  Einträge mit Detailseite zur aufgerufenen Adresse, Vorschlag des 404-Protokolls – `NotFound::suggestions()`),
   Suchfeld, Button zur Startseite, zweiter Button; `resources/css/notfound.css` (Variablen `--nf-*`). Kits überschreiben Felder
   und Ausgabe (Helfer `NotFound::boxes()`, `::path()`).
 - **Kit praxis:** eigener Renderer (Überschrift mit Punkt, Telefonzeile aus den Praxisdaten) und Startinhalte wie `error.php`.
