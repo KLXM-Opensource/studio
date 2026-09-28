@@ -13,7 +13,7 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
     $p = $n['page'];
     $count++;
     $url = Pages::url($p);
-    $dirty = $p['content_published'] !== null && Pages::hasUnpublished($p);
+    $dirty = $p['content_published'] !== null && \Core\Review\Drafts::pageChanged($p);   // schon veröffentlicht, Entwurf mit anderen Blöcken offen
     $kids = $n['children'];
     $id = (int) $p['id'];
     $trans = $multi ? array_keys(Pages::translations($p)) : [];
@@ -32,7 +32,8 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
         . '<span class="pt-status"><span class="dt-status dt-status--' . ($p['status'] === 'published' ? 'published' : 'draft') . '">' . ($p['status'] === 'published' ? 'Online' : 'Entwurf') . '</span>'
-        . ($dirty ? ' <span class="pt-dirty" title="Unveröffentlichte Änderungen">●</span>' : '')
+        // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
+        . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
         . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'

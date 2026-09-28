@@ -32,6 +32,7 @@ $core = [
     'bearbeiten' => 'Inhalte bearbeiten',
     'einstellungen' => $settingsTitle,
     'seiten' => 'Seiten verwalten',
+    'entwuerfe' => 'Entwürfe prüfen und aufräumen',
     'medien' => 'Bilder & Dateien',
     'daten' => 'Eigene Daten (Aktuelles, Team …)',
     'quellen' => 'Externe Quellen: Feeds, APIs, OpenImmo',

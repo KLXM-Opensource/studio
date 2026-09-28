@@ -6,6 +6,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Entwürfe (`Core\Review\Drafts`, Verwaltung → Entwürfe)
+- **Neue Übersicht** `/admin/entwuerfe` (Menüpunkt „Entwürfe“ mit Zähler): Seiten im Entwurf (neu bzw. offline), veröffentlichte
+  Seiten mit unveröffentlichten Änderungen (blockweise verglichen – erneutes Speichern ohne Änderung zählt nicht) und Einträge
+  eigener Datentabellen im Status „Entwurf“ – nur aktuelle Website, nach Rechten gefiltert (`pages.edit`/`pages.publish`,
+  `data.edit`/`data.publish`/`data.delete` je Tabelle).
+- Je Zeile: Art, Titel, Sprache, letzte Änderung (relativ) und wer, **Herkunft** (Content-Sync, KI, MCP, REST-API mit Token,
+  externe Quelle – aus Revisionsvermerk bzw. `change_log`), Status „neu“/„geändert“/„offline“, **„vergessen?“** nach 14 Tagen.
+- **Unterschiede** Entwurf ↔ veröffentlicht mit der Darstellung der Prüf-Ebene (neu: gemeinsame View `review/_diff.php`).
+- **Veröffentlichen / Verwerfen** einzeln und gesammelt (Rückfrage im Seiten-Dialog); Seiten-Entwürfe bleiben als Version
+  erhalten, verworfene Einträge 90 Tage in `draft_discards` („Zuletzt verworfen“ → Wiederherstellen als Entwurf).
+- **Notiz und zuständige Person** je Entwurf (Tabelle `draft_notes`), Filter Alle / Meine / Zur Prüfung / Vergessen? /
+  Content-Sync & KI; Hinweis auf offene Einreichungen unter „Eingereicht“.
+- **Seitenbaum**: veröffentlichte Seiten mit offenem Entwurf zeigen „Entwurf offen“. **Übersicht**: „Liegengebliebene Entwürfe“
+  und „Einträge im Entwurf“ führen zu Entwürfe → Vergessen?.
+- Handbuch: neues Kapitel „Entwürfe prüfen und aufräumen“; Entwicklerhandbuch → Prüf-Ebene.
+
 ### Begriffe: Tabellen-Designer, Block-Designer, Musterseiten
 - **Wortwahl** in Verwaltung, Handbüchern, Rechten/Funktionen und Übersetzungen: der Editor für Tabellen und Felder
   (Verwaltung → Daten, Recht `data.schema`) heißt **Tabellen-Designer** (EN „table designer“), der Editor für eigene

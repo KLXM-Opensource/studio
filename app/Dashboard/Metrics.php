@@ -208,15 +208,13 @@ final class Metrics
         }
         if (can('pages.edit')) {
             $old = 0;
-            $first = null;
             foreach (Pages::all() as $p) {
-                if (($p['status'] === 'draft' || Pages::hasUnpublished($p)) && (string) $p['updated_at'] < self::ago(14)) {
+                if (($p['status'] !== 'published' || \Core\Review\Drafts::pageChanged($p)) && (string) $p['updated_at'] < self::ago(\Core\Review\Drafts::STALE_DAYS)) {
                     $old++;
-                    $first ??= $p;
                 }
             }
             $add('drafts', 5, 'info', 'pencil-simple', $old, __('Liegengebliebene Entwürfe'), __('Seiten mit Änderungen, die seit über 14 Tagen nicht veröffentlicht sind.'),
-                $old === 1 && $first ? Pages::plainUrl($first) . '?edit=1' : '/admin/pages', $old === 1 ? __('Weiter bearbeiten') : __('Seiten ansehen'));
+                '/admin/entwuerfe?filter=stale', __('Entwürfe prüfen'));   // Verwaltung → Entwürfe (Core\Review\Drafts)
             $noDesc = self::val("SELECT COUNT(*) FROM pages WHERE type = 'page' AND status = 'published' AND noindex = 0 AND (meta_description IS NULL OR meta_description = '')");
             $seo = Features::on('ai', false) && can('ai.use') && can('pages.manage');
             $add('seo', 7, 'info', 'magnifying-glass', $noDesc, __('Seiten ohne SEO-Beschreibung'), __('Suchmaschinen zeigen sonst einen zufälligen Textausschnitt.'),
@@ -231,7 +229,7 @@ final class Metrics
         }
         if ($draftTable) {
             $add('entry-drafts', 6, 'info', 'pencil-simple', $entryDrafts, __('Einträge im Entwurf'), __('Seit über 14 Tagen nicht online gestellt – veröffentlichen oder löschen.'),
-                '/admin/data/' . $draftTable[0]['handle'] . '?status=draft', __('{name} ansehen', ['name' => $draftTable[0]['name']]));
+                '/admin/entwuerfe?filter=stale', __('Entwürfe prüfen'));
         }
         if (can('media.upload') && Features::on('media')) {
             $c = self::mediaCounts();

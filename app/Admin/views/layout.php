@@ -9,6 +9,8 @@ $nav = array_values(array_filter([
     ['/admin/network', __('Netzwerk'), 'network', $netUser && \Core\Network\Network::isNetworkSite()],
     ['/admin', __('Übersicht'), 'dashboard', true],
     ['/admin/pages', __('Seiten'), 'pages', $user && can('pages.edit')],
+    // Entwürfe (Core\Review\Drafts): offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen
+    ['/admin/entwuerfe', __('Entwürfe'), 'drafts', $user && \Core\Review\Drafts::canView()],
     ['/admin/settings', app()->theme->settingsTitle(), 'settings', $user && can('settings.edit')],
     ['/admin/media', __('Medien'), 'media', $user && can('media.upload')],
     ['/admin/data', __('Daten'), 'data', (bool) $dataOk],
@@ -46,6 +48,7 @@ foreach ($inboxes as $ib) $newReq += \Core\Data\Inbox::count($ib, 'neu');
 [$chatN, $chatAt] = $user ? \Core\Chat\Chat::navCount() : [0, 0];   // Chat: ungelesen + Erwähnungen (live: resources/js/userchat.js)
 $supportN = $user ? \Core\Support\Support::navCount() : 0;   // ungelesene Antworten bzw. (Team) neue Meldungen
 $reviewN = $user && \Core\Review\Queue::canReview() ? \Core\Review\Queue::pendingCount() : 0;   // offene Einreichungen (API, MCP, KI)
+$draftsN = $user && in_array('drafts', array_column($nav, 2), true) ? \Core\Review\Drafts::count() : 0;   // offene Entwürfe (Seiten, Einträge)
 // Favoriten (Core\Favorites): Liste + Vorschlag für den Stern dieser Seite (Adresse, Titel, Symbol) – resources/js/_favorites.js
 $favs = $user ? \Core\Favorites::all((int) $user['id']) : [];
 $favHere = $favTitle = $favIcon = '';
@@ -166,7 +169,7 @@ if ($user && ($req = app()->request)) {
   <nav id="adm-mainnav" aria-label="<?= e(__('Verwaltung')) ?>">
     <ul>
       <?php foreach ($nav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); // Symbol aus dem Sprite; ohne (KLXM Ai) → CSS-Maske über data-ico ?>
-      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $section === $key ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
+      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $section === $key ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts' && $draftsN): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>"><?= $draftsN ?><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
       </li>
       <?php endforeach; ?>
     </ul>

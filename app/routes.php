@@ -109,6 +109,14 @@ return function (Router $r): void {
     $r->post('/admin/pages/{id}/quick', [Admin\PageController::class, 'quick']);
     $r->post('/admin/pages/{id}/duplicate', [Admin\PageController::class, 'duplicate']);
     $r->post('/admin/pages/{id}/translate', [Admin\PageController::class, 'translate']);
+    // Entwürfe: offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen, Notiz/Zuständigkeit (Core\Review\Drafts)
+    $dr = Admin\DraftController::class;
+    $r->get('/admin/entwuerfe', [$dr, 'index']);
+    $r->get('/admin/entwuerfe/seite/{id}', [$dr, 'page']);
+    $r->get('/admin/entwuerfe/eintrag/{table}/{id}', [$dr, 'entry']);
+    $r->post('/admin/entwuerfe/notiz', [$dr, 'note']);
+    $r->post('/admin/entwuerfe/wiederherstellen/{id}', [$dr, 'restore']);
+    $r->post('/admin/entwuerfe/{op}', [$dr, 'action']);
 
     $r->get('/admin/settings', [Admin\SettingsController::class, 'edit']);
     $r->post('/admin/settings', [Admin\SettingsController::class, 'save']);

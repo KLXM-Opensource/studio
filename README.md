@@ -26,7 +26,7 @@ Aktuelle Version: siehe `CMS_VERSION` in `app/bootstrap.php` (derzeit 1.0.0) · 
 | Bereich | Kurz |
 |---|---|
 | Websites & Netzwerk | Beliebig viele Websites je Installation (eigene Domain, Datenbank, Medien, Benutzer), Netzwerk-Übersicht mit App-Icons, Status und Pool-Speicher, Website-Umschalter mit Single Sign-on, Zwei-Faktor-Anmeldung und Passkeys, Personen per E-Mail einladen, Funktionsumfang je Website (Presets `full`/`content`/`minimal`, Erweiterungen) |
-| Inhalte | Seitenbaum, Blockeditor auf der Website mit Entwurf/Veröffentlichen/Versionen, Platzhalter-Liste mit Sprung zum Block, zentrale Angaben des Kits, Style-Editor (Design-Tokens), Projekt-Hinweise aus dem Kit (`guide/*.md`) |
+| Inhalte | Seitenbaum, Blockeditor auf der Website mit Entwurf/Veröffentlichen/Versionen, Entwürfe-Übersicht (Unterschiede, Notiz, Sammelaktionen), Platzhalter-Liste mit Sprung zum Block, zentrale Angaben des Kits, Style-Editor (Design-Tokens), Projekt-Hinweise aus dem Kit (`guide/*.md`) |
 | Daten | Eigene Tabellen ohne Code (23 Feldtypen inkl. Verknüpfungen, Gruppe, IBAN, Ort, Wiederholung), Bedingungen, Detailseiten, öffentliche Formulare, Kalender mit iCal, CalDAV/CardDAV (Erweiterung), geteilte Tabellen mehrerer Websites |
 | Anfragen | Verschlüsselte Eingangs-Tabellen mit Protokoll, Zuweisung und Aufbewahrungsfrist |
 | Medien | Mediathek im Finder-Stil, zerstörungsfreie Bildbearbeitung (Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren), Zuschnitte je Format, SVG mit Bereinigung, geteilte Medien-Pools, Untertitel & Transkripte (auch per KI), dekorative Videos |

@@ -1,0 +1,44 @@
+/* ==========================================================================
+   Entwürfe (Core\Review\Drafts, app/Admin/views/drafts/*) – nutzt Liste, Tabs, Sammelauswahl und Unterschiede
+   der Prüf-Ebene (_review.css). Nur Farb-Tokens der Verwaltung (hell/dunkel); Status immer auch als Text.
+   ========================================================================== */
+.dr-hint{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;margin:0 0 16px}
+.dr-hint svg{flex:none;width:18px;height:18px;margin-top:2px;color:var(--adm-a-ink)}
+.dr-tabs{flex-wrap:wrap}
+.dr-bulk__btns{display:inline-flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.dr-table .dr-what{min-width:200px}
+.dr-lang{display:inline-block;font-size:10.5px;font-weight:700;padding:0 5px;border-radius:4px;background:var(--adm-fill);color:var(--adm-t2)}
+.dr-row .rv-row__sum{margin-top:4px}
+.dr-state{white-space:nowrap}
+.dr-st{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;margin:0 4px 4px 0;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--adm-fill);color:var(--adm-t2)}
+.dr-st--new{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
+.dr-st--changed{background:var(--adm-warn-bg);color:var(--adm-warn)}
+.dr-st--changed::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px}
+.dr-st--stale{background:var(--adm-err-bg);color:var(--adm-err)}
+.rv-ch--sync,.rv-ch--source{background:var(--adm-info-bg);color:var(--adm-ink)}
+.dr-note{min-width:180px;max-width:320px}
+.dr-note__text{margin:0 0 4px;font-size:13px;overflow-wrap:anywhere}
+.dr-who{display:inline-flex;align-items:center;gap:3px;font-weight:700}
+.dr-who svg{width:14px;height:14px}
+.dr-note__edit summary{cursor:pointer;font-size:12.5px;color:var(--adm-a-ink);font-weight:600;width:max-content}
+.dr-note__edit summary:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px;border-radius:3px}
+.dr-note__form{display:grid;gap:6px;margin-top:6px}
+.dr-note__form .f{margin:0}
+.dr-note__form textarea,.dr-note__form select{width:100%}
+.dr-actions{text-align:right;min-width:190px;max-width:300px}
+.dr-actions .adm-btn{margin:0 0 4px 2px}
+.dr-actions__note{display:block;font-size:12px;color:var(--adm-t3);white-space:normal}
+.dr-discards{margin-top:24px}
+.dr-discards h2{margin-top:0}
+.dr-discards .adm-list li{justify-content:space-between}
+.dr-discards__what{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+/* Seitenbaum: veröffentlichte Seite mit offenem Entwurf (app/Admin/views/pages/index.php) */
+.pt-draft{display:inline-flex;align-items:center;min-height:18px;padding:0 6px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--adm-warn-bg);color:var(--adm-warn)}
+/* Schmale Bildschirme: jede Zeile als Karte statt breiter Tabelle */
+@media (max-width:700px){
+  .dr-table thead{display:none}
+  .dr-table,.dr-table tbody,.dr-table tr,.dr-table td{display:block;width:auto}
+  .dr-table tr{position:relative;padding:10px 12px 10px 46px;border-bottom:1px solid var(--adm-line)}
+  .dr-table td{border:0!important;padding:3px 0!important;min-width:0;max-width:none;text-align:left}
+  .dr-table td.rv-table__sel{position:absolute;left:12px;top:12px;width:auto}
+}
