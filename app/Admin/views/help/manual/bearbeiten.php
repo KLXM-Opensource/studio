@@ -71,6 +71,8 @@ $__sample = $vars['blocks_page'] ?? null;
   </ol>
   <?= $img('blockmenu.webp', 'Auswahl der Blocktypen im Editor', '<b>Blöcke einfügen:</b> alle verfügbaren Bausteine' . ($__sample ? ' – die Seite <a href="' . e(url($__sample)) . '">' . e($__sample) . '</a> zeigt jeden als Beispiel' : '') . '.') ?>
 
+  <div class="doc-note doc-note--info"><strong>Formular-Blöcke: „Felder bearbeiten“</strong><p>Bei Blöcken mit einem Formular aus einer Datentabelle (z. B. „Formular (Datentabelle)“) steht in der Leiste neben <b>Bearbeiten</b> zusätzlich <b>Felder bearbeiten</b> – sofern Ihre Rolle Tabellen und Felder ändern darf. Damit ändern, sortieren, ergänzen und entfernen Sie die Felder des Formulars direkt auf der Seite; nach dem Speichern zeigt der Block das neue Formular sofort. Einzelheiten: <a href="<?= e(url('/admin/hilfe#felder-im-editor')) ?>">Daten → Felder direkt auf der Seite ändern</a>.</p></div>
+
   <h3>Abschnitt &amp; Navigation</h3>
   <p>Unten in der Seitenleiste (oder Menü ⋮⋮ → <b>Abschnitt &amp; Navigation</b>) legen Sie fest, wie der Abschnitt erscheint:</p>
   <table class="doc-table">

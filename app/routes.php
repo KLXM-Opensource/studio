@@ -345,6 +345,9 @@ return function (Router $r): void {
     // Einträge auf der Website bearbeiten (Seitenleiste + direkt im Text, Core\Data\EntryEdit)
     $r->get('/admin/api/entries/{handle}/{id}', [Admin\EntryEditController::class, 'form']);
     $r->post('/admin/api/entries/{handle}/{id}', [Admin\EntryEditController::class, 'save']);
+    // Felder eines Formulars im Seiten-Editor bearbeiten (Seitenleiste „Felder bearbeiten“, Core\Data\SchemaPanel) – Recht data.schema
+    $r->get('/admin/api/formfields/{handle}', [Admin\FormFieldsController::class, 'form']);
+    $r->post('/admin/api/formfields/{handle}', [Admin\FormFieldsController::class, 'save']);
 
     $r->get('/admin/api-tokens', [Admin\ApiTokenController::class, 'index']);
     $r->post('/admin/api-tokens', [Admin\ApiTokenController::class, 'store']);

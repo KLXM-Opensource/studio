@@ -192,19 +192,32 @@ final class DataController extends AdminController
         $this->auth($r, 'data.schema');
         $t = $this->table($handle);
         $this->schemaGuard($t);
-        [$def, $errors] = Tables::validate($r->post, $t);
+        [$def, $errors, $askDrop] = self::saveSchema($t, $r->post, $r->str('confirm_drop') === '1');
         if ($errors) {
-            return $this->view('data/schema', ['table' => $t, 'def' => $def + ['handle' => $t['handle']], 'errors' => $errors], 422);
+            return $this->view('data/schema', ['table' => $t, 'def' => $def + ['handle' => $t['handle']], 'errors' => $errors, 'askDrop' => $askDrop], 422);
         }
-        $dropped = Tables::droppedFields($t, $def);
-        if ($dropped && $r->str('confirm_drop') !== '1') {
-            $errors['_drop'] = 'Beim Speichern werden diese Felder samt Inhalten gelöscht: ' . implode(', ', array_column($dropped, 'label'))
-                . '. Zum Bestätigen „Felder wirklich löschen“ anhaken.';
-            return $this->view('data/schema', ['table' => $t, 'def' => $def + ['handle' => $t['handle']], 'errors' => $errors, 'askDrop' => true], 422);
-        }
-        Tables::update($t, $def);
         $this->changed();
         return $this->back('/admin/data/' . $handle . '/schema', 'success', 'Tabelle gespeichert.');
+    }
+
+    /**
+     * Felder und Einstellungen einer bestehenden Tabelle prüfen und speichern – gemeinsamer Weg des Tabellen-Designers und der
+     * Seitenleiste „Felder bearbeiten“ im Seiten-Editor (FormFieldsController). Fallen Felder samt Inhalten weg, wird erst mit
+     * $confirmDrop gespeichert (sonst Fehler „_drop“ und $askDrop = true).
+     * @return array{0: array, 1: array, 2: bool} [def, errors, askDrop]
+     */
+    public static function saveSchema(array $t, array $in, bool $confirmDrop): array
+    {
+        [$def, $errors] = Tables::validate($in, $t);
+        if ($errors) return [$def, $errors, false];
+        $dropped = Tables::droppedFields($t, $def);
+        if ($dropped && !$confirmDrop) {
+            $errors['_drop'] = __('Beim Speichern werden diese Felder samt Inhalten gelöscht: {fields}. Zum Bestätigen „Felder wirklich löschen“ anhaken.',
+                ['fields' => implode(', ', array_column($dropped, 'label'))]);
+            return [$def, $errors, true];
+        }
+        Tables::update($t, $def);
+        return [$def, [], false];
     }
 
     /** Eingang → Zustellung: Testmail mit erfundener Anfrage an die gespeicherten Empfänger (Core\Data\Delivery::test) */

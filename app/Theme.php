@@ -469,12 +469,21 @@ final class Theme
     {
         $blocks = [];
         foreach ($this->blocks as $type => $b) {
+            // Formular einer Datentabelle im Block (Knopf „Felder bearbeiten“, resources/js/_form_fields.js): 'formfields' => Feldname,
+            // sonst das erste Tabellen-Feld, das Formular-Tabellen anbietet ('type' => 'datatable', 'inbox' => true – z. B. data_form, contact)
+            $ff = $b['formfields'] ?? null;
+            if ($ff === null) {
+                foreach ($b['fields'] as $f) {
+                    if (($f['type'] ?? '') === 'datatable' && !empty($f['inbox']) && !empty($f['name'])) { $ff = (string) $f['name']; break; }
+                }
+            }
             $blocks[$type] = [
                 'label' => $b['label'], 'icon' => $b['icon'] ?? '▦', 'ico' => Icons::resolve((string) ($b['icon'] ?? '▦')), 'group' => $b['group'] ?? 'Inhalt',
                 'fields' => $b['fields'], 'variants' => $b['variants'] ?? null,
                 'central' => $b['central'] ?? null, 'background' => $b['background'] ?? 'white',
                 'help' => $b['help'] ?? null,
                 'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
+                'formfields' => $ff ?: null,
             ];
         }
         return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds()];

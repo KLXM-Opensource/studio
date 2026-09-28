@@ -87,6 +87,7 @@
  *   data:share <handle> --members=a,b [--see-members] [--merge]
  *                                                     Tabelle dieser Website teilen (diese Website = Eigentümer, --site=…)
  *   data:unshare <handle> [--all-entries]             Freigabe beenden: wieder eigene Tabelle des Eigentümers
+ *   data:selftest                                     Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor (Inhalt + Eingang)
  *   shared:list                                       Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website
  *   inbox:migrate [--all]                             Online-Anfragen → Eingangs-Tabellen (idempotent, sonst automatisch)
  *   inbox:purge [--all]                               Erledigte Anfragen nach Aufbewahrungsfrist löschen (z. B. täglich per Cron)
@@ -815,6 +816,13 @@ switch ($cmd) {
         } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
         echo "Geteilt: {$handle} (Eigentümer " . site()->key . ", Mitglieder: " . (implode(', ', Core\Data\Shared::meta($handle)['members'] ?? []) ?: '–') . ").\n";
         break;
+
+    case 'data:selftest':
+        // Core\Data\SchemaPanel: validate(toInput($t)) = $t für alle Tabellen; Seitenleiste „Felder bearbeiten“ mit vorübergehenden Tabellen
+        $res = Core\Data\SchemaPanel::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'data:unshare':
         $handle = (string) ($args[0] ?? '');

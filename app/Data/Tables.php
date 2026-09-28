@@ -414,6 +414,32 @@ final class Tables
     }
 
     /**
+     * Gespeicherte Definition im Eingabeformat von validate() – für Teiländerungen, die alles Übrige unverändert lassen
+     * (Seitenleiste „Felder bearbeiten“ im Seiten-Editor, Core\Data\SchemaPanel). validate(toInput($t), $t) ergibt wieder $t
+     * (geprüft von `php bin/console data:selftest`). Einstellungen roh aus der Datenbank (kein automatisch ergänztes Titel-Feld);
+     * das S/MIME-Zertifikat der Zustellung bleibt aus der gespeicherten Einstellung (es ist kein Eingabewert).
+     */
+    public static function toInput(array $t): array
+    {
+        $row = isset($t['shared']) ? Shared::row($t['shared']['key']) : app()->db->fetch('SELECT settings_json FROM data_tables WHERE id = ?', [(int) $t['id']]);
+        $s = (json_decode((string) ($row['settings_json'] ?? ''), true) ?: []) + $t['settings'];
+        $s['detail_page_id'] = $s['detail_page_id'] === null ? '' : (string) $s['detail_page_id'];
+        if (isset($s['search']['enabled'])) $s['search']['enabled'] = $s['search']['enabled'] ? '1' : '0';
+        unset($s['inbox']['delivery']['smime'], $s['form']['known']);
+        return ['name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'description' => (string) ($t['description'] ?? ''),
+            'handle' => $t['handle'], 'fields' => array_map([self::class, 'fieldInput'], $t['fields']), 'settings' => $s];
+    }
+
+    /** Ein gespeichertes Feld im Eingabeformat von validate(): Auswahlmöglichkeiten als Zeilen „kurzname=Text“ */
+    public static function fieldInput(array $f): array
+    {
+        if (is_array($f['options'] ?? null)) {
+            $f['options'] = implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys($f['options']), $f['options']));
+        }
+        return $f;
+    }
+
+    /**
      * Wiederholbare Gruppe bereinigen: fields (Unterfelder: name, label, type, required, width, options, labels, options_i18n),
      * min (0–20, Standard 1 bei Pflicht, sonst 0), max (1–50, Standard 10), item_label, add_label. Fehler in $def['_error'].
      */

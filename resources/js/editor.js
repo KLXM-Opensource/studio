@@ -324,6 +324,7 @@ function makeTool(type, def) {
             <button type="button" class="cms-iconbtn" data-collapse aria-expanded="true" aria-label="Block einklappen" title="Einklappen / Ausklappen">▾</button>
           </span>
           <span class="cms-block__hint" hidden></span>
+          ${def.formfields ? `<button type="button" class="cms-block__fields" hidden>${CMSAdmin.esc(CMSAdmin.t('Felder'))}<span class="cms-block__fields-more"> ${CMSAdmin.esc(CMSAdmin.t('bearbeiten'))}</span></button>` : ''}
           <button type="button" class="cms-block__edit">Bearbeiten</button>`);
       this.el = el;
       // „+ Block einfügen“ an der Unterkante (eigenes Shadow DOM): fügt nach diesem Block ein – beim letzten am Seitenende
@@ -336,6 +337,8 @@ function makeTool(type, def) {
       addBtn.addEventListener('click', e => { e.stopPropagation(); BlockPicker.open(addBtn, this); });
       addEl.addEventListener('keydown', e => e.stopPropagation());
       sr.querySelector('.cms-block__edit').addEventListener('click', e => { e.stopPropagation(); this.openDrawer(); });
+      // Formular-Blöcke: Felder der gewählten Tabelle direkt bearbeiten (nur mit Recht „Tabellen und Felder ändern“, cfg.formFields)
+      sr.querySelector('.cms-block__fields')?.addEventListener('click', e => { e.stopPropagation(); this.openFormFields(e.currentTarget); });
       sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
       sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
       sr.querySelector('[data-collapse]').addEventListener('click', e => { e.stopPropagation(); this.toggleCollapse(); });
@@ -408,6 +411,26 @@ function makeTool(type, def) {
         }
       });
       $$('input,select,textarea,button:not(.cms-block__edit)', pv).forEach(i => { i.tabIndex = -1; });
+      this.syncFormFields();
+    }
+
+    /** Knopf „Felder bearbeiten“: nur mit gewählter Tabelle, deren Felder diese Rolle ändern darf */
+    syncFormFields() {
+      const b = this.bar.querySelector('.cms-block__fields');
+      if (!b) return;
+      const handle = String(this.data?.[def.formfields] || '');
+      b.hidden = !handle || !(cfg.formFields || []).includes(handle);
+      b.setAttribute('aria-label', CMSAdmin.t('Felder des Formulars bearbeiten ({label})', { label: def.label }));
+    }
+
+    openFormFields(btn) {
+      const handle = String(this.data?.[def.formfields] || '');
+      if (!handle || !CMSAdmin.formFields) return;
+      selectBlock(this.el);
+      CMSAdmin.formFields.open(cfg.endpoints.formfields + encodeURIComponent(handle), btn, {
+        // Nach dem Speichern: alle Blöcke mit dieser Tabelle neu darstellen (ohne die Seite neu zu laden)
+        onSaved: () => tools.forEach(t => { if (t.def.formfields && String(t.data?.[t.def.formfields] || '') === handle) t.loadPreview(); }),
+      });
     }
 
     async loadPreview() {

@@ -42,3 +42,32 @@ a{color:var(--adm-a-ink)}
 @media (max-width:600px){.ep__head,.cms-epanel__body,.cms-epanel__foot{padding-left:16px;padding-right:16px}}
 /* Telefone: über der Aktionsleiste des Editors enden (--cms-bottom-bar-h, _bar.js), sonst verdeckt sie den Fuß mit „Speichern“ */
 @media (max-width:767px){:host{bottom:var(--cms-bottom-bar-h,0px)}}
+/* Seitenleiste „Felder bearbeiten“ im Seiten-Editor (resources/js/_form_fields.js, app/Views/formfields-panel.php):
+   Feldzeilen des Tabellen-Designers (admin.shadow.css: .dt-field …) für die schmale Leiste – einspaltig, Werkzeuge in einer Zeile */
+.ff h3{margin:0 0 10px;font-size:15px;letter-spacing:-.01em}
+.ff-sec{margin:0 0 22px}
+.ff-sec + .ff-sec{padding-top:16px;border-top:1px solid var(--adm-line)}
+.ff .dt-fields{margin:10px 0}
+.ff .dt-field{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:12px}
+.ff .dt-field__row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.ff .dt-in--label{grid-column:1/-1}
+.ff .dt-field__flags{display:flex}
+.ff .dt-field__tools{flex-direction:column}
+.ff-field__namehelp{margin:-4px 0 0;font-size:12px;color:var(--adm-t3)}
+.ff-note{margin:0;padding:8px 10px;border-radius:6px;background:var(--adm-warn-bg,var(--adm-fill-2));font-size:13px;color:var(--adm-ink)}
+.ff-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:6px;background:var(--adm-err-bg);box-shadow:0 0 0 1px #E7B4B0}
+.ff-confirm[hidden]{display:none}
+.ff-confirm p{margin:0;flex:1 1 100%;font-size:13px;font-weight:600}
+.ff-field.is-removing{box-shadow:0 0 0 1.5px var(--adm-err)}
+.ff-field.is-moved{animation:ff-moved .6s ease-out}
+@keyframes ff-moved{from{box-shadow:0 0 0 2px var(--adm-a)}to{box-shadow:0 0 0 1px var(--adm-line)}}
+@media (prefers-reduced-motion:reduce){.ff-field.is-moved{animation:none}}
+.ff .dt-addfield{padding-top:2px}
+.ff .dt-typebtn .ico{color:var(--adm-a-ink)}
+.ff-formfields{margin:10px 0;padding:0;border:0;display:grid;gap:4px;min-width:0}
+.ff-formfields legend{font-weight:700;font-size:13px;margin-bottom:6px;padding:0}
+.ff [data-ff-errors] ul{margin:6px 0 0;padding-left:18px}
+.ff [data-ff-errors] p{margin:0}
+.ff [data-ff-saved]:focus,.ff [data-ff-errors]:focus{outline:none}
+.cms-epanel__foot [data-ff-status]{font-size:13px;color:var(--adm-t2)}
+@media (max-width:420px){.ff .dt-field{grid-template-columns:1fr}.ff .dt-field__tools{flex-direction:row;justify-content:flex-end}.ff .dt-field__row{grid-template-columns:1fr}}

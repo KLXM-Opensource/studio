@@ -320,10 +320,12 @@ final class DataForms
         $help = trim((string) ($f['help'] ?? ''));
         if ($type === 'iban' && $help === '') $help = lt('z. B. DE89 3704 0044 0532 0130 00');
         $kinds = in_array($type, self::UPLOAD_TYPES, true) ? self::fileKinds($f, $inbox) : [];
-        if ($kinds) $help = trim($help . ' ' . self::fileHint($kinds, self::fileMb($f, $s)));
-        $desc = ($help !== '' ? "$id-h " : '') . "$id-e";
+        // Dateifeld: Hilfetext und automatischer Hinweis (Dateitypen, Größe) als eigene Absätze – beide über aria-describedby verbunden
+        $kindHint = $kinds ? self::fileHint($kinds, self::fileMb($f, $s)) : '';
+        $desc = ($help !== '' ? "$id-h " : '') . ($kindHint !== '' ? "$id-k " : '') . "$id-e";
         $aria = ' aria-describedby="' . $desc . '"' . ($err ? ' aria-invalid="true"' : '') . ($req ? ' required aria-required="true"' : '');
-        $helpHtml = $help !== '' ? '<p class="dff-help" id="' . $id . '-h">' . e($help) . '</p>' : '';
+        $helpHtml = ($help !== '' ? '<p class="dff-help" id="' . $id . '-h">' . e($help) . '</p>' : '')
+            . ($kindHint !== '' ? '<p class="dff-help dff-help--file" id="' . $id . '-k">' . e($kindHint) . '</p>' : '');
         $errHtml = '<p class="dff-err" id="' . $id . '-e"' . ($err ? '' : ' hidden') . '>' . e($err ?? '') . '</p>';
         $cls = 'dff-f' . (($f['width'] ?? '') === 'half' ? ' dff-f--half' : '') . ($req ? ' dff-f--req' : '') . ($err ? ' dff-f--error' : '');
         $sv = is_scalar($v) ? (string) $v : '';

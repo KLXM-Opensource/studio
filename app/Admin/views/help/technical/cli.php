@@ -55,6 +55,7 @@ $__cmds = [
         ['svg:selftest [--dump=ordner] [-v]', 'Selbsttest der SVG-Bereinigung (Core\\Svg): Schadcode-Proben und Exporte aus Illustrator, Inkscape, Figma'],
         ['data:share <handle> --members=a,b [--see-members] [--merge]', 'Tabelle dieser Website für weitere Websites freigeben (diese Website = Eigentümer, --site=…)'],
         ['data:unshare <handle> [--all-entries]', 'Freigabe beenden – wieder eigene Tabelle des Eigentümers'],
+        ['data:selftest', 'Selbsttest Tabellen-Definition: Rundlauf aller Tabellen und „Felder bearbeiten“ im Seiten-Editor (vorübergehende Tabellen)'],
         ['shared:list', 'Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website'],
         ['inbox:migrate [--all]', 'Alte Online-Anfragen → Eingangs-Tabellen (idempotent, läuft sonst automatisch)'],
         ['inbox:purge [--all]', 'Aufbewahrungsfristen anwenden (Cron, täglich)'],

@@ -205,6 +205,12 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-block__label>span{opacity:.8;margin-right:2px}
 .cms-block__edit{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#314164;color:#fff;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
 .cms-block__edit:hover{background:#243150}
+/* „Felder bearbeiten“ bei Formular-Blöcken (editor.js → resources/js/_form_fields.js); schmal nur „Felder“ */
+.cms-block__fields{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#fff;color:#1E2840;box-shadow:inset 0 0 0 1.5px #314164;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.cms-block__fields:hover{background:#EEF1F7}
+.cms-block__fields[hidden]{display:none}
+.cms-block__fields[aria-busy=true]{opacity:.6;cursor:progress}
+@media (max-width:600px){.cms-block__fields-more{display:none}}
 /* Hinweis nach Klick auf Inhalte ohne Direktbearbeitung (editor.js hintEdit): Knopf „Bearbeiten“ pulsiert kurz */
 .cms-block__hint{padding:4px 9px;border-radius:6px;background:#FFF4E5;color:#5C3A00;box-shadow:0 0 0 1px #F2D3A6;white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
 .cms-block__hint[hidden]{display:none}

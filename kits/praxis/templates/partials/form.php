@@ -33,22 +33,28 @@ $ready = FormCrypto::ready();
         $err = $errors[$f['name']] ?? null;
         $val = (string) ($values[$f['name']] ?? '');
         $req = $f['required'] ? ' required aria-required="true"' : '';
-        $aria = ' aria-describedby="' . $id . '-e"' . ($err ? ' aria-invalid="true"' : '');
+        // Hilfetext des Feldes und – bei Dateifeldern – der automatische Hinweis (Typen, Größe): eigene Absätze, beide per aria-describedby
+        $help = trim((string) ($f['help'] ?? ''));
+        $kindHint = $f['type'] === 'file' ? (string) ($f['file_hint'] ?? '') : '';
+        $aria = ' aria-describedby="' . ($help !== '' ? $id . '-h ' : '') . ($kindHint !== '' ? $id . '-k ' : '') . $id . '-e"' . ($err ? ' aria-invalid="true"' : '');
+        $hints = ($help !== '' ? '<p class="pform__hint" id="' . $id . '-h">' . e($help) . '</p>' : '')
+            . ($kindHint !== '' ? '<p class="pform__hint pform__hint--file" id="' . $id . '-k">' . e($kindHint) . '</p>' : '');
         $full = $f['width'] === 'full' || $f['type'] === 'bool';
     ?>
     <div class="pfield<?= $full ? ' pfield--full' : '' ?><?= $f['type'] === 'bool' ? ' pfield--check' : '' ?>">
       <?php if ($f['type'] === 'bool'): ?>
         <label class="pcheck"><input type="checkbox" id="<?= $id ?>" name="<?= e($f['name']) ?>" value="1"<?= $val ? ' checked' : '' ?><?= $req . $aria ?>> <span><?= e($f['label']) ?><?= $f['required'] ? $star : '' ?></span></label>
+        <?= $hints ?>
       <?php else: ?>
         <label for="<?= $id ?>"><?= e($f['label']) ?><?= $f['required'] ? $star : '' ?></label>
+        <?= $hints ?>
         <?php if ($f['type'] === 'select'): ?>
         <select id="<?= $id ?>" name="<?= e($f['name']) ?>"<?= $req . $aria ?>>
           <?php if (!$f['required']): ?><option value=""></option><?php endif; ?>
           <?php foreach ($f['options'] as $k => $l): ?><option value="<?= e((string) $k) ?>"<?= (string) $k === $val ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
         </select>
         <?php elseif ($f['type'] === 'file'): // Datei (nur bei Zustellung per E-Mail): Typ und Größe prüft der Server am Inhalt ?>
-        <p class="pform__hint" id="<?= $id ?>-h"><?= e($f['file_hint']) ?></p>
-        <input id="<?= $id ?>" name="<?= e($f['name']) ?>" type="file" accept="<?= e($f['accept']) ?>" data-max-bytes="<?= (int) $f['max_bytes'] ?>"<?= $req ?> aria-describedby="<?= $id ?>-h <?= $id ?>-e"<?= $err ? ' aria-invalid="true"' : '' ?>>
+        <input id="<?= $id ?>" name="<?= e($f['name']) ?>" type="file" accept="<?= e($f['accept']) ?>" data-max-bytes="<?= (int) $f['max_bytes'] ?>"<?= $req . $aria ?>>
         <?php elseif ($f['type'] === 'textarea'): ?>
         <textarea id="<?= $id ?>" name="<?= e($f['name']) ?>" rows="4" maxlength="5000"<?= $req . $aria ?>><?= e($val) ?></textarea>
         <?php else: ?>

@@ -22,6 +22,7 @@ import { initNetwork } from './_network.js';
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
 import { initEntryEdit } from './_entry_edit.js';
+import { formFields } from './_form_fields.js';   // Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken (Core\Data\SchemaPanel)
 import { initToolbar, bar_ } from './_bar.js';   // Redaktions-Werkzeugleiste: Menüs, Status, Modus, Abbrechen
 import { initAi } from './_ai.js';   // KI-Assistent (Core\AI) – ohne Konfiguration #cms-ai wirkungslos
 import { initIconPickers, initIconGallery } from './_iconpicker.js';
@@ -651,7 +652,7 @@ init();
 initSettingsPreview();
 initDesign();
 initBlockBuilder();
-window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_,
+window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene
   shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)

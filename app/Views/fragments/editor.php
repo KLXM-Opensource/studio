@@ -16,7 +16,12 @@ $config['endpoints'] = [
     'media' => url('/admin/api/media'),
     'upload' => url('/admin/media/upload'),
     'settings' => url('/admin/settings'),
+    'formfields' => url('/admin/api/formfields/'),
 ];
+// „Felder bearbeiten“ bei Formular-Blöcken: nur mit Recht data.schema, geteilte Tabellen nur auf der Eigentümer-Website
+$config['formFields'] = can('data.schema')
+    ? array_values(array_map(fn($t) => $t['handle'], array_filter(\Core\Data\Tables::all(), [\Core\Data\Shared::class, 'canSchema'])))
+    : [];
 $config['csrf'] = \Core\Csrf::token();
 $config['settingsTitle'] = app()->theme->settingsTitle();
 // Detailseiten-Vorlage: Vorschau mit dem aufgerufenen Eintrag

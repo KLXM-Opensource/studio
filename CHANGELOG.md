@@ -6,6 +6,36 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seiten: Systemadressen verständlich gesperrt
+- `/kits`, `/themes`, `/media`, `/pools`, `/assets` … sind Ordner in `public/` – der Webserver liefert dort den Ordner (301 → 403)
+  statt der Seite. Gesperrt nur noch ganz oben und in der Hauptsprache (`/en/kits`, `/leistungen/kits` sind frei); die Meldung
+  nennt den Grund. Bestehende Seiten mit so einer Adresse speichern weiter, das Formular warnt aber, dass sie nicht erreichbar sind.
+
+### Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken; Hilfetext und Dateihinweis getrennt
+- **Neu:** Blöcke mit einem Formular aus einer Datentabelle („Formular (Datentabelle)“, Formular in `contact` der Kits,
+  Newsletter in editorial) zeigen in der Block-Leiste zusätzlich **Felder bearbeiten** – nur mit dem Recht „Tabellen und
+  Felder ändern“ (`data.schema`; geteilte Tabellen nur auf der Eigentümer-Website). Seitenleiste wie „Eintrag bearbeiten“
+  (Shadow DOM, `resources/js/_form_fields.js`, `app/Views/formfields-panel.php`): Bezeichnung, Kurzname (automatisch),
+  Typ, Pflichtfeld, halbe Breite, Hilfetext, Auswahlmöglichkeiten, erlaubte Dateitypen und Höchstgröße, Reihenfolge ↑ ↓,
+  Entfernen mit Rückfrage in der Zeile, „Feld hinzufügen“; dazu Formular an/aus, „Felder im Formular“, Text nach dem
+  Absenden, Button-Beschriftung (Inhaltstabellen: Datei-Uploads). Link „Alle Einstellungen der Tabelle“ zur Verwaltung.
+- Speichern über `GET|POST /admin/api/formfields/{tabelle}` (`Admin\FormFieldsController`, CSRF) → `Core\Data\SchemaPanel`:
+  die Angaben der Leiste werden über die gespeicherte Definition gelegt (`Tables::toInput`), alles andere bleibt; geprüft
+  und gespeichert wie im Tabellen-Designer (`DataController::saveSchema` → `Tables::validate`, Rückfrage „Felder wirklich
+  löschen“). Eingangs-Tabellen behalten alle Regeln (keine Bilder/Verknüpfungen/formatierten Texte, Dateifelder nur bei
+  Zustellung per E-Mail); Zustellung und Verschlüsselung stehen nicht in der Leiste. Neue Felder kommen in eine
+  bestehende Auswahl „Felder im Formular“, umbenannte bleiben ausgewählt. Typwechsel bei vorhandenen Einträgen: Hinweis.
+- Nach dem Speichern stellt der Editor alle Blöcke mit dieser Tabelle neu dar (`loadPreview`) – ohne Neuladen.
+  Tastatur: Esc, Strg/⌘+S, Ansage der Position beim Verschieben, Fokus zurück zum Knopf; mobil in voller Breite.
+- Blockdefinition: optional `'formfields' => 'feldname'`; sonst das erste `datatable`-Feld mit `'inbox' => true`.
+- **Behoben:** Hilfetext eines Dateifelds und der automatische Hinweis („PDF oder Bild …, höchstens 5 MB.“) wurden zu
+  einem Satz verbunden („Gerne auch als PDF PDF oder Bild …“). Jetzt eigene Absätze (`…-h`, `…-k`, Klasse
+  `dff-help--file`), beide in `aria-describedby` – im Kern (`DataForms::render`) und im Kit praxis (`partials/form.php`,
+  zeigt Hilfetexte jetzt auch bei anderen Feldern).
+- Selbsttest `php bin/console data:selftest` (Rundlauf aller Tabellen, Seitenleiste mit vorübergehenden Inhalts- und
+  Eingangstabellen); `inbox:selftest` prüft die getrennten Hinweise. Handbuch „Daten → Felder direkt auf der Seite
+  ändern“ und „Seiten bearbeiten“, Entwicklerhandbuch „Seiten-Editor“, „Formulare“, „Kommandozeile“, `lang/en.php`.
+
 ### Formulare: Dateifeld fehlte im Eingangs-Formular; erlaubte Dateitypen je Dateifeld
 - **Behoben:** In Eingangs-Tabellen (Anfragen) mit Zustellung per E-Mail fehlte ein Dateifeld im Formular, wenn es nach
   dem ersten Speichern der Auswahl „Felder im Formular“ angelegt wurde – die Auswahl war dann eine feste Liste ohne das

@@ -257,7 +257,14 @@ final class DeliverySelfTest
             $html = DataForms::render($t2 + ['handle' => $handle], ['uid' => 'st']);
             $true('Formular: multipart, accept, Hinweis mit aria-describedby', str_contains($html, 'enctype="multipart/form-data"')
                 && str_contains($html, 'accept=".pdf,application/pdf,.docx,') && str_contains($html, 'PDF oder Word (DOCX), höchstens 3 MB.')
-                && (bool) preg_match('~id="st-lebenslauf-h"[^>]*>[^<]*DOCX~', $html) && str_contains($html, 'aria-describedby="st-lebenslauf-h st-lebenslauf-e"'));
+                && (bool) preg_match('~id="st-lebenslauf-k"[^>]*>[^<]*DOCX~', $html) && str_contains($html, 'aria-describedby="st-lebenslauf-k st-lebenslauf-e"'));
+            // Hilfetext und Dateihinweis als eigene Absätze, beide über aria-describedby (früher zu einem Satz verbunden)
+            $t2h = $t2 + ['handle' => $handle];
+            foreach ($t2h['fields'] as &$hf) if ($hf['name'] === 'lebenslauf') $hf['help'] = 'Gerne auch als PDF';
+            unset($hf);
+            $html = DataForms::render($t2h, ['uid' => 'st']);
+            $true('Formular: Hilfetext und Dateihinweis getrennt', (bool) preg_match('~<p class="dff-help" id="st-lebenslauf-h">Gerne auch als PDF</p><p class="dff-help dff-help--file" id="st-lebenslauf-k">PDF oder~', $html)
+                && str_contains($html, 'aria-describedby="st-lebenslauf-h st-lebenslauf-k st-lebenslauf-e"'));
 
             // Dateityp am Inhalt (nicht an der Endung)
             $tmp = sys_get_temp_dir() . '/klxm-upload-selftest-' . bin2hex(random_bytes(3));
