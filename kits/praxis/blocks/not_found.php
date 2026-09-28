@@ -6,7 +6,8 @@
  */
 use Core\NotFound;
 
-$phone = !empty($d['phone']) && trim((string) ($d['phone_text'] ?? '')) !== '';
+// Ohne Telefonnummer in den Praxisdaten: Besucher sehen die Zeile nicht, die Redaktion den Hinweis „[Telefonnummer]“
+$phone = !empty($d['phone']) && trim((string) ($d['phone_text'] ?? '')) !== '' && (praxis_has_phone() || \Core\EditorNotes::$show);
 $more = trim((string) ($d['link_label'] ?? '')) !== '' && !empty($d['link']) ? praxis_link((string) $d['link']) : '';
 ?>
 <div class="wrap cms-404">
