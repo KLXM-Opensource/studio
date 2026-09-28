@@ -1,11 +1,12 @@
 <?php
 use Core\Fields;
 $isNew = $page === null;
+$nf = !$isNew && \Core\NotFound::isPage($page);   // Seite „Nicht gefunden (404)“: feste Adresse, kein Menü, immer noindex
 $err = fn($k) => isset($errors[$k]) ? '<p class="f-error" id="' . $k . '-e">' . e($errors[$k]) . '</p>' : '';
 $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' . $k . '-e"' : '';
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/pages')) ?>">Seiten</a></p><h1><?= $isNew ? 'Neue Seite' : e($page['title']) ?></h1></div>
+  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/pages' . ($nf ? '#sonderseiten' : ''))) ?>">Seiten</a><?= $nf ? ' · ' . e(__('Nicht gefunden (404)')) : '' ?></p><h1><?= $isNew ? 'Neue Seite' : e($page['title']) ?></h1></div>
   <?php if (!$isNew): ?><a class="adm-btn adm-btn--primary" href="<?= e(\Core\Pages::url($page)) ?>?edit=1">Inhalte bearbeiten</a><?php endif; ?>
 </header>
 
@@ -24,7 +25,10 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
     <h2>Seiteneinstellungen<?php if (\Core\Lang::multi()): ?> <span class="adm-badge"><?= e(strtoupper(\Core\Lang::norm($isNew ? ($old['lang'] ?? null) : $page['lang']))) ?></span><?php endif; ?></h2>
     <div class="f<?= isset($errors['title']) ? ' f--error' : '' ?>"><label for="title">Titel <span class="req">*</span></label>
       <input id="title" name="title" required maxlength="120" value="<?= e($old['title'] ?? '') ?>"<?= $inv('title') ?>><?= $err('title') ?></div>
-    <?php if ($isNew || !$page['is_home']):
+    <?php if ($nf): ?>
+    <p class="adm-inline-box"><?= e(__('Sonderseite „Nicht gefunden (404)“: erscheint bei jeder Adresse, die es nicht gibt – mit Status 404, nie im Menü, in der Sitemap oder in Suchmaschinen. Zum Bearbeiten öffnen Sie {path}.', ['path' => \Core\Pages::url($page) . '?edit=1'])) ?></p>
+    <?php endif; ?>
+    <?php if ($isNew || (!$page['is_home'] && !$nf)):
       $exclude = $isNew ? [] : array_merge([(int) $page['id']], \Core\Pages::descendantIds((int) $page['id']));
       $parentPath = !empty($old['parent_id']) && ($pp = \Core\Pages::find((int) $old['parent_id'])) ? $pp['path'] . '/' : ''; ?>
     <div class="f"><label for="parent_id">Übergeordnete Seite</label>
@@ -47,11 +51,13 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
     <div class="f"><label for="status">Status</label>
       <select id="status" name="status"><option value="draft"<?= ($old['status'] ?? '') !== 'published' ? ' selected' : '' ?>>Entwurf (nicht öffentlich)</option><option value="published"<?= ($old['status'] ?? '') === 'published' ? ' selected' : '' ?>>Online</option></select></div>
     <?php endif; ?>
-    <?php if ($isNew || !$page['is_home']): ?>
+    <?php if ($isNew || (!$page['is_home'] && !$nf)): ?>
     <div class="f f--bool"><input type="hidden" name="menu" value="0"><label class="f-check"><input type="checkbox" name="menu" value="1"<?= !empty($old['menu']) ? ' checked' : '' ?>> <span>Im Hauptmenü zeigen</span></label></div>
     <div class="f"><label for="nav_title">Beschriftung im Menü (optional)</label><input id="nav_title" name="nav_title" maxlength="60" value="<?= e($old['nav_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? 'wie der Titel') ?>"></div>
     <?php endif; ?>
+    <?php if (!$nf): ?>
     <div class="f f--bool"><input type="hidden" name="noindex" value="0"><label class="f-check"><input type="checkbox" name="noindex" value="1"<?= !empty($old['noindex']) ? ' checked' : '' ?>> <span>Nicht in Suchmaschinen / Sitemap aufnehmen</span></label></div>
+    <?php endif; ?>
     <div class="adm-form-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= $isNew ? 'Seite anlegen' : 'Speichern' ?></button></div>
   </form>
 
@@ -59,7 +65,7 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
   <div>
     <?= /* KI-Assistent & SEO-Check (Core\AI) */ \Core\Theme::capture(ROOT . '/app/Admin/views/ai/_page.php', ['page' => $page]) ?>
     <?= /* Erweiterungen (Extension::pagePanel), z. B. Feedback & Freigabe */ \Core\Extensions::pagePanels($page) ?>
-    <?php if (\Core\Features::on('landings') && can('system.manage')): $lps = \Core\Landings::forPage($page); // Landingpages mit eigenen Domains (Core\Landings) ?>
+    <?php if (!$nf && \Core\Features::on('landings') && can('system.manage')): $lps = \Core\Landings::forPage($page); // Landingpages mit eigenen Domains (Core\Landings) ?>
     <section class="adm-card" aria-labelledby="pg-landing-h">
       <h2 id="pg-landing-h"><?= e(__('Landingpage-Domain')) ?></h2>
       <?php if ($lps): ?>

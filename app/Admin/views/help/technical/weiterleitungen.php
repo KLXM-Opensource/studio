@@ -15,7 +15,7 @@
     <li><b>Reihenfolge:</b> exakte Quelle mit Query → exakte Quelle → Platzhalter (<code>/blog/*</code>, längster Präfix gewinnt). Ein <code>*</code> im Ziel übernimmt den Rest (<code>/blog/*</code> → <code>/news/*</code>).</li>
     <li><b>Ziele:</b> <code>page:ID[#anker]</code> (über <code>Pages::url</code> – folgt Umbenennen und Verschieben; unveröffentlicht/gelöscht → 404), <code>entry:tabelle:id</code>, <code>media:id</code>, <code>/pfad</code> oder <code>https://…</code>. Die Query der Anfrage wird angehängt (außer die Quelle nennt selbst eine Query). Location mit prozent-kodierten Umlauten.</li>
     <li><b>Keine Ketten, keine Schleifen:</b> höchstens ein Sprung; Ziel = Quelle wird beim Speichern abgelehnt und zur Laufzeit ignoriert, ebenso Platzhalter, deren Ziel wieder zur Quelle passt.</li>
-    <li><b>410</b> zeigt die 404-Seite des Kits mit Status 410. Treffer: ein <code>UPDATE hits = hits + 1</code> je Weiterleitung; 301 mit <code>Cache-Control: public, max-age=3600</code>, 302 mit <code>no-cache</code>.</li>
+    <li><b>410</b> zeigt die 404-Seite (gepflegte Seite „Nicht gefunden“, sonst die des Kits) mit Status 410. Treffer: ein <code>UPDATE hits = hits + 1</code> je Weiterleitung; 301 mit <code>Cache-Control: public, max-age=3600</code>, 302 mit <code>no-cache</code>.</li>
     <li><b>Mehrsprachig &amp; Landingpages:</b> Quellen mit Sprachpräfix angeben (<code>/en/old-page</code>); Seitenziele liefern die Adresse passend zur Domain (Landing-Domains über <code>Pages::url</code>).</li>
   </ul>
 

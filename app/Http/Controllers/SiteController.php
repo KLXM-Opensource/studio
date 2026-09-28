@@ -10,6 +10,7 @@ use Core\Data\Entries;
 use Core\Data\Tables;
 use Core\Landings;
 use Core\Lang;
+use Core\NotFound;
 use Core\Pages;
 use Core\PageCache;
 use Core\Seo;
@@ -56,6 +57,11 @@ final class SiteController
                 app()->entry = ['table' => $t, 'entry' => $entry];
                 return $this->render($r, $tpl);
             }
+        }
+        // Eigene Adresse der Seite „Nicht gefunden“ (/404): antwortet selbst mit 404 – ohne Weiterleitungen und 404-Protokoll;
+        // angemeldet mit ?edit=1 öffnet sie den Editor (Core\NotFound)
+        if (NotFound::isOwnPath($path)) {
+            return $this->error(404);
         }
         // Alte Adresse einer inzwischen verschachtelten Seite → dauerhaft weiterleiten
         if (!app()->lang && !str_contains($path, '/') && ($p = Pages::bySlug($path)) && $p['type'] === 'page' && ($p['path'] ?? '') !== $path) {
@@ -120,26 +126,31 @@ final class SiteController
         return \Core\EditorNotes::publicHtml($html);
     }
 
-    private function render(Request $r, array $page): Response
+    /**
+     * Seite rendern. $status ≠ 200: Seite „Nicht gefunden“ (Core\NotFound) für eine 404/410 – ohne Wartungsseite,
+     * Landing-Weiterleitung und Seiten-Cache (die Vorschläge hängen von der Adresse ab), Meta-Angaben wie eine Fehlerseite (noindex).
+     */
+    private function render(Request $r, array $page, int $status = 200): Response
     {
         $app = app();
         $loggedIn = $app->auth->check();
+        $error = $status !== 200;
 
         $ctx = $app->entry;
         if ($page['status'] !== 'published' && !$loggedIn && !$ctx) {
             throw new HttpException(404);
         }
-        if ($app->settings->get('sys.maintenance') && !$loggedIn) {
+        if (!$error && $app->settings->get('sys.maintenance') && !$loggedIn) {
             return $this->maintenance();
         }
 
         // Hauptdomain → Landing-Domain (Modus „Eigene Domain“ mit Weiterleitung) – nur für Besucher
-        if (!$ctx && !$loggedIn && ($to = Landings::redirectFor($page, $r))) {
+        if (!$error && !$ctx && !$loggedIn && ($to = Landings::redirectFor($page, $r))) {
             return Response::redirect($to, 301);
         }
 
         $cacheKey = $ctx ? 'entry:' . $ctx['table']['handle'] . ':' . $ctx['entry']['id'] : 'page:' . $page['id'];
-        $cacheable = !$loggedIn && $r->method === 'GET' && !$r->query;
+        $cacheable = !$error && !$loggedIn && $r->method === 'GET' && !$r->query;
         if ($cacheable && ($html = PageCache::get($cacheKey)) !== null) {
             return $this->respond($html, false)->header('X-Cache', 'HIT');
         }
@@ -176,7 +187,8 @@ final class SiteController
         $html = $theme->render(Landings::template(), [
             'page' => $page,
             'content' => $content,
-            'seo' => $ctx ? Seo::forEntry($page, $ctx['table'], $ctx['entry']) : Seo::forPage($page),
+            'seo' => $error ? ['title' => (string) ($page['meta_title'] ?: $page['title'])] + Seo::forError(404)
+                : ($ctx ? Seo::forEntry($page, $ctx['table'], $ctx['entry']) : Seo::forPage($page)),
             'editor' => $editor,
             'extraCss' => $theme->conditionalCss($app->editing ? null : self::types($blocks)),
             'extraJs' => $app->editing ? [] : $theme->conditionalJs(self::types($blocks)),
@@ -188,7 +200,7 @@ final class SiteController
             $html = \Core\Icons::siteSprite($html);
         }
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
-        $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => 200]);
+        $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);
         // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);
         // Entwurfsansicht der Redaktion: als Hinweis. Im Bearbeiten-Modus nicht – die Editor-Daten brauchen den Rohtext.
         if (!\Core\EditorNotes::$show) $html = \Core\EditorNotes::publicHtml($html);
@@ -196,7 +208,7 @@ final class SiteController
         if ($cacheable) {
             PageCache::put($cacheKey, $html);
         }
-        return $this->respond($html, $loggedIn);
+        return $this->respond($html, $loggedIn, $status);
     }
 
     public function respond(string $html, bool $loggedIn, int $status = 200): Response
@@ -258,6 +270,18 @@ final class SiteController
         if (app()->request?->isAdminPath() || app()->request?->wantsJson()) {
             if (app()->request?->wantsJson()) {
                 return Response::json(['ok' => false, 'error' => $message ?: 'Fehler ' . $code], $code);
+            }
+        }
+        // 404/410: gepflegte Seite „Nicht gefunden“ der Sprache (Core\NotFound) – Status bleibt; sonst die Kit-Vorlage error.php
+        if ($shown === 404 && ($r = app()->request) && !$r->isAdminPath() && ($page = NotFound::page(null, app()->auth->check()))) {
+            if (!isset($r->query['edit'])) NotFound::begin($r->path);   // im Editor: keine Adresse → Hinweis statt Vorschlägen
+            try {
+                return $this->render($r, $page, $code);
+            } catch (\Throwable $e) {
+                error_log('[404] ' . $e->getMessage());   // Rückfall: Kit-Vorlage
+            } finally {
+                NotFound::end();
+                app()->editing = false;
             }
         }
         try {

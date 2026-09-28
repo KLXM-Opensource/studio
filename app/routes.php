@@ -99,6 +99,7 @@ return function (Router $r): void {
     $r->get('/admin/pages', [Admin\PageController::class, 'index']);
     $r->get('/admin/pages/new', [Admin\PageController::class, 'create']);
     $r->post('/admin/pages/new', [Admin\PageController::class, 'store']);
+    $r->post('/admin/pages/nicht-gefunden', [Admin\PageController::class, 'notFound']);   // Seite „Nicht gefunden (404)“ anlegen/öffnen
     $r->get('/admin/pages/{id}', [Admin\PageController::class, 'edit']);
     $r->post('/admin/pages/{id}', [Admin\PageController::class, 'update']);
     $r->post('/admin/pages/{id}/delete', [Admin\PageController::class, 'delete']);

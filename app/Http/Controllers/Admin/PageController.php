@@ -6,6 +6,7 @@ namespace Core\Http\Controllers\Admin;
 use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
+use Core\NotFound;
 use Core\Pages;
 
 final class PageController extends AdminController
@@ -15,7 +16,20 @@ final class PageController extends AdminController
         $this->auth($r, 'pages.edit');
         $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
         return $this->view('pages/index', ['tree' => Pages::tree(false, $lang), 'lang' => $lang,
-            'templates' => app()->db->fetchAll("SELECT * FROM pages WHERE type = 'template' ORDER BY title")]);
+            'templates' => app()->db->fetchAll("SELECT * FROM pages WHERE type = 'template' AND COALESCE(template_for, '') != ? ORDER BY title", [NotFound::MARK]),
+            'notFound' => NotFound::all()]);
+    }
+
+    /** Seite „Nicht gefunden (404)“ der Sprache anlegen (Entwurf mit Startinhalten des Kits) bzw. öffnen → Frontend-Editor */
+    public function notFound(Request $r): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
+        $had = NotFound::exact($lang) !== null;
+        $page = NotFound::create($lang);
+        $this->changed();
+        if (!$had) app()->session->flash('success', __('404-Seite angelegt (Entwurf). Inhalte anpassen und veröffentlichen – bis dahin sehen Besucher die Standard-Fehlerseite des Kits.'));
+        return Response::redirect(Pages::url($page) . '?edit=1');
     }
 
     public function create(Request $r): Response
@@ -65,6 +79,9 @@ final class PageController extends AdminController
             $data['slug'] = $page['slug'];
             $data['status'] = 'published';
         }
+        if (NotFound::isPage($page)) {   // Seite „Nicht gefunden“: feste Adresse, nie im Menü oder in Suchmaschinen
+            $data = ['slug' => $page['slug'], 'parent_id' => null, 'menu' => 0, 'nav_title' => '', 'noindex' => 1] + $data;
+        }
         if ($data['status'] === 'published' && $page['status'] !== 'published' && ($open = Pages::openMarkers($page['content_draft'] . ' ' . $data['title'] . ' ' . $data['meta_description']))) {
             $data['status'] = 'draft';   // offene Platzhalter „[bitte ergänzen: …]“ – nicht online stellen
             app()->session->flash('error', __('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]));
@@ -86,7 +103,7 @@ final class PageController extends AdminController
     private function validate(Request $r, ?array $page): array
     {
         $title = mb_substr(strip_tags($r->str('title')), 0, 120);
-        $slug = Pages::slugify($r->str('slug') ?: $title);
+        $slug = $page && NotFound::isPage($page) ? (string) $page['slug'] : Pages::slugify($r->str('slug') ?: $title);
         $parentId = ctype_digit($r->str('parent_id')) && (int) $r->str('parent_id') > 0 ? (int) $r->str('parent_id') : null;
         if ($page && $parentId && ($parentId === (int) $page['id'] || in_array($parentId, Pages::descendantIds((int) $page['id']), true))) {
             $parentId = $page['parent_id'] ? (int) $page['parent_id'] : null;
@@ -112,7 +129,7 @@ final class PageController extends AdminController
             $errors['title'] = 'Bitte einen Titel angeben.';
         }
         $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
-        if (!$page || !$page['is_home']) {
+        if (!$page || (!$page['is_home'] && !NotFound::isPage($page))) {
             if (in_array($slug, $reserved, true) && $slug !== ($page['slug'] ?? null)) {   // bestehende Seiten behalten ihre Adresse
                 $errors['slug'] = 'Diese Adresse ist reserviert.';
             } elseif (Pages::slugTaken($slug, $parentId, $page ? (int) $page['id'] : null, $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null))) {

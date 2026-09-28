@@ -97,6 +97,8 @@
  *                                                     Weiterleitungen importieren (JSON [{"from","to"}] oder CSV quelle;ziel;code;notiz)
  *   redirects:list [--q=text] | redirects:test <pfad>  Weiterleitungen auflisten | Wohin führt eine Adresse?
  *   redirects:selftest                                Selbsttest: Normalisieren und Vergleichen der Weiterleitungen
+ *   notfound:create [--lang=en] [--publish]           Seite „Nicht gefunden (404)“ anlegen (Startinhalte des Kits, sonst Entwurf)
+ *   notfound:selftest                                 Selbsttest der 404-Seite (Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge)
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
  *                                                     --all: alle neu)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
@@ -527,6 +529,11 @@ switch ($cmd) {
     case 'redirects:selftest':
         // Weiterleitungen (Core\Redirects) je Website (--site=…)
         exit(Core\Redirects\Console::run($cmd, $args));
+
+    case 'notfound:create':
+    case 'notfound:selftest':
+        // Seite „Nicht gefunden (404)“ (Core\NotFound) je Website (--site=…)
+        exit(Core\NotFound::console($cmd, $args));
 
     case 'search:index':
     case 'search:status':

@@ -388,6 +388,11 @@ final class Theme
         if (($types === null || in_array('partners', $types, true)) && !empty($this->blocks['partners']['core'])) {
             $out[] = $this->coreCss('partners.css');
         }
+        // 404-Vorschläge (Seite „Nicht gefunden“, Core\NotFound) – auch mit eigenem Renderer des Kits (Kästen aus NotFound::boxes);
+        // Variablen --nf-* oder eigene css/notfound.css
+        if ($types === null || in_array('not_found', $types, true)) {
+            $out[] = $this->coreCss('notfound.css');
+        }
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
         }

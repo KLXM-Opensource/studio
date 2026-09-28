@@ -600,5 +600,25 @@ return [
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$headingOptional, ...\Core\Maps::blockFields()],
         ],
+        // Kern-Block „404-Vorschläge“ mit Überschrift im Praxis-Stil und Telefonzeile aus den Praxisdaten (blocks/not_found.php)
+        'not_found' => [
+            'label' => '404-Vorschläge', 'icon' => '?', 'group' => 'Navigation',
+            'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift, Telefonzeile aus den Praxisdaten, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite.',
+            'fields' => [
+                ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'placeholder' => 'z. B. Fehler 404'],
+                ...$headingOptional,
+                ['name' => 'phone', 'label' => 'Telefonzeile aus den Praxisdaten zeigen', 'type' => 'bool', 'default' => true],
+                ['name' => 'phone_text', 'label' => 'Text der Telefonzeile', 'type' => 'text', 'max' => 120, 'default' => 'Telefonisch sind wir wie gewohnt erreichbar: {phone}',
+                    'help' => '{phone} wird durch die Telefonnummer aus den Praxisdaten ersetzt (als Link).'],
+                ...\Core\NotFound::blockFields(),
+            ],
+        ],
     ],
+
+    // Startinhalt der Seite „Nicht gefunden (404)“ beim Anlegen (Core\NotFound) – wie die Fehlerseite templates/error.php
+    'not_found_blocks' => fn(string $lang): array => [['type' => 'not_found', 'data' => [
+        'eyebrow' => lt('Fehler {code}', ['code' => 404]), 'title_strong' => lt('Seite nicht gefunden'), 'title_light' => lt('Die Adresse existiert nicht (mehr).'),
+        'phone' => true, 'phone_text' => lt('Telefonisch sind wir wie gewohnt erreichbar: {phone}'),
+        'suggest' => true, 'suggest_title' => lt('Vielleicht meinten Sie:'), 'search' => false, 'home_label' => lt('Zur Startseite'),
+    ]]],
 ];

@@ -118,6 +118,17 @@ return [
             ['name' => 'empty_text', 'label' => 'Text, wenn keine Termine', 'type' => 'text', 'default' => 'Zurzeit sind keine Termine geplant.'],
         ],
     ],
+    'not_found' => [
+        'label' => '404-Vorschläge', 'icon' => 'signpost', 'group' => 'Navigation',
+        'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift und Text, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite. Die Vorschläge erscheinen nur, wenn Besucher eine Adresse aufrufen, die es nicht gibt.',
+        'fields' => [
+            ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'width' => 'half', 'placeholder' => 'z. B. Fehler 404'],
+            ['name' => 'title', 'label' => 'Überschrift (optional, Hauptüberschrift der Seite)', 'type' => 'text', 'max' => 90, 'width' => 'half',
+                'help' => '*Sternchen* betonen ein Wort wie im Kit.'],
+            ['name' => 'intro', 'label' => 'Text (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
+            ...\Core\NotFound::blockFields(),
+        ],
+    ],
     'map' => [
         'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Medien',
         'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',

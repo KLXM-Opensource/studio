@@ -26,6 +26,19 @@
     <tr><td>Versionen</td><td>Die letzten <?= (int) app()->config->get('revisions', 20) ?> gespeicherten Stände – „Wiederherstellen“ legt einen Entwurf an.</td></tr>
   </table>
   <div class="doc-note doc-note--important"><strong>Rechtstexte</strong><p>Impressum, Datenschutz und Barrierefreiheit enthalten Platzhalter. Bitte ausschließlich mit geprüften Texten (z. B. von Kammer, Verband, Rechtsberatung oder Datenschutzbeauftragten) füllen.</p></div>
+  <h3 id="nicht-gefunden">Seite „Nicht gefunden (404)“</h3>
+  <p>Ruft jemand eine Adresse auf, die es nicht gibt (Tippfehler, alter Link), zeigt die Website eine Fehlerseite. Diese Seite können Sie selbst gestalten – mit Blöcken wie jede andere Seite. Sie finden sie in der <a href="<?= e(url('/admin/pages#sonderseiten')) ?>">Seitenübersicht</a> unten unter <b>Sonderseiten</b> und unter <b>Administration → Weiterleitungen → Nicht gefunden (404)</b>.</p>
+  <ol class="doc-steps">
+    <li><b>404-Seite anlegen</b> – die Seite entsteht als Entwurf mit den Texten, die Ihr Design bisher gezeigt hat, und öffnet sich im Editor.</li>
+    <li>Texte anpassen, Blöcke ergänzen (z. B. ein Bild oder Kontaktdaten), <b>Veröffentlichen</b>. Bis dahin sehen Besucher die bisherige Fehlerseite des Designs.</li>
+    <li>Später ändern: <b>404-Seite bearbeiten</b> (oder angemeldet eine beliebige nicht vorhandene Adresse aufrufen und in der Leiste <b>Bearbeiten</b> wählen). Entwurf, Veröffentlichen und Versionen funktionieren wie gewohnt; offene Änderungen stehen auch unter „Entwürfe“.</li>
+  </ol>
+  <ul>
+    <li>Der Block <b>404-Vorschläge</b> zeigt „Vielleicht meinten Sie …“ – Seiten (und Einträge mit Detailseite), deren Adresse der aufgerufenen ähnelt – sowie ein Suchfeld und einen Button zur Startseite. Die Vorschläge erscheinen nur bei echten Aufrufen; im Editor steht dort ein Hinweis.</li>
+    <li>Die Seite hat keine eigene Adresse für Besucher: <code>/404</code> antwortet selbst mit „nicht gefunden“. Sie steht nie im Menü, in der Sitemap, in der Suche oder in der Link-Auswahl; Suchmaschinen erhalten weiterhin den Status 404 (bzw. 410 bei „entfernt“) und nehmen sie nicht auf.</li>
+    <li>Mehrere Sprachen: je Sprache eine eigene Fassung („Übersetzung anlegen“) – ohne sie gilt die Seite der Standardsprache.</li>
+    <li>Andere Fehler (keine Berechtigung, Serverfehler, abgelaufenes Formular) zeigen weiterhin die Fehlerseite des Designs.</li>
+  </ul>
   <h3 id="notizen">Redaktionsnotizen <code>[# … #]</code></h3>
   <p>Hinweise für das Team lassen sich direkt in jeden Text schreiben – in Überschriften, Absätze, Listen, Bildunterschriften, auch in Einträge von Datentabellen: <code>[# bitte ergänzen: Seminartermine #]</code>. Eckige Klammer, Raute, Leerzeichen am Anfang, Raute und Klammer am Ende; mehrere Zeilen und mehrere Notizen je Text sind möglich.</p>
   <ul>

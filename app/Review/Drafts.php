@@ -85,7 +85,8 @@ final class Drafts
         $notes = self::notes();
         $users = self::userNames();
         if (can('pages.edit')) {
-            $rows = app()->db->fetchAll("SELECT * FROM pages WHERE type = 'page' AND (status != 'published'
+            // Seiten und die Seite „Nicht gefunden (404)“ (Core\NotFound) – Detailseiten-Vorlagen nicht
+            $rows = app()->db->fetchAll("SELECT * FROM pages WHERE " . \Core\NotFound::sqlPagesAnd404() . " AND (status != 'published'
                 OR (content_draft IS NOT NULL AND content_published IS NOT NULL AND content_draft != content_published))");
             $rows = array_values(array_filter($rows, fn($p) => $p['status'] !== 'published' || self::pageChanged($p)));
             $last = self::lastRevisions(array_map(fn($p) => (int) $p['id'], $rows));
@@ -97,7 +98,8 @@ final class Drafts
                 if ($origin === null && ($c = $log[(string) $id] ?? null) && (string) $c['created_at'] >= (string) ($p['published_at'] ?? '')) $origin = self::originFromLog($c);
                 $state = $p['status'] === 'published' ? 'changed' : ($p['content_published'] !== null ? 'offline' : 'new');
                 $out[] = self::item([
-                    'key' => 'page:' . $id, 'type' => 'page', 'id' => $id, 'title' => (string) $p['title'], 'lang' => Lang::norm($p['lang'] ?? null),
+                    'key' => 'page:' . $id, 'type' => 'page', 'id' => $id,
+                    'title' => \Core\NotFound::isPage($p) ? __('Nicht gefunden (404)') . ' · ' . $p['title'] : (string) $p['title'], 'lang' => Lang::norm($p['lang'] ?? null),
                     'state' => $state, 'updated_at' => (string) ($p['updated_at'] ?? ''),
                     'by_id' => isset($rev['user_id']) ? (int) $rev['user_id'] : null, 'origin' => $origin,
                     'edit' => Pages::plainUrl($p) . '?edit=1', 'settings' => '/admin/pages/' . $id,
@@ -174,7 +176,7 @@ final class Drafts
         try {
             $n = 0;
             if (can('pages.edit')) {
-                foreach (app()->db->fetchAll("SELECT status, content_draft, content_published FROM pages WHERE type = 'page' AND (status != 'published'
+                foreach (app()->db->fetchAll("SELECT status, content_draft, content_published FROM pages WHERE " . \Core\NotFound::sqlPagesAnd404() . " AND (status != 'published'
                     OR (content_draft IS NOT NULL AND content_published IS NOT NULL AND content_draft != content_published))") as $p) {
                     if ($p['status'] !== 'published' || self::pageChanged($p)) $n++;
                 }

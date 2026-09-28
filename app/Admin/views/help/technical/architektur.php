@@ -27,7 +27,7 @@
   <h3>Datenmodell (je Website)</h3>
   <table class="doc-table">
     <tr><th>Tabelle</th><th>Inhalt</th></tr>
-    <tr><td><code>pages</code></td><td>slug (je Ebene eindeutig), parent_id, path, menu, nav_title, type (page | template), template_for, title, meta_title, meta_description, og_image, status, is_home, noindex, lang, translation_group, content_draft, content_published (Editor.js-JSON)</td></tr>
+    <tr><td><code>pages</code></td><td>slug (je Ebene eindeutig), parent_id, path, menu, nav_title, type (page | template), template_for (Handle der Datentabelle bzw. <code>@404</code> = Seite „Nicht gefunden“, <code>Core\NotFound</code>), title, meta_title, meta_description, og_image, status, is_home, noindex, lang, translation_group, content_draft, content_published (Editor.js-JSON)</td></tr>
     <tr><td><code>revisions</code></td><td>Stände je Seite (Anzahl: <code>revisions</code>, Standard 20) inkl. Nutzer bzw. API-Token; identische Folgestände werden nicht doppelt gespeichert</td></tr>
     <tr><td><code>data_tables</code></td><td>Definition der Datentabellen: handle, name, singular, description, icon, fields_json, settings_json, sort, Zeitstempel</td></tr>
     <tr><td><code>data_{handle}</code></td><td>Einträge: id, slug, status, sort, created_at, updated_at, published_at, lang, translation_group + je Feld eine Spalte (Eingänge: nur Metadaten + verschlüsseltes <code>payload</code>)</td></tr>

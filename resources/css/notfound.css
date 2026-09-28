@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Kern-Block „404-Vorschläge“ (app/Blocks/not_found.php) – neutral, Farben aus dem Kit (currentColor-Mischungen).
+   Nur geladen, wenn der Block auf der Seite steht (Theme::conditionalCss). Komplett ersetzen: public/kits/{kit}/css/notfound.css.
+   Anpassen über Custom Properties (z. B. auf :root oder .cms-404):
+     --nf-line   Rand der Kästen     --nf-box   Fläche der Kästen   --nf-radius  Eckenradius
+     --nf-link   Farbe der Vorschläge            --nf-gap   Abstand der Kästen
+   ========================================================================== */
+.cms-404{
+  --_line:var(--nf-line,color-mix(in srgb,currentColor 16%,transparent));
+  --_box:var(--nf-box,color-mix(in srgb,currentColor 4%,transparent));
+  --_radius:var(--nf-radius,12px);
+  --_gap:var(--nf-gap,clamp(16px,2.5vw,28px));
+  display:grid;
+  gap:clamp(24px,3.5vw,40px);
+}
+.cms-404__head{max-width:46rem}
+.cms-404__head>*+*{margin-top:.5em}
+.cms-404__title{text-wrap:balance}
+.cms-404__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:var(--_gap);align-items:start}
+.cms-404__box{min-width:0;padding:clamp(16px,2.5vw,24px);border:1px solid var(--_line);border-radius:var(--_radius);background:var(--_box)}
+.cms-404__h{margin:0 0 .75em;font-size:1.0625rem;font-weight:700;line-height:1.3}
+.cms-404__list{display:grid;gap:.5em;margin:0;padding:0;list-style:none}
+.cms-404__list a{color:var(--nf-link,inherit);font-weight:600;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+.cms-404__list a:hover{text-decoration-thickness:2px}
+.cms-404__hint{margin:0;padding:12px 14px;border:1px dashed var(--_line);border-radius:8px;font-size:.875rem;opacity:.8}
+.cms-404__btns{margin:0}
+@media(forced-colors:active){.cms-404__box{border-color:CanvasText}}

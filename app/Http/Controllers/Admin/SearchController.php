@@ -84,8 +84,9 @@ final class SearchController extends AdminController
             }
             $s = self::score($q, $p['title'] . ' ' . $p['path']) * 2 + self::score($q, $hay);
             if ($q !== '' && $s === 0) continue;
-            $tpl = $p['type'] === 'template';
-            $items[] = ['title' => $p['title'], 'sub' => $tpl ? __('Detailseiten-Vorlage') : '/' . ($p['is_home'] ? '' : $p['path']) . ($p['status'] === 'published' ? '' : __(' · Entwurf')),
+            $nf = \Core\NotFound::isPage($p);   // Seite „Nicht gefunden (404)“: wie eine Seite im Editor öffnen
+            $tpl = $p['type'] === 'template' && !$nf;
+            $items[] = ['title' => $p['title'], 'sub' => $nf ? __('Nicht gefunden (404)') : ($tpl ? __('Detailseiten-Vorlage') : '/' . ($p['is_home'] ? '' : $p['path']) . ($p['status'] === 'published' ? '' : __(' · Entwurf'))),
                 'url' => $tpl ? url('/admin/pages') : Pages::url($p) . '?edit=1', 'icon' => $p['is_home'] ? 'home' : 'page',
                 'alt' => $tpl ? null : url('/admin/pages/' . $p['id']), 's' => $s ?: strtotime((string) $p['updated_at'])];
         }

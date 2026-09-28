@@ -7,5 +7,6 @@
     <li><b>Viele auf einmal:</b> Liste als CSV oder JSON importieren (zuerst „Nur prüfen“), mit <code>/alt/*</code> alle Adressen weiterleiten, die so beginnen.</li>
     <li><b>Adresse testen:</b> „Wohin führt …“ zeigt, ob eine Adresse eine Seite ist, weitergeleitet wird oder ins Leere läuft.</li>
     <li><b>Nicht gefunden (404):</b> zeigt Adressen, die Besucher vergeblich aufgerufen haben – mit Vorschlag und „Weiterleitung anlegen“ per Klick. „Interner Link“ heißt: Auf Ihrer eigenen Website zeigt ein Link ins Leere.</li>
+    <li><b>404-Seite bearbeiten / anlegen</b> (oben im Reiter „Nicht gefunden“): gestaltet die Seite, die Besucher bei einer unbekannten Adresse sehen – siehe <a href="#<?= e($anchor('seiten')) ?>">Seiten verwalten → Seite „Nicht gefunden (404)“</a>.</li>
   </ul>
   <div class="doc-note doc-note--tip"><strong>Gut zu wissen</strong><p>Eine Weiterleitung greift nur, wenn es unter der alten Adresse keine Seite gibt – Ihre Seiten gehen immer vor.</p></div>

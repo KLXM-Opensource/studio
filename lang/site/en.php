@@ -264,4 +264,13 @@ return [
     '{provider}-Video laden' => 'Load {provider} video',
     '{provider}-Videos künftig direkt laden' => 'Always load {provider} videos directly',
     '{provider}-Videos werden auf dieser Website direkt geladen.' => '{provider} videos are loaded directly on this website.',
+
+    // Seite „Nicht gefunden (404)“ und Block „404-Vorschläge“ (Core\NotFound, app/Blocks/not_found.php)
+    'Fehler 404' => 'Error 404',
+    'Seite nicht gefunden' => 'Page not found',
+    'Diese Seite gibt es nicht (mehr).' => 'This page does not exist (any more).',
+    'Vielleicht hat sich die Adresse geändert. Über die Startseite, das Menü oder die Suche finden Sie weiter.' => 'Perhaps the address has changed. The home page, the menu or the search will help you find your way.',
+    'Vielleicht meinten Sie:' => 'Did you mean:',
+    'Oder suchen Sie danach:' => 'Or search for it:',
+    'Zur Startseite' => 'Go to the home page',
 ];

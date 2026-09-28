@@ -13,6 +13,13 @@ $n404 = Redirects::notFoundCount();
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Weiterleitungen')) ?></p><h1><?= e(__('Nicht gefunden (404)')) ?></h1>
     <p class="adm-muted"><?= e(__('Adressen, die Besucher oder Suchmaschinen aufgerufen haben und die es nicht gibt – häufigste zuerst. Gespeichert werden nur Pfad, Anzahl und Zeitpunkte, keine IP-Adressen.')) ?></p></div>
+  <?php // Seite, die Besucher bei 404 sehen (Core\NotFound): bearbeiten bzw. anlegen
+  $nfPage = \Core\NotFound::exact(\Core\Lang::default()); ?>
+  <?php if ($nfPage && can('pages.edit')): ?>
+  <a class="adm-btn" href="<?= e(\Core\Pages::url($nfPage)) ?>?edit=1"><?= e(__('404-Seite bearbeiten')) ?></a>
+  <?php elseif (!$nfPage && can('pages.manage')): ?>
+  <form method="post" action="<?= e(url('/admin/pages/nicht-gefunden')) ?>"><?= csrf_field() ?><button class="adm-btn" title="<?= e(__('Eigene Seite für „Nicht gefunden“ mit Blöcken gestalten – statt der Standard-Fehlerseite des Kits')) ?>"><?= e(__('404-Seite anlegen')) ?></button></form>
+  <?php endif; ?>
 </header>
 
 <?php include __DIR__ . '/_tabs.php'; ?>

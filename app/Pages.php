@@ -65,7 +65,9 @@ final class Pages
         for ($n = 2; self::slugTaken($slug, $parent, null, $lang); $n++) $slug = $p['slug'] . '-' . $n;
         $newId = self::create(['slug' => $slug, 'title' => $p['title'], 'status' => 'draft', 'is_home' => $p['is_home'],
             'parent_id' => $parent, 'menu' => $p['menu'], 'nav_title' => $p['nav_title'], 'meta_description' => $p['meta_description'], 'meta_title' => $p['meta_title'] ?? null,
-            'noindex' => $p['noindex'], 'lang' => $lang === Lang::default() ? null : $lang, 'translation_group' => $group, 'sort' => $p['sort']],
+            'noindex' => $p['noindex'], 'lang' => $lang === Lang::default() ? null : $lang, 'translation_group' => $group, 'sort' => $p['sort'],
+            // Vorlagen (Detailseiten, Seite „Nicht gefunden“ – Core\NotFound) bleiben Vorlagen
+            'type' => $p['type'] ?? 'page', 'template_for' => $p['template_for'] ?? null],
             self::blocks($p, true));
         return self::find($newId);
     }

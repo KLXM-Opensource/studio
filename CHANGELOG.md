@@ -6,6 +6,25 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seite „Nicht gefunden (404)“ pflegbar (`Core\NotFound`, Seiten → Sonderseiten)
+- **404-Seite mit Blöcken** je Website und Sprache: Seite mit `type = template`, `template_for = @404` – bearbeitet im
+  Frontend-Editor unter `/404?edit=1` (Entwurf, Veröffentlichen, Versionen, „Entwürfe“), nie unter eigener Adresse öffentlich
+  (`/404` antwortet selbst mit 404, ohne Weiterleitung und 404-Protokoll), nicht in Menü, Sitemap, Suchindex, Link-Auswahl
+  und Seiten-Auswahlfeldern.
+- Bei **404 und 410** rendert `SiteController::error()` die veröffentlichte Seite der Sprache (Rückfall: Standardsprache) im
+  normalen Layout – Status bleibt 404/410, `noindex` (`Seo::forError`), kein Seiten-Cache; angemeldet mit Werkzeugleiste und
+  Entwurf. Ohne veröffentlichte Seite sowie bei 403/405/419/500 wie bisher `templates/error.php` des Kits.
+- **Anlegen:** Seiten → Sonderseiten „404-Seite anlegen“ (bzw. „Übersetzung anlegen“) und Weiterleitungen → Nicht gefunden
+  (404) „404-Seite anlegen/bearbeiten“; Startinhalte vom Kit (`theme.php → 'not_found_blocks'`), sonst ein Block
+  „404-Vorschläge“. Konsole: `notfound:create [--lang=…] [--publish]`, `notfound:selftest`.
+- **Kern-Block „404-Vorschläge“** (`not_found`): Dachzeile, Überschrift (H1), Text, „Vielleicht meinten Sie …“ (ähnliche Seiten und
+  Einträge mit Detailseite zur aufgerufenen Adresse, Vorschlag des 404-Protokolls zuerst – `NotFound::suggestions()`),
+  Suchfeld, Button zur Startseite, zweiter Button; `resources/css/notfound.css` (Variablen `--nf-*`). Kits überschreiben Felder
+  und Ausgabe (Helfer `NotFound::boxes()`, `::path()`).
+- **Kit praxis:** eigener Renderer (Überschrift mit Punkt, Telefonzeile aus den Praxisdaten) und Startinhalte wie `error.php`.
+- `Pages::translate()` übernimmt `type`/`template_for` (Übersetzungen von Vorlagen bleiben Vorlagen).
+- Handbuch: „Seiten verwalten → Seite „Nicht gefunden (404)““; Entwicklerhandbuch: Kits → Seite „Nicht gefunden (404)“, CLI.
+
 ### Entwürfe (`Core\Review\Drafts`, Verwaltung → Entwürfe)
 - **Neue Übersicht** `/admin/entwuerfe` (Menüpunkt „Entwürfe“ mit Zähler): Seiten im Entwurf (neu bzw. offline), veröffentlichte
   Seiten mit unveröffentlichten Änderungen (blockweise verglichen – erneutes Speichern ohne Änderung zählt nicht) und Einträge

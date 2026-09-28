@@ -591,7 +591,8 @@ final class Fields
     public static function pageOptions(): array
     {
         $o = [];
-        foreach (app()->db->fetchAll('SELECT id, title, slug FROM pages ORDER BY is_home DESC, sort, title') as $r) {
+        // ohne die Seite „Nicht gefunden (404)“ (Core\NotFound) – sie hat keine erreichbare Adresse
+        foreach (app()->db->fetchAll('SELECT id, title, slug FROM pages WHERE COALESCE(template_for, \'\') != ? ORDER BY is_home DESC, sort, title', [NotFound::MARK]) as $r) {
             $o[$r['id']] = $r['title'] . ' (/' . ($r['slug'] === 'home' ? '' : $r['slug']) . ')';
         }
         return $o;

@@ -2,7 +2,7 @@
 /**
  * Seitenbaum im Finder-Stil (Listenansicht mit Aufklapp-Dreiecken).
  * Ziehen: auf eine Seite = als Unterseite, an den oberen/unteren Rand = davor/dahinter.
- * @var array $tree  @var array $templates  @var string $lang
+ * @var array $tree  @var array $templates  @var array $notFound  @var string $lang
  */
 use Core\Lang;
 use Core\Pages;
@@ -66,6 +66,36 @@ $html = implode('', array_map($row, $tree));
   <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"><?= $html ?></ul>
   <footer class="dt-foot"><span><?= $count ?> Seiten</span><span data-pt-msg aria-live="polite"></span></footer>
 </div>
+
+<?php // Sonderseiten: „Nicht gefunden (404)“ je Sprache (Core\NotFound) – nie unter eigener Adresse öffentlich, nicht im Seitenbaum
+$nfLangs = $multi ? Lang::all() : [Lang::default() => ''];
+$nfDefault = $notFound[Lang::default()] ?? null; ?>
+<section class="adm-card pt-templates" id="sonderseiten" aria-labelledby="pt-special-h">
+  <h2 id="pt-special-h"><?= e(__('Sonderseiten')) ?></h2>
+  <p class="adm-muted"><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Bearbeiten wie jede Seite; solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></p>
+  <ul class="adm-list">
+    <?php foreach ($nfLangs as $code => $label): $nf = $notFound[$code] ?? null; ?>
+    <li><span><span class="pt-icon pt-icon--tpl" aria-hidden="true"></span> <?= e(__('Nicht gefunden (404)')) ?><?php if ($multi): ?> <span class="adm-badge"><?= e(strtoupper($code)) ?></span><?php endif; ?>
+      <?php if ($nf): $nfDirty = $nf['content_published'] !== null && \Core\Review\Drafts::pageChanged($nf); ?>
+        <small>/<?= e(ltrim(Lang::prefix($code) . '/' . $nf['path'], '/')) ?></small>
+        <span class="dt-status dt-status--<?= $nf['status'] === 'published' ? 'published' : 'draft' ?>"><?= e($nf['status'] === 'published' ? __('Online') : __('Entwurf')) ?></span><?= $nfDirty ? ' <span class="pt-draft">' . e(__('Entwurf offen')) . '</span>' : '' ?>
+      <?php elseif ($code !== Lang::default() && $nfDefault): ?>
+        <small><?= e(__('zeigt die Seite der Standardsprache')) ?></small>
+      <?php else: ?>
+        <small><?= e(__('nicht angelegt – Standard-Fehlerseite des Kits')) ?></small>
+      <?php endif; ?></span>
+      <span class="adm-row">
+      <?php if ($nf): ?>
+        <a class="adm-btn adm-btn--small" href="<?= e(Pages::url($nf)) ?>?edit=1"><?= e(__('404-Seite bearbeiten')) ?></a>
+        <?php if (can('pages.manage')): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/pages/' . (int) $nf['id'])) ?>"><?= e(__('Einstellungen')) ?></a><?php endif; ?>
+      <?php elseif (can('pages.manage')): ?>
+        <form method="post" action="<?= e(url('/admin/pages/nicht-gefunden')) ?>"><?= csrf_field() ?><input type="hidden" name="lang" value="<?= e($code) ?>">
+          <button class="adm-btn adm-btn--small adm-btn--primary"><?= e($code !== Lang::default() && $nfDefault ? __('Übersetzung anlegen') : __('404-Seite anlegen')) ?></button></form>
+      <?php endif; ?>
+      </span></li>
+    <?php endforeach; ?>
+  </ul>
+</section>
 
 <?php if ($templates): ?>
 <section class="adm-card pt-templates">

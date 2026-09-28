@@ -64,6 +64,8 @@ $__cmds = [
         ['redirects:list [--q=text] [--limit=N]', 'Weiterleitungen mit Code, Ziel, Treffern und Herkunft'],
         ['redirects:test <pfad>', 'Wohin führt eine Adresse? (Seite, Weiterleitung, 410 oder 404)'],
         ['redirects:selftest', 'Selbsttest: Normalisieren und Vergleichen (ohne Datenbank, Exit-Code 1 bei Fehlern)'],
+        ['notfound:create [--lang=en] [--publish]', 'Seite „Nicht gefunden (404)“ mit den Startinhalten des Kits anlegen (ohne --publish als Entwurf)'],
+        ['notfound:selftest', 'Selbsttest der 404-Seite: Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge (Transaktion, wird zurückgerollt)'],
     ],
     'Suche & KI' => [
         ['search:index [--all] [--full] [--no-vectors] [--kb]', 'Suchindex abgleichen (Cron alle 15 min; --full nachts; --kb Wissensdatenbank)'],

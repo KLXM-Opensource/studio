@@ -27,7 +27,7 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
     <a class="cms-bar__brand" href="<?= e(url('/admin')) ?>" aria-label="<?= e(CMS_NAME) ?> – <?= e(__('Verwaltung')) ?>" title="<?= e(CMS_NAME) ?> – <?= e(__('Verwaltung')) ?>"><?= cms_logo() ?></a>
     <span class="cms-bar__obj" aria-hidden="true"><?= icon($kind === 'page' ? 'file-text' : ($kind === 'template' ? 'squares-four' : ($b['table']['icon'] ?: 'table'))) ?></span>
     <span class="cms-bar__titles">
-      <span class="cms-bar__kind"><?php if ($kind === 'page'): ?><?= e(__('Seite')) ?><?php elseif ($kind === 'template'): ?><?= e(__('Gilt für alle Einträge')) ?><?php else: ?><?= e($b['table']['name']) ?><?php if ($b['foreign']): ?> · <?= e(__('von {site}', ['site' => $b['site']])) ?><?php endif; ?><?php endif; ?></span>
+      <span class="cms-bar__kind"><?php if ($kind === 'page'): ?><?= e(\Core\NotFound::isPage($page) ? __('Nicht gefunden (404) – für alle unbekannten Adressen') : __('Seite')) ?><?php elseif ($kind === 'template'): ?><?= e(__('Gilt für alle Einträge')) ?><?php else: ?><?= e($b['table']['name']) ?><?php if ($b['foreign']): ?> · <?= e(__('von {site}', ['site' => $b['site']])) ?><?php endif; ?><?php endif; ?></span>
       <?php $title = $kind === 'page' ? (string) $page['title'] : ($kind === 'template' ? __('Vorlage: {table}', ['table' => $b['table']['name']]) : $b['entryTitle']); ?>
       <span class="cms-bar__title" title="<?= e($title) ?>"><?= e($title) ?></span>
     </span>
