@@ -11,7 +11,8 @@
 #   <BASE>/releases/<zeit>-<rev>/   vollständiger Code-Stand (inkl. vendor, gebauter Assets)
 #   <BASE>/shared/                  bleibt bei jedem Deploy: config/config.local.php, config/sites/,
 #                                   storage/ (inkl. storage/shared = geteilte Datentabellen, storage/pools),
-#                                   public/media/, public/sites/, public/pools/, public/fonts/ (installierte Schriften)
+#                                   public/media/, public/sites/, public/pools/ (Uploads) und public/fonts/
+#                                   (installierte Schriften – im Release verlinkt als public/assets/fonts/installed)
 #   <BASE>/current -> releases/…    Dokumentstamm in Plesk: current/public
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -59,7 +60,7 @@ rsync -az --delete ${RSYNC_OPTS:-} ${RSH[@]+"${RSH[@]}"} \
   --exclude '.git' --exclude '.github' --exclude 'deploy/targets/*.env' \
   --exclude '/tools' --exclude 'kits/*/node_modules' --exclude 'themes/*/node_modules' --exclude 'extensions/*/node_modules' \
   --exclude '/storage' --exclude '/config/config.local.php' --exclude '/config/sites' \
-  --exclude '/public/media' --exclude '/public/sites' --exclude '/public/pools' --exclude '/public/fonts' \
+  --exclude '/public/media' --exclude '/public/sites' --exclude '/public/pools' --exclude '/public/fonts' --exclude '/public/assets/fonts/installed' \
   --exclude '/public/assets/tutorials' --exclude '/public/assets/trailer' \
   ./ "$DEST/$REL/"
 
@@ -72,7 +73,7 @@ remote "cd '$REL';
   ln -sfn '$BASE/shared/public/media' public/media;
   ln -sfn '$BASE/shared/public/sites' public/sites;
   ln -sfn '$BASE/shared/public/pools' public/pools;
-  ln -sfn '$BASE/shared/public/fonts' public/fonts"
+  mkdir -p public/assets/fonts; ln -sfn '$BASE/shared/public/fonts' public/assets/fonts/installed"
 
 # ── 4. Sichern (production), migrieren, prüfen – erst dann umschalten ───────
 if [[ "$TARGET" == "production" && "${SKIP_BACKUP:-0}" != "1" ]]; then

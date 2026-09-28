@@ -1,8 +1,8 @@
 /**
  * Kit-Vendoren „glas“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2, variabel)  → public/kits/glas/fonts              (latin + latin-ext, eine Datei je Familie und Zeichensatz)
- *   @font-face je Familie        → public/kits/glas/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   Webfonts (WOFF2, variabel)  → public/assets/kits/glas/fonts              (latin + latin-ext, eine Datei je Familie und Zeichensatz)
+ *   @font-face je Familie        → public/assets/kits/glas/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                                  design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für App-Icons            → kits/glas/fonts                    (nur serverseitig, App-Icon-Generator)
  */

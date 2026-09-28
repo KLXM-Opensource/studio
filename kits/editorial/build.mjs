@@ -1,9 +1,9 @@
 /**
  * Theme-Vendoren „editorial“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2)       → public/kits/editorial/fonts   latin + latin-ext; variable Schriften (eine Datei je Schnitt-Lage
+ *   Webfonts (WOFF2)       → public/assets/kits/editorial/fonts   latin + latin-ext; variable Schriften (eine Datei je Schnitt-Lage
  *                            für alle Stärken) bzw. statische Schnitte, jeweils aufrecht + kursiv
- *   @font-face je Familie  → public/kits/editorial/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   @font-face je Familie  → public/assets/kits/editorial/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                            design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF (Playfair Display) → kits/editorial/fonts  (nur serverseitig: App-Symbol, erzeugte Platzhalterbilder der Demo)
  */

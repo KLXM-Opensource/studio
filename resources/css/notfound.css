@@ -1,6 +1,6 @@
 /* ==========================================================================
    Kern-Block „404-Vorschläge“ (app/Blocks/not_found.php) – neutral, Farben aus dem Kit (currentColor-Mischungen).
-   Nur geladen, wenn der Block auf der Seite steht (Theme::conditionalCss). Komplett ersetzen: public/kits/{kit}/css/notfound.css.
+   Nur geladen, wenn der Block auf der Seite steht (Theme::conditionalCss). Komplett ersetzen: public/assets/kits/{kit}/css/notfound.css.
    Anpassen über Custom Properties (z. B. auf :root oder .cms-404):
      --nf-line   Rand der Kästen     --nf-box   Fläche der Kästen   --nf-radius  Eckenradius
      --nf-link   Farbe der Vorschläge            --nf-gap   Abstand der Kästen

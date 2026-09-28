@@ -6,7 +6,7 @@
      --dial-surface Innenscheibe                --dial-line   Rand der Innenscheibe   --dial-ink   Zahl + Bezeichnung
      --dial-muted   Zusatzzeile                 --dial-font   Schrift der Zahl (Mono oder mit Tabellenziffern)
    Ohne Angaben gelten die Zuordnungen je Theme unten (.cms-dials--t-{theme}), sonst currentColor-Mischungen.
-   Komplett ersetzen: public/kits/{name}/css/dials.css.
+   Komplett ersetzen: public/assets/kits/{name}/css/dials.css.
    ========================================================================== */
 .cms-dials{
   --_ac:var(--dial-accent,var(--_t-ac,currentColor));

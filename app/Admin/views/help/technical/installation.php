@@ -25,15 +25,15 @@ location / { try_files $uri $uri/ /index.php$is_args$args; }
 # JavaScript-Module und Untertitel: viele nginx-Installationen kennen .mjs/.vtt nicht (sonst application/octet-stream → Karte, PDF-Viewer und Untertitel gehen nicht)
 location ~* \.mjs$ { types { } default_type "text/javascript; charset=utf-8"; expires 1y; add_header Cache-Control "public, immutable"; }
 location ~* \.vtt$ { types { } default_type "text/vtt; charset=utf-8"; }
-# Versionierte statische Dateien lange cachen
-location ~* ^/(assets|kits|extensions)/.+\.(css|js|woff2|svg|png|webp|avif|jpg)$ { expires 1y; add_header Cache-Control "public, immutable"; }
-# Alte Kit-Adressen /themes/… (vor kits/): an PHP geben, public/index.php leitet mit 301 auf /kits/… um
-location ^~ /themes/ { try_files $uri /index.php$is_args$args; }
+# Versionierte statische Dateien lange cachen (Kern, Kits, Erweiterungen, Schriften – alles unter /assets/)
+location ~* ^/assets/.+\.(css|js|woff2|svg|png|webp|avif|jpg)$ { expires 1y; add_header Cache-Control "public, immutable"; }
+# Alte Adressen /kits/…, /themes/…, /extensions/…, /fonts/… (vor /assets/): an PHP geben, public/index.php leitet mit 301 um
+location ~ ^/(kits|themes|extensions|fonts)/ { try_files $uri /index.php$is_args$args; }
 location ^~ /media/cache/ { expires 1y; add_header Cache-Control "public, immutable"; }
 # SVG der Mediathek direkt aufgerufen: abschotten (Apache: .htaccess legt Core\Svg::guard() selbst an)
 location ~* ^/(media|sites/[^/]+/media|pools)/.+\.svg$ { add_header Content-Security-Policy "<?= e(\Core\Svg::CSP) ?>" always; add_header X-Content-Type-Options "nosniff" always; }</code></pre>      Mit Apache hinter nginx stattdessen die Apache-Zeilen oben plus <code>AddType text/javascript .mjs</code> und <code>AddType text/vtt .vtt</code>. HSTS in Plesk unter SSL/TLS einschalten (eigene <code>add_header</code> in den Blöcken überdecken sonst dort gesetzte Kopfzeilen). Ohne Server-Konfiguration: <code>'url_rewrite' =&gt; false</code> (Adressen dann <code>/index.php/…</code>). Kits liegen unter <code>kits/</code> bzw. <code>public/kits/</code>; alte Adressen <code>/themes/…</code> leitet der Kern um (Apache: <code>FallbackResource</code> genügt) – Umstellung bestehender Installationen: <a href="#deploy">Staging &amp; Deploy</a> → <code>deploy/migrate-kits.sh</code>.</li>
     <li><b>HTTPS</b> mit Let’s Encrypt + 301-Weiterleitung aktivieren.</li>
-    <li><b>Schreibrechte</b> für den PHP-Benutzer: <code>config/</code> (beim ersten Start), <code>storage/</code>, <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>, <code>public/extensions</code>.</li>
+    <li><b>Schreibrechte</b> für den PHP-Benutzer: <code>config/</code> (beim ersten Start), <code>storage/</code>, <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>, <code>public/assets/ext</code>, <code>public/assets/fonts/installed</code>.</li>
     <li><b>Kit vorher festlegen:</b> <code>config/sites/default.php</code> mit <code>hosts</code> und <code>theme</code> anlegen (siehe <a href="#websites">Websites</a>), <em>bevor</em> die Website zum ersten Mal aufgerufen wird – sonst spielt der Erststart die Startinhalte des Standard-Kits ein.</li>
     <li><b>Erster Aufruf</b> erzeugt Datenbank und <code>config/config.local.php</code> (mit zufälligem <code>app_key</code> und <code>setup_token</code>) und spielt die Startinhalte des Kits ein. Dann <code>/admin/setup</code> mit dem <code>setup_token</code> aus dieser Datei öffnen und das erste Konto anlegen – oder per SSH <code>php bin/console user:create name@example.org admin</code>.</li>
     <li><b>Einrichtung:</b> Grundeinstellungen → Verschlüsselung (Schlüsselpaar für Eingänge; der geheime Schlüssel wird nur einmal angezeigt), E-Mail-Versand (Testmail), Website → Kanonische Adresse; danach die zentralen Angaben des Kits. Die Übersicht der Verwaltung zeigt eine Einrichtungs-Checkliste.</li>

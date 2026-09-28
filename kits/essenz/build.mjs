@@ -1,8 +1,8 @@
 /**
  * Theme-Vendoren „essenz“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2, variabel)  → public/kits/essenz/fonts              (latin + latin-ext, eine Datei je Schnittlage)
- *   @font-face je Familie        → public/kits/essenz/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   Webfonts (WOFF2, variabel)  → public/assets/kits/essenz/fonts              (latin + latin-ext, eine Datei je Schnittlage)
+ *   @font-face je Familie        → public/assets/kits/essenz/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                                  design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für App-Icons            → kits/essenz/fonts                    (nur serverseitig, App-Icon-Generator)
  */

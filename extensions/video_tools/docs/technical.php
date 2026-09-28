@@ -28,7 +28,7 @@
     <li>ffmpeg/ffprobe laufen ausschließlich über <code>proc_open</code> mit <b>Argument-Array</b> (keine Shell) und fester, schlanker Umgebung. Befehle entstehen nur aus festen Presets; Eingaben der Oberfläche sind Preset-Schlüssel (Positivliste) und Zeiten (als Zahlen formatiert). Eigene Befehle gibt es bewusst nicht.</li>
     <li>Jede Datei wird vor der Bearbeitung mit ffprobe geprüft (muss eine Videospur haben), jedes Ergebnis danach; Ergebnisse gehen durch <code>Media::import</code>/<code>Media::replace</code> (Typprüfung, zufällige Dateinamen, Upload-Grenze). Metadaten (z. B. Aufnahmeort) werden bei Web-Presets entfernt (<code>-map_metadata -1</code>).</li>
     <li>Der einzige Shell-Aufruf ist der losgelöste Start des Arbeiters wie bei den KI-Aufträgen – nur mit Werten des Servers (PHP-Pfad, Website-Schlüssel), jeweils <code>escapeshellarg</code>.</li>
-    <li>CSP unverändert: Skript und Stil kommen aus <code>/extensions/video_tools/</code> ('self'); Vorschau im Schneide-Fenster über <code>/admin/api/video-tools/media/{id}/stream</code> (HTTP-Range, nur angemeldet).</li>
+    <li>CSP unverändert: Skript und Stil kommen aus <code>/assets/ext/video_tools/</code> ('self'); Vorschau im Schneide-Fenster über <code>/admin/api/video-tools/media/{id}/stream</code> (HTTP-Range, nur angemeldet).</li>
   </ul>
 
   <h3>Schnittstellen</h3>

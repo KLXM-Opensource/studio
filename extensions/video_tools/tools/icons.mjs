@@ -3,7 +3,7 @@
 /**
  * Eigenes kleines Symbol-Sprite der Erweiterung (Phosphor Icons, Stil duotone, MIT) für Symbole, die das Kern-Sprite nicht
  * mitbringt. Nur zur Entwicklung: node extensions/video_tools/tools/icons.mjs → assets/img/icons.svg (wird eingecheckt,
- * `pnpm run build` kopiert es nach public/extensions/video_tools/img/). Paket: @phosphor-icons/core aus tools/node_modules
+ * `pnpm run build` kopiert es nach public/assets/ext/video_tools/img/). Paket: @phosphor-icons/core aus tools/node_modules
  * (oder PHOSPHOR=/pfad/zu/@phosphor-icons/core).
  */
 import fs from 'node:fs';

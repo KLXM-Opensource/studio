@@ -5,7 +5,7 @@ namespace Core;
 
 /**
  * Gemeinsame Helfer der Kern-Blöcke „Bildergalerie“, „Slider“ und „Stapelkarten“ (app/Blocks/*.php).
- * Styles: resources/css/media.css (Theme überschreibt mit public/kits/{name}/css/media.css oder ergänzt per conditional_css),
+ * Styles: resources/css/media.css (Theme überschreibt mit public/assets/kits/{name}/css/media.css oder ergänzt per conditional_css),
  * Verhalten (Lightbox, Slider): resources/js/media.mjs – wird einmal je Seite als Modul eingebunden.
  */
 final class MediaBlocks

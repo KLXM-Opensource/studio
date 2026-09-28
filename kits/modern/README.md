@@ -45,7 +45,7 @@ kits/modern/
 └── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/modern/{css,js,fonts}` (installiert die Kit-Pakete bei Bedarf selbst).
+Build: `cd tools && pnpm run build` → `public/assets/kits/modern/{css,js,fonts}` (installiert die Kit-Pakete bei Bedarf selbst).
 
 ## Blöcke
 
@@ -115,5 +115,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Plus Jakarta Sans, Space Grotesk, Inter Tight, Manrope – SIL Open Font License 1.1 (`public/kits/modern/fonts/OFL-{key}.txt`,
+Plus Jakarta Sans, Space Grotesk, Inter Tight, Manrope – SIL Open Font License 1.1 (`public/assets/kits/modern/fonts/OFL-{key}.txt`,
 TTF für App-Icons: `kits/modern/fonts/OFL.txt`). Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch erzeugt, frei verwendbar.

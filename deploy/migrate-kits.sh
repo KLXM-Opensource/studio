@@ -17,6 +17,7 @@
 #      Der neue Kern braucht sie nicht (Rückfall in Core\Kit, alte Adressen /themes/… leitet public/index.php um).
 #   4. php bin/console cache:clear --all und health
 #
+# Danach (bzw. zusätzlich) die öffentlichen Dateien nach /assets/ umstellen: php bin/console assets:migrate (Core\PublicPaths).
 # Bei Deploys mit Releases (deploy/deploy.sh) ist nichts zu tun: jedes Release enthält kits/ aus dem Repository.
 # Nötig ist das Skript nur für Installationen, die Code direkt in den Ordner hochladen (z. B. studio.klxm.de, APP_DIR).
 # ─────────────────────────────────────────────────────────────────────────────
@@ -69,12 +70,14 @@ move themes kits
 move public/themes public/kits
 if [ "$LINKS" = 1 ]; then
   [ -e themes ] || { echo "▸ Übergangs-Link themes → kits"; run "ln -s kits themes"; }
-  [ -e public/themes ] || { echo "▸ Übergangs-Link public/themes → kits"; run "ln -s kits public/themes"; }
+  # Nur solange public/kits noch existiert (vor bin/console assets:migrate) – danach gehören Kit-Assets nach public/assets/kits
+  [ -e public/themes ] || [ ! -d public/kits ] || { echo "▸ Übergangs-Link public/themes → kits"; run "ln -s kits public/themes"; }
 fi
 if [ "$DRY" = 1 ]; then echo "(dry-run) cache:clear --all, health"; exit 0; fi
 $PHP bin/console cache:clear --all >/dev/null && echo "▸ Seiten-Cache geleert"
 $PHP bin/console health --all | grep -E '✗|!|FEHLER|OK' || true
 echo "✓ Kits liegen unter kits/"
+[ -d public/kits ] || [ -d public/extensions ] || [ -d public/fonts ] && echo "Hinweis: öffentliche Dateien noch ganz oben in public/ – nächster Schritt: $PHP bin/console assets:migrate (siehe deploy/README.md)" || true
 SH
 
 if [[ "$MODE" == "local" ]]; then

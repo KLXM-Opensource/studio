@@ -191,7 +191,7 @@ final class Design
             // Schrift der Landingpage (Überschreibung) statt der der Website
             $fv = ($t['type'] ?? '') === 'font' ? ($lp?->fontFor($n) ?? self::get($n)) : null;
             if ($fv === null || !($f = $fonts[$fv] ?? null)) continue;
-            // Installierte Schrift (Core\Fonts, public/fonts/…): eigene CSS-Datei, optional Vorladen des Hauptschnitts
+            // Installierte Schrift (Core\Fonts, public/assets/fonts/installed/…): eigene CSS-Datei, optional Vorladen des Hauptschnitts
             if (!empty($f['href'])) {
                 $used[(string) $f['href']] = true;
                 if (!empty($f['preload'])) $pre[(string) $f['preload']] = true;

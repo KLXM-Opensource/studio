@@ -1,7 +1,7 @@
 <?php
 /**
  * Grundeinstellungen → Schriften (Core\Fonts, FontsController). Vorschau: resources/js/_fonts.js lädt die Schriften als
- * FontFace von der eigenen Domain (Vorschau-Route bzw. public/fonts) – keine Anfragen an Google/Fontsource im Browser.
+ * FontFace von der eigenen Domain (Vorschau-Route bzw. public/assets/fonts/installed) – keine Anfragen an Google/Fontsource im Browser.
  * @var string $q  @var string $cat  @var string $text  @var array $results  @var bool $catalogOk  @var int $catalogSize
  * @var ?array $detail  @var array $installed
  */
@@ -53,7 +53,7 @@ $preview = fn(string $id) => url('/admin/system/fonts/preview/' . $id);
     <?php endforeach; ?>
     </tbody>
   </table></div>
-  <p class="f-help"><?= e(__('Auswahl der Schrift: Design → Schriften (Style-Editor). Dateien: public/fonts/{id}/ mit font.css und LICENSE.txt.')) ?></p>
+  <p class="f-help"><?= e(__('Auswahl der Schrift: Design → Schriften (Style-Editor). Dateien: public/assets/fonts/installed/{id}/ mit font.css und LICENSE.txt.')) ?></p>
   <?php endif; ?>
 </section>
 
@@ -82,7 +82,7 @@ $preview = fn(string $id) => url('/admin/system/fonts/preview/' . $id);
     <div class="fo-checks"><?php foreach ($detail['subsets'] as $sub): ?><label class="f-check"><input type="checkbox" name="subsets[]" value="<?= e($sub) ?>"<?= in_array($sub, $selS, true) ? ' checked' : '' ?>><span><?= e($sub) ?></span></label><?php endforeach; ?></div>
   </fieldset>
   <label class="f-check"><input type="checkbox" name="preload" value="1"<?= !empty($cur['preload']) ? ' checked' : '' ?>><span><?= e(__('Hauptschnitt vorladen')) ?> <small class="adm-muted"><?= e(__('nur für die Hauptschrift der Website sinnvoll')) ?></small></span></label>
-  <p class="f-help"><?= e(__('Die Dateien werden vom Server geladen (Fontsource/jsDelivr, sonst Google Fonts), geprüft und unter public/fonts/{id}/ gespeichert – zusammen mit dem Lizenztext.', ['id' => $detail['id']])) ?></p>
+  <p class="f-help"><?= e(__('Die Dateien werden vom Server geladen (Fontsource/jsDelivr, sonst Google Fonts), geprüft und unter public/assets/fonts/installed/{id}/ gespeichert – zusammen mit dem Lizenztext.', ['id' => $detail['id']])) ?></p>
   <div class="adm-row">
     <button class="adm-btn adm-btn--primary" type="submit"><?= e($isInst ? __('Neu installieren (ersetzt)') : __('Installieren')) ?></button>
     <a class="adm-btn adm-btn--ghost" href="<?= e($qs([])) ?>"><?= e(__('Abbrechen')) ?></a>

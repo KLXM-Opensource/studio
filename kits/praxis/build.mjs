@@ -1,7 +1,7 @@
 /**
  * Theme-Vendoren „praxis“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2)  → public/kits/praxis/fonts   (in css/site.css als ../fonts/… eingebunden)
+ *   Webfonts (WOFF2)  → public/assets/kits/praxis/fonts   (in css/site.css als ../fonts/… eingebunden)
  *   TTF für Icons     → kits/praxis/fonts          (nur serverseitig für den App-Icon-Generator, nicht öffentlich)
  */
 import path from 'node:path';

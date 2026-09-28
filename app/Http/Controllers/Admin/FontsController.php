@@ -11,7 +11,7 @@ use Core\Http\Response;
 
 /**
  * Grundeinstellungen → Schriften (Core\Fonts): Google-Fonts-Katalog durchsuchen, Schriften installieren (selbst gehostet
- * unter public/fonts, für alle Websites), Vorladen, Entfernen. Vorschau-Schriften kommen von der eigenen Domain.
+ * unter public/assets/fonts/installed, für alle Websites), Vorladen, Entfernen. Vorschau-Schriften kommen von der eigenen Domain.
  * Recht: system.manage (oder Integrator), Funktion „fonts“.
  */
 final class FontsController extends AdminController

@@ -1,9 +1,9 @@
 /**
  * Theme-Vendoren „fluid“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2, variabel)  → public/kits/fluid/fonts            (latin + latin-ext; eine Datei je Schnittlage
+ *   Webfonts (WOFF2, variabel)  → public/assets/kits/fluid/fonts            (latin + latin-ext; eine Datei je Schnittlage
  *                                                                       statt 3–4 fester Schnitte)
- *   @font-face je Familie        → public/kits/fluid/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   @font-face je Familie        → public/assets/kits/fluid/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                                  design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für App-Icons            → kits/fluid/fonts                    (nur serverseitig, App-Icon-Generator)
  */

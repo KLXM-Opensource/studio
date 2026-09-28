@@ -41,7 +41,7 @@ kits/essenz/
 └── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/essenz/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/essenz/{css,js,fonts}`.
 
 ## Budgets (minifiziert, gemessen)
 
@@ -111,5 +111,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Inter, Inter Tight, Manrope, Geist, Geist Mono – SIL Open Font License 1.1 (`public/kits/essenz/fonts/OFL-{key}.txt`).
+Inter, Inter Tight, Manrope, Geist, Geist Mono – SIL Open Font License 1.1 (`public/assets/kits/essenz/fonts/OFL-{key}.txt`).
 Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch erzeugt (GD), frei verwendbar.

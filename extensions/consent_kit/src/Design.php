@@ -143,19 +143,26 @@ final class Design
         return ':host{' . implode(';', $light) . ";color-scheme:light}\n:host([theme=dark]){" . $d . "}\n@media (prefers-color-scheme:dark){:host([theme=auto]){" . $d . "}}\n";
     }
 
-    /** Vollständiges Stylesheet: Basis-CSS der Komponente (gebaut nach public/extensions/…) + Variablen */
+    /** Vollständiges Stylesheet: Basis-CSS der Komponente (gebaut nach public/assets/ext/…) + Variablen */
     public static function css(?array $values = null): string
     {
         $base = '';
-        foreach ([ROOT . '/public/extensions/consent_kit/css/consent.css', dirname(__DIR__) . '/assets/css/consent.css'] as $f) {
+        foreach ([self::builtCss(), dirname(__DIR__) . '/assets/css/consent.css'] as $f) {
             if (is_file($f)) { $base = (string) file_get_contents($f); break; }
         }
         return "/* KLXM Studio Consent-Kit – Basis + Variablen dieser Website */\n" . self::varsCss($values) . $base;
     }
 
+    /** Gebautes Basis-CSS: public/assets/ext/consent_kit/css/consent.css (Rückfall public/extensions/…, Core\PublicPaths) */
+    private static function builtCss(): string
+    {
+        $dir = class_exists(\Core\PublicPaths::class) ? \Core\PublicPaths::dir('ext', 'consent_kit') : ROOT . '/public/extensions/consent_kit';
+        return $dir . '/css/consent.css';
+    }
+
     public static function version(): string
     {
-        $f = ROOT . '/public/extensions/consent_kit/css/consent.css';
+        $f = self::builtCss();
         return substr(sha1(self::varsCss() . (is_file($f) ? (string) filemtime($f) : '0') . app()->theme->name), 0, 10);
     }
 

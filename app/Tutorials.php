@@ -11,7 +11,8 @@ namespace Core;
  * Die Videos des Kerns werden NICHT mit dem CMS ausgeliefert: Sie liegen auf der Produkt-Website (config 'docs_url',
  * Standard https://studio.klxm.de → /tutorials/{kurzname}, Englisch /en/tutorials/{kurzname}). Die Verwaltung setzt dorthin
  * nur Links (neuer Tab) – keine Einbettung, kein Vorladen, keine Anfrage nach außen. Die Schritte bleiben als Text offline verfügbar.
- * Kits können eigene Videos lokal mitbringen ('video' => '/kits/{name}/tutorials/datei', ohne Endung, unter public/).
+ * Kits können eigene Videos lokal mitbringen ('video' => '/assets/kits/{name}/tutorials/datei', ohne Endung, unter public/;
+ * die ältere Angabe '/kits/{name}/…' geht weiter – Core\PublicPaths::current()).
  */
 final class Tutorials
 {
@@ -130,7 +131,8 @@ final class Tutorials
     /** Lokales Kit-Video: Pfad unter public/ ohne Endung → {mp4, webm, poster, de, en} (nur vorhandene Dateien) */
     private static function localMedia(string $base): ?array
     {
-        $base = rtrim($base, '/');
+        // Alte Angaben '/kits/{name}/…' bzw. '/themes/{name}/…' zeigen auf den aktuellen Ort (/assets/kits/{name}/…)
+        $base = PublicPaths::current(rtrim($base, '/'));
         $url = fn(string $ext) => is_file($p = ROOT . '/public' . $base . $ext) ? base_path() . $base . $ext . '?v=' . substr(md5((string) filemtime($p)), 0, 8) : null;
         if (!$url('.mp4') && !$url('.webm')) return null;
         $meta = [];

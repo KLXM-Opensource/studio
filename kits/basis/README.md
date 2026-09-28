@@ -28,7 +28,7 @@ kits/basis/
 └── build.mjs          kopiert die Schriften (latin + latin-ext, 400/600/700) und erzeugt css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/basis/{css,js,fonts}` (installiert Kit-Pakete bei Bedarf).
+Build: `cd tools && pnpm run build` → `public/assets/kits/basis/{css,js,fonts}` (installiert Kit-Pakete bei Bedarf).
 
 **Budgets** (minifiziert, Stand des aktuellen Builds): immer geladenes CSS = site.css ≈ 27,5 KB + nav-*.css 0,9–4,8 KB
 + Schrift ≈ 2 KB (je Familie) + Design-Datei ≈ 1,3 KB (nur wenn vom Standard abweichend). Damit liegt die Startseite je nach
@@ -122,6 +122,6 @@ entfernen, wenn keine Musterseiten gewünscht sind), Blöcke ergänzen oder entf
 ## Lizenzen
 
 Inter, Manrope, IBM Plex Sans, Source Serif 4, Lora, Fraunces – SIL Open Font License 1.1
-(`public/kits/basis/fonts/OFL-{key}.txt`). Beispielbilder der Musterseiten: automatisch erzeugt (GD), frei verwendbar.
+(`public/assets/kits/basis/fonts/OFL-{key}.txt`). Beispielbilder der Musterseiten: automatisch erzeugt (GD), frei verwendbar.
 Symbole des Kits (`basis_icon()`): eigene Pfade (24 × 24, Linie); zusätzlich stehen die Kern-Symbole (Phosphor duotone,
 MIT) über `icon()` zur Verfügung.

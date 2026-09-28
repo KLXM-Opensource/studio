@@ -3,7 +3,7 @@
  * Optionaler Build-Hook des Kits – tools/build.mjs (cd tools && pnpm run build) ruft vendors(ctx) für jedes Kit auf.
  * Das Start-Kit braucht keine Vendoren (Systemschrift, keine Bibliotheken) und tut hier nichts.
  *
- * CSS/JS baut der Core-Build ohnehin: assets/css/*.css und assets/js/*.js → public/kits/{kit}/ (esbuild, minifiziert,
+ * CSS/JS baut der Core-Build ohnehin: assets/css/*.css und assets/js/*.js → public/assets/kits/{kit}/ (esbuild, minifiziert,
  * @import wird gebündelt; Dateien mit „_“ am Anfang sind nur Bausteine).
  *
  * Beispiel: Schrift mit dem Kit ausliefern (package.json im Kit-Ordner mit "@fontsource/inter" – installiert der Build

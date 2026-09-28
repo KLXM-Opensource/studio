@@ -1,6 +1,6 @@
 /* ==========================================================================
    Kern-Block „Partner & Logos“ (app/Blocks/partners.php) – neutral, hell/dunkel über die Farben des Kits.
-   Nur geladen, wenn der Block auf der Seite steht (Theme::conditionalCss). Komplett ersetzen: public/kits/{kit}/css/partners.css.
+   Nur geladen, wenn der Block auf der Seite steht (Theme::conditionalCss). Komplett ersetzen: public/assets/kits/{kit}/css/partners.css.
    Kits passen das Aussehen über Custom Properties an (z. B. auf :root, einem Abschnitt oder .cms-partners):
      --partners-ink     Namen, Schriftzüge          --partners-text   Kurzinfo              --partners-muted  Kategorie
      --partners-line    Ränder                      --partners-link   Link in den Details   --partners-focus  Fokusrahmen

@@ -350,8 +350,8 @@ final class Tables
         }
 
         $route = trim((string) preg_replace('~[^a-z0-9\-/]+~', '-', strtolower(trim((string) ($s['route'] ?? ''), '/ '))), '-/');
-        $reserved = ['admin', 'api', 'mcp', 'anfrage', 'assets', 'media', 'kits', 'themes', 'pdf', 'sw.js', 'offline', 'dav', '.well-known', 'formular'];
-        if ($route !== '' && in_array(explode('/', $route)[0], $reserved, true)) $errors['settings.route'] = 'Diese Adresse ist reserviert.';
+        // Gesperrt: Systemadressen (Core\PublicPaths, inkl. Ordnern, die noch in public/ liegen) und feste Routen der App
+        if ($route !== '' && \Core\PublicPaths::isReserved(explode('/', $route)[0], ['mcp', 'pdf', 'sw.js', 'offline', 'dav', '.well-known', 'formular'])) $errors['settings.route'] = 'Diese Adresse ist reserviert.';
         if ($route !== '' && ($other = self::byRoute($route)) && (!$existing || (int) $other['id'] !== (int) $existing['id'])) {
             $errors['settings.route'] = 'Diese Adresse nutzt schon „' . $other['name'] . '“.';
         }

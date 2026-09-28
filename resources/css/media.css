@@ -3,7 +3,7 @@
    Nur geladen, wenn einer der Blöcke auf der Seite steht (Theme::conditionalCss).
    Themes passen das Aussehen über Custom Properties an, z. B.
      :root{--cms-accent:…;--cms-radius:…;--cms-gallery-gap:…;--cms-card-bg:…;--cms-stack-top:…}
-   oder ersetzen die Datei komplett durch public/kits/{name}/css/media.css.
+   oder ersetzen die Datei komplett durch public/assets/kits/{name}/css/media.css.
    ========================================================================== */
 .cms-gallery,.cms-slider,.cms-stack{--_r:var(--cms-radius,12px);--_accent:var(--cms-accent,currentColor)}
 .cms-head{max-width:48rem;margin-bottom:clamp(32px,4vw,56px)}

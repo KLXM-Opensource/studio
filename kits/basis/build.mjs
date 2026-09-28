@@ -1,8 +1,8 @@
 /**
  * Theme-Vendoren „basis“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2)       → public/kits/basis/fonts            (latin + latin-ext, 400/600/700)
- *   @font-face je Familie  → public/kits/basis/css/font-{key}.css (Style-Editor: theme.php → design.fonts;
+ *   Webfonts (WOFF2)       → public/assets/kits/basis/fonts            (latin + latin-ext, 400/600/700)
+ *   @font-face je Familie  → public/assets/kits/basis/css/font-{key}.css (Style-Editor: theme.php → design.fonts;
  *                            design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für Icons          → kits/basis/fonts                    (nur serverseitig für den App-Icon-Generator)
  */

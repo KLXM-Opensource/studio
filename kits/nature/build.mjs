@@ -1,8 +1,8 @@
 /**
  * Kit-Vendoren „nature“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2)             → public/kits/nature/fonts              (latin + latin-ext)
- *   @font-face je Familie        → public/kits/nature/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   Webfonts (WOFF2)             → public/assets/kits/nature/fonts              (latin + latin-ext)
+ *   @font-face je Familie        → public/assets/kits/nature/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                                  design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für App-Icons            → kits/nature/fonts                    (nur serverseitig, App-Icon-Generator)
  *

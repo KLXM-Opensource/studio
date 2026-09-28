@@ -11,7 +11,7 @@
  *
  *  Eigenes Kit anlegen (copy + rename):
  *      php bin/console kit:create meinkit                 # Kopie dieses Start-Kits, Präfix starter_* → meinkit_*
- *      cd tools && pnpm run build                         # assets/ → public/kits/meinkit/
+ *      cd tools && pnpm run build                         # assets/ → public/assets/kits/meinkit/
  *
  *  Abschnitte dieser Datei (suchen nach „§“):
  *      § 1  Meta          label, description, version, requires (Core-Version), source_lang
@@ -126,11 +126,11 @@ return [
 
     // ======================================================================================================== § 5 Assets
     // Schriften: Dieses Kit nutzt die Systemschrift (keine Datei, keine Anfrage). Eigene Schrift – ohne Build:
-    //     php bin/console fonts:install Inter --weights=400,700      (lädt einmalig, liefert selbst aus: public/fonts)
+    //     php bin/console fonts:install Inter --weights=400,700      (lädt einmalig, liefert selbst aus: public/assets/fonts/installed)
     // Danach steht „Inter“ im Style-Editor bei „Schrift“ zur Auswahl (Core\Fonts, Schlüssel installed:{id}).
     // Alternativ mit dem Kit ausliefern: build.mjs + package.json (siehe build.mjs) und hier 'preload' => ['fonts/…woff2'].
     'fonts' => [
-        // 'preload' => ['fonts/inter-latin-400-normal.woff2'],   // relativ zu public/kits/{kit}/
+        // 'preload' => ['fonts/inter-latin-400-normal.woff2'],   // relativ zu public/assets/kits/{kit}/
         // 'icon' => 'fonts/Inter_700Bold.ttf',                    // TTF für den App-Icon-Generator (serverseitig)
     ],
     // Bildformate mit eigenem Zuschnitt in der Mediathek; Blöcke übergeben das Format: img($id, $sizes, ['ratio' => '4:3'])
@@ -213,7 +213,7 @@ return [
                 ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
             ]],
         ],
-        // Schriften für Tokens vom Typ „font“ – 'css' (relativ zu public/kits/{kit}/) wird nur bei Auswahl eingebunden.
+        // Schriften für Tokens vom Typ „font“ – 'css' (relativ zu public/assets/kits/{kit}/) wird nur bei Auswahl eingebunden.
         // Mit Kit-Schrift: 'inter' => ['label' => 'Inter', 'stack' => 'Inter,system-ui,sans-serif', 'css' => 'css/font-inter.css'].
         'fonts' => [
             'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],

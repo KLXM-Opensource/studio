@@ -1,9 +1,9 @@
 /**
  * Kit-Vendoren „modern“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2, variabel)  → public/kits/modern/fonts            (latin + latin-ext; eine Datei je Schnittlage
+ *   Webfonts (WOFF2, variabel)  → public/assets/kits/modern/fonts            (latin + latin-ext; eine Datei je Schnittlage
  *                                                                       statt 3–4 fester Schnitte)
- *   @font-face je Familie        → public/kits/modern/css/font-{key}.css (Style-Editor: design.php → fonts;
+ *   @font-face je Familie        → public/assets/kits/modern/css/font-{key}.css (Style-Editor: design.php → fonts;
  *                                  design_head() bindet nur die gewählten Familien ein – ohne externe Anfragen)
  *   TTF für App-Icons            → kits/modern/fonts                    (nur serverseitig, App-Icon-Generator)
  */

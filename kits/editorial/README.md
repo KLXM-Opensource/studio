@@ -29,7 +29,7 @@ kits/editorial/
 └── build.mjs          variable Schriften (@fontsource-variable, wght-Achse, latin + latin-ext, aufrecht + kursiv) → css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/editorial/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/editorial/{css,js,fonts}`.
 
 **Budgets** (minifiziert, Startseite): site.css 22,1 KB + Kopf 0,3–2,4 KB + drei Schriften je 0,8–1,5 KB + Design-Datei 0,8 KB
 → 27,9–29,7 KB. JS: site.js 2,8 KB (+ blocks.js 1,8 KB nur bei Video/Artikel/Text). Bedingt: hero.css 4,4 KB (jeder Aufmacher),
@@ -79,5 +79,5 @@ und `ed_mitglied` (öffentliche Formulare mit Bedingungen, IBAN, Gruppe), Rubrik
 ## Lizenzen
 
 Newsreader, Fraunces, Playfair Display, Literata, Source Serif 4, DM Serif Display, Instrument Serif, Source Sans 3, Public Sans,
-Work Sans, Libre Franklin, IBM Plex Sans/Mono, Inter, JetBrains Mono – SIL Open Font License 1.1 (`public/kits/editorial/fonts/OFL-*.txt`).
+Work Sans, Libre Franklin, IBM Plex Sans/Mono, Inter, JetBrains Mono – SIL Open Font License 1.1 (`public/assets/kits/editorial/fonts/OFL-*.txt`).
 Symbole: Phosphor (Kern). Platzhalterbilder: automatisch erzeugt, frei verwendbar.

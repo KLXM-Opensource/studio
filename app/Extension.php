@@ -160,7 +160,7 @@ final class Extension
         return $this;
     }
 
-    /** CSS/JS aus {dir}/assets (gebaut nach public/extensions/{name}) in der Verwaltung laden: fn(string $view): ['css/x.css', 'js/x.js'] – $view z. B. 'media' */
+    /** CSS/JS aus {dir}/assets (gebaut nach public/assets/ext/{name}) in der Verwaltung laden: fn(string $view): ['css/x.css', 'js/x.js'] – $view z. B. 'media' */
     public function adminAssets(callable $fn): self
     {
         $this->adminAssetProviders[] = $fn;
@@ -272,7 +272,7 @@ final class Extension
     /**
      * Redaktions-Werkzeugleiste auf der Website (Core\Toolbar, nur angemeldet): fn(array $bar): [
      *   'items'       => [['label' => …, 'hint' => 'kleine Zeile (optional)', 'icon' => Symbolname, 'href' => Adresse ODER 'data' => ['fg-open' => '1'] (→ data-…-Attribute an einem <button>)]],
-     *   'scripts'     => ['js/panel.js'],     Skripte aus {dir}/assets (gebaut nach /extensions/{name}/), im Dokument nach der Leiste – nur 'self'
+     *   'scripts'     => ['js/panel.js'],     Skripte aus {dir}/assets (gebaut nach /assets/ext/{name}/), im Dokument nach der Leiste – nur 'self'
      *   'publishNote' => 'Freigegeben von …', Zusatz im Dialog „Änderungen jetzt veröffentlichen?“
      * ]. $bar = Core\Toolbar::context() (kind, mode, page, editing, canEditPages …). Rechte prüft die Erweiterung (can()).
      */
@@ -298,12 +298,18 @@ final class Extension
         return $this;
     }
 
-    /** Öffentliche Adresse einer Datei aus {dir}/public (nach extensions:publish bzw. pnpm build) */
+    /** Öffentliche Adresse einer Datei aus {dir}/public bzw. {dir}/assets (nach extensions:publish bzw. pnpm build): /assets/ext/{name}/… */
     public function asset(string $path): string
     {
-        $file = ROOT . '/public/extensions/' . $this->name . '/' . ltrim($path, '/');
+        $file = $this->publicDir() . '/' . ltrim($path, '/');
         $v = is_file($file) ? substr(md5((string) filemtime($file)), 0, 8) : (string) ($this->manifest['version'] ?? '1');
-        return base_path() . '/extensions/' . $this->name . '/' . ltrim($path, '/') . '?v=' . $v;
+        return PublicPaths::url(PublicPaths::EXT, $this->name, $path) . '?v=' . $v;
+    }
+
+    /** Öffentlicher Ordner der Erweiterung: public/assets/ext/{name} (Rückfall public/extensions/{name}, siehe Core\PublicPaths) */
+    public function publicDir(): string
+    {
+        return PublicPaths::dir(PublicPaths::EXT, $this->name);
     }
 
     /** Offene Datenbank-Schritte ausführen (Stand je Website in den Einstellungen) */

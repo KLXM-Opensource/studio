@@ -46,7 +46,7 @@ kits/glas/
 └── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/glas/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/glas/{css,js,fonts}`.
 
 ## Budgets (minifiziert, gemessen)
 
@@ -138,6 +138,6 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Outfit, Figtree, Sora, Urbanist – SIL Open Font License 1.1 (`public/kits/glas/fonts/OFL-{key}.txt`; Outfit-TTF für
+Outfit, Figtree, Sora, Urbanist – SIL Open Font License 1.1 (`public/assets/kits/glas/fonts/OFL-{key}.txt`; Outfit-TTF für
 den Icon-Generator: `kits/glas/fonts/OFL.txt`). Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch
 erzeugt (GD), frei verwendbar.

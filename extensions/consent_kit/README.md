@@ -17,7 +17,7 @@ Inline-Code, WCAG 2.2 AA.
 
 Die Migration legt `consent_services`, `consent_revisions` und `consent_log` in der Datenbank der Website an.
 Recht: `consent.manage` (Rolle „Administration“ hat es). Assets: `cd tools && pnpm run build`
-(→ `public/extensions/consent_kit`).
+(→ `public/assets/ext/consent_kit`).
 
 **Solange kein einwilligungspflichtiger Dienst aktiv ist, ändert sich für Besucher nichts**: kein Hinweis, kein Skript,
 kein Cookie, CSP unverändert.
@@ -35,7 +35,7 @@ kein Cookie, CSP unverändert.
 | Teil | Auslieferung |
 |---|---|
 | Konfiguration | `<script type="application/json" id="cms-consent-config">` (Datenblock, wird nicht ausgeführt) |
-| Kern | `/extensions/consent_kit/js/consent.js` (≈ 4,7 KB, `defer`, vor den Kit-Skripten) |
+| Kern | `/assets/ext/consent_kit/js/consent.js` (≈ 4,7 KB, `defer`, vor den Kit-Skripten) |
 | Oberfläche | `consent-ui.mjs` (≈ 14 KB) + `/consent/style.css` – nur bei Bedarf (Hinweis, Einstellungen, Platzhalter, schwebende Schaltfläche) |
 | Code der Dienste | Inline-`<script>` aus „HTML im head/body“ und die JS-Felder → `/consent/js/{dienst}.{teil}.js` (eigene Domain); externe `<script src>` bleiben extern |
 | CSP | `script-src`/`connect-src`/`img-src`/`frame-src` eines Dienstes erst, wenn der Cookie der Anfrage die Einwilligung in seine aktuelle Fassung enthält; `frame-src` der „Domains eingebetteter Inhalte“ aktiver Dienste (für „einmal laden“). Nie `unsafe-inline`. |

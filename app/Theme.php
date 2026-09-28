@@ -11,8 +11,8 @@ namespace Core;
  *   kits/{name}/fragments/         eigene Fassungen überschreibbarer Kern-Fragmente (Core\Fragments)
  *   kits/{name}/blocks/{type}.php  Renderer je Blocktyp
  *   kits/{name}/seed.php           Startinhalte (Seiten + Einstellungen)
- *   public/kits/{name}/            öffentliche Assets (CSS, JS, Bilder)
- *   Rückfall: themes/{name}/ und public/themes/{name}/ (ältere Installationen, Kits von Dritten)
+ *   public/assets/kits/{name}/     öffentliche Assets (CSS, JS, Bilder) – Ablage: Core\PublicPaths
+ *   Rückfall: themes/{name}/ sowie public/kits/{name}/, public/themes/{name}/ (ältere Installationen, Kits von Dritten)
  *
  * Der Core kennt keine praxisspezifischen Inhalte – ein neues Projekt = neues Kit.
  */
@@ -348,7 +348,7 @@ final class Theme
         return Kit::url($this->name, $path) . '?v=' . $v;
     }
 
-    /** Bringt das Kit die öffentliche Datei mit (public/kits/{name}/…)? */
+    /** Bringt das Kit die öffentliche Datei mit (public/assets/kits/{name}/…)? */
     public function hasAsset(string $path): bool
     {
         return is_file(Kit::publicDir($this->name) . '/' . ltrim($path, '/'));
@@ -421,7 +421,7 @@ final class Theme
         return array_values(array_unique($types));
     }
 
-    /** Kern-Stylesheet – oder die gleichnamige Datei des Kits (public/kits/{name}/css/…), falls vorhanden */
+    /** Kern-Stylesheet – oder die gleichnamige Datei des Kits (public/assets/kits/{name}/css/…), falls vorhanden */
     private function coreCss(string $file): string
     {
         return $this->hasAsset('css/' . $file) ? $this->asset('css/' . $file) : asset('css/' . $file);

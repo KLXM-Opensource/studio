@@ -69,7 +69,7 @@ final class FeatureInfo
                 'effects' => ['menu' => __('Administration → Design'), 'frontend' => __('Geänderte Design-Tokens wirken sofort auf der ganzen Website')]],
             'fonts' => ['group' => 'content', 'desc' => __('Schriften aus dem Google-Fonts-Katalog laden und selbst ausliefern.'),
                 'effects' => ['menu' => __('Grundeinstellungen → Schriften'), 'external' => __('Nur beim Installieren: Download vom Fontsource-Katalog; Besucher laden nichts von Google'),
-                    'data' => __('Schriftdateien unter public/fonts (für alle Websites der Installation)')]],
+                    'data' => __('Schriftdateien unter public/assets/fonts/installed (für alle Websites der Installation)')]],
             'theme_switch' => ['group' => 'content', 'desc' => __('Kit (Theme) in den Grundeinstellungen wechseln.'),
                 'effects' => ['menu' => __('Auswahl des Kits in den Grundeinstellungen'), 'frontend' => __('Ein Wechsel ändert Aussehen, Blöcke und zentrale Angaben der ganzen Website')],
                 'caution' => __('Ein Kit-Wechsel betrifft die ganze Website – nur einschalten, wenn wirklich gewechselt werden soll.')],

@@ -482,7 +482,7 @@ return [
                 'theme.php is divided into sections § 1–11. The guide: technical documentation › kits & design.',
             ],
             'tips' => ['<code>kit:create name --from=basis</code> uses another kit as the template.', 'Check the home-page budget: CSS &lt; 30 KB, JS &lt; 8 KB (start kit ≈ 15.7 KB / 0.4 KB).'],
-            'pitfalls' => ['Rebuild after changes to <code>assets/</code> – <code>public/kits/{name}/</code> only contains the built files.', 'Do not change the start kit itself – it is the template for <code>kit:create</code> and is replaced by updates.'],
+            'pitfalls' => ['Rebuild after changes to <code>assets/</code> – <code>public/assets/kits/{name}/</code> only contains the built files.', 'Do not change the start kit itself – it is the template for <code>kit:create</code> and is replaced by updates.'],
             'manual' => ['Developing your own kit (technical)', 'Kits & design (technical)', 'Command line'],
         ],
     ],

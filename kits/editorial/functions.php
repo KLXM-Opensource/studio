@@ -23,7 +23,7 @@ function editorial_header(): string
     return in_array($v, ['masthead', 'compact', 'split', 'ressorts'], true) ? $v : 'masthead';
 }
 
-/** Dateien der Schriften (Paketname in public/kits/editorial/fonts) – für <link rel="preload"> */
+/** Dateien der Schriften (Paketname in public/assets/kits/editorial/fonts) – für <link rel="preload"> */
 const EDITORIAL_FONT_FILES = [
     'newsreader' => 'newsreader-latin-wght-normal', 'fraunces' => 'fraunces-latin-wght-normal', 'playfair' => 'playfair-display-latin-wght-normal',
     'literata' => 'literata-latin-wght-normal', 'source-serif' => 'source-serif-4-latin-wght-normal', 'dm-serif' => 'dm-serif-display-latin-400-normal',

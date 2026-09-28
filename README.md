@@ -73,8 +73,10 @@ Entwicklerhandbuch → „Installation & Anforderungen“, „Betrieb“, „Sta
 
 ```
 httpdocs/
-├── public/            DOCUMENT ROOT: index.php, assets/ (Verwaltung, Editor, Vendoren, Symbole, Schrift Lato),
-│                      kits/ + extensions/ (gebaute Assets), media/, sites/{key}/media/, pools/{key}/
+├── public/            DOCUMENT ROOT – ganz oben nur index.php, assets/ und die Upload-Ordner (jeder Ordner sperrt eine Seitenadresse)
+│   ├── assets/        css/ js/ fonts/ (Lato) icons/ vendor/ (Kern) · kits/{kit}/ · ext/{name}/ (gebaute Assets)
+│   │                  · fonts/installed/ (installierte Schriften, Laufzeit) – Core\PublicPaths
+│   └── media/ · sites/{key}/media/ · pools/{key}/   Uploads (Adressen stehen in Inhalten)
 ├── app/               Core (Namespace Core\): Http/, Api/, Data/, Network/, Search/, AI/, Review/, Support/, Blocks/, Admin/views/ …
 ├── kits/              starter (Start-Kit für eigene Kits) · basis (neutrales Business-Kit mit Musterseiten) · praxis (Arztpraxis) …
 ├── extensions/        optionale Erweiterungen, z. B. dav (CalDAV/CardDAV)

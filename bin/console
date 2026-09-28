@@ -42,11 +42,14 @@
  *   features:release [--dry-run] [--only=features|extensions]
  *                                                     In der Konfiguration festgelegte Funktionen/Erweiterungen an die Verwaltung
  *                                                     übergeben (Administration → Funktionen & Erweiterungen); Sicherung .bak + Diff
- *   extensions:publish                                Öffentliche Dateien der Erweiterungen nach public/extensions kopieren
+ *   extensions:publish                                Öffentliche Dateien der Erweiterungen nach public/assets/ext kopieren
+ *   assets:migrate [--dry-run] [--no-backup]          Alte Ordner in public/ nach public/assets/ verschieben (kits, themes →
+ *                                                     assets/kits · extensions → assets/ext · fonts → assets/fonts/installed);
+ *                                                     Sicherung storage/backups/public-assets-<zeit>.tar.gz, meldet feste alte Adressen
  *   reseed --force                                    ALLE Inhalte löschen und Startinhalte neu einspielen
  *   fonts:search <name> [--category=serif]            Google-Fonts-Katalog durchsuchen (Fontsource, nur freie Lizenzen)
  *   fonts:install <familie> [--weights=400,700] [--subsets=latin,latin-ext] [--variable] [--italic] [--preload]
- *                                                     Schrift laden und selbst ausliefern (public/fonts, alle Websites)
+ *                                                     Schrift laden und selbst ausliefern (public/assets/fonts/installed, alle Websites)
  *   fonts:list                                        Installierte Schriften mit Größe, Lizenz und Verwendung
  *   fonts:remove <familie> [--force]                  Schrift entfernen (--force: auch wenn noch verwendet)
  *   accent:check                                      Akzentfarben der Verwaltung auf Kontrast prüfen (WCAG AA)
@@ -475,9 +478,9 @@ switch ($cmd) {
                 is_dir("$src/$f") ? $copy("$src/$f", "$dst/$f") : copy("$src/$f", "$dst/$f");
             }
         };
-        // Neue Kits immer unter kits/ und public/kits/ – auch wenn die Vorlage noch im alten Ordner themes/ liegt
+        // Neue Kits immer unter kits/ und public/assets/kits/ – auch wenn die Vorlage noch an einem alten Ort liegt
         $copy(Core\Kit::dir($from), ROOT . "/kits/$name");
-        $copy(Core\Kit::publicDir($from), ROOT . "/public/kits/$name");
+        $copy(Core\Kit::publicDir($from), Core\Kit::publicDir() . "/$name");
         $def = (string) Core\Kit::definitionFile(ROOT . "/kits/$name");
         // Bezeichnung und Beschreibung (Kit-Auswahl) – Zeilen mit 4 Leerzeichen Einzug, wie Core\Theme::available() sie liest
         $src = (string) file_get_contents($def);
@@ -499,7 +502,7 @@ switch ($cmd) {
         echo "Kit „{$name}“ angelegt – Kopie von „{$from}“, Präfix {$from}_ → {$prefix}\n"
            . "  kits/$name/          theme.php, Blöcke, Templates, Fragmente, Startinhalte, lang/, tools/\n"
            . "  kits/$name/assets/   CSS/JS-Quellen\n"
-           . "  public/kits/$name/   gebaute Assets (Kopie – nach Änderungen neu bauen)\n\n"
+           . "  public/assets/kits/$name/   gebaute Assets (Kopie – nach Änderungen neu bauen)\n\n"
            . "Nächste Schritte:\n"
            . "  1. kits/$name/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css\n"
            . "  2. Bauen:      cd tools && pnpm run build\n"
@@ -660,7 +663,10 @@ switch ($cmd) {
             ] + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
-                + Core\Fragments::health();    // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
+                + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
+                // Alte Ordner ganz oben in public/ (kits, themes, extensions, fonts): laufen weiter (Rückfall), sperren aber Seitenadressen
+                + (($legacy = Core\PublicPaths::legacyDirs()) ? ['Alte Ordner in public/ (' . implode(', ', $legacy) . ') – umstellen mit: php bin/console assets:migrate' => null]
+                    : ['public/: Kits, Erweiterungen und Schriften unter /assets/' => true]);
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
@@ -1011,22 +1017,40 @@ switch ($cmd) {
         exit(Core\FeatureRelease::run($args, fn(string $l) => print($l . "\n")));
 
     case 'extensions:publish':
-        // Öffentliche Dateien der Erweiterungen nach public/extensions/{name} kopieren (auch ohne pnpm auf dem Server)
+        // Öffentliche Dateien der Erweiterungen nach public/assets/ext/{name} kopieren (auch ohne pnpm auf dem Server);
+        // liegt die Erweiterung noch am alten Ort public/extensions/{name} (Server nicht umgestellt), dorthin (Core\PublicPaths)
         foreach (Core\Extensions::available() as $n => $m) {
+            $dst = Core\PublicPaths::dir(Core\PublicPaths::EXT, $n);
             // public/ (fertig gebaut) – sonst assets/ unverändert, aber nur wenn noch nichts veröffentlicht ist (z. B. Composer-Paket
             // ohne pnpm auf dem Server; Skripte/Stile müssen dafür ohne Bündeln laufen) – ein pnpm-Build wird nie überschrieben
             $src = $m['dir'] . '/public';
-            if (!is_dir($src) && is_dir($m['dir'] . '/assets') && !is_dir(ROOT . '/public/extensions/' . $n)) $src = $m['dir'] . '/assets';
+            if (!is_dir($src) && is_dir($m['dir'] . '/assets') && !is_dir($dst)) $src = $m['dir'] . '/assets';
             if (!is_dir($src)) continue;
-            $dst = ROOT . '/public/extensions/' . $n;
             $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
             foreach ($it as $f) {
                 $target = $dst . '/' . substr($f->getPathname(), strlen($src) + 1);
                 $f->isDir() ? @mkdir($target, 0775, true) : (@mkdir(dirname($target), 0775, true) && false) || copy($f->getPathname(), $target);
             }
-            echo "public/extensions/$n aktualisiert.\n";
+            echo Core\Kit::relative($dst) . " aktualisiert.\n";
         }
         break;
+
+    case 'assets:migrate':
+        // Einmalige Umstellung: alte Ordner ganz oben in public/ → public/assets/ (Core\PublicPaths::migrate, idempotent)
+        $dry = in_array('--dry-run', $args, true);
+        echo "▸ public/: Code- und Design-Dateien nach /assets/" . ($dry ? ' (dry-run – nichts wird geändert)' : '') . "\n";
+        $res = Core\PublicPaths::migrate($dry, fn(string $l) => print($l . "\n"), !in_array('--no-backup', $args, true));
+        if ($res['findings']) {
+            echo "\n! Feste alte Adressen (bitte durch Kit::url()/Theme::asset()/Extension::asset() bzw. relative Pfade ersetzen –\n"
+               . "  bis dahin leitet public/index.php sie mit 301 um):\n";
+            foreach ($res['findings'] as $f) echo "  $f\n";
+        }
+        if (!$dry && $res['changes'] && !$res['errors']) {
+            passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --all >/dev/null', $code);
+            echo $code === 0 ? "▸ Seiten-Cache geleert (cache:clear --all)\n" : "! cache:clear --all fehlgeschlagen – bitte von Hand ausführen\n";
+        }
+        echo $res['errors'] ? "FEHLER ({$res['errors']})\n" : ($dry ? "Dry-run beendet.\n" : "✓ public/ umgestellt: " . implode(', ', array_map(fn($a) => '/' . $a[0], Core\PublicPaths::AREAS)) . "\n");
+        exit($res['errors'] ? 1 : 0);
 
     default:
         // Befehle aktiver Erweiterungen

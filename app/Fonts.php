@@ -12,11 +12,11 @@ namespace Core;
  * Besucher haben nie Kontakt zu Google, Fontsource oder jsDelivr. Auch die Vorschau in der Verwaltung kommt von der
  * eigenen Domain (/admin/fonts/preview/{id}.woff2, zwischengespeichert unter storage/cache/fonts).
  *
- * Installation (für alle Websites der Installation): public/fonts/{id}/
+ * Installation (für alle Websites der Installation): public/assets/fonts/installed/{id}/ (früher public/fonts/{id}/ – Rückfall, Core\PublicPaths)
  *   *.woff2       nur geprüfte Dateien (woff2-Signatur „wOF2“, Größenlimit)
  *   font.css      @font-face je Schnitt/Zeichensatz (font-display: swap, unicode-range)
  *   LICENSE.txt   Lizenztext des Pakets (OFL-1.1, Apache-2.0 oder UFL-1.0 – andere Lizenzen werden abgelehnt)
- * public/fonts/fonts.json: Metadaten (Familie, Schnitte, Lizenz, Copyright, Größe) und Verwendung (Website · Theme).
+ * public/assets/fonts/installed/fonts.json: Metadaten (Familie, Schnitte, Lizenz, Copyright, Größe) und Verwendung (Website · Theme).
  *
  * Style-Editor (Core\Design): installierte Schriften erscheinen in jedem Token vom Typ „font“ als „Name (installiert)“,
  * sofern das Theme sie nicht mit 'design' => ['fonts_extra' => false] ausschließt; design_head() bindet font.css ein.
@@ -65,14 +65,16 @@ final class Fonts
 
     // ------------------------------------------------------------------ Ablage
 
+    /** public/assets/fonts/installed (Rückfall public/fonts, solange nicht umgestellt – Core\PublicPaths) */
     public static function dir(string $sub = ''): string
     {
-        return ROOT . '/public/fonts' . ($sub !== '' ? '/' . $sub : '');
+        return PublicPaths::dir(PublicPaths::FONTS) . ($sub !== '' ? '/' . $sub : '');
     }
 
+    /** /assets/fonts/installed/… (Rückfall /fonts/…) */
     public static function url(string $path): string
     {
-        return base_path() . '/fonts/' . ltrim($path, '/');
+        return base_path() . '/' . PublicPaths::relative(PublicPaths::FONTS) . '/' . ltrim($path, '/');
     }
 
     private static function cacheDir(string $sub = ''): string
@@ -420,7 +422,7 @@ final class Fonts
         $dst = self::dir($id);
         $old = is_dir($dst) ? self::dir('.old-' . $id . '-' . bin2hex(random_bytes(4))) : null;
         if ($old) rename($dst, $old);
-        if (!rename($tmp, $dst)) { if ($old) rename($old, $dst); return $fail(__('Schrift konnte nicht gespeichert werden (Schreibrechte für public/fonts prüfen).')); }
+        if (!rename($tmp, $dst)) { if ($old) rename($old, $dst); return $fail(__('Schrift konnte nicht gespeichert werden (Schreibrechte für public/assets/fonts/installed prüfen).')); }
         if ($old) self::rmdir($old);
         $m = self::manifest();
         $m['fonts'][$id] = $meta;
@@ -497,7 +499,7 @@ final class Fonts
 
     private static function rmdir(string $dir): void
     {
-        // Nur innerhalb von public/fonts
+        // Nur innerhalb von public/assets/fonts/installed
         $real = realpath($dir);
         $root = realpath(self::dir());
         if (!$real || !$root || !str_starts_with($real, $root . DIRECTORY_SEPARATOR)) return;
@@ -515,7 +517,7 @@ final class Fonts
         $fonts = self::installed();
         if (!$fonts) return '';
         $h = '<section class="doc-ch" id="l-installed-fonts"><h2>' . e(__('Installierte Schriften')) . '</h2>'
-            . '<p class="adm-muted">' . e(__('Über Grundeinstellungen → Schriften aus dem Google-Fonts-Katalog installiert und von dieser Website ausgeliefert. Der Lizenztext liegt jeweils neben den Dateien (public/fonts/{id}/LICENSE.txt).')) . '</p><ul>';
+            . '<p class="adm-muted">' . e(__('Über Grundeinstellungen → Schriften aus dem Google-Fonts-Katalog installiert und von dieser Website ausgeliefert. Der Lizenztext liegt jeweils neben den Dateien (public/assets/fonts/installed/{id}/LICENSE.txt).')) . '</p><ul>';
         foreach ($fonts as $id => $f) {
             $h .= '<li><strong>' . e((string) $f['family']) . '</strong> – ' . e((string) ($f['license_name'] ?? $f['license'])) . ' (<code>' . e((string) $f['license']) . '</code>)'
                 . (($f['copyright'] ?? '') !== '' ? '<br><small>' . e((string) $f['copyright']) . '</small>' : '')

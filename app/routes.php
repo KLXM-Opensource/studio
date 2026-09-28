@@ -203,7 +203,7 @@ return function (Router $r): void {
     $r->post('/admin/system/keys', [Admin\SystemController::class, 'generateKeys']);
     $r->post('/admin/system/cache', [Admin\SystemController::class, 'clearCache']);
     $r->post('/admin/system/icon-preview', [Admin\SystemController::class, 'iconPreview']);
-    // Schriften: Google-Fonts-Katalog → selbst gehostet unter public/fonts (Core\Fonts)
+    // Schriften: Google-Fonts-Katalog → selbst gehostet unter public/assets/fonts/installed (Core\Fonts)
     $r->get('/admin/system/fonts', [Admin\FontsController::class, 'index']);
     $r->post('/admin/system/fonts/install', [Admin\FontsController::class, 'install']);
     $r->get('/admin/system/fonts/preview/{id}', [Admin\FontsController::class, 'preview']);

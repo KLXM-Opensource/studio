@@ -37,7 +37,7 @@ Im Projekt: Ordner `extensions/video_tools/`. Als Paket (eigenes Repository):
 
 ```bash
 composer require klxm/studio-video-tools
-php bin/console extensions:publish        # Skript/Stil nach public/extensions/video_tools (oder: pnpm run build)
+php bin/console extensions:publish        # Skript/Stil nach public/assets/ext/video_tools (oder: pnpm run build)
 ```
 
 Paket-Typ ist `mycms-extension`; der geplante neue Typ `klxm-studio-extension` wird vom Core bereits erkannt

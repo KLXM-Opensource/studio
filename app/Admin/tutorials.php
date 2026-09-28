@@ -551,7 +551,7 @@ return [
             ],
             'commands' => "php bin/console kit:create kanzlei                 # Kopie von kits/starter, Präfix starter_ → kanzlei_\ncd tools && pnpm run build\nphp bin/console site:create kunde www.kunde.de kanzlei\nphp bin/console health --site=kunde\nphp kits/kanzlei/tools/contrast.php",
             'tips' => ['<code>kit:create name --from=basis</code> nimmt ein anderes Kit als Vorlage.', 'Budget der Startseite prüfen: CSS &lt; 30 KB, JS &lt; 8 KB (Start-Kit ≈ 15,7 KB / 0,4 KB).'],
-            'pitfalls' => ['Nach Änderungen an <code>assets/</code> neu bauen – <code>public/kits/{name}/</code> enthält nur die gebauten Dateien.', 'Das Start-Kit selbst nicht ändern – es ist die Vorlage für <code>kit:create</code> und wird mit Updates ersetzt.'],
+            'pitfalls' => ['Nach Änderungen an <code>assets/</code> neu bauen – <code>public/assets/kits/{name}/</code> enthält nur die gebauten Dateien.', 'Das Start-Kit selbst nicht ändern – es ist die Vorlage für <code>kit:create</code> und wird mit Updates ersetzt.'],
             'manual' => [['Eigenes Kit entwickeln (Technik)', '/admin/hilfe/technik#start-kit'], ['Kits & Design (Technik)', '/admin/hilfe/technik#kits'], ['Kommandozeile', '/admin/hilfe/technik#cli']],
         ],
     ],

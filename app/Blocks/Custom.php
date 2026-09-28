@@ -691,12 +691,12 @@ final class Custom
             ? "\n        'jsonld' => " . self::export_var(['type' => 'faq', 'items' => $def['jsonld']['items'], 'question' => $def['jsonld']['question'], 'answer' => $def['jsonld']['answer']], 2) . ','
             : ($def['jsonld']['type'] === 'item' ? "\n        'jsonld' => fn(\\Core\\Block \$b) => \\Core\\Blocks\\Custom::jsonld(\$b, " . self::export_var($def['jsonld'], 2) . '),' : '');
         $snippet = "<?php\n// theme.php → 'blocks' – Block „{$def['label']}“ (exportiert aus dem Block-Designer, " . date('Y-m-d') . ")\n"
-            . "// Dateien: blocks/{$key}.php → kits/{name}/blocks/, {$cssName} → kits/{name}/assets/{$cssName} (Build kopiert nach public/kits/{name}/{$cssName})\n"
+            . "// Dateien: blocks/{$key}.php → kits/{name}/blocks/, {$cssName} → kits/{name}/assets/{$cssName} (Build kopiert nach public/assets/kits/{name}/{$cssName})\n"
             . "return [\n    '{$key}' => " . rtrim(substr(self::export_var($themeDef, 1), 0, -1)) . $jsonld . "\n    ],\n];\n\n"
             . "// theme.php → 'conditional_css' (CSS nur auf Seiten mit dem Block):\n// '{$cssName}' => ['{$key}'],\n";
         $readme = "Block „{$def['label']}“ als Kit-Block\n" . str_repeat('=', 40) . "\n\n"
             . "1. blocks/{$key}.php nach kits/<kit>/blocks/ kopieren.\n"
-            . "2. {$cssName} nach kits/<kit>/assets/{$cssName} kopieren (bzw. direkt nach public/kits/<theme>/{$cssName}).\n"
+            . "2. {$cssName} nach kits/<kit>/assets/{$cssName} kopieren (bzw. direkt nach public/assets/kits/<theme>/{$cssName}).\n"
             . "3. Den Eintrag aus theme-snippet.php in theme.php unter 'blocks' einfügen und 'conditional_css' ergänzen.\n"
             . "4. Blocktyp heißt „{$key}“. Klassen (.cblk-" . str_replace('_', '-', $key) . ") und Ausgabe sind identisch zum eigenen Block;\n"
             . "   der Renderer nutzt Core\\Blocks\\Runtime (Escaping, Filter, Grenzen) und bleibt damit sicher.\n"

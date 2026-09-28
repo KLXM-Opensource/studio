@@ -20,7 +20,7 @@ kommentiert – aber jeweils nur einmal und so knapp wie möglich. Kein Showcase
    php bin/console kit:create meinkit              # Standard: --from=starter
    php bin/console kit:create meinkit --from=basis # oder ein anderes Kit als Vorlage
    ```
-2. **Bauen**: `cd tools && pnpm run build` → `public/kits/meinkit/{css,js}`
+2. **Bauen**: `cd tools && pnpm run build` → `public/assets/kits/meinkit/{css,js}`
 3. **Testwebsite**: `php bin/console site:create meinkit meinkit.localhost meinkit`, dann
    `php bin/console user:create ich@example.com admin --site=meinkit` – beim ersten Aufruf spielt der Core
    `seed.php` ein.

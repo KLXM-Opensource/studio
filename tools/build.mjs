@@ -5,12 +5,15 @@
  *   pnpm watch         Assets bei Änderungen neu bauen
  *
  * Quellen:  resources/{css,js}          → public/assets/{css,js}          (Core: Admin + Editor)
- *           kits/{name}/assets/…        → public/kits/{name}/…            (je Kit; Rückfall themes/{name}/assets)
+ *           kits/{name}/assets/…        → public/assets/kits/{name}/…     (je Kit; Rückfall themes/{name}/assets)
+ *           extensions/{name}/assets/…  → public/assets/ext/{name}/…      (je Erweiterung)
+ *           Alles liegt unter public/assets/ – ganz oben in public/ würde jeder Ordner die gleichnamige Seitenadresse
+ *           sperren (Core\PublicPaths; alte Orte public/kits, public/extensions: bin/console assets:migrate)
  * Vendoren: node_modules                → public/assets/vendor              (Core: Editor.js, PDF.js, MapLibre)
  * Symbole:  resources/icons/icons.json    → public/assets/icons/{core,thema}.svg, icons.svg, icons-map.json, catalog.json (Phosphor duotone, tools/icons.mjs)
  * Kits:     kits/{name}/build.mjs       → eigene Vendoren des Kits (z. B. Schriften), Pakete aus
  *           kits/{name}/package.json    (wird bei Bedarf automatisch installiert)
- *           Ältere Kits unter themes/{name}/ werden ebenso gebaut (Ausgabe immer nach public/kits/{name})
+ *           Ältere Kits unter themes/{name}/ werden ebenso gebaut (Ausgabe immer nach public/assets/kits/{name})
  *
  * Auf dem Server wird weder Node noch pnpm benötigt – die gebauten Dateien liegen in /public.
  */
@@ -24,6 +27,9 @@ import { icons } from './icons.mjs';
 const TOOLS = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(TOOLS, '..');
 const PUB = path.join(ROOT, 'public');
+// Ablage der Kits und Erweiterungen (wie Core\PublicPaths::AREAS)
+const KITS_OUT = path.join(PUB, 'assets/kits');
+const EXT_OUT = path.join(PUB, 'assets/ext');
 const args = process.argv.slice(2);
 
 const nm = (...p) => path.join(TOOLS, 'node_modules', ...p);
@@ -149,7 +155,7 @@ async function themeVendors() {
     };
     console.log(`Kit ${theme}:`);
     const mod = await import(pathToFileURL(hook).href);
-    await mod.vendors?.({ copy, pkg, theme, themeDir: dir, publicDir: path.join(PUB, 'kits', theme), root: ROOT });
+    await mod.vendors?.({ copy, pkg, theme, themeDir: dir, publicDir: path.join(KITS_OUT, theme), root: ROOT });
   }
 }
 
@@ -172,13 +178,13 @@ function entries() {
   add(path.join(ROOT, 'resources'), path.join(PUB, 'assets'));
   for (const [theme, dir] of kits()) {
     const src = path.join(dir, 'assets');
-    if (fs.existsSync(src)) add(src, path.join(PUB, 'kits', theme));
+    if (fs.existsSync(src)) add(src, path.join(KITS_OUT, theme));
   }
-  // Erweiterungen: extensions/{name}/assets → public/extensions/{name}
+  // Erweiterungen: extensions/{name}/assets → public/assets/ext/{name}
   const extDir = path.join(ROOT, 'extensions');
   if (fs.existsSync(extDir)) for (const ext of fs.readdirSync(extDir)) {
     const src = path.join(extDir, ext, 'assets');
-    if (fs.existsSync(src)) add(src, path.join(PUB, 'extensions', ext));
+    if (fs.existsSync(src)) add(src, path.join(EXT_OUT, ext));
   }
   return list;
 }

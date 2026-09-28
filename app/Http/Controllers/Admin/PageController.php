@@ -100,12 +100,13 @@ final class PageController extends AdminController
         return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
     }
 
-    /** Systemadressen ganz oben (Ordner in public/, feste Routen) – nur ohne übergeordnete Seite und ohne Sprachpräfix */
-    public const RESERVED_SLUGS = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'pools', 'sites', 'fonts', 'extensions', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
+    /** Systemadressen ganz oben (Ordner in public/, feste Routen) – zentrale Liste: Core\PublicPaths::RESERVED_SLUGS */
+    public const RESERVED_SLUGS = \Core\PublicPaths::RESERVED_SLUGS;
 
+    /** Nur ohne übergeordnete Seite und ohne Sprachpräfix; dazu jeder Ordner, der (noch) in public/ liegt (z. B. kits vor assets:migrate) */
     public static function reservedSlug(string $slug, ?int $parentId, ?string $lang): bool
     {
-        return $parentId === null && ($lang === null || $lang === \Core\Lang::default()) && in_array($slug, self::RESERVED_SLUGS, true);
+        return $parentId === null && ($lang === null || $lang === \Core\Lang::default()) && \Core\PublicPaths::isReserved($slug);
     }
 
     private function validate(Request $r, ?array $page): array
@@ -140,7 +141,7 @@ final class PageController extends AdminController
             $lang = $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null);
             // Bestehende Seiten dürfen ihre (alte) Adresse behalten – das Formular warnt dann (self::reservedSlug)
             if (self::reservedSlug($slug, $parentId, $lang) && !($page && $slug === $page['slug'] && $parentId === ($page['parent_id'] ? (int) $page['parent_id'] : null))) {
-                $errors['slug'] = __('Diese Adresse ist reserviert: Unter /{slug} liegen Dateien des Systems (z. B. Kits, Medien) – eine Seite wäre dort nicht erreichbar. Bitte eine andere Adresse wählen.', ['slug' => $slug]);
+                $errors['slug'] = __('Diese Adresse ist reserviert: Unter /{slug} liegen Dateien oder Funktionen des Systems (z. B. Medien, Assets, Verwaltung) – eine Seite wäre dort nicht erreichbar. Bitte eine andere Adresse wählen.', ['slug' => $slug]);
             } elseif (Pages::slugTaken($slug, $parentId, $page ? (int) $page['id'] : null, $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null))) {
                 $errors['slug'] = 'Auf dieser Ebene gibt es schon eine Seite mit dieser Adresse.';
             }

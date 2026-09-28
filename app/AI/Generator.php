@@ -275,8 +275,7 @@ final class Generator
         $lang = Lang::valid((string) ($in['language'] ?? '')) && $in['language'] !== Lang::default() ? (string) $in['language'] : null;
         $parent = ctype_digit((string) ($in['parent'] ?? '')) && (int) $in['parent'] > 0 && Pages::find((int) $in['parent']) ? (int) $in['parent'] : null;
         $slug = $d['slug'] ?: Pages::slugify($d['title']);
-        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
-        if (in_array($slug, $reserved, true)) $slug .= '-seite';
+        if (!$parent && !$lang && \Core\PublicPaths::isReserved($slug)) $slug .= '-seite';
         $base = $slug;
         for ($n = 2; Pages::slugTaken($slug, $parent, null, $lang); $n++) $slug = $base . '-' . $n;
         $blocks = Pages::sanitizeBlocks(array_map(fn($s) => ['type' => $s['type'], 'data' => $s['data'], 'tunes' => ['section' => []]], $d['sections']));

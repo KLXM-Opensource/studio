@@ -511,8 +511,7 @@ final class CmsService
 
     private function assertSlug(string $slug, ?int $ownId, ?int $parentId = null, ?string $lang = null): void
     {
-        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'mcp', 'home', 'sitemap-xml', 'robots-txt', 'index-php'];
-        if (in_array($slug, $reserved, true) && !($ownId && (Pages::find($ownId)['slug'] ?? null) === $slug)) {   // bestehende Seiten behalten ihre Adresse
+        if (!$parentId && ($lang === null || $lang === \Core\Lang::default()) && \Core\PublicPaths::isReserved($slug, ['mcp']) && !($ownId && (Pages::find($ownId)['slug'] ?? null) === $slug)) {   // bestehende Seiten behalten ihre Adresse
             throw new ApiError(422, "Die Adresse „{$slug}“ ist reserviert.");
         }
         if (Pages::slugTaken($slug, $parentId, $ownId, $lang)) {

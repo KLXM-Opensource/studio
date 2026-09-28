@@ -192,8 +192,8 @@ for (const p of all) {
 
 if (fs.existsSync(path.join(ROOT, 'public/assets/vendor'))) {
   for (const f of REQUIRED_FILES) if (!fs.existsSync(path.join(ROOT, f))) problems.push(`Lizenzdatei fehlt: ${f} (pnpm --dir tools build)`);
-  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/kits, Rückfall public/themes)
-  for (const root of ['public/kits', 'public/themes']) {
+  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/assets/kits, Rückfall public/kits, public/themes)
+  for (const root of ['public/assets/kits', 'public/kits', 'public/themes']) {
     const pubThemes = path.join(ROOT, root);
     for (const t of fs.existsSync(pubThemes) ? fs.readdirSync(pubThemes) : []) {
       const fonts = path.join(pubThemes, t, 'fonts');

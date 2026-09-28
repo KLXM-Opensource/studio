@@ -2,7 +2,7 @@
   <p class="lead">Eine Installation, beliebig viele Websites und Domains. Code, Kits und Updates teilen sich alle; Inhalte, Benutzer, Medien und Schlüssel sind je Website vollständig getrennt.</p>
   <table class="doc-table">
     <tr><th>Gemeinsam (einmal je Installation)</th><th>Getrennt (je Website)</th></tr>
-    <tr><td><code>app/</code>, <code>vendor/</code>, <code>kits/</code>, <code>public/assets</code>, <code>public/kits</code>, Proxy-Cache, Sitzungsdateien, Netzwerk-Konten, Medien-Pools, geteilte Tabellen, Support-Datenbank, KI-Anbieter (<code>storage/ai/config.json</code>)</td>
+    <tr><td><code>app/</code>, <code>vendor/</code>, <code>kits/</code>, <code>public/assets</code> (inkl. Kits, Erweiterungen, installierte Schriften), Proxy-Cache, Sitzungsdateien, Netzwerk-Konten, Medien-Pools, geteilte Tabellen, Support-Datenbank, KI-Anbieter (<code>storage/ai/config.json</code>)</td>
         <td>Datenbank (Seiten, Daten, Benutzer, Rollen, API-Tokens, Einstellungen, Anfragen), Medien, Seiten-Cache, Uploads, Spam-Log, <code>app_key</code>, <code>setup_token</code>, Session-Cookie, App-Icons, Suchindex, KI-Schalter und -Zähler, Design-Werte</td></tr>
   </table>
   <h3>Neue Website anlegen</h3>

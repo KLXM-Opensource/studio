@@ -39,7 +39,7 @@ kits/nature/
 └── build.mjs        kopiert die Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
 ```
 
-Build: `cd tools && pnpm run build` → `public/kits/nature/{css,js,fonts}`. Muster neu erzeugen: `php kits/nature/tools/patterns.php`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/nature/{css,js,fonts}`. Muster neu erzeugen: `php kits/nature/tools/patterns.php`.
 
 ## Budgets (minifiziert, gemessen auf der Demo-Startseite)
 
@@ -136,5 +136,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Fraunces, Nunito Sans, Young Serif, Source Sans 3 – SIL Open Font License 1.1 (`public/kits/nature/fonts/OFL-{key}.txt`).
+Fraunces, Nunito Sans, Young Serif, Source Sans 3 – SIL Open Font License 1.1 (`public/assets/kits/nature/fonts/OFL-{key}.txt`).
 Symbole: Phosphor (Kern-Sprite, MIT). Illustrationen und Muster: im Kit erzeugt, frei verwendbar.
