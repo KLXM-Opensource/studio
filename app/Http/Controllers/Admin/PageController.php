@@ -100,6 +100,14 @@ final class PageController extends AdminController
         return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
     }
 
+    /** Systemadressen ganz oben (Ordner in public/, feste Routen) – nur ohne übergeordnete Seite und ohne Sprachpräfix */
+    public const RESERVED_SLUGS = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'pools', 'sites', 'fonts', 'extensions', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
+
+    public static function reservedSlug(string $slug, ?int $parentId, ?string $lang): bool
+    {
+        return $parentId === null && ($lang === null || $lang === \Core\Lang::default()) && in_array($slug, self::RESERVED_SLUGS, true);
+    }
+
     private function validate(Request $r, ?array $page): array
     {
         $title = mb_substr(strip_tags($r->str('title')), 0, 120);
@@ -128,10 +136,11 @@ final class PageController extends AdminController
         if ($title === '') {
             $errors['title'] = 'Bitte einen Titel angeben.';
         }
-        $reserved = ['admin', 'api', 'anfrage', 'assets', 'media', 'kits', 'themes', 'sitemap-xml', 'robots-txt', 'home', 'index-php'];
         if (!$page || (!$page['is_home'] && !NotFound::isPage($page))) {
-            if (in_array($slug, $reserved, true) && $slug !== ($page['slug'] ?? null)) {   // bestehende Seiten behalten ihre Adresse
-                $errors['slug'] = 'Diese Adresse ist reserviert.';
+            $lang = $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null);
+            // Bestehende Seiten dürfen ihre (alte) Adresse behalten – das Formular warnt dann (self::reservedSlug)
+            if (self::reservedSlug($slug, $parentId, $lang) && !($page && $slug === $page['slug'] && $parentId === ($page['parent_id'] ? (int) $page['parent_id'] : null))) {
+                $errors['slug'] = __('Diese Adresse ist reserviert: Unter /{slug} liegen Dateien des Systems (z. B. Kits, Medien) – eine Seite wäre dort nicht erreichbar. Bitte eine andere Adresse wählen.', ['slug' => $slug]);
             } elseif (Pages::slugTaken($slug, $parentId, $page ? (int) $page['id'] : null, $page ? ($page['lang'] ?: null) : ($data['lang'] ?? null))) {
                 $errors['slug'] = 'Auf dieser Ebene gibt es schon eine Seite mit dieser Adresse.';
             }

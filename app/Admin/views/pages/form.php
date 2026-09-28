@@ -38,7 +38,10 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
         <?php endforeach; ?>
       </select><p class="f-help">Unterseiten erhalten die Adresse der übergeordneten Seite als Präfix, z. B. /leistungen/vorsorge.</p></div>
     <div class="f<?= isset($errors['slug']) ? ' f--error' : '' ?>"><label for="slug">Adresse (URL)</label>
-      <div class="adm-prefix"><span><?= e(site_url()) ?>/<?= e($parentPath) ?></span><input id="slug" name="slug" value="<?= e($old['slug'] ?? '') ?>" placeholder="wird aus dem Titel erzeugt"<?= $inv('slug') ?>></div><?= $err('slug') ?></div>
+      <div class="adm-prefix"><span><?= e(site_url()) ?>/<?= e($parentPath) ?></span><input id="slug" name="slug" value="<?= e($old['slug'] ?? '') ?>" placeholder="wird aus dem Titel erzeugt"<?= $inv('slug') ?>></div><?= $err('slug') ?>
+      <?php if (!isset($errors['slug']) && !empty($page) && \Core\Http\Controllers\Admin\PageController::reservedSlug((string) $page['slug'], $page['parent_id'] ? (int) $page['parent_id'] : null, $page['lang'] ?: null)): ?>
+      <p class="f-warn" role="status"><?= e(__('Achtung: Unter /{slug} liegen Dateien des Systems – diese Seite ist dort für Besucher nicht erreichbar. Bitte eine andere Adresse wählen.', ['slug' => $page['slug']])) ?></p>
+      <?php endif; ?></div>
     <?php endif; ?>
     <div class="f"><label for="meta_title"><?= e(__('Titel für Suchmaschinen (optional)')) ?></label>
       <input id="meta_title" name="meta_title" maxlength="120" data-max="<?= \Core\AI\SeoCheck::TITLE_MAX - mb_strlen(\Core\AI\Assist::titleSuffix()) ?>" value="<?= e($old['meta_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? '') ?>" aria-describedby="meta_title-h">

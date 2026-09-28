@@ -2415,3 +2415,5 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .pt-ext--info{background:var(--adm-info-bg);color:var(--adm-a-ink)}
 .pt-node[aria-selected=true] > .pt-row .pt-ext{background:rgba(255,255,255,.22);color:#fff}
 @media (forced-colors:active){.pt-ext{border:1px solid CanvasText}}
+/* Seiten: Adresse liegt auf einem Systemordner (PageController::reservedSlug) */
+.f-warn{margin:.4em 0 0;color:var(--adm-warn);font-weight:600}
