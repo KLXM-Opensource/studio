@@ -98,12 +98,21 @@ final class SchemaPanel
 
     // ================================================================= Selbsttest (php bin/console data:selftest)
 
+    /** Schlüssel verschachtelter Einstellungen sortieren (Reihenfolge ist für Einstellungen ohne Bedeutung) */
+    private static function sorted(mixed $v): mixed
+    {
+        if (!is_array($v)) return $v;
+        if (!array_is_list($v)) ksort($v);
+        return array_map([self::class, 'sorted'], $v);
+    }
+
     /**
      * Rundlauf und Seitenleiste: validate(toInput($t), $t) ergibt für jede Tabelle dieselbe Definition; vorübergehende Tabellen
      * (Inhalt + Eingang) prüfen Hinzufügen, Reihenfolge, Pflicht, Dateitypen, Bestätigung beim Löschen, Umbenennen in der Auswahl
      * und die Regeln des Eingangs (Typen, Dateien nur per E-Mail). Die vorübergehenden Tabellen werden danach gelöscht.
+     * $readOnly (Konsole --roundtrip): nur der Rundlauf – ändert nichts, auch auf Live-Websites unbedenklich.
      */
-    public static function selftest(): array
+    public static function selftest(bool $readOnly = false): array
     {
         $ok = 0;
         $fails = [];
@@ -111,20 +120,32 @@ final class SchemaPanel
             if ($got === $want) { $ok++; return; }
             $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
         };
-        // Rundlauf aller Tabellen, deren Felder diese Website ändern darf
+        // Rundlauf aller Tabellen, deren Felder diese Website ändern darf. Erlaubte Abweichungen = was auch der Tabellen-Designer
+        // beim Speichern bereinigt: fehlende Einstellungen älterer Tabellen (Standardwert), Übersetzungen in Sprachen, die die
+        // Website nicht (mehr) hat, das automatisch ergänzte Titel-Feld.
+        $langs = fn(array $a) => array_filter($a, fn($lc) => \Core\Lang::valid((string) $lc), ARRAY_FILTER_USE_KEY);
         foreach (Tables::all() as $t) {
             if (isset($t['shared']) && !Shared::isOwner($t)) continue;
             [$def, $errors] = Tables::validate(Tables::toInput($t), $t);
             $eq("Rundlauf {$t['handle']}: keine Fehler", $errors, []);
-            $eq("Rundlauf {$t['handle']}: Felder", $def['fields'], $t['fields']);
+            $want = array_map(function (array $f) use ($langs) {
+                foreach (['labels', 'options_i18n'] as $k) {
+                    if (isset($f[$k])) { $f[$k] = $langs((array) $f[$k]); if (!$f[$k]) unset($f[$k]); }
+                }
+                return $f;
+            }, $t['fields']);
+            $eq("Rundlauf {$t['handle']}: Felder", $def['fields'], $want);
             $want = $t['settings'];
+            if (isset($want['inbox'])) $want['inbox']['delivery'] = (array) ($want['inbox']['delivery'] ?? []) + Delivery::DEFAULTS;   // ältere Eingänge ohne Zustellung
+            if (isset($want['search']['labels'])) { $want['search']['labels'] = $langs($want['search']['labels']); if (!$want['search']['labels']) unset($want['search']['labels']); }
             foreach ($def['settings'] as $k => $v) {
-                if ($k === 'title_field' && $v === '') continue;          // automatisch ergänzt (hydrate)
+                if (!array_key_exists($k, $want) || ($k === 'title_field' && $v === '')) continue;
                 if ($k === 'form') { unset($v['known'], $want['form']['known']); }
-                $eq("Rundlauf {$t['handle']}: settings.$k", $v, $want[$k] ?? null);
+                $eq("Rundlauf {$t['handle']}: settings.$k", self::sorted($v), self::sorted($want[$k]));
             }
         }
 
+        if ($readOnly) return ['ok' => $ok, 'fails' => $fails];     // --roundtrip: nur prüfen, nichts anlegen
         $sfx = bin2hex(random_bytes(3));
         $made = [];
         try {

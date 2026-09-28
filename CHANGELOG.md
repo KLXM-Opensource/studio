@@ -33,7 +33,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   `dff-help--file`), beide in `aria-describedby` – im Kern (`DataForms::render`) und im Kit praxis (`partials/form.php`,
   zeigt Hilfetexte jetzt auch bei anderen Feldern).
 - Selbsttest `php bin/console data:selftest` (Rundlauf aller Tabellen, Seitenleiste mit vorübergehenden Inhalts- und
-  Eingangstabellen); `inbox:selftest` prüft die getrennten Hinweise. Handbuch „Daten → Felder direkt auf der Seite
+  Eingangstabellen; `--roundtrip` nur Rundlauf, ändert nichts); `inbox:selftest` prüft die getrennten Hinweise. Handbuch „Daten → Felder direkt auf der Seite
   ändern“ und „Seiten bearbeiten“, Entwicklerhandbuch „Seiten-Editor“, „Formulare“, „Kommandozeile“, `lang/en.php`.
 
 ### Formulare: Dateifeld fehlte im Eingangs-Formular; erlaubte Dateitypen je Dateifeld
