@@ -8,7 +8,7 @@
  *  - Übersetzen: Prüfansicht Quelle | Vorschlag (bearbeitbar) je Feld; vorhandene Übersetzungen nur nach Bestätigung ersetzen
  *  - SEO: Karte in Seiteneinstellungen und Einträgen, SEO-Übersicht (/admin/seo)
  *  - Medien: Alt-Text beim Hochladen und in der Info-Spalte, Sammel-Vorschläge für Bilder ohne Alt-Text
- *  - Support (Antwortvorschlag, Wissensartikel überarbeiten), Tabellen-Baukasten (Felder vorschlagen)
+ *  - Support (Antwortvorschlag, Wissensartikel überarbeiten), Tabellen-Designer (Felder vorschlagen)
  *
  * Shadow DOM: Dialoge hängen in der gemeinsamen Ebene (_shadow.js → layerBox()); Ereignisse über composedPath.
  * Konfiguration: <script type="application/json" id="cms-ai"> (Core\AI\Assist::clientScript) – fehlt sie, bleibt alles aus.
@@ -861,7 +861,7 @@ async function bulkAltLang(to, finder) {
   });
 }
 
-// ================================================================== 5. Support & Tabellen-Baukasten
+// ================================================================== 5. Support & Tabellen-Designer
 function initSupport(scope) {
   if (!can('text')) return;
   // Antwortvorschlag (nur Support-Team: Auswahl „Interne Notiz“ ist sichtbar)

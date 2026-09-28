@@ -236,7 +236,7 @@ final class Database
         EmailChange::ensureTable($this);
         // „Passwort vergessen“ (Core\PasswordReset): Links nur als Hash, 60 Minuten, einmal verwendbar
         PasswordReset::ensureTable($this);
-        // Eigene Blöcke (Block-Baukasten, Core\Blocks\Custom): Definitionen und Verlauf je Website
+        // Eigene Blöcke (Block-Designer, Core\Blocks\Custom): Definitionen und Verlauf je Website
         Blocks\Custom::ensureTable($this);
         // Externe Quellen (Core\Sources): Feeds/APIs/OpenImmo → Datentabellen, Herkunft je Eintrag, Protokoll
         Sources\Sources::ensureTable($this);

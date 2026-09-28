@@ -53,7 +53,7 @@
   <div class="doc-note doc-note--info"><strong>Suchmaschinen</strong><p>Detailseiten erhalten automatisch Titel, Beschreibung (aus dem gewählten Beschreibungs-Feld), Vorschaubild und stehen in der Sitemap. Einträge im Entwurf sind nur für Angemeldete sichtbar.</p></div>
 
   <h3 id="bedingungen">Felder, die nur manchmal gebraucht werden (Bedingungen)</h3>
-  <p>Im Tabellen-Baukasten hat jedes Feld den aufklappbaren Bereich <b>Bedingungen</b>. Dort formulieren Sie Sätze wie „Feld nur anzeigen, wenn <b>Anrede</b> <b>ist gleich</b> <b>Firma</b>“.</p>
+  <p>Im Tabellen-Designer hat jedes Feld den aufklappbaren Bereich <b>Bedingungen</b>. Dort formulieren Sie Sätze wie „Feld nur anzeigen, wenn <b>Anrede</b> <b>ist gleich</b> <b>Firma</b>“.</p>
   <ul>
     <li><b>Feld nur anzeigen, wenn …</b> – sonst ist das Feld im Formular ausgeblendet; ein Wert darin wird beim Speichern verworfen. Mehrere Bedingungen: „alle treffen zu“ oder „eine davon trifft zu“.</li>
     <li><b>Pflichtfeld, wenn …</b> – z. B. IBAN nur bei Zahlungsart „Lastschrift“ verpflichtend.</li>
@@ -65,7 +65,7 @@
   <p>Der Feldtyp <b>IBAN</b> prüft Ländercode, Länge und Prüfziffer – Tippfehler fallen sofort auf. Die Eingabe wird automatisch in Vierergruppen gegliedert. Mit „In Listen maskieren“ (Standard) zeigen Liste und Website nur z. B. <code>DE89 **** **** **** **** 00</code>; die vollständige IBAN sehen Sie im Eintrag.</p>
 
   <h3 id="gruppe">Mehrere gleichartige Angaben (Wiederholbare Gruppe)</h3>
-  <p>Der Feldtyp <b>Wiederholbare Gruppe</b> fasst mehrere Unterfelder zu einer Zeile zusammen, die sich im Formular beliebig oft hinzufügen lässt – z. B. mehrere Medikamente mit Stärke und Packungsgröße oder mehrere Ansprechpersonen. Im Baukasten legen Sie die Unterfelder (Text, Zahl, Auswahl, Datum, E-Mail, Telefon, Ja/Nein, IBAN …), die Mindest- und Höchstzahl sowie die Beschriftungen („Medikament“, „+ Weiteres Medikament“) fest. Leere Zeilen werden beim Speichern ignoriert; in der Liste steht eine Kurzfassung wie „Ibuprofen, Paracetamol +1“.</p>
+  <p>Der Feldtyp <b>Wiederholbare Gruppe</b> fasst mehrere Unterfelder zu einer Zeile zusammen, die sich im Formular beliebig oft hinzufügen lässt – z. B. mehrere Medikamente mit Stärke und Packungsgröße oder mehrere Ansprechpersonen. Im Tabellen-Designer legen Sie die Unterfelder (Text, Zahl, Auswahl, Datum, E-Mail, Telefon, Ja/Nein, IBAN …), die Mindest- und Höchstzahl sowie die Beschriftungen („Medikament“, „+ Weiteres Medikament“) fest. Leere Zeilen werden beim Speichern ignoriert; in der Liste steht eine Kurzfassung wie „Ibuprofen, Paracetamol +1“.</p>
 
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>

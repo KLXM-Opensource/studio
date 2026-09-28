@@ -47,7 +47,7 @@ final class Permissions
                 // Haupt-Admin: Funktionen & Erweiterungen der Website schalten (Core\Features) – im Netzwerk nur mit Freigabe
                 'system.features' => __('Funktionen & Erweiterungen ein- und ausschalten (Haupt-Admin)'),
                 'design.edit' => __('Design (Style-Editor)'),
-                'blocks.build' => __('Eigene Blöcke bauen und freigeben (Block-Baukasten)'),
+                'blocks.build' => __('Eigene Blöcke bauen und freigeben (Block-Designer)'),
                 'users.manage' => __('Benutzer und Rollen'),
                 'api.manage' => __('API & MCP'),
             ],

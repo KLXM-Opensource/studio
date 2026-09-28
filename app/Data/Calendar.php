@@ -14,7 +14,7 @@ use RRule\RRule;
 /**
  * Kalender für Datentabellen: Termine mit Beginn/Ende, ganztägig, Wiederholung (RFC 5545 RRULE) und Ausnahmen.
  *
- * Tabellen-Einstellung settings.calendar (Tabellen-Baukasten → „Als Kalender nutzen“):
+ * Tabellen-Einstellung settings.calendar (Tabellen-Designer → „Als Kalender nutzen“):
  *   enabled, start (date|datetime), end (date|datetime, optional), all_day (bool), recurrence (recurrence),
  *   location (text|textarea|geo), description (text|textarea|richtext), category (select|multiselect),
  *   duration (Minuten, wenn kein Ende gepflegt ist), feed (öffentlicher iCal-Feed /kalender/{handle}.ics)

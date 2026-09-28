@@ -13,7 +13,7 @@ use Core\Pages;
 use Core\StructuredData;
 
 /**
- * Eigene Blöcke (Block-Baukasten, Verwaltung → Blöcke): Admins und Integratoren bauen Blöcke aus Feldern, einer sicheren
+ * Eigene Blöcke (Block-Designer, Verwaltung → Blöcke): Admins und Integratoren bauen Blöcke aus Feldern, einer sicheren
  * Vorlage (Core\Blocks\Template) und begrenztem CSS (Core\Blocks\Css) – ohne PHP, ohne eigenes JavaScript.
  *
  * Speicher je Website: custom_blocks (Arbeitsstand + veröffentlichte Fassung) und custom_block_versions (Verlauf).
@@ -188,7 +188,7 @@ final class Custom
         return ['css' => $css, 'media' => $media];
     }
 
-    /** schema.org-Daten nach der Zuordnung im Baukasten (FAQ oder Einträge eines Typs) */
+    /** schema.org-Daten nach der Zuordnung im Block-Designer (FAQ oder Einträge eines Typs) */
     public static function jsonld(Block $b, ?array $spec = null): ?array
     {
         $spec ??= (array) ($b->def['cblk']['jsonld'] ?? []);
@@ -239,7 +239,7 @@ final class Custom
 
     // ================================================================== Prüfen & Normalisieren
 
-    /** Feldtypen des Baukastens: Typ => [Bezeichnung, Symbol] */
+    /** Feldtypen des Block-Designers: Typ => [Bezeichnung, Symbol] */
     public static function fieldTypes(): array
     {
         return [
@@ -258,7 +258,7 @@ final class Custom
     }
 
     /**
-     * Eingaben des Baukastens → Definition. Fehler in Name/Feldern verhindern das Speichern;
+     * Eingaben des Block-Designers → Definition. Fehler in Name/Feldern verhindern das Speichern;
      * Vorlage und CSS werden getrennt geprüft (check) – ein Entwurf mit Fehlern lässt sich speichern, aber nicht freigeben.
      * @return array{0: array, 1: array<string, string>}
      */
@@ -690,7 +690,7 @@ final class Custom
         $jsonld = $def['jsonld']['type'] === 'faq'
             ? "\n        'jsonld' => " . self::export_var(['type' => 'faq', 'items' => $def['jsonld']['items'], 'question' => $def['jsonld']['question'], 'answer' => $def['jsonld']['answer']], 2) . ','
             : ($def['jsonld']['type'] === 'item' ? "\n        'jsonld' => fn(\\Core\\Block \$b) => \\Core\\Blocks\\Custom::jsonld(\$b, " . self::export_var($def['jsonld'], 2) . '),' : '');
-        $snippet = "<?php\n// theme.php → 'blocks' – Block „{$def['label']}“ (exportiert aus dem Block-Baukasten, " . date('Y-m-d') . ")\n"
+        $snippet = "<?php\n// theme.php → 'blocks' – Block „{$def['label']}“ (exportiert aus dem Block-Designer, " . date('Y-m-d') . ")\n"
             . "// Dateien: blocks/{$key}.php → kits/{name}/blocks/, {$cssName} → kits/{name}/assets/{$cssName} (Build kopiert nach public/kits/{name}/{$cssName})\n"
             . "return [\n    '{$key}' => " . rtrim(substr(self::export_var($themeDef, 1), 0, -1)) . $jsonld . "\n    ],\n];\n\n"
             . "// theme.php → 'conditional_css' (CSS nur auf Seiten mit dem Block):\n// '{$cssName}' => ['{$key}'],\n";

@@ -27,7 +27,7 @@ $adminNav = array_values(array_filter([
     // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
     ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', $user && \Core\Features::canView()],
     ['/admin/design', __('Design'), 'design', $user && \Core\Features::on('design') && can('design.edit')],
-    // Block-Baukasten (Core\Blocks\Custom): eigene Blöcke für die Redaktion
+    // Block-Designer (Core\Blocks\Custom): eigene Blöcke für die Redaktion
     ['/admin/blocks', __('Blöcke'), 'blocks', $user && \Core\Features::on('blocks.custom') && can('blocks.build')],
     // Landingpages mit eigenen Domains (Core\Landings)
     ['/admin/landingpages', __('Landingpages'), 'landings', $user && \Core\Features::on('landings') && can('system.manage')],

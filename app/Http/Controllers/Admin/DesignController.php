@@ -93,15 +93,15 @@ final class DesignController extends AdminController
             'other_theme' => $theme !== null && $theme !== app()->theme->name ? $theme : null]);
     }
 
-    /** Seiten für die Vorschau-Auswahl; Musterseite des Themes (design.sample = Pfad) zuerst */
+    /** Seiten für die Vorschau-Auswahl; Musterseite des Themes (design.sample = Pfad oder Liste von Pfaden) zuerst */
     private static function previewPages(): array
     {
         $out = [];
-        $sample = (string) (Design::def()['sample'] ?? '');
+        $sample = array_values(array_filter(array_map('strval', (array) (Design::def()['sample'] ?? '')), 'strlen'));
         foreach (Pages::flat() as $p) {
             if (($p['type'] ?? 'page') !== 'page') continue;
-            $isSample = $sample !== '' ? in_array($sample, [(string) ($p['path'] ?? ''), (string) ($p['slug'] ?? '')], true)
-                : in_array((string) ($p['slug'] ?? ''), ['muster', 'musterseite', 'styleguide'], true);
+            $isSample = $sample ? (bool) array_intersect($sample, [(string) ($p['path'] ?? ''), (string) ($p['slug'] ?? '')])
+                : in_array((string) ($p['slug'] ?? ''), ['muster', 'musterseite', 'musterseiten', 'styleguide'], true);
             $row = ['id' => (int) $p['id'], 'title' => (string) $p['title'], 'depth' => (int) ($p['depth'] ?? 0), 'home' => !empty($p['is_home']), 'sample' => $isSample];
             if ($isSample) array_unshift($out, $row); else $out[] = $row;
             if (count($out) >= 60) break;

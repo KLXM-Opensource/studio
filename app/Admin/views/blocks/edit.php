@@ -1,6 +1,6 @@
 <?php
 /**
- * Block-Baukasten: Felder, Vorlage, CSS, Beispieldaten, Einstellungen, Verlauf – mit Live-Vorschau im aktiven Theme.
+ * Block-Designer: Felder, Vorlage, CSS, Beispieldaten, Einstellungen, Verlauf – mit Live-Vorschau im aktiven Theme.
  * Verhalten: resources/js/_blockbuilder.js. @var ?array $row  @var array $def  @var array $errors  @var array $warnings
  * @var array $types  @var array $versions  @var array $uses  @var bool $aiOn  @var bool $aiOpen  @var array $backgrounds  @var bool $hasDark  @var bool $library
  */

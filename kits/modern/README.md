@@ -51,7 +51,7 @@ Build: `cd tools && pnpm run build` → `public/kits/modern/{css,js,fonts}` (ins
 
 | Block | Varianten |
 |---|---|
-| hero | split (Text + Bild auf versetzter Blockfarben-Fläche, Kennzahl-Karte) · statement (Schriftzug über die volle Breite, Bild 21:9) · mosaic (drei Bilder + Kennzahl-Kachel) · compact · **product** (Produktbühne: Hauptbild mit rundem Preis-Sticker und Kennzeichnung, dunkle Datenblatt-Karte aus „Bezeichnung: Wert“-Zeilen, zwei Detailbilder) · **marquee** (Typo: Riesenschrift ohne Bild + schräge Laufzeile in Blockfarbe, Pause-Schaltfläche, steht bei „Bewegung reduzieren“) · **figures** (Aussage + 3–4 Kennzahl-Kacheln in Blockfarbe/Dunkel/Akzent/getönt mit den Kern-Rundinstrumenten) — CSS je Variante nur bei Bedarf: `css/hero-product.css`, `css/hero-marquee.css`, `css/hero-figures.css` (+ Kern-`dials.css` über `uses`); Musterseite `/baukasten/hero-varianten` (`tools/demo.php --heroes`) |
+| hero | split (Text + Bild auf versetzter Blockfarben-Fläche, Kennzahl-Karte) · statement (Schriftzug über die volle Breite, Bild 21:9) · mosaic (drei Bilder + Kennzahl-Kachel) · compact · **product** (Produktbühne: Hauptbild mit rundem Preis-Sticker und Kennzeichnung, dunkle Datenblatt-Karte aus „Bezeichnung: Wert“-Zeilen, zwei Detailbilder) · **marquee** (Typo: Riesenschrift ohne Bild + schräge Laufzeile in Blockfarbe, Pause-Schaltfläche, steht bei „Bewegung reduzieren“) · **figures** (Aussage + 3–4 Kennzahl-Kacheln in Blockfarbe/Dunkel/Akzent/getönt mit den Kern-Rundinstrumenten) — CSS je Variante nur bei Bedarf: `css/hero-product.css`, `css/hero-marquee.css`, `css/hero-figures.css` (+ Kern-`dials.css` über `uses`); Musterseite `/musterseiten/hero-varianten` (`tools/demo.php --heroes`) |
 | bento | 12-Spalten-Raster: normal, breit, hoch, groß, ganze Breite × Karte, Akzent hell, Blockfarbe, Akzent, dunkel, Bild; kurze Zahl als Dachzeile erscheint groß |
 | features | cards · icons · list · numbered |
 | cards | image · overlay · horizontal |
@@ -103,7 +103,7 @@ Neue Websites erhalten die Demo automatisch (seed.php → `after`); bestehende W
 Seiten: Start (Mosaik, Laufband, Bento, Karten, Zahlen, Zitat), Leistungen, Projekte (Datentabelle `nordlicht_projekte` mit
 Detailseiten unter `/projekte/…`, Tabelle, Galerie), Studio (Team ohne Fotos, Rundinstrumente, Zeitleiste), Journal (Artikel,
 Zwei-Klick-Video, PDF), Kontakt (öffentliches Formular `nordlicht_anfragen` mit Bedingung, Öffnungszeiten, Karte) und
-„Baukasten“ (alle übrigen Varianten; Musterseite des Style-Editors). Bilder werden prozedural mit GD erzeugt
+„Musterseiten“ (alle übrigen Varianten; Musterseite des Style-Editors). Bilder werden prozedural mit GD erzeugt
 (Polarlicht-Verläufe, gezeichnete Produkt-Entwürfe, Formstudien) – keine Fotos, keine Personen, keine Marken. Alle Namen,
 Auftraggeber, Zahlen und Stimmen sind erfunden; Kartenpunkt: geografischer Mittelpunkt Deutschlands. Video: „Big Buck
 Bunny“ © Blender Foundation, CC BY 3.0 (Zwei-Klick).

@@ -1,5 +1,5 @@
 /*
- * Block-Baukasten (Verwaltung → Blöcke, Core\Blocks\Custom): Feld-Editor, Code-Editoren mit Zeilennummern,
+ * Block-Designer (Verwaltung → Blöcke, Core\Blocks\Custom): Feld-Editor, Code-Editoren mit Zeilennummern,
  * Platzhalter-Palette, Beispieldaten (Formular vom Server), JSON-LD-Zuordnung, Live-Vorschau (_preview.js),
  * Prüfung von Vorlage und CSS und Vorschläge von KLXM Ai (füllen nur das Formular – gespeichert wird von Hand).
  */

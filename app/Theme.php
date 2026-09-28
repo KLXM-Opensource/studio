@@ -54,7 +54,7 @@ final class Theme
                 $this->blocks[$type] ??= $b + ['type' => $type, 'fields' => [], 'label' => $type, 'core' => true];
             }
         }
-        // Eigene Blöcke der Website (Block-Baukasten, Core\Blocks\Custom): freigegebene Fassungen als Typ cblk_{schlüssel}
+        // Eigene Blöcke der Website (Block-Designer, Core\Blocks\Custom): freigegebene Fassungen als Typ cblk_{schlüssel}
         foreach (Blocks\Custom::definitions() as $type => $b) {
             if (isset($b['background']) && !isset($this->backgrounds()[$b['background']])) unset($b['background']);
             $this->blocks[$type] ??= $b + ['type' => $type, 'label' => $type];

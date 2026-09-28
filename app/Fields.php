@@ -412,7 +412,7 @@ final class Fields
         }
 
         if ($type === 'recurrence') {
-            // Wiederholung: Regel-Baukasten (resources/js/_rrule.js) über dem Rohfeld „Erweitert“ – ohne JavaScript bleibt das Rohfeld
+            // Wiederholung: Regel-Editor (resources/js/_rrule.js) über dem Rohfeld „Erweitert“ – ohne JavaScript bleibt das Rohfeld
             $start = !empty($f['start_field']) ? $prefix . '[' . $f['start_field'] . ']' : '';
             $allDay = !empty($f['all_day_field']) ? $prefix . '[' . $f['all_day_field'] . ']' : '';
             return '<fieldset class="f f--rrule' . $width . ($err ? ' f--error' : '') . '" data-rrule data-start="' . e($start) . '" data-allday="' . e($allDay) . '"'

@@ -633,7 +633,7 @@ final class CmsService
                 'variants' => $b['variants'] ?? null, 'default_background' => $b['background'] ?? 'white',
                 'central' => $b['central'] ?? null,
                 'fields' => $b['fields'],
-            ] + (!empty($b['custom']) ? ['custom' => true, 'insertable' => $b['insertable'] ?? true] : []);   // eigener Block (Block-Baukasten)
+            ] + (!empty($b['custom']) ? ['custom' => true, 'insertable' => $b['insertable'] ?? true] : []);   // eigener Block (Block-Designer)
         }
         return [
             'types' => $out,

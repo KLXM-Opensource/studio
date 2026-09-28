@@ -9,7 +9,7 @@
   <table class="doc-table">
     <tr><th>Preset</th><th>Wirkung</th></tr>
     <tr><td><code>full</code></td><td>Alles an (Standard, bisheriges Verhalten).</td></tr>
-    <tr><td><code>content</code></td><td>Redaktion pflegt Inhalte; aus: <code>data.schema</code> (Tabellen-Baukasten), <code>data.shared</code>, <code>system</code>, <code>users</code>, <code>api</code>, <code>mcp</code>, <code>theme_switch</code>, <code>design</code>.</td></tr>
+    <tr><td><code>content</code></td><td>Redaktion pflegt Inhalte; aus: <code>data.schema</code> (Tabellen-Designer), <code>data.shared</code>, <code>system</code>, <code>users</code>, <code>api</code>, <code>mcp</code>, <code>theme_switch</code>, <code>design</code>.</td></tr>
     <tr><td><code>minimal</code></td><td>Nur Texte und Bilder bestehender Seiten; zusätzlich aus: <code>pages.structure</code>, <code>data</code> (und damit <code>calendar</code>, <code>forms.data</code>), <code>requests</code>, <code>languages</code>, <code>search</code>, <code>ai</code>.</td></tr>
     <tr><td colspan="2"><code>support</code>, <code>review</code>, <code>media</code>, <code>media.captions</code>, <code>maps</code>, <code>pwa</code> und <code>settings</code> bleiben in jedem Preset an. Integratoren und Netzwerk-Konten sehen immer alles.</td></tr>
   </table>

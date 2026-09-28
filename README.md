@@ -76,7 +76,7 @@ httpdocs/
 ├── public/            DOCUMENT ROOT: index.php, assets/ (Verwaltung, Editor, Vendoren, Symbole, Schrift Lato),
 │                      kits/ + extensions/ (gebaute Assets), media/, sites/{key}/media/, pools/{key}/
 ├── app/               Core (Namespace Core\): Http/, Api/, Data/, Network/, Search/, AI/, Review/, Support/, Blocks/, Admin/views/ …
-├── kits/              starter (Start-Kit für eigene Kits) · basis (neutrales Business-Kit, Baukasten) · praxis (Arztpraxis) …
+├── kits/              starter (Start-Kit für eigene Kits) · basis (neutrales Business-Kit mit Musterseiten) · praxis (Arztpraxis) …
 ├── extensions/        optionale Erweiterungen, z. B. dav (CalDAV/CardDAV)
 ├── config/            config.php (Standard) · config.local.php (Geheimnisse) · sites/{key}.php (weitere Websites)
 ├── storage/           Datenbanken, Caches, Sitzungen, Logs, Suchindex, Sicherungen, pools/, shared/, support/, ai/
@@ -98,7 +98,7 @@ httpdocs/
 | `/api/v1/openapi.json` | Maschinenlesbare OpenAPI-3.1-Beschreibung |
 | [deploy/README.md](deploy/README.md) | Staging & Deploy mit Releases und Rollback; Vorlage für GitHub Actions im Projekt-Repository (`deploy/github-actions/`) |
 | [kits/starter/README.md](kits/starter/README.md) | Start-Kit: eigenes Kit entwickeln (`php bin/console kit:create meinkit`), Schritt für Schritt |
-| [kits/basis/README.md](kits/basis/README.md) | Referenz-Kit: Design-Tokens, Navigationen, Baukasten |
+| [kits/basis/README.md](kits/basis/README.md) | Referenz-Kit: Design-Tokens, Navigationen, Musterseiten |
 | [extensions/dav/README.md](extensions/dav/README.md) | CalDAV/CardDAV-Erweiterung |
 | [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) | Mitgelieferte Drittsoftware und Lizenzen |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) | Mitwirken · Sicherheitslücken vertraulich melden |

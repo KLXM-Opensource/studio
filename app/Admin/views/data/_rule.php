@@ -1,6 +1,6 @@
 <?php
 /**
- * Eine Zeile im Bereich „Bedingungen“ des Tabellen-Baukastens.
+ * Eine Zeile im Bereich „Bedingungen“ des Tabellen-Designers.
  * @var string $p  Namenspräfix, z. B. fields[3][visible_if][rules][0]
  * @var array $r  ['field', 'op', 'value'] bzw. ['op', 'field', 'message'] (Vergleich)
  * @var string $kind  cond | cmp

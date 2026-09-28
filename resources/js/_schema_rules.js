@@ -1,5 +1,5 @@
 /*
- * Tabellen-Baukasten → Feld → „Bedingungen“ (anzeigen wenn · Pflicht wenn · Vergleich).
+ * Tabellen-Designer → Feld → „Bedingungen“ (anzeigen wenn · Pflicht wenn · Vergleich).
  * Hält die Feldauswahl aktuell (neue, umbenannte, entfernte Felder), passt das Wert-Feld an den Typ an
  * (Auswahl → Liste der Möglichkeiten, Ja/Nein → Ja/Nein, sonst Freitext) und blendet es bei „ist ausgefüllt/leer“ aus.
  * Gespeichert und geprüft wird serverseitig (Core\Data\Rules::normalize).
@@ -116,7 +116,7 @@ export function initRuleBuilder(schema, list, slug) {
       grp.querySelector('[data-rule-add]').focus();
       return;
     }
-    // Felder hinzugefügt, entfernt oder verschoben → Auswahllisten neu aufbauen (nach dem Baukasten-Code)
+    // Felder hinzugefügt, entfernt oder verschoben → Auswahllisten neu aufbauen (nach dem Code des Tabellen-Designers)
     if (e.target.closest('[data-add-field],[data-remove-field],[data-move]')) setTimeout(() => { renamed(); refresh(); });
   });
   renamed();

@@ -5,7 +5,7 @@
  * frei erfunden; Bilder werden erzeugt (keine Fotos, keine Personen, keine Marken).
  * Texte in [eckigen Klammern] sind Platzhalter (erscheinen in der Übersicht der Verwaltung als offen).
  * Hier nur zentrale Angaben und Rechtsseiten; Startseite, Leistungen, Projekte (Datentabelle mit Detailseite), Studio,
- * Journal, Kontakt und Baukasten legt 'after' an (tools/demo-content.php – mit erzeugten Bildern; entfernen: tools/demo.php --remove).
+ * Journal, Kontakt und Musterseiten legt 'after' an (tools/demo-content.php – mit erzeugten Bildern; entfernen: tools/demo.php --remove).
  */
 
 $workday = fn(string $tag) => ['tag' => $tag, 'von' => '09:00', 'bis' => '18:00', 'pause_von' => '', 'pause_bis' => '', 'notiz' => ''];

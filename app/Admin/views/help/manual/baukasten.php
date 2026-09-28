@@ -1,9 +1,9 @@
-<?php /** Handbuch · Kapitel „Eigene Blöcke bauen“ (Block-Baukasten, Core\Blocks\Custom) – für Administration und Agentur */ ?>
+<?php /** Handbuch · Kapitel „Eigene Blöcke bauen“ (Block-Designer, Core\Blocks\Custom) – für Administration und Agentur */ ?>
   <p class="lead">Unter <b>Verwaltung → Blöcke</b> bauen Administration und Agentur eigene Blöcke – z. B. eine Preistabelle, eine Teamkarte oder eine Hinweis-Box. Nach der Freigabe stehen sie der Redaktion beim Bearbeiten der Seiten neben den Blöcken des Kits zur Verfügung. Ohne Programmieren im engeren Sinn, aber mit etwas HTML und CSS. Recht: <i>Eigene Blöcke bauen und freigeben</i>; die Funktion kann je Website abgeschaltet sein.</p>
   <h3>In fünf Schritten</h3>
   <ol>
     <li><b>Felder</b> anlegen: Was pflegt die Redaktion? Text, formatierter Text, Bild, Datei, Link, Auswahl, Ja/Nein, Zahl, Datum, Symbol oder eine <b>Liste</b> (wiederholbare Einträge mit Unterfeldern, z. B. „Pakete“ mit Name und Preis). Der <i>Kurzname</i> eines Felds wird in der Vorlage verwendet.</li>
-    <li><b>Vorlage</b> schreiben: HTML mit Platzhaltern wie <code>{{ title }}</code>. Ein Klick auf ein Feld über dem Editor fügt den passenden Platzhalter ein, bei Listen gleich die ganze Schleife. Fehler zeigt der Baukasten sofort mit Zeilennummer an.</li>
+    <li><b>Vorlage</b> schreiben: HTML mit Platzhaltern wie <code>{{ title }}</code>. Ein Klick auf ein Feld über dem Editor fügt den passenden Platzhalter ein, bei Listen gleich die ganze Schleife. Fehler zeigt der Block-Designer sofort mit Zeilennummer an.</li>
     <li><b>CSS</b> ergänzen: Die Regeln gelten nur innerhalb des Blocks. Mit den Farb-Variablen (<code>var(--cb-accent)</code> …) passt sich der Block an Design und dunkle Abschnitte an.</li>
     <li><b>Vorschau</b> prüfen: rechts die Startseite des aktiven Kits mit dem Block und Beispieldaten – Desktop/Mobil, verschiedene Hintergründe, helles/dunkles Farbschema. Die Beispieldaten ändern Sie im Reiter „Beispieldaten“.</li>
     <li><b>Speichern &amp; für Redaktion freigeben</b>. Erst dann erscheint der Block in der Block-Auswahl. Spätere Änderungen bleiben Entwurf, bis Sie erneut freigeben.</li>

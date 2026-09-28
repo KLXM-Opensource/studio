@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Core\Blocks;
 
 /**
- * Sichere Vorlagensprache für eigene Blöcke (Block-Baukasten) – nie PHP aus der Verwaltung.
+ * Sichere Vorlagensprache für eigene Blöcke (Block-Designer) – nie PHP aus der Verwaltung.
  *
  *   {{ feld }}                      Ausgabe, immer escaped ({{{ … }}} gibt es nicht)
  *   {{ feld | filter('arg') }}      Filter (Core\Blocks\Runtime::FILTERS): rich, inline, image('sizes', '4:3'), icon, link, date('long'), default('…') …
@@ -885,7 +885,7 @@ final class Template
     {
         $this->phpOut = '';
         $this->phpClosed = false;
-        $this->php("<?php\n/**\n * Block „" . str_replace('*/', '* /', $label) . "“ – exportiert aus dem Block-Baukasten von KLXM Studio.\n"
+        $this->php("<?php\n/**\n * Block „" . str_replace('*/', '* /', $label) . "“ – exportiert aus dem Block-Designer von KLXM Studio.\n"
             . " * Erzeugt aus der sicheren Vorlagensprache: Escaping, Filter und Grenzen über Core\\Blocks\\Runtime.\n"
             . " * @var \\Core\\Block \$b  @var array \$d\n */\n\$rt = \\Core\\Blocks\\Runtime::for(\$b);\n?>\n");
         $this->php('<?= $rt->open() ?>');

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tabellen-Baukasten: Felder und Einstellungen.
+ * Tabellen-Designer: Felder und Einstellungen.
  * @var ?array $table  @var array $def  @var array $errors  @var bool $askDrop
  */
 use Core\Data\Tables;

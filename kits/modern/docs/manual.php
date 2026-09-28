@@ -18,11 +18,11 @@ return [
     ],
     'vars' => [
         'settings_sub' => 'Name, Adresse, Telefon, Öffnungszeiten und Logo – einmal eintragen, überall aktuell.',
-        'blocks_page' => '/baukasten',
+        'blocks_page' => '/musterseiten',
     ],
     // Beschreibungen im Kapitel „Alle Blöcke“ (übrige Blöcke: Beschreibung aus der Blockdefinition)
     'blocks' => [
-        'hero' => 'Hauptüberschrift der Seite (H1) in sieben Varianten: „Geteilt“ (Text und Bild auf versetzter Farbfläche, optional mit Kennzahl-Karte), „Große Aussage“ (Schriftzug über die volle Breite), „Mosaik“ (Text neben einem Raster aus drei Bildern und einer Kennzahl), „Seitenkopf“ – dazu „Produkt“ (Produktbild mit rundem Preis-Sticker, dunkle Datenblatt-Karte aus Zeilen „Bezeichnung: Wert“ und zwei Detailbilder), „Typo“ (Riesenschrift ohne Bild und eine schräge Laufzeile mit Stichworten; sie hält per Schaltfläche, Maus oder Tastatur und steht bei „Bewegung reduzieren“ still) und „Kennzahlen“ (Aussage mit 3–4 belegbaren Zahlen als farbige Kacheln mit Rundinstrument). Ein Wort in *Sternchen* wird hervorgehoben. Pro Seite genau einmal verwenden. Alle Varianten nebeneinander: Baukasten → Hero-Varianten.',
+        'hero' => 'Hauptüberschrift der Seite (H1) in sieben Varianten: „Geteilt“ (Text und Bild auf versetzter Farbfläche, optional mit Kennzahl-Karte), „Große Aussage“ (Schriftzug über die volle Breite), „Mosaik“ (Text neben einem Raster aus drei Bildern und einer Kennzahl), „Seitenkopf“ – dazu „Produkt“ (Produktbild mit rundem Preis-Sticker, dunkle Datenblatt-Karte aus Zeilen „Bezeichnung: Wert“ und zwei Detailbilder), „Typo“ (Riesenschrift ohne Bild und eine schräge Laufzeile mit Stichworten; sie hält per Schaltfläche, Maus oder Tastatur und steht bei „Bewegung reduzieren“ still) und „Kennzahlen“ (Aussage mit 3–4 belegbaren Zahlen als farbige Kacheln mit Rundinstrument). Ein Wort in *Sternchen* wird hervorgehoben. Pro Seite genau einmal verwenden. Alle Varianten nebeneinander: Musterseiten → Hero-Varianten.',
         'richtext' => 'Freier Text mit Zwischenüberschriften, Listen und Zitaten. „Artikel“: Lesebreite, Lesezeit, optionale Initiale und automatisches Inhaltsverzeichnis. „Mehrspaltig“: Text in Spalten.',
         'media_text' => 'Text mit Bild daneben. „Abwechselnd“: mehrere Blöcke hintereinander wechseln automatisch die Seite. „Geteilt“: randlos halb und halb. „Überlappend“: Text-Karte über großem Bild.',
         'features' => 'Leistungen oder Vorteile mit Symbol oder Bild – als Karten, große Symbole, Liste oder nummeriert.',

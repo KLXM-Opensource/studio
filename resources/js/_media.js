@@ -1333,9 +1333,16 @@ function initInlineCrop() {
   const place = () => {
     const r = target.getBoundingClientRect();
     // Nicht über Werkzeugleiste oder klebenden Kit-Kopf legen: unter deren Unterkante rücken, sonst ausblenden
-    const top = Math.max(r.top + 12, topInset() + 8);
+    let top = Math.max(r.top + 12, topInset() + 8), right = r.right - 12;
+    // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) freilassen: links daneben, bei Platzmangel darunter
+    const pen = [...d.querySelectorAll('.cms-entry-pencil')].map(p => p.getBoundingClientRect())
+      .find(p => p.width && p.left < right && p.right > r.left && p.top < top + bar.offsetHeight && p.bottom > top);
+    if (pen) {
+      if (pen.left - 8 - bar.offsetWidth >= r.left + 8) right = pen.left - 8;
+      else top = pen.bottom + 8;
+    }
     bar.style.visibility = top + bar.offsetHeight > r.bottom - 8 ? 'hidden' : '';
-    bar.style.left = (r.right + scrollX - bar.offsetWidth - 12) + 'px';
+    bar.style.left = (right + scrollX - bar.offsetWidth) + 'px';
     bar.style.top = (top + scrollY) + 'px';
   };
   const show = im => {

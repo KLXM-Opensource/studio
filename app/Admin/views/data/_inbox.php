@@ -1,6 +1,6 @@
 <?php
 /**
- * Tabellen-Baukasten: Einstellungen einer Eingangs-Tabelle (verschlüsselte Anfragen, Core\Data\Inbox).
+ * Tabellen-Designer: Einstellungen einer Eingangs-Tabelle (verschlüsselte Anfragen, Core\Data\Inbox).
  * @var array $s  @var array $def  @var ?array $table  @var callable $err
  */
 use Core\Data\DataForms;

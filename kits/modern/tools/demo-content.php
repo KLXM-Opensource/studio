@@ -42,7 +42,7 @@ function modern_demo_install(bool $force = false, ?callable $log = null): bool
     $pdf = modern_demo_pdf($log);
     $tables = modern_demo_tables($img, $log);
     modern_demo_pages($img, $pdf, $tables, $log);
-    modern_demo_heroes($log);   // Musterseite „Hero-Varianten“ unter dem Baukasten
+    modern_demo_heroes($log);   // Musterseite „Hero-Varianten“ unter den Musterseiten
     if (!(int) setting('og_default_image') && $img['wide']) app()->settings->set('og_default_image', $img['wide'][0]);
     \Core\PageCache::clear();
     $log('Fertig: Studio Nordlicht – ' . count($tables) . ' Datentabellen, ' . count($img['all']) . ' Bilder.');
@@ -601,9 +601,9 @@ function modern_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
         ]], ['background' => 'muted']),
     ]);
 
-    // ---------------------------------------------------------------- Baukasten: alle übrigen Varianten (Musterseite des Style-Editors)
-    $page(['slug' => 'baukasten', 'title' => 'Baukasten', 'menu' => 0, 'noindex' => 1, 'meta_description' => 'Alle Blöcke und Varianten des Kits „modern“ auf einer Seite.'], [
-        $B('hero', ['variant' => 'split', 'eyebrow' => 'Baukasten', 'title' => 'Alle Blöcke auf *einer* Seite.', 'text' => 'Diese Seite ist die Musterseite des Style-Editors: Wählen Sie unter Verwaltung → Design eine Vorlage und sehen Sie, wie sich alles mitändert.',
+    // ---------------------------------------------------------------- Musterseiten: alle übrigen Varianten (Musterseite des Style-Editors)
+    $page(['slug' => 'musterseiten', 'title' => 'Musterseiten', 'menu' => 0, 'noindex' => 1, 'meta_description' => 'Alle Blöcke und Varianten des Kits „modern“ auf einer Seite.'], [
+        $B('hero', ['variant' => 'split', 'eyebrow' => 'Musterseiten', 'title' => 'Alle Blöcke auf *einer* Seite.', 'text' => 'Diese Seite ist die Musterseite des Style-Editors: Wählen Sie unter Verwaltung → Design eine Vorlage und sehen Sie, wie sich alles mitändert.',
             'button_label' => 'Zur Startseite', 'button_link' => $link('/') ?: '/', 'button2_label' => 'Kontakt', 'button2_link' => $link('/kontakt'), 'points' => "4 Farbvorlagen\n4 Navigationen\nHell und dunkel", 'stat_value' => '< 30 KB', 'stat_label' => 'CSS der Startseite', 'image' => $O(2), 'ratio' => '4:5']),
         $B('features', ['variant' => 'numbered', 'eyebrow' => 'Merkmale „Nummeriert“', 'title' => 'Was das Kit mitbringt', 'intro' => '', 'size' => 's', 'items' => [
             ['icon' => '', 'image' => null, 'title' => 'WCAG 2.2 AA', 'text' => 'Alle Vorlagen hell und dunkel geprüft.', 'link_label' => '', 'link' => ''],
@@ -680,7 +680,7 @@ function modern_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
 // ------------------------------------------------------------------ Musterseite „Hero-Varianten“
 
 /**
- * Musterseite „Hero-Varianten“ unter dem Baukasten (Musterseite des Style-Editors, design.php → 'sample'):
+ * Musterseite „Hero-Varianten“ unter den Musterseiten (Musterseite des Style-Editors, design.php → 'sample'):
  * die neuen Einstiege Produkt, Typo und Kennzahlen untereinander, dazu Mosaik und Große Aussage zum Vergleich.
  * Nutzt nur die erzeugten Demo-Bilder (Schlagwort „modern-demo“). Vorhandene Musterseite wird ersetzt.
  * CLI: CMS_SITE=… php kits/modern/tools/demo.php --heroes
@@ -690,8 +690,8 @@ function modern_demo_heroes(?callable $log = null): bool
     $log ??= static fn(string $m) => null;
     $db = app()->db;
     $ids = array_map('intval', (array) json_decode((string) setting('modern.demo_pages', '[]'), true));
-    $root = $ids ? $db->fetch('SELECT id, path FROM pages WHERE slug = ? AND id IN (' . implode(',', $ids) . ') LIMIT 1', ['baukasten']) : null;
-    if (!$root) { $log('Kein Baukasten vorhanden – zuerst tools/demo.php ausführen.'); return false; }
+    $root = $ids ? $db->fetch('SELECT id, path FROM pages WHERE slug IN (?, ?) AND id IN (' . implode(',', $ids) . ') ORDER BY slug = \'musterseiten\' DESC LIMIT 1', ['musterseiten', 'baukasten']) : null;   // baukasten: frühere Bezeichnung
+    if (!$root) { $log('Keine Musterseiten vorhanden – zuerst tools/demo.php ausführen.'); return false; }
     foreach ($db->fetchAll('SELECT id FROM pages WHERE parent_id = ? AND slug = ?', [(int) $root['id'], 'hero-varianten']) as $old) {
         $db->query('DELETE FROM pages WHERE id = ?', [(int) $old['id']]);
         $ids = array_values(array_diff($ids, [(int) $old['id']]));
@@ -708,7 +708,7 @@ function modern_demo_heroes(?callable $log = null): bool
         'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => '', 'points' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''],
         'tunes' => ['section' => $tunes + ['divider' => true]]];
     $blocks = [
-        $B('compact', ['eyebrow' => 'Baukasten · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein* Block.',
+        $B('compact', ['eyebrow' => 'Musterseiten · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein* Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sieben Varianten. Neu sind Produkt, Typo und Kennzahlen – darunter zum Vergleich Mosaik und Große Aussage. Auf echten Seiten steht nur ein Einstieg ganz oben.'],
             ['background' => 'muted', 'divider' => false]),
         $B('product', ['eyebrow' => 'Variante „Produkt“ · Beispiel', 'title' => 'Leuchte „Polar“. Tippen statt schalten.',
@@ -737,7 +737,7 @@ function modern_demo_heroes(?callable $log = null): bool
             'image' => $I('nordlicht-aurora-hoch-01.jpg', 3), 'image2' => $I('nordlicht-entwurf-speaker.jpg', 6), 'image3' => $I('nordlicht-aurora-01.jpg', 0)]),
         $B('statement', ['eyebrow' => 'Zum Vergleich: „Große Aussage“', 'title' => 'Dinge, die man *gern* benutzt.',
             'text' => 'Schriftzug über die volle Breite, darunter Text und Buttons, optional ein Bild im Breitbild.',
-            'button_label' => 'Zum Baukasten', 'button_link' => '/' . $root['path'], 'image' => $I('nordlicht-aurora-02.jpg', 1), 'ratio' => '21:9'], ['background' => 'muted']),
+            'button_label' => 'Zu den Musterseiten', 'button_link' => '/' . $root['path'], 'image' => $I('nordlicht-aurora-02.jpg', 1), 'ratio' => '21:9'], ['background' => 'muted']),
     ];
     $id = Pages::create(['slug' => 'hero-varianten', 'title' => 'Hero-Varianten', 'parent_id' => (int) $root['id'], 'sort' => 1, 'status' => 'published', 'menu' => 0, 'noindex' => 1,
         'meta_description' => 'Alle Varianten des Einstiegs (Hero) im Kit „modern“: Produkt, Typo, Kennzahlen – dazu Mosaik und Große Aussage zum Vergleich.'],

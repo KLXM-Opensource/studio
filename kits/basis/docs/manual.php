@@ -24,7 +24,7 @@ return [
     ],
     'vars' => [
         'settings_sub' => 'Name, Adresse, Telefon, Öffnungszeiten und Logo – einmal eintragen, überall aktuell.',
-        'blocks_page' => '/baukasten',
+        'blocks_page' => '/musterseiten',
     ],
     // Beschreibungen im Kapitel „Alle Blöcke“ (übrige Blöcke: Beschreibung aus der Blockdefinition)
     'blocks' => [

@@ -6,7 +6,7 @@ namespace Core\Blocks;
 use Core\Block;
 
 /**
- * Selbsttest des Block-Baukastens: php bin/console blocks:selftest
+ * Selbsttest des Block-Designers: php bin/console blocks:selftest
  * Prüft Escaping und XSS-Abwehr der Vorlagensprache (Text, Attribute, Links, Rich-Text, Symbole), Übersetzungsfehler,
  * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer. Dazu die Logo-Normalisierung des Blocks „Partner & Logos“.
  * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx) und Bild im Rahmen

@@ -29,4 +29,4 @@
     <tr><td>Ausführlich</td><td>Wie klassisch, Unterseiten erscheinen in einem breiten Mega-Menü mit Beschreibung (Seiten-Beschreibung aus den SEO-Angaben), Vorschaubild der ersten Unterseite mit Vorschaubild oder Direktkontakt.</td><td>Viele Unterseiten</td></tr>
   </table>
   <div class="doc-note doc-note--tip"><strong>Mega-Menü füllen</strong><p>Tragen Sie bei Unterseiten eine kurze <b>Beschreibung</b> (Seiteneinstellungen → SEO) ein – sie erscheint im Mega-Menü. Ein <b>Vorschaubild</b> der Seite füllt die rechte Spalte.</p></div>
-  <div class="doc-note doc-note--info"><strong>Baukasten</strong><p>Der Seitenbaum „Baukasten“ zeigt alle Blöcke mit Beispielinhalten und dient der Design-Vorschau als Musterseite. Er ist frei erfunden und kann gelöscht werden (Seiten und Tabellen „… (Demo)“).</p></div>
+  <div class="doc-note doc-note--info"><strong>Musterseiten</strong><p>Der Seitenbaum „Musterseiten“ zeigt alle Blöcke mit Beispielinhalten und dient der Design-Vorschau als Musterseite. Er ist frei erfunden und kann gelöscht werden (Seiten und Tabellen „… (Demo)“).</p></div>

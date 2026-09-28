@@ -82,7 +82,7 @@ $labels = ['text' => __('Texte: schreiben, übersetzen, SEO'), 'vision' => __('B
     <li><?= e(__('„✦ KI“ in jeder Formatierungsleiste und an Textfeldern: verbessern, kürzen, erweitern, einfacher, korrigieren, Ton ändern, freier Auftrag.')) ?></li>
     <li><?= e(__('Seiteneinstellungen und Einträge: SEO-Check, SEO-Vorschläge, Teaser, „Aus Deutsch übersetzen“.')) ?></li>
     <li><?= e(__('Mediathek: Alt-Text beim Hochladen und in der Info-Spalte vorschlagen.')) ?></li>
-    <li><?= e(__('Support und Tabellen-Baukasten: Antwortvorschläge, Wissensartikel überarbeiten, Felder vorschlagen.')) ?></li>
+    <li><?= e(__('Support und Tabellen-Designer: Antwortvorschläge, Wissensartikel überarbeiten, Felder vorschlagen.')) ?></li>
   </ul>
   <p class="kia-rule"><?= e(__('Die KI erfindet keine Fakten: Fehlende Angaben erscheinen als [bitte ergänzen: …]. Bitte jeden Vorschlag prüfen.')) ?></p>
 </section>

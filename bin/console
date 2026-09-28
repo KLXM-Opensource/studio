@@ -53,7 +53,7 @@
  *
  * Betrieb & Deploy
  *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
- *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Baukasten) auflisten | Sicherheits-Selbsttest der Vorlagensprache
+ *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Designer) auflisten | Sicherheits-Selbsttest der Vorlagensprache
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
  *   fragments:list [--all] [--accept]                 Kern-Fragmente: Herkunft je Fragment (Projekt/Kit/Kern) für das aktive Kit
  *                                                     (--all: alle Kits), überschriebene mit geändertem Original;
@@ -884,7 +884,7 @@ switch ($cmd) {
         exit($bad ? 1 : 0);
 
     case 'blocks:selftest':
-        // Block-Baukasten (Core\Blocks): Escaping/XSS, Ablehnung unsicherer Vorlagen und CSS, Gleichheit mit dem Theme-Export
+        // Block-Designer (Core\Blocks): Escaping/XSS, Ablehnung unsicherer Vorlagen und CSS, Gleichheit mit dem Theme-Export
         $res = Core\Blocks\SelfTest::run();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";

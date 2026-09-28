@@ -1005,7 +1005,7 @@ add({
     await t.click(pv('Hell'), { after: 600 });
     await t.click(pv('Box'), { after: 600 });
     await t.step('Auf der Website: Der Hinweis erscheint, bis Besucher entscheiden. „Alle ablehnen“ ist so leicht wie „Alle akzeptieren“.', 'On the website: the notice appears until visitors decide. “Alle ablehnen” (reject all) is as easy as “Alle akzeptieren” (accept all).');
-    await t.goto('/baukasten/medien');
+    await t.goto('/musterseiten/medien');
     await t.wait(900);
     await t.click(t.page.locator('consent-kit button:has-text("Einstellungen")').first(), { after: 1600 });
     await t.step('„Einstellungen“ zeigt jeden Dienst mit Zweck und Speicherdauer – einzeln wählbar.', '“Einstellungen” (settings) shows every service with purpose and storage period – selectable one by one.');

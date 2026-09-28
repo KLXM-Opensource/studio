@@ -17,7 +17,7 @@ use Core\Pages;
 use Core\Seo;
 
 /**
- * Verwaltung → Blöcke (Block-Baukasten): eigene Blöcke anlegen, prüfen, in der Vorschau testen, versionieren,
+ * Verwaltung → Blöcke (Block-Designer): eigene Blöcke anlegen, prüfen, in der Vorschau testen, versionieren,
  * für die Redaktion freigeben, exportieren/importieren, als Theme-Block ausgeben und mit KLXM Ai vorschlagen lassen.
  * Recht „blocks.build“ (Administration, Integratoren), Funktion „blocks.custom“.
  */
@@ -74,7 +74,7 @@ final class BlockController extends AdminController
         ]);
     }
 
-    /** Eingaben des Baukasten-Formulars */
+    /** Eingaben des Block-Designer-Formulars */
     private static function input(Request $r): array
     {
         $p = $r->post;
@@ -203,7 +203,7 @@ final class BlockController extends AdminController
         return $this->back('/admin/blocks/' . $res['key'], 'success', __('Aus der Bibliothek übernommen (Entwurf).'));
     }
 
-    // ------------------------------------------------------------------ JSON-Endpunkte des Baukastens
+    // ------------------------------------------------------------------ JSON-Endpunkte des Block-Designers
 
     /** Prüfen + Vorschau: ganze Seite des aktiven Themes mit dem Block und Beispieldaten */
     public function preview(Request $r): Response
@@ -273,7 +273,7 @@ final class BlockController extends AdminController
             : '<p class="adm-muted">' . e(__('Noch keine Felder – zuerst im Reiter „Felder“ anlegen.')) . '</p>']));
     }
 
-    /** KLXM Ai: Vorschlag (wird nie gespeichert oder freigegeben – die Person prüft ihn im Baukasten) */
+    /** KLXM Ai: Vorschlag (wird nie gespeichert oder freigegeben – die Person prüft ihn im Block-Designer) */
     public function ai(Request $r): Response
     {
         try {

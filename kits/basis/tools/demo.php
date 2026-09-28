@@ -1,14 +1,14 @@
 <?php
 /**
- * Baukasten (Showcase aller Blöcke und Funktionen) in eine bestehende Website mit Theme „basis“ einspielen.
+ * Musterseiten (Showcase aller Blöcke und Funktionen) in eine bestehende Website mit Theme „basis“ einspielen.
  *
  *   CMS_SITE=demo php kits/basis/tools/demo.php            anlegen (nur wenn noch nicht vorhanden)
- *   CMS_SITE=demo php kits/basis/tools/demo.php --force    vorhandenen Baukasten ersetzen
- *   CMS_SITE=demo php kits/basis/tools/demo.php --remove   Baukasten, Demo-Tabellen (demo_*) und Demo-Bilder entfernen
+ *   CMS_SITE=demo php kits/basis/tools/demo.php --force    vorhandene Musterseiten ersetzen
+ *   CMS_SITE=demo php kits/basis/tools/demo.php --remove   Musterseiten, Demo-Tabellen (demo_*) und Demo-Bilder entfernen
  *   … --preset=mint                                           zusätzlich eine Design-Voreinstellung übernehmen
  *   CMS_SITE=demo php kits/basis/tools/demo.php --heroes   nur die Musterseite „Hero-Varianten“ (neu) anlegen
  *
- * Neue Websites erhalten den Baukasten automatisch (seed.php → 'after').
+ * Neue Websites erhalten die Musterseiten automatisch (seed.php → 'after').
  */
 declare(strict_types=1);
 
@@ -21,7 +21,7 @@ require_once __DIR__ . '/demo-content.php';
 $args = array_slice($argv, 1);
 $log = function (string $m): void { echo $m, "\n"; };
 if (!function_exists('basis_demo_pages') || empty(\Core\Design::def()['presets'])) {
-    fwrite(STDERR, "Die Website nutzt kein Kit mit Baukasten (aktiv: " . app()->theme->name . ").\n");
+    fwrite(STDERR, "Die Website nutzt kein Kit mit Musterseiten (aktiv: " . app()->theme->name . ").\n");
     exit(1);
 }
 if (in_array('--heroes', $args, true)) {   // nur die Musterseite „Hero-Varianten“ (neu) anlegen

@@ -251,7 +251,7 @@ final class Entries
                 $def = self::groupSchema($f) + $def;
             }
             if ($f['type'] === 'recurrence') {
-                // Regel-Baukasten liest Beginn (Wochentag, Tag im Monat) und „ganztägig“ aus dem Formular
+                // Regel-Editor liest Beginn (Wochentag, Tag im Monat) und „ganztägig“ aus dem Formular
                 $cal = Calendar::config($table);
                 $def['start_field'] = $cal['start'] ?: (array_values(array_filter($table['fields'], fn($x) => in_array($x['type'], ['datetime', 'date'], true)))[0]['name'] ?? '');
                 $def['all_day_field'] = $cal['all_day'];

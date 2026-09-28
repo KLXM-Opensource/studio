@@ -1,5 +1,5 @@
 <?php
-/** Eine Feldzeile im Tabellen-Baukasten. @var int|string $i  @var array $f  @var array $tables  @var ?string $err  @var ?array $types (erlaubte Typen)  @var ?bool $inbox */
+/** Eine Feldzeile im Tabellen-Designer. @var int|string $i  @var array $f  @var array $tables  @var ?string $err  @var ?array $types (erlaubte Typen)  @var ?bool $inbox */
 use Core\Data\Tables;
 $types ??= array_keys(Tables::TYPES);
 $inbox ??= false;

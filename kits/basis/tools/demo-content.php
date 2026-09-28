@@ -1,11 +1,12 @@
 <?php
 /**
- * „Baukasten“ des Themes basis: ein Seitenbaum, der jeden Block und jede Funktion mit frei erfundenen Inhalten zeigt –
+ * „Musterseiten“ des Kits basis: ein Seitenbaum, der jeden Block und jede Funktion mit frei erfundenen Inhalten zeigt –
  * inkl. Beispiel-Datentabelle (Projekte), Kalender (Veranstaltungen), zwei öffentlichen Formularen und erzeugten Bildern.
  *
  * Neue Websites: seed.php → 'after'. Bestehende Websites: CMS_SITE=demo php kits/basis/tools/demo.php [--force]
- * Alles ist als Demo gekennzeichnet (Seitenbaum „Baukasten“, Tabellen demo_*, Medien-Schlagwort „baukasten-demo“)
- * und lässt sich mit --remove wieder entfernen.
+ * Alles ist als Demo gekennzeichnet (Seitenbaum „Musterseiten“, Tabellen demo_*, Medien-Schlagwort „musterseiten-demo“)
+ * und lässt sich mit --remove wieder entfernen – auch der frühere Seitenbaum „Baukasten“ (/baukasten, Schlagwort
+ * „baukasten-demo“, Sammlung „Baukasten (Demo)“) älterer Installationen.
  */
 declare(strict_types=1);
 
@@ -14,15 +15,21 @@ use Core\Data\Tables;
 use Core\Media;
 use Core\Pages;
 
-const BASIS_DEMO_TAG = 'baukasten-demo';
+const BASIS_DEMO_TAG = 'musterseiten-demo';
+/** Seitenbaum der Musterseiten (Pfad); BASIS_DEMO_OLD_*: frühere Namen, die --remove/--force ebenfalls entfernt */
+const BASIS_DEMO_PATH = 'musterseiten';
+const BASIS_DEMO_COLLECTION = 'Musterseiten (Demo)';
+const BASIS_DEMO_OLD_PATH = 'baukasten';
+const BASIS_DEMO_OLD_TAG = 'baukasten-demo';
+const BASIS_DEMO_OLD_COLLECTION = 'Baukasten (Demo)';
 
-/** Baukasten anlegen. $force: vorhandenen Baukasten vorher entfernen. */
+/** Musterseiten anlegen. $force: vorhandene Musterseiten vorher entfernen. */
 function basis_demo_install(bool $force = false, ?callable $log = null): bool
 {
     $log ??= static fn(string $m) => null;
-    $existing = app()->db->fetch("SELECT id FROM pages WHERE path = 'baukasten' AND type = 'page' LIMIT 1");
+    $existing = app()->db->fetch("SELECT id FROM pages WHERE path IN (?, ?) AND type = 'page' LIMIT 1", [BASIS_DEMO_PATH, BASIS_DEMO_OLD_PATH]);
     if ($existing && !$force) {
-        $log('Der Baukasten ist schon vorhanden – mit --force neu anlegen.');
+        $log('Die Musterseiten sind schon vorhanden – mit --force neu anlegen.');
         return false;
     }
     if ($force) basis_demo_remove($log);
@@ -38,31 +45,32 @@ function basis_demo_install(bool $force = false, ?callable $log = null): bool
     basis_demo_pages($img, $pdf, $tables, $log);
     basis_demo_heroes($log);
     \Core\PageCache::clear();
-    $log('Fertig: Seitenbaum „Baukasten“ mit 6 Seiten, 4 Datentabellen und ' . count($img['all']) . ' Bildern.');
+    $log('Fertig: Seitenbaum „Musterseiten“ mit 6 Seiten, 4 Datentabellen und ' . count($img['all']) . ' Bildern.');
     return true;
 }
 
-/** Baukasten, Demo-Tabellen und Demo-Medien entfernen */
+/** Musterseiten, Demo-Tabellen und Demo-Medien entfernen (auch unter den früheren Namen „Baukasten“) */
 function basis_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
     $db = app()->db;
-    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path = 'baukasten' OR path LIKE 'baukasten/%' OR slug = '_vorlage-demo-projekte'"), 'id'));
+    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path IN (?, ?) OR path LIKE ? OR path LIKE ? OR slug = '_vorlage-demo-projekte'",
+        [BASIS_DEMO_PATH, BASIS_DEMO_OLD_PATH, BASIS_DEMO_PATH . '/%', BASIS_DEMO_OLD_PATH . '/%']), 'id'));
     foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
     if ($ids) Pages::rebuildPaths();
     foreach (Tables::all() as $t) {
         if (str_starts_with($t['handle'], 'demo_')) Tables::delete($t);
     }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . BASIS_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query("DELETE FROM media_collections WHERE name = 'Baukasten (Demo)'");
-    $log('Vorhandenen Baukasten entfernt (' . count($ids) . ' Seiten).');
+    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ? OR tags LIKE ?', ['%' . BASIS_DEMO_TAG . '%', '%' . BASIS_DEMO_OLD_TAG . '%']) as $m) Media::delete((int) $m['id']);
+    $db->query('DELETE FROM media_collections WHERE name IN (?, ?)', [BASIS_DEMO_COLLECTION, BASIS_DEMO_OLD_COLLECTION]);
+    $log('Vorhandene Musterseiten entfernt (' . count($ids) . ' Seiten).');
 }
 
 // ------------------------------------------------------------------ Bilder (abstrakt, mit GD erzeugt)
 
 function basis_demo_images(callable $log): array
 {
-    $col = Media::createCollection('Baukasten (Demo)', 'Abstrakte Beispielbilder des Kit-Baukastens – frei verwendbar, ohne Personen oder Marken.');
+    $col = Media::createCollection(BASIS_DEMO_COLLECTION, 'Abstrakte Beispielbilder der Musterseiten des Kits – frei verwendbar, ohne Personen oder Marken.');
     $motifs = [
         ['Flächen und Kreise in Petrol und Sand', [15, 110, 104], [233, 223, 204], 'circles'],
         ['Diagonale Bänder in Blaugrau', [44, 62, 80], [180, 196, 210], 'bands'],
@@ -77,7 +85,7 @@ function basis_demo_images(callable $log): array
     foreach ($motifs as $i => [$title, $dark, $light, $kind]) {
         $file = tempnam(sys_get_temp_dir(), 'bk') . '.jpg';
         basis_demo_draw($file, $dark, $light, $kind, $i);
-        [$m, $err] = Media::import($file, sprintf('baukasten-%02d.jpg', $i + 1), 'Abstrakte Grafik: ' . $title . ' (Beispielbild)',
+        [$m, $err] = Media::import($file, sprintf('musterseiten-%02d.jpg', $i + 1), 'Abstrakte Grafik: ' . $title . ' (Beispielbild)',
             ['title' => $title, 'tags' => BASIS_DEMO_TAG, 'collection' => $col, 'credit' => 'Beispielbild, automatisch erzeugt']);
         @unlink($file);
         if ($m) $all[] = (int) $m['id'];
@@ -145,7 +153,7 @@ function basis_demo_draw(string $file, array $dark, array $light, string $kind, 
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function basis_demo_pdf(callable $log): ?int
 {
-    $text = 'Baukasten - Beispiel-PDF (Demo). Frei erfundener Inhalt.';
+    $text = 'Musterseiten - Beispiel-PDF (Demo). Frei erfundener Inhalt.';
     $stream = "BT /F1 20 Tf 72 760 Td ($text) Tj ET";
     $objs = [
         '<</Type/Catalog/Pages 2 0 R>>',
@@ -163,7 +171,7 @@ function basis_demo_pdf(callable $log): ?int
     $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
     $file = tempnam(sys_get_temp_dir(), 'bk') . '.pdf';
     file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'baukasten-leistungsuebersicht.pdf', '', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => BASIS_DEMO_TAG]);
+    [$m, $err] = Media::import($file, 'musterseiten-leistungsuebersicht.pdf', '', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => BASIS_DEMO_TAG]);
     @unlink($file);
     if ($err) $log('PDF: ' . $err);
     return $m ? (int) $m['id'] : null;
@@ -187,7 +195,7 @@ function basis_demo_tables(array $img, callable $log): array
     // Projekte: Karten, Liste, Tabelle, Detailseite
     $t = basis_demo_table([
         'handle' => 'demo_projekte', 'name' => 'Projekte (Demo)', 'singular' => 'Projekt', 'icon' => '▦',
-        'description' => 'Beispiel-Tabelle des Baukastens – frei erfundene Projekte.',
+        'description' => 'Beispiel-Tabelle der Musterseiten – frei erfundene Projekte.',
         'fields' => [
             ['name' => 'titel', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'in_list' => true],
             ['name' => 'kategorie', 'label' => 'Bereich', 'type' => 'select', 'in_list' => true, 'width' => 'half', 'options' => "beratung=Beratung\nplanung=Planung\numsetzung=Umsetzung"],
@@ -196,7 +204,7 @@ function basis_demo_tables(array $img, callable $log): array
             ['name' => 'kurztext', 'label' => 'Kurzbeschreibung', 'type' => 'textarea'],
             ['name' => 'bild', 'label' => 'Bild', 'type' => 'media'],
         ],
-        'settings' => ['route' => 'baukasten-projekte', 'title_field' => 'titel', 'image_field' => 'bild', 'description_field' => 'kurztext',
+        'settings' => ['route' => 'muster-projekte', 'title_field' => 'titel', 'image_field' => 'bild', 'description_field' => 'kurztext',
             'sort_field' => 'jahr', 'sort_dir' => 'desc', 'workflow' => 0],
     ], $log);
     if ($t) {
@@ -218,7 +226,7 @@ function basis_demo_tables(array $img, callable $log): array
     // Veranstaltungen: Kalender mit Wiederholung, ganztägigem Termin und Kategorien
     $t = basis_demo_table([
         'handle' => 'demo_termine', 'name' => 'Veranstaltungen (Demo)', 'singular' => 'Veranstaltung', 'icon' => '▦',
-        'description' => 'Beispiel-Kalender des Baukastens – Termine relativ zum Tag der Anlage.',
+        'description' => 'Beispiel-Kalender der Musterseiten – Termine relativ zum Tag der Anlage.',
         'fields' => [
             ['name' => 'titel', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'in_list' => true],
             ['name' => 'beginn', 'label' => 'Beginn', 'type' => 'datetime', 'required' => true, 'in_list' => true, 'width' => 'half'],
@@ -256,7 +264,7 @@ function basis_demo_tables(array $img, callable $log): array
     // Formular 1: Rückrufwunsch (einfach)
     $t = basis_demo_table([
         'handle' => 'demo_rueckruf', 'name' => 'Rückrufwünsche (Demo)', 'singular' => 'Rückrufwunsch', 'icon' => '☏',
-        'description' => 'Öffentliches Beispiel-Formular des Baukastens.',
+        'description' => 'Öffentliches Beispiel-Formular der Musterseiten.',
         'fields' => [
             ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'in_list' => true, 'width' => 'half'],
             ['name' => 'telefon', 'label' => 'Telefon', 'type' => 'tel', 'required' => true, 'in_list' => true, 'width' => 'half'],
@@ -304,7 +312,7 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
     $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text], ['background' => 'muted']);
     $cta = $B('cta', ['variant' => 'band', 'title' => 'Genug gesehen? Dann legen Sie los.', 'text' => 'Alle Bausteine lassen sich frei kombinieren – Farben, Schriften und Navigation stellen Sie unter Verwaltung → Design ein.',
-        'button_label' => 'Kontakt aufnehmen', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/baukasten'], ['background' => 'accent']);
+        'button_label' => 'Kontakt aufnehmen', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/musterseiten'], ['background' => 'accent']);
     $proj = $tables['projekte']['handle'] ?? '';
     $term = $tables['termine']['handle'] ?? '';
 
@@ -314,18 +322,18 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
     };
 
     // ---------------------------------------------------------------- Übersicht (Musterseite für den Style-Editor)
-    $root = $page(['slug' => 'baukasten', 'title' => 'Baukasten', 'sort' => $sort, 'og_image' => $I(0),
+    $root = $page(['slug' => BASIS_DEMO_PATH, 'title' => 'Musterseiten', 'sort' => $sort, 'og_image' => $I(0),
         'meta_description' => 'Alle Blöcke und Funktionen des Kits „Basis“ auf einen Blick – mit frei erfundenen Beispielinhalten.'], [
-        $B('hero', ['variant' => 'split', 'eyebrow' => 'Baukasten (Demo)', 'title' => 'Alle Bausteine auf einen Blick.',
+        $B('hero', ['variant' => 'split', 'eyebrow' => 'Musterseiten (Demo)', 'title' => 'Alle Bausteine auf einen Blick.',
             'text' => 'Diese Seiten zeigen jeden Block des Kits mit Beispielinhalten. Unter Verwaltung → Design ändern Sie Farben, Schriften, Formen und Navigation – hier sehen Sie sofort, wie alles zusammenspielt.',
-            'button_label' => 'Inhalte ansehen', 'button_link' => '/baukasten/inhalte', 'button2_label' => 'Medien ansehen', 'button2_link' => '/baukasten/medien',
+            'button_label' => 'Inhalte ansehen', 'button_link' => '/musterseiten/inhalte', 'button2_label' => 'Medien ansehen', 'button2_link' => '/musterseiten/medien',
             'image' => $I(0), 'ratio' => '4:3']),
         $B('features', ['eyebrow' => 'Überblick', 'title' => 'Fünf Bereiche, alle Blöcke', 'intro' => 'Jede Unterseite widmet sich einem Thema.', 'columns' => '3', 'style' => 'cards', 'items' => [
-            ['icon' => 'layers', 'title' => 'Einstieg & Abschnitte', 'text' => 'Einstiege, Hintergründe, Vollbild mit Bild, Text und Bild.', 'link_label' => 'Ansehen', 'link' => '/baukasten/abschnitte'],
-            ['icon' => 'spark', 'title' => 'Inhalte', 'text' => 'Merkmale, Zitate, Ablauf, Reiter, Pakete, Logos, FAQ.', 'link_label' => 'Ansehen', 'link' => '/baukasten/inhalte'],
-            ['icon' => 'star', 'title' => 'Medien', 'text' => 'Galerie mit Lightbox, Slider, Stapelkarten, Video, Downloads, Karte.', 'link_label' => 'Ansehen', 'link' => '/baukasten/medien'],
-            ['icon' => 'calendar', 'title' => 'Daten & Termine', 'text' => 'Datenlisten in vier Darstellungen, Kalender und nächste Termine.', 'link_label' => 'Ansehen', 'link' => '/baukasten/daten'],
-            ['icon' => 'mail', 'title' => 'Formulare & Kontakt', 'text' => 'Öffentliche Formulare mit Bedingungen, IBAN und Gruppen.', 'link_label' => 'Ansehen', 'link' => '/baukasten/formulare'],
+            ['icon' => 'layers', 'title' => 'Einstieg & Abschnitte', 'text' => 'Einstiege, Hintergründe, Vollbild mit Bild, Text und Bild.', 'link_label' => 'Ansehen', 'link' => '/musterseiten/abschnitte'],
+            ['icon' => 'spark', 'title' => 'Inhalte', 'text' => 'Merkmale, Zitate, Ablauf, Reiter, Pakete, Logos, FAQ.', 'link_label' => 'Ansehen', 'link' => '/musterseiten/inhalte'],
+            ['icon' => 'star', 'title' => 'Medien', 'text' => 'Galerie mit Lightbox, Slider, Stapelkarten, Video, Downloads, Karte.', 'link_label' => 'Ansehen', 'link' => '/musterseiten/medien'],
+            ['icon' => 'calendar', 'title' => 'Daten & Termine', 'text' => 'Datenlisten in vier Darstellungen, Kalender und nächste Termine.', 'link_label' => 'Ansehen', 'link' => '/musterseiten/daten'],
+            ['icon' => 'mail', 'title' => 'Formulare & Kontakt', 'text' => 'Öffentliche Formulare mit Bedingungen, IBAN und Gruppen.', 'link_label' => 'Ansehen', 'link' => '/musterseiten/formulare'],
             ['icon' => 'bulb', 'title' => 'Design', 'text' => 'Sieben Voreinstellungen, vier Navigationen, hell und dunkel.', 'link_label' => '', 'link' => ''],
         ]]),
         $B('stats', ['eyebrow' => 'In Zahlen', 'title' => 'Beispielwerte', 'intro' => 'Frei erfundene Zahlen – nur zur Ansicht.', 'items' => [
@@ -339,16 +347,16 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
             ['name' => 'Begleitung', 'badge' => 'Beliebt', 'price' => '1.290 €', 'period' => 'pro Monat', 'text' => 'Für laufende Vorhaben.', 'features' => "Alles aus „Start“\nWöchentliche Abstimmung\nFeste Ansprechperson\nProtokolle und Aufgabenliste", 'highlight' => true, 'button_label' => 'Anfragen', 'button_link' => '/kontakt'],
             ['name' => 'Komplett', 'badge' => '', 'price' => 'auf Anfrage', 'period' => '', 'text' => 'Für große Projekte.', 'features' => "Alles aus „Begleitung“\nUmsetzung durch unser Team\nÜbergabe und Schulung", 'highlight' => false, 'button_label' => 'Gespräch vereinbaren', 'button_link' => '/kontakt'],
         ]]),
-        $B('quote', ['items' => [['text' => 'Beispielzitat: Der Baukasten hat uns gezeigt, wie viel mit wenigen, gut abgestimmten Bausteinen möglich ist.', 'name' => 'Alex Beispiel', 'role' => 'Beispiel GmbH (fiktiv)']]], ['divider' => true]),
+        $B('quote', ['items' => [['text' => 'Beispielzitat: Die Musterseiten haben uns gezeigt, wie viel mit wenigen, gut abgestimmten Bausteinen möglich ist.', 'name' => 'Alex Beispiel', 'role' => 'Beispiel GmbH (fiktiv)']]], ['divider' => true]),
         $B('steps', ['variant' => 'numbers', 'eyebrow' => 'Ablauf', 'title' => 'In vier Schritten zur Website', 'items' => [
             ['meta' => '', 'title' => 'Voreinstellung wählen', 'text' => 'Eine der sieben Vorlagen als Ausgangspunkt nehmen.'],
             ['meta' => '', 'title' => 'Anpassen', 'text' => 'Akzentfarbe, Schriften und Navigation fein einstellen.'],
             ['meta' => '', 'title' => 'Inhalte pflegen', 'text' => 'Blöcke kombinieren und Texte direkt auf der Seite ändern.'],
             ['meta' => '', 'title' => 'Veröffentlichen', 'text' => 'Prüfen, veröffentlichen – fertig.'],
         ]], ['background' => 'muted']),
-        $B('faq', ['eyebrow' => 'FAQ', 'title' => 'Fragen zum Baukasten', 'intro' => 'Kurz erklärt.', 'items' => [
+        $B('faq', ['eyebrow' => 'FAQ', 'title' => 'Fragen zu den Musterseiten', 'intro' => 'Kurz erklärt.', 'items' => [
             ['q' => 'Sind die Inhalte echt?', 'a' => '<p>Nein. Alle Namen, Zahlen, Termine und Zitate sind frei erfunden und dienen nur als Beispiel.</p>'],
-            ['q' => 'Kann ich den Baukasten löschen?', 'a' => '<p>Ja – einfach den Seitenbaum „Baukasten“ und die Tabellen „… (Demo)“ löschen, oder <code>php kits/basis/tools/demo.php --remove</code> ausführen.</p>'],
+            ['q' => 'Kann ich die Musterseiten löschen?', 'a' => '<p>Ja – einfach den Seitenbaum „Musterseiten“ und die Tabellen „… (Demo)“ löschen, oder <code>php kits/basis/tools/demo.php --remove</code> ausführen.</p>'],
             ['q' => 'Wo stelle ich Farben und Schriften ein?', 'a' => '<p>Unter Verwaltung → Design. Die Vorschau zeigt diese Seite als Muster.</p>'],
         ]]),
         $cta,
@@ -359,11 +367,11 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
         'meta_description' => 'Einstiege, Hintergründe (Standard, getönt, Akzent, dunkel), Vollbild-Abschnitte mit Hintergrundbild.'], [
         $B('hero', ['variant' => 'centered', 'eyebrow' => 'Einstieg „Zentriert“', 'title' => 'Abschnitte und Hintergründe',
             'text' => 'Dieser Einstieg füllt den Bildschirm: Hintergrundbild mit Abdunkelung. Bei der Navigation „Modern“ mit Transparenz liegt die Leiste darüber.',
-            'button_label' => 'Zum Vollbild-Abschnitt', 'button_link' => '#vollbild', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/baukasten', 'image' => null, 'ratio' => '16:9'],
+            'button_label' => 'Zum Vollbild-Abschnitt', 'button_link' => '#vollbild', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/musterseiten', 'image' => null, 'ratio' => '16:9'],
             ['background' => 'dark', 'height' => 'screen', 'bgImage' => $I(1), 'overlay' => 'dark', 'align' => 'center']),
         $B('text_image', ['variant' => 'right', 'eyebrow' => 'Hintergrund „Standard“', 'title' => 'Text und Bild nebeneinander',
             'text' => '<p>Der Block „Text + Bild“ trägt Überschrift, formatierten Text, eine Liste mit Häkchen und einen Button. Das Bild steht rechts oder links.</p>',
-            'list' => "Bildformat wählbar\nHäkchen-Liste ohne Aufwand\nButton optional", 'button_label' => 'Mehr erfahren', 'button_link' => '/baukasten/inhalte', 'image' => $I(2), 'ratio' => '4:3']),
+            'list' => "Bildformat wählbar\nHäkchen-Liste ohne Aufwand\nButton optional", 'button_label' => 'Mehr erfahren', 'button_link' => '/musterseiten/inhalte', 'image' => $I(2), 'ratio' => '4:3']),
         $B('text_image', ['variant' => 'left', 'eyebrow' => 'Hintergrund „Getönt“', 'title' => 'Ruhige Fläche für Abwechslung',
             'text' => '<p>Getönte Abschnitte gliedern lange Seiten. Die Farbe kommt aus dem Design-Token „Getönte Fläche“.</p>', 'list' => '',
             'button_label' => '', 'button_link' => '', 'image' => $I(3), 'ratio' => '3:2'], ['background' => 'muted']),
@@ -377,17 +385,17 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
             ['value' => '100 %', 'label' => 'Bildschirmhöhe', 'text' => 'für Vollbild-Abschnitte'],
         ]], ['background' => 'dark']),
         $B('cta', ['variant' => 'box', 'title' => 'Vollbild-Abschnitt mit Hintergrundbild', 'text' => 'Abschnitt-Optionen: Höhe „Bildschirmhöhe“, Hintergrundbild, Abdunkelung und Ausrichtung.',
-            'button_label' => 'Zur Übersicht', 'button_link' => '/baukasten', 'button2_label' => '', 'button2_link' => ''],
+            'button_label' => 'Zur Übersicht', 'button_link' => '/musterseiten', 'button2_label' => '', 'button2_link' => ''],
             ['background' => 'dark', 'anchor' => 'vollbild', 'height' => 'screen', 'bgImage' => $I(4), 'overlay' => 'dark', 'align' => 'center']),
         $B('text_image', ['variant' => 'right', 'eyebrow' => 'Bild mit Aufhellung', 'title' => 'Heller Schleier für ruhige Texte',
             'text' => '<p>Mit „Aufhellen“ liegt ein heller Schleier über dem Bild – dunkle Schrift bleibt gut lesbar.</p>', 'list' => '', 'button_label' => '', 'button_link' => '', 'ratio' => '4:3'],
             ['background' => 'white', 'bgImage' => $I(5), 'overlay' => 'light']),
         $B('richtext', ['eyebrow' => 'Fließtext', 'title' => 'Typografie im Fließtext', 'text' =>
-            '<p>Der Block „Fließtext“ eignet sich für längere Texte wie Rechtstexte. Er kennt <strong>Hervorhebungen</strong>, <a href="/baukasten">Links</a> und Zwischenüberschriften.</p>'
+            '<p>Der Block „Fließtext“ eignet sich für längere Texte wie Rechtstexte. Er kennt <strong>Hervorhebungen</strong>, <a href="/musterseiten">Links</a> und Zwischenüberschriften.</p>'
             . '<h2>Zwischenüberschrift</h2><p>Absätze sind auf eine angenehme Zeilenlänge begrenzt.</p>'
             . '<ul><li>Aufzählung mit Punkten</li><li>Zweiter Punkt</li></ul><ol><li>Nummerierte Liste</li><li>Zweiter Schritt</li></ol>'
             . '<blockquote><p>Ein eingerücktes Zitat im Fließtext.</p></blockquote>'
-            . '<h3>Kleinere Überschrift</h3><p>Zum Schluss ein weiterer Absatz mit einem Beispiel-Link zur <a href="/baukasten/inhalte">Inhaltsseite</a>.</p>']),
+            . '<h3>Kleinere Überschrift</h3><p>Zum Schluss ein weiterer Absatz mit einem Beispiel-Link zur <a href="/musterseiten/inhalte">Inhaltsseite</a>.</p>']),
     ]);
 
     // ---------------------------------------------------------------- Inhalte
@@ -401,9 +409,9 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
             ['icon' => 'heart', 'title' => 'Betreuung', 'text' => 'Auch nach dem Abschluss.', 'link_label' => '', 'link' => ''],
         ]]),
         $B('features', ['eyebrow' => 'Merkmale „Karten“ mit Bild', 'title' => 'Karten mit Bild und Link', 'intro' => 'Der Kartenstil (Fläche, Rahmen, Schatten) folgt der Einstellung unter Design → Form.', 'columns' => '3', 'style' => 'cards', 'items' => [
-            ['image' => $I(1), 'title' => 'Beispielprojekt Nord', 'text' => 'Kurze Beschreibung mit zwei Zeilen Text.', 'link_label' => 'Weiterlesen', 'link' => '/baukasten/daten'],
-            ['image' => $I(2), 'title' => 'Beispielprojekt Süd', 'text' => 'Die ganze Karte ist klickbar, wenn kein Linktext gesetzt ist.', 'link_label' => '', 'link' => '/baukasten/daten'],
-            ['image' => $I(3), 'title' => 'Beispielprojekt West', 'text' => 'Bilder erscheinen im Format 3:2.', 'link_label' => 'Weiterlesen', 'link' => '/baukasten/daten'],
+            ['image' => $I(1), 'title' => 'Beispielprojekt Nord', 'text' => 'Kurze Beschreibung mit zwei Zeilen Text.', 'link_label' => 'Weiterlesen', 'link' => '/musterseiten/daten'],
+            ['image' => $I(2), 'title' => 'Beispielprojekt Süd', 'text' => 'Die ganze Karte ist klickbar, wenn kein Linktext gesetzt ist.', 'link_label' => '', 'link' => '/musterseiten/daten'],
+            ['image' => $I(3), 'title' => 'Beispielprojekt West', 'text' => 'Bilder erscheinen im Format 3:2.', 'link_label' => 'Weiterlesen', 'link' => '/musterseiten/daten'],
         ]], ['background' => 'muted']),
         $B('quote', ['eyebrow' => 'Stimmen', 'title' => 'Zitate als Karten', 'items' => [
             ['text' => 'Beispielzitat: Schnelle Rückmeldungen und ein klarer Plan – genau das hatten wir gesucht.', 'name' => 'Kim Muster', 'role' => 'Verein Beispielstadt (fiktiv)'],
@@ -442,7 +450,7 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
         $B('gallery', ['eyebrow' => 'Galerie „Zeilen“', 'title' => 'Bündige Zeilen', 'intro' => '', 'source' => 'manual',
             'images' => array_map(fn($id) => ['image' => $id, 'caption' => ''], array_slice($img['all'], 0, 6)), 'layout' => 'justified', 'columns' => '3', 'ratio' => '4:3', 'captions' => false, 'lightbox' => true], ['background' => 'muted']),
         $B('slideshow', ['eyebrow' => 'Slider', 'title' => 'Folien mit Text', 'intro' => '', 'source' => 'manual', 'height' => '21:9', 'transition' => 'slide', 'arrows' => true, 'dots' => true, 'loop' => true, 'autoplay' => false, 'interval' => '6', 'slides' => [
-            ['image' => $I(0), 'eyebrow' => 'Folie 1', 'title' => 'Abgedunkelt mit heller Schrift', 'text' => 'Die Standard-Einstellung für Folien mit Text.', 'button_label' => 'Mehr', 'button_link' => '/baukasten', 'position' => 'bottom-left', 'overlay' => 'dark'],
+            ['image' => $I(0), 'eyebrow' => 'Folie 1', 'title' => 'Abgedunkelt mit heller Schrift', 'text' => 'Die Standard-Einstellung für Folien mit Text.', 'button_label' => 'Mehr', 'button_link' => '/musterseiten', 'position' => 'bottom-left', 'overlay' => 'dark'],
             ['image' => $I(3), 'eyebrow' => 'Folie 2', 'title' => 'Textkasten', 'text' => 'Ein Kasten in der Kartenfarbe.', 'button_label' => '', 'button_link' => '', 'position' => 'center-left', 'overlay' => 'box'],
             ['image' => $I(5), 'eyebrow' => 'Folie 3', 'title' => 'Aufgehellt', 'text' => 'Dunkle Schrift auf hellem Schleier.', 'button_label' => '', 'button_link' => '', 'position' => 'center', 'overlay' => 'light'],
         ]]),
@@ -463,7 +471,7 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
     $tpl = null;
     if ($proj !== '') {
         $tpl = Pages::create(['slug' => '_vorlage-demo-projekte', 'title' => 'Projekte (Demo) – Detailseite', 'type' => 'template', 'template_for' => $proj, 'status' => 'published', 'menu' => 0], Pages::sanitizeBlocks([
-            $B('data_fields', ['table' => $proj, 'fields' => ["$proj._title", "$proj.kategorie", "$proj.bild"], 'layout' => 'head', 'show_labels' => false, 'ratio' => '21:9', 'back_label' => 'Alle Projekte', 'back_link' => '/baukasten/daten'], ['spaceBottom' => 'small']),
+            $B('data_fields', ['table' => $proj, 'fields' => ["$proj._title", "$proj.kategorie", "$proj.bild"], 'layout' => 'head', 'show_labels' => false, 'ratio' => '21:9', 'back_label' => 'Alle Projekte', 'back_link' => '/musterseiten/daten'], ['spaceBottom' => 'small']),
             $B('data_fields', ['table' => $proj, 'fields' => ["$proj.kurztext"], 'layout' => 'prose', 'show_labels' => false, 'ratio' => '16:9', 'back_label' => '', 'back_link' => ''], ['spaceTop' => 'none', 'spaceBottom' => 'small']),
             $B('data_fields', ['table' => $proj, 'fields' => ["$proj.auftraggeber", "$proj.jahr", "$proj.kategorie"], 'layout' => 'dl', 'show_labels' => true, 'ratio' => '16:9', 'back_label' => '', 'back_link' => ''], ['spaceTop' => 'none']),
             $B('data_list', ['eyebrow' => '', 'title' => 'Weitere Projekte', 'intro' => '', 'table' => $proj, 'fields' => ["$proj._title", "$proj.bild", "$proj.kategorie"], 'layout' => 'cards', 'columns' => '3', 'ratio' => '16:10', 'limit' => 3, 'exclude_current' => true, 'link_detail' => true], ['background' => 'muted']),
@@ -498,52 +506,53 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
         $B('data_form', ['eyebrow' => 'Mit Bedingungen, IBAN und Gruppe', 'title' => 'Mitgliedsantrag (Beispiel)', 'intro' => '„Firma oder Verein“ blendet ein weiteres Feld ein; bei „Privatperson“ lassen sich weitere Personen hinzufügen.', 'table' => $tables['antrag']['handle'] ?? '', 'submit_label' => '', 'success_text' => ''], ['background' => 'muted']),
         $B('contact', ['eyebrow' => 'Kontakt', 'title' => 'So erreichen Sie uns', 'intro' => 'Alle Angaben kommen aus „Website“.', 'show_hours' => true, 'show_map' => true, 'note' => 'Beispieladresse – frei erfunden.']),
     ]);
-    $log('Seitenbaum „Baukasten“ angelegt (/baukasten).');
+    $log('Seitenbaum „Musterseiten“ angelegt (/' . BASIS_DEMO_PATH . ').');
 }
 
 // ------------------------------------------------------------------ Hero-Varianten (Musterseite)
 
 /**
- * Unterseite „Hero-Varianten“ im Baukasten: jede Einstiegs-Variante mit Werkzeug untereinander (Suche, Formular, Standort)
- * plus die drei klassischen zum Vergleich. Nutzt die Demo-Bilder und -Tabellen des Baukastens; ersetzt eine vorhandene Seite.
+ * Unterseite „Hero-Varianten“ der Musterseiten: jede Einstiegs-Variante mit Werkzeug untereinander (Suche, Formular, Standort)
+ * plus die drei klassischen zum Vergleich. Nutzt die Demo-Bilder und -Tabellen der Musterseiten; ersetzt eine vorhandene Seite.
  * Einzeln (bestehende Websites): CMS_SITE=demo php kits/basis/tools/demo.php --heroes
  */
 function basis_demo_heroes(?callable $log = null): bool
 {
     $log ??= static fn(string $m) => null;
     $db = app()->db;
-    $root = $db->fetch("SELECT id FROM pages WHERE path = 'baukasten' AND type = 'page' LIMIT 1");
-    if (!$root) { $log('Kein Baukasten vorhanden – zuerst tools/demo.php ausführen.'); return false; }
-    foreach ($db->fetchAll("SELECT id FROM pages WHERE path = 'baukasten/hero-varianten'") as $old) $db->query('DELETE FROM pages WHERE id = ?', [(int) $old['id']]);
+    $root = $db->fetch("SELECT id, path FROM pages WHERE path IN (?, ?) AND type = 'page' ORDER BY path = ? DESC LIMIT 1", [BASIS_DEMO_PATH, BASIS_DEMO_OLD_PATH, BASIS_DEMO_PATH]);
+    if (!$root) { $log('Keine Musterseiten vorhanden – zuerst tools/demo.php ausführen.'); return false; }
+    $base = '/' . $root['path'];
+    foreach ($db->fetchAll('SELECT id FROM pages WHERE path = ?', [$root['path'] . '/hero-varianten']) as $old) $db->query('DELETE FROM pages WHERE id = ?', [(int) $old['id']]);
     Pages::rebuildPaths();
-    $img = array_map('intval', array_column($db->fetchAll('SELECT id FROM media WHERE tags LIKE ? ORDER BY id', ['%' . BASIS_DEMO_TAG . '%']), 'id'));
+    $img = array_map('intval', array_column($db->fetchAll('SELECT id FROM media WHERE tags LIKE ? OR tags LIKE ? ORDER BY id', ['%' . BASIS_DEMO_TAG . '%', '%' . BASIS_DEMO_OLD_TAG . '%']), 'id'));
     $img = array_values(array_filter($img, fn($id) => str_starts_with((string) (Media::find($id)['mime'] ?? ''), 'image/')));
     $I = fn(int $n) => $img ? $img[$n % count($img)] : null;
     $form = Tables::find('demo_rueckruf') ? 'demo_rueckruf' : '';
     $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
         'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => ''], 'tunes' => ['section' => $tunes + ['divider' => true]]];
     $blocks = [
-        $B('compact', ['eyebrow' => 'Baukasten · Hero-Varianten', 'title' => 'Sechs Einstiege, ein Block.',
+        $B('compact', ['eyebrow' => 'Musterseiten · Hero-Varianten', 'title' => 'Sechs Einstiege, ein Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sechs Varianten. Die drei neuen bringen ein Werkzeug direkt nach oben: Suche, Formular und Standort. Jede Variante erscheint hier einmal – auf echten Seiten steht nur ein Einstieg ganz oben.'],
             ['background' => 'muted', 'divider' => false]),
         $B('search', ['eyebrow' => 'Variante „Such-Einstieg“', 'title' => 'Wie können wir Ihnen helfen?',
             'text' => 'Für Websites mit vielen Inhalten – Verwaltung, Verband, Verein. Vorschläge erscheinen schon beim Tippen.',
             'search_label' => 'Was suchen Sie?', 'search_placeholder' => 'z. B. Projekt, Termin, Formular …',
-            'search_chips' => "Projekte\nTermine\nFormular\nKontakt | /baukasten/formulare",
+            'search_chips' => "Projekte\nTermine\nFormular\nKontakt | $base/formulare",
             'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '']),
         $B('form', ['eyebrow' => 'Variante „Mit Formular“', 'title' => 'Rückruf in zwei Minuten angefragt.',
             'text' => 'Wenn ein Ziel im Vordergrund steht: Das Formular ist sofort sichtbar, der Text daneben erklärt, was danach passiert.',
             'points' => "Rückruf am selben Werktag\nKeine Kosten, keine Verpflichtung\nDaten werden verschlüsselt übertragen",
-            'button_label' => 'Leistungen ansehen', 'button_link' => '/baukasten/inhalte', 'button2_label' => '', 'button2_link' => '',
+            'button_label' => 'Leistungen ansehen', 'button_link' => $base . '/inhalte', 'button2_label' => '', 'button2_link' => '',
             'form_table' => $form, 'form_title' => 'Rückruf anfordern', 'form_submit' => '', 'form_note' => 'Demo-Formular – es ruft niemand an.'],
             ['background' => 'muted']),
         $B('map', ['eyebrow' => 'Variante „Standort“', 'title' => 'Besuchen Sie uns vor Ort.',
             'text' => 'Anschrift, Telefon, „jetzt geöffnet“ und die Öffnungszeiten kommen aus „Website“ – die Karte lädt über den eigenen Server, ohne Cookies.',
-            'button_label' => 'Route planen', 'button_link' => '/baukasten/formulare', 'button2_label' => '', 'button2_link' => '',
+            'button_label' => 'Route planen', 'button_link' => $base . '/formulare', 'button2_label' => '', 'button2_link' => '',
             'map_zoom' => '15', 'map_hours' => true, 'map_note' => 'Beispieladresse – frei erfunden. Parkplätze im Hof.']),
         $B('split', ['eyebrow' => 'Variante „Text und Bild“', 'title' => 'Der Klassiker für die Startseite.',
             'text' => 'Text links, Bild rechts – das Bildformat ist wählbar.', 'image' => $I(1), 'ratio' => '4:3',
-            'button_label' => 'Zum Baukasten', 'button_link' => '/baukasten', 'button2_label' => '', 'button2_link' => '']),
+            'button_label' => 'Zu den Musterseiten', 'button_link' => $base, 'button2_label' => '', 'button2_link' => '']),
         $B('centered', ['eyebrow' => 'Variante „Zentriert“', 'title' => 'Eine Botschaft, ein breites Bild.',
             'text' => 'Kurz und zentriert, das Bild steht im Breitbild darunter.', 'image' => $I(3), 'ratio' => '16:9',
             'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''], ['background' => 'muted']),
@@ -552,6 +561,6 @@ function basis_demo_heroes(?callable $log = null): bool
         'meta_description' => 'Alle Varianten des Einstiegs (Hero) im Kit „Basis“: Such-Einstieg, mit Formular, Standort, Text und Bild, zentriert, Seitenkopf.'],
         Pages::sanitizeBlocks($blocks));
     \Core\PageCache::clear();
-    $log('Musterseite „Hero-Varianten“ angelegt (/baukasten/hero-varianten).');
+    $log('Musterseite „Hero-Varianten“ angelegt (' . $base . '/hero-varianten).');
     return true;
 }

@@ -1,6 +1,6 @@
 # Kit „basis“
 
-Neutrales Start-Kit für KLXM Studio – Demo-Kit, Baukasten und Ausgangspunkt für Kundenprojekte
+Neutrales Start-Kit für KLXM Studio – Demo-Kit mit Musterseiten und Ausgangspunkt für Kundenprojekte
 (Unternehmen, Agentur, Kanzlei, Verein, Handwerk, Studio). Vollständig über **Design-Tokens** gesteuert
 (Style-Editor: Verwaltung → Design), vier **Navigationen**, sieben geprüfte **Voreinstellungen**, hell und dunkel,
 mehrsprachig ab dem ersten Tag, keine externen Anfragen.
@@ -12,7 +12,7 @@ kits/basis/
 ├── theme.php          Blöcke, Website, project, seo/jsonld, fonts, conditional_css, 'design' => design.php
 ├── design.php         Design-Tokens (Farben, Typografie, Form, Navigation, Farbschema), Schriften, 7 Voreinstellungen
 ├── functions.php      Helfer basis_* (Kontakt, Öffnungszeiten, Menü/Mega-Menü, Symbole, JSON-LD, Migration alter Farbwerte)
-├── seed.php           Demo-Inhalte „Musterfirma (Demo)“ + 'after' → Baukasten (tools/demo-content.php)
+├── seed.php           Demo-Inhalte „Musterfirma (Demo)“ + 'after' → Musterseiten (tools/demo-content.php)
 ├── blocks/            Renderer je Block ($b = Core\Block, $d = Daten)
 ├── templates/         layout, error, maintenance, offline, partials/
 │                      header.php → header-modern | header-bar (klassisch/ausführlich) | header-minimal, topbar, menu-btn,
@@ -21,7 +21,7 @@ kits/basis/
 │                      blocks.css, extra.css, data.css, calendar.css, dataform.css, hero-x.css (nur bei passenden Blöcken/Varianten) ·
 │                      preview.css (nur Vorschau im Style-Editor) · _topbar.css/_quick.css (Teile, per @import)
 ├── assets/js/         site.js (Menüs, Tastatur, „jetzt geöffnet“, Scroll-Zustand; ≈ 4,1 KB) · blocks.js (Reiter, Video; 1,8 KB)
-├── tools/             contrast.php (WCAG-Prüfung aller Voreinstellungen) · demo.php + demo-content.php (Baukasten)
+├── tools/             contrast.php (WCAG-Prüfung aller Voreinstellungen) · demo.php + demo-content.php (Musterseiten)
 ├── lang/              en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php    Kapitel für das Handbuch der Redaktion (Array: eigene Kapitel in docs/manual/, Rest aus dem Core)
 ├── package.json       @fontsource/{inter,manrope,ibm-plex-sans,source-serif-4,lora,fraunces} + Inter-TTF (Icons)
@@ -68,13 +68,13 @@ Tastatur: Tab, ←/→ zwischen Hauptpunkten, ↓ öffnet und springt ins Unterm
 rechnet site.js im Browser aus `data-hours` (Zeitzone der Website) – der Seiten-Cache bleibt gültig.
 Website-Suche (Kern, Funktion „search“): Lupe in `.site-nav__end` öffnet ein Popover-Suchfeld (Desktop), im Mobil- bzw. Vollbild-Menü steht das Suchfeld oben; Ergebnisse unter `/suche`. Vorschläge lädt `site.js` erst beim ersten Fokus (Kern-Skript `search.js`).
 
-## Baukasten (Showcase)
+## Musterseiten (Showcase)
 
-`CMS_SITE=<site> php kits/basis/tools/demo.php [--force|--remove] [--preset=mint]` legt den Seitenbaum `/baukasten`
+`CMS_SITE=<site> php kits/basis/tools/demo.php [--force|--remove] [--preset=mint]` legt den Seitenbaum `/musterseiten`
 (Übersicht + Einstieg & Abschnitte, Inhalte, Medien, Daten & Termine, Formulare & Kontakt) an – mit 8 erzeugten Bildern
-(Sammlung „Baukasten (Demo)“), einer Beispiel-PDF, den Tabellen `demo_projekte` (mit Detailseite), `demo_termine`
+(Sammlung „Musterseiten (Demo)“), einer Beispiel-PDF, den Tabellen `demo_projekte` (mit Detailseite), `demo_termine`
 (Kalender mit Wiederholung), `demo_rueckruf` und `demo_antrag` (öffentliche Formulare mit Bedingung, IBAN, Gruppe).
-Neue Websites erhalten ihn automatisch (seed.php → `after`). Die Übersicht ist die Musterseite des Style-Editors (`design.sample`).
+Neue Websites erhalten ihn automatisch (seed.php → `after`); `--remove`/`--force` entfernen auch den früheren Seitenbaum `/baukasten` älterer Installationen. Die Übersicht ist die Musterseite des Style-Editors (`design.sample`).
 
 ## Website (Einstellungen)
 
@@ -93,7 +93,7 @@ Link-Sonderwerte in Link-Feldern: `phone`, `email`.
 
 ## Blöcke
 
-hero (split/centered/compact, H1; mit Werkzeug: search = Such-Einstieg mit Vorschlägen und Chips, form = Text + Formular einer Datentabelle, map = Karte + Kontaktkarte mit „jetzt geöffnet“ – CSS nur dort: css/hero-x.css ≈ 5 KB; Musterseite /baukasten/hero-varianten, `tools/demo.php --heroes`) · richtext · text_image (rechts/links) · features (Raster/Karten/schlicht, 2–4 Spalten,
+hero (split/centered/compact, H1; mit Werkzeug: search = Such-Einstieg mit Vorschlägen und Chips, form = Text + Formular einer Datentabelle, map = Karte + Kontaktkarte mit „jetzt geöffnet“ – CSS nur dort: css/hero-x.css ≈ 5 KB; Musterseite /musterseiten/hero-varianten, `tools/demo.php --heroes`) · richtext · text_image (rechts/links) · features (Raster/Karten/schlicht, 2–4 Spalten,
 Symbol oder Bild) · stats · quote (1 = groß, 2–3 = Karten) · faq · cta (Band/Box) · **pricing** (2–4 Pakete, Hervorhebung) ·
 **steps** (nummeriert/Zeitleiste) · **tabs** (oben/links, ARIA-Tabs, ohne JS untereinander) · **video** (YouTube/Vimeo
 Zwei-Klick mit lokalem Vorschaubild, MP4 direkt; breit/mit Text) · logos · contact · downloads · map.
@@ -117,11 +117,11 @@ php bin/console site:create kunde www.kunde.de kunde
 
 Danach im neuen Kit: Label/Version in theme.php, Standardwerte/Voreinstellungen in design.php (Standardwerte auch
 in site.css `:root` und im Dunkel-Block anpassen – sie müssen übereinstimmen), seed.php (eigene Startinhalte; `after`
-entfernen, wenn kein Baukasten gewünscht ist), Blöcke ergänzen oder entfernen, docs/manual.php und docs/manual/*.php anpassen.
+entfernen, wenn keine Musterseiten gewünscht sind), Blöcke ergänzen oder entfernen, docs/manual.php und docs/manual/*.php anpassen.
 
 ## Lizenzen
 
 Inter, Manrope, IBM Plex Sans, Source Serif 4, Lora, Fraunces – SIL Open Font License 1.1
-(`public/kits/basis/fonts/OFL-{key}.txt`). Beispielbilder des Baukastens: automatisch erzeugt (GD), frei verwendbar.
+(`public/kits/basis/fonts/OFL-{key}.txt`). Beispielbilder der Musterseiten: automatisch erzeugt (GD), frei verwendbar.
 Symbole des Kits (`basis_icon()`): eigene Pfade (24 × 24, Linie); zusätzlich stehen die Kern-Symbole (Phosphor duotone,
 MIT) über `icon()` zur Verfügung.

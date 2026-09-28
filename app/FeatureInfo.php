@@ -87,9 +87,9 @@ final class FeatureInfo
             // ------------------------------------------------------------------ Daten
             'data' => ['group' => 'data', 'desc' => __('Eigene Datentabellen (Aktuelles, Team, Termine …) mit Listen und Detailseiten.'),
                 'effects' => ['menu' => __('Menüpunkt „Daten“'), 'frontend' => __('Blöcke „Datenliste“ und „Datenfelder“, Detailseiten'), 'data' => __('Je Tabelle eine Datenbanktabelle data_{name}')]],
-            'data.schema' => ['group' => 'data', 'desc' => __('Tabellen und Felder selbst anlegen und ändern (Baukasten).'),
+            'data.schema' => ['group' => 'data', 'desc' => __('Tabellen und Felder selbst anlegen und ändern (Tabellen-Designer).'),
                 'effects' => ['menu' => __('„Neue Tabelle“ sowie „Felder & Einstellungen“ je Tabelle')],
-                'caution' => __('Mit dem Baukasten lassen sich Felder löschen – nur für Personen, die die Datenstruktur verantworten.')],
+                'caution' => __('Mit dem Tabellen-Designer lassen sich Felder löschen – nur für Personen, die die Datenstruktur verantworten.')],
             'data.shared' => ['group' => 'data', 'desc' => __('Tabellen mit anderen Websites der Installation teilen.'),
                 'effects' => ['menu' => __('Grundeinstellungen → Geteilte Daten'), 'data' => __('Geteilte Datenbank unter storage/shared (für mehrere Websites)')]],
             'calendar' => ['group' => 'data', 'desc' => __('Kalender-Tabellen mit Wiederholungen und iCal-Abonnement.'),

@@ -29,7 +29,7 @@ import { ico } from './_icons.js';   // Symbolauswahl (Feldtyp „icon“, Tabel
 import { initAccent } from './_accent.js';   // Konto → Akzentfarbe: Live-Vorschau (Core\Accent)
 import { initFeatures } from './_features.js';   // Funktionen & Erweiterungen: Sicherheitsbestätigung (Core\Features)
 import { initFonts } from './_fonts.js';   // Grundeinstellungen → Schriften: Proben von der eigenen Domain (Core\Fonts)
-import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöcke: Block-Baukasten (Core\Blocks\Custom)
+import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöcke: Block-Designer (Core\Blocks\Custom)
 import { Rich } from './_rte.js';   // Formatierungsleiste: Stile, Farben, Marker, Link, Menüs, Tastatur
 import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Linkauswahl (Rich-Text und Feldtyp „link“)
 import { initAssistant } from './_assistant.js';
@@ -319,7 +319,7 @@ function initDataFields(scope = d) {
   });
 }
 
-// ------------------------------------------------------------ Daten: Tabellen-Baukasten
+// ------------------------------------------------------------ Daten: Tabellen-Designer
 const schema = $('[data-schema]');
 if (schema) {
   const list = $('[data-fields]', schema), tpl = $('[data-field-template]', schema);
@@ -635,7 +635,7 @@ function initBinding(scope = d) {
 listen('change', e => {
   if (e.target.matches('[data-entry-switch]')) location.href = e.target.value;
   if (e.target.matches('[data-autosubmit]')) e.target.form.submit();
-  // Tabellen-Baukasten: Feldzuordnung des Kalenders nur bei „Als Kalender nutzen“ (siehe unten: Klick auf Kalendertag)
+  // Tabellen-Designer: Feldzuordnung des Kalenders nur bei „Als Kalender nutzen“ (siehe unten: Klick auf Kalendertag)
   if (e.target.matches('[data-cal-toggle]')) { const m = e.target.closest('[data-cal-settings]')?.querySelector('[data-cal-map]'); if (m) m.hidden = !e.target.checked; }
 });
 

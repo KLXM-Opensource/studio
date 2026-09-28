@@ -114,7 +114,7 @@ final class DataController extends AdminController
         return Tables::find($handle) ?? throw new HttpException(404);
     }
 
-    // ================================================================= Übersicht & Tabellen-Baukasten
+    // ================================================================= Übersicht & Tabellen-Designer
 
     public function index(Request $r): Response
     {

@@ -1,5 +1,5 @@
 <?php
-/** Verwaltung → Blöcke: eigene Blöcke (Block-Baukasten). @var array $blocks  @var ?array $library */
+/** Verwaltung → Blöcke: eigene Blöcke (Block-Designer). @var array $blocks  @var ?array $library */
 $status = fn(array $b) => match (true) {
     $b['status'] === 'published' && $b['changed'] => ['adm-badge adm-badge--adm-warn', __('Freigegeben · Änderungen offen')],
     $b['status'] === 'published' => ['adm-badge', __('Freigegeben')],
@@ -16,7 +16,7 @@ $status = fn(array $b) => match (true) {
 </header>
 
 <details class="adm-card dt-howto"<?= $blocks ? '' : ' open' ?>>
-  <summary><?= e(__('So funktioniert der Block-Baukasten')) ?></summary>
+  <summary><?= e(__('So funktioniert der Block-Designer')) ?></summary>
   <ol class="dt-steps">
     <li><span class="dt-step">1</span><strong><?= e(__('Felder')) ?></strong><p><?= e(__('Welche Angaben pflegt die Redaktion? Text, Bild, Link, Auswahl, Listen …')) ?></p></li>
     <li><span class="dt-step">2</span><strong><?= e(__('Vorlage & CSS')) ?></strong><p><?= e(__('HTML mit Platzhaltern wie {{ title }} – ohne PHP und ohne JavaScript. Das CSS gilt nur innerhalb des Blocks.')) ?></p></li>
@@ -63,7 +63,7 @@ $status = fn(array $b) => match (true) {
   <section class="adm-card">
     <h2><?= e(__('Netzwerk-Bibliothek')) ?></h2>
     <p class="adm-muted"><?= e(__('Blöcke, die Netzwerk-Administration oder Agentur für alle Websites bereitgestellt haben. Übernehmen legt eine Kopie als Entwurf an.')) ?></p>
-    <?php if (!$library): ?><p class="adm-muted"><?= e(__('Die Bibliothek ist leer – im Baukasten „In Bibliothek kopieren“ wählen.')) ?></p><?php endif; ?>
+    <?php if (!$library): ?><p class="adm-muted"><?= e(__('Die Bibliothek ist leer – im Block-Designer „In Bibliothek kopieren“ wählen.')) ?></p><?php endif; ?>
     <ul class="cb-lib">
       <?php foreach ($library as $l): ?>
       <li><span class="dt-icon" aria-hidden="true"><?= icon($l['icon']) ?></span>

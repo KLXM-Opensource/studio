@@ -10,7 +10,7 @@ use Core\Media;
 use Core\MediaBlocks;
 
 /**
- * Laufzeit der Vorlagensprache eigener Blöcke (Block-Baukasten): Filter, kontextgerechtes Escaping, Schleifen-Grenzen,
+ * Laufzeit der Vorlagensprache eigener Blöcke (Block-Designer): Filter, kontextgerechtes Escaping, Schleifen-Grenzen,
  * Hülle des Blocks. Wird vom Interpreter (Core\Blocks\Template::run) UND von als Theme-Block exportierten PHP-Renderern
  * benutzt – beide Wege liefern dadurch dieselbe Ausgabe.
  *

@@ -263,7 +263,7 @@ TXT;
     }
 
     /**
-     * Block-Baukasten (Core\Blocks\Custom): Vorschlag für einen eigenen Block – Felder, Vorlage in der sicheren
+     * Block-Designer (Core\Blocks\Custom): Vorschlag für einen eigenen Block – Felder, Vorlage in der sicheren
      * Vorlagensprache, begrenztes CSS. Wird vom Compiler geprüft und nie automatisch freigegeben.
      * $types: Feldtyp → Bezeichnung, $filters: verfügbare Filter
      */

@@ -44,7 +44,7 @@ final class Features
             // SVG-Grafiken hochladen – nur bereinigt und optimiert (Core\Svg); abschaltbar, falls eine Website keine SVG möchte
             'media.svg' => ['SVG-Grafiken hochladen (bereinigt)', []],
             'data' => ['Datentabellen (Collections)', ['data.edit', 'data.publish', 'data.delete', 'data.schema']],
-            'data.schema' => ['Tabellen und Felder selbst anlegen (Baukasten)', ['data.schema']],
+            'data.schema' => ['Tabellen und Felder selbst anlegen (Tabellen-Designer)', ['data.schema']],
             'data.shared' => ['Geteilte Daten verwalten (Tabellen mehrerer Websites)', ['data.shared.manage']],
             'requests' => ['Anfragen: verschlüsselte Eingangs-Tabellen und ihre Formulare', ['requests.read', 'requests.manage']],
             // Anfragen je Eingang auch per E-Mail zustellen – mit vollem Inhalt, optional S/MIME (Core\Data\Delivery); Standard je Tabelle: nur im System
@@ -78,8 +78,8 @@ final class Features
             'review' => ['Eingereicht: Änderungen von API, MCP und KI prüfen und freigeben', ['review.manage']],
             // Presets lassen „support“ an: auch mit eingeschränktem Umfang kann die Redaktion Probleme melden
             'support' => ['Support & Wissensdatenbank (Probleme melden, Fragen & Antworten)', ['support.report', 'support.answer', 'support.manage']],
-            // Block-Baukasten (Core\Blocks\Custom): eigene Blöcke aus Feldern, sicherer Vorlage und begrenztem CSS
-            'blocks.custom' => ['Eigene Blöcke bauen (Block-Baukasten)', ['blocks.build']],
+            // Block-Designer (Core\Blocks\Custom): eigene Blöcke aus Feldern, sicherer Vorlage und begrenztem CSS
+            'blocks.custom' => ['Eigene Blöcke bauen (Block-Designer)', ['blocks.build']],
             // Chat zwischen Benutzern der Verwaltung (Core\Chat) – Standard aus; einschalten per config oder Chat-Einstellungen (Netzwerk/Integratoren)
             'chat' => ['Chat zwischen Benutzern der Verwaltung (Direktnachrichten, Kanäle)', ['chat.use', 'chat.manage']],
             // Externe Quellen (Core\Sources): Feeds, JSON-APIs, XML und OpenImmo in Datentabellen übernehmen – Standard aus;
@@ -142,7 +142,7 @@ final class Features
         // Externe Quellen: ebenso Standard aus, Schalter der Website (Netzwerk-Administration/Integratoren), sofern config nichts vorgibt
         if (!array_key_exists('sources', (array) $cfg->get('features', []))) $state['sources'] = Sources\Sources::siteSwitch();
         self::$raw = $state;
-        // Ohne Datentabellen kein Baukasten
+        // Ohne Datentabellen kein Tabellen-Designer
         if (!$state['data']) $state['data.schema'] = false;
         if (!$state['data']) $state['data.shared'] = false;
         // Kalender baut auf Datentabellen auf
@@ -289,7 +289,7 @@ final class Features
         $b = (array) app()->config->get('blocks', []);
         if (!empty($b['allow']) && !in_array($type, (array) $b['allow'], true)) return false;
         if (in_array($type, (array) ($b['deny'] ?? []), true)) return false;
-        // Eigene Blöcke (Block-Baukasten): ohne Funktion „blocks.custom“ bleiben bestehende sichtbar, neue lassen sich nicht einfügen
+        // Eigene Blöcke (Block-Designer): ohne Funktion „blocks.custom“ bleiben bestehende sichtbar, neue lassen sich nicht einfügen
         if (str_starts_with($type, 'cblk_') && !self::on('blocks.custom', false)) return false;
         if (in_array($type, ['data_list', 'data_fields'], true) && !self::on('data', false)) return false;
         if ($type === 'map' && !self::on('maps', false)) return false;

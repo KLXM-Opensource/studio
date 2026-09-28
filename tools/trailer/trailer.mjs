@@ -678,7 +678,7 @@ add({ id: 'adm-blocks', section: 'admin', kind: 'app', speed: 1.5, xfade: 0.4,
   vo: [['Admins can build custom blocks, with a live preview.', 'Eigene Blöcke bauen Admins selbst, mit Live-Vorschau.', 'Skrbniki lahko sestavijo lastne bloke, s sprotnim predogledom.']],
   async prep(s) { await s.go(A('fluid', '/admin/blocks/beispiel_preistabelle')); },
   async run(s) {
-    await s.label('Block builder' + small('fields, template, CSS'));
+    await s.label('Block designer' + small('fields, template, CSS'));
     await s.click('main [role=tab]:has-text("Vorlage"), main button:has-text("Vorlage")', { after: 800 });
     await s.click('main button:has-text("Vorschau")', { after: 1800 });
     await s.hover('main [data-cb] iframe, main iframe', 900, { dy: -60 }).catch(() => {});

@@ -1,8 +1,8 @@
 /*
- * Feldtyp „recurrence“: Baukasten für Wiederholungsregeln (RFC 5545 RRULE) über dem Rohfeld.
+ * Feldtyp „recurrence“: Regel-Editor für Wiederholungsregeln (RFC 5545 RRULE) über dem Rohfeld.
  * Unterstützt: täglich · wöchentlich (Wochentage) · monatlich (am n. Tag / am 2. Dienstag) · jährlich,
  * Intervall, Ende (nie / am Datum / nach n Terminen), Ausnahmen (EXDATE) und eine lesbare Zusammenfassung.
- * Regeln, die der Baukasten nicht abbildet, bleiben unter „Erweitert“ bearbeitbar.
+ * Regeln, die der Regel-Editor nicht abbildet, bleiben unter „Erweitert“ bearbeitbar.
  * Gespeichert wird „FREQ=…;…“ und optional eine Zeile „EXDATE:JJJJ-MM-TT,…“ (Server normalisiert UNTIL nach UTC).
  */
 import { t } from './_i18n.js';
@@ -200,7 +200,7 @@ export function initRRule(scope = document) {
       }
     });
     ui.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-rr-exnew]')) { e.preventDefault(); q('[data-rr-exadd]').click(); } });
-    // Rohfeld von Hand geändert → Baukasten nachziehen
+    // Rohfeld von Hand geändert → Regel-Editor nachziehen
     raw.addEventListener('input', e => { if (e.isTrusted) { s = parse(raw.value); render(); } });
     startEl?.addEventListener('change', render);
     render();

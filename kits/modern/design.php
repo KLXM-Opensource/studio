@@ -145,6 +145,6 @@ return [
     // Dunkle Werte bei „Dunkles Farbschema“ (Klasse has-dark) und Geräte-Einstellung; Vorschau im Editor setzt is-dark
     'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark'],
 
-    // Musterseite für die Vorschau im Editor (Baukasten mit allen Blöcken, tools/demo-content.php)
-    'sample' => 'baukasten',
+    // Musterseite für die Vorschau im Editor (Musterseiten mit allen Blöcken, tools/demo-content.php); 'baukasten': frühere Installationen
+    'sample' => ['musterseiten', 'baukasten'],
 ];

@@ -45,7 +45,7 @@ final class Generator
         return ['def' => $in, 'errors' => $errors, 'types' => $types, 'tables' => $tables];
     }
 
-    /** KI-Antwort bzw. bearbeitete Vorschau → Formularwerte wie im Tabellen-Baukasten */
+    /** KI-Antwort bzw. bearbeitete Vorschau → Formularwerte wie im Tabellen-Designer */
     public static function tableInput(array $d): array
     {
         $types = self::tableTypes();
@@ -288,9 +288,9 @@ final class Generator
     }
 
     /**
-     * Block-Baukasten: Vorschlag für einen eigenen Block aus einer Beschreibung. Der Vorschlag wird mit dem Compiler geprüft
+     * Block-Designer: Vorschlag für einen eigenen Block aus einer Beschreibung. Der Vorschlag wird mit dem Compiler geprüft
      * (Vorlage + CSS); bei Fehlern bekommt die KI einmal die Fehlermeldung zur Korrektur. Nichts wird gespeichert –
-     * die Person prüft den Vorschlag im Baukasten (Beispieldaten sind als „Beispiel“ markiert).
+     * die Person prüft den Vorschlag im Block-Designer (Beispieldaten sind als „Beispiel“ markiert).
      * @return array{def: array, errors: array, warnings: list<string>}
      */
     public static function proposeBlock(string $description): array

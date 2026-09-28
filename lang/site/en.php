@@ -162,7 +162,7 @@ return [
     'Transkript anzeigen' => 'Show transcript',
     'Audiodeskription' => 'Audio description',
     'Kapitel' => 'Chapters',
-    // Block-Baukasten (Core\Blocks\Runtime, Filter zoom)
+    // Block-Designer (Core\Blocks\Runtime, Filter zoom)
     'Bild vergrößern' => 'Enlarge image',
     // Kern-Block „Kennzahlen mit Skala“ (app/Blocks/dials.php)
     'Kennzahlen' => 'Key figures',

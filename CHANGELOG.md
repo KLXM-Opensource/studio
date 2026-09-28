@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Begriffe: Tabellen-Designer, Block-Designer, Musterseiten
+- **Wortwahl** in Verwaltung, Handbüchern, Rechten/Funktionen und Übersetzungen: der Editor für Tabellen und Felder
+  (Verwaltung → Daten, Recht `data.schema`) heißt **Tabellen-Designer** (EN „table designer“), der Editor für eigene
+  Blöcke (Verwaltung → Blöcke, `Core\Blocks\Custom`) **Block-Designer** (EN „block designer“), der Editor für
+  Wiederholungsregeln **Regel-Editor**. KLXM Studio wird nirgends mehr als „Baukasten“ bezeichnet.
+- **Kits basis und modern**: Die Beispielseiten mit allen Blöcken heißen **Musterseiten** (`/musterseiten`, Sammlung
+  „Musterseiten (Demo)“, Schlagwort `musterseiten-demo`, Detailseiten der Demo-Projekte unter `/muster-projekte/…`).
+  `tools/demo.php --remove`/`--force` entfernt auch die früheren Namen (`/baukasten`, „Baukasten (Demo)“,
+  `baukasten-demo`); bestehende Websites behalten ihre Seiten, bis sie neu eingespielt werden.
+- **Style-Editor**: `design.sample` darf eine Liste von Pfaden sein (jeder Treffer steht als Musterseite oben in der Vorschau-Auswahl) –
+  basis und modern erkennen so neue und ältere Installationen.
+- **Bearbeiten-Modus**: Bild-Werkzeuge überdecken den Stift „Eintrag bearbeiten“ nicht mehr.
+
 ### Anfragen per E-Mail zustellen (`Core\Data\Delivery`, Funktion `requests.mail`)
 - **Zustellung je Eingang** (Daten → Eingang → Einstellungen → „Zustellung der Anfragen“, Recht `requests.manage`):
   „Im System (verschlüsselt)“ (Standard, wie bisher), „Im System und per E-Mail“, „Nur per E-Mail – nicht im System
@@ -355,7 +368,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Die veröffentlichten Trailer-Dateien sind stumm (Videospur unverändert, Untertitel-Zeiten gelten weiter).
 - **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM Ai, Mediathek mit
   geteilten Pools, Barrierefreiheit (Alt-Texte, Videos ohne Untertitel), Datentabellen und Formulare, Website-Suche,
-  Block-Baukasten, KI optional/lokal, Funktionen & Erweiterungen, Netzwerk, Content-Sync. Wortwahl zeitlos, keine
+  Block-Designer, KI optional/lokal, Funktionen & Erweiterungen, Netzwerk, Content-Sync. Wortwahl zeitlos, keine
   Ankündigungs-Formulierungen; Titelkarten und Einblendungen auf Englisch.
 - **Sprecher Englisch, nur lokale TTS** (`tools/trailer/voice.mjs`): Stimme in einer Zeile von `tools/trailer/voice.json`
   (Standard Chatterbox mit britisch klingender Referenz aus der gemeinfreien Piper-Stimme `en_GB-cori-high`; Alternativen
@@ -653,7 +666,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Blockeditor auf der Website** (Editor.js) mit Inline-Editing, Formatierungsleiste, Abschnitts-Optionen
   (Hintergrund, Anker, Navigation, Vollbild, Hintergrundbild), Kompaktansicht, Entwurf/Live, Versionen.
 - **Seitenbaum** mit Verschachtelung, Menü, Weiterleitungen alter Adressen, SEO-Feldern und strukturierten Daten.
-- **Theme-System**: Themes als eigenständige Pakete; mitgeliefert **basis** (neutral, Baukasten, vier Navigationen,
+- **Theme-System**: Themes als eigenständige Pakete; mitgeliefert **basis** (neutral, Musterseiten, vier Navigationen,
   sieben geprüfte Design-Vorlagen, Dunkelmodus) und **praxis** (Arztpraxis).
 - **Style-Editor** (Design-Tokens) mit Vorlagen, Kontrastprüfung, Vorschau, Verlauf, Export/Import; auch über API/MCP.
 - **Einträge direkt auf der Website bearbeiten** (Seitenleiste, Felder im Text); CMS-Oberfläche per Shadow DOM

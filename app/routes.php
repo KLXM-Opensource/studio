@@ -117,7 +117,7 @@ return function (Router $r): void {
     $r->post('/admin/design', [Admin\DesignController::class, 'save']);
     $r->post('/admin/api/design-preview', [Admin\DesignController::class, 'preview']);
     $r->post('/admin/api/design-import', [Admin\DesignController::class, 'import']);
-    // Block-Baukasten (Core\Blocks\Custom): eigene Blöcke – feste Pfade vor /{key}
+    // Block-Designer (Core\Blocks\Custom): eigene Blöcke – feste Pfade vor /{key}
     $cb = Admin\BlockController::class;
     $r->get('/admin/blocks', [$cb, 'index']);
     $r->get('/admin/blocks/new', [$cb, 'create']);
@@ -138,7 +138,7 @@ return function (Router $r): void {
     $r->get('/admin/blocks/{key}/export', [$cb, 'export']);
     $r->get('/admin/blocks/{key}/theme-export', [$cb, 'themeExport']);
 
-    // Daten (Tabellen-Baukasten + Einträge) – spezifische Routen vor {handle}/{id}
+    // Daten (Tabellen-Designer + Einträge) – spezifische Routen vor {handle}/{id}
     $r->get('/admin/api/search', [Admin\SearchController::class, 'search']);
     $r->get('/admin/api/geocode', [Admin\SearchController::class, 'geocode']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);

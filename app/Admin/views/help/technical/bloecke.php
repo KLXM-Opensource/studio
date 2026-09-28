@@ -1,4 +1,4 @@
-<?php /** Entwicklerhandbuch · Eigene Blöcke (Block-Baukasten, Core\Blocks) */ ?>
+<?php /** Entwicklerhandbuch · Eigene Blöcke (Block-Designer, Core\Blocks) */ ?>
   <p class="lead">Administration und Integratoren bauen unter <b>Verwaltung → Blöcke</b> eigene Blocktypen aus Feldern, einer <b>sicheren Vorlagensprache</b> und <b>begrenztem CSS</b> – ohne PHP, ohne eigenes JavaScript, ohne Deploy. Recht <code>blocks.build</code>, Funktion <code>blocks.custom</code> (Presets <i>content</i>/<i>minimal</i>: aus). Code: <code>app/Blocks/Template.php</code> (Compiler + Interpreter + PHP-Export), <code>Runtime.php</code> (Filter, Escaping, Hülle), <code>Css.php</code> (Begrenzung), <code>Custom.php</code> (Speicher, Freigabe, Integration), Oberfläche <code>BlockController</code>, <code>views/blocks/*</code>, <code>resources/js/_blockbuilder.js</code>.</p>
 
   <h3>Datenmodell &amp; Integration</h3>

@@ -5,7 +5,7 @@
  * Texte in [eckigen Klammern] sind Platzhalter: Sie erscheinen nicht für Besucher bzw. werden
  * in der Übersicht der Verwaltung als offen gemeldet.
  * Bilder: keine auf den Hauptseiten – alle Blöcke sehen auch ohne Bilder vollständig aus.
- * Zusätzlich (after): Seitenbaum „Baukasten“ mit allen Blöcken, Demo-Datentabellen und erzeugten Beispielbildern
+ * Zusätzlich (after): Seitenbaum „Musterseiten“ mit allen Blöcken, Demo-Datentabellen und erzeugten Beispielbildern
  * (tools/demo-content.php; entfernen mit php kits/basis/tools/demo.php --remove oder in der Verwaltung).
  * Farben, Schriften und Navigation: Verwaltung → Design (Standard = Voreinstellung „Petrol Business“).
  */
@@ -55,7 +55,7 @@ return [
         'schema_type' => 'Organization',
     ],
 
-    // Baukasten nach den Seiten anlegen (Core\Seeder ruft 'after' auf)
+    // Musterseiten nach den Seiten anlegen (Core\Seeder ruft 'after' auf)
     'after' => function () {
         require_once __DIR__ . '/tools/demo-content.php';
         basis_demo_install();
