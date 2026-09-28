@@ -6,6 +6,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Markdown einfügen und importieren (`resources/js/_markdown.js`, Seiten-Editor)
+- **Einfügen in Rich-Text-Felder:** eindeutig als Markdown erkennbarer reiner Text (Überschriften, Listen, Aufgabenlisten,
+  Zitate, **fett**, *kursiv*, Links) wird beim Einfügen in Rich-Text umgewandelt – Hinweis „Als Text einfügen“ bzw.
+  ⌘/Strg+Z macht es rückgängig; normale Sätze und formatierter Text (Word, Websites) bleiben wie bisher reiner Text.
+- **Formatierungsleiste „⋯ → Markdown einfügen …“:** Dialog mit Textfeld und Vorschau, Einfügen an der Schreibmarke
+  (in Inline-Feldern nur fett/kursiv/Link/Umbruch).
+- **Werkzeugleiste „⋯ → Markdown importieren …“:** Text oder `.md`-Datei (FileReader, nichts wird hochgeladen), Vorschau,
+  „Als ein Textblock“ oder „Bei jeder ##-Überschrift einen neuen Textblock“, Position wählbar; es entstehen Textblöcke des
+  Kits (`richtext`, sonst `text`, sonst passender Block mit Rich-Text-Feld) als ungespeicherte Änderung.
+- Ausgabe nur mit Tags der Rich-Text-Whitelist; Überschriften relativ ab H2; Bilder werden nicht eingebunden, sondern als
+  Redaktionsnotiz `[# Bild: … #]` vermerkt; Tabellen bleiben Text mit Notiz; YAML-Vorspann wird entfernt.
+- Dialoge modal mit Beschriftungen, Esc und Fokus-Rückgabe; hell/dunkel. Handbuch „Seiten bearbeiten → Markdown“,
+  Entwicklerhandbuch „Editor → Rich-Text“.
+
 ### Seite „Nicht gefunden (404)“ pflegbar (`Core\NotFound`, Seiten → Sonderseiten)
 - **404-Seite mit Blöcken** je Website und Sprache: Seite mit `type = template`, `template_for = @404` – bearbeitet im
   Frontend-Editor unter `/404?edit=1` (Entwurf, Veröffentlichen, Versionen, „Entwürfe“), nie unter eigener Adresse öffentlich

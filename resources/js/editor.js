@@ -648,6 +648,55 @@ editor = new EditorJS({
   },
 });
 
+// ------------------------------------------------------------------ Markdown importieren (Menü „⋯“ der Werkzeugleiste, CMSAdmin.Markdown aus _markdown.js)
+/**
+ * Textblock des Kits für importierte Texte: „richtext“, sonst „text“, sonst ein einfügbarer Block mit Rich-Text-Feld und sonst
+ * keinen Pflichtfeldern (der kleinste gewinnt). Ergebnis { type, field, label } oder null.
+ */
+function textBlock() {
+  const rich = def => (def.fields || []).find(f => f.type === 'richtext' && f.name === 'text') || (def.fields || []).find(f => f.type === 'richtext');
+  const ok = (type, def) => def && def.insertable !== false && rich(def);
+  for (const type of ['richtext', 'text']) if (ok(type, cfg.blocks[type])) return { type, field: rich(cfg.blocks[type]).name, label: cfg.blocks[type].label };
+  const cand = Object.entries(cfg.blocks).filter(([type, def]) => ok(type, def) && !(def.fields || []).some(f => f.required && f !== rich(def)))
+    .sort((a, b) => a[1].fields.length - b[1].fields.length)[0];
+  return cand ? { type: cand[0], field: rich(cand[1]).name, label: cand[1].label } : null;
+}
+S.ui('[data-editor-md]')?.addEventListener('click', async () => {
+  const M = CMSAdmin.Markdown, tb = textBlock(), T = CMSAdmin.t;
+  const els = blockEls();
+  const blockAt = i => tools.get(editor.blocks.getBlockByIndex(i)?.id);
+  // Position: am Anfang, nach jedem Block (Standard: nach dem Block in der Seitenleiste bzw. am Ende)
+  const positions = [['0', T('Am Anfang der Seite')], ...els.map((el, i) => {
+    const tool = blockAt(i), sum = tool ? summarize(tool.data) : '';
+    return [String(i + 1), T('Nach Block {n}: {label}', { n: i + 1, label: (tool?.def.label || '') + (sum ? ' – ' + sum.slice(0, 40) : '') })];
+  })];
+  const cur = drawerFor ? els.indexOf(drawerFor.el.closest('.ce-block')) : -1;
+  const res = await M.openImport({
+    box: layerBox(), page: true, title: T('Markdown importieren'), ok: T('Importieren'), block: tb?.label || '', returnFocus: S.ui('[data-bar-more]'),   // Menüpunkt ist danach verborgen – zurück zum Knopf „⋯“
+    intro: T('Text einfügen oder eine .md-Datei wählen. Es entstehen Textblöcke als ungespeicherte Änderung – danach wie gewohnt speichern oder veröffentlichen.'),
+    disabled: tb ? '' : T('Dieses Kit hat keinen Textblock mit formatiertem Text – Markdown lässt sich hier nicht importieren.'),
+    positions, position: String(cur >= 0 ? cur + 1 : els.length),
+  });
+  if (!res || !tb) return;
+  const { parts } = M.sections(res.text, res.split);
+  if (!parts.length) return;
+  let at = Math.max(0, Math.min(+res.position || 0, blockEls().length));
+  // Leere Seite: der leere Startblock (gleicher Typ, ohne Text) wird ersetzt statt stehen zu bleiben
+  const only = blockEls().length === 1 && blockAt(0);
+  const replace = !!only && only.type === tb.type && !summarize(only.data);
+  if (replace) at = 0;
+  const made = parts.map((p, i) => editor.blocks.insert(tb.type, { [tb.field]: p.html }, undefined, at + i, false, replace && i === 0));
+  markDirty();
+  requestAnimationFrame(() => {
+    refreshMoveButtons();
+    const first = tools.get(made[0]?.id);
+    first?.el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    first?.bar.querySelector('.cms-block__edit')?.focus({ preventScroll: true });
+    const st = S.ui('[data-editor-status]');   // Live-Region der Werkzeugleiste
+    if (st) st.textContent = parts.length === 1 ? T('1 Textblock eingefügt – noch nicht gespeichert.') : T('{n} Textblöcke eingefügt – noch nicht gespeichert.', { n: parts.length });
+  });
+});
+
 // ------------------------------------------------------------------ Sprung zu einem Block (z. B. aus „Platzhalter ersetzen“ der Übersicht)
 // ?edit=1#b-{blockId} (oder ?block={blockId}, auch die eigene Sprungmarke des Blocks): Block aufklappen, in die Mitte scrollen,
 // kurz hervorheben, [Platzhalter] darin markieren und – wenn neben dem Block Platz ist – die Felder in der Seitenleiste öffnen

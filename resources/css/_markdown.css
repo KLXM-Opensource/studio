@@ -1,0 +1,45 @@
+/* Markdown einfügen/importieren (resources/js/_markdown.js): Dialog mit Vorschau, Hinweis „Als Text einfügen“ nach dem Einfügen */
+.adm-dialog.mdi{width:min(1040px,calc(100vw - 32px))}
+.mdi__form{display:grid;gap:12px}
+.mdi__intro{margin:0}
+.mdi__error{margin:0;padding:10px 12px;border-radius:8px;background:var(--adm-err-bg,#FBEAEA);color:var(--adm-ink)}
+.mdi__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.mdi__in{display:grid;gap:12px;min-width:0}
+.mdi__in .f{margin:0}
+.mdi__in .f>label,.mdi__split legend{display:block;margin-bottom:6px;font-weight:700;font-size:14px}
+.mdi__in textarea{font:400 13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:180px}
+.mdi__split{display:grid;gap:6px;margin:0;padding:0;border:0;min-width:0}
+.mdi__split .f-check{display:flex;margin:0;font-weight:500!important;font-size:14px}
+.mdi__split input[type=radio]{width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;accent-color:var(--adm-a);flex:none}
+.mdi__file input[type=file]{font:inherit;font-size:13.5px;max-width:100%}
+.mdi__file .f-help{margin:4px 0 0}
+.mdi__file .f-help:empty{display:none}
+.mdi__prev{min-width:0;display:grid;gap:6px}
+.mdi__prev h3{margin:0;font-size:14px}
+.mdi__sum{margin:0;font-size:13px;color:var(--adm-t2)}
+.mdi__sum:empty{display:none}
+.mdi__out{display:grid;gap:10px;max-height:min(56vh,520px);overflow:auto;padding:2px}
+.mdi__blk{padding:10px 14px;border-radius:8px;background:var(--adm-fill,#F1F2F6);box-shadow:inset 0 0 0 1px var(--adm-line);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.mdi__blk>:first-child{margin-top:0}
+.mdi__blk>:last-child{margin-bottom:0}
+.mdi__blk h2{font-size:18px;margin:12px 0 6px}
+.mdi__blk h3{font-size:16px;margin:10px 0 4px}
+.mdi__blk h4{font-size:14.5px;margin:8px 0 4px}
+.mdi__blk p,.mdi__blk ul,.mdi__blk ol,.mdi__blk blockquote{margin:0 0 8px}
+.mdi__blk ul,.mdi__blk ol{padding-left:22px}
+.mdi__blk ul.check{list-style:none;padding-left:4px}
+.mdi__blk ul.check>li::before{content:"✓ ";color:var(--adm-ok);font-weight:700}
+.mdi__blk blockquote{padding-left:12px;border-left:3px solid var(--adm-in);color:var(--adm-t2)}
+.mdi__blk a{color:var(--adm-a-ink)}
+.mdi__bl{margin:0 0 6px!important;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--adm-t3);text-transform:uppercase}
+.mdi__empty{margin:0;color:var(--adm-t3);font-size:14px}
+.mdi__actions{justify-content:flex-start}
+@media (max-width:760px){.mdi__grid{grid-template-columns:minmax(0,1fr)}.mdi__out{max-height:40vh}}
+/* Hinweis nach dem Einfügen (nicht modal, role=status) */
+.mdi-tip{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:2147483300;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);
+  padding:8px 8px 8px 16px;border-radius:10px;background:var(--adm-ink);color:var(--adm-card);box-shadow:0 12px 32px rgba(0,0,0,.28);font:500 14px/1.4 var(--adm-font)}
+.mdi-tip__btn,.mdi-tip__x{appearance:none;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:32px;padding:0 10px}
+.mdi-tip__btn{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.mdi-tip__btn:hover,.mdi-tip__x:hover{background:rgba(127,127,127,.25)}
+.mdi-tip__btn:focus-visible,.mdi-tip__x:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+.mdi-tip__x{font-size:18px;line-height:1;padding:0 8px}

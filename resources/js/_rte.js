@@ -4,9 +4,11 @@
  * auf der Website (editor.js, _entry_edit.js – Leiste in der Shadow-DOM-Ebene, Text im Theme-Dokument).
  *
  * Leiste: „Stil ▾“ (Normal, Hervorgehoben, Klein, Hinweis-Box, H2–H4, Zitat) · Fett · Kursiv · Marker · „Farbe ▾“ · Link
- *         · Listen · „⋯“ (Hochgestellt, Tiefgestellt, Einrücken, Link entfernen, Formatierung entfernen) · KI.
+ *         · Listen · „⋯“ (Hochgestellt, Tiefgestellt, Einrücken, Link entfernen, Formatierung entfernen, Markdown einfügen …) · KI.
  *         Schmale Bildschirme (≤ 560 px): Listen wandern ins Menü „⋯“ (Überlauf).
  * Tastatur: ⌘/Strg+B, +I, +K (Link), +⇧+H (Marker), Alt+F10 (zur Leiste), in Menüs ↑/↓/Pos1/Ende, Esc zurück in den Text.
+ * Einfügen: immer als reiner Text – außer der Text sieht eindeutig nach Markdown aus (und die Zwischenablage hat keine echte
+ * Formatierung): dann umgewandelt (_markdown.js), mit Hinweis „Als Text einfügen“; ⌘/Strg+Z macht es ebenfalls rückgängig.
  * Ergebnis (Whitelist Core\Sanitizer, keine style-Attribute): <p class="t-lead|t-small|t-note">, <span class="c-…">, <mark>, <sup>, <sub>.
  * Farben: auf der Website aus den Theme-Variablen --rt-accent … (Kontrast gegen den echten Hintergrund), in Formularen aus der
  * Palette <script id="cms-rich"> (Core\RichText). Zu geringer Kontrast wird im Farbmenü angezeigt.
@@ -15,6 +17,7 @@ import { t } from './_i18n.js';
 import { aiBarHtml, aiExec } from './_ai.js';
 import { openLinkPicker } from './_links.js';
 import { layerBox } from './_shadow.js';
+import { looksLike, htmlIsPlain, toHtml, openImport, pasteTip, hideTip } from './_markdown.js';
 
 const d = document;
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
@@ -183,7 +186,9 @@ function barHtml(mode) {
       + item('superscript', 'Hochgestellt', { radio: 1, pre: '<span class="rte-mi__i" aria-hidden="true">x²</span>' })
       + item('subscript', 'Tiefgestellt', { radio: 1, pre: '<span class="rte-mi__i" aria-hidden="true">x₂</span>' })
       + item('unlink', 'Link entfernen', { pre: '<span class="rte-mi__i" aria-hidden="true">⌫</span>' })
-      + item('paragraph', 'Formatierung entfernen', { pre: '<span class="rte-mi__i" aria-hidden="true">¶</span>', hint: mode === 'inline' ? '' : 'Normaler Text ohne Überschrift, Liste, Farbe' }))
+      + item('paragraph', 'Formatierung entfernen', { pre: '<span class="rte-mi__i" aria-hidden="true">¶</span>', hint: mode === 'inline' ? '' : 'Normaler Text ohne Überschrift, Liste, Farbe' })
+      + '<span class="rte-menu__sep" role="separator"></span>'
+      + item('markdown', 'Markdown einfügen …', { pre: '<span class="rte-mi__i" aria-hidden="true">M↓</span>', hint: 'Text mit # Überschriften, - Listen, **fett** umwandeln' }))
     + '</span></span>';
   if (mode === 'inline') return inl + more('') + aiBarHtml();
   const style = `<span class="rte-group"><span class="rte-mwrap">${menuBtn('style', `<span class="rte-style-l">${esc(t('Normal'))}</span>`, 'Absatzstil')}`
@@ -359,9 +364,37 @@ const Rich = {
     d.execCommand('insertHTML', false, `<a href="${esc(res.href)}" data-rte-new="1">${esc(res.label || res.href)}</a>`);
     $$('a[data-rte-new]', area).forEach(x => { x.removeAttribute('data-rte-new'); apply(x); });
   },
+  /**
+   * Markdown an der Schreibmarke einfügen (_markdown.js → nur Tags der Whitelist). Über execCommand('insertHTML'), damit
+   * ⌘/Strg+Z es rückgängig macht. mode: 'rich' | 'inline' (nur fett/kursiv/Link/Umbruch).
+   */
+  insertMarkdown(area, text, mode = area._rteMode || 'rich') {
+    const { html } = toHtml(text, { mode });
+    if (!html) return false;
+    if (!rangeIn(area)) { const r = d.createRange(); r.selectNodeContents(area); r.collapse(false); const s = selOf(area); s.removeAllRanges(); s.addRange(r); }
+    d.execCommand('insertHTML', false, html);
+    // Browser übertragen beim Einfügen teils berechnete Stile (<span style>, <font>) – nie Teil des Rich-Texts
+    $$('[style]', area).forEach(el => el.removeAttribute('style'));
+    $$('span:not([class]),font', area).forEach(unwrap);
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  },
+  /** „⋯ → Markdown einfügen …“: Dialog mit Textfeld und Vorschau, danach Einfügen an der gemerkten Schreibmarke */
+  async markdown(area) {
+    restoreSel(area);
+    const range = rangeIn(area)?.cloneRange() || null;
+    const mode = area._rteMode || 'rich';
+    const res = await openImport({ box: layerBox(), mode, title: t('Markdown einfügen'), returnFocus: area,
+      intro: mode === 'inline' ? t('Dieses Feld kennt nur fett, kursiv, Links und Zeilenumbrüche – Überschriften und Listen werden zu Textzeilen.') : '' });
+    area.focus();
+    if (range) { const s = selOf(area); s.removeAllRanges(); s.addRange(range); }
+    area._rteRange = null;
+    if (res) Rich.insertMarkdown(area, res.text, mode);
+  },
   /** Formatierungsbefehl auf ein bearbeitbares Element anwenden */
   async exec(area, cmd) {
     if (cmd === 'ai') { aiExec(area); return; }   // KI-Assistent (_ai.js)
+    if (cmd === 'markdown') { await Rich.markdown(area); return; }
     restoreSel(area);
     area.focus();
     const list = Rich.closestList(area);
@@ -487,6 +520,7 @@ const Rich = {
   bindKeys(area, mode) {
     if (area._rteKeys) return;
     area._rteKeys = true;
+    area._rteMode = mode;
     area.addEventListener('focus', () => {
       try { d.execCommand('defaultParagraphSeparator', false, 'p'); } catch {}
       // Leeres Feld: mit einem Absatz beginnen (sonst steht die erste Zeile ohne <p> und Stile greifen nicht)
@@ -510,7 +544,14 @@ const Rich = {
     });
     area.addEventListener('paste', e => {
       e.preventDefault();
-      d.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+      const cd = e.clipboardData || window.clipboardData, text = cd.getData('text/plain');
+      hideTip();
+      // Eindeutiges Markdown ohne echte Formatierung in der Zwischenablage: umwandeln, Hinweis bietet „Als Text einfügen“
+      if (looksLike(text) && htmlIsPlain(cd.getData('text/html')) && Rich.insertMarkdown(area, text, mode)) {
+        pasteTip(layerBox(), () => { area.focus(); d.execCommand('undo'); d.execCommand('insertText', false, text); area.dispatchEvent(new Event('input', { bubbles: true })); });
+        return;
+      }
+      d.execCommand('insertText', false, text);
     });
   },
 };

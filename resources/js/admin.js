@@ -31,6 +31,7 @@ import { initFeatures } from './_features.js';   // Funktionen & Erweiterungen: 
 import { initFonts } from './_fonts.js';   // Grundeinstellungen → Schriften: Proben von der eigenen Domain (Core\Fonts)
 import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöcke: Block-Designer (Core\Blocks\Custom)
 import { Rich } from './_rte.js';   // Formatierungsleiste: Stile, Farben, Marker, Link, Menüs, Tastatur
+import * as Markdown from './_markdown.js';   // Markdown einfügen/importieren (Rich-Text-Felder, Seiten-Editor)
 import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Linkauswahl (Rich-Text und Feldtyp „link“)
 import { initAssistant } from './_assistant.js';
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
@@ -650,7 +651,7 @@ init();
 initSettingsPreview();
 initDesign();
 initBlockBuilder();
-window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, openSpotlight, t, ico, bar: bar_,
+window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_,
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene
   shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)
