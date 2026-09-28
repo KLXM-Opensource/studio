@@ -1,11 +1,46 @@
-/* Praxis-Theme: Kern-Block „Formular (Datentabelle)“ im Stil der Anfrage-Formulare (Bordeaux, runde Felder) */
+/* Praxis-Theme: Kern-Block „Formular (Datentabelle)“ im Stil der Anfrage-Formulare (Bordeaux, runde Felder).
+   Breite/Ausrichtung aus den Block-Optionen (resources/css/_dataform-layout.css): „Textbreite“ = Spalte der Fließtexte (.wrap--text, 900px). */
 @import "../../../../resources/css/dataform.css";
-.dff-wrap{--dff-accent:var(--c-bordeaux);--dff-line:#8A9290;--dff-bg:#fff;--dff-ink:var(--c-ink);--dff-muted:var(--c-text-2);--dff-radius:12px;--dff-focus:var(--c-bordeaux);--dff-err:#A3201A}
+.dff-wrap{--dff-accent:var(--c-bordeaux);--dff-line:#8A9290;--dff-bg:#fff;--dff-ink:var(--c-ink);--dff-muted:var(--c-text-2);--dff-radius:12px;--dff-focus:var(--c-bordeaux);--dff-err:#A3201A;--dff-err-bg:#FBEAEA;--dff-err-ink:#3b0d0a;--dff-gap:20px;
+  --dff-w-text:calc(900px - 2 * var(--gutter));--dff-w-normal:46rem}
+/* Kopf: Dachzeile, Überschrift, Einleitung wie die übrigen Praxis-Abschnitte */
+.dff-head{margin-bottom:clamp(24px,3.2vw,40px)}
+.dff-title{text-wrap:balance}
+.dff-intro{margin-top:14px;font-size:clamp(18px,1.4vw,20px);color:var(--c-text-2)}
+.dff-wrap--w-text .dff-head{max-width:var(--dff-w-text)}
+/* Felder */
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]),.dff select,.dff textarea{min-height:52px;padding:12px 16px;border-color:var(--dff-line);transition:border-color .15s,box-shadow .15s}
+.dff select{height:52px}
+.dff input:not([type=checkbox]):not([type=radio]):not([type=color]):hover,.dff select:hover,.dff textarea:hover{border-color:var(--c-ink)}
 .dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.dff select:focus,.dff textarea:focus{border-color:var(--c-bordeaux);outline:none;box-shadow:0 0 0 3px rgba(122,31,53,.22)}
-.dff-f>label,.dff-f>legend{font-size:15px}
+.dff button:focus-visible,.dff a:focus-visible{outline:2px solid var(--dff-focus);outline-offset:3px}
+.dff-f>label,.dff-f>legend{font-size:15px;line-height:1.4}
+.dff-note{font-size:15px}
+.dff-check{font-size:16px;line-height:1.5}
+.dff-check input{accent-color:var(--c-bordeaux)}
+/* Absenden + Hinweis zur Verschlüsselung */
+.dff-actions{margin-top:6px}
+.dff button[type=submit]{min-width:200px;justify-content:center;text-align:center}
+.dff-note--secure{display:flex;align-items:baseline;gap:8px;font-size:14px}
+.dff-note--secure::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--dff-accent);transform:translateY(-1px)}
+.dff-wrap--a-center .dff-note--secure{justify-content:center}
+/* Zustände */
 .dff-summary{border-radius:14px}
-.dff-done{border-radius:22px;background:var(--c-gray-50);border:0}
+.dff-done{padding:24px 28px;border-radius:22px;background:var(--c-gray-50);border:0}
 .dff-done p::before{color:var(--c-bordeaux)}
-.bg-bordeaux .dff-wrap,.bg-dark .dff-wrap{--dff-accent:var(--c-apricot);--dff-focus:var(--c-apricot);--dff-ink:#fff;--dff-muted:var(--c-on-dark);--dff-err:#FFB4AB;--dff-err-bg:rgba(255,180,171,.14)}
+.bg-gray .dff-done{background:#fff}
+/* Grauer Abschnitt: weiße Felder heben sich ab */
+.bg-gray .dff-wrap{--dff-line:#7C8482}
+/* Dunkle Abschnitte (Bordeaux, Dunkel): helle Schrift, Felder dunkel-transparent, Apricot als Akzent */
+.bg-bordeaux .dff-wrap,.bg-dark .dff-wrap{--dff-accent:var(--c-apricot);--dff-focus:var(--c-apricot);--dff-ink:#fff;--dff-muted:var(--c-on-dark);--dff-line:rgba(255,255,255,.6);--dff-bg:rgba(255,255,255,.08);--dff-err:#FFB4AB;--dff-err-bg:rgba(255,180,171,.14);--dff-err-ink:#fff}
+.bg-bordeaux .dff :is(input,select,textarea):hover,.bg-dark .dff :is(input,select,textarea):hover{border-color:#fff}
+.bg-bordeaux .dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.bg-bordeaux .dff select:focus,.bg-bordeaux .dff textarea:focus,
+.bg-dark .dff input:not([type=checkbox]):not([type=radio]):not([type=color]):focus,.bg-dark .dff select:focus,.bg-dark .dff textarea:focus{border-color:var(--c-apricot);box-shadow:0 0 0 3px rgba(246,201,168,.35)}
+.bg-bordeaux .dff select option,.bg-dark .dff select option{color:var(--c-ink);background:#fff}
+.bg-bordeaux .dff-check input,.bg-dark .dff-check input{accent-color:var(--c-apricot)}
+.bg-bordeaux .dff-intro,.bg-dark .dff-intro{color:var(--c-on-dark)}
 .bg-bordeaux .dff-summary,.bg-dark .dff-summary{color:#fff}
+.bg-bordeaux .dff-done,.bg-dark .dff-done{background:rgba(255,255,255,.1);color:#fff}
+.bg-bordeaux .dff-done p::before,.bg-dark .dff-done p::before{color:var(--c-apricot)}
 .bg-bordeaux .dff .btn--primary,.bg-dark .dff .btn--primary{background:#fff;color:var(--c-bordeaux-hero)}
+.bg-bordeaux .eyebrow--accent,.bg-dark .eyebrow--accent{color:var(--c-apricot)}

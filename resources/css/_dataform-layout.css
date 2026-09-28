@@ -1,0 +1,11 @@
+/* Kern-Block „Formular (Datentabelle)“ – Darstellung aus den Block-Optionen (app/Blocks/data_form.php), kit-unabhängig.
+   Breite: dff-wrap--w-text (Spalte der Fließtexte, Standard), --w-normal (schmales Formular im Inhaltsbereich), --w-full (ganzer Inhaltsbereich).
+   Ausrichtung: dff-wrap--a-left (Standard) | --a-center. Kits passen die Textspalte über --dff-w-text an (z. B. praxis: 900px-Spalte).
+   Selektoren mit zwei Klassen: gewinnen gegen „.dff{max-width:…}“ der Kits, die resources/css/dataform.css ersetzen. */
+.dff-wrap--w-text :is(.dff-head,.dff,.dff-done){max-width:var(--dff-w-text,46rem);margin-inline:auto}
+.dff-wrap--w-normal :is(.dff,.dff-done){max-width:var(--dff-w-normal,46rem)}
+.dff-wrap--w-full :is(.dff-head,.dff,.dff-done){max-width:none}
+.dff-wrap--a-center .dff-head{display:flex;flex-direction:column;align-items:center;text-align:center;margin-inline:auto}
+.dff-wrap--a-center .dff-head>*{margin-inline:auto;justify-content:center}
+.dff-wrap--a-center.dff-wrap--w-normal :is(.dff,.dff-done){margin-inline:auto}
+.dff-wrap--a-center :is(.dff-actions,.dff-note--secure,.dff-done){text-align:center}

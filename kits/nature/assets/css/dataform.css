@@ -2,6 +2,7 @@
    Intrinsisch: Felder „halbe Breite“ stehen per auto-fit nebeneinander, solange jedes ≥ 15 rem breit ist – sonst voll.
    Fehler-, Erfolgs- und Pflichtfeld-Zustände aus den Tokens; Fehlerfarbe: festes Rot, mit der Überschriftenfarbe gemischt
    (dunkel auf hellem, hell auf dunklem Grund, ≥ 4.5:1). Bedingungen, IBAN, Gruppen: resources/js/dataform.js. */
+@import "../../../../resources/css/_dataform-layout.css";   /* Breite + Ausrichtung (Block-Optionen) */
 .dff-wrap{--n-danger:color-mix(in srgb,#E5484D 66%,var(--n-ink));--dff-gap:var(--n-s-m)}
 .dff-head{display:flex;flex-direction:column;gap:var(--n-s-s);max-width:48rem;margin-bottom:var(--n-s-xl)}
 .dff-intro{color:var(--n-muted);font-size:var(--n-t1)}
@@ -57,5 +58,5 @@
 .dff-wrap .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .dff [hidden],.dff-wrap [hidden]{display:none!important}
 /* Formular unter einem zweispaltigen Abschnittskopf: bündig mit der Überschrift */
-@container (min-width:60rem){.dff-head:has(>.eyebrow)~*{margin-inline-start:calc((100% - var(--n-s-l)) / 4 + var(--n-s-l))}}
+@container (min-width:60rem){.dff-head:not(.sec-head--center):has(>.eyebrow)~*{margin-inline-start:calc((100% - var(--n-s-l)) / 4 + var(--n-s-l))}}
 .dff-intro{max-width:40em}

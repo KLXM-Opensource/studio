@@ -6,6 +6,25 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formular (Datentabelle): Breite und Ausrichtung; Kit praxis: Block „Fließtext“, engere Text-/Formular-Abschnitte
+- **Kern-Block „Formular (Datentabelle)“** (`app/Blocks/blocks.php`, `app/Blocks/data_form.php`): neue Optionen unter
+  „Darstellung“ – **Breite** Textbreite (Standard; auch für bestehende Blöcke ohne Angabe: in der Spalte der Fließtexte) /
+  Normal (schmales Formular wie bisher) / Volle Breite, **Ausrichtung** Linksbündig (Standard) / Mittig (Kopf, Button,
+  Hinweis zentriert). Ausgabe als Klassen `dff-wrap--w-*`/`dff-wrap--a-*` und `data-width`/`data-align`, kit-unabhängige
+  Grundregeln in `resources/css/_dataform-layout.css` (von `dataform.css` und den Kits essenz, fluid, glas, modern, nature
+  eingebunden; Textspalte über `--dff-w-text`). Zentrierter Kopf erhält `sec-head--center` (nature: Dachzeile nicht seitlich).
+- **Kit praxis:** Block „Fließtext (Rechtstexte)“ heißt jetzt **„Fließtext“** (Hilfetext: Stellenanzeigen, Erläuterungen,
+  Rechtstexte), neue Option **Breite** Textbreite (Standard, unverändert) / Breit; Überschriften H2–H4, Listen und Links im
+  Text feiner abgestimmt; Leerzeilen direkt vor Zwischenüberschriften entfallen (Abstand kommt von der Überschrift); leere
+  Fließtext-Blöcke erzeugen für Besucher keinen leeren Abschnitt mehr.
+- **Kit praxis – Abstände:** folgen Fließtext- und Formular-Abschnitte mit gleichem Hintergrund aufeinander, halbiert sich
+  der Abstand (unten `--sec-y-s`, oben 0; nicht bei Trennlinie, Hintergrundbild oder eigenen Abstands-Einstellungen).
+  Startseite und übrige Seiten unverändert.
+- **Kit praxis – Formular-Stil:** Kopf mit Praxis-Überschriften, Felder 52 px, Hover/Fokus, Button zentriert beschriftet,
+  Hinweis zur Verschlüsselung mit Punkt, Erfolgsmeldung; auf Bordeaux/Dunkel transparente Felder mit heller Schrift
+  (vorher weiße Schrift auf weißen Feldern).
+- Handbuch „Daten → Formular“, Entwicklerhandbuch „Formulare“, Blockbeschreibung im Praxis-Handbuch, `lang/en.php`.
+
 ### Seiten-Editor: Seitenleiste nur über „Bearbeiten“, „+ Block einfügen“ unten am Block (`resources/js/editor.js`)
 - **Klick wählt nur aus:** Ein Klick/Tipp in einen Block öffnet die Seitenleiste nicht mehr, sondern markiert den Block
   (`.is-selected`: Leiste und Einfügen-Knopf bleiben sichtbar – auch auf Touch-Geräten). Texte bleiben direkt bearbeitbar.

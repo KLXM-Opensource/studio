@@ -42,7 +42,7 @@ return [
         'text_video' => 'Text mit Video. YouTube/Vimeo laden erst nach Klick (Datenschutz); eigene MP4-Videos mit Untertiteln.',
         'quote' => 'Großes Zitat – eingerückt oder als volle Fläche.',
         'text_columns' => 'Überschrift mit Fließtext – daneben, in Spalten oder kompakt.',
-        'richtext' => 'Freier Fließtext mit Zwischenüberschriften und Listen, z. B. für Rechtstexte.',
+        'richtext' => 'Freier Fließtext mit Zwischenüberschriften (H2–H4), Listen und Links – z. B. für Stellenanzeigen, Erläuterungen und Rechtstexte. Breite wählbar: Textbreite oder breit.',
         'services' => 'Nummerierte Leistungsliste (01, 02 …).',
         'doctors' => 'Karten für Ärztinnen und Ärzte mit Foto, Fach, Qualifikationen.',
         'team_photo' => 'Großes Teamfoto mit Text und optionaler Ausbildungs-Box.',

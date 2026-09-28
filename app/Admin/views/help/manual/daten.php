@@ -75,7 +75,9 @@
     <li><b>Daten → Tabelle → Felder</b>, rechts <b>Öffentliches Formular</b> einschalten, Felder wählen und festlegen, ob neue Einträge als <b>Entwurf</b> (Sie prüfen und veröffentlichen) oder sofort online erscheinen.</li>
     <li>Optional: bis zu fünf E-Mail-Adressen für Benachrichtigungen – die Mail enthält keine Angaben der Besucher, nur einen Link zum neuen Eintrag.</li>
     <li>Seite öffnen → <b>+</b> → Block <b>Formular (Datentabelle)</b> → Tabelle wählen.</li>
+    <li>Optional: <b>Dachzeile</b>, <b>Überschrift</b> und <b>Einleitung</b> über dem Formular. Unter <b>Darstellung</b> legen Sie die <b>Breite</b> fest – <b>Textbreite</b> (Standard: in derselben Spalte wie die Fließtexte darüber), <b>Normal</b> (schmales Formular im Inhaltsbereich) oder <b>Volle Breite</b> – und die <b>Ausrichtung</b>: <b>Linksbündig</b> (Standard) oder <b>Mittig</b> (Überschrift, Einleitung und Button zentriert).</li>
   </ol>
+  <p>Tipp: Folgen Fließtext und Formular mit derselben Hintergrundfarbe aufeinander (z. B. Stellenanzeige mit Bewerbungsformular), rückt das Kit die Abschnitte enger zusammen – so wirkt die Seite wie aus einem Guss.</p>
   <p>Das Formular ist mehrstufig gegen Spam geschützt und setzt keine Cookies. Besucher bestätigen immer den Datenschutzhinweis. Datei-Uploads (Bilder, bei Dateifeldern auch PDF; 1–10 MB) sind nur möglich, wenn Sie sie ausdrücklich erlauben; hochgeladene Dateien liegen in der Mediathek (Tag „formular“) und sind über ihre Adresse öffentlich erreichbar.</p>
   <div class="doc-note doc-note--important"><strong>Keine vertraulichen Daten</strong><p>Einträge aus diesem Formular werden nicht verschlüsselt gespeichert. Für Gesundheitsdaten oder ähnlich Vertrauliches einen verschlüsselten Eingang verwenden (siehe „Anfragen“).</p></div>
 

@@ -154,7 +154,7 @@ return [
     // keine eigene Datei in fragments/ bzw. templates/partials/ mitbringt.
     'fragments' => ['video-embed' => ['ratio_class' => 'ratio-', 'notice' => 'detailed', 'title' => true, 'empty' => 'placeholder', 'icon_size' => 26, 'poster_crop' => true]],
     'conditional_css' => [
-        'css/blocks.css' => ['text_image', 'text_video', 'image_wide', 'steps', 'cta', 'downloads', 'people', 'job', 'richtext', 'notice',
+        'css/blocks.css' => ['text_image', 'text_video', 'image_wide', 'steps', 'cta', 'downloads', 'people', 'job', 'richtext', 'data_form', 'notice',
             'teaser_tiles:image', 'quote:full', 'video', 'text_columns:columns', 'quick_contact'],
         'css/media-blocks.css' => ['gallery', 'slideshow', 'stack_cards'],   // Aussehen der Kern-Blöcke (Variablen + Feinschliff)   // „typ:variante“ = nur bei dieser Variante
         'css/hero-media.css' => ['hero'],   // auch Verlauf: eigene Bilder je Thema (hero__bg--slides)
@@ -441,10 +441,13 @@ return [
             ],
         ],
         'richtext' => [
-            'label' => 'Fließtext (Rechtstexte)', 'icon' => '¶', 'group' => 'Inhalt',
+            'label' => 'Fließtext', 'icon' => '¶', 'group' => 'Inhalt',
+            'help' => 'Für normalen Fließtext mit Editor – z. B. Stellenanzeigen, Erläuterungen, Rechtstexte. Zwischenüberschriften (H2–H4), Listen, Links und Hinweis-Box über „Stil“ in der Formatierungsleiste. Die Überschrift oben ist optional.',
             'fields' => [
                 ...$headingOptional,
                 ['name' => 'text', 'label' => 'Text', 'type' => 'richtext'],
+                ['name' => 'width', 'label' => 'Breite', 'type' => 'select', 'required' => true, 'default' => 'text',
+                    'options' => ['text' => 'Textbreite (gut lesbar)', 'wide' => 'Breit (ganzer Inhaltsbereich)']],
             ],
         ],
         'services' => [

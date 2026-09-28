@@ -15,4 +15,9 @@ return [
     'Telefonzeile aus den Praxisdaten zeigen' => 'Show phone line from the practice data',
     'Text der Telefonzeile' => 'Text of the phone line',
     '{phone} wird durch die Telefonnummer aus den Praxisdaten ersetzt (als Link).' => '{phone} is replaced by the phone number from the practice data (as a link).',
+    'Fließtext' => 'Running text',
+    'Für normalen Fließtext mit Editor – z. B. Stellenanzeigen, Erläuterungen, Rechtstexte. Zwischenüberschriften (H2–H4), Listen, Links und Hinweis-Box über „Stil“ in der Formatierungsleiste. Die Überschrift oben ist optional.' => 'For normal running text with the editor – e.g. job ads, explanations, legal texts. Subheadings (H2–H4), lists, links and note box via “Style” in the formatting bar. The heading at the top is optional.',
+    'Textbreite (gut lesbar)' => 'Text width (easy to read)',
+    'Breit (ganzer Inhaltsbereich)' => 'Wide (whole content area)',
+    'Freier Fließtext mit Zwischenüberschriften (H2–H4), Listen und Links – z. B. für Stellenanzeigen, Erläuterungen und Rechtstexte. Breite wählbar: Textbreite oder breit.' => 'Free running text with subheadings (H2–H4), lists and links – e.g. for job ads, explanations and legal texts. Width selectable: text width or wide.',
 ];

@@ -2,6 +2,7 @@
    Intrinsisch: Felder „halbe Breite“ stehen per auto-fit nebeneinander, solange jedes ≥ 15 rem breit ist – sonst voll.
    Fehler-, Erfolgs- und Pflichtfeld-Zustände aus den Tokens; Fehlerfarbe: festes Rot, mit der Überschriftenfarbe gemischt
    (dunkel auf hellem, hell auf dunklem Grund, ≥ 4.5:1). Bedingungen, IBAN, Gruppen: resources/js/dataform.js. */
+@import "../../../../resources/css/_dataform-layout.css";   /* Breite + Ausrichtung (Block-Optionen) */
 .dff-wrap{--m-danger:color-mix(in srgb,#E5484D 66%,var(--m-ink));--dff-gap:var(--m-s-m)}
 .dff-head{display:flex;flex-direction:column;gap:var(--m-s-s);max-width:48rem;margin-bottom:var(--m-s-xl)}
 .dff-intro{color:var(--m-muted);font-size:var(--m-t1)}

@@ -70,6 +70,13 @@ return [
             ['name' => 'submit_label', 'label' => 'Beschriftung des Buttons (optional)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Absenden'],
             ['name' => 'success_text', 'label' => 'Text nach dem Absenden (optional)', 'type' => 'text', 'width' => 'half',
                 'help' => 'Leer = Text aus den Einstellungen der Tabelle.'],
+            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['name' => 'form_width', 'label' => 'Breite', 'type' => 'select', 'required' => true, 'default' => 'text', 'width' => 'half',
+                'options' => ['text' => 'Textbreite (wie Fließtext)', 'normal' => 'Normal', 'full' => 'Volle Breite'],
+                'help' => 'Textbreite: in derselben Spalte wie die Fließtexte der Seite. Normal: schmales Formular im Inhaltsbereich. Volle Breite: Felder nutzen den ganzen Inhaltsbereich.'],
+            ['name' => 'form_align', 'label' => 'Ausrichtung', 'type' => 'select', 'required' => true, 'default' => 'left', 'width' => 'half',
+                'options' => ['left' => 'Linksbündig', 'center' => 'Mittig'],
+                'help' => 'Mittig: Überschrift, Einleitung und Button stehen zentriert (bei „Normal“ auch das Formular selbst).'],
         ],
     ],
     'calendar' => [

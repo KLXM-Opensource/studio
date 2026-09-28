@@ -68,6 +68,21 @@
 
 /* ---------------------------------------------------------------- Fließtext */
 .richtext__title{margin-bottom:clamp(28px,4vw,48px)}
+.richtext--wide .prose--long{max-width:none}
+.prose--long>:first-child{margin-top:0}
+.prose--long h4{line-height:1.35;letter-spacing:-.01em}
+.prose--long :is(h2,h3,h4)+:is(p,ul,ol){margin-top:.6em}
+.prose--long a{text-decoration-thickness:1px}
+.prose--long a:hover{text-decoration-thickness:2px}
+.prose--long :is(ul,ol)+p,.prose--long p+:is(ul,ol){margin-top:1em}
+
+/* Aufeinanderfolgende Fließtext-/Formular-Abschnitte mit gleichem Hintergrund (z. B. Stellenanzeige: Text → Text → Formular):
+   Abstand dazwischen einfach statt doppelt. :where hält die Spezifität bei .sec – Abstände je Block (pt-/pb-) gelten weiter;
+   nicht bei Trennlinie oder Hintergrundbild. */
+.sec:where(.sec--richtext,.sec--data-form):where(:not(.sec--divider,.sec--has-bg)):where(.sec--richtext:not(.sec--has-bg)+*,.sec--data-form:not(.sec--has-bg)+*):where(.bg-white+.bg-white,.bg-gray+.bg-gray,.bg-bordeaux+.bg-bordeaux,.bg-dark+.bg-dark){padding-top:0}
+.sec:where(.sec--richtext,.sec--data-form):where(:not(.sec--has-bg)):where(
+  :has(+:is(.sec--richtext,.sec--data-form):not(.sec--divider,.sec--has-bg,.pt-small,.pt-none)):is(.bg-white:has(+.bg-white),.bg-gray:has(+.bg-gray),.bg-bordeaux:has(+.bg-bordeaux),.bg-dark:has(+.bg-dark))
+){padding-bottom:var(--sec-y-s)}
 
 
 /* ---------------------------------------------------------------- Hinweisbox (B10) & Formularseite */
