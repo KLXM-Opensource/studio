@@ -6,12 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
-### Karten: „Route planen“ je Plattform
+### Karten: „Route planen“ je Plattform, 3D-Ansicht
 - `Core\Maps`: „Route planen“ führt standardmäßig zu Google Maps (auf Android öffnet dieselbe Adresse die App); auf
   iPhone/iPad/Mac tauscht das Kit-Skript (`a[data-route]` → `data-apple`; Kit „praxis“: `site.js`) auf Apple Karten, der Link nennt den Dienst
   („mit Apple Karten“). Aufklapper „Andere Karten-App“ (Apple Karten, Google Maps, OpenStreetMap) – `<details>`, auch ohne
   JavaScript. Ziel = Koordinaten des Standorts (`Maps::routeUrls()`); ein eigener Routenplaner-Link aus den Einstellungen hat
   weiter Vorrang. Bewusst ohne Bestätigungsdialog: Navigation ist ausdrücklich gewünscht, übermittelt wird nur das Ziel.
+- 3D-Ansicht (`project → map → 3d` bzw. Option `3d`, schlank in `map.mjs`): Gebäude als Körper (fill-extrusion aus
+  `render_height` der OpenMapTiles-Kacheln; flache Gebäude des Stils ausgeblendet), weiche Kamerafahrt auf 55° Neigung /
+  −20° Drehung (maxPitch 60), bei „Bewegung reduzieren“ sofort; Steuerung mit Kompass/Neigung, Tastatur (Umschalt + Pfeile).
+  Weiter nur nach Klick, alles über `/proxy/ofm`. Kit „praxis“: 3D an.
 
 ### Kit „praxis“: Kontaktkarte überarbeitet (Öffnungszeiten, Notfallnummern, externe Dienste, Drehung)
 - Zeiten **bündig** (Beginn rechtsbündig, Strich, Ende; tabellarische Ziffern) in der Karte und in „Alle Öffnungszeiten“

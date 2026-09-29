@@ -202,6 +202,8 @@ final class Maps
             'vendor' => base_path() . '/assets/vendor/maplibre/',
             'css' => asset('vendor/maplibre/maplibre-gl.css'),
             'i18n' => $t['maplibre'],
+            // 3D-Ansicht: geneigt, leicht gedreht, Gebäude mit Höhe (Theme: project → map → 3d, Option '3d')
+            'view3d' => (bool) ($o['3d'] ?? project('map.3d', false)),
         ];
         $kitLoader = $click && (app()->theme->def['map_loader'] ?? 'core') === 'kit';
         $h = '<figure class="cms-map cms-map--' . $height . ($click ? ' cms-map--click' : '') . (!empty($o['class']) ? ' ' . e($o['class']) : '') . '" data-cms-map="'

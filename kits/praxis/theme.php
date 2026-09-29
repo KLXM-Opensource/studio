@@ -78,7 +78,7 @@ return [
     'project' => [
         // Karten (Core\Maps): welche Einstellungen Standort, Beschriftung, Adresse und Routenlink liefern
         // click: Karte erst nach Klick (Zwei-Klick, Handoff) – Grundeinstellungen → Karten kann das je Website ändern
-        'map' => ['location' => 'karte_geo', 'label' => 'praxis_name', 'address' => ['strasse', 'plz', 'ort'], 'route' => 'routenplaner_url', 'click' => true],
+        'map' => ['location' => 'karte_geo', 'label' => 'praxis_name', 'address' => ['strasse', 'plz', 'ort'], 'route' => 'routenplaner_url', 'click' => true, '3d' => true],
         'terms' => [
             'org' => 'Praxis',
             'key' => 'Praxisschlüssel',
