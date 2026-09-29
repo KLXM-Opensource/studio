@@ -1334,10 +1334,14 @@ function initInlineCrop() {
     const r = target.getBoundingClientRect();
     // Nicht über Werkzeugleiste oder klebenden Kit-Kopf legen: unter deren Unterkante rücken, sonst ausblenden
     let top = Math.max(r.top + 12, topInset() + 8), right = r.right - 12;
-    // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) freilassen: links daneben, bei Platzmangel darunter
-    const pen = [...d.querySelectorAll('.cms-entry-pencil')].map(p => p.getBoundingClientRect())
-      .find(p => p.width && p.left < right && p.right > r.left && p.top < top + bar.offsetHeight && p.bottom > top);
-    if (pen) {
+    // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) und die Leiste des Blocks (editor.js BarPlace)
+    // freilassen: links daneben, bei Platzmangel darunter
+    const blockBar = target.closest('.cms-block')?.querySelector(':scope>.cms-block__bar');
+    const busy = [...d.querySelectorAll('.cms-entry-pencil'), ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [blockBar] : [])]
+      .map(p => p.getBoundingClientRect());
+    for (let i = 0; i < 3; i++) {
+      const pen = busy.find(p => p.width && p.left < right && p.right > right - bar.offsetWidth && p.top < top + bar.offsetHeight && p.bottom > top);
+      if (!pen) break;
       if (pen.left - 8 - bar.offsetWidth >= r.left + 8) right = pen.left - 8;
       else top = pen.bottom + 8;
     }

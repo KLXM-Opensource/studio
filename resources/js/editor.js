@@ -148,6 +148,7 @@ const InlineBar = (() => {
     if (top < minTop) top = Math.min(r.bottom + 10, innerHeight - h - 10);   // unter dem Text, wenn oben kein Platz
     el.style.top = Math.max(minTop, top) + 'px';
     el.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+    BarPlace.soon();   // Block-Leiste weicht der Formatierungsleiste aus
   };
   // Klicks, Menüs (Stil, Farbe, ⋯), Tastatur und Zustand: CMSAdmin.Rich.mount (_rte.js)
   CMSAdmin.Rich.mount(el, () => target, () => place());
@@ -178,6 +179,7 @@ const InlineBar = (() => {
 function selectBlock(el) {
   $$('.cms-block.is-selected', holder()).forEach(b => { if (b !== el) b.classList.remove('is-selected'); });
   el?.classList.add('is-selected');
+  if (el) BarPlace.soon();
 }
 // Ereignisse aus Schatten-Bäumen (Block-Leiste, „+“) kommen hier mit dem Host als target an; Klicks in Werkzeugleiste,
 // Ebene (Seitenleiste, Dialoge) und Eintrags-Seitenleiste lassen die Auswahl stehen
@@ -187,6 +189,126 @@ d.addEventListener('pointerdown', e => {
   selectBlock(t.closest('.cms-block'));
 }, true);
 d.addEventListener('focusin', e => { const b = e.target.closest?.('.cms-block'); if (b) selectBlock(b); });
+
+// ------------------------------------------------------------------ Lage der Block-Leiste: nie über Inhalten
+/**
+ * Die Block-Leiste (Name, ↑ ↓ ▾, „Bearbeiten“) darf keine Inhalte verdecken – vor allem nicht die Zeile, in der gerade
+ * geschrieben wird. Je sichtbarer Leiste (Hover, Auswahl, Fokus) werden Lagen der Reihe nach geprüft:
+ *   oben rechts im Block → auf der Naht zum Block darüber → ganz über der Oberkante → dasselbe links →
+ *   (Block oben aus dem Bild gescrollt) unter der Werkzeugleiste bzw. dem klebenden Kopf des Kits (topInset).
+ * Jede Lage erst in voller Breite, dann schmal (nur Symbol), dann ganz knapp (Symbol + „Bearbeiten“).
+ * Hindernisse: Texte, bearbeitbare Felder und Bedienelemente des Blocks und seiner Nachbarn, die Formatierungsleiste
+ * (hat Vorrang), „+ Block einfügen“, Stift „Eintrag bearbeiten“, Knöpfe am Bild, Editor.js-Griff, Kopf des Kits.
+ * Bilder sind weiche Hindernisse (lieber daneben, notfalls darüber). Ist nirgends Platz, weicht die Leiste beim
+ * Schreiben ganz aus (.is-yield) und kommt bei Mausbewegung bzw. nach dem Verlassen des Felds zurück.
+ */
+const BarPlace = (() => {
+  const LIVE = '.cms-block:is(:hover,.is-selected,.is-active,:focus-within)';
+  const HARD = '[data-edit],input,select,textarea,button,.btn,[role=button]';
+  const SOFT = 'img,video,iframe,canvas,picture,svg:not(button svg):not(a svg)';
+  let raf = 0;
+  const R = r => ({ l: r.left, t: r.top, r: r.right, b: r.bottom });
+  const area = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
+  const less = (a, b) => { const i = a.findIndex((v, k) => v !== b[k]); return i >= 0 && a[i] < b[i]; };
+  const off = el => !el || el.closest('.is-collapsed,.is-compact') || !el.isConnected;
+  const visibleEl = el => { if (!el) return false; const s = getComputedStyle(el); return s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0; };
+
+  /** Hindernisse im Band [top, bottom] (Viewport) – Text zeilenweise, Felder/Knöpfe als Kasten, Bilder weich */
+  function obstacles(blk, band) {
+    const hard = [], soft = [];
+    const inBand = r => r.bottom > band.t && r.top < band.b && r.width > 0 && r.height > 0;
+    const ce = blk.closest('.ce-block');
+    const scopes = [ce?.previousElementSibling, ce, ce?.nextElementSibling].map(c => c?.querySelector('.cms-block__preview')).filter(Boolean);
+    for (const pv of scopes) {
+      const tw = d.createTreeWalker(pv, NodeFilter.SHOW_TEXT);
+      const rg = d.createRange();
+      for (let n; (n = tw.nextNode());) {
+        if (!n.data.trim()) continue;
+        const pe = n.parentElement;
+        if (!pe || !inBand(pe.getBoundingClientRect())) continue;
+        rg.selectNodeContents(n);
+        for (const r of rg.getClientRects()) if (inBand(r)) hard.push(R(r));
+      }
+      for (const x of pv.querySelectorAll(HARD)) { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
+      for (const x of pv.querySelectorAll(SOFT)) { const r = x.getBoundingClientRect(); if (inBand(r) && r.width * r.height > 900) soft.push(R(r)); }
+      for (const x of pv.querySelectorAll('.cms-entry-pencil')) hard.push(R(x.getBoundingClientRect()));
+    }
+    // Bedienelemente: Formatierungsleiste (Vorrang), „+ Block einfügen“ dieses und des vorigen Blocks, Knöpfe am Bild,
+    // Leisten der Nachbarblöcke, Griff von Editor.js, Kopf des Kits
+    const layer = S.layerBox();
+    const extra = [layer.querySelector('.cms-inline-bar:not([hidden])'), layer.querySelector('.cms-imgtools:not([hidden])'),
+      ...[ce?.previousElementSibling, ce].map(c => c?.querySelector('.cms-block__add')?.shadowRoot?.querySelector('button')),
+      ...[ce?.previousElementSibling, ce?.nextElementSibling].map(c => c?.querySelector(':scope .cms-block:is(:hover,.is-selected,.is-active,:focus-within)>.cms-block__bar')),
+      holder().querySelector('.ce-toolbar--opened .ce-toolbar__actions'),
+      ...d.querySelectorAll('[data-cms-header]')];
+    for (const x of extra) if (x && visibleEl(x) && getComputedStyle(x).visibility !== 'hidden') { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
+    return { hard, soft };
+  }
+
+  function place(blk) {
+    const host = blk.querySelector(':scope>.cms-block__bar');
+    if (!host) return;
+    if (off(blk)) { host.removeAttribute('style'); host.classList.remove('is-slim', 'is-mini', 'is-yield', 'is-crowded'); return; }
+    const br = blk.getBoundingClientRect();
+    const inset = CMSAdmin.shadow.topInset ? CMSAdmin.shadow.topInset() : 0;
+    const vw = d.documentElement.clientWidth;
+    const levels = [[], ['is-slim'], ['is-slim', 'is-mini']];
+    const sizes = levels.map(cls => {
+      host.classList.remove('is-slim', 'is-mini'); host.classList.add(...cls);
+      return [host.offsetWidth, host.offsetHeight];
+    });
+    const hMax = Math.max(...sizes.map(s => s[1]));
+    const band = { t: Math.min(br.top - hMax - 12, inset), b: Math.max(br.top + hMax + 16, inset + hMax + 16) };
+    const { hard, soft } = obstacles(blk, band);
+    const typing = blk.contains(d.activeElement) && !!d.activeElement.closest?.('[data-edit]');
+    let best = null;
+    levels.forEach((cls, li) => {
+      const [w, h] = sizes[li];
+      const tops = [8, -h / 2, -h - 6];
+      if (br.top + 8 < inset + 4 && br.bottom > inset + h + 24) tops.push(inset + 8 - br.top);   // Block oben aus dem Bild
+      const sides = [['right', br.right - 10 - w], ['left', br.left + 10]];
+      sides.forEach(([side, x], si) => tops.forEach((top, ti) => {
+        const c = { l: x, r: x + w, t: br.top + top, b: br.top + top + h };
+        if (c.l < 4 || c.r > vw - 4 || c.t < inset + 2) return;
+        const hit = hard.reduce((s, o) => s + area(c, o), 0);
+        const img = soft.reduce((s, o) => s + area(c, o), 0);
+        // Rangfolge: frei vor verdeckt, Stufe (voll → schmal → knapp), keine Bildfläche, Lage
+        const score = [hit > 0 ? 1 : 0, hit, li, img > 0 ? 1 : 0, si * 10 + ti];
+        if (!best || less(score, best.score)) best = { score, cls, side, top };
+      }));
+    });
+    host.classList.remove('is-slim', 'is-mini');
+    if (!best) { host.removeAttribute('style'); return; }
+    host.classList.add(...best.cls);
+    host.style.top = best.top + 'px';
+    if (best.side === 'right') { host.style.right = '10px'; host.style.left = 'auto'; }
+    else { host.style.left = '10px'; host.style.right = 'auto'; }
+    const crowded = best.score[0] === 1;
+    host.classList.toggle('is-crowded', crowded);
+    // Kein freier Platz: beim Schreiben ausweichen, sonst (Maus) die am wenigsten störende Lage
+    if (!crowded || !typing) host.classList.remove('is-yield');
+    else if (!host.dataset.peek) host.classList.add('is-yield');
+  }
+
+  const run = () => { raf = 0; for (const b of $$(LIVE, holder())) place(b); };
+  const soon = () => { if (!raf) raf = requestAnimationFrame(run); };
+  addEventListener('scroll', soon, { passive: true });
+  addEventListener('resize', soon);
+  let hovered = null;
+  d.addEventListener('pointerover', e => { const b = e.target.closest?.('.cms-block'); if (b && b !== hovered) { hovered = b; soon(); } }, true);
+  d.addEventListener('focusout', soon);
+  d.addEventListener('input', e => { if (e.target.closest?.('.cms-block')) soon(); });
+  // Beim Schreiben (ohne freien Platz) weicht die Leiste aus; Mausbewegung holt sie zurück, Tippen blendet wieder aus
+  d.addEventListener('keydown', e => {
+    const b = e.target.closest?.('.cms-block');
+    const host = b?.querySelector(':scope>.cms-block__bar');
+    if (host && e.target.closest('[data-edit]') && host.classList.contains('is-crowded')) { delete host.dataset.peek; host.classList.add('is-yield'); }
+  });
+  d.addEventListener('pointermove', e => {
+    for (const host of $$('.cms-block__bar.is-yield', holder())) { host.dataset.peek = '1'; host.classList.remove('is-yield'); }
+  }, { passive: true });
+  return { soon, place };
+})();
 
 // ------------------------------------------------------------------ „+ Block einfügen“ unter einem Block: Auswahl der Blocktypen
 /**
@@ -315,7 +437,7 @@ function makeTool(type, def) {
       const barEl = el.firstElementChild;
       const sr = this.bar = S.shadowFor(barEl, `
           <span class="cms-block__swatch" aria-hidden="true"></span>
-          <span class="cms-block__label"><span aria-hidden="true">${blockIcon(def)}</span> ${CMSAdmin.esc(def.label)}</span>
+          <span class="cms-block__label" title="${CMSAdmin.esc(def.label)}"><span aria-hidden="true">${blockIcon(def)}</span><span class="cms-block__name"> ${CMSAdmin.esc(def.label)}</span></span>
           <span class="cms-block__summary"></span>
           <span class="cms-block__flags"></span>
           <span class="cms-block__tools">
@@ -412,6 +534,7 @@ function makeTool(type, def) {
       });
       $$('input,select,textarea,button:not(.cms-block__edit)', pv).forEach(i => { i.tabIndex = -1; });
       this.syncFormFields();
+      BarPlace.soon();
     }
 
     /** Knopf „Felder bearbeiten“: nur mit gewählter Tabelle, deren Felder diese Rolle ändern darf */
@@ -474,6 +597,7 @@ function makeTool(type, def) {
       b.setAttribute('aria-expanded', on ? 'false' : 'true');
       b.setAttribute('aria-label', on ? 'Block ausklappen' : 'Block einklappen');
       b.textContent = on ? '▸' : '▾';
+      BarPlace.place(this.el);
       if (remember) { on ? collapsed.add(this.blockId) : collapsed.delete(this.blockId); store.set(COLLAPSE_KEY, [...collapsed]); }
     }
 
@@ -486,10 +610,10 @@ function makeTool(type, def) {
       selectBlock(this.el);
       const hint = this.bar.querySelector('.cms-block__hint'), btn = this.bar.querySelector('.cms-block__edit');
       hint.textContent = central ? CMSAdmin.t('Zentral gepflegt – ändern unter „{title}“', { title: cfg.settingsTitle || CMSAdmin.t('Einstellungen') }) : CMSAdmin.t('Felder ändern: „Bearbeiten“');
-      hint.hidden = false; this.bar.host.classList.add('is-hinting');
+      hint.hidden = false; this.bar.host.classList.add('is-hinting'); BarPlace.soon();
       btn.classList.remove('is-hint'); void btn.offsetWidth; btn.classList.add('is-hint');
       clearTimeout(this.hintT);
-      this.hintT = setTimeout(() => { hint.hidden = true; this.bar.host.classList.remove('is-hinting'); btn.classList.remove('is-hint'); }, 2600);
+      this.hintT = setTimeout(() => { hint.hidden = true; this.bar.host.classList.remove('is-hinting'); btn.classList.remove('is-hint'); BarPlace.soon(); }, 2600);
     }
 
     syncDrawerField(path, value, rich = false) {

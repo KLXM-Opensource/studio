@@ -13,6 +13,9 @@ $edit = $mode !== 'view';
 $T = $b['config']['texts'];
 $chip = $b['status'] !== '' ? $T['chip'][$b['status']] : null;
 $page = $b['page'];
+// Umschalter „Ansehen | Bearbeiten“ vorhanden → der Primär-Knopf „Bearbeiten“ wäre doppelt: ab 1024 px ausblenden
+// (darunter ist der Umschalter im Menü „⋯“, dort bleibt der Knopf die Hauptaktion; editor.shadow.css .cms-bar__grp--seg)
+$segEdit = in_array('edit', array_column($b['modes'] ?: [], 0), true) ? ' cms-bar__grp--seg' : '';
 
 // Menüeintrag: <a> mit href oder <button>; $extra = bereits maskierte Attribute
 $item = function (string $label, string $ico, ?string $href = null, string $extra = '', string $class = '') {
@@ -65,7 +68,7 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
 
     <?php /* ---------- Ansehen: EINE Hauptaktion ---------- */ ?>
     <?php if ($kind === 'entry'): ?>
-    <span class="cms-bar__grp" data-bar-group="view"<?= $edit ? ' hidden' : '' ?>>
+    <span class="cms-bar__grp<?= $b['entryEditable'] ? $segEdit : '' ?>" data-bar-group="view"<?= $edit ? ' hidden' : '' ?>>
       <?php if ($b['entryEditable']): ?>
         <button type="button" class="cms-btn cms-btn--primary" data-bar-mode="edit"><?= icon('pencil-simple') ?><span><?= e(__('Bearbeiten')) ?></span></button>
       <?php elseif ($b['origin'] && $b['origin']['sso']): ?>
@@ -76,7 +79,7 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
       <?php endif; ?>
     </span>
     <?php elseif (!$edit && $b['hasPage'] && $b['canEditPages']): ?>
-    <span class="cms-bar__grp" data-bar-group="view">
+    <span class="cms-bar__grp<?= $segEdit ?>" data-bar-group="view">
       <a class="cms-btn cms-btn--primary" href="<?= e($b['pageEditUrl']) ?>" data-bar-mode="edit"><?= icon('pencil-simple') ?><span><?= e(__('Bearbeiten')) ?></span></a>
     </span>
     <?php endif; ?>

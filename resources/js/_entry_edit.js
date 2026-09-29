@@ -302,6 +302,8 @@ const Inline = (() => {
     const first = nodes.find(inView);
     if (first) first.focus({ preventScroll: true }); else ui('[data-bar-cancel]')?.focus();
   }
+  // „Bearbeiten“: Primär-Knopf bzw. ab 1024 px der Umschalter (der Knopf ist dort ausgeblendet, toolbar.php $segEdit)
+  const editBtn = () => [ui('.cms-bar__grp [data-bar-mode=edit]'), ui('.cms-seg [data-bar-mode=edit]')].find(b => b?.getClientRects().length) || null;
   function stop() {
     if (!editing) return;
     editing = false;
@@ -311,7 +313,7 @@ const Inline = (() => {
     d.documentElement.classList.remove('cms-entry-editing');
     Bar.setMode('view');
     // Fokus nicht verlieren: aus Feld, Leiste oder Rückfrage-Dialog zurück auf „Bearbeiten“
-    if (!a || a === d.body || nodes.includes(a) || a === barHost() || a.id === 'cms-layer-host') ui('.cms-bar__grp [data-bar-mode=edit]')?.focus();
+    if (!a || a === d.body || nodes.includes(a) || a === barHost() || a.id === 'cms-layer-host') editBtn()?.focus();
   }
 
   // Schwebende Formatierungsleiste (gleiche Befehle wie im Seiten-Editor)
@@ -439,7 +441,7 @@ const Inline = (() => {
         save: async () => { await save(); return !dirty; },
         discard: restore,
         exit: href => { stop(); if (href) location.href = href; },
-        start: () => (nodes.length ? start() : Panel.open(cfg.endpoint, ui('.cms-bar__grp [data-bar-mode=edit]'))),
+        start: () => (nodes.length ? start() : Panel.open(cfg.endpoint, editBtn())),
       });
       // Aus dem Vorlagen-Editor „Bearbeiten“ gewählt: …#cms-bearbeiten
       if (location.hash === '#cms-bearbeiten') {

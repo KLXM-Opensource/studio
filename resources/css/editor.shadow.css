@@ -119,6 +119,8 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 /* Aktionen */
 .cms-bar__act{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
 .cms-bar__grp{display:inline-flex;align-items:center;gap:6px}
+/* „Bearbeiten“ steht schon im Umschalter „Ansehen | Bearbeiten“ (ab 1024 px sichtbar) – nicht doppelt (toolbar.php $segEdit) */
+@media (min-width:1024px){.cms-bar__grp.cms-bar__grp--seg{display:none}}
 .cms-bar[data-bar] .cms-btn{gap:7px;min-height:36px;padding:0 16px;background:var(--b-fill);color:var(--b-ink);font-size:13.5px;font-weight:700}
 .cms-bar[data-bar] .cms-btn:hover{background:var(--b-fill-h);color:var(--b-ink)}
 .cms-bar[data-bar] .cms-btn .ico{width:16px;height:16px}
@@ -202,7 +204,10 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 /* ------------------------------------------------------------------ Block-Leiste (Host .cms-block__bar liegt in der Seite, Lage: editor.css) */
 :host(.cms-block__bar){font:600 12px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#16201E;-webkit-font-smoothing:antialiased}
 .cms-block__label{padding:4px 9px;border-radius:6px;background:#16201E;color:#fff;white-space:nowrap}
-.cms-block__label>span{opacity:.8;margin-right:2px}
+.cms-block__label>span[aria-hidden]{opacity:.8;margin-right:2px}
+/* Wenig Platz (editor.js BarPlace): schmal = nur Symbol, Markierungen weg; knapp = zusätzlich ohne ↑ ↓ ▾ (Alt+↑/↓ bleibt) */
+:host(.is-slim) .cms-block__name,:host(.is-slim) .cms-block__flags,:host(.is-mini) .cms-block__tools{display:none}
+:host(.is-slim) .cms-block__label>span[aria-hidden]{margin-right:0}
 .cms-block__edit{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#314164;color:#fff;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
 .cms-block__edit:hover{background:#243150}
 /* „Felder bearbeiten“ bei Formular-Blöcken (editor.js → resources/js/_form_fields.js); schmal nur „Felder“ */

@@ -3,7 +3,7 @@
  * Reiter · Repeater · Rich-Text · Medienauswahl · Bestätigungen · Link-Vorschläge
  * Wird auch vom Inline-Editor genutzt (window.CMSAdmin).
  */
-import { initBar, layer, layerBox, listen, pathTarget, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathClosest, inPath, IN_ADMIN } from './_shadow.js';
+import { initBar, layer, layerBox, listen, pathTarget, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathClosest, inPath, IN_ADMIN, topInset } from './_shadow.js';
 import './_media.js';
 import { openSpotlight } from './_spotlight.js';
 import { t } from './_i18n.js';
@@ -654,6 +654,6 @@ initDesign();
 initBlockBuilder();
 window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene
-  shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN } };
+  shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN, topInset } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)
 initEntryEdit();

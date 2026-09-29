@@ -19,7 +19,8 @@
 .is-editing main{padding-bottom:120px}
 .cms-editor .codex-editor__redactor{padding-bottom:160px!important}
 .cms-editor .ce-block__content,.cms-editor .ce-toolbar__content{max-width:none;margin:0}
-.cms-editor .ce-toolbar__actions{right:auto;left:10px;top:10px;z-index:2147483000;background:#fff;border-radius:10px;padding:2px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+/* Griff „+ ⠿“ über der Blockkante statt auf dem Inhalt; die Block-Leiste (BarPlace) weicht ihm aus */
+.cms-editor .ce-toolbar__actions{right:auto;left:10px;top:-40px;z-index:2147483000;background:#fff;border-radius:10px;padding:2px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
 .cms-editor .ce-toolbar__plus,.cms-editor .ce-toolbar__settings-btn{color:#16201E;width:30px;height:30px}
 /* Editor.js-Bedienelemente liegen in der Seite (Editor.js bringt eigenes CSS mit): Schrift/Größen nicht vom Theme erben */
 .cms-editor :is(.ce-toolbar,.ce-popover,.ce-inline-toolbar){font:400 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:normal;text-transform:none}
@@ -37,8 +38,11 @@
 .cms-block.is-hidden .cms-block__preview{opacity:.4;filter:grayscale(.6)}
 .cms-block.is-hidden .is-hidden-block{display:block}
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
-.cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
+.cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
 .cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block.is-selected>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
+/* Lage (top/left/right) setzt editor.js (BarPlace) so, dass die Leiste keine Inhalte verdeckt – Breite = Inhalt der Leiste.
+   Ohne freien Platz weicht sie beim Schreiben ganz aus (.is-yield) und kommt bei Mausbewegung zurück. */
+.cms-block>.cms-block__bar.is-yield{opacity:0!important;pointer-events:none}
 /* Klick in den Block wählt ihn nur aus (.is-selected, editor.js selectBlock) – die Seitenleiste öffnet „Bearbeiten“ */
 .cms-block.is-selected:not(.is-active){outline:1px dashed rgba(49,65,100,.75)}
 .cms-block__preview,.cms-block__preview :is(a,button):not([data-entry-edit]){cursor:default}
@@ -85,7 +89,7 @@
 
 /* Verschieben ohne Drag & Drop, Einklappen, Kompaktansicht */
 .cms-block.is-collapsed .cms-block__preview,.is-compact .cms-block__preview{display:none}
-.cms-block.is-collapsed>.cms-block__bar.cms-block__bar,.is-compact .cms-block__bar.cms-block__bar{position:static;opacity:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:58px;padding:10px 14px 10px 92px;background:#FAFAFA;border-bottom:1px solid #E6E6E9;--cms-bb-row:block}
+.cms-block.is-collapsed>.cms-block__bar.cms-block__bar,.is-compact .cms-block__bar.cms-block__bar{position:static;width:auto;opacity:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:58px;padding:10px 14px 10px 92px;background:#FAFAFA;border-bottom:1px solid #E6E6E9;--cms-bb-row:block}
 .is-compact .cms-block__bar.cms-block__bar{--cms-bb-collapse:none}
 .is-compact{max-width:1100px;margin:24px auto;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #E6E6E9}
 .is-compact .cms-block{outline:0}
