@@ -6,6 +6,24 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit „praxis“: Kontaktkarte überarbeitet (Öffnungszeiten, Notfallnummern, externe Dienste, Drehung)
+- Zeiten **bündig** (Beginn rechtsbündig, Strich, Ende; tabellarische Ziffern) in der Karte und in „Alle Öffnungszeiten“
+  (`praxis_range_html()`); Vorderseite kompakter, eigene Linien-Symbole je Dienst (`praxis_icon()`: Kalender, Tablette,
+  Dokument mit Pfeil), auch im Mobilmenü und in der Schnellkontakt-Leiste.
+- **Geschlossen** (im Browser nach Ortszeit berechnet, seitencache-fest): „Wir öffnen wieder um … / morgen um … / am Montag um …“
+  und „In dringenden Notfällen“ mit **116 117** und **112** als `tel:`-Links; Chip nur „Geschlossen“. Beide Varianten stehen im
+  Markup (Platz reserviert, kein Layout-Shift). Hinweiszeile (`notfall_kurz`): Trennzeichen-Reste („! ·.“) aufgeräumt
+  (`praxis_card_note()`), Sätze mit 116 117/112 werden bei „geschlossen“ ausgeblendet.
+- **Externe Dienste** (Doctolib, externes Rezept/Überweisung): Kachel dreht zu „Sie verlassen unsere Website und wechseln zu …
+  Dort gelten deren Datenschutzbestimmungen.“ mit „Weiter zu …“ / „Abbrechen“ (Esc, Fokus zurück); ohne JavaScript normaler Link mit ↗.
+- **Drehung**: beide Seiten drehen einzeln (600 ms, symmetrische Kurve, Seitenwechsel genau bei 90°), Rückseite zieht synchron
+  auf ihre Höhe auf und liegt als eigene Ebene über dem folgenden Inhalt – Hero und Seite verschieben sich nicht (CLS 0);
+  „Bewegung reduzieren“: Überblenden. Desktop: Hero-Höhe nur nach Text, die Karte ragt nach unten. Rückseiten-Stile
+  `css/card-back.css` erst beim Umdrehen. Hero-Steuerung reserviert ohne JavaScript ihren Platz (Layout-Shift beim Start behoben).
+- **Online-Rezept**: Gruppe „Medikamente“ → ein mehrzeiliges Textfeld (`field_updates` ID `praxis-rezept-medikamente-text-2026-09-29`,
+  wird beim nächsten Aufruf/`migrate` einmalig angewendet). Alte Anfragen mit der Gruppe zeigen weiter eine Tabelle mit den
+  alten Beschriftungen (`Inbox::open` liest die frühere Definition aus `field_updates`). `form.js` prüft auch Textfelder.
+
 ### public/: Kits, Erweiterungen und Schriften unter /assets/ – Seitenadressen /kits, /themes, /extensions, /fonts frei
 - Jeder Ordner ganz oben in `public/` sperrte die gleichnamige Seitenadresse (Apache/nginx: 301 → 403). Code- und
   Design-Dateien liegen jetzt unter `/assets/`: Kits `public/assets/kits/{kit}/` (vorher `public/kits/`, `public/themes/`),

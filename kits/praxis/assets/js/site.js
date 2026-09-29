@@ -55,28 +55,43 @@ if (badges.length) {
     const iso = `${p.year}-${p.month}-${p.day}`;
     return { iso, dow: new Date(iso + 'T12:00:00Z').getUTCDay(), min: +p.hour * 60 + +p.minute };
   };
+  // → [Klasse, Text des Status-Chips, „Wir öffnen wieder …“ (nur geschlossen)]
   const status = () => {
     const n = now(), today = cfg.days[n.dow] || [];
-    if (closedOn(n.iso)) return ['is-holiday', T('holiday', { date: dm(cfg.closedTo) })];
-    for (const [a, b] of today) {
+    const hol = closedOn(n.iso);
+    if (!hol) for (const [a, b] of today) {
       if (n.min >= toMin(a) && n.min < toMin(b)) {
         return toMin(b) - n.min <= 30 ? ['is-soon', T('soon', clock(b))] : ['is-open', T('open', clock(b))];
       }
     }
-    const later = today.find(([a]) => toMin(a) > n.min);
-    if (later) return ['is-closed', T('later', clock(later[0]))];
-    for (let i = 1; i <= 21; i++) {
+    const later = !hol && today.find(([a]) => toMin(a) > n.min);
+    if (later) return ['is-closed', T('later', clock(later[0])), T('reopen', clock(later[0]))];
+    for (let i = 1; i <= 42; i++) {
       const iso = addDays(n.iso, i), dow = (n.dow + i) % 7, seg = cfg.days[dow];
       if (seg && seg.length && !closedOn(iso)) {
-        const day = i === 1 ? L.tomorrow : i < 7 ? DAYS[dow] : T('dayDate', { day: DAYS[dow], date: dm(iso) });
-        return ['is-closed', T('next', { day, ...clock(seg[0][0]) })];
+        const day = i === 1 ? L.tomorrow : i < 7 ? DAYS[dow] : T('dayDate', { day: DAYS[dow], date: dm(iso) }), t = clock(seg[0][0]);
+        return [hol ? 'is-holiday' : 'is-closed', hol ? T('holiday', { date: dm(cfg.closedTo) }) : T('next', { day, ...t }),
+          T('reopenDay', { day: i === 1 ? day : T('onDay', { day }), ...t })];
       }
     }
-    return ['is-closed', L.closed];
+    return [hol ? 'is-holiday' : 'is-closed', hol ? T('holiday', { date: dm(cfg.closedTo) }) : L.closed, ''];
   };
   const render = () => {
-    const [cls, text] = status();
-    badges.forEach(b => { b.className = b.className.replace(/\bis-\w+/g, '').trim() + ' ' + cls; b.querySelector('.openb__text').textContent = text; b.hidden = false; });
+    const [cls, text, again] = status(), shut = cls == 'is-closed' || cls == 'is-holiday';
+    badges.forEach(b => {
+      b.className = b.className.replace(/\bis-\w+/g, '').trim() + ' ' + cls;
+      // In der Kontaktkarte steht „Wir öffnen wieder …“ groß darunter – der Chip sagt dann nur „Geschlossen“
+      $('.openb__text', b).textContent = cls == 'is-closed' && b.closest('[data-flipcard]') ? L.shut : text;
+      b.hidden = false;
+    });
+    // Kontaktkarte: geschlossen → „Wir öffnen wieder …“ + Bereitschaftsdienst/Notruf statt der heutigen Zeiten
+    // (beide Varianten stehen im Markup im selben Rasterfeld – kein Sprung, die Karte bleibt gleich hoch)
+    $$('[data-flipcard]').forEach(c => {
+      c.dataset.now = shut ? 'closed' : 'open';
+      $$('[data-now-open]', c).forEach(x => x.hidden = shut);
+      $$('[data-now-closed]', c).forEach(x => x.hidden = !shut);
+      $$('[data-reopen]', c).forEach(x => { x.textContent = again; x.parentNode.classList.toggle('is-empty', !again); });
+    });
   };
   render();
   setInterval(render, 60000);
@@ -127,11 +142,34 @@ $$('[data-hero]').forEach(hero => {
 });
 
 // ------------------------------------------------------------ Flip-Kontaktkarte
+// 3D-Drehung (CSS, 600 ms). Die Karte behält im Seitenfluss die Höhe der Vorderseite (nichts verschiebt sich); eine längere
+// Rückseite (Formular) liegt als eigene Ebene darüber, ragt nach unten über den folgenden Inhalt und zieht synchron zur
+// Drehung weich auf (Höhe der Rückseite: Vorderseite → eigene Höhe, beim Zurückdrehen umgekehrt).
+// Fokus: nach dem Seitenwechsel (Mitte der Drehung) auf die Überschrift der Rückseite, beim Zurückdrehen auf die auslösende Kachel.
+// Externe Dienste (Doctolib …): Die Rückseite fragt „Sie verlassen unsere Website …“ – „Weiter“ öffnet den Link, „Abbrechen“/Esc dreht zurück.
 const card = $('[data-flipcard]');
 if (card) {
   const front = $('.card--front', card), back = $('.card--back', card), title = $('[data-flip-title]', card);
   back.hidden = false; back.inert = true; back.setAttribute('aria-hidden', 'true');
-  let opener = null;
+  let opener = null, timer;
+  // Fokus, sobald die Seite sichtbar ist (Mitte der Drehung) – vorher ist sie nicht fokussierbar, daher kurz nachfassen
+  const focusSoon = el => {
+    let n = 0;
+    const go = () => { el?.focus({ preventScroll: true }); if (el && d.activeElement !== el && n++ < 12) timer = setTimeout(go, 50); };
+    clearTimeout(timer);
+    timer = setTimeout(go, still ? 0 : 300);
+  };
+  const hgt = el => el.getBoundingClientRect().height;   // genau (Bruchteile), sonst springt die Rückseite am Ende um < 1 px
+  // Höhe der Rückseite animieren (px → px), danach wieder „auto“ (Fehlermeldungen, Danke-Text passen sich an)
+  const size = (from, to) => {
+    if (still || Math.abs(from - to) < 2) return;
+    card.classList.add('is-turning');
+    back.style.height = from + 'px'; void back.offsetHeight;
+    back.style.height = to + 'px';
+  };
+  card.addEventListener('transitionend', e => {
+    if (e.target == back && e.propertyName == 'height') { back.style.height = ''; card.classList.remove('is-turning'); }
+  });
   // Formular-Stile/-Skripte der Rückseite: vorladen, sobald jemand auf die Karte zeigt oder hineintabbt
   const assets = () => Promise.all(JSON.parse(card.dataset.assets || '[]').map(load));
   card.addEventListener('pointerover', assets, { once: true });
@@ -143,33 +181,39 @@ if (card) {
       $$('[data-panel]', card).forEach(p => p.hidden = p !== panel);
       title.textContent = panel.dataset.title;
       opener = from;
+      back.style.height = '';
+      const fh = hgt(front), bh = hgt(back);
       card.classList.add('is-flipped');
+      size(fh, bh);
       front.inert = true; front.setAttribute('aria-hidden', 'true');
       back.inert = false; back.removeAttribute('aria-hidden');
       const form = $('form', panel);
       if (form) window.praxisForm?.(form, true);
-      setTimeout(() => $('#flip-title').focus({ preventScroll: true }), still ? 0 : 450);
+      focusSoon($('#flip-title'));
     });
     return true;
   };
   const unflip = () => {
+    if (!card.classList.contains('is-flipped')) return;
+    size(hgt(back), hgt(front));
     card.classList.remove('is-flipped');
     back.inert = true; back.setAttribute('aria-hidden', 'true');
     front.inert = false; front.removeAttribute('aria-hidden');
-    (opener && front.contains(opener) ? opener : $('.svc', front))?.focus({ preventScroll: true });
+    focusSoon(opener && front.contains(opener) ? opener : $('.svc', front));
   };
   d.addEventListener('click', e => {
     const t = e.target.closest('[data-flip]');
-    if (t && !t.target) {
-      if (flip(t.dataset.flip, t)) {
-        e.preventDefault();
-        closeMenu();
-        if (!front.contains(t)) card.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
-      }
+    // Strg/Umschalt/Cmd-Klick: Link wie gewohnt (neuer Tab), keine Drehung
+    if (t && !(e.metaKey || e.ctrlKey || e.shiftKey) && flip(t.dataset.flip, t)) {
+      e.preventDefault();
+      closeMenu();
+      if (!front.contains(t)) card.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
     }
     if (e.target.closest('[data-flip-back]')) unflip();
+    if (e.target.closest('[data-leave]')) setTimeout(unflip, 400);   // externer Dienst öffnet im neuen Tab – Karte zurückdrehen
   });
-  card.addEventListener('keydown', e => { if (e.key === 'Escape' && card.classList.contains('is-flipped')) unflip(); });
+  // Esc: auch wenn der Fokus (noch) nicht in der Karte liegt, z. B. direkt nach dem Umdrehen
+  d.addEventListener('keydown', e => { if (e.key === 'Escape' && card.classList.contains('is-flipped') && (card.contains(d.activeElement) || d.activeElement === d.body)) unflip(); });
 }
 
 // Popover „Alle Öffnungszeiten“ bei Klick außerhalb schließen

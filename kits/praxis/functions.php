@@ -137,10 +137,10 @@ function praxis_hours(): array
         if (!isset($byDay[$dow])) continue;
         $rows = $byDay[$dow];
         $note = implode(' · ', array_filter(array_map(fn($r) => trim((string) ($r['notiz'] ?? '')), $rows)));
-        $am = $pm = [];
+        $am = $pm = $amSeg = $pmSeg = [];
         foreach (praxis_raw_segments($rows) as [$from, $to]) {
             $label = praxis_clock($from) . '–' . praxis_clock($to);
-            $from < '12:00' ? $am[] = $label : $pm[] = $label;
+            if ($from < '12:00') { $am[] = $label; $amSeg[] = [$from, $to]; } else { $pm[] = $label; $pmSeg[] = [$from, $to]; }
         }
         // Notiz „nachmittags geschlossen“ wird zur Zelle „geschlossen“; andere Notizen erscheinen darunter
         $closedNote = (bool) preg_match('~geschlossen~iu', $note);
@@ -151,6 +151,8 @@ function praxis_hours(): array
             'note' => $note,
             'am' => $am ? implode(' · ', $am) : null,
             'pm' => $pm ? implode(' · ', $pm) : null,
+            'am_seg' => $amSeg, 'pm_seg' => $pmSeg,                              // [[von, bis], …] für bündige Darstellung
+            'raw' => praxis_raw_segments($rows),
             'extra' => $closedNote && (!$am || !$pm) ? '' : $note,
         ];
     }
@@ -224,6 +226,10 @@ function praxis_js_texts(): array
         'dayDate' => lt('{day}, {date}'),
         'holiday' => lt('Praxis geschlossen bis {date}'),
         'closed' => lt('Derzeit geschlossen'),
+        'shut' => lt('Geschlossen'),
+        'reopen' => lt('um {time} Uhr'),                // Kontaktkarte: „Wir öffnen wieder“ + „um 15:30 Uhr“
+        'reopenDay' => lt('{day} um {time} Uhr'),       // … „morgen um 7:30 Uhr“ / „am Montag um 7:30 Uhr“
+        'onDay' => lt('am {day}'),
         'play' => lt('Abspielen'),
         'pause' => lt('Pause'),
         'start' => lt('Themenwechsel starten'),
@@ -243,10 +249,91 @@ function praxis_today(): array
         if ($h['dow'] === $dow) {
             $lines = array_map(fn($s) => lt('{time} Uhr', ['time' => $s]), $h['segments']);
             return ['name' => praxis_day_name($dow), 'lines' => $lines ?: [$h['note'] ?: lt('Sprechzeiten siehe unten')],
-                'note' => $lines ? $h['note'] : '', 'time' => $h['time']];
+                'note' => $lines ? $h['note'] : '', 'time' => $h['time'], 'seg' => $h['raw']];
         }
     }
-    return ['name' => praxis_day_name($dow), 'lines' => [lt('Heute geschlossen')], 'note' => '', 'time' => lt('Heute geschlossen')];
+    return ['name' => praxis_day_name($dow), 'lines' => [lt('Heute geschlossen')], 'note' => '', 'time' => lt('Heute geschlossen'), 'seg' => []];
+}
+
+/**
+ * Zeitspanne bündig: Beginn rechtsbündig, Strich, Ende – in Tabellen/Rastern stehen die Striche untereinander.
+ * $from/$to = „HH:MM“. Screenreader lesen „7:30 bis 11:00“.
+ */
+function praxis_range_html(string $from, string $to): string
+{
+    return '<span class="trange"><span class="trange__a">' . e(praxis_clock($from)) . '</span><span class="trange__d" aria-hidden="true">–</span>'
+        . '<span class="sr-only"> ' . e(lt('bis')) . ' </span><span class="trange__b">' . e(praxis_clock($to)) . '</span></span>';
+}
+
+/** Mehrere Zeitspannen einer Tabellenzelle (Vormittag/Nachmittag) */
+function praxis_ranges_html(array $segments): string
+{
+    return implode('<br>', array_map(fn($s) => praxis_range_html($s[0], $s[1]), $segments));
+}
+
+/**
+ * Linien-Symbole des Kits (24er Raster, Strich = currentColor), dekorativ (aria-hidden).
+ * termin = Kalender, rezept = Tablette/Kapsel, ueberweisung = Dokument mit Pfeil, tel = Telefon, anfahrt = Ort, extern = Pfeil nach außen.
+ */
+function praxis_icon(string $key, int $size = 22, float $stroke = 2): string
+{
+    static $paths = [
+        'tel' => '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+        'termin' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8.5 15.5l2.2 2.2 4.8-4.7"/>',
+        'rezept' => '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><path d="m8.5 8.5 7 7"/>',
+        'ueberweisung' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 15h7M12.5 12l3 3-3 3"/>',
+        'anfahrt' => '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+        'extern' => '<path d="M7 17 17 7M8 7h9v9"/>',
+    ];
+    return '<svg aria-hidden="true" focusable="false" width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'
+        . $stroke . '" stroke-linecap="round" stroke-linejoin="round">' . ($paths[$key] ?? $paths['termin']) . '</svg>';
+}
+
+/** Anzeigename der Domain eines externen Links: „https://www.doctolib.de/…“ → „doctolib.de“ */
+function praxis_host(string $url): string
+{
+    return preg_replace('~^www\.~i', '', (string) parse_url($url, PHP_URL_HOST));
+}
+
+/**
+ * Hinweiszeile der Kontaktkarte (Praxisdaten → Notfall – Kurzform) sauber zusammengesetzt und in Sätze/Abschnitte geteilt.
+ * Aufgeräumt werden Reste von Trennzeichen („erreichbar! ·. Außerhalb“ → „erreichbar! Außerhalb“), doppelte Leerzeichen und
+ * doppelte Satzzeichen. Abschnitte mit den Notrufnummern (116 117 / 112) werden markiert: Ist die Praxis gerade geschlossen,
+ * zeigt die Karte diese Nummern groß – die Wiederholung in der Hinweiszeile blendet site.js dann aus.
+ * @return list<array{text: string, emergency: bool}>
+ */
+function praxis_card_note(?string $text = null): array
+{
+    $t = trim(preg_replace('~\s+~u', ' ', \Core\EditorNotes::strip((string) ($text ?? setting('notfall_kurz')))));
+    $t = preg_replace('~\s*([.!?:;,])(?:\s*[·•|]\s*[.,;]?)+~u', '$1 ', $t);         // „! ·.“ → „!“
+    $t = preg_replace('~\s*[·•|]\s*([.!?:;,])~u', '$1', $t);                           // „ ·.“ → „.“
+    $t = preg_replace('~([.!?])[.,;]+~u', '$1', $t);                                     // „!.“ → „!“
+    $t = trim(preg_replace(['~^[\s·•|.,;]+|[\s·•|,;]+$~u', '~ {2,}~'], ['', ' '], $t));
+    if ($t === '') return [];
+    $parts = preg_split('~\s+[·•|]\s+|(?<=[.!?])\s+(?=\p{Lu}|\d)~u', $t, -1, PREG_SPLIT_NO_EMPTY);
+    return array_map(fn($p) => ['text' => trim($p), 'emergency' => (bool) preg_match('~116\s?117|(?<!\d)112(?!\d)~u', $p)], $parts);
+}
+
+/**
+ * Hinweiszeile als HTML. Enthält sie die Notrufnummern und noch anderes, stehen zwei Fassungen übereinander im selben
+ * Rasterfeld (Platz reserviert, die Karte bleibt gleich hoch): vollständig (geöffnet) und ohne die Notruf-Sätze (geschlossen –
+ * dann stehen 116 117/112 groß oben). Besteht der Hinweis nur aus Notruf-Sätzen, bleibt er in beiden Zuständen stehen.
+ */
+function praxis_card_note_html(?string $text = null): string
+{
+    $parts = praxis_card_note($text);
+    $join = function (array $list): string {
+        $out = '';
+        $prev = '';
+        foreach (array_values($list) as $i => $p) {
+            $out .= ($i ? (preg_match('~[.!?:]$~u', $prev) ? ' ' : ' · ') : '') . $p['text'];
+            $prev = $p['text'];
+        }
+        return e($out);
+    };
+    $rest = array_filter($parts, fn($p) => !$p['emergency']);
+    if (!$parts || !$rest || count($rest) === count($parts)) return $join($parts);
+    return '<span data-now-open>' . $join($parts) . '</span><span data-now-closed hidden>' . $join($rest) . '</span>';
 }
 
 function praxis_greeting(): string

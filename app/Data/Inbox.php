@@ -361,14 +361,31 @@ final class Inbox
             unset($values[$f['name']]);
         }
         foreach ($values as $name => $v) {                                           // inzwischen gelöschte Felder: gespeicherte Beschriftung
-            if (is_array($v) && $v && is_array(reset($v))) {                        // frühere Gruppe: Spalten = gespeicherte Unterfeld-Namen
-                $cols = array_keys(array_merge(...array_values(array_filter($v, 'is_array'))));
+            if (is_array($v) && $v && is_array(reset($v))) {                        // frühere Gruppe
+                $old = self::formerField($t, (string) $name);
+                if ($old && ($old['type'] ?? '') === 'group') {                     // Definition aus field_updates des Kits: Beschriftungen/Auswahltexte
+                    $old = Tables::groupDef($old, []);
+                    $out['fields'][] = self::groupTable((string) ($labels[$name] ?? Tables::label($old, Lang::default())),
+                        array_map(fn($sf) => [$sf['name'], Tables::label($sf, Lang::default()), $sf], (array) ($old['fields'] ?? [])), $v);
+                    continue;
+                }
+                $cols = array_keys(array_merge(...array_values(array_filter($v, 'is_array'))));   // sonst Spalten = gespeicherte Unterfeld-Namen
                 $out['fields'][] = self::groupTable((string) ($labels[$name] ?? $name), array_map(fn($k) => [$k, (string) $k, ['type' => 'text']], $cols), $v);
                 continue;
             }
             $out['fields'][] =['label' => (string) ($labels[$name] ?? $name), 'value' => is_array($v) ? implode(', ', array_map('strval', $v)) : (is_bool($v) ? ($v ? __('Ja') : __('Nein')) : (string) $v)];
         }
         return $out;
+    }
+
+    /** Frühere Felddefinition eines Theme-Formulars (theme.php → forms → {key} → field_updates → field), z. B. eine inzwischen ersetzte Gruppe */
+    private static function formerField(array $t, string $name): ?array
+    {
+        $def = app()->theme->forms()[(string) ($t['settings']['inbox']['form'] ?? '')] ?? null;
+        foreach ((array) ($def['field_updates'] ?? []) as $u) {
+            if (($u['field']['name'] ?? null) === $name) return (array) $u['field'];
+        }
+        return null;
     }
 
     /**

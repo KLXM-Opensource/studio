@@ -1,0 +1,26 @@
+/*
+ * Kit „praxis“ – Rückseite der Flip-Kontaktkarte (partials/contact-card.php). Lädt site.js erst, wenn jemand auf die Karte
+ * zeigt/tabbt bzw. vor dem Umdrehen (data-assets) – die Startseite bleibt schlank. Grundgerüst (Drehung, Sichtbarkeit) in site.css.
+ */
+/* Bewegung reduzieren: Überblenden statt Drehen */
+@media (prefers-reduced-motion:reduce){
+  .card--front,.card--back,.flip.is-flipped .card--front{transform:none}
+  .card--front,.card--back{transition:opacity .2s,visibility 0s linear .2s}
+  .card--back,.flip.is-flipped .card--front{opacity:0}
+  .flip.is-flipped .card--back,.flip:not(.is-flipped) .card--front{opacity:1;transition-delay:0s}
+}
+.card__head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card__title{font-size:22px;font-weight:700;letter-spacing:-.025em;outline:none}
+.card__panel{display:flex;flex-direction:column;gap:14px;flex:1}
+.card__text{font-size:16px;color:var(--c-text-2)}
+.card__small{font-size:13px;color:var(--c-text-3)}
+/* Externer Dienst: „Sie verlassen unsere Website …“ + Weiter / Abbrechen */
+.leave{display:flex;gap:10px;padding:14px 16px;border-radius:14px;background:var(--c-rose-1);font-size:15px;line-height:1.45;color:var(--c-ink)}
+.leave__icon{flex:none;display:flex;padding-top:2px;color:var(--c-bordeaux)}
+.card__actions{display:grid;gap:8px;margin-top:auto}
+.btn-ghost{min-height:48px;padding:0 22px;border-radius:999px;border:1px solid var(--c-input);background:#fff;color:var(--c-ink);font:600 15px var(--font);cursor:pointer}
+.btn-ghost:hover{border-color:var(--c-ink)}
+.btn-wide svg{flex:none}
+.card__panel>.btn-wide{margin-top:auto}
+/* Punkt der Überschrift als ::after (ein eigenes <span> meldete Chrome beim Umdrehen als Layout-Shift < 1 px) */
+[data-flip-title]::after{content:".";color:var(--c-bordeaux)}

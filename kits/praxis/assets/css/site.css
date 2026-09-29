@@ -194,8 +194,19 @@ section[id],[id="anfahrt"]{scroll-margin-top:90px}
 .hero__sub{margin-top:16px;font-size:clamp(18px,1.5vw,21px);line-height:1.35;font-weight:300;letter-spacing:-.01em;max-width:24em;color:var(--c-rose-1)}
 .hero .btn-row{margin-top:26px}
 .hero .btn{min-height:48px}
+/* Mobil: Hero straffen, damit Status, Telefon und Termin/Rezept/Überweisung früh sichtbar sind (Text bleibt linksbündig) */
+@media (max-width:640px){
+  .hero__grid{padding-top:22px;padding-bottom:28px;gap:24px}
+  .hero__topics{gap:16px}
+  .hero .eyebrow--line{margin-bottom:10px;font-size:12.5px}
+  .hero__title{font-size:clamp(32px,9.4vw,40px)}
+  .hero__sub{margin-top:10px;font-size:17px}
+  .hero .btn-row{margin-top:18px;gap:8px}
+  .hero .btn{min-height:44px;padding:0 20px;font-size:15px}
+}
 .hero__controls{display:flex;align-items:center;gap:14px}
-.no-js .hero__controls{display:none}
+/* Ohne JavaScript unsichtbar, Platz bleibt: sonst wächst der Hero beim Start des Skripts (Layout-Shift) */
+.no-js .hero__controls{visibility:hidden}
 .dots{display:flex;gap:6px}
 .dots__btn{position:relative;width:44px;height:28px;padding:0;border:0;background:transparent;cursor:pointer}
 .dots__btn>span{position:absolute;left:0;right:0;top:13px;height:2px;background:rgba(255,255,255,.28);overflow:hidden}
@@ -206,27 +217,72 @@ section[id],[id="anfahrt"]{scroll-margin-top:90px}
 .hero__pause{min-height:32px;padding:0 12px;border-radius:999px;border:0;background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--font);cursor:pointer}
 .hero__pause:hover{background:rgba(255,255,255,.22)}
 .hero__card{width:100%;max-width:440px;justify-self:center}
+/* Desktop: Die Hero-Höhe richtet sich nur nach Text/Themen – die Kontaktkarte steht oben bündig und ragt nach unten über den
+   Hero-Rand in den nächsten Abschnitt (liegt darüber: .hero__stage z-index 2). Umdrehen/Aufklappen verschiebt nichts. */
+@media (min-width:1080px){
+  .hero__grid>.hero__card{position:relative;align-self:stretch}
+  .hero__grid>.hero__card>.flip{position:absolute;top:0;left:0;right:0}
+  /* Karte liegt frei – kein Platz für die jeweils andere Variante (geöffnet/geschlossen) nötig */
+  .hero__grid .flip [data-now-open][hidden],.hero__grid .flip [data-now-closed][hidden]{display:none!important}
+  /* Luft für die hineinragende Karte im folgenden Abschnitt */
+  .hero:has(.hero__card .flip)+.sec{padding-top:max(112px,var(--sec-y))}
+}
 
 /* ---------------------------------------------------------------- Flip-Kontaktkarte */
-.flip{perspective:1600px}
-.flip__inner{position:relative;display:grid;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,.7,.2,1)}
-.flip.is-flipped .flip__inner{transform:rotateY(180deg)}
-@media (prefers-reduced-motion:reduce){.flip__inner{transition:none}}
+.flip{perspective:1800px;scroll-margin-top:96px}
+/* Drehen: 3D um die Y-Achse, 600 ms, weich an- und auslaufend. Die Karte behält die Höhe der Vorderseite (der Hero springt
+   nicht); eine längere Rückseite (Formular) ragt als eigene Ebene über den folgenden Inhalt. */
+/* Symmetrische Kurve: 90° genau nach 300 ms = Moment des Seitenwechsels (visibility) – kein Aufblitzen der gespiegelten Seite (WebKit) */
+.flip__inner{--turn:.6s cubic-bezier(.65,0,.35,1);position:relative;display:grid;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}
+.flip.is-flipped,.hero__card:has(>.flip.is-flipped){position:relative;z-index:20}
 .card{border-radius:26px;background:#fff;color:var(--c-ink);box-shadow:var(--shadow-card);-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.card--front{grid-area:1/1;padding:24px;display:flex;flex-direction:column;gap:18px}
-.card--back{position:absolute;top:0;left:0;right:0;transform:rotateY(180deg);padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
-.card--front,.card--back{transition:visibility 0s linear .4s}
-.card--back{visibility:hidden}
-.flip.is-flipped .card--front{visibility:hidden}
+.card--front{grid-area:1/1;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.card--back{position:absolute;top:0;left:0;right:0;min-height:100%;overflow:hidden;padding:22px 26px 26px;display:flex;flex-direction:column;gap:16px}
+/* Seitenwechsel genau in der Mitte der Drehung (90°) */
+.card--front{transition:transform var(--turn),visibility 0s linear .3s}
+.card--back{transform:rotateY(180deg);transition:transform var(--turn),visibility 0s linear .3s,height var(--turn)}
+/* Beide Seiten drehen einzeln (Vorderseite 0 → −180°, Rückseite 180° → 0); in Ruhe ohne transform – exakt pixelgenau, kein Nachrücken */
+.flip.is-flipped .card--front{transform:rotateY(-180deg)}
+.flip.is-flipped .card--back{transform:none}
+/* Rückseite dauerhaft auf eigener Ebene: sonst rastet sie nach der Drehung um Bruchteile eines Pixels ein (Chrome meldet Layout-Shift) */
+.card--back{will-change:transform}
+.card--back,.flip.is-flipped .card--front{visibility:hidden}
 .flip.is-flipped .card--back{visibility:visible}
-@media (prefers-reduced-motion:reduce){.card--front,.card--back{transition:none}}
-.card__top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.card__top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--c-line)}
 .card__today{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c-bordeaux)}
-.card__phone{color:var(--c-bordeaux);font-weight:700;font-size:15px}
-.card__hours{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.card__phone{color:var(--c-bordeaux);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.card__main{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+/* Heute geöffnet / geschlossen: beide Varianten im selben Rasterfeld – Platz für die größere reserviert, kein Sprung */
+.card__now,.card__note{display:grid;width:100%}
+.card__now>*,.card__note>*{grid-area:1/1}
+.card__open{align-self:center}
+.flip [data-now-open][hidden],.flip [data-now-closed][hidden]{display:block!important;visibility:hidden}
+/* Heutige Zeiten bündig: Beginn rechtsbündig · Strich · Ende · „Uhr“ */
+.card__hours{display:grid;grid-template-columns:auto auto auto auto;justify-content:start;align-items:baseline;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.card__hours .trange{display:contents}
+.card__hours .trange__a{text-align:right}
+.card__hours .trange__d{padding:0 .12em;color:var(--c-text-3);font-weight:500}
+.card__uhr{margin-left:.35em;font-size:15px;font-weight:600;letter-spacing:0;color:var(--c-text-3)}
+.card__hours--text{display:block;font-size:22px}
 .card__hours-note{margin-top:4px;font-size:15px;color:var(--c-text-3)}
-.popover{position:relative;margin-top:8px;font-size:15px}
-.popover summary{display:inline-flex;align-items:center;gap:6px;min-height:32px;color:var(--c-text-3);font-weight:600}
+/* Geschlossen: Bereitschaftsdienst und Notruf */
+.card__reopen{display:flex;flex-direction:column;font-size:13px;font-weight:600;line-height:1.25;color:var(--c-text-2)}
+.card__reopen b{min-height:1.25em;font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--c-ink)}
+.card__reopen.is-empty{visibility:hidden}
+.card__urgent{margin:2px 0 6px;font-size:13px;color:var(--c-text-2)}
+.card__sos-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;list-style:none;margin:0;padding:0}
+.sos{display:flex;flex-direction:column;justify-content:center;height:100%;min-height:60px;padding:6px 14px;border-radius:14px;background:var(--c-rose-1);color:var(--c-bordeaux);text-decoration:none;transition:background .2s,color .2s}
+.sos:hover{background:var(--c-bordeaux);color:#fff}
+.sos__num{order:-1;font-size:25px;font-weight:800;letter-spacing:-.01em;line-height:1.15;font-variant-numeric:tabular-nums}
+.sos__label{font-size:12.5px;font-weight:600;line-height:1.25}
+.sos--112{background:var(--c-bordeaux);color:#fff}
+.sos--112:hover{background:var(--c-bordeaux-dark)}
+.popover{position:relative;font-size:15px}
+.popover summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-block:-8px;color:var(--c-text-3);font-size:14px;font-weight:600;cursor:pointer;list-style:none}
+.popover summary::-webkit-details-marker{display:none}
+.popover summary:hover{color:var(--c-bordeaux)}
+.popover__chev{width:7px;height:7px;margin-top:-3px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .2s}
+.popover[open] .popover__chev{margin-top:3px;transform:rotate(-135deg)}
 .popover__panel{position:absolute;left:-12px;top:calc(100% + 6px);z-index:5;width:min(340px,calc(100vw - 48px));padding:14px 16px 12px;border-radius:16px;background:#fff;box-shadow:0 18px 40px -12px rgba(30,4,14,.35),0 0 0 1px var(--c-line)}
 .is-today{color:var(--c-bordeaux)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -236,6 +292,10 @@ section[id],[id="anfahrt"]{scroll-margin-top:90px}
 .htable thead th{padding:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--c-text-3);text-align:left}
 .htable th[scope=row]{padding:9px 14px 9px 0;text-align:left;font-weight:600;white-space:nowrap;color:var(--c-ink)}
 .htable td{padding:9px 12px 9px 0;color:var(--c-text-2);white-space:nowrap}
+/* Zeitspanne bündig: Beginn rechtsbündig in fester Breite – die Striche stehen untereinander */
+.trange{display:inline-grid;grid-template-columns:4.6ch auto auto}
+.trange__a{text-align:right}
+.trange__d{padding:0 .15em}
 .htable tbody tr{border-top:1px solid var(--c-line)}
 .htable td.is-closed{color:var(--c-text-3);font-style:italic}
 .htable tr.is-today th,.htable tr.is-today td:not(.is-closed){color:var(--c-bordeaux)}
@@ -261,33 +321,30 @@ section[id],[id="anfahrt"]{scroll-margin-top:90px}
 .openb.is-soon{background:#FDF0DC;color:#7A4700}.openb.is-soon .openb__dot{background:#C77A00}
 .openb.is-closed{background:var(--c-gray-100);color:var(--c-text-2)}.openb.is-closed .openb__dot{background:#8D9694}
 .openb.is-holiday{background:#FBEAEE;color:var(--c-bordeaux)}.openb.is-holiday .openb__dot{background:var(--c-bordeaux)}
-.openb--card{margin-bottom:10px}
 /* Platz schon vor dem Skript reservieren – der Status erscheint ohne Layout-Sprung (CLS) */
 .openb[hidden]{display:inline-flex!important;visibility:hidden}
 .contact__card .openb.is-closed{background:#fff}
 @media (prefers-reduced-motion:reduce){.openb.is-open .openb__dot::after{animation:none}}
 
-.card__services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.card__services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .card__services--1{grid-template-columns:1fr}
 .card__services--2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.svc{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;min-height:88px;padding:14px;border-radius:16px;background:var(--c-gray-50);color:var(--c-bordeaux);text-decoration:none;font:600 16px var(--font);transition:background .25s,color .25s}
+.svc{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;min-height:74px;padding:12px 14px;border-radius:16px;background:var(--c-gray-50);color:var(--c-bordeaux);text-decoration:none;font:600 16px var(--font);transition:background .25s,color .25s}
 .svc:hover{background:var(--c-bordeaux);color:#fff}
-.svc__icon{font-size:18px;line-height:1}
-@media (max-width:420px){.svc{font-size:14px;padding:12px 10px;min-height:80px}.card--front{padding:20px}}
+.svc__icon{display:flex;line-height:1}
+.svc__ext{position:absolute;top:12px;right:12px;display:flex;opacity:.65}
+@media (max-width:420px){.svc{font-size:14px;padding:11px 10px;min-height:70px}.card--front{padding:18px;gap:12px}.card--back{padding:18px 18px 20px}.card__hours{font-size:24px}.card__services{gap:8px}}
 .svc__label{line-height:1.2}
 .svc__sub{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
-.card__note{font-size:13px;color:var(--c-text-3)}
-.card__head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.card__title{font-size:22px;font-weight:700;letter-spacing:-.025em;outline:none}
-.card__panel{display:flex;flex-direction:column;gap:14px;flex:1}
-.card__text{font-size:16px;color:var(--c-text-2)}
-.card__small{font-size:13px;color:var(--c-text-3)}
+.card__note{padding-top:12px;border-top:1px solid var(--c-line);font-size:12.5px;line-height:1.45;color:var(--c-text-3)}
 .btn-back{min-height:40px;padding:0 14px;border-radius:999px;border:0;background:var(--c-gray-100);color:var(--c-ink);font:600 14px var(--font);cursor:pointer;flex:none}
 .btn-back:hover{background:var(--c-line)}
 .btn-wide{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;padding:0 22px;border-radius:999px;border:0;background:var(--c-bordeaux);color:#fff;text-decoration:none;font:700 16px var(--font);cursor:pointer}
 .btn-wide:hover{background:var(--c-bordeaux-dark);color:#fff}
 .btn-wide[aria-busy="true"]{opacity:.7;cursor:progress}
-.card__panel .btn-wide{margin-top:auto}
+
+
+/* Rückseite der Kontaktkarte (Überschrift, Termin-/Hinweis-Panel, Bewegung reduzieren): css/card-back.css – lädt site.js vor dem Umdrehen */
 
 /* ---------------------------------------------------------------- Formulare (öffentlich) */
 .opt{font-weight:400;color:var(--c-text-3)}

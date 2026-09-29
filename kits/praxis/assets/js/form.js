@@ -66,7 +66,7 @@ $$('form[data-form]').forEach(form => {
     // Clientseitige Prüfung: Fehlermeldung je Feld, Fokus auf erstes fehlerhaftes Feld
     let first = null;
     $$('[data-group]', form).forEach(g => setError(form, g.dataset.group, ''));
-    $$('input,select', form).forEach(i => {
+    $$('input,select,textarea', form).forEach(i => {
       if (!i.name || i.name[0] === '_' || i.closest('.hp')) return;
       const bad = !i.checkValidity();
       setError(form, i.name, bad ? (i.type === 'checkbox' ? L.confirm : L.fill) : '');

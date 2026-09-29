@@ -13,8 +13,9 @@ $today = !empty($noToday) ? -1 : (int) date('w');   // Offline-Seite: kein „he
   <?php foreach ($hours as $h): $isToday = $h['dow'] === $today; ?>
     <tr<?= $isToday ? ' class="is-today"' : '' ?>>
       <th scope="row"><?= e($h['day']) ?><?= $isToday ? '<span class="sr-only"> ' . e(lt('(heute)')) . '</span>' : '' ?></th>
-      <td<?= $h['am'] ? '' : ' class="is-closed"' ?>><?= e($h['am'] ?? '–') ?></td>
-      <td<?= $h['pm'] ? '' : ' class="is-closed"' ?>><?= e($h['pm'] ?? ($h['am'] ? lt('geschlossen') : '–')) ?></td>
+      <?php /* Zeiten bündig (praxis_range_html): Beginn rechtsbündig in fester Breite – die Striche stehen untereinander */ ?>
+      <td<?= $h['am'] ? '' : ' class="is-closed"' ?>><?= $h['am'] ? praxis_ranges_html($h['am_seg']) : '–' ?></td>
+      <td<?= $h['pm'] ? '' : ' class="is-closed"' ?>><?= $h['pm'] ? praxis_ranges_html($h['pm_seg']) : e($h['am'] ? lt('geschlossen') : '–') ?></td>
     </tr>
     <?php if ($h['extra'] !== '' && ($h['am'] || $h['pm'])): ?>
     <tr class="htable__note"><td></td><td colspan="2"><?= e($h['extra']) ?></td></tr>

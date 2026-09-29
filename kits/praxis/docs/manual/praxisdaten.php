@@ -34,6 +34,8 @@
     <tr><td><span class="tag tag--danger">● Praxis geschlossen bis 25.10.</span></td><td>im eingetragenen Zeitraum „Praxis geschlossen“ (<?= e($settingsTitle) ?> → Hinweise)</td></tr>
   </table>
   <p>Das Badge lässt sich unter <?= e($settingsTitle) ?> → Hinweise ausschalten. An Feiertagen bitte den Zeitraum „Praxis geschlossen“ nutzen.</p>
+  <p><b>Geschlossen:</b> Statt der heutigen Zeiten zeigt die Kontaktkarte dann „Wir öffnen wieder um 15:30 Uhr“ (bzw. „morgen um …“, „am Montag um …“) und darunter groß „In dringenden Notfällen“: <b>116 117</b> (ärztlicher Bereitschaftsdienst) und <b>112</b> (Notruf) – beide Nummern zum Antippen. Der Chip sagt dann nur „Geschlossen“. Sätze mit 116 117 oder 112 in der <b>Notfall – Kurzform</b> (Hinweiszeile unten auf der Karte) blendet die Karte in dieser Zeit aus, damit nichts doppelt steht; der Rest (z. B. „Die Praxis ist nicht barrierefrei erreichbar“) bleibt. Überzählige Trennzeichen wie „! ·.“ räumt die Karte selbst auf.</p>
+  <p><b>Termin (Doctolib) und externe Dienste:</b> Die Kachel dreht die Karte zu einem kurzen Hinweis „Sie verlassen unsere Website und wechseln zu Doctolib (doctolib.de) …“ mit <b>Weiter zu Doctolib</b> und <b>Abbrechen</b>.</p>
 
   <h3>Hero-Themen (Kopfbereich)</h3>
   <ul>

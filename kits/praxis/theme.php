@@ -177,9 +177,11 @@ return [
             'external_url' => 'rezept_url', 'fields' => 'formfelder_rezept',
             'success' => 'Vielen Dank – Ihre Anfrage ist eingegangen.',
             'table' => ['handle' => 'rezeptanfragen', 'name' => 'Rezeptanfragen', 'singular' => 'Rezeptanfrage', 'icon' => 'prescription'],
-            // Mehrere Medikamente je Anfrage: das Textfeld „medikament“ wird zur wiederholbaren Gruppe „Medikamente“
-            // (neue Installationen direkt nach dem Anlegen, bestehende einmalig über Inbox::migrate – Merker sys.inbox_field_updates).
-            // Alte Anfragen behalten ihren Einzelwert und erscheinen weiter unter „Medikament und Stärke“.
+            // Feld-Änderungen (neue Installationen direkt nach dem Anlegen, bestehende einmalig über Inbox::migrate – Merker
+            // sys.inbox_field_updates; nacheinander angewendet). Alte Anfragen behalten ihre Werte im verschlüsselten payload und
+            // erscheinen unter der gespeicherten Beschriftung (Einzelwert „Medikament und Stärke“ bzw. Tabelle „Medikamente“).
+            //  1. 2026-09: Textfeld „medikament“ → wiederholbare Gruppe „Medikamente“ (Medikament, Stärke, Packungsgröße)
+            //  2. 2026-09-29: Gruppe → ein mehrzeiliges Textfeld „Medikamente“ (Wunsch der Praxis: einfacher auszufüllen)
             'field_updates' => [[
                 'id' => 'praxis-rezept-medikamente-2026-09',
                 'replace' => 'medikament',
@@ -194,6 +196,13 @@ return [
                             'options' => ['n1' => 'N1', 'n2' => 'N2', 'n3' => 'N3', 'weiss_nicht' => 'weiß nicht'],
                             'options_i18n' => ['en' => ['weiss_nicht' => "don't know"]]],
                     ],
+                ],
+            ], [
+                'id' => 'praxis-rezept-medikamente-text-2026-09-29',
+                'replace' => 'medikamente',
+                'field' => [
+                    'name' => 'medikamente_text', 'label' => 'Medikamente', 'labels' => ['en' => 'Medications'], 'type' => 'textarea', 'required' => 1, 'width' => '',
+                    'help' => 'Bitte Name, Stärke und Packungsgröße je Medikament – eine Zeile pro Medikament.',
                 ],
             ]],
         ],

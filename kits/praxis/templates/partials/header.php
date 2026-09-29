@@ -68,14 +68,6 @@ $home = url('/');
      Menü-Schaltfläche zurück. site.js: Fallback für ältere Browser, aria-expanded, Schließen beim Klick auf einen Link.
      Aussehen: css/mnav.css – lädt site.js erst beim ersten Öffnen (data-css, vorgeladen beim Zeigen/Fokussieren der
      Schaltfläche); ohne JavaScript bindet layout.php sie per <noscript> ein. */
-  $ico = fn(string $d) => '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' . $d . '</svg>';
-  $icons = [
-      'tel' => '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
-      'termin' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-      'rezept' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 11v6M9 14h6"/>',
-      'ueberweisung' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M13 12l3 3-3 3"/>',
-      'anfahrt' => '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
-  ];
   $acc = function (array $items, int $lvl = 0) use (&$acc): string {
       $h = '';
       foreach ($items as $m) {
@@ -111,11 +103,11 @@ $home = url('/');
       </ul>
       <h2 class="mnav__h"><?= e(lt('Schnellzugriff')) ?></h2>
       <div class="mnav__quick">
-        <a href="<?= e(praxis_phone_href()) ?>"><?= $ico($icons['tel']) ?><?= e(lt('Anrufen')) ?></a>
+        <a href="<?= e(praxis_phone_href()) ?>"><?= praxis_icon('tel') ?><?= e(lt('Anrufen')) ?></a>
         <?php foreach ($services as $key => $s): ?>
-        <a href="<?= e($s['href']) ?>" data-flip="<?= e($key) ?>"<?= ext_attrs($s['href']) ?>><?= $ico($icons[$key] ?? $icons['termin']) ?><?= e($s['label']) ?></a>
+        <a href="<?= e($s['href']) ?>" data-flip="<?= e($key) ?>"<?= ext_attrs($s['href']) ?>><?= praxis_icon($key) ?><?= e($s['label']) ?></a>
         <?php endforeach; ?>
-        <a href="<?= e(link_href('#anfahrt')) ?>"><?= $ico($icons['anfahrt']) ?><?= e(lt('Anfahrt')) ?></a>
+        <a href="<?= e(link_href('#anfahrt')) ?>"><?= praxis_icon('anfahrt') ?><?= e(lt('Anfahrt')) ?></a>
       </div>
       <div class="mnav__contact">
         <h2 class="mnav__h"><?= e(lt('Kontakt')) ?></h2>
