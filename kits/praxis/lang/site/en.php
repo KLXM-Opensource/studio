@@ -183,4 +183,7 @@ return [
     'Abbrechen' => 'Cancel',
     'Akute Beschwerden bitte telefonisch.' => 'For acute symptoms, please phone us.',
     'Bitte Name, Stärke und Packungsgröße je Medikament – eine Zeile pro Medikament.' => 'Please give name, strength and pack size – one line per medication.',
+    // Karte (Core\Maps): Route planen
+    'mit {name}' => 'with {name}',
+    'Andere Karten-App' => 'Other map app',
 ];

@@ -185,8 +185,9 @@ final class Maps
         $zoom = max(3, min(18, (int) ($o['zoom'] ?? 15)));
         $height = isset(self::HEIGHTS[$o['height'] ?? '']) ? $o['height'] : 'm';
         $route = $o['route'] ?? true;
-        $routeUrl = is_string($route) && $route !== '' ? $route
-            : 'https://www.openstreetmap.org/directions?to=' . rawurlencode($p[0] . ',' . $p[1]) . '#map=' . $zoom . '/' . $p[0] . '/' . $p[1];
+        $routes = self::routeUrls($p, $zoom);
+        $custom = is_string($route) && $route !== '';                 // eigener Routenplaner-Link (Einstellung) hat Vorrang
+        $routeUrl = $custom ? $route : $routes['google'];
         $t = self::texts();
         $click = (bool) ($o['click'] ?? self::clickToLoad());
 
@@ -215,7 +216,7 @@ final class Maps
                 : '<button type="button" class="cms-map__load" data-cms-map-load hidden>' . e($t['load']) . '</button></div>')
             . '<figcaption class="cms-map__cap"><span>' . ($label !== '' ? '<strong>' . e($label) . '</strong>' : '')
             . ($address !== '' ? ($label !== '' ? ' · ' : '') . e($address) : '') . '</span>'
-            . ($route ? '<a class="cms-map__route" href="' . e($routeUrl) . '" target="_blank" rel="noopener">' . e($t['route']) . '<span class="sr-only"> ' . e($t['newtab']) . '</span></a>' : '')
+            . ($route ? self::routeLinks($routeUrl, $custom ? [] : $routes, $t) : '')
             . '</figcaption></figure>';
         if (!self::$assets) {
             self::$assets = true;
@@ -223,6 +224,43 @@ final class Maps
                 . ($kitLoader ? '' : '<script type="module" src="' . e(asset('js/map.mjs')) . '"></script>');
         }
         return $h;
+    }
+
+    /**
+     * Routen-Links zu den Koordinaten (nur Ziel, keine weiteren Daten): Google Maps (Browser; auf Android öffnet dieselbe Adresse
+     * die App), Apple Karten, OpenStreetMap.
+     * @return array{google: string, apple: string, osm: string}
+     */
+    public static function routeUrls(array $p, int $zoom = 15): array
+    {
+        $ll = $p[0] . ',' . $p[1];
+        return [
+            'google' => 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($ll),
+            'apple' => 'https://maps.apple.com/?daddr=' . rawurlencode($ll) . '&dirflg=d',
+            'osm' => 'https://www.openstreetmap.org/directions?to=' . rawurlencode($ll) . '#map=' . $zoom . '/' . $p[0] . '/' . $p[1],
+        ];
+    }
+
+    /**
+     * „Route planen“: Standard Google Maps; auf iPhone/iPad/Mac tauscht das Kit-Skript (a[data-route] → data-apple) auf Apple Karten.
+     * Aufklapper „Andere Karten-App“ (<details>, auch ohne JavaScript bedienbar). Kein Bestätigungsdialog: die Navigation ist
+     * ausdrücklich gewünscht, Ziel-Dienst und „öffnet in neuem Tab“ stehen im Link (übermittelt wird nur das Ziel).
+     */
+    private static function routeLinks(string $href, array $routes, array $t): string
+    {
+        $sr = '<span class="sr-only"> ' . e($t['newtab']) . '</span>';
+        if (!$routes) {
+            return '<a class="cms-map__route" href="' . e($href) . '" target="_blank" rel="noopener">' . e($t['route']) . $sr . '</a>';
+        }
+        $names = ['apple' => 'Apple Karten', 'google' => 'Google Maps', 'osm' => 'OpenStreetMap'];
+        $h = '<span class="cms-map__routes"><a class="cms-map__route" href="' . e($href) . '" target="_blank" rel="noopener" data-route'
+            . ' data-apple="' . e($routes['apple']) . '">' . e($t['route']) . ' <span class="cms-map__via" data-route-via data-apple-name="' . e($names['apple']) . '">'
+            . e(str_replace('{name}', $names['google'], $t['via'])) . '</span>' . $sr . '</a>'
+            . '<details class="cms-map__apps"><summary>' . e($t['apps']) . '</summary><ul>';
+        foreach ($names as $k => $n) {
+            $h .= '<li><a href="' . e($routes[$k]) . '" target="_blank" rel="noopener">' . e($n) . $sr . '</a></li>';
+        }
+        return $h . '</ul></details></span>';
     }
 
     /** Zwei-Klick für Karten: Einstellung sys.map_click, sonst Vorgabe des Kits (theme.php → project → map → click) */
@@ -236,6 +274,7 @@ final class Maps
     {
         return [
             'region' => lt('Karte: {label}'), 'load' => lt('Karte anzeigen'), 'route' => lt('Route planen'), 'newtab' => lt('(öffnet in neuem Tab)'),
+            'via' => lt('mit {name}'), 'apps' => lt('Andere Karten-App'),
             'note' => lt('Die Karte lädt erst nach Klick. Die Kartendaten (OpenStreetMap) holt unser Server – Ihr Browser verbindet sich dabei nicht mit Dritten.'),
             'privacy' => lt('Datenschutzerklärung'),
             'maplibre' => [

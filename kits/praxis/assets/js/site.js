@@ -261,6 +261,14 @@ if (spy.length) {
 let suggestJs;
 d.addEventListener('focusin', e => { const s = e.target.dataset?.suggestJs; s && !suggestJs && (suggestJs = d.head.append(Object.assign(d.createElement('script'), { src: s })) || 1); });
 
+// ------------------------------------------------------------ „Route planen“ (Core\Maps): iPhone/iPad/Mac → Apple Karten, sonst Google Maps
+// (auf Android öffnet dieselbe Adresse die App). Ohne JavaScript: Google Maps + Aufklapper „Andere Karten-App“.
+if (/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)) $$('a[data-route]').forEach(a => {
+  a.href = a.dataset.apple;
+  const v = $('[data-route-via]', a);
+  if (v) v.textContent = v.textContent.replace('Google Maps', v.dataset.appleName);
+});
+
 // ------------------------------------------------------------ Karte erst nach Klick (Core\Maps, Zwei-Klick mit Kit-Lader)
 d.addEventListener('click', e => {
   const b = e.target.closest('[data-cms-map-load]'), m = b?.closest('[data-cms-map-js]');

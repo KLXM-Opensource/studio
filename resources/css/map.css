@@ -24,6 +24,12 @@
 .cms-map__cap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;font-size:.95em}
 .cms-map__route{font-weight:700;color:inherit;text-underline-offset:3px}
 .cms-map__route::after{content:" ↗"}
+.cms-map__routes{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.cms-map__via{font-weight:400;opacity:.8}
+.cms-map__apps{position:relative}
+.cms-map__apps summary{cursor:pointer;min-height:44px;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:3px}
+.cms-map__apps ul{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:4px 14px}
+.cms-map__apps a{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-underline-offset:3px}
 .cms-map .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cms-map--empty{padding:24px;border:2px dashed var(--_line,#DCDCE0);border-radius:16px;text-align:center}
 .cms-map .maplibregl-ctrl-attrib{font-size:11px}

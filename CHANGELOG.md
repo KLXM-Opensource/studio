@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Karten: „Route planen“ je Plattform
+- `Core\Maps`: „Route planen“ führt standardmäßig zu Google Maps (auf Android öffnet dieselbe Adresse die App); auf
+  iPhone/iPad/Mac tauscht das Kit-Skript (`a[data-route]` → `data-apple`; Kit „praxis“: `site.js`) auf Apple Karten, der Link nennt den Dienst
+  („mit Apple Karten“). Aufklapper „Andere Karten-App“ (Apple Karten, Google Maps, OpenStreetMap) – `<details>`, auch ohne
+  JavaScript. Ziel = Koordinaten des Standorts (`Maps::routeUrls()`); ein eigener Routenplaner-Link aus den Einstellungen hat
+  weiter Vorrang. Bewusst ohne Bestätigungsdialog: Navigation ist ausdrücklich gewünscht, übermittelt wird nur das Ziel.
+
 ### Kit „praxis“: Kontaktkarte überarbeitet (Öffnungszeiten, Notfallnummern, externe Dienste, Drehung)
 - Zeiten **bündig** (Beginn rechtsbündig, Strich, Ende; tabellarische Ziffern) in der Karte und in „Alle Öffnungszeiten“
   (`praxis_range_html()`); Vorderseite kompakter, eigene Linien-Symbole je Dienst (`praxis_icon()`: Kalender, Tablette,
