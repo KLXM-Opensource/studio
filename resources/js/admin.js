@@ -455,16 +455,19 @@ if (pt) {
   };
   const open = n => { location.href = n.dataset.url + '?edit=1'; };
 
+  // Nur Klicks auf der Zeile selbst: der Bereich der Unterseiten (ul[role=group]) gehört zum Eltern-Knoten – ein Klick in den
+  // Abstand zwischen zwei Zeilen (z. B. knapp neben „⋯“) hätte sonst die Mutterseite gewählt und dorthin gescrollt
+  const nodeAt = e => e.target.closest('.pt-row')?.closest('.pt-node') || null;
   tree.addEventListener('click', e => {
-    const n = e.target.closest('.pt-node'); if (!n) return;
+    const n = nodeAt(e); if (!n) return;
     if (e.target.closest('[data-toggle]')) { setExp(n, n.getAttribute('aria-expanded') !== 'true'); return; }
     if (e.target.closest('[data-menu]')) return;
     if (e.target.closest('[data-more]')) { select(n); const r = e.target.getBoundingClientRect(); menu(n, r.left - 160, r.bottom + 4); return; }
     if (e.target.closest('.pt-title')) { e.preventDefault(); }
     select(n); tree.focus();
   });
-  tree.addEventListener('dblclick', e => { const n = e.target.closest('.pt-node'); if (n && !e.target.closest('[data-menu],[data-toggle],[data-more]')) open(n); });
-  tree.addEventListener('contextmenu', e => { const n = e.target.closest('.pt-node'); if (!n) return; e.preventDefault(); select(n); menu(n, e.clientX, e.clientY); });
+  tree.addEventListener('dblclick', e => { const n = nodeAt(e); if (n && !e.target.closest('[data-menu],[data-toggle],[data-more]')) open(n); });
+  tree.addEventListener('contextmenu', e => { const n = nodeAt(e); if (!n) return; e.preventDefault(); select(n); menu(n, e.clientX, e.clientY); });
   tree.addEventListener('keydown', e => {
     const list = nodes(), i = list.indexOf(active);
     if (e.key === 'ArrowDown') { e.preventDefault(); select(list[Math.min(list.length - 1, i + 1)] || list[0]); }
