@@ -80,7 +80,7 @@ $anyDiscard = (bool) array_filter($items, fn($i) => $i['can_discard']);
     <tbody>
     <?php foreach ($items as $n => $i): $aid = DraftController::anchor($i['key']); $sel = $i['can_publish'] || $i['can_discard']; ?>
       <tr class="rv-row dr-row<?= $i['stale'] ? ' is-stale' : '' ?>" id="<?= e($aid) ?>">
-        <td class="rv-table__sel"><?php if ($sel): ?><input type="checkbox" name="items[]" value="<?= e($i['key']) ?>" id="dr-sel-<?= $n ?>" aria-labelledby="dr-t-<?= $n ?>" data-rv-item><?php endif; ?></td>
+        <td class="rv-table__sel"><?php if ($sel): ?><input type="checkbox" name="items[]" value="<?= e($i['key']) ?>" id="dr-sel-<?= $n ?>" aria-labelledby="dr-t-<?= $n ?>" data-rv-item<?= ($i['state'] ?? '') === 'offline' ? ' data-rv-noall' : '' ?>><?php endif; ?></td>
         <td class="dr-what">
           <span class="rv-row__type"><?= e($typeLabel($i)) ?></span><?php if ($multi): ?> <span class="dr-lang" title="<?= e(Lang::all()[$i['lang']] ?? $i['lang']) ?>"><?= e(strtoupper($i['lang'])) ?></span><?php endif; ?>
           <a class="rv-row__title" id="dr-t-<?= $n ?>" href="<?= e(url($showUrl($i))) ?>"><?= e($i['title'] !== '' ? $i['title'] : '–') ?></a>
