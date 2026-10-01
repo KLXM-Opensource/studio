@@ -398,7 +398,12 @@ function cms_chat_launcher(?array $page = null, bool $editing = false): string
  */
 function footer_links(): array
 {
-    return \Core\Extensions::footerLinks();
+    $links = \Core\Extensions::footerLinks();
+    // Glossar (Core\Glossary): Übersicht verlinken, sobald die Funktion an und die Seite veröffentlicht ist
+    if (\Core\Features::on('glossary', false) && ($u = \Core\Glossary\Glossary::overviewUrl())) {
+        array_unshift($links, ['label' => lt('Glossar'), 'href' => $u]);
+    }
+    return $links;
 }
 
 /** Adresse der Datenschutzerklärung (Core\Legal) – für Kern-Fragmente und Kits statt kit-eigener Helfer */
