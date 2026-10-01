@@ -388,7 +388,10 @@ final class Pages
     /** Offene Platzhalter „[bitte ergänzen: …]“ (KI-Assistent, Core\AI) im JSON bzw. Text einer Seite */
     public static function openMarkers(?string $json): array
     {
-        $s = html_entity_decode(strip_tags(str_replace(['\\u00e4', '\\u00c4'], ['ä', 'Ä'], (string) $json)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $s = str_replace(['\\u00e4', '\\u00c4'], ['ä', 'Ä'], (string) $json);
+        // Beispiele in Code (<code>…</code>, `Backticks`) sind keine offenen Platzhalter – z. B. in Anleitungen
+        $s = preg_replace(['~<code\b[^>]*>.*?<\\\\?/code>~is', '~`[^`\r\n]*`~u'], '', $s) ?? $s;
+        $s = html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         preg_match_all('~\[\s*bitte erg(?:ä|ae)nzen[^\]]{0,160}\]~iu', $s, $m);
         return array_values(array_unique($m[0]));
     }
