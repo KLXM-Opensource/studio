@@ -30,6 +30,21 @@ $manual = $sort === 'sort' && $q === '' && $status === 'all';
 $ownerPicks = \Core\Data\Tables::isShared($t) && !\Core\Data\Shared::isOwner($t) ? \Core\Data\Shared::picks($t, array_column($rows, 'id'), $t['shared']['owner']) : [];
 // Externe Quellen (Core\Sources): Einträge aus einem Feed/einer API – nur lesbar, Badge mit Name der Quelle
 $extOrigin = \Core\Sources\Sources::originMap($t, array_column($rows, 'id'));
+// Status je Zeile: Online | Offline (war schon online) | Entwurf (nie veröffentlicht); mit data.publish ein Knopf (admin.js → Einträge)
+$canPub = $t['settings']['workflow'] && can('data.publish', $t['handle']) && !Tables::isInbox($t);
+$statusCell = function (array $e) use ($t, $canPub, $extOrigin): string {
+    $st = $e['status'] === 'published' ? 'online' : (!empty($e['published_at']) ? 'offline' : 'draft');
+    $label = ['online' => __('Online'), 'offline' => __('Offline'), 'draft' => __('Entwurf')][$st];
+    $cls = 'dt-status dt-status--' . ['online' => 'published', 'offline' => 'offline', 'draft' => 'draft'][$st];
+    // Nur eigene Einträge: nicht aus externen Quellen (nur lesbar), bei geteilten Tabellen nicht von anderen Websites
+    if (!$canPub || isset($extOrigin[$e['id']]) || (Tables::isShared($t) && \Core\Data\Shared::isForeign($t, $e))) {
+        return '<span class="' . $cls . '">' . e($label) . '</span>';
+    }
+    $title = Entries::title($t, $e);
+    $act = $st === 'online' ? __('Offline nehmen') : ($st === 'offline' ? __('Online stellen') : __('Veröffentlichen'));
+    return '<button type="button" class="pt-stbtn ' . $cls . '" data-status-toggle data-state="' . $st . '" data-title="' . e($title) . '"'
+        . ' aria-label="' . e(__('„{title}“: {status} – {action}', ['title' => $title, 'status' => $label, 'action' => $act])) . '" title="' . e($act) . '">' . e($label) . '</button>';
+};
 ?>
 <?php // Ansicht (Liste/Kalender), Felder und „Detailseite gestalten“ stehen in der Daten-Navigation (data/_nav.php) ?>
 <header class="adm-head dt-head">
@@ -44,7 +59,7 @@ $extOrigin = \Core\Sources\Sources::originMap($t, array_column($rows, 'id'));
     <?php if ($multi): ?><nav class="fx-seg dt-seg" aria-label="Sprache"><?php foreach (\Core\Lang::all() as $code => $label): ?><a href="<?= e(url($base) . '?lang=' . $code) ?>"<?= $code === $lang ? ' aria-current="true"' : '' ?>><?= e($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
     <nav class="fx-seg dt-seg" aria-label="Status">
       <?php foreach (['all' => 'Alle', 'published' => 'Online', 'draft' => 'Entwurf'] as $k => $l): if ($k !== 'all' && !$t['settings']['workflow']) continue; ?>
-      <a href="<?= e($qs(['status' => $k === 'all' ? '' : $k, 'seite' => null])) ?>"<?= $status === $k ? ' aria-current="true"' : '' ?>><?= $l ?> <small><?= $counts[$k] ?></small></a>
+      <a href="<?= e($qs(['status' => $k === 'all' ? '' : $k, 'seite' => null])) ?>"<?= $status === $k ? ' aria-current="true"' : '' ?>><?= $l ?> <small data-count="<?= $k ?>"><?= $counts[$k] ?></small></a>
       <?php endforeach; ?>
     </nav>
     <form class="fx-search dt-search" method="get" action="<?= e(url($base)) ?>" role="search">
@@ -91,7 +106,7 @@ $extOrigin = \Core\Sources\Sources::originMap($t, array_column($rows, 'id'));
           <?php if ($url): ?><a class="dt-view" href="<?= e($url) ?>" target="_blank" rel="noopener" aria-label="Auf der Website ansehen">↗</a><?php endif; ?>
         </td>
         <?php foreach ($cols as $c): ?><td><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
-        <?php if ($t['settings']['workflow']): ?><td><span class="dt-status dt-status--<?= e($e['status']) ?>"><?= $e['status'] === 'published' ? 'Online' : 'Entwurf' ?></span></td><?php endif; ?>
+        <?php if ($t['settings']['workflow']): ?><td><?= $statusCell($e) ?></td><?php endif; ?>
         <td class="adm-muted"><?= e(date('d.m.Y', strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
       </tr>
     <?php endforeach; ?>
@@ -99,6 +114,7 @@ $extOrigin = \Core\Sources\Sources::originMap($t, array_column($rows, 'id'));
   </table>
   <footer class="dt-foot">
     <span><?= $total ?> <?= $total === 1 ? 'Eintrag' : 'Einträge' ?><?= $manual ? ' · Reihenfolge per Ziehen ändern' : '' ?></span>
+    <span data-entries-msg aria-live="polite"></span>
     <?php if ($pages > 1): ?><span class="dt-pager">
       <?php if ($page > 1): ?><a href="<?= e($qs(['seite' => $page - 1])) ?>">← Zurück</a><?php endif; ?>
       Seite <?= $page ?> / <?= $pages ?>

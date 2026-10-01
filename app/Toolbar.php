@@ -86,11 +86,12 @@ final class Toolbar
         if ($live) {
             $status = 'live';
         } elseif ($kind === 'entry') {
-            $status = $b['entryDraft'] ? 'draft' : 'published';
+            // offline = war schon online (published_at gesetzt), Status „Entwurf“
+            $status = $b['entryDraft'] ? (!empty($e['published_at']) ? 'offline' : 'draft') : 'published';
         } elseif (!$hasPage) {
             $status = '';
         } elseif (($page['status'] ?? '') !== 'published') {
-            $status = 'draft';
+            $status = ($page['content_published'] ?? null) !== null ? 'offline' : 'draft';
         } else {
             $status = $dirty ? 'changed' : 'published';
         }
@@ -115,6 +116,19 @@ final class Toolbar
             'kind' => $kind, 'mode' => $b['mode'], 'status' => $status, 'viewUrl' => $viewUrl,
             'hasPublished' => $b['canDiscard'], 'texts' => self::texts($kind),
         ];
+        // Status-Chip: „Offline nehmen“ / „Online stellen“ ohne Neuladen (_bar.js). Seiten: Recht pages.publish, nicht die
+        // Startseite; Einträge: Freigabe-Ablauf + data.publish, nur eigene (nicht von einer anderen Website geteilte) Einträge.
+        $b['toggle'] = null;
+        if (!$live && $kind === 'page' && $hasPage && $b['canPublish'] && empty($page['is_home'])) {
+            $b['toggle'] = ['off' => url('/admin/pages/' . (int) $page['id'] . '/offline'), 'on' => url('/admin/pages/' . (int) $page['id'] . '/publish'),
+                'pending' => $dirty];
+        } elseif (!$live && $kind === 'entry' && $b['entryPub'] && !$b['foreign']) {
+            $bulk = url('/admin/data/' . $t['handle'] . '/bulk');
+            $b['toggle'] = ['off' => $bulk, 'on' => $bulk, 'id' => (int) $e['id'], 'pending' => false];
+        }
+        if ($b['toggle']) {
+            $b['config']['toggle'] = $b['toggle'] + ['csrf' => Csrf::token()];
+        }
         // Erweiterungen (Extension::toolbar): Einträge im Menü „⋯“, Skripte nach der Leiste, Zusatz im Veröffentlichen-Dialog
         $b['ext'] = Extensions::toolbar($b);
         if ($b['ext']['notes']) {
@@ -137,6 +151,9 @@ final class Toolbar
                     : __('Nur für die angemeldete Redaktion sichtbar. Besucher sehen diese Seite erst nach dem Veröffentlichen.')],
                 'changed' => [__('Geändert – nicht veröffentlicht'),
                     __('Es gibt einen gespeicherten Entwurf mit Änderungen. Besucher sehen noch die zuletzt veröffentlichte Fassung – „Veröffentlichen“ bringt die Änderungen online.')],
+                'offline' => [__('Offline'), $entry
+                    ? __('War schon online und ist derzeit offline: Besucher sehen diesen Eintrag nicht – nur die angemeldete Redaktion.')
+                    : __('War schon online und ist derzeit offline: Besucher erhalten „Nicht gefunden“, Menü, Sitemap und Suche lassen die Seite aus. Nur die angemeldete Redaktion sieht sie.')],
                 'unsaved' => [__('Ungespeichert'),
                     __('Es gibt Änderungen, die noch nicht gespeichert sind. „Speichern“ (⌘S / Strg+S) sichert sie, „Abbrechen“ verwirft sie.')],
                 'live' => [__('Live-Fassung'), __('Sie sehen die veröffentlichte Fassung – so, wie Besucher die Seite gerade sehen.')],
@@ -160,6 +177,16 @@ final class Toolbar
             'dropTitle' => __('Entwurf verwerfen?'),
             'dropBody' => __('Alle Änderungen seit der letzten Veröffentlichung werden verworfen. Der bisherige Entwurf wird als Version gesichert.'),
             'dropOk' => __('Entwurf verwerfen'),
+            // Status-Chip: online/offline umschalten
+            'goOffline' => __('Offline nehmen'), 'goOnline' => __('Online stellen'),
+            'offlineTitle' => $entry ? __('Eintrag offline nehmen?') : __('Seite offline nehmen?'),
+            'offlineBody' => $entry
+                ? __('Besucher sehen ihn dann nicht mehr; er verschwindet aus Listen, Sitemap und Suche. Der Inhalt bleibt erhalten – „Online stellen“ bringt ihn zurück.')
+                : __('Besucher sehen sie dann nicht mehr (Seite „Nicht gefunden“); sie verschwindet aus Menü, Sitemap und Suche, Weiterleitungen und Links auf diese Seite laufen ins Leere. Die veröffentlichte Fassung bleibt erhalten – „Online stellen“ bringt sie zurück.'),
+            'offlineOk' => __('Offline nehmen'),
+            'offlineDone' => $entry ? __('Eintrag ist offline.') : __('Seite ist offline.'),
+            'onlineDone' => $entry ? __('Eintrag ist online.') : __('Seite ist online.'),
+            'pendingHint' => __('Es gibt unveröffentlichte Änderungen – „Veröffentlichen“ stellt die Seite mit diesen Änderungen wieder online.'),
         ];
     }
 }

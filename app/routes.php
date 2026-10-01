@@ -111,6 +111,7 @@ return function (Router $r): void {
     $r->post('/admin/pages/{id}', [Admin\PageController::class, 'update']);
     $r->post('/admin/pages/{id}/delete', [Admin\PageController::class, 'delete']);
     $r->post('/admin/pages/{id}/publish', [Admin\PageController::class, 'publish']);
+    $r->post('/admin/pages/{id}/offline', [Admin\PageController::class, 'offline']);   // offline nehmen (Status Entwurf, veröffentlichte Fassung bleibt)
     $r->post('/admin/pages/{id}/discard', [Admin\PageController::class, 'discard']);
     $r->post('/admin/pages/{id}/restore/{rev}', [Admin\PageController::class, 'restore']);
     $r->post('/admin/pages/{id}/move', [Admin\PageController::class, 'move']);

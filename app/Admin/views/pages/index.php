@@ -9,7 +9,22 @@ use Core\Pages;
 $multi = Lang::multi();
 
 $count = 0;
-$row = function (array $n) use (&$row, &$count, $multi): string {
+$canPub = can('pages.publish');
+// Status: Online | Offline (war schon online) | Entwurf (nie veröffentlicht). Mit pages.publish ein Knopf zum Umschalten
+// (admin.js → Seitenbaum: Offline nehmen mit Rückfrage, Online stellen über Pages::publish samt Platzhalter-Sperre)
+$statusCell = function (array $p) use ($canPub): string {
+    $st = Pages::state($p);
+    $label = ['online' => __('Online'), 'offline' => __('Offline'), 'draft' => __('Entwurf')][$st];
+    $cls = 'dt-status dt-status--' . ['online' => 'published', 'offline' => 'offline', 'draft' => 'draft'][$st];
+    if (!$canPub || $p['is_home']) {
+        return '<span class="' . $cls . '">' . e($label) . '</span>';
+    }
+    $act = $st === 'online' ? __('Offline nehmen') : ($st === 'offline' ? __('Online stellen') : __('Veröffentlichen'));
+    return '<button type="button" class="pt-stbtn ' . $cls . '" data-status-toggle data-state="' . $st . '"'
+        . ' aria-label="' . e(__('„{title}“: {status} – {action}', ['title' => $p['title'], 'status' => $label, 'action' => $act])) . '" title="' . e($act) . '">'
+        . e($label) . '</button>';
+};
+$row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
     $p = $n['page'];
     $count++;
     $url = Pages::url($p);
@@ -20,7 +35,7 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
     $ext = \Core\Extensions::pageList($p);   // Erweiterungen (Extension::pageList): Hinweise + Kontextmenü
     $h = '<li class="pt-node" role="treeitem" id="pt-' . $id . '" data-id="' . $id . '" data-parent="' . (int) ($p['parent_id'] ?? 0) . '"'
         . ' data-url="' . e($url) . '" data-title="' . e($p['title']) . '" data-home="' . (int) $p['is_home'] . '" data-dirty="' . (int) $dirty . '"'
-        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-langs="' . e(implode(',', $trans)) . '" aria-level="' . ($n['depth'] + 1) . '"'
+        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-state="' . Pages::state($p) . '" data-langs="' . e(implode(',', $trans)) . '" aria-level="' . ($n['depth'] + 1) . '"'
         . ($ext['actions'] ? ' data-ext-actions="' . json_attr(array_map(fn($a) => [$a['label'], url($a['href'])], $ext['actions'])) . '"' : '')
         . ($kids ? ' aria-expanded="true"' : '') . ' aria-selected="false">'
         . '<div class="pt-row" draggable="' . ($p['is_home'] ? 'false' : 'true') . '">'
@@ -31,7 +46,7 @@ $row = function (array $n) use (&$row, &$count, $multi): string {
         . ($multi ? '<span class="pt-langs">' . implode('', array_map(fn($l) => '<span class="pt-lang' . (in_array($l, $trans, true) ? ' is-on' : '') . '" title="' . e(Lang::all()[$l]) . '">' . e(strtoupper($l)) . '</span>', array_keys(Lang::all()))) . '</span>' : '')
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
-        . '<span class="pt-status"><span class="dt-status dt-status--' . ($p['status'] === 'published' ? 'published' : 'draft') . '">' . ($p['status'] === 'published' ? 'Online' : 'Entwurf') . '</span>'
+        . '<span class="pt-status">' . $statusCell($p)
         // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
         . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
         . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
@@ -55,7 +70,7 @@ $html = implode('', array_map($row, $tree));
   </div>
 </header>
 
-<div class="pt" data-pagetree data-base="<?= e(url('/admin/pages')) ?>" data-languages="<?= e(json_encode($multi ? Lang::all() : [], JSON_UNESCAPED_UNICODE)) ?>" data-lang="<?= e($lang) ?>">
+<div class="pt" data-pagetree data-base="<?= e(url('/admin/pages')) ?>" data-can-publish="<?= $canPub ? '1' : '0' ?>" data-languages="<?= e(json_encode($multi ? Lang::all() : [], JSON_UNESCAPED_UNICODE)) ?>" data-lang="<?= e($lang) ?>">
   <div class="dt-bar pt-bar">
     <?php if ($multi): ?><nav class="fx-seg dt-seg" aria-label="Sprache"><?php foreach (Lang::all() as $code => $label): ?><a href="<?= e(url('/admin/pages?lang=' . $code)) ?>"<?= $code === $lang ? ' aria-current="true"' : '' ?>><?= e($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
     <label class="fx-search dt-search"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3 9l3.3 3.3 1-1L11 10A5 5 0 0 0 7 2zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></svg><input type="search" placeholder="Seiten filtern" aria-label="Seiten filtern" data-filter></label>

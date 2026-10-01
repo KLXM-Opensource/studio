@@ -397,6 +397,33 @@ if (schema) {
 // Daten: Eintrag bearbeiten – Felder abhängig von anderen Feldern ein-/ausblenden (Core\Data\Rules)
 $$('form[data-conditions]').forEach(f => conditions(f, JSON.parse(f.dataset.conditions || '{}'), 'f'));
 
+// ------------------------------------------------------------ Status Online ⇄ Offline (Seitenbaum, Eintragsliste)
+// Fehler (z. B. Platzhalter-Sperre beim Veröffentlichen) als Meldung über der Liste, Erfolg in der Live-Region der Liste;
+// der Zähler „Entwürfe“ in der Seitenleiste folgt ohne Neuladen.
+const statusFlash = (box, type, msg) => {
+  let f = box.previousElementSibling?.matches('[data-status-flash]') ? box.previousElementSibling : null;
+  if (!msg) { f?.remove(); return; }
+  if (!f) { f = d.createElement('div'); f.dataset.statusFlash = ''; box.before(f); }
+  f.className = `adm-flash adm-flash--${type}`;
+  f.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  f.textContent = msg;
+};
+const setDraftsBadge = n => {
+  const b = $('[data-drafts-badge]');
+  if (!b || typeof n !== 'number') return;
+  b.hidden = !n; $('[data-n]', b).textContent = n;
+};
+const STATUS = { online: ['Online', 'published'], offline: ['Offline', 'offline'], draft: ['Entwurf', 'draft'] };
+const STATUS_ACT = { online: 'Offline nehmen', offline: 'Online stellen', draft: 'Veröffentlichen' };
+/** Status-Knopf auf neuen Zustand setzen (Text, Farbe, Beschriftung für Screenreader) */
+const paintStatus = (btn, st, title) => {
+  btn.dataset.state = st;
+  btn.className = `pt-stbtn dt-status dt-status--${STATUS[st][1]}`;
+  btn.textContent = t(STATUS[st][0]);
+  btn.title = t(STATUS_ACT[st]);
+  btn.setAttribute('aria-label', t('„{title}“: {status} – {action}', { title, status: t(STATUS[st][0]), action: t(STATUS_ACT[st]) }));
+};
+
 // ------------------------------------------------------------ Daten: Einträge (Sammelaktionen, Reihenfolge ziehen)
 const entries = $('[data-entries]');
 if (entries) {
@@ -408,6 +435,26 @@ if (entries) {
     if (e.target.matches('[data-checkall]')) $$('[data-check]', entries).forEach(c => { c.checked = e.target.checked; });
     upd();
   });
+  // Status je Zeile: Online ⇄ Offline (Recht data.publish; Rückfrage nur beim Offline-Nehmen)
+  const live = $('[data-entries-msg]', entries);
+  const say = m => { if (!live) return; live.textContent = m; clearTimeout(live._t); live._t = setTimeout(() => (live.textContent = ''), 4000); };
+  const count = (k, delta) => { const c = $(`[data-count="${k}"]`, entries); if (c) c.textContent = Math.max(0, +c.textContent + delta); };
+  entries.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-status-toggle]'); if (!btn || btn.getAttribute('aria-busy') === 'true') return;
+    const tr = btn.closest('tr[data-id]'), title = btn.dataset.title || '', st = btn.dataset.state, online = st !== 'online';
+    if (!online && !(await bar_.ask({ title: t('Eintrag offline nehmen?'), body: t('Besucher sehen ihn dann nicht mehr; er verschwindet aus Listen, Sitemap und Suche. Der Inhalt bleibt erhalten – „Online stellen“ bringt ihn zurück.'), ok: t('Offline nehmen'), danger: true }))) return;
+    btn.setAttribute('aria-busy', 'true');
+    let res;
+    try { res = await post({ action: online ? 'publish' : 'draft', ids: [+tr.dataset.id] }); } catch { res = { ok: false }; }
+    btn.removeAttribute('aria-busy');
+    if (!res?.ok) { const m = res?.error || t('Status konnte nicht geändert werden.'); statusFlash(entries, 'error', m); return; }   // role=alert
+    statusFlash(entries, '', '');
+    paintStatus(btn, online ? 'online' : 'offline', title);
+    count('published', online ? 1 : -1); count('draft', online ? -1 : 1);
+    setDraftsBadge(res.drafts);
+    say(t(online ? '„{title}“ ist online.' : '„{title}“ ist offline.', { title }));
+    btn.focus();
+  });
   entries.addEventListener('click', async e => {
     const b = e.target.closest('[data-bulk-action]'); if (!b) return;
     const ids = checked();
@@ -415,7 +462,7 @@ if (entries) {
     await post({ action: b.dataset.bulkAction, ids }); location.reload();
   });
   // Zeile anklicken = bearbeiten (außer auf Links/Checkboxen)
-  entries.addEventListener('dblclick', e => { const tr = e.target.closest('tr[data-id]'); if (tr && !e.target.closest('a,input')) $('.dt-c-title a', tr).click(); });
+  entries.addEventListener('dblclick', e => { const tr = e.target.closest('tr[data-id]'); if (tr && !e.target.closest('a,input,button')) $('.dt-c-title a', tr).click(); });
   const tbody = $('.is-sortable [data-rows]', entries);
   if (tbody) {
     let drag = null;
@@ -458,8 +505,30 @@ if (pt) {
   // Nur Klicks auf der Zeile selbst: der Bereich der Unterseiten (ul[role=group]) gehört zum Eltern-Knoten – ein Klick in den
   // Abstand zwischen zwei Zeilen (z. B. knapp neben „⋯“) hätte sonst die Mutterseite gewählt und dorthin gescrollt
   const nodeAt = e => e.target.closest('.pt-row')?.closest('.pt-node') || null;
+  // Status Online ⇄ Offline (Recht pages.publish): Offline nehmen mit Rückfrage, Online stellen = Pages::publish (Platzhalter-Sperre)
+  const toggleStatus = async n => {
+    const btn = $(':scope > .pt-row [data-status-toggle]', n);
+    if (!btn || btn.getAttribute('aria-busy') === 'true') return;
+    const st = n.dataset.state, online = st !== 'online', title = n.dataset.title;
+    if (!online && !(await bar_.ask({ title: t('Seite offline nehmen?'), body: t('Besucher sehen sie dann nicht mehr (Seite „Nicht gefunden“); sie verschwindet aus Menü, Sitemap und Suche, Weiterleitungen und Links auf diese Seite laufen ins Leere. Die veröffentlichte Fassung bleibt erhalten – „Online stellen“ bringt sie zurück.'), ok: t('Offline nehmen'), danger: true }))) return;
+    // Offline mit offenem Entwurf: „Online stellen“ veröffentlicht die Änderungen mit
+    if (online && n.dataset.dirty === '1' && !(await bar_.ask({ title: t('Mit den offenen Änderungen online stellen?'), body: t('Diese Seite hat unveröffentlichte Änderungen. Online stellen veröffentlicht den aktuellen Entwurf.'), ok: t('Online stellen'), danger: false }))) return;
+    btn.setAttribute('aria-busy', 'true');
+    let res;
+    try { res = await post(`${base}/${n.dataset.id}/${online ? 'publish' : 'offline'}`); } catch { res = { ok: false }; }
+    btn.removeAttribute('aria-busy');
+    if (!res?.ok) { const m = res?.error || t('Status konnte nicht geändert werden.'); statusFlash(pt, 'error', m); return; }   // role=alert
+    statusFlash(pt, '', '');
+    const now = res.state || (online ? 'online' : 'offline');
+    n.dataset.state = now;
+    paintStatus(btn, now, title);
+    if (online) { n.dataset.dirty = '0'; n.dataset.published = '1'; $(':scope > .pt-row .pt-draft', n)?.remove(); }
+    setDraftsBadge(res.drafts);
+    note(res.message || t(online ? '„{title}“ ist online.' : '„{title}“ ist offline.', { title }));
+  };
   tree.addEventListener('click', e => {
     const n = nodeAt(e); if (!n) return;
+    if (e.target.closest('[data-status-toggle]')) { select(n); toggleStatus(n); return; }
     if (e.target.closest('[data-toggle]')) { setExp(n, n.getAttribute('aria-expanded') !== 'true'); return; }
     if (e.target.closest('[data-menu]')) return;
     if (e.target.closest('[data-more]')) { select(n); const r = e.target.getBoundingClientRect(); menu(n, r.left - 160, r.bottom + 4); return; }
@@ -469,6 +538,7 @@ if (pt) {
   tree.addEventListener('dblclick', e => { const n = nodeAt(e); if (n && !e.target.closest('[data-menu],[data-toggle],[data-more]')) open(n); });
   tree.addEventListener('contextmenu', e => { const n = nodeAt(e); if (!n) return; e.preventDefault(); select(n); menu(n, e.clientX, e.clientY); });
   tree.addEventListener('keydown', e => {
+    if (e.target !== tree && e.target.closest('button,input')) return;   // Knöpfe/Schalter in der Zeile: eigene Tastatur
     const list = nodes(), i = list.indexOf(active);
     if (e.key === 'ArrowDown') { e.preventDefault(); select(list[Math.min(list.length - 1, i + 1)] || list[0]); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); select(list[Math.max(0, i - 1)] || list[0]); }
@@ -552,7 +622,13 @@ if (pt) {
           if (res.ok) location.href = res.url; else alert(res.error);
         }]),
       ...(home ? [] : [['Duplizieren', async () => { await post(`${base}/${id}/duplicate`); location.reload(); }]]),
-      ...(n.dataset.dirty === '1' ? [['Änderungen veröffentlichen', async () => { await post(`${base}/${id}/publish`); location.reload(); }]] : []),
+      ...(n.dataset.dirty === '1' && n.dataset.state === 'online' ? [['Änderungen veröffentlichen', async () => {
+        const res = await post(`${base}/${id}/publish`);
+        if (!res.ok) { statusFlash(pt, 'error', res.error || t('Status konnte nicht geändert werden.')); return; }
+        location.reload();
+      }]] : []),
+      // Online ⇄ Offline (wie der Status-Knopf der Zeile)
+      ...($(':scope > .pt-row [data-status-toggle]', n) ? [[t(STATUS_ACT[n.dataset.state] || 'Veröffentlichen'), () => toggleStatus(n)]] : []),
       // Erweiterungen (Extension::pageList): [Beschriftung, Adresse]
       ...(n.dataset.extActions ? [['-'], ...JSON.parse(n.dataset.extActions).map(([l, href]) => [l, () => { location.href = href; }])] : []),
       ...(home ? [] : [['-'], ['Löschen …', async () => {

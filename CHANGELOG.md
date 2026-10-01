@@ -6,6 +6,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Status Online ⇄ Offline direkt umschalten
+- **Seitenbaum:** Der Status ist ein Knopf (Recht `pages.publish`, nicht die Startseite): **Online** → „Offline nehmen“ (gestaltete
+  Rückfrage), **Offline** (war schon online) bzw. **Entwurf** (nie veröffentlicht) → „Online stellen“ über `Pages::publish`
+  (Platzhalter-Sperre: Meldung über der Liste, Seite bleibt offline; offline mit offenem Entwurf fragt nach). Auch im Kontextmenü,
+  per Tastatur (<kbd>Tab</kbd>/<kbd>Enter</kbd>, <kbd>Umschalt</kbd>+<kbd>F10</kbd>), ohne Neuladen, Meldung in der Live-Region,
+  Zähler „Entwürfe“ in der Seitenleiste aktualisiert sich. Neu: `POST /admin/pages/{id}/offline` (`Pages::unpublish`: Status
+  `draft`, `content_published` bleibt), `Pages::state()` (online | offline | draft).
+- **Eintragsliste (Daten):** Status-Spalte als Knopf für Tabellen mit Freigabe (`data.publish`, nur eigene Einträge – nicht von
+  anderen Websites geteilter Tabellen oder aus externen Quellen); nutzt `POST /admin/data/{tabelle}/bulk`, Zähler der Filter und
+  „Entwürfe“ folgen ohne Neuladen. Anzeige „Offline“ für schon einmal veröffentlichte Einträge im Entwurf.
+- **Werkzeugleiste der Website:** neuer Chip-Zustand **Offline**; das Erklärfeld bietet „Offline nehmen“ (online, mit Rückfrage)
+  bzw. „Online stellen“ (offline ohne offenen Entwurf) für Seiten und Detailseiten von Einträgen – ohne Neuladen. Mit
+  ungespeicherten/unveröffentlichten Änderungen bleibt es bei „Veröffentlichen“.
+- Besucher erhalten für offline genommene Seiten/Einträge „Nicht gefunden“; Menü, Sitemap, Suche und Seiten-Cache folgen wie
+  beim Veröffentlichen (`PageCache::clear` → `Search::changed`).
+
 ### Schreibweise „KLXM AI“ und „KI“
 - Produktname durchgängig **„KLXM AI“** (vorher „KLXM Ai“): Oberfläche, Standard für `ai_brand`, Handbücher, Tutorials,
   Trailer-/Tutorial-Texte und Aussprache-Lexika; Abkürzungen „AI“/„KI“ immer groß. Code-Namen (`Core\AI\Ai`, `ai`, `/admin/ai`) bleiben.

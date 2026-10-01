@@ -39,7 +39,16 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
       <button type="button" class="cms-chip" data-bar-chip data-state="<?= e($b['status']) ?>" aria-expanded="false" aria-controls="cms-chip-pop" aria-label="<?= e(__('Status: {status}', ['status' => $chip[0]])) ?>">
         <span class="cms-chip__dot" aria-hidden="true"></span><span class="cms-chip__t"><?= e($chip[0]) ?></span>
       </button>
-      <span class="cms-pop" id="cms-chip-pop" hidden><strong data-bar-chip-title><?= e($chip[0]) ?></strong> <span data-bar-chip-text><?= e($chip[1]) ?></span></span>
+      <span class="cms-pop" id="cms-chip-pop" hidden><strong data-bar-chip-title><?= e($chip[0]) ?></strong> <span data-bar-chip-text><?= e($chip[1]) ?></span>
+        <?php if ($b['toggle']): // Online/Offline umschalten (_bar.js initToggle); sichtbar je nach Zustand ?>
+        <span class="cms-pop__err" data-bar-toggle-err role="alert" hidden></span>
+        <span class="cms-pop__hint" data-bar-pending hidden><?= e($T['pendingHint']) ?></span>
+        <span class="cms-pop__act">
+          <button type="button" class="cms-btn cms-btn--small" data-bar-offline hidden><?= icon('eye-slash') ?><span><?= e($T['goOffline']) ?></span></button>
+          <button type="button" class="cms-btn cms-btn--small cms-btn--primary" data-bar-online hidden><?= icon('globe') ?><span><?= e($T['goOnline']) ?></span></button>
+        </span>
+        <?php endif; ?>
+      </span>
     </span>
     <?php endif; ?>
     <?php if ($kind === 'template' && count($b['others']) > 1): $cur = array_values(array_filter($b['others'], fn($o) => $o['current']))[0] ?? $b['others'][0]; ?>

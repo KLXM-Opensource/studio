@@ -116,6 +116,61 @@ function setChip(state) {
   const pop = R.getElementById('cms-chip-pop');
   pop.querySelector('[data-bar-chip-title]').textContent = c[0];
   pop.querySelector('[data-bar-chip-text]').textContent = c[1];
+  toggleButtons(state);
+}
+
+// ------------------------------------------------------------------ Online/Offline umschalten (Status-Chip, Core\Toolbar → config.toggle)
+/**
+ * „Offline nehmen“ bei online (auch mit offenem Entwurf), „Online stellen“ bei offline ohne offenen Entwurf.
+ * Ungespeichert, Entwurf (nie veröffentlicht) und offline mit offenen Änderungen: kein Knopf – dort gilt „Veröffentlichen“.
+ */
+function toggleButtons(state) {
+  const tg = cfg.toggle, pop = R?.getElementById('cms-chip-pop');
+  if (!tg || !pop) return;
+  const off = pop.querySelector('[data-bar-offline]'), on = pop.querySelector('[data-bar-online]'), hint = pop.querySelector('[data-bar-pending]');
+  if (off) off.hidden = !(state === 'published' || state === 'changed');
+  if (on) on.hidden = !(state === 'offline' && !tg.pending);
+  if (hint) hint.hidden = !(state === 'offline' && tg.pending && cfg.kind === 'page');
+}
+function initToggle() {
+  const tg = cfg.toggle, pop = R.getElementById('cms-chip-pop');
+  if (!tg || !pop) return;
+  const live = R.querySelector('[data-editor-status],[data-entry-status]'), err = pop.querySelector('[data-bar-toggle-err]');
+  const say = m => { if (live) { live.textContent = ''; setTimeout(() => { live.textContent = m; }, 30); } };
+  const send = async online => {
+    const url = online ? tg.on : tg.off;
+    const body = tg.id ? { action: online ? 'publish' : 'draft', ids: [tg.id] } : {};
+    const r = await fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-Token': tg.csrf }, body: JSON.stringify(body) });
+    let res = {};
+    try { res = await r.json(); } catch { res = { ok: false, error: T('error') }; }
+    if (!r.ok || !res.ok) throw new Error(res.error || T('error'));
+    return res;
+  };
+  const run = async (btn, online) => {
+    if (btn.getAttribute('aria-busy') === 'true') return;
+    if (!online && !(await ask({ title: T('offlineTitle'), body: T('offlineBody'), ok: T('offlineOk'), danger: true }))) return;
+    if (err) err.hidden = true;
+    btn.setAttribute('aria-busy', 'true');
+    try {
+      await send(online);
+      cfg.status = online ? 'published' : 'offline';
+      // Seite mit offenem Entwurf offline genommen: Chip „Offline“, „Online stellen“ erst nach dem Veröffentlichen
+      setChip(H?.dirty?.() ? 'unsaved' : cfg.status);
+      // Eintrag: „Als Entwurf speichern (offline nehmen)“ im Menü passt nur, solange er online ist
+      R.querySelectorAll('[data-entry-draft]').forEach(x => { x.dataset.barWhen = online ? 'edit' : 'never'; x.hidden = !online || mode === 'view'; });
+      say(T(online ? 'onlineDone' : 'offlineDone'));
+      const next = pop.querySelector(online ? '[data-bar-offline]' : '[data-bar-online]');
+      (next && !next.hidden ? next : R.querySelector('[data-bar-chip]'))?.focus();
+    } catch (e) {
+      // z. B. Platzhalter-Sperre beim Veröffentlichen: Meldung im Erklärfeld (role=alert), Status bleibt
+      if (err) { err.textContent = e.message; err.hidden = false; }
+    } finally {
+      btn.removeAttribute('aria-busy');
+    }
+  };
+  pop.querySelector('[data-bar-offline]')?.addEventListener('click', e => run(e.currentTarget, false));
+  pop.querySelector('[data-bar-online]')?.addEventListener('click', e => run(e.currentTarget, true));
+  toggleButtons(cfg.status);
 }
 
 // ------------------------------------------------------------------ Zustand: dirty | saving | publishing | saved | published | error | clean
@@ -134,8 +189,12 @@ export function barState(s, msg = '') {
   if (!bar) return;
   // EIN Chip
   if (s === 'dirty' || (s === 'error' && H?.dirty?.())) setChip('unsaved');
-  else if (s === 'published') { cfg.status = 'published'; setChip('published'); }
-  else if (s === 'saved') setChip(cfg.kind === 'entry' || cfg.status === 'draft' ? cfg.status : 'changed');
+  else if (s === 'published') { cfg.status = 'published'; if (cfg.toggle) cfg.toggle.pending = false; setChip('published'); }
+  else if (s === 'saved') {
+    // Seite offline mit gespeichertem Entwurf: „Online stellen“ entfällt, „Veröffentlichen“ bringt sie mit den Änderungen zurück
+    if (cfg.toggle && cfg.kind === 'page') cfg.toggle.pending = true;
+    setChip(cfg.kind === 'entry' || cfg.status === 'draft' || cfg.status === 'offline' ? cfg.status : 'changed');
+  }
   else if (s === 'clean') setChip(cfg.status);
   // Speichern-Knopf: „Speichern“ · „Speichere …“ · „Gespeichert ✓“ (aria-disabled, solange nichts zu speichern ist)
   const done = s === 'saved' || s === 'published', open_ = s === 'dirty' || s === 'error';
@@ -318,6 +377,7 @@ export function initToolbar() {
   mode = cfg.mode || 'view';
   initMenus();
   initChip();
+  initToggle();
   initModes();
   setMode(mode);
 }

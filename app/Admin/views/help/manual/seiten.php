@@ -12,12 +12,20 @@
     <tr><td>Öffnen</td><td>Doppelklick oder <kbd>Enter</kbd> öffnet den Editor.</td></tr>
     <tr><td>Weitere Aktionen</td><td>Rechtsklick oder <b><?= icon('dots-three', ['label' => 'Mehr']) ?></b>: Seiteneinstellungen, Ansehen, Neue Unterseite, Duplizieren, Änderungen veröffentlichen, Löschen (Unterseiten rücken dann eine Ebene nach oben).</td></tr>
     <tr><td>Menü</td><td>Schalter in der Spalte <b>Menü</b>: Seite erscheint im Hauptmenü, Unterseiten als Aufklappmenü.</td></tr>
+    <tr><td>Online / Offline</td><td>Klick auf den Status (oder Rechtsklick → <b>Offline nehmen</b> / <b>Online stellen</b>) schaltet direkt um, ohne die Seite neu zu laden. <b>Offline nehmen</b> fragt vorher nach. Mit der Tastatur: <kbd>Tab</kbd> bis zum Status, <kbd>Enter</kbd>. Nur mit dem Recht „Seiten veröffentlichen“; die Startseite ist immer online.</td></tr>
   </table>
+  <table class="doc-table">
+    <tr><th>Status</th><th>Bedeutung</th></tr>
+    <tr><td><b>Online</b></td><td>Öffentlich sichtbar, im Menü (wenn eingeschaltet), in Sitemap und Suche.</td></tr>
+    <tr><td><b>Offline</b></td><td>War schon online und ist vorübergehend abgeschaltet: Besucher erhalten „Nicht gefunden“, die Seite verschwindet aus Menü, Sitemap und Suche, Weiterleitungen und Links auf sie laufen ins Leere. Angemeldete sehen sie weiter. Die veröffentlichte Fassung bleibt erhalten – <b>Online stellen</b> bringt genau diese zurück. Sie erscheint unter <b>Entwürfe</b> als „offline“.</td></tr>
+    <tr><td><b>Entwurf</b></td><td>Noch nie veröffentlicht. Ein Klick auf den Status veröffentlicht sie (wie <b>Veröffentlichen</b> im Editor).</td></tr>
+  </table>
+  <div class="doc-note doc-note--info"><strong>Online stellen und Platzhalter</strong><p>Enthält die Seite noch Platzhalter wie <code>[bitte ergänzen: …]</code> (z. B. aus dem Seiten-Generator), bleibt sie offline; die Meldung erscheint über der Liste. Hat eine offline genommene Seite inzwischen unveröffentlichte Änderungen, fragt „Online stellen“ nach – dabei werden die Änderungen mit veröffentlicht.</p></div>
   <table class="doc-table">
     <tr><th>Einstellung</th><th>Bedeutung</th></tr>
     <tr><td>Übergeordnete Seite</td><td>Legt die Ebene fest (auch per Ziehen änderbar).</td></tr>
     <tr><td>Adresse (URL)</td><td>Entsteht aus dem Titel; bei veröffentlichten Seiten nur mit Bedacht ändern – alte Links leiten dann weiter, externe Verweise sollten angepasst werden.</td></tr>
-    <tr><td>Status</td><td><b>Entwurf</b> = nur für Angemeldete sichtbar, <b>Online</b> = öffentlich.</td></tr>
+    <tr><td>Status</td><td><b>Entwurf</b> = nur für Angemeldete sichtbar, <b>Online</b> = öffentlich. Schneller geht’s mit dem Status-Knopf in der Seitenübersicht oder in der Leiste auf der Website.</td></tr>
     <tr><td>Im Hauptmenü zeigen, Beschriftung</td><td>Menüeintrag an/aus und ein kürzerer Menütext.</td></tr>
     <tr><td>Titel für Suchmaschinen</td><td>Optional ein eigener Titel für Google &amp; Co., wenn der Seitentitel dafür zu kurz oder zu lang ist.</td></tr>
     <tr><td>Beschreibung für Suchmaschinen</td><td>Der kurze Text unter dem Link bei Google (120–160 Zeichen). Der <b>SEO-Check</b> prüft Titel, Beschreibung, Überschriften und Alt-Texte.</td></tr>

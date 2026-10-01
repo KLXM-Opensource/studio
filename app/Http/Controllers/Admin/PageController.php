@@ -178,9 +178,29 @@ final class PageController extends AdminController
             return $this->back('/admin/pages', 'error', $e->getMessage());
         }
         if ($r->wantsJson()) {
-            return Response::json(['ok' => true]);
+            return Response::json(['ok' => true, 'state' => 'online', 'drafts' => \Core\Review\Drafts::count(), 'message' => __('„{title}“ ist online.', ['title' => (string) (Pages::find((int) $id)['title'] ?? '')])]);
         }
         return $this->back('/admin/pages', 'success', 'Seite veröffentlicht.');
+    }
+
+    /**
+     * Offline nehmen (Seitenbaum, Werkzeugleiste): Status „Entwurf“, die veröffentlichte Fassung bleibt erhalten (Pages::unpublish).
+     * Gegenstück „Online stellen“ ist publish() – mit Platzhalter-Sperre.
+     */
+    public function offline(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.publish');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (!Pages::unpublish((int) $id)) {
+            $err = __('Die Startseite ist immer online.');
+            if ($r->wantsJson()) return Response::json(['ok' => false, 'error' => $err], 422);
+            return $this->back('/admin/pages', 'error', $err);
+        }
+        $msg = __('„{title}“ ist offline. Besucher sehen die Seite nicht mehr.', ['title' => $page['title']]);
+        if ($r->wantsJson()) {
+            return Response::json(['ok' => true, 'state' => Pages::state(Pages::find((int) $id)), 'drafts' => \Core\Review\Drafts::count(), 'message' => $msg]);
+        }
+        return $this->back('/admin/pages', 'success', $msg);
     }
 
     public function discard(Request $r, string $id): Response

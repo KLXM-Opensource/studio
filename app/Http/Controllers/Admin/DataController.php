@@ -496,7 +496,8 @@ final class DataController extends AdminController
             'reorder' => Entries::reorder($t, $ids),
             default => throw new HttpException(422, 'Unbekannte Aktion.'),
         };
-        return $r->wantsJson() ? Response::json(['ok' => true]) : $this->back("/admin/data/$handle", 'success', 'Erledigt.');
+        // drafts: Zähler „Entwürfe“ der Seitenleiste (Status-Knopf der Eintragsliste aktualisiert ihn ohne Neuladen)
+        return $r->wantsJson() ? Response::json(['ok' => true, 'drafts' => \Core\Review\Drafts::count()]) : $this->back("/admin/data/$handle", 'success', 'Erledigt.');
     }
 
     // ================================================================= Geteilte Tabellen (Core\Data\Shared)

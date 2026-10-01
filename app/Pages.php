@@ -417,6 +417,33 @@ final class Pages
     }
 
     /**
+     * Offline nehmen: Status „Entwurf“, die veröffentlichte Fassung (content_published) bleibt erhalten – „Online stellen“
+     * (publish) bringt sie zurück. Besucher erhalten danach „Nicht gefunden“, Menü, Sitemap und Suche lassen die Seite aus.
+     * @return bool false für die Startseite (immer online) und unbekannte Seiten
+     */
+    public static function unpublish(int $id): bool
+    {
+        $p = self::find($id);
+        if (!$p || $p['is_home']) {
+            return false;
+        }
+        if ($p['status'] === 'published') {
+            self::db()->update('pages', ['status' => 'draft', 'updated_at' => now()], 'id = :id', ['id' => $id]);
+            PageCache::clear();   // Seiten-Cache + Suchindex (Core\Search::changed)
+        }
+        return true;
+    }
+
+    /**
+     * Veröffentlichungsstand für Listen und die Werkzeugleiste: online | offline (war schon online, Status „Entwurf“) |
+     * draft (noch nie veröffentlicht)
+     */
+    public static function state(array $p): string
+    {
+        return $p['status'] === 'published' ? 'online' : ($p['content_published'] !== null ? 'offline' : 'draft');
+    }
+
+    /**
      * Entwurf verwerfen: Arbeitsstand = veröffentlichte Fassung.
      * Der verworfene Entwurf bleibt als Version erhalten (wiederherstellbar).
      * @return bool false, wenn die Seite noch nie veröffentlicht wurde
