@@ -233,8 +233,12 @@ final class Pages
             foreach ($nodes as $n) {
                 $p = $n['page'];
                 if (!$p['menu'] || $p['type'] !== 'page' || (!$includeDrafts && $p['status'] !== 'published')) continue;
+                // Angemeldet: neue, noch nie veröffentlichte Seiten erscheinen (Vorschau, 'draft' => true); offline gestellte
+                // (schon einmal veröffentlicht) nicht – sie sollen aus dem Menü verschwinden, z. B. nach dem Zusammenlegen
+                if ($p['status'] !== 'published' && $p['content_published'] !== null) continue;
                 $out[] = ['id' => (int) $p['id'], 'label' => $p['nav_title'] ?: $p['title'], 'href' => self::url($p),
-                    'active' => in_array((int) $p['id'], $activeIds, true), 'children' => $walk($n['children'])];
+                    'active' => in_array((int) $p['id'], $activeIds, true), 'children' => $walk($n['children']),
+                    'draft' => $p['status'] !== 'published'];
             }
             return $out;
         };
