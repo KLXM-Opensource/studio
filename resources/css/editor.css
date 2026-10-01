@@ -21,6 +21,10 @@
 .cms-editor .ce-block__content,.cms-editor .ce-toolbar__content{max-width:none;margin:0}
 /* Griff „+ ⠿“ über der Blockkante statt auf dem Inhalt; die Block-Leiste (BarPlace) weicht ihm aus */
 .cms-editor .ce-toolbar__actions{right:auto;left:10px;top:-40px;z-index:2147483000;background:#fff;border-radius:10px;padding:2px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+/* Brücke zum Griff: Der Bereich über der linken oberen Ecke gehört zum Block, solange er unter der Maus ist – sonst
+   übernimmt beim Hochfahren der Block darüber und der Griff springt weg („+“ wäre nicht erreichbar) */
+.cms-editor .ce-block{position:relative}
+.cms-editor .ce-block:hover::before{content:"";position:absolute;left:0;top:-48px;width:96px;height:48px;z-index:1}
 .cms-editor .ce-toolbar__plus,.cms-editor .ce-toolbar__settings-btn{color:#16201E;width:30px;height:30px}
 /* Editor.js-Bedienelemente liegen in der Seite (Editor.js bringt eigenes CSS mit): Schrift/Größen nicht vom Theme erben */
 .cms-editor :is(.ce-toolbar,.ce-popover,.ce-inline-toolbar){font:400 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:normal;text-transform:none}
@@ -37,6 +41,17 @@
 .cms-block.is-active{outline:2px solid #314164}
 .cms-block.is-hidden .cms-block__preview{opacity:.4;filter:grayscale(.6)}
 .cms-block.is-hidden .is-hidden-block{display:block}
+/* Blöcke nebeneinander (Tune „row“, editor.js layoutRows): Markierung am Block; ab 1100 px auch im Editor nebeneinander
+   (flex-basis 1px: ein voller Block davor bleibt allein in seiner Zeile), schmaler untereinander */
+.cms-block.is-row{box-shadow:inset 4px 0 0 #6B5BA8}
+.cms-block.is-row::after{content:attr(data-row-label);position:absolute;left:12px;top:0;z-index:3;padding:3px 9px;border-radius:0 0 6px 6px;background:#6B5BA8;color:#fff;font:600 12px/1.35 Lato,"Segoe UI",system-ui,sans-serif;letter-spacing:normal;text-transform:none;pointer-events:none}
+.cms-block.is-row-ignored{box-shadow:inset 4px 0 0 #9A5B00}
+.cms-block.is-row-ignored::after{background:#9A5B00}
+@media (min-width:1100px){
+  .cms-editor .codex-editor__redactor{display:flex;flex-wrap:wrap;align-items:flex-start}
+  .cms-editor .codex-editor__redactor>.ce-block{flex:0 0 100%;min-width:0}
+  .cms-editor .codex-editor__redactor>.ce-block.cms-row-cell{flex:var(--cms-row-g,1) 1 1px}
+}
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
 .cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
 .cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block.is-selected>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
