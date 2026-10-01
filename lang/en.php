@@ -5396,4 +5396,15 @@ return [
     'Eintrag ist offline.' => 'Entry is offline.',
     'Eintrag ist online.' => 'Entry is online.',
     'Es gibt unveröffentlichte Änderungen – „Veröffentlichen“ stellt die Seite mit diesen Änderungen wieder online.' => 'There are unpublished changes – “Publish” puts the page back online with these changes.',
+    // Linkauswahl: Struktur, Weitere laden, Neueste Einträge
+    'Neueste Einträge' => 'Latest entries',
+    'Noch keine Seiten vorhanden.' => 'No pages yet.',
+    'Seitenbaum' => 'Page tree',
+    'Struktur' => 'Structure',
+    'Struktur (Seitenbaum)' => 'Structure (page tree)',
+    'Tastatur: ↑/↓ Seite wählen · →/← auf- und zuklappen · Enter übernehmen · Esc abbrechen' => 'Keyboard: ↑/↓ select page · →/← expand and collapse · Enter apply · Esc cancel',
+    'Weitere laden' => 'Load more',
+    'Wird geladen …' => 'Loading …',
+    '{n} Seiten' => '{n} pages',
+    '{n} von {m} – {label}' => '{n} of {m} – {label}',
 ];

@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Linkauswahl: Struktur, „Weitere laden“, neueste Einträge
+- **Struktur:** Im Reiter „Seiten & Inhalte“ schaltet **Suche | Struktur** auf den echten Seitenbaum um – Reihenfolge und Ebenen
+  wie unter „Seiten“, Status Offline/Entwurf, Anker als Unterpunkte (`page:ID#anker`), Sprache wählbar (DE/EN …, Vorgabe: Sprache
+  der bearbeiteten Seite). WAI-ARIA-Baum mit <kbd>↑</kbd>/<kbd>↓</kbd>, <kbd>→</kbd>/<kbd>←</kbd> (auf-/zuklappen, Kind/Eltern),
+  <kbd>Enter</kbd> übernimmt, Tippen wechselt zur Suche; aktuelles Ziel ist markiert und aufgeklappt. Die zuletzt gewählte Ansicht
+  merkt sich der Browser (`cms-links-view`). Neu: `GET /admin/api/links?format=tree&lang=…&page=ID` (`Core\Links::tree()`).
+- **Weitere laden:** Jede Gruppe mit mehr Treffern („15 von 37“) endet mit „Weitere laden“ (auch per Tastatur) – Seiten, Einträge
+  je Tabelle, neueste Einträge, Dateien. API: `&group=…&offset=N&limit=N`, jede Gruppe liefert `total` und `offset`.
+- **Neueste Einträge:** Ohne Suchbegriff die zuletzt geänderten verlinkbaren Einträge aller Tabellen mit Detailseite (Tabelle,
+  kurzes Datum, Entwurf gekennzeichnet) statt der Gruppen je Tabelle; ein Suchbegriff, der auf den Tabellennamen passt, zeigt alle
+  Einträge dieser Tabelle. Entwürfe nur mit `data.edit` für die Tabelle. Selbsttest `php bin/console links:selftest`.
+
 ### Visitenkarte (vCard) der Organisation und von Personen
 - **`GET /vcard.vcf`:** Visitenkarte der Website-Organisation zum Speichern im Adressbuch (vCard 3.0 – iOS, Android, Outlook):
   `FN`/`ORG` (`org_name()`), `ADR` (Straße, PLZ, Ort, Land), `TEL;TYPE=WORK,VOICE`, `EMAIL;TYPE=INTERNET,WORK`, `URL`

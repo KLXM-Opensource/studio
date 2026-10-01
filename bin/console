@@ -126,6 +126,7 @@
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
  *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
+ *   links:selftest                                    Selbsttest der Linkauswahl (Seitenbaum „Struktur“, Weitere laden, Neueste Einträge)
  *
  * Suche & KI
  *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
@@ -993,6 +994,13 @@ switch ($cmd) {
         $res = Core\VCard::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Organisation: " . ($res['org'] ? Core\VCard::ORG_PATH : 'keine Angaben → 404') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'links:selftest':
+        // Linkauswahl (Core\Links): Seitenbaum für „Struktur“, Weiterblättern, „Neueste Einträge“, Rechte, kurzes Datum
+        $res = Core\Links::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'notes:selftest':

@@ -115,10 +115,11 @@ final class EditorController extends AdminController
         return app()->entry = $t && $entry ? ['table' => $t, 'entry' => $entry] : null;
     }
 
-    /** Interne Links (Seiten + Anker) für Autocomplete */
     /**
      * Linkziele. Ohne Parameter: flache Liste [{value, label}] (<datalist id="cms-links">, kompatibel).
-     * ?format=groups&q=…&page=ID&mode=rich|field → Gruppen für die Linkauswahl (Core\Links::sources, resources/js/_links.js).
+     * ?format=groups&q=…&page=ID&mode=rich|field → Gruppen für die Linkauswahl (Core\Links::sources, resources/js/_links.js);
+     *   &group=pages|entries:{tabelle}|recent-entries|files|…&offset=N&limit=N → nur diese Gruppe ab dem N-ten Treffer („Weitere laden“).
+     * ?format=tree&lang=…&page=ID → Seitenbaum einer Sprache für den Modus „Struktur“ (Core\Links::tree).
      * ?describe=Wert → lesbare Beschreibung eines Link-Werts (Anzeige im Feld „link“).
      */
     public function links(Request $r): Response
@@ -131,7 +132,11 @@ final class EditorController extends AdminController
         if ($r->str('format') === 'groups') {
             return Response::json(['groups' => \Core\Links::sources([
                 'q' => mb_substr($r->str('q'), 0, 80), 'page' => (int) $r->str('page'), 'mode' => $r->str('mode'),
+                'group' => mb_substr($r->str('group'), 0, 60), 'offset' => (int) $r->str('offset'), 'limit' => (int) $r->str('limit') ?: null,
             ])]);
+        }
+        if ($r->str('format') === 'tree') {
+            return Response::json(\Core\Links::tree($r->str('lang'), (int) $r->str('page')));
         }
         $out = [];
         foreach (Pages::all() as $p) {

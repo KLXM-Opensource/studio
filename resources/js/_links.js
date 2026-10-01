@@ -1,12 +1,19 @@
 /*
  * Linkauswahl (Core, Teil von admin.js) – ein Dialog für Rich-Text (Formatierungsleiste, ⌘K) und Felder vom Typ „link“.
  *
- *  - Suche mit Live-Ergebnissen, gruppiert: Zuletzt verwendet · Anker auf dieser Seite · Seiten (Pfad im Seitenbaum, Sprache)
- *    · Einträge je Inhaltstabelle mit Detailseite · Dateien & Medien (PDF im Viewer oder direkt) · Sonderziele des Themes (nur Felder)
- *    Quelle: GET /admin/api/links?format=groups&q=…&page=…&mode=rich|field (Core\Links::sources)
+ *  - Reiter „Seiten & Inhalte“ mit zwei Ansichten (Umschalter Suche | Struktur, zuletzt gewählte pro Browser in localStorage):
+ *    Suche: Live-Ergebnisse, gruppiert: Zuletzt verwendet · Anker auf dieser Seite · Seiten (Pfad im Seitenbaum, Sprache)
+ *    · ohne Suchbegriff „Neueste Einträge“ (alle Inhaltstabellen mit Detailseite, zuletzt geändert zuerst), mit Suchbegriff
+ *    Einträge je Tabelle · Dateien & Medien (PDF im Viewer oder direkt) · Sonderziele des Kits (nur Felder).
+ *    Gruppen mit mehr Treffern enden mit „Weitere laden“ (selbst eine Option: per Tastatur erreichbar).
+ *    Quelle: GET /admin/api/links?format=groups&q=…&page=…&mode=rich|field[&group=…&offset=…&limit=…] (Core\Links::sources)
+ *    Struktur: echter Seitenbaum (Reihenfolge und Ebenen wie unter „Seiten“, eine Sprache, Status Offline/Entwurf), Anker als
+ *    Unterpunkte; WAI-ARIA-Baum (role=tree/treeitem, aria-level, aria-expanded) mit aria-activedescendant.
+ *    Quelle: GET /admin/api/links?format=tree&lang=…&page=… (Core\Links::tree, ganzer Baum auf einmal)
  *  - Reiter Web-Adresse (https-Prüfung, ergänzt https://, warnt bei http://), E-Mail (mailto, Betreff), Telefon (tel: wie tel_href())
  *  - Bearbeiten: zeigt das aktuelle Ziel, „Link entfernen“; Optionen „In neuem Tab öffnen“ und Linktitel (nur Rich-Text)
- *  - Tastatur: ↑/↓ in der Ergebnisliste, Enter übernimmt, Esc bricht ab, ←/→ zwischen den Reitern
+ *  - Tastatur: ↑/↓ in der Ergebnisliste, Enter übernimmt, Esc bricht ab, ←/→ zwischen den Reitern;
+ *    im Baum ↑/↓ bewegen, → aufklappen/erstes Kind, ← zuklappen/Elternseite, Pos1/Ende, Enter übernimmt, Buchstabe → Suche
  *  - Stabile Verweise: page:ID, page:ID#anker, entry:{tabelle}:{id}, media:{id}[:viewer] (Core\Links) – im Rich-Text als
  *    data-link am <a>, im Feld als Wert. Zuletzt verwendete Ziele: localStorage (nur Komfort, pro Browser).
  * Website: Dialog in der Shadow-DOM-Ebene (_shadow.js layerBox()), Verwaltung: im Dokument.
@@ -18,6 +25,8 @@ import { ico } from './_icons.js';
 const d = document;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const RECENT_KEY = 'cms-links-recent';
+const VIEW_KEY = 'cms-links-view';   // zuletzt gewählte Ansicht: search | tree (nur Komfort)
+const MORE = 30;                     // „Weitere laden“: so viele auf einmal
 const REF = /^(page:\d+(#[\w-]{1,80})?|entry:[a-z][a-z0-9_]{0,40}:\d+|media:\d+(:viewer)?)$/;
 const KIND = { page: 'Seite', anchor: 'Anker', entry: 'Eintrag', file: 'Datei', keyword: 'Sonderziel', url: 'Externe Adresse', mail: 'E-Mail', tel: 'Telefon', path: 'Interner Pfad' };
 
@@ -39,6 +48,9 @@ function cfg() {
 // ------------------------------------------------------------------ Zuletzt verwendet (nur Komfort, darf fehlen)
 function recent() {
   try { const r = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(r) ? r.slice(0, 6) : []; } catch { return []; }
+}
+function savedView() {
+  try { return localStorage.getItem(VIEW_KEY) === 'tree' ? 'tree' : 'search'; } catch { return 'search'; }
 }
 function remember(item) {
   if (!item?.value) return;
@@ -120,9 +132,17 @@ function build() {
         <button type="button" role="tab" id="cms-lp-tab-tel" aria-controls="cms-lp-p-tel" data-lp-tab="tel">${ico('phone')} ${esc(t('Telefon'))}</button>
       </div>
       <div class="lp__panel" role="tabpanel" id="cms-lp-p-search" aria-labelledby="cms-lp-tab-search" data-lp-panel="search">
-        <input type="search" class="lp__q" data-lp-q role="combobox" aria-expanded="true" aria-controls="cms-lp-list" aria-autocomplete="list"
-          aria-label="${esc(t('Linkziel suchen'))}" autocomplete="off" spellcheck="false" placeholder="${esc(t('Seite, Eintrag, Datei oder Anker suchen …'))}">
+        <div class="lp__bar">
+          <input type="search" class="lp__q" data-lp-q role="combobox" aria-expanded="true" aria-controls="cms-lp-list" aria-autocomplete="list"
+            aria-label="${esc(t('Linkziel suchen'))}" autocomplete="off" spellcheck="false" placeholder="${esc(t('Seite, Eintrag, Datei oder Anker suchen …'))}">
+          <p class="lp__treeh" data-lp-treeh hidden><span data-lp-count></span><span class="lp__langs" role="group" aria-label="${esc(t('Sprache'))}" data-lp-langs></span></p>
+          <div class="lp__seg" role="group" aria-label="${esc(t('Ansicht'))}">
+            <button type="button" data-lp-view="search" aria-pressed="true" title="${esc(t('Suche'))}">${ico('magnifying-glass')}<span>${esc(t('Suche'))}</span></button>
+            <button type="button" data-lp-view="tree" aria-pressed="false" title="${esc(t('Struktur (Seitenbaum)'))}">${ico('tree-structure')}<span>${esc(t('Struktur'))}</span></button>
+          </div>
+        </div>
         <div class="lp__list" id="cms-lp-list" role="listbox" aria-label="${esc(t('Linkziele'))}" data-lp-list></div>
+        <ul class="lp__list lp__tree" id="cms-lp-tree" role="tree" aria-label="${esc(t('Seitenbaum'))}" tabindex="0" data-lp-tree hidden></ul>
       </div>
       <div class="lp__panel" role="tabpanel" id="cms-lp-p-url" aria-labelledby="cms-lp-tab-url" data-lp-panel="url" hidden>
         <label class="f"><span>${esc(t('Adresse'))}</span><input type="url" inputmode="url" data-lp-url autocomplete="off" spellcheck="false" placeholder="https://beispiel.de/seite" aria-describedby="cms-lp-url-msg"></label>
@@ -149,7 +169,7 @@ function build() {
         <button type="button" class="adm-btn adm-btn--ghost lp__remove" data-lp-remove hidden>${esc(t('Link entfernen'))}</button>
         <button type="button" class="adm-btn adm-btn--ghost" data-lp-cancel>${esc(t('Abbrechen'))}</button>
       </div>
-      <p class="lp__keys f-help">${esc(t('Tastatur: ↑/↓ Ergebnis wählen · Enter übernehmen · Esc abbrechen'))}</p>
+      <p class="lp__keys f-help" data-lp-keys>${esc(t('Tastatur: ↑/↓ Ergebnis wählen · Enter übernehmen · Esc abbrechen'))}</p>
     </form></dialog>`);
   dlg = box.querySelector('#cms-lp');
   wire();
@@ -172,12 +192,28 @@ function wire() {
     else if (e.key === 'ArrowUp') n = i <= 0 ? 0 : i - 1;
     else if (e.key === 'Home' && e.ctrlKey) n = 0;
     else if (e.key === 'End' && e.ctrlKey) n = opts.length - 1;
-    else if (e.key === 'Enter' && i >= 0) { e.preventDefault(); choose(opts[i], true); return; }
+    else if (e.key === 'Enter' && i >= 0) { e.preventDefault(); choose(opts[i], !opts[i].dataset.more); return; }
     if (n !== null) { e.preventDefault(); activate(opts[n]); }
   });
   list.addEventListener('click', e => { const o = e.target.closest('[role=option]'); if (o) choose(o, false); });
-  list.addEventListener('dblclick', e => { const o = e.target.closest('[role=option]'); if (o) choose(o, true); });
+  list.addEventListener('dblclick', e => { const o = e.target.closest('[role=option]'); if (o && !o.dataset.more) choose(o, true); });
   list.addEventListener('mousedown', e => e.preventDefault());   // Fokus bleibt im Suchfeld
+  // Ansicht Suche | Struktur
+  qa('[data-lp-view]').forEach(b => b.addEventListener('click', () => view(b.dataset.lpView, true)));
+  // Seitenbaum
+  const tree = q('[data-lp-tree]');
+  tree.addEventListener('click', e => {
+    const n = e.target.closest('[role=treeitem]');
+    if (!n) return;
+    tree.focus({ preventScroll: true });
+    if (e.target.closest('[data-lp-twisty]')) { expand(n, n.getAttribute('aria-expanded') !== 'true'); activate(n, false); return; }
+    choose(n, false);
+  });
+  tree.addEventListener('dblclick', e => { const n = e.target.closest('[role=treeitem]'); if (n && !e.target.closest('[data-lp-twisty]')) choose(n, true); });
+  tree.addEventListener('mousedown', e => { if (e.target.closest('[data-lp-twisty]')) e.preventDefault(); });
+  tree.addEventListener('focus', () => { if (!tree.getAttribute('aria-activedescendant')) { const n = tree.querySelector('[role=treeitem][aria-selected=true]') || visibleNodes()[0]; if (n) activate(n); } });
+  tree.addEventListener('keydown', treeKey);
+  q('[data-lp-langs]').addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) loadTree(b.dataset.lang, true); });
   // Reiter
   const tabs = qa('[role=tab]');
   tabs.forEach((b, i) => {
@@ -211,7 +247,7 @@ function tab(name, focusField) {
   qa('[data-lp-panel]').forEach(p => { p.hidden = p.dataset.lpPanel !== name; });
   err('');
   showPicked();
-  if (focusField) (name === 'search' ? q('[data-lp-q]') : q(`[data-lp-${name}]`))?.focus();
+  if (focusField) (name === 'search' ? q(state.view === 'tree' ? '[data-lp-tree]' : '[data-lp-q]') : q(`[data-lp-${name}]`))?.focus();
 }
 
 function hint(kind) {
@@ -224,18 +260,50 @@ function hint(kind) {
 }
 const sameHost = h => { try { return new URL(h).host === location.host; } catch { return false; } };
 
+// ------------------------------------------------------------------ Ansicht Suche | Struktur
+function view(name, focus) {
+  if (!state) return;
+  state.view = name = name === 'tree' ? 'tree' : 'search';
+  try { localStorage.setItem(VIEW_KEY, name); } catch {}
+  qa('[data-lp-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lpView === name ? 'true' : 'false'));
+  const tree = name === 'tree';
+  q('[data-lp-q]').hidden = tree;
+  q('[data-lp-treeh]').hidden = !tree;
+  q('[data-lp-list]').hidden = tree;
+  q('[data-lp-tree]').hidden = !tree;
+  q('[data-lp-keys]').textContent = tree ? t('Tastatur: ↑/↓ Seite wählen · →/← auf- und zuklappen · Enter übernehmen · Esc abbrechen')
+    : t('Tastatur: ↑/↓ Ergebnis wählen · Enter übernehmen · Esc abbrechen');
+  if (tree) {
+    if (!state.tree) loadTree(state.treeLang, focus);
+    else { syncSelected(q('[data-lp-tree]')); if (focus) q('[data-lp-tree]').focus(); }
+  } else {
+    if (!state.groups) search(q('[data-lp-q]').value);
+    else syncSelected(q('[data-lp-list]'));
+    if (focus) q('[data-lp-q]').focus();
+  }
+}
+/** aria-selected nach dem gewählten Ziel (beide Ansichten teilen sich state.picked) */
+function syncSelected(box) {
+  const tree = box.matches('[data-lp-tree]'), list = tree ? state.titems : state.items;
+  box.querySelectorAll(tree ? '[role=treeitem]' : '[role=option]').forEach(o => {
+    const it = list[+o.dataset.i];
+    o.setAttribute('aria-selected', state.picked && it && it.value === state.picked.value ? 'true' : 'false');
+  });
+}
+
 // ------------------------------------------------------------------ Suche
 let seq = 0;
+async function fetchGroups(params) {
+  const u = linksUrl();
+  const r = await fetch(u + (u.includes('?') ? '&' : '?') + new URLSearchParams({ format: 'groups', page: currentPage(), mode: state.mode, ...params }), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+  return (await r.json()).groups || [];
+}
 async function search(qs) {
   const n = ++seq;
   const list = q('[data-lp-list]');
   list.setAttribute('aria-busy', 'true');
   let groups = [];
-  try {
-    const u = linksUrl();
-    const r = await fetch(u + (u.includes('?') ? '&' : '?') + new URLSearchParams({ format: 'groups', q: qs.trim(), page: currentPage(), mode: state.mode }), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
-    groups = (await r.json()).groups || [];
-  } catch { groups = []; }
+  try { groups = await fetchGroups({ q: qs.trim() }); } catch { groups = []; }
   if (n !== seq || !state) return;
   if (!qs.trim()) {
     const rec = recent().filter(r => state.mode === 'field' || r.kind !== 'keyword');
@@ -244,32 +312,174 @@ async function search(qs) {
   // Eingabe sieht aus wie Adresse/E-Mail/Telefon → Vorschlag als erstes Ergebnis
   const guess = guessDirect(qs);
   if (guess) groups.unshift({ id: 'direct', label: t('Direkt verlinken'), icon: guess.kind === 'mail' ? 'at' : guess.kind === 'tel' ? 'phone' : 'globe', items: [guess] });
-  state.items = [];
-  let html = '', i = 0;
-  for (const g of groups) {
-    if (!g.items?.length) continue;
-    const gid = 'cms-lp-g-' + esc(g.id).replace(/[^\w-]/g, '_');
-    html += `<div class="lp__group" role="group" aria-labelledby="${gid}"><p class="lp__gh" id="${gid}" role="presentation">${g.icon ? ico(g.icon) : ''} ${esc(g.label)}${g.total > g.items.length ? ` <small>${esc(t('{n} von {m}', { n: g.items.length, m: g.total }))}</small>` : ''}</p>`;
-    for (const it of g.items) {
-      state.items.push(it);
-      const sel = state.picked && state.picked.value === it.value;
-      html += `<div class="lp__opt${it.draft ? ' is-draft' : ''}" role="option" id="cms-lp-o${i}" data-i="${i}" aria-selected="${sel ? 'true' : 'false'}">`
-        + (it.thumb ? `<img class="lp__thumb" src="${esc(it.thumb)}" alt="" width="36" height="36" loading="lazy">` : `<span class="lp__ico" aria-hidden="true">${ico(kindIcon(it, g))}</span>`)
-        + `<span class="lp__txt"><span class="lp__label">${esc(it.label)}</span><span class="lp__meta">${esc(it.meta || it.href || '')}</span></span>`
-        + (it.badge ? `<span class="lp__badge" title="${esc(t('Sprache'))}">${esc(it.badge)}</span>` : '')
-        + (it.draft ? `<span class="lp__badge lp__badge--draft">${esc(t('Entwurf'))}</span>` : '') + '</div>';
-      i++;
-    }
-    html += '</div>';
-  }
-  list.innerHTML = html || `<p class="lp__empty">${esc(qs.trim() ? t('Nichts gefunden. Tipp: Web-Adressen, E-Mail und Telefon über die Reiter oben eingeben.') : t('Noch keine Inhalte vorhanden.'))}</p>`;
+  state.q = qs.trim();
+  state.groups = groups;
+  render();
   list.removeAttribute('aria-busy');
   q('[data-lp-q]').removeAttribute('aria-activedescendant');
   const pre = list.querySelector('[aria-selected=true]');
   if (pre) activate(pre, false);
 }
+/** Zustand des Status für Seiten (online | offline | draft) bzw. Einträge (draft) → Kennzeichen */
+function stateBadge(it) {
+  if (!it.draft) return '';
+  return `<span class="lp__badge lp__badge--draft">${esc(it.state === 'offline' ? t('Offline') : t('Entwurf'))}</span>`;
+}
+/** Ergebnisliste aus state.groups zeichnen (nach Suche und nach „Weitere laden“) */
+function render() {
+  const list = q('[data-lp-list]');
+  state.items = [];
+  let html = '', i = 0;
+  for (const g of state.groups) {
+    if (!g.items?.length) continue;
+    const gid = 'cms-lp-g-' + esc(g.id).replace(/[^\w-]/g, '_');
+    const more = g.total > g.items.length;
+    html += `<div class="lp__group" role="group" aria-labelledby="${gid}"><p class="lp__gh" id="${gid}" role="presentation">${g.icon ? ico(g.icon) : ''} ${esc(g.label)}${more ? ` <small>${esc(t('{n} von {m}', { n: g.items.length, m: g.total }))}</small>` : ''}</p>`;
+    g.items.forEach((it, gi) => {
+      state.items.push(it);
+      const sel = state.picked && state.picked.value === it.value;
+      html += `<div class="lp__opt${it.draft ? ' is-draft' : ''}" role="option" id="cms-lp-o${i}" data-i="${i}" data-g="${esc(g.id)}" data-gi="${gi}" aria-selected="${sel ? 'true' : 'false'}">`
+        + (it.thumb ? `<img class="lp__thumb" src="${esc(it.thumb)}" alt="" width="36" height="36" loading="lazy">` : `<span class="lp__ico" aria-hidden="true">${ico(kindIcon(it, g))}</span>`)
+        + `<span class="lp__txt"><span class="lp__label">${esc(it.label)}</span><span class="lp__meta">${esc(it.meta || it.href || '')}</span></span>`
+        + (it.badge ? `<span class="lp__badge" title="${esc(t('Sprache'))}">${esc(it.badge)}</span>` : '')
+        + stateBadge(it) + '</div>';
+      i++;
+    });
+    if (more) {   // „Weitere laden“ als Option: mit ↑/↓ erreichbar, Enter/Klick lädt nach
+      state.items.push({ more: true, group: g.id });
+      html += `<div class="lp__opt lp__more" role="option" id="cms-lp-o${i}" data-i="${i}" data-more="${esc(g.id)}" aria-selected="false">`
+        + `<span class="lp__ico" aria-hidden="true">${ico('dots-three')}</span><span class="lp__txt"><span class="lp__label">${esc(t('Weitere laden'))}</span>`
+        + `<span class="lp__meta">${esc(t('{n} von {m} – {label}', { n: g.items.length, m: g.total, label: g.label }))}</span></span></div>`;
+      i++;
+    }
+    html += '</div>';
+  }
+  list.innerHTML = html || `<p class="lp__empty">${esc(state.q ? t('Nichts gefunden. Tipp: Web-Adressen, E-Mail und Telefon über die Reiter oben eingeben.') : t('Noch keine Inhalte vorhanden.'))}</p>`;
+}
+/** Gruppe weiterblättern (offset = schon geladene Treffer), danach erstes neues Ergebnis aktiv */
+async function loadMore(gid) {
+  const g = state.groups?.find(x => x.id === gid);
+  if (!g || state.loading) return;
+  const n = seq, from = g.items.length;
+  const opt = q(`[data-more="${gid}"]`);
+  state.loading = true;
+  opt?.setAttribute('aria-busy', 'true');
+  opt?.querySelector('.lp__label')?.replaceChildren(t('Wird geladen …'));
+  try {
+    const res = (await fetchGroups({ q: state.q || '', group: gid, offset: from, limit: MORE }))[0];
+    if (n !== seq || !state) return;
+    if (res) { g.items.push(...res.items); g.total = res.total; } else g.total = g.items.length;
+  } catch { if (state) g.total = g.items.length; }
+  finally { if (state) state.loading = false; }
+  render();
+  const next = q(`[data-g="${gid}"][data-gi="${from}"]`) || q(`[data-g="${gid}"][data-gi="${from - 1}"]`);
+  if (next) activate(next);
+}
+
+// ------------------------------------------------------------------ Struktur (Seitenbaum)
+const openNodes = new Set();   // aufgeklappte Seiten (bleibt, solange die Seite offen ist)
+async function loadTree(lang, focus) {
+  const tree = q('[data-lp-tree]'), n = ++state.treeSeq;
+  tree.setAttribute('aria-busy', 'true');
+  let data = null;
+  try {
+    const u = linksUrl();
+    const r = await fetch(u + (u.includes('?') ? '&' : '?') + new URLSearchParams({ format: 'tree', lang: lang || '', page: currentPage() }), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+    data = await r.json();
+  } catch { data = null; }
+  if (!state || n !== state.treeSeq) return;
+  tree.removeAttribute('aria-busy');
+  state.tree = data || { nodes: [], langs: {}, count: 0 };
+  state.treeLang = state.tree.lang || '';
+  renderTree();
+  if (focus) tree.focus();
+}
+function renderTree() {
+  const tree = q('[data-lp-tree]'), data = state.tree, cur = String(currentPage() || '');
+  // Sprache(n) und Anzahl
+  const langs = Object.entries(data.langs || {});
+  q('[data-lp-count]').textContent = t('{n} Seiten', { n: data.count || 0 });
+  q('[data-lp-langs]').innerHTML = langs.length > 1 ? langs.map(([c, l]) => `<button type="button" data-lang="${esc(c)}" aria-pressed="${c === data.lang ? 'true' : 'false'}" title="${esc(l)}">${esc(c.toUpperCase())}</button>`).join('') : '';
+  // Gewähltes bzw. aktuelles Ziel sichtbar machen: Vorfahren aufklappen
+  const raw = state.picked?.value || state.current?.ref || '', target = raw.replace(/#.*$/, '');
+  const path = [];
+  const find = (nodes, trail) => nodes.some(nd => (nd.value === target ? (path.push(...trail), true) : find(nd.children || [], [...trail, nd.id])));
+  if (/^page:\d+$/.test(target) && find(data.nodes || [], []) && raw.includes('#')) path.push(+target.slice(5));   // Anker: Seite aufklappen
+  if (!openNodes.size) (data.nodes || []).forEach(nd => { if (nd.children?.length) openNodes.add(nd.id); });   // anfangs: oberste Ebene mit Unterseiten offen, Anker zu
+  path.forEach(id => openNodes.add(id));
+  state.titems = [];
+  let i = 0;
+  const row = (it, level, kids) => {
+    const k = i++;
+    state.titems.push(it);
+    const sel = state.picked ? state.picked.value === it.value : state.current?.ref === it.value;
+    const open = it.kind === 'page' && openNodes.has(it.id);
+    const icon = it.kind === 'anchor' ? 'hash' : it.home ? 'house' : kids ? 'folder' : 'file-text';
+    return `<li role="treeitem" id="cms-lp-t${k}" data-i="${k}"${it.kind === 'page' ? ` data-id="${it.id}"` : ''} aria-level="${level}" aria-labelledby="cms-lp-tl${k} cms-lp-tb${k}"`
+      + (kids ? ` aria-expanded="${open ? 'true' : 'false'}"` : '') + ` aria-selected="${sel ? 'true' : 'false'}" class="lp__ti${it.draft ? ' is-draft' : ''}">`
+      + `<div class="lp__tr" style="--lvl:${level - 1}">`
+      + (kids ? `<button type="button" class="lp__twisty" data-lp-twisty tabindex="-1" aria-hidden="true"></button>` : '<span class="lp__twisty lp__twisty--none"></span>')
+      + `<span class="lp__ico" aria-hidden="true">${ico(icon)}</span>`
+      + `<span class="lp__txt"><span class="lp__label" id="cms-lp-tl${k}">${esc(it.label)}</span><span class="lp__meta">${esc(it.meta || it.href || '')}</span></span>`
+      + `<span id="cms-lp-tb${k}">${stateBadge(it)}</span></div>`;
+  };
+  const walk = (nodes, level) => nodes.map(nd => {
+    const anchors = (nd.anchors || []).map(a => String(nd.id) === cur ? { ...a, value: a.meta, href: a.meta } : a);   // aktuelle Seite: #anker
+    const kids = anchors.length + (nd.children?.length || 0);
+    let h = row(nd, level, kids);
+    if (kids) h += '<ul role="group">' + anchors.map(a => row(a, level + 1, 0) + '</li>').join('') + walk(nd.children || [], level + 1) + '</ul>';
+    return h + '</li>';
+  }).join('');
+  tree.innerHTML = walk(data.nodes || [], 1) || `<li class="lp__empty" role="none">${esc(t('Noch keine Seiten vorhanden.'))}</li>`;
+  tree.removeAttribute('aria-activedescendant');
+  const sel = tree.querySelector('[role=treeitem][aria-selected=true]');
+  if (sel) activate(sel);
+}
+/** Sichtbare Knoten (kein zugeklappter Vorfahre) in Baumreihenfolge */
+function visibleNodes() {
+  return qa('[data-lp-tree] [role=treeitem]').filter(n => !n.parentElement.closest('[role=treeitem][aria-expanded=false]'));
+}
+function expand(n, open) {
+  if (!n?.hasAttribute('aria-expanded')) return;
+  n.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const id = +n.dataset.id;
+  if (id) open ? openNodes.add(id) : openNodes.delete(id);
+}
+function treeKey(e) {
+  const tree = e.currentTarget;
+  const nodes = visibleNodes();
+  if (!nodes.length) return;
+  const cur = tree.querySelector('#' + (tree.getAttribute('aria-activedescendant') || 'x'));
+  const i = nodes.indexOf(cur);
+  let n = null;
+  if (e.key === 'ArrowDown') n = nodes[Math.min(nodes.length - 1, i + 1)];
+  else if (e.key === 'ArrowUp') n = nodes[Math.max(0, i - 1)];
+  else if (e.key === 'Home') n = nodes[0];
+  else if (e.key === 'End') n = nodes[nodes.length - 1];
+  else if (e.key === 'ArrowRight' && cur) {
+    if (cur.getAttribute('aria-expanded') === 'false') expand(cur, true);
+    else if (cur.getAttribute('aria-expanded') === 'true') n = cur.querySelector('[role=treeitem]');
+  } else if (e.key === 'ArrowLeft' && cur) {
+    if (cur.getAttribute('aria-expanded') === 'true') expand(cur, false);
+    else n = cur.parentElement.closest('[role=treeitem]');
+  } else if (e.key === 'Enter' && cur) { e.preventDefault(); choose(cur, true); return; }
+  else if (e.key === ' ' && cur) { e.preventDefault(); choose(cur, false); return; }
+  else if (e.key === '*' && cur) {   // alle Geschwister aufklappen (WAI-ARIA)
+    [...cur.parentElement.children].forEach(x => expand(x, true));
+  } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && /\S/.test(e.key)) {
+    // Tippen → zur Suche wechseln und weiterschreiben
+    e.preventDefault();
+    const inp = q('[data-lp-q]');
+    inp.value = e.key;
+    view('search', true);
+    search(inp.value);
+    return;
+  } else return;
+  e.preventDefault();
+  if (n) activate(n);
+}
 function kindIcon(it, g) {
-  return { page: 'file-text', anchor: 'hash', entry: g.icon || 'database', file: it.pdf ? 'file-pdf' : 'file', keyword: 'star', url: 'globe', mail: 'at', tel: 'phone' }[it.kind] || 'link';
+  return { page: 'file-text', anchor: 'hash', entry: it.icon || g.icon || 'database', file: it.pdf ? 'file-pdf' : 'file', keyword: 'star', url: 'globe', mail: 'at', tel: 'phone' }[it.kind] || 'link';
 }
 function guessDirect(qs) {
   const v = qs.trim();
@@ -282,15 +492,19 @@ function guessDirect(qs) {
   return null;
 }
 function activate(o, scroll = true) {
-  qa('[role=option].is-active').forEach(x => x.classList.remove('is-active'));
+  const tree = o.closest('[data-lp-tree]');
+  const box = tree || q('[data-lp-list]');
+  box.querySelectorAll('.is-active').forEach(x => x.classList.remove('is-active'));
   o.classList.add('is-active');
-  q('[data-lp-q]').setAttribute('aria-activedescendant', o.id);
-  if (scroll) o.scrollIntoView({ block: 'nearest' });
+  (tree || q('[data-lp-q]')).setAttribute('aria-activedescendant', o.id);
+  if (scroll) (o.querySelector(':scope > .lp__tr') || o).scrollIntoView({ block: 'nearest' });
 }
 function choose(o, apply) {
-  const it = state.items[+o.dataset.i];
+  const tree = !!o.closest('[data-lp-tree]');
+  const it = (tree ? state.titems : state.items)[+o.dataset.i];
   if (!it) return;
-  qa('[role=option]').forEach(x => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
+  if (it.more) { loadMore(it.group); return; }
+  qa(tree ? '[data-lp-tree] [role=treeitem]' : '[role=option]').forEach(x => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
   activate(o, false);
   state.picked = it;
   if (it.kind === 'url' && !state.blankTouched) q('[data-lp-blank]').checked = !sameHost(it.href);
@@ -343,7 +557,8 @@ export function openLinkPicker(opts = {}) {
   return new Promise(resolve => {
     const mode = opts.mode === 'field' ? 'field' : 'rich';
     const cur = opts.current || (opts.value ? { href: opts.value, ref: REF.test(opts.value) ? opts.value : '' } : null);
-    state = { resolve, mode, current: cur && (cur.href || cur.ref) ? cur : null, picked: null, items: [], tab: 'search', blankTouched: false };
+    state = { resolve, mode, current: cur && (cur.href || cur.ref) ? cur : null, picked: null, items: [], titems: [], groups: null, q: '',
+      tab: 'search', view: 'search', tree: null, treeLang: '', treeSeq: 0, blankTouched: false };
     q('#cms-lp-t').textContent = state.current ? t('Link bearbeiten') : t('Link einfügen');
     qa('[data-lp-richonly]').forEach(n => { n.hidden = mode !== 'rich'; });
     q('[data-lp-remove]').hidden = !state.current;
@@ -373,9 +588,13 @@ export function openLinkPicker(opts = {}) {
       q('[data-lp-q]').value = opts.text.trim();   // markierter Text ist schon eine Adresse
     }
     dlg.returnValue = '';
+    q('[data-lp-list]').innerHTML = '';
+    q('[data-lp-tree]').innerHTML = '';
     dlg.showModal();
-    tab(start, true);
-    search(q('[data-lp-q]').value);
+    tab(start, false);
+    // Ansicht: wie zuletzt gewählt – außer der markierte Text ist schon eine Adresse (dann Suche mit Vorschlag)
+    view(q('[data-lp-q]').value ? 'search' : savedView(), start === 'search');
+    if (start !== 'search') tab(start, true);
   });
 }
 
