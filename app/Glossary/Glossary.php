@@ -28,6 +28,9 @@ use Core\Pages;
  *  - Ausnehmen: data-glossary="off" an einem Element, Abschnitts-Option „Glossar-Begriffe hier nicht markieren“ (Tune noGlossary),
  *    Einstellung „Seiten ausnehmen“ (Pfade, * am Ende = Präfix).
  *  - Einstellungen (sys.glossary): mode (page|section|off), headings (h1…hN nicht markieren, Standard 3), live, exclude, page_id.
+ *  - Mehrsprachig: Begriffe sind Einträge je Sprache (Übersetzung des Eintrags, Entries::translate). Eine Seite markiert nur die
+ *    Begriffe ihrer Sprache (Wortendungen je Sprache, Annotator-Option lang); Detailseiten /en/glossar/{slug}; die Übersicht ist
+ *    die Übersetzung der Glossar-Seite (z. B. /en/glossary) – ohne veröffentlichte Übersetzung kein Link auf die Übersicht.
  */
 final class Glossary
 {
@@ -141,6 +144,7 @@ final class Glossary
             'url' => Entries::href($t, $e),
             'variants' => self::splitVariants((string) ($e['varianten'] ?? '')),
             'draft' => ($e['status'] ?? 'published') !== 'published',
+            'lang' => Lang::norm($e['lang'] ?? null),
         ];
     }
 
@@ -170,8 +174,9 @@ final class Glossary
     {
         $id = (int) (self::settings()['page_id'] ?? 0);
         $p = $id ? Pages::find($id) : null;
+        // Andere Sprache: deren Übersetzung der Übersicht (ohne Übersetzung kein Link – die Übersicht zeigt Begriffe ihrer Sprache)
+        if ($p && Lang::multi() && Lang::norm($p['lang'] ?? null) !== Lang::current()) $p = Pages::translations($p)[Lang::current()] ?? null;
         if (!$p || ($p['status'] !== 'published' && !app()->auth->check())) return null;
-        if (Lang::multi() && ($tr = Pages::translations($p)[Lang::current()] ?? null)) $p = $tr;
         return Pages::url($p);
     }
 
@@ -200,7 +205,8 @@ final class Glossary
             $exclude = [];
             $ctx = app()->entry;
             if ($ctx && ($ctx['table']['handle'] ?? '') === $t['handle']) $exclude[] = (int) $ctx['entry']['id'];
-            $a = new Annotator($terms, ['mode' => $s['mode'], 'headings' => $s['headings'], 'exclude' => $exclude, 'labels' => self::labels()]);
+            $a = new Annotator($terms, ['mode' => $s['mode'], 'headings' => $s['headings'], 'exclude' => $exclude, 'labels' => self::labels(),
+                'lang' => Lang::current()]);
             $out = $a->annotate($html);
             $live = self::liveIn($out, $s['live']);
             // Block „Glossar“ (Übersicht): Skript für Suchfilter und Buchstaben auch ohne Markierungen
@@ -297,7 +303,7 @@ final class Glossary
             $terms[] = ['k' => $t['key'], 't' => $t['term'], 's' => $t['short'], 'u' => $t['url'],
                 'v' => array_map(fn($v) => [$v, Annotator::caseSensitive($v) ? 1 : 0], Annotator::variants($t))];
         }
-        return ['mode' => $s['mode'], 'headings' => (int) $s['headings'], 'labels' => self::labels(), 'terms' => $terms];
+        return ['mode' => $s['mode'], 'headings' => (int) $s['headings'], 'lang' => Lang::current(), 'labels' => self::labels(), 'terms' => $terms];
     }
 
     // ================================================================= Einrichten
@@ -398,24 +404,28 @@ final class Glossary
                 $plain = trim($v, '"„“”');
                 if (mb_strlen($plain) < 2) $out[] = ['level' => 'warn', 'id' => $t['id'], 'text' => __('„{t}“: Variante „{v}“ ist zu kurz.', ['t' => $t['term'], 'v' => $v])];
                 $norm = Annotator::caseSensitive($plain) ? $plain : mb_strtolower($plain);
-                $owners[$norm][$t['id']] = $t['term'];
+                // Je Sprache: „API“ auf Deutsch und Englisch ist kein Doppel (eine Seite markiert nur Begriffe ihrer Sprache)
+                $owners[($t['lang'] ?? '') . "\x1F" . $norm][$t['id']] = $t['term'];
             }
         }
         foreach ($owners as $v => $ids) {
+            $v = substr((string) $v, (int) strpos((string) $v, "\x1F") + 1);
             if (count($ids) > 1) {
                 $out[] = ['level' => 'warn', 'id' => (int) array_key_first($ids), 'text' => __('„{v}“ steht bei mehreren Begriffen ({list}) – markiert wird nur einer.', ['v' => $v, 'list' => implode(', ', $ids)])];
             }
         }
         // Überschneidungen: Variante steckt als ganzes Wort in einer Variante eines anderen Begriffs (TLS ⊂ TLS-RPT)
-        $keys = array_keys($owners);
-        foreach ($keys as $short) {
-            foreach ($keys as $long) {
-                if ($short === $long || mb_strlen((string) $long) <= mb_strlen((string) $short)) continue;
-                if (!preg_match('~(?<![\p{L}\p{N}])' . preg_quote((string) $short, '~') . '(?![\p{L}\p{N}])~u', (string) $long)) continue;
-                $a = array_values($owners[$short])[0];
-                $b = array_values($owners[$long])[0];
+        $keys = array_map('strval', array_keys($owners));
+        foreach ($keys as $ks) {
+            [$ls, $short] = explode("\x1F", $ks, 2);
+            foreach ($keys as $kl) {
+                [$ll, $long] = explode("\x1F", $kl, 2);
+                if ($ls !== $ll || $short === $long || mb_strlen($long) <= mb_strlen($short)) continue;
+                if (!preg_match('~(?<![\p{L}\p{N}])' . preg_quote($short, '~') . '(?![\p{L}\p{N}])~u', $long)) continue;
+                $a = array_values($owners[$ks])[0];
+                $b = array_values($owners[$kl])[0];
                 if ($a === $b) continue;
-                $out[] = ['level' => 'info', 'id' => (int) array_key_first($owners[$long]),
+                $out[] = ['level' => 'info', 'id' => (int) array_key_first($owners[$kl]),
                     'text' => __('„{short}“ ({a}) steckt in „{long}“ ({b}) – dort gilt der längere Begriff.', ['short' => $short, 'a' => $a, 'long' => $long, 'b' => $b])];
             }
         }
@@ -432,11 +442,12 @@ final class Glossary
         if (!$refresh && is_file($file) && filemtime($file) > time() - 600) {
             return json_decode((string) file_get_contents($file), true) ?: [];
         }
-        $terms = self::terms(true);
-        $rx = Annotator::pattern($terms);
         $out = [];
-        if ($rx !== null) {
-            foreach (\Core\Search\Documents::build(Lang::default()) as $doc) {
+        // Je Sprache: deren Begriffe in deren Seiten und Einträgen
+        foreach (Lang::multi() ? array_keys(Lang::all()) : [Lang::default()] as $lang) {
+            $rx = Annotator::pattern(self::terms(true, $lang), $lang);
+            if ($rx === null) continue;
+            foreach (\Core\Search\Documents::build($lang) as $doc) {
                 if (($doc['table'] ?? '') === self::HANDLE || ($doc['url'] ?? '') === '') continue;
                 $hit = [];
                 preg_replace_callback($rx, function ($m) use (&$hit) {
@@ -453,7 +464,8 @@ final class Glossary
 
     // ================================================================= Import & Export
 
-    public const CSV_COLUMNS = ['begriff', 'varianten', 'kurz', 'erklaerung', 'kategorie', 'link', 'status'];
+    /** Spalte lang: Sprache des Begriffs (leer = Standardsprache) – vorhandene Begriffe werden je Sprache abgeglichen */
+    public const CSV_COLUMNS = ['begriff', 'varianten', 'kurz', 'erklaerung', 'kategorie', 'link', 'status', 'lang'];
 
     public static function exportCsv(): string
     {
@@ -463,7 +475,7 @@ final class Glossary
         fputcsv($fh, self::CSV_COLUMNS, ';', '"', '');
         foreach ($t ? Entries::query($t, ['status' => 'all', 'limit' => 5000, 'lang' => 'all']) : [] as $e) {
             fputcsv($fh, [(string) $e['begriff'], implode(', ', self::splitVariants((string) ($e['varianten'] ?? ''))), (string) $e['kurz'],
-                (string) ($e['erklaerung'] ?? ''), (string) ($e['kategorie'] ?? ''), (string) ($e['link'] ?? ''), (string) $e['status']], ';', '"', '');
+                (string) ($e['erklaerung'] ?? ''), (string) ($e['kategorie'] ?? ''), (string) ($e['link'] ?? ''), (string) $e['status'], Lang::norm($e['lang'] ?? null)], ';', '"', '');
         }
         rewind($fh);
         return (string) stream_get_contents($fh);
@@ -486,7 +498,8 @@ final class Glossary
         $head = array_map(fn($h) => strtolower(trim((string) $h)), fgetcsv($fh, null, $sep, '"', '') ?: []);
         if (!in_array('begriff', $head, true)) throw new \RuntimeException(__('Die erste Zeile braucht die Spaltennamen, mindestens „begriff“ und „kurz“.'));
         $existing = [];
-        foreach (Entries::query($t, ['status' => 'all', 'limit' => 5000, 'lang' => 'all']) as $e) $existing[mb_strtolower(trim((string) $e['begriff']))] = $e;
+        $key = fn(string $lang, string $name) => $lang . "\x1F" . mb_strtolower(trim($name));
+        foreach (Entries::query($t, ['status' => 'all', 'limit' => 5000, 'lang' => 'all']) as $e) $existing[$key(Lang::norm($e['lang'] ?? null), (string) $e['begriff'])] = $e;
         $res = ['total' => 0, 'created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => []];
         $line = 1;
         while (($row = fgetcsv($fh, null, $sep, '"', '')) !== false) {
@@ -497,16 +510,19 @@ final class Glossary
             foreach ($head as $i => $h) if (in_array($h, self::CSV_COLUMNS, true)) $r[$h] = trim((string) ($row[$i] ?? ''));
             $name = (string) ($r['begriff'] ?? '');
             if ($name === '' || ($r['kurz'] ?? '') === '') { $res['errors'][$line] = __('Begriff und Kurz-Erklärung sind Pflicht.'); continue; }
-            $cur = $existing[mb_strtolower($name)] ?? null;
+            $lang = strtolower((string) ($r['lang'] ?? ''));
+            $lang = $lang !== '' && Lang::valid($lang) ? $lang : Lang::default();
+            $cur = $existing[$key($lang, $name)] ?? null;
             if ($cur && !$overwrite) { $res['skipped']++; continue; }
             $in = ['begriff' => $name, 'kurz' => self::short($r['kurz']), 'varianten' => implode("\n", self::splitVariants((string) ($r['varianten'] ?? '')))];
             foreach (['erklaerung', 'kategorie', 'link'] as $k) if (array_key_exists($k, $r)) $in[$k] = $r[$k];
             $in['status'] = in_array(strtolower((string) ($r['status'] ?? '')), ['published', 'veröffentlicht', 'online'], true) ? 'published' : 'draft';
+            if (!$cur) $in['lang'] = $lang;
             if ($dry) { $res[$cur ? 'updated' : 'created']++; continue; }
             [$id, $errors] = Entries::save($t, $cur ? (int) $cur['id'] : null, $in);
             if ($errors) { $res['errors'][$line] = implode(' ', $errors); continue; }
             $res[$cur ? 'updated' : 'created']++;
-            $existing[mb_strtolower($name)] = ['id' => $id, 'begriff' => $name];
+            $existing[$key($lang, $name)] = ['id' => $id, 'begriff' => $name];
         }
         self::flush();
         return $res;

@@ -12,8 +12,11 @@ const esc = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&').replace(/ /g, '\\s+
 const OPT = { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden'] };
 let n = 0;
 
+// Wortendungen je Sprache (wie Annotator::alternative): Englisch -s/-es bzw. y → ies, sonst die deutschen Endungen
+const EN = (j) => /^en(-|$)/.test(j.lang || '');
+
 function prep(j) {
-  const cs = new Map(), ci = new Map(), a = [[], []];
+  const cs = new Map(), ci = new Map(), a = [[], []], en = EN(j);
   for (const t of j.terms) {
     for (let [v, exact] of t.v) {
       const q = /^["„“](.+)["“”]$/u.exec(v);
@@ -21,21 +24,24 @@ function prep(j) {
       if (v.length < 2) continue;
       // Endungen nach dem letzten Wort (wie Annotator::alternative): Abkürzung → Plural-s, Wort ab 4 Buchstaben → übliche Endungen
       const last = v.split(/[\s\-/]+/).pop();
+      const word = !q && !(/\p{Lu}$/u.test(v) && (last.match(/\p{Lu}/gu) || []).length >= 2) && last.length >= 4 && /\p{Ll}$/u.test(v) && !/\p{Ll}\p{Lu}/u.test(last);
+      const ies = word && en && /[^aeiouy]y$/i.test(last);
       const suf = q ? '' : /\p{Lu}$/u.test(v) && (last.match(/\p{Lu}/gu) || []).length >= 2 ? 's?'
-        : last.length >= 4 && /\p{Ll}$/u.test(v) && !/\p{Ll}\p{Lu}/u.test(last) ? '(?:e|en|n|s|es|er|ern)?' : '';
+        : word ? (en ? (ies ? '' : '(?:s|es)?') : '(?:e|en|n|s|es|er|ern)?') : '';
       (exact ? cs : ci).set(exact ? v : v.toLowerCase(), t);
-      a[exact ? 0 : 1].push([v.length, esc(v) + suf]);
+      a[exact ? 0 : 1].push([v.length, (ies ? esc(v.slice(0, -1)) + '(?:y|ies)' : esc(v)) + suf]);
     }
   }
   const rx = (list, f) => list.length ? new RegExp('(?<!' + L + ')(?:' + list.sort((x, y) => y[0] - x[0]).map((x) => x[1]).join('|') + ')' + R, f) : null;
-  return { cs, ci, rx: [rx(a[0], 'gu'), rx(a[1], 'giu')] };
+  return { cs, ci, en, rx: [rx(a[0], 'gu'), rx(a[1], 'giu')] };
 }
 
 // Begriff zum Treffer: genau, sonst ohne Plural-s bzw. übliche Endungen
 function find(D, m, exact) {
   const s = m.replace(/\s+/g, ' '), map = exact ? D.cs : D.ci, k = exact ? s : s.toLowerCase();
   if (map.has(k)) return map.get(k);
-  for (const e of ['ern', 'er', 'es', 'en', 'e', 'n', 's']) if (k.endsWith(e) && map.has(k.slice(0, -e.length))) return map.get(k.slice(0, -e.length));
+  if (D.en && k.endsWith('ies') && map.has(k.slice(0, -3) + 'y')) return map.get(k.slice(0, -3) + 'y');
+  for (const e of D.en ? ['es', 's'] : ['ern', 'er', 'es', 'en', 'e', 'n', 's']) if (k.endsWith(e) && map.has(k.slice(0, -e.length))) return map.get(k.slice(0, -e.length));
   return null;
 }
 

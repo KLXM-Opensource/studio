@@ -16,7 +16,8 @@
   <ul>
     <li><b>Hinweise</b>: Varianten, die bei mehreren Begriffen stehen, fehlende oder zu lange Kurz-Erklärungen und Überschneidungen (z. B. „TLS“ in „TLS-RPT“ – dort gilt der längere Begriff).</li>
     <li><b>Vorkommen</b>: auf wie vielen Seiten der Begriff steht (nach dem Text der Website-Suche) – mit Liste der Seiten.</li>
-    <li><b>Import &amp; Export</b> als CSV-Datei (Semikolon; erste Zeile <code>begriff;varianten;kurz;erklaerung;kategorie;link;status</code>). Neue Begriffe werden Entwürfe.</li>
+    <li><b>Import &amp; Export</b> als CSV-Datei (Semikolon; erste Zeile <code>begriff;varianten;kurz;erklaerung;kategorie;link;status;lang</code>, <code>lang</code> leer = Hauptsprache). Neue Begriffe werden Entwürfe.</li>
+    <li><b>Mehrere Sprachen</b>: Übersetzen Sie einen Begriff wie jeden Eintrag (Daten → Glossar → Eintrag → Übersetzung anlegen). Englische Seiten markieren nur die englischen Begriffe – mit englischen Endungen („data table“ findet auch „data tables“). Für die Übersicht legen Sie die Übersetzung der Seite Glossar an (z. B. <code>/en/glossary</code>); in der Liste trägt jeder übersetzte Begriff das Kürzel seiner Sprache.</li>
   </ul>
   <h3>Wo nicht markiert wird</h3>
   <ul>

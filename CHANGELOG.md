@@ -26,6 +26,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   **KI-Vorschlag** (immer als Entwurf). Entwürfe sieht die angemeldete Redaktion im Text mit Hinweis „Entwurf“.
 - Suche & Besucher-Chat: veröffentlichte Begriffe kommen über ihre Detailseiten automatisch in den Suchindex.
 - Kommandozeile: `glossary:install`, `glossary:import`, `glossary:export`, `glossary:check`, `glossary:selftest [--bench]`.
+- **Mehrsprachig:** Begriffe je Sprache als Übersetzung des Eintrags; eine Seite markiert nur die Begriffe ihrer Sprache, mit
+  Wortendungen dieser Sprache (Englisch `-s`/`-es`, `y` → `ies`; sonst die deutschen Endungen), auch in `glossary-live.mjs`.
+  Übersicht = Übersetzung der Glossar-Seite (z. B. `/en/glossary`, Link im Fußbereich nur, wenn sie veröffentlicht ist),
+  Detailseiten `/en/glossar/<slug>`, JSON-LD mit `inLanguage`. Hinweise und „Vorkommen“ je Sprache, Kennzeichen der Sprache in
+  der Liste, CSV mit Spalte `lang`.
 
 ### Stellenangebote & Google for Jobs – Vorlage „Stellenangebote“ + Eingang „Bewerbungen“
 - Neue Tabellen-Vorlage **„Stellenangebote“** (Daten → Vorlage, alle Kits): Titel, Kurzbeschreibung, Beschreibung, Veröffentlicht am

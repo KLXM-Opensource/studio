@@ -16,7 +16,8 @@ namespace Core\Glossary;
  *  - Je Begriff nur das erste Vorkommen – je Seite (mode „page“) oder je Abschnitt <section>/<article> (mode „section“).
  *  - Wortgrenzen mit Unicode (Umlaute, ß), längste Variante zuerst; Abkürzungen (mehrere Großbuchstaben, z. B. SPF, IPv6,
  *    MTA-STS) nur in genau dieser Schreibweise (+ Plural-s), Wörter ohne Rücksicht auf Groß-/Kleinschreibung (+ übliche
- *    deutsche Endungen ab 4 Zeichen). "In Anführungszeichen" erzwingt die genaue Schreibweise ohne Endungen.
+ *    Endungen ab 4 Zeichen in der Sprache der Seite, Option lang: Englisch -s/-es bzw. y → ies, sonst die deutschen Endungen).
+ *    "In Anführungszeichen" erzwingt die genaue Schreibweise ohne Endungen.
  *  - Bereits markierte Stellen (Hülle .gl) werden übersprungen – zweimal anwenden ändert nichts.
  *
  * Ausgabe je Treffer (Disclosure/„Toggletip“, keine role=tooltip – das Fenster enthält einen Link):
@@ -43,6 +44,8 @@ final class Annotator
     private const AUTO_CLOSE = ['p' => ['p'], 'li' => ['li'], 'dt' => ['dt', 'dd'], 'dd' => ['dt', 'dd'], 'tr' => ['tr', 'td', 'th'], 'td' => ['td', 'th'], 'th' => ['td', 'th']];
     /** Übliche Endungen deutscher Wörter (Plural, Genitiv, Dativ) */
     private const SUFFIX_WORD = '(?:e|en|n|s|es|er|ern)?';
+    /** Englisch: Plural -s/-es (Wörter auf Konsonant + y: -ies, Annotator::alternative) */
+    private const SUFFIX_WORD_EN = '(?:s|es)?';
 
     private array $byId = [];
     private ?string $rx = null;
@@ -55,27 +58,28 @@ final class Annotator
 
     /**
      * $o: mode (page|section), headings (0–6: h1…hN überspringen, Standard 3), exclude (Liste von Begriffs-IDs),
-     *     labels ([more, close, draft]), prefix (ID-Präfix, Standard „gl-“), main (null = automatisch: nur in <main>, falls vorhanden)
+     *     labels ([more, close, draft]), prefix (ID-Präfix, Standard „gl-“), main (null = automatisch: nur in <main>, falls vorhanden),
+     *     lang (Sprache der Seite für die Wortendungen, Standard „de“)
      */
     public function __construct(array $terms, private array $o = [])
     {
-        $this->o += ['mode' => 'page', 'headings' => 3, 'exclude' => [], 'labels' => [], 'prefix' => 'gl-', 'main' => null];
+        $this->o += ['mode' => 'page', 'headings' => 3, 'exclude' => [], 'labels' => [], 'prefix' => 'gl-', 'main' => null, 'lang' => 'de'];
         $this->o['labels'] += ['more' => 'Mehr im Glossar', 'close' => 'Schließen', 'draft' => 'Entwurf'];
         $exclude = array_map('intval', (array) $this->o['exclude']);
         foreach ($terms as $t) {
             if (in_array((int) $t['id'], $exclude, true) || trim((string) ($t['short'] ?? '')) === '') continue;
             $this->byId[(int) $t['id']] = $t;
         }
-        $this->rx = self::pattern(array_values($this->byId));
+        $this->rx = self::pattern(array_values($this->byId), (string) $this->o['lang']);
     }
 
-    /** Regulärer Ausdruck für alle Varianten (längste zuerst, Begriffs-ID als MARK) – null ohne Begriffe */
-    public static function pattern(array $terms): ?string
+    /** Regulärer Ausdruck für alle Varianten (längste zuerst, Begriffs-ID als MARK) – null ohne Begriffe. $lang: Wortendungen */
+    public static function pattern(array $terms, string $lang = 'de'): ?string
     {
         $alts = [];
         foreach ($terms as $t) {
             foreach (self::variants($t) as $v) {
-                [$src, $len] = self::alternative($v);
+                [$src, $len] = self::alternative($v, $lang);
                 if ($src === '') continue;
                 $alts[] = [$len, $src . '(*MARK:' . (int) $t['id'] . ')'];
             }
@@ -114,8 +118,14 @@ final class Annotator
         return false;
     }
 
+    /** Sprache mit englischen statt deutschen Wortendungen? (en, en-gb …) */
+    public static function english(string $lang): bool
+    {
+        return $lang === 'en' || str_starts_with($lang, 'en-');
+    }
+
     /** Teil-Ausdruck einer Variante: [Quelle, Länge] */
-    private static function alternative(string $v): array
+    private static function alternative(string $v, string $lang = 'de'): array
     {
         $exact = false;
         if (preg_match('~^["„“](.+)["“”]$~u', $v, $m)) {
@@ -133,7 +143,12 @@ final class Annotator
         $last = (string) end($words);
         if (!$exact) {
             if (preg_match('~\p{Lu}$~u', $v) && preg_match_all('~\p{Lu}~u', $last) >= 2) $suffix = '(?:s)?';
-            elseif (mb_strlen($last) >= 4 && preg_match('~\p{Ll}$~u', $v) && !preg_match('~\p{Ll}\p{Lu}~u', $last)) $suffix = self::SUFFIX_WORD;
+            elseif (mb_strlen($last) >= 4 && preg_match('~\p{Ll}$~u', $v) && !preg_match('~\p{Ll}\p{Lu}~u', $last)) {
+                if (!self::english($lang)) $suffix = self::SUFFIX_WORD;
+                // Englisch: entry → entries (Konsonant + y), sonst -s/-es
+                elseif (preg_match('~[^aeiouy]y$~iu', $last)) $src = substr($src, 0, -1) . '(?:y|ies)';
+                else $suffix = self::SUFFIX_WORD_EN;
+            }
         }
         return [($cs ? '(?:' . $src . ')' : '(?i:' . $src . ')') . $suffix, mb_strlen($v)];
     }

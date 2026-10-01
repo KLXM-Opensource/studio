@@ -74,6 +74,7 @@ foreach ($checks as $c) $byId[$c['id']][] = $c;
         <?php foreach ($terms as $x): $where = $occ[$x['id']] ?? []; $alt = array_values(array_diff($x['variants'], [$x['term']])); ?>
           <tr>
             <td class="gls-term"><a href="<?= e(url('/admin/data/' . $t['handle'] . '/' . $x['id'])) ?>"><b><?= e($x['term']) ?></b></a>
+              <?php if (\Core\Lang::multi() && ($x['lang'] ?? '') !== \Core\Lang::default()): ?> <span class="adm-badge" title="<?= e(__('Sprache')) ?>"><?= e(strtoupper((string) $x['lang'])) ?></span><?php endif; ?>
               <?php if ($x['draft']): ?> <span class="adm-badge adm-badge--muted"><?= e(__('Entwurf')) ?></span><?php endif; ?>
               <?php if (!empty($byId[$x['id']])): ?> <span class="adm-badge adm-badge--adm-warn" title="<?= e(implode(' ', array_column($byId[$x['id']], 'text'))) ?>"><?= e(__('Hinweis')) ?></span><?php endif; ?>
               <?php if ($alt): ?><span class="gls-alt"><?= e(implode(', ', $alt)) ?></span><?php endif; ?>

@@ -88,6 +88,29 @@ final class SelfTest
         self::eq('Satzzeichen', $hits('<main><p>(SPF).</p></main>'), ['SPF']);
         self::eq('ohne Kurz-Erklärung', $hits('<main><p>Leer</p></main>'), []);
 
+        // Englische Seite (Option lang): Endungen -s/-es, y → ies; keine deutschen Endungen
+        $E = [['id' => 51, 'key' => 'data-table', 'term' => 'data table', 'short' => 'Structured content.', 'url' => '/en/glossar/data-table', 'variants' => []],
+            ['id' => 52, 'key' => 'block', 'term' => 'Block', 'short' => 'Building block of a page.', 'url' => null, 'variants' => []],
+            ['id' => 53, 'key' => 'repository', 'term' => 'repository', 'short' => 'Code storage.', 'url' => null, 'variants' => []],
+            ['id' => 54, 'key' => 'api', 'term' => 'API', 'short' => 'Interface.', 'url' => null, 'variants' => []],
+            ['id' => 55, 'key' => 'passkey', 'term' => 'passkey', 'short' => 'Login without password.', 'url' => null, 'variants' => []]];
+        $en = fn(string $body) => self::hits((new Annotator($E, ['lang' => 'en', 'mode' => 'section']))->annotate($mk($body)));
+        self::eq('en: Plural -s', $en('<main><p>Two data tables</p></main>'), ['data tables']);
+        self::eq('en: y → ies', $en('<main><p>Both repositories</p></main>'), ['repositories']);
+        self::eq('en: Endung -es', $en('<main><p>Two passkeys and boxes</p></main>'), ['passkeys']);
+        self::eq('en: keine deutschen Endungen', $en('<main><p>A blocker, passkeyer, repositoryes</p></main>'), []);
+        self::eq('en: Abkürzung Plural', $en('<main><p>Two APIs</p></main>'), ['APIs']);
+        self::eq('en-gb wie en', Annotator::english('en-gb') && !Annotator::english('de') && !Annotator::english('eo'), true);
+        self::eq('de bleibt: Blocker', self::hits((new Annotator($E))->annotate($mk('<main><p>Der Blocker</p></main>'))), ['Blocker']);
+        self::eq('en: Muster mit lang', (bool) preg_match((string) Annotator::pattern($E, 'en'), 'repositories'), true);
+        self::eq('de: Muster ohne ies', (bool) preg_match((string) Annotator::pattern($E, 'de'), 'repositories'), false);
+        // Prüfungen je Sprache: gleiche Variante auf Deutsch und Englisch ist kein Doppel, in derselben Sprache schon
+        $ck = fn(array $terms) => count(array_filter(Glossary::checks($terms), fn($c) => $c['level'] === 'warn'));
+        self::eq('Prüfung: API de + en kein Doppel', $ck([['id' => 1, 'term' => 'API', 'short' => 'x', 'variants' => [], 'lang' => 'de'],
+            ['id' => 2, 'term' => 'API', 'short' => 'x', 'variants' => [], 'lang' => 'en']]), 0);
+        self::eq('Prüfung: API zweimal de = Doppel', $ck([['id' => 1, 'term' => 'API', 'short' => 'x', 'variants' => [], 'lang' => 'de'],
+            ['id' => 2, 'term' => 'API', 'short' => 'x', 'variants' => [], 'lang' => 'de']]), 1);
+
         // Ausnahmen
         $skip = [
             'Link' => '<a href="/x">SPF</a>', 'Button' => '<button>SPF</button>', 'Code' => '<code>SPF</code>', 'Pre' => '<pre>SPF</pre>',
