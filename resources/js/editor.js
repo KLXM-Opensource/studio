@@ -30,7 +30,7 @@ const previews = initial.previews || {};
 const tools = new Map();      // blockId → Tool-Instanz
 const tunes = new Map();      // blockId → Tune-Instanz
 const initialTunes = Object.fromEntries((initial.blocks || []).map(b => [b.id, b.tunes?.section || {}]));
-const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '' };
+const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false };
 let editor, dirty = false, drawerFor = null, drawerSnap = null;
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const COLLAPSE_KEY = 'cms-collapsed-' + cfg.page.id;
@@ -555,6 +555,7 @@ function makeTool(type, def) {
         t.height === 'screen' && '<span class="cms-flag">Vollbild</span>',
         t.bgImage && '<span class="cms-flag">Hintergrundbild</span>',
         t.row && `<span class="cms-flag cms-flag--row">${CMSAdmin.esc(CMSAdmin.t('Reihe: {w}', { w: CMSAdmin.t(ROW_LABEL[t.row] || t.row) }))}</span>`,
+        cfg.glossary && t.noGlossary && `<span class="cms-flag">${CMSAdmin.esc(CMSAdmin.t('ohne Glossar'))}</span>`,
       ].filter(Boolean).join('');
       layoutRows();
       // Direkt editierbare Texte: plain = nur Text, rich/inline = mit schwebender Formatierungsleiste
@@ -897,7 +898,9 @@ function renderTuneForm(tool) {
       <button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> <button type="button" class="btn btn--small btn--ghost" data-media-clear>Entfernen</button></div></div>
     <div class="f"><label for="t-ov">Bild abdunkeln oder aufhellen</label><select id="t-ov" name="overlay">${opt({ none: 'Nein', dark: 'Abdunkeln (helle Schrift)', light: 'Aufhellen (dunkle Schrift)' }, t.overlay)}</select></div>
     ${cfg.rows && !tool.def?.raw ? `<div class="f"><label for="t-row">${E(CMSAdmin.t('Neben den vorigen Block stellen'))}</label><select id="t-row" name="row" aria-describedby="t-row-h">${opt(rowOpts, t.row || '')}</select>
-      <p class="f-help" id="t-row-h">${E(CMSAdmin.t('Breite dieses Blocks; der vorige Block bekommt den Rest. Hintergrund, Abstände, Trennlinie und Hintergrundbild kommen vom ersten Block der Reihe – ein anderer Hintergrund macht diesen Block zur Karte. Auf schmalen Bildschirmen stehen die Blöcke untereinander.'))}</p></div>` : ''}`;
+      <p class="f-help" id="t-row-h">${E(CMSAdmin.t('Breite dieses Blocks; der vorige Block bekommt den Rest. Hintergrund, Abstände, Trennlinie und Hintergrundbild kommen vom ersten Block der Reihe – ein anderer Hintergrund macht diesen Block zur Karte. Auf schmalen Bildschirmen stehen die Blöcke untereinander.'))}</p></div>` : ''}
+    ${cfg.glossary ? `<div class="f"><label class="f-check"><input type="checkbox" name="noGlossary"${t.noGlossary ? ' checked' : ''} aria-describedby="t-gl-h"> <span>${E(CMSAdmin.t('Glossar-Begriffe hier nicht markieren'))}</span></label>
+      <p class="f-help" id="t-gl-h">${E(CMSAdmin.t('Begriffe aus dem Glossar bekommen in diesem Abschnitt keine Erklärung zum Aufklappen (z. B. in Zitaten oder Werbetexten).'))}</p></div>` : ''}`;
   f.classList.add('adm-fields');
   CMSAdmin.init(f);
   f.oninput = f.onchange = () => {
@@ -908,6 +911,7 @@ function renderTuneForm(tool) {
       navLabel: f.navLabel.value, spaceTop: f.spaceTop.value, spaceBottom: f.spaceBottom.value,
       height: f.height.value, align: f.align.value, bgImage: +f.bgImage.value || null, overlay: f.overlay.value,
       row: f.row ? f.row.value : (tune?.data?.row || ''),
+      noGlossary: f.noGlossary ? f.noGlossary.checked : !!tune?.data?.noGlossary,
     };
     f.align.disabled = data.height !== 'screen';
     if (tune) tune.data = data;
@@ -986,6 +990,48 @@ editor = new EditorJS({
     requestAnimationFrame(() => jumpToBlock());
   },
 });
+
+// ------------------------------------------------------------------ Griff „+ ⠿“: erst nach kurzem Verweilen umsetzen (Hover-Intent)
+/*
+ * Editor.js setzt den Griff bei jeder Mausbewegung sofort an den Block unter dem Zeiger (watchBlockHoveredEvents auf dem
+ * Redaktor). Der Griff sitzt über der Blockkante – auf dem Weg dorthin kreuzt die Maus oft den Block darüber, und der Griff
+ * springt weg („+“ nicht erreichbar). Darum halten wir Mausbewegungen über einem ANDEREN Block zurück, bis der Zeiger dort
+ * INTENT_MS verweilt; über dem Griff selbst und im Korridor zwischen Block und Griff bleibt er immer stehen.
+ */
+(() => {
+  const INTENT_MS = 320;
+  const host = holder();
+  if (!host) return;
+  let current = null, pending = null, timer = 0, replay = false;
+  const actions = () => host.querySelector('.ce-toolbar__actions');
+  const inCorridor = (e, blk) => {
+    const a = actions(); if (!a || !blk) return false;
+    const r = a.getBoundingClientRect(), b = blk.getBoundingClientRect();
+    if (!r.width) return false;
+    // Rechteck vom Griff bis zur Oberkante des Blocks, seitlich großzügig
+    return e.clientX >= r.left - 40 && e.clientX <= Math.max(r.right + 160, r.left + 260) && e.clientY >= r.top - 12 && e.clientY <= b.top + 24;
+  };
+  host.addEventListener('mousemove', e => {
+    if (replay) return;
+    if (e.target.closest?.('.ce-toolbar')) { clearTimeout(timer); pending = null; return; }
+    const blk = e.target.closest?.('.ce-block');
+    if (!blk || blk === current || !current || !current.isConnected) { if (blk) current = blk; clearTimeout(timer); pending = null; return; }
+    // Anderer Block: zurückhalten – im Korridor zum Griff ganz, sonst bis zum Verweilen
+    e.stopPropagation();
+    if (inCorridor(e, current)) { clearTimeout(timer); pending = null; return; }
+    if (pending !== blk) {
+      pending = blk; clearTimeout(timer);
+      const { clientX, clientY } = e, target = e.target;
+      timer = setTimeout(() => {
+        if (pending !== blk || !target.isConnected) return;
+        current = blk; pending = null; replay = true;
+        target.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX, clientY }));
+        replay = false;
+      }, INTENT_MS);
+    }
+  }, true);
+  host.addEventListener('mouseleave', () => { clearTimeout(timer); pending = null; });
+})();
 
 // ------------------------------------------------------------------ Markdown importieren (Menü „⋯“ der Werkzeugleiste, CMSAdmin.Markdown aus _markdown.js)
 /**
