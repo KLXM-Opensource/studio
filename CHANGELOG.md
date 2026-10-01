@@ -6,6 +6,27 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Glossar – Fachbegriffe im Text erklären (Funktion `glossary`, Standard aus)
+- Begriffe als Datentabelle **„Glossar“** (Begriff, Varianten/Synonyme/Abkürzungen, Kurz-Erklärung ≤ 240 Zeichen, ausführliche
+  Erklärung, Kategorie, Mehr erfahren, Status); einrichten unter **Verwaltung → Glossar** bzw. `glossary:install`. Detailseiten
+  `/glossar/<begriff>` (JSON-LD `DefinedTerm`), Übersicht A–Z mit Buchstaben und Suchfilter (Kern-Block **„Glossar“**,
+  `DefinedTermSet`).
+- **Markierung auf der Website** (`Core\Glossary\Annotator`): erstes Vorkommen je Seite (oder je Abschnitt) im fertigen HTML,
+  vor dem Seiten-Cache – auch in Ausgaben von Erweiterungen. Nur lesbarer Inhalt (nicht in Links, Buttons, Code, Formularen,
+  Navigation, Kopf/Fuß, h1–h3, `[data-glossary=off]`, eigener Detailseite, Bearbeiten-Modus); Unicode-Wortgrenzen, Abkürzungen
+  nur in genauer Schreibweise, Wörter mit üblichen Endungen, längste Variante zuerst, nie doppelt.
+- Barrierearm: Schaltfläche mit `aria-expanded` + Popover („Toggletip“, kein `role=tooltip`), Tastatur (Enter/Leertaste/Esc),
+  Touch (Blatt unten), Druck mit Erklärung in Klammern, „Bewegung reduzieren“, kein Layout-Verschieben. CSP-konform:
+  `glossary.js` ≈ 1,2 KB, `glossary.css` ≈ 1,4 KB (gz) nur auf Seiten mit Begriffen. Kits passen über `--gl-*` bzw.
+  `css/glossary.css` an; Standard passt sich hell/dunkel an.
+- **Dynamische Bereiche** (Einstellung bzw. `data-glossary="live"`): Inhalte, die erst im Browser entstehen (z. B. Ergebnisse
+  von KLXM Check), markiert `glossary-live.mjs` über `/_glossary.json`.
+- Redaktion: Abschnitts-Option **„Glossar-Begriffe hier nicht markieren“**, Seiten ausnehmen, Hinweise zu doppelten/überlappenden
+  Varianten, „Vorkommen“ je Begriff (Text des Suchindex), CSV-Import/-Export, „Begriff schnell hinzufügen“ – optional mit
+  **KI-Vorschlag** (immer als Entwurf). Entwürfe sieht die angemeldete Redaktion im Text mit Hinweis „Entwurf“.
+- Suche & Besucher-Chat: veröffentlichte Begriffe kommen über ihre Detailseiten automatisch in den Suchindex.
+- Kommandozeile: `glossary:install`, `glossary:import`, `glossary:export`, `glossary:check`, `glossary:selftest [--bench]`.
+
 ### Stellenangebote & Google for Jobs – Vorlage „Stellenangebote“ + Eingang „Bewerbungen“
 - Neue Tabellen-Vorlage **„Stellenangebote“** (Daten → Vorlage, alle Kits): Titel, Kurzbeschreibung, Beschreibung, Veröffentlicht am
   (heute vorbelegt), Gültig bis, Beschäftigungsart, Beginn, Arbeitsweise (vor Ort/hybrid/remote), Arbeitsort (leer = Adresse der

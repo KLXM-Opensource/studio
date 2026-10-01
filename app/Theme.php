@@ -28,6 +28,8 @@ final class Theme
         'background' => 'white', 'anchor' => '', 'visible' => true, 'showInNav' => false, 'navLabel' => '',
         'spaceTop' => 'normal', 'spaceBottom' => 'normal', 'divider' => false,
         'height' => 'auto', 'bgImage' => null, 'overlay' => 'none', 'align' => 'center', 'row' => '',
+        // Glossar (Core\Glossary): in diesem Abschnitt keine Begriffe markieren
+        'noGlossary' => false,
     ];
 
     /**
@@ -167,6 +169,7 @@ final class Theme
         // Neben den vorigen Block stellen: '' = eigener Abschnitt, sonst Breite (auto, 1-2, 1-3, 2-3, 1-4, 3-4); true = auto
         $row = ($t['row'] ?? '') === true ? 'auto' : (string) ($t['row'] ?? '');
         $out['row'] = array_key_exists($row, self::ROW_WIDTHS) ? $row : '';
+        $out['noGlossary'] = filter_var($t['noGlossary'] ?? false, FILTER_VALIDATE_BOOL);
         return $out;
     }
 
@@ -394,6 +397,10 @@ final class Theme
         }
         $html = !empty($block->def['raw']) ? $inner   // Block rendert seinen Abschnitt selbst
             : $this->render('partials/section', ['b' => $block, 'inner' => $inner]);
+        // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“: Kennzeichen am äußersten Element (Core\Glossary\Annotator)
+        if (!empty($block->tunes['noGlossary']) && !app()->editing) {
+            $html = (string) preg_replace('~^(\s*<[a-zA-Z][a-zA-Z0-9-]*)(?=[\s>/])~', '$1 data-glossary="off"', $html, 1);
+        }
         // Redaktion (Bearbeiten-Modus, Entwurfsansicht): Notizen als Hinweis „Notiz: …“ (Core\EditorNotes)
         return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
     }
@@ -516,6 +523,10 @@ final class Theme
         if (($types === null && ($this->def['rows'] ?? true) !== false) || $this->rowCss) {
             $out[] = $this->coreCss('rows.css');
         }
+        // Glossar (Block „Glossar“; Hinweise im Text bindet Core\Glossary\Glossary::page ein) – Kern + optional css/glossary.css des Kits
+        if (($types === null || in_array('glossary', $types, true)) && Features::on('glossary', false)) {
+            array_push($out, ...Glossary\Glossary::stylesheets(true));
+        }
         foreach ($this->def['conditional_css'] ?? [] as $file => $needs) {
             if (str_ends_with($file, '.css') && ($types === null || array_intersect($needs, $types))) {
                 $out[] = $this->asset($file);
@@ -607,6 +618,7 @@ final class Theme
                 'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“
             ];
         }
-        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false];
+        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false,
+            'glossary' => Features::on('glossary', false)];   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
     }
 }

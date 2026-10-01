@@ -12,6 +12,7 @@
 @import "./_imagefit.css";   /* Bild im Rahmen: Dialog mit Vorschau (resources/js/_imagefit.js) */
 @import "./_imageedit.css";   /* Bild bearbeiten: Werkzeugleiste und Bildeditor (Core\ImageEdit, resources/js/_imageedit.js) */
 @import "./_redirects.css";   /* Weiterleitungen und 404-Protokoll (Core\Redirects) */
+@import "./_glossary.css";   /* Verwaltung → Glossar (Core\Glossary) */
 @import "./_markdown.css";   /* Markdown einfügen/importieren: Dialog und Hinweis (resources/js/_markdown.js) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 /* ==========================================================================

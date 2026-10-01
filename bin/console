@@ -112,6 +112,10 @@
  *                                                     Weiterleitungen importieren (JSON [{"from","to"}] oder CSV quelle;ziel;code;notiz)
  *   redirects:list [--q=text] | redirects:test <pfad>  Weiterleitungen auflisten | Wohin führt eine Adresse?
  *   redirects:selftest                                Selbsttest: Normalisieren und Vergleichen der Weiterleitungen
+ *   glossary:install [--publish] [--enable]           Glossar einrichten: Tabelle „glossar“, Detailseiten /glossar/…, Übersicht /glossar
+ *   glossary:import <datei.csv> [--overwrite] [--dry-run] | glossary:export [--out=datei.csv]
+ *                                                     Begriffe aus CSV übernehmen (neue als Entwurf) bzw. ausgeben
+ *   glossary:check | glossary:selftest [--bench]      Hinweise (doppelte Varianten …) | Selbsttest der Markierung (Regeln, Laufzeit)
  *   notfound:create [--lang=en] [--publish]           Seite „Nicht gefunden (404)“ anlegen (Startinhalte des Kits, sonst Entwurf)
  *   notfound:selftest                                 Selbsttest der 404-Seite (Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge)
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
@@ -537,6 +541,14 @@ switch ($cmd) {
     case 'sources:list':
         // Externe Quellen (Core\Sources): Feeds, JSON-APIs, XML, OpenImmo → Datentabellen
         exit(Core\Sources\Console::run($cmd, $args, __FILE__));
+
+    case 'glossary:install':
+    case 'glossary:import':
+    case 'glossary:export':
+    case 'glossary:check':
+    case 'glossary:selftest':
+        // Glossar (Core\Glossary) je Website (--site=…)
+        exit(Core\Glossary\Console::run($cmd, $args));
 
     case 'redirects:import':
     case 'redirects:list':

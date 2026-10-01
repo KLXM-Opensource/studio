@@ -1,0 +1,47 @@
+<?php /** Entwicklerhandbuch · Glossar (Core\Glossary) */ ?>
+  <p class="lead">Fachbegriffe als gewöhnliche Datentabelle; der Kern markiert das erste Vorkommen auf jeder Seite im fertigen HTML (vor dem Seiten-Cache) und liefert Übersicht, Detailseiten, JSON-LD und Suchindex. Funktion <code>glossary</code> (Standard <b>aus</b>, setzt <code>data</code> voraus), Verwaltung → <b>Glossar</b> (Recht <code>data.edit</code> auf die Tabelle, Einrichten/Einstellungen <code>data.schema</code>).</p>
+  <table class="doc-table">
+    <tr><th>Baustein</th><th>Ort</th></tr>
+    <tr><td>Daten</td><td>Tabelle <code>glossar</code>: <code>begriff</code>*, <code>varianten</code> (Zeilen bzw. Komma/Semikolon), <code>kurz</code>* (Klartext ≤ 240), <code>erklaerung</code> (Rich Text), <code>kategorie</code>, <code>link</code> (url), Status. Route <code>glossar</code>, Detailvorlage <code>_vorlage-glossar</code> (Block <code>glossary</code>, Ansicht <code>term</code>), schema.org-Typ „keiner“ (der Block liefert <code>DefinedTerm</code> bzw. <code>DefinedTermSet</code>).</td></tr>
+    <tr><td>Code</td><td><code>Core\Glossary\Glossary</code> (Einstellungen, Begriffe, <code>page()</code>, <code>install()</code>, Prüfungen, Vorkommen, CSV, KI-Vorschlag), <code>…\Annotator</code> (Markierung ohne DOM-Bibliothek), <code>…\Console</code>, <code>…\SelfTest</code>, <code>Admin\GlossaryController</code>, Block <code>app/Blocks/glossary.php</code></td></tr>
+    <tr><td>Website</td><td><code>resources/css/glossary.css</code> (Begriffe/Fenster, ≈ 1,4 KB gz), <code>glossary-list.css</code> (Block), <code>resources/js/glossary.js</code> (≈ 1,2 KB gz), <code>glossary-live.mjs</code> (nur mit dynamischen Bereichen), <code>GET /_glossary.json?lang=</code> (veröffentlichte Begriffe, 5 min öffentlich cachebar)</td></tr>
+    <tr><td>Einstellungen</td><td><code>sys.glossary</code>: <code>mode</code> (page|section|off), <code>headings</code> (h1…hN nicht markieren, Standard 3), <code>exclude</code> (Pfade, <code>/x/*</code>), <code>live</code> (Selektoren), <code>page_id</code> (Übersicht)</td></tr>
+  </table>
+
+  <h3>Markieren</h3>
+  <ul>
+    <li><b>Wann:</b> <code>SiteController::render()</code> nach Erweiterungs-Filtern und Redaktionsnotizen, vor <code>PageCache::put</code> – also einmal je gecachter Seite. Seiten außerhalb von <code>render()</code> (eigene Routen von Erweiterungen) über <code>respond()</code>; <code>Glossary::$done</code> verhindert doppelte Arbeit, ein Cache-Treffer setzt es. Nie im Bearbeiten-Modus, nicht für Status ≠ 200, nicht auf der Suchseite. Angemeldet mit <code>data.edit</code>: auch Entwürfe (Hinweis „Entwurf“, ohne Cache).</li>
+    <li><b>Wo:</b> nur <code>&lt;body&gt;</code>, gibt es ein <code>&lt;main&gt;</code>, nur darin. Rohtext-Bereiche (script, style, pre, code, textarea, template, svg, select, iframe, Kommentare) bleiben unberührt; übersprungen werden a, button, label, summary, legend, kbd, samp, var, abbr, dfn, nav, time, Überschriften bis <code>headings</code>, header/footer außerhalb von main/article/section/aside, <code>[hidden]</code>, <code>[inert]</code>, <code>[contenteditable]</code>, <code>[aria-hidden=true]</code>, interaktive Rollen, Klassen <code>sr-only</code>, <code>visually-hidden</code>, <code>cms-note</code> … und alles unter <code>[data-glossary="off"]</code> (Abschnitts-Option <code>noGlossary</code> setzt das am Abschnitt, der Block „Glossar“ an der Übersicht).</li>
+    <li><b>Treffer:</b> ein regulärer Ausdruck für alle Varianten, längste zuerst, Begriffs-ID als <code>(*MARK)</code>. Wortgrenzen per Unicode (<code>\p{L}\p{N}</code>), nicht in Adressen/Zuweisungen (<code>. @ / : = &amp;</code> davor bzw. <code>.x</code> danach). Abkürzungen (≥ 2 Großbuchstaben in einem Wort, oder klein→groß) genau, sonst <code>(?i)</code>; Endungen nach dem letzten Wort: Abkürzung <code>s</code>, Wort ab 4 Zeichen <code>e|en|n|s|es|er|ern</code>. <code>"…"</code> = genau, ohne Endung. Leerraum in Varianten passt auch auf <code>&amp;nbsp;</code>. Je Begriff das erste Vorkommen je Seite bzw. je <code>section</code>/<code>article</code>; schon vorhandene Markierungen (<code>.gl[data-gl]</code>) zählen mit – zweimal anwenden ändert nichts.</li>
+    <li><b>Laufzeit:</b> ≈ 20 ms für 580 KB HTML und 316 Begriffe (<code>glossary:selftest --bench</code>); danach liefert der Seiten-Cache.</li>
+    <li><b>Dynamische Bereiche:</b> Elemente mit <code>data-glossary="live"</code> oder den Selektoren aus <code>live</code> beobachtet <code>glossary-live.mjs</code> (MutationObserver); beim ersten Inhalt lädt es <code>/_glossary.json</code> und markiert mit denselben Regeln (je Bereich das erste Vorkommen, nur DOM-Methoden). So bekommen z. B. die Ergebnisse von KLXM Check Erklärungen, ohne die Erweiterung zu ändern.</li>
+  </ul>
+
+  <h3>Markup und Barrierefreiheit</h3>
+  <pre><code>&lt;span class="gl" data-gl="spf"&gt;&lt;button type="button" class="gl-term" popovertarget="gl-1" aria-expanded="false" aria-controls="gl-1"&gt;SPF&lt;/button&gt;
+&lt;span class="gl-pop" id="gl-1" popover&gt;&lt;span class="gl-pop__head"&gt;&lt;span class="gl-pop__t"&gt;SPF&lt;/span&gt;&lt;button … popovertargetaction="hide" aria-label="Erklärung schließen"&gt;×&lt;/button&gt;&lt;/span&gt;
+&lt;span class="gl-pop__d"&gt;…&lt;/span&gt;&lt;a class="gl-pop__more" href="/glossar/spf"&gt;Mehr im Glossar →&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;</code></pre>
+  <ul>
+    <li><b>Muster „Toggletip“/Disclosure</b> statt <code>role="tooltip"</code>: Das Fenster enthält einen Link, Tooltips dürfen keine bedienbaren Inhalte haben und erscheinen nur bei Hover/Fokus. Der Begriff ist eine Schaltfläche mit <code>aria-expanded</code>/<code>aria-controls</code>; die Erklärung folgt im DOM direkt danach (Screenreader lesen sie nach dem Aufklappen als Nächstes). Kein <code>aria-describedby</code> – sonst würde die Erklärung bei jedem Fokus zusätzlich vorgelesen. Geschlossene Fenster sind ausgeblendet und stören das normale Lesen nicht.</li>
+    <li><b>Bedienung:</b> Enter/Leertaste öffnen und schließen, Tab führt ins Fenster (Schließen, Link), Esc und Klick daneben schließen (Popover-API, Fokus zurück zum Begriff). Ohne Popover-API übernimmt <code>glossary.js</code> dasselbe (Klasse <code>is-open</code>). Ohne JavaScript öffnet das Fenster in aktuellen Browsern trotzdem (deklaratives <code>popovertarget</code>).</li>
+    <li><b>Darstellung:</b> gepunktete Unterstreichung, Schrift und Farbe des Textes – kein Verschieben (CLS 0). Fenster in der obersten Ebene, am Begriff ausgerichtet (unten oder darüber), auf schmalen Bildschirmen als Blatt unten (der Begriff bleibt sichtbar). Animation nur ohne „Bewegung reduzieren“; <code>forced-colors</code> beachtet. Druck: Erklärung in Klammern hinter dem Begriff.</li>
+    <li><b>CSP:</b> nur externe Dateien, kein Inline-Code; Positionen per CSSOM.</li>
+  </ul>
+
+  <h3>Kits</h3>
+  <p>Ohne Anpassung: Akzent aus den Link-Farben der Kern-Kits (<code>--b-link</code>, <code>--m-link</code> …), Fläche und Text des Fensters aus der Textfarbe abgeleitet (hell/dunkel automatisch, relative Farbsyntax mit Rückfall <code>Canvas</code>). Variablen: <code>--gl-accent</code>, <code>--gl-line</code>, <code>--gl-bg</code>, <code>--gl-text</code>, <code>--gl-border</code>, <code>--gl-radius</code>, <code>--gl-shadow</code>, <code>--gl-width</code>, <code>--gl-font</code>, <code>--gl-pop-accent</code>. Ergänzungen in <code>kits/{kit}/assets/css/glossary.css</code> (wird nach dem Kern geladen); den Block überschreibt <code>kits/{kit}/blocks/glossary.php</code>.</p>
+
+  <h3>Suche, KI, Schnittstellen</h3>
+  <ul>
+    <li>Veröffentlichte Begriffe haben Detailseiten und landen damit automatisch im Suchindex (<code>TableSearch</code>: Begriff hoch, Varianten/Erklärungen normal) – und so auch im Besucher-Chat, der aus dem Index antwortet.</li>
+    <li>„Vorkommen“ zählt in den Texten von <code>Search\Documents::build()</code> (Seiten und Einträge anderer Tabellen), 10 Minuten zwischengespeichert (<code>storage/…/cache/glossary-occurrences.json</code>).</li>
+    <li>KI (optional, Funktion <code>ai</code>): „Von der KI vorschlagen“ ruft <code>Assist::call('text', …)</code> mit festem Auftrag (≤ 220 Zeichen, Sie-Form, sachlich) – Ergebnis immer als Entwurf.</li>
+    <li>API/MCP: wie jede Datentabelle (<code>/api/v1/data/glossar</code>).</li>
+  </ul>
+
+  <h3>Kommandozeile</h3>
+  <pre><code>php bin/console glossary:install [--publish] [--enable] [--dry-run]   # Tabelle, Detailseiten, Übersicht /glossar
+php bin/console glossary:import begriffe.csv [--overwrite] [--dry-run]
+php bin/console glossary:export [--out=glossar.csv]
+php bin/console glossary:check                                        # doppelte Varianten, Überschneidungen, fehlende Texte
+php bin/console glossary:selftest [--bench]                           # Regeln, Ausnahmen, Escaping, Laufzeit</code></pre>

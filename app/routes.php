@@ -83,6 +83,13 @@ return function (Router $r): void {
     $r->post('/admin/landingpages/{id}/delete', [Admin\LandingController::class, 'delete']);
     $r->post('/admin/landingpages/{id}/check', [Admin\LandingController::class, 'check']);
     // Weiterleitungen und 404-Protokoll (Core\Redirects, Funktion „redirects“, Recht redirects.manage)
+    // Glossar (Funktion „glossary“, Core\Glossary): Begriffe, Prüfungen, Einstellungen, Import/Export, KI-Vorschlag
+    $r->get('/admin/glossar', [Admin\GlossaryController::class, 'index']);
+    $r->post('/admin/glossar/einrichten', [Admin\GlossaryController::class, 'install']);
+    $r->post('/admin/glossar/einstellungen', [Admin\GlossaryController::class, 'settings']);
+    $r->post('/admin/glossar/neu', [Admin\GlossaryController::class, 'quick']);
+    $r->post('/admin/glossar/import', [Admin\GlossaryController::class, 'import']);
+    $r->get('/admin/glossar/export', [Admin\GlossaryController::class, 'export']);
     $r->get('/admin/weiterleitungen', [Admin\RedirectController::class, 'index']);
     $r->get('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'edit']);
     $r->post('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'save']);
@@ -511,6 +518,8 @@ return function (Router $r): void {
     $r->get('/sitemap.xml', [SiteController::class, 'sitemap']);
     // Rechtstexte im Dialog (Datenschutzhinweise an Formularen, Core\LegalDialog)
     $r->get('/_legal/{kind}', fn(\Core\Http\Request $req, string $kind) => \Core\LegalDialog::handle($req, $kind));
+    // Glossar: Begriffe für Inhalte, die erst im Browser entstehen (resources/js/glossary-live.mjs) – nur veröffentlichte
+    $r->get(\Core\Glossary\Glossary::JSON_PATH, fn(\Core\Http\Request $req) => \Core\Glossary\Glossary::jsonResponse($req));
     $r->get('/robots.txt', [SiteController::class, 'robots']);
     // Theme-Formulare (z. B. /anfrage/rezept) – dahinter die Eingangs-Tabelle des Formulars
     $r->get('/api/form/{form}', [FormController::class, 'challenge']);

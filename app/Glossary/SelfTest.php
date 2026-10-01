@@ -1,0 +1,167 @@
+<?php
+// SPDX-License-Identifier: MIT
+// KLXM Studio – Copyright (C) 2026 KLXM and contributors (see LICENSE, COPYRIGHT)
+declare(strict_types=1);
+
+namespace Core\Glossary;
+
+/**
+ * php bin/console glossary:selftest [--bench] – Markierung ohne Datenbank prüfen: Wortgrenzen, Groß-/Kleinschreibung,
+ * Umlaute, Abkürzungen, längste Variante, erstes Vorkommen (Seite/Abschnitt), Ausnahmen, Escaping, keine Doppel-Markierung.
+ */
+final class SelfTest
+{
+    private static int $ok = 0;
+    private static array $fail = [];
+
+    public static function terms(): array
+    {
+        $t = fn(int $id, string $term, array $v, string $short = 'Erklärung.') => ['id' => $id, 'key' => \Core\Pages::slugify($term), 'term' => $term,
+            'short' => $short, 'url' => '/glossar/' . \Core\Pages::slugify($term), 'variants' => $v];
+        return [
+            $t(1, 'SPF', ['Sender Policy Framework'], 'Legt im DNS fest, welche Server Mails senden dürfen.'),
+            $t(2, 'DNS', ['Domain Name System']),
+            $t(3, 'DNSSEC', []),
+            $t(4, 'Barrierefreiheit', ['barrierefrei']),
+            $t(5, 'MX-Eintrag', ['MX']),
+            $t(6, 'TLS', ['Transport Layer Security']),
+            $t(7, 'TLS-RPT', []),
+            $t(8, 'Zertifikat', ['SSL-Zertifikat']),
+            $t(9, 'Übertragung', []),
+            $t(10, 'IPv6', []),
+            $t(11, 'Cookie', ['"Cookie"']),
+            $t(12, 'CDN', ['Content Delivery Network']),
+            $t(13, 'XSS', [], 'Gefährlich: <script>alert("x")</script> & mehr'),
+            $t(14, 'Leer', [], ''),
+            $t(15, 'HTTP/2', []),
+            $t(16, 'Straße', []),
+            $t(17, 'DNS-Lookup', []),
+        ];
+    }
+
+    private static function eq(string $name, mixed $got, mixed $want): void
+    {
+        if ($got === $want) { self::$ok++; return; }
+        self::$fail[] = $name . ': erwartet ' . json_encode($want, JSON_UNESCAPED_UNICODE) . ', erhalten ' . json_encode($got, JSON_UNESCAPED_UNICODE);
+    }
+
+    /** Markierte Begriffe (Text der Buttons) */
+    private static function hits(string $html): array
+    {
+        preg_match_all('~<button type="button" class="gl-term"[^>]*>(.*?)</button>~s', $html, $m);
+        return $m[1];
+    }
+
+    public static function run(bool $bench = false): int
+    {
+        self::$ok = 0;
+        self::$fail = [];
+        $T = self::terms();
+        $a = new Annotator($T);
+        $mk = fn(string $body) => '<!doctype html><html><head><title>SPF</title><meta name="description" content="SPF und DNS"></head><body>' . $body . '</body></html>';
+        $hits = fn(string $body, array $o = []) => self::hits((new Annotator($T, $o))->annotate($mk($body)));
+
+        // Grundregeln
+        self::eq('einfach', $hits('<main><p>SPF und DNS prüfen.</p></main>'), ['SPF', 'DNS']);
+        self::eq('erstes Vorkommen je Seite', $hits('<main><p>SPF, SPF</p><section><p>SPF</p></section></main>'), ['SPF']);
+        self::eq('je Abschnitt', $hits('<main><section><p>SPF und SPF</p></section><section><p>SPF</p></section></main>', ['mode' => 'section']), ['SPF', 'SPF']);
+        self::eq('Abkürzung: genaue Schreibweise', $hits('<main><p>spf und Spf</p></main>'), []);
+        self::eq('Wort: Groß/klein egal', $hits('<main><p>Mehr barrierefreiheit!</p></main>'), ['barrierefreiheit']);
+        self::eq('Wort: Endung', $hits('<main><p>Zwei Zertifikate</p></main>'), ['Zertifikate']);
+        self::eq('Umlaut groß', $hits('<main><p>ÜBERTRAGUNG läuft</p></main>'), ['ÜBERTRAGUNG']);
+        self::eq('Umlaut Endung', $hits('<main><p>Viele Übertragungen</p></main>'), ['Übertragungen']);
+        self::eq('ß', $hits('<main><p>In der Straße</p></main>'), ['Straße']);
+        self::eq('Wortgrenze', $hits('<main><p>SPFX, MXR, aDNS, Zertifikatsstelle</p></main>'), []);
+        self::eq('längste zuerst', $hits('<main><p>DNSSEC und TLS-RPT</p></main>'), ['DNSSEC', 'TLS-RPT']);
+        self::eq('Bindestrich-Wort', $hits('<main><p>Der DNS-Eintrag</p></main>'), ['DNS']);
+        self::eq('Plural-s Abkürzung', $hits('<main><p>Mehrere CDNs</p></main>'), ['CDNs']);
+        self::eq('IPv6', $hits('<main><p>Nur IPv6.</p></main>'), ['IPv6']);
+        self::eq('IPv6 nicht in ipv6', $hits('<main><p>ipv6</p></main>'), []);
+        self::eq('Anführungszeichen = genau', $hits('<main><p>cookie</p></main>'), []);
+        self::eq('Anführungszeichen ok', $hits('<main><p>Cookie</p></main>'), ['Cookie']);
+        self::eq('Mehrwort mit nbsp', $hits('<main><p>Sender&nbsp;Policy Framework</p></main>'), ['Sender&nbsp;Policy Framework']);
+        self::eq('Mehrwort Zeilenumbruch', $hits("<main><p>Domain\n  Name System</p></main>"), ["Domain\n  Name System"]);
+        self::eq('Schrägstrich', $hits('<main><p>HTTP/2 ist schnell</p></main>'), ['HTTP/2']);
+        self::eq('Adresse/Domain', $hits('<main><p>spf.example.org und mail@SPF.de und /SPF/</p></main>'), []);
+        self::eq('Endung nach Abkürzung', $hits('<main><p>Höchstens 10 DNS-Lookups.</p></main>'), ['DNS-Lookups']);
+        self::eq('Zuweisung (=)', $hits('<main><p>Kopf: s=SPF und SPF=1</p></main>'), []);
+        self::eq('Satzzeichen', $hits('<main><p>(SPF).</p></main>'), ['SPF']);
+        self::eq('ohne Kurz-Erklärung', $hits('<main><p>Leer</p></main>'), []);
+
+        // Ausnahmen
+        $skip = [
+            'Link' => '<a href="/x">SPF</a>', 'Button' => '<button>SPF</button>', 'Code' => '<code>SPF</code>', 'Pre' => '<pre>SPF</pre>',
+            'h1' => '<h1>SPF</h1>', 'h3' => '<h3>SPF</h3>', 'nav' => '<nav><span>SPF</span></nav>', 'data-glossary' => '<div data-glossary="off"><p>SPF</p></div>',
+            'textarea' => '<textarea>SPF</textarea>', 'script' => '<script>var a="SPF";</script>', 'hidden' => '<p hidden>SPF</p>',
+            'aria-hidden' => '<p aria-hidden="true">SPF</p>', 'contenteditable' => '<div contenteditable="false">SPF</div>', 'sr-only' => '<span class="x sr-only">SPF</span>',
+            'label' => '<label>SPF <input></label>', 'summary' => '<details><summary>SPF</summary></details>', 'kbd' => '<kbd>SPF</kbd>', 'abbr' => '<abbr title="x">SPF</abbr>',
+            'role=button' => '<div role="button">SPF</div>', 'Redaktionsnotiz' => '<span class="cms-note">SPF</span>', 'select' => '<select><option>SPF</option></select>',
+            'Dachzeile' => '<p class="cli-eyebrow">SPF</p>', 'Schlagwort' => '<span class="card__tag">SPF</span>',
+            'Attribut' => '<p title="SPF und DNS" data-x="a > SPF">x</p>', 'svg' => '<svg><text>SPF</text></svg>',
+        ];
+        foreach ($skip as $name => $html) self::eq('übersprungen: ' . $name, $hits('<main>' . $html . '</main>'), []);
+        self::eq('h4 erlaubt', $hits('<main><h4>SPF</h4></main>'), ['SPF']);
+        self::eq('h3 erlaubt mit headings=2', $hits('<main><h3>SPF</h3></main>', ['headings' => 2]), ['SPF']);
+        self::eq('nach Ausnahme weiter', $hits('<main><a href="#">SPF</a> und SPF</main>'), ['SPF']);
+        self::eq('Kopf außerhalb main', $hits('<header>SPF</header><main><p>DNS</p></main><footer>Cookie</footer>'), ['DNS']);
+        self::eq('header im Abschnitt', $hits('<main><section><header><p>SPF</p></header></section></main>'), ['SPF']);
+        self::eq('ohne main: footer übersprungen', $hits('<div><p>SPF</p></div><footer>DNS</footer>'), ['SPF']);
+        self::eq('offenes <p>', $hits('<main><p>Text<p>SPF<br>DNS</main>'), ['SPF', 'DNS']);
+        self::eq('ausgenommener Begriff', $hits('<main><p>SPF und DNS</p></main>', ['exclude' => [1]]), ['DNS']);
+
+        // Kopf und Daten bleiben unberührt; Escaping; keine Doppel-Markierung
+        $page = $mk('<main><p>XSS und SPF, später SPF</p><script type="application/ld+json">{"name":"SPF"}</script></main>');
+        $out = $a->annotate($page);
+        self::eq('Kopf unberührt', str_contains($out, '<title>SPF</title><meta name="description" content="SPF und DNS">'), true);
+        self::eq('JSON-LD unberührt', str_contains($out, '{"name":"SPF"}'), true);
+        self::eq('Erklärung escaped', str_contains($out, '&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; mehr') && !str_contains($out, '<script>alert'), true);
+        self::eq('Anzahl', $a->count, 2);
+        self::eq('Markup', str_contains($out, '<button type="button" class="gl-term" popovertarget="gl-2" aria-expanded="false" aria-controls="gl-2">SPF</button><span class="gl-pop" id="gl-2" popover>'), true);
+        self::eq('Link zum Glossar', str_contains($out, '<a class="gl-pop__more" href="/glossar/spf">'), true);
+        $again = (new Annotator($T))->annotate($out);
+        self::eq('zweimal = einmal', $again, $out);
+        self::eq('ohne Begriffe unverändert', (new Annotator([]))->annotate($page), $page);
+        self::eq('nichts gefunden unverändert', $a->annotate($mk('<main><p>Nichts.</p></main>')), $mk('<main><p>Nichts.</p></main>'));
+
+        // Hilfsfunktionen
+        self::eq('caseSensitive SPF', Annotator::caseSensitive('SPF'), true);
+        self::eq('caseSensitive MTA-STS', Annotator::caseSensitive('MTA-STS'), true);
+        self::eq('caseSensitive Sender Policy Framework', Annotator::caseSensitive('Sender Policy Framework'), false);
+        self::eq('caseSensitive eID', Annotator::caseSensitive('eID'), true);
+        self::eq('Varianten', Glossary::splitVariants("SPF-Eintrag\nSender Policy Framework; spf1, SPF-Eintrag"), ['SPF-Eintrag', 'Sender Policy Framework', 'spf1']);
+        self::eq('Kurz kürzen', mb_strlen(Glossary::short(str_repeat('Wort ', 80))) <= Glossary::SHORT_MAX, true);
+        self::eq('Kurz ohne HTML', Glossary::short('<p>Hallo&nbsp;<b>Welt</b></p>'), 'Hallo Welt');
+        self::eq('Pfad genau', Glossary::excluded('/impressum/', "/impressum\n/blog/*"), true);
+        self::eq('Pfad Präfix', Glossary::excluded('/blog/2026/x', "/impressum\n/blog/*"), true);
+        self::eq('Pfad nicht', Glossary::excluded('/blogger', "/blog/*\n/impressum"), false);
+
+        foreach (self::$fail as $f) echo "  FEHLER: $f\n";
+        echo '  ' . self::$ok . ' Prüfungen bestanden, ' . count(self::$fail) . " fehlgeschlagen\n";
+        if ($bench) self::bench();
+        return self::$fail ? 1 : 0;
+    }
+
+    /** Laufzeit: 300 Begriffe auf einer großen Seite (≈ 400 KB, 2.000 Absätze) */
+    private static function bench(): void
+    {
+        $terms = self::terms();
+        $words = ['Lorem', 'ipsum', 'dolor', 'Netzwerk', 'Server', 'Anfrage', 'Konfiguration', 'Sicherheit', 'Daten', 'Website'];
+        for ($i = 100; $i < 400; $i++) {
+            $terms[] = ['id' => $i, 'key' => 'b' . $i, 'term' => 'Begriff' . $i, 'short' => 'Erklärung ' . $i, 'url' => null, 'variants' => ['Fachwort' . $i, 'FW' . $i]];
+        }
+        $body = '<header><nav><a href="/">Start</a></nav></header><main>';
+        for ($p = 0; $p < 2000; $p++) {
+            $s = [];
+            for ($w = 0; $w < 25; $w++) $s[] = $words[($p * 7 + $w * 3) % count($words)];
+            if ($p % 9 === 0) $s[] = 'Begriff' . (100 + $p % 300);
+            if ($p % 13 === 0) $s[] = 'SPF';
+            $body .= '<section><h3>Abschnitt ' . $p . '</h3><p>' . implode(' ', $s) . ' <a href="/x">Link</a> <strong>fett</strong>.</p></section>';
+        }
+        $html = '<!doctype html><html><head><title>x</title></head><body>' . $body . '</main></body></html>';
+        $t = hrtime(true);
+        $a = new Annotator($terms);
+        $out = $a->annotate($html);
+        $ms = (hrtime(true) - $t) / 1e6;
+        printf("  Laufzeit: %.1f ms für %d KB, %d Begriffe, %d Markierungen (Ausgabe %d KB)\n", $ms, strlen($html) / 1024, count($terms), $a->count, strlen($out) / 1024);
+    }
+}

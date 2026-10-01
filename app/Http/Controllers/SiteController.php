@@ -152,6 +152,7 @@ final class SiteController
         $cacheKey = $ctx ? 'entry:' . $ctx['table']['handle'] . ':' . $ctx['entry']['id'] : 'page:' . $page['id'];
         $cacheable = !$error && !$loggedIn && $r->method === 'GET' && !$r->query;
         if ($cacheable && ($html = PageCache::get($cacheKey)) !== null) {
+            \Core\Glossary\Glossary::$done = true;   // Glossar-Begriffe sind im Seiten-Cache schon markiert
             return $this->respond($html, false)->header('X-Cache', 'HIT');
         }
 
@@ -205,6 +206,8 @@ final class SiteController
         // Entwurfsansicht der Redaktion: als Hinweis. Im Bearbeiten-Modus nicht – die Editor-Daten brauchen den Rohtext.
         if (!\Core\EditorNotes::$show) $html = \Core\EditorNotes::publicHtml($html);
         elseif (!$app->editing) $html = \Core\EditorNotes::decorate($html);
+        // Glossar (Funktion „glossary“): erstes Vorkommen der Begriffe markieren – vor dem Seiten-Cache, nie im Bearbeiten-Modus
+        $html = \Core\Glossary\Glossary::page($html, $status);
         if ($cacheable) {
             PageCache::put($cacheKey, $html);
         }
@@ -216,6 +219,8 @@ final class SiteController
         // Redaktionsnotizen [# … #] auch aus Seiten außerhalb von render() entfernen (Formularseiten /anfrage/…, Datenformulare,
         // Suche, Fehler-/Wartungsseite): dort kommen Notizen aus Einstellungen und Kit-Vorlagen (z. B. fehlende Praxisdaten)
         if (!\Core\EditorNotes::$show) $html = \Core\EditorNotes::publicHtml($html);
+        // Glossar: Seiten außerhalb von render() (z. B. eigene Seiten von Erweiterungen) – einmal je Anfrage
+        if (!\Core\Glossary\Glossary::$done) $html = \Core\Glossary\Glossary::page($html, $status);
         $res = new Response($html, $status);
         $res->header('Content-Security-Policy', self::csp($loggedIn));
         $res->header('Cache-Control', $loggedIn ? 'no-store, private' : 'public, max-age=0, must-revalidate');

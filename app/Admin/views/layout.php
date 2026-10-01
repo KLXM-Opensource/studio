@@ -14,6 +14,9 @@ $nav = array_values(array_filter([
     ['/admin/settings', app()->theme->settingsTitle(), 'settings', $user && can('settings.edit')],
     ['/admin/media', __('Medien'), 'media', $user && can('media.upload')],
     ['/admin/data', __('Daten'), 'data', (bool) $dataOk],
+    // Glossar (Core\Glossary): Begriffe, Hinweise, Einstellungen – Funktion „glossary“, Recht data.edit auf die Tabelle (Einrichten: data.schema)
+    ['/admin/glossar', __('Glossar'), 'glossary', $user && \Core\Glossary\Glossary::enabled()
+        && (($gt = \Core\Glossary\Glossary::table()) ? can('data.edit', $gt['handle']) : can('data.schema'))],
     ['/admin/requests', __('Anfragen'), 'requests', (bool) $inboxes || ($user && can('requests.read') && can('data.schema') && \Core\Data\Inbox::available())],
     // Support & Wissensdatenbank: im Abschnitt „Hilfe & Support“ unten in der Seitenleiste
     // Chat zwischen Benutzern (Core\Chat, optional) – öffnet mit JavaScript die Schublade (resources/js/userchat.js)

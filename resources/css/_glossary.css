@@ -1,0 +1,16 @@
+/* Verwaltung → Glossar (Core\Glossary, app/Admin/views/glossary/index.php) */
+.gls-stats{margin:0 0 16px}
+.gls-setup{max-width:44rem}
+.gls-checks ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.gls-check{display:flex;gap:8px;align-items:baseline}
+.gls-check a{color:inherit}
+.gls-term b{font-weight:700}
+.gls-alt{display:block;font-size:.86em;color:var(--adm-muted)}
+.gls-short{max-width:34rem}
+.gls-len.is-long{color:var(--adm-danger,#b42318);font-weight:700}
+.gls-occ details summary{cursor:pointer}
+.gls-occ ul{margin:6px 0 0;padding-left:1.1em;text-align:left;font-size:.9em}
+.gls-note{margin-top:10px;font-size:.9em}
+.gls-info{margin-top:10px}
+.gls-info summary{cursor:pointer;color:var(--adm-muted)}
+.gls-info ul{margin:8px 0 0;padding-left:1.2em;font-size:.92em}

@@ -341,4 +341,20 @@ return [
                 'help' => 'Entfällt bei „Bewegung reduzieren“ und ohne JavaScript – dann steht sofort der Endwert da.'],
         ],
     ],
+    // Glossar (Funktion „glossary“, Core\Glossary): Übersicht A–Z bzw. aufgerufener Begriff auf der Detailseiten-Vorlage
+    'glossary' => [
+        'label' => 'Glossar', 'icon' => 'book-open-text', 'group' => 'Daten',
+        'help' => 'Fachbegriffe von A bis Z mit Buchstaben und Suchfeld – auf der Detailseiten-Vorlage des Glossars der aufgerufene Begriff. Die Begriffe pflegen Sie unter Glossar bzw. Daten → Glossar.',
+        'fields' => [
+            ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
+            ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'width' => 'half'],
+            ['name' => 'intro', 'label' => 'Einleitung (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
+            ['name' => 'view', 'label' => 'Ansicht', 'type' => 'select', 'required' => true, 'default' => 'list',
+                'options' => ['list' => 'Übersicht A–Z', 'term' => 'Aufgerufener Begriff (Detailseiten-Vorlage)']],
+            ['name' => 'search', 'label' => 'Suchfeld zum Filtern', 'type' => 'bool', 'default' => true, 'width' => 'half'],
+            ['name' => 'letters', 'label' => 'Buchstaben-Navigation', 'type' => 'bool', 'default' => true, 'width' => 'half'],
+            ['name' => 'category', 'label' => 'Nur Begriffe der Kategorie (optional)', 'type' => 'text', 'width' => 'half'],
+            ['name' => 'show_category', 'label' => 'Kategorie anzeigen', 'type' => 'bool', 'default' => true, 'width' => 'half'],
+        ],
+    ],
 ];

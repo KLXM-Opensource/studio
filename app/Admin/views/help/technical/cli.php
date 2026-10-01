@@ -72,6 +72,12 @@ $__cmds = [
         ['notfound:create [--lang=en] [--publish]', 'Seite „Nicht gefunden (404)“ mit den Startinhalten des Kits anlegen (ohne --publish als Entwurf)'],
         ['notfound:selftest', 'Selbsttest der 404-Seite: Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge (Transaktion, wird zurückgerollt)'],
     ],
+    'Glossar' => [
+        ['glossary:install [--publish] [--enable] [--dry-run]', 'Glossar einrichten: Tabelle „glossar“, Detailseiten /glossar/…, Übersicht /glossar (ohne --publish als Entwurf), --enable schaltet die Funktion ein'],
+        ['glossary:import <datei.csv> [--overwrite] [--dry-run] | glossary:export [--out=datei.csv]', 'Begriffe aus CSV übernehmen (neue als Entwurf) bzw. ausgeben'],
+        ['glossary:check', 'Hinweise: doppelte Varianten, Überschneidungen, fehlende oder zu lange Kurz-Erklärungen'],
+        ['glossary:selftest [--bench]', 'Selbsttest der Markierung (Wortgrenzen, Abkürzungen, Umlaute, Ausnahmen, Escaping, keine Doppel-Markierung); --bench: Laufzeit einer großen Seite'],
+    ],
     'Suche & KI' => [
         ['search:index [--all] [--full] [--no-vectors] [--kb]', 'Suchindex abgleichen (Cron alle 15 min; --full nachts; --kb Wissensdatenbank)'],
         ['search:status [--all]', 'Stand des Suchindex und des KI-Anbieters'],

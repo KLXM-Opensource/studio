@@ -85,11 +85,13 @@ final class Features
             // Externe Quellen (Core\Sources): Feeds, JSON-APIs, XML und OpenImmo in Datentabellen übernehmen – Standard aus;
             // einschalten per config 'features' => ['sources' => true] oder unter Daten → Externe Quellen (Netzwerk/Integratoren)
             'sources' => ['Externe Quellen: Feeds, APIs und OpenImmo in Datentabellen übernehmen', ['sources.manage']],
+            // Glossar (Core\Glossary): Fachbegriffe als Datentabelle, erstes Vorkommen im Text mit Erklärung, Übersicht A–Z – Standard aus
+            'glossary' => ['Glossar: Fachbegriffe auf der Website erklären (Hinweis im Text, Übersicht A–Z)', []],
         ], self::$extra);
     }
 
     /** Funktionen, die ohne ausdrückliche Freigabe in der Konfiguration aus sind (Besucher-Texte gehen an einen KI-Anbieter) */
-    public const OFF_BY_DEFAULT = ['chat.visitor'];
+    public const OFF_BY_DEFAULT = ['chat.visitor', 'glossary'];
 
     /** UI-Schalter je Website (nur ausdrücklich gesetzte Werte): ['api' => false, 'mcp' => true] */
     public const UI_KEY = 'sys.features_ui';
@@ -100,7 +102,7 @@ final class Features
     /** Hart voneinander abhängige Funktionen: Funktion => Voraussetzung (ohne sie wirkungslos) */
     public const REQUIRES = [
         'data.schema' => 'data', 'data.shared' => 'data', 'calendar' => 'data', 'forms.data' => 'data', 'sources' => 'data',
-        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media', 'requests.mail' => 'requests',
+        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media', 'requests.mail' => 'requests', 'glossary' => 'data',
     ];
 
     /** Voreinstellungen für typische Projekte */
@@ -151,6 +153,8 @@ final class Features
         if (!$state['data']) $state['forms.data'] = false;
         // Externe Quellen schreiben in Datentabellen
         if (!$state['data']) $state['sources'] = false;
+        // Glossar: Begriffe stehen in einer Datentabelle
+        if (!$state['data']) $state['glossary'] = false;
         return self::$state = $state;
     }
 
@@ -294,6 +298,7 @@ final class Features
         if (in_array($type, ['data_list', 'data_fields'], true) && !self::on('data', false)) return false;
         if ($type === 'map' && !self::on('maps', false)) return false;
         if (in_array($type, ['calendar', 'upcoming'], true) && !self::on('calendar', false)) return false;
+        if ($type === 'glossary' && !self::on('glossary', false)) return false;
         // Formular-Block: für Inhaltstabellen (forms.data) oder Eingangs-Tabellen (requests)
         if ($type === 'data_form' && !self::on('forms.data', false) && !self::on('requests', false)) return false;
         return true;

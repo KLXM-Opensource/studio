@@ -47,6 +47,7 @@ $core = [
     'ki-chat' => 'KI-Chats: Assistent & Besucher-Chat',
     'ki' => 'KI-Assistenten über MCP & Freigabe',
     'suche' => 'Website-Suche',
+    'glossar' => 'Glossar: Fachbegriffe erklären',
     'landingpages' => 'Landingpages mit eigener Domain',
     'weiterleitungen' => 'Weiterleitungen & 404-Protokoll',
     'cookies' => 'Cookie-Einwilligung (falls eingeschaltet)',
