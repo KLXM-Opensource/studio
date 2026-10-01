@@ -1,7 +1,7 @@
 /*
  * Linkauswahl (Core, Teil von admin.js) – ein Dialog für Rich-Text (Formatierungsleiste, ⌘K) und Felder vom Typ „link“.
  *
- *  - Reiter „Seiten & Inhalte“ mit zwei Ansichten (Umschalter Suche | Struktur, zuletzt gewählte pro Browser in localStorage):
+ *  - Reiter „Seiten & Inhalte“ mit drei Ansichten (Umschalter Suche | Struktur | Daten, zuletzt gewählte pro Browser in localStorage):
  *    Suche: Live-Ergebnisse, gruppiert: Zuletzt verwendet · Anker auf dieser Seite · Seiten (Pfad im Seitenbaum, Sprache)
  *    · ohne Suchbegriff „Neueste Einträge“ (alle Inhaltstabellen mit Detailseite, zuletzt geändert zuerst), mit Suchbegriff
  *    Einträge je Tabelle · Dateien & Medien (PDF im Viewer oder direkt) · Sonderziele des Kits (nur Felder).
@@ -10,9 +10,12 @@
  *    Struktur: echter Seitenbaum (Reihenfolge und Ebenen wie unter „Seiten“, eine Sprache, Status Offline/Entwurf), Anker als
  *    Unterpunkte; WAI-ARIA-Baum (role=tree/treeitem, aria-level, aria-expanded) mit aria-activedescendant.
  *    Quelle: GET /admin/api/links?format=tree&lang=…&page=… (Core\Links::tree, ganzer Baum auf einmal)
+ *    Daten: Auswahl einer Quelle (jede Inhaltstabelle mit Detailseite, Glossar bei eingeschalteter Funktion; zuletzt gewählte pro
+ *    Browser), darunter ihre Einträge neueste zuerst (Titel, kurzes Datum, Entwurf) mit Filter und „Weitere laden“.
+ *    Quellen: GET …?format=sources (Core\Links::dataSources); Einträge: …?format=groups&group=entries:{tabelle}&q=…&literal=1&offset=…
  *  - Reiter Web-Adresse (https-Prüfung, ergänzt https://, warnt bei http://), E-Mail (mailto, Betreff), Telefon (tel: wie tel_href())
  *  - Bearbeiten: zeigt das aktuelle Ziel, „Link entfernen“; Optionen „In neuem Tab öffnen“ und Linktitel (nur Rich-Text)
- *  - Tastatur: ↑/↓ in der Ergebnisliste, Enter übernimmt, Esc bricht ab, ←/→ zwischen den Reitern;
+ *  - Tastatur: ↑/↓ in der Ergebnisliste (Suche und Daten), Enter übernimmt, Esc bricht ab, ←/→ zwischen den Reitern;
  *    im Baum ↑/↓ bewegen, → aufklappen/erstes Kind, ← zuklappen/Elternseite, Pos1/Ende, Enter übernimmt, Buchstabe → Suche
  *  - Stabile Verweise: page:ID, page:ID#anker, entry:{tabelle}:{id}, media:{id}[:viewer] (Core\Links) – im Rich-Text als
  *    data-link am <a>, im Feld als Wert. Zuletzt verwendete Ziele: localStorage (nur Komfort, pro Browser).
@@ -25,7 +28,9 @@ import { ico } from './_icons.js';
 const d = document;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const RECENT_KEY = 'cms-links-recent';
-const VIEW_KEY = 'cms-links-view';   // zuletzt gewählte Ansicht: search | tree (nur Komfort)
+const VIEW_KEY = 'cms-links-view';   // zuletzt gewählte Ansicht: search | tree | data (nur Komfort)
+const SRC_KEY = 'cms-links-source';  // zuletzt gewählte Quelle der Ansicht „Daten“ (z. B. entries:news)
+const VIEWS = ['search', 'tree', 'data'];
 const MORE = 30;                     // „Weitere laden“: so viele auf einmal
 const REF = /^(page:\d+(#[\w-]{1,80})?|entry:[a-z][a-z0-9_]{0,40}:\d+|media:\d+(:viewer)?)$/;
 const KIND = { page: 'Seite', anchor: 'Anker', entry: 'Eintrag', file: 'Datei', keyword: 'Sonderziel', url: 'Externe Adresse', mail: 'E-Mail', tel: 'Telefon', path: 'Interner Pfad' };
@@ -50,7 +55,10 @@ function recent() {
   try { const r = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(r) ? r.slice(0, 6) : []; } catch { return []; }
 }
 function savedView() {
-  try { return localStorage.getItem(VIEW_KEY) === 'tree' ? 'tree' : 'search'; } catch { return 'search'; }
+  try { const v = localStorage.getItem(VIEW_KEY); return VIEWS.includes(v) ? v : 'search'; } catch { return 'search'; }
+}
+function savedSource() {
+  try { return localStorage.getItem(SRC_KEY) || ''; } catch { return ''; }
 }
 function remember(item) {
   if (!item?.value) return;
@@ -135,13 +143,20 @@ function build() {
         <div class="lp__bar">
           <input type="search" class="lp__q" data-lp-q role="combobox" aria-expanded="true" aria-controls="cms-lp-list" aria-autocomplete="list"
             aria-label="${esc(t('Linkziel suchen'))}" autocomplete="off" spellcheck="false" placeholder="${esc(t('Seite, Eintrag, Datei oder Anker suchen …'))}">
+          <div class="lp__datah" data-lp-datah hidden>
+            <select class="lp__src" data-lp-src aria-label="${esc(t('Datenquelle'))}"></select>
+            <input type="search" class="lp__q" data-lp-filter role="combobox" aria-expanded="true" aria-controls="cms-lp-dlist" aria-autocomplete="list"
+              aria-label="${esc(t('Einträge filtern'))}" autocomplete="off" spellcheck="false" placeholder="${esc(t('Filtern …'))}">
+          </div>
           <p class="lp__treeh" data-lp-treeh hidden><span data-lp-count></span><span class="lp__langs" role="group" aria-label="${esc(t('Sprache'))}" data-lp-langs></span></p>
           <div class="lp__seg" role="group" aria-label="${esc(t('Ansicht'))}">
             <button type="button" data-lp-view="search" aria-pressed="true" title="${esc(t('Suche'))}">${ico('magnifying-glass')}<span>${esc(t('Suche'))}</span></button>
             <button type="button" data-lp-view="tree" aria-pressed="false" title="${esc(t('Struktur (Seitenbaum)'))}">${ico('tree-structure')}<span>${esc(t('Struktur'))}</span></button>
+            <button type="button" data-lp-view="data" aria-pressed="false" title="${esc(t('Daten (Tabellen und Glossar)'))}">${ico('database')}<span>${esc(t('Daten'))}</span></button>
           </div>
         </div>
         <div class="lp__list" id="cms-lp-list" role="listbox" aria-label="${esc(t('Linkziele'))}" data-lp-list></div>
+        <div class="lp__list" id="cms-lp-dlist" role="listbox" aria-label="${esc(t('Einträge'))}" data-lp-dlist hidden></div>
         <ul class="lp__list lp__tree" id="cms-lp-tree" role="tree" aria-label="${esc(t('Seitenbaum'))}" tabindex="0" data-lp-tree hidden></ul>
       </div>
       <div class="lp__panel" role="tabpanel" id="cms-lp-p-url" aria-labelledby="cms-lp-tab-url" data-lp-panel="url" hidden>
@@ -179,12 +194,10 @@ function build() {
 const q = s => dlg.querySelector(s);
 const qa = s => [...dlg.querySelectorAll(s)];
 
-function wire() {
-  const input = q('[data-lp-q]'), list = q('[data-lp-list]');
-  let timer;
-  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => search(input.value), 140); });
+/** Combobox-Tastatur für ein Eingabefeld und seine Liste (Suche bzw. Filter der Ansicht „Daten“) */
+function listKeys(input, list) {
   input.addEventListener('keydown', e => {
-    const opts = qa('[role=option]');
+    const opts = [...list.querySelectorAll('[role=option]')];
     if (!opts.length) return;
     const i = opts.findIndex(o => o.id === input.getAttribute('aria-activedescendant'));
     let n = null;
@@ -197,8 +210,25 @@ function wire() {
   });
   list.addEventListener('click', e => { const o = e.target.closest('[role=option]'); if (o) choose(o, false); });
   list.addEventListener('dblclick', e => { const o = e.target.closest('[role=option]'); if (o && !o.dataset.more) choose(o, true); });
-  list.addEventListener('mousedown', e => e.preventDefault());   // Fokus bleibt im Suchfeld
-  // Ansicht Suche | Struktur
+  list.addEventListener('mousedown', e => e.preventDefault());   // Fokus bleibt im Eingabefeld
+}
+
+function wire() {
+  const input = q('[data-lp-q]'), list = q('[data-lp-list]');
+  let timer;
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => search(input.value), 140); });
+  listKeys(input, list);
+  // Daten: Quelle wählen, Einträge filtern
+  const filter = q('[data-lp-filter]');
+  let ftimer;
+  filter.addEventListener('input', () => { clearTimeout(ftimer); ftimer = setTimeout(() => loadData(), 160); });
+  listKeys(filter, q('[data-lp-dlist]'));
+  q('[data-lp-src]').addEventListener('change', e => {
+    try { localStorage.setItem(SRC_KEY, e.target.value); } catch {}
+    state.data.src = e.target.value;
+    loadData();
+  });
+  // Ansicht Suche | Struktur | Daten
   qa('[data-lp-view]').forEach(b => b.addEventListener('click', () => view(b.dataset.lpView, true)));
   // Seitenbaum
   const tree = q('[data-lp-tree]');
@@ -247,7 +277,7 @@ function tab(name, focusField) {
   qa('[data-lp-panel]').forEach(p => { p.hidden = p.dataset.lpPanel !== name; });
   err('');
   showPicked();
-  if (focusField) (name === 'search' ? q(state.view === 'tree' ? '[data-lp-tree]' : '[data-lp-q]') : q(`[data-lp-${name}]`))?.focus();
+  if (focusField) (name === 'search' ? viewField() : q(`[data-lp-${name}]`))?.focus();
 }
 
 function hint(kind) {
@@ -260,34 +290,53 @@ function hint(kind) {
 }
 const sameHost = h => { try { return new URL(h).host === location.host; } catch { return false; } };
 
-// ------------------------------------------------------------------ Ansicht Suche | Struktur
+// ------------------------------------------------------------------ Ansicht Suche | Struktur | Daten
+/** Element mit dem Fokus der aktuellen Ansicht: Suchfeld, Baum bzw. Filter (ohne Quellen: Auswahl) */
+function viewField() {
+  return state.view === 'tree' ? q('[data-lp-tree]') : state.view === 'data' ? q(state.data.sources?.length === 0 ? '[data-lp-src]' : '[data-lp-filter]') : q('[data-lp-q]');
+}
+/** Liste und zugehöriges Eingabefeld (aria-activedescendant) eines Elements in der Ansicht */
+function boxOf(o) {
+  if (o.closest('[data-lp-tree]')) return { box: q('[data-lp-tree]'), items: state.titems, owner: q('[data-lp-tree]'), sel: '[data-lp-tree] [role=treeitem]' };
+  if (o.closest('[data-lp-dlist]')) return { box: q('[data-lp-dlist]'), items: state.data.items, owner: q('[data-lp-filter]'), sel: '[data-lp-dlist] [role=option]' };
+  return { box: q('[data-lp-list]'), items: state.items, owner: q('[data-lp-q]'), sel: '[data-lp-list] [role=option]' };
+}
 function view(name, focus) {
   if (!state) return;
-  state.view = name = name === 'tree' ? 'tree' : 'search';
+  state.view = name = VIEWS.includes(name) ? name : 'search';
   try { localStorage.setItem(VIEW_KEY, name); } catch {}
   qa('[data-lp-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lpView === name ? 'true' : 'false'));
-  const tree = name === 'tree';
-  q('[data-lp-q]').hidden = tree;
+  const tree = name === 'tree', data = name === 'data', srch = name === 'search';
+  q('[data-lp-q]').hidden = !srch;
+  q('[data-lp-list]').hidden = !srch;
   q('[data-lp-treeh]').hidden = !tree;
-  q('[data-lp-list]').hidden = tree;
   q('[data-lp-tree]').hidden = !tree;
+  q('[data-lp-datah]').hidden = !data;
+  q('[data-lp-dlist]').hidden = !data;
   q('[data-lp-keys]').textContent = tree ? t('Tastatur: ↑/↓ Seite wählen · →/← auf- und zuklappen · Enter übernehmen · Esc abbrechen')
     : t('Tastatur: ↑/↓ Ergebnis wählen · Enter übernehmen · Esc abbrechen');
   if (tree) {
     if (!state.tree) loadTree(state.treeLang, focus);
     else { syncSelected(q('[data-lp-tree]')); if (focus) q('[data-lp-tree]').focus(); }
+  } else if (data) {
+    if (!state.data.sources) loadSources(focus);
+    else { syncSelected(q('[data-lp-dlist]')); if (focus) viewField().focus(); }
   } else {
     if (!state.groups) search(q('[data-lp-q]').value);
     else syncSelected(q('[data-lp-list]'));
     if (focus) q('[data-lp-q]').focus();
   }
 }
-/** aria-selected nach dem gewählten Ziel (beide Ansichten teilen sich state.picked) */
+/** Gewähltes Ziel, sonst der Verweis des aktuellen Links (alle Ansichten teilen sich state.picked) */
+function targetValue() {
+  return state.picked ? state.picked.value : state.current?.ref || '';
+}
+/** aria-selected nach dem gewählten bzw. aktuellen Ziel */
 function syncSelected(box) {
-  const tree = box.matches('[data-lp-tree]'), list = tree ? state.titems : state.items;
+  const tree = box.matches('[data-lp-tree]'), list = tree ? state.titems : box.matches('[data-lp-dlist]') ? state.data.items : state.items, v = targetValue();
   box.querySelectorAll(tree ? '[role=treeitem]' : '[role=option]').forEach(o => {
     const it = list[+o.dataset.i];
-    o.setAttribute('aria-selected', state.picked && it && it.value === state.picked.value ? 'true' : 'false');
+    o.setAttribute('aria-selected', v && it && it.value === v ? 'true' : 'false');
   });
 }
 
@@ -325,6 +374,21 @@ function stateBadge(it) {
   if (!it.draft) return '';
   return `<span class="lp__badge lp__badge--draft">${esc(it.state === 'offline' ? t('Offline') : t('Entwurf'))}</span>`;
 }
+/** Eine Option der Ergebnisliste (Suche und Daten) */
+function optHtml(it, id, i, icon, attrs = '') {
+  const sel = !!it.value && it.value === targetValue();
+  return `<div class="lp__opt${it.draft ? ' is-draft' : ''}" role="option" id="${id}" data-i="${i}"${attrs} aria-selected="${sel ? 'true' : 'false'}">`
+    + (it.thumb ? `<img class="lp__thumb" src="${esc(it.thumb)}" alt="" width="36" height="36" loading="lazy">` : `<span class="lp__ico" aria-hidden="true">${ico(icon)}</span>`)
+    + `<span class="lp__txt"><span class="lp__label">${esc(it.label)}</span><span class="lp__meta">${esc(it.meta || it.href || '')}</span></span>`
+    + (it.badge ? `<span class="lp__badge" title="${esc(t('Sprache'))}">${esc(it.badge)}</span>` : '')
+    + stateBadge(it) + '</div>';
+}
+/** „Weitere laden“ als Option */
+function moreHtml(id, i, gid, meta) {
+  return `<div class="lp__opt lp__more" role="option" id="${id}" data-i="${i}" data-more="${esc(gid)}" aria-selected="false">`
+    + `<span class="lp__ico" aria-hidden="true">${ico('dots-three')}</span><span class="lp__txt"><span class="lp__label">${esc(t('Weitere laden'))}</span>`
+    + `<span class="lp__meta">${esc(meta)}</span></span></div>`;
+}
 /** Ergebnisliste aus state.groups zeichnen (nach Suche und nach „Weitere laden“) */
 function render() {
   const list = q('[data-lp-list]');
@@ -337,19 +401,12 @@ function render() {
     html += `<div class="lp__group" role="group" aria-labelledby="${gid}"><p class="lp__gh" id="${gid}" role="presentation">${g.icon ? ico(g.icon) : ''} ${esc(g.label)}${more ? ` <small>${esc(t('{n} von {m}', { n: g.items.length, m: g.total }))}</small>` : ''}</p>`;
     g.items.forEach((it, gi) => {
       state.items.push(it);
-      const sel = state.picked && state.picked.value === it.value;
-      html += `<div class="lp__opt${it.draft ? ' is-draft' : ''}" role="option" id="cms-lp-o${i}" data-i="${i}" data-g="${esc(g.id)}" data-gi="${gi}" aria-selected="${sel ? 'true' : 'false'}">`
-        + (it.thumb ? `<img class="lp__thumb" src="${esc(it.thumb)}" alt="" width="36" height="36" loading="lazy">` : `<span class="lp__ico" aria-hidden="true">${ico(kindIcon(it, g))}</span>`)
-        + `<span class="lp__txt"><span class="lp__label">${esc(it.label)}</span><span class="lp__meta">${esc(it.meta || it.href || '')}</span></span>`
-        + (it.badge ? `<span class="lp__badge" title="${esc(t('Sprache'))}">${esc(it.badge)}</span>` : '')
-        + stateBadge(it) + '</div>';
+      html += optHtml(it, 'cms-lp-o' + i, i, kindIcon(it, g), ` data-g="${esc(g.id)}" data-gi="${gi}"`);
       i++;
     });
     if (more) {   // „Weitere laden“ als Option: mit ↑/↓ erreichbar, Enter/Klick lädt nach
       state.items.push({ more: true, group: g.id });
-      html += `<div class="lp__opt lp__more" role="option" id="cms-lp-o${i}" data-i="${i}" data-more="${esc(g.id)}" aria-selected="false">`
-        + `<span class="lp__ico" aria-hidden="true">${ico('dots-three')}</span><span class="lp__txt"><span class="lp__label">${esc(t('Weitere laden'))}</span>`
-        + `<span class="lp__meta">${esc(t('{n} von {m} – {label}', { n: g.items.length, m: g.total, label: g.label }))}</span></span></div>`;
+      html += moreHtml('cms-lp-o' + i, i, g.id, t('{n} von {m} – {label}', { n: g.items.length, m: g.total, label: g.label }));
       i++;
     }
     html += '</div>';
@@ -361,7 +418,7 @@ async function loadMore(gid) {
   const g = state.groups?.find(x => x.id === gid);
   if (!g || state.loading) return;
   const n = seq, from = g.items.length;
-  const opt = q(`[data-more="${gid}"]`);
+  const opt = q(`[data-lp-list] [data-more="${gid}"]`);
   state.loading = true;
   opt?.setAttribute('aria-busy', 'true');
   opt?.querySelector('.lp__label')?.replaceChildren(t('Wird geladen …'));
@@ -372,8 +429,76 @@ async function loadMore(gid) {
   } catch { if (state) g.total = g.items.length; }
   finally { if (state) state.loading = false; }
   render();
-  const next = q(`[data-g="${gid}"][data-gi="${from}"]`) || q(`[data-g="${gid}"][data-gi="${from - 1}"]`);
+  const next = q(`[data-lp-list] [data-g="${gid}"][data-gi="${from}"]`) || q(`[data-lp-list] [data-g="${gid}"][data-gi="${from - 1}"]`);
   if (next) activate(next);
+}
+
+// ------------------------------------------------------------------ Daten (Tabellen mit Detailseite, Glossar)
+async function loadSources(focus) {
+  const sel = q('[data-lp-src]'), list = q('[data-lp-dlist]');
+  list.setAttribute('aria-busy', 'true');
+  let src = null;
+  try {
+    const u = linksUrl();
+    const r = await fetch(u + (u.includes('?') ? '&' : '?') + new URLSearchParams({ format: 'sources' }), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+    src = (await r.json()).sources;
+  } catch { src = null; }
+  if (!state) return;
+  list.removeAttribute('aria-busy');
+  state.data.sources = Array.isArray(src) ? src : [];
+  const all = state.data.sources;
+  sel.innerHTML = all.map(x => `<option value="${esc(x.id)}">${esc(x.label)} (${esc(String(x.total))})</option>`).join('');
+  sel.disabled = !all.length;
+  q('[data-lp-filter]').disabled = !all.length;
+  // Quelle: die des aktuellen Ziels (entry:{tabelle}:…), sonst die zuletzt gewählte, sonst die erste
+  const ref = /^entry:([a-z][a-z0-9_]*):/.exec(state.current?.ref || '');
+  const want = [ref && 'entries:' + ref[1], savedSource()].find(v => v && all.some(x => x.id === v));
+  state.data.src = want || all[0]?.id || '';
+  sel.value = state.data.src;
+  if (!all.length) {
+    list.innerHTML = `<p class="lp__empty">${esc(src ? t('Keine verlinkbaren Daten: Tabellen brauchen eine URL-Basis und eine Detailseite.') : t('Konnte nicht geladen werden.'))}</p>`;
+    if (focus && state.view === 'data') sel.focus();
+    return;
+  }
+  await loadData();
+  if (focus && state?.view === 'data') viewField().focus();
+}
+/** Einträge der gewählten Quelle laden (more: weiterblättern, sonst neu ab dem ersten) */
+async function loadData(more) {
+  const dt = state?.data;
+  if (!dt?.src || (more && dt.loading)) return;
+  if (more && dt.items.at(-1)?.more) dt.items.pop();   // Platzhalter „Weitere laden“ (letzter Eintrag)
+  const list = q('[data-lp-dlist]'), n = ++dt.seq, from = more ? dt.items.length : 0, filter = q('[data-lp-filter]').value.trim();
+  dt.loading = true;
+  if (more) {
+    const opt = list.querySelector('[data-more]');
+    opt?.setAttribute('aria-busy', 'true');
+    opt?.querySelector('.lp__label')?.replaceChildren(t('Wird geladen …'));
+  } else list.setAttribute('aria-busy', 'true');
+  let g = null, failed = false;
+  try { g = (await fetchGroups({ q: filter, group: dt.src, literal: '1', offset: from, limit: MORE }))[0] || null; } catch { failed = true; }
+  if (!state || n !== dt.seq) return;
+  dt.loading = false;
+  list.removeAttribute('aria-busy');
+  if (!more) dt.items = [];
+  if (g) { dt.items.push(...g.items); dt.total = g.total; } else if (!more || failed) dt.total = dt.items.length;
+  dt.failed = failed && !dt.items.length;
+  dt.filter = filter;
+  renderData();
+  q('[data-lp-filter]').removeAttribute('aria-activedescendant');
+  const next = more ? list.querySelector(`[data-i="${from}"]`) || list.querySelector(`[data-i="${from - 1}"]`) : list.querySelector('[aria-selected=true]');
+  if (next) activate(next, !!more);
+}
+function renderData() {
+  const dt = state.data, list = q('[data-lp-dlist]'), src = dt.sources.find(x => x.id === dt.src);
+  const icon = src?.icon || 'database';
+  let html = dt.items.map((it, i) => optHtml(it, 'cms-lp-d' + i, i, it.icon || icon)).join('');
+  if (dt.total > dt.items.length) {
+    const i = dt.items.length;
+    dt.items.push({ more: true, data: true });
+    html += moreHtml('cms-lp-d' + i, i, dt.src, t('{n} von {m} – {label}', { n: i, m: dt.total, label: src?.label || '' }));
+  }
+  list.innerHTML = html || `<p class="lp__empty">${esc(dt.failed ? t('Konnte nicht geladen werden.') : dt.filter ? t('Nichts gefunden.') : t('Noch keine Einträge.'))}</p>`;
 }
 
 // ------------------------------------------------------------------ Struktur (Seitenbaum)
@@ -492,19 +617,18 @@ function guessDirect(qs) {
   return null;
 }
 function activate(o, scroll = true) {
-  const tree = o.closest('[data-lp-tree]');
-  const box = tree || q('[data-lp-list]');
+  const { box, owner } = boxOf(o);
   box.querySelectorAll('.is-active').forEach(x => x.classList.remove('is-active'));
   o.classList.add('is-active');
-  (tree || q('[data-lp-q]')).setAttribute('aria-activedescendant', o.id);
+  owner.setAttribute('aria-activedescendant', o.id);
   if (scroll) (o.querySelector(':scope > .lp__tr') || o).scrollIntoView({ block: 'nearest' });
 }
 function choose(o, apply) {
-  const tree = !!o.closest('[data-lp-tree]');
-  const it = (tree ? state.titems : state.items)[+o.dataset.i];
+  const { items, sel } = boxOf(o);
+  const it = items[+o.dataset.i];
   if (!it) return;
-  if (it.more) { loadMore(it.group); return; }
-  qa(tree ? '[data-lp-tree] [role=treeitem]' : '[role=option]').forEach(x => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
+  if (it.more) { it.data ? loadData(true) : loadMore(it.group); return; }
+  qa(sel).forEach(x => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
   activate(o, false);
   state.picked = it;
   if (it.kind === 'url' && !state.blankTouched) q('[data-lp-blank]').checked = !sameHost(it.href);
@@ -558,7 +682,8 @@ export function openLinkPicker(opts = {}) {
     const mode = opts.mode === 'field' ? 'field' : 'rich';
     const cur = opts.current || (opts.value ? { href: opts.value, ref: REF.test(opts.value) ? opts.value : '' } : null);
     state = { resolve, mode, current: cur && (cur.href || cur.ref) ? cur : null, picked: null, items: [], titems: [], groups: null, q: '',
-      tab: 'search', view: 'search', tree: null, treeLang: '', treeSeq: 0, blankTouched: false };
+      tab: 'search', view: 'search', tree: null, treeLang: '', treeSeq: 0, blankTouched: false,
+      data: { sources: null, src: '', items: [], total: 0, filter: '', seq: 0, loading: false } };
     q('#cms-lp-t').textContent = state.current ? t('Link bearbeiten') : t('Link einfügen');
     qa('[data-lp-richonly]').forEach(n => { n.hidden = mode !== 'rich'; });
     q('[data-lp-remove]').hidden = !state.current;
@@ -566,7 +691,7 @@ export function openLinkPicker(opts = {}) {
     q('[data-lp-blank]').checked = !!cur?.newTab;
     q('[data-lp-blank]').onchange = () => { if (state) state.blankTouched = true; };
     q('[data-lp-title]').value = cur?.title || '';
-    for (const k of ['q', 'url', 'mail', 'subject', 'tel']) q(`[data-lp-${k}]`).value = '';
+    for (const k of ['q', 'filter', 'url', 'mail', 'subject', 'tel']) q(`[data-lp-${k}]`).value = '';
     ['url', 'mail', 'tel'].forEach(hint);
     err('');
     // Aktuelles Ziel anzeigen und passenden Reiter öffnen
@@ -590,6 +715,8 @@ export function openLinkPicker(opts = {}) {
     dlg.returnValue = '';
     q('[data-lp-list]').innerHTML = '';
     q('[data-lp-tree]').innerHTML = '';
+    q('[data-lp-dlist]').innerHTML = '';
+    q('[data-lp-src]').innerHTML = '';
     dlg.showModal();
     tab(start, false);
     // Ansicht: wie zuletzt gewählt – außer der markierte Text ist schon eine Adresse (dann Suche mit Vorschlag)

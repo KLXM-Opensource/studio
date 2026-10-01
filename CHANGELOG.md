@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Linkauswahl: Ansicht „Daten“ und Glossar
+- **Daten:** Im Reiter „Seiten & Inhalte“ gibt es jetzt **Suche | Struktur | Daten**. „Daten“ ist ein kleiner Datenbrowser: Eine
+  Auswahl listet alle verlinkbaren Quellen (jede Inhaltstabelle mit URL-Basis und Detailseite, dazu „Glossar“ bei eingeschalteter
+  Funktion), darunter die Einträge der gewählten Quelle neueste zuerst (Titel, kurzes Datum, Entwurf gekennzeichnet) mit Filter
+  und „Weitere laden“ (je 30, über `offset`). <kbd>↑</kbd>/<kbd>↓</kbd> wie in der Suche, <kbd>Enter</kbd>/Klick übernimmt.
+  Ansicht und Quelle merkt sich der Browser (`cms-links-view`, `cms-links-source`); beim Bearbeiten eines Eintrags-Links ist
+  dessen Tabelle gewählt und das Ziel markiert – in allen Ansichten.
+- **Glossar:** Begriffe sind Einträge mit eigener Detailseite – verlinkt wird stabil mit `entry:glossar:{id}` (→ `/glossar/{slug}`),
+  nur veröffentlichte Begriffe (auch für die Redaktion), in der Suche auch über den Begriff; „glossar“ als Suchbegriff zeigt alle.
+- **API:** `GET /admin/api/links?format=sources` (`Core\Links::dataSources()`); `format=groups&group=entries:{tabelle}&literal=1`
+  filtert nur die Einträge. Einträge je Tabelle kommen neueste zuerst (Datumsfeld der Sortierung bzw. Anlagedatum) mit `date`/`day`.
+  Entwürfe weiterhin nur mit `data.edit` für die Tabelle. Selbsttest `links:selftest` um Quellen, Blättern, Filter, Rechte und Glossar erweitert.
+
 ### Linkauswahl: Struktur, „Weitere laden“, neueste Einträge
 - **Struktur:** Im Reiter „Seiten & Inhalte“ schaltet **Suche | Struktur** auf den echten Seitenbaum um – Reihenfolge und Ebenen
   wie unter „Seiten“, Status Offline/Entwurf, Anker als Unterpunkte (`page:ID#anker`), Sprache wählbar (DE/EN …, Vorgabe: Sprache

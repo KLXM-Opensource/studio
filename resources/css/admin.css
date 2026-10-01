@@ -2345,7 +2345,11 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .lp__seg button[aria-pressed=true]{background:var(--adm-card,#fff);color:var(--adm-ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .lp__seg button:focus-visible,.lp__langs button:focus-visible{outline:2px solid var(--adm-a);outline-offset:1px}
 .lp__treeh{flex:1 1 auto;display:flex;align-items:center;gap:10px;min-height:44px;margin:0;color:var(--adm-t3);font-size:13px;font-weight:600}
-.lp__treeh[hidden],.lp__q[hidden],.lp__list[hidden]{display:none}
+.lp__treeh[hidden],.lp__q[hidden],.lp__list[hidden],.lp__datah[hidden]{display:none}
+.lp__datah{flex:1 1 auto;display:flex;gap:6px;min-width:0}
+.lp__datah .lp__q{flex:1 1 120px;min-width:0}
+.lp__src{flex:0 1 auto;width:auto;max-width:55%;min-width:0;min-height:44px;padding:9px 30px 9px 10px;border-radius:8px;border:1.5px solid var(--adm-in);background:var(--adm-surface);color:var(--adm-ink);font:600 14px var(--adm-font);text-overflow:ellipsis}
+.lp__src:focus{border-color:var(--adm-a);outline:none;box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .15)}
 .lp__langs{display:flex;gap:2px;padding:2px;border-radius:7px;background:var(--adm-fill,#F2F2F4)}
 .lp__langs:empty{display:none}
 .lp__langs button{min-width:34px;min-height:30px;padding:0 6px;border:0;border-radius:5px;background:none;color:var(--adm-t2);font:700 12px var(--adm-font);cursor:pointer}
@@ -2367,7 +2371,7 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .lp__ti[aria-expanded=false]>.lp__tr .lp__twisty::before{transform:none}
 .lp__twisty--none::before{display:none}
 @media (prefers-reduced-motion:reduce){.lp__twisty::before{transition:none}}
-@media (max-width:480px){.lp__seg button{padding:0 9px}.lp__seg button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.lp__tr{padding-left:calc(2px + var(--lvl,0) * 12px)}.lp{padding:14px 12px 10px}.lp__tabs [role=tab]{flex:1 1 45%}.lp__keys{display:none}.lp__actions .adm-btn{flex:1 1 auto}.lp__remove{margin-left:0}}
+@media (max-width:480px){.lp__datah{flex-wrap:wrap}.lp__src{flex:1 1 100%;max-width:none}.lp__bar{align-items:flex-start}.lp__seg button{padding:0 9px}.lp__seg button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.lp__tr{padding-left:calc(2px + var(--lvl,0) * 12px)}.lp{padding:14px 12px 10px}.lp__tabs [role=tab]{flex:1 1 45%}.lp__keys{display:none}.lp__actions .adm-btn{flex:1 1 auto}.lp__remove{margin-left:0}}
 .rte-menu{overflow:auto;overscroll-behavior:contain}
 .rte-menu.rte-menu--up{top:auto;bottom:calc(100% + 4px)}
 

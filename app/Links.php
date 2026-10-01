@@ -5,6 +5,7 @@ namespace Core;
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Glossary\Glossary;
 
 /**
  * Linkziele: stabile Verweise, Auflösung und Quellen für die Linkauswahl (resources/js/_links.js, GET /admin/api/links).
@@ -16,6 +17,10 @@ use Core\Data\Tables;
  */
 final class Links
 {
+    /** Nur für den Selbsttest: Recht data.edit je Tabelle bzw. Funktion „Glossar“ vorgeben (null = echte Prüfung) */
+    private static ?\Closure $testCanEdit = null;
+    private static ?bool $testGlossary = null;
+
     public const REF = '~^(page:\d+(#[\w-]{1,80})?|entry:[a-z][a-z0-9_]{0,40}:\d+|media:\d+(:viewer)?)$~';
 
     public static function isRef(string $v): bool
@@ -98,15 +103,19 @@ final class Links
     /**
      * Quellen für die Linkauswahl, nach Art gruppiert.
      * $o: q (Suche), page (ID der aktuellen Seite → deren Anker zuerst), mode (rich|field; field = mit Sonderzielen des Kits), limit,
-     *     group (nur diese Gruppe, z. B. „pages“, „entries:news“, „recent-entries“, „files“ – zum Weiterblättern), offset (ab dem n-ten Treffer)
+     *     group (nur diese Gruppe, z. B. „pages“, „entries:news“, „recent-entries“, „files“ – zum Weiterblättern), offset (ab dem n-ten Treffer),
+     *     literal (mit group=entries:…: q nur als Filter – ohne „Suchbegriff = Tabellenname → alle Einträge“; Ansicht „Daten“)
+     * Einträge je Tabelle: neueste zuerst (Datumsfeld der Sortierung bzw. Anlagedatum), mit kurzem Datum.
      * Jede Gruppe: id, label, icon, items, total (alle Treffer), offset. Ohne Suche: „Neueste Einträge“ über alle Inhaltstabellen
-     * statt der Gruppen je Tabelle. Einträge im Entwurf nur mit data.edit für die Tabelle (sonst nur veröffentlichte).
+     * statt der Gruppen je Tabelle. Einträge im Entwurf nur mit data.edit für die Tabelle (sonst nur veröffentlichte), Glossar nur veröffentlicht.
      * @return list<array{id: string, label: string, icon: string, items: list<array>, total: int, offset: int}>
      */
     public static function sources(array $o = []): array
     {
         $q = trim((string) ($o['q'] ?? ''));
         $only = (string) ($o['group'] ?? '');
+        $literal = !empty($o['literal']) && str_starts_with($only, 'entries:');
+        $tables = self::linkableTables();
         $offset = $only !== '' ? max(0, (int) ($o['offset'] ?? 0)) : 0;
         $limit = max(3, min(50, (int) ($o['limit'] ?? ($q === '' ? 8 : 12))));
         $want = fn(string $id) => $only === '' || $only === $id;
@@ -155,7 +164,6 @@ final class Links
 
         // Einträge: ohne Suche die neuesten über alle Inhaltstabellen, mit Suche je Tabelle
         // (passt die Suche auf den Namen der Tabelle, erscheinen alle ihre Einträge)
-        $tables = self::linkableTables();
         if ($q === '' && $want('recent-entries')) {
             [$items, $total] = self::recentEntries($tables, $offset, $limit, $multi);
             $group('recent-entries', __('Neueste Einträge'), 'calendar', $items, $total);
@@ -163,19 +171,11 @@ final class Links
         if ($q !== '' || str_starts_with($only, 'entries:')) {
             foreach ($tables as $t) {
                 if (!$want('entries:' . $t['handle'])) continue;
-                $tq = $q !== '' && $match((string) $t['name'], (string) $t['singular'], (string) $t['handle']) ? '' : $q;
-                $opt = ['status' => self::entryStatus($t), 'q' => $tq];
-                try {
-                    $total = Entries::count($t, $opt);
-                    $rows = $total > $offset ? Entries::query($t, $opt + ['limit' => $limit, 'offset' => $offset]) : [];
-                } catch (\Throwable) {
-                    continue;
-                }
-                $items = [];
-                foreach ($rows as $e) {
-                    if ($it = self::entryItem($t, $e, $multi)) $items[] = $it;
-                }
-                $group('entries:' . $t['handle'], (string) $t['name'], (string) ($t['icon'] ?? ''), $items, $total);
+                // Suchbegriff = Name der Tabelle → alle ihre Einträge (nicht im Filter der Ansicht „Daten“)
+                $tq = $q !== '' && !$literal && $match((string) $t['name'], (string) $t['singular'], (string) $t['handle'], self::sourceLabel($t)) ? '' : $q;
+                [$items, $total] = self::tableEntries($t, $tq, $offset, $limit);
+                if ($total === null) continue;
+                $group('entries:' . $t['handle'], self::sourceLabel($t), (string) ($t['icon'] ?? ''), $items, $total);
             }
         }
 
@@ -246,6 +246,32 @@ final class Links
         return ['lang' => (string) $lang, 'langs' => $multi ? Lang::all() : [], 'count' => $count, 'nodes' => $nodes];
     }
 
+    /**
+     * Quellen der Ansicht „Daten“: alle Inhaltstabellen mit Detailseite (Glossar nur bei eingeschalteter Funktion), je Quelle
+     * id (Gruppe für format=groups: entries:{tabelle}), handle, label, singular, icon, total (Einträge, die diese Rolle verlinken darf).
+     * @return list<array{id: string, handle: string, label: string, singular: string, icon: string, total: int}>
+     */
+    public static function dataSources(): array
+    {
+        $out = [];
+        foreach (self::linkableTables() as $t) {
+            try {
+                $total = Entries::count($t, ['status' => self::entryStatus($t)]);
+            } catch (\Throwable) {
+                continue;
+            }
+            $out[] = ['id' => 'entries:' . $t['handle'], 'handle' => (string) $t['handle'], 'label' => self::sourceLabel($t),
+                'singular' => (string) $t['singular'], 'icon' => (string) ($t['icon'] ?? ''), 'total' => $total];
+        }
+        return $out;
+    }
+
+    /** Anzeigename einer Quelle: Name der Tabelle, beim Glossar immer „Glossar“ */
+    private static function sourceLabel(array $t): string
+    {
+        return self::isGlossary($t) ? __('Glossar') : (string) $t['name'];
+    }
+
     /** Eintrag der Linkauswahl für eine Seite (Status wie im Seitenbaum: online | offline | draft) */
     private static function pageItem(array $p, bool $multi): array
     {
@@ -254,16 +280,73 @@ final class Links
             'badge' => $multi ? strtoupper(Lang::norm($p['lang'] ?? null)) : '', 'draft' => $state !== 'online', 'state' => $state, 'kind' => 'page'];
     }
 
-    /** Inhaltstabellen, deren Einträge eine eigene Adresse haben (URL-Basis + Detailseite) */
+    /**
+     * Inhaltstabellen, deren Einträge eine eigene Adresse haben (URL-Basis + Detailseite). Das Glossar nur, solange die Funktion
+     * „Glossar“ eingeschaltet ist (seine Begriffe sind gewöhnliche Einträge: entry:glossar:ID → /glossar/{slug}).
+     */
     private static function linkableTables(): array
     {
-        return array_values(array_filter(Tables::content(), fn($t) => ($t['settings']['route'] ?? '') !== '' && !empty($t['settings']['detail_page_id'])));
+        $glossaryOn = null;
+        return array_values(array_filter(Tables::content(), function ($t) use (&$glossaryOn) {
+            if (($t['settings']['route'] ?? '') === '' || empty($t['settings']['detail_page_id'])) return false;
+            return !self::isGlossary($t) || ($glossaryOn ??= self::$testGlossary ?? Glossary::enabled());
+        }));
     }
 
-    /** Entwürfe nur für Rollen, die Einträge dieser Tabelle bearbeiten dürfen – sonst nur, was Besucher sehen */
+    private static function isGlossary(array $t): bool
+    {
+        return ($t['handle'] ?? '') === Glossary::HANDLE && Glossary::fieldsOk($t);
+    }
+
+    /**
+     * Entwürfe nur für Rollen, die Einträge dieser Tabelle bearbeiten dürfen – sonst nur, was Besucher sehen.
+     * Glossar: immer nur veröffentlichte Begriffe (nur die erscheinen auf der Website und im Hinweisfenster).
+     */
     private static function entryStatus(array $t): string
     {
-        return can('data.edit', (string) $t['handle']) ? 'all' : 'published';
+        $edit = self::$testCanEdit ? (self::$testCanEdit)((string) $t['handle']) : can('data.edit', (string) $t['handle']);
+        return !self::isGlossary($t) && $edit ? 'all' : 'published';
+    }
+
+    /**
+     * Sortierung in der Linkauswahl: neueste zuerst – nach dem Datumsfeld, nach dem die Tabelle sortiert ist (z. B. Datum einer
+     * Meldung), sonst nach dem Anlagedatum (auch beim Glossar). Rückgabe: Datumsfeld (absteigend, bei Gleichstand nach ID)
+     */
+    private static function dateField(array $t): string
+    {
+        $sf = (string) ($t['settings']['sort_field'] ?? '');
+        $f = $sf !== '' ? Tables::field($t, $sf) : null;
+        return $f && in_array($f['type'], ['date', 'datetime'], true) ? $sf : 'created_at';
+    }
+
+    /**
+     * Einträge einer Tabelle für die Linkauswahl (Suche je Tabelle, Ansicht „Daten“): neueste zuerst, mit Titel, kurzem Datum
+     * (day, auch vorn in meta) und Entwurfskennzeichen; beim Glossar statt der Adresse die Kurz-Erklärung.
+     * @return array{0: list<array>, 1: ?int} [Einträge, Gesamtzahl] – Gesamtzahl null bei Fehlern
+     */
+    public static function tableEntries(array $t, string $q, int $offset, int $limit): array
+    {
+        $df = self::dateField($t);
+        $opt = ['status' => self::entryStatus($t), 'q' => $q];
+        try {
+            $total = Entries::count($t, $opt);
+            $rows = $total > $offset ? Entries::query($t, $opt + ['sort' => $df, 'dir' => 'desc', 'limit' => $limit, 'offset' => $offset]) : [];
+        } catch (\Throwable) {
+            return [[], null];
+        }
+        $multi = Lang::multi();
+        $glossary = self::isGlossary($t);
+        $items = [];
+        foreach ($rows as $e) {
+            $date = (string) ($e[$df] ?? '');
+            $ts = $date !== '' ? strtotime($date) : false;
+            $day = $ts !== false ? date('d.m.Y', $ts) : '';
+            $text = $glossary ? Glossary::short((string) ($e['kurz'] ?? '')) : '';
+            if (mb_strlen($text) > 90) $text = rtrim(mb_substr($text, 0, 89)) . '…';
+            $text = $text !== '' ? $text : (string) Entries::href($t, $e);
+            if ($it = self::entryItem($t, $e, $multi, ($day !== '' ? $day . ' · ' : '') . $text)) $items[] = $it + ['date' => $date, 'day' => $day];
+        }
+        return [$items, $total];
     }
 
     private static function entryItem(array $t, array $e, bool $multi, string $meta = ''): ?array
@@ -432,7 +515,138 @@ final class Links
             if ($pdo->inTransaction()) $pdo->rollBack();
             PageCache::clear();
         }
+        self::selftestTables($eq, $byId, $fails);
         return ['ok' => $ok, 'fails' => $fails];
+    }
+
+    /**
+     * Selbsttest Ansicht „Daten“ und Glossar: legt eine Testtabelle an (Meldungen mit Datum, dazu das Glossar, falls es noch keins
+     * gibt), Einträge in einer Transaktion (zurückgerollt), die Tabellen werden am Ende wieder gelöscht.
+     * Prüft: Quellenliste (Anzahl, Glossar nur bei eingeschalteter Funktion), neueste zuerst, Blättern ohne Lücken, kurzes Datum,
+     * Entwurf, Filter (literal), Rechte (Entwürfe nur mit data.edit), Glossar nur veröffentlicht, Suche nach Begriff und Tabellenname.
+     */
+    private static function selftestTables(\Closure $eq, \Closure $byId, array &$fails): void
+    {
+        $handle = 'lnk_test_' . bin2hex(random_bytes(3));
+        $made = [];
+        $pdo = app()->db->pdo;
+        try {
+            $tpl = fn(string $h) => Pages::create(['slug' => '_vorlage-' . $h, 'title' => 'Vorlage ' . $h, 'type' => 'template', 'template_for' => $h, 'status' => 'published']);
+            [$def, $err] = Tables::validate(['name' => 'Linktest Meldungen', 'singular' => 'Linktest Meldung', 'handle' => $handle, 'icon' => 'newspaper',
+                'fields' => [['label' => 'Titel', 'name' => 'titel', 'type' => 'text', 'required' => 1], ['label' => 'Datum', 'name' => 'datum', 'type' => 'date']],
+                'settings' => ['route' => str_replace('_', '-', $handle), 'title_field' => 'titel', 'sort_field' => 'datum', 'sort_dir' => 'desc', 'workflow' => 1]]);
+            $eq('Testtabelle gültig', $err, []);
+            if ($err) return;
+            $def['settings']['detail_page_id'] = $tpl($handle);
+            Tables::create($def);
+            $made[] = $handle;
+            $gl = null;
+            if (!Tables::find(Glossary::HANDLE)) {
+                [$gdef, $gerr] = Tables::validate(Glossary::definition());
+                $eq('Glossar-Tabelle gültig', $gerr, []);
+                if (!$gerr) {
+                    $gdef['settings']['detail_page_id'] = $tpl(Glossary::HANDLE);
+                    Tables::create($gdef);
+                    $made[] = Glossary::HANDLE;
+                    Glossary::flush();
+                    $gl = Tables::find(Glossary::HANDLE);
+                }
+            }
+            Tables::flush();
+            $t = Tables::find($handle);
+
+            $pdo->beginTransaction();
+            self::$testCanEdit = fn(string $h) => true;
+            self::$testGlossary = true;
+            // 23 Meldungen mit Datum (eine im Entwurf)
+            for ($i = 1; $i <= 23; $i++) {
+                Entries::save($t, null, ['titel' => sprintf('Linktest Meldung %02d', $i), 'datum' => date('Y-m-d', strtotime('2026-01-01 +' . $i . ' days')),
+                    'status' => $i === 23 ? 'draft' : 'published']);
+            }
+            if ($gl) {
+                foreach (['Zertifikat' => 'published', 'DNS' => 'published', 'Ärztekammer' => 'published', 'Barrierefreiheit' => 'published', 'Entwurfsbegriff' => 'draft'] as $term => $st) {
+                    Entries::save($gl, null, ['begriff' => $term, 'kurz' => 'Kurz erklärt: ' . $term, 'status' => $st]);
+                }
+            }
+            $src = fn(string $h) => array_values(array_filter(self::dataSources(), fn($x) => $x['handle'] === $h))[0] ?? null;
+
+            // Quellenliste
+            $s1 = $src($handle);
+            $eq('Quellen: Tabelle mit Detailseite', [$s1['id'] ?? null, $s1['label'] ?? null, $s1['icon'] ?? null], ['entries:' . $handle, 'Linktest Meldungen', 'newspaper']);
+            $eq('Quellen: Anzahl mit data.edit inkl. Entwurf', $s1['total'] ?? null, 23);
+
+            // Einträge: neueste zuerst nach Datum, Seiten zu 10 ohne Lücken und Doppelte, Entwurf gekennzeichnet
+            $seen = [];
+            $dates = [];
+            for ($off = 0; $off < 30; $off += 10) {
+                $g = $byId(self::sources(['group' => 'entries:' . $handle, 'offset' => $off, 'limit' => 10, 'literal' => 1]), 'entries:' . $handle);
+                if (!$g) break;
+                $eq("Einträge ab $off: Gesamtzahl und offset", [$g['total'], $g['offset']], [23, $off]);
+                foreach ($g['items'] as $it) { $seen[] = $it['value']; $dates[] = $it['date'] ?? ''; }
+            }
+            $sorted = $dates;
+            rsort($sorted);
+            $eq('Einträge: alle genau einmal', [count($seen), count(array_unique($seen))], [23, 23]);
+            $eq('Einträge: neueste zuerst (Datumsfeld)', $dates, $sorted);
+            $first = $byId(self::sources(['group' => 'entries:' . $handle, 'limit' => 3]), 'entries:' . $handle)['items'][0] ?? [];
+            $eq('Eintrag: neuester ist der Entwurf', [$first['label'] ?? null, $first['draft'] ?? null], ['Linktest Meldung 23', true]);
+            $eq('Eintrag: kurzes Datum', [$first['day'] ?? null, str_starts_with((string) ($first['meta'] ?? ''), '24.01.2026 · ')], ['24.01.2026', true]);
+            $eq('Eintrag: stabiler Verweis', (bool) preg_match('~^entry:' . $handle . ':\d+$~', (string) ($first['value'] ?? '')), true);
+
+            // Filter der Ansicht „Daten“ (literal): sucht in den Einträgen, auch wenn er auf den Tabellennamen passt
+            $g = $byId(self::sources(['group' => 'entries:' . $handle, 'q' => 'Meldung 07', 'literal' => 1]), 'entries:' . $handle);
+            $eq('Filter: Treffer', array_column($g['items'] ?? [], 'label'), ['Linktest Meldung 07']);
+            $g = $byId(self::sources(['group' => 'entries:' . $handle, 'q' => 'Linktest Meldungen', 'literal' => 1]), 'entries:' . $handle);
+            $eq('Filter = Tabellenname: kein „alle Einträge“', $g, null);
+            $g = $byId(self::sources(['q' => 'Linktest Meldungen']), 'entries:' . $handle);
+            $eq('Suche = Tabellenname: alle Einträge', $g['total'] ?? null, 23);
+            $g = $byId(self::sources(['q' => 'Linktest Meldungen', 'group' => 'entries:' . $handle, 'offset' => 12, 'limit' => 30]), 'entries:' . $handle);
+            $eq('Suche = Tabellenname: Weitere laden', count($g['items'] ?? []), 11);
+
+            // Rechte: ohne data.edit nur Veröffentlichtes (Quellen und Liste)
+            self::$testCanEdit = fn(string $h) => false;
+            $eq('Ohne data.edit: Anzahl ohne Entwurf', $src($handle)['total'] ?? null, 22);
+            $g = $byId(self::sources(['group' => 'entries:' . $handle, 'limit' => 50]), 'entries:' . $handle);
+            $eq('Ohne data.edit: keine Entwürfe', [count($g['items'] ?? []), count(array_filter($g['items'] ?? [], fn($it) => $it['draft']))], [22, 0]);
+            self::$testCanEdit = fn(string $h) => true;
+
+            if ($gl) {
+                $gs = $src(Glossary::HANDLE);
+                $eq('Glossar: Quelle „Glossar“', [$gs['id'] ?? null, $gs['label'] ?? null], ['entries:' . Glossary::HANDLE, __('Glossar')]);
+                $eq('Glossar: nur veröffentlichte Begriffe (auch mit data.edit)', $gs['total'] ?? null, 4);
+                $g = $byId(self::sources(['group' => 'entries:' . Glossary::HANDLE, 'limit' => 50, 'literal' => 1]), 'entries:' . Glossary::HANDLE);
+                $labels = array_column($g['items'] ?? [], 'label');
+                $eq('Glossar: neueste zuerst, ohne Entwurf', $labels, ['Barrierefreiheit', 'Ärztekammer', 'DNS', 'Zertifikat']);
+                $g2 = $byId(self::sources(['group' => 'entries:' . Glossary::HANDLE, 'offset' => 2, 'limit' => 3]), 'entries:' . Glossary::HANDLE);
+                $eq('Glossar: Weiterblättern', array_column($g2['items'] ?? [], 'label'), ['DNS', 'Zertifikat']);
+                $eq('Glossar: Verweis entry:glossar:ID → /glossar/{slug}', [(bool) preg_match('~^entry:glossar:\d+$~', (string) ($g['items'][0]['value'] ?? '')),
+                    (bool) preg_match('~/glossar/[a-z0-9-]+$~', (string) ($g['items'][0]['href'] ?? ''))], [true, true]);
+                $eq('Glossar: Verweis löst auf', self::href((string) ($g['items'][0]['value'] ?? '')), $g['items'][0]['href'] ?? false);
+                $eq('Glossar: Kurz-Erklärung in der Beschreibung', str_ends_with((string) ($g['items'][0]['meta'] ?? ''), 'Kurz erklärt: Barrierefreiheit'), true);
+                $eq('Glossar: auch unter „Neueste Einträge“ nur Veröffentlichtes', count(array_filter(self::recentEntries([$gl], 0, 50, false)[0], fn($it) => $it['draft'])), 0);
+                $g = $byId(self::sources(['q' => 'Zertifikat']), 'entries:' . Glossary::HANDLE);
+                $eq('Glossar: Suche nach Begriff', array_column($g['items'] ?? [], 'label'), ['Zertifikat']);
+                $g = $byId(self::sources(['q' => 'glossar']), 'entries:' . Glossary::HANDLE);
+                $eq('Glossar: Suchbegriff „glossar“ zeigt alle Begriffe', $g['total'] ?? null, 4);
+                $eq('Glossar: Entwurf nicht in der Suche', $byId(self::sources(['q' => 'Entwurfsbegriff']), 'entries:' . Glossary::HANDLE), null);
+                self::$testGlossary = false;
+                $eq('Glossar: Funktion aus → keine Quelle', $src(Glossary::HANDLE), null);
+                $eq('Glossar: Funktion aus → nicht in der Suche', $byId(self::sources(['q' => 'glossar']), 'entries:' . Glossary::HANDLE), null);
+            }
+        } catch (\Throwable $e) {
+            $fails[] = 'Ausnahme (Tabellen): ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
+        } finally {
+            self::$testCanEdit = null;
+            self::$testGlossary = null;
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            foreach ($made as $h) {
+                Tables::flush();
+                if ($x = Tables::find($h)) Tables::delete($x);
+            }
+            Tables::flush();
+            Glossary::flush();
+            PageCache::clear();
+        }
     }
 
     private static function fileMeta(array $m): string

@@ -118,7 +118,9 @@ final class EditorController extends AdminController
     /**
      * Linkziele. Ohne Parameter: flache Liste [{value, label}] (<datalist id="cms-links">, kompatibel).
      * ?format=groups&q=…&page=ID&mode=rich|field → Gruppen für die Linkauswahl (Core\Links::sources, resources/js/_links.js);
-     *   &group=pages|entries:{tabelle}|recent-entries|files|…&offset=N&limit=N → nur diese Gruppe ab dem N-ten Treffer („Weitere laden“).
+     *   &group=pages|entries:{tabelle}|recent-entries|files|…&offset=N&limit=N → nur diese Gruppe ab dem N-ten Treffer („Weitere laden“);
+     *   &literal=1 (mit group=entries:…) → q nur als Filter der Einträge (Ansicht „Daten“).
+     * ?format=sources → Quellen der Ansicht „Daten“ (Core\Links::dataSources: Tabellen mit Detailseite, Glossar).
      * ?format=tree&lang=…&page=ID → Seitenbaum einer Sprache für den Modus „Struktur“ (Core\Links::tree).
      * ?describe=Wert → lesbare Beschreibung eines Link-Werts (Anzeige im Feld „link“).
      */
@@ -133,7 +135,11 @@ final class EditorController extends AdminController
             return Response::json(['groups' => \Core\Links::sources([
                 'q' => mb_substr($r->str('q'), 0, 80), 'page' => (int) $r->str('page'), 'mode' => $r->str('mode'),
                 'group' => mb_substr($r->str('group'), 0, 60), 'offset' => (int) $r->str('offset'), 'limit' => (int) $r->str('limit') ?: null,
+                'literal' => $r->str('literal') === '1',
             ])]);
+        }
+        if ($r->str('format') === 'sources') {
+            return Response::json(['sources' => \Core\Links::dataSources()]);
         }
         if ($r->str('format') === 'tree') {
             return Response::json(\Core\Links::tree($r->str('lang'), (int) $r->str('page')));

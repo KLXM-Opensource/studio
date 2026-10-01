@@ -5407,4 +5407,10 @@ return [
     'Wird geladen …' => 'Loading …',
     '{n} Seiten' => '{n} pages',
     '{n} von {m} – {label}' => '{n} of {m} – {label}',
+    // Linkauswahl: Ansicht „Daten“ (Tabellen mit Detailseite, Glossar)
+    'Datenquelle' => 'Data source',
+    'Einträge filtern' => 'Filter entries',
+    'Filtern …' => 'Filter …',
+    'Daten (Tabellen und Glossar)' => 'Data (tables and glossary)',
+    'Keine verlinkbaren Daten: Tabellen brauchen eine URL-Basis und eine Detailseite.' => 'No linkable data: tables need a URL base and a detail page.',
 ];
