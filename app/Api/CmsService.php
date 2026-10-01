@@ -643,6 +643,7 @@ final class CmsService
                 'spaceTop' => ['normal', 'small', 'none'], 'spaceBottom' => ['normal', 'small', 'none'], 'divider' => 'bool',
                 'height' => ['auto', 'screen'], 'bgImage' => 'Medien-ID (Bild) oder null', 'overlay' => ['none', 'light', 'dark'],
                 'align' => ['top', 'center', 'bottom'],
+                'row' => ['' => 'eigener Abschnitt', 'auto' => 'neben den vorigen Block, Breite automatisch', '1-2' => '½', '1-3' => '⅓', '2-3' => '⅔', '1-4' => '¼', '3-4' => '¾'],
             ],
         ];
     }

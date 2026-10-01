@@ -233,6 +233,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-flag{padding:4px 8px;border-radius:6px;background:#fff;color:#16201E;box-shadow:0 0 0 1px #E6E6E9}
 .cms-flag--off{background:#FDF0DC;color:#9A5B00}
 .cms-flag--nav{background:#E7F2EE;color:#2F5A50}
+.cms-flag--row{background:#EEEBF7;color:#4A3D85}
 .cms-block__tools{display:inline-flex;gap:3px}
 .cms-iconbtn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin:0;padding:0;border-radius:8px;border:0;background:#fff;color:#16201E;box-shadow:0 0 0 1px #E6E6E9;font:700 14px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
 .cms-iconbtn:hover{background:#F0F0F2}

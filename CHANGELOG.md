@@ -6,6 +6,32 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Blöcke nebeneinander (Reihen) – Abschnitts-Option „Neben den vorigen Block stellen“
+- Neue Abschnitts-Option `row` (Abschnitt & Navigation): Breite **dieses** Blocks neben dem vorigen – ½, ⅓, ⅔, ¼, ¾ oder
+  automatisch; der erste Block bekommt den Rest. Kein verschachtelter Editor, kein „Raster-Block“: Jeder Block bleibt ein
+  normaler Block. `Theme::renderBlocks()` fasst aufeinanderfolgende Blöcke zu **einem Abschnitt** zusammen (`Theme::renderRow()`):
+  Hintergrund, Anker, Navigation, Abstände, Trennlinie, Vollbild und Hintergrundbild vom ersten Block (Klasse `sec--row`),
+  darin `.wrap.sec-row` mit einer Zelle je Block (Inhalt ohne eigene Hülle, `Theme::renderInner()`). Späterer Block mit
+  **anderem Hintergrund → Karte** (`sec sec-row__cell--card bg-{name}`), gleicher Hintergrund → nahtlos; eigene Sprungmarke an
+  der Zelle. Am ersten Block der Seite (und nach Blöcken mit eigener Hülle, `raw`) wird die Option ignoriert.
+- `css/rows.css` (nur mit Reihe auf der Seite, Kit kann sie ersetzen): Flexbox ohne Media Query, Anteile in Zwölfteln,
+  untereinander unter `--row-stack` (Standard 700px Inhaltsbreite ≈ Fenster < 768 px); `--row-gap`, `--row-align`,
+  `--row-card-pad`, `--row-card-radius`. Funktioniert mit allen mitgelieferten Kits (Partial `section` + `.wrap`);
+  `theme.php → 'rows' => false` schaltet ab, `['wrap' => …]` setzt die Container-Klasse. Block-Vorlagen: `$b->inRow()`, `$b->rowLead`.
+- Editor: Blöcke einer Reihe ab 1100 px Fensterbreite auch im Editor nebeneinander (Anteile wie auf der Website, spätere Blöcke
+  als Zelle/Karte mit Hintergrund und Abständen des ersten), schmaler untereinander; Markierung „In einer Reihe mit dem vorigen
+  Block (½)“ bzw. „wird ignoriert“ am ersten Block der Seite. REST/MCP/OpenAPI: `section.row`. `blocks:selftest` prüft Anteile,
+  Bereinigung und Gruppierung.
+- Kit-Befehle: `kits/{kit}/console.php` (`Core\Kit::commands()`) – Befehle des aktiven Kits in `bin/console`.
+- Kit „basis“: Karten-Fläche für „Standard“-Hintergrund, Box-Variante des Handlungsaufrufs in einer Karte ohne zweite Fläche.
+- Kit „praxis“: „Handlungsaufruf“ mit Variante **Box / Karte** (kleine Überschrift – in einer Reihe h3 –, optionaler Text, Button;
+  allein hell mit Rahmen, in einer Reihe mit anderem Hintergrund als farbige Karte) und optionalem Text auch im Band;
+  „Text + Bild“ zusätzlich im Format 16:9. Reihen stehen in diesem Kit bis ca. 1080 px Fensterbreite untereinander
+  (`--row-stack:1000px`). Block **„Teamfoto + Text“ veraltet** (nicht mehr einfügbar, bestehende werden weiter dargestellt):
+  `php bin/console praxis:migrate-team [--dry-run] [--page=ID]` ersetzt ihn durch „Bild breit“ (16:9, mit Anker/Navigation des
+  alten Blocks) + „Fließtext“ (⅔) + „Handlungsaufruf“ als dunkle Box daneben (⅓, nur mit Ausbildungs-/Stellen-Box) – Entwurf und
+  veröffentlichte Fassung je für sich, Version „Team-Abschnitt umgestellt“, wiederholbar.
+
 ### Karten: „Route planen“ je Plattform, 3D-Ansicht
 - `Core\Maps`: „Route planen“ führt standardmäßig zu Google Maps (auf Android öffnet dieselbe Adresse die App); auf
   iPhone/iPad/Mac tauscht das Kit-Skript (`a[data-route]` → `data-apple`; Kit „praxis“: `site.js`) auf Apple Karten, der Link nennt den Dienst

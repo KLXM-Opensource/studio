@@ -391,7 +391,7 @@ return [
             'variants' => ['right' => 'Bild rechts (B01)', 'left' => 'Bild links (B02)'],
             'fields' => [
                 ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '4-3', 'width' => 'half',
-                    'options' => ['4-3' => '4:3', '1-1' => '1:1', '3-4' => '3:4']],
+                    'options' => ['4-3' => '4:3', '1-1' => '1:1', '3-4' => '3:4', '16-9' => '16:9']],
                 ['name' => 'title_style', 'label' => 'Überschrift-Stil', 'type' => 'select', 'required' => true, 'default' => 'split', 'width' => 'half',
                     'options' => ['split' => 'Stichwort. + leichte Zeile', 'sentence' => 'Ein Satz (mit Dachzeile)']],
                 ['name' => 'eyebrow', 'label' => 'Dachzeile', 'type' => 'text', 'max' => 40],
@@ -488,8 +488,11 @@ return [
                 ]],
             ],
         ],
+        // Veraltet (seit 01.10.2026): zu speziell – stattdessen „Bild breit“/„Text + Bild“ und „Handlungsaufruf“ als Box daneben
+        // (Abschnitts-Option „Neben den vorigen Block stellen“). Bestehende Blöcke werden weiter dargestellt; nicht mehr einfügbar.
+        // Umstellen: php bin/console praxis:migrate-team [--dry-run]
         'team_photo' => [
-            'label' => 'Teamfoto + Text', 'icon' => '◉', 'group' => 'Personen',
+            'label' => 'Teamfoto + Text (veraltet)', 'icon' => '◉', 'group' => 'Personen', 'insertable' => false,
             'fields' => [
                 ['name' => 'image', 'label' => 'Teamfoto 2:1 (min. 2400 px)', 'type' => 'media'],
                 ...$heading,
@@ -560,8 +563,12 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf (B11)', 'icon' => '➜', 'group' => 'Inhalt', 'background' => 'dark',
+            // Box: kompakt (kleine Überschrift, Text, Button) – z. B. „Neben den vorigen Block stellen“ (⅓) neben einem Text;
+            // in einer Reihe mit anderem Hintergrund als der Abschnitt wird sie zur farbigen Karte, sonst hell mit Rahmen
+            'variants' => ['band' => 'Band (ganze Breite)', 'box' => 'Box / Karte (z. B. neben einem Text)'],
             'fields' => [
                 ...$heading,
+                ['name' => 'text', 'label' => 'Text (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 300],
                 ['name' => 'buttons', 'label' => 'Buttons', 'type' => 'repeater', 'item_label' => 'Button', 'max_items' => 2, 'fields' => [
                     ['name' => 'label', 'label' => 'Beschriftung', 'type' => 'text', 'required' => true, 'max' => 28, 'width' => 'half'],
                     ['name' => 'link', 'label' => 'Link', 'type' => 'link', 'required' => true, 'width' => 'half',

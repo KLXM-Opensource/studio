@@ -1,0 +1,22 @@
+/* ==========================================================================
+   Blöcke nebeneinander (Abschnitts-Option „Neben den vorigen Block stellen“, Tune row, Core\Theme::renderRow)
+   <section class="sec … sec--row"><div class="wrap sec-row"><div class="sec-row__cell sec-row__cell--w8 …">…</div>…</div></section>
+   Nur geladen, wenn die Seite eine Reihe enthält. Theme-Datei public/assets/kits/{name}/css/rows.css ersetzt sie.
+   Anpassbar (am Kit, z. B. :root oder .sec-row):
+     --row-gap          Abstand zwischen den Spalten (auch beim Stapeln)
+     --row-stack        Breite des Inhaltsbereichs, unter der die Spalten untereinander stehen (Standard 700px ≈ Fenster < 768 px)
+     --row-align        vertikale Ausrichtung der Spalten (start | center | end | stretch)
+     --row-card-pad, --row-card-radius   Karte (Block mit eigenem Hintergrund in der Reihe)
+   Stapeln ohne Media Query: flex-basis wird unter --row-stack riesig (jede Spalte 100 %), darüber 0 (Anteile über flex-grow).
+   ========================================================================== */
+.sec-row{display:flex;flex-wrap:wrap;gap:var(--row-gap,clamp(28px,4vw,56px));align-items:var(--row-align,flex-start)}
+.sec-row>.sec-row__cell{flex-grow:var(--row-w,1);flex-shrink:1;flex-basis:calc((var(--row-stack,700px) - 100%) * 999);min-width:0;padding:0}
+/* Die Block-Vorlagen bringen ihre eigene .wrap mit – in der Zelle ohne Höchstbreite und Seitenrand */
+.sec-row>.sec-row__cell>.wrap{max-width:none;width:auto;margin-inline:0;padding-inline:0}
+/* Karte (Block mit anderem Hintergrund als die Reihe): Klassen sec + bg-{name} wie ein Abschnitt, aber kompakt.
+   Innenabstand an der .wrap des Blocks (nicht an der Zelle) – so bleiben die Spaltenanteile exakt */
+.sec-row>.sec-row__cell--card{border-radius:var(--row-card-radius,16px);margin:0}
+.sec-row>.sec-row__cell--card>.wrap,.sec-row>.sec-row__cell--card:not(:has(>.wrap)){padding:var(--row-card-pad,clamp(24px,3.5vw,40px))}
+.sec-row__cell--w1{--row-w:1}.sec-row__cell--w2{--row-w:2}.sec-row__cell--w3{--row-w:3}.sec-row__cell--w4{--row-w:4}
+.sec-row__cell--w5{--row-w:5}.sec-row__cell--w6{--row-w:6}.sec-row__cell--w7{--row-w:7}.sec-row__cell--w8{--row-w:8}
+.sec-row__cell--w9{--row-w:9}.sec-row__cell--w10{--row-w:10}.sec-row__cell--w11{--row-w:11}.sec-row__cell--w12{--row-w:12}

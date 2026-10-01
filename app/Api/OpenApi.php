@@ -296,7 +296,8 @@ final class OpenApi
                         'height' => ['type' => 'string', 'enum' => ['auto', 'screen'], 'description' => 'screen = Vollbild (mindestens 100svh, Inhalt vertikal ausgerichtet)'],
                         'bgImage' => ['type' => ['integer', 'null'], 'description' => 'Medien-ID eines Hintergrundbilds (responsiv, hinter dem Inhalt)'],
                         'overlay' => ['type' => 'string', 'enum' => ['none', 'light', 'dark'], 'description' => 'Aufhellung/Abdunkelung über dem Hintergrundbild für lesbaren Text'],
-                        'align' => ['type' => 'string', 'enum' => ['top', 'center', 'bottom'], 'description' => 'Vertikale Ausrichtung bei height = screen']]],
+                        'align' => ['type' => 'string', 'enum' => ['top', 'center', 'bottom'], 'description' => 'Vertikale Ausrichtung bei height = screen'],
+                        'row' => ['type' => 'string', 'enum' => ['', 'auto', '1-2', '1-3', '2-3', '1-4', '3-4'], 'description' => 'Neben den vorigen Block stellen (Breite dieses Blocks; „“ = eigener Abschnitt). Abschnitts-Optionen der Reihe vom ersten Block']]],
                     'Block' => ['type' => 'object', 'required' => ['type'], 'properties' => [
                         'id' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(app()->theme->blocks())],
                         'data' => ['type' => 'object', 'description' => 'Felder laut /block-types'], 'section' => $ref('Section')]],

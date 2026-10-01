@@ -30,7 +30,7 @@ const previews = initial.previews || {};
 const tools = new Map();      // blockId → Tool-Instanz
 const tunes = new Map();      // blockId → Tune-Instanz
 const initialTunes = Object.fromEntries((initial.blocks || []).map(b => [b.id, b.tunes?.section || {}]));
-const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center' };
+const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '' };
 let editor, dirty = false, drawerFor = null, drawerSnap = null;
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const COLLAPSE_KEY = 'cms-collapsed-' + cfg.page.id;
@@ -46,8 +46,64 @@ const summarize = data => {
   const first = ['items', 'files', 'columns', 'buttons'].map(k => data?.[k]?.[0]).find(Boolean);
   return first ? summarize(first) : '';
 };
+/**
+ * Blöcke nebeneinander (Tune „row“, Core\Theme::renderRow): Im Editor stehen Blöcke einer Reihe auf breiten Bildschirmen
+ * ebenfalls nebeneinander (Anteile wie auf der Website, editor.css → .cms-row-cell), schmal untereinander. Jeder Block der Reihe
+ * trägt die Markierung „In einer Reihe mit dem vorigen Block (½)“; beim ersten Block der Seite: „wird ignoriert“.
+ */
+const ROW_W = { auto: null, '1-2': 6, '1-3': 4, '2-3': 8, '1-4': 3, '3-4': 9 };
+const ROW_LABEL = { auto: 'automatisch', '1-2': '½', '1-3': '⅓', '2-3': '⅔', '1-4': '¼', '3-4': '¾' };
+function rowSpans(rows) {
+  let fixed = 0, autos = 0;
+  rows.forEach((r, i) => { const n = i === 0 ? null : ROW_W[r] ?? null; n === null ? autos++ : fixed += n; });
+  const share = autos ? Math.max(2, Math.floor(Math.max(0, 12 - fixed) / autos)) : 0;
+  return rows.map((r, i) => (i === 0 ? share : ROW_W[r] ?? share));
+}
+function layoutRows() {
+  if (!cfg.rows) return;
+  const groups = [];
+  blockEls().forEach((ce, i) => {
+    const tool = tools.get(ce.dataset.id), row = tool?.tuneData?.row || '';
+    const x = { ce, el: tool?.el, row, raw: !!tool?.def?.raw };
+    const last = groups[groups.length - 1];
+    if (row && i > 0 && !x.raw && !last[0].raw) last.push(x); else groups.push([x]);
+  });
+  for (const g of groups) {
+    const spans = rowSpans(g.map(x => x.row));
+    g.forEach((x, i) => {
+      const inRow = g.length > 1;
+      x.ce.classList.toggle('cms-row-cell', inRow);
+      x.ce.classList.toggle('cms-row-lead', inRow && i === 0);
+      if (inRow) x.ce.style.setProperty('--cms-row-g', String(spans[i])); else x.ce.style.removeProperty('--cms-row-g');
+      if (!x.el) return;
+      // Vorschau eines Blocks „neben dem vorigen“ (Theme::renderBlock → .sec--row-preview): Hintergrund und Abstände wie der
+      // erste Block der Reihe; eigene Fläche (Karte) nur bei anderem Hintergrund – wie auf der Website (Theme::renderRow)
+      const pv = x.el.querySelector(':scope>.cms-block__preview>.sec--row-preview');
+      const leadSec = g[0].el?.querySelector(':scope>.cms-block__preview>section');
+      if (pv && i > 0 && leadSec) {
+        const own = pv.dataset.rowBg || '', lead = [...leadSec.classList].find(c => c.startsWith('bg-'))?.slice(3) || '';
+        pv.className = ['sec', 'sec--row-preview', ...[...leadSec.classList].filter(c => /^(bg-|pt-|pb-)/.test(c))].join(' ');
+        const cell = pv.querySelector('.sec-row__cell');
+        if (cell) {
+          cell.classList.toggle('sec-row__cell--card', own !== lead);
+          cell.classList.toggle('sec', own !== lead);
+          cell.classList.toggle('bg-' + own, own !== lead);
+        }
+      }
+      const ignored = !!x.row && i === 0;
+      x.el.classList.toggle('is-row', !!x.row);
+      x.el.classList.toggle('is-row-ignored', ignored);
+      if (x.row) x.el.dataset.rowLabel = ignored
+        ? CMSAdmin.t('Neben den vorigen Block – wird ignoriert (kein Block davor)')
+        : CMSAdmin.t('In einer Reihe mit dem vorigen Block ({w})', { w: CMSAdmin.t(ROW_LABEL[x.row] || x.row) });
+      else delete x.el.dataset.rowLabel;
+    });
+  }
+}
+
 /** Pfeile am Anfang/Ende deaktivieren */
 function refreshMoveButtons() {
+  layoutRows();
   const els = blockEls();
   els.forEach((b, i) => {
     const sr = b.querySelector('.cms-block__bar')?.shadowRoot;
@@ -498,7 +554,9 @@ function makeTool(type, def) {
         t.showInNav && '<span class="cms-flag cms-flag--nav">Navigation</span>',
         t.height === 'screen' && '<span class="cms-flag">Vollbild</span>',
         t.bgImage && '<span class="cms-flag">Hintergrundbild</span>',
+        t.row && `<span class="cms-flag cms-flag--row">${CMSAdmin.esc(CMSAdmin.t('Reihe: {w}', { w: CMSAdmin.t(ROW_LABEL[t.row] || t.row) }))}</span>`,
       ].filter(Boolean).join('');
+      layoutRows();
       // Direkt editierbare Texte: plain = nur Text, rich/inline = mit schwebender Formatierungsleiste
       $$('[data-edit]', pv).forEach(n => {
         const mode = n.dataset.editMode || 'plain';
@@ -819,6 +877,8 @@ function renderTuneForm(tool) {
   const t = tool.tuneData, bgs = cfg.backgrounds, E = CMSAdmin.esc;
   const opt = (o, v) => Object.entries(o).map(([k, l]) => `<option value="${E(k)}"${k === v ? ' selected' : ''}>${E(l)}</option>`).join('');
   const sp = { normal: 'Normal', small: 'Klein', none: 'Kein' };
+  const rowOpts = { '': CMSAdmin.t('Nein – eigener Abschnitt'), auto: CMSAdmin.t('Ja – Breite automatisch'),
+    ...Object.fromEntries(['1-2', '1-3', '2-3', '1-4', '3-4'].map(k => [k, CMSAdmin.t('Ja – {w} Breite', { w: ROW_LABEL[k] })])) };
   const bgImg = tool.el?.querySelector('.sec__bg img'), bgThumb = bgImg && (bgImg.currentSrc || bgImg.src);
   f.innerHTML = `
     <div class="f f--half"><label for="t-bg">Hintergrund</label><select id="t-bg" name="background">${opt(bgs, t.background)}</select></div>
@@ -835,7 +895,9 @@ function renderTuneForm(tool) {
       <div class="media-field" data-accept="image"><input type="hidden" name="bgImage" value="${E(t.bgImage || '')}">
       <div class="media-field-preview">${t.bgImage ? (bgThumb ? `<img src="${E(bgThumb)}" alt="" width="120">` : '') + '<span>Bild gewählt</span>' : '<span class="media-empty">Kein Bild gewählt</span>'}</div>
       <button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> <button type="button" class="btn btn--small btn--ghost" data-media-clear>Entfernen</button></div></div>
-    <div class="f"><label for="t-ov">Bild abdunkeln oder aufhellen</label><select id="t-ov" name="overlay">${opt({ none: 'Nein', dark: 'Abdunkeln (helle Schrift)', light: 'Aufhellen (dunkle Schrift)' }, t.overlay)}</select></div>`;
+    <div class="f"><label for="t-ov">Bild abdunkeln oder aufhellen</label><select id="t-ov" name="overlay">${opt({ none: 'Nein', dark: 'Abdunkeln (helle Schrift)', light: 'Aufhellen (dunkle Schrift)' }, t.overlay)}</select></div>
+    ${cfg.rows && !tool.def?.raw ? `<div class="f"><label for="t-row">${E(CMSAdmin.t('Neben den vorigen Block stellen'))}</label><select id="t-row" name="row" aria-describedby="t-row-h">${opt(rowOpts, t.row || '')}</select>
+      <p class="f-help" id="t-row-h">${E(CMSAdmin.t('Breite dieses Blocks; der vorige Block bekommt den Rest. Hintergrund, Abstände, Trennlinie und Hintergrundbild kommen vom ersten Block der Reihe – ein anderer Hintergrund macht diesen Block zur Karte. Auf schmalen Bildschirmen stehen die Blöcke untereinander.'))}</p></div>` : ''}`;
   f.classList.add('adm-fields');
   CMSAdmin.init(f);
   f.oninput = f.onchange = () => {
@@ -845,6 +907,7 @@ function renderTuneForm(tool) {
       visible: f.visible.checked, divider: f.divider.checked, showInNav: f.showInNav.checked,
       navLabel: f.navLabel.value, spaceTop: f.spaceTop.value, spaceBottom: f.spaceBottom.value,
       height: f.height.value, align: f.align.value, bgImage: +f.bgImage.value || null, overlay: f.overlay.value,
+      row: f.row ? f.row.value : (tune?.data?.row || ''),
     };
     f.align.disabled = data.height !== 'screen';
     if (tune) tune.data = data;

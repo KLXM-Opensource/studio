@@ -5219,4 +5219,13 @@ return [
     // Seiten: Systemadressen (PageController::reservedSlug)
     'Diese Adresse ist reserviert: Unter /{slug} liegen Dateien oder Funktionen des Systems (z. B. Medien, Assets, Verwaltung) – eine Seite wäre dort nicht erreichbar. Bitte eine andere Adresse wählen.' => 'This address is reserved: system files or functions (e.g. media, assets, admin) live under /{slug} – a page there would not be reachable. Please choose another address.',
     'Achtung: Unter /{slug} liegen Dateien des Systems – diese Seite ist dort für Besucher nicht erreichbar. Bitte eine andere Adresse wählen.' => 'Warning: system files live under /{slug} – visitors cannot reach this page there. Please choose another address.',
+    // Blöcke nebeneinander (Abschnitts-Option „row“, editor.js)
+    'Neben den vorigen Block stellen' => 'Place next to the previous block',
+    'Nein – eigener Abschnitt' => 'No – own section',
+    'Ja – Breite automatisch' => 'Yes – automatic width',
+    'Ja – {w} Breite' => 'Yes – {w} width',
+    'Reihe: {w}' => 'Row: {w}',
+    'In einer Reihe mit dem vorigen Block ({w})' => 'In a row with the previous block ({w})',
+    'Neben den vorigen Block – wird ignoriert (kein Block davor)' => 'Next to the previous block – ignored (no block before it)',
+    'Breite dieses Blocks; der vorige Block bekommt den Rest. Hintergrund, Abstände, Trennlinie und Hintergrundbild kommen vom ersten Block der Reihe – ein anderer Hintergrund macht diesen Block zur Karte. Auf schmalen Bildschirmen stehen die Blöcke untereinander.' => 'Width of this block; the previous block gets the rest. Background, spacing, divider and background image come from the first block of the row – a different background turns this block into a card. On narrow screens the blocks are stacked.',
 ];

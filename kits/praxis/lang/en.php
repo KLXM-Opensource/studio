@@ -20,4 +20,9 @@ return [
     'Textbreite (gut lesbar)' => 'Text width (easy to read)',
     'Breit (ganzer Inhaltsbereich)' => 'Wide (whole content area)',
     'Freier Fließtext mit Zwischenüberschriften (H2–H4), Listen und Links – z. B. für Stellenanzeigen, Erläuterungen und Rechtstexte. Breite wählbar: Textbreite oder breit.' => 'Free running text with subheadings (H2–H4), lists and links – e.g. for job ads, explanations and legal texts. Width selectable: text width or wide.',
+
+    // Handlungsaufruf als Box, Teamfoto veraltet (01.10.2026)
+    'Band (ganze Breite)' => 'Band (full width)',
+    'Box / Karte (z. B. neben einem Text)' => 'Box / card (e.g. next to a text)',
+    'Teamfoto + Text (veraltet)' => 'Team photo + text (deprecated)',
 ];

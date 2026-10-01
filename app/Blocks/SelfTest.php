@@ -11,6 +11,7 @@ use Core\Block;
  * CSS-Begrenzung und die Gleichheit von Interpreter und exportiertem PHP-Renderer. Dazu die Logo-Normalisierung des Blocks „Partner & Logos“.
  * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx) und Bild im Rahmen
  * (Core\ImageFit: Format, Vorrang Einbindung → Mediathek → automatisch, Klassen, Regeln, transparenter Rand).
+ * Blöcke nebeneinander (Tune „row“, Core\Theme::renderRow): Anteile, Bereinigung, Gruppierung, erster Block ignoriert.
  */
 final class SelfTest
 {
@@ -30,10 +31,34 @@ final class SelfTest
             $t->partnerLogos();
             $t->imageFx();
             $t->imageFit();
+            $t->rows();
         } finally {
             app()->editing = $prev;
         }
         return ['ok' => $t->ok, 'fails' => $t->fails];
+    }
+
+    /** Blöcke nebeneinander: Theme::rowSpans, sanitizeTunes('row'), renderBlocks gruppiert (mit dem aktiven Kit) */
+    private function rows(): void
+    {
+        $th = app()->theme;
+        $sp = fn(array $w) => implode(',', \Core\Theme::rowSpans($w));
+        $this->assert($sp(['', '1-3']) === '8,4' && $sp(['', 'auto']) === '6,6' && $sp(['', '1-4', '1-4']) === '6,3,3' && $sp(['', 'auto', 'auto']) === '4,4,4',
+            'Reihen: Anteile (Rest für den ersten Block, auto teilt)');
+        $this->assert($sp(['', '3-4', '1-2']) === '2,9,6', 'Reihen: zu breit → erster Block Mindestanteil');
+        $tn = fn($v) => $th->sanitizeTunes(['row' => $v])['row'];
+        $this->assert($tn('1-2') === '1-2' && $tn(true) === 'auto' && $tn('x') === '' && $tn(null) === '' && $th->sanitizeTunes([])['row'] === '', 'Reihen: Tune row bereinigt');
+        $type = $th->block('richtext') ? 'richtext' : null;
+        if (!$type || !$th->rowable(new Block('t', $type, [], $th->sanitizeTunes([]), $th->block($type)))) { $this->ok++; return; }
+        $title = in_array('title_strong', array_column($th->block($type)['fields'], 'name'), true) ? 'title_strong' : 'title';
+        $bl = fn(string $id, string $row, string $bg = '') => ['id' => $id, 'type' => $type, 'data' => [$title => 'T ' . $id, 'text' => '<p>Text ' . $id . '</p>'],
+            'tunes' => ['section' => ['row' => $row] + ($bg !== '' ? ['background' => $bg] : [])]];
+        $bgs = array_keys($th->backgrounds());
+        $html = $th->renderBlocks([$bl('r1', '1-2'), $bl('r2', '1-3', $bgs[1] ?? $bgs[0]), $bl('r3', '')]);
+        $this->assert(substr_count($html, 'sec-row"') === 1 && str_contains($html, 'sec-row__cell--w8') && str_contains($html, 'sec-row__cell--w4')
+            && substr_count($html, '<section') === 2, 'Reihen: zwei Blöcke in einem Abschnitt, dritter eigener Abschnitt (erster Block: Option ignoriert)');
+        $this->assert(!isset($bgs[1]) || str_contains($html, 'sec-row__cell--card'), 'Reihen: anderer Hintergrund → Karte');
+        $this->assert(str_contains($html, 'id="r1"') === false && str_contains($html, 'id="b-r1"'), 'Reihen: Abschnitt trägt Anker des ersten Blocks');
     }
 
     /** Block „Partner & Logos“ (Core\Blocks\PartnerLogos): flächengleiche Logo-Breite, Grenzen, Sortierung */

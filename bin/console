@@ -1057,6 +1057,10 @@ switch ($cmd) {
         if ($cmd !== null && isset(Core\Extensions::commands()[$cmd])) {
             exit((int) (Core\Extensions::commands()[$cmd][1]($args) ?? 0));
         }
+        // Befehle des aktiven Kits (kits/{kit}/console.php, Core\Kit::commands)
+        if ($cmd !== null && isset(Core\Kit::commands()[$cmd])) {
+            exit((int) (Core\Kit::commands()[$cmd][1]($args) ?? 0));
+        }
         // Befehl einer installierten, auf dieser Website abgeschalteten Erweiterung (z. B. Cron video:work): ruhig beenden
         if ($cmd !== null && ($ext = Core\Extensions::inactiveCommand($cmd))) {
             echo "Erweiterung „{$ext}“ ist auf Website „" . site()->key . "“ nicht aktiv – nichts zu tun ($cmd).\n";
@@ -1069,6 +1073,10 @@ switch ($cmd) {
         if ($ext = Core\Extensions::commands()) {
             echo "\nBefehle aktiver Erweiterungen (" . site()->key . ")\n";
             foreach ($ext as $c => $def) printf("  %-48s %s\n", $c, (string) ($def[0] ?? ''));
+        }
+        if ($kc = Core\Kit::commands()) {
+            echo "\nBefehle des Kits „" . app()->theme->name . "“ (" . site()->key . ")\n";
+            foreach ($kc as $c => $def) printf("  %-48s %s\n", $c, (string) ($def[0] ?? ''));
         }
         if ($cmd !== null && !in_array($cmd, ['help', '--help', '-h'], true)) exit(1);
 }

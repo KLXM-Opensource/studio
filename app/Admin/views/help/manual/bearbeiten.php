@@ -84,7 +84,23 @@ $__sample = $vars['blocks_page'] ?? null;
     <tr><td>Abstand oben/unten, Trennlinie oben</td><td>Feinabstimmung, wenn zwei Blöcke optisch zusammengehören.</td></tr>
     <tr><td>Höhe, Inhalt vertikal</td><td>„Vollbild“ macht den Abschnitt so hoch wie den Bildschirm; der Inhalt steht dann oben, mittig oder unten.</td></tr>
     <tr><td>Hintergrundbild, abdunkeln/aufhellen</td><td>Ein Bild aus der Mediathek hinter dem Abschnitt; „Abdunkeln“ sorgt für helle, „Aufhellen“ für dunkle, gut lesbare Schrift.</td></tr>
+    <tr><td>Neben den vorigen Block stellen</td><td>Stellt den Block in eine Reihe mit dem Block davor – mit der gewählten Breite (½, ⅓, ⅔, ¼, ¾ oder automatisch). Siehe <a href="#nebeneinander">Blöcke nebeneinander</a>.</td></tr>
   </table>
+
+  <h3 id="nebeneinander">Blöcke nebeneinander</h3>
+  <p>Zwei oder mehr Blöcke lassen sich in eine <b>Reihe</b> stellen – z. B. ein Text (⅔) und daneben eine Box mit Button (⅓), zwei Texte je ½ oder vier kurze Blöcke je ¼. Es gibt keinen eigenen „Raster-Block“: Jeder Block bleibt ein normaler Block, Sie stellen ihn nur neben den vorigen.</p>
+  <ol class="doc-steps">
+    <li>Den ersten Block der Reihe wie gewohnt anlegen (z. B. „Fließtext“). Er bestimmt den <b>Abschnitt</b>: Hintergrund, Sprungmarke, Navigation, Abstände, Trennlinie und Hintergrundbild.</li>
+    <li>Darunter den nächsten Block einfügen, <b>Bearbeiten</b> → unten <b>Abschnitt &amp; Navigation</b> → <b>Neben den vorigen Block stellen</b> und die <b>Breite dieses Blocks</b> wählen (½, ⅓, ⅔, ¼, ¾ oder „automatisch“). Der erste Block bekommt den Rest; mehrere „automatisch“ teilen ihn gleichmäßig.</li>
+    <li>Für drei oder vier Spalten weitere Blöcke ebenso einstellen – jeder schließt an den Block davor an.</li>
+  </ol>
+  <ul>
+    <li><b>Hintergrund:</b> Hat ein späterer Block denselben Hintergrund wie der erste, steht er nahtlos daneben. Ein <b>anderer Hintergrund</b> macht ihn zur <b>Karte</b> (eigene Fläche mit runden Ecken) – z. B. eine dunkle Box neben hellem Text. Abstände, Trennlinie, Vollbild und Hintergrundbild der späteren Blöcke gelten in der Reihe nicht.</li>
+    <li><b>Sprungmarke:</b> Die des ersten Blocks gilt für den ganzen Abschnitt; spätere Blöcke können eine eigene haben (Sprung direkt zu ihnen).</li>
+    <li><b>Schmale Bildschirme:</b> Auf dem Handy (und je nach Design auch auf dem Tablet) stehen die Blöcke automatisch untereinander, in der Reihenfolge der Seite.</li>
+    <li><b>Im Editor</b> erscheinen Blöcke einer Reihe auf breiten Bildschirmen ebenfalls nebeneinander; jeder spätere Block trägt oben links den Hinweis „In einer Reihe mit dem vorigen Block (⅓)“. Auf schmaleren Fenstern stehen sie untereinander – mit demselben Hinweis.</li>
+    <li>Beim <b>ersten Block der Seite</b> hat die Option keine Wirkung (es gibt keinen Block davor); der Editor zeigt dann „wird ignoriert“. Blöcke mit eigener Hülle (z. B. ein großer Kopfbereich) können keine Reihe beginnen.</li>
+  </ul>
 
   <h3>Speichern, Veröffentlichen, Versionen</h3>
   <ol class="doc-steps">

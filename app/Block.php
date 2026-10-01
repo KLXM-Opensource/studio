@@ -17,9 +17,28 @@ final class Block
         public readonly ?Block $prev = null,
     ) {}
 
+    /** Erster Block einer Reihe (Theme::renderRow): Abschnitt bekommt die Klasse sec--row */
+    public bool $rowLead = false;
+
     public function tune(string $key): mixed
     {
         return $this->tunes[$key] ?? null;
+    }
+
+    /**
+     * Steht der Block neben dem vorigen (Tune „row“: auto, 1-2, 1-3, 2-3, 1-4, 3-4)? Dann gibt Theme::renderRow() nur seinen
+     * Inhalt in einer Zelle des Abschnitts des ersten Blocks aus – z. B. für eine kleinere Überschrift (h3 statt h2).
+     * Im Editor (Vorschau je Block) gilt die Einstellung, auch wenn sie beim ersten Block der Seite ignoriert wird.
+     */
+    public function inRow(): bool
+    {
+        return ($this->tunes['row'] ?? '') !== '';
+    }
+
+    /** Kopie mit geänderten Abschnitts-Optionen */
+    public function withTunes(array $tunes): self
+    {
+        return new self($this->id, $this->type, $this->data, array_replace($this->tunes, $tunes), $this->def, $this->prev);
     }
 
     public function variant(): string
@@ -92,6 +111,7 @@ final class Block
         if ($this->tunes['spaceTop'] !== 'normal') $c[] = 'pt-' . $this->tunes['spaceTop'];
         if ($this->tunes['spaceBottom'] !== 'normal') $c[] = 'pb-' . $this->tunes['spaceBottom'];
         if ($this->tunes['divider']) $c[] = 'sec--divider';
+        if ($this->rowLead) $c[] = 'sec--row';
         if (!$this->tunes['visible']) $c[] = 'is-hidden-block';
         if ($this->variant()) $c[] = 'v-' . $this->variant();
         // Vollbild-Abschnitt (min. 100svh, Inhalt vertikal ausgerichtet) und Hintergrundbild

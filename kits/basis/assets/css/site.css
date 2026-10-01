@@ -371,3 +371,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--b-fx,50%) var(--b-fy,50%)}
 .prose ul.check{list-style:none;padding-left:0}
 .prose ul.check>li{position:relative;padding-left:1.7em}
 .prose ul.check>li::before{content:"";position:absolute;left:0;top:.3em;width:1.05em;height:1.05em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* Blöcke nebeneinander (Kern css/rows.css): Karte = Block mit anderem Hintergrund in einer Reihe */
+.bg-white{--b-sec-bg:var(--b-bg)}
+.sec-row{--row-card-radius:var(--b-radius-l)}
+.sec-row__cell--card .cta--box{padding:0;background:none}

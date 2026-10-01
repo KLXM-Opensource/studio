@@ -27,8 +27,17 @@ final class Theme
     public const TUNES = [
         'background' => 'white', 'anchor' => '', 'visible' => true, 'showInNav' => false, 'navLabel' => '',
         'spaceTop' => 'normal', 'spaceBottom' => 'normal', 'divider' => false,
-        'height' => 'auto', 'bgImage' => null, 'overlay' => 'none', 'align' => 'center',
+        'height' => 'auto', 'bgImage' => null, 'overlay' => 'none', 'align' => 'center', 'row' => '',
     ];
+
+    /**
+     * Blöcke nebeneinander (Tune „row“): Breite des Blocks in Zwölfteln; auto = teilt sich den Rest mit dem ersten Block der Reihe.
+     * Der erste Block einer Reihe hat keine eigene Breite (er bekommt den Rest).
+     */
+    public const ROW_WIDTHS = ['auto' => null, '1-2' => 6, '1-3' => 4, '2-3' => 8, '1-4' => 3, '3-4' => 9];
+
+    /** Wurde beim Rendern eine Reihe ausgegeben? (→ css/rows.css) */
+    private bool $rowCss = false;
 
     /** Wurde beim Rendern ein Abschnitt mit Vollbild-Höhe oder Hintergrundbild ausgegeben? (→ css/sections.css) */
     private bool $sectionCss = false;
@@ -155,6 +164,9 @@ final class Theme
         $out['bgImage'] = (int) ($t['bgImage'] ?? 0) > 0 ? (int) $t['bgImage'] : null;
         $out['overlay'] = in_array($t['overlay'] ?? '', ['light', 'dark'], true) ? $t['overlay'] : 'none';
         $out['align'] = in_array($t['align'] ?? '', ['top', 'bottom'], true) ? $t['align'] : 'center';
+        // Neben den vorigen Block stellen: '' = eigener Abschnitt, sonst Breite (auto, 1-2, 1-3, 2-3, 1-4, 3-4); true = auto
+        $row = ($t['row'] ?? '') === true ? 'auto' : (string) ($t['row'] ?? '');
+        $out['row'] = array_key_exists($row, self::ROW_WIDTHS) ? $row : '';
         return $out;
     }
 
@@ -221,16 +233,94 @@ final class Theme
     {
         $html = '';
         $prev = null;
+        $row = [];   // laufende Reihe: erster Block = Kopf (Abschnitt), weitere mit Tune „row“
         foreach ($blocks as $i => $b) {
             $block = $this->makeBlock($b, $prev, $blocks[$i + 1] ?? null);
             if (!$block || (!$block->tune('visible') && !app()->editing)) {
                 continue;
             }
-            $html .= $this->renderBlock($block);
+            if ($block->inRow()) {
+                if ($row && $this->rowable($row[0]) && $this->rowable($block)) {
+                    $row[] = $block;
+                    StructuredData::collect($block);
+                    $prev = $block;
+                    continue;
+                }
+                // Erster Block der Seite (bzw. nach einem Block mit eigener Hülle): Option wird ignoriert
+                $block = $block->withTunes(['row' => '']);
+            }
+            $html .= $this->renderRow($row);
+            $row = [$block];
             StructuredData::collect($block);   // schema.org-Daten des Blocks (theme.php → 'jsonld')
             $prev = $block;
         }
-        return $html;
+        return $html . $this->renderRow($row);
+    }
+
+    /** Unterstützt das Kit Reihen (theme.php → 'rows' => false schaltet sie ab) – und rendert der Block keine eigene Hülle? */
+    public function rowable(Block $block): bool
+    {
+        return ($this->def['rows'] ?? true) !== false && empty($block->def['raw']);
+    }
+
+    /**
+     * Reihe „Blöcke nebeneinander“ ausgeben: ein Abschnitt mit den Optionen des ersten Blocks (Hintergrund, Anker, Abstände,
+     * Hintergrundbild …), darin <div class="wrap sec-row"> mit einer Zelle je Block (Inhalt ohne eigenen Abschnitt).
+     * Weitere Blöcke: eigener Hintergrund ≠ dem der Reihe → Karte (bg-{name}, sec-row__cell--card); Sprungmarke an der Zelle;
+     * Abstände, Trennlinie, Vollbild und Hintergrundbild gelten nur vom ersten Block. Ein einzelner Block → renderBlock().
+     */
+    public function renderRow(array $row): string
+    {
+        if (count($row) < 2) {
+            return $row ? $this->renderBlock($row[0]) : '';
+        }
+        $lead = $row[0];
+        $lead->rowLead = true;
+        $this->rowCss = true;
+        if ($lead->tunes['height'] === 'screen' || $lead->tunes['bgImage']) {
+            $this->sectionCss = true;
+        }
+        $spans = self::rowSpans(array_map(fn(Block $b) => $b->tunes['row'], $row));
+        $cells = '';
+        foreach ($row as $i => $b) {
+            $inner = $this->renderInner($b);
+            if ($inner === null || (trim($inner) === '' && !app()->editing)) continue;
+            $cls = ['sec-row__cell', 'sec-row__cell--w' . $spans[$i], 'sec--' . str_replace('_', '-', $b->type)];
+            if ($b->variant()) $cls[] = 'v-' . $b->variant();
+            $id = '';
+            if ($i === 0) {
+                $cls[] = 'sec-row__cell--lead';
+            } else {
+                // Karte: eigener Hintergrund; „sec“ dazu, weil viele Kits Fläche/Schriftfarbe nur an .sec.bg-* setzen (Variablen)
+                if ($b->bg() !== $lead->bg()) array_push($cls, 'sec', 'sec-row__cell--card', 'bg-' . $b->bg());
+                if (!$b->tunes['visible']) $cls[] = 'is-hidden-block';
+                if ($b->tunes['anchor'] !== '') $id = ' id="' . e($b->domId()) . '"';
+            }
+            $cells .= '<div' . $id . ' class="' . e(implode(' ', $cls)) . '">' . $inner . "</div>\n";
+        }
+        $wrap = (string) ($this->def['rows']['wrap'] ?? 'wrap');
+        $html = $this->render('partials/section', ['b' => $lead, 'inner' => '<div class="' . e(trim($wrap . ' sec-row')) . '">' . "\n" . $cells . '</div>']);
+        return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
+    }
+
+    /**
+     * Spaltenanteile einer Reihe (Zwölftel als flex-grow): feste Breiten wie gewählt, „auto“ und der erste Block teilen den Rest.
+     * @param string[] $widths Tune „row“ je Block (erster wird als auto gewertet)
+     * @return int[]
+     */
+    public static function rowSpans(array $widths): array
+    {
+        $fixed = 0; $autos = 0;
+        foreach (array_values($widths) as $i => $w) {
+            $n = $i === 0 ? null : (self::ROW_WIDTHS[$w] ?? null);
+            $n === null ? $autos++ : $fixed += $n;
+        }
+        $share = $autos ? max(2, intdiv(max(0, 12 - $fixed), $autos)) : 0;
+        $out = [];
+        foreach (array_values($widths) as $i => $w) {
+            $out[] = $i === 0 ? $share : (self::ROW_WIDTHS[$w] ?? $share);
+        }
+        return $out;
     }
 
     public function makeBlock(array $b, ?Block $prev = null, ?array $next = null): ?Block
@@ -288,6 +378,29 @@ final class Theme
 
     public function renderBlock(Block $block): string
     {
+        $inner = $this->renderInner($block);
+        if ($inner === null) {
+            return app()->editing ? '<p>Renderer für „' . e($block->type) . '“ fehlt.</p>' : '';
+        }
+        if (app()->editing && $block->inRow() && $this->rowable($block)) {
+            // Editor (Vorschau je Block): Block „neben dem vorigen“ schon als Zelle einer Reihe – Hintergrund/Abstände der Reihe
+            // und „Karte ja/nein“ setzt editor.js (layoutRows) nach dem ersten Block der Reihe
+            $this->rowCss = true;
+            $cls = ['sec-row__cell', 'sec-row__cell--w12', 'sec--' . str_replace('_', '-', $block->type), 'sec', 'sec-row__cell--card', 'bg-' . $block->bg()];
+            if ($block->variant()) $cls[] = 'v-' . $block->variant();
+            $html = '<section id="' . e($block->domId()) . '" class="sec sec--row-preview bg-' . e($block->bg()) . '" data-row-bg="' . e($block->bg()) . '">'
+                . '<div class="' . e(trim((string) ($this->def['rows']['wrap'] ?? 'wrap') . ' sec-row')) . '"><div class="' . e(implode(' ', $cls)) . '">' . $inner . '</div></div></section>';
+            return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
+        }
+        $html = !empty($block->def['raw']) ? $inner   // Block rendert seinen Abschnitt selbst
+            : $this->render('partials/section', ['b' => $block, 'inner' => $inner]);
+        // Redaktion (Bearbeiten-Modus, Entwurfsansicht): Notizen als Hinweis „Notiz: …“ (Core\EditorNotes)
+        return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
+    }
+
+    /** Inhalt eines Blocks ohne Abschnitts-Hülle (Block-Vorlage des Kits, Kern-Block, Erweiterung, eigener Block); null = kein Renderer */
+    public function renderInner(Block $block): ?string
+    {
         $file = $this->path . '/blocks/' . $block->type . '.php';
         if (!is_file($file) && !empty($block->def['core'])) {
             $file = ROOT . '/app/Blocks/' . $block->type . '.php';
@@ -297,7 +410,7 @@ final class Theme
         }
         $custom = !empty($block->def['custom']);   // eigener Block: sichere Vorlagensprache statt PHP-Datei
         if (!$custom && !is_file($file)) {
-            return app()->editing ? '<p>Renderer für „' . e($block->type) . '“ fehlt.</p>' : '';
+            return null;
         }
         if ($block->tunes['height'] === 'screen' || $block->tunes['bgImage']) {
             $this->sectionCss = true;
@@ -306,15 +419,11 @@ final class Theme
         ImageFx::enter($block->data);
         ImageFit::enter($block->data, $block->def['fields'] ?? []);   // Bild im Rahmen je Einbindung (data._fit je Feldpfad, Core\ImageFit)
         try {
-            $inner = $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
+            return $custom ? Blocks\Custom::render($block) : self::capture($file, ['b' => $block, 'd' => $block->data]);
         } finally {
             ImageFit::leave();
             ImageFx::leave();
         }
-        $html = !empty($block->def['raw']) ? $inner   // Block rendert seinen Abschnitt selbst
-            : $this->render('partials/section', ['b' => $block, 'inner' => $inner]);
-        // Redaktion (Bearbeiten-Modus, Entwurfsansicht): Notizen als Hinweis „Notiz: …“ (Core\EditorNotes)
-        return EditorNotes::$show ? EditorNotes::decorate($html) : $html;
     }
 
     /** Öffentliche Adresse einer Theme-Schrift ohne Versions-Parameter (muss exakt der URL im CSS entsprechen) */
@@ -395,6 +504,11 @@ final class Theme
         }
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
+        }
+        // Blöcke nebeneinander (Tune „row“) – Variablen --row-gap, --row-stack, --row-align, --row-card-pad, --row-card-radius
+        // oder eigene css/rows.css des Kits
+        if (($types === null && ($this->def['rows'] ?? true) !== false) || $this->rowCss) {
+            $out[] = $this->coreCss('rows.css');
         }
         foreach ($this->def['conditional_css'] ?? [] as $file => $needs) {
             if (str_ends_with($file, '.css') && ($types === null || array_intersect($needs, $types))) {
@@ -484,8 +598,9 @@ final class Theme
                 'help' => $b['help'] ?? null,
                 'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
                 'formfields' => $ff ?: null,
+                'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“
             ];
         }
-        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds()];
+        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false];
     }
 }

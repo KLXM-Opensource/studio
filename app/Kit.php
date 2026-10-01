@@ -107,6 +107,21 @@ final class Kit
         return Fragments::find($name, $kit)['file'] ?? null;
     }
 
+    /**
+     * Befehle des aktiven Kits für bin/console: kits/{kit}/console.php gibt ['name' => ['Beschreibung', fn(array $args): int], …]
+     * zurück (z. B. Inhalts-Umstellungen des Kits wie praxis:migrate-team). Kern- und Erweiterungsbefehle haben Vorrang.
+     */
+    public static function commands(): array
+    {
+        static $cache = [];
+        $file = app()->theme->path . '/console.php';
+        if (!isset($cache[$file])) {
+            $cmds = is_file($file) ? require $file : [];
+            $cache[$file] = is_array($cmds) ? array_filter($cmds, fn($c, $k) => is_string($k) && is_array($c) && is_callable($c[1] ?? null), ARRAY_FILTER_USE_BOTH) : [];
+        }
+        return $cache[$file];
+    }
+
     /** Pfad relativ zur Installation (für Meldungen, Kommentare im Entwicklermodus) */
     public static function relative(string $path): string
     {
