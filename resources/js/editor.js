@@ -996,7 +996,7 @@ editor = new EditorJS({
  * Editor.js setzt den Griff bei jeder Mausbewegung sofort an den Block unter dem Zeiger (watchBlockHoveredEvents auf dem
  * Redaktor). Der Griff sitzt über der Blockkante – auf dem Weg dorthin kreuzt die Maus oft den Block darüber, und der Griff
  * springt weg („+“ nicht erreichbar). Darum halten wir Mausbewegungen über einem ANDEREN Block zurück, bis der Zeiger dort
- * INTENT_MS verweilt; über dem Griff selbst und im Korridor zwischen Block und Griff bleibt er immer stehen.
+ * INTENT_MS stillsteht; über dem Griff selbst und im Korridor zwischen Block und Griff bleibt er immer stehen.
  */
 (() => {
   const INTENT_MS = 320;
@@ -1008,8 +1008,8 @@ editor = new EditorJS({
     const a = actions(); if (!a || !blk) return false;
     const r = a.getBoundingClientRect(), b = blk.getBoundingClientRect();
     if (!r.width) return false;
-    // Rechteck vom Griff bis zur Oberkante des Blocks, seitlich großzügig
-    return e.clientX >= r.left - 40 && e.clientX <= Math.max(r.right + 160, r.left + 260) && e.clientY >= r.top - 12 && e.clientY <= b.top + 24;
+    // Band vom Griff bis zur Oberkante des Blocks, über die ganze Blockbreite
+    return e.clientX >= Math.min(r.left, b.left) - 40 && e.clientX <= b.right + 40 && e.clientY >= r.top - 12 && e.clientY <= b.top + 24;
   };
   host.addEventListener('mousemove', e => {
     if (replay) return;
@@ -1019,7 +1019,9 @@ editor = new EditorJS({
     // Anderer Block: zurückhalten – im Korridor zum Griff ganz, sonst bis zum Verweilen
     e.stopPropagation();
     if (inCorridor(e, current)) { clearTimeout(timer); pending = null; return; }
-    if (pending !== blk) {
+    // Verweilen statt Durchqueren: jede weitere Bewegung startet die Wartezeit neu (große Blöcke wie ein Hero liegen
+    // oft auf dem Weg zum Griff des Blocks darunter)
+    {
       pending = blk; clearTimeout(timer);
       const { clientX, clientY } = e, target = e.target;
       timer = setTimeout(() => {
