@@ -6,7 +6,7 @@ import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm
  *  - Editor: Cue-Liste mit Zeiten + Text, Vorschau im Video (TextTrack-API, ohne blob:), Tastatur: Alt+Enter neuer Untertitel,
  *    Alt+P Abspielen/Pause, Alt+↑/↓ vorheriger/nächster, Strg/⌘+S speichern
  *  - KI: Transkription (whisper.cpp / OpenAI-kompatibel) und Übersetzung als Hintergrund-Auftrag mit Stand (Polling)
- *  - Bereich „KLXM Ai → Untertitel“: [data-cap-queue]
+ *  - Bereich „KLXM AI → Untertitel“: [data-cap-queue]
  * Entwürfe (KI) erscheinen erst nach „Geprüft – veröffentlichen“ auf der Website.
  */
 const d = document;
@@ -383,7 +383,7 @@ async function openEditor(m, trackId, st, ro, done) {
   (cues.length ? $('[data-f="text"]', list) : $('[data-add]', dlg) || f.kind).focus();
 }
 
-// ============================================================ Bereich „KLXM Ai → Untertitel“
+// ============================================================ Bereich „KLXM AI → Untertitel“
 export function initCaptionsQueue(helpers) {
   const root = $('[data-cap-queue]'); if (!root) return;
   H = helpers;

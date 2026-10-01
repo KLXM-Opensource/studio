@@ -124,7 +124,7 @@ final class MediaController extends AdminController
             'pool' => Media::pool(),
             'can_edit' => Media::pool() === null ? can('media.upload') : \Core\MediaPools::canEdit(Media::pool()),
             'can_share' => (bool) array_filter(array_keys(\Core\MediaPools::forSite()), [\Core\MediaPools::class, 'canEdit']),
-            // „Prüfen“: Untertitel-Funktion an? Schnellzugänge in den Bereich KLXM Ai (nur mit eingeschalteter KI)
+            // „Prüfen“: Untertitel-Funktion an? Schnellzugänge in den Bereich KLXM AI (nur mit eingeschalteter KI)
             'ai' => [
                 'captions' => \Core\MediaTracks::enabled(),
                 'alt' => \Core\AI\Assist::available('vision') && can('media.upload') ? url('/admin/ai/alt-texte') : null,

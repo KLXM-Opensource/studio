@@ -1455,12 +1455,12 @@ if (root) {
   drill({ panel: f.$side, home: f.root, area: 'media', title: t('Medien'), label: t('Mediathek'), back: t('Zurück zu Medien') });
   const hm = location.hash.match(/^#m(\d+)$/);   // Sprung aus der Suche: Datei öffnen
   if (hm) f.load(+hm[1]).then(() => f.edit(+hm[1]));
-  const hc = location.hash.match(/^#c(\d+)$/);   // Sprung aus „KLXM Ai → Untertitel“: Datei auswählen, Untertitel rechts prüfen
+  const hc = location.hash.match(/^#c(\d+)$/);   // Sprung aus „KLXM AI → Untertitel“: Datei auswählen, Untertitel rechts prüfen
   if (hc) f.load(+hc[1]);
   // Sprung aus der Übersicht („Was ist zu tun?“): Prüf-Filter öffnen – #check=noalt | missing:en | nocaptions | notranscript | notitle
   const hk = location.hash.match(/^#check=((?:noalt|notitle|nocaptions|notranscript)|missing:[a-z]{2,3}(?:-[a-z]{2})?)$/i);
   if (hk) { f.src = { type: 'check', value: hk[1] }; f.load(); }
 }
 initInlineCrop();
-initCaptionsQueue(CAP_HELPERS);   // Bereich „KLXM Ai → Untertitel“ (Knöpfe, Stand der Aufträge)
+initCaptionsQueue(CAP_HELPERS);   // Bereich „KLXM AI → Untertitel“ (Knöpfe, Stand der Aufträge)
 })();

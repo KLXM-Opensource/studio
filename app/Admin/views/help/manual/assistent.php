@@ -1,4 +1,4 @@
-<?php /** Handbuch · Kapitel „KLXM Ai“ – KI-Funktionen der Redaktion (Variablen: siehe help/manual.php) */ $__brand = \Core\AI\Assist::brand(); ?>
+<?php /** Handbuch · Kapitel „KLXM AI“ – KI-Funktionen der Redaktion (Variablen: siehe help/manual.php) */ $__brand = \Core\AI\Assist::brand(); ?>
   <p class="lead">Wenn die Administration die KI eingeschaltet hat (<b>Grundeinstellungen → KI</b>) und Ihre Rolle „KI-Funktionen nutzen“ darf, erscheinen überall ein <b>✦ KI</b>-Knopf und ✦-Vorschläge sowie im Hauptmenü der Bereich <b><?= e($__brand) ?></b>. Die KI macht immer nur <b>Vorschläge</b>: Nichts wird ohne Ihre Prüfung gespeichert oder veröffentlicht.</p>
   <h3>Texte schreiben und überarbeiten</h3>
   <ul>

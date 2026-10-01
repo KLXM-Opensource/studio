@@ -79,7 +79,7 @@ return [
                 '<b>Was ist zu tun?</b> – Aufgaben nach Dringlichkeit, jede mit Erklärung und direktem Link.',
                 'Statistik ohne Besucher-Tracking: <b>Aktivität</b> der letzten 30 Tage – auch als Tabelle.',
                 '<b>Zuletzt bearbeitet</b>: weiterarbeiten, wo Sie oder das Team aufgehört haben.',
-                '<b>Hilfe &amp; Einstieg</b>: KLXM Ai fragen, Tutorials für Ihre Rolle und was neu ist.',
+                '<b>Hilfe &amp; Einstieg</b>: KLXM AI fragen, Tutorials für Ihre Rolle und was neu ist.',
                 '<b>Übersicht anpassen</b>: Karten verschieben, ausblenden oder zuklappen – je Konto.',
                 '<b>Standard wiederherstellen</b> bringt die ursprüngliche Anordnung zurück. <b>Fertig</b> schließt.',
             ],
@@ -211,7 +211,7 @@ return [
         ],
 
         'r-ki-texte' => [
-            'track' => 'redaktion', 'title' => 'KLXM Ai: Text verbessern & übersetzen', 'icon' => 'sparkle', 'level' => 'Grundlagen', 'feature' => 'ai',
+            'track' => 'redaktion', 'title' => 'KLXM AI: Text verbessern & übersetzen', 'icon' => 'sparkle', 'level' => 'Grundlagen', 'feature' => 'ai',
             'summary' => 'Vorschläge der KI prüfen, übernehmen oder verwerfen – und Übersetzungen als Entwurf anlegen.',
             'goal' => 'Sie lassen einen Text verbessern und einen Eintrag übersetzen – und prüfen jeden Vorschlag, bevor er gespeichert wird.',
             'prerequisites' => ['Recht „KI-Funktionen nutzen“ und eingeschaltete KI (Grundeinstellungen › KI).', 'Für Übersetzungen: eine zweite Sprache.'],
@@ -220,7 +220,7 @@ return [
                 '<b>Verbessern</b>, <b>Kürzen</b>, <b>Einfacher</b> … oder ein <b>Freier Auftrag</b>. Markierter Text = nur dieser Teil.',
                 'Ein Vorschlag, kein Automatismus: <b>Vorschau</b> und <b>Änderungen</b> prüfen, dann <b>Übernehmen</b> oder <b>Verwerfen</b>.',
                 'Übernommen wird in den Entwurf – online geht es erst mit <b>Veröffentlichen</b>.',
-                'Übersetzen: <b>KLXM Ai › Übersetzen</b> zeigt, was in anderen Sprachen noch fehlt (im Video eine Website mit Englisch).',
+                'Übersetzen: <b>KLXM AI › Übersetzen</b> zeigt, was in anderen Sprachen noch fehlt (im Video eine Website mit Englisch).',
                 '<b>Übersetzung anlegen</b> erstellt einen Entwurf in der anderen Sprache.',
                 '<b>✦ Aus Deutsch übersetzen</b>: Texte auswählen, <b>Vorschläge erzeugen</b>.',
                 'Jede Übersetzung prüfen und bei Bedarf ändern – übernommen wird nur, was angehakt ist (<b>In das Formular übernehmen</b>).',
@@ -228,7 +228,7 @@ return [
             ],
             'tips' => ['Die KI erfindet keine Fakten: Fehlende Angaben erscheinen als <code>[bitte ergänzen: …]</code> – solche Seiten lassen sich nicht veröffentlichen.', 'Ton und Stil steuert die Administration unter Grundeinstellungen › KI (Hinweise, Glossar).'],
             'pitfalls' => ['Fachbegriffe, Namen, Zahlen und Zeiten immer gegenlesen – besonders bei Übersetzungen.', 'Keine vertraulichen Daten (z. B. aus Anfragen) in den freien Auftrag kopieren.'],
-            'manual' => [['KLXM Ai: schreiben, übersetzen, prüfen', '/admin/hilfe#assistent']],
+            'manual' => [['KLXM AI: schreiben, übersetzen, prüfen', '/admin/hilfe#assistent']],
         ],
 
         /* ================================================================ Administration */
@@ -305,7 +305,7 @@ return [
                 'Kalender: unter <b>Felder &amp; Einstellungen</b> <b>Als Kalender nutzen</b> und das Feld <b>Beginn</b> wählen, <b>Speichern</b>.',
                 'Jetzt gibt es Kalenderansicht, Wiederholungen und ein iCal-Abo für diese Tabelle.',
             ],
-            'tips' => ['Vorlagen auf der Seite Daten (Aktuelles, Team, Termine …) sparen Zeit.', 'Mit KI: <b>✦ Felder vorschlagen</b> bzw. KLXM Ai › Tabellen-Generator.'],
+            'tips' => ['Vorlagen auf der Seite Daten (Aktuelles, Team, Termine …) sparen Zeit.', 'Mit KI: <b>✦ Felder vorschlagen</b> bzw. KLXM AI › Tabellen-Generator.'],
             'pitfalls' => ['Der <b>Kurzname</b> ist später nicht mehr änderbar (Datenbank, API).', 'Kalender-Felder erst nach dem Anlegen wählbar – neue Felder stehen dort vor dem Speichern noch nicht zur Auswahl.', 'Für vertrauliche Angaben (Gesundheitsdaten) statt einer Inhaltstabelle einen verschlüsselten <b>Eingang</b> anlegen (Art der Tabelle).'],
             'manual' => [['Eigene Daten', '/admin/hilfe#daten'], ['Bedingungen', '/admin/hilfe#bedingungen'], ['Formular für Besucher', '/admin/hilfe#formular']],
         ],
@@ -363,7 +363,7 @@ return [
                 '<b>API &amp; MCP</b>: Zugänge für Automatisierungen und KI-Assistenten wie Claude. <b>Neuen Token erzeugen</b>: Name, <b>Berechtigung: Lesen und ändern</b>.',
                 '<b>Änderungen: Zur Freigabe</b> – ein Mensch prüft jede Änderung, bevor sie online geht. <b>Token erzeugen</b>.',
                 'Der Token erscheint nur einmal – sofort in den Passwortmanager kopieren (im Video unkenntlich).',
-                'Ändert der Assistent jetzt etwas, landet es unter <b>KLXM Ai › Eingereicht</b>.',
+                'Ändert der Assistent jetzt etwas, landet es unter <b>KLXM AI › Eingereicht</b>.',
                 'Herkunft (Token, Kanal) und Vorher/Nachher prüfen – dann <b>Übernehmen</b> oder <b>Ablehnen</b> (mit Begründung).',
                 'Jede Einreichung bleibt protokolliert. Tokens lassen sich jederzeit umstellen oder <b>Widerrufen</b>.',
             ],
@@ -379,14 +379,14 @@ return [
             'goal' => 'Alle Seiten und Einträge haben eine passende Beschreibung für Suchmaschinen.',
             'prerequisites' => ['Recht „KI-Funktionen nutzen“ und „Seiten anlegen, … Seiteneinstellungen“.'],
             'steps' => [
-                '<b>KLXM Ai › SEO-Übersicht</b>: Wo fehlen Angaben für Suchmaschinen – oder sind doppelt?',
+                '<b>KLXM AI › SEO-Übersicht</b>: Wo fehlen Angaben für Suchmaschinen – oder sind doppelt?',
                 'Zeilen auswählen – hier nur „Datenschutz“ – und <b>✦ Vorschläge für Auswahl erzeugen</b>.',
                 'Vorschlag lesen und bei Bedarf ändern (Zähler: ideal bis 160 Zeichen). Nur Angehaktes wird übernommen: <b>Ausgewählte übernehmen</b>.',
                 'Die Beschreibung steht jetzt in den <b>Seiteneinstellungen</b> – dort prüft auch der <b>SEO-Check</b> Überschriften und Bilder.',
             ],
             'tips' => ['Gute Beschreibungen nennen Angebot, Ort und Nutzen in einem Satz.'],
             'pitfalls' => ['Doppelte Beschreibungen („Gleiche Beschreibung wie …“) schwächen beide Seiten in Suchergebnissen.'],
-            'manual' => [['KLXM Ai: SEO', '/admin/hilfe#assistent']],
+            'manual' => [['KLXM AI: SEO', '/admin/hilfe#assistent']],
         ],
 
         'a-consent' => [
@@ -495,12 +495,12 @@ return [
                 '<b>Tageslimit</b>, <b>Hinweise für die KI</b> (Zielgruppe, Anrede, Stil) und ein <b>Glossar</b> steuern den Assistenten.',
                 '<b>Fähigkeiten</b>: Anbieter und Modell legt die Agentur in der Konfiguration fest – z. B. Ollama und whisper.cpp.',
                 '„bleibt auf dem Server“: Mit lokalen Modellen verlassen Inhalte das Haus nicht. Externe Dienste sind gekennzeichnet. <b>Verbindung testen</b> prüft jede Fähigkeit.',
-                'Konfiguration und Befehle (<code>ai:test</code>, <code>search:index</code>) stehen in der <b>Technischen Dokumentation › KLXM Ai</b>.',
+                'Konfiguration und Befehle (<code>ai:test</code>, <code>search:index</code>) stehen in der <b>Technischen Dokumentation › KLXM AI</b>.',
             ],
             'commands' => "// config/config.local.php (Installation) oder config/sites/{website}.php\n'ai' => [\n    'provider' => 'ollama',\n    'base_url' => 'http://127.0.0.1:11434',\n    'models'   => ['text' => 'gemma3', 'embed' => 'bge-m3', 'vision' => 'gemma3'],\n    'transcribe' => ['backend' => 'whisper_cpp', 'model_path' => '…/ggml-large-v3-turbo-q5_0.bin'],\n],\n\nphp bin/console ai:test --cap=text\nphp bin/console search:index --all",
             'tips' => ['Die Rechte „KI-Funktionen nutzen“ und „Eingereichte Änderungen prüfen“ vergeben Sie je Rolle.'],
             'pitfalls' => ['Externe Anbieter (OpenAI, Mistral …) in der Datenschutzerklärung nennen und einen AV-Vertrag abschließen.', 'API-Schlüssel nur in der Konfiguration, nie in Kits oder im Repository.'],
-            'manual' => [['KLXM Ai: KI-Dienst & Funktionen (Technik)', '/admin/hilfe/technik#ki'], ['Website-Suche (Technik)', '/admin/hilfe/technik#suche']],
+            'manual' => [['KLXM AI: KI-Dienst & Funktionen (Technik)', '/admin/hilfe/technik#ki'], ['Website-Suche (Technik)', '/admin/hilfe/technik#suche']],
         ],
 
         'n-staging-deploy' => [

@@ -27,7 +27,7 @@ final class Assist
     /** Name des KI-Bereichs in der Verwaltung (config 'ai_brand', für Agenturen anpassbar) */
     public static function brand(): string
     {
-        return trim((string) app()->config->get('ai_brand', '')) ?: 'KLXM Ai';
+        return trim((string) app()->config->get('ai_brand', '')) ?: 'KLXM AI';
     }
 
     /** KLXM-Logo (übernimmt die Textfarbe) für den Kopf des KI-Bereichs */
@@ -90,7 +90,7 @@ final class Assist
         }
     }
 
-    /** Menüpunkt „KLXM Ai“: Funktion „ai“, Recht „ai.use“ und KI eingeschaltet – die Administration sieht ihn auch ohne Einrichtung (Hinweis) */
+    /** Menüpunkt „KLXM AI“: Funktion „ai“, Recht „ai.use“ und KI eingeschaltet – die Administration sieht ihn auch ohne Einrichtung (Hinweis) */
     public static function navVisible(): bool
     {
         try {

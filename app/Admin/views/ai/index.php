@@ -1,5 +1,5 @@
 <?php
-/** Bereich „KLXM Ai“ – Übersicht: Status je Fähigkeit, Tageslimit, Schnellzugriffe; ohne Einrichtung eine Erklärung. */
+/** Bereich „KLXM AI“ – Übersicht: Status je Fähigkeit, Tageslimit, Schnellzugriffe; ohne Einrichtung eine Erklärung. */
 use Core\AI\Ai;
 use Core\AI\Assist;
 use Core\AI\Center;

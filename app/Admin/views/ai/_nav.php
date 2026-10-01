@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereichsnavigation „KLXM Ai“ (Marke: config 'ai_brand'): Übersicht, Texte, Übersetzen, SEO, Alt-Texte, Verlauf, Einstellungen.
+ * Bereichsnavigation „KLXM AI“ (Marke: config 'ai_brand'): Übersicht, Texte, Übersetzen, SEO, Alt-Texte, Verlauf, Einstellungen.
  * Das Layout zeigt sie links anstelle der Hauptnavigation (resources/js/_drill.js).
  * @var string $cur
  */

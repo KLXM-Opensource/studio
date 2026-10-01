@@ -12,7 +12,7 @@ use Core\Review\Queue;
 use Core\Review\Snapshot;
 
 /**
- * Prüf-Ebene „Eingereicht“ (Bereich KLXM Ai): Änderungen über REST-API, MCP und KI ansehen, übernehmen, bearbeiten, ablehnen.
+ * Prüf-Ebene „Eingereicht“ (Bereich KLXM AI): Änderungen über REST-API, MCP und KI ansehen, übernehmen, bearbeiten, ablehnen.
  * Recht „review.manage“ (Standard: Administration), Funktion „review“.
  */
 final class ReviewController extends AdminController

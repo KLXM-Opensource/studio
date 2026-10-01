@@ -984,7 +984,7 @@ function initSchema(scope) {
   });
 }
 
-// ================================================================== 6. Bereich „KLXM Ai“ (/admin/ai/*)
+// ================================================================== 6. Bereich „KLXM AI“ (/admin/ai/*)
 function initArea(scope) {
   initTableGen($('[data-kia-tablegen]', scope));
   initPageGen($('[data-kia-pagegen]', scope));

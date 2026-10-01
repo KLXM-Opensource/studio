@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereich „KLXM Ai“ → Übersetzen: fehlende Übersetzungen je Sprache (Seiten, Einträge, Alt-Texte, Website-Texte) mit
+ * Bereich „KLXM AI“ → Übersetzen: fehlende Übersetzungen je Sprache (Seiten, Einträge, Alt-Texte, Website-Texte) mit
  * Prüfansicht (resources/js/_ai.js). Seiten werden als Entwurf angelegt und übersetzt; nichts wird veröffentlicht.
  */
 use Core\AI\Assist;

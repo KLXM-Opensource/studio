@@ -879,7 +879,7 @@ body.adm{font:400 14px/1.45 var(--adm-font);grid-template-columns:232px minmax(0
 .adm-side nav a:hover{background:var(--adm-hover);color:var(--adm-ink)}
 .adm-side nav a[aria-current]{background:var(--adm-press);color:var(--adm-ink);font-weight:600}
 .adm-side nav a[data-ico]::before{content:"";flex:none;width:16px;height:16px;background:var(--adm-a);-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
-[data-ico=ai]{--ico:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http://www.w3.org/2000/svg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20fill-rule%3D%27evenodd%27%20d%3D%27M10.002%2C18.997C5.031%2C18.998%201.001%2C14.971%201%2C10.002C0.999%2C5.033%205.028%2C1.003%209.998%2C1.003C14.969%2C1.001%2018.999%2C5.029%2019%2C9.998C19.001%2C14.967%2014.972%2C18.996%2010.002%2C18.997ZM10.005%2C7.175L7.183%2C4.353L4.361%2C7.175L7.183%2C9.997L4.361%2C12.819L7.183%2C15.641L10.005%2C12.819L12.827%2C15.641L15.649%2C12.819L12.827%2C9.997L15.649%2C7.175L12.827%2C4.353L10.005%2C7.175Z%27/%3E%3C/svg%3E")}   /* KLXM Ai (Core\AI) – KLXM-Logo */
+[data-ico=ai]{--ico:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http://www.w3.org/2000/svg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20fill-rule%3D%27evenodd%27%20d%3D%27M10.002%2C18.997C5.031%2C18.998%201.001%2C14.971%201%2C10.002C0.999%2C5.033%205.028%2C1.003%209.998%2C1.003C14.969%2C1.001%2018.999%2C5.029%2019%2C9.998C19.001%2C14.967%2014.972%2C18.996%2010.002%2C18.997ZM10.005%2C7.175L7.183%2C4.353L4.361%2C7.175L7.183%2C9.997L4.361%2C12.819L7.183%2C15.641L10.005%2C12.819L12.827%2C15.641L15.649%2C12.819L12.827%2C9.997L15.649%2C7.175L12.827%2C4.353L10.005%2C7.175Z%27/%3E%3C/svg%3E")}   /* KLXM AI (Core\AI) – KLXM-Logo */
 .adm-side__label{margin:12px 8px 4px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--adm-t3)}
 /* Symbole (Phosphor duotone, Core\Icons / icon()): Kontur + durchscheinende Fläche in currentColor.
    Deckkraft der Fläche: --ico-2-opacity (Sprite-Vorgabe .2; dunkel etwas kräftiger) */
@@ -2334,7 +2334,7 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .rte-menu{overflow:auto;overscroll-behavior:contain}
 .rte-menu.rte-menu--up{top:auto;bottom:calc(100% + 4px)}
 
-/* Bereichsmodus (Medien, Daten, Support, KLXM Ai): Seitenleiste unterhalb der Favoriten in der Bereichsfarbe –
+/* Bereichsmodus (Medien, Daten, Support, KLXM AI): Seitenleiste unterhalb der Favoriten in der Bereichsfarbe –
    Grenze setzt _drill.js (--drill-top), der Bereich (data-area) die Farben:
    --drill-deep  tiefer Farbton, über die (immer dunkle) Leiste gelegt – Helligkeit bleibt fast gleich,
                  Schrift behält ≥ 10:1 (hell) bzw. ≥ 5,5:1 (gedämpft)
@@ -2356,7 +2356,7 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
   --drill-sheen:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.035) 38%,transparent 58%,rgba(79,216,200,.04) 82%,transparent)}
 /* Support: Indigo-Violett, Lavendel */
 .is-drill .adm-side[data-area=support]{--drill-deep:rgba(92,52,168,.26);--drill-mark:#BBA2FF}
-/* KLXM Ai: Tiefblau, Azur */
+/* KLXM AI: Tiefblau, Azur */
 .is-drill .adm-side[data-area=ai]{--drill-deep:rgba(10,100,210,.28);--drill-mark:#7DB2FF}
 .is-drill .adm-side[data-area] .adm-drill{--adm-mint:var(--drill-mark,#3DD9A0)}
 .is-drill.is-drill-nav .adm-side[style*="--drill-top"]{background-image:none}

@@ -3,7 +3,7 @@
 [![CI](https://github.com/KLXM-Opensource/studio/actions/workflows/ci.yml/badge.svg)](https://github.com/KLXM-Opensource/studio/actions/workflows/ci.yml)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
 
-**Schlankes Multi-Site-CMS ohne Framework – PHP 8.4, Kits, Datentabellen, KLXM Ai, REST-API und MCP-Server.**
+**Schlankes Multi-Site-CMS ohne Framework – PHP 8.4, Kits, Datentabellen, KLXM AI, REST-API und MCP-Server.**
 
 Quellcode: [github.com/KLXM-Opensource/studio](https://github.com/KLXM-Opensource/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Tutorials: [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) · Downloads: [Releases](https://github.com/KLXM-Opensource/studio/releases) · Fehler und Wünsche: [Issues](https://github.com/KLXM-Opensource/studio/issues)
 
@@ -31,7 +31,7 @@ Aktuelle Version: siehe `CMS_VERSION` in `app/bootstrap.php` (derzeit 1.0.0) · 
 | Anfragen | Verschlüsselte Eingangs-Tabellen mit Protokoll, Zuweisung und Aufbewahrungsfrist |
 | Medien | Mediathek im Finder-Stil, zerstörungsfreie Bildbearbeitung (Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren), Zuschnitte je Format, SVG mit Bereinigung, geteilte Medien-Pools, Untertitel & Transkripte (auch per KI), dekorative Videos |
 | Suche | Website-Suche mit Tippfehlertoleranz (Loupe), optional semantisch/hybrid (Symfony AI) |
-| KLXM Ai | Schreiben, Übersetzen, SEO, Alt-Texte, Seiten- und Tabellen-Generator, Transkription – mit Ollama, EU-Anbietern oder OpenAI-kompatiblen Servern; Prüf-Ebene „Eingereicht“ |
+| KLXM AI | Schreiben, Übersetzen, SEO, Alt-Texte, Seiten- und Tabellen-Generator, Transkription – mit Ollama, EU-Anbietern oder OpenAI-kompatiblen Servern; Prüf-Ebene „Eingereicht“ |
 | Schnittstellen | REST-API (OpenAPI 3.1) und MCP-Server (Streamable HTTP) mit gemeinsamer Fachlogik und Tokens |
 | Support | Meldungen an das Support-Team, Fragen & Antworten, Wissensdatenbank – zentral für alle Websites |
 
@@ -94,7 +94,7 @@ httpdocs/
 | Wo | Inhalt |
 |---|---|
 | Verwaltung → **Handbuch & Hilfe** (`/admin/hilfe`) | Handbuch für die Redaktion (Kern-Kapitel + Kapitel des Kits), Wissensdatenbank, Fragen & Antworten, Symbole |
-| `/admin/hilfe/technik` | **Entwicklerhandbuch**: Architektur, Installation, Konfiguration, Build, Deploy, Betrieb, CLI, Multi-Site & Netzwerk, Rechte, Sicherheit, Kits & Design, Editor, Datentabellen, Formulare, Kalender, Medien, Sprachen, Suche, KLXM Ai, Freigabe, REST-API, MCP, Support, Verwaltung, Symbole, Karten, PWA – API- und MCP-Referenz live aus dem Code |
+| `/admin/hilfe/technik` | **Entwicklerhandbuch**: Architektur, Installation, Konfiguration, Build, Deploy, Betrieb, CLI, Multi-Site & Netzwerk, Rechte, Sicherheit, Kits & Design, Editor, Datentabellen, Formulare, Kalender, Medien, Sprachen, Suche, KLXM AI, Freigabe, REST-API, MCP, Support, Verwaltung, Symbole, Karten, PWA – API- und MCP-Referenz live aus dem Code |
 | `/admin/hilfe/tutorials` | Tutorials für Redaktion, Administration und Agenturen als Text (DE/EN, offline) – mit Links zu den Videos |
 | [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) | **Tutorial-Videos und Trailer** (ohne Ton, Untertitel DE/EN). Sie werden nicht mit dem CMS ausgeliefert; die Verwaltung verlinkt dorthin (`config/config.php` → `docs_url`, eigene Adresse oder `''` für White-Label) |
 | `/api/v1/openapi.json` | Maschinenlesbare OpenAPI-3.1-Beschreibung |
@@ -116,7 +116,7 @@ claude mcp add --transport http mycms https://ihre-domain.de/mcp --header "Autho
 ```
 
 Inhaltsänderungen entstehen als Entwurf mit Revision; Zugänge „Zur Freigabe“ reichen Änderungen zur Prüfung ein
-(Verwaltung → KLXM Ai → Eingereicht). Anfragen aus Eingängen sind über API/MCP nur als Metadaten sichtbar.
+(Verwaltung → KLXM AI → Eingereicht). Anfragen aus Eingängen sind über API/MCP nur als Metadaten sichtbar.
 
 ## Lizenz
 

@@ -226,7 +226,7 @@ final class AiController extends AdminController
         }, 'seo', 'applied');
     }
 
-    // ------------------------------------------------------------------ Bereich „KLXM Ai“ (/admin/ai, Marke: config 'ai_brand')
+    // ------------------------------------------------------------------ Bereich „KLXM AI“ (/admin/ai, Marke: config 'ai_brand')
 
     /** Alle Seiten des Bereichs bekommen die Bereichsnavigation (views/ai/_nav.php, Drill-down wie „Daten“) */
     protected function view(string $view, array $vars = [], int $status = 200): Response

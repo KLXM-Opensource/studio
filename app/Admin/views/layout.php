@@ -21,7 +21,7 @@ $nav = array_values(array_filter([
     // Support & Wissensdatenbank: im Abschnitt „Hilfe & Support“ unten in der Seitenleiste
     // Chat zwischen Benutzern (Core\Chat, optional) – öffnet mit JavaScript die Schublade (resources/js/userchat.js)
     ['/admin/chat', __('Chat'), 'chat', $user && \Core\Chat\Chat::canUse()],
-    // KI-Bereich (Core\AI, Marke config 'ai_brand' – Standard „KLXM Ai“)
+    // KI-Bereich (Core\AI, Marke config 'ai_brand' – Standard „KLXM AI“)
     ['/admin/ai', \Core\AI\Assist::brand(), 'ai', $user && \Core\AI\Assist::navVisible()],
     // Prüf-Ebene „Eingereicht“ (Core\Review) – eigener Punkt nur, wenn der KI-Bereich nicht sichtbar ist
     ['/admin/ai/eingereicht', __('Eingereicht'), 'review', $user && \Core\Review\Queue::canReview() && !\Core\AI\Assist::navVisible()],
@@ -119,7 +119,7 @@ if ($user && ($req = app()->request)) {
   <?php endif; ?>
     <div class="adm-brand-tools">
       <button type="button" class="adm-site-open adm-site-open--search" data-spotlight aria-keyshortcuts="Meta+K Control+K" title="<?= e(__('Suchen')) ?> (⌘K)" aria-label="<?= e(__('Suchen')) ?>"><?= icon('magnifying-glass') ?></button>
-      <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM Ai) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
+      <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
       <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
       <?php endif; ?>
       <a class="adm-site-open" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?>" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?></a>
@@ -171,7 +171,7 @@ if ($user && ($req = app()->request)) {
   <?php endif; ?>
   <nav id="adm-mainnav" aria-label="<?= e(__('Verwaltung')) ?>">
     <ul>
-      <?php foreach ($nav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); // Symbol aus dem Sprite; ohne (KLXM Ai) → CSS-Maske über data-ico ?>
+      <?php foreach ($nav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); // Symbol aus dem Sprite; ohne (KLXM AI) → CSS-Maske über data-ico ?>
       <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $section === $key ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts' && $draftsN): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>"><?= $draftsN ?><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
       </li>
       <?php endforeach; ?>

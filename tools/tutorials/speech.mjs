@@ -92,7 +92,7 @@ export function speakable(text, lang) {
   s = s.replace(/\s*\(\s*/g, ', ').replace(/\s*\)\s*(?=[.,:;!?])/g, '').replace(/\s*\)\s*/g, ', ');
   // Aussprache-Lexikon (Kandidat): vor dem Buchstabieren, damit Umschriften Vorrang haben
   if (useLexicon()) s = applyLexicon(s, lang);
-  // Produktnamen: „KLXM Ai“ wie „K L X M A I“ sprechen
+  // Produktnamen: „KLXM AI“ (alte Schreibweise „KLXM Ai“) wie „K L X M A I“ sprechen
   s = s.replace(/\bKLXM Ai\b/g, 'KLXM AI');
   // Akronyme buchstabieren
   s = s.replace(/(?<![\w-])(KLXM|KI|AI|SEO|API|MCP|SSO|PDFs|PDF|CSS|EN|AAA|AA|SRT|VTT|PHP|CPP|SH|2FA)(?![\w])/g, (m) => (SPELL.includes(m) ? spell(m) : m));

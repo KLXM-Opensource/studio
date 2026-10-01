@@ -1,7 +1,7 @@
 {
  "_comment": "Aussprache-Lexikon (Englisch) für den Trailer-Sprecher (tools/trailer/voice.mjs): Begriff → gesprochene Umschrift, je Engine möglich ({\"chatterbox\": …, \"piper\": …, \"*\": …}). Gilt NUR für den gesprochenen Text; Untertitel behalten die Schreibweise. Ganze Wörter, längere Begriffe zuerst.",
  "terms": {
-  "KLXM Ai": {
+  "KLXM AI": {
    "*": "K L X M, A I",
    "chatterbox": "Kay El Ex Em, Ay Eye"
   },

@@ -223,7 +223,7 @@ return function (Router $r): void {
     $r->post('/admin/system/ai/provider', [Admin\AiSearchController::class, 'provider']);
     // KI-Assistent der Redaktion (Core\AI\Assist, resources/js/_ai.js) und SEO-Übersicht – Vorschläge, gespeichert wird erst nach Prüfung
     $ai = Admin\AiController::class;
-    $r->get('/admin/ai', [$ai, 'areaIndex']);                  // Bereich „KLXM Ai“ (Marke: config 'ai_brand')
+    $r->get('/admin/ai', [$ai, 'areaIndex']);                  // Bereich „KLXM AI“ (Marke: config 'ai_brand')
     $r->get('/admin/ai/texte', [$ai, 'areaWrite']);
     $r->get('/admin/ai/uebersetzen', [$ai, 'areaTranslate']);
     $r->get('/admin/ai/seo', [$ai, 'overview']);

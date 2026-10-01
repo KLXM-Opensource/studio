@@ -11,7 +11,7 @@ use Core\Media;
 use Core\Pages;
 
 /**
- * Daten für den Bereich „KLXM Ai“ (Core\Http\Controllers\Admin\AiController): fehlende Übersetzungen je Sprache
+ * Daten für den Bereich „KLXM AI“ (Core\Http\Controllers\Admin\AiController): fehlende Übersetzungen je Sprache
  * (Seiten, Einträge, Alt-Texte, Website-Texte) und Bilder ohne Alt-Text. Ohne KI-Aufrufe.
  */
 final class Center

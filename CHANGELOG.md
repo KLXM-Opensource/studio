@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Schreibweise „KLXM AI“ und „KI“
+- Produktname durchgängig **„KLXM AI“** (vorher „KLXM Ai“): Oberfläche, Standard für `ai_brand`, Handbücher, Tutorials,
+  Trailer-/Tutorial-Texte und Aussprache-Lexika; Abkürzungen „AI“/„KI“ immer groß. Code-Namen (`Core\AI\Ai`, `ai`, `/admin/ai`) bleiben.
+  Gespeicherte Inhalte und ein eigener `ai_brand`-Wert werden nicht automatisch umgeschrieben.
+
 ### Layout: Blöcke in Spalten (ersetzt „Neben den vorigen Block stellen“)
 - Neuer Kern-Block **„Layout (Spalten)“** (`layout`, alle Kits; `theme.php → 'layout' => false` schaltet ab): Raster ½+½, ⅔+⅓,
   ⅓+⅔, ⅓×3, ¼×4, ¼+¾, ¾+¼, Ausrichtung vertikal (oben/mitte/unten/gestreckt), Abstand (klein/normal/groß), Stapeln auf schmalen
@@ -574,7 +579,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Stimmungs-Animationen): Checkbox beim Hochladen, rechts in der Mediathek und unter „Alle Details“ mit Hinweis
   „Hintergrund- oder Stimmungsvideo ohne Informationsgehalt – braucht keine Untertitel und wird für Screenreader ausgeblendet.“
 - Dekorative Videos zählen nicht mehr als „Videos ohne Untertitel“ (Prüf-Filter `nocaptions` in Mediathek, Übersicht,
-  KLXM Ai → Untertitel, API/MCP); der Hinweis „Noch keine Untertitel“ entfällt.
+  KLXM AI → Untertitel, API/MCP); der Hinweis „Noch keine Untertitel“ entfällt.
 - Website: `MediaTracks::player()` gibt dekorative Videos als `MediaTracks::decorativeVideo()` aus – `aria-hidden="true"`,
   `tabindex="-1"`, ohne `controls`/Spuren, stumme Schleife nur sichtbar und ohne „Bewegung reduzieren“, beschriftete
   Pause-Schaltfläche (WCAG 2.2.2). `['controls' => true]` erzwingt den normalen Player. Neu: `MediaTracks::isDecorative($m)`.
@@ -650,7 +655,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Standard ohne Ton** (`tools/trailer/voice.json` `"audio": false`): `trailer.mjs` erzeugt MP4/WebM ohne Tonspur;
   `--voice` (oder `"audio": true`) mit englischem Sprecher, `--voice-timing` stumm im Takt des Sprechers, `--silent` wie bisher.
   Die veröffentlichten Trailer-Dateien sind stumm (Videospur unverändert, Untertitel-Zeiten gelten weiter).
-- **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM Ai, Mediathek mit
+- **Neu gedreht** (`tools/trailer/trailer.mjs`): Kits, Bearbeiten auf der Seite mit Blöcken und KLXM AI, Mediathek mit
   geteilten Pools, Barrierefreiheit (Alt-Texte, Videos ohne Untertitel), Datentabellen und Formulare, Website-Suche,
   Block-Designer, KI optional/lokal, Funktionen & Erweiterungen, Netzwerk, Content-Sync. Wortwahl zeitlos, keine
   Ankündigungs-Formulierungen; Titelkarten und Einblendungen auf Englisch.
@@ -853,7 +858,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Statistiken als Inline-SVG mit Tabellen-Alternative, nachgeladen über `GET /admin/api/dashboard/{karte}` und
   5 Minuten je Website zwischengespeichert: Aktivität, Anfragen je Woche, meistbearbeitete Seiten, Termine (7 Tage),
   Suchbegriffe ohne Treffer, Technik & Betrieb (Administration). Dazu „Zuletzt bearbeitet“ und „Hilfe & Einstieg“
-  (KLXM Ai fragen, Tutorials der Rolle, Trailer, Neuigkeiten).
+  (KLXM AI fragen, Tutorials der Rolle, Trailer, Neuigkeiten).
 - Karten zuklappen, verschieben (Pfeile, Ziehen) und ausblenden – je Konto in `users.ui_prefs`, zurücksetzbar, auch ohne JavaScript.
 - Neuer Erweiterungs-Haken `Extension::dashboard(fn($user))` für eigene Kacheln und Karten (z. B. eine spätere Matomo-Erweiterung).
 - Handbuch-Kapitel „Die Übersicht“, Entwicklerhandbuch → Verwaltung und Funktionsumfang & Erweiterungen.
@@ -975,7 +980,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Suche, KI & Schnittstellen
 - **Website-Suche** mit Loupe (Tippfehlertoleranz, Synonyme, Gewichtung, Filter), optional semantisch/hybrid.
-- **KLXM Ai** (Symfony AI): Schreiben, Übersetzen, SEO-Check und -Vorschläge, Alt-Texte, Seiten- und
+- **KLXM AI** (Symfony AI): Schreiben, Übersetzen, SEO-Check und -Vorschläge, Alt-Texte, Seiten- und
   Tabellen-Generator, Untertitel; Anbieter Ollama, Mistral, OpenAI (EU-Region) oder OpenAI-kompatibel; lokale
   Transkription mit whisper.cpp; Tageslimit, Nutzungsübersicht, Glossar.
 - **Prüf-Ebene „Eingereicht“**: Herkunftsprotokoll aller Änderungen aus API, MCP und KI; Tokens „Zur Freigabe“

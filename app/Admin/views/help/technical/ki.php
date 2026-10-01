@@ -1,4 +1,4 @@
-<?php /** Entwicklerhandbuch · KLXM Ai: KI-Dienst, Funktionen, Transkription, Prompts */ ?>
+<?php /** Entwicklerhandbuch · KLXM AI: KI-Dienst, Funktionen, Transkription, Prompts */ ?>
   <p class="lead"><b><?= e($aiBrand) ?></b> (Menüname aus <code>'ai_brand'</code>) bündelt alle KI-Funktionen: einen allgemeinen KI-Dienst <code>Core\AI\Ai</code> auf Basis von <b>Symfony AI</b> (Funktion <code>ai</code>, Recht <code>ai.use</code>), die Helfer der Redaktion (<code>Core\AI\Assist</code>), Seiten- und Tabellen-Generator, Untertitel per Transkription und die semantische Suche. Alle Ergebnisse sind Vorschläge; gespeichert wird erst nach menschlicher Prüfung.</p>
   <table class="doc-table">
     <tr><th>Fähigkeit (<code>Ai::CAPS</code>)</th><th>Wofür</th><th>Schalter je Website</th></tr>

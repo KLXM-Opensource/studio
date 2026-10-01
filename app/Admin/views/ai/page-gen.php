@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereich „KLXM Ai“ → Seiten-Generator: Thema/Ziel → Seiten-Entwurf aus vorhandenen Blöcken → bearbeitbare Vorschau →
+ * Bereich „KLXM AI“ → Seiten-Generator: Thema/Ziel → Seiten-Entwurf aus vorhandenen Blöcken → bearbeitbare Vorschau →
  * „Als Entwurf anlegen“ (unveröffentlicht, öffnet im Editor). Fakten nur aus dem Auftrag und den Angaben der Website;
  * fehlende Angaben werden „[bitte ergänzen: …]“ – solche Seiten lassen sich nicht veröffentlichen.
  */

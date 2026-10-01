@@ -1,5 +1,5 @@
 <?php
-/** Bereich „KLXM Ai“ → Verlauf: eigene KI-Vorschläge der letzten 90 Tage – nur Metadaten, keine Inhalte. @var array $rows */
+/** Bereich „KLXM AI“ → Verlauf: eigene KI-Vorschläge der letzten 90 Tage – nur Metadaten, keine Inhalte. @var array $rows */
 use Core\AI\Assist;
 
 $kinds = ['text' => __('Text-Assistent'), 'translate' => __('Übersetzen'), 'seo' => __('SEO'), 'alt' => __('Alt-Text'), 'summary' => __('Teaser'),

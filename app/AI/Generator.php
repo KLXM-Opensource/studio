@@ -11,7 +11,7 @@ use Core\Lang;
 use Core\Pages;
 
 /**
- * Generatoren im Bereich „KLXM Ai“: Tabellen-Generator und Seiten-Generator.
+ * Generatoren im Bereich „KLXM AI“: Tabellen-Generator und Seiten-Generator.
  * Die KI liefert einen Entwurf, den die Person in einer Vorschau bearbeitet; angelegt wird über die normalen Wege
  * (Tables::validate/create, Pages::create als Entwurf) – eine spätere Prüf-Ebene kann dort eingreifen.
  * Seiten mit „[bitte ergänzen: …]“ lassen sich nicht veröffentlichen (Pages::publish).

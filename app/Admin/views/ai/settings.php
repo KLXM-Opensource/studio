@@ -1,5 +1,5 @@
 <?php
-/** Bereich „KLXM Ai“ → Einstellungen: Zusammenfassung; ändern in Grundeinstellungen → KI (Administration). */
+/** Bereich „KLXM AI“ → Einstellungen: Zusammenfassung; ändern in Grundeinstellungen → KI (Administration). */
 use Core\AI\Ai;
 use Core\AI\Assist;
 

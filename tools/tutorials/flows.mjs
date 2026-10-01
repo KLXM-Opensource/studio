@@ -310,7 +310,7 @@ add({
   // Echte lokale KI: Text verbessern auf „fluid“ (Probeseite aus „Über uns“, nur erzeugte Bilder und Katzenfotos),
   // Übersetzen in der Verwaltung von „praxis“ (einzige Website mit zweiter Sprache und echter KI; nur die Kategorie
   // „Vorsorge“ – Name + Beschreibung, kein Bildfeld, keine Website-Ansicht). „demo“ nutzt in der Testkopie einen Fake-Anbieter.
-  slug: 'r-ki-texte', title: 'KLXM Ai: Text verbessern & übersetzen', account: 'fluid',
+  slug: 'r-ki-texte', title: 'KLXM AI: Text verbessern & übersetzen', account: 'fluid',
   async setup(t, s, ACC) {
     await probePage(t, s, '/ueber-uns', 'Über uns – Probeseite KI', 'probeseite-ki');
     await t.signIn(ACC.praxis);
@@ -338,7 +338,7 @@ add({
     await t.click('[data-kia-apply]', { after: 1400 });
     await t.step('Übernommen wird in den Entwurf – online geht es erst mit „Veröffentlichen“.', 'It goes into the draft – it only goes live with “Veröffentlichen” (publish).');
     await t.click('[aria-label="Redaktion"] button:has-text("Speichern")', { after: 1400 });
-    await t.step('Übersetzen: KLXM Ai › Übersetzen zeigt, was in anderen Sprachen noch fehlt (im Video eine Website mit Englisch).', 'Translate: KLXM Ai › Übersetzen shows what is still missing in other languages (here a website with English).');
+    await t.step('Übersetzen: KLXM AI › Übersetzen zeigt, was in anderen Sprachen noch fehlt (im Video eine Website mit Englisch).', 'Translate: KLXM AI › Übersetzen shows what is still missing in other languages (here a website with English).');
     await t.goto(ACC.praxis.url.replace(/\/$/, '') + '/admin/ai/uebersetzen');
     const entry = t.page.locator('main li').filter({ hasText: 'Vorsorge' }).filter({ hasText: 'Kategorien' }).locator('button:has-text("Übersetzung anlegen")').first();
     await entry.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
@@ -621,7 +621,7 @@ add({
     const r = await fetch(`${t.base}/api/v1/pages/${s.pageId}`, { method: 'PATCH', headers: { Authorization: `Bearer ${s.token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ meta_description: 'Wer wir sind, wie wir arbeiten und was uns wichtig ist – das Team der Musterfirma stellt sich vor.' }) });
     s.status = r.status;
-    await t.step('Ändert der Assistent jetzt etwas, landet es unter KLXM Ai › Eingereicht.', 'When the assistant now changes something, it lands in KLXM Ai › Eingereicht (submitted).');
+    await t.step('Ändert der Assistent jetzt etwas, landet es unter KLXM AI › Eingereicht.', 'When the assistant now changes something, it lands in KLXM AI › Eingereicht (submitted).');
     await t.goto('/admin/ai/eingereicht');
     await t.wait(800);
     await t.click('main a[href*="/admin/ai/eingereicht/"] >> nth=0', { after: 1600 });
@@ -650,7 +650,7 @@ add({
   },
   async run(t, s) {
     await t.goto('/admin/ai/seo');
-    await t.step('KLXM Ai › SEO-Übersicht: Wo fehlen Angaben für Suchmaschinen – oder sind doppelt?', 'KLXM Ai › SEO overview: where are search-engine descriptions missing – or duplicated?');
+    await t.step('KLXM AI › SEO-Übersicht: Wo fehlen Angaben für Suchmaschinen – oder sind doppelt?', 'KLXM AI › SEO overview: where are search-engine descriptions missing – or duplicated?');
     await t.ring('main table >> nth=0', 1800);
     await t.step('Zeilen auswählen – hier nur „Datenschutz“ – und „Vorschläge für Auswahl erzeugen“.', 'Select rows – here only “Datenschutz” (privacy) – and click “Vorschläge für Auswahl erzeugen” (generate suggestions).');
     const all = t.page.getByLabel('Alle mit Problemen auswählen').first();
@@ -850,7 +850,7 @@ add({
       await t.click(table.locator('button:has-text("Verbindung testen")').first(), { after: 300 });
       await t.wait(4000);
     });
-    await t.step('Konfiguration und Befehle (ai:test, search:index) stehen in der Technischen Dokumentation › KLXM Ai.', 'Configuration and commands (ai:test, search:index) are in the technical documentation › KLXM Ai.');
+    await t.step('Konfiguration und Befehle (ai:test, search:index) stehen in der Technischen Dokumentation › KLXM AI.', 'Configuration and commands (ai:test, search:index) are in the technical documentation › KLXM AI.');
     await t.goto('/admin/hilfe/technik#ki');
     await t.wait(900);
     await t.scroll(300, 2400);
@@ -932,7 +932,7 @@ add({
     await t.click('#dash-activity summary', { after: 1400 }).catch(() => {});
     await t.step('„Zuletzt bearbeitet“: weiterarbeiten, wo Sie oder das Team aufgehört haben.', '“Zuletzt bearbeitet” (recently edited): continue where you or the team left off.');
     await t.ring('#dash-recent', 1800);
-    await t.step('„Hilfe & Einstieg“: KLXM Ai fragen, Tutorials für Ihre Rolle und was neu ist.', '“Hilfe & Einstieg” (help & getting started): ask KLXM Ai, tutorials for your role and what’s new.');
+    await t.step('„Hilfe & Einstieg“: KLXM AI fragen, Tutorials für Ihre Rolle und was neu ist.', '“Hilfe & Einstieg” (help & getting started): ask KLXM AI, tutorials for your role and what’s new.');
     await t.ring('#dash-help', 1800);
     await t.page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
     await t.wait(900);

@@ -490,7 +490,7 @@ add({ id: 'theme-landing', section: 'themes', kind: 'stage', xfade: 0.5,
   async run(s) { await s.wait(350); await s.page.evaluate(() => Object.assign(document.getElementById('w1').style, { transform: 'none', opacity: '1' })); await s.wait(2400); } });
 
 // ---------- Bearbeiten (Website „fluid“, Seite „Über uns“ – nichts wird gespeichert)
-add({ id: 'card-edit', section: 'edit', kind: 'card', card: ['section', { section: 'edit', no: '02', title: 'Editing', sub: 'Right on the page – with suggestions from KLXM Ai' }], dur: 2.0, xfade: 0.5 });
+add({ id: 'card-edit', section: 'edit', kind: 'card', card: ['section', { section: 'edit', no: '02', title: 'Editing', sub: 'Right on the page – with suggestions from KLXM AI' }], dur: 2.0, xfade: 0.5 });
 add({ id: 'edit-open', section: 'edit', kind: 'app', speed: 1.2, xfade: 0.5,
   vo: [['Editing happens right on the page.', 'Bearbeitet wird direkt auf der Seite.', 'Urejate neposredno na strani.']],
   async prep(s) { await s.go(A('fluid', '/ueber-uns')); s.x = 640; s.y = 300; await s.sync(); },
@@ -539,10 +539,10 @@ add({ id: 'edit-media', section: 'edit', kind: 'app', speed: 2.0, xfade: 0.4, ne
     await s.wait(600);
   } });
 add({ id: 'edit-ai', section: 'edit', kind: 'app', speed: 1.8, xfade: 0.4, needs: 'edit-media',
-  vo: [['KLXM Ai makes suggestions.', 'KLXM Ai macht Vorschläge.', 'KLXM Ai daje predloge.'],
+  vo: [['KLXM AI makes suggestions.', 'KLXM AI macht Vorschläge.', 'KLXM AI daje predloge.'],
     ['You compare them, then decide.', 'Sie vergleichen und entscheiden.', 'Vi jih primerjate in se odločite.']],
   async run(s) {
-    await s.label('KLXM Ai' + small('review the suggestion, then apply'));
+    await s.label('KLXM AI' + small('review the suggestion, then apply'));
     const p = blockOf(s, 'Text + Bild').locator('[data-edit="text"] p').first();
     await s.click(p, { dx: 60, after: 500 });
     await s.click(s.page.locator('button[data-cmd="ai"]:visible').first(), { after: 900 });
@@ -684,10 +684,10 @@ add({ id: 'adm-blocks', section: 'admin', kind: 'app', speed: 1.5, xfade: 0.4,
     await s.hover('main [data-cb] iframe, main iframe', 900, { dy: -60 }).catch(() => {});
   } });
 add({ id: 'adm-ai', section: 'admin', kind: 'app', speed: 1.4, xfade: 0.4,
-  vo: [['KLXM Ai is optional, and can run locally, on your own server.', 'KLXM Ai ist optional und läuft auf Wunsch lokal, auf dem eigenen Server.', 'Uporaba KLXM Ai je izbirna; lahko teče tudi lokalno, na vašem strežniku.']],
+  vo: [['KLXM AI is optional, and can run locally, on your own server.', 'KLXM AI ist optional und läuft auf Wunsch lokal, auf dem eigenen Server.', 'Uporaba KLXM AI je izbirna; lahko teče tudi lokalno, na vašem strežniku.']],
   async prep(s) { await s.go(A('fluid', '/admin/ai/einstellungen')); s.x = 700; s.y = 420; await s.sync(); },
   async run(s) {
-    await s.label('KLXM Ai' + small('optional – here with Ollama, local'));
+    await s.label('KLXM AI' + small('optional – here with Ollama, local'));
     await s.wait(400);
     const row = s.page.locator('main :is(tr,div,dl,li):has-text("Ollama"):visible').last();
     await s.ring(row, 1800);

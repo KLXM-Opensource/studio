@@ -18,7 +18,7 @@ use Core\Seo;
 
 /**
  * Verwaltung → Blöcke (Block-Designer): eigene Blöcke anlegen, prüfen, in der Vorschau testen, versionieren,
- * für die Redaktion freigeben, exportieren/importieren, als Theme-Block ausgeben und mit KLXM Ai vorschlagen lassen.
+ * für die Redaktion freigeben, exportieren/importieren, als Theme-Block ausgeben und mit KLXM AI vorschlagen lassen.
  * Recht „blocks.build“ (Administration, Integratoren), Funktion „blocks.custom“.
  */
 final class BlockController extends AdminController
@@ -273,7 +273,7 @@ final class BlockController extends AdminController
             : '<p class="adm-muted">' . e(__('Noch keine Felder – zuerst im Reiter „Felder“ anlegen.')) . '</p>']));
     }
 
-    /** KLXM Ai: Vorschlag (wird nie gespeichert oder freigegeben – die Person prüft ihn im Block-Designer) */
+    /** KLXM AI: Vorschlag (wird nie gespeichert oder freigegeben – die Person prüft ihn im Block-Designer) */
     public function ai(Request $r): Response
     {
         try {

@@ -68,7 +68,7 @@
 .cap-empty{padding:16px;border-radius:8px;background:var(--adm-fill);color:var(--adm-t3);font-size:13px}
 @media (max-width:900px){.cap-grid{grid-template-columns:1fr}.cap-player{position:static}.cap-cue{grid-template-columns:22px minmax(0,1fr) auto}.cap-cue .cap-text{grid-column:2 / -1}}
 
-/* Bereich „KLXM Ai → Untertitel“ */
+/* Bereich „KLXM AI → Untertitel“ */
 .cap-q{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .cap-q__item{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;box-shadow:0 0 0 1px var(--adm-line);background:var(--adm-surface)}
 .cap-q__kind{display:inline-grid;place-items:center;min-width:40px;height:26px;border-radius:6px;background:var(--adm-fill);font:700 11px/1 var(--adm-font);color:var(--adm-t2)}

@@ -1,5 +1,5 @@
 <?php
-/** Bereich „KLXM Ai“ → Alt-Texte: Bilder ohne Alt-Text, Sammel-Vorschläge mit Prüfliste (resources/js/_ai.js → bulkAlt). */
+/** Bereich „KLXM AI“ → Alt-Texte: Bilder ohne Alt-Text, Sammel-Vorschläge mit Prüfliste (resources/js/_ai.js → bulkAlt). */
 use Core\AI\Assist;
 use Core\AI\Center;
 use Core\Media;

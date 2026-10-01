@@ -1,7 +1,7 @@
 /*
  * Block-Designer (Verwaltung → Blöcke, Core\Blocks\Custom): Feld-Editor, Code-Editoren mit Zeilennummern,
  * Platzhalter-Palette, Beispieldaten (Formular vom Server), JSON-LD-Zuordnung, Live-Vorschau (_preview.js),
- * Prüfung von Vorlage und CSS und Vorschläge von KLXM Ai (füllen nur das Formular – gespeichert wird von Hand).
+ * Prüfung von Vorlage und CSS und Vorschläge von KLXM AI (füllen nur das Formular – gespeichert wird von Hand).
  */
 import { t } from './_i18n.js';
 import { livePreview } from './_preview.js';
@@ -352,7 +352,7 @@ export function initBlockBuilder() {
     dirty = false;
   });
 
-  // ---------------------------------------------------------------- KLXM Ai: Vorschlag übernehmen (nur ins Formular)
+  // ---------------------------------------------------------------- KLXM AI: Vorschlag übernehmen (nur ins Formular)
   const aiBox = $('[data-cb-aibox]');
   const aiGo = $('[data-cb-aigo]', aiBox || d), aiState = $('[data-cb-aistate]', aiBox || d);
   aiGo?.addEventListener('click', async () => {
@@ -360,7 +360,7 @@ export function initBlockBuilder() {
     if (desc.length < 8) { aiState.textContent = t('Bitte beschreiben Sie kurz, was der Block zeigen soll.'); $('[data-cb-aidesc]', aiBox).focus(); return; }
     if (dirty && !await ask({ title: t('Formular mit dem Vorschlag überschreiben?'), body: t('Ungespeicherte Änderungen gehen verloren.'), ok: t('Überschreiben') })) return;
     aiGo.disabled = true;
-    aiState.textContent = t('{brand} entwirft den Block … (das kann eine Minute dauern)', { brand: 'KLXM Ai' });
+    aiState.textContent = t('{brand} entwirft den Block … (das kann eine Minute dauern)', { brand: 'KLXM AI' });
     const fd = new FormData();
     fd.set('_csrf', csrf());
     fd.set('description', desc);

@@ -344,7 +344,7 @@ carries an imperceptible PerTh watermark”).
 
 ## 6. AI models and runtimes (Optional, not bundled)
 
-KLXM Ai features are off unless the operator configures a provider. Nothing below ships with KLXM Studio.
+KLXM AI features are off unless the operator configures a provider. Nothing below ships with KLXM Studio.
 
 | Component | License | Notes |
 |---|---|---|

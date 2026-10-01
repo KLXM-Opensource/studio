@@ -2,7 +2,7 @@
  "_comment": "Aussprache-Lexikon (Deutsch) für die Sprecher: Begriff → gesprochene Umschrift. Gilt NUR für den gesprochenen Text (speech.mjs speakable), die Untertitel behalten die echte Schreibweise. Ganze Wörter, Groß/Klein wie hier; längere Einträge gewinnen. Aktiv für TUT_TTS=chatterbox (Piper unverändert, außer TUT_LEXICON=1).",
  "terms": {
   "KLXM Studio": "Kah, El, Ix, Emm Studio",
-  "KLXM Ai": "Kah, El, Ix, Emm ei ei",
+  "KLXM AI": "Kah, El, Ix, Emm ei ei",
   "KLXM": "Kah, El, Ix, Emm",
   "Open Source": "Oupen Sors",
   "Multi-Site": "Malti-Seit",

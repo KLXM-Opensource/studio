@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereich „KLXM Ai“ → Texte: freier Schreib-Assistent mit Zusammenhang (Seite/Eintrag). Das Ergebnis lässt sich kopieren
+ * Bereich „KLXM AI“ → Texte: freier Schreib-Assistent mit Zusammenhang (Seite/Eintrag). Das Ergebnis lässt sich kopieren
  * oder als ENTWURF in ein Textfeld einer Seite einfügen (resources/js/_ai.js → initWrite).
  */
 use Core\AI\Assist;

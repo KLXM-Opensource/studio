@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereich „KLXM Ai“ → Tabellen-Generator: Beschreibung → Tabellen-Entwurf (nur vorhandene Feldtypen) → bearbeitbare Vorschau →
+ * Bereich „KLXM AI“ → Tabellen-Generator: Beschreibung → Tabellen-Entwurf (nur vorhandene Feldtypen) → bearbeitbare Vorschau →
  * „Tabelle anlegen“ über Tables::validate/create. Beispiel-Einträge nur auf Wunsch, als Entwurf und deutlich markiert.
  */
 use Core\AI\Assist;

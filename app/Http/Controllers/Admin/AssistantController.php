@@ -13,7 +13,7 @@ use Core\Http\Sse;
 
 /**
  * Assistent der Redaktion (Core\AI\Assistant): Frage (Server-Sent Events bzw. JSON), Aktion ausführen, Verlauf
- * speichern/löschen und die Seite „KLXM Ai → Assistent“. Jeder Aufruf: Anmeldung, CSRF (POST), Assistant::available().
+ * speichern/löschen und die Seite „KLXM AI → Assistent“. Jeder Aufruf: Anmeldung, CSRF (POST), Assistant::available().
  */
 final class AssistantController extends AdminController
 {

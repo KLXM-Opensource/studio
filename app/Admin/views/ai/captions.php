@@ -1,6 +1,6 @@
 <?php
 /**
- * Bereich „KLXM Ai“ → Untertitel: Videos ohne Untertitel, Audio ohne Transkript, Aufträge der KI-Transkription.
+ * Bereich „KLXM AI“ → Untertitel: Videos ohne Untertitel, Audio ohne Transkript, Aufträge der KI-Transkription.
  * Knöpfe und Stand (Polling) über resources/js/_captions.js ([data-cap-queue]). Ergebnisse sind Entwürfe – geprüft wird in der Mediathek.
  */
 use Core\AI\Assist;

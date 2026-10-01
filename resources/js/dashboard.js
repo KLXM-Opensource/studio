@@ -4,7 +4,7 @@
  *  - Karten auf-/zuklappen, im Modus „Übersicht anpassen“ verschieben (Pfeile, Ziehen am Griff), aus-/einblenden
  *  - Speichern je Konto: POST /admin/api/dashboard/prefs (users.ui_prefs → dash). Ohne JavaScript tun dieselben Knöpfe
  *    das per Formular (Seite lädt neu), nachgeladene Karten zeigt /admin?alle=1.
- *  - „Fragen Sie KLXM Ai“: öffnet das Assistent-Fenster mit der Frage (window.cmsAssistant), sonst die Assistent-Seite.
+ *  - „Fragen Sie KLXM AI“: öffnet das Assistent-Fenster mit der Frage (window.cmsAssistant), sonst die Assistent-Seite.
  */
 import { t } from './_i18n.js';
 
