@@ -50,7 +50,10 @@
 @media (min-width:1100px){
   .cms-editor .codex-editor__redactor{display:flex;flex-wrap:wrap;align-items:flex-start}
   .cms-editor .codex-editor__redactor>.ce-block{flex:0 0 100%;min-width:0}
-  .cms-editor .codex-editor__redactor>.ce-block.cms-row-cell{flex:var(--cms-row-g,1) 1 1px}
+  .cms-editor .codex-editor__redactor>.ce-block.cms-row-cell{flex:var(--cms-row-g,1) 1 var(--cms-row-basis,1px)}
+  /* Zellen am Inhaltsbereich des Kits ausrichten (Werte setzt editor.js layoutRows): Hintergrund bleibt randlos,
+     der Inhalt beginnt/endet an der Kante wie auf der Website */
+  .cms-editor .ce-block.cms-row-cell .cms-block__preview>section>.wrap{max-width:none;width:auto;margin-inline:0;padding-left:var(--cms-row-pl,0);padding-right:var(--cms-row-pr,0)}
 }
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
 .cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}

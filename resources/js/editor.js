@@ -59,6 +59,7 @@ function rowSpans(rows) {
   const share = autos ? Math.max(2, Math.floor(Math.max(0, 12 - fixed) / autos)) : 0;
   return rows.map((r, i) => (i === 0 ? share : ROW_W[r] ?? share));
 }
+addEventListener('resize', () => { clearTimeout(layoutRows.t); layoutRows.t = setTimeout(layoutRows, 150); });
 function layoutRows() {
   if (!cfg.rows) return;
   const groups = [];
@@ -68,8 +69,25 @@ function layoutRows() {
     const last = groups[groups.length - 1];
     if (row && i > 0 && !x.raw && !last[0].raw) last.push(x); else groups.push([x]);
   });
+  // Inhaltsbereich des Kits (wie auf der Website): .wrap eines Blocks außerhalb einer Reihe – Reihen im Editor daran ausrichten
+  const red = holder()?.querySelector('.codex-editor__redactor');
+  const refWrap = groups.filter(g => g.length === 1).map(g => g[0].el?.querySelector(':scope>.cms-block__preview>section>.wrap')).find(Boolean);
+  let inset = null;
+  if (red && refWrap) {
+    const rr = red.getBoundingClientRect(), wr = refWrap.getBoundingClientRect(), cs = getComputedStyle(refWrap);
+    inset = { l: Math.max(0, wr.left + parseFloat(cs.paddingLeft) - rr.left), r: Math.max(0, rr.right - (wr.right - parseFloat(cs.paddingRight))) };
+  }
+  const GAP = 48;
   for (const g of groups) {
     const spans = rowSpans(g.map(x => x.row));
+    g.forEach((x, i) => {
+      // Zelle: linker Rand = Inhaltskante (erste Zelle) bzw. Abstand zur vorigen Zelle, rechter Rand = Inhaltskante (letzte Zelle)
+      const on = g.length > 1 && inset;
+      const pl = !on ? 0 : (i === 0 ? inset.l : GAP), pr = !on ? 0 : (i === g.length - 1 ? inset.r : 0);
+      for (const [k, v] of [['--cms-row-pl', pl], ['--cms-row-pr', pr], ['--cms-row-basis', pl + pr]]) {
+        if (on) x.ce.style.setProperty(k, v + 'px'); else x.ce.style.removeProperty(k);
+      }
+    });
     g.forEach((x, i) => {
       const inRow = g.length > 1;
       x.ce.classList.toggle('cms-row-cell', inRow);
