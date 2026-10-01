@@ -125,6 +125,7 @@
  *                                                     --all: alle neu)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
+ *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
  *
  * Suche & KI
  *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
@@ -985,6 +986,13 @@ switch ($cmd) {
         if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'vcard:selftest':
+        // Visitenkarten (Core\VCard): Aufbau, Maskierung, Faltung, CRLF, Bild – dazu die Karten dieser Website
+        $res = Core\VCard::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Organisation: " . ($res['org'] ? Core\VCard::ORG_PATH : 'keine Angaben → 404') . ")\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'notes:selftest':

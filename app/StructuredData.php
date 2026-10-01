@@ -340,8 +340,8 @@ final class StructuredData
         return $n;
     }
 
-    /** Wert des ersten passenden Feldes (Typ + optional Namensmuster) als Text bzw. Rohwert */
-    private static function field(array $table, array $e, array $types, array $names = []): mixed
+    /** Wert des ersten passenden Feldes (Typ + optional Namensmuster) als Text bzw. Rohwert – auch für Core\VCard */
+    public static function field(array $table, array $e, array $types, array $names = []): mixed
     {
         foreach ($table['fields'] as $f) {
             if (!in_array($f['type'], $types, true)) continue;

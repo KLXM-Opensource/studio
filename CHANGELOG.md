@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Visitenkarte (vCard) der Organisation und von Personen
+- **`GET /vcard.vcf`:** Visitenkarte der Website-Organisation zum Speichern im Adressbuch (vCard 3.0 – iOS, Android, Outlook):
+  `FN`/`ORG` (`org_name()`), `ADR` (Straße, PLZ, Ort, Land), `TEL;TYPE=WORK,VOICE`, `EMAIL;TYPE=INTERNET,WORK`, `URL`
+  (Hauptadresse), `GEO` (Standort der Karte), `PHOTO` (Logo als PNG/JPEG, verkleinert, höchstens 48 KB, nie SVG), `NOTE` mit
+  den Öffnungszeiten. Quelle sind die zentralen Angaben des Kits (`project.public_info`, JSON-LD der Organisation) – keine neue
+  Ablage, keine Funktion zum Einschalten; ohne Telefon, E-Mail und Adresse 404. `?lang=en` für weitere Sprachen.
+- **`GET /vcard/{tabelle}/{slug}.vcf`:** Personen aus Tabellen mit Schema-Typ „Person“ (z. B. Team): Name (N/FN), Organisation,
+  Funktion (`TITLE`), Telefon, E-Mail, Detailseite, Foto – nur veröffentlichte Einträge.
+- Texte maskiert, Zeilen nach 75 Oktetts gefaltet (UTF-8-sicher), CRLF; `Content-Disposition: attachment` mit Namen als
+  Dateiname, `Cache-Control: public, max-age=900`, `noindex`; im Wartungsmodus nur für Angemeldete.
+- Helfer für Kits: `vcard_url()` und `vcard_entry_url($table, $entry)` (jeweils `null` ohne Karte). `/vcard` ist als
+  Seitenadresse gesperrt. Code: `Core\VCard`, `VCardController`; Selbsttest `php bin/console vcard:selftest`.
+
 ### Status Online ⇄ Offline direkt umschalten
 - **Seitenbaum:** Der Status ist ein Knopf (Recht `pages.publish`, nicht die Startseite): **Online** → „Offline nehmen“ (gestaltete
   Rückfrage), **Offline** (war schon online) bzw. **Entwurf** (nie veröffentlicht) → „Online stellen“ über `Pages::publish`

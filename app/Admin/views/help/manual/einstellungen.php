@@ -9,6 +9,7 @@
   <ul>
     <li><b>Vorschau:</b> Rechts zeigt die Seite auf Wunsch die echte Startseite mit Ihren <b>noch nicht gespeicherten</b> Werten – auf dem Computer und dem Handy.</li>
     <li><b>Mehrere Sprachen:</b> Über dem Formular wählen Sie die Sprache. In einer weiteren Sprache erscheinen nur Felder, die übersetzt werden können (Texte); leere Felder zeigen den Text der Standardsprache. Telefon, E-Mail und Adresse gelten für alle Sprachen.</li>
+    <li><b>Visitenkarte:</b> Aus Name, Adresse, Telefon, E-Mail, Logo, Standort und Öffnungszeiten entsteht automatisch eine Visitenkarte zum Speichern im Adressbuch: <a href="<?= e(url('/vcard.vcf')) ?>"><code>/vcard.vcf</code></a>. Sie ist da, sobald Telefon, E-Mail oder Adresse eingetragen sind, und immer aktuell. Verlinken Sie sie z. B. als „Kontakt speichern“ (Link-Feld: Adresse <code>/vcard.vcf</code>). Personen einer Tabelle mit „Strukturierte Daten: Person“ (z. B. Team) haben eigene Karten unter <code>/vcard/{tabelle}/{adresse-des-eintrags}.vcf</code>.</li>
     <li>Mit dem <b>Stern</b> merken Sie sich einen Reiter als Favorit.</li>
   </ul>
   <?php include __DIR__ . '/_design.php'; ?>

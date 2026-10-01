@@ -425,6 +425,23 @@ function org_name(bool $short = false): string
 }
 
 /**
+ * Visitenkarte der Organisation (Core\VCard, vCard 3.0) – Adresse von /vcard.vcf oder null ohne Telefon, E-Mail und Adresse.
+ * Im Kit: <?php if ($v = vcard_url()): ?><a href="<?= e($v) ?>" download>Kontakt speichern</a><?php endif; ?>
+ */
+function vcard_url(): ?string
+{
+    if (\Core\VCard::orgData() === null) return null;
+    $lang = \Core\Lang::current();
+    return url(\Core\VCard::ORG_PATH) . ($lang !== \Core\Lang::default() ? '?lang=' . rawurlencode($lang) : '');
+}
+
+/** Visitenkarte einer Person (Tabelle mit Schema-Typ „Person“, veröffentlichter Eintrag) – /vcard/{tabelle}/{slug}.vcf oder null */
+function vcard_entry_url(array $table, array $entry): ?string
+{
+    return \Core\VCard::personUrl($table, $entry);
+}
+
+/**
  * Kern-Fragment bzw. die Fassung von Projekt/Kit (Core\Fragments, Suchreihenfolge project/overrides → Kit → Kern):
  * <?= fragment('langswitch', ['langs' => language_links()]) ?> – gleichbedeutend mit app()->theme->partial(…).
  */

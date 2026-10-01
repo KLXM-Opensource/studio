@@ -545,6 +545,9 @@ return function (Router $r): void {
     // Kalender: iCal-Feed und einzelne Termine (Funktion „calendar“, nur Tabellen mit Kalender + Feed)
     $r->get('/kalender/{handle}.ics', [\Core\Http\Controllers\CalendarController::class, 'feed']);
     $r->get('/kalender/{handle}/{slug}.ics', [\Core\Http\Controllers\CalendarController::class, 'event']);
+    // Visitenkarten (Core\VCard, vCard 3.0): Organisation der Website und Personen aus Tabellen mit Schema-Typ „Person“
+    $r->get(\Core\VCard::ORG_PATH, [\Core\Http\Controllers\VCardController::class, 'org']);
+    $r->get('/vcard/{handle}/{slug}.vcf', [\Core\Http\Controllers\VCardController::class, 'person']);
     // Website-Suche (Funktion „search“, Core\Search): /suche, /en/search …, Vorschläge als JSON – Seiten mit gleichem Pfad haben Vorrang
     $r->get(\Core\Search\Search::routePattern(true), [\Core\Http\Controllers\SearchPageController::class, 'suggest']);
     $r->get(\Core\Search\Search::routePattern(), [\Core\Http\Controllers\SearchPageController::class, 'show']);

@@ -265,6 +265,20 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
   &lt;?php endforeach; ?&gt;
 &lt;/div&gt;</code></pre>
   <p>Der Block erscheint automatisch im Editor (Feldformular, Live-Vorschau, Abschnitts-Optionen, Drag &amp; Drop), in der REST-API und im MCP-Server.</p>
+  <h3 id="vcard">Visitenkarte (vCard) – <code>vcard_url()</code>, <code>Core\VCard</code></h3>
+  <p>Besucher speichern die Organisation mit einem Klick im Adressbuch (iOS, Android, Outlook, Thunderbird). Immer an, sobald Telefon, E-Mail oder Adresse eingetragen sind – keine eigene Funktion, keine eigene Ablage.</p>
+  <table class="doc-table">
+    <tr><th>Adresse</th><th>Inhalt</th></tr>
+    <tr><td><code>GET /vcard.vcf</code></td><td>Organisation: <code>FN</code>/<code>ORG</code> (<code>org_name()</code>; ohne eingetragenen Namen der Name aus dem JSON-LD des Kits), <code>ADR;TYPE=WORK</code> (Straße, PLZ, Ort, Land), <code>TEL;TYPE=WORK,VOICE</code>, <code>EMAIL;TYPE=INTERNET,WORK</code>, <code>URL</code> (Hauptadresse der Website, auch auf Landing-Domains), <code>GEO</code> (Standort der Karte, <code>Maps::siteLocation()</code>), <code>PHOTO</code> (Logo <code>setting('logo')</code> wie im Fragment <code>brand</code>), <code>NOTE</code> mit den Öffnungszeiten (<code>project.hours</code>, Wochentage zusammengefasst, Bezeichnung aus <code>project('hours.label')</code>), <code>X-ABShowAs:COMPANY</code>, <code>REV</code>. Ohne Telefon, E-Mail und Adresse: 404.</td></tr>
+    <tr><td><code>GET /vcard/{tabelle}/{slug}.vcf</code></td><td>Person aus einer Inhaltstabelle mit Schema-Typ <b>Person</b> (Tabellen-Designer „Strukturierte Daten“, z. B. Vorlage „Team“), nur veröffentlichte Einträge: <code>N</code> (letztes Wort = Nachname, vorangestellte „Dr.“/„Prof.“ = Titel), <code>FN</code>, <code>ORG</code>, <code>TITLE</code> (Textfeld „Position/Funktion/Rolle“), <code>TEL</code>, <code>EMAIL</code>, <code>URL</code> (Detailseite), <code>PHOTO</code> (Bildfeld der Tabelle). Feldzuordnung wie bei den strukturierten Daten (<code>StructuredData::field()</code>).</td></tr>
+  </table>
+  <ul>
+    <li><b>Quelle:</b> dieselben zentralen Angaben wie Kontakt-Blöcke, Fußbereich und JSON-LD – <code>project.public_info</code> des Kits (<code>CmsService::publicInfo()</code>), ergänzt um <code>StructuredData::organization()</code> (Adresse mit Land, Logo, Geo). Ein Kit muss dafür nichts tun, solange es <code>public_info</code> bzw. <code>jsonld</code> liefert.</li>
+    <li><b>Format:</b> vCard 3.0 (RFC 2426), UTF-8, Zeilenende CRLF, Zeilen nach 75 Oktetts gefaltet (UTF-8-sicher, <code>ICal::fold</code>), Texte maskiert (<code>\\</code> <code>\;</code> <code>\,</code> <code>\n</code>), Redaktionsnotizen <code>[# … #]</code> entfernt. Bilder nur als PNG/JPEG (WebP/GIF werden mit GD umgewandelt), auf <?= \Core\VCard::IMAGE_MAX_SIDE ?> px verkleinert und nur bis <?= (int) (\Core\VCard::IMAGE_MAX_BYTES / 1024) ?> KB eingebettet; SVG nie.</li>
+    <li><b>Antwort:</b> <code>Content-Type: text/vcard; charset=utf-8</code>, <code>Content-Disposition: attachment; filename="{name}.vcf"</code> (Name als Dateiname, Umlaute umschrieben), <code>Cache-Control: public, max-age=900</code>, <code>X-Robots-Tag: noindex</code>. Nicht im Seiten-Cache; im Wartungsmodus nur für Angemeldete. <code>?lang=en</code> wählt die Sprache (Öffnungszeiten, übersetzte Einträge).</li>
+    <li><b>Im Kit:</b> <code>&lt;?php if ($v = vcard_url()): ?&gt;&lt;a href="&lt;?= e($v) ?&gt;" download&gt;&lt;?= e(lt('Kontakt speichern')) ?&gt;&lt;/a&gt;&lt;?php endif; ?&gt;</code> – auf Detailseiten <code>vcard_entry_url($ctx['table'], $ctx['entry'])</code> mit <code>$ctx = app()-&gt;entry</code>. Beide liefern <code>null</code>, wenn es keine Karte gibt. <code>/vcard</code> ist als Seitenadresse gesperrt (<code>PublicPaths::RESERVED_SLUGS</code>).</li>
+    <li><b>Test:</b> <code>php bin/console vcard:selftest</code> (zerlegt die erzeugten Karten wieder).</li>
+  </ul>
   <h3>Template-Helfer</h3>
   <table class="doc-table">
     <tr><th>Helfer</th><th>Zweck</th></tr>
@@ -272,6 +286,7 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <tr><td><code>rich($html)</code>, <code>inline($html)</code></td><td>Rich-Text über Whitelist ausgeben</td></tr>
     <tr><td><code>setting('key')</code>, <code>filled($v)</code></td><td>Einstellung lesen; „befüllt und kein [Platzhalter]“</td></tr>
     <tr><td><code>url('/pfad')</code>, <code>link_href($link)</code>, <code>tel_href($nr)</code></td><td>URLs (Rewrite-sicher), Link-Felder, Telefon-Links</td></tr>
+    <tr><td><code>vcard_url()</code>, <code>vcard_entry_url($table, $entry)</code></td><td>Visitenkarte der Organisation bzw. einer Person (<code>.vcf</code>) oder <code>null</code> – siehe <a href="#vcard">Visitenkarte</a></td></tr>
     <tr><td><code>img($id, $sizes, $opt)</code></td><td><code>&lt;picture&gt;</code> mit AVIF/WebP-srcset, width/height, lazy</td></tr>
     <tr><td><code>theme_asset()</code>, <code>asset()</code></td><td>Asset-URL mit Cache-Busting</td></tr>
     <tr><td><code>$b-&gt;edit('pfad')</code>, <code>$b-&gt;central()</code></td><td>Inline-Editing bzw. Markierung „zentral gepflegt“ (nur im Editor); an den Datensatz gebundene Felder werden als <code>data-bound</code> gekennzeichnet und sind nicht inline bearbeitbar</td></tr>

@@ -53,6 +53,7 @@ $__cmds = [
         ['pool:list', 'Pools und nutzende Websites'],
         ['media:thumbs [--missing|--all] [--pool=key]', 'Vorschaubilder für Videos erzeugen (nur mit ffmpeg): fehlende bzw. alle neu'],
         ['media:selftest', 'Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Format, Reihenfolge, GD)'],
+        ['vcard:selftest', 'Selbsttest der Visitenkarten (Core\\VCard): Aufbau vCard 3.0, Maskierung, Faltung nach 75 Oktetts, CRLF, UTF-8, Bild (PNG/JPEG, kein SVG) – dazu die Karte der Website und je eine Personen-Karte (Exit-Code 1 bei Fehlern)'],
         ['svg:selftest [--dump=ordner] [-v]', 'Selbsttest der SVG-Bereinigung (Core\\Svg): Schadcode-Proben und Exporte aus Illustrator, Inkscape, Figma'],
         ['data:share <handle> --members=a,b [--see-members] [--merge]', 'Tabelle dieser Website für weitere Websites freigeben (diese Website = Eigentümer, --site=…)'],
         ['data:unshare <handle> [--all-entries]', 'Freigabe beenden – wieder eigene Tabelle des Eigentümers'],
