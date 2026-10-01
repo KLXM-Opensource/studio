@@ -185,3 +185,13 @@
 .cta-box--dark .cta-box__text{color:var(--c-on-dark)}
 .cta-box:not(.cta-box--dark) .btn--outline-light{box-shadow:inset 0 0 0 1.5px var(--c-ink);color:var(--c-ink)}
 .cta__text{margin-top:12px;max-width:60ch}
+/* Handlungsaufruf mit eigener Fläche (Feld „surface“): Balken bzw. Box farbig, Abschnitt bleibt wie eingestellt */
+.cta-surface{padding:clamp(28px,4vw,48px);border-radius:24px}
+.cta-surface.bg-white{box-shadow:inset 0 0 0 1.5px var(--c-line)}
+.cta-box--surface{padding:clamp(28px,4vw,44px);border-radius:24px}
+.cta-box--surface.bg-white{box-shadow:inset 0 0 0 1.5px var(--c-line)}
+/* Knöpfe richten sich nach der eigenen Fläche, nicht nach dem Abschnitt */
+.cta-surface:is(.bg-dark,.bg-bordeaux) .cta .btn--light{background:#fff;color:var(--c-bordeaux)}
+.cta-surface:is(.bg-dark,.bg-bordeaux) .cta .btn--outline-light{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6);color:#fff}
+.cta-surface.bg-white .cta .btn--light{background:var(--c-bordeaux);color:#fff}
+.cta-surface.bg-white .cta .btn--outline-light{box-shadow:inset 0 0 0 1.5px var(--c-ink);color:var(--c-ink)}

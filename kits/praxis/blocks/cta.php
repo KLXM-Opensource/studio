@@ -1,6 +1,8 @@
 <?php /** Handlungsaufruf (B11) – Band (Hintergrund dunkel oder bordeaux über Abschnitts-Optionen) oder Box/Karte. @var \Core\Block $b  @var array $d */
 $box = $b->variant() === 'box';
-$dark = $b->dark();
+// Eigene Fläche (Feld „surface“) unabhängig vom Abschnitt – sonst gilt der Hintergrund des Abschnitts
+$surface = ['hell' => 'bg-white', 'bordeaux' => 'bg-bordeaux', 'dunkel' => 'bg-dark'][$d['surface'] ?? ''] ?? '';
+$dark = $surface ? $surface !== 'bg-white' : $b->dark();
 $btnLabel = fn(array $btn) => $btn['link'] === 'telefon' && str_starts_with((string) $btn['label'], '[') ? (praxis_has_phone() ? praxis_phone() : lt('Anrufen')) : $btn['label'];
 $arrow = fn(array $btn) => ' <span aria-hidden="true">' . (is_external(praxis_link($btn['link'])) ? '↗' : '→') . '</span>';
 ?>
@@ -8,7 +10,7 @@ $arrow = fn(array $btn) => ' <span aria-hidden="true">' . (is_external(praxis_li
     // Box: in einer Reihe (neben einem Text) eine Ebene tiefer (h3) – allein im Abschnitt h2
     $tag = $b->inRow() ? 'h3' : 'h2'; ?>
 <div class="wrap">
-  <div class="cta-box<?= $dark ? ' cta-box--dark' : '' ?>" data-reveal="up">
+  <div class="cta-box<?= $dark ? ' cta-box--dark' : '' ?><?= $surface ? ' cta-box--surface ' . $surface : '' ?>" data-reveal="up">
     <div>
       <?= praxis_heading($b, $tag, 'h3 cta-box__title', 'title_strong', 'title_light', false) ?>
       <?php if ($d['text'] || is_editing()): ?><p class="cta-box__text"<?= $b->edit('text') ?>><?= e($d['text']) ?></p><?php endif; ?>
@@ -23,7 +25,8 @@ $arrow = fn(array $btn) => ' <span aria-hidden="true">' . (is_external(praxis_li
   </div>
 </div>
 <?php else: ?>
-<div class="wrap cta">
+<?php if ($surface): ?><div class="wrap"><div class="cta-surface <?= $surface ?>" data-reveal="up"><?php endif; ?>
+<div class="<?= $surface ? '' : 'wrap ' ?>cta">
   <?php if ($d['text']): ?>
   <div>
     <?= praxis_heading($b, 'h2', 'h2 h2--cta', 'title_strong', 'title_light', false) ?>
@@ -40,4 +43,5 @@ $arrow = fn(array $btn) => ' <span aria-hidden="true">' . (is_external(praxis_li
   </div>
   <?php endif; ?>
 </div>
+<?php if ($surface): ?></div></div><?php endif; ?>
 <?php endif; ?>

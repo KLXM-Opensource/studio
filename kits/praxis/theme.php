@@ -574,6 +574,10 @@ return [
                     ['name' => 'link', 'label' => 'Link', 'type' => 'link', 'required' => true, 'width' => 'half',
                         'help' => 'Sonderwerte: „doctolib“ und „telefon“ nutzen die Praxisdaten.'],
                 ]],
+                // Fläche unabhängig vom Abschnitt: z. B. Abschnitt hell, Balken/Box dunkel
+                ['name' => 'surface', 'label' => 'Farbe von Balken bzw. Box', 'type' => 'select', 'default' => '',
+                    'options' => ['' => 'Wie der Abschnitt', 'hell' => 'Hell', 'bordeaux' => 'Bordeaux', 'dunkel' => 'Dunkel'],
+                    'help' => 'Der Hintergrund des Abschnitts (Abschnitt & Navigation …) bleibt davon unberührt – so steht z. B. ein dunkler Balken in einem hellen Abschnitt.'],
             ],
         ],
         'downloads' => [
