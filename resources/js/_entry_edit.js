@@ -467,6 +467,8 @@ export function initEntryEdit() {
     Panel.open(a.dataset.entryEdit, a);
   }, true);
   if (cfg) Inline.init();
+  // Status-Chip der Werkzeugleiste hat online/offline umgeschaltet (_bar.js entryStatus)
+  d.addEventListener('cms:entry-status', e => { if (cfg) cfg.status = e.detail.status; });
   // Höhe der Werkzeugleiste (--cms-bar-h) für klebende Theme-Köpfe: _shadow.js initBar()
   restoreScroll();
 }

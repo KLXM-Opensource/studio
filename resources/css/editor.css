@@ -144,6 +144,7 @@
    ========================================================================== */
 .cms-entry-note.cms-entry-note{all:unset;display:block;box-sizing:border-box;padding:8px 16px;background:#FFF4E5;color:#5C3A00;border-bottom:1px solid #F2D3A6;font:500 14px/1.4 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif}
 .cms-entry-note strong{font-weight:800}
+.cms-entry-note.cms-entry-note[hidden],.cms-entry-note [hidden]{display:none}
 .cms-entry-note.cms-entry-note:not(.cms-entry-note--draft){background:#EEF1F8;color:#1E2840;border-bottom-color:#C9D2E6}
 
 /* Felder des Eintrags direkt im Text – nur im Modus „Bearbeiten“ der Werkzeugleiste (html.cms-entry-editing, _entry_edit.js) */

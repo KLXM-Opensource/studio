@@ -132,6 +132,30 @@ function toggleButtons(state) {
   if (on) on.hidden = !(state === 'offline' && !tg.pending);
   if (hint) hint.hidden = !(state === 'offline' && tg.pending && cfg.kind === 'page');
 }
+/**
+ * Eintrag online/offline ohne Neuladen: Knöpfe im Bearbeiten-Modus (Entwurf: Speichern + Veröffentlichen, online: Speichern
+ * sofort sichtbar), „Als Entwurf speichern“ im Menü, gelber Hinweis „Entwurf …“ unter der Leiste; _entry_edit.js hört auf
+ * cms:entry-status (Rückfrage „Als Entwurf?“ der Seitenleiste).
+ */
+function entryStatus(online) {
+  R.querySelectorAll('[data-entry-when]').forEach(x => {
+    const want = x.dataset.entryWhen === (online ? 'published' : 'draft');
+    if (x.hasAttribute('data-bar-when')) { x.dataset.barWhen = want ? 'edit' : 'never'; x.hidden = !want || mode === 'view'; }
+    else x.hidden = !want;
+  });
+  R.querySelectorAll('[data-entry-save]').forEach(b => {
+    b.classList.toggle('cms-btn--primary', online);
+    if (online && b.dataset.titleOnline) b.title = b.dataset.titleOnline; else b.removeAttribute('title');
+  });
+  const note = d.querySelector('[data-entry-note]');
+  if (note) {
+    const draft = note.querySelector('[data-entry-note-draft]');
+    if (draft) draft.hidden = online;
+    note.classList.toggle('cms-entry-note--draft', !online);
+    note.hidden = online && !note.querySelector('[data-entry-note-other]');
+  }
+  d.dispatchEvent(new CustomEvent('cms:entry-status', { detail: { status: online ? 'published' : 'draft' } }));
+}
 function initToggle() {
   const tg = cfg.toggle, pop = R.getElementById('cms-chip-pop');
   if (!tg || !pop) return;
@@ -156,8 +180,7 @@ function initToggle() {
       cfg.status = online ? 'published' : 'offline';
       // Seite mit offenem Entwurf offline genommen: Chip „Offline“, „Online stellen“ erst nach dem Veröffentlichen
       setChip(H?.dirty?.() ? 'unsaved' : cfg.status);
-      // Eintrag: „Als Entwurf speichern (offline nehmen)“ im Menü passt nur, solange er online ist
-      R.querySelectorAll('[data-entry-draft]').forEach(x => { x.dataset.barWhen = online ? 'edit' : 'never'; x.hidden = !online || mode === 'view'; });
+      if (cfg.kind === 'entry') entryStatus(online);
       say(T(online ? 'onlineDone' : 'offlineDone'));
       const next = pop.querySelector(online ? '[data-bar-offline]' : '[data-bar-online]');
       (next && !next.hidden ? next : R.querySelector('[data-bar-chip]'))?.focus();

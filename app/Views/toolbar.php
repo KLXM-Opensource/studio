@@ -97,11 +97,12 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
     <?php if ($kind === 'entry' && $b['entryEditable']): ?>
     <span class="cms-bar__grp cms-bar__edit" data-bar-group="edit"<?= $edit ? '' : ' hidden' ?>>
       <button type="button" class="cms-btn cms-btn--ghost" data-bar-cancel aria-keyshortcuts="Escape"><?= e(__('Abbrechen')) ?></button>
-      <?php if ($b['entryPub'] && $b['entryDraft']): ?>
-        <button type="button" class="cms-btn" data-entry-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S"><?= e(__('Speichern')) ?></button>
-        <button type="button" class="cms-btn cms-btn--primary" data-entry-publish><?= e(__('Veröffentlichen')) ?></button>
-      <?php else: /* veröffentlicht (Speichern = sofort online) oder ohne Freigabe-Ablauf; „Als Entwurf“ steht im Menü „⋯“ */ ?>
-        <button type="button" class="cms-btn cms-btn--primary" data-entry-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S"<?= $b['entryPub'] ? ' title="' . e(__('Änderungen sind nach dem Speichern sofort sichtbar.')) . '"' : '' ?>><?= e(__('Speichern')) ?></button>
+      <?php if ($b['entryPub']): /* Freigabe-Ablauf: Entwurf = Speichern + Veröffentlichen; veröffentlicht = Speichern (sofort online), „Als Entwurf“ im Menü „⋯“.
+        Beide Varianten stehen im Markup – _bar.js (Status-Chip: Online/Offline) schaltet ohne Neuladen um (data-entry-when) */ ?>
+        <button type="button" class="cms-btn<?= $b['entryDraft'] ? '' : ' cms-btn--primary' ?>" data-entry-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S" data-title-online="<?= e(__('Änderungen sind nach dem Speichern sofort sichtbar.')) ?>"<?= $b['entryDraft'] ? '' : ' title="' . e(__('Änderungen sind nach dem Speichern sofort sichtbar.')) . '"' ?>><?= e(__('Speichern')) ?></button>
+        <button type="button" class="cms-btn cms-btn--primary" data-entry-publish data-entry-when="draft"<?= $b['entryDraft'] ? '' : ' hidden' ?>><?= e(__('Veröffentlichen')) ?></button>
+      <?php else: /* ohne Freigabe-Ablauf bzw. ohne Recht zum Veröffentlichen */ ?>
+        <button type="button" class="cms-btn cms-btn--primary" data-entry-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S"><?= e(__('Speichern')) ?></button>
       <?php endif; ?>
     </span>
     <?php elseif ($edit && $b['hasPage']): ?>
@@ -147,8 +148,8 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
           <button type="button" role="menuitemcheckbox" class="cms-menu__item" tabindex="-1" data-editor-compact aria-checked="false"><span class="cms-menu__ico" aria-hidden="true"><?= icon('list') ?></span><span class="cms-menu__label"><?= e(__('Kompakt')) ?><small><?= e(__('Blöcke einklappen – zum Umsortieren')) ?></small></span></button>
           <?= $item(e(__('Markdown importieren …')) . '<small>' . e(__('Text oder .md-Datei als Textblöcke einfügen')) . '</small>', 'file-text', null, ' data-editor-md aria-haspopup="dialog"') ?>
         <?php endif; ?>
-        <?php if ($kind === 'entry' && $b['entryPub'] && !$b['entryDraft']): ?>
-          <?= $item(e(__('Als Entwurf speichern (offline nehmen)')), 'eye-slash', null, ' data-entry-draft data-bar-when="edit"' . ($edit ? '' : ' hidden')) ?>
+        <?php if ($kind === 'entry' && $b['entryPub']): ?>
+          <?= $item(e(__('Als Entwurf speichern (offline nehmen)')), 'eye-slash', null, ' data-entry-draft data-entry-when="published" data-bar-when="' . ($b['entryDraft'] ? 'never' : 'edit') . '"' . ($edit && !$b['entryDraft'] ? '' : ' hidden')) ?>
         <?php endif; ?>
         <?php if ($kind !== 'page' && $b['panel'] && !$b['live']): ?>
           <?= $item(e(__('Alle Felder bearbeiten')) . '<small>' . e(__('Seitenleiste mit allen Feldern des Eintrags')) . '</small>', 'sidebar-simple', null, ' data-entry-edit="' . e($b['panel']) . '" aria-haspopup="dialog"') ?>
@@ -182,11 +183,11 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
 <?php foreach ($b['ext']['scripts'] ?? [] as $xs): // Skripte der Erweiterungen (Extension::toolbar) – nur 'self' ?><script src="<?= e($xs['src']) ?>"<?= $xs['module'] ? ' type="module"' : ' defer' ?>></script>
 <?php endforeach; ?>
 <?php if ($kind === 'entry'): $reason = $b['canTable'] && !$b['foreign'] ? EntryEdit::reason($b['table'], $b['entry']) : null; ?>
-<?php if ($b['entryDraft'] || $b['foreign'] || $reason): ?>
-<div class="cms-entry-note<?= $b['entryDraft'] ? ' cms-entry-note--draft' : '' ?>" role="note">
-  <?php if ($b['entryDraft']): ?><strong><?= e(__('Entwurf')) ?></strong> – <?= e(__('nur für die angemeldete Redaktion sichtbar. Besucher sehen diesen Eintrag erst nach dem Veröffentlichen.')) ?><?php endif; ?>
-  <?php if ($b['foreign']): ?> <?= e(__('Dieser Eintrag stammt von „{site}“ und ist hier nur lesbar. Ändern kann ihn nur diese Website.', ['site' => $b['site']])) ?><?php endif; ?>
-  <?php if ($reason && !$b['live']): ?> <?= e($reason) ?><?php endif; ?>
+<?php $other = ($b['foreign'] ? ' ' . __('Dieser Eintrag stammt von „{site}“ und ist hier nur lesbar. Ändern kann ihn nur diese Website.', ['site' => $b['site']]) : '') . ($reason && !$b['live'] ? ' ' . $reason : '');
+// Mit Online/Offline-Umschalter (Status-Chip) steht der Hinweis immer im Markup – _bar.js blendet den Entwurfs-Teil ohne Neuladen ein/aus
+if ($b['entryDraft'] || $other !== '' || $b['toggle']): ?>
+<div class="cms-entry-note<?= $b['entryDraft'] ? ' cms-entry-note--draft' : '' ?>" role="note" data-entry-note<?= $b['entryDraft'] || $other !== '' ? '' : ' hidden' ?>>
+  <span data-entry-note-draft<?= $b['entryDraft'] ? '' : ' hidden' ?>><strong><?= e(__('Entwurf')) ?></strong> – <?= e(__('nur für die angemeldete Redaktion sichtbar. Besucher sehen diesen Eintrag erst nach dem Veröffentlichen.')) ?></span><?php if ($other !== ''): ?><span data-entry-note-other><?= e($other) ?></span><?php endif; ?>
 </div>
 <?php endif; ?>
 <?php if ($b['entryEditable']): ?>
