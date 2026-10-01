@@ -223,6 +223,18 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 @media (max-width:600px){:host(.is-hinting) :is(.cms-block__label,.cms-block__tools){display:none}}
 .cms-block__edit.is-hint{box-shadow:0 0 0 3px #E8A33D}
 @media (prefers-reduced-motion:no-preference){.cms-block__edit.is-hint{animation:cms-hint .9s ease 2}@keyframes cms-hint{50%{box-shadow:0 0 0 6px rgba(232,163,61,.35)}}}
+/* Block „Layout“: Leiste je Block in einer Spalte (Host .cms-lay-bar im Fluss der Spalte) und „+ Block in diese Spalte“ */
+:host(.cms-lay-bar){display:flex;flex-wrap:wrap;align-items:center;gap:6px;font:600 12px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#16201E;-webkit-font-smoothing:antialiased}
+.cms-lay-bar__label{flex:0 1 auto;min-width:0;padding:4px 9px;border-radius:6px;background:#EEF1F7;color:#1E2840;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cms-lay-bar__label>span[aria-hidden]{opacity:.8}
+.cms-lay-bar__tools{display:inline-flex;flex-wrap:wrap;gap:3px;align-items:center}
+.cms-lay-bar__edit{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#314164;color:#fff;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
+.cms-lay-bar__edit:hover{background:#243150}
+.cms-lay-bar__edit.is-hint{box-shadow:0 0 0 3px #E8A33D}
+.cms-iconbtn--danger:hover{background:#FCE8E6;color:#B3261E}
+:host(.cms-lay-bar) :focus-visible,:host(.cms-lay-add) :focus-visible{outline:2px solid #314164;outline-offset:2px}
+@media (pointer:coarse){.cms-lay-bar__edit{min-height:36px}:host(.cms-lay-bar) .cms-iconbtn{width:36px;height:36px}}
+.cms-addbtn--col{box-shadow:none;border-style:dashed}
 /* „+ Block einfügen“ an der Unterkante des Blocks (Host .cms-block__add, Lage: editor.css) */
 .cms-addbtn{display:inline-flex;align-items:center;gap:6px;min-height:32px;margin:0;padding:0 14px 0 10px;border-radius:999px;border:1.5px solid #314164;background:#fff;color:#1E2840;font:700 13px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;-webkit-font-smoothing:antialiased;white-space:nowrap;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.16)}
 .cms-addbtn>span{font-size:18px;line-height:1;font-weight:700}

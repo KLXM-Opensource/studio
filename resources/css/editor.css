@@ -55,6 +55,17 @@
      der Inhalt beginnt/endet an der Kante wie auf der Website */
   .cms-editor .ce-block.cms-row-cell .cms-block__preview>section>.wrap{max-width:none;width:auto;margin-inline:0;padding-left:var(--cms-row-pl,0);padding-right:var(--cms-row-pr,0)}
 }
+/* Block „Layout“ (Core\Layout, editor.js decorateLayout): Spalten gestrichelt umrandet (Umriss – ändert die Maße nicht), leere Spalten
+   mit Mindesthöhe; Leiste je Block und „+ Block in diese Spalte“ stehen im Fluss der Spalte (verdecken keine Inhalte) */
+.cms-block [data-lay-col]{outline:1px dashed rgba(49,65,100,.28);outline-offset:6px;border-radius:4px}
+.cms-block:is(:hover,.is-selected,.is-active) [data-lay-col]{outline-color:rgba(49,65,100,.55)}
+.cms-block [data-lay-col].lay-col--empty{min-height:96px;justify-content:center}
+.cms-lay-bar.cms-lay-bar,.cms-lay-add.cms-lay-add{all:initial;display:block;font:600 12px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#16201E;user-select:none;-webkit-user-select:none}
+.cms-lay-bar.cms-lay-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.lay-item--card>.cms-lay-bar.cms-lay-bar{margin:12px 12px 0}
+.cms-lay-add.cms-lay-add{text-align:center}
+.lay-item.is-hidden-block{opacity:.45}
+.lay-item--invalid{outline:2px dashed #B3261E}
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
 .cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
 .cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block.is-selected>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}

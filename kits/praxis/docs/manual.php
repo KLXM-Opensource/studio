@@ -45,7 +45,7 @@ return [
         'richtext' => 'Freier Fließtext mit Zwischenüberschriften (H2–H4), Listen und Links – z. B. für Stellenanzeigen, Erläuterungen und Rechtstexte. Breite wählbar: Textbreite oder breit.',
         'services' => 'Nummerierte Leistungsliste (01, 02 …).',
         'doctors' => 'Karten für Ärztinnen und Ärzte mit Foto, Fach, Qualifikationen.',
-        'team_photo' => 'Veraltet – nicht mehr einfügbar. Stattdessen „Bild breit“ (Teamfoto), „Fließtext“ und daneben „Handlungsaufruf“ als Box (Abschnitt & Navigation → „Neben den vorigen Block stellen“, ⅓).',
+        'team_photo' => 'Veraltet – nicht mehr einfügbar. Stattdessen „Bild breit“ (Teamfoto), darunter ein „Layout“ (⅔ + ⅓) mit „Fließtext“ und „Handlungsaufruf“ als Box.',
         'people' => 'Kompakte Personenliste (z. B. Praxisteam, MFA).',
         'image_wide' => 'Breites Bild mit Bildunterschrift und Fotonachweis.',
         'steps' => 'Ablauf in 3–5 Schritten (z. B. „Ihr erster Besuch“).',

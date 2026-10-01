@@ -20,19 +20,30 @@ final class Block
     /** Erster Block einer Reihe (Theme::renderRow): Abschnitt bekommt die Klasse sec--row */
     public bool $rowLead = false;
 
+    /** Layout-Block, in dessen Spalte dieser Block steht (Core\Layout) – null = eigener Abschnitt */
+    public ?Block $parent = null;
+
+    /** Datenpfad im Layout für die Direktbearbeitung (z. B. „columns.0.blocks.1.data.“), leer außerhalb eines Layouts */
+    public string $editPrefix = '';
+
     public function tune(string $key): mixed
     {
         return $this->tunes[$key] ?? null;
     }
 
     /**
-     * Steht der Block neben dem vorigen (Tune „row“: auto, 1-2, 1-3, 2-3, 1-4, 3-4)? Dann gibt Theme::renderRow() nur seinen
-     * Inhalt in einer Zelle des Abschnitts des ersten Blocks aus – z. B. für eine kleinere Überschrift (h3 statt h2).
-     * Im Editor (Vorschau je Block) gilt die Einstellung, auch wenn sie beim ersten Block der Seite ignoriert wird.
+     * Steht der Block in einer Spalte (Block „Layout“, Core\Layout) bzw. – alte Inhalte – neben dem vorigen (Tune „row“)?
+     * Dann gibt der Kern nur seinen Inhalt ohne eigenen Abschnitt aus – z. B. für eine kleinere Überschrift (h3 statt h2).
      */
     public function inRow(): bool
     {
-        return ($this->tunes['row'] ?? '') !== '';
+        return $this->parent !== null || ($this->tunes['row'] ?? '') !== '';
+    }
+
+    /** Steht der Block in einer Spalte eines Layouts? */
+    public function nested(): bool
+    {
+        return $this->parent !== null;
     }
 
     /** Kopie mit geänderten Abschnitts-Optionen */
@@ -96,7 +107,7 @@ final class Block
         if (isset($this->data['_bind'][explode('.', $path)[0]])) {
             return ' data-bound="' . e((string) $this->data['_bind'][explode('.', $path)[0]]) . '" title="Aus dem Datensatz"';
         }
-        return ' data-edit="' . e($path) . '"' . ($mode !== 'plain' ? ' data-edit-mode="' . e($mode) . '"' : '');
+        return ' data-edit="' . e($this->editPrefix . $path) . '"' . ($mode !== 'plain' ? ' data-edit-mode="' . e($mode) . '"' : '');
     }
 
     /** Markiert zentral gepflegte Inhalte (Einstellungen des Themes) im Bearbeitungsmodus. */

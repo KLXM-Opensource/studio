@@ -632,7 +632,10 @@ final class CmsService
                 'variants' => $b['variants'] ?? null, 'default_background' => $b['background'] ?? 'white',
                 'central' => $b['central'] ?? null,
                 'fields' => $b['fields'],
-            ] + (!empty($b['custom']) ? ['custom' => true, 'insertable' => $b['insertable'] ?? true] : []);   // eigener Block (Block-Designer)
+                // In einer Spalte des Blocks „layout“ erlaubt: true | Liste erlaubter Varianten | false
+                'nestable' => app()->theme->nestableVariants($type),
+            ] + ($type === \Core\Layout::TYPE ? ['columns' => 'data.columns = [{blocks: [{id, type, data, tunes?: {section: {anchor, visible, background}}}]}] – Anzahl laut preset (' . implode(', ', array_keys(\Core\Layout::PRESETS)) . '); Kinder nur mit nestable'] : [])
+              + (!empty($b['custom']) ? ['custom' => true, 'insertable' => $b['insertable'] ?? true] : []);   // eigener Block (Block-Designer)
         }
         return [
             'types' => $out,
@@ -643,7 +646,7 @@ final class CmsService
                 'spaceTop' => ['normal', 'small', 'none'], 'spaceBottom' => ['normal', 'small', 'none'], 'divider' => 'bool',
                 'height' => ['auto', 'screen'], 'bgImage' => 'Medien-ID (Bild) oder null', 'overlay' => ['none', 'light', 'dark'],
                 'align' => ['top', 'center', 'bottom'],
-                'row' => ['' => 'eigener Abschnitt', 'auto' => 'neben den vorigen Block, Breite automatisch', '1-2' => '½', '1-3' => '⅓', '2-3' => '⅔', '1-4' => '¼', '3-4' => '¾'],
+                'row' => 'veraltet – für Blöcke nebeneinander den Blocktyp „layout“ verwenden (php bin/console layout:migrate-rows stellt alte Reihen um)',
             ],
         ];
     }
@@ -663,7 +666,12 @@ final class CmsService
                 'tunes' => ['section' => (array) ($b['section'] ?? $b['tunes']['section'] ?? [])],
             ];
         }
-        return Pages::sanitizeBlocks($raw);
+        $out = Pages::sanitizeBlocks($raw);
+        // Block „Layout“: nur verschachtelbare Blöcke in den Spalten (block_types → nestable)
+        if (Pages::$rejected) {
+            throw new ApiError(422, 'Diese Blöcke können nicht in einer Spalte des Layouts stehen: ' . implode(', ', array_unique(Pages::$rejected)) . '. Siehe block_types → nestable.');
+        }
+        return $out;
     }
 
     /** Hinweise auf fehlende Pflichtfelder (blockieren das Speichern nicht – Entwürfe dürfen unvollständig sein) */

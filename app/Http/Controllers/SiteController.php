@@ -93,6 +93,7 @@ final class SiteController
     /** Blocktypen der Seite für conditional_css (Stylesheets und Skripte): „typ“ und „typ:variante“ */
     private static function types(array $blocks): array
     {
+        $blocks = \Core\Layout::flatten($blocks);   // auch Blöcke in Spalten (Stylesheets/Skripte je Typ)
         return array_merge(array_column($blocks, 'type'), array_map(fn($b) => $b['type'] . ':' . ($b['data']['variant'] ?? ''), $blocks));
     }
 

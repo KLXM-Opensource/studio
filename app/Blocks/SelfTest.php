@@ -12,6 +12,8 @@ use Core\Block;
  * Außerdem: Bild anpassen je Einbindung (Core\ImageFx: Format, Klassen, Feldpfade in data._fx) und Bild im Rahmen
  * (Core\ImageFit: Format, Vorrang Einbindung → Mediathek → automatisch, Klassen, Regeln, transparenter Rand).
  * Blöcke nebeneinander (Tune „row“, Core\Theme::renderRow): Anteile, Bereinigung, Gruppierung, erster Block ignoriert.
+ * Block „Layout“ (Core\Layout): verschachtelbare Blöcke, Prüfung beim Speichern, Raster ändern ohne Inhaltsverlust, Ausgabe,
+ * Umstellung alter Reihen (layout:migrate-rows) samt Aufheben bei nicht verschachtelbaren Blöcken und Wiederholbarkeit.
  */
 final class SelfTest
 {
@@ -32,6 +34,7 @@ final class SelfTest
             $t->imageFx();
             $t->imageFit();
             $t->rows();
+            $t->layout();
         } finally {
             app()->editing = $prev;
         }
@@ -59,6 +62,77 @@ final class SelfTest
             && substr_count($html, '<section') === 2, 'Reihen: zwei Blöcke in einem Abschnitt, dritter eigener Abschnitt (erster Block: Option ignoriert)');
         $this->assert(!isset($bgs[1]) || str_contains($html, 'sec-row__cell--card'), 'Reihen: anderer Hintergrund → Karte');
         $this->assert(str_contains($html, 'id="r1"') === false && str_contains($html, 'id="b-r1"'), 'Reihen: Abschnitt trägt Anker des ersten Blocks');
+    }
+
+    /** Block „Layout“ mit dem aktiven Kit: Whitelist, sanitizeBlocks, fitColumns, render, migrateRows */
+    private function layout(): void
+    {
+        $th = app()->theme;
+        $L = \Core\Layout::class;
+        if (!$th->block($L::TYPE)) { $this->ok++; return; }   // Kit hat das Layout abgeschaltet
+        $nest = $flat = null;
+        foreach ($th->blocks() as $type => $def) {
+            if ($type === $L::TYPE || !empty($def['custom'])) continue;
+            if (!$nest && $th->nestable($type) && $th->nestableVariants($type) === true) $nest = $type;
+            if (!$flat && !$th->nestable($type) && empty($def['raw'])) $flat = $type;
+        }
+        $this->assert(!$th->nestable($L::TYPE), 'Layout: kein Layout im Layout');
+        foreach ($th->blocks() as $type => $def) if (!empty($def['raw'])) { $this->assert(!$th->nestable($type), "Layout: Block mit eigener Hülle ($type) nicht verschachtelbar"); break; }
+        foreach ($th->blocks() as $type => $def) {
+            if (is_array($v = $th->nestableVariants($type))) {
+                $other = array_values(array_diff(array_keys($def['variants'] ?? []), $v))[0] ?? null;
+                if ($other !== null) $this->assert($th->nestable($type, $v[0]) && !$th->nestable($type, $other), "Layout: nur erlaubte Varianten ($type)");
+                break;
+            }
+        }
+        if (!$nest) { $this->ok++; return; }
+        // Raster ändern: weniger Spalten → Blöcke wandern in die letzte Spalte
+        $cols = $L::fitColumns([['blocks' => [['id' => 'a']]], ['blocks' => [['id' => 'b']]], ['blocks' => [['id' => 'c'], ['id' => 'd']]]], 2);
+        $this->assert(count($cols) === 2 && array_column($cols[1]['blocks'], 'id') === ['b', 'c', 'd'], 'Layout: weniger Spalten → nichts geht verloren');
+        $this->assert(count($L::fitColumns([], 4)) === 4, 'Layout: fehlende Spalten ergänzt');
+        $this->assert($L::closestPreset([8, 4]) === '2-1' && $L::closestPreset([6, 6]) === '1-1' && $L::closestPreset([3, 9]) === '1-3'
+            && $L::closestPreset([4, 4, 4]) === '1-1-1' && $L::closestPreset([2, 2, 2, 2, 2]) === null, 'Layout: nächstes Raster zu alten Reihen');
+        // Speichern: nicht verschachtelbare Kinder abgelehnt, IDs eindeutig, Raster bestimmt die Spaltenzahl
+        $child = fn(string $id, string $type) => ['id' => $id, 'type' => $type, 'data' => [], 'tunes' => ['section' => ['background' => 'nope', 'anchor' => 'Mein Anker']]];
+        $in = [['id' => 'x1', 'type' => $L::TYPE, 'data' => ['preset' => '1-1', 'columns' => [
+            ['blocks' => [$child('k1', $nest), $child('k1', $nest)]], ['blocks' => array_filter([$flat ? $child('k3', $flat) : null, $child('k4', $L::TYPE)])], ['blocks' => [$child('k5', $nest)]]]]]];
+        $out = \Core\Pages::sanitizeBlocks($in);
+        $c = $out[0]['data']['columns'] ?? [];
+        $ids = array_merge([$out[0]['id']], ...array_map(fn($col) => array_column($col['blocks'], 'id'), $c));
+        $this->assert(count($c) === 2 && count($c[1]['blocks']) === 1 && $c[1]['blocks'][0]['id'] === 'k5', 'Layout: Spalten laut Raster, nicht verschachtelbare Blöcke verworfen');
+        $this->assert(in_array($L::TYPE, \Core\Pages::$rejected, true) && (!$flat || in_array($flat, \Core\Pages::$rejected, true)), 'Layout: Ablehnung gemeldet (Pages::$rejected)');
+        $this->assert(count($ids) === count(array_unique($ids)), 'Layout: Block-IDs eindeutig (auch in Spalten)');
+        $this->assert(($c[0]['blocks'][0]['tunes']['section'] ?? null) === ['anchor' => 'mein-anker', 'visible' => true, 'background' => ''], 'Layout: Optionen eines Kinds bereinigt');
+        // Ausgabe: ein Abschnitt, Spalten mit Gewicht, Kinder ohne eigenen Abschnitt, Typen für Stylesheets (flatten)
+        $title = in_array('title_strong', array_column($th->block($nest)['fields'], 'name'), true) ? 'title_strong' : 'title';
+        $txt = fn(string $id) => ['id' => $id, 'type' => $nest, 'data' => [$title => 'T ' . $id, 'text' => '<p>Text ' . $id . '</p>', 'q' => 'Q', 'a' => '<p>A</p>']];
+        $page = [['id' => 'lay1', 'type' => $L::TYPE, 'data' => ['preset' => '2-1', 'columns' => [['blocks' => [$txt('c1')]], ['blocks' => [$txt('c2') + ['tunes' => ['section' => ['anchor' => 'zwei']]]]]]],
+            'tunes' => ['section' => ['anchor' => 'spalten']]]];
+        $html = $th->renderBlocks(\Core\Pages::sanitizeBlocks($page));
+        $this->assert(substr_count($html, '<section') === 1 && str_contains($html, 'lay-grid--2-1') && substr_count($html, 'class="lay-col ') === 2
+            && str_contains($html, 'lay-col--w2') && str_contains($html, 'id="spalten"') && str_contains($html, 'id="zwei"'), 'Layout: ein Abschnitt mit zwei Spalten, Sprungmarken');
+        $this->assert(in_array($nest, array_column($L::flatten(\Core\Pages::sanitizeBlocks($page)), 'type'), true), 'Layout: flatten liefert die Blöcke der Spalten');
+        $prev = app()->editing; app()->editing = true;
+        try {
+            $eh = $th->renderBlock($th->makeBlock(\Core\Pages::sanitizeBlocks($page)[0]));
+        } finally { app()->editing = $prev; }
+        $this->assert(str_contains($eh, 'data-lay-item="1.0"') && (!str_contains($eh, 'data-edit=') || str_contains($eh, 'data-edit="columns.0.blocks.0.data.')), 'Layout: Editor – Pfade der Direktbearbeitung im Layout');
+        // Umstellung alter Reihen
+        $bl = fn(string $id, string $type, string $row, string $bg = '') => ['id' => $id, 'type' => $type, 'data' => [], 'tunes' => ['section' => ['row' => $row, 'anchor' => $id] + ($bg !== '' ? ['background' => $bg] : [])]];
+        $bgs = array_keys($th->backgrounds());
+        $m = $L::migrateRows([$bl('a', $nest, ''), $bl('b', $nest, '1-3', $bgs[1] ?? $bgs[0]), $bl('c', $nest, '')], $th);
+        $lay = $m['blocks'][0];
+        $this->assert(count($m['blocks']) === 2 && $lay['type'] === $L::TYPE && $lay['data']['preset'] === '2-1' && $lay['tunes']['section']['anchor'] === 'a'
+            && !isset($lay['tunes']['section']['row']) && $lay['data']['columns'][1]['blocks'][0]['tunes']['section']['anchor'] === 'b', 'Layout: Reihe ⅔ + ⅓ → ein Layout mit den Optionen des ersten Blocks');
+        $this->assert(!isset($bgs[1]) || $lay['data']['columns'][1]['blocks'][0]['tunes']['section']['background'] === $bgs[1], 'Layout: anderer Hintergrund → Karte');
+        $this->assert($L::migrateRows($m['blocks'], $th)['changed'] === 0, 'Layout: Umstellung wiederholbar (idempotent)');
+        if ($flat) {
+            $m2 = $L::migrateRows([$bl('s', $flat, ''), $bl('w', $flat, '1-2')], $th);
+            $this->assert(count($m2['blocks']) === 2 && $m2['cleared'] === 1 && ($m2['blocks'][1]['tunes']['section']['row'] ?? '') === '' && $m2['blocks'][1]['type'] === $flat,
+                'Layout: nicht verschachtelbar → Reihe aufgehoben (untereinander), gemeldet');
+        }
+        $m3 = $L::migrateRows([$bl('f', $nest, '1-2')], $th);
+        $this->assert($m3['cleared'] === 1 && !isset($m3['blocks'][0]['tunes']['section']['row']), 'Layout: Option am ersten Block (ohne Wirkung) entfernt');
     }
 
     /** Block „Partner & Logos“ (Core\Blocks\PartnerLogos): flächengleiche Logo-Breite, Grenzen, Sortierung */

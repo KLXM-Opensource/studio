@@ -220,6 +220,7 @@ return [
             ],
         ],
         'richtext' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fließtext', 'icon' => '¶', 'group' => 'Inhalt',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen und Links – z. B. für Rechtstexte.',
             'fields' => [...$head(false, false), ['name' => 'text', 'label' => 'Text', 'type' => 'richtext']],
@@ -267,6 +268,7 @@ return [
             ],
         ],
         'quote' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Zitat / Stimmen', 'icon' => '❝', 'group' => 'Inhalt',
             'help' => 'Ein Eintrag = großes Zitat. Zwei oder drei Einträge = Karten nebeneinander. Nur echte, freigegebene Stimmen verwenden.',
             'fields' => [
@@ -280,6 +282,7 @@ return [
             ],
         ],
         'faq' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fragen & Antworten', 'icon' => '?', 'group' => 'Inhalt',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],   // schema.org FAQPage
             'fields' => [
@@ -291,6 +294,7 @@ return [
             ],
         ],
         'cta' => [
+            'nestable' => ['box'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Handlungsaufruf', 'icon' => '➜', 'group' => 'Inhalt', 'background' => 'accent',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box'],
             'fields' => [
@@ -345,6 +349,7 @@ return [
             ],
         ],
         'video' => [
+            'nestable' => ['wide'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video', 'icon' => '▶', 'group' => 'Medien',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung: Vorschaubild vom eigenen Server, Player erst nach Klick (ohne Cookies bis dahin). Eigene MP4-Dateien laufen direkt.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben'],
@@ -382,6 +387,7 @@ return [
             ],
         ],
         'downloads' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads', 'icon' => '↓', 'group' => 'Medien',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
@@ -398,6 +404,7 @@ return [
             ],
         ],
         'map' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Karte', 'icon' => '⌖', 'group' => 'Website',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],

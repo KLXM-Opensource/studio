@@ -293,7 +293,7 @@ final class Pages
     public static function anchors(array $page, bool $draft = false): array
     {
         $out = [];
-        foreach (self::blocks($page, $draft) as $b) {
+        foreach (Layout::flatten(self::blocks($page, $draft)) as $b) {   // auch Sprungmarken von Blöcken in Spalten
             $t = $b['tunes']['section'] ?? [];
             if (!empty($t['anchor']) && ($t['visible'] ?? true)) {
                 $out[$t['anchor']] = $t['navLabel'] ?? ($b['data']['title_strong'] ?? $b['data']['title'] ?? $t['anchor']);
@@ -309,15 +309,32 @@ final class Pages
         return trim((string) $s, '-') ?: 'seite';
     }
 
-    /** Bereinigt eingehendes Editor.js-JSON anhand der Block-Schemata. */
-    public static function sanitizeBlocks(array $blocks): array
+    /**
+     * Abgelehnte Kinder des letzten sanitizeBlocks() (Block „Layout“: nicht verschachtelbare Blöcke) – je „Typ“ als Text,
+     * z. B. für eine Fehlermeldung der API.
+     * @var list<string>
+     */
+    public static array $rejected = [];
+
+    /**
+     * Bereinigt eingehendes Editor.js-JSON anhand der Block-Schemata. Block „Layout“ (Core\Layout): Spalten passend zum Raster,
+     * darin nur verschachtelbare Blöcke (Theme::nestable – andere werden verworfen und in self::$rejected gemeldet); Block-IDs
+     * der ganzen Seite eindeutig (auch in Spalten).
+     */
+    public static function sanitizeBlocks(array $blocks, ?array &$seen = null, bool $nested = false): array
     {
         $theme = app()->theme;
         $out = [];
+        if ($seen === null) { $seen = []; self::$rejected = []; }
         foreach ($blocks as $b) {
+            if (!is_array($b)) continue;
             $type = (string) ($b['type'] ?? '');
             $def = $theme->block($type);
             if (!$def) {
+                continue;
+            }
+            if ($nested && !$theme->nestable($type)) {
+                self::$rejected[] = $type;
                 continue;
             }
             [$data] = Fields::sanitize($def['fields'] ?? [], is_array($b['data'] ?? null) ? $b['data'] : []);
@@ -334,13 +351,23 @@ final class Pages
             if (!empty($b['data']['_fit']) && ($fit = ImageFit::sanitize($b['data']['_fit'], $def['fields'] ?? [], $data))) $data['_fit'] = $fit;
             if (!empty($def['variants'])) {
                 $variant = (string) ($b['data']['variant'] ?? '');
-                $data['variant'] = array_key_exists($variant, $def['variants']) ? $variant : array_key_first($def['variants']);
+                // In einer Spalte nur die erlaubten Varianten (z. B. Handlungsaufruf nur als Box)
+                $allowed = $nested && is_array($nv = $theme->nestableVariants($type)) ? array_flip($nv) : $def['variants'];
+                $data['variant'] = array_key_exists($variant, $allowed) ? $variant : (string) array_key_first($allowed);
             }
+            if ($type === Layout::TYPE) {
+                $preset = Layout::preset($data);
+                $cols = Layout::fitColumns(is_array($b['data']['columns'] ?? null) ? $b['data']['columns'] : [], Layout::count($preset));
+                $data['columns'] = array_map(fn($c) => ['blocks' => self::sanitizeBlocks($c['blocks'], $seen, true)], $cols);
+            }
+            $id = preg_replace('~[^\w\-]~', '', (string) ($b['id'] ?? '')) ?: substr(bin2hex(random_bytes(6)), 0, 10);
+            while (isset($seen[$id])) $id = substr(bin2hex(random_bytes(6)), 0, 10);
+            $seen[$id] = true;
             $out[] = [
-                'id' => preg_replace('~[^\w\-]~', '', (string) ($b['id'] ?? '')) ?: substr(bin2hex(random_bytes(6)), 0, 10),
+                'id' => $id,
                 'type' => $type,
                 'data' => $data,
-                'tunes' => ['section' => $theme->sanitizeTunes($b['tunes']['section'] ?? [], $def)],
+                'tunes' => ['section' => $nested ? Layout::childTunes((array) ($b['tunes']['section'] ?? $b['section'] ?? []), $theme) : $theme->sanitizeTunes($b['tunes']['section'] ?? [], $def)],
             ];
         }
         return $out;

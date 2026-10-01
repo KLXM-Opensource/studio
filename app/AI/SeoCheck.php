@@ -106,7 +106,7 @@ final class SeoCheck
                 if (($f['type'] ?? '') === 'repeater' && is_array($v)) foreach ($v as $item) if (is_array($item)) $walk((array) ($f['fields'] ?? []), $item);
             }
         };
-        foreach ($blocks as $b) {
+        foreach (\Core\Layout::flatten($blocks) as $b) {
             $def = app()->theme->block((string) ($b['type'] ?? ''));
             if ($def && is_array($b['data'] ?? null)) $walk((array) ($def['fields'] ?? []), $b['data']);
             if (!empty($b['tunes']['section']['bgImage'])) $ids[] = (int) $b['tunes']['section']['bgImage'];

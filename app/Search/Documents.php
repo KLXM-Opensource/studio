@@ -84,7 +84,7 @@ final class Documents
     {
         $theme = app()->theme;
         $head = $text = [];
-        foreach ($blocks as $b) {
+        foreach (\Core\Layout::flatten($blocks) as $b) {   // auch Blöcke in Spalten eines Layouts
             $type = (string) ($b['type'] ?? '');
             if (in_array($type, self::SKIP_BLOCKS, true) || !(($b['tunes']['section']['visible'] ?? true))) continue;
             $def = $theme->block($type);

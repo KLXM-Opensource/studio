@@ -176,11 +176,15 @@
 /* Blöcke nebeneinander (Kern css/rows.css): Karten wie die Boxen des Kits; untereinander bis ca. 1080 px Fensterbreite (Inhalt < 1000 px) */
 .sec-row{--row-stack:1000px;--row-card-radius:24px;--row-card-pad:clamp(28px,4vw,44px)}
 .sec-row__cell--card.bg-white{background:#fff}
+/* Block „Layout“ (Kern css/layout.css): Karten (Block mit eigener Fläche) wie die Boxen des Kits; untereinander wie bisher bei den
+   Reihen bis ca. 1080 px Fensterbreite (Inhalt < 1000 px) – schmale Spalten wären für die großen Überschriften des Kits zu eng */
+.lay-grid{--lay-stack:1000px;--lay-stack-tablet:1000px;--lay-card-radius:24px;--lay-card-pad:clamp(28px,4vw,44px)}
+.lay-item--card.bg-white{background:#fff}
 /* Handlungsaufruf als Box (Variante „box“): Text links, Button rechts – schmal (z. B. ⅓ neben einem Text) untereinander.
    Allein bzw. mit gleichem Hintergrund wie der Abschnitt: helle Karte mit Rahmen; als Karte in einer Reihe (anderer Hintergrund) ohne eigene Fläche */
 .cta-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 48px;align-items:center}
-:not(.sec-row__cell--card)>.wrap>.cta-box{padding:clamp(28px,4vw,44px);border-radius:24px;box-shadow:inset 0 0 0 1.5px var(--c-line)}
-:not(.sec-row__cell--card)>.wrap>.cta-box--dark{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28)}
+:not(.sec-row__cell--card,.lay-item--card)>.wrap>.cta-box{padding:clamp(28px,4vw,44px);border-radius:24px;box-shadow:inset 0 0 0 1.5px var(--c-line)}
+:not(.sec-row__cell--card,.lay-item--card)>.wrap>.cta-box--dark{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28)}
 .cta-box__text{margin-top:10px;color:var(--c-text-2)}
 .cta-box--dark .cta-box__text{color:var(--c-on-dark)}
 .cta-box:not(.cta-box--dark) .btn--outline-light{box-shadow:inset 0 0 0 1.5px var(--c-ink);color:var(--c-ink)}

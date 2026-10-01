@@ -33,7 +33,8 @@ final class Theme
     ];
 
     /**
-     * Blöcke nebeneinander (Tune „row“): Breite des Blocks in Zwölfteln; auto = teilt sich den Rest mit dem ersten Block der Reihe.
+     * Veraltet – Blöcke nebeneinander jetzt mit dem Block „Layout“ (Core\Layout); nur noch Darstellung alter Inhalte bis zur Umstellung
+     * (php bin/console layout:migrate-rows). Tune „row“: Breite des Blocks in Zwölfteln; auto = teilt sich den Rest mit dem ersten Block der Reihe.
      * Der erste Block einer Reihe hat keine eigene Breite (er bekommt den Rest).
      */
     public const ROW_WIDTHS = ['auto' => null, '1-2' => 6, '1-3' => 4, '2-3' => 8, '1-4' => 3, '3-4' => 9];
@@ -64,6 +65,10 @@ final class Theme
             foreach (require ROOT . '/app/Blocks/blocks.php' as $type => $b) {
                 $this->blocks[$type] ??= $b + ['type' => $type, 'fields' => [], 'label' => $type, 'core' => true];
             }
+        }
+        // Layout (Spalten, Core\Layout): in jedem Kit, außer theme.php → 'layout' => false
+        if (($this->def['layout'] ?? true) !== false) {
+            $this->blocks[Layout::TYPE] ??= Layout::definition() + ['type' => Layout::TYPE];
         }
         // Eigene Blöcke der Website (Block-Designer, Core\Blocks\Custom): freigegebene Fassungen als Typ cblk_{schlüssel}
         foreach (Blocks\Custom::definitions() as $type => $b) {
@@ -114,6 +119,32 @@ final class Theme
     public function block(string $type): ?array
     {
         return $this->blocks[$type] ?? null;
+    }
+
+    /**
+     * Darf der Block in einer Spalte eines Layouts stehen? theme.php → blocks → {typ} → 'nestable' => true | false | ['variante', …]
+     * (nur diese Varianten). Markiert das Kit keinen Block, gelten Layout::DEFAULT_NESTABLE. Layouts, Blöcke mit eigener Hülle
+     * ('raw') und nicht einfügbare Typen nie. $variant = '' prüft nur den Typ.
+     */
+    public function nestable(string $type, string $variant = ''): bool
+    {
+        $v = $this->nestableVariants($type);
+        return $v === true || (is_array($v) && ($variant === '' || in_array($variant, $v, true)));
+    }
+
+    /** true = alle Varianten, Liste = nur diese Varianten, false = nicht verschachtelbar */
+    public function nestableVariants(string $type): bool|array
+    {
+        $def = $this->blocks[$type] ?? null;
+        if (!$def || $type === Layout::TYPE || !empty($def['raw'])) return false;
+        static $marked = [];
+        $marked[$this->name] ??= (bool) array_filter($this->blocks, fn($b) => array_key_exists('nestable', $b) && empty($b['core']) && empty($b['custom']));
+        $n = $def['nestable'] ?? (!$marked[$this->name] && empty($def['core']) && in_array($type, Layout::DEFAULT_NESTABLE, true));
+        if (is_array($n)) {
+            $n = array_values(array_filter(array_map('strval', $n), fn($v) => isset($def['variants'][$v])));
+            return $n ?: false;
+        }
+        return (bool) $n;
     }
 
     /** Gruppen des zentralen Einstellungsformulars (Titel vom Theme) */
@@ -385,7 +416,7 @@ final class Theme
         if ($inner === null) {
             return app()->editing ? '<p>Renderer für „' . e($block->type) . '“ fehlt.</p>' : '';
         }
-        if (app()->editing && $block->inRow() && $this->rowable($block)) {
+        if (app()->editing && $block->parent === null && $block->inRow() && $this->rowable($block)) {
             // Editor (Vorschau je Block): Block „neben dem vorigen“ schon als Zelle einer Reihe – Hintergrund/Abstände der Reihe
             // und „Karte ja/nein“ setzt editor.js (layoutRows) nach dem ersten Block der Reihe
             $this->rowCss = true;
@@ -523,6 +554,10 @@ final class Theme
         if (($types === null && ($this->def['rows'] ?? true) !== false) || $this->rowCss) {
             $out[] = $this->coreCss('rows.css');
         }
+        // Layout (Spalten, Core\Layout) – Variablen --lay-gap*, --lay-stack, --lay-stack-tablet, --lay-item-gap, --lay-card-* oder css/layout.css des Kits
+        if (($types === null && isset($this->blocks[Layout::TYPE])) || ($types !== null && in_array(Layout::TYPE, $types, true))) {
+            $out[] = $this->coreCss('layout.css');
+        }
         // Glossar (Block „Glossar“; Hinweise im Text bindet Core\Glossary\Glossary::page ein) – Kern + optional css/glossary.css des Kits
         if (($types === null || in_array('glossary', $types, true)) && Features::on('glossary', false)) {
             array_push($out, ...Glossary\Glossary::stylesheets(true));
@@ -616,9 +651,12 @@ final class Theme
                 'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
                 'formfields' => $ff ?: null,
                 'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“
+                'nestable' => $this->nestableVariants($type),   // in einer Spalte des Layouts erlaubt (true | Varianten | false)
             ];
         }
+        // rows: nur noch Darstellung alter Reihen (Tune row) – die Option ist im Editor abgeschafft (Block „Layout“)
         return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false,
+            'layout' => isset($this->blocks[Layout::TYPE]) ? ['presets' => Layout::PRESETS] : null,
             'glossary' => Features::on('glossary', false)];   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
     }
 }

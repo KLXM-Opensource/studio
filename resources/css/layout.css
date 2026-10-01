@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Block „Layout“ (Spalten, Core\Layout) – Blöcke in einem Raster nebeneinander
+   <section class="sec sec--layout bg-white"><div class="wrap lay-grid lay-grid--2-1 lay-v-top lay-gap-normal">
+     <div class="lay-col lay-col--w2"><div class="lay-item sec--richtext"><div class="wrap">…</div></div></div>
+     <div class="lay-col lay-col--w1"><div class="lay-item sec--cta v-box sec lay-item--card bg-dark"><div class="wrap">…</div></div></div>
+   </div></section>
+   Nur geladen, wenn die Seite ein Layout enthält. Kit-Datei public/assets/kits/{name}/css/layout.css ersetzt sie.
+   Anpassbar (am Kit, z. B. :root oder .lay-grid):
+     --lay-gap-s, --lay-gap, --lay-gap-l   Abstand zwischen den Spalten (klein, normal, groß) – auch beim Stapeln
+     --lay-stack          Breite des Inhaltsbereichs, unter der die Spalten untereinander stehen (Standard 700px ≈ Fenster < 768 px)
+     --lay-stack-tablet   dasselbe für „Schon auf Tablets untereinander“ (Standard 940px ≈ Fenster < 1024 px)
+     --lay-item-gap       Abstand zwischen Blöcken in derselben Spalte
+     --lay-card-pad, --lay-card-radius   Karte (Block mit eigenem Hintergrund)
+   Stapeln ohne Media Query (Kits können die Grenze über Variablen setzen): flex-basis wird unter --lay-stack riesig (jede Spalte
+   100 %), darüber 0 (Anteile über flex-grow = Gewicht der Spalte). Reihenfolge mobil umkehren: wrap-reverse (gestapelt steht die
+   letzte Spalte oben; nebeneinander bleibt alles gleich, die Ausrichtung wird gespiegelt ausgeglichen).
+   ========================================================================== */
+.lay-grid{--lay-g:var(--lay-gap,clamp(28px,4vw,56px));--lay-al:flex-start;display:flex;flex-wrap:wrap;gap:var(--lay-g);align-items:var(--lay-al)}
+.lay-gap-small{--lay-g:var(--lay-gap-s,clamp(16px,2vw,24px))}
+.lay-gap-large{--lay-g:var(--lay-gap-l,clamp(40px,6vw,96px))}
+.lay-v-center{--lay-al:center}.lay-v-bottom{--lay-al:flex-end}.lay-v-stretch{--lay-al:stretch}
+.lay-rev{flex-wrap:wrap-reverse}
+.lay-rev.lay-v-top{--lay-al:flex-end}.lay-rev.lay-v-bottom{--lay-al:flex-start}
+.lay-grid>.lay-col{flex-grow:var(--lay-w,1);flex-shrink:1;flex-basis:calc((var(--lay-stack,700px) - 100%) * 999);min-width:0;
+  display:flex;flex-direction:column;gap:var(--lay-item-gap,clamp(24px,3vw,40px))}
+.lay-stack-tablet>.lay-col{flex-basis:calc((var(--lay-stack-tablet,940px) - 100%) * 999)}
+.lay-col--w1{--lay-w:1}.lay-col--w2{--lay-w:2}.lay-col--w3{--lay-w:3}
+/* Gestreckt: Blöcke füllen die Spaltenhöhe (Karten gleich hoch) */
+.lay-v-stretch>.lay-col>.lay-item:last-child{flex-grow:1}
+/* Leere Spalte (Besucher): nimmt Platz ein, zeigt nichts */
+.lay-col--empty:not([data-lay-col]){min-height:0}
+/* Die Block-Vorlagen bringen ihre eigene .wrap mit – in der Spalte ohne Höchstbreite und Seitenrand */
+.lay-grid>.lay-col>.lay-item>.wrap{max-width:none;width:auto;margin-inline:0;padding-inline:0}
+.lay-item{min-width:0;margin:0}
+/* Karte: Klassen sec + bg-{name} wie ein Abschnitt, aber kompakt; Innenabstand an der .wrap des Blocks */
+.lay-item--card{border-radius:var(--lay-card-radius,16px);padding:0}
+.lay-grid>.lay-col>.lay-item--card>.wrap,.lay-item--card:not(:has(>.wrap)){padding:var(--lay-card-pad,clamp(24px,3.5vw,40px))}

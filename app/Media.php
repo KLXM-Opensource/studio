@@ -1033,7 +1033,7 @@ final class Media
                 $out[] = ['label' => $p['title'] . ' → Vorschaubild', 'url' => Pages::url($p)];
             }
             $seen = [];
-            foreach (array_merge(Pages::blocks($p, false), Pages::blocks($p, true)) as $b) {
+            foreach (Layout::flatten(array_merge(Pages::blocks($p, false), Pages::blocks($p, true))) as $b) {
                 $def = $theme->block((string) ($b['type'] ?? ''));
                 $inBlock = $def && (self::fieldsUse($def['fields'], $b['data'] ?? [], $id) || (int) ($b['tunes']['section']['bgImage'] ?? 0) === $id);
                 if ($inBlock && !isset($seen[$b['id']])) {

@@ -330,6 +330,7 @@ return [
             ],
         ],
         'text' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Text', 'icon' => 'paragraph', 'group' => 'Inhalt',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links.',
             'fields' => [
@@ -373,6 +374,7 @@ return [
             ],
         ],
         'faq' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten sie als strukturierte Daten (FAQPage).',
             // JSON-LD je Block: Der Core (Core\StructuredData) baut daraus FAQPage – ohne eigenen Code
@@ -387,6 +389,7 @@ return [
         ],
         // --- Medien: dünne Hüllen um Kern-Helfer (Core\Embeds, Core\MediaTracks, Core\Media) ---------------------------
         'video' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, keine Daten an Dritte bis zum Klick) oder eigene MP4-Datei mit Untertiteln.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title'],   // VideoObject (nur mit Vorschaubild)
@@ -399,6 +402,7 @@ return [
             ],
         ],
         'downloads' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
             'help' => 'Dateien zum Herunterladen; PDFs lassen sich zusätzlich im Browser ansehen (PDF.js vom eigenen Server).',
             'fields' => [

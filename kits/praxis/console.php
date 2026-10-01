@@ -7,7 +7,7 @@
  *       1. „Bild breit“ (16:9) mit dem Teamfoto – übernimmt Hintergrund, Sprungmarke, Navigation, Abstand oben (eigener Abschnitt)
  *       2. „Fließtext“ (breit) mit Überschrift + Text – darunter, Abstand unten wie bisher
  *       3. nur mit „Ausbildungs-/Stellen-Box“: „Handlungsaufruf“ als Box (dunkel) mit Titel, Text und Button,
- *          „Neben den vorigen Block stellen“ (⅓) → Text ⅔ + Box ⅓ in einem Abschnitt
+ *          → Text ⅔ + Box ⅓ zusammen als Block „Layout“ (Core\Layout, Raster ⅔ + ⅓; Box als dunkle Karte)
  *     Nur team_photo-Blöcke werden angefasst; alle anderen Blöcke bleiben Byte für Byte gleich. Entwurf und veröffentlichte
  *     Fassung werden je für sich umgestellt (gleicher Stand → gleiches Ergebnis, die Seite zeigt danach keinen offenen Entwurf).
  *     Version „Team-Abschnitt umgestellt“. Wiederholbar: ohne team_photo-Blöcke ändert sich nichts.
@@ -49,6 +49,8 @@ function praxis_migrate_team_blocks(array $blocks): array
                     'text' => (string) ($d['jobs_text'] ?? ''), 'buttons' => $label !== '' && $link !== '' ? [['label' => $label, 'link' => $link]] : []],
                 'tunes' => ['section' => ['background' => 'dark', 'visible' => $visible, 'row' => '1-3']]];
         }
+        // Text + Box (Reihe) → ein Block „Layout“ ⅔ + ⅓ (Core\Layout::migrateRows), danach wie beim Speichern bereinigt
+        $new = \Core\Layout::migrateRows(\Core\Pages::sanitizeBlocks($new), app()->theme)['blocks'];
         foreach (\Core\Pages::sanitizeBlocks($new) as $nb) $out[] = $nb;
     }
     return [$out, $n];
@@ -57,7 +59,7 @@ function praxis_migrate_team_blocks(array $blocks): array
 
 return [
     'praxis:migrate-team' => [
-        'Block „Teamfoto + Text“ in Bild breit + Fließtext + Box (nebeneinander) umstellen [--dry-run] [--page=ID]',
+        'Block „Teamfoto + Text“ in Bild breit + Layout (Fließtext ⅔ + Box ⅓) umstellen [--dry-run] [--page=ID]',
         function (array $args): int {
             $dry = in_array('--dry-run', $args, true);
             $only = 0;

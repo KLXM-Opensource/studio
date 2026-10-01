@@ -63,3 +63,13 @@
     <li>Überschrift und Einleitung wie bei anderen Blöcken; den Hintergrund des Abschnitts wählen Sie wie gewohnt – auf dunklen Abschnitten passen sich Kacheln und Texte an.</li>
   </ul>
   <?php endif; ?>
+  <?php if (isset($blocks['layout'])):
+    $th = app()->theme;
+    $nest = [];
+    foreach ($blocks as $type => $b) {
+        if (!($v = $th->nestableVariants((string) $type))) continue;
+        $nest[] = $b['label'] . (is_array($v) && !empty($b['variants']) ? ' (' . implode(', ', array_intersect_key($b['variants'], array_flip($v))) . ')' : '');
+    } ?>
+  <h3 id="layout-spalten"><?= e($blocks['layout']['label']) ?></h3>
+  <p>Stellt Blöcke in Spalten nebeneinander (Raster ½ + ½, ⅔ + ⅓, ⅓ × 3 …) – siehe <a href="<?= e(url('/admin/hilfe#layout')) ?>">Layout: Blöcke in Spalten</a>. In eine Spalte passen in diesem Design: <?= e($nest ? implode(' · ', $nest) : '–') ?>.</p>
+  <?php endif; ?>

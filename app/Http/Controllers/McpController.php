@@ -180,7 +180,7 @@ final class McpController
         $page = $str('Seiten-ID, Pfad (z. B. „leistungen/beratung“ oder „impressum“) oder „home“ für die Startseite');
         $publish = $bool('Nach dem Speichern sofort veröffentlichen (Standard: false = Entwurf)');
         // Hintergründe kommen aus dem aktiven Theme (theme.php → backgrounds)
-        $section = $obj('Abschnitts-Optionen: background (' . implode('|', array_keys(app()->theme->backgrounds())) . '), anchor, visible, showInNav, navLabel, spaceTop/spaceBottom (normal|small|none), divider, height (auto|screen = Vollbild 100svh), bgImage (Medien-ID Hintergrundbild), overlay (none|light|dark), align (top|center|bottom, bei height=screen), row (\'\'|auto|1-2|1-3|2-3|1-4|3-4 = neben den vorigen Block stellen, Breite dieses Blocks)');
+        $section = $obj('Abschnitts-Optionen: background (' . implode('|', array_keys(app()->theme->backgrounds())) . '), anchor, visible, showInNav, navLabel, spaceTop/spaceBottom (normal|small|none), divider, height (auto|screen = Vollbild 100svh), bgImage (Medien-ID Hintergrundbild), overlay (none|light|dark), align (top|center|bottom, bei height=screen), row (veraltet). Blöcke nebeneinander: Blocktyp „layout“ mit data.preset und data.columns = [{blocks: [{id, type, data}]}], Kinder nur mit nestable (list_block_types)');
         $schema = fn(array $props, array $req = []) => ['type' => 'object', 'properties' => $props ?: new \stdClass()] + ($req ? ['required' => $req] : []);
         $ro = ['readOnlyHint' => true, 'openWorldHint' => false];
         $rw = ['readOnlyHint' => false, 'destructiveHint' => false, 'openWorldHint' => false];

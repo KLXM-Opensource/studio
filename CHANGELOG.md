@@ -6,6 +6,29 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Layout: Blöcke in Spalten (ersetzt „Neben den vorigen Block stellen“)
+- Neuer Kern-Block **„Layout (Spalten)“** (`layout`, alle Kits; `theme.php → 'layout' => false` schaltet ab): Raster ½+½, ⅔+⅓,
+  ⅓+⅔, ⅓×3, ¼×4, ¼+¾, ¾+¼, Ausrichtung vertikal (oben/mitte/unten/gestreckt), Abstand (klein/normal/groß), Stapeln auf schmalen
+  Bildschirmen (Standard < 768 px, „schon auf Tablets“ < 1024 px; Kits über `--lay-stack`), „Reihenfolge mobil umkehren“.
+  Abschnitts-Optionen gelten für das ganze Layout. Daten `columns: [{blocks: [{id, type, data, tunes?}]}]`; weniger Spalten →
+  Blöcke wandern in die letzte Spalte (nie Inhalt verlieren).
+- **Nur verschachtelbare Blöcke** in Spalten: Block-Definition `'nestable' => true | ['variante', …]`; Prüfung beim Speichern
+  (`Pages::sanitizeBlocks`, abgelehnte in `Pages::$rejected`, REST/MCP 422), eindeutige Block-IDs, kein Layout im Layout, keine
+  Blöcke mit eigener Hülle. Kern: Formular, Datensatz-Felder, Stelle (Eckdaten/Bewerbung), Nächste Termine, Karte; Kits praxis,
+  basis, starter markiert, sonst Standardliste (`Layout::DEFAULT_NESTABLE`).
+- Ausgabe ohne eigenen Abschnitt je Kind (`Layout::render`, `css/layout.css`, Variablen `--lay-*`); Kind mit eigener Fläche = Karte.
+  Seitenweite Auswertung über `Layout::flatten()`: Stylesheets je Typ, Suchindex, Sprungmarken, Mediennutzung, SEO-Prüfung; JSON-LD,
+  Redaktionsnotizen und Glossar auch in Spalten.
+- **Editor:** Spalten wie auf der Website; je Block in einer Spalte eine Leiste im Fluss (↑ ↓, ← → in die Nachbarspalte,
+  Bearbeiten in der Seitenleiste mit Optionen „In der Spalte“, Löschen mit Rückfrage), „+ Block in diese Spalte“ (nur passende
+  Blöcke), Direktbearbeitung über `columns.{s}.blocks.{n}.data.{feld}`, Tastatur, Live-Meldungen.
+- Abschnitts-Option **„Neben den vorigen Block stellen“ abgeschafft** (Tune `row` nur noch zur Darstellung alter Inhalte;
+  „Aus der Reihe lösen“ in der Seitenleiste). Umstellung `php bin/console layout:migrate-rows [--site=…] [--dry-run]`: Reihe aus
+  verschachtelbaren Blöcken → ein Layout (nächstes Raster, Optionen des ersten Blocks, anderer Hintergrund = Karte), sonst Reihe
+  aufheben (untereinander) und melden; veröffentlicht/Entwurf getrennt, Version „Reihen in Layout umgewandelt“, wiederholbar.
+  Kit praxis: `praxis:migrate-team` erzeugt direkt ein Layout ⅔ + ⅓.
+- Handbuch („Layout: Blöcke in Spalten“, Blockliste mit passenden Blöcken je Kit), Entwicklerhandbuch, `blocks:selftest` (+18).
+
 ### Glossar – Fachbegriffe im Text erklären (Funktion `glossary`, Standard aus)
 - Begriffe als Datentabelle **„Glossar“** (Begriff, Varianten/Synonyme/Abkürzungen, Kurz-Erklärung ≤ 240 Zeichen, ausführliche
   Erklärung, Kategorie, Mehr erfahren, Status); einrichten unter **Verwaltung → Glossar** bzw. `glossary:install`. Detailseiten

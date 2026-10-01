@@ -375,4 +375,5 @@ img[class*=fx],img[class*=fy]{object-position:var(--b-fx,50%) var(--b-fy,50%)}
 /* Blöcke nebeneinander (Kern css/rows.css): Karte = Block mit anderem Hintergrund in einer Reihe */
 .bg-white{--b-sec-bg:var(--b-bg)}
 .sec-row{--row-card-radius:var(--b-radius-l)}
-.sec-row__cell--card .cta--box{padding:0;background:none}
+.lay-grid{--lay-card-radius:var(--b-radius-l)}
+.sec-row__cell--card .cta--box,.lay-item--card .cta--box{padding:0;background:none}

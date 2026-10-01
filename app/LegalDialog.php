@@ -51,7 +51,7 @@ final class LegalDialog
             return str_contains($v, '<') ? Sanitizer::block($v) : '<p>' . nl2br(e($v), false) . '</p>';
         };
         $title = fn(string $v) => preg_replace('~\*([^*]+)\*~u', '$1', trim($v)) ?? trim($v);
-        foreach (Pages::blocks($page) as $b) {
+        foreach (Layout::flatten(Pages::blocks($page)) as $b) {
             $d = (array) ($b['data'] ?? []);
             if ($b['type'] === 'hero') {   // Seitentitel steht im Dialogkopf; nur die Einleitung
                 $h .= $text((string) ($d['text'] ?? $d['intro'] ?? ''));

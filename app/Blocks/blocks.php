@@ -46,6 +46,7 @@ return [
     ],
     'data_fields' => [
         'label' => 'Datensatz-Felder', 'icon' => 'table', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für Detailseiten-Vorlagen: zeigt Felder des aufgerufenen Eintrags. In allen anderen Blöcken der Vorlage funktionieren zusätzlich Platzhalter wie {{titel}}.',
         'fields' => [
             ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true],
@@ -61,6 +62,7 @@ return [
     ],
     'data_form' => [
         'label' => 'Formular (Datentabelle)', 'icon' => 'clipboard-text', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Besucher legen über ein Formular einen Eintrag in einer Datentabelle an (z. B. Anmeldungen). Welche Felder, Status und Benachrichtigung stellen Sie bei der Tabelle ein (Felder → Öffentliches Formular). Mehrstufiger Spamschutz, ohne Cookies. Mit einer Eingangs-Tabelle (Anfragen) werden die Angaben Ende-zu-Ende verschlüsselt.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
@@ -84,6 +86,7 @@ return [
     // Stellenangebote (Core\Data\Jobs): nur auf der Detailseiten-Vorlage einer Tabelle mit schema.org-Typ „JobPosting“
     'job_facts' => [
         'label' => 'Stelle: Eckdaten', 'icon' => 'briefcase', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: Beschäftigungsart, Arbeitsort, Beginn, Gehalt, Bewerbungsfrist und Ansprechperson auf einen Blick – mit Button „Jetzt bewerben“ zum Formular. Ist die Stelle abgelaufen, steht hier „Diese Stelle ist nicht mehr ausgeschrieben“.',
         'fields' => [
             ['name' => 'title', 'label' => 'Überschrift (optional)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'z. B. Auf einen Blick'],
@@ -93,6 +96,7 @@ return [
     ],
     'job_apply' => [
         'label' => 'Stelle: Bewerbung', 'icon' => 'envelope-simple', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: das Bewerbungsformular der Tabelle (Felder & Einstellungen → „Bewerbungsformular“). Das Feld „Stelle“ ist ausgefüllt und gesperrt, der Betreff der E-Mail nennt die Stelle. Bei abgelaufenen Stellen erscheint kein Formular.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
@@ -130,6 +134,7 @@ return [
     ],
     'upcoming' => [
         'label' => 'Nächste Termine', 'icon' => 'calendar-dots', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Die nächsten Termine einer Kalender-Tabelle ab heute – Wiederholungen werden einzeln aufgeführt.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
@@ -165,6 +170,7 @@ return [
     ],
     'map' => [
         'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Medien',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],

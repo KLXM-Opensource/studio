@@ -12,6 +12,8 @@
  *  - Bild anpassen je Einbindung (Core\ImageFx): data._fx = {feldpfad: anpassung}; Knopf am Bild (_media.js) und je Bild-Feld
  *    in der Seitenleiste. Gespeichert wird mit dem normalen Entwurf.
  *  - Bild im Rahmen je Einbindung (Core\ImageFit): data._fit = {feldpfad: „contain blur“ | „original“ | …}, gleiche Stellen.
+ *  - Block „Layout“ (Core\Layout): Spalten mit Blöcken – Leiste je Block in der Spalte (↑ ↓ ← →, Bearbeiten, Löschen),
+ *    „+ Block in diese Spalte“ (nur verschachtelbare Blöcke), Direktbearbeitung über Pfade columns.{s}.blocks.{n}.data.{feld}.
  */
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
@@ -36,9 +38,14 @@ const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? 
 const COLLAPSE_KEY = 'cms-collapsed-' + cfg.page.id;
 const collapsed = new Set(store.get(COLLAPSE_KEY, []));
 const holder = () => $('#cms-editor');
+const LAYOUT = 'layout';   // Kern-Block „Layout“ (Core\Layout)
 const blockEls = () => $$('.ce-block', holder());
 /** Kurzbeschreibung eines Blocks für die eingeklappte Zeile */
 const summarize = data => {
+  // Layout: Kurzbeschreibungen der Blöcke in den Spalten
+  if (Array.isArray(data?.columns) && data.columns.length && data.columns.every(c => c && Array.isArray(c.blocks))) {
+    return data.columns.flatMap(c => c.blocks).map(b => summarize(b.data) || cfg.blocks[b.type]?.label || b.type).filter(Boolean).join(' · ').slice(0, 90);
+  }
   for (const k of ['title_strong', 'title', 'caption', 'intro', 'text', 'q']) {
     const v = data?.[k];
     if (typeof v === 'string' && v.trim()) return v.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
@@ -278,7 +285,7 @@ d.addEventListener('focusin', e => { const b = e.target.closest?.('.cms-block');
  */
 const BarPlace = (() => {
   const LIVE = '.cms-block:is(:hover,.is-selected,.is-active,:focus-within)';
-  const HARD = '[data-edit],input,select,textarea,button,.btn,[role=button]';
+  const HARD = '[data-edit],input,select,textarea,button,.btn,[role=button],.cms-lay-bar,.cms-lay-add';
   const SOFT = 'img,video,iframe,canvas,picture,svg:not(button svg):not(a svg)';
   let raf = 0;
   const R = r => ({ l: r.left, t: r.top, r: r.right, b: r.bottom });
@@ -403,7 +410,7 @@ const BlockPicker = (() => {
   const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false);
   list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
   const items = () => $$('.cms-addpop__item:not([hidden])', list);
-  let tool = null, opener = null;
+  let tool = null, opener = null, only = null, column = null;   // only/column: „+ Block in diese Spalte“ (Layout)
   const place = () => {
     if (el.hidden || !opener) return;
     const r = opener.getBoundingClientRect(), h = el.offsetHeight, w = el.offsetWidth;
@@ -414,7 +421,7 @@ const BlockPicker = (() => {
   const mark = btn => items().forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
   const filter = () => {
     const v = q.value.trim().toLowerCase();
-    $$('.cms-addpop__item', list).forEach(b => { b.hidden = !!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v); });
+    $$('.cms-addpop__item', list).forEach(b => { b.hidden = (only && !only.has(b.dataset.type)) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v)); });
     none.hidden = items().length > 0;
     mark(items()[0]);
     place();
@@ -423,11 +430,12 @@ const BlockPicker = (() => {
     if (el.hidden) return;
     el.hidden = true;
     if (back) opener?.focus({ preventScroll: true });
-    opener = null; tool = null;
+    opener = null; tool = null; only = null; column = null;
   };
   const insert = type => {
-    const t = tool;
+    const t = tool, col = column;
     close(false);
+    if (col != null && type && t?.addChild) { t.addChild(col, type); return; }
     const idx = blockEls().indexOf(t?.el.closest('.ce-block'));
     if (!type || idx < 0) return;
     editor.blocks.insert(type, {}, undefined, idx + 1, false);
@@ -454,9 +462,13 @@ const BlockPicker = (() => {
   addEventListener('resize', place);
   addEventListener('scroll', place, { passive: true });
   return {
-    open(btn, t) {
+    /** opts.column: Spalte eines Layouts – nur verschachtelbare Blöcke (cfg.blocks[typ].nestable) */
+    open(btn, t, opts = {}) {
       if (!el.hidden && opener === btn) { close(); return; }
       opener = btn; tool = t;
+      column = opts.column ?? null;
+      only = column != null ? new Set(types.filter(([, def]) => def.nestable).map(([type]) => type)) : null;
+      el.setAttribute('aria-label', column != null ? T('Block in diese Spalte einfügen') : T('Block einfügen'));
       q.value = ''; filter();
       el.hidden = false; place();
       q.focus({ preventScroll: true });
@@ -551,6 +563,10 @@ function makeTool(type, def) {
         if (e.target.closest('[data-edit]') || e.target.closest('summary')) return;
         e.preventDefault();
         if (e.target.closest('[data-cms-open]')) { this.openDrawer(); return; }
+        // Block in einer Spalte (Layout): auf „Bearbeiten“ seiner eigenen Leiste hinweisen
+        const item = e.target.closest('[data-lay-item]');
+        const ib = item && $(':scope>.cms-lay-bar', item)?.shadowRoot?.querySelector('[data-act="edit"]');
+        if (ib) { selectBlock(this.el); ib.classList.remove('is-hint'); void ib.offsetWidth; ib.classList.add('is-hint'); return; }
         this.hintEdit(!!e.target.closest('[data-central]'));
       });
       pv.addEventListener('submit', e => e.preventDefault());
@@ -590,7 +606,7 @@ function makeTool(type, def) {
             const v = fieldValue(n, false);
             setPath(this.data, n.dataset.edit, v);
             markDirty();
-            if (drawerFor === this) { this.syncDrawerField(n.dataset.edit, v); drawerTouched(); }
+            this.syncInline(n.dataset.edit, v);
           });
           n.addEventListener('paste', e => { e.preventDefault(); d.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
           n.addEventListener('focus', () => InlineBar.hide());
@@ -603,13 +619,14 @@ function makeTool(type, def) {
             const html = fieldValue(n, true).replace(/^<p><br><\/p>$/, '');
             setPath(this.data, n.dataset.edit, html);
             markDirty();
-            if (drawerFor === this) { this.syncDrawerField(n.dataset.edit, html, true); drawerTouched(); }
+            this.syncInline(n.dataset.edit, html, true);
           });
           n.addEventListener('focus', () => InlineBar.show(n, mode));
           n.addEventListener('blur', () => InlineBar.hideSoon());
         }
       });
       $$('input,select,textarea,button:not(.cms-block__edit)', pv).forEach(i => { i.tabIndex = -1; });
+      if (type === LAYOUT) this.decorateLayout(pv);
       this.syncFormFields();
       BarPlace.soon();
     }
@@ -637,6 +654,7 @@ function makeTool(type, def) {
       try {
         const res = await api(cfg.endpoints.preview, { page: cfg.page.id, entry: cfg.entry, block: this.serialize() });
         if (!Object.keys(this.data).length) this.data = res.block.data; // neuer Block → Standardwerte übernehmen
+        if (type === LAYOUT) this.adoptColumns(res.block.data.columns || []);
         this.setPreview(res.html);
         const pv = this.el.querySelector('.cms-block__preview');
         if (!pv.textContent.trim()) pv.insertAdjacentHTML('beforeend', `<p class="cms-empty">${CMSAdmin.esc(CMSAdmin.t('{label} – noch leer.', { label: def.label }))} <button type="button" class="cms-empty__btn" data-cms-open>${CMSAdmin.esc(CMSAdmin.t('Inhalte eingeben'))}</button></p>`);
@@ -693,57 +711,217 @@ function makeTool(type, def) {
       this.hintT = setTimeout(() => { hint.hidden = true; this.bar.host.classList.remove('is-hinting'); btn.classList.remove('is-hint'); BarPlace.soon(); }, 2600);
     }
 
-    syncDrawerField(path, value, rich = false) {
-      const name = 'f[' + path.split('.').join('][') + ']';
-      const input = drawer.querySelector(`[name="${CSS.escape(name)}"]`);
-      if (!input) return;
-      input.value = value;
-      const area = rich && input.closest('.rte')?.querySelector('.rte-area');
-      if (area && !area.contains(d.activeElement)) area.innerHTML = value;
+    syncDrawerField(path, value, rich = false) { syncDrawerField(path, value, rich); }
+
+    openDrawer(focusSection = false) { return openDrawer(this, focusSection); }
+
+    /** Direkt bearbeiteter Text → Seitenleiste angleichen (auch für einen Block in einer Spalte, dessen Felder gerade offen sind) */
+    syncInline(path, value, rich = false) {
+      if (drawerFor === this) { syncDrawerField(path, value, rich); drawerTouched(); return; }
+      if (drawerFor?.parent === this) {
+        const m = path.match(/^columns\.(\d+)\.blocks\.(\d+)\.data\.(.+)$/);
+        if (m && this.data.columns?.[m[1]]?.blocks?.[m[2]]?.id === drawerFor.blockId) { syncDrawerField(m[3], value, rich); drawerTouched(); }
+      }
     }
 
-    async openDrawer(focusSection = false) {
-      // Stand beim Öffnen merken: „Abbrechen“ in der Seitenleiste setzt nur diesen Block zurück
-      if (drawerSnap?.tool !== this || drawer.hidden) {
-        drawerSnap = { tool: this, data: structuredClone(this.data), tunes: structuredClone(this.tuneData), dirty, touched: false };
-        drawerButtons();
+    // -------------------------------------------------------------- Layout (Spalten, Core\Layout)
+    /** Spalten vom Server übernehmen, wenn sich die Aufteilung geändert hat (Raster mit weniger Spalten, abgelehnte Blöcke) */
+    adoptColumns(srv) {
+      const cur = this.data.columns || [];
+      const shape = cols => JSON.stringify(cols.map(c => (c.blocks || []).map(b => b.id)));
+      if (shape(srv) !== shape(cur)) { this.data.columns = structuredClone(srv); return; }
+      // Neu eingefügte Blöcke (noch ohne Daten): Standardwerte des Servers übernehmen
+      srv.forEach((c, ci) => c.blocks.forEach((b, bi) => {
+        const mine = cur[ci].blocks[bi];
+        if (!Object.keys(mine.data || {}).length) mine.data = structuredClone(b.data);
+        if (!mine.tunes) mine.tunes = structuredClone(b.tunes || { section: {} });
+      }));
+    }
+
+    /** Leiste je Block in einer Spalte und „+ Block in diese Spalte“ (eigene Schatten-Wurzeln, im Fluss – nie über Inhalten) */
+    decorateLayout(pv) {
+      const T = CMSAdmin.t, E = CMSAdmin.esc;
+      const cols = this.data.columns || [];
+      $$('[data-lay-col]', pv).forEach(colEl => {
+        const ci = +colEl.dataset.layCol;
+        const list = cols[ci]?.blocks || [];
+        $$(':scope>[data-lay-item]', colEl).forEach(itemEl => {
+          const bi = +itemEl.dataset.layItem.split('.')[1];
+          const child = list[bi];
+          if (!child) return;
+          const cdef = cfg.blocks[child.type] || { label: child.type };
+          const host = d.createElement('div');
+          host.className = 'cms-lay-bar'; host.contentEditable = 'false';
+          itemEl.prepend(host);
+          const L = E(cdef.label);
+          const sr = S.shadowFor(host, `<span class="cms-lay-bar__label" title="${L}"><span aria-hidden="true">${blockIcon(cdef)}</span> <span class="cms-lay-bar__name">${L}</span></span>
+            <span class="cms-lay-bar__tools" role="group" aria-label="${E(T('Block „{label}“ in Spalte {n}', { label: cdef.label, n: ci + 1 }))}">
+              <button type="button" class="cms-iconbtn" data-act="up" aria-label="${E(T('Nach oben'))}" title="${E(T('Nach oben'))}">↑</button>
+              <button type="button" class="cms-iconbtn" data-act="down" aria-label="${E(T('Nach unten'))}" title="${E(T('Nach unten'))}">↓</button>
+              <button type="button" class="cms-iconbtn" data-act="left" aria-label="${E(T('In die Spalte links'))}" title="${E(T('In die Spalte links'))}">←</button>
+              <button type="button" class="cms-iconbtn" data-act="right" aria-label="${E(T('In die Spalte rechts'))}" title="${E(T('In die Spalte rechts'))}">→</button>
+              <button type="button" class="cms-lay-bar__edit" data-act="edit" aria-label="${E(T('„{label}“ bearbeiten', { label: cdef.label }))}">${E(T('Bearbeiten'))}</button>
+              <button type="button" class="cms-iconbtn cms-iconbtn--danger" data-act="del" aria-label="${E(T('„{label}“ löschen', { label: cdef.label }))}" title="${E(T('Löschen'))}">✕</button>
+            </span>`);
+          const dis = { up: bi === 0, down: bi === list.length - 1, left: ci === 0, right: ci === cols.length - 1 };
+          $$('[data-act]', sr).forEach(b => {
+            if (dis[b.dataset.act]) b.disabled = true;
+            b.addEventListener('click', e => { e.stopPropagation(); this.childAction(child.id, b.dataset.act); });
+          });
+          host.addEventListener('keydown', e => e.stopPropagation());
+          if (this.focusAfter?.id === child.id) {
+            const want = $(`[data-act="${this.focusAfter.act}"]`, sr);
+            (want && !want.disabled ? want : $('[data-act="edit"]', sr)).focus({ preventScroll: true });
+            this.focusAfter = null;
+          }
+        });
+        const addHost = d.createElement('div');
+        addHost.className = 'cms-lay-add'; addHost.contentEditable = 'false';
+        colEl.append(addHost);
+        const asr = S.shadowFor(addHost, `<button type="button" class="cms-addbtn cms-addbtn--col" aria-haspopup="dialog"><span aria-hidden="true">+</span> ${E(T('Block in diese Spalte'))}</button>`);
+        const ab = asr.querySelector('button');
+        ab.setAttribute('aria-label', T('Block in Spalte {n} einfügen', { n: ci + 1 }));
+        ab.addEventListener('click', e => { e.stopPropagation(); BlockPicker.open(ab, this, { column: ci }); });
+        addHost.addEventListener('keydown', e => e.stopPropagation());
+        if (this.focusAfter?.add === ci) { ab.focus({ preventScroll: true }); this.focusAfter = null; }
+      });
+    }
+
+    /** Lage eines Blocks in den Spalten: [Spalte, Position] */
+    childLoc(id) {
+      const cols = this.data.columns || [];
+      for (let ci = 0; ci < cols.length; ci++) {
+        const bi = (cols[ci].blocks || []).findIndex(b => b.id === id);
+        if (bi >= 0) return [ci, bi];
       }
-      drawerFor = this;
-      const form = $('[data-drawer-form]', drawer), central = $('[data-drawer-central]', drawer);
-      $('#cms-drawer-title', drawer).textContent = def.label;
-      central.hidden = !def.central;
-      if (def.central) central.innerHTML = `${CMSAdmin.esc(def.central)} <a href="${cfg.endpoints.settings}" target="_blank" rel="noopener">Zentral gepflegt → ${CMSAdmin.esc(cfg.settingsTitle || 'Einstellungen')} ↗</a>`;
-      form.innerHTML = '<p class="adm-muted">Lade Felder …</p>';
-      drawer.hidden = false; d.body.classList.add('has-drawer');
-      $$('.cms-block.is-active').forEach(b => b.classList.remove('is-active'));
-      this.el.classList.add('is-active');
+      return null;
+    }
+
+    async childAction(id, act) {
+      const loc = this.childLoc(id);
+      if (!loc) return;
+      const [ci, bi] = loc, cols = this.data.columns, list = cols[ci].blocks, child = list[bi];
+      const T = CMSAdmin.t, label = cfg.blocks[child.type]?.label || child.type;
       selectBlock(this.el);
-      renderTuneForm(this);
-      if (focusSection) { const s = $('.cms-drawer__section', drawer); s.open = true; s.scrollIntoView(); }
-      const res = await api(cfg.endpoints.form, { type: this.type, data: this.data, entry: cfg.entry });
-      if (drawerFor !== this) return;
-      form.innerHTML = res.html;
-      CMSAdmin.init(form);
-      // Felder nur für bestimmte Varianten (Core\Fields 'variants' → .f-vis[data-variants]) passend zur Auswahl zeigen
-      const byVariant = () => {
-        const v = form.querySelector('[name="f[variant]"]')?.value;
-        if (v != null) $$('[data-variants]', form).forEach(el => { el.hidden = !el.dataset.variants.split(' ').includes(v); });
-      };
-      byVariant();
-      const onChange = () => {
-        byVariant();
-        const fx = this.data._fx, fit = this.data._fit;   // Bildanpassungen und Rahmen stehen nicht im Formular
-        this.data = formToObject(form);
-        if (fx) this.data._fx = fx;
-        if (fit) this.data._fit = fit;
-        markDirty(); drawerTouched(); this.refresh();
-        fxFieldButtons(form, this);
-      };
-      form.oninput = onChange; form.onchange = onChange;
-      fxFieldButtons(form, this);
-      if (!focusSection) $('input:not([type=hidden]),select,textarea,[contenteditable]', form)?.focus({ preventScroll: true });
+      if (act === 'edit') { openDrawer(new ChildRef(this, id)); return; }
+      if (act === 'del') {
+        if (!(await (Bar?.ask || (o => Promise.resolve(confirm(o.title + '\n' + o.body))))({ title: T('Block löschen?'), body: T('„{label}“ wird aus dieser Spalte entfernt. Bis zum Speichern lässt sich das mit „Abbrechen“ rückgängig machen; danach über Versionen.', { label }), ok: T('Löschen'), danger: true }))) return;
+        list.splice(bi, 1);
+        if (drawerFor?.blockId === id) closeDrawer();
+        this.focusAfter = { add: ci };
+      } else if (act === 'up' || act === 'down') {
+        const to = bi + (act === 'up' ? -1 : 1);
+        if (to < 0 || to >= list.length) return;
+        [list[bi], list[to]] = [list[to], list[bi]];
+        this.focusAfter = { id, act };
+      } else if (act === 'left' || act === 'right') {
+        const tc = ci + (act === 'left' ? -1 : 1);
+        if (tc < 0 || tc >= cols.length) return;
+        list.splice(bi, 1);
+        const dest = cols[tc].blocks;
+        dest.splice(Math.min(bi, dest.length), 0, child);
+        this.focusAfter = { id, act };
+      }
+      markDirty();
+      const st = S.ui('[data-editor-status]');
+      if (st) st.textContent = { del: T('„{label}“ gelöscht – noch nicht gespeichert.', { label }), up: T('„{label}“ nach oben verschoben.', { label }),
+        down: T('„{label}“ nach unten verschoben.', { label }), left: T('„{label}“ in die Spalte links verschoben.', { label }), right: T('„{label}“ in die Spalte rechts verschoben.', { label }) }[act] || '';
+      await this.loadPreview();
+    }
+
+    /** Neuer Block in einer Spalte: danach in den ersten Text schreiben bzw. (ohne direkt bearbeitbaren Text) die Felder öffnen */
+    async addChild(ci, type) {
+      const id = Math.random().toString(16).slice(2, 12).padEnd(10, '0');
+      this.data.columns ||= [];
+      while (this.data.columns.length <= ci) this.data.columns.push({ blocks: [] });
+      this.data.columns[ci].blocks.push({ id, type, data: {}, tunes: { section: {} } });
+      markDirty();
+      await this.loadPreview();
+      const item = this.el.querySelector(`[data-lay-id="${CSS.escape(id)}"]`);
+      const first = item && $('[data-edit]', item);
+      item?.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      if (first) first.focus({ preventScroll: true }); else openDrawer(new ChildRef(this, id));
+      const st = S.ui('[data-editor-status]');
+      if (st) st.textContent = CMSAdmin.t('Block „{label}“ in Spalte {n} eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type, n: ci + 1 });
     }
   };
+}
+
+
+// ------------------------------------------------------------------ Seitenleiste „Block“ (Felder eines Blocks oder eines Blocks in einer Spalte)
+/**
+ * Block in einer Spalte eines Layouts – gleiche Schnittstelle wie ein Block-Tool (type, def, data, tuneData, el, refresh,
+ * loadPreview), damit Seitenleiste, Bild anpassen und Bild im Rahmen ihn wie einen eigenen Block behandeln. Die Daten liegen im
+ * Layout (data.columns[s].blocks[n]); gefunden über die Block-ID, damit Verschieben die Verbindung nicht löst.
+ */
+class ChildRef {
+  constructor(parent, id) { this.parent = parent; this.blockId = id; this.isChild = true; }
+  get child() { for (const c of this.parent.data.columns || []) { const b = (c.blocks || []).find(x => x.id === this.blockId); if (b) return b; } return null; }
+  get type() { return this.child?.type || ''; }
+  get def() { return cfg.blocks[this.type] || { label: this.type, fields: [] }; }
+  get data() { return this.child?.data || {}; }
+  set data(v) { const c = this.child; if (c) c.data = v; }
+  get tuneData() { return { anchor: '', visible: true, background: '', ...(this.child?.tunes?.section || {}) }; }
+  setTunes(t) { const c = this.child; if (c) c.tunes = { section: { ...t } }; }
+  get el() { return this.parent.el; }
+  refresh() { this.parent.refresh(); }
+  loadPreview() { return this.parent.loadPreview(); }
+}
+/** Werkzeug (Block oder Block in einer Spalte) zu einem Element der Vorschau */
+function toolFor(node) {
+  const el = node.closest('.cms-block');
+  const tool = [...tools.values()].find(x => x.el === el);
+  const item = node.closest('[data-lay-id]');
+  return tool && item ? new ChildRef(tool, item.dataset.layId) : tool;
+}
+function syncDrawerField(path, value, rich = false) {
+  const name = 'f[' + path.split('.').join('][') + ']';
+  const input = drawer.querySelector(`[name="${CSS.escape(name)}"]`);
+  if (!input) return;
+  input.value = value;
+  const area = rich && input.closest('.rte')?.querySelector('.rte-area');
+  if (area && !area.contains(d.activeElement)) area.innerHTML = value;
+}
+async function openDrawer(tool, focusSection = false) {
+  const def = tool.def;
+  // Stand beim Öffnen merken: „Abbrechen“ in der Seitenleiste setzt nur diesen Block zurück
+  if (drawerSnap?.tool?.blockId !== tool.blockId || drawer.hidden) {
+    drawerSnap = { tool, data: structuredClone(tool.data), tunes: structuredClone(tool.tuneData), dirty, touched: false };
+    drawerButtons();
+  }
+  drawerFor = tool;
+  const form = $('[data-drawer-form]', drawer), central = $('[data-drawer-central]', drawer);
+  $('#cms-drawer-title', drawer).textContent = tool.isChild ? CMSAdmin.t('{label} (in Spalte)', { label: def.label }) : def.label;
+  central.hidden = !def.central;
+  if (def.central) central.innerHTML = `${CMSAdmin.esc(def.central)} <a href="${cfg.endpoints.settings}" target="_blank" rel="noopener">Zentral gepflegt → ${CMSAdmin.esc(cfg.settingsTitle || 'Einstellungen')} ↗</a>`;
+  form.innerHTML = '<p class="adm-muted">Lade Felder …</p>';
+  drawer.hidden = false; d.body.classList.add('has-drawer');
+  $$('.cms-block.is-active').forEach(b => b.classList.remove('is-active'));
+  tool.el.classList.add('is-active');
+  selectBlock(tool.el);
+  renderTuneForm(tool);
+  if (focusSection) { const s = $('.cms-drawer__section', drawer); s.open = true; s.scrollIntoView(); }
+  const res = await api(cfg.endpoints.form, { type: tool.type, data: tool.data, entry: cfg.entry, nested: !!tool.isChild });
+  if (drawerFor !== tool) return;
+  form.innerHTML = res.html;
+  CMSAdmin.init(form);
+  // Felder nur für bestimmte Varianten (Core\Fields 'variants' → .f-vis[data-variants]) passend zur Auswahl zeigen
+  const byVariant = () => {
+    const v = form.querySelector('[name="f[variant]"]')?.value;
+    if (v != null) $$('[data-variants]', form).forEach(el => { el.hidden = !el.dataset.variants.split(' ').includes(v); });
+  };
+  byVariant();
+  const onChange = () => {
+    byVariant();
+    // Nicht im Formular: Bildanpassungen, Rahmen und – beim Layout – die Blöcke der Spalten
+    const keep = Object.fromEntries(['_fx', '_fit', ...(tool.type === LAYOUT ? ['columns'] : [])].filter(k => tool.data[k] !== undefined).map(k => [k, tool.data[k]]));
+    tool.data = { ...formToObject(form), ...keep };
+    markDirty(); drawerTouched(); tool.refresh();
+    fxFieldButtons(form, tool);
+  };
+  form.oninput = onChange; form.onchange = onChange;
+  fxFieldButtons(form, tool);
+  if (!focusSection) $('input:not([type=hidden]),select,textarea,[contenteditable]', form)?.focus({ preventScroll: true });
 }
 
 // ------------------------------------------------------------------ Bild anpassen je Einbindung (Core\ImageFx)
@@ -782,8 +960,7 @@ async function openFx(tool, paths, id) {
 window.CMSEditor = Object.assign(window.CMSEditor || {}, {
   fx: {
     target(img) {
-      const el = img.closest('.cms-block');
-      const tool = [...tools.values()].find(x => x.el === el);
+      const tool = toolFor(img);
       const id = +img.dataset.mediaId;
       const paths = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
       if (!paths.length) return null;
@@ -823,8 +1000,8 @@ async function openFit(tool, paths, id, img) {
 }
 window.CMSEditor.fit = {
   target(img) {
-    const el = img.closest('.cms-block');
-    const tool = [...tools.values()].find(x => x.el === el);
+    const tool = toolFor(img);
+    const el = img.closest('[data-lay-id]') || img.closest('.cms-block');
     const id = +img.dataset.mediaId;
     const all = tool ? mediaPaths(tool.def.fields, tool.data, id) : [];
     // Bild im Rahmen gilt je Feldpfad (Core\ImageFit): Pfad am Bild (data-media-path) oder n-tes Vorkommen im Block
@@ -893,11 +1070,23 @@ function fxFieldButtons(form, tool) {
 // ------------------------------------------------------------------ Abschnitt-Formular in der Seitenleiste
 function renderTuneForm(tool) {
   const f = $('[data-drawer-tunes]', drawer);
-  const t = tool.tuneData, bgs = cfg.backgrounds, E = CMSAdmin.esc;
+  const t = tool.tuneData, bgs = cfg.backgrounds, E = CMSAdmin.esc, T = CMSAdmin.t;
   const opt = (o, v) => Object.entries(o).map(([k, l]) => `<option value="${E(k)}"${k === v ? ' selected' : ''}>${E(l)}</option>`).join('');
   const sp = { normal: 'Normal', small: 'Klein', none: 'Kein' };
-  const rowOpts = { '': CMSAdmin.t('Nein – eigener Abschnitt'), auto: CMSAdmin.t('Ja – Breite automatisch'),
-    ...Object.fromEntries(['1-2', '1-3', '2-3', '1-4', '3-4'].map(k => [k, CMSAdmin.t('Ja – {w} Breite', { w: ROW_LABEL[k] })])) };
+  const slug = v => v.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+  $('.cms-drawer__section>summary', drawer).textContent = tool.isChild ? T('In der Spalte') : T('Abschnitt & Navigation');
+  // Block in einer Spalte: nur eigene Fläche (Karte), Sprungmarke, sichtbar – Abschnitt, Abstände, Navigation gelten fürs Layout
+  if (tool.isChild) {
+    f.innerHTML = `
+      <p class="f-help">${E(T('Hintergrund, Abstände, Navigation und Hintergrundbild gelten für das ganze Layout – dort einstellen.'))}</p>
+      <div class="f f--half"><label for="t-cbg">${E(T('Eigene Fläche (Karte)'))}</label><select id="t-cbg" name="background">${opt({ '': T('Keine – wie das Layout'), ...bgs }, t.background || '')}</select></div>
+      <div class="f f--half"><label for="t-anchor">Sprungmarke (Anker)</label><input id="t-anchor" name="anchor" value="${E(t.anchor || '')}" placeholder="z. B. termine"></div>
+      <div class="f"><label class="f-check"><input type="checkbox" name="visible"${t.visible !== false ? ' checked' : ''}> <span>Sichtbar</span></label></div>`;
+    f.classList.add('adm-fields');
+    CMSAdmin.init(f);
+    f.oninput = f.onchange = () => { tool.setTunes({ background: f.background.value, anchor: slug(f.anchor.value), visible: f.visible.checked }); markDirty(); drawerTouched(); tool.refresh(); };
+    return;
+  }
   const bgImg = tool.el?.querySelector('.sec__bg img'), bgThumb = bgImg && (bgImg.currentSrc || bgImg.src);
   f.innerHTML = `
     <div class="f f--half"><label for="t-bg">Hintergrund</label><select id="t-bg" name="background">${opt(bgs, t.background)}</select></div>
@@ -915,8 +1104,8 @@ function renderTuneForm(tool) {
       <div class="media-field-preview">${t.bgImage ? (bgThumb ? `<img src="${E(bgThumb)}" alt="" width="120">` : '') + '<span>Bild gewählt</span>' : '<span class="media-empty">Kein Bild gewählt</span>'}</div>
       <button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> <button type="button" class="btn btn--small btn--ghost" data-media-clear>Entfernen</button></div></div>
     <div class="f"><label for="t-ov">Bild abdunkeln oder aufhellen</label><select id="t-ov" name="overlay">${opt({ none: 'Nein', dark: 'Abdunkeln (helle Schrift)', light: 'Aufhellen (dunkle Schrift)' }, t.overlay)}</select></div>
-    ${cfg.rows && !tool.def?.raw ? `<div class="f"><label for="t-row">${E(CMSAdmin.t('Neben den vorigen Block stellen'))}</label><select id="t-row" name="row" aria-describedby="t-row-h">${opt(rowOpts, t.row || '')}</select>
-      <p class="f-help" id="t-row-h">${E(CMSAdmin.t('Breite dieses Blocks; der vorige Block bekommt den Rest. Hintergrund, Abstände, Trennlinie und Hintergrundbild kommen vom ersten Block der Reihe – ein anderer Hintergrund macht diesen Block zur Karte. Auf schmalen Bildschirmen stehen die Blöcke untereinander.'))}</p></div>` : ''}
+    ${t.row ? `<div class="f"><input type="hidden" name="row" value="${E(t.row)}"><p class="f-help" id="t-row-h">${E(T('Dieser Block steht noch in einer alten Reihe neben dem vorigen Block. Für Spalten gibt es jetzt den Block „Layout“ – die Umstellung erledigt php bin/console layout:migrate-rows.'))}</p>
+      <button type="button" class="btn btn--small" data-row-clear aria-describedby="t-row-h">${E(T('Aus der Reihe lösen (eigener Abschnitt)'))}</button></div>` : ''}
     ${cfg.glossary ? `<div class="f"><label class="f-check"><input type="checkbox" name="noGlossary"${t.noGlossary ? ' checked' : ''} aria-describedby="t-gl-h"> <span>${E(CMSAdmin.t('Glossar-Begriffe hier nicht markieren'))}</span></label>
       <p class="f-help" id="t-gl-h">${E(CMSAdmin.t('Begriffe aus dem Glossar bekommen in diesem Abschnitt keine Erklärung zum Aufklappen (z. B. in Zitaten oder Werbetexten).'))}</p></div>` : ''}`;
   f.classList.add('adm-fields');
@@ -928,13 +1117,19 @@ function renderTuneForm(tool) {
       visible: f.visible.checked, divider: f.divider.checked, showInNav: f.showInNav.checked,
       navLabel: f.navLabel.value, spaceTop: f.spaceTop.value, spaceBottom: f.spaceBottom.value,
       height: f.height.value, align: f.align.value, bgImage: +f.bgImage.value || null, overlay: f.overlay.value,
-      row: f.row ? f.row.value : (tune?.data?.row || ''),
+      row: f.row ? f.row.value : '',
       noGlossary: f.noGlossary ? f.noGlossary.checked : !!tune?.data?.noGlossary,
     };
     f.align.disabled = data.height !== 'screen';
     if (tune) tune.data = data;
     markDirty(); drawerTouched(); tool.refresh();
   };
+  // Alte Reihe (Tune row) auflösen – die Option selbst gibt es nicht mehr (Block „Layout“)
+  $('[data-row-clear]', f)?.addEventListener('click', () => {
+    const tune = tunes.get(tool.blockId);
+    if (tune) tune.data = { ...tune.data, row: '' };
+    markDirty(); drawerTouched(); tool.refresh(); renderTuneForm(tool);
+  });
 }
 
 function closeDrawer() {
@@ -965,7 +1160,7 @@ drawerClose.addEventListener('click', async () => {
   if (r !== 'discard') return;
   s.tool.data = s.data;
   const tn = tunes.get(s.tool.blockId);
-  if (tn) tn.data = s.tunes;
+  if (s.tool.setTunes) s.tool.setTunes(s.tunes); else if (tn) tn.data = s.tunes;
   s.tool.loadPreview();
   if (!s.dirty) { dirty = false; Bar?.state('clean'); }
   closeDrawer();
@@ -1178,7 +1373,7 @@ compactBtn?.addEventListener('click', () => setCompact(!holder().classList.conta
 setCompact(store.get('cms-compact', false));
 // Alt + ↑/↓ verschiebt den gerade bearbeiteten Block
 d.addEventListener('keydown', e => {
-  if (!e.altKey || !drawerFor || !['ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  if (!e.altKey || !drawerFor?.move || !['ArrowUp', 'ArrowDown'].includes(e.key)) return;
   e.preventDefault();
   drawerFor.move(e.key === 'ArrowUp' ? -1 : 1);
 });

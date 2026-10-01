@@ -78,6 +78,9 @@
  *                                                     Geänderte Seiten übernehmen – nur ohne Konflikt, als Entwurf mit Version
  *   notes:convert [--dry-run]                         Alte Marker („[bitte ergänzen: …]“, „[Platzhalter]“, „NEU (bitte prüfen)“) in Seiten und
  *                                                     Einträgen in Redaktionsnotizen „[# … #]“ umstellen (Version „Notizen umgestellt“)
+ *   layout:migrate-rows [--dry-run]                   Alte Reihen („Neben den vorigen Block stellen“) in Blöcke „Layout“ umwandeln
+ *                                                     (veröffentlicht und Entwurf getrennt, Version „Reihen in Layout umgewandelt“);
+ *                                                     nicht verschachtelbare Blöcke: Reihe aufheben (untereinander) + Meldung; wiederholbar
  *   notes:selftest                                    Selbsttest der Redaktionsnotizen (Entfernen, Hinweis, Umstellung, Suchindex)
  *   pool:backup [key|--all] [--keep=N]                Geteilte Medien-Pools sichern
  *   pool:restore <datei> --force                      Pool-Sicherung einspielen
@@ -991,6 +994,15 @@ switch ($cmd) {
         foreach ($res['fail'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fail']) . " fehlgeschlagen\n";
         exit($res['fail'] ? 1 : 0);
+
+    case 'layout:migrate-rows':
+        // Reihen (Tune row) → Block „Layout“ (Core\Layout::migrateSite); --dry-run zeigt nur, was passieren würde
+        $dry = in_array('--dry-run', $args, true);
+        $res = Core\Layout::migrateSite($dry);
+        foreach ($res['log'] as $l) echo $l, "\n";
+        echo ($dry ? 'Probelauf – nichts geändert. ' : '') . 'Website „' . site()->key . '“: ' . $res['pages'] . ' Seite(n), ' . $res['versions'] . ' Fassung(en), '
+            . $res['layouts'] . ' Layout(s) angelegt, ' . $res['cleared'] . " Reihen-Option(en) entfernt (Blöcke untereinander).\n";
+        exit(0);
 
     case 'notes:convert':
         // Alte Marker → [# … #] (Core\NotesConvert); --dry-run zählt nur

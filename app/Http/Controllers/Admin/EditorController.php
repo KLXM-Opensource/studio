@@ -85,8 +85,11 @@ final class EditorController extends AdminController
         }
         $html = '';
         if (!empty($def['variants'])) {
+            // Block in einer Spalte (Layout): nur die dort erlaubten Varianten (theme.php → 'nestable' => ['box', …])
+            $variants = $def['variants'];
+            if (!empty($r->post['nested']) && is_array($nv = app()->theme->nestableVariants($type))) $variants = array_intersect_key($variants, array_flip($nv));
             $html .= \Core\Fields::renderField(['name' => 'variant', 'label' => 'Variante', 'type' => 'select', 'required' => true,
-                'options' => $def['variants']], $data['variant'] ?? array_key_first($def['variants']), [], 'f');
+                'options' => $variants], isset($variants[$data['variant'] ?? '']) ? $data['variant'] : array_key_first($variants), [], 'f');
         }
         // Detailseiten-Vorlage: Felder lassen sich an den Datensatz binden
         if ($ctx) {

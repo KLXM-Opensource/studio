@@ -419,6 +419,7 @@ return [
             ],
         ],
         'video' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video (breit)', 'icon' => '▶', 'group' => 'Medien',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title_strong', 'description' => 'caption'],
             'variants' => ['16-9' => 'Querformat 16:9', '4-3' => 'Format 4:3'],
@@ -431,6 +432,7 @@ return [
             ],
         ],
         'quote' => [
+            'nestable' => ['inset'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Zitat', 'icon' => '❝', 'group' => 'Inhalt',
             'variants' => ['inset' => 'Eingerückte Fläche (Praxis)', 'full' => 'Vollfläche (B04)'],
             'fields' => [
@@ -440,6 +442,7 @@ return [
             ],
         ],
         'text_columns' => [
+            'nestable' => ['compact'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Überschrift + Text', 'icon' => '☰', 'group' => 'Inhalt',
             'variants' => ['stacked' => 'Überschrift links, Text rechts', 'columns' => 'Überschrift + Spalten (B05)', 'compact' => 'Kleine Überschrift (H3) + Text'],
             'fields' => [
@@ -450,6 +453,7 @@ return [
             ],
         ],
         'richtext' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fließtext', 'icon' => '¶', 'group' => 'Inhalt',
             'help' => 'Für normalen Fließtext mit Editor – z. B. Stellenanzeigen, Erläuterungen, Rechtstexte. Zwischenüberschriften (H2–H4), Listen, Links und Hinweis-Box über „Stil“ in der Formatierungsleiste. Die Überschrift oben ist optional.',
             'fields' => [
@@ -488,8 +492,8 @@ return [
                 ]],
             ],
         ],
-        // Veraltet (seit 01.10.2026): zu speziell – stattdessen „Bild breit“/„Text + Bild“ und „Handlungsaufruf“ als Box daneben
-        // (Abschnitts-Option „Neben den vorigen Block stellen“). Bestehende Blöcke werden weiter dargestellt; nicht mehr einfügbar.
+        // Veraltet (seit 01.10.2026): zu speziell – stattdessen „Bild breit“/„Text + Bild“ und ein „Layout“ (⅔ + ⅓) mit Fließtext und
+        // „Handlungsaufruf“ als Box. Bestehende Blöcke werden weiter dargestellt; nicht mehr einfügbar.
         // Umstellen: php bin/console praxis:migrate-team [--dry-run]
         'team_photo' => [
             'label' => 'Teamfoto + Text (veraltet)', 'icon' => '◉', 'group' => 'Personen', 'insertable' => false,
@@ -536,6 +540,7 @@ return [
             ],
         ],
         'accordion' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Akkordeon / FAQ (B09)', 'icon' => '≡', 'group' => 'Inhalt',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],   // schema.org FAQPage
             'fields' => [
@@ -552,6 +557,7 @@ return [
             ],
         ],
         'notice' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Hinweisbox (B10)', 'icon' => '!', 'group' => 'Inhalt',
             'fields' => [
                 ['name' => 'items', 'label' => 'Hinweise', 'type' => 'repeater', 'item_label' => 'Hinweis', 'max_items' => 3, 'fields' => [
@@ -562,9 +568,10 @@ return [
             ],
         ],
         'cta' => [
+            'nestable' => ['box'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Handlungsaufruf (B11)', 'icon' => '➜', 'group' => 'Inhalt', 'background' => 'dark',
-            // Box: kompakt (kleine Überschrift, Text, Button) – z. B. „Neben den vorigen Block stellen“ (⅓) neben einem Text;
-            // in einer Reihe mit anderem Hintergrund als der Abschnitt wird sie zur farbigen Karte, sonst hell mit Rahmen
+            // Box: kompakt (kleine Überschrift, Text, Button) – z. B. im Block „Layout“ (⅓) neben einem Text; in einer Spalte nur als Box.
+            // Mit eigener Fläche (In der Spalte → Eigene Fläche) bzw. Feld „surface“ farbige Karte, sonst hell mit Rahmen
             'variants' => ['band' => 'Band (ganze Breite)', 'box' => 'Box / Karte (z. B. neben einem Text)'],
             'fields' => [
                 ...$heading,
@@ -581,6 +588,7 @@ return [
             ],
         ],
         'downloads' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads (B12)', 'icon' => '↓', 'group' => 'Medien',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
@@ -599,6 +607,7 @@ return [
             ],
         ],
         'job' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Stellenangebot (B14)', 'icon' => '✦', 'group' => 'Personen',
             'fields' => [
                 ['name' => 'tags', 'label' => 'Schlagworte (mit Komma getrennt)', 'type' => 'text', 'help' => 'Das erste Schlagwort wird farbig hervorgehoben.'],
@@ -619,6 +628,7 @@ return [
             ],
         ],
         'map' => [
+            'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Karte', 'icon' => '⌖', 'group' => 'Praxisdaten',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$headingOptional, ...\Core\Maps::blockFields()],
