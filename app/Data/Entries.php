@@ -121,6 +121,12 @@ final class Entries
             array_push($params, ...array_fill(0, count($cols), '%' . $q . '%'));
         }
         array_push($where, ...self::conditions($table, (array) ($o['where'] ?? []), $params));
+        // Stellenangebote (Core\Data\Jobs): abgelaufene („Gültig bis“ vor heute) erscheinen auf der Website nicht – in Listen, Sitemap,
+        // Suche und API; Ausnahmen: Verwaltung, Abfragen nach IDs, ausdrücklich 'expired' => true
+        if ($status === 'published' && empty($o['expired']) && empty($o['ids']) && Jobs::is($table) && !(app()->request?->isAdminPath() ?? false)
+            && ($sql = Jobs::currentSql($table, $params))) {
+            $where[] = $sql;
+        }
         // Geteilte Tabellen: Quelle (eigene, Eigentümer, Mitglieder, wie eingestellt …), Vorschläge, Auswahl, Herkunft
         if (Tables::isShared($table)) {
             $src = (string) ($o['source'] ?? 'site');

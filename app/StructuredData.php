@@ -19,7 +19,8 @@ use Core\Data\Tables;
  *    oder mit einer Funktion: 'jsonld' => fn(Block $b): ?array => [...].
  *    Kern-Blöcke (Datenliste, Kalender, Nächste Termine) melden ihre Einträge selbst (itemList(), events()).
  *  - Detailseiten: Typ je Datentabelle (Einstellung „Schema.org-Typ“): NewsArticle, Article, BlogPosting, Event,
- *    Person, Product, Service, Place, Organization, CreativeWork – Felder werden über Typ und Namen zugeordnet.
+ *    Person, Product, Service, Place, Organization, CreativeWork – Felder werden über Typ und Namen zugeordnet;
+ *    JobPosting (Stellenangebote) baut Core\Data\Jobs::jsonLd() nach den Vorgaben von Google for Jobs.
  */
 final class StructuredData
 {
@@ -28,6 +29,7 @@ final class StructuredData
         'NewsArticle' => 'Nachricht (NewsArticle)', 'Article' => 'Artikel (Article)', 'BlogPosting' => 'Blogbeitrag (BlogPosting)',
         'Event' => 'Veranstaltung/Termin (Event)', 'Person' => 'Person', 'Product' => 'Produkt (Product)', 'Service' => 'Leistung (Service)',
         'Place' => 'Ort (Place)', 'Organization' => 'Organisation', 'CreativeWork' => 'Sonstiges Werk (CreativeWork)',
+        'JobPosting' => 'Stellenangebot (JobPosting – Google for Jobs)',
     ];
 
     /** Während des Renderns gesammelte Knoten der Blöcke */
@@ -276,6 +278,8 @@ final class StructuredData
             $next = Calendar::occurrences($table, new \DateTimeImmutable('today'), new \DateTimeImmutable('+1 year'), ['ids' => [(int) $e['id']], 'limit' => 1, 'status' => $e['status'] === 'published' ? 'published' : 'all'])[0] ?? null;
             return $next ? self::event($table, $e, $next['start'], $next['end'], (bool) $next['all_day']) : self::event($table, $e, $span['start'], $span['end'], $span['all_day']);
         }
+        // Stellenangebot: eigener Aufbau nach den Vorgaben von Google for Jobs (abgelaufen → keiner)
+        if ($type === 'JobPosting') return Data\Jobs::jsonLd($table, $e, $url);
         $title = Entries::title($table, $e);
         $desc = ($table['settings']['description_field'] ?? '') !== '' ? trim(Entries::text($table, $e, $table['settings']['description_field'])) : '';
         $n = ['@type' => $type, 'name' => $title, 'url' => $url];

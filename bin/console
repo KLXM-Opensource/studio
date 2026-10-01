@@ -92,6 +92,16 @@
  *   data:unshare <handle> [--all-entries]             Freigabe beenden: wieder eigene Tabelle des Eigentümers
  *   data:selftest [--roundtrip]                       Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor
  *                                                     (vorübergehende Tabellen); --roundtrip: nur Rundlauf, ändert nichts
+ *   data:template <vorlage> [--handle=…] [--name="…"] [--slug=adresse] [--form=bewerbungen|new|none] [--with-detail-page]
+ *                 [--with-list-page] [--dry-run]     Tabelle aus Vorlage anlegen bzw. ergänzen (wie „Neue Tabelle aus Vorlage“; wiederholbar):
+ *                                                     blog, team, products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
+ *                                                     „Bewerbungen“, faq, inbox, applications
+ *   jobs:from-page <seite-id|pfad> [--table=…] [--title="…"] [--slug=…] [--employment=vollzeit,teilzeit] [--posted=JJJJ-MM-TT]
+ *                 [--no-redirect] [--no-links] [--dry-run]
+ *                                                     Alte Stellenseite → Eintrag der Stellen-Tabelle; Formular der Seite wird Bewerbungs-
+ *                                                     formular, Links page:ID → Stelle, Seite offline + 301 (wiederholbar)
+ *   jobs:selftest                                     Selbsttest Stellenangebote: Vorlage, JSON-LD (Google-Pflichtangaben), Ablauf, Gehalt,
+ *                                                     Remote, gesperrtes Feld „Stelle“; prüft alle laufenden Stellen der Website
  *   shared:list                                       Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website
  *   inbox:migrate [--all]                             Online-Anfragen → Eingangs-Tabellen (idempotent, sonst automatisch)
  *   inbox:purge [--all]                               Erledigte Anfragen nach Aufbewahrungsfrist löschen (z. B. täglich per Cron)
@@ -827,6 +837,39 @@ switch ($cmd) {
     case 'data:selftest':
         // Core\Data\SchemaPanel: validate(toInput($t)) = $t für alle Tabellen; Seitenleiste „Felder bearbeiten“ mit vorübergehenden Tabellen
         $res = Core\Data\SchemaPanel::selftest(in_array('--roundtrip', $args, true));
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'data:template':
+        // Tabelle aus Vorlage (Core\Data\Templates::install) – vorhandene Tabelle bleibt, fehlende Teile werden ergänzt
+        $preset = (string) ($args[0] ?? '');
+        if ($preset === '' || str_starts_with($preset, '--')) {
+            fwrite(STDERR, "Aufruf: data:template <vorlage> [--handle=…] [--name=\"…\"] [--slug=…] [--form=…] [--with-detail-page] [--with-list-page] [--dry-run]\n"
+                . 'Vorlagen: ' . implode(', ', array_keys(Core\Http\Controllers\Admin\DataController::presets())) . "\n");
+            exit(1);
+        }
+        $o = ['detail' => in_array('--with-detail-page', $args, true), 'list' => in_array('--with-list-page', $args, true)];
+        foreach ($args as $a) if (preg_match('~^--(handle|name|slug|form)=(.*)$~s', $a, $m)) $o[$m[1]] = $m[2];
+        $dry = in_array('--dry-run', $args, true);
+        $res = Core\Data\Templates::install($preset, $o, fn(string $l) => print($l . "\n"), $dry);
+        if ($res['ok'] && !$dry && ($t = $res['table'])) {
+            echo "✓ Fertig: Daten → {$t['name']}" . ($t['settings']['route'] !== '' ? " · Adresse /{$t['settings']['route']}/…" : '') . "\n";
+        }
+        exit($res['ok'] ? 0 : 1);
+
+    case 'jobs:from-page':
+        $ref = (string) ($args[0] ?? '');
+        if ($ref === '' || str_starts_with($ref, '--')) { fwrite(STDERR, "Aufruf: jobs:from-page <seite-id|pfad> [--table=…] [--title=\"…\"] [--slug=…] [--employment=…] [--posted=JJJJ-MM-TT] [--no-redirect] [--no-links] [--dry-run]\n"); exit(1); }
+        $o = ['redirect' => !in_array('--no-redirect', $args, true), 'links' => !in_array('--no-links', $args, true)];
+        foreach ($args as $a) if (preg_match('~^--(table|title|slug|employment|posted)=(.*)$~s', $a, $m)) $o[$m[1]] = $m[2];
+        $dry = in_array('--dry-run', $args, true);
+        $ok = Core\Data\Templates::fromPage($ref, $o, fn(string $l) => print($l . "\n"), $dry);
+        if ($dry && $ok) echo "Dry-run – nichts geändert. Ohne --dry-run ausführen, um zu übernehmen.\n";
+        exit($ok ? 0 : 1);
+
+    case 'jobs:selftest':
+        $res = Core\Data\Jobs::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);

@@ -15,7 +15,7 @@ $chapters = [
     'websites' => ['Mehrere Websites', 1], 'netzwerk' => ['Netzwerk-Administration', 1], 'landingpages' => ['Landingpages mit eigenen Domains', 1], 'weiterleitungen' => ['Weiterleitungen & 404-Protokoll', 1], 'rechte' => ['Rollen, Rechte & Zwei-Faktor', 1],
     'funktionen' => ['Funktionsumfang & Erweiterungen', 1], 'sicherheit' => ['Sicherheit & Datenschutz', 1], 'consent' => ['Cookie-Einwilligung (Erweiterung Consent-Kit)', 1],
     'kits' => ['Kits & Design', 2], 'schriften' => ['Schriften aus Google Fonts (selbst gehostet)', 2], 'editor' => ['Bearbeiten auf der Website', 2], 'felder' => ['Feldtypen', 2], 'bloecke' => ['Eigene Blöcke (Block-Designer)', 2], 'daten' => ['Seitenbaum & Datentabellen', 2],
-    'formulare' => ['Formulare & Eingänge', 2], 'kalender' => ['Kalender, iCal & CalDAV', 2], 'geteilt' => ['Geteilte Datentabellen', 2], 'quellen' => ['Externe Quellen (Feeds, APIs, OpenImmo)', 2],
+    'formulare' => ['Formulare & Eingänge', 2], 'kalender' => ['Kalender, iCal & CalDAV', 2], 'stellen' => ['Stellenangebote & Google for Jobs', 2], 'geteilt' => ['Geteilte Datentabellen', 2], 'quellen' => ['Externe Quellen (Feeds, APIs, OpenImmo)', 2],
     'medien' => ['Medien, Pools & Untertitel', 2], 'sprachen' => ['Sprachen & Übersetzung', 2],
     'suche' => ['Website-Suche', 3], 'ki' => [$aiBrand . ': KI-Dienst & Funktionen', 3], 'ki-chat' => ['KI-Chats: Assistent & Besucher-Chat (SSE)', 3], 'freigabe' => ['Prüf-Ebene „Eingereicht“', 3],
     'api' => ['REST-API', 3], 'mcp' => ['MCP-Server', 3],

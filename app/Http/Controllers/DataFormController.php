@@ -62,11 +62,13 @@ final class DataFormController
     {
         $t = $this->table($table);
         (new FormController())->useLang($r);
-        $result = DataForms::submit($t, $r->post, $r->files, $r->ip());
+        // Bewerbung auf einer Stellenseite: Feld „Stelle“ setzt der Server aus `_job` (Core\Data\Jobs)
+        $post = \Core\Data\Jobs::applyPost($t, $r->post);
+        $result = DataForms::submit($t, $post, $r->files, $r->ip());
         if ($r->wantsJson()) {
             return Response::json(array_diff_key($result, ['id' => 1, 'stored' => 1]), $result['ok'] ? 200 : 422)->header('Cache-Control', 'no-store');
         }
-        $values = array_filter($r->post, fn($k) => !str_starts_with((string) $k, '_') || $k === DataForms::PRIVACY, ARRAY_FILTER_USE_KEY);
+        $values = array_filter($post, fn($k) => !str_starts_with((string) $k, '_') || $k === DataForms::PRIVACY, ARRAY_FILTER_USE_KEY);
         DataForms::$state[$t['handle']] = [
             'values' => $result['ok'] ? [] : $values, 'errors' => $result['errors'] ?? [],
             'message' => $result['ok'] ? null : ($result['message'] ?? null), 'sent' => $result['ok'],

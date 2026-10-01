@@ -224,13 +224,16 @@ final class DataForms
      * Für Erweiterungen (eigenes Formular auf Basis der Tabelle, z. B. Buchungen): action (Adresse statt /formular/{handle}; das Skript
      * holt das Token unter {action}/challenge), prepend (fertiges HTML vor den Feldern, z. B. Terminauswahl; Fehler unter data-cf),
      * hidden ([name => wert]), server_message (true: nach dem Absenden die Meldung des Servers zeigen statt des festen Textes),
-     * fields_legend (Felder als <fieldset class="dff-set"> mit dieser Überschrift, z. B. „Ihre Angaben“ neben einer eigenen Auswahl).
+     * fields_legend (Felder als <fieldset class="dff-set"> mit dieser Überschrift, z. B. „Ihre Angaben“ neben einer eigenen Auswahl),
+     * locked ([feld => wert]: Textfeld vorbelegt und schreibgeschützt, z. B. „Stelle“ im Bewerbungsformular einer Stellenseite –
+     * den endgültigen Wert setzt der Server, siehe Core\Data\Jobs::applyPost).
      */
     public static function render(array $t, array $o = []): string
     {
         $s = $t['settings']['form'];
         $uid = preg_replace('~[^a-z0-9_-]+~i', '-', (string) ($o['uid'] ?? 'dff-' . $t['handle']));
-        $values = (array) ($o['values'] ?? []);
+        $locked = array_map('strval', array_filter((array) ($o['locked'] ?? []), 'is_scalar'));
+        $values = $locked + (array) ($o['values'] ?? []);
         $errors = (array) ($o['errors'] ?? []);
         $fields = self::fields($t);
         $inbox = Inbox::is($t);
@@ -269,7 +272,7 @@ final class DataForms
         foreach ($fields as $f) {
             $h .= $f['type'] === 'group'
                 ? self::group(Entries::groupSchema($f, true) + ['label' => Tables::label($f)] + $f, $uid, $values[$f['name']] ?? null, $errors)
-                : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s, $inbox);
+                : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s, $inbox, isset($locked[$f['name']]));
         }
         $h .= '</div>' . ($legend !== '' ? '</fieldset>' : '');
         // Datenschutz (Pflicht)
@@ -309,7 +312,7 @@ final class DataForms
         return '<script type="module" src="' . e(asset('js/dataform.js')) . '"></script>';
     }
 
-    private static function field(array $f, string $uid, mixed $v, ?string $err, array $s, bool $inbox = false): string
+    private static function field(array $f, string $uid, mixed $v, ?string $err, array $s, bool $inbox = false, bool $locked = false): string
     {
         $n = $f['name'];
         $id = $uid . '-' . $n;
@@ -355,6 +358,14 @@ final class DataForms
             in_array($n, ['ort', 'stadt', 'city'], true) => 'address-level2',
             default => 'off',
         };
+        if ($locked && in_array($type, ['text', 'textarea', 'select'], true)) {
+            // Vorbelegt und schreibgeschützt (lesbar, fokussierbar, wird mitgesendet) – z. B. die Stelle im Bewerbungsformular
+            return '<div class="' . $cls . ' dff-f--locked" data-cf="' . e($n) . '"><label for="' . $id . '">' . $label . '</label>'
+                . (mb_strlen($sv) > 60
+                    ? '<textarea id="' . $id . '" name="' . e($n) . '" rows="' . min(4, (int) ceil(mb_strlen($sv) / 40)) . '" readonly aria-readonly="true" aria-describedby="' . $id . '-e">' . e($sv) . '</textarea>'
+                    : '<input type="text" id="' . $id . '" name="' . e($n) . '" value="' . e($sv) . '" readonly aria-readonly="true" aria-describedby="' . $id . '-e">')
+                . '<p class="dff-err" id="' . $id . '-e" hidden></p></div>';
+        }
         $control = match ($type) {
             'textarea' => '<textarea id="' . $id . '" name="' . e($n) . '" rows="5" maxlength="5000"' . $aria . '>' . e($sv) . '</textarea>',
             'select' => (function () use ($f, $id, $n, $sv, $aria) {

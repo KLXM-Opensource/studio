@@ -6,6 +6,27 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Stellenangebote & Google for Jobs – Vorlage „Stellenangebote“ + Eingang „Bewerbungen“
+- Neue Tabellen-Vorlage **„Stellenangebote“** (Daten → Vorlage, alle Kits): Titel, Kurzbeschreibung, Beschreibung, Veröffentlicht am
+  (heute vorbelegt), Gültig bis, Beschäftigungsart, Beginn, Arbeitsweise (vor Ort/hybrid/remote), Arbeitsort (leer = Adresse der
+  Organisation), Gehalt von/bis/pro, Arbeitgeber, Kennung, Ansprechperson, Bild. Neuer schema.org-Typ `JobPosting`
+  (`Core\Data\Jobs`): genau ein JobPosting je Detailseite nach den Vorgaben von Google (description als HTML, datePosted,
+  validThrough = Tagesende mit Zeitzone, employmentType nach Google-Werten, jobLocation bzw. TELECOMMUTE +
+  applicantLocationRequirements, baseSalary nur mit Angaben, identifier, directApply). Prüfung `Jobs::check()` – Hinweis
+  „Google for Jobs“ im Eintrag.
+- **Abgelaufene Stellen** (Gültig bis < heute): kein JSON-LD, `noindex`, Hinweis „Diese Stelle ist nicht mehr ausgeschrieben“,
+  kein Formular; aus Datenliste, Sitemap, Suche und API ausgeblendet (`Entries::where`, nicht in der Verwaltung).
+- Kern-Blöcke **„Stelle: Eckdaten“** (`job_facts`, Button „Jetzt bewerben“ → `#bewerben`) und **„Stelle: Bewerbung“**
+  (`job_apply`); Stile `css/jobs.css` (Variablen `--job-*`, Kit kann ersetzen). Detailvorlage: Kopf · Eckdaten · Beschreibung ·
+  Bewerbung. Datenliste: Kurzzeile „Vollzeit, Teilzeit · Ort“ bei Stellen; neue Option **„Abschnitt ausblenden, wenn nichts da ist“**.
+- Vorlage **„Bewerbungen“** (Eingang): Stelle, Vorname, Nachname, E-Mail, Telefon, Nachricht, Lebenslauf und weitere Unterlagen
+  (PDF/DOCX/ODT) – Standard „nur per E-Mail“ an die Website-Adresse. Auf Stellenseiten ist „Stelle“ vorbelegt und gesperrt
+  (`DataForms::render` Option `locked`; den Wert setzt der Server aus `_job`), der Betreff der E-Mail nennt die Stelle.
+- Kommandozeile: `data:template <vorlage> [--slug=…] [--form=…] [--with-detail-page] [--with-list-page] [--dry-run]` (alle
+  Vorlagen, wiederholbar), `jobs:from-page <seite>` (alte Stellenseite → Eintrag, Formular verknüpfen, Links umstellen, Seite
+  offline + 301), `jobs:selftest`. Handbuch „Stellenangebote & Google for Jobs“ (Checkliste Search Console, Rich-Results-Test),
+  Entwicklerhandbuch mit Feldzuordnung.
+
 ### Blöcke nebeneinander (Reihen) – Abschnitts-Option „Neben den vorigen Block stellen“
 - Neue Abschnitts-Option `row` (Abschnitt & Navigation): Breite **dieses** Blocks neben dem vorigen – ½, ⅓, ⅔, ¼, ¾ oder
   automatisch; der erste Block bekommt den Rest. Kein verschachtelter Editor, kein „Raster-Block“: Jeder Block bleibt ein

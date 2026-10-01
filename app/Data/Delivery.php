@@ -372,6 +372,11 @@ final class Delivery
         }
         $subject = strtr((string) ($c['subject'] !== '' ? $c['subject'] : self::SUBJECT), $vars);
         $subject = trim((string) preg_replace(['~\{[a-z0-9_]+\}~', '~\s+~'], ['', ' '], $subject));
+        // Bewerbungen (Core\Data\Jobs): die Stelle gehört in den Betreff – ergänzt, wenn der Betreff sie nicht selbst als {feld} nennt
+        if (($jf = Jobs::fieldFor($t)) && !str_contains((string) $c['subject'], '{' . $jf . '}') && is_scalar($values[$jf] ?? null)
+            && ($jv = trim((string) preg_replace('~\s+~', ' ', (string) $values[$jf]))) !== '') {
+            $subject .= ' – ' . mb_strimwidth($jv, 0, 90, '…');
+        }
         if ($test) $subject = '[TEST] ' . $subject;
 
         $meta = [

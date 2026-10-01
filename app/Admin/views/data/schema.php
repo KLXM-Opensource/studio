@@ -133,6 +133,22 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
       <?= $sel('description_field', 'Beschreibung für Suchmaschinen', $fieldOpts(['text', 'textarea', 'richtext'])) ?>
     </section>
 
+    <?php if (($s['schema_type'] ?? '') === \Core\Data\Jobs::TYPE): $jc = (array) ($s['jobs'] ?? []) + \Core\Data\Jobs::DEFAULTS; $inboxes = \Core\Data\Inbox::available() ? \Core\Data\Inbox::tables() : []; ?>
+    <section class="adm-card" id="stellen">
+      <h2><?= e(__('Stellenangebote & Bewerbung')) ?></h2>
+      <p class="f-help"><?= e(__('Diese Tabelle beschreibt Stellen für Google for Jobs (JobPosting). Abgelaufene Stellen („Gültig bis“ vor heute) verschwinden automatisch aus Listen, Sitemap und Google; ihre Seite zeigt „nicht mehr ausgeschrieben“.')) ?></p>
+      <div class="f"><label for="t-jobs-form"><?= e(__('Bewerbungsformular')) ?></label>
+        <select id="t-jobs-form" name="settings[jobs][form]">
+          <option value=""><?= e(__('– kein Formular –')) ?></option>
+          <?php if ($isNew || $jc['form'] === '_new'): ?><option value="_new"<?= $jc['form'] === '_new' ? ' selected' : '' ?>><?= e(Core\Data\Tables::find('bewerbungen') ? __('Eingang „Bewerbungen“ nutzen (Feld „Stelle“ wird ergänzt)') : __('Neuen Eingang „Bewerbungen“ anlegen')) ?></option><?php endif; ?>
+          <?php foreach ($inboxes as $ib): ?><option value="<?= e($ib['handle']) ?>"<?= $jc['form'] === $ib['handle'] ? ' selected' : '' ?>><?= e($ib['name']) ?></option><?php endforeach; ?>
+        </select>
+        <p class="f-help"><?= e(__('Eingang, dessen Formular auf jeder Stellenseite erscheint (Block „Stelle: Bewerbung“). Das Feld „Stelle“ ist dort schon ausgefüllt und gesperrt; der Betreff der E-Mail nennt die Stelle.')) ?></p></div>
+      <input type="hidden" name="settings[jobs][field]" value="<?= e((string) $jc['field']) ?>">
+      <?php foreach ((array) $jc['map'] as $role => $fname): ?><input type="hidden" name="settings[jobs][map][<?= e((string) $role) ?>]" value="<?= e((string) $fname) ?>"><?php endforeach; ?>
+    </section>
+    <?php endif; ?>
+
     <?php if (\Core\Features::on('calendar')): $c = (array) ($s['calendar'] ?? []) + \Core\Data\Calendar::DEFAULTS;
       $calSel = function (string $key, string $label, bool $optional = true, string $help = '') use ($c, $fieldOpts) {
           $h = '<div class="f"><label for="t-cal-' . $key . '">' . e($label) . '</label><select id="t-cal-' . $key . '" name="settings[calendar][' . $key . ']">'

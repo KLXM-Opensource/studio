@@ -392,6 +392,10 @@ final class Tables
         $settings['kind'] = $kind;
         // Website-Suche je Tabelle (Core\Search\TableSearch) – ohne Formularabschnitt bleibt die bisherige Einstellung
         $settings['search'] = \Core\Search\TableSearch::validate((array) ($s['search'] ?? ($existing['settings']['search'] ?? [])), $fields, $settings);
+        // Stellenangebote (schema.org JobPosting, Core\Data\Jobs): Bewerbungs-Eingang und Feld „Stelle“ – nur bei diesem Typ
+        if ($settings['schema_type'] === Jobs::TYPE) {
+            $settings['jobs'] = Jobs::validateSettings((array) ($s['jobs'] ?? []), $fields, $existing['settings']['jobs'] ?? null);
+        }
         if ($inbox) {
             // Eingang: keine Detailseiten, keine strukturierten Daten, kein Kalender, keine Uploads; Einträge nur über das Formular
             $settings = array_merge($settings, ['route' => '', 'image_field' => '', 'description_field' => '', 'schema_type' => '', 'detail_page_id' => null,

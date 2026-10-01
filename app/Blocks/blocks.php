@@ -40,6 +40,8 @@ return [
             ['name' => 'more_label', 'label' => 'Button unter der Liste', 'type' => 'text', 'width' => 'half', 'placeholder' => 'z. B. Alle Beiträge'],
             ['name' => 'more_link', 'label' => 'Button-Link', 'type' => 'link', 'width' => 'half'],
             ['name' => 'empty_text', 'label' => 'Text, wenn nichts da ist', 'type' => 'text', 'default' => 'Zurzeit gibt es hier keine Einträge.'],
+            ['name' => 'hide_empty', 'label' => 'Abschnitt ausblenden, wenn nichts da ist', 'type' => 'bool', 'default' => false,
+                'help' => 'Ohne Einträge erscheint für Besucher gar nichts – z. B. „Offene Stellen“ auf einer allgemeinen Karriereseite.'],
         ],
     ],
     'data_fields' => [
@@ -77,6 +79,31 @@ return [
             ['name' => 'form_align', 'label' => 'Ausrichtung', 'type' => 'select', 'required' => true, 'default' => 'left', 'width' => 'half',
                 'options' => ['left' => 'Linksbündig', 'center' => 'Mittig'],
                 'help' => 'Mittig: Überschrift, Einleitung und Button stehen zentriert (bei „Normal“ auch das Formular selbst).'],
+        ],
+    ],
+    // Stellenangebote (Core\Data\Jobs): nur auf der Detailseiten-Vorlage einer Tabelle mit schema.org-Typ „JobPosting“
+    'job_facts' => [
+        'label' => 'Stelle: Eckdaten', 'icon' => 'briefcase', 'group' => 'Daten',
+        'help' => 'Für die Detailseite eines Stellenangebots: Beschäftigungsart, Arbeitsort, Beginn, Gehalt, Bewerbungsfrist und Ansprechperson auf einen Blick – mit Button „Jetzt bewerben“ zum Formular. Ist die Stelle abgelaufen, steht hier „Diese Stelle ist nicht mehr ausgeschrieben“.',
+        'fields' => [
+            ['name' => 'title', 'label' => 'Überschrift (optional)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'z. B. Auf einen Blick'],
+            ['name' => 'apply_label', 'label' => 'Button zum Formular', 'type' => 'text', 'width' => 'half', 'default' => 'Jetzt bewerben',
+                'help' => 'Springt zum Block „Stelle: Bewerbung“ (Sprungmarke „bewerben“). Leer = kein Button.'],
+        ],
+    ],
+    'job_apply' => [
+        'label' => 'Stelle: Bewerbung', 'icon' => 'envelope-simple', 'group' => 'Daten',
+        'help' => 'Für die Detailseite eines Stellenangebots: das Bewerbungsformular der Tabelle (Felder & Einstellungen → „Bewerbungsformular“). Das Feld „Stelle“ ist ausgefüllt und gesperrt, der Betreff der E-Mail nennt die Stelle. Bei abgelaufenen Stellen erscheint kein Formular.',
+        'fields' => [
+            ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
+            ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'width' => 'half', 'default' => 'Jetzt bewerben'],
+            ['name' => 'intro', 'label' => 'Einleitung (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
+            ['name' => 'submit_label', 'label' => 'Beschriftung des Buttons (optional)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Bewerbung absenden'],
+            ['name' => 'success_text', 'label' => 'Text nach dem Absenden (optional)', 'type' => 'text', 'width' => 'half', 'help' => 'Leer = Text des Eingangs.'],
+            ['name' => 'form_width', 'label' => 'Breite', 'type' => 'select', 'required' => true, 'default' => 'text', 'width' => 'half',
+                'options' => ['text' => 'Textbreite (wie Fließtext)', 'normal' => 'Normal', 'full' => 'Volle Breite']],
+            ['name' => 'form_align', 'label' => 'Ausrichtung', 'type' => 'select', 'required' => true, 'default' => 'left', 'width' => 'half',
+                'options' => ['left' => 'Linksbündig', 'center' => 'Mittig']],
         ],
     ],
     'calendar' => [

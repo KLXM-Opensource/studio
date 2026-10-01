@@ -472,6 +472,8 @@ final class Theme
     {
         if ($types !== null) $types = $this->withUses($types);
         if ($types !== null && Sanitizer::styled()) $types[] = '@rich';
+        // Stelle: Bewerbung (job_apply) ist ein Formular wie „Formular (Datentabelle)“ – gleiche Stile (Kern und Kit)
+        if ($types !== null && in_array('job_apply', $types, true)) $types[] = 'data_form';
         $out = [];
         // Kern-Blöcke: Theme-Stylesheet css/data.css bevorzugt, sonst das neutrale aus dem Kern
         if ($types === null || array_intersect(['data_list', 'data_fields'], $types)) {
@@ -488,6 +490,10 @@ final class Theme
         // Formular (Datentabelle) – Theme kann css/dataform.css mitbringen
         if ($types === null || in_array('data_form', $types, true)) {
             $out[] = $this->coreCss('dataform.css');
+        }
+        // Stellenangebote: Eckdaten + gesperrtes Feld „Stelle“ (Core\Data\Jobs) – Kit kann css/jobs.css mitbringen
+        if ($types === null || array_intersect(['job_facts', 'job_apply'], $types)) {
+            $out[] = $this->coreCss('jobs.css');
         }
         // Kennzahlen mit Skala – Variablen --dial-* aus dem Theme, oder eigene css/dials.css
         if (($types === null || in_array('dials', $types, true)) && !empty($this->blocks['dials']['core'])) {

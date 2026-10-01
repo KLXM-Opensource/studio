@@ -52,7 +52,10 @@ if (!empty($d['sort_dir'])) $o['dir'] = $d['sort_dir'];
 // Geteilte Tabellen: Quelle (leer = wie für die Website eingestellt), hervorgehobene Einträge zuerst
 if (!empty($d['source'])) $o['source'] = (string) $d['source'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
-$rows = Entries::query($t, $o);
+$rows = Entries::query($t, $o);   // Stellenangebote: abgelaufene fehlen schon hier (Core\Data\Jobs, Entries::where)
+// „Abschnitt ausblenden, wenn nichts da ist“: für Besucher keine Ausgabe – die Hülle (partials/section) entfällt dann
+if (!$rows && !empty($d['hide_empty']) && !is_editing()) return;
+$jobs = \Core\Data\Jobs::is($t);
 if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, strip_emphasis((string) ($d['title'] ?? '')));   // schema.org ItemList
 $pages = !empty($d['paginate']) && $limit ? (int) ceil(Entries::count($t, $o) / $limit) : 1;
 $layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table'], true) ? $d['layout'] : 'cards';
@@ -97,7 +100,7 @@ $colLabel = fn(string $f) => match (true) {
       <div class="dl-img ratio-<?= e(str_replace(':', '-', (string) ($d['ratio'] ?? '16:10'))) ?>"><?= $pic ?: '<span class="dl-ph" aria-hidden="true"></span>' ?></div>
       <?php endif; ?>
       <div class="dl-body">
-        <?php $meta = []; foreach ($other as $f) { if (in_array(Tables::field($t, $f)['type'] ?? 'date', ['date', 'datetime', 'select', 'time'], true) || $f === 'published_at') { $h = Entries::html($t, $e, $f); if ($h !== '') $meta[] = $h; } } ?>
+        <?php $meta = $jobs && ($js = \Core\Data\Jobs::summary($t, $e)) !== '' ? [e($js)] : []; foreach ($other as $f) { if (in_array(Tables::field($t, $f)['type'] ?? 'date', ['date', 'datetime', 'select', 'time'], true) || $f === 'published_at') { $h = Entries::html($t, $e, $f); if ($h !== '') $meta[] = $h; } } ?>
         <?php if ($meta): ?><p class="dl-meta"><?= implode('<span aria-hidden="true"> · </span>', $meta) ?></p><?php endif; ?>
         <?php if ($showTitle): ?><<?= $hTag ?> class="dl-name"><?= $url ? '<a href="' . e($url) . '" class="dl-link">' . e($title) . '</a>' : e($title) ?></<?= $hTag ?>><?php endif; ?>
         <?php foreach ($other as $f): $type = Tables::field($t, $f)['type'] ?? 'date'; if (in_array($type, ['date', 'datetime', 'select', 'time'], true)) continue; $html = Entries::html($t, $e, $f, ['link' => false]); if ($html === '') continue; ?>

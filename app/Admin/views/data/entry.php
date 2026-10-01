@@ -75,6 +75,14 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
       </dl>
       <?php endif; ?>
     </section>
+    <?php if (!$isNew && \Core\Data\Jobs::is($t)): $jp = $e['status'] === 'published' ? \Core\Data\Jobs::problems($t, $e) : [__('Entwurf – erst veröffentlicht erscheint die Stelle bei Google.')]; ?>
+    <section class="adm-card">
+      <h2><?= e(__('Google for Jobs')) ?></h2>
+      <?php if (!$jp): ?><p><?= icon('check-circle') ?> <?= e(__('Alle Pflichtangaben vorhanden – die Detailseite liefert ein gültiges JobPosting.')) ?></p>
+      <?php else: ?><ul><?php foreach ($jp as $msg): ?><li><?= e($msg) ?></li><?php endforeach; ?></ul><?php endif; ?>
+      <p class="f-help"><?= e(__('Prüfen: Rich-Suchergebnis-Test von Google mit der Adresse der Stelle. „Gültig bis“ aktuell halten bzw. besetzte Stellen auf Entwurf stellen.')) ?></p>
+    </section>
+    <?php endif; ?>
     <?php if (!$isNew && ($links = Entries::backlinks($t, (int) $e['id']))): ?>
     <section class="adm-card dt-backlinks">
       <h2>Verknüpft mit</h2>

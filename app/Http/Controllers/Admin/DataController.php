@@ -69,10 +69,19 @@ final class DataController extends AdminController
         ], 'title' => '', 'image' => '', 'desc' => ''],
     ];
 
-    /** Vorlagen, die auf dieser Website angeboten werden (Eingang nur mit Funktion „requests“) */
+    /**
+     * Vorlagen, die auf dieser Website angeboten werden (Eingang nur mit Funktion „requests“). Dazu „Stellenangebote“
+     * (Google for Jobs, Core\Data\Jobs) nach „Termine“ und der passende Eingang „Bewerbungen“.
+     */
     public static function presets(): array
     {
-        return array_filter(self::PRESETS, fn($p) => ($p['kind'] ?? 'content') !== 'inbox' || \Core\Data\Inbox::available());
+        $all = [];
+        foreach (self::PRESETS as $k => $p) {
+            $all[$k] = $p;
+            if ($k === 'events') $all['jobs'] = \Core\Data\Jobs::preset();
+        }
+        $all['applications'] = \Core\Data\Jobs::applicationsPreset();
+        return array_filter($all, fn($p) => ($p['kind'] ?? 'content') !== 'inbox' || \Core\Data\Inbox::available());
     }
 
     /** Eingangs-Tabellen haben keine Eintragsverwaltung hier – sie werden unter „Anfragen“ gelesen */
@@ -142,9 +151,12 @@ final class DataController extends AdminController
             'settings' => ['route' => $p['route'] ?? '', 'title_field' => $p['title'] ?? '', 'image_field' => $p['image'] ?? '',
                 'description_field' => $p['desc'] ?? '', 'sort_field' => $p['sort'][0] ?? 'sort', 'sort_dir' => $p['sort'][1] ?? 'asc', 'workflow' => true,
                 'calendar' => \Core\Features::on('calendar') ? ($p['calendar'] ?? []) : [], 'kind' => $p['kind'] ?? 'content']];
+        if (!empty($p['schema_type'])) $def['settings']['schema_type'] = $p['schema_type'];
+        if (isset($p['jobs'])) $def['settings']['jobs'] = $p['jobs'] + \Core\Data\Jobs::DEFAULTS;
         if (($p['kind'] ?? '') === 'inbox') {
-            $def['settings']['form'] = ['enabled' => true] + \Core\Data\DataForms::DEFAULTS;
-            $def['settings']['inbox'] = \Core\Data\Inbox::DEFAULTS;
+            $def['settings']['form'] = ['enabled' => true] + (array) ($p['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
+            $def['settings']['inbox'] = (array) ($p['inbox'] ?? []) + \Core\Data\Inbox::DEFAULTS;
+            if (isset($p['delivery'])) $def['settings']['inbox']['delivery'] = (array) $p['delivery'] + \Core\Data\Delivery::DEFAULTS;
         }
         foreach ($def['fields'] as &$f) {
             $f['name'] = Tables::normName($f['label']);
@@ -162,6 +174,12 @@ final class DataController extends AdminController
         }
         Tables::create($def);
         $t = Tables::find($def['handle']);
+        // Stellenangebote: Bewerbungs-Eingang „Bewerbungen“ anlegen bzw. vorhandenen nutzen (Auswahl „neu anlegen“)
+        if (\Core\Data\Jobs::is($t) && \Core\Data\Jobs::config($t)['form'] === '_new') {
+            $form = \Core\Data\Jobs::ensureForm('bewerbungen');
+            \Core\Data\Jobs::linkForm($t, $form['handle'] ?? '');
+            $t = Tables::find($def['handle']);
+        }
         if (Tables::isInbox($t)) {
             return $this->back('/admin/data/' . $def['handle'] . '/schema', 'success', __('Eingang „{name}“ angelegt. Formular mit dem Block „Formular (Datentabelle)“ auf einer Seite einfügen – eingegangene Anfragen lesen Sie unter „Anfragen“.', ['name' => $def['name']]));
         }
@@ -195,6 +213,10 @@ final class DataController extends AdminController
         [$def, $errors, $askDrop] = self::saveSchema($t, $r->post, $r->str('confirm_drop') === '1');
         if ($errors) {
             return $this->view('data/schema', ['table' => $t, 'def' => $def + ['handle' => $t['handle']], 'errors' => $errors, 'askDrop' => $askDrop], 422);
+        }
+        $t = $this->table($handle);
+        if (\Core\Data\Jobs::is($t) && \Core\Data\Jobs::config($t)['form'] === '_new') {
+            \Core\Data\Jobs::linkForm($t, \Core\Data\Jobs::ensureForm('bewerbungen')['handle'] ?? '');
         }
         $this->changed();
         return $this->back('/admin/data/' . $handle . '/schema', 'success', 'Tabelle gespeichert.');
@@ -270,8 +292,9 @@ final class DataController extends AdminController
         return Response::redirect((string) Entries::url($t, $first) . '?edit=1');
     }
 
-    public function makeTemplate(array $t): int
+    public static function makeTemplate(array $t): int
     {
+        if (\Core\Data\Jobs::is($t)) return \Core\Data\Jobs::makeTemplate($t);   // Stellen: Eckdaten + Bewerbungsformular
         // Kopf: Titel, Datum (erstes Datumsfeld, sonst Veröffentlichung), Auswahlfelder, Bild – darunter die übrigen Felder
         $h = $t['handle'] . '.';
         $st = $t['settings'];
@@ -354,6 +377,8 @@ final class DataController extends AdminController
             $sf = \Core\Data\Calendar::config($t)['start'];
             $values[$sf] = (Tables::field($t, $sf)['type'] ?? '') === 'datetime' ? $r->str('start') . ' 09:00' : $r->str('start');
         }
+        // Stellenangebot: „Veröffentlicht am“ = heute
+        if (\Core\Data\Jobs::is($t) && ($df = \Core\Data\Jobs::f($t, 'date_posted')) !== '') $values[$df] = \Core\Data\Jobs::today();
         return $this->view('data/entry', ['t' => $t, 'e' => null, 'values' => $values, 'errors' => []]);
     }
 
