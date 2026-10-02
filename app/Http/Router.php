@@ -132,7 +132,7 @@ final class Router
         return static function (Request $req, mixed ...$params) use ($handler, $perm, $public, $csrf): mixed {
             $checkCsrf = $csrf && !in_array($req->method, self::SAFE, true);
             if ($public) {
-                if ($checkCsrf && !\Core\Csrf::valid($req)) throw new HttpException(419, __('Sitzung abgelaufen. Bitte Seite neu laden.'));
+                if ($checkCsrf && !\Core\Csrf::valid($req)) throw new HttpException(419, __('Sitzung abgelaufen – bitte Seite neu laden.'));
             } else {
                 AdminController::routeGuard($req, $perm ?? false, $checkCsrf);
             }
