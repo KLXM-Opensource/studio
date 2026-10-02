@@ -311,14 +311,14 @@ final class ImageFit
         $small = imagecreatetruecolor($sw, $sh);
         imagefill($small, 0, 0, imagecolorallocate($small, 255, 255, 255));   // transparente Bilder: auf Weiß
         imagecopyresampled($small, $img, 0, 0, 0, 0, $sw, $sh, $w, $h);
-        imagedestroy($img);
+        unset($img);
         for ($i = 0; $i < 4; $i++) imagefilter($small, IMG_FILTER_GAUSSIAN_BLUR);
         // 2. auf längste Seite 160 px vergrößern (weiche Übergänge) und nochmals weichzeichnen; Rand (Unschärfe-Artefakte) weg
         $bw = max(2, (int) round($sw * 4));
         $bh = max(2, (int) round($sh * 4));
         $big = imagecreatetruecolor($bw, $bh);
         imagecopyresampled($big, $small, 0, 0, 0, 0, $bw, $bh, $sw, $sh);
-        imagedestroy($small);
+        unset($small);
         for ($i = 0; $i < 6; $i++) imagefilter($big, IMG_FILTER_GAUSSIAN_BLUR);
         $cx = (int) round($bw * 0.06);
         $cy = (int) round($bh * 0.06);
@@ -326,8 +326,8 @@ final class ImageFit
         @mkdir(dirname($dest), 0775, true);
         $tmp = $dest . '.' . bin2hex(random_bytes(4)) . '.tmp';
         $ok = $fmt === 'webp' ? @imagewebp($out, $tmp, 70) : @imagejpeg($out, $tmp, 75);
-        if ($out !== $big) imagedestroy($out);
-        imagedestroy($big);
+        if ($out !== $big) unset($out);
+        unset($big);
         if (!$ok || !@rename($tmp, $dest)) {
             @unlink($tmp);
             return false;
@@ -358,7 +358,7 @@ final class ImageFit
             } : false;
             if ($img) {
                 $alpha = self::edgeAlpha($img);
-                imagedestroy($img);
+                unset($img);
                 // Merken – bei geteilten Medien im Pool (Media::find: _pool, _pool_id)
                 $v['alpha'] = $alpha;
                 if (!empty($m['_pool']) && !empty($m['_pool_id'])) {

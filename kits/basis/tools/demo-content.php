@@ -147,7 +147,7 @@ function basis_demo_draw(string $file, array $dark, array $light, string $kind, 
             break;
     }
     imagejpeg($im, $file, 84);
-    imagedestroy($im);
+    unset($im);
 }
 
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */

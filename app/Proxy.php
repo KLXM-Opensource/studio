@@ -328,7 +328,8 @@ final class Proxy
             if ($body === false) return null;
             $status = 0;
             $type = '';
-            foreach ($http_response_header ?? [] as $h) {
+            // PHP 8.5: $http_response_header ist veraltet – Kopfzeilen der letzten Antwort über die Funktion (ab PHP 8.4)
+            foreach (http_get_last_response_headers() ?? [] as $h) {
                 if (preg_match('~^HTTP/\S+\s+(\d{3})~', $h, $m)) $status = (int) $m[1];
                 if (stripos($h, 'content-type:') === 0) $type = trim(substr($h, 13));
                 if (stripos($h, 'content-encoding: gzip') === 0) $body = (string) @gzdecode($body);

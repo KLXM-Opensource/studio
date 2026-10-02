@@ -201,7 +201,7 @@ function fluid_demo_draw(string $file, int $w, int $h, array $dark, array $light
             break;
     }
     imagejpeg($im, $file, 84);
-    imagedestroy($im);
+    unset($im);
 }
 
 /** Monogramm (600 × 600): Kreis-Komposition mit Initialen – Platzhalter statt Porträtfoto */
@@ -219,7 +219,7 @@ function fluid_demo_avatar(string $file, string $initials, array $rgb, string $f
         imagettftext($im, 190, 0, (int) ((600 - $tw) / 2) - $box[0], 385, $ink, $font, $initials);
     }
     imagepng($im, $file, 7);
-    imagedestroy($im);
+    unset($im);
 }
 
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
@@ -790,7 +790,7 @@ function fluid_demo_compare_pair(callable $log): array
             for ($s = 0; $s < 22; $s++) { $nx = $x + mt_rand(-40, 40); $ny = $y + mt_rand(20, 50); imageline($im, $x, $y, $nx, $ny, $crack); [$x, $y] = [$nx, $ny]; }
         }
         imagejpeg($im, $before, 84);
-        imagedestroy($im);
+        unset($im);
     }
     foreach ([[$before, 'showcase-vergleich-vorher.jpg', 'Vergleich (Beispiel): Wand vorher', 'Abstrakte Grafik: graue, fleckige Mauer mit Rissen – Zustand vorher (Beispielbild)'],
               [$after, 'showcase-vergleich-nachher.jpg', 'Vergleich (Beispiel): Wand nachher', 'Abstrakte Grafik: Bögen in Terrakotta und Sand – Zustand nachher (Beispielbild)']] as $k => [$file, $name, $title, $alt]) {

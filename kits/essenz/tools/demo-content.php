@@ -184,8 +184,8 @@ function essenz_demo_comp(string $file, int $w, int $h, string $kind, int $seed)
     $out = imagecreatetruecolor($w, $h);
     imagecopyresampled($out, $im, 0, 0, 0, 0, $w, $h, $W, $H);
     imagejpeg($out, $file, 86);
-    imagedestroy($im);
-    imagedestroy($out);
+    unset($im);
+    unset($out);
 }
 
 /** Abgerundetes Rechteck (gefüllt) */
@@ -278,8 +278,8 @@ function essenz_demo_object(string $file, string $kind): void
     imagefilledrectangle($out, 0, 0, 1200, 900, imagecolorallocatealpha($out, 0, 0, 0, 127));
     imagecopyresampled($out, $im, 0, 0, 0, 0, 1200, 900, $W, $H);
     imagepng($out, $file, 7);
-    imagedestroy($im);
-    imagedestroy($out);
+    unset($im);
+    unset($out);
 }
 
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */

@@ -112,7 +112,7 @@ function frameworks_demo_draw(string $file, int $w, int $h, array $dark, array $
         imagefilledellipse($im, mt_rand(0, $w), mt_rand(0, $h), $r, $r, imagecolorallocatealpha($im, $rgb[0], $rgb[1], $rgb[2], mt_rand(70, 105)));
     }
     imagejpeg($im, $file, 82);
-    imagedestroy($im);
+    unset($im);
 }
 
 // ------------------------------------------------------------------ Datentabellen

@@ -254,7 +254,7 @@ final class SelfTest
         imagefilledrectangle($pic, 0, 0, 44, 159, imagecolorallocate($pic, 200, 40, 40));
         imagefilledrectangle($pic, 45, 0, 89, 159, imagecolorallocate($pic, 30, 90, 200));
         imagejpeg($pic, site()->mediaDir() . '/' . $srcRel, 90);
-        imagedestroy($pic);
+        unset($pic);
         $port = ['id' => 0, 'mime' => 'image/jpeg', 'file' => $srcRel, 'width' => 90, 'height' => 160, 'variants_json' => '{}', 'fit' => 'contain blur', 'alt' => 'x', 'decorative' => 0];
         $blurCls = $f::pictureClass(['mode' => 'contain', 'bg' => 'blur', 'auto' => false], $port);
         preg_match('~url\("([^"]+/fit/(blur-[0-9a-f]{12}\.(?:webp|jpg)))"\)~', $f::css(), $bm);
