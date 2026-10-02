@@ -471,3 +471,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-blockmenu .cms-addpop__item.is-danger{color:#B3261E}
 .cms-blockmenu .cms-addpop__item.is-danger .cms-addpop__ico{color:#B3261E}
 @media (pointer:coarse){.cms-blockmenu .cms-addpop__item{min-height:44px}}
+
+.cms-block__label[draggable=true]{cursor:grab}
+.cms-block__label[draggable=true]:active{cursor:grabbing}
+.cms-block__grip{margin-right:5px;opacity:.7;letter-spacing:-1px}

@@ -6024,4 +6024,5 @@ return [
     'Block gelöscht – noch nicht gespeichert. Wiederherstellen über „Versionen“.' => 'Block deleted – not saved yet. Restore via “Versions”.',
     'Klicken: Block-Menü' => 'Click: block menu',
     'Datensatz' => 'Record',
+    'Block verschoben – noch nicht gespeichert.' => 'Block moved – not saved yet.',
 ];

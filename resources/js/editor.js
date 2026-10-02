@@ -696,7 +696,7 @@ function makeTool(type, def) {
       const barEl = el.firstElementChild;
       const sr = this.bar = S.shadowFor(barEl, `
           <span class="cms-block__swatch" aria-hidden="true"></span>
-          <span class="cms-block__label" title="${CMSAdmin.esc(def.label)}"><span aria-hidden="true">${blockIcon(def)}</span><span class="cms-block__name"> ${CMSAdmin.esc(def.label)}</span></span>
+          <span class="cms-block__label" draggable="true" data-drag title="${CMSAdmin.esc(CMSAdmin.t('Ziehen zum Verschieben'))} – ${CMSAdmin.esc(def.label)}"><span class="cms-block__grip" aria-hidden="true">⠿</span><span aria-hidden="true">${blockIcon(def)}</span><span class="cms-block__name"> ${CMSAdmin.esc(def.label)}</span></span>
           <span class="cms-block__summary"></span>
           <span class="cms-block__flags"></span>
           <span class="cms-block__hint" hidden></span>
@@ -724,6 +724,16 @@ function makeTool(type, def) {
       sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
       sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
       sr.querySelector('[data-blockmenu]').addEventListener('click', e => { e.stopPropagation(); BlockMenu.open(e.currentTarget, this); });
+      // Ziehen am Blocknamen verschiebt den Block (Maus/Trackpad; auf Touch: ↑ ↓ oder Block-Menü)
+      const grip = sr.querySelector('[data-drag]');
+      grip.addEventListener('dragstart', e => {
+        e.stopPropagation();
+        BlockDrag.from = this;
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/x-cms-block', this.blockId); } catch { /* */ }
+        this.el.classList.add('is-dragging');
+      });
+      grip.addEventListener('dragend', () => { this.el.classList.remove('is-dragging'); BlockDrag.clear(); BlockDrag.from = null; });
       sr.querySelector('.cms-block__summary').addEventListener('click', () => this.toggleCollapse(false));
       // Editor.js soll Tasten in der Leiste (Enter/Leertaste auf Knöpfen) nicht als Texteingabe behandeln
       barEl.addEventListener('keydown', e => e.stopPropagation());
@@ -1348,6 +1358,38 @@ holder()?.addEventListener('click', e => {
   if (e.target.closest?.('.codex-editor__redactor') || e.target.classList?.contains('codex-editor')) e.stopPropagation();
 }, true);
 
+// ------------------------------------------------------------------ Blöcke ziehen (Griff am Blocknamen)
+const BlockDrag = {
+  from: null, target: null, after: false,
+  clear() { $$('.ce-block.is-drop-before, .ce-block.is-drop-after', holder()).forEach(b => b.classList.remove('is-drop-before', 'is-drop-after')); this.target = null; },
+};
+holder()?.addEventListener('dragover', e => {
+  if (!BlockDrag.from) return;
+  const b = e.target.closest?.('.ce-block');
+  e.preventDefault(); e.stopPropagation();
+  e.dataTransfer.dropEffect = 'move';
+  if (!b) return;
+  const r = b.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2;
+  if (BlockDrag.target === b && BlockDrag.after === after) return;
+  BlockDrag.clear(); BlockDrag.target = b; BlockDrag.after = after;
+  b.classList.add(after ? 'is-drop-after' : 'is-drop-before');
+}, true);
+holder()?.addEventListener('drop', e => {
+  if (!BlockDrag.from) return;
+  e.preventDefault(); e.stopPropagation();   // Editor.js soll nichts als Text einfügen
+  const els = blockEls(), from = els.indexOf(BlockDrag.from.el.closest('.ce-block')), ti = els.indexOf(BlockDrag.target);
+  const after = BlockDrag.after;
+  BlockDrag.clear();
+  if (from < 0 || ti < 0) return;
+  let to = after ? ti + 1 : ti;
+  if (from < to) to -= 1;
+  if (to === from) return;
+  editor.blocks.move(to, from);
+  markDirty();
+  requestAnimationFrame(refreshMoveButtons);
+  editorStatus(CMSAdmin.t('Block verschoben – noch nicht gespeichert.'));
+}, true);
+
 // ------------------------------------------------------------------ Editor starten
 const toolsCfg = { section: SectionTune };
 for (const [type, def] of Object.entries(cfg.blocks)) toolsCfg[type] = { class: makeTool(type, def) };
@@ -1567,11 +1609,22 @@ const setCompact = on => {
 };
 compactBtn?.addEventListener('click', () => setCompact(!holder().classList.contains('is-compact')));
 setCompact(store.get('cms-compact', false));
-// Alt + ↑/↓ verschiebt den gerade bearbeiteten Block
+// Alt/⌥ + ↑/↓ verschiebt den bearbeiteten Block (Seitenleiste offen) bzw. den Block unter der Maus / mit dem Fokus.
+// In Textfeldern bleibt ⌥+Pfeil die Cursor-Bewegung (macOS), solange keine Seitenleiste offen ist.
 d.addEventListener('keydown', e => {
-  if (!e.altKey || !drawerFor?.move || !['ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  if (!e.altKey || e.metaKey || e.ctrlKey || !['ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  const tgt = e.composedPath()[0];
+  const typing = tgt && (tgt.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName || ''));
+  let t = drawerFor?.move ? drawerFor : null;
+  if (!t) {
+    if (typing) return;
+    const host = tgt?.getRootNode?.()?.host;   // Fokus in der Blockleiste (Shadow DOM)
+    const b = (host || tgt)?.closest?.('.ce-block') || hoveredBlockEl;
+    t = b && tools.get(b.dataset.id);
+  }
+  if (!t) return;
   e.preventDefault();
-  drawerFor.move(e.key === 'ArrowUp' ? -1 : 1);
+  t.move(e.key === 'ArrowUp' ? -1 : 1);
 });
 S.ui('[data-editor-save]')?.addEventListener('click', () => save(false));
 S.ui('[data-editor-discard]')?.addEventListener('click', async () => {

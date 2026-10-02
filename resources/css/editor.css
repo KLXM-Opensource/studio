@@ -278,3 +278,9 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-target-edit.cms-target-edit:hover{background:#fff;color:#1E2840;box-shadow:0 0 0 1.5px #1E2840,0 2px 10px rgba(0,0,0,.22)}
 .cms-target-edit.cms-target-edit:focus-visible{outline:2px solid #1E2840;outline-offset:2px;box-shadow:0 0 0 1px rgba(30,40,64,.28)}
 @media (hover:none) and (max-width:767px){.cms-target-edit.cms-target-edit{width:32px;min-height:32px}}
+
+/* Nur noch eine Blockleiste: Griff/„+“ von Editor.js aus; Ziehen über den Blocknamen (⠿), Ablage-Linie */
+.cms-editor .ce-toolbar__actions{display:none!important}
+.cms-editor .ce-block.is-dragging{opacity:.45}
+.cms-editor .ce-block.is-drop-before{box-shadow:0 -3px 0 #314164}
+.cms-editor .ce-block.is-drop-after{box-shadow:0 3px 0 #314164}

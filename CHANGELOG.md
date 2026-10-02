@@ -7,9 +7,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
-- Eigenes Block-Menü (Stil wie „+ Block einfügen“), geöffnet über „⋯“ in der Blockleiste oder Klick auf den Griff ⠿ (Ziehen bleibt):
-  Nach oben/unten, Duplizieren, Kopieren, Einfügen darunter, Einklappen, Abschnitt & Navigation, Löschen mit Rückfrage. Leiste:
-  Name, ↑ ↓, Bearbeiten, ⋯. Das Menü von Editor.js und dessen zweites „+“ entfallen.
+- Eine Blockleiste je Block: „⠿ Name“ (zum Ziehen, mit Ablage-Linie), ↑ ↓, Bearbeiten, ⋯. Unter „⋯“ ein eigenes Menü (Stil wie
+  „+ Block einfügen“): Nach oben/unten, Duplizieren, Kopieren, Einfügen darunter, Einklappen, Abschnitt & Navigation, Löschen mit
+  Rückfrage. Griff, Menü und „+“ von Editor.js entfallen. Alt/⌥+↑/↓ auch für den Block unter der Maus (vorher nur bei offener
+  Seitenleiste; auf dem Mac in Textfeldern weiter Cursor-Bewegung).
 - Karten außerhalb des Bearbeiten-Modus: Aktion „Ziel bearbeiten“ als kleiner heller Chip mit Datenbank-Symbol „Datensatz“
   bzw. Fenster-Symbol „Seite“ – nicht mehr „Bearbeiten“ wie im Bearbeiten-Modus.
 - Ein Klick unter den letzten Block legt keinen leeren Textblock mehr an (Editor.js-Bottom-Zone abgefangen, freie Fläche 80 px).
