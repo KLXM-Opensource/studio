@@ -2743,6 +2743,7 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
   .pt-twisty{width:32px;height:40px}
   .pt-stbtn,.dt-status.pt-stbtn{min-height:40px}
   .pt-switch{padding:10px 4px;box-sizing:content-box}
+  .pt-switch span{inset:10px 4px}   /* sichtbarer Schalter bleibt klein, nur die Tippfläche wächst */
   .dt-c-check input,.dt-table thead input[type=checkbox]{width:22px;height:22px}
   .dt-view{min-width:40px;min-height:40px;display:inline-grid;place-items:center}
   .fx-upbtn,.fx-seg button{min-height:40px;min-width:40px}
@@ -2777,4 +2778,11 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
    über den Rand). Auf Touch-Geräten daher alle Eingabefelder mit mindestens 16 px. */
 @media (hover:none) and (pointer:coarse){
   input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea,[contenteditable=true]{font-size:max(16px,1em)!important}
+}
+
+/* Seitenbaum schmal: Statusspalte ohne Überlauf – „Entwurf offen“ als oranger Punkt (Text für Screenreader), weitere Kennzeichen aus */
+@media (max-width:600px){
+  .pt-status{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden}
+  .pt-status .pt-draft{flex:none;width:9px;height:9px;min-height:0;padding:0;border-radius:50%;background:var(--adm-warn);font-size:0;color:transparent;overflow:hidden}
+  .pt-status .pt-ext{display:none}
 }

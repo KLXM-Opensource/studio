@@ -19,6 +19,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   leise Zeile, ohne Farbleiste; Passkey-Knopf mit Symbol; „Zur Website“ und KLXM Studio in einer Zeile. Auf dem Handy ohne
   Kartenrahmen, Formular direkt auf dem Farbhimmel. Eingabefelder auf Touch-Geräten mit 16 px (sonst zoomt Safari auf dem
   iPhone beim Antippen in die Seite und das Formular ragt über den Rand).
+- Seitenbaum auf dem Handy: Menü-Schalter wurden durch die größere Tippfläche zu großen Quadraten – sichtbarer Schalter
+  bleibt klein; „Entwurf offen“ als oranger Punkt statt Text (überlagerte sonst Schalter und Menü).
 
 ### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
 - Eine Blockleiste je Block: „⠿ Name“ (zum Ziehen, mit Ablage-Linie), ↑ ↓, Bearbeiten, ⋯. Unter „⋯“ ein eigenes Menü (Stil wie
