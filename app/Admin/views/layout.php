@@ -238,7 +238,7 @@ if ($user && ($req = app()->request)) {
   <?php endforeach; ?>
   <?php // Hinweise zu diesem Projekt für diesen Bereich (Core\Guide, Front Matter „bereich:“) – kleiner Link über dem Inhalt
   $guideT = isset($t) && is_array($t) ? $t : (isset($table) && is_array($table) ? $table : null);
-  if ($user && $section !== 'help' && ($guideHere = \Core\Guide::forArea($section, $guideT['handle'] ?? null))): ?>
+  if ($user && $section !== 'help' && !\Core\Guide::$shownInline && ($guideHere = \Core\Guide::forArea($section, $guideT['handle'] ?? null))): ?>
   <p class="adm-guidehint"><?= icon('lightbulb') ?><span><?= e(count($guideHere) > 1 ? __('Hinweise zum Projekt:') : __('Hinweis zum Projekt:')) ?>
     <?php foreach ($guideHere as $gi => $gn): ?><?= $gi ? ' · ' : '' ?><a href="<?= e(\Core\Guide::url($gn)) ?>"><?= e($gn['title']) ?></a><?php endforeach; ?></span></p>
   <?php endif; ?>

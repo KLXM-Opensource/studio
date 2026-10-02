@@ -35,6 +35,9 @@ final class Guide
     /** Bildformate aus dem guide-Ordner (kein SVG: könnte Skript enthalten) */
     public const IMAGES = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'webp' => 'image/webp', 'gif' => 'image/gif', 'avif' => 'image/avif'];
     /** Bereiche der Verwaltung (Front Matter „bereich“) → Abschnitt der Ansicht (erstes Segment von $view) */
+    /** Eine Ansicht zeigt die Hinweise ihres Bereichs selbst (z. B. in der Hilfe „?“) → keine Leiste über dem Inhalt */
+    public static bool $shownInline = false;
+
     public const AREAS = ['uebersicht' => 'dashboard', 'seiten' => 'pages', 'einstellungen' => 'settings', 'website' => 'settings', 'medien' => 'media',
         'daten' => 'data', 'anfragen' => 'requests', 'design' => 'design', 'bloecke' => 'blocks', 'benutzer' => 'users', 'weiterleitungen' => 'redirects'];
 

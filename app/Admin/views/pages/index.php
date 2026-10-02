@@ -69,6 +69,14 @@ $html = implode('', array_map($row, $tree));
     <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/pages/new' . ($multi ? '?lang=' . $lang : ''))) ?>">+ Neue Seite</a>
     <details class="adm-tip adm-tip--end"><summary class="adm-tip__btn" aria-label="<?= e(__('Hilfe: Seiten ordnen und bearbeiten')) ?>" title="<?= e(__('Hilfe')) ?>">?</summary>
       <div class="adm-tip__body">
+        <?php if ($__guide = \Core\Guide::forArea('pages')): \Core\Guide::$shownInline = true;   // Hinweise zum Projekt (Core\Guide) – vorn, abgesetzt ?>
+        <div class="adm-tip__guide"><?= icon('lightbulb') ?><div>
+          <b><?= e(count($__guide) > 1 ? __('Hinweise zum Projekt') : __('Hinweis zum Projekt')) ?></b>
+          <ul><?php foreach ($__guide as $__gn): $__ex = \Core\Guide::plain($__gn, 140); ?>
+            <li><a href="<?= e(\Core\Guide::url($__gn)) ?>"><?= e($__gn['title']) ?></a><?php if ($__ex !== ''): ?><br><span><?= e($__ex) ?></span><?php endif; ?></li>
+          <?php endforeach; ?></ul>
+        </div></div>
+        <?php endif; ?>
         <ul>
           <li><?= e(__('Auf eine andere Seite ziehen = Unterseite, zwischen zwei Seiten = Reihenfolge, unter die letzte Zeile = ans Ende.')) ?></li>
           <li><?= e(__('Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken).')) ?></li>

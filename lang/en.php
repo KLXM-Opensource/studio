@@ -6000,4 +6000,5 @@ return [
     'Vorschau schließen' => 'Close preview',
     'Seitenvorlagen verwalten' => 'Manage page templates',
     'Zu den Daten' => 'Go to data',
+    'Hinweise zum Projekt' => 'Project notes',
 ];
