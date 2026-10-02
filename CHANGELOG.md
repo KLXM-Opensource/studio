@@ -9,6 +9,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Seitenbaum: Symbole aus der Web-Welt, eckige Schalter
 - Statt Ordner und Dokument: Browserfenster (Seite), gestapelte Fenster (Seite mit Unterseiten, Akzentfarbe), Haus (Startseite),
   gestricheltes Fenster (Sonderseiten/Vorlagen). Farben aus den Tokens der Verwaltung – passen im Dunkelmodus und bei „Kontrast erhöhen“.
+- Eigene Symbole für Seitenvorlagen (gestricheltes Fenster mit Plus; im Menü und als Standard ein Stempel), Detailseiten-Vorlagen
+  (Fenster mit Datenzeilen) und die 404-Seite (Fenster mit Fragezeichen). Seitenbaum: eigene Karte „Seitenvorlagen“ mit „Blöcke
+  bearbeiten“ (nur Administration); Seitenvorlagen erschienen fälschlich unter „Detailseiten-Vorlagen“ (ohne Bearbeiten-Knopf).
 - Schalter (Seitenbaum „Im Menü“, Einstellungen) eckig mit quadratischem Knopf und Akzentfarbe statt iOS-Pille in Grün.
 
 ### Seitenvorlagen für die Redaktion, Blöcke kopieren und duplizieren

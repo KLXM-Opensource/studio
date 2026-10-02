@@ -40,7 +40,7 @@ use Core\PageTemplates;
     <?php if ($templates): ?>
     <ul class="adm-list">
       <?php foreach ($templates as $t): ?>
-      <li><span><?= icon($t['icon'] ?: 'files') ?> <?= e($t['label']) ?></span>
+      <li><span><?= icon($t['icon'] ?: 'stamp') ?> <?= e($t['label']) ?></span>
         <a class="adm-btn adm-btn--small" href="<?= e(PageTemplates::editUrl($t['page'])) ?>"><?= e(__('Blöcke bearbeiten')) ?></a></li>
       <?php endforeach; ?>
     </ul>

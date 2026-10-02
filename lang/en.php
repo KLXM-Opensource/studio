@@ -5981,4 +5981,6 @@ return [
     'Vorlage anlegen – leer oder als Kopie einer Seite – und die Blöcke gestalten. Platzhalter wie „[bitte ergänzen: Preis]“ verhindern, dass eine Seite unfertig online geht.' => 'Create a template – empty or as a copy of a page – and design the blocks. Placeholders like “[bitte ergänzen: Preis]” keep unfinished pages from going online.',
     'Vorlagen, aus denen die Redaktion neue Seiten anlegt – z. B. „Leistung“ oder „Stellenanzeige“. Vorlagen sind keine Seiten der Website: keine Adresse, nicht im Seitenbaum, Menü oder in der Suche; bearbeiten kann sie nur die Administration.' => 'Templates editors use to create new pages – e.g. “Service” or “Job ad”. Templates are not pages of the website: no address, not in the page tree, menu or search; only administrators can edit them.',
     'Vorlagenseite' => 'Template page',
+    'Anordnen und benennen' => 'Arrange and name',
+    'Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.' => 'Starting point for new pages by editors – no address of their own, only administrators can change them.',
 ];

@@ -90,7 +90,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
   <p class="adm-muted"><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Bearbeiten wie jede Seite; solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></p>
   <ul class="adm-list">
     <?php foreach ($nfLangs as $code => $label): $nf = $notFound[$code] ?? null; ?>
-    <li><span><span class="pt-icon pt-icon--tpl" aria-hidden="true"></span> <?= e(__('Nicht gefunden (404)')) ?><?php if ($multi): ?> <span class="adm-badge"><?= e(strtoupper($code)) ?></span><?php endif; ?>
+    <li><span><span class="pt-icon pt-icon--404" aria-hidden="true"></span> <?= e(__('Nicht gefunden (404)')) ?><?php if ($multi): ?> <span class="adm-badge"><?= e(strtoupper($code)) ?></span><?php endif; ?>
       <?php if ($nf): $nfDirty = $nf['content_published'] !== null && \Core\Review\Drafts::pageChanged($nf); ?>
         <small>/<?= e(ltrim(Lang::prefix($code) . '/' . $nf['path'], '/')) ?></small>
         <span class="dt-status dt-status--<?= $nf['status'] === 'published' ? 'published' : 'draft' ?>"><?= e($nf['status'] === 'published' ? __('Online') : __('Entwurf')) ?></span><?= $nfDirty ? ' <span class="pt-draft">' . e(__('Entwurf offen')) . '</span>' : '' ?>
@@ -111,6 +111,19 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
     <?php endforeach; ?>
   </ul>
 </section>
+
+<?php if (!empty($pageTemplates)): ?>
+<section class="adm-card pt-templates" aria-labelledby="pt-pagetpl-h">
+  <h2 id="pt-pagetpl-h"><?= e(__('Seitenvorlagen')) ?></h2>
+  <p class="adm-muted"><?= e(__('Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.')) ?> <a href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Anordnen und benennen')) ?></a></p>
+  <ul class="adm-list">
+    <?php foreach ($pageTemplates as $pt_): ?>
+    <li><span><span class="pt-icon pt-icon--pagetpl" aria-hidden="true"></span> <?= e($pt_['label']) ?></span>
+      <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(\Core\PageTemplates::editUrl($pt_['page'])) ?>"><?= e(__('Blöcke bearbeiten')) ?></a></li>
+    <?php endforeach; ?>
+  </ul>
+</section>
+<?php endif; ?>
 
 <?php if ($templates): ?>
 <section class="adm-card pt-templates">

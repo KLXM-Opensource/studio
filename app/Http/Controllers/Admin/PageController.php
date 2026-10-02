@@ -16,7 +16,9 @@ final class PageController extends AdminController
         $this->auth($r, 'pages.edit');
         $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
         return $this->view('pages/index', ['tree' => Pages::tree(false, $lang), 'lang' => $lang,
-            'templates' => app()->db->fetchAll("SELECT * FROM pages WHERE type = 'template' AND COALESCE(template_for, '') != ? ORDER BY title", [NotFound::MARK]),
+            // Detailseiten-Vorlagen – ohne 404-Seite und Seitenvorlagen (eigene Karten)
+            'templates' => app()->db->fetchAll("SELECT * FROM pages WHERE type = 'template' AND COALESCE(template_for, '') NOT IN (?, ?) ORDER BY title", [NotFound::MARK, \Core\PageTemplates::MARK]),
+            'pageTemplates' => can('system.manage') ? \Core\PageTemplates::all() : [],
             'notFound' => NotFound::all()]);
     }
 
