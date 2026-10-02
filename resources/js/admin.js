@@ -129,8 +129,14 @@ $$('[data-tabs]').forEach(form => {
     }
   }
   // Beim Absenden: ersten Reiter mit Fehler öffnen
+  // … und das erste fehlerhafte Feld zeigen (sonst wirkt es, als sei man nur im falschen Reiter gelandet)
   const errTab = tabs.find(t => $('.adm-dot', t));
-  if (errTab) select(errTab.dataset.tab);
+  if (errTab) {
+    select(errTab.dataset.tab);
+    const panel = d.getElementById(errTab.getAttribute('aria-controls'));
+    const bad = panel && $('[aria-invalid="true"], .f--error input, .f--error select, .f--error textarea, .f--error [contenteditable]', panel);
+    if (bad) requestAnimationFrame(() => { bad.scrollIntoView({ block: 'center' }); bad.focus({ preventScroll: true }); });
+  }
 });
 
 // ------------------------------------------------------------ Repeater
