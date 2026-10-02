@@ -122,6 +122,20 @@ $$('[data-tabs]').forEach(form => {
 
 // ------------------------------------------------------------ Repeater
 let uid = Date.now();
+/**
+ * Neuer Listeneintrag: Die Vorlage enthält feste IDs (z. B. f-f-schritte-i-titel) – jeder hinzugefügte Eintrag bekäme dieselben,
+ * Beschriftungen zeigten aufs erste Feld. IDs im Eintrag eindeutig machen und label[for] / aria-* darin nachziehen.
+ */
+function uniqueIds(el) {
+  const map = {};
+  $$('[id]', el).forEach(x => { const n = x.id + '-n' + (uid++); map[x.id] = n; x.id = n; });
+  if (!Object.keys(map).length) return;
+  $$('label[for]', el).forEach(l => { if (map[l.htmlFor]) l.htmlFor = map[l.htmlFor]; });
+  ['aria-describedby', 'aria-labelledby', 'aria-controls', 'aria-errormessage', 'list'].forEach(a => $$(`[${a}]`, el).forEach(x => {
+    x.setAttribute(a, x.getAttribute(a).split(/\s+/).map(v => map[v] || v).join(' '));
+  }));
+}
+
 function initRepeaters(scope = d) {
   $$('.rep', scope).forEach(rep => {
     if (rep._init) return; rep._init = true;
@@ -134,6 +148,7 @@ function initRepeaters(scope = d) {
         const html = tpl.innerHTML.replaceAll('__i__', 'n' + (uid++));
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
+        uniqueIds(added);
         initRepeaters(added); initRte(added); initMedia(added); initIconPickers(added); initLinkFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
