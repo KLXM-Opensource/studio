@@ -1339,7 +1339,8 @@ function initInlineCrop() {
     // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) und die Leiste des Blocks (editor.js BarPlace)
     // freilassen: links daneben, bei Platzmangel darunter
     const blockBar = target.closest('.cms-block')?.querySelector(':scope>.cms-block__bar');
-    const busy = [...d.querySelectorAll('.cms-entry-pencil'), ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [blockBar] : [])]
+    const busy = [...d.querySelectorAll('.cms-entry-pencil, .cms-target-edit'),   // auch „✎ Bearbeiten“ an Karten/Kacheln (Core\TargetEdit)
+       ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [blockBar] : [])]
       .map(p => p.getBoundingClientRect());
     for (let i = 0; i < 3; i++) {
       const pen = busy.find(p => p.width && p.left < right && p.right > right - bar.offsetWidth && p.top < top + bar.offsetHeight && p.bottom > top);
