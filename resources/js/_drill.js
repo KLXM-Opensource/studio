@@ -56,7 +56,10 @@ export function drill({ panel, title, label = '', back = '', home, box = null, a
   const fav = side.querySelector(':scope > .adm-fav');
   if (fav && 'ResizeObserver' in window) {
     const mark = () => side.style.setProperty('--drill-top', Math.round(fav.offsetTop + fav.offsetHeight + (parseFloat(getComputedStyle(side).rowGap) || 0) / 2) + 'px');
-    new ResizeObserver(mark).observe(fav);
+    // auch alles darüber beobachten (z. B. die aufgeklappte Website-Auswahl im Netzwerk) – sonst blieb die Linie mitten im Menü stehen
+    const ro = new ResizeObserver(mark);
+    for (let el = side.firstElementChild; el; el = el.nextElementSibling) { ro.observe(el); if (el === fav) break; }
+    side.querySelectorAll(':scope > details').forEach(dt => dt.addEventListener('toggle', mark));
     mark();
   }
   // Schmal: Ansichten der aktuellen Tabelle zusätzlich über dem Inhalt (Kopie der Links, ohne Formulare)
