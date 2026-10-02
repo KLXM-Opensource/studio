@@ -1,6 +1,28 @@
 <?php /** Entwicklerhandbuch · Erweiterungen: Verwaltungsseiten nach Art, Werkzeuge der Website, Ereignisse (Core\AdminPages, Core\FrontendTools) */ ?>
   <p class="lead">Erweiterungen (und Funktionen des Cores) erweitern die Verwaltung und das Bearbeiten auf der Website über drei stabile Schnittstellen: <b>Verwaltungsseiten mit Art</b> (wo eine Seite erscheint), <b>Werkzeuge der Website</b> (Knopf in der Werkzeugleiste, Seitenleiste in der Shadow-DOM-Ebene) und <b>Ereignisse</b> in PHP und im Browser. Referenzbeispiel ist das <a href="#glossar">Quick-Glossar</a> – der Core meldet es genau so an wie eine Erweiterung.</p>
 
+  <h3 id="erweiterungen-regeln">Integrationspunkte und Regeln</h3>
+  <p>Erweiterungen dürfen <b>nur über die folgenden Stellen</b> eingreifen. Jede Stelle hat eine Methode im Manifest (<code>Core\Extension</code>), einen festen Datenvertrag, eine Rechteprüfung und einen Selbsttest (<code>extensions:selftest</code>). Was hier nicht steht, gibt es nicht – auch nicht „vorübergehend“. Neue Stellen entstehen nur im Core, mit Doku und Selbsttest, nie als zweiter Weg für etwas, das es schon gibt.</p>
+  <table class="doc-table">
+    <tr><th>Bereich</th><th>Stellen (Manifest)</th><th>Vertrag</th></tr>
+    <tr><td>Lebenszyklus</td><td><code>boot</code>, <code>install</code>, <code>deactivate</code>, <code>requirements</code>, <code>usage</code>, <code>migration()</code>, <code>schema()</code></td><td>Tabellen deklarativ mit <a href="#erweiterungen-schema"><code>Core\Db\Table</code></a> (idempotent), einmalige Datenschritte mit <code>migration()</code>. Eigene Tabellen tragen den Namen der Erweiterung als Präfix.</td></tr>
+    <tr><td>Routen</td><td><code>routes()</code></td><td>Routen unter <code>/admin</code> sind <a href="#erweiterungen-routen">geschützt</a>: Anmeldung, CSRF bei Nicht-GET und ein <b>Recht pro Route</b>. Ausnahmen nur benannt (<code>'csrf' =&gt; false</code>, <code>'public' =&gt; true</code>), sichtbar in <code>extensions:list</code>.</td></tr>
+    <tr><td>Verwaltungsseiten</td><td><code>adminPage()</code> / <code>nav()</code>, <code>permissions()</code>, <code>feature()</code>, <code>adminAssets()</code></td><td>Art <code>content|tool|settings|stats</code> bestimmt den Ort (siehe unten).</td></tr>
+    <tr><td>Slots der Verwaltung</td><td><code>pageList()</code>, <code>pagePanel()</code>, <code>tableActions()</code>, <code>mediaPanel()</code>, <code>dashboard()</code>, <code>account()</code></td><td>Liefern <b>Daten</b>, der Core rendert und escaped (<a href="#erweiterungen-slots">Slots</a>).</td></tr>
+    <tr><td>Website</td><td><code>blocks()</code>, <code>htmlFilter()</code>, <code>csp()</code>, <code>footerLinks()</code>, <code>frontendTool()</code>, <code>toolbar()</code></td><td>CSP nur Hosts (kein <code>'unsafe-inline'</code>), Werkzeuge nur angemeldet.</td></tr>
+    <tr><td>Mediathek</td><td><code>mediaChecks()</code>, <code>mediaJson()</code>, <code>mediaTypes()</code>, <code>mediaPoster()</code> (+ im Browser <code>CMSMedia.extend()</code>)</td><td>siehe Kapitel <a href="#medien">Medien</a>.</td></tr>
+    <tr><td>Ereignisse</td><td><code>on(PageSaved::class, …)</code></td><td><a href="#erweiterungen-hooks">Typisierte Ereignisse</a> (<code>Core\Events\*</code>); die Namen <code>'page.saved'</code> … bleiben als Alias.</td></tr>
+    <tr><td>Betrieb</td><td><code>command()</code>, <code>health()</code>, <code>afterAdminResponse()</code>, <code>proxy()</code>, <code>docs()</code>, <code>inbox()</code></td><td>Fehler einer Erweiterung werden protokolliert und brechen die Anfrage nicht ab.</td></tr>
+  </table>
+  <p><b>Regeln:</b></p>
+  <ul>
+    <li><b>Keine Eingriffe am Core vorbei:</b> keine Core-Dateien ändern oder überschreiben, keine Ausgabe-Puffer auf Verwaltungsseiten, keine eigenen <code>&lt;script&gt;</code> außer über <code>adminAssets()</code>/<code>toolbar()</code>, kein direktes Schreiben in Core-Tabellen (<code>pages</code>, <code>media</code>, <code>settings</code>, Datentabellen) – dafür gibt es <code>Pages</code>, <code>Entries</code>, <code>Media</code>, <code>app()-&gt;settings</code>.</li>
+    <li><b>Escapen macht der Core:</b> Slots geben Beschriftungen, Werte und Pfade zurück, kein HTML. Alte Rückgaben als HTML (<code>pagePanel()</code>, Karten der Übersicht mit <code>render</code>) laufen weiter, gelten aber als Altform.</li>
+    <li><b>Rechte doppelt:</b> Die Angabe <code>perm</code> steuert Sichtbarkeit und Route; Endpunkte, die Daten ändern, prüfen zusätzlich fachlich (z. B. Recht je Tabelle).</li>
+    <li><b>Formatieren mit <code>Core\Format</code></b> (Datum, Zahl, Größe, Dauer …) statt eigener Helfer – siehe <a href="#format">Format</a>.</li>
+    <li><b>Eigene Pakete:</b> Jede Erweiterung lebt in einem eigenen Repository und wird per Composer installiert (Typ <code>klxm-studio-extension</code>); interne Erweiterungen gehören nicht ins öffentliche Core-Repository.</li>
+  </ul>
+
   <h3 id="erweiterungen-seiten">Verwaltungsseiten: Art und Ort (<code>Core\AdminPages</code>)</h3>
   <p>Jede Seite, die eine Funktion oder Erweiterung in der Verwaltung anmeldet, hat eine <b>Art</b>. Die Art bestimmt den Ort – das Backend bleibt aufgeräumt:</p>
   <table class="doc-table">
