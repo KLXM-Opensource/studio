@@ -11,7 +11,7 @@ $nav = array_values(array_filter([
     ['/admin/pages', __('Seiten'), 'pages', $user && can('pages.edit')],
     // Entwürfe (Core\Review\Drafts): offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen
     ['/admin/entwuerfe', __('Entwürfe'), 'drafts', $user && \Core\Review\Drafts::canView()],
-    ['/admin/settings', app()->theme->settingsTitle(), 'settings', $user && can('settings.edit')],
+    // Website-Angaben (/admin/settings) stehen unter „Einrichtung › Website“ (Core\AdminPages::groups)
     ['/admin/media', __('Medien'), 'media', $user && can('media.upload')],
     ['/admin/data', __('Daten'), 'data', (bool) $dataOk],
     // Glossar (Core\Glossary) ist eine Einstellungsseite (Core\AdminPages, kind settings): Sammelseite „Einstellungen“ und an der Tabelle „glossar“
@@ -179,7 +179,7 @@ if ($user && ($req = app()->request)) {
       <?php endforeach; ?>
     </ul>
     <?php if ($adminGroups): // Administration: aufklappbare Gruppen – Zustand je Browser (resources/js/_navgroups.js), offen auf ihren Seiten ?>
-    <p class="adm-side__label" id="adm-admin-h"><?= e(__('Administration')) ?></p>
+    <p class="adm-side__label" id="adm-admin-h"><?= e(__('Einrichtung')) ?></p>
     <ul class="adm-navgrps" aria-labelledby="adm-admin-h">
       <?php foreach ($adminGroups as $g): $gOpen = (bool) array_filter($g['items'], fn($n) => $isCur($n[2], $n[0])); ?>
       <?php if (count($g['items']) === 1): [$href, $label, $key] = $g['items'][0]; $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); ?>

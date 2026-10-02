@@ -8,7 +8,7 @@ namespace Core;
 /**
  * Seitenvorlagen für die Redaktion – eigene Seiten wie die Sonderseiten (type = 'template', template_for = '@page'):
  * keine Adresse für Besucher, nicht im Seitenbaum, Menü, Sitemap, Suche, Entwürfe oder Linkauswahl. Anlegen, gestalten,
- * benennen und anordnen nur mit „system.manage“ (Werkzeuge → Seitenvorlagen, /admin/seitenvorlagen); bearbeitet wird im
+ * benennen und anordnen nur mit „system.manage“ (Einrichtung › Website › Seitenvorlagen, /admin/seitenvorlagen); bearbeitet wird im
  * normalen Block-Editor unter /_seitenvorlage/{id}?edit=1. Die Redaktion wählt beim Anlegen einer Seite „Leere Seite“ oder
  * eine Vorlage (passend zur übergeordneten Seite vorgewählt) und bekommt eine Kopie der Blöcke mit neuen IDs.
  * Reihenfolge, Name, Symbol, Beschreibung und „Vorschlagen unter“ stehen in der Einstellung sys.page_templates

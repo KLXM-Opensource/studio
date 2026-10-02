@@ -1,6 +1,6 @@
 <?php
 /**
- * Werkzeuge → Seitenvorlagen (Core\PageTemplates) – nur Administration.
+ * Einrichtung › Website › Seitenvorlagen (Core\PageTemplates) – nur Administration.
  * @var array $fields  @var array $values  @var array $errors  @var array $templates
  */
 use Core\Fields;

@@ -156,29 +156,34 @@ final class AdminPages
     }
 
     /**
-     * Gruppen des Abschnitts „Administration“ der Seitenleiste (und Gliederung der Sammelseite): „Einstellungen“ und „Werkzeuge“,
+     * Gruppen des Abschnitts „Einrichtung“ der Seitenleiste: „Website“, „System“ und „Werkzeuge“,
      * je [key, label, icon, items => [[href, label, key (Symbol/Menü-Schlüssel), true], …]] – nur sichtbare Punkte, keine leeren Gruppen.
      * Werkzeuge: feste Seiten des Cores + alle Seiten mit Platz 'admin' (nav('admin'), v. a. kind tool der Erweiterungen).
      */
     public static function groups(): array
     {
         $groups = [
-            ['key' => 'einstellungen', 'label' => __('Einstellungen'), 'icon' => 'gear', 'items' => [
+            // Website: alles, was Auftritt und Aufbau der Website betrifft – Angaben, Gestaltung, Vorlagen, Bausteine, Adressen
+            ['key' => 'website', 'label' => __('Website'), 'icon' => 'globe', 'items' => [
+                ['/admin/settings', app()->theme->settingsTitle(), 'settings', can('settings.edit')],
+                ['/admin/design', __('Design'), 'design', Features::on('design') && can('design.edit')],
+                ['/admin/seitenvorlagen', __('Seitenvorlagen'), 'pagetemplates', can('system.manage')],
+                // Block-Designer (Core\Blocks\Custom), Landingpages (Core\Landings), Weiterleitungen und 404-Protokoll (Core\Redirects)
+                ['/admin/blocks', __('Blöcke'), 'blocks', Features::on('blocks.custom') && can('blocks.build')],
+                ['/admin/landingpages', __('Landingpages'), 'landings', Features::on('landings') && can('system.manage')],
+                ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', Features::on('redirects') && can('redirects.manage')],
+            ]],
+            // System: Betrieb der Installation – Grundeinstellungen, Funktionen, Personen
+            ['key' => 'einstellungen', 'label' => __('System'), 'icon' => 'gear', 'items' => [
                 ['/admin/system', __('Grundeinstellungen'), 'system', can('system.manage')],
                 // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
                 ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', Features::canView()],
                 // Sammelseite (kind settings): Einstellungen der Funktionen & Erweiterungen – nur wenn es etwas zu zeigen gibt
                 [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
                 ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
-                ['/admin/design', __('Design'), 'design', Features::on('design') && can('design.edit')],
             ]],
+            // Werkzeuge: Auswertungen und Werkzeuge von Funktionen/Erweiterungen (nav('admin'), v. a. kind tool)
             ['key' => 'werkzeuge', 'label' => __('Werkzeuge'), 'icon' => 'tools', 'items' => [
-                // Block-Designer (Core\Blocks\Custom), Landingpages (Core\Landings), Weiterleitungen und 404-Protokoll (Core\Redirects)
-                ['/admin/blocks', __('Blöcke'), 'blocks', Features::on('blocks.custom') && can('blocks.build')],
-                ['/admin/seitenvorlagen', __('Seitenvorlagen'), 'pagetemplates', can('system.manage')],
-                ['/admin/landingpages', __('Landingpages'), 'landings', Features::on('landings') && can('system.manage')],
-                ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', Features::on('redirects') && can('redirects.manage')],
-                // Sammelseite Statistiken (kind stats)
                 [self::STATS, __('Statistiken'), 'stats', self::hasStats()],
                 ...self::nav('admin'),
             ]],

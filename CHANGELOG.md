@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
+- Alle Block-Aktionen im Menü am Griff ⋮⋮ (Bearbeiten, Abschnitt & Navigation, Duplizieren, Kopieren, Einklappen, Nach oben/unten,
+  Löschen); am Block bleiben Name und „Bearbeiten“. Das zweite „+“ von Editor.js entfällt („+ Block einfügen“ genügt).
+- Ein Klick unter den letzten Block legt keinen leeren Textblock mehr an (Editor.js-Bottom-Zone abgefangen, freie Fläche 80 px).
+- Seitenleiste: Inhalte oben; neuer Abschnitt „Einrichtung“ mit „Website“ (Website-Angaben, Design, Seitenvorlagen, Blöcke,
+  Landingpages, Weiterleitungen), „System“ (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen,
+  Benutzer & Rollen) und „Werkzeuge“ (Statistiken, Werkzeuge der Erweiterungen).
+
 ### Verwaltung: Usability-Durchgang Desktop, Tablet, Mobil
 - Seitenbaum: Spalten überlappten unter 900 px (Regel ohne Media-Query) – behoben, feste Status-Spalte, mobil nur Statuspunkt,
   kein eigener Scrollbereich mehr; Vorschau-Seitenleiste verkleinert den Inhalt statt ihn zu überdecken.

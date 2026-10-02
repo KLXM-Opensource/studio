@@ -12,7 +12,7 @@ use Core\Http\Response;
 use Core\Pages;
 use Core\PageTemplates;
 
-/** Werkzeuge → Seitenvorlagen: Vorlagen anlegen, gestalten, anordnen (Core\PageTemplates) – nur Administration. */
+/** Einrichtung › Website › Seitenvorlagen: Vorlagen anlegen, gestalten, anordnen (Core\PageTemplates) – nur Administration. */
 final class PageTemplateController extends AdminController
 {
     public function index(Request $r, array $errors = [], ?array $values = null): Response
@@ -41,7 +41,7 @@ final class PageTemplateController extends AdminController
         $this->auth($r, 'system.manage');
         $from = (int) ($r->post['from'] ?? 0);
         $id = PageTemplates::create((string) ($r->post['label'] ?? ''), $from > 0 ? $from : null);
-        app()->session->flash('success', __('Vorlage angelegt. Gestalten Sie jetzt die Blöcke – Name, Symbol und Reihenfolge unter Werkzeuge → Seitenvorlagen.'));
+        app()->session->flash('success', __('Vorlage angelegt. Gestalten Sie jetzt die Blöcke – Name, Symbol und Reihenfolge unter Einrichtung › Website › Seitenvorlagen.'));
         return Response::redirect(PageTemplates::editUrl($id));
     }
 
