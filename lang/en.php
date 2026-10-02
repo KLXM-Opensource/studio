@@ -6053,4 +6053,6 @@ return [
     'übliche Adresse' => 'common address',
     'Unter dieser Adresse melden Sie sich an. Standard ist /admin. Optional eine eigene Adresse: Sie hält automatische Login-Scanner fern – ersetzt aber keine starken Passwörter und keinen zweiten Faktor.' => 'This is where you sign in. The default is /admin. Optionally use your own address: it keeps automated login scanners away – but does not replace strong passwords or a second factor.',
     'eigene Adresse' => 'own address',
+    'Adresse der Verwaltung ändern' => 'Change the admin address',
+    'Die Anmeldung liegt noch unter /admin – dort suchen automatische Login-Scanner zuerst. Eine eigene Adresse hält sie fern.' => 'Sign-in is still at /admin – the first place automated login scanners look. Your own address keeps them away.',
 ];

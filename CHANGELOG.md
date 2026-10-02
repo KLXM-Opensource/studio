@@ -13,7 +13,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   verwaltung …) sind gesperrt. Intern bleibt alles `/admin` – Routen, Rechte und Erweiterungen unverändert, `url('/admin/…')`
   liefert die eigene Adresse. `/admin` direkt: ohne Anmeldung „Seite nicht gefunden“ (kein Cookie), angemeldet weiter erreichbar;
   Netzwerk-SSO und öffentliche Routen von Erweiterungen bleiben erreichbar, Netzwerk-Links nutzen die Adresse der Ziel-Website.
-  Standard bleibt `/admin`; `health` und `setup:token` zeigen die aktuelle Adresse, Selbsttest `adminpath:selftest`.
+  Standard bleibt `/admin`, die Übersicht zeigt dann die Aufgabe „Adresse der Verwaltung ändern“ (nur wer sie ändern darf);
+  `health` und `setup:token` zeigen die aktuelle Adresse, Selbsttest `adminpath:selftest`.
 - Anmeldung (alle Bildschirme vor der Anmeldung): eine linksbündige Spalte – App-Icon neben Name und „Verwaltung“, Gruß als
   leise Zeile, ohne Farbleiste; Passkey-Knopf mit Symbol; „Zur Website“ und KLXM Studio in einer Zeile. Auf dem Handy ohne
   Kartenrahmen, Formular direkt auf dem Farbhimmel.
