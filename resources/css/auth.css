@@ -67,7 +67,7 @@ html[data-theme=dark] .auth-screen,.auth--night{--auth-bg:linear-gradient(170deg
   padding:max(28px,env(safe-area-inset-top)) 0 max(28px,env(safe-area-inset-bottom))}
 body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-height:calc(100dvh - 26px)}   /* Streifen „Testumgebung“ */
 .auth-screen .adm-main>.adm-flash{width:calc(100% - 40px);max-width:400px;margin:0 auto 12px}
-.auth-screen .adm-auth{width:100%;max-width:432px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr auto;align-items:center}
+.auth-screen .adm-auth{width:100%;max-width:432px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .auth-screen .adm-auth>*{grid-column:1/-1;min-width:0}
 .auth-screen .adm-auth.inv-auth{max-width:512px}
 
@@ -105,7 +105,7 @@ body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-heigh
 /* Passkey: leiser Umriss – „Anmelden“ bleibt der Hauptknopf */
 .auth-screen [data-pk-login-btn]{background:transparent;border:1px solid color-mix(in srgb,var(--adm-ink) 22%,transparent);box-shadow:none}
 .auth-screen [data-pk-login-btn]:hover{border-color:color-mix(in srgb,var(--adm-ink) 45%,transparent)}
-.auth-screen .adm-auth input{min-height:48px}
+.auth-screen .adm-auth input{min-height:48px;font-size:16px}
 .auth-screen .adm-auth input:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
 
 /* Unter der Karte eine Zeile: links „Zur Website“, rechts KLXM Studio – Text auf dem Himmel immer in --adm-ink (Kontrast) */

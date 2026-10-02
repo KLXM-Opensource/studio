@@ -17,7 +17,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   `health` und `setup:token` zeigen die aktuelle Adresse, Selbsttest `adminpath:selftest`.
 - Anmeldung (alle Bildschirme vor der Anmeldung): eine linksbündige Spalte – App-Icon neben Name und „Verwaltung“, Gruß als
   leise Zeile, ohne Farbleiste; Passkey-Knopf mit Symbol; „Zur Website“ und KLXM Studio in einer Zeile. Auf dem Handy ohne
-  Kartenrahmen, Formular direkt auf dem Farbhimmel.
+  Kartenrahmen, Formular direkt auf dem Farbhimmel. Eingabefelder auf Touch-Geräten mit 16 px (sonst zoomt Safari auf dem
+  iPhone beim Antippen in die Seite und das Formular ragt über den Rand).
 
 ### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
 - Eine Blockleiste je Block: „⠿ Name“ (zum Ziehen, mit Ablage-Linie), ↑ ↓, Bearbeiten, ⋯. Unter „⋯“ ein eigenes Menü (Stil wie

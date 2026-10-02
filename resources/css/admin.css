@@ -2772,3 +2772,9 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
 .ap-input input{flex:1;min-width:0;padding-left:4px!important;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .ap-input:focus-within{border-color:var(--adm-a)}
 .ap-hint code{white-space:nowrap}
+
+/* iPhone/iPad: Safari zoomt beim Antippen von Feldern mit weniger als 16 px Schrift in die Seite (Anmeldung ragte danach
+   über den Rand). Auf Touch-Geräten daher alle Eingabefelder mit mindestens 16 px. */
+@media (hover:none) and (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea,[contenteditable=true]{font-size:max(16px,1em)!important}
+}
