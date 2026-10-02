@@ -95,7 +95,10 @@ final class Entries
         $where = [];
         $params = [];
         // Sprache: Standard = aktuelle Sprache (nur wenn mehrere Sprachen aktiv sind); 'all' = alle
-        $lang = $o['lang'] ?? (!empty($o['ids']) || !\Core\Lang::multi() ? 'all' : \Core\Lang::current());
+        // Einsprachige Website mit geteilter Tabelle: nur Einträge der Standardsprache – sonst erschienen z. B. die englischen
+        // Glossar-Begriffe einer mehrsprachigen Partner-Website auf einer rein deutschen Website (eigene Tabellen haben ohnehin nur sie)
+        $default = !empty($o['ids']) ? 'all' : (!\Core\Lang::multi() ? (isset($table['shared']) ? \Core\Lang::default() : 'all') : \Core\Lang::current());
+        $lang = $o['lang'] ?? $default;
         if ($lang !== 'all') {
             $where[] = \Core\Lang::sql();
             $params[] = \Core\Lang::norm($lang);
