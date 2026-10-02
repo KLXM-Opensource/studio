@@ -20,7 +20,7 @@ spl_autoload_register(function (string $class): void {
 
 if (!function_exists('consent_settings_link')) {
     /**
-     * Link „Cookie-Einstellungen“ zum erneuten Öffnen der Auswahl – z. B. im Fußbereich eines eigenen Themes.
+     * Link „Cookie-Einstellungen“ zum erneuten Öffnen der Auswahl – z. B. im Fußbereich eines eigenen Kits.
      * Liefert '' solange auf dieser Website kein einwilligungspflichtiger Dienst aktiv ist (dann gibt es nichts einzustellen).
      */
     function consent_settings_link(string $label = '', string $class = ''): string
@@ -51,24 +51,26 @@ if (!function_exists('consent_has')) {
 return [
     'name' => 'consent_kit',
     'label' => 'Consent-Kit (Cookie-Einwilligung)',
-    'version' => '1.0.1',
+    'version' => '1.1.0',
     'requires' => '>=1.0.0',
     'description' => 'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).',
     'author' => 'KLXM Crossmedia GmbH and contributors',
     'license' => 'MIT',
-    'provides' => ['Menüpunkt „Cookie-Einwilligung“', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Cookie-Einstellungen“ im Fußbereich'],
+    'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Cookie-Einstellungen“ im Fußbereich'],
     'docs' => ['Technik: Consent-Kit' => '/admin/hilfe/technik#consent'],
     'boot' => function (Core\Extension $x): void {
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
         $x->permissions('Cookie-Einwilligung', ['consent.manage' => 'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten']);
         $x->migration(1, fn(Core\Database $db) => MyCms\Consent\Repository::migrate($db));
-        $x->nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 'admin');
+        // Reine Konfiguration → Sammelseite Administration → Einstellungen (Core\AdminPages)
+        $x->adminPage(['href' => '/admin/consent', 'label' => 'Cookie-Einwilligung', 'kind' => 'settings', 'icon' => 'cookie',
+            'perm' => 'consent.manage', 'feature' => 'consent', 'description' => 'Dienste, Texte und Darstellung des Cookie-Hinweises, Protokoll']);
 
         // Website: Konfiguration + Skript nur auf Websites mit aktivem, einwilligungspflichtigem Dienst
         $x->htmlFilter(fn(string $html, array $ctx) => MyCms\Consent\Consent::filterHtml($html, $ctx));
         // CSP: Hosts eines Dienstes erst nach Einwilligung (Cookie dieser Anfrage); iframe-Hosts aktiver Dienste für den Platzhalter
         $x->csp(fn() => MyCms\Consent\Consent::cspSources());
-        // „Cookie-Einstellungen“ in der Rechtliches-Zeile der Theme-Fußbereiche (footer_links())
+        // „Cookie-Einstellungen“ in der Rechtliches-Zeile der Fußbereiche der Kits (footer_links())
         $x->footerLinks(fn() => MyCms\Consent\Consent::footerLinks());
 
         // Block „Externer Inhalt (mit Einwilligung)“: Karten-, Social-Media- und Audio-Einbettungen als 2-Klick-Platzhalter
@@ -81,31 +83,32 @@ return [
             $r->get('/consent/style.css', [MyCms\Consent\PublicController::class, 'style']);
             // Verwaltung
             $c = MyCms\Consent\AdminController::class;
-            $r->get('/admin/consent', [$c, 'index']);
-            $r->post('/admin/consent/services/toggle', [$c, 'toggle']);
-            $r->post('/admin/consent/services/domains', [$c, 'domains']);
-            $r->post('/admin/consent/services/move', [$c, 'move']);
-            $r->get('/admin/consent/templates', [$c, 'templates']);
-            $r->get('/admin/consent/service/new', [$c, 'create']);
-            $r->get('/admin/consent/service/{id}', [$c, 'edit']);
-            $r->post('/admin/consent/service/{id}', [$c, 'save']);
-            $r->post('/admin/consent/service/{id}/delete', [$c, 'delete']);
-            $r->post('/admin/consent/service/{id}/reset', [$c, 'reset']);
-            $r->get('/admin/consent/service/{id}/export', [$c, 'exportOne']);
-            $r->get('/admin/consent/settings', [$c, 'settings']);
-            $r->post('/admin/consent/settings', [$c, 'saveSettings']);
-            $r->post('/admin/consent/reask', [$c, 'reask']);
-            $r->get('/admin/consent/design', [$c, 'design']);
-            $r->post('/admin/consent/design', [$c, 'saveDesign']);
-            $r->get('/admin/consent/log', [$c, 'log']);
-            $r->get('/admin/consent/log.csv', [$c, 'logCsv']);
-            $r->post('/admin/consent/log/purge', [$c, 'purge']);
-            $r->get('/admin/consent/revision/{id}', [$c, 'revision']);
-            $r->get('/admin/consent/io', [$c, 'io']);
-            $r->post('/admin/consent/io/import', [$c, 'import']);
-            $r->post('/admin/consent/io/export', [$c, 'export']);
-            $r->get('/admin/consent/io/file/{name}', [$c, 'downloadTemplate']);
-            $r->post('/admin/consent/io/file/{name}/delete', [$c, 'deleteTemplate']);
+            $p = 'consent.manage';   // Recht an jeder Route (Core\Http\Router prüft Anmeldung, Recht, CSRF)
+            $r->get('/admin/consent', [$c, 'index'], $p);
+            $r->post('/admin/consent/services/toggle', [$c, 'toggle'], $p);
+            $r->post('/admin/consent/services/domains', [$c, 'domains'], $p);
+            $r->post('/admin/consent/services/move', [$c, 'move'], $p);
+            $r->get('/admin/consent/templates', [$c, 'templates'], $p);
+            $r->get('/admin/consent/service/new', [$c, 'create'], $p);
+            $r->get('/admin/consent/service/{id}', [$c, 'edit'], $p);
+            $r->post('/admin/consent/service/{id}', [$c, 'save'], $p);
+            $r->post('/admin/consent/service/{id}/delete', [$c, 'delete'], $p);
+            $r->post('/admin/consent/service/{id}/reset', [$c, 'reset'], $p);
+            $r->get('/admin/consent/service/{id}/export', [$c, 'exportOne'], $p);
+            $r->get('/admin/consent/settings', [$c, 'settings'], $p);
+            $r->post('/admin/consent/settings', [$c, 'saveSettings'], $p);
+            $r->post('/admin/consent/reask', [$c, 'reask'], $p);
+            $r->get('/admin/consent/design', [$c, 'design'], $p);
+            $r->post('/admin/consent/design', [$c, 'saveDesign'], $p);
+            $r->get('/admin/consent/log', [$c, 'log'], $p);
+            $r->get('/admin/consent/log.csv', [$c, 'logCsv'], $p);
+            $r->post('/admin/consent/log/purge', [$c, 'purge'], $p);
+            $r->get('/admin/consent/revision/{id}', [$c, 'revision'], $p);
+            $r->get('/admin/consent/io', [$c, 'io'], $p);
+            $r->post('/admin/consent/io/import', [$c, 'import'], $p);
+            $r->post('/admin/consent/io/export', [$c, 'export'], $p);
+            $r->get('/admin/consent/io/file/{name}', [$c, 'downloadTemplate'], $p);
+            $r->post('/admin/consent/io/file/{name}/delete', [$c, 'deleteTemplate'], $p);
         });
 
         $x->command('consent:purge', 'Consent-Kit: Protokoll nach Aufbewahrungsfrist bereinigen [--days=N] (Standard: Einstellung, 1095 Tage; 0 = nie)', function (array $args): int {

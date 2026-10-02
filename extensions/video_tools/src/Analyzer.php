@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Klxm\VideoTools;
 
+use Core\Format;
+
 /**
  * Bewertung eines Videos für die Auslieferung im Web: Punktzahl 0–100 und konkrete Empfehlungen (mit passendem Preset).
  * „Optimiert“ = faststart und mindestens 80 Punkte.
@@ -87,7 +89,7 @@ final class Analyzer
             }
         }
         if (($v['fps'] ?? 0) > 31) {
-            $add('info', 'fps', __('{fps} Bilder/s – für die meisten Inhalte genügen 25–30 (halbe Dateigröße).', ['fps' => rtrim(rtrim(number_format((float) $v['fps'], 2, ',', ''), '0'), ',')]), 5);
+            $add('info', 'fps', __('{fps} Bilder/s – für die meisten Inhalte genügen 25–30 (halbe Dateigröße).', ['fps' => Format::admin()->decimal((float) $v['fps'], 2)]), 5);
         }
         if (!$audio) {
             $add('info', 'noaudio', __('Audio fehlt – für Hintergrundvideos gut, sonst Tonspur prüfen.'));
@@ -104,7 +106,7 @@ final class Analyzer
             }
         }
         if (($info['size'] ?? 0) > 150 * 1024 * 1024) {
-            $add('info', 'size', __('Große Datei ({mb} MB) – auf Mobilgeräten lange Ladezeit.', ['mb' => number_format($info['size'] / 1048576, 0, ',', '.')]), 5, 'web720');
+            $add('info', 'size', __('Große Datei ({mb} MB) – auf Mobilgeräten lange Ladezeit.', ['mb' => Format::admin()->number($info['size'] / 1048576)]), 5, 'web720');
         }
         $score = max(0, min(100, $score));
         // Optimiert: faststart, mindestens 80 Punkte und keine Warnung zu Codec, Farbformat, Bitrate oder Audio-Codec
@@ -116,11 +118,11 @@ final class Analyzer
 
     public static function mbit(int $bps): string
     {
-        return number_format($bps / 1_000_000, 1, ',', '.');
+        return Format::admin()->number($bps / 1_000_000, 1);
     }
 
     private static function num(float $v): string
     {
-        return str_replace('-', '−', number_format($v, 1, ',', '.'));
+        return str_replace('-', '−', Format::admin()->number($v, 1));
     }
 }

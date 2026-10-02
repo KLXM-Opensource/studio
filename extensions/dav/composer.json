@@ -1,0 +1,19 @@
+{
+    "name": "klxm/studio-dav",
+    "description": "KLXM Studio – CalDAV/CardDAV: Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵), Anmeldung mit App-Passwörtern",
+    "type": "klxm-studio-extension",
+    "license": "MIT",
+    "keywords": ["klxm-studio", "klxm-studio-extension", "caldav", "carddav", "webdav", "calendar", "contacts"],
+    "homepage": "https://studio.klxm.de",
+    "authors": [{ "name": "KLXM Crossmedia GmbH and contributors" }],
+    "require": {
+        "php": ">=8.4.1",
+        "sabre/dav": "^4.7"
+    },
+    "extra": {
+        "klxm-studio": {
+            "entry": "extension.php",
+            "requires-core": ">=1.0.0"
+        }
+    }
+}

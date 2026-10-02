@@ -1,0 +1,19 @@
+{
+    "name": "klxm/studio-consent-kit",
+    "description": "KLXM Studio – Consent-Kit: Einwilligungsverwaltung (Cookie-Hinweis) mit geprüften Vorlagen, barrierefreier Web Component, 2-Klick-Platzhaltern, Google Consent Mode v2, GPC und Protokoll ohne IP-Adresse",
+    "type": "klxm-studio-extension",
+    "license": "MIT",
+    "keywords": ["klxm-studio", "klxm-studio-extension", "consent", "cookie", "gdpr", "dsgvo", "consent-mode"],
+    "homepage": "https://studio.klxm.de",
+    "authors": [{ "name": "KLXM Crossmedia GmbH and contributors" }],
+    "require": {
+        "php": ">=8.4.1",
+        "ext-json": "*"
+    },
+    "extra": {
+        "klxm-studio": {
+            "entry": "extension.php",
+            "requires-core": ">=1.0.0"
+        }
+    }
+}

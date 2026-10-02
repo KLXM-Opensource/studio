@@ -104,7 +104,7 @@
 
   <?php if (\Core\Extensions::isActive('dav') && \Core\Features::on('dav')): ?>
   <h3 id="apps">Termine und Kontakte in Kalender-Apps</h3>
-  <p>Unter <b>Kalender &amp; Kontakte in Apps</b> erzeugen Sie ein <b>App-Passwort</b> (nur einmal sichtbar, „Lesen und ändern“ oder „Nur lesen“). Damit verbinden Sie Apple Kalender/Kontakte, Thunderbird oder DAVx⁵ (Android) mit der Website: Kalender-Tabellen erscheinen als Kalender, freigegebene Tabellen als Adressbuch. Benutzername ist Ihre E-Mail-Adresse, Server die Adresse der Website. Was Sie in der App ändern, landet im CMS – und umgekehrt. Löschen in der App setzt einen Eintrag normalerweise nur auf Entwurf.</p>
+  <p>Unter <b>Konto → Kalender &amp; Kontakte in Apps</b> erzeugen Sie ein <b>App-Passwort</b> (nur einmal sichtbar, „Lesen und ändern“ oder „Nur lesen“). Damit verbinden Sie Apple Kalender/Kontakte, Thunderbird oder DAVx⁵ (Android) mit der Website: Kalender-Tabellen erscheinen als Kalender, freigegebene Tabellen als Adressbuch. Benutzername ist Ihre E-Mail-Adresse, Server die Adresse der Website. Was Sie in der App ändern, landet im CMS – und umgekehrt. Löschen in der App setzt einen Eintrag normalerweise nur auf Entwurf.</p>
   <?php endif; ?>
 
   <h3 id="geteilt">Geteilte Tabellen (mehrere Websites)</h3>

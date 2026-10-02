@@ -24,7 +24,8 @@ KLXM-Studio-Mediathek. Lizenz: MIT (`LICENSE`).
   stumm, `'preview' => true`, Standard aus) für das Raster; das Standbild im Raster erzeugt der Kern automatisch
   (`Core\VideoThumbs`), „Poster wählen“ überschreibt es.
 - **Hintergrund-Aufträge** mit Fortschrittsring in der Mediathek, Aufträge-Dialog (Abbrechen, Wiederholen,
-  Protokoll), Statusseite **Verwaltung → Video-Werkzeuge**.
+  Protokoll), Statusseite **Administration → Video-Werkzeuge** (`adminPage`, Art `tool`; jede Route unter `/admin` mit
+  Recht `video.tools` – Anmeldung, Recht und CSRF prüft der Core).
 - **Prüfen**: „Videos nicht optimiert“ und „Videos ohne Poster“ in der Seitenleiste der Mediathek, mit
   Sammelaktion „Alle optimieren (Preset …)“ bzw. „Poster für alle erzeugen“.
 
@@ -40,8 +41,7 @@ composer require klxm/studio-video-tools
 php bin/console extensions:publish        # Skript/Stil nach public/assets/ext/video_tools (oder: pnpm run build)
 ```
 
-Paket-Typ ist `mycms-extension`; der geplante neue Typ `klxm-studio-extension` wird vom Core bereits erkannt
-(Einstieg: `extra.klxm-studio.entry` bzw. `extra.mycms.entry`, Standard `extension.php`). Die Skripte/Stile in
+Paket-Typ `klxm-studio-extension` (Einstieg: `extra.klxm-studio.entry`, Standard `extension.php`). Die Skripte/Stile in
 `assets/` laufen ohne Bündeln – `extensions:publish` kopiert sie, wenn kein Build vorhanden ist.
 
 Je Website aktivieren (`config/sites/{key}.php`, Hauptwebsite `config/config.local.php`):

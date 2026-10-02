@@ -66,9 +66,16 @@ return [
     'CalDAV/CardDAV (Kalender und Kontakte in Apps)' => 'CalDAV/CardDAV (calendars and contacts in apps)',
     // Administration → Funktionen & Erweiterungen (Manifest: risk, provides, docs)
     'Öffnet /dav für Kalender- und Adressbuch-Apps. Wer ein App-Passwort hat, kann freigegebene Tabellen lesen und – je nach Passwort – ändern.' => 'Opens /dav for calendar and address book apps. Anyone with an app password can read shared tables and – depending on the password – change them.',
-    'Menüpunkt „Kalender & Kontakte in Apps“' => '“Calendar & contacts in apps” menu item',
+    'Abschnitt „Kalender & Kontakte in Apps“ im Konto (App-Passwörter)' => '“Calendar & contacts in apps” section in the account (app passwords)',
+    'Einstellungen je Tabelle unter Administration → Einstellungen (Recht data.schema)' => 'Settings per table under Administration → Settings (permission data.schema)',
     'Adressen /dav und /.well-known/caldav|carddav' => 'Addresses /dav and /.well-known/caldav|carddav',
     'App-Passwörter je Benutzer' => 'App passwords per user',
     'Technik: CalDAV/CardDAV' => 'Technical: CalDAV/CardDAV',
     'Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵). Anmeldung mit App-Passwörtern.' => 'Sync events and contacts from data tables with calendar and address book apps (Apple, Thunderbird, DAVx⁵). Sign-in with app passwords.',
+    'App-Passwort anlegen' => 'Create app password',
+    'App-Passwörter' => 'App passwords',
+    'App-Passwörter verwalten' => 'Manage app passwords',
+    'Termine und Kontakte mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵) – Anmeldung mit einem App-Passwort, nicht mit Ihrem Kennwort.' => 'Sync events and contacts with calendar and address book apps (Apple, Thunderbird, DAVx⁵) – sign in with an app password, not with your password.',
+    'Zuletzt benutzt' => 'Last used',
+    'Tabellen als Kalender bzw. Adressbuch für Apps bereitstellen, App-Passwörter' => 'Provide tables as calendars or address books for apps, app passwords',
 ];

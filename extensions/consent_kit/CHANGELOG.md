@@ -1,5 +1,17 @@
 # Changelog – Erweiterung „consent_kit“
 
+## 1.1.0 (2026-10-02)
+
+Angepasst an die Integrationspunkte von KLXM Studio 1.0 (Entwicklerhandbuch → Erweiterungen → „Integrationspunkte und Regeln“):
+
+- Verwaltung als Einstellungsseite (`adminPage`, Art `settings`): **Administration → Einstellungen → Cookie-Einwilligung**
+  statt eigenem Menüpunkt; nur sichtbar mit Recht `consent.manage` und eingeschalteter Funktion `consent`. Adresse unverändert.
+- Jede Verwaltungsroute nennt ihr Recht (`consent.manage`) – Anmeldung, Recht und CSRF prüft der Router vor dem Controller
+  (`extensions:list` meldet keine Altform mehr).
+- Datum im Protokoll und bei Ständen über `Core\Format` (Sprache der Verwaltung, „24.09.2026, 14:05“).
+- `composer.json` (Paket `klxm/studio-consent-kit`, Typ `klxm-studio-extension`).
+- Begriffe: „Kit“ statt „Theme“ in Kommentaren.
+
 ## 1.0.1 (2026-09-27)
 
 Abgleich mit FriendsOfREDAXO/consent_kit 1.0.0 (commit c5f31ce):

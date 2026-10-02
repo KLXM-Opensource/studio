@@ -165,10 +165,10 @@ final class FeatureInfo
                     'data' => __('Aufträge, Protokolle und optimierte Versionen in der Mediathek')],
                 'risk' => __('Startet ffmpeg/ffprobe als Prozesse auf dem Server (proc_open) und verarbeitet hochgeladene Dateien. Nur einschalten, wenn Videos wirklich hier bearbeitet werden; Speicherplatz und CPU-Last im Blick behalten.')],
             'dav' => ['group' => 'interfaces', 'desc' => __('Termine und Kontakte mit Kalender- und Adressbuch-Apps abgleichen.'),
-                'effects' => ['menu' => __('„Kalender & Kontakte in Apps“ mit App-Passwörtern'), 'external' => __('Apps greifen mit App-Passwort über /dav auf Tabellen zu')],
+                'effects' => ['menu' => __('Konto → „Kalender & Kontakte in Apps“ (App-Passwörter); Tabellen unter Administration → Einstellungen'), 'external' => __('Apps greifen mit App-Passwort über /dav auf Tabellen zu')],
                 'risk' => __('Öffnet /dav für Kalender- und Adressbuch-Apps. Wer ein App-Passwort hat, kann freigegebene Tabellen lesen und – je nach Passwort – ändern.')],
             'consent' => ['group' => 'ops', 'desc' => __('Cookie-Einwilligung: Dienste, Hinweis, Protokoll.'),
-                'effects' => ['menu' => __('Administration → Cookie-Einwilligung'), 'frontend' => __('Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist; Cookie mit der Auswahl'),
+                'effects' => ['menu' => __('Administration → Einstellungen → Cookie-Einwilligung'), 'frontend' => __('Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist; Cookie mit der Auswahl'),
                     'data' => __('Einwilligungs-Protokoll ohne IP-Adresse und User-Agent')]],
         ];
     }

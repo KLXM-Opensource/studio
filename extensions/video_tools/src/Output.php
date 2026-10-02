@@ -95,7 +95,7 @@ final class Output
         Repo::link((int) $new['id'], (int) $m['id'], 'clip', null, Jobs::clock($from) . '–' . Jobs::clock($to));
         $msg = __('Ausschnitt „{name}“ angelegt ({size}).', ['name' => Media::displayName($new), 'size' => Media::humanSize((int) $new['size'])]);
         if ($n) $msg .= ' ' . __('{n} Untertitel-Spur(en) zugeschnitten.', ['n' => $n]);
-        if ($offset > 50) $msg .= ' ' . __('Beginnt {s} s früher (Keyframe).', ['s' => number_format($offset / 1000, 1, ',', '')]);
+        if ($offset > 50) $msg .= ' ' . __('Beginnt {s} s früher (Keyframe).', ['s' => \Core\Format::admin()->number($offset / 1000, 1)]);
         return [(int) $new['id'], $msg, (int) $new['size']];
     }
 

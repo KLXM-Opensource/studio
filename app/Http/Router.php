@@ -11,6 +11,7 @@ use Core\Http\Controllers\Admin\AdminController;
  * Routen von Erweiterungen (Extensions::routes → scoped()) unter /admin sind geschützt, bevor der Handler läuft:
  *   $r->get('/admin/kalender', [C::class, 'index'], 'calendar.edit');                 Recht als dritte Angabe
  *   $r->post('/admin/kalender/sync', [C::class, 'sync'], ['perm' => 'calendar.edit']);  Anmeldung + Recht + CSRF (Nicht-GET)
+ *   $r->get('/admin/kalender/notiz', [C::class, 'note'], ['perm' => ['calendar.edit', 'calendar.note']]);   eines der Rechte genügt
  *   $r->post('/admin/kalender/hook', $fn, ['perm' => 'calendar.edit', 'csrf' => false]);   benannte Ausnahme: ohne CSRF
  *   $r->get('/admin/kalender/status', $fn, ['public' => true]);                         benannte Ausnahme: ohne Anmeldung
  * Ohne Recht: in der Entwicklung (environment development bzw. debug) Fehler beim Anmelden der Route, sonst 403.
@@ -64,7 +65,7 @@ final class Router
 
     /**
      * $opts (nur für Routen von Erweiterungen unter /admin wirksam): Recht als Zeichenkette oder
-     * ['perm' => 'recht', 'csrf' => false (Ausnahme), 'public' => true (Ausnahme: ohne Anmeldung und Recht)].
+     * ['perm' => 'recht' bzw. ['recht.a', 'recht.b'] (eines genügt), 'csrf' => false (Ausnahme), 'public' => true (Ausnahme: ohne Anmeldung und Recht)].
      */
     public function add(string $method, string $pattern, callable|array $handler, array|string $opts = []): void
     {
@@ -113,7 +114,9 @@ final class Router
     /** Schutz vor dem Handler: Anmeldung (außer public), Recht, CSRF bei Nicht-GET (außer csrf false) */
     private function guard(string $method, string $pattern, callable|array $handler, array $opts): \Closure
     {
-        $perm = isset($opts['perm']) && is_string($opts['perm']) && trim($opts['perm']) !== '' ? trim($opts['perm']) : null;
+        // Recht als Zeichenkette oder Liste (eines davon genügt, z. B. ['pages.edit', 'feedback.write'])
+        $perms = array_values(array_unique(array_filter(array_map(fn($p) => is_string($p) ? trim($p) : '', (array) ($opts['perm'] ?? [])), fn($p) => $p !== '')));
+        $perm = $perms ? implode('|', $perms) : null;
         $public = !empty($opts['public']);
         $csrf = ($opts['csrf'] ?? true) !== false;
         // Altform: Controller auf Basis von AdminController prüft Recht selbst (auth()) – weiter erlaubt, wird gemeldet
@@ -129,12 +132,17 @@ final class Router
                 throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
             };
         }
-        return static function (Request $req, mixed ...$params) use ($handler, $perm, $public, $csrf): mixed {
+        return static function (Request $req, mixed ...$params) use ($handler, $perms, $public, $csrf): mixed {
             $checkCsrf = $csrf && !in_array($req->method, self::SAFE, true);
             if ($public) {
                 if ($checkCsrf && !\Core\Csrf::valid($req)) throw new HttpException(419, __('Sitzung abgelaufen – bitte Seite neu laden.'));
+            } elseif (count($perms) > 1) {
+                // eines der Rechte genügt: erst Anmeldung, dann mit dem ersten vorhandenen Recht (sonst dem ersten → 403) prüfen
+                AdminController::routeGuard($req, false, false);
+                $has = array_values(array_filter($perms, fn(string $p) => app()->auth->can($p)));
+                AdminController::routeGuard($req, $has[0] ?? $perms[0], $checkCsrf);
             } else {
-                AdminController::routeGuard($req, $perm ?? false, $checkCsrf);
+                AdminController::routeGuard($req, $perms[0] ?? false, $checkCsrf);
             }
             if (is_array($handler)) $handler = [new $handler[0](), $handler[1]];
             return $handler($req, ...$params);

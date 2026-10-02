@@ -80,6 +80,7 @@ return [
     'Dienste' => 'Services',
     'Dienste (keine Auswahl = alle)' => 'Services (none selected = all)',
     'Dienste nach Gruppen' => 'Services by group',
+    'Dienste, Texte und Darstellung des Cookie-Hinweises, Protokoll' => 'Services, texts and appearance of the cookie notice, log',
     'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten' => 'Manage services, design, settings and log of the cookie consent',
     'Diese Vorlage kennt keine Ereignis-Aufrufe – nur „Eigener Code“ ist möglich.' => 'This template has no event calls – only “Custom code” is possible.',
     'Diesen Schlüssel gibt es schon.' => 'This key already exists.',
@@ -326,7 +327,7 @@ return [
     '„{value}“ ist keine gültige Quelle (erlaubt: https://host oder https://*.host).' => '“{value}” is not a valid source (allowed: https://host or https://*.host).',
     '… dann melde' => '… then report',
     // Administration → Funktionen & Erweiterungen (Manifest: risk, provides, docs)
-    'Menüpunkt „Cookie-Einwilligung“' => '“Cookie consent” menu item',
+    'Seite „Cookie-Einwilligung“ unter Administration → Einstellungen' => '“Cookie consent” page under Administration → Settings',
     'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist' => 'Banner and script on the website as soon as a consent-based service is active',
     'Block „Externer Inhalt (mit Einwilligung)“' => 'Block “External content (with consent)”',
     'Link „Cookie-Einstellungen“ im Fußbereich' => '“Cookie settings” link in the footer',

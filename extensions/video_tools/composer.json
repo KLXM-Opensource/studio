@@ -1,22 +1,18 @@
 {
     "name": "klxm/studio-video-tools",
     "description": "KLXM Studio – Video-Werkzeuge: Videos der Mediathek analysieren, fürs Web optimieren, schneiden, Poster setzen (ffmpeg, Hintergrund-Aufträge)",
-    "type": "mycms-extension",
+    "type": "klxm-studio-extension",
     "license": "MIT",
-    "keywords": ["klxm-studio", "mycms-extension", "klxm-studio-extension", "ffmpeg", "video", "media"],
+    "keywords": ["klxm-studio", "klxm-studio-extension", "ffmpeg", "video", "media"],
     "homepage": "https://studio.klxm.de",
     "authors": [{ "name": "KLXM Crossmedia GmbH and contributors" }],
     "require": {
-        "php": ">=8.4"
+        "php": ">=8.4.1"
     },
     "suggest": {
         "ext-posix": "nicht nötig – Aufträge werden über Datei-Sperren überwacht"
     },
     "extra": {
-        "mycms": {
-            "entry": "extension.php",
-            "requires-core": ">=1.0.0"
-        },
         "klxm-studio": {
             "entry": "extension.php",
             "requires-core": ">=1.0.0"

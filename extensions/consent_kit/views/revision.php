@@ -5,7 +5,7 @@ $snap = $rev['snapshot'];
 <p><a class="adm-link" href="<?= e(url('/admin/consent/log')) ?>">← <?= e(__('Protokoll')) ?></a></p>
 <section class="adm-card">
   <h2><?= e(__('Stand #{id}', ['id' => (int) $rev['id']])) ?></h2>
-  <p class="adm-muted"><?= e(__('Angelegt am {date} für {domain} · Sprache {lang} · Epoche {epoch}', ['date' => date('d.m.Y H:i', strtotime((string) $rev['created_at'])),
+  <p class="adm-muted"><?= e(__('Angelegt am {date} für {domain} · Sprache {lang} · Epoche {epoch}', ['date' => \Core\Format::admin()->datetime((string) $rev['created_at']),
       'domain' => $domains[$rev['host']] ?? $rev['host'], 'lang' => (string) ($snap['lang'] ?? ''), 'epoch' => (int) ($snap['epoch'] ?? 0)])) ?></p>
   <?php foreach ((array) ($snap['groups'] ?? []) as $g): ?>
   <h3><?= e((string) $g['name']) ?><?= !empty($g['required']) ? ' · ' . e(__('immer aktiv')) : '' ?></h3>

@@ -57,6 +57,22 @@ final class Dav
         return app()->db->fetchAll('SELECT id, name, prefix, scope, created_at, last_used_at FROM dav_passwords WHERE user_id = ? ORDER BY id DESC', [$userId]);
     }
 
+    /** Slot „Konto“ (Extension::account): eigene App-Passwörter und Link zur Einrichtung – Daten, der Core rendert */
+    public static function accountCard(array $user): ?array
+    {
+        if (!self::enabled()) return null;
+        $list = self::passwords((int) ($user['id'] ?? 0));
+        $used = array_filter(array_column($list, 'last_used_at'));
+        $lines = [__('App-Passwörter') => (string) count($list)];
+        if ($list) $lines[__('Zuletzt benutzt')] = $used ? \Core\Format::admin()->relative((string) max($used)) : __('nie');
+        return [
+            'title' => __('Kalender & Kontakte in Apps'),
+            'text' => __('Termine und Kontakte mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵) – Anmeldung mit einem App-Passwort, nicht mit Ihrem Kennwort.'),
+            'lines' => $lines,
+            'actions' => [['label' => $list ? __('App-Passwörter verwalten') : __('App-Passwort anlegen'), 'href' => '/admin/dav', 'primary' => !$list]],
+        ];
+    }
+
     public static function revoke(int $userId, int $id): void
     {
         app()->db->query('DELETE FROM dav_passwords WHERE id = ? AND user_id = ?', [$id, $userId]);

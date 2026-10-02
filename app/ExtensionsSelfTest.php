@@ -343,12 +343,14 @@ final class ExtensionsSelfTest
             $r->post('/admin/qa/speichern', $ok, ['perm' => 'pages.edit']);
             $r->post('/admin/qa/hook', $ok, ['perm' => 'pages.edit', 'csrf' => false]);
             $r->get('/admin/qa/status', $ok, ['public' => true]);
+            $r->post('/admin/qa/eines', $ok, ['perm' => ['pages.edit', 'media.upload']]);   // eines der Rechte genügt
             $r->post('/admin/qa/alt', [Http\Controllers\Admin\DashboardController::class, 'index']);
             $r->post('/admin/qa/ohne', $ok);
             $r->get('/qa-website', $ok);                       // außerhalb /admin: Sache der Erweiterung
         });
         $meta = array_column($r->meta('qa_selftest'), null, 'pattern');
-        self::eq('Angaben: nur /admin-Routen', array_keys($meta), ['/admin/qa', '/admin/qa/speichern', '/admin/qa/hook', '/admin/qa/status', '/admin/qa/alt', '/admin/qa/ohne']);
+        self::eq('Angaben: nur /admin-Routen', array_keys($meta), ['/admin/qa', '/admin/qa/speichern', '/admin/qa/hook', '/admin/qa/status', '/admin/qa/eines', '/admin/qa/alt', '/admin/qa/ohne']);
+        self::eq('Angaben: mehrere Rechte (eines genügt)', [$meta['/admin/qa/eines']['perm'], $meta['/admin/qa/eines']['legacy'], $meta['/admin/qa/eines']['denied']], ['pages.edit|media.upload', false, false]);
         self::eq('Angaben: Recht, Ausnahmen, Altform, abgelehnt', [$meta['/admin/qa']['perm'], $meta['/admin/qa/hook']['csrf'], $meta['/admin/qa/status']['public'],
             $meta['/admin/qa/alt']['legacy'], $meta['/admin/qa/ohne']['denied'], $meta['/admin/qa/speichern']['denied']], ['pages.edit', false, true, true, true, false]);
         self::eq('Abgemeldet: Anmeldung verlangt', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), 'login');
@@ -356,6 +358,10 @@ final class ExtensionsSelfTest
         self::eq('Außerhalb /admin: unverändert', $status(fn() => $r->dispatch($req('GET', '/qa-website'))), 'ok');
         self::actAs(['media.upload']);
         self::eq('Ohne Recht: 403', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), '403');
+        self::eq('Mehrere Rechte: das zweite genügt (dann CSRF)', $status(fn() => $r->dispatch($req('POST', '/admin/qa/eines'))), '419');
+        self::actAs(['support.report']);
+        self::eq('Mehrere Rechte: keines vorhanden → 403', $status(fn() => $r->dispatch($req('POST', '/admin/qa/eines'))), '403');
+        self::actAs(['media.upload']);
         self::eq('Fehlendes Recht an der Route: 403 (Produktion)', $status(fn() => $r->dispatch($req('POST', '/admin/qa/ohne'))), '403');
         self::actAs(['pages.edit']);
         self::eq('Mit Recht: GET', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), 'ok');

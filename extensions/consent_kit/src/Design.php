@@ -8,7 +8,7 @@ use Core\Design as SiteDesign;
 
 /**
  * Gestaltung des Hinweises: CSS Custom Properties (--ck-*), deren Standardwerte aus den Design-Tokens der Website
- * (Core\Design, Verwaltung → Design) abgeleitet werden – hell und dunkel, sofern das Theme einen Dunkelmodus hat.
+ * (Core\Design, Verwaltung → Design) abgeleitet werden – hell und dunkel, sofern das Kit einen Dunkelmodus hat.
  * Abweichungen aus dem Design-Editor der Erweiterung überschreiben die abgeleiteten Werte. Ausgeliefert wird eine Datei
  * /consent/style.css (Basis-CSS der Komponente + Variablen), geladen im Shadow DOM – keine Inline-Styles.
  */

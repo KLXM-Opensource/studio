@@ -31,7 +31,7 @@ use Klxm\VideoTools\VideoTools;
 return [
     'name' => 'video_tools',
     'label' => 'Video-Werkzeuge (ffmpeg)',
-    'version' => '1.0.1',
+    'version' => '1.1.0',
     'requires' => '>=1.0.0',
     'description' => 'Videos in der Mediathek prüfen, fürs Web optimieren, schneiden und mit Poster versehen – im Hintergrund mit ffmpeg.',
     // Angaben für Administration → Funktionen & Erweiterungen (Autor/Lizenz zusätzlich aus composer.json)
@@ -60,7 +60,9 @@ return [
         $x->feature(VideoTools::FEATURE, 'Video-Werkzeuge: Videos optimieren, schneiden, Poster (ffmpeg)', [VideoTools::PERM], false);
         $x->permissions('Medien', [VideoTools::PERM => 'Videos optimieren, schneiden und Poster setzen (Original ersetzen/löschen zusätzlich mit „Medien löschen“)']);
         $x->migration(1, fn(Core\Database $db) => Repo::migrate($db));
-        $x->nav('/admin/video-tools', 'Video-Werkzeuge', 'video-camera', VideoTools::PERM, 'admin');
+        // Werkzeug (Zustand, Aufträge) im Abschnitt „Administration“ (Core\AdminPages)
+        $x->adminPage(['href' => '/admin/video-tools', 'label' => 'Video-Werkzeuge', 'kind' => 'tool', 'place' => 'admin', 'icon' => 'video-camera',
+            'perm' => VideoTools::PERM, 'feature' => VideoTools::FEATURE, 'description' => 'Zustand von ffmpeg, Aufträge und Voreinstellungen']);
 
         // Mediathek: Oberfläche (Info-Panel, Trimmer, Aufträge) nur in der Medienverwaltung, nur mit Recht
         $x->adminAssets(fn(string $view) => str_starts_with($view, 'media') && VideoTools::allowed() ? ['css/video-tools.css', 'js/video-tools.js'] : []);
@@ -82,21 +84,22 @@ return [
 
         $x->routes(function (Core\Http\Router $r): void {
             $c = AdminController::class;
-            $r->get('/admin/video-tools', [$c, 'index']);
-            $r->get('/admin/api/video-tools/media/{id}', [$c, 'info']);
-            $r->get('/admin/api/video-tools/media/{id}/stream', [$c, 'stream']);
-            $r->post('/admin/api/video-tools/media/{id}/loudness', [$c, 'loudness']);
-            $r->get('/admin/api/video-tools/media/{id}/keyframe', [$c, 'keyframe']);
-            $r->post('/admin/api/video-tools/media/{id}/optimize', [$c, 'optimize']);
-            $r->post('/admin/api/video-tools/media/{id}/trim', [$c, 'trim']);
-            $r->post('/admin/api/video-tools/media/{id}/poster', [$c, 'poster']);
-            $r->post('/admin/api/video-tools/media/{id}/poster/clear', [$c, 'posterClear']);
-            $r->post('/admin/api/video-tools/previews', [$c, 'previews']);
-            $r->post('/admin/api/video-tools/bulk', [$c, 'bulk']);
-            $r->get('/admin/api/video-tools/jobs', [$c, 'jobs']);
-            $r->post('/admin/api/video-tools/jobs/{jid}/cancel', [$c, 'cancel']);
-            $r->post('/admin/api/video-tools/jobs/{jid}/retry', [$c, 'retry']);
-            $r->get('/admin/api/video-tools/jobs/{jid}/log', [$c, 'log']);
+            $p = VideoTools::PERM;   // Recht an jeder Route (Router prüft Anmeldung, Recht, CSRF); media.delete prüft der Controller fachlich
+            $r->get('/admin/video-tools', [$c, 'index'], $p);
+            $r->get('/admin/api/video-tools/media/{id}', [$c, 'info'], $p);
+            $r->get('/admin/api/video-tools/media/{id}/stream', [$c, 'stream'], $p);
+            $r->post('/admin/api/video-tools/media/{id}/loudness', [$c, 'loudness'], $p);
+            $r->get('/admin/api/video-tools/media/{id}/keyframe', [$c, 'keyframe'], $p);
+            $r->post('/admin/api/video-tools/media/{id}/optimize', [$c, 'optimize'], $p);
+            $r->post('/admin/api/video-tools/media/{id}/trim', [$c, 'trim'], $p);
+            $r->post('/admin/api/video-tools/media/{id}/poster', [$c, 'poster'], $p);
+            $r->post('/admin/api/video-tools/media/{id}/poster/clear', [$c, 'posterClear'], $p);
+            $r->post('/admin/api/video-tools/previews', [$c, 'previews'], $p);
+            $r->post('/admin/api/video-tools/bulk', [$c, 'bulk'], $p);
+            $r->get('/admin/api/video-tools/jobs', [$c, 'jobs'], $p);
+            $r->post('/admin/api/video-tools/jobs/{jid}/cancel', [$c, 'cancel'], $p);
+            $r->post('/admin/api/video-tools/jobs/{jid}/retry', [$c, 'retry'], $p);
+            $r->get('/admin/api/video-tools/jobs/{jid}/log', [$c, 'log'], $p);
         });
 
         $x->command('video:info', 'Video analysieren: video:info <id> [--loudness] [--json]', fn(array $a) => Console::info($a));

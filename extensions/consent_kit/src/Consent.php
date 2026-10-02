@@ -10,7 +10,7 @@ use Core\Features;
 use Core\Links;
 
 /**
- * Einstieg der Erweiterung für Website, CSP und Themes.
+ * Einstieg der Erweiterung für Website, CSP und Kits.
  *
  * Grundsätze (wie der Kern): Besucher erhalten keine Cookies und keine Tracker, solange sie nicht zugestimmt haben;
  * ohne aktiven einwilligungspflichtigen Dienst gibt es weder Hinweis noch Skript. Der Cookie „cms_consent“ entsteht
@@ -61,7 +61,7 @@ final class Consent
         $tags = '<script type="application/json" id="cms-consent-config">'
             . json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . "</script>\n"
             . '<script src="' . e(self::asset('js/consent.js')) . '" defer></script>' . "\n";
-        // Vor dem ersten Skript bzw. Stylesheet im <head>: läuft damit vor den (ebenfalls verzögerten) Theme-Skripten
+        // Vor dem ersten Skript bzw. Stylesheet im <head>: läuft damit vor den (ebenfalls verzögerten) Kit-Skripten
         $head = strpos($html, '</head>');
         $first = null;
         foreach (['<script', '<link rel="stylesheet"'] as $needle) {
@@ -107,7 +107,7 @@ final class Consent
         ];
     }
 
-    /** Datenschutz-/Impressum-Link: Einstellung (Linkauswahl) → Seite aus den Theme-Einstellungen. @return array{0: ?string, 1: ?int} */
+    /** Datenschutz-/Impressum-Link: Einstellung (Linkauswahl) → Seite aus den Website-Angaben des Kits. @return array{0: ?string, 1: ?int} */
     public static function legal(string $which): array
     {
         $v = trim((string) (Repository::settings()[$which] ?? ''));
@@ -117,7 +117,7 @@ final class Consent
         }
         if ($v === '') return [null, null];
         if (preg_match('~^page:(\d+)$~', $v, $m) && ($p = \Core\Pages::find((int) $m[1]))) {
-            // Übersetzung der Seite in der Sprache der Anfrage (wie die Rechtliches-Links der Themes)
+            // Übersetzung der Seite in der Sprache der Anfrage (wie die Rechtliches-Links der Kits)
             if (\Core\Lang::multi()) $p = \Core\Pages::translations($p)[\Core\Lang::current()] ?? $p;
             return [\Core\Pages::url($p), (int) $p['id']];
         }
@@ -217,7 +217,7 @@ final class Consent
         return array_map(fn($l) => array_values(array_unique($l)), $out);
     }
 
-    // ------------------------------------------------------------------ Themes
+    // ------------------------------------------------------------------ Kits
 
     public static function footerLinks(): array
     {

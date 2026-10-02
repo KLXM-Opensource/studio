@@ -1,5 +1,16 @@
 # Changelog – Video-Werkzeuge (`video_tools`)
 
+## 1.1.0 – 2026-10-02
+
+Angepasst an die Integrationspunkte von KLXM Studio 1.0 (Entwicklerhandbuch → Erweiterungen → „Integrationspunkte und Regeln“):
+
+- Statusseite als Werkzeug angemeldet (`adminPage`, Art `tool`, Abschnitt „Administration“, nur mit Funktion `video.tools`).
+- Jede Verwaltungsroute nennt ihr Recht (`video.tools`) – Anmeldung, Recht und CSRF prüft der Router vor dem Controller
+  (`extensions:list` meldet keine Altform mehr). Original ersetzen/löschen prüft weiter zusätzlich `media.delete`.
+- Zahlen (Bildrate, Bitrate, Lautheit, Dateigröße, freier Speicher, Versatz beim Schneiden) über `Core\Format` in der Sprache
+  der Verwaltung.
+- `composer.json`: Paket-Typ `klxm-studio-extension` (Altname `mycms-extension` entfernt), PHP ≥ 8.4.1.
+
 ## 1.0.1 – 2026-09-26
 
 - ffmpeg/ffprobe-Erkennung und Aufrufe kommen aus dem Kern (`Core\Ffmpeg`): per Aufruf statt Dateiprüfung, damit auch

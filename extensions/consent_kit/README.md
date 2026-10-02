@@ -17,14 +17,18 @@ Inline-Code, WCAG 2.2 AA.
 
 Die Migration legt `consent_services`, `consent_revisions` und `consent_log` in der Datenbank der Website an.
 Recht: `consent.manage` (Rolle „Administration“ hat es). Assets: `cd tools && pnpm run build`
-(→ `public/assets/ext/consent_kit`).
+(→ `public/assets/ext/consent_kit`). Als Composer-Paket: `klxm/studio-consent-kit` (Typ `klxm-studio-extension`).
+
+Die Verwaltung ist eine reine Einstellungsseite: **Administration → Einstellungen → Cookie-Einwilligung**
+(`/admin/consent`, Art `settings`). Jede Route unter `/admin/consent` verlangt `consent.manage`; Anmeldung, Recht und
+CSRF prüft der Core, bevor der Controller läuft.
 
 **Solange kein einwilligungspflichtiger Dienst aktiv ist, ändert sich für Besucher nichts**: kein Hinweis, kein Skript,
 kein Cookie, CSP unverändert.
 
 ## In fünf Minuten
 
-1. Verwaltung → **Cookie-Einwilligung → Dienst hinzufügen**: Vorlage wählen (z. B. Matomo), Kennungen eintragen,
+1. Administration → Einstellungen → **Cookie-Einwilligung → Dienst hinzufügen**: Vorlage wählen (z. B. Matomo), Kennungen eintragen,
    „Aktiv“ anhaken, speichern.
 2. **Einstellungen**: Form (Box, Leiste, Dialog, Off-Canvas), Rechtstexte (Linkauswahl; leer = Seiten aus den
    Kit-Einstellungen), GPC, Consent Mode, Aufbewahrung.

@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Erweiterungen auf die Integrationspunkte umgestellt
+- **Mehrere Rechte an einer Route:** `$r->get('/admin/x', $h, ['perm' => ['a', 'b']])` – eines davon genügt (für Seiten, die zwei
+  Gruppen nutzen, z. B. `pages.edit` und `feedback.write`). `extensions:list` zeigt `a|b`; ältere Cores behandeln solche Routen von
+  `AdminController`-Controllern als Altform. Selbsttest `extensions:selftest`, Entwicklerhandbuch › Erweiterungen › Routen.
+- **Mitgelieferte Erweiterungen:** jede Verwaltungsroute nennt ihr Recht (`extensions:list` meldet keine Altform mehr), Seiten mit Art,
+  `composer.json` vom Typ `klxm-studio-extension`, Changelog und Übersetzungen:
+  - `consent_kit` 1.1.0 – Einstellungsseite (Administration → Einstellungen → Cookie-Einwilligung), Datum über `Core\Format`.
+  - `dav` 1.1.0 – App-Passwörter als Abschnitt im **Konto** (Slot `account`), Einstellungen je Tabelle als Einstellungsseite
+    (Recht `data.schema`), Datum über `Core\Format`.
+  - `video_tools` 1.1.0 – Werkzeug-Seite (`adminPage`, Art `tool`), Zahlen über `Core\Format`, Altname `mycms-extension` entfernt.
+- Funktionsübersicht, Handbuch (Cookies, Daten) und Entwicklerhandbuch (Funktionen, Consent-Kit) nennen die neuen Orte.
+
 ### Plattform für Erweiterungen: feste Integrationspunkte
 - **Entwicklerhandbuch › Erweiterungen › Integrationspunkte und Regeln:** kuratierte Liste der Stellen, über die Erweiterungen
   eingreifen dürfen – alles andere gibt es nicht.

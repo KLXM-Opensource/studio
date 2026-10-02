@@ -50,7 +50,7 @@ $st = ['queued' => __('wartet'), 'running' => __('läuft'), 'done' => __('fertig
         <dt><?= e(__('Zeitlimit')) ?></dt><dd><?= e(__('{n} Minuten je Auftrag', ['n' => (int) round($c['timeout'] / 60)])) ?></dd>
         <dt><?= e(__('Eingang max.')) ?></dt><dd><?= (int) $c['max_input_mb'] ?> MB</dd>
         <dt><?= e(__('Ergebnis max.')) ?></dt><dd><?= e(__('{n} MB (Upload-Grenze der Mediathek, media.max_upload_mb)', ['n' => $s['max_upload_mb']])) ?></dd>
-        <dt><?= e(__('Freier Speicher')) ?></dt><dd><?= $s['free_mb'] !== null ? e(number_format($s['free_mb'], 0, ',', '.') . ' MB') : '–' ?> <small>(<?= e(__('mindestens {n} MB frei halten', ['n' => $c['min_free_mb']])) ?>)</small></dd>
+        <dt><?= e(__('Freier Speicher')) ?></dt><dd><?= $s['free_mb'] !== null ? e(\Core\Format::admin()->number($s['free_mb']) . ' MB') : '–' ?> <small>(<?= e(__('mindestens {n} MB frei halten', ['n' => $c['min_free_mb']])) ?>)</small></dd>
         <dt><?= e(__('Animierte Vorschau')) ?></dt><dd><?= e($c['preview'] ? __('an (bei Bedarf erzeugt)') : __('aus')) ?></dd>
       </dl>
       <?php if ($admin): ?>

@@ -31,9 +31,9 @@ $email = strtolower((string) $user['email']);
       <tbody>
       <?php foreach ($passwords as $p): ?>
         <tr>
-          <td><strong><?= e($p['name']) ?></strong><br><span class="adm-muted"><code><?= e($p['prefix']) ?>…</code> · <?= e(__('angelegt')) ?> <?= e(date('d.m.Y', strtotime((string) $p['created_at']))) ?></span></td>
+          <td><strong><?= e($p['name']) ?></strong><br><span class="adm-muted"><code><?= e($p['prefix']) ?>…</code> · <?= e(__('angelegt')) ?> <?= e(\Core\Format::admin()->date((string) $p['created_at'])) ?></span></td>
           <td><span class="adm-badge<?= $p['scope'] === 'write' ? ' adm-badge--warn' : '' ?>"><?= e(__(Dav::SCOPES[$p['scope']] ?? $p['scope'])) ?></span></td>
-          <td class="adm-muted"><?= $p['last_used_at'] ? e(date('d.m.Y H:i', strtotime((string) $p['last_used_at']))) : e(__('nie')) ?></td>
+          <td class="adm-muted"><?= $p['last_used_at'] ? e(\Core\Format::admin()->datetime((string) $p['last_used_at'])) : e(__('nie')) ?></td>
           <td class="adm-actions"><form method="post" action="<?= e(url('/admin/dav/passwords/' . (int) $p['id'] . '/delete')) ?>" data-confirm="<?= e(__('App-Passwort „{name}“ widerrufen? Die App kann sich danach nicht mehr anmelden.', ['name' => $p['name']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Widerrufen')) ?></button></form></td>
         </tr>
       <?php endforeach; ?>

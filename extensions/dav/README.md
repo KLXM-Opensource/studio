@@ -14,6 +14,7 @@ Technik: [sabre/dav](https://sabre.io/dav/) 4.7 (per Composer im Projekt), eigen
 ```
 
 Beim ersten Aufruf legt die Migration die Tabellen `dav_passwords` und `dav_objects` an (je Website).
+Als Composer-Paket: `klxm/studio-dav` (Typ `klxm-studio-extension`; `sabre/dav` bringt der Core mit).
 Voraussetzungen: Funktion `data` (und für Kalender `calendar`) an, HTTPS in Produktion.
 
 ## Einrichten
@@ -21,9 +22,9 @@ Voraussetzungen: Funktion `data` (und für Kalender `calendar`) an, HTTPS in Pro
 1. **Rechte:** Die Rolle braucht `dav.use` (Administration hat alles) und `data.edit` für die Tabellen.
    Rollen mit Tabellen-Einschränkung sehen nur ihre Tabellen.
 2. **Kalender:** Daten → Tabelle → Felder & Einstellungen → „Als Kalender nutzen“ (Core-Funktion `calendar`).
-3. **Adressbuch:** Verwaltung → „Kalender & Kontakte in Apps“ → Tabellen → „Als Adressbuch (CardDAV) bereitstellen“,
+3. **Adressbuch:** Administration → Einstellungen → „Kalender & Kontakte in Apps“ → Tabellen (Recht `data.schema`) → „Als Adressbuch (CardDAV) bereitstellen“,
    Zuordnung der vCard-Felder prüfen (wird aus Feldnamen wie vorname, nachname, firma, strasse, plz, ort vorbelegt).
-4. **App-Passwort:** Verwaltung → „Kalender & Kontakte in Apps“ → „Neues App-Passwort“ (nur einmal sichtbar,
+4. **App-Passwort:** Konto → Abschnitt „Kalender & Kontakte in Apps“ → „App-Passwort anlegen“ (Seite `/admin/dav`) → „Neues App-Passwort“ (nur einmal sichtbar,
    „Lesen und ändern“ oder „Nur lesen“). Alternativ: `php bin/console dav:password <e-mail> [name] [read|write]`.
 
 ## Verbinden
@@ -104,3 +105,13 @@ python -m pip install caldav   # caldav.DAVClient(url="https://ihre-domain.de/da
 ## Lizenz
 
 MIT wie KLXM Studio – siehe `LICENSE`. Die verwendeten sabre/*-Pakete stehen unter BSD-3-Clause (© fruux GmbH).
+
+## Einbindung in die Verwaltung
+
+| Stelle | Was |
+|---|---|
+| Slot `account` (Recht `dav.use`) | Abschnitt im Konto: Anzahl eigener App-Passwörter, zuletzt benutzt, Link zur Seite `/admin/dav` |
+| `adminPage` Art `settings` (Recht `data.schema`) | Karte auf Administration → Einstellungen: Tabellen als Kalender bzw. Adressbuch bereitstellen |
+| Routen | `GET /admin/dav`, `POST /admin/dav/passwords`, `POST /admin/dav/passwords/{id}/delete` mit `dav.use`; `POST /admin/dav/tables` mit `data.schema` – Anmeldung, Recht und CSRF prüft der Core |
+
+vCard-Felder `X-MYCMS-*` bleiben als historische technische Kennung (in den Apps gespeichert).

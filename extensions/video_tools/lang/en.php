@@ -305,6 +305,7 @@ return [
     // Administration → Funktionen & Erweiterungen (Manifest: risk, provides, docs)
     '{n} Video-Aufträge' => '{n} video jobs',
     'Startet ffmpeg/ffprobe als Prozesse auf dem Server (proc_open) und verarbeitet hochgeladene Dateien. Nur aktivieren, wenn Videos wirklich hier bearbeitet werden; Speicherplatz und CPU-Last im Blick behalten.' => 'Starts ffmpeg/ffprobe as processes on the server (proc_open) and processes uploaded files. Only activate if videos really are edited here; keep an eye on disk space and CPU load.',
+    'Zustand von ffmpeg, Aufträge und Voreinstellungen' => 'ffmpeg status, jobs and presets',
     'Menüpunkt „Video-Werkzeuge“ und Werkzeuge in der Mediathek' => '“Video tools” menu item and tools in the media library',
     'Recht „Videos optimieren, schneiden und Poster setzen“' => 'Permission “Optimise, trim and set posters for videos”',
     'Hintergrund-Aufträge (Cron video:work, jede Minute empfohlen)' => 'Background jobs (cron video:work, every minute recommended)',

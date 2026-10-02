@@ -61,6 +61,7 @@ $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 
     $c = KalenderController::class;
     $r-&gt;get('/admin/kalender', [$c, 'index'], 'calendar.edit');                      // Recht als dritte Angabe
     $r-&gt;post('/admin/kalender/{id}', [$c, 'save'], ['perm' =&gt; 'calendar.edit']);      // + CSRF
+    $r-&gt;get('/admin/kalender/notiz', [$c, 'note'], ['perm' =&gt; ['calendar.edit', 'calendar.note']]);   // eines der Rechte genügt
     $r-&gt;post('/admin/kalender/webhook', [$c, 'hook'], ['perm' =&gt; 'calendar.edit', 'csrf' =&gt; false]);   // Ausnahme, benannt
     $r-&gt;get('/admin/kalender/status.json', [$c, 'status'], ['public' =&gt; true]);       // Ausnahme: ohne Anmeldung
     $r-&gt;get('/kalender.ics', [$c, 'feed']);                                           // Website: Sache der Erweiterung
@@ -68,6 +69,7 @@ $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 
   <table class="doc-table">
     <tr><th>Fall</th><th>Verhalten</th></tr>
     <tr><td>mit Recht</td><td>Anmeldung, Recht, CSRF (Nicht-GET) – der Handler kann sich auf alles verlassen. Fachliche Prüfungen (Recht je Tabelle, eigene Einträge) bleiben Sache des Handlers.</td></tr>
+    <tr><td>mehrere Rechte (Liste)</td><td><code>['perm' =&gt; ['a', 'b']]</code>: eines davon genügt – für Seiten, die zwei Gruppen nutzen (z. B. Redaktion mit <code>pages.edit</code> und Prüfende nur mit <code>feedback.write</code>). <code>extensions:list</code> zeigt <code>a|b</code>. Ältere Cores kennen die Liste nicht: Controller auf Basis von <code>AdminController</code> laufen dort als Altform (prüfen selbst), andere Handler werden abgelehnt.</td></tr>
     <tr><td><code>'csrf' =&gt; false</code>, <code>'public' =&gt; true</code></td><td>Benannte Ausnahmen – <code>php bin/console extensions:list</code> listet sie je Erweiterung. <code>public</code> verzichtet auf Anmeldung und Recht, CSRF gilt weiter (außer zusätzlich <code>'csrf' =&gt; false</code>).</td></tr>
     <tr><td>ohne Recht, Handler <code>[Controller, 'methode']</code> auf Basis von <code>AdminController</code></td><td><b>Altform</b> (alle Erweiterungen vor dieser Regel): läuft weiter – der Controller prüft das Recht wie bisher mit <code>$this-&gt;auth($r, 'recht')</code>, der Core prüft zusätzlich Anmeldung und CSRF. <code>extensions:list</code> meldet diese Routen; bitte das Recht an der Route angeben.</td></tr>
     <tr><td>ohne Recht, anderer Handler (Closure …)</td><td>Entwicklung (<code>'environment' =&gt; 'development'</code> oder <code>debug</code>): <code>LogicException</code> beim Anmelden. Produktion: Route antwortet mit 403 und schreibt ins Fehlerprotokoll.</td></tr>

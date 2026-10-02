@@ -46,7 +46,7 @@ $pages = max(1, (int) ceil($total / 50));
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
-        <td><?= e(date('d.m.Y H:i', strtotime((string) $r['created_at']))) ?></td>
+        <td><?= e(\Core\Format::admin()->datetime((string) $r['created_at'])) ?></td>
         <td><a href="<?= e(url('/admin/consent/log?id=' . rawurlencode((string) $r['consent_id']))) ?>"><code><?= e(substr((string) $r['consent_id'], 0, 8)) ?>…</code></a></td>
         <td><?= e(__(Log::ACTIONS[$r['action']] ?? $r['action'])) ?></td>
         <td><?= e(implode(', ', $r['accepted']) ?: '–') ?></td>
