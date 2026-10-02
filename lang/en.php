@@ -5962,4 +5962,5 @@ return [
     'Vorschlagen unter (optional)' => 'Suggest below (optional)',
     'Wird eine neue Seite unter einer dieser Seiten angelegt, ist diese Vorlage vorgewählt.' => 'When a new page is created below one of these pages, this template is preselected.',
     'z. B. Leistung, Stellenanzeige, Veranstaltung' => 'e.g. Service, Job ad, Event',
+    'Symbol (optional)' => 'Icon (optional)',
 ];

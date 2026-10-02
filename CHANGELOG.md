@@ -9,7 +9,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Seitenvorlagen für die Redaktion, Blöcke kopieren und duplizieren
 - **Seitenvorlagen** (`Core\PageTemplates`, Werkzeuge → Seitenvorlagen, Recht `system.manage`): Name, Beschreibung, Quellseite,
   „Vorschlagen unter“ (Seitenauswahl), Reihenfolge per ↑/↓; im Seitenbaum „⋯ → Als Vorlage anbieten“ und Kennzeichen „Vorlage“.
-  „Neue Seite“ bietet „Leere Seite“ oder die Vorlagen an, passend zur übergeordneten Seite vorgewählt; Blöcke der Quellseite mit
+  Je Vorlage ein Symbol. „Neue Seite“ bietet „Leere Seite“ oder die Vorlagen als Kacheln mit Symbol an, passend zur übergeordneten Seite vorgewählt; Blöcke der Quellseite mit
   neuen IDs (auch in Spalten).
 - **Neue Seiten starten leer** statt mit einem erzwungenen Textblock „Neuer Inhalt.“ (Editor zeigt den Platzhalter „Leere Seite“).
 - **Blöcke duplizieren** (⧉, Kopie darunter) und **kopieren** (⎘, Block-Zwischenablage für alle Seiten der Website; „+ Block einfügen“

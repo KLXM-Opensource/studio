@@ -44,10 +44,16 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
       $__cur = (string) ($old['template'] ?? ''); ?>
     <fieldset class="f tpl-pick" data-tpl-map="<?= e(json_encode($__map)) ?>">
       <legend><?= e(__('Vorlage')) ?></legend>
-      <label class="tpl-pick__opt"><input type="radio" name="template" value=""<?= $__cur === '' ? ' checked' : '' ?>> <span><b><?= e(__('Leere Seite')) ?></b><small><?= e(__('Ohne Blöcke beginnen.')) ?></small></span></label>
-      <?php foreach ($__tpls as $__t): ?>
-      <label class="tpl-pick__opt"><input type="radio" name="template" value="<?= (int) $__t['i'] ?>"<?= $__cur === (string) $__t['i'] ? ' checked' : '' ?>> <span><b><?= e($__t['label']) ?></b><?php if ($__t['description'] !== ''): ?><small><?= e($__t['description']) ?></small><?php endif; ?></span></label>
-      <?php endforeach; ?>
+      <div class="tpl-pick__grid">
+        <label class="tpl-pick__opt"><input class="sr-only" type="radio" name="template" value=""<?= $__cur === '' ? ' checked' : '' ?>>
+          <span class="tpl-pick__ico" aria-hidden="true"><?= icon('file') ?></span>
+          <span class="tpl-pick__txt"><b><?= e(__('Leere Seite')) ?></b><small><?= e(__('Ohne Blöcke beginnen.')) ?></small></span></label>
+        <?php foreach ($__tpls as $__t): ?>
+        <label class="tpl-pick__opt"><input class="sr-only" type="radio" name="template" value="<?= (int) $__t['i'] ?>"<?= $__cur === (string) $__t['i'] ? ' checked' : '' ?>>
+          <span class="tpl-pick__ico" aria-hidden="true"><?= icon($__t['icon'] ?: 'files') ?></span>
+          <span class="tpl-pick__txt"><b><?= e($__t['label']) ?></b><?php if ($__t['description'] !== ''): ?><small><?= e($__t['description']) ?></small><?php endif; ?></span></label>
+        <?php endforeach; ?>
+      </div>
       <p class="f-help"><?= e(__('Die Blöcke der Vorlage werden übernommen und lassen sich danach frei ändern.')) ?></p>
     </fieldset>
     <?php endif; ?>

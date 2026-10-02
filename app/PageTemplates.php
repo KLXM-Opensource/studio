@@ -28,6 +28,7 @@ final class PageTemplates
                 ['name' => 'label', 'label' => __('Name'), 'type' => 'text', 'required' => true, 'max' => 60, 'width' => 'half', 'placeholder' => __('z. B. Leistung, Stellenanzeige, Veranstaltung')],
                 ['name' => 'page', 'label' => __('Quellseite'), 'type' => 'page', 'required' => true, 'width' => 'half',
                     'help' => __('Seite mit dem gewünschten Aufbau – am besten offline, z. B. unter einer Seite „Vorlagen“.')],
+                ['name' => 'icon', 'label' => __('Symbol (optional)'), 'type' => 'icon', 'width' => 'half'],
                 ['name' => 'description', 'label' => __('Beschreibung für die Redaktion (optional)'), 'type' => 'textarea', 'rows' => 2, 'max' => 200],
                 ['name' => 'parents', 'label' => __('Vorschlagen unter (optional)'), 'type' => 'pages',
                     'help' => __('Wird eine neue Seite unter einer dieser Seiten angelegt, ist diese Vorlage vorgewählt.')],
@@ -41,7 +42,7 @@ final class PageTemplates
         $out = [];
         foreach ((array) app()->settings->get(self::KEY, []) as $i => $t) {
             if (!is_array($t) || empty($t['page']) || !($p = Pages::find((int) $t['page']))) continue;
-            $out[] = ['i' => (int) $i, 'label' => trim((string) ($t['label'] ?? '')) ?: (string) $p['title'], 'description' => trim((string) ($t['description'] ?? '')),
+            $out[] = ['i' => (int) $i, 'label' => trim((string) ($t['label'] ?? '')) ?: (string) $p['title'], 'description' => trim((string) ($t['description'] ?? '')), 'icon' => trim((string) ($t['icon'] ?? '')),
                 'page' => (int) $p['id'], 'parents' => array_values((array) ($t['parents'] ?? [])), 'source' => $p];
         }
         return $out;
@@ -71,7 +72,7 @@ final class PageTemplates
         $p = Pages::find($pageId);
         if (!$p || self::isSource($pageId)) return;
         $list = (array) app()->settings->get(self::KEY, []);
-        $list[] = ['label' => (string) $p['title'], 'page' => $pageId, 'description' => '', 'parents' => []];
+        $list[] = ['label' => (string) $p['title'], 'page' => $pageId, 'icon' => '', 'description' => '', 'parents' => []];
         self::save($list);
     }
 
