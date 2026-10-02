@@ -1455,6 +1455,7 @@ return [
     'Zugewiesen' => 'Assigned',
     'Zugewiesen.' => 'Assigned.',
     'Zurück' => 'Back',
+    'Zur Tabelle „{name}“' => 'To the table “{name}”',
     'Zuweisen' => 'Assign',
     'Zuweisen an' => 'Assign to',
     'Zuweisung entfernt.' => 'Assignment removed.',

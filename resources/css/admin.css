@@ -1277,6 +1277,12 @@ body.adm{font-family:var(--adm-font);letter-spacing:0}
 .adm-side .adm-navgrp__list{margin:1px 0 4px 17px;padding:0 0 0 8px;border-left:1px solid var(--adm-line)}
 .adm-side .adm-navgrp__list[hidden]{display:none}
 .adm-side .adm-navgrp__list a{font-size:13px}
+/* Unterseite einer Sammelseite (z. B. Einstellungen einer Erweiterung) – eingerückt unter „Einstellungen der Funktionen“; Rückweg über dem Inhalt */
+.adm-side .adm-navgrp__sub{display:grid;gap:1px;margin:1px 0 2px 10px;padding:0 0 0 8px;border-left:1px solid var(--adm-line);list-style:none}
+.adm-side .adm-navgrp__list a.is-parent{color:var(--adm-ink);font-weight:600}
+.adm-backbar{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:0 0 14px;font-size:14px}
+.adm-backbar a{display:inline-flex;align-items:center;gap:6px;min-height:32px;color:var(--adm-a);text-decoration:none}
+.adm-backbar a:hover,.adm-backbar a:focus-visible{text-decoration:underline}
 @media (prefers-reduced-motion:reduce){.adm-navgrp.is-anim .adm-navgrp__chev::before{transition:none}}
 /* Grundeinstellungen: geteilte Medien */
 .pl-card{display:grid;gap:10px;padding:14px 16px;margin:0 0 12px;border-radius:8px;box-shadow:0 0 0 1px var(--adm-line);background:var(--adm-surface)}

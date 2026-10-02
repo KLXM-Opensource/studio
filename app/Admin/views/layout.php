@@ -36,6 +36,10 @@ $section = explode('/', $view)[0];
 $reqPath = $user && app()->request ? (string) app()->request->path : '';
 $hubKind = $reqPath !== '' ? (\Core\AdminPages::match($reqPath)['kind'] ?? '') : '';
 $hubKind = in_array($hubKind, ['settings', 'stats'], true) ? $hubKind : '';
+// Unterseite einer Sammelseite (z. B. Einstellungen von KLXM Check): im Menü eingerückt unter der Sammelseite, über dem Inhalt ein Rückweg –
+// sonst wäre die Seite eine Sackgasse
+$hubPage = $hubKind !== '' ? \Core\AdminPages::match($reqPath) : null;
+if ($hubPage && in_array(rtrim($hubPage['href'], '/'), [\Core\AdminPages::HUB, \Core\AdminPages::STATS], true)) $hubPage = null;
 // Aktueller Menüpunkt: Sammelseite > Adresse (mit $href, Administration) > Bereich der Ansicht
 $isCur = function (string $key, string $href = '') use ($hubKind, $reqPath, $section): bool {
     if ($hubKind !== '') return ($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats');
@@ -185,7 +189,9 @@ if ($user && ($req = app()->request)) {
         <button type="button" class="adm-navgrp__btn" aria-expanded="<?= $gOpen ? 'true' : 'false' ?>" aria-controls="<?= e($gId) ?>"><?= \Core\Icons::nav($g['icon'], 'adm-nav__ico') ?><span><?= e($g['label']) ?></span><span class="adm-navgrp__chev" aria-hidden="true"></span></button>
         <ul class="adm-navgrp__list" id="<?= e($gId) ?>"<?= $gOpen ? '' : ' hidden' ?>>
           <?php foreach ($g['items'] as [$href, $label, $key]): ?>
-          <li><a href="<?= e(url($href)) ?>" data-nav="<?= e($key) ?>"<?= $isCur($key, $href) ? ' aria-current="page"' : '' ?>><span><?= e($label) ?></span></a></li>
+          <?php $sub = $hubPage && (($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats')); ?>
+          <li><a href="<?= e(url($href)) ?>" data-nav="<?= e($key) ?>"<?= $sub ? ' class="is-parent"' : ($isCur($key, $href) ? ' aria-current="page"' : '') ?>><span><?= e($label) ?></span></a>
+            <?php if ($sub): ?><ul class="adm-navgrp__sub"><li><a href="<?= e(url($hubPage['href'])) ?>" aria-current="page"><span><?= e($hubPage['label']) ?></span></a></li></ul><?php endif; ?></li>
           <?php endforeach; ?>
         </ul>
       </li>
@@ -221,6 +227,12 @@ if ($user && ($req = app()->request)) {
 </aside>
 <?php endif; ?>
 <main class="adm-main" id="main">
+  <?php if ($hubPage): // Rückweg von einer Einstellungs-/Statistikseite zur Sammelseite (und zur Datentabelle, falls sie dazugehört) ?>
+  <nav class="adm-backbar" aria-label="<?= e(__('Zurück')) ?>">
+    <a href="<?= e(url($hubKind === 'stats' ? \Core\AdminPages::STATS : \Core\AdminPages::HUB)) ?>"><span aria-hidden="true">←</span> <?= e($hubKind === 'stats' ? __('Statistiken') : __('Einstellungen der Funktionen')) ?></a>
+    <?php if (!empty($hubPage['table']) && ($tbl = \Core\Data\Tables::find((string) $hubPage['table']))): ?><a href="<?= e(url('/admin/data/' . $tbl['handle'])) ?>"><?= e(__('Zur Tabelle „{name}“', ['name' => (string) $tbl['name']])) ?></a><?php endif; ?>
+  </nav>
+  <?php endif; ?>
   <?php foreach ($flash as [$type, $msg]): ?>
   <div class="adm-flash adm-flash--<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($msg) ?></div>
   <?php endforeach; ?>
