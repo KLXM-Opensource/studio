@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Geteilte Daten: Adresse der Ursprungs-Website auch beim Teilen per Kommandozeile
+- `Shared::touch()` trägt die Adresse einer Website jetzt auch auf der Kommandozeile (Teilen/Beitreten per CLI, MCP) ins Register
+  (`sites_info`) ein – aber nur eine eingestellte (`sys.site_url`, `base_url`), nie einen geratenen Host. Bisher blieb sie leer,
+  bis jemand die Verwaltung der Tabelle im Browser öffnete; bis dahin zeigte das Canonical fremder Einträge nicht auf die
+  Ursprungs-Website (die Website „default“ hat oft keine `hosts`, also keinen Rückfall).
+- Selbsttests: `glossary:sharetest --sandbox` stellt die Adressen der Test-Websites ein und prüft das Canonical gegen die Adresse
+  von A; `blocks:selftest` prüft das Layout mit einem Kind-Block, der ohne Kontext etwas ausgibt (kit-unabhängig – „Datenfelder“
+  bleibt ohne Eintrag leer und hat dann keine Sprungmarke).
+
 ### Geteilte Daten: Medien-Pool nur bei Bedarf
 - Der Pool `data-{key}` einer geteilten Tabelle entsteht erst, wenn sie ein Bild- oder Dateifeld hat (beim Anlegen, Teilen,
   Beitreten oder beim Speichern des Schemas, sobald das erste solche Feld dazukommt) bzw. wenn die erste Datei zugeordnet wird

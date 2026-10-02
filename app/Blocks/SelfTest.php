@@ -104,20 +104,32 @@ final class SelfTest
         $this->assert(in_array($L::TYPE, \Core\Pages::$rejected, true) && (!$flat || in_array($flat, \Core\Pages::$rejected, true)), 'Layout: Ablehnung gemeldet (Pages::$rejected)');
         $this->assert(count($ids) === count(array_unique($ids)), 'Layout: Block-IDs eindeutig (auch in Spalten)');
         $this->assert(($c[0]['blocks'][0]['tunes']['section'] ?? null) === ['anchor' => 'mein-anker', 'visible' => true, 'background' => ''], 'Layout: Optionen eines Kinds bereinigt');
-        // Ausgabe: ein Abschnitt, Spalten mit Gewicht, Kinder ohne eigenen Abschnitt, Typen für Stylesheets (flatten)
-        $title = in_array('title_strong', array_column($th->block($nest)['fields'], 'name'), true) ? 'title_strong' : 'title';
-        $txt = fn(string $id) => ['id' => $id, 'type' => $nest, 'data' => [$title => 'T ' . $id, 'text' => '<p>Text ' . $id . '</p>', 'q' => 'Q', 'a' => '<p>A</p>']];
-        $page = [['id' => 'lay1', 'type' => $L::TYPE, 'data' => ['preset' => '2-1', 'columns' => [['blocks' => [$txt('c1')]], ['blocks' => [$txt('c2') + ['tunes' => ['section' => ['anchor' => 'zwei']]]]]]],
-            'tunes' => ['section' => ['anchor' => 'spalten']]]];
-        $html = $th->renderBlocks(\Core\Pages::sanitizeBlocks($page));
-        $this->assert(substr_count($html, '<section') === 1 && str_contains($html, 'lay-grid--2-1') && substr_count($html, 'class="lay-col ') === 2
-            && str_contains($html, 'lay-col--w2') && str_contains($html, 'id="spalten"') && str_contains($html, 'id="zwei"'), 'Layout: ein Abschnitt mit zwei Spalten, Sprungmarken');
-        $this->assert(in_array($nest, array_column($L::flatten(\Core\Pages::sanitizeBlocks($page)), 'type'), true), 'Layout: flatten liefert die Blöcke der Spalten');
-        $prev = app()->editing; app()->editing = true;
-        try {
-            $eh = $th->renderBlock($th->makeBlock(\Core\Pages::sanitizeBlocks($page)[0]));
-        } finally { app()->editing = $prev; }
-        $this->assert(str_contains($eh, 'data-lay-item="1.0"') && (!str_contains($eh, 'data-edit=') || str_contains($eh, 'data-edit="columns.0.blocks.0.data.')), 'Layout: Editor – Pfade der Direktbearbeitung im Layout');
+        // Ausgabe: ein Abschnitt, Spalten mit Gewicht, Kinder ohne eigenen Abschnitt, Typen für Stylesheets (flatten).
+        // Kind-Block: der erste verschachtelbare, der mit Beispielinhalt etwas ausgibt – kit-unabhängig (z. B. „Datenfelder“ bleibt
+        // ohne aufgerufenen Eintrag leer; ein leeres Kind hat keine Hülle und damit auch keine Sprungmarke)
+        $txt = function (string $id, string $type) use ($th): array {
+            $title = in_array('title_strong', array_column($th->block($type)['fields'] ?? [], 'name'), true) ? 'title_strong' : 'title';
+            return ['id' => $id, 'type' => $type, 'data' => [$title => 'T ' . $id, 'text' => '<p>Text ' . $id . '</p>', 'q' => 'Q', 'a' => '<p>A</p>']];
+        };
+        $show = null;
+        foreach ($th->blocks() as $type => $def) {
+            if ($type === $L::TYPE || !empty($def['custom']) || !$th->nestable($type) || $th->nestableVariants($type) !== true) continue;
+            $probe = ($san = \Core\Pages::sanitizeBlocks([$txt('probe', $type)])) ? $th->makeBlock($san[0]) : null;
+            if ($probe && trim((string) $th->renderInner($probe)) !== '') { $show = $type; break; }
+        }
+        if ($show) {   // sonst gibt kein Kind-Block ohne Kontext etwas aus
+            $page = [['id' => 'lay1', 'type' => $L::TYPE, 'data' => ['preset' => '2-1', 'columns' => [['blocks' => [$txt('c1', $show)]], ['blocks' => [$txt('c2', $show) + ['tunes' => ['section' => ['anchor' => 'zwei']]]]]]],
+                'tunes' => ['section' => ['anchor' => 'spalten']]]];
+            $html = $th->renderBlocks(\Core\Pages::sanitizeBlocks($page));
+            $this->assert(substr_count($html, '<section') === 1 && str_contains($html, 'lay-grid--2-1') && substr_count($html, 'class="lay-col ') === 2
+                && str_contains($html, 'lay-col--w2') && str_contains($html, 'id="spalten"') && str_contains($html, 'id="zwei"'), "Layout: ein Abschnitt mit zwei Spalten, Sprungmarken ($show)");
+            $this->assert(in_array($show, array_column($L::flatten(\Core\Pages::sanitizeBlocks($page)), 'type'), true), 'Layout: flatten liefert die Blöcke der Spalten');
+            $prev = app()->editing; app()->editing = true;
+            try {
+                $eh = $th->renderBlock($th->makeBlock(\Core\Pages::sanitizeBlocks($page)[0]));
+            } finally { app()->editing = $prev; }
+            $this->assert(str_contains($eh, 'data-lay-item="1.0"') && (!str_contains($eh, 'data-edit=') || str_contains($eh, 'data-edit="columns.0.blocks.0.data.')), 'Layout: Editor – Pfade der Direktbearbeitung im Layout');
+        }
         // Umstellung alter Reihen
         $bl = fn(string $id, string $type, string $row, string $bg = '') => ['id' => $id, 'type' => $type, 'data' => [], 'tunes' => ['section' => ['row' => $row, 'anchor' => $id] + ($bg !== '' ? ['background' => $bg] : [])]];
         $bgs = array_keys($th->backgrounds());

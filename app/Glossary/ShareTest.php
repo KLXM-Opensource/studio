@@ -142,6 +142,10 @@ final class ShareTest
                 Features::setUi(Glossary::FEATURE, true);
                 Glossary::install(['publish' => true]);
                 Glossary::flush();
+                // Adresse der Website wie im Betrieb einstellen (sonst kennt das Register auf der Kommandozeile keine Adresse von A –
+                // live kommt sie aus sys.site_url bzw. dem ersten Aufruf im Browser)
+                if ((string) app()->settings->get('sys.site_url', '') === '') app()->settings->set('sys.site_url', 'https://' . site()->key . '.sharetest.invalid');
+                $state[$step === 'setupA' ? 'urlA' : 'urlB'] = rtrim((string) app()->settings->get('sys.site_url'), '/');
                 $ids = [];
                 if ($step === 'setupA') {
                     $ids['SPF'] = $add('SPF', 'A: Absender-Richtlinie.', 'published', 'Sender Policy Framework');
@@ -208,7 +212,7 @@ final class ShareTest
                 $res['hiddenDetail'] = Entries::bySlug($t, (string) $ue['slug'], true, $lang, 'site') !== null;
                 $spf = Entries::find($t, (int) $state['idsA']['SPF']);
                 $aUrl = Shared::siteInfo((string) $spf['origin_site'], Sharing::KEY)['url'];
-                $res['canonOrigin'] = $aUrl !== '' && str_starts_with((string) Entries::absUrl($t, $spf), $aUrl . '/');
+                $res['canonOrigin'] = $aUrl === ($state['urlA'] ?? '') && $aUrl !== '' && str_starts_with((string) Entries::absUrl($t, $spf), $aUrl . '/');
                 Shared::saveLocal(Sharing::KEY, ['canonical' => 'self']);
                 $res['canonSelf'] = Entries::absUrl($t, $spf) === site_url() . Entries::url($t, $spf);
                 Shared::saveLocal(Sharing::KEY, ['canonical' => 'origin']);

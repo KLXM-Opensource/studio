@@ -526,8 +526,10 @@ final class Shared
         $info = $cur;
         $name = trim(site_name());
         if ($name !== '' && $name !== CMS_NAME) $info['name'] = $name;
-        $url = rtrim(site_url(), '/');
-        if ($url !== '' && PHP_SAPI !== 'cli') $info['url'] = $url;
+        // Adresse: im Browser die aufgerufene (bzw. eingestellte); auf der Kommandozeile (Teilen per CLI/MCP) nur eine eingestellte
+        // Adresse (sys.site_url, base_url) – nie ein geratener Host
+        $url = rtrim(PHP_SAPI !== 'cli' ? site_url() : ((string) app()->settings->get('sys.site_url', '') ?: (string) app()->config->get('base_url', '')), '/');
+        if ($url !== '') $info['url'] = $url;
         $tpl = self::localConfig($t['shared']['key'])['detail_page_id'];
         $info['detail'] = $tpl && ($t['settings']['route'] ?? '') !== '' && Pages::find((int) $tpl) !== null;
         if ($info != $cur) {
