@@ -5915,4 +5915,5 @@ return [
     'Balken oben, zentriert' => 'Bar at the top, centred',
     'Schwebende Bubble (unten links, schließbar)' => 'Floating bubble (bottom left, can be closed)',
     'Schwebende Bubble (unten mittig, schließbar)' => 'Floating bubble (bottom centre, can be closed)',
+    'Schwebende Bubble (Bildschirmmitte, schließbar)' => 'Floating bubble (centre of the screen, can be closed)',
 ];

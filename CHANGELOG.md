@@ -9,7 +9,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Hinweisbalken: Zeitraum und Darstellung
 - **Zeitraum:** „Anzeigen ab“ / „Anzeigen bis“ unter dem Hinweistext (Website → Hinweisbalken) – der Hinweis erscheint und
   verschwindet von selbst, auch bei Treffern im Seiten-Cache und auf offenen Seiten (`data-notice-from/-until`, `notice.js`).
-- **Darstellung:** Balken wie im Design, linksbündig, zentriert oder als **schwebende Bubble** unten links bzw. mittig (Farben vom Kit,
+- **Darstellung:** Balken wie im Design, linksbündig, zentriert oder als **schwebende Bubble** unten links, unten mittig oder in der Bildschirmmitte (Farben vom Kit,
   schließbar, für die Sitzung gemerkt; ruhig bei „Bewegung reduzieren“).
 - Der Core ergänzt die Felder für jedes Kit mit `project.notice` (`Core\Notice`); Kits öffnen den Balken mit
   `notice_open('topnote')`, prüfen `notice_on()` und rufen `notice_late('topnote')` vor `</body>`. CSS/JS nur, wenn Zeitraum oder

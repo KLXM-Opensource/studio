@@ -7,7 +7,7 @@ namespace Core;
  * Hinweisbalken der Website (theme.php 'project' => ['notice' => ['text' => …, 'active' => …]]): Zeitraum und Darstellung.
  *
  * Der Core ergänzt im Einstellungsformular unter dem Hinweistext drei Felder: notice_from / notice_until (Zeitraum, leer = sofort
- * bzw. unbegrenzt) und notice_style ('' = wie im Design, 'left', 'center', 'bubble' / 'bubble-center' = schwebende Bubble unten links bzw. mittig, schließbar).
+ * bzw. unbegrenzt) und notice_style ('' = wie im Design, 'left', 'center', 'bubble' / 'bubble-center' / 'bubble-middle' = schwebende Bubble unten links, unten mittig bzw. in der Bildschirmmitte, schließbar).
  * Kits rendern den Balken weiter selbst, öffnen ihn aber mit notice_open('topnote') und rufen notice_late('topnote') vor </body>:
  *
  *   <?php if (notice_on()): ?><?= notice_open('topnote') ?><div class="wrap">…</div></div><?php endif; ?>
@@ -19,7 +19,7 @@ namespace Core;
  */
 final class Notice
 {
-    public const STYLES = ['', 'left', 'center', 'bubble', 'bubble-center'];
+    public const STYLES = ['', 'left', 'center', 'bubble', 'bubble-center', 'bubble-middle'];
 
     private static bool $assets = false;
 
@@ -38,7 +38,8 @@ final class Notice
                 'help' => __('Leer = bis Sie ihn ausschalten. Danach verschwindet er von selbst.')],
             ['name' => 'notice_style', 'label' => __('Darstellung'), 'type' => 'select', 'translate' => false, 'default' => '',
                 'options' => ['' => __('Balken oben (wie im Design)'), 'left' => __('Balken oben, linksbündig'), 'center' => __('Balken oben, zentriert'),
-                    'bubble' => __('Schwebende Bubble (unten links, schließbar)'), 'bubble-center' => __('Schwebende Bubble (unten mittig, schließbar)')]],
+                    'bubble' => __('Schwebende Bubble (unten links, schließbar)'), 'bubble-center' => __('Schwebende Bubble (unten mittig, schließbar)'),
+                    'bubble-middle' => __('Schwebende Bubble (Bildschirmmitte, schließbar)')]],
         ];
     }
 
@@ -146,7 +147,7 @@ final class Notice
         $html = self::assets();
         if (self::isBubble()) {
             $id = substr(md5(self::text() . '|' . setting('notice_from', '') . '|' . setting('notice_until', '')), 0, 10);
-            $html .= '<aside class="' . e($class) . ' cms-notice-bubble' . (self::style() === 'bubble-center' ? ' cms-notice-bubble--center' : '') . '" role="note" aria-label="' . e(lt('Hinweis')) . '" data-notice data-notice-id="' . $id . '"' . self::timeAttrs() . '>'
+            $html .= '<aside class="' . e($class) . ' cms-notice-bubble' . (self::style() !== 'bubble' ? ' cms-notice-bubble--' . substr(self::style(), 7) : '') . '" role="note" aria-label="' . e(lt('Hinweis')) . '" data-notice data-notice-id="' . $id . '"' . self::timeAttrs() . '>'
                 . '<div class="cms-notice-bubble__text">' . inline(self::text()) . '</div>'
                 . '<button type="button" class="cms-notice-bubble__close" data-notice-close aria-label="' . e(lt('Hinweis schließen')) . '">'
                 . '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></aside>';

@@ -26,5 +26,11 @@
     el.classList.add('is-closing');
     el.addEventListener('animationend', () => { el.hidden = true; }, { once: true });
   });
+  // Esc schließt eine sichtbare Bubble (die mittige verdeckt Inhalt)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    const btn = document.querySelector('.cms-notice-bubble:not([hidden]) [data-notice-close]');
+    if (btn && !document.querySelector('dialog[open]')) btn.click();
+  });
   update();
 })();
