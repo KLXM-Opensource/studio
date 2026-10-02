@@ -445,7 +445,20 @@ final class ExtensionsSelfTest
         $x->account(fn(array $u) => ['title' => 'QA-Konto', 'text' => 'Hallo ' . $u['name']]);
         $x->account(fn(array $u) => '<b>Altform nicht erlaubt</b>');
         $x->dashboard(fn(array $u) => ['cards' => ['qa' => ['title' => 'QA', 'body' => ['text' => '<i>Zahl</i>', 'lines' => ['Neu' => '2']]]]]);
-        self::activate($x);
+        // Nur die Prüf-Erweiterung aktiv – Slots anderer Erweiterungen der Website (z. B. Freigabe) würden mitzählen
+        $prop = new \ReflectionProperty(Extensions::class, 'active');
+        $others = $prop->getValue();
+        $prop->setValue(null, []);
+        try {
+            self::activate($x);
+            self::slotChecks();
+        } finally {
+            $prop->setValue(null, $others);
+        }
+    }
+
+    private static function slotChecks(): void
+    {
         self::actAs(['pages.edit', 'media.upload']);
         $page = ['id' => 5, 'title' => 'Start <&>'];
         $pp = Extensions::pagePanels($page);
