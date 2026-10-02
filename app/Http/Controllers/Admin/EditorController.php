@@ -17,6 +17,7 @@ final class EditorController extends AdminController
     {
         $user = $this->auth($r, 'pages.edit');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         $blocks = Pages::sanitizeBlocks((array) ($r->post['blocks'] ?? []));
         $publish = !empty($r->post['publish']);
         if ($publish && !can('pages.publish')) {
@@ -39,7 +40,8 @@ final class EditorController extends AdminController
     public function discard(Request $r, string $id): Response
     {
         $user = $this->auth($r, 'pages.edit');
-        Pages::find((int) $id) ?? throw new HttpException(404);
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         if (!Pages::discardDraft((int) $id, (int) $user['id'])) {
             return Response::json(['ok' => false, 'error' => 'Seite wurde noch nie veröffentlicht.'], 422);
         }

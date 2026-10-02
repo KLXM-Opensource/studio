@@ -58,6 +58,12 @@ final class SiteController
                 return $this->render($r, $tpl);
             }
         }
+        // Seitenvorlage (Core\PageTemplates): nur angemeldet mit „system.manage“, nie für Besucher
+        if (preg_match('~^' . \Core\PageTemplates::PATH . '/(\d+)$~', $path, $m)) {
+            $tpl = Pages::find((int) $m[1]);
+            if ($tpl && \Core\PageTemplates::isTemplatePage($tpl) && app()->auth->check() && can('system.manage')) return $this->render($r, $tpl);
+            throw new HttpException(404);
+        }
         // Eigene Adresse der Seite „Nicht gefunden“ (/404): antwortet selbst mit 404 – ohne Weiterleitungen und 404-Protokoll;
         // angemeldet mit ?edit=1 öffnet sie den Editor (Core\NotFound)
         if (NotFound::isOwnPath($path)) {

@@ -12,7 +12,7 @@ use Core\Http\Response;
 use Core\Pages;
 use Core\PageTemplates;
 
-/** Werkzeuge → Seitenvorlagen: Vorlagen für die Redaktion anbieten und anordnen (Core\PageTemplates). */
+/** Werkzeuge → Seitenvorlagen: Vorlagen anlegen, gestalten, anordnen (Core\PageTemplates) – nur Administration. */
 final class PageTemplateController extends AdminController
 {
     public function index(Request $r, array $errors = [], ?array $values = null): Response
@@ -35,13 +35,22 @@ final class PageTemplateController extends AdminController
         return $this->back('/admin/seitenvorlagen', 'success', __('Seitenvorlagen gespeichert.'));
     }
 
-    /** Seitenbaum „⋯“: Seite als Vorlage anbieten bzw. nicht mehr anbieten (JSON) */
-    public function toggle(Request $r, string $id): Response
+    /** Neue Vorlage (leer oder aus einer Seite kopiert) → gleich im Block-Editor öffnen */
+    public function create(Request $r): Response
+    {
+        $this->auth($r, 'system.manage');
+        $from = (int) ($r->post['from'] ?? 0);
+        $id = PageTemplates::create((string) ($r->post['label'] ?? ''), $from > 0 ? $from : null);
+        app()->session->flash('success', __('Vorlage angelegt. Gestalten Sie jetzt die Blöcke – Name, Symbol und Reihenfolge unter Werkzeuge → Seitenvorlagen.'));
+        return Response::redirect(PageTemplates::editUrl($id));
+    }
+
+    /** Seitenbaum „⋯ → Als Vorlage speichern“: Kopie der Seite als neue Vorlage (JSON) */
+    public function fromPage(Request $r, string $id): Response
     {
         $this->auth($r, 'system.manage');
         $p = Pages::find((int) $id) ?? throw new HttpException(404);
-        $on = !PageTemplates::isSource((int) $p['id']);
-        $on ? PageTemplates::add((int) $p['id']) : PageTemplates::remove((int) $p['id']);
-        return Response::json(['ok' => true, 'template' => $on]);
+        $tpl = PageTemplates::create((string) $p['title'], (int) $p['id']);
+        return Response::json(['ok' => true, 'id' => $tpl, 'url' => url('/admin/seitenvorlagen')]);
     }
 }

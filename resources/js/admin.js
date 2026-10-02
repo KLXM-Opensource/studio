@@ -736,9 +736,9 @@ if (pt) {
         }]),
       ...(home ? [] : [['Duplizieren', async () => { await post(`${base}/${id}/duplicate`); location.reload(); }]]),
       // Seitenvorlagen (Core\PageTemplates): nur für die Administration
-      ...(pt.dataset.canTemplates === '1' && !home ? [[n.dataset.template === '1' ? t('Nicht mehr als Vorlage anbieten') : t('Als Vorlage anbieten'), async () => {
+      ...(pt.dataset.canTemplates === '1' && !home ? [[t('Als Vorlage speichern'), async () => {
         const res = await post(`${base}/${id}/template`);
-        if (res.ok) location.reload(); else statusFlash(pt, 'error', res.error || t('Das hat nicht geklappt.'));
+        if (res.ok) location.href = res.url; else statusFlash(pt, 'error', res.error || t('Das hat nicht geklappt.'));
       }]] : []),
       ...(n.dataset.dirty === '1' && n.dataset.state === 'online' ? [['Änderungen veröffentlichen', async () => {
         const res = await post(`${base}/${id}/publish`);

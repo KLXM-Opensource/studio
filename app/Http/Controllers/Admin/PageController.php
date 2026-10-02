@@ -62,6 +62,7 @@ final class PageController extends AdminController
     {
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         // [Platzhalter] dieser Seite oben zeigen (Sprungziel „In der Verwaltung“ aus der Übersicht) – bearbeitet wird im Frontend-Editor
         $ph = \Core\Dashboard\Metrics::placeholders(app()->db, \Core\Dashboard\Metrics::placeholdersOk(), 500, (int) $page['id']);
         return $this->view('pages/form', ['page' => $page, 'errors' => [], 'old' => $page, 'revisions' => Pages::revisions((int) $id),
@@ -72,6 +73,7 @@ final class PageController extends AdminController
     {
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         [$data, $errors] = $this->validate($r, $page);
         if ($errors) {
             return $this->view('pages/form', ['page' => $page, 'errors' => $errors, 'old' => $data + $page, 'revisions' => Pages::revisions((int) $id)], 422);
@@ -154,6 +156,7 @@ final class PageController extends AdminController
     {
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         if ($page['is_home']) {
             return $this->back('/admin/pages', 'error', 'Die Startseite kann nicht gelöscht werden.');
         }
