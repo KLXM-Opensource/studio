@@ -41,7 +41,7 @@
 
   <h3>Export, Import, Bibliothek</h3>
   <ul>
-    <li><b>JSON</b> (<code>format: mycms-block</code>): Definition inkl. Beispieldaten; Import legt immer einen Entwurf an (Kurzname bei Kollision mit Suffix).</li>
+    <li><b>JSON</b> (<code>format: klxm-studio-block</code>; ältere Exporte mit <code>mycms-block</code> werden weiter gelesen): Definition inkl. Beispieldaten; Import legt immer einen Entwurf an (Kurzname bei Kollision mit Suffix).</li>
     <li><b>Netzwerk-Bibliothek</b> <code>storage/blocks/{schlüssel}.json</code>: Kopien für alle Websites (nur Netzwerk-Administration/Integratoren). Keine Live-Verknüpfung – Änderungen erreichen andere Websites erst durch erneutes Übernehmen.</li>
     <li><b>Als Kit-Block exportieren</b> (ZIP): <code>blocks/{schlüssel}.php</code> (aus der Vorlage übersetzter PHP-Renderer über <code>Core\Blocks\Runtime</code> – gleiche Ausgabe wie der Interpreter, geprüft von <code>blocks:selftest</code>), <code>css/cblk-{schlüssel}.css</code>, <code>theme-snippet.php</code> (Eintrag für <code>'blocks'</code> mit <code>'cblk' =&gt; [...]</code> und <code>conditional_css</code>), <code>block.json</code>, <code>README.txt</code>. Blocktyp im Kit: <code>{schlüssel}</code> (ohne <code>cblk_</code>); bestehende Seiten werden nicht umgestellt.</li>
   </ul>

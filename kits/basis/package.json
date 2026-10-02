@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-basis",
+  "name": "klxm-studio-kit-basis",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „basis“ (Schriften für den Style-Editor: Inter, Manrope, IBM Plex Sans, Source Serif 4, Lora, Fraunces). Wird von tools/build.mjs automatisch installiert und über kits/basis/build.mjs kopiert.",

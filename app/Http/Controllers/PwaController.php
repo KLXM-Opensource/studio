@@ -66,7 +66,7 @@ final class PwaController
                 '__BASE__' => json_encode(base_path(), JSON_UNESCAPED_SLASHES),
             ]);
         } else {
-            $js = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n.startsWith('mycms-')).map(n=>caches.delete(n)))).then(()=>self.registration.unregister())));";
+            $js = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>/^(klxm-studio|mycms)-/.test(n)).map(n=>caches.delete(n)))).then(()=>self.registration.unregister())));";
         }
         return (new Response($js))
             ->header('Content-Type', 'application/javascript; charset=utf-8')

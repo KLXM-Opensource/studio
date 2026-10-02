@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-glas",
+  "name": "klxm-studio-kit-glas",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „glas“ (selbst gehostete Schriften: Outfit, Figtree, Sora, Urbanist – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über kits/glas/build.mjs kopiert.",

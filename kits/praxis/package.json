@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-praxis",
+  "name": "klxm-studio-kit-praxis",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „praxis“ (Hausschrift). Wird von tools/build.mjs automatisch installiert und über kits/praxis/build.mjs kopiert.",

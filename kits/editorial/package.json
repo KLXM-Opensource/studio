@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-editorial",
+  "name": "klxm-studio-kit-editorial",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „editorial“ (Schriften für den Style-Editor – Serifen für Überschriften, humanistische Grotesk für Text, Mono für Auszeichnungen; Playfair-TTF für App-Symbol und Platzhalterbilder). Wird von tools/build.mjs automatisch installiert und über kits/editorial/build.mjs kopiert.",

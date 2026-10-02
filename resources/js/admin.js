@@ -490,9 +490,9 @@ if (entries) {
 const pt = $('[data-pagetree]');
 if (pt) {
   const tree = $('.pt-tree', pt), base = pt.dataset.base, msg = $('[data-pt-msg]', pt);
-  const KEY = 'mycms-pt-collapsed';
-  const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } })());
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...collapsed])); } catch {} };
+  const KEY = 'klxm-studio-pt-collapsed', OLD = 'mycms-pt-collapsed'; // OLD: historischer Schlüssel, wird noch gelesen
+  const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem(KEY) ?? localStorage.getItem(OLD) ?? '[]'); } catch { return []; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...collapsed])); localStorage.removeItem(OLD); } catch {} };
   const post = (url, body) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-Token': csrf() }, body: JSON.stringify(body || {}) }).then(r => r.json());
   const note = t => { msg.textContent = t; clearTimeout(msg._t); msg._t = setTimeout(() => (msg.textContent = ''), 3000); };
   const nodes = () => $$('.pt-node', tree).filter(n => n.offsetParent !== null);

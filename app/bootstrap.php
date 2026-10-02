@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 define('ROOT', dirname(__DIR__));
 define('CMS_NAME', 'KLXM Studio');
-define('CMS_SLUG', 'klxm-studio');   // MCP-Serverkennung, Bearer-Realms (früher: klxm-mycms, mycms-light)
+define('CMS_SLUG', 'klxm-studio');   // MCP-Serverkennung, Bearer-Realms
 define('CMS_VERSION', '1.0.0');
 
 require ROOT . '/vendor/autoload.php';

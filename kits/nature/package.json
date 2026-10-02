@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-nature",
+  "name": "klxm-studio-kit-nature",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „nature“ (selbst gehostete Schriften: Fraunces, Nunito Sans, Young Serif, Source Sans 3 – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über kits/nature/build.mjs kopiert.",

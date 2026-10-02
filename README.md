@@ -112,7 +112,7 @@ gespeichert wird nur ein SHA-256-Hash. Header `Authorization: Bearer cms_…` (R
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" https://ihre-domain.de/api/v1/me
-claude mcp add --transport http mycms https://ihre-domain.de/mcp --header "Authorization: Bearer cms_…"
+claude mcp add --transport http klxm-studio https://ihre-domain.de/mcp --header "Authorization: Bearer cms_…"
 ```
 
 Inhaltsänderungen entstehen als Entwurf mit Revision; Zugänge „Zur Freigabe“ reichen Änderungen zur Prüfung ein

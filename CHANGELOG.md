@@ -6,6 +6,17 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Altname „MyCMS“ aus dem Core entfernt
+- Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
+  Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`
+  (`mycms-extension` wird still weiter erkannt). Kit-Pakete heißen `klxm-studio-kit-{name}`; `kit:new` benennt auch alte Namen um.
+- Block-Export im Format `klxm-studio-block`; Import und Netzwerk-Bibliothek lesen ältere `mycms-block`-Dateien weiter.
+- Lokale Schlüssel im Browser (`klxm-studio-media-*`, `klxm-studio-{bereich}-*`, `klxm-studio-pt-collapsed`) lesen die alten
+  `mycms-*`-Werte als Rückfall und räumen sie beim Speichern auf; Service-Worker-Cache `klxm-studio-{version}`, alte
+  `mycms-*`-Caches werden gelöscht. Drag-&-Drop-Typ der Medien `application/x-klxm-studio-media`.
+- Bleiben als historische technische Kennung: vCard-Felder `X-MYCMS-*` (in CardDAV-Clients gespeichert), Altname
+  `mycms-extension`/`extra.mycms.entry`, Rückfall-Schlüssel `mycms-consent-*`.
+
 ### Kit „frameworks“: Tailwind CSS oder UIkit – und was ein Framework-Kit braucht
 - Neues Demo-Kit `kits/frameworks` (fiktive Firma „Beispielwerk“): dieselben Blöcke mit **Tailwind CSS 4** (vorkompiliert mit
   `@tailwindcss/cli`, Preflight in `@layer base`, Variante `dark:`) oder **UIkit 3.25** (mitgeliefert, Brücke für Kontrast,

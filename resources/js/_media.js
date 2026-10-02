@@ -48,8 +48,9 @@ const ALL_TYPES = [...ACCEPT.image, ...ACCEPT.pdf, ...ACCEPT.video, ...ACCEPT.au
 const ftype = f => f.type || (/\.svg$/i.test(f.name) ? 'image/svg+xml' : '');
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const store = {
-  get(k, def) { try { const v = localStorage.getItem('mycms-media-' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
-  set(k, v) { try { localStorage.setItem('mycms-media-' + k, JSON.stringify(v)); } catch {} },
+  // Schlüssel klxm-studio-media-*; mycms-media-* (historisch) wird noch gelesen und beim Schreiben entfernt
+  get(k, def) { try { const v = localStorage.getItem('klxm-studio-media-' + k) ?? localStorage.getItem('mycms-media-' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
+  set(k, v) { try { localStorage.setItem('klxm-studio-media-' + k, JSON.stringify(v)); localStorage.removeItem('mycms-media-' + k); } catch {} },
 };
 const TAG_COLORS = ['#FF5F57', '#FF9F0A', '#FFD60A', '#32D74B', '#0A84FF', '#BF5AF2', '#8E8E93'];
 const tagColor = t => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TAG_COLORS[h % TAG_COLORS.length]; };
@@ -589,13 +590,13 @@ class Finder {
     // Dateien auf eine Sammlung ziehen
     this.$side.addEventListener('dragover', e => {
       const t = e.target.closest('[data-src="collection"]');
-      if (t && e.dataTransfer.types.includes('application/x-mycms-media')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; t.classList.add('is-drop'); }
+      if (t && e.dataTransfer.types.includes('application/x-klxm-studio-media')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; t.classList.add('is-drop'); }
     });
     this.$side.addEventListener('dragleave', e => e.target.closest('[data-src]')?.classList.remove('is-drop'));
     this.$side.addEventListener('drop', async e => {
       const t = e.target.closest('[data-src="collection"]'); if (!t) return;
       t.classList.remove('is-drop');
-      const ids = JSON.parse(e.dataTransfer.getData('application/x-mycms-media') || '[]');
+      const ids = JSON.parse(e.dataTransfer.getData('application/x-klxm-studio-media') || '[]');
       if (!ids.length) return;
       e.preventDefault(); e.stopPropagation();
       await api.bulk({ ids, action: 'collect', collection: +t.dataset.value });
@@ -631,7 +632,7 @@ class Finder {
       const it = e.target.closest('[data-id]'); if (!it) return;
       const id = +it.dataset.id;
       const ids = this.sel.has(id) ? [...this.sel] : [id];
-      e.dataTransfer.setData('application/x-mycms-media', JSON.stringify(ids));
+      e.dataTransfer.setData('application/x-klxm-studio-media', JSON.stringify(ids));
       e.dataTransfer.effectAllowed = 'copy';
       if (ids.length > 1) { const g = d.createElement('div'); g.className = 'fx-dragghost'; g.textContent = `${ids.length} Dateien`; box().append(g); e.dataTransfer.setDragImage(g, 20, 20); setTimeout(() => g.remove()); }
     });

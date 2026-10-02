@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-fluid",
+  "name": "klxm-studio-kit-fluid",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „fluid“ (selbst gehostete Schriften für den Style-Editor: Inter, Instrument Sans, Bricolage Grotesque, DM Sans, Space Grotesk, Fraunces, Newsreader, Instrument Serif, JetBrains Mono). Wird von tools/build.mjs automatisch installiert und über kits/fluid/build.mjs kopiert.",

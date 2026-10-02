@@ -72,7 +72,7 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '
   <div class="adm-snippets">
     <div>
       <h3>Claude Code (Terminal)</h3>
-      <pre id="snip-cc"><code>claude mcp add --transport http mycms <?= e($mcpUrl) ?> \
+      <pre id="snip-cc"><code>claude mcp add --transport http klxm-studio <?= e($mcpUrl) ?> \
   --header "Authorization: Bearer <?= e($tok) ?>"</code></pre>
       <button type="button" class="adm-btn adm-btn--small" data-copy="#snip-cc">Kopieren</button>
     </div>
@@ -80,7 +80,7 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '
       <h3>Claude Desktop · <code>claude_desktop_config.json</code></h3>
       <pre id="snip-cd"><code>{
   "mcpServers": {
-    "mycms": {
+    "klxm-studio": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "<?= e($mcpUrl) ?>",
                "--header", "Authorization:${CMS_TOKEN}"],

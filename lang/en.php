@@ -2932,7 +2932,7 @@ return [
     'Jede Änderung wird gespeichert (die letzten {n}). Wiederherstellen legt die Fassung als neuen Entwurf an – veröffentlicht wird erst mit „Freigeben“.' => 'Every change is saved (the last {n}). Restoring creates the version as a new draft – it only goes live with “Release”.',
     'Jeder Zweig von {% if %} muss die HTML-Tags schließen, die er öffnet (Anweisung in Zeile {n}).' => 'Every branch of {% if %} must close the HTML tags it opens (statement in line {n}).',
     'KI-Vorschlag' => 'AI proposal',
-    'Keine gültige Block-Datei (Format „mycms-block“).' => 'Not a valid block file (format “mycms-block”).',
+    'Keine gültige Block-Datei (Format „klxm-studio-block“).' => 'Not a valid block file (format “klxm-studio-block”).',
     'Konnte nicht gespeichert werden.' => 'Could not be saved.',
     'Kurzname (Blocktyp)' => 'Short name (block type)',
     'Kurzname: 2–31 Zeichen, a–z, 0–9 und _, beginnt mit einem Buchstaben.' => 'Short name: 2–31 characters, a–z, 0–9 and _, starting with a letter.',

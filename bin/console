@@ -526,8 +526,8 @@ switch ($cmd) {
             if (!in_array($f->getExtension(), ['php', 'mjs', 'js', 'css', 'json', 'md'], true)) continue;
             $src = (string) file_get_contents($f->getPathname());
             $new = preg_replace('~\b' . preg_quote($from, '~') . '_~', $prefix, $src);
-            $new = str_replace(["mycms-theme-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "kits/$from/", "Kit „{$from}“", "Theme „{$from}“"],
-                ["mycms-theme-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "kits/$name/", "kits/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
+            $new = str_replace(["mycms-theme-$from", "klxm-studio-kit-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "kits/$from/", "Kit „{$from}“", "Theme „{$from}“"],
+                ["klxm-studio-kit-$name", "klxm-studio-kit-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "kits/$name/", "kits/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
             if ($new !== $src) file_put_contents($f->getPathname(), $new);
         }
         echo "Kit „{$name}“ angelegt – Kopie von „{$from}“, Präfix {$from}_ → {$prefix}\n"
@@ -1150,7 +1150,7 @@ switch ($cmd) {
             $src = Core\Extensions::lock($n) ? 'config' : (array_key_exists($n, Core\Extensions::ui()) ? 'verwaltung' : '');
             printf("%-16s %-8s %-9s %-11s %-24s %s\n", $n, $m['version'] ?: '–', in_array($n, $active, true) ? 'aktiv' : '–', $src, $m['source'], $m['label']);
         }
-        if (!Core\Extensions::available()) echo "Keine Erweiterungen installiert (extensions/{name}/extension.php oder Composer-Pakete vom Typ mycms-extension).\n";
+        if (!Core\Extensions::available()) echo "Keine Erweiterungen installiert (extensions/{name}/extension.php oder Composer-Pakete vom Typ klxm-studio-extension).\n";
         break;
 
     case 'features:list':

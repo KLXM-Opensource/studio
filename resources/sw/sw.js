@@ -4,7 +4,7 @@
  * Nie gespeichert: Verwaltung, API, MCP, Formulare, private Antworten (angemeldete Nutzer).
  */
 const VERSION = '__VERSION__';
-const CACHE = 'mycms-' + VERSION;
+const CACHE = 'klxm-studio-' + VERSION;
 const PRECACHE = __PRECACHE__;
 const OFFLINE = __OFFLINE__;
 const BASE = __BASE__;
@@ -17,7 +17,7 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k.startsWith('mycms-') && k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => /^(klxm-studio|mycms)-/.test(k) && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

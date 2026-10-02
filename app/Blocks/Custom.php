@@ -607,11 +607,15 @@ final class Custom
 
     // ================================================================== Export, Import, Bibliothek
 
+    /** Dateiformat des JSON-Exports; „mycms-block“ ist die historische technische Kennung älterer Exporte und wird weiter gelesen */
+    public const FORMAT = 'klxm-studio-block';
+    public const FORMATS = ['klxm-studio-block', 'mycms-block'];
+
     public static function export(string $key): ?array
     {
         $row = self::find($key);
         if (!$row) return null;
-        return ['format' => 'mycms-block', 'format_version' => 1, 'cms' => CMS_VERSION, 'exported_at' => date('c'), 'site' => site()->key,
+        return ['format' => self::FORMAT, 'format_version' => 1, 'cms' => CMS_VERSION, 'exported_at' => date('c'), 'site' => site()->key,
             'block' => self::definition($row)];
     }
 
@@ -619,8 +623,8 @@ final class Custom
     public static function import(string $json, int $userId, string $kind = 'import'): array
     {
         $d = json_decode($json, true);
-        if (!is_array($d) || ($d['format'] ?? '') !== 'mycms-block' || !is_array($d['block'] ?? null)) {
-            return ['key' => null, 'errors' => ['import' => __('Keine gültige Block-Datei (Format „mycms-block“).')]];
+        if (!is_array($d) || !in_array($d['format'] ?? '', self::FORMATS, true) || !is_array($d['block'] ?? null)) {
+            return ['key' => null, 'errors' => ['import' => __('Keine gültige Block-Datei (Format „klxm-studio-block“).')]];
         }
         $b = $d['block'];
         $base = preg_match('~^[a-z][a-z0-9_]{1,30}$~', (string) ($b['key'] ?? '')) ? (string) $b['key'] : self::normName((string) ($b['label'] ?? 'block'));
@@ -646,7 +650,7 @@ final class Custom
         $out = [];
         foreach (glob(self::libraryDir() . '/*.json') ?: [] as $f) {
             $d = json_decode((string) file_get_contents($f), true);
-            if (!is_array($d) || ($d['format'] ?? '') !== 'mycms-block') continue;
+            if (!is_array($d) || !in_array($d['format'] ?? '', self::FORMATS, true)) continue;
             $out[] = ['file' => basename($f), 'label' => (string) ($d['block']['label'] ?? basename($f)), 'description' => (string) ($d['block']['description'] ?? ''),
                 'icon' => (string) ($d['block']['icon'] ?? 'package'), 'site' => (string) ($d['site'] ?? ''), 'exported_at' => (string) ($d['exported_at'] ?? '')];
         }

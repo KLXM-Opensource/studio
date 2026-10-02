@@ -367,7 +367,7 @@ return [
                 'Herkunft (Token, Kanal) und Vorher/Nachher prüfen – dann <b>Übernehmen</b> oder <b>Ablehnen</b> (mit Begründung).',
                 'Jede Einreichung bleibt protokolliert. Tokens lassen sich jederzeit umstellen oder <b>Widerrufen</b>.',
             ],
-            'commands' => "# MCP-Server in Claude Code verbinden (Token aus dem Passwortmanager)\nclaude mcp add --transport http mycms https://www.ihre-website.de/mcp \\\n  --header \"Authorization: Bearer cms_IHR_TOKEN\"",
+            'commands' => "# MCP-Server in Claude Code verbinden (Token aus dem Passwortmanager)\nclaude mcp add --transport http klxm-studio https://www.ihre-website.de/mcp \\\n  --header \"Authorization: Bearer cms_IHR_TOKEN\"",
             'tips' => ['„Nur lesen“ genügt für Auswertungen und Prüfungen.', 'Optional: „Gültig bis“ begrenzt einen Token zeitlich.'],
             'pitfalls' => ['Tokens nie in E-Mails, Tickets oder Code-Repositories – sie sind wie Passwörter.', 'Bestehende Tokens bleiben auf „Direkt übernehmen“, bis Sie sie umstellen.'],
             'manual' => [['KI-Assistenten über MCP & Freigabe', '/admin/hilfe#ki'], ['Prüf-Ebene „Eingereicht“ (Technik)', '/admin/hilfe/technik#freigabe'], ['MCP-Server (Technik)', '/admin/hilfe/technik#mcp']],

@@ -1,5 +1,5 @@
 {
-  "name": "mycms-theme-essenz",
+  "name": "klxm-studio-kit-essenz",
   "private": true,
   "license": "MIT",
   "description": "Build-Abhängigkeiten des Kits „essenz“ (selbst gehostete Schriften: Inter, Inter Tight, Manrope, Geist, Geist Mono – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über kits/essenz/build.mjs kopiert.",
