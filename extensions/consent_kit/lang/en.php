@@ -327,7 +327,7 @@ return [
     '„{value}“ ist keine gültige Quelle (erlaubt: https://host oder https://*.host).' => '“{value}” is not a valid source (allowed: https://host or https://*.host).',
     '… dann melde' => '… then report',
     // Administration → Funktionen & Erweiterungen (Manifest: risk, provides, docs)
-    'Seite „Cookie-Einwilligung“ unter Administration → Einstellungen' => '“Cookie consent” page under Administration → Settings',
+    'Seite „Cookie-Einwilligung“ unter Administration → Einstellungen → Einstellungen der Funktionen' => '“Cookie consent” page under Administration → Settings → Feature settings',
     'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist' => 'Banner and script on the website as soon as a consent-based service is active',
     'Block „Externer Inhalt (mit Einwilligung)“' => 'Block “External content (with consent)”',
     'Link „Cookie-Einstellungen“ im Fußbereich' => '“Cookie settings” link in the footer',

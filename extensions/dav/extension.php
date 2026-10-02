@@ -22,7 +22,7 @@ return [
     'author' => 'KLXM Crossmedia GmbH and contributors',
     'license' => 'MIT',
     'risk' => 'Öffnet /dav für Kalender- und Adressbuch-Apps. Wer ein App-Passwort hat, kann freigegebene Tabellen lesen und – je nach Passwort – ändern.',
-    'provides' => ['Abschnitt „Kalender & Kontakte in Apps“ im Konto (App-Passwörter)', 'Einstellungen je Tabelle unter Administration → Einstellungen (Recht data.schema)', 'Adressen /dav und /.well-known/caldav|carddav', 'App-Passwörter je Benutzer'],
+    'provides' => ['Abschnitt „Kalender & Kontakte in Apps“ im Konto (App-Passwörter)', 'Einstellungen je Tabelle unter Administration → Einstellungen → Einstellungen der Funktionen (Recht data.schema)', 'Adressen /dav und /.well-known/caldav|carddav', 'App-Passwörter je Benutzer'],
     'requirements' => fn(): array => ['sabre/dav (Composer)' => class_exists(\Sabre\DAV\Server::class)],
     'docs' => ['Technik: CalDAV/CardDAV' => '/admin/hilfe/technik#dav'],
     'boot' => function (Core\Extension $x): void {

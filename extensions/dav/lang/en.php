@@ -67,7 +67,7 @@ return [
     // Administration → Funktionen & Erweiterungen (Manifest: risk, provides, docs)
     'Öffnet /dav für Kalender- und Adressbuch-Apps. Wer ein App-Passwort hat, kann freigegebene Tabellen lesen und – je nach Passwort – ändern.' => 'Opens /dav for calendar and address book apps. Anyone with an app password can read shared tables and – depending on the password – change them.',
     'Abschnitt „Kalender & Kontakte in Apps“ im Konto (App-Passwörter)' => '“Calendar & contacts in apps” section in the account (app passwords)',
-    'Einstellungen je Tabelle unter Administration → Einstellungen (Recht data.schema)' => 'Settings per table under Administration → Settings (permission data.schema)',
+    'Einstellungen je Tabelle unter Administration → Einstellungen → Einstellungen der Funktionen (Recht data.schema)' => 'Settings per table under Administration → Settings → Feature settings (permission data.schema)',
     'Adressen /dav und /.well-known/caldav|carddav' => 'Addresses /dav and /.well-known/caldav|carddav',
     'App-Passwörter je Benutzer' => 'App passwords per user',
     'Technik: CalDAV/CardDAV' => 'Technical: CalDAV/CardDAV',

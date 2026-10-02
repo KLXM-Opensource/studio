@@ -111,7 +111,7 @@ MIT wie KLXM Studio – siehe `LICENSE`. Die verwendeten sabre/*-Pakete stehen u
 | Stelle | Was |
 |---|---|
 | Slot `account` (Recht `dav.use`) | Abschnitt im Konto: Anzahl eigener App-Passwörter, zuletzt benutzt, Link zur Seite `/admin/dav` |
-| `adminPage` Art `settings` (Recht `data.schema`) | Karte auf Administration → Einstellungen: Tabellen als Kalender bzw. Adressbuch bereitstellen |
+| `adminPage` Art `settings` (Recht `data.schema`) | Karte auf Administration → Einstellungen → Einstellungen der Funktionen: Tabellen als Kalender bzw. Adressbuch bereitstellen |
 | Routen | `GET /admin/dav`, `POST /admin/dav/passwords`, `POST /admin/dav/passwords/{id}/delete` mit `dav.use`; `POST /admin/dav/tables` mit `data.schema` – Anmeldung, Recht und CSRF prüft der Core |
 
 vCard-Felder `X-MYCMS-*` bleiben als historische technische Kennung (in den Apps gespeichert).

@@ -56,13 +56,13 @@ return [
     'description' => 'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).',
     'author' => 'KLXM Crossmedia GmbH and contributors',
     'license' => 'MIT',
-    'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Cookie-Einstellungen“ im Fußbereich'],
+    'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen → Einstellungen der Funktionen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Cookie-Einstellungen“ im Fußbereich'],
     'docs' => ['Technik: Consent-Kit' => '/admin/hilfe/technik#consent'],
     'boot' => function (Core\Extension $x): void {
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
         $x->permissions('Cookie-Einwilligung', ['consent.manage' => 'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten']);
         $x->migration(1, fn(Core\Database $db) => MyCms\Consent\Repository::migrate($db));
-        // Reine Konfiguration → Sammelseite Administration → Einstellungen (Core\AdminPages)
+        // Reine Konfiguration → Sammelseite Administration → Einstellungen → Einstellungen der Funktionen (Core\AdminPages)
         $x->adminPage(['href' => '/admin/consent', 'label' => 'Cookie-Einwilligung', 'kind' => 'settings', 'icon' => 'cookie',
             'perm' => 'consent.manage', 'feature' => 'consent', 'description' => 'Dienste, Texte und Darstellung des Cookie-Hinweises, Protokoll']);
 

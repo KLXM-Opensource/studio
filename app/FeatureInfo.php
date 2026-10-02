@@ -157,7 +157,7 @@ final class FeatureInfo
                 'effects' => ['menu' => __('Administration → Benutzer & Rollen')],
                 'caution' => __('Aus = niemand (auch nicht die Administration) kann Benutzer anlegen oder Rollen ändern, bis die Funktion wieder an ist.')],
             'system' => ['group' => 'ops', 'desc' => __('Grundeinstellungen (Adresse, E-Mail, Schlüssel, Sicherheit).'),
-                'effects' => ['menu' => __('Administration → Grundeinstellungen')],
+                'effects' => ['menu' => __('Administration → Einstellungen → Grundeinstellungen')],
                 'caution' => __('Aus = die Grundeinstellungen sind für alle gesperrt, bis die Funktion wieder an ist.')],
             // Funktionen der mitgelieferten Erweiterungen (erscheinen nur, wenn die Erweiterung läuft)
             'video.tools' => ['group' => 'media', 'desc' => __('Videos der Mediathek prüfen, fürs Web optimieren, schneiden und mit Poster versehen.'),
@@ -165,7 +165,7 @@ final class FeatureInfo
                     'data' => __('Aufträge, Protokolle und optimierte Versionen in der Mediathek')],
                 'risk' => __('Startet ffmpeg/ffprobe als Prozesse auf dem Server (proc_open) und verarbeitet hochgeladene Dateien. Nur einschalten, wenn Videos wirklich hier bearbeitet werden; Speicherplatz und CPU-Last im Blick behalten.')],
             'dav' => ['group' => 'interfaces', 'desc' => __('Termine und Kontakte mit Kalender- und Adressbuch-Apps abgleichen.'),
-                'effects' => ['menu' => __('Konto → „Kalender & Kontakte in Apps“ (App-Passwörter); Tabellen unter Administration → Einstellungen'), 'external' => __('Apps greifen mit App-Passwort über /dav auf Tabellen zu')],
+                'effects' => ['menu' => __('Konto → „Kalender & Kontakte in Apps“ (App-Passwörter); Tabellen unter Administration → Einstellungen → Einstellungen der Funktionen'), 'external' => __('Apps greifen mit App-Passwort über /dav auf Tabellen zu')],
                 'risk' => __('Öffnet /dav für Kalender- und Adressbuch-Apps. Wer ein App-Passwort hat, kann freigegebene Tabellen lesen und – je nach Passwort – ändern.')],
             'consent' => ['group' => 'ops', 'desc' => __('Cookie-Einwilligung: Dienste, Hinweis, Protokoll.'),
                 'effects' => ['menu' => __('Administration → Einstellungen → Cookie-Einwilligung'), 'frontend' => __('Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist; Cookie mit der Auswahl'),
