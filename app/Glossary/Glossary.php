@@ -72,11 +72,13 @@ final class Glossary
         $s = self::settings();
         $s['mode'] = isset(self::MODES[$in['mode'] ?? '']) ? (string) $in['mode'] : 'page';
         $s['headings'] = max(0, min(6, (int) ($in['headings'] ?? 3)));
-        $clean = fn(string $v, string $rx) => implode("\n", array_slice(array_values(array_filter(array_map('trim', preg_split('~[\r\n,]+~', $v) ?: []),
-            fn($l) => $l !== '' && preg_match($rx, $l))), 0, 30));
+        $clean = fn(string $v, string $rx) => implode("\n", array_slice(array_values(array_unique(array_filter(array_map('trim', preg_split('~[\r\n,]+~', $v) ?: []),
+            fn($l) => $l !== '' && preg_match($rx, $l)))), 0, 30));
         // Dynamische Bereiche: einfache Selektoren (.klasse, #id, [attribut], element)
         $s['live'] = $clean(mb_substr((string) ($in['live'] ?? ''), 0, 1000), '~^(?:[a-z][a-z0-9-]*)?(?:[.#][A-Za-z_][\w-]*|\[[a-z][\w-]*(?:=["\']?[\w -]+["\']?)?\])*$~');
-        $s['exclude'] = $clean(mb_substr((string) ($in['exclude'] ?? ''), 0, 2000), '~^/[^\s<>"]*$~');
+        // Ausnahmen: Seitenauswahl (Feldtyp „pages“, Pfade als Liste) oder Text mit einem Pfad je Zeile
+        $ex = $in['exclude'] ?? '';
+        $s['exclude'] = $clean(mb_substr(is_array($ex) ? implode("\n", array_map('strval', array_filter($ex, 'is_scalar'))) : (string) $ex, 0, 2000), '~^/[^\s<>"]*$~');
         app()->settings->set(self::SET, $s);
         PageCache::clear();
         return $s;

@@ -51,6 +51,7 @@ final class Ai
         'ollama' => 'Ollama (lokal/eigener Server)',
         'mistral' => 'Mistral AI (EU)',
         'openai' => 'OpenAI',
+        'anthropic' => 'Anthropic (Claude)',
         'generic' => 'OpenAI-kompatibel (z. B. vLLM, LM Studio, IONOS, Scaleway, STACKIT)',
         'fake' => 'Test-Anbieter (ohne KI)',
     ];
@@ -59,6 +60,7 @@ final class Ai
         'ollama' => ['embed' => 'nomic-embed-text'],
         'mistral' => ['text' => 'mistral-small-latest', 'embed' => 'mistral-embed', 'vision' => 'pixtral-12b-latest'],
         'openai' => ['text' => 'gpt-4o-mini', 'embed' => 'text-embedding-3-small', 'vision' => 'gpt-4o-mini'],
+        'anthropic' => ['text' => 'claude-haiku-4-5', 'vision' => 'claude-haiku-4-5'],
         'fake' => ['embed' => 'hash', 'text' => 'fake', 'vision' => 'fake'],
     ];
     /** Nach einem Fehler wird der Anbieter so lange nicht mehr gefragt (Sekunden) – Besucher warten nicht auf Zeitüberschreitungen */
@@ -96,29 +98,36 @@ final class Ai
         return array_replace_recursive($base, is_array($local) ? (array) ($local['ai'] ?? []) : []);
     }
 
+    /** Konfigurations-Ebene aus den Dateien dieser Website (config.php ← config.local.php ← config/sites/{key}.php) */
+    public static function fileLayer(): array
+    {
+        return (array) app()->config->get('ai', []);
+    }
+
     /** Konfiguration der Installation (Verwaltung ← Dateien), ohne Werte einzelner Websites – z. B. für die Wissensdatenbank */
     public static function installationConfig(): array
     {
-        return self::config(array_replace_recursive(self::stored(), self::fileConfig()));
+        return self::config(Profiles::merge(self::stored(), self::fileConfig()));
+    }
+
+    /** Rohwerte dieser Website im Format 2 (Verwaltung ← Dateien), Grundlage für config() und die Verwaltung */
+    public static function raw(): array
+    {
+        return Profiles::merge(self::stored(), self::fileLayer());
     }
 
     /**
-     * Normalisierte Konfiguration dieser Website (Verwaltung ← config.local.php ← config/sites/{key}.php).
-     * Enthält u. a. provider, base_url, api_key, region, models[cap], timeout, text_timeout, index_timeout, configured, external.
+     * Normalisierte Konfiguration dieser Website (Verwaltung ← config.local.php ← config/sites/{key}.php), siehe Core\AI\Profiles.
+     * Enthält profiles, assign und – wie bisher, für alle Aufrufer – provider, base_url, api_key, region (der Verbindung für
+     * Texte), models[cap], providers[cap] (je Fähigkeit inkl. „chat“), timeout, text_timeout, index_timeout, transcribe,
+     * configured, external. $raw: eigene Rohwerte (altes oder neues Format).
      */
     public static function config(?array $raw = null): array
     {
-        $c = $raw ?? array_replace_recursive(self::stored(), (array) app()->config->get('ai', []));
-        $provider = strtolower(trim((string) ($c['provider'] ?? '')));
-        $provider = isset(self::PROVIDERS[$provider]) ? $provider : '';
-        $models = (array) ($c['models'] ?? []);
-        // Ältere Schlüssel: 'embeddings' (Embedding-Modell), 'model' (Textmodell)
-        $models += array_filter(['embed' => $c['embeddings'] ?? null, 'text' => $c['model'] ?? null]);
+        $c = $raw !== null ? Profiles::upgrade($raw) : self::raw();
         $out = [
-            'provider' => $provider,
-            'base_url' => rtrim(trim((string) ($c['base_url'] ?? '')), '/'),
-            'api_key' => (string) ($c['api_key'] ?? ''),
-            'region' => ($c['region'] ?? null) ? strtoupper((string) $c['region']) : null,
+            'profiles' => Profiles::profiles($c),
+            'assign' => Profiles::assignments($c),
             'models' => [],
             'providers' => [],
             'timeout' => max(0.5, min(30.0, (float) ($c['timeout'] ?? 2.5))),
@@ -128,44 +137,60 @@ final class Ai
             'kb' => ($c['kb'] ?? true) !== false,   // Wissensdatenbank (Support) semantisch durchsuchen
             'prices' => (array) ($c['prices'] ?? []),
         ];
-        if ($out['provider'] === 'ollama' && $out['base_url'] === '') $out['base_url'] = 'http://127.0.0.1:11434';
-        $out['transcribe'] = Transcriber::normalize((array) ($c['transcribe'] ?? []));
-        foreach (array_keys(self::CAPS) as $cap) {
-            if ($cap === 'transcribe') continue;   // eigener Abschnitt 'transcribe' (Transcriber::capability)
-            $o = (array) ($c['providers'][$cap] ?? []);
-            $p = strtolower(trim((string) ($o['provider'] ?? $provider)));
-            $p = isset(self::PROVIDERS[$p]) ? $p : '';
-            $out['providers'][$cap] = [
-                'provider' => $p,
-                'base_url' => rtrim(trim((string) ($o['base_url'] ?? ($p === $provider ? $out['base_url'] : ''))), '/') ?: ($p === 'ollama' ? 'http://127.0.0.1:11434' : ''),
-                'api_key' => (string) ($o['api_key'] ?? ($p === $provider ? $out['api_key'] : '')),
-                'region' => isset($o['region']) ? strtoupper((string) $o['region']) : ($p === $provider ? $out['region'] : null),
-            ];
-            $m = trim((string) ($o['model'] ?? $models[$cap] ?? ''));
-            $out['models'][$cap] = $m !== '' ? $m : (self::DEFAULT_MODELS[$p][$cap] ?? '');
+        $off = ($c['enabled'] ?? true) === false;
+        $empty = ['provider' => '', 'base_url' => '', 'api_key' => '', 'region' => null, 'profile' => '', 'label' => '', 'timeout' => null, 'fallback' => null];
+        foreach (['text', 'chat', 'embed', 'vision'] as $cap) {
+            $r = $off ? null : Profiles::resolve($c, $cap);
+            $fb = $off || $cap === 'embed' ? null : Profiles::resolve($c, $cap, true);   // Embeddings: kein Ersatz (Vektoren passen nicht zusammen)
+            $p = $r ? array_intersect_key($r, $empty) + $empty : $empty;
+            if ($fb && $fb['model'] === '') $fb['model'] = self::DEFAULT_MODELS[$fb['provider']][$cap === 'chat' ? 'text' : $cap] ?? '';
+            $p['fallback'] = $fb && $fb['model'] !== '' ? array_intersect_key($fb, $empty) + ['model' => $fb['model']] : null;
+            $out['providers'][$cap] = $p;
+            $m = trim((string) ($r['model'] ?? ''));
+            $out['models'][$cap] = $m !== '' ? $m : (self::DEFAULT_MODELS[$p['provider']][$cap === 'chat' ? 'text' : $cap] ?? '');
         }
-        $out['configured'] = $provider !== '' && ($c['enabled'] ?? true) !== false;
+        // Bisherige Einzelwerte (Anzeige, ältere Aufrufer): Verbindung für Texte, sonst die erste zugeordnete
+        $main = $out['providers']['text']['provider'] !== '' ? $out['providers']['text']
+            : ($out['providers']['embed']['provider'] !== '' ? $out['providers']['embed'] : $out['providers']['vision']);
+        $out += ['provider' => $main['provider'], 'base_url' => $main['base_url'], 'api_key' => $main['api_key'], 'region' => $main['region']];
+        $out['transcribe'] = Transcriber::normalize(Profiles::transcribe($c));
+        $out['configured'] = $out['provider'] !== '';
         $out['enabled'] = $out['configured'];                     // Kompatibilität
         $out['embeddings'] = $out['configured'] ? $out['models']['embed'] : '';
         $out['model'] = $out['models']['text'];
-        $out['external'] = $out['configured'] && self::isExternal(self::capability('embed', $out)) ;
+        $out['external'] = $out['configured'] && self::isExternal(self::capability('embed', $out));
         return $out;
     }
 
     /**
-     * Angaben einer Fähigkeit: provider, base_url, api_key, region, model, endpoint, external, configured
-     * @param 'text'|'embed'|'vision' $cap
+     * Angaben einer Fähigkeit bzw. eines Zwecks: provider, base_url, api_key, region, model, profile, label, timeout, fallback,
+     * endpoint, external, configured. 'chat' = Besucher-Chat (ohne eigene Zuordnung wie 'text').
+     * @param 'text'|'chat'|'embed'|'vision'|'transcribe' $cap
      */
     public static function capability(string $cap, ?array $cfg = null): array
     {
         $cfg ??= self::config();
         if ($cap === 'transcribe') return Transcriber::capability($cfg['transcribe'] ?? Transcriber::normalize([]), true);
         $p = $cfg['providers'][$cap] ?? ['provider' => '', 'base_url' => '', 'api_key' => '', 'region' => null];
-        $out = $p + ['cap' => $cap, 'model' => (string) ($cfg['models'][$cap] ?? '')];
+        $out = $p + ['cap' => $cap, 'model' => (string) ($cfg['models'][$cap] ?? ''), 'profile' => '', 'label' => '', 'timeout' => null, 'fallback' => null];
         $out['configured'] = ($cfg['configured'] ?? false) && $out['provider'] !== '' && $out['model'] !== '';
         $out['endpoint'] = self::endpoint($out);
         $out['external'] = $out['configured'] && self::isExternal($out);
         return $out;
+    }
+
+    /** Zweck → Verbindung → Modell (Kurzform): Ai::for('vision') */
+    public static function for(string $purpose): array
+    {
+        return self::capability($purpose);
+    }
+
+    /** Symfony-AI-Platform für einen Zweck (Verbindung + Zeitlimit der Verbindung bzw. für Redaktionsaufgaben) */
+    public static function platformFor(string $purpose): PlatformInterface
+    {
+        $c = self::capability($purpose);
+        if (!$c['configured']) throw new AiException(__('Für diese KI-Funktion ist kein Modell konfiguriert.'));
+        return self::platform($c, (float) ($c['timeout'] ?? self::config()['text_timeout']));
     }
 
     /** Schalter dieser Website: KI an/aus und je Fähigkeit (Grundeinstellungen → KI) */
@@ -210,6 +235,7 @@ final class Ai
         return match ($cap['provider'] ?? '') {
             'openai' => ($cap['region'] ?? null) === 'EU' ? 'https://eu.api.openai.com' : 'https://api.openai.com',
             'mistral' => ($cap['base_url'] ?? '') ?: 'https://api.mistral.ai',
+            'anthropic' => ($cap['base_url'] ?? '') ?: 'https://api.anthropic.com',
             'fake' => 'local://fake',
             default => (string) ($cap['base_url'] ?? ''),
         };
@@ -220,7 +246,7 @@ final class Ai
     /** Symfony-AI-Platform für eine Fähigkeit (Anbieter-Bridge mit Positivliste und Zeitlimit) */
     public static function platform(array $cap, float $timeout): PlatformInterface
     {
-        if (!in_array($cap['provider'] ?? '', ['ollama', 'mistral', 'openai', 'generic'], true)) {
+        if (!in_array($cap['provider'] ?? '', ['ollama', 'mistral', 'openai', 'anthropic', 'generic'], true)) {
             throw new AiException(__('Kein KI-Anbieter konfiguriert.'));
         }
         $key = md5(json_encode([$cap['provider'], $cap['base_url'], $cap['api_key'], $cap['region'], $timeout]));
@@ -239,6 +265,8 @@ final class Ai
             'mistral' => MistralFactory::createPlatform((string) $apiKey, $http, baseUrl: $endpoint),
             'openai' => OpenAiFactory::createPlatform((string) $apiKey, $http, region: ($cap['region'] ?? null) === 'EU' ? OpenAiFactory::REGION_EU : null),
             'generic' => GenericFactory::createPlatform($endpoint, $apiKey, $http),
+            // Anthropic: OpenAI-kompatible Schnittstelle (/v1/chat/completions, Bearer-Schlüssel); keine Embeddings
+            'anthropic' => GenericFactory::createPlatform($endpoint, $apiKey, $http, supportsEmbeddings: false, name: 'anthropic'),
         };
         return self::$platforms[$key] = $platform;
     }
@@ -296,7 +324,7 @@ final class Ai
      */
     public static function stream(string|array $messages, array $o, callable $onDelta): array
     {
-        $cap = self::ready('text', $o);
+        $cap = isset($o['_cap']) && is_array($o['_cap']) ? $o['_cap'] : self::ready('text', $o);
         $track = preg_replace('~[^a-z_]~', '', (string) ($o['track'] ?? 'text')) ?: 'text';
         $bag = [];
         if (($o['system'] ?? '') !== '') $bag[] = Message::forSystem((string) $o['system']);
@@ -332,7 +360,7 @@ final class Ai
                     usleep(15000);
                 }
             } else {
-                $deferred = self::platform($cap, (float) ($o['timeout'] ?? $cfg['text_timeout']))->invoke($cap['model'], new MessageBag(...$bag), $opts + ['stream' => true]);
+                $deferred = self::platform($cap, (float) ($o['timeout'] ?? $cap['timeout'] ?? $cfg['text_timeout']))->invoke($cap['model'], new MessageBag(...$bag), $opts + ['stream' => true]);
                 $result = $deferred->getResult();
                 if ($result instanceof \Symfony\AI\Platform\Result\StreamResult) {
                     foreach ($result->getContent() as $delta) {
@@ -355,6 +383,10 @@ final class Ai
         } catch (\Throwable $e) {
             self::track($track, $cap, 0, 0, (int) ((microtime(true) - $t) * 1000), true);
             self::failed($e, $cap);
+            // Ersatz-Verbindung, solange noch nichts ausgegeben wurde
+            if ($text === '' && empty($o['no_fallback']) && ($fb = self::fallbackOf($cap)) && !self::paused($fb)) {
+                return self::stream($messages, ['no_fallback' => true, '_cap' => $fb] + $o, $onDelta);
+            }
             throw new AiException(self::shortError($e), 0, $e);
         }
         $ms = (int) ((microtime(true) - $t) * 1000);
@@ -397,16 +429,35 @@ final class Ai
         }
     }
 
+    /** Ersatz-Verbindung einer Fähigkeit (Zuordnung „fallback“) als vollständige Fähigkeit oder null */
+    private static function fallbackOf(array $c): ?array
+    {
+        $f = $c['fallback'] ?? null;
+        if (!is_array($f) || ($f['provider'] ?? '') === '' || ($f['model'] ?? '') === '') return null;
+        $out = $f + ['cap' => $c['cap'], 'profile' => '', 'label' => '', 'timeout' => null, 'region' => null, 'base_url' => '', 'api_key' => ''];
+        $out['fallback'] = null;
+        $out['is_fallback'] = true;
+        $out['configured'] = true;
+        $out['endpoint'] = self::endpoint($out);
+        $out['external'] = self::isExternal($out);
+        return $out;
+    }
+
     /** Fähigkeit bereit? (Website-Schalter, Anbieter, Pause nach Fehler) – sonst AiException */
     private static function ready(string $cap, array $o): array
     {
         if (empty($o['force']) && !self::enabled($cap)) {
             throw new AiException(__('KI ist für diese Website nicht eingeschaltet (Grundeinstellungen → KI).'));
         }
-        $c = self::capability($cap);
+        // 'use' => 'chat': Besucher-Chat mit eigener Zuordnung (sonst wie „text“), zählt aber zum Schalter „Texte“
+        $c = self::capability($cap === 'text' && ($o['use'] ?? '') === 'chat' ? 'chat' : $cap);
         if (!$c['configured']) throw new AiException(__('Für diese KI-Funktion ist kein Modell konfiguriert.'));
         if (!empty($o['model'])) $c['model'] = (string) $o['model'];
-        if (self::paused($c) && empty($o['force'])) throw new AiException(__('Der KI-Anbieter ist gerade nicht erreichbar. Bitte in einer Minute erneut versuchen.'));
+        if (self::paused($c) && empty($o['force'])) {
+            // Ersatz-Verbindung, solange die erste pausiert
+            if ($fb = self::fallbackOf($c)) { if (!self::paused($fb)) return $fb; }
+            throw new AiException(__('Der KI-Anbieter ist gerade nicht erreichbar. Bitte in einer Minute erneut versuchen.'));
+        }
         return $c;
     }
 
@@ -431,7 +482,7 @@ final class Ai
                 $text = isset($o['fake']) ? (string) $o['fake'] : ($capName === 'vision' ? 'Testbild' : 'bereit');
                 $usage = null;
             } else {
-                $deferred = self::platform($cap, (float) ($o['timeout'] ?? $cfg['text_timeout']))->invoke($cap['model'], $bag, $opts);
+                $deferred = self::platform($cap, (float) ($o['timeout'] ?? $cap['timeout'] ?? $cfg['text_timeout']))->invoke($cap['model'], $bag, $opts);
                 $result = $deferred->getResult();
                 $text = trim((string) $deferred->asText());
                 $usage = $result->getMetadata()->get('token_usage');
@@ -439,6 +490,8 @@ final class Ai
         } catch (\Throwable $e) {
             self::track($capName, $cap, 0, 0, (int) ((microtime(true) - $t) * 1000), true);
             self::failed($e, $cap);
+            // Ersatz-Verbindung (Zuordnung „fallback“) einmal versuchen
+            if (empty($o['no_fallback']) && ($fb = self::fallbackOf($cap)) && !self::paused($fb)) return self::run($capName, $fb, $bag, ['no_fallback' => true] + $o);
             throw new AiException(self::shortError($e), 0, $e);
         }
         $ms = (int) ((microtime(true) - $t) * 1000);

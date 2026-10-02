@@ -44,6 +44,14 @@
     <tr><td>Verlauf</td><td>Ihre eigenen KI-Vorschläge der letzten 90 Tage – ohne Inhalte.</td></tr>
     <tr><td>Einstellungen</td><td>Überblick über Anbieter und Schalter; ändern lässt sich das unter Grundeinstellungen → KI.</td></tr>
   </table>
+  <h3 id="ki-einrichten">Einrichten: Verbindungen und Verwendung (Administration)</h3>
+  <p>Unter <b>Grundeinstellungen → KI</b> ist alles in aufklappbaren Abschnitten geordnet: <b>Übersicht</b> (je Zweck Verbindung, Modell, Status, „Verbindung testen“), <b>Verbindungen</b>, <b>Verwendung</b>, danach die Schalter dieser Website, der KI-Assistent, der Besucher-Chat, Datenschutz und Nutzung.</p>
+  <ol>
+    <li><b>Verbindung hinzufügen</b> (nur Agentur bzw. Netzwerk-Administration): Bezeichnung (z. B. „Ollama Büro“), Anbieter, Adresse – bei Ollama z. B. <code>http://localhost:11434</code> oder die Adresse Ihres Servers – und, falls nötig, API-Schlüssel bzw. Token. Mit <b>Verbindung prüfen</b> sehen Sie sofort, ob alles stimmt: „Verbindung in Ordnung“ mit Version, Anzahl der Modelle und Dauer, sonst „Schlüssel falsch“, „nicht erreichbar“ oder „falsche Art“. Gespeicherte Schlüssel werden nie wieder angezeigt; leer lassen = unverändert, „-“ löscht ihn.</li>
+    <li><b>Modelle anzeigen</b> listet die Modelle der Verbindung mit Größe, Parametern, Quantisierung, Kontextlänge und Eignung (Text, Bilder, Embeddings, Audio) – mit Filter. <b>Übernehmen</b> trägt das Modell für den gewählten Zweck ein.</li>
+    <li>Unter <b>Verwendung</b> wählen Sie je Zweck – Texte &amp; Redaktion, Besucher-Chat, Embeddings (Suche), Bilder (Alt-Texte), Sprache → Text – die Verbindung und mit <b>Modelle …</b> das Modell per Klick (oder tippen den Namen ein). Optional springt eine <b>Ersatz-Verbindung</b> ein, wenn die erste nicht antwortet. Dann <b>Verwendung speichern</b>.</li>
+  </ol>
+  <p>So lassen sich Anbieter mischen, z. B. Texte und Bilder über den eigenen Ollama-Server, der Besucher-Chat über einen EU-Anbieter. Ein Statuspunkt zeigt je Verbindung das letzte Prüfergebnis. Ein neues Embedding-Modell bedeutet: Der Suchindex wird neu berechnet – bis dahin findet die semantische Suche weniger. Bereiche, die in einer Konfigurationsdatei festgelegt sind, sind gesperrt.</p>
   <h3>Weitere Helfer</h3>
   <ul>
     <li><b>Support-Team</b>: ✦ Antwortvorschlag in einer Meldung (stützt sich auf den Verlauf und passende Wissensartikel), ✦ Mit KI überarbeiten beim Wissensartikel (entfernt Namen und Kontaktdaten).</li>

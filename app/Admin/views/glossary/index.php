@@ -171,8 +171,10 @@ $siteName = fn(string $k) => \Core\Data\Shared::siteInfo($k, 'glossar')['name'];
         <select id="gls-mode" name="s[mode]"><?php foreach (Glossary::MODES as $k => $l): ?><option value="<?= e($k) ?>"<?= $settings['mode'] === $k ? ' selected' : '' ?>><?= e(__($l)) ?></option><?php endforeach; ?></select></div>
       <div class="f"><label for="gls-h"><?= e(__('Überschriften nicht markieren')) ?></label>
         <select id="gls-h" name="s[headings]"><?php foreach ([0 => __('Alle Überschriften markieren'), 1 => 'h1', 2 => 'h1–h2', 3 => 'h1–h3', 4 => 'h1–h4', 6 => __('Keine Überschrift (h1–h6)')] as $k => $l): ?><option value="<?= $k ?>"<?= (int) $settings['headings'] === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select></div>
-      <div class="f"><label for="gls-ex"><?= e(__('Seiten ausnehmen')) ?></label><textarea id="gls-ex" name="s[exclude]" rows="3" spellcheck="false" data-kia-off aria-describedby="gls-ex-h" placeholder="/impressum&#10;/blog/*"><?= e($settings['exclude']) ?></textarea>
-        <p class="f-help" id="gls-ex-h"><?= e(__('Ein Pfad je Zeile; „/pfad/*“ nimmt alle Seiten darunter aus. Einzelne Abschnitte: Abschnitts-Option „Glossar-Begriffe hier nicht markieren“ im Editor.')) ?></p></div>
+      <?php // Seiten ausnehmen: Seitenauswahl mit Baum und Suche (Core\PagePicker, Pfade wie bisher; eigene Pfade wie /blog/* im Dialog)
+      echo \Core\Fields::renderField(['name' => 'exclude', 'label' => __('Seiten ausnehmen'), 'type' => 'pages', 'store' => 'paths',
+          'help' => __('„mit Unterseiten“ nimmt alle Seiten darunter aus; eigene Pfade (z. B. /blog/*) lassen sich im Dialog ergänzen. Einzelne Abschnitte: Abschnitts-Option „Glossar-Begriffe hier nicht markieren“ im Editor.')],
+          $settings['exclude'], [], 's') ?>
       <div class="f"><label for="gls-live"><?= e(__('Dynamische Bereiche (CSS-Selektoren)')) ?></label><textarea id="gls-live" name="s[live]" rows="2" spellcheck="false" data-kia-off aria-describedby="gls-live-h" placeholder=".ergebnisse"><?= e($settings['live']) ?></textarea>
         <p class="f-help" id="gls-live-h"><?= e(__('Für Inhalte, die erst im Browser entstehen (z. B. Prüfergebnisse eines Werkzeugs): einfache Selektoren wie .klasse oder #id, einer je Zeile. Dort wird je Bereich das erste Vorkommen markiert. Elemente mit data-glossary="live" gelten immer.')) ?></p></div>
       <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Speichern')) ?></button>

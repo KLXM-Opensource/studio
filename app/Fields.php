@@ -11,12 +11,13 @@ namespace Core;
  *
  * Feld: ['name','label','type','required','help','default','options','fields','width','max','placeholder']
  * Typen: text textarea richtext inline email tel url link number bool select date time
- *        page media file repeater secret heading icon (Symbolauswahl, Wert = Symbolname, Ausgabe: icon($wert))
+ *        page pages (mehrere Seiten, Core\PagePicker) media file repeater secret heading icon (Symbolauswahl, Wert = Symbolname, Ausgabe: icon($wert))
+ * Überschrift mit 'collapse' => true|'open': aufklappbarer Abschnitt bis zur nächsten Überschrift (geöffnet bei Fehlern darin).
  */
 final class Fields
 {
     public const TYPES = ['text', 'textarea', 'richtext', 'inline', 'email', 'tel', 'url', 'link', 'number',
-        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'media', 'file', 'collection', 'repeater', 'group', 'secret', 'heading'];
+        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'pages', 'media', 'file', 'collection', 'repeater', 'group', 'secret', 'heading'];
 
     /** Standardwerte eines Schemas als flaches Array */
     public static function defaults(array $fields): array
@@ -36,6 +37,7 @@ final class Fields
         return match ($f['type'] ?? 'text') {
             'bool' => false,
             'repeater', 'group', 'multiselect', 'datafields' => [],
+            'pages' => ($f['store'] ?? 'ids') === 'paths' ? '' : [],
             'number', 'media', 'file', 'page', 'collection' => null,
             default => '',
         };
@@ -261,6 +263,8 @@ final class Fields
                 return [preg_match('~^[a-z][a-z0-9_]*(\.[a-z_][a-z0-9_]*)?$~', $s) ? $s : '', null];
             case 'datafields':
                 return [array_values(array_filter(array_map('strval', is_array($raw) ? $raw : []), fn($v) => (bool) preg_match('~^[a-z][a-z0-9_]*\.[a-z_][a-z0-9_]*$~', $v))), null];
+            case 'pages':
+                return [PagePicker::clean($f, $raw), null];
             case 'multiselect':
                 $opts = self::options($f);
                 $vals = array_values(array_unique(array_filter(array_map('strval', is_array($raw) ? $raw : ($s === '' ? [] : explode(',', $s))), fn($v) => $v !== '' && array_key_exists($v, $opts))));
@@ -311,9 +315,33 @@ final class Fields
     public static function renderForm(array $fields, array $values, array $errors = [], string $prefix = 'f', string $path = ''): string
     {
         $html = '';
+        $open = null;   // aufklappbarer Abschnitt: [Kopf, Inhalt, offen?]
+        $close = function () use (&$open, &$html): void {
+            if ($open === null) return;
+            $html .= '<details class="f-sec"' . ($open[2] ? ' open' : '') . '>' . $open[0] . '<div class="f-sec__body">' . $open[1] . '</div></details>';
+            $open = null;
+        };
         foreach ($fields as $f) {
-            $html .= self::renderField($f, $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f)), $errors, $prefix, $path);
+            if (($f['type'] ?? '') === 'heading') {
+                $close();
+                if (!empty($f['collapse']) && $path === '') {
+                    $help = (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '')
+                        . (!empty($f['links']) ? '<p class="f-help">' . implode(' · ', array_map(fn($l) => '<a href="' . e(url((string) $l['url'])) . '">' . e((string) $l['label']) . '</a>', (array) $f['links'])) . '</p>' : '');
+                    $open = ['<summary class="f-sec__sum"><span class="f-sec__title">' . e($f['label']) . '</span>'
+                        . (!empty($f['summary']) ? '<span class="f-sec__hint">' . e((string) $f['summary']) . '</span>' : '') . '</summary>', $help, $f['collapse'] === 'open'];
+                    continue;
+                }
+            }
+            $one = self::renderField($f, $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f)), $errors, $prefix, $path);
+            if ($open !== null) {
+                $open[1] .= $one;
+                $n = $f['name'] ?? null;
+                if ($n !== null && array_filter(array_keys($errors), fn($k) => $k === $n || str_starts_with((string) $k, $n . '.'))) $open[2] = true;
+            } else {
+                $html .= $one;
+            }
         }
+        $close();
         return $html;
     }
 
@@ -403,6 +431,10 @@ final class Fields
                     . (in_array((string) $k, $sel, true) ? ' checked' : '') . '> <span>' . e((string) $l) . '</span></label>';
             }
             return $h . '</div>' . $help . $errHtml . '</fieldset>';
+        }
+
+        if ($type === 'pages') {
+            return PagePicker::render($f, $value, $id, $inputName, $label, $help, $errHtml, $describedBy, $width);
         }
 
         if ($type === 'bool') {

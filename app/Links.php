@@ -238,6 +238,7 @@ final class Links
                         'label' => trim(strip_tags((string) $label)) ?: (string) $a, 'meta' => '#' . $a, 'kind' => 'anchor'];
                 }
                 $out[] = self::pageItem($p, $multi) + ['id' => (int) $p['id'], 'meta' => $url, 'home' => (bool) $p['is_home'],
+                    'path' => \Core\PagePicker::pathOf($p),   // Pfad ohne Basis-Pfad (Feldtyp „pages“ mit store 'paths')
                     'anchors' => $anchors, 'children' => $walk($n['children'])];
             }
             return $out;

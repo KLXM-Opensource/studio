@@ -9,8 +9,8 @@ use Core\Lang;
 
 /**
  * Grundeinstellungen → „Suche“ und „KI“: Felder der Website (über SystemSchema gespeichert) plus Status-/Test-Kästen
- * (app/Admin/views/system/_search.php, _ai.php). Die Anbieter-Konfiguration der Installation (Schlüssel, Modelle)
- * pflegt nur die Agentur/Netzwerk-Administration (Features::integrator()) – gespeichert in storage/ai/config.json.
+ * (app/Admin/views/system/_search.php, _ai.php). Verbindungen und Verwendung der Installation (Core\AI\Profiles: Schlüssel,
+ * Modelle je Zweck) pflegt nur die Agentur/Netzwerk-Administration (Features::integrator()) – gespeichert in storage/ai/config.json.
  */
 final class AdminSettings
 {
@@ -46,15 +46,16 @@ final class AdminSettings
         }
         if (Features::on('ai')) {
             $out[] = ['id' => 'ki', 'label' => __('KI'), 'fields' => [
-                ['type' => 'heading', 'label' => __('KI auf dieser Website (Symfony AI)'),
-                    'help' => __('Texte schreiben und übersetzen, SEO-Vorschläge, Alt-Texte für Bilder und semantische Suche. Welcher Anbieter genutzt wird, legt die Agentur für die Installation fest (unten).')],
+                ['type' => 'heading', 'label' => __('Diese Website: KI-Funktionen'), 'collapse' => 'open',
+                    'summary' => app()->settings->get('sys.ai_enabled', false) ? __('eingeschaltet') : __('ausgeschaltet'),
+                    'help' => __('Texte schreiben und übersetzen, SEO-Vorschläge, Alt-Texte für Bilder und semantische Suche. Welche Verbindung und welches Modell je Zweck genutzt wird, steht oben unter „Verwendung“.')],
                 ['name' => 'sys.ai_enabled', 'label' => __('KI-Funktionen auf dieser Website einschalten'), 'type' => 'bool', 'default' => false],
                 ['name' => 'sys.ai_text', 'label' => __('Texte: schreiben, kürzen, übersetzen, SEO'), 'type' => 'bool', 'default' => true, 'width' => 'half'],
                 ['name' => 'sys.ai_vision', 'label' => __('Bilder: Alt-Texte vorschlagen'), 'type' => 'bool', 'default' => true, 'width' => 'half'],
                 ['name' => 'sys.ai_embed', 'label' => __('Embeddings: semantische Suche'), 'type' => 'bool', 'default' => true, 'width' => 'half'],
                 ['name' => 'sys.ai_transcribe', 'label' => __('Sprache → Text: Untertitel für Videos und Audio'), 'type' => 'bool', 'default' => true, 'width' => 'half'],
                 // KI-Assistent der Redaktion (Core\AI\Assist, Anweisungen in app/AI/Prompts.php)
-                ['type' => 'heading', 'label' => __('KI-Assistent der Redaktion'),
+                ['type' => 'heading', 'label' => __('KI-Assistent der Redaktion'), 'collapse' => true,
                     'help' => __('Die KI macht nur Vorschläge – sie werden erst gespeichert, wenn jemand sie prüft und übernimmt. Sie erfindet keine Fakten, sondern setzt „[bitte ergänzen: …]“.'),
                     'links' => [['label' => __('SEO-Übersicht öffnen'), 'url' => '/admin/ai/seo']]],
                 ['name' => 'sys.ai_daily_cap', 'label' => __('Tageslimit: KI-Aufrufe je Tag (Texte + Bilder)'), 'type' => 'number', 'width' => 'half', 'default' => \Core\AI\Assist::DEFAULT_DAILY_CAP,
@@ -76,13 +77,9 @@ final class AdminSettings
     private static function chatFields(): array
     {
         if (!Features::on('chat.visitor')) return [];
-        $pages = [];
-        foreach (\Core\Pages::all() as $p) {
-            if (($p['type'] ?? 'page') !== 'page') continue;
-            $pages[(string) $p['id']] = $p['title'] . (($l = \Core\Lang::norm($p['lang'] ?? null)) !== \Core\Lang::default() ? ' (' . $l . ')' : '');
-        }
         return [
-            ['type' => 'heading', 'label' => __('Besucher-Chat'),
+            ['type' => 'heading', 'label' => __('Besucher-Chat'), 'collapse' => true,
+                'summary' => app()->settings->get('sys.chat_enabled', false) ? __('auf der Website sichtbar') : __('aus'),
                 'help' => __('Ein Chat-Knopf auf der Website beantwortet Fragen von Besuchern – ausschließlich aus den Inhalten dieser Website (Suchindex, FAQ, Einträge, Kontakt und Öffnungszeiten) und mit Links zu den Quellen. Findet er nichts, sagt er das und bietet den Kontakt an. Fragen und Antworten werden nicht gespeichert, es gibt keine Cookies.')],
             ['name' => 'sys.chat_enabled', 'label' => __('Besucher-Chat auf der Website zeigen'), 'type' => 'bool', 'default' => false,
                 'help' => __('Braucht KI für Texte und die Website-Suche. Vorher den Datenschutz-Absatz (unten) in die Datenschutzerklärung übernehmen.')],
@@ -102,55 +99,10 @@ final class AdminSettings
                 'help' => __('0 = unbegrenzt. Zählt getrennt vom Tageslimit der Redaktion. Zusätzlich gilt je Besucher: {m} Fragen pro Minute, {d} pro Tag.', ['m' => \Core\AI\VisitorChat::PER_MINUTE, 'd' => \Core\AI\VisitorChat::PER_DAY])],
             ['name' => 'sys.chat_position', 'label' => __('Position des Chat-Knopfs'), 'type' => 'select', 'width' => 'half', 'default' => 'right',
                 'options' => ['right' => __('unten rechts'), 'left' => __('unten links')]],
-            ['name' => 'sys.chat_exclude', 'label' => __('Auf diesen Seiten keinen Chat zeigen'), 'type' => 'multiselect', 'options' => $pages],
+            // Seitenauswahl (Core\PagePicker): IDs wie bisher, „12*“ = mit Unterseiten
+            ['name' => 'sys.chat_exclude', 'label' => __('Auf diesen Seiten keinen Chat zeigen'), 'type' => 'pages', 'store' => 'ids',
+                'help' => __('„mit Unterseiten“ blendet den Chat auch auf allen Seiten darunter aus.')],
         ];
-    }
-
-    /** Anbieter-Konfiguration der Installation speichern (nur Agentur/Netzwerk) – Werte aus Konfigurationsdateien bleiben gesperrt */
-    public static function saveProvider(array $in): array
-    {
-        $cur = Ai::stored();
-        $file = Ai::fileConfig();
-        $errors = [];
-        $provider = strtolower(trim((string) ($in['provider'] ?? '')));
-        if ($provider !== '' && !isset(Ai::PROVIDERS[$provider])) $errors[] = __('Unbekannter Anbieter.');
-        $base = rtrim(trim((string) ($in['base_url'] ?? '')), '/');
-        if ($base !== '' && !preg_match('~^https?://[a-z0-9.\-\[\]:]+(:\d+)?(/[\w\-./]*)?$~i', $base)) $errors[] = __('Adresse (base_url) ist ungültig.');
-        if ($base !== '' && str_starts_with($base, 'http://') && !Ai::isLocalHost((string) parse_url($base, PHP_URL_HOST))) $errors[] = __('Externe Anbieter nur über https://.');
-        if ($errors) return $errors;
-        $new = [
-            'provider' => $provider,
-            'base_url' => $base,
-            'region' => ($in['region'] ?? '') === 'EU' ? 'EU' : null,
-            'models' => array_map(fn($v) => trim(mb_substr((string) $v, 0, 120)), array_intersect_key((array) ($in['models'] ?? []), Ai::CAPS)),
-            'timeout' => max(0.5, min(30.0, (float) str_replace(',', '.', (string) ($in['timeout'] ?? 2.5)))),
-            'text_timeout' => max(5, min(300, (int) ($in['text_timeout'] ?? 60))),
-        ];
-        // API-Schlüssel: leer = unverändert, „-“ = löschen
-        $key = trim((string) ($in['api_key'] ?? ''));
-        $new['api_key'] = $key === '-' ? '' : ($key !== '' ? $key : (string) ($cur['api_key'] ?? ''));
-        unset($new['models']['transcribe']);
-        // Sprache → Text (Core\AI\Transcriber): whisper.cpp lokal oder OpenAI-kompatibel – Pfade nur absolut oder relativ zur Installation
-        if (isset($in['transcribe']) && is_array($in['transcribe'])) {
-            $tr = (array) $in['transcribe'];
-            foreach (['whisper_bin', 'ffmpeg', 'model_path'] as $k) {
-                $v = trim((string) ($tr[$k] ?? ''));
-                if ($v !== '' && (str_contains($v, '..') || !preg_match('~^[\w./@+\-]+$~', $v))) $errors[] = __('Pfad „{path}“ ist ungültig.', ['path' => $v]);
-            }
-            $tb = rtrim(trim((string) ($tr['base_url'] ?? '')), '/');
-            if ($tb !== '' && !preg_match('~^https?://[a-z0-9.\-\[\]:]+(:\d+)?(/[\w\-./]*)?$~i', $tb)) $errors[] = __('Adresse (base_url) ist ungültig.');
-            if ($tb !== '' && str_starts_with($tb, 'http://') && !Ai::isLocalHost((string) parse_url($tb, PHP_URL_HOST))) $errors[] = __('Externe Anbieter nur über https://.');
-            if ($errors) return $errors;
-            $tkey = trim((string) ($tr['api_key'] ?? ''));
-            $tr['api_key'] = $tkey === '-' ? '' : ($tkey !== '' ? $tkey : (string) ($cur['transcribe']['api_key'] ?? ''));
-            $new['transcribe'] = array_filter(\Core\AI\Transcriber::normalize($tr), fn($v) => $v !== '' && $v !== null);
-        } elseif (isset($cur['transcribe'])) {
-            $new['transcribe'] = $cur['transcribe'];
-        }
-        foreach (array_keys($file) as $locked) unset($new[$locked]);   // in config.local.php gesetzt → nicht überschreiben
-        Ai::store(array_filter($new, fn($v) => $v !== null && $v !== '' && $v !== []));
-        \Core\PageCache::clear();
-        return [];
     }
 
     /** Text für die Datenschutzerklärung (je nach Anbieter) */

@@ -38,6 +38,8 @@ import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöc
 import { Rich } from './_rte.js';   // Formatierungsleiste: Stile, Farben, Marker, Link, Menüs, Tastatur
 import * as Markdown from './_markdown.js';   // Markdown einfügen/importieren (Rich-Text-Felder, Seiten-Editor)
 import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Linkauswahl (Rich-Text und Feldtyp „link“)
+import { initPagesFields, openPagesPicker } from './_pages.js';   // Seitenauswahl (Feldtyp „pages“, Core\PagePicker)
+import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles)
 import { initAssistant } from './_assistant.js';
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
@@ -85,6 +87,7 @@ initNetwork();
 initReview();
 initRedirects();
 initSources();
+initAiSettings();   // Grundeinstellungen → KI (nur mit #aip-data)
 // Konto → Akzentfarbe (_accent.js)
 initAccent();
 // Grundeinstellungen → Schriften (_fonts.js)
@@ -115,6 +118,16 @@ $$('[data-tabs]').forEach(form => {
   });
   const hash = location.hash.slice(1);
   if (hash && tabs.some(t => t.dataset.tab === hash)) select(hash);
+  else if (hash) {
+    // Sprungziel innerhalb eines Reiters (z. B. #ki-use): Reiter öffnen, umgebende Abschnitte aufklappen, hinscrollen
+    const el = d.getElementById(hash), panel = el?.closest('[role=tabpanel]');
+    const tab = panel && tabs.find(t => t.getAttribute('aria-controls') === panel.id);
+    if (tab) {
+      select(tab.dataset.tab);
+      for (let x = el; x; x = x.parentElement?.closest('details')) if (x.tagName === 'DETAILS') x.open = true;
+      requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }));
+    }
+  }
   // Beim Absenden: ersten Reiter mit Fehler öffnen
   const errTab = tabs.find(t => $('.adm-dot', t));
   if (errTab) select(errTab.dataset.tab);
@@ -149,7 +162,7 @@ function initRepeaters(scope = d) {
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
         uniqueIds(added);
-        initRepeaters(added); initRte(added); initMedia(added); initIconPickers(added); initLinkFields(added);
+        initRepeaters(added); initRte(added); initMedia(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
         bar_.ask({ title: t('Eintrag entfernen?'), ok: t('Entfernen') }).then(ok => { if (!ok) return; const nx = item.nextElementSibling || item.previousElementSibling; item.remove(); rep.dispatchEvent(new Event('input', { bubbles: true })); ($('[data-rep=remove]', nx || rep) || $('[data-rep=add]', rep))?.focus(); });
@@ -750,12 +763,12 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initMedia(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
 init();
 initSettingsPreview();
 initDesign();
 initBlockBuilder();
-window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
+window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, openPagesPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
   // Werkzeuge beim Bearbeiten und Ereignisse (stabile Schnittstelle, Technik → Erweiterungen): CMSAdmin.tools.register(id, { mount, unmount })
   tools: tools_, events: { emit, beforeSave },
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene

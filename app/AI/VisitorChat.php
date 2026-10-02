@@ -52,7 +52,8 @@ final class VisitorChat
             'privacy' => trim((string) $s->get('sys.chat_privacy', '')),
             'privacy_url' => trim((string) $s->get('sys.chat_privacy_url', '')),
             'daily' => max(0, (int) $s->get('sys.chat_daily', self::DEFAULT_DAILY)),
-            'exclude' => array_values(array_map('intval', (array) $s->get('sys.chat_exclude', []))),
+            // Seiten ohne Chat (Feldtyp „pages“): „12“ = diese Seite, „12*“ = mit allen Unterseiten
+            'exclude' => array_values(array_map('strval', (array) $s->get('sys.chat_exclude', []))),
             'position' => $s->get('sys.chat_position', 'right') === 'left' ? 'left' : 'right',
         ];
     }
@@ -71,7 +72,7 @@ final class VisitorChat
     /** Verlassen die Fragen den Server? (externer Text- oder Embedding-Anbieter) */
     public static function external(): bool
     {
-        return Ai::capability('text')['external'] || (Search::semanticActive() && Ai::capability('embed')['external']);
+        return Ai::capability('chat')['external'] || (Search::semanticActive() && Ai::capability('embed')['external']);
     }
 
     /**
@@ -82,7 +83,7 @@ final class VisitorChat
     {
         if ($editing || !self::available()) return '';
         $s = self::settings();
-        if ($page && in_array((int) ($page['id'] ?? 0), $s['exclude'], true)) return '';
+        if ($page && \Core\PagePicker::matches($s['exclude'], $page)) return '';
         $attrs = [
             'class' => 'cms-chat', 'data-cms-chat' => '', 'hidden' => '',
             'data-start' => asset('css/visitor-chat-start.css'), 'data-src' => asset('js/visitor-chat.mjs'), 'data-css' => asset('css/visitor-chat.css'),
@@ -159,7 +160,7 @@ final class VisitorChat
     /** Vorschlag für die Datenschutzerklärung (Grundeinstellungen → KI → Besucher-Chat) */
     public static function privacyPolicyText(): string
     {
-        $c = Ai::capability('text');
+        $c = Ai::capability('chat');
         $name = __(Ai::PROVIDERS[$c['provider']] ?? 'KI-Dienstleister');
         return self::external()
             ? __('KI-Chat auf dieser Website: Wenn Sie den Chat öffnen und eine Frage stellen, übermitteln wir den Text Ihrer Frage (ohne IP-Adresse, ohne Cookies) an {name}, um daraus eine Antwort aus den Inhalten dieser Website zu erzeugen (Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an einer hilfreichen Auskunft). Mit dem Anbieter besteht ein Vertrag zur Auftragsverarbeitung. Fragen und Antworten werden von uns nicht gespeichert; zum Schutz vor Missbrauch zählen wir Anfragen je gekürzter, verschlüsselter IP-Adresse für höchstens 24 Stunden. Bitte geben Sie im Chat keine personenbezogenen Daten ein.', ['name' => $name])
@@ -339,7 +340,7 @@ final class VisitorChat
         $open = false;
         $fake = self::fakeAnswer($q, $sources);
         $r = Ai::stream($pack['messages'], ['system' => $pack['system'], 'max_tokens' => $pack['max_tokens'], 'temperature' => $pack['temperature'],
-            'track' => 'chat', 'timeout' => 60, 'fake' => $fake], function (string $piece) use (&$buf, &$open, $emit) {
+            'track' => 'chat', 'use' => 'chat', 'timeout' => 60, 'fake' => $fake], function (string $piece) use (&$buf, &$open, $emit) {
             $buf .= $piece;
             if (!$open) {
                 $t = ltrim($buf);

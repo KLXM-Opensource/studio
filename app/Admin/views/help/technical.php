@@ -37,7 +37,7 @@ $fieldInfo = [
     'link' => 'https:, mailto:, tel:, #anker, /pfad, page:ID[#anker], entry:{tabelle}:{id}, media:{id}[:viewer] (+ Kit-Sonderwerte aus link_keywords); Linkauswahl „Auswählen …“', 'number' => 'Zahl', 'bool' => 'Ja/Nein', 'select' => 'Auswahl (options)',
     'date' => 'JJJJ-MM-TT', 'time' => 'HH:MM',
     'datetime' => 'JJJJ-MM-TT HH:MM (Ortszeit der Website; Eingabe datetime-local, akzeptiert auch „T“/Sekunden)',
-    'recurrence' => 'Wiederholung: RFC-5545-RRULE (DAILY|WEEKLY|MONTHLY|YEARLY, max. 1000 Termine) + optional Zeile „EXDATE:JJJJ-MM-TT,…“; Regel-Editor in der Verwaltung', 'page' => 'Seiten-ID', 'media' => 'Bild-ID (Mediathek)', 'file' => 'Datei-ID (Mediathek)',
+    'recurrence' => 'Wiederholung: RFC-5545-RRULE (DAILY|WEEKLY|MONTHLY|YEARLY, max. 1000 Termine) + optional Zeile „EXDATE:JJJJ-MM-TT,…“; Regel-Editor in der Verwaltung', 'page' => 'Seiten-ID', 'pages' => 'Mehrere Seiten (Core\\PagePicker): Chips mit Pfad im Seitenbaum, Dialog mit Baum, Suche, „mit Unterseiten“, Tastatur wie die Linkauswahl. store \'ids\' (Standard) → Liste „12“ bzw. „12*“ (mit Unterseiten, PagePicker::matches()), store \'paths\' → Pfade je Zeile („/x“, „/x/*“, eigene Pfade); subpages => false ohne Unterseiten', 'media' => 'Bild-ID (Mediathek)', 'file' => 'Datei-ID (Mediathek)',
     'color' => 'Farbe #RRGGBB oder #RGB (Farbwähler + Hex-Eingabe)', 'multiselect' => 'Mehrfachauswahl (options) → Array',
     'collection' => 'Medien-Sammlung (ID)', 'datatable' => 'Datentabelle (Kurzname)', 'datafield' => 'Feld einer Tabelle „tabelle.feld“ (optional mit system-Sortierfeldern)',
     'datafields' => 'Mehrere Felder „tabelle.feld“; das Formular zeigt nur die der gewählten Tabelle',

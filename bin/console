@@ -153,6 +153,8 @@
  *   search:status [--all]                             Stand des Suchindex und des KI-Anbieters
  *   search:query "<text>" [--lang=en]                 Testsuche wie Besucher
  *   ai:test [--cap=text|embed|vision|transcribe]      KI-Anbieter je Fähigkeit prüfen (Symfony AI, Core\AI\Ai)
+ *   ai:selftest                                       Selbsttest Verbindungen/Verwendung (altes Format, Ebenen, Sperren), Prüfen und
+ *                                                     Modelle ohne Netz (Ollama, OpenAI, Mistral, Anthropic), Feldtyp „pages“
  *   ai:transcribe <medien-id> [--lang=de|auto] [--pool=key]
  *                                                     Video/Audio transkribieren → Untertitel-Entwurf (Core\AI\MediaJobs)
  *   ai:jobs [--all]                                   Wartende Medien-Aufträge (Transkription, Übersetzung) abarbeiten
@@ -1027,6 +1029,13 @@ switch ($cmd) {
         $res = Core\VCard::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Organisation: " . ($res['org'] ? Core\VCard::ORG_PATH : 'keine Angaben → 404') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'ai:selftest':
+        // KI-Verbindungen (Core\AI\Profiles), Prüfen/Modelle (Core\AI\Probe, ohne Netz), Seitenauswahl (Core\PagePicker)
+        $res = Core\AI\SelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'links:selftest':

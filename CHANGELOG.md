@@ -6,6 +6,35 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### KI: Verbindungen, Modelle per Klick, Verwendung je Zweck
+- **Verbindungen:** beliebig viele benannte KI-Verbindungen („Ollama Büro“, „Mistral EU“, „OpenAI“) mit Art, Adresse, optionalem
+  Schlüssel bzw. Token (nur schreibbar, nie wieder angezeigt), Region und Zeitlimit; neu: **Anthropic** (über die OpenAI-kompatible
+  Schnittstelle) und **whisper.cpp** als Verbindungsart. **Verbindung prüfen** meldet „in Ordnung“ mit Version, Anzahl Modelle und
+  Dauer bzw. Schlüssel falsch, nicht erreichbar, falsche Art; Statuspunkt je Verbindung.
+- **Modelle anzeigen:** Ollama (`/api/tags`, `/api/show`: Größe, Parameter, Quantisierung, Kontext, Fähigkeiten), OpenAI/Mistral/
+  OpenAI-kompatibel (`/v1/models`), Anthropic (Liste bzw. kuratiert), whisper.cpp (Modelle auf dem Server) – mit Filter und Eignung;
+  **Übernehmen** trägt das Modell für den gewählten Zweck ein, Eingabe von Hand bleibt möglich.
+- **Verwendung:** je Zweck (Texte & Redaktion, Besucher-Chat, Embeddings, Bilder, Sprache → Text) Verbindung + Modell, optional
+  Ersatz-Verbindung bei Ausfall; Hinweis, wenn sich das Embedding-Modell ändert (Suchindex rechnet neu). `Ai::for($zweck)`,
+  `Ai::platformFor()`; bestehende Aufrufe unverändert.
+- **Altes Format bleibt gültig:** `provider`/`models`/`providers`/`transcribe` werden beim Lesen zur Verbindung „Standard“
+  (`Core\AI\Profiles::upgrade()`), gespeichert wird Format 2 in `storage/ai/config.json`; Werte aus Konfigurationsdateien sind je
+  Verbindung bzw. Zuordnung gesperrt.
+- **Sicherheit:** Prüfungen serverseitig (`Core\AI\Probe`): nur die Adresse der Verbindung, keine Weiterleitungen, Zeitlimit, Größenlimit,
+  Metadaten-Adressen nie, eigenes Netz nur für Ollama/OpenAI-kompatibel; Recht `system.manage`, CSRF, 20 Prüfungen je Minute; keine
+  Schlüssel in Antworten, Seiten oder Protokollen.
+- **Grundeinstellungen → KI** neu geordnet in aufklappbaren Abschnitten (Übersicht, Verbindungen, Verwendung, Website, Assistent,
+  Besucher-Chat, Datenschutz, Nutzung); Überschriften mit `'collapse'` machen das für jedes Feld-Schema möglich.
+- Selbsttest `ai:selftest` (Umwandlung, Ebenen, Sperren, Prüfen/Modelle mit vorgefertigten Antworten, Seitenauswahl).
+
+### Seitenauswahl als Feldtyp `pages`
+- Statt langer Kästchen-Listen: gewählte Seiten als Chips mit Pfad im Seitenbaum, **Seiten auswählen …** öffnet den Seitenbaum der
+  Linkauswahl mit Kästchen, Suche, „Alle sichtbaren auswählen“, Sprachen, Anzahl und **+ Unterseiten**; Tastatur und WAI-ARIA wie die
+  Linkauswahl, hell/dunkel, ab 390 px, auch in der Shadow-DOM-Ebene der Website.
+- Werte wie bisher: Seiten-IDs (`12`, neu `12*` = mit Unterseiten, `Core\PagePicker::matches()`) bzw. Pfade (`/x`, `/x/*`, eigene Pfade).
+- Umgestellt: Besucher-Chat „Auf diesen Seiten keinen Chat zeigen“ (jetzt auch mit Unterseiten), Glossar „Seiten ausnehmen“.
+- Sprungziele innerhalb von Reitern (z. B. `/admin/system#ki-use`) öffnen Reiter und Abschnitt.
+
 ### Seitenleiste: „Administration“ in zwei aufklappbaren Gruppen
 - **Einstellungen** (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen, Benutzer & Rollen, Design) und
   **Werkzeuge** (Blöcke, Landingpages, Weiterleitungen, Statistiken, Werkzeuge der Erweiterungen) statt einer losen Liste – die

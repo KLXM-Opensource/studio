@@ -127,7 +127,8 @@ final class EditorController extends AdminController
     public function links(Request $r): Response
     {
         $this->auth($r);
-        if (!can('pages.edit') && !can('data.edit') && !can('settings.edit')) throw new HttpException(403);
+        // Seitenauswahl (Feldtyp „pages“) auch in Grundeinstellungen und Glossar
+        if (!can('pages.edit') && !can('data.edit') && !can('settings.edit') && !can('system.manage') && !can('data.schema')) throw new HttpException(403);
         if (($v = $r->str('describe')) !== '') {
             return Response::json(\Core\Links::describe($v));
         }

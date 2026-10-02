@@ -31,6 +31,9 @@ use Core\Fields;
   <?php foreach ($groups as $i => $g): ?>
   <section class="adm-card adm-panel" role="tabpanel" id="panel-<?= e($g['id']) ?>" aria-labelledby="tab-<?= e($g['id']) ?>"<?= $i === 0 ? '' : ' hidden' ?>>
     <h2><?= e($g['label']) ?></h2>
+    <?php if ($g['id'] === 'ki'): /* KI: Übersicht, Verbindungen und Verwendung der Installation vor den Schaltern der Website */ ?>
+      <?= \Core\Theme::capture(ROOT . '/app/Admin/views/system/_ai.php', ['part' => 'top']) ?>
+    <?php endif; ?>
     <div class="adm-fields"><?= Fields::renderForm($g['fields'], $values, $errors, 'f') ?></div>
     <?php if ($g['id'] === 'app'): ?>
       <div class="ai-preview" data-icon-preview="<?= e(url('/admin/system/icon-preview')) ?>" aria-live="polite">

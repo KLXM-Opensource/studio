@@ -43,7 +43,7 @@
   <ul>
     <li>Nie in Links, Buttons, Formularen, Code, Navigation, Kopf- und Fußbereich, großen Überschriften (h1–h3, einstellbar) und auf der eigenen Seite des Begriffs; nie im Bearbeiten-Modus.</li>
     <li><b>Einzelner Abschnitt</b>: im Editor in den Abschnitts-Optionen „Glossar-Begriffe hier nicht markieren“ (z. B. bei Zitaten oder Werbetexten).</li>
-    <li><b>Ganze Seiten</b>: unter Daten → Glossar → Prüfen &amp; Einstellungen → „Seiten ausnehmen“ (z. B. <code>/impressum</code> oder <code>/blog/*</code>).</li>
+    <li><b>Ganze Seiten</b>: unter Daten → Glossar → Prüfen &amp; Einstellungen → „Seiten ausnehmen“: <b>Seiten auswählen …</b> zeigt den Seitenbaum mit Suche und „+ Unterseiten“; Adressen ohne eigene Seite (z. B. <code>/blog/*</code>) tragen Sie im Dialog unter „Eigene Pfade“ ein.</li>
     <li><b>Je Seite oder je Abschnitt</b>: Standard ist das erste Vorkommen je Seite; „je Abschnitt“ markiert in jedem Abschnitt erneut.</li>
   </ul>
   <div class="doc-note doc-note--tip"><strong>Gut zu wissen</strong><p>Auch Inhalte von Erweiterungen werden markiert. Entstehen Inhalte erst im Browser – etwa Ergebnisse eines Prüf-Werkzeugs –, trägt die Administration den Bereich unter Einstellungen → „Dynamische Bereiche“ ein (z. B. <code>.ergebnisse</code>). Für Screenreader ist jeder markierte Begriff eine Schaltfläche, die ihre Erklärung aufklappt; beim Drucken steht die Erklärung in Klammern hinter dem Begriff.</p></div>
