@@ -105,7 +105,10 @@ final class ExtensionsSelfTest
         self::eq('Hauptmenü: content der Erweiterung', in_array('/admin/qa-inhalt', $main, true), true);
         self::eq('Administration: tool der Erweiterung', in_array('/admin/qa-werkzeug', $admin, true), true);
         self::eq('Menü: keine Einstellungen/Statistiken', array_values(array_intersect(['/admin/qa-einstellungen', '/admin/qa-statistik', '/admin/glossar', '/admin/api-tokens'], [...$main, ...$admin])), []);
-        self::eq('Extensions::adminNav (veraltet) nur Erweiterungen', array_column(Extensions::adminNav('main'), 0), ['/admin/qa-inhalt']);
+        // Nur die Einträge der Prüf-Erweiterung betrachten – auf echten Websites sind weitere Erweiterungen aktiv (z. B. Buchungen)
+        $legacy = array_column(Extensions::adminNav('main'), 0);
+        self::eq('Extensions::adminNav (veraltet) nur Erweiterungen', array_values(array_filter($legacy, fn($u) => str_starts_with((string) $u, '/admin/qa-'))), ['/admin/qa-inhalt']);
+        self::eq('Extensions::adminNav (veraltet) ohne Core-Seiten', array_values(array_intersect(['/admin/glossar', '/admin/seiten', '/admin/medien'], $legacy)), []);
         $hub = AdminPages::settings();
         $qa = array_values(array_filter($hub, fn($g) => $g['key'] === 'ext:qa_selftest'))[0] ?? null;
         self::eq('Sammelseite: Gruppe mit Namen der Erweiterung', $qa['label'] ?? null, 'QA-Erweiterung');
