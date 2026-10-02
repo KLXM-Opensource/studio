@@ -1,5 +1,5 @@
 <?php /** Entwicklerhandbuch · Weiterleitungen und 404-Protokoll (Core\Redirects) */ ?>
-  <p class="lead">Alte Adressen – nach einem Umzug, einer neuen Seitenstruktur oder einer umbenannten Seite – führen per 301/302 zu Seiten, Pfaden oder anderen Websites oder melden 410 („dauerhaft entfernt“). Je Website, Funktion <code>redirects</code> (Standard an), Recht <code>redirects.manage</code>, Verwaltung → Administration → <b>Weiterleitungen</b>.</p>
+  <p class="lead">Alte Adressen – nach einem Umzug, einer neuen Seitenstruktur oder einer umbenannten Seite – führen per 301/302 zu Seiten, Pfaden oder anderen Websites oder melden 410 („dauerhaft entfernt“). Je Website, Funktion <code>redirects</code> (Standard an), Recht <code>redirects.manage</code>, Verwaltung → Administration → Werkzeuge → <b>Weiterleitungen</b>.</p>
   <table class="doc-table">
     <tr><th>Baustein</th><th>Ort</th></tr>
     <tr><td>Regeln</td><td>Tabelle <code>redirects</code> der Website: <code>source</code> (Pfad ohne Domain, optional <code>?query</code>, optional <code>*</code> am Ende), <code>source_hash</code> (sha1 des Vergleichsschlüssels), <code>wildcard</code>, <code>target</code>, <code>code</code> (301|302|410), <code>note</code>, <code>origin</code> (manual|auto|import), <code>hits</code>, <code>last_hit</code>, <code>active</code>, Zeitstempel</td></tr>

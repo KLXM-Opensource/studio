@@ -13,7 +13,7 @@ $selRoles = (array) ($acc['roles'] ?? []);
 $selUsers = (array) ($acc['users'] ?? []);
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Chat-Einstellungen')) ?></h1>
+  <div><p class="adm-eyebrow"><a href="<?= e(url(\Core\AdminPages::HUB)) ?>"><?= e(__('Einstellungen der Funktionen')) ?></a></p><h1><?= e(__('Chat-Einstellungen')) ?></h1>
     <p class="adm-muted"><?= e(__('Direktnachrichten und Kanäle zwischen den Personen, die die Verwaltung nutzen. Der Chat ist optional und standardmäßig ausgeschaltet.')) ?></p></div>
   <?php if (Chat::canUse()): ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/chat')) ?>"><?= icon('chats') ?> <?= e(__('Chat öffnen')) ?></a><?php endif; ?>
 </header>

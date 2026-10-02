@@ -239,7 +239,7 @@ return [
             'goal' => 'Jede Person bekommt ein eigenes Konto mit genau den Rechten, die sie braucht – abgesichert mit Zwei-Faktor-Anmeldung.',
             'prerequisites' => ['Recht „Benutzer und Rollen“ (Standard: Administration).'],
             'steps' => [
-                '<b>Administration › Benutzer &amp; Rollen</b>: Jede Person bekommt ein eigenes Konto.',
+                '<b>Administration › Einstellungen › Benutzer &amp; Rollen</b>: Jede Person bekommt ein eigenes Konto.',
                 'Erst eine passende Rolle: <b>+ Neue Rolle</b>, Namen eintragen und Rechte anhaken.',
                 'Was nicht angehakt ist, sieht die Rolle nicht – z. B. kein <b>Veröffentlichen</b>. <b>Rolle speichern</b>.',
                 '<b>Neuen Benutzer anlegen</b>: Name, E-Mail-Adresse, Startpasswort (persönlich übergeben) und Rolle – <b>Anlegen</b>.',
@@ -278,7 +278,7 @@ return [
             'goal' => 'Sie passen Farben, Schrift und Navigation an – barrierefrei geprüft und ohne das Kit zu verändern.',
             'prerequisites' => ['Recht „Design (Style-Editor)“ und die Funktion Design.'],
             'steps' => [
-                '<b>Administration › Design</b>: Farben, Schrift und Formen des Kits für diese Website.',
+                '<b>Administration › Einstellungen › Design</b>: Farben, Schrift und Formen des Kits für diese Website.',
                 '<b>Vorlagen</b> füllen das Formular mit einem stimmigen Satz – die Vorschau rechts zeigt es sofort.',
                 'Jede Farbe mit Kontrastprüfung (AA/AAA) – für helle und dunkle Darstellung.',
                 'Reiter <b>Typografie</b>, <b>Navigation</b>, <b>Kopfbereich: Suche &amp; Aktionen</b> – Schrift, Menü, Suchfeld und Button oben.',

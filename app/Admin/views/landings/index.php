@@ -3,7 +3,7 @@
 $modes = ['own' => __('Eigene Domain'), 'mirror' => __('Spiegel')];
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Grundeinstellungen')) ?></p><h1><?= e(__('Landingpages')) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Werkzeuge')) ?></p><h1><?= e(__('Landingpages')) ?></h1>
     <p class="adm-muted"><?= e(__('Weitere Domains zeigen eine Seite dieser Website – auf Wunsch mit ihren Unterseiten, eigenem Logo, Farben und Favicon. Inhalte, Formulare und Anfragen bleiben in diesem Projekt.')) ?>
       <a href="<?= e(url('/admin/hilfe/technik#landingpages')) ?>"><?= e(__('Technische Dokumentation →')) ?></a></p></div>
   <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/landingpages/new')) ?>"><?= e(__('Neue Landingpage')) ?></a>

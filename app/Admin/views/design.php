@@ -16,7 +16,7 @@ foreach ((array) ($schema['groups'] ?? []) as $gi => $g) {
 foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = $tr($p['label'] ?? '');
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Design')) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1><?= e(__('Design')) ?></h1>
     <p class="adm-muted"><?= e(__('Farben, Formen und Schrift des Kits „{theme}“ für diese Website anpassen. Die Vorschau zeigt Änderungen sofort, online gehen sie erst mit „Speichern“.', ['theme' => $themeLabel])) ?></p></div>
   <?php if ($enabled): ?>
   <div class="adm-row">

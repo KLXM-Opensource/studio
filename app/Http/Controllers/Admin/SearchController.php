@@ -61,14 +61,20 @@ final class SearchController extends AdminController
             $actions[] = [$t['name'], __('Anfragen'), '/admin/requests?table=' . $t['handle'], 'inbox', 'anfragen eingang ' . $t['name'] . ' ' . $t['singular']];
         }
         if ($isAdmin) {
-            array_push($actions,
-                [__('Grundeinstellungen'), __('E-Mail, Spamschutz, App-Icon'), '/admin/system', 'gear', 'system einstellungen mail smtp spam icon favicon pwa'],
-                [__('Neue Datentabelle'), __('Eigenen Inhaltstyp anlegen'), '/admin/data/new', 'table', 'tabelle collection daten neu'],
-                [__('Benutzer'), __('Zugänge verwalten'), '/admin/users', 'user', 'benutzer nutzer zugang passwort']);
+            $actions[] = [__('Neue Datentabelle'), __('Eigenen Inhaltstyp anlegen'), '/admin/data/new', 'table', 'tabelle collection daten neu'];
+        }
+        // Administration: Punkte der Gruppen „Einstellungen“ und „Werkzeuge“ (Core\AdminPages::groups) – Untertitel = Gruppe wie im Menü
+        $kwAdmin = ['system' => 'system einstellungen mail smtp spam icon favicon pwa', 'features' => 'funktionen erweiterungen schalten an aus',
+            'prefs' => 'einstellungen funktionen erweiterungen konfiguration', 'users' => 'benutzer nutzer rollen rechte zugang passwort',
+            'design' => 'design farben schriften kit', 'stats' => 'statistik bericht'];
+        foreach (\Core\AdminPages::groups() as $g) {
+            foreach ($g['items'] as [$href, $label, $key]) {
+                $actions[] = [$label, $g['label'], $href, $key, ($kwAdmin[$key] ?? '') . ' ' . mb_strtolower($g['label'])];
+            }
         }
         // Einstellungs- und Statistikseiten (Core\AdminPages) stehen nicht im Menü – über die Suche bleiben sie direkt erreichbar
         foreach (\Core\AdminPages::ofKind('settings', 'stats') as $ap) {
-            $actions[] = [$ap['label'], $ap['description'] !== '' ? $ap['description'] : ($ap['kind'] === 'stats' ? __('Statistiken') : __('Einstellungen')),
+            $actions[] = [$ap['label'], $ap['description'] !== '' ? $ap['description'] : ($ap['kind'] === 'stats' ? __('Statistiken') : __('Einstellungen der Funktionen')),
                 $ap['href'], $ap['icon'], ($ap['kind'] === 'stats' ? 'statistik bericht ' : 'einstellungen konfiguration ') . $ap['description'] . ' ' . $ap['href']];
         }
         $items = [];

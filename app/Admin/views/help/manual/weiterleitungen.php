@@ -1,5 +1,5 @@
 <?php /** Handbuch · Kapitel „Weiterleitungen“ (Core\Redirects; Variablen: siehe help/manual.php) */ ?>
-  <p class="lead">Wenn sich Adressen ändern – nach einem Umzug der Website oder weil eine Seite umbenannt wurde – sorgen <b>Weiterleitungen</b> dafür, dass alte Links und Suchmaschinen-Treffer weiter funktionieren. Sie finden sie unter <b>Administration → Weiterleitungen</b> (Recht „Weiterleitungen verwalten“).</p>
+  <p class="lead">Wenn sich Adressen ändern – nach einem Umzug der Website oder weil eine Seite umbenannt wurde – sorgen <b>Weiterleitungen</b> dafür, dass alte Links und Suchmaschinen-Treffer weiter funktionieren. Sie finden sie unter <b>Administration → Werkzeuge → Weiterleitungen</b> (Recht „Weiterleitungen verwalten“).</p>
   <ul>
     <li><b>Automatisch:</b> Benennen Sie eine veröffentlichte Seite um oder verschieben Sie sie, führt die alte Adresse von selbst zur Seite. Nichts zu tun.</li>
     <li><b>Von Hand:</b> „Neue Weiterleitung“ – alte Adresse (z. B. <code>/team/</code>) und Ziel wählen. Am besten eine Seite auswählen: Die Weiterleitung bleibt richtig, auch wenn die Seite später umbenannt wird.</li>

@@ -16,7 +16,7 @@ $nRules = Redirects::count();
 $n404 = $count404;
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Weiterleitungen')) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Werkzeuge')) ?></p><h1><?= e(__('Weiterleitungen')) ?></h1>
     <p class="adm-muted"><?= e(__('Alte Adressen führen zu Seiten, Pfaden oder anderen Websites. Weitergeleitet wird nur, wenn es unter der Adresse keine Seite gibt – bestehende Seiten gehen immer vor. Beim Umbenennen oder Verschieben veröffentlichter Seiten entstehen Weiterleitungen automatisch.')) ?>
       <a href="<?= e(url('/admin/hilfe/technik#weiterleitungen')) ?>"><?= e(__('Technische Dokumentation →')) ?></a></p></div>
   <a class="adm-btn adm-btn--primary" href="<?= e(url($base . '/new')) ?>"><?= e(__('Neue Weiterleitung')) ?></a>

@@ -1261,6 +1261,21 @@ body.adm{font-family:var(--adm-font);letter-spacing:0}
 /* Aktiver Menüpunkt: links gerade Kante mit 2px Mintgrün */
 .adm-side{--adm-mint:#3DD9A0}
 .adm-side nav a[aria-current],.adm-side nav a[aria-current=page]{border-radius:0 6px 6px 0;box-shadow:inset 2px 0 0 var(--adm-mint)}
+/* Administration: aufklappbare Gruppen „Einstellungen“, „Werkzeuge“ (views/layout.php, resources/js/_navgroups.js) */
+.adm-navgrps,.adm-navgrp__list{display:grid;gap:1px}
+.adm-navgrp__btn{display:flex;align-items:center;gap:8px;width:100%;min-height:28px;padding:0 8px;border:0;border-radius:6px;background:none;color:var(--adm-ink);font:500 13.5px var(--adm-font);text-align:left;cursor:pointer}
+.adm-navgrp__btn > .ico{width:18px;height:18px;color:var(--adm-a)}
+.adm-navgrp__btn > span:not(.adm-navgrp__chev){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-navgrp__btn:hover{background:var(--adm-hover)}
+.adm-navgrp.is-current:not(.is-open) > .adm-navgrp__btn{background:var(--adm-accent-bg);font-weight:700;border-radius:0 6px 6px 0;box-shadow:inset 2px 0 0 var(--adm-mint)}
+.adm-navgrp__chev{display:inline-grid;place-items:center;flex:none;width:14px;height:14px;color:var(--adm-t3)}
+.adm-navgrp__chev::before{content:"";width:6px;height:6px;margin:0 0 0 -2px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg)}
+.adm-navgrp.is-anim .adm-navgrp__chev::before{transition:transform .15s}   /* erst nach einem Klick – nicht beim Laden */
+.adm-navgrp__btn[aria-expanded=true] .adm-navgrp__chev::before{margin:-3px 0 0;transform:rotate(45deg)}
+.adm-side .adm-navgrp__list{margin:1px 0 4px 17px;padding:0 0 0 8px;border-left:1px solid var(--adm-line)}
+.adm-side .adm-navgrp__list[hidden]{display:none}
+.adm-side .adm-navgrp__list a{font-size:13px}
+@media (prefers-reduced-motion:reduce){.adm-navgrp.is-anim .adm-navgrp__chev::before{transition:none}}
 /* Grundeinstellungen: geteilte Medien */
 .pl-card{display:grid;gap:10px;padding:14px 16px;margin:0 0 12px;border-radius:8px;box-shadow:0 0 0 1px var(--adm-line);background:var(--adm-surface)}
 .pl-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
@@ -2013,6 +2028,8 @@ html.adm-ui[data-theme=dark] .sp-dot,html.adm-ui[data-theme=dark] .sp-item.is-un
   .adm-side .adm-search{height:40px}
   .adm-side nav ul{grid-template-columns:minmax(0,1fr)}
   .adm-side nav a{min-height:44px}
+  .adm-navgrp__btn{min-height:44px}
+  .adm-side .adm-navgrp__list a{min-height:40px}
   .adm-side .adm-fav nav a{min-height:40px}
   .adm-fav__toggle,.adm-fav__edit{min-height:32px}
   .adm-help-link,.adm-me{min-height:44px}

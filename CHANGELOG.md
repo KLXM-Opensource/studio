@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenleiste: „Administration“ in zwei aufklappbaren Gruppen
+- **Einstellungen** (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen, Benutzer & Rollen, Design) und
+  **Werkzeuge** (Blöcke, Landingpages, Weiterleitungen, Statistiken, Werkzeuge der Erweiterungen) statt einer losen Liste – die
+  Sammelseite `/admin/einstellungen` heißt jetzt **„Einstellungen der Funktionen“** und zeigt oben die übrigen Punkte der Gruppe.
+- Knopf mit `aria-expanded`, offen auf den eigenen Seiten, Zustand je Browser (`localStorage` `klxm-studio-navgroups`), <kbd>Esc</kbd>
+  schließt; ohne JavaScript offen. Nur Punkte mit Recht, leere Gruppen entfallen, ein einzelner Punkt steht direkt da.
+- `Core\AdminPages::groups()` liefert die Gruppen (Seitenleiste, Sammelseite, ⌘K-Suche); Seiten der Art `tool` landen ohne
+  `place` automatisch unter „Werkzeuge“. Überschriften der Seiten zeigen den Weg („Administration › Einstellungen“ bzw.
+  „› Werkzeuge“); Handbuch und Entwicklerhandbuch nennen die neuen Wege.
+
 ### Erweiterungen auf die Integrationspunkte umgestellt
 - **Mehrere Rechte an einer Route:** `$r->get('/admin/x', $h, ['perm' => ['a', 'b']])` – eines davon genügt (für Seiten, die zwei
   Gruppen nutzen, z. B. `pages.edit` und `feedback.write`). `extensions:list` zeigt `a|b`; ältere Cores behandeln solche Routen von

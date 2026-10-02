@@ -6,7 +6,7 @@ $tok = $newToken ?: 'cms_IHR_TOKEN';
 $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '</p>' : '';
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow">Administration</p><h1>API &amp; MCP</h1>
+  <div><p class="adm-eyebrow"><a href="<?= e(url(\Core\AdminPages::HUB)) ?>"><?= e(__('Einstellungen der Funktionen')) ?></a></p><h1>API &amp; MCP</h1>
     <p class="adm-muted">Schnittstellen für Automatisierungen und KI-Assistenten. REST-API unter <code><?= e($apiUrl) ?></code>, MCP-Server unter <code><?= e($mcpUrl) ?></code>.
       <a href="<?= e(url('/admin/hilfe/technik#api')) ?>">Technische Dokumentation →</a></p></div>
 </header>

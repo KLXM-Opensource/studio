@@ -10,7 +10,8 @@ namespace Core;
  *
  * Jede Seite hat eine Art (kind):
  *   content   arbeitet mit Inhalten (Seiten, Einträge, Buchungen …)        → Hauptmenü (place 'main') bzw. Administration ('admin')
- *   tool      Werkzeug / Arbeitsablauf (Prüfen, Importieren, Video …)     → wie content
+ *   tool      Werkzeug / Arbeitsablauf (Prüfen, Importieren, Video …)     → Administration → Gruppe „Werkzeuge“ (Standard-Platz
+ *                                                                           'admin'; mit 'place' => 'main' ausdrücklich im Hauptmenü)
  *   settings  reine Konfiguration                                         → NICHT im Menü: Sammelseite „Einstellungen“
  *                                                                           (/admin/einstellungen), mit 'table' zusätzlich an der Datentabelle
  *   stats     Berichte, Statistiken                                       → NICHT im Menü: Sammelseite „Statistiken“ (/admin/statistiken)
@@ -19,8 +20,13 @@ namespace Core;
  * über core() (unten). Felder einer Anmeldung:
  *   href (Pflicht, /admin/…), label (Pflicht), kind, icon (Symbolname oder Menü-Schlüssel), perm (Recht, can()), table (Kurzname
  *   einer Datentabelle – nur settings), tableLabel (Beschriftung an der Tabelle, Standard label), description (eine Zeile für die Karte), feature (Funktion muss an sein), visible (fn(): bool
- *   für weitere Bedingungen), place ('main' | 'admin', nur content/tool), id (Standard: aus href).
+ *   für weitere Bedingungen), place ('main' | 'admin', nur content/tool; Standard: tool → 'admin', sonst 'main'), id (Standard: aus href).
  * Adressen und Rechte ändern sich durch die Einordnung nicht – nur der Ort in der Navigation.
+ *
+ * Abschnitt „Administration“ der Seitenleiste (app/Admin/views/layout.php): nur aufklappbare Gruppen – „Einstellungen“
+ * (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen = Sammelseite, Benutzer & Rollen, Design) und
+ * „Werkzeuge“ (Blöcke, Landingpages, Weiterleitungen, Statistiken und alle Seiten mit Platz 'admin', also die Werkzeuge der
+ * Erweiterungen aus nav('admin')). Eine Gruppe mit nur einem sichtbaren Punkt erscheint als einfacher Link.
  */
 final class AdminPages
 {
@@ -53,8 +59,9 @@ final class AdminPages
         $href = (string) ($def['href'] ?? '');
         $label = trim((string) ($def['label'] ?? ''));
         if ($label === '' || !str_starts_with($href, '/') || str_starts_with($href, '//') || preg_match('~[\s"<>]~', $href)) return null;
-        $place = ($def['place'] ?? 'main') === 'admin' ? 'admin' : 'main';
         $kind = (string) ($def['kind'] ?? '');
+        // Ohne Platz: Werkzeuge in die Administration (Gruppe „Werkzeuge“), alles andere ins Hauptmenü
+        $place = ($def['place'] ?? ($kind === 'tool' ? 'admin' : 'main')) === 'admin' ? 'admin' : 'main';
         $legacy = !in_array($kind, self::KINDS, true);
         if ($legacy) $kind = $place === 'admin' ? 'tool' : 'content';
         $table = isset($def['table']) && preg_match('~^[a-z][a-z0-9_]{0,40}$~', (string) $def['table']) ? (string) $def['table'] : null;
@@ -144,6 +151,41 @@ final class AdminPages
         foreach (self::all() as $p) {
             if ($p['place'] !== $place || !in_array($p['kind'], ['content', 'tool'], true)) continue;
             $out[] = [$p['href'], $p['source'] === 'core' ? $p['label'] : self::tr($p), $p['icon'], self::visible($p)];
+        }
+        return $out;
+    }
+
+    /**
+     * Gruppen des Abschnitts „Administration“ der Seitenleiste (und Gliederung der Sammelseite): „Einstellungen“ und „Werkzeuge“,
+     * je [key, label, icon, items => [[href, label, key (Symbol/Menü-Schlüssel), true], …]] – nur sichtbare Punkte, keine leeren Gruppen.
+     * Werkzeuge: feste Seiten des Cores + alle Seiten mit Platz 'admin' (nav('admin'), v. a. kind tool der Erweiterungen).
+     */
+    public static function groups(): array
+    {
+        $groups = [
+            ['key' => 'einstellungen', 'label' => __('Einstellungen'), 'icon' => 'gear', 'items' => [
+                ['/admin/system', __('Grundeinstellungen'), 'system', can('system.manage')],
+                // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
+                ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', Features::canView()],
+                // Sammelseite (kind settings): Einstellungen der Funktionen & Erweiterungen – nur wenn es etwas zu zeigen gibt
+                [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
+                ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
+                ['/admin/design', __('Design'), 'design', Features::on('design') && can('design.edit')],
+            ]],
+            ['key' => 'werkzeuge', 'label' => __('Werkzeuge'), 'icon' => 'tools', 'items' => [
+                // Block-Designer (Core\Blocks\Custom), Landingpages (Core\Landings), Weiterleitungen und 404-Protokoll (Core\Redirects)
+                ['/admin/blocks', __('Blöcke'), 'blocks', Features::on('blocks.custom') && can('blocks.build')],
+                ['/admin/landingpages', __('Landingpages'), 'landings', Features::on('landings') && can('system.manage')],
+                ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', Features::on('redirects') && can('redirects.manage')],
+                // Sammelseite Statistiken (kind stats)
+                [self::STATS, __('Statistiken'), 'stats', self::hasStats()],
+                ...self::nav('admin'),
+            ]],
+        ];
+        $out = [];
+        foreach ($groups as $g) {
+            $g['items'] = array_values(array_filter($g['items'], fn($n) => (bool) $n[3]));
+            if ($g['items']) $out[] = $g;
         }
         return $out;
     }

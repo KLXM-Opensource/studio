@@ -16,7 +16,7 @@ $locales = \Core\I18n::available();
 $defLocale = (string) (setting('sys.admin_locale') ?: \Core\I18n::SOURCE);
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Benutzer & Rollen')) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1><?= e(__('Benutzer & Rollen')) ?></h1>
     <p class="adm-muted"><?= e(__('Jede Person bekommt ein eigenes Konto. Was sie darf, bestimmt ihre Rolle – Rollen lassen sich frei zusammenstellen.')) ?></p></div>
 </header>
 

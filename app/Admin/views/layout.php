@@ -27,30 +27,22 @@ $nav = array_values(array_filter([
     // stehen gesammelt unter „Einstellungen“ bzw. „Statistiken“ (Administration)
     ...($user ? \Core\AdminPages::nav('main') : []),
 ], fn($n) => $n[3]));
-$adminNav = array_values(array_filter([
-    ['/admin/system', __('Grundeinstellungen'), 'system', $user && can('system.manage')],
-    // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
-    ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', $user && \Core\Features::canView()],
-    // Sammelseiten (Core\AdminPages): Einstellungen der Funktionen & Erweiterungen, Statistiken – nur wenn es etwas zu zeigen gibt
-    ['/admin/einstellungen', __('Einstellungen'), 'prefs', $user && \Core\AdminPages::hasSettings()],
-    ['/admin/statistiken', __('Statistiken'), 'stats', $user && \Core\AdminPages::hasStats()],
-    ['/admin/design', __('Design'), 'design', $user && \Core\Features::on('design') && can('design.edit')],
-    // Block-Designer (Core\Blocks\Custom): eigene Blöcke für die Redaktion
-    ['/admin/blocks', __('Blöcke'), 'blocks', $user && \Core\Features::on('blocks.custom') && can('blocks.build')],
-    // Landingpages mit eigenen Domains (Core\Landings)
-    ['/admin/landingpages', __('Landingpages'), 'landings', $user && \Core\Features::on('landings') && can('system.manage')],
-    // Weiterleitungen und 404-Protokoll (Core\Redirects)
-    ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', $user && \Core\Features::on('redirects') && can('redirects.manage')],
-    ['/admin/users', __('Benutzer & Rollen'), 'users', $user && can('users.manage')],
-    // Chat-Einstellungen und API & MCP: reine Einstellungen → Sammelseite „Einstellungen“ (Core\AdminPages::core)
-    // Werkzeuge der Erweiterungen mit Platz „admin“ (z. B. Video-Werkzeuge)
-    ...($user ? \Core\AdminPages::nav('admin') : []),
-], fn($n) => $n[3]));
+// Abschnitt „Administration“: nur aufklappbare Gruppen „Einstellungen“ und „Werkzeuge“ (Core\AdminPages::groups) – leere entfallen,
+// eine Gruppe mit nur einem Punkt erscheint als einfacher Link (z. B. Redaktion, die nur das Glossar einstellen darf)
+$adminGroups = $user ? \Core\AdminPages::groups() : [];
+$adminNav = array_merge([], ...array_column($adminGroups, 'items'));
 $section = explode('/', $view)[0];
 // Seite einer Sammelseite (Einstellungen/Statistiken, Core\AdminPages)? Dann ist deren Menüpunkt der aktuelle
-$hubKind = $user && app()->request ? (\Core\AdminPages::match(app()->request->path)['kind'] ?? '') : '';
+$reqPath = $user && app()->request ? (string) app()->request->path : '';
+$hubKind = $reqPath !== '' ? (\Core\AdminPages::match($reqPath)['kind'] ?? '') : '';
 $hubKind = in_array($hubKind, ['settings', 'stats'], true) ? $hubKind : '';
-$isCur = fn(string $key) => $hubKind !== '' ? ($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats') : $section === $key;
+// Aktueller Menüpunkt: Sammelseite > Adresse (mit $href, Administration) > Bereich der Ansicht
+$isCur = function (string $key, string $href = '') use ($hubKind, $reqPath, $section): bool {
+    if ($hubKind !== '') return ($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats');
+    if ($href !== '' && ($reqPath === $href || str_starts_with($reqPath, $href . '/'))) return true;
+    if (in_array($key, ['prefs', 'stats'], true)) return false;   // beide Sammelseiten liegen in views/prefs – nur über die Adresse
+    return $section === $key || ($key === 'users' && $section === 'role');
+};
 $newReq = 0;
 foreach ($inboxes as $ib) $newReq += \Core\Data\Inbox::count($ib, 'neu');
 [$chatN, $chatAt] = $user ? \Core\Chat\Chat::navCount() : [0, 0];   // Chat: ungelesen + Erwähnungen (live: resources/js/userchat.js)
@@ -106,7 +98,8 @@ if ($user && ($req = app()->request)) {
 <?php if ($user):
   // Schmale Bildschirme (≤ 900 px): schlanke Kopfleiste, Seitenleiste als Schublade (resources/js/_drawer.js; ohne JavaScript per #adm-side)
   $areaTitle = (string) ($drillTitle ?? '');
-  if ($areaTitle === '') foreach ([...$nav, ...$adminNav] as [, $l, $k]) if ($k === $section) { $areaTitle = (string) $l; break; }
+  if ($areaTitle === '') foreach ($adminNav as [$h, $l, $k]) if ($isCur($k, $h)) { $areaTitle = (string) $l; break; }
+  if ($areaTitle === '') foreach ($nav as [, $l, $k]) if ($isCur($k)) { $areaTitle = (string) $l; break; }
   if ($areaTitle === '') $areaTitle = match ($section) { 'help' => __('Handbuch & Hilfe'), 'account' => __('Konto'), 'role' => __('Benutzer & Rollen'), default => (string) ($title ?? __('Verwaltung')) };
 ?>
 <header class="adm-top">
@@ -181,13 +174,25 @@ if ($user && ($req = app()->request)) {
       </li>
       <?php endforeach; ?>
     </ul>
-    <?php if ($adminNav): ?>
-    <p class="adm-side__label"><?= e(__('Administration')) ?></p>
-    <ul>
-      <?php foreach ($adminNav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); ?>
-      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $isCur($key) ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span></a></li>
+    <?php if ($adminGroups): // Administration: aufklappbare Gruppen – Zustand je Browser (resources/js/_navgroups.js), offen auf ihren Seiten ?>
+    <p class="adm-side__label" id="adm-admin-h"><?= e(__('Administration')) ?></p>
+    <ul class="adm-navgrps" aria-labelledby="adm-admin-h">
+      <?php foreach ($adminGroups as $g): $gOpen = (bool) array_filter($g['items'], fn($n) => $isCur($n[2], $n[0])); ?>
+      <?php if (count($g['items']) === 1): [$href, $label, $key] = $g['items'][0]; $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); ?>
+      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $gOpen ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span></a></li>
+      <?php else: $gId = 'adm-grp-' . $g['key']; ?>
+      <li class="adm-navgrp<?= $gOpen ? ' is-open is-current' : '' ?>" data-navgroup="<?= e($g['key']) ?>">
+        <button type="button" class="adm-navgrp__btn" aria-expanded="<?= $gOpen ? 'true' : 'false' ?>" aria-controls="<?= e($gId) ?>"><?= \Core\Icons::nav($g['icon'], 'adm-nav__ico') ?><span><?= e($g['label']) ?></span><span class="adm-navgrp__chev" aria-hidden="true"></span></button>
+        <ul class="adm-navgrp__list" id="<?= e($gId) ?>"<?= $gOpen ? '' : ' hidden' ?>>
+          <?php foreach ($g['items'] as [$href, $label, $key]): ?>
+          <li><a href="<?= e(url($href)) ?>" data-nav="<?= e($key) ?>"<?= $isCur($key, $href) ? ' aria-current="page"' : '' ?>><span><?= e($label) ?></span></a></li>
+          <?php endforeach; ?>
+        </ul>
+      </li>
+      <?php endif; ?>
       <?php endforeach; ?>
     </ul>
+    <noscript><style>.adm-side .adm-navgrp__list[hidden]{display:grid}.adm-navgrp__chev{display:none}</style></noscript>
     <?php endif; ?>
   </nav>
   <div class="adm-side__foot">

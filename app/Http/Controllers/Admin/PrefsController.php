@@ -11,8 +11,8 @@ use Core\Http\Request;
 use Core\Http\Response;
 
 /**
- * Sammelseiten der Verwaltung (Core\AdminPages): „Einstellungen“ (/admin/einstellungen) mit einer Karte je Einstellungsseite
- * von Funktionen und Erweiterungen, „Statistiken“ (/admin/statistiken) für Berichte. Sichtbar ist, was die Rolle öffnen darf –
+ * Sammelseiten der Verwaltung (Core\AdminPages): „Einstellungen der Funktionen“ (/admin/einstellungen, Gruppe „Einstellungen“) mit einer Karte je Einstellungsseite
+ * von Funktionen und Erweiterungen, „Statistiken“ (/admin/statistiken, Gruppe „Werkzeuge“) für Berichte. Sichtbar ist, was die Rolle öffnen darf –
  * jede Zielseite prüft ihre Rechte trotzdem selbst.
  */
 final class PrefsController extends AdminController
@@ -22,7 +22,7 @@ final class PrefsController extends AdminController
         $this->auth($r);
         $groups = AdminPages::settings();
         if (!$groups && !\Core\Features::canView() && !can('system.manage')) throw new HttpException(404);
-        return $this->view('prefs/settings', ['groups' => $groups, 'title' => __('Einstellungen')]);
+        return $this->view('prefs/settings', ['groups' => $groups, 'title' => __('Einstellungen der Funktionen')]);
     }
 
     public function stats(Request $r): Response

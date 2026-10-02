@@ -3,7 +3,7 @@
 use Core\Fields;
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow">Administration</p><h1>Grundeinstellungen</h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1>Grundeinstellungen</h1>
     <p class="adm-muted">Technische Einstellungen: Website, E-Mail-Versand (Symfony Mailer), Spamschutz und Verschlüsselung.</p></div>
   <?php if (\Core\Fonts::canManage()): // Schriften aus Google Fonts selbst hosten (Core\Fonts) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/fonts')) ?>"><?= icon('text-t') ?> <?= e(__('Schriften')) ?></a><?php endif; ?>
 </header>

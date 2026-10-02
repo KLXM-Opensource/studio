@@ -35,7 +35,7 @@
   </table>
   <div class="doc-note doc-note--important"><strong>Rechtstexte</strong><p>Impressum, Datenschutz und Barrierefreiheit enthalten Platzhalter. Bitte ausschließlich mit geprüften Texten (z. B. von Kammer, Verband, Rechtsberatung oder Datenschutzbeauftragten) füllen.</p></div>
   <h3 id="nicht-gefunden">Seite „Nicht gefunden (404)“</h3>
-  <p>Ruft jemand eine Adresse auf, die es nicht gibt (Tippfehler, alter Link), zeigt die Website eine Fehlerseite. Diese Seite können Sie selbst gestalten – mit Blöcken wie jede andere Seite. Sie finden sie in der <a href="<?= e(url('/admin/pages#sonderseiten')) ?>">Seitenübersicht</a> unten unter <b>Sonderseiten</b> und unter <b>Administration → Weiterleitungen → Nicht gefunden (404)</b>.</p>
+  <p>Ruft jemand eine Adresse auf, die es nicht gibt (Tippfehler, alter Link), zeigt die Website eine Fehlerseite. Diese Seite können Sie selbst gestalten – mit Blöcken wie jede andere Seite. Sie finden sie in der <a href="<?= e(url('/admin/pages#sonderseiten')) ?>">Seitenübersicht</a> unten unter <b>Sonderseiten</b> und unter <b>Administration → Werkzeuge → Weiterleitungen → Nicht gefunden (404)</b>.</p>
   <ol class="doc-steps">
     <li><b>404-Seite anlegen</b> – die Seite entsteht als Entwurf mit den Texten, die Ihr Design bisher gezeigt hat, und öffnet sich im Editor.</li>
     <li>Texte anpassen, Blöcke ergänzen (z. B. ein Bild oder Kontaktdaten), <b>Veröffentlichen</b>. Bis dahin sehen Besucher die bisherige Fehlerseite des Designs.</li>

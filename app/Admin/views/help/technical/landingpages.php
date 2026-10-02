@@ -3,7 +3,7 @@
   <table class="doc-table">
     <tr><th>Baustein</th><th>Ort</th></tr>
     <tr><td>Domain gehört zur Website</td><td><code>config/sites/{key}.php</code> → <code>'landing_hosts' =&gt; ['reisemedizin-musterstadt.de', 'www.reisemedizin-musterstadt.de']</code> (Agentur; <code>Sites::resolve</code> prüft <code>hosts</code> und <code>landing_hosts</code>). Hauptadresse der Website bleibt <code>hosts[0]</code>.</td></tr>
-    <tr><td>Zuordnung Domain → Seite</td><td>Tabelle <code>landings</code> der Website (id, label, hosts JSON, page_id, include_subpages, mode, options_json, active) – Verwaltung → Administration → <b>Landingpages</b> (Recht <code>system.manage</code>, Funktion <code>landings</code>)</td></tr>
+    <tr><td>Zuordnung Domain → Seite</td><td>Tabelle <code>landings</code> der Website (id, label, hosts JSON, page_id, include_subpages, mode, options_json, active) – Verwaltung → Administration → Werkzeuge → <b>Landingpages</b> (Recht <code>system.manage</code>, Funktion <code>landings</code>)</td></tr>
     <tr><td>Funktion</td><td><code>landings</code> (Core\Features) – an in <code>full</code>, aus in den Presets <code>content</code>/<code>minimal</code>; Integratoren und Netzwerk-Konten sehen sie immer. Ohne Funktion werden Landing-Domains wie normale Domains der Website behandelt.</td></tr>
     <tr><td>Kits</td><td><code>landing()</code> → <code>?Core\Landing</code> (null auf der Hauptdomain): <code>-&gt;name</code>, <code>-&gt;tagline</code>, <code>-&gt;logo</code> (Medien-ID), <code>-&gt;layout</code>; Klassen <code>is-landing</code> / <code>is-landing--reduced</code> am <code>&lt;html&gt;</code> (über <code>design_classes()</code>); optionales Template <code>templates/landing.php</code> für das reduzierte Layout</td></tr>
   </table>

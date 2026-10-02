@@ -22,7 +22,7 @@ $sw = function (bool $on, bool $disabled, string $label) {
 };
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?></p><h1><?= e(__('Funktionen & Erweiterungen')) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1><?= e(__('Funktionen & Erweiterungen')) ?></h1>
     <p class="adm-muted"><?= e(__('{on} von {total} Funktionen und {ext} von {exts} Erweiterungen sind auf dieser Website eingeschaltet.', ['on' => $onCount, 'total' => $total, 'ext' => $extOn, 'exts' => count($exts)])) ?></p></div>
 </header>
 

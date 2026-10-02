@@ -197,7 +197,7 @@ return [
             'goal' => 'Everyone gets their own account with exactly the permissions they need – secured with two-factor sign-in.',
             'prerequisites' => ['Permission “users and roles” (default: administrators).'],
             'steps' => [
-                'Administration › Benutzer & Rollen (users & roles): everyone gets their own account.',
+                'Administration › Einstellungen › Benutzer & Rollen (settings › users & roles): everyone gets their own account.',
                 'First a suitable role: “+ Neue Rolle” (new role), enter a name and tick the permissions.',
                 'Whatever is not ticked stays hidden for the role – e.g. no “Veröffentlichen” (publish).',
                 '“Neuen Benutzer anlegen” (new user): name, email, initial password (hand over in person) and role.',
@@ -234,7 +234,7 @@ return [
             'goal' => 'You adjust colours, fonts and navigation – checked for accessibility and without changing the kit.',
             'prerequisites' => ['Permission “design (style editor)” and the design feature.'],
             'steps' => [
-                'Administration › Design: colours, fonts and shapes of the kit for this website.',
+                'Administration › Einstellungen › Design (settings › design): colours, fonts and shapes of the kit for this website.',
                 'Presets fill the form with a matching set – the preview on the right shows it right away.',
                 'Every colour with a contrast check (AA/AAA) – for light and dark mode.',
                 'Tabs “Typografie”, “Navigation”, “Kopfbereich: Suche & Aktionen” (header: search & actions) – fonts, menu, search field and button at the top.',

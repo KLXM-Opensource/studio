@@ -1,5 +1,5 @@
 <?php /** Handbuch · Kapitel „Funktionen & Erweiterungen“ (Core\Features, Core\Extensions) – für den Haupt-Admin bzw. die Agentur */ ?>
-  <p class="lead">Unter <b>Administration → Funktionen &amp; Erweiterungen</b> legen Sie fest, was diese Website kann – von der REST-API über KI-Funktionen bis zu Erweiterungen wie den Video-Werkzeugen. Die Seite sehen nur Personen mit dem Recht <i>Funktionen &amp; Erweiterungen ein- und ausschalten</i> (in einer Einzel-Installation hat die Rolle „Administration“ es; weitere Rollen bekommen es unter <b>Benutzer &amp; Rollen</b>).</p>
+  <p class="lead">Unter <b>Administration → Einstellungen → Funktionen &amp; Erweiterungen</b> legen Sie fest, was diese Website kann – von der REST-API über KI-Funktionen bis zu Erweiterungen wie den Video-Werkzeugen. Die Seite sehen nur Personen mit dem Recht <i>Funktionen &amp; Erweiterungen ein- und ausschalten</i> (in einer Einzel-Installation hat die Rolle „Administration“ es; weitere Rollen bekommen es unter <b>Benutzer &amp; Rollen</b>).</p>
   <div class="doc-note doc-note--warn"><strong>Nur einschalten, was die Website wirklich braucht</strong><p>Jede Funktion ist zusätzliche Angriffsfläche, Pflege und ggf. Datenverarbeitung. Abgeschaltete Funktionen sperren ihre Rechte, Menüpunkte, API- und MCP-Werkzeuge automatisch – auch für die Administration. Im Zweifel aus lassen und erst einschalten, wenn es konkret gebraucht wird.</p></div>
   <h3>Funktionen</h3>
   <ul>
@@ -20,9 +20,10 @@
   <h3 id="einstellungen-sammelseite">Wo Seiten von Funktionen und Erweiterungen erscheinen</h3>
   <p>Damit die Seitenleiste übersichtlich bleibt, gilt eine feste Ordnung:</p>
   <ul>
-    <li><b>Inhalte und Werkzeuge</b> (z. B. Seiten, Daten, Anfragen, Buchungen, Video-Werkzeuge) stehen im Hauptmenü bzw. unter Administration.</li>
-    <li><b>Reine Einstellungen</b> stehen gesammelt unter <b>Administration → Einstellungen</b> – je Funktion oder Erweiterung eine Karte mit kurzer Beschreibung, nur die, die Ihre Rolle öffnen darf. Heute z. B. Glossar, Chat und API &amp; MCP. Gehört eine Einstellungsseite zu einer Datentabelle (Glossar), erscheint sie zusätzlich dort als Knopf und Unterpunkt.</li>
-    <li><b>Statistiken und Berichte</b> stehen gesammelt unter <b>Administration → Statistiken</b> – der Punkt erscheint erst, wenn eine Funktion oder Erweiterung welche mitbringt.</li>
+    <li><b>Inhalte</b> (z. B. Seiten, Daten, Anfragen, Buchungen) stehen im Hauptmenü.</li>
+    <li>Unter <b>Administration</b> gibt es nur zwei aufklappbare Gruppen: <b>Einstellungen</b> (Grundeinstellungen, Funktionen &amp; Erweiterungen, Einstellungen der Funktionen, Benutzer &amp; Rollen, Design) und <b>Werkzeuge</b> (Blöcke, Landingpages, Weiterleitungen, Statistiken und die Werkzeuge der Erweiterungen, z. B. Video-Werkzeuge). Die Gruppe der aktuellen Seite ist offen; ob die andere offen oder zu ist, merkt sich Ihr Browser. Sie sehen nur Punkte, die Ihre Rolle öffnen darf – bleibt in einer Gruppe nur ein Punkt, steht er direkt da.</li>
+    <li><b>Reine Einstellungen</b> der Funktionen und Erweiterungen stehen gesammelt unter <b>Administration → Einstellungen → Einstellungen der Funktionen</b> – je Funktion oder Erweiterung eine Karte mit kurzer Beschreibung, nur die, die Ihre Rolle öffnen darf. Heute z. B. Glossar, Chat und API &amp; MCP. Gehört eine Einstellungsseite zu einer Datentabelle (Glossar), erscheint sie zusätzlich dort als Knopf und Unterpunkt.</li>
+    <li><b>Statistiken und Berichte</b> stehen gesammelt unter <b>Administration → Werkzeuge → Statistiken</b> – der Punkt erscheint erst, wenn eine Funktion oder Erweiterung welche mitbringt.</li>
     <li>Alles bleibt über die Suche (<kbd>⌘K</kbd>) direkt erreichbar; Adressen und Rechte ändern sich nicht.</li>
   </ul>
   <h3>„Per Konfiguration festgelegt“</h3>

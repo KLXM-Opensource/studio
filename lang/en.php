@@ -925,6 +925,7 @@ return [
     'Abmelden' => 'Sign out',
     'Konto' => 'Account',
     'Einstellungen' => 'Settings',
+    'Einstellungen der Funktionen' => 'Feature settings',
     'Organisation' => 'organisation',
     'Schlüssel' => 'key',
     'Formular-Anfragen' => 'Form requests',

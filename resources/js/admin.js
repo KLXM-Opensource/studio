@@ -17,6 +17,7 @@ import { initDesign } from './_design.js';
 import { drill } from './_drill.js';
 import { initDrawer } from './_drawer.js';
 import { initFavorites } from './_favorites.js';
+import { initNavGroups } from './_navgroups.js';   // Seitenleiste → Administration: aufklappbare Gruppen
 import { initSupport } from './_support.js';
 import { initNetwork } from './_network.js';
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
@@ -65,6 +66,8 @@ if (IN_ADMIN) initAssistant();
     box.addEventListener('toggle', () => { try { localStorage.setItem('adm.helpbox', box.open ? '1' : '0'); } catch {} });
   }
 }
+// ------------------------------------------------------------ Administration: aufklappbare Gruppen „Einstellungen“, „Werkzeuge“ (_navgroups.js)
+initNavGroups();
 // ------------------------------------------------------------ Bereichsnavigation (Daten): serverseitig in der Seitenleiste
 {
   const box = $('.adm-side > .adm-drill');
