@@ -1,5 +1,5 @@
 <?php
-/** Verwaltung → Blöcke: eigene Blöcke (Block-Designer). @var array $blocks  @var ?array $library */
+/** Verwaltung → Blöcke: eigene Blöcke (Block-Designer). @var array $blocks  @var ?array $library  @var array $demos  @var string $demoToken */
 $status = fn(array $b) => match (true) {
     $b['status'] === 'published' && $b['changed'] => ['adm-badge adm-badge--adm-warn', __('Freigegeben · Änderungen offen')],
     $b['status'] === 'published' => ['adm-badge', __('Freigegeben')],
@@ -18,11 +18,14 @@ $status = fn(array $b) => match (true) {
 <details class="adm-card dt-howto"<?= $blocks ? '' : ' open' ?>>
   <summary><?= e(__('So funktioniert der Block-Designer')) ?></summary>
   <ol class="dt-steps">
-    <li><span class="dt-step">1</span><strong><?= e(__('Felder')) ?></strong><p><?= e(__('Welche Angaben pflegt die Redaktion? Text, Bild, Link, Auswahl, Listen …')) ?></p></li>
-    <li><span class="dt-step">2</span><strong><?= e(__('Vorlage & CSS')) ?></strong><p><?= e(__('HTML mit Platzhaltern wie {{ title }} – ohne PHP und ohne JavaScript. Das CSS gilt nur innerhalb des Blocks.')) ?></p></li>
-    <li><span class="dt-step">3</span><strong><?= e(__('Freigeben')) ?></strong><p><?= e(__('Nach dem Test in der Vorschau erscheint der Block beim Bearbeiten der Seiten neben den Blöcken des Kits.')) ?></p></li>
+    <li><span class="dt-step">1</span><strong><?= e(__('Felder anlegen')) ?></strong><p><?= e(__('Welche Angaben pflegt die Redaktion? Text, Bild, Link, Auswahl, Listen …')) ?></p></li>
+    <li><span class="dt-step">2</span><strong><?= e(__('Vorlage schreiben')) ?></strong><p><?= e(__('HTML mit Platzhaltern wie {{ title }} – ohne PHP und ohne JavaScript. Alle Ausgaben werden automatisch geschützt.')) ?></p></li>
+    <li><span class="dt-step">3</span><strong><?= e(__('CSS ergänzen')) ?></strong><p><?= e(__('Das CSS gilt nur innerhalb des Blocks und nutzt die Farben des Kits. Danach in der Vorschau prüfen und für die Redaktion freigeben.')) ?></p></li>
   </ol>
-  <p class="adm-muted"><a href="<?= e(url('/admin/hilfe/technik#bloecke')) ?>"><?= e(__('Referenz der Vorlagensprache')) ?> →</a></p>
+  <p class="adm-muted cb-howto__links">
+    <?php if ($demos): ?><a href="#beispiele"><?= e(__('Mit einem Beispiel anfangen')) ?> ↓</a> · <?php endif; ?>
+    <a href="<?= e(url('/admin/hilfe#baukasten')) ?>"><?= e(__('Handbuch: Eigene Blöcke bauen')) ?> →</a> ·
+    <a href="<?= e(url('/admin/hilfe/technik#bloecke')) ?>"><?= e(__('Referenz der Vorlagensprache')) ?> →</a></p>
 </details>
 
 <?php if ($blocks): ?>
@@ -44,6 +47,34 @@ $status = fn(array $b) => match (true) {
 </div>
 <?php else: ?>
 <p class="adm-muted"><?= e(__('Noch keine eigenen Blöcke.')) ?></p>
+<?php endif; ?>
+
+<?php if ($demos): ?>
+<details class="adm-card cb-demos" id="beispiele"<?= $blocks ? '' : ' open' ?> data-cb-demos>
+  <summary><span class="cb-demos__title"><?= icon('lightbulb') ?> <?= e(__('Beispiele')) ?></span>
+    <span class="adm-muted"><?= e(__('{n} Beispiel-Blöcke – vom einfachen Hinweis bis zur Aufklappliste', ['n' => count($demos)])) ?></span></summary>
+  <p class="adm-muted cb-demos__lead"><?= e(__('Jedes Beispiel zeigt ein Konzept des Block-Designers. „Als Vorlage übernehmen“ legt eine Kopie als Entwurf an – bestehende Blöcke bleiben unberührt. Im Block-Designer erklären Hinweise, was das Beispiel zeigt. Die Vorschau nutzt das aktive Kit.')) ?></p>
+  <ol class="cb-demos__grid">
+    <?php $i = 0; foreach ($demos as $name => $d): $i++; $b = $d['block']; ?>
+    <li class="cb-demo">
+      <div class="cb-demo__shot" aria-hidden="true">
+        <iframe src="<?= e(url('/admin/blocks/demos/' . $name . '/preview')) ?>" loading="lazy" tabindex="-1" title="<?= e(__('Vorschau: {label}', ['label' => $b['label']])) ?>"></iframe>
+      </div>
+      <div class="cb-demo__body">
+        <p class="cb-demo__step"><?= e(__('Beispiel {n}', ['n' => $i])) ?><?= $d['level'] !== '' ? ' · ' . e($d['level']) : '' ?></p>
+        <h3 class="cb-demo__name"><span class="dt-icon" aria-hidden="true"><?= icon((string) ($b['icon'] ?? 'package')) ?></span> <?= e((string) $b['label']) ?></h3>
+        <p class="cb-demo__teaches"><?= e($d['teaches']) ?></p>
+        <?php if ($d['concepts']): ?><ul class="cb-demo__tags" aria-label="<?= e(__('Zeigt')) ?>"><?php foreach ($d['concepts'] as $c): ?><li><?= e($c) ?></li><?php endforeach; ?></ul><?php endif; ?>
+        <form method="post" action="<?= e(url('/admin/blocks/demos')) ?>" class="cb-demo__act">
+          <?= csrf_field() ?><input type="hidden" name="demo" value="<?= e($name) ?>"><input type="hidden" name="token" value="<?= e(substr(md5($demoToken . $name), 0, 16)) ?>">
+          <button class="adm-btn adm-btn--small adm-btn--primary" type="submit"><?= e(__('Als Vorlage übernehmen')) ?><span class="adm-sr"> – <?= e((string) $b['label']) ?></span></button>
+          <?php if ($d['copies']): ?><small class="adm-muted"><?= e(__('schon {n}× übernommen', ['n' => $d['copies']])) ?></small><?php endif; ?>
+        </form>
+      </div>
+    </li>
+    <?php endforeach; ?>
+  </ol>
+</details>
 <?php endif; ?>
 
 <div class="adm-grid2">

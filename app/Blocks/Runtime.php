@@ -24,7 +24,7 @@ final class Runtime
         'rich' => [0, 0], 'inline' => [0, 0], 'plain' => [0, 0], 'upper' => [0, 0], 'lower' => [0, 0], 'trim' => [0, 0],
         'date' => [0, 1], 'default' => [1, 1], 'truncate' => [1, 1], 'number' => [0, 1], 'length' => [0, 0],
         'image' => [0, 2], 'zoom' => [0, 2], 'alt' => [0, 0], 'icon' => [0, 0],
-        'link' => [0, 0], 'tel' => [0, 0], 'file' => [0, 0], 'filename' => [0, 0], 'filesize' => [0, 0],
+        'link' => [0, 0], 'tel' => [0, 0], 'mailto' => [0, 0], 'file' => [0, 0], 'filename' => [0, 0], 'filesize' => [0, 0],
         'lt' => [0, 0], 'lines' => [0, 0], 'nl2br' => [0, 0], 'paragraphs' => [0, 0],
     ];
     public const DATE_STYLES = ['short', 'long', 'weekday', 'day_month'];
@@ -264,6 +264,9 @@ final class Runtime
                 return self::resolveLink(self::scalar($v));
             case 'tel':
                 return tel_href(self::scalar($v)) ?? '';
+            case 'mailto':
+                $s = trim(self::scalar($v));
+                return filter_var($s, FILTER_VALIDATE_EMAIL) !== false ? 'mailto:' . $s : '';
             case 'file':
                 $m = is_numeric($v) ? Media::find((int) $v) : null;
                 return $m ? Media::url($m) : '';

@@ -28,6 +28,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   - `video_tools` 1.1.0 – Werkzeug-Seite (`adminPage`, Art `tool`), Zahlen über `Core\Format`, Altname `mycms-extension` entfernt.
 - Funktionsübersicht, Handbuch (Cookies, Daten) und Entwicklerhandbuch (Funktionen, Consent-Kit) nennen die neuen Orte.
 
+### Block-Designer: Beispiele und Einstieg
+- **Sieben Beispiel-Blöcke** unter Verwaltung → Blöcke → **Beispiele** (`app/Blocks/demos/*.json`, `Core\Blocks\Demos`), vom
+  Einfachen zum Fortgeschrittenen: Hinweisbox (Auswahlfeld, Bedingungen), Zitat mit Bild (Bildfeld, Alt-Text), Kennzahlen
+  (Liste, `number`), Ablauf / Schritte (Symbol, `loop.index`), Ansprechpartner-Karte (`tel`, `mailto`, Linkfeld), FAQ /
+  Aufklappliste (`<details>`, JSON-LD FAQPage), Termin-Hinweis (Datum, `<time>`). Kit-neutral über die `--cb-*`-Variablen,
+  hell/dunkel, `prefers-reduced-motion`, ohne Inline-Styles.
+- Galerie mit Live-Vorschau im aktiven Kit; **„Als Vorlage übernehmen“** legt eine Kopie als Entwurf an (eindeutiger Kurzname,
+  nie überschreibend, je Klick genau einmal). Im Block-Designer erklären „Was zeigt dieses Beispiel?“ und Hinweise je Reiter
+  das Beispiel (ausblendbar). Einstieg oben in drei Schritten (Felder → Vorlage → CSS) mit Links ins Handbuch.
+- `php bin/console blocks:demos [--install=name|--all]` (wiederholbar); `blocks:selftest` prüft alle Beispiele.
+- Neuer Vorlagen-Filter `mailto`. Block-Designer: gespeicherte Beispieldaten erscheinen beim Öffnen wieder (statt neu erzeugter),
+  Feldangaben ohne eigenes Eingabefeld (Platzhalter, Standardwert, Zeilen) bleiben beim Bearbeiten erhalten; Kurznamen
+  `new`, `import`, `library`, `demos` sind reserviert.
+
 ### Plattform für Erweiterungen: feste Integrationspunkte
 - **Entwicklerhandbuch › Erweiterungen › Integrationspunkte und Regeln:** kuratierte Liste der Stellen, über die Erweiterungen
   eingreifen dürfen – alles andere gibt es nicht.

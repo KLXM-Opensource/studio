@@ -1,0 +1,106 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 7,
+        "level": "Datum",
+        "teaches": "Ein Datumsfeld, formatiert in der Sprache der Seite – mit maschinenlesbarem <time datetime> und Schaltfläche.",
+        "concepts": [
+            "Datumsfeld (date)",
+            "date('weekday' | 'day_month' | 'long')",
+            "<time datetime>",
+            "Schaltfläche aus Kit-Farben"
+        ],
+        "hints": {
+            "felder": "Das Datumsfeld speichert JJJJ-MM-TT. Uhrzeit und Ort sind freie Textfelder – so bleibt „ab 18 Uhr“ oder „online“ möglich.",
+            "vorlage": "{{ datum | date('long') }} ergibt „15. Oktober 2026“, 'weekday' den Wochentag, 'day_month' „15. Oktober“, 'short' „15.10.2026“ – auf englischen Seiten automatisch englisch. <time datetime=\"{{ datum }}\"> liefert das Datum zusätzlich maschinenlesbar.",
+            "css": "Das Kalenderblatt und die Schaltfläche nutzen var(--cb-accent) mit var(--cb-on-accent) – dieses Farbpaar stellt das Kit lesbar ein. :focus-visible zeigt beim Tabben einen deutlichen Rahmen.",
+            "beispiel": "Wählen Sie ein anderes Datum – Wochentag und Kalenderblatt passen sich an."
+        }
+    },
+    "block": {
+        "key": "termin",
+        "label": "Termin-Hinweis",
+        "icon": "calendar-blank",
+        "group": "Beispiele",
+        "description": "Einzelner Termin mit Kalenderblatt, Uhrzeit, Ort und Link.",
+        "fields": [
+            {
+                "name": "title",
+                "label": "Titel",
+                "type": "text",
+                "required": true,
+                "max": 120
+            },
+            {
+                "name": "datum",
+                "label": "Datum",
+                "type": "date",
+                "required": true,
+                "width": "half"
+            },
+            {
+                "name": "uhrzeit",
+                "label": "Uhrzeit",
+                "type": "text",
+                "width": "half",
+                "max": 40,
+                "placeholder": "18–20 Uhr"
+            },
+            {
+                "name": "ort",
+                "label": "Ort",
+                "type": "text",
+                "max": 120
+            },
+            {
+                "name": "text",
+                "label": "Text",
+                "type": "textarea",
+                "rows": 3,
+                "max": 600
+            },
+            {
+                "name": "link",
+                "label": "Link",
+                "type": "link"
+            },
+            {
+                "name": "linktext",
+                "label": "Linktext",
+                "type": "text",
+                "max": 60,
+                "placeholder": "Mehr erfahren"
+            }
+        ],
+        "template": "{# Beispiel 7 · Termin-Hinweis: Datumsfeld mit date('…') und maschinenlesbarem <time>. #}\n<div class=\"event\">\n  {% if datum %}\n  <p class=\"event__sheet\" aria-hidden=\"true\"><span class=\"event__dow\">{{ datum | date('weekday') }}</span><span class=\"event__day\">{{ datum | date('day_month') }}</span></p>\n  {% endif %}\n  <div class=\"event__body\">\n    <h2 class=\"event__title\" id=\"{{ block.title_id }}\">{{ title }}</h2>\n    <ul class=\"event__meta\" role=\"list\">\n      {% if datum %}<li><span class=\"event__ico\" aria-hidden=\"true\">{{ 'calendar-blank' | icon }}</span><time datetime=\"{{ datum }}\">{{ datum | date('long') }}</time></li>{% endif %}\n      {% if uhrzeit %}<li><span class=\"event__ico\" aria-hidden=\"true\">{{ 'clock' | icon }}</span>{{ uhrzeit }}</li>{% endif %}\n      {% if ort %}<li><span class=\"event__ico\" aria-hidden=\"true\">{{ 'map-pin' | icon }}</span>{{ ort }}</li>{% endif %}\n    </ul>\n    {% if text %}<p class=\"event__text\">{{ text }}</p>{% endif %}\n    {% if link %}<p class=\"event__cta\"><a class=\"event__btn\" href=\"{{ link }}\">{{ linktext | default('Mehr erfahren') }}</a></p>{% endif %}\n  </div>\n</div>",
+        "css": ".event {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: flex-start;\n  gap: 1.25rem 2rem;\n  padding: clamp(1.25rem, 3vw, 2rem);\n  border: 1px solid var(--cb-line);\n  border-radius: var(--cb-radius);\n  background: var(--cb-surface);\n}\n.event__sheet {\n  display: flex;\n  flex: none;\n  flex-direction: column;\n  align-items: center;\n  min-width: 8.5rem;\n  margin: 0;\n  padding: 1rem 1.25rem;\n  border-radius: var(--cb-radius);\n  background: var(--cb-accent);\n  color: var(--cb-on-accent);\n  text-align: center;\n}\n.event__dow { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }\n.event__day { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }\n.event__body { flex: 1 1 18rem; min-width: 0; }\n.event__title { margin: 0 0 .6rem; }\n.event__meta { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; margin: 0 0 .9rem; padding: 0; list-style: none; }\n.event__meta li { display: inline-flex; align-items: center; gap: .4rem; }\n.event__ico { display: inline-flex; font-size: 1.1rem; }\n.event__text { max-width: 42rem; margin: 0 0 1rem; }\n.event__cta { margin: 0; }\n.event__btn {\n  display: inline-block;\n  padding: .7rem 1.25rem;\n  border-radius: var(--cb-radius);\n  background: var(--cb-accent);\n  color: var(--cb-on-accent);\n  font-weight: 600;\n  text-decoration: none;\n}\n.event__btn:hover { text-decoration: underline; }\n.event__btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }",
+        "behaviours": [],
+        "jsonld": {
+            "type": "item",
+            "schema": "Event",
+            "list": "",
+            "props": {
+                "name": "title",
+                "startDate": "datum",
+                "location": "ort",
+                "description": "text",
+                "url": "link"
+            }
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "title": "Tag der offenen Tür",
+            "datum": "",
+            "uhrzeit": "14–18 Uhr",
+            "ort": "Musterstraße 1, Musterstadt",
+            "text": "Schauen Sie sich in Ruhe um, stellen Sie Ihre Fragen und lernen Sie das Team kennen. Eine Anmeldung ist nicht nötig.",
+            "link": "/",
+            "linktext": "Mehr erfahren"
+        }
+    }
+}

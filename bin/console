@@ -62,6 +62,8 @@
  * Betrieb & Deploy
  *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
  *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Designer) auflisten | Sicherheits-Selbsttest der Vorlagensprache
+ *   blocks:demos [--install=name|--all]               Beispiel-Blöcke (app/Blocks/demos) auflisten bzw. als Entwurf übernehmen
+ *                                                     (wiederholbar: vorhandene Kopien werden nicht noch einmal angelegt)
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
  *   kit:check [--kit=name|--all] [--strict] [-v]     Überschreibungen eines Kits prüfen: verwaiste Block-Vorlagen, Kern-Blöcke
  *                                                     mit geändertem Vertrag (unbekannte Angaben), Kern-Fragmente mit neuem Original
@@ -1165,6 +1167,29 @@ switch ($cmd) {
                 trim(($n['hidden'] ? 'ausgeblendet ' : '') . ($n['areas'] ? 'bereich=' . implode(',', $n['areas']) . ' ' : '') . ($n['blocks'] ? 'block=' . implode(',', $n['blocks']) : '')));
         }
         break;
+
+    case 'blocks:demos':
+        // Beispiel-Blöcke (Core\Blocks\Demos): ohne Option auflisten, --install=a,b bzw. --all übernehmen (je Beispiel höchstens eine Kopie)
+        $want = null;
+        foreach ($args as $a) {
+            if ($a === '--all') $want = array_keys(Core\Blocks\Demos::all());
+            elseif (str_starts_with($a, '--install=')) $want = array_values(array_filter(array_map('trim', explode(',', substr($a, 10)))));
+        }
+        if ($want === null) {
+            foreach (Core\Blocks\Demos::all() as $n => $d) {
+                $have = Core\Blocks\Demos::installed($n);
+                printf("  %-18s %-12s %-26s %s\n", $n, $d['level'], $d['block']['label'], $have ? 'übernommen: ' . implode(', ', array_map(fn($k) => 'cblk_' . $k, $have)) : '–');
+            }
+            echo "  Übernehmen: php bin/console blocks:demos --install=name[,name] | --all [--site=…]\n";
+            break;
+        }
+        $bad = 0;
+        foreach ($want as $n) {
+            $res = Core\Blocks\Demos::install($n, 0, true);
+            if ($res['errors']) { $bad++; echo "  FEHLER $n: " . implode(' ', $res['errors']) . "\n"; continue; }
+            echo '  ' . ($res['existing'] ? 'vorhanden ' : 'angelegt  ') . str_pad($n, 18) . ' cblk_' . $res['key'] . ($res['existing'] ? '' : ' (Entwurf – unter Verwaltung → Blöcke prüfen und freigeben)') . "\n";
+        }
+        exit($bad ? 1 : 0);
 
     case 'blocks:list':
         // Eigene Blöcke dieser Website (Verwaltung → Blöcke)

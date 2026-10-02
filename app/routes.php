@@ -150,6 +150,9 @@ return function (Router $r): void {
     $r->post('/admin/blocks/import', [$cb, 'import']);
     $r->post('/admin/blocks/library', [$cb, 'libraryImport']);
     $r->get('/admin/blocks/preview.css', [$cb, 'previewCss']);
+    $r->post('/admin/blocks/demos', [$cb, 'demoInstall']);                       // Beispiele: Kopie als Entwurf (Core\Blocks\Demos)
+    $r->get('/admin/blocks/demos/{name}/preview', [$cb, 'demoPreview']);
+    $r->get('/admin/blocks/demos/{name}/preview.css', [$cb, 'demoCss']);
     $r->post('/admin/api/blocks/preview', [$cb, 'preview']);
     $r->post('/admin/api/blocks/sample-form', [$cb, 'sampleForm']);
     $r->post('/admin/api/blocks/ai', [$cb, 'ai']);

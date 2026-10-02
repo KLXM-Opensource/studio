@@ -14,6 +14,8 @@ use Core\Block;
  * Blöcke nebeneinander (Tune „row“, Core\Theme::renderRow): Anteile, Bereinigung, Gruppierung, erster Block ignoriert.
  * Block „Layout“ (Core\Layout): verschachtelbare Blöcke, Prüfung beim Speichern, Raster ändern ohne Inhaltsverlust, Ausgabe,
  * Umstellung alter Reihen (layout:migrate-rows) samt Aufheben bei nicht verschachtelbaren Blöcken und Wiederholbarkeit.
+ * Beispiel-Blöcke (Core\Blocks\Demos): Format, Prüfung ohne Fehler/Hinweise, CSS begrenzt, Ausgabe mit Beispieldaten
+ * (Besucher und Bearbeiten-Modus, gleich wie Kit-Export), keine Inline-Styles/Skripte.
  */
 final class SelfTest
 {
@@ -30,6 +32,7 @@ final class SelfTest
             $t->rejects();
             $t->css();
             $t->export();
+            $t->demos();
             $t->partnerLogos();
             $t->imageFx();
             $t->imageFit();
@@ -473,6 +476,51 @@ TPL;
             foreach (explode(',', $s) as $x) if (trim($x) !== '') $out[] = trim($x);
         }
         return $out;
+    }
+
+    /** Mitgelieferte Beispiele: importierbar, fehlerfrei, begrenztes CSS, Ausgabe mit Beispieldaten */
+    private function demos(): void
+    {
+        $all = Demos::all();
+        $this->assert(count($all) >= 5 && count(glob(Demos::DIR . '/*.json') ?: []) === count($all), 'Beispiele: mindestens 5, alle Dateien lesbar');
+        foreach ($all as $name => $d) {
+            $raw = (string) file_get_contents(Demos::DIR . '/' . $name . '.json');
+            $j = json_decode($raw, true);
+            $this->assert(($j['format'] ?? '') === Custom::FORMAT && ($j['block']['key'] ?? '') === $name, "Beispiel $name: Format und Kurzname = Dateiname");
+            $this->assert($d['teaches'] !== '' && $d['concepts'] && $d['hints'] && count((array) ($j['demo']['hints'] ?? [])) === count($d['hints']), "Beispiel $name: Lernangaben (teaches, concepts, hints je Reiter)");
+            [$def, $errs] = Custom::normalize($j['block'], $name);
+            $this->assert(!$errs, "Beispiel $name: Felder gültig " . implode(' ', $errs));
+            $this->assert(count($def['fields']) === count((array) $j['block']['fields']), "Beispiel $name: kein Feld beim Normalisieren verloren");
+            $chk = Custom::check($def);
+            $this->assert(!$chk['errors'] && !$chk['warnings'], "Beispiel $name: Vorlage und CSS ohne Fehler/Hinweise " . implode(' ', array_merge($chk['errors'], $chk['warnings'])));
+            if ($chk['errors']) continue;
+            foreach (self::selectors((string) $chk['css']) as $sel) {
+                if (!str_starts_with($sel, '.' . Runtime::cls($name))) { $this->fails[] = "Beispiel $name: CSS nicht begrenzt: $sel"; continue 2; }
+            }
+            $this->ok++;
+            $this->assert(!preg_match('~(transition|animation)\s*:~', $def['css']) || str_contains($def['css'], 'prefers-reduced-motion'), "Beispiel $name: Bewegung nur mit prefers-reduced-motion");
+            $this->assert(!preg_match('~#[0-9a-f]{3,8}\b~i', (string) preg_replace('~color-mix\([^;]*\)~', '', $def['css'])), "Beispiel $name: feste Farben nur gemischt (color-mix), sonst Kit-Variablen");
+            $this->assert(str_contains(Demos::css($name), '#b-demo'), "Beispiel $name: Vorschau-CSS");
+            $b = Demos::block($name);
+            $tpl = Template::compile($def['template'], $def['fields'], $def['behaviours']);
+            foreach ([false, true] as $editing) {
+                app()->editing = $editing;
+                $rt = Runtime::for($b);
+                $html = $rt->open() . $tpl->run($rt, $b->data) . $rt->close();
+                $mode = $editing ? ' (Bearbeiten-Modus)' : '';
+                $this->assert(strlen(strip_tags($html)) > 20 && !str_contains($html, 'cms-error'), "Beispiel $name: Ausgabe mit Beispieldaten$mode");
+                $this->assert(!preg_match('~<script|\sstyle=|\son[a-z]+=|<h1~i', $html), "Beispiel $name: keine Skripte, Inline-Styles, Ereignis-Attribute, h1$mode");
+                $file = tempnam(sys_get_temp_dir(), 'cblk') . '.php';
+                file_put_contents($file, $tpl->toPhp($def['label']));
+                $php = \Core\Theme::capture($file, ['b' => $b, 'd' => $b->data]);
+                @unlink($file);
+                $this->assert($html === $php, "Beispiel $name: Kit-Export rendert identisch$mode");
+            }
+            app()->editing = false;
+        }
+        // Filter mailto: nur gültige Adressen
+        $rt = new Runtime(null);
+        $this->assert($rt->f('mailto', 'a@example.org') === 'mailto:a@example.org' && $rt->f('mailto', 'x" onclick') === '' && $rt->f('mailto', 'javascript:alert(1)') === '', 'Filter mailto');
     }
 
     private function export(): void

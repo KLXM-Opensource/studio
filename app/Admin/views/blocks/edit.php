@@ -3,6 +3,7 @@
  * Block-Designer: Felder, Vorlage, CSS, Beispieldaten, Einstellungen, Verlauf – mit Live-Vorschau im aktiven Theme.
  * Verhalten: resources/js/_blockbuilder.js. @var ?array $row  @var array $def  @var array $errors  @var array $warnings
  * @var array $types  @var array $versions  @var array $uses  @var bool $aiOn  @var bool $aiOpen  @var array $backgrounds  @var bool $hasDark  @var bool $library
+ * @var ?array $demo  Beispiel, aus dem der Block übernommen wurde (Core\Blocks\Demos) – Hinweise „Was zeigt dieses Beispiel?“
  */
 use Core\Blocks\Custom;
 use Core\Blocks\Runtime;
@@ -17,7 +18,10 @@ $status = $isNew ? null : match (true) {
     $row['status'] === 'withdrawn' => ['adm-badge adm-badge--muted', __('Zurückgezogen')],
     default => ['adm-badge adm-badge--draft', __('Entwurf – noch nicht freigegeben')],
 };
-$kinds = ['save' => __('Gespeichert'), 'publish' => __('Freigegeben'), 'restore' => __('Wiederhergestellt'), 'import' => __('Importiert'), 'ai' => __('KI-Vorschlag'), 'library' => __('Aus Bibliothek')];
+$kinds = ['save' => __('Gespeichert'), 'publish' => __('Freigegeben'), 'restore' => __('Wiederhergestellt'), 'import' => __('Importiert'), 'ai' => __('KI-Vorschlag'), 'library' => __('Aus Bibliothek'), 'demo' => __('Aus Beispiel')];
+// Hinweis eines Beispiels je Reiter (ausblendbar, resources/js/blockdemos.js)
+$hint = fn(string $tab) => $demo && ($demo['hints'][$tab] ?? '') !== ''
+    ? '<aside class="cb-tiphint" data-cb-demohint><span class="cb-tiphint__ico" aria-hidden="true">' . icon('lightbulb') . '</span><p><b>' . e(__('Im Beispiel:')) . '</b> ' . e($demo['hints'][$tab]) . '</p></aside>' : '';
 $tabs = ['felder' => __('Felder'), 'vorlage' => __('Vorlage'), 'css' => __('CSS'), 'beispiel' => __('Beispieldaten'), 'einstellungen' => __('Einstellungen')];
 if (!$isNew) $tabs['verlauf'] = __('Verlauf');
 $tabErr = ['felder' => isset($errors['fields']), 'vorlage' => isset($errors['template']), 'css' => isset($errors['css'])];
@@ -40,6 +44,21 @@ $cfg = [
   </div>
   <?php endif; ?>
 </header>
+
+<?php if ($demo): ?>
+<section class="adm-card cb-demohint" data-cb-demohints data-key="<?= e($isNew ? '' : $row['key']) ?>" aria-labelledby="cb-demohint-h">
+  <div class="cb-demohint__head">
+    <h2 id="cb-demohint-h"><span class="cb-tiphint__ico" aria-hidden="true"><?= icon('lightbulb') ?></span> <?= e(__('Was zeigt dieses Beispiel?')) ?></h2>
+    <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cb-demohints-off><?= e(__('Hinweise ausblenden')) ?></button>
+  </div>
+  <p><?= e($demo['teaches']) ?></p>
+  <?php if ($demo['concepts']): ?><ul class="cb-demo__tags" aria-label="<?= e(__('Zeigt')) ?>"><?php foreach ($demo['concepts'] as $c): ?><li><?= e($c) ?></li><?php endforeach; ?></ul><?php endif; ?>
+  <p class="adm-muted"><?= e(__('Weitere Hinweise stehen in den Reitern. Alles ist frei änderbar – die Vorschau rechts zeigt jede Änderung sofort. Erst „Speichern & für Redaktion freigeben“ macht den Block beim Bearbeiten der Seiten verfügbar.')) ?>
+    <a href="<?= e(url('/admin/hilfe#baukasten')) ?>"><?= e(__('Handbuch: Eigene Blöcke bauen')) ?></a></p>
+</section>
+<p class="cb-demohint-on" data-cb-demohints-show hidden><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cb-demohints-on><?= icon('lightbulb') ?> <?= e(__('Hinweise zum Beispiel einblenden')) ?></button></p>
+<script src="<?= e(asset('js/blockdemos.js')) ?>" defer></script>
+<?php endif; ?>
 
 <?php if ($aiOn): ?>
 <details class="adm-card cb-ai" data-cb-aibox<?= $aiOpen ? ' open' : '' ?>>
@@ -88,6 +107,7 @@ $cfg = [
   <!-- Felder -->
   <section class="adm-card adm-panel" role="tabpanel" id="panel-felder" aria-labelledby="tab-felder">
     <h2><?= e(__('Felder')) ?></h2>
+    <?= $hint('felder') ?>
     <p class="adm-muted"><?= e(__('Die Felder erscheinen beim Bearbeiten in der Seitenleiste. Mit dem Kurznamen greifen Sie in der Vorlage darauf zu: {{ kurzname }}.')) ?></p>
     <?= $err('fields') ?>
     <ol class="dt-fields cb-fields" data-cb-fields></ol>
@@ -103,6 +123,7 @@ $cfg = [
   <!-- Vorlage -->
   <section class="adm-card adm-panel" role="tabpanel" id="panel-vorlage" aria-labelledby="tab-vorlage" hidden>
     <h2><?= e(__('Vorlage')) ?></h2>
+    <?= $hint('vorlage') ?>
     <p class="adm-muted"><?= e(__('HTML mit Platzhaltern – kein PHP, kein JavaScript. Ausgaben werden automatisch geschützt (escaped). Klick auf ein Feld fügt den passenden Platzhalter an der Cursorposition ein.')) ?></p>
     <div class="cb-palette" data-cb-palette role="group" aria-label="<?= e(__('Platzhalter einfügen')) ?>"></div>
     <div class="cb-editor" data-cb-editor>
@@ -131,6 +152,7 @@ $cfg = [
   <!-- CSS -->
   <section class="adm-card adm-panel" role="tabpanel" id="panel-css" aria-labelledby="tab-css" hidden>
     <h2><?= e(__('CSS')) ?></h2>
+    <?= $hint('css') ?>
     <p class="adm-muted"><?= e(__('Selektoren ohne Präfix schreiben – sie gelten automatisch nur innerhalb des Blocks. :scope ist der Block selbst, :dark der Block auf dunklem Hintergrund. Farben über var(--cb-accent), var(--cb-surface), var(--cb-line), var(--cb-radius), var(--cb-gap) – so wirken Design-Einstellungen weiter.')) ?></p>
     <div class="cb-editor" data-cb-editor>
       <pre class="cb-gutter" aria-hidden="true" data-cb-gutter></pre>
@@ -144,14 +166,17 @@ $cfg = [
   <!-- Beispieldaten -->
   <section class="adm-card adm-panel" role="tabpanel" id="panel-beispiel" aria-labelledby="tab-beispiel" hidden>
     <h2><?= e(__('Beispieldaten')) ?></h2>
+    <?= $hint('beispiel') ?>
     <p class="adm-muted"><?= e(__('Nur für die Vorschau – so, wie die Redaktion den Block später ausfüllt. Beispieltexte sind als „Beispiel“ markiert.')) ?></p>
-    <div class="adm-fields cb-sample" data-cb-sample></div>
+    <div class="adm-fields cb-sample" data-cb-sample data-cb-sample-json="<?= e(json_encode((object) ($def['sample'] ?? []), JSON_UNESCAPED_UNICODE)) ?>"></div>
     <p><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cb-sample-reset><?= e(__('Beispieldaten neu erzeugen')) ?></button></p>
   </section>
 
   <!-- Einstellungen -->
   <section class="adm-card adm-panel adm-fields" role="tabpanel" id="panel-einstellungen" aria-labelledby="tab-einstellungen" hidden>
     <h2><?= e(__('Einstellungen')) ?></h2>
+    <?= $hint('einstellungen') ?>
+    <?php if (($def['settings']['demo'] ?? '') !== ''): ?><input type="hidden" name="settings[demo]" value="<?= e($def['settings']['demo']) ?>"><?php endif; ?>
     <div class="f f--half"><label for="cb-icon"><?= e(__('Symbol in der Block-Auswahl')) ?></label><?= \Core\Icons::picker('cb-icon', 'icon', $def['icon'] ?: 'package', ['suggest' => 'cb-label']) ?></div>
     <div class="f f--half"><label for="cb-group"><?= e(__('Gruppe')) ?></label><input id="cb-group" name="group" value="<?= e($def['group']) ?>" maxlength="60" placeholder="<?= e(__('Eigene Blöcke')) ?>"></div>
     <div class="f"><label for="cb-desc"><?= e(__('Beschreibung (für die Übersicht)')) ?></label><input id="cb-desc" name="description" value="<?= e($def['description']) ?>" maxlength="400"></div>

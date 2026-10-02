@@ -1,0 +1,73 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 1,
+        "level": "Einstieg",
+        "teaches": "Felder, ein Auswahlfeld und Bedingungen: Die Art des Hinweises wird zur CSS-Klasse und wählt das Symbol.",
+        "concepts": [
+            "Auswahlfeld (select)",
+            "Klasse aus einem Feld",
+            "{% if %} / {% elseif %}",
+            "Formatierter Text"
+        ],
+        "hints": {
+            "felder": "Drei Felder: „Art des Hinweises“ ist eine Auswahl mit festen Werten (info, warnung, erfolg) und einem Standardwert. „Überschrift“ ist optional, „Text“ ist formatierter Text mit Fett, Kursiv und Links.",
+            "vorlage": "class=\"box box--{{ ton }}\" macht aus dem gewählten Wert eine Klasse (box--warnung). {% if ton == 'warnung' %} … {% elseif %} … {% else %} wählt das Symbol. {% if title or block.editing %} blendet eine leere Überschrift für Besucher aus – beim Bearbeiten bleibt sie stehen, damit man direkt hineinschreiben kann. {{ text | rich }} steht allein in einem <div> – so lässt sich der Text direkt auf der Seite bearbeiten.",
+            "css": "Jede Art setzt nur die Variable --ton. Die Signalfarbe wird mit currentColor gemischt und bleibt so auf hellen und dunklen Flächen lesbar. Hintergrund, Linie und Radius kommen aus dem Kit (var(--cb-surface), var(--cb-line), var(--cb-radius)).",
+            "beispiel": "Stellen Sie die Art auf „Achtung“ oder „Erledigt / positiv“ und sehen Sie in der Vorschau, wie Farbe und Symbol wechseln."
+        }
+    },
+    "block": {
+        "key": "hinweisbox",
+        "label": "Hinweisbox",
+        "icon": "info",
+        "group": "Beispiele",
+        "description": "Hervorgehobener Hinweis in drei Arten: Information, Achtung, Erledigt.",
+        "fields": [
+            {
+                "name": "ton",
+                "label": "Art des Hinweises",
+                "type": "select",
+                "options": {
+                    "info": "Information",
+                    "warnung": "Achtung",
+                    "erfolg": "Erledigt / positiv"
+                },
+                "default": "info",
+                "width": "half",
+                "help": "Steuert Farbe und Symbol."
+            },
+            {
+                "name": "title",
+                "label": "Überschrift",
+                "type": "text",
+                "max": 120,
+                "width": "half",
+                "placeholder": "z. B. Geänderte Öffnungszeiten"
+            },
+            {
+                "name": "text",
+                "label": "Text",
+                "type": "richtext",
+                "required": true
+            }
+        ],
+        "template": "{# Beispiel 1 · Hinweisbox: Das Auswahlfeld „ton“ wird zur CSS-Klasse und wählt das Symbol. #}\n<div class=\"box box--{{ ton }}\" role=\"note\">\n  <span class=\"box__icon\" aria-hidden=\"true\">{% if ton == 'warnung' %}{{ 'warning' | icon }}{% elseif ton == 'erfolg' %}{{ 'check-circle' | icon }}{% else %}{{ 'info' | icon }}{% endif %}</span>\n  <div class=\"box__body\">\n    {% if title or block.editing %}<h2 class=\"box__title\" id=\"{{ block.title_id }}\">{{ title }}</h2>{% endif %}\n    <div class=\"box__text\">{{ text | rich }}</div>\n  </div>\n</div>",
+        "css": "/* Jede Art setzt nur --ton. Die Signalfarbe wird mit der Textfarbe des Kits gemischt –\n   so bleibt sie auf hellen und dunklen Flächen lesbar. */\n.box {\n  --ton: var(--cb-accent);\n  display: flex;\n  gap: 1rem;\n  align-items: flex-start;\n  padding: 1.25rem 1.5rem;\n  border: 1px solid var(--cb-line);\n  border-inline-start: .375rem solid var(--ton);\n  border-radius: var(--cb-radius);\n  background: var(--cb-surface);\n  background: color-mix(in srgb, var(--ton) 9%, var(--cb-surface));\n}\n.box--warnung { --ton: color-mix(in srgb, #D97706 78%, currentColor); }\n.box--erfolg { --ton: color-mix(in srgb, #16A34A 72%, currentColor); }\n.box__icon { flex: none; display: inline-flex; color: var(--ton); font-size: 1.75rem; line-height: 1; }\n.box__body { min-width: 0; }\n.box__title { margin: 0 0 .35rem; font-size: 1.2rem; line-height: 1.3; }\n.box__text > :first-child { margin-top: 0; }\n.box__text > :last-child { margin-bottom: 0; }\n@media (max-width: 30rem) {\n  .box { flex-direction: column; gap: .5rem; padding: 1rem 1.1rem; }\n}",
+        "behaviours": [],
+        "jsonld": {
+            "type": "none"
+        },
+        "settings": {
+            "help": "Kurzer, hervorgehobener Hinweis – sparsam einsetzen.",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "ton": "warnung",
+            "title": "Geänderte Öffnungszeiten",
+            "text": "<p>Vom <b>23. bis 27. Dezember</b> sind wir nur vormittags erreichbar. In dringenden Fällen hilft die <a href=\"#\">Vertretung</a> weiter.</p>"
+        }
+    }
+}

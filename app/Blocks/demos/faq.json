@@ -1,0 +1,90 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 6,
+        "level": "Barrierefrei",
+        "teaches": "Aufklappliste mit nativem <details>/<summary>: per Tastatur bedienbar, ohne JavaScript – dazu FAQ-Daten für Suchmaschinen.",
+        "concepts": [
+            "<details> / <summary>",
+            "Verhalten „accordion“",
+            "JSON-LD FAQPage",
+            "prefers-reduced-motion"
+        ],
+        "hints": {
+            "felder": "Eine Liste „Fragen“ mit Frage (Text) und Antwort (formatierter Text).",
+            "vorlage": "<details> und <summary> sind eingebautes HTML: Tastatur (Tab, Enter, Leertaste), Screenreader und Suche im Browser funktionieren ohne Skript. Mit name=\"…\" am <details> wäre immer nur eine Antwort offen – das ist jedoch weniger übersichtlich.",
+            "css": "list-style: none und ::-webkit-details-marker blenden das Standard-Dreieck aus; der Pfeil dreht sich bei [open]. Die Drehung ist nur animiert, wenn niemand „Bewegung reduzieren“ eingestellt hat (@media (prefers-reduced-motion: no-preference)).",
+            "einstellungen": "Unter „Einstellungen“ sind das Verhalten „Aufklappliste“ und die Suchmaschinen-Daten „FAQ“ (Liste: Fragen, Frage, Antwort) gesetzt – daraus entsteht JSON-LD vom Typ FAQPage."
+        }
+    },
+    "block": {
+        "key": "faq",
+        "label": "FAQ / Aufklappliste",
+        "icon": "question",
+        "group": "Beispiele",
+        "description": "Häufige Fragen zum Aufklappen – barrierefrei und mit FAQ-Daten für Suchmaschinen.",
+        "fields": [
+            {
+                "name": "title",
+                "label": "Überschrift",
+                "type": "text",
+                "max": 120
+            },
+            {
+                "name": "fragen",
+                "label": "Fragen",
+                "type": "repeater",
+                "item_label": "Frage",
+                "max_items": 30,
+                "fields": [
+                    {
+                        "name": "frage",
+                        "label": "Frage",
+                        "type": "text",
+                        "required": true,
+                        "max": 200
+                    },
+                    {
+                        "name": "antwort",
+                        "label": "Antwort",
+                        "type": "richtext"
+                    }
+                ]
+            }
+        ],
+        "template": "{# Beispiel 6 · FAQ: natives <details>/<summary> – per Tastatur bedienbar, ohne JavaScript. #}\n{% if title or block.editing %}<h2 class=\"faq__title\" id=\"{{ block.title_id }}\">{{ title }}</h2>{% endif %}\n<div class=\"faq\">\n  {% for f in fragen %}\n  <details class=\"faq__item\">\n    <summary class=\"faq__q\"><span class=\"faq__text\">{{ f.frage }}</span><span class=\"faq__mark\" aria-hidden=\"true\">{{ 'caret-down' | icon }}</span></summary>\n    <div class=\"faq__a\">{{ f.antwort | rich }}</div>\n  </details>\n  {% endfor %}\n</div>",
+        "css": ".faq__title { margin: 0 0 1.25rem; }\n.faq { display: grid; gap: .75rem; max-width: 50rem; }\n.faq__item { border: 1px solid var(--cb-line); border-radius: var(--cb-radius); background: var(--cb-surface); }\n.faq__q { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; font-weight: 600; list-style: none; }\n.faq__q::-webkit-details-marker { display: none; }\n.faq__q:hover .faq__text { text-decoration: underline; text-underline-offset: .2em; }\n.faq__mark { display: inline-flex; flex: none; font-size: 1.25rem; }\n.faq__item[open] .faq__mark { transform: rotate(180deg); }\n.faq__a { padding: 0 1.25rem 1.1rem; }\n.faq__a > :first-child { margin-top: 0; }\n.faq__a > :last-child { margin-bottom: 0; }\n@media (prefers-reduced-motion: no-preference) {\n  .faq__mark { transition: transform .2s ease; }\n}",
+        "behaviours": [
+            "accordion"
+        ],
+        "jsonld": {
+            "type": "faq",
+            "items": "fragen",
+            "question": "frage",
+            "answer": "antwort"
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "title": "Häufige Fragen",
+            "fragen": [
+                {
+                    "frage": "Wie schnell erhalte ich eine Antwort?",
+                    "antwort": "<p>In der Regel innerhalb von <b>zwei Werktagen</b>.</p>"
+                },
+                {
+                    "frage": "Kann ich einen Termin online vereinbaren?",
+                    "antwort": "<p>Ja – über das Kontaktformular oder telefonisch.</p>"
+                },
+                {
+                    "frage": "Welche Unterlagen soll ich mitbringen?",
+                    "antwort": "<ul><li>Ausweis</li><li>vorhandene Unterlagen zum Anliegen</li></ul>"
+                }
+            ]
+        }
+    }
+}

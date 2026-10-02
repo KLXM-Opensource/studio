@@ -1,0 +1,76 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 2,
+        "level": "Einstieg",
+        "teaches": "Ein Bildfeld mit responsiver Ausgabe. Der Alt-Text kommt aus der Mediathek; ohne Bild bleibt der Block sauber.",
+        "concepts": [
+            "Bildfeld (media)",
+            "image('sizes', '1:1')",
+            "Alt-Text aus der Mediathek",
+            "figure / blockquote / figcaption"
+        ],
+        "hints": {
+            "felder": "„Bild“ ist ein Bildfeld: Die Redaktion wählt ein Bild aus der Mediathek. Den Alt-Text pflegt sie dort einmal – er gilt überall, wo das Bild vorkommt.",
+            "vorlage": "{{ bild | image('4.5rem', '1:1') }} gibt ein responsives Bild (AVIF/WebP) im Format 1:1 aus. Der erste Wert sagt dem Browser, wie breit das Bild angezeigt wird. {% if bild %} verhindert einen leeren Rahmen. Mit {{ bild | alt }} können Sie den Alt-Text zusätzlich als Text ausgeben.",
+            "css": "Das Bild wird mit border-radius: 50% rund und mit object-fit: cover beschnitten. Das Anführungszeichen ist ein Symbol in der Akzentfarbe des Kits.",
+            "beispiel": "Wählen Sie unter „Bild“ ein Porträt aus der Mediathek. Ohne Bild rückt der Name nach links."
+        }
+    },
+    "block": {
+        "key": "zitat",
+        "label": "Zitat mit Bild",
+        "icon": "quotes",
+        "group": "Beispiele",
+        "description": "Stimme oder Empfehlung mit Name, Funktion und rundem Porträt.",
+        "fields": [
+            {
+                "name": "zitat",
+                "label": "Zitat",
+                "type": "textarea",
+                "rows": 4,
+                "required": true,
+                "max": 600
+            },
+            {
+                "name": "name",
+                "label": "Name",
+                "type": "text",
+                "width": "half",
+                "max": 80
+            },
+            {
+                "name": "rolle",
+                "label": "Funktion / Ort",
+                "type": "text",
+                "width": "half",
+                "max": 120,
+                "placeholder": "z. B. Kundin seit 2019"
+            },
+            {
+                "name": "bild",
+                "label": "Bild",
+                "type": "media",
+                "help": "Quadratisches Porträt wirkt am besten. Den Alt-Text pflegen Sie in der Mediathek."
+            }
+        ],
+        "template": "{# Beispiel 2 · Zitat mit Bild: Bildfeld mit image(), Alt-Text aus der Mediathek. #}\n<figure class=\"quote\">\n  <span class=\"quote__mark\" aria-hidden=\"true\">{{ 'quotes' | icon }}</span>\n  <blockquote class=\"quote__text\">\n    <p>{{ zitat }}</p>\n  </blockquote>\n  <figcaption class=\"quote__by\">\n    {% if bild %}<span class=\"quote__img\">{{ bild | image('4.5rem', '1:1') }}</span>{% endif %}\n    <span class=\"quote__who\"><strong class=\"quote__name\">{{ name }}</strong>{% if rolle %}<span class=\"quote__role\">{{ rolle }}</span>{% endif %}</span>\n  </figcaption>\n</figure>",
+        "css": ".quote {\n  max-width: 46rem;\n  margin: 0 auto;\n  padding: clamp(1.5rem, 4vw, 2.5rem);\n  border: 1px solid var(--cb-line);\n  border-radius: var(--cb-radius);\n  background: var(--cb-surface);\n}\n.quote__mark { display: block; margin-bottom: .5rem; color: var(--cb-accent); font-size: 2.5rem; line-height: 1; }\n.quote__text { margin: 0; padding: 0; border: 0; font-size: clamp(1.15rem, 2.2vw, 1.4rem); line-height: 1.5; }\n.quote__text p { margin: 0; }\n.quote__by { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }\n.quote__img { flex: none; width: 4.5rem; }\n.quote__img img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 50%; }\n.quote__who { display: flex; flex-direction: column; }\n.quote__name { font-weight: 700; }\n.quote__role { color: var(--cb-muted); font-size: .95rem; }",
+        "behaviours": [],
+        "jsonld": {
+            "type": "none"
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "zitat": "Wir wurden von Anfang an gut beraten. Jede Frage wurde schnell und verständlich beantwortet – genau so stellen wir uns Zusammenarbeit vor.",
+            "name": "Maria Beispiel",
+            "rolle": "Kundin seit 2019",
+            "bild": null
+        }
+    }
+}

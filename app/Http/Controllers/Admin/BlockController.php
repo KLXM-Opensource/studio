@@ -7,6 +7,7 @@ use Core\AI\AiException;
 use Core\AI\Assist;
 use Core\Block;
 use Core\Blocks\Custom;
+use Core\Blocks\Demos;
 use Core\Design;
 use Core\Features;
 use Core\Fields;
@@ -40,10 +41,53 @@ final class BlockController extends AdminController
         $blocks = Custom::all();
         foreach ($blocks as &$b) $b['uses'] = count(Custom::usages($b['key']));
         unset($b);
+        $demos = Demos::all();
+        foreach ($demos as $n => &$d) $d['copies'] = count(array_filter($blocks, fn($b) => ($b['settings']['demo'] ?? '') === $n));
+        unset($d);
         return $this->view('blocks/index', [
             'blocks' => $blocks,
             'library' => Custom::libraryAllowed() ? Custom::libraryList() : null,
+            'demos' => $demos,
+            'demoToken' => bin2hex(random_bytes(8)),
+            'css' => ['css/blockdemos.css'],
         ]);
+    }
+
+    /**
+     * Beispiel „Als Vorlage übernehmen“: immer eine neue Kopie als Entwurf – je Klick genau einmal
+     * (das Formular trägt ein Einmal-Kennzeichen; ein doppelt abgeschickter Klick führt zur schon angelegten Kopie).
+     */
+    public function demoInstall(Request $r): Response
+    {
+        $user = $this->guard($r);
+        $name = $r->str('demo');
+        $token = preg_replace('~[^a-f0-9]~', '', $r->str('token'));
+        $done = (array) app()->session->get('cblk_demo_tokens', []);
+        if ($token !== '' && isset($done[$token]) && Custom::find((string) $done[$token])) {
+            return $this->back('/admin/blocks/' . $done[$token], 'info', __('Das Beispiel wurde bereits übernommen.'));
+        }
+        $res = Demos::install($name, (int) $user['id']);
+        if ($res['errors']) return $this->back('/admin/blocks', 'error', implode(' ', $res['errors']));
+        if ($token !== '') app()->session->set('cblk_demo_tokens', array_slice([$token => $res['key']] + $done, 0, 30, true));
+        return $this->back('/admin/blocks/' . $res['key'], 'success', __('Beispiel als Entwurf übernommen – ändern Sie es nach Belieben. Erst „Für Redaktion freigeben“ macht es beim Bearbeiten der Seiten verfügbar.'));
+    }
+
+    /** Vorschau eines Beispiels (iframe in der Übersicht): Seite des aktiven Kits, nur der Block mit Beispieldaten */
+    public function demoPreview(Request $r, string $name): Response
+    {
+        $this->guard($r);
+        if (!Demos::find($name)) throw new HttpException(404);
+        $html = Demos::page($name, url('/admin/blocks/demos/' . $name . '/preview.css') . '?v=' . substr(md5((string) json_encode(Demos::find($name))), 0, 8));
+        if ($html === null) throw new HttpException(404);
+        if ($r->str('dark') === '1') $html = DesignController::forceDark($html, Design::values());
+        return self::secure(new Response($html, 200, ['Content-Type' => 'text/html; charset=utf-8']));
+    }
+
+    public function demoCss(Request $r, string $name): Response
+    {
+        $this->guard($r);
+        if (!Demos::find($name)) throw new HttpException(404);
+        return self::secure(new Response(Demos::css($name), 200, ['Content-Type' => 'text/css; charset=utf-8']));
     }
 
     public function create(Request $r): Response
@@ -70,6 +114,8 @@ final class BlockController extends AdminController
             'uses' => $row ? Custom::usages($row['key']) : [], 'aiOn' => Assist::available('text'), 'aiOpen' => $ai,
             'backgrounds' => app()->theme->backgrounds(), 'hasDark' => !empty((array) (Design::def()['dark'] ?? [])),
             'library' => Custom::libraryAllowed(),
+            'demo' => Demos::find((string) ($def['settings']['demo'] ?? '')),
+            'css' => ['css/blockdemos.css'],
             'title' => $row ? $row['label'] . ' · ' . __('Blöcke') : __('Neuer Block'),
         ]);
     }

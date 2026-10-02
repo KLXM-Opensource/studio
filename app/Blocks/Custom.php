@@ -272,6 +272,8 @@ final class Custom
             $key = $key === '' ? self::normName($label) : $key;
             if (!preg_match('~^[a-z][a-z0-9_]{1,30}$~', $key)) {
                 $errors['key'] = __('Kurzname: 2–31 Zeichen, a–z, 0–9 und _, beginnt mit einem Buchstaben.');
+            } elseif (in_array($key, ['new', 'import', 'library', 'demos'], true)) {
+                $errors['key'] = __('„{name}“ ist als Kurzname reserviert.', ['name' => $key]);   // Adressen der Verwaltung
             }
         }
         [$fields, $fe] = self::normFields(is_string($in['fields'] ?? null) ? (json_decode((string) $in['fields'], true) ?: []) : (array) ($in['fields'] ?? []));
@@ -283,6 +285,9 @@ final class Custom
             'background' => preg_replace('~[^a-z0-9_-]~', '', (string) ($s['background'] ?? '')),
             'width' => ($s['width'] ?? '') === 'full' ? 'full' : 'wrap',
         ];
+        // Herkunft aus den mitgelieferten Beispielen (Core\Blocks\Demos) – nur für die Hinweise im Block-Designer
+        $demo = preg_replace('~[^a-z0-9_]~', '', (string) ($s['demo'] ?? ''));
+        if ($demo !== '') $settings['demo'] = substr($demo, 0, 31);
         $icon = trim((string) ($in['icon'] ?? ''));
         $def = [
             'key' => $key,

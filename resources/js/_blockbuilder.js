@@ -83,7 +83,16 @@ export function initBlockBuilder() {
     if (type === 'repeater' && !$('[data-cb-sub]', li)) $('[data-cb-subs]', li).append(subRow({ type: 'text' }));
   }
 
+  // Angaben ohne eigenes Eingabefeld im Feld-Editor (Platzhalter, Standardwert, Zeilen; bei Unterfeldern auch Hilfe und Höchstlänge)
+  // bleiben beim Bearbeiten erhalten – z. B. aus Beispielen, Importen oder KI-Vorschlägen
+  const KEEP = ['placeholder', 'default', 'rows'], KEEP_SUB = ['placeholder', 'default', 'rows', 'help', 'max'];
+  const keep = (f, prev, keys) => {
+    if (prev && prev.type === f.type) for (const k of keys) if (prev[k] !== undefined && f[k] === undefined) f[k] = prev[k];
+    return f;
+  };
+
   function readFields() {
+    const before = Object.fromEntries(fields.map(f => [f.name, f]));
     return $$(':scope > [data-cb-field]', list).map(li => {
       const g = p => $(`[data-p=${p}]`, li);
       const f = { name: g('name').value.trim(), label: g('label').value.trim(), type: g('type').value };
@@ -101,10 +110,10 @@ export function initBlockBuilder() {
           if (q('required').checked) sf.required = true;
           if (q('half').checked) sf.width = 'half';
           if (sf.type === 'select') sf.options = q('options').value;
-          return sf;
+          return keep(sf, (before[f.name]?.fields || []).find(x => x.name === sf.name), KEEP_SUB);
         }).filter(sf => sf.label || sf.name);
       }
-      return f;
+      return keep(f, before[f.name], KEEP);
     }).filter(f => f.label || f.name);
   }
 
@@ -236,7 +245,10 @@ export function initBlockBuilder() {
   sampleBox?.addEventListener('input', () => { touch(); changed(); });
   sampleBox?.addEventListener('change', () => { touch(); changed(); });
   $('[data-cb-sample-reset]', form)?.addEventListener('click', () => { touch(); loadSample(true); });
-  loadSample();
+  // Beim Öffnen die gespeicherten Beispieldaten zeigen (z. B. aus Beispielen oder Importen), nicht neu erzeugte
+  let saved = null;
+  try { saved = JSON.parse(sampleBox?.dataset.cbSampleJson || 'null'); } catch { saved = null; }
+  loadSample(false, saved && Object.keys(saved).length ? saved : null);
 
   // ---------------------------------------------------------------- JSON-LD-Zuordnung
   let jsonld = {};

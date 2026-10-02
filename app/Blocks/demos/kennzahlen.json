@@ -1,0 +1,102 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 3,
+        "level": "Listen",
+        "teaches": "Eine Liste (wiederholbare Einträge) mit einer for-Schleife. Zahlen werden in der Sprache der Seite formatiert.",
+        "concepts": [
+            "Liste (repeater)",
+            "{% for %} … {% else %}",
+            "number",
+            "block.editing"
+        ],
+        "hints": {
+            "felder": "„Kennzahlen“ ist eine Liste: Jeder Eintrag hat die Unterfelder Bezeichnung, Wert (Zahl) und Zusatz. Die Redaktion fügt Einträge hinzu, sortiert und löscht sie. „Höchstens“ begrenzt die Anzahl.",
+            "vorlage": "{% for z in zahlen %} … {% endfor %} wiederholt den Inhalt für jeden Eintrag; z.wert ist ein Unterfeld. {{ z.wert | number }} schreibt 1250 als „1.250“ (Englisch: „1,250“). Der {% else %}-Zweig erscheint bei leerer Liste – hier mit {% if block.editing %} nur beim Bearbeiten.",
+            "css": "repeat(auto-fit, minmax(min(100%, 11rem), 1fr)) verteilt die Einträge ohne Media Queries: vier nebeneinander am Desktop, einer untereinander am Handy. tabular-nums hält Ziffern gleich breit.",
+            "beispiel": "Ändern Sie die Zahlen oder fügen Sie einen fünften Eintrag hinzu – das Raster passt sich an."
+        }
+    },
+    "block": {
+        "key": "kennzahlen",
+        "label": "Kennzahlen",
+        "icon": "chart-bar",
+        "group": "Beispiele",
+        "description": "Zahlen auf einen Blick: Wert, Zusatz (z. B. %) und Bezeichnung.",
+        "fields": [
+            {
+                "name": "title",
+                "label": "Überschrift",
+                "type": "text",
+                "max": 120
+            },
+            {
+                "name": "zahlen",
+                "label": "Kennzahlen",
+                "type": "repeater",
+                "item_label": "Kennzahl",
+                "max_items": 8,
+                "fields": [
+                    {
+                        "name": "label",
+                        "label": "Bezeichnung",
+                        "type": "text",
+                        "required": true,
+                        "max": 80
+                    },
+                    {
+                        "name": "wert",
+                        "label": "Wert",
+                        "type": "number",
+                        "width": "half"
+                    },
+                    {
+                        "name": "zusatz",
+                        "label": "Zusatz",
+                        "type": "text",
+                        "width": "half",
+                        "max": 12,
+                        "placeholder": "%, +, Jahre"
+                    }
+                ]
+            }
+        ],
+        "template": "{# Beispiel 3 · Kennzahlen: Liste mit for-Schleife, number formatiert in der Sprache der Seite. #}\n{% if title or block.editing %}<h2 class=\"kz__title\" id=\"{{ block.title_id }}\">{{ title }}</h2>{% endif %}\n<ul class=\"kz\" role=\"list\">\n  {% for z in zahlen %}\n  <li class=\"kz__item\">\n    <span class=\"kz__num\">{{ z.wert | number }}{% if z.zusatz %}<span class=\"kz__unit\">{{ z.zusatz }}</span>{% endif %}</span>\n    <span class=\"kz__label\">{{ z.label }}</span>\n  </li>\n  {% else %}\n  {% if block.editing %}<li class=\"kz__item\">Noch keine Kennzahlen – in der Seitenleiste „Kennzahl hinzufügen“.</li>{% endif %}\n  {% endfor %}\n</ul>",
+        "css": ".kz__title { margin: 0 0 1.5rem; }\n.kz {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));\n  gap: var(--cb-gap);\n  margin: 0;\n  padding: 0;\n  list-style: none;\n}\n.kz__item {\n  display: flex;\n  flex-direction: column;\n  gap: .35rem;\n  padding: 1.25rem;\n  border: 1px solid var(--cb-line);\n  border-radius: var(--cb-radius);\n  background: var(--cb-surface);\n  box-shadow: inset 0 .25rem 0 var(--cb-accent);\n}\n.kz__num { font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }\n.kz__unit { margin-left: .1em; font-size: .6em; }\n.kz__label { color: var(--cb-muted); }",
+        "behaviours": [],
+        "jsonld": {
+            "type": "none"
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "title": "Auf einen Blick",
+            "zahlen": [
+                {
+                    "label": "Jahre Erfahrung",
+                    "wert": 25,
+                    "zusatz": ""
+                },
+                {
+                    "label": "abgeschlossene Projekte",
+                    "wert": 1250,
+                    "zusatz": "+"
+                },
+                {
+                    "label": "würden uns weiterempfehlen",
+                    "wert": 98,
+                    "zusatz": "%"
+                },
+                {
+                    "label": "Fachleute im Team",
+                    "wert": 12,
+                    "zusatz": ""
+                }
+            ]
+        }
+    }
+}

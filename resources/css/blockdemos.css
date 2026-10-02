@@ -1,0 +1,31 @@
+/* Verwaltung → Blöcke: Beispiele (Core\Blocks\Demos) – Galerie in der Übersicht und Hinweise im Block-Designer */
+.cb-howto__links{margin:12px 0 0}
+.cb-demos{margin:0 0 22px}
+.cb-demos > summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;cursor:pointer}
+.cb-demos__title{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+.cb-demos__title .ico{color:var(--adm-a)}
+.cb-demos__lead{margin:12px 0 16px;max-width:72ch}
+.cb-demos__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:16px;margin:0;padding:0;list-style:none}
+.cb-demo{display:flex;flex-direction:column;overflow:hidden;border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line)}
+.cb-demo__shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#fff;border-bottom:1px solid var(--adm-line)}
+.cb-demo__shot iframe{position:absolute;inset:0;width:200%;height:200%;border:0;transform:scale(.5);transform-origin:0 0;pointer-events:none}
+.cb-demo__body{display:flex;flex:1;flex-direction:column;gap:8px;padding:14px 16px 16px}
+.cb-demo__step{margin:0;color:var(--adm-t2);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.cb-demo__name{display:flex;align-items:center;gap:8px;margin:0;font-size:16px}
+.cb-demo__teaches{margin:0;font-size:13.5px;line-height:1.5}
+.cb-demo__tags{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.cb-demo__tags li{padding:2px 8px;border-radius:999px;background:var(--adm-fill,#F1F1F4);color:var(--adm-ink);font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb-demo__act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:auto;padding-top:6px}
+/* Block-Designer: „Was zeigt dieses Beispiel?“ und Hinweise je Reiter */
+.cb-demohint{border-left:3px solid var(--adm-a)}
+.cb-demohint[hidden],.cb-tiphint[hidden],.cb-demohint-on[hidden]{display:none}
+.cb-demohint__head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.cb-demohint__head h2{display:flex;align-items:center;gap:8px;margin:0;font-size:16px}
+.cb-demohint > p{margin:10px 0 0;max-width:80ch}
+.cb-demohint .cb-demo__tags{margin-top:10px}
+.cb-demohint-on{margin:0 0 12px}
+.cb-tiphint{display:flex;gap:10px;align-items:flex-start;margin:0 0 14px;padding:10px 14px;border-radius:8px;background:var(--adm-accent-bg,#EEF6F3);font-size:13.5px;line-height:1.5}
+.cb-tiphint p{margin:0}
+.cb-tiphint__ico{display:inline-flex;flex:none;color:var(--adm-a);font-size:18px;line-height:1}
+.adm-fields > .cb-tiphint{grid-column:1/-1}
+@media (max-width:600px){.cb-demo__shot{aspect-ratio:4/3}}

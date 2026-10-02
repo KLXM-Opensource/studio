@@ -1,0 +1,109 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 4,
+        "level": "Listen",
+        "teaches": "Eine nummerierte Liste mit Symbolfeld: loop.index zählt mit, ein Symbol ersetzt auf Wunsch die Zahl.",
+        "concepts": [
+            "Symbolfeld (icon)",
+            "loop.index / loop.length",
+            "<ol> statt <div>",
+            "Media Query"
+        ],
+        "hints": {
+            "felder": "Jeder Schritt hat Titel, Text und ein optionales Symbol. Das Symbolfeld öffnet die Symbolauswahl des Kerns.",
+            "vorlage": "{{ loop.index }} ist die laufende Nummer (ab 1), {{ loop.length }} die Anzahl. {{ s.symbol | icon }} gibt das gewählte Symbol aus; ohne Symbol steht die Zahl im Kreis. <ol> sagt Screenreadern, dass die Reihenfolge zählt; die Zahl im Kreis ist deshalb aria-hidden.",
+            "css": "Untereinander verbindet eine Linie (::before) die Kreise; :last-child lässt sie beim letzten Schritt weg. Ab 60rem Breite stehen die Schritte nebeneinander (@media).",
+            "beispiel": "Entfernen Sie bei einem Schritt das Symbol – dann erscheint die Nummer."
+        }
+    },
+    "block": {
+        "key": "ablauf",
+        "label": "Ablauf / Schritte",
+        "icon": "path",
+        "group": "Beispiele",
+        "description": "So läuft es ab: nummerierte Schritte mit Symbol, Titel und Text.",
+        "fields": [
+            {
+                "name": "title",
+                "label": "Überschrift",
+                "type": "text",
+                "max": 120
+            },
+            {
+                "name": "intro",
+                "label": "Einleitung",
+                "type": "textarea",
+                "rows": 2,
+                "max": 400
+            },
+            {
+                "name": "schritte",
+                "label": "Schritte",
+                "type": "repeater",
+                "item_label": "Schritt",
+                "max_items": 8,
+                "fields": [
+                    {
+                        "name": "titel",
+                        "label": "Titel",
+                        "type": "text",
+                        "required": true,
+                        "max": 80
+                    },
+                    {
+                        "name": "text",
+                        "label": "Text",
+                        "type": "textarea",
+                        "rows": 3,
+                        "max": 400
+                    },
+                    {
+                        "name": "symbol",
+                        "label": "Symbol",
+                        "type": "icon",
+                        "help": "Optional – ohne Symbol erscheint die Nummer."
+                    }
+                ]
+            }
+        ],
+        "template": "{# Beispiel 4 · Ablauf: Liste mit Symbolfeld und Nummerierung über loop.index. #}\n{% if title or block.editing %}<h2 class=\"steps__title\" id=\"{{ block.title_id }}\">{{ title }}</h2>{% endif %}\n{% if intro or block.editing %}<p class=\"steps__intro\">{{ intro }}</p>{% endif %}\n<ol class=\"steps\" role=\"list\">\n  {% for s in schritte %}\n  <li class=\"step\">\n    <span class=\"step__badge\" aria-hidden=\"true\">{% if s.symbol %}{{ s.symbol | icon }}{% else %}{{ loop.index }}{% endif %}</span>\n    <div class=\"step__body\">\n      <p class=\"step__count\">{{ 'Schritt' | lt }} {{ loop.index }} {{ 'von' | lt }} {{ loop.length }}</p>\n      <h3 class=\"step__title\">{{ s.titel }}</h3>\n      {% if s.text %}<p class=\"step__text\">{{ s.text }}</p>{% endif %}\n    </div>\n  </li>\n  {% endfor %}\n</ol>",
+        "css": ".steps__title { margin: 0 0 .75rem; }\n.steps__intro { max-width: 42rem; margin: 0 0 2rem; color: var(--cb-muted); }\n.steps { display: grid; margin: 0; padding: 0; list-style: none; }\n.step { position: relative; display: grid; grid-template-columns: 3rem 1fr; gap: 1rem; padding-bottom: 1.75rem; }\n/* Verbindungslinie zwischen den Kreisen */\n.step::before { content: \"\"; position: absolute; top: 3.25rem; bottom: .25rem; left: calc(1.5rem - 1px); width: 2px; background: var(--cb-line); }\n.step:last-child { padding-bottom: 0; }\n.step:last-child::before { display: none; }\n.step__badge {\n  display: grid;\n  place-items: center;\n  width: 3rem;\n  height: 3rem;\n  border-radius: 50%;\n  background: var(--cb-accent);\n  color: var(--cb-on-accent);\n  font-size: 1.15rem;\n  font-weight: 700;\n}\n.step__badge svg { width: 1.35rem; height: 1.35rem; }\n.step__count { margin: .15rem 0 .1rem; color: var(--cb-muted); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }\n.step__title { margin: 0 0 .35rem; font-size: 1.2rem; }\n.step__text { max-width: 42rem; margin: 0; }\n@media (min-width: 60rem) {\n  .steps { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--cb-gap); }\n  .step { grid-template-columns: 1fr; padding-bottom: 0; }\n  .step::before { top: calc(1.5rem - 1px); bottom: auto; left: 3.75rem; right: .75rem; width: auto; height: 2px; }\n}",
+        "behaviours": [],
+        "jsonld": {
+            "type": "none"
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "title": "So läuft es ab",
+            "intro": "Vom ersten Kontakt bis zum Ergebnis – in vier überschaubaren Schritten.",
+            "schritte": [
+                {
+                    "titel": "Kennenlernen",
+                    "text": "Sie schildern Ihr Anliegen – telefonisch, per E-Mail oder vor Ort.",
+                    "symbol": "chat-circle"
+                },
+                {
+                    "titel": "Angebot",
+                    "text": "Sie erhalten einen klaren Vorschlag mit Zeitplan.",
+                    "symbol": "lightbulb"
+                },
+                {
+                    "titel": "Umsetzung",
+                    "text": "Wir legen los und halten Sie auf dem Laufenden.",
+                    "symbol": ""
+                },
+                {
+                    "titel": "Abschluss",
+                    "text": "Gemeinsame Abnahme – und auf Wunsch weitere Betreuung.",
+                    "symbol": "handshake"
+                }
+            ]
+        }
+    }
+}

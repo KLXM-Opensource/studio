@@ -1,0 +1,109 @@
+{
+    "format": "klxm-studio-block",
+    "format_version": 1,
+    "demo": {
+        "order": 5,
+        "level": "Links",
+        "teaches": "Links richtig bauen: Telefon mit tel, E-Mail mit mailto, eine Seite über ein Linkfeld – unsichere Adressen werden automatisch zu „#“.",
+        "concepts": [
+            "Linkfeld (link)",
+            "tel / mailto",
+            "default('…')",
+            "Text nur für Screenreader"
+        ],
+        "hints": {
+            "felder": "Telefon und E-Mail sind einfache Textfelder – die Redaktion schreibt sie so, wie sie angezeigt werden sollen. „Seite“ ist ein Linkfeld mit Seitenauswahl: Verschiebt jemand die Seite, bleibt der Link richtig.",
+            "vorlage": "href=\"{{ telefon | tel }}\" macht aus „02841 123 45 67“ den Link tel:+492841… (Landesvorwahl aus den Grundeinstellungen). href=\"{{ email | mailto }}\" baut mailto: nur aus gültigen Adressen. In href steht immer genau ein Platzhalter. {{ linktext | default('Mehr erfahren') }} springt ein, wenn das Feld leer ist. <span class=\"vh\"> liest nur der Screenreader vor.",
+            "css": ".vh ist die übliche „visually hidden“-Klasse – hier im Block selbst definiert, damit der Block in jedem Kit funktioniert. Die Symbol-Kreise mischen die Akzentfarbe mit transparent.",
+            "beispiel": "Leeren Sie das Feld „E-Mail“: Die Zeile verschwindet vollständig."
+        }
+    },
+    "block": {
+        "key": "ansprechpartner",
+        "label": "Ansprechpartner-Karte",
+        "icon": "user-circle",
+        "group": "Beispiele",
+        "description": "Person mit Foto, Funktion, Telefon, E-Mail und Link zur Profil- oder Kontaktseite.",
+        "fields": [
+            {
+                "name": "name",
+                "label": "Name",
+                "type": "text",
+                "required": true,
+                "width": "half",
+                "max": 80
+            },
+            {
+                "name": "funktion",
+                "label": "Funktion",
+                "type": "text",
+                "width": "half",
+                "max": 120
+            },
+            {
+                "name": "bild",
+                "label": "Foto",
+                "type": "media"
+            },
+            {
+                "name": "telefon",
+                "label": "Telefon",
+                "type": "text",
+                "width": "half",
+                "max": 40,
+                "placeholder": "02841 123 45 67",
+                "help": "Wie angezeigt – der Link wird automatisch international."
+            },
+            {
+                "name": "email",
+                "label": "E-Mail",
+                "type": "text",
+                "width": "half",
+                "max": 120,
+                "placeholder": "name@example.org"
+            },
+            {
+                "name": "seite",
+                "label": "Seite",
+                "type": "link",
+                "help": "z. B. Profil- oder Kontaktseite (optional)."
+            },
+            {
+                "name": "linktext",
+                "label": "Linktext",
+                "type": "text",
+                "max": 60,
+                "placeholder": "Mehr erfahren"
+            }
+        ],
+        "template": "{# Beispiel 5 · Ansprechpartner: Telefon über tel, E-Mail über mailto, Seite über ein Linkfeld. #}\n<article class=\"person\">\n  {% if bild %}<div class=\"person__img\">{{ bild | image('(min-width: 40rem) 10rem, 7rem', '1:1') }}</div>{% endif %}\n  <div class=\"person__body\">\n    <h2 class=\"person__name\">{{ name }}</h2>\n    {% if funktion %}<p class=\"person__role\">{{ funktion }}</p>{% endif %}\n    {% if telefon or email %}\n    <ul class=\"person__contact\" role=\"list\">\n      {% if telefon %}<li><a href=\"{{ telefon | tel }}\"><span class=\"person__ico\" aria-hidden=\"true\">{{ 'phone' | icon }}</span><span class=\"vh\">{{ 'Telefon' | lt }}: </span>{{ telefon }}</a></li>{% endif %}\n      {% if email %}<li><a href=\"{{ email | mailto }}\"><span class=\"person__ico\" aria-hidden=\"true\">{{ 'envelope-simple' | icon }}</span><span class=\"vh\">{{ 'E-Mail' | lt }}: </span>{{ email }}</a></li>{% endif %}\n    </ul>\n    {% endif %}\n    {% if seite %}<p class=\"person__more\"><a href=\"{{ seite }}\">{{ linktext | default('Mehr erfahren') }}<span aria-hidden=\"true\">{{ 'arrow-right' | icon }}</span></a></p>{% endif %}\n  </div>\n</article>",
+        "css": ".person {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 1.25rem 1.75rem;\n  max-width: 44rem;\n  padding: clamp(1.25rem, 3vw, 2rem);\n  border: 1px solid var(--cb-line);\n  border-radius: var(--cb-radius);\n  background: var(--cb-surface);\n}\n.person__img { flex: none; width: 7rem; }\n.person__img img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 50%; }\n.person__body { flex: 1 1 16rem; min-width: 0; }\n.person__name { margin: 0; font-size: 1.4rem; }\n.person__role { margin: .2rem 0 0; color: var(--cb-muted); }\n.person__contact { display: grid; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }\n.person__contact a { display: inline-flex; align-items: center; gap: .6rem; overflow-wrap: anywhere; }\n.person__ico {\n  display: inline-grid;\n  place-items: center;\n  flex: none;\n  width: 2rem;\n  height: 2rem;\n  border-radius: 50%;\n  background: color-mix(in srgb, var(--cb-accent) 15%, transparent);\n}\n.person__more { margin: 1rem 0 0; }\n.person__more a { display: inline-flex; align-items: center; gap: .4rem; font-weight: 600; }\n@media (min-width: 40rem) {\n  .person__img { width: 10rem; }\n}\n.vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }",
+        "behaviours": [],
+        "jsonld": {
+            "type": "item",
+            "schema": "Person",
+            "list": "",
+            "props": {
+                "name": "name",
+                "jobTitle": "funktion",
+                "image": "bild",
+                "telephone": "telefon",
+                "email": "email"
+            }
+        },
+        "settings": {
+            "help": "",
+            "background": "",
+            "width": "wrap"
+        },
+        "sample": {
+            "name": "Alex Muster",
+            "funktion": "Ansprechpartner für Anfragen",
+            "bild": null,
+            "telefon": "02841 123 45 67",
+            "email": "kontakt@example.org",
+            "seite": "/",
+            "linktext": "Zur Kontaktseite"
+        }
+    }
+}
