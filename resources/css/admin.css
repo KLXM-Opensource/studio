@@ -2516,3 +2516,18 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .tpl-pick__txt b{font-weight:600}
 .tpl-pick__txt b{font-weight:600}.tpl-pick__txt small{color:var(--adm-t2);font-size:13px;font-weight:400;line-height:1.35}
 @media (forced-colors:active){.tpl-pick__opt:has(input:checked){outline:2px solid Highlight}}
+
+/* Schalter (Seitenbaum „Im Menü“, Einstellungen): eckig statt iOS-Pille – Spur mit Kontur, quadratischer Knopf, Akzentfarbe */
+.pt-switch span,.ds-switch span{border-radius:5px;background:var(--adm-fill-2);box-shadow:inset 0 0 0 1.5px var(--adm-line);transition:background-color .18s,box-shadow .18s}
+.pt-switch span::after,.ds-switch span::after{left:4px;top:4px;border-radius:2px;background:var(--adm-t3);box-shadow:none;transition:transform .18s cubic-bezier(.3,.7,.2,1),background-color .18s}
+.pt-switch span::after{width:11px;height:11px}
+.ds-switch span::after{width:13px;height:13px}
+.pt-switch input:checked + span,.ds-switch input:checked + span{background:var(--adm-a);box-shadow:inset 0 0 0 1.5px var(--adm-a)}
+.pt-switch input:checked + span::after,.ds-switch input:checked + span::after{background:var(--adm-on-ink)}
+.pt-switch input:checked + span::after{transform:translateX(13px)}
+.ds-switch input:checked + span::after{transform:translateX(15px)}
+.pt-switch:hover span,.ds-switch:hover span{box-shadow:inset 0 0 0 1.5px var(--adm-t3)}
+.pt-switch:hover input:checked + span,.ds-switch:hover input:checked + span{box-shadow:inset 0 0 0 1.5px var(--adm-a)}
+.pt-switch input:focus-visible + span,.ds-switch input:focus-visible + span{outline:2px solid var(--adm-a);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.pt-switch span,.ds-switch span,.pt-switch span::after,.ds-switch span::after{transition:none}}
+@media (forced-colors:active){.pt-switch span,.ds-switch span{border:1px solid CanvasText}.pt-switch span::after,.ds-switch span::after{background:CanvasText}.pt-switch input:checked + span,.ds-switch input:checked + span{background:Highlight}}

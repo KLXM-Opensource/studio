@@ -6,9 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
-### Seitenbaum: Symbole aus der Web-Welt
+### Seitenbaum: Symbole aus der Web-Welt, eckige Schalter
 - Statt Ordner und Dokument: Browserfenster (Seite), gestapelte Fenster (Seite mit Unterseiten, Akzentfarbe), Haus (Startseite),
   gestricheltes Fenster (Sonderseiten/Vorlagen). Farben aus den Tokens der Verwaltung – passen im Dunkelmodus und bei „Kontrast erhöhen“.
+- Schalter (Seitenbaum „Im Menü“, Einstellungen) eckig mit quadratischem Knopf und Akzentfarbe statt iOS-Pille in Grün.
 
 ### Seitenvorlagen für die Redaktion, Blöcke kopieren und duplizieren
 - **Seitenvorlagen** (`Core\PageTemplates`, Werkzeuge → Seitenvorlagen, nur `system.manage`): eigene Seiten wie die Sonderseiten
