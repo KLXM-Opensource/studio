@@ -5989,4 +5989,7 @@ return [
     'Doppelklick öffnet den Editor, Rechtsklick weitere Aktionen.' => 'Double-click opens the editor, right-click shows more actions.',
     'Hilfe: Seiten ordnen und bearbeiten' => 'Help: arranging and editing pages',
     'Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken).' => 'Without dragging: select a page and press Alt + arrow keys (or “⋯” → Move up/down, Indent, Outdent).',
+    'Detailseiten-Vorlagen gelten für alle Einträge einer Datentabelle und werden unter „Daten“ gestaltet.' => 'Detail page templates apply to all entries of a data table and are designed under “Data”.',
+    'Seitenvorlagen sind der Ausgangspunkt für neue Seiten der Redaktion – ohne eigene Adresse, nur die Administration kann sie ändern.' => 'Page templates are the starting point for new pages by editors – without an address of their own, only administrators can change them.',
+    '„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.' => '“Not found (404)” appears when visitors open an address that does not exist – with status 404, not in menu, sitemap or search. Until it is published, the website shows the kit’s default error page.',
 ];

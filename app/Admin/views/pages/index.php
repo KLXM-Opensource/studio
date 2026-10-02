@@ -70,6 +70,14 @@ $html = implode('', array_map($row, $tree));
           <li><?= e(__('Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken).')) ?></li>
           <li><?= e(__('Doppelklick öffnet den Editor, Rechtsklick weitere Aktionen.')) ?></li>
         </ul>
+        <?php if (can('pages.manage') || can('data.schema') || can('system.manage')): ?>
+        <h3 class="adm-tip__h"><?= e(__('Sonderseiten & Vorlagen')) ?></h3>
+        <ul>
+          <?php if (can('pages.manage')): ?><li><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></li><?php endif; ?>
+          <?php if (can('system.manage')): ?><li><?= e(__('Seitenvorlagen sind der Ausgangspunkt für neue Seiten der Redaktion – ohne eigene Adresse, nur die Administration kann sie ändern.')) ?></li><?php endif; ?>
+          <?php if (can('data.schema')): ?><li><?= e(__('Detailseiten-Vorlagen gelten für alle Einträge einer Datentabelle und werden unter „Daten“ gestaltet.')) ?></li><?php endif; ?>
+        </ul>
+        <?php endif; ?>
       </div>
     </details></div></div>
   <div class="adm-row">
@@ -110,7 +118,6 @@ $canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pa
 <?php if (can('system.manage') && empty($pageTemplates)): ?>
 <section class="adm-card pt-templates">
   <h2><?= e(__('Seitenvorlagen')) ?></h2>
-  <p class="adm-muted"><?= e(__('Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.')) ?></p>
   <p><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Erste Vorlage anlegen')) ?></a></p>
 </section>
 <?php endif; ?>
@@ -120,7 +127,6 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 <?php if ($canSpecial404): ?>
 <section class="adm-card pt-templates" aria-labelledby="pt-special-h">
   <h2 id="pt-special-h"><?= e(__('Sonderseiten')) ?></h2>
-  <p class="adm-muted"><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Bearbeiten wie jede Seite; solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></p>
   <ul class="adm-list">
     <?php foreach ($nfLangs as $code => $label): $nf = $notFound[$code] ?? null; ?>
     <li><span><span class="pt-icon pt-icon--404" aria-hidden="true"></span> <?= e(__('Nicht gefunden (404)')) ?><?php if ($multi): ?> <span class="adm-badge"><?= e(strtoupper($code)) ?></span><?php endif; ?>
@@ -149,7 +155,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 <?php if (!empty($pageTemplates)): ?>
 <section class="adm-card pt-templates" aria-labelledby="pt-pagetpl-h">
   <h2 id="pt-pagetpl-h"><?= e(__('Seitenvorlagen')) ?></h2>
-  <p class="adm-muted"><?= e(__('Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.')) ?> <a href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Anordnen und benennen')) ?></a></p>
+  <p class="pt-cardlink"><a href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Anordnen und benennen')) ?></a></p>
   <ul class="adm-list">
     <?php foreach ($pageTemplates as $pt_): ?>
     <li><span><?= $pt_['icon'] !== '' ? '<span class="pt-tplico" aria-hidden="true">' . icon($pt_['icon']) . '</span>' : '<span class="pt-icon pt-icon--pagetpl" aria-hidden="true"></span>' ?> <?= e($pt_['label']) ?></span>
@@ -162,7 +168,6 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 <?php if ($templates && can('data.schema')): ?>
 <section class="adm-card pt-templates">
   <h2>Detailseiten-Vorlagen</h2>
-  <p class="adm-muted">Gelten für alle Einträge einer Datentabelle und werden unter <a href="<?= e(url('/admin/data')) ?>">Daten</a> gestaltet.</p>
   <ul class="adm-list">
     <?php foreach ($templates as $tp): $tbl = \Core\Data\Tables::find((string) $tp['template_for']); ?>
     <li><span><span class="pt-icon pt-icon--tpl" aria-hidden="true"></span> <?= e($tp['title']) ?><?php if ($tbl && $tbl['settings']['route']): ?> <small>/<?= e($tbl['settings']['route']) ?>/…</small><?php endif; ?></span>

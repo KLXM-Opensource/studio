@@ -2556,3 +2556,5 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .adm-tip__btn:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
 .adm-tip__body{position:absolute;z-index:40;top:calc(100% + 8px);left:0;width:min(440px,calc(100vw - 32px));padding:12px 16px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-surface);color:var(--adm-ink);font-size:14px;line-height:1.5;box-shadow:0 12px 32px -12px rgba(0,0,0,.3)}
 .adm-tip__body ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.adm-tip__h{margin:12px 0 6px;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--adm-t2)}
+.pt-cardlink{margin:0 0 4px;font-size:14px}
