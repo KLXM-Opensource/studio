@@ -5929,4 +5929,6 @@ return [
     'Die Bewegung läuft nur ein paar Sekunden und entfällt, wenn Besucher „Bewegung reduzieren“ eingestellt haben.' => 'The motion runs for only a few seconds and is skipped when visitors have “reduce motion” turned on.',
     'Automatisch entschlüsselt: Der geheime {key} ist in der Hosting-Umgebung hinterlegt.' => 'Decrypted automatically: the secret {key} is stored in the hosting environment.',
     'Schlüssel aus der Hosting-Umgebung' => 'key from the hosting environment',
+    'Leere Seite' => 'Empty page',
+    'Fügen Sie mit „+ Block einfügen“ den ersten Block hinzu.' => 'Add the first block with “+ Insert block”.',
 ];

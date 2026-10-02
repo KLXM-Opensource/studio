@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seiten-Editor: leere Seite ohne festen Textblock
+- Editor.js braucht immer einen Block und legte bei neuen Seiten (und nach dem Löschen des letzten Blocks) einen leeren
+  „Text“-Block an, der sich nicht entfernen ließ. Jetzt erscheint er als Platzhalter „Leere Seite“; „+ Block einfügen“ ersetzt
+  ihn, gespeichert wird eine wirklich leere Seite.
+
 ### Online-Anfragen: geheimer Schlüssel optional aus der Hosting-Umgebung
 - Liegt der geheime Schlüssel als Umgebungsvariable vor (`KLXM_FORM_SECRET_{WEBSITE}` oder `KLXM_FORM_SECRET`, z. B. Plesk
   `env[…]` im PHP-FPM-Pool), sind Anfragen ohne Eingabe lesbar – nur wenn er zum öffentlichen Schlüssel passt. Schutz dann gegen

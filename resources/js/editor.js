@@ -152,7 +152,26 @@ function fieldValue(n, rich) {
 // Werkzeugleiste (_bar.js): EIN Status-Chip, „Gespeichert ✓“, Live-Region, Abbrechen
 const Bar = CMSAdmin.bar;
 const BT = k => Bar?.texts?.[k] || { close: 'Schließen', cancel: 'Abbrechen', done: 'Fertig' }[k] || k;
-const markDirty = () => { const was = dirty; dirty = true; if (!was) Bar?.state('dirty'); };
+const markDirty = () => { const was = dirty; dirty = true; if (!was) Bar?.state('dirty'); requestAnimationFrame(blankState); };
+
+/*
+ * Leere Seite: Editor.js braucht immer einen Block und legt dafür einen leeren Standardblock (Text) an – auch nach dem
+ * Löschen des letzten Blocks. Ist das der einzige Block und noch leer, zeigen wir ihn als Platzhalter „Leere Seite“,
+ * ersetzen ihn beim ersten „+ Block einfügen“ und speichern ihn nicht mit.
+ */
+const DEFAULT_TYPE = cfg.blocks.richtext ? 'richtext' : Object.keys(cfg.blocks)[0];
+const OPTION_TYPES = ['select', 'bool', 'number', 'color', 'heading', 'icon'];
+const hasValue = v => Array.isArray(v) ? v.length > 0 : (v && typeof v === 'object' ? Object.values(v).some(hasValue)
+  : String(v ?? '').replace(/<[^>]*>|&nbsp;/g, '').trim() !== '');
+const hasContent = (def, data) => (def.fields || []).some(f => f.name && !OPTION_TYPES.includes(f.type) && hasValue(data?.[f.name]));
+function blankState() {
+  if (!editor?.blocks) return false;
+  const els = blockEls();
+  const only = els.length === 1 ? tools.get(editor.blocks.getBlockByIndex(0)?.id) : null;
+  const blank = !!only && only.type === DEFAULT_TYPE && !hasContent(only.def, only.data);
+  els.forEach(b => b.querySelector('.cms-block')?.classList.toggle('is-blank', blank));
+  return blank;
+}
 
 async function api(url, body) {
   const r = await fetch(url, {
@@ -444,7 +463,9 @@ const BlockPicker = (() => {
     if (col != null && type && t?.addChild) { t.addChild(col, type); return; }
     const idx = blockEls().indexOf(t?.el.closest('.ce-block'));
     if (!type || idx < 0) return;
+    const wasBlank = blankState();
     editor.blocks.insert(type, {}, undefined, idx + 1, false);
+    if (wasBlank) editor.blocks.delete(idx);   // Platzhalter „Leere Seite“ ersetzen
     markDirty();
     requestAnimationFrame(refreshMoveButtons);
     const st = S.ui('[data-editor-status]');
@@ -525,7 +546,8 @@ function makeTool(type, def) {
       const el = d.createElement('div');
       el.className = 'cms-block';
       // Block-Leiste: eigenes Shadow DOM (Knöpfe unabhängig von Theme-Regeln für button, font, line-height …)
-      el.innerHTML = '<div class="cms-block__bar" contenteditable="false"></div><div class="cms-block__preview"></div>';
+      el.innerHTML = '<div class="cms-block__bar" contenteditable="false"></div><div class="cms-block__preview"></div>'
+        + `<div class="cms-block__blank" contenteditable="false"><strong>${CMSAdmin.esc(CMSAdmin.t('Leere Seite'))}</strong> ${CMSAdmin.esc(CMSAdmin.t('Fügen Sie mit „+ Block einfügen“ den ersten Block hinzu.'))}</div>`;
       const barEl = el.firstElementChild;
       const sr = this.bar = S.shadowFor(barEl, `
           <span class="cms-block__swatch" aria-hidden="true"></span>
@@ -1200,10 +1222,12 @@ editor = new EditorJS({
   onChange: (_api, ev) => {
     const evs = Array.isArray(ev) ? ev : [ev];
     if (evs.some(x => ['block-added', 'block-removed', 'block-moved'].includes(x?.type))) { markDirty(); requestAnimationFrame(refreshMoveButtons); }
+    requestAnimationFrame(blankState);
   },
   onReady: () => {
     if (window.DragDrop) new DragDrop(editor, '3px solid #314164');
     refreshMoveButtons();
+    blankState();
     dirty = false;
     Bar?.state('clean');
     requestAnimationFrame(() => jumpToBlock());
@@ -1352,7 +1376,7 @@ async function save(publish = false) {
   Bar?.state(publish ? 'publishing' : 'saving');
   try {
     const out = await editor.save();
-    const blocks = out.blocks.map(b => ({ ...b, tunes: { section: tunes.get(b.id)?.data || b.tunes?.section || {} } }));
+    const blocks = blankState() ? [] : out.blocks.map(b => ({ ...b, tunes: { section: tunes.get(b.id)?.data || b.tunes?.section || {} } }));
     // cms:before-save: Werkzeuge/Erweiterungen dürfen prüfen und abbrechen (auch asynchron, detail.waitUntil)
     const gate = await (CMSAdmin.events?.beforeSave({ kind: 'page', publish, page: cfg.page, blocks }) ?? { ok: true });
     if (!gate.ok) {

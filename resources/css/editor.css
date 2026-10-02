@@ -258,3 +258,10 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 
 /* Quick-Glossar „Zur Stelle“ (resources/js/quick-glossary.mjs): Treffer kurz hervorheben – CSS Custom Highlight, ändert das DOM nicht */
 ::highlight(cms-gl-hit){background:#FFD54F;color:#111}
+
+/* Leere Seite: einziger, leerer Standardblock als Platzhalter (editor.js blankState) – „+ Block einfügen“ immer sichtbar */
+.cms-block__blank{display:none}
+.cms-block.is-blank>.cms-block__bar,.cms-block.is-blank>.cms-block__preview{display:none}
+.cms-block.is-blank>.cms-block__blank{display:block;margin:24px clamp(12px,4vw,48px) 36px;padding:40px 24px;border:2px dashed color-mix(in srgb,currentColor 25%,transparent);border-radius:14px;text-align:center;font:400 16px/1.5 system-ui,sans-serif;color:inherit;opacity:.8}
+.cms-block.is-blank>.cms-block__blank strong{display:block;font-size:18px;margin-bottom:4px}
+.cms-block.is-blank>.cms-block__add{opacity:1;pointer-events:auto}
