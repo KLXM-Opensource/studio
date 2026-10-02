@@ -460,3 +460,14 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .qg-intro{margin:0 0 6px;font-size:13px;color:var(--adm-t2,#3F4A47)}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .cms-toast--error{background:#B3261E}
+
+/* Block-Menü (editor.js BlockMenu): Stil wie „+ Block einfügen“, mit Titel, Trennern, Tastenhinweis und Löschen in Rot */
+.cms-blockmenu{width:min(280px,calc(100vw - 16px));max-height:min(520px,calc(100vh - 16px));overflow:auto;gap:2px}
+.cms-blockmenu__title{margin:2px 8px 4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--adm-t3,#5A6461)}
+.cms-blockmenu hr{width:100%;margin:4px 0;border:0;border-top:1px solid var(--adm-line,#E6E6E9)}
+.cms-blockmenu .cms-addpop__item:disabled{opacity:.4;cursor:default}
+.cms-blockmenu .cms-addpop__item:focus-visible{outline:2px solid var(--adm-a,#314164);outline-offset:-2px}
+.cms-blockmenu .cms-addpop__item kbd{margin-left:auto;font:500 11px/1 system-ui,sans-serif;color:var(--adm-t3,#5A6461)}
+.cms-blockmenu .cms-addpop__item.is-danger{color:#B3261E}
+.cms-blockmenu .cms-addpop__item.is-danger .cms-addpop__ico{color:#B3261E}
+@media (pointer:coarse){.cms-blockmenu .cms-addpop__item{min-height:44px}}

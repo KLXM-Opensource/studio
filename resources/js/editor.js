@@ -565,30 +565,94 @@ class SectionTune {
   save() { return this.data; }
 }
 
-// ------------------------------------------------------------------ Block-Menü (⠿): alle Aktionen an einem Ort
+// ------------------------------------------------------------------ Block-Menü: alle Aktionen eines Blocks an einem Ort
 /*
- * Statt einer zweiten Knopfleiste je Block stehen Bearbeiten, Duplizieren, Kopieren und Einklappen im Menü von Editor.js
- * (zusammen mit „Abschnitt & Navigation“, Nach oben/unten, Löschen). Sichtbar am Block bleiben nur Name und „Bearbeiten“.
+ * Geöffnet über „⋯“ in der Blockleiste oder einen Klick auf den Griff ⠿ (Ziehen am Griff verschiebt weiterhin).
+ * Gleicher Stil wie „+ Block einfügen“. Reihenfolge: Verschieben · Duplizieren/Kopieren/Einfügen · Einklappen/Abschnitt · Löschen.
  */
-const ICO = {
-  edit: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
-  dup: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/><path d="M14 11v6M11 14h6"/></svg>',
-  copy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>',
-  fold: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
-};
-const actionTune = (title, icon, run) => class {
-  static get isTune() { return true; }
-  constructor({ block }) { this.blockId = block?.id; }
-  render() {
-    const t = typeof title === 'function' ? title(tools.get(this.blockId)) : title;
-    return { icon, title: t, onActivate: () => { const tool = tools.get(this.blockId); if (tool) run(tool); } };
-  }
-  save() { return undefined; }
-};
-const EditTune = actionTune(CMSAdmin.t('Bearbeiten'), ICO.edit, tool => tool.openDrawer());
-const DupTune = actionTune(CMSAdmin.t('Duplizieren'), ICO.dup, tool => tool.duplicate());
-const CopyTune = actionTune(CMSAdmin.t('Kopieren (für andere Seiten)'), ICO.copy, tool => tool.copy());
-const FoldTune = actionTune(tool => tool?.el?.classList.contains('is-collapsed') ? CMSAdmin.t('Ausklappen') : CMSAdmin.t('Einklappen'), ICO.fold, tool => tool.toggleCollapse());
+const BlockMenu = (() => {
+  const T = CMSAdmin.t;
+  const el = d.createElement('div');
+  el.className = 'cms-addpop cms-blockmenu'; el.hidden = true;
+  el.setAttribute('role', 'menu');
+  layerBox().append(el);
+  let tool = null, opener = null, armed = false;
+  const place = () => {
+    if (el.hidden || !opener) return;
+    const r = opener.getBoundingClientRect(), h = el.offsetHeight, w = el.offsetWidth;
+    el.style.top = (r.bottom + 6 + h <= innerHeight - 8 ? r.bottom + 6 : Math.max(8, r.top - 6 - h)) + 'px';
+    el.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  };
+  const close = (back = true) => { if (el.hidden) return; el.hidden = true; if (back) opener?.focus?.({ preventScroll: true }); tool = null; opener = null; armed = false; };
+  const index = () => blockEls().indexOf(tool?.el.closest('.ce-block'));
+  const item = (key, ico, label, opts = {}) => `<button type="button" class="cms-addpop__item${opts.danger ? ' is-danger' : ''}" role="menuitem" data-act="${key}"${opts.disabled ? ' disabled aria-disabled="true"' : ''}><span class="cms-addpop__ico" aria-hidden="true">${ico}</span><span>${CMSAdmin.esc(label)}</span>${opts.kbd ? `<kbd>${opts.kbd}</kbd>` : ''}</button>`;
+  const render = () => {
+    const i = index(), n = blockEls().length, c = clipboard(), folded = tool.el.classList.contains('is-collapsed');
+    el.innerHTML = `<p class="cms-blockmenu__title">${CMSAdmin.esc(tool.def.label)}</p>`
+      + item('up', '↑', T('Nach oben'), { disabled: i <= 0, kbd: 'Alt ↑' })
+      + item('down', '↓', T('Nach unten'), { disabled: i < 0 || i >= n - 1, kbd: 'Alt ↓' })
+      + '<hr>'
+      + item('dup', '⧉', T('Duplizieren'))
+      + item('copy', '⎘', T('Kopieren'))
+      + (c ? item('paste', '↧', T('Einfügen darunter: {label}', { label: cfg.blocks[c.type].label })) : '')
+      + '<hr>'
+      + item('fold', folded ? '▸' : '▾', folded ? T('Ausklappen') : T('Einklappen'))
+      + item('section', '▭', T('Abschnitt & Navigation …'))
+      + '<hr>'
+      + item('delete', '✕', armed ? T('Wirklich löschen?') : T('Löschen'), { danger: true });
+  };
+  const run = act => {
+    const t = tool, i = index();
+    if (!t) return;
+    if (act === 'delete') {
+      if (!armed) { armed = true; render(); el.querySelector('[data-act="delete"]')?.focus(); return; }
+      close(false); editor.blocks.delete(i); markDirty(); requestAnimationFrame(refreshMoveButtons);
+      editorStatus(T('Block gelöscht – noch nicht gespeichert. Wiederherstellen über „Versionen“.'));
+      return;
+    }
+    close(act !== 'section');
+    if (act === 'up') t.move(-1);
+    else if (act === 'down') t.move(1);
+    else if (act === 'dup') t.duplicate();
+    else if (act === 'copy') t.copy();
+    else if (act === 'paste') { const c = clipboard(); if (c && insertCopy(c, i + 1)) editorStatus(T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[c.type].label })); }
+    else if (act === 'fold') t.toggleCollapse();
+    else if (act === 'section') t.openDrawer(true);
+  };
+  el.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled) run(b.dataset.act); });
+  el.addEventListener('keydown', e => {
+    e.stopPropagation();
+    const items = [...el.querySelectorAll('[data-act]:not([disabled])')], cur = items.indexOf(d.activeElement) >= 0 ? items.indexOf(d.activeElement) : items.indexOf(e.composedPath()[0]);
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(cur + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); }
+    else if (e.key === 'Tab') close(false);
+  });
+  d.addEventListener('pointerdown', e => { if (!el.hidden && !e.composedPath().includes(el) && !e.composedPath().includes(opener)) close(false); }, true);
+  addEventListener('resize', place);
+  addEventListener('scroll', place, { passive: true });
+  return {
+    open(btn, t) {
+      if (!el.hidden && tool === t) { close(); return; }
+      opener = btn; tool = t; armed = false;
+      render(); el.hidden = false; place();
+      el.querySelector('[data-act]:not([disabled])')?.focus({ preventScroll: true });
+    },
+    close,
+  };
+})();
+
+// Griff ⠿ von Editor.js: Klick öffnet unser Block-Menü (statt des Editor.js-Menüs), Ziehen verschiebt weiterhin
+let hoveredBlockEl = null;
+holder()?.addEventListener('mouseover', e => { const b = e.target.closest?.('.ce-block'); if (b) hoveredBlockEl = b; });
+holder()?.addEventListener('focusin', e => { const b = e.target.closest?.('.ce-block'); if (b) hoveredBlockEl = b; });
+holder()?.addEventListener('mousedown', e => { if (e.target.closest?.('.ce-toolbar__settings-btn')) e.stopPropagation(); }, true);
+holder()?.addEventListener('click', e => {
+  const grip = e.target.closest?.('.ce-toolbar__settings-btn');
+  if (!grip) return;
+  e.preventDefault(); e.stopPropagation();
+  const t = hoveredBlockEl && tools.get(hoveredBlockEl.dataset.id);
+  if (t) BlockMenu.open(grip, t);
+}, true);
 
 // ------------------------------------------------------------------ Generisches Block-Tool
 function makeTool(type, def) {
@@ -637,7 +701,12 @@ function makeTool(type, def) {
           <span class="cms-block__flags"></span>
           <span class="cms-block__hint" hidden></span>
           ${def.formfields ? `<button type="button" class="cms-block__fields" hidden>${CMSAdmin.esc(CMSAdmin.t('Felder'))}<span class="cms-block__fields-more"> ${CMSAdmin.esc(CMSAdmin.t('bearbeiten'))}</span></button>` : ''}
-          <button type="button" class="cms-block__edit">Bearbeiten</button>`);
+          <span class="cms-block__tools">
+            <button type="button" class="cms-iconbtn" data-move="up" aria-label="${CMSAdmin.esc(CMSAdmin.t('Block nach oben'))}" title="${CMSAdmin.esc(CMSAdmin.t('Nach oben'))} (Alt+↑)">↑</button>
+            <button type="button" class="cms-iconbtn" data-move="down" aria-label="${CMSAdmin.esc(CMSAdmin.t('Block nach unten'))}" title="${CMSAdmin.esc(CMSAdmin.t('Nach unten'))} (Alt+↓)">↓</button>
+          </span>
+          <button type="button" class="cms-block__edit">Bearbeiten</button>
+          <button type="button" class="cms-iconbtn cms-block__more" data-blockmenu aria-haspopup="menu" aria-label="${CMSAdmin.esc(CMSAdmin.t('Weitere Aktionen'))}" title="${CMSAdmin.esc(CMSAdmin.t('Weitere Aktionen'))}">⋯</button>`);
       this.el = el;
       // „+ Block einfügen“ an der Unterkante (eigenes Shadow DOM): fügt nach diesem Block ein – beim letzten am Seitenende
       const addEl = d.createElement('div');
@@ -652,6 +721,9 @@ function makeTool(type, def) {
       // Formular-Blöcke: Felder der gewählten Tabelle direkt bearbeiten (nur mit Recht „Tabellen und Felder ändern“, cfg.formFields)
       sr.querySelector('.cms-block__fields')?.addEventListener('click', e => { e.stopPropagation(); this.openFormFields(e.currentTarget); });
       // Eingeklappte Zeile: Klick auf den Titel klappt auf
+      sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
+      sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
+      sr.querySelector('[data-blockmenu]').addEventListener('click', e => { e.stopPropagation(); BlockMenu.open(e.currentTarget, this); });
       sr.querySelector('.cms-block__summary').addEventListener('click', () => this.toggleCollapse(false));
       // Editor.js soll Tasten in der Leiste (Enter/Leertaste auf Knöpfen) nicht als Texteingabe behandeln
       barEl.addEventListener('keydown', e => e.stopPropagation());
@@ -780,7 +852,8 @@ function makeTool(type, def) {
       requestAnimationFrame(() => {
         refreshMoveButtons();
         this.el.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-        this.bar.querySelector('.cms-block__edit')?.focus({ preventScroll: true });
+        const btn = this.bar.querySelector(`[data-move="${dir < 0 ? 'up' : 'down'}"]`);
+        (btn && !btn.disabled ? btn : this.bar.querySelector('.cms-block__edit'))?.focus({ preventScroll: true });
         this.el.classList.remove('is-moved'); void this.el.offsetWidth; this.el.classList.add('is-moved');
       });
     }
@@ -1276,20 +1349,20 @@ holder()?.addEventListener('click', e => {
 }, true);
 
 // ------------------------------------------------------------------ Editor starten
-const toolsCfg = { cmsEdit: EditTune, cmsDup: DupTune, cmsCopy: CopyTune, cmsFold: FoldTune, section: SectionTune };
+const toolsCfg = { section: SectionTune };
 for (const [type, def] of Object.entries(cfg.blocks)) toolsCfg[type] = { class: makeTool(type, def) };
 
 editor = new EditorJS({
   holder: 'cms-editor',
   data: { blocks: initial.blocks || [] },
   tools: toolsCfg,
-  tunes: ['cmsEdit', 'section', 'cmsDup', 'cmsCopy', 'cmsFold'],   // Block-Menü (⠿); dazu Nach oben, Löschen, Nach unten von Editor.js
+  tunes: ['section'],   // Abschnitts-Daten; das Menü am Griff ⠿ ist unser eigenes (BlockMenu)
   defaultBlock: cfg.blocks.richtext ? 'richtext' : Object.keys(cfg.blocks)[0],
   minHeight: 80,   // freie Fläche unter dem letzten Block (Standard 300 px)
   i18n: {
     messages: {
       ui: {
-        blockTunes: { toggler: { 'Click to tune': 'Block-Menü: Bearbeiten, Verschieben, Kopieren, Löschen …', 'or drag to move': 'oder ziehen zum Verschieben' } },
+        blockTunes: { toggler: { 'Click to tune': 'Klicken: Block-Menü', 'or drag to move': 'ziehen: verschieben' } },
         toolbar: { toolbox: { Add: 'Block hinzufügen', Filter: 'Suchen', 'Nothing found': 'Nichts gefunden' } },
         popover: { Filter: 'Suchen', 'Nothing found': 'Nichts gefunden', 'Convert to': 'Umwandeln in' },
       },

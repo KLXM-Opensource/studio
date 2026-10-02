@@ -7,8 +7,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
-- Alle Block-Aktionen im Menü am Griff ⋮⋮ (Bearbeiten, Abschnitt & Navigation, Duplizieren, Kopieren, Einklappen, Nach oben/unten,
-  Löschen); am Block bleiben Name und „Bearbeiten“. Das zweite „+“ von Editor.js entfällt („+ Block einfügen“ genügt).
+- Eigenes Block-Menü (Stil wie „+ Block einfügen“), geöffnet über „⋯“ in der Blockleiste oder Klick auf den Griff ⠿ (Ziehen bleibt):
+  Nach oben/unten, Duplizieren, Kopieren, Einfügen darunter, Einklappen, Abschnitt & Navigation, Löschen mit Rückfrage. Leiste:
+  Name, ↑ ↓, Bearbeiten, ⋯. Das Menü von Editor.js und dessen zweites „+“ entfallen.
 - Ein Klick unter den letzten Block legt keinen leeren Textblock mehr an (Editor.js-Bottom-Zone abgefangen, freie Fläche 80 px).
 - Seitenleiste: Inhalte oben; neuer Abschnitt „Einrichtung“ mit „Website“ (Website-Angaben, Design, Seitenvorlagen, Blöcke,
   Landingpages, Weiterleitungen), „System“ (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen,
