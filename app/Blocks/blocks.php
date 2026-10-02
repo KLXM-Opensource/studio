@@ -239,11 +239,19 @@ return [
     ],
     'live_text' => [
         'label' => 'Live-Text (Ticker)', 'icon' => 'broadcast', 'group' => 'Daten', 'live' => true,
-        'help' => 'Meldungen aus einer Datentabelle, die sich bei Besuchern ohne Neuladen aktualisieren – als Ticker (neueste oben) oder nur die aktuelle Meldung, z. B. Spielstand, Wartezeit, Ablauf einer Veranstaltung. Neue Meldung = neuer veröffentlichter Eintrag (auch per API/MCP).',
+        'help' => 'Meldungen, die sich bei Besuchern ohne Neuladen aktualisieren – als Ticker (neueste oben) oder nur die aktuelle Meldung, z. B. Spielstand, Wartezeit, Ablauf einer Veranstaltung. Direkt hier geschrieben (erscheinen beim Veröffentlichen der Seite) oder aus einer Datentabelle (erscheinen sofort, auch per API/MCP).',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
             ['type' => 'heading', 'label' => 'Meldungen'],
-            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true,
+            ['name' => 'source', 'label' => 'Quelle', 'type' => 'select', 'required' => true, 'default' => 'manual', 'width' => 'half',
+                'options' => ['manual' => 'Meldungen hier schreiben', 'table' => 'Aus einer Datentabelle']],
+            ['name' => 'items', 'label' => 'Meldungen (bei „hier schreiben“)', 'type' => 'repeater', 'item_label' => 'Meldung', 'title_field' => 'title',
+                'help' => 'Neue Meldungen unten anfügen – sie erscheinen bei Besuchern, sobald Sie die Seite veröffentlichen.', 'fields' => [
+                ['name' => 'time', 'label' => 'Zeit (optional)', 'type' => 'datetime', 'width' => 'half', 'help' => 'Leer = ohne Zeitangabe.'],
+                ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'width' => 'half', 'max' => 160],
+                ['name' => 'text', 'label' => 'Text (optional)', 'type' => 'inline'],
+            ]],
+            ['name' => 'table', 'label' => 'Tabelle (bei „Datentabelle“)', 'type' => 'datatable',
                 'help' => 'Titel = Überschrift der Meldung, dazu ein Textfeld. Nur veröffentlichte Einträge erscheinen.'],
             ['name' => 'text_field', 'label' => 'Textfeld (optional)', 'type' => 'datafield', 'empty_label' => '– Beschreibung der Tabelle –'],
             ['name' => 'mode', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'ticker', 'width' => 'half',
