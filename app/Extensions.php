@@ -290,7 +290,7 @@ final class Extensions
         $x = self::$active[$name] ?? null;
         if (!$x) return [];
         $blocks = array_keys(array_filter(app()->theme->blocks(), fn($b) => ($b['extension'] ?? '') === $name));
-        return ['nav' => array_map(fn($n) => [$n[0], __($n[1])], $x->nav), 'perms' => array_merge([], ...array_values($x->perms)),
+        return ['nav' => array_map(fn($n) => [$n[0], self::tr($name, (string) $n[1]), (string) ($n[5] ?? '')], $x->nav), 'perms' => array_merge([], ...array_values($x->perms)),
             'commands' => array_map(fn($c) => (string) $c[0], $x->commands), 'blocks' => $blocks, 'csp' => (bool) $x->cspProviders,
             'routes' => count($x->routeCallbacks), 'frontend' => (bool) ($x->htmlFilters || $x->footerLinkProviders)];
     }
@@ -355,18 +355,13 @@ final class Extensions
         }
     }
 
-    /** Zusätzliche Einträge der Admin-Navigation: [href, label, key, sichtbar]; $place 'main' (Hauptmenü) oder 'admin' (Abschnitt Administration) */
+    /**
+     * Veraltet (seit Core\AdminPages): Menüeinträge der Erweiterungen [href, label, key, sichtbar] – nur Inhalte/Werkzeuge,
+     * $place 'main' (Hauptmenü) oder 'admin' (Administration). Das Layout nutzt AdminPages::nav().
+     */
     public static function adminNav(string $place = 'main'): array
     {
-        $out = [];
-        foreach (self::$active as $x) {
-            foreach ($x->nav as $n) {
-                [$href, $label, $icon, $perm] = $n;
-                if (($n[4] ?? 'main') !== $place) continue;
-                $out[] = [$href, __($label), $icon, $perm === null || can($perm)];   // Beschriftung übersetzbar (lang/{locale}.php der Erweiterung)
-            }
-        }
-        return $out;
+        return array_values(array_filter(AdminPages::nav($place), fn($n) => (AdminPages::match($n[0])['source'] ?? '') !== 'core'));
     }
 
     /** Zusätzliche Rechte-Gruppen: [Gruppe => [recht => Bezeichnung]] */

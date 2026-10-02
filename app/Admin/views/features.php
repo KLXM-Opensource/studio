@@ -160,7 +160,7 @@ $sw = function (bool $on, bool $disabled, string $label) {
         <dl class="ft-effects">
           <?php if ($x['provides']): ?><dt><?= e(__('Bringt mit')) ?></dt><dd><?= e(implode(' · ', $x['provides'])) ?></dd><?php endif; ?>
           <?php $c = $x['contrib']; if ($c): ?>
-            <?php if ($c['nav']): ?><dt><?= e(__('Menü & Seiten')) ?></dt><dd><?= e(implode(' · ', array_column($c['nav'], 1))) ?></dd><?php endif; ?>
+            <?php if ($c['nav']): // Ort je Art (Core\AdminPages): Menü, Sammelseite „Einstellungen“ bzw. „Statistiken“ ?><dt><?= e(__('Menü & Seiten')) ?></dt><dd><?= e(implode(' · ', array_map(fn($n) => $n[1] . match ($n[2] ?? '') { 'settings' => ' (' . __('unter Einstellungen') . ')', 'stats' => ' (' . __('unter Statistiken') . ')', default => '' }, $c['nav']))) ?></dd><?php endif; ?>
             <?php if ($c['perms']): ?><dt><?= e(__('Rechte')) ?></dt><dd><?= e(implode(' · ', array_map('__', $c['perms']))) ?></dd><?php endif; ?>
             <?php if ($c['blocks']): ?><dt><?= e(__('Blöcke')) ?></dt><dd><?= e(implode(' · ', $c['blocks'])) ?></dd><?php endif; ?>
             <?php if ($c['commands']): ?><dt><?= e(__('Befehle (Cron)')) ?></dt><dd><code><?= e(implode(' ', array_keys($c['commands']))) ?></code></dd><?php endif; ?>

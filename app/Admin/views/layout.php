@@ -14,9 +14,7 @@ $nav = array_values(array_filter([
     ['/admin/settings', app()->theme->settingsTitle(), 'settings', $user && can('settings.edit')],
     ['/admin/media', __('Medien'), 'media', $user && can('media.upload')],
     ['/admin/data', __('Daten'), 'data', (bool) $dataOk],
-    // Glossar (Core\Glossary): Begriffe, Hinweise, Einstellungen – Funktion „glossary“, Recht data.edit auf die Tabelle (Einrichten: data.schema)
-    ['/admin/glossar', __('Glossar'), 'glossary', $user && \Core\Glossary\Glossary::enabled()
-        && (($gt = \Core\Glossary\Glossary::table()) ? can('data.edit', $gt['handle']) : can('data.schema'))],
+    // Glossar (Core\Glossary) ist eine Einstellungsseite (Core\AdminPages, kind settings): Sammelseite „Einstellungen“ und an der Tabelle „glossar“
     ['/admin/requests', __('Anfragen'), 'requests', (bool) $inboxes || ($user && can('requests.read') && can('data.schema') && \Core\Data\Inbox::available())],
     // Support & Wissensdatenbank: im Abschnitt „Hilfe & Support“ unten in der Seitenleiste
     // Chat zwischen Benutzern (Core\Chat, optional) – öffnet mit JavaScript die Schublade (resources/js/userchat.js)
@@ -25,12 +23,17 @@ $nav = array_values(array_filter([
     ['/admin/ai', \Core\AI\Assist::brand(), 'ai', $user && \Core\AI\Assist::navVisible()],
     // Prüf-Ebene „Eingereicht“ (Core\Review) – eigener Punkt nur, wenn der KI-Bereich nicht sichtbar ist
     ['/admin/ai/eingereicht', __('Eingereicht'), 'review', $user && \Core\Review\Queue::canReview() && !\Core\AI\Assist::navVisible()],
-    ...($user ? \Core\Extensions::adminNav() : []),
+    // Seiten von Funktionen und Erweiterungen (Core\AdminPages): hier nur Inhalte und Werkzeuge – Einstellungen und Statistiken
+    // stehen gesammelt unter „Einstellungen“ bzw. „Statistiken“ (Administration)
+    ...($user ? \Core\AdminPages::nav('main') : []),
 ], fn($n) => $n[3]));
 $adminNav = array_values(array_filter([
     ['/admin/system', __('Grundeinstellungen'), 'system', $user && can('system.manage')],
     // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
     ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', $user && \Core\Features::canView()],
+    // Sammelseiten (Core\AdminPages): Einstellungen der Funktionen & Erweiterungen, Statistiken – nur wenn es etwas zu zeigen gibt
+    ['/admin/einstellungen', __('Einstellungen'), 'prefs', $user && \Core\AdminPages::hasSettings()],
+    ['/admin/statistiken', __('Statistiken'), 'stats', $user && \Core\AdminPages::hasStats()],
     ['/admin/design', __('Design'), 'design', $user && \Core\Features::on('design') && can('design.edit')],
     // Block-Designer (Core\Blocks\Custom): eigene Blöcke für die Redaktion
     ['/admin/blocks', __('Blöcke'), 'blocks', $user && \Core\Features::on('blocks.custom') && can('blocks.build')],
@@ -39,13 +42,15 @@ $adminNav = array_values(array_filter([
     // Weiterleitungen und 404-Protokoll (Core\Redirects)
     ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', $user && \Core\Features::on('redirects') && can('redirects.manage')],
     ['/admin/users', __('Benutzer & Rollen'), 'users', $user && can('users.manage')],
-    // Chat-Einstellungen: Ein/Aus (Netzwerk/Integratoren), Kanäle (chat.manage)
-    ['/admin/chat/einstellungen', __('Chat'), 'chatcfg', $user && \Core\Chat\Chat::settingsVisible()],
-    ['/admin/api-tokens', __('API & MCP'), 'api', $user && can('api.manage')],
-    // Erweiterungen mit Platz „admin“ (Werkzeuge, Einstellungen – z. B. Video-Werkzeuge, KLXM Check)
-    ...($user ? \Core\Extensions::adminNav('admin') : []),
+    // Chat-Einstellungen und API & MCP: reine Einstellungen → Sammelseite „Einstellungen“ (Core\AdminPages::core)
+    // Werkzeuge der Erweiterungen mit Platz „admin“ (z. B. Video-Werkzeuge)
+    ...($user ? \Core\AdminPages::nav('admin') : []),
 ], fn($n) => $n[3]));
 $section = explode('/', $view)[0];
+// Seite einer Sammelseite (Einstellungen/Statistiken, Core\AdminPages)? Dann ist deren Menüpunkt der aktuelle
+$hubKind = $user && app()->request ? (\Core\AdminPages::match(app()->request->path)['kind'] ?? '') : '';
+$hubKind = in_array($hubKind, ['settings', 'stats'], true) ? $hubKind : '';
+$isCur = fn(string $key) => $hubKind !== '' ? ($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats') : $section === $key;
 $newReq = 0;
 foreach ($inboxes as $ib) $newReq += \Core\Data\Inbox::count($ib, 'neu');
 [$chatN, $chatAt] = $user ? \Core\Chat\Chat::navCount() : [0, 0];   // Chat: ungelesen + Erwähnungen (live: resources/js/userchat.js)
@@ -172,7 +177,7 @@ if ($user && ($req = app()->request)) {
   <nav id="adm-mainnav" aria-label="<?= e(__('Verwaltung')) ?>">
     <ul>
       <?php foreach ($nav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); // Symbol aus dem Sprite; ohne (KLXM AI) → CSS-Maske über data-ico ?>
-      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $section === $key ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts'): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>" data-drafts-badge<?= $draftsN ? '' : ' hidden' ?>><span data-n><?= $draftsN ?></span><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
+      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $isCur($key) ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts'): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>" data-drafts-badge<?= $draftsN ? '' : ' hidden' ?>><span data-n><?= $draftsN ?></span><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
       </li>
       <?php endforeach; ?>
     </ul>
@@ -180,7 +185,7 @@ if ($user && ($req = app()->request)) {
     <p class="adm-side__label"><?= e(__('Administration')) ?></p>
     <ul>
       <?php foreach ($adminNav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); ?>
-      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $section === $key ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span></a></li>
+      <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $isCur($key) ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span></a></li>
       <?php endforeach; ?>
     </ul>
     <?php endif; ?>

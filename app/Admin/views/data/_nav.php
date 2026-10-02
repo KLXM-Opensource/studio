@@ -35,6 +35,8 @@ $ac = fn(bool $on, string $v = 'page') => $on ? ' aria-current="' . $v . '"' : '
               $subs[] = [url($base . '/display'), __('Anzeige auf dieser Website'), $cur === 'display'];
           }
           if ($schema && \Core\Data\Shared::canSchema($t)) $subs[] = [url($base . '/schema'), __('Felder & Einstellungen'), $cur === 'schema'];
+          // Einstellungsseiten von Funktionen/Erweiterungen zu dieser Tabelle (Core\AdminPages, 'table' => …), z. B. Glossar
+          foreach (\Core\AdminPages::forTable($t['handle']) as $tp) $subs[] = [url($tp['href']), $tp['label'], $cur === 'page:' . $tp['id']];
       }
       $tpl = $on && $schema && $t['settings']['route'] !== '';
       // Nur ein Unterpunkt (z. B. „Liste“): kein eigenes Untermenü, die Tabelle selbst ist die Seite

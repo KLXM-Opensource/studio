@@ -50,6 +50,9 @@ $statusCell = function (array $e) use ($t, $canPub, $extOrigin): string {
 <header class="adm-head dt-head">
   <h1><span aria-hidden="true" class="dt-h1icon"><?= icon($t['icon']) ?></span> <?= e($t['name']) ?><?php if ($shared = \Core\Data\Tables::isShared($t)): ?> <span class="dt-nav__shared"><?= e(__('geteilt')) ?></span><?php endif; ?></h1>
   <div class="adm-row">
+    <?php if ($tblPages = \Core\AdminPages::forTable($t['handle'])): // Einstellungsseiten dieser Tabelle (Core\AdminPages, 'table' => …), z. B. Glossar ?>
+    <span class="dt-head__pages"><?php foreach ($tblPages as $tp): ?><a class="adm-btn adm-btn--ghost" href="<?= e(url($tp['href'])) ?>"><?= \Core\Icons::render($tp['icon'], ['fallback' => 'gear-six']) ?> <?= e($tp['label']) ?></a><?php endforeach; ?></span>
+    <?php endif; ?>
     <a class="adm-btn adm-btn--primary" href="<?= e(url($base . '/new') . ($multi ? '?lang=' . $lang : '')) ?>">+ <?= e($t['singular']) ?></a>
   </div>
 </header>

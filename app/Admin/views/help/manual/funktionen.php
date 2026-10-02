@@ -17,6 +17,14 @@
     <li>„Fester Bestandteil“ kennzeichnet Erweiterungen, ohne die diese Website nicht funktioniert; sie lassen sich hier nicht abschalten.</li>
     <li>Erweiterungen sind eigene Pakete, die die Agentur per Composer installiert – z. B. <b>Entwurf teilen &amp; freigeben</b> (<code>klxm/studio-freigabe</code>): den Entwurf einer Seite per geheimem Link zeigen, Kommentare, Dateien und eine Freigabe einsammeln, ohne Konto für die Empfänger und ohne automatische Veröffentlichung.<?php if ($has('entwurf-teilen')): ?> Anleitung: <a href="#<?= e($anchor('entwurf-teilen')) ?>">Entwurf teilen und freigeben lassen</a>.<?php endif; ?> Eine aktive Erweiterung bringt ihr eigenes Kapitel in dieses Handbuch mit.</li>
   </ul>
+  <h3 id="einstellungen-sammelseite">Wo Seiten von Funktionen und Erweiterungen erscheinen</h3>
+  <p>Damit die Seitenleiste übersichtlich bleibt, gilt eine feste Ordnung:</p>
+  <ul>
+    <li><b>Inhalte und Werkzeuge</b> (z. B. Seiten, Daten, Anfragen, Buchungen, Video-Werkzeuge) stehen im Hauptmenü bzw. unter Administration.</li>
+    <li><b>Reine Einstellungen</b> stehen gesammelt unter <b>Administration → Einstellungen</b> – je Funktion oder Erweiterung eine Karte mit kurzer Beschreibung, nur die, die Ihre Rolle öffnen darf. Heute z. B. Glossar, Chat und API &amp; MCP. Gehört eine Einstellungsseite zu einer Datentabelle (Glossar), erscheint sie zusätzlich dort als Knopf und Unterpunkt.</li>
+    <li><b>Statistiken und Berichte</b> stehen gesammelt unter <b>Administration → Statistiken</b> – der Punkt erscheint erst, wenn eine Funktion oder Erweiterung welche mitbringt.</li>
+    <li>Alles bleibt über die Suche (<kbd>⌘K</kbd>) direkt erreichbar; Adressen und Rechte ändern sich nicht.</li>
+  </ul>
   <h3>„Per Konfiguration festgelegt“</h3>
   <p>Hat die Agentur eine Funktion oder Erweiterung in der Konfigurationsdatei der Website festgelegt, gilt dieser Wert und der Schalter ist gesperrt (der Hinweis nennt die Datei). Zum Freigeben entfernt die Agentur den Eintrag oder führt auf dem Server <code>php bin/console features:release</code> aus – danach steuern Sie den Schalter hier.</p>
   <h3>Netzwerk mit mehreren Websites</h3>

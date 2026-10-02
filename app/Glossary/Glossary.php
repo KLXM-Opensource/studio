@@ -19,7 +19,7 @@ use Core\Pages;
  *    Komma/Semikolon getrennt), kurz* (Klartext ≤ 240 Zeichen – Inhalt des Hinweisfensters), erklaerung (formatierter Text),
  *    kategorie, link (Mehr erfahren) + Status. Detailseiten unter /glossar/{slug} (Vorlage mit Block „Glossar“, Ansicht „Begriff“,
  *    DefinedTerm), Übersicht A–Z mit Buchstaben und Suchfilter (Block „Glossar“, DefinedTermSet). Anlegen: install() bzw.
- *    Verwaltung → Glossar → „Glossar einrichten“ oder php bin/console glossary:install.
+ *    Verwaltung → Einstellungen → Glossar (bzw. Daten → Glossar → Prüfen & Einstellungen) → „Glossar einrichten“ oder php bin/console glossary:install.
  *  - Markieren: page() läuft auf dem fertigen HTML jeder Seite (SiteController::render vor dem Seiten-Cache, respond() für Seiten
  *    von Erweiterungen) – Regeln in Annotator. Nur veröffentlichte Begriffe; angemeldete Redaktion (Recht data.edit) sieht
  *    Entwürfe mit Hinweis „Entwurf“. Nie im Bearbeiten-Modus, nie auf der eigenen Detailseite des Begriffs.

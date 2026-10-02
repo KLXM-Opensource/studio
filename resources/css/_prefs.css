@@ -1,0 +1,21 @@
+/* Sammelseiten „Einstellungen“ und „Statistiken“ (Core\AdminPages, app/Admin/views/prefs/*) und Knöpfe an der Datentabelle */
+.pf-top{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 22px}
+.pf-top .ico{width:16px;height:16px}
+.pf-group{margin:0 0 26px}
+.pf-group__h{margin:0 0 10px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--adm-t3)}
+.pf-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px;margin:0;padding:0;list-style:none}
+.pf-card{position:relative;display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 1px var(--adm-line)}
+.pf-card:hover{box-shadow:0 0 0 1px var(--adm-a)}
+.pf-card:focus-within{box-shadow:0 0 0 2px var(--adm-a)}
+.pf-card__ico{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:10px;background:var(--adm-fill,#EEF0F4);color:var(--adm-a)}
+.pf-card__ico .ico{width:22px;height:22px}
+.pf-card__body{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pf-card__a{font-weight:700;color:var(--adm-ink);text-decoration:none}
+.pf-card__a::after{content:"";position:absolute;inset:0;border-radius:10px}   /* ganze Karte klickbar */
+.pf-card__a:focus-visible{outline:none}
+.pf-card__d{font-size:14px;color:var(--adm-t2)}
+.pf-card__t{display:inline-flex;gap:5px;align-items:center;font-size:12px;color:var(--adm-t3)}
+.pf-card__t .ico{width:14px;height:14px}
+/* Datentabelle: Einstellungsseiten der Tabelle (z. B. Glossar) im Kopf */
+.dt-head__pages{display:flex;flex-wrap:wrap;gap:8px}
+.dt-head__pages .ico{width:16px;height:16px}

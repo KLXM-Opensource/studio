@@ -201,6 +201,9 @@ return function (Router $r): void {
     $r->get('/admin/data/{handle}', [Admin\DataController::class, 'entries']);
 
     // Funktionen & Erweiterungen der Website (Core\Features, Core\Extensions) – Recht system.features bzw. Netzwerk/Integratoren
+    // Sammelseiten (Core\AdminPages): Einstellungen der Funktionen & Erweiterungen, Statistiken
+    $r->get('/admin/einstellungen', [Admin\PrefsController::class, 'settings']);
+    $r->get('/admin/statistiken', [Admin\PrefsController::class, 'stats']);
     $r->get('/admin/funktionen', [Admin\FeaturesController::class, 'index']);
     $r->post('/admin/funktionen/funktion', [Admin\FeaturesController::class, 'feature']);
     $r->post('/admin/funktionen/erweiterung', [Admin\FeaturesController::class, 'extension']);

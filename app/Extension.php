@@ -8,7 +8,10 @@ namespace Core;
  *
  *   $x->blocks(['termine' => [...Blockdefinition...]])    Blöcke (Renderer: {dir}/blocks/{typ}.php)
  *   $x->routes(fn(Router $r) => $r->get('/kalender.ics', …))  eigene Routen
- *   $x->nav('/admin/kalender', 'Kalender', 'calendar', 'calendar.edit')   Eintrag in der Verwaltung
+ *   $x->adminPage(['href' => '/admin/kalender', 'label' => 'Kalender', 'kind' => 'content', 'icon' => 'calendar', 'perm' => 'calendar.edit'])
+ *                                                                      Seite der Verwaltung; kind content|tool → Menü, settings → Sammelseite
+ *                                                                      „Einstellungen“ (+ 'table' => 'handle' an der Datentabelle), stats → „Statistiken“
+ *   $x->nav('/admin/kalender', 'Kalender', 'calendar', 'calendar.edit')   Kurzform (ohne Art veraltet: 'main' = content, 'admin' = tool)
  *   $x->permissions('Kalender', ['calendar.edit' => 'Termine pflegen'])   Rechte für Rollen
  *   $x->feature('calendar', 'Kalender', ['calendar.edit'])             je Website abschaltbar
  *   $x->proxy('wetter', [...])                                         externe Quelle über Core\Proxy
@@ -45,6 +48,8 @@ final class Extension
     /** Schlüssel der Funktionen, die diese Erweiterung angemeldet hat (feature()) */
     public array $featureKeys = [];
     public array $nav = [];
+    /** @var list<array> Seiten der Verwaltung (Core\AdminPages::normalize) */
+    public array $pages = [];
     public array $perms = [];
     public array $commands = [];
     /** @var list<callable(string, array): string> */
@@ -98,12 +103,35 @@ final class Extension
     }
 
     /**
-     * Eintrag in der Seitenleiste der Verwaltung. $place: 'main' = Hauptmenü (Arbeitsbereiche der Redaktion),
-     * 'admin' = Abschnitt „Administration“ (Werkzeuge, Einstellungen, Technik)
+     * Kurzform für adminPage(): Eintrag in der Verwaltung. $place: 'main' = Hauptmenü, 'admin' = Abschnitt „Administration“ –
+     * oder gleich die Art (Core\AdminPages): 'content' | 'tool' (Menü), 'settings' (Sammelseite „Einstellungen“), 'stats'
+     * („Statistiken“). $opts: weitere Angaben wie bei adminPage() (table, description, kind, place, visible …).
+     * Ohne Art (nur 'main'/'admin') ist der Aufruf veraltet: er bleibt an seinem Platz (main → content, admin → tool).
      */
-    public function nav(string $href, string $label, string $icon = 'ext', ?string $perm = null, string $place = 'main'): self
+    public function nav(string $href, string $label, string $icon = 'ext', ?string $perm = null, string $place = 'main', array $opts = []): self
     {
-        $this->nav[] = [$href, $label, $icon, $perm, $place === 'admin' ? 'admin' : 'main'];
+        $def = ['href' => $href, 'label' => $label, 'icon' => $icon, 'perm' => $perm] + $opts;
+        if (in_array($place, AdminPages::KINDS, true)) $def['kind'] ??= $place;
+        else $def['place'] ??= $place;
+        return $this->adminPage($def);
+    }
+
+    /**
+     * Seite der Verwaltung anmelden (Core\AdminPages): ['href' => '/admin/…', 'label' => …, 'kind' => 'content'|'tool'|'settings'|'stats',
+     * 'icon' => Symbol, 'perm' => Recht, 'place' => 'main'|'admin' (content/tool), 'table' => Datentabelle (settings: auch dort als Knopf),
+     * 'description' => eine Zeile für die Karte, 'feature' => Funktion muss an sein, 'visible' => fn(): bool].
+     * Die Route meldet die Erweiterung selbst mit routes() an – Adresse und Rechteprüfung der Route bleiben ihre Sache.
+     */
+    public function adminPage(array $def): self
+    {
+        $p = AdminPages::normalize($def, 'ext:' . $this->name, (string) ($this->manifest['label'] ?? $this->name));
+        if (!$p) {
+            error_log('[Erweiterung ' . $this->name . '] adminPage: ungültige Angaben (href/label)');
+            return $this;
+        }
+        $this->pages[] = $p;
+        // Rückwärtskompatibel: [href, label, icon, perm, place] (Extensions::contributions, ältere Aufrufer)
+        $this->nav[] = [$p['href'], $p['label'], $p['icon'], $p['perm'], $p['place'], $p['kind']];
         return $this;
     }
 

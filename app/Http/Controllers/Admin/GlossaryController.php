@@ -40,7 +40,10 @@ final class GlossaryController extends AdminController
         $occ = $t ? Glossary::occurrences(isset($r->query['neu'])) : [];
         $import = app()->session->get('_glossary_import');
         app()->session->forget('_glossary_import');
-        return $this->view('glossary/index', ['t' => $t, 'terms' => $terms, 'checks' => $t ? Glossary::checks($terms) : [], 'occ' => $occ,
+        // Einstellungsseite der Tabelle „glossar“ (Core\AdminPages): Bereichsnavigation „Daten“ mit der Tabelle geöffnet
+        $drill = can('data.schema') || ($t && can('data.edit', $t['handle']))
+            ? \Core\Theme::capture(ROOT . '/app/Admin/views/data/_nav.php', ['cur' => 'page:glossary', 'active' => $t]) : '';
+        return $this->view('glossary/index', ['drill' => $drill, 'drillTitle' => __('Daten'), 't' => $t, 'terms' => $terms, 'checks' => $t ? Glossary::checks($terms) : [], 'occ' => $occ,
             'settings' => Glossary::settings(), 'import' => $import, 'ai' => Glossary::aiAvailable(), 'overview' => Glossary::overviewUrl()]);
     }
 

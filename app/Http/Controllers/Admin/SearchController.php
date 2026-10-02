@@ -64,8 +64,12 @@ final class SearchController extends AdminController
             array_push($actions,
                 [__('Grundeinstellungen'), __('E-Mail, Spamschutz, App-Icon'), '/admin/system', 'gear', 'system einstellungen mail smtp spam icon favicon pwa'],
                 [__('Neue Datentabelle'), __('Eigenen Inhaltstyp anlegen'), '/admin/data/new', 'table', 'tabelle collection daten neu'],
-                [__('Benutzer'), __('Zugänge verwalten'), '/admin/users', 'user', 'benutzer nutzer zugang passwort'],
-                [__('API & MCP'), __('Tokens für Schnittstellen'), '/admin/api-tokens', 'key', 'api mcp token ki']);
+                [__('Benutzer'), __('Zugänge verwalten'), '/admin/users', 'user', 'benutzer nutzer zugang passwort']);
+        }
+        // Einstellungs- und Statistikseiten (Core\AdminPages) stehen nicht im Menü – über die Suche bleiben sie direkt erreichbar
+        foreach (\Core\AdminPages::ofKind('settings', 'stats') as $ap) {
+            $actions[] = [$ap['label'], $ap['description'] !== '' ? $ap['description'] : ($ap['kind'] === 'stats' ? __('Statistiken') : __('Einstellungen')),
+                $ap['href'], $ap['icon'], ($ap['kind'] === 'stats' ? 'statistik bericht ' : 'einstellungen konfiguration ') . $ap['description'] . ' ' . $ap['href']];
         }
         $items = [];
         foreach ($actions as [$t, $sub, $href, $icon, $kw]) {

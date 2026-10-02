@@ -1,6 +1,6 @@
 <?php
 /**
- * Verwaltung → Glossar (Core\Glossary): einrichten, Begriffe mit Vorkommen und Hinweisen, schnell hinzufügen, Import/Export, Einstellungen.
+ * Verwaltung → Daten → Glossar → „Prüfen & Einstellungen“ bzw. Einstellungen → Glossar (Core\Glossary, Core\AdminPages kind settings): einrichten, Begriffe mit Vorkommen und Hinweisen, schnell hinzufügen, Import/Export, Einstellungen.
  * @var ?array $t  @var array $terms  @var array $checks  @var array $occ  @var array $settings  @var ?array $import  @var bool $ai  @var ?string $overview
  */
 use Core\Glossary\Glossary;

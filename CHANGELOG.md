@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Verwaltung: Seiten nach Art – Einstellungen und Statistiken gesammelt
+- **Arten:** Jede Seite, die eine Funktion oder Erweiterung in der Verwaltung anmeldet, hat eine Art (`Core\AdminPages`):
+  `content` und `tool` stehen im Menü (Hauptmenü bzw. Administration), `settings` gesammelt unter **Administration → Einstellungen**
+  (`/admin/einstellungen`, eine Karte je Seite mit Symbol und Beschreibung, nur was die Rolle öffnen darf), `stats` unter
+  **Administration → Statistiken** (`/admin/statistiken`, Menüpunkt nur wenn vorhanden). Mit `'table' => 'handle'` erscheint eine
+  Einstellungsseite zusätzlich an der Datentabelle (Knopf im Kopf der Liste, Unterpunkt in der Daten-Navigation).
+- **Umgezogen:** **Glossar** (nicht mehr im Hauptmenü → Daten → Glossar → „Prüfen & Einstellungen“ und Einstellungen; die Seite
+  zeigt die Daten-Navigation), **Chat-Einstellungen** und **API & MCP** (aus „Administration“ → Einstellungen). Adressen und Rechte
+  bleiben gleich; alle Einstellungsseiten sind über die Suche (⌘K) direkt erreichbar, „Funktionen & Erweiterungen“ nennt den Ort.
+- **Erweiterungen:** `$x->adminPage(['href', 'label', 'kind', 'icon', 'perm', 'table', 'tableLabel', 'description', 'feature', 'visible', 'place'])`;
+  `$x->nav(…, $kindOderPlatz, $angaben)` als Kurzform. `nav()` ohne Art ist **veraltet** und bleibt an seinem Platz (`main` → content,
+  `admin` → tool); `Extensions::adminNav()` ebenso (Layout: `AdminPages::nav()`).
+
 ### Linkauswahl: Ansicht „Daten“ und Glossar
 - **Daten:** Im Reiter „Seiten & Inhalte“ gibt es jetzt **Suche | Struktur | Daten**. „Daten“ ist ein kleiner Datenbrowser: Eine
   Auswahl listet alle verlinkbaren Quellen (jede Inhaltstabelle mit URL-Basis und Detailseite, dazu „Glossar“ bei eingeschalteter

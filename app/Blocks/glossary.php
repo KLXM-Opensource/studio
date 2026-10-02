@@ -14,7 +14,7 @@ use Core\StructuredData;
 $wrap = app()->theme->def['container_class'] ?? 'wrap';
 $t = Glossary::table();
 if (!$t) {
-    if (is_editing()) echo '<div class="' . e($wrap) . '"><p class="glx-empty">' . e(__('Das Glossar ist noch nicht eingerichtet (Verwaltung → Glossar).')) . '</p></div>';
+    if (is_editing()) echo '<div class="' . e($wrap) . '"><p class="glx-empty">' . e(__('Das Glossar ist noch nicht eingerichtet (Verwaltung → Einstellungen → Glossar).')) . '</p></div>';
     return;
 }
 $ctx = app()->entry;
