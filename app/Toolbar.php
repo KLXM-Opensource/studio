@@ -131,7 +131,7 @@ final class Toolbar
         }
         // Erweiterungen (Extension::toolbar): Einträge im Menü „⋯“, Skripte nach der Leiste, Zusatz im Veröffentlichen-Dialog
         $b['ext'] = Extensions::toolbar($b);
-        // Werkzeuge beim Bearbeiten (Core\FrontendTools): nur im Bearbeiten-Modus, nur mit Recht – Module lädt erst der Klick
+        // Werkzeuge (Core\FrontendTools): Bearbeiten-Modus bzw. mit modes view auch beim Ansehen, nur mit Recht – Module lädt erst der Klick
         $b['tools'] = FrontendTools::forBar($b);
         if ($b['ext']['notes']) {
             $b['config']['texts']['publishBody'] = trim($b['config']['texts']['publishBody'] . "\n\n" . implode("\n", $b['ext']['notes']));

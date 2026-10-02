@@ -34,19 +34,26 @@ $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 
   <p>API: <code>AdminPages::register([...])</code> (Core), <code>all()</code>, <code>visible($p)</code>, <code>ofKind('settings', …)</code>, <code>nav('main'|'admin')</code>, <code>settings()</code> / <code>stats()</code> (gruppiert), <code>forTable($handle)</code>, <code>match($path)</code>. Selbsttest: <code>php bin/console extensions:selftest</code>.</p>
 
   <h3 id="erweiterungen-werkzeuge">Werkzeuge beim Bearbeiten auf der Website (<code>Core\FrontendTools</code>)</h3>
-  <p>Ein Werkzeug ist ein Knopf in der Werkzeugleiste (<code>placement =&gt; 'main'</code>, auf Telefonen im Menü „⋯“) oder ein Eintrag im Menü „⋯“ (<code>'more'</code>), optional mit Tastenkürzel. Es erscheint <b>nur angemeldet, nur im Bearbeiten-Modus</b> (Seiten-Editor inkl. Vorlage: <code>page</code>; Eintrag direkt im Text: <code>entry</code>, dort erst nach „Bearbeiten“) und nur mit Recht. Das ES-Modul lädt der Browser <b>erst beim ersten Öffnen</b> – Besucher laden nichts, die Redaktion beim Ansehen auch nicht.</p>
+  <p>Ein Werkzeug ist ein Knopf in der Werkzeugleiste (<code>placement =&gt; 'main'</code>, auf Telefonen im Menü „⋯“) oder ein Eintrag im Menü „⋯“ (<code>'more'</code>), optional mit Tastenkürzel. Es erscheint <b>nur angemeldet</b> und nur mit Recht – standardmäßig <b>nur im Bearbeiten-Modus</b> (Seiten-Editor inkl. Vorlage: <code>page</code>; Eintrag direkt im Text: <code>entry</code>, dort erst nach „Bearbeiten“). Mit <code>'view' =&gt; true</code> (bzw. <code>'view'</code> in <code>modes</code>) erscheint es zusätzlich beim <b>Ansehen</b> (Seite ohne <code>?edit=1</code>, auch Live-Fassung; Detailseite eines Eintrags vor „Bearbeiten“) – dort ist jeder Text der Seite markierbar. Das ES-Modul lädt der Browser <b>erst beim ersten Öffnen</b> – Besucher laden nie etwas.</p>
   <pre><code>$x-&gt;frontendTool([
     'id' =&gt; 'notiz', 'label' =&gt; 'Notiz', 'icon' =&gt; 'note-pencil', 'placement' =&gt; 'main', 'shortcut' =&gt; 'Alt+N',
     'hint' =&gt; 'Kurze Notiz an der Schreibmarke',             // kleine Zeile im Menü „⋯“
     'module' =&gt; 'js/notiz.mjs',                              // {dir}/assets/js/notiz.mjs → /assets/ext/{name}/js/notiz.mjs
     'perm' =&gt; 'pages.edit', 'feature' =&gt; 'notiz',             // optional 'table' (Recht je Tabelle), 'visible' =&gt; fn(array $bar): bool
-    'modes' =&gt; ['page', 'entry'],
+    'modes' =&gt; ['page', 'entry'],                      // Standard; 'view' =&gt; true = zusätzlich beim Ansehen
+    'view' =&gt; true, 'chip' =&gt; 'Als Notiz',             // optional: schwebender Knopf neben markiertem Text (nur Ansehen)
     'panel' =&gt; ['title' =&gt; 'Notizen', 'size' =&gt; 'narrow'],    // narrow | wide
     'endpoints' =&gt; ['list' =&gt; '/admin/api/notiz'],          // eigene Routen – prüfen Recht + CSRF bei JEDEM Aufruf
     'data' =&gt; fn(array $bar) =&gt; ['max' =&gt; 200],              // je Werkzeugleiste, frei für das Modul
     'texts' =&gt; ['insert' =&gt; __('Einfügen')],                 // übersetzte Texte (auf der Website gibt es kein Wörterbuch)
 ]);</code></pre>
-  <p><b>Quick-Glossar (Core, Referenz):</b> <code>Core\Glossary\QuickTool::definition()</code> liefert genau diese Angaben – <code>id</code> <code>glossary</code>, Kürzel <code>Alt+G</code>, <code>feature</code> <code>glossary</code>, <code>visible</code> = Tabelle eingerichtet und <code>data.edit</code> auf <code>glossar</code>, drei Endpunkte (<code>GlossaryController::api*</code>), Modul <code>resources/js/quick-glossary.mjs</code>.</p>
+  <p><b>Quick-Glossar (Core, Referenz):</b> <code>Core\Glossary\QuickTool::definition()</code> liefert genau diese Angaben – <code>id</code> <code>glossary</code>, Kürzel <code>Alt+G</code>, <code>feature</code> <code>glossary</code>, <code>visible</code> = Tabelle eingerichtet und <code>data.edit</code> auf <code>glossar</code>, <code>'view' =&gt; true</code> mit <code>chip</code> „Als Glossar-Begriff“, drei Endpunkte (<code>GlossaryController::api*</code>), Modul <code>resources/js/quick-glossary.mjs</code>.</p>
+  <table class="doc-table">
+    <tr><th>Modi</th><th>Wann</th><th>Hinweise</th></tr>
+    <tr><td><code>page</code></td><td>Seiten-Editor (<code>?edit=1</code>) und Vorlagen-Editor</td><td>Standard</td></tr>
+    <tr><td><code>entry</code></td><td>Detailseite eines Eintrags im Modus „Bearbeiten“ (Wechsel ohne Neuladen)</td><td>Standard</td></tr>
+    <tr><td><code>view</code></td><td>Ansehen: Seite ohne <code>?edit=1</code> (auch <code>?live=1</code>), Detailseite vor „Bearbeiten“</td><td>nur mit <code>'view' =&gt; true</code>; <code>ctx.mode</code> = <code>'view'</code>, <code>insertText</code>/<code>insertLink</code> ohne Wirkung (<code>false</code>), <code>selection()</code> = markierter Text der Seite. Auf Detailseiten bekommt ein Werkzeug nur eines Modus <code>data-bar-when</code> (die Werkzeugleiste blendet es beim Wechsel aus); offene Werkzeuge des anderen Modus schließen.</td></tr>
+  </table>
   <h4>Modul (JavaScript)</h4>
   <pre><code>// assets/js/notiz.mjs – ES-Modul, wird mit pnpm build gebaut
 export default {
@@ -66,12 +73,12 @@ export default {
   <table class="doc-table">
     <tr><th><code>ctx</code></th><th>Inhalt</th></tr>
     <tr><td><code>id</code>, <code>tool</code></td><td>Kennung und Angaben vom Server (<code>tool.data</code>, <code>tool.texts</code>, <code>tool.endpoints</code> als fertige Adressen, <code>tool.shortcut</code>).</td></tr>
-    <tr><td><code>page</code>, <code>entry</code>, <code>kind</code>, <code>mode</code>, <code>lang</code>, <code>csrf</code></td><td>Seite <code>{id, title, lang}</code> bzw. Eintrag <code>{table, id}</code>, Art der Werkzeugleiste (<code>page|entry|template</code>), Bearbeiten-Art (<code>page|entry</code>), Sprache, CSRF-Token.</td></tr>
+    <tr><td><code>page</code>, <code>entry</code>, <code>kind</code>, <code>mode</code>, <code>editKind</code>, <code>lang</code>, <code>csrf</code></td><td>Seite <code>{id, title, lang}</code> bzw. Eintrag <code>{table, id}</code>, Art der Werkzeugleiste (<code>page|entry|template</code>), <b>aktueller</b> Modus <code>'view'|'edit'</code> (Getter – auf Detailseiten wechselt er ohne Neuladen, Ereignis <code>cms:mode-change</code>), Bearbeiten-Art (<code>page|entry|null</code>), Sprache, CSRF-Token.</td></tr>
     <tr><td><code>panel</code></td><td><code>{ el, body, setTitle(t), close(), focus() }</code> – Seitenleiste in der Shadow-DOM-Ebene (<code>#cms-layer-host</code>, <code>role="dialog"</code>, nicht modal). Stile: <code>admin.shadow.css</code> + <code>editor.shadow.css</code> (Klassen <code>adm-btn</code>, <code>f</code>, <code>f-help</code> …); Kit-CSS wirkt nicht hinein.</td></tr>
     <tr><td><code>t(key, params)</code></td><td>Text aus <code>tool.texts</code> (sonst gemeinsame Texte), Platzhalter <code>{name}</code>.</td></tr>
     <tr><td><code>fetch(url, { method, json, query })</code></td><td>JSON-Anfrage mit <code>X-CSRF-Token</code> und Sitzung; wirft bei Fehler (<code>error.status</code>, <code>error.data</code>).</td></tr>
-    <tr><td><code>selection()</code></td><td>Gemerkte Stelle im zuletzt bearbeiteten Text: <code>{ editable, range, text, rich }</code> oder <code>null</code> – bleibt erhalten, während die Seitenleiste den Fokus hat.</td></tr>
-    <tr><td><code>insertText(text)</code>, <code>insertLink({ href, ref, label, title, newTab })</code></td><td>An der gemerkten Schreibmarke einfügen bzw. den markierten Text verlinken (gleiche Logik wie die Linkauswahl, <code>Rich.insertLink</code>; stabile Verweise <code>page:ID</code>, <code>entry:{tabelle}:{id}</code>, <code>media:{id}</code> in <code>data-link</code>). Felder ohne Links bekommen nur den Text. Ergebnis <code>'link'|'text'|false</code> (kein Text aktiv). Löst <code>input</code> aus – der Editor merkt die Änderung.</td></tr>
+    <tr><td><code>selection()</code></td><td>Bearbeiten: gemerkte Stelle im zuletzt bearbeiteten Text <code>{ editable, range, text, rich }</code>. Ansehen: markierter Text irgendwo auf der Seite (außerhalb der CMS-Oberfläche) <code>{ editable: null, range, text, rich: false, view: true }</code> – gemerkt, <b>bevor</b> der Fokus in die Seitenleiste wechselt (Knopf, Kürzel, <code>chip</code>); ein Klick in die Seite beginnt neu. Sonst <code>null</code>.</td></tr>
+    <tr><td><code>insertText(text)</code>, <code>insertLink({ href, ref, label, title, newTab })</code></td><td>Nur beim Bearbeiten (beim Ansehen ohne Wirkung, Ergebnis <code>false</code>). An der gemerkten Schreibmarke einfügen bzw. den markierten Text verlinken (gleiche Logik wie die Linkauswahl, <code>Rich.insertLink</code>; stabile Verweise <code>page:ID</code>, <code>entry:{tabelle}:{id}</code>, <code>media:{id}</code> in <code>data-link</code>). Felder ohne Links bekommen nur den Text. Ergebnis <code>'link'|'text'|false</code> (kein Text aktiv). Löst <code>input</code> aus – der Editor merkt die Änderung.</td></tr>
     <tr><td><code>focusText()</code>, <code>toast(msg, kind)</code>, <code>announce(msg)</code>, <code>on(event, fn)</code>, <code>close()</code></td><td>Zurück an die Schreibmarke, kurze Meldung (<code>ok|error</code>), Meldung für Screenreader (Live-Region der Werkzeugleiste), Ereignis am <code>document</code> abonnieren (bei <code>unmount</code> automatisch abgemeldet), schließen.</td></tr>
   </table>
   <p><b>Tastatur und Fokus:</b> Öffnen per Knopf oder Kürzel; der Fokus geht in die Seitenleiste (<code>[autofocus]</code>, sonst erstes Feld). <kbd>Esc</kbd> schließt und bringt den Fokus zurück an die Schreibmarke bzw. zum Knopf. Das Kürzel springt zwischen Text und offener Seitenleiste. Tasten in der Seitenleiste bleiben dort: Der Core hält sie von Editor.js und den Kürzeln der Seite fern (das echte Ereignis endet am <code>window</code>, eine nicht „composed“ Kopie erreicht das Ziel; Standardaktionen wie Tippen und Tab bleiben).</p>
@@ -87,6 +94,7 @@ export default {
     <tr><td><code>cms:published</code></td><td>wie <code>cms:saved</code></td><td>nach dem Veröffentlichen</td></tr>
     <tr><td><code>cms:status-changed</code></td><td><code>{ kind, status: 'published'|'offline'|'draft', via?, id?, page?, entry? }</code></td><td>Online/Offline über den Status-Chip, Veröffentlichen, Eintrag als Entwurf</td></tr>
     <tr><td><code>cms:tool-open</code>, <code>cms:tool-close</code></td><td><code>{ id }</code></td><td>Werkzeug geöffnet/geschlossen</td></tr>
+    <tr><td><code>cms:mode-change</code></td><td><code>{ mode: 'view'|'edit'|'template' }</code></td><td>Modus der Werkzeugleiste gewechselt (Detailseite: Ansehen ↔ Bearbeiten ohne Neuladen)</td></tr>
   </table>
   <pre><code>// Beispiel: Veröffentlichen nur mit Alt-Text an allen Bildern
 document.addEventListener('cms:before-save', e =&gt; {
@@ -119,7 +127,7 @@ document.addEventListener('cms:before-save', e =&gt; {
   <h3 id="erweiterungen-sicherheit">Sicherheit</h3>
   <ul>
     <li><b>Server prüft immer:</b> Jeder Endpunkt eines Werkzeugs ruft <code>AdminController::auth()</code> (Anmeldung, bei POST CSRF über <code>X-CSRF-Token</code>) und prüft das Recht selbst – die Angaben <code>perm</code>/<code>visible</code> steuern nur die Anzeige.</li>
-    <li><b>Keine Besucher:</b> Werkzeugleiste, Konfiguration (<code>#cms-tools</code>) und Module gibt es nur angemeldet und nur im Bearbeiten-Modus; Seiten im Seiten-Cache enthalten sie nie.</li>
+    <li><b>Keine Besucher:</b> Werkzeugleiste, Konfiguration (<code>#cms-tools</code>), schwebender Knopf und Module gibt es nur angemeldet (Bearbeiten bzw. mit <code>view</code> auch Ansehen); Seiten im Seiten-Cache enthalten sie nie.</li>
     <li><b>Nur eigene Dateien:</b> Module von Erweiterungen kommen aus ihrem <code>assets</code>-Ordner (kein <code>..</code>, keine fremde Domain, CSP <code>'self'</code>); Endpunkte nur als Pfade dieser Installation.</li>
     <li><b>Isoliert:</b> Oberflächen in der Shadow-DOM-Ebene – kein Kit-CSS hinein, kein Werkzeug-CSS hinaus. Eigene Stile: Klassen der Verwaltung nutzen oder ein eigenes Stylesheet per <code>&lt;link&gt;</code> in <code>ctx.panel.el</code> anhängen (keine Inline-Styles, CSP).</li>
   </ul>

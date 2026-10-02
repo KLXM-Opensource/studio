@@ -32,7 +32,9 @@ final class Annotator
     private const SKIP_TAGS = ['a', 'button', 'label', 'summary', 'legend', 'select', 'option', 'textarea', 'input', 'kbd', 'samp', 'var',
         'abbr', 'dfn', 'nav', 'dialog', 'time', 'output', 'meter', 'progress', 'map', 'canvas', 'audio', 'video', 'picture', 'title'];
     /** Bereiche, die ungelesen übernommen werden (Rohtext oder Code) */
-    private const RAW = '~(<(script|style|textarea|template|svg|math|noscript|iframe|object|select|pre|code|head)\b[^>]*>.*?</\2\s*>|<!--.*?-->)~is';
+    // Rohtext-Bereiche und Kommentare; (?|…) hält die Gruppen gleich (Kommentar: Gruppe 2 leer) – sonst verschob ein Kommentar die
+    // Teile von preg_split und der Text danach galt als Rohtext (z. B. Kommentare der Fragmente im Debug-Modus: keine Markierung)
+    private const RAW = '~(?|(<(script|style|textarea|template|svg|math|noscript|iframe|object|select|pre|code|head)\b[^>]*>.*?</\2\s*>)|(<!--.*?-->)())~is';
     /** Klassen versteckter bzw. technischer Bereiche */
     private const SKIP_CLASSES = ['gl', 'gl-pop', 'sr-only', 'visually-hidden', 'screen-reader-text', 'sr-text', 'cms-note', 'skip-link', 'notranslate'];
     /** Klassen von Etiketten (Dachzeile, Schlagwort, Badge, Chip) – Endung des Klassennamens */

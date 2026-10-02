@@ -24,6 +24,13 @@ $item = function (string $label, string $ico, ?string $href = null, string $extr
     return $href !== null ? '<a href="' . e($href) . '"' . $attrs . '>' . $inner . '</a>' : '<button type="button"' . $attrs . '>' . $inner . '</button>';
 };
 $sep = '<div class="cms-menu__sep" role="separator"></div>';
+// Werkzeuge (Core\FrontendTools): auf Detailseiten wechselt „Ansehen ↔ Bearbeiten“ ohne Neuladen – Werkzeuge nur eines Modus
+// bekommen data-bar-when (_bar.js setMode), Werkzeuge für beide Modi bleiben immer sichtbar
+$toolWhen = function (array $tl) use ($kind, $edit): string {
+    if ($kind !== 'entry' || ($tl['when'] ?? 'edit') === 'both') return '';
+    $w = $tl['when'] === 'view' ? 'view' : 'edit';
+    return ' data-bar-when="' . $w . '"' . (($w === 'edit') === $edit ? '' : ' hidden');
+};
 ?>
 <div class="cms-bar cms-bar--<?= e($kind) ?><?= $edit ? ' is-edit' : '' ?>" role="region" aria-label="<?= e(__('Redaktion')) ?>" data-bar="<?= json_attr($b['config']) ?>" data-mode="<?= e($mode) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>">
   <div class="cms-bar__ctx">
@@ -126,9 +133,9 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
     </span>
     <?php endif; ?>
 
-    <?php // Werkzeuge beim Bearbeiten (Core\FrontendTools, resources/js/_tools.js): Knöpfe „main“ – Eintrag: erst im Modus „Bearbeiten“
+    <?php // Werkzeuge (Core\FrontendTools, resources/js/_tools.js): Knöpfe „main“ – Eintrag: je nach Modus des Werkzeugs ($toolWhen)
     foreach ($b['tools'] as $tl): if ($tl['placement'] !== 'main') continue; $sc = $tl['shortcut']; ?>
-    <button type="button" class="cms-ibtn cms-bar__tool" data-cms-tool="<?= e($tl['id']) ?>" aria-label="<?= e($tl['label']) ?>" title="<?= e($tl['label'] . ($sc ? ' (' . $sc['label'] . ')' : '')) ?>" aria-haspopup="dialog" aria-expanded="false"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $kind === 'entry' ? ' data-bar-when="edit"' . ($edit ? '' : ' hidden') : '' ?>><?= icon($tl['icon']) ?></button>
+    <button type="button" class="cms-ibtn cms-bar__tool" data-cms-tool="<?= e($tl['id']) ?>" aria-label="<?= e($tl['label']) ?>" title="<?= e($tl['label'] . ($sc ? ' (' . $sc['label'] . ')' : '')) ?>" aria-haspopup="dialog" aria-expanded="false"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $toolWhen($tl) ?>><?= icon($tl['icon']) ?></button>
     <?php endforeach; ?>
     <button type="button" class="cms-ibtn cms-bar__search" data-spotlight aria-label="<?= e(__('Suchen')) ?>" title="<?= e(__('Suchen (⌘K / Strg+K)')) ?>" aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?></button>
 
@@ -170,7 +177,7 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
         <?= $sep ?>
         <?php if ($kind !== 'page' && $b['canTable'] && !$b['foreign']): ?><?= $item(e(__('In der Verwaltung öffnen')), 'arrow-square-out', $b['adminUrl']) ?><?php endif; ?>
         <?php foreach ($b['tools'] as $tl): // Werkzeuge (Core\FrontendTools): „more“ immer hier, „main“ nur auf Telefonen (Knopf ist dort ausgeblendet)
-          $sc = $tl['shortcut']; $when = $kind === 'entry' ? ' data-bar-when="edit"' . ($edit ? '' : ' hidden') : ''; ?>
+          $sc = $tl['shortcut']; $when = $toolWhen($tl); ?>
           <button type="button" role="menuitem" class="cms-menu__item<?= $tl['placement'] === 'main' ? ' cms-menu--phone' : '' ?>" tabindex="-1" data-cms-tool="<?= e($tl['id']) ?>" aria-haspopup="dialog"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $when ?>><span class="cms-menu__ico" aria-hidden="true"><?= icon($tl['icon']) ?></span><span class="cms-menu__label"><?= e($tl['label']) ?><?php if ($tl['hint'] !== ''): ?><small><?= e($tl['hint']) ?></small><?php endif; ?></span><?php if ($sc): ?><kbd><?= e($sc['label']) ?></kbd><?php endif; ?></button>
         <?php endforeach; ?>
         <?php foreach ($b['ext']['items'] ?? [] as $xi): // Erweiterungen (Extension::toolbar) ?>

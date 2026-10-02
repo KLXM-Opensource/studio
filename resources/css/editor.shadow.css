@@ -403,6 +403,14 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 }
 @media (prefers-reduced-motion:no-preference){.cms-tpanel:not([hidden]){animation:cms-tpanel .16s ease-out}@keyframes cms-tpanel{from{opacity:0;transform:translateY(6px)}}}
 
+/* Ansehen: schwebender Knopf neben markiertem Text (Werkzeuge mit chip, _tools.js) */
+.cms-selchip{position:fixed;z-index:5;display:inline-flex;align-items:center;gap:6px;min-height:34px;margin:0;padding:0 8px 0 10px;border:0;border-radius:999px;background:#1E2840;color:#fff;font:600 13px/1 var(--adm-font,Lato,"Segoe UI",system-ui,sans-serif);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 8px 24px rgba(0,0,0,.28);cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none}
+.cms-selchip[hidden]{display:none}
+.cms-selchip .ico{width:16px;height:16px}
+.cms-selchip kbd{padding:1px 5px;border-radius:5px;background:rgba(255,255,255,.16);font:600 11px var(--adm-font,system-ui)}
+.cms-selchip:hover{background:#2C3A5C}
+@media (prefers-reduced-motion:no-preference){.cms-selchip:not([hidden]){animation:cms-selchip .12s ease-out}@keyframes cms-selchip{from{opacity:0;transform:translateY(3px)}}}
+
 /* Quick-Glossar (resources/js/quick-glossary.mjs) */
 .qg-ctx{margin:0 0 10px;padding:7px 10px;border-radius:8px;background:var(--adm-fill,#EEF0F4);font-size:13px;color:var(--adm-t2,#3F4A47)}
 .qg-ctx:empty{display:none}
@@ -438,6 +446,15 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .qg-note{font-size:13px;color:var(--adm-t3,#5A6461)}
 .qg-actions{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 0}
 .qg-done{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--adm-ok-bg,#E6F2EE)}
+.qg-done p{margin:0 0 8px}
+.qg-done .qg-actions{margin:0}
+.qg-dupe{margin:6px 0 0;font-size:13px;color:var(--adm-t3,#5A6461)}
+.qg-dupe:empty{display:none}
+.qg-dupe b{color:var(--adm-t2,#3F4A47)}
+.qg-dupe .qg-linkbtn{margin-left:4px}
+.qg-auto{margin:0 0 12px;padding:7px 10px;border-radius:8px;background:var(--adm-fill,#EEF0F4);font-size:13px;color:var(--adm-t2,#3F4A47)}
+.qg-viewnote{margin:10px 0 0;font-size:13px;color:var(--adm-t3,#5A6461)}
+.qg-viewnote a{color:var(--adm-a-ink,#314164)}
 .qg-done p{margin:0 0 8px}
 .qg-done .ico{width:16px;height:16px;vertical-align:-3px}
 .qg-intro{margin:0 0 6px;font-size:13px;color:var(--adm-t2,#3F4A47)}

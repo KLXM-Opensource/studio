@@ -164,7 +164,11 @@ final class ExtensionsSelfTest
         $x->frontendTool(['id' => 'qa-pfad', 'label' => 'QA', 'module' => '../geheim.mjs']);
         $x->frontendTool(['id' => 'qa-fremd', 'label' => 'QA', 'module' => '//evil.example/x.mjs']);
         $x->frontendTool(['id' => 'Böse ID', 'label' => 'QA', 'module' => 'js/x.mjs']);
-        self::eq('Werkzeug: nur gültige Angaben angemeldet (kein ../, keine fremde Domain, gültige id)', array_column($x->frontendTools, 'id'), ['qa-ok']);
+        $x->frontendTool(['id' => 'qa-view', 'label' => 'QA Ansehen', 'module' => 'js/v.mjs', 'perm' => 'pages.edit', 'view' => true, 'chip' => 'Als QA']);
+        $x->frontendTool(['id' => 'qa-nurview', 'label' => 'QA nur Ansehen', 'module' => 'js/v.mjs', 'perm' => 'pages.edit', 'modes' => ['view', 'quatsch']]);
+        self::eq('Werkzeug: nur gültige Angaben angemeldet (kein ../, keine fremde Domain, gültige id)', array_column($x->frontendTools, 'id'), ['qa-ok', 'qa-view', 'qa-nurview']);
+        self::eq('Modi: Standard nur Bearbeiten, view => true ergänzt Ansehen, nur gültige Modi', array_column($x->frontendTools, 'modes'), [['page', 'entry'], ['page', 'entry', 'view'], ['view']]);
+        self::eq('chip nur mit Ansehen', [$x->frontendTools[1]['chip'], FrontendTools::normalize(['id' => 'qa', 'label' => 'QA', 'module' => '/x.mjs', 'chip' => 'X'])['chip'] ?? null], ['Als QA', '']);
         self::eq('Werkzeug: Modul aus assets der Erweiterung', str_contains((string) ($x->frontendTools[0]['module'] ?? ''), '/ext/qa_selftest/js/qa.mjs'), true);
         self::eq('Werkzeug: nur eigene Endpunkte', array_keys($x->frontendTools[0]['endpoints'] ?? []), ['go']);
         self::eq('Kern: Modul nur ab „/“', FrontendTools::normalize(['id' => 'qa', 'label' => 'QA', 'module' => 'https://cdn.example/x.mjs'], 'core'), null);
@@ -180,7 +184,24 @@ final class ExtensionsSelfTest
         self::eq('Modus: Eintrag nur wenn bearbeitbar', [FrontendTools::mode(['kind' => 'entry', 'entryEditable' => true] + $bar), FrontendTools::mode(['kind' => 'entry', 'entryEditable' => false] + $bar)], ['entry', null]);
         $ids = array_column(FrontendTools::forBar($bar), 'id');
         self::eq('Werkzeuge: mit Recht im Bearbeiten-Modus', in_array('qa-ok', $ids, true), true);
-        self::eq('Werkzeuge: nicht beim Ansehen', array_column(FrontendTools::forBar(['editing' => false] + $bar), 'id'), []);
+        self::eq('Werkzeuge: mit view auch im Bearbeiten-Modus, nur Ansehen nicht', [in_array('qa-view', $ids, true), in_array('qa-nurview', $ids, true)], [true, false]);
+        $view = ['editing' => false] + $bar;
+        self::eq('Ansehen: nur Werkzeuge mit view', array_column(FrontendTools::forBar($view), 'id'), ['qa-view', 'qa-nurview']);
+        self::eq('Ansehen: viewing() Seite/Bearbeiten/Vorlage/Eintrag', [FrontendTools::viewing($view), FrontendTools::viewing($bar), FrontendTools::viewing(['kind' => 'template'] + $bar), FrontendTools::viewing(['kind' => 'entry'] + $bar)], [true, false, false, true]);
+        $tv = $x->frontendTools[1];
+        $te = $x->frontendTools[0];
+        self::eq('when(): Seite Ansehen/Bearbeiten', [FrontendTools::when($tv, $view), FrontendTools::when($tv, $bar), FrontendTools::when($te, $view), FrontendTools::when($te, $bar)], ['view', 'edit', null, 'edit']);
+        $eb = ['kind' => 'entry', 'entryEditable' => true] + $bar;
+        self::eq('when(): Eintrag (Wechsel ohne Neuladen)', [FrontendTools::when($tv, $eb), FrontendTools::when($te, $eb), FrontendTools::when($tv, ['entryEditable' => false] + $eb), FrontendTools::when($te, ['entryEditable' => false] + $eb)], ['both', 'edit', 'view', null]);
+        self::eq('Live-Fassung: Ansehen-Werkzeuge ja, Bearbeiten-Werkzeuge nein', array_column(FrontendTools::forBar(['live' => true] + $view), 'id'), ['qa-view', 'qa-nurview']);
+        $cv = FrontendTools::config($view, FrontendTools::forBar($view));
+        $ce = FrontendTools::config($bar, FrontendTools::forBar($bar));
+        self::eq('Konfiguration: mode view|edit, editKind', [$cv['mode'], $cv['editKind'], $ce['mode'], $ce['editKind'], FrontendTools::config(['kind' => 'template'] + $bar, [])['mode']], ['view', null, 'edit', 'page', 'edit']);
+        $one = array_values(array_filter(FrontendTools::forBar($view), fn($t) => $t['id'] === 'qa-view'))[0] ?? [];
+        self::eq('Konfiguration Ansehen: when + chip', [$one['when'] ?? null, $one['chip'] ?? null], ['view', 'Als QA']);
+        self::actAs(null);
+        self::eq('Ansehen: abgemeldet keine', FrontendTools::forBar($view), []);
+        self::actAs(['pages.edit']);
         $one = array_values(array_filter(FrontendTools::forBar($bar), fn($t) => $t['id'] === 'qa-ok'))[0] ?? [];
         self::eq('Konfiguration: Endpunkte als Adressen, keine Callables', [str_ends_with((string) ($one['endpoints']['go'] ?? ''), '/admin/api/qa'), json_encode($one) !== false], [true, true]);
         self::actAs(['media.upload']);
@@ -196,7 +217,12 @@ final class ExtensionsSelfTest
             self::eq('Quick-Glossar: Kürzel ⌥G, Platz main', [$qg['shortcut']['label'] ?? null, $qg['placement']], ['⌥G', 'main']);
             self::eq('Quick-Glossar: ohne data.publish kein Veröffentlichen', $qg['data']['publish'] ?? null, false);
             self::eq('Quick-Glossar: Endpunkte', array_keys($qg['endpoints']), ['search', 'create', 'page']);
+            $qv = array_values(array_filter(FrontendTools::forBar(['editing' => false] + $bar), fn($t) => $t['id'] === 'glossary'))[0] ?? null;
+            self::eq('Quick-Glossar: auch beim Ansehen, mit schwebendem Knopf', [$qv['when'] ?? null, ($qv['chip'] ?? '') !== ''], ['view', true]);
+            self::eq('Quick-Glossar: Ansehen ohne Seitenrecht kein Wechsel-Link', $qv['data']['editUrl'] ?? null, '');
         }
+        self::actAs(['data.edit'], ['andere_tabelle']);
+        self::eq('Quick-Glossar: Ansehen ohne Recht auf glossar nicht da', in_array('glossary', array_column(FrontendTools::forBar(['editing' => false] + $bar), 'id'), true), false);
         self::activate(null);
     }
 

@@ -5471,4 +5471,18 @@ return [
     '„{term}“ als neuen Begriff anlegen' => 'Create “{term}” as a new term',
     '„{term}“ angelegt und veröffentlicht.' => '“{term}” created and published.',
     '„{term}“ gibt es schon.' => '“{term}” already exists.',
+    // Quick-Glossar beim Ansehen (Werkzeuge mit modes view, Core\FrontendTools)
+    'Als Glossar-Begriff' => 'As glossary term',
+    'Als Entwurf sieht nur die angemeldete Redaktion die Markierung.' => 'As a draft, only logged-in editors see the marking.',
+    'Beim Ansehen nicht möglich – zum Einfügen in den Bearbeiten-Modus wechseln.' => 'Not possible while viewing – switch to edit mode to insert.',
+    'Die automatische Markierung ist ausgeschaltet – der Begriff steht im Glossar.' => 'Automatic marking is turned off – the term is in the glossary.',
+    'Gibt es schon?' => 'Already there?',
+    'Markiert: „{text}“ – unter „Neuer Begriff“ vorbelegt.' => 'Selected: “{text}” – prefilled under “New term”.',
+    'Noch kein ähnlicher Begriff.' => 'No similar term yet.',
+    'Seite neu laden' => 'Reload page',
+    'Text auf der Seite markieren und {key} drücken – er wird als neuer Begriff vorbelegt.' => 'Select text on the page and press {key} – it is prefilled as a new term.',
+    'Wird automatisch auf allen Seiten markiert, sobald veröffentlicht.' => 'Marked automatically on all pages once published.',
+    'Zum Verlinken in den Bearbeiten-Modus wechseln.' => 'Switch to edit mode to link terms.',
+    'Ähnlich:' => 'Similar:',
+    '„{term}“ in der Verwaltung öffnen' => 'Open “{term}” in the admin',
 ];

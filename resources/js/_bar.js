@@ -313,6 +313,7 @@ function isEditMode() { return mode !== 'view'; }
 
 /** Modus ohne Neuladen setzen (Eintrag: Ansehen ↔ Bearbeiten) */
 function setMode(m) {
+  const changed = m !== mode;
   mode = m;
   if (!bar) return;
   bar.dataset.mode = m;
@@ -327,6 +328,8 @@ function setMode(m) {
   d.documentElement.classList.toggle('cms-editing', m !== 'view');
   d.documentElement.classList.toggle('cms-has-actionbar', m !== 'view' && !!R.querySelector('.cms-bar__edit'));
   bottomBar();
+  // Werkzeuge (CMSAdmin.tools) und Erweiterungen: Modus gewechselt (Eintrag: Ansehen ↔ Bearbeiten ohne Neuladen)
+  if (changed) d.dispatchEvent(new CustomEvent('cms:mode-change', { detail: { mode: m } }));
 }
 let bbObs = null;
 function bottomBar() {

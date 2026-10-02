@@ -17,6 +17,8 @@ use Core\Lang;
  *    den markierten Text (wie die Linkauswahl).
  *  - „Neuer Begriff“: vorbelegt mit dem markierten Text; Entwurf – veröffentlicht nur mit Recht data.publish auf die Tabelle.
  *  - „Auf dieser Seite“: Begriffe, die die automatische Markierung (Annotator) auf der Seite kennzeichnen würde, mit Sprung.
+ *  - Auch beim Ansehen ('view' => true): dort ist JEDER Text der Seite markierbar (beim Bearbeiten nur die Textfelder) – Markierung
+ *    + ⌥G bzw. der schwebende Knopf „Als Glossar-Begriff“ (chip) öffnet „Neuer Begriff“ vorbelegt; „Einfügen“ gibt es nur beim Bearbeiten.
  * Endpunkte (GlossaryController::api*): Funktion „glossary“ an, Tabelle eingerichtet, Recht data.edit auf die Tabelle, CSRF bei POST.
  */
 final class QuickTool
@@ -30,6 +32,7 @@ final class QuickTool
         return [
             'id' => 'glossary', 'label' => __('Glossar'), 'icon' => 'book-open-text', 'module' => asset('js/quick-glossary.mjs'),
             'placement' => 'main', 'shortcut' => 'Alt+G', 'hint' => __('Begriffe suchen, verlinken und anlegen'),
+            'view' => true, 'chip' => __('Als Glossar-Begriff'),
             'feature' => Glossary::FEATURE,
             'visible' => fn(array $bar) => ($t = Glossary::table()) !== null && can('data.edit', $t['handle']),
             'panel' => ['title' => __('Quick-Glossar')],
@@ -53,6 +56,8 @@ final class QuickTool
             'self' => $self, 'shortMax' => Glossary::SHORT_MAX,
             'admin' => url('/admin/glossar'), 'tableUrl' => $t ? url('/admin/data/' . $t['handle']) : '',
             'mode' => Glossary::settings()['mode'],
+            // Ansehen: Wechsel in den Bearbeiten-Modus (Seite: ?edit=1; Eintrag: Umschalter in der Werkzeugleiste ohne Neuladen)
+            'editUrl' => ($bar['kind'] ?? '') === 'page' && !empty($bar['hasPage']) && !empty($bar['canEditPages']) ? (string) ($bar['pageEditUrl'] ?? '') : '',
         ];
     }
 
@@ -79,6 +84,16 @@ final class QuickTool
             'selected' => __('Markiert: „{text}“ – Einfügen verlinkt diesen Text.'), 'cursor' => __('Einfügen an der Schreibmarke in „{field}“.'), 'cursorAny' => __('Einfügen an der Schreibmarke im Text.'),
             'requiredTerm' => __('Bitte einen Begriff eingeben.'), 'requiredShort' => __('Bitte eine Kurz-Erklärung eingeben.'),
             'tooLong' => __('Höchstens {n} Zeichen.'), 'chars' => __('{n} von {max} Zeichen'),
+            // Ansehen
+            'viewCtx' => __('Text auf der Seite markieren und {key} drücken – er wird als neuer Begriff vorbelegt.'),
+            'viewSelected' => __('Markiert: „{text}“ – unter „Neuer Begriff“ vorbelegt.'),
+            'viewLink' => __('Zum Verlinken in den Bearbeiten-Modus wechseln.'), 'toEdit' => __('Bearbeiten'),
+            'open' => __('Öffnen'), 'openAria' => __('„{term}“ in der Verwaltung öffnen'),
+            'autoHint' => __('Wird automatisch auf allen Seiten markiert, sobald veröffentlicht.'),
+            'autoDraft' => __('Als Entwurf sieht nur die angemeldete Redaktion die Markierung.'),
+            'autoOff' => __('Die automatische Markierung ist ausgeschaltet – der Begriff steht im Glossar.'),
+            'reload' => __('Seite neu laden'),
+            'dupeQ' => __('Gibt es schon?'), 'dupeNone' => __('Noch kein ähnlicher Begriff.'), 'dupeSome' => __('Ähnlich:'),
         ];
     }
 

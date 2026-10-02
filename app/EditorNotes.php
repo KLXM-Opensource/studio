@@ -29,8 +29,11 @@ final class EditorNotes
     public const RX = '~(?<!`)\[#(?:[\s\x{00A0}]|&nbsp;)(.*?)#\](?!`)~su';
     /** Bereiche, in denen nichts ersetzt wird (Code-Beispiele; Formularfelder/Stile sind nie Inhalt) */
     private const KEEP = '~(<(code|pre|style|textarea)\b[^>]*>.*?</\2\s*>)~is';
-    /** Zusätzlich beim Hervorheben ausgenommen: Skripte (Editor-Daten!), Titel, Auswahllisten, SVG */
-    private const KEEP_EDIT = '~(<(code|pre|style|textarea|script|title|option|svg|template)\b[^>]*>.*?</\2\s*>|<!--.*?-->)~is';
+    /**
+     * Zusätzlich beim Hervorheben ausgenommen: Skripte (Editor-Daten!), Titel, Auswahllisten, SVG, Kommentare. (?|…) hält die Gruppen
+     * gleich (Kommentar: Gruppe 2 leer) – sonst verschob ein Kommentar die Teile von split() und zerstörte das Markup danach.
+     */
+    private const KEEP_EDIT = '~(?|(<(code|pre|style|textarea|script|title|option|svg|template)\b[^>]*>.*?</\2\s*>)|(<!--.*?-->)())~is';
     /** Schlüssel in Blockdaten, die keine Texte sind */
     private const SKIP_KEYS = ['_fx', '_fit', '_bind'];
 
@@ -200,6 +203,9 @@ final class EditorNotes
         $eq('Hinweis: escaped', str_contains(self::decorate('[# <img src=x onerror=alert(1)> & "q" #]'), '<img src=x onerror=alert(1)>'), true);   // Tag bleibt als Tag stehen (war schon im Inhalt), Notiztext escaped
         $eq('Hinweis: Text escaped', str_contains(self::badge('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;'), true);
         $eq('idempotent', self::decorate($dec), $dec);
+        $c = '<!-- fragment --><p>A</p><svg><path d="M1"/></svg><!-- x --><p>B [# n #]</p><script>{"t":"[# roh #]"}</script></body>';
+        $dc = self::decorate($c);
+        $eq('Hinweis: Kommentare zerstören das Markup nicht', [str_contains($dc, '</svg><!-- x --><p>B '), str_contains($dc, 'data-cms-note="n"'), str_contains($dc, '{"t":"[# roh #]"}'), str_ends_with($dc, '</body>'), substr_count($dc, 'svg')], [true, true, true, true, 2]);
         // Umstellung alter Marker (NotesConvert)
         foreach ([
             ['[bitte ergänzen: Datum]', '[# bitte ergänzen: Datum #]'],

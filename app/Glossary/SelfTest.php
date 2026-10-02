@@ -63,6 +63,7 @@ final class SelfTest
 
         // Grundregeln
         self::eq('einfach', $hits('<main><p>SPF und DNS prüfen.</p></main>'), ['SPF', 'DNS']);
+        self::eq('nach HTML-Kommentaren (Fragmente im Debug-Modus)', $hits('<!-- fragment header --><header>x</header><main><!-- a --><p>SPF <!-- b --> und DNS</p><script>SPF</script><p>TLS</p></main>'), ['SPF', 'DNS', 'TLS']);
         self::eq('erstes Vorkommen je Seite', $hits('<main><p>SPF, SPF</p><section><p>SPF</p></section></main>'), ['SPF']);
         self::eq('je Abschnitt', $hits('<main><section><p>SPF und SPF</p></section><section><p>SPF</p></section></main>', ['mode' => 'section']), ['SPF', 'SPF']);
         self::eq('Abkürzung: genaue Schreibweise', $hits('<main><p>spf und Spf</p></main>'), []);

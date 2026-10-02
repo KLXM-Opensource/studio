@@ -6,6 +6,23 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Quick-Glossar auch beim Ansehen: jeden Text als Begriff übernehmen
+- Im Bearbeiten-Modus lassen sich nur Textfelder markieren – beim **Ansehen** (angemeldet, Werkzeugleiste sichtbar) jetzt jeder
+  Text der Seite: markieren, dann <kbd>⌥G</kbd>, der Knopf „Glossar“ oder der schwebende Knopf **Als Glossar-Begriff** neben der
+  Markierung (nur Zeiger/Touch, nicht im Tab-Fluss – per Tastatur gilt <kbd>⌥G</kbd>; Markieren und Kopieren bleiben ungestört).
+  „Neuer Begriff“ ist vorbelegt und prüft sofort **Gibt es schon?** (gleich, Variante, ähnlich); Hinweis „Wird automatisch auf allen
+  Seiten markiert, sobald veröffentlicht“, nach dem Anlegen **Seite neu laden**. „Einfügen“ nur beim Bearbeiten – beim Ansehen
+  „Öffnen“ (Verwaltung) und „Zum Verlinken in den Bearbeiten-Modus wechseln“. „Auf dieser Seite“ zählt bereits markierte Begriffe mit.
+  Rechte unverändert (`data.edit`/`data.publish` auf „glossar“, Funktion „glossary“); Besucher bekommen nichts.
+- Schnittstelle `$x->frontendTool([...])`: `'view' => true` (bzw. `'view'` in `modes`) – Werkzeug auch beim Ansehen, Standard bleibt
+  nur Bearbeiten; `'chip' => 'Beschriftung'` für den schwebenden Knopf. `ctx.mode` ist jetzt `'view'|'edit'` (aktuell, Detailseiten
+  wechseln ohne Neuladen), die Bearbeiten-Art steht in `ctx.editKind`; beim Ansehen liefert `selection()` den markierten Text der
+  Seite, `insertText`/`insertLink` sind ohne Wirkung. Neues Ereignis `cms:mode-change`. `FrontendTools::viewing()`/`when()`,
+  `extensions:selftest` erweitert.
+- Behoben: HTML-Kommentare im Seiteninhalt (z. B. Fragment-Kommentare im Debug-Modus) brachten die Zerlegung von Glossar-Markierung
+  (`Annotator`) und Redaktionsnotizen (`EditorNotes::decorate`, Ansicht der angemeldeten Redaktion) durcheinander – danach wurde nichts
+  mehr markiert bzw. das Markup beschädigt. Selbsttests `glossary:selftest` und `notes:selftest` prüfen das.
+
 ### Karten und Kacheln: verlinkte Seite bzw. Eintrag direkt bearbeiten
 - Karten, die auf eine andere Seite oder einen Eintrag zeigen, haben für die angemeldete Redaktion oben rechts **✎ Bearbeiten**
   (bei Zeiger/Fokus, auf Touch-Geräten immer, unter 768 px nur das Symbol). Seite → Seiten-Editor (`?edit=1`), im Editor mit

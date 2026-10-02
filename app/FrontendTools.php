@@ -10,21 +10,26 @@ namespace Core;
  * (register) und Erweiterungen ($x->frontendTool([...])).
  *
  * Ein Werkzeug ist ein Knopf in der Werkzeugleiste (placement 'main') bzw. ein Eintrag im Menü „⋯“ ('more'), optional mit
- * Tastenkürzel. Erst beim ersten Öffnen lädt der Browser sein ES-Modul (module) und ruft mount(ctx) auf – Besucher und
- * Redaktion außerhalb des Bearbeitens laden nichts. Oberfläche: Seitenleiste in der Shadow-DOM-Ebene (CSS isoliert).
+ * Tastenkürzel. Erst beim ersten Öffnen lädt der Browser sein ES-Modul (module) und ruft mount(ctx) auf – Besucher laden nie
+ * etwas, die Redaktion nur für Werkzeuge des aktuellen Modus. Oberfläche: Seitenleiste in der Shadow-DOM-Ebene (CSS isoliert).
  * Verhalten im Browser: resources/js/_tools.js (CMSAdmin.tools), Ereignisse cms:* (Technik → Erweiterungen).
  *
  * Angaben: id (a–z, 0–9, -, _), label, icon (Symbolname), module ('js/x.mjs' im assets-Ordner der Erweiterung bzw. für den Core
  * eine fertige Adresse ab „/“), placement 'main'|'more', shortcut ('Alt+G', 'Alt+Shift+K' …), hint (kleine Zeile im Menü),
  * perm (Recht), table (Tabelle zum Recht, can($perm, $table)), feature (Funktion muss an sein), visible (fn(array $bar): bool),
- * modes (['page', 'entry'] – Seiten-Editor inkl. Vorlage bzw. Eintrag direkt im Text), panel (['title' => …, 'size' => 'narrow'|'wide']),
+ * modes (['page', 'entry'] – Seiten-Editor inkl. Vorlage bzw. Eintrag direkt im Text; 'view' = auch beim Ansehen, angemeldet),
+ * view (true = Kurzform für 'view' zusätzlich zu den Bearbeiten-Modi), chip (Beschriftung eines schwebenden Knopfs neben markiertem
+ * Text der Seite – nur beim Ansehen), panel (['title' => …, 'size' => 'narrow'|'wide']),
  * endpoints (['name' => '/admin/api/…'] → absolute Pfade), data (array oder fn(array $bar): array – frei für das Modul),
  * texts (übersetzte Texte für das Modul – auf der Website gibt es kein Wörterbuch der Verwaltung).
  * Rechte der Endpunkte prüft der Server bei JEDEM Aufruf selbst; die Angaben hier steuern nur die Anzeige.
  */
 final class FrontendTools
 {
+    /** Bearbeiten-Modi (Standard eines Werkzeugs) */
     public const MODES = ['page', 'entry'];
+    /** Alle Modi: zusätzlich 'view' = Ansehen (angemeldet, Werkzeugleiste sichtbar) – nur auf ausdrücklichen Wunsch */
+    public const ALL_MODES = ['page', 'entry', 'view'];
     /** @var array<string, array> Werkzeuge des Cores */
     private static array $core = [];
 
@@ -53,7 +58,9 @@ final class FrontendTools
         } elseif (!str_starts_with($module, '/') || str_starts_with($module, '//')) {
             return null;
         }
-        $modes = array_values(array_intersect((array) ($def['modes'] ?? self::MODES), self::MODES)) ?: self::MODES;
+        // Modi: Standard nur Bearbeiten; 'view' => true bzw. 'view' in modes = auch beim Ansehen
+        $modes = array_values(array_intersect((array) ($def['modes'] ?? self::MODES), self::ALL_MODES)) ?: self::MODES;
+        if (!empty($def['view']) && !in_array('view', $modes, true)) $modes[] = 'view';
         $endpoints = [];
         foreach ((array) ($def['endpoints'] ?? []) as $k => $v) {
             $v = (string) $v;
@@ -69,6 +76,7 @@ final class FrontendTools
             'feature' => isset($def['feature']) && $def['feature'] !== '' ? (string) $def['feature'] : null,
             'visible' => is_callable($def['visible'] ?? null) ? $def['visible'] : null,
             'modes' => $modes,
+            'chip' => in_array('view', $modes, true) ? trim((string) ($def['chip'] ?? '')) : '',
             'panel' => ['title' => trim((string) ($def['panel']['title'] ?? $label)), 'size' => ($def['panel']['size'] ?? '') === 'wide' ? 'wide' : 'narrow'],
             'endpoints' => $endpoints,
             'data' => $def['data'] ?? [],
@@ -146,16 +154,41 @@ final class FrontendTools
     }
 
     /**
-     * Werkzeuge für eine Werkzeugleiste (Core\Toolbar::context): nur angemeldet, nur in einem Bearbeiten-Modus, nur mit Recht.
-     * Ergebnis je Werkzeug: Angaben für das Markup und die JSON-Konfiguration (ohne Callables).
+     * Ansehen mit Werkzeugleiste? Seite ohne Bearbeiten (auch Live-Fassung) bzw. Detailseite eines Eintrags (dort wechselt
+     * „Ansehen ↔ Bearbeiten“ ohne Neuladen – beginnt immer mit „Ansehen“). Vorlage = Bearbeiten.
+     */
+    public static function viewing(array $bar): bool
+    {
+        $kind = $bar['kind'] ?? 'page';
+        if ($kind === 'entry') return true;
+        return $kind === 'page' && empty($bar['editing']);
+    }
+
+    /**
+     * Wann gilt ein Werkzeug in dieser Werkzeugleiste? 'edit' | 'view' | 'both' (Eintrag: Werkzeug für beide Modi) | null.
+     * Bearbeiten nur im passenden Bearbeiten-Modus (page|entry), Ansehen nur mit 'view' in modes.
+     */
+    public static function when(array $t, array $bar): ?string
+    {
+        $edit = self::mode($bar);
+        $inEdit = $edit !== null && in_array($edit, $t['modes'], true);
+        $inView = self::viewing($bar) && in_array('view', $t['modes'], true);
+        // Seite: entweder Ansehen ODER Bearbeiten (Wechsel lädt neu); Eintrag: beide in einer Seite möglich
+        if (($bar['kind'] ?? 'page') !== 'entry') return $inView ? 'view' : ($inEdit ? 'edit' : null);
+        return $inEdit && $inView ? 'both' : ($inEdit ? 'edit' : ($inView ? 'view' : null));
+    }
+
+    /**
+     * Werkzeuge für eine Werkzeugleiste (Core\Toolbar::context): nur angemeldet, nur mit Recht; Standard nur im Bearbeiten-Modus,
+     * mit 'view' auch beim Ansehen. Ergebnis je Werkzeug: Angaben für das Markup und die JSON-Konfiguration (ohne Callables).
      */
     public static function forBar(array $bar): array
     {
-        $mode = self::mode($bar);
-        if ($mode === null) return [];
+        if (self::mode($bar) === null && !self::viewing($bar)) return [];
         $out = [];
         foreach (self::all() as $t) {
-            if (!in_array($mode, $t['modes'], true) || !self::visible($t, $bar)) continue;
+            $when = self::when($t, $bar);
+            if ($when === null || !self::visible($t, $bar)) continue;
             $data = $t['data'];
             if (is_callable($data)) {
                 try {
@@ -166,7 +199,7 @@ final class FrontendTools
                 }
             }
             $out[] = ['id' => $t['id'], 'label' => $t['label'], 'icon' => $t['icon'], 'module' => $t['module'], 'placement' => $t['placement'],
-                'shortcut' => $t['shortcut'], 'hint' => $t['hint'], 'panel' => $t['panel'], 'texts' => $t['texts'], 'source' => $t['source'],
+                'shortcut' => $t['shortcut'], 'hint' => $t['hint'], 'panel' => $t['panel'], 'when' => $when, 'chip' => $t['chip'], 'texts' => $t['texts'], 'source' => $t['source'],
                 'endpoints' => array_map(fn($p) => url($p), $t['endpoints']), 'data' => is_array($data) ? $data : []];
         }
         return $out;
@@ -177,13 +210,15 @@ final class FrontendTools
     {
         $page = $bar['page'] ?? [];
         return [
-            'mode' => self::mode($bar), 'kind' => $bar['kind'] ?? 'page',
+            // mode: Modus beim Laden ('view' | 'edit' – Vorlage zählt als Bearbeiten; Eintrag wechselt im Browser), editKind: page|entry|null
+            'mode' => self::viewing($bar) ? 'view' : 'edit', 'editKind' => self::mode($bar), 'kind' => $bar['kind'] ?? 'page',
             'page' => !empty($page['id']) ? ['id' => (int) $page['id'], 'title' => (string) ($page['title'] ?? ''), 'lang' => Lang::norm($page['lang'] ?? null)] : null,
             'entry' => isset($bar['entry'], $bar['table']) ? ['table' => (string) $bar['table']['handle'], 'id' => (int) $bar['entry']['id']] : null,
             'lang' => Lang::current(), 'csrf' => Csrf::token(),
             'texts' => ['close' => __('Schließen'), 'noText' => __('Bitte zuerst in einen Text klicken – dort wird eingefügt.'),
                 'noLinks' => __('Dieses Feld kennt keine Links – eingefügt wird nur der Text.'), 'error' => __('Das hat nicht geklappt.'),
-                'loading' => __('Wird geladen …'), 'backToText' => __('Zurück zum Text')],
+                'loading' => __('Wird geladen …'), 'backToText' => __('Zurück zum Text'),
+                'viewOnly' => __('Beim Ansehen nicht möglich – zum Einfügen in den Bearbeiten-Modus wechseln.')],
             'tools' => $tools,
         ];
     }

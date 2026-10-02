@@ -1,20 +1,24 @@
 /*
  * Werkzeuge beim Bearbeiten auf der Website (Core\FrontendTools) – Teil von admin.js, global als CMSAdmin.tools.
  *
- *  - Konfiguration: <script type="application/json" id="cms-tools"> (nur angemeldet, nur im Bearbeiten-Modus, nur erlaubte
- *    Werkzeuge). Knöpfe [data-cms-tool] in der Werkzeugleiste (Schatten-Wurzel) bzw. im Menü „⋯“, Tastenkürzel je Werkzeug.
+ *  - Konfiguration: <script type="application/json" id="cms-tools"> (nur angemeldet, nur erlaubte Werkzeuge; Standard nur im
+ *    Bearbeiten-Modus, Werkzeuge mit modes 'view' auch beim Ansehen). Knöpfe [data-cms-tool] in der Werkzeugleiste (Schatten-Wurzel) bzw. im Menü „⋯“, Tastenkürzel je Werkzeug.
  *  - Lazy: Erst beim ersten Öffnen wird das ES-Modul geladen (import()). Es registriert sich mit export default
  *    { mount(ctx), unmount(ctx) } oder ruft selbst CMSAdmin.tools.register(id, { mount, unmount }) auf.
  *  - Oberfläche: Seitenleiste in der gemeinsamen Shadow-DOM-Ebene (_shadow.js layer(), editor.shadow.css .cms-tpanel) –
  *    Kit-CSS wirkt nicht hinein. role="dialog" (nicht modal): Esc schließt, Fokus kehrt zurück; das Tastenkürzel springt
  *    zwischen Text und Seitenleiste hin und her (die Schreibmarke im Text bleibt gemerkt).
- *  - ctx (für mount/unmount): id, tool (Angaben vom Server: data, texts, endpoints), page, entry, kind, lang, csrf,
+ *  - ctx (für mount/unmount): id, tool (Angaben vom Server: data, texts, endpoints), page, entry, kind, mode ('view'|'edit', aktuell –
+ *    Detailseiten wechseln ohne Neuladen), editKind ('page'|'entry'|null), lang, csrf,
  *    panel { el, body, setTitle(t), close(), focus() }, t(key, params), fetch(url, { method, json, query }),
- *    selection() → { editable, text, range, rich } | null, insertText(text), insertLink({ href, ref, label, title, newTab }),
+ *    selection() → { editable, text, range, rich, view } | null (beim Ansehen: markierter Text irgendwo auf der Seite, editable null),
+ *    insertText(text), insertLink({ href, ref, label, title, newTab }) – beim Ansehen ohne Wirkung (Ergebnis false),
  *    focusText(), toast(msg, kind), announce(msg), on(event, fn) (wird bei unmount abgemeldet), close().
  *  - Ereignisse am document (CustomEvent, detail siehe Technik → Erweiterungen): cms:editor-ready, cms:block-select,
  *    cms:before-save (abbrechbar, detail.waitUntil(promise) für asynchrone Prüfungen), cms:saved, cms:published,
- *    cms:status-changed; dazu cms:tool-open / cms:tool-close.
+ *    cms:status-changed, cms:mode-change; dazu cms:tool-open / cms:tool-close.
+ *  - Ansehen: Werkzeuge mit chip zeigen neben markiertem Text der Seite einen schwebenden Knopf (öffnet das Werkzeug; per Tastatur
+ *    gilt das Kürzel). Die Markierung wird gemerkt, bevor der Fokus in die Seitenleiste wechselt.
  */
 import { layerBox, barRoot, deepActive, uiAll } from './_shadow.js';
 import { Rich } from './_rte.js';
@@ -30,6 +34,14 @@ const impls = new Map();        // id → { mount, unmount }
 const state = new Map();        // id → { ctx, panel, offs: [] }
 let current = null;             // id des offenen Werkzeugs
 let lastEditable = null, lastRange = null, opener = null;
+let viewSel = null;             // Ansehen: gemerkte Markierung auf der Seite { range, text }
+const UI_HOSTS = '.cms-bar-host,#cms-layer-host,#cms-epanel-host';
+
+/** Aktueller Modus der Werkzeugleiste: 'view' | 'edit' (Vorlage zählt als Bearbeiten; Eintrag wechselt ohne Neuladen) */
+function curMode() {
+  const m = barRoot()?.querySelector('.cms-bar[data-mode]')?.dataset.mode || cfg?.mode || 'edit';
+  return m === 'view' ? 'view' : 'edit';
+}
 
 // ------------------------------------------------------------------ Ereignisse
 /** Ereignis am document melden (für Werkzeuge, Erweiterungen, Kits) */
@@ -59,6 +71,18 @@ const editableRoot = n => { let e = n?.nodeType === 1 ? n : n?.parentElement; le
 /** Formatierter Text (Links erlaubt)? Seiten-Editor: data-edit-mode rich|inline, Eintrag: data-entry-mode ≠ plain|lines */
 const isRich = el => !!el && (['rich', 'inline'].includes(el.dataset.editMode) || (el.dataset.entryMode !== undefined && !['plain', 'lines'].includes(el.dataset.entryMode)));
 
+/** Ansehen: markierter Text der Seite (nicht in der CMS-Oberfläche, nicht in einem Textfeld des Editors) oder null */
+function pageSelection() {
+  const s = getSelection();
+  if (!s || !s.rangeCount || s.isCollapsed) return null;
+  const r = s.getRangeAt(0), text = r.toString();
+  if (!text.trim()) return null;
+  const el = n => (n?.nodeType === 1 ? n : n?.parentElement);
+  const a = el(r.startContainer), b = el(r.endContainer);
+  if (!a || !b || a.closest(UI_HOSTS) || b.closest(UI_HOSTS) || editableRoot(r.startContainer)) return null;
+  return { range: r.cloneRange(), text };
+}
+
 function track() {
   d.addEventListener('focusin', e => { const r = editableRoot(e.target); if (r) lastEditable = r; });
   d.addEventListener('selectionchange', () => {
@@ -66,10 +90,18 @@ function track() {
     if (!s.rangeCount) return;
     const r = editableRoot(s.anchorNode);
     if (r) { lastEditable = r; lastRange = s.getRangeAt(0).cloneRange(); }
+    // Ansehen: nur nicht-leere Markierungen merken – der Fokus in der Seitenleiste darf sie nicht löschen
+    else if (curMode() === 'view') { const p = pageSelection(); if (p) viewSel = p; }
   });
+  // Ansehen: Klick/Tippen in die Seite (nicht in die CMS-Oberfläche) beginnt eine neue Markierung
+  d.addEventListener('pointerdown', e => { if (!e.target?.closest?.(UI_HOSTS)) viewSel = null; }, true);
 }
 
 function selection() {
+  if (curMode() === 'view') {
+    if (viewSel && !viewSel.range.startContainer.isConnected) viewSel = null;
+    return viewSel ? { editable: null, range: viewSel.range.cloneRange(), text: viewSel.text, rich: false, view: true } : null;
+  }
   if (!lastEditable?.isConnected || !lastEditable.isContentEditable) return null;
   const range = lastRange && lastEditable.contains(lastRange.commonAncestorContainer) ? lastRange.cloneRange() : null;
   return { editable: lastEditable, range, text: range ? range.toString() : '', rich: isRich(lastEditable) };
@@ -85,6 +117,7 @@ function restore(sel) {
 
 /** Text an der gemerkten Schreibmarke einfügen (ersetzt die Auswahl). false = kein Textfeld aktiv */
 function insertText(text) {
+  if (curMode() === 'view') return false;
   const sel = selection();
   if (!sel) return false;
   restore(sel);
@@ -99,6 +132,7 @@ function insertText(text) {
  * wird nur der Text eingefügt. Ergebnis: 'link' | 'text' | false (kein Textfeld aktiv)
  */
 function insertLink(res) {
+  if (curMode() === 'view') return false;
   const sel = selection();
   if (!sel) return false;
   if (!sel.rich) return insertText(sel.text || res.label || res.href) ? 'text' : false;
@@ -167,7 +201,8 @@ async function load(def) {
 function makeCtx(def, panel) {
   const offs = [];
   const ctx = {
-    id: def.id, tool: def, page: cfg.page, entry: cfg.entry, kind: cfg.kind, mode: cfg.mode, lang: cfg.lang, csrf: cfg.csrf, panel,
+    id: def.id, tool: def, page: cfg.page, entry: cfg.entry, kind: cfg.kind, editKind: cfg.editKind ?? null, lang: cfg.lang, csrf: cfg.csrf, panel,
+    get mode() { return curMode(); },
     t: (k, p) => fill(def.texts?.[k] ?? cfg.texts?.[k] ?? k, p),
     async fetch(url, o = {}) {
       const u = new URL(url, location.href);
@@ -197,6 +232,9 @@ export async function open(id) {
   const def = defs.get(id);
   if (!def) return false;
   if (current && current !== id) close(current, false);
+  // Ansehen: Markierung der Seite JETZT merken – gleich wandert der Fokus in die Seitenleiste
+  if (curMode() === 'view') { const p = pageSelection(); if (p) viewSel = p; }
+  hideChip();
   // Auslöser merken: Fokus kehrt beim Schließen dorthin zurück (Text mit Schreibmarke, sonst der Knopf)
   const a = deepActive();
   opener = editableRoot(a) || a;
@@ -268,6 +306,64 @@ export function register(id, impl) {
   if (impl && typeof impl.mount === 'function') impls.set(id, impl);
 }
 
+// ------------------------------------------------------------------ Ansehen: schwebender Knopf neben markiertem Text
+let chipEl = null, chipRaf = 0, chipT = 0;
+/** Werkzeug mit chip, das gerade (Ansehen) erreichbar ist */
+function chipDef() {
+  if (curMode() !== 'view') return null;
+  for (const def of defs.values()) {
+    if (!def.chip || def.when === 'edit') continue;
+    const bs = buttons(def.id);
+    if (bs.length && bs.every(b => b.hidden)) continue;
+    return def;
+  }
+  return null;
+}
+function hideChip() { if (chipEl) chipEl.hidden = true; }
+function updateChip() {
+  const def = chipDef();
+  const p = def ? pageSelection() : null;
+  const text = p?.text.replace(/\s+/g, ' ').trim() || '';
+  if (!p || text.length > 120) return hideChip();
+  const rects = p.range.getClientRects();
+  const r = rects[rects.length - 1] || p.range.getBoundingClientRect();
+  if (!r || (!r.width && !r.height) || r.bottom < 0 || r.top > innerHeight) return hideChip();
+  if (!chipEl) {
+    chipEl = d.createElement('button');
+    chipEl.type = 'button';
+    chipEl.className = 'cms-selchip';
+    chipEl.tabIndex = -1;   // Tastatur: das Kürzel des Werkzeugs (aria-keyshortcuts) – der Knopf stört Markieren und Kopieren nicht
+    chipEl.hidden = true;
+    // Markierung behalten (kein Fokuswechsel, keine neue Auswahl), dann öffnen
+    chipEl.addEventListener('pointerdown', e => e.preventDefault());
+    chipEl.addEventListener('mousedown', e => e.preventDefault());
+    chipEl.addEventListener('click', () => { const p2 = pageSelection(); if (p2) viewSel = p2; hideChip(); open(chipEl.dataset.tool); });
+    layerBox().append(chipEl);
+  }
+  if (chipEl.dataset.tool !== def.id) {
+    chipEl.dataset.tool = def.id;
+    chipEl.innerHTML = `${ico(def.icon)}<span>${esc(def.chip)}</span>${def.shortcut ? `<kbd>${esc(def.shortcut.label)}</kbd>` : ''}`;
+    chipEl.title = def.chip + (def.shortcut ? ' (' + def.shortcut.label + ')' : '');
+    if (def.shortcut) chipEl.setAttribute('aria-keyshortcuts', def.shortcut.keys); else chipEl.removeAttribute('aria-keyshortcuts');
+  }
+  if (!chipEl.isConnected) layerBox().append(chipEl);
+  chipEl.hidden = false;
+  const w = chipEl.offsetWidth, h = chipEl.offsetHeight;
+  let top = r.bottom + 8;
+  if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 8);
+  chipEl.style.top = Math.round(top) + 'px';
+  chipEl.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.right - w / 2))) + 'px';
+}
+function initChip() {
+  if (![...defs.values()].some(t => t.chip)) return;
+  d.addEventListener('selectionchange', () => { clearTimeout(chipT); chipT = setTimeout(updateChip, 160); });
+  // Scrollen: Knopf folgt der Markierung (auch wenn sie erst ins Bild scrollt, z. B. bei scroll-behavior: smooth)
+  const follow = () => { if ((chipEl && !chipEl.hidden) || !getSelection()?.isCollapsed) { cancelAnimationFrame(chipRaf); chipRaf = requestAnimationFrame(updateChip); } };
+  addEventListener('scroll', follow, { passive: true, capture: true });
+  addEventListener('resize', follow, { passive: true });
+  d.addEventListener('keydown', e => { if (e.key === 'Escape' && chipEl && !chipEl.hidden) hideChip(); });
+}
+
 // ------------------------------------------------------------------ Start
 function shortcutMatch(e, sc) {
   return !!sc && e.code === sc.code && !!e.altKey === !!sc.alt && !!e.shiftKey === !!sc.shift && !!e.ctrlKey === !!sc.ctrl && !!e.metaKey === !!sc.meta;
@@ -281,6 +377,12 @@ export function initTools() {
   cfg.texts ||= {};
   cfg.tools.forEach(t => defs.set(t.id, t));
   track();
+  initChip();
+  // Eintrag: Ansehen ↔ Bearbeiten ohne Neuladen – Werkzeug des anderen Modus schließen, schwebenden Knopf ausblenden
+  d.addEventListener('cms:mode-change', () => {
+    hideChip();
+    if (current && buttons(current).length && buttons(current).every(b => b.hidden)) close(current, false);
+  });
   // Knöpfe in der Werkzeugleiste (Schatten-Wurzel): Klick öffnet/schließt
   barRoot()?.addEventListener('click', e => {
     const b = e.target.closest('[data-cms-tool]');
@@ -311,7 +413,7 @@ export function initTools() {
 function shortcut(e) {
   for (const def of defs.values()) {
     if (!shortcutMatch(e, def.shortcut)) continue;
-    // Eintrag: nur im Modus „Bearbeiten“ (Knöpfe sind sonst verborgen)
+    // Eintrag: nur im passenden Modus (Knöpfe des anderen Modus sind verborgen, data-bar-when)
     if (buttons(def.id).length && buttons(def.id).every(b => b.hidden)) return false;
     const st = state.get(def.id);
     if (current === def.id && st) {
