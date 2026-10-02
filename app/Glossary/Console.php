@@ -14,6 +14,11 @@ use Core\Features;
  *   glossary:export [--out=datei.csv]                       Begriffe als CSV
  *   glossary:check                                          Hinweise: doppelte Varianten, Überschneidungen, fehlende Erklärungen
  *   glossary:selftest [--bench]                             Selbsttest der Markierung (ohne Datenbank); --bench: Laufzeit großer Seiten
+ *   glossary:share [--invite=a,b]                          Glossar dieser Website teilen (wird Eigentümerin), Websites einladen
+ *   glossary:invite a,b                                     Einladungen setzen (Eigentümer; leer = keine)
+ *   glossary:join [--plan] [--choice=existing|mine|both]   Geteiltem Glossar beitreten (Doppel: Standard existing); --plan nur zeigen
+ *   glossary:leave [--no-copies]                            Verlassen (Mitglied, mit Kopien fremder Begriffe) bzw. Teilen beenden (Eigentümer)
+ *   glossary:sharetest --sandbox                            Ende-zu-Ende-Test des Teilens mit zwei Websites – NUR in einer Wegwerf-Kopie
  */
 final class Console
 {
@@ -28,6 +33,8 @@ final class Console
         };
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         if ($cmd === 'glossary:selftest') return SelfTest::run($opt('bench') !== null);
+        if ($cmd === 'glossary:sharetest') return ShareTest::run($opt('sandbox') !== null, $opt('step'), $opt('state'));
+        $list = fn(?string $v) => array_values(array_filter(array_map('trim', explode(',', (string) $v))));
         try {
             switch ($cmd) {
                 case 'glossary:install':
@@ -49,6 +56,29 @@ final class Console
                 case 'glossary:export':
                     $csv = Glossary::exportCsv();
                     if (($out = $opt('out')) !== null && $out !== '') { file_put_contents($out, $csv); echo "Gespeichert: $out\n"; } else echo $csv;
+                    return 0;
+                case 'glossary:share':
+                    foreach (Sharing::share($list($opt('invite'))) as $m) echo "  $m\n";
+                    return 0;
+                case 'glossary:invite':
+                    Sharing::invite($list($pos[0] ?? ''));
+                    echo '  Eingeladen: ' . (implode(', ', \Core\Data\Shared::meta(Sharing::KEY)['invited'] ?? []) ?: '–') . "\n";
+                    return 0;
+                case 'glossary:join':
+                    if ($opt('plan') !== null) {
+                        $p = Sharing::plan();
+                        printf("  %d eigene Begriffe, %d der anderen Websites, %d doppelt\n", $p['local'], $p['shared'], count($p['dupes']));
+                        foreach ($p['dupes'] as $d) echo '  = ' . $d['term']['term'] . ' ↔ ' . implode(', ', array_map(fn($x) => $x['term'] . ' (' . $x['origin'] . ')', $d['matches'])) . "\n";
+                        return 0;
+                    }
+                    $choice = (string) ($opt('choice') ?? 'existing');
+                    if (!in_array($choice, Sharing::CHOICES, true)) { fwrite(STDERR, "--choice: existing, mine oder both\n"); return 1; }
+                    $choices = [];
+                    foreach (Sharing::plan()['dupes'] as $d) $choices[(int) $d['term']['id']] = $choice;
+                    foreach (Sharing::join($choices, 'cli') as $m) echo "  $m\n";
+                    return 0;
+                case 'glossary:leave':
+                    foreach (Sharing::leave($opt('no-copies') === null) as $m) echo "  $m\n";
                     return 0;
                 case 'glossary:check':
                     if (!Glossary::table()) { echo "Kein Glossar auf dieser Website (" . site()->key . ").\n"; return 1; }

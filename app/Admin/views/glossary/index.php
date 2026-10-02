@@ -2,6 +2,7 @@
 /**
  * Verwaltung → Daten → Glossar → „Prüfen & Einstellungen“ bzw. Einstellungen → Glossar (Core\Glossary, Core\AdminPages kind settings): einrichten, Begriffe mit Vorkommen und Hinweisen, schnell hinzufügen, Import/Export, Einstellungen.
  * @var ?array $t  @var array $terms  @var array $checks  @var array $occ  @var array $settings  @var ?array $import  @var bool $ai  @var ?string $overview
+ * @var ?array $sharing (Core\Glossary\Sharing::status(), null bei nur einer Website)  @var int $hiddenCount
  */
 use Core\Glossary\Glossary;
 
@@ -10,6 +11,9 @@ $schema = can('data.schema');
 $pub = count(array_filter($terms, fn($x) => !$x['draft']));
 $byId = [];
 foreach ($checks as $c) $byId[$c['id']][] = $c;
+$shared = $t && \Core\Data\Tables::isShared($t);
+$canHide = $shared && can('data.publish', $t['handle']);
+$siteName = fn(string $k) => \Core\Data\Shared::siteInfo($k, 'glossar')['name'];
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Inhalte')) ?></p><h1><?= e(__('Glossar')) ?></h1>
@@ -30,6 +34,10 @@ foreach ($checks as $c) $byId[$c['id']][] = $c;
   </form>
   <?php else: ?>
   <p class="adm-muted"><?= e(__('Einrichten kann die Administration (Recht „Tabellen und Felder anlegen“).')) ?></p>
+  <?php endif; ?>
+  <?php if ($sharing && $sharing['role'] === 'invited'): ?>
+  <p><?= e(__('Oder: „{site}“ lädt diese Website zum gemeinsamen Glossar ein.', ['site' => (string) $sharing['owner']])) ?>
+    <a class="adm-btn adm-btn--small" href="<?= e(url($base . '/teilen')) ?>"><?= e(__('Beitreten …')) ?></a></p>
   <?php endif; ?>
 </section>
 <?php return; endif; ?>
@@ -76,9 +84,13 @@ foreach ($checks as $c) $byId[$c['id']][] = $c;
             <td class="gls-term"><a href="<?= e(url('/admin/data/' . $t['handle'] . '/' . $x['id'])) ?>"><b><?= e($x['term']) ?></b></a>
               <?php if (\Core\Lang::multi() && ($x['lang'] ?? '') !== \Core\Lang::default()): ?> <span class="adm-badge" title="<?= e(__('Sprache')) ?>"><?= e(strtoupper((string) $x['lang'])) ?></span><?php endif; ?>
               <?php if ($x['draft']): ?> <span class="adm-badge adm-badge--muted"><?= e(__('Entwurf')) ?></span><?php endif; ?>
+              <?php if (!empty($x['foreign'])): ?> <span class="adm-badge gls-origin" title="<?= e(__('Begriff einer anderen Website – ändern lässt er sich nur dort.')) ?>"><?= e(__('von {site}', ['site' => $siteName($x['origin'])])) ?></span><?php endif; ?>
               <?php if (!empty($byId[$x['id']])): ?> <span class="adm-badge adm-badge--adm-warn" title="<?= e(implode(' ', array_column($byId[$x['id']], 'text'))) ?>"><?= e(__('Hinweis')) ?></span><?php endif; ?>
               <?php if ($alt): ?><span class="gls-alt"><?= e(implode(', ', $alt)) ?></span><?php endif; ?>
-              <?php if ($x['category'] !== ''): ?><span class="gls-alt"><?= e(__('Kategorie')) ?>: <?= e($x['category']) ?></span><?php endif; ?></td>
+              <?php if ($x['category'] !== ''): ?><span class="gls-alt"><?= e(__('Kategorie')) ?>: <?= e($x['category']) ?></span><?php endif; ?>
+              <?php if ($canHide && !empty($x['foreign'])): ?><form method="post" action="<?= e(url($base . '/ausblenden')) ?>" class="gls-hide"><?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= (int) $x['id'] ?>"><input type="hidden" name="state" value="hide">
+                <button class="adm-btn adm-btn--small adm-btn--ghost" type="submit" aria-label="<?= e(__('„{t}“ auf dieser Website ausblenden', ['t' => $x['term']])) ?>"><?= e(__('Ausblenden')) ?></button></form><?php endif; ?></td>
             <td class="gls-short"><?= e($x['short']) ?> <small class="adm-muted gls-len<?= mb_strlen($x['short']) > Glossary::SHORT_MAX ? ' is-long' : '' ?>">(<?= mb_strlen($x['short']) ?>/<?= Glossary::SHORT_MAX ?>)</small></td>
             <td class="rd-num gls-occ">
               <?php if (!$where): ?><span class="adm-muted">0</span>
@@ -99,6 +111,19 @@ foreach ($checks as $c) $byId[$c['id']][] = $c;
   </div>
 
   <div class="rd-side">
+    <?php if ($sharing): $role = $sharing['role']; ?>
+    <section class="adm-card" id="teilen" aria-labelledby="gls-share-h">
+      <h2 id="gls-share-h"><?= e(__('Mit anderen Websites teilen')) ?></h2>
+      <p class="adm-muted"><?= e(match ($role) {
+          'owner' => __('Geteilt – diese Website ist Eigentümerin. Beteiligt: {n}.', ['n' => count($sharing['meta']['members'])]),
+          'member' => __('Geteilt – Glossar von „{site}“.', ['site' => (string) $sharing['owner']]),
+          'invited' => __('„{site}“ lädt diese Website zum gemeinsamen Glossar ein.', ['site' => (string) $sharing['owner']]),
+          'none' => __('„{site}“ teilt ein Glossar – diese Website ist nicht eingeladen.', ['site' => (string) $sharing['owner']]),
+          default => __('Ein Glossar für mehrere Websites dieser Installation: jede pflegt eigene Begriffe und zeigt die der anderen.'),
+      }) ?><?php if ($hiddenCount): ?> <?= e(__('{n} hier ausgeblendet.', ['n' => $hiddenCount])) ?><?php endif; ?></p>
+      <a class="adm-btn adm-btn--small" href="<?= e(url($base . '/teilen')) ?>"><?= e(match ($role) { 'local' => __('Glossar teilen …'), 'invited' => __('Beitreten …'), default => __('Teilen verwalten') }) ?></a>
+    </section>
+    <?php endif; ?>
     <section class="adm-card" id="neu" aria-labelledby="gls-new-h">
       <h2 id="gls-new-h"><?= e(__('Begriff schnell hinzufügen')) ?></h2>
       <form method="post" action="<?= e(url($base . '/neu')) ?>">

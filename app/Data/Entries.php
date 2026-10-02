@@ -601,10 +601,13 @@ final class Entries
         return self::url($table, $e);
     }
 
-    /** Absolute Adresse (für Canonical, JSON-LD, Feeds): fremde Einträge → Ursprungs-Website, falls sie Detailseiten hat */
+    /**
+     * Absolute Adresse (für Canonical, JSON-LD, Feeds): fremde Einträge → Ursprungs-Website, falls sie Detailseiten hat – außer die
+     * Website hat für die geteilte Tabelle „Canonical: eigene Adresse“ eingestellt (Shared::localConfig canonical = self)
+     */
     public static function absUrl(array $table, array $e): ?string
     {
-        if (Tables::isShared($table) && ($o = Shared::originUrl($table, $e))) return $o;
+        if (Tables::isShared($table) && Shared::localConfig($table['shared']['key'])['canonical'] !== 'self' && ($o = Shared::originUrl($table, $e))) return $o;
         $u = self::url($table, $e);
         return $u !== null ? site_url() . $u : null;
     }

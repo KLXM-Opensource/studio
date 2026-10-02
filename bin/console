@@ -121,6 +121,9 @@
  *   glossary:import <datei.csv> [--overwrite] [--dry-run] | glossary:export [--out=datei.csv]
  *                                                     Begriffe aus CSV übernehmen (neue als Entwurf) bzw. ausgeben
  *   glossary:check | glossary:selftest [--bench]      Hinweise (doppelte Varianten …) | Selbsttest der Markierung (Regeln, Laufzeit)
+ *   glossary:share [--invite=a,b] | glossary:invite a,b | glossary:join [--plan] [--choice=existing|mine|both] | glossary:leave [--no-copies]
+ *                                                     Geteiltes Glossar: teilen, einladen, beitreten (Doppel abgleichen), verlassen
+ *   glossary:sharetest --sandbox                      Ende-zu-Ende-Test des geteilten Glossars (zwei Websites) – nur in einer Wegwerf-Kopie
  *   notfound:create [--lang=en] [--publish]           Seite „Nicht gefunden (404)“ anlegen (Startinhalte des Kits, sonst Entwurf)
  *   notfound:selftest                                 Selbsttest der 404-Seite (Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge)
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
@@ -555,6 +558,11 @@ switch ($cmd) {
     case 'glossary:export':
     case 'glossary:check':
     case 'glossary:selftest':
+    case 'glossary:sharetest':
+    case 'glossary:share':
+    case 'glossary:invite':
+    case 'glossary:join':
+    case 'glossary:leave':
         // Glossar (Core\Glossary) je Website (--site=…)
         exit(Core\Glossary\Console::run($cmd, $args));
 

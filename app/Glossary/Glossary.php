@@ -31,6 +31,9 @@ use Core\Pages;
  *  - Mehrsprachig: Begriffe sind Einträge je Sprache (Übersetzung des Eintrags, Entries::translate). Eine Seite markiert nur die
  *    Begriffe ihrer Sprache (Wortendungen je Sprache, Annotator-Option lang); Detailseiten /en/glossar/{slug}; die Übersicht ist
  *    die Übersetzung der Glossar-Seite (z. B. /en/glossary) – ohne veröffentlichte Übersetzung kein Link auf die Übersicht.
+ *  - Geteilt (Core\Glossary\Sharing): ist „glossar“ eine geteilte Tabelle, liefert table() sie und terms() die eigenen Begriffe +
+ *    die sichtbaren der übrigen Websites (Quelle „site“) – Markierung, Übersicht, Detailseiten, Quick-Glossar und Linkauswahl
+ *    lesen damit ohne Sonderfall das gemeinsame Glossar.
  */
 final class Glossary
 {
@@ -145,6 +148,9 @@ final class Glossary
             'variants' => self::splitVariants((string) ($e['varianten'] ?? '')),
             'draft' => ($e['status'] ?? 'published') !== 'published',
             'lang' => Lang::norm($e['lang'] ?? null),
+            // Geteiltes Glossar (Core\Glossary\Sharing): Begriff einer anderen Website – nur lesbar, hier ausblendbar
+            'foreign' => isset($t['shared']) && \Core\Data\Shared::isForeign($t, $e),
+            'origin' => isset($t['shared']) ? (string) ($e['origin_site'] ?? '') : '',
         ];
     }
 
@@ -513,7 +519,8 @@ final class Glossary
             $lang = strtolower((string) ($r['lang'] ?? ''));
             $lang = $lang !== '' && Lang::valid($lang) ? $lang : Lang::default();
             $cur = $existing[$key($lang, $name)] ?? null;
-            if ($cur && !$overwrite) { $res['skipped']++; continue; }
+            // Geteiltes Glossar: Begriffe anderer Websites bleiben unberührt (nur eigene lassen sich ändern)
+            if ($cur && (!$overwrite || \Core\Data\Shared::isForeign($t, $cur))) { $res['skipped']++; continue; }
             $in = ['begriff' => $name, 'kurz' => self::short($r['kurz']), 'varianten' => implode("\n", self::splitVariants((string) ($r['varianten'] ?? '')))];
             foreach (['erklaerung', 'kategorie', 'link'] as $k) if (array_key_exists($k, $r)) $in[$k] = $r[$k];
             $in['status'] = in_array(strtolower((string) ($r['status'] ?? '')), ['published', 'veröffentlicht', 'online'], true) ? 'published' : 'draft';
@@ -522,7 +529,7 @@ final class Glossary
             [$id, $errors] = Entries::save($t, $cur ? (int) $cur['id'] : null, $in);
             if ($errors) { $res['errors'][$line] = implode(' ', $errors); continue; }
             $res[$cur ? 'updated' : 'created']++;
-            $existing[$key($lang, $name)] = ['id' => $id, 'begriff' => $name];
+            $existing[$key($lang, $name)] = ['id' => $id, 'begriff' => $name, 'origin_site' => site()->key];
         }
         self::flush();
         return $res;

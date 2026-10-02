@@ -20,6 +20,7 @@ use Core\Lang;
  *  - Auch beim Ansehen ('view' => true): dort ist JEDER Text der Seite markierbar (beim Bearbeiten nur die Textfelder) – Markierung
  *    + ⌥G bzw. der schwebende Knopf „Als Glossar-Begriff“ (chip) öffnet „Neuer Begriff“ vorbelegt; „Einfügen“ gibt es nur beim Bearbeiten.
  * Endpunkte (GlossaryController::api*): Funktion „glossary“ an, Tabelle eingerichtet, Recht data.edit auf die Tabelle, CSRF bei POST.
+ * Geteiltes Glossar: Suche, Doppelprüfung und „Auf dieser Seite“ über alle sichtbaren Begriffe; Treffer anderer Websites mit deren Namen.
  */
 final class QuickTool
 {
@@ -93,6 +94,7 @@ final class QuickTool
             'autoDraft' => __('Als Entwurf sieht nur die angemeldete Redaktion die Markierung.'),
             'autoOff' => __('Die automatische Markierung ist ausgeschaltet – der Begriff steht im Glossar.'),
             'reload' => __('Seite neu laden'),
+            'from' => __('von {site}'), 'foreignHint' => __('Begriff einer anderen Website des geteilten Glossars – ändern lässt er sich nur dort.'),
             'dupeQ' => __('Gibt es schon?'), 'dupeNone' => __('Noch kein ähnlicher Begriff.'), 'dupeSome' => __('Ähnlich:'),
         ];
     }
@@ -133,9 +135,12 @@ final class QuickTool
     /** Begriff für das Werkzeug: Verweis entry:glossar:{id} (wie die Linkauswahl) + Adresse der Detailseite */
     public static function item(array $t, array $x): array
     {
+        $foreign = !empty($x['foreign']);
         return ['id' => (int) $x['id'], 'term' => $x['term'], 'short' => $x['short'], 'variants' => array_values(array_diff($x['variants'], [$x['term']])),
             'category' => $x['category'], 'draft' => (bool) $x['draft'], 'href' => (string) ($x['url'] ?? ''),
-            'ref' => 'entry:' . $t['handle'] . ':' . (int) $x['id'], 'edit' => url('/admin/data/' . $t['handle'] . '/' . (int) $x['id'])];
+            'ref' => 'entry:' . $t['handle'] . ':' . (int) $x['id'], 'edit' => url('/admin/data/' . $t['handle'] . '/' . (int) $x['id']),
+            // Geteiltes Glossar: Begriff einer anderen Website (nur lesbar) mit deren Namen
+            'foreign' => $foreign, 'origin' => $foreign && isset($t['shared']) ? \Core\Data\Shared::siteInfo((string) $x['origin'], $t['shared']['key'])['name'] : ''];
     }
 
     /**
@@ -152,9 +157,11 @@ final class QuickTool
         if ($term === '' || mb_strlen($term) > 120) return ['ok' => false, 'field' => 'term', 'error' => $term === '' ? __('Bitte einen Begriff eingeben.') : __('Höchstens {n} Zeichen.', ['n' => 120])];
         if ($shortRaw === '') return ['ok' => false, 'field' => 'short', 'error' => __('Bitte eine Kurz-Erklärung eingeben.')];
         if (mb_strlen($shortRaw) > Glossary::SHORT_MAX) return ['ok' => false, 'field' => 'short', 'error' => __('Höchstens {n} Zeichen.', ['n' => Glossary::SHORT_MAX])];
-        // Gibt es den Begriff (oder eine gleichlautende Variante) in dieser Sprache schon? → kein Doppel, Vorhandenen zeigen
+        // Gibt es den Begriff (oder eine gleichlautende Variante) in dieser Sprache schon? → kein Doppel, Vorhandenen zeigen.
+        // Ohne Groß-/Kleinschreibung und Akzente; im geteilten Glossar auch Begriffe der anderen Websites (hier ausgeblendete nicht)
+        $norm = Sharing::norm($term);
         foreach (Glossary::terms(true, $lang) as $x) {
-            if (mb_strtolower($x['term']) === mb_strtolower($term) || in_array(mb_strtolower($term), array_map('mb_strtolower', $x['variants']), true)) {
+            if ($norm !== '' && isset(Sharing::keys($x)[$norm])) {
                 return ['ok' => false, 'field' => 'term', 'error' => __('„{term}“ gibt es schon.', ['term' => $x['term']]), 'exists' => self::item($t, $x)];
             }
         }

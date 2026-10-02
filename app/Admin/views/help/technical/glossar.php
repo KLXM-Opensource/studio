@@ -41,9 +41,26 @@
     <li>API/MCP: wie jede Datentabelle (<code>/api/v1/data/glossar</code>).</li>
   </ul>
 
+  <h3 id="glossar-geteilt">Geteiltes Glossar (mehrere Websites einer Installation)</h3>
+  <p><code>Core\Glossary\Sharing</code> baut auf den <a href="#geteilt">geteilten Datentabellen</a> auf – kein eigener Mechanismus: Schlüssel = Kurzname <code>glossar</code>, Speicher <code>storage/shared/glossar/</code>, Herkunft je Begriff <code>origin_site</code>, Ausblenden je Website über <code>share_picks</code> (<code>hidden</code>).</p>
+  <ul class="doc-list">
+    <li><b>Teilen</b> (<code>share()</code>, Eigentümer): <code>Shared::shareLocal('glossar')</code> – IDs bleiben, <code>entry:glossar:{id}</code> wirkt weiter; dazu <code>members_see_members</code> und automatische Übernahme ohne Regeln (alle sehen alles) sowie Einladungen (<code>share.json</code> → <code>invited</code>).</li>
+    <li><b>Beitreten</b> (<code>plan()</code>, <code>join($choices)</code>, nur eingeladene Website): Doppel = gleiche Vergleichsform (<code>Sharing::norm()</code>: klein, ohne Akzente/Umlaute, ß → ss, ohne Leer-/Satzzeichen) von Begriff oder Variante, je Sprache, gegen die veröffentlichten Begriffe der übrigen Beteiligten. Je Doppel <code>existing</code> (nicht übernehmen; <code>shareLocal(…, $skip)</code> bildet die alte ID auf den vorhandenen Begriff ab), <code>mine</code> (übernehmen, den anderen per Pick ausblenden) oder <code>both</code>. Übernahme mit <code>shareLocal(…, merge: true)</code> als Mitglied (neue IDs, Slug-Kollisionen → <code>-2</code>, im Protokoll); <code>rewriteRefs()</code> stellt <code>entry:glossar:{alt}</code> in <code>pages.content_draft/content_published</code>, <code>revisions.blocks_json</code> und den Textfeldern der eigenen Begriffe um. Danach <code>shared.glossar</code> = owner an, members „all“, und <code>install()</code> (Detailvorlage/Übersicht, falls fehlend).</li>
+    <li><b>Lesen:</b> unverändert über <code>Glossary::terms()</code> → <code>Entries::query(…, source „site“)</code>: eigene Begriffe (auch Entwürfe) + veröffentlichte der übrigen, ohne ausgeblendete. Damit lesen Markierung (<code>page()</code>, Annotator), Block „Glossar“ (A–Z, Begriff), <code>/_glossary.json</code>, Quick-Glossar (Suche, „Auf dieser Seite“, Doppelprüfung jetzt mit <code>Sharing::norm()</code>), Prüfungen und Linkauswahl das gemeinsame Glossar. <code>term()</code> liefert zusätzlich <code>foreign</code>/<code>origin</code>; der Quick-Glossar zeigt „von {Website}“. Detailseiten fremder Begriffe: <code>bySlug(…, 'site')</code> unter <code>/glossar/{slug}</code> jeder Website, Canonical nach <code>shared.glossar.canonical</code> (s. u.), <code>link_origin</code> verlinkt direkt zur Ursprungs-Website.</li>
+    <li><b>Cache:</b> <code>terms()</code> je Anfrage; markiert wird vor dem Seiten-Cache. Jede Änderung eines Begriffs leert die Seiten-Caches aller Beteiligten (<code>Entries::changed()</code> → <code>Shared::clearCaches()</code>), Ausblenden nur den eigenen. Beitreten/Verlassen leeren alle.</li>
+    <li><b>Verlassen</b> (<code>leave()</code>): Mitglied → <code>Shared::leave()</code> (eigene Tabelle mit gleichen IDs, eigene Begriffe + optional Kopien der zuletzt gezeigten fremden; eigene verlassen den Speicher, Sicherung <code>storage/shared/glossar/left/</code>). Eigentümer → <code>Shared::unshare()</code>, erst ohne Mitglieder.</li>
+    <li><b>Rechte:</b> Teilen/Einladen/Beitreten/Verlassen: <code>system.manage</code> + <code>Shared::canManage()</code> (<code>data.shared.manage</code> bzw. Integrator); Ausblenden: <code>data.publish</code> auf <code>glossar</code>; Ändern nur eigene Begriffe (<code>Entries::save</code>), wie bei jeder geteilten Tabelle. Routen <code>GET|POST /admin/glossar/teilen</code> (<code>do</code> = share|invite|join|leave), <code>POST /admin/glossar/ausblenden</code>.</li>
+  </ul>
+
   <h3>Kommandozeile</h3>
   <pre><code>php bin/console glossary:install [--publish] [--enable] [--dry-run]   # Tabelle, Detailseiten, Übersicht /glossar
 php bin/console glossary:import begriffe.csv [--overwrite] [--dry-run]
 php bin/console glossary:export [--out=glossar.csv]
 php bin/console glossary:check                                        # doppelte Varianten, Überschneidungen, fehlende Texte
-php bin/console glossary:selftest [--bench]                           # Regeln, Ausnahmen, Escaping, Laufzeit</code></pre>
+php bin/console glossary:selftest [--bench]                           # Regeln, Ausnahmen, Escaping, Laufzeit, Doppel-Erkennung
+php bin/console glossary:share [--invite=neo] --site=default          # teilen (wird Eigentümerin), einladen
+php bin/console glossary:invite neo,partner --site=default            # Einladungen setzen
+php bin/console glossary:join --plan --site=neo                       # Doppel anzeigen
+php bin/console glossary:join [--choice=existing|mine|both] --site=neo # beitreten
+php bin/console glossary:leave [--no-copies] --site=neo               # verlassen bzw. (Eigentümer) Teilen beenden
+php bin/console glossary:sharetest --sandbox                          # Ende-zu-Ende mit zwei Websites – NUR in einer Wegwerf-Kopie</code></pre>

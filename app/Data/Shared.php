@@ -24,8 +24,10 @@ use Doctrine\DBAL\Connection;
  *
  * Der Schlüssel ist zugleich der Kurzname (handle) der Tabelle. Das Schema legt die Eigentümer-Website fest (ein gemeinsames Schema);
  * jede Website pflegt nur Einträge mit origin_site = eigene Website. Welche fremden Einträge eine Website zeigt, steht in deren
- * Einstellungen („shared.{key}“: owner, members, sites, where, link_origin, detail_page_id). Bilder liegen im Medien-Pool „data-{key}“,
+ * Einstellungen („shared.{key}“: owner, members, sites, where, link_origin, canonical, detail_page_id). Bilder liegen im Medien-Pool „data-{key}“,
  * gespeichert werden Pool-IDs; beim Lesen werden sie in Verweise der jeweiligen Website übersetzt (MediaPools::mirror).
+ * Einladungen (share.json „invited“): Websites, die der Eigentümer zum Beitreten freigegeben hat – beitreten (shareLocal mit $merge bzw.
+ * addMember) macht die Website selbst, so stimmen beide Seiten zu. Verlassen: leave() (Mitglied), unshare() (Eigentümer).
  */
 final class Shared
 {
@@ -40,7 +42,9 @@ final class Shared
      * site (Standard: wie für die Website eingestellt), own, owner, members, own_owner, all (alles Sichtbare), featured (nur hervorgehobene)
      */
     public const SOURCES = ['site', 'own', 'owner', 'members', 'own_owner', 'all', 'featured'];
-    public const CONFIG = ['owner' => true, 'members' => 'off', 'sites' => [], 'where' => [], 'link_origin' => false, 'detail_page_id' => null];
+    public const CONFIG = ['owner' => true, 'members' => 'off', 'sites' => [], 'where' => [], 'link_origin' => false, 'canonical' => 'origin', 'detail_page_id' => null];
+    /** Canonical fremder Einträge: origin (Ursprungs-Website, falls sie Detailseiten hat – Standard) oder self (eigene Adresse, dann auch in der Sitemap) */
+    public const CANONICAL = ['origin', 'self'];
 
     private static array $dbs = [];
     private static ?array $metas = null;
@@ -86,8 +90,9 @@ final class Shared
 
     private static function normMeta(string $key, array $m): array
     {
-        $m += ['label' => $key, 'owner' => Site::DEFAULT, 'members' => [], 'members_see_members' => false, 'auto' => [], 'sites_info' => [], 'created' => null];
+        $m += ['label' => $key, 'owner' => Site::DEFAULT, 'members' => [], 'invited' => [], 'members_see_members' => false, 'auto' => [], 'sites_info' => [], 'created' => null];
         $m['members'] = array_values(array_diff(array_map('strval', (array) $m['members']), [$m['owner']]));
+        $m['invited'] = array_values(array_diff(array_map('strval', (array) $m['invited']), [$m['owner']], $m['members']));
         $m['auto'] = (array) $m['auto'] + ['enabled' => false, 'sites' => [], 'where' => []];
         $m['members_see_members'] = (bool) $m['members_see_members'];
         return $m;
@@ -220,6 +225,7 @@ final class Shared
         $c['sites'] = array_values(array_map('strval', (array) $c['sites']));
         $c['where'] = array_values(array_filter((array) $c['where'], 'is_array'));
         $c['link_origin'] = (bool) $c['link_origin'];
+        $c['canonical'] = in_array($c['canonical'], self::CANONICAL, true) ? (string) $c['canonical'] : 'origin';
         $c['detail_page_id'] = ctype_digit((string) ($c['detail_page_id'] ?? '')) ? (int) $c['detail_page_id'] : null;
         return $c;
     }
@@ -471,6 +477,9 @@ final class Shared
             $meta['members'] = $members;
         }
         if (array_key_exists('members_see_members', $in)) $meta['members_see_members'] = !empty($in['members_see_members']);
+        if (isset($in['invited'])) {
+            $meta['invited'] = array_values(array_diff(self::cleanMembers((array) $in['invited'], $meta['owner']), $meta['members']));
+        }
         if (isset($in['auto'])) {
             $t = Tables::sharedTable($key);
             $a = (array) $in['auto'];
@@ -478,9 +487,33 @@ final class Shared
                 'sites' => array_values(array_intersect(array_map('strval', (array) ($a['sites'] ?? [])), $meta['members'])),
                 'where' => $t ? self::cleanWhere($t, (array) ($a['where'] ?? [])) : []];
         }
-        self::saveMeta($key, $meta);
+        self::saveMeta($key, self::normMeta($key, $meta));
         self::ensurePool($key);
         foreach (array_unique(array_merge($before, self::participants($meta))) as $s) PageCache::clearSite($s);
+    }
+
+    /** Ist diese (oder eine andere) Website zum Beitreten eingeladen (und noch nicht beteiligt)? */
+    public static function isInvited(string $key, ?string $site = null): bool
+    {
+        $m = self::meta($key);
+        return $m !== null && in_array($site ?? site()->key, $m['invited'], true);
+    }
+
+    /**
+     * Diese Website tritt bei (nur auf Einladung des Eigentümers): Mitglied werden, Einladung erledigt. Ohne Konfliktprüfung –
+     * eine gleichnamige lokale Tabelle führt shareLocal(…, merge: true) vorher zusammen.
+     */
+    public static function addMember(string $key): void
+    {
+        $meta = self::meta($key) ?? throw new \InvalidArgumentException(__('Unbekannte geteilte Tabelle.'));
+        $site = site()->key;
+        if (in_array($site, self::participants($meta), true)) return;
+        if (!in_array($site, $meta['invited'], true)) throw new \InvalidArgumentException(__('Diese Website ist nicht zum Beitreten eingeladen – die Website, der die Tabelle gehört, gibt sie frei.'));
+        $meta['members'][] = $site;
+        $meta['invited'] = array_values(array_diff($meta['invited'], [$site]));
+        self::saveMeta($key, self::normMeta($key, $meta));
+        self::ensurePool($key);
+        self::clearCaches($key);
     }
 
     /** Angaben dieser Website (Name, Adresse, Detailseiten vorhanden?) im Register aktualisieren */
@@ -615,9 +648,11 @@ final class Shared
      * Lokale Tabelle dieser Website in eine geteilte Tabelle verschieben (diese Website wird Eigentümer).
      * Einträge behalten ihre IDs (origin_site = diese Website), Bilder wandern in den Pool, die lokale Tabelle bleibt als Sicherung
      * „zz_unshared_{handle}_{zeit}“ erhalten. Mit $merge in eine bestehende geteilte Tabelle gleichen Kurznamens (neue IDs,
-     * Verweise lokaler Tabellen werden umgeschrieben). @return list<string> Protokoll
+     * Verweise lokaler Tabellen werden umgeschrieben) – als Eigentümer oder als eingeladene Website (wird dabei Mitglied).
+     * $skip: [lokale ID => ID in der geteilten Tabelle] – diese Einträge nicht übernehmen, Verweise zeigen auf den vorhandenen
+     * Eintrag (z. B. doppelte Glossar-Begriffe). $map (Rückgabe): [alte lokale ID => ID in der geteilten Tabelle]. @return list<string> Protokoll
      */
-    public static function shareLocal(string $handle, array $members, bool $merge = false, array $flags = []): array
+    public static function shareLocal(string $handle, array $members, bool $merge = false, array $flags = [], ?array &$map = null, array $skip = []): array
     {
         $log = [];
         $row = app()->db->fetch('SELECT * FROM data_tables WHERE handle = ?', [$handle]) ?? throw new \InvalidArgumentException(__('Lokale Tabelle „{key}“ nicht gefunden.', ['key' => $handle]));
@@ -636,10 +671,13 @@ final class Shared
         $localCfgDetail = $local['settings']['detail_page_id'] ?? null;
         if ($merge) {
             $meta = self::meta($handle) ?? throw new \InvalidArgumentException(__('Zum Zusammenführen gibt es keine geteilte Tabelle „{key}“.', ['key' => $handle]));
-            if ($meta['owner'] !== site()->key) throw new \InvalidArgumentException(__('Zusammenführen kann nur die Website, der die geteilte Tabelle gehört.'));
+            $joining = $meta['owner'] !== site()->key;
+            if ($joining && !in_array(site()->key, $meta['invited'], true) && !in_array(site()->key, $meta['members'], true)) {
+                throw new \InvalidArgumentException(__('Zusammenführen kann nur die Website, der die geteilte Tabelle gehört – oder eine Website, die sie zum Beitreten eingeladen hat.'));
+            }
             // Kurzname ist lokal belegt – nur die geteilte Tabelle direkt lesen
             $shared = self::hydrateRaw($handle);
-            if ($members) self::update($handle, ['members' => array_unique(array_merge($meta['members'], $members))]);
+            if ($members && !$joining) self::update($handle, ['members' => array_unique(array_merge($meta['members'], $members))]);
         } else {
             if (self::meta($handle)) throw new \InvalidArgumentException(__('Eine geteilte Tabelle „{key}“ gibt es schon – mit --merge zusammenführen.', ['key' => $handle]));
             $members = self::cleanMembers($members, site()->key);
@@ -661,12 +699,15 @@ final class Shared
         self::ensurePool($handle);
         $sdb = self::db($handle);
         $have = array_column($sdb->fetchAll("PRAGMA table_info({$shared['table']})"), 'name');
-        $map = [];
+        $skip = $merge ? array_map('intval', $skip) : [];
+        $map = $skip;
         $media = array_column(array_filter($local['fields'], fn($f) => in_array($f['type'], ['media', 'file'], true)), 'name');
         $moved = 0;
-        $sdb->transaction(function () use ($local, $shared, $sdb, $have, $merge, $media, &$map, &$moved) {
+        $renamed = [];
+        $sdb->transaction(function () use ($local, $shared, $sdb, $have, $merge, $media, $skip, &$map, &$moved, &$renamed) {
             $fix = [];
             foreach (app()->db->fetchAll("SELECT * FROM {$local['table']} ORDER BY id") as $r) {
+                if (isset($skip[(int) $r['id']])) continue;
                 $ins = array_intersect_key($r, array_flip($have));
                 foreach ($media as $mf) {
                     if (!empty($r[$mf])) $ins[$mf] = self::toPool($shared, (int) $r[$mf]);
@@ -680,6 +721,7 @@ final class Shared
                     for ($n = 2, $slug = $base; $sdb->fetchValue("SELECT id FROM {$shared['table']} WHERE slug = ? AND COALESCE(lang, '') = ?", [$slug, (string) ($ins['lang'] ?? '')]); $n++) {
                         $slug = $base . '-' . $n;
                     }
+                    if ($slug !== $base && $base === (string) ($ins['slug'] ?? '')) $renamed[] = $base . ' → ' . $slug;
                     $ins['slug'] = $slug;
                 }
                 $newId = $sdb->insert($shared['table'], $ins);
@@ -692,7 +734,7 @@ final class Shared
                 $selfRel = array_column(array_filter($local['fields'], fn($f) => $f['type'] === 'relation' && ($f['target'] ?? '') === $local['handle']), 'name');
                 foreach ($fix as $newId => $r) {
                     $upd = [];
-                    if (!empty($r['translation_group'])) $upd['translation_group'] = $map[(int) $r['translation_group']] ?? null;
+                    if (!empty($r['translation_group'])) $upd['translation_group'] = isset($skip[(int) $r['translation_group']]) ? null : ($map[(int) $r['translation_group']] ?? null);
                     foreach ($selfRel as $fn) if (!empty($r[$fn])) $upd[$fn] = $map[(int) $r[$fn]] ?? null;
                     if ($upd) $sdb->update($shared['table'], $upd, 'id = :id', ['id' => $newId]);
                 }
@@ -711,6 +753,8 @@ final class Shared
             }
         });
         $log[] = __('{n} Einträge übernommen.', ['n' => $moved]);
+        if ($renamed) $log[] = __('Adresse geändert, weil sie in der geteilten Tabelle schon vergeben war: {list}', ['list' => implode(', ', $renamed)]);
+        if ($skip) $log[] = __('{n} Einträge nicht übernommen – stattdessen gilt der vorhandene Eintrag der geteilten Tabelle.', ['n' => count($skip)]);
         // Verweise anderer lokaler Tabellen auf umnummerierte Einträge
         if ($merge && $map) {
             foreach (app()->db->fetchAll('SELECT * FROM data_tables WHERE handle != ?', [$handle]) as $or) {
@@ -743,6 +787,10 @@ final class Shared
         app()->db->query('DELETE FROM data_tables WHERE id = ?', [(int) $local['id']]);
         $log[] = __('Lokale Tabelle als Sicherung „{name}“ behalten.', ['name' => 'zz_unshared_' . $handle . '_' . $stamp]);
         Tables::flush();
+        if ($merge && !empty($joining)) {
+            self::addMember($handle);
+            $log[] = __('Diese Website ist jetzt beteiligt.');
+        }
         if ($localCfgDetail) self::saveLocal($handle, ['detail_page_id' => (int) $localCfgDetail]);
         if ($t = Tables::sharedTable($handle)) self::touch($t);
         self::clearCaches($handle);
@@ -782,13 +830,88 @@ final class Shared
         $meta = self::meta($key) ?? throw new \InvalidArgumentException(__('Unbekannte geteilte Tabelle.'));
         if ($meta['owner'] !== site()->key) throw new \InvalidArgumentException(__('Die Freigabe beenden kann nur die Website, der die Tabelle gehört ({site}).', ['site' => $meta['owner']]));
         $t = self::hydrateRaw($key);
+        $rows = self::db($key)->fetchAll("SELECT * FROM {$t['table']}" . ($all ? '' : ' WHERE origin_site = ?') . ' ORDER BY id', $all ? [] : [site()->key]);
+        self::toLocal($key, $t, $rows);
+        unset(self::$dbs[$key]);
+        @mkdir(self::dir('_removed'), 0770, true);
+        rename(self::dir($key), self::dir('_removed') . '/' . $key . '-' . date('YmdHis'));
+        self::flush();
+        Tables::flush();
+        foreach (self::participants($meta) as $s) PageCache::clearSite($s);
+        return [__('„{name}“ ist wieder eine eigene Tabelle dieser Website ({n} Einträge).', ['name' => $t['name'], 'n' => count($rows)]),
+            __('Die geteilten Daten liegen als Sicherung unter storage/shared/_removed/.')];
+    }
+
+    /**
+     * Mitglied verlässt die geteilte Tabelle: sie wird wieder eine eigene Tabelle dieser Website – mit den eigenen Einträgen und mit
+     * $keepForeign zusätzlich Kopien der fremden Einträge, die diese Website zuletzt gezeigt hat (Quelle „site“, veröffentlicht).
+     * IDs und Adressen bleiben gleich (Verweise entry:{key}:{id} wirken weiter). Die eigenen Einträge verlassen die geteilte Tabelle
+     * (Sicherung als JSON unter storage/shared/{key}/left/), Auswahl und Anzeige-Einstellungen dieser Website werden entfernt.
+     * @return list<string> Protokoll
+     */
+    public static function leave(string $key, bool $keepForeign = true): array
+    {
+        $meta = self::meta($key) ?? throw new \InvalidArgumentException(__('Unbekannte geteilte Tabelle.'));
+        $site = site()->key;
+        if ($meta['owner'] === $site) throw new \InvalidArgumentException(__('Die Website, der die Tabelle gehört, kann sie nicht verlassen – sie beendet die Freigabe.'));
+        if (!in_array($site, $meta['members'], true)) throw new \InvalidArgumentException(__('Diese Website ist an „{key}“ nicht beteiligt.', ['key' => $key]));
+        if (app()->db->fetch('SELECT id FROM data_tables WHERE handle = ?', [$key])) {
+            throw new \InvalidArgumentException(__('Es gibt hier schon eine eigene Tabelle „{key}“ – bitte zuerst umbenennen.', ['key' => $key]));
+        }
+        Tables::flush();
+        $t = Tables::sharedTable($key) ?? throw new \RuntimeException('Geteilte Tabelle „' . $key . '“ nicht lesbar.');
+        $db = self::db($key);
+        $own = $db->fetchAll("SELECT * FROM {$t['table']} WHERE origin_site = ? ORDER BY id", [$site]);
+        $foreign = [];
+        if ($keepForeign) {
+            $ids = array_column(array_filter(Entries::query($t, ['status' => 'published', 'lang' => 'all', 'source' => 'site', 'limit' => 100000]),
+                fn($e) => (string) $e['origin_site'] !== $site), 'id');
+            foreach (array_chunk(array_map('intval', $ids), 500) as $chunk) {
+                array_push($foreign, ...$db->fetchAll("SELECT * FROM {$t['table']} WHERE id IN (" . implode(',', $chunk) . ') ORDER BY id'));
+            }
+        }
+        self::toLocal($key, $t, array_merge($own, $foreign));
+        // Eigene Einträge aus der geteilten Tabelle nehmen (Sicherung vorher)
+        $ownIds = array_map(fn($r) => (int) $r['id'], $own);
+        $backup = ['site' => $site, 'left' => date('c'), 'rows' => $own, 'pivots' => []];
+        foreach ($t['fields'] as $f) {
+            if ($f['type'] !== 'relations' || !$ownIds) continue;
+            $backup['pivots'][$f['name']] = $db->fetchAll('SELECT * FROM ' . Tables::pivot($t, $f['name']) . ' WHERE entry_id IN (' . implode(',', $ownIds) . ')');
+        }
+        @mkdir(self::dir($key) . '/left', 0770, true);
+        file_put_contents(self::dir($key) . '/left/' . $site . '-' . date('YmdHis') . '.json', json_encode($backup, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $db->transaction(function () use ($db, $t, $site, $ownIds) {
+            foreach (array_chunk($ownIds, 500) as $chunk) {
+                $in = implode(',', $chunk);
+                foreach ($t['fields'] as $f) if ($f['type'] === 'relations') $db->query('DELETE FROM ' . Tables::pivot($t, $f['name']) . " WHERE entry_id IN ($in)");
+                $db->query("DELETE FROM share_picks WHERE pick_entry IN ($in)");
+                $db->query("DELETE FROM {$t['table']} WHERE id IN ($in)");
+            }
+            $db->query('DELETE FROM share_picks WHERE pick_site = ?', [$site]);
+        });
+        $meta['members'] = array_values(array_diff($meta['members'], [$site]));
+        unset($meta['sites_info'][$site]);
+        self::saveMeta($key, self::normMeta($key, $meta));
+        app()->settings->delete('shared.' . $key);
+        Tables::flush();
+        foreach (array_unique(array_merge([$site], self::participants($meta))) as $s) PageCache::clearSite($s);
+        $log = [__('„{name}“ ist wieder eine eigene Tabelle dieser Website: {own} eigene Einträge, {copies} Kopien von anderen Websites.', ['name' => $t['name'], 'own' => count($own), 'copies' => count($foreign)])];
+        if ($own) $log[] = __('Die eigenen Einträge erscheinen nicht mehr bei den anderen Websites (Sicherung unter storage/shared/{key}/left/).', ['key' => $key]);
+        return $log;
+    }
+
+    /**
+     * Lokale Tabelle dieser Website aus der geteilten anlegen (gleicher Kurzname, gleiche IDs) und $rows (Rohzeilen der geteilten
+     * Tabelle) eintragen: Bilder aus dem Pool als Verweise dieser Website, Verknüpfungen der übernommenen Einträge, Detailseite.
+     */
+    private static function toLocal(string $key, array $t, array $rows): int
+    {
         $detail = self::localConfig($key)['detail_page_id'];
         $settings = $t['settings'];
         $settings['detail_page_id'] = $detail;
         $def = ['handle' => $key, 'name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'description' => (string) $t['description'],
             'fields' => $t['fields'], 'settings' => $settings];
         $media = array_column(array_filter($t['fields'], fn($f) => in_array($f['type'], ['media', 'file'], true)), 'name');
-        $rows = self::db($key)->fetchAll("SELECT * FROM {$t['table']}" . ($all ? '' : ' WHERE origin_site = ?') . ' ORDER BY id', $all ? [] : [site()->key]);
         $pivots = [];
         foreach ($t['fields'] as $f) if ($f['type'] === 'relations') $pivots[$f['name']] = self::db($key)->fetchAll('SELECT * FROM ' . Tables::pivot($t, $f['name']));
         // Reste früherer Sicherungen (gleichnamige Indizes) dürfen das Anlegen nicht blockieren
@@ -818,14 +941,7 @@ final class Shared
                 if (isset($ids[(int) $p['entry_id']])) app()->db->insert(Tables::pivot($local, $name), ['entry_id' => (int) $p['entry_id'], 'target_id' => (int) $p['target_id'], 'sort' => (int) $p['sort']]);
             }
         }
-        unset(self::$dbs[$key]);
-        @mkdir(self::dir('_removed'), 0770, true);
-        rename(self::dir($key), self::dir('_removed') . '/' . $key . '-' . date('YmdHis'));
-        self::flush();
-        Tables::flush();
-        foreach (self::participants($meta) as $s) PageCache::clearSite($s);
-        return [__('„{name}“ ist wieder eine eigene Tabelle dieser Website ({n} Einträge).', ['name' => $t['name'], 'n' => count($rows)]),
-            __('Die geteilten Daten liegen als Sicherung unter storage/shared/_removed/.')];
+        return $id;
     }
 
     // ================================================================= Blöcke

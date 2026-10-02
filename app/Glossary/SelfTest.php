@@ -7,7 +7,8 @@ namespace Core\Glossary;
 
 /**
  * php bin/console glossary:selftest [--bench] – Markierung ohne Datenbank prüfen: Wortgrenzen, Groß-/Kleinschreibung,
- * Umlaute, Abkürzungen, längste Variante, erstes Vorkommen (Seite/Abschnitt), Ausnahmen, Escaping, keine Doppel-Markierung.
+ * Umlaute, Abkürzungen, längste Variante, erstes Vorkommen (Seite/Abschnitt), Ausnahmen, Escaping, keine Doppel-Markierung;
+ * geteiltes Glossar: Vergleichsform und Doppel-Erkennung (Sharing). Ende-zu-Ende mit zwei Websites: glossary:sharetest (ShareTest).
  */
 final class SelfTest
 {
@@ -158,6 +159,20 @@ final class SelfTest
         self::eq('Pfad genau', Glossary::excluded('/impressum/', "/impressum\n/blog/*"), true);
         self::eq('Pfad Präfix', Glossary::excluded('/blog/2026/x', "/impressum\n/blog/*"), true);
         self::eq('Pfad nicht', Glossary::excluded('/blogger', "/blog/*\n/impressum"), false);
+
+        // Geteiltes Glossar (Sharing): Vergleichsform und doppelte Begriffe über Websites (ohne Datenbank)
+        self::eq('Teilen: Vergleich ohne Groß/klein', Sharing::norm('SPF') === Sharing::norm('spf'), true);
+        self::eq('Teilen: Vergleich ohne Akzente/Umlaute', [Sharing::norm('Übertragung'), Sharing::norm('Café')], [Sharing::norm('ubertragung'), 'cafe']);
+        self::eq('Teilen: ß und Bindestrich', [Sharing::norm('Straße'), Sharing::norm('E-Mail')], ['strasse', 'email']);
+        $mine = [['id' => 1, 'term' => 'spf', 'variants' => [], 'lang' => 'de'], ['id' => 2, 'term' => 'Zertifikat', 'variants' => ['TLS-Zertifikat'], 'lang' => 'de'],
+            ['id' => 3, 'term' => 'Neu', 'variants' => [], 'lang' => 'de'], ['id' => 4, 'term' => 'API', 'variants' => [], 'lang' => 'en']];
+        $theirs = [['id' => 11, 'term' => 'SPF', 'variants' => ['Sender Policy Framework'], 'lang' => 'de'], ['id' => 12, 'term' => 'TLS Zertifikat', 'variants' => [], 'lang' => 'de'],
+            ['id' => 13, 'term' => 'API', 'variants' => [], 'lang' => 'de'], ['id' => 14, 'term' => 'Sender-Policy-Framework', 'variants' => [], 'lang' => 'de']];
+        $dupes = Sharing::duplicates($mine, $theirs);
+        self::eq('Teilen: Doppel gefunden (Begriff, Variante)', array_map(fn($d) => [$d['term']['id'], array_column($d['matches'], 'id')], $dupes), [[1, [11]], [2, [12]]]);
+        self::eq('Teilen: Doppel je Sprache (API de ≠ en)', in_array(4, array_map(fn($d) => $d['term']['id'], $dupes), true), false);
+        self::eq('Teilen: Variante ↔ Begriff', array_column(Sharing::duplicates([['id' => 5, 'term' => 'x', 'variants' => ['Sender Policy Framework'], 'lang' => 'de']], $theirs)[0]['matches'] ?? [], 'id'), [11, 14]);
+        self::eq('Teilen: zu kurz zählt nicht', Sharing::duplicates([['id' => 6, 'term' => 'A', 'variants' => [], 'lang' => 'de']], [['id' => 7, 'term' => 'a', 'variants' => [], 'lang' => 'de']]), []);
 
         // Quick-Glossar (QuickTool): Treffer „Auf dieser Seite“ ohne Datenbank
         $h = fn(string $html, array $s = [], int $self = 0) => QuickTool::hits($T, $html, $s + ['mode' => 'page', 'headings' => 3], 'de', $self);

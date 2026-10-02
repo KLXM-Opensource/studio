@@ -576,7 +576,7 @@ final class DataController extends AdminController
             // Eigentümer: automatische Übernahme nach Regeln (für alle Websites der Tabelle gespeichert)
             Shared::update($key, ['auto' => ['enabled' => $r->str('auto_enabled') === '1', 'sites' => (array) ($r->post['auto_sites'] ?? []),
                 'where' => self::whereRows($r->post['auto_where'] ?? [])]]);
-            Shared::saveLocal($key, ['link_origin' => false]);
+            Shared::saveLocal($key, ['link_origin' => false, 'canonical' => $r->str('canonical') === 'self' ? 'self' : 'origin']);
         } else {
             $members = in_array($r->str('members'), ['off', 'all', 'selected'], true) ? $r->str('members') : 'off';
             Shared::saveLocal($key, [
@@ -584,6 +584,7 @@ final class DataController extends AdminController
                 'sites' => array_values(array_intersect((array) ($r->post['sites'] ?? []), $t['shared']['members'])),
                 'where' => Shared::cleanWhere($t, self::whereRows($r->post['where'] ?? [])),
                 'link_origin' => $r->str('link_origin') === '1',
+                'canonical' => $r->str('canonical') === 'self' ? 'self' : 'origin',
             ]);
         }
         $this->changed();

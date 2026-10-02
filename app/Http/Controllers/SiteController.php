@@ -328,10 +328,13 @@ final class SiteController
         }
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
             if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id'])) continue;
-            // Geteilte Tabellen: nur eigene Einträge (fremde haben ihre Adresse auf der Ursprungs-Website)
-            foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => 'own']) as $e) {
+            // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
+            // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
+            foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
+                $loc = site_url() . Entries::url($t, $e);
+                if (Tables::isShared($t) && Entries::absUrl($t, $e) !== $loc) continue;
                 $mod = substr((string) ($e['updated_at'] ?? $e['published_at']), 0, 10);
-                $xml .= '  <url><loc>' . e(site_url() . Entries::url($t, $e)) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+                $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
             }
         }
         $xml .= '</urlset>' . "\n";

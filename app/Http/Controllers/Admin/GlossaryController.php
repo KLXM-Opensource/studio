@@ -8,13 +8,15 @@ namespace Core\Http\Controllers\Admin;
 use Core\Data\Entries;
 use Core\Glossary\Glossary;
 use Core\Glossary\QuickTool;
+use Core\Glossary\Sharing;
 use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
 
 /**
  * Verwaltung → Glossar (Funktion „glossary“, Core\Glossary): einrichten, Begriffe mit Vorkommen und Hinweisen, schnell
- * hinzufügen (optional mit KI-Vorschlag als Entwurf), Import/Export (CSV), Einstellungen. Bearbeitet wird in der Datentabelle.
+ * hinzufügen (optional mit KI-Vorschlag als Entwurf), Import/Export (CSV), Einstellungen, Teilen mit anderen Websites der Installation
+ * (Core\Glossary\Sharing, /admin/glossar/teilen). Bearbeitet wird in der Datentabelle.
  */
 final class GlossaryController extends AdminController
 {
@@ -45,7 +47,70 @@ final class GlossaryController extends AdminController
         $drill = can('data.schema') || ($t && can('data.edit', $t['handle']))
             ? \Core\Theme::capture(ROOT . '/app/Admin/views/data/_nav.php', ['cur' => 'page:glossary', 'active' => $t]) : '';
         return $this->view('glossary/index', ['drill' => $drill, 'drillTitle' => __('Daten'), 't' => $t, 'terms' => $terms, 'checks' => $t ? Glossary::checks($terms) : [], 'occ' => $occ,
-            'settings' => Glossary::settings(), 'import' => $import, 'ai' => Glossary::aiAvailable(), 'overview' => Glossary::overviewUrl()]);
+            'settings' => Glossary::settings(), 'import' => $import, 'ai' => Glossary::aiAvailable(), 'overview' => Glossary::overviewUrl(),
+            'sharing' => Sharing::available() ? Sharing::status() : null, 'hiddenCount' => $t && \Core\Data\Tables::isShared($t) ? count(Sharing::hidden()) : 0]);
+    }
+
+    // ================================================================= Geteiltes Glossar (Core\Glossary\Sharing)
+
+    /** Teilen, Einladungen, Beitreten mit Abgleich doppelter Begriffe, ausgeblendete Begriffe, Verlassen */
+    public function sharing(Request $r): Response
+    {
+        $this->gate($r);
+        if (!Sharing::available()) throw new HttpException(404);
+        $status = Sharing::status();
+        $t = Glossary::table();
+        $drill = \Core\Theme::capture(ROOT . '/app/Admin/views/data/_nav.php', ['cur' => 'page:glossary', 'active' => $t]);
+        return $this->view('glossary/sharing', ['drill' => $drill, 'drillTitle' => __('Daten'), 't' => $t, 'status' => $status, 'manage' => Sharing::canManage(),
+            'plan' => in_array($status['role'], ['invited'], true) ? Sharing::plan() : null, 'hidden' => Sharing::hidden(),
+            'canHide' => $t && can('data.publish', $t['handle'])]);
+    }
+
+    public function sharingSave(Request $r): Response
+    {
+        $this->gate($r);
+        if (!Sharing::available()) throw new HttpException(404);
+        if (!Sharing::canManage()) throw new HttpException(403, __('Teilen einrichten darf, wer die Grundeinstellungen ändern und geteilte Daten verwalten darf.'));
+        $back = self::BASE . '/teilen';
+        $by = (string) (app()->auth->user()['email'] ?? '');
+        try {
+            switch ($r->str('do')) {
+                case 'share':
+                    $log = Sharing::share((array) ($r->post['invite'] ?? []));
+                    break;
+                case 'invite':
+                    Sharing::invite((array) ($r->post['invite'] ?? []));
+                    $log = [__('Einladungen gespeichert.')];
+                    break;
+                case 'join':
+                    $log = Sharing::join(array_map('strval', (array) ($r->post['choice'] ?? [])), $by);
+                    break;
+                case 'leave':
+                    if ($r->str('confirm') !== Glossary::HANDLE) return $this->back($back, 'error', __('Zum Bestätigen bitte „{key}“ eintippen.', ['key' => Glossary::HANDLE]));
+                    $log = Sharing::leave($r->str('copies') === '1');
+                    break;
+                default:
+                    throw new HttpException(400);
+            }
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return $this->back($back, 'error', $e->getMessage());
+        }
+        return $this->back($back, 'success', implode(' ', $log));
+    }
+
+    /** Begriff einer anderen Website hier aus- oder wieder einblenden (Recht data.publish) */
+    public function hide(Request $r): Response
+    {
+        $this->gate($r);
+        $t = Glossary::table() ?? throw new HttpException(404);
+        if (!can('data.publish', $t['handle'])) throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
+        $back = $r->str('back') === 'teilen' ? self::BASE . '/teilen' : self::BASE;
+        try {
+            Sharing::hide((int) $r->str('id'), $r->str('state') !== 'show', (string) (app()->auth->user()['email'] ?? ''));
+        } catch (\InvalidArgumentException $e) {
+            return $this->back($back, 'error', $e->getMessage());
+        }
+        return $this->back($back, 'success', $r->str('state') === 'show' ? __('Begriff wird auf dieser Website wieder gezeigt.') : __('Begriff auf dieser Website ausgeblendet.'));
     }
 
     public function install(Request $r): Response

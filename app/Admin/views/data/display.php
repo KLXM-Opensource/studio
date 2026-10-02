@@ -72,9 +72,14 @@ $own = Entries::count($t, ['status' => 'published', 'lang' => 'all', 'source' =>
     </fieldset>
     <fieldset class="sh-fieldset"><legend><?= e(__('Verlinkung fremder Einträge')) ?></legend>
       <label class="f-check"><input type="hidden" name="link_origin" value="0"><input type="checkbox" name="link_origin" value="1"<?= $cfg['link_origin'] ? ' checked' : '' ?>> <span><?= e(__('Direkt auf die Ursprungs-Website verlinken (statt Detailseite auf dieser Website)')) ?></span></label>
-      <p class="adm-muted"><?= e(__('Detailseiten fremder Einträge auf dieser Website verweisen per Canonical auf die Ursprungs-Website – Suchmaschinen werten sie nicht doppelt.')) ?></p>
     </fieldset>
   <?php endif; ?>
+    <fieldset class="sh-fieldset"><legend><?= e(__('Suchmaschinen: Canonical fremder Einträge')) ?></legend>
+      <?php foreach (['origin' => __('Ursprungs-Website (empfohlen)'), 'self' => __('Diese Website')] as $k => $l): ?>
+      <label class="f-check"><input type="radio" name="canonical" value="<?= e($k) ?>"<?= $cfg['canonical'] === $k ? ' checked' : '' ?>> <span><?= e($l) ?></span></label>
+      <?php endforeach; ?>
+      <p class="adm-muted"><?= e(__('Detailseiten fremder Einträge gibt es auf jeder beteiligten Website unter deren eigener Adresse. Standard: Sie verweisen per Canonical auf die Ursprungs-Website (falls diese Detailseiten hat) und stehen nicht in der Sitemap – Suchmaschinen werten den gleichen Text nicht doppelt. „Diese Website“ nur wählen, wenn die Seiten hier für sich gefunden werden sollen; dann erscheinen sie auch in der Sitemap dieser Website.')) ?></p>
+    </fieldset>
   <?php if ($canSave): ?><div class="adm-row"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Speichern')) ?></button></div>
   <?php else: ?><p class="adm-muted"><?= e(__('Ändern darf, wer Einträge veröffentlichen darf.')) ?></p><?php endif; ?>
 </form>

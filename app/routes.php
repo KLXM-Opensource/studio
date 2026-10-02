@@ -90,6 +90,10 @@ return function (Router $r): void {
     $r->post('/admin/glossar/neu', [Admin\GlossaryController::class, 'quick']);
     $r->post('/admin/glossar/import', [Admin\GlossaryController::class, 'import']);
     $r->get('/admin/glossar/export', [Admin\GlossaryController::class, 'export']);
+    // Geteiltes Glossar (Core\Glossary\Sharing): teilen, einladen, beitreten, verlassen; fremde Begriffe aus-/einblenden
+    $r->get('/admin/glossar/teilen', [Admin\GlossaryController::class, 'sharing']);
+    $r->post('/admin/glossar/teilen', [Admin\GlossaryController::class, 'sharingSave']);
+    $r->post('/admin/glossar/ausblenden', [Admin\GlossaryController::class, 'hide']);
     // Quick-Glossar beim Bearbeiten auf der Website (Core\Glossary\QuickTool, resources/js/quick-glossary.mjs)
     $r->get('/admin/api/glossar/suche', [Admin\GlossaryController::class, 'apiSearch']);
     $r->post('/admin/api/glossar/begriff', [Admin\GlossaryController::class, 'apiCreate']);

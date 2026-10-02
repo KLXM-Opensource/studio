@@ -6,6 +6,26 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Geteiltes Glossar: ein Glossar für mehrere Websites einer Installation
+- **Glossar → Prüfen & Einstellungen → Mit anderen Websites teilen** (`/admin/glossar/teilen`, `Core\Glossary\Sharing`) – gebaut auf den
+  geteilten Datentabellen (Schlüssel `glossar`, `storage/shared/glossar/`), kein eigener Mechanismus. **Teilen** macht die Website zur
+  Eigentümerin (IDs und Adressen bleiben, `entry:glossar:{id}` wirkt weiter) und **lädt** andere Websites ein; alle sehen alles
+  (gegenseitig + automatische Übernahme). **Beitreten** nur auf Einladung, mit **Abgleich doppelter Begriffe** (Begriff/Variante ohne
+  Groß-/Kleinschreibung, Akzente, Leer- und Satzzeichen, je Sprache): je Doppel „Vorhandenen nutzen“ (Standard), „Eigenen übernehmen,
+  anderen hier ausblenden“ oder „Beide behalten“. Neue IDs werden in Seiten, Versionen und Erklärungen umgeschrieben, die alte Tabelle
+  bleibt als Sicherung. **Verlassen** mit Kopie (eigene Begriffe + zuletzt gezeigte fremde, gleiche IDs); die Eigentümerin beendet das
+  Teilen erst ohne Mitglieder. Rechte: „Grundeinstellungen“ + „Geteilte Daten verwalten“; Ausblenden: `data.publish`.
+- Alles liest das gemeinsame Glossar: Markierung im Text, Übersicht A–Z, Detailseiten `/glossar/{slug}` auf jeder Website,
+  `/_glossary.json`, Quick-Glossar (Suche mit „von {Website}“, „Auf dieser Seite“, Doppelprüfung jetzt ohne Akzente), Linkauswahl,
+  Prüfungen. Begriffsliste mit Herkunft und **Ausblenden** je Website; CSV-Import lässt fremde Begriffe unberührt.
+- **Geteilte Daten allgemein:** Einladungen (`share.json` → `invited`, `Shared::addMember()`), Zusammenführen als eingeladene Website
+  (`shareLocal(…, merge: true, $map, $skip)`), `Shared::leave()` für Mitglieder. Neue Einstellung **Canonical fremder Einträge**
+  (Anzeige auf dieser Website): Standard „Ursprungs-Website“ (wie bisher, nicht in der Sitemap), wahlweise „Diese Website“
+  (eigene Adresse, dann auch in der Sitemap). Die Sitemap nimmt fremde Einträge auf, deren Canonical hier liegt.
+- Kommandozeile `glossary:share|invite|join|leave`, Selbsttest `glossary:selftest` (Doppel-Erkennung) und
+  `glossary:sharetest --sandbox` (Ende-zu-Ende mit zwei Websites, nur in einer Wegwerf-Kopie: Teilen ein/aus, Doppel, gemeinsames
+  Lesen, Ausblenden, Markierung, Canonical, Rechte, Verweise, Verlassen).
+
 ### Quick-Glossar auch beim Ansehen: jeden Text als Begriff übernehmen
 - Im Bearbeiten-Modus lassen sich nur Textfelder markieren – beim **Ansehen** (angemeldet, Werkzeugleiste sichtbar) jetzt jeder
   Text der Seite: markieren, dann <kbd>⌥G</kbd>, der Knopf „Glossar“ oder der schwebende Knopf **Als Glossar-Begriff** neben der

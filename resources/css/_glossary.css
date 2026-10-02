@@ -14,3 +14,15 @@
 .gls-info{margin-top:10px}
 .gls-info summary{cursor:pointer;color:var(--adm-muted)}
 .gls-info ul{margin:8px 0 0;padding-left:1.2em;font-size:.92em}
+/* Geteiltes Glossar (Core\Glossary\Sharing, glossary/sharing.php + Begriffsliste) */
+.gls-share{max-width:60rem}
+.gls-share h3{margin:18px 0 6px;font-size:1rem}
+.gls-sites{margin:6px 0 10px;padding-left:1.2em}
+.gls-dupes td{vertical-align:top}
+.gls-dupes td p{margin:0 0 6px}
+.gls-choice{margin:0;padding:0;border:0;display:grid;gap:4px}
+.gls-hidden{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.gls-hidden li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gls-inline{display:inline}
+.gls-origin{font-weight:400}
+.gls-hide{margin-top:4px}

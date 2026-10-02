@@ -60,7 +60,9 @@ function view(ctx) {
 
 function itemHtml(ctx, it, i, kind) {
   const T = ctx.t;
-  const badge = it.draft ? ` <span class="qg-badge" title="${esc(T('draftLink'))}">${esc(T('draft'))}</span>` : '';
+  const badge = (it.draft ? ` <span class="qg-badge" title="${esc(T('draftLink'))}">${esc(T('draft'))}</span>` : '')
+    // Geteiltes Glossar: Begriff einer anderen Website (nur dort änderbar)
+    + (it.foreign && it.origin ? ` <span class="qg-badge" title="${esc(T('foreignHint'))}">${esc(T('from', { site: it.origin }))}</span>` : '');
   const variants = it.variants?.length ? `<span class="qg-var">${esc(it.variants.join(', '))}</span>` : '';
   const match = kind === 'page' && it.match && it.match.toLowerCase() !== it.term.toLowerCase() ? `<span class="qg-var">„${esc(it.match)}“</span>` : '';
   const btn = kind === 'page'
