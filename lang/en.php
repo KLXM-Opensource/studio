@@ -1683,6 +1683,10 @@ return [
     'Vereine' => 'Clubs',
     'Vom Verband' => 'From the association',
     'Von Vereinen' => 'From clubs',
+    'Haupt-Website' => 'Main website',
+    'Partner-Websites' => 'Partner websites',
+    'Von der Haupt-Website' => 'From the main website',
+    'Von Partner-Websites' => 'From partner websites',
     'niemand' => 'nobody',
 
     // Einträge auf der Website bearbeiten (Core\Data\EntryEdit)
