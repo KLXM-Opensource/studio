@@ -1,10 +1,25 @@
 # Changelog
 
-Übersicht der Funktionsbereiche von **KLXM Studio** (früher „MyCMS.dev light“). Die Versionsnummer steht in
+Übersicht der Funktionsbereiche von **KLXM Studio**. Die Versionsnummer steht in
 `app/bootstrap.php` (`CMS_VERSION`); Einzelheiten zu jedem Bereich im Entwicklerhandbuch (`/admin/hilfe/technik`)
 und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
+
+### Kit „frameworks“: Tailwind CSS oder UIkit – und was ein Framework-Kit braucht
+- Neues Demo-Kit `kits/frameworks` (fiktive Firma „Beispielwerk“): dieselben Blöcke mit **Tailwind CSS 4** (vorkompiliert mit
+  `@tailwindcss/cli`, Preflight in `@layer base`, Variante `dark:`) oder **UIkit 3.25** (mitgeliefert, Brücke für Kontrast,
+  Dunkelmodus und Rich-Text-Klassen); umschaltbar unter Design → „Framework“, zum Vergleichen `?fw=uikit` / `?fw=tailwind`.
+  Startinhalte mit Seitenbaum, Datentabelle mit Detailseite, Formular, Glossar, Karte und Video.
+- Neues Kapitel im Entwicklerhandbuch: **Frameworks (Tailwind, UIkit, Bootstrap)** – warum es funktioniert, empfohlene Setups,
+  Fallstricke aus den Tests, eigenes Framework-Kit beginnen.
+- `editor.css`: Overlays der Frameworks (UIkit `uk-offcanvas`/`uk-modal`, Bootstrap `.offcanvas`/`.modal` + Backdrops) liegen beim
+  Bearbeiten über dem angehobenen Kopf des Kits (z-index 2147483055); Seitenmenüs rücken um die sichtbare Leistenhöhe ein – vorher
+  verdeckten Kopf und Werkzeugleiste am Telefon den Schließen-Knopf.
+- `dataform.css`: Felder des Formulars setzen `box-sizing:border-box` selbst – mit Frameworks ohne globalen Reset (UIkit) liefen sie
+  bei 390 px über den Rand.
+- Entwicklerhandbuch: Kapitelnummern mit eigenem Zähler (Kapitel-Dateien, die `$__n` benutzen, stellten sonst alle folgenden
+  Nummern auf „00“).
 
 ### Geteilte Daten: Adresse der Ursprungs-Website auch beim Teilen per Kommandozeile
 - `Shared::touch()` trägt die Adresse einer Website jetzt auch auf der Kommandozeile (Teilen/Beitreten per CLI, MCP) ins Register

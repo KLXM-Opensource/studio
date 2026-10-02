@@ -7,7 +7,7 @@
 
 Quellcode: [github.com/KLXM-Opensource/studio](https://github.com/KLXM-Opensource/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Tutorials: [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) · Downloads: [Releases](https://github.com/KLXM-Opensource/studio/releases) · Fehler und Wünsche: [Issues](https://github.com/KLXM-Opensource/studio/issues)
 
-KLXM Studio (früher „MyCMS.dev light“) betreibt eine oder viele Websites aus einer Installation. Redaktionen
+KLXM Studio betreibt eine oder viele Websites aus einer Installation. Redaktionen
 bearbeiten direkt auf der Website (Blockeditor, Inline-Editing), pflegen zentrale Angaben, eigene Datentabellen,
 Medien mit Untertiteln und verschlüsselte Online-Anfragen. Agenturen steuern Funktionsumfang, Kits und
 Websites zentral über die Netzwerk-Administration.
