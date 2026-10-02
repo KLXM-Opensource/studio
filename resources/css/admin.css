@@ -2621,5 +2621,6 @@ html.has-ptpv[style*="--ptpv-user"]{--ptpv-w:var(--ptpv-user)}
 .ptpv__grip::after{content:"";position:absolute;left:3px;top:50%;width:2px;height:40px;margin-top:-20px;border-radius:2px;background:var(--adm-line)}
 .ptpv__grip:hover::after,.ptpv.is-resizing .ptpv__grip::after{background:var(--adm-a)}
 .ptpv.is-resizing iframe{pointer-events:none}
-.pt-row{min-height:44px;padding-block:4px}
 @media (max-width:900px){html.has-ptpv{--ptpv-w:100vw!important}}
+/* Vorschau füllt die Höhe der Leiste: Breite = Gerät (skaliert), Höhe = verfügbare Fläche */
+.ptpv__stage iframe{top:12px;transform-origin:50% 0}

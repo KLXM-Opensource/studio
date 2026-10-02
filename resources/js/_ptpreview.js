@@ -1,7 +1,8 @@
 /*
  * Seitenbaum → Vorschau als Seitenleiste (Markup: app/Admin/views/pages/index.php, [data-ptpv]).
  * Zeigt die markierte Seite über /admin/pages/{id}/vorschau (ohne Werkzeugleiste) in einem skalierten Rahmen:
- * Mobil 390 × 844 bzw. Desktop 1280 × 800, jeweils hoch oder quer (Desktop: Leiste automatisch breiter, Breite ziehbar); Entwurf (Arbeitsstand) oder Live.
+ * Gerätebreite Mobil 390 (quer 844) bzw. Desktop 1280 (hoch 800), nach der Breite skaliert und in voller Höhe der Leiste
+ * (Desktop: Leiste automatisch breiter, Breite ziehbar); Entwurf (Arbeitsstand) oder Live.
  * Folgt der Auswahl im Baum (aria-selected), merkt sich offen/Gerät/Ausrichtung/Fassung (localStorage).
  * Öffnen: Augen-Knopf je Zeile ([data-ptpv-row], neben Online/Offline). Ereignis „ptpv:open“ (detail: Baumknoten) öffnet die Leiste für eine Seite – z. B. aus dem Kontextmenü.
  */
@@ -32,13 +33,15 @@ export function initPagePreview() {
   };
   const fit = () => {
     if (box.hidden) return;
-    const [w, h] = dims();
+    // Füllend: nach der Gerätebreite skalieren, Höhe = ganze Leiste (die Seite scrollt darin wie auf dem Gerät)
+    const [w] = dims();
     const sw = Math.max(0, stage.clientWidth - 24), sh = Math.max(0, stage.clientHeight - 24);
-    const sc = Math.min(1, sw / w, sh / h) || 1;
+    const sc = Math.min(1, sw / w) || 1;
+    const h = Math.round(sh / sc);
     frame.style.width = w + 'px';
     frame.style.height = h + 'px';
-    frame.style.transform = `translate(-50%, -50%) scale(${sc})`;
-    scaleEl.textContent = `${w} × ${h} · ${Math.round(sc * 100)} %`;
+    frame.style.transform = `translateX(-50%) scale(${sc})`;
+    scaleEl.textContent = `${w} px · ${Math.round(sc * 100)} %`;
   };
   const load = () => {
     if (!pageId) { frame.hidden = true; empty.hidden = false; openLink.hidden = true; return; }
