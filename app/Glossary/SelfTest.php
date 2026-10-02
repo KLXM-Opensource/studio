@@ -145,6 +145,9 @@ final class SelfTest
         self::eq('Link zum Glossar', str_contains($out, '<a class="gl-pop__more" href="/glossar/spf">'), true);
         $short = (new Annotator(array_map(fn($x) => ['more' => false] + $x, $T)))->annotate($page);
         self::eq('Kein Link, wenn die Bubble alles zeigt', str_contains($short, 'gl-pop__more'), false);
+        $src = (new Annotator(array_map(fn($x) => ['more' => false, 'link' => 'https://www.example.org/spf'] + $x, $T)))->annotate($page);
+        self::eq('Nur Quelle: Link direkt zur Quelle', str_contains($src, 'class="gl-pop__more gl-pop__src" href="https://www.example.org/spf" target="_blank" rel="noopener">example.org'), true);
+        self::eq('Nur Quelle: kein Link ins Glossar', str_contains($src, 'href="/glossar/spf"'), false);
         $again = (new Annotator($T))->annotate($out);
         self::eq('zweimal = einmal', $again, $out);
         self::eq('ohne Begriffe unverändert', (new Annotator([]))->annotate($page), $page);

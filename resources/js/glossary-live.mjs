@@ -75,6 +75,13 @@ function make(t, text, lab) {
     ar.setAttribute('aria-hidden', 'true');
     m.append(ar);
     p.append(m);
+  } else if (t.x) {
+    // Keine ausführliche Erklärung, aber eine Quelle: direkt dorthin (neuer Tab)
+    const m = el('a', 'gl-pop__more gl-pop__src', new URL(t.x).hostname.replace(/^www\./, '') + ' '), ar = el('span', '', '↗'), sr = el('span', 'gl-sr', ' ' + (lab.newtab || ''));
+    m.href = t.x; m.target = '_blank'; m.rel = 'noopener';
+    ar.setAttribute('aria-hidden', 'true');
+    m.append(ar, sr);
+    p.append(m);
   }
   w.append(b, p);
   return w;

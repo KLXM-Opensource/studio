@@ -288,7 +288,13 @@ final class Annotator
         $id = $this->o['prefix'] . (++$this->n);
         $l = $this->o['labels'];
         $draft = !empty($t['draft']) ? ' <span class="gl-pop__draft">' . e($l['draft']) . '</span>' : '';
-        $more = !empty($t['url']) && ($t['more'] ?? true) ? '<a class="gl-pop__more" href="' . e((string) $t['url']) . '">' . e($l['more']) . ' <span aria-hidden="true">→</span></a>' : '';
+        // „Mehr im Glossar“ nur bei ausführlicher Erklärung; sonst – falls vorhanden – direkt die Quelle (neuer Tab)
+        $src = (string) ($t['link'] ?? '');
+        $more = !empty($t['url']) && ($t['more'] ?? true)
+            ? '<a class="gl-pop__more" href="' . e((string) $t['url']) . '">' . e($l['more']) . ' <span aria-hidden="true">→</span></a>'
+            : ($src !== '' && Glossary::safeLink($src)
+                ? '<a class="gl-pop__more gl-pop__src" href="' . e($src) . '" target="_blank" rel="noopener">' . e(Glossary::linkHost($src)) . ' <span aria-hidden="true">↗</span><span class="gl-sr"> ' . e($l['newtab'] ?? '') . '</span></a>'
+                : '');
         return '<span class="gl" data-gl="' . e((string) $t['key']) . '">'
             . '<button type="button" class="gl-term" popovertarget="' . $id . '" aria-expanded="false" aria-controls="' . $id . '">' . $match . '</button>'
             . '<span class="gl-pop" id="' . $id . '" popover>'

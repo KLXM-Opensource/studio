@@ -144,8 +144,8 @@ final class Glossary
             'long' => isset($has['erklaerung']) && trim(strip_tags((string) ($e['erklaerung'] ?? ''))) !== '' ? Entries::html($t, $e, 'erklaerung') : '',
             'category' => isset($has['kategorie']) ? trim(strip_tags((string) ($e['kategorie'] ?? ''))) : '',
             'link' => isset($has['link']) ? trim((string) ($e['link'] ?? '')) : '',
-            // Bubble mit „Mehr im Glossar →“ nur, wenn die Detailseite mehr bietet als die Bubble (ausführliche Erklärung oder Quelle)
-            'more' => (isset($has['erklaerung']) && trim(strip_tags((string) ($e['erklaerung'] ?? ''))) !== '') || (isset($has['link']) && trim((string) ($e['link'] ?? '')) !== ''),
+            // Bubble mit „Mehr im Glossar →“ nur bei ausführlicher Erklärung; gibt es nur eine Quelle, verlinkt die Bubble direkt dorthin
+            'more' => isset($has['erklaerung']) && trim(strip_tags((string) ($e['erklaerung'] ?? ''))) !== '',
             'url' => Entries::href($t, $e),
             'variants' => self::splitVariants((string) ($e['varianten'] ?? '')),
             'draft' => ($e['status'] ?? 'published') !== 'published',
@@ -229,7 +229,19 @@ final class Glossary
     /** Feste Texte der Hinweisfenster (Sprache der Seite) */
     public static function labels(): array
     {
-        return ['more' => lt('Mehr im Glossar'), 'close' => lt('Erklärung schließen'), 'draft' => lt('Entwurf')];
+        return ['more' => lt('Mehr im Glossar'), 'close' => lt('Erklärung schließen'), 'draft' => lt('Entwurf'), 'newtab' => lt('(öffnet in neuem Tab)')];
+    }
+
+    /** Quelle eines Begriffs als Link in der Bubble: nur http(s) */
+    public static function safeLink(string $u): bool
+    {
+        return (bool) preg_match('~^https?://[^\s"<>]+$~i', trim($u));
+    }
+
+    /** Anzeigename einer Quelle: Host ohne „www.“ (opensource.org) */
+    public static function linkHost(string $u): string
+    {
+        return (string) preg_replace('~^www\.~i', '', (string) parse_url(trim($u), PHP_URL_HOST));
     }
 
     /** Pfad ausgenommen? Zeilen „/pfad“ (genau) oder „/pfad/*“ (alles darunter) */
@@ -308,7 +320,7 @@ final class Glossary
         $terms = [];
         foreach (self::terms(false) as $t) {
             if ($t['short'] === '') continue;
-            $terms[] = ['k' => $t['key'], 't' => $t['term'], 's' => $t['short'], 'u' => ($t['more'] ?? true) ? $t['url'] : null,
+            $terms[] = ['k' => $t['key'], 't' => $t['term'], 's' => $t['short'], 'u' => ($t['more'] ?? true) ? $t['url'] : null, 'x' => !($t['more'] ?? true) && self::safeLink($t['link'] ?? '') ? $t['link'] : null,
                 'v' => array_map(fn($v) => [$v, Annotator::caseSensitive($v) ? 1 : 0], Annotator::variants($t))];
         }
         return ['mode' => $s['mode'], 'headings' => (int) $s['headings'], 'lang' => Lang::current(), 'labels' => self::labels(), 'terms' => $terms];

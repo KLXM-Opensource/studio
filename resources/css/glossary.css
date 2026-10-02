@@ -24,6 +24,7 @@
 /* Über „ganze Karte ist ein Link“ (::after mit inset:0, z. B. Referenz- und Leistungskarten) liegen – sonst öffnet der Begriff
    nie sein Hinweisfenster, der Klick ginge an den Karten-Link. Der Rest der Karte bleibt klickbar. */
 .gl-term{position:relative;z-index:2}
+.gl-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 .gl-term:hover,.gl-term[aria-expanded=true]{text-decoration-color:var(--_acc);text-decoration-style:solid}
 .gl-term[aria-expanded=true]{background:color-mix(in srgb,var(--_acc) 14%,transparent)}
 .gl-term:focus-visible{outline:2px solid var(--_acc);outline-offset:2px}
