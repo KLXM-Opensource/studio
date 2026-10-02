@@ -35,6 +35,9 @@ export function livePreview({ wrap, endpoint, body, key = 'st', onData, openDefa
     const w = device === 'mobile' ? 390 : 1280;
     const avail = stage.clientWidth || w;
     const scale = Math.min(1, avail / w);
+    // Höhe wie ein echter Bildschirm (Desktop 1280 × 800, Mobil 390 × 844), höchstens Fensterhöhe – im Vollbild-Blatt per CSS
+    stage.style.height = pane.classList.contains('is-sheet') ? ''
+      : Math.max(260, Math.min(innerHeight - 170, Math.round((device === 'mobile' ? 844 : 800) * scale))) + 'px';
     frame.style.width = w + 'px';
     frame.style.height = Math.round((stage.clientHeight || 700) / scale) + 'px';
     frame.style.transform = `scale(${scale})`;
