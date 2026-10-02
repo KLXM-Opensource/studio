@@ -283,7 +283,7 @@ final class Tables
                 'id' => preg_match('~^[a-z0-9]{6,16}$~', (string) ($f['id'] ?? '')) ? $f['id'] : bin2hex(random_bytes(4)),
                 'name' => $fname, 'label' => $label ?: $fname, 'type' => $type,
                 'required' => !empty($f['required']), 'in_list' => !empty($f['in_list']), 'searchable' => !empty($f['searchable']),
-                'help' => mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 200),
+                'help' => trim(mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 200)),
                 'width' => ($f['width'] ?? '') === 'half' ? 'half' : '',
             ];
             if (in_array($type, ['select', 'multiselect'], true)) {
