@@ -23,6 +23,7 @@ import { initNetwork } from './_network.js';
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
 import { initSources } from './_sources.js';   // Daten → Externe Quellen: Zuordnung mit Auswahl, Beispiel und Probeabruf (Core\Sources)
+import { initPagePreview } from './_ptpreview.js';   // Seitenbaum → Vorschau als Seitenleiste (Mobil/Desktop, hoch/quer)
 import { initEntryEdit } from './_entry_edit.js';
 import { initTargetEdit } from './_target_edit.js';   // „Bearbeiten“ an Karten/Kacheln → Seite bzw. Eintrag (Core\TargetEdit)
 import { formFields } from './_form_fields.js';   // Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken (Core\Data\SchemaPanel)
@@ -87,6 +88,7 @@ initNetwork();
 initReview();
 initRedirects();
 initSources();
+initPagePreview();
 initAiSettings();   // Grundeinstellungen → KI (nur mit #aip-data)
 // Konto → Akzentfarbe (_accent.js)
 initAccent();
@@ -731,6 +733,7 @@ if (pt) {
       ['Inhalte bearbeiten', () => open(n)],
       ['Seiteneinstellungen …', () => { location.href = `${base}/${id}`; }],
       ['Ansehen ↗', () => window.open(n.dataset.url, '_blank', 'noopener')],
+      [t('Vorschau'), () => { n.click(); d.dispatchEvent(new CustomEvent('ptpv:open', { detail: n })); }],
       ['-'],
       ['Neue Unterseite …', () => { location.href = `${base}/new?parent=${id}&lang=${pt.dataset.lang}`; }],
       // Verschieben ohne Ziehen (auch per Tastatur: Alt + Pfeiltasten)

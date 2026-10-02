@@ -78,8 +78,8 @@ $html = implode('', array_map($row, $tree));
         <h3 class="adm-tip__h"><?= e(__('Sonderseiten & Vorlagen')) ?></h3>
         <ul>
           <?php if (can('pages.manage')): ?><li><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></li><?php endif; ?>
-          <?php if (can('system.manage')): ?><li><?= e(__('Seitenvorlagen sind der Ausgangspunkt für neue Seiten der Redaktion – ohne eigene Adresse, nur die Administration kann sie ändern.')) ?></li><?php endif; ?>
-          <?php if (can('data.schema')): ?><li><?= e(__('Detailseiten-Vorlagen gelten für alle Einträge einer Datentabelle und werden unter „Daten“ gestaltet.')) ?></li><?php endif; ?>
+          <?php if (can('system.manage')): ?><li><?= e(__('Seitenvorlagen sind der Ausgangspunkt für neue Seiten der Redaktion – ohne eigene Adresse, nur die Administration kann sie ändern.')) ?> <a href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Seitenvorlagen verwalten')) ?></a></li><?php endif; ?>
+          <?php if (can('data.schema')): ?><li><?= e(__('Detailseiten-Vorlagen gelten für alle Einträge einer Datentabelle und werden unter „Daten“ gestaltet.')) ?> <a href="<?= e(url('/admin/data')) ?>"><?= e(__('Zu den Daten')) ?></a></li><?php endif; ?>
         </ul>
         <?php endif; ?>
       </div>
@@ -108,6 +108,7 @@ $canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pa
     <label class="fx-search dt-search"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3 9l3.3 3.3 1-1L11 10A5 5 0 0 0 7 2zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></svg><input type="search" placeholder="Seiten filtern" aria-label="Seiten filtern" data-filter></label>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-expand-all>Alle aufklappen</button>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-collapse-all>Alle zuklappen</button>
+    <button type="button" class="adm-btn adm-btn--small ptpv-toggle" data-ptpv-toggle aria-pressed="false" aria-controls="ptpv"><?= icon('browser') ?> <?= e(__('Vorschau')) ?></button>
   </div>
   <div class="pt-head" aria-hidden="true"><span>Name</span><span>Adresse</span><span>Status</span><span>Menü</span><span>Geändert</span><span></span></div>
   <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"><?= $html ?></ul>
@@ -181,3 +182,28 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 </div>
 <?php endif; ?>
 </div>
+
+<?php // Vorschau als Seitenleiste (resources/js/_ptpreview.js): markierte Seite, Mobil/Desktop, hoch/quer, Entwurf/Live ?>
+<aside class="ptpv" id="ptpv" data-ptpv data-base="<?= e(url('/admin/pages')) ?>" aria-labelledby="ptpv-title" hidden>
+  <div class="ptpv__bar">
+    <h2 class="ptpv__title" id="ptpv-title" data-ptpv-title><?= e(__('Vorschau')) ?></h2>
+    <a class="ptpv__icon" data-ptpv-open href="#" target="_blank" rel="noopener" title="<?= e(__('In neuem Tab öffnen')) ?>" aria-label="<?= e(__('Vorschau in neuem Tab öffnen')) ?>">↗</a>
+    <button type="button" class="ptpv__icon" data-ptpv-close aria-label="<?= e(__('Vorschau schließen')) ?>" title="<?= e(__('Schließen')) ?>">✕</button>
+  </div>
+  <div class="ptpv__tools">
+    <div class="ptpv-seg" role="group" aria-label="<?= e(__('Gerät')) ?>">
+      <button type="button" data-dev="mobile"><?= e(__('Mobil')) ?></button><button type="button" data-dev="desktop"><?= e(__('Desktop')) ?></button>
+    </div>
+    <div class="ptpv-seg" role="group" aria-label="<?= e(__('Ausrichtung')) ?>">
+      <button type="button" data-orient="portrait"><?= e(__('Hoch')) ?></button><button type="button" data-orient="landscape"><?= e(__('Quer')) ?></button>
+    </div>
+    <div class="ptpv-seg" role="group" aria-label="<?= e(__('Fassung')) ?>">
+      <button type="button" data-stand=""><?= e(__('Entwurf')) ?></button><button type="button" data-stand="live"><?= e(__('Live')) ?></button>
+    </div>
+  </div>
+  <div class="ptpv__stage" data-ptpv-stage>
+    <iframe title="<?= e(__('Vorschau der gewählten Seite')) ?>" data-ptpv-frame hidden></iframe>
+    <p class="ptpv__empty" data-ptpv-empty><?= e(__('Eine Seite im Seitenbaum wählen.')) ?></p>
+    <span class="ptpv__scale" data-ptpv-scale aria-hidden="true"></span>
+  </div>
+</aside>

@@ -261,6 +261,21 @@ final class PageController extends AdminController
         return Response::json(['ok' => true]);
     }
 
+    /**
+     * Vorschau für die Seitenleiste im Seitenbaum (ohne Werkzeugleiste, noindex): ?stand=live = veröffentlichte Fassung,
+     * sonst Arbeitsstand (Entwurf). Seitenvorlagen nur für die Administration.
+     */
+    public function preview(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.edit');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403);
+        if (($page['type'] ?? 'page') === 'template' && !\Core\PageTemplates::isTemplatePage($page) && !NotFound::isPage($page)) throw new HttpException(404);
+        $live = $r->str('stand') === 'live' && $page['content_published'] !== null;
+        $site = new \Core\Http\Controllers\SiteController();
+        return $site->respond($site->previewHtml($page, !$live), true)->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'no-store, private');
+    }
+
     /** Seite duplizieren (als Entwurf, direkt dahinter) */
     public function duplicate(Request $r, string $id): Response
     {

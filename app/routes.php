@@ -125,6 +125,7 @@ return function (Router $r): void {
     $r->post('/admin/pages/{id}/move', [Admin\PageController::class, 'move']);
     $r->post('/admin/pages/{id}/quick', [Admin\PageController::class, 'quick']);
     $r->post('/admin/pages/{id}/duplicate', [Admin\PageController::class, 'duplicate']);
+    $r->get('/admin/pages/{id}/vorschau', [Admin\PageController::class, 'preview']);   // Seitenleiste „Vorschau“ im Seitenbaum
     // Seitenvorlagen für die Redaktion (Core\PageTemplates)
     $r->get('/admin/seitenvorlagen', [Admin\PageTemplateController::class, 'index']);
     $r->post('/admin/seitenvorlagen', [Admin\PageTemplateController::class, 'save']);
