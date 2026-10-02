@@ -6,6 +6,23 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### CSS & JS: Referenz für alle Kits und Generator
+- **Entwicklerhandbuch › CSS & JS** (`#css-js`): die vier Ebenen (Verwaltung, Editor im Shadow DOM, öffentliche Kern-Bausteine,
+  Kit), Laden (`conditional_css` mit „typ:variante“ und `@rich`, Kern-Stylesheets je Block und wie ein Kit sie ersetzt,
+  `.mjs`/`import()`, Versionierung `?v=`, `/assets/…`), CSP für Besucher (kein Inline-CSS/JS, keine Nonces – Klassen,
+  `data-*`, CSSOM), Präfixe und was öffentlich bzw. intern ist, alle Variablen der Kern-Bausteine mit Vorgaben,
+  `data-*`-Attribute, globale Objekte (`CMSAdmin`, `CMSEditor`, `CMSMedia` …), Ereignisse (`cms:*`, Muster `{kit}:inview`,
+  `{kit}:content`), Pflichtregeln für Bewegung (Endbild bei „Bewegung reduzieren“, Pausenknopf nach WCAG 2.2.2, Fokus,
+  `forced-colors`, Bearbeiten-Modus), Dos & Don'ts und die Z-Skala. Tabellen mit Variablen, Ereignissen, Ladern und
+  Attributen entstehen zur Laufzeit aus den Quellen (gecacht).
+- **`php bin/console docs:assets [--kit=…|--kit-dir=…] [--kit-only] [--out[=…]] [--update] [--json]`** (`Core\AssetDocs`):
+  Markdown-Referenz aus CSS, JS, Vorlagen und `theme.php` – Custom Properties mit Vorgaben (auch Rückfälle aus `var()`),
+  `conditional_css` → Block → Dateien, Ereignisse mit Payload, `data-*`, Bewegung/Barrierefreiheit je Datei (⚠ bei
+  Animation ohne `prefers-reduced-motion`). `docs:selftest` prüft die Parser an Beispielen und am Kern.
+- **Kit-Seite „CSS & JS“** (`kits/{name}/docs/css-js.md`): einheitlicher Aufbau (Überblick, Tokens, Blöcke → Dateien,
+  Animationen, Overlays, JavaScript, Sonderfälle) plus generierter Anhang zwischen Markern, den `--update` erneuert.
+  Für alle mitgelieferten Kits angelegt; Beschreibung unter Kits & Design.
+
 ### Externe Quellen: Zuordnung ohne Vorwissen
 - **Felder in der Quelle:** Nach „Vorschau laden“ zeigt die Quelle alle Felder des ersten Eintrags mit Bedeutung („Datum der
   Veröffentlichung“), Pfad (`pubDate`) und Beispielwert – statt einer versteckten Auswahlliste. Ohne Vorschau steht dort, was zu tun ist.

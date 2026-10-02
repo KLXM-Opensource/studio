@@ -104,6 +104,28 @@ Bilder im Format **16:10**. Website-Screenshots …
 
 ## Schlagworte
 - Hashtag ohne #, Leistungen als Filter</code></pre>
+  <h3 id="kit-css-js">Die Kit-Seite „CSS &amp; JS“ – <code>docs/css-js.md</code></h3>
+  <p>Was der Kern an CSS und JavaScript mitbringt, steht einmal für alle in <a href="#css-js">CSS &amp; JS</a>. Was ein Kit darauf setzt, beschreibt jedes Kit auf <b>einer</b> Seite mit festem Aufbau: <code>kits/{name}/docs/css-js.md</code> (Entwicklerdoku – bewusst nicht unter <code>guide/</code>, denn die Hinweise dort liest die Redaktion im Handbuch).</p>
+  <table class="doc-table">
+    <tr><th>Abschnitt</th><th>Inhalt</th></tr>
+    <tr><td>1. Überblick</td><td>Dateien, die immer laden, Budgets, Build-Befehl</td></tr>
+    <tr><td>2. Tokens &amp; Farben</td><td>Präfix der Kit-Variablen, Design-Tokens des Style-Editors, Hell/Dunkel, welche Kern-Variablen (<code>--dl-*</code>, <code>--gl-*</code> …) das Kit setzt</td></tr>
+    <tr><td>3. Blöcke → Dateien</td><td>Besonderheiten zur generierten Tabelle (geteilte Dateien, Varianten mit eigener Datei, ersetzte Kern-Stylesheets)</td></tr>
+    <tr><td>4. Animationen &amp; Regeln</td><td>Was sich bewegt, Endbild bei „Bewegung reduzieren“, Pausenknopf (WCAG 2.2.2), Verhalten im Bearbeiten-Modus</td></tr>
+    <tr><td>5. Overlays, Sheets, Dialoge</td><td>z-index des Kits, Fokus, <kbd>Esc</kbd>, nachgeladene Inhalte</td></tr>
+    <tr><td>6. JavaScript &amp; Ereignisse</td><td>Globale Objekte, eigene Ereignisse mit Payload, <code>data-*</code>-Schnittstellen</td></tr>
+    <tr><td>7. Sonderfälle</td><td>Abweichungen von den Kern-Regeln mit Begründung</td></tr>
+    <tr><td>Anhang (generiert)</td><td>zwischen <code>&lt;!-- docs:assets:start … --&gt;</code> und <code>&lt;!-- docs:assets:end --&gt;</code>: immer geladene Dateien, <code>conditional_css</code>, Blöcke → Renderer/CSS/JS je Variante, Design-Tokens, Variablen je Datei, Bewegung/Barrierefreiheit je Datei (⚠ bei Animation ohne <code>prefers-reduced-motion</code>), Ereignisse, <code>data-*</code></td></tr>
+  </table>
+  <pre><code>php bin/console docs:assets --kit=meinkit --update        # legt docs/css-js.md mit Vorlage an bzw. erneuert nur den Anhang
+php bin/console docs:assets --kit-dir=/pfad/zum/kit --update   # Kit außerhalb von kits/ (z. B. private Kits einer anderen Installation)</code></pre>
+  <p>Text außerhalb der Marker bleibt bei jedem Lauf unverändert. Nach Änderungen an <code>theme.php</code>, Block-Dateien oder <code>assets/</code> den Anhang erneuern und im selben Commit mitgeben. Stand der mitgelieferten Kits:</p>
+  <table class="doc-table">
+    <tr><th>Kit</th><th>Blöcke mit Renderer</th><th>bedingte Dateien</th><th>Seite</th></tr>
+    <?php foreach (\Core\Kit::all() as $__kn => $__kd): $__ka = \Core\AssetDocs::kit($__kd); ?>
+    <tr><td><code><?= e($__kn) ?></code></td><td><?= count(array_filter($__ka['blocks'], fn($b) => $b['renderer'] !== '')) ?></td><td><?= count($__ka['conditional']) ?></td><td><?= is_file($__kd . '/docs/css-js.md') ? '<code>' . e(\Core\Kit::relative($__kd)) . '/docs/css-js.md</code>' : '–' ?></td></tr>
+    <?php endforeach; ?>
+  </table>
   <h3 id="design">Design (Style-Editor) – <code>theme.php → 'design'</code></h3>
   <p>Unter <b>Verwaltung → Design</b> ändern Admins Farben, Formen und Schriften, ohne das Kit anzufassen. Das Kit beschreibt, <em>was</em> einstellbar ist; jeder Wert ist eine CSS-Variable (oder eine Klasse am <code>&lt;html&gt;</code>). Werte gelten je Website <b>und</b> je Kit (Einstellung <code>design.{theme}</code>, Verlauf der letzten 10 Stände in <code>design.{theme}.history</code> mit Zeitpunkt und Benutzer). Recht <code>design.edit</code> (Standard: nur Administration), Funktion <code>design</code> im Funktionsumfang.</p>
   <pre><code>'design' => [

@@ -30,6 +30,7 @@ $__cmds = [
         ['guide:list | guide:selftest', 'Hinweise zu diesem Projekt (Kit + Website, guide/*.md) mit Herkunft und Bezug auflisten | Selbsttest des Einlesens'],
         ['notes:convert [--dry-run] | notes:selftest', 'Alte Marker ([bitte ergänzen: …], [Platzhalter], „NEU (bitte prüfen)“) in Seiten und Einträgen in Redaktionsnotizen [# … #] umstellen | Selbsttest der Notizen (Entfernen, Hinweis, Umstellung, Suchindex)'],
         ['fragments:list [--all] [--accept]', 'Kern-Fragmente: Herkunft je Fragment (Projekt, Kit, Kern) für das aktive Kit bzw. alle; überschriebene mit geändertem Original; --accept markiert geänderte Originale als geprüft'],
+        ['docs:assets [--kit=name|--kit-dir=pfad] [--kit-only] [--out[=datei|ordner]] [--update] [--json] | docs:selftest', 'CSS-&-JS-Referenz aus den Quellen (Variablen mit Vorgaben, conditional_css → Block → Dateien, Ereignisse, data-*, Bewegung je Datei) als Markdown: stdout, --out ohne Wert storage/docs/; --update erneuert den Anhang von kits/{name}/docs/css-js.md (Kapitel CSS & JS) | Selbsttest der Parser'],
         ['reseed --force', 'ALLE Inhalte löschen und Startinhalte des Kits neu einspielen (Schlüssel bleiben)'],
     ],
     'Betrieb & Deploy' => [

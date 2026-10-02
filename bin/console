@@ -134,6 +134,11 @@
  *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
  *   links:selftest                                    Selbsttest der Linkauswahl (Seitenbaum, Daten-Quellen, Glossar, Weitere laden, Rechte)
  *   targetedit:selftest                               Selbsttest „Ziel bearbeiten“ an Karten (edit_link: Auflösen, Rechte, keine Ausgabe für Besucher)
+ *   docs:assets [--kit=handle|--kit-dir=pfad] [--kit-only] [--out[=datei|ordner]] [--update] [--json]
+ *                                                     CSS-&-JS-Referenz aus den Quellen: Variablen mit Vorgaben, conditional_css (Block → Dateien),
+ *                                                     Ereignisse, data-*-Attribute (Standard: stdout; --out ohne Wert: storage/docs/;
+ *                                                     --update: Anhang in kits/{kit}/docs/css-js.md zwischen den Markern neu schreiben)
+ *   docs:selftest                                     Selbsttest der Parser (CSS-Variablen, Ereignisse, data-*, Kit-Dokument)
  *
  * Suche & KI
  *   search:index [--all] [--full] [--no-vectors] [--kb] [--help]
@@ -1019,6 +1024,43 @@ switch ($cmd) {
     case 'targetedit:selftest':
         // „Ziel bearbeiten“ an Karten und Kacheln (Core\TargetEdit, edit_link()): Auflösen, Rechte, keine Ausgabe für Besucher
         $res = Core\TargetEdit::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'docs:assets':
+        // CSS-&-JS-Referenz (Core\AssetDocs): Kern + optional ein Kit (Name unter kits/ oder Ordner, z. B. aus einer anderen Installation)
+        $opt = [];
+        foreach ($args as $a) if (preg_match('~^--([a-z-]+)(?:=(.*))?$~', $a, $m)) $opt[$m[1]] = $m[2] ?? true;
+        $kitDir = null;
+        if (is_string($opt['kit-dir'] ?? null)) $kitDir = realpath($opt['kit-dir']) ?: null;
+        elseif (is_string($opt['kit'] ?? null)) $kitDir = Core\Kit::exists($opt['kit']) ? Core\Kit::dir($opt['kit']) : null;
+        if ((isset($opt['kit']) || isset($opt['kit-dir'])) && (!$kitDir || !Core\Kit::definitionFile($kitDir))) {
+            fwrite(STDERR, "Kit nicht gefunden: " . ($opt['kit-dir'] ?? $opt['kit']) . " (Name unter kits/ oder --kit-dir=ordner mit theme.php)\n");
+            exit(1);
+        }
+        $kit = $kitDir ? Core\AssetDocs::kit($kitDir) : null;
+        if (!empty($opt['update'])) {
+            if (!$kit) { fwrite(STDERR, "--update braucht --kit=… bzw. --kit-dir=…\n"); exit(1); }
+            $st = Core\AssetDocs::updateKitDoc($kitDir, $kit);
+            echo Core\Kit::relative($kitDir) . "/docs/css-js.md: " . ['created' => 'angelegt (Vorlage + Anhang)', 'updated' => 'Anhang aktualisiert', 'unchanged' => 'unverändert'][$st] . "\n";
+            break;
+        }
+        $core = !empty($opt['kit-only']) && $kit ? null : Core\AssetDocs::core(true);
+        $text = !empty($opt['json'])
+            ? json_encode(['core' => $core, 'kit' => $kit], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n"
+            : Core\AssetDocs::markdown($core, $kit);
+        if (!isset($opt['out'])) { echo $text; break; }
+        $out = is_string($opt['out']) && $opt['out'] !== '' ? $opt['out'] : ROOT . '/storage/docs/';
+        if (str_ends_with($out, '/') || is_dir($out)) $out = rtrim($out, '/') . '/css-js-' . ($kit['name'] ?? 'core') . (!empty($opt['json']) ? '.json' : '.md');
+        if (!is_dir(dirname($out)) && !mkdir(dirname($out), 0775, true)) { fwrite(STDERR, "Ordner nicht anlegbar: " . dirname($out) . "\n"); exit(1); }
+        file_put_contents($out, $text);
+        echo "geschrieben: " . Core\Kit::relative($out) . " (" . number_format(strlen($text) / 1024, 1, ',', '') . " KB)\n";
+        break;
+
+    case 'docs:selftest':
+        // Parser der CSS-&-JS-Referenz (Core\AssetDocs): Fixtures + bekannte Variablen/Ereignisse/Attribute des Kerns, conditional_css
+        $res = Core\AssetDocs::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
