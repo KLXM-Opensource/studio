@@ -1679,6 +1679,8 @@ return [
     'Geteilte Tabelle gespeichert.' => 'Shared table saved.',
     'Zum Beenden der Freigabe bitte den Kurznamen „{key}“ eintippen.' => 'To stop sharing, please type the handle “{key}”.',
     'Geteilte Daten verwalten (Tabellen für mehrere Websites anlegen, Mitglieder zuordnen)' => 'Manage shared data (create tables for several websites, assign members)',
+    'Bild oder Video auswählen' => 'Choose image or video',
+    'Bilder und Videos' => 'Images and videos',
     'Verband' => 'Association',
     'Vereine' => 'Clubs',
     'Vom Verband' => 'From the association',

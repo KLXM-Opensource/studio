@@ -172,7 +172,7 @@ class Uploader {
       <div class="mu-actions" hidden><p class="mu-hint"></p><button type="button" class="adm-btn adm-btn--primary adm-btn--small" data-mu-start>Hochladen</button></div>`;
     $('[data-mu-start]', root).addEventListener('click', () => this.start());
   }
-  types() { return this.opts.accept === 'image' ? ACCEPT.image : ALL_TYPES; }
+  types() { return this.opts.accept === 'image' ? ACCEPT.image : this.opts.accept === 'visual' ? [...ACCEPT.image, ...ACCEPT.video] : ALL_TYPES; }
   choose() { pickFiles(this.types()).then(f => f.length && this.add(f)); }
   add(files) {
     for (const file of files) {
@@ -487,7 +487,7 @@ class Finder {
     // Pool-Datei gewählt → Verweis auf dieser Website anlegen und diesen zurückgeben
     const pick = opts.onPick;
     if (pick) this.opts = { ...opts, onPick: async m => pick(this.pool ? (await api.use(m.id)).item : m) };
-    this.src = { type: opts.kind === 'image' ? 'kind' : 'all', value: opts.kind === 'image' ? 'image' : '' };
+    this.src = { type: opts.kind === 'image' || opts.kind === 'visual' ? 'kind' : 'all', value: opts.kind === 'image' || opts.kind === 'visual' ? opts.kind : '' };
     this.q = ''; this.items = []; this.sel = new Set(); this.anchor = null; this.active = null; this.meta = null;
     this.view = store.get('view', 'grid'); this.size = store.get('size', 132); this.sort = store.get('sort', { key: 'created_at', dir: -1 });
     this.build(); this.load();
@@ -525,7 +525,7 @@ class Finder {
       </section>`;
     this.$items = $('.fx-items', r); this.$info = $('.fx-info', r); this.$side = $('.fx-side', r);
     this.uploader = new Uploader($('[data-uploader]', r), {
-      accept: this.opts.kind === 'image' ? 'image' : null,
+      accept: this.opts.kind === 'image' || this.opts.kind === 'visual' ? this.opts.kind : null,
       collection: () => (this.src.type === 'collection' ? +this.src.value : 0),
       tags: () => (this.src.type === 'tag' ? this.src.value : ''),
       onDone: m => { this.load(m.id); if (this.mode === 'pick' && this.uploader.items.filter(i => i.status === 'wait' || i.status === 'up').length === 0) this.opts.onPick?.(m); },
@@ -576,7 +576,7 @@ class Finder {
     // Seitenleiste
     this.$side.addEventListener('click', async e => {
       const sc = e.target.closest('[data-scope]');
-      if (sc) { this.pool = POOL = sc.dataset.scope; this.src = { type: this.opts.kind === 'image' ? 'kind' : 'all', value: this.opts.kind === 'image' ? 'image' : '' }; this.sel.clear(); this.load(); return; }
+      if (sc) { this.pool = POOL = sc.dataset.scope; this.src = { type: this.opts.kind === 'image' || this.opts.kind === 'visual' ? 'kind' : 'all', value: this.opts.kind === 'image' || this.opts.kind === 'visual' ? this.opts.kind : '' }; this.sel.clear(); this.load(); return; }
       const b = e.target.closest('[data-src]');
       if (b) { this.src = { type: b.dataset.src, value: b.dataset.value || '' }; this.sel.clear(); this.root.classList.remove('is-side-open'); if (inDrawer()) document.dispatchEvent(new CustomEvent('adm:drawer', { detail: 'close' })); this.load(); return; }
       if (e.target.closest('[data-newcol]')) {
@@ -681,6 +681,8 @@ class Finder {
     if (this.src.type === 'collection') p.collection = this.src.value;
     if (this.src.type === 'tag') p.tag = this.src.value;
     if (this.opts.kind === 'image') p.kind = 'image';
+    // 'visual' (Felder für Bild oder Video): nur Bilder/Videos – gewählte Unterart (Bilder bzw. Videos) bleibt erhalten
+    if (this.opts.kind === 'visual' && !['image', 'video', 'visual'].includes(p.kind)) p.kind = 'visual';
     const seq = this.loadSeq = (this.loadSeq || 0) + 1;
     const data = await api.list(p);
     if (seq !== this.loadSeq) return;   // inzwischen neu geladen (z. B. Prüf-Filter aus der Übersicht) – ältere Antwort verwerfen
@@ -716,7 +718,7 @@ class Finder {
       </div>${cur ? `<p class="fx-scope__note">${this.ro ? 'Geteilt – nur verwenden. Pflegen dürfen Personen mit dem Recht „Geteilte Medien pflegen“.' : 'Geteilt – Änderungen wirken auf allen Websites, die diesen Pool nutzen.'}</p>` : ''}` : ''}
       <h3>${cur ? esc(cur.label) : 'Mediathek'}</h3>
       <ul>
-        ${img ? row('kind', 'image', SVG.image, 'Bilder', counts.image) : row('all', '', SVG.all, 'Alle Medien', counts.alle)
+        ${this.opts.kind === 'visual' ? row('kind', 'visual', SVG.all, t('Bilder und Videos'), (counts.image || 0) + (counts.video || 0)) + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'video', SVG.video || SVG.all, 'Videos', counts.video) : img ? row('kind', 'image', SVG.image, 'Bilder', counts.image) : row('all', '', SVG.all, 'Alle Medien', counts.alle)
           + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'pdf', SVG.pdf, 'PDF-Dokumente', counts.pdf)
           + (counts.video ? row('kind', 'video', SVG.video, 'Videos', counts.video) : '')
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')}
@@ -1306,8 +1308,8 @@ function pick(kind = 'image') {
   return new Promise(resolve => {
     const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
     let chosen = null;
-    dlg.innerHTML = `<div class="fx-dhead"><h2>${kind === 'image' ? 'Bild auswählen' : 'Datei auswählen'}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>Abbrechen</button></div><div class="fx-host"></div>`;
-    new Finder($('.fx-host', dlg), { mode: 'pick', kind: kind === 'image' ? 'image' : null, onPick: m => { chosen = m; dlg.close(); } });
+    dlg.innerHTML = `<div class="fx-dhead"><h2>${kind === 'image' ? 'Bild auswählen' : kind === 'visual' ? t('Bild oder Video auswählen') : 'Datei auswählen'}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>Abbrechen</button></div><div class="fx-host"></div>`;
+    new Finder($('.fx-host', dlg), { mode: 'pick', kind: kind === 'image' || kind === 'visual' ? kind : null, onPick: m => { chosen = m; dlg.close(); } });
     $('[data-close]', dlg).onclick = () => dlg.close();
     dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; };
     dlg.showModal();

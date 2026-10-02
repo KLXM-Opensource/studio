@@ -161,6 +161,7 @@ final class Media
         if (!empty($f['kind'])) {
             $where[] = match ($f['kind']) {
                 'image' => "m.mime LIKE 'image/%'",
+                'visual' => "(m.mime LIKE 'image/%' OR m.mime LIKE 'video/%')",   // Bild oder Video (Felder mit 'accept' => 'visual')
                 'pdf' => "m.mime = 'application/pdf'",
                 'video' => "m.mime LIKE 'video/%'",
                 'audio' => "m.mime LIKE 'audio/%'",

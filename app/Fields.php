@@ -448,7 +448,7 @@ final class Fields
             'datatable' => self::renderSelect($id, $inputName, array_column(!empty($f['inbox']) ? array_values(array_filter(\Core\Data\Tables::all(),
                 fn($t) => !\Core\Data\Tables::isInbox($t) || \Core\Data\Inbox::available())) : \Core\Data\Tables::content(), 'name', 'handle'), $v, $aria . ' data-datatable', !$req),
             'datafield' => self::renderDataField($id, $inputName, $v, $aria, $f),
-            'media', 'file' => '<div class="media-field" data-accept="' . ($type === 'media' ? 'image' : 'file') . '">'
+            'media', 'file' => '<div class="media-field" data-accept="' . ($type === 'media' ? (($f['accept'] ?? '') === 'visual' ? 'visual' : 'image') : 'file') . '">'
                 . '<input type="hidden" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '">'
                 . '<div class="media-field-preview">' . self::mediaPreview($v === '' ? null : (int) $v) . '</div>'
                 . '<button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> '
