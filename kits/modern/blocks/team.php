@@ -21,7 +21,7 @@ $tones = ['pop', 'tint', 'dark'];
         $email = trim((string) ($it['email'] ?? ''));
         $pic = !empty($it['image']) ? img((int) $it['image'], $v === 'grid' ? '(min-width: 1080px) 300px, 50vw' : '96px', ['ratio' => $v === 'grid' ? '4:5' : '1:1', 'alt' => '']) : '';
     ?>
-    <li class="member member--<?= e($v) ?><?= $cover ? ' member--link' : '' ?><?= $v === 'grid' ? ' card' : '' ?>" data-reveal>
+    <li class="member member--<?= e($v) ?><?= $cover ? ' member--link' : '' ?><?= $v === 'grid' ? ' card' : '' ?>" data-reveal><?= $b->targetEdit($link, $name) ?>
       <div class="member__pic<?= $pic === '' ? ' member__pic--initials member__pic--' . $tones[$i % 3] : '' ?>"<?= $pic === '' ? ' aria-hidden="true"' : '' ?>>
         <?= $pic !== '' ? $pic : '<span>' . e(modern_initials($name)) . '</span>' ?>
       </div>

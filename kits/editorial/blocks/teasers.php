@@ -13,7 +13,7 @@ $items = array_values(array_filter((array) ($d['items'] ?? []), fn($it) => trim(
       $href = trim((string) ($it['link'] ?? '')) !== '' ? editorial_link((string) $it['link']) : null;
       $lead = $v === 'lead' && $i === 0;
       $pic = in_array($v, ['grid', 'lead'], true) ? editorial_image((int) ($it['image'] ?? 0) ?: null, $lead ? '(min-width: 1360px) 760px, 100vw' : '(min-width: 1080px) 400px, 50vw', $ratio, 'tz__media') : ''; ?>
-    <li class="tz<?= $lead ? ' tz--lead' : '' ?>">
+    <li class="tz<?= $lead ? ' tz--lead' : '' ?>"><?= $b->targetEdit((string) ($it['link'] ?? ''), (string) ($it['title'] ?? '')) ?>
       <?php if ($v === 'list'): ?><span class="tz__num" aria-hidden="true"><?= $i + 1 ?></span><?php endif; ?>
       <?= $pic ?>
       <div class="tz__body">

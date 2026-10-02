@@ -1726,6 +1726,8 @@ return [
     '{lang} anlegen (Verwaltung)' => 'Create {lang} (admin)',
     'Änderungen sind nach dem Speichern sofort sichtbar.' => 'Changes are visible immediately after saving.',
     '„{title}“ bearbeiten' => 'Edit “{title}”',
+    'Seite „{title}“ bearbeiten' => 'Edit page “{title}”',
+    'Eintrag „{title}“ bearbeiten' => 'Edit entry “{title}”',
     // Website-Suche & KI (Core\Search, Core\AI)
     '(Standard)' => '(default)',
     '0–10: Treffer in Zwischenüberschriften, Beschreibungen, FAQ-Fragen.' => '0–10: matches in subheadings, descriptions, FAQ questions.',

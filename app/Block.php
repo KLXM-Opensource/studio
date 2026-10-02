@@ -110,6 +110,15 @@ final class Block
         return ' data-edit="' . e($this->editPrefix . $path) . '"' . ($mode !== 'plain' ? ' data-edit-mode="' . e($mode) . '"' : '');
     }
 
+    /**
+     * „Ziel bearbeiten“ an einer Karte/Kachel, die auf eine Seite oder einen Eintrag zeigt (Core\TargetEdit):
+     * <?= $b->targetEdit($it['link'], $it['title']) ?> als erstes Kind der Karte. Für Besucher und ohne Recht leer.
+     */
+    public function targetEdit(?string $ref, ?string $label = null): string
+    {
+        return TargetEdit::html($ref, $label);
+    }
+
     /** Markiert zentral gepflegte Inhalte (Einstellungen des Themes) im Bearbeitungsmodus. */
     public function central(?string $label = null): string
     {

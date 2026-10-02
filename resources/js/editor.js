@@ -318,7 +318,7 @@ const BarPlace = (() => {
       }
       for (const x of pv.querySelectorAll(HARD)) { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
       for (const x of pv.querySelectorAll(SOFT)) { const r = x.getBoundingClientRect(); if (inBand(r) && r.width * r.height > 900) soft.push(R(r)); }
-      for (const x of pv.querySelectorAll('.cms-entry-pencil')) hard.push(R(x.getBoundingClientRect()));
+      for (const x of pv.querySelectorAll('.cms-entry-pencil,.cms-target-edit')) hard.push(R(x.getBoundingClientRect()));
     }
     // Bedienelemente: Formatierungsleiste (Vorrang), „+ Block einfügen“ dieses und des vorigen Blocks, Knöpfe am Bild,
     // Leisten der Nachbarblöcke, Griff von Editor.js, Kopf des Kits

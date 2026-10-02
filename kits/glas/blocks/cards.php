@@ -19,7 +19,7 @@ $tag = glas_htag($d);
         $meta = trim((string) ($it['meta'] ?? ''));
         $pic = $v === 'service' ? '' : glas_image(!empty($it['image']) ? (int) $it['image'] : null, '(min-width: 1080px) 420px, (min-width: 640px) 50vw, 90vw', $ratio, 'pcard__media');
     ?>
-    <li class="pcard card<?= $link !== '' ? ' pcard--link' : '' ?>" data-reveal>
+    <li class="pcard card<?= $link !== '' ? ' pcard--link' : '' ?>" data-reveal><?= $b->targetEdit($link, (string) ($it['title'] ?? '')) ?>
       <?= $pic ?>
       <?php if ($v === 'service' && !empty($it['icon'])): ?><span class="orb pcard__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
       <div class="pcard__body<?= $v === 'overlay' ? ' glass' : '' ?>">

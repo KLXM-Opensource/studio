@@ -365,6 +365,16 @@ function entry_edit_attr(array $table, array $entry, string $field, ?string $mod
 }
 
 /**
+ * Karten/Kacheln: kleine Aktion „Bearbeiten“ für das Ziel (Seite → Seiten-Editor, Eintrag → Seitenleiste) – nur für die
+ * angemeldete Redaktion mit Recht (pages.edit bzw. data.edit der Tabelle), sonst ''. $ref: page:ID, entry:{tabelle}:{id}
+ * oder eine Adresse dieser Website (Core\TargetEdit). <li class="card"><?= edit_link($it['link'], $it['title']) ?>…
+ */
+function edit_link(?string $ref, ?string $label = null): string
+{
+    return \Core\TargetEdit::html($ref, $label);
+}
+
+/**
  * Redaktions-Werkzeugleiste der Website (Core\Toolbar, alle Modi). Kits rufen $theme->partial('toolbar', $toolbar) auf –
  * das Kern-Fragment rendert sie (nur Kern); cms_toolbar() bleibt für ältere Kit-Dateien und eigene Aufrufe.
  */

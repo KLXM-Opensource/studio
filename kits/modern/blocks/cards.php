@@ -18,7 +18,7 @@ $tag = modern_htag($d);
         $label = trim((string) ($it['link_label'] ?? ''));
         $pic = modern_image(!empty($it['image']) ? (int) $it['image'] : null, $v === 'horizontal' ? '(min-width: 1080px) 320px, 100vw' : '(min-width: 1080px) 420px, (min-width: 640px) 50vw, 90vw', $ratio, 'tcard__media');
     ?>
-    <li class="tcard tcard--<?= e($v) ?><?= $v === 'overlay' ? '' : ' card' ?><?= $link !== '' ? ' tcard--link' : '' ?>" data-reveal>
+    <li class="tcard tcard--<?= e($v) ?><?= $v === 'overlay' ? '' : ' card' ?><?= $link !== '' ? ' tcard--link' : '' ?>" data-reveal><?= $b->targetEdit($link, (string) ($it['title'] ?? '')) ?>
       <div class="tcard__in">
         <?= $pic ?>
         <div class="tcard__body">

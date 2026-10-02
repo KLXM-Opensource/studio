@@ -22,7 +22,7 @@ $tones = ['card', 'tint', 'highlight', 'accent', 'dark', 'image'];
         $eyebrow = trim((string) ($it['eyebrow'] ?? ''));
         $big = $eyebrow !== '' && preg_match('#^[\d.,+%€$×x/<>~\s-]{1,8}$#u', $eyebrow);
     ?>
-    <li class="tile tile--<?= e($size) ?> tile--<?= e($tone) ?><?= ['tint' => ' bg-tint', 'accent' => ' bg-accent', 'dark' => ' bg-dark', 'image' => ' on-media'][$tone] ?? '' ?><?= $img !== '' ? ' tile--has-img' : '' ?>" data-reveal>
+    <li class="tile tile--<?= e($size) ?> tile--<?= e($tone) ?><?= ['tint' => ' bg-tint', 'accent' => ' bg-accent', 'dark' => ' bg-dark', 'image' => ' on-media'][$tone] ?? '' ?><?= $img !== '' ? ' tile--has-img' : '' ?>" data-reveal><?= $b->targetEdit($link, (string) ($it['title'] ?? '')) ?>
       <?php if ($img !== ''): ?><div class="tile__img"<?= $tone === 'image' ? ' aria-hidden="true"' : '' ?>><?= $img ?></div><?php endif; ?>
       <div class="tile__body">
         <?php if (!empty($it['icon'])): ?><span class="tile__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>

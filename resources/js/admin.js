@@ -22,6 +22,7 @@ import { initNetwork } from './_network.js';
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
 import { initEntryEdit } from './_entry_edit.js';
+import { initTargetEdit } from './_target_edit.js';   // „Bearbeiten“ an Karten/Kacheln → Seite bzw. Eintrag (Core\TargetEdit)
 import { formFields } from './_form_fields.js';   // Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken (Core\Data\SchemaPanel)
 import { initToolbar, bar_ } from './_bar.js';   // Redaktions-Werkzeugleiste: Menüs, Status, Modus, Abbrechen
 import { initTools, tools_, emit, beforeSave } from './_tools.js';   // Werkzeuge beim Bearbeiten (Core\FrontendTools) + Ereignisse cms:*
@@ -741,3 +742,5 @@ window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, 
   shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN, topInset } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)
 initEntryEdit();
+// Karten und Kacheln: Ziel (Seite/Eintrag) bearbeiten – mit Rückfrage der Werkzeugleiste bei ungespeicherten Änderungen
+initTargetEdit(bar_);

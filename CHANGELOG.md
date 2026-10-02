@@ -6,6 +6,17 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Karten und Kacheln: verlinkte Seite bzw. Eintrag direkt bearbeiten
+- Karten, die auf eine andere Seite oder einen Eintrag zeigen, haben für die angemeldete Redaktion oben rechts **✎ Bearbeiten**
+  (bei Zeiger/Fokus, auf Touch-Geräten immer, unter 768 px nur das Symbol). Seite → Seiten-Editor (`?edit=1`), im Editor mit
+  ungespeicherten Änderungen erst die gewohnte Rückfrage („Speichern & beenden“ · „Verwerfen“ · „Weiter bearbeiten“);
+  Eintrag → Seitenleiste „Eintrag bearbeiten“ an Ort und Stelle (Strg/⌘-Klick: Detailseite bzw. Verwaltung im neuen Tab).
+- Vorlagen: `edit_link($ref, ?$label)` bzw. `$b->targetEdit($ref, ?$label)` (`Core\TargetEdit`) – `page:ID`, `entry:{tabelle}:{id}`
+  oder eine Adresse dieser Website (Pfad, eigene Domain, Detailseite). Rechte `pages.edit` bzw. `data.edit` der Tabelle; Besucher,
+  Seiten-Cache und „Live-Ansicht“ bekommen kein Markup. Stil im Kern (`editor.css`, `.cms-target-edit`), Verhalten `_target_edit.js`.
+- Eingebaut in die Karten-Blöcke der Kern-Kits (cards, bento, teasers, team) sowie die Kern-Blöcke „Stapelkarten“ und „Nächste Termine“.
+  Selbsttest `php bin/console targetedit:selftest`.
+
 ### Quick-Glossar beim Bearbeiten auf der Website
 - Knopf **Glossar** in der Werkzeugleiste (⌥G, Telefon: Menü „⋯“), nur mit Funktion „glossary“ und Recht auf die Tabelle „glossar“.
   **Suchen** (Begriff, Varianten, Kurz-Erklärung) mit „Einfügen“ = Link `entry:glossar:{id}` an der Schreibmarke bzw. um den markierten

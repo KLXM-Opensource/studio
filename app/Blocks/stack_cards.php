@@ -24,7 +24,7 @@ $hTag = trim((string) ($d['title'] ?? '')) !== '' ? 'h3' : 'h2';
         $link = trim((string) ($c['link'] ?? ''));
     ?>
     <li class="cms-stack__card">
-      <article class="cms-stack__inner<?= $pic !== '' ? ' has-img' : '' ?><?= $start ? ' img-start' : '' ?>">
+      <article class="cms-stack__inner<?= $pic !== '' ? ' has-img' : '' ?><?= $start ? ' img-start' : '' ?>"><?= $b->targetEdit($link, (string) ($c['title'] ?? '')) ?>
         <div class="cms-stack__body">
           <span class="cms-stack__num" aria-hidden="true"><?= sprintf('%02d', $i + 1) ?></span>
           <?php if (!empty($c['eyebrow'])): ?><p class="cms-stack__eyebrow"<?= $b->edit("cards.$k.eyebrow") ?>><?= e($c['eyebrow']) ?></p><?php endif; ?>

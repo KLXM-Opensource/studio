@@ -11,7 +11,7 @@ $h = filled($d['title']) ? 'h3' : 'h2';   // √úberschriften-Hierarchie ohne Spr√
   <?= starter_head($b) ?>
   <ul class="cards" role="list">
     <?php foreach ($d['items'] as $i => $it): $href = trim((string) ($it['link'] ?? '')) !== '' ? starter_link($it['link']) : ''; ?>
-    <li class="card">
+    <li class="card"><?= $b->targetEdit((string) ($it['link'] ?? ''), (string) ($it['title'] ?? '')) ?>
       <?php if (!empty($it['image'])): ?><div class="media r-3-2"><?= img((int) $it['image'], '(min-width: 1100px) 360px, 100vw', ['ratio' => '3:2', 'alt' => '']) ?></div>
       <?php elseif (filled($it['icon'] ?? '')): ?><span class="card__icon"><?= icon($it['icon']) ?></span><?php endif; ?>
       <<?= $h ?> class="card__title"><?php if ($href !== ''): ?><a href="<?= e($href) ?>"<?= ext_attrs($href) ?><?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?></<?= $h ?>>
