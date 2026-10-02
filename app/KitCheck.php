@@ -26,9 +26,19 @@ final class KitCheck
         }
         $core = require ROOT . '/app/Blocks/blocks.php';
         $own = (array) ($kit->def['blocks'] ?? []);
+        // Teil-Vorlagen: Dateien mit „_“ am Anfang oder solche, die eine andere Kit-Datei per include/require einbindet
+        // (z. B. blocks/stage.php → stage-photo.php) – keine eigenen Blöcke, also nicht „verwaist“
+        $included = [];
+        foreach (array_merge(glob($kit->path . '/blocks/*.php') ?: [], glob($kit->path . '/templates/*.php') ?: [], glob($kit->path . '/templates/**/*.php') ?: [], [$kit->path . '/functions.php']) as $src) {
+            if (!is_file($src)) continue;
+            if (preg_match_all('~(?:include|require)(?:_once)?\s*\(?\s*[^;]*?[\'"](?:[^\'"]*/)?([\w.-]+\.php)[\'"]~', (string) file_get_contents($src), $m)) {
+                foreach ($m[1] as $name) $included[$name] = true;
+            }
+        }
         foreach (glob($kit->path . '/blocks/*.php') ?: [] as $file) {
             $type = basename($file, '.php');
             $rel = Kit::relative($file);
+            if (!isset($blocks[$type]) && (str_starts_with($type, '_') || isset($included[$type . '.php']))) continue;
             if (!isset($blocks[$type])) {
                 $out[] = ['level' => 'warn', 'file' => $rel, 'text' => "verwaist: kein Block „{$type}“ (weder im Kit noch im Kern oder in einer Erweiterung) – wird nie gerendert"];
                 continue;
