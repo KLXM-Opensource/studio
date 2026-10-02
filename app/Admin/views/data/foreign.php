@@ -71,8 +71,8 @@ $members = $t['shared']['members'];
       <?php foreach ($rows as $e): $pick = $e['_pick']; $on = isset($shown[$e['id']]); $origin = Shared::originUrl($t, $e); ?>
         <tr>
           <?php if ($canPick): ?><td class="dt-c-check"><input type="checkbox" name="ids[]" data-check value="<?= (int) $e['id'] ?>" aria-label="<?= e(__('{title} auswählen', ['title' => Entries::title($t, $e)])) ?>"></td><?php endif; ?>
-          <td class="dt-c-title"><a href="<?= e(url($base . '/' . $e['id'])) ?>"><?= e(Entries::title($t, $e)) ?></a>
-            <?php if ($origin): ?><a class="dt-view" href="<?= e($origin) ?>" target="_blank" rel="noopener" aria-label="<?= e(__('Auf Ursprungs-Website öffnen')) ?>">↗</a><?php endif; ?></td>
+          <td class="dt-c-title"><div class="dt-c-title__in"><a href="<?= e(url($base . '/' . $e['id'])) ?>"><?= e(Entries::title($t, $e)) ?></a>
+            <?php if ($origin): ?><a class="dt-view" href="<?= e($origin) ?>" target="_blank" rel="noopener" aria-label="<?= e(__('Auf Ursprungs-Website öffnen')) ?>">↗</a><?php endif; ?></div></td>
           <?php foreach ($cols as $c): ?><td><?= strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>') ?></td><?php endforeach; ?>
           <td><?= e(Shared::siteInfo((string) $e['origin_site'], $key)['name']) ?></td>
           <td><span class="dt-status dt-status--<?= $on ? 'published' : 'draft' ?>"><?= e($on ? __('sichtbar') : __('nicht sichtbar')) ?></span>

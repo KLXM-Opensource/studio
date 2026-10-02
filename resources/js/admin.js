@@ -111,7 +111,11 @@ $$('[data-tpl-map]').forEach(box => {
 });
 
 // ------------------------------------------------------------ Hilfe-Knopf „?“ (<details class="adm-tip">): Klick außerhalb oder Esc schließt
-d.addEventListener('click', e => { $$('details.adm-tip[open]').forEach(t => { if (!t.contains(e.target)) t.open = false; }); });
+d.addEventListener('click', e => {
+  const x = e.target.closest?.('[data-tip-close]');
+  if (x) { const t = x.closest('details.adm-tip'); t.open = false; t.querySelector('summary')?.focus(); return; }
+  $$('details.adm-tip[open]').forEach(t => { if (!t.contains(e.target)) t.open = false; });
+});
 d.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   $$('details.adm-tip[open]').forEach(t => { t.open = false; $('summary', t)?.focus(); });

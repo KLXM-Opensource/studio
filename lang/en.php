@@ -6008,4 +6008,5 @@ return [
     'Indexieren erlauben' => 'Allow indexing',
     'Nicht in Suchmaschinen und Sitemap' => 'Not in search engines and sitemap',
     'noindex' => 'noindex',
+    'Hilfe schließen' => 'Close help',
 ];

@@ -72,6 +72,7 @@ $html = implode('', array_map($row, $tree));
     <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/pages/new' . ($multi ? '?lang=' . $lang : ''))) ?>">+ Neue Seite</a>
     <details class="adm-tip adm-tip--end"><summary class="adm-tip__btn" aria-label="<?= e(__('Hilfe: Seiten ordnen und bearbeiten')) ?>" title="<?= e(__('Hilfe')) ?>">?</summary>
       <div class="adm-tip__body">
+        <button type="button" class="adm-tip__close" data-tip-close aria-label="<?= e(__('Hilfe schließen')) ?>">✕</button>
         <?php if ($__guide = \Core\Guide::forArea('pages')): \Core\Guide::$shownInline = true;   // Hinweise zum Projekt (Core\Guide) – vorn, abgesetzt ?>
         <div class="adm-tip__guide"><?= icon('lightbulb') ?><div>
           <b><?= e(count($__guide) > 1 ? __('Hinweise zum Projekt') : __('Hinweis zum Projekt')) ?></b>

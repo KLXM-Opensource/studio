@@ -519,12 +519,12 @@ class Finder {
         <footer class="fx-status" aria-live="polite"></footer>
         <div class="fx-dropmsg" aria-hidden="true"><span>${SVG.up} Loslassen zum Hochladen</span></div>
       </section>
-      <aside class="fx-info" aria-label="Informationen"></aside>
+      <aside class="fx-info" aria-label="Informationen"><button type="button" class="fx-info__close" data-info-close aria-label="Informationen schließen" title="Schließen">✕</button><div class="fx-info__body"></div></aside>
       <section class="fx-uploads" hidden aria-label="Hochladen">
         <header><strong>Hochladen</strong><span data-updest></span><button type="button" class="mu-x" data-upclose aria-label="Schließen">✕</button></header>
         <div data-uploader></div>
       </section>`;
-    this.$items = $('.fx-items', r); this.$info = $('.fx-info', r); this.$side = $('.fx-side', r);
+    this.$items = $('.fx-items', r); this.$info = $('.fx-info__body', r); this.$side = $('.fx-side', r);
     this.uploader = new Uploader($('[data-uploader]', r), {
       accept: this.opts.kind === 'image' || this.opts.kind === 'visual' ? this.opts.kind : null,
       collection: () => (this.src.type === 'collection' ? +this.src.value : 0),
@@ -568,7 +568,25 @@ class Finder {
     // Mediathek: Orte/Sammlungen stehen in der Seitenleiste (Drill-down) – schmal öffnet der Knopf die Schublade (_drawer.js)
     const inDrawer = () => !!this.$side.closest('.adm-side');
     $('[data-sidetoggle]', r).addEventListener('click', () => inDrawer() ? document.dispatchEvent(new CustomEvent('adm:drawer', { detail: 'open' })) : r.classList.toggle('is-side-open'));
-    $('[data-infotoggle]', r).addEventListener('click', () => r.classList.toggle('is-info-hidden'));
+    // Informationen ein-/ausblenden: Zustand sichtbar (aria-pressed) und gemerkt; ✕ im Panel schließt (schmal: Auswahl aufheben)
+    const infoBtn = $('[data-infotoggle]', r);
+    const setInfo = hidden => {
+      r.classList.toggle('is-info-hidden', hidden);
+      infoBtn?.setAttribute('aria-pressed', String(!hidden));
+      try { localStorage.setItem('fx-info-hidden', hidden ? '1' : ''); } catch { /* privates Fenster */ }
+    };
+    try { if (localStorage.getItem('fx-info-hidden') === '1' && this.mode === 'library') r.classList.add('is-info-hidden'); } catch { /* */ }
+    infoBtn?.setAttribute('aria-pressed', String(!r.classList.contains('is-info-hidden')));
+    infoBtn?.addEventListener('click', () => setInfo(!r.classList.contains('is-info-hidden')));
+    $('[data-info-close]', r)?.addEventListener('click', () => {
+      if (matchMedia('(max-width:1180px)').matches) { this.sel.clear(); this.syncSel(); this.$items.focus(); }
+      else setInfo(true);
+    });
+    // Höhe der Mediathek nach dem tatsächlichen Abstand oben (Hinweise, Leisten) – kein doppeltes Scrollen
+    if (this.mode === 'library') {
+      const top = () => r.style.setProperty('--fx-top', Math.max(0, Math.round(r.getBoundingClientRect().top + scrollY)) + 'px');
+      top(); addEventListener('resize', top);
+    }
     $$('[data-view]', r).forEach(b => b.addEventListener('click', () => { this.view = b.dataset.view; store.set('view', this.view); this.applyView(); this.render(); }));
     $('[data-size]', r).addEventListener('input', e => { this.size = +e.target.value; store.set('size', this.size); this.applyView(); });
     let t;

@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Verwaltung: Usability-Durchgang Desktop, Tablet, Mobil
+- Seitenbaum: Spalten überlappten unter 900 px (Regel ohne Media-Query) – behoben, feste Status-Spalte, mobil nur Statuspunkt,
+  kein eigener Scrollbereich mehr; Vorschau-Seitenleiste verkleinert den Inhalt statt ihn zu überdecken.
+- Eintragslisten: Tabelle scrollt waagerecht; auf dem Handy Karten mit Titel, Status-Schalter, Ansehen-Link und beschrifteten
+  Feldern; Titelzelle sauber (kein schwebender Rand mehr).
+- Medien: Info-Panel mit Schließen-Knopf, Zustand am Info-Knopf (gemerkt), auf dem Desktop nur bei Auswahl, schmal mit Abdunkeln;
+  Höhe nach verfügbarem Platz; Sammlungsnamen gekürzt; Suche mobil in eigener Zeile.
+- Hilfe „?“ mobil als Blatt unten mit Schließen; Speichern-Leiste und Seitenleiste nicht mehr unter dem Staging-Banner.
+- Reiter: Desktop umbrechend, schmal waagerecht scrollbar; aktiver Reiter im Dunkelmodus erkennbar.
+- Touch: Tippflächen mindestens 40 px (Knöpfe, Menüs, Schalter, Checkboxen); „Ansehen“ ohne Hover sichtbar.
+- Doppelte Navigation entfernt: Leiste mit den Einstellungs-Punkten auf „Einstellungen der Funktionen“ (steht in der Seitenleiste);
+  Reiter „Website“ der Grundeinstellungen heißt jetzt „Allgemein“ (Verwechslung mit „Website“-Angaben).
+
 ### Indexierung & Crawler
 - Grundeinstellungen → „Indexierung & Crawler“ (`Core\Indexing`): KI-Crawler erlauben / KI-Training sperren (GPTBot, ClaudeBot,
   Google-Extended, CCBot …; Antwort-Bots mit Quellenlink bleiben) / alle sperren; eigene Regeln für die robots.txt (geprüft);

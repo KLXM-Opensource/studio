@@ -25,7 +25,7 @@ final class SystemSchema
         $app = app()->theme->def['app']['defaults'] ?? [];
         $info = AppIcons::appInfo();
         return [
-            ['id' => 'website', 'label' => 'Website', 'fields' => [
+            ['id' => 'website', 'label' => 'Allgemein', 'fields' => [
                 ['name' => 'sys.theme', 'label' => 'Aktives Kit', 'type' => 'select', 'required' => true,
                     'options' => site()->allowedThemes(), 'default' => site()->defaultTheme(),
                     'help' => 'Kits liegen unter /kits/{name} (Templates, Blöcke, Fragmente) und /public/assets/kits/{name} (Assets); ältere Kits unter /themes/{name} werden weiter erkannt.'],

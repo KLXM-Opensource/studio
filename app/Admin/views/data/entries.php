@@ -105,17 +105,17 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
       <tr data-id="<?= (int) $e['id'] ?>"<?= $manual ? ' draggable="true"' : '' ?>>
         <td class="dt-c-check"><input type="checkbox" data-check value="<?= (int) $e['id'] ?>" aria-label="<?= e(Entries::title($t, $e)) ?> auswählen"></td>
         <?php if ($manual): ?><td class="dt-c-grip" aria-hidden="true">⋮⋮</td><?php endif; ?>
-        <td class="dt-c-title">
+        <td class="dt-c-title"><div class="dt-c-title__in">
           <?php if ($img && !empty($e[$img]) && ($m = \Core\Media::find((int) $e[$img]))): ?><img src="<?= e(\Core\Media::url($m, 480)) ?>" alt="" class="dt-thumb<?= $listImg === 'large' ? ' dt-thumb--l' : '' ?>" loading="lazy"><?php elseif ($listImg !== 'none'): ?><span class="dt-thumb dt-thumb--ph<?= $listImg === 'large' ? ' dt-thumb--l' : '' ?>" aria-hidden="true"><?= icon($t['icon']) ?></span><?php endif; ?>
           <a href="<?= e(url($base . '/' . $e['id'])) ?>"><?= e(Entries::title($t, $e)) ?></a>
           <?php if (!empty($shared) && !empty($e['suggest'])): $sp = $ownerPicks[$e['id']] ?? null; ?><small class="sh-pick sh-pick--<?= e($sp ?? 'suggested') ?>"><?= e(match ($sp) { 'visible' => __('übernommen'), 'featured' => __('hervorgehoben'), 'rejected' => __('abgelehnt'), 'hidden' => __('ausgeblendet'), default => __('vorgeschlagen') }) ?></small><?php endif; ?>
           <?php if (isset($extOrigin[$e['id']])): ?><small class="src-badge" title="<?= e(__('Aus der externen Quelle „{name}“ – nur lesbar', ['name' => $extOrigin[$e['id']]['name']])) ?>"><?= icon('plugs-connected') ?> <?= e(__('aus Quelle')) ?></small><?php endif; ?>
           <?php if ($url): ?><a class="dt-view" href="<?= e($url) ?>" target="_blank" rel="noopener" aria-label="Auf der Website ansehen">↗</a><?php endif; ?>
           <?php if ($extTbl['row']): foreach (\Core\Extensions::rowActions($extTbl['row'], (int) $e['id']) as $xa): ?><a class="dt-rowact" href="<?= e(url($xa['href'])) ?>" aria-label="<?= e($xa['label'] . ': ' . Entries::title($t, $e)) ?>"><?= e($xa['label']) ?></a><?php endforeach; endif; ?>
-        </td>
-        <?php foreach ($cols as $c): ?><td><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
-        <?php if ($t['settings']['workflow']): ?><td><?= $statusCell($e) ?></td><?php endif; ?>
-        <td class="adm-muted"><?= e(date('d.m.Y', strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
+        </div></td>
+        <?php foreach ($cols as $c): ?><td data-label="<?= e($c['label']) ?>"><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
+        <?php if ($t['settings']['workflow']): ?><td class="dt-c-status" data-label="Status"><?= $statusCell($e) ?></td><?php endif; ?>
+        <td class="adm-muted dt-c-date" data-label="Geändert"><?= e(date('d.m.Y', strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
       </tr>
     <?php endforeach; ?>
     </tbody>
