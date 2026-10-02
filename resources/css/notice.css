@@ -20,6 +20,36 @@
 .cms-notice-bubble.is-closing{animation:cms-notice-out .2s ease-in both}
 @keyframes cms-notice-in{from{opacity:0;transform:translateY(12px) scale(.98)}}
 @keyframes cms-notice-out{to{opacity:0;transform:translateY(8px)}}
+
+/* Farbe (notice_color): Signalfarben statt Kit-Farben – zwei Attribute schlagen die Kit-Klasse */
+[data-notice][data-notice-color]{background:var(--n-bg);color:var(--n-ink)}
+[data-notice][data-notice-color] a{color:inherit}
+[data-notice-color="yellow"]{--n-bg:#ffd43b;--n-ink:#1d1a05}
+[data-notice-color="red"]{--n-bg:#c92a2a;--n-ink:#fff}
+[data-notice-color="green"]{--n-bg:#2b8a3e;--n-ink:#fff}
+[data-notice-color="blue"]{--n-bg:#1864ab;--n-ink:#fff}
+[data-notice-color="dark"]{--n-bg:#15171c;--n-ink:#fff}
+[data-notice-color="light"]{--n-bg:#fff;--n-ink:#15171c}
+[data-notice][data-notice-color="light"]:not(.cms-notice-bubble){border-bottom:1px solid rgb(0 0 0 / .12)}
+.cms-notice-bubble[data-notice-color="light"]{outline:1px solid rgb(0 0 0 / .1)}
+
+/* Hervorheben (notice_fx): wenige Durchläufe, nie endlos; ohne Bewegung bei „Bewegung reduzieren“ */
+.cms-notice-bubble{--n-shadow:0 12px 32px -8px rgb(0 0 0 / .35),0 2px 6px rgb(0 0 0 / .12);--n-ring:color-mix(in srgb,var(--n-bg,#3b5bdb) 55%,transparent)}
+@media (prefers-reduced-motion:no-preference){
+  .cms-notice-bubble[data-notice-fx="pulse"]{animation:cms-notice-in .35s cubic-bezier(.2,.8,.2,1) both,cms-n-pulse 1.8s ease-out .6s 4}
+  .cms-notice-bubble[data-notice-fx="glow"]{animation:cms-notice-in .35s cubic-bezier(.2,.8,.2,1) both,cms-n-glow 2.4s ease-in-out .4s 3}
+  .cms-notice-bubble[data-notice-fx="wiggle"]{animation:cms-notice-in .35s cubic-bezier(.2,.8,.2,1) both,cms-n-wiggle 2.6s ease-in-out 1s 2}
+  [data-notice][data-notice-fx="pulse"]:not(.cms-notice-bubble){animation:cms-n-bar 1.8s ease-in-out .3s 4}
+  [data-notice][data-notice-fx="glow"]:not(.cms-notice-bubble){animation:cms-n-barglow 2.4s ease-in-out .3s 3}
+  [data-notice][data-notice-fx="wiggle"]:not(.cms-notice-bubble) > *{animation:cms-n-shake 2.6s ease-in-out .8s 2}
+  .cms-notice-bubble.is-closing{animation:cms-notice-out .2s ease-in both}
+}
+@keyframes cms-n-pulse{0%{box-shadow:var(--n-shadow),0 0 0 0 var(--n-ring)}70%{box-shadow:var(--n-shadow),0 0 0 16px transparent}100%{box-shadow:var(--n-shadow),0 0 0 0 transparent}}
+@keyframes cms-n-glow{50%{box-shadow:var(--n-shadow),0 0 28px 6px var(--n-ring)}}
+@keyframes cms-n-wiggle{0%,30%,100%{rotate:0deg}5%{rotate:-3deg}10%{rotate:3deg}15%{rotate:-2deg}20%{rotate:2deg}25%{rotate:-1deg}}
+@keyframes cms-n-shake{0%,30%,100%{translate:0}5%{translate:-5px}10%{translate:5px}15%{translate:-3px}20%{translate:3px}25%{translate:-1px}}
+@keyframes cms-n-bar{50%{filter:brightness(1.18) saturate(1.15)}}
+@keyframes cms-n-barglow{50%{box-shadow:inset 0 0 0 999px rgb(255 255 255 / .12),0 4px 22px color-mix(in srgb,var(--n-bg,#3b5bdb) 60%,transparent)}}
 @media (prefers-reduced-motion:reduce){.cms-notice-bubble,.cms-notice-bubble.is-closing{animation:none}}
 @media (forced-colors:active){.cms-notice-bubble{border:1px solid CanvasText}}
 @media print{.cms-notice-bubble{display:none!important}}

@@ -6,8 +6,9 @@ namespace Core;
 /**
  * Hinweisbalken der Website (theme.php 'project' => ['notice' => ['text' => …, 'active' => …]]): Zeitraum und Darstellung.
  *
- * Der Core ergänzt im Einstellungsformular unter dem Hinweistext drei Felder: notice_from / notice_until (Zeitraum, leer = sofort
- * bzw. unbegrenzt) und notice_style ('' = wie im Design, 'left', 'center', 'bubble' / 'bubble-center' / 'bubble-middle' = schwebende Bubble unten links, unten mittig bzw. in der Bildschirmmitte, schließbar).
+ * Der Core ergänzt im Einstellungsformular unter dem Hinweistext diese Felder: notice_from / notice_until (Zeitraum, leer = sofort
+ * bzw. unbegrenzt) und notice_style ('' = wie im Design, 'left', 'center', 'bubble' / 'bubble-center' / 'bubble-middle' = schwebende Bubble unten links, unten mittig bzw. in der Bildschirmmitte, schließbar),
+ * notice_color (Signalfarben statt Kit-Farben) und notice_fx (pulse, wiggle, glow – kurz, still bei „Bewegung reduzieren“).
  * Kits rendern den Balken weiter selbst, öffnen ihn aber mit notice_open('topnote') und rufen notice_late('topnote') vor </body>:
  *
  *   <?php if (notice_on()): ?><?= notice_open('topnote') ?><div class="wrap">…</div></div><?php endif; ?>
@@ -40,6 +41,12 @@ final class Notice
                 'options' => ['' => __('Balken oben (wie im Design)'), 'left' => __('Balken oben, linksbündig'), 'center' => __('Balken oben, zentriert'),
                     'bubble' => __('Schwebende Bubble (unten links, schließbar)'), 'bubble-center' => __('Schwebende Bubble (unten mittig, schließbar)'),
                     'bubble-middle' => __('Schwebende Bubble (Bildschirmmitte, schließbar)')]],
+            ['name' => 'notice_color', 'label' => __('Farbe'), 'type' => 'select', 'translate' => false, 'default' => '', 'width' => 'half',
+                'options' => ['' => __('Wie im Design'), 'yellow' => __('Signalgelb'), 'red' => __('Rot'), 'green' => __('Grün'), 'blue' => __('Blau'),
+                    'dark' => __('Schwarz'), 'light' => __('Weiß')]],
+            ['name' => 'notice_fx', 'label' => __('Hervorheben'), 'type' => 'select', 'translate' => false, 'default' => '', 'width' => 'half',
+                'options' => ['' => __('Ruhig'), 'pulse' => __('Pulsieren'), 'wiggle' => __('Kurz wackeln'), 'glow' => __('Leuchten')],
+                'help' => __('Die Bewegung läuft nur ein paar Sekunden und entfällt, wenn Besucher „Bewegung reduzieren“ eingestellt haben.')],
         ];
     }
 
@@ -82,6 +89,23 @@ final class Notice
         return in_array($s, self::STYLES, true) ? $s : '';
     }
 
+    public const COLORS = ['', 'yellow', 'red', 'green', 'blue', 'dark', 'light'];
+    public const EFFECTS = ['', 'pulse', 'wiggle', 'glow'];
+
+    private static function pick(string $key, array $allowed): string
+    {
+        $v = (string) setting($key, '');
+        return in_array($v, $allowed, true) ? $v : '';
+    }
+
+    /** Farbe und Hervorhebung als data-Attribute (notice.css) */
+    private static function lookAttrs(): string
+    {
+        $c = self::pick('notice_color', self::COLORS);
+        $fx = self::pick('notice_fx', self::EFFECTS);
+        return ($c !== '' ? ' data-notice-color="' . $c . '"' : '') . ($fx !== '' ? ' data-notice-fx="' . $fx . '"' : '');
+    }
+
     /** Eingeschaltet, Text vorhanden und Zeitraum nicht abgelaufen (Beginn darf in der Zukunft liegen → per JS) */
     public static function pending(): bool
     {
@@ -122,7 +146,7 @@ final class Notice
 
     private static function needsAssets(): bool
     {
-        return self::style() !== '' || self::ts('notice_from') !== null || self::ts('notice_until') !== null;
+        return self::style() !== '' || self::ts('notice_from') !== null || self::ts('notice_until') !== null || self::lookAttrs() !== '';
     }
 
     private static function assets(): string
@@ -137,7 +161,7 @@ final class Notice
     {
         $tag = preg_match('~^[a-z]+$~', $tag) ? $tag : 'div';
         $align = in_array(self::style(), ['left', 'center'], true) ? ' data-notice-align="' . self::style() . '"' : '';
-        return self::assets() . '<' . $tag . ' class="' . e($class) . '" role="note" data-notice' . $align . self::timeAttrs() . '>';
+        return self::assets() . '<' . $tag . ' class="' . e($class) . '" role="note" data-notice' . $align . self::lookAttrs() . self::timeAttrs() . '>';
     }
 
     /** Vor </body>: Bubble (Kit-Klasse für Farben) und Skript für Zeitraum/Schließen */
@@ -147,7 +171,7 @@ final class Notice
         $html = self::assets();
         if (self::isBubble()) {
             $id = substr(md5(self::text() . '|' . setting('notice_from', '') . '|' . setting('notice_until', '')), 0, 10);
-            $html .= '<aside class="' . e($class) . ' cms-notice-bubble' . (self::style() !== 'bubble' ? ' cms-notice-bubble--' . substr(self::style(), 7) : '') . '" role="note" aria-label="' . e(lt('Hinweis')) . '" data-notice data-notice-id="' . $id . '"' . self::timeAttrs() . '>'
+            $html .= '<aside class="' . e($class) . ' cms-notice-bubble' . (self::style() !== 'bubble' ? ' cms-notice-bubble--' . substr(self::style(), 7) : '') . '" role="note" aria-label="' . e(lt('Hinweis')) . '" data-notice data-notice-id="' . $id . '"' . self::lookAttrs() . self::timeAttrs() . '>'
                 . '<div class="cms-notice-bubble__text">' . inline(self::text()) . '</div>'
                 . '<button type="button" class="cms-notice-bubble__close" data-notice-close aria-label="' . e(lt('Hinweis schließen')) . '">'
                 . '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></aside>';
