@@ -2544,3 +2544,5 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 /* Seiten: Reiter „Seitenbaum“ | „Sonderseiten & Vorlagen“ */
 .pt-tabbar{margin-bottom:14px}
 .pt-special:not([hidden]){display:grid;gap:16px}
+.pt-tplico{display:inline-grid;place-items:center;width:18px;height:18px;vertical-align:-3px;color:var(--adm-a)}
+.pt-tplico .ico{width:18px;height:18px}

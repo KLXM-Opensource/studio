@@ -144,7 +144,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
   <p class="adm-muted"><?= e(__('Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.')) ?> <a href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Anordnen und benennen')) ?></a></p>
   <ul class="adm-list">
     <?php foreach ($pageTemplates as $pt_): ?>
-    <li><span><span class="pt-icon pt-icon--pagetpl" aria-hidden="true"></span> <?= e($pt_['label']) ?></span>
+    <li><span><?= $pt_['icon'] !== '' ? '<span class="pt-tplico" aria-hidden="true">' . icon($pt_['icon']) . '</span>' : '<span class="pt-icon pt-icon--pagetpl" aria-hidden="true"></span>' ?> <?= e($pt_['label']) ?></span>
       <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(\Core\PageTemplates::editUrl($pt_['page'])) ?>"><?= e(__('Blöcke bearbeiten')) ?></a></li>
     <?php endforeach; ?>
   </ul>
