@@ -173,7 +173,7 @@ final class CmsService
         if (self::hasHours()) {
             $out['opening_hours'] = $svc->hoursGet();
         }
-        if (self::hasNotice() && setting(project('notice.active'))) {
+        if (self::hasNotice() && \Core\Notice::visible()) {
             $out['notice'] = \Core\EditorNotes::strip(strip_tags((string) setting(project('notice.text'))));
         }
         return array_filter($out, fn($v) => $v !== null && $v !== [] && $v !== '');
@@ -411,12 +411,16 @@ final class CmsService
         return $this->hoursGet();
     }
 
-    public function noticeSet(string $text, bool $active): array
+    /** $from/$until: null = unverändert, '' = leeren, sonst „JJJJ-MM-TT HH:MM“ (Ortszeit der Website) – Core\Notice */
+    public function noticeSet(string $text, bool $active, ?string $from = null, ?string $until = null): array
     {
         if (!self::hasNotice()) {
             throw new ApiError(404, 'Diese Website hat keinen Hinweisbalken.');
         }
-        return $this->settingsUpdate(array_filter([(string) project('notice.text') => $text, (string) project('notice.active', '') => $active], fn($k) => $k !== '', ARRAY_FILTER_USE_KEY));
+        $vals = array_filter([(string) project('notice.text') => $text, (string) project('notice.active', '') => $active], fn($k) => $k !== '', ARRAY_FILTER_USE_KEY);
+        if ($from !== null) $vals['notice_from'] = $from;
+        if ($until !== null) $vals['notice_until'] = $until;
+        return $this->settingsUpdate($vals);
     }
 
     // ================================================================= Seiten

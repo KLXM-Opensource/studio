@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Hinweisbalken: Zeitraum und Darstellung
+- **Zeitraum:** „Anzeigen ab“ / „Anzeigen bis“ unter dem Hinweistext (Website → Hinweisbalken) – der Hinweis erscheint und
+  verschwindet von selbst, auch bei Treffern im Seiten-Cache und auf offenen Seiten (`data-notice-from/-until`, `notice.js`).
+- **Darstellung:** Balken wie im Design, linksbündig, zentriert oder als **schwebende Bubble** unten links (Farben vom Kit,
+  schließbar, für die Sitzung gemerkt; ruhig bei „Bewegung reduzieren“).
+- Der Core ergänzt die Felder für jedes Kit mit `project.notice` (`Core\Notice`); Kits öffnen den Balken mit
+  `notice_open('topnote')`, prüfen `notice_on()` und rufen `notice_late('topnote')` vor `</body>`. CSS/JS nur, wenn Zeitraum oder
+  Darstellung gesetzt sind (CSP ohne Inline-Code). MCP `set_notice` nimmt optional `from`/`until`.
+
 ### Seitenbaum: Verschieben trifft die richtige Stelle, auch ohne Ziehen
 - **Fehler behoben:** Ziehen zwischen zwei Seiten landete auf der obersten Ebene an der falschen Stelle (z. B. „AGB“ hinter
   „Impressum“ rutschte hinter „Agentur“ – oder schien gar nichts zu tun). Ursache: Der Baum schickte die Position als Index, gezählt

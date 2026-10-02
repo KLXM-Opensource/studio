@@ -16,7 +16,7 @@
  */
 $theme = app()->theme;
 $lang = \Core\Lang::current();
-$notice = setting('notice_active') && trim(strip_tags((string) setting('notice_text'))) !== '';
+$notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $fw = frameworks_assets();
 ?><!doctype html>
 <html lang="<?= e($lang) ?>" class="<?= e(frameworks_html_class()) ?><?= $editor ? ' is-editing' : '' ?>">
@@ -59,7 +59,7 @@ $fw = frameworks_assets();
 <body>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
 <a class="fw-skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
-<?php if ($notice): ?><div class="fw-notice" role="note"><?= inline((string) setting('notice_text')) ?></div>
+<?php if ($notice): ?><?= notice_open('fw-notice') ?><?= inline((string) setting('notice_text')) ?></div>
 <?php endif; ?>
 <?= $theme->partial('header') ?>
 <main id="main" tabindex="-1">
@@ -67,5 +67,6 @@ $fw = frameworks_assets();
 </main>
 <?= $theme->partial('footer') ?>
 <?= cms_chat_launcher($page ?? null, (bool) $editor) ?>
+<?= notice_late('fw-notice') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>
 </body>
 </html>

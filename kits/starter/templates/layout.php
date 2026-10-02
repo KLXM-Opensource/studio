@@ -14,7 +14,7 @@
  */
 $theme = app()->theme;
 $lang = \Core\Lang::current();
-$notice = setting('notice_active') && trim(strip_tags((string) setting('notice_text'))) !== '';
+$notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 ?><!doctype html>
 <html lang="<?= e($lang) ?>" class="<?= e(starter_html_class()) ?><?= $editor ? ' is-editing' : '' ?>">
 <head>
@@ -58,7 +58,7 @@ $notice = setting('notice_active') && trim(strip_tags((string) setting('notice_t
 <body>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) /* ohne eigenes Partial rendert der Core die Leiste */ ?><?php endif; ?>
 <a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
-<?php if ($notice): ?><div class="notice" role="note"><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
+<?php if ($notice): ?><?= notice_open('notice') ?><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>
 <?= $theme->partial('header') ?>
 <main id="main" tabindex="-1">
@@ -67,5 +67,6 @@ $notice = setting('notice_active') && trim(strip_tags((string) setting('notice_t
 <?= $theme->partial('footer') ?>
 <?= cms_chat_launcher($page ?? null, (bool) $editor) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange ausgeschaltet */ ?>
 <?= header_actions_late() /* Kopfbereich-Aktionen: Paneel des Kontakt-Menüs – nicht renderblockierend */ ?>
+<?= notice_late('notice') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>
 </body>
 </html>

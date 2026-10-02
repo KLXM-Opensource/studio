@@ -8,7 +8,7 @@
 $theme = app()->theme;
 $lang = \Core\Lang::current();
 $ogLocale = ['de' => 'de_DE', 'en' => 'en_GB', 'fr' => 'fr_FR', 'it' => 'it_IT', 'es' => 'es_ES', 'nl' => 'nl_NL'][$lang] ?? str_replace('-', '_', $lang);
-$notice = setting('notice_active') && trim(strip_tags((string) setting('notice_text'))) !== '';
+$notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
 // Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Übergänge) – nur das Gewählte
 $optCss = [];
@@ -70,7 +70,7 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
 <a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?>
-<div class="topnote" role="note"><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
+<?= notice_open('topnote') ?><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>
 <?= $theme->partial('header') ?>
 <main id="main" tabindex="-1">
@@ -86,5 +86,6 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <link rel="stylesheet" href="<?= e(theme_asset('css/overlay.css')) ?>">
 <?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange aus */ ?>
 <?= header_actions_late() /* Kopfbereich-Aktionen: Paneel des Kontakt-Menüs – nicht renderblockierend */ ?>
+<?= notice_late('topnote') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>
 </body>
 </html>

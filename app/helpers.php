@@ -392,6 +392,24 @@ function entry_toolbar(array $vars): string
     return \Core\Data\EntryEdit::toolbar($vars);
 }
 
+/** Hinweisbalken im Kit-Layout rendern? (eingeschaltet, Text vorhanden, Zeitraum nicht abgelaufen, nicht als Bubble) – Core\Notice */
+function notice_on(): bool
+{
+    return \Core\Notice::bar();
+}
+
+/** Öffnendes Element des Hinweisbalkens mit Kit-Klasse (role, Ausrichtung, Zeitraum) – schließen mit </div> */
+function notice_open(string $class = 'topnote', string $tag = 'div'): string
+{
+    return \Core\Notice::open($class, $tag);
+}
+
+/** Vor </body>: schwebende Hinweis-Bubble und Skript für den Zeitraum ('' ohne Zeitraum/Darstellung) */
+function notice_late(string $class = 'topnote'): string
+{
+    return \Core\Notice::late($class);
+}
+
 /**
  * Besucher-Chat (Core\AI\VisitorChat): Starter-Knopf unten rechts/links – im Theme-Layout vor </body>:
  * <?= cms_chat_launcher($page, (bool) $editor) ?>. Liefert '' solange der Chat nicht eingeschaltet ist; das Chat-Fenster

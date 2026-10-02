@@ -150,7 +150,8 @@ final class Theme
     /** Gruppen des zentralen Einstellungsformulars (Titel vom Theme) */
     public function settingsGroups(): array
     {
-        return $this->def['settings']['groups'] ?? [];
+        // Hinweisbalken: Zeitraum und Darstellung ergänzt der Core (Core\Notice)
+        return Notice::extendGroups($this->def['settings']['groups'] ?? []);
     }
 
     public function settingsTitle(): string

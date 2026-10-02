@@ -5906,4 +5906,12 @@ return [
     'Nach unten verschieben' => 'Move down',
     'Einrücken (Unterseite der vorigen)' => 'Indent (subpage of the previous page)',
     'Ausrücken (eine Ebene höher)' => 'Outdent (one level up)',
+    'Anzeigen ab' => 'Show from',
+    'Anzeigen bis' => 'Show until',
+    'Leer = sofort. Der Hinweis erscheint automatisch zu diesem Zeitpunkt.' => 'Empty = right away. The notice appears automatically at this time.',
+    'Leer = bis Sie ihn ausschalten. Danach verschwindet er von selbst.' => 'Empty = until you switch it off. After that it disappears by itself.',
+    'Balken oben (wie im Design)' => 'Bar at the top (as in the design)',
+    'Balken oben, linksbündig' => 'Bar at the top, left-aligned',
+    'Balken oben, zentriert' => 'Bar at the top, centred',
+    'Schwebende Bubble (unten links, schließbar)' => 'Floating bubble (bottom left, can be closed)',
 ];

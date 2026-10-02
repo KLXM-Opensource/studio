@@ -315,9 +315,11 @@ final class McpController
                 'von' => $str('HH:MM'), 'bis' => $str('HH:MM'), 'pause_von' => $str('HH:MM'), 'pause_bis' => $str('HH:MM'),
                 'notiz' => $str('z. B. „nachmittags geschlossen“')]]]], ['hours']), $rw + ['idempotentHint' => true], true,
             fn($a) => ['hours' => $s->hoursSet((array) $a['hours'])]);
-        if (CmsService::hasNotice()) $add('set_notice', 'Aktuellen Hinweis setzen', 'Hinweisbalken oben auf der Website (' . project('notice.example', 'z. B. Betriebsferien') . '). active=false blendet ihn aus. Wirkt sofort.',
-            $schema(['text' => $str('Text; erlaubt: <b>, <i>, <a href>'), 'active' => $bool('Anzeigen (Standard: true)')], ['text']), $rw + ['idempotentHint' => true], true,
-            fn($a) => ['saved' => $s->noticeSet((string) $a['text'], (bool) ($a['active'] ?? true))]);
+        if (CmsService::hasNotice()) $add('set_notice', 'Aktuellen Hinweis setzen', 'Hinweisbalken oben auf der Website (' . project('notice.example', 'z. B. Betriebsferien') . '). active=false blendet ihn aus. Wirkt sofort; mit from/until erscheint und verschwindet er automatisch.',
+            $schema(['text' => $str('Text; erlaubt: <b>, <i>, <a href>'), 'active' => $bool('Anzeigen (Standard: true)'),
+                'from' => $str('Anzeigen ab „JJJJ-MM-TT HH:MM“ (Ortszeit der Website; leer = sofort)'), 'until' => $str('Anzeigen bis „JJJJ-MM-TT HH:MM“ (leer = unbegrenzt)')], ['text']),
+            $rw + ['idempotentHint' => true], true,
+            fn($a) => ['saved' => $s->noticeSet((string) $a['text'], (bool) ($a['active'] ?? true), self::noticeTime($a, 'from'), self::noticeTime($a, 'until'))]);
         $add('create_page', 'Seite anlegen', 'Neue Seite anlegen (Standard: Entwurf). Optional direkt mit Blöcken [{type, data, section}].',
             $schema(['title' => $str('Titel'), 'slug' => $str('URL-Pfad, z. B. „leistungen“'), 'status' => $str('draft|published', ['enum' => ['draft', 'published']]),
                 'meta_description' => $str('Beschreibung für Suchmaschinen (≤160 Zeichen)'), 'noindex' => $bool('Nicht indexieren'),
@@ -520,5 +522,14 @@ final class McpController
         $args = is_array($p['arguments'] ?? null) ? $p['arguments'] : [];
         $text = preg_replace_callback('~\{(\w+)\}~', fn($m) => (string) ($args[$m[1]] ?? ($m[1] === 'seite' ? 'home' : '(offen)')), $all[$name]['text']);
         return ['description' => $all[$name]['description'], 'messages' => [['role' => 'user', 'content' => ['type' => 'text', 'text' => $text]]]];
+    }
+
+    /** from/until für set_notice prüfen: null = nicht angegeben, '' = leeren */
+    private static function noticeTime(array $a, string $k): ?string
+    {
+        if (!array_key_exists($k, $a)) return null;
+        [$v, $err] = \Core\Fields::clean(['name' => $k, 'label' => $k, 'type' => 'datetime'], (string) $a[$k]);
+        if ($err) throw new ApiError(422, $err);
+        return (string) $v;
     }
 }

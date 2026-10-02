@@ -55,8 +55,8 @@ $phone = praxis_phone();
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
 <a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 
-<?php if (setting('aktueller_hinweis_aktiv') && trim((string) setting('aktueller_hinweis_text')) !== ''): ?>
-<div class="topnote" role="note"><strong><?= e(lt('Aktuell.')) ?></strong> <?= inline((string) setting('aktueller_hinweis_text')) ?></div>
+<?php if (notice_on()): /* Core\Notice: Schalter, Zeitraum, Darstellung */ ?>
+<?= notice_open('topnote') ?><strong><?= e(lt('Aktuell.')) ?></strong> <?= inline((string) setting('aktueller_hinweis_text')) ?></div>
 <?php endif; ?>
 
 <?= $theme->partial('header', ['phone' => $phone]) ?>
@@ -91,5 +91,6 @@ $phone = praxis_phone();
 <?php else: ?><noscript><link rel="stylesheet" href="<?= e(theme_asset('css/mnav.css')) ?>" media="(max-width:1079.98px)"></noscript>
 <?php endif; ?>
 <?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange aus */ ?>
+<?= notice_late('topnote') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>
 </body>
 </html>
