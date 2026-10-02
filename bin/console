@@ -42,6 +42,7 @@
  *   extensions:selftest                               Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten nach Art, Werkzeuge
  *                                                     der Website, Ereignisse, Verwaltungsrouten, Tabellen, Slots)
  *   db:selftest                                       Selbsttest Core\Db\Table (anlegen, idempotent, umbenennen, Indizes, Fremdschlüssel)
+ *   format:selftest                                   Selbsttest Core\Format (Datum, relativ, Zahl, Betrag, Größe, Dauer, Auszug; DE/EN)
  *   features:list                                     Funktionen dieser Website: an/aus, Quelle (Konfiguration, Verwaltung, Standard)
  *   features:release [--dry-run] [--only=features|extensions]
  *                                                     In der Konfiguration festgelegte Funktionen/Erweiterungen an die Verwaltung
@@ -1146,6 +1147,13 @@ switch ($cmd) {
             printf("  %-28s %-12s v%-3d %s\n", 'cblk_' . $b['key'], $b['status'] . ($b['changed'] ? '*' : ''), $b['version'], $b['label']);
         }
         break;
+
+    case 'format:selftest':
+        // Core\Format: Datum, relative Angaben, Zahlen, Beträge, Größen, Dauer, Auszug – und gleiche Ausgaben wie die früheren Helfer
+        $res = Core\FormatSelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'db:selftest':
         // Core\Db\Table: Anlegen, Idempotenz, Ergänzen, Umbenennen, Indizes, Fremdschlüssel – in einer Wegwerf-Datenbank

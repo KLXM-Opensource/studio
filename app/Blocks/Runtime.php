@@ -239,7 +239,7 @@ final class Runtime
                 $s = self::scalar($v);
                 if (!is_numeric($s)) return $s;
                 $dec = max(0, min(4, (int) ($args[0] ?? 0)));
-                return Lang::current() === 'de' ? number_format((float) $s, $dec, ',', '.') : number_format((float) $s, $dec, '.', ',');
+                return \Core\Format::for()->number($s, $dec);
             case 'length':
                 return is_array($v) ? count($v) : mb_strlen(self::scalar($v));
             case 'image':

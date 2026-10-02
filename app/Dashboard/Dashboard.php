@@ -280,16 +280,6 @@ final class Dashboard
     /** Relative Zeitangabe: „vor 5 Min.“, „gestern“, „12.09.“ */
     public static function ago(string $at): string
     {
-        $t = strtotime($at);
-        if (!$t) return '';
-        $d = time() - $t;
-        return match (true) {
-            $d < 90 => __('gerade eben'),
-            $d < 3600 => __('vor {n} Min.', ['n' => (int) round($d / 60)]),
-            $d < 86400 && date('Y-m-d', $t) === date('Y-m-d') => __('heute, {time}', ['time' => date('H:i', $t)]),
-            date('Y-m-d', $t) === date('Y-m-d', time() - 86400) => __('gestern, {time}', ['time' => date('H:i', $t)]),
-            $d < 7 * 86400 => __('vor {n} Tagen', ['n' => (int) ceil($d / 86400)]),
-            default => date('d.m.Y', $t),
-        };
+        return \Core\Format::admin()->relative($at);
     }
 }

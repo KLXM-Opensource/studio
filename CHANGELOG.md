@@ -25,6 +25,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   derselben PDO-Verbindung (auch in Transaktionen). Manifest: `$x->table('name', fn(Table $t) => …)` – angeglichen beim Start nach
   geänderter Beschreibung (Fingerabdruck je Website) und bei jedem `migrate`, vor den `migration()`-Schritten.
   Selbsttest `db:selftest`.
+- **Werte formatieren: `Core\Format`** (nach `rex_formatter`) mit Helfer `fmt()`: `date`, `time`, `datetime`, `relative`,
+  `number`, `decimal`, `currency`, `bytes`, `duration`, `phone`, `host`, `excerpt` – Sprache der Seite (`Lang::current()`),
+  `fmt('en')` bzw. `Format::admin()`. Umgestellt mit gleicher Ausgabe (Schnappschuss + `format:selftest`): `date_local()`,
+  `Media::humanSize()` (ab 1 GB „GB“), `Links::ago()`, `Dashboard::ago()`, `MediaJobs::duration()`, `Clamp::excerpt()`,
+  Block-Filter `number`. In englischer Verwaltung bzw. auf englischen Seiten folgen Trenner und Datum jetzt der Sprache.
+  Neues Kapitel im Entwicklerhandbuch: **Werte formatieren**.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`

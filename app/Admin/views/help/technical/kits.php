@@ -308,6 +308,8 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <tr><td><code>rich($html)</code>, <code>inline($html)</code></td><td>Rich-Text über Whitelist ausgeben</td></tr>
     <tr><td><code>setting('key')</code>, <code>filled($v)</code></td><td>Einstellung lesen; „befüllt und kein [Platzhalter]“</td></tr>
     <tr><td><code>url('/pfad')</code>, <code>link_href($link)</code>, <code>tel_href($nr)</code></td><td>URLs (Rewrite-sicher), Link-Felder, Telefon-Links</td></tr>
+    <tr><td><code>fmt()-&gt;date($v)</code>, <code>-&gt;relative()</code>, <code>-&gt;number()</code>, <code>-&gt;bytes()</code> …</td><td>Werte formatieren in der Sprache der Seite (<code>Core\Format</code>) – Datum, Zahl, Betrag, Größe, Dauer, Telefon, Host, Auszug; siehe <a href="#format">Format</a>. <code>date_local($v, $stil)</code> und <code>phone_display()</code> bleiben als Kurzformen</td></tr>
+    <tr><td><code>paragraphs($text)</code></td><td>Mehrzeiligen Text (ohne HTML) in Absätze <code>&lt;p&gt;</code> mit <code>&lt;br&gt;</code> umwandeln (maskiert)</td></tr>
     <tr><td><code>vcard_url()</code>, <code>vcard_entry_url($table, $entry)</code></td><td>Visitenkarte der Organisation bzw. einer Person (<code>.vcf</code>) oder <code>null</code> – siehe <a href="#vcard">Visitenkarte</a></td></tr>
     <tr><td><code>img($id, $sizes, $opt)</code></td><td><code>&lt;picture&gt;</code> mit AVIF/WebP-srcset, width/height, lazy</td></tr>
     <tr><td><code>theme_asset()</code>, <code>asset()</code></td><td>Asset-URL mit Cache-Busting</td></tr>

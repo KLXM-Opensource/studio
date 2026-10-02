@@ -260,7 +260,7 @@ final class MediaJobs
 
     public static function duration(int $s): string
     {
-        return $s >= 3600 ? sprintf('%d:%02d:%02d h', intdiv($s, 3600), intdiv($s % 3600, 60), $s % 60) : sprintf('%d:%02d min', intdiv($s, 60), $s % 60);
+        return \Core\Format::admin()->duration($s);   // „3:05 min“, „1:02:03 h“
     }
 
     // ================================================================== Kommandozeile

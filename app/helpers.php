@@ -543,33 +543,22 @@ function lt(string $text, array $params = []): string
 
 /**
  * Datum in der Sprache der aufgerufenen Seite. $style: short (24.09.2026 / 24/09/2026), long (24. September 2026 / 24 September 2026),
- * weekday (Donnerstag / Thursday), day_month (24. September / 24 September).
+ * weekday (Donnerstag / Thursday), day_month (24. September / 24 September). Leer = heute. Siehe fmt()->date() (Core\Format).
  */
 function date_local(int|string|null $when, string $style = 'short'): string
 {
     $ts = is_int($when) ? $when : (($when === null || $when === '') ? time() : strtotime((string) $when));
     if ($ts === false) return '';
-    $lang = \Core\Lang::current();
-    if (class_exists(\IntlDateFormatter::class)) {
-        $pattern = match ($style) {
-            'long' => $lang === 'de' ? 'd. MMMM y' : 'd MMMM y',
-            'weekday' => 'EEEE',
-            'day_month' => $lang === 'de' ? 'd. MMMM' : 'd MMMM',
-            default => $lang === 'de' ? 'dd.MM.y' : 'dd/MM/y',
-        };
-        $f = new \IntlDateFormatter($lang, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, date_default_timezone_get(), null, $pattern);
-        $out = $f->format($ts);
-        if (is_string($out)) return $out;
-    }
-    $months = ['de' => ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']];
-    $days = ['de' => ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']];
-    $m = isset($months[$lang]) ? $months[$lang][(int) date('n', $ts) - 1] : date('F', $ts);
-    return match ($style) {
-        'long' => date('j', $ts) . ($lang === 'de' ? '. ' : ' ') . $m . ' ' . date('Y', $ts),
-        'weekday' => isset($days[$lang]) ? $days[$lang][(int) date('w', $ts)] : date('l', $ts),
-        'day_month' => date('j', $ts) . ($lang === 'de' ? '. ' : ' ') . $m,
-        default => date($lang === 'de' ? 'd.m.Y' : 'd/m/Y', $ts),
-    };
+    return \Core\Format::for()->date($ts, $style);
+}
+
+/**
+ * Werte formatieren (Core\Format) in der Sprache der Seite bzw. $lang: fmt()->date($v), ->time(), ->datetime(), ->relative(),
+ * ->number($v, 2), ->decimal(), ->currency(), ->bytes(), ->duration(), ->phone(), ->host(), ->excerpt($html, 160). Ergebnis ist Text → e().
+ */
+function fmt(?string $lang = null): \Core\Format
+{
+    return \Core\Format::for($lang);
 }
 
 function __(string $text, array $params = []): string

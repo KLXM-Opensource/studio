@@ -74,12 +74,7 @@ final class Clamp
     /** Auszug: Leerraum zusammenfassen, an einer Wortgrenze kürzen, „…“ anhängen */
     public static function excerpt(string $text, int $max): string
     {
-        $s = trim((string) preg_replace('~\s+~u', ' ', $text));
-        if ($max <= 0 || mb_strlen($s) <= $max) return $s;
-        $cut = mb_substr($s, 0, $max);
-        $sp = mb_strrpos($cut, ' ');
-        if ($sp !== false && $sp > $max * .6) $cut = mb_substr($cut, 0, $sp);
-        return rtrim($cut, " ,.;:–-") . ' …';
+        return \Core\Format::for()->excerpt($text, $max, false);   // Eingabe ist reiner Text (Entries::text)
     }
 
     /**

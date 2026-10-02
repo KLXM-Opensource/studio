@@ -1071,12 +1071,20 @@ final class Media
 
     // ================================================================= Hilfen
 
+    /** Dateigröße für die Anzeige (Core\Format::bytes in der Sprache der Verwaltung bzw. Seite) – „1,5 MB“, „12 KB“ */
     public static function humanSize(int $bytes): string
     {
-        if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 1, ',', '.') . ' MB';
+        return Format::for(self::fmtLang())->bytes($bytes);
+    }
+
+    /** Sprache für Größenangaben: aufgerufene Seite der Website (app()->lang), sonst Sprache der Verwaltung */
+    private static function fmtLang(): string
+    {
+        try {
+            return app()->lang ?? I18n::locale();
+        } catch (\Throwable) {
+            return 'de';
         }
-        return max(1, (int) round($bytes / 1024)) . ' KB';
     }
 
     public static function typeLabel(string $mime): string

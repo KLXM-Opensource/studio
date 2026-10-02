@@ -392,16 +392,7 @@ final class Links
     /** Kurzes Datum: „heute, 14:05“, „gestern“, „vor 3 Tagen“, sonst 12.09.2026 */
     public static function ago(string $ts, ?int $now = null): string
     {
-        $t = strtotime($ts);
-        if ($t === false) return '';
-        $now ??= time();
-        $days = (int) floor((strtotime('today', $now) - strtotime('today', $t)) / 86400);
-        return match (true) {
-            $days <= 0 => __('heute, {time}', ['time' => date('H:i', $t)]),
-            $days === 1 => __('gestern'),
-            $days < 7 => __('vor {n} Tagen', ['n' => $days]),
-            default => date('d.m.Y', $t),
-        };
+        return Format::admin()->relative($ts, $now, 'day');
     }
 
     /**
