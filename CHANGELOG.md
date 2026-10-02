@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Quick-Glossar beim Bearbeiten auf der Website
+- Knopf **Glossar** in der Werkzeugleiste (⌥G, Telefon: Menü „⋯“), nur mit Funktion „glossary“ und Recht auf die Tabelle „glossar“.
+  **Suchen** (Begriff, Varianten, Kurz-Erklärung) mit „Einfügen“ = Link `entry:glossar:{id}` an der Schreibmarke bzw. um den markierten
+  Text; **Neuer Begriff** (vorbelegt mit der Markierung, Entwurf bzw. veröffentlicht je nach `data.publish`, Doppel werden erkannt);
+  **Auf dieser Seite** (was die automatische Markierung kennzeichnen würde, „Zur Stelle“ markiert den Treffer im Text).
+  Tastatur vollständig, hell/dunkel, ab 390 px als Blatt unten.
+- Erstes Werkzeug über die neue Schnittstelle (`Core\Glossary\QuickTool`, `resources/js/quick-glossary.mjs`) – Referenzbeispiel
+  für Erweiterungen. Endpunkte `GET /admin/api/glossar/suche`, `POST /admin/api/glossar/begriff`, `POST /admin/api/glossar/seite`;
+  `glossary:selftest` prüft Treffer und Endpunkte.
+
 ### Werkzeuge und Ereignisse beim Bearbeiten auf der Website
 - **Werkzeuge:** `$x->frontendTool([...])` (`Core\FrontendTools`) – Knopf in der Werkzeugleiste oder Eintrag im Menü „⋯“, Tastenkürzel,
   Rechte (`perm`, `table`, `feature`, `visible`), Modi `page`/`entry`. Nur angemeldet und nur im Bearbeiten-Modus; das ES-Modul lädt

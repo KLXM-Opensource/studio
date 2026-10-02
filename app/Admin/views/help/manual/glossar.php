@@ -2,7 +2,8 @@
   <p class="lead">Mit dem <b>Glossar</b> erklären Sie Fachbegriffe direkt im Text: Das erste Vorkommen eines Begriffs auf einer Seite bekommt eine gepunktete Unterstreichung. Ein Klick oder Tippen öffnet ein kleines Fenster mit der Kurz-Erklärung und dem Link „Mehr im Glossar“. Dazu gibt es eine Übersicht von A bis Z und für jeden Begriff eine eigene Seite. Die Funktion schaltet die Administration unter <b>Funktionen &amp; Erweiterungen → Glossar</b> ein (Standard: aus).</p>
   <h3>Einrichten</h3>
   <ul>
-    <li>Menü <b>Glossar</b> → „Glossar einrichten“: legt die Datentabelle „Glossar“ an, Detailseiten unter <code>/glossar/…</code> und die Übersichtsseite <code>/glossar</code> (als Entwurf – veröffentlichen Sie sie, wenn die ersten Begriffe stehen; im Menü erscheint sie erst, wenn Sie sie dort einhängen).</li>
+    <li><b>Wo?</b> Das Glossar hat keinen eigenen Punkt im Hauptmenü mehr: Seine Seite <b>Prüfen &amp; Einstellungen</b> erreichen Sie über <b>Daten → Glossar</b> (Knopf oben bzw. Unterpunkt in der Tabelle) und unter <b>Administration → Einstellungen</b>. Die Adresse <code>/admin/glossar</code> bleibt gleich.</li>
+    <li><b>Prüfen &amp; Einstellungen</b> → „Glossar einrichten“: legt die Datentabelle „Glossar“ an, Detailseiten unter <code>/glossar/…</code> und die Übersichtsseite <code>/glossar</code> (als Entwurf – veröffentlichen Sie sie, wenn die ersten Begriffe stehen; im Menü erscheint sie erst, wenn Sie sie dort einhängen).</li>
   </ul>
   <h3>Begriffe pflegen</h3>
   <ul>
@@ -10,9 +11,18 @@
     <li><b>Varianten, Synonyme, Abkürzungen</b>: eine je Zeile, z. B. „Sender Policy Framework“. Abkürzungen mit mehreren Großbuchstaben (SPF, IPv6, MTA-STS) zählen nur in genau dieser Schreibweise, normale Wörter ohne Rücksicht auf Groß- und Kleinschreibung und mit üblichen Endungen („Zertifikat“ findet auch „Zertifikate“). Soll ein Wort nur genau so gelten, setzen Sie es in Anführungszeichen: <code>"Cookie"</code>.</li>
     <li><b>Ausführliche Erklärung</b>, <b>Kategorie</b> und <b>Mehr erfahren</b> (Link zu einer Quelle) sind freiwillig und erscheinen auf der Detailseite.</li>
     <li><b>Status</b>: Nur veröffentlichte Begriffe werden für Besucher markiert. Entwürfe sehen Sie angemeldet auf der Website mit dem Hinweis „Entwurf“ – so prüfen Sie neue Erklärungen im Zusammenhang.</li>
-    <li>Bearbeitet wird wie bei jeder Datentabelle (<b>Daten → Glossar</b> oder der Link im Menü Glossar). „Begriff schnell hinzufügen“ legt einen Entwurf an; ist die KI eingerichtet, schlägt „Von der KI vorschlagen“ eine Erklärung vor – immer als Entwurf, den Sie prüfen.</li>
+    <li>Bearbeitet wird wie bei jeder Datentabelle (<b>Daten → Glossar</b>). „Begriff schnell hinzufügen“ legt einen Entwurf an; ist die KI eingerichtet, schlägt „Von der KI vorschlagen“ eine Erklärung vor – immer als Entwurf, den Sie prüfen.</li>
   </ul>
-  <h3>Übersicht im Menü Glossar</h3>
+  <h3 id="quick-glossar">Quick-Glossar beim Bearbeiten auf der Website</h3>
+  <p>Wer Seiten bearbeitet, braucht das Glossar oft mitten im Text. Im Bearbeiten-Modus (Seite oder Eintrag) steht dafür in der Werkzeugleiste der Knopf <b>Glossar</b> (Buch-Symbol; auf dem Telefon im Menü „⋯“). Tastenkürzel: <kbd>⌥G</kbd> (Windows: <kbd>Alt</kbd>+<kbd>G</kbd>). Sie brauchen das Recht, Einträge der Tabelle „Glossar“ zu bearbeiten.</p>
+  <ul>
+    <li><b>Suchen</b>: Tippen Sie einen Begriff, eine Variante oder ein Wort aus der Erklärung. Jeder Treffer zeigt die Kurz-Erklärung. <b>Einfügen</b> setzt einen Link auf den Begriff – um den markierten Text oder, ohne Markierung, als neues Wort an der Schreibmarke. Der Link bleibt gültig, auch wenn der Begriff umbenannt wird (wie in der Linkauswahl). Oben im Fenster steht, wo eingefügt wird.</li>
+    <li><b>Neuer Begriff</b>: ist mit dem markierten Text vorbelegt. Begriff und Kurz-Erklärung genügen; Varianten und eine ausführliche Erklärung sind freiwillig. Ohne das Recht „Einträge veröffentlichen“ entsteht ein Entwurf, sonst können Sie gleich veröffentlichen. Danach „Jetzt im Text verlinken“. Gibt es den Begriff schon, sagt das Fenster es und zeigt ihn.</li>
+    <li><b>Auf dieser Seite</b>: listet die Begriffe, die die automatische Markierung auf dieser Seite kennzeichnen würde (jeweils das erste Vorkommen, mit Ihren Einstellungen). <b>Zur Stelle</b> springt dorthin und markiert das Wort – „Einfügen“ unter „Suchen“ verlinkt es dann.</li>
+    <li><b>Tastatur</b>: Im Suchfeld führt <kbd>↓</kbd> in die Treffer, <kbd>↑</kbd>/<kbd>↓</kbd> wechseln, <kbd>Enter</kbd> fügt ein. Reiter mit <kbd>←</kbd>/<kbd>→</kbd>. <kbd>⌥G</kbd> springt zwischen Fenster und Text, <kbd>Esc</kbd> schließt das Fenster und bringt Sie zurück an die Schreibmarke.</li>
+  </ul>
+  <p>Eingefügte Links sind normale Änderungen: Speichern bzw. Veröffentlichen wie gewohnt. Links auf Begriffe im Entwurf wirken für Besucher erst, wenn der Begriff veröffentlicht ist.</p>
+  <h3>Seite „Prüfen &amp; Einstellungen“</h3>
   <ul>
     <li><b>Hinweise</b>: Varianten, die bei mehreren Begriffen stehen, fehlende oder zu lange Kurz-Erklärungen und Überschneidungen (z. B. „TLS“ in „TLS-RPT“ – dort gilt der längere Begriff).</li>
     <li><b>Vorkommen</b>: auf wie vielen Seiten der Begriff steht (nach dem Text der Website-Suche) – mit Liste der Seiten.</li>
@@ -23,7 +33,7 @@
   <ul>
     <li>Nie in Links, Buttons, Formularen, Code, Navigation, Kopf- und Fußbereich, großen Überschriften (h1–h3, einstellbar) und auf der eigenen Seite des Begriffs; nie im Bearbeiten-Modus.</li>
     <li><b>Einzelner Abschnitt</b>: im Editor in den Abschnitts-Optionen „Glossar-Begriffe hier nicht markieren“ (z. B. bei Zitaten oder Werbetexten).</li>
-    <li><b>Ganze Seiten</b>: im Menü Glossar unter Einstellungen → „Seiten ausnehmen“ (z. B. <code>/impressum</code> oder <code>/blog/*</code>).</li>
+    <li><b>Ganze Seiten</b>: unter Daten → Glossar → Prüfen &amp; Einstellungen → „Seiten ausnehmen“ (z. B. <code>/impressum</code> oder <code>/blog/*</code>).</li>
     <li><b>Je Seite oder je Abschnitt</b>: Standard ist das erste Vorkommen je Seite; „je Abschnitt“ markiert in jedem Abschnitt erneut.</li>
   </ul>
   <div class="doc-note doc-note--tip"><strong>Gut zu wissen</strong><p>Auch Inhalte von Erweiterungen werden markiert. Entstehen Inhalte erst im Browser – etwa Ergebnisse eines Prüf-Werkzeugs –, trägt die Administration den Bereich unter Einstellungen → „Dynamische Bereiche“ ein (z. B. <code>.ergebnisse</code>). Für Screenreader ist jeder markierte Begriff eine Schaltfläche, die ihre Erklärung aufklappt; beim Drucken steht die Erklärung in Klammern hinter dem Begriff.</p></div>

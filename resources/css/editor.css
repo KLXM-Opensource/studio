@@ -232,3 +232,6 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 [data-edit] .cms-note{cursor:pointer}
 @media (forced-colors:active){.cms-note{border:1px solid CanvasText;background:Canvas;color:CanvasText}}
 @media print{.cms-note{display:none}}
+
+/* Quick-Glossar „Zur Stelle“ (resources/js/quick-glossary.mjs): Treffer kurz hervorheben – CSS Custom Highlight, ändert das DOM nicht */
+::highlight(cms-gl-hit){background:#FFD54F;color:#111}

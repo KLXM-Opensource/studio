@@ -55,6 +55,8 @@ final class Annotator
     public int $count = 0;
     /** Markierte Begriffe (id => true) im letzten annotate() */
     public array $marked = [];
+    /** Markierter Text je Begriff (id => Treffer wie im Text, z. B. „SPF-Einträge“) – Quick-Glossar „Auf dieser Seite“ */
+    public array $hits = [];
 
     /**
      * $o: mode (page|section), headings (0–6: h1…hN überspringen, Standard 3), exclude (Liste von Begriffs-IDs),
@@ -158,6 +160,7 @@ final class Annotator
     {
         $this->count = 0;
         $this->marked = [];
+        $this->hits = [];
         $this->seen = [];
         if ($this->rx === null || $html === '') return $html;
         // Nur der <body> (Kopf, JSON-LD, Meta-Angaben bleiben unberührt)
@@ -271,6 +274,7 @@ final class Annotator
             if ($id === 0 || isset($this->seen[$id]) || !isset($this->byId[$id])) return $m[0];
             $this->seen[$id] = true;
             $this->marked[$id] = true;
+            $this->hits[$id] ??= html_entity_decode($m[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
             $this->count++;
             return $this->markup($this->byId[$id], $m[0]);
         }, $t);

@@ -103,7 +103,7 @@ final class FrontendTools
     private static function coreTools(): array
     {
         $out = [];
-        foreach ([] as $def) {   // Quick-Glossar: Core\Glossary\QuickTool (nächster Schritt)
+        foreach ([fn() => \Core\Glossary\QuickTool::definition()] as $def) {
             try {
                 if ($t = self::normalize($def(), 'core')) $out[$t['id']] = $t;
             } catch (\Throwable $e) {

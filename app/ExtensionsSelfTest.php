@@ -182,6 +182,18 @@ final class ExtensionsSelfTest
         self::eq('Konfiguration: Endpunkte als Adressen, keine Callables', [str_ends_with((string) ($one['endpoints']['go'] ?? ''), '/admin/api/qa'), json_encode($one) !== false], [true, true]);
         self::actAs(['media.upload']);
         self::eq('Werkzeuge: ohne Recht keine', in_array('qa-ok', array_column(FrontendTools::forBar($bar), 'id'), true), false);
+        // Quick-Glossar (Kern): Funktion + Tabelle + data.edit auf glossar
+        $gOn = \Core\Glossary\Glossary::enabled() && \Core\Glossary\Glossary::table();
+        self::actAs(['pages.edit', 'data.edit'], ['andere_tabelle']);
+        self::eq('Quick-Glossar: ohne Recht auf glossar nicht da', in_array('glossary', array_column(FrontendTools::forBar($bar), 'id'), true), false);
+        self::actAs(['pages.edit', 'data.edit'], ['glossar']);
+        $qg = array_values(array_filter(FrontendTools::forBar($bar), fn($t) => $t['id'] === 'glossary'))[0] ?? null;
+        self::eq('Quick-Glossar: mit Recht da (wenn eingeschaltet)', $qg !== null, (bool) $gOn);
+        if ($qg) {
+            self::eq('Quick-Glossar: Kürzel ⌥G, Platz main', [$qg['shortcut']['label'] ?? null, $qg['placement']], ['⌥G', 'main']);
+            self::eq('Quick-Glossar: ohne data.publish kein Veröffentlichen', $qg['data']['publish'] ?? null, false);
+            self::eq('Quick-Glossar: Endpunkte', array_keys($qg['endpoints']), ['search', 'create', 'page']);
+        }
         self::activate(null);
     }
 

@@ -90,6 +90,10 @@ return function (Router $r): void {
     $r->post('/admin/glossar/neu', [Admin\GlossaryController::class, 'quick']);
     $r->post('/admin/glossar/import', [Admin\GlossaryController::class, 'import']);
     $r->get('/admin/glossar/export', [Admin\GlossaryController::class, 'export']);
+    // Quick-Glossar beim Bearbeiten auf der Website (Core\Glossary\QuickTool, resources/js/quick-glossary.mjs)
+    $r->get('/admin/api/glossar/suche', [Admin\GlossaryController::class, 'apiSearch']);
+    $r->post('/admin/api/glossar/begriff', [Admin\GlossaryController::class, 'apiCreate']);
+    $r->post('/admin/api/glossar/seite', [Admin\GlossaryController::class, 'apiPage']);
     $r->get('/admin/weiterleitungen', [Admin\RedirectController::class, 'index']);
     $r->get('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'edit']);
     $r->post('/admin/weiterleitungen/new', [Admin\RedirectController::class, 'save']);

@@ -158,6 +158,17 @@ final class SelfTest
         self::eq('Pfad Präfix', Glossary::excluded('/blog/2026/x', "/impressum\n/blog/*"), true);
         self::eq('Pfad nicht', Glossary::excluded('/blogger', "/blog/*\n/impressum"), false);
 
+        // Quick-Glossar (QuickTool): Treffer „Auf dieser Seite“ ohne Datenbank
+        $h = fn(string $html, array $s = [], int $self = 0) => QuickTool::hits($T, $html, $s + ['mode' => 'page', 'headings' => 3], 'de', $self);
+        self::eq('Quick: Treffer mit Text wie im Inhalt', $h('<p>Der SPF steht im DNS. Wir sind barrierefrei.</p>'), [1 => 'SPF', 2 => 'DNS', 4 => 'barrierefrei']);
+        self::eq('Quick: contenteditable zählt als Text', $h('<div contenteditable="true"><p>Ein Zertifikat</p></div>'), [8 => 'Zertifikat']);
+        self::eq('Quick: Überschrift bis h3 und Links nicht', $h('<h2>SPF</h2><p><a href="/x">DNS</a></p>'), []);
+        self::eq('Quick: Überschriften-Einstellung 0 → markiert', $h('<h2>SPF</h2>', ['headings' => 0]), [1 => 'SPF']);
+        self::eq('Quick: eigener Begriff ausgenommen', $h('<p>SPF und DNS</p>', [], 1), [2 => 'DNS']);
+        self::eq('Quick: nur erstes Vorkommen', $h('<p>DNS</p><p>Domain Name System</p>'), [2 => 'DNS']);
+        $db = QuickTool::selftestDb(fn(string $n, mixed $g, mixed $w) => self::eq('Quick (DB): ' . $n, $g, $w));
+        if (!$db) echo "  Hinweis: Glossar nicht eingerichtet – Endpunkte des Quick-Glossars nicht mit Datenbank geprüft.\n";
+
         foreach (self::$fail as $f) echo "  FEHLER: $f\n";
         echo '  ' . self::$ok . ' Prüfungen bestanden, ' . count(self::$fail) . " fehlgeschlagen\n";
         if ($bench) self::bench();

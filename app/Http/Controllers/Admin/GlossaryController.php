@@ -7,6 +7,7 @@ namespace Core\Http\Controllers\Admin;
 
 use Core\Data\Entries;
 use Core\Glossary\Glossary;
+use Core\Glossary\QuickTool;
 use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
@@ -112,6 +113,43 @@ final class GlossaryController extends AdminController
         app()->session->set('_glossary_import', $res);
         return $this->back(self::BASE . '#import', $res['errors'] && !$res['created'] && !$res['updated'] ? 'error' : 'success',
             __('Import: {c} neu, {u} geändert, {s} übersprungen.', ['c' => $res['created'], 'u' => $res['updated'], 's' => $res['skipped']]));
+    }
+
+    // ================================================================= Quick-Glossar (Werkzeug auf der Website, Core\Glossary\QuickTool)
+
+    /** Gemeinsame Prüfung der JSON-Endpunkte: Funktion an, Tabelle eingerichtet, Recht data.edit auf die Tabelle (CSRF bei POST: auth()) */
+    private function apiGate(Request $r): array
+    {
+        $this->auth($r);
+        $t = Glossary::enabled() ? Glossary::table() : null;
+        if (!$t) throw new HttpException(404, __('Das Glossar ist hier nicht eingeschaltet oder noch nicht eingerichtet.'));
+        if (!can('data.edit', $t['handle'])) throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
+        return $t;
+    }
+
+    /** GET /admin/api/glossar/suche?q=…&lang=… */
+    public function apiSearch(Request $r): Response
+    {
+        $this->apiGate($r);
+        $res = QuickTool::search($r->str('q'), QuickTool::lang($r->str('lang')), (int) ($r->query['limit'] ?? QuickTool::LIMIT));
+        return self::secure(Response::json(['ok' => true] + $res));
+    }
+
+    /** POST /admin/api/glossar/begriff {term, short, long, variants, publish, lang} */
+    public function apiCreate(Request $r): Response
+    {
+        $this->apiGate($r);
+        $res = QuickTool::create($r->post);
+        return self::secure(Response::json($res, $res['ok'] ? 200 : (isset($res['exists']) ? 409 : 422)));
+    }
+
+    /** POST /admin/api/glossar/seite {html, lang, path, self} */
+    public function apiPage(Request $r): Response
+    {
+        $this->apiGate($r);
+        $res = QuickTool::onPage((string) ($r->post['html'] ?? ''), QuickTool::lang((string) ($r->post['lang'] ?? '')),
+            '/' . ltrim((string) ($r->post['path'] ?? '/'), '/'), (int) ($r->post['self'] ?? 0));
+        return self::secure(Response::json(['ok' => true] + $res));
     }
 
     public function export(Request $r): Response
