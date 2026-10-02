@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Plattform für Erweiterungen: feste Integrationspunkte
+- **Entwicklerhandbuch › Erweiterungen › Integrationspunkte und Regeln:** kuratierte Liste der Stellen, über die Erweiterungen
+  eingreifen dürfen – alles andere gibt es nicht.
+- **Typisierte Ereignisse** `Core\Events\*`: `PageSaved`, `PagePublished`, `PageUnpublished`, `PageDiscarded`, `PageDeleted`,
+  `EntrySaved`, `EntryPublished`, `EntryUnpublished`, `EntryDeleted` – unveränderlich, mit `table`, `id`, `lang`, `userId`,
+  `state` (`draft`|`live`). `$x->on(PageSaved::class, fn(PageSaved $e) => …)`; die Namen (`'page.saved'`) bleiben Alias:
+  Listener mit Ereignis-Typ bekommen das Objekt, alle anderen die bisherigen Argumente. `EntryDeleted` trägt jetzt den Stand vor
+  dem Löschen. `Extensions::listens()` versteht Name und Klasse.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`

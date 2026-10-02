@@ -505,19 +505,64 @@ final class Extensions
         });
     }
 
-    /** Hört eine aktive Erweiterung auf das Ereignis? – teure Angaben (z. B. Eintrag neu laden) nur dann berechnen */
+    /**
+     * Hört eine aktive Erweiterung auf das Ereignis? – teure Angaben (z. B. Eintrag neu laden) nur dann berechnen.
+     * $event: Name ('page.saved') oder Klasse (PageSaved::class) – beide Schreibweisen zählen.
+     */
     public static function listens(string $event): bool
     {
-        foreach (self::$active as $x) if (!empty($x->listeners[$event])) return true;
+        $keys = self::eventKeys($event);
+        foreach (self::$active as $x) {
+            foreach ($keys as $k) if (!empty($x->listeners[$k])) return true;
+        }
         return false;
     }
 
-    /** Ereignis an alle Erweiterungen melden (Fehler einer Erweiterung brechen den Ablauf nicht ab) */
-    public static function emit(string $event, mixed ...$args): void
+    /**
+     * Ereignis an alle Erweiterungen melden (Fehler einer Erweiterung brechen den Ablauf nicht ab).
+     * Typisiert: emit(new Events\PageSaved($page, $uid)) – Listener auf die Klasse bekommen das Objekt, Listener auf den Namen
+     * je nach Typ des ersten Parameters das Objekt oder die Argumente der Altform (Event::legacyArgs()).
+     * Ohne Typ (media.*, inbox.*): emit('media.deleted', $m).
+     */
+    public static function emit(string|Events\Event $event, mixed ...$args): void
     {
-        foreach (self::$active as $x) {
-            foreach ($x->listeners[$event] ?? [] as $fn) self::safe($x, 'on ' . $event, fn() => $fn(...$args));
+        if (is_string($event)) {
+            foreach (self::$active as $x) {
+                foreach ($x->listeners[$event] ?? [] as $fn) self::safe($x, 'on ' . $event, fn() => $fn(...$args));
+            }
+            return;
         }
+        $name = $event->name();
+        foreach (self::$active as $x) {
+            foreach ($x->listeners[$event::class] ?? [] as $fn) self::safe($x, 'on ' . $name, fn() => $fn($event));
+            foreach ($x->listeners[$name] ?? [] as $fn) {
+                self::safe($x, 'on ' . $name, fn() => self::wantsEvent($fn, $event) ? $fn($event) : $fn(...$event->legacyArgs()));
+            }
+        }
+    }
+
+    /** Schlüssel eines Ereignisses in Extension::$listeners: Name und Klasse */
+    private static function eventKeys(string $event): array
+    {
+        $event = ltrim($event, '\\');
+        $class = Events\Event::classFor($event);
+        if (!$class) return [$event];
+        return array_values(array_unique([$event, $class, $class::NAME]));
+    }
+
+    /** Erwartet der Listener (registriert mit dem Namen) das Ereignis-Objekt? – am Typ des ersten Parameters */
+    private static function wantsEvent(callable $fn, Events\Event $event): bool
+    {
+        static $cache = null;
+        $cache ??= new \WeakMap();
+        $c = \Closure::fromCallable($fn);
+        if (isset($cache[$c])) return $cache[$c];
+        $type = ((new \ReflectionFunction($c))->getParameters()[0] ?? null)?->getType();
+        $want = false;
+        foreach ($type instanceof \ReflectionUnionType ? $type->getTypes() : [$type] as $t) {
+            if ($t instanceof \ReflectionNamedType && !$t->isBuiltin() && is_a($event, $t->getName())) $want = true;
+        }
+        return $cache[$c] = $want;
     }
 
     /** Filter unter „Prüfen“: ['schlüssel' => ['label', 'icon', 'where', 'params', 'kind', 'extension']] */

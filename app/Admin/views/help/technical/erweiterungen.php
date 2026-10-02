@@ -127,24 +127,29 @@ document.addEventListener('cms:before-save', e =&gt; {
   }));
 });</code></pre>
 
-  <h3 id="erweiterungen-hooks">Ereignisse auf dem Server (<code>$x-&gt;on()</code>)</h3>
-  <p>Gemeldet über <code>Extensions::emit()</code> nach der Änderung, unabhängig vom Weg (Verwaltung, Website, REST-API, MCP, KI, Kommandozeile). Fehler einer Erweiterung werden protokolliert und brechen nichts ab. Teure Angaben berechnet der Core nur, wenn jemand zuhört (<code>Extensions::listens()</code>).</p>
+  <h3 id="erweiterungen-hooks">Ereignisse auf dem Server (<code>$x-&gt;on()</code>, <code>Core\Events</code>)</h3>
+  <p>Gemeldet über <code>Extensions::emit()</code> nach der Änderung, unabhängig vom Weg (Verwaltung, Website, REST-API, MCP, KI, Kommandozeile). Fehler einer Erweiterung werden protokolliert und brechen nichts ab. Teure Angaben berechnet der Core nur, wenn jemand zuhört (<code>Extensions::listens()</code> – Name und Klasse zählen gleich).</p>
+  <p><b>Typisiert (empfohlen):</b> Seiten und Einträge melden unveränderliche Ereignis-Objekte. Gemeinsame Angaben (<code>readonly</code>): <code>table</code> (<code>'pages'</code> bzw. Kurzname der Datentabelle), <code>id</code>, <code>lang</code> (nie <code>null</code>), <code>userId</code> (wer – <code>null</code> = System/Kommandozeile), <code>state</code> (<code>'draft'</code> = Arbeitsstand, <code>'live'</code> = veröffentlichte Fassung).</p>
   <table class="doc-table">
-    <tr><th>Ereignis</th><th>Argumente</th><th>Auslöser</th></tr>
-    <tr><td><code>page.saved</code></td><td><code>array $page, ?int $userId</code></td><td>Entwurf gespeichert (<code>Pages::saveDraft</code>)</td></tr>
-    <tr><td><code>page.published</code></td><td><code>array $page</code></td><td>veröffentlicht bzw. wieder online (<code>Pages::publish</code>)</td></tr>
-    <tr><td><code>page.unpublished</code></td><td><code>array $page</code></td><td>offline genommen (nur bei echter Änderung)</td></tr>
-    <tr><td><code>page.discarded</code></td><td><code>array $page</code></td><td>Entwurf verworfen</td></tr>
-    <tr><td><code>page.deleted</code></td><td><code>array $page</code> (Stand vor dem Löschen)</td><td>Seite gelöscht (Verwaltung, API/MCP)</td></tr>
-    <tr><td><code>entry.saved</code></td><td><code>array $table, array $entry, bool $created, ?array $old</code></td><td>Eintrag angelegt/geändert (<code>Entries::save</code>, auch Quellen-Abgleich und Formulare)</td></tr>
-    <tr><td><code>entry.published</code>, <code>entry.unpublished</code></td><td><code>array $table, array $entry</code></td><td>Status wechselt auf veröffentlicht bzw. Entwurf (<code>save</code>, <code>setStatus</code> – nur bei echter Änderung)</td></tr>
-    <tr><td><code>entry.deleted</code></td><td><code>array $table, int $id</code></td><td>Eintrag gelöscht</td></tr>
-    <tr><td><code>media.imported</code>, <code>media.replaced</code>, <code>media.edited</code>, <code>media.deleted</code></td><td><code>$m</code> (bei replaced/edited zusätzlich die alte Fassung)</td><td>Mediathek</td></tr>
-    <tr><td><code>inbox.status</code>, <code>inbox.deleted</code></td><td>siehe <a href="#inbox-hooks">Eingangs-Tabellen</a></td><td>Anfragen</td></tr>
+    <tr><th>Klasse (<code>Core\Events\…</code>)</th><th>Name (Alias)</th><th>Zusätzlich</th><th><code>state</code></th><th>Altform (Name, ohne Typ)</th><th>Auslöser</th></tr>
+    <tr><td><code>PageSaved</code></td><td><code>page.saved</code></td><td><code>page</code></td><td>draft</td><td><code>array $page, ?int $userId</code></td><td>Entwurf gespeichert (<code>Pages::saveDraft</code>)</td></tr>
+    <tr><td><code>PagePublished</code></td><td><code>page.published</code></td><td><code>page</code></td><td>live</td><td><code>array $page</code></td><td>veröffentlicht bzw. wieder online (<code>Pages::publish</code>)</td></tr>
+    <tr><td><code>PageUnpublished</code></td><td><code>page.unpublished</code></td><td><code>page</code></td><td>live</td><td><code>array $page</code></td><td>offline genommen (nur bei echter Änderung)</td></tr>
+    <tr><td><code>PageDiscarded</code></td><td><code>page.discarded</code></td><td><code>page</code></td><td>draft</td><td><code>array $page</code></td><td>Entwurf verworfen</td></tr>
+    <tr><td><code>PageDeleted</code></td><td><code>page.deleted</code></td><td><code>page</code> (Stand vor dem Löschen)</td><td>live</td><td><code>array $page</code></td><td>Seite gelöscht (Verwaltung, API/MCP)</td></tr>
+    <tr><td><code>EntrySaved</code></td><td><code>entry.saved</code></td><td><code>definition</code>, <code>entry</code>, <code>created</code>, <code>old</code></td><td>nach Status</td><td><code>array $table, array $entry, bool $created, ?array $old</code></td><td>Eintrag angelegt/geändert (<code>Entries::save</code>, auch Quellen-Abgleich und Formulare)</td></tr>
+    <tr><td><code>EntryPublished</code>, <code>EntryUnpublished</code></td><td><code>entry.published</code>, <code>entry.unpublished</code></td><td><code>definition</code>, <code>entry</code></td><td>live / draft</td><td><code>array $table, array $entry</code></td><td>Status wechselt (<code>save</code>, <code>setStatus</code> – nur bei echter Änderung)</td></tr>
+    <tr><td><code>EntryDeleted</code></td><td><code>entry.deleted</code></td><td><code>definition</code>, <code>entry</code> (Stand vor dem Löschen, sonst <code>null</code>)</td><td>live</td><td><code>array $table, int $id</code></td><td>Eintrag gelöscht</td></tr>
   </table>
-  <pre><code>$x-&gt;on('entry.published', function (array $t, array $e): void {
-    if ($t['handle'] === 'news') Newsletter::queue((int) $e['id']);
-});</code></pre>
+  <pre><code>use Core\Events\{EntryPublished, PageSaved};
+
+$x-&gt;on(EntryPublished::class, function (EntryPublished $e): void {
+    if ($e-&gt;table === 'news') Newsletter::queue($e-&gt;id);
+});
+$x-&gt;on('page.saved', fn(PageSaved $e) =&gt; Log::draft($e-&gt;id, $e-&gt;userId));   // Name als Alias – am Typ erkannt
+$x-&gt;on('page.saved', fn(array $page, ?int $uid) =&gt; …);                      // Altform: bisherige Argumente</code></pre>
+  <p><b>Rückwärtskompatibel:</b> Listener, die mit dem Namen angemeldet sind und am ersten Parameter keinen Ereignis-Typ haben, bekommen weiter die bisherigen Argumente. Das Objekt erlaubt zusätzlich Array-Zugriff zum Lesen (<code>$e['id']</code>, <code>$e['title']</code> = Feld des Datensatzes); Schreiben wirft eine <code>LogicException</code>.</p>
+  <p><b>Ohne Typ</b> (nur Name, Argumente wie bisher): <code>media.imported</code> (<code>array $m</code>), <code>media.replaced</code> und <code>media.edited</code> (<code>array $neu, array $alt</code>), <code>media.deleted</code> (<code>array $m</code>), <code>inbox.status</code> und <code>inbox.deleted</code> (siehe <a href="#inbox-hooks">Eingangs-Tabellen</a>). Weitere Ereignisse kommen nur dazu, wenn eine Erweiterung sie wirklich braucht.</p>
 
   <h3 id="erweiterungen-sicherheit">Sicherheit</h3>
   <ul>

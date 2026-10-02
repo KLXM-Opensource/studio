@@ -39,8 +39,8 @@ namespace Core;
  *   $x->toolbar(fn(array $bar) => ['items' => [...], 'scripts' => ['js/x.js'], 'publishNote' => '…'])   Menü „⋯“ der Werkzeugleiste
  *   $x->frontendTool(['id' => 'notiz', 'label' => 'Notiz', 'icon' => 'note', 'module' => 'js/notiz.mjs', 'shortcut' => 'Alt+N', 'perm' => 'pages.edit'])
  *                                                                      Werkzeug beim Bearbeiten auf der Website (Core\FrontendTools, CMSAdmin.tools)
- * Ereignisse (on): page.saved, page.published, page.unpublished, page.discarded, page.deleted, entry.saved, entry.published,
- *   entry.unpublished, entry.deleted, media.*, inbox.* – siehe Technik → Erweiterungen
+ * Ereignisse (on): typisiert on(Core\Events\PageSaved::class, fn(PageSaved $e) => …) – Seiten und Einträge (Core\Events\*);
+ *   Namen wie 'page.saved' bleiben als Alias (Altform mit Array-Argumenten), media.*, inbox.* – siehe Technik → Erweiterungen
  * Eingangs-Tabellen (Anfragen, Core\Data\Inbox):
  *   $x->inbox(fn(array $t) => $t['handle'] === 'buchungen' ? ['statuses' => [...], 'info' => fn(array $row) => '…'] : null)   eigene Status, Zusatzzeile, Prüfung
  *   $x->on('inbox.status', fn(array $t, array $ids, string $status, array $old) => …)   Ereignisse inbox.status / inbox.deleted
@@ -219,14 +219,18 @@ final class Extension
     }
 
     /**
-     * Ereignis des Cores abonnieren: media.imported (array $m), media.replaced (array $neu, array $alt), media.deleted (array $m),
-     * page.saved (array $page, ?int $userId), page.published (array $page), page.unpublished (array $page), page.discarded (array $page),
-     * page.deleted (array $page), entry.saved (array $table, array $entry, bool $created, ?array $old), entry.published (array $table,
-     * array $entry), entry.unpublished (array $table, array $entry), entry.deleted (array $table, int $id), inbox.status, inbox.deleted
+     * Ereignis des Cores abonnieren. Typisiert (empfohlen): on(Core\Events\PageSaved::class, fn(PageSaved $e) => …) – Seiten:
+     * PageSaved, PagePublished, PageUnpublished, PageDiscarded, PageDeleted; Einträge: EntrySaved, EntryPublished, EntryUnpublished,
+     * EntryDeleted (readonly: table, id, lang, userId, state 'draft'|'live' + Datensatz). Der Name ('page.saved') ist ein Alias:
+     * Listener mit Ereignis-Typ am ersten Parameter bekommen das Objekt, alle anderen die bisherigen Argumente (Altform):
+     * page.saved (array $page, ?int $userId), page.published|unpublished|discarded|deleted (array $page), entry.saved (array $table,
+     * array $entry, bool $created, ?array $old), entry.published|unpublished (array $table, array $entry), entry.deleted (array $table,
+     * int $id). Ohne Typ (nur Name): media.imported (array $m), media.replaced (array $neu, array $alt), media.edited, media.deleted
+     * (array $m), inbox.status, inbox.deleted.
      */
     public function on(string $event, callable $fn): self
     {
-        $this->listeners[$event][] = $fn;
+        $this->listeners[ltrim($event, '\\')][] = $fn;
         return $this;
     }
 

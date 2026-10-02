@@ -576,7 +576,7 @@ final class CmsService
         app()->db->query('UPDATE pages SET parent_id = ? WHERE parent_id = ?', [$p['parent_id'], (int) $p['id']]);
         Pages::rebuildPaths();
         PageCache::clear();
-        \Core\Extensions::emit('page.deleted', $p);   // Erweiterungen (Extension::on)
+        \Core\Extensions::emit(new \Core\Events\PageDeleted($p));   // Erweiterungen (Extension::on)
         return ['deleted' => (int) $p['id']];
     }
 

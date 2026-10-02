@@ -461,14 +461,16 @@ final class Entries
         if (!\Core\Extensions::listens('entry.saved') && !($pub && \Core\Extensions::listens($pub))) return;
         $e = self::find($table, $id);
         if (!$e) return;
-        \Core\Extensions::emit('entry.saved', $table, $e, $old === null, $old);
-        if ($pub) \Core\Extensions::emit($pub, $table, $e);
+        \Core\Extensions::emit(new \Core\Events\EntrySaved($table, $e, $old));
+        if ($pub) \Core\Extensions::emit($pub === 'entry.published' ? new \Core\Events\EntryPublished($table, $e) : new \Core\Events\EntryUnpublished($table, $e));
     }
 
     public static function delete(array $table, int $id): void
     {
         self::guard($table);
         $db = Tables::db($table);
+        // Stand vor dem Löschen für Erweiterungen (Core\Events\EntryDeleted) – nur laden, wenn jemand zuhört
+        $before = \Core\Extensions::listens('entry.deleted') ? self::find($table, $id) : null;
         if (Tables::isShared($table)) {
             // Geteilt: nur eigene Einträge; Auswahl aller Websites mit entfernen
             if ($db->query("DELETE FROM {$table['table']} WHERE id = ? AND origin_site = ?", [$id, site()->key])->rowCount() === 0) return;
@@ -485,7 +487,7 @@ final class Entries
             else Tables::db($t)->query('DELETE FROM ' . Tables::pivot($t, $f['name']) . ' WHERE target_id = ?', [$id]);
         }
         self::changed($table);
-        \Core\Extensions::emit('entry.deleted', $table, $id);   // Erweiterungen (Extension::on)
+        \Core\Extensions::emit(new \Core\Events\EntryDeleted($table, $id, $before));   // Erweiterungen (Extension::on)
     }
 
     /** Wer verweist auf diesen Eintrag? [['table' => …, 'field' => …, 'entries' => […]], …] */
@@ -566,7 +568,7 @@ final class Entries
         self::changed($table);
         // Ereignisse nur für Einträge, deren Status sich wirklich geändert hat (Erweiterungen, Extension::on)
         foreach ($before as $id => $was) {
-            if ($was !== null && $was !== $new && ($e = self::find($table, $id)) && $e['status'] === $new) \Core\Extensions::emit($ev, $table, $e);
+            if ($was !== null && $was !== $new && ($e = self::find($table, $id)) && $e['status'] === $new) \Core\Extensions::emit($new === 'published' ? new \Core\Events\EntryPublished($table, $e) : new \Core\Events\EntryUnpublished($table, $e));
         }
     }
 

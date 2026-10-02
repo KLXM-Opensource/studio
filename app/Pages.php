@@ -384,7 +384,7 @@ final class Pages
         self::db()->update('pages', ['content_draft' => $json, 'updated_at' => now()], 'id = :id', ['id' => $id]);
         self::addRevision($id, $json, $userId, $note);
         // Ereignis für Erweiterungen (Extension::on): Entwurf gespeichert
-        if (Extensions::listens('page.saved') && ($p = self::find($id))) Extensions::emit('page.saved', $p, $userId);
+        if (Extensions::listens('page.saved') && ($p = self::find($id))) Extensions::emit(new Events\PageSaved($p, $userId));
     }
 
     /** Offene Platzhalter „[bitte ergänzen: …]“ (KI-Assistent, Core\AI) im JSON bzw. Text einer Seite */
@@ -416,7 +416,7 @@ final class Pages
             'status' => 'published', 'published_at' => now(), 'updated_at' => now(),
         ], 'id = :id', ['id' => $id]);
         PageCache::clear();
-        if (Extensions::listens('page.published') && ($p = self::find($id))) Extensions::emit('page.published', $p);
+        if (Extensions::listens('page.published') && ($p = self::find($id))) Extensions::emit(new Events\PagePublished($p, $userId));
     }
 
     /**
@@ -433,7 +433,7 @@ final class Pages
         if ($p['status'] === 'published') {
             self::db()->update('pages', ['status' => 'draft', 'updated_at' => now()], 'id = :id', ['id' => $id]);
             PageCache::clear();   // Seiten-Cache + Suchindex (Core\Search::changed)
-            if (Extensions::listens('page.unpublished') && ($q = self::find($id))) Extensions::emit('page.unpublished', $q);
+            if (Extensions::listens('page.unpublished') && ($q = self::find($id))) Extensions::emit(new Events\PageUnpublished($q));
         }
         return true;
     }
@@ -463,7 +463,7 @@ final class Pages
         }
         self::db()->update('pages', ['content_draft' => $p['content_published'], 'updated_at' => now()], 'id = :id', ['id' => $id]);
         self::addRevision($id, (string) $p['content_published'], $userId, $note);
-        if (Extensions::listens('page.discarded') && ($q = self::find($id))) Extensions::emit('page.discarded', $q);
+        if (Extensions::listens('page.discarded') && ($q = self::find($id))) Extensions::emit(new Events\PageDiscarded($q, $userId));
         return true;
     }
 

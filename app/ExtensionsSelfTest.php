@@ -235,14 +235,38 @@ final class ExtensionsSelfTest
         foreach (['page.saved', 'page.published', 'page.unpublished', 'page.discarded', 'entry.saved', 'entry.published', 'entry.unpublished', 'entry.deleted'] as $ev) {
             $x->on($ev, function (...$a) use (&$got, $ev): void { $got[] = $ev . ':' . (is_array($a[0] ?? null) ? ($a[0]['handle'] ?? $a[0]['id'] ?? '') : '') ; });
         }
+        // Typisiert: Klasse, Name mit Ereignis-Typ (Alias) und Altform nebeneinander
+        $typed = [];
+        $x->on(Events\PageSaved::class, function (Events\PageSaved $e) use (&$typed): void { $typed[] = ['class', $e->table, $e->id, $e->state, $e->lang, $e['id'], $e['title']]; });
+        $x->on('page.saved', function (Events\PageEvent $e) use (&$typed): void { $typed[] = ['alias', $e::class]; });
+        $x->on('page.saved', function (array $page, ?int $uid) use (&$typed): void { $typed[] = ['legacy', (int) $page['id'], $uid]; });
+        $x->on(Events\PagePublished::class, function (Events\PagePublished $e) use (&$typed): void { $typed[] = ['published', $e->state]; });
+        $x->on(Events\EntrySaved::class, function (Events\EntrySaved $e) use (&$typed): void { $typed[] = ['entry', $e->table, $e->created, $e->state, $e->old === null]; });
+        $x->on(Events\EntryDeleted::class, function (Events\EntryDeleted $e) use (&$typed): void { $typed[] = ['deleted', $e->table, $e->id === (int) ($e->entry['id'] ?? 0)]; });
         self::eq('listens(): ohne aktive Erweiterung', Extensions::listens('page.saved'), false);
         self::activate($x);
         self::eq('listens(): mit Erweiterung', Extensions::listens('page.saved'), true);
+        self::eq('listens(): Klasse und Name gleichwertig', [Extensions::listens(Events\PageSaved::class), Extensions::listens('page.published'), Extensions::listens('\\' . Events\EntryDeleted::class)], [true, true, true]);
+        self::eq('Event::classFor', [Events\Event::classFor('entry.saved'), Events\Event::classFor('media.deleted'), Events\Event::classFor(Events\PageDeleted::class)], [Events\EntrySaved::class, null, Events\PageDeleted::class]);
+        $ev = new Events\PageSaved(['id' => 7, 'title' => 'T', 'lang' => null], 3);
+        self::eq('PageSaved: Eigenschaften', [$ev->table, $ev->id, $ev->userId, $ev->state, $ev->lang, $ev->name()], ['pages', 7, 3, 'draft', Lang::default(), 'page.saved']);
+        self::eq('PageSaved: Altform-Argumente', $ev->legacyArgs(), [['id' => 7, 'title' => 'T', 'lang' => null], 3]);
+        self::eq('Array-Zugriff: Eigenschaft und Feld', [$ev['state'], $ev['title'], isset($ev['title']), isset($ev['gibt_es_nicht'])], ['draft', 'T', true, false]);
+        try { $ev['title'] = 'X'; self::eq('Ereignis unveränderlich', 'geändert', 'Ausnahme'); } catch (\LogicException) { self::$ok++; }
+        try { (new \ReflectionProperty($ev, 'id'))->setValue($ev, 9); self::eq('readonly', 'geändert', 'Fehler'); } catch (\Error) { self::$ok++; }
+        $es = new Events\EntrySaved(['handle' => 'qa'], ['id' => 5, 'status' => 'published', 'lang' => 'en'], ['id' => 5, 'status' => 'draft']);
+        self::eq('EntrySaved: Eigenschaften', [$es->table, $es->id, $es->state, $es->created, $es->lang], ['qa', 5, 'live', false, 'en']);
+        self::eq('EntrySaved: Altform-Argumente', count($es->legacyArgs()) === 4 && $es->legacyArgs()[2] === false, true);
+        $ed = new Events\EntryDeleted(['handle' => 'qa'], 9);
+        self::eq('EntryDeleted: ohne Stand, Altform (Tabelle, ID)', [$ed->id, $ed->entry, $ed->legacyArgs()[1], $ed['id']], [9, null, 9, 9]);
         $pdo = app()->db->pdo;
         $pdo->beginTransaction();
         try {
             $id = Pages::create(['slug' => 'ext-selbsttest', 'title' => 'Ext-Selbsttest', 'lang' => Lang::default(), 'sort' => 9999]);
-            $got = [];
+            $got = $typed = [];
+            Pages::saveDraft($id, [['type' => 'paragraph', 'data' => ['text' => 'x']]], 42);
+            self::eq('Typisiert: Klasse, Alias mit Typ, Altform', $typed, [['class', 'pages', $id, 'draft', Lang::default(), $id, 'Ext-Selbsttest'], ['alias', Events\PageSaved::class], ['legacy', $id, 42]]);
+            $got = $typed = [];
             Pages::saveDraft($id, [['type' => 'paragraph', 'data' => ['text' => 'x']]], null);
             Pages::publish($id, null);
             Pages::unpublish($id);
@@ -260,7 +284,7 @@ final class ExtensionsSelfTest
             if ($t) {
                 $in = [];
                 foreach ($t['fields'] as $f) if ($f['required']) $in[$f['name']] = in_array($f['type'], ['text', 'textarea', 'richtext', 'inline'], true) ? 'Selbsttest' : null;
-                $got = [];
+                $got = $typed = [];
                 [$eid, $err] = \Core\Data\Entries::save($t, null, $in + ['status' => 'draft']);
                 if ($eid) {
                     \Core\Data\Entries::setStatus($t, [$eid], 'published');
@@ -269,6 +293,7 @@ final class ExtensionsSelfTest
                     \Core\Data\Entries::delete($t, $eid);
                     $h = $t['handle'];
                     self::eq('Eintrags-Ereignisse', $got, ["entry.saved:$h", "entry.published:$h", "entry.saved:$h", "entry.unpublished:$h", "entry.deleted:$h"]);
+                    self::eq('Eintrags-Ereignisse typisiert (neu, geändert, gelöscht mit Stand)', $typed, [['entry', $h, true, 'draft', true], ['entry', $h, false, 'draft', false], ['deleted', $h, true]]);
                 } else {
                     self::$ok++;   // Pflichtfelder anderer Art – nicht prüfbar
                 }
