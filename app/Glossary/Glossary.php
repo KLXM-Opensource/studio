@@ -144,6 +144,8 @@ final class Glossary
             'long' => isset($has['erklaerung']) && trim(strip_tags((string) ($e['erklaerung'] ?? ''))) !== '' ? Entries::html($t, $e, 'erklaerung') : '',
             'category' => isset($has['kategorie']) ? trim(strip_tags((string) ($e['kategorie'] ?? ''))) : '',
             'link' => isset($has['link']) ? trim((string) ($e['link'] ?? '')) : '',
+            // Bubble mit „Mehr im Glossar →“ nur, wenn die Detailseite mehr bietet als die Bubble (ausführliche Erklärung oder Quelle)
+            'more' => (isset($has['erklaerung']) && trim(strip_tags((string) ($e['erklaerung'] ?? ''))) !== '') || (isset($has['link']) && trim((string) ($e['link'] ?? '')) !== ''),
             'url' => Entries::href($t, $e),
             'variants' => self::splitVariants((string) ($e['varianten'] ?? '')),
             'draft' => ($e['status'] ?? 'published') !== 'published',
@@ -306,7 +308,7 @@ final class Glossary
         $terms = [];
         foreach (self::terms(false) as $t) {
             if ($t['short'] === '') continue;
-            $terms[] = ['k' => $t['key'], 't' => $t['term'], 's' => $t['short'], 'u' => $t['url'],
+            $terms[] = ['k' => $t['key'], 't' => $t['term'], 's' => $t['short'], 'u' => ($t['more'] ?? true) ? $t['url'] : null,
                 'v' => array_map(fn($v) => [$v, Annotator::caseSensitive($v) ? 1 : 0], Annotator::variants($t))];
         }
         return ['mode' => $s['mode'], 'headings' => (int) $s['headings'], 'lang' => Lang::current(), 'labels' => self::labels(), 'terms' => $terms];

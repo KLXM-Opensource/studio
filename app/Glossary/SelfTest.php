@@ -143,6 +143,8 @@ final class SelfTest
         self::eq('Anzahl', $a->count, 2);
         self::eq('Markup', str_contains($out, '<button type="button" class="gl-term" popovertarget="gl-2" aria-expanded="false" aria-controls="gl-2">SPF</button><span class="gl-pop" id="gl-2" popover>'), true);
         self::eq('Link zum Glossar', str_contains($out, '<a class="gl-pop__more" href="/glossar/spf">'), true);
+        $short = (new Annotator(array_map(fn($x) => ['more' => false] + $x, $T)))->annotate($page);
+        self::eq('Kein Link, wenn die Bubble alles zeigt', str_contains($short, 'gl-pop__more'), false);
         $again = (new Annotator($T))->annotate($out);
         self::eq('zweimal = einmal', $again, $out);
         self::eq('ohne Begriffe unverändert', (new Annotator([]))->annotate($page), $page);

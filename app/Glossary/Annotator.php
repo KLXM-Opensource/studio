@@ -288,7 +288,7 @@ final class Annotator
         $id = $this->o['prefix'] . (++$this->n);
         $l = $this->o['labels'];
         $draft = !empty($t['draft']) ? ' <span class="gl-pop__draft">' . e($l['draft']) . '</span>' : '';
-        $more = !empty($t['url']) ? '<a class="gl-pop__more" href="' . e((string) $t['url']) . '">' . e($l['more']) . ' <span aria-hidden="true">→</span></a>' : '';
+        $more = !empty($t['url']) && ($t['more'] ?? true) ? '<a class="gl-pop__more" href="' . e((string) $t['url']) . '">' . e($l['more']) . ' <span aria-hidden="true">→</span></a>' : '';
         return '<span class="gl" data-gl="' . e((string) $t['key']) . '">'
             . '<button type="button" class="gl-term" popovertarget="' . $id . '" aria-expanded="false" aria-controls="' . $id . '">' . $match . '</button>'
             . '<span class="gl-pop" id="' . $id . '" popover>'
