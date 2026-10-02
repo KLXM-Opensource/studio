@@ -350,9 +350,36 @@ final class Extensions
     /** Routen aller aktiven Erweiterungen (vor der Seiten-Route registrieren) */
     public static function routes(Http\Router $r): void
     {
+        // Herkunft je Erweiterung: Routen unter /admin schützt der Router (Anmeldung, Recht, CSRF – siehe Core\Http\Router)
         foreach (self::$active as $x) {
-            foreach ($x->routeCallbacks as $cb) $cb($r);
+            foreach ($x->routeCallbacks as $cb) $r->scoped($x->name, $cb);
         }
+    }
+
+    /**
+     * Verwaltungsrouten aktiver Erweiterungen für extensions:list: [name => ['routes' => n, 'perm' => n, 'legacy' => [...],
+     * 'denied' => [...], 'no_csrf' => [...], 'public' => [...], 'error' => ?string]] – Routen in einem eigenen Router angemeldet.
+     */
+    public static function routeReport(): array
+    {
+        $out = [];
+        foreach (self::$active as $x) {
+            $r = new Http\Router();
+            $err = null;
+            try {
+                foreach ($x->routeCallbacks as $cb) $r->scoped($x->name, $cb);
+            } catch (\Throwable $e) {
+                $err = $e->getMessage();
+            }
+            $rows = $r->meta($x->name);
+            $fmt = fn(array $m): string => $m['method'] . ' ' . $m['pattern'];
+            $out[$x->name] = ['routes' => count($rows), 'perm' => count(array_filter($rows, fn($m) => $m['perm'] !== null)),
+                'legacy' => array_map($fmt, array_values(array_filter($rows, fn($m) => $m['legacy']))),
+                'denied' => array_map($fmt, array_values(array_filter($rows, fn($m) => $m['denied']))),
+                'no_csrf' => array_map($fmt, array_values(array_filter($rows, fn($m) => !$m['csrf']))),
+                'public' => array_map($fmt, array_values(array_filter($rows, fn($m) => $m['public']))), 'error' => $err];
+        }
+        return $out;
     }
 
     /**

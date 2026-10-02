@@ -12,7 +12,8 @@ namespace Core;
  *  - Werkzeuge der Website (Core\FrontendTools): Tastenkürzel, Modul-Adressen (nur eigene Domain/assets), Bearbeiten-Modus,
  *    Rechte, Konfiguration ohne Callables;
  *  - Ereignisse (Extension::on, Extensions::listens/emit): page.saved/published/unpublished, entry.saved/published/unpublished/deleted
- *    in einer Transaktion, die am Ende zurückgerollt wird.
+ *    in einer Transaktion, die am Ende zurückgerollt wird; typisiert (Core\Events) und Altform;
+ *  - Verwaltungsrouten von Erweiterungen (Core\Http\Router::scoped): Anmeldung, Recht, CSRF, Altform, benannte Ausnahmen.
  * Rollen werden für die Prüfung vorübergehend gesetzt (Auth per Reflection) und danach zurückgestellt.
  */
 final class ExtensionsSelfTest
@@ -59,6 +60,7 @@ final class ExtensionsSelfTest
             self::adminPages();
             self::frontendTools();
             self::events();
+            self::routes();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -305,5 +307,82 @@ final class ExtensionsSelfTest
             PageCache::clear();
             self::activate(null);
         }
+    }
+
+    // ================================================================= Verwaltungsrouten von Erweiterungen
+
+    private static function routes(): void
+    {
+        $ok = fn() => new Http\Response('ok');
+        $req = fn(string $method, string $path, array $post = [], array $server = []) => new Http\Request($method, $path, [], $post, [], $server);
+        $status = function (callable $run): string {
+            try {
+                $res = $run();
+                return $res instanceof Http\Response ? 'ok' : 'anders';
+            } catch (Http\Controllers\Admin\RedirectException) {
+                return 'login';
+            } catch (Http\HttpException $e) {
+                return (string) $e->getCode();
+            }
+        };
+
+        // Kern-Routen (ohne scoped) bleiben unverändert – der Controller prüft selbst
+        $core = new Http\Router(false);
+        $core->post('/admin/kern', $ok);
+        self::actAs(null);
+        self::eq('Kern-Route: kein zusätzlicher Schutz', [$status(fn() => $core->dispatch($req('POST', '/admin/kern'))), $core->meta()], ['ok', []]);
+
+        // Erweiterung: Recht, benannte Ausnahmen, Altform, fehlendes Recht (Produktion: 403)
+        $r = new Http\Router(false);
+        $r->scoped('qa_selftest', function (Http\Router $r) use ($ok): void {
+            $r->get('/admin/qa', $ok, 'pages.edit');
+            $r->post('/admin/qa/speichern', $ok, ['perm' => 'pages.edit']);
+            $r->post('/admin/qa/hook', $ok, ['perm' => 'pages.edit', 'csrf' => false]);
+            $r->get('/admin/qa/status', $ok, ['public' => true]);
+            $r->post('/admin/qa/alt', [Http\Controllers\Admin\DashboardController::class, 'index']);
+            $r->post('/admin/qa/ohne', $ok);
+            $r->get('/qa-website', $ok);                       // außerhalb /admin: Sache der Erweiterung
+        });
+        $meta = array_column($r->meta('qa_selftest'), null, 'pattern');
+        self::eq('Angaben: nur /admin-Routen', array_keys($meta), ['/admin/qa', '/admin/qa/speichern', '/admin/qa/hook', '/admin/qa/status', '/admin/qa/alt', '/admin/qa/ohne']);
+        self::eq('Angaben: Recht, Ausnahmen, Altform, abgelehnt', [$meta['/admin/qa']['perm'], $meta['/admin/qa/hook']['csrf'], $meta['/admin/qa/status']['public'],
+            $meta['/admin/qa/alt']['legacy'], $meta['/admin/qa/ohne']['denied'], $meta['/admin/qa/speichern']['denied']], ['pages.edit', false, true, true, true, false]);
+        self::eq('Abgemeldet: Anmeldung verlangt', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), 'login');
+        self::eq('Abgemeldet: public erreichbar', $status(fn() => $r->dispatch($req('GET', '/admin/qa/status'))), 'ok');
+        self::eq('Außerhalb /admin: unverändert', $status(fn() => $r->dispatch($req('GET', '/qa-website'))), 'ok');
+        self::actAs(['media.upload']);
+        self::eq('Ohne Recht: 403', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), '403');
+        self::eq('Fehlendes Recht an der Route: 403 (Produktion)', $status(fn() => $r->dispatch($req('POST', '/admin/qa/ohne'))), '403');
+        self::actAs(['pages.edit']);
+        self::eq('Mit Recht: GET', $status(fn() => $r->dispatch($req('GET', '/admin/qa'))), 'ok');
+        self::eq('POST ohne CSRF-Token: 419', $status(fn() => $r->dispatch($req('POST', '/admin/qa/speichern'))), '419');
+        // Sitzung vorübergehend „gestartet“ (Kommandozeile hat keine) – Token wie im Browser
+        $sp = new \ReflectionProperty(app()->session, 'started');
+        [$wasStarted, $wasSession] = [$sp->getValue(app()->session), $_SESSION ?? null];
+        $sp->setValue(app()->session, true);
+        $_SESSION = [];
+        try {
+            $token = Csrf::token();
+            self::eq('POST mit CSRF-Token (Feld bzw. Kopfzeile)', [$status(fn() => $r->dispatch($req('POST', '/admin/qa/speichern', ['_csrf' => $token]))),
+                $status(fn() => $r->dispatch($req('POST', '/admin/qa/speichern', [], ['HTTP_X_CSRF_TOKEN' => $token])))], ['ok', 'ok']);
+            self::eq('POST mit falschem Token: 419', $status(fn() => $r->dispatch($req('POST', '/admin/qa/speichern', ['_csrf' => str_repeat('0', 64)]))), '419');
+        } finally {
+            $sp->setValue(app()->session, $wasStarted);
+            if ($wasSession === null) unset($_SESSION); else $_SESSION = $wasSession;
+        }
+        self::eq('Ausnahme csrf => false: ohne Token', $status(fn() => $r->dispatch($req('POST', '/admin/qa/hook'))), 'ok');
+        self::eq('Altform: Core prüft CSRF vor dem Controller', $status(fn() => $r->dispatch($req('POST', '/admin/qa/alt'))), '419');
+
+        // Entwicklung: fehlendes Recht ist ein Fehler beim Anmelden
+        $dev = new Http\Router(true);
+        try {
+            $dev->scoped('qa_selftest', fn(Http\Router $r) => $r->post('/admin/qa/ohne', $ok));
+            self::eq('Entwicklung: Route ohne Recht abgelehnt', 'angemeldet', 'LogicException');
+        } catch (\LogicException) {
+            self::$ok++;
+        }
+        $dev->scoped('qa_selftest', fn(Http\Router $r) => $r->post('/admin/qa/alt', [Http\Controllers\Admin\DashboardController::class, 'index']));
+        self::eq('Entwicklung: Altform bleibt erlaubt', (array_slice($dev->meta('qa_selftest'), -1)[0]['legacy'] ?? null), true);
+        self::actAs(null);
     }
 }

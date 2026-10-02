@@ -14,6 +14,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   `state` (`draft`|`live`). `$x->on(PageSaved::class, fn(PageSaved $e) => …)`; die Namen (`'page.saved'`) bleiben Alias:
   Listener mit Ereignis-Typ bekommen das Objekt, alle anderen die bisherigen Argumente. `EntryDeleted` trägt jetzt den Stand vor
   dem Löschen. `Extensions::listens()` versteht Name und Klasse.
+- **Verwaltungsrouten von Erweiterungen geschützt ab Werk:** `Router::scoped()` – Routen unter `/admin` prüfen Anmeldung, Recht
+  und CSRF (Nicht-GET), bevor der Handler läuft; das Recht steht an der Route (`$r->get('/admin/x', $h, 'x.view')` bzw.
+  `['perm' => …]`). Benannte Ausnahmen `'csrf' => false` und `'public' => true`. Ohne Recht: in der Entwicklung Fehler beim
+  Anmelden, in Produktion 403. Altform (Controller auf Basis von `AdminController`, die selbst `auth()` aufrufen) läuft weiter
+  und wird – wie die Ausnahmen – in `extensions:list` gemeldet. Routen des Cores bleiben unverändert;
+  `AdminController::routeGuard()` ist die gemeinsame Prüfung.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`

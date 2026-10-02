@@ -19,6 +19,28 @@ abstract class AdminController
      */
     protected function auth(Request $r, bool|string $perm = false, ?string $table = null): array
     {
+        $user = $this->verifyAccess($r, $perm, $table, $r->isPost());
+        // Aufbewahrung der Anfragen (Eingangs-Tabellen): gelegentlich nebenbei, ≈ 1 % der Verwaltungsaufrufe
+        \Core\Data\Inbox::maybePurge();
+        // Externe Quellen: fällige Abrufe nach der Antwort erledigen (billige Prüfung; zuverlässiger per Cron sources:sync)
+        \Core\Sources\Sources::maybeRun();
+        // Erweiterungen: fällige Arbeiten nach der Antwort (z. B. Hintergrund-Aufträge; billige Prüfung, siehe Extension::afterAdminResponse)
+        \Core\Extensions::afterAdminResponse();
+        return $user;
+    }
+
+    /**
+     * Schutz der Verwaltungsrouten von Erweiterungen (Core\Http\Router): Anmeldung, Zwei-Faktor-Einrichtung, Recht und – bei
+     * $csrf – CSRF-Token. Wie auth(), aber ohne Nebenarbeiten (die erledigt der Controller der Erweiterung bzw. der nächste Aufruf).
+     */
+    public static function routeGuard(Request $r, bool|string $perm = false, bool $csrf = true): array
+    {
+        return (new class extends AdminController {})->verifyAccess($r, $perm, null, $csrf);
+    }
+
+    /** Anmeldung, Zwei-Faktor-Einrichtung, Recht und CSRF prüfen (gemeinsam für auth() und routeGuard()) */
+    private function verifyAccess(Request $r, bool|string $perm, ?string $table, bool $csrf): array
+    {
         $user = app()->auth->user();
         if (!$user) {
             // Vorschau der Tageszeit (?tod=…&weekend=1, nur lokal/Debug – Core\AuthScreen) auf die Anmeldeseite mitnehmen
@@ -43,15 +65,9 @@ abstract class AdminController
         if (is_string($perm) && !app()->auth->can($perm, $table)) {
             throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
         }
-        if ($r->isPost() && !Csrf::valid($r)) {
+        if ($csrf && !Csrf::valid($r)) {
             throw new HttpException(419, 'Sitzung abgelaufen. Bitte Seite neu laden.');
         }
-        // Aufbewahrung der Anfragen (Eingangs-Tabellen): gelegentlich nebenbei, ≈ 1 % der Verwaltungsaufrufe
-        \Core\Data\Inbox::maybePurge();
-        // Externe Quellen: fällige Abrufe nach der Antwort erledigen (billige Prüfung; zuverlässiger per Cron sources:sync)
-        \Core\Sources\Sources::maybeRun();
-        // Erweiterungen: fällige Arbeiten nach der Antwort (z. B. Hintergrund-Aufträge; billige Prüfung, siehe Extension::afterAdminResponse)
-        \Core\Extensions::afterAdminResponse();
         return $user;
     }
 

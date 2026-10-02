@@ -1151,6 +1151,19 @@ switch ($cmd) {
             printf("%-16s %-8s %-9s %-11s %-24s %s\n", $n, $m['version'] ?: '–', in_array($n, $active, true) ? 'aktiv' : '–', $src, $m['source'], $m['label']);
         }
         if (!Core\Extensions::available()) echo "Keine Erweiterungen installiert (extensions/{name}/extension.php oder Composer-Pakete vom Typ klxm-studio-extension).\n";
+        // Verwaltungsrouten der aktiven Erweiterungen (Core\Http\Router): Rechte, Altform, benannte Ausnahmen
+        $report = array_filter(Core\Extensions::routeReport(), fn($r) => $r['routes'] || $r['error']);
+        if ($report) echo "\nVerwaltungsrouten (/admin – Anmeldung, Recht und CSRF prüft der Core):\n";
+        foreach ($report as $n => $r) {
+            printf("  %-16s %d Route(n), %d mit Recht%s\n", $n, $r['routes'], $r['perm'], $r['error'] ? ' – FEHLER: ' . $r['error'] : '');
+            foreach (['legacy' => 'Altform (Controller prüft Recht selbst – bitte \'perm\' angeben)', 'denied' => 'ohne Recht – abgelehnt (403)',
+                'no_csrf' => "Ausnahme 'csrf' => false", 'public' => "Ausnahme 'public' => true (ohne Anmeldung)"] as $k => $label) {
+                if (!$r[$k]) continue;
+                echo "    $label:\n";
+                foreach (array_slice($r[$k], 0, $k === 'legacy' ? 6 : 50) as $route) echo "      $route\n";
+                if (count($r[$k]) > ($k === 'legacy' ? 6 : 50)) echo '      … (' . count($r[$k]) . " insgesamt)\n";
+            }
+        }
         break;
 
     case 'features:list':

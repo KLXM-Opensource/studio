@@ -44,7 +44,7 @@ $x-&gt;adminPage(['href' =&gt; '/admin/matomo', 'label' =&gt; 'Besucher', 'kind'
 $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 'settings', ['description' =&gt; '…']);</code></pre>
   <table class="doc-table">
     <tr><th>Angabe</th><th>Bedeutung</th></tr>
-    <tr><td><code>href</code>*, <code>label</code>*</td><td>Adresse in dieser Installation (beginnt mit <code>/</code>) und Beschriftung (übersetzbar über <code>lang/{locale}.php</code> der Erweiterung). Die Route meldet die Erweiterung mit <code>routes()</code> an – sie prüft Rechte und CSRF selbst.</td></tr>
+    <tr><td><code>href</code>*, <code>label</code>*</td><td>Adresse in dieser Installation (beginnt mit <code>/</code>) und Beschriftung (übersetzbar über <code>lang/{locale}.php</code> der Erweiterung). Die Route meldet die Erweiterung mit <code>routes()</code> an – mit Recht (<a href="#erweiterungen-routen">geschützte Verwaltungsrouten</a>).</td></tr>
     <tr><td><code>kind</code></td><td><code>content</code> | <code>tool</code> | <code>settings</code> | <code>stats</code> (siehe oben).</td></tr>
     <tr><td><code>place</code></td><td><code>main</code> (Hauptmenü, Standard) oder <code>admin</code> (Abschnitt Administration) – nur für <code>content</code>/<code>tool</code>.</td></tr>
     <tr><td><code>icon</code>, <code>description</code></td><td>Symbolname bzw. Menü-Schlüssel (<code>Core\Icons</code>) und eine Zeile für die Karte auf der Sammelseite.</td></tr>
@@ -54,6 +54,25 @@ $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 
   <div class="doc-note doc-note--warn"><strong>Veraltet: <code>nav()</code> ohne Art</strong><p>Ältere Aufrufe <code>$x-&gt;nav($href, $label, $icon, $perm)</code> bzw. <code>…, 'admin')</code> funktionieren weiter und bleiben an ihrem Platz (<code>main</code> → <code>content</code>, <code>admin</code> → <code>tool</code>). Bitte die Art angeben – reine Einstellungsseiten gehören nach <code>settings</code>, Berichte nach <code>stats</code>. <code>Extensions::adminNav()</code> ist veraltet; das Layout nutzt <code>AdminPages::nav()</code>.</p></div>
   <p><b>Einordnung im Core:</b> Hauptmenü = Übersicht, Seiten, Entwürfe, Website-Angaben des Kits, Medien, Daten, Anfragen, Chat, KI (Inhalte/Werkzeuge); Administration = Grundeinstellungen, Funktionen &amp; Erweiterungen, <b>Einstellungen</b> (Sammelseite), <b>Statistiken</b> (nur wenn vorhanden), Design, Blöcke, Landingpages, Weiterleitungen, Benutzer &amp; Rollen. Als <code>settings</code> gesammelt: <b>Glossar</b> (<code>/admin/glossar</code>, an der Tabelle <code>glossar</code> als „Prüfen &amp; Einstellungen“), <b>Chat</b> (<code>/admin/chat/einstellungen</code>), <b>API &amp; MCP</b> (<code>/admin/api-tokens</code>). Externe Quellen sind ein Werkzeug der Daten-Navigation. Adressen und Rechte sind unverändert.</p>
   <p>API: <code>AdminPages::register([...])</code> (Core), <code>all()</code>, <code>visible($p)</code>, <code>ofKind('settings', …)</code>, <code>nav('main'|'admin')</code>, <code>settings()</code> / <code>stats()</code> (gruppiert), <code>forTable($handle)</code>, <code>match($path)</code>. Selbsttest: <code>php bin/console extensions:selftest</code>.</p>
+
+  <h3 id="erweiterungen-routen">Routen: Verwaltung geschützt ab Werk (<code>Core\Http\Router</code>)</h3>
+  <p>Routen, die eine Erweiterung mit <code>routes()</code> unter <code>/admin</code> anmeldet, schützt der Core, <b>bevor</b> der Handler läuft: Anmeldung (sonst Weiterleitung zur Anmeldung), Zwei-Faktor-Einrichtung, das angegebene <b>Recht</b> (sonst 403) und bei allen Methoden außer GET/HEAD/OPTIONS das <b>CSRF-Token</b> (Feld <code>_csrf</code> oder Kopfzeile <code>X-CSRF-Token</code>, sonst 419). Jede Verwaltungsroute braucht ein Recht.</p>
+  <pre><code>$x-&gt;routes(function (Core\Http\Router $r): void {
+    $c = KalenderController::class;
+    $r-&gt;get('/admin/kalender', [$c, 'index'], 'calendar.edit');                      // Recht als dritte Angabe
+    $r-&gt;post('/admin/kalender/{id}', [$c, 'save'], ['perm' =&gt; 'calendar.edit']);      // + CSRF
+    $r-&gt;post('/admin/kalender/webhook', [$c, 'hook'], ['perm' =&gt; 'calendar.edit', 'csrf' =&gt; false]);   // Ausnahme, benannt
+    $r-&gt;get('/admin/kalender/status.json', [$c, 'status'], ['public' =&gt; true]);       // Ausnahme: ohne Anmeldung
+    $r-&gt;get('/kalender.ics', [$c, 'feed']);                                           // Website: Sache der Erweiterung
+});</code></pre>
+  <table class="doc-table">
+    <tr><th>Fall</th><th>Verhalten</th></tr>
+    <tr><td>mit Recht</td><td>Anmeldung, Recht, CSRF (Nicht-GET) – der Handler kann sich auf alles verlassen. Fachliche Prüfungen (Recht je Tabelle, eigene Einträge) bleiben Sache des Handlers.</td></tr>
+    <tr><td><code>'csrf' =&gt; false</code>, <code>'public' =&gt; true</code></td><td>Benannte Ausnahmen – <code>php bin/console extensions:list</code> listet sie je Erweiterung. <code>public</code> verzichtet auf Anmeldung und Recht, CSRF gilt weiter (außer zusätzlich <code>'csrf' =&gt; false</code>).</td></tr>
+    <tr><td>ohne Recht, Handler <code>[Controller, 'methode']</code> auf Basis von <code>AdminController</code></td><td><b>Altform</b> (alle Erweiterungen vor dieser Regel): läuft weiter – der Controller prüft das Recht wie bisher mit <code>$this-&gt;auth($r, 'recht')</code>, der Core prüft zusätzlich Anmeldung und CSRF. <code>extensions:list</code> meldet diese Routen; bitte das Recht an der Route angeben.</td></tr>
+    <tr><td>ohne Recht, anderer Handler (Closure …)</td><td>Entwicklung (<code>'environment' =&gt; 'development'</code> oder <code>debug</code>): <code>LogicException</code> beim Anmelden. Produktion: Route antwortet mit 403 und schreibt ins Fehlerprotokoll.</td></tr>
+  </table>
+  <p>Routen des Cores (<code>app/routes.php</code>) sind davon nicht betroffen – ihre Controller prüfen mit <code>auth()</code>. <code>AdminController::routeGuard($r, $perm, $csrf)</code> ist dieselbe Prüfung ohne Nebenarbeiten. Selbsttest: <code>extensions:selftest</code> (Abschnitt Verwaltungsrouten).</p>
 
   <h3 id="erweiterungen-werkzeuge">Werkzeuge beim Bearbeiten auf der Website (<code>Core\FrontendTools</code>)</h3>
   <p>Ein Werkzeug ist ein Knopf in der Werkzeugleiste (<code>placement =&gt; 'main'</code>, auf Telefonen im Menü „⋯“) oder ein Eintrag im Menü „⋯“ (<code>'more'</code>), optional mit Tastenkürzel. Es erscheint <b>nur angemeldet</b> und nur mit Recht – standardmäßig <b>nur im Bearbeiten-Modus</b> (Seiten-Editor inkl. Vorlage: <code>page</code>; Eintrag direkt im Text: <code>entry</code>, dort erst nach „Bearbeiten“). Mit <code>'view' =&gt; true</code> (bzw. <code>'view'</code> in <code>modes</code>) erscheint es zusätzlich beim <b>Ansehen</b> (Seite ohne <code>?edit=1</code>, auch Live-Fassung; Detailseite eines Eintrags vor „Bearbeiten“) – dort ist jeder Text der Seite markierbar. Das ES-Modul lädt der Browser <b>erst beim ersten Öffnen</b> – Besucher laden nie etwas.</p>
@@ -153,7 +172,7 @@ $x-&gt;on('page.saved', fn(array $page, ?int $uid) =&gt; …);                  
 
   <h3 id="erweiterungen-sicherheit">Sicherheit</h3>
   <ul>
-    <li><b>Server prüft immer:</b> Jeder Endpunkt eines Werkzeugs ruft <code>AdminController::auth()</code> (Anmeldung, bei POST CSRF über <code>X-CSRF-Token</code>) und prüft das Recht selbst – die Angaben <code>perm</code>/<code>visible</code> steuern nur die Anzeige.</li>
+    <li><b>Server prüft immer:</b> Endpunkte unter <code>/admin</code> meldet die Erweiterung mit Recht an – der Router prüft Anmeldung, Recht und CSRF (<code>X-CSRF-Token</code>), bevor der Handler läuft (<a href="#erweiterungen-routen">Routen</a>). Die Angaben <code>perm</code>/<code>visible</code> an Werkzeugen und Slots steuern nur die Anzeige.</li>
     <li><b>Keine Besucher:</b> Werkzeugleiste, Konfiguration (<code>#cms-tools</code>), schwebender Knopf und Module gibt es nur angemeldet (Bearbeiten bzw. mit <code>view</code> auch Ansehen); Seiten im Seiten-Cache enthalten sie nie.</li>
     <li><b>Nur eigene Dateien:</b> Module von Erweiterungen kommen aus ihrem <code>assets</code>-Ordner (kein <code>..</code>, keine fremde Domain, CSP <code>'self'</code>); Endpunkte nur als Pfade dieser Installation.</li>
     <li><b>Isoliert:</b> Oberflächen in der Shadow-DOM-Ebene – kein Kit-CSS hinein, kein Werkzeug-CSS hinaus. Eigene Stile: Klassen der Verwaltung nutzen oder ein eigenes Stylesheet per <code>&lt;link&gt;</code> in <code>ctx.panel.el</code> anhängen (keine Inline-Styles, CSP).</li>
