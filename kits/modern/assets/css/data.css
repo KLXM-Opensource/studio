@@ -2,6 +2,7 @@
    Intrinsisch: Karten im auto-fill-Raster (Mindestbreite aus der Spaltenwahl), „Liste mit Bild“ als Container-Query je
    Eintrag (Bild daneben ab 34 rem Eintragsbreite), Tabelle scrollt waagerecht. Hervorgehobene Einträge geteilter
    Tabellen (dl-item--featured) tragen ein Etikett-Band. Hochformat-/Quadratbilder in Listen werden zu Porträts (Team). */
+@import "../../../../resources/css/_data-clamp.css";   /* Textlänge (Datenliste) */
 .dl,.df{--dl-gap:var(--m-s-l)}
 .dl-head{display:flex;flex-direction:column;gap:var(--m-s-s);max-width:52rem;margin-bottom:var(--m-s-2xl)}
 .dl-head .eyebrow,.dl-head .h2{margin:0}

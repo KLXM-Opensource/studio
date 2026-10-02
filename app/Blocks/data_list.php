@@ -3,6 +3,7 @@
  * Datenliste: Einträge einer Datentabelle ausgeben (Kern-Block, vom Theme überschreibbar).
  * @var \Core\Block $b  @var array $d
  */
+use Core\Data\Clamp;
 use Core\Data\Entries;
 use Core\Data\Tables;
 
@@ -61,6 +62,7 @@ $pages = !empty($d['paginate']) && $limit ? (int) ceil(Entries::count($t, $o) / 
 $layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table'], true) ? $d['layout'] : 'cards';
 $link = fn(array $e) => !empty($d['link_detail']) ? Entries::href($t, $e) : null;
 $hTag = !empty($d['title']) ? 'h3' : 'h2';
+$titleClamp = Clamp::titleClass($d);   // Textlänge/Titel kürzen (Karten und Listen; Texte über Clamp::text)
 // Spaltenköpfe der Tabelle: Titel-Feld, Sonderfelder „_when“ (Termin) und „published_at“ wie im Block „Datensatz-Felder“
 $colLabel = fn(string $f) => match (true) {
     $f === '_title' => ($tf = Tables::field($t, $t['settings']['title_field'])) ? Tables::label($tf) : lt('Titel'),
@@ -102,9 +104,9 @@ $colLabel = fn(string $f) => match (true) {
       <div class="dl-body">
         <?php $meta = $jobs && ($js = \Core\Data\Jobs::summary($t, $e)) !== '' ? [e($js)] : []; foreach ($other as $f) { if (in_array(Tables::field($t, $f)['type'] ?? 'date', ['date', 'datetime', 'select', 'time'], true) || $f === 'published_at') { $h = Entries::html($t, $e, $f); if ($h !== '') $meta[] = $h; } } ?>
         <?php if ($meta): ?><p class="dl-meta"><?= implode('<span aria-hidden="true"> · </span>', $meta) ?></p><?php endif; ?>
-        <?php if ($showTitle): ?><<?= $hTag ?> class="dl-name"><?= $url ? '<a href="' . e($url) . '" class="dl-link">' . e($title) . '</a>' : e($title) ?></<?= $hTag ?>><?php endif; ?>
-        <?php foreach ($other as $f): $type = Tables::field($t, $f)['type'] ?? 'date'; if (in_array($type, ['date', 'datetime', 'select', 'time'], true)) continue; $html = Entries::html($t, $e, $f, ['link' => false]); if ($html === '') continue; ?>
-        <div class="dl-f dl-f--<?= e($type) ?>"><?= $html ?></div>
+        <?php if ($showTitle): ?><<?= $hTag ?> class="dl-name<?= $titleClamp ?>"><?= $url ? '<a href="' . e($url) . '" class="dl-link">' . e($title) . '</a>' : e($title) ?></<?= $hTag ?>><?php endif; ?>
+        <?php foreach ($other as $f): $type = Tables::field($t, $f)['type'] ?? 'date'; if (in_array($type, ['date', 'datetime', 'select', 'time'], true)) continue; [$clamp, $html] = Clamp::text($t, $e, $f, $d); if ($html === '') continue; ?>
+        <div class="dl-f dl-f--<?= e($type) ?><?= $clamp ?>"><?= $html ?></div>
         <?php endforeach; ?>
         <?php if ($url && !$showTitle): ?><a href="<?= e($url) ?>" class="dl-link dl-more-link"><?= e(lt('Mehr')) ?><span class="sr-only"> <?= e(lt('zu {title}', ['title' => $title])) ?></span></a><?php endif; ?>
       </div>

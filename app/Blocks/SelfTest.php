@@ -35,6 +35,7 @@ final class SelfTest
             $t->imageFit();
             $t->rows();
             $t->layout();
+            $t->dataClamp();
         } finally {
             app()->editing = $prev;
         }
@@ -278,6 +279,45 @@ final class SelfTest
         imagefill($photo, 0, 0, imagecolorallocate($photo, 90, 120, 150));
         $this->assert($f::edgeAlpha($logo) && !$f::edgeAlpha($photo), 'ImageFit: transparenter Rand erkannt');
         $f::reset();
+    }
+
+    /** Datenliste „Textlänge“/„Titel kürzen“ (Core\Data\Clamp): Optionen, Klassen, Auszug, reiner Text, CSS in Kern und Kits */
+    private function dataClamp(): void
+    {
+        $c = \Core\Data\Clamp::class;
+        $def = (require ROOT . '/app/Blocks/blocks.php')['data_list']['fields'];
+        $byName = array_column(array_filter($def, fn($f) => isset($f['name'])), null, 'name');
+        $this->assert(isset($byName['text_lines'], $byName['title_lines']) && $byName['text_lines']['default'] === '' && $byName['title_lines']['default'] === ''
+            && array_map('strval', array_keys($byName['text_lines']['options'])) === ['', '2', '3', '4', '6']
+            && array_map('strval', array_keys($byName['title_lines']['options'])) === ['', '2', '3'],
+            'Textlänge: Optionen im Block data_list, Standard vollständig');
+        $this->assert($c::lines([]) === 0 && $c::lines(['text_lines' => '3']) === 3 && $c::lines(['text_lines' => '5']) === 0 && $c::lines(['text_lines' => 'x']) === 0
+            && $c::titleLines(['title_lines' => 2]) === 2 && $c::titleLines(['title_lines' => '4']) === 0, 'Textlänge: nur erlaubte Zeilenzahlen');
+        $this->assert($c::textClass([]) === '' && $c::textClass(['text_lines' => '6']) === ' dl-clamp dl-clamp-6' && $c::titleClass(['title_lines' => '3']) === ' dl-clamp dl-clamp-3',
+            'Textlänge: Klassen (ohne Option keine)');
+        $long = str_repeat('Wort ', 200);
+        $ex = $c::excerpt("  Ein\n\n  kurzer   Text ", 100);
+        $cut = $c::excerpt($long, 50);
+        $this->assert($ex === 'Ein kurzer Text' && str_ends_with($cut, ' …') && mb_strlen($cut) <= 52 && !str_contains($cut, 'Wor …') && $c::excerpt($long, 0) === trim(preg_replace('~\s+~', ' ', $long)),
+            'Textlänge: Auszug (Leerraum, Wortgrenze, „…“)');
+        $t = ['handle' => 'x', 'name' => 'X', 'singular' => 'X', 'settings' => ['title_field' => 'titel'], 'fields' => [
+            ['name' => 'titel', 'type' => 'text'], ['name' => 'teaser', 'type' => 'richtext'], ['name' => 'notiz', 'type' => 'textarea'], ['name' => 'zahl', 'type' => 'number']]];
+        $e = ['id' => 1, 'titel' => 'T', 'teaser' => '<p>Erster <b>Absatz</b></p><ul><li>Punkt</li></ul><p><img src="/a.jpg" alt="Bild"> <a href="https://x.test/">Link</a> &lt;script&gt;</p>',
+            'notiz' => "Zeile 1\nZeile 2 <b>", 'zahl' => 3];
+        [$cl, $h] = $c::text($t, $e, 'teaser', ['text_lines' => '3']);
+        $this->assert($cl === ' dl-clamp dl-clamp-3' && !preg_match('~<(?!/?b\b)[a-z]~i', $h) && !str_contains($h, '<') && str_contains($h, 'Erster Absatz Punkt') && str_contains($h, '&lt;script&gt;'),
+            'Textlänge: Rich-Text gekürzt als reiner, maskierter Text (ohne Listen/Bilder): ' . $h);
+        [$cl2, $h2] = $c::text($t, $e, 'teaser', []);
+        $this->assert($cl2 === '' && str_contains($h2, '<ul>'), 'Textlänge: vollständig → unverändertes HTML');
+        [$cl3, $h3] = $c::text($t, $e, 'notiz', ['text_lines' => '2']);
+        [$cl4, $h4] = $c::text($t, $e, 'zahl', ['text_lines' => '2']);
+        $this->assert($cl3 !== '' && $h3 === 'Zeile 1 Zeile 2 &lt;b&gt;' && $cl4 === '' && $h4 === '3', 'Textlänge: mehrzeilig maskiert in einer Zeile, Zahl unberührt');
+        [, $h5] = $c::text($t, ['teaser' => '<p>' . $long . '</p>'] + $e, 'teaser', ['text_lines' => '2']);
+        $this->assert(mb_strlen(html_entity_decode($h5)) <= 2 * $c::CHARS_PER_LINE + 2, 'Textlänge: Auszug vom Server begrenzt (Rückfall ohne line-clamp)');
+        // CSS: Kern (gebaut) und jedes Kit mit eigenem data.css bringen die Klassen mit – selbst oder per @import aus resources/css
+        $files = array_merge([ROOT . '/public/assets/css/data.css'], glob(ROOT . '/kits/*/assets/css/data.css') ?: []);
+        $missing = array_filter($files, fn($f) => !preg_match('~\.dl-clamp-3\s*\{|@import\s+"[./]*(?:resources/css/)?(?:_data-clamp|_data-list|data)\.css"~', (string) file_get_contents($f)));
+        $this->assert(!$missing, 'Textlänge: CSS fehlt in ' . implode(', ', array_map(fn($f) => substr($f, strlen(ROOT) + 1), $missing)));
     }
 
     private function assert(bool $cond, string $label): void

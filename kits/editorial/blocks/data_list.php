@@ -13,6 +13,7 @@
  * @var \Core\Block $b  @var array $d
  */
 use Core\Data\Calendar;
+use Core\Data\Clamp;
 use Core\Data\Entries;
 use Core\Data\Shared;
 use Core\Data\Tables;
@@ -110,11 +111,11 @@ $dek = function (array $e, int $max = 220) use ($t, $textField): string {
     $s = trim(preg_replace('~\s+~u', ' ', Entries::text($t, $e, $textField)));
     return mb_strlen($s) > $max ? rtrim(mb_substr($s, 0, $max - 1), " ,.;:–-") . ' …' : $s;
 };
-$extra = function (array $e) use ($t, $rest): string {
+$extra = function (array $e) use ($t, $rest, $d): string {
     $h = '';
     foreach ($rest as $f) {
-        $v = Entries::html($t, $e, $f, ['link' => false]);
-        if ($v !== '') $h .= '<p class="tz__f tz__f--' . e(Tables::field($t, $f)['type'] ?? 'x') . '">' . $v . '</p>';
+        [$cl, $v] = Clamp::text($t, $e, $f, $d);   // Textlänge: gekürzt als reiner Text
+        if ($v !== '') $h .= '<p class="tz__f tz__f--' . e(Tables::field($t, $f)['type'] ?? 'x') . $cl . '">' . $v . '</p>';
     }
     return $h;
 };
@@ -137,9 +138,11 @@ $teaser = function (array $e, int $i, string $variant, ?string $tag = null) use 
     $h .= $pic . '<div class="tz__body">';
     if ($kicker !== '') $h .= '<p class="kicker tz__kicker">' . $kicker . '</p>';
     if ($showTitle) {
-        $h .= '<' . $tag . ' class="tz__title">' . ($url ? '<a class="tz__link" href="' . e($url) . '"' . ext_attrs($url) . '>' . e($title) . editorial_ext_note($url) . '</a>' : e($title)) . '</' . $tag . '>';
+        $h .= '<' . $tag . ' class="tz__title' . Clamp::titleClass($d) . '">' . ($url ? '<a class="tz__link" href="' . e($url) . '"' . ext_attrs($url) . '>' . e($title) . editorial_ext_note($url) . '</a>' : e($title)) . '</' . $tag . '>';
     }
-    if ($variant !== 'brief' && ($s = $dek($e, $lead ? 320 : ($variant === 'people' ? 140 : 200))) !== '') $h .= '<p class="tz__dek">' . e($s) . '</p>';
+    // Vorspann: fester Auszug; mit „Textlänge“ zusätzlich auf n Zeilen (Aufmacher bleibt beim festen Auszug)
+    $lines = $lead ? 0 : Clamp::lines($d);
+    if ($variant !== 'brief' && ($s = $dek($e, $lines ? min($lines * Clamp::CHARS_PER_LINE, 320) : ($lead ? 320 : ($variant === 'people' ? 140 : 200)))) !== '') $h .= '<p class="tz__dek' . Clamp::cls($lines) . '">' . e($s) . '</p>';
     $h .= $extra($e);
     if ($variant !== 'river' && $meta) $h .= '<p class="tz__meta">' . implode('<span aria-hidden="true"> · </span>', $meta) . '</p>';
     elseif ($variant === 'river' && ($o = $origin($e)) !== '') $h .= '<p class="tz__meta">' . $o . '</p>';

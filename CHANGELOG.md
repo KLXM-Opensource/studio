@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Datenliste: Textlänge und Titel kürzen
+- Block **Datenliste** hat zwei neue Optionen: **Textlänge** (vollständig, 2, 3, 4 oder 6 Zeilen) für Text-, mehrzeilige und formatierte
+  Felder in Karten und Listen sowie **Titel kürzen** (2 oder 3 Zeilen) – z. B. für Nachrichten aus RSS-Feeds mit sehr langem Teaser.
+  Standard „vollständig“: bestehende Listen bleiben unverändert.
+- Umsetzung über `Core\Data\Clamp` (Klassen `dl-clamp dl-clamp-{n}` mit `line-clamp`, `resources/css/_data-clamp.css`; ohne
+  Inline-Stile wegen CSP). Gekürzt erscheint Rich-Text als reiner, maskierter Text mit Auszug vom Server (keine Listen, Bilder oder
+  Überschriften im Teaser, Screenreader lesen keinen doppelten Text); der volle Text steht auf der Detailseite.
+- Kern-Ausgabe, Kit „editorial“ (Titel, Vorspann, weitere Felder) und alle Kits mit eigenem `data.css` (essenz, fluid, glas, modern,
+  nature; basis, praxis und starter über den Kern) unterstützen die Option. Selbsttest in `blocks:selftest`.
+- Behoben: In den Kits essenz, fluid, glas und nature ergab „Spalten: 2“ auf breiten Bildschirmen 3 Karten je Zeile und „4“ bis zu 5 –
+  die Spaltenwahl ist jetzt wie im Kern die Höchstzahl (`--cols`), schmal weiterhin weniger Spalten.
+
 ### Wording: neutrale Begriffe in Kern-Oberfläche
 - Geteilte Daten: Standardbegriff **Eigentümer-Website** statt „Haupt-Website“ (kollidierte mit „Hauptwebsite“ = Standard-Website
   der Installation); Kits können `project → terms → shared_owner …` weiter umbenennen. „Dem {owner} vorschlagen“ (grammatisch nur für

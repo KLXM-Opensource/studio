@@ -1,4 +1,5 @@
 /* Kern-Block „Datenliste“ (+ Chips/Farbfelder, auch in „Datensatz-Felder“) – Teil von data.css; Kits können nur diesen Teil importieren */
+@import "./_data-clamp.css";   /* Textlänge (Datenliste) */
 .dl,.df{--dl-accent:currentColor;--dl-surface:rgba(0,0,0,.035);--dl-radius:14px;--dl-muted:rgba(0,0,0,.6);--dl-gap:clamp(16px,2.4vw,28px)}
 .dl-head{margin-bottom:clamp(24px,3.5vw,44px);max-width:46em}
 .dl-intro{margin-top:14px}

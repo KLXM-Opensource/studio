@@ -2,13 +2,15 @@
    Intrinsisch: Karten im auto-fill-Raster (Mindestbreite aus der Spaltenwahl), „Liste mit Bild“ als Container-Query je
    Eintrag (Bild daneben ab 34 rem Eintragsbreite), Tabelle scrollt waagerecht. Hervorgehobene Einträge geteilter
    Tabellen (dl-item--featured) tragen ein Etikett-Band. Hochformat-/Quadratbilder in Listen werden zu Porträts (Team). */
+@import "../../../../resources/css/_data-clamp.css";   /* Textlänge (Datenliste) */
 .dl,.df{--dl-gap:var(--e-s-l)}
 .dl-head{display:flex;flex-direction:column;gap:var(--e-s-s);max-width:52rem;margin-bottom:var(--e-s-2xl)}
 .dl-head .eyebrow,.dl-head .h2{margin:0}
 .dl-intro{color:var(--e-muted);font-size:var(--e-t1);line-height:1.5}
 .dl-items{display:grid;gap:var(--dl-gap);margin:0;padding:0;list-style:none}
-.dl--cards .dl-items{grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min,17rem)),1fr))}
-.dl-cols-2{--min:22rem}.dl-cols-3{--min:17rem}.dl-cols-4{--min:13rem}
+/* Spalten (2/3/4) als Höchstzahl: Spaltenbreite mindestens --min, sonst Anteil der Zeile – schmal weniger Spalten */
+.dl--cards .dl-items{--cols:3;grid-template-columns:repeat(auto-fit,minmax(min(100%,max(var(--min,17rem),calc((100% - (var(--cols) - 1) * var(--dl-gap)) / var(--cols)))),1fr))}
+.dl--cards .dl-cols-2{--cols:2;--min:22rem}.dl--cards .dl-cols-3{--min:17rem}.dl--cards .dl-cols-4{--cols:4;--min:13rem}
 .dl-item{position:relative;container-type:inline-size;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--e-card-bd);border-radius:var(--e-r-l);background:var(--e-card);box-shadow:var(--e-card-sh);transition:border-color .2s,translate .25s cubic-bezier(.2,.7,.2,1)}
 .dl-item:has(.dl-link):hover{border-color:var(--e-line-strong)}
 .has-motion .dl-item:has(.dl-link):hover{translate:0 -3px}

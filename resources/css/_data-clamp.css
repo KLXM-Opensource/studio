@@ -1,0 +1,8 @@
+/* Block „Datenliste“: Textlänge / Titel kürzen (Core\Data\Clamp) – nur visuell, voller Text auf der Detailseite.
+   Klassen statt style-Attribut (CSP ohne Inline-Stile). Kits mit eigenem data.css importieren diese Datei. */
+.dl-clamp{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.dl-clamp-2{-webkit-line-clamp:2;line-clamp:2}
+.dl-clamp-3{-webkit-line-clamp:3;line-clamp:3}
+.dl-clamp-4{-webkit-line-clamp:4;line-clamp:4}
+.dl-clamp-6{-webkit-line-clamp:6;line-clamp:6}
+@media print{.dl-clamp{display:block;-webkit-line-clamp:none;line-clamp:none;overflow:visible}}

@@ -22,6 +22,7 @@ return [
             ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'default' => '16:10', 'width' => 'half', 'required' => true,
                 'options' => ['16:9' => '16:9', '16:10' => '16:10', '4:3' => '4:3', '1:1' => '1:1', '3:4' => '3:4']],
             ['name' => 'limit', 'label' => 'Anzahl', 'type' => 'number', 'default' => 6, 'width' => 'half', 'help' => '0 = alle'],
+            ...\Core\Data\Clamp::fields(),   // Textlänge, Titel kürzen (Karten und Listen)
             ['type' => 'heading', 'label' => 'Filter & Sortierung'],
             ['name' => 'filter_field', 'label' => 'Nur Einträge, bei denen …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– kein Filter –'],
             ['name' => 'filter_op', 'label' => 'Bedingung', 'type' => 'select', 'default' => '=', 'width' => 'half', 'required' => true,

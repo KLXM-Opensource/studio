@@ -34,6 +34,7 @@
     <li>Tabelle wählen, <b>angezeigte Felder</b> ankreuzen, Darstellung wählen: Karten, Liste mit Bild, kompakte Liste oder Tabelle.</li>
     <li>Optional filtern (z. B. nur Kategorie „Neuigkeiten“ oder nur Termine ab „heute“), sortieren, Anzahl begrenzen, seitenweise blättern, Button „Alle Beiträge“.</li>
   </ol>
+  <p><b>Lange Texte kürzen:</b> Bringt eine Tabelle sehr lange Texte mit – etwa Nachrichten aus einem RSS-Feed –, stellen Sie in der Datenliste unter <b>Textlänge</b> „2 Zeilen“, „3 Zeilen“, „4 Zeilen“ oder „6 Zeilen“ ein; <b>Titel kürzen</b> begrenzt lange Überschriften auf 2 oder 3 Zeilen. Das gilt für Karten und Listen (nicht für die Tabelle). Gekürzte Texte erscheinen ohne Formatierung (keine Aufzählungen, Bilder oder Zwischenüberschriften) und enden mit „…“; der vollständige Text steht auf der Detailseite, zu der Titel und Karte verlinken. Standard ist „vollständig“ – bestehende Listen bleiben unverändert.</p>
 
   <h3>4. Detailseite gestalten</h3>
   <p><b>Daten → Tabelle → Detailseite gestalten</b> öffnet die Vorlage im Editor – mit den echten Inhalten eines Eintrags. Die Vorlage gilt für <b>alle</b> Einträge (oben steht „Vorlage · Aktuelles“, daneben wählen Sie unter <b>Vorschau mit</b> einen anderen Eintrag zum Prüfen).</p>
