@@ -600,7 +600,7 @@ if (pt) {
     if (e.target.closest('.pt-title')) { e.preventDefault(); }
     select(n); tree.focus();
   });
-  tree.addEventListener('dblclick', e => { const n = nodeAt(e); if (n && !e.target.closest('[data-menu],[data-toggle],[data-more]')) open(n); });
+  tree.addEventListener('dblclick', e => { const n = nodeAt(e); if (n && !e.target.closest('[data-menu],[data-toggle],[data-more],[data-ptpv-row]')) open(n); });
   tree.addEventListener('contextmenu', e => { const n = nodeAt(e); if (!n) return; e.preventDefault(); select(n); menu(n, e.clientX, e.clientY); });
   tree.addEventListener('keydown', e => {
     if (e.target !== tree && e.target.closest('button,input')) return;   // Knöpfe/Schalter in der Zeile: eigene Tastatur

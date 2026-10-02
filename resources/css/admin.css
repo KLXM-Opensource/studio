@@ -2590,9 +2590,21 @@ html.has-ptpv .adm-main{margin-right:var(--ptpv-w);max-width:none}
 .ptpv__scale{position:absolute;right:10px;bottom:8px;padding:2px 8px;border-radius:999px;background:var(--adm-surface);color:var(--adm-t3);font-size:11.5px;font-variant-numeric:tabular-nums}
 @media (max-width:900px){:root{--ptpv-w:100vw}html.has-ptpv .adm-main{margin-right:0}}
 .adm-tip__body a{color:var(--adm-a);font-weight:600}
-/* Hilfe „?“: Hinweise zum Projekt (Core\Guide) vorn, farblich abgesetzt wie die Hinweisleiste */
-.adm-tip__guide{display:flex;gap:10px;margin:-2px -6px 12px;padding:10px 12px;border-radius:8px;background:var(--adm-info-bg);color:var(--adm-ink)}
-.adm-tip__guide > .ico{flex:none;width:18px;height:18px;margin-top:2px;color:var(--adm-a)}
+/* Hilfe „?“: Hinweise zum Projekt (Core\Guide) vorn, farblich abgesetzt – nur Titel als Links ins Handbuch */
+.adm-tip__guide{display:flex;gap:10px;margin:0 0 12px;padding:10px 12px;border-radius:8px;background:var(--adm-info-bg);color:var(--adm-ink)}
+.adm-tip__guide > .ico{flex:none;width:18px;height:18px;margin-top:1px;color:var(--adm-a)}
+.adm-tip__guide > div{min-width:0}
 .adm-tip__guide b{display:block;margin-bottom:4px;font-size:13px}
-.adm-tip__guide ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
-.adm-tip__guide span{color:var(--adm-t2);font-size:13px}
+.adm-tip__guide ul{list-style:none;padding:0;margin:0;display:grid;gap:3px}
+.adm-tip__guide a{font-weight:500;text-decoration:none}
+.adm-tip__guide a:hover{text-decoration:underline}
+.adm-tip__body{width:min(480px,calc(100vw - 32px))}
+/* Seitenbaum: Augen-Knopf „Vorschau“ neben Online/Offline */
+.pt-pvbtn{display:inline-grid;place-items:center;width:26px;height:24px;margin-left:2px;padding:0;border:0;border-radius:6px;background:none;color:var(--adm-t3);vertical-align:middle;cursor:pointer}
+.pt-pvbtn .ico{width:16px;height:16px}
+.pt-pvbtn:hover{background:var(--adm-hover);color:var(--adm-ink)}
+.pt-pvbtn[aria-pressed=true]{background:var(--adm-accent-bg);color:var(--adm-a)}
+.pt-pvbtn:focus-visible{outline:2px solid var(--adm-a);outline-offset:1px}
+.pt-node[aria-selected=true] > .pt-row .pt-pvbtn{color:rgba(255,255,255,.85)}
+.pt-node[aria-selected=true] > .pt-row .pt-pvbtn:hover,.pt-node[aria-selected=true] > .pt-row .pt-pvbtn[aria-pressed=true]{background:rgba(255,255,255,.18);color:#fff}
+.pt-node[aria-selected=true] > .pt-row .pt-pvbtn:focus-visible{outline-color:#fff}

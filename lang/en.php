@@ -6001,4 +6001,5 @@ return [
     'Seitenvorlagen verwalten' => 'Manage page templates',
     'Zu den Daten' => 'Go to data',
     'Hinweise zum Projekt' => 'Project notes',
+    'Vorschau: {title}' => 'Preview: {title}',
 ];

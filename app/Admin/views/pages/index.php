@@ -47,6 +47,8 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
         . '<span class="pt-status">' . $statusCell($p)
+        // Vorschau (Seitenleiste, resources/js/_ptpreview.js) direkt neben Online/Offline
+        . ' <button type="button" class="pt-pvbtn" data-ptpv-row aria-pressed="false" aria-label="' . e(__('Vorschau: {title}', ['title' => $p['title']])) . '" title="' . e(__('Vorschau')) . '">' . icon('eye') . '</button>'
         // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
         . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
         . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
@@ -72,8 +74,8 @@ $html = implode('', array_map($row, $tree));
         <?php if ($__guide = \Core\Guide::forArea('pages')): \Core\Guide::$shownInline = true;   // Hinweise zum Projekt (Core\Guide) – vorn, abgesetzt ?>
         <div class="adm-tip__guide"><?= icon('lightbulb') ?><div>
           <b><?= e(count($__guide) > 1 ? __('Hinweise zum Projekt') : __('Hinweis zum Projekt')) ?></b>
-          <ul><?php foreach ($__guide as $__gn): $__ex = \Core\Guide::plain($__gn, 140); ?>
-            <li><a href="<?= e(\Core\Guide::url($__gn)) ?>"><?= e($__gn['title']) ?></a><?php if ($__ex !== ''): ?><br><span><?= e($__ex) ?></span><?php endif; ?></li>
+          <ul><?php foreach ($__guide as $__gn): ?>
+            <li><a href="<?= e(\Core\Guide::url($__gn)) ?>" title="<?= e(\Core\Guide::plain($__gn, 160)) ?>"><?= e($__gn['title']) ?> <span aria-hidden="true">→</span></a></li>
           <?php endforeach; ?></ul>
         </div></div>
         <?php endif; ?>
@@ -116,7 +118,6 @@ $canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pa
     <label class="fx-search dt-search"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3 9l3.3 3.3 1-1L11 10A5 5 0 0 0 7 2zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></svg><input type="search" placeholder="Seiten filtern" aria-label="Seiten filtern" data-filter></label>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-expand-all>Alle aufklappen</button>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-collapse-all>Alle zuklappen</button>
-    <button type="button" class="adm-btn adm-btn--small ptpv-toggle" data-ptpv-toggle aria-pressed="false" aria-controls="ptpv"><?= icon('browser') ?> <?= e(__('Vorschau')) ?></button>
   </div>
   <div class="pt-head" aria-hidden="true"><span>Name</span><span>Adresse</span><span>Status</span><span>Menü</span><span>Geändert</span><span></span></div>
   <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"><?= $html ?></ul>

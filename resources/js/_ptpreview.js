@@ -3,7 +3,7 @@
  * Zeigt die markierte Seite über /admin/pages/{id}/vorschau (ohne Werkzeugleiste) in einem skalierten Rahmen:
  * Mobil 390 × 844 bzw. Desktop 1440 × 900, jeweils hoch oder quer; Entwurf (Arbeitsstand) oder Live.
  * Folgt der Auswahl im Baum (aria-selected), merkt sich offen/Gerät/Ausrichtung/Fassung (localStorage).
- * Ereignis „ptpv:open“ (detail: Baumknoten) öffnet die Leiste für eine Seite – z. B. aus dem Kontextmenü.
+ * Öffnen: Augen-Knopf je Zeile ([data-ptpv-row], neben Online/Offline). Ereignis „ptpv:open“ (detail: Baumknoten) öffnet die Leiste für eine Seite – z. B. aus dem Kontextmenü.
  */
 import { t } from './_i18n.js';
 
@@ -48,6 +48,7 @@ export function initPagePreview() {
   };
   const select = n => {
     pageId = n?.dataset.id || null;
+    tree?.querySelectorAll('[data-ptpv-row]').forEach(b => b.setAttribute('aria-pressed', String(!box.hidden && b.closest('.pt-node')?.dataset.id === pageId)));
     title.textContent = n?.dataset.title ? `${t('Vorschau')}: ${n.dataset.title}` : t('Vorschau');
     load();
   };
@@ -67,11 +68,20 @@ export function initPagePreview() {
       requestAnimationFrame(fit);
     } else {
       frame.removeAttribute('src'); delete frame.dataset.src;
-      toggle?.focus({ preventScroll: true });
+      tree?.querySelectorAll('[data-ptpv-row][aria-pressed=true]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      (tree?.querySelector('.pt-node[aria-selected=true] [data-ptpv-row]') || toggle)?.focus({ preventScroll: true });
     }
   };
 
   toggle?.addEventListener('click', () => open(box.hidden));
+  // Augen-Knopf je Zeile: Vorschau dieser Seite öffnen; dieselbe Seite noch einmal = schließen
+  tree?.addEventListener('click', e => {
+    const b = e.target.closest('[data-ptpv-row]');
+    if (!b) return;
+    const n = b.closest('.pt-node');   // markiert wird die Zeile vom Klick-Handler des Baums (admin.js)
+    if (!box.hidden && n?.dataset.id === pageId) { open(false); return; }
+    open(true, n);
+  });
   $('[data-ptpv-close]').addEventListener('click', () => open(false));
   box.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); open(false); } });
   box.addEventListener('click', e => {
