@@ -37,6 +37,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   `dashboard` (Karten jetzt auch als Daten `'body'`), **neu** `account` (Abschnitt auf „Konto“). Gemeinsamer Kartenvertrag
   (`title`, `text`, `tone`, `lines`, `actions` – nur Pfade dieser Installation). Altform-HTML von `pagePanel` und
   `'render'` bleibt erlaubt.
+- **`kit:check [--kit=…|--all] [--strict] [-v]`:** verwaiste Block-Vorlagen eines Kits, Überschreibungen von Kern-Blöcken,
+  die Angaben lesen, die der Kern nicht mehr kennt, und Kern-Fragmente mit geändertem Original – nur aus den Quellen, ohne Zustand.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`

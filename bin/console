@@ -63,6 +63,8 @@
  *   migrate [--all]                                   Datenbank auf den Stand des Codes bringen (nach jedem Deploy)
  *   blocks:list | blocks:selftest                     Eigene Blöcke (Block-Designer) auflisten | Sicherheits-Selbsttest der Vorlagensprache
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
+ *   kit:check [--kit=name|--all] [--strict] [-v]     Überschreibungen eines Kits prüfen: verwaiste Block-Vorlagen, Kern-Blöcke
+ *                                                     mit geändertem Vertrag (unbekannte Angaben), Kern-Fragmente mit neuem Original
  *   fragments:list [--all] [--accept]                 Kern-Fragmente: Herkunft je Fragment (Projekt/Kit/Kern) für das aktive Kit
  *                                                     (--all: alle Kits), überschriebene mit geändertem Original;
  *                                                     --accept: geänderte Originale als geprüft markieren
@@ -1108,6 +1110,29 @@ switch ($cmd) {
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'kit:check':
+        // Überschreibungen eines Kits: verwaiste Block-Vorlagen, Kern-Blöcke mit geändertem Vertrag, Kern-Fragmente mit neuem Original
+        if (in_array('--all', $args, true)) {
+            $fail = 0;
+            foreach (array_keys(Core\Kit::all()) as $k) {
+                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' kit:check --kit=' . escapeshellarg($k)
+                    . (in_array('--strict', $args, true) ? ' --strict' : '') . (in_array('-v', $args, true) ? ' -v' : '') . ' --site=' . escapeshellarg(site()->key), $code);
+                $fail = $fail ?: $code;
+            }
+            exit($fail);
+        }
+        $kitName = '';
+        foreach ($args as $a) if (str_starts_with($a, '--kit=')) $kitName = substr($a, 6);
+        $kitName = $kitName !== '' ? Core\Kit::clean($kitName) : app()->theme->name;
+        if (!Core\Kit::exists($kitName)) { fwrite(STDERR, "Kit „{$kitName}“ nicht gefunden.\n"); exit(1); }
+        $kit = $kitName === app()->theme->name ? app()->theme : new Core\Theme($kitName);
+        $found = Core\KitCheck::run($kit, in_array('-v', $args, true));
+        echo "── Kit $kitName (" . Core\Kit::relative($kit->path) . ")\n";
+        foreach ($found as $f) echo '  ' . ($f['level'] === 'warn' ? '! ' : '· ') . $f['file'] . ': ' . $f['text'] . "\n";
+        $warn = count(array_filter($found, fn($f) => $f['level'] === 'warn'));
+        echo $warn ? "  $warn Hinweis(e).\n" : "  Keine verwaisten oder veralteten Überschreibungen.\n";
+        exit($warn && in_array('--strict', $args, true) ? 1 : 0);
 
     case 'fragments:list':
         // Kern-Fragmente (Core\Fragments): woher kommt welches Fragment, wo hat sich das Original seit dem Überschreiben geändert?
