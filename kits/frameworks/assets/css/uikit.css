@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Kit „frameworks“ – uikit.css: Brücke zwischen UIkit 3 (vendor/uikit/uikit.min.css, unverändert) und Kit/CMS.
+   Lädt nur im UIkit-Modus, nach uikit.min.css und site.css. Ohne Kaskaden-Layer – wie UIkit selbst.
+
+   1. Farben über Variablen: UIkit 3 ist mit festen Farben kompiliert (Less/SCSS) und kennt keinen Dunkelmodus. Hier werden
+      die benutzten Komponenten auf --u-* umgestellt; hell/dunkel tauscht nur die Variablen. (Alternative für Projekte:
+      UIkit aus den Quellen mit eigenen Variablen bauen – dann entfällt der größte Teil dieser Datei.)
+   2. Kontrast (WCAG 2.2 AA): UIkits Standard-Grau #999 (Navigation, Meta, Reiter, Unternavigation) erreicht auf Weiß nur
+      2,8:1, Link-/Primärblau #1e87f0 nur 3,7:1 → dunklere Töne bzw. die Akzentfarbe des Kits.
+   3. Rich-Text: Klassenvertrag der Formatierungsleiste (t-lead, t-note, c-*), Links im Fließtext unterstrichen
+      (UIkit: a{text-decoration:none}), <em> nicht pink (UIkit: em{color:#f0506e}).
+   4. Bearbeiten: klickbare Karten (fw-cover) im Editor aus, Dialog-Vorschau, keine Animationen bei „Bewegung reduzieren“.
+   ========================================================================== */
+
+html.fw-uikit{
+  --u-bg:#fff;--u-fg:#575757;--u-head:#1f2328;--u-muted:#5c5c5c;--u-soft:#f4f5f7;--u-card:#fff;--u-line:#dcdfe4;
+  --u-nav:#3f4650;--u-input:#fff;--u-band:var(--fw-accent);--u-link:var(--fw-accent);--u-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme:dark){
+  html.fw-uikit.has-dark{--u-bg:#121418;--u-fg:#c8cdd5;--u-head:#f2f4f7;--u-muted:#a3acb8;--u-soft:#1b1e23;--u-card:#1b1e23;--u-line:#2d323a;
+    --u-nav:#d3d8e0;--u-input:#1b1e23;--u-band:#22357F;--u-link:var(--fw-accent);--u-shadow:0 5px 15px rgba(0,0,0,.5)}
+}
+html.fw-uikit.is-dark{--u-bg:#121418;--u-fg:#c8cdd5;--u-head:#f2f4f7;--u-muted:#a3acb8;--u-soft:#1b1e23;--u-card:#1b1e23;--u-line:#2d323a;
+  --u-nav:#d3d8e0;--u-input:#1b1e23;--u-band:#22357F;--u-link:var(--fw-accent);--u-shadow:0 5px 15px rgba(0,0,0,.5)}
+
+/* ---------------------------------------------------------------- 1. Grundfarben */
+html.fw-uikit{background:var(--u-bg);color:var(--u-fg)}
+.fw-uikit :is(h1,h2,h3,h4,h5,h6,.uk-h1,.uk-h2,.uk-h3,.uk-h4,.uk-h5,.uk-h6,.uk-heading-medium,.uk-card-title,.uk-accordion-title,.uk-text-lead,.uk-logo,.uk-modal-title){color:var(--u-head)}
+.fw-uikit a,.fw-uikit .uk-link{color:var(--u-link)}
+.fw-uikit a:hover,.fw-uikit .uk-link:hover{color:var(--u-link)}
+.fw-uikit .uk-link-heading,.fw-uikit .uk-link-heading:hover{color:inherit}
+.fw-uikit em{color:inherit}
+.fw-uikit :not(pre)>code{color:inherit;background:var(--u-soft)}
+.fw-uikit ::selection{background:var(--fw-accent);color:var(--fw-on-accent)}
+.fw-uikit :focus-visible{outline:3px solid var(--fw-accent);outline-offset:2px}
+.uk-section-default{background:var(--u-bg)}
+.uk-section-muted{background:var(--u-soft)}
+.uk-section-primary{background:var(--u-band)}
+.uk-card-default{background:var(--u-card);color:var(--u-fg);box-shadow:var(--u-shadow)}
+.uk-card-default.uk-card-hover:hover{background:var(--u-card)}
+.uk-section-muted .uk-card-default{box-shadow:none;border:1px solid var(--u-line)}
+.uk-navbar-container:not(.uk-navbar-transparent){background:var(--u-bg);border-bottom:1px solid var(--u-line)}
+.uk-navbar-dropdown,.uk-modal-dialog{background:var(--u-card);color:var(--u-fg)}
+.uk-list-divider>:nth-child(n+2),.fw-uikit hr{border-color:var(--u-line)}
+.fw-uikit :is(.uk-input,.uk-select,.uk-textarea){background:var(--u-input);color:var(--u-fg);border-color:var(--u-line)}
+.uk-placeholder{border-color:var(--u-line);color:var(--u-muted)}
+/* Buttons sind oft <a>: gleiche Spezifität wie „.fw-uikit a“ oben nötig, sonst bekäme der Text die Linkfarbe */
+.fw-uikit .uk-button-default{color:var(--u-head);border-color:var(--u-line)}
+.fw-uikit .uk-button-default:hover{color:var(--u-head);border-color:var(--u-muted)}
+.fw-uikit .uk-button-primary,.fw-uikit .uk-button-primary:hover,.fw-uikit .uk-button-primary:focus{background:var(--fw-accent);color:var(--fw-on-accent)}
+.uk-button-primary:hover{filter:brightness(1.08)}
+
+/* ---------------------------------------------------------------- 2. Kontrast */
+.uk-navbar-nav>li>a,.uk-navbar-toggle,.uk-navbar-item{color:var(--u-nav)}
+.uk-navbar-nav>li:hover>a,.uk-navbar-nav>li>a[aria-expanded=true],.uk-navbar-nav>li.uk-active>a{color:var(--u-head)}
+.uk-navbar-nav>li.uk-active>a{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.5em}
+.uk-navbar-dropdown-nav>li>a,.uk-nav-default>li>a,.uk-nav-sub a{color:var(--u-nav)}
+.uk-navbar-dropdown-nav>li>a:hover,.uk-navbar-dropdown-nav>li.uk-active>a{color:var(--u-head)}
+.uk-text-meta,.uk-text-muted,.uk-subnav>*>:first-child,.uk-pagination>*>*{color:var(--u-muted)!important}
+.uk-tab>*>a{color:var(--u-muted)}
+.uk-tab>.uk-active>a{color:var(--u-head);border-color:var(--fw-accent)}
+.uk-text-lead{color:var(--u-head)}
+/* Inverse (uk-light): UIkit stellt Text auf 70 %/50 % Weiß – auf der Akzentfläche zu wenig → 90 %/85 % */
+.uk-light{color:rgba(255,255,255,.92)}
+.uk-light :is(.uk-text-meta,.uk-text-muted,.uk-subnav>*>:first-child){color:rgba(255,255,255,.85)!important}
+.uk-light a,.uk-light a:hover,.uk-light .uk-link{color:#fff}
+.fw-uikit .uk-light .uk-button-default{color:#fff;border-color:rgba(255,255,255,.8)}
+/* UIkit: .uk-section-primary:not(.uk-preserve-color) .uk-button-default (0,3,0) – daher höhere Spezifität */
+.fw-uikit .uk-light .uk-button.fw-btn-invert{background:#fff;color:var(--u-band);border-color:#fff}
+.fw-uikit .uk-light .uk-button.fw-btn-invert:hover{background:rgba(255,255,255,.88);color:var(--u-band)}
+/* Links im Text ohne Klasse unterstreichen (UIkit: a{text-decoration:none} – Farbe allein reicht für WCAG 1.4.1 nicht),
+   z. B. „Datenschutzhinweise“ im Kern-Formular */
+.fw-uikit main a:not([class]){text-decoration:underline;text-underline-offset:.2em}
+/* Glossar-Übersicht (Kern): Varianten mit opacity:.75 – auf UIkits hellerem Grau zu blass */
+.fw-uikit .glx-item__alt{opacity:1;color:var(--u-muted)}
+/* Fuß (uk-section-secondary uk-light): Links unterstreichen, damit sie sich vom Text abheben */
+.fw-footer a{text-decoration:underline;text-underline-offset:.2em}
+
+/* ---------------------------------------------------------------- 3. Rich-Text (rich()) – Klassenvertrag */
+.fw-prose>:last-child{margin-bottom:0}
+.fw-prose a{text-decoration:underline;text-underline-offset:.2em}
+.fw-prose :is(h2,h3,h4){margin-top:1.4em}
+.fw-prose blockquote{border-left:3px solid var(--fw-accent);padding-left:1em;font-style:normal;color:var(--u-head)}
+.fw-uikit .t-lead{font-size:1.25rem;color:var(--u-head)}
+.fw-uikit .t-small{font-size:.875rem}
+.fw-uikit .t-note{padding:.75em 1em;border-left:4px solid var(--fw-accent);border-radius:0 var(--fw-radius) var(--fw-radius) 0;background:var(--u-soft)}
+.fw-uikit .c-accent{color:var(--rt-accent)}.fw-uikit .c-muted{color:var(--rt-muted)}.fw-uikit .c-success{color:var(--rt-success)}
+.fw-uikit .c-warning{color:var(--rt-warning)}.fw-uikit .c-danger{color:var(--rt-danger)}
+.fw-uikit mark{padding:0 .15em;border-radius:3px;background:#FFE58A;color:#111418}
+
+/* ---------------------------------------------------------------- 4. Bausteine des Kits */
+.fw-uikit .uk-logo{display:inline-flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.2rem}
+.fw-mark{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:8px;background:var(--fw-accent);color:var(--fw-on-accent);font-size:.9rem}
+.fw-eyebrow{margin:0 0 .5rem;color:var(--u-link);font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.uk-light .fw-eyebrow{color:#fff}
+.fw-head{max-width:46rem}
+.fw-btns{display:flex;flex-wrap:wrap;gap:.75rem}
+.fw-list{list-style:none}   /* kein margin:0 – uk-grid braucht den negativen Rand links für die Abstände */
+.fw-card{width:100%;border-radius:var(--fw-radius);overflow:hidden}
+.fw-media--flat{border-radius:0}
+.fw-icon{display:inline-grid;place-items:center;width:3rem;height:3rem;margin-bottom:1rem;border-radius:10px;background:color-mix(in srgb,var(--fw-accent) 12%,transparent);color:var(--u-link);font-size:1.5rem}
+.fw-cover::after{content:"";position:absolute;inset:0}
+.is-editing .fw-cover::after{content:none}
+.fw-featured{outline:2px solid var(--fw-accent)}
+.fw-accordion .uk-accordion-title{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.fw-acc-icon{flex:none;width:1.1em;height:1.1em}
+.uk-open>.uk-accordion-title .fw-acc-icon{transform:rotate(180deg)}
+@media (prefers-reduced-motion:no-preference){.fw-acc-icon{transition:transform .2s}}
+.fw-contact li{display:flex;gap:.75rem;align-items:flex-start}
+.fw-ci{flex:none;margin-top:.25em;width:1.25em;height:1.25em;color:var(--u-link)}
+.fw-dlg-preview{border:2px dashed currentColor;background:transparent;color:inherit}
+.fw-toggle{gap:.25rem;background:none;border:0}   /* <button>: UIkit setzt keinen Hintergrund zurück (sonst Systemgrau, im Dunkelmodus #6b6b6b) */
+/* Datenliste/Formular des Kerns: Buttons tragen „btn … uk-button uk-button-primary“ (theme.php → button_class) */
+.fw-uikit .dl-more .uk-button,.fw-uikit .dff-actions .uk-button{border-radius:var(--fw-radius)}
+
+/* ---------------------------------------------------------------- 5. Bewegung reduzieren
+   UIkit animiert Offcanvas, Modal, Dropdown und Switcher per CSS-Transition/-Animation – bei „Bewegung reduzieren“ aus. */
+@media (prefers-reduced-motion:reduce){
+  .fw-uikit :is(.uk-offcanvas-bar,.uk-offcanvas-overlay::before,.uk-modal,.uk-modal-dialog,.uk-navbar-dropdown,.uk-switcher>*,.uk-card-hover,[class*=uk-animation-]){transition:none!important;animation:none!important}
+}

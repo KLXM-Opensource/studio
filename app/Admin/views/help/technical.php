@@ -14,7 +14,7 @@ $chapters = [
     'build' => ['Build & Entwicklung', 0], 'deploy' => ['Staging & Deploy', 0], 'betrieb' => ['Betrieb: Cronjobs, Sicherungen, Updates', 0], 'cli' => ['Kommandozeile', 0],
     'websites' => ['Mehrere Websites', 1], 'netzwerk' => ['Netzwerk-Administration', 1], 'landingpages' => ['Landingpages mit eigenen Domains', 1], 'weiterleitungen' => ['Weiterleitungen & 404-Protokoll', 1], 'rechte' => ['Rollen, Rechte & Zwei-Faktor', 1],
     'funktionen' => ['Funktionsumfang & Erweiterungen', 1], 'erweiterungen' => ['Erweiterungen: Seiten, Werkzeuge & Ereignisse', 1], 'sicherheit' => ['Sicherheit & Datenschutz', 1], 'consent' => ['Cookie-Einwilligung (Erweiterung Consent-Kit)', 1],
-    'kits' => ['Kits & Design', 2], 'css-js' => ['CSS & JS', 2], 'schriften' => ['Schriften aus Google Fonts (selbst gehostet)', 2], 'editor' => ['Bearbeiten auf der Website', 2], 'felder' => ['Feldtypen', 2], 'bloecke' => ['Eigene Blöcke (Block-Designer)', 2], 'daten' => ['Seitenbaum & Datentabellen', 2],
+    'kits' => ['Kits & Design', 2], 'css-js' => ['CSS & JS', 2], 'frameworks' => ['Frameworks (Tailwind, UIkit, Bootstrap)', 2], 'schriften' => ['Schriften aus Google Fonts (selbst gehostet)', 2], 'editor' => ['Bearbeiten auf der Website', 2], 'felder' => ['Feldtypen', 2], 'bloecke' => ['Eigene Blöcke (Block-Designer)', 2], 'daten' => ['Seitenbaum & Datentabellen', 2],
     'formulare' => ['Formulare & Eingänge', 2], 'kalender' => ['Kalender, iCal & CalDAV', 2], 'stellen' => ['Stellenangebote & Google for Jobs', 2], 'geteilt' => ['Geteilte Datentabellen', 2], 'quellen' => ['Externe Quellen (Feeds, APIs, OpenImmo)', 2],
     'medien' => ['Medien, Pools & Untertitel', 2], 'sprachen' => ['Sprachen & Übersetzung', 2], 'glossar' => ['Glossar', 2],
     'suche' => ['Website-Suche', 3], 'ki' => [$aiBrand . ': KI-Dienst & Funktionen', 3], 'ki-chat' => ['KI-Chats: Assistent & Besucher-Chat (SSE)', 3], 'freigabe' => ['Prüf-Ebene „Eingereicht“', 3],
@@ -76,9 +76,9 @@ $fieldInfo = [
   </div>
 </section>
 
-<?php $__n = 0; foreach ($chapters as $__key => [$__title, $__part]): $__n++; ?>
+<?php $__chapterNo = 0; foreach ($chapters as $__key => [$__title, $__part]): $__chapterNo++; /* eigener Zähler – Kapitel-Dateien dürfen $__n benutzen */ ?>
 <section class="doc-ch" id="<?= e($__key) ?>">
-  <h2><span class="no"><?= sprintf('%02d', $__n) ?></span><?= e($__title) ?><span class="dot">.</span></h2>
+  <h2><span class="no"><?= sprintf('%02d', $__chapterNo) ?></span><?= e($__title) ?><span class="dot">.</span></h2>
 <?php include $__extFiles[$__key] ?? __DIR__ . '/technical/' . $__key . '.php'; ?>
 </section>
 

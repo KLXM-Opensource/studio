@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Kit „frameworks“ – site.css: lädt in BEIDEN Modi nach dem Framework-CSS (Tailwind bzw. UIkit).
+   Bewusst klein und ohne Kaskaden-Layer: nur Design-Tokens (Style-Editor), Variablen der Kern-Bausteine und ein paar
+   Kern-Klassen, die keinem Framework gehören (Sprunglink, Bildformate, Fokuspunkt). Kein Element-Reset, keine Typografie –
+   das macht das Framework. Gegen Tailwind-Utilities gewinnt diese Datei (ungeschichtet), deshalb nichts, was eine
+   Utility im Markup überschreiben soll.
+   ========================================================================== */
+
+/* Design-Tokens – Standardwerte = theme.php § 6 (sonst liefert design_head() eine Datei mit den Abweichungen) */
+:root{
+  --fw-accent:#2747C4;
+  --fw-on-accent:#FFFFFF;
+  --fw-radius:12px;
+  --fw-bar:var(--cms-toolbar-h,0px);   /* Höhe der Redaktions-Werkzeugleiste (editor.css setzt --cms-toolbar-h), Besucher: 0 */
+  /* Rich-Text-Farben für die Kontrastprüfung der Formatierungsleiste (liest die Variablen am bearbeiteten Text) */
+  --rt-accent:var(--fw-accent);--rt-muted:#525A66;--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318;
+  /* Besucher-Chat-Knopf (Kern, Shadow DOM) */
+  --cb-theme-accent:var(--fw-accent);--cb-theme-on-accent:var(--fw-on-accent);
+}
+@media (prefers-color-scheme:dark){
+  html.has-dark{--fw-accent:#9DB4FF;--fw-on-accent:#0B1533;--rt-muted:#A3ACB8;--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F;color-scheme:dark}
+}
+html.is-dark{color-scheme:dark}
+.bg-ink,.bg-band{--rt-accent:currentColor;--rt-muted:currentColor}
+/* Dunkler Abschnitt auf heller Seite: helle Fassung der Akzentfarbe (fest – der Style-Editor kennt je Token nur hell/dunkel der Seite) */
+.bg-ink{--fw-accent:#AFC2FF;--fw-on-accent:#0B1533}
+
+/* Sprunglink, Hinweisbalken – Kit-eigene Klassen mit Präfix fw- (kollidieren mit keinem Framework) */
+.fw-skip{position:absolute;z-index:1100;left:1rem;top:-10rem;padding:.75rem 1rem;border-radius:8px;background:#111418;color:#fff;text-decoration:underline}
+.fw-skip:focus{top:calc(var(--fw-bar) + 1rem)}
+.fw-notice{padding:.6rem 1rem;background:var(--fw-accent);color:var(--fw-on-accent);text-align:center}
+.fw-notice a{color:inherit;text-decoration:underline}
+main:focus{outline:none}
+
+/* Überschreibbare Grundwerte in @layer base: In Tailwind-Modus ist das derselbe Layer wie Preflight – Utilities am Markup
+   (z. B. size-5 am Symbol, rounded-none am Bild) gewinnen. Ohne Layer würde diese Datei jede Utility schlagen.
+   Im UIkit-Modus gibt es keine anderen Layer; die Regeln gelten wie gewohnt. */
+@layer base{
+  /* Symbole des Kerns (icon()): Größe wie Schrift. Wichtig mit Tailwind-Preflight (svg ist dort display:block). */
+  .ico{display:inline-block;width:1em;height:1em;flex:none;fill:currentColor;vertical-align:-.125em}
+  /* Bilder im Format (frameworks_image) und Fokuspunkt aus der Mediathek (Klassen fx{0–100}/fy{0–100} am <img>) */
+  .fw-media{overflow:hidden;border-radius:var(--fw-radius)}
+  .fw-media picture{display:contents}
+  .fw-media img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--fx,50%) var(--fy,50%)}
+  .r-16-9{aspect-ratio:16/9}.r-3-2{aspect-ratio:3/2}.r-4-3{aspect-ratio:4/3}.r-1-1{aspect-ratio:1}.r-16-10{aspect-ratio:16/10}.r-3-4{aspect-ratio:3/4}
+  .fw-media--empty{display:grid;place-items:center;min-height:10rem;border:2px dashed currentColor;opacity:.7}
+}
+.fx0{--fx:0%}.fx10{--fx:10%}.fx20{--fx:20%}.fx30{--fx:30%}.fx40{--fx:40%}.fx60{--fx:60%}.fx70{--fx:70%}.fx80{--fx:80%}.fx90{--fx:90%}.fx100{--fx:100%}
+.fy0{--fy:0%}.fy10{--fy:10%}.fy20{--fy:20%}.fy30{--fy:30%}.fy40{--fy:40%}.fy60{--fy:60%}.fy70{--fy:70%}.fy80{--fy:80%}.fy90{--fy:90%}.fy100{--fy:100%}
+
+/* Abstands-Optionen der Abschnitte (Kern: pt-/pb-small|none) – gewinnen gegen die Abstände des Frameworks */
+.sec.pt-small{padding-top:2rem!important}.sec.pt-none{padding-top:0!important}
+.sec.pb-small{padding-bottom:2rem!important}.sec.pb-none{padding-bottom:0!important}
+.sec--divider{border-top:1px solid color-mix(in srgb,currentColor 18%,transparent)}
+.is-hidden-block{opacity:.45}
+.empty-hint{padding:1rem;border:1px dashed currentColor;border-radius:var(--fw-radius);opacity:.8}
+
+/* Kopf: klebt unter der Werkzeugleiste der Redaktion (--fw-bar, sonst 0). UIkit-Sticky und Tailwind „sticky top-0“
+   erkennt editor.css zusätzlich selbst (Klassen .uk-sticky, .sticky.top-0) – siehe Hilfe → Frameworks. */
+html.has-sticky .fw-hdr:not(.fw-hdr--uk){position:sticky;top:var(--fw-bar);z-index:980}   /* UIkit: uk-sticky übernimmt (views/uikit/header.php) */
+.fw-hdr{position:relative;z-index:980}
+html{scroll-padding-top:calc(var(--fw-bar) + 5rem)}
+
+/* ---------------------------------------------------------------- Kern-Bausteine: nur Variablen
+   Mit „:root“ davor: Die Kern-Stylesheets (data.css, dataform.css, glossary.css) laden NACH dieser Datei und setzen dieselben
+   Variablen mit gleicher Spezifität – ohne den Zusatz gewönne der Kern-Standard (dunkel auf hell, auch im Dunkelmodus).
+   Formular (Datentabelle) – Aussehen aus dem Kern (dataform.css), Farben/Radius aus dem Kit; Button = theme.php → button_class */
+:root .dff-wrap{--dff-accent:var(--fw-accent);--dff-focus:var(--fw-accent);--dff-radius:calc(var(--fw-radius) * .66)}
+@media (prefers-color-scheme:dark){:root.has-dark .dff-wrap{--dff-err:#FF9A8F;--dff-err-bg:#3A1714;--dff-err-ink:#FFDAD6}}
+:root .bg-ink .dff-wrap,:root .bg-band .dff-wrap{--dff-bg:rgb(0 0 0/.22);--dff-ink:currentColor;--dff-muted:currentColor;--dff-line:color-mix(in srgb,currentColor 60%,transparent);--dff-accent:currentColor;--dff-focus:currentColor;color-scheme:dark}
+/* Datenliste (Kern-Layouts „Kompakt“/„Tabelle“), Detailseite (Datensatz-Felder) */
+/* Kern-Standard ist dunkel auf hell (rgba(0,0,0,.6)) – aus der Textfarbe abgeleitet passt es hell, dunkel und in dunklen Abschnitten */
+:root .dl,:root .df{--dl-accent:var(--fw-accent);--dl-radius:var(--fw-radius);--dl-muted:color-mix(in srgb,currentColor 88%,transparent);--dl-surface:color-mix(in srgb,currentColor 6%,transparent)}
+:root .dl-table :is(th,td){border-bottom-color:color-mix(in srgb,currentColor 16%,transparent)}
+/* Glossar-Hinweise im Text (.gl-term) und Hinweisfenster (.gl-pop) */
+:root .gl,:root .glx{--gl-accent:var(--fw-accent);--gl-radius:var(--fw-radius)}
+/* Karte */
+:root .cms-map{--cms-map-accent:var(--fw-accent);--cms-map-radius:var(--fw-radius)}
+:root .sec{--cms-accent:var(--fw-accent);--cms-on-accent:var(--fw-on-accent);--cms-radius:var(--fw-radius)}

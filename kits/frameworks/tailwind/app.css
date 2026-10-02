@@ -1,0 +1,8 @@
+/* Tailwind-Fassung MIT Preflight (Standard, empfohlen). Wie @import "tailwindcss", aber ohne automatisches Scannen
+   (source(none)) – die Quellen stehen in _kit.css. Preflight liegt in @layer base und verliert gegen jedes ungeschichtete
+   CSS (Kern, editor.css, site.css); die CMS-Oberfläche im Shadow DOM erreicht es gar nicht. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "./_kit.css";

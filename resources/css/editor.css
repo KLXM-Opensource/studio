@@ -214,6 +214,7 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
      2147482990  Markierungen in der Seite (Stift je Eintrag, „Zentral gepflegt“)
      2147483000  Bedienelemente in der Seite (Block-Leisten, „+“/Ziehgriff der Editor.js-Werkzeugleiste)
      2147483050  Kopf des Kits ([data-cms-header], [data-cms-sticky]) mit seinen Menüs – über den Bedienelementen der Blöcke
+     2147483055  Geöffnete Overlays der Frameworks (uk-offcanvas, uk-modal, Bootstrap .offcanvas/.modal + Backdrops) – über dem Kopf
      2147483060  Geöffnete Editor.js-Menüs (Block einfügen/Optionen, Inline-Leiste) – über dem Kopf, solange sie offen sind
      2147483100  Seitenleiste „Eintrag bearbeiten“ (#cms-epanel-host, entry-panel.css)
      2147483200  Gemeinsame Ebene (#cms-layer-host: Seitenleiste „Block“, Formatierungsleiste, Meldungen; _shadow.js)
@@ -235,6 +236,11 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    !important: Frameworks setzen top teils inline (UIkit). */
 :is(html.cms-has-bar,html:has(.cms-bar-host)){--cms-toolbar-h:var(--cms-bar-offset,var(--cms-bar-h,52px))}
 :is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,[data-cms-pinned]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}
+/* Overlays der Frameworks (UIkit uk-offcanvas/uk-modal, Bootstrap .offcanvas/.modal, z-index ~1000–1055) lägen sonst unter dem
+   angehobenen Kopf des Kits (2147483050): Z-Skala oben. Seitenmenüs zusätzlich um die sichtbare Leistenhöhe einrücken, sonst
+   verdeckt die Leiste Schließen-Knopf und erste Einträge (Telefon). */
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.uk-offcanvas-bar,.offcanvas.offcanvas-start,.offcanvas.offcanvas-end){top:var(--cms-bar-offset,var(--cms-bar-h,52px))}
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.uk-offcanvas,.uk-modal,.offcanvas,.offcanvas-backdrop,.modal,.modal-backdrop){z-index:2147483055}
 /* Kopf des Kits mit Menüs über den Bedienelementen der Blöcke (Leisten, „+“, Knöpfe am Bild) – Z-Skala oben.
    Ohne Werkzeugleiste (Besucher) greift nichts davon. */
 :is(html.cms-has-bar,html:has(.cms-bar-host)) :is([data-cms-header],[data-cms-sticky],body>header,body>.site-header):not(.cms-bar-host){z-index:2147483050!important}

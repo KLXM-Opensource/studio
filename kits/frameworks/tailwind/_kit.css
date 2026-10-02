@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Tailwind CSS v4 – gemeinsamer Teil beider Fassungen (app.css mit Preflight, app-nopf.css ohne).
+   Gebaut von kits/frameworks/build.mjs mit @tailwindcss/cli → public/assets/kits/frameworks/css/tailwind*.css (eingecheckt).
+
+   Warum das neben dem CMS funktioniert:
+   - Tailwind v4 legt ALLES in Kaskaden-Layer (theme, base, components, utilities). Ungeschichtetes CSS – editor.css,
+     die Kern-Stylesheets (Formular, Glossar, Datenliste …) und css/site.css des Kits – gewinnt immer gegen Layer, egal
+     wie spezifisch. Preflight (in @layer base) kann daher keine Kern-Komponente „zurücksetzen“, die eigene Regeln hat.
+   - Die Oberfläche des CMS (Werkzeugleiste, Seitenleiste, Dialoge) lebt im Shadow DOM: Selektoren der Seite erreichen sie
+     nicht, vererbte Werte (Schrift, Farbe) setzt :host{all:initial} zurück.
+   Kehrseite: Eine Tailwind-Utility an Kern-Markup verliert gegen die Kern-Regel – Kern-Bausteine über ihre Variablen
+   (--dff-*, --gl-*, --dl-* in css/site.css) oder über eine eigene Ausgabe (blocks/data_list.php) anpassen.
+   ========================================================================== */
+
+/* Nur diese Dateien werden nach Klassen durchsucht (kein automatisches Scannen des ganzen Ordners – source(none) in app.css).
+   views/uikit/ fehlt absichtlich: Wörter wie „hidden“ oder „flex“ in UIkit-Vorlagen erzeugten sonst unnötige Utilities. */
+@source "../views/tailwind";
+@source "../templates";
+@source "../blocks";
+@source "../functions.php";
+/* Klassen, die erst im Editor oder in Inhalten entstehen (nicht im Quelltext des Kits), ausdrücklich erzeugen.
+   Beispiel: Bildformate der Datenliste, die die Redaktion wählt (aspect-*). Rich-Text-Klassen (t-lead, c-accent …) sind
+   unten als Komponenten definiert und brauchen das nicht. */
+@source inline("aspect-{video,square,[4/3],[3/2],[16/10],[3/4],[21/9]}");
+
+@plugin "@tailwindcss/typography";
+
+/* Farben aus den Design-Tokens des Kits (css/site.css, Style-Editor) – „inline“: Utilities verweisen direkt auf var(--fw-…),
+   so wirken Änderungen im Style-Editor ohne neuen Build. */
+@theme inline {
+  --color-accent: var(--fw-accent);
+  --color-on-accent: var(--fw-on-accent);
+  --radius-kit: var(--fw-radius);
+}
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Dunkelmodus: Variante dark: gilt, wenn
+   - das Gerät dunkel eingestellt ist UND das Kit es erlaubt (html.has-dark, Design → Farbschema),
+   - die Vorschau im Style-Editor „Dunkel“ erzwingt (html.is-dark),
+   - oder das Element in einem dunklen Abschnitt steht (.bg-ink) – so passen sich Karten, Text und prose dort an. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(.has-dark, .has-dark *) {
+      @slot;
+    }
+  }
+  &:where(.is-dark, .is-dark *, .bg-ink, .bg-ink *) {
+    @slot;
+  }
+}
+
+@layer base {
+  html {
+    @apply bg-white text-slate-700 antialiased dark:bg-slate-950 dark:text-slate-300;
+  }
+  /* Kern-Bausteine (Datenliste, Detailseite, Formular, Glossar-Übersicht) geben Überschriften ohne Klassen aus –
+     ohne diese Grundwerte wären sie nach Preflight so groß wie Fließtext. */
+  h1, h2, h3, h4 {
+    @apply font-bold tracking-tight text-balance text-slate-900 dark:text-white;
+  }
+  h1 { @apply text-4xl sm:text-5xl; }
+  h2 { @apply text-3xl; }
+  h3 { @apply text-xl; }
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-accent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within { scroll-behavior: smooth; }
+  }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8; }
+  .wrap-text { @apply max-w-3xl; }
+  .eyebrow { @apply mb-3 text-sm font-semibold tracking-wider text-accent uppercase; }
+  .bg-band .eyebrow, .bg-ink .eyebrow { @apply text-current; }
+
+  /* Buttons – auch für Kern-Blöcke (theme.php → button_class: „btn btn-primary …“) */
+  .btn {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-transparent px-5 py-2 font-semibold no-underline;
+    @apply motion-safe:transition-colors;
+  }
+  .btn-primary { @apply bg-accent text-on-accent hover:bg-accent/85; }
+  .btn-secondary { @apply border-current text-accent hover:bg-accent/10; }
+  .bg-band .btn-primary { @apply bg-on-accent text-accent hover:bg-on-accent/90; }
+  .bg-band .btn-secondary, .bg-ink .btn-secondary { @apply text-current; }
+  .bg-ink .btn-primary { @apply bg-white text-slate-900 hover:bg-slate-200; }
+
+  /* Abschnitte: Kern-Klassen sec, bg-{plain|tint|band|ink}, pt-/pb-small|none */
+  .sec { @apply py-16 sm:py-24; }
+  .bg-plain { @apply bg-white dark:bg-slate-950; }
+  .bg-tint { @apply bg-slate-100 dark:bg-slate-900; }
+  .bg-band { @apply bg-accent text-on-accent; }
+  .bg-band :where(h1, h2, h3, h4) { @apply text-on-accent; }
+  .bg-ink { @apply bg-slate-900 text-slate-200; }
+  .bg-plain + .bg-plain, .bg-tint + .bg-tint { @apply pt-0; }
+
+  /* Rich-Text-Klassenvertrag der Formatierungsleiste (Core\Sanitizer): t-lead, t-small, t-note, c-*, mark */
+  .t-lead { @apply text-xl text-slate-900 dark:text-white; }
+  .t-small { @apply text-sm; }
+  .t-note { @apply rounded-r-lg border-l-4 border-accent bg-slate-100 px-4 py-3 dark:bg-slate-800; }
+  .c-accent { @apply text-accent; }
+  .c-muted { @apply text-slate-600 dark:text-slate-400; }
+  .c-success { @apply text-green-800 dark:text-green-300; }
+  .c-warning { @apply text-amber-800 dark:text-amber-300; }
+  .c-danger { @apply text-red-700 dark:text-red-300; }
+  .prose mark, mark { @apply rounded-sm bg-yellow-200 px-0.5 text-slate-900; }
+  .bg-band .prose { @apply text-on-accent; }
+  .bg-band .prose :where(a, strong, h2, h3, h4, blockquote) { color: inherit; }
+}
+
+/* Namensgleichheit: Kern-Bausteine geben class="prose" aus (Detailseite „Datensatz-Felder“, Glossar-Erklärung). Das
+   Typography-Plugin gestaltet sie deshalb mit – gut so, aber im Dunkelmodus fehlt dort prose-invert (steht nicht im Markup). */
+@layer utilities {
+  .df .prose, .glx .prose {
+    @variant dark {
+      @apply prose-invert;
+    }
+  }
+}

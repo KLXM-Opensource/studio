@@ -24,7 +24,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper) | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
@@ -73,6 +73,16 @@ TikTok, WhatsApp, Telegram, Pinterest, GitHub, Discord, Spotify) are drawn by Ph
 artwork only. The names and logos are trademarks of their respective owners; the MIT license grants no trademark rights.
 Use them only to link to the respective service (e.g. a profile link), unaltered and without suggesting endorsement or
 partnership, and follow the owners' brand guidelines.
+
+### 1.2a Frameworks in the demo kit `frameworks` (`public/assets/kits/frameworks/`)
+
+Installed from `kits/frameworks/package.json` and copied/built by `kits/frameworks/build.mjs` (called by `tools/build.mjs`).
+
+| Component | Version | License | Shipped as | License text |
+|---|---|---|---|---|
+| UIkit, © 2013–2026 YOOtheme GmbH | 3.25.25 | MIT | `vendor/uikit/uikit.min.css`, `uikit.min.js`, `uikit-icons.min.js` (unmodified) | `vendor/uikit/LICENSE.md` |
+| Tailwind CSS (`tailwindcss`), © Tailwind Labs, Inc. – Preflight, theme variables and generated utilities | 4.3.3 | MIT | `css/tailwind.css`, `css/tailwind-nopf.css` (generated) | `css/LICENSE-tailwindcss.txt` |
+| `@tailwindcss/typography`, © Tailwind Labs, Inc. – `prose` styles generated into the same files | 0.5.20 | MIT | inside `css/tailwind*.css` | `css/LICENSE-tailwindcss-typography.txt` |
 
 ### 1.3 Components bundled inside PDF.js (`public/assets/vendor/pdfjs/`)
 
@@ -255,6 +265,7 @@ Notes:
 | Tool | Version | License | Purpose |
 |---|---|---|---|
 | esbuild | 0.25.12 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
+| `@tailwindcss/cli` (with `@tailwindcss/oxide`, lightningcss), © Tailwind Labs, Inc. / Devon Govett (MPL-2.0 for lightningcss) | 4.3.3 | MIT (lightningcss: MPL-2.0) | Building `kits/frameworks` Tailwind CSS (`kits/frameworks/build.mjs`) |
 | Playwright / playwright-core, © Microsoft Corporation | 1.62.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
 | @napi-rs/canvas | 1.0.9 | MIT | Optional dependency of pdfjs-dist, not used at runtime |
 | Piper TTS (`piper-tts`, OHF-Voice/piper1-gpl), incl. espeak-ng phonemizer | 1.8.0 | GPL-3.0-or-later | Tutorial narration (section 5), run locally via pipx |
@@ -374,7 +385,7 @@ KLXM AI features are off unless the operator configures a provider. Nothing belo
 
 - **“Big Buck Bunny”** – © 2008 Blender Foundation / www.bigbuckbunny.org, licensed under Creative Commons
   Attribution 3.0 (https://creativecommons.org/licenses/by/3.0/). Used as the example YouTube video
-  (`aqz-KE-bpKQ`) in the demo content of the basis, editorial and fluid kits (`themes/*/tools/demo-content.php`);
+  (`aqz-KE-bpKQ`) in the demo content of the basis, editorial, fluid and frameworks kits (`themes/*/tools/demo-content.php`);
   the video itself is not bundled – only a cached preview frame is stored at runtime in `public/media/embeds/`. The
   attribution is part of the demo block text and caption: “Big Buck Bunny” © 2008 Blender Foundation /
   www.bigbuckbunny.org – CC BY 3.0.

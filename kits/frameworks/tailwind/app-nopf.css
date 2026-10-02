@@ -1,0 +1,20 @@
+/* Tailwind-Fassung OHNE Preflight – nur zum Vergleich (Design → „Tailwind: Preflight“ aus). Dann gelten die Grundstile des
+   Browsers; das Kit ergänzt nur das Nötigste. Ergebnis der Tests: Mit Preflight in @layer base gibt es keine Konflikte mit
+   dem CMS – diese Fassung ist also nicht nötig. Sie zeigt, was man ohne Preflight selbst zurückholen muss: Die Utilities
+   setzen den Reset voraus. Ohne die Regeln unten (Test 2026-10) fielen axe-Prüfungen durch – Buttons mit Systemgrau als
+   Hintergrund (weiße Schrift auf Hellgrau, Reiter im Dunkelmodus) und Links mit 18 px Höhe (Zeilenhöhe „normal“ statt 1.5,
+   WCAG 2.5.8 Zielgröße). */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "./_kit.css";
+@layer base {
+  *, ::before, ::after { box-sizing: border-box; }
+  body { margin: 0; }
+  img, svg, video { max-width: 100%; height: auto; }
+  ul[role=list], ol[role=list] { list-style: none; margin: 0; padding: 0; }
+  dialog { padding: 0; border: 0; }
+  html { line-height: 1.5; }
+  button { background: transparent; color: inherit; font: inherit; border: 0 solid; }
+  h1, h2, h3, h4, p { margin: 0; }
+}

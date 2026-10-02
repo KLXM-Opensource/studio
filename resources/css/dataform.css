@@ -25,7 +25,7 @@
 .dff-f--req .dff-req,.dff-f.is-req .dff-req{display:inline}
 .dff-help,.dff-note{margin:0;font-size:.9em;color:var(--dff-muted)}
 .dff input:not([type=checkbox]):not([type=radio]):not([type=color]),.dff select,.dff textarea{
-  width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--dff-line);border-radius:var(--dff-radius);
+  box-sizing:border-box;width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--dff-line);border-radius:var(--dff-radius);
   background:var(--dff-bg);color:var(--dff-ink);font:inherit;line-height:1.4}
 .dff select{height:48px;padding-block:0}
 .dff textarea{min-height:120px;resize:vertical}

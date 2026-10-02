@@ -1,0 +1,1 @@
+(()=>{var t=document;t.documentElement.classList.replace("no-js","js");var e=t.querySelector("[data-fw-popnav]");e?.addEventListener("click",o=>{o.target.closest('a[href*="#"]')&&e.matches?.(":popover-open")&&e.hidePopover()});})();

@@ -1,0 +1,16 @@
+{
+  "name": "klxm-studio-kit-frameworks",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „frameworks“: Tailwind CSS v4 (CLI + Typography) für das vorkompilierte tailwind.css und UIkit 3 (CSS, JS, Icons). Wird von tools/build.mjs automatisch installiert; kits/frameworks/build.mjs baut Tailwind und kopiert UIkit nach public/assets/kits/frameworks/.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "@tailwindcss/typography": "0.5.20",
+    "tailwindcss": "4.3.3",
+    "uikit": "3.25.25"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "@tailwindcss/oxide"]
+  }
+}
