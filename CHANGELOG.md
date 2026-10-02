@@ -8,8 +8,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Seitenbaum: Vorschau als Seitenleiste
 - Augen-Knopf neben Online/Offline jeder Seite (und „⋯ → Vorschau“) öffnet rechts eine Seitenleiste mit der Seite: Mobil (390 × 844) oder
-  Desktop (1440 × 900), jeweils hoch oder quer, skaliert eingepasst; Entwurf (Arbeitsstand) oder Live; „in neuem Tab öffnen“.
-  Folgt der Auswahl im Baum, merkt sich die Einstellungen. Neue Adresse `/admin/pages/{id}/vorschau[?stand=live]` (ohne
+  Desktop (1280 × 800), jeweils hoch oder quer, skaliert eingepasst; Entwurf (Arbeitsstand) oder Live; „in neuem Tab öffnen“.
+  Folgt der Auswahl im Baum, merkt sich die Einstellungen. Desktop 1280 × 800 mit automatisch breiterer Leiste, Breite per Griff ziehbar
+  (Doppelklick = zurücksetzen); Auge vor dem Status (bündig), höhere Zeilen im Seitenbaum. Neue Adresse `/admin/pages/{id}/vorschau[?stand=live]` (ohne
   Werkzeugleiste, noindex; Seitenvorlagen nur für die Administration).
 - Hilfe „?“ neben „+ Neue Seite“ mit den Erklärungen zu Sonderseiten und Vorlagen samt Links.
 

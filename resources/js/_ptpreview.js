@@ -1,13 +1,13 @@
 /*
  * Seitenbaum → Vorschau als Seitenleiste (Markup: app/Admin/views/pages/index.php, [data-ptpv]).
  * Zeigt die markierte Seite über /admin/pages/{id}/vorschau (ohne Werkzeugleiste) in einem skalierten Rahmen:
- * Mobil 390 × 844 bzw. Desktop 1440 × 900, jeweils hoch oder quer; Entwurf (Arbeitsstand) oder Live.
+ * Mobil 390 × 844 bzw. Desktop 1280 × 800, jeweils hoch oder quer (Desktop: Leiste automatisch breiter, Breite ziehbar); Entwurf (Arbeitsstand) oder Live.
  * Folgt der Auswahl im Baum (aria-selected), merkt sich offen/Gerät/Ausrichtung/Fassung (localStorage).
  * Öffnen: Augen-Knopf je Zeile ([data-ptpv-row], neben Online/Offline). Ereignis „ptpv:open“ (detail: Baumknoten) öffnet die Leiste für eine Seite – z. B. aus dem Kontextmenü.
  */
 import { t } from './_i18n.js';
 
-const SIZES = { mobile: [390, 844], desktop: [1440, 900] };   // natürliche Ausrichtung: Mobil hoch, Desktop quer
+const SIZES = { mobile: [390, 844], desktop: [1280, 800] };   // natürliche Ausrichtung: Mobil hoch, Desktop quer
 
 export function initPagePreview() {
   const box = document.querySelector('[data-ptpv]');
@@ -57,7 +57,29 @@ export function initPagePreview() {
     box.querySelectorAll('[data-orient]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.orient === orient)));
     box.querySelectorAll('[data-stand]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.stand === stand)));
     box.dataset.dev = dev;
+    document.documentElement.classList.toggle('ptpv-wide', dev === 'desktop');
+    requestAnimationFrame(fit);
   };
+  // Breite per Griff ziehen (Maus/Touch) bzw. Pfeiltasten; gemerkt
+  const grip = $('[data-ptpv-grip]');
+  const setW = px => {
+    const w = Math.round(Math.max(320, Math.min(innerWidth - 360, px)));
+    document.documentElement.style.setProperty('--ptpv-user', w + 'px');
+    store.set('w', w); fit();
+  };
+  const savedW = store.get('w', 0);
+  if (savedW) document.documentElement.style.setProperty('--ptpv-user', savedW + 'px');
+  grip?.addEventListener('pointerdown', e => {
+    e.preventDefault(); grip.setPointerCapture(e.pointerId); box.classList.add('is-resizing');
+    const move = ev => setW(innerWidth - ev.clientX);
+    const up = () => { box.classList.remove('is-resizing'); grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up);
+  });
+  grip?.addEventListener('keydown', e => {
+    const k = { ArrowLeft: 40, ArrowRight: -40 }[e.key];
+    if (k) { e.preventDefault(); setW(box.getBoundingClientRect().width + k); }
+  });
+  grip?.addEventListener('dblclick', () => { document.documentElement.style.removeProperty('--ptpv-user'); store.set('w', 0); requestAnimationFrame(fit); });
   const open = (on, node) => {
     box.hidden = !on;
     toggle?.setAttribute('aria-pressed', String(on));

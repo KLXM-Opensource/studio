@@ -6002,4 +6002,5 @@ return [
     'Zu den Daten' => 'Go to data',
     'Hinweise zum Projekt' => 'Project notes',
     'Vorschau: {title}' => 'Preview: {title}',
+    'Breite der Vorschau ändern' => 'Resize preview',
 ];

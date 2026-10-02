@@ -194,6 +194,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 
 <?php // Vorschau als Seitenleiste (resources/js/_ptpreview.js): markierte Seite, Mobil/Desktop, hoch/quer, Entwurf/Live ?>
 <aside class="ptpv" id="ptpv" data-ptpv data-base="<?= e(url('/admin/pages')) ?>" aria-labelledby="ptpv-title" hidden>
+  <div class="ptpv__grip" data-ptpv-grip role="separator" aria-orientation="vertical" aria-label="<?= e(__('Breite der Vorschau ändern')) ?>" tabindex="0"></div>
   <div class="ptpv__bar">
     <h2 class="ptpv__title" id="ptpv-title" data-ptpv-title><?= e(__('Vorschau')) ?></h2>
     <a class="ptpv__icon" data-ptpv-open href="#" target="_blank" rel="noopener" title="<?= e(__('In neuem Tab öffnen')) ?>" aria-label="<?= e(__('Vorschau in neuem Tab öffnen')) ?>">↗</a>

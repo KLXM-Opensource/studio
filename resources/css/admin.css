@@ -2608,3 +2608,18 @@ html.has-ptpv .adm-main{margin-right:var(--ptpv-w);max-width:none}
 .pt-node[aria-selected=true] > .pt-row .pt-pvbtn{color:rgba(255,255,255,.85)}
 .pt-node[aria-selected=true] > .pt-row .pt-pvbtn:hover,.pt-node[aria-selected=true] > .pt-row .pt-pvbtn[aria-pressed=true]{background:rgba(255,255,255,.18);color:#fff}
 .pt-node[aria-selected=true] > .pt-row .pt-pvbtn:focus-visible{outline-color:#fff}
+
+/* Status-Zelle: Auge zuerst (feste Position), dann Online/Offline/Entwurf – in jeder Zeile bündig */
+.pt-status{display:flex;align-items:center;gap:2px;min-width:0}
+.pt-status .pt-pvbtn{order:-1;margin:0 2px 0 -6px}
+.pt-status .pt-stbtn{margin-left:0}
+.pt-head,.pt-row{grid-template-columns:minmax(0,2.4fr) minmax(0,1.5fr) 150px 70px 96px 40px}
+/* Vorschau: Breite ziehbar (Griff links), Desktop automatisch breiter */
+html.has-ptpv.ptpv-wide{--ptpv-w:min(980px,60vw)}
+html.has-ptpv[style*="--ptpv-user"]{--ptpv-w:var(--ptpv-user)}
+.ptpv__grip{position:absolute;left:-4px;top:0;bottom:0;width:8px;cursor:ew-resize;z-index:1}
+.ptpv__grip::after{content:"";position:absolute;left:3px;top:50%;width:2px;height:40px;margin-top:-20px;border-radius:2px;background:var(--adm-line)}
+.ptpv__grip:hover::after,.ptpv.is-resizing .ptpv__grip::after{background:var(--adm-a)}
+.ptpv.is-resizing iframe{pointer-events:none}
+.pt-row{min-height:44px;padding-block:4px}
+@media (max-width:900px){html.has-ptpv{--ptpv-w:100vw!important}}
