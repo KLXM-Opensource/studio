@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenbaum: Symbole aus der Web-Welt
+- Statt Ordner und Dokument: Browserfenster (Seite), gestapelte Fenster (Seite mit Unterseiten, Akzentfarbe), Haus (Startseite),
+  gestricheltes Fenster (Sonderseiten/Vorlagen). Farben aus den Tokens der Verwaltung – passen im Dunkelmodus und bei „Kontrast erhöhen“.
+
 ### Seitenvorlagen für die Redaktion, Blöcke kopieren und duplizieren
 - **Seitenvorlagen** (`Core\PageTemplates`, Werkzeuge → Seitenvorlagen, nur `system.manage`): eigene Seiten wie die Sonderseiten
   (`type = 'template'`, `template_for = '@page'`) – ohne Adresse, nicht in Seitenbaum, Menü, Suche; Redakteure können sie nicht
