@@ -1133,7 +1133,7 @@ class Finder {
         <form class="md-form" novalidate>
           <div class="f"><label for="md-t">Titel / Anzeigename</label><input id="md-t" name="title" value="${esc(m.title)}" placeholder="${esc(m.display)}" maxlength="180"></div>
           ${isImg ? `
-          <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen? z. B. „Dr. Muster im Gespräch mit einer Patientin“">${esc(m.alt)}</textarea>
+          <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen? z. B. „Zwei Personen im Gespräch an einem Infostand“">${esc(m.alt)}</textarea>
             <p class="f-help">Wird vorgelesen, wenn jemand das Bild nicht sehen kann. Kurz und konkret, ohne „Bild von …“.</p></div>
           <label class="f-check"><input type="checkbox" name="decorative" ${m.decorative ? 'checked' : ''}> <span>Dekoratives Bild (trägt keine Information)</span></label>`
           : `<div class="f"><label for="md-alt">Beschreibung</label><input id="md-alt" name="alt" value="${esc(m.alt)}" maxlength="250"></div>${decoVideo(m, 'f-check')}`}

@@ -103,9 +103,9 @@ final class Block
             // Detailseite außerhalb des Vorlagen-Editors: gebundene Felder bearbeiten den Eintrag selbst
             return app()->entryEdit ? \Core\Data\EntryEdit::blockAttr($this, $path) : '';
         }
-        // An den Datensatz gebunden → nicht direkt bearbeitbar, sondern gekennzeichnet
+        // An den Eintrag gebunden → nicht direkt bearbeitbar, sondern gekennzeichnet
         if (isset($this->data['_bind'][explode('.', $path)[0]])) {
-            return ' data-bound="' . e((string) $this->data['_bind'][explode('.', $path)[0]]) . '" title="Aus dem Datensatz"';
+            return ' data-bound="' . e((string) $this->data['_bind'][explode('.', $path)[0]]) . '" title="' . e(__('Aus dem Eintrag')) . '"';
         }
         return ' data-edit="' . e($this->editPrefix . $path) . '"' . ($mode !== 'plain' ? ' data-edit-mode="' . e($mode) . '"' : '');
     }

@@ -315,7 +315,7 @@ TXT;
             . "Grundlage sind AUSSCHLIESSLICH die nummerierten Quellen (Inhalte dieser Website), die mit jeder Frage kommen.\n"
             . "Regeln, die immer gelten:\n"
             . "- Antworte auf {$lang}, kurz (höchstens vier Sätze oder eine kurze Liste), freundlich und sachlich" . (str_starts_with((string) ($ctx['language'] ?? 'de'), 'de') ? ', mit „Sie“' : '') . ".\n"
-            . "- Du sprichst für die Website bzw. Organisation („wir“, „unsere Sprechzeiten“); die fragende Person ist Besucherin oder Besucher.\n"
+            . "- Du sprichst für die Website bzw. Organisation („wir“, „unsere Öffnungszeiten“); die fragende Person ist Besucherin oder Besucher.\n"
             . "- Verwende nur Aussagen, die in den Quellen stehen. Erfinde nichts: keine Zeiten, Preise, Namen, Telefonnummern, Adressen, Leistungen, Termine oder Links, die nicht in den Quellen stehen.\n"
             . "- Belege jede Aussage mit der Nummer ihrer Quelle in eckigen Klammern, z. B. [2]. Schreibe keine Internet-Adressen – die Quellen werden automatisch verlinkt.\n"
             . '- Beantworten die Quellen die Frage nicht, antworte nur mit ' . self::CHAT_UNKNOWN . " und sonst nichts.\n"

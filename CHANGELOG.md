@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Wording: neutrale Begriffe in Kern-Oberfläche
+- Geteilte Daten: Standardbegriff **Eigentümer-Website** statt „Haupt-Website“ (kollidierte mit „Hauptwebsite“ = Standard-Website
+  der Installation); Kits können `project → terms → shared_owner …` weiter umbenennen. „Dem {owner} vorschlagen“ (grammatisch nur für
+  männliche Begriffe passend) heißt jetzt „Zur Übernahme vorschlagen ({owner})“.
+- Branchenreste aus Kern-Texten entfernt bzw. als neutrale Beispiele: S/MIME-Hilfe („Mailprogramm der Empfänger“), Platzhalter für
+  KI-Hinweise, KI-Glossar, Synonyme, Seiten-Generator, Alt-Text, Zustell-Adresse, Tutorials „Medien“ und „Geteilte Daten“.
+- „Eintrag“ statt „Datensatz“ bei Feldbindungen im Vorlagen-Editor (jetzt übersetzt), „Kit“ statt „Kit (Theme)“; Englisch:
+  „Basic settings“ einheitlich für „Grundeinstellungen“, „network website“.
+
 ### Geteiltes Glossar: ein Glossar für mehrere Websites einer Installation
 - **Glossar → Prüfen & Einstellungen → Mit anderen Websites teilen** (`/admin/glossar/teilen`, `Core\Glossary\Sharing`) – gebaut auf den
   geteilten Datentabellen (Schlüssel `glossar`, `storage/shared/glossar/`), kein eigener Mechanismus. **Teilen** macht die Website zur

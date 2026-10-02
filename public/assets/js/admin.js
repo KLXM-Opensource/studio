@@ -378,7 +378,7 @@ Die Dateien stehen dann allen Websites zur Verf\xFCgung, die diesen Pool nutzen.
         <form class="md-form" novalidate>
           <div class="f"><label for="md-t">Titel / Anzeigename</label><input id="md-t" name="title" value="${s(m.title)}" placeholder="${s(m.display)}" maxlength="180"></div>
           ${w?`
-          <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative?"disabled":""} placeholder="Was ist zu sehen? z. B. \u201EDr. Muster im Gespr\xE4ch mit einer Patientin\u201C">${s(m.alt)}</textarea>
+          <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative?"disabled":""} placeholder="Was ist zu sehen? z. B. \u201EZwei Personen im Gespr\xE4ch an einem Infostand\u201C">${s(m.alt)}</textarea>
             <p class="f-help">Wird vorgelesen, wenn jemand das Bild nicht sehen kann. Kurz und konkret, ohne \u201EBild von \u2026\u201C.</p></div>
           <label class="f-check"><input type="checkbox" name="decorative" ${m.decorative?"checked":""}> <span>Dekoratives Bild (tr\xE4gt keine Information)</span></label>`:`<div class="f"><label for="md-alt">Beschreibung</label><input id="md-alt" name="alt" value="${s(m.alt)}" maxlength="250"></div>${E(m,"f-check")}`}
           ${this.meta?.languages&&Object.keys(this.meta.languages).length?`<fieldset class="md-trans"><legend>${s(i("\xDCbersetzungen"))}</legend>${r(m,this.meta,w)}</fieldset>`:""}
@@ -471,7 +471,7 @@ EXDATE:`+e.exdates.join(","):"")}function Rd(e,t){if(!e.freq)return i("Keine Wie
       </div>
       <details class="kia-free"${o?" open":""}><summary>${x(i("Freier Auftrag"))}</summary>
         <label class="adm-sr" for="kia-instr">${x(i("Auftrag an die KI"))}</label>
-        <textarea id="kia-instr" rows="2" maxlength="1000" placeholder="${x(i("Schreibe \u2026 z. B. \u201ESchreibe eine kurze Einleitung zu unseren Sprechzeiten\u201C oder \u201EFormuliere als Aufz\xE4hlung\u201C"))}"></textarea>
+        <textarea id="kia-instr" rows="2" maxlength="1000" placeholder="${x(i("Anweisung, z. B. \u201EKurze Einleitung zu unseren \xD6ffnungszeiten schreiben\u201C oder \u201EAls Aufz\xE4hlung formulieren\u201C"))}"></textarea>
         <button type="button" class="adm-btn adm-btn--small adm-btn--primary" data-act="free">${x(i("Schreiben"))}</button></details>
       <div class="kia-result" data-kia-result hidden></div>
       <div data-kia-status></div>

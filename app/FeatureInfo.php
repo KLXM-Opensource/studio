@@ -74,7 +74,7 @@ final class FeatureInfo
             'fonts' => ['group' => 'content', 'desc' => __('Schriften aus dem Google-Fonts-Katalog laden und selbst ausliefern.'),
                 'effects' => ['menu' => __('Grundeinstellungen → Schriften'), 'external' => __('Nur beim Installieren: Download vom Fontsource-Katalog; Besucher laden nichts von Google'),
                     'data' => __('Schriftdateien unter public/assets/fonts/installed (für alle Websites der Installation)')]],
-            'theme_switch' => ['group' => 'content', 'desc' => __('Kit (Theme) in den Grundeinstellungen wechseln.'),
+            'theme_switch' => ['group' => 'content', 'desc' => __('Kit in den Grundeinstellungen wechseln.'),
                 'effects' => ['menu' => __('Auswahl des Kits in den Grundeinstellungen'), 'frontend' => __('Ein Wechsel ändert Aussehen, Blöcke und zentrale Angaben der ganzen Website')],
                 'caution' => __('Ein Kit-Wechsel betrifft die ganze Website – nur einschalten, wenn wirklich gewechselt werden soll.')],
             'blocks.custom' => ['group' => 'content', 'desc' => __('Eigene Blöcke aus Feldern, sicherer Vorlage und begrenztem CSS bauen.'),
@@ -90,7 +90,7 @@ final class FeatureInfo
 
             // ------------------------------------------------------------------ Daten
             'data' => ['group' => 'data', 'desc' => __('Eigene Datentabellen (Aktuelles, Team, Termine …) mit Listen und Detailseiten.'),
-                'effects' => ['menu' => __('Menüpunkt „Daten“'), 'frontend' => __('Blöcke „Datenliste“ und „Datenfelder“, Detailseiten'), 'data' => __('Je Tabelle eine Datenbanktabelle data_{name}')]],
+                'effects' => ['menu' => __('Menüpunkt „Daten“'), 'frontend' => __('Blöcke „Datenliste“ und „Datensatz-Felder“, Detailseiten'), 'data' => __('Je Tabelle eine Datenbanktabelle data_{name}')]],
             'data.schema' => ['group' => 'data', 'desc' => __('Tabellen und Felder selbst anlegen und ändern (Tabellen-Designer).'),
                 'effects' => ['menu' => __('„Neue Tabelle“ sowie „Felder & Einstellungen“ je Tabelle')],
                 'caution' => __('Mit dem Tabellen-Designer lassen sich Felder löschen – nur für Personen, die die Datenstruktur verantworten.')],

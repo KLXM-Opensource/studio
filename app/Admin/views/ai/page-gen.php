@@ -21,10 +21,10 @@ $catalog = Generator::blockCatalog();
     <h2 id="kia-pg-h"><?= e(__('Auftrag')) ?></h2>
     <div class="adm-fields">
       <div class="f"><label for="kia-pg-topic"><?= e(__('Thema und Ziel der Seite')) ?> <span class="req" aria-hidden="true">*</span></label>
-        <textarea id="kia-pg-topic" rows="3" maxlength="1500" required data-kia-off placeholder="<?= e(__('z. B. Seite zur Reisemedizin: Beratung vor Fernreisen, welche Impfungen es gibt, wie man einen Termin bekommt')) ?>"></textarea>
+        <textarea id="kia-pg-topic" rows="3" maxlength="1500" required data-kia-off placeholder="<?= e(__('z. B. Seite zu unseren Workshops: was angeboten wird, für wen sie passen, wie man sich anmeldet')) ?>"></textarea>
         <p class="f-help"><?= e(__('Worum geht es, was sollen Besucher danach wissen oder tun?')) ?></p></div>
       <div class="f"><label for="kia-pg-facts"><?= e(__('Fakten & Stichpunkte (optional)')) ?></label>
-        <textarea id="kia-pg-facts" rows="4" maxlength="4000" data-kia-off placeholder="<?= e(__('z. B. Gelbfieber-Impfung vor Ort, Beratung dienstags 14–16 Uhr, Kosten übernimmt oft die Kasse')) ?>"></textarea>
+        <textarea id="kia-pg-facts" rows="4" maxlength="4000" data-kia-off placeholder="<?= e(__('z. B. Workshops samstags 10–14 Uhr, höchstens 12 Personen, Material inklusive, Anmeldung bis Donnerstag')) ?>"></textarea>
         <p class="f-help"><?= e(__('Nur was hier, im Thema oder in den einbezogenen Website-Angaben steht, darf als Fakt auf die Seite. Alles andere markiert die KI mit [bitte ergänzen: …].')) ?></p></div>
       <div class="f f--half"><label for="kia-pg-ctx"><?= e(__('Website-Angaben einbeziehen')) ?></label><select id="kia-pg-ctx">
         <option value="basic"><?= e(__('Nur Name & Kontakt')) ?></option><option value="full"><?= e(__('Alles Passende (zentrale Angaben, ähnliche Seiten)')) ?></option><option value="none"><?= e(__('Keine')) ?></option></select></div>

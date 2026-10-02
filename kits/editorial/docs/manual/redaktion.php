@@ -12,4 +12,4 @@
   <h3>Rubrikseiten</h3>
   <p>Eine Rubrik beginnt mit dem <b>Aufmacher</b> in der Variante „Ressortkopf“: Unterseiten erscheinen automatisch als Reiter. Mit „Besucher filtern nach …“ in der Datenliste entsteht eine Rubrik-Leiste, die ohne JavaScript funktioniert.</p>
   <h3>Geteilte Tabellen (Verband und Vereine)</h3>
-  <p>Nutzt Ihre Website Tabellen des <?= e(term('shared_owner')) ?>s, zeigen Datenlisten fremde Einträge mit „von …“. Welche Einträge erscheinen, bestimmt die Quelle der Tabelle bzw. das Feld „Quelle“ im Block.</p>
+  <p>Nutzt Ihre Website geteilte Tabellen einer anderen Website (<?= e(term('shared_owner')) ?>), zeigen Datenlisten fremde Einträge mit „von …“. Welche Einträge erscheinen, bestimmt die Quelle der Tabelle bzw. das Feld „Quelle“ im Block.</p>

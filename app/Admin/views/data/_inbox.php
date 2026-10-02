@@ -104,7 +104,7 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
         <?php endforeach; ?>
 
         <div class="f"><label for="t-dv-to"><?= e(__('Empfänger (E-Mail)')) ?></label>
-          <input id="t-dv-to" name="settings[inbox][delivery][to]" value="<?= e($dv['to']) ?>" placeholder="praxis@example.de" autocomplete="off" spellcheck="false">
+          <input id="t-dv-to" name="settings[inbox][delivery][to]" value="<?= e($dv['to']) ?>" placeholder="anfragen@example.de" autocomplete="off" spellcheck="false">
           <p class="f-help"><?= e(__('Eine oder mehrere Adressen, durch Komma getrennt (höchstens 10). Ohne Empfänger werden Anfragen verschlüsselt im System gesichert.')) ?></p><?= $err('settings.delivery') ?></div>
 
         <?php if ($selects): ?>
@@ -135,7 +135,7 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
             <option value="json"<?= $dv['machine'] === 'json' ? ' selected' : '' ?>>JSON (anfrage-{ref}.json)</option>
             <option value="xml"<?= $dv['machine'] === 'xml' ? ' selected' : '' ?>>XML (anfrage-{ref}.xml)</option>
           </select>
-          <p class="f-help"><?= e(__('Für den Import in ein eigenes System (z. B. Praxissoftware oder Archiv).')) ?></p></div>
+          <p class="f-help"><?= e(__('Für den Import in ein eigenes System (z. B. Fachsoftware, CRM oder Archiv).')) ?></p></div>
         <div class="f"><label for="t-dv-mb"><?= e(__('Anhänge höchstens (MB je E-Mail)')) ?></label>
           <input type="number" id="t-dv-mb" name="settings[inbox][delivery][attach_mb]" min="1" max="25" value="<?= (int) $dv['attach_mb'] ?>">
           <p class="f-help"><?= e(__('Größere Dateien: bei „System und E-Mail“ ein Hinweis statt des Anhangs (die Datei liegt verschlüsselt im System), bei „nur per E-Mail“ lehnt das Formular sie ab.')) ?></p></div>
@@ -154,7 +154,7 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
           <div class="f"><label for="t-dv-smime"><?= e($certs ? __('Neues Zertifikat (ersetzt das bisherige)') : __('Zertifikat der Empfänger (PEM)')) ?></label>
             <textarea id="t-dv-smime" name="settings[inbox][delivery][smime]" rows="4" spellcheck="false" class="adm-mono" placeholder="-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----" data-pem-target></textarea>
             <p class="f-help"><label><?= e(__('oder Datei wählen (.pem, .crt, .cer):')) ?> <input type="file" accept=".pem,.crt,.cer,.der,application/x-x509-ca-cert,application/pkix-cert" data-pem-file></label></p>
-            <p class="f-help"><?= e(__('Nur der öffentliche Teil (Zertifikat), nie den privaten Schlüssel. Mit Zertifikat wird jede E-Mail samt Anhängen mit S/MIME verschlüsselt (AES-256) – lesbar nur mit dem privaten Schlüssel im Mailprogramm der Praxis. Mehrere Zertifikate (z. B. je Empfänger) nacheinander einfügen; jede E-Mail ist dann für alle lesbar. Ist das Zertifikat abgelaufen, wird nichts im Klartext versendet.')) ?></p>
+            <p class="f-help"><?= e(__('Nur der öffentliche Teil (Zertifikat), nie den privaten Schlüssel. Mit Zertifikat wird jede E-Mail samt Anhängen mit S/MIME verschlüsselt (AES-256) – lesbar nur mit dem privaten Schlüssel im Mailprogramm der Empfänger. Mehrere Zertifikate (z. B. je Empfänger) nacheinander einfügen; jede E-Mail ist dann für alle lesbar. Ist das Zertifikat abgelaufen, wird nichts im Klartext versendet.')) ?></p>
             <?= $err('settings.delivery.smime') ?></div>
           <p class="f-help"><a href="<?= e(url('/admin/hilfe#smime')) ?>"><?= e(__('Anleitung: S/MIME einrichten')) ?></a> · <?= e(__('PGP wird nicht unterstützt (keine MIT-kompatible Umsetzung ohne externes Programm).')) ?></p>
         </fieldset>

@@ -94,7 +94,7 @@ return [
                 'Done: the images are in the library and can be chosen in any block.',
             ],
             'tips' => ['Purely decorative images: tick <b>dekorativ (ohne Aussage)</b> (decorative) instead of writing alt text.', 'Up to 50 MB per file; images are generated automatically in suitable sizes as WebP/AVIF.'],
-            'pitfalls' => ['Alt texts describe the content, not “image of …”. No names of patients or clients without consent.'],
+            'pitfalls' => ['Alt texts describe the content, not “image of …”. Only name people with their consent.'],
             'manual' => ['Images & files'],
         ],
         'r-videos' => [
@@ -406,7 +406,7 @@ return [
         ],
         'n-geteilt' => [
             'title' => 'Shared media & shared data',
-            'summary' => 'Media pools (e.g. brand images) and an association’s tables for its member clubs.',
+            'summary' => 'Media pools (e.g. brand images) and data tables shared by several websites (e.g. an association and its member clubs).',
             'goal' => 'Several websites use common images and data – maintained in one place.',
             'prerequisites' => ['A network account or administration of the main website.'],
             'steps' => [
@@ -415,8 +415,8 @@ return [
                 'Per pool: “Genutzt von” (used by) and “Pflegen dürfen” (may maintain) – everyone else only uses the files.',
                 'In the media library: right-click a file › “In … verschieben (geteilt)” (move to shared) – existing uses are kept.',
                 'Switch between “Diese Website” (this website) and the pool at the top – the file now lives there for every website of the pool.',
-                'Shared data: one website (e.g. the association) owns the table, members (clubs) see and add entries.',
-                'At the club the association’s entries appear in the same table – read-only, its own stay editable.',
+                'Shared data: one website owns the table (owner website, e.g. an association), the participating websites (e.g. its clubs) see and add entries.',
+                'On the participating websites the owner website’s entries appear in the same table – read-only, its own stay editable.',
                 'Backup commands: pool:backup and shared:backup (see technical documentation › shared data tables).',
             ],
             'tips' => ['Sharing existing files: right-click in the media library › “In … verschieben (geteilt)” (move to shared) – existing uses stay valid.'],

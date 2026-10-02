@@ -335,15 +335,15 @@ final class Fields
             $inner = self::renderField($f, $value, $errors, $prefix, $path);
             self::$binding = $b;
             $cur = (string) ($b['bound'][$f['name']] ?? '');
-            $sel = '<select name="' . $prefix . '[_bind][' . e($f['name']) . ']" aria-label="' . e(($f['label'] ?? $f['name']) . ' aus Datensatz') . '" data-bind-select>'
-                . '<option value="">– nicht verknüpft –</option>';
+            $sel = '<select name="' . $prefix . '[_bind][' . e($f['name']) . ']" aria-label="' . e(__('{label} aus dem Eintrag', ['label' => $f['label'] ?? $f['name']])) . '" data-bind-select>'
+                . '<option value="">' . e(__('– nicht verknüpft –')) . '</option>';
             foreach ($opts as $k => $l) $sel .= '<option value="' . e($k) . '"' . ($k === $cur ? ' selected' : '') . '>' . e($l) . '</option>';
             $sel .= '</select>';
             return '<div class="f-bindwrap' . (($f['width'] ?? '') === 'half' ? ' f-bindwrap--half' : '') . ($cur !== '' ? ' is-bound' : '') . '" data-bindwrap>'
-                . '<button type="button" class="f-bindbtn" data-bind-toggle title="„' . e($f['label'] ?? $f['name']) . '“ aus dem Datensatz nehmen" aria-label="„' . e($f['label'] ?? $f['name']) . '“ mit Datensatz-Feld verknüpfen" aria-pressed="' . ($cur !== '' ? 'true' : 'false') . '">' . icon('link') . '</button>'
+                . '<button type="button" class="f-bindbtn" data-bind-toggle title="' . e(__('„{label}“ aus dem Eintrag übernehmen', ['label' => $f['label'] ?? $f['name']])) . '" aria-label="' . e(__('„{label}“ mit einem Feld des Eintrags verknüpfen', ['label' => $f['label'] ?? $f['name']])) . '" aria-pressed="' . ($cur !== '' ? 'true' : 'false') . '">' . icon('link') . '</button>'
                 . $inner
-                . '<div class="f-bind"><span class="f-bind__label">' . e($f['label'] ?? $f['name']) . ' aus <b>' . e($b['table']['singular']) . '</b>:</span>' . $sel
-                . '<p class="f-help">Zeigt auf jeder Detailseite den Wert des aufgerufenen Eintrags.</p></div></div>';
+                . '<div class="f-bind"><span class="f-bind__label">' . e(__('{label} aus', ['label' => $f['label'] ?? $f['name']])) . ' <b>' . e($b['table']['singular']) . '</b>:</span>' . $sel
+                . '<p class="f-help">' . e(__('Zeigt auf jeder Detailseite den Wert des aufgerufenen Eintrags.')) . '</p></div></div>';
         }
         $type = $f['type'] ?? 'text';
         if ($type === 'heading') {

@@ -248,7 +248,7 @@ function openText({ format, value, selection, apply, ctx, lang }) {
       </div>
       <details class="kia-free"${empty ? ' open' : ''}><summary>${esc(t('Freier Auftrag'))}</summary>
         <label class="adm-sr" for="kia-instr">${esc(t('Auftrag an die KI'))}</label>
-        <textarea id="kia-instr" rows="2" maxlength="1000" placeholder="${esc(t('Schreibe … z. B. „Schreibe eine kurze Einleitung zu unseren Sprechzeiten“ oder „Formuliere als Aufzählung“'))}"></textarea>
+        <textarea id="kia-instr" rows="2" maxlength="1000" placeholder="${esc(t('Anweisung, z. B. „Kurze Einleitung zu unseren Öffnungszeiten schreiben“ oder „Als Aufzählung formulieren“'))}"></textarea>
         <button type="button" class="adm-btn adm-btn--small adm-btn--primary" data-act="free">${esc(t('Schreiben'))}</button></details>
       <div class="kia-result" data-kia-result hidden></div>
       <div data-kia-status></div>

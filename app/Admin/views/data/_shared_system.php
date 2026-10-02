@@ -67,7 +67,7 @@ endif; ?>
     <fieldset class="pl-sites"><legend><?= e(__('Grundlage')) ?></legend>
       <label class="f-check"><input type="radio" form="sh-new" name="mode" value="new" checked> <span><?= e(__('Neue Tabelle aus Vorlage')) ?></span></label>
       <div class="adm-row sh-indent">
-        <label class="pl-field"><span><?= e(__('Name')) ?></span><input form="sh-new" name="name" maxlength="80" placeholder="<?= e(__('z. B. Verbandsnews')) ?>"></label>
+        <label class="pl-field"><span><?= e(__('Name')) ?></span><input form="sh-new" name="name" maxlength="80" placeholder="<?= e(__('z. B. Gemeinsame Termine')) ?>"></label>
         <label class="pl-field"><span><?= e(__('Kurzname')) ?></span><input form="sh-new" name="handle" pattern="[a-z][a-z0-9_]{1,40}" maxlength="41" placeholder="verbandsnews"></label>
         <label class="pl-field"><span><?= e(__('Vorlage')) ?></span><select form="sh-new" name="preset"><option value=""><?= e(__('Leer (nur Titel)')) ?></option>
           <?php foreach (\Core\Http\Controllers\Admin\DataController::presets() as $pk => $p): if (($p['kind'] ?? '') === 'inbox') continue; ?><option value="<?= e($pk) ?>"><?= e($p['name']) ?></option><?php endforeach; ?></select></label>

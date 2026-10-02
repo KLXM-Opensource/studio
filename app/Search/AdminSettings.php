@@ -35,7 +35,7 @@ final class AdminSettings
             ];
             foreach (Lang::all() as $code => $label) {
                 $fields[] = ['name' => 'sys.search_syn_' . $code, 'label' => __('Synonyme ({lang})', ['lang' => $label]), 'type' => 'textarea', 'rows' => 3,
-                    'placeholder' => $code === 'de' ? "Öffnungszeiten, Sprechzeiten, geöffnet\nArzt, Ärztin, Doktor" : "opening hours, office hours, open",
+                    'placeholder' => $code === 'de' ? "Öffnungszeiten, Sprechzeiten, geöffnet\nAnfahrt, Wegbeschreibung, Parken" : "opening hours, office hours, open",
                     'help' => __('Eine Zeile je Gruppe, Begriffe mit Komma getrennt. Wer einen Begriff sucht, findet auch die anderen.')];
             }
             $fields[] = ['name' => 'sys.search_semantic', 'label' => __('Semantische Suche (KI): findet auch Inhalte mit anderen Worten'), 'type' => 'bool', 'default' => false,
@@ -60,9 +60,9 @@ final class AdminSettings
                 ['name' => 'sys.ai_daily_cap', 'label' => __('Tageslimit: KI-Aufrufe je Tag (Texte + Bilder)'), 'type' => 'number', 'width' => 'half', 'default' => \Core\AI\Assist::DEFAULT_DAILY_CAP,
                     'help' => __('0 = unbegrenzt. Die Suche zählt nicht mit; der heutige Stand steht unten unter „Nutzung“.')],
                 ['name' => 'sys.ai_notes', 'label' => __('Hinweise für die KI (Zielgruppe, Anrede, Stil)'), 'type' => 'textarea', 'rows' => 3, 'max' => 1500,
-                    'placeholder' => __('z. B. Wir sprechen Patientinnen und Patienten mit „Sie“ an, schreiben freundlich und ohne Fachjargon.')],
+                    'placeholder' => __('z. B. Wir sprechen Besucherinnen und Besucher mit „Sie“ an, schreiben freundlich und ohne Fachjargon.')],
                 ['name' => 'sys.ai_glossary', 'label' => __('Glossar: nicht übersetzen / feste Übersetzung'), 'type' => 'textarea', 'rows' => 4,
-                    'placeholder' => "MyCMS\nPraxis Dr. Muster\nSprechstunde = consultation hours",
+                    'placeholder' => "Musterfirma GmbH\nStadtfest Musterstadt\nÖffnungszeiten = opening hours",
                     'help' => __('Eine Zeile je Begriff. „Begriff“ bleibt in jeder Sprache gleich (z. B. Marken- und Eigennamen), „Begriff = Übersetzung“ wird immer so übersetzt.')],
                 ...(Features::on('chat.assistant') ? [['name' => 'sys.ai_assistant', 'label' => __('Assistent-Chat für die Redaktion (Fragen zur Bedienung, Aktionen mit Bestätigung)'), 'type' => 'bool', 'default' => true,
                     'help' => __('Überall in der Verwaltung erreichbar (Seitenleiste, Suche ⌘K, Tastenkürzel). Zählt zum Tageslimit oben; Aktionen laufen mit den Rechten der Person und – falls eingestellt – über „Eingereicht“.')]] : []),

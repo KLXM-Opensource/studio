@@ -48,7 +48,7 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
           $sugg = !empty($values['_suggest'] ?? $values['suggest'] ?? false);
           $sp = $e ? (\Core\Data\Shared::picks($t, [$e['id']], $t['shared']['owner'])[$e['id']] ?? null) : null; ?>
         <input type="hidden" name="suggest" value="0">
-        <label class="f-check"><input type="checkbox" name="suggest" value="1"<?= $sugg ? ' checked' : '' ?>> <span><?= e(__('Dem {owner} vorschlagen', ['owner' => term('shared_owner')])) ?></span></label>
+        <label class="f-check"><input type="checkbox" name="suggest" value="1"<?= $sugg ? ' checked' : '' ?>> <span><?= e(__('Zur Übernahme vorschlagen ({owner})', ['owner' => term('shared_owner')])) ?></span></label>
         <p class="f-help"><?= e(match ($sp) {
             'visible' => __('Übernommen – erscheint auf der Website von „{site}“.', ['site' => \Core\Data\Shared::siteInfo($t['shared']['owner'], $t['shared']['key'])['name']]),
             'featured' => __('Übernommen und hervorgehoben.'),

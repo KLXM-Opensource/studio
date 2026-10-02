@@ -128,7 +128,7 @@ return [
                 'Fertig: Die Bilder stehen in der Mediathek und lassen sich in jedem Block auswählen.',
             ],
             'tips' => ['Rein dekorative Bilder: <b>dekorativ (ohne Aussage)</b> ankreuzen statt Alt-Text.', 'Bis 50 MB je Datei; Bilder werden automatisch in passenden Größen als WebP/AVIF erzeugt.'],
-            'pitfalls' => ['Alt-Texte beschreiben den Inhalt, nicht „Bild von …“. Keine Namen von Patientinnen/Kundinnen ohne Einwilligung.'],
+            'pitfalls' => ['Alt-Texte beschreiben den Inhalt, nicht „Bild von …“. Personen nur mit ihrer Einwilligung namentlich nennen.'],
             'manual' => [['Bilder & Dateien', '/admin/hilfe#medien']],
         ],
 
@@ -154,7 +154,7 @@ return [
 
         'r-termin-anlegen' => [
             'track' => 'redaktion', 'title' => 'Termin mit Wiederholung anlegen', 'icon' => 'calendar-plus', 'level' => 'Grundlagen', 'feature' => 'calendar',
-            'summary' => 'Datensatz anlegen (Serie wöchentlich) und direkt auf der Detailseite ändern.',
+            'summary' => 'Eintrag anlegen (Serie wöchentlich) und direkt auf der Detailseite ändern.',
             'goal' => 'Sie legen einen wiederkehrenden Termin an und korrigieren ihn später direkt auf seiner Seite der Website.',
             'prerequisites' => ['Eine Tabelle „Termine“ (oder eine andere Tabelle mit Kalender).', 'Recht „Einträge anlegen und bearbeiten“.'],
             'steps' => [
@@ -466,7 +466,7 @@ return [
 
         'n-geteilt' => [
             'track' => 'agentur', 'title' => 'Geteilte Medien & geteilte Daten', 'icon' => 'share-network', 'level' => 'Fortgeschritten',
-            'summary' => 'Medien-Pools (z. B. Markenbilder) und Tabellen eines Verbands für seine Vereine.',
+            'summary' => 'Medien-Pools (z. B. Markenbilder) und Datentabellen, die mehrere Websites gemeinsam nutzen (z. B. ein Verband und seine Vereine).',
             'goal' => 'Mehrere Websites nutzen gemeinsame Bilder und Daten – gepflegt an einer Stelle.',
             'prerequisites' => ['Netzwerk-Konto oder Administration der Hauptwebsite.'],
             'steps' => [
@@ -475,8 +475,8 @@ return [
                 'Je Pool: <b>Genutzt von</b> (welche Websites) und <b>Pflegen dürfen</b> – alle anderen verwenden die Dateien nur.',
                 'In der Mediathek der Website: Datei mit rechter Maustaste › <b>In … verschieben (geteilt)</b> – bisherige Verwendungen bleiben erhalten.',
                 'Oben zwischen <b>Diese Website</b> und dem Pool umschalten – dort liegt die Datei jetzt für alle Websites des Pools.',
-                'Geteilte Daten: Eine Website (z. B. der Verband) besitzt die Tabelle, Mitglieder (Vereine) sehen und ergänzen Einträge – <b>Grundeinstellungen › Geteilte Daten</b>.',
-                'Beim Verein erscheinen die Einträge des Verbands in derselben Tabelle – nur lesbar, eigene bleiben bearbeitbar. Überblick: <b>Netzwerk › Geteilte Ressourcen</b>.',
+                'Geteilte Daten: Eine Website besitzt die Tabelle (Eigentümer-Website, z. B. ein Verband), die beteiligten Websites (z. B. seine Vereine) sehen und ergänzen Einträge – <b>Grundeinstellungen › Geteilte Daten</b>.',
+                'Auf den beteiligten Websites erscheinen die Einträge der Eigentümer-Website in derselben Tabelle – nur lesbar, eigene bleiben bearbeitbar. Überblick: <b>Netzwerk › Geteilte Ressourcen</b>.',
                 'Befehle für Sicherungen: <code>pool:backup</code> und <code>shared:backup</code>.',
             ],
             'commands' => "php bin/console pool:create marke \"Markenbilder\"\nphp bin/console data:share verbandsnews --members=verein-a,verein-b --site=verband\nphp bin/console pool:backup --all\nphp bin/console shared:backup --all",

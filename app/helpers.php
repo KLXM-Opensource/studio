@@ -516,10 +516,11 @@ function term(string $key): string
         'requests_data' => 'personenbezogene Daten',     // was die Anfragen enthalten
         'records_system' => 'Ihr Fachsystem',            // wohin Anfragen übernommen werden
         'site_name' => 'Name der Website',
-        // Geteilte Datentabellen – neutral; ein Kit für Verbände setzt z. B. project → terms → shared_owner = 'Verband', shared_members = 'Vereine'
-        'shared_owner' => 'Haupt-Website',               // Eigentümer-Website geteilter Datentabellen
+        // Geteilte Datentabellen – neutral; ein Kit für Verbände setzt z. B. project → terms → shared_owner = 'Verband', shared_members = 'Vereine'.
+        // Nicht „Hauptwebsite“: so heißt in der Verwaltung die Standard-Website der Installation, Eigentümerin kann jede Website sein.
+        'shared_owner' => 'Eigentümer-Website',          // Eigentümer-Website geteilter Datentabellen
         'shared_members' => 'Partner-Websites',          // übrige beteiligte Websites
-        'shared_from_owner' => 'Von der Haupt-Website',  // Daten-Navigation: Einträge der Eigentümer-Website
+        'shared_from_owner' => 'Von der Eigentümer-Website', // Daten-Navigation: Einträge der Eigentümer-Website
         'shared_from_members' => 'Von Partner-Websites', // Daten-Navigation: Einträge der übrigen Websites
     ];
     return __((string) project('terms.' . $key, $neutral[$key] ?? $key));
