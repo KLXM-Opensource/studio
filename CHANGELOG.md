@@ -16,7 +16,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **`Core\Live`:** Kanäle mit Versionen (Datentabellen, geteilte Tabellen, Sammlungen, Seiten, eigene `ext:…`), signierte Abos,
   ein SSE-Endpunkt `/api/live` für alle Elemente einer Seite, Nachladen einzelner Blöcke (`/api/live/block`), Begrenzung
   gleichzeitiger Streams (`live_max_streams`) mit Rückfall auf seltenes Nachfragen. `live.js`/`live.css` nur auf Seiten mit Live-Inhalt.
-- **Live-Galerie:** Bilder einer Sammlung erscheinen ohne Neuladen (neueste zuerst), Lightbox, Anhalten für Besucher.
+- **Live-Galerie:** Bilder einer Sammlung erscheinen ohne Neuladen (neueste zuerst), Lightbox, Anhalten für Besucher; alternativ
+  einzeln ausgewählte Bilder – neue erscheinen bei Besuchern, sobald die Seite veröffentlicht wird (Kanal `page:{id}`).
 - **Live-Text (Ticker):** veröffentlichte Einträge einer Datentabelle als Ticker oder „nur die aktuelle Meldung“, mit Uhrzeit.
 - **Fehler behoben:** Galerien aus einer Sammlung zeigten geteilte Bilder (Medien-Pool) nicht an.
 - `php bin/console live:selftest`; Entwicklerhandbuch „Live-Aktualisierung für Besucher (SSE)“, Handbuch „Live-Galerie & Live-Ticker“.

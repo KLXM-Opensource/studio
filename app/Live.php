@@ -69,10 +69,10 @@ final class Live
         return $v;
     }
 
-    /** Typisierte Ereignisse (Extensions::emit) → Kanäle */
+    /** Typisierte Ereignisse (Extensions::emit) → Kanäle; Veröffentlichen/Zurückziehen ruft Pages zusätzlich direkt auf */
     public static function fromEvent(Events\Event $e): void
     {
-        if ($e instanceof Events\PageEvent && !$e instanceof Events\PageSaved) self::touch('page:' . $e->id);
+        if ($e instanceof Events\PageDeleted) self::touch('page:' . $e->id);
     }
 
     // ------------------------------------------------------------------ Abos (signiert)

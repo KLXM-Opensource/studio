@@ -426,6 +426,7 @@ final class Pages
             'status' => 'published', 'published_at' => now(), 'updated_at' => now(),
         ], 'id = :id', ['id' => $id]);
         PageCache::clear();
+        Live::touch('page:' . $id);   // Live-Blöcke dieser Seite (Core\Live)
         if (Extensions::listens('page.published') && ($p = self::find($id))) Extensions::emit(new Events\PagePublished($p, $userId));
     }
 
@@ -443,6 +444,7 @@ final class Pages
         if ($p['status'] === 'published') {
             self::db()->update('pages', ['status' => 'draft', 'updated_at' => now()], 'id = :id', ['id' => $id]);
             PageCache::clear();   // Seiten-Cache + Suchindex (Core\Search::changed)
+            Live::touch('page:' . $id);   // Live-Blöcke dieser Seite (Core\Live)
             if (Extensions::listens('page.unpublished') && ($q = self::find($id))) Extensions::emit(new Events\PageUnpublished($q));
         }
         return true;
