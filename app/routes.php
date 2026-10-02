@@ -125,6 +125,10 @@ return function (Router $r): void {
     $r->post('/admin/pages/{id}/move', [Admin\PageController::class, 'move']);
     $r->post('/admin/pages/{id}/quick', [Admin\PageController::class, 'quick']);
     $r->post('/admin/pages/{id}/duplicate', [Admin\PageController::class, 'duplicate']);
+    // Seitenvorlagen für die Redaktion (Core\PageTemplates)
+    $r->get('/admin/seitenvorlagen', [Admin\PageTemplateController::class, 'index']);
+    $r->post('/admin/seitenvorlagen', [Admin\PageTemplateController::class, 'save']);
+    $r->post('/admin/pages/{id}/template', [Admin\PageTemplateController::class, 'toggle']);
     $r->post('/admin/pages/{id}/translate', [Admin\PageController::class, 'translate']);
     // Entwürfe: offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen, Notiz/Zuständigkeit (Core\Review\Drafts)
     $dr = Admin\DraftController::class;

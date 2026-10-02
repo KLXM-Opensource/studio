@@ -41,6 +41,7 @@ $core = [
     'smime' => 'S/MIME einrichten: verschlüsselte Anfragen per E-Mail',
     'bloecke' => 'Alle Blöcke',
     'baukasten' => 'Eigene Blöcke bauen (Administration)',
+    'vorlagen' => 'Seitenvorlagen & Blöcke kopieren',
     'live' => 'Live-Galerie & Live-Ticker',
     'funktionen' => 'Funktionen & Erweiterungen (Haupt-Admin)',
     'aufgaben' => 'Häufige Aufgaben',

@@ -95,6 +95,19 @@ initFonts();
 initFeatures();
 initDelivery();
 
+// ------------------------------------------------------------ Neue Seite: Vorlage passend zur übergeordneten Seite vorwählen (Core\PageTemplates)
+$$('[data-tpl-map]').forEach(box => {
+  const map = JSON.parse(box.dataset.tplMap || '{}'), parent = $('#parent_id', box.form);
+  let touched = false;
+  box.addEventListener('change', () => { touched = true; });
+  parent?.addEventListener('change', () => {
+    if (touched) return;
+    const v = map[parent.value];
+    const r = $(`input[name="template"][value="${v ?? ''}"]`, box);
+    if (r) r.checked = true;
+  });
+});
+
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
   const tabs = $$('[role=tab]', form), hidden = form.elements._tab;
@@ -722,6 +735,11 @@ if (pt) {
           if (res.ok) location.href = res.url; else alert(res.error);
         }]),
       ...(home ? [] : [['Duplizieren', async () => { await post(`${base}/${id}/duplicate`); location.reload(); }]]),
+      // Seitenvorlagen (Core\PageTemplates): nur für die Administration
+      ...(pt.dataset.canTemplates === '1' && !home ? [[n.dataset.template === '1' ? t('Nicht mehr als Vorlage anbieten') : t('Als Vorlage anbieten'), async () => {
+        const res = await post(`${base}/${id}/template`);
+        if (res.ok) location.reload(); else statusFlash(pt, 'error', res.error || t('Das hat nicht geklappt.'));
+      }]] : []),
       ...(n.dataset.dirty === '1' && n.dataset.state === 'online' ? [['Änderungen veröffentlichen', async () => {
         const res = await post(`${base}/${id}/publish`);
         if (!res.ok) { statusFlash(pt, 'error', res.error || t('Status konnte nicht geändert werden.')); return; }

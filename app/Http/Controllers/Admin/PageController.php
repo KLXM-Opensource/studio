@@ -37,7 +37,8 @@ final class PageController extends AdminController
         $this->auth($r, 'pages.manage');
         $parent = ctype_digit($r->str('parent')) ? (int) $r->str('parent') : null;
         $lang = \Core\Lang::valid($r->str('lang')) ? $r->str('lang') : \Core\Lang::default();
-        return $this->view('pages/form', ['page' => null, 'errors' => [], 'old' => ['status' => 'draft', 'parent_id' => $parent, 'menu' => 0, 'lang' => $lang], 'revisions' => []]);
+        $tpl = \Core\PageTemplates::suggested($parent);
+        return $this->view('pages/form', ['page' => null, 'errors' => [], 'old' => ['status' => 'draft', 'parent_id' => $parent, 'menu' => 0, 'lang' => $lang, 'template' => $tpl === null ? '' : (string) $tpl], 'revisions' => []]);
     }
 
     public function store(Request $r): Response
@@ -45,15 +46,15 @@ final class PageController extends AdminController
         $this->auth($r, 'pages.manage');
         [$data, $errors] = $this->validate($r, null);
         if ($errors) {
-            return $this->view('pages/form', ['page' => null, 'errors' => $errors, 'old' => $data, 'revisions' => []], 422);
+            return $this->view('pages/form', ['page' => null, 'errors' => $errors, 'old' => $data + ['template' => (string) ($r->post['template'] ?? '')], 'revisions' => []], 422);
         }
-        $blocks = Pages::sanitizeBlocks([[
-            'type' => 'richtext', 'data' => ['title_strong' => $data['title'], 'text' => '<p>Neuer Inhalt.</p>'], 'tunes' => ['section' => []],
-        ]]);
+        // Vorlage (Core\PageTemplates) oder leere Seite – der Editor zeigt dann den Platzhalter „Leere Seite“
+        $tpl = (string) ($r->post['template'] ?? '');
+        $blocks = $tpl !== '' && ctype_digit($tpl) ? Pages::sanitizeBlocks(\Core\PageTemplates::blocks((int) $tpl)) : [];
         $sort = (int) app()->db->fetchValue('SELECT COALESCE(MAX(sort), 0) + 10 FROM pages WHERE ' . ($data['parent_id'] ? 'parent_id = ?' : 'parent_id IS NULL'), $data['parent_id'] ? [$data['parent_id']] : []);
         $id = Pages::create($data + ['sort' => $sort], $blocks);
         $this->changed();
-        app()->session->flash('success', 'Seite angelegt. Jetzt Inhalte im Bearbeitungsmodus hinzufügen.');
+        app()->session->flash('success', $blocks ? __('Seite aus der Vorlage angelegt. Jetzt Inhalte anpassen.') : 'Seite angelegt. Jetzt Inhalte im Bearbeitungsmodus hinzufügen.');
         return Response::redirect(Pages::url(Pages::find($id)) . '?edit=1');
     }
 

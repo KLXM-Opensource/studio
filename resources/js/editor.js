@@ -416,6 +416,31 @@ const BarPlace = (() => {
   return { soon, place };
 })();
 
+// ------------------------------------------------------------------ Blöcke kopieren / duplizieren
+/*
+ * „Kopieren“ legt Typ, Inhalt und Abschnitts-Einstellungen in localStorage ab (gilt für alle Seiten dieser Website, auch nach dem
+ * Neuladen); „+ Block einfügen“ bietet ihn dann oben an. „Duplizieren“ setzt eine Kopie direkt darunter. Neue IDs – auch für
+ * Blöcke in Spalten des Blocks „Layout“ –, die Abschnitts-Einstellungen gehen über initialTunes an den neuen Block.
+ */
+const CLIP_KEY = 'cms-block-clip';
+const newBlockId = () => Math.random().toString(36).slice(2, 12).padEnd(10, '0');
+const freshIds = data => {
+  const c = structuredClone(data || {});
+  (Array.isArray(c.columns) ? c.columns : []).forEach(col => (Array.isArray(col?.blocks) ? col.blocks : []).forEach(b => { b.id = newBlockId(); if (b.data) b.data = freshIds(b.data); }));
+  return c;
+};
+const clipboard = () => { const c = store.get(CLIP_KEY, null); return c && cfg.blocks[c.type] ? c : null; };
+function insertCopy(src, index) {
+  if (!src || !cfg.blocks[src.type]) return false;
+  const id = newBlockId();
+  initialTunes[id] = structuredClone(src.tunes || {});
+  editor.blocks.insert(src.type, freshIds(src.data), undefined, index, false, false, id);
+  markDirty();
+  requestAnimationFrame(refreshMoveButtons);
+  return true;
+}
+const editorStatus = msg => { const st = S.ui('[data-editor-status]'); if (st) st.textContent = msg; };
+
 // ------------------------------------------------------------------ „+ Block einfügen“ unter einem Block: Auswahl der Blocktypen
 /**
  * Gleiche Blocktypen wie das „+“ von Editor.js (einfügbare Typen des Kits, gleiche Reihenfolge), eingefügt über
@@ -434,6 +459,16 @@ const BlockPicker = (() => {
   const q = $('.cms-addpop__q', el), list = $('.cms-addpop__list', el), none = $('.cms-addpop__none', el);
   const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false);
   list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
+  // Kopierter Block (oben, nur außerhalb von Spalten)
+  const pasteBtn = d.createElement('button');
+  pasteBtn.type = 'button'; pasteBtn.className = 'cms-addpop__item cms-addpop__item--paste'; pasteBtn.setAttribute('role', 'option');
+  pasteBtn.tabIndex = -1; pasteBtn.dataset.type = '__paste'; pasteBtn.hidden = true;
+  list.prepend(pasteBtn);
+  const syncPaste = () => {
+    const c = column == null ? clipboard() : null;
+    pasteBtn.dataset.off = c ? '' : '1';
+    if (c) pasteBtn.innerHTML = `<span class="cms-addpop__ico" aria-hidden="true">${blockIcon(cfg.blocks[c.type])}</span><span>${CMSAdmin.esc(T('Kopierten Block einfügen: {label}', { label: cfg.blocks[c.type].label }))}</span>`;
+  };
   const items = () => $$('.cms-addpop__item:not([hidden])', list);
   let tool = null, opener = null, only = null, column = null;   // only/column: „+ Block in diese Spalte“ (Layout)
   const place = () => {
@@ -446,7 +481,7 @@ const BlockPicker = (() => {
   const mark = btn => items().forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
   const filter = () => {
     const v = q.value.trim().toLowerCase();
-    $$('.cms-addpop__item', list).forEach(b => { b.hidden = (only && !only.has(b.dataset.type)) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v)); });
+    $$('.cms-addpop__item', list).forEach(b => { b.hidden = b.dataset.off === '1' || (b === pasteBtn ? !!v : (only && !only.has(b.dataset.type)) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v))); });
     none.hidden = items().length > 0;
     mark(items()[0]);
     place();
@@ -464,6 +499,13 @@ const BlockPicker = (() => {
     const idx = blockEls().indexOf(t?.el.closest('.ce-block'));
     if (!type || idx < 0) return;
     const wasBlank = blankState();
+    if (type === '__paste') {
+      const c = clipboard();
+      if (!c || !insertCopy(c, idx + 1)) return;
+      if (wasBlank) editor.blocks.delete(idx);
+      editorStatus(T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[c.type].label }));
+      return;
+    }
     editor.blocks.insert(type, {}, undefined, idx + 1, false);
     if (wasBlank) editor.blocks.delete(idx);   // Platzhalter „Leere Seite“ ersetzen
     markDirty();
@@ -496,7 +538,7 @@ const BlockPicker = (() => {
       column = opts.column ?? null;
       only = column != null ? new Set(types.filter(([, def]) => def.nestable).map(([type]) => type)) : null;
       el.setAttribute('aria-label', column != null ? T('Block in diese Spalte einfügen') : T('Block einfügen'));
-      q.value = ''; filter();
+      q.value = ''; syncPaste(); filter();
       el.hidden = false; place();
       q.focus({ preventScroll: true });
     },
@@ -542,6 +584,20 @@ function makeTool(type, def) {
 
     get tuneData() { return tunes.get(this.blockId)?.data || { ...TUNE_DEFAULTS, background: def.background || 'white' }; }
 
+    /** Kopie direkt unter diesem Block */
+    duplicate() {
+      const idx = blockEls().indexOf(this.el?.closest('.ce-block'));
+      if (idx < 0) return;
+      insertCopy({ type, data: this.data, tunes: this.tuneData }, idx + 1);
+      editorStatus(CMSAdmin.t('Block „{label}“ dupliziert – noch nicht gespeichert.', { label: def.label }));
+    }
+
+    /** In die Block-Zwischenablage (localStorage) – einfügen über „+ Block einfügen“, auch auf anderen Seiten */
+    copy() {
+      store.set(CLIP_KEY, { type, data: structuredClone(this.data), tunes: structuredClone(this.tuneData), at: Date.now() });
+      editorStatus(CMSAdmin.t('Block „{label}“ kopiert – über „+ Block einfügen“ auf dieser oder einer anderen Seite einsetzen.', { label: def.label }));
+    }
+
     render() {
       const el = d.createElement('div');
       el.className = 'cms-block';
@@ -557,6 +613,8 @@ function makeTool(type, def) {
           <span class="cms-block__tools">
             <button type="button" class="cms-iconbtn" data-move="up" aria-label="Block nach oben" title="Nach oben (Alt+↑)">↑</button>
             <button type="button" class="cms-iconbtn" data-move="down" aria-label="Block nach unten" title="Nach unten (Alt+↓)">↓</button>
+            <button type="button" class="cms-iconbtn" data-dup aria-label="${CMSAdmin.esc(CMSAdmin.t('Block duplizieren'))}" title="${CMSAdmin.esc(CMSAdmin.t('Duplizieren (Kopie darunter)'))}">⧉</button>
+            <button type="button" class="cms-iconbtn" data-copy aria-label="${CMSAdmin.esc(CMSAdmin.t('Block kopieren'))}" title="${CMSAdmin.esc(CMSAdmin.t('Kopieren – auf jeder Seite über „+ Block einfügen“ einsetzen'))}">⎘</button>
             <button type="button" class="cms-iconbtn" data-collapse aria-expanded="true" aria-label="Block einklappen" title="Einklappen / Ausklappen">▾</button>
           </span>
           <span class="cms-block__hint" hidden></span>
@@ -578,6 +636,8 @@ function makeTool(type, def) {
       sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
       sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
       sr.querySelector('[data-collapse]').addEventListener('click', e => { e.stopPropagation(); this.toggleCollapse(); });
+      sr.querySelector('[data-dup]').addEventListener('click', e => { e.stopPropagation(); this.duplicate(); });
+      sr.querySelector('[data-copy]').addEventListener('click', e => { e.stopPropagation(); this.copy(); });
       // Eingeklappte Zeile: Klick auf den Titel klappt auf
       sr.querySelector('.cms-block__summary').addEventListener('click', () => this.toggleCollapse(false));
       // Editor.js soll Tasten in der Leiste (Enter/Leertaste auf Knöpfen) nicht als Texteingabe behandeln

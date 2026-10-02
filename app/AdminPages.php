@@ -175,6 +175,7 @@ final class AdminPages
             ['key' => 'werkzeuge', 'label' => __('Werkzeuge'), 'icon' => 'tools', 'items' => [
                 // Block-Designer (Core\Blocks\Custom), Landingpages (Core\Landings), Weiterleitungen und 404-Protokoll (Core\Redirects)
                 ['/admin/blocks', __('Blöcke'), 'blocks', Features::on('blocks.custom') && can('blocks.build')],
+                ['/admin/seitenvorlagen', __('Seitenvorlagen'), 'pagetemplates', can('system.manage')],
                 ['/admin/landingpages', __('Landingpages'), 'landings', Features::on('landings') && can('system.manage')],
                 ['/admin/weiterleitungen', __('Weiterleitungen'), 'redirects', Features::on('redirects') && can('redirects.manage')],
                 // Sammelseite Statistiken (kind stats)

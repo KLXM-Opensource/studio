@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenvorlagen für die Redaktion, Blöcke kopieren und duplizieren
+- **Seitenvorlagen** (`Core\PageTemplates`, Werkzeuge → Seitenvorlagen, Recht `system.manage`): Name, Beschreibung, Quellseite,
+  „Vorschlagen unter“ (Seitenauswahl), Reihenfolge per ↑/↓; im Seitenbaum „⋯ → Als Vorlage anbieten“ und Kennzeichen „Vorlage“.
+  „Neue Seite“ bietet „Leere Seite“ oder die Vorlagen an, passend zur übergeordneten Seite vorgewählt; Blöcke der Quellseite mit
+  neuen IDs (auch in Spalten).
+- **Neue Seiten starten leer** statt mit einem erzwungenen Textblock „Neuer Inhalt.“ (Editor zeigt den Platzhalter „Leere Seite“).
+- **Blöcke duplizieren** (⧉, Kopie darunter) und **kopieren** (⎘, Block-Zwischenablage für alle Seiten der Website; „+ Block einfügen“
+  bietet „Kopierten Block einfügen“ an) – mit Abschnitts-Einstellungen, neue IDs auch für verschachtelte Blöcke.
+
 ### Seiten-Editor: leere Seite ohne festen Textblock
 - Editor.js braucht immer einen Block und legte bei neuen Seiten (und nach dem Löschen des letzten Blocks) einen leeren
   „Text“-Block an, der sich nicht entfernen ließ. Jetzt erscheint er als Platzhalter „Leere Seite“; „+ Block einfügen“ ersetzt

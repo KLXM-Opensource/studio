@@ -33,9 +33,10 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
     $id = (int) $p['id'];
     $trans = $multi ? array_keys(Pages::translations($p)) : [];
     $ext = \Core\Extensions::pageList($p);   // Erweiterungen (Extension::pageList): Hinweise + Kontextmenü
+    $isTpl = \Core\PageTemplates::isSource($id);   // Quelle einer Seitenvorlage (Werkzeuge → Seitenvorlagen)
     $h = '<li class="pt-node" role="treeitem" id="pt-' . $id . '" data-id="' . $id . '" data-parent="' . (int) ($p['parent_id'] ?? 0) . '"'
         . ' data-url="' . e($url) . '" data-title="' . e($p['title']) . '" data-home="' . (int) $p['is_home'] . '" data-dirty="' . (int) $dirty . '"'
-        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-state="' . Pages::state($p) . '" data-langs="' . e(implode(',', $trans)) . '" aria-level="' . ($n['depth'] + 1) . '"'
+        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-state="' . Pages::state($p) . '" data-langs="' . e(implode(',', $trans)) . '" data-template="' . (int) $isTpl . '" aria-level="' . ($n['depth'] + 1) . '"'
         . ($ext['actions'] ? ' data-ext-actions="' . json_attr(array_map(fn($a) => [$a['label'], url($a['href'])], $ext['actions'])) . '"' : '')
         . ($kids ? ' aria-expanded="true"' : '') . ' aria-selected="false">'
         . '<div class="pt-row" draggable="' . ($p['is_home'] ? 'false' : 'true') . '">'
@@ -49,6 +50,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . '<span class="pt-status">' . $statusCell($p)
         // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
         . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
+        . ($isTpl ? ' <span class="pt-ext pt-ext--info" title="' . e(__('Quelle einer Seitenvorlage – neue Seiten übernehmen ihre Blöcke')) . '">' . e(__('Vorlage')) . '</span>' : '')
         . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'
@@ -70,7 +72,7 @@ $html = implode('', array_map($row, $tree));
   </div>
 </header>
 
-<div class="pt" data-pagetree data-base="<?= e(url('/admin/pages')) ?>" data-can-publish="<?= $canPub ? '1' : '0' ?>" data-languages="<?= e(json_encode($multi ? Lang::all() : [], JSON_UNESCAPED_UNICODE)) ?>" data-lang="<?= e($lang) ?>">
+<div class="pt" data-pagetree data-base="<?= e(url('/admin/pages')) ?>" data-can-publish="<?= $canPub ? '1' : '0' ?>" data-can-templates="<?= can('system.manage') ? '1' : '0' ?>" data-languages="<?= e(json_encode($multi ? Lang::all() : [], JSON_UNESCAPED_UNICODE)) ?>" data-lang="<?= e($lang) ?>">
   <div class="dt-bar pt-bar">
     <?php if ($multi): ?><nav class="fx-seg dt-seg" aria-label="Sprache"><?php foreach (Lang::all() as $code => $label): ?><a href="<?= e(url('/admin/pages?lang=' . $code)) ?>"<?= $code === $lang ? ' aria-current="true"' : '' ?>><?= e($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
     <label class="fx-search dt-search"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3 9l3.3 3.3 1-1L11 10A5 5 0 0 0 7 2zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></svg><input type="search" placeholder="Seiten filtern" aria-label="Seiten filtern" data-filter></label>

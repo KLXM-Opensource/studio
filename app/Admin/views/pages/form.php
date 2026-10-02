@@ -37,6 +37,20 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
         <option value="<?= (int) $fp['id'] ?>"<?= (int) ($old['parent_id'] ?? 0) === (int) $fp['id'] ? ' selected' : '' ?>><?= str_repeat('  ', (int) $fp['depth']) . ((int) $fp['depth'] ? '└ ' : '') . e($fp['title']) ?></option>
         <?php endforeach; ?>
       </select><p class="f-help">Unterseiten erhalten die Adresse der übergeordneten Seite als Präfix, z. B. /leistungen/vorsorge.</p></div>
+    <?php if ($isNew && ($__tpls = \Core\PageTemplates::all())):
+      // Vorschlag je übergeordneter Seite (für den Wechsel im Formular, admin.js [data-tpl-map])
+      $__map = [];
+      foreach (\Core\Pages::flat() as $fp) { $sg = \Core\PageTemplates::suggested((int) $fp['id']); if ($sg !== null) $__map[(int) $fp['id']] = $sg; }
+      $__cur = (string) ($old['template'] ?? ''); ?>
+    <fieldset class="f tpl-pick" data-tpl-map="<?= e(json_encode($__map)) ?>">
+      <legend><?= e(__('Vorlage')) ?></legend>
+      <label class="tpl-pick__opt"><input type="radio" name="template" value=""<?= $__cur === '' ? ' checked' : '' ?>> <span><b><?= e(__('Leere Seite')) ?></b><small><?= e(__('Ohne Blöcke beginnen.')) ?></small></span></label>
+      <?php foreach ($__tpls as $__t): ?>
+      <label class="tpl-pick__opt"><input type="radio" name="template" value="<?= (int) $__t['i'] ?>"<?= $__cur === (string) $__t['i'] ? ' checked' : '' ?>> <span><b><?= e($__t['label']) ?></b><?php if ($__t['description'] !== ''): ?><small><?= e($__t['description']) ?></small><?php endif; ?></span></label>
+      <?php endforeach; ?>
+      <p class="f-help"><?= e(__('Die Blöcke der Vorlage werden übernommen und lassen sich danach frei ändern.')) ?></p>
+    </fieldset>
+    <?php endif; ?>
     <div class="f<?= isset($errors['slug']) ? ' f--error' : '' ?>"><label for="slug">Adresse (URL)</label>
       <div class="adm-prefix"><span><?= e(site_url()) ?>/<?= e($parentPath) ?></span><input id="slug" name="slug" value="<?= e($old['slug'] ?? '') ?>" placeholder="wird aus dem Titel erzeugt"<?= $inv('slug') ?>></div><?= $err('slug') ?>
       <?php if (!isset($errors['slug']) && !empty($page) && \Core\Http\Controllers\Admin\PageController::reservedSlug((string) $page['slug'], $page['parent_id'] ? (int) $page['parent_id'] : null, $page['lang'] ?: null)): ?>

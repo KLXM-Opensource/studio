@@ -2498,3 +2498,12 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 @media (forced-colors:active){.pt-ext{border:1px solid CanvasText}}
 /* Seiten: Adresse liegt auf einem Systemordner (PageController::reservedSlug) */
 .f-warn{margin:.4em 0 0;color:var(--adm-warn);font-weight:600}
+
+/* Neue Seite: Vorlagenwahl (Core\PageTemplates) */
+.tpl-pick{border:0;padding:0;margin:0;display:grid;gap:8px}
+.tpl-pick legend{font-weight:600;margin-bottom:6px;padding:0}
+.tpl-pick__opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--adm-line);border-radius:10px;cursor:pointer;background:var(--adm-surface)}
+.tpl-pick__opt:has(input:checked){border-color:var(--adm-a);background:var(--adm-accent-bg);box-shadow:inset 0 0 0 1px var(--adm-a)}
+.tpl-pick__opt input{margin-top:3px}
+.tpl-pick__opt span{display:grid;gap:2px}
+.tpl-pick__opt small{color:var(--adm-t2)}
