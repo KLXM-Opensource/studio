@@ -16,7 +16,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Ein Klick unter den letzten Block legt keinen leeren Textblock mehr an (Editor.js-Bottom-Zone abgefangen, freie Fläche 80 px).
 - Seitenleiste: Inhalte oben; neuer Abschnitt „Einrichtung“ mit „Website“ (Website-Angaben, Design, Seitenvorlagen, Blöcke,
   Landingpages, Weiterleitungen), „System“ (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen,
-  Benutzer & Rollen) und „Werkzeuge“ (Statistiken, Werkzeuge der Erweiterungen).
+  Benutzer & Rollen, Werkzeuge der Erweiterungen wie Video-Werkzeuge) und „Statistiken“.
 
 ### Verwaltung: Usability-Durchgang Desktop, Tablet, Mobil
 - Seitenbaum: Spalten überlappten unter 900 px (Regel ohne Media-Query) – behoben, feste Status-Spalte, mobil nur Statuspunkt,

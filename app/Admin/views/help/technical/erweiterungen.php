@@ -29,7 +29,7 @@
     <tr><th>Art (<code>kind</code>)</th><th>Wofür</th><th>Wo sie erscheint</th></tr>
     <tr><td><code>content</code></td><td>arbeitet mit Inhalten (Einträge, Buchungen, Termine …)</td><td>Hauptmenü (<code>place =&gt; 'main'</code>) bzw. Administration (<code>'admin'</code>)</td></tr>
     <tr><td><code>tool</code></td><td>Werkzeug, Arbeitsablauf (prüfen, importieren, Video bearbeiten …)</td><td>wie <code>content</code>, meist <code>place =&gt; 'admin'</code></td></tr>
-    <tr><td><code>settings</code></td><td>reine Konfiguration</td><td><b>nicht im Menü</b>: Sammelseite <b>Administration → Einstellungen → Einstellungen der Funktionen</b> (<code>/admin/einstellungen</code>, eine Karte je Seite, gruppiert nach Funktion/Erweiterung). Mit <code>'table' =&gt; 'handle'</code> zusätzlich an der Datentabelle (Knopf im Kopf der Liste, Unterpunkt in der Daten-Navigation)</td></tr>
+    <tr><td><code>settings</code></td><td>reine Konfiguration</td><td><b>nicht im Menü</b>: Sammelseite <b>Einrichtung › System › Einstellungen der Funktionen</b> (<code>/admin/einstellungen</code>, eine Karte je Seite, gruppiert nach Funktion/Erweiterung). Mit <code>'table' =&gt; 'handle'</code> zusätzlich an der Datentabelle (Knopf im Kopf der Liste, Unterpunkt in der Daten-Navigation)</td></tr>
     <tr><td><code>stats</code></td><td>Berichte, Statistiken</td><td><b>nicht im Menü</b>: Sammelseite <b>Administration → Statistiken</b> (<code>/admin/statistiken</code>) – der Menüpunkt erscheint erst, wenn es mindestens eine sichtbare Seite gibt</td></tr>
   </table>
   <pre><code>// extension.php → 'boot' =&gt; function (Core\Extension $x) { … }

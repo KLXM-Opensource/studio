@@ -156,7 +156,7 @@ final class AdminPages
     }
 
     /**
-     * Gruppen des Abschnitts „Einrichtung“ der Seitenleiste: „Website“, „System“ und „Werkzeuge“,
+     * Gruppen des Abschnitts „Einrichtung“ der Seitenleiste: „Website“, „System“ (inkl. Werkzeuge der Erweiterungen) und „Statistiken“,
      * je [key, label, icon, items => [[href, label, key (Symbol/Menü-Schlüssel), true], …]] – nur sichtbare Punkte, keine leeren Gruppen.
      * Werkzeuge: feste Seiten des Cores + alle Seiten mit Platz 'admin' (nav('admin'), v. a. kind tool der Erweiterungen).
      */
@@ -181,11 +181,12 @@ final class AdminPages
                 // Sammelseite (kind settings): Einstellungen der Funktionen & Erweiterungen – nur wenn es etwas zu zeigen gibt
                 [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
                 ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
-            ]],
-            // Werkzeuge: Auswertungen und Werkzeuge von Funktionen/Erweiterungen (nav('admin'), v. a. kind tool)
-            ['key' => 'werkzeuge', 'label' => __('Werkzeuge'), 'icon' => 'tools', 'items' => [
-                [self::STATS, __('Statistiken'), 'stats', self::hasStats()],
+                // Werkzeuge/Infoseiten von Funktionen und Erweiterungen (nav('admin'), v. a. kind tool – z. B. Video-Werkzeuge)
                 ...self::nav('admin'),
+            ]],
+            // Auswertungen (Sammelseite kind stats) – als einzelner Punkt, sobald es Statistiken gibt
+            ['key' => 'werkzeuge', 'label' => __('Statistiken'), 'icon' => 'stats', 'items' => [
+                [self::STATS, __('Statistiken'), 'stats', self::hasStats()],
             ]],
         ];
         $out = [];

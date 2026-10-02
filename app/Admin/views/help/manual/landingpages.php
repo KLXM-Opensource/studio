@@ -3,7 +3,7 @@
   <ol class="doc-steps">
     <li><b>Domain einrichten lassen:</b> Ihre Agentur registriert die Domain, richtet sie im Hosting ein und trägt sie für Ihre Website ein.</li>
     <li><b>Seite vorbereiten:</b> z. B. „Reisemedizin“ mit Unterseiten „Impfungen“ und „Reiseapotheke“ unter <b>Seiten</b> anlegen.</li>
-    <li><b>Administration → Werkzeuge → Landingpages → Neue Landingpage:</b> Domain und Seite wählen, speichern, „Status prüfen“. In den Seiteneinstellungen sehen Sie unter „Landingpage-Domain“, unter welcher Adresse die Seite erscheint.</li>
+    <li><b>Einrichtung › Website › Landingpages → Neue Landingpage:</b> Domain und Seite wählen, speichern, „Status prüfen“. In den Seiteneinstellungen sehen Sie unter „Landingpage-Domain“, unter welcher Adresse die Seite erscheint.</li>
   </ol>
   <ul>
     <li><b>Maßgebliche Adresse:</b> „Eigene Domain“ – Suchmaschinen führen die Seiten unter der Landing-Domain (optional werden Besucher der alten Adresse dorthin weitergeleitet). „Spiegel“ – die Seiten bleiben unter der Adresse Ihrer Website maßgeblich.</li>
