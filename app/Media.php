@@ -199,12 +199,16 @@ final class Media
             $where[] = '(' . $c['where'] . ')';
             array_push($params, ...$c['params']);
         }
-        if (self::$pool === null) {
-            $where[] = 'm.pool_ref IS NULL';   // Verweise auf Pool-Dateien erscheinen unter „Geteilt“
+        // Verweise auf Pool-Dateien erscheinen unter „Geteilt“ – in einer Sammlung gehören sie aber dazu (Galerie, Live-Galerie)
+        if (self::$pool === null && empty($f['collection'])) {
+            $where[] = 'm.pool_ref IS NULL';
         }
         $sql .= ($where ? ' WHERE ' . implode(' AND ', $where) : '')
             . (!empty($f['collection']) ? ' ORDER BY ci.sort, m.id DESC' : ' ORDER BY m.id DESC');
         $rows = self::db()->fetchAll($sql, $params);
+        if (self::$pool === null && !empty($f['collection'])) {
+            $rows = array_values(array_filter(array_map(fn($r) => empty($r['pool_ref']) ? $r : self::find((int) $r['id']), $rows)));
+        }
         if (self::$pool !== null) {
             foreach ($rows as &$r) { $r['_pool'] = self::$pool; $r['_pool_id'] = (int) $r['id']; }
         }
@@ -916,6 +920,7 @@ final class Media
             return;
         }
         Extensions::emit('media.deleted', $m);
+        $live = array_map(fn($c) => 'media:collection:' . $c, self::collectionIds($id));   // Live-Galerien (Core\Live)
         if (self::$pool !== null || empty($m['pool_ref'])) {
             self::deleteFiles($m);   // Verweise auf Pool-Dateien löschen nur den Verweis
             MediaTracks::deleteAll($m);
@@ -924,6 +929,7 @@ final class Media
         self::db()->query('DELETE FROM media WHERE id = ?', [$id]);
         self::forget($id);
         PageCache::clear();
+        Live::touch(...$live);
     }
 
     // ================================================================= Tags
@@ -989,6 +995,7 @@ final class Media
             }
         }
         PageCache::clear();
+        Live::touch('media:collection:' . $collectionId);
     }
 
     public static function removeFromCollection(int $collectionId, array $mediaIds): void
@@ -997,10 +1004,12 @@ final class Media
             self::db()->query('DELETE FROM media_collection_items WHERE collection_id = ? AND media_id = ?', [$collectionId, (int) $mid]);
         }
         PageCache::clear();
+        Live::touch('media:collection:' . $collectionId);
     }
 
     public static function setCollections(int $mediaId, array $collectionIds): void
     {
+        Live::touch(...array_map(fn($c) => 'media:collection:' . $c, self::collectionIds($mediaId)));   // bisherige Sammlungen
         self::db()->query('DELETE FROM media_collection_items WHERE media_id = ?', [$mediaId]);
         foreach (array_unique(array_map('intval', $collectionIds)) as $cid) {
             if ($cid > 0) {

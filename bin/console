@@ -138,6 +138,7 @@
  *                                                     --all: alle neu)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
+ *   live:selftest                                     Selbsttest der Live-Aktualisierung (Versionen, signierte Abos, Live-Blöcke)
  *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
  *   links:selftest                                    Selbsttest der Linkauswahl (Seitenbaum, Daten-Quellen, Glossar, Weitere laden, Rechte)
  *   targetedit:selftest                               Selbsttest „Ziel bearbeiten“ an Karten (edit_link: Auflösen, Rechte, keine Ausgabe für Besucher)
@@ -1022,6 +1023,13 @@ switch ($cmd) {
         if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'live:selftest':
+        // Live-Aktualisierung (Core\Live): Versionen, signierte Abos, Blöcke
+        $res = Core\Live::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'vcard:selftest':

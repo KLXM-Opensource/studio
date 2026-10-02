@@ -513,6 +513,8 @@ final class Theme
         if ($types !== null && Sanitizer::styled()) $types[] = '@rich';
         // Stelle: Bewerbung (job_apply) ist ein Formular wie „Formular (Datentabelle)“ – gleiche Stile (Kern und Kit)
         if ($types !== null && in_array('job_apply', $types, true)) $types[] = 'data_form';
+        // Live-Galerie nutzt das Markup der Bildergalerie (cms-gallery) – gleiche Stile (Kern und Kit)
+        if ($types !== null && in_array('live_gallery', $types, true)) $types[] = 'gallery';
         $out = [];
         // Kern-Blöcke: Theme-Stylesheet css/data.css bevorzugt, sonst das neutrale aus dem Kern
         if ($types === null || array_intersect(['data_list', 'data_fields'], $types)) {

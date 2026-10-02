@@ -60,9 +60,11 @@ final class Entries
     private static function changed(array $table): void
     {
         PageCache::clear();
+        \Core\Live::touch('data:' . $table['handle']);   // Live-Blöcke (Core\Live)
         if (Tables::isShared($table)) {
             Shared::clearCaches($table['shared']['key']);
             Shared::touch($table);
+            \Core\Live::touch('g:shared:' . $table['shared']['key']);
         }
     }
 

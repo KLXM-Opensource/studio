@@ -41,6 +41,7 @@ $core = [
     'smime' => 'S/MIME einrichten: verschlüsselte Anfragen per E-Mail',
     'bloecke' => 'Alle Blöcke',
     'baukasten' => 'Eigene Blöcke bauen (Administration)',
+    'live' => 'Live-Galerie & Live-Ticker',
     'funktionen' => 'Funktionen & Erweiterungen (Haupt-Admin)',
     'aufgaben' => 'Häufige Aufgaben',
     'assistent' => \Core\AI\Assist::brand() . ': schreiben, übersetzen, prüfen',

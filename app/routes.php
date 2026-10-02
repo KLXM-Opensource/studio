@@ -522,6 +522,9 @@ return function (Router $r): void {
     // Besucher-Chat (Funktion „chat.visitor“, Core\AI\VisitorChat): Texte + Antwort (Server-Sent Events bzw. JSON)
     $r->get('/api/chat/config', [\Core\Http\Controllers\VisitorChatController::class, 'config']);
     $r->post('/api/chat', [\Core\Http\Controllers\VisitorChatController::class, 'ask']);
+    // Live-Aktualisierung (Core\Live): Versionen per Server-Sent Events, Block der veröffentlichten Seite neu rendern
+    $r->get('/api/live', fn(\Core\Http\Request $req) => \Core\Live::stream($req));
+    $r->get('/api/live/block', fn(\Core\Http\Request $req) => \Core\Live::block($req));
     $r->get('/pdf/{id}', [PdfController::class, 'show']);
     $r->get('/pdf/pool/{pool}/{id}', [PdfController::class, 'showPool']);
     $r->get('/favicon.ico', [PwaController::class, 'icon']);

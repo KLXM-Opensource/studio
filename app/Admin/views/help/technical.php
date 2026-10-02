@@ -17,7 +17,7 @@ $chapters = [
     'kits' => ['Kits & Design', 2], 'css-js' => ['CSS & JS', 2], 'format' => ['Werte formatieren (Core\\Format)', 2], 'frameworks' => ['Frameworks (Tailwind, UIkit, Bootstrap)', 2], 'schriften' => ['Schriften aus Google Fonts (selbst gehostet)', 2], 'editor' => ['Bearbeiten auf der Website', 2], 'felder' => ['Feldtypen', 2], 'bloecke' => ['Eigene Blöcke (Block-Designer)', 2], 'daten' => ['Seitenbaum & Datentabellen', 2],
     'formulare' => ['Formulare & Eingänge', 2], 'kalender' => ['Kalender, iCal & CalDAV', 2], 'stellen' => ['Stellenangebote & Google for Jobs', 2], 'geteilt' => ['Geteilte Datentabellen', 2], 'quellen' => ['Externe Quellen (Feeds, APIs, OpenImmo)', 2],
     'medien' => ['Medien, Pools & Untertitel', 2], 'sprachen' => ['Sprachen & Übersetzung', 2], 'glossar' => ['Glossar', 2],
-    'suche' => ['Website-Suche', 3], 'ki' => [$aiBrand . ': KI-Dienst & Funktionen', 3], 'ki-chat' => ['KI-Chats: Assistent & Besucher-Chat (SSE)', 3], 'freigabe' => ['Prüf-Ebene „Eingereicht“', 3],
+    'suche' => ['Website-Suche', 3], 'ki' => [$aiBrand . ': KI-Dienst & Funktionen', 3], 'ki-chat' => ['KI-Chats: Assistent & Besucher-Chat (SSE)', 3], 'live' => ['Live-Aktualisierung für Besucher (SSE)', 3], 'freigabe' => ['Prüf-Ebene „Eingereicht“', 3],
     'api' => ['REST-API', 3], 'mcp' => ['MCP-Server', 3],
     'verwaltung' => ['Verwaltungsoberfläche', 4], 'support' => ['Support & Wissensdatenbank', 4], 'chat' => ['Chat zwischen Benutzern (SSE)', 4], 'symbole' => ['Symbole (Icons)', 4],
     'karten' => ['Karten & Proxy', 4], 'pwa' => ['Favicon & PWA', 4], 'tutorials' => ['Tutorials & Videos', 4],

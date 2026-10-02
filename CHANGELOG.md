@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Live-Aktualisierung (SSE) als zentraler Dienst, Live-Galerie und Live-Ticker
+- **`Core\Live`:** Kanäle mit Versionen (Datentabellen, geteilte Tabellen, Sammlungen, Seiten, eigene `ext:…`), signierte Abos,
+  ein SSE-Endpunkt `/api/live` für alle Elemente einer Seite, Nachladen einzelner Blöcke (`/api/live/block`), Begrenzung
+  gleichzeitiger Streams (`live_max_streams`) mit Rückfall auf seltenes Nachfragen. `live.js`/`live.css` nur auf Seiten mit Live-Inhalt.
+- **Live-Galerie:** Bilder einer Sammlung erscheinen ohne Neuladen (neueste zuerst), Lightbox, Anhalten für Besucher.
+- **Live-Text (Ticker):** veröffentlichte Einträge einer Datentabelle als Ticker oder „nur die aktuelle Meldung“, mit Uhrzeit.
+- **Fehler behoben:** Galerien aus einer Sammlung zeigten geteilte Bilder (Medien-Pool) nicht an.
+- `php bin/console live:selftest`; Entwicklerhandbuch „Live-Aktualisierung für Besucher (SSE)“, Handbuch „Live-Galerie & Live-Ticker“.
+
 ### Hinweisbalken: Zeitraum und Darstellung
 - **Zeitraum:** „Anzeigen ab“ / „Anzeigen bis“ unter dem Hinweistext (Website → Hinweisbalken) – der Hinweis erscheint und
   verschwindet von selbst, auch bei Treffern im Seiten-Cache und auf offenen Seiten (`data-notice-from/-until`, `notice.js`).

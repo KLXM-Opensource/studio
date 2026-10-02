@@ -560,6 +560,7 @@ final class Extensions
             }
             return;
         }
+        Live::fromEvent($event);   // Live-Kanäle (page:{id}) – auch ohne Erweiterungen
         $name = $event->name();
         foreach (self::$active as $x) {
             foreach ($x->listeners[$event::class] ?? [] as $fn) self::safe($x, 'on ' . $name, fn() => $fn($event));

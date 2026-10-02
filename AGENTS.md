@@ -21,6 +21,8 @@ Entwicklerhandbuch (`/admin/hilfe/technik`).
   (`Core\Events`), Tabellen mit `Core\Db\Table`. Keine Core-Dateien ändern, keine parallelen APIs. Fehlt eine Stelle:
   Vorschlag für einen neuen Slot im Core – mit Doku und Selbsttest.
 - Formatieren mit `Core\Format` / `fmt()` statt eigener Helfer.
+- Live-Aktualisierung für Besucher nur über `Core\Live` (Kanäle `ext:{name}:…`, `Live::touch()`, `Live::attrs()`) –
+  keine eigenen Streams oder Polling-Schleifen.
 - Kits überschreiben Kern-Blöcke und -Fragmente nur bewusst; `php bin/console kit:check --all` meldet Verwaistes und Veraltetes.
 
 ## Begriffe und Sprache
