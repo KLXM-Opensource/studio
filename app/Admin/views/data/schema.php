@@ -102,6 +102,7 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
       <div class="f"><label for="t-route">Adresse der Detailseiten</label>
         <div class="adm-prefix"><span>/</span><input id="t-route" name="settings[route]" value="<?= e($s['route'] ?? '') ?>" placeholder="z. B. aktuelles"></div>
         <p class="f-help">Einträge erscheinen unter <code>/<?= e(($s['route'] ?? '') ?: 'adresse') ?>/titel-des-eintrags</code>. Leer = keine Detailseiten.</p><?= $err('settings.route') ?></div>
+      <label class="f-check"><input type="checkbox" name="settings[noindex]" value="1"<?= !empty($s['noindex']) ? ' checked' : '' ?>> <span><?= e(__('Detailseiten nicht indexieren (nicht in Suchmaschinen, Sitemap und llms.txt)')) ?></span></label>
       <?php if ($isNew): ?>
       <label class="f-check"><input type="checkbox" name="with_template" value="1" checked> <span>Detailseiten-Vorlage gleich mit anlegen</span></label>
       <?php elseif ($s['route'] ?? ''): ?>

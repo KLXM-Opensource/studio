@@ -45,10 +45,17 @@ final class SystemSchema
                     'help' => 'Nichts angehakt = alle Bereiche. „Allgemein“ und „Bedienung“ sind immer dabei; über die Suche lassen sich weitere Bereiche einblenden. Auf der Website lädt ohnehin nur ein kleines Sprite mit den tatsächlich verwendeten Symbolen.'],
                 ['name' => 'sys.phone_country', 'label' => 'Landesvorwahl', 'type' => 'text', 'width' => 'half', 'default' => '+49', 'max' => 5,
                     'help' => 'Für Anruf-Links und die internationale Schreibweise von Telefonnummern auf Seiten in weiteren Sprachen (z. B. „0211 …“ → „+49 211 …“).'],
-                ['name' => 'sys.noindex', 'label' => 'Suchmaschinen aussperren (Testumgebung)', 'type' => 'bool', 'default' => false],
                 ['name' => 'sys.maintenance', 'label' => 'Wartungsmodus – Website nur für eingeloggte Nutzer', 'type' => 'bool', 'default' => false],
                 ['name' => 'sys.maintenance_text', 'label' => 'Text im Wartungsmodus', 'type' => 'textarea', 'rows' => 2,
                     'default' => 'Unsere Website wird gerade überarbeitet. Telefonisch sind wir wie gewohnt für Sie da.'],
+            ]],
+            // Indexierung & Crawler (Core\Indexing): robots.txt, KI-Crawler, llms.txt
+            ['id' => 'index', 'label' => 'Indexierung & Crawler', 'fields' => [
+                ...array_map(fn($w) => ['type' => 'heading', 'label' => '⚠ ' . $w], Indexing::warnings()),
+                ['name' => 'sys.noindex', 'label' => 'Suchmaschinen aussperren (Testumgebung)', 'type' => 'bool', 'default' => false,
+                    'help' => 'Sperrt die ganze Website (robots.txt „Disallow: /“, noindex). Auf Staging und lokal immer an. Einzelne Seiten: Seiteneinstellungen bzw. im Seitenbaum „⋯ → Nicht indexieren“; ganze Datentabellen: in deren Einstellungen.'],
+                ...Indexing::fields(),
+                ['type' => 'heading', 'label' => 'Ergebnis prüfen', 'help' => 'Aktuelle Fassung: ' . absolute_url('/robots.txt') . ' · ' . absolute_url('/sitemap.xml') . (Indexing::llmsEnabled() ? ' · ' . absolute_url('/llms.txt') : '')],
             ]],
             ['id' => 'app', 'label' => 'App-Icon & PWA', 'fields' => [
                 ['type' => 'heading', 'label' => 'Favicon & App-Icon',

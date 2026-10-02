@@ -333,7 +333,7 @@ final class SiteController
             $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
         }
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
-            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id'])) continue;
+            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])) continue;
             // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
             // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
             foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
@@ -349,9 +349,13 @@ final class SiteController
 
     public function robots(Request $r): Response
     {
-        $txt = noindex_site() || Landings::current()?->noindex
-            ? "User-agent: *\nDisallow: /\n"
-            : "User-agent: *\nDisallow: /admin\nDisallow: /anfrage/\nDisallow: /api/\nDisallow: /mcp\n\nSitemap: " . absolute_url('/sitemap.xml') . "\n";
-        return new Response($txt, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+        return new Response(\Core\Indexing::robotsTxt(), 200, ['Content-Type' => 'text/plain; charset=utf-8']);   // Core\Indexing
+    }
+
+    /** /llms.txt – Übersicht für KI-Assistenten (Grundeinstellungen → Indexierung & Crawler) */
+    public function llms(Request $r): Response
+    {
+        if (!\Core\Indexing::llmsEnabled()) throw new HttpException(404);
+        return new Response(\Core\Indexing::llmsTxt(), 200, ['Content-Type' => 'text/markdown; charset=utf-8', 'X-Robots-Tag' => 'noindex']);
     }
 }

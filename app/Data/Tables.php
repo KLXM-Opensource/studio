@@ -383,6 +383,8 @@ final class Tables
             'sort_dir' => ($s['sort_dir'] ?? '') === 'desc' ? 'desc' : 'asc',
             'detail_page_id' => ctype_digit((string) ($s['detail_page_id'] ?? '')) ? (int) $s['detail_page_id'] : ($existing['settings']['detail_page_id'] ?? null),
             'workflow' => !isset($s['workflow']) || !empty($s['workflow']),
+            // Detailseiten nicht in Suchmaschinen, Sitemap und llms.txt (Core\Indexing)
+            'noindex' => !empty($s['noindex']),
             'per_page' => max(5, min(200, (int) ($s['per_page'] ?? 50))),
             // Kalender: Feldzuordnung (Beginn, Ende, ganztägig, Wiederholung, Ort …) – siehe Core\Data\Calendar
             'calendar' => Calendar::validateSettings((array) ($s['calendar'] ?? []), $fields, $errors, $existing['settings']['calendar'] ?? null),

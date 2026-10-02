@@ -276,6 +276,18 @@ final class PageController extends AdminController
         return $site->respond($site->previewHtml($page, !$live), true)->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'no-store, private');
     }
 
+    /** Seitenbaum „⋯ → Nicht indexieren / Indexieren erlauben“ (JSON) – wie der Haken in den Seiteneinstellungen */
+    public function noindex(Request $r, string $id): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if ($page['is_home'] || ($page['type'] ?? 'page') !== 'page') return Response::json(['ok' => false, 'error' => __('Für diese Seite nicht möglich.')], 422);
+        $on = empty($page['noindex']);
+        app()->db->update('pages', ['noindex' => $on ? 1 : 0, 'updated_at' => now()], 'id = :id', ['id' => (int) $id]);
+        $this->changed();
+        return Response::json(['ok' => true, 'noindex' => $on]);
+    }
+
     /** Seite duplizieren (als Entwurf, direkt dahinter) */
     public function duplicate(Request $r, string $id): Response
     {

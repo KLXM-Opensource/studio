@@ -745,6 +745,11 @@ if (pt) {
           if (res.ok) location.href = res.url; else alert(res.error);
         }]),
       ...(home ? [] : [['Duplizieren', async () => { await post(`${base}/${id}/duplicate`); location.reload(); }]]),
+      // Indexierung (Core\Indexing): wie „Nicht in Suchmaschinen / Sitemap aufnehmen“ in den Seiteneinstellungen
+      ...(home ? [] : [[n.dataset.noindex === '1' ? t('Indexieren erlauben') : t('Nicht indexieren'), async () => {
+        const res = await post(`${base}/${id}/noindex`);
+        if (res.ok) location.reload(); else statusFlash(pt, 'error', res.error || t('Das hat nicht geklappt.'));
+      }]]),
       // Seitenvorlagen (Core\PageTemplates): nur für die Administration
       ...(pt.dataset.canTemplates === '1' && !home ? [[t('Als Vorlage speichern'), async () => {
         const res = await post(`${base}/${id}/template`);

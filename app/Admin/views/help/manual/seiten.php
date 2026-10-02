@@ -57,3 +57,10 @@
   </ul>
   <h3 id="sprachen">Mehrere Sprachen</h3>
   <p>Sind in den Grundeinstellungen weitere Sprachen aktiviert, zeigt die Seitenübersicht oben Reiter je Sprache. Rechtsklick auf eine Seite → <b>Übersetzung anlegen: English</b> erstellt eine verknüpfte Kopie als Entwurf unter <code>/en/…</code> – Texte übersetzen, veröffentlichen, fertig. Die Kürzel <b>DE EN</b> neben dem Titel zeigen, welche Fassungen es gibt. Einträge unter <b>Daten</b> übersetzen Sie im Eintrag rechts über „+ English“. Feste Texte des Designs (z. B. „Kontakt“, Wochentage) übersetzt die Website selbst, sofern das Kit sie mitbringt; die übersetzbaren Angaben der zentralen Einstellungen pflegen Sie je Sprache. Mit eingeschalteter KI hilft <b>✦ Aus Deutsch übersetzen</b> (siehe <a href="#<?= e($anchor('assistent')) ?>">KI-Kapitel</a>).</p>
+
+  <h3>Suchmaschinen &amp; KI-Crawler</h3>
+  <ul>
+    <li><b>Seite nicht indexieren</b> (z. B. Impressum, Danke-Seiten): im Seitenbaum „⋯ → Nicht indexieren“ oder in den Seiteneinstellungen „Nicht in Suchmaschinen / Sitemap aufnehmen“. Die Seite trägt dann das Kennzeichen „noindex“ und fehlt in Sitemap und llms.txt.</li>
+    <li><b>Ganze Datentabelle</b> (z. B. Glossar): in den Einstellungen der Tabelle „Detailseiten nicht indexieren“.</li>
+    <li><b>KI-Crawler, robots.txt, llms.txt</b> (Administration): Grundeinstellungen → „Indexierung &amp; Crawler“ – KI-Training sperren oder alle KI-Crawler sperren, eigene Regeln für die robots.txt, optional eine llms.txt für KI-Assistenten.</li>
+  </ul>

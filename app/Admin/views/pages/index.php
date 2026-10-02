@@ -35,7 +35,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
     $ext = \Core\Extensions::pageList($p);   // Erweiterungen (Extension::pageList): Hinweise + Kontextmenü
     $h = '<li class="pt-node" role="treeitem" id="pt-' . $id . '" data-id="' . $id . '" data-parent="' . (int) ($p['parent_id'] ?? 0) . '"'
         . ' data-url="' . e($url) . '" data-title="' . e($p['title']) . '" data-home="' . (int) $p['is_home'] . '" data-dirty="' . (int) $dirty . '"'
-        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-state="' . Pages::state($p) . '" data-langs="' . e(implode(',', $trans)) . '" aria-level="' . ($n['depth'] + 1) . '"'
+        . ' data-published="' . (int) ($p['content_published'] !== null) . '" data-state="' . Pages::state($p) . '" data-langs="' . e(implode(',', $trans)) . '" data-noindex="' . (int) !empty($p['noindex']) . '" aria-level="' . ($n['depth'] + 1) . '"'
         . ($ext['actions'] ? ' data-ext-actions="' . json_attr(array_map(fn($a) => [$a['label'], url($a['href'])], $ext['actions'])) . '"' : '')
         . ($kids ? ' aria-expanded="true"' : '') . ' aria-selected="false">'
         . '<div class="pt-row" draggable="' . ($p['is_home'] ? 'false' : 'true') . '">'
@@ -51,6 +51,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . ' <button type="button" class="pt-pvbtn" data-ptpv-row aria-pressed="false" aria-label="' . e(__('Vorschau: {title}', ['title' => $p['title']])) . '" title="' . e(__('Vorschau')) . '">' . icon('eye') . '</button>'
         // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
         . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
+        . (!empty($p['noindex']) ? ' <span class="pt-ext pt-ext--info" title="' . e(__('Nicht in Suchmaschinen und Sitemap')) . '">' . e(__('noindex')) . '</span>' : '')
         . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'

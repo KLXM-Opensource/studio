@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Indexierung & Crawler
+- Grundeinstellungen → „Indexierung & Crawler“ (`Core\Indexing`): KI-Crawler erlauben / KI-Training sperren (GPTBot, ClaudeBot,
+  Google-Extended, CCBot …; Antwort-Bots mit Quellenlink bleiben) / alle sperren; eigene Regeln für die robots.txt (geprüft);
+  optional `/llms.txt`; Warnungen bei gesperrter Live-Website oder „Disallow: /“; „Suchmaschinen aussperren“ hierher verschoben.
+- Seitenbaum: „⋯ → Nicht indexieren / Indexieren erlauben“ und Kennzeichen „noindex“ (z. B. Impressum).
+- Datentabellen: „Detailseiten nicht indexieren“ – noindex, nicht in Sitemap und llms.txt.
+
 ### Seitenbaum: Vorschau als Seitenleiste
 - Augen-Knopf neben Online/Offline jeder Seite (und „⋯ → Vorschau“) öffnet rechts eine Seitenleiste mit der Seite: Mobil (Breite 390, quer 844) oder
   Desktop (Breite 1280, hoch 800), nach der Breite skaliert und in voller Höhe der Leiste; Entwurf (Arbeitsstand) oder Live; „in neuem Tab öffnen“.

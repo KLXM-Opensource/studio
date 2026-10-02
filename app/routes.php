@@ -125,6 +125,7 @@ return function (Router $r): void {
     $r->post('/admin/pages/{id}/move', [Admin\PageController::class, 'move']);
     $r->post('/admin/pages/{id}/quick', [Admin\PageController::class, 'quick']);
     $r->post('/admin/pages/{id}/duplicate', [Admin\PageController::class, 'duplicate']);
+    $r->post('/admin/pages/{id}/noindex', [Admin\PageController::class, 'noindex']);   // Nicht indexieren umschalten
     $r->get('/admin/pages/{id}/vorschau', [Admin\PageController::class, 'preview']);   // Seitenleiste „Vorschau“ im Seitenbaum
     // Seitenvorlagen für die Redaktion (Core\PageTemplates)
     $r->get('/admin/seitenvorlagen', [Admin\PageTemplateController::class, 'index']);
@@ -545,6 +546,7 @@ return function (Router $r): void {
     // Glossar: Begriffe für Inhalte, die erst im Browser entstehen (resources/js/glossary-live.mjs) – nur veröffentlichte
     $r->get(\Core\Glossary\Glossary::JSON_PATH, fn(\Core\Http\Request $req) => \Core\Glossary\Glossary::jsonResponse($req));
     $r->get('/robots.txt', [SiteController::class, 'robots']);
+    $r->get('/llms.txt', [SiteController::class, 'llms']);   // Core\Indexing (nur wenn eingeschaltet)
     // Theme-Formulare (z. B. /anfrage/rezept) – dahinter die Eingangs-Tabelle des Formulars
     $r->get('/api/form/{form}', [FormController::class, 'challenge']);
     $r->get('/anfrage/{form}', [FormController::class, 'show']);

@@ -6003,4 +6003,9 @@ return [
     'Hinweise zum Projekt' => 'Project notes',
     'Vorschau: {title}' => 'Preview: {title}',
     'Breite der Vorschau ändern' => 'Resize preview',
+    'Detailseiten nicht indexieren (nicht in Suchmaschinen, Sitemap und llms.txt)' => 'Do not index detail pages (not in search engines, sitemap and llms.txt)',
+    'Für diese Seite nicht möglich.' => 'Not possible for this page.',
+    'Indexieren erlauben' => 'Allow indexing',
+    'Nicht in Suchmaschinen und Sitemap' => 'Not in search engines and sitemap',
+    'noindex' => 'noindex',
 ];
