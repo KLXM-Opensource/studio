@@ -110,7 +110,7 @@ $$('[data-tpl-map]').forEach(box => {
 
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
-  const tabs = $$('[role=tab]', form), hidden = form.elements._tab;
+  const tabs = $$('[role=tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)
   const select = (id, focus) => {
     tabs.forEach(t => {
       const on = t.dataset.tab === id;

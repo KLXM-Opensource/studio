@@ -5983,4 +5983,6 @@ return [
     'Vorlagenseite' => 'Template page',
     'Anordnen und benennen' => 'Arrange and name',
     'Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.' => 'Starting point for new pages by editors – no address of their own, only administrators can change them.',
+    'Erste Vorlage anlegen' => 'Create the first template',
+    'Sonderseiten & Vorlagen' => 'Special pages & templates',
 ];

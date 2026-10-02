@@ -70,6 +70,20 @@ $html = implode('', array_map($row, $tree));
   </div>
 </header>
 
+<?php
+// Reiter: Seitenbaum für alle mit Seitenrechten; „Sonderseiten & Vorlagen“ nur mit passendem Recht (404: pages.manage,
+// Detailseiten-Vorlagen: data.schema, Seitenvorlagen: system.manage)
+$canSpecial404 = can('pages.manage');
+$canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pageTemplates) || can('system.manage');
+?>
+<div class="pt-tabs" data-tabs>
+<?php if ($canSpecial): ?>
+<div class="adm-tabs pt-tabbar" role="tablist" aria-label="<?= e(__('Seiten')) ?>">
+  <button type="button" role="tab" id="tab-baum" aria-controls="panel-baum" data-tab="baum" aria-selected="true"><?= e(__('Seitenbaum')) ?></button>
+  <button type="button" role="tab" id="tab-sonderseiten" aria-controls="panel-sonderseiten" data-tab="sonderseiten" aria-selected="false" tabindex="-1"><?= e(__('Sonderseiten & Vorlagen')) ?></button>
+</div>
+<?php endif; ?>
+<div id="panel-baum"<?= $canSpecial ? ' role="tabpanel" aria-labelledby="tab-baum"' : '' ?>>
 <div class="pt" data-pagetree data-base="<?= e(url('/admin/pages')) ?>" data-can-publish="<?= $canPub ? '1' : '0' ?>" data-can-templates="<?= can('system.manage') ? '1' : '0' ?>" data-languages="<?= e(json_encode($multi ? Lang::all() : [], JSON_UNESCAPED_UNICODE)) ?>" data-lang="<?= e($lang) ?>">
   <div class="dt-bar pt-bar">
     <?php if ($multi): ?><nav class="fx-seg dt-seg" aria-label="Sprache"><?php foreach (Lang::all() as $code => $label): ?><a href="<?= e(url('/admin/pages?lang=' . $code)) ?>"<?= $code === $lang ? ' aria-current="true"' : '' ?>><?= e($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
@@ -82,10 +96,21 @@ $html = implode('', array_map($row, $tree));
   <footer class="dt-foot"><span><?= $count ?> Seiten</span><span data-pt-msg aria-live="polite"></span></footer>
 </div>
 
+</div>
+<?php if ($canSpecial): ?>
+<div role="tabpanel" id="panel-sonderseiten" aria-labelledby="tab-sonderseiten" class="pt-special" hidden>
+<?php if (can('system.manage') && empty($pageTemplates)): ?>
+<section class="adm-card pt-templates">
+  <h2><?= e(__('Seitenvorlagen')) ?></h2>
+  <p class="adm-muted"><?= e(__('Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.')) ?></p>
+  <p><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/seitenvorlagen')) ?>"><?= e(__('Erste Vorlage anlegen')) ?></a></p>
+</section>
+<?php endif; ?>
 <?php // Sonderseiten: „Nicht gefunden (404)“ je Sprache (Core\NotFound) – nie unter eigener Adresse öffentlich, nicht im Seitenbaum
 $nfLangs = $multi ? Lang::all() : [Lang::default() => ''];
 $nfDefault = $notFound[Lang::default()] ?? null; ?>
-<section class="adm-card pt-templates" id="sonderseiten" aria-labelledby="pt-special-h">
+<?php if ($canSpecial404): ?>
+<section class="adm-card pt-templates" aria-labelledby="pt-special-h">
   <h2 id="pt-special-h"><?= e(__('Sonderseiten')) ?></h2>
   <p class="adm-muted"><?= e(__('„Nicht gefunden (404)“ erscheint, wenn Besucher eine Adresse aufrufen, die es nicht gibt – mit Status 404, nicht in Menü, Sitemap und Suche. Bearbeiten wie jede Seite; solange sie nicht veröffentlicht ist, zeigt die Website die Standard-Fehlerseite des Kits.')) ?></p>
   <ul class="adm-list">
@@ -111,6 +136,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
     <?php endforeach; ?>
   </ul>
 </section>
+<?php endif; ?>
 
 <?php if (!empty($pageTemplates)): ?>
 <section class="adm-card pt-templates" aria-labelledby="pt-pagetpl-h">
@@ -125,7 +151,7 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
 </section>
 <?php endif; ?>
 
-<?php if ($templates): ?>
+<?php if ($templates && can('data.schema')): ?>
 <section class="adm-card pt-templates">
   <h2>Detailseiten-Vorlagen</h2>
   <p class="adm-muted">Gelten für alle Einträge einer Datentabelle und werden unter <a href="<?= e(url('/admin/data')) ?>">Daten</a> gestaltet.</p>
@@ -137,3 +163,6 @@ $nfDefault = $notFound[Lang::default()] ?? null; ?>
   </ul>
 </section>
 <?php endif; ?>
+</div>
+<?php endif; ?>
+</div>
