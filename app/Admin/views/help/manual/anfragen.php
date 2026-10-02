@@ -3,6 +3,7 @@
   <ol class="doc-steps">
     <li>Sie erhalten eine E-Mail „Neue Anfrage“ – ohne Inhalte, aus Datenschutzgründen. Neue Anfragen zeigt auch die Zahl neben <b>Anfragen</b> im Menü.</li>
     <li><a href="<?= e(url('/admin/requests')) ?>">Anfragen</a> öffnen, oben den Eingang wählen (z. B. Rezepte oder Überweisungen), den <b>geheimen <?= e(term('key')) ?></b> aus dem Passwortmanager einfügen, <b>Entschlüsseln</b>. Die Inhalte sind nur in dieser Ansicht lesbar – nach dem Neuladen wieder verschlossen.</li>
+    <li><b>Ohne Eingabe (optional, für kleine Websites):</b> Hat Ihr Webhoster bzw. Ihre Agentur den geheimen <?= e(term('key')) ?> in der Hosting-Umgebung hinterlegt, sind die Anfragen sofort lesbar – oben steht dann „Automatisch entschlüsselt“. Wer nur die Datenbank erbeutet, kann weiterhin nichts lesen; bei einem Einbruch in den Server selbst schon. Einrichtung: Einstellungen → Grundeinstellungen → „Verschlüsselung der Online-Anfragen“.</li>
     <li>Status setzen: <b>In Bearbeitung</b> oder <b>Als erledigt markieren</b>. Mit <b>Zuweisen</b> sehen alle, wer sich kümmert. <b>Drucken</b> und <b>Kopieren</b> helfen beim Übertragen in <?= e(term('records_system')) ?>.</li>
     <li>Erledigte Anfragen werden nach der eingestellten Frist (Standard 90 Tage) automatisch gelöscht.</li>
   </ol>

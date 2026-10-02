@@ -85,7 +85,28 @@ use Core\Fields;
       <dt>Status</dt><dd><?= $keyReady ? '<span class="adm-badge">Aktiv</span>' : '<span class="adm-badge adm-badge--warn">Kein Schlüssel – Formulare sind deaktiviert</span>' ?></dd>
       <dt>Fingerabdruck</dt><dd><code><?= e($fingerprint) ?></code></dd>
       <?php if ($ts = setting('sys.form_key_created')): ?><dt>Erzeugt</dt><dd><?= e(date('d.m.Y H:i', strtotime((string) $ts))) ?></dd><?php endif; ?>
+      <?php $__env = \Core\FormCrypto::envStatus(); if ($keyReady && $__env['state'] !== 'off'): ?>
+      <dt>Automatisch entschlüsseln</dt><dd><?= match ($__env['state']) {
+          'active' => '<span class="adm-badge">Aktiv</span> Schlüssel aus <code>' . e($__env['name']) . '</code>',
+          'mismatch' => '<span class="adm-badge adm-badge--warn">Passt nicht</span> <code>' . e($__env['name']) . '</code> ist gesetzt, gehört aber nicht zu diesem Schlüssel',
+          default => 'Aus – optional über die Umgebungsvariable <code>' . e($__env['name']) . '</code>',
+      } ?></dd>
+      <?php endif; ?>
     </dl>
+    <?php if ($keyReady && $__env['state'] !== 'off'): ?>
+    <details class="f-sec" id="key-env">
+      <summary class="f-sec__sum"><span class="f-sec__title">Geheimen Schlüssel im Hosting hinterlegen</span><span class="f-sec__hint">automatisch entschlüsseln (optional)</span></summary>
+      <div class="f-sec__body f-sec__body--block">
+      <p>Für kleine Websites: Liegt der geheime Schlüssel als Umgebungsvariable beim Hosting, sind Anfragen für alle mit Leserecht sofort lesbar – ohne Eingabe. Wer nur die <b>Datenbank</b> erbeutet (Sicherung, SQL-Lücke), liest weiterhin nichts; wer den <b>Server selbst</b> übernimmt, kann mitlesen. Ohne Variable bleibt alles wie bisher.</p>
+      <ol>
+        <li>Plesk: <i>Websites &amp; Domains → PHP-Einstellungen</i> → „Zusätzliche Konfigurationsanweisungen“ (PHP-FPM) bzw. im FPM-Pool:<br><code>env[<?= e(\Core\FormCrypto::envNames()[0] ?? 'KLXM_FORM_SECRET') ?>] = "…geheimer Schlüssel…"</code></li>
+        <li>Andere Server: Apache <code>SetEnv <?= e(\Core\FormCrypto::envNames()[0] ?? 'KLXM_FORM_SECRET') ?> "…"</code> im vHost (nicht in <code>.htaccess</code> im Webverzeichnis) oder die Umgebung des PHP-Dienstes.</li>
+        <li>Seite neu laden: hier erscheint „Aktiv“. Den Schlüssel trotzdem zusätzlich im Passwortmanager aufbewahren.</li>
+      </ol>
+      <p class="adm-muted">Der Schlüssel wird nie gespeichert oder protokolliert. Abschalten für die ganze Website: <code>'form_secret_env' => false</code> in der Konfiguration.</p>
+      </div>
+    </details>
+    <?php endif; ?>
     <div class="adm-inline-box">
       <strong><?= $keyReady ? 'Schlüssel ersetzen' : e(term('key')) . ' erzeugen' ?></strong>
       <?php if ($keyReady): ?><p class="adm-muted">Nur nötig, wenn der geheime Schlüssel verloren ging oder kompromittiert wurde. Bereits gespeicherte Anfragen bleiben nur mit dem alten Schlüssel lesbar. Zur Bestätigung „NEU“ eintippen.</p>

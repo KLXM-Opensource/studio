@@ -45,6 +45,9 @@ final class InboxController extends AdminController
 
         // Entsperren: geheimer Schlüssel nur im POST-Body dieser Anfrage – nie gespeichert, nie protokolliert
         $secret = $r->isPost() ? (string) ($r->post['secret'] ?? '') : '';
+        // Schlüssel aus der Hosting-Umgebung (FormCrypto::envSecret): automatisch entsperren, wenn niemand einen eingibt
+        $auto = $secret === '' ? FormCrypto::envSecret() : null;
+        if ($auto !== null) $secret = $auto;
         $decrypted = [];
         $keyError = null;
         if ($r->isPost() && $secret === '') {
@@ -56,10 +59,11 @@ final class InboxController extends AdminController
                 foreach ($rows as $row) {
                     $decrypted[$row['id']] = Inbox::open($t, $row, $secret);
                 }
-                if ($rows) Inbox::log($t['handle'], array_column($rows, 'id'), 'decrypt', count($rows) . ' ' . __('Einträge'));
+                if ($rows) Inbox::log($t['handle'], array_column($rows, 'id'), 'decrypt', count($rows) . ' ' . __('Einträge') . ($auto !== null ? ' (' . __('Schlüssel aus der Hosting-Umgebung') . ')' : ''));
             }
         }
-        $secret = '';
+        $autoUnlocked = $auto !== null && $decrypted !== [];
+        $secret = $auto = '';
         foreach ($rows as &$row) unset($row['payload']);                      // Chiffretext nicht an die Ansicht weiterreichen
         unset($row);
 
@@ -69,7 +73,7 @@ final class InboxController extends AdminController
         foreach ($tables as $x) $newCounts[$x['handle']] = Inbox::count($x, 'neu');
         return $this->view('requests/index', [
             'tables' => $tables, 't' => $t, 'rows' => $rows, 'decrypted' => $decrypted, 'keyError' => $keyError,
-            'unlocked' => $decrypted !== [], 'status' => $status, 'page' => $page, 'pages' => (int) ceil($total / self::PER_PAGE),
+            'unlocked' => $decrypted !== [], 'autoUnlocked' => $autoUnlocked, 'envKey' => FormCrypto::envSecret() !== null, 'status' => $status, 'page' => $page, 'pages' => (int) ceil($total / self::PER_PAGE),
             'counts' => $counts, 'newCounts' => $newCounts, 'users' => $this->assignees($t), 'canManage' => can('requests.manage', $t['handle']),
             'canLog' => self::canLog(), 'keyReady' => FormCrypto::ready(),
             // Zustellung per E-Mail (Core\Data\Delivery): Modus, Einrichtungshinweise, fehlgeschlagene Zustellungen, Rückfall-Einträge

@@ -52,6 +52,9 @@ $userNames = array_column($users ?? [], null, 'id');
   <?php foreach (array_filter($deliveryProblems ?? [], fn($p) => $p['level'] === 'error') as $p): ?><br><b><?= e($p['text']) ?></b><?php endforeach; ?></p>
 <?php endif; ?>
 
+<?php if (!empty($envKey)): ?>
+<p class="adm-flash adm-flash--info" role="note"><?= e(__('Automatisch entschlüsselt: Der geheime {key} ist in der Hosting-Umgebung hinterlegt.', ['key' => term('key')])) ?></p>
+<?php else: ?>
 <form class="adm-card adm-unlock" method="post" action="<?= e($qs(['seite' => $page > 1 ? $page : null])) ?>" autocomplete="off">
   <?= csrf_field() ?>
   <input type="hidden" name="table" value="<?= e($t['handle']) ?>">
@@ -61,6 +64,7 @@ $userNames = array_column($users ?? [], null, 'id');
   <button class="adm-btn adm-btn--primary" type="submit"><?= e($unlocked ? __('Erneut entschlüsseln') : __('Entschlüsseln')) ?></button>
   <?php if ($unlocked): ?><span class="adm-badge"><?= e(__('Entsperrt für diese Ansicht')) ?></span><?php endif; ?>
 </form>
+<?php endif; ?>
 
 <p class="adm-filter" aria-label="<?= e(__('Status')) ?>">
   <?php $statuses = Inbox::statuses($t); foreach ([...array_keys($statuses), 'alle'] as $k): ?>

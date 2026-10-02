@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Online-Anfragen: geheimer Schlüssel optional aus der Hosting-Umgebung
+- Liegt der geheime Schlüssel als Umgebungsvariable vor (`KLXM_FORM_SECRET_{WEBSITE}` oder `KLXM_FORM_SECRET`, z. B. Plesk
+  `env[…]` im PHP-FPM-Pool), sind Anfragen ohne Eingabe lesbar – nur wenn er zum öffentlichen Schlüssel passt. Schutz dann gegen
+  Datenbank-Diebstahl (Sicherung, SQL-Lücke), nicht gegen eine Server-Übernahme; für kleine Websites gedacht. Systemseite zeigt
+  Zustand (aus, aktiv, passt nicht) und Anleitung; Protokoll vermerkt automatisches Entschlüsseln. `'form_secret_env' => false` schaltet ab.
+
 ### Live-Aktualisierung (SSE) als zentraler Dienst, Live-Galerie und Live-Ticker
 - **`Core\Live`:** Kanäle mit Versionen (Datentabellen, geteilte Tabellen, Sammlungen, Seiten, eigene `ext:…`), signierte Abos,
   ein SSE-Endpunkt `/api/live` für alle Elemente einer Seite, Nachladen einzelner Blöcke (`/api/live/block`), Begrenzung

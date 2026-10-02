@@ -8,6 +8,12 @@ namespace Core;
  * verschlüsselt gespeichert. Auf dem Server liegt NUR der öffentliche Schlüssel.
  * Der geheime Schlüssel bleibt beim Betreiber (z. B. Passwortmanager) und wird
  * zum Lesen im Admin eingegeben – er wird nicht gespeichert.
+ *
+ * Optional (kleine Websites): der geheime Schlüssel als Umgebungsvariable des Hostings – KLXM_FORM_SECRET_{WEBSITE}
+ * (Kurzname in Großbuchstaben, z. B. KLXM_FORM_SECRET_DEFAULT) oder KLXM_FORM_SECRET; eigener Name per config
+ * 'form_secret_env', abschalten mit 'form_secret_env' => false. Passt er zum öffentlichen Schlüssel, entsperrt die
+ * Anfragen-Ansicht automatisch (für Personen mit Leserecht). Schutz dann: Wer nur die Datenbank (Sicherung, SQL-Lücke)
+ * erbeutet, liest nichts; wer den Server selbst übernimmt, schon. Der Schlüssel steht nie in Datenbank, Dateien oder Logs.
  */
 final class FormCrypto
 {
@@ -78,5 +84,42 @@ final class FormCrypto
         $pk = self::publicKey();
         return $sk !== false && strlen($sk) === SODIUM_CRYPTO_BOX_SECRETKEYBYTES && $pk
             && hash_equals($pk, sodium_crypto_box_publickey_from_secretkey($sk));
+    }
+
+    /** Namen der Umgebungsvariablen in Prüf-Reihenfolge ([] = abgeschaltet) */
+    public static function envNames(): array
+    {
+        $cfg = app()->config->get('form_secret_env', null);
+        if ($cfg === false) return [];
+        if (is_string($cfg) && preg_match('~^[A-Z_][A-Z0-9_]{0,63}$~', $cfg)) return [$cfg];
+        return ['KLXM_FORM_SECRET_' . strtoupper(preg_replace('~[^A-Za-z0-9]+~', '_', site()->key)), 'KLXM_FORM_SECRET'];
+    }
+
+    /** Erste gesetzte Umgebungsvariable: [Name, Wert] oder null */
+    private static function envRaw(): ?array
+    {
+        foreach (self::envNames() as $n) {
+            $v = getenv($n);
+            if (!is_string($v) || $v === '') $v = (string) ($_SERVER[$n] ?? $_ENV[$n] ?? '');
+            if (trim($v) !== '') return [$n, trim($v)];
+        }
+        return null;
+    }
+
+    /** Geheimer Schlüssel aus der Hosting-Umgebung – nur wenn er zum öffentlichen Schlüssel passt */
+    public static function envSecret(): ?string
+    {
+        $raw = self::envRaw();
+        return $raw && self::keyMatches($raw[1]) ? $raw[1] : null;
+    }
+
+    /** Zustand für die Systemseite: ['state' => off|missing|mismatch|active, 'name' => Variable] */
+    public static function envStatus(): array
+    {
+        $names = self::envNames();
+        if (!$names) return ['state' => 'off', 'name' => ''];
+        $raw = self::envRaw();
+        if (!$raw) return ['state' => 'missing', 'name' => $names[0]];
+        return ['state' => self::keyMatches($raw[1]) ? 'active' : 'mismatch', 'name' => $raw[0]];
     }
 }
