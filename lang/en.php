@@ -5415,7 +5415,9 @@ return [
     'Keine verlinkbaren Daten: Tabellen brauchen eine URL-Basis und eine Detailseite.' => 'No linkable data: tables need a URL base and a detail page.',
     // Verwaltungsseiten nach Art (Core\AdminPages), Werkzeuge der Website (Core\FrontendTools), Quick-Glossar (Core\Glossary\QuickTool)
     'Berichte und Auswertungen der Funktionen und Erweiterungen dieser Website.' => 'Reports and statistics of the features and extensions of this website.',
+    'Bitte zuerst in einen Text klicken – dort wird eingefügt.' => 'Please click into a text first – that is where it will be inserted.',
     'Chat ein- oder ausschalten, Kanäle anlegen und verwalten' => 'Turn the chat on or off, create and manage channels',
+    'Dieses Feld kennt keine Links – eingefügt wird nur der Text.' => 'This field does not support links – only the text is inserted.',
     'Eingeschaltete Funktionen und Erweiterungen mit eigenen Einstellungen erscheinen hier.' => 'Enabled features and extensions with their own settings appear here.',
     'Einstellungen der Funktionen und Erweiterungen dieser Website. Seiten, die zu einer Datentabelle gehören, finden Sie zusätzlich direkt an der Tabelle.' => 'Settings of the features and extensions of this website. Pages that belong to a data table are also available directly at the table.',
     'Gehört zur Tabelle „{name}“' => 'Belongs to the table “{name}”',
@@ -5425,6 +5427,7 @@ return [
     'Statistiken' => 'Statistics',
     'Weitere Einstellungen' => 'More settings',
     'Zugänge (Tokens) für Automatisierungen und KI-Assistenten' => 'Access tokens for automations and AI assistants',
+    'Zurück zum Text' => 'Back to the text',
     'unter Einstellungen' => 'under Settings',
     'unter Statistiken' => 'under Statistics',
 ];

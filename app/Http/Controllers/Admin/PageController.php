@@ -162,6 +162,7 @@ final class PageController extends AdminController
         app()->db->query('UPDATE pages SET parent_id = ? WHERE parent_id = ?', [$page['parent_id'], (int) $id]);
         Pages::rebuildPaths();
         $this->changed();
+        \Core\Extensions::emit('page.deleted', $page);   // Erweiterungen (Extension::on)
         if ($r->wantsJson()) {
             return Response::json(['ok' => true]);
         }

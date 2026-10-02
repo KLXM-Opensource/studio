@@ -37,6 +37,10 @@ namespace Core;
  *   $x->pageList(fn(array $page) => ['badges' => [['label' => …]], 'actions' => [['label' => …, 'href' => …]]])   Seitenbaum: Hinweis + Kontextmenü
  *   $x->pagePanel(fn(array $page) => '<section class="adm-card">…</section>')   Karte in der Seitenleiste der Seiteneinstellungen
  *   $x->toolbar(fn(array $bar) => ['items' => [...], 'scripts' => ['js/x.js'], 'publishNote' => '…'])   Menü „⋯“ der Werkzeugleiste
+ *   $x->frontendTool(['id' => 'notiz', 'label' => 'Notiz', 'icon' => 'note', 'module' => 'js/notiz.mjs', 'shortcut' => 'Alt+N', 'perm' => 'pages.edit'])
+ *                                                                      Werkzeug beim Bearbeiten auf der Website (Core\FrontendTools, CMSAdmin.tools)
+ * Ereignisse (on): page.saved, page.published, page.unpublished, page.discarded, page.deleted, entry.saved, entry.published,
+ *   entry.unpublished, entry.deleted, media.*, inbox.* – siehe Technik → Erweiterungen
  * Eingangs-Tabellen (Anfragen, Core\Data\Inbox):
  *   $x->inbox(fn(array $t) => $t['handle'] === 'buchungen' ? ['statuses' => [...], 'info' => fn(array $row) => '…'] : null)   eigene Status, Zusatzzeile, Prüfung
  *   $x->on('inbox.status', fn(array $t, array $ids, string $status, array $old) => …)   Ereignisse inbox.status / inbox.deleted
@@ -86,6 +90,8 @@ final class Extension
     public array $toolbarProviders = [];
     /** @var list<callable(array): ?array> */
     public array $inboxProviders = [];
+    /** @var list<array> Werkzeuge für das Bearbeiten auf der Website (Core\FrontendTools::normalize) */
+    public array $frontendTools = [];
     private array $migrations = [];
 
     public function __construct(public readonly string $name, public readonly string $dir, public readonly array $manifest) {}
@@ -212,7 +218,12 @@ final class Extension
         return $this;
     }
 
-    /** Ereignis des Cores abonnieren: media.imported (array $m), media.replaced (array $neu, array $alt), media.deleted (array $m) */
+    /**
+     * Ereignis des Cores abonnieren: media.imported (array $m), media.replaced (array $neu, array $alt), media.deleted (array $m),
+     * page.saved (array $page, ?int $userId), page.published (array $page), page.unpublished (array $page), page.discarded (array $page),
+     * page.deleted (array $page), entry.saved (array $table, array $entry, bool $created, ?array $old), entry.published (array $table,
+     * array $entry), entry.unpublished (array $table, array $entry), entry.deleted (array $table, int $id), inbox.status, inbox.deleted
+     */
     public function on(string $event, callable $fn): self
     {
         $this->listeners[$event][] = $fn;
@@ -307,6 +318,20 @@ final class Extension
     public function toolbar(callable $fn): self
     {
         $this->toolbarProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Werkzeug für das Bearbeiten auf der Website (Core\FrontendTools): Knopf in der Werkzeugleiste ('placement' => 'main') bzw.
+     * Eintrag im Menü „⋯“ ('more'), optional Tastenkürzel ('shortcut' => 'Alt+G'). 'module' => 'js/x.mjs' aus {dir}/assets wird
+     * erst beim ersten Öffnen geladen (ES-Modul: export default { mount(ctx), unmount(ctx) }). Nur angemeldet, nur beim Bearbeiten,
+     * nur mit Recht ('perm', 'table', 'feature', 'visible' => fn(array $bar): bool). Endpunkte prüfen Rechte und CSRF selbst.
+     */
+    public function frontendTool(array $def): self
+    {
+        $t = FrontendTools::normalize($def, 'ext:' . $this->name, $this);
+        if ($t) $this->frontendTools[] = $t;
+        else error_log('[Erweiterung ' . $this->name . '] frontendTool: ungültige Angaben (id/label/module)');
         return $this;
     }
 

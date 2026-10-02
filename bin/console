@@ -38,6 +38,8 @@
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
  *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung)
+ *   extensions:selftest                               Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten nach Art, Werkzeuge
+ *                                                     der Website, Ereignisse page.… und entry.…)
  *   features:list                                     Funktionen dieser Website: an/aus, Quelle (Konfiguration, Verwaltung, Standard)
  *   features:release [--dry-run] [--only=features|extensions]
  *                                                     In der Konfiguration festgelegte Funktionen/Erweiterungen an die Verwaltung
@@ -1074,6 +1076,13 @@ switch ($cmd) {
             printf("  %-28s %-12s v%-3d %s\n", 'cblk_' . $b['key'], $b['status'] . ($b['changed'] ? '*' : ''), $b['version'], $b['label']);
         }
         break;
+
+    case 'extensions:selftest':
+        // Core\AdminPages (Arten, Sammelseite, Tabelle, Rechte), Core\FrontendTools (Kürzel, Module, Modus, Rechte), Ereignisse
+        $res = Core\ExtensionsSelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'extensions:list':
         $active = Core\Extensions::enabled();

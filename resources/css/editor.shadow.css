@@ -190,7 +190,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 @media (max-width:767px){
   .cms-bar[data-bar]{gap:8px;min-height:52px;padding:8px 8px 8px 8px}
   .cms-bar__ctx{gap:8px}
-  .cms-bar__obj,.cms-bar__kind,.cms-bar__pick,.cms-bar__search{display:none}
+  .cms-bar__obj,.cms-bar__kind,.cms-bar__pick,.cms-bar__search,.cms-bar__tool{display:none}
   .cms-menu__item.cms-menu--phone{display:flex}
   .cms-bar[data-bar] .cms-btn{padding:0 14px}
   .cms-bar__edit{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:var(--b-bg);box-shadow:0 -1px 0 var(--b-line),0 -12px 30px rgba(0,0,0,.2)}
@@ -379,3 +379,29 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-inline-bar .rte-mbtn{display:inline-flex;align-items:center;gap:4px}
 .cms-inline-bar [aria-expanded=true]{background:rgba(255,255,255,.18)}
 @media (max-width:560px){.cms-inline-bar button{min-width:30px;padding:0 7px}.cms-inline-bar .rte-group{padding-right:2px;margin-right:1px}}
+
+/* Werkzeuge beim Bearbeiten (Core\FrontendTools, resources/js/_tools.js): Seitenleiste in der Ebene – rechts, auf Telefonen als
+   Blatt unten über der Aktionsleiste. Nicht modal (role=dialog, aria-modal=false): Text bleibt bedienbar, Esc schließt. */
+.cms-tpanel{position:fixed;top:calc(var(--cms-bar-h,48px) + 10px);right:10px;bottom:calc(var(--cms-bottom-bar-h,0px) + 10px);z-index:4;display:flex;flex-direction:column;width:min(400px,calc(100vw - 20px));max-height:calc(100vh - var(--cms-bar-h,48px) - var(--cms-bottom-bar-h,0px) - 20px);border-radius:14px;background:var(--adm-card,#fff);color:var(--adm-ink,#16201E);box-shadow:0 0 0 1px var(--adm-line,#E6E6E9),0 24px 60px -18px rgba(0,0,0,.4);font:400 14px/1.45 var(--adm-font,Lato,"Segoe UI",system-ui,sans-serif);color-scheme:inherit;overflow:hidden}
+.cms-tpanel[hidden]{display:none}
+.cms-tpanel--wide{width:min(560px,calc(100vw - 20px))}
+.cms-tpanel__head{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-bottom:1px solid var(--adm-line,#E6E6E9)}
+.cms-tpanel__ico{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--adm-fill,#EEF0F4);color:var(--adm-a,#314164)}
+.cms-tpanel__ico .ico{width:18px;height:18px}
+.cms-tpanel__t{flex:1;margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.cms-tpanel__t:focus{outline:none}
+.cms-tpanel__kbd{font:600 12px var(--adm-font,system-ui);padding:1px 6px;border-radius:5px;border:1px solid var(--adm-line,#E6E6E9);color:var(--adm-t3,#5A6461)}
+.cms-tpanel__x{display:grid;place-items:center;width:36px;height:36px;margin:0;padding:0;border:0;border-radius:999px;background:transparent;color:inherit;cursor:pointer}
+.cms-tpanel__x:hover{background:var(--adm-fill,#EEF0F4)}
+.cms-tpanel__x .ico{width:18px;height:18px}
+.cms-tpanel__body{flex:1;min-height:0;overflow:auto;padding:12px 16px 16px;overscroll-behavior:contain}
+.cms-tpanel__wait,.cms-tpanel__err{margin:8px 0;color:var(--adm-t3,#5A6461)}
+.cms-tpanel__err{color:var(--adm-err,#B3261E);font-weight:600}
+.cms-tpanel :focus-visible{outline:2px solid var(--adm-a,#314164);outline-offset:2px}
+@media (max-width:600px){
+  .cms-tpanel,.cms-tpanel--wide{top:auto;left:0;right:0;bottom:var(--cms-bottom-bar-h,0px);width:auto;max-height:min(72vh,calc(100vh - var(--cms-bar-h,48px) - var(--cms-bottom-bar-h,0px)));border-radius:16px 16px 0 0}
+}
+@media (prefers-reduced-motion:no-preference){.cms-tpanel:not([hidden]){animation:cms-tpanel .16s ease-out}@keyframes cms-tpanel{from{opacity:0;transform:translateY(6px)}}}
+
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.cms-toast--error{background:#B3261E}

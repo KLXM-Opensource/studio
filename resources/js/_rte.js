@@ -346,6 +346,17 @@ const Rich = {
     if (range) { sel.removeAllRanges(); sel.addRange(range); }
     if (!res || res.keep && !a) return;
     if (res.remove) { if (a) unwrap(a); else d.execCommand('unlink'); return; }
+    Rich.insertLink(area, res, range, a);
+  },
+  /**
+   * Link in ein bearbeitbares Element setzen – gemeinsame Logik für die Linkauswahl und Werkzeuge (CMSAdmin.tools, ctx.insertLink).
+   * res: {href, ref (z. B. entry:glossar:12), label (Linktext ohne Markierung), newTab, title}. range: Auswahl (sonst die aktuelle),
+   * a: vorhandener Link zum Ändern. Markierter Text wird zum Link, sonst wird label als neuer Link an der Schreibmarke eingefügt.
+   */
+  insertLink(area, res, range = null, a = null) {
+    if (range) { area.focus({ preventScroll: true }); const sel = selOf(area); sel.removeAllRanges(); sel.addRange(range); }
+    else range = rangeIn(area)?.cloneRange() || null;
+    a ??= up(area, n => n.tagName === 'A');
     const apply = el => {
       el.setAttribute('href', res.href);
       if (res.ref) el.dataset.link = res.ref; else el.removeAttribute('data-link');
@@ -361,6 +372,7 @@ const Rich = {
       return;
     }
     // Kein Text markiert: Linktext = Name des Ziels
+    if (!range) { const r = d.createRange(); r.selectNodeContents(area); r.collapse(false); const s2 = selOf(area); s2.removeAllRanges(); s2.addRange(r); }
     d.execCommand('insertHTML', false, `<a href="${esc(res.href)}" data-rte-new="1">${esc(res.label || res.href)}</a>`);
     $$('a[data-rte-new]', area).forEach(x => { x.removeAttribute('data-rte-new'); apply(x); });
   },

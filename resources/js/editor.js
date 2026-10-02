@@ -258,9 +258,15 @@ const InlineBar = (() => {
  * Touch-Geräten ohne Hover der einzige Weg dorthin. Die Seitenleiste öffnet ausschließlich „Bearbeiten“.
  */
 function selectBlock(el) {
+  const was = el?.classList.contains('is-selected');
   $$('.cms-block.is-selected', holder()).forEach(b => { if (b !== el) b.classList.remove('is-selected'); });
   el?.classList.add('is-selected');
   if (el) BarPlace.soon();
+  // Ereignis für Werkzeuge/Erweiterungen (CMSAdmin.events): cms:block-select { id, type, label, el }
+  if (el && !was) {
+    const tool = toolFor(el);
+    CMSAdmin.events?.emit('cms:block-select', { kind: 'page', id: tool?.blockId || el.closest('.ce-block')?.dataset.id || '', type: tool?.type || '', label: tool?.def?.label || '', el });
+  }
 }
 // Ereignisse aus Schatten-Bäumen (Block-Leiste, „+“) kommen hier mit dem Host als target an; Klicks in Werkzeugleiste,
 // Ebene (Seitenleiste, Dialoge) und Eintrags-Seitenleiste lassen die Auswahl stehen
@@ -1201,6 +1207,8 @@ editor = new EditorJS({
     dirty = false;
     Bar?.state('clean');
     requestAnimationFrame(() => jumpToBlock());
+    // Ereignis für Werkzeuge/Erweiterungen: Seiten-Editor ist bereit
+    CMSAdmin.events?.emit('cms:editor-ready', { kind: 'page', page: cfg.page, template: !!cfg.entry, entry: cfg.entry || null });
   },
 });
 
@@ -1345,9 +1353,19 @@ async function save(publish = false) {
   try {
     const out = await editor.save();
     const blocks = out.blocks.map(b => ({ ...b, tunes: { section: tunes.get(b.id)?.data || b.tunes?.section || {} } }));
+    // cms:before-save: Werkzeuge/Erweiterungen dürfen prüfen und abbrechen (auch asynchron, detail.waitUntil)
+    const gate = await (CMSAdmin.events?.beforeSave({ kind: 'page', publish, page: cfg.page, blocks }) ?? { ok: true });
+    if (!gate.ok) {
+      Bar?.state('dirty', gate.reason || '');
+      if (gate.reason) alert(gate.reason);
+      return false;
+    }
     const res = await api(cfg.endpoints.save, { blocks, publish });
     dirty = false;
     Bar?.state(publish ? 'published' : 'saved', (publish ? BT('published') : BT('saved')).replace('{time}', res.saved_at));
+    const ev = { kind: 'page', page: cfg.page, publish, savedAt: res.saved_at || '' };
+    CMSAdmin.events?.emit('cms:saved', ev);
+    if (publish) { CMSAdmin.events?.emit('cms:published', ev); CMSAdmin.events?.emit('cms:status-changed', { kind: 'page', page: cfg.page, status: 'published' }); }
     return true;
   } catch (e) {
     Bar?.state('error');

@@ -505,6 +505,13 @@ final class Extensions
         });
     }
 
+    /** Hört eine aktive Erweiterung auf das Ereignis? – teure Angaben (z. B. Eintrag neu laden) nur dann berechnen */
+    public static function listens(string $event): bool
+    {
+        foreach (self::$active as $x) if (!empty($x->listeners[$event])) return true;
+        return false;
+    }
+
     /** Ereignis an alle Erweiterungen melden (Fehler einer Erweiterung brechen den Ablauf nicht ab) */
     public static function emit(string $event, mixed ...$args): void
     {

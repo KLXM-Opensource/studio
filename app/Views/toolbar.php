@@ -126,6 +126,10 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
     </span>
     <?php endif; ?>
 
+    <?php // Werkzeuge beim Bearbeiten (Core\FrontendTools, resources/js/_tools.js): Knöpfe „main“ – Eintrag: erst im Modus „Bearbeiten“
+    foreach ($b['tools'] as $tl): if ($tl['placement'] !== 'main') continue; $sc = $tl['shortcut']; ?>
+    <button type="button" class="cms-ibtn cms-bar__tool" data-cms-tool="<?= e($tl['id']) ?>" aria-label="<?= e($tl['label']) ?>" title="<?= e($tl['label'] . ($sc ? ' (' . $sc['label'] . ')' : '')) ?>" aria-haspopup="dialog" aria-expanded="false"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $kind === 'entry' ? ' data-bar-when="edit"' . ($edit ? '' : ' hidden') : '' ?>><?= icon($tl['icon']) ?></button>
+    <?php endforeach; ?>
     <button type="button" class="cms-ibtn cms-bar__search" data-spotlight aria-label="<?= e(__('Suchen')) ?>" title="<?= e(__('Suchen (⌘K / Strg+K)')) ?>" aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?></button>
 
     <?php /* ---------- Alles Weitere: EIN Menü ---------- */ ?>
@@ -165,6 +169,10 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
         <?php endif; ?>
         <?= $sep ?>
         <?php if ($kind !== 'page' && $b['canTable'] && !$b['foreign']): ?><?= $item(e(__('In der Verwaltung öffnen')), 'arrow-square-out', $b['adminUrl']) ?><?php endif; ?>
+        <?php foreach ($b['tools'] as $tl): // Werkzeuge (Core\FrontendTools): „more“ immer hier, „main“ nur auf Telefonen (Knopf ist dort ausgeblendet)
+          $sc = $tl['shortcut']; $when = $kind === 'entry' ? ' data-bar-when="edit"' . ($edit ? '' : ' hidden') : ''; ?>
+          <button type="button" role="menuitem" class="cms-menu__item<?= $tl['placement'] === 'main' ? ' cms-menu--phone' : '' ?>" tabindex="-1" data-cms-tool="<?= e($tl['id']) ?>" aria-haspopup="dialog"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $when ?>><span class="cms-menu__ico" aria-hidden="true"><?= icon($tl['icon']) ?></span><span class="cms-menu__label"><?= e($tl['label']) ?><?php if ($tl['hint'] !== ''): ?><small><?= e($tl['hint']) ?></small><?php endif; ?></span><?php if ($sc): ?><kbd><?= e($sc['label']) ?></kbd><?php endif; ?></button>
+        <?php endforeach; ?>
         <?php foreach ($b['ext']['items'] ?? [] as $xi): // Erweiterungen (Extension::toolbar) ?>
           <?= $item(e($xi['label']) . ($xi['hint'] !== '' ? '<small>' . e($xi['hint']) . '</small>' : ''), $xi['icon'], $xi['href'] !== null ? url($xi['href']) : null,
               implode('', array_map(fn($k, $v) => ' data-' . e($k) . '="' . e($v) . '"', array_keys($xi['data']), $xi['data']))) ?>
@@ -180,6 +188,9 @@ $sep = '<div class="cms-menu__sep" role="separator"></div>';
   </div>
 </div>
 <!--cms-bar-end-->
+<?php if ($b['tools']): // Werkzeuge beim Bearbeiten: Konfiguration für resources/js/_tools.js (Module erst beim Öffnen) ?>
+<script type="application/json" id="cms-tools"><?= json_encode(\Core\FrontendTools::config($b, $b['tools']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<?php endif; ?>
 <?php foreach ($b['ext']['scripts'] ?? [] as $xs): // Skripte der Erweiterungen (Extension::toolbar) – nur 'self' ?><script src="<?= e($xs['src']) ?>"<?= $xs['module'] ? ' type="module"' : ' defer' ?>></script>
 <?php endforeach; ?>
 <?php if ($kind === 'entry'): $reason = $b['canTable'] && !$b['foreign'] ? EntryEdit::reason($b['table'], $b['entry']) : null; ?>

@@ -24,6 +24,7 @@ import { initRedirects } from './_redirects.js';   // Administration → Weiterl
 import { initEntryEdit } from './_entry_edit.js';
 import { formFields } from './_form_fields.js';   // Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken (Core\Data\SchemaPanel)
 import { initToolbar, bar_ } from './_bar.js';   // Redaktions-Werkzeugleiste: Menüs, Status, Modus, Abbrechen
+import { initTools, tools_, emit, beforeSave } from './_tools.js';   // Werkzeuge beim Bearbeiten (Core\FrontendTools) + Ereignisse cms:*
 import { initAi } from './_ai.js';   // KI-Assistent (Core\AI) – ohne Konfiguration #cms-ai wirkungslos
 import { initIconPickers, initIconGallery } from './_iconpicker.js';
 import { ico } from './_icons.js';   // Symbolauswahl (Feldtyp „icon“, Tabellensymbol)
@@ -45,6 +46,8 @@ const csrf = () => $('#adm-csrf')?.value || window.CMS_CSRF || '';
 // ------------------------------------------------------------ Website: Werkzeugleiste im Shadow DOM (_shadow.js, Verhalten: _bar.js)
 initBar();
 initToolbar();
+// Werkzeuge beim Bearbeiten (z. B. Quick-Glossar): Knöpfe, Tastenkürzel, Module erst beim Öffnen (_tools.js)
+initTools();
 
 // ------------------------------------------------------------ Schmale Bildschirme: Seitenleiste als Schublade (_drawer.js)
 initDrawer();
@@ -732,6 +735,8 @@ initSettingsPreview();
 initDesign();
 initBlockBuilder();
 window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
+  // Werkzeuge beim Bearbeiten und Ereignisse (stabile Schnittstelle, Technik → Erweiterungen): CMSAdmin.tools.register(id, { mount, unmount })
+  tools: tools_, events: { emit, beforeSave },
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene
   shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN, topInset } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)

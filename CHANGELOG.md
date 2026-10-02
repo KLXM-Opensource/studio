@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Werkzeuge und Ereignisse beim Bearbeiten auf der Website
+- **Werkzeuge:** `$x->frontendTool([...])` (`Core\FrontendTools`) – Knopf in der Werkzeugleiste oder Eintrag im Menü „⋯“, Tastenkürzel,
+  Rechte (`perm`, `table`, `feature`, `visible`), Modi `page`/`entry`. Nur angemeldet und nur im Bearbeiten-Modus; das ES-Modul lädt
+  erst beim ersten Öffnen (Besucher laden nichts). Oberfläche: Seitenleiste in der Shadow-DOM-Ebene (`role="dialog"`, Esc, Fokus zurück).
+- **JavaScript:** `CMSAdmin.tools` (`register`, `open`, `close`, `toggle`, `unmount`) und `ctx` mit Seite/Eintrag, Sprache, CSRF,
+  `fetch()`, gemerkter Schreibmarke (`selection()`), `insertText()`, `insertLink()` (gleiche Logik wie die Linkauswahl, jetzt
+  `Rich.insertLink`), `toast()`, `announce()`, `on()`. Tasten in der Seitenleiste erreichen Editor.js nicht mehr.
+- **Ereignisse im Browser:** `cms:editor-ready`, `cms:block-select`, `cms:before-save` (abbrechbar, `detail.waitUntil(promise)`),
+  `cms:saved`, `cms:published`, `cms:status-changed`, `cms:tool-open`/`-close` (`CMSAdmin.events`).
+- **Ereignisse auf dem Server** (`$x->on()`): `page.saved`, `page.published`, `page.unpublished`, `page.discarded`, `page.deleted`,
+  `entry.saved`, `entry.published`, `entry.unpublished`, `entry.deleted` – unabhängig vom Weg (Verwaltung, Website, API, MCP, CLI);
+  `Extensions::listens()`. Selbsttest `php bin/console extensions:selftest`. Doku: Technik → „Erweiterungen: Seiten, Werkzeuge & Ereignisse“.
+
 ### Verwaltung: Seiten nach Art – Einstellungen und Statistiken gesammelt
 - **Arten:** Jede Seite, die eine Funktion oder Erweiterung in der Verwaltung anmeldet, hat eine Art (`Core\AdminPages`):
   `content` und `tool` stehen im Menü (Hauptmenü bzw. Administration), `settings` gesammelt unter **Administration → Einstellungen**

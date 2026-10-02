@@ -182,6 +182,8 @@ function initToggle() {
       setChip(H?.dirty?.() ? 'unsaved' : cfg.status);
       if (cfg.kind === 'entry') entryStatus(online);
       say(T(online ? 'onlineDone' : 'offlineDone'));
+      // Ereignis für Werkzeuge/Erweiterungen (Technik → Erweiterungen): Online/Offline über den Status-Chip
+      d.dispatchEvent(new CustomEvent('cms:status-changed', { detail: { kind: cfg.kind, status: online ? 'published' : 'offline', via: 'toggle', id: tg.id || null } }));
       const next = pop.querySelector(online ? '[data-bar-offline]' : '[data-bar-online]');
       (next && !next.hidden ? next : R.querySelector('[data-bar-chip]'))?.focus();
     } catch (e) {

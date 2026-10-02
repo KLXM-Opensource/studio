@@ -29,6 +29,7 @@
     <tr><td><code>html.cms-editing</code></td><td>Ein Bearbeiten-Modus ist aktiv (Seite, Eintrag, Vorlage) – jede Breite.</td></tr>
     <tr><td><code>html.cms-has-actionbar</code></td><td>Zusätzlich steht die Aktionsleiste des Editors unten (&lt; 768 px); <code>body</code> bekommt passenden Abstand unten.</td></tr>
     <tr><td><code>[data-cms-hide-editing]</code></td><td>Konvention: Elemente mit diesem Attribut blendet <code>editor.css</code> aus, solange die Aktionsleiste unten steht. Kostet das Kit kein CSS.</td></tr>
+    <tr><td><code>html.cms-has-tpanel</code></td><td>Ein Werkzeug (z. B. Quick-Glossar) hat seine Seitenleiste geöffnet (<a href="#erweiterungen-werkzeuge">Werkzeuge</a>). Ereignisse <code>cms:editor-ready</code>, <code>cms:saved</code>, <code>cms:published</code>, <code>cms:status-changed</code> u. a.: <a href="#erweiterungen-ereignisse">Ereignisse im Browser</a>.</td></tr>
     <tr><td><code>--cms-bottom-bar-h</code></td><td>Höhe der Aktionsleiste unten (sonst <code>0px</code>) – für Kits, die ihre Leiste lieber verschieben: <code>bottom: calc(12px + var(--cms-bottom-bar-h, 0px))</code>.</td></tr>
   </table>
   <p>Beispiel (praxis, <code>templates/layout.php</code>): <code>&lt;div class="bottombar" … data-cms-hide-editing&gt;</code> – „Anrufen / Termin“ verschwindet auf Telefonen, solange bearbeitet wird. Seitenleiste „Block“ und Eintrags-Seitenleiste enden auf Telefonen über der Aktionsleiste (<code>bottom: var(--cms-bottom-bar-h)</code>).</p>

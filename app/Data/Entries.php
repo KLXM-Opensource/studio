@@ -443,7 +443,23 @@ final class Entries
             }
         }
         self::changed($table);
+        self::events($table, (int) $id, $current, $status);
         return [$id, []];
+    }
+
+    /**
+     * Ereignisse für Erweiterungen (Extension::on) nach dem Speichern: entry.saved ($table, $entry, $created, $old) und bei einem
+     * Wechsel des Status entry.published bzw. entry.unpublished ($table, $entry). Eintrag nur laden, wenn jemand zuhört.
+     */
+    private static function events(array $table, int $id, ?array $old, string $status): void
+    {
+        $was = $old['status'] ?? null;
+        $pub = $status === 'published' && $was !== 'published' ? 'entry.published' : ($status !== 'published' && $was === 'published' ? 'entry.unpublished' : null);
+        if (!\Core\Extensions::listens('entry.saved') && !($pub && \Core\Extensions::listens($pub))) return;
+        $e = self::find($table, $id);
+        if (!$e) return;
+        \Core\Extensions::emit('entry.saved', $table, $e, $old === null, $old);
+        if ($pub) \Core\Extensions::emit($pub, $table, $e);
     }
 
     public static function delete(array $table, int $id): void
@@ -466,6 +482,7 @@ final class Entries
             else Tables::db($t)->query('DELETE FROM ' . Tables::pivot($t, $f['name']) . ' WHERE target_id = ?', [$id]);
         }
         self::changed($table);
+        \Core\Extensions::emit('entry.deleted', $table, $id);   // Erweiterungen (Extension::on)
     }
 
     /** Wer verweist auf diesen Eintrag? [['table' => …, 'field' => …, 'entries' => […]], …] */
@@ -530,6 +547,12 @@ final class Entries
         $db = Tables::db($table);
         // Geteilt: nur eigene Einträge
         [$own, $op] = Tables::isShared($table) ? [' AND origin_site = :origin', ['origin' => site()->key]] : ['', []];
+        $new = $status === 'draft' ? 'draft' : 'published';
+        $ev = 'entry.' . ($new === 'published' ? 'published' : 'unpublished');
+        $before = [];
+        if (\Core\Extensions::listens($ev)) {
+            foreach (array_map('intval', $ids) as $id) $before[$id] = $db->fetchValue("SELECT status FROM {$table['table']} WHERE id = ?", [$id]);
+        }
         foreach (array_map('intval', $ids) as $id) {
             $upd = ['status' => $status === 'draft' ? 'draft' : 'published', 'updated_at' => now()];
             $db->update($table['table'], $upd, 'id = :id' . $own, ['id' => $id] + $op);
@@ -538,6 +561,10 @@ final class Entries
             }
         }
         self::changed($table);
+        // Ereignisse nur für Einträge, deren Status sich wirklich geändert hat (Erweiterungen, Extension::on)
+        foreach ($before as $id => $was) {
+            if ($was !== null && $was !== $new && ($e = self::find($table, $id)) && $e['status'] === $new) \Core\Extensions::emit($ev, $table, $e);
+        }
     }
 
     /** Manuelle Reihenfolge speichern */

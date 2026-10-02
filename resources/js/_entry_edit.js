@@ -8,6 +8,7 @@
  *  - Nach dem Speichern: Seite neu laden, Scroll-Position bleibt.
  */
 import { conditions } from './_conditions.js';
+import { emit, beforeSave } from './_tools.js';   // Ereignisse cms:* (Werkzeuge, Erweiterungen)
 import { ui, uiAll, layerBox, barHost, openDialog, addRoot, pathClosest, setUiCss, deepActive } from './_shadow.js';
 import { ico } from './_icons.js';
 import { bar_ as Bar, barState, confirmDiscard, ask } from './_bar.js';
@@ -29,6 +30,15 @@ const now = () => new Date().toTimeString().slice(0, 5);
 let cfg = null;               // Detailseite: {table, id, status, endpoint, workflow, publish, csrf, texts}
 let csrfToken = '';
 const csrf = () => csrfToken || $('#adm-csrf')?.value || cfg?.csrf || '';
+
+/** Ereignisse nach dem Speichern eines Eintrags: cms:saved, bei Statuswechsel cms:published / cms:status-changed */
+function entryEvents(status, res, panel) {
+  const entry = cfg ? { table: cfg.table, id: cfg.id } : null;
+  const ev = { kind: 'entry', entry, panel, status: status || cfg?.status || '', savedAt: res?.saved_at || '' };
+  emit('cms:saved', ev);
+  if (status === 'published') emit('cms:published', ev);
+  if (status) emit('cms:status-changed', { kind: 'entry', entry, status });
+}
 
 async function request(url, { method = 'GET', json, form } = {}) {
   const headers = { Accept: 'application/json', 'X-CSRF-Token': csrf() };
@@ -211,6 +221,8 @@ const Panel = (() => {
     if (!form) return;
     if (status === 'published' && !(await askPublish())) return;
     if (status === 'draft' && cfg?.status === 'published' && url === cfg.endpoint && !(await askDraft())) return;
+    const gate = await beforeSave({ kind: 'entry', panel: true, status: status || '', entry: cfg ? { table: cfg.table, id: cfg.id } : null });
+    if (!gate.ok) { if (gate.reason) alert(gate.reason); return; }
     const fd = new FormData(form);
     if (status) fd.set('status', status);
     const btns = [...root.querySelectorAll('.cms-epanel__foot button')];
@@ -230,6 +242,7 @@ const Panel = (() => {
     }
     dirty = false;
     Inline.reset();
+    entryEvents(status, res, true);
     const msg = tx(status === 'published' ? 'published' : status === 'draft' ? 'drafted' : 'saved', { time: res.saved_at || now() });
     // Seiten-Editor (Vorlage) mit ungespeicherten Änderungen: nicht neu laden
     if ($('#cms-editor') && ui('[data-editor-status].is-dirty')) { close(); alert(T.pending); return; }
@@ -298,6 +311,7 @@ const Inline = (() => {
     nodes.forEach(n => editable(n, true));
     d.documentElement.classList.add('cms-entry-editing');
     Bar.setMode('edit');
+    emit('cms:editor-ready', { kind: 'entry', entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: nodes.map(n => n.dataset.entryField) });
     // Fokus: erstes sichtbares Feld, sonst „Abbrechen“ (der Knopf „Bearbeiten“ ist jetzt ausgeblendet)
     const first = nodes.find(inView);
     if (first) first.focus({ preventScroll: true }); else ui('[data-bar-cancel]')?.focus();
@@ -396,6 +410,9 @@ const Inline = (() => {
     if (status === 'draft' && !(await askDraft())) return;
     const f = {};
     list.forEach(n => { f[n.dataset.entryField] = read(n); });
+    // cms:before-save: Werkzeuge/Erweiterungen dürfen prüfen und abbrechen (auch asynchron, detail.waitUntil)
+    const gate = await beforeSave({ kind: 'entry', status, entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: f });
+    if (!gate.ok) { setStatus(gate.reason || T.dirty, 'is-dirty'); if (gate.reason) alert(gate.reason); return; }
     setStatus(T.saving, 'is-busy');
     let res;
     try { res = await request(cfg.endpoint, { method: 'POST', json: { f, partial: 1, ...(status ? { status } : {}) } }); }
@@ -412,6 +429,7 @@ const Inline = (() => {
       if (rest.length || !Object.keys(errs).length) alert((res.error || T.error) + (rest.length ? '\n\n' + rest.join('\n') : ''));
       return;
     }
+    entryEvents(status, res, false);
     const msg = tx(status === 'published' ? 'published' : status === 'draft' ? 'drafted' : 'saved', { time: res.saved_at || now() });
     if (status || (res.url && new URL(res.url, location.href).pathname !== location.pathname)) { dirty = false; reloadKeepScroll(msg, res.url && new URL(res.url, location.href).pathname !== location.pathname ? res.url : null); return; }
     nodes.forEach(n => { n._orig = read(n); n._html = n.innerHTML; clearError(n); });
