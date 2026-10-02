@@ -670,6 +670,11 @@ final class Extensions
                     $tiles[] = $t + ['extension' => $x->name];
                 }
                 foreach ((array) ($d['cards'] ?? []) as $key => $c) {
+                    // Inhalt als Daten ('body', escaped vom Core – Core\Slots) oder Altform 'render' (HTML)
+                    if (is_array($c) && !isset($c['render']) && is_array($c['body'] ?? null)) {
+                        $body = $c['body'];
+                        $c['render'] = fn(): string => Slots::card($body, 'body', $x->name);
+                    }
                     if (!is_array($c) || !preg_match('~^[a-z][a-z0-9_-]{1,40}$~', (string) $key) || !is_callable($c['render'] ?? null)) continue;
                     $render = $c['render'];
                     $cards['x-' . preg_replace('~[^a-z0-9-]~', '-', strtolower($x->name)) . '-' . str_replace('_', '-', (string) $key)] = [
@@ -710,12 +715,69 @@ final class Extensions
         return ['badges' => $badges, 'actions' => $actions];
     }
 
-    /** Seiteneinstellungen: Karten aktiver Erweiterungen für die Seitenleiste (Extension::pagePanel) – fertiges HTML */
+    /** Seiteneinstellungen: Karten aktiver Erweiterungen für die Seitenleiste (Extension::pagePanel) – Karte (Slots::card) oder Altform-HTML */
     public static function pagePanels(array $page): string
+    {
+        return self::cards('pagePanelProviders', 'pagePanel', $page, 'card', true);
+    }
+
+    /** Mediathek: Abschnitte aktiver Erweiterungen für eine Datei (Extension::mediaPanel) – Liste fertiger, escapter HTML-Abschnitte */
+    public static function mediaPanels(array $m): array
+    {
+        $out = [];
+        foreach (self::$active as $x) {
+            foreach ($x->mediaPanelProviders as $fn) {
+                $spec = self::safe($x, 'mediaPanel', fn() => $fn($m));
+                if (is_array($spec) && ($html = Slots::card($spec, 'media', $x->name)) !== '') $out[] = $html;
+            }
+        }
+        return $out;
+    }
+
+    /** Konto: Abschnitte aktiver Erweiterungen (Extension::account) – escapte Karten */
+    public static function accountSections(array $user): string
+    {
+        return self::cards('accountProviders', 'account', $user, 'card', false);
+    }
+
+    /**
+     * Datentabelle: Knöpfe im Kopf und Aktionen je Zeile (Extension::tableActions), Pfade geprüft, {table} ersetzt; {id} ersetzt rowActions().
+     * @return array{actions: list<array>, row: list<array{label: string, href: string, extension: string}>}
+     */
+    public static function tableActions(array $t): array
+    {
+        $actions = $row = [];
+        foreach (self::$active as $x) {
+            foreach ($x->tableActionProviders as $fn) {
+                $d = self::safe($x, 'tableActions', fn() => $fn($t));
+                if (!is_array($d)) continue;
+                foreach (Slots::actions((array) ($d['actions'] ?? []), ['table' => (string) ($t['handle'] ?? '')]) as $a) $actions[] = $a + ['extension' => $x->name];
+                foreach ((array) ($d['row'] ?? []) as $a) {
+                    // Pfad mit {id}: erst je Zeile prüfen (rowActions)
+                    if (!is_array($a) || trim((string) ($a['label'] ?? '')) === '') continue;
+                    $row[] = ['label' => trim((string) $a['label']), 'href' => str_replace('{table}', rawurlencode((string) ($t['handle'] ?? '')), (string) ($a['href'] ?? '')), 'extension' => $x->name];
+                }
+            }
+        }
+        return ['actions' => $actions, 'row' => $row];
+    }
+
+    /** Aktionen je Zeile für einen Eintrag ({id} ersetzt, Pfade geprüft) */
+    public static function rowActions(array $row, int $id): array
+    {
+        return Slots::actions($row, ['id' => $id]);
+    }
+
+    /** Karten eines Slots sammeln: Array → Slots::card, Zeichenkette nur bei $legacyHtml (Altform, selbst escaptes HTML) */
+    private static function cards(string $prop, string $hook, array $arg, string $variant, bool $legacyHtml): string
     {
         $out = '';
         foreach (self::$active as $x) {
-            foreach ($x->pagePanelProviders as $fn) $out .= (string) self::safe($x, 'pagePanel', fn() => $fn($page), '');
+            foreach ($x->{$prop} as $fn) {
+                $spec = self::safe($x, $hook, fn() => $fn($arg), null);
+                if (is_array($spec)) $out .= Slots::card($spec, $variant, $x->name);
+                elseif ($legacyHtml && is_string($spec)) $out .= $spec;
+            }
         }
         return $out;
     }

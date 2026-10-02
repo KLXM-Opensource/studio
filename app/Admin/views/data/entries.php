@@ -46,12 +46,16 @@ $statusCell = function (array $e) use ($t, $canPub, $extOrigin): string {
         . ' aria-label="' . e(__('„{title}“: {status} – {action}', ['title' => $title, 'status' => $label, 'action' => $act])) . '" title="' . e($act) . '">' . e($label) . '</button>';
 };
 ?>
-<?php // Ansicht (Liste/Kalender), Felder und „Detailseite gestalten“ stehen in der Daten-Navigation (data/_nav.php) ?>
+<?php // Ansicht (Liste/Kalender), Felder und „Detailseite gestalten“ stehen in der Daten-Navigation (data/_nav.php)
+$extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kopf, Aktionen je Zeile (Core\Slots) ?>
 <header class="adm-head dt-head">
   <h1><span aria-hidden="true" class="dt-h1icon"><?= icon($t['icon']) ?></span> <?= e($t['name']) ?><?php if ($shared = \Core\Data\Tables::isShared($t)): ?> <span class="dt-nav__shared"><?= e(__('geteilt')) ?></span><?php endif; ?></h1>
   <div class="adm-row">
     <?php if ($tblPages = \Core\AdminPages::forTable($t['handle'])): // Einstellungsseiten dieser Tabelle (Core\AdminPages, 'table' => …), z. B. Glossar ?>
     <span class="dt-head__pages"><?php foreach ($tblPages as $tp): ?><a class="adm-btn adm-btn--ghost" href="<?= e(url($tp['href'])) ?>"><?= \Core\Icons::render($tp['icon'], ['fallback' => 'gear-six']) ?> <?= e($tp['label']) ?></a><?php endforeach; ?></span>
+    <?php endif; ?>
+    <?php if ($extTbl['actions']): // Erweiterungen (Extension::tableActions, Core\Slots): Knöpfe im Kopf ?>
+    <span class="dt-head__pages"><?php foreach ($extTbl['actions'] as $xa): ?><a class="adm-btn adm-btn--ghost" href="<?= e(url($xa['href'])) ?>" data-slot="<?= e($xa['extension']) ?>"><?= $xa['icon'] !== '' ? \Core\Icons::render($xa['icon']) . ' ' : '' ?><?= e($xa['label']) ?></a><?php endforeach; ?></span>
     <?php endif; ?>
     <a class="adm-btn adm-btn--primary" href="<?= e(url($base . '/new') . ($multi ? '?lang=' . $lang : '')) ?>">+ <?= e($t['singular']) ?></a>
   </div>
@@ -107,6 +111,7 @@ $statusCell = function (array $e) use ($t, $canPub, $extOrigin): string {
           <?php if (!empty($shared) && !empty($e['suggest'])): $sp = $ownerPicks[$e['id']] ?? null; ?><small class="sh-pick sh-pick--<?= e($sp ?? 'suggested') ?>"><?= e(match ($sp) { 'visible' => __('übernommen'), 'featured' => __('hervorgehoben'), 'rejected' => __('abgelehnt'), 'hidden' => __('ausgeblendet'), default => __('vorgeschlagen') }) ?></small><?php endif; ?>
           <?php if (isset($extOrigin[$e['id']])): ?><small class="src-badge" title="<?= e(__('Aus der externen Quelle „{name}“ – nur lesbar', ['name' => $extOrigin[$e['id']]['name']])) ?>"><?= icon('plugs-connected') ?> <?= e(__('aus Quelle')) ?></small><?php endif; ?>
           <?php if ($url): ?><a class="dt-view" href="<?= e($url) ?>" target="_blank" rel="noopener" aria-label="Auf der Website ansehen">↗</a><?php endif; ?>
+          <?php if ($extTbl['row']): foreach (\Core\Extensions::rowActions($extTbl['row'], (int) $e['id']) as $xa): ?><a class="dt-rowact" href="<?= e(url($xa['href'])) ?>" aria-label="<?= e($xa['label'] . ': ' . Entries::title($t, $e)) ?>"><?= e($xa['label']) ?></a><?php endforeach; endif; ?>
         </td>
         <?php foreach ($cols as $c): ?><td><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
         <?php if ($t['settings']['workflow']): ?><td><?= $statusCell($e) ?></td><?php endif; ?>

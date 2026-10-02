@@ -1163,6 +1163,8 @@ final class Media
             'captions' => MediaTracks::supports($m) ? MediaTracks::summary($m) : null,
             // Angaben aktiver Erweiterungen (Extension::mediaJson), z. B. ext.video_tools
             'ext' => (object) Extensions::mediaJson($m),
+            // Abschnitte aktiver Erweiterungen unter „Informationen“ (Extension::mediaPanel) – vom Core escaptes HTML (Core\Slots)
+            'panels' => Extensions::mediaPanels($m),
         ];
     }
 }

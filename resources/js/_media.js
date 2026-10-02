@@ -1035,6 +1035,8 @@ class Finder {
     this.inlineEdit(m);
     window.CMSAi?.mediaPanel?.(this, m);   // KI: Alt-Text vorschlagen (_ai.js)
     if (this.meta?.ai?.captions !== false) captionsPanel(this, m, CAP_HELPERS);   // Untertitel & Transkript (_captions.js)
+    // Erweiterungen (PHP, Extension::mediaPanel): fertige Abschnitte, vom Core escaped (Core\Slots::card)
+    if (this.mode === 'library' && Array.isArray(m.panels) && m.panels.length) this.$info.insertAdjacentHTML('beforeend', m.panels.join(''));
     if (this.mode === 'library') hook('panel', this, m, UI);   // Erweiterungen (z. B. Video-Werkzeuge)
   }
 

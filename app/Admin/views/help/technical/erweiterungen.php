@@ -103,6 +103,38 @@ Table::named('kalender_log')-&gt;id()-&gt;column('text', 'text')-&gt;ensure();</
   </table>
   <p><code>table()</code> ersetzt handgeschriebenes SQL (<code>$pk</code>/<code>$long</code> je Datenbank) für <b>neue</b> Tabellen; einmalige Datenschritte (Werte umstellen, kopieren) bleiben <code>migration()</code>. Bestehende Migrationen müssen nicht umgeschrieben werden. Selbsttest: <code>php bin/console db:selftest</code> (Wegwerf-Datenbank: anlegen, idempotent, ergänzen, umbenennen, Indizes, Fremdschlüssel, Transaktion).</p>
 
+  <h3 id="erweiterungen-slots">Slots der Verwaltung (<code>Core\Slots</code>)</h3>
+  <p>Erweiterungen hängen sich nur an diesen sechs Stellen in Seiten des Cores ein. Jeder Slot hat genau eine Manifest-Methode, nimmt als zweites Argument optional ein <b>Recht</b> (ohne <code>can($perm)</code> erscheint nichts) und liefert <b>Daten</b> – der Core rendert und escaped. Fehler einer Erweiterung landen im Fehlerprotokoll, die Seite bleibt stehen. Reihenfolge: wie die Erweiterungen starten.</p>
+  <table class="doc-table">
+    <tr><th>Slot</th><th>Methode</th><th>Wo</th><th>Rückgabe</th></tr>
+<?php foreach (\Core\Slots::ALL as $__slot => [$__m, $__where, $__ret]): ?>
+    <tr><td><code><?= e($__slot) ?></code></td><td><code><?= e($__m) ?>(fn, ?perm)</code></td><td><?= e($__where) ?></td><td><?= $__ret === 'Karte' ? 'Karte (siehe unten)' : '<code>' . e($__ret) . '</code>' ?></td></tr>
+<?php endforeach; ?>
+  </table>
+  <p><b>Karte</b> (gleicher Vertrag für <code>pagePanel</code>, <code>mediaPanel</code>, <code>account</code> und <code>'body'</code> einer Karte der Übersicht): <code>['title' =&gt; …, 'text' =&gt; …, 'tone' =&gt; 'ok'|'warn'|'info'|'muted', 'lines' =&gt; ['Bezeichnung' =&gt; 'Wert'], 'actions' =&gt; [['label' =&gt; …, 'href' =&gt; '/admin/…', 'primary' =&gt; true]]]</code> – alles Klartext. Aktionen nur als Pfad dieser Installation (beginnt mit <code>/</code>, kein <code>//</code>, kein <code>javascript:</code>); sie öffnen Seiten der Erweiterung (deren Routen sind <a href="#erweiterungen-routen">geschützt</a>).</p>
+  <pre><code>$x-&gt;pagePanel(fn(array $page) =&gt; [
+    'title' =&gt; 'Feedback &amp; Freigabe', 'text' =&gt; Feedback::sentence($page['id']), 'tone' =&gt; 'ok',
+    'lines' =&gt; ['Offene Rückmeldungen' =&gt; (string) Feedback::open($page['id'])],
+    'actions' =&gt; [['label' =&gt; 'Feedback ansehen', 'href' =&gt; '/admin/feedback/' . $page['id'], 'primary' =&gt; true]],
+], 'feedback.view');
+$x-&gt;tableActions(fn(array $t) =&gt; $t['handle'] !== 'news' ? null : [
+    'actions' =&gt; [['label' =&gt; 'Newsletter', 'href' =&gt; '/admin/newsletter/{table}', 'icon' =&gt; 'envelope']],   // Kopf der Liste
+    'row'     =&gt; [['label' =&gt; 'Versenden', 'href' =&gt; '/admin/newsletter/{table}/{id}']],                       // je Eintrag
+], 'newsletter.send');
+$x-&gt;mediaPanel(fn(array $m) =&gt; ($o = Origin::of($m)) ? ['title' =&gt; 'Herkunft', 'lines' =&gt; ['Quelle' =&gt; $o['label']]] : null, 'media.upload');
+$x-&gt;account(fn(array $user) =&gt; ['title' =&gt; 'Kalender-Abo', 'text' =&gt; 'Persönlicher Link für Ihre Kalender-App.',
+    'actions' =&gt; [['label' =&gt; 'Link anzeigen', 'href' =&gt; '/admin/kalender/abo']]]);
+$x-&gt;dashboard(fn(array $user) =&gt; ['cards' =&gt; ['offen' =&gt; ['title' =&gt; 'Buchungen', 'icon' =&gt; 'calendar-check',
+    'body' =&gt; ['lines' =&gt; ['Heute' =&gt; '4', 'Offen' =&gt; '2'], 'actions' =&gt; [['label' =&gt; 'Öffnen', 'href' =&gt; '/admin/buchungen']]]]]]);</code></pre>
+  <ul>
+    <li><b>Seitenbaum</b> (<code>pageList</code>): <code>badges</code> = kurze Hinweise in „Status“ (<code>label</code>, <code>title</code>, <code>tone</code>), <code>actions</code> = Einträge im Kontextmenü. Läuft für jede Seite – Daten einmal vorab laden.</li>
+    <li><b>Datentabelle:</b> eigene <i>Seiten</i> an einer Tabelle sind <code>adminPage(['kind' =&gt; 'settings', 'table' =&gt; …])</code> (Knopf im Kopf und Unterpunkt der Daten-Navigation); <code>tableActions()</code> ergänzt Knöpfe und eine Aktion je Zeile (Platzhalter <code>{table}</code>, <code>{id}</code>).</li>
+    <li><b>Mediathek:</b> <code>mediaPanel()</code> für einen Abschnitt aus Daten; für Bedienelemente mit eigenem Skript bleibt <code>CMSMedia.extend({ panel, menu, … })</code> (siehe <a href="#medien">Medien</a>) und <code>mediaJson()</code> für Zusatzangaben.</li>
+    <li><b>Altform:</b> <code>pagePanel()</code> darf weiter fertiges, selbst escaptes HTML als Zeichenkette liefern, Karten der Übersicht weiter <code>'render' =&gt; fn(): string</code>. Neue Slots (<code>tableActions</code>, <code>mediaPanel</code>, <code>account</code>) nehmen nur Daten.</li>
+    <li><b>Nicht vorgesehen</b> (bewusst): eigene Spalten in fremden Tabellen, eigene Felder im Seiten-Editor außerhalb von Blöcken, Eingriffe ins Menü außer <code>adminPage()</code>, Ersetzen von Core-Ansichten. Bedarf → Vorschlag für einen neuen Slot im Core.</li>
+  </ul>
+  <p>Selbsttest: <code>extensions:selftest</code> (Abschnitt Slots: Methoden, Escapen, Pfade, Platzhalter, Rechte, Altform, Fehler).</p>
+
   <h3 id="erweiterungen-werkzeuge">Werkzeuge beim Bearbeiten auf der Website (<code>Core\FrontendTools</code>)</h3>
   <p>Ein Werkzeug ist ein Knopf in der Werkzeugleiste (<code>placement =&gt; 'main'</code>, auf Telefonen im Menü „⋯“) oder ein Eintrag im Menü „⋯“ (<code>'more'</code>), optional mit Tastenkürzel. Es erscheint <b>nur angemeldet</b> und nur mit Recht – standardmäßig <b>nur im Bearbeiten-Modus</b> (Seiten-Editor inkl. Vorlage: <code>page</code>; Eintrag direkt im Text: <code>entry</code>, dort erst nach „Bearbeiten“). Mit <code>'view' =&gt; true</code> (bzw. <code>'view'</code> in <code>modes</code>) erscheint es zusätzlich beim <b>Ansehen</b> (Seite ohne <code>?edit=1</code>, auch Live-Fassung; Detailseite eines Eintrags vor „Bearbeiten“) – dort ist jeder Text der Seite markierbar. Das ES-Modul lädt der Browser <b>erst beim ersten Öffnen</b> – Besucher laden nie etwas.</p>
   <pre><code>$x-&gt;frontendTool([

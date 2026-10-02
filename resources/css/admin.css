@@ -119,6 +119,13 @@ body.adm--bare{display:block}
 .adm-dl--request{background:var(--adm-surface);border-radius:8px;padding:14px 16px}
 .adm-dl--request dd{font-weight:600}
 .adm-dl dd{min-width:0}
+/* Karten aus Slots der Erweiterungen (Core\Slots::card) */
+.slot-card__text--ok{color:var(--adm-ok)}
+.slot-card__text--warn{color:var(--adm-warn);font-weight:600}
+.slot-card__text--muted{color:var(--adm-t3)}
+.slot-card__lines{margin:10px 0 0}
+.slot-card__actions{margin-top:12px;flex-wrap:wrap}
+.slot-card--media .slot-card__lines{gap:4px 14px;font-size:13px}
 .adm-inbox-group{border-collapse:collapse;font-size:14px;max-width:100%;display:block;overflow-x:auto}
 .adm-inbox-group th,.adm-inbox-group td{padding:4px 14px 4px 0;text-align:left;vertical-align:top;border-bottom:1px solid var(--adm-line)}
 .adm-inbox-group thead th{font-size:12px;font-weight:600;color:var(--adm-t3);letter-spacing:.02em}
@@ -771,6 +778,9 @@ img.media-vthumb{object-fit:cover}
 .dt-thumb--ph{display:grid;place-items:center;background:var(--adm-fill);color:var(--adm-t3);font-size:14px}
 .dt-view{margin-left:auto;padding:2px 7px;border-radius:6px;font-weight:400;color:var(--adm-t3)!important;opacity:0}
 .dt-table tr:hover .dt-view{opacity:1}
+/* Aktion je Zeile aus Erweiterungen (Extension::tableActions, Core\Slots) */
+.dt-rowact{margin-left:6px;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:600;color:var(--adm-a)!important;background:var(--adm-bg);white-space:nowrap}
+.dt-rowact:hover,.dt-rowact:focus-visible{background:var(--adm-line)}
 .dt-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--adm-t2)}
 .dt-status::before{content:"";width:8px;height:8px;border-radius:50%;background:#32D74B}
 .dt-status--draft::before{background:#FF9F0A}

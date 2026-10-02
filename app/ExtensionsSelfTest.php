@@ -14,7 +14,8 @@ namespace Core;
  *  - Ereignisse (Extension::on, Extensions::listens/emit): page.saved/published/unpublished, entry.saved/published/unpublished/deleted
  *    in einer Transaktion, die am Ende zurückgerollt wird; typisiert (Core\Events) und Altform;
  *  - Verwaltungsrouten von Erweiterungen (Core\Http\Router::scoped): Anmeldung, Recht, CSRF, Altform, benannte Ausnahmen;
- *  - Tabellen von Erweiterungen (Extension::table, Fingerabdruck) in einer Transaktion, die zurückgerollt wird.
+ *  - Tabellen von Erweiterungen (Extension::table, Fingerabdruck) in einer Transaktion, die zurückgerollt wird;
+ *  - Slots der Verwaltung (Core\Slots): Methoden, Escapen, nur eigene Pfade, Platzhalter, Rechte, Altform-HTML, Fehler isoliert.
  * Rollen werden für die Prüfung vorübergehend gesetzt (Auth per Reflection) und danach zurückgestellt.
  */
 final class ExtensionsSelfTest
@@ -63,6 +64,7 @@ final class ExtensionsSelfTest
             self::events();
             self::routes();
             self::tables();
+            self::slots();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -410,5 +412,62 @@ final class ExtensionsSelfTest
             if ($pdo->inTransaction()) $pdo->rollBack();
         }
         self::eq('table(): zurückgerollt', Db\Table::exists('qa_selftest_items'), false);
+    }
+
+    // ================================================================= Slots der Verwaltung
+
+    private static function slots(): void
+    {
+        foreach (Slots::ALL as $key => [$method]) self::eq("Slot $key: Methode $method", method_exists(Extension::class, $method), true);
+
+        // Karte: alles escaped, nur Pfade dieser Installation
+        $html = Slots::card(['title' => '<script>T</script>', 'text' => 'a & b', 'tone' => 'warn', 'lines' => ['<b>Offen</b>' => '3 <i>', 'leer' => ['x']],
+            'actions' => [['label' => 'Ok', 'href' => '/admin/qa?x=1&y=2', 'primary' => true], ['label' => 'Böse', 'href' => 'javascript:alert(1)'],
+                ['label' => 'Fremd', 'href' => '//evil.example/'], ['label' => 'Backslash', 'href' => '/\\evil.example'], ['label' => '', 'href' => '/admin/leer']]], 'card', 'qa_selftest');
+        self::eq('Karte: kein rohes HTML aus Angaben', [str_contains($html, '<script>'), str_contains($html, '<b>'), str_contains($html, '<i>')], [false, false, false]);
+        self::eq('Karte: escaped Inhalte', [str_contains($html, '&lt;script&gt;T&lt;/script&gt;'), str_contains($html, 'a &amp; b'), str_contains($html, '&lt;b&gt;Offen&lt;/b&gt;')], [true, true, true]);
+        self::eq('Karte: nur eigene Pfade als Aktion', [substr_count($html, 'adm-btn--small'), str_contains($html, 'javascript'), str_contains($html, 'evil')], [1, false, false]);
+        self::eq('Karte: Ton, Primärknopf, Herkunft', [str_contains($html, 'slot-card__text--warn'), str_contains($html, 'adm-btn--primary'), str_contains($html, 'data-slot="qa_selftest"')], [true, true, true]);
+        self::eq('Karte: Varianten', [str_starts_with(Slots::card(['title' => 'M'], 'media'), '<section class="fx-i-sec'), str_starts_with(Slots::card(['text' => 'B'], 'body'), '<div class="slot-card'),
+            str_contains(Slots::card(['title' => 'C']), '<h2>C</h2>'), Slots::card([])], [true, true, true, '']);
+        self::eq('Aktionen: Platzhalter kodiert, offene Platzhalter verworfen', array_column(Slots::actions([['label' => 'A', 'href' => '/admin/x/{table}/{id}'], ['label' => 'B', 'href' => '/admin/{rest}']], ['table' => 'a b', 'id' => 7]), 'href'), ['/admin/x/a%20b/7']);
+
+        // Erweiterung mit allen Slots
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+        $x->pagePanel(fn(array $p) => ['title' => 'Panel ' . $p['title'], 'lines' => ['ID' => (string) $p['id']]]);
+        $x->pagePanel(fn(array $p) => '<section class="adm-card">Altform</section>');                 // Altform: HTML bleibt erlaubt
+        $x->pagePanel(fn(array $p) => ['title' => 'Nur mit Recht'], 'qa.geheim');
+        $x->pagePanel(function (array $p): array { throw new \RuntimeException('kaputt'); });          // Fehler isoliert
+        $x->pageList(fn(array $p) => ['badges' => [['label' => 'QA', 'tone' => 'quatsch']], 'actions' => [['label' => 'Öffnen', 'href' => '/admin/qa/' . $p['id']], ['label' => 'X', 'href' => 'https://evil.example']]]);
+        $x->tableActions(fn(array $t) => ['actions' => [['label' => 'Export', 'href' => '/admin/qa/{table}/export', 'icon' => 'download'], ['label' => 'Fremd', 'href' => 'https://evil.example']],
+            'row' => [['label' => 'Senden', 'href' => '/admin/qa/{table}/{id}'], ['label' => 'Böse', 'href' => 'javascript:alert({id})']]]);
+        $x->mediaPanel(fn(array $m) => ['title' => 'Herkunft', 'lines' => ['Datei' => '<' . $m['name'] . '>']], 'media.upload');
+        $x->account(fn(array $u) => ['title' => 'QA-Konto', 'text' => 'Hallo ' . $u['name']]);
+        $x->account(fn(array $u) => '<b>Altform nicht erlaubt</b>');
+        $x->dashboard(fn(array $u) => ['cards' => ['qa' => ['title' => 'QA', 'body' => ['text' => '<i>Zahl</i>', 'lines' => ['Neu' => '2']]]]]);
+        self::activate($x);
+        self::actAs(['pages.edit', 'media.upload']);
+        $page = ['id' => 5, 'title' => 'Start <&>'];
+        $pp = Extensions::pagePanels($page);
+        self::eq('pagePanel: Karte escaped + Altform + Recht + Fehler isoliert', [str_contains($pp, 'Panel Start &lt;&amp;&gt;'), str_contains($pp, 'Altform'), str_contains($pp, 'Nur mit Recht'), substr_count($pp, '<section')], [true, true, false, 2]);
+        $pl = Extensions::pageList($page);
+        self::eq('pageList: Ton geprüft, nur eigene Pfade', [$pl['badges'][0]['tone'] ?? null, array_column($pl['actions'], 'href')], ['info', ['/admin/qa/5']]);
+        $ta = Extensions::tableActions(['handle' => 'qa_tabelle']);
+        self::eq('tableActions: Kopf mit {table}, fremde Adressen verworfen', array_column($ta['actions'], 'href'), ['/admin/qa/qa_tabelle/export']);
+        self::eq('tableActions: Zeile mit {id}, javascript: verworfen', array_column(Extensions::rowActions($ta['row'], 12), 'href'), ['/admin/qa/qa_tabelle/12']);
+        $mp = Extensions::mediaPanels(['id' => 1, 'name' => 'bild.jpg']);
+        self::eq('mediaPanel: Abschnitt escaped', [count($mp), str_contains($mp[0] ?? '', '&lt;bild.jpg&gt;'), str_contains($mp[0] ?? '', 'fx-i-sec')], [1, true, true]);
+        $acc = Extensions::accountSections(['id' => 1, 'name' => 'Erika <M>']);
+        self::eq('account: Karte escaped, Altform-HTML nicht erlaubt', [str_contains($acc, 'Hallo Erika &lt;M&gt;'), str_contains($acc, 'Altform nicht erlaubt')], [true, false]);
+        $dash = Extensions::dashboard(['id' => 1]);
+        $card = $dash['cards']['x-qa-selftest-qa'] ?? null;
+        self::eq('dashboard: body als Karte, escaped', $card ? [str_contains(($card['render'])(), '&lt;i&gt;Zahl&lt;/i&gt;'), str_contains(($card['render'])(), 'adm-dl')] : null, [true, true]);
+        self::actAs(['pages.edit']);
+        self::eq('Recht am Slot: ohne media.upload kein Abschnitt', Extensions::mediaPanels(['id' => 1, 'name' => 'a']), []);
+        self::actAs(['pages.edit', 'qa.geheim']);
+        self::eq('Recht am Slot: mit Recht sichtbar', str_contains(Extensions::pagePanels($page), 'Nur mit Recht'), true);
+        self::activate(null);
+        self::eq('Erweiterung aus → keine Slots', [Extensions::pagePanels($page), Extensions::mediaPanels(['id' => 1, 'name' => 'a']), Extensions::tableActions(['handle' => 'x'])], ['', [], ['actions' => [], 'row' => []]]);
+        self::actAs(null);
     }
 }

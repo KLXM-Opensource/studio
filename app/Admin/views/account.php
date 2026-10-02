@@ -156,3 +156,4 @@ $isShadow = !empty($user['network_uid']);
   </ol>
   <?php endif; ?>
 </section>
+<?= /* Erweiterungen (Extension::account, Core\Slots): eigene Abschnitte – escaped vom Core */ \Core\Extensions::accountSections((array) ($user ?? app()->auth->user() ?? [])) ?>

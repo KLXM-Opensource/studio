@@ -31,6 +31,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   `Media::humanSize()` (ab 1 GB „GB“), `Links::ago()`, `Dashboard::ago()`, `MediaJobs::duration()`, `Clamp::excerpt()`,
   Block-Filter `number`. In englischer Verwaltung bzw. auf englischen Seiten folgen Trenner und Datum jetzt der Sprache.
   Neues Kapitel im Entwicklerhandbuch: **Werte formatieren**.
+- **Slots der Verwaltung: `Core\Slots`** – sechs feste Stellen mit je einer Manifest-Methode, optionalem Recht und
+  Escapen durch den Core: `pageList` (Seitenbaum), `pagePanel` (Seiteneinstellungen), **neu** `tableActions` (Datentabelle:
+  Knöpfe im Kopf, Aktion je Zeile mit `{table}`/`{id}`), **neu** `mediaPanel` (Abschnitt unter „Informationen“ der Mediathek),
+  `dashboard` (Karten jetzt auch als Daten `'body'`), **neu** `account` (Abschnitt auf „Konto“). Gemeinsamer Kartenvertrag
+  (`title`, `text`, `tone`, `lines`, `actions` – nur Pfade dieser Installation). Altform-HTML von `pagePanel` und
+  `'render'` bleibt erlaubt.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`

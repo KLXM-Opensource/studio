@@ -35,9 +35,12 @@ namespace Core;
  *   $x->mediaPoster(fn(array $m): ?int => …)                           Vorschaubild (Bild-ID) für Videos ohne eigenes Poster (Themes, Player)
  *   $x->docs('manual'|'technical', ['key' => ['title' => …, 'file' => …, 'after' => 'medien']])   Kapitel im Handbuch/Entwicklerhandbuch
  *   $x->dashboard(fn(array $user) => ['tiles' => [...], 'cards' => [...]])   Kennzahlen-Kacheln und Karten der Übersicht (/admin)
- * Seiten (Verwaltung und Werkzeugleiste der Website):
+ * Slots der Verwaltung (Core\Slots – Daten statt HTML, der Core escaped; optional zweites Argument = Recht):
  *   $x->pageList(fn(array $page) => ['badges' => [['label' => …]], 'actions' => [['label' => …, 'href' => …]]])   Seitenbaum: Hinweis + Kontextmenü
- *   $x->pagePanel(fn(array $page) => '<section class="adm-card">…</section>')   Karte in der Seitenleiste der Seiteneinstellungen
+ *   $x->pagePanel(fn(array $page) => ['title' => …, 'text' => …, 'lines' => [...], 'actions' => [...]])   Karte in den Seiteneinstellungen
+ *   $x->tableActions(fn(array $t) => ['actions' => [...], 'row' => [['label' => …, 'href' => '/admin/x/{table}/{id}']]])   Datentabelle
+ *   $x->mediaPanel(fn(array $m) => ['title' => …, 'lines' => [...]], 'media.upload')   Abschnitt in „Informationen“ der Mediathek
+ *   $x->account(fn(array $user) => ['title' => …, 'actions' => [...]])                Abschnitt auf „Konto“
  *   $x->toolbar(fn(array $bar) => ['items' => [...], 'scripts' => ['js/x.js'], 'publishNote' => '…'])   Menü „⋯“ der Werkzeugleiste
  *   $x->frontendTool(['id' => 'notiz', 'label' => 'Notiz', 'icon' => 'note', 'module' => 'js/notiz.mjs', 'shortcut' => 'Alt+N', 'perm' => 'pages.edit'])
  *                                                                      Werkzeug beim Bearbeiten auf der Website (Core\FrontendTools, CMSAdmin.tools)
@@ -90,6 +93,12 @@ final class Extension
     public array $pagePanelProviders = [];
     /** @var list<callable(array): array> */
     public array $toolbarProviders = [];
+    /** @var list<callable(array): ?array> Datentabelle (tableActions) */
+    public array $tableActionProviders = [];
+    /** @var list<callable(array): ?array> Mediathek, eine Datei (mediaPanel) */
+    public array $mediaPanelProviders = [];
+    /** @var list<callable(array): ?array> Konto (account) */
+    public array $accountProviders = [];
     /** @var list<callable(array): ?array> */
     public array $inboxProviders = [];
     /** @var list<array> Werkzeuge für das Bearbeiten auf der Website (Core\FrontendTools::normalize) */
@@ -318,12 +327,13 @@ final class Extension
      *   'tiles' => [['key' => 'besuche', 'label' => 'Besuche', 'value' => '1.234', 'text' => '30 Tage', 'level' => 0–100 (Füllstand, optional),
      *               'trend' => ['now' => 1234, 'prev' => 1100, 'label' => 'Besuche'] (optional), 'href' => '/admin/…' (optional)]],
      *   'cards' => ['besucher' => ['title' => 'Besucher', 'icon' => 'chart-line', 'size' => 'third'|'half'|'two-thirds'|'full',
-     *               'render' => fn(): string (HTML, selbst escapen), 'lazy' => true (nachladen, 'ttl' Sekunden Zwischenspeicher je Website)]],
-     * ]. Rechte prüft die Erweiterung selbst (can()); leeres Array = nichts anzeigen. Fehler werden protokolliert, die Übersicht bleibt stehen.
+     *               'body' => ['text' => …, 'lines' => [...], 'actions' => [...]] (Core\Slots::card, escaped vom Core) ODER
+     *               'render' => fn(): string (Altform: HTML, selbst escapen), 'lazy' => true (nachladen, 'ttl' Sekunden Zwischenspeicher je Website)]],
+     * ]. Recht: zweites Argument (Slot nur mit can($perm)) bzw. in der Funktion; leeres Array = nichts anzeigen. Fehler werden protokolliert.
      */
-    public function dashboard(callable $fn): self
+    public function dashboard(callable $fn, ?string $perm = null): self
     {
-        $this->dashboardProviders[] = $fn;
+        $this->dashboardProviders[] = self::gated($fn, $perm, []);
         return $this;
     }
 
@@ -333,17 +343,53 @@ final class Extension
      *   'actions' => [['label' => 'Entwurf teilen …', 'href' => '/admin/…']],                                         Einträge im Kontextmenü (Link)
      * ]. Läuft für JEDE Seite des Baums – Daten einmal vorab laden (statischer Zwischenspeicher), Rechte selbst prüfen (can()).
      */
-    public function pageList(callable $fn): self
+    public function pageList(callable $fn, ?string $perm = null): self
     {
-        $this->pageListProviders[] = $fn;
+        $this->pageListProviders[] = self::gated($fn, $perm, []);
         return $this;
     }
 
-    /** Seiteneinstellungen (Verwaltung → Seiten → Seite): fn(array $page): string – fertiges, selbst escaptes HTML (z. B. <section class="adm-card">) in der Seitenleiste */
-    public function pagePanel(callable $fn): self
+    /**
+     * Seiteneinstellungen (Verwaltung → Seiten → Seite): fn(array $page): ?array – Karte in der Seitenleiste (Core\Slots::card:
+     * title, text, tone, lines, actions; escaped vom Core). Altform: fertiges, selbst escaptes HTML als Zeichenkette.
+     */
+    public function pagePanel(callable $fn, ?string $perm = null): self
     {
-        $this->pagePanelProviders[] = $fn;
+        $this->pagePanelProviders[] = self::gated($fn, $perm, null);
         return $this;
+    }
+
+    /**
+     * Datentabelle (Verwaltung → Daten → Tabelle): fn(array $table): ?array – [
+     *   'actions' => [['label' => 'Exportieren', 'href' => '/admin/x/{table}/export', 'icon' => 'download']],   Knöpfe im Kopf der Liste
+     *   'row'     => [['label' => 'Senden', 'href' => '/admin/x/{table}/{id}']],                                  Aktion je Zeile
+     * ]. Platzhalter {table} (Kurzname) und {id} ersetzt der Core. Eigene Seiten an der Tabelle: adminPage(['kind' => 'settings', 'table' => …]).
+     */
+    public function tableActions(callable $fn, ?string $perm = null): self
+    {
+        $this->tableActionProviders[] = self::gated($fn, $perm, null);
+        return $this;
+    }
+
+    /** Mediathek (eine Datei, „Informationen“): fn(array $m): ?array – Karte (Core\Slots::card) als eigener Abschnitt */
+    public function mediaPanel(callable $fn, ?string $perm = null): self
+    {
+        $this->mediaPanelProviders[] = self::gated($fn, $perm, null);
+        return $this;
+    }
+
+    /** Konto (/admin/account): fn(array $user): ?array – Karte (Core\Slots::card) als eigener Abschnitt, z. B. persönliche Einstellungen der Erweiterung */
+    public function account(callable $fn, ?string $perm = null): self
+    {
+        $this->accountProviders[] = self::gated($fn, $perm, null);
+        return $this;
+    }
+
+    /** Slot nur mit Recht: ohne $perm unverändert, sonst $empty, wenn can($perm) fehlt */
+    private static function gated(callable $fn, ?string $perm, mixed $empty): callable
+    {
+        if ($perm === null || $perm === '') return $fn;
+        return static fn(mixed ...$a) => can($perm) ? $fn(...$a) : $empty;
     }
 
     /**
