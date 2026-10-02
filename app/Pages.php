@@ -160,9 +160,12 @@ final class Pages
 
     /**
      * Seite im Baum verschieben: neuer Elternteil ($parentId null = oberste Ebene) und Position.
+     * Position am besten über eine Nachbarseite ($before/$after = ID einer Seite derselben Ebene): Der Seitenbaum der
+     * Verwaltung zeigt nicht alle Geschwister (Detailseiten-Vorlagen, 404-Seiten und andere Sprachen liegen unsichtbar
+     * auf derselben Ebene) – ein dort gezählter $index trifft in der Datenbank sonst die falsche Stelle.
      * Prüft Zyklen und Slug-Kollisionen, baut Pfade neu auf.
      */
-    public static function move(int $id, ?int $parentId, int $index): ?string
+    public static function move(int $id, ?int $parentId, int $index, ?int $before = null, ?int $after = null): ?string
     {
         $page = self::find($id);
         if (!$page) return 'Seite nicht gefunden.';
@@ -174,9 +177,16 @@ final class Pages
         if (self::slugTaken($page['slug'], $parentId, $id)) {
             return 'Auf dieser Ebene gibt es schon eine Seite mit der Adresse „' . $page['slug'] . '“.';
         }
-        self::db()->transaction(function () use ($id, $parentId, $index) {
-            $sql = 'SELECT id FROM pages WHERE id != ? AND ' . ($parentId ? 'parent_id = ?' : 'parent_id IS NULL') . ' ORDER BY is_home DESC, sort, id';
-            $siblings = array_map('intval', array_column(self::db()->fetchAll($sql, $parentId ? [$id, $parentId] : [$id]), 'id'));
+        $sql = 'SELECT id FROM pages WHERE id != ? AND ' . ($parentId ? 'parent_id = ?' : 'parent_id IS NULL') . ' ORDER BY is_home DESC, sort, id';
+        $siblings = array_map('intval', array_column(self::db()->fetchAll($sql, $parentId ? [$id, $parentId] : [$id]), 'id'));
+        $anchor = $before ?: $after;
+        if ($anchor) {
+            if ($anchor === $id) return null;   // auf sich selbst abgelegt: nichts zu tun
+            $at = array_search($anchor, $siblings, true);
+            if ($at === false) return 'Die Bezugsseite liegt nicht auf dieser Ebene.';
+            $index = $at + ($before ? 0 : 1);
+        }
+        self::db()->transaction(function () use ($id, $parentId, $index, $siblings) {
             array_splice($siblings, max(0, min($index, count($siblings))), 0, [$id]);
             foreach ($siblings as $i => $sid) {
                 self::db()->update('pages', ['sort' => $i * 10] + ($sid === $id ? ['parent_id' => $parentId] : []), 'id = :id', ['id' => $sid]);

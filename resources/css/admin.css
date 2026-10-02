@@ -536,6 +536,7 @@ img.media-vthumb{object-fit:cover}
 .fx-menu button:hover,.fx-menu button:focus{background:var(--fx-sel,#314164);color:#fff;outline:none}
 .fx-menu .is-danger{color:var(--adm-err)}
 .fx-menu hr{margin:4px 6px;border:0;border-top:1px solid rgba(0,0,0,.1)}
+.fx-menu-key{float:right;margin-left:16px;font:inherit;opacity:.6}
 .fx-ql{width:min(1100px,calc(100vw - 40px));height:min(820px,calc(100vh - 40px));padding:0;border:0;border-radius:8px;background:rgba(30,30,32,.96);color:#fff;display:none;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
 .fx-ql[open]{display:flex}
 .fx-ql::backdrop{background:rgba(0,0,0,.35)}
@@ -852,6 +853,8 @@ img.media-vthumb{object-fit:cover}
 .pt-drop-in{background:rgba(10,132,255,.14)!important;box-shadow:inset 0 0 0 2px #0A84FF;border-radius:6px}
 .pt-drop-before{box-shadow:inset 0 2px 0 #0A84FF}
 .pt-drop-after{box-shadow:inset 0 -2px 0 #0A84FF}
+.pt-tree{padding-bottom:28px}   /* freie Fläche: hier ablegen = ans Ende der obersten Ebene */
+.pt-tree.pt-drop-end > .pt-node:last-child{box-shadow:0 2px 0 #0A84FF}
 .pt-tree.is-filtering .pt-node:not(.pt-hit):not(.pt-hit-parent) > .pt-row{display:none}
 .pt-templates{margin-top:20px}
 .pt-templates small{color:var(--adm-t3);font-family:ui-monospace,Menlo,monospace}

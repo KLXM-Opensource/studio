@@ -7,7 +7,7 @@
   </ol>
   <table class="doc-table">
     <tr><th>Aktion</th><th>So geht’s</th></tr>
-    <tr><td>Ordnen</td><td>Seite <b>ziehen</b>: auf eine andere Seite = wird deren Unterseite (blauer Rahmen), zwischen zwei Seiten = neue Reihenfolge (blaue Linie). Die Adressen passen sich automatisch an; alte Einzeladressen leiten weiter.</td></tr>
+    <tr><td>Ordnen</td><td>Seite <b>ziehen</b>: auf eine andere Seite = wird deren Unterseite (blauer Rahmen), zwischen zwei Seiten = neue Reihenfolge (blaue Linie), auf die freie Fläche unter der letzten Zeile = ans Ende. Ohne Maus: Seite wählen und <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> (eine Stelle nach oben/unten), <kbd>Alt</kbd> + <kbd>→</kbd> (einrücken: Unterseite der Seite darüber), <kbd>Alt</kbd> + <kbd>←</kbd> (ausrücken: eine Ebene höher) – dieselben Befehle stehen im Menü „⋯“. Ändert sich dabei die Ebene, passen sich die Adressen automatisch an; alte Einzeladressen leiten weiter.</td></tr>
     <tr><td>Auf- und zuklappen</td><td>Dreieck vor der Seite oder <kbd>→</kbd>/<kbd>←</kbd>. „Alle aufklappen/zuklappen“ oben.</td></tr>
     <tr><td>Öffnen</td><td>Doppelklick oder <kbd>Enter</kbd> öffnet den Editor.</td></tr>
     <tr><td>Weitere Aktionen</td><td>Rechtsklick oder <b><?= icon('dots-three', ['label' => 'Mehr']) ?></b>: Seiteneinstellungen, Ansehen, Neue Unterseite, Duplizieren, Änderungen veröffentlichen, Löschen (Unterseiten rücken dann eine Ebene nach oben).</td></tr>

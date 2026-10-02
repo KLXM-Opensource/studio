@@ -605,16 +605,63 @@ if (pt) {
   $('[data-expand-all]', pt).onclick = () => $$('.pt-node[aria-expanded]', tree).forEach(n => setExp(n, true));
   $('[data-collapse-all]', pt).onclick = () => $$('.pt-node[aria-expanded]', tree).forEach(n => setExp(n, false));
 
-  // Ziehen: Mitte = Unterseite, oberes/unteres Viertel = davor/dahinter
+  // Verschieben. Die Stelle geht als Nachbarseite an den Server (before_id/after_id), nicht als Index: Auf derselben Ebene
+  // liegen Seiten, die der Baum nicht zeigt (Detailseiten-Vorlagen, 404-Seiten, andere Sprachen) – ein hier gezählter
+  // Index landete sonst an der falschen Stelle (z. B. „AGB hinter Impressum“ rutschte hinter „Agentur“)
+  const MOVED = 'klxm-studio-pt-moved';
+  const kids = n => $$(':scope > ul > .pt-node', n);
+  const sibs = n => $$(':scope > .pt-node', n.parentElement);
+  const parentOf = n => n.parentElement.closest('.pt-node');
+  const pid = n => +n.dataset.parent || null;
+  const moveTo = async (n, body, done) => {
+    let res;
+    try { res = await post(`${base}/${n.dataset.id}/move`, body); } catch { res = { ok: false }; }
+    if (!res?.ok) { statusFlash(pt, 'error', res?.error || t('Verschieben nicht möglich.')); return; }
+    try { sessionStorage.setItem(MOVED, JSON.stringify({ id: n.dataset.id, msg: done })); } catch {}
+    location.reload();
+  };
+  // Nach dem Neuladen: verschobene Seite wieder auswählen und ansagen (aria-live)
+  try {
+    const m = JSON.parse(sessionStorage.getItem(MOVED) || 'null'); sessionStorage.removeItem(MOVED);
+    const n = m && $(`#pt-${CSS.escape(m.id)}`, tree);
+    if (n) { let p = parentOf(n); while (p) { setExp(p, true); p = parentOf(p); } select(n); tree.focus({ preventScroll: true }); if (m.msg) note(m.msg); }
+  } catch {}
+  // Tastatur und Menü: eine Stelle nach oben/unten, einrücken (Unterseite der vorigen Seite), ausrücken (hinter die Mutterseite)
+  const moves = n => {
+    if (n.dataset.home === '1') return {};
+    const list = sibs(n), i = list.indexOf(n), prev = list[i - 1], next = list[i + 1], up = parentOf(n), title = n.dataset.title;
+    const ok = prev && prev.dataset.home !== '1';
+    return {
+      up: ok ? () => moveTo(n, { parent_id: pid(n), before_id: +prev.dataset.id }, t('„{title}“ steht jetzt vor „{other}“.', { title, other: prev.dataset.title })) : null,
+      down: next ? () => moveTo(n, { parent_id: pid(n), after_id: +next.dataset.id }, t('„{title}“ steht jetzt hinter „{other}“.', { title, other: next.dataset.title })) : null,
+      indent: ok ? () => { const last = kids(prev).at(-1); moveTo(n, { parent_id: +prev.dataset.id, ...(last ? { after_id: +last.dataset.id } : { index: 0 }) }, t('„{title}“ ist jetzt Unterseite von „{other}“.', { title, other: prev.dataset.title })); } : null,
+      outdent: up ? () => moveTo(n, { parent_id: pid(up), after_id: +up.dataset.id }, t('„{title}“ steht jetzt hinter „{other}“.', { title, other: up.dataset.title })) : null,
+    };
+  };
+  tree.addEventListener('keydown', e => {
+    if (!e.altKey || !active || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    if (e.target !== tree && e.target.closest('button,input')) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const fn = moves(active)[{ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'outdent', ArrowRight: 'indent' }[e.key]];
+    fn ? fn() : note(t('In diese Richtung lässt sich „{title}“ nicht verschieben.', { title: active.dataset.title }));
+  }, true);
+
+  // Ziehen: Mitte = Unterseite, oberes/unteres Viertel = davor/dahinter; unter der letzten Zeile = ans Ende der obersten Ebene
   let drag = null, drop = null;
-  const clear = () => $$('.pt-drop-in,.pt-drop-before,.pt-drop-after', tree).forEach(x => x.classList.remove('pt-drop-in', 'pt-drop-before', 'pt-drop-after'));
+  const clear = () => { tree.classList.remove('pt-drop-end'); $$('.pt-drop-in,.pt-drop-before,.pt-drop-after', tree).forEach(x => x.classList.remove('pt-drop-in', 'pt-drop-before', 'pt-drop-after')); };
   tree.addEventListener('dragstart', e => {
     const n = e.target.closest('.pt-node'); if (!n || n.dataset.home === '1') return e.preventDefault();
     drag = n; n.classList.add('is-drag'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', n.dataset.id);
   });
   tree.addEventListener('dragover', e => {
     if (!drag) return;
-    const row = e.target.closest('.pt-row'); if (!row) return;
+    const row = e.target.closest('.pt-row');
+    if (!row) {
+      // Freie Fläche unter der letzten Zeile: hinter die letzte Seite der obersten Ebene
+      const rows = $$('.pt-row', tree).filter(r => r.offsetParent !== null), last = rows.at(-1);
+      if (!last || e.clientY < last.getBoundingClientRect().bottom) { clear(); drop = null; return; }
+      e.preventDefault(); clear(); tree.classList.add('pt-drop-end'); drop = { pos: 'end' }; return;
+    }
     const n = row.parentElement;
     if (n === drag || drag.contains(n)) { clear(); drop = null; return; }
     e.preventDefault();
@@ -626,18 +673,25 @@ if (pt) {
   tree.addEventListener('drop', async e => {
     e.preventDefault(); clear();
     if (!drag || !drop) return;
-    const { n, pos } = drop;
-    let parent, index;
-    if (pos === 'in') {
-      parent = +n.dataset.id; index = $$(':scope > ul > .pt-node', n).length;
+    const { n, pos } = drop, title = drag.dataset.title;
+    let body, done;
+    if (pos === 'end') {
+      const last = $$(':scope > .pt-node', tree).filter(x => x !== drag).at(-1);
+      body = { parent_id: null, ...(last ? { after_id: +last.dataset.id } : { index: 0 }) };
+      done = t('„{title}“ steht jetzt am Ende.', { title });
+    } else if (pos === 'in') {
+      const last = kids(n).filter(x => x !== drag).at(-1);
+      body = { parent_id: +n.dataset.id, ...(last ? { after_id: +last.dataset.id } : { index: 0 }) };
+      done = t('„{title}“ ist jetzt Unterseite von „{other}“.', { title, other: n.dataset.title });
+    } else if (pos === 'after' && n.getAttribute('aria-expanded') === 'true' && kids(n).length) {
+      // Unterkante einer aufgeklappten Seite: die Linie steht über ihrer ersten Unterseite – also dorthin (wie im Finder)
+      body = { parent_id: +n.dataset.id, before_id: +kids(n)[0].dataset.id };
+      done = t('„{title}“ ist jetzt Unterseite von „{other}“.', { title, other: n.dataset.title });
     } else {
-      parent = +n.dataset.parent || null;
-      const sibs = $$(':scope > .pt-node', n.parentElement).filter(x => x !== drag);
-      index = sibs.indexOf(n) + (pos === 'after' ? 1 : 0);
+      body = { parent_id: pid(n), [pos === 'after' ? 'after_id' : 'before_id']: +n.dataset.id };
+      done = t(pos === 'after' ? '„{title}“ steht jetzt hinter „{other}“.' : '„{title}“ steht jetzt vor „{other}“.', { title, other: n.dataset.title });
     }
-    const res = await post(`${base}/${drag.dataset.id}/move`, { parent_id: parent, index });
-    if (!res.ok) { alert(res.error || 'Verschieben nicht möglich.'); return; }
-    location.reload();
+    moveTo(drag, body, done);
   });
   tree.addEventListener('dragend', () => { drag?.classList.remove('is-drag'); drag = null; clear(); });
 
@@ -653,6 +707,9 @@ if (pt) {
       ['Ansehen ↗', () => window.open(n.dataset.url, '_blank', 'noopener')],
       ['-'],
       ['Neue Unterseite …', () => { location.href = `${base}/new?parent=${id}&lang=${pt.dataset.lang}`; }],
+      // Verschieben ohne Ziehen (auch per Tastatur: Alt + Pfeiltasten)
+      ...(() => { const mv = moves(n), l = [[t('Nach oben verschieben'), mv.up, 'Alt+↑'], [t('Nach unten verschieben'), mv.down, 'Alt+↓'], [t('Einrücken (Unterseite der vorigen)'), mv.indent, 'Alt+→'], [t('Ausrücken (eine Ebene höher)'), mv.outdent, 'Alt+←']].filter(x => x[1]);
+        return l.length ? [['-'], ...l.map(([lbl, fn, k]) => [lbl, fn, false, k])] : []; })(),
       ...Object.entries(JSON.parse(pt.dataset.languages || '{}')).filter(([code]) => code !== pt.dataset.lang).map(([code, label]) =>
         [(n.dataset.langs || '').split(',').includes(code) ? `${label}: Übersetzung öffnen` : `Übersetzung anlegen: ${label}`, async () => {
           const res = await post(`${base}/${id}/translate`, { lang: code });
@@ -675,7 +732,7 @@ if (pt) {
       }, true]]),
     ];
     mEl = d.createElement('div'); mEl.className = 'fx-menu'; mEl.setAttribute('role', 'menu');
-    mEl.innerHTML = items.map(([l, , danger], i) => l === '-' ? '<hr>' : `<button type="button" role="menuitem" data-i="${i}"${danger ? ' class="is-danger"' : ''}>${esc(l)}</button>`).join('');
+    mEl.innerHTML = items.map(([l, , danger, key], i) => l === '-' ? '<hr>' : `<button type="button" role="menuitem" data-i="${i}"${danger ? ' class="is-danger"' : ''}${key ? ` aria-keyshortcuts="${key.replace('↑', 'ArrowUp').replace('↓', 'ArrowDown').replace('→', 'ArrowRight').replace('←', 'ArrowLeft')}"` : ''}>${esc(l)}${key ? ` <kbd class="fx-menu-key" aria-hidden="true">${esc(key)}</kbd>` : ''}</button>`).join('');
     d.body.append(mEl);
     const r = mEl.getBoundingClientRect();
     mEl.style.left = Math.max(8, Math.min(x, innerWidth - r.width - 8)) + 'px'; mEl.style.top = Math.min(y, innerHeight - r.height - 8) + 'px';

@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenbaum: Verschieben trifft die richtige Stelle, auch ohne Ziehen
+- **Fehler behoben:** Ziehen zwischen zwei Seiten landete auf der obersten Ebene an der falschen Stelle (z. B. „AGB“ hinter
+  „Impressum“ rutschte hinter „Agentur“ – oder schien gar nichts zu tun). Ursache: Der Baum schickte die Position als Index, gezählt
+  ohne die Seiten, die er nicht zeigt (Detailseiten-Vorlagen, 404-Seiten, andere Sprachen); der Server zählte sie mit. Jetzt geht
+  die Nachbarseite mit (`before_id`/`after_id`, `Pages::move(…, $before, $after)`), `index` bleibt für Aufrufer ohne Nachbarn.
+- Unterkante einer aufgeklappten Seite = erste Unterseite (die blaue Linie steht dort); freie Fläche unter der letzten Zeile = ans
+  Ende der obersten Ebene.
+- **Ohne Maus:** <kbd>Alt</kbd> + Pfeiltasten (nach oben/unten, einrücken, ausrücken) und dieselben Befehle im Menü „⋯“; nach dem
+  Neuladen bleibt die Seite gewählt, die Statuszeile sagt an, wo sie jetzt steht. Fehler erscheinen als Hinweis statt `alert`.
+
 ### KI: Verbindungen, Modelle per Klick, Verwendung je Zweck
 - **Verbindungen:** beliebig viele benannte KI-Verbindungen („Ollama Büro“, „Mistral EU“, „OpenAI“) mit Art, Adresse, optionalem
   Schlüssel bzw. Token (nur schreibbar, nie wieder angezeigt), Region und Zeitlimit; neu: **Anthropic** (über die OpenAI-kompatible

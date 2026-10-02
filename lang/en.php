@@ -5895,4 +5895,15 @@ return [
     'Anthropic (Claude)' => 'Anthropic (Claude)',
     'whisper.cpp (lokal, nur Sprache → Text)' => 'whisper.cpp (local, speech → text only)',
     'Embeddings' => 'Embeddings',
+    // Seitenbaum: Verschieben (Ziehen, Alt + Pfeiltasten, Kontextmenü)
+    'Verschieben nicht möglich.' => 'The page could not be moved.',
+    '„{title}“ steht jetzt vor „{other}“.' => '“{title}” is now before “{other}”.',
+    '„{title}“ steht jetzt hinter „{other}“.' => '“{title}” is now after “{other}”.',
+    '„{title}“ ist jetzt Unterseite von „{other}“.' => '“{title}” is now a subpage of “{other}”.',
+    '„{title}“ steht jetzt am Ende.' => '“{title}” is now at the end.',
+    'In diese Richtung lässt sich „{title}“ nicht verschieben.' => '“{title}” cannot be moved in this direction.',
+    'Nach oben verschieben' => 'Move up',
+    'Nach unten verschieben' => 'Move down',
+    'Einrücken (Unterseite der vorigen)' => 'Indent (subpage of the previous page)',
+    'Ausrücken (eine Ebene höher)' => 'Outdent (one level up)',
 ];

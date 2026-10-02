@@ -231,12 +231,13 @@ final class PageController extends AdminController
 
     // ------------------------------------------------------------------ Seitenbaum (JSON)
 
-    /** Verschieben: {parent_id: ?int, index: int} */
+    /** Verschieben: {parent_id: ?int, before_id?: int, after_id?: int, index?: int} – before_id/after_id (Nachbarseite) vor index */
     public function move(Request $r, string $id): Response
     {
         $this->auth($r, 'pages.manage');
         $parent = isset($r->post['parent_id']) && $r->post['parent_id'] !== null && $r->post['parent_id'] !== '' ? (int) $r->post['parent_id'] : null;
-        $err = Pages::move((int) $id, $parent, (int) ($r->post['index'] ?? 0));
+        $ref = fn(string $k) => isset($r->post[$k]) && (int) $r->post[$k] > 0 ? (int) $r->post[$k] : null;
+        $err = Pages::move((int) $id, $parent, (int) ($r->post['index'] ?? 0), $ref('before_id'), $ref('after_id'));
         return $err ? Response::json(['ok' => false, 'error' => $err], 422) : Response::json(['ok' => true, 'url' => Pages::url(Pages::find((int) $id))]);
     }
 
