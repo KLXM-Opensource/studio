@@ -10,6 +10,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Eigenes Block-Menü (Stil wie „+ Block einfügen“), geöffnet über „⋯“ in der Blockleiste oder Klick auf den Griff ⠿ (Ziehen bleibt):
   Nach oben/unten, Duplizieren, Kopieren, Einfügen darunter, Einklappen, Abschnitt & Navigation, Löschen mit Rückfrage. Leiste:
   Name, ↑ ↓, Bearbeiten, ⋯. Das Menü von Editor.js und dessen zweites „+“ entfallen.
+- Karten außerhalb des Bearbeiten-Modus: Aktion „Ziel bearbeiten“ als kleiner heller Chip mit Datenbank-Symbol „Datensatz“
+  bzw. Fenster-Symbol „Seite“ – nicht mehr „Bearbeiten“ wie im Bearbeiten-Modus.
 - Ein Klick unter den letzten Block legt keinen leeren Textblock mehr an (Editor.js-Bottom-Zone abgefangen, freie Fläche 80 px).
 - Seitenleiste: Inhalte oben; neuer Abschnitt „Einrichtung“ mit „Website“ (Website-Angaben, Design, Seitenvorlagen, Blöcke,
   Landingpages, Weiterleitungen), „System“ (Grundeinstellungen, Funktionen & Erweiterungen, Einstellungen der Funktionen,

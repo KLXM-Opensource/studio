@@ -271,3 +271,10 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 @media (pointer:coarse){.cms-editor .ce-toolbar__settings-btn{width:44px;height:44px}}
 .cms-editor .ce-popover-item{min-height:36px}
 @media (pointer:coarse){.cms-editor .ce-popover-item{min-height:44px}}
+
+/* „Ziel bearbeiten“ an Karten (Core\TargetEdit) – kein Bearbeiten-Modus: heller, umrandeter Mini-Chip mit Art des Ziels */
+.cms-target-edit.cms-target-edit{min-height:26px;padding:0 9px 0 7px;gap:5px;background:rgba(255,255,255,.94);color:#1E2840;box-shadow:0 0 0 1px rgba(30,40,64,.28),0 2px 8px rgba(0,0,0,.18);font:600 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.01em}
+.cms-target-edit.cms-target-edit svg{width:13px;height:13px}
+.cms-target-edit.cms-target-edit:hover{background:#fff;color:#1E2840;box-shadow:0 0 0 1.5px #1E2840,0 2px 10px rgba(0,0,0,.22)}
+.cms-target-edit.cms-target-edit:focus-visible{outline:2px solid #1E2840;outline-offset:2px;box-shadow:0 0 0 1px rgba(30,40,64,.28)}
+@media (hover:none) and (max-width:767px){.cms-target-edit.cms-target-edit{width:32px;min-height:32px}}

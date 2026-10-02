@@ -159,8 +159,11 @@ final class TargetEdit
         return '<a class="' . e($cls) . '" href="' . e($x['href']) . '" data-cms-target="' . e($x['kind']) . '"'
             . ($x['panel'] !== '' ? ' data-entry-edit="' . e($x['panel']) . '"' : '')
             . ' aria-label="' . e($x['label']) . '" title="' . e($x['label']) . '" contenteditable="false">'
-            . '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M11.1 2.2a1.6 1.6 0 0 1 2.3 0l.4.4a1.6 1.6 0 0 1 0 2.3L6 12.7l-3.3.8.8-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
-            . '<span>' . e(__('Bearbeiten')) . '</span></a>';
+            // Eindeutig vom Bearbeiten-Modus unterscheiden: Symbol + Art des Ziels („Datensatz“ bzw. „Seite“), heller Chip
+            . ($x['kind'] === 'entry'
+                ? '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><ellipse cx="8" cy="3.6" rx="5.2" ry="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.8 3.6v8.8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2V3.6M2.8 8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>'
+                : '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><rect x="1.8" y="2.6" width="12.4" height="10.8" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 5.8h12.4" stroke="currentColor" stroke-width="1.4"/></svg>')
+            . '<span>' . e($x['kind'] === 'entry' ? __('Datensatz') : __('Seite')) . '</span></a>';
     }
 
     /** Zwischenspeicher leeren (Selbsttest) */
@@ -242,7 +245,7 @@ final class TargetEdit
             $h = self::html('page:' . $child);
             $eq('Seite: Link zum Seiten-Editor', str_contains($h, 'href="' . e(Pages::url(Pages::find($child)) . '?edit=1') . '"'), true);
             $eq('Seite: Bezeichnung mit Titel', str_contains($h, 'aria-label="' . e(__('Seite „{title}“ bearbeiten', ['title' => 'Marke & Corporate Design'])) . '"'), true);
-            $eq('Seite: sichtbarer Text', str_contains($h, '>' . e(__('Bearbeiten')) . '</span>'), true);
+            $eq('Seite: sichtbarer Text „Seite“ (nicht „Bearbeiten“ wie im Bearbeiten-Modus)', str_contains($h, '>' . e(__('Seite')) . '</span>'), true);
             $eq('Seite: keine Seitenleiste', str_contains($h, 'data-entry-edit'), false);
             $eq('Seite: eigene Bezeichnung (ohne *Betonung*)', self::target('page:' . $child, '*Marke* neu')['title'] ?? null, 'Marke neu');
             $eq('Fremde Adresse: keine Ausgabe', self::html('https://example.org/'), '');
