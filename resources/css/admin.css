@@ -2531,3 +2531,10 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .pt-switch input:focus-visible + span,.ds-switch input:focus-visible + span{outline:2px solid var(--adm-a);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.pt-switch span,.ds-switch span,.pt-switch span::after,.ds-switch span::after{transition:none}}
 @media (forced-colors:active){.pt-switch span,.ds-switch span{border:1px solid CanvasText}.pt-switch span::after,.ds-switch span::after{background:CanvasText}.pt-switch input:checked + span,.ds-switch input:checked + span{background:Highlight}}
+/* Markierte Zeile im Seitenbaum (Hintergrund = Akzentfarbe): Schalter und Symbole hell umkehren, sonst verschwinden sie */
+.pt-node[aria-selected=true] > .pt-row .pt-icon{--pt-ico:#fff}
+.pt-node[aria-selected=true] > .pt-row .pt-switch span{background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55)}
+.pt-node[aria-selected=true] > .pt-row .pt-switch span::after{background:rgba(255,255,255,.75)}
+.pt-node[aria-selected=true] > .pt-row .pt-switch input:checked + span{background:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.pt-node[aria-selected=true] > .pt-row .pt-switch input:checked + span::after{background:var(--adm-a)}
+.pt-node[aria-selected=true] > .pt-row .pt-switch input:focus-visible + span{outline-color:#fff}
