@@ -8,7 +8,8 @@ namespace Core;
 /**
  * Eigene Adresse der Verwaltung statt /admin (z. B. /werkstatt-k7m2x).
  *  - Einstellung: Umgebungsvariable KLXM_ADMIN_PATH, sonst config 'admin_path' (config.local.php, je Website config/sites/{key}.php);
- *    setzen mit `php bin/console admin:path <adresse>|--random|--reset`. Neue Installationen erhalten eine zufällige Adresse.
+ *    setzen in Grundeinstellungen → „Adresse der Verwaltung“ (Administration; bei mehreren Websites nur die Netzwerk-Administration,
+ *    mit Passwort) oder `php bin/console admin:path <adresse>|--random|--reset`. Standard bleibt /admin.
  *  - Intern bleibt alles /admin (Routen, Rechte, Erweiterungen). Eingehend wird die eigene Adresse auf /admin abgebildet
  *    (App::handle), ausgehend url('/admin/…') auf die eigene Adresse.
  *  - /admin direkt: ohne Anmeldung 404 wie jede unbekannte Seite (Anmeldung, „Passwort vergessen“ usw. verraten nichts);
@@ -57,8 +58,8 @@ final class AdminPath
     /** Fehlermeldung für eine gewünschte Adresse (ohne Schrägstrich) oder null */
     public static function error(string $slug): ?string
     {
-        if (!preg_match('~^[a-z0-9][a-z0-9-]{4,39}$~', $slug)) return 'Bitte 5–40 Zeichen: Kleinbuchstaben, Ziffern und Bindestriche (nicht am Anfang).';
-        if (in_array($slug, self::RESERVED, true)) return 'Diese Adresse ist zu üblich oder schon vergeben – bitte eine eigene wählen.';
+        if (!preg_match('~^[a-z0-9][a-z0-9-]{4,39}$~', $slug)) return __('Bitte 5–40 Zeichen: Kleinbuchstaben, Ziffern und Bindestriche (nicht am Anfang).');
+        if (in_array($slug, self::RESERVED, true)) return __('Diese Adresse ist zu üblich oder schon vergeben – bitte eine eigene wählen.');
         return null;
     }
 
@@ -94,6 +95,44 @@ final class AdminPath
         if (!str_starts_with($path, self::INTERNAL)) return false;
         $c = $path[strlen(self::INTERNAL)] ?? '';
         return $c === '' || $c === '/' || $c === '?' || $c === '#';
+    }
+
+    /** Über die Umgebungsvariable festgelegt (dann nicht in der Verwaltung änderbar) */
+    public static function fromEnv(): bool
+    {
+        return (string) getenv('KLXM_ADMIN_PATH') !== '';
+    }
+
+    /** Ändern in der Verwaltung: gilt für alle Websites der Installation → bei mehreren Websites nur die Netzwerk-Administration */
+    public static function canManage(): bool
+    {
+        if (!can('system.manage')) return false;
+        return !Sites::multi() || Network\Network::isNetworkUser();
+    }
+
+    /**
+     * Adresse speichern (config/config.local.php, alle Websites der Installation); '' = wieder /admin.
+     * @return ?string Fehlermeldung oder null
+     */
+    public static function save(string $slug): ?string
+    {
+        $slug = self::normalize($slug);
+        if (self::fromEnv()) return __('Die Adresse ist über die Umgebungsvariable KLXM_ADMIN_PATH festgelegt – bitte dort ändern.');
+        if ($slug !== '' && ($err = self::error($slug))) return $err;
+        if ($slug !== '' && Pages::byPath('/' . $slug)) return __('Unter /{slug} gibt es bereits eine Seite – bitte eine andere Adresse wählen.', ['slug' => $slug]);
+        $file = ROOT . '/config/config.local.php';
+        $local = is_file($file) ? require $file : [];
+        if (!is_array($local)) return __('config/config.local.php ist nicht lesbar.');
+        if ($slug === '') unset($local['admin_path']); else $local['admin_path'] = $slug;
+        $php = "<?php\n// Lokale Konfiguration – NICHT versionieren, NICHT weitergeben.\n// Geändert am " . date('Y-m-d H:i') . " (Adresse der Verwaltung)\nreturn " . var_export($local, true) . ";\n";
+        if (!is_writable($file) || @file_put_contents($file, $php, LOCK_EX) === false) {
+            return __('config/config.local.php ist nicht beschreibbar – bitte per Konsole setzen: {cmd}', ['cmd' => 'php bin/console admin:path ' . ($slug ?: '--reset')]);
+        }
+        @chmod($file, 0640);
+        if (function_exists('opcache_invalidate')) @opcache_invalidate($file, true);
+        self::reset($slug === '' ? null : '/' . $slug);
+        if ($slug === '') self::$prefix = self::INTERNAL;
+        return null;
     }
 
     /** Darf /admin… ohne Anmeldung direkt erreichbar bleiben? (Netzwerk-SSO, öffentliche Routen von Erweiterungen) */

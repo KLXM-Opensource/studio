@@ -102,6 +102,8 @@ body.adm--bare{display:block}
 
 /* Badges */
 .adm-badge{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:6px;background:var(--adm-ok-bg);color:var(--adm-ok);font-size:12px;font-weight:700}
+.adm-badge--warn{background:color-mix(in srgb,var(--adm-warn) 14%,transparent);color:var(--adm-warn)}
+.adm-badge--muted{background:color-mix(in srgb,var(--adm-ink) 8%,transparent);color:var(--adm-t2)}
 .adm-badge--draft{background:var(--adm-fill);color:var(--adm-t2)}
 .adm-badge--adm-warn{background:var(--adm-warn-bg);color:var(--adm-warn)}
 .adm-badge--muted{background:var(--adm-fill);color:var(--adm-t3)}
@@ -2764,3 +2766,9 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
   .dt-c-title__in{flex-wrap:wrap}
   .dt-c-title .dt-view{opacity:1;margin-left:auto}
 }
+
+/* Grundeinstellungen › Adresse der Verwaltung (Core\AdminPath): Domain als Vorsatz (.adm-prefix), lange Domains gekürzt */
+.ap-input span{flex:0 1 auto;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+.ap-input input{flex:1;min-width:0;padding-left:4px!important;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ap-input:focus-within{border-color:var(--adm-a)}
+.ap-hint code{white-space:nowrap}

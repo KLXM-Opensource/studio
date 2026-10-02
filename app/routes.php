@@ -177,6 +177,7 @@ return function (Router $r): void {
     $r->get('/admin/api/search', [Admin\SearchController::class, 'search']);
     $r->get('/admin/api/geocode', [Admin\SearchController::class, 'geocode']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);
+    $r->post('/admin/system/admin-path', [Admin\SystemController::class, 'adminPath']);   // Adresse der Verwaltung (Core\AdminPath)
     $r->post('/admin/system/pools', [Admin\SystemController::class, 'poolCreate']);
     $r->post('/admin/system/pools/{key}', [Admin\SystemController::class, 'poolUpdate']);
     $r->post('/admin/system/pools/{key}/delete', [Admin\SystemController::class, 'poolDelete']);

@@ -3,13 +3,16 @@ declare(strict_types=1);
 
 namespace Core\Http\Controllers\Admin;
 
+use Core\AdminPath;
 use Core\AppIcons;
 use Core\Fields;
 use Core\FormCrypto;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Mailer;
+use Core\Mfa;
 use Core\PageCache;
+use Core\RateLimiter;
 use Core\Sites;
 use Core\SystemSchema;
 
@@ -230,6 +233,38 @@ final class SystemController extends AdminController
             return $this->back('/admin/system#shared', 'error', $e->getMessage());
         }
         return $this->back('/admin/system#shared', 'success', implode(' ', $log));
+    }
+
+    /**
+     * Adresse der Verwaltung ändern (Core\AdminPath) – gilt für alle Websites der Installation; bei mehreren Websites nur
+     * Netzwerk-Administration. Bestätigung mit dem Passwort (oder kürzlich bestätigt, Mfa::recentAuth). Danach geht es unter
+     * der neuen Adresse weiter.
+     */
+    public function adminPath(Request $r): Response
+    {
+        $user = $this->auth($r, 'system.manage');
+        if (!AdminPath::canManage()) return $this->back('/admin/system#adminpath', 'error', __('Die Adresse der Verwaltung gilt für alle Websites – ändern kann sie nur die Netzwerk-Administration.'));
+        $row = Mfa::row($user);
+        $hash = (string) ($row['password_hash'] ?? '');
+        if (!Mfa::recentAuth() || $r->str('password') !== '') {
+            $limiter = new RateLimiter(app()->db);
+            $key = 'adminpath:' . (int) ($user['id'] ?? 0);
+            if ($limiter->tooMany($key, 5, 900)) return $this->back('/admin/system#adminpath', 'error', __('Zu viele Versuche. Bitte warten Sie 15 Minuten.'));
+            if ($hash === '' || !password_verify((string) ($r->post['password'] ?? ''), $hash)) {
+                $limiter->hit($key);
+                return $this->back('/admin/system#adminpath', 'error', $hash === '' ? __('Bitte melden Sie sich ab und wieder an – danach gilt die Anmeldung 15 Minuten als Bestätigung.') : __('Das Passwort ist falsch.'));
+            }
+            $limiter->clear($key);
+            app()->session->set('reauth_at', time());
+        }
+        $slug = $r->str('reset') === '1' ? '' : $r->str('admin_path');
+        if ($r->str('reset') !== '1' && AdminPath::normalize($slug) === '') return $this->back('/admin/system#adminpath', 'error', __('Bitte eine Adresse eintragen.'));
+        if ($err = AdminPath::save($slug)) return $this->back('/admin/system#adminpath', 'error', $err);
+        if (Sites::multi()) \Core\Network\Network::log('admin.path', null, (string) ($user['email'] ?? ''), AdminPath::prefix());
+        $this->changed();
+        return $this->back('/admin/system#adminpath', 'success', AdminPath::custom()
+            ? __('Die Verwaltung liegt jetzt unter {url} – bitte Lesezeichen und die App auf dem Homescreen neu anlegen. /admin zeigt ohne Anmeldung „Seite nicht gefunden“.', ['url' => absolute_url('/admin')])
+            : __('Die Verwaltung liegt wieder unter /admin.'));
     }
 
     public function clearProxy(Request $r): Response

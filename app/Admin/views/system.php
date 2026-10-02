@@ -26,6 +26,7 @@ use Core\Fields;
     <button type="button" role="tab" id="tab-keys" aria-controls="panel-keys" data-tab="keys" aria-selected="false" tabindex="-1">Verschlüsselung</button>
     <button type="button" role="tab" id="tab-pools" aria-controls="panel-pools" data-tab="pools" aria-selected="false" tabindex="-1"><?= e(__('Geteilte Medien')) ?></button>
     <?php $sharedTab = \Core\Data\Shared::canManage() || \Core\Data\Shared::forSite(); if ($sharedTab): ?><button type="button" role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared" aria-selected="false" tabindex="-1"><?= e(__('Geteilte Daten')) ?></button><?php endif; ?>
+    <button type="button" role="tab" id="tab-adminpath" aria-controls="panel-adminpath" data-tab="adminpath" aria-selected="false" tabindex="-1"><?= e(__('Adresse der Verwaltung')) ?></button>
     <button type="button" role="tab" id="tab-info" aria-controls="panel-info" data-tab="info" aria-selected="false" tabindex="-1">Systeminfo</button>
   </div>
   <?php foreach ($groups as $i => $g): ?>
@@ -225,6 +226,36 @@ use Core\Fields;
 
   <?php if ($sharedTab): ?><?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_shared_system.php', ['part' => 'panel', 'user' => $user]) ?><?php endif; ?>
 
+  <?php // Adresse der Verwaltung (Core\AdminPath): eigenes Formular #adminpath unten, Felder per form-Attribut
+    $apCustom = \Core\AdminPath::custom(); $apCan = \Core\AdminPath::canManage() && !\Core\AdminPath::fromEnv();
+    $apHasPw = (string) (\Core\Mfa::row(app()->auth->user() ?? [])['password_hash'] ?? '') !== ''; ?>
+  <section class="adm-card adm-panel" role="tabpanel" id="panel-adminpath" aria-labelledby="tab-adminpath" hidden>
+    <h2><?= e(__('Adresse der Verwaltung')) ?></h2>
+    <p><?= e(__('Unter dieser Adresse melden Sie sich an. Standard ist /admin. Optional eine eigene Adresse: Sie hält automatische Login-Scanner fern – ersetzt aber keine starken Passwörter und keinen zweiten Faktor.')) ?></p>
+    <dl class="adm-dl">
+      <dt><?= e(__('Aktuell')) ?></dt><dd><code id="ap-current"><?= e(absolute_url('/admin')) ?></code> <button type="button" class="adm-btn adm-btn--small" data-copy="#ap-current"><?= e(__('Kopieren')) ?></button>
+        <?= $apCustom ? ' <span class="adm-badge">' . e(__('eigene Adresse')) . '</span>' : ' <span class="adm-badge adm-badge--muted">' . e(__('Standard')) . '</span>' ?></dd>
+      <?php if (\Core\Sites::multi()): ?><dt><?= e(__('Gilt für')) ?></dt><dd><?= e(__('alle Websites dieser Installation')) ?></dd><?php endif; ?>
+    </dl>
+    <?php if (\Core\AdminPath::fromEnv()): ?>
+    <p class="adm-flash adm-flash--info"><?= e(__('Festgelegt über die Umgebungsvariable KLXM_ADMIN_PATH beim Hosting – dort ändern.')) ?></p>
+    <?php elseif (!$apCan): ?>
+    <p class="adm-flash adm-flash--info"><?= e(__('Die Adresse gilt für alle Websites dieser Installation – ändern kann sie nur die Netzwerk-Administration.')) ?></p>
+    <?php else: $apSuggest = \Core\AdminPath::random(); ?>
+    <div class="adm-fields">
+      <div class="f f--half"><label for="ap-path"><?= e(__('Neue Adresse')) ?></label>
+        <div class="adm-prefix ap-input"><span aria-hidden="true"><?= e(preg_replace('~^https?://~', '', site_url()) . '/') ?></span><input id="ap-path" name="admin_path" form="adminpath" autocomplete="off" spellcheck="false" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{4,39}" value="<?= e($apCustom ? ltrim(\Core\AdminPath::prefix(), '/') : '') ?>" placeholder="<?= e($apSuggest) ?>" aria-describedby="ap-help"></div>
+        <p class="f-help ap-hint" id="ap-help"><?= e(__('5–40 Zeichen: Kleinbuchstaben, Ziffern, Bindestriche. Nicht erlaubt sind übliche Adressen wie admin, login, wp-admin, backend oder verwaltung.')) ?> <?= e(__('Vorschlag:')) ?> <code><?= e($apSuggest) ?></code></p></div>
+      <?php if ($apHasPw && !\Core\Mfa::recentAuth()): // kürzlich angemeldet/bestätigt: kein Passwort nötig ?><div class="f f--half"><label for="ap-pw"><?= e(__('Ihr Passwort zur Bestätigung')) ?></label><input id="ap-pw" name="password" type="password" form="adminpath" autocomplete="current-password" required></div><?php endif; ?>
+    </div>
+    <p class="adm-flash adm-flash--info"><?= e(__('Nach dem Ändern geht es sofort unter der neuen Adresse weiter. Lesezeichen und die App auf dem Homescreen bitte neu anlegen. /admin zeigt ohne Anmeldung nur noch „Seite nicht gefunden“.')) ?></p>
+    <div class="adm-form-actions">
+      <button class="adm-btn adm-btn--primary" type="submit" form="adminpath"><?= e(__('Adresse ändern')) ?></button>
+      <?php if ($apCustom): ?><button class="adm-btn" type="submit" form="adminpath" name="reset" value="1" formnovalidate><?= e(__('Zurück zu /admin')) ?></button><?php endif; ?>
+    </div>
+    <?php endif; ?>
+  </section>
+
   <section class="adm-card adm-panel" role="tabpanel" id="panel-info" aria-labelledby="tab-info" hidden>
     <h2>Systeminfo</h2>
     <dl class="adm-dl">
@@ -253,7 +284,7 @@ use Core\Fields;
         <tr><td><strong><?= e($s->label()) ?></strong><br><code><?= e($k) ?></code><?= $k === site()->key ? ' <span class="adm-badge">diese</span>' : '' ?></td>
           <td><?= e(implode(', ', $s->hosts()) ?: 'alle übrigen Domains') ?></td>
           <td><?= e($k === site()->key ? app()->theme->name : ((string) ($c['theme'] ?? '') ?: '–')) ?></td>
-          <td><?php if ($h && $k !== site()->key): ?><a href="<?= e((str_contains($h, ':') || str_ends_with($h, '.localhost') ? 'http://' : 'https://') . $h . '/admin') ?>" target="_blank" rel="noopener">Verwaltung ↗</a><?php endif; ?></td></tr>
+          <td><?php if ($h && $k !== site()->key): ?><a href="<?= e(\Core\Network\Network::siteLink($k, '/admin')) ?>" target="_blank" rel="noopener">Verwaltung ↗</a><?php endif; ?></td></tr>
       <?php endforeach; ?>
       </tbody>
     </table>
@@ -265,6 +296,7 @@ use Core\Fields;
 <form id="testmail" method="post" action="<?= e(url('/admin/system/testmail')) ?>"><?= csrf_field() ?></form>
 <form id="keys" method="post" action="<?= e(url('/admin/system/keys')) ?>"><?= csrf_field() ?></form>
 <form id="proxy-clear" method="post" action="<?= e(url('/admin/system/proxy-clear')) ?>"><?= csrf_field() ?></form>
+<?php if (\Core\AdminPath::canManage()): ?><form id="adminpath" method="post" action="<?= e(url('/admin/system/admin-path')) ?>"><?= csrf_field() ?></form><?php endif; ?>
 <?php if (\Core\MediaPools::canManage()): ?>
 <form id="pool-new" method="post" action="<?= e(url('/admin/system/pools')) ?>"><?= csrf_field() ?></form>
 <?php foreach (\Core\MediaPools::all() as $pk => $pl): ?>
