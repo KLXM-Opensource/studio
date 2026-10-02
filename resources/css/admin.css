@@ -2558,3 +2558,10 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .adm-tip__body ul{margin:0;padding-left:18px;display:grid;gap:6px}
 .adm-tip__h{margin:12px 0 6px;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--adm-t2)}
 .pt-cardlink{margin:0 0 4px;font-size:14px}
+/* Knopfgruppe „+ Neue Seite | ?“: gleiche Höhe und Farbe, Hilfe klappt rechtsbündig auf */
+.adm-btngroup{display:inline-flex;align-items:stretch}
+.adm-btngroup > .adm-btn{border-top-right-radius:0;border-bottom-right-radius:0}
+.adm-btngroup .adm-tip{display:flex}
+.adm-btngroup .adm-tip__btn{box-sizing:border-box;width:32px;height:auto;padding:0;border:0;border-left:1px solid rgba(255,255,255,.28);border-radius:0 6px 6px 0;background:linear-gradient(#3C4E78,#314164);color:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.3),0 1px 1px rgba(0,0,0,.12),inset 0 .5px 0 rgba(255,255,255,.25)}
+.adm-btngroup .adm-tip__btn:hover,.adm-btngroup .adm-tip[open] .adm-tip__btn{background:#243150;color:#fff}
+.adm-tip--end .adm-tip__body{left:auto;right:0}

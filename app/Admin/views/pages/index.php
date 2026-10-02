@@ -62,8 +62,12 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
 $html = implode('', array_map($row, $tree));
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow">Inhalte</p><div class="adm-titlerow"><h1>Seiten</h1>
-    <details class="adm-tip"><summary class="adm-tip__btn" aria-label="<?= e(__('Hilfe: Seiten ordnen und bearbeiten')) ?>" title="<?= e(__('Hilfe')) ?>">?</summary>
+  <div><p class="adm-eyebrow">Inhalte</p><h1>Seiten</h1></div>
+  <div class="adm-row">
+    <?php if (\Core\AI\Assist::available('text') && can('pages.manage')): ?><a class="adm-btn kia-btn" href="<?= e(url('/admin/ai/seiten')) ?>"><span class="kia-spark" aria-hidden="true"><?= icon('sparkle') ?></span> <?= e(__('Seite generieren')) ?></a><?php endif; ?>
+    <div class="adm-btngroup">
+    <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/pages/new' . ($multi ? '?lang=' . $lang : ''))) ?>">+ Neue Seite</a>
+    <details class="adm-tip adm-tip--end"><summary class="adm-tip__btn" aria-label="<?= e(__('Hilfe: Seiten ordnen und bearbeiten')) ?>" title="<?= e(__('Hilfe')) ?>">?</summary>
       <div class="adm-tip__body">
         <ul>
           <li><?= e(__('Auf eine andere Seite ziehen = Unterseite, zwischen zwei Seiten = Reihenfolge, unter die letzte Zeile = ans Ende.')) ?></li>
@@ -79,10 +83,8 @@ $html = implode('', array_map($row, $tree));
         </ul>
         <?php endif; ?>
       </div>
-    </details></div></div>
-  <div class="adm-row">
-    <?php if (\Core\AI\Assist::available('text') && can('pages.manage')): ?><a class="adm-btn kia-btn" href="<?= e(url('/admin/ai/seiten')) ?>"><span class="kia-spark" aria-hidden="true"><?= icon('sparkle') ?></span> <?= e(__('Seite generieren')) ?></a><?php endif; ?>
-    <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/pages/new' . ($multi ? '?lang=' . $lang : ''))) ?>">+ Neue Seite</a>
+    </details>
+    </div>
   </div>
 </header>
 
