@@ -5985,4 +5985,8 @@ return [
     'Ausgangspunkt für neue Seiten der Redaktion – keine eigene Adresse, nur die Administration kann sie ändern.' => 'Starting point for new pages by editors – no address of their own, only administrators can change them.',
     'Erste Vorlage anlegen' => 'Create the first template',
     'Sonderseiten & Vorlagen' => 'Special pages & templates',
+    'Auf eine andere Seite ziehen = Unterseite, zwischen zwei Seiten = Reihenfolge, unter die letzte Zeile = ans Ende.' => 'Drop onto another page = subpage, between two pages = order, below the last row = at the end.',
+    'Doppelklick öffnet den Editor, Rechtsklick weitere Aktionen.' => 'Double-click opens the editor, right-click shows more actions.',
+    'Hilfe: Seiten ordnen und bearbeiten' => 'Help: arranging and editing pages',
+    'Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken).' => 'Without dragging: select a page and press Alt + arrow keys (or “⋯” → Move up/down, Indent, Outdent).',
 ];

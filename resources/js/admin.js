@@ -108,6 +108,13 @@ $$('[data-tpl-map]').forEach(box => {
   });
 });
 
+// ------------------------------------------------------------ Hilfe-Knopf „?“ (<details class="adm-tip">): Klick außerhalb oder Esc schließt
+d.addEventListener('click', e => { $$('details.adm-tip[open]').forEach(t => { if (!t.contains(e.target)) t.open = false; }); });
+d.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  $$('details.adm-tip[open]').forEach(t => { t.open = false; $('summary', t)?.focus(); });
+});
+
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
   const tabs = $$('[role=tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)

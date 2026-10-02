@@ -2546,3 +2546,13 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .pt-special:not([hidden]){display:grid;gap:16px}
 .pt-tplico{display:inline-grid;place-items:center;width:18px;height:18px;vertical-align:-3px;color:var(--adm-a)}
 .pt-tplico .ico{width:18px;height:18px}
+/* Hilfe-Knopf „?“ neben Überschriften (<details class="adm-tip">) – Erklärtext erst auf Wunsch */
+.adm-titlerow{display:flex;align-items:center;gap:10px}
+.adm-titlerow h1{margin:0}
+.adm-tip{position:relative}
+.adm-tip__btn{display:grid;place-items:center;width:26px;height:26px;border-radius:6px;border:1.5px solid var(--adm-line);background:var(--adm-surface);color:var(--adm-t2);font:700 14px/1 var(--adm-font);cursor:pointer;list-style:none;user-select:none}
+.adm-tip__btn::-webkit-details-marker{display:none}
+.adm-tip__btn:hover,.adm-tip[open] .adm-tip__btn{border-color:var(--adm-a);color:var(--adm-a)}
+.adm-tip__btn:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.adm-tip__body{position:absolute;z-index:40;top:calc(100% + 8px);left:0;width:min(440px,calc(100vw - 32px));padding:12px 16px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-surface);color:var(--adm-ink);font-size:14px;line-height:1.5;box-shadow:0 12px 32px -12px rgba(0,0,0,.3)}
+.adm-tip__body ul{margin:0;padding-left:18px;display:grid;gap:6px}

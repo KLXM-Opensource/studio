@@ -62,8 +62,16 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
 $html = implode('', array_map($row, $tree));
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow">Inhalte</p><h1>Seiten</h1>
-    <p class="adm-muted">Seiten per Ziehen ordnen: auf eine andere Seite ziehen = Unterseite, zwischen zwei Seiten = Reihenfolge, unter die letzte Zeile = ans Ende. Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken). Doppelklick öffnet den Editor, Rechtsklick weitere Aktionen.</p></div>
+  <div><p class="adm-eyebrow">Inhalte</p><div class="adm-titlerow"><h1>Seiten</h1>
+    <details class="adm-tip"><summary class="adm-tip__btn" aria-label="<?= e(__('Hilfe: Seiten ordnen und bearbeiten')) ?>" title="<?= e(__('Hilfe')) ?>">?</summary>
+      <div class="adm-tip__body">
+        <ul>
+          <li><?= e(__('Auf eine andere Seite ziehen = Unterseite, zwischen zwei Seiten = Reihenfolge, unter die letzte Zeile = ans Ende.')) ?></li>
+          <li><?= e(__('Ohne Ziehen: Seite wählen und Alt + Pfeiltasten (oder „⋯“ → Nach oben/unten, Einrücken, Ausrücken).')) ?></li>
+          <li><?= e(__('Doppelklick öffnet den Editor, Rechtsklick weitere Aktionen.')) ?></li>
+        </ul>
+      </div>
+    </details></div></div>
   <div class="adm-row">
     <?php if (\Core\AI\Assist::available('text') && can('pages.manage')): ?><a class="adm-btn kia-btn" href="<?= e(url('/admin/ai/seiten')) ?>"><span class="kia-spark" aria-hidden="true"><?= icon('sparkle') ?></span> <?= e(__('Seite generieren')) ?></a><?php endif; ?>
     <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/pages/new' . ($multi ? '?lang=' . $lang : ''))) ?>">+ Neue Seite</a>
