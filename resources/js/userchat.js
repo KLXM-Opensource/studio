@@ -665,7 +665,7 @@ function init() {
   function favs() { try { return JSON.parse($('#adm-fav-data')?.textContent || '[]'); } catch { return []; } }
   async function linkSearch() {
     const q = el.linkq.value.trim();
-    const here = location.pathname.includes('/admin/chat') ? [] : [{ title: t('Diese Seite') + ': ' + (d.querySelector('.adm-main h1')?.textContent?.trim() || baseTitle), url: location.pathname + location.search + location.hash, icon: 'arrow-right' }];
+    const here = /\/chat(\/|$)/.test(location.pathname) ? [] : [{ title: t('Diese Seite') + ': ' + (d.querySelector('.adm-main h1')?.textContent?.trim() || baseTitle), url: location.pathname + location.search + location.hash, icon: 'arrow-right' }];
     let items = [...here, ...favs().filter(f => !q || f.title.toLowerCase().includes(q.toLowerCase())).map(f => ({ title: f.title, sub: t('Favorit'), url: f.href || f.url, icon: 'star' }))];
     if (q.length >= 2 && searchUrl) {
       linkCtrl?.abort(); linkCtrl = new AbortController();

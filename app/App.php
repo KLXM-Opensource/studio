@@ -46,6 +46,7 @@ final class App
     {
         $app = new self($config);
         self::$instance = $app;
+        AdminPath::reset();   // Verwaltungsadresse je Website neu lesen
         $app->site = $site ?? new Site(Site::DEFAULT);
         foreach ([$app->site->storage('database'), $app->site->mediaDir()] as $dir) {
             if (!is_dir($dir)) @mkdir($dir, 0775, true);
@@ -146,9 +147,18 @@ final class App
 
     public function handle(Request $request): Response
     {
-        $this->request = $request;
         $router = new Router();
         (require ROOT . '/app/routes.php')($router);
+        // Eigene Verwaltungsadresse (Core\AdminPath): intern weiter /admin; /admin direkt nur angemeldet (sonst 404, kein Cookie)
+        $direct = false;
+        if (AdminPath::custom()) {
+            if (($in = AdminPath::toInternal($request->path)) !== null) {
+                $request = $request->withPath($in);
+            } elseif ($request->isAdminPath() && !AdminPath::directAllowed($request->path, $router, $request->method)) {
+                $direct = true;
+            }
+        }
+        $this->request = $request;
 
         // Landing-Domains (Core\Landings): Verwaltung nur auf der Hauptdomain – dort gelten Sitzung, Cookies und Passkeys (RP-ID = Domain)
         if ($request->isAdminPath() && Landings::current()) {
@@ -157,11 +167,11 @@ final class App
 
         // Sessions nur für Admin-Routen oder wenn bereits eingeloggt
         // (Besucher erhalten KEINE Cookies).
-        if ($request->isAdminPath() || $this->session->hasCookie()) {
+        if (($request->isAdminPath() && !$direct) || $this->session->hasCookie()) {
             $this->session->start($request->isSecure());
         }
         // Oberflächensprache: Benutzer → Grundeinstellung → Deutsch
-        if ($request->isAdminPath() || $this->session->hasCookie()) {
+        if (($request->isAdminPath() && !$direct) || $this->session->hasCookie()) {
             $u = $this->auth->user();
             I18n::setLocale((string) (($u['locale'] ?? '') ?: ($this->settings->get('sys.admin_locale') ?: I18n::SOURCE)));
         }
@@ -172,6 +182,9 @@ final class App
         }
         try {
             if (!Features::allowsPath($request->path)) {
+                throw new Http\HttpException(404);
+            }
+            if ($direct && !($this->session->hasCookie() && $this->auth->user())) {
                 throw new Http\HttpException(404);
             }
             return $router->dispatch($request);

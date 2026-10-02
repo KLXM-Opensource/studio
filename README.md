@@ -62,9 +62,10 @@ CSS/JS-Quellen ändern** (`resources/`, `kits/*/assets`, `extensions/*/assets`):
 gebauten Assets, Prüfsumme `.sha256`) von [GitHub Releases](https://github.com/KLXM-Opensource/studio/releases) laden, entpacken,
 Dokumentstamm auf `public/` setzen.
 
-Beim ersten Aufruf entstehen Datenbank und `config/config.local.php` (mit `app_key` und `setup_token`) und das Kit
-spielt seine Startinhalte ein. Danach `/admin/setup` mit dem Setup-Token öffnen (oder
-`php bin/console user:create name@example.org admin`). Für die Entwicklung `'debug' => true` in `config/config.local.php`.
+Beim ersten Aufruf entstehen Datenbank und `config/config.local.php` (mit `app_key`, `setup_token` und einer zufälligen
+Adresse der Verwaltung `admin_path`, z. B. `kontor-x4m9q` – nicht `/admin`) und das Kit spielt seine Startinhalte ein.
+Danach `/<admin_path>/setup` mit dem Setup-Token öffnen (`php bin/console setup:token` zeigt beides) oder
+`php bin/console user:create name@example.org admin`. Adresse ändern: `php bin/console admin:path <adresse>|--random|--reset`. Für die Entwicklung `'debug' => true` in `config/config.local.php`.
 
 Produktion (Plesk, Cronjobs, KI-Einrichtung, Sicherheits-Checkliste): Installations- und Betriebsanleitung bzw.
 Entwicklerhandbuch → „Installation & Anforderungen“, „Betrieb“, „Staging & Deploy“.

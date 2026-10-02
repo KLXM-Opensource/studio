@@ -1,7 +1,8 @@
 /* ==========================================================================
    Bildschirme vor der Anmeldung (Core\AuthScreen): Anmelden, Passkey, Zwei-Faktor, Einladung, Links aus E-Mails,
    Einrichtung. Ruhiger Farbhimmel (drei weiche Farbflächen, nur transform/opacity animiert) hinter einer Karte aus
-   Milchglas. Tageszeit als Klasse am <body> (auth--morning|day|evening|night, is-weekend), nachts immer dunkel.
+   Milchglas; eine linksbündige Spalte (Kopf mit App-Icon, Karte, Fußzeile), auf dem Handy ohne Kartenrahmen.
+   Tageszeit als Klasse am <body> (auth--morning|day|evening|night, is-weekend), nachts immer dunkel.
    Markenfarbe der Website: --auth-h / --auth-h2 / --auth-s / --auth-brand aus media/auth/auth-<hash>.css.
    Anpassen (Kit oder eigene CSS-Datei): --auth-bg (Grundverlauf), --auth-c1..3 (Farbflächen), --auth-o (Deckkraft
    der Flächen), --auth-glass (Kartenfläche), --auth-edge (Kartenrand), --auth-shadow, --auth-speed (Tempo, 1 = normal).
@@ -61,53 +62,71 @@ html[data-theme=dark] .auth-screen,.auth--night{--auth-bg:linear-gradient(170deg
   animation:auth-twinkle calc(7s / var(--auth-speed)) ease-in-out infinite alternate}
 @keyframes auth-twinkle{to{opacity:.3}}
 
-/* Inhalt über dem Himmel, senkrecht mittig */
+/* Inhalt über dem Himmel, senkrecht mittig – eine linksbündige Spalte */
 .auth-screen .adm-main{position:relative;z-index:1;max-width:none;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
-  padding:max(28px,env(safe-area-inset-top)) 0 max(32px,env(safe-area-inset-bottom))}
+  padding:max(28px,env(safe-area-inset-top)) 0 max(28px,env(safe-area-inset-bottom))}
 body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-height:calc(100dvh - 26px)}   /* Streifen „Testumgebung“ */
-.auth-screen .adm-main>.adm-flash{width:calc(100% - 32px);max-width:440px;margin:0 auto 12px}
-.auth-screen .adm-auth{width:100%;margin:0 auto;padding:0 16px}
-.auth-screen .adm-auth.inv-auth{max-width:480px}
+.auth-screen .adm-main>.adm-flash{width:calc(100% - 40px);max-width:400px;margin:0 auto 12px}
+.auth-screen .adm-auth{width:100%;max-width:432px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr auto;align-items:center}
+.auth-screen .adm-auth>*{grid-column:1/-1;min-width:0}
+.auth-screen .adm-auth.inv-auth{max-width:512px}
 
-/* Kopf: App-Icon und Name der Website */
-.auth-screen .adm-brand--auth{align-items:center;text-align:center;margin-bottom:22px;color:var(--adm-ink)}
-.auth-screen .adm-brand--auth span{font-size:22px}
+/* Kopf: App-Icon links, daneben Name und „Verwaltung“ */
+.auth-screen .adm-brand--auth{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center;text-align:left;margin:0 0 20px;padding:0 4px;color:var(--adm-ink)}
+.auth-screen .adm-brand--auth>*{grid-column:2}
+.auth-screen .adm-brand--auth span{font-size:17px;align-self:end}
 .auth-screen .adm-brand--auth i{color:var(--auth-dot)}
-.auth-screen .adm-brand--auth small{color:var(--adm-ink);opacity:1;font-size:13px;margin-top:6px}
-.auth-screen .inv-brand__icon{display:block;width:60px;height:60px;border-radius:16px;margin:0 auto 12px;
-  box-shadow:0 0 0 1px var(--auth-edge),0 10px 24px -10px var(--auth-shadow)}
+.auth-screen .adm-brand--auth small{align-self:start;color:var(--adm-ink);opacity:.75;font-size:13px;margin-top:3px}
+.auth-screen .inv-brand__icon{grid-column:1;grid-row:1/3;display:block;width:44px;height:44px;border-radius:12px;margin:0;
+  box-shadow:0 0 0 1px var(--auth-edge),0 8px 18px -10px var(--auth-shadow)}
 .auth-screen .adm-brand--product .cms-mark{font-size:24px}
 
 /* Karte aus Milchglas – ohne backdrop-filter bleibt sie deckend (--adm-card) */
-.auth-screen .adm-auth .adm-card{position:relative;border-radius:16px;padding:28px 26px 26px;background:var(--adm-card);
-  box-shadow:0 0 0 1px var(--auth-edge),0 22px 50px -22px var(--auth-shadow),0 2px 6px -3px rgba(0,0,0,.12);
+.auth-screen .adm-auth .adm-card{position:relative;border-radius:18px;padding:28px 28px 26px;background:var(--adm-card);
+  box-shadow:0 0 0 1px var(--auth-edge),0 22px 50px -24px var(--auth-shadow);
   animation:auth-in .22s ease-out both}
-.auth-screen .adm-auth .adm-card::before{content:"";position:absolute;inset:0 18px auto;height:3px;border-radius:0 0 3px 3px;opacity:.9;
-  background:linear-gradient(90deg,hsl(var(--auth-h) var(--auth-s) 55%),hsl(var(--auth-h2) var(--auth-s) 50%),hsl(28 90% 60%))}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .auth-screen .adm-auth .adm-card{background:var(--auth-glass);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5)}
 }
 .auth-screen .adm-auth .adm-card + .adm-card{margin-top:16px}
-.auth-screen .adm-auth h1{font-size:26px;letter-spacing:-.025em}
+.auth-screen .adm-auth h1{font-size:26px;letter-spacing:-.025em;margin-bottom:24px}
+.auth-screen .adm-auth .f{margin-bottom:16px}
+.auth-screen .adm-auth .adm-btn--block{min-height:46px}
 @keyframes auth-in{from{opacity:0;transform:translateY(8px) scale(.985)}}
 
-/* Gruß zur Tageszeit */
-.auth-greet{display:flex;align-items:center;gap:8px;margin:0 0 6px!important;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--adm-a-ink)}
-.auth-greet::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;
-  background:conic-gradient(hsl(var(--auth-h) var(--auth-s) 55%),hsl(var(--auth-h2) var(--auth-s) 50%),hsl(28 90% 60%),hsl(var(--auth-h) var(--auth-s) 55%))}
+/* Gruß zur Tageszeit: leise Zeile über der Überschrift */
+.auth-greet{margin:0 0 2px!important;font-size:14px;font-weight:500;color:var(--adm-t2)}
 
 /* „Passwort vergessen?“ neben der Beschriftung des Passwortfelds */
 .auth-pwlabel{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
-.auth-forgot{font-size:13.5px;font-weight:600;color:var(--adm-a-ink);text-underline-offset:3px}
+.auth-forgot{font-size:13px;font-weight:600;color:var(--adm-a-ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.auth-screen .pk-or{margin:20px 0;color:var(--adm-ink)}
+.auth-screen .pk-or::before,.auth-screen .pk-or::after{background:color-mix(in srgb,var(--adm-ink) 18%,transparent)}
+/* Passkey: leiser Umriss – „Anmelden“ bleibt der Hauptknopf */
+.auth-screen [data-pk-login-btn]{background:transparent;border:1px solid color-mix(in srgb,var(--adm-ink) 22%,transparent);box-shadow:none}
+.auth-screen [data-pk-login-btn]:hover{border-color:color-mix(in srgb,var(--adm-ink) 45%,transparent)}
+.auth-screen .adm-auth input{min-height:48px}
+.auth-screen .adm-auth input:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
 
-/* Unter der Karte: Zur Website, KLXM Studio – Text direkt auf dem Himmel immer in --adm-ink (Kontrast ≥ 4,5:1 auf allen Farbflächen) */
-.auth-screen .adm-auth>.adm-muted{margin:18px 0 8px;color:var(--adm-ink)}
-.auth-screen .adm-auth>.adm-muted a{color:var(--adm-ink);text-underline-offset:3px}
-.auth-screen .adm-product{color:var(--adm-ink)}
+/* Unter der Karte eine Zeile: links „Zur Website“, rechts KLXM Studio – Text auf dem Himmel immer in --adm-ink (Kontrast) */
+.auth-screen .adm-auth>.adm-muted{margin:18px 0 0;padding:0 4px;text-align:left;font-size:14px;color:var(--adm-ink)}
+.auth-screen .adm-auth>.adm-muted a{color:var(--adm-ink);text-decoration:none}
+.auth-screen .adm-auth>.adm-muted a:hover,.auth-screen .adm-auth>.adm-muted a:focus-visible{text-decoration:underline;text-underline-offset:3px}
+.auth-screen .adm-auth>.adm-muted:has(+.adm-product){grid-column:1}
+.auth-screen .adm-auth>.adm-product{grid-column:2;margin:18px 0 0;padding:0 4px;font-size:13px;color:var(--adm-ink)}
 
-@media (max-width:480px){
-  .auth-screen .adm-auth .adm-card{padding:24px 18px 20px;border-radius:14px}
-  .auth-screen .adm-auth h1{font-size:23px}
+@media (max-width:520px){
+  /* Handy: keine Karte – das Formular steht direkt auf dem Himmel, volle Breite */
+  .auth-screen .adm-main{justify-content:flex-start;padding-top:max(clamp(32px,9vh,88px),env(safe-area-inset-top))}
+  /* Ohne Karte: Felder mit eigener Fläche, Sterne nur schwach hinter dem Formular */
+  .auth-screen .adm-auth input{background:var(--auth-glass);border-color:color-mix(in srgb,var(--adm-ink) 26%,transparent)}
+  .auth--night .auth-sky::after{opacity:.3;-webkit-mask-image:linear-gradient(#000 0 6%,rgba(0,0,0,.25) 20% 80%,#000);mask-image:linear-gradient(#000 0 6%,rgba(0,0,0,.25) 20% 80%,#000)}
+  .auth-screen .adm-auth{padding:0 20px}
+  .auth-screen .adm-brand--auth{margin-bottom:28px;padding:0}
+  .auth-screen .adm-auth .adm-card{padding:0;border-radius:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;animation:none}
+  .auth-screen .adm-auth .adm-card + .adm-card{margin-top:28px;padding-top:24px;border-top:1px solid var(--auth-edge)}
+  .auth-screen .adm-auth h1{font-size:28px}
+  .auth-screen .adm-auth>.adm-muted,.auth-screen .adm-auth>.adm-product{margin-top:28px;padding:16px 0 0;border-top:1px solid var(--auth-edge)}
   .auth-blob{width:110vmax;height:110vmax}
 }
 
@@ -122,6 +141,6 @@ body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-heigh
 }
 /* Erzwungene Farben (Windows-Kontrastmodus): kein Himmel, Systemfarben */
 @media (forced-colors:active){
-  .auth-sky,.auth-greet::before,.auth-screen .adm-auth .adm-card::before{display:none}
+  .auth-sky{display:none}
   .auth-screen .adm-auth .adm-card{background:Canvas;color:CanvasText;border:1px solid CanvasText;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
 }

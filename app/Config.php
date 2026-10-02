@@ -6,7 +6,7 @@ namespace Core;
 /**
  * Lädt config/config.php (Standardwerte, versioniert) und überschreibt sie mit
  * config/config.local.php (Geheimnisse, NICHT versioniert). Fehlt die lokale
- * Datei, wird sie beim ersten Aufruf mit zufälligen Schlüsseln angelegt.
+ * Datei, wird sie beim ersten Aufruf mit zufälligen Schlüsseln und zufälliger Verwaltungsadresse (admin_path) angelegt.
  */
 final class Config
 {
@@ -48,6 +48,7 @@ final class Config
         $values = array_replace([
             'app_key'     => bin2hex(random_bytes(32)),
             'setup_token' => bin2hex(random_bytes(12)),
+            'admin_path'  => AdminPath::random(),   // eigene Verwaltungsadresse statt /admin (Core\AdminPath)
             'debug'       => false,
         ], $overrides);
 

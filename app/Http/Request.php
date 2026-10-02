@@ -38,6 +38,12 @@ final class Request
         return new self(strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'), $path, $_GET, $post, $_FILES, $_SERVER);
     }
 
+    /** Gleiche Anfrage mit anderem (internem) Pfad – Core\AdminPath bildet die eigene Verwaltungsadresse auf /admin ab */
+    public function withPath(string $path): self
+    {
+        return new self($this->method, $path, $this->query, $this->post, $this->files, $this->server);
+    }
+
     public function input(string $key, mixed $default = null): mixed
     {
         return $this->post[$key] ?? $this->query[$key] ?? $default;

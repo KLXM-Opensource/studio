@@ -321,7 +321,11 @@ final class Network
     /** Adresse eines Pfads auf einer anderen Website (berücksichtigt url_rewrite der Ziel-Website) */
     public static function siteLink(string $key, string $path): string
     {
-        $rewrite = (bool) self::config($key)->get('url_rewrite', true);
+        $cfg = self::config($key);
+        $rewrite = (bool) $cfg->get('url_rewrite', true);
+        // Eigene Verwaltungsadresse der Ziel-Website (Core\AdminPath, config admin_path)
+        $own = \Core\AdminPath::normalize((string) (getenv('KLXM_ADMIN_PATH') ?: $cfg->get('admin_path', '')));
+        if ($own !== '' && \Core\AdminPath::error($own) === null && \Core\AdminPath::isInternal($path)) $path = '/' . $own . substr($path, strlen(\Core\AdminPath::INTERNAL));
         return self::siteUrl($key) . ($rewrite ? $path : '/index.php' . $path);
     }
 

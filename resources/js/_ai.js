@@ -316,7 +316,7 @@ export function initAi(scope = d) {
     $$('textarea', scope).forEach(ta => {
       if (ta._kia || ta.disabled || ta.readOnly || ta.hidden) return;
       ta._kia = true;
-      if (ta.matches('[data-rrule-raw],[data-kia-off],#meta_description,#kia-instr,[name^="i18n."]') || ta.closest('[data-schema],.kia-dlg,.rr-adv,form[action$="/admin/system"],.fx-i-form,.md-form,.mu')) return;
+      if (ta.matches('[data-rrule-raw],[data-kia-off],#meta_description,#kia-instr,[name^="i18n."]') || ta.closest('[data-schema],.kia-dlg,.rr-adv,form[action$="/system"],.fx-i-form,.md-form,.mu')) return;
       const f = ta.closest('.f, .dt-in'); if (!f) return;
       const b = d.createElement('button');
       b.type = 'button'; b.className = 'kia-fieldbtn';
@@ -478,7 +478,7 @@ function initPanels(scope) {
   $$('[data-kia-page]', scope).forEach(card => {
     if (card._kia) return; card._kia = true;
     const c = JSON.parse(card.dataset.kiaPage), out = $('[data-kia-out]', card);
-    const form = d.querySelector('form[action$="/admin/pages/' + c.id + '"]');
+    const form = d.querySelector('form[action$="/pages/' + c.id + '"]');
     $('[data-kia-check]', card)?.addEventListener('click', async e => {
       const b = e.currentTarget; b.disabled = true; out.innerHTML = '';
       const B = busy(out, t('Seite wird geprüft …'));

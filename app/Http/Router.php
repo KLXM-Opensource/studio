@@ -69,13 +69,24 @@ final class Router
      */
     public function add(string $method, string $pattern, callable|array $handler, array|string $opts = []): void
     {
+        $public = false;
         if ($this->owner !== null && self::isAdminPath($pattern)) {
+            $public = is_array($opts) && !empty($opts['public']);
             $handler = $this->guard($method, $pattern, $handler, is_string($opts) ? ['perm' => $opts] : $opts);
         }
         // {name} → benannte Gruppe, {name*} → inkl. Schrägstriche
         $regex = preg_replace_callback('/\{(\w+)(\*)?\}/', fn($m) =>
             '(?P<' . $m[1] . '>' . (isset($m[2]) ? '.+' : '[^/]+') . ')', $pattern);
-        $this->routes[] = [$method, '#^' . $regex . '$#u', $handler];
+        $this->routes[] = [$method, '#^' . $regex . '$#u', $handler, $public];
+    }
+
+    /** Bedient eine öffentliche Route einer Erweiterung ('public' => true) diesen Pfad? (Core\AdminPath: /admin direkt erreichbar) */
+    public function isPublicExtensionRoute(string $method, string $path): bool
+    {
+        foreach ($this->routes as $r) {
+            if (!empty($r[3]) && ($r[0] === $method || $r[0] === '*' || ($r[0] === 'GET' && $method === 'HEAD')) && preg_match($r[1], $path)) return true;
+        }
+        return false;
     }
 
     /** Routen einer Erweiterung anmelden: $register() läuft mit $owner als Herkunft (Schutz für /admin, Angaben für extensions:list) */

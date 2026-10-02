@@ -138,6 +138,7 @@ function base_path(): string
 function url(string $path = '/'): string
 {
     $path = '/' . ltrim($path, '/');
+    if (str_starts_with($path, '/admin')) $path = \Core\AdminPath::toPublic($path);   // eigene Verwaltungsadresse
     [$p, $frag] = array_pad(explode('#', $path, 2), 2, null);
     $rewrite = (bool) app()->config->get('url_rewrite', true);
     $out = base_path() . ($rewrite || $p === '/' ? $p : '/index.php' . $p);

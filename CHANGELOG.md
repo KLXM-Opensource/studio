@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Eigene Adresse der Verwaltung; Anmeldung aufgeräumt
+- Verwaltung unter eigener Adresse statt `/admin` (`Core\AdminPath`): `php bin/console admin:path <adresse>|--random|--reset`
+  bzw. config `admin_path` / Umgebungsvariable `KLXM_ADMIN_PATH`; übliche Adressen (admin, login, wp-admin, backend, cms,
+  verwaltung …) sind gesperrt. Intern bleibt alles `/admin` – Routen, Rechte und Erweiterungen unverändert, `url('/admin/…')`
+  liefert die eigene Adresse. `/admin` direkt: ohne Anmeldung „Seite nicht gefunden“ (kein Cookie), angemeldet weiter erreichbar;
+  Netzwerk-SSO und öffentliche Routen von Erweiterungen bleiben erreichbar, Netzwerk-Links nutzen die Adresse der Ziel-Website.
+  Neue Installationen erhalten eine zufällige Adresse (config.local.php); `health` empfiehlt sie, `setup:token` zeigt die
+  Einrichtungsadresse, Selbsttest `adminpath:selftest`.
+- Anmeldung (alle Bildschirme vor der Anmeldung): eine linksbündige Spalte – App-Icon neben Name und „Verwaltung“, Gruß als
+  leise Zeile, ohne Farbleiste; Passkey-Knopf mit Symbol; „Zur Website“ und KLXM Studio in einer Zeile. Auf dem Handy ohne
+  Kartenrahmen, Formular direkt auf dem Farbhimmel.
+
 ### Editor: ein Block-Menü statt zwei Leisten; Navigation neu gegliedert
 - Eine Blockleiste je Block: „⠿ Name“ (zum Ziehen, mit Ablage-Linie), ↑ ↓, Bearbeiten, ⋯. Unter „⋯“ ein eigenes Menü (Stil wie
   „+ Block einfügen“): Nach oben/unten, Duplizieren, Kopieren, Einfügen darunter, Einklappen, Abschnitt & Navigation, Löschen mit

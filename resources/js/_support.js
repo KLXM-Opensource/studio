@@ -17,7 +17,7 @@ const MAX_FILES = 5, MAX_BYTES = 8 * 1024 * 1024, TYPES = ['image/png', 'image/j
 export function initSupport(csrf) {
   // ---------------------------------------------------------------- Kontext: aktuelle Seite
   const here = location.pathname + location.search;
-  if (!location.pathname.includes('/admin/support/neu')) {
+  if (!location.pathname.includes('/support/neu')) {
     $$('[data-support-report]').forEach(a => {
       try {
         const u = new URL(a.href, location.href);

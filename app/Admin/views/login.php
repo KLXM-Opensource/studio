@@ -14,7 +14,7 @@
     <?php if ($pkLogin): // Anmeldung ohne Passwort (Core\Passkeys) – erscheint nur mit JavaScript und Passkey-fähigem Browser ?>
     <div class="pk-login" data-pk-login="<?= e(url('/admin/login/passkey')) ?>" data-next="<?= e($next) ?>" hidden>
       <p class="pk-or"><span><?= e(__('oder')) ?></span></p>
-      <button class="adm-btn adm-btn--block" type="button" data-pk-login-btn><?= e(__('Mit Passkey anmelden')) ?></button>
+      <button class="adm-btn adm-btn--block" type="button" data-pk-login-btn><?= icon('fingerprint') ?> <?= e(__('Mit Passkey anmelden')) ?></button>
       <p class="adm-flash pk-msg" data-pk-msg aria-live="polite" hidden></p>
     </div>
     <?php endif; ?>

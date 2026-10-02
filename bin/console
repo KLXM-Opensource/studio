@@ -17,7 +17,10 @@
  *   user:invite <email> [rolle] [--name="…"] [--lang=de|en]
  *                                                     Person einladen (E-Mail mit Link, 7 Tage gültig; ohne Versand wird der Link angezeigt)
  *   invites:selftest                                  Selbsttest der Einladungen (Token, Hash, Rollenprüfung)
- *   setup:token                                       Setup-Token für /admin/setup anzeigen
+ *   setup:token                                       Setup-Token und Adresse der Einrichtung (…/setup) anzeigen
+ *   admin:path [<adresse>|--random|--reset]           Adresse der Verwaltung anzeigen bzw. setzen (statt /admin, z. B. kontor-x4m9q;
+ *                                                     alle Websites der Installation, config.local.php); --reset = wieder /admin
+ *   adminpath:selftest                                Selbsttest der eigenen Verwaltungsadresse (Abbildung, Prüfung, Links)
  *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
  *
  * Websites & Netzwerk
@@ -500,7 +503,61 @@ switch ($cmd) {
 
     case 'setup:token':
         echo $app->config->get('setup_token') . "\n";
+        echo 'Einrichtung: ' . absolute_url('/admin/setup') . "\n";
         break;
+
+    case 'admin:path':
+        // Adresse der Verwaltung (Core\AdminPath) – gilt für alle Websites dieser Installation
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $want = in_array('--reset', $args, true) ? '' : (in_array('--random', $args, true) ? Core\AdminPath::random() : ($pos[0] ?? null));
+        if ($want === null) {
+            echo 'Verwaltung: ' . absolute_url('/admin') . (Core\AdminPath::custom() ? '' : "  (Standard – empfohlen: eigene Adresse, z. B. php bin/console admin:path --random)") . "\n";
+            if (getenv('KLXM_ADMIN_PATH')) echo "Hinweis: gesetzt über die Umgebungsvariable KLXM_ADMIN_PATH (hat Vorrang vor config.local.php).\n";
+            break;
+        }
+        $slug = Core\AdminPath::normalize($want);
+        if ($slug !== '' && ($err = Core\AdminPath::error($slug))) { fwrite(STDERR, $err . "\n"); exit(1); }
+        if ($slug !== '' && Core\Pages::byPath('/' . $slug)) { fwrite(STDERR, "Unter /{$slug} gibt es bereits eine Seite – bitte eine andere Adresse wählen.\n"); exit(1); }
+        $file = ROOT . '/config/config.local.php';
+        $local = is_file($file) ? require $file : [];
+        if (!is_array($local)) { fwrite(STDERR, "config/config.local.php ist nicht lesbar.\n"); exit(1); }
+        if ($slug === '') unset($local['admin_path']); else $local['admin_path'] = $slug;
+        $php = "<?php\n// Lokale Konfiguration – NICHT versionieren, NICHT weitergeben.\n// Geändert am " . date('Y-m-d H:i') . " (admin:path)\nreturn " . var_export($local, true) . ";\n";
+        if (@file_put_contents($file, $php, LOCK_EX) === false) { fwrite(STDERR, "config/config.local.php konnte nicht geschrieben werden.\n"); exit(1); }
+        @chmod($file, 0640);
+        if (function_exists('opcache_invalidate')) @opcache_invalidate($file, true);
+        Core\AdminPath::reset($slug === '' ? null : '/' . $slug);
+        echo 'Verwaltung jetzt unter: ' . absolute_url('/admin') . "\n";
+        echo ($slug === '' ? 'Wieder die übliche Adresse /admin.' : '/admin zeigt ohne Anmeldung nur noch „Seite nicht gefunden“. Lesezeichen und App auf dem Homescreen bitte neu anlegen.') . "\n";
+        break;
+
+    case 'adminpath:selftest':
+        $fail = 0;
+        $eq = function (string $name, mixed $got, mixed $want) use (&$fail) {
+            $ok = $got === $want; if (!$ok) $fail++;
+            echo ($ok ? '  ✓ ' : '  ✗ ') . $name . ($ok ? '' : ' – erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true)) . "\n";
+        };
+        $keep = Core\AdminPath::prefix();
+        Core\AdminPath::reset('/admin');
+        $eq('Standard: url() unverändert', str_ends_with(url('/admin/seiten'), '/admin/seiten'), true);
+        $eq('Standard: keine Abbildung eingehend', Core\AdminPath::toInternal('/kontor-x4m9q/seiten'), null);
+        Core\AdminPath::reset('/kontor-x4m9q');
+        $eq('eigene Adresse: /admin → öffentlich', Core\AdminPath::toPublic('/admin'), '/kontor-x4m9q');
+        $eq('eigene Adresse: Unterseite + Abfrage + Anker', Core\AdminPath::toPublic('/admin/seiten?x=1#a'), '/kontor-x4m9q/seiten?x=1#a');
+        $eq('ähnlicher Pfad bleibt (/administrator)', Core\AdminPath::toPublic('/administrator'), '/administrator');
+        $eq('Seite der Website bleibt', Core\AdminPath::toPublic('/agentur/admin'), '/agentur/admin');
+        $eq('eingehend → intern', Core\AdminPath::toInternal('/kontor-x4m9q/login/2fa'), '/admin/login/2fa');
+        $eq('eingehend: Startseite der Verwaltung', Core\AdminPath::toInternal('/kontor-x4m9q'), '/admin');
+        $eq('eingehend: ähnlicher Pfad nicht', Core\AdminPath::toInternal('/kontor-x4m9qq'), null);
+        $eq('url() nutzt die eigene Adresse', str_ends_with(url('/admin/login'), '/kontor-x4m9q/login'), true);
+        $eq('SSO bleibt direkt erreichbar', Core\AdminPath::directAllowed('/admin/sso'), true);
+        $eq('Anmeldung nicht direkt erreichbar', Core\AdminPath::directAllowed('/admin/login'), false);
+        $eq('übliche Adresse abgelehnt', Core\AdminPath::error('wp-admin') !== null && Core\AdminPath::error('admin') !== null && Core\AdminPath::error('verwaltung') !== null, true);
+        $eq('zu kurz/ungültig abgelehnt', Core\AdminPath::error('ab') !== null && Core\AdminPath::error('-abcde') !== null && Core\AdminPath::error('Ab Cd') !== null, true);
+        $eq('Zufallsadresse gültig', Core\AdminPath::error(Core\AdminPath::random()), null);
+        Core\AdminPath::reset($keep === '/admin' ? null : $keep);
+        echo $fail ? "{$fail} Fehler\n" : "Alles in Ordnung.\n";
+        exit($fail ? 1 : 0);
 
     case 'theme:create':
     case 'kit:create':
@@ -723,7 +780,9 @@ switch ($cmd) {
                 'app_key gesetzt' => strlen((string) $app->config->get('app_key')) >= 32,
                 'network_key gesetzt (Netzwerk-Anmeldung)' => !Core\Sites::multi() || strlen((string) (Core\Network\Network::install()['network_key'] ?? '')) >= 32,
                 'Kit kompatibel' => app()->theme->compatible(),
-            ] + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
+            ] + (Core\AdminPath::custom() ? ['Verwaltung unter eigener Adresse (nicht /admin)' => true]
+                    : ['Verwaltung unter /admin – eigene Adresse empfohlen: php bin/console admin:path --random' => null])   // nur Hinweis
+              + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
