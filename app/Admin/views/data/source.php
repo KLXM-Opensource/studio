@@ -1,9 +1,11 @@
 <?php
 /**
  * Externe Quelle anlegen/bearbeiten (Core\Sources): Quelle, Abruf, Zieltabelle + Zuordnung, Vorschau & Test, Status, Upload, Protokoll.
- * Ohne JavaScript bedienbar: „Vorschau & Test“ schickt das Formular ab und zeigt es mit Ergebnis wieder an
- * (Tabellen-/Formatwechsel lösen das per data-autosubmit aus).
+ * Ohne JavaScript bedienbar: „Vorschau laden“, „Zuordnung vorschlagen“ und „Probeabruf“ schicken das Formular ab und zeigen es
+ * mit Ergebnis wieder an (Tabellen-/Formatwechsel lösen das per data-autosubmit aus). Mit JavaScript (resources/js/_sources.js):
+ * Auswahl der Felder je Zeile, „Beispiel: …“ und Probeabruf live (do=probe, JSON – ohne erneuten Abruf der Quelle).
  * @var ?array $src  @var array $v  @var array $errors  @var ?array $preview  @var array $tables  @var array $logs  @var ?string $upload
+ * @var ?array $sample  @var bool $canSchema  @var ?array $notice  @var ?array $newTable  @var ?string $focus
  */
 use Core\Sources\Mapper;
 use Core\Sources\Sources;
@@ -15,12 +17,21 @@ $o = $v['options'];
 $a = $v['auth'];
 $t = $v['table'] ?? null;
 $map = $v['mapping'];
-$paths = $preview['paths'] ?? ($isNew ? [] : Sync::knownPaths((int) $src['id']));
+$sample ??= null;
+$newTable ??= null;
+$notice ??= null;
+$focus ??= null;
+$canSchema ??= false;
+$sfields = $sample ? Mapper::sourceFields($sample['paths']) : [];
+$explain = $t && $sample ? Mapper::explain($t, $map, $sample['items'][0]) : [];
+$dry = $t && $sample ? Mapper::preview($t, $map, $sample['items'], 3) : [];
+$miss = $t ? Mapper::missingRequired($t, $map) : [];
+$txHelp = Mapper::transformHelp();
 $err = fn(string $k) => isset($errors[$k]) ? '<p class="f-error" id="err-' . e(str_replace('.', '-', $k)) . '">' . e((string) $errors[$k]) . '</p>' : '';
 $inv = fn(string $k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="err-' . e(str_replace('.', '-', $k)) . '"' : '';
 $fmt = $v['format'];
 $tx = Mapper::transforms();
-$optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: de oder en (leer = automatisch) · Vorlage: {pfad} {pfad2}');
+$optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: de oder en · Kürzen/erster Absatz: Zeichenzahl, z. B. 200 · Vorlage: {pfad} {pfad2}');
 ?>
 <header class="adm-head dt-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/quellen')) ?>"><span aria-hidden="true"><?= icon('plugs-connected') ?></span> <?= e(__('Externe Quellen')) ?></a></p>
@@ -32,7 +43,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
 <?php if ($errors && empty($errors['_'])): ?><p class="adm-flash adm-flash--error" role="alert"><?= e(__('Bitte prüfen Sie die markierten Angaben – es wurde nichts gespeichert.')) ?></p><?php endif; ?>
 
 <div class="src-grid">
-<form method="post" action="<?= e($action) ?>" class="src-form" novalidate>
+<form method="post" action="<?= e($action) ?>" class="src-form" novalidate data-src-form>
   <?= csrf_field() ?>
   <input type="hidden" name="do" value="preview">
   <input type="hidden" name="mapping_table" value="<?= e((string) ($v['table_handle'] ?? '')) ?>">
@@ -100,94 +111,154 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
     </div>
   </section>
 
-  <section class="adm-card" id="zuordnung" aria-labelledby="src-h-map">
+  <?php // ------------------------------------------------ Felder in der Quelle (aus der letzten Vorschau) ?>
+  <section class="adm-card src-fields" id="src-felder" aria-labelledby="src-h-felder" tabindex="-1"<?= $focus === 'src-felder' ? ' data-autofocus' : '' ?>>
+    <h2 id="src-h-felder"><?= e(__('Felder in der Quelle')) ?></h2>
+    <?php if ($preview && !$preview['ok']): ?>
+    <p class="adm-flash adm-flash--error" role="alert"><?= icon('warning') ?> <?= e((string) $preview['error']) ?></p>
+    <?php elseif ($preview): ?>
+    <p class="adm-flash adm-flash--success" role="status"><?= icon('check-circle') ?> <?= e(__('{n} Einträge gelesen ({kb} KB{cached}).', ['n' => $preview['total'], 'kb' => number_format($preview['bytes'] / 1024, 1, ',', '.'),
+        'cached' => $preview['cached'] ? ', ' . __('aus dem Zwischenspeicher') : ($preview['ms'] ? ', ' . $preview['ms'] . ' ms' : '')])) ?>
+      <?php if (!empty($preview['meta']['partial'])): ?> <?= e(__('OpenImmo-Teilabgleich: fehlende Objekte bleiben unverändert.')) ?><?php endif; ?></p>
+    <?php endif; ?>
+    <?php if ($sfields): ?>
+    <p class="f-help"><?= e(__('So sieht der erste Eintrag der Quelle aus: links, was ein Wert bedeutet, in der Mitte der Pfad für die Zuordnung, rechts ein Beispiel. In der Zuordnung unten übernehmen Sie Pfade mit „Auswählen“.')) ?></p>
+    <div class="src-fields__wrap" role="region" aria-labelledby="src-h-felder" tabindex="0">
+      <table class="adm-table src-paths">
+        <thead><tr><th scope="col"><?= e(__('Bedeutung')) ?></th><th scope="col"><?= e(__('Pfad')) ?></th><th scope="col"><?= e(__('Beispiel (erster Eintrag)')) ?></th></tr></thead>
+        <tbody><?php foreach ($sfields as $sf): ?><tr><td><?= $sf['label'] !== '' ? e($sf['label']) : '<span class="adm-muted">–</span>' ?></td><td><code><?= e($sf['path']) ?></code></td><td><?= e($sf['sample']) ?></td></tr><?php endforeach; ?></tbody>
+      </table>
+    </div>
+    <p class="adm-muted src-fields__meta"><?= e(__('{n} Felder · Stand der Vorschau: {when}', ['n' => count($sfields), 'when' => date('d.m.Y H:i', (int) $sample['at'])])) ?></p>
+    <?php else: ?>
+    <p class="src-empty"><?= icon('info') ?> <span><?= e($fmt === 'openimmo' && !$isNew ? __('Noch keine Felder bekannt: OpenImmo-Datei hochladen (rechts) oder Adresse eintragen und „Vorschau laden“.') : __('Erst Adresse eintragen und „Vorschau laden“ – dann erscheinen hier alle Felder der Quelle mit einem Beispielwert.')) ?></span></p>
+    <?php endif; ?>
+    <div class="adm-row src-fields__actions">
+      <button class="adm-btn" name="do" value="preview"><?= icon('eye') ?> <?= e(__('Vorschau laden')) ?></button>
+      <label class="f-check src-fresh"><input type="checkbox" name="fresh" value="1"> <span><?= e(__('neu laden (Zwischenspeicher umgehen)')) ?></span></label>
+    </div>
+  </section>
+
+  <?php // ------------------------------------------------ Zieltabelle & Zuordnung ?>
+  <section class="adm-card" id="zuordnung" aria-labelledby="src-h-map" tabindex="-1"<?= $focus === 'zuordnung' ? ' data-autofocus' : '' ?>>
     <h2 id="src-h-map"><?= e(__('Zieltabelle & Zuordnung')) ?></h2>
     <div class="adm-fields">
       <div class="f"><label for="src-table"><?= e(__('Datentabelle')) ?></label>
         <div class="adm-row">
-          <select id="src-table" name="table_handle" data-autosubmit<?= $inv('table_handle') ?>>
+          <select id="src-table" name="table_handle" data-autosubmit<?= $inv('table_handle') ?> aria-describedby="src-table-help">
             <option value=""><?= e(__('– Tabelle wählen –')) ?></option>
-            <?php foreach ($tables as $tb): ?><option value="<?= e($tb['handle']) ?>"<?= ($v['table_handle'] ?? '') === $tb['handle'] ? ' selected' : '' ?>><?= e($tb['name']) ?></option><?php endforeach; ?>
+            <?php foreach ($tables as $tb): ?><option value="<?= e($tb['handle']) ?>"<?= !$newTable && ($v['table_handle'] ?? '') === $tb['handle'] ? ' selected' : '' ?>><?= e($tb['name']) ?></option><?php endforeach; ?>
+            <?php if ($canSchema): ?><option value="__new"<?= $newTable ? ' selected' : '' ?>><?= e(__('+ Neue Tabelle aus dieser Quelle anlegen …')) ?></option>
+            <?php else: ?><option value="" disabled><?= e(__('+ Neue Tabelle (Recht „Tabellen und Felder ändern“ fehlt)')) ?></option><?php endif; ?>
           </select>
-          <?php if (!$isNew && can('data.schema')): ?><button class="adm-btn adm-btn--small adm-btn--ghost" form="src-tbl"><?= icon('plus') ?> <?= e(match ($fmt) { 'openimmo' => __('Tabelle „Immobilien“ anlegen'), 'rss', 'atom' => __('Tabelle „Meldungen“ anlegen'), default => __('Tabelle anlegen') }) ?></button><?php endif; ?>
+          <?php if (!$isNew && $fmt === 'openimmo' && $canSchema): ?><button class="adm-btn adm-btn--small adm-btn--ghost" form="src-tbl"><?= icon('plus') ?> <?= e(__('Tabelle „Immobilien“ anlegen')) ?></button><?php endif; ?>
         </div><?= $err('table_handle') ?>
-        <p class="f-help"><?= e($isNew ? __('Nach dem ersten Speichern können Sie hier auch eine passende Tabelle mit Detailseite anlegen lassen.') : __('Die Vorlage legt eine Tabelle mit passenden Feldern, Detailseite und Zuordnung an.')) ?></p></div>
+        <p class="f-help" id="src-table-help"><?= e($canSchema ? __('Vorhandene Tabelle wählen – oder „Neue Tabelle aus dieser Quelle anlegen“: Felder, Typen und Zuordnung werden aus den Daten der Quelle vorgeschlagen.') : __('Neue Tabellen anlegen dürfen Rollen mit dem Recht „Tabellen und Felder ändern“.')) ?></p></div>
     </div>
+
+    <?php if ($newTable): include __DIR__ . '/_source_newtable.php'; endif; ?>
+
     <?php if ($t): ?>
-    <datalist id="src-paths"><?php foreach ($paths as $p => $sample): ?><option value="<?= e((string) $p) ?>"><?= e(mb_strimwidth((string) $sample, 0, 60, '…')) ?></option><?php endforeach; ?></datalist>
+    <div class="src-howto">
+      <p><b><?= e(__('So funktioniert die Zuordnung:')) ?></b> <?= e(__('Jede Zeile füllt ein Feld Ihrer Tabelle mit einem Wert aus der Quelle. Wählen Sie den Wert mit „Auswählen“ – darunter sehen Sie sofort, was im ersten Eintrag ankommt. Beispiele für RSS:')) ?></p>
+      <ul>
+        <li><code>pubDate</code> – <?= e(__('ein Element des Eintrags (hier das Datum)')) ?></li>
+        <li><code>content:encoded | description</code> – <?= e(__('Alternativen mit |: der erste nicht leere Wert zählt')) ?></li>
+        <li><code>enclosure@url</code> – <?= e(__('ein Attribut mit @ (hier die Bildadresse aus <enclosure url="…">)')) ?></li>
+        <li><code>{dc:creator} · {category}</code> – <?= e(__('Vorlage unter „Erweitert“: mehrere Werte in geschweiften Klammern zusammensetzen (Umwandlung „Vorlage“)')) ?></li>
+      </ul>
+    </div>
+    <?php if ($notice): ?><p class="adm-flash adm-flash--<?= $notice[0] === 'ok' ? 'success' : 'warning' ?>" role="status"><?= icon($notice[0] === 'ok' ? 'check-circle' : 'info') ?> <?= e($notice[1]) ?></p><?php endif; ?>
+    <div class="adm-row src-map-tools">
+      <button class="adm-btn" name="do" value="suggest" aria-describedby="src-suggest-help"><?= icon('list-checks') ?> <?= e(__('Zuordnung vorschlagen')) ?></button>
+      <p class="f-help" id="src-suggest-help"><?= e(__('Füllt alle leeren Zeilen passend zu Feldname und Feldtyp (Datum ← pubDate, Bild ← enclosure@url …). Belegte Zeilen bleiben unverändert.')) ?></p>
+    </div>
     <div class="adm-fields">
       <div class="f f--half"><label for="src-id"><?= e(__('Eindeutige ID (Pfad)')) ?></label>
-        <input id="src-id" name="mapping[id_path]" value="<?= e($map['id_path']) ?>" list="src-paths" placeholder="guid" spellcheck="false">
-        <p class="f-help"><?= e(__('Erkennt Einträge beim nächsten Abruf wieder (keine Dubletten). Leer = Link bzw. Prüfsumme.')) ?></p></div>
+        <div class="src-pathbox"><input id="src-id" name="mapping[id_path]" value="<?= e($map['id_path']) ?>" placeholder="guid" spellcheck="false" data-src-path aria-describedby="src-id-help">
+          <button type="button" class="adm-btn adm-btn--small src-pick" data-src-pick="src-id" aria-haspopup="dialog" aria-expanded="false"<?= $sfields ? '' : ' disabled' ?>><?= icon('magnifying-glass') ?> <?= e(__('Auswählen')) ?><span class="sr-only"> – <?= e(__('Eindeutige ID (Pfad)')) ?></span></button></div>
+        <p class="f-help" id="src-id-help"><?= e(__('Erkennt Einträge beim nächsten Abruf wieder (keine Dubletten). Leer = Link bzw. Prüfsumme.')) ?></p></div>
       <div class="f f--half"><label for="src-slug"><?= e(__('Adresse der Detailseite (Pfad, optional)')) ?></label>
-        <input id="src-slug" name="mapping[slug_path]" value="<?= e($map['slug_path']) ?>" list="src-paths" placeholder="<?= e(__('aus dem Titel')) ?>" spellcheck="false"></div>
+        <div class="src-pathbox"><input id="src-slug" name="mapping[slug_path]" value="<?= e($map['slug_path']) ?>" placeholder="<?= e(__('aus dem Titel')) ?>" spellcheck="false" data-src-path>
+          <button type="button" class="adm-btn adm-btn--small src-pick" data-src-pick="src-slug" aria-haspopup="dialog" aria-expanded="false"<?= $sfields ? '' : ' disabled' ?>><?= icon('magnifying-glass') ?> <?= e(__('Auswählen')) ?><span class="sr-only"> – <?= e(__('Adresse der Detailseite (Pfad, optional)')) ?></span></button></div></div>
     </div>
-    <p class="f-help"><?= e(__('Pfade: Punkt-Schreibweise wie in der Vorschau, z. B. title, enclosure@url, link[@rel=alternate]@href, anhaenge.anhang[0].daten.pfad. Mehrere Pfade mit | – der erste nicht leere zählt.')) ?></p>
+    <p class="src-missing adm-flash adm-flash--warning" id="src-missing" role="status"<?= $miss ? '' : ' hidden' ?>><?= icon('warning') ?> <span data-src-missing><?= e($miss ? __('Pflichtfelder ohne Zuordnung: {list}', ['list' => implode(', ', $miss)]) : '') ?></span>
+      <small><?= e(__('Ohne Wert wird ein Eintrag nicht gespeichert. Pfad wählen, Standardwert unter „Erweitert“ angeben oder – bei Datumsfeldern – „jetzt (Zeitpunkt des Abrufs)“.')) ?></small></p>
     <div class="src-map-wrap">
     <table class="adm-table src-map">
-      <thead><tr><th scope="col"><?= e(__('Feld')) ?></th><th scope="col"><?= e(__('Quelle (Pfad)')) ?></th><th scope="col"><?= e(__('Umwandlung')) ?></th><th scope="col"><?= e(__('Option / Vorlage')) ?></th><th scope="col"><?= e(__('Standardwert')) ?></th></tr></thead>
+      <thead><tr><th scope="col"><?= e(__('Feld')) ?></th><th scope="col"><?= e(__('Wert aus der Quelle')) ?></th><th scope="col"><?= e(__('Umwandlung')) ?></th></tr></thead>
       <tbody>
       <?php foreach ($t['fields'] as $f): $row = (array) ($map['rows'][$f['name']] ?? []); $n = 'mapping[rows][' . $f['name'] . ']'; $fid = 'm-' . $f['name'];
-        $unsup = in_array($f['type'], Mapper::UNSUPPORTED, true); $isMedia = in_array($f['type'], ['media', 'file'], true); ?>
-        <tr>
-          <th scope="row"><label for="<?= e($fid) ?>"><?= e($f['label']) ?></label><?= !empty($f['required']) ? ' <span class="req" aria-hidden="true">*</span>' : '' ?><br><small class="adm-muted"><?= e(\Core\Data\Tables::TYPES[$f['type']][0] ?? $f['type']) ?></small></th>
+        $unsup = in_array($f['type'], Mapper::UNSUPPORTED, true); $isMedia = in_array($f['type'], ['media', 'file'], true);
+        $ex = $explain[$f['name']] ?? null; $isMiss = isset($miss[$f['name']]);
+        $adv = trim((string) ($row['opt'] ?? '')) !== '' || trim((string) ($row['default'] ?? '')) !== '' || trim((string) ($row['lookup'] ?? '')) !== '' || in_array($row['tx'] ?? '', ['template', 'truncate', 'para'], true);
+        $curTx = (string) ($row['tx'] ?? ''); ?>
+        <tr class="src-row<?= $isMiss ? ' is-missing' : '' ?>" data-src-row="<?= e($f['name']) ?>">
+          <th scope="row"><label for="<?= e($fid) ?>"><?= e($f['label']) ?></label><?= !empty($f['required']) ? ' <span class="req" aria-hidden="true">*</span><span class="sr-only"> (' . e(__('Pflichtfeld')) . ')</span>' : '' ?>
+            <small class="adm-muted src-type"><?= e(\Core\Data\Tables::TYPES[$f['type']][0] ?? $f['type']) ?></small>
+            <?php if (!$unsup): ?><small class="src-hint" id="<?= e($fid) ?>-hint"><?= e(Mapper::typeHint($f['type'])) ?></small><?php endif; ?></th>
           <?php if ($unsup): ?>
-          <td colspan="4" class="adm-muted"><?= e(__('Dieser Feldtyp lässt sich nicht aus einer Quelle füllen.')) ?></td>
+          <td colspan="2" class="adm-muted"><?= e(__('Dieser Feldtyp lässt sich nicht aus einer Quelle füllen.')) ?></td>
           <?php else: ?>
-          <td><input id="<?= e($fid) ?>" name="<?= e($n) ?>[path]" value="<?= e((string) ($row['path'] ?? '')) ?>" list="src-paths" spellcheck="false" aria-describedby="src-h-map">
-            <?php if ($isMedia): ?><label class="src-sub" for="<?= e($fid) ?>-alt"><?= e(__('Alt-Text aus')) ?></label><input id="<?= e($fid) ?>-alt" name="<?= e($n) ?>[alt]" value="<?= e((string) ($row['alt'] ?? '')) ?>" list="src-paths" spellcheck="false" placeholder="<?= e(__('Titel des Eintrags')) ?>"><?php endif; ?>
-            <details class="src-lookup"<?= !empty($row['lookup']) ? ' open' : '' ?>><summary><?= e(__('Werte ersetzen')) ?></summary>
-              <label class="sr-only" for="<?= e($fid) ?>-lk"><?= e(__('Werte ersetzen')) ?></label><textarea id="<?= e($fid) ?>-lk" name="<?= e($n) ?>[lookup]" rows="2" placeholder="VERBRAUCH=Verbrauchsausweis" spellcheck="false"><?= e((string) ($row['lookup'] ?? '')) ?></textarea></details></td>
-          <td><?php if ($isMedia): ?><span class="adm-muted"><?= e(__('Bild/Datei laden')) ?></span><?php else: ?>
-            <label class="sr-only" for="<?= e($fid) ?>-tx"><?= e(__('Umwandlung')) ?></label><select id="<?= e($fid) ?>-tx" name="<?= e($n) ?>[tx]"><?php foreach ($tx as $k => $l): ?><option value="<?= e($k) ?>"<?= ($row['tx'] ?? '') === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select><?php endif; ?></td>
-          <td><?php if (!$isMedia): ?><label class="sr-only" for="<?= e($fid) ?>-opt"><?= e(__('Option / Vorlage')) ?></label><input id="<?= e($fid) ?>-opt" name="<?= e($n) ?>[opt]" value="<?= e((string) ($row['opt'] ?? '')) ?>" spellcheck="false" title="<?= e($optHelp) ?>"><?php endif; ?></td>
-          <td><label class="sr-only" for="<?= e($fid) ?>-def"><?= e(__('Standardwert')) ?></label><input id="<?= e($fid) ?>-def" name="<?= e($n) ?>[default]" value="<?= e((string) ($row['default'] ?? '')) ?>"></td>
+          <td>
+            <div class="src-pathbox"><input id="<?= e($fid) ?>" name="<?= e($n) ?>[path]" value="<?= e((string) ($row['path'] ?? '')) ?>" spellcheck="false" data-src-path aria-describedby="<?= e($fid) ?>-ex <?= e($fid) ?>-hint" placeholder="<?= e($sfields ? __('Pfad – oder „Auswählen“') : __('z. B. title')) ?>">
+              <button type="button" class="adm-btn adm-btn--small src-pick" data-src-pick="<?= e($fid) ?>" aria-haspopup="dialog" aria-expanded="false"<?= $sfields ? '' : ' disabled' ?>><?= icon('magnifying-glass') ?> <?= e(__('Auswählen')) ?><span class="sr-only"> – <?= e($f['label']) ?></span></button></div>
+            <p class="src-ex is-<?= e($ex['state'] ?? 'none') ?>" id="<?= e($fid) ?>-ex" data-src-ex="<?= e($f['name']) ?>"><?php if ($ex): ?><?= ($ex['state'] === 'ok' ? '<span class="src-ex__k">' . e(__('Beispiel:')) . '</span> ' : icon($ex['state'] === 'error' || $ex['state'] === 'warn' ? 'warning' : 'info') . ' ') . e($ex['text']) ?><?php else: ?><?= e($sample ? __('Beispiel erscheint, sobald eine Zieltabelle gespeichert ist.') : __('Beispiel erscheint nach „Vorschau laden“.')) ?><?php endif; ?></p>
+            <?php if ($isMedia): ?><label class="src-sub" for="<?= e($fid) ?>-alt"><?= e(__('Alt-Text aus')) ?></label><div class="src-pathbox"><input id="<?= e($fid) ?>-alt" name="<?= e($n) ?>[alt]" value="<?= e((string) ($row['alt'] ?? '')) ?>" spellcheck="false" placeholder="<?= e(__('Titel des Eintrags')) ?>" data-src-path>
+              <button type="button" class="adm-btn adm-btn--small src-pick" data-src-pick="<?= e($fid) ?>-alt" aria-haspopup="dialog" aria-expanded="false"<?= $sfields ? '' : ' disabled' ?>><?= icon('magnifying-glass') ?> <span class="sr-only"><?= e(__('Auswählen')) ?> – <?= e(__('Alt-Text aus')) ?></span></button></div><?php endif; ?>
+            <details class="src-adv"<?= $adv ? ' open' : '' ?>><summary><?= e(__('Erweitert')) ?><span class="sr-only"> – <?= e($f['label']) ?></span></summary>
+              <div class="src-adv__grid">
+                <?php if (!$isMedia): ?><div><label for="<?= e($fid) ?>-opt"><?= e(__('Option / Vorlage')) ?></label><input id="<?= e($fid) ?>-opt" name="<?= e($n) ?>[opt]" value="<?= e((string) ($row['opt'] ?? '')) ?>" spellcheck="false" aria-describedby="<?= e($fid) ?>-opth">
+                  <small class="src-sub" id="<?= e($fid) ?>-opth"><?= e($optHelp) ?></small></div><?php endif; ?>
+                <div><label for="<?= e($fid) ?>-def"><?= e(__('Standardwert')) ?></label><input id="<?= e($fid) ?>-def" name="<?= e($n) ?>[default]" value="<?= e((string) ($row['default'] ?? '')) ?>" aria-describedby="<?= e($fid) ?>-defh">
+                  <small class="src-sub" id="<?= e($fid) ?>-defh"><?= e(__('Greift, wenn die Quelle nichts liefert.')) ?></small></div>
+                <div class="src-adv__wide"><label for="<?= e($fid) ?>-lk"><?= e(__('Werte ersetzen')) ?></label><textarea id="<?= e($fid) ?>-lk" name="<?= e($n) ?>[lookup]" rows="2" placeholder="VERBRAUCH=Verbrauchsausweis" spellcheck="false" aria-describedby="<?= e($fid) ?>-lkh"><?= e((string) ($row['lookup'] ?? '')) ?></textarea>
+                  <small class="src-sub" id="<?= e($fid) ?>-lkh"><?= e(__('Eine Zeile je Wert: Quelle=Ersatz (vor der Umwandlung; * = alle übrigen).')) ?></small></div>
+              </div>
+            </details></td>
+          <td><?php if ($isMedia): ?><span class="adm-muted"><?= e(__('Bild/Datei laden')) ?></span><p class="src-txhelp"><?= e(__('Die Datei wird geladen, neu gespeichert (ohne Kamera- und Standortdaten) und in die Mediathek übernommen.')) ?></p><?php else: ?>
+            <label class="sr-only" for="<?= e($fid) ?>-tx"><?= e(__('Umwandlung')) ?> – <?= e($f['label']) ?></label><select id="<?= e($fid) ?>-tx" name="<?= e($n) ?>[tx]" data-src-tx aria-describedby="<?= e($fid) ?>-txh"><?php foreach ($tx as $k => $l): ?><option value="<?= e($k) ?>" data-help="<?= e($txHelp[$k] ?? '') ?>"<?= $curTx === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
+            <p class="src-txhelp" id="<?= e($fid) ?>-txh" data-src-txhelp><?= e($txHelp[$curTx] ?? '') ?></p><?php endif; ?></td>
           <?php endif; ?>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
     </div>
-    <p class="f-help"><?= e($optHelp) ?></p>
-    <?php if ($miss = Mapper::missingRequired($t, $map)): ?><p class="adm-badge adm-badge--adm-warn"><?= icon('warning') ?> <?= e(__('Pflichtfelder ohne Zuordnung: {list}', ['list' => implode(', ', $miss)])) ?></p><?php endif; ?>
+
+    <?php // ------------------------------------------------ Probeabruf ?>
+    <section class="src-dry" id="probeabruf" aria-labelledby="src-h-dry" tabindex="-1"<?= $focus === 'probeabruf' ? ' data-autofocus' : '' ?>>
+      <div class="src-dry__head">
+        <h3 id="src-h-dry"><?= e(__('Probeabruf')) ?></h3>
+        <button class="adm-btn adm-btn--small" name="do" value="dryrun" data-src-dry<?= $sample ? '' : ' disabled' ?>><?= icon('play-circle') ?> <?= e(__('Probeabruf aktualisieren')) ?></button>
+      </div>
+      <p class="f-help"><?= e(__('Die ersten 3 Einträge so, wie sie mit der Zuordnung oben gespeichert würden – nichts wird gespeichert. Grundlage ist die letzte Vorschau.')) ?></p>
+      <div class="src-dry__out" data-src-dry-out aria-live="polite">
+        <?php if (!$sample): ?><p class="src-empty"><?= icon('info') ?> <span><?= e(__('Noch keine Vorschau: Erst Adresse eintragen und „Vorschau laden“.')) ?></span></p>
+        <?php else: foreach ($dry as $i => $m): ?>
+        <article class="src-item<?= $m['errors'] ? ' is-error' : '' ?>">
+          <h4><?= e($m['title'] !== '' ? $m['title'] : __('Eintrag {n}', ['n' => $i + 1])) ?> <small class="adm-muted">ID <code><?= e(mb_strimwidth($m['ext_id'], 0, 70, '…')) ?></code></small></h4>
+          <?php if ($m['errors']): ?><ul class="src-errs"><?php foreach ($m['errors'] as $w): ?><li><?= icon('warning') ?> <?= e($w) ?></li><?php endforeach; ?></ul><?php endif; ?>
+          <dl class="src-dl">
+            <?php foreach ($m['fields'] as $fd): ?><div class="<?= !empty($fd['error']) ? 'is-error' : (!empty($fd['empty']) ? 'is-empty' : '') ?>"><dt><?= e($fd['label']) ?></dt><dd><?= !empty($fd['media']) ? icon('image') . ' <code>' . e(mb_strimwidth($fd['value'], 0, 90, '…')) . '</code>' . ($fd['alt'] !== '' ? ' <small class="adm-muted">Alt: ' . e($fd['alt']) . '</small>' : '')
+              : ($fd['value'] === '' ? '<span class="adm-muted">' . e(!empty($fd['error']) ? __('leer – Pflichtfeld') : __('leer')) . '</span>' : e(mb_strimwidth($fd['value'], 0, 300, '…'))) ?></dd></div><?php endforeach; ?>
+            <?php if (!$m['fields']): ?><div><dt><?= e(__('Ergebnis')) ?></dt><dd class="adm-muted"><?= e(__('Kein Feld zugeordnet.')) ?></dd></div><?php endif; ?>
+          </dl>
+          <?php if ($m['warnings']): ?><ul class="src-warn"><?php foreach ($m['warnings'] as $w): ?><li><?= icon('warning') ?> <?= e($w) ?></li><?php endforeach; ?></ul><?php endif; ?>
+        </article>
+        <?php endforeach; endif; ?>
+      </div>
+    </section>
+    <?php elseif (!$newTable): ?>
+    <p class="adm-muted"><?= e(__('Wählen Sie eine Zieltabelle, um die Felder der Quelle zuzuordnen.')) ?></p>
     <?php endif; ?>
   </section>
 
   <div class="adm-form-actions src-actions">
-    <button class="adm-btn" name="do" value="preview"><?= icon('eye') ?> <?= e(__('Vorschau & Test')) ?></button>
-    <label class="f-check src-fresh"><input type="checkbox" name="fresh" value="1"> <span><?= e(__('neu laden (Zwischenspeicher umgehen)')) ?></span></label>
+    <button class="adm-btn" name="do" value="preview"><?= icon('eye') ?> <?= e(__('Vorschau laden')) ?></button>
     <button class="adm-btn adm-btn--primary" name="do" value="save"><?= e($isNew ? __('Quelle anlegen') : __('Speichern')) ?></button>
   </div>
-
-  <?php if ($preview): ?>
-  <section class="adm-card src-preview" id="vorschau" aria-labelledby="src-h-prev" tabindex="-1">
-    <h2 id="src-h-prev"><?= e(__('Vorschau')) ?></h2>
-    <?php if (!$preview['ok']): ?>
-    <p class="adm-flash adm-flash--error" role="alert"><?= icon('warning') ?> <?= e((string) $preview['error']) ?></p>
-    <?php else: ?>
-    <p class="adm-flash adm-flash--success" role="status"><?= icon('check-circle') ?> <?= e(__('{n} Einträge gelesen ({kb} KB{cached}).', ['n' => $preview['total'], 'kb' => number_format($preview['bytes'] / 1024, 1, ',', '.'),
-        'cached' => $preview['cached'] ? ', ' . __('aus dem Zwischenspeicher') : ($preview['ms'] ? ', ' . $preview['ms'] . ' ms' : '')])) ?>
-      <?php if (!empty($preview['meta']['partial'])): ?> <?= e(__('OpenImmo-Teilabgleich: fehlende Objekte bleiben unverändert.')) ?><?php endif; ?></p>
-    <?php if ($preview['suggested']): ?><p class="f-help"><?= e(__('Die Zuordnung oben wurde vorgeschlagen – bitte prüfen und speichern.')) ?></p><?php endif; ?>
-    <?php if (!$t): ?><p class="adm-muted"><?= e(__('Wählen Sie eine Zieltabelle, um das Ergebnis der Zuordnung zu sehen.')) ?></p><?php endif; ?>
-    <?php foreach ($preview['mapped'] as $i => $m): ?>
-    <article class="src-item">
-      <h3><?= e($m['title'] !== '' ? $m['title'] : __('Eintrag {n}', ['n' => $i + 1])) ?> <small class="adm-muted">ID <code><?= e(mb_strimwidth($m['ext_id'], 0, 70, '…')) ?></code></small></h3>
-      <dl class="sh-fields">
-        <?php foreach ($m['fields'] as $fd): ?><dt><?= e($fd['label']) ?></dt><dd><?= !empty($fd['media']) ? icon('image') . ' <code>' . e(mb_strimwidth($fd['value'], 0, 90, '…')) . '</code>' . ($fd['alt'] !== '' ? ' <small class="adm-muted">Alt: ' . e($fd['alt']) . '</small>' : '') : e(mb_strimwidth($fd['value'], 0, 300, '…')) ?></dd><?php endforeach; ?>
-        <?php if (!$m['fields']): ?><dt><?= e(__('Ergebnis')) ?></dt><dd class="adm-muted"><?= e(__('Kein Feld zugeordnet.')) ?></dd><?php endif; ?>
-      </dl>
-      <?php if ($m['warnings']): ?><ul class="src-warn"><?php foreach ($m['warnings'] as $w): ?><li><?= icon('warning') ?> <?= e($w) ?></li><?php endforeach; ?></ul><?php endif; ?>
-    </article>
-    <?php endforeach; ?>
-    <details class="src-raw"><summary><?= e(__('Gefundene Pfade und Beispielwerte ({n})', ['n' => count($preview['paths'])])) ?></summary>
-      <table class="adm-table src-paths"><thead><tr><th scope="col"><?= e(__('Pfad')) ?></th><th scope="col"><?= e(__('Beispiel (erster Eintrag)')) ?></th></tr></thead><tbody>
-        <?php foreach ($preview['paths'] as $p => $sample): ?><tr><td><code><?= e((string) $p) ?></code></td><td><?= e((string) $sample) ?></td></tr><?php endforeach; ?>
-      </tbody></table>
-    </details>
-    <?php endif; ?>
-  </section>
-  <?php endif; ?>
+  <?php if ($sfields): ?><script type="application/json" id="src-fields-data"><?= json_encode($sfields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script><?php endif; ?>
 </form>
 
 <aside class="src-side">
@@ -201,6 +272,9 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
       <dt><?= e(__('Nächster Abruf')) ?></dt><dd><?= e(!$src['active'] ? __('pausiert') : ($src['next_due'] ? date('d.m.Y H:i', (int) $src['next_due']) : __('nur manuell'))) ?></dd>
       <dt><?= e(__('Einträge')) ?></dt><dd><?= (int) $src['items'] ?></dd>
     </dl>
+    <?php if ($src['table'] && ($smiss = Mapper::missingRequired($src['table'], $src['mapping']))): ?>
+    <p class="adm-flash adm-flash--warning"><?= icon('warning') ?> <?= e(__('Abruf nicht möglich – gespeicherte Zuordnung ohne Pflichtfelder: {list}', ['list' => implode(', ', $smiss)])) ?></p>
+    <?php endif; ?>
     <?php if ($src['table']): ?>
     <form method="post" action="<?= e(url('/admin/quellen/' . $src['id'] . '/sync')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--primary adm-btn--block"><?= icon('arrows-clockwise') ?> <?= e(__('Jetzt abrufen')) ?></button></form>
     <?php endif; ?>
@@ -246,8 +320,9 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
   <section class="adm-card">
     <h2><?= e(__('Tipps')) ?></h2>
     <ul class="src-tips">
-      <li><?= e(__('„Vorschau & Test“ ruft die Quelle ab und zeigt die ersten Einträge – vor dem Speichern.')) ?></li>
-      <li><?= e(__('Zieltabelle wählen: die Zuordnung wird aus der Vorlage bzw. aus gleichnamigen Feldern vorgeschlagen.')) ?></li>
+      <li><?= e(__('Adresse eintragen und „Vorschau laden“: Sie sehen alle Felder der Quelle mit einem Beispielwert – vor dem Speichern.')) ?></li>
+      <li><?= e(__('Zieltabelle wählen oder „Neue Tabelle aus dieser Quelle anlegen“ – Felder und Zuordnung werden aus den Daten vorgeschlagen.')) ?></li>
+      <li><?= e(__('Der Probeabruf zeigt die ersten Einträge so, wie sie gespeichert würden.')) ?></li>
       <li><?= e(__('Übernommene Einträge sind in der Tabelle nur lesbar, lassen sich aber ausblenden.')) ?></li>
     </ul>
   </section>

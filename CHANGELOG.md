@@ -6,6 +6,26 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Externe Quellen: Zuordnung ohne Vorwissen
+- **Felder in der Quelle:** Nach „Vorschau laden“ zeigt die Quelle alle Felder des ersten Eintrags mit Bedeutung („Datum der
+  Veröffentlichung“), Pfad (`pubDate`) und Beispielwert – statt einer versteckten Auswahlliste. Ohne Vorschau steht dort, was zu tun ist.
+- **Zuordnung:** je Zeile „Auswählen“ (Felder mit Filter und Beispiel, per Tastatur bedienbar) und darunter sofort das Ergebnis für den
+  ersten Eintrag („Beispiel: 01.10.2026, 14:05“), live ohne erneuten Abruf. Standardansicht nur „Feld ← Wert aus der Quelle“ + Umwandlung
+  mit Erklärung; Option/Vorlage, Standardwert und „Werte ersetzen“ je Zeile unter „Erweitert“. Hinweis je Feldtyp, welches Format erkannt
+  wird (Datum: RFC 822, ISO 8601, Unix-Zeit). Kurze Anleitung mit RSS-Beispielen (`pubDate`, `|`, `@attribut`, `{…}`).
+- **„Zuordnung vorschlagen“** füllt leere Zeilen nach Feldname und Feldtyp für RSS, Atom und JSON (Datum ← `pubDate | published |
+  updated | dc:date`, Bild ← `enclosure@url | media:content@url …`, Autor ← `dc:creator | author.name` …); bei Wahl der Tabelle geschieht
+  das automatisch. Pflichtfelder ohne Wert werden markiert (Zeile, Hinweis, „Stand“ der Quelle).
+- **Probeabruf:** die ersten drei Einträge so, wie sie gespeichert würden – Feld → Wert, leere Pflichtfelder rot.
+- **Neue Tabelle aus dieser Quelle:** in der Auswahl der Zieltabelle, ohne vorheriges Speichern. Name aus dem Feed-Titel, Felder und Typen
+  aus den Beispielwerten (Datum, Webadresse, Bild, formatierter Text, Zahl …), je Feld an/aus, Bezeichnung und Typ änderbar; optional
+  Detailseite, Übersichtsseite und Menüeintrag. Legt Tabelle an, setzt sie als Ziel, füllt die Zuordnung und zeigt den Probeabruf.
+  Recht „Tabellen und Felder ändern“; vergebene Kurznamen/Adressen bekommen einen Zähler.
+- Neue Umwandlungen **„Kürzen“** (ohne HTML, an Wortgrenze mit „…“, Standard 200 Zeichen – für Teaser aus Beschreibung/Volltext, bei
+  Teaser-/Kurztext-Feldern vorgeschlagen), **„Nur erster Absatz“** und **„jetzt (Zeitpunkt des Abrufs)“** für Quellen ohne Datum (bleibt
+  bei späteren Abrufen unverändert). `liste[*]` verbindet alle Werte mit Komma.
+- Selbsttest `php bin/console sources:selftest`; Handbuch mit Schritt-für-Schritt-Beispiel für einen RSS-Feed.
+
 ### Datenliste: Textlänge und Titel kürzen
 - Block **Datenliste** hat zwei neue Optionen: **Textlänge** (vollständig, 2, 3, 4 oder 6 Zeilen) für Text-, mehrzeilige und formatierte
   Felder in Karten und Listen sowie **Titel kürzen** (2 oder 3 Zeilen) – z. B. für Nachrichten aus RSS-Feeds mit sehr langem Teaser.

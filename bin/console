@@ -113,6 +113,7 @@
  *   inbox:selftest                                    Selbsttest der Zustellung per E-Mail (Modi, Rückfall, S/MIME, keine Inhalte in DB/Protokoll)
  *   sources:sync [--all] [--source=ID] [--force]      Externe Quellen abgleichen: fällige (Cron, z. B. alle 15 min) bzw. eine/alle sofort
  *   sources:list [--all]                              Externe Quellen mit Stand (letzter Abruf, Einträge, Fehler)
+ *   sources:selftest                                  Selbsttest der Zuordnung: Vorschlag, Beispiel je Feld, Probeabruf, Kürzen, Typen für neue Tabellen
  *   redirects:import <datei.json|csv> [--dry-run] [--overwrite] [--keep-paths]
  *                                                     Weiterleitungen importieren (JSON [{"from","to"}] oder CSV quelle;ziel;code;notiz)
  *   redirects:list [--q=text] | redirects:test <pfad>  Weiterleitungen auflisten | Wohin führt eine Adresse?
@@ -550,6 +551,7 @@ switch ($cmd) {
 
     case 'sources:sync':
     case 'sources:list':
+    case 'sources:selftest':
         // Externe Quellen (Core\Sources): Feeds, JSON-APIs, XML, OpenImmo → Datentabellen
         exit(Core\Sources\Console::run($cmd, $args, __FILE__));
 

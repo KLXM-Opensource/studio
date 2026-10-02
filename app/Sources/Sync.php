@@ -43,6 +43,37 @@ final class Sync
         return $id > 0 && is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
     }
 
+    /**
+     * Beispiel-Einträge der letzten Vorschau bzw. des letzten Abrufs (erste 5, gelesen) – für „Felder in der Quelle“, „Beispiel: …“
+     * und den Probeabruf ohne erneuten Abruf. Schlüssel: Format + Adresse + Pfad/XPath (bei Uploads die Quelle).
+     */
+    public static function sampleKey(array $src): string
+    {
+        $o = (array) ($src['options'] ?? []);
+        return substr(hash('sha256', implode("\n", [(string) $src['format'], (string) $src['url'], (string) ($o['items_path'] ?? ''), (string) ($o['xpath'] ?? ''),
+            $src['url'] === '' ? 'id:' . (int) ($src['id'] ?? 0) : ''])), 0, 32);
+    }
+
+    public static function storeSample(array $src, array $items, array $meta): void
+    {
+        $d = self::dir() . '/samples';
+        if (!is_dir($d)) @mkdir($d, 0770, true);
+        // Aufräumen: Beispiele älter als 14 Tage
+        foreach (glob($d . '/*.json') ?: [] as $f) if (filemtime($f) < time() - 14 * 86400) @unlink($f);
+        @file_put_contents($d . '/' . self::sampleKey($src) . '.json', json_encode(['at' => time(), 'items' => array_slice($items, 0, 5),
+            'meta' => array_intersect_key($meta, ['format' => 1, 'title' => 1, 'total' => 1, 'root' => 1])], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), LOCK_EX);
+    }
+
+    /** @return ?array{at: int, items: list<array>, meta: array, paths: array} */
+    public static function sample(array $src): ?array
+    {
+        if ($src['url'] === '' && empty($src['id'])) return null;
+        $f = self::dir() . '/samples/' . self::sampleKey($src) . '.json';
+        $d = is_file($f) ? json_decode((string) file_get_contents($f), true) : null;
+        if (!is_array($d) || empty($d['items']) || !is_array($d['items'])) return null;
+        return ['at' => (int) ($d['at'] ?? 0), 'items' => $d['items'], 'meta' => (array) ($d['meta'] ?? []), 'paths' => Parser::paths($d['items'])];
+    }
+
     /** Hochgeladene ZIP-/XML-Datei (OpenImmo) – bleibt für erneutes Einlesen liegen */
     public static function uploadFile(int $id): ?string
     {
@@ -150,6 +181,7 @@ final class Sync
             $out['paths'] = Parser::paths($parsed['items']);
             // Gefundene Pfade merken (Auswahlliste der Zuordnung auch ohne neue Vorschau)
             if ($src['id'] > 0) @file_put_contents(self::dir($src['id']) . '/paths.json', json_encode($out['paths'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            self::storeSample($src, $parsed['items'], $parsed['meta']);
             $out['cached'] = $raw['cached'];
             $out['bytes'] = $raw['bytes'];
             $out['ms'] = $raw['ms'];
@@ -204,6 +236,7 @@ final class Sync
             $parsed = Parser::parse($raw['body'], $src['format'], ['items_path' => $src['options']['items_path'], 'xpath' => $src['options']['xpath'], 'max' => $src['options']['max_items']]);
             $stats['fetched'] = count($parsed['items']);
             @file_put_contents(self::dir($src['id']) . '/paths.json', json_encode(Parser::paths($parsed['items']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            self::storeSample($src, $parsed['items'], $parsed['meta']);
             self::$writing = true;
             self::apply($src, $table, $parsed, $raw['files'], $stats);
             $stats['ok'] = true;
@@ -254,6 +287,10 @@ final class Sync
                     continue;
                 }
                 $in = $m['values'];
+                // „jetzt (Zeitpunkt des Abrufs)“: bestehende Einträge behalten den Zeitpunkt des ersten Abrufs
+                foreach (array_keys($m['now'] ?? []) as $fname) {
+                    if ($entry && isset($entry[$fname]) && $entry[$fname] !== '' && $entry[$fname] !== null) $in[$fname] = $entry[$fname];
+                }
                 $imgFailed = false;
                 foreach ($m['media'] as $field => $ref) {
                     if (!$src['options']['images']) break;

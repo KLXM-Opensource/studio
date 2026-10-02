@@ -110,7 +110,7 @@ final class Templates
     }
 
     /** Einfache Übersichtsseite für andere Vorlagen: Datenliste mit Titel, Bild, Beschreibung */
-    private static function makeListPage(array $t): ?int
+    public static function makeListPage(array $t): ?int
     {
         $route = (string) $t['settings']['route'];
         if ($route === '' || str_contains($route, '/') || Pages::byPath($route)) return null;
