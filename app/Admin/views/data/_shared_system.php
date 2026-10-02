@@ -25,7 +25,7 @@ if ($part === 'forms'):
 endif; ?>
 <section class="adm-card adm-panel" role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden>
   <h2><?= e(__('Geteilte Daten')) ?></h2>
-  <p class="adm-muted"><?= e(__('Datentabellen für mehrere Websites dieser Installation, z. B. Neuigkeiten oder Termine eines Verbands und seiner Vereine. Eine Website ist Eigentümerin und legt die Felder fest; jede beteiligte Website pflegt ihre eigenen Einträge und entscheidet, welche fremden Einträge sie zeigt. Bilder liegen automatisch in geteilten Medien.')) ?></p>
+  <p class="adm-muted"><?= e(__('Datentabellen für mehrere Websites dieser Installation, z. B. Neuigkeiten oder Termine eines Verbands und seiner Vereine. Eine Website ist Eigentümerin und legt die Felder fest; jede beteiligte Website pflegt ihre eigenen Einträge und entscheidet, welche fremden Einträge sie zeigt. Bilder und Dateien der Einträge liegen automatisch in geteilten Medien – ein Pool je Tabelle, sobald sie Bild- oder Dateifelder hat.')) ?></p>
 
   <?php if (!$visible): ?><p><?= e(__('Diese Website nimmt an keiner geteilten Tabelle teil.')) ?></p><?php endif; ?>
   <?php foreach ($visible as $k => $m): $admin = Shared::canAdmin($k) && $manage; $t = Tables::sharedTable($k); ?>

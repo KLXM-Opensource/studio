@@ -111,6 +111,49 @@ use Core\Fields;
     <h2><?= e(__('Geteilte Medien')) ?></h2>
     <p class="adm-muted"><?= e(__('Zentrale Mediatheken für mehrere Websites dieser Installation, z. B. Logos und Markenbilder. In der Mediathek erscheint dafür eine Umschaltung. Pflegen dürfen Rollen mit „Geteilte Medien pflegen“ auf der Hauptwebsite und auf Websites, die unter „Pflegen dürfen“ freigegeben sind; alle anderen verwenden die Dateien nur. Änderungen wirken sofort auf allen Websites.')) ?></p>
     <?php if ($manage): ?>
+      <?php
+      // Pools geteilter Datentabellen („data-{key}“) verwaltet die Tabelle: eigene Darstellung, leere zusammengeklappt
+      $autoPools = $emptyAuto = [];
+      foreach ($pools as $pk => $pl) {
+          if (($tk = \Core\Data\Shared::poolTable($pk)) === null) continue;
+          $autoPools[$pk] = $tk;
+          unset($pools[$pk]);
+      }
+      $siteLabel = fn(string $sk) => $sk === 'default' ? __('Hauptwebsite') : (isset($allSites[$sk]) ? (new \Core\Site($sk, $allSites[$sk]))->label() : $sk);
+      ?>
+      <?php foreach ($autoPools as $pk => $tk): $meta = \Core\MediaPools::meta($pk); $n = \Core\MediaPools::count($pk); $sm = \Core\Data\Shared::meta($tk);
+        if ($n === 0) { $emptyAuto[$pk] = $tk; continue; } ?>
+      <div class="pl-card pl-card--auto">
+        <div class="pl-head">
+          <strong><?= e(__('Bilder der geteilten Tabelle „{name}“', ['name' => $sm['label'] ?? $tk])) ?></strong>
+          <code><?= e($pk) ?></code><span class="adm-muted"><?= e($n === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => $n])) ?></span>
+          <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/system?table=' . rawurlencode($tk) . '#shared')) ?>"><?= e(__('Zur Tabelle')) ?></a>
+        </div>
+        <p class="adm-muted"><?= e(__('Genutzt von: {sites} – automatisch alle beteiligten Websites der Tabelle.', ['sites' => implode(', ', array_map($siteLabel, (array) $meta['sites']))])) ?></p>
+        <fieldset class="pl-sites"><legend><?= e(__('Pflegen dürfen')) ?> <small class="adm-muted"><?= e(__('Alt-Texte, Zuschnitte und Sammlungen in der Mediathek – Bilder der Einträge setzt jede beteiligte Website selbst')) ?></small></legend>
+          <?php foreach ($allSites as $sk => $sc): $main = $sk === $network; ?>
+          <label class="f-check"><input type="checkbox" form="pool-<?= e($pk) ?>" name="editors[]" value="<?= e($sk) ?>"<?= $main || in_array($sk, (array) $meta['editors'], true) ? ' checked' : '' ?><?= $main ? ' disabled' : '' ?>>
+            <span><?= e($siteLabel($sk)) ?><?= $main ? ' <small class="adm-muted">' . e(__('immer')) . '</small>' : '' ?></span></label>
+          <?php endforeach; ?>
+        </fieldset>
+        <div class="adm-row">
+          <button class="adm-btn adm-btn--small" type="submit" form="pool-<?= e($pk) ?>"><?= e(__('Speichern')) ?></button>
+          <span class="adm-muted pl-hint"><?= e(__('Wird mit der Tabelle verwaltet.')) ?></span>
+        </div>
+      </div>
+      <?php endforeach; ?>
+      <?php if ($emptyAuto): ?>
+      <details class="pl-card pl-card--auto">
+        <summary><?= e(__('Leere Pools geteilter Tabellen ({n})', ['n' => count($emptyAuto)])) ?></summary>
+        <p class="adm-muted"><?= e(__('Diese Pools gehören zu geteilten Datentabellen und enthalten noch keine Dateien. Sie werden mit der Tabelle verwaltet; Pools von Tabellen ohne Bild- oder Dateifelder entfernt „migrate“ automatisch.')) ?></p>
+        <ul>
+          <?php foreach ($emptyAuto as $pk => $tk): $sm = \Core\Data\Shared::meta($tk); ?>
+          <li><?= e(__('Bilder der geteilten Tabelle „{name}“', ['name' => $sm['label'] ?? $tk])) ?> <code><?= e($pk) ?></code>
+            <?= \Core\Data\Shared::hasMediaFields($tk) ? '' : '<small class="adm-muted">' . e(__('ohne Bild-/Dateifelder – wird beim nächsten „migrate“ entfernt')) . '</small>' ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </details>
+      <?php endif; ?>
       <?php foreach ($pools as $pk => $pl): $meta = \Core\MediaPools::meta($pk); $cfgSites = $viaConfig($pk); $n = \Core\MediaPools::count($pk); ?>
       <div class="pl-card">
         <div class="pl-head">

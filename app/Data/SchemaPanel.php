@@ -109,7 +109,8 @@ final class SchemaPanel
     /**
      * Rundlauf und Seitenleiste: validate(toInput($t), $t) ergibt für jede Tabelle dieselbe Definition; vorübergehende Tabellen
      * (Inhalt + Eingang) prüfen Hinzufügen, Reihenfolge, Pflicht, Dateitypen, Bestätigung beim Löschen, Umbenennen in der Auswahl
-     * und die Regeln des Eingangs (Typen, Dateien nur per E-Mail). Die vorübergehenden Tabellen werden danach gelöscht.
+     * und die Regeln des Eingangs (Typen, Dateien nur per E-Mail), dazu die Medien-Pools geteilter Tabellen (SharedPoolsTest).
+     * Die vorübergehenden Tabellen werden danach gelöscht.
      * $readOnly (Konsole --roundtrip): nur der Rundlauf – ändert nichts, auch auf Live-Websites unbedenklich.
      */
     public static function selftest(bool $readOnly = false): array
@@ -230,6 +231,10 @@ final class SchemaPanel
         } finally {
             foreach ($made as $h) if ($x = Tables::find($h)) Tables::delete($x);
         }
+        // Medien-Pools geteilter Tabellen: nur bei Bedarf anlegen, leere automatische aufräumen
+        $sp = SharedPoolsTest::run();
+        $ok += $sp['ok'];
+        array_push($fails, ...$sp['fails']);
         return ['ok' => $ok, 'fails' => $fails];
     }
 }

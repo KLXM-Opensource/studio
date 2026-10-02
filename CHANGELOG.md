@@ -6,6 +6,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Geteilte Daten: Medien-Pool nur bei Bedarf
+- Der Pool `data-{key}` einer geteilten Tabelle entsteht erst, wenn sie ein Bild- oder Dateifeld hat (beim Anlegen, Teilen,
+  Beitreten oder beim Speichern des Schemas, sobald das erste solche Feld dazukommt) bzw. wenn die erste Datei zugeordnet wird
+  (`Shared::ensurePool($key, $force)`, `Shared::hasMediaFields()`). Tabellen nur mit Text – etwa das geteilte Glossar – bekommen
+  keinen leeren Pool mehr. Neue Pools tragen `shared_table` in `pool.json`.
+- **Aufräumen mit `migrate`** (`Shared::cleanupPools()`): leere, automatisch angelegte Pools geteilter Tabellen ohne Bild-/Dateifelder
+  (z. B. `data-glossar`) werden entfernt – nie Pools mit Dateien (Datenbank, Ordner oder Verweise einer Website), nie selbst
+  angelegte. Die Pool-Datenbank wandert nach `storage/pools/_removed/`, Protokoll in `storage/pools/_removed/removed.log`,
+  idempotent.
+- **Grundeinstellungen › Geteilte Medien:** Pools geteilter Tabellen heißen „Bilder der geteilten Tabelle „…““, verweisen zur
+  Tabelle und werden mit ihr verwaltet – kein Löschen, nutzende Websites folgen den Beteiligten der Tabelle (nur „Pflegen dürfen“
+  bleibt einstellbar); leere stehen zusammengeklappt.
+- Selbsttest `data:selftest` prüft Anlegen nach Bedarf und das Aufräumen (`Core\Data\SharedPoolsTest`).
+
 ### CSS & JS: Referenz für alle Kits und Generator
 - **Entwicklerhandbuch › CSS & JS** (`#css-js`): die vier Ebenen (Verwaltung, Editor im Shadow DOM, öffentliche Kern-Bausteine,
   Kit), Laden (`conditional_css` mit „typ:variante“ und `@rich`, Kern-Stylesheets je Block und wie ein Kit sie ersetzt,

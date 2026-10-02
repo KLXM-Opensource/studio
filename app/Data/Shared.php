@@ -24,8 +24,9 @@ use Doctrine\DBAL\Connection;
  *
  * Der Schlüssel ist zugleich der Kurzname (handle) der Tabelle. Das Schema legt die Eigentümer-Website fest (ein gemeinsames Schema);
  * jede Website pflegt nur Einträge mit origin_site = eigene Website. Welche fremden Einträge eine Website zeigt, steht in deren
- * Einstellungen („shared.{key}“: owner, members, sites, where, link_origin, canonical, detail_page_id). Bilder liegen im Medien-Pool „data-{key}“,
- * gespeichert werden Pool-IDs; beim Lesen werden sie in Verweise der jeweiligen Website übersetzt (MediaPools::mirror).
+ * Einstellungen („shared.{key}“: owner, members, sites, where, link_origin, canonical, detail_page_id). Bilder liegen im Medien-Pool „data-{key}“
+ * (angelegt erst, wenn die Tabelle Bild-/Dateifelder hat bzw. die erste Datei kommt – ensurePool), gespeichert werden Pool-IDs;
+ * beim Lesen werden sie in Verweise der jeweiligen Website übersetzt (MediaPools::mirror).
  * Einladungen (share.json „invited“): Websites, die der Eigentümer zum Beitreten freigegeben hat – beitreten (shareLocal mit $merge bzw.
  * addMember) macht die Website selbst, so stimmen beide Seiten zu. Verlassen: leave() (Mitglied), unshare() (Eigentümer).
  */
@@ -576,19 +577,112 @@ final class Shared
         return rtrim(substr('data-' . str_replace('_', '-', $key), 0, 32), '-');
     }
 
-    /** Pool anlegen bzw. alle Beteiligten eintragen */
-    public static function ensurePool(string $key): string
+    /** Feldtypen, deren Werte im Pool der Tabelle liegen */
+    public const MEDIA_TYPES = ['media', 'file'];
+
+    /** Hat die geteilte Tabelle Bild- oder Dateifelder? (aus dem Register, ohne Hydrieren) */
+    public static function hasMediaFields(string $key): bool
+    {
+        try {
+            $row = self::row($key);
+        } catch (\Throwable) {
+            return false;
+        }
+        foreach ($row ? (json_decode((string) $row['fields_json'], true) ?: []) : [] as $f) {
+            if (in_array($f['type'] ?? '', self::MEDIA_TYPES, true)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Geteilte Tabelle, zu der ein Pool gehört (Schlüssel) – oder null (frei angelegter Pool). Neue Pools tragen die Markierung
+     * „shared_table“ in pool.json; ältere erkennt der Kurzname „data-{key}“ einer vorhandenen geteilten Tabelle.
+     */
+    public static function poolTable(string $poolKey): ?string
+    {
+        $mark = (string) (MediaPools::meta($poolKey)['shared_table'] ?? '');
+        if ($mark !== '' && self::meta($mark)) return $mark;
+        foreach (array_keys(self::all()) as $key) if (self::poolKey($key) === $poolKey) return $key;
+        return null;
+    }
+
+    /**
+     * Pool „data-{key}“ bei Bedarf anlegen bzw. alle Beteiligten eintragen. Angelegt wird er nur, wenn die Tabelle Bild-/Dateifelder hat
+     * oder $force (die erste Datei kommt hinzu, toPool) – eine Tabelle ohne Medien (z. B. das Glossar) bekommt keinen leeren Pool.
+     * Ein vorhandener Pool bekommt neue Beteiligte dazu (ausgetretene behalten ihn: ihre Verweise zeigen weiter in den Pool).
+     * @return string|null Pool-Kurzname oder null (kein Pool nötig)
+     */
+    public static function ensurePool(string $key, bool $force = false): ?string
     {
         $pk = self::poolKey($key);
         $meta = self::meta($key);
         $sites = $meta ? self::participants($meta) : [site()->key];
         if (!is_file(MediaPools::dir($pk) . '/pool.json')) {
-            MediaPools::create($pk, __('Daten: {name}', ['name' => $meta['label'] ?? $key]), $sites);
+            if (!$force && !self::hasMediaFields($key)) return null;
+            MediaPools::create($pk, __('Daten: {name}', ['name' => $meta['label'] ?? $key]), $sites, ['shared_table' => $key]);
         } else {
             $pm = MediaPools::meta($pk);
             if (array_diff($sites, (array) $pm['sites'])) MediaPools::update($pk, (string) $pm['label'], array_values(array_unique(array_merge((array) $pm['sites'], $sites))));
         }
         return $pk;
+    }
+
+    /**
+     * Leere, automatisch angelegte Pools geteilter Tabellen ohne Bild-/Dateifelder entfernen (läuft mit `migrate`, idempotent).
+     * Entfernt wird nur, was sicher automatisch entstand und nie genutzt wurde: Kurzname „data-{key}“ einer geteilten Tabelle,
+     * Markierung „shared_table“ oder automatische Bezeichnung („Daten: …“/„Data: …“), keine Dateien in Datenbank und Ordner,
+     * kein Verweis einer beteiligten Website. Die Pool-Datenbank wandert nach storage/pools/_removed/, Protokoll in
+     * storage/pools/_removed/removed.log. $dry: nur melden; $only: nur diese Tabellen (Selbsttest).
+     * @return list<string> entfernte (bzw. zu entfernende) Pool-Kurznamen
+     */
+    public static function cleanupPools(bool $dry = false, ?array $only = null): array
+    {
+        $removed = [];
+        foreach (self::all() as $key => $meta) {
+            if ($only !== null && !in_array($key, $only, true)) continue;
+            $pk = self::poolKey($key);
+            if (!is_file(MediaPools::dir($pk) . '/pool.json')) continue;
+            try {
+                if (!self::row($key) || self::hasMediaFields($key)) continue;   // Register unlesbar: lieber nichts anfassen
+            } catch (\Throwable) {
+                continue;
+            }
+            $pm = MediaPools::meta($pk);
+            $auto = ($pm['shared_table'] ?? null) === $key || preg_match('~^(Daten|Data): ~u', (string) $pm['label']);
+            if (!$auto || !self::poolEmpty($pk, self::participants($meta))) continue;
+            if (!$dry) {
+                MediaPools::retire($pk);
+                @mkdir(MediaPools::dir('_removed'), 0770, true);
+                file_put_contents(MediaPools::dir('_removed') . '/removed.log', date('c') . " $pk (geteilte Tabelle $key, leer, ohne Bild-/Dateifelder) entfernt\n", FILE_APPEND | LOCK_EX);
+            }
+            $removed[] = $pk;
+        }
+        return $removed;
+    }
+
+    /** Pool ohne Dateien (Datenbank, Ordner) und ohne Verweise der angegebenen Websites? */
+    private static function poolEmpty(string $pk, array $sites): bool
+    {
+        try {
+            if (MediaPools::count($pk) > 0) return false;
+        } catch (\Throwable) {
+            return false;
+        }
+        $dir = MediaPools::mediaDir($pk);
+        if (is_dir($dir)) {
+            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)) as $f) {
+                if ($f->isFile()) return false;
+            }
+        }
+        foreach ($sites as $s) {
+            try {
+                $db = self::siteDb((string) $s);
+                if ($db && $db->fetchValue('SELECT COUNT(*) FROM media WHERE pool_ref LIKE ?', [$pk . ':%']) > 0) return false;
+            } catch (\Throwable) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -599,7 +693,7 @@ final class Shared
     {
         $id = (int) $localId;
         if ($id <= 0) return null;
-        $pk = self::ensurePool($t['shared']['key']);
+        $pk = self::ensurePool($t['shared']['key'], true);
         $row = app()->db->fetch('SELECT id, pool_ref FROM media WHERE id = ?', [$id]);
         if (!$row) return null;
         if (!empty($row['pool_ref'])) {
@@ -984,6 +1078,12 @@ final class Shared
             } catch (\Throwable $e) {
                 $out[] = "geteilt: $key FEHLER " . $e->getMessage();
             }
+        }
+        // Leere Pools „data-{key}“ von Tabellen ohne Bild-/Dateifelder (frühere Versionen legten sie immer an)
+        try {
+            foreach (self::cleanupPools() as $pk) $out[] = "geteilt: leerer Medien-Pool $pk entfernt (Tabelle ohne Bild-/Dateifelder)";
+        } catch (\Throwable $e) {
+            $out[] = 'geteilt: Aufräumen der Medien-Pools FEHLER ' . $e->getMessage();
         }
         return $out;
     }

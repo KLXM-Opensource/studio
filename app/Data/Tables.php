@@ -544,7 +544,10 @@ final class Tables
         }
         self::sync(self::find((int) $table['id']), $renames);
         PageCache::clear();
-        if (isset($table['shared'])) Shared::clearCaches($table['shared']['key']);
+        if (isset($table['shared'])) {
+            Shared::ensurePool($table['shared']['key']);   // erstes Bild-/Dateifeld: jetzt den Pool „data-{key}“ anlegen
+            Shared::clearCaches($table['shared']['key']);
+        }
     }
 
     /** Welche Spalten fielen beim Speichern weg? (Warnung vor Datenverlust) */

@@ -142,7 +142,13 @@ final class SystemController extends AdminController
     {
         $this->poolAuth($r);
         try {
-            \Core\MediaPools::update($key, $r->str('label'), (array) ($r->post['sites'] ?? []), (array) ($r->post['editors'] ?? []));
+            if (\Core\Data\Shared::poolTable($key) !== null) {
+                // Pool einer geteilten Tabelle: Name und nutzende Websites folgen der Tabelle, nur „Pflegen dürfen“ ist einstellbar
+                $meta = \Core\MediaPools::meta($key);
+                \Core\MediaPools::update($key, (string) $meta['label'], (array) $meta['sites'], (array) ($r->post['editors'] ?? []));
+            } else {
+                \Core\MediaPools::update($key, $r->str('label'), (array) ($r->post['sites'] ?? []), (array) ($r->post['editors'] ?? []));
+            }
         } catch (\InvalidArgumentException $e) {
             return $this->back('/admin/system#pools', 'error', $e->getMessage());
         }
@@ -152,6 +158,9 @@ final class SystemController extends AdminController
     public function poolDelete(Request $r, string $key): Response
     {
         $this->poolAuth($r);
+        if (\Core\Data\Shared::poolTable($key) !== null) {
+            return $this->back('/admin/system#pools', 'error', __('Dieser Pool gehört zu einer geteilten Datentabelle und wird mit der Tabelle verwaltet.'));
+        }
         try {
             \Core\MediaPools::delete($key);
         } catch (\InvalidArgumentException $e) {

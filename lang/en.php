@@ -1632,7 +1632,7 @@ return [
     'Detailseiten fremder Einträge auf dieser Website verweisen per Canonical auf die Ursprungs-Website – Suchmaschinen werten sie nicht doppelt.' => 'Detail pages of other websites’ entries point to the origin website via canonical – search engines do not count them twice.',
     'Ändern darf, wer Einträge veröffentlichen darf.' => 'Anyone allowed to publish entries can change this.',
     'Geteilte Daten' => 'Shared data',
-    'Datentabellen für mehrere Websites dieser Installation, z. B. Neuigkeiten oder Termine eines Verbands und seiner Vereine. Eine Website ist Eigentümerin und legt die Felder fest; jede beteiligte Website pflegt ihre eigenen Einträge und entscheidet, welche fremden Einträge sie zeigt. Bilder liegen automatisch in geteilten Medien.' => 'Data tables for several websites of this installation, e.g. news or events of an association and its clubs. One website owns the table and defines the fields; every participating website maintains its own entries and decides which entries of others it shows. Images are stored in shared media automatically.',
+    'Datentabellen für mehrere Websites dieser Installation, z. B. Neuigkeiten oder Termine eines Verbands und seiner Vereine. Eine Website ist Eigentümerin und legt die Felder fest; jede beteiligte Website pflegt ihre eigenen Einträge und entscheidet, welche fremden Einträge sie zeigt. Bilder und Dateien der Einträge liegen automatisch in geteilten Medien – ein Pool je Tabelle, sobald sie Bild- oder Dateifelder hat.' => 'Data tables for several websites of this installation, e.g. news or events of an association and its clubs. One website owns the table and defines the fields; every participating website maintains its own entries and decides which entries of others it shows. Images and files of the entries are stored in shared media automatically – one pool per table, as soon as it has image or file fields.',
     'Diese Website nimmt an keiner geteilten Tabelle teil.' => 'This website does not participate in any shared table.',
     'Eigentümer: {site}' => 'Owner: {site}',
     'Beteiligte Websites' => 'Participating websites',
@@ -5717,4 +5717,14 @@ return [
     'Übersichtsseite mit allen Einträgen anlegen' => 'Create an overview page with all entries',
     '„{label}“: „{value}“ ist keine vollständige Adresse (https://…).' => '“{label}”: “{value}” is not a full address (https://…).',
     'Zuordnung vorgeschlagen – bitte die Beispiele prüfen und speichern.' => 'Mapping suggested – please check the samples and save.',
+    // Pools geteilter Datentabellen (Core\Data\Shared::ensurePool/cleanupPools, Grundeinstellungen → Geteilte Medien)
+    'Bilder der geteilten Tabelle „{name}“' => 'Images of the shared table “{name}”',
+    'Zur Tabelle' => 'Go to table',
+    'Genutzt von: {sites} – automatisch alle beteiligten Websites der Tabelle.' => 'Used by: {sites} – automatically all participating websites of the table.',
+    'Alt-Texte, Zuschnitte und Sammlungen in der Mediathek – Bilder der Einträge setzt jede beteiligte Website selbst' => 'Alt texts, crops and collections in the media library – every participating website sets the images of its entries itself',
+    'Wird mit der Tabelle verwaltet.' => 'Managed together with the table.',
+    'Leere Pools geteilter Tabellen ({n})' => 'Empty pools of shared tables ({n})',
+    'Diese Pools gehören zu geteilten Datentabellen und enthalten noch keine Dateien. Sie werden mit der Tabelle verwaltet; Pools von Tabellen ohne Bild- oder Dateifelder entfernt „migrate“ automatisch.' => 'These pools belong to shared data tables and contain no files yet. They are managed together with the table; “migrate” removes pools of tables without image or file fields automatically.',
+    'ohne Bild-/Dateifelder – wird beim nächsten „migrate“ entfernt' => 'no image/file fields – removed by the next “migrate”',
+    'Dieser Pool gehört zu einer geteilten Datentabelle und wird mit der Tabelle verwaltet.' => 'This pool belongs to a shared data table and is managed together with the table.',
 ];

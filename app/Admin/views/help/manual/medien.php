@@ -86,6 +86,7 @@
   <div class="doc-note doc-note--warn"><strong>Bildrechte und Einwilligungen</strong><p>Nur Fotos verwenden, für die Nutzungsrechte bestehen. Bei erkennbaren Personen (Team, Kundinnen und Kunden) ist eine schriftliche Einwilligung nötig.</p></div>
   <h3 id="pools">Geteilte Medien</h3>
   <p>Gehört Ihre Website zu einem Verbund, kann es <b>geteilte Mediatheken</b> geben (z. B. Markenbilder einer Unternehmensgruppe). Oben in der Mediathek schalten Sie dann um: <b>Diese Website | ⇄ Name der Mediathek</b>. Geteilte Dateien verwenden Sie wie eigene; ändern, hochladen und löschen dürfen dort nur Personen mit dem Recht „Geteilte Medien pflegen“. Wer es hat, kann eigene Dateien per Rechtsklick <b>In „…“ verschieben (geteilt)</b> – alle bisherigen Verwendungen auf Ihrer Website bleiben erhalten.</p>
+  <p>Unter <b>Grundeinstellungen → Geteilte Medien</b> erscheinen außerdem die Bildbereiche geteilter Datentabellen als „Bilder der geteilten Tabelle „…““ mit Verweis <b>Zur Tabelle</b>. Sie werden mit der Tabelle verwaltet: Genutzt werden sie automatisch von allen beteiligten Websites, löschen lassen sie sich hier nicht; einstellbar ist nur, welche Websites Alt-Texte und Zuschnitte pflegen dürfen. Noch leere Bereiche stehen zusammengeklappt unter „Leere Pools geteilter Tabellen“.</p>
   <h3 id="pruefen">Prüfen: Was fehlt noch?</h3>
   <p>Links in der Mediathek steht immer die Gruppe <b>„Prüfen“</b> – mit der Anzahl der betroffenen Dateien (grau = alles erledigt):</p>
   <ul>

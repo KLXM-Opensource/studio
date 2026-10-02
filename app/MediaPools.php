@@ -48,7 +48,10 @@ final class MediaPools
         return $out;
     }
 
-    /** Angaben eines Pools aus pool.json: label, sites (Websites, die ihn nutzen), editors (Websites, die ihn pflegen dürfen), created */
+    /**
+     * Angaben eines Pools aus pool.json: label, sites (Websites, die ihn nutzen), editors (Websites, die ihn pflegen dürfen), created,
+     * shared_table (nur automatisch angelegte Pools geteilter Datentabellen: deren Kurzname)
+     */
     public static function meta(string $key): array
     {
         $f = self::dir($key) . '/pool.json';
@@ -120,6 +123,25 @@ final class MediaPools
         if (is_dir(self::mediaDir($key))) $rm(self::mediaDir($key));
     }
 
+    /**
+     * Leeren Pool beiseitelegen (Aufräumen automatisch angelegter Pools, Core\Data\Shared::cleanupPools): pool.json und Datenbank
+     * wandern nach storage/pools/_removed/{key}-{Zeit}/, der (leere) Dateiordner public/pools/{key} wird entfernt.
+     */
+    public static function retire(string $key): void
+    {
+        if (!is_file(self::dir($key) . '/pool.json')) throw new \InvalidArgumentException('Unbekannter Pool.');
+        if (self::count($key) > 0) throw new \InvalidArgumentException('Der Pool enthält noch Dateien.');
+        unset(self::$dbs[$key]);
+        @mkdir(self::dir('_removed'), 0770, true);
+        if (!@rename(self::dir($key), self::dir('_removed') . '/' . $key . '-' . date('YmdHis'))) throw new \RuntimeException("Pool „{$key}“ konnte nicht verschoben werden.");
+        $rm = function (string $dir) use (&$rm): void {
+            foreach (array_diff(scandir($dir) ?: [], ['.', '..']) as $f) is_dir("$dir/$f") ? $rm("$dir/$f") : @unlink("$dir/$f");
+            @rmdir($dir);
+        };
+        if (is_dir(self::mediaDir($key))) $rm(self::mediaDir($key));
+        self::forget();
+    }
+
     public static function count(string $key): int
     {
         return (int) self::db($key)->fetchValue('SELECT COUNT(*) FROM media');
@@ -130,7 +152,8 @@ final class MediaPools
         return isset(self::forSite()[$key]);
     }
 
-    public static function create(string $key, string $label, array $sites = []): void
+    /** $extra: weitere Angaben für pool.json (z. B. 'shared_table' => Kurzname bei automatisch angelegten Pools geteilter Tabellen) */
+    public static function create(string $key, string $label, array $sites = [], array $extra = []): void
     {
         if (!preg_match('~^[a-z][a-z0-9-]{1,31}$~', $key)) {
             throw new \InvalidArgumentException('Kurzname: a–z, 0–9, Bindestrich (2–32 Zeichen).');
@@ -140,7 +163,7 @@ final class MediaPools
         }
         @mkdir(self::dir($key), 0770, true);
         @mkdir(self::mediaDir($key), 0775, true);
-        self::saveMeta($key, ['label' => mb_substr(trim(strip_tags($label)), 0, 80) ?: $key, 'sites' => array_values($sites), 'created' => date('c')]);
+        self::saveMeta($key, ['label' => mb_substr(trim(strip_tags($label)), 0, 80) ?: $key, 'sites' => array_values($sites), 'created' => date('c')] + $extra);
         self::db($key);
     }
 
