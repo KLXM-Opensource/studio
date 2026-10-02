@@ -13,7 +13,8 @@ namespace Core;
  *    Rechte, Konfiguration ohne Callables;
  *  - Ereignisse (Extension::on, Extensions::listens/emit): page.saved/published/unpublished, entry.saved/published/unpublished/deleted
  *    in einer Transaktion, die am Ende zurückgerollt wird; typisiert (Core\Events) und Altform;
- *  - Verwaltungsrouten von Erweiterungen (Core\Http\Router::scoped): Anmeldung, Recht, CSRF, Altform, benannte Ausnahmen.
+ *  - Verwaltungsrouten von Erweiterungen (Core\Http\Router::scoped): Anmeldung, Recht, CSRF, Altform, benannte Ausnahmen;
+ *  - Tabellen von Erweiterungen (Extension::table, Fingerabdruck) in einer Transaktion, die zurückgerollt wird.
  * Rollen werden für die Prüfung vorübergehend gesetzt (Auth per Reflection) und danach zurückgestellt.
  */
 final class ExtensionsSelfTest
@@ -61,6 +62,7 @@ final class ExtensionsSelfTest
             self::frontendTools();
             self::events();
             self::routes();
+            self::tables();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -384,5 +386,29 @@ final class ExtensionsSelfTest
         $dev->scoped('qa_selftest', fn(Http\Router $r) => $r->post('/admin/qa/alt', [Http\Controllers\Admin\DashboardController::class, 'index']));
         self::eq('Entwicklung: Altform bleibt erlaubt', (array_slice($dev->meta('qa_selftest'), -1)[0]['legacy'] ?? null), true);
         self::actAs(null);
+    }
+
+    // ================================================================= Tabellen von Erweiterungen
+
+    private static function tables(): void
+    {
+        // MySQL: DDL beendet Transaktionen – dort nur db:selftest-Logik, hier nichts anlegen
+        if (app()->db->driver !== 'sqlite') { self::$ok++; return; }
+        $pdo = app()->db->pdo;
+        $pdo->beginTransaction();
+        try {
+            $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+            $x->table('qa_selftest_items', fn(Db\Table $t) => $t->id()->column('name', 'string', ['length' => 80])->index('name'));
+            self::eq('table(): anlegen', $x->ensureTables(), ['qa_selftest_items' => 'created']);
+            self::eq('table(): gleicher Fingerabdruck → nichts zu tun', $x->ensureTables(), []);
+            self::eq('table(): migrate (erzwungen) idempotent', $x->ensureTables(true), ['qa_selftest_items' => 'unchanged']);
+            $y = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+            $y->table('qa_selftest_items', fn(Db\Table $t) => $t->id()->column('name', 'string', ['length' => 80])->column('menge', 'int', ['default' => 1])->index('name'));
+            self::eq('table(): geänderte Beschreibung → angleichen', $y->ensureTables(), ['qa_selftest_items' => 'altered']);
+            self::eq('table(): Spalte da', in_array('menge', array_column(app()->db->fetchAll('PRAGMA table_info(qa_selftest_items)'), 'name'), true) || app()->db->driver === 'mysql', true);
+        } finally {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+        }
+        self::eq('table(): zurückgerollt', Db\Table::exists('qa_selftest_items'), false);
     }
 }

@@ -5,7 +5,7 @@
   <p>Erweiterungen dürfen <b>nur über die folgenden Stellen</b> eingreifen. Jede Stelle hat eine Methode im Manifest (<code>Core\Extension</code>), einen festen Datenvertrag, eine Rechteprüfung und einen Selbsttest (<code>extensions:selftest</code>). Was hier nicht steht, gibt es nicht – auch nicht „vorübergehend“. Neue Stellen entstehen nur im Core, mit Doku und Selbsttest, nie als zweiter Weg für etwas, das es schon gibt.</p>
   <table class="doc-table">
     <tr><th>Bereich</th><th>Stellen (Manifest)</th><th>Vertrag</th></tr>
-    <tr><td>Lebenszyklus</td><td><code>boot</code>, <code>install</code>, <code>deactivate</code>, <code>requirements</code>, <code>usage</code>, <code>migration()</code>, <code>schema()</code></td><td>Tabellen deklarativ mit <a href="#erweiterungen-schema"><code>Core\Db\Table</code></a> (idempotent), einmalige Datenschritte mit <code>migration()</code>. Eigene Tabellen tragen den Namen der Erweiterung als Präfix.</td></tr>
+    <tr><td>Lebenszyklus</td><td><code>boot</code>, <code>install</code>, <code>deactivate</code>, <code>requirements</code>, <code>usage</code>, <code>table()</code>, <code>migration()</code></td><td>Tabellen deklarativ mit <a href="#erweiterungen-schema"><code>Core\Db\Table</code></a> (idempotent), einmalige Datenschritte mit <code>migration()</code>. Eigene Tabellen tragen den Namen der Erweiterung als Präfix.</td></tr>
     <tr><td>Routen</td><td><code>routes()</code></td><td>Routen unter <code>/admin</code> sind <a href="#erweiterungen-routen">geschützt</a>: Anmeldung, CSRF bei Nicht-GET und ein <b>Recht pro Route</b>. Ausnahmen nur benannt (<code>'csrf' =&gt; false</code>, <code>'public' =&gt; true</code>), sichtbar in <code>extensions:list</code>.</td></tr>
     <tr><td>Verwaltungsseiten</td><td><code>adminPage()</code> / <code>nav()</code>, <code>permissions()</code>, <code>feature()</code>, <code>adminAssets()</code></td><td>Art <code>content|tool|settings|stats</code> bestimmt den Ort (siehe unten).</td></tr>
     <tr><td>Slots der Verwaltung</td><td><code>pageList()</code>, <code>pagePanel()</code>, <code>tableActions()</code>, <code>mediaPanel()</code>, <code>dashboard()</code>, <code>account()</code></td><td>Liefern <b>Daten</b>, der Core rendert und escaped (<a href="#erweiterungen-slots">Slots</a>).</td></tr>
@@ -73,6 +73,35 @@ $x-&gt;nav('/admin/consent', 'Cookie-Einwilligung', 'cookie', 'consent.manage', 
     <tr><td>ohne Recht, anderer Handler (Closure …)</td><td>Entwicklung (<code>'environment' =&gt; 'development'</code> oder <code>debug</code>): <code>LogicException</code> beim Anmelden. Produktion: Route antwortet mit 403 und schreibt ins Fehlerprotokoll.</td></tr>
   </table>
   <p>Routen des Cores (<code>app/routes.php</code>) sind davon nicht betroffen – ihre Controller prüfen mit <code>auth()</code>. <code>AdminController::routeGuard($r, $perm, $csrf)</code> ist dieselbe Prüfung ohne Nebenarbeiten. Selbsttest: <code>extensions:selftest</code> (Abschnitt Verwaltungsrouten).</p>
+
+  <h3 id="erweiterungen-schema">Tabellen deklarativ (<code>Core\Db\Table</code>)</h3>
+  <p>Nach dem Vorbild von <code>rex_sql_table</code>: eine Tabelle beschreiben statt <code>CREATE</code>/<code>ALTER</code> je Datenbank zu schreiben. <code>ensure()</code> legt an bzw. gleicht an – beliebig oft, gleiches Ergebnis (idempotent). Unter der Haube Doctrine DBAL (wie bei den Datentabellen) auf <b>derselben PDO-Verbindung</b> wie <code>app()-&gt;db</code> – also auch in einer offenen Transaktion, ohne zweite Sperre bei SQLite. SQLite und MySQL/MariaDB.</p>
+  <pre><code>use Core\Db\Table;
+
+// extension.php → boot: angeglichen beim Start (nur wenn sich die Beschreibung geändert hat) und bei jedem `migrate`
+$x-&gt;table('kalender_termine', fn(Table $t) =&gt; $t
+    -&gt;id()                                                         // INTEGER, Primärschlüssel, Autoincrement
+    -&gt;column('titel', 'string', ['length' =&gt; 120, 'null' =&gt; false, 'default' =&gt; ''])
+    -&gt;column('status', 'string', ['length' =&gt; 12, 'default' =&gt; 'neu'])
+    -&gt;column('beginn', 'datetime')                                // VARCHAR(25) „Y-m-d H:i:s“ wie im Core
+    -&gt;column('media_id', 'int')
+    -&gt;index(['status', 'beginn'])                                 // Name: kalender_termine_status_beginn
+    -&gt;unique('titel')
+    -&gt;foreignKey('media_id', 'media', 'id', 'SET NULL')
+    -&gt;renameColumn('title', 'titel'));                            // ausdrücklich, Daten bleiben
+
+// direkt (Kommandozeile, neue Tabellen des Cores): Rückgabe 'created' | 'altered' | 'unchanged'
+Table::named('kalender_log')-&gt;id()-&gt;column('text', 'text')-&gt;ensure();</code></pre>
+  <table class="doc-table">
+    <tr><th>Angabe</th><th>Bedeutung</th></tr>
+    <tr><td>Typen</td><td><code>id</code>, <code>int</code>, <code>bigint</code>, <code>string</code> (Länge 191), <code>text</code>, <code>longtext</code>, <code>bool</code>, <code>float</code>, <code>decimal</code> (<code>precision</code>/<code>scale</code>), <code>datetime</code>, <code>date</code>, <code>json</code> (TEXT).</td></tr>
+    <tr><td>Optionen</td><td><code>null</code> (Standard <code>true</code>), <code>default</code>, <code>length</code>, <code>precision</code>, <code>scale</code>, <code>unsigned</code>.</td></tr>
+    <tr><td>Additiv</td><td>Nicht beschriebene Spalten und Indizes bleiben. Entfernt wird nur mit <code>dropColumn()</code> bzw. <code>dropIndex()</code>. Der Primärschlüssel wird nur beim Anlegen gesetzt.</td></tr>
+    <tr><td>NOT NULL</td><td>Neue Spalte in einer gefüllten Tabelle wird ohne <code>default</code> nullable angelegt; eine bestehende nullable Spalte wird nur mit <code>default</code> zu NOT NULL (leere Werte werden damit gefüllt).</td></tr>
+    <tr><td>Umbenennen</td><td><code>renameColumn('alt', 'neu')</code> – nur wenn <code>alt</code> da und <code>neu</code> noch nicht da ist; Indizes über die Spalte bitte mit neuem Namen beschreiben und den alten mit <code>dropIndex()</code> entfernen.</td></tr>
+    <tr><td>Fremdschlüssel</td><td>Nur zwischen Tabellen derselben Datenbank (nicht zu geteilten Tabellen oder Pools). SQLite: <code>PRAGMA foreign_keys = ON</code> setzt <code>Core\Database</code>; das Ergänzen an einer bestehenden Tabelle baut sie neu auf (DBAL).</td></tr>
+  </table>
+  <p><code>table()</code> ersetzt handgeschriebenes SQL (<code>$pk</code>/<code>$long</code> je Datenbank) für <b>neue</b> Tabellen; einmalige Datenschritte (Werte umstellen, kopieren) bleiben <code>migration()</code>. Bestehende Migrationen müssen nicht umgeschrieben werden. Selbsttest: <code>php bin/console db:selftest</code> (Wegwerf-Datenbank: anlegen, idempotent, ergänzen, umbenennen, Indizes, Fremdschlüssel, Transaktion).</p>
 
   <h3 id="erweiterungen-werkzeuge">Werkzeuge beim Bearbeiten auf der Website (<code>Core\FrontendTools</code>)</h3>
   <p>Ein Werkzeug ist ein Knopf in der Werkzeugleiste (<code>placement =&gt; 'main'</code>, auf Telefonen im Menü „⋯“) oder ein Eintrag im Menü „⋯“ (<code>'more'</code>), optional mit Tastenkürzel. Es erscheint <b>nur angemeldet</b> und nur mit Recht – standardmäßig <b>nur im Bearbeiten-Modus</b> (Seiten-Editor inkl. Vorlage: <code>page</code>; Eintrag direkt im Text: <code>entry</code>, dort erst nach „Bearbeiten“). Mit <code>'view' =&gt; true</code> (bzw. <code>'view'</code> in <code>modes</code>) erscheint es zusätzlich beim <b>Ansehen</b> (Seite ohne <code>?edit=1</code>, auch Live-Fassung; Detailseite eines Eintrags vor „Bearbeiten“) – dort ist jeder Text der Seite markierbar. Das ES-Modul lädt der Browser <b>erst beim ersten Öffnen</b> – Besucher laden nie etwas.</p>

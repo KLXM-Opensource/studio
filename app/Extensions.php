@@ -29,7 +29,7 @@ namespace Core;
  *     'requirements' => fn(): array => ['ffmpeg gefunden' => true],       // Prüfung ohne Start (true/false/null = Warnung)
  *     'usage' => fn(): ?string => '12 Termine',                           // „Wird auf dieser Website verwendet von …“
  *     'commands' => ['kalender:sync'],                                    // Cron-Befehle: ohne Aktivierung ruhig beenden
- *     'install' => fn(Core\Database $db) => …,                            // einmalig je Website beim ersten Start (nach Migrationen)
+ *     'install' => fn(Core\Database $db) => …,                            // einmalig je Website beim ersten Start (nach Tabellen und Migrationen)
  *     'deactivate' => fn() => …,                                          // beim Abschalten in der Verwaltung (Daten bleiben)
  *     'required' => true,                                                 // Kern der Website: in der Verwaltung nicht abschaltbar
  *   ];
@@ -159,6 +159,7 @@ final class Extensions
         $x = new Extension($m['name'], $m['dir'], $m);
         self::$active[$name] = $x;
         if (is_callable($m['boot'] ?? null)) ($m['boot'])($x);
+        $x->ensureTables();
         $x->runMigrations();
         // Einrichtung einmalig je Website (Manifest 'install'), nach den Datenbank-Schritten
         if (is_callable($m['install'] ?? null) && isset(app()->settings) && !app()->settings->get('ext.' . $name . '.installed')) {

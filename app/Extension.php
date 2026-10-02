@@ -15,7 +15,9 @@ namespace Core;
  *   $x->permissions('Kalender', ['calendar.edit' => 'Termine pflegen'])   Rechte für Rollen
  *   $x->feature('calendar', 'Kalender', ['calendar.edit'])             je Website abschaltbar
  *   $x->proxy('wetter', [...])                                         externe Quelle über Core\Proxy
- *   $x->migration(1, fn(Database $db) => …)                            Datenbank-Schritte (einmalig, versioniert)
+ *   $x->table('kalender_termine', fn(Core\Db\Table $t) => $t->id()->column('titel', 'string')->index('titel'))
+ *                                                                      Tabelle deklarativ (angeglichen beim Start nach Änderung und mit migrate)
+ *   $x->migration(1, fn(Database $db) => …)                            Datenbank-Schritte (einmalig, versioniert – z. B. Daten umstellen)
  *   $x->command('kalender:import', 'Beschreibung', fn(array $args) => …)  CLI
  *   $x->asset('css/kalender.css')                                      URL zu {dir}/public/… (per extensions:publish veröffentlicht)
  *   $x->htmlFilter(fn(string $html, array $ctx) => $html)             HTML-Ausgabe der Website nachbearbeiten (vor dem Seiten-Cache)
@@ -93,6 +95,8 @@ final class Extension
     /** @var list<array> Werkzeuge für das Bearbeiten auf der Website (Core\FrontendTools::normalize) */
     public array $frontendTools = [];
     private array $migrations = [];
+    /** @var array<string, callable(Db\Table): mixed> Tabellen (table()) */
+    private array $tables = [];
 
     public function __construct(public readonly string $name, public readonly string $dir, public readonly array $manifest) {}
 
@@ -159,6 +163,36 @@ final class Extension
     {
         Proxy::register($key, $def);
         return $this;
+    }
+
+    /**
+     * Tabelle der Erweiterung deklarativ beschreiben (Core\Db\Table): fn(Table $t) => $t->id()->column(…)->index(…).
+     * Angeglichen wird beim Start, wenn sich die Beschreibung geändert hat (Fingerabdruck je Website), und bei jedem `migrate` –
+     * vor den migration()-Schritten. Additiv: Spalten entfernt nur dropColumn(). Name am besten mit dem Namen der Erweiterung als Präfix.
+     */
+    public function table(string $name, callable $define): self
+    {
+        $this->tables[$name] = $define;
+        return $this;
+    }
+
+    /** Tabellen (table()) angleichen – nur bei geändertem Fingerabdruck bzw. $force (migrate). @return array<string, string> Name → created|altered|unchanged */
+    public function ensureTables(bool $force = false): array
+    {
+        if (!$this->tables) return [];
+        $defs = [];
+        foreach ($this->tables as $name => $define) {
+            $t = Db\Table::named($name);
+            $define($t);
+            $defs[$name] = $t;
+        }
+        $fp = md5(implode('|', array_map(fn(Db\Table $t) => $t->fingerprint(), $defs)));
+        $key = 'ext.' . $this->name . '.tables';
+        if (!$force && app()->settings->get($key) === $fp) return [];
+        $out = [];
+        foreach ($defs as $name => $t) $out[$name] = $t->ensure(app()->db);
+        app()->settings->set($key, $fp);
+        return $out;
     }
 
     public function migration(int $version, callable $step): self

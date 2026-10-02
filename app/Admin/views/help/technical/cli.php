@@ -22,7 +22,8 @@ $__cmds = [
     'Kits & Erweiterungen' => [
         ['theme:list', 'Installierte Kits (Alias: kit:list)'],
         ['theme:create <name> <vorlage>', 'Neues Kit als Kopie (Präfix vorlage_* → name_*; Alias: kit:create)'],
-        ['extensions:list', 'Installierte Erweiterungen: aktiv je Website, Quelle (config bzw. verwaltung)'],
+        ['extensions:list', 'Installierte Erweiterungen: aktiv je Website, Quelle (config bzw. verwaltung); Verwaltungsrouten aktiver Erweiterungen – Altform ohne Recht und benannte Ausnahmen (csrf, public)'],
+        ['extensions:selftest | db:selftest', 'Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten, Werkzeuge, Ereignisse, Verwaltungsrouten, Tabellen, Slots) | Selbsttest Core\\Db\\Table in einer Wegwerf-Datenbank (Exit-Code 1 bei Fehlern)'],
         ['features:list', 'Funktionen dieser Website: an/aus und Quelle (Konfiguration, Preset, Verwaltung, Standard); „ruht“ bei fehlender Voraussetzung'],
         ['features:release [--dry-run] [--only=features|extensions]', 'In der Konfiguration festgelegte preset/features/extensions an Administration → Funktionen & Erweiterungen übergeben: Schalter setzen, Einträge aus config/sites/{key}.php (Einzel-Installation auch config.local.php) entfernen, Sicherung {datei}.{zeit}.bak, Diff – wirksamer Stand bleibt gleich'],
         ['extensions:publish', 'Öffentliche Dateien der Erweiterungen nach public/assets/ext kopieren'],

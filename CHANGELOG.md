@@ -20,6 +20,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Anmelden, in Produktion 403. Altform (Controller auf Basis von `AdminController`, die selbst `auth()` aufrufen) läuft weiter
   und wird – wie die Ausnahmen – in `extensions:list` gemeldet. Routen des Cores bleiben unverändert;
   `AdminController::routeGuard()` ist die gemeinsame Prüfung.
+- **Tabellen deklarativ: `Core\Db\Table`** (nach `rex_sql_table`): `id()`, `column()`, `index()`, `unique()`, `foreignKey()`,
+  `renameColumn()`, `dropColumn()`, `dropIndex()`, `ensure()` – idempotent und additiv, SQLite und MySQL über Doctrine DBAL auf
+  derselben PDO-Verbindung (auch in Transaktionen). Manifest: `$x->table('name', fn(Table $t) => …)` – angeglichen beim Start nach
+  geänderter Beschreibung (Fingerabdruck je Website) und bei jedem `migrate`, vor den `migration()`-Schritten.
+  Selbsttest `db:selftest`.
 ### Altname „MyCMS“ aus dem Core entfernt
 - Beispiele und Doku nennen nur noch KLXM Studio: MCP-Verbindung `claude mcp add --transport http klxm-studio …` (API-Seite,
   Entwicklerhandbuch, Tutorial, README), Composer-Beispiel `agentur/klxm-studio-shop`, Paket-Typ `klxm-studio-extension`
