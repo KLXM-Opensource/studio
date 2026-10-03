@@ -57,7 +57,13 @@ const tagColor = t => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt
 const fmtDate = s => s ? new Date(s.replace(' ', 'T')).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
 
 // Geteilte Medien: aktueller Pool (leer = Mediathek der Website) – wird an jede Anfrage gehängt
-let POOL = '';
+let POOL = '';   // gewählte geteilte Mediathek – gilt nur für die Mediathek selbst (Finder), siehe local()
+/*
+ * Alles außerhalb der Mediathek (Bildfelder im Editor, Werkzeuge auf der Seite, Einstellungen, KI) arbeitet mit Dateien DIESER
+ * Website (IDs der Felder sind eigene IDs, auch für Verweise auf geteilte Medien). Sonst landeten Aufrufe nach einer Pool-Auswahl
+ * in der Mediathek beim falschen Bild (404 bzw. „Nur Bilder lassen sich anpassen“).
+ */
+const local = async fn => { const prev = POOL; POOL = ''; try { return await fn(); } finally { POOL = prev; } };
 /** Hinweis: Datei wird verwendet – Löschen gesperrt (Fundstellen als eigene Zeilen) */
 const usedMsg = (name, used) => t('„{name}“ wird noch verwendet', { name }) + '\n'
   + used.slice(0, 6).map(u => '• ' + u.label).join('\n') + (used.length > 6 ? '\n' + t('und {n} weitere', { n: used.length - 6 }) : '')
@@ -1366,9 +1372,7 @@ function pick(kind = 'image') {
  */
 function initInlineCrop() {
   if (!$('#cms-editor')) return;
-  // Bilder auf der Seite sind Dateien dieser Website (data-media-id = eigene ID, auch für Verweise auf geteilte Medien) –
-  // nie im zuletzt in der Mediathek gewählten Pool nachschlagen (sonst 404: …/api/media/192?pool=…)
-  const local = async fn => { const prev = POOL; POOL = ''; try { return await fn(); } finally { POOL = prev; } };
+  // Bilder auf der Seite: Dateien dieser Website (local(), nie im zuletzt gewählten Pool – sonst 404: …/api/media/192?pool=…)
   const bar = d.createElement('div');
   bar.className = 'cms-imgtools'; bar.hidden = true;
   bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
@@ -1495,8 +1499,10 @@ d.addEventListener('paste', e => {
   f.pasteFiles(files);
 });
 
-window.CMSMedia = { pick, crop, Finder, Uploader, api, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml, adjust: adjustDialog, fxLabel,
-  fit: o => fitDialog({ base: BASE, ...o }), fitLabel };
+// Nach außen immer im Kontext dieser Website (local) – die Mediathek selbst nutzt api/crop intern mit ihrem Pool
+const localApi = new Proxy(api, { get: (o, k) => typeof o[k] === 'function' ? (...a) => local(() => o[k](...a)) : o[k] });
+window.CMSMedia = { pick, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
+  adjust: o => local(() => adjustDialog(o)), fxLabel, fit: o => local(() => fitDialog({ base: BASE, ...o })), fitLabel };
 const root = $('[data-media-library]');
 if (root) {
   const f = new Finder(root, { mode: 'library' });
