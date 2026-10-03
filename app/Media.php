@@ -1099,10 +1099,34 @@ final class Media
         return $out;
     }
 
-    /** Löschen verweigern, solange die Datei verwendet wird: Meldung mit den ersten Fundstellen, sonst null */
-    public static function deleteBlocked(int $id): ?string
+    /**
+     * Verwendungen für das Löschen: diese Website und – bei Dateien geteilter Medien (Pool) – alle anderen Websites, die den Pool
+     * nutzen (MediaPools::usagesElsewhere). Nicht erreichbare Website = Verwendung unbekannt → zählt als verwendet.
+     * @param int[] $ids
+     * @return array<int, array<int, array{label: string, url: ?string}>> [id => Fundstellen] nur für verwendete Dateien
+     */
+    public static function usagesForDelete(array $ids): array
     {
-        $u = self::usages($id);
+        $out = [];
+        foreach ($ids as $id) if ($u = self::usages((int) $id)) $out[(int) $id] = $u;
+        if (self::$pool !== null) {
+            foreach (MediaPools::usagesElsewhere(self::$pool, $ids) as $site) {
+                foreach ($ids as $id) {
+                    if ($site['items'] === null) {
+                        $out[(int) $id][] = ['label' => $site['label'] . ': ' . __('nicht erreichbar – Verwendung unbekannt'), 'url' => null];
+                    } else {
+                        foreach ($site['items'][(int) $id] ?? [] as $u) $out[(int) $id][] = ['label' => $site['label'] . ': ' . $u['label'], 'url' => $u['url']];
+                    }
+                }
+            }
+        }
+        return $out;
+    }
+
+    /** Löschen verweigern, solange die Datei verwendet wird (auch auf anderen Websites bei geteilten Medien): Meldung, sonst null */
+    public static function deleteBlocked(int $id, ?array $u = null): ?string
+    {
+        $u ??= self::usagesForDelete([$id])[$id] ?? [];
         if (!$u) return null;
         return __('„{name}“ wird noch verwendet: {where}. Bitte zuerst dort entfernen – oder die Datei ersetzen (Verwendungen bleiben erhalten).', [
             'name' => ($m = self::find($id)) ? (trim(self::title($m)) ?: (string) $m['original_name']) : '#' . $id,

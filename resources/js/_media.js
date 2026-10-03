@@ -71,7 +71,7 @@ async function http(url, opt = {}) {
   }
   const r = await fetch(url, { credentials: 'same-origin', ...opt, headers: { Accept: 'application/json', 'X-CSRF-Token': csrf(), ...(opt.json !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: opt.json !== undefined ? JSON.stringify(opt.json) : opt.body });
   const data = await r.json().catch(() => ({}));
-  if (!r.ok || data.ok === false) throw new Error(data.error || 'Fehler ' + r.status);
+  if (!r.ok || data.ok === false) throw Object.assign(new Error(data.error || 'Fehler ' + r.status), { data, status: r.status });   // data.usages bei gesperrtem Löschen
   return data;
 }
 const api = {
@@ -892,10 +892,19 @@ class Finder {
     if (used.length) { await ask({ title: usedMsg(this.byId(ids[0]).display, used), ok: t('Verstanden'), danger: false, cancel: false }); return; }
     const msg = ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien bleiben erhalten.`;
     if (!(await ask({ title: msg, ok: 'Löschen' }))) return;
+    if (ids.length === 1) {
+      try { await api.del(ids[0]); this.sel.clear(); toast('Gelöscht'); this.load(); } catch (ex) { await this.deleteRefused(ex, this.byId(ids[0]).display); }
+      return;
+    }
     try {
       const res = await api.bulk({ ids, action: 'delete' });
       this.sel.clear(); toast(res?.kept ? res.message : 'Gelöscht'); this.load();
     } catch (ex) { toast(ex.message); }
+  }
+  /** Server lehnt ab (z. B. geteilte Datei auf einer anderen Website verwendet): Fundstellen wie beim Einzellöschen zeigen */
+  async deleteRefused(ex, name) {
+    if (ex?.data?.usages?.length) await ask({ title: usedMsg(name, ex.data.usages), ok: t('Verstanden'), danger: false, cancel: false });
+    else toast(ex.message);
   }
 
   // ---------------------------------------------------------- Kontextmenü
@@ -1273,7 +1282,7 @@ class Finder {
       if (m.usages.length) { await ask({ title: usedMsg(m.display, m.usages), ok: t('Verstanden'), danger: false, cancel: false }); return; }
       if (!(await ask({ title: `„${m.display}“ endgültig löschen?`, ok: 'Löschen' }))) return;
       try { await api.del(m.id); dirty = false; dlg.close(); this.sel.delete(m.id); toast('Gelöscht'); this.load(); }
-      catch (ex) { toast(ex.message); }
+      catch (ex) { await this.deleteRefused(ex, m.display); }
     });
     if (!dlg.open) dlg.showModal();
     (isImg && !m.alt && !m.decorative ? form.alt : form.title).focus();
@@ -1357,6 +1366,9 @@ function pick(kind = 'image') {
  */
 function initInlineCrop() {
   if (!$('#cms-editor')) return;
+  // Bilder auf der Seite sind Dateien dieser Website (data-media-id = eigene ID, auch für Verweise auf geteilte Medien) –
+  // nie im zuletzt in der Mediathek gewählten Pool nachschlagen (sonst 404: …/api/media/192?pool=…)
+  const local = async fn => { const prev = POOL; POOL = ''; try { return await fn(); } finally { POOL = prev; } };
   const bar = d.createElement('div');
   bar.className = 'cms-imgtools'; bar.hidden = true;
   bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
@@ -1430,13 +1442,16 @@ function initInlineCrop() {
     if (!target) return;
     const id = +target.dataset.mediaId, ratio = target.dataset.ratio;
     bar.hidden = true;
-    crop(id, ratio, (r, res) => refreshPictures(id, r, res.sources), { only: ratio });
+    local(() => crop(id, ratio, (r, res) => refreshPictures(id, r, res.sources), { only: ratio }));
   });
   fxBtn.addEventListener('click', async e => {
     e.preventDefault(); e.stopPropagation();
     if (!target) return;
     const im = target, id = +im.dataset.mediaId;
     bar.hidden = true;
+    await local(() => adjustHere(im, id));
+  });
+  const adjustHere = async (im, id) => {
     let m;
     try { m = await api.detail(id); } catch (ex) { toast(ex.message); return; }
     const place = window.CMSEditor?.fx?.target(im);
@@ -1454,7 +1469,7 @@ function initInlineCrop() {
       onApply: async val => { place.set(val); },
     });
     if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
-  });
+  };
   // Bild im Rahmen je Einbindung (data._fit des Blocks über window.CMSEditor.fit, resources/js/editor.js)
   fitBtn.addEventListener('click', async e => {
     e.preventDefault(); e.stopPropagation();
@@ -1463,7 +1478,7 @@ function initInlineCrop() {
     bar.hidden = true;
     const place = window.CMSEditor?.fit?.target(im);
     if (!place) { toast(t('Dieses Bild lässt sich hier keinem Bild-Feld des Blocks zuordnen – den Standard bitte in der Mediathek festlegen.')); return; }
-    const v = await place.open();
+    const v = await local(() => place.open());
     if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
   });
 }

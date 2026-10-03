@@ -75,6 +75,72 @@ final class MediaPools
         return $out;
     }
 
+    /** Websites, die den Pool nutzen (pool.json 'sites' oder Konfiguration 'media_pools' der Website) */
+    public static function sitesUsing(string $key): array
+    {
+        $out = array_map('strval', (array) self::meta($key)['sites']);
+        foreach (array_keys(Sites::all()) as $k) {
+            try {
+                if (in_array($key, (array) Network\Network::config((string) $k)->get('media_pools', []), true)) $out[] = (string) $k;
+            } catch (\Throwable) {
+                // Website-Konfiguration nicht lesbar
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /** Signatur der Abfrage „Verwendungen von Pool-Dateien“ zwischen Websites einer Installation (Netzwerk-Schlüssel) */
+    public static function usageSig(string $key, string $ids, int $exp): string
+    {
+        return hash_hmac('sha256', 'media-usages|' . $key . '|' . $ids . '|' . $exp, Network\Network::key());
+    }
+
+    /**
+     * Verwendungen von Pool-Dateien auf den ANDEREN Websites, die den Pool nutzen – jede Website prüft im eigenen Kontext
+     * (Blöcke ihres Kits, Datensätze, Einstellungen) über GET /admin/network/media-usages (signiert, 60 s gültig).
+     * @param int[] $poolIds
+     * @return array<string, array{label: string, items: ?array<int, array<int, array{label: string, url: ?string}>>}>
+     *         je Website: items = [poolId => Fundstellen] oder null (nicht erreichbar → Verwendung unbekannt)
+     */
+    public static function usagesElsewhere(string $key, array $poolIds): array
+    {
+        $ids = implode(',', array_values(array_unique(array_filter(array_map('intval', $poolIds)))));
+        if ($ids === '' || strlen(Network\Network::key()) < 32) return [];
+        $out = [];
+        foreach (self::sitesUsing($key) as $site) {
+            if ($site === site()->key || !isset(Sites::all()[$site])) continue;
+            $exp = time() + 60;
+            $url = Network\Network::siteLink($site, '/admin/network/media-usages') . '?' . http_build_query(['pool' => $key, 'ids' => $ids, 'exp' => $exp, 'sig' => self::usageSig($key, $ids, $exp)]);
+            $label = (new Site($site, Sites::all()[$site]))->label();
+            $res = self::getJson($url);
+            $items = null;
+            if (is_array($res) && ($res['ok'] ?? false) && is_array($res['usages'] ?? null)) {
+                $items = [];
+                foreach ($res['usages'] as $pid => $list) {
+                    $items[(int) $pid] = array_map(fn($u) => ['label' => (string) ($u['label'] ?? ''),
+                        'url' => !empty($u['url']) ? (preg_match('~^https?://~', (string) $u['url']) ? (string) $u['url'] : Network\Network::siteUrl($site) . $u['url']) : null], (array) $list);
+                }
+            }
+            $out[$site] = ['label' => $label, 'items' => $items];
+        }
+        return $out;
+    }
+
+    private static function getJson(string $url): ?array
+    {
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_HTTPHEADER => ['Accept: application/json'], CURLOPT_USERAGENT => 'KLXM-Studio-Network']);
+            $body = curl_exec($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            curl_close($ch);
+            return $code === 200 && is_string($body) ? (json_decode($body, true) ?: null) : null;
+        }
+        $body = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 8, 'header' => "Accept: application/json\r\n", 'ignore_errors' => true]]));
+        return is_string($body) ? (json_decode($body, true) ?: null) : null;
+    }
+
     /** Darf die angemeldete Person Pools verwalten? (Hauptwebsite mit Grundeinstellungen-Recht oder Integrator) */
     public static function canManage(): bool
     {

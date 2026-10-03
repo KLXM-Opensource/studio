@@ -6067,4 +6067,5 @@ return [
     '{n} verwendete Datei(en) nicht gelöscht: {names}. Bitte zuerst dort entfernen, wo sie verwendet werden.' => '{n} file(s) in use not deleted: {names}. Please remove them where they are used first.',
     '„{name}“ wird noch verwendet' => '“{name}” is still in use',
     '„{name}“ wird noch verwendet: {where}. Bitte zuerst dort entfernen – oder die Datei ersetzen (Verwendungen bleiben erhalten).' => '“{name}” is still in use: {where}. Please remove it there first – or replace the file (usages are kept).',
+    'nicht erreichbar – Verwendung unbekannt' => 'not reachable – usage unknown',
 ];

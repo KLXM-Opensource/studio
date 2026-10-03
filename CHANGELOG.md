@@ -12,6 +12,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Löschen verweigert, solange die Datei verwendet wird (`Media::deleteBlocked`): Mediathek zeigt die Fundstellen mit
   „Verstanden“ statt „Löschen“, Sammellöschen lässt verwendete Dateien liegen und meldet sie, API/MCP antworten mit 409.
   Austauschen bleibt über „Ersetzen“ möglich (Verwendungen bleiben erhalten).
+- Geteilte Medien (Pools): Vor dem Löschen einer Pool-Datei fragt die Website alle anderen Websites ab, die den Pool nutzen
+  (`MediaPools::usagesElsewhere`, signiert mit dem Netzwerk-Schlüssel über `GET /admin/network/media-usages`); jede prüft im
+  eigenen Kontext. Fundstellen erscheinen mit Website-Namen und Link; ist eine Website nicht erreichbar, bleibt die Datei.
+- Bild-Werkzeuge im Bearbeiten-Modus („Anpassen“, „Rahmen“, „Zuschneiden“) liefen ins Leere (404), wenn in der Mediathek zuvor
+  geteilte Medien gewählt waren – sie fragen jetzt immer die Datei dieser Website ab.
 
 ### Eigene Adresse der Verwaltung; Anmeldung aufgeräumt
 - Verwaltung unter eigener Adresse statt `/admin` (`Core\AdminPath`): Grundeinstellungen → „Adresse der Verwaltung“ (Administration;

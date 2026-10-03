@@ -87,6 +87,25 @@ final class NetworkController extends AdminController
     }
 
     /** Ziel-Website: Token prüfen, Schatten-Konto anmelden, Token per Weiterleitung aus der Adresse entfernen */
+    /**
+     * Verwendungen von Pool-Dateien auf DIESER Website (für das Löschen in geteilten Medien auf einer anderen Website):
+     * ohne Anmeldung, aber mit Signatur über den Netzwerk-Schlüssel (MediaPools::usageSig), 60 s gültig. Antwort:
+     * {ok, usages: {poolId: [{label, url}]}} – nur Dateien, die hier einen Verweis-Eintrag haben.
+     */
+    public function mediaUsages(Request $r): Response
+    {
+        $key = $r->str('pool'); $ids = $r->str('ids'); $exp = (int) $r->str('exp');
+        $ok = preg_match('~^[a-z0-9_\-]{1,40}$~', $key) && preg_match('~^\d+(,\d+){0,199}$~', $ids) && $exp >= time() && $exp <= time() + 120
+            && strlen(Network::key()) >= 32 && hash_equals(\Core\MediaPools::usageSig($key, $ids, $exp), $r->str('sig'));
+        if (!$ok) return Response::json(['ok' => false, 'error' => 'Ungültige Anfrage.'], 403);
+        $out = [];
+        foreach (explode(',', $ids) as $pid) {
+            $local = app()->db->fetchValue('SELECT id FROM media WHERE pool_ref = ?', [$key . ':' . (int) $pid]);
+            if ($local && ($u = \Core\Media::usages((int) $local))) $out[(int) $pid] = $u;
+        }
+        return Response::json(['ok' => true, 'usages' => (object) $out])->header('Cache-Control', 'no-store');
+    }
+
     public function sso(Request $r): Response
     {
         $limiter = new RateLimiter(app()->db);

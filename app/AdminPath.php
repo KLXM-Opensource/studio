@@ -138,7 +138,7 @@ final class AdminPath
     /** Darf /admin… ohne Anmeldung direkt erreichbar bleiben? (Netzwerk-SSO, öffentliche Routen von Erweiterungen) */
     public static function directAllowed(string $internalPath, ?Http\Router $router = null, string $method = 'GET'): bool
     {
-        if ($internalPath === '/admin/sso' || str_starts_with($internalPath, '/admin/sso/')) return true;
+        if ($internalPath === '/admin/sso' || str_starts_with($internalPath, '/admin/sso/') || $internalPath === '/admin/network/media-usages') return true;
         return $router !== null && $router->isPublicExtensionRoute($method, $internalPath);
     }
 }
