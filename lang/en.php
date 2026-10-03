@@ -6055,4 +6055,16 @@ return [
     'eigene Adresse' => 'own address',
     'Adresse der Verwaltung ändern' => 'Change the admin address',
     'Die Anmeldung liegt noch unter /admin – dort suchen automatische Login-Scanner zuerst. Eine eigene Adresse hält sie fern.' => 'Sign-in is still at /admin – the first place automated login scanners look. Your own address keeps them away.',
+    // Medien: Löschen gesperrt, solange verwendet
+    'Bitte zuerst dort entfernen – oder „Ersetzen“ nutzen, dann bleiben alle Verwendungen erhalten.' => 'Please remove it there first – or use “Replace”, which keeps all usages.',
+    'Favicon / App-Icon' => 'Favicon / app icon',
+    'Landingpage' => 'Landing page',
+    'Seitenvorlage' => 'Page template',
+    'Sonderseite' => 'Special page',
+    'Verstanden' => 'Got it',
+    'Vorschaubild' => 'Preview image',
+    'und {n} weitere' => 'and {n} more',
+    '{n} verwendete Datei(en) nicht gelöscht: {names}. Bitte zuerst dort entfernen, wo sie verwendet werden.' => '{n} file(s) in use not deleted: {names}. Please remove them where they are used first.',
+    '„{name}“ wird noch verwendet' => '“{name}” is still in use',
+    '„{name}“ wird noch verwendet: {where}. Bitte zuerst dort entfernen – oder die Datei ersetzen (Verwendungen bleiben erhalten).' => '“{name}” is still in use: {where}. Please remove it there first – or replace the file (usages are kept).',
 ];

@@ -1021,7 +1021,9 @@ final class Media
     // ================================================================= Verwendung
 
     /**
-     * Wo wird das Medium verwendet? (Seiten-Blöcke, Einstellungen)
+     * Wo wird das Medium verwendet? Seiten (auch Sonderseiten und Seitenvorlagen; Blöcke, Vorschaubild, Abschnitts-Hintergrund,
+     * Links „media:ID“ im Text), Datensätze (Felder, Gruppen, Links im Text), Landingpages (Logo, Favicon, Vorschaubild),
+     * Grundeinstellungen (App-Icon) und Einstellungen des Kits. Verwendete Dateien lassen sich nicht löschen (Media::deleteBlocked).
      * @return array<int, array{label: string, url: ?string}>
      */
     public static function usages(int $id): array
@@ -1038,26 +1040,74 @@ final class Media
         }
         $out = [];
         $theme = app()->theme;
-        foreach (Pages::all() as $p) {
+        $link = '~\bmedia:' . $id . '(?![0-9])~';   // Link auf die Datei (Core\Links), z. B. „media:9“ oder „media:9:viewer“
+        foreach (app()->db->fetchAll('SELECT * FROM pages ORDER BY title') as $p) {
+            $type = (string) ($p['type'] ?? 'page');
+            $name = $p['title'] . match (true) { $type === 'page' => '', PageTemplates::isTemplatePage($p) => ' (' . __('Seitenvorlage') . ')', default => ' (' . __('Sonderseite') . ')' };
+            $url = $type === 'page' ? Pages::url($p) : (PageTemplates::isTemplatePage($p) ? PageTemplates::editUrl((int) $p['id']) : null);
             if ((int) $p['og_image'] === $id) {
-                $out[] = ['label' => $p['title'] . ' → Vorschaubild', 'url' => Pages::url($p)];
+                $out[] = ['label' => $name . ' → ' . __('Vorschaubild'), 'url' => $url];
             }
             $seen = [];
             foreach (Layout::flatten(array_merge(Pages::blocks($p, false), Pages::blocks($p, true))) as $b) {
                 $def = $theme->block((string) ($b['type'] ?? ''));
-                $inBlock = $def && (self::fieldsUse($def['fields'], $b['data'] ?? [], $id) || (int) ($b['tunes']['section']['bgImage'] ?? 0) === $id);
-                if ($inBlock && !isset($seen[$b['id']])) {
-                    $seen[$b['id']] = true;
-                    $out[] = ['label' => $p['title'] . ' → ' . $def['label'], 'url' => Pages::url($p)];
+                $data = is_array($b['data'] ?? null) ? $b['data'] : [];
+                $inBlock = ($def && self::fieldsUse($def['fields'], $data, $id)) || (int) ($b['tunes']['section']['bgImage'] ?? 0) === $id
+                    || preg_match($link, (string) json_encode($data, JSON_UNESCAPED_SLASHES));
+                if ($inBlock && !isset($seen[$b['id'] ?? ''])) {
+                    $seen[$b['id'] ?? ''] = true;
+                    $out[] = ['label' => $name . ' → ' . ($def['label'] ?? (string) ($b['type'] ?? __('Block'))), 'url' => $url];
                 }
             }
         }
-        foreach ($theme->settingsFields() as $f) {
+        // Datensätze: Bild-/Dateifelder, Gruppen (wiederholbar) und Links im Text; geteilte Tabellen nur eigene Einträge
+        foreach (Data\Tables::content() as $t) {
+            try {
+                $rows = Data\Entries::query($t, ['status' => 'all'] + (Data\Tables::isShared($t) ? ['source' => 'own'] : []));
+            } catch (\Throwable) {
+                continue;
+            }
+            foreach ($rows as $e) {
+                $hit = self::fieldsUse($t['fields'], $e, $id)
+                    || preg_match($link, (string) json_encode($e, JSON_UNESCAPED_SLASHES));
+                if ($hit) $out[] = ['label' => $t['name'] . ' → ' . Data\Entries::title($t, $e), 'url' => url('/admin/data/' . $t['handle'] . '/' . (int) $e['id'])];
+            }
+        }
+        // Landingpages (eigene Marke)
+        try {
+            foreach (app()->db->fetchAll('SELECT id, label, options_json FROM landings') as $l) {
+                $o = json_decode((string) $l['options_json'], true) ?: [];
+                foreach (['logo' => __('Logo'), 'favicon' => __('Favicon / App-Icon'), 'og_image' => __('Vorschaubild')] as $k => $lbl) {
+                    if ((int) ($o[$k] ?? 0) === $id) $out[] = ['label' => __('Landingpage') . ' „' . $l['label'] . '“ → ' . $lbl, 'url' => url('/admin/landingpages/' . (int) $l['id'])];
+                }
+            }
+        } catch (\Throwable) {
+            // Tabelle fehlt (Funktion nie benutzt)
+        }
+        foreach (SystemSchema::fields() as $f) {
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) setting($f['name']) === $id) {
-                $out[] = ['label' => $theme->settingsTitle() . ' → ' . $f['label'], 'url' => null];
+                $out[] = ['label' => __('Grundeinstellungen') . ' → ' . $f['label'], 'url' => url('/admin/system')];
+            }
+        }
+        foreach ($theme->settingsFields() as $f) {
+            $v = setting($f['name']);
+            if ((in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v === $id) || (is_string($v) && preg_match($link, $v))
+                || (($f['type'] ?? '') === 'repeater' && is_array($v) && self::fieldsUse([$f], [$f['name'] => $v], $id))) {
+                $out[] = ['label' => $theme->settingsTitle() . ' → ' . $f['label'], 'url' => url('/admin/settings')];
             }
         }
         return $out;
+    }
+
+    /** Löschen verweigern, solange die Datei verwendet wird: Meldung mit den ersten Fundstellen, sonst null */
+    public static function deleteBlocked(int $id): ?string
+    {
+        $u = self::usages($id);
+        if (!$u) return null;
+        return __('„{name}“ wird noch verwendet: {where}. Bitte zuerst dort entfernen – oder die Datei ersetzen (Verwendungen bleiben erhalten).', [
+            'name' => ($m = self::find($id)) ? (trim(self::title($m)) ?: (string) $m['original_name']) : '#' . $id,
+            'where' => implode(', ', array_map(fn($x) => $x['label'], array_slice($u, 0, 3))) . (count($u) > 3 ? ' ' . __('und {n} weitere', ['n' => count($u) - 3]) : ''),
+        ]);
     }
 
     private static function fieldsUse(array $fields, array $data, int $id): bool
@@ -1067,8 +1117,9 @@ final class Media
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v === $id) {
                 return true;
             }
-            if (($f['type'] ?? '') === 'repeater' && is_array($v)) {
-                foreach ($v as $item) {
+            // Wiederholbare Felder und Gruppen (Datensätze: einzeln oder als Liste)
+            if (in_array($f['type'] ?? '', ['repeater', 'group'], true) && is_array($v)) {
+                foreach (array_is_list($v) ? $v : [$v] as $item) {
                     if (is_array($item) && self::fieldsUse($f['fields'] ?? [], $item, $id)) {
                         return true;
                     }

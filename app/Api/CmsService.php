@@ -887,6 +887,7 @@ final class CmsService
     public function mediaDelete(int $id): array
     {
         Media::find($id) ?? throw new ApiError(404, 'Datei nicht gefunden.');
+        if ($msg = Media::deleteBlocked($id)) throw new ApiError(409, $msg);   // verwendete Dateien bleiben
         if (($g = $this->gate(__FUNCTION__, [$id], ['type' => 'media', 'id' => $id], fn() => null)) !== null) return $g['__gate'];
         Media::delete($id);
         return ['deleted' => $id];

@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Medien: verwendete Dateien lassen sich nicht mehr löschen
+- `Media::usages()` findet jetzt auch Datensätze (Bild-/Dateifelder, Gruppen), Links `media:ID` im Text, Sonderseiten und
+  Seitenvorlagen, Landingpages und Grundeinstellungen (App-Icon) – vorher nur Seitenblöcke und Kit-Einstellungen.
+- Löschen verweigert, solange die Datei verwendet wird (`Media::deleteBlocked`): Mediathek zeigt die Fundstellen mit
+  „Verstanden“ statt „Löschen“, Sammellöschen lässt verwendete Dateien liegen und meldet sie, API/MCP antworten mit 409.
+  Austauschen bleibt über „Ersetzen“ möglich (Verwendungen bleiben erhalten).
+
 ### Eigene Adresse der Verwaltung; Anmeldung aufgeräumt
 - Verwaltung unter eigener Adresse statt `/admin` (`Core\AdminPath`): Grundeinstellungen → „Adresse der Verwaltung“ (Administration;
   bei mehreren Websites nur Netzwerk-Administration; Bestätigung mit Passwort) oder `php bin/console admin:path <adresse>|--random|--reset`

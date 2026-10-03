@@ -309,6 +309,10 @@ final class MediaController extends AdminController
     {
         $this->auth($r, 'media.delete');
         if ($e = $this->scope($r, true)) return $e;
+        // Verwendete Dateien nicht löschen (Seiten, Datensätze, Einstellungen – Media::usages)
+        if ($msg = Media::deleteBlocked((int) $id)) {
+            return $r->wantsJson() ? Response::json(['ok' => false, 'error' => $msg, 'usages' => Media::usages((int) $id)], 409) : $this->back('/admin/media', 'error', $msg);
+        }
         Media::delete((int) $id);
         return $r->wantsJson() ? Response::json(['ok' => true]) : $this->back('/admin/media', 'success', 'Datei gelöscht.');
     }
@@ -326,6 +330,7 @@ final class MediaController extends AdminController
         if (!$ids) {
             return Response::json(['ok' => false, 'error' => 'Keine Dateien ausgewählt.'], 422);
         }
+        $kept = [];
         foreach ($ids as $id) {
             $m = Media::find($id);
             if (!$m) continue;
@@ -337,6 +342,7 @@ final class MediaController extends AdminController
                 Media::db()->update('media', ['tags' => Media::tagString($tags), 'updated_at' => now()], 'id = :id', ['id' => $id]);
                 Media::forget($id);
             } elseif ($action === 'delete') {
+                if (Media::usages($id)) { $kept[] = trim(Media::title($m)) ?: (string) $m['original_name']; continue; }   // verwendet: bleibt
                 Media::delete($id);
             }
         }
@@ -347,6 +353,10 @@ final class MediaController extends AdminController
             Media::removeFromCollection($cid, $ids);
         }
         $this->changed();
+        if ($kept) {
+            return Response::json(['ok' => true, 'kept' => count($kept), 'message' => __('{n} verwendete Datei(en) nicht gelöscht: {names}. Bitte zuerst dort entfernen, wo sie verwendet werden.',
+                ['n' => count($kept), 'names' => implode(', ', array_slice($kept, 0, 5)) . (count($kept) > 5 ? ' …' : '')])]);
+        }
         return Response::json(['ok' => true]);
     }
 

@@ -58,6 +58,11 @@ const fmtDate = s => s ? new Date(s.replace(' ', 'T')).toLocaleDateString('de-DE
 
 // Geteilte Medien: aktueller Pool (leer = Mediathek der Website) – wird an jede Anfrage gehängt
 let POOL = '';
+/** Hinweis: Datei wird verwendet – Löschen gesperrt (Fundstellen als eigene Zeilen) */
+const usedMsg = (name, used) => t('„{name}“ wird noch verwendet', { name }) + '\n'
+  + used.slice(0, 6).map(u => '• ' + u.label).join('\n') + (used.length > 6 ? '\n' + t('und {n} weitere', { n: used.length - 6 }) : '')
+  + '\n' + t('Bitte zuerst dort entfernen – oder „Ersetzen“ nutzen, dann bleiben alle Verwendungen erhalten.');
+
 async function http(url, opt = {}) {
   if (POOL) {
     if (opt.json !== undefined) opt = { ...opt, json: { ...opt.json, pool: POOL } };
@@ -883,10 +888,14 @@ class Finder {
   async deleteSel() {
     const ids = [...this.sel];
     const used = ids.length === 1 ? (await api.detail(ids[0])).usages : [];
-    const msg = ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` + (used.length ? `\n\nAchtung – wird verwendet: ${used.map(u => u.label).join(', ')}` : '') : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien fehlen danach auf der Website.`;
+    // Verwendete Dateien lassen sich nicht löschen (Server prüft ebenso, Media::deleteBlocked)
+    if (used.length) { await ask({ title: usedMsg(this.byId(ids[0]).display, used), ok: t('Verstanden'), danger: false, cancel: false }); return; }
+    const msg = ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien bleiben erhalten.`;
     if (!(await ask({ title: msg, ok: 'Löschen' }))) return;
-    await api.bulk({ ids, action: 'delete' });
-    this.sel.clear(); toast('Gelöscht'); this.load();
+    try {
+      const res = await api.bulk({ ids, action: 'delete' });
+      this.sel.clear(); toast(res?.kept ? res.message : 'Gelöscht'); this.load();
+    } catch (ex) { toast(ex.message); }
   }
 
   // ---------------------------------------------------------- Kontextmenü
@@ -1261,9 +1270,10 @@ class Finder {
     };
     $('[data-replace]', dlg).onclick = async () => { if (await this.replace(m, $('.fx-i-progress', dlg))) { dirty = false; dlg.close(); this.edit(m.id); } };
     $('[data-del]', dlg)?.addEventListener('click', async () => {
-      const warn = m.usages.length ? `\n\nAchtung – wird verwendet: ${m.usages.map(u => u.label).join(', ')}` : '';
-      if (!(await ask({ title: `„${m.display}“ endgültig löschen?${warn}`, ok: 'Löschen' }))) return;
-      await api.del(m.id); dirty = false; dlg.close(); this.sel.delete(m.id); toast('Gelöscht'); this.load();
+      if (m.usages.length) { await ask({ title: usedMsg(m.display, m.usages), ok: t('Verstanden'), danger: false, cancel: false }); return; }
+      if (!(await ask({ title: `„${m.display}“ endgültig löschen?`, ok: 'Löschen' }))) return;
+      try { await api.del(m.id); dirty = false; dlg.close(); this.sel.delete(m.id); toast('Gelöscht'); this.load(); }
+      catch (ex) { toast(ex.message); }
     });
     if (!dlg.open) dlg.showModal();
     (isImg && !m.alt && !m.decorative ? form.alt : form.title).focus();

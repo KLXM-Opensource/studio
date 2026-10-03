@@ -273,6 +273,7 @@ export function confirmDiscard(o = {}) {
  * ask('Titel?\nErklärung') oder ask({ title, body, ok, cancel, danger }). Ergebnis: Promise<boolean>.
  * Fokus liegt auf der sicheren Aktion (Abbrechen), Esc = Abbrechen, Fokus kehrt danach zum Auslöser zurück.
  */
+/** Rückfrage; cancel: false = nur Hinweis mit einem Knopf (ok) */
 export function ask(o = {}) {
   if (typeof o === 'string') o = { title: o };
   let title = String(o.title ?? ''), body = o.body ?? '';
@@ -294,8 +295,8 @@ export function ask(o = {}) {
     <div id="cms-confirm-b">${String(body || '').split(/\n+/).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</div>
     <div class="cms-confirm__foot">
       <span class="cms-confirm__right">
-        <button type="button" class="adm-btn" data-r="cancel" autofocus>${esc(o.cancel || lab('cancel'))}</button>
-        <button type="button" class="adm-btn ${danger ? 'adm-btn--danger' : 'adm-btn--primary'}" data-r="ok">${esc(o.ok || lab('ok'))}</button>
+        ${o.cancel === false ? '' : `<button type="button" class="adm-btn" data-r="cancel" autofocus>${esc(o.cancel || lab('cancel'))}</button>`}
+        <button type="button" class="adm-btn ${danger ? 'adm-btn--danger' : 'adm-btn--primary'}" data-r="ok"${o.cancel === false ? ' autofocus' : ''}>${esc(o.ok || lab('ok'))}</button>
       </span>
     </div>`;
   const before = deepActive();
