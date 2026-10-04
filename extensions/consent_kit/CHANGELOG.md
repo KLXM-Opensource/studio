@@ -1,5 +1,23 @@
 # Changelog – Erweiterung „consent_kit“
 
+## 1.2.0 (2026-10-04)
+
+Abgleich mit FriendsOfREDAXO/consent_kit 1.1.0:
+
+- **Neu: „Hinweis beim Seitenaufruf“** (Einstellungen → Darstellung, `open_mode`): *Immer* (Standard, wie bisher), *Nur bei
+  Bedarf* (nur wenn auf der Seite ein `<consent-embed>` eines bekannten, noch nicht erlaubten Dienstes steht) oder *Nie*
+  (nur über Platzhalter, schwebende Schaltfläche oder den Link „Datenschutz-Einstellungen“). Bringt ein optionaler Dienst
+  eigenen Code mit (head/body, js_accept, Ereignisse), erscheint der Hinweis bei „Nur bei Bedarf“ trotzdem – sonst würde
+  er nie starten; „Nie“ unterdrückt ausnahmslos. GPC und „für diese Sitzung geschlossen“ haben weiter Vorrang, die Vorschau
+  zeigt immer. Unbekannte Werte fallen auf „Immer“ zurück. Die Einstellungsseite warnt und nennt solche Dienste beim Namen.
+- **Neu: Niederländisch und Italienisch** für alle Texte auf der Website (`lang/site/nl.php`, `it.php`) und in den
+  Dienst-Vorlagen (Beschreibungen, Hinweise, Parameter) – gilt für neu angelegte Dienste. Die Zwecke der Cookie- und
+  Storage-Einträge speichert die Erweiterung weiterhin deutsch/englisch; fehlt eine Sprache, gilt jetzt Englisch vor Deutsch.
+- **Wording:** „Datenschutz-Einstellungen“ statt „Cookie-Einstellungen“ (Link im Fußbereich, schwebende Schaltfläche,
+  Hinweistext, Platzhalter; en: „Privacy settings“) – der Dialog verwaltet Dienste und jede Art von Speicher. Im Kit
+  überschriebene Texte bleiben; der Anker `#cookie-einstellungen` funktioniert weiter.
+- Keine Datenbankänderung nötig; ohne Einstellung bleibt das Verhalten unverändert.
+
 ## 1.1.0 (2026-10-02)
 
 Angepasst an die Integrationspunkte von KLXM Studio 1.0 (Entwicklerhandbuch → Erweiterungen → „Integrationspunkte und Regeln“):

@@ -3,6 +3,9 @@
 use Core\Fields;
 use MyCms\Consent\AdminController;
 ?>
+<?php if ($conf = AdminController::openModeConflicts()): ?>
+<p class="adm-flash adm-flash--error" role="status"><?= e(__('„Hinweis beim Seitenaufruf“ ist eingeschränkt, aber diese Dienste bringen eigenen Code mit, der erst nach der Einwilligung läuft: {names}. Bei „Nur bei Bedarf“ erscheint der Hinweis deshalb trotzdem; bei „Nie“ starten sie erst, wenn Besucher die Einstellungen selbst öffnen.', ['names' => implode(', ', $conf)])) ?></p>
+<?php endif; ?>
 <form method="post" action="<?= e(url('/admin/consent/settings')) ?>" novalidate>
   <?= csrf_field() ?>
   <section class="adm-card">
@@ -21,7 +24,7 @@ use MyCms\Consent\AdminController;
   <h2><?= e(__('Einbindung im Kit')) ?></h2>
   <ul class="ck-list">
     <li><?= e(__('Automatisch: Konfiguration und ein Skript im <head>, nur auf Seiten der Website mit aktivem einwilligungspflichtigem Dienst.')) ?></li>
-    <li><?= e(__('„Cookie-Einstellungen“ im Fußbereich: automatisch in den mitgelieferten Kits (footer_links()); in eigenen Kits')) ?> <code>&lt;?= consent_settings_link() ?&gt;</code> <?= e(__('oder ein Link auf')) ?> <code>#cookie-einstellungen</code>.</li>
+    <li><?= e(__('„Datenschutz-Einstellungen“ im Fußbereich: automatisch in den mitgelieferten Kits (footer_links()); in eigenen Kits')) ?> <code>&lt;?= consent_settings_link() ?&gt;</code> <?= e(__('oder ein Link auf')) ?> <code>#cookie-einstellungen</code>.</li>
     <li><?= e(__('Eigene Skripte sperren')) ?>: <code>&lt;script type="text/plain" data-consent="matomo" data-src="/pfad/datei.js"&gt;&lt;/script&gt;</code></li>
     <li><?= e(__('Fremde Inhalte')) ?>: <code>&lt;?= consent_embed('google_maps', '&lt;iframe src=…&gt;&lt;/iframe&gt;', ['title' =&gt; 'Anfahrt']) ?&gt;</code> <?= e(__('oder der Block „Externer Inhalt (mit Einwilligung)“.')) ?></li>
   </ul>

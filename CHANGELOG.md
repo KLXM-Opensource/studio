@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Consent Kit 1.2.0 (Abgleich mit FriendsOfREDAXO/consent_kit 1.1.0)
+- „Hinweis beim Seitenaufruf“: immer, nur bei Bedarf (gesperrter Inhalt auf der Seite) oder nie; Dienste mit eigenem Code
+  erzwingen die Abfrage, Warnung in den Einstellungen. Website-Texte und Vorlagen zusätzlich niederländisch und italienisch.
+- „Datenschutz-Einstellungen“ statt „Cookie-Einstellungen“ (Link im Fußbereich, Schaltfläche, Hinweis, Platzhalter, Kits, Handbuch).
+
 ### Medien: verwendete Dateien lassen sich nicht mehr löschen
 - `Media::usages()` findet jetzt auch Datensätze (Bild-/Dateifelder, Gruppen), Links `media:ID` im Text, Sonderseiten und
   Seitenvorlagen, Landingpages und Grundeinstellungen (App-Icon) – vorher nur Seitenblöcke und Kit-Einstellungen.

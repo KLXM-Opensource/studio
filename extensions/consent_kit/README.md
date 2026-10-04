@@ -57,14 +57,14 @@ strengen CSP nur eingeschränkt (bewusst kein `unsafe-inline`).
   `SameSite=Lax`, `Secure` unter HTTPS, Laufzeit = Einstellung (≤ 400 Tage). Vom Browser gesetzt und vom Server per
   `Set-Cookie` bestätigt; der Server liest ihn für die CSP.
 - `cms_consent_dismissed` (sessionStorage): Hinweis ohne Entscheidung geschlossen (× / Escape).
-- Beide erscheinen automatisch in der Gruppe „Notwendig“ der Cookie-Einstellungen.
+- Beide erscheinen automatisch in der Gruppe „Notwendig“ der Datenschutz-Einstellungen.
 - Global Privacy Control („Als Ablehnung werten“): kein Hinweis, nichts wird geladen, **nichts gespeichert und nichts
   protokolliert** (Abweichung vom AddOn, das „Abgelehnt per GPC“ als Cookie + Protokoll ablegt); eine ausdrückliche
-  Einwilligung über die Cookie-Einstellungen geht vor.
+  Einwilligung über die Datenschutz-Einstellungen geht vor.
 
 ## Kits
 
-- **Fußbereich**: Die mitgelieferten Kits hängen `footer_links()` an ihre Rechtliches-Links („Cookie-Einstellungen“,
+- **Fußbereich**: Die mitgelieferten Kits hängen `footer_links()` an ihre Rechtliches-Links („Datenschutz-Einstellungen“,
   `href="#cookie-einstellungen"`). Eigene Kits: `<?= consent_settings_link() ?>` oder ein Link auf `#cookie-einstellungen`
   bzw. `[data-consent-open]`.
 - **2-Klick-Videos** (Video-Block, YouTube/Vimeo): Ist ein Dienst für den Anbieter angelegt (Schlüssel `youtube`/`vimeo`
@@ -103,6 +103,25 @@ php bin/console consent:status --site=<key>     # aktive Dienste, Fingerabdrück
 Endpunkt `POST /consent/save` (JSON, nur `Sec-Fetch-Site: same-origin` bzw. passender `Origin`, Rate-Limit mit
 gehashter IP, IP wird nicht gespeichert).
 
+## Hinweis beim Seitenaufruf
+
+Einstellungen → Darstellung → **Hinweis beim Seitenaufruf** (`open_mode`):
+
+| Wert | Verhalten |
+|---|---|
+| Immer (Standard) | Hinweis beim ersten Aufruf, solange keine Entscheidung vorliegt |
+| Nur bei Bedarf | nur, wenn auf der Seite ein `<consent-embed>` eines angelegten, noch nicht erlaubten Dienstes steht |
+| Nie | nur auf Zuruf: Platzhalter, schwebende Schaltfläche oder Link „Datenschutz-Einstellungen“ (`#cookie-einstellungen`) |
+
+Bringt ein optionaler Dienst eigenen Code mit (HTML im head/body, JS nach Einwilligung, Ereignisse), erscheint der
+Hinweis bei „Nur bei Bedarf“ trotzdem – sonst würde der Dienst nie starten. Die Einstellungsseite nennt solche Dienste.
+GPC und „für diese Sitzung geschlossen“ haben Vorrang; die Vorschau im Design zeigt den Hinweis immer.
+
+## Sprachen
+
+Texte auf der Website: Deutsch, Englisch, Niederländisch, Italienisch (`lang/site/*.php`, im Kit überschreibbar).
+Dienst-Vorlagen enthalten Beschreibungen und Hinweise in allen vier Sprachen; fehlt eine Sprache, gilt Englisch vor Deutsch.
+
 ## Vorlagen
 
 `presets/*.json` (Format: `presets/FORMAT.md`, kompatibel mit dem AddOn), eigene je Website in
@@ -111,7 +130,7 @@ gehashter IP, IP wird nicht gespeichert).
 
 ## Übernommen / nicht übernommen
 
-Übernommen: Dienste/Gruppen, 38 Vorlagen, Varianten, Domain-Matrix, Fingerabdrücke + Stände, Consent Mode v2, GPC,
+Übernommen (Stand FriendsOfREDAXO/consent_kit 1.1.0): Dienste/Gruppen, 38 Vorlagen (DE/EN/NL/IT), „Hinweis beim Seitenaufruf“, Varianten, Domain-Matrix, Fingerabdrücke + Stände, Consent Mode v2, GPC,
 Anbieter-Aufrufe (UET, Clarity, Meta …), Conversions ohne Code, 2-Klick-Platzhalter, Protokoll/CSV/Aufbewahrung,
 Design-Editor mit Kontrastprüfung, Import/Export.
 

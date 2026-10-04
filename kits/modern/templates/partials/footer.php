@@ -4,14 +4,14 @@
  *   big        dunkle Fläche: großer Schriftzug (Satz aus „Website“) mit Button, darunter die Spalten
  *   columns    Name + Claim, Kontakt, Seiten, Social Media als Spalten
  *   simple     eine ruhige, umbrechende Zeile: Wortmarke, Seiten, Rechtliches, Social Media, Sprache
- * footer_links(): z. B. „Cookie-Einstellungen“ der Einwilligungs-Verwaltung (Erweiterung consent_kit).
+ * footer_links(): z. B. „Datenschutz-Einstellungen“ der Einwilligungs-Verwaltung (Erweiterung consent_kit).
  */
 $address = modern_address_lines();
 $phone = modern_phone();
 $email = modern_email();
 $social = modern_social();
 $pages = \Core\Pages::menu(false);
-$legal = array_merge(modern_legal_links(), footer_links());   // footer_links(): z. B. „Cookie-Einstellungen“ (Erweiterung consent_kit)
+$legal = array_merge(modern_legal_links(), footer_links());   // footer_links(): z. B. „Datenschutz-Einstellungen“ (Erweiterung consent_kit)
 $langs = language_links();
 $text = trim((string) setting('footer_text'));
 $tagline = trim((string) setting('tagline'));

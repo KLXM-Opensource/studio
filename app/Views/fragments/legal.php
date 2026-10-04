@@ -2,7 +2,7 @@
 /**
  * Kern-Fragment „legal“ (überschreibbar: kits/{kit}/fragments/legal.php): Rechtliches-Zeile im Fußbereich –
  * Impressum, Datenschutz, Barrierefreiheit (legal_links(), Core\Legal) und Links der Erweiterungen (footer_links(),
- * z. B. „Cookie-Einstellungen“ von consent_kit). Klassen: .legal (+ $class) · aktuelle Seite aria-current="page".
+ * z. B. „Datenschutz-Einstellungen“ von consent_kit). Klassen: .legal (+ $class) · aktuelle Seite aria-current="page".
  * @var ?string $class  @var ?string $label  Beschriftung der Navigation (Standard „Rechtliches“)
  */
 $links = array_merge(legal_links(), footer_links());

@@ -312,11 +312,14 @@ final class Compiler
         }
     }
 
-    /** Übersetzbares Feld {de, en, …}: Sprache → Sprachanteil → Deutsch → Englisch → erster Wert */
+    /**
+     * Übersetzbares Feld {de, en, nl, it, …}: Sprache → Sprachanteil → (Deutsch für de-*) → Englisch → Deutsch → erster Wert.
+     * Wie FriendsOfREDAXO/consent_kit: fehlt eine Sprache (z. B. nl), lieber Englisch als Deutsch.
+     */
     public static function pick(array|string $v, string $lang): string
     {
         if (is_string($v)) return $v;
-        foreach ([$lang, substr($lang, 0, 2), 'de', 'en'] as $k) {
+        foreach ([$lang, substr($lang, 0, 2), 'en', 'de'] as $k) {
             if (trim((string) ($v[$k] ?? '')) !== '') return (string) $v[$k];
         }
         foreach ($v as $x) if (is_string($x) && trim($x) !== '') return $x;

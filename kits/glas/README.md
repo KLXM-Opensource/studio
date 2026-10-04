@@ -112,7 +112,7 @@ Milchglas, Minimal-Kopf).
 
 Kern-Blöcke im Kit-Stil: data_list, data_fields, data_form, calendar, upcoming, gallery (Lichtkante, gläserne
 Lightbox-Tasten), slideshow, stack_cards, dials (Skalen auf Glas über `--dial-*`), Suche (Popover an der Lupe),
-Besucher-Chat (`cms_chat_launcher()`), `footer_links()` (z. B. „Cookie-Einstellungen“), Symbol-Sprite je Website (`icon()`).
+Besucher-Chat (`cms_chat_launcher()`), `footer_links()` (z. B. „Datenschutz-Einstellungen“), Symbol-Sprite je Website (`icon()`).
 
 ## Musterseiten (Demo)
 

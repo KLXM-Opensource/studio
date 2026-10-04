@@ -402,7 +402,7 @@ return [
                 'Auf der Website: Der Hinweis erscheint, bis Besucher entscheiden. <b>Alle ablehnen</b> ist so leicht wie <b>Alle akzeptieren</b>.',
                 '<b>Einstellungen</b> zeigt jeden Dienst mit Zweck und Speicherdauer – einzeln wählbar.',
                 'Abgelehnte Inhalte zeigen einen Platzhalter: erst nach Klick lädt das Video vom Anbieter.',
-                'Jede Entscheidung steht anonym im <b>Protokoll</b>; Besucher ändern sie jederzeit über <b>Cookie-Einstellungen</b>.',
+                'Jede Entscheidung steht anonym im <b>Protokoll</b>; Besucher ändern sie jederzeit über <b>Datenschutz-Einstellungen</b>.',
             ],
             'tips' => ['Datenschutzerklärung und Impressum sind im Hinweis verlinkt – beide Seiten zuerst anlegen.', 'Landingpages mit eigener Domain haben eine eigene Spalte: Dienste je Domain an- oder abschalten.'],
             'pitfalls' => ['Neue Dienste (z. B. ein Karten- oder Video-Anbieter) immer zuerst hier eintragen – sonst laden sie ohne Einwilligung.', 'Ändert sich ein Dienst wesentlich, fragt der Hinweis erneut – das ist gewollt.'],

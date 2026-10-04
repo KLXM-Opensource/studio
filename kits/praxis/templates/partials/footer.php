@@ -9,7 +9,7 @@
     </div>
     <nav aria-label="<?= e(lt('Rechtliches')) ?>">
       <ul>
-        <?php foreach (array_merge(praxis_legal_links(), footer_links()) as $l): /* footer_links(): z. B. „Cookie-Einstellungen“ (consent_kit) */ ?>
+        <?php foreach (array_merge(praxis_legal_links(), footer_links()) as $l): /* footer_links(): z. B. „Datenschutz-Einstellungen“ (consent_kit) */ ?>
         <li><a href="<?= e($l['href']) ?>"><?= e($l['label']) ?></a></li>
         <?php endforeach; ?>
       </ul>

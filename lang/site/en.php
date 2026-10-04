@@ -256,7 +256,7 @@ return [
     'Impressum' => 'Legal notice',
     'Datenschutz' => 'Privacy',
     'Barrierefreiheit' => 'Accessibility',
-    'Cookie-Einstellungen' => 'Cookie settings',
+    'Datenschutz-Einstellungen' => 'Privacy settings',
     'Video' => 'Video',
     '[Video folgt]' => '[Video to follow]',
     'Beim Abspielen lädt {provider} ({company}) das Video. Dabei werden Daten wie Ihre IP-Adresse an {provider} übertragen.' => 'When you play the video, {provider} ({company}) loads it. Data such as your IP address is transferred to {provider}.',

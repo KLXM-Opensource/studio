@@ -1,7 +1,7 @@
 <?php
 /**
  * Fußbereich: Marke + Kurzbeschreibung, Kontakt (aus „Website“), Seiten, Rechtliches.
- * footer_links(): zusätzliche Links von Erweiterungen (z. B. „Cookie-Einstellungen“ von consent_kit) – immer anhängen,
+ * footer_links(): zusätzliche Links von Erweiterungen (z. B. „Datenschutz-Einstellungen“ von consent_kit) – immer anhängen,
  * damit Erweiterungen in jedem Kit funktionieren. Leer ohne Erweiterungen.
  */
 $address = starter_address_lines();

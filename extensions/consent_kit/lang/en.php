@@ -333,4 +333,14 @@ return [
     'Link „Cookie-Einstellungen“ im Fußbereich' => '“Cookie settings” link in the footer',
     'Technik: Consent-Kit' => 'Technical: Consent Kit',
     'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).' => 'Consent management: services from vetted templates, an accessible banner in the website’s design, two-click placeholders, Google Consent Mode v2, GPC, a log without IP addresses. Port of the REDAXO add-on consent_kit (MIT).',
+    // 1.2.0: Hinweis beim Seitenaufruf, Datenschutz-Einstellungen
+    'Hinweis beim Seitenaufruf' => 'Notice on page load',
+    'Immer, solange keine Entscheidung vorliegt' => 'Always, as long as no decision has been made',
+    'Nur bei Bedarf – wenn auf der Seite ein gesperrter externer Inhalt steht' => 'Only when needed – if the page contains blocked external content',
+    'Nie von selbst – nur über Platzhalter, Schaltfläche oder Link' => 'Never on its own – only via placeholder, button or link',
+    '„Nur bei Bedarf“ passt zu Websites, die nur externe Inhalte (Karten, Videos) einbinden. Dienste mit eigenem Code (Statistik, Pixel, Tag Manager) erzwingen die Abfrage trotzdem – sonst würden sie nie starten. „Nie“ unterdrückt ausnahmslos.' => '“Only when needed” suits websites that only embed external content (maps, videos). Services with their own code (statistics, pixels, tag manager) still force the prompt – otherwise they would never start. “Never” suppresses it without exception.',
+    '„Hinweis beim Seitenaufruf“ ist eingeschränkt, aber diese Dienste bringen eigenen Code mit, der erst nach der Einwilligung läuft: {names}. Bei „Nur bei Bedarf“ erscheint der Hinweis deshalb trotzdem; bei „Nie“ starten sie erst, wenn Besucher die Einstellungen selbst öffnen.' => '“Notice on page load” is restricted, but these services bring their own code that only runs after consent: {names}. With “Only when needed” the notice therefore still appears; with “Never” they only start once visitors open the settings themselves.',
+    '„Datenschutz-Einstellungen“ im Fußbereich der Website (Rechtliches)' => '“Privacy settings” in the website footer (legal)',
+    '„Datenschutz-Einstellungen“ im Fußbereich: automatisch in den mitgelieferten Kits (footer_links()); in eigenen Kits' => '“Privacy settings” in the footer: automatic in the bundled kits (footer_links()); in your own kits',
+    'Was der Dienst im Browser ablegt. Erscheint in den Datenschutz-Einstellungen; beim Widerruf werden diese Einträge gelöscht, soweit der Browser das zulässt. Änderungen hier fragen Besucher zu diesem Dienst erneut.' => 'What the service stores in the browser. Appears in the privacy settings; on withdrawal these entries are deleted as far as the browser allows. Changes here ask visitors about this service again.',
 ];

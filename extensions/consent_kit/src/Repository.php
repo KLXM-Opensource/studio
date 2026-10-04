@@ -165,8 +165,9 @@ final class Repository
         'position' => 'bottom-left',  // bottom-left | bottom-right | top-left | top-right
         'theme' => 'site',            // site (folgt dem Dunkelmodus der Website) | light | dark | auto
         'dismiss' => true,            // Schließen-Schaltfläche (×) ohne Entscheidung
-        'trigger' => false,           // schwebende Schaltfläche (Standard aus: „Cookie-Einstellungen“ steht im Fußbereich)
-        'footer_link' => true,        // „Cookie-Einstellungen“ automatisch in der Rechtliches-Zeile der Kits
+        'open_mode' => 'always',      // Hinweis beim Seitenaufruf: always | on_demand (nur bei gesperrtem Inhalt) | never (nur auf Zuruf)
+        'trigger' => false,           // schwebende Schaltfläche (Standard aus: „Datenschutz-Einstellungen“ steht im Fußbereich)
+        'footer_link' => true,        // „Datenschutz-Einstellungen“ automatisch in der Rechtliches-Zeile der Kits
         'banner_groups' => false,     // Gruppen im Hinweis (nur Dialog/Off-Canvas)
         'days' => 365,                // Gültigkeit der Entscheidung
         'reload' => true,             // nach Widerruf neu laden

@@ -177,12 +177,25 @@
     api.open('settings');
   });
 
+  /* Hinweis beim Seitenaufruf (openMode): never = nur auf Zuruf; on_demand = nur, wenn auf der Seite ein <consent-embed>
+     eines bekannten, noch nicht erlaubten Dienstes steht – es sei denn, ein optionaler Dienst bringt eigenen Code mit
+     (head/body/js_accept/Ereignisse), der sonst nie starten würde. Vorschau: nie unterdrücken. */
+  const loadsOnConsent = s => !!((s.head && s.head.length) || (s.body && s.body.length) || s.acc);
+  const blockedEmbed = () => [...d.querySelectorAll('consent-embed[service]')].some(el => { const k = el.getAttribute('service') || ''; return services.has(k) && !has(k); });
+  const suppressed = () => {
+    const mode = cfg.openMode;
+    if (cfg.preview || (mode !== 'on_demand' && mode !== 'never')) return false;   // unbekannt = always (sichere Seite)
+    if (mode === 'never') return true;
+    if (optional.some(loadsOnConsent)) return false;
+    return !blockedEmbed();
+  };
+
   const start = async () => {
     if (cfg.def && !cfg.preview) await script(codeUrl('_', 'd'));
     apply();
     emit('ready');
     new MutationObserver(() => activate()).observe(d.body, { childList: true, subtree: true });
-    const need = optional.length > 0 && needsDecision() && !autoRejected() && (!dismissed() || cfg.preview);
+    const need = optional.length > 0 && needsDecision() && !autoRejected() && (!dismissed() || cfg.preview) && !suppressed();
     if (need || cfg.trigger || d.querySelector('consent-embed')) {
       const u = await ui();
       if (u && need) u.open('banner');

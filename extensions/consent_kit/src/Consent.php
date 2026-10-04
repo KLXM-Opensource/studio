@@ -98,6 +98,8 @@ final class Consent
             'layout' => (string) $s['layout'], 'position' => (string) $s['position'],
             'theme' => (string) $s['theme'], 'darkScope' => $s['theme'] === 'site' ? (string) ($dark['scope'] ?? '') : '',
             'dismiss' => (bool) $s['dismiss'], 'trigger' => (bool) $s['trigger'], 'reload' => (bool) $s['reload'],
+            // Wann der Hinweis von selbst erscheint – unbekannte Werte fallen auf die sichere Seite (always)
+            'openMode' => in_array($s['open_mode'] ?? 'always', ['always', 'on_demand', 'never'], true) ? (string) $s['open_mode'] : 'always',
             'bannerGroups' => (bool) $s['banner_groups'] && in_array($s['layout'], ['modal', 'offcanvas'], true),
             'gpc' => (string) $s['gpc'], 'quiet' => $quiet,
             'gcm' => $b['gcm'] ? ['redaction' => (bool) $s['gcm_redaction'], 'passthrough' => (bool) $s['gcm_passthrough'], 'wait' => max(0, (int) $s['gcm_wait'])] : null,
@@ -133,7 +135,7 @@ final class Consent
         $t = fn(string $x) => Compiler::t($x, $lang);
         return [
             'title' => $t('Datenschutz-Einstellungen'),
-            'intro' => $t('Wir verwenden Cookies und ähnliche Technologien. Einige sind für den Betrieb der Website notwendig, andere werden nur mit Ihrer Einwilligung eingesetzt. Sie können Ihre Auswahl jederzeit über „Cookie-Einstellungen“ ändern oder widerrufen.'),
+            'intro' => $t('Wir verwenden Cookies und ähnliche Technologien. Einige sind für den Betrieb der Website notwendig, andere werden nur mit Ihrer Einwilligung eingesetzt. Sie können Ihre Auswahl jederzeit über „Datenschutz-Einstellungen“ ändern oder widerrufen.'),
             'accept_all' => $t('Alle akzeptieren'), 'reject_all' => $t('Alle ablehnen'), 'settings' => $t('Einstellungen'), 'save' => $t('Auswahl speichern'),
             'close' => $t('Schließen, ohne zu entscheiden'), 'settings_title' => $t('Dienste auswählen'),
             'settings_intro' => $t('Hier können Sie jeden Dienst einzeln zulassen oder ablehnen. Notwendige Dienste sind immer aktiv.'),
@@ -143,12 +145,12 @@ final class Consent
             'provider' => $t('Anbieter'), 'privacy_policy' => $t('Datenschutzerklärung'), 'privacy_policy_of' => $t('Datenschutzerklärung von {name}'),
             'storage' => $t('Cookies und Speichereinträge'), 'no_items' => $t('Für diesen Dienst sind keine Einträge hinterlegt.'),
             'col_name' => $t('Name'), 'col_type' => $t('Art'), 'col_host' => $t('Domain'), 'col_duration' => $t('Laufzeit'), 'col_purpose' => $t('Zweck'),
-            'trigger' => $t('Cookie-Einstellungen'), 'consent_info' => $t('Einwilligungs-ID: {id} · gespeichert am {date}'),
+            'trigger' => $t('Datenschutz-Einstellungen'), 'consent_info' => $t('Einwilligungs-ID: {id} · gespeichert am {date}'),
             'withdraw' => $t('Einwilligung widerrufen'),
             'gpc_notice' => $t('Ihr Browser sendet das Signal „Global Privacy Control“. Optionale Dienste wurden deshalb nicht aktiviert.'),
             'embed_title' => $t('Externer Inhalt von {name}'),
-            'embed_text' => $t('Zum Anzeigen dieses Inhalts werden Daten an {name} übertragen. Details finden Sie in den Cookie-Einstellungen.'),
-            'embed_once' => $t('Inhalt einmal laden'), 'embed_always' => $t('{name} immer erlauben'), 'embed_settings' => $t('Cookie-Einstellungen öffnen'),
+            'embed_text' => $t('Zum Anzeigen dieses Inhalts werden Daten an {name} übertragen. Details finden Sie in den Datenschutz-Einstellungen.'),
+            'embed_once' => $t('Inhalt einmal laden'), 'embed_always' => $t('{name} immer erlauben'), 'embed_settings' => $t('Datenschutz-Einstellungen öffnen'),
             'embed_unavailable' => $t('Dieser Inhalt ist derzeit nicht verfügbar.'), 'imprint' => $t('Impressum'),
             'new_tab' => $t('(öffnet in neuem Tab)'),
         ];
@@ -222,13 +224,13 @@ final class Consent
     public static function footerLinks(): array
     {
         if (!self::enabled() || !Repository::settings()['footer_link'] || !self::needed()) return [];
-        return [['label' => lt('Cookie-Einstellungen'), 'href' => '#cookie-einstellungen']];
+        return [['label' => lt('Datenschutz-Einstellungen'), 'href' => '#cookie-einstellungen']];
     }
 
     public static function settingsLink(string $label = '', string $class = ''): string
     {
         if (!self::needed()) return '';
-        return '<a href="#cookie-einstellungen" data-consent-open' . ($class !== '' ? ' class="' . e($class) . '"' : '') . '>' . e($label !== '' ? $label : lt('Cookie-Einstellungen')) . '</a>';
+        return '<a href="#cookie-einstellungen" data-consent-open' . ($class !== '' ? ' class="' . e($class) . '"' : '') . '>' . e($label !== '' ? $label : lt('Datenschutz-Einstellungen')) . '</a>';
     }
 
     /** Markup in <consent-embed> verpacken: erst nach Einwilligung (oder „einmal laden“) gelangt es in die Seite */

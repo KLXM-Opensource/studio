@@ -422,7 +422,7 @@ function cms_chat_launcher(?array $page = null, bool $editing = false): string
 }
 
 /**
- * Zusätzliche Links für die Rechtliches-Zeile im Fußbereich (z. B. „Cookie-Einstellungen“ der Erweiterung consent_kit):
+ * Zusätzliche Links für die Rechtliches-Zeile im Fußbereich (z. B. „Datenschutz-Einstellungen“ der Erweiterung consent_kit):
  * [['label' => …, 'href' => …], …]. Im Theme: array_merge(theme_legal_links(), footer_links()). Leer ohne Erweiterungen.
  */
 function footer_links(): array

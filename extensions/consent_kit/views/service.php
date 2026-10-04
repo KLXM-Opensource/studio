@@ -81,7 +81,7 @@ $p = $s['preset'] ? \MyCms\Consent\Presets::get($s['preset']) : null;
   </section>
 
   <section class="adm-card adm-panel" role="tabpanel" id="panel-items" aria-labelledby="tab-items" hidden>
-    <p class="adm-muted"><?= e(__('Was der Dienst im Browser ablegt. Erscheint in den Cookie-Einstellungen; beim Widerruf werden diese Einträge gelöscht, soweit der Browser das zulässt. Änderungen hier fragen Besucher zu diesem Dienst erneut.')) ?></p>
+    <p class="adm-muted"><?= e(__('Was der Dienst im Browser ablegt. Erscheint in den Datenschutz-Einstellungen; beim Widerruf werden diese Einträge gelöscht, soweit der Browser das zulässt. Änderungen hier fragen Besucher zu diesem Dienst erneut.')) ?></p>
     <?= Fields::renderForm([['name' => 'items', 'label' => __('Cookies & Speicher'), 'type' => 'repeater', 'item_label' => __('Eintrag'), 'title_field' => 'name', 'fields' => AdminController::itemFields()]], ['items' => $s['items']], $errors, 's') ?>
   </section>
 

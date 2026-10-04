@@ -66,7 +66,7 @@ Build: `cd tools && pnpm run build` → `public/assets/kits/modern/{css,js,fonts
 Kern-Blöcke im Kit-Stil: data_list (Karten 2/3/4 Spalten, Liste, kompakt, Tabelle), data_fields (Detailseiten), data_form,
 calendar, upcoming, gallery (feste Spaltenzahl je Stufe), slideshow, stack_cards, dials, Suche (Ergebnisseite + Popover an der
 Lupe per CSS-Ankerpositionierung, sonst site.js), Besucher-Chat (`cms_chat_launcher()`), `footer_links()` (z. B.
-„Cookie-Einstellungen“), Symbole über das Sprite der Website (`icon()`).
+„Datenschutz-Einstellungen“), Symbole über das Sprite der Website (`icon()`).
 
 ## Navigation (Design → Navigation)
 

@@ -105,7 +105,7 @@ Alle sechs Vorlagen hell und dunkel nach WCAG 2.2 AA geprüft: `php kits/nature/
 
 Kern-Blöcke im Kit-Stil: data_list, data_fields, data_form, calendar, upcoming, dials (`--dial-*` aus den Tokens),
 gallery, slideshow, stack_cards; Such-Popover an der Lupe (CSS-Ankerpositionierung, sonst site.js), Besucher-Chat
-(`cms_chat_launcher()`), `footer_links()` (z. B. Cookie-Einstellungen), Symbol-Sprite je Website (`icon()`).
+(`cms_chat_launcher()`), `footer_links()` (z. B. Datenschutz-Einstellungen), Symbol-Sprite je Website (`icon()`).
 
 ## Website-Formular
 

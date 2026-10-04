@@ -300,8 +300,11 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
             ['name' => 'position', 'label' => __('Position'), 'type' => 'select', 'required' => true, 'width' => 'half', 'options' => ['bottom-left' => __('unten links'), 'bottom-right' => __('unten rechts'), 'top-left' => __('oben links'), 'top-right' => __('oben rechts')]],
             ['name' => 'theme', 'label' => __('Farbschema'), 'type' => 'select', 'required' => true, 'width' => 'half', 'options' => ['site' => __('Wie die Website (Dunkelmodus des Kits)'), 'light' => __('Hell'), 'dark' => __('Dunkel'), 'auto' => __('Automatisch (System der Besucher)')]],
             ['name' => 'banner_groups', 'label' => __('Gruppen im Hinweis zeigen (nur Dialog/Off-Canvas; nichts vorausgewählt)'), 'type' => 'bool', 'width' => 'half'],
+            ['name' => 'open_mode', 'label' => __('Hinweis beim Seitenaufruf'), 'type' => 'select', 'required' => true, 'default' => 'always',
+                'options' => ['always' => __('Immer, solange keine Entscheidung vorliegt'), 'on_demand' => __('Nur bei Bedarf – wenn auf der Seite ein gesperrter externer Inhalt steht'), 'never' => __('Nie von selbst – nur über Platzhalter, Schaltfläche oder Link')],
+                'help' => __('„Nur bei Bedarf“ passt zu Websites, die nur externe Inhalte (Karten, Videos) einbinden. Dienste mit eigenem Code (Statistik, Pixel, Tag Manager) erzwingen die Abfrage trotzdem – sonst würden sie nie starten. „Nie“ unterdrückt ausnahmslos.')],
             ['name' => 'dismiss', 'label' => __('Schließen-Schaltfläche (×): schließt ohne Entscheidung, nichts wird geladen'), 'type' => 'bool'],
-            ['name' => 'footer_link', 'label' => __('„Cookie-Einstellungen“ im Fußbereich der Website (Rechtliches)'), 'type' => 'bool'],
+            ['name' => 'footer_link', 'label' => __('„Datenschutz-Einstellungen“ im Fußbereich der Website (Rechtliches)'), 'type' => 'bool'],
             ['name' => 'trigger', 'label' => __('Schwebende Schaltfläche zum erneuten Öffnen'), 'type' => 'bool',
                 'help' => __('Lädt die Oberfläche auf jeder Seite (ca. 9 KB). Der Widerruf muss so einfach sein wie die Einwilligung – mindestens eines von beiden einschalten.')],
             ['type' => 'heading', 'label' => __('Rechtstexte')],
@@ -318,6 +321,23 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
             ['name' => 'gcm_passthrough', 'label' => __('Google Consent Mode: url_passthrough'), 'type' => 'bool'],
             ['name' => 'gcm_wait', 'label' => __('Google Consent Mode: wait_for_update (ms)'), 'type' => 'number', 'width' => 'half', 'step' => 50],
         ];
+    }
+
+    /**
+     * „Nur bei Bedarf“/„Nie“ taugen nur, wenn ohne Einwilligung nichts lädt: aktive optionale Dienste mit eigenem Code
+     * (head/body, js_accept, Ereignisse) brauchen die Abfrage beim Seitenaufruf – deren Namen, sonst [].
+     */
+    public static function openModeConflicts(): array
+    {
+        if ((Repository::settings()['open_mode'] ?? 'always') === 'always') return [];
+        $out = [];
+        foreach (Repository::services(true) as $s) {
+            if (($s['grp'] ?? '') === 'necessary') continue;
+            $code = !empty($s['events']);
+            foreach (['html_head', 'html_body', 'js_accept'] as $f) $code = $code || trim((string) ($s[$f] ?? '')) !== '';
+            if ($code) $out[] = (string) $s['name'];
+        }
+        return $out;
     }
 
     public function settings(Request $r): Response

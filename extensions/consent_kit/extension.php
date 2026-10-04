@@ -20,7 +20,7 @@ spl_autoload_register(function (string $class): void {
 
 if (!function_exists('consent_settings_link')) {
     /**
-     * Link „Cookie-Einstellungen“ zum erneuten Öffnen der Auswahl – z. B. im Fußbereich eines eigenen Kits.
+     * Link „Datenschutz-Einstellungen“ zum erneuten Öffnen der Auswahl – z. B. im Fußbereich eines eigenen Kits.
      * Liefert '' solange auf dieser Website kein einwilligungspflichtiger Dienst aktiv ist (dann gibt es nichts einzustellen).
      */
     function consent_settings_link(string $label = '', string $class = ''): string
@@ -51,12 +51,12 @@ if (!function_exists('consent_has')) {
 return [
     'name' => 'consent_kit',
     'label' => 'Consent-Kit (Cookie-Einwilligung)',
-    'version' => '1.1.0',
+    'version' => '1.2.0',
     'requires' => '>=1.0.0',
     'description' => 'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).',
     'author' => 'KLXM Crossmedia GmbH and contributors',
     'license' => 'MIT',
-    'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen → Einstellungen der Funktionen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Cookie-Einstellungen“ im Fußbereich'],
+    'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen → Einstellungen der Funktionen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Datenschutz-Einstellungen“ im Fußbereich'],
     'docs' => ['Technik: Consent-Kit' => '/admin/hilfe/technik#consent'],
     'boot' => function (Core\Extension $x): void {
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
@@ -70,7 +70,7 @@ return [
         $x->htmlFilter(fn(string $html, array $ctx) => MyCms\Consent\Consent::filterHtml($html, $ctx));
         // CSP: Hosts eines Dienstes erst nach Einwilligung (Cookie dieser Anfrage); iframe-Hosts aktiver Dienste für den Platzhalter
         $x->csp(fn() => MyCms\Consent\Consent::cspSources());
-        // „Cookie-Einstellungen“ in der Rechtliches-Zeile der Fußbereiche der Kits (footer_links())
+        // „Datenschutz-Einstellungen“ in der Rechtliches-Zeile der Fußbereiche der Kits (footer_links())
         $x->footerLinks(fn() => MyCms\Consent\Consent::footerLinks());
 
         // Block „Externer Inhalt (mit Einwilligung)“: Karten-, Social-Media- und Audio-Einbettungen als 2-Klick-Platzhalter

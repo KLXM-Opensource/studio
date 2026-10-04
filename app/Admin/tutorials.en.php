@@ -350,7 +350,7 @@ return [
                 'On the website: the notice appears until visitors decide. “Alle ablehnen” (reject all) is as easy as “Alle akzeptieren” (accept all).',
                 '“Einstellungen” (settings) shows every service with purpose and storage period – selectable one by one.',
                 'Rejected content shows a placeholder: the video only loads from the provider after a click.',
-                'Every decision is logged anonymously; visitors can change it at any time via “Cookie-Einstellungen” (cookie settings).',
+                'Every decision is logged anonymously; visitors can change it at any time via “Datenschutz-Einstellungen” (privacy settings).',
             ],
             'tips' => ['The privacy policy and legal notice are linked in the notice – create both pages first.', 'Landing pages with their own domain have their own column: switch services on or off per domain.'],
             'pitfalls' => ['Always add new services (e.g. a map or video provider) here first – otherwise they load without consent.', 'If a service changes significantly, the notice asks again – this is intended.'],

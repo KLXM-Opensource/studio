@@ -49,7 +49,7 @@ return [
         $x-&gt;proxy('lieferant', ['upstream' =&gt; 'https://api.example.org']);
         $x-&gt;htmlFilter(fn(string $html, array $ctx) =&gt; $html);          // Website-HTML ergänzen (vor dem Seiten-Cache)
         $x-&gt;csp(fn() =&gt; ['frame-src' =&gt; ['https://player.example.org']]);  // CSP je Anfrage ergänzen (nur Hosts)
-        $x-&gt;footerLinks(fn() =&gt; [['label' =&gt; 'Cookie-Einstellungen', 'href' =&gt; '#cookie-einstellungen']]);
+        $x-&gt;footerLinks(fn() =&gt; [['label' =&gt; 'Datenschutz-Einstellungen', 'href' =&gt; '#cookie-einstellungen']]);
         // Verwaltung, Mediathek, Betrieb
         $x-&gt;feature('shop', 'Shop', ['shop.edit'], false);                 // Funktion Standard AUS ('features' =&gt; ['shop' =&gt; true])
         $x-&gt;adminAssets(fn(string $view) =&gt; $view === 'media' ? ['css/shop.css', 'js/shop.js'] : []);
