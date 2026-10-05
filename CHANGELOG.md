@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Editor: Seitenleiste macht die ganze Website schmaler
+- Mit offener Seitenleiste „Bearbeiten“ rücken Kopf, Inhalt und Fuß der Website (alles direkt unter `<body>` außer den Ebenen des
+  Editors) zur Seite – vorher nur der Inhaltsbereich, Kopf und Fuß lagen unter der Leiste. Unter 1100 px überdeckt die Leiste weiterhin.
+
 ### Versionen für Einträge, Ansicht „Versionen“
 - Einträge haben Versionen wie Seiten (`entry_revisions`, `Core\Data\Revisions`): jedes Speichern über `Entries::save` (Verwaltung,
   Website, API, MCP, DAV; nicht der Abgleich externer Quellen), beim ersten Ändern zusätzlich der Ausgangsstand; die letzten
