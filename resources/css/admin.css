@@ -178,7 +178,8 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .rep-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
 .rep-fields>.f{grid-column:1/-1}
 .rep-fields>.f--half{grid-column:auto}
-@media (max-width:700px){.adm-fields,.rep-fields{grid-template-columns:1fr}.adm-fields>.f--half,.rep-fields>.f--half,.adm-fields>.f-vis>.f--half{grid-column:1/-1}}
+.rep-fields>.f-vis>:is(.f,.f-heading){grid-column:1/-1}.rep-fields>.f-vis>.f--half{grid-column:auto}
+@media (max-width:700px){.adm-fields,.rep-fields{grid-template-columns:1fr}.adm-fields>.f--half,.rep-fields>.f--half,.adm-fields>.f-vis>.f--half,.rep-fields>.f-vis>.f--half{grid-column:1/-1}}
 .adm-prefix{display:flex;align-items:stretch;border:1.5px solid var(--adm-in);border-radius:6px;overflow:hidden;background:var(--adm-surface)}
 .adm-prefix span{display:flex;align-items:center;padding:0 10px;background:var(--adm-fill);color:var(--adm-t3);font-size:13px;white-space:nowrap}
 .adm-prefix input{border:0!important;border-radius:0!important}

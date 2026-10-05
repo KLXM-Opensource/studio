@@ -486,7 +486,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 /* Felder passen sich der Breite der Leiste an: schmal = untereinander statt zwei gequetschte Spalten */
 @container drawer (max-width:500px){
   .cms-drawer__form,.cms-drawer [data-drawer-tunes],.cms-drawer .adm-fields,.cms-drawer .rep-fields{grid-template-columns:minmax(0,1fr)}
-  .cms-drawer__form>.f--half,.cms-drawer__form>.f-vis>.f--half,.cms-drawer [data-drawer-tunes]>.f--half,.cms-drawer .adm-fields>.f--half,.cms-drawer .rep-fields>.f--half{grid-column:1/-1}
+  .cms-drawer__form>.f--half,.cms-drawer__form>.f-vis>.f--half,.cms-drawer [data-drawer-tunes]>.f--half,.cms-drawer .adm-fields>.f--half,.cms-drawer .rep-fields>.f--half,.cms-drawer .rep-fields>.f-vis>.f--half{grid-column:1/-1}
 }
 /* Bildfeld: Beschreibung unter das Bild, sobald daneben kein Platz ist */
 .cms-drawer .media-field{container-type:inline-size}

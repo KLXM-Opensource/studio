@@ -194,7 +194,7 @@ function initRepeaters(scope = d) {
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
         uniqueIds(added);
-        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
+        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initShowIf(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
         bar_.ask({ title: t('Eintrag entfernen?'), ok: t('Entfernen') }).then(ok => { if (!ok) return; const nx = item.nextElementSibling || item.previousElementSibling; item.remove(); rep.dispatchEvent(new Event('input', { bubbles: true })); ($('[data-rep=remove]', nx || rep) || $('[data-rep=add]', rep))?.focus(); });
@@ -252,6 +252,27 @@ function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;
 const openMediaPicker = (kind = 'image') => window.CMSMedia.pick(kind);
 
 // Feld „Sammlung“: Mediathek öffnen, Sammlung anlegen/füllen und übernehmen (CMSMedia.pickCollection)
+/* Bedingte Felder (Core\Fields 'show_if' → .f-vis[data-show-if]): nur Anzeige, Werte bleiben erhalten */
+function initShowIf(scope = d) {
+  const forms = new Set();
+  $$('[data-show-if]', scope).forEach(el => forms.add(el.closest('form') || el.getRootNode()));
+  if (scope.matches?.('[data-show-if]') || scope.closest?.('form')) forms.add(scope.closest?.('form') || scope);
+  const val = c => !c ? '' : c.type === 'checkbox' ? (c.checked ? '1' : '') : c.type === 'radio' ? '' : String(c.value).trim();
+  forms.forEach(form => {
+    if (!form?.querySelectorAll) return;
+    const run = () => $$('[data-show-if]', form).forEach(el => {
+      let cond; try { cond = JSON.parse(el.dataset.showIf); } catch { return; }
+      el.hidden = ![].concat(cond).some(alt => Object.entries(alt).every(([name, vals]) => {
+        const list = $$(`[name="${name.replace(/"/g, '\\"')}"]`, form), radio = list.find(c => c.type === 'radio' && c.checked);
+        const box = list.filter(c => c.type === 'checkbox'), v = radio ? radio.value : val(box[0] || list.find(c => c.type !== 'hidden') || list[0]);
+        return vals.some(x => x === '*' ? v !== '' : x === v);
+      }));
+    });
+    if (!form._showIf) { form._showIf = true; form.addEventListener('input', run); form.addEventListener('change', run); }
+    run();
+  });
+}
+
 function initCollectionFields(scope = d) {
   $$('[data-col-pick]', scope).forEach(btn => {
     if (btn._init) return; btn._init = true;
@@ -880,7 +901,7 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
 init();
 initSettingsPreview();
 initDesign();

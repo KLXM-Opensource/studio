@@ -357,6 +357,21 @@ final class Fields
             unset($f['variants']);
             return '<div class="f-vis" data-variants="' . e($vs) . '">' . self::renderField($f, $value, $errors, $prefix, $path) . '</div>';
         }
+        // Feld nur, wenn andere Felder bestimmte Werte haben ('show_if' => ['kind' => ['image', 'ui']], mehrere Felder = alle,
+        // '/variant' = Feld des Blocks statt der eigenen Zeile; Liste von Bedingungen = eine genügt: [['kind' => ['image']], ['/variant' => ['grid']]];
+        // '*' = ausgefüllt, '' = leer) – auch in Wiederholgruppen (Felder derselben Zeile). Nur Anzeige (resources/js/admin.js
+        // initShowIf): der Wert bleibt beim Umschalten erhalten und wird gespeichert. Datentabellen nutzen 'visible_if' (Core\Data\Rules).
+        if (!empty($f['show_if']) && is_array($f['show_if'])) {
+            $cond = [];
+            $root = strstr($prefix, '[', true) ?: $prefix;   // '/variant' = Feld des Blocks (z. B. Variante) aus einer Wiederholgruppe heraus
+            foreach (array_is_list($f['show_if']) ? $f['show_if'] : [$f['show_if']] as $alt) {   // Liste = Alternativen (eine genügt)
+                $c = [];
+                foreach ((array) $alt as $n => $vals) $c[(str_starts_with((string) $n, '/') ? $root . '[' . substr((string) $n, 1) . ']' : $prefix . '[' . $n . ']')] = array_map('strval', (array) $vals);
+                $cond[] = $c;
+            }
+            unset($f['show_if']);
+            return '<div class="f-vis" data-show-if="' . e(json_encode($cond, JSON_UNESCAPED_UNICODE)) . '">' . self::renderField($f, $value, $errors, $prefix, $path) . '</div>';
+        }
         if (self::$binding && $path === '' && isset($f['name']) && ($opts = \Core\Data\Entries::bindable(self::$binding['table'], $f['type'] ?? 'text'))) {
             $b = self::$binding;
             self::$binding = null;                           // Feld selbst normal rendern
@@ -578,7 +593,7 @@ final class Fields
 
     private static function renderSelect(string $id, string $name, array $opts, string $v, string $aria, bool $empty): string
     {
-        $h = '<select id="' . $id . '" name="' . $name . '"' . $aria . '>' . ($empty ? '<option value="">– keine Auswahl –</option>' : '');
+        $h = '<select id="' . $id . '" name="' . $name . '"' . $aria . '>' . ($empty && !array_key_exists('', $opts) ? '<option value="">– keine Auswahl –</option>' : '');   // eigene Leer-Option („Automatisch“) ersetzt den Platzhalter
         foreach ($opts as $k => $l) {
             $h .= '<option value="' . e((string) $k) . '"' . ((string) $k === $v ? ' selected' : '') . '>' . e((string) $l) . '</option>';
         }

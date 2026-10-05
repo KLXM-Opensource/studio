@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bedingte Block-Felder (`show_if`)
+- Felder eines Blocks erscheinen nur, wenn sie passen (z. B. „Bild“ nur bei Art „Bild/Video“), auch in Wiederholgruppen und
+  abhängig von der Variante (`'/variant'`); Alternativen als Liste. Werte bleiben beim Umschalten erhalten.
+- Auswahlfelder mit eigener Leer-Option („Automatisch“) zeigen kein zusätzliches „– keine Auswahl –“ mehr.
+
 ### Consent Kit 1.2.0 (Abgleich mit FriendsOfREDAXO/consent_kit 1.1.0)
 - „Hinweis beim Seitenaufruf“: immer, nur bei Bedarf (gesperrter Inhalt auf der Seite) oder nie; Dienste mit eigenem Code
   erzwingen die Abfrage, Warnung in den Einstellungen. Website-Texte und Vorlagen zusätzlich niederländisch und italienisch.

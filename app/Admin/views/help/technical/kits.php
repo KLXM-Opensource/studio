@@ -296,6 +296,11 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
   &lt;?php endforeach; ?&gt;
 &lt;/div&gt;</code></pre>
   <p>Der Block erscheint automatisch im Editor (Feldformular, Live-Vorschau, Abschnitts-Optionen, Drag &amp; Drop), in der REST-API und im MCP-Server.</p>
+  <p><b>Bedingte Felder (<code>show_if</code>):</b> Ein Feld erscheint nur, wenn andere Felder bestimmte Werte haben – auch in
+    Wiederholgruppen (Felder derselben Zeile). <code>'show_if' =&gt; ['kind' =&gt; ['image', '']]</code> (mehrere Felder = alle müssen passen;
+    <code>'*'</code> = ausgefüllt, <code>''</code> = leer), <code>'/variant'</code> = Feld des Blocks statt der eigenen Zeile, eine Liste
+    <code>[['kind' =&gt; ['image']], ['/variant' =&gt; ['grid']]]</code> = eine Bedingung genügt. Nur Anzeige: ausgeblendete Werte bleiben
+    erhalten und werden gespeichert (Datentabellen nutzen <code>visible_if</code>, siehe Daten).</p>
   <h3 id="vcard">Visitenkarte (vCard) – <code>vcard_url()</code>, <code>Core\VCard</code></h3>
   <p>Besucher speichern die Organisation mit einem Klick im Adressbuch (iOS, Android, Outlook, Thunderbird). Immer an, sobald Telefon, E-Mail oder Adresse eingetragen sind – keine eigene Funktion, keine eigene Ablage.</p>
   <table class="doc-table">
