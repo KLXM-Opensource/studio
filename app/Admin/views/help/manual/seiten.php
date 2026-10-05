@@ -42,6 +42,7 @@
     die gespeicherten Stände untereinander, nach Tagen gruppiert, oben „Jetzt“ – und rechts die Seite so, wie sie damals aussah (auch als
     Handy-Ansicht). Mit Klick oder <kbd>↑</kbd>/<kbd>↓</kbd> wechseln Sie den Stand. <b>Wiederherstellen</b> legt den gewählten Stand als
     Entwurf an – veröffentlicht wird erst, wenn Sie es tun. <kbd>Esc</kbd> schließt.</p>
+  <p><b>Änderungen hervorheben</b> rahmt Blöcke ein, die gegenüber dem vorherigen Stand neu (grün) oder geändert (orange) sind; entfernte Blöcke nennt die Zeile darüber. <b>Gegenüberstellen</b> zeigt links die Live-Fassung und rechts den gewählten Stand – beide scrollen gemeinsam.</p>
 
   <h3 id="nicht-gefunden">Seite „Nicht gefunden (404)“</h3>
   <p>Ruft jemand eine Adresse auf, die es nicht gibt (Tippfehler, alter Link), zeigt die Website eine Fehlerseite. Diese Seite können Sie selbst gestalten – mit Blöcken wie jede andere Seite. Sie finden sie in der <a href="<?= e(url('/admin/pages#sonderseiten')) ?>">Seitenübersicht</a> unten unter <b>Sonderseiten</b> und unter <b>Einrichtung › Website › Weiterleitungen → Nicht gefunden (404)</b>.</p>

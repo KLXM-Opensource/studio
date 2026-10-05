@@ -331,7 +331,8 @@ final class Theme
                 if (!$b->tunes['visible']) $cls[] = 'is-hidden-block';
                 if ($b->tunes['anchor'] !== '') $id = ' id="' . e($b->domId()) . '"';
             }
-            $cells .= '<div' . $id . ' class="' . e(implode(' ', $cls)) . '">' . $inner . "</div>\n";
+            $vd = isset(self::$vdiff[$b->id]) ? ' data-vdiff="' . e(self::$vdiff[$b->id]) . '"' : '';
+            $cells .= '<div' . $id . $vd . ' class="' . e(implode(' ', $cls)) . '">' . $inner . "</div>\n";
         }
         $wrap = (string) ($this->def['rows']['wrap'] ?? 'wrap');
         $html = $this->render('partials/section', ['b' => $lead, 'inner' => '<div class="' . e(trim($wrap . ' sec-row')) . '">' . "\n" . $cells . '</div>']);
@@ -411,6 +412,9 @@ final class Theme
         return $data;
     }
 
+    /** Versionen-Vorschau (Admin\VersionsController, ?mark=1): Block-ID → 'new' | 'changed' – als data-vdiff am äußersten Element */
+    public static array $vdiff = [];
+
     public function renderBlock(Block $block): string
     {
         $inner = $this->renderInner($block);
@@ -432,6 +436,9 @@ final class Theme
         // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“: Kennzeichen am äußersten Element (Core\Glossary\Annotator)
         if (!empty($block->tunes['noGlossary']) && !app()->editing) {
             $html = (string) preg_replace('~^(\s*<[a-zA-Z][a-zA-Z0-9-]*)(?=[\s>/])~', '$1 data-glossary="off"', $html, 1);
+        }
+        if (isset(self::$vdiff[$block->id])) {
+            $html = (string) preg_replace('~^(\s*<[a-zA-Z][a-zA-Z0-9-]*)(?=[\s>/])~', '$1 data-vdiff="' . e(self::$vdiff[$block->id]) . '"', $html, 1);
         }
         // Redaktion (Bearbeiten-Modus, Entwurfsansicht): Notizen als Hinweis „Notiz: …“ (Core\EditorNotes)
         return EditorNotes::$show ? EditorNotes::decorate($html) : $html;

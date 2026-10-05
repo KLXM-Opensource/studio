@@ -39,6 +39,11 @@ final class VersionsController extends AdminController
         return [
             'title' => __('Versionen'), 'today' => __('Heute'), 'desktop' => __('Desktop'), 'mobile' => __('Mobil'), 'changes' => __('Geändert: {list}'),
             'preview' => __('Vorschau dieses Stands'),
+            'compare' => __('Gegenüberstellen'), 'live' => __('Live'), 'liveDraft' => __('Jetzt (noch nie veröffentlicht)'), 'selected' => __('Gewählter Stand'),
+            'highlight' => __('Änderungen hervorheben'), 'markNew' => __('Neu'), 'markChanged' => __('Geändert'),
+            'blocksNew' => __('{n} neu'), 'blocksChanged' => __('{n} geändert'), 'blocksRemoved' => __('Entfernt: {list}'),
+            'noDiff' => __('Keine Änderung an den Blöcken gegenüber dem vorherigen Stand.'), 'firstState' => __('Ältester Stand – nichts zum Vergleichen.'),
+            'diffHint' => __('Hervorgehoben: Änderungen gegenüber dem vorherigen Stand.'),
             'now' => __('Jetzt'), 'count' => __('{n} ältere Stände'), 'count1' => __('1 älterer Stand'), 'close' => __('Schließen'), 'timeline' => __('Zeitleiste'),
             'older' => __('Älterer Stand'), 'newer' => __('Neuerer Stand'), 'cancel' => __('Abbrechen'), 'restore' => __('Wiederherstellen'),
             'back' => __('Zurück'), 'yes' => __('Ja, wiederherstellen'), 'restoring' => __('Wird wiederhergestellt …'),
@@ -68,38 +73,100 @@ final class VersionsController extends AdminController
         return ['day' => $f->date($at, 'long'), 'time' => $f->time($at), 'ago' => $f->relative($at), 'at' => $f->datetime($at, 'long')];
     }
 
-    public function pageVersions(Request $r, string $id): Response
+    /** Blöcke eines Stands (JSON der Seite bzw. Version) */
+    private static function blocksOf(?string $json): array
     {
-        $page = $this->page($r, $id);
-        $f = Format::admin();
-        $strip = fn(?string $json) => json_encode(json_decode((string) $json, true)['blocks'] ?? []);
-        $now = $strip($page['content_draft'] ?? $page['content_published']);
-        $out = [[
-            'id' => 0, 'now' => true, 'label' => __('Jetzt'), ...self::when($page['updated_at'] ?? null),
-            'note' => $page['status'] === 'published' && ($page['content_draft'] ?? null) !== null && $page['content_draft'] !== $page['content_published'] ? __('Entwurf mit unveröffentlichten Änderungen') : __('Aktueller Stand'),
-            'user' => '', 'preview' => url('/admin/pages/' . (int) $page['id'] . '/vorschau'),
-        ]];
-        $seen = [$now => true];
+        return array_values(array_filter((array) (json_decode((string) $json, true)['blocks'] ?? []), 'is_array'));
+    }
+
+    /**
+     * Unterschied zweier Stände einer Seite (je Block-ID): neu, geändert, entfernt. Vergleich ohne Zeitstempel/Reihenfolge-Felder.
+     * @return array{marks: array<string,string>, new: int, changed: int, removed: list<string>}
+     */
+    private static function blockDiff(array $blocks, ?array $base): array
+    {
+        $out = ['marks' => [], 'new' => 0, 'changed' => 0, 'removed' => []];
+        if ($base === null) return $out;
+        $key = fn(array $b) => json_encode([$b['type'] ?? '', $b['data'] ?? [], $b['tunes'] ?? []], JSON_UNESCAPED_UNICODE);
+        $old = [];
+        foreach ($base as $b) if (isset($b['id'])) $old[(string) $b['id']] = $b;
+        $seen = [];
+        foreach ($blocks as $b) {
+            $id = (string) ($b['id'] ?? '');
+            if ($id === '') continue;
+            $seen[$id] = true;
+            if (!isset($old[$id])) { $out['marks'][$id] = 'new'; $out['new']++; }
+            elseif ($key($old[$id]) !== $key($b)) { $out['marks'][$id] = 'changed'; $out['changed']++; }
+        }
+        foreach ($old as $id => $b) {
+            if (isset($seen[$id])) continue;
+            $out['removed'][] = (string) (app()->theme->block((string) ($b['type'] ?? ''))['label'] ?? ($b['type'] ?? '?'));
+        }
+        return $out;
+    }
+
+    /** Stände einer Seite, neueste zuerst: ['id' (0 = jetzt), 'json', 'created_at', 'note', 'email'] – gleiche Inhalte nur einmal */
+    private static function pageStates(array $page): array
+    {
+        $strip = fn(?string $json) => json_encode(self::blocksOf($json));
+        $now = (string) ($page['content_draft'] ?? $page['content_published']);
+        $out = [['id' => 0, 'json' => $now, 'created_at' => $page['updated_at'] ?? null, 'note' => '', 'email' => '']];
+        $seen = [$strip($now) => true];
         foreach (app()->db->fetchAll('SELECT r.id, r.created_at, r.note, r.blocks_json, u.email FROM revisions r LEFT JOIN users u ON u.id = r.user_id WHERE r.page_id = ? ORDER BY r.id DESC', [(int) $page['id']]) as $rv) {
             $k = $strip($rv['blocks_json']);
             if (isset($seen[$k])) continue;   // gleicher Inhalt wie ein neuerer Stand
             $seen[$k] = true;
-            $out[] = ['id' => (int) $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), ...self::when($rv['created_at']),
-                'note' => (string) ($rv['note'] ?? '') ?: __('Gespeichert'), 'user' => (string) ($rv['email'] ?? ''),
-                'preview' => url('/admin/pages/' . (int) $page['id'] . '/versions/' . (int) $rv['id'] . '/vorschau')];
+            $out[] = ['id' => (int) $rv['id'], 'json' => (string) $rv['blocks_json'], 'created_at' => $rv['created_at'], 'note' => (string) ($rv['note'] ?? ''), 'email' => (string) ($rv['email'] ?? '')];
         }
-        return Response::json(['ok' => true, 'kind' => 'page', 'title' => (string) $page['title'], 'versions' => $out, 'texts' => self::texts(), 'today' => Format::admin()->date(now(), 'long'),
+        return $out;
+    }
+
+    public function pageVersions(Request $r, string $id): Response
+    {
+        $page = $this->page($r, $id);
+        $f = Format::admin();
+        $states = self::pageStates($page);
+        $out = [];
+        foreach ($states as $i => $st) {
+            $older = $states[$i + 1] ?? null;
+            $d = self::blockDiff(self::blocksOf($st['json']), $older ? self::blocksOf($older['json']) : null);
+            $base = '/admin/pages/' . (int) $page['id'] . '/versions/' . $st['id'] . '/vorschau';
+            $out[] = ['id' => $st['id'], 'now' => $st['id'] === 0, 'label' => $st['id'] === 0 ? __('Jetzt') : $f->relative($st['created_at']), ...self::when($st['created_at']),
+                'note' => $st['id'] === 0
+                    ? ($page['status'] === 'published' && ($page['content_draft'] ?? null) !== null && $page['content_draft'] !== $page['content_published'] ? __('Entwurf mit unveröffentlichten Änderungen') : __('Aktueller Stand'))
+                    : ($st['note'] ?: __('Gespeichert')),
+                'user' => $st['email'],
+                'preview' => url($base), 'preview_mark' => url($base) . '?mark=1',
+                'diff' => ['new' => $d['new'], 'changed' => $d['changed'], 'removed' => $d['removed'], 'first' => $older === null]];
+        }
+        $live = $page['content_published'] !== null ? url('/admin/pages/' . (int) $page['id'] . '/vorschau') . '?stand=live' : url('/admin/pages/' . (int) $page['id'] . '/versions/0/vorschau');
+        return Response::json(['ok' => true, 'kind' => 'page', 'title' => (string) $page['title'], 'versions' => $out, 'live' => $live, 'has_live' => $page['content_published'] !== null, 'texts' => self::texts(), 'today' => Format::admin()->date(now(), 'long'),
             'restore' => url('/admin/pages/' . (int) $page['id'] . '/restore/{rev}'), 'can_restore' => can('pages.edit')]);
     }
 
+    /** HTML der Seite in einem Stand (rev 0 = jetzt); ?mark=1 markiert neue/geänderte Blöcke gegenüber dem vorherigen Stand */
     public function pagePreview(Request $r, string $id, string $rev): Response
     {
         $page = $this->page($r, $id);
         if (($page['type'] ?? 'page') === 'template' && !\Core\PageTemplates::isTemplatePage($page) && !NotFound::isPage($page)) throw new HttpException(404);
-        $json = app()->db->fetchValue('SELECT blocks_json FROM revisions WHERE id = ? AND page_id = ?', [(int) $rev, (int) $page['id']]) ?? throw new HttpException(404);
+        $states = self::pageStates($page);
+        $at = null;
+        foreach ($states as $i => $st) if ($st['id'] === (int) $rev) { $at = $i; break; }
+        if ($at === null) {
+            // Stand ist nicht in der Liste (gleicher Inhalt wie ein neuerer) – trotzdem direkt aus der Tabelle zeigen
+            $json = app()->db->fetchValue('SELECT blocks_json FROM revisions WHERE id = ? AND page_id = ?', [(int) $rev, (int) $page['id']]) ?? throw new HttpException(404);
+            $states = [['id' => (int) $rev, 'json' => (string) $json]];
+            $at = 0;
+        }
+        \Core\Theme::$vdiff = $r->str('mark') === '1' && isset($states[$at + 1])
+            ? self::blockDiff(self::blocksOf($states[$at]['json']), self::blocksOf($states[$at + 1]['json']))['marks'] : [];
         $site = new \Core\Http\Controllers\SiteController();
-        return $site->respond($site->previewHtml(['content_draft' => (string) $json] + $page, true), true)
-            ->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'no-store, private');
+        try {
+            $html = $site->previewHtml(['content_draft' => $states[$at]['json']] + $page, true);
+        } finally {
+            \Core\Theme::$vdiff = [];
+        }
+        return $site->respond($html, true)->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'no-store, private');
     }
 
     // ------------------------------------------------------------------ Einträge
@@ -118,16 +185,25 @@ final class VersionsController extends AdminController
     {
         [$t, $e] = $this->entry($r, $handle, $id);
         $f = Format::admin();
+        // Stände, neueste zuerst; gleiche Inhalte nur einmal
         $now = Revisions::snapshot($t, $e);
         $key = fn(array $d) => json_encode($d, JSON_UNESCAPED_UNICODE);
-        $fields = function (array $data) use ($t, $e, $now): array {
+        $states = [['id' => 0, 'data' => $now, 'created_at' => $e['updated_at'] ?? null, 'note' => __('Aktueller Stand'), 'user_email' => '', 'status' => (string) ($e['status'] ?? '')]];
+        $seen = [$key($now) => true];
+        foreach (Revisions::list($t, (int) $e['id']) as $rv) {
+            if (isset($seen[$key($rv['data'])])) continue;
+            $seen[$key($rv['data'])] = true;
+            $states[] = $rv;
+        }
+        // Felder eines Stands; changed = anders als im vorherigen (älteren) Stand
+        $fields = function (array $data, ?array $base) use ($t, $e): array {
             $row = ['id' => (int) $e['id']] + $data + $e;
             $out = [];
             foreach ($t['fields'] as $fd) {
                 $n = $fd['name'];
                 $v = $data[$n] ?? null;
                 $empty = $v === null || $v === '' || $v === [];
-                $changed = json_encode($v) !== json_encode($now[$n] ?? null);
+                $changed = $base !== null && json_encode($v) !== json_encode($base[$n] ?? null);
                 if ($empty && !$changed) continue;
                 try {
                     $html = $empty ? '' : Entries::html($t, $row, $n, ['sizes' => '480px']);
@@ -138,25 +214,16 @@ final class VersionsController extends AdminController
             }
             return $out;
         };
-        $out = [['id' => 0, 'now' => true, 'label' => __('Jetzt'), ...self::when($e['updated_at'] ?? null), 'note' => __('Aktueller Stand'), 'user' => '',
-            'status' => (string) ($e['status'] ?? ''), 'title' => Entries::title($t, $e), 'fields' => $fields($now), '_d' => $now]];
-        $seen = [$key($now) => true];
-        foreach (Revisions::list($t, (int) $e['id']) as $rv) {
-            $k = $key($rv['data']);
-            if (isset($seen[$k])) continue;
-            $seen[$k] = true;
-            $out[] = ['id' => $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), ...self::when($rv['created_at']),
-                'note' => $rv['note'] ?: __('Gespeichert'), 'user' => $rv['user_email'], 'status' => $rv['status'],
-                'title' => Entries::title($t, ['id' => (int) $e['id']] + $rv['data'] + $e), 'fields' => $fields($rv['data']), '_d' => $rv['data']];
+        $out = [];
+        foreach ($states as $i => $st) {
+            $base = $states[$i + 1]['data'] ?? null;
+            $fl = $fields($st['data'], $base);
+            $out[] = ['id' => (int) $st['id'], 'now' => (int) $st['id'] === 0, 'label' => (int) $st['id'] === 0 ? __('Jetzt') : $f->relative($st['created_at']), ...self::when($st['created_at']),
+                'note' => (string) ($st['note'] ?? '') ?: __('Gespeichert'), 'user' => (string) ($st['user_email'] ?? ''), 'status' => (string) ($st['status'] ?? ''),
+                'title' => Entries::title($t, ['id' => (int) $e['id']] + $st['data'] + $e), 'fields' => $fl,
+                'changes' => array_values(array_map(fn($x) => $x['label'], array_filter($fl, fn($x) => $x['changed']))),
+                'diff' => ['first' => $base === null]];
         }
-        // Je Stand: welche Felder sich gegenüber dem nächstälteren geändert haben (Karte in der Zeitleiste: „Titel, Bild“)
-        foreach ($out as $i => &$v) {
-            $older = $out[$i + 1]['_d'] ?? null;
-            $v['changes'] = $older === null ? [] : array_values(array_map(fn($fd) => (string) ($fd['label'] ?? $fd['name']),
-                array_filter($t['fields'], fn($fd) => json_encode($v['_d'][$fd['name']] ?? null) !== json_encode($older[$fd['name']] ?? null))));
-        }
-        unset($v);
-        $out = array_map(function ($v) { unset($v['_d']); return $v; }, $out);
         return Response::json(['ok' => true, 'kind' => 'entry', 'title' => Entries::title($t, $e), 'table' => (string) $t['name'], 'versions' => $out, 'texts' => self::texts(), 'today' => Format::admin()->date(now(), 'long'),
             'restore' => url('/admin/api/data/' . $t['handle'] . '/' . (int) $e['id'] . '/versions/{rev}/restore'), 'can_restore' => true]);
     }

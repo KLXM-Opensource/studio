@@ -66,6 +66,9 @@ export async function open({ endpoint, csrf = '' } = {}) {
   const V = data.versions || [];
   const isEntry = data.kind === 'entry';
   let cur = V.length > 1 ? 1 : 0, busy = false, mobile = false;
+  let mark = true;   // Änderungen hervorheben (gegenüber dem vorherigen Stand) – gemerkt je Browser
+  let cmp = false;   // Gegenüberstellen: links live (Seite) bzw. jetzt (Eintrag), rechts der gewählte Stand
+  try { mark = localStorage.getItem('cms-versions-mark') !== '0'; cmp = localStorage.getItem('cms-versions-cmp') === '1'; } catch { /* privates Fenster */ }
 
   vs.querySelector('#vs-t').textContent = L('title');
   vs.querySelector('[data-close]').setAttribute('aria-label', L('close'));
@@ -81,8 +84,12 @@ export async function open({ endpoint, csrf = '' } = {}) {
   });
   const card = i => {
     const v = V[i];
-    const chips = isEntry && v.changes?.length
-      ? `<span class="vs-chips" aria-label="${esc(L('changes', { list: v.changes.join(', ') }))}">${v.changes.slice(0, 4).map(c => `<span class="vs-chip">${esc(c)}</span>`).join('')}${v.changes.length > 4 ? `<span class="vs-chip">+${v.changes.length - 4}</span>` : ''}</span>`
+    const d = v.diff || {};
+    const list = isEntry ? (v.changes || []).map(c => [c, ''])
+      : [...(d.changed ? [[L('blocksChanged', { n: d.changed }), 'chg']] : []), ...(d.new ? [[L('blocksNew', { n: d.new }), 'new']] : []),
+        ...(d.removed?.length ? [[L('blocksRemoved', { list: d.removed.length }), 'del']] : [])];
+    const chips = list.length
+      ? `<span class="vs-chips">${list.slice(0, 4).map(([c, k]) => `<span class="vs-chip${k ? ' vs-chip--' + k : ''}">${esc(c)}</span>`).join('')}${list.length > 4 ? `<span class="vs-chip">+${list.length - 4}</span>` : ''}</span>`
       : '';
     return `<li class="vs-item${v.now ? ' is-now' : ''}" role="presentation"><button type="button" class="vs-card" role="option" data-i="${i}" aria-selected="false" tabindex="-1">
       <span class="vs-card__top"><span class="vs-card__time">${esc(v.time)}</span><span class="vs-card__ago">${esc(v.now ? '' : v.ago)}</span>${v.now ? `<span class="vs-badge">${esc(L('now'))}</span>` : ''}</span>
@@ -98,6 +105,8 @@ export async function open({ endpoint, csrf = '' } = {}) {
       <div class="vs-pv__bar">
         <div><p class="vs-pv__t" data-pt></p><span class="vs-pv__s" data-ps></span></div>
         <div class="vs-pv__tools">
+          <label class="vs-only"><input type="checkbox" role="switch" data-cmp${cmp ? ' checked' : ''}> ${esc(L('compare'))}</label>
+          <label class="vs-only vs-only--mark"><input type="checkbox" role="switch" data-mark${mark ? ' checked' : ''}> ${esc(L('highlight'))}</label>
           ${isEntry ? `<label class="vs-only"><input type="checkbox" data-only> ${esc(L('onlyChanges'))}</label>`
             : `<span class="vs-seg" role="group" aria-label="${esc(L('preview'))}"><button type="button" data-dev="desktop" aria-pressed="true">${esc(L('desktop'))}</button><button type="button" data-dev="mobile" aria-pressed="false">${esc(L('mobile'))}</button></span>`}
           <button type="button" class="vs-btn" data-older>${SVG.down}<span>${esc(L('older'))}</span></button>
@@ -108,7 +117,11 @@ export async function open({ endpoint, csrf = '' } = {}) {
       <div class="vs-confirm" data-confirm hidden><p>${esc(isEntry ? L('askEntry') : L('askPage'))}</p>
         <button type="button" class="vs-btn" data-no>${esc(L('back'))}</button><button type="button" class="vs-btn vs-btn--primary" data-yes>${esc(L('yes'))}</button></div>
       <p class="vs-msg" data-msg role="alert" hidden></p>
-      <div class="vs-frame" data-frame><div class="vs-win" data-win></div><p class="vs-load" data-load hidden>${esc(L('loading'))}</p></div>
+      <p class="vs-diff" data-diff aria-live="polite" hidden></p>
+      <div class="vs-frame" data-frame>
+        <div class="vs-pane" data-pane-live hidden><p class="vs-pane__h" data-live-h></p><div class="vs-win" data-win-live></div></div>
+        <div class="vs-pane"><p class="vs-pane__h" data-sel-h hidden></p><div class="vs-win" data-win></div></div>
+        <p class="vs-load" data-load hidden>${esc(L('loading'))}</p></div>
     </section>`);
 
   const cards = [...vs.querySelectorAll('.vs-card')];
@@ -116,23 +129,96 @@ export async function open({ endpoint, csrf = '' } = {}) {
   const restoreBtn = vs.querySelector('[data-restore]');
   let iframe = null;
 
-  const renderEntry = v => {
+  const renderEntry = (v, target = win, marked = mark) => {
     const status = v.status === 'draft' ? `<span class="vs-status vs-status--draft">${esc(L('draft'))}</span>` : v.status ? `<span class="vs-status">${esc(L('published'))}</span>` : '';
-    win.innerHTML = `<div class="vs-scroll"><div class="vs-entry"><h2 class="vs-entry__t">${esc(v.title || data.title)}</h2>
+    target.classList.toggle('vs-mark', marked);
+    target.innerHTML = `<div class="vs-scroll"><div class="vs-entry"><h2 class="vs-entry__t">${esc(v.title || data.title)}</h2>
       <p class="vs-entry__m">${status}${esc(v.at)}${v.user ? ' · ' + esc(v.user) : ''}</p>
       <dl class="vs-fields">${(v.fields || []).map(f => `<div class="vs-f${f.changed ? ' is-changed' : ''}${f.empty ? ' is-empty' : ''}"><dt data-changed="${esc(L('changed'))}">${esc(f.label)}</dt><dd>${f.empty ? esc(L('empty')) : f.html}</dd></div>`).join('') || `<p>${esc(L('noFields'))}</p>`}</dl></div></div>`;
   };
   const renderPage = v => {
     if (!iframe) {
       iframe = document.createElement('iframe');
-      // Vorschau immer oben beginnen (Kits mit sanftem Scrollen/Ankern würden sonst mitten auf der Seite starten)
-      iframe.addEventListener('load', () => { load.hidden = true; try { iframe.contentWindow.scrollTo({ top: 0, behavior: 'instant' }); } catch { /* */ } });
+      // Vorschau oben beginnen (Kits mit sanftem Scrollen/Ankern würden sonst mitten auf der Seite starten); markierte Blöcke hervorheben
+      iframe.addEventListener('load', () => {
+        load.hidden = true;
+        try { iframe.contentWindow.scrollTo({ top: 0, behavior: 'instant' }); decorate(iframe.contentDocument); } catch { /* */ }
+        if (liveFrame) couple(iframe, liveFrame);
+      });
       win.append(iframe);
     }
     iframe.title = (v.now ? L('now') : v.at) + ' – ' + data.title;
     load.hidden = false;
-    iframe.src = v.preview;
+    iframe.src = mark && !v.diff?.first ? v.preview_mark : v.preview;
   };
+  // Gegenüberstellen: links live (Seite: veröffentlichte Fassung) bzw. jetzt (Eintrag) – einmal geladen, Scrollen gekoppelt
+  const paneLive = vs.querySelector('[data-pane-live]'), winLive = vs.querySelector('[data-win-live]');
+  let liveFrame = null, syncing = false;
+  const couple = (a, b) => {
+    try {
+      const wa = a.contentWindow;
+      wa.addEventListener('scroll', () => {
+        if (syncing || !cmp) return;
+        const da = a.contentDocument.scrollingElement, db = b.contentDocument?.scrollingElement;
+        if (!da || !db) return;
+        syncing = true;
+        db.scrollTop = (da.scrollTop / Math.max(1, da.scrollHeight - da.clientHeight)) * (db.scrollHeight - db.clientHeight);
+        requestAnimationFrame(() => { syncing = false; });
+      }, { passive: true });
+    } catch { /* */ }
+  };
+  function renderCompare() {
+    frame.classList.toggle('is-cmp', cmp);
+    paneLive.hidden = !cmp;
+    vs.querySelector('[data-sel-h]').hidden = !cmp;
+    if (!cmp) return;
+    vs.querySelector('[data-live-h]').textContent = isEntry ? L('now') : (data.has_live ? L('live') : L('liveDraft'));
+    vs.querySelector('[data-sel-h]').textContent = L('selected') + ' · ' + (V[cur].now ? L('now') : V[cur].at);
+    if (isEntry) { renderEntry(V[0], winLive, false); return; }
+    if (!liveFrame) {
+      liveFrame = document.createElement('iframe');
+      liveFrame.title = L('live') + ' – ' + data.title;
+      liveFrame.addEventListener('load', () => {
+        try { liveFrame.contentWindow.scrollTo({ top: 0, behavior: 'instant' }); } catch { /* */ }
+        couple(liveFrame, iframe); if (iframe) couple(iframe, liveFrame);
+      });
+      liveFrame.src = data.live;
+      winLive.append(liveFrame);
+    }
+  }
+
+  // Blöcke mit data-vdiff (Admin\VersionsController, ?mark=1): farbiger Rahmen + Abzeichen „Neu“/„Geändert“ (CSSOM – CSP-tauglich)
+  const COLORS = { new: '#1F8A4C', changed: '#C2410C' };
+  function decorate(doc) {
+    if (!doc || !mark) return;
+    const els = [...doc.querySelectorAll('[data-vdiff]')];
+    els.forEach(el => {
+      const kind = el.dataset.vdiff === 'new' ? 'new' : 'changed', c = COLORS[kind];
+      el.style.setProperty('outline', `3px solid ${c}`, 'important');
+      el.style.setProperty('outline-offset', '-3px', 'important');
+      if (doc.defaultView.getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      const b = doc.createElement('span');
+      b.textContent = kind === 'new' ? L('markNew') : L('markChanged');
+      b.setAttribute('aria-hidden', 'true');
+      Object.assign(b.style, { position: 'absolute', top: '10px', left: '10px', zIndex: '60', padding: '3px 10px', borderRadius: '999px',
+        background: c, color: '#fff', font: '700 12px/1.3 system-ui,-apple-system,sans-serif', boxShadow: '0 4px 12px rgba(0,0,0,.25)', pointerEvents: 'none' });
+      el.prepend(b);
+    });
+    els[0]?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }
+  // Zeile über der Vorschau: was sich gegenüber dem vorherigen Stand geändert hat
+  function diffLine(v) {
+    const el = vs.querySelector('[data-diff]'), d = v.diff || {};
+    if (!mark) { el.hidden = true; return; }
+    let t;
+    if (d.first) t = L('firstState');
+    else if (isEntry) t = v.changes?.length ? L('diffHint') + ' ' + L('changes', { list: v.changes.join(', ') }) : L('noDiff');
+    else {
+      const parts = [d.changed ? L('blocksChanged', { n: d.changed }) : '', d.new ? L('blocksNew', { n: d.new }) : '', d.removed?.length ? L('blocksRemoved', { list: d.removed.join(', ') }) : ''].filter(Boolean);
+      t = parts.length ? L('diffHint') + ' ' + parts.join(' · ') : L('noDiff');
+    }
+    el.textContent = t; el.hidden = false;
+  }
 
   const select = (i, focus = false) => {
     i = Math.max(0, Math.min(V.length - 1, i));
@@ -149,6 +235,8 @@ export async function open({ endpoint, csrf = '' } = {}) {
     restoreBtn.title = v.now ? L('isNow') : '';
     ask(false); msg('');
     if (isEntry) renderEntry(v); else renderPage(v);
+    diffLine(v);
+    renderCompare();
   };
 
   // Rückfrage und Wiederherstellen
@@ -182,6 +270,16 @@ export async function open({ endpoint, csrf = '' } = {}) {
   vs.querySelector('[data-newer]').addEventListener('click', () => select(cur - 1));
   vs.querySelector('[data-tl]').addEventListener('click', e => { const c = e.target.closest('[data-i]'); if (c) select(+c.dataset.i, true); });
   vs.querySelector('[data-only]')?.addEventListener('change', e => win.classList.toggle('vs-onlychg', e.target.checked));
+  vs.querySelector('[data-cmp]').addEventListener('change', e => {
+    cmp = e.target.checked;
+    try { localStorage.setItem('cms-versions-cmp', cmp ? '1' : '0'); } catch { /* */ }
+    renderCompare();
+  });
+  vs.querySelector('[data-mark]').addEventListener('change', e => {
+    mark = e.target.checked;
+    try { localStorage.setItem('cms-versions-mark', mark ? '1' : '0'); } catch { /* */ }
+    select(cur);   // neu zeichnen (Seiten: Vorschau mit bzw. ohne Markierung)
+  });
   vs.querySelectorAll('[data-dev]').forEach(b => b.addEventListener('click', () => {
     mobile = b.dataset.dev === 'mobile';
     vs.querySelectorAll('[data-dev]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));

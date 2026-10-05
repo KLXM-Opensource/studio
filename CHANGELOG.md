@@ -13,6 +13,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Ansicht „Versionen“ (`resources/js/versions.mjs`, `Admin\VersionsController`): links Zeitleiste mit gestapelten Karten (nach Tagen,
   mit geänderten Feldern), rechts die Vorschau des Stands – Seiten als echte Seite (Desktop/Mobil), Einträge als Felder mit markierten
   Änderungen; Wiederherstellen mit Rückfrage. Aufruf: Seiteneinstellungen → Versionen, Eintrag → „Versionen“, Website-Menü ⋯ → „Versionen“.
+- „Änderungen hervorheben“: Seiten markieren neue/geänderte Blöcke gegenüber dem vorherigen Stand (`Theme::$vdiff` → `data-vdiff`,
+  Vorschau `?mark=1`), entfernte Blöcke stehen in der Hinweiszeile; Einträge markieren geänderte Felder. „Gegenüberstellen“: links live
+  (Seite: veröffentlichte Fassung) bzw. jetzt (Eintrag), rechts der gewählte Stand – Seiten scrollen gekoppelt.
 - Gemeinsame Meldungen (`resources/js/_toast.js`, `CMSAdmin.toast` / `toastNext` – Meldung nach dem Neuladen) für Verwaltung und Website;
   Mediathek, Werkzeuge und Inline-Bearbeitung nutzen sie.
 - „Neue Seite“: auf Detailseiten von Einträgen ist die Seite vorgewählt, unter deren Adresse sie liegen.

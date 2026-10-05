@@ -33,7 +33,7 @@
     wird zusätzlich der bisherige Stand gesichert (die letzten <?= (int) app()->config->get('revisions', 20) ?> Stände je Eintrag).
     <b>Versionen</b> oben im Eintrag bzw. auf der Detailseite <b>⋯ → Versionen</b> zeigt links die Stände als Zeitleiste (mit den jeweils geänderten Feldern), rechts den gewählten Stand;
     geänderte Felder sind markiert, „Nur Änderungen“ blendet den Rest aus. <b>Wiederherstellen</b> setzt die Felder sofort auf den
-    gewählten Stand (der Status bleibt) – der bisherige Stand bleibt als Version erhalten.</p>
+    gewählten Stand (der Status bleibt) – der bisherige Stand bleibt als Version erhalten. <b>Änderungen hervorheben</b> markiert die Felder, die sich gegenüber dem vorherigen Stand geändert haben; <b>Gegenüberstellen</b> zeigt links den jetzigen Eintrag.</p>
 
   <h3>3. Auf der Website ausgeben</h3>
   <ol class="doc-steps">
