@@ -1448,9 +1448,15 @@ function initInlineCrop() {
     // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) und die Leiste des Blocks (editor.js BarPlace)
     // freilassen: links daneben, bei Platzmangel darunter
     const blockBar = target.closest('.cms-block')?.querySelector(':scope>.cms-block__bar');
-    const busy = [...d.querySelectorAll('.cms-entry-pencil, .cms-target-edit'),   // auch „✎ Bearbeiten“ an Karten/Kacheln (Core\TargetEdit)
-       ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [blockBar] : [])]
-      .map(p => p.getBoundingClientRect());
+    // Leiste des Blocks: nur die sichtbaren Knöpfe zählen (das Element selbst ist so breit wie der Block)
+    const barRect = el => {
+      const parts = [...(el.shadowRoot?.children || el.children)].map(c => c.getBoundingClientRect()).filter(r => r.width && r.height);
+      if (!parts.length) return el.getBoundingClientRect();
+      const l = Math.min(...parts.map(r => r.left)), t = Math.min(...parts.map(r => r.top)), rr = Math.max(...parts.map(r => r.right)), b = Math.max(...parts.map(r => r.bottom));
+      return { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t };
+    };
+    const busy = [...[...d.querySelectorAll('.cms-entry-pencil, .cms-target-edit')].map(p => p.getBoundingClientRect()),   // auch „✎ Bearbeiten“ an Karten/Kacheln (Core\TargetEdit)
+       ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [barRect(blockBar)] : [])];
     for (let i = 0; i < 3; i++) {
       const pen = busy.find(p => p.width && p.left < right && p.right > right - bar.offsetWidth && p.top < top + bar.offsetHeight && p.bottom > top);
       if (!pen) break;
@@ -1462,7 +1468,9 @@ function initInlineCrop() {
     bar.style.top = (top + scrollY) + 'px';
   };
   const show = im => {
-    clearTimeout(hideT); leaving = false; target = im;
+    clearTimeout(hideT); leaving = false;
+    if (target !== im) { if (target) ro.unobserve(target); ro.observe(im); }
+    target = im;
     cropBtn.hidden = !im.dataset.ratio;
     fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
     fitBtn.hidden = fxBtn.hidden || !window.CMSEditor?.fit;
@@ -1507,6 +1515,14 @@ function initInlineCrop() {
   // Tastatur: Knöpfe erscheinen, sobald der Fokus in einem Block mit Bild liegt (Tab führt dann in die Leiste)
   bar.addEventListener('focusout', e => { if (!bar.contains(e.relatedTarget)) hideT = setTimeout(hide, 250); });
   addEventListener('scroll', () => { if (target && !bar.hidden) place(); }, { passive: true });
+  // Breite ändert sich (Seitenleiste „Bearbeiten“ öffnet/schließt, Fenster, Übergänge): neu setzen – sonst bleibt die Leiste stehen,
+  // während die Leiste des Blocks mitwandert, und beide überlappen
+  let rq = 0;
+  const replace = () => { if (rq || !target || bar.hidden) return; rq = requestAnimationFrame(() => { rq = 0; if (target?.isConnected && !bar.hidden) place(); }); };
+  const ro = new ResizeObserver(replace);
+  ro.observe(d.documentElement);
+  addEventListener('resize', replace);
+  d.addEventListener('transitionend', replace, true);
   cropBtn.addEventListener('click', e => {
     e.preventDefault(); e.stopPropagation();
     if (!target) return;
