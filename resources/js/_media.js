@@ -69,6 +69,9 @@ const usedMsg = (name, used) => t('„{name}“ wird noch verwendet', { name }) 
   + used.slice(0, 6).map(u => '• ' + u.label).join('\n') + (used.length > 6 ? '\n' + t('und {n} weitere', { n: used.length - 6 }) : '')
   + '\n' + t('Bitte zuerst dort entfernen – oder „Ersetzen“ nutzen, dann bleiben alle Verwendungen erhalten.');
 
+/** Datei-Details laden – schlägt das fehl, sichtbare Meldung statt stillem Abbruch (nur Konsole) */
+const loadFailed = ex => toast(t('Die Datei konnte nicht geladen werden ({msg}). Bitte die Seite neu laden – bleibt der Fehler, bitte melden.', { msg: ex && ex.message ? ex.message : '?' }));
+
 async function http(url, opt = {}) {
   if (POOL) {
     if (opt.json !== undefined) opt = { ...opt, json: { ...opt.json, pool: POOL } };
@@ -893,7 +896,8 @@ class Finder {
   }
   async deleteSel() {
     const ids = [...this.sel];
-    const used = ids.length === 1 ? (await api.detail(ids[0])).usages : [];
+    let used = [];
+    if (ids.length === 1) { try { used = (await api.detail(ids[0])).usages; } catch (ex) { loadFailed(ex); return; } }
     // Verwendete Dateien lassen sich nicht löschen (Server prüft ebenso, Media::deleteBlocked)
     if (used.length) { await ask({ title: usedMsg(this.byId(ids[0]).display, used), ok: t('Verstanden'), danger: false, cancel: false }); return; }
     const msg = ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien bleiben erhalten.`;
@@ -1008,7 +1012,12 @@ class Finder {
       return;
     }
     if (ids.length > 1) return this.renderMulti(ids);
-    const m = await api.detail(ids[0]);
+    let m;
+    try { m = await api.detail(ids[0]); } catch (ex) {
+      if (token !== this._infoToken) return;
+      this.$info.innerHTML = '<p class="fx-i-hint" role="alert">' + esc(t('Die Datei konnte nicht geladen werden.')) + '</p>';
+      loadFailed(ex); return;
+    }
     if (token !== this._infoToken) return;           // inzwischen andere Auswahl
     this.renderSingle(m);
   }
@@ -1135,7 +1144,8 @@ class Finder {
 
   /** Großer Bearbeiten-Dialog: Vorschau mit Fokuspunkt + Zuschnitte links, Felder rechts */
   async edit(id) {
-    const m = await api.detail(id);
+    let m;
+    try { m = await api.detail(id); } catch (ex) { loadFailed(ex); return; }
     const isImg = m.kind === 'image', cols = this.meta.collections, ratios = this.meta.ratios;
     const dlg = inBox('media-detail', '<dialog id="media-detail" class="adm-dialog adm-dialog--wide md" aria-labelledby="md-title"></dialog>');
     let focus = { ...m.focus }, tags = [...m.tags], dirty = false;

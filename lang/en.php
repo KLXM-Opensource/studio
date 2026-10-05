@@ -6068,4 +6068,6 @@ return [
     '„{name}“ wird noch verwendet' => '“{name}” is still in use',
     '„{name}“ wird noch verwendet: {where}. Bitte zuerst dort entfernen – oder die Datei ersetzen (Verwendungen bleiben erhalten).' => '“{name}” is still in use: {where}. Please remove it there first – or replace the file (usages are kept).',
     'nicht erreichbar – Verwendung unbekannt' => 'not reachable – usage unknown',
+    'Die Datei konnte nicht geladen werden ({msg}). Bitte die Seite neu laden – bleibt der Fehler, bitte melden.' => 'The file could not be loaded ({msg}). Please reload the page – if the error persists, please report it.',
+    'Die Datei konnte nicht geladen werden.' => 'The file could not be loaded.',
 ];
