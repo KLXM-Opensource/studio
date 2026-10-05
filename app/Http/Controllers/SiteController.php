@@ -199,7 +199,7 @@ final class SiteController
                 : ($ctx ? Seo::forEntry($page, $ctx['table'], $ctx['entry']) : Seo::forPage($page)),
             'editor' => $editor,
             'extraCss' => $theme->conditionalCss($app->editing ? null : self::types($blocks)),
-            'extraJs' => $app->editing ? [] : $theme->conditionalJs(self::types($blocks)),
+            'extraJs' => $app->editing ? $theme->editorJs() : $theme->conditionalJs(self::types($blocks)),
             'toolbar' => $loggedIn ? ['page' => $page, 'editing' => $app->editing, 'dirty' => Pages::hasUnpublished($page), 'live' => $live] : null,
         ]);
 

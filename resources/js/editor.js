@@ -813,6 +813,14 @@ function makeTool(type, def) {
         cfg.glossary && t.noGlossary && `<span class="cms-flag">${CMSAdmin.esc(CMSAdmin.t('ohne Glossar'))}</span>`,
       ].filter(Boolean).join('');
       layoutRows();
+      // Kits/Erweiterungen: Block ist (neu) gezeichnet – Skripte für Videos, Animationen usw. können ihn jetzt einrichten
+      // (die Vorschau wird nach dem Laden der Seite eingesetzt, Kit-Skripte sind dann schon gelaufen)
+      // Erste Vorschau entsteht, bevor der Block im Dokument hängt – Ereignis dann senden, sobald er eingehängt ist
+      const fire = (n = 0) => {
+        if (pv.isConnected) pv.dispatchEvent(new CustomEvent('cms:block-preview', { bubbles: true, detail: { type: this.type, id: this.blockId } }));
+        else if (n < 120) requestAnimationFrame(() => fire(n + 1));
+      };
+      fire();
       // Direkt editierbare Texte: plain = nur Text, rich/inline = mit schwebender Formatierungsleiste
       $$('[data-edit]', pv).forEach(n => {
         const mode = n.dataset.editMode || 'plain';

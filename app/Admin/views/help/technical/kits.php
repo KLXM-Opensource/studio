@@ -296,6 +296,10 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
   &lt;?php endforeach; ?&gt;
 &lt;/div&gt;</code></pre>
   <p>Der Block erscheint automatisch im Editor (Feldformular, Live-Vorschau, Abschnitts-Optionen, Drag &amp; Drop), in der REST-API und im MCP-Server.</p>
+  <p><b>Skripte im Seiten-Editor (<code>editor_js</code>):</b> Beim Bearbeiten lädt der Editor keine Kit-Skripte. Was dort trotzdem laufen
+    soll (Videoschleifen, Animationen), steht in <code>theme.php</code> unter <code>'editor_js' =&gt; ['js/b-loop.js', …]</code> – das Layout gibt es
+    über <code>$extraJs</code> aus. Weil der Editor Blöcke nach dem Laden einsetzt und bei Änderungen neu zeichnet, richten diese Skripte
+    Blöcke beim Ereignis <code>cms:block-preview</code> ein (<code>e.target</code> = Vorschau des Blocks).</p>
   <p><b>Bedingte Felder (<code>show_if</code>):</b> Ein Feld erscheint nur, wenn andere Felder bestimmte Werte haben – auch in
     Wiederholgruppen (Felder derselben Zeile). <code>'show_if' =&gt; ['kind' =&gt; ['image', '']]</code> (mehrere Felder = alle müssen passen;
     <code>'*'</code> = ausgefüllt, <code>''</code> = leer), <code>'/variant'</code> = Feld des Blocks statt der eigenen Zeile, eine Liste

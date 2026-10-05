@@ -616,6 +616,20 @@ final class Theme
         return $out;
     }
 
+    /**
+     * Skripte, die auch im Seiten-Editor laufen dürfen (theme.php → 'editor_js' => ['js/b-loop.js', …]). Sonst lädt der Editor
+     * bewusst keine Kit-Skripte (sie könnten Klicks und Eingaben abfangen). Gedacht für Videos, Animationen u. Ä., die Blöcke
+     * auch nach dem Neuzeichnen einrichten (Ereignis cms:block-preview).
+     */
+    public function editorJs(): array
+    {
+        $out = [];
+        foreach ((array) ($this->def['editor_js'] ?? []) as $file) {
+            if (is_string($file) && str_ends_with($file, '.js') && !str_contains($file, '..')) $out[] = $this->asset($file);
+        }
+        return $out;
+    }
+
     /** Navigation aus Blöcken der Startseite mit Tune „showInNav“ */
     public function navigation(): array
     {

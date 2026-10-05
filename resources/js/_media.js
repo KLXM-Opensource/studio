@@ -1456,12 +1456,12 @@ function initInlineCrop() {
       return { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t };
     };
     const busy = [...[...d.querySelectorAll('.cms-entry-pencil, .cms-target-edit')].map(p => p.getBoundingClientRect()),   // auch „✎ Bearbeiten“ an Karten/Kacheln (Core\TargetEdit)
-       ...(blockBar && +getComputedStyle(blockBar).opacity > 0 && !blockBar.classList.contains('is-yield') ? [barRect(blockBar)] : [])];
+       // Platz der Blockleiste immer freihalten – auch wenn sie gerade unsichtbar ist (erscheint bei Hover/Auswahl), sonst springt die Bildleiste
+       ...(blockBar && !blockBar.classList.contains('is-yield') ? [barRect(blockBar)] : [])];
     for (let i = 0; i < 3; i++) {
       const pen = busy.find(p => p.width && p.left < right && p.right > right - bar.offsetWidth && p.top < top + bar.offsetHeight && p.bottom > top);
       if (!pen) break;
-      if (pen.left - 8 - bar.offsetWidth >= r.left + 8) right = pen.left - 8;
-      else top = pen.bottom + 8;
+      top = pen.bottom + 8;   // nur nach unten ausweichen (seitliches Ausweichen ließ die Leiste hin- und herspringen)
     }
     bar.style.visibility = top + bar.offsetHeight > r.bottom - 8 ? 'hidden' : '';
     bar.style.left = (right + scrollX - bar.offsetWidth) + 'px';

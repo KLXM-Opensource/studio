@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Editor: Kit-Skripte für Videos/Animationen, Ereignis `cms:block-preview`
+- Kits können Skripte für den Seiten-Editor freigeben (`theme.php` → `'editor_js'`, `Theme::editorJs()`), z. B. Videoschleifen –
+  vorher liefen im Bearbeitungsmodus gar keine Kit-Skripte (Videos starteten nicht).
+- Ereignis `cms:block-preview` an der Vorschau eines Blocks, sobald sie (neu) gezeichnet und eingehängt ist.
+- Bildwerkzeuge am Bild weichen der Blockleiste immer nach unten aus (sprangen vorher zwischen links und unten).
+
 ### Editor: Seitenleiste macht die ganze Website schmaler
 - Mit offener Seitenleiste „Bearbeiten“ rücken Kopf, Inhalt und Fuß der Website (alles direkt unter `<body>` außer den Ebenen des
   Editors) zur Seite – vorher nur der Inhaltsbereich, Kopf und Fuß lagen unter der Leiste. Unter 1100 px überdeckt die Leiste weiterhin.
