@@ -274,7 +274,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-layer :focus-visible{outline:2px solid var(--adm-a,#314164);outline-offset:2px}
 
 /* Seitenleiste „Block“ (Seiten-Editor) */
-.cms-drawer{position:fixed;top:var(--cms-bar-h,48px);right:0;bottom:0;width:min(460px,100vw);overflow:auto;background:var(--adm-card);color:var(--adm-ink);border-left:1px solid var(--adm-line);box-shadow:-20px 0 60px rgba(0,0,0,.18);padding:0 22px 60px;font:400 15px/1.5 var(--adm-font);color-scheme:inherit}
+.cms-drawer{position:fixed;top:var(--cms-bar-h,48px);right:0;bottom:0;width:min(var(--cms-drawer-w,clamp(480px,40vw,720px)),100vw);container:drawer/inline-size;overflow:auto;background:var(--adm-card);color:var(--adm-ink);border-left:1px solid var(--adm-line);box-shadow:-20px 0 60px rgba(0,0,0,.18);padding:0 22px 60px;font:400 15px/1.5 var(--adm-font);color-scheme:inherit}
 .cms-drawer__head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 -22px 14px;position:sticky;top:0;background:var(--adm-card);padding:12px 22px;border-bottom:1px solid var(--adm-line);z-index:3}
 .cms-drawer__head h2{margin:0;font-size:20px;line-height:1.25;letter-spacing:-.02em;font-weight:700}
 .cms-drawer__central{padding:10px 12px;border-radius:10px;background:var(--adm-info-bg);font-size:13px;margin:0 0 14px}
@@ -475,3 +475,24 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-block__label[draggable=true]{cursor:grab}
 .cms-block__label[draggable=true]:active{cursor:grabbing}
 .cms-block__grip{margin-right:5px;opacity:.7;letter-spacing:-1px}
+
+/* Seitenleiste: Breite ziehen (Griff an der linken Kante, Pfeiltasten, Doppelklick = Standard; js/editor.js) */
+.cms-drawer__grip{position:fixed;top:var(--cms-bar-h,48px);bottom:0;right:calc(min(var(--cms-drawer-w,clamp(480px,40vw,720px)),100vw) - 5px);width:10px;z-index:5;cursor:ew-resize;touch-action:none}
+.cms-drawer__grip::after{content:"";position:absolute;left:4px;top:50%;width:2px;height:48px;margin-top:-24px;border-radius:2px;background:var(--adm-line);transition:background .15s,height .15s}
+.cms-drawer__grip:hover::after,.cms-drawer__grip:focus-visible::after,.cms-drawer.is-resizing .cms-drawer__grip::after{background:var(--adm-a);height:96px;margin-top:-48px}
+.cms-drawer__grip:focus-visible{outline:none}
+.cms-drawer.is-resizing{user-select:none}
+@media (max-width:600px){.cms-drawer__grip{display:none}}
+/* Felder passen sich der Breite der Leiste an: schmal = untereinander statt zwei gequetschte Spalten */
+@container drawer (max-width:500px){
+  .cms-drawer__form,.cms-drawer [data-drawer-tunes],.cms-drawer .adm-fields,.cms-drawer .rep-fields{grid-template-columns:minmax(0,1fr)}
+  .cms-drawer__form>.f--half,.cms-drawer__form>.f-vis>.f--half,.cms-drawer [data-drawer-tunes]>.f--half,.cms-drawer .adm-fields>.f--half,.cms-drawer .rep-fields>.f--half{grid-column:1/-1}
+}
+/* Bildfeld: Beschreibung unter das Bild, sobald daneben kein Platz ist */
+.cms-drawer .media-field{container-type:inline-size}
+@container (max-width:360px){
+  .cms-drawer .media-field-preview{flex-direction:column;align-items:flex-start;gap:6px}
+  .cms-drawer .media-field-preview img{width:100%;max-width:280px}
+}
+.cms-drawer .media-field-preview{line-height:1.4}
+.cms-drawer .media-field-preview>span,.cms-drawer .media-field-preview>small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}

@@ -6070,4 +6070,12 @@ return [
     'nicht erreichbar – Verwendung unbekannt' => 'not reachable – usage unknown',
     'Die Datei konnte nicht geladen werden ({msg}). Bitte die Seite neu laden – bleibt der Fehler, bitte melden.' => 'The file could not be loaded ({msg}). Please reload the page – if the error persists, please report it.',
     'Die Datei konnte nicht geladen werden.' => 'The file could not be loaded.',
+    'Sammlung wählen oder anlegen' => 'Choose or create a collection',
+    'Links unter „Sammlungen“ mit + anlegen, Bilder hochladen und auf die Sammlung ziehen – dann übernehmen.' => 'Create one on the left under “Collections” with +, upload images and drag them onto the collection – then apply.',
+    'Sammlung wählen' => 'Choose a collection',
+    '„{name}“ übernehmen' => 'Use “{name}”',
+    'Nur Sammlungen dieser Website' => 'Only collections of this website',
+    'Medien öffnen …' => 'Open media …',
+    'Breite der Seitenleiste ändern (Pfeiltasten, Doppelklick = Standard)' => 'Resize the sidebar (arrow keys, double-click = default)',
+    'Breite ziehen · Doppelklick = Standard' => 'Drag to resize · double-click = default',
 ];

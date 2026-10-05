@@ -476,7 +476,9 @@ final class Fields
             'iban' => '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v !== '' ? Iban::format($v) : '') . '" maxlength="42" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="DE00 0000 0000 0000 0000 00" data-iban' . $aria . '>',
             'datetime' => '<input type="datetime-local" id="' . $id . '" name="' . $inputName . '" value="' . e(str_replace(' ', 'T', $v)) . '" step="60"' . $aria . '>',
             'page' => self::renderSelect($id, $inputName, self::pageOptions(), $v, $aria, true),
-            'collection' => self::renderSelect($id, $inputName, array_column(Media::collections(), 'name', 'id'), $v, $aria, true),
+            // Sammlung: Auswahl + Mediathek öffnen (anlegen, füllen, übernehmen – CMSMedia.pickCollection, resources/js/admin.js)
+            'collection' => '<div class="col-field">' . self::renderSelect($id, $inputName, array_column(Media::collections(), 'name', 'id'), $v, $aria, true)
+                . '<button type="button" class="btn btn--small" data-col-pick>' . e(__('Medien öffnen …')) . '</button></div>',
             'datatable' => self::renderSelect($id, $inputName, array_column(!empty($f['inbox']) ? array_values(array_filter(\Core\Data\Tables::all(),
                 fn($t) => !\Core\Data\Tables::isInbox($t) || \Core\Data\Inbox::available())) : \Core\Data\Tables::content(), 'name', 'handle'), $v, $aria . ' data-datatable', !$req),
             'datafield' => self::renderDataField($id, $inputName, $v, $aria, $f),

@@ -597,7 +597,7 @@ class Finder {
       else setInfo(true);
     });
     // Höhe der Mediathek nach dem tatsächlichen Abstand oben (Hinweise, Leisten) – kein doppeltes Scrollen
-    if (this.mode === 'library') {
+    if (this.mode === 'library' && !this.opts.embedded) {
       const top = () => r.style.setProperty('--fx-top', Math.max(0, Math.round(r.getBoundingClientRect().top + scrollY)) + 'px');
       top(); addEventListener('resize', top);
     }
@@ -720,6 +720,7 @@ class Finder {
     const data = await api.list(p);
     if (seq !== this.loadSeq) return;   // inzwischen neu geladen (z. B. Prüf-Filter aus der Übersicht) – ältere Antwort verwerfen
     this.meta = data;
+    this.opts.onLoad?.(this);   // z. B. Sammlungswahl: Knopf „übernehmen“ nachführen
     this.ro = data.can_edit === false;   // z. B. Pool ohne Recht „Geteilte Medien pflegen“: nur ansehen und verwenden
     this.root.classList.toggle('is-ro', this.ro);
     this.items = this.sorted(data.items);
@@ -854,7 +855,7 @@ class Finder {
     } else this.$items.removeAttribute('aria-activedescendant');
     this.root.classList.toggle('has-sel', this.sel.size > 0);
     // Mediathek: einzeln ausgewählte Datei steht in der Adresse (#m123) – Favoriten, Neuladen, Link teilen
-    if (this.mode === 'library') {
+    if (this.mode === 'library' && !this.opts.embedded) {
       const want = this.sel.size === 1 ? '#m' + [...this.sel][0] : '', cur = /^#m\d+$/.test(location.hash) ? location.hash : '';
       if (want !== cur && (want || cur)) {
         history.replaceState(null, '', location.pathname + location.search + (want || (cur ? '' : location.hash)));
@@ -1360,6 +1361,34 @@ class Finder {
 }
 
 // ============================================================ Auswahldialog für Felder
+/**
+ * Sammlung wählen oder anlegen (Feld „Sammlung“): volle Mediathek im Dialog – Sammlung anlegen (+), Bilder hochladen und
+ * hineinziehen – dann „übernehmen“. Ergebnis {id, name} oder null. Nur Sammlungen dieser Website (nicht in geteilten Medien).
+ */
+function pickCollection(current = 0) {
+  return local(() => new Promise(resolve => {
+    const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
+    let chosen = null, f = null;
+    dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(t('Sammlung wählen oder anlegen'))}</h2>
+      <p class="fx-dhint">${esc(t('Links unter „Sammlungen“ mit + anlegen, Bilder hochladen und auf die Sammlung ziehen – dann übernehmen.'))}</p>
+      <button type="button" class="adm-btn adm-btn--primary adm-btn--small" data-take disabled>${esc(t('Sammlung wählen'))}</button>
+      <button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div><div class="fx-host"></div>`;
+    const take = $('[data-take]', dlg);
+    const sync = fx => {
+      const c = !fx.pool && fx.src.type === 'collection' ? (fx.meta?.collections || []).find(x => String(x.id) === String(fx.src.value)) : null;
+      take.disabled = !c;
+      take.textContent = c ? t('„{name}“ übernehmen', { name: c.name }) : fx.pool ? t('Nur Sammlungen dieser Website') : t('Sammlung wählen');
+      take._c = c;
+    };
+    f = new Finder($('.fx-host', dlg), { mode: 'library', embedded: true, kind: 'image', onLoad: sync });
+    if (current) { f.src = { type: 'collection', value: String(current) }; f.load(); }
+    take.onclick = () => { if (take._c) { chosen = { id: +take._c.id, name: take._c.name }; dlg.close(); } };
+    $('[data-close]', dlg).onclick = () => dlg.close();
+    dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; };
+    dlg.showModal();
+  }));
+}
+
 function pick(kind = 'image') {
   return new Promise(resolve => {
     const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
@@ -1511,7 +1540,7 @@ d.addEventListener('paste', e => {
 
 // Nach außen immer im Kontext dieser Website (local) – die Mediathek selbst nutzt api/crop intern mit ihrem Pool
 const localApi = new Proxy(api, { get: (o, k) => typeof o[k] === 'function' ? (...a) => local(() => o[k](...a)) : o[k] });
-window.CMSMedia = { pick, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
+window.CMSMedia = { pick, pickCollection, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
   adjust: o => local(() => adjustDialog(o)), fxLabel, fit: o => local(() => fitDialog({ base: BASE, ...o })), fitLabel };
 const root = $('[data-media-library]');
 if (root) {

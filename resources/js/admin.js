@@ -194,7 +194,7 @@ function initRepeaters(scope = d) {
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
         uniqueIds(added);
-        initRepeaters(added); initRte(added); initMedia(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
+        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
         bar_.ask({ title: t('Eintrag entfernen?'), ok: t('Entfernen') }).then(ok => { if (!ok) return; const nx = item.nextElementSibling || item.previousElementSibling; item.remove(); rep.dispatchEvent(new Event('input', { bubbles: true })); ($('[data-rep=remove]', nx || rep) || $('[data-rep=add]', rep))?.focus(); });
@@ -250,6 +250,23 @@ function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;
 
 // ------------------------------------------------------------ Medienauswahl (Mediathek-Modul, _media.js)
 const openMediaPicker = (kind = 'image') => window.CMSMedia.pick(kind);
+
+// Feld „Sammlung“: Mediathek öffnen, Sammlung anlegen/füllen und übernehmen (CMSMedia.pickCollection)
+function initCollectionFields(scope = d) {
+  $$('[data-col-pick]', scope).forEach(btn => {
+    if (btn._init) return; btn._init = true;
+    btn.addEventListener('click', async () => {
+      const sel = btn.closest('.col-field')?.querySelector('select');
+      if (!sel || !window.CMSMedia?.pickCollection) return;
+      const c = await window.CMSMedia.pickCollection(+sel.value || 0);
+      if (!c) return;
+      if (![...sel.options].some(o => o.value === String(c.id))) sel.add(new Option(c.name, String(c.id)));
+      else [...sel.options].find(o => o.value === String(c.id)).textContent = c.name;
+      sel.value = String(c.id);
+      sel.dispatchEvent(new Event('input', { bubbles: true })); sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+}
 
 function initMedia(scope = d) {
   $$('.media-field', scope).forEach(mf => {
@@ -863,7 +880,7 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
 init();
 initSettingsPreview();
 initDesign();

@@ -878,8 +878,8 @@ img.media-vthumb{object-fit:cover}
 .dt-bl-head small{font-weight:400;color:var(--adm-t3)}
 .dt-backlinks ul{margin:4px 0 0;padding-left:20px;font-size:14px}
 /* Knöpfe der Feld-Widgets (Medien, Ort, Repeater: .btn aus Core\Fields) – in Verwaltung, Seitenleisten und Dialogen gleich */
-:is(.media-field,.geo,.rep) .btn{display:inline-flex;align-items:center;min-height:34px;padding:0 14px;border:0;border-radius:6px;background:var(--adm-fill);color:var(--adm-ink);font:600 13px var(--adm-font);text-decoration:none;cursor:pointer}
-:is(.media-field,.geo,.rep) .btn:hover{background:var(--adm-fill-2)}
+:is(.media-field,.geo,.rep,.col-field) .btn{display:inline-flex;align-items:center;min-height:34px;padding:0 14px;border:0;border-radius:6px;background:var(--adm-fill);color:var(--adm-ink);font:600 13px var(--adm-font);text-decoration:none;cursor:pointer}
+:is(.media-field,.geo,.rep,.col-field) .btn:hover{background:var(--adm-fill-2)}
 :is(.media-field,.geo,.rep) .btn--ghost{background:transparent;box-shadow:inset 0 0 0 1.5px var(--adm-in)}
 
 /* ==========================================================================
@@ -2786,3 +2786,11 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
   .pt-status .pt-draft{flex:none;width:9px;height:9px;min-height:0;padding:0;border-radius:50%;background:var(--adm-warn);font-size:0;color:transparent;overflow:hidden}
   .pt-status .pt-ext{display:none}
 }
+
+/* Feld „Sammlung“: Auswahl + „Medien öffnen …“ (Sammlung anlegen, füllen, übernehmen) */
+.col-field{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.col-field select{flex:1 1 180px;min-width:0}
+.col-field .btn{flex:none}
+.fx-dhead{gap:10px}
+.fx-dhint{flex:1;min-width:0;margin:0 8px;font-size:13px;line-height:1.35;color:var(--adm-t3)}
+@media (max-width:700px){.fx-dhint{display:none}}

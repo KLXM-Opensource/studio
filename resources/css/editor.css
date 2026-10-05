@@ -105,7 +105,7 @@
 .is-editing .card--back{display:none!important}
 
 /* Seitenleiste „Block“: lebt im Shadow DOM der Ebene (editor.shadow.css) – hier nur Platz für den Inhalt */
-.has-drawer .cms-editor{margin-right:min(460px,100vw)}
+.has-drawer .cms-editor{margin-right:min(var(--cms-drawer-w,clamp(480px,40vw,720px)),100vw)}
 @media (max-width:1100px){.has-drawer .cms-editor{margin-right:0}}
 
 /* Editor.js unterstreicht Links – im WYSIWYG das Frontend-Verhalten wiederherstellen */

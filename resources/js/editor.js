@@ -27,6 +27,35 @@ const layerBox = () => S.layerBox();
 // Seitenleiste „Block“ (serverseitig im Dokument gerendert) in die Ebene verschieben – Theme-CSS wirkt dort nicht
 const drawer = $('#cms-drawer');
 layerBox().append(drawer);
+// Breite der Seitenleiste ziehen (gemerkt); Standard: clamp(480px, 40vw, 720px) aus editor.css/editor.shadow.css
+(() => {
+  const root = d.documentElement, KEY = 'cms:drawer-w';
+  const set = w => {
+    if (!w) { root.style.removeProperty('--cms-drawer-w'); try { localStorage.removeItem(KEY); } catch { /* privat */ } return; }
+    w = Math.round(Math.max(380, Math.min(w, innerWidth - 320, 1100)));
+    root.style.setProperty('--cms-drawer-w', w + 'px');
+    try { localStorage.setItem(KEY, String(w)); } catch { /* privat */ }
+  };
+  try { const w = +localStorage.getItem(KEY); if (w) set(w); } catch { /* privat */ }
+  const grip = d.createElement('div');
+  grip.className = 'cms-drawer__grip'; grip.tabIndex = 0;
+  grip.setAttribute('role', 'separator'); grip.setAttribute('aria-orientation', 'vertical');
+  const tr = (window.CMSAdmin && CMSAdmin.t) || (x => x);
+  grip.setAttribute('aria-label', tr('Breite der Seitenleiste ändern (Pfeiltasten, Doppelklick = Standard)'));
+  grip.title = tr('Breite ziehen · Doppelklick = Standard');
+  drawer.prepend(grip);
+  grip.addEventListener('pointerdown', e => {
+    e.preventDefault(); grip.setPointerCapture(e.pointerId); drawer.classList.add('is-resizing');
+    const move = ev => set(innerWidth - ev.clientX);
+    const up = () => { drawer.classList.remove('is-resizing'); grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up);
+  });
+  grip.addEventListener('keydown', e => {
+    const k = { ArrowLeft: 40, ArrowRight: -40 }[e.key];
+    if (k) { e.preventDefault(); set(drawer.getBoundingClientRect().width + k); }
+  });
+  grip.addEventListener('dblclick', () => set(0));
+})();
 const initial = JSON.parse($('#cms-editor-data').textContent);
 const previews = initial.previews || {};
 const tools = new Map();      // blockId → Tool-Instanz
