@@ -70,7 +70,11 @@ final class VersionsController extends AdminController
     {
         $f = Format::admin();
         $at = $at ?: now();
-        return ['day' => $f->date($at, 'long'), 'time' => $f->time($at), 'ago' => $f->relative($at), 'at' => $f->datetime($at, 'long')];
+        $ts = strtotime((string) $at) ?: time();
+        // ts + Ortszeit (Stunde/Minute) für die Uhr im Kopf der Ansicht
+        $local = (new \DateTimeImmutable('@' . $ts))->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+        return ['day' => $f->date($at, 'long'), 'time' => $f->time($at), 'ago' => $f->relative($at), 'at' => $f->datetime($at, 'long'),
+            'ts' => $ts, 'hm' => [(int) $local->format('G'), (int) $local->format('i')], 'dm' => [(int) $local->format('j'), self::monthShort($local)]];
     }
 
     /** Blöcke eines Stands (JSON der Seite bzw. Version) */
@@ -119,6 +123,17 @@ final class VersionsController extends AdminController
             $out[] = ['id' => (int) $rv['id'], 'json' => (string) $rv['blocks_json'], 'created_at' => $rv['created_at'], 'note' => (string) ($rv['note'] ?? ''), 'email' => (string) ($rv['email'] ?? '')];
         }
         return $out;
+    }
+
+    /** Monatskürzel für das Kalenderblatt (Sprache der Verwaltung, z. B. „Okt“) */
+    private static function monthShort(\DateTimeInterface $d): string
+    {
+        if (class_exists(\IntlDateFormatter::class)) {
+            $fmt = new \IntlDateFormatter(\Core\I18n::locale(), \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, $d->getTimezone()->getName(), null, 'MMM');
+            $m = $fmt->format($d);
+            if (is_string($m) && $m !== '') return rtrim($m, '.');
+        }
+        return ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][(int) $d->format('n') - 1];
     }
 
     public function pageVersions(Request $r, string $id): Response

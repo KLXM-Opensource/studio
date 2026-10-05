@@ -16,6 +16,27 @@
 .vs-head{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:14px 16px 14px 20px;border-bottom:1px solid var(--vs-line);background:var(--vs-panel)}
 .vs-head__ico{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--vs-fill);color:var(--vs-accent)}
 .vs-head__ico svg{width:20px;height:20px}
+.vs-head__ico:has(.vs-clock){width:40px;height:40px;border-radius:50%;padding:2px}
+.vs-head__ico .vs-clock{width:36px;height:36px;overflow:visible}
+.vs-clock__face{fill:var(--vs-panel);stroke:var(--vs-accent);stroke-width:1.6}
+.vs-clock__tick{stroke:var(--vs-muted);stroke-width:1.2;stroke-linecap:round}
+.vs-clock__h,.vs-clock__m{stroke:var(--vs-ink);stroke-linecap:round;transform-box:view-box;transform-origin:20px 20px;transition:transform 1.1s cubic-bezier(.45,.05,.2,1)}
+.vs-clock__h{stroke-width:2.6}
+.vs-clock__m{stroke-width:1.8;stroke:var(--vs-accent)}
+.vs-clock__pin{fill:var(--vs-accent)}
+@media (prefers-reduced-motion:reduce){.vs-clock__h,.vs-clock__m{transition:none}}
+/* Kalenderblatt neben der Uhr: Monat oben in der Akzentfarbe, Tag groß; blättert beim Tageswechsel */
+.vs-cal{display:inline-grid;grid-template-rows:auto 1fr;width:34px;height:38px;border-radius:7px;overflow:hidden;background:var(--vs-panel);
+  box-shadow:0 0 0 1.5px var(--vs-accent);text-align:center;perspective:200px;font-variant-numeric:tabular-nums}
+.vs-cal__m{padding:1px 0;background:var(--vs-accent);color:var(--vs-accent-ink);font-size:9px;font-weight:700;line-height:12px;letter-spacing:.06em;text-transform:uppercase}
+.vs-cal__d{display:grid;place-items:center;font-size:16px;font-weight:700;line-height:1;transform-origin:50% 0}
+@media (prefers-reduced-motion:no-preference){
+  .vs-cal.is-flip-back .vs-cal__d{animation:vs-flip-back .36s ease-in-out}
+  .vs-cal.is-flip-fwd .vs-cal__d{animation:vs-flip-fwd .36s ease-in-out}
+  @keyframes vs-flip-back{0%{transform:rotateX(0)}50%{transform:rotateX(-90deg);opacity:.2}100%{transform:rotateX(0)}}
+  @keyframes vs-flip-fwd{0%{transform:rotateX(0)}50%{transform:rotateX(90deg);opacity:.2}100%{transform:rotateX(0)}}
+}
+.vs-head{gap:10px}
 .vs-head__t{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .vs-head__s{margin:0;color:var(--vs-muted);font-size:13px}
 .vs-x{margin-left:auto;display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:inherit;font-size:22px;line-height:1;cursor:pointer}

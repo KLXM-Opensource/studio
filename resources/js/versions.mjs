@@ -15,7 +15,10 @@
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fill = (s, p = {}) => Object.entries(p).reduce((x, [k, v]) => x.replaceAll('{' + k + '}', String(v)), String(s ?? ''));
 const SVG = {
-  hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/><path d="M12 7v5l3 2"/></svg>',
+  // Uhr im Kopf: Zifferblatt mit Strichen, Stunden- und Minutenzeiger (drehen per JS zur Zeit des gewählten Stands)
+  clock: '<svg class="vs-clock" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" class="vs-clock__face"/>'
+    + Array.from({ length: 12 }, (_, i) => `<line x1="20" y1="${i % 3 ? 4.5 : 3.5}" x2="20" y2="${i % 3 ? 6.5 : 7.5}" class="vs-clock__tick" transform="rotate(${i * 30} 20 20)"/>`).join('')
+    + '<line x1="20" y1="20" x2="20" y2="11" class="vs-clock__h" data-hand="h"/><line x1="20" y1="21.5" x2="20" y2="6.5" class="vs-clock__m" data-hand="m"/><circle cx="20" cy="20" r="1.8" class="vs-clock__pin"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>',
   restore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
@@ -37,7 +40,7 @@ export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
   vs.setAttribute('role', 'dialog');
   vs.setAttribute('aria-modal', 'true');
   vs.setAttribute('aria-labelledby', 'vs-t');
-  vs.innerHTML = `<div class="vs__box"><div class="vs-head"><span class="vs-head__ico">${SVG.hist}</span><div><p class="vs-head__t" id="vs-t">…</p><p class="vs-head__s" data-sub></p></div><button type="button" class="vs-x" data-close>×</button></div><div class="vs-load" data-wait>…</div></div>`;
+  vs.innerHTML = `<div class="vs__box"><div class="vs-head"><span class="vs-head__ico">${SVG.clock}</span><span class="vs-cal" aria-hidden="true"><span class="vs-cal__m" data-cal-m></span><span class="vs-cal__d" data-cal-d></span></span><div><p class="vs-head__t" id="vs-t">…</p><p class="vs-head__s" data-sub></p></div><button type="button" class="vs-x" data-close>×</button></div><div class="vs-load" data-wait>…</div></div>`;
   root.append(vs);
   document.body.append(host);
   const prevOverflow = document.documentElement.style.overflow;
@@ -252,6 +255,43 @@ export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
     el.textContent = t; el.hidden = false;
   }
 
+  // Uhr: Winkel fortlaufend (nicht modulo), damit die Zeiger zurück- bzw. vorwärts laufen – älter = rückwärts, mit Extrarunden je Abstand
+  const hands = { h: vs.querySelector('[data-hand="h"]'), m: vs.querySelector('[data-hand="m"]') };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let clockTs = Math.floor(Date.now() / 1000), angH = 0, angM = 0;
+  { const n = new Date(); angH = (n.getHours() % 12) * 30 + n.getMinutes() * 0.5; angM = n.getMinutes() * 6; }
+  const setHands = () => {
+    hands.h.style.transform = `rotate(${angH}deg)`;
+    hands.m.style.transform = `rotate(${angM}deg)`;
+  };
+  setHands();
+  const turnTo = v => {
+    if (!v?.hm) return;
+    const [hh, mm] = v.hm, dir = (v.ts ?? clockTs) < clockTs ? -1 : 1;
+    const days = Math.abs((v.ts ?? clockTs) - clockTs) / 86400;
+    const extra = reduce ? 0 : Math.min(3, Math.floor(days));   // Extrarunden des Minutenzeigers
+    const step = (cur, target, full) => {
+      let d = ((target - cur) % full + full) % full;   // 0 … full vorwärts
+      if (dir < 0 && d) d -= full;                       // rückwärts
+      return cur + d + dir * extra * full;
+    };
+    angM = step(angM, mm * 6, 360);
+    angH = step(angH, (hh % 12) * 30 + mm * 0.5, 360) ;
+    // Kalenderblatt: blättert um, wenn sich der Tag ändert (älter = nach unten weg, neuer = nach oben)
+    const cal = vs.querySelector('.vs-cal'), key = v.dm ? v.dm.join(' ') : '';
+    if (cal && v.dm && cal.dataset.key !== key) {
+      const fill = () => { vs.querySelector('[data-cal-d]').textContent = v.dm[0]; vs.querySelector('[data-cal-m]').textContent = v.dm[1]; cal.dataset.key = key; };
+      if (!cal.dataset.key || reduce) fill();
+      else {
+        cal.classList.remove('is-flip-back', 'is-flip-fwd'); void cal.offsetWidth;
+        cal.classList.add(dir < 0 ? 'is-flip-back' : 'is-flip-fwd');
+        setTimeout(fill, 180);
+      }
+    }
+    clockTs = v.ts ?? clockTs;
+    setHands();
+  };
+
   const select = (i, focus = false) => {
     i = Math.max(0, Math.min(V.length - 1, i));
     cur = i;
@@ -267,6 +307,7 @@ export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
     restoreBtn.title = v.now ? L('isNow') : '';
     ask(false); msg('');
     if (isEntry) renderEntry(v); else renderPage(v);
+    turnTo(v);
     diffLine(v);
     renderCompare();
   };
