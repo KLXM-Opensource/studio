@@ -1085,11 +1085,12 @@ final class Media
             // Tabelle fehlt (Funktion nie benutzt)
         }
         foreach (SystemSchema::fields() as $f) {
-            if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) setting($f['name']) === $id) {
+            if (in_array($f['type'] ?? '', ['media', 'file'], true) && is_string($f['name'] ?? null) && (int) setting($f['name']) === $id) {
                 $out[] = ['label' => __('Grundeinstellungen') . ' → ' . $f['label'], 'url' => url('/admin/system')];
             }
         }
         foreach ($theme->settingsFields() as $f) {
+            if (!is_string($f['name'] ?? null) || $f['name'] === '') continue;   // Zwischenüberschriften u. Ä. ohne Namen
             $v = setting($f['name']);
             if ((in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v === $id) || (is_string($v) && preg_match($link, $v))
                 || (($f['type'] ?? '') === 'repeater' && is_array($v) && self::fieldsUse([$f], [$f['name'] => $v], $id))) {
