@@ -27,6 +27,24 @@ final class Toolbar
         return Theme::capture(ROOT . '/app/Views/toolbar.php', ['bar' => self::context($vars)]);
     }
 
+    /**
+     * Netzwerk-Konten: andere Websites der Installation für „Website wechseln“ im Menü ⋯ (Einmal-Anmeldung über
+     * /admin/network/open mit path „/“ – landet angemeldet auf der Startseite der Ziel-Website). Sonst leer.
+     * @return list<array{key:string, label:string, home:bool}>
+     */
+    private static function netSites(): array
+    {
+        $u = app()->auth->user();
+        if (!$u || !\Core\Network\Network::isNetworkUser($u)) return [];
+        $out = [];
+        foreach (\Core\Sites::all() as $k => $c) {
+            if ($k === site()->key) continue;
+            $out[] = ['key' => (string) $k, 'label' => (new \Core\Site((string) $k, $c))->label(), 'home' => $k === \Core\Network\Network::siteKey()];
+        }
+        usort($out, fn($a, $b) => [$b['home'], mb_strtolower($a['label'])] <=> [$a['home'], mb_strtolower($b['label'])]);
+        return $out;
+    }
+
     /** Alles, was die Ansicht braucht (Rechte, Adressen, Zustände) */
     public static function context(array $v): array
     {
@@ -44,6 +62,7 @@ final class Toolbar
             'ai' => \Core\AI\Assist::client(), 'aiBrand' => \Core\AI\Assist::brand(),
             'help' => url('/admin/hilfe') . '#' . ($kind === 'page' ? 'bearbeiten' : 'daten'),
             'origin' => null, 'site' => '', 'others' => [],
+            'netSites' => self::netSites(),
         ];
 
         if ($ctx) {

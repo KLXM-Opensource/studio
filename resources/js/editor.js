@@ -1216,6 +1216,59 @@ async function openFit(tool, paths, id, img) {
     onApply: async v => setFit(tool, paths, v),
   });
 }
+// ------------------------------------------------------------------ Bild tauschen direkt am Bild (Knöpfe „Tauschen“/„Hochladen“, _media.js)
+/** Bildfelder eines Blocks mit Pfad und Felddefinition (wie mediaPaths, aber mit Feld – für die Art der Auswahl) */
+function mediaFields(fields, data, id, prefix = '') {
+  const out = [];
+  for (const f of fields || []) {
+    const v = data?.[f.name], p = prefix + f.name;
+    if (f.type === 'media' && v != null && v !== '' && +v === id) out.push({ path: p, field: f });
+    if ((f.type === 'repeater' || f.type === 'group') && Array.isArray(v)) v.forEach((item, i) => out.push(...mediaFields(f.fields, item, id, `${p}.${i}.`)));
+  }
+  return out;
+}
+/** Wert an einem Pfad wie „items.2.image“ setzen */
+function setPath(obj, path, v) {
+  const keys = path.split('.');
+  let o = obj;
+  for (const k of keys.slice(0, -1)) { if (o[k] == null) return false; o = o[k]; }
+  o[keys[keys.length - 1]] = v;
+  return true;
+}
+window.CMSEditor.swap = {
+  /** Bild im Block → { kind ('image'|'visual'), set(media) } oder null (nicht zuordenbar, z. B. aus einer Datentabelle) */
+  target(img) {
+    const tool = toolFor(img);
+    const id = +img.dataset.mediaId;
+    const all = tool ? mediaFields(tool.def.fields, tool.data, id) : [];
+    if (!all.length) return null;
+    // Genau diese Stelle: Pfad am Bild oder n-tes Vorkommen; sonst alle Stellen mit diesem Bild
+    let hit = all;
+    const own = img.dataset.mediaPath;
+    if (own && all.some(x => x.path === own)) hit = all.filter(x => x.path === own);
+    else if (all.length > 1) {
+      const el = img.closest('[data-lay-id]') || img.closest('.cms-block');
+      const imgs = [...el.querySelectorAll(`img[data-media-id="${id}"]`)];
+      if (imgs.length === all.length) hit = [all[imgs.indexOf(img)]];
+    }
+    const kind = hit.some(x => x.field.accept === 'visual') ? 'visual' : 'image';
+    return {
+      kind,
+      set(m) {
+        if (!m?.id) return;
+        hit.forEach(({ path }) => {
+          setPath(tool.data, path, m.id);
+          // Anpassung und Rahmen galten dem alten Bild
+          if (tool.data._fx) delete tool.data._fx[path];
+          if (tool.data._fit) delete tool.data._fit[path];
+        });
+        markDirty();
+        tool.loadPreview();
+        if (drawerFor === tool) openDrawer(tool);   // Seitenleiste zeigt das neue Bild
+      },
+    };
+  },
+};
 window.CMSEditor.fit = {
   target(img) {
     const tool = toolFor(img);

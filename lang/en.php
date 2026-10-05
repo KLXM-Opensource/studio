@@ -6102,4 +6102,12 @@ return [
     'diese Seite' => 'this page',
     'nicht im Menü' => 'not in menu',
     'Übergeordnete Seite nicht gefunden.' => 'Parent page not found.',
+    // Bilder tauschen auf der Website (Blöcke, Bildfelder von Einträgen)
+    'Bild entfernen' => 'Remove image',
+    'Bild tauschen (Mediathek)' => 'Replace image (media library)',
+    'Bild wählen …' => 'Choose image …',
+    'Kein Bild – „Bild wählen …“' => 'No image – “Choose image …”',
+    'Klicken, um ein anderes Bild zu wählen: {label}' => 'Click to choose another image: {label}',
+    'Neues Bild hochladen und hier verwenden' => 'Upload a new image and use it here',
+    'Tauschen' => 'Replace',
 ];

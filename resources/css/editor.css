@@ -157,6 +157,10 @@
 .cms-entry-editing [data-entry-field]:empty::before{content:"…";opacity:.4}
 .cms-entry-editing :is(.bg-bordeaux,.bg-dark,.hero) [data-entry-field]:is(:hover,:focus){outline-color:#EDE9E3}
 .cms-entry-editing [data-entry-field] a{cursor:text}
+/* Bildfelder (mode media): Klick wählt ein anderes Bild; ohne Bild ein Platzhalter */
+.cms-entry-editing [data-entry-mode=media]{cursor:pointer}
+.cms-entry-editing [data-entry-mode=media] a{cursor:pointer}
+.cms-entry-media-empty{display:grid;place-items:center;min-height:180px;padding:16px;border:2px dashed rgba(49,65,100,.35);border-radius:8px;color:inherit;opacity:.75;font-weight:600;text-align:center}
 
 /* Telefone: Aktionen des Bearbeiten-Modus als Leiste unten (Werkzeugleiste, _bar.js) – Platz für den Seitenschluss */
 @media (max-width:767px){html.cms-has-actionbar body{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}}

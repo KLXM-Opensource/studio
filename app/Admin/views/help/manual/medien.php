@@ -60,6 +60,13 @@
   <p>Die Vorschau im Fenster zeigt das Bild im Rahmen genau dieser Stelle. Die Einstellung gilt <b>nur für diese Stelle</b> und wird mit dem Entwurf gespeichert (<b>Speichern</b>/<b>Veröffentlichen</b>). Kommt dasselbe Bild in einem Block mehrmals vor, gilt die Einstellung für alle diese Stellen des Blocks.</p>
   <p><b>Standard des Bildes:</b> Im großen Bearbeitungsfenster der Mediathek legen Sie unter <b>Darstellung im Rahmen</b> fest, wie das Bild überall dort erscheint, wo keine eigene Einstellung gewählt ist. Ohne Angabe gilt <b>Automatisch</b>: Fotos füllen den Rahmen, <b>SVG-Grafiken und PNG-Logos mit transparentem Rand</b> werden eingepasst (transparent) – so werden Logos in Galerien und Karten nicht mehr abgeschnitten. Ist für das Format ein eigener Zuschnitt gesetzt, bleibt es beim Füllen. Der Alt-Text bleibt unverändert; der unscharfe Hintergrund ist reine Dekoration und wird nicht vorgelesen.</p>
 
+  <h3 id="bild-tauschen">Bild auf der Seite tauschen oder neu hochladen</h3>
+  <p>Im Bearbeitungsmodus erscheinen am Bild eines Blocks neben <b>Anpassen</b>, <b>Rahmen</b> und <b>Zuschneiden</b> auch
+    <b>Tauschen</b> (Auswahl aus der Mediathek) und <b>Hochladen</b> (öffnet gleich die Dateiauswahl – die neue Datei landet in der
+    Mediathek und steht sofort an dieser Stelle). Anpassung und Rahmen der Stelle beginnen beim neuen Bild von vorn. Gespeichert
+    wird wie immer mit dem Entwurf. Bilder von Einträgen (z. B. Referenzen) tauschen Sie auf deren Detailseite: <b>Bearbeiten</b>, dann
+    <b>Bild wählen …</b> am Bild oder ein Klick aufs Bild.</p>
+
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
   <p>Datei auswählen → <b>Datei ersetzen …</b> (im Bearbeitungsfenster oder per Rechtsklick) → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
 

@@ -383,9 +383,10 @@ final class Network
         return ['uid' => (int) $d['u'], 'path' => self::safePath((string) ($d['p'] ?? '/admin'))];
     }
 
-    /** Nur Verwaltungspfade dieser Website als Ziel */
+    /** Nur Verwaltungspfade dieser Website als Ziel – oder „/“ (Startseite, Wechsel aus der Werkzeugleiste der Website) */
     public static function safePath(string $p): string
     {
+        if ($p === '/') return '/';
         return preg_match('~^/admin(/[\w\-/]*)?$~', $p) && !str_starts_with($p, '/admin/sso') && !str_starts_with($p, '/admin/login') ? $p : '/admin';
     }
 

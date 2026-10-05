@@ -323,6 +323,14 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-cropbtn:focus-visible{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px #314164}
 
 /* Fehlerhinweis unter Feldern des Eintrags (Dokument-Koordinaten) */
+/* Bildfelder eines Eintrags direkt auf der Website (resources/js/_entry_edit.js mediaUi) */
+.cms-emedia{position:absolute;z-index:3;display:flex;gap:6px}
+.cms-emedia[hidden]{display:none}
+.cms-emedia__btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;margin:0;padding:0 12px;border:0;border-radius:999px;background:rgba(20,24,32,.86);color:#fff;font:600 13px/1 Lato,"Segoe UI",system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.cms-emedia__btn:hover{background:#314164}
+.cms-emedia__btn .ico{width:16px;height:16px}
+.cms-emedia__btn--x{width:36px;padding:0;justify-content:center}
+.cms-emedia__btn:focus-visible{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px #314164}
 .cms-entry-errtip{position:absolute;max-width:min(420px,calc(100vw - 16px));padding:5px 10px;border-radius:6px;background:#B3261E;color:#fff;font:600 13px/1.35 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.2)}
 
 /* Kurze Meldung nach dem Speichern */

@@ -143,6 +143,16 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
     <span class="cms-menuwrap">
       <button type="button" class="cms-ibtn" data-bar-more aria-haspopup="menu" aria-expanded="false" aria-controls="cms-more-menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" title="<?= e(__('Weitere Aktionen')) ?>"><?= icon('dots-three') ?></button>
       <span class="cms-menu cms-menu--end" id="cms-more-menu" role="menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" hidden>
+        <?php if ($b['netSites']): // Netzwerk-Konten: andere Website öffnen – angemeldet per Einmal-Anmeldung (Startseite der Ziel-Website) ?>
+        <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="cms-menu__grp cms-bar__form" role="group" aria-label="<?= e(__('Website wechseln')) ?>">
+          <?= csrf_field() ?><input type="hidden" name="path" value="/">
+          <span class="cms-menu__head" aria-hidden="true"><?= e(__('Website wechseln')) ?></span>
+          <?php foreach ($b['netSites'] as $ns): ?>
+          <button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1" name="site" value="<?= e($ns['key']) ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ns['home'] ? 'tree-structure' : 'globe') ?></span><span class="cms-menu__label"><?= e($ns['label']) ?><?php if ($ns['home']): ?><small><?= e(__('Netzwerk-Website')) ?></small><?php endif; ?></span></button>
+          <?php endforeach; ?>
+        </form>
+        <?= $sep ?>
+        <?php endif; ?>
         <?php if ($b['modes']): ?>
         <span class="cms-menu__grp cms-menu--narrow" role="group" aria-label="<?= e(__('Modus')) ?>">
           <span class="cms-menu__head" aria-hidden="true"><?= e(__('Modus')) ?></span>

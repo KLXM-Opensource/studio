@@ -23,6 +23,7 @@ const T = {
   dirty: 'Ungespeicherte Änderungen', saving: 'Speichere …', saved: 'Gespeichert {time}', published: 'Veröffentlicht {time}',
   drafted: 'Als Entwurf gespeichert {time}', error: 'Fehler beim Speichern', loading: 'Lade Felder …', failed: 'Laden fehlgeschlagen: {error}',
   close: 'Schließen', panel: 'Eintrag bearbeiten', format: 'Formatierung',
+  mediaPick: 'Bild wählen …', mediaRemove: 'Bild entfernen', mediaNone: 'Kein Bild – „Bild wählen …“', mediaHint: 'Klicken, um ein anderes Bild zu wählen: {label}',
 };
 const tx = (k, p = {}) => Object.entries(p).reduce((s, [a, b]) => s.replaceAll('{' + a + '}', String(b)), T[k] ?? k);
 const now = () => new Date().toTimeString().slice(0, 5);
@@ -268,13 +269,65 @@ const Inline = (() => {
     c.querySelectorAll('[data-cms-note]').forEach(x => x.replaceWith(document.createTextNode(`[# ${x.dataset.cmsNote} #]`)));
     return c;
   };
-  const read = n => n.dataset.entryMode === 'plain' ? unnote(n).textContent.replace(/\s+/g, ' ').trim()
+  const read = n => n.dataset.entryMode === 'media' ? (n.dataset.entryValue && n.dataset.entryValue !== '0' ? n.dataset.entryValue : '')
+    : n.dataset.entryMode === 'plain' ? unnote(n).textContent.replace(/\s+/g, ' ').trim()
     : n.dataset.entryMode === 'lines' ? (n.querySelector('[data-cms-note]') ? unnote(n).textContent : n.innerText).replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
     : unnote(n).innerHTML.trim().replace(/^<p><br><\/p>$/, '');
 
   function changed() { return nodes.filter(n => read(n) !== n._orig); }
 
+  // ---------------------------------------------------------------- Bildfelder (mode media): Knöpfe am Bild, Mediathek-Auswahl
+  // Vorschau sofort (Bild der Auswahl statt <picture>), gespeichert wie Texte über „Speichern“; Abbrechen stellt das HTML wieder her.
+  function placeMedia(n) {
+    const ui_ = n._mui;
+    if (!ui_) return;
+    const r = n.getBoundingClientRect();
+    ui_.hidden = !r.width;
+    ui_.style.top = (scrollY + r.top + 10) + 'px';
+    ui_.style.left = Math.max(8, scrollX + r.right - ui_.offsetWidth - 10) + 'px';
+  }
+  function setMedia(n, m) {
+    n.dataset.entryValue = m ? String(m.id) : '0';
+    if (m) {
+      const src = m.kind === 'video' ? (m.poster || m.large || m.thumb) : (m.large || m.url || m.thumb);
+      let img = n.querySelector('img');
+      if (!img) { n.innerHTML = ''; img = d.createElement('img'); n.append(img); }
+      n.querySelectorAll('picture source').forEach(s => s.remove());
+      n.querySelectorAll('video').forEach(v => { v.hidden = true; });
+      img.removeAttribute('srcset'); img.removeAttribute('sizes'); img.hidden = false;
+      if (src) img.src = src;
+      img.alt = m.alt || '';
+    } else {
+      n.innerHTML = `<span class="cms-entry-media-empty">${tx('mediaNone')}</span>`;
+    }
+    clearError(n); refresh();
+  }
+  async function chooseMedia(n) {
+    if (!window.CMSMedia?.pick) return;
+    const m = await window.CMSMedia.pick(n.dataset.entryKind || 'image');
+    if (m) setMedia(n, m);
+    n._mui?.querySelector('[data-emedia-pick]')?.focus();
+  }
+  function mediaUi(n, on) {
+    if (!on) { n._mui?.remove(); n._mui = null; n.classList.remove('cms-entry-media'); return; }
+    if (n._mui) return;
+    n.classList.add('cms-entry-media');
+    const box = d.createElement('div');
+    box.className = 'cms-emedia'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', n.dataset.entryLabel || '');
+    box.innerHTML = `<button type="button" class="cms-emedia__btn" data-emedia-pick>${ico('image')}<span>${tx('mediaPick')}</span></button>`
+      + ('entryOptional' in n.dataset ? `<button type="button" class="cms-emedia__btn cms-emedia__btn--x" data-emedia-remove aria-label="${tx('mediaRemove')}" title="${tx('mediaRemove')}">${ico('trash')}</button>` : '');
+    box.querySelector('[data-emedia-pick]').addEventListener('click', () => chooseMedia(n));
+    box.querySelector('[data-emedia-remove]')?.addEventListener('click', () => setMedia(n, null));
+    layerBox().append(box);
+    n._mui = box;
+    placeMedia(n);
+  }
+  const placeAll = () => nodes.forEach(placeMedia);
+  addEventListener('resize', placeAll);
+  addEventListener('load', placeAll);
+
   function refresh() {
+    placeAll();
     const was = dirty;
     dirty = changed().length > 0;
     nodes.forEach(n => n.classList.toggle('is-changed', read(n) !== n._orig));
@@ -286,6 +339,12 @@ const Inline = (() => {
   let editing = false;
   function editable(n, on) {
     const mode = n.dataset.entryMode;
+    if (mode === 'media') {
+      mediaUi(n, on);
+      if (on) { n._titleM = n.getAttribute('title'); n.title = tx('mediaHint', { label: n.dataset.entryLabel || '' }); }
+      else { if (n._titleM) n.title = n._titleM; else n.removeAttribute('title'); clearError(n); }
+      return;
+    }
     if (!on) {
       ['contenteditable', 'role', 'aria-label', 'aria-multiline'].forEach(a => n.removeAttribute(a));
       if (n._title) n.title = n._title; else n.removeAttribute('title');
@@ -313,7 +372,7 @@ const Inline = (() => {
     Bar.setMode('edit');
     emit('cms:editor-ready', { kind: 'entry', entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: nodes.map(n => n.dataset.entryField) });
     // Fokus: erstes sichtbares Feld, sonst „Abbrechen“ (der Knopf „Bearbeiten“ ist jetzt ausgeblendet)
-    const first = nodes.find(inView);
+    const first = nodes.find(n => inView(n) && n.dataset.entryMode !== 'media');
     if (first) first.focus({ preventScroll: true }); else ui('[data-bar-cancel]')?.focus();
   }
   // „Bearbeiten“: Primär-Knopf bzw. ab 1024 px der Umschalter (der Knopf ist dort ausgeblendet, toolbar.php $segEdit)
@@ -382,6 +441,13 @@ const Inline = (() => {
   function bind(n) {
     const mode = n.dataset.entryMode;
     n._orig = read(n); n._html = n.innerHTML; n._title = n.getAttribute('title') || '';
+    if (mode === 'media') {
+      // Klick aufs Bild im Bearbeiten-Modus: Auswahl statt Großansicht/Link
+      n.addEventListener('click', e => { if (!editing) return; e.preventDefault(); e.stopPropagation(); chooseMedia(n); }, true);
+      n.querySelectorAll('img').forEach(i => i.addEventListener('load', placeAll));
+      nodes.push(n);
+      return;
+    }
     n.addEventListener('keydown', e => {
       if (e.key === 'Escape') { e.preventDefault(); n.blur(); return; }
       if (mode === 'plain' && e.key === 'Enter') { e.preventDefault(); n.blur(); return; }
@@ -439,7 +505,7 @@ const Inline = (() => {
 
   /** Ungespeicherte Änderungen im Text zurücksetzen (Abbrechen → Verwerfen) */
   function restore() {
-    nodes.forEach(n => { n.innerHTML = n._html; clearError(n); });
+    nodes.forEach(n => { n.innerHTML = n._html; if (n.dataset.entryMode === 'media') n.dataset.entryValue = n._orig || '0'; clearError(n); });
     refresh();
   }
 

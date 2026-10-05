@@ -11,7 +11,8 @@ use Core\Network\Network;
  * Einträge direkt auf der Website bearbeiten (nur angemeldete Redaktion).
  *
  *  - Detailseiten: Werkzeugleiste mit Eintrag, Status, „Eintrag bearbeiten“ (Seitenleiste mit allen Feldern),
- *    „In der Verwaltung öffnen“; Text-, Mehrzeilen- und Rich-Text-Felder sind direkt im Text editierbar.
+ *    „In der Verwaltung öffnen“; Text-, Mehrzeilen- und Rich-Text-Felder sind direkt im Text editierbar, Bildfelder (media)
+ *    über einen Knopf am Bild (Mediathek-Auswahl, Vorschau sofort, gespeichert mit „Speichern“).
  *  - Datenlisten: Stift je Eintrag und „+ Neuer Eintrag“.
  *
  * Alles hier erzeugt nur für angemeldete Nutzer mit Recht „data.edit“ auf die Tabelle Markup – Besucher
@@ -22,7 +23,7 @@ use Core\Network\Network;
 final class EntryEdit
 {
     /** Inline editierbare Feldtypen → Bearbeitungsart */
-    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich'];
+    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media'];
 
     /** Darf der angemeldete Nutzer diese Tabelle überhaupt auf der Website bearbeiten? */
     public static function canTable(array $t): bool
@@ -84,10 +85,14 @@ final class EntryEdit
         if ($field === '_title') $field = (string) $t['settings']['title_field'];
         $auto = self::mode($t, $field);
         if ($auto === '') return '';
+        // Bildfelder nur als Bild (Knopf am Element), Textfelder nie als Bild
+        if ($auto === 'media' || $mode === 'media') $mode = $auto === 'media' ? 'media' : '';
         $mode ??= $auto;
-        if (!in_array($mode, ['plain', 'lines', 'rich'], true) || ($mode === 'rich' && $auto !== 'rich')) return '';
+        if (!in_array($mode, ['plain', 'lines', 'rich', 'media'], true) || ($mode === 'rich' && $auto !== 'rich')) return '';
         $f = Tables::field($t, $field);
-        return ' data-entry-field="' . e($field) . '" data-entry-mode="' . e($mode) . '" data-entry-label="' . e((string) ($f['label'] ?? $field)) . '"';
+        $extra = $mode === 'media' ? ' data-entry-value="' . (int) ($e[$field] ?? 0) . '" data-entry-kind="visual"'
+            . (empty($f['required']) ? ' data-entry-optional' : '') : '';
+        return ' data-entry-field="' . e($field) . '" data-entry-mode="' . e($mode) . '" data-entry-label="' . e((string) ($f['label'] ?? $field)) . '"' . $extra;
     }
 
     /**
@@ -189,6 +194,10 @@ final class EntryEdit
             'saveExit' => __('Speichern & beenden'),
             'panel' => __('Eintrag bearbeiten'),
             'format' => __('Formatierung'),
+            'mediaPick' => __('Bild wählen …'),
+            'mediaRemove' => __('Bild entfernen'),
+            'mediaNone' => __('Kein Bild – „Bild wählen …“'),
+            'mediaHint' => __('Klicken, um ein anderes Bild zu wählen: {label}'),
         ];
     }
 

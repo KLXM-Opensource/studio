@@ -1412,16 +1412,18 @@ function pickCollection(current = 0) {
   }));
 }
 
-function pick(kind = 'image') {
+/** Auswahldialog; opts.upload = gleich die Dateiauswahl zum Hochladen öffnen (neue Datei wird direkt übernommen) */
+function pick(kind = 'image', opts = {}) {
   return new Promise(resolve => {
     const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
     let chosen = null;
     dlg.innerHTML = `<div class="fx-dhead"><h2>${kind === 'image' ? 'Bild auswählen' : kind === 'visual' ? t('Bild oder Video auswählen') : 'Datei auswählen'}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>Abbrechen</button></div><div class="fx-host"></div>`;
-    new Finder($('.fx-host', dlg), { mode: 'pick', kind: kind === 'image' || kind === 'visual' ? kind : null, onPick: m => { chosen = m; dlg.close(); } });
+    const f = new Finder($('.fx-host', dlg), { mode: 'pick', kind: kind === 'image' || kind === 'visual' ? kind : null, onPick: m => { chosen = m; dlg.close(); } });
     $('[data-close]', dlg).onclick = () => dlg.close();
     dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; };
     dlg.showModal();
     $('.fx-items', dlg).focus();
+    if (opts.upload) f.uploader?.choose();   // noch in derselben Nutzeraktion (Klick) – sonst blockiert der Browser die Dateiauswahl
   });
 }
 
@@ -1437,9 +1439,9 @@ function initInlineCrop() {
   // Bilder auf der Seite: Dateien dieser Website (local(), nie im zuletzt gewählten Pool – sonst 404: …/api/media/192?pool=…)
   const bar = d.createElement('div');
   bar.className = 'cms-imgtools'; bar.hidden = true;
-  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button>`;
+  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button><button type="button" class="cms-cropbtn" data-swap>${ico('arrows-clockwise')} ${esc(t('Tauschen'))}</button><button type="button" class="cms-cropbtn" data-swap-up>${ico('upload-simple')} ${esc(t('Hochladen'))}</button>`;
   box().append(bar);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
-  const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar), fitBtn = $('[data-fit]', bar);
+  const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar), fitBtn = $('[data-fit]', bar), swapBtn = $('[data-swap]', bar), upBtn = $('[data-swap-up]', bar);
   let target = null, hideT, leaving = false;
   const place = () => {
     const r = target.getBoundingClientRect();
@@ -1466,7 +1468,11 @@ function initInlineCrop() {
     cropBtn.hidden = !im.dataset.ratio;
     fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
     fitBtn.hidden = fxBtn.hidden || !window.CMSEditor?.fit;
-    if (cropBtn.hidden && fxBtn.hidden) { bar.hidden = true; return; }
+    // Tauschen/Hochladen: nur Bilder, die einem Bildfeld des Blocks gehören (nicht aus Datentabellen oder zentral gepflegt)
+    swapBtn.hidden = upBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.swap?.target(im);
+    if (cropBtn.hidden && fxBtn.hidden && swapBtn.hidden) { bar.hidden = true; return; }
+    swapBtn.setAttribute('aria-label', t('Bild tauschen (Mediathek)'));
+    upBtn.setAttribute('aria-label', t('Neues Bild hochladen und hier verwenden'));
     fitBtn.setAttribute('aria-label', t('Darstellung im Rahmen: füllen, einpassen oder Originalformat'));
     cropBtn.setAttribute('aria-label', t('Bild zuschneiden ({ratio})', { ratio: im.dataset.ratio || '' }));
     fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast, Schärfe)'));
@@ -1510,6 +1516,16 @@ function initInlineCrop() {
     bar.hidden = true;
     local(() => crop(id, ratio, (r, res) => refreshPictures(id, r, res.sources), { only: ratio }));
   });
+  // Tauschen: Mediathek-Auswahl (dort auch Hochladen); Hochladen: gleich die Dateiauswahl – neue Datei wird direkt übernommen
+  const swap = upload => e => {
+    e.preventDefault(); e.stopPropagation();
+    const s = target && window.CMSEditor?.swap?.target(target);
+    if (!s) return;
+    bar.hidden = true;
+    pick(s.kind, { upload }).then(m => { if (m) s.set(m); });
+  };
+  swapBtn.addEventListener('click', swap(false));
+  upBtn.addEventListener('click', swap(true));
   fxBtn.addEventListener('click', async e => {
     e.preventDefault(); e.stopPropagation();
     if (!target) return;
