@@ -165,10 +165,11 @@ function announce(msg) {
 function panelFor(def) {
   const box = layerBox();
   const el = d.createElement('section');
+  const modal = def.panel?.size === 'modal';
   el.className = 'cms-tpanel cms-tpanel--' + (def.panel?.size || 'narrow');
   el.id = 'cms-tool-' + def.id;
   el.setAttribute('role', 'dialog');
-  el.setAttribute('aria-modal', 'false');
+  el.setAttribute('aria-modal', modal ? 'true' : 'false');
   el.setAttribute('aria-labelledby', el.id + '-t');
   el.hidden = true;
   el.innerHTML = `<header class="cms-tpanel__head"><span class="cms-tpanel__ico" aria-hidden="true">${ico(def.icon)}</span>
@@ -177,6 +178,22 @@ function panelFor(def) {
       <button type="button" class="cms-tpanel__x" data-tpanel-close aria-label="${esc(cfg.texts.close)}" title="${esc(cfg.texts.close)} (Esc)">${ico('x')}</button></header>
     <div class="cms-tpanel__body"></div>`;
   box.append(el);
+  if (modal) {
+    // Modal: abgedunkelter Hintergrund folgt der Sichtbarkeit des Dialogs; Klick daneben schließt, Tab bleibt im Dialog
+    const bd = d.createElement('div');
+    bd.className = 'cms-tmodal-bd'; bd.hidden = true;
+    el.before(bd);
+    bd.addEventListener('click', () => close(def.id));
+    new MutationObserver(() => { bd.hidden = el.hidden; }).observe(el, { attributes: true, attributeFilter: ['hidden'] });
+    el.addEventListener('keydown', e => {
+      if (e.key !== 'Tab') return;
+      const f = [...el.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]')].filter(x => x.getClientRects().length);
+      if (!f.length) return;
+      const a = deepActive();
+      if (e.shiftKey && a === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && a === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    });
+  }
   el.querySelector('[data-tpanel-close]').addEventListener('click', () => close(def.id));
   el.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); e.stopPropagation(); close(def.id); }

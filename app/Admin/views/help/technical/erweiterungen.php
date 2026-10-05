@@ -151,6 +151,7 @@ $x-&gt;dashboard(fn(array $user) =&gt; ['cards' =&gt; ['offen' =&gt; ['title' =&
     'data' =&gt; fn(array $bar) =&gt; ['max' =&gt; 200],              // je Werkzeugleiste, frei für das Modul
     'texts' =&gt; ['insert' =&gt; __('Einfügen')],                 // übersetzte Texte (auf der Website gibt es kein Wörterbuch)
 ]);</code></pre>
+  <p><b>Neue Seite (Core):</b> <code>Core\PageTool::definition()</code> – Knopf in der Werkzeugleiste (<code>Alt+N</code>, <code>perm</code> <code>pages.manage</code>, auch beim Ansehen), <code>'panel' =&gt; ['size' =&gt; 'modal']</code> (Dialog in der Mitte, abgedunkelter Hintergrund, Tab bleibt im Dialog), Modul <code>resources/js/new-page.mjs</code>, Endpunkte <code>GET /admin/api/pages/tree</code> und <code>POST /admin/api/pages/create</code> (<code>PageController::apiTree/apiCreate</code>, gleiche Prüfungen wie das Formular).</p>
   <p><b>Quick-Glossar (Core, Referenz):</b> <code>Core\Glossary\QuickTool::definition()</code> liefert genau diese Angaben – <code>id</code> <code>glossary</code>, Kürzel <code>Alt+G</code>, <code>feature</code> <code>glossary</code>, <code>visible</code> = Tabelle eingerichtet und <code>data.edit</code> auf <code>glossar</code>, <code>'view' =&gt; true</code> mit <code>chip</code> „Als Glossar-Begriff“, drei Endpunkte (<code>GlossaryController::api*</code>), Modul <code>resources/js/quick-glossary.mjs</code>.</p>
   <table class="doc-table">
     <tr><th>Modi</th><th>Wann</th><th>Hinweise</th></tr>

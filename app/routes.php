@@ -368,6 +368,8 @@ return function (Router $r): void {
     $r->post('/admin/roles/{key}/delete', [Admin\RoleController::class, 'delete']);
 
     // Editor-API (JSON)
+    $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);       // „Neue Seite“ auf der Website (Core\PageTool)
+    $r->post('/admin/api/pages/create', [Admin\PageController::class, 'apiCreate']);
     $r->post('/admin/api/pages/{id}/save', [Admin\EditorController::class, 'save']);
     $r->post('/admin/api/pages/{id}/discard', [Admin\EditorController::class, 'discard']);
     $r->post('/admin/api/preview', [Admin\EditorController::class, 'preview']);

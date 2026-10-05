@@ -5,6 +5,9 @@
     <li>Status <b>Entwurf</b> lassen, bis die Seite fertig ist. Nach dem Anlegen öffnet sich der Editor.</li>
     <li>Blöcke einfügen, Inhalte schreiben, <b>Veröffentlichen</b>.</li>
   </ol>
+  <p><b>Direkt auf der Website:</b> In der Werkzeugleiste oben öffnet <b>Neue Seite</b> (<kbd>⌥N</kbd> bzw. <kbd>Alt+N</kbd>) ein Fenster mit dem
+    Seitenbaum. Seite wählen, dann <b>Darunter</b> (als Unterseite), <b>Davor</b> oder <b>Danach</b> – die Adresse der neuen Seite steht gleich darunter.
+    Titel eingeben, bei Bedarf Vorlage und „Im Menü zeigen“ wählen, <b>Seite anlegen und bearbeiten</b>: Die Seite entsteht als Entwurf und öffnet sich im Editor.</p>
   <table class="doc-table">
     <tr><th>Aktion</th><th>So geht’s</th></tr>
     <tr><td>Ordnen</td><td>Seite <b>ziehen</b>: auf eine andere Seite = wird deren Unterseite (blauer Rahmen), zwischen zwei Seiten = neue Reihenfolge (blaue Linie), auf die freie Fläche unter der letzten Zeile = ans Ende. Ohne Maus: Seite wählen und <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> (eine Stelle nach oben/unten), <kbd>Alt</kbd> + <kbd>→</kbd> (einrücken: Unterseite der Seite darüber), <kbd>Alt</kbd> + <kbd>←</kbd> (ausrücken: eine Ebene höher) – dieselben Befehle stehen im Menü „⋯“. Ändert sich dabei die Ebene, passen sich die Adressen automatisch an; alte Einzeladressen leiten weiter.</td></tr>

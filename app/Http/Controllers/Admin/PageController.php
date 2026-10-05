@@ -114,6 +114,65 @@ final class PageController extends AdminController
         return $parentId === null && ($lang === null || $lang === \Core\Lang::default()) && \Core\PublicPaths::isReserved($slug);
     }
 
+    // ------------------------------------------------------------------ Neue Seite von der Website aus (Werkzeug Core\PageTool)
+
+    /** Seitenbaum für „Neue Seite“: flach in Baumreihenfolge, nur Seiten der Sprache der aktuellen Seite (ohne Vorlagen) */
+    public function apiTree(Request $r): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $lang = \Core\Lang::valid($r->str('lang')) ? \Core\Lang::norm($r->str('lang')) : null;
+        $tpls = \Core\PageTemplates::all();
+        $out = [];
+        $walk = function (array $nodes) use (&$walk, &$out, $tpls) {
+            foreach ($nodes as $n) {
+                $p = $n['page'];
+                if (NotFound::isPage($p)) continue;
+                $sug = null;   // Vorlage, die unter dieser Seite vorgeschlagen wird (Seitenvorlagen → „Vorschlagen unter“)
+                foreach ($tpls as $t) if ($t['parents'] && \Core\PagePicker::matches($t['parents'], $p)) { $sug = $t['i']; break; }
+                $out[] = ['id' => (int) $p['id'], 'parent' => $p['parent_id'] ? (int) $p['parent_id'] : null, 'depth' => $n['depth'],
+                    'title' => (string) (($p['nav_title'] ?? '') ?: $p['title']), 'status' => (string) $p['status'], 'menu' => (bool) $p['menu'],
+                    'home' => (bool) $p['is_home'], 'path' => '/' . ltrim((string) ($p['path'] ?? ''), '/'), 'suggest' => $sug];
+                $walk($n['children']);
+            }
+        };
+        $walk(Pages::tree(false, $lang));
+        return Response::json(['ok' => true, 'pages' => $out,
+            'templates' => array_map(fn($t) => ['i' => $t['i'], 'label' => $t['label'], 'description' => $t['description']], $tpls)]);
+    }
+
+    /**
+     * Seite anlegen (JSON): title, slug (optional), parent (ID | leer = oberste Ebene), position 'end' | 'before' | 'after' mit
+     * anchor (ID einer Seite derselben Ebene), template (Index | leer), menu (bool), lang. Immer als Entwurf; Antwort: Adresse im
+     * Bearbeiten-Modus. Gleiche Prüfungen wie das Formular der Verwaltung (Titel, reservierte und doppelte Adressen).
+     */
+    public function apiCreate(Request $r): Response
+    {
+        $this->auth($r, 'pages.manage');
+        $p = $r->post;
+        $parent = (int) ($p['parent'] ?? 0);
+        $parentPage = $parent ? Pages::find($parent) : null;
+        if ($parent && (!$parentPage || $parentPage['type'] !== 'page')) return Response::json(['ok' => false, 'errors' => ['parent' => __('Übergeordnete Seite nicht gefunden.')]], 422);
+        $lang = (string) ($p['lang'] ?? '');
+        if ($parentPage) $lang = (string) ($parentPage['lang'] ?: \Core\Lang::default());
+        $req = new Request('POST', $r->path, [], ['title' => (string) ($p['title'] ?? ''), 'slug' => (string) ($p['slug'] ?? ''),
+            'parent_id' => $parentPage ? (string) $parent : '', 'menu' => !empty($p['menu']) ? '1' : '0', 'lang' => $lang, 'status' => 'draft'], [], $r->server);
+        [$data, $errors] = $this->validate($req, null);
+        if ($errors) return Response::json(['ok' => false, 'errors' => $errors], 422);
+        $tpl = (string) ($p['template'] ?? '');
+        $blocks = $tpl !== '' && ctype_digit($tpl) ? Pages::sanitizeBlocks(\Core\PageTemplates::blocks((int) $tpl)) : [];
+        $sort = (int) app()->db->fetchValue('SELECT COALESCE(MAX(sort), 0) + 10 FROM pages WHERE ' . ($data['parent_id'] ? 'parent_id = ?' : 'parent_id IS NULL'), $data['parent_id'] ? [$data['parent_id']] : []);
+        $id = Pages::create($data + ['sort' => $sort], $blocks);
+        // Position zwischen Geschwistern (vor/nach einer Seite derselben Ebene); sonst am Ende
+        $pos = (string) ($p['position'] ?? 'end');
+        $anchor = (int) ($p['anchor'] ?? 0);
+        if ($anchor && in_array($pos, ['before', 'after'], true)) {
+            Pages::move($id, $data['parent_id'], 0, $pos === 'before' ? $anchor : null, $pos === 'after' ? $anchor : null);
+        }
+        $this->changed();
+        $page = Pages::find($id);
+        return Response::json(['ok' => true, 'id' => $id, 'url' => Pages::url($page) . '?edit=1', 'title' => $page['title']]);
+    }
+
     private function validate(Request $r, ?array $page): array
     {
         $title = mb_substr(strip_tags($r->str('title')), 0, 120);

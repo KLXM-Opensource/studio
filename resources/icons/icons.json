@@ -4,6 +4,7 @@
     "squares-four",
     "files",
     "file-text",
+    "file-plus",
     "house",
     "sliders-horizontal",
     "images",
@@ -2161,6 +2162,11 @@
           "Textdokument",
           "Document",
           "seite text datei"
+        ],
+        "file-plus": [
+          "Neue Seite",
+          "New page",
+          "seite anlegen hinzufügen datei neu"
         ],
         "file-pdf": [
           "PDF",

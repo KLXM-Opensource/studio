@@ -9,6 +9,9 @@
     <li>Ein kopiertes Bild oder eine Datei fügen Sie auch mit <kbd>⌘</kbd>/<kbd>Strg</kbd>+<kbd>V</kbd> direkt in die Mediathek ein.</li>
   </ol>
 
+  <p>Die Mediathek merkt sich, wo Sie zuletzt waren (Sammlung, Tag, Dateiart, geteilte Medien) – beim nächsten Öffnen und in den
+    Auswahlfenstern der Bildfelder geht es dort weiter.</p>
+
   <h3>Ordnen: Tags und Sammlungen</h3>
   <ul>
     <li><b>Tags</b> (farbige Punkte) tragen Sie rechts in den Informationen ein: Wort tippen, <kbd>Enter</kbd>. Links unter „Tags“ filtern Sie danach.</li>

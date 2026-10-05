@@ -505,7 +505,29 @@ class Finder {
     this.src = { type: opts.kind === 'image' || opts.kind === 'visual' ? 'kind' : 'all', value: opts.kind === 'image' || opts.kind === 'visual' ? opts.kind : '' };
     this.q = ''; this.items = []; this.sel = new Set(); this.anchor = null; this.active = null; this.meta = null;
     this.view = store.get('view', 'grid'); this.size = store.get('size', 132); this.sort = store.get('sort', { key: 'created_at', dir: -1 });
-    this.build(); this.load();
+    // Zuletzt geöffneter Ort (Pool, Sammlung, Tag, Art) – gilt für Mediathek und Auswahl-Dialoge; nicht bei Sprüngen (#m12, #check=…)
+    const restored = !/^#(m\d+|c\d+|check=)/.test(location.hash) && this.restoreLast();
+    this.build();
+    this.load().catch(ex => {
+      if (!restored) throw ex;
+      this.pool = POOL = ''; this.src = { ...this.defaultSrc() }; store.set('last', null); return this.load();   // Ort gibt es nicht mehr
+    });
+  }
+  defaultSrc() {
+    const k = this.opts.kind === 'image' || this.opts.kind === 'visual';
+    return { type: k ? 'kind' : 'all', value: k ? this.opts.kind : '' };
+  }
+  /** Letzten Ort übernehmen, soweit er zum Dialog passt (Bildfeld: keine reinen PDF-/Audio-Filter) */
+  restoreLast() {
+    const l = store.get('last', null);
+    if (!l || typeof l !== 'object' || !l.src || typeof l.src.type !== 'string') return false;
+    const t = l.src.type, k = this.opts.kind;
+    const ok = ['collection', 'tag'].includes(t) || (!k && ['all', 'kind', 'noalt'].includes(t))
+      || (k && t === 'kind' && (k === 'image' ? l.src.value === 'image' : ['image', 'video', 'visual'].includes(l.src.value)));
+    if (!ok && !l.pool) return false;
+    this.pool = POOL = String(l.pool || '');
+    if (ok) this.src = { type: t, value: String(l.src.value ?? '') };
+    return true;
   }
 
   // ---------------------------------------------------------- Aufbau
@@ -728,6 +750,7 @@ class Finder {
     this.sel = new Set([...this.sel].filter(id => ids.has(id)));
     if (selectId && ids.has(selectId)) { this.sel = new Set([selectId]); this.anchor = this.active = selectId; }
     hook('loaded', this, data);
+    if (this.src.type !== 'check') store.set('last', { pool: this.pool, src: this.src });   // Ort für das nächste Öffnen merken
     this.renderSide(); this.render(); this.updateUploadDest(); this.renderSources();
   }
   sorted(items) {

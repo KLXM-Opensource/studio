@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Neue Seite direkt auf der Website
+- Knopf „Neue Seite“ in der Werkzeugleiste (⌥N, Recht `pages.manage`, auch beim Ansehen): Modal mit Seitenbaum – Ort wählen
+  (darunter, davor, danach), Titel, Adresse, Vorlage (Vorschlag der Seitenvorlagen), „Im Menü zeigen“; legt einen Entwurf an und
+  öffnet ihn im Editor (`Core\PageTool`, `GET /admin/api/pages/tree`, `POST /admin/api/pages/create`).
+- Werkzeuge (`Core\FrontendTools`) können als Modal erscheinen: `'panel' => ['size' => 'modal']`.
+
+### Mediathek merkt sich den letzten Ort
+- Sammlung, Tag, Dateiart und Pool bleiben beim nächsten Öffnen und in Auswahl-Dialogen erhalten (Browser-Speicher).
+
 ### Editor: Blättern im Bearbeiten-Modus
 - „Ansehen“/„Bearbeiten“ behalten die Parameter der Seite (z. B. `?seite=2`) – vorher landete man auf Seite 1.
 - Blätter- und Filter-Links derselben Seite funktionieren im Bearbeiten-Modus und bleiben darin; die Block-Vorschau
