@@ -6,6 +6,17 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Versionen für Einträge und Time Machine
+- Einträge haben Versionen wie Seiten (`entry_revisions`, `Core\Data\Revisions`): jedes Speichern über `Entries::save` (Verwaltung,
+  Website, API, MCP, DAV; nicht der Abgleich externer Quellen), beim ersten Ändern zusätzlich der Ausgangsstand; die letzten
+  `revisions` (Standard 20) je Eintrag. Wiederherstellen schreibt die Felder zurück (Status bleibt).
+- Time Machine (`resources/js/timemachine.mjs`, `Admin\VersionsController`): Stände von Seiten (echte Vorschau je Stand) und
+  Einträgen (Felder, Änderungen markiert) gestaffelt im Raum, Zeitleiste, Tastatur/Mausrad, Wiederherstellen mit Rückfrage.
+  Aufruf: Seiteneinstellungen → Versionen, Eintrag → „Versionen“, Website-Menü ⋯ → „Versionen (Time Machine)“.
+- Gemeinsame Meldungen (`resources/js/_toast.js`, `CMSAdmin.toast` / `toastNext` – Meldung nach dem Neuladen) für Verwaltung und Website;
+  Mediathek, Werkzeuge und Inline-Bearbeitung nutzen sie.
+- „Neue Seite“: auf Detailseiten von Einträgen ist die Seite vorgewählt, unter deren Adresse sie liegen.
+
 ### Bilder auf der Website tauschen
 - Bildleiste im Seiten-Editor: zusätzlich „Tauschen“ (Mediathek) und „Hochladen“ (Dateiauswahl, neue Datei wird direkt übernommen) –
   setzt das Bildfeld des Blocks (`CMSEditor.swap`), Anpassung/Rahmen der Stelle werden zurückgesetzt. `CMSMedia.pick(kind, { upload })`.

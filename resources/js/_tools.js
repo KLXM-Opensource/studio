@@ -23,6 +23,7 @@
 import { layerBox, barRoot, deepActive, uiAll } from './_shadow.js';
 import { Rich } from './_rte.js';
 import { ico } from './_icons.js';
+import { toast } from './_toast.js';
 
 const d = document;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -143,17 +144,7 @@ function insertLink(res) {
   return 'link';
 }
 
-// ------------------------------------------------------------------ Meldungen
-let toastEl = null, toastT = 0;
-function toast(msg, kind = 'ok') {
-  toastEl ??= Object.assign(d.createElement('div'), { className: 'cms-toast' });
-  toastEl.className = 'cms-toast cms-toast--' + kind;
-  toastEl.setAttribute('role', kind === 'error' ? 'alert' : 'status');
-  toastEl.textContent = msg;
-  if (!toastEl.isConnected) layerBox().append(toastEl);
-  clearTimeout(toastT);
-  toastT = setTimeout(() => toastEl.remove(), 4000);
-}
+// ------------------------------------------------------------------ Meldungen: gemeinsame Lösung (_toast.js)
 function announce(msg) {
   const live = uiAll('[data-editor-status],[data-entry-status]')[0];
   if (!live) return;

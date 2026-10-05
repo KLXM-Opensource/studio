@@ -1,4 +1,5 @@
 import { t } from './_i18n.js';
+import { toast as sharedToast } from './_toast.js';
 import { drill } from './_drill.js';
 import { layerBox, inPath, topInset } from './_shadow.js';
 import { ico } from './_icons.js';
@@ -70,7 +71,7 @@ const usedMsg = (name, used) => t('„{name}“ wird noch verwendet', { name }) 
   + '\n' + t('Bitte zuerst dort entfernen – oder „Ersetzen“ nutzen, dann bleiben alle Verwendungen erhalten.');
 
 /** Datei-Details laden – schlägt das fehl, sichtbare Meldung statt stillem Abbruch (nur Konsole) */
-const loadFailed = ex => toast(t('Die Datei konnte nicht geladen werden ({msg}). Bitte die Seite neu laden – bleibt der Fehler, bitte melden.', { msg: ex && ex.message ? ex.message : '?' }));
+const loadFailed = ex => toast(t('Die Datei konnte nicht geladen werden ({msg}). Bitte die Seite neu laden – bleibt der Fehler, bitte melden.', { msg: ex && ex.message ? ex.message : '?' }), 'error');
 
 async function http(url, opt = {}) {
   if (POOL) {
@@ -144,11 +145,8 @@ function extend(plugin) {
   FINDERS.forEach(f => { if (f.meta && f.root.isConnected) { plugin.loaded?.(f, f.meta); f.renderSide(); f.render(); f.renderSources(); } });
 }
 
-function toast(text) {
-  const t = inBox('mu-toast', '<div id="mu-toast" class="mu-toast" role="status" hidden></div>');
-  t.textContent = text; t.hidden = false;
-  clearTimeout(t._h); t._h = setTimeout(() => (t.hidden = true), 2600);
-}
+// Meldungen: gemeinsame Lösung (_toast.js) – kürzer als sonst, die Mediathek meldet oft hintereinander
+const toast = (text, kind = 'ok') => sharedToast(text, kind, 2600);
 
 // ============================================================ Upload in Stücken
 async function uploadFile(file, meta, onProgress) {

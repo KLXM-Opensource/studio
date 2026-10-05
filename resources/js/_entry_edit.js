@@ -11,6 +11,7 @@ import { conditions } from './_conditions.js';
 import { emit, beforeSave } from './_tools.js';   // Ereignisse cms:* (Werkzeuge, Erweiterungen)
 import { ui, uiAll, layerBox, barHost, openDialog, addRoot, pathClosest, setUiCss, deepActive } from './_shadow.js';
 import { ico } from './_icons.js';
+import { toast as sharedToast } from './_toast.js';
 import { bar_ as Bar, barState, confirmDiscard, ask } from './_bar.js';
 
 const d = document;
@@ -71,10 +72,7 @@ function restoreScroll() {
 function toast(msg, kind = 'ok') {
   const st = ui('[data-entry-status]');
   if (st) { setStatus(msg, 'is-' + kind); return; }
-  const el = d.createElement('div');
-  el.className = 'cms-toast cms-toast--' + kind; el.setAttribute('role', 'status'); el.textContent = msg;
-  layerBox().append(el);   // Shadow-DOM-Ebene (editor.shadow.css)
-  setTimeout(() => el.remove(), 4000);
+  sharedToast(msg, kind);   // gemeinsame Lösung (_toast.js)
 }
 function setStatus(t, cls = '') {
   // Werkzeugleiste (_bar.js): Chip, „Gespeichert ✓“, Live-Region

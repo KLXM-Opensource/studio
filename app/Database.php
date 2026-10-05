@@ -249,10 +249,14 @@ final class Database
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS data_tables (id $pk, handle VARCHAR(64) NOT NULL UNIQUE, name $str NOT NULL,
             singular $str, icon VARCHAR(40), description TEXT, fields_json $long, settings_json $long, sort INT NOT NULL DEFAULT 0,
             created_at VARCHAR(25), updated_at VARCHAR(25))$tail");
+        // Versionen von Einträgen (Core\Data\Revisions): Stand je Speichern, gekürzt auf die letzten N je Eintrag
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS entry_revisions (id $pk, tbl VARCHAR(64) NOT NULL, entry_id INT NOT NULL, data_json $long,
+            status VARCHAR(20), created_at VARCHAR(25), user_id INT NULL, user_email $str, note $str)$tail");
 
         if (!$my) {
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS hits_key ON hits (hkey, created_at)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS rev_page ON revisions (page_id, id)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS erev_entry ON entry_revisions (tbl, entry_id, id)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS pages_path ON pages (path)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS pages_parent ON pages (parent_id, sort)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS inbox_log_time ON inbox_log (created_at)');

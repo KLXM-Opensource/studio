@@ -368,6 +368,11 @@ return function (Router $r): void {
     $r->post('/admin/roles/{key}/delete', [Admin\RoleController::class, 'delete']);
 
     // Editor-API (JSON)
+    // Versionen / Time Machine (resources/js/timemachine.mjs)
+    $r->get('/admin/api/pages/{id}/versions', [Admin\VersionsController::class, 'pageVersions']);
+    $r->get('/admin/pages/{id}/versions/{rev}/vorschau', [Admin\VersionsController::class, 'pagePreview']);
+    $r->get('/admin/api/data/{handle}/{id}/versions', [Admin\VersionsController::class, 'entryVersions']);
+    $r->post('/admin/api/data/{handle}/{id}/versions/{rev}/restore', [Admin\VersionsController::class, 'entryRestore']);
     $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);       // „Neue Seite“ auf der Website (Core\PageTool)
     $r->post('/admin/api/pages/create', [Admin\PageController::class, 'apiCreate']);
     $r->post('/admin/api/pages/{id}/save', [Admin\EditorController::class, 'save']);

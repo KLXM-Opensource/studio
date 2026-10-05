@@ -27,7 +27,14 @@ export default {
       return;
     }
     const byId = new Map(st.pages.map(p => [p.id, p]));
-    const cur = D.current && byId.get(D.current);
+    // Vorauswahl: aktuelle Seite – auf Detailseiten von Einträgen (keine eigene Seite) die Seite, unter deren Adresse sie liegt
+    let cur = D.current && byId.get(D.current);
+    if (!cur) {
+      const here = location.pathname.replace(/\/+$/, '') || '/';
+      cur = st.pages.filter(p => !p.home && p.path !== '/' && (here === p.path || here.startsWith(p.path.replace(/\/+$/, '') + '/')))
+        .sort((a, b) => b.path.length - a.path.length)[0] || null;
+      if (cur) D.current = cur.id;
+    }
     st.target = cur ? cur.id : 0;
     st.pos = cur && !cur.home ? 'inside' : (cur ? 'after' : 'inside');
 

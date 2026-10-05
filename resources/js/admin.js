@@ -5,6 +5,7 @@
  */
 import { initBar, layer, layerBox, listen, pathTarget, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathClosest, inPath, IN_ADMIN, topInset } from './_shadow.js';
 import './_media.js';
+import { toast, toastNext, flushToast } from './_toast.js';   // Meldungen (Verwaltung + Website)
 import { openSpotlight } from './_spotlight.js';
 import { t } from './_i18n.js';
 import { initGeo } from './_geo.js';
@@ -903,10 +904,21 @@ d.addEventListener('click', e => {
 
 function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
 init();
+flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
+
+// Time Machine (Versionen von Seiten und Einträgen): Knopf [data-timemachine="<Endpunkt>"] in Verwaltung und Werkzeugleiste
+// (auch im Shadow DOM) – lädt resources/js/timemachine.mjs erst beim Öffnen (data-tm-module)
+d.addEventListener('click', e => {
+  const b = e.composedPath().find(n => n instanceof Element && n.hasAttribute('data-timemachine'));
+  if (!b) return;
+  e.preventDefault();
+  import(b.dataset.tmModule).then(m => m.open({ endpoint: b.dataset.timemachine, csrf: b.dataset.tmCsrf || csrf() }))
+    .catch(err => console.error('[Time Machine]', err));
+});
 initSettingsPreview();
 initDesign();
 initBlockBuilder();
-window.CMSAdmin = { init, openMediaPicker, pickLink, openLinkPicker, openPagesPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
+window.CMSAdmin = { init, toast, toastNext, openMediaPicker, pickLink, openLinkPicker, openPagesPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
   // Werkzeuge beim Bearbeiten und Ereignisse (stabile Schnittstelle, Technik → Erweiterungen): CMSAdmin.tools.register(id, { mount, unmount })
   tools: tools_, events: { emit, beforeSave },
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene

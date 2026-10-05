@@ -513,7 +513,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .qg-done .ico{width:16px;height:16px;vertical-align:-3px}
 .qg-intro{margin:0 0 6px;font-size:13px;color:var(--adm-t2,#3F4A47)}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-.cms-toast--error{background:#B3261E}
+.cms-toast--error{background:#B3261E}.cms-toast--info{background:#314164}
 
 /* Block-Menü (editor.js BlockMenu): Stil wie „+ Block einfügen“, mit Titel, Trennern, Tastenhinweis und Löschen in Rot */
 .cms-blockmenu{width:min(280px,calc(100vw - 16px));max-height:min(520px,calc(100vh - 16px));overflow:auto;gap:2px}

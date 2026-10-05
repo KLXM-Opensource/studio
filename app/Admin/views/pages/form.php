@@ -115,6 +115,7 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
       </div>
       <?php endif; ?>
       <p class="adm-muted">Die letzten <?= (int) app()->config->get('revisions', 20) ?> Stände. Wiederherstellen legt einen Entwurf an.</p>
+      <?php if ($revisions): ?><p><button type="button" class="adm-btn adm-btn--small"<?= \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/pages/' . (int) $page['id'] . '/versions') ?>><?= icon('clock-counter-clockwise') ?> <?= e(__('Time Machine öffnen')) ?></button></p><?php endif; ?>
       <ul class="adm-list adm-list--rev">
         <?php foreach ($revisions as $i => $rv): ?>
         <li><span><?= e(date('d.m.Y H:i', strtotime($rv['created_at']))) ?> · <?= e($rv['note']) ?><small><?= e($rv['email'] ?? 'System') ?></small></span>

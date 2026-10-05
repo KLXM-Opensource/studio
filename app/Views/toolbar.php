@@ -194,6 +194,10 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
           <?= $item(e($xi['label']) . ($xi['hint'] !== '' ? '<small>' . e($xi['hint']) . '</small>' : ''), $xi['icon'], $xi['href'] !== null ? url($xi['href']) : null,
               implode('', array_map(fn($k, $v) => ' data-' . e($k) . '="' . e($v) . '"', array_keys($xi['data']), $xi['data']))) ?>
         <?php endforeach; ?>
+        <?php // Time Machine: Versionen der Seite bzw. des Eintrags (Admin\VersionsController, resources/js/timemachine.mjs)
+        if ($kind === 'page' && $b['hasPage'] && $b['canEditPages']): ?><?= $item(e(__('Versionen (Time Machine)')) . '<small>' . e(__('frühere Stände ansehen und wiederherstellen')) . '</small>', 'clock-counter-clockwise', null, \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/pages/' . (int) $page['id'] . '/versions')) ?>
+        <?php elseif ($kind === 'entry' && !empty($b['entryEditable']) && !$b['foreign']): ?><?= $item(e(__('Versionen (Time Machine)')) . '<small>' . e(__('frühere Stände ansehen und wiederherstellen')) . '</small>', 'clock-counter-clockwise', null, \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/data/' . $b['table']['handle'] . '/' . (int) $b['entry']['id'] . '/versions')) ?>
+        <?php endif; ?>
         <?php if ($b['hasPage'] && $b['canManage']): ?><?= $item(e($kind === 'page' ? __('Seiteneinstellungen') : __('Einstellungen der Vorlagen-Seite')), 'gear-six', url('/admin/pages/' . $page['id'])) ?><?php endif; ?>
         <?php if ($b['canSettings']): ?><?= $item(e($b['settingsTitle']), 'sliders-horizontal', url('/admin/settings')) ?><?php endif; ?>
         <?= $sep ?>

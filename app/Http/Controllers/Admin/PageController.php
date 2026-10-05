@@ -291,6 +291,8 @@ final class PageController extends AdminController
         $row = app()->db->fetch('SELECT * FROM revisions WHERE id = ? AND page_id = ?', [(int) $rev, (int) $id]) ?? throw new HttpException(404);
         $blocks = json_decode((string) $row['blocks_json'], true)['blocks'] ?? [];
         Pages::saveDraft((int) $id, Pages::sanitizeBlocks($blocks), (int) $user['id'], 'Wiederhergestellt (Stand ' . $row['created_at'] . ')');
+        // Time Machine (JSON): Entwurf angelegt – die Seite öffnet danach im Editor
+        if ($r->wantsJson()) return Response::json(['ok' => true, 'message' => __('Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.'), 'url' => Pages::url(Pages::find((int) $id)) . '?edit=1']);
         return $this->back('/admin/pages/' . $id, 'success', 'Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.');
     }
 

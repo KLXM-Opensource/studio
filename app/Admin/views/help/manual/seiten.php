@@ -37,6 +37,12 @@
     <tr><td>Versionen</td><td>Die letzten <?= (int) app()->config->get('revisions', 20) ?> gespeicherten Stände – „Wiederherstellen“ legt einen Entwurf an.</td></tr>
   </table>
   <div class="doc-note doc-note--important"><strong>Rechtstexte</strong><p>Impressum, Datenschutz und Barrierefreiheit enthalten Platzhalter. Bitte ausschließlich mit geprüften Texten (z. B. von Kammer, Verband, Rechtsberatung oder Datenschutzbeauftragten) füllen.</p></div>
+  <h3 id="time-machine">Time Machine: frühere Stände ansehen</h3>
+  <p>Unter <b>Versionen</b> in den Seiteneinstellungen bzw. auf der Website im Menü <b>⋯ → Versionen (Time Machine)</b> öffnet sich
+    die Time Machine: Vorne steht die Seite so, wie sie zu einem früheren Zeitpunkt aussah, die älteren Stände liegen dahinter. Mit den Pfeilen,
+    <kbd>↑</kbd>/<kbd>↓</kbd>, dem Mausrad oder einem Klick auf die Zeitleiste rechts gehen Sie in der Zeit zurück und vor (unten steht „Jetzt“).
+    <b>Wiederherstellen</b> legt den gewählten Stand als Entwurf an – veröffentlicht wird erst, wenn Sie es tun. <kbd>Esc</kbd> schließt.</p>
+
   <h3 id="nicht-gefunden">Seite „Nicht gefunden (404)“</h3>
   <p>Ruft jemand eine Adresse auf, die es nicht gibt (Tippfehler, alter Link), zeigt die Website eine Fehlerseite. Diese Seite können Sie selbst gestalten – mit Blöcken wie jede andere Seite. Sie finden sie in der <a href="<?= e(url('/admin/pages#sonderseiten')) ?>">Seitenübersicht</a> unten unter <b>Sonderseiten</b> und unter <b>Einrichtung › Website › Weiterleitungen → Nicht gefunden (404)</b>.</p>
   <ol class="doc-steps">

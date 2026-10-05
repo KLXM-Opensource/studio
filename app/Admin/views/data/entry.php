@@ -14,6 +14,7 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
 <header class="adm-head dt-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url($base)) ?>"><span aria-hidden="true"><?= icon($t['icon']) ?></span> <?= e($t['name']) ?></a></p>
     <h1><?= $isNew ? 'Neu: ' . e($t['singular']) : e(Entries::title($t, $e)) ?></h1></div>
+  <?php if (!$isNew): // Versionen des Eintrags (Core\Data\Revisions) ?><button type="button" class="adm-btn adm-btn--ghost"<?= \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/data/' . $t['handle'] . '/' . (int) $e['id'] . '/versions') ?>><?= icon('clock-counter-clockwise') ?> <?= e(__('Versionen')) ?></button><?php endif; ?>
   <?php if ($url): ?><a class="adm-btn adm-btn--ghost" href="<?= e($url) ?>" target="_blank" rel="noopener">Ansehen ↗</a><?php endif; ?>
 </header>
 

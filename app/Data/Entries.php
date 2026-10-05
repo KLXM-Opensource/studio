@@ -355,9 +355,9 @@ final class Entries
 
     /**
      * Eintrag anlegen oder ändern.
-     * $in: Feldwerte + optional slug, status. @return array{0: ?int, 1: array} [id, errors]
+     * $in: Feldwerte + optional slug, status. $note: Notiz der Version (Core\Data\Revisions). @return array{0: ?int, 1: array} [id, errors]
      */
-    public static function save(array $table, ?int $id, array $in): array
+    public static function save(array $table, ?int $id, array $in, string $note = ''): array
     {
         self::guard($table);
         $current = $id ? self::find($table, $id) : null;
@@ -432,6 +432,9 @@ final class Entries
             // „Dem Verband vorschlagen“ – nur Mitglieder, nicht die Eigentümer-Website
             $row['suggest'] = !Shared::isOwner($table) && !empty($in['_suggest']) && $in['_suggest'] !== '0' ? 1 : 0;
         }
+        // Versionen: vor der ersten Änderung den bisherigen Stand sichern (Abgleich externer Quellen ausgenommen)
+        $versioned = !\Core\Sources\Sync::$writing;
+        if ($current && $versioned && !Revisions::has($table, (int) $id)) Revisions::record($table, $current, __('Ausgangsstand'));
         if ($current) {
             $db->update($table['table'], $row, 'id = :id', ['id' => $id]);
         } else {
@@ -448,6 +451,11 @@ final class Entries
             }
         }
         self::changed($table);
+        if ($versioned && ($saved = self::find($table, (int) $id))) {
+            $was = $current['status'] ?? null;
+            $note = $note !== '' ? $note : (!$current ? __('Angelegt') : ($was !== $status ? ($status === 'published' ? __('Veröffentlicht') : __('Als Entwurf gespeichert')) : ''));
+            Revisions::record($table, $saved, $note);
+        }
         self::events($table, (int) $id, $current, $status);
         return [$id, []];
     }
@@ -473,6 +481,7 @@ final class Entries
         $db = Tables::db($table);
         // Stand vor dem Löschen für Erweiterungen (Core\Events\EntryDeleted) – nur laden, wenn jemand zuhört
         $before = \Core\Extensions::listens('entry.deleted') ? self::find($table, $id) : null;
+        Revisions::forget($table, $id);
         if (Tables::isShared($table)) {
             // Geteilt: nur eigene Einträge; Auswahl aller Websites mit entfernen
             if ($db->query("DELETE FROM {$table['table']} WHERE id = ? AND origin_site = ?", [$id, site()->key])->rowCount() === 0) return;
