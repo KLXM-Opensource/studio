@@ -368,7 +368,7 @@ return function (Router $r): void {
     $r->post('/admin/roles/{key}/delete', [Admin\RoleController::class, 'delete']);
 
     // Editor-API (JSON)
-    // Versionen / Time Machine (resources/js/timemachine.mjs)
+    // Versionen von Seiten und Einträgen (resources/js/versions.mjs)
     $r->get('/admin/api/pages/{id}/versions', [Admin\VersionsController::class, 'pageVersions']);
     $r->get('/admin/pages/{id}/versions/{rev}/vorschau', [Admin\VersionsController::class, 'pagePreview']);
     $r->get('/admin/api/data/{handle}/{id}/versions', [Admin\VersionsController::class, 'entryVersions']);

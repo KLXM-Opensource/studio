@@ -6,13 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
-### Versionen für Einträge und Time Machine
+### Versionen für Einträge, Ansicht „Versionen“
 - Einträge haben Versionen wie Seiten (`entry_revisions`, `Core\Data\Revisions`): jedes Speichern über `Entries::save` (Verwaltung,
   Website, API, MCP, DAV; nicht der Abgleich externer Quellen), beim ersten Ändern zusätzlich der Ausgangsstand; die letzten
   `revisions` (Standard 20) je Eintrag. Wiederherstellen schreibt die Felder zurück (Status bleibt).
-- Time Machine (`resources/js/timemachine.mjs`, `Admin\VersionsController`): Stände von Seiten (echte Vorschau je Stand) und
-  Einträgen (Felder, Änderungen markiert) gestaffelt im Raum, Zeitleiste, Tastatur/Mausrad, Wiederherstellen mit Rückfrage.
-  Aufruf: Seiteneinstellungen → Versionen, Eintrag → „Versionen“, Website-Menü ⋯ → „Versionen (Time Machine)“.
+- Ansicht „Versionen“ (`resources/js/versions.mjs`, `Admin\VersionsController`): links Zeitleiste mit gestapelten Karten (nach Tagen,
+  mit geänderten Feldern), rechts die Vorschau des Stands – Seiten als echte Seite (Desktop/Mobil), Einträge als Felder mit markierten
+  Änderungen; Wiederherstellen mit Rückfrage. Aufruf: Seiteneinstellungen → Versionen, Eintrag → „Versionen“, Website-Menü ⋯ → „Versionen“.
 - Gemeinsame Meldungen (`resources/js/_toast.js`, `CMSAdmin.toast` / `toastNext` – Meldung nach dem Neuladen) für Verwaltung und Website;
   Mediathek, Werkzeuge und Inline-Bearbeitung nutzen sie.
 - „Neue Seite“: auf Detailseiten von Einträgen ist die Seite vorgewählt, unter deren Adresse sie liegen.

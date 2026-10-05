@@ -906,14 +906,14 @@ function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); in
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 
-// Time Machine (Versionen von Seiten und Einträgen): Knopf [data-timemachine="<Endpunkt>"] in Verwaltung und Werkzeugleiste
-// (auch im Shadow DOM) – lädt resources/js/timemachine.mjs erst beim Öffnen (data-tm-module)
+// Versionen von Seiten und Einträgen: Knopf [data-versions="<Endpunkt>"] in Verwaltung und Werkzeugleiste (auch im Shadow DOM)
+// – lädt resources/js/versions.mjs erst beim Öffnen (data-versions-module)
 d.addEventListener('click', e => {
-  const b = e.composedPath().find(n => n instanceof Element && n.hasAttribute('data-timemachine'));
+  const b = e.composedPath().find(n => n instanceof Element && n.hasAttribute('data-versions'));
   if (!b) return;
   e.preventDefault();
-  import(b.dataset.tmModule).then(m => m.open({ endpoint: b.dataset.timemachine, csrf: b.dataset.tmCsrf || csrf() }))
-    .catch(err => console.error('[Time Machine]', err));
+  import(b.dataset.versionsModule).then(m => m.open({ endpoint: b.dataset.versions, csrf: b.dataset.versionsCsrf || csrf() }))
+    .catch(err => console.error('[Versionen]', err));
 });
 initSettingsPreview();
 initDesign();

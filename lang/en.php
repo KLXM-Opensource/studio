@@ -6114,7 +6114,7 @@ return [
     'Die Anpassung gilt für alle Verwendungen dieses Bildes.' => 'The adjustment applies to all uses of this image.',
     'Effekte, Helligkeit, Kontrast – gilt für alle Verwendungen des Bildes' => 'Effects, brightness, contrast – applies to all uses of the image',
     'Gespeichert – gilt für alle Verwendungen dieses Bildes (nach dem Neuladen sichtbar).' => 'Saved – applies to all uses of this image (visible after reloading).',
-    // Versionen / Time Machine
+    // Versionen
     'Aktueller Stand' => 'Current state',
     'Als Entwurf gespeichert' => 'Saved as draft',
     'Angelegt' => 'Created',
@@ -6129,9 +6129,7 @@ return [
     'Nur Änderungen' => 'Changes only',
     'Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.' => 'State restored – as a draft. Review it, then publish.',
     'Stand wiederhergestellt.' => 'State restored.',
-    'Time Machine öffnen' => 'Open Time Machine',
     'Version nicht gefunden.' => 'Version not found.',
-    'Versionen (Time Machine)' => 'Versions (Time Machine)',
     'Wiederhergestellt (Stand {date})' => 'Restored (state of {date})',
     'Wiederherstellen fehlgeschlagen.' => 'Restore failed.',
     'Wird wiederhergestellt …' => 'Restoring …',
@@ -6140,4 +6138,7 @@ return [
     '{n} ältere Stände' => '{n} earlier states',
     'Älterer Stand' => 'Older state',
     '1 älterer Stand' => '1 earlier state',
+    'Geändert: {list}' => 'Changed: {list}',
+    'Versionen ansehen' => 'View versions',
+    'Vorschau dieses Stands' => 'Preview of this state',
 ];

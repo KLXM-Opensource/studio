@@ -12,7 +12,7 @@ namespace Core\Data;
  *    Stand gesichert („Ausgangsstand“), damit es immer etwas zum Zurückgehen gibt.
  *  - Gleiche Stände hintereinander werden nicht doppelt gespeichert (Vergleich ohne Zeitstempel).
  *  - restore(): Feldwerte des Stands per Entries::save zurückschreiben (Status bleibt, wie er ist) – das ergibt selbst eine Version.
- *  - Time Machine (resources/js/timemachine.mjs): Admin\DataController::apiVersions / apiRestoreVersion.
+ *  - Ansicht „Versionen“ (resources/js/versions.mjs): Admin\VersionsController::entryVersions / entryRestore.
  */
 final class Revisions
 {

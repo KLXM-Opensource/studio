@@ -15,7 +15,7 @@ use Core\NotFound;
 use Core\Pages;
 
 /**
- * Versionen für die Time Machine (resources/js/timemachine.mjs) – Seiten (Tabelle revisions) und Einträge (Core\Data\Revisions).
+ * Versionen ansehen und wiederherstellen (resources/js/versions.mjs) – Seiten (Tabelle revisions) und Einträge (Core\Data\Revisions).
  *
  *  GET  /admin/api/pages/{id}/versions                → Stände der Seite, je Stand eine Vorschau-Adresse (echte Seite im Iframe)
  *  GET  /admin/pages/{id}/versions/{rev}/vorschau     → HTML der Seite in diesem Stand (noindex, no-store, ohne Redaktionsnotizen)
@@ -27,16 +27,18 @@ use Core\Pages;
  */
 final class VersionsController extends AdminController
 {
-    /** Attribute für einen Knopf, der die Time Machine öffnet (admin.js lädt das Modul erst beim Klick) */
+    /** Attribute für einen Knopf, der die Versionen öffnet (admin.js lädt resources/js/versions.mjs erst beim Klick) */
     public static function attrs(string $endpoint): string
     {
-        return ' data-timemachine="' . e(url($endpoint)) . '" data-tm-module="' . e(asset('js/timemachine.mjs')) . '" data-tm-csrf="' . e(\Core\Csrf::token()) . '" aria-haspopup="dialog"';
+        return ' data-versions="' . e(url($endpoint)) . '" data-versions-module="' . e(asset('js/versions.mjs')) . '" data-versions-csrf="' . e(\Core\Csrf::token()) . '" aria-haspopup="dialog"';
     }
 
-    /** Texte für resources/js/timemachine.mjs (Sprache der Verwaltung) */
+    /** Texte für resources/js/versions.mjs (Sprache der Verwaltung) */
     public static function texts(): array
     {
         return [
+            'title' => __('Versionen'), 'today' => __('Heute'), 'desktop' => __('Desktop'), 'mobile' => __('Mobil'), 'changes' => __('Geändert: {list}'),
+            'preview' => __('Vorschau dieses Stands'),
             'now' => __('Jetzt'), 'count' => __('{n} ältere Stände'), 'count1' => __('1 älterer Stand'), 'close' => __('Schließen'), 'timeline' => __('Zeitleiste'),
             'older' => __('Älterer Stand'), 'newer' => __('Neuerer Stand'), 'cancel' => __('Abbrechen'), 'restore' => __('Wiederherstellen'),
             'back' => __('Zurück'), 'yes' => __('Ja, wiederherstellen'), 'restoring' => __('Wird wiederhergestellt …'),
@@ -58,6 +60,14 @@ final class VersionsController extends AdminController
         return $page;
     }
 
+    /** Zeitangaben eines Stands: day (Gruppe der Zeitleiste), time, ago, at (lang) */
+    private static function when(?string $at): array
+    {
+        $f = Format::admin();
+        $at = $at ?: now();
+        return ['day' => $f->date($at, 'long'), 'time' => $f->time($at), 'ago' => $f->relative($at), 'at' => $f->datetime($at, 'long')];
+    }
+
     public function pageVersions(Request $r, string $id): Response
     {
         $page = $this->page($r, $id);
@@ -65,7 +75,7 @@ final class VersionsController extends AdminController
         $strip = fn(?string $json) => json_encode(json_decode((string) $json, true)['blocks'] ?? []);
         $now = $strip($page['content_draft'] ?? $page['content_published']);
         $out = [[
-            'id' => 0, 'now' => true, 'label' => __('Jetzt'), 'at' => $f->datetime($page['updated_at'] ?? now(), 'long'),
+            'id' => 0, 'now' => true, 'label' => __('Jetzt'), ...self::when($page['updated_at'] ?? null),
             'note' => $page['status'] === 'published' && ($page['content_draft'] ?? null) !== null && $page['content_draft'] !== $page['content_published'] ? __('Entwurf mit unveröffentlichten Änderungen') : __('Aktueller Stand'),
             'user' => '', 'preview' => url('/admin/pages/' . (int) $page['id'] . '/vorschau'),
         ]];
@@ -74,11 +84,11 @@ final class VersionsController extends AdminController
             $k = $strip($rv['blocks_json']);
             if (isset($seen[$k])) continue;   // gleicher Inhalt wie ein neuerer Stand
             $seen[$k] = true;
-            $out[] = ['id' => (int) $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), 'at' => $f->datetime($rv['created_at'], 'long'),
-                'note' => (string) ($rv['note'] ?? ''), 'user' => (string) ($rv['email'] ?? ''),
+            $out[] = ['id' => (int) $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), ...self::when($rv['created_at']),
+                'note' => (string) ($rv['note'] ?? '') ?: __('Gespeichert'), 'user' => (string) ($rv['email'] ?? ''),
                 'preview' => url('/admin/pages/' . (int) $page['id'] . '/versions/' . (int) $rv['id'] . '/vorschau')];
         }
-        return Response::json(['ok' => true, 'kind' => 'page', 'title' => (string) $page['title'], 'versions' => $out, 'texts' => self::texts(),
+        return Response::json(['ok' => true, 'kind' => 'page', 'title' => (string) $page['title'], 'versions' => $out, 'texts' => self::texts(), 'today' => Format::admin()->date(now(), 'long'),
             'restore' => url('/admin/pages/' . (int) $page['id'] . '/restore/{rev}'), 'can_restore' => can('pages.edit')]);
     }
 
@@ -128,18 +138,26 @@ final class VersionsController extends AdminController
             }
             return $out;
         };
-        $out = [['id' => 0, 'now' => true, 'label' => __('Jetzt'), 'at' => $f->datetime($e['updated_at'] ?? now(), 'long'), 'note' => __('Aktueller Stand'), 'user' => '',
-            'status' => (string) ($e['status'] ?? ''), 'title' => Entries::title($t, $e), 'fields' => $fields($now)]];
+        $out = [['id' => 0, 'now' => true, 'label' => __('Jetzt'), ...self::when($e['updated_at'] ?? null), 'note' => __('Aktueller Stand'), 'user' => '',
+            'status' => (string) ($e['status'] ?? ''), 'title' => Entries::title($t, $e), 'fields' => $fields($now), '_d' => $now]];
         $seen = [$key($now) => true];
         foreach (Revisions::list($t, (int) $e['id']) as $rv) {
             $k = $key($rv['data']);
             if (isset($seen[$k])) continue;
             $seen[$k] = true;
-            $out[] = ['id' => $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), 'at' => $f->datetime($rv['created_at'], 'long'),
-                'note' => $rv['note'], 'user' => $rv['user_email'], 'status' => $rv['status'],
-                'title' => Entries::title($t, ['id' => (int) $e['id']] + $rv['data'] + $e), 'fields' => $fields($rv['data'])];
+            $out[] = ['id' => $rv['id'], 'now' => false, 'label' => $f->relative($rv['created_at']), ...self::when($rv['created_at']),
+                'note' => $rv['note'] ?: __('Gespeichert'), 'user' => $rv['user_email'], 'status' => $rv['status'],
+                'title' => Entries::title($t, ['id' => (int) $e['id']] + $rv['data'] + $e), 'fields' => $fields($rv['data']), '_d' => $rv['data']];
         }
-        return Response::json(['ok' => true, 'kind' => 'entry', 'title' => Entries::title($t, $e), 'table' => (string) $t['name'], 'versions' => $out, 'texts' => self::texts(),
+        // Je Stand: welche Felder sich gegenüber dem nächstälteren geändert haben (Karte in der Zeitleiste: „Titel, Bild“)
+        foreach ($out as $i => &$v) {
+            $older = $out[$i + 1]['_d'] ?? null;
+            $v['changes'] = $older === null ? [] : array_values(array_map(fn($fd) => (string) ($fd['label'] ?? $fd['name']),
+                array_filter($t['fields'], fn($fd) => json_encode($v['_d'][$fd['name']] ?? null) !== json_encode($older[$fd['name']] ?? null))));
+        }
+        unset($v);
+        $out = array_map(function ($v) { unset($v['_d']); return $v; }, $out);
+        return Response::json(['ok' => true, 'kind' => 'entry', 'title' => Entries::title($t, $e), 'table' => (string) $t['name'], 'versions' => $out, 'texts' => self::texts(), 'today' => Format::admin()->date(now(), 'long'),
             'restore' => url('/admin/api/data/' . $t['handle'] . '/' . (int) $e['id'] . '/versions/{rev}/restore'), 'can_restore' => true]);
     }
 

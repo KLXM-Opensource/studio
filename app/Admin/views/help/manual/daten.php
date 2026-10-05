@@ -28,10 +28,10 @@
   <h3>2. Einträge pflegen</h3>
   <p>Links im Menü unter <b>Daten</b> steht jede Tabelle einzeln. Die Liste lässt sich durchsuchen, nach Spalten sortieren und – bei manueller Sortierung – per Ziehen ordnen. Mehrere Einträge markieren: gemeinsam online stellen, auf Entwurf setzen oder löschen. Einzeln geht es schneller über die Spalte <b>Status</b> (bei Tabellen mit Freigabe): Klick auf <b>Online</b> nimmt den Eintrag nach einer Rückfrage offline, Klick auf <b>Offline</b> oder <b>Entwurf</b> stellt ihn online – ohne Neuladen, auch per <kbd>Tab</kbd> und <kbd>Enter</kbd>. <b>Offline</b> heißt: war schon online, Besucher sehen ihn nicht mehr (Listen, Detailseite, Sitemap, Suche), der Inhalt bleibt erhalten. Den Knopf gibt es nur mit dem Recht „Veröffentlichen“ für die Tabelle und nur für eigene Einträge (nicht für Einträge anderer Websites oder aus externen Quellen). <b>Speichern &amp; neu</b> beschleunigt das Anlegen mehrerer Einträge. Auf mehrsprachigen Websites legt „+ English“ im Eintrag eine verknüpfte Übersetzung an. Unter <b>Felder &amp; Einstellungen</b> stellen Sie außerdem Listenbild, Einträge je Seite und die <b>Suche</b> für diese Tabelle ein (siehe <a href="#<?= e($anchor('suche')) ?>">Website-Suche</a>).</p>
 
-  <h3 id="versionen">Versionen von Einträgen (Time Machine)</h3>
+  <h3 id="versionen">Versionen von Einträgen</h3>
   <p>Jedes Speichern eines Eintrags legt eine Version an – in der Verwaltung, direkt auf der Website, über API und MCP; beim ersten Ändern
     wird zusätzlich der bisherige Stand gesichert (die letzten <?= (int) app()->config->get('revisions', 20) ?> Stände je Eintrag).
-    <b>Versionen</b> oben im Eintrag bzw. auf der Detailseite <b>⋯ → Versionen (Time Machine)</b> zeigt die Stände gestaffelt hintereinander;
+    <b>Versionen</b> oben im Eintrag bzw. auf der Detailseite <b>⋯ → Versionen</b> zeigt links die Stände als Zeitleiste (mit den jeweils geänderten Feldern), rechts den gewählten Stand;
     geänderte Felder sind markiert, „Nur Änderungen“ blendet den Rest aus. <b>Wiederherstellen</b> setzt die Felder sofort auf den
     gewählten Stand (der Status bleibt) – der bisherige Stand bleibt als Version erhalten.</p>
 
