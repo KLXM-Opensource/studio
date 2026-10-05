@@ -110,6 +110,8 @@
 body.has-drawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):not(script):not(style):not(link):not(template){
   margin-right:min(var(--cms-drawer-w,clamp(480px,40vw,720px)),100vw);transition:margin-right .2s ease}
 @media (max-width:1100px){body.has-drawer>*{margin-right:0!important}}
+/* Hülle der Website im Editor (resources/js/_cq.js): Container für die umgeschriebenen Haltepunkte des Kits */
+.cms-cq-site{container:site/inline-size}
 @media (prefers-reduced-motion:reduce){body.has-drawer>*{transition:none}}
 
 /* Editor.js unterstreicht Links – im WYSIWYG das Frontend-Verhalten wiederherstellen */

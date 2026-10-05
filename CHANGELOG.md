@@ -15,6 +15,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Editor: Seitenleiste macht die ganze Website schmaler
 - Mit offener Seitenleiste „Bearbeiten“ rücken Kopf, Inhalt und Fuß der Website (alles direkt unter `<body>` außer den Ebenen des
   Editors) zur Seite – vorher nur der Inhaltsbereich, Kopf und Fuß lagen unter der Leiste. Unter 1100 px überdeckt die Leiste weiterhin.
+- Die Website reagiert im Editor auf ihre eigene Breite (`resources/js/_cq.js`): Hülle `.cms-cq-site` als Container, Stylesheets der
+  Seite werden im Browser umgeschrieben (`@media` nur mit Breite → `@container site`, `vw` → `cqi`, darin `:root/html/body` → Kinder der
+  Hülle). Seitenleiste breit ziehen → Tablet-/Handy-Ansicht, weiter bearbeitbar. Blockleisten passen sich der Breite an.
+- Behoben: eine doppelte Hilfsfunktion im Editor überschrieb `setPath` (direkt bearbeitete Texte in noch leeren verschachtelten Feldern).
 
 ### Versionen für Einträge, Ansicht „Versionen“
 - Einträge haben Versionen wie Seiten (`entry_revisions`, `Core\Data\Revisions`): jedes Speichern über `Entries::save` (Verwaltung,

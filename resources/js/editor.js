@@ -15,10 +15,13 @@
  *  - Block „Layout“ (Core\Layout): Spalten mit Blöcken – Leiste je Block in der Spalte (↑ ↓ ← →, Bearbeiten, Löschen),
  *    „+ Block in diese Spalte“ (nur verschachtelbare Blöcke), Direktbearbeitung über Pfade columns.{s}.blocks.{n}.data.{feld}.
  */
+import { responsiveEditing } from './_cq.js';
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
 const cfg = JSON.parse($('#cms-editor-config').textContent);
+// Website reagiert im Editor auf ihre eigene Breite (Seitenleiste breit → Tablet-/Handy-Ansicht) – resources/js/_cq.js
+responsiveEditing();
 // Shadow DOM (resources/js/_shadow.js über window.CMSAdmin): Werkzeugleiste, Ebene für Seitenleiste/Leisten, Block-Leisten
 const S = CMSAdmin.shadow;
 // Blocksymbol: Symbol aus dem Sprite (def.ico, vom Server aufgelöst), sonst Zeichen aus theme.php
@@ -444,6 +447,8 @@ const BarPlace = (() => {
   }, { passive: true });
   return { soon, place };
 })();
+// Breite der Seite ändert sich (Seitenleiste breiter/schmaler, Fenster): Leisten neu einpassen (schmal = nur Symbol, knapp = ohne Pfeile)
+new ResizeObserver(() => BarPlace.soon()).observe(d.querySelector('.cms-cq-site') || d.body);
 
 // ------------------------------------------------------------------ Blöcke kopieren / duplizieren
 /*
@@ -1234,14 +1239,6 @@ function mediaFields(fields, data, id, prefix = '') {
     if ((f.type === 'repeater' || f.type === 'group') && Array.isArray(v)) v.forEach((item, i) => out.push(...mediaFields(f.fields, item, id, `${p}.${i}.`)));
   }
   return out;
-}
-/** Wert an einem Pfad wie „items.2.image“ setzen */
-function setPath(obj, path, v) {
-  const keys = path.split('.');
-  let o = obj;
-  for (const k of keys.slice(0, -1)) { if (o[k] == null) return false; o = o[k]; }
-  o[keys[keys.length - 1]] = v;
-  return true;
 }
 window.CMSEditor.swap = {
   /** Bild im Block → { kind ('image'|'visual'), set(media) } oder null (nicht zuordenbar, z. B. aus einer Datentabelle) */
