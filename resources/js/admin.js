@@ -912,7 +912,7 @@ d.addEventListener('click', e => {
   const b = e.composedPath().find(n => n instanceof Element && n.hasAttribute('data-versions'));
   if (!b) return;
   e.preventDefault();
-  import(b.dataset.versionsModule).then(m => m.open({ endpoint: b.dataset.versions, csrf: b.dataset.versionsCsrf || csrf() }))
+  import(b.dataset.versionsModule).then(m => m.open({ endpoint: b.dataset.versions, csrf: b.dataset.versionsCsrf || csrf(), css: b.dataset.versionsCss }))
     .catch(err => console.error('[Versionen]', err));
 });
 initSettingsPreview();

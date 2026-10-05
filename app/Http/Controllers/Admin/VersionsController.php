@@ -30,7 +30,7 @@ final class VersionsController extends AdminController
     /** Attribute für einen Knopf, der die Versionen öffnet (admin.js lädt resources/js/versions.mjs erst beim Klick) */
     public static function attrs(string $endpoint): string
     {
-        return ' data-versions="' . e(url($endpoint)) . '" data-versions-module="' . e(asset('js/versions.mjs')) . '" data-versions-csrf="' . e(\Core\Csrf::token()) . '" aria-haspopup="dialog"';
+        return ' data-versions="' . e(url($endpoint)) . '" data-versions-module="' . e(asset('js/versions.mjs')) . '" data-versions-css="' . e(asset('css/versions.css')) . '" data-versions-csrf="' . e(\Core\Csrf::token()) . '" aria-haspopup="dialog"';
     }
 
     /** Texte für resources/js/versions.mjs (Sprache der Verwaltung) */

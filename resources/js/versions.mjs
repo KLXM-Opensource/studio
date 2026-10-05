@@ -21,7 +21,7 @@ const SVG = {
   restore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
 };
 
-export async function open({ endpoint, csrf = '' } = {}) {
+export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
   if (!endpoint || document.getElementById('cms-versions')) return;
   const opener = document.activeElement;
   const host = document.createElement('div');
@@ -29,7 +29,8 @@ export async function open({ endpoint, csrf = '' } = {}) {
   const root = host.attachShadow({ mode: 'open' });
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = new URL('../css/versions.css', import.meta.url).href;
+  // Versionierte Adresse vom Server (asset(), ?v=…) – sonst bliebe nach Updates das alte Stylesheet im Browser-Cache
+  css.href = cssUrl || new URL('../css/versions.css' + new URL(import.meta.url).search, import.meta.url).href;
   root.append(css);
   const vs = document.createElement('div');
   vs.className = 'vs';
