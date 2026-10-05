@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Editor: Blättern im Bearbeiten-Modus
+- „Ansehen“/„Bearbeiten“ behalten die Parameter der Seite (z. B. `?seite=2`) – vorher landete man auf Seite 1.
+- Blätter- und Filter-Links derselben Seite funktionieren im Bearbeiten-Modus und bleiben darin; die Block-Vorschau
+  (`/admin/api/preview`, Feld `query`) rendert mit den Parametern der Seite.
+
 ### Bedingte Block-Felder (`show_if`)
 - Felder eines Blocks erscheinen nur, wenn sie passen (z. B. „Bild“ nur bei Art „Bild/Video“), auch in Wiederholgruppen und
   abhängig von der Variante (`'/variant'`); Alternativen als Liste. Werte bleiben beim Umschalten erhalten.

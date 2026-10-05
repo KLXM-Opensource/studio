@@ -774,6 +774,15 @@ function makeTool(type, def) {
       pv.addEventListener('click', e => {
         if (e.target.closest('[data-edit]') || e.target.closest('summary')) return;
         e.preventDefault();
+        // Blättern/Filter derselben Seite (?seite=2): im Bearbeiten-Modus bleiben (ungespeichert → Rückfrage des Browsers)
+        const a = e.target.closest('a[href]');
+        const u = a && new URL(a.href, location.href);
+        const plain = s => { const p = new URLSearchParams(s); p.delete('edit'); p.sort(); return p.toString(); };
+        if (u && u.origin === location.origin && u.pathname === location.pathname && plain(u.search) !== plain(location.search) && !e.target.closest('[data-cms-open]')) {
+          u.searchParams.set('edit', '1');
+          location.href = u.href;
+          return;
+        }
         if (e.target.closest('[data-cms-open]')) { this.openDrawer(); return; }
         // Block in einer Spalte (Layout): auf „Bearbeiten“ seiner eigenen Leiste hinweisen
         const item = e.target.closest('[data-lay-item]');
@@ -864,7 +873,7 @@ function makeTool(type, def) {
 
     async loadPreview() {
       try {
-        const res = await api(cfg.endpoints.preview, { page: cfg.page.id, entry: cfg.entry, block: this.serialize() });
+        const res = await api(cfg.endpoints.preview, { page: cfg.page.id, entry: cfg.entry, block: this.serialize(), query: location.search });
         if (!Object.keys(this.data).length) this.data = res.block.data; // neuer Block → Standardwerte übernehmen
         if (type === LAYOUT) this.adoptColumns(res.block.data.columns || []);
         this.setPreview(res.html);

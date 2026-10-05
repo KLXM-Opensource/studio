@@ -59,6 +59,10 @@ final class EditorController extends AdminController
         app()->dataEdit = true;   // Datenlisten: Stift je Eintrag wie in der ersten Vorschau
         \Core\EditorNotes::$show = true;   // Redaktionsnotizen [# … #] als Hinweis
         $this->entryContext($r);
+        // Parameter der bearbeiteten Seite (Blättern ?seite=2, Filter): Blöcke rendern wie in der Seite, nicht immer Seite 1
+        parse_str(ltrim((string) ($r->post['query'] ?? ''), '?'), $q);
+        unset($q['edit'], $q['live']);
+        if ($q) app()->request = (app()->request ?? $r)->withQuery($q);
         $raw = (array) ($r->post['block'] ?? []);
         $blocks = Pages::sanitizeBlocks([$raw]);
         if (!$blocks) {

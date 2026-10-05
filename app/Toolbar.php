@@ -76,6 +76,9 @@ final class Toolbar
 
         // Adressen der Modi
         $pageUrl = $hasPage ? Pages::url($page) : url('/');
+        // Beim Umschalten Ansehen ↔ Bearbeiten die übrigen Parameter behalten (Blättern ?seite=2, Filter) – sonst landet man auf Seite 1
+        $keep = array_diff_key(app()->request?->query ?? [], ['edit' => 1, 'live' => 1]);
+        $qs = fn(bool $edit) => ($q = http_build_query($keep + ($edit ? ['edit' => 1] : []))) !== '' ? '?' . $q : '';
         $viewUrl = $ctx ? $b['entryUrl'] : $pageUrl;
         $b['viewUrl'] = $viewUrl;
         $b['pageEditUrl'] = $viewUrl . '?edit=1';
@@ -102,8 +105,8 @@ final class Toolbar
         $modes = [];
         if ($kind === 'page') {
             if ($hasPage) {
-                $modes[] = ['view', __('Ansehen'), 'eye', $pageUrl, !$editing];
-                if ($b['canEditPages']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $pageUrl . '?edit=1', $editing];
+                $modes[] = ['view', __('Ansehen'), 'eye', $pageUrl . $qs(false), !$editing];
+                if ($b['canEditPages']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $pageUrl . $qs(true), $editing];
             }
         } else {
             $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry'];

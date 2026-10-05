@@ -38,6 +38,12 @@ final class Request
         return new self(strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'), $path, $_GET, $post, $_FILES, $_SERVER);
     }
 
+    /** Gleiche Anfrage mit anderen GET-Parametern (Editor-Vorschau: Parameter der bearbeiteten Seite, z. B. ?seite=2) */
+    public function withQuery(array $query): self
+    {
+        return new self($this->method, $this->path, $query, $this->post, $this->files, $this->server);
+    }
+
     /** Gleiche Anfrage mit anderem (internem) Pfad – Core\AdminPath bildet die eigene Verwaltungsadresse auf /admin ab */
     public function withPath(string $path): self
     {
