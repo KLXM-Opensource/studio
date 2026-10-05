@@ -144,7 +144,7 @@ export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
       iframe.addEventListener('load', () => {
         load.hidden = true;
         try { iframe.contentWindow.scrollTo({ top: 0, behavior: 'instant' }); decorate(iframe.contentDocument); } catch { /* */ }
-        if (liveFrame) couple(iframe, liveFrame);
+        if (liveFrame) { couple(iframe, liveFrame); couple(liveFrame, iframe); if (cmp && leader !== iframe) syncFrom(liveFrame, iframe); }
       });
       win.append(iframe);
     }
@@ -154,17 +154,48 @@ export async function open({ endpoint, csrf = '', css: cssUrl = '' } = {}) {
   };
   // Gegenüberstellen: links live (Seite: veröffentlichte Fassung) bzw. jetzt (Eintrag) – einmal geladen, Scrollen gekoppelt
   const paneLive = vs.querySelector('[data-pane-live]'), winLive = vs.querySelector('[data-win-live]');
-  let liveFrame = null, syncing = false;
+  let liveFrame = null, leader = null;
+  // Gekoppeltes Scrollen: nur die Seite, die gerade bedient wird, führt (sonst schaukeln sich beide auf). Abgleich am selben Block
+  // (Abschnitte mit id, z. B. b-…/Anker): gleicher Block oben, gleiche Lage darin; ohne gemeinsamen Block nach Anteil der Höhe.
+  const anchorAt = (doc, y) => {
+    let best = null;
+    for (const el of doc.querySelectorAll('body [id]')) {
+      if (!/^(b-|sec-)/.test(el.id) && el.tagName !== 'SECTION') continue;
+      const top = el.getBoundingClientRect().top + y;
+      if (top <= y + 2 && (!best || top >= best.top)) best = { el, top };
+    }
+    return best;
+  };
+  const syncFrom = (from, to) => {
+    const wf = from.contentWindow, wt = to.contentWindow;
+    const df = from.contentDocument, dt = to.contentDocument;
+    if (!df || !dt) return;
+    const y = wf.scrollY, a = anchorAt(df, y);
+    let ty = null;
+    const twin = a && dt.getElementById(a.el.id);
+    if (twin) {
+      const r1 = a.el.getBoundingClientRect(), r2 = twin.getBoundingClientRect();
+      const inside = r1.height ? (y - a.top) / r1.height : 0;
+      ty = r2.top + wt.scrollY + inside * r2.height;
+    } else {
+      const sf = df.scrollingElement, st = dt.scrollingElement;
+      ty = (y / Math.max(1, sf.scrollHeight - sf.clientHeight)) * (st.scrollHeight - st.clientHeight);
+    }
+    wt.scrollTo({ top: Math.max(0, ty), behavior: 'instant' });
+  };
   const couple = (a, b) => {
     try {
-      const wa = a.contentWindow;
-      wa.addEventListener('scroll', () => {
-        if (syncing || !cmp) return;
-        const da = a.contentDocument.scrollingElement, db = b.contentDocument?.scrollingElement;
-        if (!da || !db) return;
-        syncing = true;
-        db.scrollTop = (da.scrollTop / Math.max(1, da.scrollHeight - da.clientHeight)) * (db.scrollHeight - db.clientHeight);
-        requestAnimationFrame(() => { syncing = false; });
+      const w = a.contentWindow, d = a.contentDocument;
+      if (!w || w._vsCoupled === b) return;
+      w._vsCoupled = b;
+      d.documentElement.style.scrollBehavior = 'auto';   // kein sanftes Scrollen in der Vorschau (sonst Nachlaufen beim Abgleich)
+      const lead = () => { leader = a; };
+      ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(t => d.addEventListener(t, lead, { passive: true, capture: true }));
+      a.addEventListener('pointerenter', lead);
+      let raf = 0;
+      w.addEventListener('scroll', () => {
+        if (!cmp || leader !== a || raf) return;
+        raf = requestAnimationFrame(() => { raf = 0; syncFrom(a, b); });
       }, { passive: true });
     } catch { /* */ }
   };
