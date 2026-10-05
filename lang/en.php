@@ -6110,4 +6110,8 @@ return [
     'Klicken, um ein anderes Bild zu wählen: {label}' => 'Click to choose another image: {label}',
     'Neues Bild hochladen und hier verwenden' => 'Upload a new image and use it here',
     'Tauschen' => 'Replace',
+    'Darstellung im Rahmen – gilt für alle Verwendungen des Bildes' => 'Display in frame – applies to all uses of the image',
+    'Die Anpassung gilt für alle Verwendungen dieses Bildes.' => 'The adjustment applies to all uses of this image.',
+    'Effekte, Helligkeit, Kontrast – gilt für alle Verwendungen des Bildes' => 'Effects, brightness, contrast – applies to all uses of the image',
+    'Gespeichert – gilt für alle Verwendungen dieses Bildes (nach dem Neuladen sichtbar).' => 'Saved – applies to all uses of this image (visible after reloading).',
 ];

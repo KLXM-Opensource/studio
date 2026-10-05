@@ -23,7 +23,8 @@ const T = {
   dirty: 'Ungespeicherte Änderungen', saving: 'Speichere …', saved: 'Gespeichert {time}', published: 'Veröffentlicht {time}',
   drafted: 'Als Entwurf gespeichert {time}', error: 'Fehler beim Speichern', loading: 'Lade Felder …', failed: 'Laden fehlgeschlagen: {error}',
   close: 'Schließen', panel: 'Eintrag bearbeiten', format: 'Formatierung',
-  mediaPick: 'Bild wählen …', mediaRemove: 'Bild entfernen', mediaNone: 'Kein Bild – „Bild wählen …“', mediaHint: 'Klicken, um ein anderes Bild zu wählen: {label}',
+  mediaPick: 'Bild wählen …', mediaRemove: 'Bild entfernen', mediaFx: 'Anpassen', mediaFit: 'Rahmen', mediaCrop: 'Zuschneiden',
+  mediaFxHint: 'Effekte, Helligkeit, Kontrast – gilt für alle Verwendungen des Bildes', mediaFitHint: 'Darstellung im Rahmen – gilt für alle Verwendungen des Bildes', mediaNone: 'Kein Bild – „Bild wählen …“', mediaHint: 'Klicken, um ein anderes Bild zu wählen: {label}',
 };
 const tx = (k, p = {}) => Object.entries(p).reduce((s, [a, b]) => s.replaceAll('{' + a + '}', String(b)), T[k] ?? k);
 const now = () => new Date().toTimeString().slice(0, 5);
@@ -300,7 +301,7 @@ const Inline = (() => {
     } else {
       n.innerHTML = `<span class="cms-entry-media-empty">${tx('mediaNone')}</span>`;
     }
-    clearError(n); refresh();
+    clearError(n); n._muiSync?.(); refresh();
   }
   async function chooseMedia(n) {
     if (!window.CMSMedia?.pick) return;
@@ -314,13 +315,33 @@ const Inline = (() => {
     n.classList.add('cms-entry-media');
     const box = d.createElement('div');
     box.className = 'cms-emedia'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', n.dataset.entryLabel || '');
-    box.innerHTML = `<button type="button" class="cms-emedia__btn" data-emedia-pick>${ico('image')}<span>${tx('mediaPick')}</span></button>`
+    const M = window.CMSMedia;
+    box.innerHTML = `<button type="button" class="cms-emedia__btn" data-emedia-pick>${ico('arrows-clockwise')}<span>${tx('mediaPick')}</span></button>`
+      + (M?.adjustAll ? `<button type="button" class="cms-emedia__btn" data-emedia-fx title="${tx('mediaFxHint')}">${ico('sliders-horizontal')}<span>${tx('mediaFx')}</span></button>` : '')
+      + (M?.fitAll ? `<button type="button" class="cms-emedia__btn" data-emedia-fit title="${tx('mediaFitHint')}">${ico('image')}<span>${tx('mediaFit')}</span></button>` : '')
+      + `<button type="button" class="cms-emedia__btn" data-emedia-crop hidden>${ico('crop')}<span>${tx('mediaCrop')}</span></button>`
       + ('entryOptional' in n.dataset ? `<button type="button" class="cms-emedia__btn cms-emedia__btn--x" data-emedia-remove aria-label="${tx('mediaRemove')}" title="${tx('mediaRemove')}">${ico('trash')}</button>` : '');
+    // Anpassen/Rahmen/Zuschneiden wirken auf das gespeicherte Bild (wie in der Mediathek) – nach einem Tausch erst speichern
+    const cur = () => { const id = +(n.dataset.entryValue || 0); return id && String(id) === n._orig ? id : 0; };
+    const sync = () => {
+      const im = n.querySelector('img[data-media-id]');
+      const ok = !!cur();
+      box.querySelectorAll('[data-emedia-fx],[data-emedia-fit]').forEach(b => { b.hidden = !ok; });
+      box.querySelector('[data-emedia-crop]').hidden = !ok || !im?.dataset.ratio;
+    };
+    n._muiSync = sync;
     box.querySelector('[data-emedia-pick]').addEventListener('click', () => chooseMedia(n));
+    box.querySelector('[data-emedia-fx]')?.addEventListener('click', () => { if (cur()) M.adjustAll(cur()); });
+    box.querySelector('[data-emedia-fit]')?.addEventListener('click', () => { if (cur()) M.fitAll(cur()); });
+    box.querySelector('[data-emedia-crop]').addEventListener('click', () => { const im = n.querySelector('img[data-media-id]'); if (cur() && im?.dataset.ratio) M.cropAt(cur(), im.dataset.ratio); });
     box.querySelector('[data-emedia-remove]')?.addEventListener('click', () => setMedia(n, null));
+    sync();
     layerBox().append(box);
     n._mui = box;
     placeMedia(n);
+    // Breite steht erst nach dem ersten Zeichnen fest (Stile der Ebene, Schrift) – dann rechtsbündig ins Bild setzen
+    requestAnimationFrame(() => placeMedia(n));
+    setTimeout(() => placeMedia(n), 300);
   }
   const placeAll = () => nodes.forEach(placeMedia);
   addEventListener('resize', placeAll);

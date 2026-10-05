@@ -11,6 +11,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   setzt das Bildfeld des Blocks (`CMSEditor.swap`), Anpassung/Rahmen der Stelle werden zurückgesetzt. `CMSMedia.pick(kind, { upload })`.
 - Einträge: Bildfelder (`media`) direkt auf der Detailseite – Knopf „Bild wählen …“ bzw. Klick aufs Bild, Vorschau sofort,
   gespeichert mit „Speichern“ (`EntryEdit` Modus `media`, `entry_edit_attr($t, $e, 'bild', 'media')`).
+  Dazu „Anpassen“, „Rahmen“ und (bei Bildformat) „Zuschneiden“ – wirken wie in der Mediathek für alle Verwendungen
+  (`CMSMedia.adjustAll/fitAll/cropAt`); „Rahmen“ in der Detailvorlage nutzt für Bilder aus dem Eintrag ebenfalls den Standard des Bildes.
 
 ### Netzwerk: Website wechseln auch auf der Website
 - Netzwerk-Konten finden im Menü ⋯ der Werkzeugleiste „Website wechseln“: Einmal-Anmeldung wie in der Verwaltung, Ziel ist die

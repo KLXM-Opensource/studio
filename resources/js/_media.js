@@ -1559,7 +1559,8 @@ function initInlineCrop() {
     const im = target;
     bar.hidden = true;
     const place = window.CMSEditor?.fit?.target(im);
-    if (!place) { toast(t('Dieses Bild lässt sich hier keinem Bild-Feld des Blocks zuordnen – den Standard bitte in der Mediathek festlegen.')); return; }
+    // Nicht zuordenbar (z. B. Bild aus einem Eintrag in der Detailvorlage): Standard des Bildes wie in der Mediathek
+    if (!place) { await window.CMSMedia.fitAll(+im.dataset.mediaId); return; }
     const v = await local(() => place.open());
     if (v !== undefined) toast(t('Übernommen – mit „Speichern“ sichern'));
   });
@@ -1580,7 +1581,24 @@ d.addEventListener('paste', e => {
 // Nach außen immer im Kontext dieser Website (local) – die Mediathek selbst nutzt api/crop intern mit ihrem Pool
 const localApi = new Proxy(api, { get: (o, k) => typeof o[k] === 'function' ? (...a) => local(() => o[k](...a)) : o[k] });
 window.CMSMedia = { pick, pickCollection, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
-  adjust: o => local(() => adjustDialog(o)), fxLabel, fit: o => local(() => fitDialog({ base: BASE, ...o })), fitLabel };
+  adjust: o => local(() => adjustDialog(o)), fxLabel, fit: o => local(() => fitDialog({ base: BASE, ...o })), fitLabel,
+  // Für Bilder ohne Block-Einbindung (z. B. Bildfelder von Einträgen auf der Detailseite): wirkt wie in der Mediathek für alle Verwendungen
+  adjustAll: id => local(async () => {
+    const m = await api.detail(id);
+    const v = await adjustDialog({ src: m.large || m.url, thumb: m.thumb, name: m.display, scope: 'global', value: m.adjust,
+      note: t('Die Anpassung gilt für alle Verwendungen dieses Bildes.'), onApply: async val => { await api.adjust(m.id, val); } });
+    if (v !== undefined) { $$(`img[data-media-id="${id}"]`).forEach(x => applyFx(x, v)); toast(v ? t('Anpassung gespeichert') : t('Anpassung entfernt – Original')); }
+    return v;
+  }),
+  fitAll: id => local(async () => {
+    const m = await api.detail(id);
+    const v = await fitDialog({ base: BASE, src: m.large || m.url, thumb: m.thumb || m.url, name: m.display, scope: 'global', value: m.fit, auto: m.fit_auto, svg: m.svg,
+      onApply: async val => { await api.fit(m.id, val); } });
+    if (v !== undefined) toast(t('Gespeichert – gilt für alle Verwendungen dieses Bildes (nach dem Neuladen sichtbar).'));
+    return v;
+  }),
+  cropAt: (id, ratio) => local(() => crop(id, ratio, (r, res) => refreshPictures(id, r, res.sources), { only: ratio })),
+};
 const root = $('[data-media-library]');
 if (root) {
   const f = new Finder(root, { mode: 'library' });
