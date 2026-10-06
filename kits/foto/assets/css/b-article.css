@@ -1,0 +1,18 @@
+/* Kit „foto“ – Fließtext „Artikel“ (Lesebreite + Inhaltsverzeichnis) und „Mehrspaltig“ (nur wenn verwendet)
+   Artikel: Sidebar-Muster – Inhaltsverzeichnis links (13–16 rem), Text daneben, solange der Text ≥ 60 % behält; sonst darüber. */
+.article{display:flex;flex-direction:column;gap:var(--f-s-l)}
+.article__head{margin:0;max-width:48rem}
+.article__head .h2{font-size:max(var(--f-t4),min(var(--f-t5),10cqi))}
+.article__meta{color:var(--f-muted);font:500 var(--f-t-1)/1.4 var(--f-font-label)}
+.article__body{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--f-s-xl) var(--f-s-3xl);padding-top:var(--f-s-l);border-top:1px solid var(--f-line)}
+.article__body>.prose{flex:999 1 0;min-width:min(100%,60%);font-size:calc(var(--f-t0) * 1.04)}
+.toc{flex:1 1 min(14rem,100%);position:sticky;top:6rem;max-height:calc(100vh - 8rem);overflow:auto;padding:var(--f-s-m);border-radius:var(--f-r-l);background:var(--f-surface)}
+.toc__title{margin-bottom:.5rem;color:var(--f-muted);font:600 var(--f-t-2)/1.2 var(--f-font-label);letter-spacing:.1em;text-transform:uppercase}
+.toc__list{display:grid;gap:.1rem;margin:0;padding:0;list-style:none;counter-reset:toc}
+.toc__item a{display:flex;gap:.6em;padding:.35rem .5rem;border-radius:var(--f-r-s);color:var(--f-text);font-size:var(--f-t-1);line-height:1.35;text-decoration:none}
+.toc__item--2 a::before{counter-increment:toc;content:counter(toc,decimal-leading-zero);color:var(--f-muted);font:500 .85em/1.6 var(--f-font-mono)}
+.toc__item--3 a{padding-left:2.4rem;color:var(--f-muted)}
+.toc__item a:hover,.toc__item a[aria-current]{background:var(--f-bg);color:var(--f-ink)}
+.prose--columns{max-width:none;column-width:22rem;column-gap:var(--f-s-2xl);column-rule:1px solid var(--f-line)}
+.prose--columns>*{break-inside:avoid-column}
+.prose--columns :is(h3,h4){break-after:avoid-column}

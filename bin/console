@@ -319,7 +319,9 @@ switch ($cmd) {
         $have = [];
         foreach ($files as $file) if (is_file($file)) $have += (array) require $file;
         $found = [];
-        $scan = $siteTexts ? '~/(app|(?:kits|themes)/' . preg_quote($theme->name, '~') . ')/.*\.php$~' : '~/(app|kits|themes|resources/js)/.*\.(php|js|mjs)$~';
+        // Kits: nur das aktive Kit (seine lang-Datei wird verglichen) – Texte anderer Kits prüft man auf deren Website (--site=…)
+        $kitRe = '(?:kits|themes)/' . preg_quote($theme->name, '~');
+        $scan = $siteTexts ? '~/(app|' . $kitRe . ')/.*\.php$~' : '~/(app|' . $kitRe . '|resources/js)/.*\.(php|js|mjs)$~';
         $pattern = $siteTexts ? "~\\blt\\('((?:[^'\\\\]|\\\\.)*)'~" : "~(?:__|\\bt)\\('((?:[^'\\\\]|\\\\.)*)'~";
         if ($extDir) $scan = $siteTexts ? '~/(src|views|blocks)/.*\.php$|/extension\.php$~' : '~/(src|views|assets/js)/.*\.(php|js|mjs)$|/extension\.php$~';
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extDir ?: ROOT, FilesystemIterator::SKIP_DOTS));

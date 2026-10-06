@@ -1,0 +1,33 @@
+/* Kit „galerie“ – Video (nur wenn verwendet): Zwei-Klick-Lösung, eigene MP4 mit Untertiteln + Transkript (<details>). */
+.video{margin:0}
+.video__cap{margin-top:var(--f-s-s);color:var(--f-muted);font-size:var(--f-t-1)}
+.video-split{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-xl) var(--f-s-3xl)}
+.video-split__text{flex:1 1 min(20rem,100%);display:flex;flex-direction:column;gap:var(--f-s-l)}
+.video-split__text .sec-head{margin:0}
+.video-split>.video{flex:1.4 1 min(22rem,100%)}
+.sec.v-cinema{background:var(--f-dark);--f-sec-bg:var(--f-dark);--f-fg:var(--f-on-dark);--f-ink:var(--f-fg);--f-text:var(--f-fg);--f-muted:color-mix(in srgb,var(--f-fg) 80%,var(--f-dark));--f-link:var(--f-fg);--f-focus:var(--f-fg);--f-line:color-mix(in srgb,var(--f-fg) 20%,transparent);color:var(--f-text)}
+.video-cinema{width:min(100% - 2 * var(--f-gutter),calc(var(--f-wrap) + 12rem))}
+.vembed{position:relative;overflow:hidden;border-radius:var(--f-r-l);background:var(--f-dark);color:#fff}
+.vembed video,.vembed__poster,.vembed__frame{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+.vembed video{object-fit:contain;background:#000}
+.vembed__gate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:clamp(.75rem,3cqi,2rem);background:linear-gradient(0deg,rgb(0 0 0/.75),rgb(0 0 0/.3));text-align:center}
+.vembed__play{display:inline-flex;align-items:center;gap:.75rem;min-height:3.25rem;padding:.5rem 1.4rem .5rem .6rem;border:0;border-radius:999px;background:#fff;color:#111;font-weight:650;cursor:pointer;box-shadow:0 10px 30px rgb(0 0 0/.35)}
+.vembed__play:hover{scale:1.03}
+.vembed__play:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.vembed__icon{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--f-a);color:var(--f-a-on)}
+.vembed__info{max-width:34rem;font-size:.8125rem;line-height:1.5;color:rgb(255 255 255/.92)}
+.vembed__info a,.vembed__ext{color:#fff}
+.vembed__row{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1.25rem;margin-top:.4rem}
+.vembed__remember{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
+.vembed__revoke{margin-top:.5rem;color:var(--f-muted);font-size:var(--f-t-2)}
+.vembed__revoke button{padding:0;border:0;background:none;color:var(--f-link);text-decoration:underline;cursor:pointer}
+/* Zwei-Klick-Hinweis im Fluss: Der Kasten wächst mit dem Text (Seitenverhältnis = Mindesthöhe, overflow:clip statt hidden), nichts wird abgeschnitten oder ausgeblendet; die Schaltfläche steht nach dem Hinweis. */
+.vembed[data-embed]:not(.is-loaded){display:flex;flex-direction:column;overflow:clip}
+.vembed[data-embed]:not(.is-loaded) .vembed__gate{position:relative;inset:auto;flex:1 0 auto}
+.vembed--empty{display:grid;place-items:center;border:1px dashed var(--f-line-strong);background:var(--f-surface);color:var(--f-muted)}
+@container (max-width:30rem){.vembed__info{font-size:.75rem}}
+/* Transkript und Untertitel aus der Mediathek (Core\MediaTracks) */
+.media-transcript{margin-top:var(--f-s-s);border:1px solid var(--f-line);border-radius:var(--f-radius);background:var(--f-card)}
+.media-transcript summary{display:flex;align-items:center;min-height:2.75rem;padding:0 1rem;color:var(--f-ink);font-weight:600;cursor:pointer}
+.media-transcript>:not(summary){padding:0 1rem 1rem}
+.media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

@@ -1,0 +1,7 @@
+/* Übergang zwischen Abschnitten „Bogen“ (design.php → dividers): Ein Abschnitt mit anderem Hintergrund als der vorige (oder mit Hintergrundbild) rückt um die Höhe der Form
+   nach oben und wird oben per Maske ausgeschnitten – der vorige Abschnitt scheint durch. Die Form liegt im Innenabstand (≥ 3 rem),
+   der Inhalt bleibt unberührt; Abschnitte ohne Abstand oben (pt-none) und im Seiten-Editor bleiben gerade. */
+.div-curve :is(main,.page__main) :is(.sec.bg-white+.sec:not(.bg-white,.pt-none),.sec.bg-muted+.sec:not(.bg-muted,.pt-none),.sec.bg-tint+.sec:not(.bg-tint,.pt-none),.sec.bg-accent+.sec:not(.bg-accent,.pt-none),.sec.bg-secondary+.sec:not(.bg-secondary,.pt-none),.sec.bg-dark+.sec:not(.bg-dark,.pt-none),.sec+.sec.sec--has-bg:not(.pt-none)){--div-h:clamp(1.25rem,.6rem + 3vw,3.25rem);position:relative;margin-top:calc(-1 * var(--div-h));
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0 10Q50 -10 100 10Z'/%3E%3C/svg%3E") top center/100% var(--div-h) no-repeat,linear-gradient(#000 0 0) 0 calc(var(--div-h) - 1px)/100% calc(100% - var(--div-h) + 1px) no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0 10Q50 -10 100 10Z'/%3E%3C/svg%3E") top center/100% var(--div-h) no-repeat,linear-gradient(#000 0 0) 0 calc(var(--div-h) - 1px)/100% calc(100% - var(--div-h) + 1px) no-repeat}
+@media print{.div-curve .sec+.sec{margin-top:0;-webkit-mask:none;mask:none}}

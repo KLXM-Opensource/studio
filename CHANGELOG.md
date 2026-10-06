@@ -12,6 +12,47 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Website-Sprite. Lucide/Tabler über eine Namenszuordnung (`resources/icons/sets.json`), fehlende Symbole aus Phosphor „Linie“.
   Die Verwaltung und die Redaktionsleiste bleiben duotone; Editor-Vorschau und angemeldete Ansicht zeigen den gewählten Stil.
 
+### Kit „foto“: Fotografie und Portfolio
+- Neues Kit für Fotografinnen und Fotografen (Grundlage: breakpointlose Architektur von „fluid“): ruhige Navigation mit
+  Aufklappmenü für Serien, Serien als eigene Seiten, Bilder tragen das Design. Sechs Vorlagen, hell und dunkel WCAG 2.2 AA
+  (`php kits/foto/tools/contrast.php`): Weiß & still (Standard), Dunkelkammer, Galerie-Grau, Editorial, Reportage, Analog.
+- Design-Gruppe „Bilder & Galerien“: Bildabstand, Ecken, Bildunterschriften (darunter, beim Zeigen, auf dem Bild, ausgeblendet)
+  und ihre Schrift, Lightbox-Hintergrund (dunkel, hell, verschwommen – auch für die Kern-Galerie), Schwarzweiß (bis zum Zeigen,
+  immer), Rahmen/Passepartout, Breite der Galerien (Inhaltsbreite, breiter, randlos), Wirkung verlinkter Bilder; dazu
+  Wortmarke oder Logo-Bild.
+- Blöcke: „Bühne“ (Bild, stummes Video oder Bildfolge mit Überblendung, Pause-Schaltfläche, Abdunkelung hinter dem Text),
+  „Fotostrecke“ (Mosaik, bündige Zeilen, Raster mit wählbarem Format, große Einzelbilder, waagerechtes Band; Bilder und
+  Videos gemischt, YouTube/Vimeo per Zwei-Klick), „Serien-Übersicht“ (aus Unterseiten oder von Hand: Raster, große Liste mit
+  Bildvorschau, Reihen), „Serie (Kopf)“, „Bild & Text“. Eigene Lightbox (≈ 1,5 KB, Tastatur, Wischen, Videos mit Untertiteln).
+- Bearbeiten-Modus: Fotos und Videos direkt auf Fotostrecke, Bühne, Serie (Kopf) oder Bild & Text ziehen (oder auswählen) –
+  Upload über die Mediathek (Alt-Text-Pflicht, Fortschritt je Datei, „Alle als Sammlung“), danach umsortieren (Ziehen oder
+  Pfeile) und entfernen; Rückgängig über den Editor. Nutzt die vorgeschlagene Kern-Schnittstelle `CMSEditor.block(node)`;
+  ohne sie lädt die Ablagefläche hoch und verweist auf die Seitenleiste.
+- Demo „Mara Beispiel (Demo)“ mit Startseite, „Arbeiten“ und drei Serien, „Über mich“, „Kontakt“; Bilder sind mit GD
+  erzeugte Platzhalter (Videos mit ffmpeg, falls vorhanden). `CMS_SITE=… php kits/foto/tools/demo.php [--force|--remove]`.
+
+### Kit „galerie“: Kunstgalerie, Kunstverein, Projektraum
+- Neues Kit (Grundlage: breakpointlose Architektur von „fluid“) mit drei Datentabellen und Detailseiten: Künstler (/kuenstler),
+  Ausstellungen (/ausstellungen), Werke (/werke). Der Status einer Ausstellung – „Jetzt“, „Demnächst“, „Archiv“, in der letzten
+  Woche „Letzte Tage“ – wird jeden Tag aus Beginn und Ende berechnet; kein Statusfeld.
+- Blöcke: „Aktuelle Ausstellung“ (Vollbild, Bild und Text, typografisch; automatisch die laufende, sonst die nächste),
+  „Ausstellungen“ (Liste, Karten, Zeitleiste nach Jahren, Messen & Termine; Reiter Aktuell · Demnächst · Archiv),
+  „Künstlerinnen und Künstler“ (typografische Liste mit Bild beim Zeigen, Porträts, ein Werk je Künstler, A–Z-Register),
+  „Werke“ (Raster, Mauerwerk, Salonhängung, Viewing Room mit Einrasten; Filter nach Künstler und Verfügbarkeit),
+  Detailseiten für Künstler, Ausstellung und Werk (Lightbox, JSON-LD `Person`, `ExhibitionEvent`, `VisualArtwork`), „Besuch“
+  (heute geöffnet/geschlossen, abweichende Öffnungszeiten, mehrere Orte, Eintritt, Termine nach Vereinbarung).
+- Werke: Museumsschild, Verfügbarkeit als Wort mit Punkt (grün, halb, rot), Preis / „Preis auf Anfrage“ / ausgeblendet,
+  Button „Anfrage zu diesem Werk“ (Seite mit vorausgefülltem Formular oder E-Mail mit Betreff).
+- Bilder und Videos gemischt (Bildfeld + Dateifelder, YouTube/Vimeo per Zwei-Klick); für die Redaktion auf den Detailseiten
+  ein Kasten „Bilder und Videos hierher ziehen“ (Upload über den Uploader des Kerns mit Fortschritt, vorgeschlagenem Alt-Text,
+  Reihenfolge, Entfernen, sofort gespeichert) und im Seiten-Editor „Neues Werk aus Foto“ (Entwurf + Seitenleiste).
+- Design-Gruppe „Galerie“: Präsentation der Werke (flach, an der Wand, Passepartout), Werkangaben (Museumsschild, knapp,
+  eine Zeile), Verfügbarkeitspunkte, Preise global, Datumsformat, Etikett „Jetzt“, Dichte der Listen; Punktfarben mit
+  Kontrastprüfung. Sechs Vorlagen, hell und dunkel WCAG 2.2 AA (`php kits/galerie/tools/contrast.php`): White Cube (Standard),
+  Salon, Nacht, Kunstverein, Archiv, Atelier. Zwölf selbst gehostete Schriften (u. a. EB Garamond, Hanken Grotesk, IBM Plex Mono).
+- Demo „Galerie Beispiel (Demo)“ mit erfundenen Namen; alle Bilder sind mit GD erzeugte Platzhalter (abstrakte Werke,
+  montierte Ausstellungsansichten, Monogramme). `CMS_SITE=… php kits/galerie/tools/demo.php [--force|--remove]`.
+
 ### Seiten-Editor: Rückgängig und Wiederholen
 - Knöpfe in der Werkzeugleiste und ⌘/Strg+Z, ⇧⌘Z bzw. Strg+Y (außerhalb von Textfeldern; im Text gilt das Rückgängig des Browsers):
   bis zu 50 Schritte je Bearbeitung – Texte, Felder der Seitenleiste, Abschnitts-Einstellungen, Einfügen, Löschen, Verschieben.

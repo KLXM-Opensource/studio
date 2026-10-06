@@ -1,0 +1,3 @@
+/* Kopfbereich „Minimal“ (design.php → header): nur Marke, Aktionen und Menü-Schaltfläche – das Menü öffnet immer als Seitenblatt */
+.hdr--minimal .hdr__nav{display:none!important}
+.hdr--minimal .menu-btn{display:inline-flex!important}

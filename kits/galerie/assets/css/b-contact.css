@@ -1,0 +1,21 @@
+/* Kit „galerie“ – Kontakt und Karte (nur wenn verwendet). Angaben als auto-fit-Karten; Formular/Karte daneben
+   (Sidebar-Muster: Angaben ≥ 17 rem, Hauptteil ≥ 55 %) oder darunter, wenn der Platz fehlt. */
+.contact{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--f-s-l) var(--f-s-2xl)}
+.contact__info{flex:1 1 min(17rem,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:var(--f-s-m)}
+.contact:not(.contact--aside) .contact__info{flex-basis:100%}
+.contact__main{flex:999 1 0;min-width:min(100%,55%);display:grid;gap:var(--f-s-l)}
+.contact__card{display:flex;flex-direction:column;gap:.5rem;padding:var(--f-pad)}
+.contact__ico{display:grid;place-items:center;width:2.75rem;height:2.75rem;margin-bottom:.25rem;border-radius:calc(var(--f-radius) * .8);background:var(--f-ico-bg);color:var(--f-ico);font-size:1.35rem}
+.contact__h{color:var(--f-ink);font:var(--f-hw) var(--f-t1)/1.25 var(--f-font-head)}
+.contact__list{display:grid;gap:.5rem;margin:0;padding:0;list-style:none}
+.contact__label{display:block;color:var(--f-muted);font-size:var(--f-t-2);letter-spacing:.06em;text-transform:uppercase}
+.contact__list a{font-weight:600;overflow-wrap:anywhere}
+.contact__note{color:var(--f-muted);font-size:var(--f-t-1)}
+.contact__form{padding:var(--f-pad)}
+.contact__formtitle{margin-bottom:var(--f-s-m)}
+.contact__foot{margin-top:var(--f-s-l);color:var(--f-muted);font-size:var(--f-t-1)}
+/* Karte (Kern: css/map.css) – Farben aus den Tokens */
+.cms-map{--cms-map-accent:var(--f-a);--cms-map-radius:var(--f-r-l);--cms-map-bg:var(--f-surface-2);--cms-map-line:var(--f-line);color:var(--f-muted)}
+.sec .cms-map__route{color:var(--f-link)}
+.sec .cms-map__cap strong{color:var(--f-ink)}
+.cms-map__load{border-radius:var(--f-btn-r)}

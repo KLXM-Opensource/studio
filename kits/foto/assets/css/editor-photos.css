@@ -1,0 +1,11 @@
+/* Kit „foto“ – Upload-Dialog im Seiten-Editor (js/editor-photos.js). Lädt in der Shadow-DOM-Ebene der Verwaltung (Link im Dialog),
+   ergänzt deren Stile (fx-dialog, mu-*, adm-btn). */
+.foto-up{width:min(46rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem)}
+.foto-up__body{display:flex;flex-direction:column;gap:.85rem;padding:1rem 1.25rem 1.25rem;overflow:auto}
+.foto-up__body p{margin:0}
+.foto-up__intro{color:#444;font-size:.9375rem;line-height:1.45}
+.foto-up__col{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;padding:.6rem .75rem;border:1px solid #ddd;border-radius:8px;font-size:.9375rem}
+.foto-up__col label{display:inline-flex;align-items:center;gap:.4rem}
+.foto-up__col input[type=text]{min-height:2.25rem;padding:.25rem .5rem;border:1px solid #bbb;border-radius:6px;font:inherit}
+.foto-up__status{min-height:1.4em;font-weight:600}
+.foto-up__foot{display:flex;justify-content:flex-start}

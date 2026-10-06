@@ -1,0 +1,133 @@
+/* Kit „galerie“ – Ausstellungen: „Aktuelle Ausstellung“ (xf), Liste/Karten/Zeitleiste/Messen (xl), Detailseite (xd).
+   Breakpointlos: Switcher (flex-basis + min-inline-size) und Container-Queries auf .wrap. */
+
+/* ---------------------------------------------------------------- Aktuelle Ausstellung */
+.xf__eyebrow{margin-bottom:var(--f-s-s)}
+.xf__title{color:var(--f-ink);font:var(--f-hw) max(var(--f-t4),min(calc(var(--f-t6) * 1.1),11cqi))/1 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance;hyphens:auto;-webkit-hyphens:auto}
+.xf__sub{margin-top:var(--f-s-xs);color:var(--f-ink);font:400 var(--f-t2)/1.25 var(--f-font-head);text-wrap:balance}
+.head-serif .xf__sub{font-style:italic}
+.xf__artists{margin-top:var(--f-s-m);color:var(--f-ink);font-size:var(--f-t1);font-weight:550}
+.xf__artists a{color:inherit;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent)}
+.xf__meta,.xf__opening{margin-top:var(--f-s-2xs);color:var(--f-muted);font:500 var(--f-t0)/1.5 var(--f-font-label)}
+.xf__meta{margin-top:var(--f-s-s)}
+.xf__lead{margin-top:var(--f-s-m);max-width:38em;color:var(--f-text);text-wrap:pretty}
+.xf__more{margin-top:var(--f-s-l)}
+.xf__more .more{color:var(--f-ink)}
+.xf__text{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+
+/* Vollbild: Abschnitt ohne Innenabstand, Titel unten links auf dem Bild */
+.sec--exhibition-feature.v-bleed{padding:0}
+.xf--bleed{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:calc(100vh - 4.5rem);min-height:calc(100svh - 4.5rem);background:var(--f-dark);overflow:clip}
+.xf--bleed.xf--h-large{min-height:min(75vh,52rem);min-height:min(75svh,52rem)}
+.xf__media{position:absolute;inset:0;z-index:-1}
+.xf__media picture{display:contents}
+.xf__media img{width:100%;height:100%;object-fit:cover}
+.xf--ov-gradient .xf__media::after,.xf--ov-strong .xf__media::after{content:"";position:absolute;inset:0}
+.xf--ov-gradient .xf__media::after{background:linear-gradient(0deg,color-mix(in srgb,var(--f-dark) 88%,transparent) 0%,color-mix(in srgb,var(--f-dark) 45%,transparent) 42%,transparent 72%)}
+.xf--ov-strong .xf__media::after{background:color-mix(in srgb,var(--f-dark) 62%,transparent)}
+.xf__inner{padding-block:var(--f-s-3xl) calc(var(--f-s-2xl) + var(--f-s-m))}
+.xf--bleed .xf__text{max-width:62rem}
+/* Ohne Abdunkelung bzw. ohne Bild: Text unter dem Bild in den Farben der Seite */
+.xf--ov-none,.xf--noimg{display:block;min-height:0;background:transparent}
+.xf--ov-none .xf__media{position:relative;z-index:auto;aspect-ratio:21/9;max-height:78svh}
+.xf--noimg .xf__inner{padding-block:var(--f-sec)}
+.xf--ov-none .xf__inner{padding-block:var(--f-s-xl) var(--f-sec)}
+
+/* Bild und Text: Switcher – nebeneinander, solange beide ≥ 20 rem haben */
+.xf--split{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-xl) var(--f-s-3xl)}
+.xf--split .xf__img{flex:1 1 min(20rem,100%)}
+.xf--split .xf__text{flex:1 1 min(20rem,100%)}
+.xf--split .xf__title{font-size:max(var(--f-t3),min(var(--f-t5),7cqi))}
+
+/* Typografisch: sehr großer Titel, kleines Bild */
+.xf--type{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--f-s-xl) var(--f-s-2xl)}
+.xf--type .xf__text{flex:999 1 min(26rem,100%)}
+.xf--type .xf__title{font-size:max(var(--f-t5),min(calc(var(--f-t6) * 1.45),13cqi));line-height:.95}
+.xf--type .xf__img{flex:1 1 11rem;max-width:22rem}
+
+/* ---------------------------------------------------------------- Ausstellungsliste */
+.xl{display:grid;margin:0;padding:0;list-style:none}
+.xl__item{position:relative;display:grid;gap:var(--f-s-s) var(--f-s-xl);align-items:start;padding-block:calc(var(--f-s-l) * var(--g-density));border-top:1px solid var(--f-line)}
+.xl--list .xl__item:last-child,.xl--timeline .xl__item:last-child{border-bottom:1px solid var(--f-line)}
+@container (min-width:38rem){.xl--list .xl__item--img,.xl--timeline .xl__item--img{grid-template-columns:minmax(9rem,15rem) minmax(0,1fr)}}
+.xl__body{display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;min-width:0}
+.xl__badge{margin-bottom:var(--f-s-2xs)}
+.xl__title{color:var(--f-ink);font:var(--f-hw) max(var(--f-t2),min(var(--f-t3),5.5cqi))/1.12 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance}
+.xl__title a{color:inherit}
+.xl__sub{color:var(--f-text);font-family:var(--f-font-head);font-size:var(--f-t1)}
+.head-serif .xl__sub{font-style:italic}
+.xl__artists{color:var(--f-ink);font-weight:550}
+.xl__meta,.xl__opening{color:var(--f-muted);font:500 var(--f-t-1)/1.5 var(--f-font-label)}
+.xl__meta{margin-top:var(--f-s-2xs)}
+.xl__item:hover .xl__title a{text-decoration:underline;text-decoration-thickness:.05em;text-underline-offset:.15em}
+/* Karten */
+.xl--cards{gap:calc(var(--f-s-2xl) * var(--g-density)) var(--f-s-xl)}
+.xl--cards .xl__item{display:flex;flex-direction:column;align-items:stretch;gap:var(--f-s-s);padding:0;border:0}
+.xl--cards .xl__title{font-size:var(--f-t2)}
+/* Jahre (Archiv) und Zeitleiste */
+.xl-years{display:grid;gap:var(--f-s-2xl)}
+.xl-year__h{margin-bottom:var(--f-s-s);color:var(--f-muted);font:600 var(--f-t1)/1.2 var(--f-font-label);font-variant-numeric:tabular-nums}
+@container (min-width:46rem){
+  .xl-years--timeline .xl-year{display:grid;grid-template-columns:8rem minmax(0,1fr);gap:var(--f-s-xl)}
+  .xl-years--timeline .xl-year__h{position:sticky;top:6rem;align-self:start;padding-top:calc(var(--f-s-l) * var(--g-density));border-top:1px solid var(--f-ink);color:var(--f-ink);font-size:var(--f-t2)}
+}
+.xl-years--timeline .xl__title{font-size:var(--f-t1)}
+.xl-years--timeline .xl__item{padding-block:calc(var(--f-s-m) * var(--g-density))}
+@container (min-width:38rem){.xl-years--timeline .xl__item--img{grid-template-columns:7rem minmax(0,1fr)}}
+/* Messen & Termine: eine Zeile je Termin */
+.xl-fairs{display:grid;margin:0;padding:0;list-style:none;border-bottom:1px solid var(--f-line)}
+.xl-fair{position:relative;display:grid;gap:.1rem var(--f-s-l);padding-block:calc(var(--f-s-m) * var(--g-density));border-top:1px solid var(--f-line)}
+@container (min-width:46rem){.xl-fair{grid-template-columns:13rem minmax(0,1.3fr) minmax(0,1fr);align-items:baseline}.xl-fair__artists{grid-column:2/-1}}
+.xl-fair__dates{color:var(--f-muted);font:500 var(--f-t-1)/1.4 var(--f-font-label);font-variant-numeric:tabular-nums}
+.xl-fair__title{color:var(--f-ink);font:600 var(--f-t1)/1.25 var(--f-font-head)}
+.xl-fair__title a{color:inherit}
+.xl-fair__place{color:var(--f-text)}
+.xl-fair__artists{color:var(--f-muted);font-size:var(--f-t-1)}
+/* Reiter Aktuell · Demnächst · Archiv (js/tabs.js; ohne JavaScript Abschnitte untereinander) */
+.xl-tabs__list{display:flex;gap:var(--f-s-xl);margin-bottom:var(--f-s-xl);overflow-x:auto;border-bottom:1px solid var(--f-line);scrollbar-width:none}
+.xl-tabs__list[hidden]{display:none}
+.xl-tabs__tab{flex:none;min-height:2.75rem;margin-bottom:-1px;padding:.5rem 0;border:0;border-bottom:2px solid transparent;background:none;color:var(--f-muted);font:600 var(--f-t0)/1.2 var(--f-font-label);cursor:pointer}
+.xl-tabs__tab:hover{color:var(--f-ink)}
+.xl-tabs__tab[aria-selected=true]{border-color:var(--f-ink);color:var(--f-ink)}
+.xl-tabs__n{margin-inline-start:.2em;color:var(--f-muted);font-weight:400;font-size:.8em;font-variant-numeric:tabular-nums}
+.xl-tabs.is-js .xl-group__h{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.xl-group[hidden]{display:none}
+.xl-group:focus-visible{outline-offset:6px}
+.xl-group__h{margin-bottom:var(--f-s-l);color:var(--f-ink);font:var(--f-hw) var(--f-t2)/1.2 var(--f-font-head)}
+.xl-tabs:not(.is-js) .xl-group+.xl-group,.xl-group--open+.xl-group--open{margin-top:var(--f-s-3xl)}
+
+/* ---------------------------------------------------------------- Detailseite */
+.sec--exhibition-detail{padding-top:calc(var(--f-sec) * .5)}
+.sec--exhibition-detail.v-bleed{padding-top:0}
+.xd__head{display:flex;flex-direction:column;align-items:flex-start;gap:var(--f-s-2xs);min-width:0}
+.xd__status{margin-bottom:var(--f-s-s)}
+.xd__artists{color:var(--f-ink);font-size:var(--f-t1);font-weight:550}
+.xd__artists a{color:inherit}
+.xd__title{color:var(--f-ink);font:var(--f-hw) max(var(--f-t4),min(var(--f-t6),10cqi))/1.02 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance;hyphens:auto;-webkit-hyphens:auto}
+.xd__sub{color:var(--f-ink);font:400 var(--f-t2)/1.25 var(--f-font-head)}
+.head-serif .xd__sub{font-style:italic}
+.xd__meta,.xd__opening{color:var(--f-muted);font:500 var(--f-t0)/1.5 var(--f-font-label)}
+.xd__meta{margin-top:var(--f-s-s)}
+.xd__hero{margin-bottom:var(--f-s-2xl)}
+.xd__hero picture{display:contents}
+.xd__hero img{width:100%;height:min(78vh,52rem);height:min(78svh,52rem);object-fit:cover}
+.xd__split{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--f-s-xl) var(--f-s-3xl)}
+.xd__img{flex:1.2 1 min(22rem,100%)}
+.xd__img picture{display:contents}
+.xd__img img{width:100%;height:auto}
+.xd__split .xd__head{flex:1 1 min(20rem,100%)}
+.xd__split .xd__title{font-size:max(var(--f-t3),min(var(--f-t5),7cqi))}
+.xd__body{display:flex;flex-wrap:wrap;gap:var(--f-s-2xl) var(--f-s-3xl);margin-top:var(--f-s-3xl)}
+.xd__aside{flex:1 1 15rem;display:flex;flex-direction:column;gap:var(--f-s-l)}
+.xd__text{flex:999 1 0;min-width:min(100%,58%);display:flex;flex-direction:column;gap:var(--f-s-l)}
+.xd__lead{max-width:36em;color:var(--f-ink);font:400 var(--f-t1)/1.5 var(--f-font-head);text-wrap:pretty}
+.xd__dl{display:grid;margin:0}
+.xd__dl>div{display:grid;gap:.1rem;padding-block:.65rem;border-top:1px solid var(--f-line)}
+.xd__dl>div:last-child{border-bottom:1px solid var(--f-line)}
+.xd__dl dt{color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.xd__dl dd{margin:0;color:var(--f-ink)}
+.xd__dl dd a{color:inherit}
+.xd__size{color:var(--f-muted);font-weight:400}
+.xd__views,.xd__works{margin-top:var(--f-sec)}
+/* Nach dem randlosen Vollbild immer voller Abstand (die Regel „gleiche Hintergründe hintereinander“ greift hier nicht) */
+.sec--exhibition-feature.v-bleed+.sec{padding-top:var(--f-sec)!important}

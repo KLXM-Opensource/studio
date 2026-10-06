@@ -1,0 +1,52 @@
+/* Kit „foto“ – Fotostrecke (photo_grid), nur auf Seiten mit diesem Block (theme.php → conditional_css).
+   Breakpointlos: CSS-Spalten mit Mindestbreite, auto-fill-Raster mit höchstens N Spalten, Flex-Umbruch nach Seitenverhältnis,
+   scroll-snap. Container ist .gwrap (Breite der Galerie); Höhen in cqi bzw. svh. Abstand: --f-gap-img (Design). */
+.pg{margin:0;padding:0;list-style:none}
+.pg-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--f-s-m) var(--f-s-xl);margin-bottom:var(--f-s-xl)}
+.pg-head .sec-head{flex:1 1 min(30rem,100%);margin:0}
+.pg-head--strip:not(:has(.sec-head)){margin-bottom:var(--f-s-m)}
+
+/* Mosaik: columns = höchstens N Spalten, jede mindestens --colmin breit */
+.pg--masonry{columns:var(--colmin,17rem);column-gap:var(--f-gap-img)}
+.pg--masonry.cols-2{columns:2 15rem}.pg--masonry.cols-3{columns:3 13rem}.pg--masonry.cols-4{columns:4 11rem}
+.pg--masonry .pg__item{break-inside:avoid;margin-bottom:var(--f-gap-img)}
+.pg--masonry .ph--cap{padding-bottom:.35em}
+
+/* Raster: höchstens N Spalten, nie schmaler als --min (auto-fill + max()) */
+.pg--grid{display:grid;align-items:start;gap:var(--f-gap-img);grid-template-columns:repeat(auto-fill,minmax(min(100%,max(var(--min,15rem),(100% - (var(--n,3) - 1) * var(--f-gap-img)) / var(--n,3))),1fr))}
+.pg--grid.cols-auto{grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
+.pg--grid.cols-2{--n:2;--min:16rem}.pg--grid.cols-3{--n:3;--min:13rem}.pg--grid.cols-4{--n:4;--min:10.5rem}
+
+/* Bündige Zeilen: flex-grow = Seitenverhältnis × 10 (Klasse ar-NN), Grundbreite = Verhältnis × Zeilenhöhe */
+.pg--justified{display:flex;flex-wrap:wrap;gap:var(--f-gap-img)}
+.pg--justified::after{content:"";flex:999 1 0}
+.pg--justified .pg__item{flex:var(--ar,13) var(--ar,13) calc(var(--ar,13) * var(--rh) / 10);min-width:0}
+.pg--justified.rh-s,.pg--strip.rh-s{--rh:clamp(8rem,20cqi,13rem);--sh:clamp(11rem,38svh,18rem)}
+.pg--justified.rh-m,.pg--strip.rh-m{--rh:clamp(10rem,28cqi,19rem);--sh:clamp(15rem,56svh,30rem)}
+.pg--justified.rh-l,.pg--strip.rh-l{--rh:clamp(12rem,38cqi,27rem);--sh:clamp(18rem,72svh,42rem)}
+.ar-5{--ar:5}.ar-6{--ar:6}.ar-7{--ar:7}.ar-8{--ar:8}.ar-9{--ar:9}.ar-10{--ar:10}.ar-11{--ar:11}.ar-12{--ar:12}.ar-13{--ar:13}.ar-14{--ar:14}.ar-15{--ar:15}.ar-16{--ar:16}.ar-17{--ar:17}.ar-18{--ar:18}.ar-19{--ar:19}.ar-20{--ar:20}.ar-21{--ar:21}.ar-22{--ar:22}.ar-23{--ar:23}.ar-24{--ar:24}
+.pg--justified .ph__img--orig img{width:100%;height:auto}
+
+/* Große Einzelbilder: untereinander, Hochformate nie höher als der Bildschirm, viel Luft */
+.pg--single{display:flex;flex-direction:column;align-items:center;gap:calc(var(--f-gap-img) * 2 + var(--f-s-2xl))}
+.pg--single .pg__item{width:100%;display:flex;justify-content:center}
+.pg--single .ph{width:fit-content;max-width:100%}
+.pg--single .ph__img--orig img{width:auto;max-width:100%;max-height:min(90svh,64rem)}
+.pg--single .ph__cap,.pg--strip .ph__cap{width:0;min-width:100%}
+
+/* Waagerechtes Band: gleiche Höhe, Breite aus dem Seitenverhältnis, höchstens 86 % der Galeriebreite */
+.pg--strip{display:flex;align-items:flex-start;gap:var(--f-gap-img);overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:inline mandatory;padding-bottom:var(--f-s-s);scrollbar-width:thin;scrollbar-color:var(--f-line-strong) transparent}
+.pg--strip:focus-visible{outline:2px solid var(--f-focus);outline-offset:4px}
+.pg--strip .pg__item{flex:none;scroll-snap-align:start}
+.pg--strip .ph{width:fit-content}
+.pg--strip .ph__img--orig img{width:auto;max-width:none;height:min(var(--sh),calc(86cqi * 10 / var(--ar,13)))}
+.gwrap--full .pg--strip{scroll-padding-inline:var(--f-gap-img)}
+.pg-ctrl{margin-inline-start:auto}
+/* Bildunterschrift auf dem Bild: Breite aus inset, nicht aus der Bildbreite (sonst ragt sie bei Rahmen über das Bild) */
+.cap-overlay :is(.pg--single,.pg--strip) .ph__cap{width:auto;min-width:0}
+@media (hover:hover){.cap-hover :is(.pg--single,.pg--strip) .ph__cap{width:auto;min-width:0}}
+/* Videos und Videolinks: Breite aus dem Format (Band, Einzelbilder), Höhe wie die Bilder */
+.pg--strip .ph__img:not(.ph__img--orig){height:min(var(--sh),calc(86cqi * 10 / var(--ar,13)));width:auto}
+.pg--strip .ph--embed{width:min(86cqi,calc(var(--sh) * 16 / 9))}
+.pg--single .ph:is(.ph--video,.ph--embed){width:min(100%,64rem)}
+.pg--single .ph--video:has(.r-9-16,.r-2-3,.r-4-5){width:min(100%,calc(80svh * .6))}

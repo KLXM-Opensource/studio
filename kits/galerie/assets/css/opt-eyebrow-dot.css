@@ -1,0 +1,2 @@
+/* Kit „galerie“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+.eb-dot .eyebrow::before{content:"";width:.5em;height:.5em;border-radius:50%;background:currentColor;box-shadow:0 0 0 .22em var(--f-a-soft)}

@@ -1,0 +1,18 @@
+/* Kit „galerie“ – nur auf Seiten mit diesem Block (theme.php → conditional_css) */
+/* ---------------------------------------------------------------- Merkmale */
+.feat{position:relative;display:flex;flex-direction:column;gap:var(--f-s-s)}
+.feats--cards .feat{padding:var(--f-pad)}
+.feats--cards .feat__media{margin:calc(var(--f-pad) * -1) calc(var(--f-pad) * -1) var(--f-s-2xs);border-radius:var(--f-r-l) var(--f-r-l) 0 0}
+.feat__ico{display:grid;place-items:center;width:3rem;height:3rem;border-radius:calc(var(--f-radius) * .9);background:var(--f-ico-bg);color:var(--f-ico);font-size:1.6rem}
+.feats--icons{--gap:var(--f-s-2xl) var(--f-s-xl)}
+.feats--icons .feat__ico{width:auto;height:auto;place-items:start;background:none;font-size:2.75rem;--ico-2-opacity:.35}
+.feats--list{--gap:var(--f-s-xl) var(--f-s-2xl)}
+.feats--list .feat{flex-flow:row wrap;align-items:flex-start;gap:var(--f-s-s) var(--f-s-m)}
+.feats--list .feat__body{flex:1 1 min(12rem,100%)}
+.feats--numbered .feat{padding-top:var(--f-s-m);border-top:2px solid var(--f-ink)}
+.feat__num{color:var(--f-link);font:var(--f-hw) var(--f-t3)/1 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);font-variant-numeric:tabular-nums}
+.feat__body{display:flex;flex-direction:column;gap:var(--f-s-xs)}
+.feat__title{color:var(--f-ink);font:var(--f-hw) var(--f-t1)/1.25 var(--f-font-head);letter-spacing:calc(var(--f-track) * .006em);text-wrap:balance}
+.feat__text{color:var(--f-muted)}
+.feat .more{margin-top:auto;padding-top:var(--f-s-xs)}
+

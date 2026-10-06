@@ -1,0 +1,4 @@
+/* Kit „galerie“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+.btn-sharp .btn--primary::after{content:"→";font-weight:400;transition:translate .15s}
+.btn-sharp .btn--primary:hover::after{translate:.2em 0}
+.btn-sharp .btn{text-transform:uppercase;letter-spacing:.06em;font-size:calc(var(--f-t0) * .84)}

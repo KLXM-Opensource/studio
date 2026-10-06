@@ -1,0 +1,76 @@
+/* ---------------------------------------------------------------- Kopfbereich – intrinsisch
+   Der Kopf ist ein Container (hdr). Die Klasse fit-NN (galerie_nav_fit) nennt die Breite in rem, die das Menü in einer Zeile
+   braucht. Standard ist die kompakte Leiste mit Menü-Schaltfläche; ab fit-NN zeigt die Container-Query das Menü in der Leiste.
+   .is-overflow (site.js) erzwingt die Schaltfläche, falls die Schätzung zu knapp war. Keine Media-Queries. */
+.hdr{container:hdr/inline-size;position:relative;z-index:60;background:var(--f-hdr-bg);border-bottom:1px solid var(--f-line);backdrop-filter:saturate(1.6) blur(14px)}
+.hdr-sticky .hdr{position:sticky;top:0}
+.hdr__bar{display:flex;align-items:center;gap:var(--f-s-s) var(--f-s-l);width:min(100% - 2 * var(--f-gutter),var(--f-wrap));min-height:4.25rem;margin-inline:auto}
+.hdr__brand{margin-inline-end:auto}
+.hdr__nav{display:none;align-items:center;gap:var(--f-s-s)}
+.hdr__tools{display:flex;align-items:center;gap:.5rem}
+.hdr.is-overflow .hdr__nav{display:none}.hdr.is-overflow .menu-btn{display:inline-flex}
+@container hdr (max-width:32rem){.hdr__cta{display:none}}
+@container hdr (min-width:30rem){.fit-30 .hdr__nav{display:flex}.fit-30 .menu-btn{display:none}}
+@container hdr (min-width:36rem){.fit-36 .hdr__nav{display:flex}.fit-36 .menu-btn{display:none}}
+@container hdr (min-width:42rem){.fit-42 .hdr__nav{display:flex}.fit-42 .menu-btn{display:none}}
+@container hdr (min-width:48rem){.fit-48 .hdr__nav{display:flex}.fit-48 .menu-btn{display:none}}
+@container hdr (min-width:54rem){.fit-54 .hdr__nav{display:flex}.fit-54 .menu-btn{display:none}}
+@container hdr (min-width:60rem){.fit-60 .hdr__nav{display:flex}.fit-60 .menu-btn{display:none}}
+@container hdr (min-width:66rem){.fit-66 .hdr__nav{display:flex}.fit-66 .menu-btn{display:none}}
+@container hdr (min-width:72rem){.fit-72 .hdr__nav{display:flex}.fit-72 .menu-btn{display:none}}
+@container hdr (min-width:78rem){.fit-78 .hdr__nav{display:flex}.fit-78 .menu-btn{display:none}}
+@container hdr (min-width:84rem){.fit-84 .hdr__nav{display:flex}.fit-84 .menu-btn{display:none}}
+@container hdr (min-width:90rem){.fit-90 .hdr__nav{display:flex}.fit-90 .menu-btn{display:none}}
+@container hdr (min-width:96rem){.fit-96 .hdr__nav{display:flex}.fit-96 .menu-btn{display:none}}
+@container hdr (min-width:102rem){.fit-102 .hdr__nav{display:flex}.fit-102 .menu-btn{display:none}}
+@container hdr (max-width:22rem){.menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{padding-inline:.8rem}.brand__name{font-size:1rem}}
+
+/* Beim Scrollen leichter Schatten – Scroll-Timeline ohne JavaScript, wo unterstützt */
+@supports (animation-timeline:scroll()){.hdr-sticky .hdr:not(.hdr--floating,.hdr--rail){animation:f-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}}
+@keyframes f-hdr{to{box-shadow:0 10px 30px -18px var(--f-sh2)}}
+
+/* Marke */
+.brand{display:inline-flex;align-items:center;gap:.7rem;min-height:2.75rem;color:var(--f-ink);text-decoration:none}
+.brand__mark{display:grid;place-items:center;flex:none;width:2.35rem;height:2.35rem;border-radius:calc(var(--f-radius) * .8);background:var(--f-ink);color:var(--f-bg);font:var(--f-hw) 1.15rem/1 var(--f-font-head);box-shadow:inset 0 -3px 0 var(--f-a)}
+.brand__name{font:var(--f-hw) 1.125rem/1.15 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);white-space:nowrap}
+.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+.brand__logo--dark{display:none}
+
+/* Menü in der Leiste (Aufklappmenüs mit <details>) */
+.hnav__list{display:flex;align-items:center;gap:.125rem;margin:0;padding:0;list-style:none}
+.hnav__item{position:relative}
+.hnav__link{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;padding:0 .75rem;border-radius:var(--f-r-s);color:var(--f-text);font:500 .9375rem/1.1 var(--f-font);text-decoration:none;white-space:nowrap;cursor:pointer;list-style:none;transition:background-color .15s,color .15s}
+.hnav__link::-webkit-details-marker{display:none}
+.hnav__link:hover{background:var(--f-surface);color:var(--f-ink)}
+.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link{color:var(--f-ink);text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:2px;text-underline-offset:.5em}
+.hnav__chev{font-size:.85em;transition:rotate .2s}
+.hnav__sub[open]>.hnav__link .hnav__chev{rotate:180deg}
+
+/* Sprache */
+.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(var(--f-btn-r) + 3px);background:var(--f-surface)}
+.btn-sharp .langswitch{border-radius:0}
+.langswitch a{display:grid;place-items:center;min-width:2.25rem;min-height:2rem;padding:0 .5rem;border-radius:var(--f-btn-r);color:var(--f-muted);font:600 .8125rem/1 var(--f-font);letter-spacing:.04em;text-decoration:none}
+.langswitch a:hover{color:var(--f-ink)}
+.langswitch a[aria-current]{background:var(--f-bg);color:var(--f-ink);box-shadow:0 0 0 1px var(--f-line)}
+.langswitch--wide a{min-height:2.75rem;padding-inline:1rem;font-size:.9375rem;letter-spacing:0}
+
+/* Menü-Schaltfläche */
+.menu-btn{display:inline-flex;align-items:center;gap:.6rem;min-height:2.75rem;padding:0 1rem 0 .9rem;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:transparent;color:var(--f-ink);font:600 .9375rem/1 var(--f-font);cursor:pointer}
+.menu-btn:hover{border-color:var(--f-ink)}
+.menu-btn__bars,.menu-btn__bars::before{display:block;width:1.1rem;height:2px;border-radius:2px;background:currentColor}
+.menu-btn__bars{position:relative;translate:0 -3px}
+.menu-btn__bars::before{content:"";position:absolute;top:6px;width:.75rem}
+
+/* Website-Suche: Lupe → Popover (Kern: Search::form('header')); Ergebnisseite: css/search.css */
+.hsearch__btn{display:inline-grid;place-items:center;width:2.75rem;height:2.75rem;padding:0;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:transparent;color:var(--f-ink);cursor:pointer}
+.hsearch__btn:hover{border-color:var(--f-ink)}
+/* Kopfbereich-Aktionen (Core\HeaderActions, /assets/css/header-actions*.css) – Look „galerie“: Feld auf getönter Fläche,
+   Textlink in Überschriftenfarbe mit Akzent-Unterstrich. Standard: Suchfeld in der Leiste + Textlink. Enger Kopf → Lupe. */
+.ha,.ha-below{--ha-accent:var(--f-a);--ha-on:var(--f-a-on);--ha-ink:var(--f-ink);--ha-muted:var(--f-muted);--ha-line:var(--f-line-strong);--ha-bg:var(--f-bg);--ha-surface:var(--f-surface);--ha-open:var(--f-link);--ha-h:2.75rem;--ha-gap:.5rem}
+.hdr .ha-cta--link{color:var(--f-ink);font-weight:600;text-decoration-color:var(--f-a);text-decoration-thickness:2px;text-underline-offset:.45em}
+.hdr .ha-cta--link .ha-arrow{color:var(--f-link)}
+.hdr .ha-field__in{border-color:transparent}
+.hdr .ha-field__in:hover{border-color:var(--f-line-strong)}
+.hdr .ha-center{margin-inline:auto}
+.hdr__below{width:min(100% - 2 * var(--f-gutter),var(--f-wrap));margin-inline:auto}
+@container hdr (max-width:48rem){.hdr .ha-search--inline,.hdr .ha-search--expand,.hdr .ha-center{display:none}.hdr .ha-search--fallback{display:flex}}

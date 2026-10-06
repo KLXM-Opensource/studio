@@ -1,0 +1,95 @@
+/* Kit „galerie“ – gemeinsame Galerie-Bausteine (lädt nur mit Galerie-Blöcken): Status-Etiketten, Werkangaben (Museumsschild),
+   Verfügbarkeitspunkte, Werkabbildung (Präsentation af-*), Werk-Karte, vergrößerbare Bildlisten, Zurück-Link.
+   Design → Galerie: lbl-{text|pill|dot|outline} · cap-{museum|minimal|line} · has-dots · af-{flat|wall|mat} · --g-density */
+
+/* ---------------------------------------------------------------- Status-Etikett „Jetzt“ / „Demnächst“ / „Archiv“ */
+.xlabel{display:inline-flex;align-items:center;gap:.5em;width:fit-content;color:var(--f-ink);font:600 var(--f-t-1)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.xlabel--past{color:var(--f-muted)}
+.lbl-pill .xlabel{padding:.32em .8em;border-radius:999px;background:var(--f-a);color:var(--f-a-on);letter-spacing:.06em}
+.lbl-pill .xlabel--upcoming,.lbl-pill .xlabel--past{background:transparent;color:var(--f-ink);box-shadow:inset 0 0 0 1px var(--f-line-strong)}
+.lbl-pill :is(.on-media,.bg-dark,.bg-accent) .xlabel--current{background:var(--f-fg);color:var(--f-sec-bg,var(--f-dark))}
+.lbl-outline .xlabel{padding:.28em .7em;border:1px solid currentColor;border-radius:var(--f-btn-r)}
+.lbl-dot .xlabel::before{content:"";width:.6em;height:.6em;border-radius:50%;background:currentColor;flex:none}
+.lbl-dot .xlabel--current::before{background:var(--g-avail);box-shadow:0 0 0 .2em color-mix(in srgb,var(--g-avail) 22%,transparent)}
+.lbl-dot .xlabel--upcoming::before{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
+
+/* ---------------------------------------------------------------- Werkangaben (Museumsschild) */
+.cap{display:flex;flex-direction:column;gap:.08em;margin:0;color:var(--f-muted);font-size:var(--f-t-1);line-height:1.45}
+.cap__artist{color:var(--f-ink);font-weight:650}
+.cap__artist a{color:inherit;text-decoration:none}
+.cap__work{color:var(--f-ink)}
+.cap__h{display:inline;margin:0;font:inherit;letter-spacing:inherit}
+.cap__title{font-style:italic}
+.cap__title a{color:inherit;text-decoration:none}
+.cap__title a:hover{text-decoration:underline;text-decoration-thickness:.06em}
+.cap__meta{display:flex;flex-wrap:wrap;align-items:center;gap:.25em 1.1em;margin-top:.5em;color:var(--f-text)}
+.cap__price{font-variant-numeric:tabular-nums}
+/* Knapp: nur Künstler, Titel, Jahr (+ Verfügbarkeit/Preis) */
+.cap-minimal .cap:not(.cap--full) :is(.cap__medium,.cap__size,.cap__ed){display:none}
+/* Eine Zeile (Katalog): Angaben mit Kommas, klein, in der Etiketten-Schrift */
+.cap-line .cap:not(.cap--full){display:block;font:400 var(--f-t-2)/1.55 var(--f-font-label);letter-spacing:.01em}
+.cap-line .cap:not(.cap--full)>:not(.cap__meta){display:inline}
+.cap-line .cap:not(.cap--full)>:is(.cap__work,.cap__medium,.cap__size,.cap__ed)::before{content:", "}
+.cap-line .cap:not(.cap--full)>.cap__work:first-child::before{content:none}
+.cap-line .cap:not(.cap--full) .cap__meta{margin-top:.35em}
+/* Vollständig (Detailseite, Viewing Room) */
+.cap--full{gap:.2em;font-size:var(--f-t0)}
+.cap--full .cap__artist{font-size:var(--f-t1)}
+.cap--full .cap__work{margin-bottom:.35em;font:var(--f-hw) max(var(--f-t2),min(var(--f-t4),6cqi))/1.12 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance}
+.cap--full .cap__year{font-style:normal}
+.cap--full .cap__meta{margin-top:.9em;padding-top:.9em;border-top:1px solid var(--f-line);font-size:var(--f-t0)}
+
+/* ---------------------------------------------------------------- Verfügbarkeit: Wort + Punkt (Punkt = Zierde) */
+.avail{display:inline-flex;align-items:center;gap:.45em}
+.avail__dot{display:none;flex:none;width:.72em;height:.72em;border-radius:50%}
+.has-dots .avail__dot{display:inline-block}
+.avail--available .avail__dot{background:var(--g-avail)}
+.avail--sold .avail__dot{background:var(--g-sold)}
+.avail--reserved .avail__dot{background:linear-gradient(90deg,var(--g-sold) 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px var(--g-sold)}
+@media (forced-colors:active){.avail__dot{forced-color-adjust:none;outline:1px solid CanvasText}}
+
+/* ---------------------------------------------------------------- Werkabbildung (nie beschnitten) – Präsentation af-* */
+.art{display:block}
+.art__frame{position:relative;display:block}
+.art picture{display:contents}
+.art img{display:block;width:100%;height:auto}
+.af-wall .art img{box-shadow:0 1px 1px rgb(0 0 0/.06),0 4px 10px -3px rgb(0 0 0/.16),0 22px 44px -22px rgb(0 0 0/.34)}
+.af-mat .art img{padding:clamp(.5rem,5.5%,2.25rem);background:var(--g-mat,#FCFCFA);box-shadow:0 0 0 1px color-mix(in srgb,var(--f-ink) 10%,transparent),0 3px 10px -4px rgb(0 0 0/.2)}
+.af-mat.is-darkbase .art img{--g-mat:#EDEBE6}
+@media (prefers-color-scheme:dark){html.has-dark.af-mat .art img{--g-mat:#EDEBE6}}
+.art--empty{display:grid;place-items:center;aspect-ratio:4/3;background:var(--f-surface-2);color:var(--f-muted);font-size:var(--f-t-1)}
+
+/* ---------------------------------------------------------------- Werk-Karte (Raster, Mauerwerk, Salon, „Weitere Werke“) */
+.aw{position:relative;display:flex;flex-direction:column;gap:calc(var(--f-s-xs) * var(--g-density));min-width:0}
+.aw__fig{display:flex;flex-direction:column;gap:calc(var(--f-s-s) * var(--g-density));margin:0;min-width:0}
+.aw .cover-link::after{z-index:1}
+.aw__enq{position:relative;z-index:2;font-size:var(--f-t-1)}
+.aw__enq-link{color:var(--f-ink);text-decoration-color:var(--f-line-strong)}
+.aw__enq-link:hover{text-decoration-color:currentColor}
+.aw img{transition:opacity .25s}
+.aw:has(.cover-link):hover img{opacity:.9}
+:is(.aw,.xl__item,.ag__item,.xl-fair):has(.cover-link:focus-visible){outline:2px solid var(--f-focus);outline-offset:6px}
+.aw[hidden]{display:none}
+
+/* ---------------------------------------------------------------- Vergrößerbare Bilder (Lightbox des Kerns) */
+.lb{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:var(--f-s-m);margin:0;padding:0;list-style:none}
+.lb__item:first-child:nth-last-child(2n+3){grid-column:1/-1}   /* bei 3, 5 … Bildern: das erste groß */
+.lb__link{position:relative;display:block;color:inherit}
+.lb__link img{width:100%;height:auto}
+.lb__zoom{position:absolute;right:.75rem;bottom:.75rem;display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:50%;background:color-mix(in srgb,var(--f-bg) 88%,transparent);color:var(--f-ink);font-size:1.15rem;opacity:0;transition:opacity .2s}
+.lb__link:is(:hover,:focus-visible) .lb__zoom{opacity:1}
+@media (hover:none){.lb__zoom{opacity:1}}
+
+/* ---------------------------------------------------------------- Detailseiten: Zurück-Link, Abschnittsüberschriften */
+.xd__back{margin-bottom:var(--f-s-xl);font-size:var(--f-t-1)}
+.xd__back a{display:inline-flex;align-items:center;gap:.45em;min-height:2.5rem;color:var(--f-muted);text-decoration:none}
+.xd__back a:hover{color:var(--f-ink)}
+.xd__h{margin-bottom:var(--f-s-xl);color:var(--f-ink);font:var(--f-hw) var(--f-t2)/1.2 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em)}
+.xd__sep{color:var(--f-line-strong)}
+.empty-hint,.xl-empty{color:var(--f-muted)}
+
+/* ---------------------------------------------------------------- Gemischte Galerie: Bilder (Lightbox) + Videos (Player, startet nie von selbst) */
+.mg{display:grid;gap:var(--f-s-xl)}
+.mg__videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:var(--f-s-xl);margin:0;padding:0;list-style:none}
+.mg__video .video{margin:0}
+.ap__media,.wd__videos{margin-top:var(--f-s-2xl)}

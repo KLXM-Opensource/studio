@@ -1,0 +1,22 @@
+{
+  "name": "klxm-studio-kit-galerie",
+  "private": true,
+  "license": "MIT",
+  "description": "Build-Abhängigkeiten des Kits „galerie“ (selbst gehostete Schriften für den Style-Editor: Inter, Manrope, Instrument Sans, Hanken Grotesk, Space Grotesk, Atkinson Hyperlegible Next, Newsreader, Fraunces, Instrument Serif, EB Garamond, JetBrains Mono, IBM Plex Mono). Wird von tools/build.mjs automatisch installiert und über kits/galerie/build.mjs kopiert.",
+  "packageManager": "pnpm@10.29.2",
+  "devDependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/eb-garamond": "^5.2.0",
+    "@fontsource-variable/fraunces": "^5.2.0",
+    "@fontsource-variable/hanken-grotesk": "^5.2.0",
+    "@fontsource-variable/instrument-sans": "^5.2.0",
+    "@fontsource-variable/inter": "^5.2.0",
+    "@fontsource-variable/jetbrains-mono": "^5.2.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.2.0",
+    "@fontsource-variable/space-grotesk": "^5.2.0",
+    "@fontsource/ibm-plex-mono": "^5.2.0",
+    "@fontsource/instrument-serif": "^5.2.0"
+  }
+}

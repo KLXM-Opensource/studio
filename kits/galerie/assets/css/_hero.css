@@ -1,0 +1,18 @@
+/* ---------------------------------------------------------------- Einstieg (Hero): split, centered, compact
+   Flex-Umbruch statt Breakpoint: Text (≥ 26 rem) und Bild (≥ 19 rem) stehen nebeneinander, solange beide passen.
+   Weitere Varianten (fullbleed, cards, type): css/hero-x.css */
+.sec--hero{padding-block:calc(var(--f-sec) * .7) var(--f-sec)}
+.hero{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-2xl) clamp(2rem,6cqi,6rem)}
+.hero__text{container-type:inline-size;flex:1 1 min(26rem,100%);display:flex;flex-direction:column;align-items:flex-start;gap:var(--f-s-m);max-width:46rem}
+.hero__title{margin-block:var(--f-s-2xs) 0}
+.hero__media{flex:1 1 min(19rem,100%)}
+.hero__lead{max-width:34em;color:var(--f-muted);font-size:var(--f-t1);line-height:1.5;text-wrap:pretty}
+.hero__actions{margin-top:var(--f-s-xs)}
+.hero__points{display:flex;flex-wrap:wrap;gap:var(--f-s-2xs) var(--f-s-l);color:var(--f-muted);font-size:var(--f-t-1)}
+.hero--centered{flex-flow:column nowrap;align-items:stretch;text-align:center}
+.hero--centered .hero__text{align-items:center;align-self:center;width:100%;max-width:54rem}
+.hero--centered .hero__points{justify-content:center}
+.hero--centered .hero__media{flex:none;width:100%}
+.sec--hero.v-compact{padding-block:calc(var(--f-sec) * .55) calc(var(--f-sec) * .5)}
+.hero--compact .h1{font-size:max(var(--f-t3),min(var(--f-t5),11cqi))}
+

@@ -1,0 +1,64 @@
+/* Kit „foto“ – Serien-Übersicht (series_index) und Serie (Kopf) (series_head); nur auf Seiten mit diesen Blöcken.
+   Raster: höchstens N Spalten (auto-fill + max()); Liste: große Titel in cqi, Vorschau per js/series.js; Reihen: Flex-Umbruch. */
+.sx-meta{margin-top:.35em;color:var(--f-muted);font-size:var(--f-t-1);letter-spacing:.01em}
+.capst-mono .sx-meta,.capst-mono .sx-list__meta{font-family:var(--f-font-mono);font-size:var(--f-t-2)}
+.capst-caps .sx-meta,.capst-caps .sx-list__meta{font-size:var(--f-t-2);letter-spacing:.12em;text-transform:uppercase}
+
+/* Raster der Titelbilder */
+.sx-grid{display:grid;align-items:start;gap:calc(var(--f-gap-img) + var(--f-s-l)) var(--f-gap-img);margin:0;padding:0;list-style:none;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,max(var(--min,14rem),(100% - (var(--n,3) - 1) * var(--f-gap-img)) / var(--n,3))),1fr))}
+.sx-grid.cols-auto{grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr))}
+.sx-grid.cols-2{--n:2;--min:17rem}.sx-grid.cols-3{--n:3;--min:14rem}.sx-grid.cols-4{--n:4;--min:11rem}
+.sx-card{position:relative;display:flex;flex-direction:column;gap:.85rem}
+.sx-card__title,.sx-row__title{margin:0;color:var(--f-ink);font:var(--f-hw) var(--f-t1)/1.2 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em)}
+.sx-card__title a,.sx-row__title a{color:inherit;text-decoration:none}
+.sx-card:hover .sx-card__title a,.sx-row:hover .sx-row__title a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+:is(.sx-card,.sx-row):has(.cover-link:focus-visible){outline:2px solid var(--f-focus);outline-offset:4px}
+
+/* Große Liste mit Bildvorschau */
+.sx-list{margin:0;padding:0;list-style:none;border-top:1px solid var(--f-line)}
+.sx-list__item{border-bottom:1px solid var(--f-line)}
+.sx-list__link{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem clamp(1rem,3cqi,2.5rem);padding-block:clamp(.9rem,.6rem + 1.6cqi,1.75rem);color:var(--f-ink);text-decoration:none;transition:color .25s}
+.sx-list__title{flex:1 1 min(14rem,100%);font:var(--f-hw) max(var(--f-t2),min(var(--f-t5),6.2cqi))/1.05 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance}
+.sx-list__meta{color:var(--f-muted);font-size:var(--f-t-1)}
+.sx-list__thumb{position:relative;order:-1;flex:none;width:clamp(3.5rem,13cqi,5.5rem);overflow:hidden;border-radius:var(--f-img-r);background:var(--f-surface)}
+.sx-list__thumb picture{display:contents}
+.sx-list__thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sx-list:has(a:hover) .sx-list__link:not(:hover){color:var(--f-muted)}
+a.sx-list__link:focus-visible{outline:2px solid var(--f-focus);outline-offset:2px}
+/* Mit Maus und JavaScript: Vorschau schwebt (js/series.js setzt die Position), sonst kleines Bild in der Zeile */
+@media (hover:hover){.js .sx-list[data-sx-ready] .sx-list__thumb{display:none}}
+.sx-peek{position:fixed;inset:0 auto auto 0;z-index:40;width:clamp(13rem,22vw,24rem);overflow:hidden;border-radius:var(--f-img-r);background:var(--f-surface);box-shadow:0 30px 60px -30px rgb(0 0 0/.45);pointer-events:none;opacity:0;transition:opacity .25s}
+.sx-peek.is-on{opacity:1}
+.sx-peek picture{display:contents}
+.sx-peek img{display:block;width:100%;height:100%;object-fit:cover}
+.sx-peek--fixed{inset:50% var(--f-gutter) auto auto;translate:0 -50%}
+@media (prefers-reduced-motion:reduce){.sx-peek{transition:none}}
+
+/* Abwechselnde Reihen */
+.sx-rows{display:flex;flex-direction:column;gap:calc(var(--f-sec) * .6)}
+.sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-xl) clamp(2rem,6cqi,6rem)}
+.sx-row__media{flex:1.5 1 min(20rem,100%)}
+.sx-row__text{flex:1 1 min(16rem,100%);display:flex;flex-direction:column;gap:.6rem}
+.sx-row--flip .sx-row__media{order:2}
+.sx-row__title{font-size:max(var(--f-t2),min(var(--f-t4),5cqi));line-height:1.08}
+.sx-row__place{color:var(--f-muted)}
+.sx-row .more{margin-top:.5rem}
+
+/* ---------------------------------------------------------------- Serie (Kopf) */
+.sec--series-head{padding-bottom:calc(var(--f-sec) * .55)}
+.sh{display:flex;flex-direction:column;gap:var(--f-s-2xl)}
+.sh__main{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--f-s-xl) clamp(2rem,7cqi,7rem)}
+.sh__head{flex:1 1 min(22rem,100%);display:flex;flex-direction:column;align-items:flex-start;gap:var(--f-s-s)}
+.sh__title{font-size:max(var(--f-t3),min(var(--f-t5),8cqi));max-width:18ch}
+.sh__body{flex:1.25 1 min(20rem,100%);display:flex;flex-direction:column;gap:var(--f-s-l);padding-top:.4rem}
+.sh--side{flex-flow:row wrap;align-items:center}
+.sh--side .sh__main{flex:1 1 min(22rem,100%);flex-direction:column}
+.sh--side .sh__media{flex:1.2 1 min(20rem,100%)}
+.sh--side :is(.sh__head,.sh__body){flex:none;width:100%}
+.sh__back{display:inline-flex;align-items:center;gap:.45rem;min-height:2.75rem;margin-bottom:var(--f-s-xs);color:var(--f-muted);font-size:var(--f-t-1);text-decoration:none}
+.sh__back:hover{color:var(--f-ink)}
+.sh__facts{display:flex;flex-wrap:wrap;gap:.9rem clamp(1.5rem,4cqi,3rem);margin:0}
+.sh__facts dt{color:var(--f-muted);font:500 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.1em;text-transform:uppercase}
+.sh__facts dd{margin:.15rem 0 0;color:var(--f-ink)}
+.sh__statement{font-size:var(--f-t1);line-height:1.55;color:var(--f-text)}

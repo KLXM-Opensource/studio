@@ -1,0 +1,16 @@
+/* ==========================================================================
+   Kit „galerie“ – breakpointlos (intrinsisch). Vollständig über Design-Tokens gesteuert.
+   Werte: Verwaltung → Design → /media/…/design/design-galerie-*.css (nach diesem Stylesheet geladen).
+   Klassen am <html>: hdr-{inline|centered|split|floating|rail} hdr-sticky btn-{solid|pill|outline|soft|sharp}
+   cards-{flat|outlined|elevated|glass} eb-{line|pill|dot|plain} ft-{columns|simple|statement} pagebg-{plain|grid|dots|glow}
+   has-motion has-dark is-darkbase head-serif · sec2-* hcase-* em-* ln-* img-* imgfx-* hov-* ic-* mo-* div-* hbg-* nl-* (_options.css, opt-*.css).
+   Keine @media-Abfragen für Breiten: nur prefers-color-scheme, prefers-reduced-motion, hover/pointer und print (README).
+   Blöcke außerhalb dieser Datei laden nur bei Bedarf (theme.php → conditional_css).
+   ========================================================================== */
+@import "_tokens.css";
+@import "_base.css";
+@import "_header.css";
+@import "_footer.css";
+@import "_hero.css";
+@import "_options.css";
+@media print{[data-reveal]{opacity:1!important;translate:none!important}.hdr,.mnav,.ftr__statement,.skip,.menu-btn,.hsearch__btn,.reel-ctrl{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}}

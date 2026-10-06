@@ -1,0 +1,7 @@
+/* Kit „foto“ – nur in der Vorschau des Style-Editors (Verwaltung → Design → „Dunkel“): dieselben Regeln wie in
+   _tokens.css, ausgelöst über die Klasse is-dark statt über prefers-color-scheme (design.php → dark.force).
+   Die dunklen Farbwerte setzt der Editor selbst; hier nur das, was keine Farbe ist. */
+html.is-dark{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
+html.is-dark .brand__logo--light{display:none}
+html.is-dark .brand__logo--dark{display:block}
+html.is-dark{--f-mat-bg:color-mix(in srgb,var(--f-bg) 78%,#FFF)}

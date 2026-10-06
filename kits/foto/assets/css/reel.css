@@ -1,0 +1,12 @@
+/* Kit „foto“ – nur auf Seiten mit diesem Block (theme.php → conditional_css) */
+/* Wischbares Band (Reel): scroll-snap ohne Bibliothek; js/reel.js ergänzt Pfeile (nur wenn es etwas zu blättern gibt) */
+.reel{position:relative;display:flex;gap:var(--gap,var(--f-s-l));margin:0;padding:0 0 var(--f-s-s);list-style:none;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:inline mandatory;scroll-padding-inline:0;scrollbar-width:thin;scrollbar-color:var(--f-line-strong) transparent}
+.reel>*{flex:0 0 min(85%,var(--min,20rem));scroll-snap-align:start}
+.reel:focus-visible{outline-offset:4px}
+.reel-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--f-s-m) var(--f-s-xl);margin-bottom:var(--f-s-xl)}
+.reel-head .sec-head{flex:1 1 min(30rem,100%);margin:0}
+.reel-ctrl{display:flex;gap:.5rem}
+.reel-ctrl[hidden]{display:none}
+.reel-btn{display:grid;place-items:center;width:2.9rem;height:2.9rem;padding:0;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:var(--f-card);color:var(--f-ink);font-size:1.15rem;cursor:pointer}
+.reel-btn:hover:not([aria-disabled=true]){border-color:var(--f-ink)}
+.reel-btn[aria-disabled=true]{opacity:.4;cursor:default}

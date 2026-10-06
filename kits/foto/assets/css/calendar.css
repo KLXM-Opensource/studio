@@ -1,0 +1,83 @@
+/* Kit „foto“ – Kern-Blöcke „Kalender“ und „Nächste Termine“ (ersetzt resources/css/calendar.css; nur wenn verwendet).
+   Intrinsisch: Die Monatsübersicht wird unter 44 rem Blockbreite (Container-Query auf .cal = .wrap) zur Liste der Tage mit
+   Terminen; Terminliste und „Nächste Termine“ brechen per Flex-Umbruch um. Farben aus den Tokens. */
+.cal{--cal-accent:var(--f-btn-bg);--cal-accent-ink:var(--f-btn-ink);--cal-muted:var(--f-muted);--cal-line:var(--f-line);--cal-surface:var(--f-surface);--cal-ev-bg:var(--f-a-soft);--cal-today-bg:var(--f-a-soft);--cal-radius:var(--f-r-l)}
+.bg-muted .cal{--cal-surface:var(--f-bg)}
+.cal-head{display:flex;flex-direction:column;gap:var(--f-s-s);max-width:52rem;margin-bottom:var(--f-s-xl)}
+.cal-intro{color:var(--f-muted);font-size:var(--f-t1)}
+.cal-sr,.cal-full,.cal-navtext{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.cal-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem 1.5rem;margin-bottom:var(--f-s-m)}
+.cal-month,.cal-adate,.cal-upname{color:var(--f-ink);font-family:var(--f-font-head);font-weight:var(--f-hw);letter-spacing:calc(var(--f-track) * .006em)}
+.cal-month{margin:0;font-size:var(--f-t2);line-height:1.2}
+.cal-nav,.cal-filter{display:flex;flex-wrap:wrap;gap:.5rem}
+.cal-filter{margin-bottom:var(--f-s-m)}
+.cal-navlink,.cal-chip{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;padding:0 1rem;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);color:var(--f-ink);font-size:var(--f-t-1);font-weight:600;text-decoration:none}
+.cal-navlink:hover,.cal-chip:hover{border-color:var(--f-ink)}
+.cal-chip[aria-current=true]{border-color:var(--cal-accent);background:var(--cal-accent);color:var(--cal-accent-ink)}
+.cal a:focus-visible{outline:2px solid var(--f-focus);outline-offset:2px}
+/* Monatsübersicht */
+.cal-gridwrap{position:relative;overflow:hidden;border:1px solid var(--f-card-bd);border-radius:var(--cal-radius);background:var(--f-card)}
+.cal-grid{width:100%;table-layout:fixed;border-collapse:collapse}
+.cal-grid th{padding:.6rem .5rem;border-bottom:1px solid var(--cal-line);color:var(--cal-muted);font:600 var(--f-t-2)/1.2 var(--f-font-label);letter-spacing:.06em;text-align:start;text-transform:uppercase}
+.cal-day{height:7.5rem;padding:.4rem;border:1px solid var(--cal-line);vertical-align:top}
+.cal-grid tr>:first-child{border-left:0}.cal-grid tr>:last-child{border-right:0}.cal-grid tr:last-child .cal-day{border-bottom:0}
+.cal-day.is-other{background:var(--cal-surface)}
+.cal-day.is-other .cal-num{color:var(--cal-muted)}
+.cal-num{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;border-radius:999px;font-size:.875rem;font-weight:650;font-variant-numeric:tabular-nums}
+.cal-day.is-today{background:var(--cal-today-bg)}
+.cal-day.is-today .cal-num{background:var(--cal-accent);color:var(--cal-accent-ink)}
+.cal-events{display:grid;gap:.25rem;margin:.25rem 0 0;padding:0;list-style:none}
+.cal-ev{padding:.2rem .4rem;border-radius:calc(var(--f-radius) * .5);background:var(--cal-ev-bg);color:var(--f-ink);font-size:.8rem;line-height:1.3;overflow-wrap:anywhere}
+.cal-ev--allday{background:var(--cal-accent);color:var(--cal-accent-ink)}
+.cal-ev a{color:inherit;text-decoration:none}
+.cal-ev a:hover{text-decoration:underline}
+.cal-time{font-weight:650;font-variant-numeric:tabular-nums}
+.cal-loc{display:block;color:var(--cal-muted);font-size:.92em}
+.cal-empty{margin:var(--f-s-m) 0 0;padding:var(--f-s-l);border-radius:var(--cal-radius);background:var(--cal-surface);color:var(--cal-muted)}
+@container (max-width:44rem){
+  .cal-gridwrap{border:0;background:none;overflow:visible}
+  .cal-grid,.cal-grid tbody,.cal-grid tr,.cal-grid td{display:block;width:auto;height:auto}
+  .cal-grid thead{display:none}
+  .cal-day{padding:.75rem 0;border:0!important;border-top:1px solid var(--cal-line)!important}
+  .cal-day:not(.has-events):not(.is-today),.cal-day.is-other{display:none}
+  .cal-day.is-today{padding-inline:.75rem;border-radius:var(--f-r-s)}
+  .cal-num{display:none}
+  .cal-full{position:static!important;width:auto;height:auto;margin:0;overflow:visible;clip-path:none;white-space:normal;display:block;color:var(--f-ink);font-weight:650}
+  .cal-ev{padding:.4rem .6rem;font-size:var(--f-t-1)}
+}
+/* Terminliste des Monats: Datum neben den Terminen (Sidebar-Muster), bei wenig Platz darüber */
+.cal-agenda{display:grid;margin:0;padding:0;list-style:none;border-top:1px solid var(--f-line-strong)}
+.cal-aday{display:flex;flex-wrap:wrap;gap:.25rem var(--f-s-l);padding:var(--f-s-s) 0;border-bottom:1px solid var(--cal-line)}
+.cal-adate{flex:1 1 min(10rem,100%);margin:0;font-size:var(--f-t0);line-height:1.4}
+.cal-aday.is-today .cal-adate{color:var(--f-link)}
+.cal-badge{display:inline-block;margin-left:.4rem;padding:0 .5rem;border-radius:999px;background:var(--f-a2);color:var(--f0-ink);font-size:.75rem;vertical-align:1px}
+.cal-alist{flex:999 1 0;min-width:min(100%,60%);display:grid;gap:.6rem;margin:0;padding:0;list-style:none}
+.cal-aev{display:flex;flex-wrap:wrap;gap:.1rem 1rem}
+.cal-atime{flex:0 0 min(8rem,100%);color:var(--cal-muted);font-variant-numeric:tabular-nums}
+.cal-abody{flex:1 1 min(14rem,100%)}
+.cal-abody .cal-link,.cal-abody .cal-title{font-weight:650}
+.cal-abody .cal-time{display:none}
+.cal-link{color:var(--f-ink);text-decoration:none}
+.cal-link:hover{color:var(--f-link);text-decoration:underline}
+/* Nächste Termine */
+.cal-uplist{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--f-s-s);margin:0;padding:0;list-style:none}
+.cal-upitem{display:flex;align-items:flex-start;gap:var(--f-s-m);padding:var(--f-s-s) var(--f-s-m);border:1px solid var(--f-card-bd);border-radius:var(--cal-radius);background:var(--f-card);box-shadow:var(--f-card-sh)}
+.cal-upcal{flex:none;display:grid;place-items:center;align-content:center;width:3.75rem;height:3.75rem;border-radius:var(--f-radius);background:var(--cal-accent);color:var(--cal-accent-ink);line-height:1}
+.cal-upday{font:var(--f-hw) 1.4rem/1 var(--f-font-head);font-variant-numeric:tabular-nums}
+.cal-upmon{margin-top:.15rem;font:650 .7rem/1 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.cal-upbody{min-width:0}
+.cal-upname{margin:0;overflow-wrap:anywhere;font-size:var(--f-t1);line-height:1.3}
+.cal-upmeta{margin:.25rem 0 0;color:var(--cal-muted);font-size:var(--f-t-1)}
+.cal-upmeta .cal-loc{display:inline}
+.cal-up--compact .cal-uplist{gap:0;border-top:1px solid var(--f-line-strong)}
+.cal-up--compact .cal-upitem{padding:var(--f-s-s) 0;border:0;border-bottom:1px solid var(--cal-line);border-radius:0;background:none;box-shadow:none}
+.cal-up--compact .cal-upcal{width:3rem;height:3rem;background:none;color:var(--f-ink);box-shadow:inset 0 0 0 1px var(--f-line-strong)}
+.cal-upitem.is-today .cal-upmeta time{color:var(--f-link);font-weight:650}
+/* Abonnieren + Button */
+.cal-sub{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;margin:var(--f-s-m) 0 0;font-size:var(--f-t-1)}
+.cal-sublink{display:inline-flex;align-items:center;gap:.5rem;color:var(--f-link);font-weight:650}
+.cal-sublink::before{content:"";width:1em;height:1em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 2h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 3v8h10V5z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 2h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 3v8h10V5z'/%3E%3C/svg%3E") center/contain no-repeat}
+.cal-subalt{color:var(--cal-muted)}
+.cal-subalt a{color:inherit}
+.cal-more{margin-top:var(--f-s-l)}
+@media (forced-colors:active){.cal-ev,.cal-upcal,.cal-day.is-today .cal-num{border:1px solid CanvasText}}

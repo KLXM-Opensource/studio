@@ -1,0 +1,1 @@
+.cards-glass{--f-card:color-mix(in srgb,var(--f-bg) 62%,transparent);--f-card-bd:color-mix(in srgb,var(--f-ink) 14%,transparent);--f-card-blur:blur(16px) saturate(1.4);--f-card-sh:var(--f-shadow)}

@@ -1,0 +1,6 @@
+/* Kit „foto“ – Kopfbereich-Variante (lädt nur, wenn unter Design gewählt; templates/layout.php) */
+/* Schwebend: abgerundete Leiste mit Abstand zum Rand */
+.hdr--floating{background:none;border:0;backdrop-filter:none;padding-top:.75rem}
+.hdr-sticky .hdr--floating{top:0}
+.hdr--floating .hdr__bar{width:min(100% - 2 * var(--f-gutter) + 1rem,var(--f-wrap) + 2rem);padding-inline:1rem .5rem;border:1px solid var(--f-line);border-radius:calc(var(--f-radius) + .75rem);background:var(--f-hdr-bg);box-shadow:var(--f-shadow);backdrop-filter:saturate(1.6) blur(14px)}
+.btn-pill .hdr--floating .hdr__bar{border-radius:999px;padding-inline:1.25rem .5rem}

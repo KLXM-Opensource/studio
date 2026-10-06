@@ -1,0 +1,79 @@
+/* ---------------------------------------------------------------- Fotografie: gemeinsame Bausteine aller Foto-Blöcke
+   .gwrap   Breite einer Galerie (Design → „Breite der Galerien“ bzw. Block-Option): Inhaltsbreite, breiter, randlos
+   .ph      ein Foto: figure > .ph__box (Link zur Lightbox oder span; Passepartout/Linie) > .ph__img (Zuschnitt r-* oder
+            Originalformat) + figcaption.ph__cap
+   Klassen am <html> (design.php → „Bilder & Galerien“): cap-* (Bildunterschriften), capst-* (Schrift), mat-* (Rahmen),
+   gs-* (Schwarzweiß), ih-* (verlinkte Bilder beim Zeigen), lb-* (Lightbox, css/lightbox.css). Variablen: --f-gap-img, --f-img-r.
+   Keine Breiten-Media-Queries; (hover:hover) nur für „Bildunterschrift beim Zeigen“. */
+.gwrap{width:min(100% - 2 * var(--f-gutter),var(--f-gw,var(--f-wrap)));margin-inline:auto;container-type:inline-size}
+.gwrap--wide{--f-gw:calc(var(--f-wrap) + 22rem)}
+.gwrap--full{width:100%;padding-inline:var(--f-gap-img)}
+.gwrap+.gwrap,.wrap+.gwrap{margin-top:0}
+
+.ph{position:relative;min-width:0;margin:0}
+.ph__box{display:block;position:relative;border-radius:var(--f-img-r);color:inherit;text-decoration:none}
+a.ph__box{cursor:zoom-in}
+a.ph__box:focus-visible{outline:2px solid var(--f-focus);outline-offset:3px}
+.ph__img{display:block;position:relative;overflow:hidden;border-radius:var(--f-img-r);background:var(--f-surface)}
+.ph__img picture{display:contents}
+.ph__img:not(.ph__img--orig) img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph__img--orig img{width:100%;height:auto}
+.ph__img.frame--empty{display:grid;place-items:center;color:var(--f-muted);font-size:var(--f-t-1);border:1px dashed var(--f-line-strong)}
+
+/* Bildunterschriften: darunter (Standard), beim Zeigen, auf dem Bild, ausgeblendet */
+.ph__cap{margin-top:.65em;color:var(--f-muted);font-size:var(--f-t-1);line-height:1.45;text-wrap:pretty;max-width:60ch}
+.capst-mono .ph__cap,.capst-mono .stage__cap{font-family:var(--f-font-mono);font-size:var(--f-t-2);letter-spacing:.01em}
+.capst-italic .ph__cap,.capst-italic .stage__cap{font-family:var(--f-font-head);font-style:italic}
+.capst-caps .ph__cap,.capst-caps .stage__cap{font-size:var(--f-t-2);letter-spacing:.12em;text-transform:uppercase}
+.cap-hidden .ph__cap{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* Auf dem Bild: Verlauf mit mind. 58 % Schwarz hinter der Schrift – Weiß bleibt auch auf hellen Bildern ≥ 4,5:1 */
+.cap-overlay .ph__cap{position:absolute;inset:auto var(--f-mat-in,0px) var(--f-mat-in,0px);z-index:1;max-width:none;margin:0;padding:2.25em 1em .8em;border-radius:0 0 var(--f-img-r) var(--f-img-r);background:linear-gradient(to top,rgb(0 0 0/.7),rgb(0 0 0/.58) 55%,transparent);color:#FFF;pointer-events:none}
+@media (hover:hover){
+  .cap-hover .ph__cap{position:absolute;inset:auto var(--f-mat-in,0px) var(--f-mat-in,0px);z-index:1;max-width:none;margin:0;padding:2.25em 1em .8em;border-radius:0 0 var(--f-img-r) var(--f-img-r);background:linear-gradient(to top,rgb(0 0 0/.7),rgb(0 0 0/.58) 55%,transparent);color:#FFF;pointer-events:none;opacity:0;transition:opacity .3s}
+  .cap-hover .ph:is(:hover,:focus-within) .ph__cap{opacity:1}
+}
+
+/* Rahmen: feine Linie oder weißes Passepartout (Abstand relativ zur Bildbreite) */
+.mat-line .ph__box{padding:.35rem;border:1px solid var(--f-line-strong)}
+.mat-line .ph{--f-mat-in:calc(.35rem + 1px)}
+.mat-white .ph__box{padding:clamp(.5rem,4.5%,2.25rem);background:var(--f-mat-bg,#FFF);box-shadow:0 1px 2px rgb(0 0 0/.08),0 10px 28px -14px rgb(0 0 0/.3)}
+.mat-white .ph{--f-mat-in:clamp(.5rem,4.5%,2.25rem)}
+.mat-white .ph__img{border-radius:calc(var(--f-img-r) * .5)}
+
+/* Schwarzweiß: immer bzw. bis zum Zeigen (nur Darstellung; Originale bleiben farbig) */
+.gs-always :is(.ph,.frame,.stage__slide,.sx-list__thumb,.sx-peek,.flb__fig) img{filter:grayscale(1)}
+.gs-hover :is(.ph,.frame,.sx-list__thumb,.sx-peek) img{filter:grayscale(1);transition:filter .5s}
+.gs-hover :is(.ph,.frame,.sx-card,.sx-row,.tcard):is(:hover,:focus-within) img{filter:none}
+
+/* Verlinkte Bilder beim Zeigen: leicht vergrößern bzw. aufhellen */
+@media (prefers-reduced-motion:no-preference){
+  .ih-zoom :is(a.ph__box,.sx-card,.sx-row,.tcard--link) .ph__img img,.ih-zoom :is(.sx-card,.sx-row) .frame img{transition:scale .7s cubic-bezier(.2,.7,.2,1),filter .5s}
+  .ih-zoom :is(a.ph__box:hover,.sx-card:hover,.sx-row:hover) .ph__img img{scale:1.035}
+}
+.ih-fade :is(a.ph__box,.sx-card,.sx-row) .ph__img img{transition:opacity .4s,filter .5s}
+.ih-fade :is(a.ph__box:hover,.sx-card:hover,.sx-row:hover) .ph__img img{opacity:.82}
+
+/* Wortmarke (Design → „Marke oben links“) */
+.brand--word{gap:0}
+.brand--word .brand__name{font:var(--f-hw) clamp(1.0625rem,.95rem + .4vw,1.3rem)/1.1 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em)}
+.hcase-upper .brand--word .brand__name{text-transform:uppercase;letter-spacing:.06em}
+
+/* Leere Hinweise im Editor */
+.empty-hint{padding:1.5rem;border:1px dashed var(--f-line-strong);color:var(--f-muted);text-align:center}
+
+/* Passepartout im dunklen Farbschema: gedämpft statt grellweiß (Vorschau im Editor: preview.css) */
+@media (prefers-color-scheme:dark){html.has-dark{--f-mat-bg:color-mix(in srgb,var(--f-bg) 78%,#FFF)}}
+/* Kopf einer randlosen Galerie bleibt auf der Linie des Seitenrands */
+.gwrap--full>:is(.sec-head,.pg-head){padding-inline:max(0px,var(--f-gutter) - var(--f-gap-img))}
+
+/* Videos in Foto-Blöcken: Vorschaubild mit Abspiel-Zeichen (Lightbox) bzw. <video controls> in der Kachel; Format r-9-16 für Hochkant-Videos */
+.r-9-16{aspect-ratio:9/16}
+.ph__img--video,.ph--video .ph__img{background:#111}
+.ph__img--video video,.ph__video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#111}
+.ph__play{position:absolute;inset:50% auto auto 50%;z-index:1;display:grid;place-items:center;width:3.5rem;height:3.5rem;translate:-50% -50%;border:1px solid rgb(255 255 255/.7);border-radius:50%;background:rgb(0 0 0/.55);pointer-events:none;transition:background-color .2s,scale .2s}
+.ph__play::before{content:"";width:0;height:0;margin-left:.25rem;border-style:solid;border-width:.6rem 0 .6rem 1rem;border-color:transparent transparent transparent #FFF}
+a.ph__box--video{cursor:pointer}
+a.ph__box--video:hover .ph__play{background:rgb(0 0 0/.78)}
+.ph--video .media-transcript,.ph--embed .media-transcript{margin-top:.5rem;font-size:var(--f-t-1)}
+.ph--embed .vembed{border-radius:var(--f-img-r);overflow:clip}
+@media (forced-colors:active){.ph__play{border-color:CanvasText;background:Canvas}.ph__play::before{border-left-color:CanvasText}}

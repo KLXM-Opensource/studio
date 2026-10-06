@@ -1,0 +1,29 @@
+/* ---------------------------------------------------------------- Fußbereich (Design → „Fußbereich“) */
+.ftr{padding-block:var(--f-s-3xl) var(--f-s-l);background:var(--f-surface);border-top:1px solid var(--f-line);color:var(--f-muted);font-size:var(--f-t-1);--f-card:var(--f-bg)}
+.ftr a:not(.btn){color:var(--f-text);text-decoration:none}
+.ftr a:not(.btn):hover,.ftr a[aria-current]{color:var(--f-ink);text-decoration:underline}
+.ftr__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:var(--f-s-2xl) var(--f-s-xl)}
+.ftr__about{display:flex;flex-direction:column;gap:var(--f-s-s);grid-column:span 2;max-width:26rem}
+@container (max-width:26rem){.ftr__about{grid-column:auto}}
+.ftr__tagline{color:var(--f-text)}
+.ftr__h{margin-bottom:var(--f-s-s);color:var(--f-ink);font:600 var(--f-t-2)/1.2 var(--f-font-label);letter-spacing:.1em;text-transform:uppercase}
+.ftr__address{margin-bottom:.5rem}
+.ftr__list{display:grid;gap:.1rem;margin:0;padding:0;list-style:none}
+.ftr__list a{display:inline-flex;align-items:center;gap:.5rem;min-height:2.25rem}
+.ftr__list .ico{color:var(--f-link)}
+.ftr__bottom{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-s) var(--f-s-xl);margin-top:var(--f-s-2xl);padding-top:var(--f-s-l);border-top:1px solid var(--f-line)}
+.ftr__copy{margin-inline-end:auto}
+.ftr__legal{--gap:.25rem 1.5rem}
+.ftr__legal a{display:inline-flex;align-items:center;min-height:2.25rem}
+.ftr .langswitch{background:var(--f-surface-2)}
+.ftr--simple{padding-top:var(--f-s-2xl)}
+.ftr__row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-m) var(--f-s-xl)}
+.ftr__row .ftr__tagline{flex:1 1 min(16rem,100%)}
+.ftr__inline .cluster{--gap:.25rem 1.25rem}
+.ftr--simple .ftr__text{margin-top:var(--f-s-l);max-width:60rem}
+/* Galerie: Öffnungszeiten im Fußbereich (Spalten) */
+.ftr__hours{display:grid;gap:.15rem;margin:0}
+.ftr__hours div{display:grid}
+.ftr__hours dt{color:var(--f-text)}
+.ftr__hours dd{margin:0}
+.ftr__hnote{margin-top:.5rem}
