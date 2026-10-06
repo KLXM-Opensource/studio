@@ -83,12 +83,12 @@ Einstiegs-Varianten (nur bei Verwendung): hero-x.css 4,1 KB · hx-scale.css 2,3 
 
 | Gruppe | Tokens |
 |---|---|
-| Farben | accent `--f-a`, accent_strong, on_accent, highlight `--f-a2` (Zweitfarbe), ink, text, muted, background, surface, line, dark_section – je hell/dunkel mit Kontrastprüfung |
-| Typografie | font_body, font_head, font_mono, label_font (Dachzeilen), fs_min/fs_max (Grundschrift klein/groß), ratio (1,125–1,6), vw_min/vw_max (Fließbereich), heading_weight (300–900 stufenlos), heading_tracking |
-| Form & Raum | radius, buttons `btn-{solid,pill,outline,soft,sharp}`, cards `cards-{flat,outlined,elevated,glass}`, shadow (none/soft/crisp/layered), density, space, wrap (Inhaltsbreite), eyebrow `eb-{line,pill,dot,plain}` |
-| Kopf & Fuß | header `hdr-{inline,centered,split,floating,rail}`, header_sticky, footer `ft-{columns,simple,statement}`, pagebg `pagebg-{plain,grid,dots,glow}` |
+| Farben | accent `--f-a`, accent_strong, on_accent, highlight `--f-a2` (Hervorhebung: Flächen, Marker), secondary `--f-b` + on_secondary `--f-b-on` (zweite Markenfarbe, Einsatz über secondary_role `sec2-{sections,details,buttons,all}`), ink, text, muted, background, surface, line, dark_section – je hell/dunkel mit Kontrastprüfung |
+| Typografie | font_body, font_head, font_mono, label_font (Dachzeilen), fs_min/fs_max (Grundschrift klein/groß), ratio (1,125–1,6), vw_min/vw_max (Fließbereich), heading_weight (300–900 stufenlos), heading_tracking, heading_case `hcase-*`, emphasis `em-{accent,italic,bold,marker,underline,gradient}`, links `ln-{underline,accent,marker}` |
+| Form & Raum | radius, buttons `btn-{solid,pill,outline,soft,sharp}`, cards `cards-{flat,outlined,elevated,glass}`, shadow (none/soft/crisp/layered), density, space, wrap (Inhaltsbreite), eyebrow `eb-{line,pill,dot,plain}`, images `img-{radius,sharp,round,arch}`, image_fx `imgfx-{none,mono,tint,frame}`, hover `hov-{lift,glow,none}`, icons `ic-{soft,circle,outline,plain}`, dividers `div-{none,wave,slant,curve,zigzag}` (opt-dividers-*.css, nur zwischen Abschnitten mit unterschiedlichem Hintergrund) |
+| Kopf & Fuß | header `hdr-{inline,centered,split,floating,rail,minimal}`, header_sticky, header_bg `hbg-{page,surface,accent,secondary,dark}`, nav_style `nl-{plain,underline,pill,caps}`, topbar `meta-{off,dark,accent,secondary,surface}` (Infoleiste mit Telefon, E-Mail, Social und Text aus den Einstellungen `topbar_text`), footer `ft-{columns,simple,statement,centered}`, footer_bg `fbg-{surface,page,dark,accent,secondary}`, pagebg `pagebg-{plain,grid,dots,glow}` |
 | Kopfbereich: Suche & Aktionen | `ha_*` aus `Core\HeaderActions::designGroup()` – Standard: Suchfeld + Textlink („Projekt besprechen →“) (Handlungsaufruf, Suche, Anordnung, Kontakt-Chip, Sprache, Social, Anmelden; `header_actions()`) |
-| Bewegung & Schema | motion `has-motion` (Einblenden, Laufband – nie bei „Bewegung reduzieren“), dark `has-dark` |
+| Bewegung & Schema | motion `has-motion` (Einblenden, Laufband – nie bei „Bewegung reduzieren“), motion_style `mo-{rise,fade,scale,blur}`, dark `has-dark` |
 
 Abgeleitet (color-mix): `--f-a-soft`, `--f-surface-2`, `--f-line-strong`, Rollen je Fläche (`.bg-accent`, `.bg-dark`,
 `.on-media`, Hintergrundbild mit Abdunkelung). Ist der Hintergrund schon im hellen Schema dunkel (Vorlage „Tech-Startup“),
@@ -99,7 +99,12 @@ setzt `fluid_html_class()` `is-darkbase` (color-scheme dark). Serifen-Überschri
 Fluid Standard · Kanzlei (Newsreader, eckig, zentriert) · Handwerk (Bricolage, Pille, schwebend, Punktraster) ·
 Praxis (Salbei, Instrument Sans, Schatten, Verlauf) · Agentur (Verhältnis 1,45, Violett/Limette, geteilt, Raster) ·
 Verein (Blau/Gelb, DM Sans 800) · Restaurant (Fraunces, Creme, Kontur) · Tech-Startup (dunkel, Space Grotesk, Glas,
-Mono-Etiketten) · Kultur (Instrument Serif 1,5, Signalrot, Seitenleiste). Alle AA hell + dunkel.
+Mono-Etiketten) · Kultur (Instrument Serif 1,5, Signalrot, Seitenleiste) · Sozialträger (Orange/Grün, Lato, Textmarker,
+Infoleiste) · Verband (Roboto Condensed in Versalien, Kopf in Markenfarbe, schräge Übergänge) · Gesundheit (Atkinson
+Hyperlegible, größere Grundschrift, runde Bilder) · Betrieb & Notdienst (Roboto/Roboto Slab, dunkler Kopf, rote Infoleiste) ·
+Kommune & Portal (Poppins, Violett/Petrol, Wellen, zentrierter Fuß) · Wissen & Kampagne (dunkel, Manrope, Verlaufs-Betonung).
+Alle 15 AA hell + dunkel. Zusätzliche Schriften: Open Sans, Source Sans 3, Lato, Roboto (+ Condensed, Slab), PT Sans, Poppins,
+Manrope, Atkinson Hyperlegible Next (selbst gehostet, Fontsource).
 
 ## Blöcke und Varianten
 

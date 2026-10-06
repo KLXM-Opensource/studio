@@ -325,4 +325,7 @@ return [
     'Live-Aktualisierung fortsetzen' => 'Resume live updates',
     'Senden fehlgeschlagen.' => 'Sending failed.',
     '{n} neue Einträge' => '{n} new entries',
+    'mit {name}' => 'with {name}',
+    'Andere Karten-App' => 'Other map app',
+    '…' => '…',
 ];

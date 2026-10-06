@@ -8,7 +8,7 @@
 .prose--dropcap>p:first-of-type::first-letter{float:inline-start;margin:.06em .12em 0 0;color:var(--f-link);font:var(--f-hw) 3.4em/.8 var(--f-font-head)}
 /* Rich-Text-Stile (Klassenvertrag Core\Sanitizer: t-lead, t-small, t-note, c-*, mark, sup/sub) – auch per „@rich“ geladen.
    Farben als --rt-* (Kontrastprüfung der Leiste): hell ≥ 4,5:1 auf Hintergrund/Fläche/Tönung, dunkel auf dunklen Flächen, blass auf Akzent. */
-:root,.bg-white,.bg-muted,.bg-tint,.bg-accent,.bg-dark,.on-media,.sec--ov-dark{--rt-accent:var(--f-link);--rt-muted:var(--f-muted)}
+:root,.bg-white,.bg-muted,.bg-tint,.bg-accent,.bg-secondary,.bg-dark,.on-media,.sec--ov-dark{--rt-accent:var(--f-link);--rt-muted:var(--f-muted)}
 :root{--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318}
 .bg-dark,.on-media,.sec--ov-dark,html.is-darkbase{--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
 .bg-accent{--rt-success:#D5F5E0;--rt-warning:#FFF1C2;--rt-danger:#FFE0DC}

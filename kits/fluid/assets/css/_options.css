@@ -1,0 +1,105 @@
+/* ---------------------------------------------------------------- Weitere Design-Optionen (design.php, Klassen am <html>)
+   Zweitfarbe (sec2-*), Überschriften (hcase-*), Betonung *Wort* (em-*), Links im Text (ln-*), Bilder (img-*, imgfx-*),
+   Hover der Karten (hov-*), Symbole (ic-*), Einblenden (mo-*). Abschnittsübergänge: opt-dividers-*.css (nur bei Bedarf). */
+
+/* Zweitfarbe (zweite Markenfarbe): Abschnitt „Zweitfarbe“ immer; dazu wahlweise Details (Symbole, Dachzeilen-Marke) und Buttons */
+.bg-secondary{--f-sec-bg:var(--f-b);--f-fg:var(--f-b-on);--f-muted:var(--f-b-on);--f-btn-ink:var(--f-b)}
+html:is(.sec2-details,.sec2-all){--f-ico-bg:color-mix(in srgb,var(--f-b) 16%,var(--f-bg));--f-ico:var(--f-b)}
+:is(.sec2-details,.sec2-all) .eyebrow::before{background:var(--f-b)}
+:is(.sec2-buttons,.sec2-all) .btn--secondary{background:var(--f-b);color:var(--f-b-on);border-color:var(--f-b)}
+:is(.sec2-buttons,.sec2-all) .btn--secondary:hover{background:color-mix(in srgb,var(--f-b) 84%,var(--f-ink));border-color:transparent;color:var(--f-b-on)}
+:is(.sec2-buttons,.sec2-all) :is(.bg-accent,.bg-dark,.bg-secondary,.on-media,.sec--ov-dark) .btn--secondary{background:transparent;color:var(--f-fg);border-color:currentColor}
+
+/* Überschriften: Versalien bzw. Kapitälchen */
+.hcase-upper :is(h1,h2,h3,h4){text-transform:uppercase;letter-spacing:max(.02em,calc(var(--f-track)*.01em + .04em))}
+.hcase-smallcaps :is(h1,h2,h3,h4){font-variant-caps:all-small-caps;letter-spacing:.03em}
+
+/* Betonung *Wort* in Überschriften (.hl) */
+html.em-italic .hl{font-style:italic;color:inherit}
+html.em-bold .hl{font-style:normal;font-weight:max(800,calc(var(--f-hw) + 200));color:inherit}
+html.em-marker .hl{font-style:normal;color:inherit;background:linear-gradient(transparent 58%,var(--f-a2) 58%, var(--f-a2) 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.06em}
+html.em-underline .hl{font-style:normal;color:inherit;text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:.09em;text-underline-offset:.14em}
+html.em-gradient .hl{font-style:normal;background:linear-gradient(90deg,var(--f-a),var(--f-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+@media (forced-colors:active){html.em-gradient .hl{color:CanvasText;background:none}}
+
+/* Links im Fließtext (nur Links ohne eigene Klasse) */
+html.ln-accent main a:not([class]){text-decoration:none;font-weight:600}
+html.ln-accent main a:not([class]):hover{text-decoration:underline}
+html.ln-marker main a:not([class]){color:inherit;text-decoration:none;background:linear-gradient(var(--f-a-soft),var(--f-a-soft)) 0 100%/100% .45em no-repeat;transition:background-size .2s}
+html.ln-marker main a:not([class]):hover{background-size:100% 100%}
+
+/* Bilder: Ecken und Wirkung (Rahmen .frame) */
+.img-sharp .frame{border-radius:0}
+.img-round .frame{border-radius:calc(var(--f-radius) * 2.4 + 8px)}
+.img-arch .frame{border-radius:999px 999px var(--f-r-l) var(--f-r-l)}
+.imgfx-mono .frame img{filter:grayscale(1);transition:filter .4s}
+.imgfx-mono :is(a,.tcard,.tile,.feat):hover .frame img,.imgfx-mono .frame:hover img{filter:none}
+.imgfx-tint .frame::after{content:"";position:absolute;inset:0;background:var(--f-a);mix-blend-mode:color;opacity:.55;pointer-events:none;transition:opacity .4s}
+.imgfx-tint :is(a,.tcard,.tile):hover .frame::after{opacity:0}
+.imgfx-frame .frame{overflow:visible;isolation:isolate}
+.imgfx-frame .frame::before{content:"";position:absolute;inset:0;translate:.6rem .6rem;z-index:-1;border:2px solid var(--f-a);border-radius:inherit}
+.imgfx-frame .frame :is(img,video){border-radius:inherit}
+@media (forced-colors:active){.imgfx-tint .frame::after{display:none}}
+
+/* Hover der Karten: Anheben (Standard, has-motion), Leuchten oder ruhig */
+.has-motion.hov-glow :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-glow :is(.feat--link,.tcard--link.card,.tile):hover{border-color:var(--f-a);box-shadow:0 0 0 3px var(--f-a-soft),var(--f-card-sh)}
+.has-motion.hov-none :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-none .tcard--link:hover .frame img{scale:1}
+
+/* Symbole (Merkmale u. a.): getönt (Standard), Kreis, Kontur, schlicht */
+.ic-circle .feat__ico{border-radius:50%}
+.ic-outline .feat__ico{background:transparent;box-shadow:inset 0 0 0 2px currentColor}
+.ic-plain .feat__ico{width:auto;height:auto;background:none;font-size:2rem;place-items:start}
+
+/* Einblenden beim Scrollen: Aufsteigen (Standard), nur Blende, Wachsen, Unschärfe */
+@media (prefers-reduced-motion:no-preference){
+  .has-motion.js.mo-fade [data-reveal]:not(.is-in){translate:none}
+  .has-motion.js.mo-scale [data-reveal]:not(.is-in){translate:none;scale:.96}
+  .has-motion.js.mo-scale [data-reveal]{transition:opacity .6s cubic-bezier(.2,.7,.2,1),scale .6s cubic-bezier(.2,.7,.2,1)}
+  .has-motion.js.mo-blur [data-reveal]:not(.is-in){translate:none;filter:blur(8px)}
+  .has-motion.js.mo-blur [data-reveal]{transition:opacity .7s ease,filter .7s ease}
+}
+
+/* ---------------------------------------------------------------- Kopf & Fuß
+   Hintergrund des Kopfs (hbg-*) und des Fußes (fbg-*): auf Farbflächen dieselben Rollen wie in farbigen Abschnitten. */
+.hbg-surface .hdr{--f-hdr-bg:var(--f-surface)}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta{
+  --f-ink:var(--f-fg);--f-text:var(--f-fg);--f-muted:color-mix(in srgb,var(--f-fg) 82%,var(--f-zone));--f-bg:var(--f-zone);
+  --f-line:color-mix(in srgb,var(--f-fg) 20%,transparent);--f-line-strong:color-mix(in srgb,var(--f-fg) 48%,transparent);
+  --f-surface:color-mix(in srgb,var(--f-fg) 12%,transparent);--f-surface-2:color-mix(in srgb,var(--f-fg) 16%,transparent);
+  --f-card:color-mix(in srgb,var(--f-fg) 7%,transparent);--f-link:var(--f-fg);--f-focus:var(--f-fg);
+  --f-btn-bg:var(--f-fg);--f-btn-ink:var(--f-zone);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-zone))}
+.hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta{--f-zone:var(--f-a);--f-fg:var(--f-a-on)}
+.hbg-secondary .hdr,.fbg-secondary .ftr,.meta-secondary .hdr__meta{--f-zone:var(--f-b);--f-fg:var(--f-b-on)}
+.hbg-dark .hdr,.fbg-dark .ftr,.meta-dark .hdr__meta{--f-zone:var(--f-dark);--f-fg:var(--f-on-dark)}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr{--f-hdr-bg:var(--f-zone);border-bottom-color:transparent}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[aria-current=page],:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[data-active]{text-decoration-color:currentColor}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .brand__mark{box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--f-zone) 60%,var(--f-fg))}
+.fbg-page .ftr{background:var(--f-bg)}
+:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr{background:var(--f-zone);border-top-color:transparent;color:var(--f-muted)}
+
+/* Menüpunkte (nl-*) */
+.nl-underline .hnav__link:hover{background:none;color:var(--f-ink);text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:2px;text-underline-offset:.5em}
+.nl-pill .hnav__link{border-radius:999px;padding-inline:1rem}
+.nl-pill :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){background:var(--f-a-soft);color:var(--f-ink);text-decoration:none}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark).nl-pill :is(.hnav__link[aria-current=page],.hnav__link[data-active]){background:var(--f-surface)}
+.nl-caps .hnav__link{font-size:.8125rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase}
+
+/* Infoleiste über dem Kopf (meta-*) */
+.hdr__meta{background:var(--f-surface);color:var(--f-text);font-size:var(--f-t-2)}
+:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta{background:var(--f-zone)}
+.hdr__meta-in{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--f-s-l);width:min(100% - 2 * var(--f-gutter),var(--f-wrap));min-height:2.25rem;margin-inline:auto}
+.hdr__meta-text{margin:0;color:var(--f-ink);font-weight:600}
+.hdr__meta-list{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--f-s-m);margin:0 0 0 auto;padding:0;list-style:none}
+.hdr__meta a{display:inline-flex;align-items:center;gap:.4em;min-height:2.25rem;color:inherit;text-decoration:none}
+.hdr__meta a:hover{color:var(--f-ink);text-decoration:underline}
+.hdr__meta .ico{font-size:1.05em}
+@container hdr (max-width:40rem){.hdr__meta-social,.hdr__meta-mail span{display:none}.hdr__meta-text{flex-basis:100%;padding-top:.35rem}.hdr__meta-list{margin-inline-start:0}}
+
+/* Fuß „Zentriert“ (Markup wie „Schlicht“) */
+.ftr--centered{text-align:center}
+.ftr--centered .ftr__row{flex-direction:column;justify-content:center}
+.ftr--centered :is(.ftr__inline .cluster,.ftr__bottom,.ftr__legal){justify-content:center}
+.ftr--centered .ftr__copy{margin-inline:0}
+.ftr--centered .ftr__text{margin-inline:auto;margin-block-start:1.25rem;max-width:40rem}

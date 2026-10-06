@@ -12,7 +12,7 @@ $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
 // Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten) – nur das Gewählte
 $optCss = [];
-foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards'] as $opt) {
+foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers'] as $opt) {
     $file = 'css/opt-' . $opt . '-' . preg_replace('~[^a-z]~', '', (string) design($opt)) . '.css';
     if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
 }

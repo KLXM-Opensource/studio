@@ -6,6 +6,19 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit „fluid“: mehr Gestaltung – zweite Markenfarbe, Infoleiste, Übergänge, sechs neue Vorlagen
+- Zweite Markenfarbe (`secondary`/`on_secondary`, `--f-b`) mit Einsatzbereich (Abschnitte, Details, Buttons, überall); Fläche
+  „Zweite Markenfarbe“ für Abschnitte. „Zweitfarbe“ heißt jetzt „Hervorhebung (Flächen, Marker)“.
+- Typografie: Überschriften in Versalien, sechs Betonungsarten (Akzent, kursiv, fett, Textmarker, unterstrichen, Verlauf),
+  Linkstil; neun weitere Schriften selbst gehostet (Open Sans, Source Sans 3, Lato, Roboto, Roboto Condensed, Roboto Slab,
+  PT Sans, Poppins, Manrope, Atkinson Hyperlegible Next).
+- Form: Bildform und -wirkung, Hover-Effekt, Symbolstil, Übergänge zwischen Abschnitten (Welle, schräg, Bogen, Zickzack – nur
+  bei wechselndem Hintergrund), Animationsstil.
+- Kopf & Fuß: Kopfbereich „Minimal“, Farbe von Kopf und Fuß, Menüstil, Infoleiste (Telefon, E-Mail, Social, eigener Text),
+  Fußbereich „Zentriert“.
+- Neue Vorlagen für typische KLXM-Projekte: Sozialträger, Verband, Gesundheit, Betrieb & Notdienst, Kommune & Portal, Wissen &
+  Kampagne – alle 15 Vorlagen hell und dunkel WCAG 2.2 AA (`php kits/fluid/tools/contrast.php`).
+
 ### Editor: Kit-Skripte für Videos/Animationen, Ereignis `cms:block-preview`
 - Kits können Skripte für den Seiten-Editor freigeben (`theme.php` → `'editor_js'`, `Theme::editorJs()`), z. B. Videoschleifen –
   vorher liefen im Bearbeitungsmodus gar keine Kit-Skripte (Videos starteten nicht).

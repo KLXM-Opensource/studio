@@ -54,7 +54,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .bg-accent{--f-sec-bg:var(--f-a);--f-fg:var(--f-a-on);--f-muted:var(--f-a-on);--f-btn-ink:var(--f-a)}
 .bg-dark,.on-media{--f-sec-bg:var(--f-dark);--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 80%,var(--f-dark));--f-btn-ink:var(--f-dark)}
 .on-media{--f-muted:color-mix(in srgb,var(--f-on-dark) 88%,transparent)}
-.bg-accent,.bg-dark,.on-media,.sec--ov-dark{
+.bg-accent,.bg-secondary,.bg-dark,.on-media,.sec--ov-dark{
   --f-ink:var(--f-fg);--f-text:var(--f-fg);--f-line:color-mix(in srgb,var(--f-fg) 20%,transparent);--f-line-strong:color-mix(in srgb,var(--f-fg) 48%,transparent);
   --f-card:color-mix(in srgb,var(--f-fg) 7%,transparent);--f-card-bd:var(--f-line);--f-card-sh:none;--f-surface:color-mix(in srgb,var(--f-fg) 9%,transparent);--f-surface-2:color-mix(in srgb,var(--f-fg) 14%,transparent);
   --f-link:var(--f-fg);--f-focus:var(--f-fg);--f-ico-bg:color-mix(in srgb,var(--f-fg) 14%,transparent);--f-ico:var(--f-fg);--f-a-soft:color-mix(in srgb,var(--f-fg) 12%,transparent);

@@ -17,7 +17,7 @@
 .dff-help,.dff-note{margin:0;color:var(--f-muted);font-size:var(--f-t-1)}
 .dff input:not([type=checkbox],[type=radio],[type=color]),.dff select,.dff textarea{width:100%;min-height:3rem;padding:.65rem .9rem;border:1.5px solid var(--f-muted);border-radius:var(--f-radius);background:var(--f-bg);color:var(--f-ink);font:inherit;line-height:1.4;transition:border-color .15s,box-shadow .15s}
 .bg-muted .dff :is(input,select,textarea),.contact__form .dff :is(input,select,textarea){background:var(--f-bg)}
-:is(.bg-accent,.bg-dark) .dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea){background:transparent}
+:is(.bg-accent,.bg-secondary,.bg-dark) .dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea){background:transparent}
 .dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea):hover{border-color:var(--f-ink)}
 .dff :is(input:not([type=checkbox],[type=radio],[type=color]),select,textarea):focus{border-color:var(--f-a);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--f-a) 28%,transparent)}
 .dff select{height:3rem;padding-block:0}

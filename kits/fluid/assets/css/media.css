@@ -132,7 +132,7 @@ html:has(.cms-lb[open]){overflow:hidden}
 .bg-muted .cms-stack__inner{background:var(--f-bg)}
 .cards-flat .bg-white .cms-stack__inner{background:var(--f-surface)}
 /* Stapelkarten bleiben deckend in Seitenfarbe (--f-bg) → in dunklen Abschnitten auch Schrift der Seite (--f0-*: am :root berechnet) */
-:is(.bg-accent,.bg-dark,.sec--ov-dark) .cms-stack__inner{--f-ink:var(--f0-ink);--f-text:var(--f0-text);--f-muted:var(--f0-muted);--f-link:var(--f0-link);--_accent:var(--f-link)}
+:is(.bg-accent,.bg-secondary,.bg-dark,.sec--ov-dark) .cms-stack__inner{--f-ink:var(--f0-ink);--f-text:var(--f0-text);--f-muted:var(--f0-muted);--f-link:var(--f0-link);--_accent:var(--f-link)}
 .cms-stack__body{display:flex;flex-direction:column;justify-content:center;padding:clamp(1.5rem,5cqi,3.5rem)}
 .cms-stack__num{display:inline-flex;align-items:center;gap:.6rem;margin-bottom:clamp(1rem,4cqi,2.5rem);color:var(--_accent);font:700 .875rem/1 var(--f-font-label);letter-spacing:.08em;font-variant-numeric:tabular-nums}
 .cms-stack__num::after{content:"";width:1.5rem;height:2px;background:currentColor}

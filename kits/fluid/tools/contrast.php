@@ -10,6 +10,8 @@
  */
 declare(strict_types=1);
 
+// design.php nutzt Kern-Klassen (Kopfbereich-Aktionen) – Autoloader des Projekts laden, falls vorhanden
+if (is_file($al = dirname(__DIR__, 3) . '/vendor/autoload.php')) require_once $al;
 $design = require dirname(__DIR__) . '/design.php';
 
 function lum(string $hex): float
@@ -39,7 +41,9 @@ $fail = 0;
 $verbose = in_array('-v', $argv, true);
 foreach ($design['presets'] as $key => $p) {
     foreach (['hell' => '', 'dunkel' => '@dark'] as $mode => $sfx) {
-        $v = fn(string $k) => $p['values'][$k . $sfx];
+        // Zweite Markenfarbe: in älteren Vorlagen nicht gesetzt → Standard des Tokens
+        $def2 = ['secondary' => ['#0F766E', '#5EEAD4'], 'on_secondary' => ['#FFFFFF', '#062B27']];
+        $v = fn(string $k) => $p['values'][$k . $sfx] ?? $def2[$k][$sfx === '' ? 0 : 1];
         $soft = mix($v('accent'), 14, $v('background'));
         $white = '#FFFFFF';
         $checks = [
@@ -58,6 +62,8 @@ foreach ($design['presets'] as $key => $p) {
             'Abschnitt Akzent hell: Text' => [$v('text'), $soft, 4.5],
             'Abschnitt Akzent hell: Nebentext' => [$v('muted'), $soft, 4.5],
             'Zweitfarbe: Überschrift' => [$v('ink'), $v('highlight'), 4.5],
+            'Zweite Markenfarbe / Hintergrund (Grafik)' => [$v('secondary'), $v('background'), 3],
+            'Schrift auf zweiter Markenfarbe' => [$v('on_secondary'), $v('secondary'), 4.5],
             'Zweitfarbe: Fließtext' => [$v('text'), $v('highlight'), 4.5],
             'Abschnitt Akzent: Nebentext auf Karte (7 %)' => [$v('on_accent'), mix($v('on_accent'), 7, $v('accent')), 4.5],
             'Abschnitt Dunkel: Weiß / Fläche' => [$white, $v('dark_section'), 7],

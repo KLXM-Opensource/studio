@@ -20,7 +20,7 @@
 .hx-collage:not(:has(.hx-collage__tile)) .hx-collage__card{margin:0}
 .hx-collage__card .h1{font-size:max(var(--f-t3),min(var(--f-t5),12cqi))}
 .bg-muted .hx-collage__card,.bg-tint .hx-collage__card{background:var(--f-bg)}
-.bg-accent .hx-collage__card,.bg-dark .hx-collage__card{border-color:color-mix(in srgb,var(--f-fg) 22%,transparent)}
+.bg-accent .hx-collage__card,.bg-secondary .hx-collage__card,.bg-dark .hx-collage__card{border-color:color-mix(in srgb,var(--f-fg) 22%,transparent)}
 
 @container hxc (min-width:52rem){
   .hx-collage{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(6,minmax(clamp(3.5rem,7cqi,6rem),auto))}

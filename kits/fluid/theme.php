@@ -45,8 +45,8 @@ return [
     'requires' => '>=1.0.0',
     'source_lang' => 'de',
 
-    'backgrounds' => ['white' => 'Standard', 'muted' => 'Getönt', 'tint' => 'Akzent hell', 'accent' => 'Akzentfarbe', 'dark' => 'Dunkel'],
-    'dark_backgrounds' => ['accent', 'dark'],
+    'backgrounds' => ['white' => 'Standard', 'muted' => 'Getönt', 'tint' => 'Akzent hell', 'accent' => 'Akzentfarbe', 'secondary' => 'Zweite Markenfarbe', 'dark' => 'Dunkel'],
+    'dark_backgrounds' => ['accent', 'secondary', 'dark'],
     'frame_hosts' => [],
 
     'container_class' => 'wrap',
@@ -179,6 +179,8 @@ return [
                     'help' => 'SVG oder PNG mit transparentem Hintergrund, ca. 40 px hoch dargestellt.'],
                 ['name' => 'logo_dark', 'label' => 'Logo für dunkles Farbschema (optional)', 'type' => 'media', 'width' => 'half', 'translate' => false,
                     'help' => 'Helle Fassung des Logos. Leer = normales Logo.'],
+                ['name' => 'topbar_text', 'label' => 'Text der Infoleiste (optional)', 'type' => 'text', 'max' => 90,
+                    'help' => 'Kurzer Hinweis links in der Infoleiste, z. B. „Notdienst rund um die Uhr“ oder „Sprechzeiten Mo–Fr 8–18 Uhr“. Infoleiste einschalten: Design → Kopf & Fuß.'],
                 ['name' => 'footer_statement', 'label' => 'Satz im Fußbereich „Großer Schriftzug“ (optional)', 'type' => 'text', 'max' => 90,
                     'help' => 'Z. B. „Lassen Sie uns reden.“ – leer = Kurzname. Der Button im Kopfbereich erscheint daneben.'],
                 ['name' => 'footer_text', 'label' => 'Text im Fußbereich', 'type' => 'textarea', 'rows' => 2, 'max' => 240],

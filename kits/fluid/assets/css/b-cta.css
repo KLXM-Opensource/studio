@@ -5,7 +5,7 @@
 .cta__text{container-type:inline-size;flex:1 1 min(22rem,100%);display:flex;flex-direction:column;gap:var(--f-s-s);max-width:46rem}
 .cta__lead{color:var(--f-muted);font-size:var(--f-t1);line-height:1.5}
 .cta--box{padding:calc(var(--f-s-2xl) * var(--f-density)) var(--f-pad);border-radius:var(--f-r-l);background:var(--f-a-soft)}
-.bg-accent .cta--box,.bg-dark .cta--box{background:var(--f-surface)}
+.bg-accent .cta--box,.bg-secondary .cta--box,.bg-dark .cta--box{background:var(--f-surface)}
 .bg-tint .cta--box{background:var(--f-bg)}
 .cta--split{padding:var(--f-pad);border-radius:var(--f-r-l);background:var(--f-card);border:1px solid var(--f-card-bd)}
 .cta--split .cta__main{flex-direction:column;align-items:flex-start}
@@ -14,6 +14,6 @@
 .cta--big .cta__main{flex-direction:column;align-items:flex-start;gap:var(--f-s-xl)}
 .cta--big .cta__text{flex:none;max-width:none}
 .cta__big{font-size:max(var(--f-t4),min(calc(var(--f-t6)*1.3),10cqi));line-height:.98}
-.bg-accent .btn--secondary,.bg-dark .btn--secondary{color:var(--f-fg)}
+.bg-accent .btn--secondary,.bg-secondary .btn--secondary,.bg-dark .btn--secondary{color:var(--f-fg)}
 
 .cta--big .cta__text,.cta--split .cta__text{width:100%}

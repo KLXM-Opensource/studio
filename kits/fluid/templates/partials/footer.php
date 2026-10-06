@@ -38,7 +38,7 @@ $pageList = function () use ($pages): string {
       <?php if ($cta): ?><a class="btn btn--primary ftr__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?><?= icon('arrow-right') ?></a><?php endif; ?>
     </div>
   <?php endif; ?>
-  <?php if ($variant === 'simple'): ?>
+  <?php if ($variant === 'simple' || $variant === 'centered'): ?>
     <div class="ftr__row">
       <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
       <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= e($tagline) ?></p><?php endif; ?>
@@ -78,7 +78,7 @@ $pageList = function () use ($pages): string {
       <?php if ($legal): ?>
       <nav aria-label="<?= e(lt('Rechtliches')) ?>"><ul class="cluster ftr__legal" role="list"><?php foreach ($legal as $l): ?><li><a href="<?= e($l['href']) ?>"><?= e($l['label']) ?></a></li><?php endforeach; ?></ul></nav>
       <?php endif; ?>
-      <?php if ($variant === 'simple' && $social): ?><ul class="cluster ftr__legal" role="list" aria-label="<?= e(lt('Social Media')) ?>"><?= $socialList() ?></ul><?php endif; ?>
+      <?php if (($variant === 'simple' || $variant === 'centered') && $social): ?><ul class="cluster ftr__legal" role="list" aria-label="<?= e(lt('Social Media')) ?>"><?= $socialList() ?></ul><?php endif; ?>
       <?php if ($langs): ?><?= app()->theme->partial('langswitch', ['langs' => $langs]) ?><?php endif; ?>
     </div>
   </div>

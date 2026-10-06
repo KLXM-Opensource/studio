@@ -41,6 +41,16 @@ function fluid_font_files(): array
         'fraunces' => 'fraunces-latin-opsz-normal.woff2',
         'newsreader' => 'newsreader-latin-wght-normal.woff2',
         'instrument-serif' => 'instrument-serif-latin-400-normal.woff2',
+        'open-sans' => 'open-sans-latin-wght-normal.woff2',
+        'lato' => 'lato-latin-400-normal.woff2',
+        'roboto' => 'roboto-latin-wght-normal.woff2',
+        'roboto-condensed' => 'roboto-condensed-latin-wght-normal.woff2',
+        'roboto-slab' => 'roboto-slab-latin-wght-normal.woff2',
+        'pt-sans' => 'pt-sans-latin-400-normal.woff2',
+        'source-sans' => 'source-sans-3-latin-wght-normal.woff2',
+        'poppins' => 'poppins-latin-400-normal.woff2',
+        'atkinson' => 'atkinson-hyperlegible-next-latin-wght-normal.woff2',
+        'manrope' => 'manrope-latin-wght-normal.woff2',
     ];
 }
 
