@@ -56,6 +56,47 @@ final class Icons
 
     public const DEFAULT = 'table';
 
+    /**
+     * Symbolstil der Website (Grundeinstellungen → „Symbolstil auf der Website“, sys.symbol_style): duotone = Kern-Sprites (Standard),
+     * sonst ein Sprite aus public/assets/icons/styles/{stil}.svg (tools/icons.mjs). Die Verwaltung und die Redaktionsleiste bleiben duotone.
+     */
+    public const STYLES = ['duotone' => 'Phosphor Duotone (zweifarbig, Standard)', 'regular' => 'Phosphor Linie', 'light' => 'Phosphor Fein',
+        'thin' => 'Phosphor Haarfein', 'bold' => 'Phosphor Kräftig', 'fill' => 'Phosphor Gefüllt', 'lucide' => 'Lucide (Linie)', 'tabler' => 'Tabler (Linie)'];
+
+    /** Gewählter Stil der Website (nur wenn das Stil-Sprite existiert) */
+    public static function style(): string
+    {
+        static $memo = [];
+        $key = site()->key;
+        if (isset($memo[$key])) return $memo[$key];
+        $s = (string) (app()->settings->get('sys.symbol_style') ?: 'duotone');
+        if ($s !== 'duotone' && (!isset(self::STYLES[$s]) || !is_file(ROOT . '/public/assets/icons/styles/' . $s . '.svg'))) $s = 'duotone';
+        return $memo[$key] = $s;
+    }
+
+    /** Auswahl für die Einstellung (Bezeichnungen übersetzt) */
+    public static function styleOptions(): array
+    {
+        return array_map(fn($l) => __($l), self::STYLES);
+    }
+
+    /**
+     * Angemeldete Redaktion auf der Website: Symbole im fertigen HTML auf den gewählten Stil umstellen (volles Stil-Sprite),
+     * die Redaktionsleiste (.cms-bar-host) ausgenommen. Besucher bekommen ihn über siteSprite().
+     */
+    public static function applyStyle(string $html): string
+    {
+        $style = self::style();
+        if ($style === 'duotone') return $html;
+        $url = asset('icons/styles/' . $style . '.svg');
+        $re = '~(<use href=")' . preg_quote(base_path() . '/assets/icons/', '~') . '[a-z0-9-]+\.svg\?v=[a-z0-9]+(#i-[a-z0-9-]+")~';
+        $start = strpos($html, '<div class="cms-bar-host');
+        $end = $start === false ? false : strpos($html, '</template></div>', $start);
+        $fix = fn(string $part) => (string) preg_replace($re, '$1' . $url . '$2', $part);
+        if ($start === false || $end === false) return $fix($html);
+        return $fix(substr($html, 0, $start)) . substr($html, $start, $end - $start) . $fix(substr($html, $end));
+    }
+
     private static ?array $catalog = null;
     private static ?array $map = null;
     private static array $urls = [];
@@ -128,7 +169,7 @@ final class Icons
      */
     public static function siteSprite(string $html): string
     {
-        $re = '~(<use href=")' . preg_quote(base_path() . '/assets/icons/', '~') . '[a-z0-9-]+\.svg\?v=[a-z0-9]+#i-([a-z0-9-]+)"~';
+        $re = '~(<use href=")' . preg_quote(base_path() . '/assets/icons/', '~') . '(?:styles/)?[a-z0-9-]+\.svg\?v=[a-z0-9]+#i-([a-z0-9-]+)"~';
         if (!preg_match_all($re, $html, $m)) return $html;
         $map = self::map();
         $names = array_values(array_unique(array_filter($m[2], fn($n) => isset($map[$n]))));
@@ -144,11 +185,12 @@ final class Icons
     /** Adresse des Website-Sprites, das mindestens $names enthält (legt es bei Bedarf an); null = nicht möglich */
     public static function siteSpriteUrl(array $names): ?string
     {
-        $full = ROOT . '/public/assets/icons/icons.svg';
+        $style = self::style();
+        $full = ROOT . '/public/assets/icons/' . ($style === 'duotone' ? 'icons.svg' : 'styles/' . $style . '.svg');
         $dir = ROOT . '/public/assets/icons/sites';
         $stateDir = site()->storage('cache/icons');
         if (!is_file($full) || (!is_dir($stateDir) && !@mkdir($stateDir, 0770, true))) return null;
-        $stateFile = $stateDir . '/site.json';
+        $stateFile = $stateDir . '/site' . ($style === 'duotone' ? '' : '-' . $style) . '.json';
         $state = is_file($stateFile) ? (json_decode((string) file_get_contents($stateFile), true) ?: []) : [];
         $known = (array) ($state['names'] ?? []);
         $file = (string) ($state['file'] ?? '');
@@ -165,14 +207,14 @@ final class Icons
             $all = array_values(array_filter(array_unique([...(array) ($state['names'] ?? []), ...$names]), fn($n) => is_string($n) && isset($map[$n])));
             sort($all);
             $build = filemtime($full);
-            $file = site()->key . '.' . substr(hash('sha256', implode(',', $all) . '|' . $build), 0, 12) . '.svg';
+            $file = site()->key . '.' . substr(hash('sha256', implode(',', $all) . '|' . $build . '|' . $style), 0, 12) . '.svg';
             if (!is_file("$dir/$file")) {
                 if (!is_dir($dir) && !@mkdir($dir, 0775, true)) return null;
                 if (!preg_match_all('~<symbol id="i-([a-z0-9-]+)".*?</symbol>~s', (string) file_get_contents($full), $sm)) return null;
                 $syms = array_combine($sm[1], $sm[0]);
                 $body = '';
                 foreach ($all as $n) $body .= $syms[$n] ?? '';
-                $svg = '<svg xmlns="http://www.w3.org/2000/svg"><style>[opacity]{opacity:var(--ico-2-opacity,.2)}</style>' . $body . "</svg>\n";
+                $svg = '<svg xmlns="http://www.w3.org/2000/svg">' . ($style === 'duotone' ? '<style>[opacity]{opacity:var(--ico-2-opacity,.2)}</style>' : '') . $body . "</svg>\n";
                 $tmp = "$dir/.$file." . bin2hex(random_bytes(4));
                 if (@file_put_contents($tmp, $svg) === false || !@rename($tmp, "$dir/$file")) { @unlink($tmp); return null; }
                 @chmod("$dir/$file", 0644);

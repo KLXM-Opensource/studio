@@ -13,6 +13,14 @@
     <tr><td>Symbolbereiche</td><td>Grundeinstellungen → Website → „Symbolbereiche in der Symbolauswahl“ (<code>sys.icon_topics</code>, Mehrfachauswahl, leer = alle): welche Themen die Symbolauswahl zeigt. „Allgemein“ und „Bedienung“ sind immer dabei (<code>Icons::ALWAYS</code>). In der Auswahl blendet „Weitere Bereiche anzeigen“ die übrigen ein (auch bei Suchtreffern). Übergabe an JavaScript: <code>data-icons-topics</code>. Die Website selbst ist davon unabhängig (Website-Sprite).</td></tr>
     <tr><td>Marken-Logos</td><td>Thema „Social Web“ enthält Logos (Facebook, Instagram, LinkedIn, X, Mastodon, YouTube, WhatsApp …). Die Marken gehören ihren Inhabern; verwenden Sie sie nur, um auf das jeweilige Angebot zu verlinken (z. B. Profil in der Fußzeile), unverändert und ohne den Eindruck einer Partnerschaft (siehe <code>THIRD-PARTY-NOTICES.md</code>).</td></tr>
   </table>
+  <h3 id="symbolstil">Symbolstil der Website</h3>
+  <p>Grundeinstellungen → <b>Symbolstil auf der Website</b> (<code>sys.symbol_style</code>, <code>Core\Icons::STYLES</code>): Phosphor Duotone (Standard), Linie, Fein, Haarfein, Kräftig, Gefüllt sowie die freien Linien-Sätze <b>Lucide</b> (ISC) und <b>Tabler</b> (MIT). Der Build (<code>tools/icons.mjs</code> → <code>styleSprites()</code>) legt je Stil ein Sprite mit allen Symbolen unter denselben Namen ab: <code>public/assets/icons/styles/{stil}.svg</code>. Lucide/Tabler: Zuordnung Phosphor-Name → eigener Name in <code>resources/icons/sets.json</code> (z. B. <code>magnifying-glass → search</code>); Symbole ohne Gegenstück kommen aus Phosphor „regular“ (gleiche Bildsprache). Linien-Symbole tragen <code>fill="none" stroke="currentColor"</code> am <code>&lt;symbol&gt;</code>.</p>
+  <ul>
+    <li><b>Besucher:</b> <code>Icons::siteSprite()</code> baut das kleine Website-Sprite aus dem Stil-Sprite (Dateiname mit Stil im Hash, Zustand je Stil in <code>cache/icons/site-{stil}.json</code>).</li>
+    <li><b>Angemeldete Redaktion auf der Website</b> und die <b>Vorschau im Editor</b> (<code>/admin/api/preview</code>): <code>Icons::applyStyle()</code> stellt die Verweise auf das volle Stil-Sprite um – die Redaktionsleiste (<code>.cms-bar-host</code>) und die Verwaltung bleiben duotone.</li>
+    <li>Kits, die die zweite Ebene nutzen (<code>--ico-2-opacity</code>), verlieren sie bei anderen Stilen – das ist gewollt (einfarbige Sätze).</li>
+    <li>Neue Zuordnung ergänzen: Eintrag in <code>sets.json</code> (<code>lucide</code>/<code>tabler</code>) und <code>pnpm run build</code>.</li>
+  </ul>
   <h3>Neues Symbol aufnehmen</h3>
   <ol>
     <li>Namen auf <a href="https://phosphoricons.com" rel="noopener">phosphoricons.com</a> suchen (z. B. <code>hand-heart</code>).</li>

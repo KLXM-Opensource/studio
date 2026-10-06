@@ -63,6 +63,9 @@ are written next to the files by the build.
 | – bundled: @mapbox/point-geometry, @maplibre/geojson-vt, @maplibre/maplibre-gl-style-spec, earcut, kdbush, potpack, quickselect, tinyqueue (ISC); @mapbox/tiny-sdf, @mapbox/unitbezier (BSD-2-Clause); @mapbox/vector-tile, pbf (BSD-3-Clause); @maplibre/mlt (MIT OR Apache-2.0); @maplibre/vt-pbf, bidi-js, gl-matrix, murmurhash-js, @mapbox/jsonlint-lines-primitives, json-stringify-pretty-compact and others (MIT) | | see left | inside the MapLibre bundle | `THIRD-PARTY-LICENSES.txt` (generated) |
 | Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.3.289 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
 | Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI) | `public/assets/fonts/OFL-Lato.txt` |
+| Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (Symbolstil der Website) | `public/assets/icons/LICENSE.txt` |
+| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
+| Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
 | Phosphor Icons, duotone (`@phosphor-icons/core`), © 2023 Phosphor Icons | 2.1.1 | MIT | `public/assets/icons/*.svg` (core, one sprite per topic, `icons.svg`), `sites/*.svg` (generated per website), `icons-map.json`, `catalog.json` | `public/assets/icons/LICENSE.txt` |
 
 Phosphor: the sprites are built by `tools/icons.mjs` from the curated list in `resources/icons/icons.json`; path data

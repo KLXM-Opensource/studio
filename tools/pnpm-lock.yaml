@@ -17,12 +17,18 @@ importers:
       '@phosphor-icons/core':
         specifier: ^2.1.1
         version: 2.1.1
+      '@tabler/icons':
+        specifier: ^3.49.0
+        version: 3.49.0
       editorjs-drag-drop:
         specifier: ^1.1.16
         version: 1.1.16
       esbuild:
         specifier: ^0.25.0
         version: 0.25.12
+      lucide-static:
+        specifier: ^1.52.0
+        version: 1.52.0
       maplibre-gl:
         specifier: ^6.11.2
         version: 6.11.2
@@ -313,6 +319,9 @@ packages:
   '@phosphor-icons/core@2.1.1':
     resolution: {integrity: sha512-v4ARvrip4qBCImOE5rmPUylOEK4iiED9ZyKjcvzuezqMaiRASCHKcRIuvvxL/twvLpkfnEODCOJp5dM4eZilxQ==}
 
+  '@tabler/icons@3.49.0':
+    resolution: {integrity: sha512-l+GnSkFETx0U26icxv1VUFnxxiTqXfCcVRiRAnyMwibupM2S2L/hSaZ9gmSgz01rkrsH/93NvLsxykqdanc6lw==}
+
   '@types/geojson@7946.0.16':
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
@@ -349,6 +358,9 @@ packages:
 
   kdbush@4.1.0:
     resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
+
+  lucide-static@1.52.0:
+    resolution: {integrity: sha512-0zZYihAze4ZmUCcyNa9OkWYqn/Y5f9AdTh02AZIxMtP5ravcTTfoSIAnUPBH6ZvKxt+ZW28JB0ldzLRyD82fcw==}
 
   maplibre-gl@6.11.2:
     resolution: {integrity: sha512-Xh06pxoipjX/Ad1sUPGhiNh9go9naCNGZZ1IJm3sIeqK1kYGuMaMDSTIGDQ2igOLfVyukJU7kvEOA089VO7Z7g==}
@@ -584,6 +596,8 @@ snapshots:
 
   '@phosphor-icons/core@2.1.1': {}
 
+  '@tabler/icons@3.49.0': {}
+
   '@types/geojson@7946.0.16': {}
 
   bidi-js@1.1.0:
@@ -635,6 +649,8 @@ snapshots:
   json-stringify-pretty-compact@4.0.0: {}
 
   kdbush@4.1.0: {}
+
+  lucide-static@1.52.0: {}
 
   maplibre-gl@6.11.2:
     dependencies:

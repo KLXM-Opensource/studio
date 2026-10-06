@@ -148,6 +148,55 @@ export async function icons({ root, nm, log = console.log }) {
   fs.writeFileSync(path.join(out, 'icons-map.json'), JSON.stringify(map));
   fs.writeFileSync(path.join(out, 'catalog.json'), JSON.stringify({ topics, icons: catalog, files: Object.keys(files) }));
   fs.copyFileSync(nm('@phosphor-icons/core/LICENSE'), path.join(out, 'LICENSE.txt'));
+  styleSprites({ root, nm, names: Object.keys(info).sort(), out, log });
   const pkg = JSON.parse(fs.readFileSync(nm('@phosphor-icons/core/package.json'), 'utf8'));
   log(`  Symbole  ${symbols.length} aus @phosphor-icons/core ${pkg.version} (${pkg.license}) → public/assets/icons/ (KB roh/gzip): ${sizes.join(' · ')}`);
+}
+
+/**
+ * Symbolstile für die Website (Grundeinstellungen → „Symbolstil auf der Website“, Core\Icons::style()): je Stil ein Sprite mit
+ * ALLEN Symbolen unter gleichem Namen – public/assets/icons/styles/{stil}.svg. Die Website baut daraus ihr kleines Sprite.
+ *   Phosphor: thin, light, regular, bold, fill (gleiche Namen wie duotone, vollständig)
+ *   Lucide (ISC) und Tabler (MIT): Linien-Symbole; Zuordnung Phosphor-Name → Name in resources/icons/sets.json,
+ *   fehlende Symbole aus Phosphor „regular“ (gleiche Bildsprache: Linie)
+ * Linien-Symbole bringen fill/stroke am <symbol> mit (vererbt sich im <use>-Baum, schlägt fill:currentColor der .ico-Hülle).
+ */
+function styleSprites({ root, nm, names, out, log }) {
+  const dir = path.join(out, 'styles');
+  fs.mkdirSync(dir, { recursive: true });
+  const inner = svg => svg.replace(/<!--.*?-->/gs, '').replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
+    .replace(/<path stroke="none" d="M0 0h24v24H0z" fill="none"\s*\/>/, '').replace(/\s+/g, ' ').replace(/> </g, '><').trim();
+  const phosphor = (name, style) => {
+    const f = nm(`@phosphor-icons/core/assets/${style}/${style === 'regular' ? name : name + '-' + style}.svg`);
+    if (!fs.existsSync(f)) return null;
+    const paths = [...fs.readFileSync(f, 'utf8').matchAll(/<path d="([^"]+)"\/>/g)].map(([, d]) => `<path d="${minifyPath(d)}"/>`);
+    return paths.length ? `<symbol id="i-${name}" viewBox="0 0 256 256">${paths.join('')}</symbol>` : null;
+  };
+  const sizes = [];
+  const write = (style, syms) => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg">' + syms.join('') + '</svg>\n';
+    fs.writeFileSync(path.join(dir, style + '.svg'), svg);
+    sizes.push(`${style} ${(zlib.gzipSync(svg, { level: 9 }).length / 1024).toFixed(0)}`);
+  };
+  for (const style of ['thin', 'light', 'regular', 'bold', 'fill']) write(style, names.map(n => phosphor(n, style)).filter(Boolean));
+  let sets = {};
+  try { sets = JSON.parse(fs.readFileSync(path.join(root, 'resources/icons/sets.json'), 'utf8')); } catch { sets = {}; }
+  const line = { lucide: n => nm(`lucide-static/icons/${n}.svg`), tabler: n => nm(`@tabler/icons/icons/outline/${n}.svg`) };
+  for (const [set, file] of Object.entries(line)) {
+    if (!fs.existsSync(path.dirname(file('x')))) { log(`  Symbole  Stil ${set} übersprungen (Paket fehlt)`); continue; }
+    let own = 0;
+    const syms = names.map(n => {
+      const f = sets[set]?.[n] ? file(sets[set][n]) : null;
+      if (f && fs.existsSync(f)) {
+        own++;
+        return `<symbol id="i-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner(fs.readFileSync(f, 'utf8'))}</symbol>`;
+      }
+      return phosphor(n, 'regular');
+    }).filter(Boolean);
+    write(set, syms);
+    sizes.push(`(${set}: ${own}/${names.length} eigene)`);
+    const lic = set === 'lucide' ? nm('lucide-static/LICENSE') : nm('@tabler/icons/LICENSE');
+    if (fs.existsSync(lic)) fs.copyFileSync(lic, path.join(dir, `LICENSE-${set}.txt`));
+  }
+  log(`  Symbole  Stile → public/assets/icons/styles/ (KB gzip): ${sizes.join(' · ')}`);
 }

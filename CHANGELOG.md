@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Symbolstil der Website wählbar
+- Grundeinstellungen → „Symbolstil auf der Website“: Phosphor Duotone (Standard), Linie, Fein, Haarfein, Kräftig, Gefüllt sowie die
+  freien Sätze Lucide (ISC) und Tabler (MIT). Ein Sprite je Stil (`public/assets/icons/styles/`), Besucher laden weiter nur das kleine
+  Website-Sprite. Lucide/Tabler über eine Namenszuordnung (`resources/icons/sets.json`), fehlende Symbole aus Phosphor „Linie“.
+  Die Verwaltung und die Redaktionsleiste bleiben duotone; Editor-Vorschau und angemeldete Ansicht zeigen den gewählten Stil.
+
 ### Seiten-Editor: Rückgängig und Wiederholen
 - Knöpfe in der Werkzeugleiste und ⌘/Strg+Z, ⇧⌘Z bzw. Strg+Y (außerhalb von Textfeldern; im Text gilt das Rückgängig des Browsers):
   bis zu 50 Schritte je Bearbeitung – Texte, Felder der Seitenleiste, Abschnitts-Einstellungen, Einfügen, Löschen, Verschieben.

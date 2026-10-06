@@ -214,6 +214,8 @@ final class SiteController
         // Besucher: ein Sprite der Website mit nur den verwendeten Symbolen statt mehrerer Themen-Sprites (Core\Icons)
         if (!$loggedIn) {
             $html = \Core\Icons::siteSprite($html);
+        } else {
+            $html = \Core\Icons::applyStyle($html);   // Redaktion: gewählter Symbolstil, Leiste bleibt duotone
         }
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);

@@ -73,7 +73,8 @@ final class EditorController extends AdminController
         // Bild im Rahmen (Core\ImageFit): erzeugte Regeln (Farbe, unscharfer Hintergrund) für die Vorschau mitliefern
         $html .= \Core\ImageFit::rulesLink();
         \Core\ImageFit::reset();
-        return Response::json(['ok' => true, 'html' => $html, 'block' => $blocks[0]]);
+        // Gewählter Symbolstil der Website auch in der Vorschau des Editors (Core\Icons::applyStyle)
+        return Response::json(['ok' => true, 'html' => \Core\Icons::applyStyle($html), 'block' => $blocks[0]]);
     }
 
     /** Feldformular eines Blocks für die Seitenleiste (gleicher Renderer wie im Admin). */
