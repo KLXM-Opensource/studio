@@ -1,7 +1,7 @@
 /* Besucher-Chat – nur der Knopf (Shadow DOM, resources/js/visitor-chat-start.js). Farben aus den Design-Tokens des Themes. */
 :host {
-  --a: var(--cb-theme-accent, var(--b-a, var(--f-a, var(--e-a, var(--c-bordeaux, #0f766e)))));
-  --ao: var(--cb-theme-on-accent, var(--b-a-on, var(--f-a-on, var(--e-a-on, #fff))));
+  --a: var(--cb-theme-accent, var(--kit-accent, var(--b-a, var(--f-a, var(--e-a, var(--c-bordeaux, #0f766e))))));
+  --ao: var(--cb-theme-on-accent, var(--kit-on-accent, var(--b-a-on, var(--f-a-on, var(--e-a-on, #fff)))));
   position: fixed; z-index: 2147483000; right: 16px; bottom: calc(16px + var(--cms-chat-lift, 0px));
 }
 :host([data-pos=left]) { right: auto; left: 16px; }

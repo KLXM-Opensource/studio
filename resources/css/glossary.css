@@ -11,7 +11,7 @@
    Ohne Angaben: Akzent aus den Link-Farben der Kern-Kits, Fläche und Text aus der Textfarbe abgeleitet (hell/dunkel).
    ========================================================================== */
 .gl{
-  --_acc:var(--gl-accent,var(--b-link,var(--m-link,var(--e-link,var(--n-link,var(--f-link,var(--g-link,var(--s-link,var(--primary,currentColor)))))))));
+  --_acc:var(--gl-accent,var(--kit-link,var(--b-link,var(--m-link,var(--e-link,var(--n-link,var(--f-link,var(--g-link,var(--s-link,var(--primary,currentColor))))))))));
   --_r:var(--gl-radius,10px)
 }
 .gl{display:inline}

@@ -63,6 +63,10 @@
   .cms-dials .cms-dial__hub{fill:Canvas}
 }
 
+/* ---------------------------------------------------------------- Kit-Vertrag: jedes Kit setzt --kit-* (folgt Bändern und Dunkelmodus);
+   die Zuordnungen je Kit darunter bleiben für ältere Kits ohne Vertrag und für Feinheiten */
+.cms-dials{--_t-ac:var(--kit-accent);--_t-track:var(--kit-surface);--_t-tick:var(--kit-line);--_t-surface:var(--kit-bg);--_t-line:var(--kit-line);--_t-ink:var(--kit-ink);--_t-muted:var(--kit-muted);--_t-font:var(--kit-font-head)}
+
 /* ---------------------------------------------------------------- Zuordnung je Theme (Rollen-Variablen folgen Abschnitt + Dunkelmodus) */
 .cms-dials--t-basis{--_t-ac:var(--b-link);--_t-track:var(--b-surface-2);--_t-tick:var(--b-line-strong);--_t-surface:var(--b-card);--_t-line:var(--b-card-bd);--_t-ink:var(--b-ink);--_t-muted:var(--b-muted);--_t-font:var(--b-font-head)}
 .cms-dials--t-fluid{--_t-ac:var(--f-link);--_t-track:var(--f-surface-2);--_t-tick:var(--f-line-strong);--_t-surface:var(--f-card);--_t-line:var(--f-line);--_t-ink:var(--f-ink);--_t-muted:var(--f-muted);--_t-font:var(--f-font-head)}

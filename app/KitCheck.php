@@ -11,7 +11,8 @@ namespace Core;
  *  - Überschreibungen von Kern-Blöcken (Datenliste, Partner …): Angaben ($d['…'], $b->data['…'], $b->edit('…')), die der Kern-Block
  *    weder als Feld kennt noch selbst liest (Vertrag geändert bzw. Tippfehler), und neue Felder des Kerns, die die Kit-Fassung nicht
  *    liest (nur mit -v; viele werden über Kern-Helfer verarbeitet);
- *  - Kern-Fragmente mit geändertem Original (Core\Fragments::overrides, wie fragments:list).
+ *  - Kern-Fragmente mit geändertem Original (Core\Fragments::overrides, wie fragments:list);
+ *  - Kit-Vertrag: Pflicht-Rollen --kit-* (accent, on-accent, link, muted, radius) in den Stylesheets des Kits.
  */
 final class KitCheck
 {
@@ -61,7 +62,26 @@ final class KitCheck
         foreach (Fragments::overrides($kit->name, false) as $o) {
             if (!empty($o['changed'])) $out[] = ['level' => 'warn', 'file' => Kit::relative((string) ($o['file'] ?? $o['name'])), 'text' => "Kern-Fragment „{$o['name']}“ überschrieben – Original geändert seit {$o['since']} (fragments:list --accept nach Prüfung)"];
         }
+        // Kit-Vertrag: Kern-Bausteine und Erweiterungen lesen nur --kit-* – fehlt eine Rolle, fallen sie auf neutrale Vorgaben zurück
+        $missing = self::missingContract($kit);
+        if ($missing) {
+            $out[] = ['level' => 'warn', 'file' => Kit::relative($kit->path . '/assets/css'), 'text' => 'Kit-Vertrag unvollständig – nicht gesetzt: ' . implode(', ', $missing)
+                . ' (Buchung, Check, Mitglieder, Suche, Glossar … nutzen dann neutrale Farben; Entwicklerhandbuch → CSS & JS → „Kit-Vertrag“)'];
+        }
         return $out;
+    }
+
+    /** Rollen des Kit-Vertrags: Pflicht (ohne sie passt keine Erweiterung zum Kit) und empfohlen */
+    public const CONTRACT = ['accent', 'on-accent', 'link', 'muted', 'radius'];
+    public const CONTRACT_OPTIONAL = ['ink', 'text', 'bg', 'surface', 'line', 'font', 'font-head'];
+
+    /** Fehlende Pflicht-Rollen des Kit-Vertrags (--kit-*) in den Stylesheets des Kits */
+    public static function missingContract(Theme $kit): array
+    {
+        $css = '';
+        foreach (glob($kit->path . '/assets/css/*.css') ?: [] as $f) $css .= (string) file_get_contents($f);
+        if ($css === '') return [];   // Kit ohne eigene Stylesheets (z. B. reine Vorlagen) – nichts zu prüfen
+        return array_values(array_map(fn($r) => "--kit-$r", array_filter(self::CONTRACT, fn($r) => !preg_match('~--kit-' . preg_quote($r, '~') . '\s*:~', $css))));
     }
 
     /** Feldnamen eines Blocks (oberste Ebene, ohne Überschriften) */

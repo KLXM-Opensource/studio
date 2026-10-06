@@ -3,7 +3,7 @@
    Nur auf Seiten mit dem Block (Theme::conditionalCss); Variablen wie glossary.css (--gl-accent, --gl-radius).
    ========================================================================== */
 .glx{
-  --_acc:var(--gl-accent,var(--b-link,var(--m-link,var(--e-link,var(--n-link,var(--f-link,var(--g-link,var(--s-link,var(--primary,currentColor)))))))));
+  --_acc:var(--gl-accent,var(--kit-link,var(--b-link,var(--m-link,var(--e-link,var(--n-link,var(--f-link,var(--g-link,var(--s-link,var(--primary,currentColor))))))))));
   --_r:var(--gl-radius,10px)
 }
 .glx [hidden]{display:none!important}

@@ -61,6 +61,30 @@ $__v = fn(?string $s) => $s === null || $s === '' ? '–' : '<code>' . e($s) . '
     <li>Kit-eigene Klassen und Variablen mit dem Kit-Präfix (siehe <code>--b-*</code> in basis), Block-Dateien als <code>b-{block}.css</code>/<code>b-{block}.js</code> – dann ist auch ohne Tabelle klar, was wohin gehört.</li>
   </ul>
 
+  <h3 id="kit-vertrag">Kit-Vertrag: Grundwerte <code>--kit-*</code> für Kern und Erweiterungen</h3>
+  <p>Jedes Kit setzt einmal einen festen Satz Variablen. Kern-Bausteine (Suche, Glossar, Kopfbereich-Aktionen, Besucher-Chat, Formulare, Partner, Kennzahlen) und Erweiterungen (Buchung, Check, Mitgliederbereich …) lesen <b>nur diese Namen</b> – nie die Tokens eines bestimmten Kits. So passt jede Erweiterung zu jedem Kit, auch zu künftigen, ohne dass sie Kit-Präfixe kennen muss. <code>php bin/console kit:check</code> meldet fehlende Pflicht-Rollen.</p>
+  <table class="doc-table">
+    <tr><th>Variable</th><th>Rolle</th><th></th></tr>
+    <tr><td><code>--kit-accent</code></td><td>Akzent: Auswahl, Fokus, Knöpfe, Markierungen</td><td>Pflicht</td></tr>
+    <tr><td><code>--kit-on-accent</code></td><td>Schrift auf dem Akzent (mind. 4,5:1)</td><td>Pflicht</td></tr>
+    <tr><td><code>--kit-link</code></td><td>Linkfarbe (oft gleich dem Akzent)</td><td>Pflicht</td></tr>
+    <tr><td><code>--kit-muted</code></td><td>Nebentext (mind. 4,5:1 auf dem Hintergrund)</td><td>Pflicht</td></tr>
+    <tr><td><code>--kit-radius</code></td><td>Rundung von Feldern, Karten, Knöpfen</td><td>Pflicht</td></tr>
+    <tr><td><code>--kit-ink</code>, <code>--kit-text</code></td><td>Überschriften, Fließtext</td><td>empfohlen</td></tr>
+    <tr><td><code>--kit-bg</code>, <code>--kit-surface</code>, <code>--kit-line</code></td><td>Hintergrund, getönte Fläche, Linie</td><td>empfohlen</td></tr>
+    <tr><td><code>--kit-font</code>, <code>--kit-font-head</code></td><td>Schrift für Text bzw. Überschriften</td><td>empfohlen</td></tr>
+  </table>
+  <p><b>Wo setzen:</b> Stellt das Kit seine Farben in Bändern, Kopf oder Fuß um (dunkle Abschnitte, Karten auf Bildern), leitet jedes Element den Vertrag aus seinen eigenen Tokens ab – mit <code>:where(*)</code> (ohne Spezifität). An <code>:root</code> allein würden Bausteine in einem dunklen Band die hellen Farben der Seite erben. Kits ohne solche Umstellungen genügt <code>:root</code> plus feste Werte je Band (Beispiel: praxis).</p>
+  <pre><code>/* kits/{name}/assets/css/_tokens.css */
+:where(*){--kit-accent:var(--b-a);--kit-on-accent:var(--b-a-on);--kit-link:var(--b-link);--kit-ink:var(--b-ink);
+  --kit-text:var(--b-text);--kit-muted:var(--b-muted);--kit-bg:var(--b-bg);--kit-surface:var(--b-surface);
+  --kit-line:var(--b-line);--kit-radius:var(--b-radius);--kit-font:var(--b-font);--kit-font-head:var(--b-font-head)}</code></pre>
+  <ul>
+    <li><b>Nur lesen:</b> Farben ändert das Kit über seine eigenen Tokens; ein an einem Element gesetztes <code>--kit-*</code> erben dessen Kinder nicht (dort leitet <code>:where(*)</code> neu ab).</li>
+    <li><b>Lesen mit Rückfall:</b> <code>var(--kit-accent,currentColor)</code> bzw. die bisherige Kette dahinter – Kits ohne Vertrag (ältere, eigene) bleiben so lesbar.</li>
+    <li>Die Variablen der einzelnen Bausteine (<code>--se-*</code>, <code>--gl-*</code>, <code>--dff-*</code> …) gibt es weiter – für Feinheiten setzt das Kit sie zusätzlich.</li>
+  </ul>
+
   <h3 id="css-js-variablen">Anpassen: Variablen der Kern-Bausteine</h3>
   <p>Jeder öffentliche Baustein liest Variablen mit seinem Präfix; fehlen sie, gilt die Vorgabe (meist aus <code>currentColor</code>/<code>Canvas</code> abgeleitet, damit der Baustein ohne Kit-Anpassung hell und dunkel lesbar bleibt). Ein Kit setzt sie an der Komponente oder an <code>:root</code> – und im Dunkelmodus erneut:</p>
   <pre><code>/* kits/{name}/assets/css/site.css */

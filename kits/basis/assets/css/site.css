@@ -377,3 +377,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--b-fx,50%) var(--b-fy,50%)}
 .sec-row{--row-card-radius:var(--b-radius-l)}
 .lay-grid{--lay-card-radius:var(--b-radius-l)}
 .sec-row__cell--card .cta--box,.lay-item--card .cta--box{padding:0;background:none}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
+   nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie
+   dunklen Bändern, Kopf und Fuß folgen. Nur lesen, nicht überschreiben – Farben ändern über die Tokens des Kits. */
+:where(*){--kit-accent:var(--b-a);--kit-on-accent:var(--b-a-on);--kit-link:var(--b-link);--kit-ink:var(--b-ink);--kit-text:var(--b-text);--kit-muted:var(--b-muted);--kit-bg:var(--b-bg);--kit-surface:var(--b-surface);--kit-line:var(--b-line);--kit-radius:var(--b-radius);--kit-font:var(--b-font);--kit-font-head:var(--b-font-head)}

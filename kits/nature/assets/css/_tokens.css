@@ -71,3 +71,8 @@
   html.has-dark .brand__logo--light{display:none}
   html.has-dark .brand__logo--dark{display:block}
 }
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
+   nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie
+   dunklen Bändern, Kopf und Fuß folgen. Nur lesen, nicht überschreiben – Farben ändern über die Tokens des Kits. */
+:where(*){--kit-accent:var(--n-a);--kit-on-accent:var(--n-a-on);--kit-link:var(--n-link);--kit-ink:var(--n-ink);--kit-text:var(--n-text);--kit-muted:var(--n-muted);--kit-bg:var(--n-bg);--kit-surface:var(--n-surface);--kit-line:var(--n-line);--kit-radius:var(--n-radius);--kit-font:var(--n-font);--kit-font-head:var(--n-font-head)}

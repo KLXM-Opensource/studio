@@ -121,6 +121,10 @@
 }
 @media print{.cms-partners.is-enhanced .cms-partners__details{display:grid}.cms-partners__slot{display:none}}
 
+/* ---------------------------------------------------------------- Kit-Vertrag: jedes Kit setzt --kit-* (folgt Bändern und Dunkelmodus);
+   die Zuordnungen je Kit darunter bleiben für ältere Kits ohne Vertrag und für Feinheiten */
+.cms-partners{--_t-ink:var(--kit-ink);--_t-text:var(--kit-text);--_t-muted:var(--kit-muted);--_t-line:var(--kit-line);--_t-link:var(--kit-link);--_t-focus:var(--kit-accent);--_t-bg:var(--kit-bg);--_t-r:var(--kit-radius)}
+
 /* ---------------------------------------------------------------- Zuordnung je Kit (Rollen-Variablen folgen Abschnitt + Dunkelmodus) */
 .cms-partners--t-basis{--_t-ink:var(--b-ink);--_t-text:var(--b-text);--_t-muted:var(--b-muted);--_t-line:var(--b-line);--_t-link:var(--b-link);--_t-focus:var(--b-focus);--_t-bg:var(--b-bg);--_t-r:var(--b-radius)}
 .cms-partners--t-editorial{--_t-ink:var(--e-ink);--_t-text:var(--e-text);--_t-muted:var(--e-muted);--_t-line:var(--e-line);--_t-link:var(--e-link);--_t-focus:var(--e-focus);--_t-bg:var(--e-bg);--_t-r:var(--e-radius)}

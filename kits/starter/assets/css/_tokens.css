@@ -61,3 +61,8 @@
 }
 /* Vorschau „Dunkel“ im Style-Editor: Farbwerte setzt der Core, hier nur Formularelemente & Scrollbalken */
 html.is-dark{color-scheme:dark}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
+   nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie
+   dunklen Bändern, Kopf und Fuß folgen. Nur lesen, nicht überschreiben – Farben ändern über die Tokens des Kits. */
+:where(*){--kit-accent:var(--s-a);--kit-on-accent:var(--s-a-on);--kit-link:var(--s-link);--kit-ink:var(--s-ink);--kit-text:var(--s-text);--kit-muted:var(--s-muted);--kit-bg:var(--s-bg);--kit-surface:var(--s-surface);--kit-line:var(--s-line);--kit-radius:var(--s-radius);--kit-font:var(--s-font);--kit-font-head:var(--s-font-head)}

@@ -77,3 +77,8 @@ html{scroll-padding-top:calc(var(--fw-bar) + 5rem)}
 /* Karte */
 :root .cms-map{--cms-map-accent:var(--fw-accent);--cms-map-radius:var(--fw-radius)}
 :root .sec{--cms-accent:var(--fw-accent);--cms-on-accent:var(--fw-on-accent);--cms-radius:var(--fw-radius)}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*.
+   Schrift-, Flächen- und Linienfarben kommen hier aus Tailwind bzw. UIkit (erben über currentColor) – gesetzt sind
+   Akzent, Nebentext und Rundung; :where(*), damit .bg-ink (eigener Akzent) und der Dunkelmodus durchgreifen. */
+:where(*){--kit-accent:var(--fw-accent);--kit-on-accent:var(--fw-on-accent);--kit-link:var(--fw-accent);--kit-muted:var(--rt-muted);--kit-radius:var(--fw-radius)}

@@ -39,6 +39,7 @@
   </ul>
   <p><code>--strict</code> beendet mit Exit-Code 1, sobald es Hinweise gibt (z. B. in der CI eines Kit-Repositorys).</p>
 
+  <p><b>Kit-Vertrag:</b> <code>kit:check</code> prüft außerdem, ob das Kit die Grundwerte <code>--kit-*</code> setzt (Pflicht: Akzent, Schrift auf Akzent, Link, Nebentext, Rundung) – ohne sie passen Erweiterungen und Kern-Bausteine nicht zum Kit. Details: <a href="#kit-vertrag">Kit-Vertrag</a>.</p>
   <h3 id="layout">Block „Layout“ (Spalten) – <code>Core\Layout</code>, <code>css/layout.css</code></h3>
   <p>Kern-Block <code>layout</code> (jedes Kit, abschalten mit <code>theme.php → 'layout' =&gt; false</code>): ein Abschnitt mit Raster und Blöcken je Spalte. Die Abschnitts-Optionen (Hintergrund, Anker, Navigation, Abstände, Trennlinie, Vollbild, Hintergrundbild) gelten für das ganze Layout. Daten:</p>
   <pre><code>{ "preset": "2-1", "valign": "top|center|bottom|stretch", "gap": "small|normal|large", "stack": "default|tablet", "reverse": false,

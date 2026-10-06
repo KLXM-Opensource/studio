@@ -478,3 +478,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 
 /* Logo einer Landing-Domain statt der Wortmarke (Core\Landings, partials/header.php) */
 .wordmark__img{display:block;max-height:44px;width:auto;max-width:220px}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*.
+   Praxis stellt Farben in Bändern direkt um (nicht über Tokens) – deshalb hier die Werte für Bordeaux- und Dunkel-Bänder. */
+:root{--kit-accent:var(--c-bordeaux);--kit-on-accent:var(--c-white);--kit-link:var(--c-bordeaux);--kit-ink:var(--c-ink);--kit-text:var(--c-ink);--kit-muted:var(--c-text-2);--kit-bg:var(--c-white);--kit-surface:var(--c-gray-50);--kit-line:var(--c-line);--kit-radius:var(--r-card);--kit-font:var(--font);--kit-font-head:var(--font)}
+:where(.bg-bordeaux,.bg-dark){--kit-accent:var(--c-apricot);--kit-on-accent:var(--c-ink);--kit-link:var(--c-apricot);--kit-ink:#FFFFFF;--kit-text:var(--c-on-dark);--kit-muted:var(--c-on-dark);--kit-line:rgb(255 255 255/.24);--kit-surface:rgb(255 255 255/.06)}

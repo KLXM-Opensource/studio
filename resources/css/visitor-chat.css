@@ -4,8 +4,8 @@
  * aus der Seite (--bg/--fg, vom Skript gemessen) → passt zu hellen und dunklen Themes. Schrift erbt vom Theme.
  */
 :host {
-  --a: var(--cb-theme-accent, var(--b-a, var(--f-a, var(--e-a, var(--c-bordeaux, #0f766e)))));
-  --ao: var(--cb-theme-on-accent, var(--b-a-on, var(--f-a-on, var(--e-a-on, #fff))));
+  --a: var(--cb-theme-accent, var(--kit-accent, var(--b-a, var(--f-a, var(--e-a, var(--c-bordeaux, #0f766e))))));
+  --ao: var(--cb-theme-on-accent, var(--kit-on-accent, var(--b-a-on, var(--f-a-on, var(--e-a-on, #fff)))));
   --bg: #fff;
   --fg: #1c1c1c;
   position: fixed; z-index: 2147483000; right: 16px; bottom: calc(16px + var(--cms-chat-lift, 0px));

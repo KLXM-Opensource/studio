@@ -95,3 +95,8 @@
 .is-solid{--g-floor:1}
 @media (prefers-contrast:more){:root{--g-floor:1;--g-ff:0;--g-muted:var(--g-text);--g-line:color-mix(in srgb,var(--g-ink) 40%,transparent);--g-edge:var(--g-line-strong)}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--g-floor:.94}}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
+   nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie
+   dunklen Bändern, Kopf und Fuß folgen. Nur lesen, nicht überschreiben – Farben ändern über die Tokens des Kits. */
+:where(*){--kit-accent:var(--g-a);--kit-on-accent:var(--g-a-on);--kit-link:var(--g-link);--kit-ink:var(--g-ink);--kit-text:var(--g-text);--kit-muted:var(--g-muted);--kit-bg:var(--g-bg);--kit-surface:var(--g-surface);--kit-line:var(--g-line);--kit-radius:var(--g-radius);--kit-font:var(--g-font);--kit-font-head:var(--g-font-head)}

@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit-Vertrag: Grundwerte `--kit-*` für Kern-Bausteine und Erweiterungen
+- Jedes Kit setzt einen festen Satz Variablen – Pflicht: `--kit-accent`, `--kit-on-accent`, `--kit-link`, `--kit-muted`,
+  `--kit-radius`; empfohlen: `--kit-ink`, `--kit-text`, `--kit-bg`, `--kit-surface`, `--kit-line`, `--kit-font`, `--kit-font-head`.
+  Gesetzt mit `:where(*)`, damit die Werte dunklen Bändern, Kopf und Fuß folgen. Alle mitgelieferten Kits erfüllen den Vertrag.
+- Suche, Glossar, Kopfbereich-Aktionen, Besucher-Chat, Formulare (`--dff-accent`), Partner & Logos und Kennzahlen lesen zuerst
+  `--kit-*`; die bisherigen Ketten aus Kit-Präfixen bleiben als Rückfall für ältere Kits. Partner und Kennzahlen passen damit
+  auch zu Foto, Galerie, Frameworks und künftigen Kits.
+- `kit:check` meldet fehlende Pflicht-Rollen. Entwicklerhandbuch → CSS & JS → „Kit-Vertrag“; Erweiterungen lesen Farben und
+  Formen der Website nur noch darüber.
+
 ### Symbolstil der Website wählbar
 - Grundeinstellungen → „Symbolstil auf der Website“: Phosphor Duotone (Standard), Linie, Fein, Haarfein, Kräftig, Gefüllt sowie die
   freien Sätze Lucide (ISC) und Tabler (MIT). Ein Sprite je Stil (`public/assets/icons/styles/`), Besucher laden weiter nur das kleine

@@ -23,6 +23,7 @@
     <li><b>Eigene Pakete:</b> Jede Erweiterung lebt in einem eigenen Repository und wird per Composer installiert (Typ <code>klxm-studio-extension</code>); interne Erweiterungen gehören nicht ins öffentliche Core-Repository.</li>
   </ul>
 
+  <div class="doc-note doc-note--info"><strong>Farben und Formen der Website: nur <code>--kit-*</code></strong><p>Blöcke und Seiten einer Erweiterung lesen die Grundwerte des Kits ausschließlich über den <a href="#kit-vertrag">Kit-Vertrag</a> (<code>--kit-accent</code>, <code>--kit-muted</code>, <code>--kit-line</code>, <code>--kit-radius</code> …), immer mit Rückfall (<code>var(--kit-accent,currentColor)</code>) – keine Ketten aus Kit-Präfixen wie <code>--b-a</code> oder <code>--f-a</code>. Eigene Variablen mit dem Präfix der Erweiterung (z. B. <code>--bk-*</code>) leiten sich davon ab, damit Kits gezielt nachsteuern können.</p></div>
   <h3 id="erweiterungen-seiten">Verwaltungsseiten: Art und Ort (<code>Core\AdminPages</code>)</h3>
   <p>Jede Seite, die eine Funktion oder Erweiterung in der Verwaltung anmeldet, hat eine <b>Art</b>. Die Art bestimmt den Ort – das Backend bleibt aufgeräumt:</p>
   <table class="doc-table">

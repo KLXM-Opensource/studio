@@ -284,3 +284,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--e-fx,50%) var(--e-fy,50%)}
   .sec{padding-block:12pt}
   .prose a[href^="http"]::after{content:" (" attr(href) ")";font-size:.85em}
 }
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
+   nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie
+   dunklen Bändern, Kopf und Fuß folgen. Nur lesen, nicht überschreiben – Farben ändern über die Tokens des Kits. */
+:where(*){--kit-accent:var(--e-a);--kit-on-accent:var(--e-a-on);--kit-link:var(--e-link);--kit-ink:var(--e-ink);--kit-text:var(--e-text);--kit-muted:var(--e-muted);--kit-bg:var(--e-bg);--kit-surface:var(--e-surface);--kit-line:var(--e-line);--kit-radius:var(--e-radius);--kit-font:var(--e-font);--kit-font-head:var(--e-font-display)}

@@ -68,7 +68,7 @@
  *   blocks:demos [--install=name|--all]               Beispiel-Blöcke (app/Blocks/demos) auflisten bzw. als Entwurf übernehmen
  *                                                     (wiederholbar: vorhandene Kopien werden nicht noch einmal angelegt)
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
- *   kit:check [--kit=name|--all] [--strict] [-v]     Überschreibungen eines Kits prüfen: verwaiste Block-Vorlagen, Kern-Blöcke
+ *   kit:check [--kit=name|--all] [--strict] [-v]     Überschreibungen eines Kits prüfen (+ Kit-Vertrag --kit-*): verwaiste Block-Vorlagen, Kern-Blöcke
  *                                                     mit geändertem Vertrag (unbekannte Angaben), Kern-Fragmente mit neuem Original
  *   fragments:list [--all] [--accept]                 Kern-Fragmente: Herkunft je Fragment (Projekt/Kit/Kern) für das aktive Kit
  *                                                     (--all: alle Kits), überschriebene mit geändertem Original;

@@ -3,7 +3,7 @@
    Systemfarben Canvas/CanvasText – hell exakt wie bisher (#fff, Schwarz 45 %/66 %), dunkel (Kit setzt color-scheme:dark,
    z. B. :root im Dunkelmodus oder dunkle Abschnitte) dunkle Felder mit heller Schrift. Fehlerfarben per light-dark(). */
 @import "./_dataform-layout.css";
-.dff-wrap{--dff-accent:currentColor;--dff-line:rgba(0,0,0,.45);--dff-bg:#fff;--dff-ink:inherit;--dff-muted:rgba(0,0,0,.66);--dff-err:#B3261E;--dff-err-bg:#FBEAEA;--dff-err-ink:#3b0d0a;--dff-radius:8px;--dff-gap:18px;--dff-focus:currentColor}
+.dff-wrap{--dff-accent:var(--kit-accent,currentColor);--dff-line:rgba(0,0,0,.45);--dff-bg:#fff;--dff-ink:inherit;--dff-muted:rgba(0,0,0,.66);--dff-err:#B3261E;--dff-err-bg:#FBEAEA;--dff-err-ink:#3b0d0a;--dff-radius:8px;--dff-gap:18px;--dff-focus:var(--kit-accent,currentColor)}
 @supports (color:color-mix(in srgb,CanvasText 45%,transparent)){
   .dff-wrap{--dff-line:color-mix(in srgb,CanvasText 45%,transparent);--dff-bg:Canvas;--dff-muted:color-mix(in srgb,CanvasText 66%,transparent)}
 }
