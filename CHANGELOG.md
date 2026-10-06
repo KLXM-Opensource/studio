@@ -12,7 +12,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Typografie: Überschriften in Versalien, sechs Betonungsarten (Akzent, kursiv, fett, Textmarker, unterstrichen, Verlauf),
   Linkstil; neun weitere Schriften selbst gehostet (Open Sans, Source Sans 3, Lato, Roboto, Roboto Condensed, Roboto Slab,
   PT Sans, Poppins, Manrope, Atkinson Hyperlegible Next).
-- Form: Bildform und -wirkung, Hover-Effekt, Symbolstil, Übergänge zwischen Abschnitten (Welle, schräg, Bogen, Zickzack – nur
+- Form: Bildform und -wirkung, Hover-Effekt, Symbolstil (Kontur jetzt dünn und ruhig) und Anordnung der Symbole (über dem Titel, in
+  einer Zeile mit dem Titel, links neben dem Text), Übergänge zwischen Abschnitten (Welle, schräg, Bogen, Zickzack – nur
   bei wechselndem Hintergrund), Animationsstil.
 - Kopf & Fuß: Kopfbereich „Minimal“, Farbe von Kopf und Fuß, Menüstil, Infoleiste (Telefon, E-Mail, Social, eigener Text),
   Fußbereich „Zentriert“.

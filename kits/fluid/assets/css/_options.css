@@ -49,8 +49,18 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 
 /* Symbole (Merkmale u. a.): getönt (Standard), Kreis, Kontur, schlicht */
 .ic-circle .feat__ico{border-radius:50%}
-.ic-outline .feat__ico{background:transparent;box-shadow:inset 0 0 0 2px currentColor}
+.ic-outline .feat__ico{background:transparent;box-shadow:inset 0 0 0 1px var(--f-line-strong);--ico-2-opacity:0}
 .ic-plain .feat__ico{width:auto;height:auto;background:none;font-size:2rem;place-items:start}
+
+/* Anordnung der Symbole (icon_pos): über dem Titel (Standard), in einer Zeile mit dem Titel, links neben dem Text */
+.icp-inline .feat:has(>.feat__ico){display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--f-s-xs) var(--f-s-s)}
+.icp-inline .feat:has(>.feat__ico)>.feat__body{display:contents}
+.icp-inline .feat:has(>.feat__ico) :is(.feat__text,.more){grid-column:1/-1}
+.icp-inline .feat:has(>.feat__ico) .more{margin-top:0}
+.icp-inline .feat__ico{width:2.5rem;height:2.5rem;font-size:1.35rem}
+.icp-inline.ic-plain .feat__ico,.icp-inline .feats--icons .feat__ico{width:auto;height:auto;font-size:1.75rem}
+.icp-side .feat:has(>.feat__ico){display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:var(--f-s-s) var(--f-s-m)}
+.icp-side .feat:has(>.feat__ico)>.feat__body{height:100%}
 
 /* Einblenden beim Scrollen: Aufsteigen (Standard), nur Blende, Wachsen, Unschärfe */
 @media (prefers-reduced-motion:no-preference){

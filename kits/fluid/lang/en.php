@@ -486,4 +486,8 @@ return [
     'Erzählend und atmosphärisch: dunkel von Anfang an, Manrope, Glas-Karten, sanfter Verlauf, Betonung im Farbverlauf.' => 'Narrative and atmospheric: dark from the start, Manrope, glass cards, soft gradient, gradient emphasis.',
     'Text der Infoleiste (optional)' => 'Info bar text (optional)',
     'Kurzer Hinweis links in der Infoleiste, z. B. „Notdienst rund um die Uhr“ oder „Sprechzeiten Mo–Fr 8–18 Uhr“. Infoleiste einschalten: Design → Kopf & Fuß.' => 'Short note on the left of the info bar, e.g. “24/7 emergency service” or “Office hours Mon–Fri 8–18”. Turn on the info bar: Design → Header & footer.',
+    'Anordnung der Symbole' => 'Icon placement',
+    'Über dem Titel' => 'Above the title',
+    'In einer Zeile mit dem Titel' => 'In line with the title',
+    'Links neben dem Text' => 'Left of the text',
 ];
