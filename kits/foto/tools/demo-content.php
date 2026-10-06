@@ -307,19 +307,48 @@ function foto_demo_pages(array $img, callable $log): void
         'button_label' => 'Kontakt aufnehmen', 'button_link' => '/kontakt', 'button2_label' => '', 'button2_link' => '',
     ]];
 
-    // Startseite
-    $page(['slug' => 'start', 'title' => 'Start', 'is_home' => 1, 'menu' => 0, 'sort' => 0,
+    // Startseite: kaum Text – ein Bildstrom aus großen Momenten, darunter ein Bento, das beim Scrollen nachlädt.
+    // Hinter den Bildern stecken Galerien (Sammlungen) und Seiten (Serien); Videos laufen stumm, solange sie zu sehen sind.
+    $V = $img['video'] ?? [];
+    $C = $img['col'];
+    $t = fn(?int $id, array $o = []) => $o + ['image' => $id, 'size' => 'auto', 'open' => 'zoom', 'collection' => null, 'link' => '', 'tone' => 'none', 'title' => '', 'text' => '', 'place' => 'auto'];
+    $home = $page(['slug' => 'start', 'title' => 'Start', 'is_home' => 1, 'menu' => 0, 'sort' => 0,
         'meta_description' => 'Demo-Website der fiktiven Fotografin Mara Beispiel: Porträt, Reportage und Landschaft.'], [
-        ['type' => 'photo_hero', 'data' => ['variant' => 'slideshow', 'title' => 'Das Licht *dazwischen*.', 'text' => 'Fotografie von Mara Beispiel (Demo)',
-            'show_title' => true, 'position' => 'bottom-left', 'height' => 'screen', 'overlay' => 'soft', 'autoplay' => true, 'interval' => '6', 'scroll_hint' => true, 'full_width' => true,
-            'slides' => [['image' => $at($L, 0), 'caption' => ''], ['image' => $img['video']['land'] ?? $at($R, 3), 'caption' => ''], ['image' => $at($L, 2), 'caption' => ''], ['image' => $at($L, 5), 'caption' => '']]]],
-        ['type' => 'series_index', 'data' => ['variant' => 'grid', 'eyebrow' => '', 'title' => 'Ausgewählte Serien', 'intro' => '', 'source' => 'children', 'parent' => null,
-            'limit' => 0, 'ratio' => '4:5', 'columns' => '3', 'width' => '', 'show_meta' => true, 'items' => []]],
-        ['type' => 'photo_text', 'data' => ['variant' => 'left', 'eyebrow' => '', 'title' => 'Sehen, bevor man auslöst.',
-            'text' => '<p>Ich fotografiere Menschen, Orte und das, was zwischen ihnen passiert – ruhig, genau und mit Zeit. [Eigenen Text hier einsetzen.]</p>',
-            'button_label' => 'Über mich', 'button_link' => '/ueber-mich', 'button2_label' => '', 'button2_link' => '',
-            'image' => $at($P, 0), 'caption' => '', 'ratio' => '4:5', 'size' => 'third', 'align' => 'center', 'lightbox' => false]],
-        $cta,
+        ['type' => 'moments', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'stream', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual',
+            'motion' => 'reveal', 'row_height' => 'm', 'labels' => 'hover', 'more' => 'all', 'batch' => 12, 'spy' => false, 'width' => 'full', 'tiles' => [
+            $t($at($L, 0), ['size' => 'full', 'open' => 'gallery', 'collection' => $C['land'] ?? null, 'title' => 'Weite.', 'text' => 'Landschaften, 2023–2025']),
+            $t($at($P, 1), ['size' => 'm', 'open' => 'page', 'link' => '@portraet']),
+            $t($at($P, 4), ['size' => 's', 'open' => 'zoom']),
+            $t(null, ['size' => 's', 'open' => 'page', 'link' => '@portraet', 'title' => 'Stille Gesichter.', 'text' => 'Sechs Begegnungen, eine Stunde, ein Licht.']),
+            $t($V['land'] ?? $at($L, 2), ['size' => 'wide', 'place' => 'end', 'open' => 'zoom']),
+            $t($at($R, 0), ['size' => 'l', 'place' => 'center', 'tone' => 'secondary', 'open' => 'gallery', 'collection' => $C['report'] ?? null, 'title' => 'Stadt am Mittag.', 'text' => 'Reportage']),
+            $t(null, ['size' => 's', 'title' => 'Echte Orte. Wenig Worte.', 'text' => 'Alles beginnt mit einem Moment, der nicht gestellt ist.', 'open' => 'none']),
+            $t($at($R, 1), ['size' => 's', 'open' => 'zoom']),
+            $t($V['report'] ?? $at($R, 5), ['size' => 'm', 'tone' => 'dark', 'open' => 'zoom']),
+        ]]],
+        ['type' => 'moments', 'tunes' => ['spaceTop' => 'small'], 'data' => ['variant' => 'bento', 'eyebrow' => '', 'title' => 'Kontaktbogen', 'intro' => '', 'source' => 'manual',
+            'motion' => 'rise', 'row_height' => 'm', 'labels' => 'hover', 'more' => 'scroll', 'batch' => 10, 'spy' => true, 'width' => 'full', 'tiles' => [
+            $t($at($L, 1), ['size' => 'l', 'open' => 'gallery', 'collection' => $C['land'] ?? null, 'title' => 'Dünen.']),
+            $t($at($P, 0), ['size' => 'tall', 'open' => 'page', 'link' => '@portraet']),
+            $t($at($R, 2), ['size' => 's']),
+            $t(null, ['size' => 's', 'tone' => 'accent', 'title' => 'Porträt.', 'text' => 'Zur Serie', 'open' => 'page', 'link' => '@portraet']),
+            $t($at($R, 3), ['size' => 'wide', 'open' => 'page', 'link' => '@reportage', 'title' => 'Arkaden.']),
+            $t($at($L, 3), ['size' => 'm']),
+            $t($V['report'] ?? $at($R, 5), ['size' => 'm']),
+            $t($at($P, 2), ['size' => 's']),
+            $t($at($L, 4), ['size' => 'full', 'open' => 'page', 'link' => '@landschaft', 'title' => 'Weite.', 'text' => 'Zur Serie']),
+            $t($at($P, 3), ['size' => 'm']),
+            $t($at($R, 4), ['size' => 'tall']),
+            $t($at($L, 5), ['size' => 'wide']),
+            $t(null, ['size' => 'm', 'tone' => 'dark', 'title' => 'Ein Auftrag?', 'text' => 'Schreiben Sie mir.', 'open' => 'page', 'link' => '/kontakt']),
+            $t($at($P, 5), ['size' => 's']),
+            $t($at($R, 5), ['size' => 'wide']),
+            $t($at($L, 2), ['size' => 'm']),
+            $t($V['land'] ?? $at($L, 0), ['size' => 'l']),
+            $t($at($P, 4), ['size' => 'tall']),
+            $t($at($R, 1), ['size' => 's']),
+            $t($at($R, 0), ['size' => 's']),
+        ]]],
     ]);
 
     // Arbeiten + drei Serien
@@ -398,7 +427,20 @@ function foto_demo_pages(array $img, callable $log): void
     $home = app()->db->fetch("SELECT id, content_published FROM pages WHERE slug = 'start' AND is_home = 1 ORDER BY id DESC LIMIT 1");
     if ($home) {
         $json = json_decode((string) $home['content_published'], true);
-        foreach ($json['blocks'] as &$bl) if ($bl['type'] === 'series_index') $bl['data']['parent'] = $root;
+        // Kacheln des Bildstroms: „@slug“ → stabiler Verweis page:ID (Serien unter „Arbeiten“, sonst Hauptebene)
+        $ref = function (string $slug) use ($root): string {
+            $id = app()->db->fetchValue("SELECT id FROM pages WHERE slug = ? AND type = 'page' AND (parent_id = ? OR parent_id IS NULL) ORDER BY parent_id IS NULL, id DESC LIMIT 1", [$slug, $root]);
+            return $id ? 'page:' . (int) $id : '';
+        };
+        foreach ($json['blocks'] as &$bl) {
+            if ($bl['type'] === 'series_index') $bl['data']['parent'] = $root;
+            if ($bl['type'] !== 'moments') continue;
+            foreach ($bl['data']['tiles'] as &$tile) {
+                if (str_starts_with((string) $tile['link'], '@')) $tile['link'] = $ref(substr($tile['link'], 1));
+                elseif (str_starts_with((string) $tile['link'], '/')) $tile['link'] = $ref(trim($tile['link'], '/'));
+            }
+            unset($tile);
+        }
         unset($bl);
         $enc = json_encode($json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         app()->db->query('UPDATE pages SET content_published = ?, content_draft = ? WHERE id = ?', [$enc, $enc, (int) $home['id']]);

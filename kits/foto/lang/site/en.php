@@ -76,4 +76,10 @@ return [
     'Zum Inhalt springen' => 'Skip to content',
     'Zur Startseite' => 'Go to home page',
     'Zurück' => 'Previous',
+    // Bildstrom (moments) und „Kopfbereich zurücknehmen“
+    'Bildstrom' => 'Image stream',
+    'Galerie mit {n} Bildern öffnen' => 'Open gallery with {n} images',
+    'Mehr zeigen' => 'Show more',
+    'Video anhalten' => 'Pause video',
+    '{n} weitere Bilder geladen' => '{n} more images loaded',
 ];

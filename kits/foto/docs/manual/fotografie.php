@@ -18,6 +18,16 @@
     <li><b>YouTube/Vimeo:</b> In der Seitenleiste je Eintrag einen Link eintragen – das Video lädt erst nach Klick (Zwei-Klick-Lösung).</li>
     <li>Vorschaubild und Untertitel pflegen Sie in der Mediathek an der Videodatei.</li>
   </ul>
+  <h3>Bildstrom: Bilder statt Worte</h3>
+  <p>Der Block <b>„Bildstrom (Bento)“</b> ist für Startseiten und Übersichten gemacht, die fast ohne Text auskommen. Fotos und Videos einfach auf den Block ziehen – jede Datei wird eine Kachel. In der Seitenleiste stellen Sie je Kachel ein:</p>
+  <ul>
+    <li><b>Größe:</b> automatisch (nach Bildformat) oder klein, mittel, breit, hoch, groß, ganze Breite.</li>
+    <li><b>Beim Anklicken:</b> das Bild groß zeigen, eine <b>ganze Galerie</b> öffnen (eine Sammlung der Mediathek – die Kachel zeigt die Anzahl) oder eine <b>Seite</b> öffnen (im Struktur-Browser wählen, z. B. eine Serie).</li>
+    <li><b>Fläche um das Bild:</b> getönt, Akzentfarbe, zweite Markenfarbe oder dunkel – wie ein farbiges Passepartout.</li>
+    <li><b>Titel und Zeile:</b> kurz halten („Lost Place.“). Sie erscheinen beim Zeigen auf dem Bild. Eine Kachel <b>ohne Bild, nur mit Titel</b> wird zur Textkachel.</li>
+  </ul>
+  <p>Zwei Darstellungen: <b>Bento</b> (dichtes Mosaik, Lücken füllen sich selbst) und <b>Strom</b> (große Momente im eigenen Format, links, mittig oder rechts gesetzt – wie ein Bildband). Kacheln erscheinen beim Scrollen nacheinander; stumme Videos laufen nur, solange sie zu sehen sind. Bei vielen Bildern: <b>„Endlos: beim Scrollen nachladen“</b> oder <b>„Mehr zeigen“</b>. Der Zähler „07 / 24“ zeigt beim Scrollen, wo man gerade ist.</p>
+  <div class="doc-note doc-note--info"><strong>Ruhige Navigation</strong><p>Damit die Bilder wirken: Design → Kopf &amp; Fuß → <b>„Kopfbereich zurücknehmen“</b>. Die Navigation verschwindet beim Herunterscrollen und ist beim Hochscrollen sofort wieder da. Die Vorlage <b>„Bildstrom“</b> stellt alles passend ein.</p></div>
   <h3>Eine neue Serie anlegen</h3>
   <ol>
     <li>Bilder in die <b>Mediathek</b> laden, je Bild einen <b>Alt-Text</b> (was ist zu sehen?) und bei Bedarf einen Fokuspunkt setzen. Tipp: eine <b>Sammlung</b> je Serie anlegen.</li>

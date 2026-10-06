@@ -15,11 +15,11 @@ dort, wo der Block steht, selbst gehostete Schriften, WCAG 2.2 AA.
 ```
 kits/foto/
 ├── theme.php        Blöcke (5 Foto-Blöcke + 16 übernommene), Website, conditional_css, editor_js, 'design' => design.php
-├── design.php       Tokens (Farben, Typografie, Form, Kopf/Fuß, Bewegung) + Gruppe „Bilder & Galerien“ + 6 Vorlagen
+├── design.php       Tokens (Farben, Typografie, Form, Kopf/Fuß, Bewegung) + Gruppe „Bilder & Galerien“ + 7 Vorlagen
 ├── functions.php    Helfer foto_* (aus fluid) + Abschnitt „Fotografie“: foto_brand, foto_gw, foto_photo, foto_video, foto_embed,
 │                    foto_images, foto_lightbox, foto_series_items/meta, foto_drop_zone, foto_item_tools
 ├── seed.php         Einstellungen + Rechtstexte; 'after' → tools/demo-content.php (Startseite, Arbeiten + 3 Serien, Über mich, Kontakt)
-├── blocks/          photo_hero, photo_grid, series_index, series_head, photo_text + hero, richtext, media_text, features, cards,
+├── blocks/          photo_hero, photo_grid, moments, series_index, series_head, photo_text + hero, richtext, media_text, features, cards,
 │                    logos, quote, steps, pricing, faq, cta, scrolly, video, contact, downloads, map
 ├── templates/       layout, error, maintenance, offline; partials: header, sheet, footer, section (Marke über foto_brand())
 ├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero, _options, _photo) · b-photo-grid, b-photo-hero, b-series,
@@ -54,6 +54,15 @@ Standardwerte = Vorlage „Weiß & still“, identisch in `assets/css/_tokens.cs
 | `gallery_width` Breite der Galerien | `gw-*` → `.gwrap--{contained,wide,full}` | contained · wide (Inhaltsbreite + 22 rem) · full (randlos, Rand = Bildabstand) |
 | `img_hover` verlinkte Bilder beim Zeigen | `ih-*` | none · zoom (nur ohne „Bewegung reduzieren“) · fade |
 | `logo_style` Marke oben links (Gruppe Kopf & Fuß) | `logo-*` | text (Wortmarke, `foto_brand()`) · image (Kern-Fragment „brand“) |
+
+Block „Bildstrom“ (`moments`, `blocks/moments.php`, `css/b-moments.css`, `js/moments.js`): Bento (12er-Raster, `grid-auto-flow: dense`,
+Kacheln s · m · wide · tall · l · full) oder Strom (Originalformat `r-*`, Startspalte `mo-c*`). Kachel öffnet Lightbox, Galerie (Sammlung
+→ versteckte `a[data-lb]` derselben `[data-lb-group]`) oder Seite (`page:ID`). `foto_moments()` vereinheitlicht die Quellen (von Hand,
+Unterseiten, Sammlung). Einblenden erst mit `.mo-armed` (JS), `mo-fx-drift` per `animation-timeline: view()`; Nachladen blendet nur
+`.mo__later` ein (alles steht im HTML).
+
+Kopfbereich zurücknehmen: `header_recede` → `hrc-off | hrc-hide | hrc-quiet` (site.js setzt `.is-away` beim Herunterscrollen;
+„quiet“ = transparent, `mix-blend-mode: difference`).
 
 Navigation: `header` = inline (Leiste oben) · minimal (nur Menü-Schaltfläche) · rail (Seitenleiste links) · centered · split · floating.
 Kopfbereich-Aktionen: Handlungsaufruf als letzter Menüpunkt (`navitem`), Suche als Lupe.

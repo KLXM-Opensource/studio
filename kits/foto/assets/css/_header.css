@@ -74,3 +74,21 @@
 .hdr .ha-center{margin-inline:auto}
 .hdr__below{width:min(100% - 2 * var(--f-gutter),var(--f-wrap));margin-inline:auto}
 @container hdr (max-width:48rem){.hdr .ha-search--inline,.hdr .ha-search--expand,.hdr .ha-center{display:none}.hdr .ha-search--fallback{display:flex}}
+
+/* Kopfbereich zurücknehmen (Design → „Kopfbereich beim Scrollen“, Klasse hrc-*):
+   hide  blendet beim Herunterscrollen aus, beim Hochscrollen wieder ein (site.js → .is-away)
+   quiet dazu ohne Fläche und Linie, Schrift im Differenz-Modus – bleibt auf hellen und dunklen Bildern lesbar.
+   Mit „Minimal“: Menü-Schaltfläche links (nur Striche), Name in der Mitte – nichts lenkt von den Bildern ab. */
+:is(.hrc-hide,.hrc-quiet) .hdr{position:sticky;top:0;transition:translate .45s cubic-bezier(.2,.7,.2,1),opacity .3s}
+:is(.hrc-hide,.hrc-quiet) .hdr.is-away{translate:0 -105%;opacity:0}
+.hrc-quiet .hdr{--f-ink:#FFF;--f-text:#FFF;--f-a:#FFF;--f-a-strong:#FFF;--f-link:#FFF;--f-muted:#FFF;--f-line-strong:transparent;background:transparent;border-bottom:0;backdrop-filter:none;mix-blend-mode:difference;animation:none!important}
+.hrc-quiet .hdr__bar{min-height:3.5rem}
+.hrc-quiet .menu-btn{border-color:transparent;padding-inline:.5rem}
+.hrc-quiet .hdr--minimal .hdr__bar{display:grid;grid-template-columns:1fr auto 1fr}
+.hrc-quiet .hdr--minimal .hdr__tools{grid-area:1/1;justify-self:start;flex-direction:row-reverse}
+.hrc-quiet .hdr--minimal .hdr__brand{grid-area:1/2;margin:0}
+.hrc-quiet .hdr--minimal .hdr__tools>:not(.menu-btn){display:none}   /* Handlungsaufruf und Suche stehen im Menü */
+.hrc-quiet .hdr--minimal .menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hrc-quiet .hdr--minimal .menu-btn__bars{width:1.6rem;height:1.5px}
+.hrc-quiet .hdr--minimal .menu-btn__bars::before{width:1.6rem;height:1.5px;top:7px}
+@media (prefers-reduced-motion:reduce){:is(.hrc-hide,.hrc-quiet) .hdr{transition:none}}

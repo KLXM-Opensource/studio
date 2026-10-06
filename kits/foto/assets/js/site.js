@@ -43,6 +43,25 @@ if (hdr && nav && 'ResizeObserver' in window) {
   d.fonts?.ready.then(check);
 }
 
+// ------------------------------------------------------------ Kopf zurücknehmen (Design → hrc-hide | hrc-quiet): beim Herunterscrollen weg, beim Hochscrollen da
+if (hdr && html.matches('.hrc-hide,.hrc-quiet')) {
+  let y0 = scrollY, ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = scrollY;
+      if (Math.abs(y - y0) > 8) {
+        const away = y > y0 && y > hdr.offsetHeight * 2 && !hdr.contains(d.activeElement) && !hdr.querySelector('.hnav__sub[open]');
+        hdr.classList.toggle('is-away', away);
+        y0 = y;
+      }
+      ticking = false;
+    });
+  }, { passive: true });
+  hdr.addEventListener('focusin', () => hdr.classList.remove('is-away'));
+}
+
 // ------------------------------------------------------------ Seitenblatt (popover)
 const sheet = d.querySelector('[data-mnav]');
 if (sheet) {

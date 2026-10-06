@@ -9,7 +9,7 @@
  *  - blocks     Blocktypen (= Editor.js-Tools) mit Feld-Schema und Varianten; Foto-Blöcke: photo_hero, photo_grid,
  *               series_index, series_head, photo_text
  *  - settings   zentrales Einstellungsformular („Website“)
- *  - design     design.php – sechs Vorlagen und die Gruppe „Bilder & Galerien“
+ *  - design     design.php – sieben Vorlagen und die Gruppe „Bilder & Galerien“
  * Eigenes Kundenprojekt: php bin/console kit:create kunde --from=foto  (Präfix foto_* → kunde_*)
  */
 
@@ -133,8 +133,10 @@ return [
         'css/b-photo-hero.css' => ['photo_hero'],
         'css/b-series.css' => ['series_index', 'series_head'],
         'css/b-photo-text.css' => ['photo_text'],
-        'css/lightbox.css' => ['photo_grid', 'photo_text', 'series_head'],
-        'js/lightbox.js' => ['photo_grid', 'photo_text', 'series_head'],
+        'css/b-moments.css' => ['moments'],
+        'js/moments.js' => ['moments'],
+        'css/lightbox.css' => ['photo_grid', 'photo_text', 'series_head', 'moments'],
+        'js/lightbox.js' => ['photo_grid', 'photo_text', 'series_head', 'moments'],
         'js/photo-hero.js' => ['photo_hero'],
         'js/series.js' => ['series_index:list'],
         'js/reel.js' => ['quote', 'cards', 'photo_grid:strip'],
@@ -308,6 +310,55 @@ return [
                 $gwidth,
                 ['name' => 'captions', 'label' => 'Bildunterschriften zeigen', 'type' => 'bool', 'default' => true, 'width' => 'half'],
                 ['name' => 'lightbox', 'label' => 'Lightbox (Bild groß öffnen)', 'type' => 'bool', 'default' => true, 'width' => 'half'],
+            ],
+        ],
+        'moments' => [
+            'label' => 'Bildstrom (Bento)', 'icon' => 'squares-four', 'group' => 'Medien',
+            'help' => 'Bilder und Videos als lebendiges Mosaik mit wenig Text – hinter jeder Kachel kann das Bild groß, eine ganze Galerie oder eine Seite stecken. Kacheln erscheinen beim Scrollen nacheinander, stumme Videos laufen nur, solange sie zu sehen sind. Fotos und Videos einfach auf den Block in der Seite ziehen.',
+            'variants' => ['bento' => 'Bento – Kacheln verschiedener Größe', 'stream' => 'Strom – große Momente untereinander'],
+            'variant_help' => [
+                'bento' => 'Dichtes Mosaik aus kleinen, breiten, hohen und großen Kacheln – Lücken füllen sich von selbst.',
+                'stream' => 'Jedes Bild in seinem Format, frei gesetzt (links, Mitte, rechts) mit viel Luft – Textkacheln stehen daneben. Wie ein Bildband zum Durchscrollen.',
+            ],
+            'fields' => [
+                ...$head(false),
+                ['name' => 'source', 'label' => 'Kacheln', 'type' => 'select', 'required' => true, 'default' => 'manual', 'width' => 'half',
+                    'options' => ['manual' => 'Von Hand zusammenstellen', 'pages' => 'Unterseiten einer Seite (je Seite eine Kachel)', 'collection' => 'Alle Bilder und Videos einer Sammlung']],
+                ['name' => 'parent', 'label' => 'Seite mit den Unterseiten', 'type' => 'link', 'width' => 'half',
+                    'help' => 'Bei „Unterseiten“: Seite im Struktur-Browser wählen. Leer = Unterseiten dieser Seite. Titelbild und Titel kommen aus „Serie (Kopf)“.'],
+                ['name' => 'collection', 'label' => 'Sammlung', 'type' => 'collection', 'width' => 'half', 'help' => 'Bei „Sammlung“: jedes Bild wird zur Kachel, Größe automatisch.'],
+                ['name' => 'tiles', 'label' => 'Kacheln (bei „Von Hand“)', 'type' => 'repeater', 'item_label' => 'Kachel', 'title_field' => 'title', 'max_items' => 200,
+                    'help' => 'Am einfachsten: Fotos und Videos direkt auf den Bildstrom in der Seite ziehen. Eine Kachel ohne Bild, nur mit Titel, wird zur Textkachel.', 'fields' => [
+                    ['name' => 'image', 'label' => 'Bild oder Video', 'type' => 'media', 'accept' => 'visual', 'width' => 'half',
+                        'help' => 'Videos (MP4, kurz, ohne Ton) laufen als stumme Schleife, solange sie zu sehen sind.'],
+                    ['name' => 'size', 'label' => 'Größe', 'type' => 'select', 'required' => true, 'default' => 'auto', 'width' => 'half',
+                        'options' => ['auto' => 'Automatisch (nach Bildformat)', 's' => 'Klein', 'm' => 'Mittel', 'wide' => 'Breit', 'tall' => 'Hoch', 'l' => 'Groß', 'full' => 'Ganze Breite']],
+                    ['name' => 'open', 'label' => 'Beim Anklicken', 'type' => 'select', 'required' => true, 'default' => 'zoom', 'width' => 'half',
+                        'options' => ['zoom' => 'Bild bzw. Video groß zeigen', 'gallery' => 'Galerie öffnen (Sammlung)', 'page' => 'Seite öffnen', 'none' => 'Nichts (nur zeigen)']],
+                    ['name' => 'collection', 'label' => 'Galerie hinter dem Bild (Sammlung)', 'type' => 'collection', 'width' => 'half',
+                        'help' => 'Bei „Galerie öffnen“: alle Bilder und Videos der Sammlung als Folge. Ohne eigenes Bild zeigt die Kachel das erste.'],
+                    ['name' => 'link', 'label' => 'Seite hinter dem Bild', 'type' => 'link', 'width' => 'half',
+                        'help' => 'Bei „Seite öffnen“: Seite im Struktur-Browser wählen. Ohne eigenes Bild zeigt die Kachel das Titelbild der Seite.'],
+                    ['name' => 'tone', 'label' => 'Fläche um das Bild', 'type' => 'select', 'required' => true, 'default' => 'none', 'width' => 'half',
+                        'options' => ['none' => 'Keine', 'muted' => 'Getönt', 'accent' => 'Akzentfarbe', 'secondary' => 'Zweite Markenfarbe', 'dark' => 'Dunkel']],
+                    ['name' => 'title', 'label' => 'Titel (optional, kurz)', 'type' => 'text', 'max' => 60, 'width' => 'half', 'help' => 'Ein, zwei Wörter – z. B. „Lost Place.“'],
+                    ['name' => 'text', 'label' => 'Zeile (optional)', 'type' => 'text', 'max' => 160, 'width' => 'half'],
+                    ['name' => 'place', 'label' => 'Lage (bei „Strom“)', 'type' => 'select', 'required' => true, 'default' => 'auto', 'width' => 'half',
+                        'options' => ['auto' => 'Fließend', 'start' => 'Links', 'center' => 'Mitte', 'end' => 'Rechts']],
+                ]],
+                ['name' => 'motion', 'label' => 'Erscheinen beim Scrollen', 'type' => 'select', 'required' => true, 'default' => 'rise', 'width' => 'half',
+                    'options' => ['rise' => 'Aufsteigen, nacheinander', 'fade' => 'Einblenden, nacheinander', 'zoom' => 'Leicht wachsen', 'reveal' => 'Aufdecken (Vorhang)', 'drift' => 'Aufsteigen + Tiefe (Bild wandert leicht)', 'none' => 'Ohne Bewegung'],
+                    'help' => 'Nur mit Design → „Dezente Animationen“; Besucher mit „Bewegung reduzieren“ sehen nie Bewegung.'],
+                ['name' => 'row_height', 'label' => 'Kachelhöhe (Bento)', 'type' => 'select', 'required' => true, 'default' => 'm', 'width' => 'half',
+                    'options' => ['s' => 'Niedrig', 'm' => 'Mittel', 'l' => 'Hoch']],
+                ['name' => 'labels', 'label' => 'Titel auf den Bildern', 'type' => 'select', 'required' => true, 'default' => 'hover', 'width' => 'half',
+                    'options' => ['hover' => 'Beim Zeigen (Touch: immer)', 'always' => 'Immer', 'none' => 'Nie (nur für Screenreader)']],
+                ['name' => 'more', 'label' => 'Viele Bilder', 'type' => 'select', 'required' => true, 'default' => 'all', 'width' => 'half',
+                    'options' => ['all' => 'Alle sofort zeigen', 'scroll' => 'Endlos: beim Scrollen nachladen', 'button' => 'Schaltfläche „Mehr zeigen“']],
+                ['name' => 'batch', 'label' => 'Kacheln je Schritt', 'type' => 'number', 'default' => 12, 'width' => 'half', 'help' => 'Beim Nachladen: so viele Kacheln auf einmal (4–60).'],
+                ['name' => 'spy', 'label' => 'Zähler „07 / 24“ beim Scrollen', 'type' => 'bool', 'default' => false, 'width' => 'half',
+                    'help' => 'Kleine Anzeige am unteren Rand: welches Bild gerade zu sehen ist, mit Titel.'],
+                $gwidth,
             ],
         ],
         'series_index' => [

@@ -1,9 +1,10 @@
 <?php /** Handbuch „foto“ · Kapitel „Design: Vorlagen, Bilder, Kopf & Fuß“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> stellen Sie Farben, Schriften, Bilder &amp; Galerien, Kopf- und Fußbereich ein. Die Vorschau zeigt jede Änderung sofort – hell und dunkel, auf Computer und Handy. Online geht sie erst mit <b>Speichern</b>; frühere Stände holen Sie über <b>Verlauf</b> zurück.</p>
-  <h3>Sechs Vorlagen für Fotografie</h3>
+  <h3>Vorlagen für Fotografie</h3>
   <p>Jede Vorlage setzt alle Werte auf einmal; danach passen Sie Einzelnes an. Alle sind hell und dunkel auf Lesbarkeit (WCAG 2.2 AA) geprüft.</p>
   <table class="doc-table">
     <tr><th>Vorlage</th><th>Charakter</th></tr>
+    <tr><td>Bildstrom</td><td>Bilder statt Worte: ganz leise Navigation (Menü links, Name in der Mitte, verschwindet beim Scrollen), Serifen für die wenigen Titel, Korallrot für Farbflächen, randlose Mosaike.</td></tr>
     <tr><td>Weiß &amp; still (Standard)</td><td>Weißer Grund, schwarze Schrift, Inter in leichter Stärke, eckige Bilder, viel Weißraum.</td></tr>
     <tr><td>Dunkelkammer</td><td>Fast schwarz von Anfang an, warmes Rotlicht als Akzent, minimale Navigation, Bildunterschriften auf dem Bild, randlose Galerien.</td></tr>
     <tr><td>Galerie-Grau</td><td>Warmes Grau wie im Ausstellungsraum, weiße Passepartouts, zentrierter Kopf, Bildunterschriften beim Zeigen.</td></tr>

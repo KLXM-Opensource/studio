@@ -33,7 +33,7 @@ if (dlg) {
       const v = media.querySelector('video');
       if (v) { v.focus({ preventScroll: true }); v.play().catch(() => {}); }   // Klick auf „Abspielen“ = Nutzeraktion; Ton wie in der Datei
     } else load(img, a);
-    img.alt = a.querySelector('img')?.alt || '';
+    img.alt = a.dataset.alt || a.querySelector('img')?.alt || '';
     if (a.dataset.w) { img.width = +a.dataset.w; img.height = +a.dataset.h; }
     text.textContent = a.dataset.caption || '';
     count.textContent = list.length > 1 ? tpl.replace('{n}', i + 1).replace('{total}', list.length) : '';

@@ -39,7 +39,7 @@ $base = [
     'radius' => 0, 'buttons' => 'outline', 'cards' => 'flat', 'shadow' => 'none', 'density' => 'normal', 'space' => 'airy', 'wrap' => 80,
     'secondary_role' => 'sections', 'heading_case' => 'normal', 'emphasis' => 'italic', 'links' => 'underline',
     'hover' => 'none', 'icons' => 'plain', 'icon_pos' => 'top', 'dividers' => 'none', 'motion_style' => 'fade',
-    'eyebrow' => 'plain', 'header' => 'inline', 'header_sticky' => true, 'header_bg' => 'page', 'nav_style' => 'plain', 'topbar' => 'off',
+    'eyebrow' => 'plain', 'header' => 'inline', 'header_sticky' => true, 'header_recede' => 'off', 'header_bg' => 'page', 'nav_style' => 'plain', 'topbar' => 'off',
     'footer' => 'simple', 'footer_bg' => 'page', 'logo_style' => 'text',
     // Bilder & Galerien
     'img_gap' => 'medium', 'images' => 'sharp', 'captions' => 'below', 'caption_style' => 'plain', 'lightbox' => 'dark',
@@ -181,6 +181,9 @@ return [
                 'options' => ['text' => 'Wortmarke (Name als Schrift)', 'image' => 'Logo-Bild (falls unter „Website“ hinterlegt)'],
                 'help' => 'Die Wortmarke nutzt den Kurznamen und die Schrift der Überschriften.'],
             ['name' => 'header_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'hdr-sticky', 'default' => true],
+            ['name' => 'header_recede', 'label' => 'Kopfbereich zurücknehmen', 'type' => 'choice', 'class' => 'hrc-{value}', 'default' => 'off',
+                'options' => ['off' => 'Nein – immer gleich', 'hide' => 'Beim Herunterscrollen ausblenden, beim Hochscrollen zeigen', 'quiet' => 'Ganz leise – ohne Fläche über den Bildern, blendet beim Scrollen aus'],
+                'help' => 'Damit die Bilder wirken: Die Navigation tritt zurück und ist beim Hochscrollen sofort wieder da. „Ganz leise“ mit Navigation „Minimal“: Menü links, Name in der Mitte.'],
             ['name' => 'header_bg', 'label' => 'Hintergrund des Kopfbereichs', 'type' => 'choice', 'class' => 'hbg-{value}', 'default' => 'page',
                 'options' => ['page' => 'Wie die Seite (leicht durchscheinend)', 'surface' => 'Getönte Fläche', 'accent' => 'Akzentfarbe', 'secondary' => 'Zweite Markenfarbe', 'dark' => 'Dunkel']],
             ['name' => 'nav_style', 'label' => 'Menüpunkte', 'type' => 'choice', 'class' => 'nl-{value}', 'default' => 'plain',
@@ -221,8 +224,15 @@ return [
         'system-mono' => ['label' => 'System-Monospace (ohne Download)', 'stack' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace'],
     ],
 
-    // Sechs Vorlagen für Fotografie – alle hell und dunkel AA-geprüft (tools/contrast.php)
+    // Vorlagen für Fotografie – alle hell und dunkel AA-geprüft (tools/contrast.php)
     'presets' => [
+        'bildstrom' => $preset('Bildstrom', 'Bilder statt Worte: weißer Grund, ganz leise Navigation (Menü links, Name in der Mitte, verschwindet beim Scrollen), Newsreader für die wenigen Titel, Korallrot für Farbflächen, kleiner Bildabstand, randlose Mosaike.',
+            ['#B23A2E', '#8E2C22', '#FFFFFF', '#F6D9D2', '#111111', '#2A2A2A', '#5C5C5C', '#FFFFFF', '#F0F0F0', '#E3E3E3', '#141414'],
+            ['#F2A493', '#F8C3B6', '#2A0B06', '#3A1C16', '#F2F2F0', '#D6D6D3', '#A3A3A0', '#0E0E0E', '#181818', '#2A2A2A', '#1C1C1C'],
+            ['secondary' => '#D5654F', 'secondary@dark' => '#E8877A', 'on_secondary' => '#1A0A07', 'on_secondary@dark' => '#1A0A07',
+             'font_body' => 'inter', 'font_head' => 'newsreader', 'heading_weight' => 400, 'heading_tracking' => -0.5, 'ratio' => 1.25,
+             'header' => 'minimal', 'header_sticky' => true, 'header_recede' => 'quiet', 'captions' => 'hover', 'lightbox' => 'light',
+             'gallery_width' => 'full', 'img_gap' => 'small', 'img_hover' => 'none', 'footer' => 'centered', 'motion_style' => 'rise', 'space' => 'normal'] + $base),
         'still' => $preset('Weiß & still', 'Minimal und ruhig: weißer Grund, schwarze Schrift, Inter in leichter Stärke, eckige Bilder, viel Weißraum – die Bilder tragen das Design.',
             ['#1A1A1A', '#000000', '#FFFFFF', '#EDEDEA', '#111111', '#2E2E2E', '#5E5E5E', '#FFFFFF', '#F5F5F3', '#E6E6E3', '#141414'],
             ['#F0F0EE', '#FFFFFF', '#111111', '#2A2A28', '#F4F4F2', '#D4D4D0', '#A3A3A0', '#0F0F0F', '#191919', '#2A2A2A', '#1E1E1E'],

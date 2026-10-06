@@ -15,7 +15,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Kit „foto“: Fotografie und Portfolio
 - Neues Kit für Fotografinnen und Fotografen (Grundlage: breakpointlose Architektur von „fluid“): ruhige Navigation mit
   Aufklappmenü für Serien, Serien als eigene Seiten, Bilder tragen das Design. Sechs Vorlagen, hell und dunkel WCAG 2.2 AA
-  (`php kits/foto/tools/contrast.php`): Weiß & still (Standard), Dunkelkammer, Galerie-Grau, Editorial, Reportage, Analog.
+  (`php kits/foto/tools/contrast.php`): Bildstrom, Weiß & still (Standard), Dunkelkammer, Galerie-Grau, Editorial, Reportage, Analog.
 - Design-Gruppe „Bilder & Galerien“: Bildabstand, Ecken, Bildunterschriften (darunter, beim Zeigen, auf dem Bild, ausgeblendet)
   und ihre Schrift, Lightbox-Hintergrund (dunkel, hell, verschwommen – auch für die Kern-Galerie), Schwarzweiß (bis zum Zeigen,
   immer), Rahmen/Passepartout, Breite der Galerien (Inhaltsbreite, breiter, randlos), Wirkung verlinkter Bilder; dazu
@@ -28,7 +28,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Upload über die Mediathek (Alt-Text-Pflicht, Fortschritt je Datei, „Alle als Sammlung“), danach umsortieren (Ziehen oder
   Pfeile) und entfernen; Rückgängig über den Editor. Nutzt die vorgeschlagene Kern-Schnittstelle `CMSEditor.block(node)`;
   ohne sie lädt die Ablagefläche hoch und verweist auf die Seitenleiste.
-- Demo „Mara Beispiel (Demo)“ mit Startseite, „Arbeiten“ und drei Serien, „Über mich“, „Kontakt“; Bilder sind mit GD
+- Block „Bildstrom (Bento)“ – Mixed Media mit wenig Text: Bento (Kacheln klein, mittel, breit, hoch, groß, ganze Breite im
+  12er-Raster, dicht gepackt) oder Strom (große Momente im eigenen Format, links/Mitte/rechts, Textkacheln daneben). Hinter jeder
+  Kachel: Bild groß, ganze Galerie (Sammlung als Lightbox-Folge) oder eine Seite (Struktur-Browser); Quelle auch „Unterseiten“
+  oder „Sammlung“. Farbflächen um Bilder, stumme Video-Schleifen nur im sichtbaren Bereich (mit Pause), Einblenden beim Scrollen
+  (Aufsteigen, Einblenden, Wachsen, Aufdecken, Tiefe per Scroll-Timeline) nacheinander, endloses Nachladen bzw. „Mehr zeigen“,
+  Zähler „07 / 24“ als Scrollspy. Ohne JavaScript ist alles sichtbar; nie Bewegung bei „Bewegung reduzieren“.
+- Design → „Kopfbereich zurücknehmen“: beim Herunterscrollen ausblenden oder „ganz leise“ (ohne Fläche über den Bildern,
+  Differenz-Modus, mit „Minimal“ Menü links und Name in der Mitte). Neue Vorlage „Bildstrom“.
+- Demo „Mara Beispiel (Demo)“ mit Startseite (Bildstrom: Strom + endloses Bento), „Arbeiten“ und drei Serien, „Über mich“, „Kontakt“; Bilder sind mit GD
   erzeugte Platzhalter (Videos mit ffmpeg, falls vorhanden). `CMS_SITE=… php kits/foto/tools/demo.php [--force|--remove]`.
 
 ### Kit „galerie“: Kunstgalerie, Kunstverein, Projektraum

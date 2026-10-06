@@ -808,3 +808,130 @@ function foto_item_tools(string $field, int $i, int $pos, int $count): string
         . $b('remove', 'trash', __('Aus der Fotostrecke entfernen'))
         . '</span>';
 }
+
+// ------------------------------------------------------------------ Bildstrom (Bento, Mixed Media) – blocks/moments.php, js/moments.js
+
+/** Kachelgrößen des Bildstroms: Bento (Spalten × Zeilen im 12er-Raster) und Strom (Spalten) */
+const FOTO_MO_SIZES = ['s', 'm', 'wide', 'tall', 'l', 'full'];
+
+/**
+ * Kacheln des Bildstroms, vereinheitlicht – aus der Liste „tiles“ (von Hand), den Unterseiten einer Seite oder einer Sammlung.
+ * Hinter jeder Kachel kann etwas stecken: das Bild groß (zoom), eine ganze Galerie (Sammlung → Lightbox-Folge) oder eine Seite.
+ * @return list<array{m: ?array, size: string, tone: string, place: string, title: string, text: string, open: string,
+ *                    href: string, gallery: list<array>, path: ?string, i: int, video: bool}>
+ */
+function foto_moments(array $d): array
+{
+    $src = (string) ($d['source'] ?? 'manual');
+    $visual = fn(?array $m) => $m && (str_starts_with((string) $m['mime'], 'image/') || str_starts_with((string) $m['mime'], 'video/'));
+    $tile = fn(array $t) => $t + ['m' => null, 'size' => 'auto', 'tone' => 'none', 'place' => 'auto', 'title' => '', 'text' => '', 'open' => 'none',
+        'href' => '', 'gallery' => [], 'path' => null, 'i' => 0];
+    $out = [];
+    if ($src === 'collection') {
+        foreach (!empty($d['collection']) ? \Core\Media::all(['collection' => (int) $d['collection'], 'kind' => 'visual']) : [] as $m) {
+            $out[] = $tile(['m' => $m, 'title' => '', 'text' => trim(\Core\Media::title($m)), 'open' => 'zoom', 'i' => count($out)]);
+        }
+    } elseif ($src === 'pages') {
+        $parent = preg_match('~^page:(\d+)~', (string) ($d['parent'] ?? ''), $p) ? (int) $p[1] : (int) (app()->currentPage['id'] ?? 0);
+        $drafts = app()->auth->check();
+        $rows = $parent ? app()->db->fetchAll("SELECT * FROM pages WHERE parent_id = ? AND type = 'page'" . ($drafts ? '' : " AND status = 'published'") . ' ORDER BY sort, id', [$parent]) : [];
+        foreach ($rows as $row) {
+            if (!$drafts && \Core\PageAccess::restricted($row)) continue;
+            $meta = foto_series_meta($row);
+            $out[] = $tile(['m' => $meta['image'] ? media((int) $meta['image']) : null, 'title' => $meta['title'] !== '' ? $meta['title'] : (string) ($row['nav_title'] ?: $row['title']),
+                'text' => foto_meta_line([$meta['year'], $meta['category']]), 'open' => 'page', 'href' => \Core\Pages::url($row), 'i' => count($out)]);
+        }
+    } else {
+        foreach ((array) ($d['tiles'] ?? []) as $i => $it) {
+            if (!is_array($it)) continue;
+            $m = !empty($it['image']) ? \Core\Media::find((int) $it['image']) : null;
+            $m = $visual($m) ? $m : null;
+            $open = in_array($it['open'] ?? '', ['none', 'zoom', 'gallery', 'page'], true) ? (string) $it['open'] : 'zoom';
+            $title = trim((string) ($it['title'] ?? ''));
+            $text = trim((string) ($it['text'] ?? $it['caption'] ?? ''));
+            $href = '';
+            $gallery = [];
+            if ($open === 'page') {
+                $link = trim((string) ($it['link'] ?? ''));
+                $href = $link !== '' ? foto_link($link) : '';
+                // Seite ohne eigenes Bild: Titelbild und Titel der Zielseite (wie in der Serien-Übersicht)
+                // Kachel ohne Bild und ohne Titel: Titelbild und Titel der Zielseite; mit Titel bleibt sie eine Textkachel
+                if ($title === '' && preg_match('~^page:(\d+)$~', $link, $pm) && ($pg = app()->db->fetch('SELECT * FROM pages WHERE id = ?', [(int) $pm[1]]))) {
+                    $meta = foto_series_meta($pg);
+                    $m ??= $meta['image'] ? media((int) $meta['image']) : null;
+                    $title = $meta['title'] !== '' ? $meta['title'] : (string) ($pg['nav_title'] ?: $pg['title']);
+                }
+                if ($href === '' || $href === '#') $open = 'none';
+            } elseif ($open === 'gallery') {
+                foreach (!empty($it['collection']) ? \Core\Media::all(['collection' => (int) $it['collection'], 'kind' => 'visual']) : [] as $g) {
+                    if (!$m || (int) $g['id'] !== (int) $m['id']) $gallery[] = $g;
+                }
+                $m ??= array_shift($gallery);
+                if (!$gallery) $open = $m ? 'zoom' : 'none';
+            }
+            if ($open === 'zoom' && !$m) $open = 'none';
+            if (!$m && $title === '' && $text === '' && !is_editing()) continue;
+            $out[] = $tile([
+                'm' => $m, 'size' => in_array($it['size'] ?? '', FOTO_MO_SIZES, true) ? (string) $it['size'] : 'auto',
+                'tone' => in_array($it['tone'] ?? '', ['muted', 'accent', 'secondary', 'dark'], true) ? (string) $it['tone'] : 'none',
+                'place' => in_array($it['place'] ?? '', ['start', 'center', 'end'], true) ? (string) $it['place'] : 'auto',
+                'title' => $title, 'text' => $text, 'open' => $open, 'href' => $href, 'gallery' => $gallery, 'path' => "tiles.$i", 'i' => (int) $i,
+            ]);
+        }
+    }
+    // „Automatisch“: Größe aus dem Seitenverhältnis – mit etwas Abwechslung, damit ein Bento entsteht und keine Liste
+    $n = 0;
+    foreach ($out as &$t) {
+        $t['video'] = $t['m'] && str_starts_with((string) $t['m']['mime'], 'video/');
+        if ($t['size'] !== 'auto') continue;
+        if (!$t['m']) { $t['size'] = 's'; continue; }
+        $w = (int) ($t['m']['width'] ?? 0); $h = (int) ($t['m']['height'] ?? 0);
+        $r = $w > 0 && $h > 0 ? $w / $h : 1.5;
+        $n++;
+        $t['size'] = match (true) {
+            $r < .9 => $n % 5 === 0 ? 'tall' : 'm',
+            $r > 1.9 => 'wide',
+            $n % 7 === 1 => 'l',
+            $n % 3 === 0 => 's',
+            default => $r > 1.25 ? 'wide' : 'm',
+        };
+    }
+    return $out;
+}
+
+/**
+ * Lightbox-Link einer Datei (Bild oder Video) – für die Kachel selbst ($inner = Bild) oder versteckt als weiteres Bild der Galerie.
+ * Videos: <template> mit <video controls> + Untertitel/Transkript (wie foto_video); lightbox.js klont es.
+ */
+function foto_lb_link(array $m, string $caption, string $class, string $inner, bool $hidden = false): string
+{
+    $alt = \Core\Media::alt($m);
+    $attrs = ' class="' . e($class) . '" data-lb' . ($hidden ? ' hidden tabindex="-1"' : '') . ($alt !== '' ? ' data-alt="' . e($alt) . '"' : '');
+    if (str_starts_with((string) $m['mime'], 'video/')) {
+        static $n = 0;
+        $tpl = 'mo-v' . (++$n);
+        $poster = \Core\Media::posterFor($m);
+        $title = $caption !== '' ? $caption : trim(\Core\Media::title($m));
+        $video = '<video class="flb__video" controls playsinline preload="metadata"' . ($poster ? ' poster="' . e(\Core\Media::url($poster, 1600)) . '"' : '')
+            . ($title !== '' ? ' aria-label="' . e($title) . '"' : '') . '><source src="' . e(\Core\Media::url($m)) . '" type="' . e((string) $m['mime']) . '">'
+            . \Core\MediaTracks::trackTags($m) . '</video>' . \Core\MediaTracks::transcriptHtml($m);
+        return '<a href="' . e(\Core\Media::url($m)) . '"' . $attrs . ' data-lb-video="' . e($tpl) . '" data-w="' . (int) ($m['width'] ?? 0) . '" data-h="' . (int) ($m['height'] ?? 0) . '"'
+            . ($caption !== '' ? ' data-caption="' . e($caption) . '"' : '') . '>' . $inner . '</a><template id="' . e($tpl) . '">' . $video . '</template>';
+    }
+    return '<a' . \Core\MediaBlocks::lightboxLink($m, $caption) . $attrs . '>' . $inner . '</a>';
+}
+
+/**
+ * Bild bzw. stummes Video einer Kachel. Videos laufen als Schleife, sobald sie sichtbar sind (js/moments.js; nie bei
+ * „Bewegung reduzieren“ – dann bleibt das Vorschaubild stehen), ohne Ton; mit Pause-Schaltfläche neben dem Link.
+ */
+function foto_mo_media(array $m, string $sizes, string $ratio, bool $eager): string
+{
+    if (str_starts_with((string) $m['mime'], 'video/')) {
+        $poster = \Core\Media::posterFor($m);
+        $title = trim(\Core\Media::title($m));
+        return '<video class="mo__vid" muted loop playsinline preload="none" data-mo-loop' . ($poster ? ' poster="' . e(\Core\Media::url($poster, 1600)) . '"' : '')
+            . ($title !== '' ? ' aria-label="' . e($title) . '"' : ' aria-hidden="true"') . '><source src="' . e(\Core\Media::url($m)) . '" type="' . e((string) $m['mime']) . '"></video>';
+    }
+    return \Core\Media::pictureOf($m, $sizes, ($ratio !== '' ? ['ratio' => $ratio] : []) + ($eager ? ['eager' => true] : []));
+}
