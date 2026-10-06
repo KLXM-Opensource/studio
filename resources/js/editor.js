@@ -1275,6 +1275,23 @@ window.CMSEditor.swap = {
     };
   },
 };
+// Schnittstelle für Kit- und Erweiterungs-Skripte im Seiten-Editor (theme.php → 'editor_js'): Daten eines Blocks lesen und
+// ändern – z. B. Fotos per Drag & Drop anhängen (Kit „foto“). set() übernimmt die Werte (Pfade mit Punkten), markiert die Seite
+// als geändert, frischt die offene Seitenleiste auf und zeichnet die Vorschau neu (Ereignis cms:block-preview).
+window.CMSEditor.block = node => {
+  const tool = node instanceof Element ? toolFor(node) : null;
+  if (!tool) return null;
+  return {
+    type: tool.type, id: tool.blockId, def: tool.def,
+    get: path => structuredClone(path ? String(path).split('.').reduce((o, k) => o?.[k], tool.data) : tool.data),
+    set(changes) {
+      Object.entries(changes || {}).forEach(([p, v]) => setPath(tool.data, p, structuredClone(v)));
+      markDirty();
+      if (drawerFor === tool || (tool.isChild && drawerFor?.blockId === tool.blockId)) openDrawer(tool);
+      return tool.loadPreview();
+    },
+  };
+};
 window.CMSEditor.fit = {
   target(img) {
     const tool = toolFor(img);

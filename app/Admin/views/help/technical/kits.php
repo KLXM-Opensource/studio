@@ -300,6 +300,7 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     soll (Videoschleifen, Animationen), steht in <code>theme.php</code> unter <code>'editor_js' =&gt; ['js/b-loop.js', …]</code> – das Layout gibt es
     über <code>$extraJs</code> aus. Weil der Editor Blöcke nach dem Laden einsetzt und bei Änderungen neu zeichnet, richten diese Skripte
     Blöcke beim Ereignis <code>cms:block-preview</code> ein (<code>e.target</code> = Vorschau des Blocks).</p>
+  <p><b>Blockdaten aus Kit-Skripten ändern (<code>CMSEditor.block(node)</code>):</b> liefert für ein Element in einem Block <code>{ type, id, def, get(pfad?), set({ 'pfad.mit.punkten': wert }) }</code> oder <code>null</code>. <code>set()</code> schreibt die Werte in die Blockdaten, markiert die Seite als geändert (Rückgängig/Wiederholen inklusive), frischt eine offene Seitenleiste auf und zeichnet die Vorschau neu (Promise, danach <code>cms:block-preview</code>). Beispiel: Kit „foto“ (<code>js/editor-photos.js</code>) – Fotos und Videos per Drag &amp; Drop hochladen (<code>CMSMedia.Uploader</code>) und an die Liste eines Blocks anhängen, umsortieren, entfernen.</p>
   <p><b>Bedingte Felder (<code>show_if</code>):</b> Ein Feld erscheint nur, wenn andere Felder bestimmte Werte haben – auch in
     Wiederholgruppen (Felder derselben Zeile). <code>'show_if' =&gt; ['kind' =&gt; ['image', '']]</code> (mehrere Felder = alle müssen passen;
     <code>'*'</code> = ausgefüllt, <code>''</code> = leer), <code>'/variant'</code> = Feld des Blocks statt der eigenen Zeile, eine Liste
