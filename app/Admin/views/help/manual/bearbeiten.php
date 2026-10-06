@@ -115,6 +115,8 @@ $__sample = $vars['blocks_page'] ?? null;
     <li><b>Frühere „Reihen“:</b> Die alte Abschnitts-Option „Neben den vorigen Block stellen“ gibt es nicht mehr. Bestehende Reihen werden weiter dargestellt, bis die Technik sie umstellt (<code>layout:migrate-rows</code>); in der Seitenleiste lässt sich ein Block mit <b>Aus der Reihe lösen</b> wieder als eigener Abschnitt anzeigen.</li>
   </ul>
 
+  <h3 id="rueckgaengig">Rückgängig und Wiederholen</h3>
+  <p>Die Pfeile <b>↶ ↷</b> links neben „Abbrechen“ (oder <kbd>⌘</kbd>/<kbd>Strg</kbd> + <kbd>Z</kbd>, Wiederholen mit <kbd>⇧</kbd> + <kbd>⌘</kbd> + <kbd>Z</kbd> bzw. <kbd>Strg</kbd> + <kbd>Y</kbd>) nehmen die letzten Änderungen dieser Bearbeitung zurück – bis zu 50 Schritte: Texte, Felder der Seitenleiste, Abschnitts-Einstellungen, eingefügte, gelöschte und verschobene Blöcke. Mehrere getippte Wörter zählen als ein Schritt. Während Sie in einem Text schreiben, gilt dort das gewohnte Rückgängig des Browsers. Der Verlauf gilt bis zum Verlassen der Seite; ältere Stände holen Sie über <b>Versionen</b> zurück.</p>
   <h3>Speichern, Veröffentlichen, Versionen</h3>
   <ol class="doc-steps">
     <li><b>Speichern</b> (oder <kbd>Strg</kbd>/<kbd>⌘</kbd> + <kbd>S</kbd>) sichert einen <b>Entwurf</b>. Besucher sehen weiterhin den alten Stand; Sie sehen den Entwurf, solange Sie angemeldet sind. Der Knopf zeigt danach „Gespeichert ✓“, der Status „Geändert – nicht veröffentlicht“.</li>

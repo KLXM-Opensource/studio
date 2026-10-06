@@ -550,3 +550,10 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 }
 .cms-drawer .media-field-preview{line-height:1.4}
 .cms-drawer .media-field-preview>span,.cms-drawer .media-field-preview>small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Rückgängig / Wiederholen im Seiten-Editor (editor.js → History) */
+.cms-undo{display:inline-flex;gap:2px}
+.cms-bar[data-bar] .cms-btn--sq{min-width:34px;padding-inline:8px;display:inline-grid;place-items:center}
+.cms-bar[data-bar] .cms-btn--sq svg{width:18px;height:18px}
+.cms-bar[data-bar] .cms-redo svg{transform:scaleX(-1)}
+.cms-bar[data-bar] .cms-btn--sq[aria-disabled="true"]{opacity:.4;cursor:default}

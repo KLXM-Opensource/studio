@@ -66,6 +66,7 @@ const tunes = new Map();      // blockId → Tune-Instanz
 const initialTunes = Object.fromEntries((initial.blocks || []).map(b => [b.id, b.tunes?.section || {}]));
 const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false };
 let editor, dirty = false, drawerFor = null, drawerSnap = null;
+let History = null;   // Rückgängig/Wiederholen (unten)
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const COLLAPSE_KEY = 'cms-collapsed-' + cfg.page.id;
 const collapsed = new Set(store.get(COLLAPSE_KEY, []));
@@ -184,7 +185,7 @@ function fieldValue(n, rich) {
 // Werkzeugleiste (_bar.js): EIN Status-Chip, „Gespeichert ✓“, Live-Region, Abbrechen
 const Bar = CMSAdmin.bar;
 const BT = k => Bar?.texts?.[k] || { close: 'Schließen', cancel: 'Abbrechen', done: 'Fertig' }[k] || k;
-const markDirty = () => { const was = dirty; dirty = true; if (!was) Bar?.state('dirty'); requestAnimationFrame(blankState); };
+const markDirty = () => { const was = dirty; dirty = true; if (!was) Bar?.state('dirty'); requestAnimationFrame(blankState); History?.touch(); };
 
 /*
  * Leere Seite: Editor.js braucht immer einen Block und legt dafür einen leeren Standardblock (Text) an – auch nach dem
@@ -1689,6 +1690,93 @@ async function save(publish = false) {
     return false;
   }
 }
+// ------------------------------------------------------------------ Rückgängig / Wiederholen
+/*
+ * Verlauf der Seite im Browser (nicht gespeichert, max. 50 Schritte): nach jeder Änderung (markDirty, gebündelt nach 600 ms –
+ * Tippen ergibt einen Schritt) ein Stand aller Blöcke (Daten + Abschnitts-Einstellungen). Rückgängig zeichnet den Editor aus dem
+ * Stand neu (editor.render): Blöcke mit unveränderten Daten behalten ihre Vorschau, nur geänderte holt der Server neu.
+ * Tasten: ⌘/Strg+Z, ⇧⌘Z bzw. Strg+Y – nicht in Textfeldern/direkt bearbeitetem Text (dort gilt das Rückgängig des Browsers).
+ * Knöpfe in der Werkzeugleiste: [data-editor-undo], [data-editor-redo].
+ */
+History = (() => {
+  const MAX = 50;
+  let past = [], future = [], cur = null, timer = 0, busy = false, ready = false;
+  const ub = S.uiAll('[data-editor-undo]'), rb = S.uiAll('[data-editor-redo]');
+  const key = s => JSON.stringify(s.map(b => [b.id, b.type, b.data, b.tunes]));
+  const snap = async () => {
+    const out = await editor.save();
+    return out.blocks.map(b => ({ id: b.id, type: b.type, data: structuredClone(b.data), tunes: { section: structuredClone(tunes.get(b.id)?.data || b.tunes?.section || {}) } }));
+  };
+  const buttons = () => {
+    ub.forEach(b => b.setAttribute('aria-disabled', past.length ? 'false' : 'true'));
+    rb.forEach(b => b.setAttribute('aria-disabled', future.length ? 'false' : 'true'));
+  };
+  const record = async () => {
+    clearTimeout(timer); timer = 0;
+    if (busy || !ready) return;
+    const s = await snap();
+    if (cur && key(s) === key(cur)) return;
+    if (cur) { past.push(cur); if (past.length > MAX) past.shift(); }
+    cur = s; future = [];
+    buttons();
+  };
+  const apply = async (target) => {
+    busy = true;
+    try {
+      if (drawerFor) closeDrawer();
+      // Vorschau unveränderter Blöcke übernehmen, geänderte neu laden (kein Eintrag in previews → loadPreview)
+      const now = new Map((cur || []).map(b => [b.id, b]));
+      for (const b of target) {
+        const was = now.get(b.id);
+        const html = tools.get(b.id)?.el?.querySelector('.cms-block__preview')?.innerHTML;
+        if (was && html != null && JSON.stringify(was.data) === JSON.stringify(b.data) && was.type === b.type) previews[b.id] = html;
+        else delete previews[b.id];
+        initialTunes[b.id] = structuredClone(b.tunes.section || {});
+      }
+      tools.clear(); tunes.clear();
+      await editor.render({ blocks: target.map(b => ({ id: b.id, type: b.type, data: structuredClone(b.data), tunes: structuredClone(b.tunes) })) });
+      cur = target;
+      dirty = true; Bar?.state('dirty');
+      requestAnimationFrame(() => { refreshMoveButtons(); blankState(); });
+    } finally {
+      setTimeout(() => { busy = false; }, 0);
+      buttons();
+    }
+  };
+  const undo = async () => {
+    if (timer) await record();
+    if (!past.length || busy) return;
+    future.push(cur);
+    await apply(past.pop());
+    editorStatus(CMSAdmin.t('Rückgängig gemacht – noch nicht gespeichert.'));
+  };
+  const redo = async () => {
+    if (!future.length || busy) return;
+    past.push(cur);
+    await apply(future.pop());
+    editorStatus(CMSAdmin.t('Wiederhergestellt – noch nicht gespeichert.'));
+  };
+  ub.forEach(b => b.addEventListener('click', () => b.getAttribute('aria-disabled') !== 'true' && undo()));
+  rb.forEach(b => b.addEventListener('click', () => b.getAttribute('aria-disabled') !== 'true' && redo()));
+  S.uiAll('[data-editor-history]').forEach(g => { g.hidden = false; });
+  d.addEventListener('keydown', e => {
+    if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+    const k = e.key.toLowerCase();
+    const isUndo = k === 'z' && !e.shiftKey, isRedo = (k === 'z' && e.shiftKey) || (k === 'y' && e.ctrlKey && !e.metaKey);
+    if (!isUndo && !isRedo) return;
+    const tgt = e.composedPath()[0];
+    if (tgt && (tgt.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName || ''))) return;   // Text: Rückgängig des Browsers
+    if (S.openDialog?.() || d.body.classList.contains('has-epanel')) return;
+    e.preventDefault(); e.stopPropagation();
+    isUndo ? undo() : redo();
+  }, true);   // Erfassungsphase: Editor.js hält Tasten aus Blöcken sonst zurück
+  // Ausgangsstand, sobald Editor.js bereit ist (danach zählt jede Änderung)
+  editor.isReady.then(() => requestAnimationFrame(async () => { cur = await snap(); ready = true; buttons(); }));
+  return {
+    touch() { if (busy || !ready) return; clearTimeout(timer); timer = setTimeout(record, 600); },
+  };
+})();
+
 // Vorschau: ungespeicherte Änderungen vorher als Entwurf sichern, damit die Vorschau sie zeigt
 S.ui('[data-editor-preview]')?.addEventListener('click', async e => {
   e.preventDefault();

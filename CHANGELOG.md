@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seiten-Editor: Rückgängig und Wiederholen
+- Knöpfe in der Werkzeugleiste und ⌘/Strg+Z, ⇧⌘Z bzw. Strg+Y (außerhalb von Textfeldern; im Text gilt das Rückgängig des Browsers):
+  bis zu 50 Schritte je Bearbeitung – Texte, Felder der Seitenleiste, Abschnitts-Einstellungen, Einfügen, Löschen, Verschieben.
+  Tippen wird zu einem Schritt gebündelt; nur geänderte Blöcke holen ihre Vorschau neu.
+
 ### Geschützte Bereiche: Seiten, Datentabellen und Medien (Grundlage für Mitgliederbereiche)
 - `Core\PageAccess` + `Extension::pageAccess()`: Erweiterungen schützen Seiten (mit Unterseiten oder einzeln), Datentabellen und
   einzelne Einträge/Felder. Der Core prüft vor dem Seiten-Cache, cacht geschützte Seiten nie (private, no-store) und lässt sie

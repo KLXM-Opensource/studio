@@ -114,6 +114,10 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
     </span>
     <?php elseif ($edit && $b['hasPage']): ?>
     <span class="cms-bar__grp cms-bar__edit" data-bar-group="edit">
+      <span class="cms-undo" role="group" aria-label="<?= e(__('Verlauf')) ?>" data-editor-history hidden>
+        <button type="button" class="cms-btn cms-btn--ghost cms-btn--sq" data-editor-undo aria-disabled="true" aria-keyshortcuts="Meta+Z Control+Z" aria-label="<?= e(__('Rückgängig')) ?>" title="<?= e(__('Rückgängig')) ?> (⌘/Strg+Z)"><?= icon('arrow-counter-clockwise') ?></button>
+        <button type="button" class="cms-btn cms-btn--ghost cms-btn--sq cms-redo" data-editor-redo aria-disabled="true" aria-keyshortcuts="Meta+Shift+Z Control+Y" aria-label="<?= e(__('Wiederholen')) ?>" title="<?= e(__('Wiederholen')) ?> (⇧⌘Z / Strg+Y)"><?= icon('arrow-counter-clockwise') ?></button>
+      </span>
       <button type="button" class="cms-btn cms-btn--ghost" data-bar-cancel aria-keyshortcuts="Escape"><?= e(__('Abbrechen')) ?></button>
       <?php if ($b['canPublish']): ?>
         <button type="button" class="cms-btn" data-editor-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S"><?= e(__('Speichern')) ?></button>

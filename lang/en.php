@@ -6153,4 +6153,7 @@ return [
     'Gewählter Stand' => 'Selected state',
     'Geschützt' => 'Protected',
     'Geschützt: Dateien nur für angemeldete Personen (z. B. Mitgliederbereich) – nicht öffentlich erreichbar, nicht in der Suche' => 'Protected: files only for logged-in people (e.g. members area) – not publicly reachable, not in search',
+    'Rückgängig' => 'Undo',
+    'Rückgängig gemacht – noch nicht gespeichert.' => 'Undone – not saved yet.',
+    'Wiederhergestellt – noch nicht gespeichert.' => 'Redone – not saved yet.',
 ];
