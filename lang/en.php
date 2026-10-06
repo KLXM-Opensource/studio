@@ -6151,4 +6151,6 @@ return [
     'Gegenüberstellen' => 'Side by side',
     'Jetzt (noch nie veröffentlicht)' => 'Now (never published)',
     'Gewählter Stand' => 'Selected state',
+    'Geschützt' => 'Protected',
+    'Geschützt: Dateien nur für angemeldete Personen (z. B. Mitgliederbereich) – nicht öffentlich erreichbar, nicht in der Suche' => 'Protected: files only for logged-in people (e.g. members area) – not publicly reachable, not in search',
 ];

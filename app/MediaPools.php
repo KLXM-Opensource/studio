@@ -15,6 +15,12 @@ namespace Core;
  * alle anderen sehen den Pool und verwenden die Dateien. Eine verwendete Pool-Datei bekommt auf der
  * Website einen schlanken Verweis-Eintrag (media.pool_ref) mit eigener ID – Blöcke, Felder und Themes
  * funktionieren unverändert, und Änderungen im Pool wirken sofort überall.
+ *
+ * Geschützter Pool (pool.json 'protected' => true, z. B. für einen Mitgliederbereich): Dateien samt aller Größen, Zuschnitte,
+ * Bearbeitungen und Video-Vorschaubilder liegen außerhalb von public/ in storage/pools/{key}/files und haben die Adresse
+ * /geschuetzt/{key}/… – ausgeliefert nur von Core\Http\Controllers\ProtectedMediaController nach Prüfung: angemeldete Redaktion
+ * oder eine Erweiterung erlaubt es (Extension::mediaAccess, z. B. angemeldete Mitglieder). Keine Unschärfe-Kopien (ImageFit),
+ * nicht im Suchindex, PDF-Ansicht nur mit Zugriff. Ob ein Pool geschützt ist, wird beim Anlegen festgelegt.
  */
 final class MediaPools
 {
@@ -26,14 +32,33 @@ final class MediaPools
         return ROOT . '/storage/pools' . ($key !== null ? '/' . $key : '');
     }
 
+    public const PROTECTED_PATH = '/geschuetzt';
+
     public static function mediaDir(string $key): string
     {
-        return ROOT . '/public/pools/' . $key;
+        return self::isProtected($key) ? self::dir($key) . '/files' : ROOT . '/public/pools/' . $key;
     }
 
     public static function url(string $key, string $rel): string
     {
-        return base_path() . '/pools/' . $key . '/' . ltrim($rel, '/');
+        return base_path() . (self::isProtected($key) ? self::PROTECTED_PATH : '/pools') . '/' . $key . '/' . ltrim($rel, '/');
+    }
+
+    /** Geschützter Pool? (pool.json 'protected') – je Anfrage gemerkt */
+    public static function isProtected(?string $key): bool
+    {
+        static $memo = [];
+        if ($key === null || $key === '') return false;
+        return $memo[$key] ??= !empty(self::meta($key)['protected']);
+    }
+
+    /** Gehört eine Mediendatei (Website-Verweis mit pool_ref oder Pool-Zeile mit _pool) zu einem geschützten Pool? */
+    public static function mediaProtected(?array $m): bool
+    {
+        if (!$m) return false;
+        $key = (string) ($m['_pool'] ?? '');
+        if ($key === '' && !empty($m['pool_ref'])) $key = (string) strtok((string) $m['pool_ref'], ':');
+        return self::isProtected($key);
     }
 
     /** Alle Pools der Installation [key => Bezeichnung] */
@@ -228,8 +253,8 @@ final class MediaPools
             throw new \InvalidArgumentException("Pool „{$key}“ gibt es schon.");
         }
         @mkdir(self::dir($key), 0770, true);
-        @mkdir(self::mediaDir($key), 0775, true);
         self::saveMeta($key, ['label' => mb_substr(trim(strip_tags($label)), 0, 80) ?: $key, 'sites' => array_values($sites), 'created' => date('c')] + $extra);
+        @mkdir(self::mediaDir($key), !empty($extra['protected']) ? 0770 : 0775, true);   // geschützt: storage/pools/{key}/files
         self::db($key);
     }
 

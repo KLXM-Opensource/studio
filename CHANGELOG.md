@@ -6,6 +6,25 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Geschützte Bereiche: Seiten, Datentabellen und Medien (Grundlage für Mitgliederbereiche)
+- `Core\PageAccess` + `Extension::pageAccess()`: Erweiterungen schützen Seiten (mit Unterseiten oder einzeln), Datentabellen und
+  einzelne Einträge/Felder. Der Core prüft vor dem Seiten-Cache, cacht geschützte Seiten nie (private, no-store) und lässt sie
+  aus Menü, Sitemap, llms.txt, Suchindex, Besucher-Chat und Live-Blöcken weg. Einträge geschützter Tabellen erscheinen auf
+  öffentlichen Seiten nur, soweit eine Erweiterung sie freigibt.
+- Geschützte Medien-Pools: Dateien samt aller Größen, Zuschnitte und Vorschaubilder außerhalb von `public/`, Adresse
+  `/geschuetzt/{pool}/…`, Auslieferung nur nach Prüfung (Redaktion oder `Extension::mediaAccess`), mit Byte-Bereichen für Videos;
+  keine Unschärfe-Kopien, nicht im Suchindex, kein OG-Bild, PDF-Ansicht nur mit Zugriff. Anlegen: Grundeinstellungen → Geteilte
+  Medien → „Geschützt“.
+- `Core\Passkeys` mit eigener Tabelle und eigenem Sitzungsplatz (für Konten von Erweiterungen, z. B. Mitglieder).
+- Erweiterung „members“ (eigenes Paket, KLXM-Opensource/studio-members): Mitgliederbereich mit Anmeldung per Passwort, Passkey oder
+  Anmelde-Link, Einladungen und Anträgen, Gruppen, Profilen als Datentabelle (Mitglieder wählen je Feld die Sichtbarkeit),
+  Profilfoto, Bestätigung vor Änderungen an den Zugangsdaten.
+
+### Videos im Format des Videos
+- Der Rahmen eines Videos (Kern-Fragment `video-embed`, alle Kits) folgt dem echten Seitenverhältnis – YouTube/Vimeo laut Anbieter
+  (oEmbed), eigene Videos laut Mediathek. Keine schwarzen Balken mehr, wenn das eingestellte Format nicht passt; die Einstellung
+  des Blocks gilt nur noch, wenn das Format unbekannt ist.
+
 ### Kit „fluid“: mehr Gestaltung – zweite Markenfarbe, Infoleiste, Übergänge, sechs neue Vorlagen
 - Zweite Markenfarbe (`secondary`/`on_secondary`, `--f-b`) mit Einsatzbereich (Abschnitte, Details, Buttons, überall); Fläche
   „Zweite Markenfarbe“ für Abschnitte. „Zweitfarbe“ heißt jetzt „Hervorhebung (Flächen, Marker)“.

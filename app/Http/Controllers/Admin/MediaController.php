@@ -120,7 +120,7 @@ final class MediaController extends AdminController
             // Weitere Inhaltssprachen für Alt-Text/Titel-Übersetzungen
             'languages' => (object) array_diff_key(\Core\Lang::all(), [\Core\Lang::default() => 1]),
             // Geteilte Medien: verfügbare Pools, aktueller Pool, darf die Person dort ändern?
-            'pools' => array_map(fn($k, $l) => ['key' => $k, 'label' => $l, 'edit' => \Core\MediaPools::canEdit($k)], array_keys(\Core\MediaPools::forSite()), \Core\MediaPools::forSite()),
+            'pools' => array_map(fn($k, $l) => ['key' => $k, 'label' => $l, 'edit' => \Core\MediaPools::canEdit($k), 'protected' => \Core\MediaPools::isProtected($k)], array_keys(\Core\MediaPools::forSite()), \Core\MediaPools::forSite()),
             'pool' => Media::pool(),
             'can_edit' => Media::pool() === null ? can('media.upload') : \Core\MediaPools::canEdit(Media::pool()),
             'can_share' => (bool) array_filter(array_keys(\Core\MediaPools::forSite()), [\Core\MediaPools::class, 'canEdit']),

@@ -46,7 +46,7 @@ final class PublicPaths
      * Zentrale Liste für Seiten (PageController), KI-Generator, API und Datentabellen (die ihre eigenen Routen ergänzen).
      * Solange ein Server noch nicht umgestellt ist, sperrt Pages::slugTaken() zusätzlich jeden vorhandenen Ordner in public/.
      */
-    public const RESERVED_SLUGS = ['admin', 'api', 'anfrage', 'assets', 'media', 'pools', 'sites', 'sitemap-xml', 'robots-txt', 'llms-txt', 'vcard', 'vcard-vcf', 'home', 'index-php'];
+    public const RESERVED_SLUGS = ['admin', 'api', 'anfrage', 'assets', 'media', 'pools', 'sites', 'geschuetzt', 'sitemap-xml', 'robots-txt', 'llms-txt', 'vcard', 'vcard-vcf', 'home', 'index-php'];
 
     /** Gesperrte Adressen ganz oben: die feste Liste plus jeder Ordner/jede Datei, die (noch) in public/ liegt */
     public static function reservedSlugs(array $extra = []): array

@@ -243,6 +243,8 @@ final class Pages
             foreach ($nodes as $n) {
                 $p = $n['page'];
                 if (!$p['menu'] || $p['type'] !== 'page' || (!$includeDrafts && $p['status'] !== 'published')) continue;
+                // Geschützter Bereich (Core\PageAccess): für Besucher nicht im Menü – das Menü steht im Seiten-Cache, gilt also für alle
+                if (!app()->auth->check() && PageAccess::restricted($p)) continue;
                 // Angemeldet: neue, noch nie veröffentlichte Seiten erscheinen (Vorschau, 'draft' => true); offline gestellte
                 // (schon einmal veröffentlicht) nicht – sie sollen aus dem Menü verschwinden, z. B. nach dem Zusammenlegen
                 if ($p['status'] !== 'published' && $p['content_published'] !== null) continue;

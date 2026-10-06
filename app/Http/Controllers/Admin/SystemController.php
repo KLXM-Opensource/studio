@@ -134,7 +134,7 @@ final class SystemController extends AdminController
         $this->poolAuth($r);
         $key = strtolower(trim($r->str('key')));
         try {
-            \Core\MediaPools::create($key, $r->str('label') ?: $key, (array) ($r->post['sites'] ?? [site()->key]));
+            \Core\MediaPools::create($key, $r->str('label') ?: $key, (array) ($r->post['sites'] ?? [site()->key]), !empty($r->post['protected']) ? ['protected' => true] : []);
         } catch (\InvalidArgumentException $e) {
             return $this->back('/admin/system#pools', 'error', $e->getMessage());
         }

@@ -31,12 +31,20 @@ final class PdfController
         if (!$m || $m['mime'] !== 'application/pdf') {
             throw new HttpException(404);
         }
+        // Geschützter Pool: Ansicht nur mit Zugriff wie die Datei selbst (Core\Http\Controllers\ProtectedMediaController)
+        $private = \Core\MediaPools::mediaProtected($m);
+        if ($private && !app()->auth->check()) {
+            $key = (string) ($m['_pool'] ?? strtok((string) $m['pool_ref'], ':'));
+            $ok = \Core\Extensions::mediaAccess(['pool' => $key, 'path' => (string) $m['file']], $r);
+            if ($ok instanceof Response) return $ok->header('Cache-Control', 'private, no-store');
+            if ($ok !== true) throw new HttpException(404);
+        }
         $html = Theme::capture(ROOT . '/app/Views/pdf-viewer.php', [
             'm' => $m, 'embed' => isset($r->query['embed']),
             'back' => isset($r->query['embed']) ? null : url('/'),
         ]);
         return (new Response($html))
-            ->header('Cache-Control', 'public, max-age=300')
+            ->header('Cache-Control', $private ? 'private, no-store' : 'public, max-age=300')
             ->header('X-Robots-Tag', 'noindex')
             ->header('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",

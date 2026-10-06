@@ -24,6 +24,8 @@ final class Passkeys
     public const TTL = 300;
     public const MAX_PER_USER = 20;
     public const NAME_MAX = 60;
+    /** Tabelle der Konten der Verwaltung; Erweiterungen (z. B. Mitglieder) übergeben ihre eigene – nie dieselbe */
+    public const TABLE = 'user_passkeys';
 
     /** Bekannte Anbieter (AAGUID → Name) – nur als Namensvorschlag */
     private const AAGUIDS = [
@@ -45,16 +47,17 @@ final class Passkeys
     // ================================================================= Tabelle
 
     /** Tabelle anlegen (Database::migrate für jede Website, Network::ensureSchema für die Netzwerk-Datenbank) – idempotent */
-    public static function ensureTable(Database $db): void
+    public static function ensureTable(Database $db, string $table = self::TABLE): void
     {
+        $table = self::tbl($table);
         $my = $db->driver === 'mysql';
         $pk = $my ? 'INT UNSIGNED AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
         $tail = $my ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '';
-        $db->pdo->exec("CREATE TABLE IF NOT EXISTS user_passkeys (id $pk, user_id INT NOT NULL, rp_id VARCHAR(191) NOT NULL,
+        $db->pdo->exec("CREATE TABLE IF NOT EXISTS $table (id $pk, user_id INT NOT NULL, rp_id VARCHAR(191) NOT NULL,
             cred_hash VARCHAR(64) NOT NULL UNIQUE, credential_id TEXT NOT NULL, public_key TEXT NOT NULL, sign_count INT NOT NULL DEFAULT 0,
             transports VARCHAR(120) NULL, aaguid VARCHAR(36) NULL, name VARCHAR(191) NOT NULL, uv INT NOT NULL DEFAULT 0,
             backup INT NOT NULL DEFAULT 0, created_at VARCHAR(25) NULL, last_used_at VARCHAR(25) NULL)$tail");
-        if (!$my) $db->pdo->exec('CREATE INDEX IF NOT EXISTS user_passkeys_user ON user_passkeys (user_id, rp_id)');
+        if (!$my) $db->pdo->exec("CREATE INDEX IF NOT EXISTS {$table}_user ON $table (user_id, rp_id)");
     }
 
     // ================================================================= Adresse, Kennungen
@@ -101,6 +104,20 @@ final class Passkeys
         return $bin === false ? null : $bin;
     }
 
+    /** Tabellenname prüfen (nur Buchstaben, Ziffern, Unterstrich – er steht im SQL) */
+    private static function tbl(string $table): string
+    {
+        if (!preg_match('~^[a-z][a-z0-9_]{0,62}$~', $table)) throw new \InvalidArgumentException('Passkeys: ungültige Tabelle');
+        return $table;
+    }
+
+    /** Schlüssel der Challenge in der Sitzung (Zweck bzw. Registrierung) */
+    private static function slot(string $slot): string
+    {
+        if (!preg_match('~^[a-z0-9_]{1,31}$~', $slot)) throw new \InvalidArgumentException('Passkeys: ungültiger Zweck');
+        return $slot;
+    }
+
     public static function credHash(string $rawId): string
     {
         return hash('sha256', $rawId);
@@ -109,9 +126,9 @@ final class Passkeys
     // ================================================================= Verwaltung
 
     /** @return list<array> Passkeys eines Kontos (optional nur einer Domain), neueste zuerst */
-    public static function list(Database $db, int $uid, ?string $rpId = null): array
+    public static function list(Database $db, int $uid, ?string $rpId = null, string $table = self::TABLE): array
     {
-        $sql = 'SELECT id, rp_id, name, aaguid, transports, backup, uv, created_at, last_used_at FROM user_passkeys WHERE user_id = ?';
+        $sql = 'SELECT id, rp_id, name, aaguid, transports, backup, uv, created_at, last_used_at FROM ' . self::tbl($table) . ' WHERE user_id = ?';
         $args = [$uid];
         if ($rpId !== null) {
             $sql .= ' AND rp_id = ?';
@@ -124,45 +141,46 @@ final class Passkeys
         }
     }
 
-    public static function count(Database $db, int $uid, ?string $rpId = null): int
+    public static function count(Database $db, int $uid, ?string $rpId = null, string $table = self::TABLE): int
     {
+        $t = self::tbl($table);
         try {
             return $rpId === null
-                ? (int) $db->fetchValue('SELECT COUNT(*) FROM user_passkeys WHERE user_id = ?', [$uid])
-                : (int) $db->fetchValue('SELECT COUNT(*) FROM user_passkeys WHERE user_id = ? AND rp_id = ?', [$uid, $rpId]);
+                ? (int) $db->fetchValue("SELECT COUNT(*) FROM $t WHERE user_id = ?", [$uid])
+                : (int) $db->fetchValue("SELECT COUNT(*) FROM $t WHERE user_id = ? AND rp_id = ?", [$uid, $rpId]);
         } catch (\Throwable) {
             return 0;
         }
     }
 
     /** @return array<int,int> Anzahl je Konto (Benutzerliste) */
-    public static function counts(Database $db): array
+    public static function counts(Database $db, string $table = self::TABLE): array
     {
         try {
             $out = [];
-            foreach ($db->fetchAll('SELECT user_id, COUNT(*) AS n FROM user_passkeys GROUP BY user_id') as $r) $out[(int) $r['user_id']] = (int) $r['n'];
+            foreach ($db->fetchAll('SELECT user_id, COUNT(*) AS n FROM ' . self::tbl($table) . ' GROUP BY user_id') as $r) $out[(int) $r['user_id']] = (int) $r['n'];
             return $out;
         } catch (\Throwable) {
             return [];
         }
     }
 
-    public static function rename(Database $db, int $uid, int $id, string $name): bool
+    public static function rename(Database $db, int $uid, int $id, string $name, string $table = self::TABLE): bool
     {
         $name = self::cleanName($name);
         if ($name === '') return false;
-        return $db->query('UPDATE user_passkeys SET name = ? WHERE id = ? AND user_id = ?', [$name, $id, $uid])->rowCount() > 0;
+        return $db->query('UPDATE ' . self::tbl($table) . ' SET name = ? WHERE id = ? AND user_id = ?', [$name, $id, $uid])->rowCount() > 0;
     }
 
-    public static function delete(Database $db, int $uid, int $id): bool
+    public static function delete(Database $db, int $uid, int $id, string $table = self::TABLE): bool
     {
-        return $db->query('DELETE FROM user_passkeys WHERE id = ? AND user_id = ?', [$id, $uid])->rowCount() > 0;
+        return $db->query('DELETE FROM ' . self::tbl($table) . ' WHERE id = ? AND user_id = ?', [$id, $uid])->rowCount() > 0;
     }
 
-    public static function deleteAll(Database $db, int $uid): int
+    public static function deleteAll(Database $db, int $uid, string $table = self::TABLE): int
     {
         try {
-            return $db->query('DELETE FROM user_passkeys WHERE user_id = ?', [$uid])->rowCount();
+            return $db->query('DELETE FROM ' . self::tbl($table) . ' WHERE user_id = ?', [$uid])->rowCount();
         } catch (\Throwable) {
             return 0;
         }
@@ -186,10 +204,10 @@ final class Passkeys
      * Optionen für navigator.credentials.create() (JSON, Binärwerte base64url). Challenge in der Sitzung.
      * @param list<string> $exclude vorhandene Kennungen (base64url) – kein zweites Mal derselbe Authenticator
      */
-    public static function creationOptions(string $handle, string $userName, string $displayName, array $exclude, array $pending = []): array
+    public static function creationOptions(string $handle, string $userName, string $displayName, array $exclude, array $pending = [], string $slot = 'reg'): array
     {
         $challenge = random_bytes(32);
-        app()->session->set('_pk_reg', ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'h' => self::b64($handle)] + $pending);
+        app()->session->set('_pk_' . self::slot($slot), ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'h' => self::b64($handle)] + $pending);
         $rpName = trim(site_name()) ?: CMS_NAME;
         return [
             'rp' => ['name' => mb_substr($rpName, 0, 64), 'id' => self::rpId()],
@@ -206,9 +224,9 @@ final class Passkeys
     }
 
     /** Offene Registrierung (Sitzung) – z. B. um den gewünschten Namen zu lesen */
-    public static function pending(): ?array
+    public static function pending(string $slot = 'reg'): ?array
     {
-        $p = app()->session->get('_pk_reg');
+        $p = app()->session->get('_pk_' . self::slot($slot));
         return is_array($p) && time() - (int) ($p['at'] ?? 0) <= self::TTL ? $p : null;
     }
 
@@ -216,10 +234,11 @@ final class Passkeys
      * Antwort von navigator.credentials.create() prüfen und speichern.
      * @return array|string gespeicherte Zeile oder Fehlertext
      */
-    public static function register(Database $db, int $uid, array $in, string $name): array|string
+    public static function register(Database $db, int $uid, array $in, string $name, string $table = self::TABLE, string $slot = 'reg'): array|string
     {
-        $p = self::pending();
-        app()->session->forget('_pk_reg');
+        $t = self::tbl($table);
+        $p = self::pending($slot);
+        app()->session->forget('_pk_' . self::slot($slot));
         if (!$p || ($p['rp'] ?? '') !== self::rpId()) return __('Die Anfrage ist abgelaufen. Bitte erneut versuchen.');
         $resp = is_array($in['response'] ?? null) ? $in['response'] : [];
         $rawId = self::unb64($in['rawId'] ?? $in['id'] ?? null);
@@ -246,12 +265,12 @@ final class Passkeys
             return __('Die Antwort des Geräts konnte nicht gelesen werden.');
         }
         if (!hash_equals($credId, $rawId)) return __('Die Antwort des Geräts ist unvollständig.');
-        if (self::count($db, $uid) >= self::MAX_PER_USER) return __('Höchstens {n} Passkeys je Konto.', ['n' => self::MAX_PER_USER]);
+        if (self::count($db, $uid, null, $t) >= self::MAX_PER_USER) return __('Höchstens {n} Passkeys je Konto.', ['n' => self::MAX_PER_USER]);
         $hash = self::credHash($credId);
-        if ($db->fetchValue('SELECT COUNT(*) FROM user_passkeys WHERE cred_hash = ?', [$hash])) return __('Dieser Passkey ist bereits eingerichtet.');
+        if ($db->fetchValue("SELECT COUNT(*) FROM $t WHERE cred_hash = ?", [$hash])) return __('Dieser Passkey ist bereits eingerichtet.');
         $transports = array_values(array_intersect((array) ($resp['transports'] ?? []), ['usb', 'nfc', 'ble', 'hybrid', 'internal', 'smart-card']));
         $name = self::cleanName($name) ?: (self::providerName($aaguid) ?? __('Passkey'));
-        $id = $db->insert('user_passkeys', ['user_id' => $uid, 'rp_id' => self::rpId(), 'cred_hash' => $hash, 'credential_id' => self::b64($credId),
+        $id = $db->insert($t, ['user_id' => $uid, 'rp_id' => self::rpId(), 'cred_hash' => $hash, 'credential_id' => self::b64($credId),
             'public_key' => $pem, 'sign_count' => $count, 'transports' => implode(',', $transports) ?: null, 'aaguid' => $aaguid,
             'name' => $name, 'uv' => $uv ? 1 : 0, 'backup' => $backup ? 1 : 0, 'created_at' => now()]);
         return ['id' => $id, 'name' => $name, 'aaguid' => $aaguid];
@@ -266,7 +285,7 @@ final class Passkeys
     public static function requestOptions(string $purpose, array $creds = [], bool $uv = false): array
     {
         $challenge = random_bytes(32);
-        app()->session->set('_pk_' . $purpose, ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'uv' => $uv]);
+        app()->session->set('_pk_' . self::slot($purpose), ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'uv' => $uv]);
         $o = ['challenge' => self::b64($challenge), 'rpId' => self::rpId(), 'timeout' => 180000, 'userVerification' => $uv ? 'required' : 'preferred'];
         if ($creds) {
             $o['allowCredentials'] = array_map(fn($c) => array_filter(['type' => 'public-key', 'id' => $c['credential_id'],
@@ -283,12 +302,13 @@ final class Passkeys
     }
 
     /** Zeile zur Kennung dieser Domain (optional nur für ein Konto) */
-    public static function find(Database $db, string $credHash, ?int $uid = null): ?array
+    public static function find(Database $db, string $credHash, ?int $uid = null, string $table = self::TABLE): ?array
     {
+        $t = self::tbl($table);
         try {
             return $uid === null
-                ? $db->fetch('SELECT * FROM user_passkeys WHERE cred_hash = ? AND rp_id = ?', [$credHash, self::rpId()])
-                : $db->fetch('SELECT * FROM user_passkeys WHERE cred_hash = ? AND rp_id = ? AND user_id = ?', [$credHash, self::rpId(), $uid]);
+                ? $db->fetch("SELECT * FROM $t WHERE cred_hash = ? AND rp_id = ?", [$credHash, self::rpId()])
+                : $db->fetch("SELECT * FROM $t WHERE cred_hash = ? AND rp_id = ? AND user_id = ?", [$credHash, self::rpId(), $uid]);
         } catch (\Throwable) {
             return null;
         }
@@ -299,10 +319,10 @@ final class Passkeys
      * @param string $handle erwartete Benutzerkennung (binär) – wird mit userHandle der Antwort verglichen, falls vorhanden
      * @return string|null Fehlertext oder null (gültig)
      */
-    public static function verify(Database $db, string $purpose, array $in, ?array $row, string $handle, bool $requireHandle = false): ?string
+    public static function verify(Database $db, string $purpose, array $in, ?array $row, string $handle, bool $requireHandle = false, string $table = self::TABLE): ?string
     {
-        $p = app()->session->get('_pk_' . $purpose);
-        app()->session->forget('_pk_' . $purpose);
+        $p = app()->session->get('_pk_' . self::slot($purpose));
+        app()->session->forget('_pk_' . self::slot($purpose));
         if (!is_array($p) || time() - (int) ($p['at'] ?? 0) > self::TTL || ($p['rp'] ?? '') !== self::rpId()) {
             return __('Die Anfrage ist abgelaufen. Bitte erneut versuchen.');
         }
@@ -333,7 +353,7 @@ final class Passkeys
             error_log('[passkey] sign counter not increasing for passkey ' . (int) $row['id']);
             return __('Dieser Passkey wurde abgelehnt (Zähler ungültig). Bitte einen anderen Passkey verwenden oder die Administration informieren.');
         }
-        $db->update('user_passkeys', ['sign_count' => $new, 'last_used_at' => now(), 'backup' => $ad->getIsBackupEligible() ? 1 : (int) $row['backup']],
+        $db->update(self::tbl($table), ['sign_count' => $new, 'last_used_at' => now(), 'backup' => $ad->getIsBackupEligible() ? 1 : (int) $row['backup']],
             'id = :id', ['id' => $row['id']]);
         return null;
     }

@@ -69,6 +69,7 @@ final class Documents
     {
         $rows = app()->db->fetchAll("SELECT * FROM pages WHERE status = 'published' AND type = 'page' AND noindex = 0 AND " . Lang::sql(), [$lang]);
         foreach ($rows as $p) {
+            if (\Core\PageAccess::restricted($p)) continue;   // geschützter Bereich (Erweiterung): nie im Suchindex
             [$head, $text] = self::blocksText(Pages::blocks($p), $p);
             yield self::doc([
                 'id' => 'p-' . $p['id'], 'type' => 'page', 'badge' => lt('Seite'),
@@ -159,7 +160,7 @@ final class Documents
     {
         $exclude = Search::settings()['exclude'];
         return array_values(array_filter(Tables::content(), fn($t) => ($t['settings']['route'] ?? '') !== '' && !empty($t['settings']['detail_page_id'])
-            && TableSearch::config($t)['enabled'] && !in_array($t['handle'], $exclude, true)));
+            && TableSearch::config($t)['enabled'] && !in_array($t['handle'], $exclude, true) && !\Core\PageAccess::tableRestricted($t)));
     }
 
     private static function entries(string $lang): \Generator
@@ -302,6 +303,7 @@ final class Documents
     private static function files(): \Generator
     {
         foreach (Media::all(['kind' => 'pdf']) as $m) {
+            if (\Core\MediaPools::mediaProtected($m)) continue;   // geschützter Pool: nie im Suchindex
             $url = Media::viewerUrl($m) ?? Media::url($m);
             yield self::doc([
                 'id' => 'm-' . $m['id'], 'type' => 'file', 'badge' => lt('Dokument'),

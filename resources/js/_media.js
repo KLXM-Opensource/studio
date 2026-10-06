@@ -769,7 +769,7 @@ class Finder {
     this.$side.innerHTML = `
       ${pools.length ? `<div class="fx-scope" role="group" aria-label="Mediathek wählen">
         <button type="button" data-scope="" aria-pressed="${!this.pool}">Diese Website</button>
-        ${pools.map(p => `<button type="button" data-scope="${esc(p.key)}" aria-pressed="${this.pool === p.key}" title="Geteilte Medien">⇄ ${esc(p.label)}</button>`).join('')}
+        ${pools.map(p => `<button type="button" data-scope="${esc(p.key)}" aria-pressed="${this.pool === p.key}" title="${p.protected ? 'Geschützte Medien – nur für angemeldete Personen' : 'Geteilte Medien'}">${p.protected ? '🔒' : '⇄'} ${esc(p.label)}</button>`).join('')}
       </div>${cur ? `<p class="fx-scope__note">${this.ro ? 'Geteilt – nur verwenden. Pflegen dürfen Personen mit dem Recht „Geteilte Medien pflegen“.' : 'Geteilt – Änderungen wirken auf allen Websites, die diesen Pool nutzen.'}</p>` : ''}` : ''}
       <h3>${cur ? esc(cur.label) : 'Mediathek'}</h3>
       <ul>
@@ -977,8 +977,10 @@ class Finder {
     if (this.src.type === 'collection') e.push(['Aus Sammlung entfernen', async () => { await api.bulk({ ids, action: 'uncollect', collection: +this.src.value }); this.load(); }]);
     // Vorhandene Dateien der Website in einen geteilten Pool verschieben (Verwendungen bleiben erhalten)
     if (!this.pool && this.meta.can_share && ids.length) for (const p of (this.meta.pools || []).filter(p => p.edit)) {
-      e.push([`In „${p.label}“ verschieben (geteilt) …`, async () => {
-        if (!(await ask({ ok: 'Verschieben', danger: false, title: `${ids.length > 1 ? ids.length + ' Dateien' : '„' + (one?.display || '') + '“'} nach „${p.label}“ verschieben?\n\nDie Dateien stehen dann allen Websites zur Verfügung, die diesen Pool nutzen. Bisherige Verwendungen auf dieser Website bleiben erhalten; ändern dürfen sie danach nur Personen mit dem Recht „Geteilte Medien pflegen“.` }))) return;
+      e.push([`In „${p.label}“ verschieben (${p.protected ? 'geschützt' : 'geteilt'}) …`, async () => {
+        if (!(await ask({ ok: 'Verschieben', danger: false, title: `${ids.length > 1 ? ids.length + ' Dateien' : '„' + (one?.display || '') + '“'} nach „${p.label}“ verschieben?\n\n` + (p.protected
+          ? 'Die Dateien sind danach nur noch für angemeldete Personen abrufbar (z. B. Mitglieder) – nicht mehr öffentlich und nicht in der Suche. Bisherige Verwendungen auf öffentlichen Seiten zeigen sie Besuchern dann nicht mehr.'
+          : 'Die Dateien stehen dann allen Websites zur Verfügung, die diesen Pool nutzen. Bisherige Verwendungen auf dieser Website bleiben erhalten; ändern dürfen sie danach nur Personen mit dem Recht „Geteilte Medien pflegen“.') }))) return;
         try { const r = await api.share(ids, p.key); toast(`${r.shared} ${r.shared === 1 ? 'Datei' : 'Dateien'} geteilt`); this.sel.clear(); this.load(); }
         catch (ex) { toast(ex.message); }
       }]);

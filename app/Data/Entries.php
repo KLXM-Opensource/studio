@@ -34,6 +34,22 @@ final class Entries
      */
     public static function query(array $table, array $o = []): array
     {
+        // Geschützte Tabelle (Core\PageAccess, z. B. Mitgliederbereich): Besucher öffentlicher Seiten sehen keine Einträge bzw. nur,
+        // was eine Erweiterung freigibt; auf geschützten Seiten ggf. gekürzt
+        if (\Core\PageAccess::hidesTable($table)) return [];
+        $audience = \Core\PageAccess::audience($table);
+        if ($audience !== 'all') {
+            $limit = (int) ($o['limit'] ?? 0);
+            $offset = (int) ($o['offset'] ?? 0);
+            unset($o['limit'], $o['offset']);
+            $rows = \Core\PageAccess::filterEntries($table, self::queryAll($table, $o), $audience);
+            return $limit ? array_slice($rows, $offset, $limit) : $rows;
+        }
+        return self::queryAll($table, $o);
+    }
+
+    private static function queryAll(array $table, array $o): array
+    {
         [$where, $params] = self::where($table, $o);
         $sort = (string) ($o['sort'] ?? $table['settings']['sort_field']);
         if (!in_array($sort, array_merge(Tables::SYSTEM, array_column($table['fields'], 'name')), true)) $sort = 'sort';
@@ -87,6 +103,8 @@ final class Entries
 
     public static function count(array $table, array $o = []): int
     {
+        if (\Core\PageAccess::hidesTable($table)) return 0;
+        if (\Core\PageAccess::audience($table) !== 'all') return count(self::query($table, $o));
         [$where, $params] = self::where($table, $o);
         return (int) Tables::db($table)->fetchValue("SELECT COUNT(*) FROM {$table['table']}" . ($where ? ' WHERE ' . implode(' AND ', $where) : ''), $params);
     }

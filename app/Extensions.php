@@ -402,6 +402,18 @@ final class Extensions
         return $out;
     }
 
+    /** Zugriff auf eine Datei eines geschützten Pools: erste Erweiterung, die true oder eine Antwort liefert, entscheidet */
+    public static function mediaAccess(array $ctx, Http\Request $r): bool|Http\Response
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->mediaAccessProviders as $fn) {
+                $ok = self::safe($x, 'mediaAccess', fn() => $fn($ctx, $r), false);
+                if ($ok === true || $ok instanceof Http\Response) return $ok;
+            }
+        }
+        return false;
+    }
+
     /** HTML-Ausgabe der Website durch die Filter aktiver Erweiterungen schicken (Fehler einer Erweiterung brechen die Seite nicht) */
     public static function filterHtml(string $html, array $ctx = []): string
     {

@@ -156,8 +156,16 @@ final class SiteController
             return Response::redirect($to, 301);
         }
 
+        // Geschützter Bereich (Erweiterung, Core\PageAccess): vor dem Seiten-Cache prüfen; erlaubte Aufrufe nie cachen
+        $private = false;
+        if (!$error && !$loggedIn && (\Core\PageAccess::restricted($page) || ($ctx && \Core\PageAccess::tableRestricted($ctx['table'])))) {
+            if ($deny = \Core\PageAccess::deny($page, $r, $ctx['table'] ?? null)) return $deny;
+            $private = true;
+            \Core\PageAccess::$allowedEntry = $ctx !== null;
+        }
+
         $cacheKey = $ctx ? 'entry:' . $ctx['table']['handle'] . ':' . $ctx['entry']['id'] : 'page:' . $page['id'];
-        $cacheable = !$error && !$loggedIn && $r->method === 'GET' && !$r->query;
+        $cacheable = !$error && !$loggedIn && !$private && $r->method === 'GET' && !$r->query;
         if ($cacheable && ($html = PageCache::get($cacheKey)) !== null) {
             \Core\Glossary\Glossary::$done = true;   // Glossar-Begriffe sind im Seiten-Cache schon markiert
             return $this->respond($html, false)->header('X-Cache', 'HIT');
@@ -218,10 +226,11 @@ final class SiteController
         if ($cacheable) {
             PageCache::put($cacheKey, $html);
         }
-        return $this->respond($html, $loggedIn, $status);
+        return $this->respond($html, $loggedIn, $status, $private);
     }
 
-    public function respond(string $html, bool $loggedIn, int $status = 200): Response
+    /** $private: Inhalt nur für diese Sitzung (geschützter Bereich) – nicht in geteilten Caches oder dem Service Worker */
+    public function respond(string $html, bool $loggedIn, int $status = 200, bool $private = false): Response
     {
         // Redaktionsnotizen [# … #] auch aus Seiten außerhalb von render() entfernen (Formularseiten /anfrage/…, Datenformulare,
         // Suche, Fehler-/Wartungsseite): dort kommen Notizen aus Einstellungen und Kit-Vorlagen (z. B. fehlende Praxisdaten)
@@ -230,7 +239,8 @@ final class SiteController
         if (!\Core\Glossary\Glossary::$done) $html = \Core\Glossary\Glossary::page($html, $status);
         $res = new Response($html, $status);
         $res->header('Content-Security-Policy', self::csp($loggedIn));
-        $res->header('Cache-Control', $loggedIn ? 'no-store, private' : 'public, max-age=0, must-revalidate');
+        $res->header('Cache-Control', $loggedIn || $private ? 'no-store, private' : 'public, max-age=0, must-revalidate');
+        if ($private) $res->header('X-Robots-Tag', 'noindex, nofollow');
         if (noindex_site() || Landings::current()?->noindex) {
             $res->header('X-Robots-Tag', 'noindex, nofollow');
         }
@@ -317,7 +327,7 @@ final class SiteController
         // Landing-Domain: nur ihre Seiten (Modus „Eigene Domain“; Spiegel und „nicht in Suchmaschinen“ → leer)
         if ($l = Landings::current()) {
             foreach ($l->mode === 'own' && !$l->noindex ? $l->pages() : [] as $p) {
-                if ($p['noindex']) continue;
+                if ($p['noindex'] || \Core\PageAccess::restricted($p)) continue;
                 $mod = substr((string) ($p['published_at'] ?? $p['updated_at']), 0, 10);
                 $xml .= '  <url><loc>' . e((string) $l->absUrl($p)) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
             }
@@ -325,7 +335,7 @@ final class SiteController
         }
         foreach (Pages::published() as $p) {
             // Seiten einer Landingpage mit eigener Domain stehen in deren Sitemap
-            if ($p['noindex'] || Landings::owner($p)) {
+            if ($p['noindex'] || Landings::owner($p) || \Core\PageAccess::restricted($p)) {
                 continue;
             }
             $loc = abs_url(Pages::url($p));
@@ -333,7 +343,8 @@ final class SiteController
             $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
         }
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
-            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])) continue;
+            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])
+                || \Core\PageAccess::tableRestricted($t)) continue;
             // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
             // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
             foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {

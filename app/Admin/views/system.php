@@ -151,7 +151,7 @@ use Core\Fields;
       <div class="pl-card pl-card--auto">
         <div class="pl-head">
           <strong><?= e(__('Bilder der geteilten Tabelle „{name}“', ['name' => $sm['label'] ?? $tk])) ?></strong>
-          <code><?= e($pk) ?></code><span class="adm-muted"><?= e($n === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => $n])) ?></span>
+          <code><?= e($pk) ?></code><?php if (!empty($meta['protected'])): ?> <span class="adm-badge"><?= icon('lock') ?> <?= e(__('Geschützt')) ?></span><?php endif; ?><span class="adm-muted"><?= e($n === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => $n])) ?></span>
           <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/system?table=' . rawurlencode($tk) . '#shared')) ?>"><?= e(__('Zur Tabelle')) ?></a>
         </div>
         <p class="adm-muted"><?= e(__('Genutzt von: {sites} – automatisch alle beteiligten Websites der Tabelle.', ['sites' => implode(', ', array_map($siteLabel, (array) $meta['sites']))])) ?></p>
@@ -215,6 +215,7 @@ use Core\Fields;
           <label class="f-check"><input type="checkbox" form="pool-new" name="sites[]" value="<?= e($sk) ?>"<?= $sk === site()->key ? ' checked' : '' ?>> <span><?= e($sk === 'default' ? __('Hauptwebsite') : $st->label()) ?></span></label>
           <?php endforeach; ?>
         </fieldset>
+        <label class="f-check"><input type="checkbox" form="pool-new" name="protected" value="1"> <span><?= e(__('Geschützt: Dateien nur für angemeldete Personen (z. B. Mitgliederbereich) – nicht öffentlich erreichbar, nicht in der Suche')) ?></span></label>
         <button class="adm-btn adm-btn--primary adm-btn--small" type="submit" form="pool-new"><?= e(__('Anlegen')) ?></button>
       </div>
     <?php else: ?>

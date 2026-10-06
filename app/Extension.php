@@ -23,6 +23,8 @@ namespace Core;
  *   $x->htmlFilter(fn(string $html, array $ctx) => $html)             HTML-Ausgabe der Website nachbearbeiten (vor dem Seiten-Cache)
  *   $x->csp(fn() => ['script-src' => ['https://…']])                   Quellen je Anfrage zur Website-CSP ergänzen (nie 'unsafe-inline')
  *   $x->footerLinks(fn() => [['label' => …, 'href' => '#…']])          Links in der Rechtliches-Zeile der Theme-Fußbereiche (footer_links())
+ *   $x->pageAccess(['restricted' => fn(array $page): bool, 'allow' => fn(array $page, Request $r, ?array $table): bool|Response, 'table' => fn(array $t): bool, 'entry' => fn(array $t, array $e, string $audience): ?array])
+ *                                                                      geschützte Seiten (Core\PageAccess: kein Cache, nicht in Menü/Sitemap/Suche)
  * Verwaltung, Mediathek & Betrieb (siehe Technik → „Funktionsumfang & Erweiterungen“):
  *   $x->feature('kalender', 'Kalender', [...], false)                  Funktion Standard AUS (erst 'features' => ['kalender' => true])
  *   $x->adminAssets(fn(string $view) => $view === 'media' ? ['css/x.css', 'js/x.js'] : [])   Dateien aus {dir}/assets in der Verwaltung laden
@@ -32,6 +34,7 @@ namespace Core;
  *   $x->mediaChecks(fn() => ['key' => ['label' => …, 'icon' => …, 'where' => "SQL auf m.*", 'kind' => 'video']])   Filter unter „Prüfen“
  *   $x->mediaJson(fn(array $m) => [...] | null)                        Zusatzangaben je Datei in der Mediathek-API (Feld ext.{name})
  *   $x->mediaTypes(['video/webm' => ['ext' => 'webm', 'magic' => "\x1A\x45\xDF\xA3", 'label' => 'WebM']])   weitere Dateitypen der Mediathek
+ *   $x->mediaAccess(fn(array $ctx, Request $r): bool|Response => …)   Zugriff auf Dateien geschützter Pools ($ctx: pool, path)
  *   $x->mediaPoster(fn(array $m): ?int => …)                           Vorschaubild (Bild-ID) für Videos ohne eigenes Poster (Themes, Player)
  *   $x->docs('manual'|'technical', ['key' => ['title' => …, 'file' => …, 'after' => 'medien']])   Kapitel im Handbuch/Entwicklerhandbuch
  *   $x->dashboard(fn(array $user) => ['tiles' => [...], 'cards' => [...]])   Kennzahlen-Kacheln und Karten der Übersicht (/admin)
@@ -67,6 +70,8 @@ final class Extension
     public array $cspProviders = [];
     /** @var list<callable(): list<array{label: string, href: string}>> */
     public array $footerLinkProviders = [];
+    /** @var list<array{restricted: callable(array): bool, allow: callable(array, Http\Request): (bool|Http\Response)}> Zugriffsschutz (pageAccess) */
+    public array $pageGuards = [];
     /** @var list<callable(string): list<string>> */
     public array $adminAssetProviders = [];
     /** @var list<callable(): array<string, ?bool>> */
@@ -83,6 +88,8 @@ final class Extension
     public array $mediaTypeDefs = [];
     /** @var list<callable(array): ?int> */
     public array $posterProviders = [];
+    /** @var list<callable(array, Http\Request): (bool|Http\Response)> Zugriff auf geschützte Pools (mediaAccess) */
+    public array $mediaAccessProviders = [];
     /** @var array<string, array<string, array>> */
     public array $docChapters = [];
     /** @var list<callable(array): array> */
@@ -234,6 +241,29 @@ final class Extension
     public function footerLinks(callable $fn): self
     {
         $this->footerLinkProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Seiten schützen (Core\PageAccess): 'restricted' => fn(array $page): bool (billig, für alle Besucher gleich),
+     * 'allow' => fn(array $page, Http\Request $r): bool|Http\Response (true = zeigen, false = 404, Response z. B. Anmeldung).
+     */
+    /**
+     * Zugriff auf Dateien geschützter Medien-Pools (Core\MediaPools, Adresse /geschuetzt/…): fn(array $ctx, Http\Request $r): bool|Http\Response
+     * – $ctx: pool, path. true = ausliefern, Response = z. B. Weiterleitung zur Anmeldung. Angemeldete Redaktion darf immer.
+     */
+    public function mediaAccess(callable $fn): self
+    {
+        $this->mediaAccessProviders[] = $fn;
+        return $this;
+    }
+
+    public function pageAccess(array $def): self
+    {
+        if (!is_callable($def['restricted'] ?? null) || !is_callable($def['allow'] ?? null)) {
+            throw new \InvalidArgumentException('pageAccess braucht restricted und allow');
+        }
+        $this->pageGuards[] = ['restricted' => $def['restricted'], 'allow' => $def['allow']] + array_filter(['table' => $def['table'] ?? null, 'entry' => $def['entry'] ?? null], 'is_callable');
         return $this;
     }
 

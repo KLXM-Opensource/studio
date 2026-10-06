@@ -549,6 +549,8 @@ return function (Router $r): void {
     $r->get('/sw.js', [PwaController::class, 'serviceWorker']);
     $r->get('/offline', [PwaController::class, 'offline']);
     $r->get('/proxy/{source}/{path*}', [ProxyController::class, 'handle']);
+    // Geschützte Medien-Pools (Core\MediaPools::isProtected): nur mit Zugriff
+    $r->get(\Core\MediaPools::PROTECTED_PATH . '/{pool}/{path*}', [\Core\Http\Controllers\ProtectedMediaController::class, 'serve']);
     $r->get('/sitemap.xml', [SiteController::class, 'sitemap']);
     // Rechtstexte im Dialog (Datenschutzhinweise an Formularen, Core\LegalDialog)
     $r->get('/_legal/{kind}', fn(\Core\Http\Request $req, string $kind) => \Core\LegalDialog::handle($req, $kind));

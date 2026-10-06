@@ -199,7 +199,8 @@ final class Live
     {
         $page = Pages::find((int) ($r->query['p'] ?? 0));
         $id = (string) ($r->query['b'] ?? '');
-        if (!$page || Pages::state($page) !== 'online' || $id === '' || ($page['type'] ?? 'page') !== 'page') return Response::json(['error' => 'Nicht gefunden.'], 404);
+        if (!$page || Pages::state($page) !== 'online' || $id === '' || ($page['type'] ?? 'page') !== 'page'
+            || (!app()->auth->check() && PageAccess::restricted($page))) return Response::json(['error' => 'Nicht gefunden.'], 404);
         $raw = self::findBlock(Pages::blocks($page), $id);
         $theme = app()->theme;
         $def = $raw ? ($theme->blocks()[(string) ($raw['type'] ?? '')] ?? null) : null;

@@ -84,7 +84,8 @@ final class Embeds
         if (is_file($json)) {
             $meta = json_decode((string) file_get_contents($json), true) ?: [];
             // Fehlgeschlagene Abrufe nach einem Tag erneut versuchen
-            if (!empty($meta['ok']) || (time() - (int) ($meta['fetched'] ?? 0)) < 86400) {
+            // Ältere Abrufe ohne Player-Format (ow/oh) einmal erneuern; fehlgeschlagene nach einem Tag erneut versuchen
+            if ((!empty($meta['ok']) && isset($meta['ow'])) || (empty($meta['ok']) && (time() - (int) ($meta['fetched'] ?? 0)) < 86400)) {
                 return self::publicMeta($meta, $key);
             }
         }
@@ -105,6 +106,9 @@ final class Embeds
             'title' => (string) ($meta['title'] ?? ''),
             'width' => (int) ($meta['w'] ?? 1280),
             'height' => (int) ($meta['h'] ?? 720),
+            // Seitenverhältnis des Players laut Anbieter (oEmbed) – Vorschaubilder sind auf 16:9 zugeschnitten
+            'video_width' => (int) ($meta['ow'] ?? 0),
+            'video_height' => (int) ($meta['oh'] ?? 0),
         ];
     }
 
@@ -115,10 +119,14 @@ final class Embeds
         if ($v['provider'] === 'youtube') {
             $o = json_decode((string) self::get('https://www.youtube.com/oembed?format=json&url=' . rawurlencode(self::watchUrl($v))), true);
             $meta['title'] = (string) ($o['title'] ?? '');
+            $meta['ow'] = (int) ($o['width'] ?? 0);
+            $meta['oh'] = (int) ($o['height'] ?? 0);
             $imageUrls = ["https://i.ytimg.com/vi/{$v['id']}/maxresdefault.jpg", "https://i.ytimg.com/vi/{$v['id']}/sddefault.jpg", "https://i.ytimg.com/vi/{$v['id']}/hqdefault.jpg"];
         } else {
             $o = json_decode((string) self::get('https://vimeo.com/api/oembed.json?width=1280&url=' . rawurlencode(self::watchUrl($v))), true);
             $meta['title'] = (string) ($o['title'] ?? '');
+            $meta['ow'] = (int) ($o['width'] ?? 0);
+            $meta['oh'] = (int) ($o['height'] ?? 0);
             if (!empty($o['thumbnail_url']) && preg_match('~^https://i\.vimeocdn\.com/~', $o['thumbnail_url'])) {
                 $imageUrls[] = $o['thumbnail_url'];
             }

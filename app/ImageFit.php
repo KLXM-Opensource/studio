@@ -280,6 +280,7 @@ final class ImageFit
     public static function blurUrl(array $m): ?string
     {
         if ((string) ($m['mime'] ?? '') === Svg::MIME || !function_exists('imagecreatefromstring')) return null;
+        if (MediaPools::mediaProtected($m)) return null;   // keine öffentliche Kopie geschützter Bilder
         $file = Media::localFile($m, 480, 'webp');
         if (!is_file($file)) $file = Media::path($m);
         if (!is_file($file)) return null;

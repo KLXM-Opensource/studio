@@ -26,7 +26,11 @@
  *   play_icon    Symbolname (icon()) statt des Standard-Dreiecks; icon_size = Größe des Dreiecks (Standard 22)
  *   poster_crop  true = eigenes Vorschaubild auf das Format zuschneiden
  *
- * @var string $url  @var ?int $file  @var ?int $poster  @var string $ratio 16-9|4-3|21-9  @var string $label  Titel für Screenreader
+ * Format: das echte Seitenverhältnis des Videos (Mediathek: Breite/Höhe, YouTube/Vimeo: Angaben des Anbieters) bestimmt die
+ * Format-Klasse – nächstliegendes von 16-9, 4-3, 21-9, damit kein Video mit schwarzen Balken breiter gezeigt wird als es ist.
+ * $ratio des Blocks gilt nur, wenn das Format unbekannt ist.
+ *
+ * @var string $url  @var ?int $file  @var ?int $poster  @var string $ratio 16-9|4-3|21-9 (Rückfall)  @var string $label  Titel für Screenreader
  * @var string $note  eigener Hinweistext der Redaktion (ersetzt nur den erklärenden Satz – Datenschutz-Link bleibt)
  * @var array $options
  */
@@ -37,9 +41,20 @@ $o = ($options ?? []) + ['ratio_class' => 'r-', 'notice' => 'short', 'title' => 
     'play_class' => '', 'play_icon' => '', 'icon_size' => 22, 'poster_crop' => false];
 $ratio = in_array($ratio ?? '', ['16-9', '4-3', '21-9'], true) ? $ratio : '16-9';
 $rc = preg_replace('~[^a-z0-9_-]~i', '', (string) $o['ratio_class']);
-$rcls = $rc !== '' ? ' ' . $rc . $ratio : '';
 $v = Embeds::parse((string) ($url ?? ''));
 $mp4 = !$v && !empty($file) ? media((int) $file) : null;
+// Echtes Format des Videos → nächstliegende Format-Klasse (sonst Einstellung des Blocks)
+$nearest = static function (int $w, int $h) use ($ratio): string {
+    if ($w <= 0 || $h <= 0) return $ratio;
+    $r = $w / $h;
+    $best = $ratio;
+    $diff = PHP_FLOAT_MAX;
+    foreach (['16-9' => 16 / 9, '4-3' => 4 / 3, '21-9' => 21 / 9] as $k => $x) if (abs($r - $x) < $diff) { $diff = abs($r - $x); $best = $k; }
+    return $best;
+};
+if ($mp4) $ratio = $nearest((int) ($mp4['width'] ?? 0), (int) ($mp4['height'] ?? 0));
+elseif ($v) { $vm = Embeds::meta($v); $ratio = $nearest((int) ($vm['video_width'] ?? 0), (int) ($vm['video_height'] ?? 0)); }   // unbekannt (alter Abruf) → Einstellung
+$rcls = $rc !== '' ? ' ' . $rc . $ratio : '';
 $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) : null);   // ohne eigenes Poster: Vorschaubild einer Erweiterung (z. B. video_tools)
 $label = trim((string) ($label ?? ''));
 $note = trim((string) ($note ?? ''));

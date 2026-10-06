@@ -87,12 +87,12 @@ final class Indexing
         $out = '# ' . site_name() . "\n\n" . ($desc !== '' ? '> ' . str_replace("\n", ' ', $desc) . "\n\n" : '');
         $out .= "## Seiten\n\n";
         foreach (Pages::published() as $p) {
-            if ($p['noindex'] || Landings::owner($p)) continue;
+            if ($p['noindex'] || Landings::owner($p) || PageAccess::restricted($p)) continue;
             $d = trim(str_replace("\n", ' ', (string) ($p['meta_description'] ?? '')));
             $out .= '- [' . str_replace(['[', ']'], '', (string) $p['title']) . '](' . abs_url(Pages::url($p)) . ')' . ($d !== '' ? ': ' . $d : '') . "\n";
         }
         foreach (Tables::content() as $t) {
-            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])) continue;
+            if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex']) || PageAccess::tableRestricted($t)) continue;
             $rows = Entries::query($t, ['status' => 'published', 'limit' => 50, 'source' => Tables::isShared($t) ? 'site' : 'own']);
             if (!$rows) continue;
             $out .= "\n## " . $t['name'] . "\n\n";

@@ -51,7 +51,7 @@ final class Seo
             'description' => $desc,
             'canonical' => $canonical,
             // SVG zeigen soziale Netzwerke nicht als Vorschaubild
-            'og_image' => $og && $og['mime'] !== Svg::MIME ? site_url() . Media::url($og, 1200) : null,
+            'og_image' => $og && $og['mime'] !== Svg::MIME && !MediaPools::mediaProtected($og) ? site_url() . Media::url($og, 1200) : null,
             'noindex' => !empty($page['noindex']) || $page['status'] !== 'published' || noindex_site() || ($lp?->noindex ?? false),
         ];
         // schema.org-Graph: Organisation (Theme), WebSite, WebPage, Brotkrumen + Daten der Blöcke (Spiegel: wie auf der Hauptdomain)
@@ -72,7 +72,7 @@ final class Seo
         }
         $imgField = \Core\Data\Tables::imageField($table);
         $img = $imgField !== '' ? ($entry[$imgField] ?? null) : null;
-        if ($img && ($m = Media::find((int) $img)) && $m['mime'] !== Svg::MIME) {
+        if ($img && ($m = Media::find((int) $img)) && $m['mime'] !== Svg::MIME && !MediaPools::mediaProtected($m)) {
             $seo['og_image'] = site_url() . Media::url($m, 1200);
         }
         // Fremde Einträge geteilter Tabellen: Canonical auf die Ursprungs-Website (falls sie Detailseiten hat)
