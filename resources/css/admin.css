@@ -3203,3 +3203,11 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 /* Unterseiten mit Seitenleiste (Schriften, Kits): breite Tabellen scrollen in sich, nicht die Seite */
 .us-main .adm-table{display:block;max-width:100%;overflow-x:auto}
 .push-cron-steps{margin:10px 0 0;padding-left:1.2em;display:grid;gap:4px}
+/* Hochladen: Fenster mittig in der Mediathek statt unten rechts – fliegt von unten herein (leichtes Federn); Hintergrund leicht abgedunkelt */
+.fx-uploads{left:50%;right:auto;top:50%;bottom:auto;width:min(520px,calc(100% - 32px));max-height:min(80%,640px);transform:translate(-50%,-50%);border-radius:12px;z-index:30}
+.fx-uploads:not([hidden]){animation:fx-up-in .42s cubic-bezier(.2,1.25,.35,1) both}
+.fx:has(> .fx-uploads:not([hidden]))::after{content:"";position:absolute;inset:0;z-index:25;background:rgba(15,20,30,.22);border-radius:inherit;animation:fx-up-dim .25s ease-out both;pointer-events:none}
+@keyframes fx-up-in{from{opacity:0;transform:translate(-50%,calc(-50% + 48px)) scale(.94)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes fx-up-dim{from{opacity:0}to{opacity:1}}
+.fx--library .fx-info:has(~ .fx-uploads:not([hidden])){padding-bottom:0}
+@media (prefers-reduced-motion:reduce){.fx-uploads:not([hidden]),.fx:has(> .fx-uploads:not([hidden]))::after{animation:none}}
