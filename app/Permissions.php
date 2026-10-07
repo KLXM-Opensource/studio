@@ -68,6 +68,11 @@ final class Permissions
                 'chat.use' => __('Chat nutzen (Direktnachrichten, Kanäle der Website)'),
                 'chat.manage' => __('Kanäle anlegen, Mitglieder festlegen, Nachrichten in Kanälen entfernen'),
             ],
+            // Push-Benachrichtigungen (Core\Push) – zusätzlich Funktion „push“ der Website
+            __('Mitteilungen') => [
+                'push.view' => __('Mitteilungen: Verlauf, Kanäle und Statistik ansehen'),
+                'push.send' => __('Mitteilungen verfassen und senden, Kanäle und Website-Einbindung verwalten'),
+            ],
         ] + Extensions::permissions();
     }
 
@@ -85,7 +90,7 @@ final class Permissions
             'network' => ['name' => 'Netzwerk-Administration', 'description' => 'Alle Websites und alle Daten (zentral verwaltet)', 'permissions' => ['*'], 'builtin' => 1],
             'editor' => ['name' => 'Redaktion', 'description' => 'Inhalte pflegen und veröffentlichen',
                 'permissions' => ['pages.edit', 'pages.publish', 'pages.manage', 'settings.edit', 'media.upload', 'media.delete',
-                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use']],
+                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use', 'push.view']],
             'author' => ['name' => 'Autorin / Autor', 'description' => 'Entwürfe schreiben, nichts veröffentlichen',
                 'permissions' => ['pages.edit', 'media.upload', 'data.edit', 'support.report']],
             'requests' => ['name' => 'Anfragen bearbeiten', 'description' => 'Nur Online-Anfragen',

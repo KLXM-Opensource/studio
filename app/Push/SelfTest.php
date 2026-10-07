@@ -44,6 +44,7 @@ final class SelfTest
             self::topics();
             self::serviceWorker();
             self::database();
+            self::chart();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -329,7 +330,8 @@ final class SelfTest
             self::eq('429: später erneut (Retry-After)', [$q3['status'], (int) $q3['attempts'], (int) $q3['next_at'] >= time() + 100], ['queued', 1, true]);
             self::eq('400: Fehlversuch gezählt', (int) $db->fetchValue('SELECT failures FROM push_subscriptions WHERE id = ?', [$id4]), 1);
             self::eq('Erfolg: zuletzt gesendet', $db->fetchValue('SELECT last_sent_at FROM push_subscriptions WHERE id = ?', [$id1]) !== null, true);
-            self::eq('Nachricht: Zähler', [(int) $db->fetchValue('SELECT sent FROM push_messages WHERE id = ?', [$mid]), (int) $db->fetchValue('SELECT failed FROM push_messages WHERE id = ?', [$mid])], [1, 2]);
+            $mr = $db->fetch('SELECT sent, failed, gone FROM push_messages WHERE id = ?', [$mid]);
+            self::eq('Nachricht: Zähler zugestellt/fehlgeschlagen/ungültig', [(int) $mr['sent'], (int) $mr['failed'], (int) $mr['gone']], [1, 1, 1]);
             for ($i = 0; $i < Push::MAX_FAILURES; $i++) {
                 $db->query('UPDATE push_subscriptions SET failures = ? WHERE id = ?', [Push::MAX_FAILURES - 1, $id4]);
             }
@@ -343,9 +345,111 @@ final class SelfTest
             self::eq('Besucher-Abo mit Konto: abmelden lässt Themen', Push::unlinkUser($uid, $id5), 'unlinked');
             self::eq('Thema abbestellen → Abo weg', Push::removeTopics(Push::find($s3['endpoint']), ['data:qa_selbsttest']), 'deleted');
             self::eq('Status liest Zahlen', is_int(Push::status()['queued']), true);
+            self::stage2($db, $uid, $mk);
         } finally {
             Push::unregisterEvent('qa_push.selftest');
             if ($db->pdo->inTransaction()) $db->pdo->rollBack();
         }
+    }
+
+    // ================================================================= Stufe 2: Kanäle, Mitteilungen von Hand, Planung, Statistik
+
+    private static function stage2(\Core\Database $db, int $uid, callable $mk): void
+    {
+        Push::$transport = fn(array $jobs) => array_fill_keys(array_column($jobs, 'id'), ['code' => 201, 'error' => null, 'retry_after' => null]);
+        // Kanäle
+        [$cid, $err] = Channels::save(null, ['name' => 'Notdienst Musterstadt', 'description' => 'Wichtige Hinweise', 'public' => '1']);
+        self::eq('Kanal angelegt', [is_int($cid), $err], [true, []]);
+        $c = Channels::find((int) $cid);
+        $topic = Channels::PREFIX . $c['handle'];
+        self::eq('Kanal: Kurzname aus dem Namen', $c['handle'], 'notdienst_musterstadt');
+        [, $err] = Channels::save(null, ['name' => 'Notdienst Musterstadt']);
+        self::eq('Kanal: doppelter Kurzname abgelehnt', isset($err['handle']), true);
+        [, $err] = Channels::save(null, ['name' => '']);
+        self::eq('Kanal: Name Pflicht', isset($err['name']), true);
+        self::eq('Kanal öffentlich', in_array($topic, Channels::publicTopics(), true), true);
+        [$cid2] = Channels::save(null, ['name' => 'Intern QA', 'public' => '0']);
+        self::eq('Nicht öffentlicher Kanal nicht abonnierbar', in_array(Channels::PREFIX . 'intern_qa', Channels::publicTopics(), true), false);
+        Channels::archive(Channels::find((int) $cid2), true);
+        self::eq('Archivierter Kanal: kein Ziel', isset(Channels::all()[Channels::PREFIX . 'intern_qa']) && !Channels::all()[Channels::PREFIX . 'intern_qa']['archived'], false);
+
+        // Statistik: Abo, Abbestellen, abgelaufen – nur Zähler je Tag und Kanal
+        $before = Stats::daily($topic, 1)[date('Y-m-d')];
+        $v1 = $mk('kanal1');
+        $v2 = $mk('kanal2');
+        [$sid1] = Push::store($v1, null, [$topic]);
+        [$sid2] = Push::store($v2, null, [$topic, 'data:qa_zwei']);
+        [$sid3] = Push::store($mk('staff'), $uid);
+        $after = Stats::daily($topic, 1)[date('Y-m-d')];
+        self::eq('Statistik: 2 neue Abos im Kanal', $after['sub'] - $before['sub'], 2);
+        Push::store($v1, null, [$topic]);
+        self::eq('Statistik: erneutes Abo zählt nicht doppelt', Stats::daily($topic, 1)[date('Y-m-d')]['sub'] - $before['sub'], 2);
+        Push::removeTopics(Push::find($v2['endpoint']), [$topic]);
+        self::eq('Statistik: Abbestellen zählt als Abgang', Stats::daily($topic, 1)[date('Y-m-d')]['lost'] - $before['lost'], 1);
+        self::eq('Teil-Abbestellen: anderes Thema bleibt', Push::topicsOf(Push::find($v2['endpoint'])), ['data:qa_zwei']);
+        self::eq('Statistik: aktuelle Abos je Kanal', Stats::current()[$topic] ?? 0, 1);
+        self::eq('Statistik: Protokoll ohne Endpunkte', array_keys(Stats::log(1)[0] ?? []), ['day', 'topic', 'sub', 'unsub', 'gone']);
+
+        // Mitteilung von Hand: Prüfung, Ziel, Empfänger, Erreichbarkeit, ein Gerät nur einmal
+        [$dd, $err] = Compose::validate(['title' => '', 'topics' => []]);
+        self::eq('Verfassen: Titel und Empfänger Pflicht', [isset($err['title']), isset($err['targets'])], [true, true]);
+        [, $err] = Compose::validate(['title' => 'x', 'topics' => [$topic], 'link' => 'https://evil.example/x']);
+        self::eq('Verfassen: fremde Adresse abgelehnt', isset($err['link']), true);
+        self::eq('Verfassen: Pfad wird absolute Adresse', str_ends_with((string) Compose::resolve('/kontakt'), '/kontakt'), true);
+        [, $err] = Compose::validate(['title' => 'x', 'topics' => [$topic], 'when' => 'later', 'at' => date('Y-m-d\TH:i', time() - 3600)]);
+        self::eq('Planen: Vergangenheit abgelehnt', isset($err['at']), true);
+        [, $err] = Compose::validate(['title' => 'x', 'topics' => [$topic], 'when' => 'later', 'at' => date('Y-m-d\TH:i', time() + 400 * 86400)]);
+        self::eq('Planen: höchstens 90 Tage', isset($err['at']), true);
+        Push::store($v2, null, [$topic]);   // v2 wieder im Kanal
+        Push::store($v1, $uid);             // v1 zusätzlich Gerät der Person → trotzdem nur eine Zustellung
+        [$dd, $err] = Compose::validate(['title' => 'Hinweis', 'body' => 'Heute geschlossen', 'link' => '/', 'topics' => [$topic, 'gibt:esnicht'], 'users' => [$uid]]);
+        self::eq('Verfassen: gültig, unbekannter Kanal entfernt', [$err, $dd['targets']['topics']], [[], [$topic]]);
+        $reach = Compose::reach($dd['targets']);
+        if (Push::visitorsAllowed()) {
+            self::eq('Erreichbar: Kanal 2, Person 2 Geräte, gesamt 3 verschiedene', [$reach['visitors'], $reach['staff'], $reach['total']], [2, 2, 3]);
+        }
+        Push::saveUserEvents($uid, [Compose::EVENT => false]);
+        self::eq('Schalter „Mitteilungen der Redaktion“ aus → Person nicht erreichbar', Compose::reach($dd['targets'])['staff'], 0);
+        Push::saveUserEvents($uid, [Compose::EVENT => true]);
+        $mid = Compose::create($dd, $uid);
+        $m = $db->fetch('SELECT * FROM push_messages WHERE id = ?', [$mid]);
+        self::eq('Sofort: gesendet-Status, Quelle manual', [$m['status'], $m['source']], ['sent', 'manual']);
+        self::eq('Sofort: jedes Gerät einmal', (int) $db->fetchValue('SELECT COUNT(*) FROM push_queue WHERE message_id = ?', [$mid]),
+            (int) $db->fetchValue('SELECT COUNT(DISTINCT subscription_id) FROM push_queue WHERE message_id = ?', [$mid]));
+        Push::process(50, 5.0);
+        self::eq('Sofort: zugestellt', (int) $db->fetchValue('SELECT sent FROM push_messages WHERE id = ?', [$mid]), (int) $m['recipients']);
+        self::eq('Verlauf: Empfänger in Worten', str_contains(Compose::summary($m), 'Notdienst Musterstadt'), true);
+
+        // Geplant: noch nichts vorgemerkt, abbrechen, fällig → vormerken
+        [$dd2] = Compose::validate(['title' => 'Später', 'topics' => [$topic], 'when' => 'later', 'at' => date('Y-m-d\TH:i', time() + 7200)]);
+        $pid = Compose::create($dd2, $uid);
+        self::eq('Geplant: keine Zustellungen vor dem Termin', [(string) $db->fetchValue('SELECT status FROM push_messages WHERE id = ?', [$pid]), (int) $db->fetchValue('SELECT COUNT(*) FROM push_queue WHERE message_id = ?', [$pid])], ['scheduled', 0]);
+        self::eq('Geplant: noch nicht fällig', Compose::due($db), 0);
+        $db->query('UPDATE push_messages SET scheduled_at = ? WHERE id = ?', [time() - 5, $pid]);
+        $cid3 = Compose::create($dd2, $uid);
+        self::eq('Abbrechen', [Compose::cancel($cid3), Compose::cancel($cid3)], [true, false]);
+        Push::process(50, 5.0);
+        $pm = $db->fetch('SELECT status, recipients, sent FROM push_messages WHERE id = ?', [$pid]);
+        self::eq('Fällig: versendet (push:send)', [$pm['status'], (int) $pm['recipients'] > 0 || !Push::visitorsAllowed()], ['sent', true]);
+        self::eq('Abgebrochen bleibt ungesendet', (int) $db->fetchValue('SELECT COUNT(*) FROM push_queue WHERE message_id = ?', [$cid3]), 0);
+        $pf = Compose::prefill($db->fetch('SELECT * FROM push_messages WHERE id = ?', [$mid]));
+        self::eq('Duplizieren: Inhalt und Empfänger übernommen', [$pf['title'], $pf['topics'], $pf['users']], ['Hinweis', [$topic], [$uid]]);
+        self::eq('Versand je Woche zählt Mitteilungen', array_sum(array_column(Stats::deliveries(1), 'messages')) >= 2, true);
+
+        // Abgelaufen (410) zählt in der Statistik als „gone“
+        $g0 = Stats::daily($topic, 1)[date('Y-m-d')]['lost'];
+        Push::delete((int) Push::find($v2['endpoint'])['id']);
+        self::eq('Statistik: ungültiges Abo = Abgang', Stats::daily($topic, 1)[date('Y-m-d')]['lost'] - $g0, 1);
+        self::eq('Geräte der Redaktion je Anlass', (Stats::staff()[Compose::EVENT]['devices'] ?? 0) >= 2, true);
+    }
+
+    private static function chart(): void
+    {
+        $svg = Stats::chart(['1.' => ['sub' => 4, 'lost' => 0], '2.' => ['sub' => 2, 'lost' => 2]], 'Test');
+        preg_match_all('~class="pst-chart__(up|down)"[^>]*height="([\d.]+)"~', $svg, $m, PREG_SET_ORDER);
+        $h = array_map(fn($x) => [$x[1], (float) $x[2]], $m);
+        // maßstäblich: 4 nach oben doppelt so hoch wie 2; 2 nach unten so hoch wie 2 nach oben
+        self::eq('Grafik: maßstäblich', [count($h), round($h[0][1] / $h[1][1], 2), round($h[2][1] / $h[1][1], 2)], [3, 2.0, 1.0]);
+        self::eq('Grafik: Achsenwerte', Stats::scale(['a' => ['sub' => 4, 'lost' => 0], 'b' => ['sub' => 2, 'lost' => 3]]), ['up' => 4, 'down' => 3]);
     }
 }

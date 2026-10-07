@@ -26,6 +26,8 @@ abstract class AdminController
         \Core\Sources\Sources::maybeRun();
         // Erweiterungen: fällige Arbeiten nach der Antwort (z. B. Hintergrund-Aufträge; billige Prüfung, siehe Extension::afterAdminResponse)
         \Core\Extensions::afterAdminResponse();
+        // Push: geplante Mitteilungen ohne Cron nebenbei verschicken (billige Prüfung, Core\Push\Compose)
+        \Core\Push\Compose::maybeDue();
         return $user;
     }
 

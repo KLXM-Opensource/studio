@@ -6,7 +6,15 @@
  */
 use Core\Push\Topics;
 
-if (!\Core\Push\Push::on() || (($def['settings']['kind'] ?? 'content') === 'inbox')) return;
+if (($def['settings']['kind'] ?? 'content') === 'inbox') return;
+if (!\Core\Push\Push::on()): // Funktion aus: Karte mit Hinweis statt nichts – wer Funktionen schalten darf, bekommt den Weg dorthin ?>
+<section class="adm-card dt-push" id="table-push">
+  <h2><?= e(__('Benachrichtigungen (Push)')) ?></h2>
+  <p class="f-help"><?= e(__('Push-Benachrichtigungen sind auf dieser Website aus. Eingeschaltet können Besucher neue Einträge dieser Tabelle abonnieren.')) ?></p>
+  <?php if (\Core\Features::canManage()): ?><p><a href="<?= e(url('/admin/funktionen#f-push')) ?>"><?= e(__('Unter Funktionen & Erweiterungen einschalten')) ?></a></p>
+  <?php elseif (\Core\Features::canView()): ?><p class="f-help"><?= e(__('Einschalten kann die Netzwerk-Administration bzw. Agentur (Funktionen & Erweiterungen).')) ?></p><?php endif; ?>
+</section>
+<?php return; endif;
 $p = (array) ($def['settings']['push'] ?? []);
 $pf = (array) ($def['fields'] ?? []);
 $pOpts = fn(array $types) => array_column(array_filter($pf, fn($f) => in_array($f['type'] ?? '', $types, true)), 'label', 'name');
@@ -23,6 +31,9 @@ $pCount = $table && !empty($table['id']) ? Topics::subscribers($table) : 0;
     <div class="f"><label for="t-push-title"><?= e(__('Titel der Mitteilung')) ?></label>
       <input id="t-push-title" name="settings[push][title]" value="<?= e((string) ($p['title'] ?? '')) ?>" maxlength="120" placeholder="{title}">
       <p class="f-help"><?= e(__('Platzhalter: {title} (Titel des Eintrags), {table}, {site} und jedes Feld als {feldname}. Leer = Titel des Eintrags.')) ?></p></div>
+    <div class="f"><label for="t-push-desc"><?= e(__('Beschreibung für Besucher (optional)')) ?></label>
+      <input id="t-push-desc" name="settings[push][description]" value="<?= e((string) ($p['description'] ?? '')) ?>" maxlength="200" placeholder="<?= e(__('z. B. Neue Angebote, etwa zweimal im Monat')) ?>">
+      <p class="f-help"><?= e(__('Erscheint, wenn Besucher zwischen mehreren Kanälen wählen (Block, Banner, Glocke).')) ?></p></div>
     <div class="f"><label for="t-push-body"><?= e(__('Kurztext aus')) ?></label>
       <select id="t-push-body" name="settings[push][body]">
         <option value=""><?= e(__('– Beschreibungsfeld bzw. erstes Textfeld –')) ?></option>

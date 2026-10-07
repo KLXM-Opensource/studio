@@ -378,6 +378,20 @@ return function (Router $r): void {
     $r->post('/admin/account/push/devices/{id}/delete', [Admin\PushController::class, 'deleteDevice']);
     $r->post('/admin/account/push/test', [Admin\PushController::class, 'test']);
     $r->post('/admin/system/push/keys', [Admin\PushController::class, 'keys']);
+    // Mitteilungen (Core\Push): Verfassen, Verlauf, Kanäle, Statistik, Website-Einbindung – Rechte push.view / push.send
+    $mc = Admin\MessagesController::class;
+    $r->get('/admin/mitteilungen', [$mc, 'index']);
+    $r->get('/admin/mitteilungen/neu', [$mc, 'compose']);
+    $r->post('/admin/mitteilungen/neu', [$mc, 'send']);
+    $r->post('/admin/mitteilungen/{id}/abbrechen', [$mc, 'cancel']);
+    $r->get('/admin/mitteilungen/kanaele', [$mc, 'channels']);
+    $r->post('/admin/mitteilungen/kanaele', [$mc, 'channelSave']);
+    $r->post('/admin/mitteilungen/kanaele/{id}', [$mc, 'channelSave']);
+    $r->post('/admin/mitteilungen/kanaele/{id}/archiv', [$mc, 'channelArchive']);
+    $r->get('/admin/mitteilungen/statistik', [$mc, 'stats']);
+    $r->get('/admin/mitteilungen/website', [$mc, 'website']);
+    $r->post('/admin/mitteilungen/website', [$mc, 'websiteSave']);
+    $r->get('/admin/api/push/reach', [$mc, 'reach']);
     // Favoriten je Benutzer (Core\Favorites): Stern, Seitenleiste, Konto-Seite
     $r->post('/admin/api/favorites', [Admin\FavoriteController::class, 'add']);
     $r->post('/admin/api/favorites/remove', [Admin\FavoriteController::class, 'remove']);

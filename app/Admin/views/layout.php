@@ -19,6 +19,8 @@ $nav = array_values(array_filter([
     // Support & Wissensdatenbank: im Abschnitt „Hilfe & Support“ unten in der Seitenleiste
     // Chat zwischen Benutzern (Core\Chat, optional) – öffnet mit JavaScript die Schublade (resources/js/userchat.js)
     ['/admin/chat', __('Chat'), 'chat', $user && \Core\Chat\Chat::canUse()],
+    // Mitteilungen (Core\Push, Funktion „push“): verfassen, Verlauf, Kanäle, Statistik
+    ['/admin/mitteilungen', __('Mitteilungen'), 'push', $user && \Core\Push\Push::on() && can('push.view')],
     // KI-Bereich (Core\AI, Marke config 'ai_brand' – Standard „KLXM AI“)
     ['/admin/ai', \Core\AI\Assist::brand(), 'ai', $user && \Core\AI\Assist::navVisible()],
     // Prüf-Ebene „Eingereicht“ (Core\Review) – eigener Punkt nur, wenn der KI-Bereich nicht sichtbar ist

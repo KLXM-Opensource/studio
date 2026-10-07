@@ -219,6 +219,8 @@ final class SiteController
         } else {
             $html = \Core\Icons::applyStyle($html);   // Redaktion: gewählter Symbolstil, Leiste bleibt duotone
         }
+        // Push-Benachrichtigungen (Core\Push\Visitor): Banner und Glocke – für alle gleich, das Skript entscheidet im Browser
+        if (!$app->editing) $html = \Core\Push\Visitor::inject($html);
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);
         // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);

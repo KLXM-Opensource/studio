@@ -16,6 +16,7 @@ use Core\PageAccess;
  *   title    Titel der Mitteilung mit Platzhaltern {title} {table} {site} {feldname} (leer = Titel des Eintrags)
  *   body     Feld für den Kurztext (leer = Beschreibungsfeld der Tabelle bzw. erstes Textfeld; '-' = kein Text)
  *   filter   ['field' => …, 'value' => …] – nur Einträge, deren Feld diesen Wert hat (z. B. Kategorie „presse“)
+ *   description  Beschreibung des Kanals für Besucher (Auswahl in Block, Banner und Glocke)
  * Thema der Abos: „data:{kurzname}“. Gesendet wird, wenn ein Eintrag zum ersten Mal veröffentlicht wird (published_at war leer:
  * Entries::save und setStatus) – nicht bei späteren Änderungen, nicht beim Abgleich externer Quellen, nie für geschützte Tabellen
  * ohne öffentliche Freigabe (PageAccess) und nur an Abos in der Sprache des Eintrags.
@@ -44,6 +45,8 @@ final class Topics
         if ($en === true || $en === '1' || $en === 1) $out['enabled'] = true;
         $title = trim(strip_tags(mb_substr((string) ($in['title'] ?? ''), 0, 120)));
         if ($title !== '') $out['title'] = $title;
+        $desc = trim(strip_tags(mb_substr((string) ($in['description'] ?? ''), 0, 200)));
+        if ($desc !== '') $out['description'] = $desc;   // Beschreibung des Kanals (Auswahl auf der Website)
         $body = (string) ($in['body'] ?? '');
         if ($body === '-' || in_array($types[$body] ?? '', ['text', 'textarea', 'richtext'], true)) $out['body'] = $body;
         $ff = (string) ($in['filter']['field'] ?? '');

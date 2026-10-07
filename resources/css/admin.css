@@ -17,6 +17,7 @@
 @import "./_markdown.css";   /* Markdown einfügen/importieren: Dialog und Hinweis (resources/js/_markdown.js) */
 @import "./_pages.css";   /* Feldtyp „pages“ (Core\PagePicker) + aufklappbare Abschnitte in Formularen */
 @import "./_aiset.css";   /* Grundeinstellungen → KI: Verbindungen, Verwendung, Modelle (Core\AI\Profiles) */
+@import "./_pushadmin.css";   /* Verwaltung → Mitteilungen (Core\Push, app/Admin/views/push/*) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 /* ==========================================================================
    Admin-Oberfläche (Core). Nutzt dieselbe Schrift und Farbwelt wie das Theme.

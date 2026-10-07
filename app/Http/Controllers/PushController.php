@@ -9,6 +9,7 @@ use Core\Data\Tables;
 use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
+use Core\Push\Channels;
 use Core\Push\Keys;
 use Core\Push\Push;
 use Core\Push\Topics;
@@ -19,7 +20,7 @@ use Core\RateLimiter;
 /**
  * Öffentliche Seite der Push-Benachrichtigungen (Funktion „push“, sonst 404 – Features::allowsPath):
  *   GET  /push-sw.js              Service Worker (resources/sw/push.js) – Bereich {base}/push-sw/, steuert keine Seiten
- *   POST /api/push/subscribe      {subscription, topics[], lang, token} – Abo für Themen „data:{tabelle}“ (nur abonnierbare Tabellen)
+ *   POST /api/push/subscribe      {subscription, topics[], offered[]?, lang, token} – Abo für öffentliche Kanäle (Core\Push\Channels)
  *   POST /api/push/unsubscribe    {endpoint, auth, topics[]|null, token} – Themen entfernen (ohne Themen: Abo löschen)
  *   POST /api/push/status         {endpoint, auth, token} → abonnierte Themen dieses Browsers
  *   POST /api/push/renew          {old, subscription} – vom Service Worker bei pushsubscriptionchange
@@ -41,25 +42,45 @@ final class PushController
             ->header('X-Robots-Tag', 'noindex');
     }
 
+    /**
+     * Abo für Kanäle: topics = gewählte Kanäle. Mit offered (die Kanäle, die das Formular angeboten hat – Mehrfachauswahl in Block,
+     * Banner, Glocke) gilt die Auswahl als vollständig: angebotene, aber nicht gewählte Kanäle werden abbestellt; andere bleiben.
+     */
     public function subscribe(Request $r): Response
     {
         if ($deny = $this->guard($r, 'sub', Push::VISITOR_PER_HOUR)) return $deny;
-        $topics = [];
-        foreach (array_slice((array) ($r->post['topics'] ?? []), 0, 10) as $t) {
-            $t = (string) $t;
-            if (!str_starts_with($t, 'data:') || !($table = Tables::findContent(substr($t, 5))) || !Topics::enabled($table)) {
-                return self::json(['ok' => false, 'error' => lt('Diese Inhalte lassen sich nicht abonnieren.')], 422);
+        $public = Channels::publicTopics();
+        $pick = function (mixed $list) use ($public): ?array {
+            $out = [];
+            foreach (array_slice((array) $list, 0, 20) as $t) {
+                if (!in_array((string) $t, $public, true)) return null;
+                $out[] = (string) $t;
             }
-            $topics[] = Topics::topic($table);
+            return array_values(array_unique($out));
+        };
+        $topics = $pick($r->post['topics'] ?? []);
+        $offered = isset($r->post['offered']) ? $pick($r->post['offered']) : null;
+        if ($topics === null || (isset($r->post['offered']) && $offered === null) || (!$topics && $offered === null)) {
+            return self::json(['ok' => false, 'error' => lt('Diese Inhalte lassen sich nicht abonnieren.')], 422);
         }
-        if (!$topics) return self::json(['ok' => false, 'error' => lt('Diese Inhalte lassen sich nicht abonnieren.')], 422);
         $s = Push::parse($r->post['subscription'] ?? null);
         if (!$s) return self::json(['ok' => false, 'error' => lt('Dieser Browser bzw. Push-Dienst wird nicht unterstützt.')], 422);
         $lang = (string) ($r->post['lang'] ?? '');
+        $row = Push::find($s['endpoint']);
+        if (!$topics) {
+            // Nichts gewählt: angebotene Kanäle abbestellen (nur mit passendem Geheimnis)
+            $state = $row && Push::owns($row, $s['auth']) ? Push::removeTopics($row, $offered) : 'unknown';
+            $left = $state === 'updated' ? Push::topicsOf(Push::find($s['endpoint']) ?? []) : [];
+            return self::json(['ok' => true, 'state' => $state, 'topics' => $left]);
+        }
         [$id, $err] = Push::store($s, null, $topics, \Core\Lang::valid($lang) ? $lang : null, (string) ($r->server['HTTP_USER_AGENT'] ?? ''));
         if ($err === 'conflict') return self::json(['ok' => false, 'error' => 'conflict'], 409);
-        $row = app()->db->fetch('SELECT topics FROM push_subscriptions WHERE id = ?', [(int) $id]);
-        return self::json(['ok' => true, 'topics' => Push::topicsOf($row ?? [])]);
+        $row = app()->db->fetch('SELECT * FROM push_subscriptions WHERE id = ?', [(int) $id]);
+        if ($row && $offered !== null && ($drop = array_values(array_diff($offered, $topics)))) {
+            Push::removeTopics($row, $drop);
+            $row = app()->db->fetch('SELECT * FROM push_subscriptions WHERE id = ?', [(int) $id]);
+        }
+        return self::json(['ok' => true, 'state' => 'updated', 'topics' => Push::topicsOf($row ?? [])]);
     }
 
     public function unsubscribe(Request $r): Response

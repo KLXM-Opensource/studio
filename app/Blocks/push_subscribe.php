@@ -6,7 +6,7 @@
  * @var \Core\Block $b  @var array $d
  */
 $wrap = app()->theme->def['container_class'] ?? 'wrap';
-$html = \Core\Push\Visitor::render((string) ($d['table'] ?? '') ?: null, [
+$html = \Core\Push\Visitor::render((string) ($d['table'] ?? '') ?: null, ['channels' => (array) ($d['channels'] ?? []),
     'title' => (string) ($d['title'] ?? ''), 'intro' => (string) ($d['intro'] ?? ''), 'button' => (string) ($d['button'] ?? ''),
     'layout' => (string) ($d['layout'] ?? 'box'), 'edit' => $b,
 ]);

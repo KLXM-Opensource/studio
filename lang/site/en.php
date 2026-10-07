@@ -359,4 +359,18 @@ return [
     'Wir benachrichtigen Sie auf diesem Gerät, sobald hier etwas Neues erscheint („{name}“). Ohne Anmeldung und ohne Tracking – gespeichert wird nur die Zustelladresse Ihres Browsers. Abbestellen jederzeit hier.' => 'We will notify you on this device as soon as something new appears here (“{name}”). No sign-up and no tracking – only your browser’s delivery address is stored. Unsubscribe here at any time.',
     'Zu viele Anfragen. Bitte versuchen Sie es später noch einmal.' => 'Too many requests. Please try again later.',
     'Zum Abonnieren wird JavaScript benötigt.' => 'JavaScript is required to subscribe.',
+    // Push: Kanäle, Banner, Glocke
+    'Themen' => 'Topics',
+    'Alle abbestellen' => 'Unsubscribe from all',
+    'Auf Wunsch benachrichtigen wir Sie auf diesem Gerät über Neuigkeiten – ohne Anmeldung, jederzeit abbestellbar.' => 'If you like, we notify you about news on this device – no sign-up, unsubscribe at any time.',
+    'Auswahl speichern' => 'Save selection',
+    'Auswählen …' => 'Choose …',
+    'Benachrichtigungen' => 'Notifications',
+    'Benachrichtigungen abonnieren: Die Funktion „Push-Benachrichtigungen“ ist auf dieser Website aus (Verwaltung → Funktionen & Erweiterungen). Besucher sehen hier nichts.' => 'Subscribe to notifications: the “Push notifications” feature is off on this website (admin → Features & extensions). Visitors see nothing here.',
+    'Benachrichtigungen abonnieren: Für diese Tabelle ist „Besucher können neue Einträge abonnieren“ nicht eingeschaltet (Tabelle → Felder & Einstellungen) bzw. kein Kanal gewählt. Besucher sehen hier nichts.' => 'Subscribe to notifications: “Visitors can subscribe to new entries” is not enabled for this table (table → Fields & settings) or no channel is chosen. Visitors see nothing here.',
+    'Bitte wählen Sie mindestens einen Kanal.' => 'Please choose at least one channel.',
+    'Gespeichert – Sie erhalten Mitteilungen zu den gewählten Themen.' => 'Saved – you will receive notifications about the chosen topics.',
+    'Nein, danke' => 'No, thanks',
+    'Nichts mehr verpassen?' => 'Never miss anything?',
+    'Wählen Sie, worüber wir Sie auf diesem Gerät benachrichtigen. Ohne Anmeldung und ohne Tracking – gespeichert wird nur die Zustelladresse Ihres Browsers. Ändern oder abbestellen jederzeit hier.' => 'Choose what we notify you about on this device. No sign-up and no tracking – only your browser’s delivery address is stored. Change or unsubscribe here at any time.',
 ];

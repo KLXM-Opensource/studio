@@ -123,6 +123,12 @@ final class Push
             $db->pdo->exec('CREATE INDEX IF NOT EXISTS push_queue_sub ON push_queue (subscription_id, created_at)');
             $db->pdo->exec('CREATE INDEX IF NOT EXISTS push_msg_topic ON push_messages (topic, created_at)');
         }
+        // Stufe 2: Mitteilungen von Hand (geplant, Empfänger, Bild), getrennte Zähler, Kanäle, Statistik
+        $db->ensureColumns('push_messages', ['status' => 'VARCHAR(12) NULL', 'source' => 'VARCHAR(10) NULL', 'scheduled_at' => 'INT NULL',
+            'targets_json' => 'TEXT NULL', 'gone' => 'INT NOT NULL DEFAULT 0', 'expired' => 'INT NOT NULL DEFAULT 0', 'link' => 'VARCHAR(600) NULL', 'image_id' => 'INT NULL']);
+        if (!$my) $db->pdo->exec('CREATE INDEX IF NOT EXISTS push_msg_status ON push_messages (status, scheduled_at)');
+        Channels::ensureTable($db);
+        Stats::ensureTable($db);
     }
 
     // ================================================================= Abos
@@ -195,10 +201,16 @@ final class Push
             if ($userId !== null) $data['user_id'] = $userId;
             if ($topics) $data['topics'] = self::topicsString([...self::topicsOf($row), ...$topics]);
             $db->update('push_subscriptions', $data, 'id = :id', ['id' => (int) $row['id']]);
+            // Statistik (nur Zähler): neu abonnierte Kanäle, neu angemeldetes Gerät der Redaktion; altes Abo mit anderem Schlüssel = neu
+            $stale = $row['key_fp'] !== Keys::fingerprint();
+            foreach (array_diff(self::topicsOf(['topics' => $data['topics'] ?? $row['topics']]), $stale ? [] : self::topicsOf($row)) as $t) Stats::hit($t, 'sub', 1, $db);
+            if ($userId !== null && ($stale || (int) $row['user_id'] !== $userId)) Stats::hit(Stats::STAFF, 'sub', 1, $db);
             return [(int) $row['id'], null];
         }
         $id = $db->insert('push_subscriptions', $data + ['endpoint' => $s['endpoint'], 'endpoint_hash' => hash('sha256', $s['endpoint']),
             'user_id' => $userId, 'topics' => self::topicsString($topics), 'created_at' => now(), 'label' => $data['label'] ?? self::deviceLabel('')]);
+        foreach (self::topicsOf(['topics' => self::topicsString($topics)]) as $t) Stats::hit($t, 'sub', 1, $db);
+        if ($userId !== null) Stats::hit(Stats::STAFF, 'sub', 1, $db);
         return [$id, null];
     }
 
@@ -209,8 +221,9 @@ final class Push
         $row = $id !== null ? $db->fetch('SELECT * FROM push_subscriptions WHERE id = ? AND user_id = ?', [$id, $userId])
             : ($endpoint !== null ? $db->fetch('SELECT * FROM push_subscriptions WHERE endpoint_hash = ? AND user_id = ?', [hash('sha256', $endpoint), $userId]) : null);
         if (!$row) return null;
+        Stats::hit(Stats::STAFF, 'unsub', 1, $db);
         if (!self::topicsOf($row)) {
-            self::delete((int) $row['id']);
+            self::delete((int) $row['id'], $db, null);
             return 'deleted';
         }
         $db->update('push_subscriptions', ['user_id' => null], 'id = :id', ['id' => (int) $row['id']]);
@@ -221,18 +234,20 @@ final class Push
     public static function removeTopics(array $row, ?array $topics): ?string
     {
         $left = $topics === null ? [] : array_values(array_diff(self::topicsOf($row), $topics));
+        foreach (array_diff(self::topicsOf($row), $left) as $t) Stats::hit($t, 'unsub');
         if (!$left && $row['user_id'] === null) {
-            self::delete((int) $row['id']);
+            self::delete((int) $row['id'], null, null);
             return 'deleted';
         }
         app()->db->update('push_subscriptions', ['topics' => self::topicsString($left), 'last_seen' => now()], 'id = :id', ['id' => (int) $row['id']]);
         return 'updated';
     }
 
-    /** Abo löschen (offene Zustellungen werden verworfen) */
-    public static function delete(int $id, ?Database $db = null): void
+    /** Abo löschen (offene Zustellungen werden verworfen). $stat: Art für die Statistik ('gone' = Push-Dienst/Fehler; null = schon gezählt) */
+    public static function delete(int $id, ?Database $db = null, ?string $stat = 'gone'): void
     {
         $db ??= app()->db;
+        if ($stat !== null && ($row = $db->fetch('SELECT topics, user_id FROM push_subscriptions WHERE id = ?', [$id]))) Stats::lost($row, $stat, $db);
         $db->query("UPDATE push_queue SET status = 'gone' WHERE subscription_id = ? AND status = 'queued'", [$id]);
         $db->query('DELETE FROM push_subscriptions WHERE id = ?', [$id]);
     }
@@ -296,6 +311,8 @@ final class Push
                 'perm' => 'chat.use', 'feature' => 'chat', 'default' => true, 'owner' => 'core'],
             'chat.mention' => ['label' => __('Erwähnungen im Chat'), 'help' => __('Wenn Sie in einem Kanal mit @Name erwähnt werden.'),
                 'perm' => 'chat.use', 'feature' => 'chat', 'default' => true, 'owner' => 'core'],
+            'push.manual' => ['label' => __('Mitteilungen der Redaktion'), 'help' => __('Nachrichten, die jemand unter „Mitteilungen“ an Personen der Verwaltung schickt.'),
+                'perm' => null, 'feature' => self::FEATURE, 'default' => true, 'owner' => 'core'],
             'review.pending' => ['label' => __('Einreichungen zur Freigabe'), 'help' => __('Änderungen über API, MCP oder KI warten unter „Eingereicht“ auf Ihre Prüfung.'),
                 'perm' => 'review.manage', 'feature' => 'review', 'default' => true, 'owner' => 'core'],
         ] + self::$extra;
@@ -317,6 +334,13 @@ final class Push
         unset(self::$extra[$key]);
     }
 
+    /** Funktion eines Ereignisses an? (die eigene Funktion „push“ über on(), damit der Selbsttest sie erzwingen kann) */
+    public static function featureOn(?string $feature): bool
+    {
+        if ($feature === null || $feature === '') return true;
+        return $feature === self::FEATURE ? self::on() : Features::on($feature, false);
+    }
+
     /** Darf das Konto das (Rolle + Funktionsumfang)? Gesperrte Konten nie. */
     public static function userCan(array $u, ?string $perm, ?string $table = null, ?array $roles = null): bool
     {
@@ -330,7 +354,7 @@ final class Push
     public static function visibleEvents(array $user): array
     {
         $roles = Permissions::roles();
-        return array_filter(self::events(), fn($ev) => (empty($ev['feature']) || Features::on((string) $ev['feature'], false))
+        return array_filter(self::events(), fn($ev) => self::featureOn($ev['feature'] ?? null)
             && self::userCan($user, $ev['perm'] ?? null, null, $roles));
     }
 
@@ -380,7 +404,7 @@ final class Push
                 error_log("[push] Unbekanntes Ereignis „{$event}“ (Push::events, Extension::pushEvent)");
                 return 0;
             }
-            if (!empty($ev['feature']) && !Features::on((string) $ev['feature'], false)) return 0;
+            if (!self::featureOn($ev['feature'] ?? null)) return 0;
             $db = app()->db;
             $fp = Keys::fingerprint();
             $users = $db->fetchAll('SELECT DISTINCT u.id, u.role, u.disabled, u.locale FROM users u JOIN push_subscriptions s ON s.user_id = u.id WHERE s.key_fp = ?', [$fp]);
@@ -505,11 +529,12 @@ final class Push
         return app()->db->insert('push_messages', ['kind' => $kind, 'event' => mb_substr($event, 0, 60), 'topic' => $topic, 'title' => mb_substr($p['title'], 0, 190),
             'payload_json' => json_encode($p, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'ttl' => max(60, min(28 * 86400, (int) ($o['ttl'] ?? 86400))),
             'urgency' => in_array($o['urgency'] ?? '', ['very-low', 'low', 'normal', 'high'], true) ? $o['urgency'] : 'normal',
-            'collapse' => $collapse, 'user_id' => $user ? (int) $user : null, 'recipients' => 0, 'sent' => 0, 'failed' => 0, 'created_at' => now()]);
+            'collapse' => $collapse, 'user_id' => $user ? (int) $user : null, 'recipients' => 0, 'sent' => 0, 'failed' => 0, 'created_at' => now(),
+            'status' => 'sent', 'source' => $kind === 'test' ? 'test' : 'auto']);
     }
 
     /**
-     * Inhalt einer Mitteilung: nur title, body, url, tag, icon, quiet, lang, ts – Text ohne HTML, gekürzt; Adresse absolut auf dieser
+     * Inhalt einer Mitteilung: nur title, body, url, tag, icon, image, quiet, lang, ts – Text ohne HTML, gekürzt; Adresse absolut auf dieser
      * Website (der Service Worker öffnet nur Adressen seiner eigenen Website). Höchstens WebPush::MAX_PAYLOAD Byte als JSON.
      */
     public static function payload(array $p): array
@@ -521,6 +546,8 @@ final class Push
         if (!preg_match('~^https?://~i', $url)) $url = self::origin() . url(str_starts_with($url, '/') ? $url : '/' . $url);
         $out = ['title' => $title !== '' ? $title : site_name(), 'body' => $clean((string) ($p['body'] ?? ''), 240), 'url' => mb_substr($url, 0, 600),
             'icon' => self::icon(), 'ts' => time()];
+        // Großes Bild (Chrome/Edge/Android zeigen es, andere ignorieren es) – nur absolute Adressen
+        if (!empty($p['image']) && preg_match('~^https?://~i', (string) $p['image'])) $out['image'] = mb_substr((string) $p['image'], 0, 600);
         if (!empty($p['tag'])) $out['tag'] = mb_substr((string) preg_replace('~[^A-Za-z0-9_.:-]~', '', (string) $p['tag']), 0, 64);
         if (!empty($p['quiet'])) $out['quiet'] = \Core\AdminPath::prefix();
         if (!empty($p['lang'])) $out['lang'] = (string) $p['lang'];
@@ -592,6 +619,8 @@ final class Push
         try {
             $fp = Keys::fingerprint();
             $subject = Keys::subject();
+            // Geplante Mitteilungen, deren Zeit gekommen ist: Empfänger jetzt ermitteln und vormerken (Core\Push\Compose)
+            if (Compose::due($db)) $touched[0] = true;
             $start = microtime(true);
             while ($limit > 0 && microtime(true) - $start < $budget) {
                 $rows = $db->fetchAll("SELECT q.id, q.attempts, q.message_id, q.subscription_id, s.id AS sid, s.endpoint, s.p256dh, s.auth, s.key_fp,
@@ -655,6 +684,7 @@ final class Push
                     }
                 }
             }
+            unset($touched[0]);
             foreach (array_keys($touched) as $mid) self::count($db, $mid);
             if ($touched || random_int(1, 20) === 1) self::housekeeping($db, $fp);
             if ($touched) app()->settings->set('sys.push_last_run', ['at' => now(), 'stats' => $stats]);
@@ -683,7 +713,7 @@ final class Push
     {
         $c = [];
         foreach ($db->fetchAll('SELECT status, COUNT(*) AS n FROM push_queue WHERE message_id = ? GROUP BY status', [$mid]) as $r) $c[$r['status']] = (int) $r['n'];
-        $db->update('push_messages', ['sent' => $c['sent'] ?? 0, 'failed' => ($c['failed'] ?? 0) + ($c['gone'] ?? 0) + ($c['expired'] ?? 0)]
+        $db->update('push_messages', ['sent' => $c['sent'] ?? 0, 'failed' => $c['failed'] ?? 0, 'gone' => $c['gone'] ?? 0, 'expired' => $c['expired'] ?? 0]
             + (empty($c['queued']) ? ['done_at' => now()] : []), 'id = :id', ['id' => $mid]);
     }
 
@@ -695,6 +725,7 @@ final class Push
         if ($fp !== '') {
             foreach ($db->fetchAll('SELECT id FROM push_subscriptions WHERE key_fp != ?', [$fp]) as $r) self::delete((int) $r['id'], $db);
         }
+        Stats::purge($db);
     }
 
     // ================================================================= Übersicht

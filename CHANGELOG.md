@@ -6,6 +6,21 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mitteilungen: verfassen, planen, Kanäle, Statistik, Banner und Glocke
+- Neuer Bereich **Mitteilungen** im Hauptmenü (Rechte `push.view`, `push.send`): **Neue Mitteilung** mit Titel, Text, Ziel über die
+  Linkauswahl, optional Bild, Vorschau Telefon/Computer, Empfänger (Kanäle, Rollen, Personen) mit erreichbaren Geräten, sofort oder
+  **geplant** (push:send bzw. nebenbei), Bestätigung mit Empfängerzahl; **Verlauf** aller Mitteilungen (von Hand und automatisch)
+  mit Status und Zustellung, Abbrechen, Als Entwurf kopieren. Neues Ereignis `push.manual` („Mitteilungen der Redaktion“) im Konto.
+- **Kanäle:** freie Kanäle (z. B. „Allgemeine News“, „Notdienst“: Name, Beschreibung, öffentlich, archivieren) neben den Kanälen
+  aus Datentabellen (neu mit Beschreibung für Besucher).
+- **Statistik** nur mit Zählern (`push_stats`): Abos je Kanal, Zu-/Abgänge je Tag/Woche (maßstäbliche Grafik), Versand und
+  Zustellquote je Woche, Geräte der Redaktion je Anlass, Protokoll; Karte „Mitteilungen“ auf der Übersicht.
+- **Website:** Block „Benachrichtigungen abonnieren“ mit mehreren Kanälen zur Auswahl (Abo ändern/abbestellen im selben Block),
+  **Banner** (verzögert, auf Wunsch ab der zweiten Seite, „Nein, danke“ gemerkt) und **schwebende Glocke** mit Kanalauswahl
+  (Mitteilungen → Auf der Website). Abfrage des Browsers nur nach Klick; CSP-sauber, Seiten-Cache-tauglich, zugänglich.
+- Tabelleneinstellungen und Block zeigen bei ausgeschalteter Funktion einen Hinweis (mit Link zu Funktionen & Erweiterungen)
+  statt nichts. Mitteilungen mit Bild (`image`); Zähler je Nachricht getrennt (fehlgeschlagen, ungültig, abgelaufen).
+
 ### Push-Benachrichtigungen (Web Push) für Redaktion und Besucher
 - Neue Funktion **`push`** (Standard aus, Kommunikation): echte Mitteilungen auf Telefon und Computer, auch bei geschlossenem Tab –
   Web Push nach RFC 8030/8291/8292 (VAPID ES256, `aes128gcm`) **ohne neue Abhängigkeit** (`Core\Push\WebPush`: PHP openssl, `hash_hkdf`,

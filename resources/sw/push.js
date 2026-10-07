@@ -31,6 +31,7 @@ self.addEventListener('push', e => {
     }
     const opts = { body: String(d.body || ''), data: { url: pushTarget(d.url).href } };
     if (d.icon) opts.icon = String(d.icon);
+    if (d.image) opts.image = String(d.image);
     if (d.tag) { opts.tag = String(d.tag); opts.renotify = true; }
     if (d.lang) opts.lang = String(d.lang);
     if (d.ts) opts.timestamp = Number(d.ts) * 1000;

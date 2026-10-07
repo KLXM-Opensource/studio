@@ -75,6 +75,7 @@ final class SearchController extends AdminController
             ['/admin/chat', __('Chat'), 'chat', \Core\Chat\Chat::canUse(), 'chat nachrichten'],
             ['/admin/ai', \Core\AI\Assist::brand(), 'ai', \Core\AI\Assist::navVisible(), 'ki assistent texte übersetzen seo'],
             ['/admin/ai/eingereicht', __('Eingereicht'), 'review', \Core\Review\Queue::canReview(), 'eingereicht freigabe prüfen review'],
+            ['/admin/mitteilungen', __('Mitteilungen'), 'push', \Core\Push\Push::on() && (can('push.view') || can('push.send')), 'mitteilungen push benachrichtigung senden kanäle statistik abos'],
         ];
         foreach (\Core\AdminPages::nav('main') as [$href, $label, $key, $vis]) $main[] = [$href, $label, $key, $vis, mb_strtolower($label) . ' ' . $href];
         foreach ($main as [$href, $label, $key, $vis, $kw]) {
@@ -93,6 +94,52 @@ final class SearchController extends AdminController
         foreach (\Core\AdminPages::ofKind('settings', 'stats') as $ap) {
             $actions[] = [$ap['label'], $ap['description'] !== '' ? $ap['description'] : ($ap['kind'] === 'stats' ? __('Statistiken') : __('Einstellungen der Funktionen')),
                 $ap['href'], $ap['icon'], ($ap['kind'] === 'stats' ? 'statistik bericht ' : 'einstellungen konfiguration ') . $ap['description'] . ' ' . $ap['href']];
+        }
+        // Einstellungen im Detail: Bereiche der Grundeinstellungen (mit ihren Feldern als Suchwörtern), Funktionen, Konto, Handbuch
+        $more = [];
+        if (can('system.manage')) {
+            $sysIco = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
+                'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle'];
+            foreach (\Core\SystemSchema::groups() as $g) {
+                $kw = implode(' ', array_map(fn($f) => (string) ($f['label'] ?? '') . ' ' . (string) ($f['help'] ?? ''), $g['fields']));
+                $more[] = [$g['label'], __('Grundeinstellungen'), '/admin/system#' . $g['id'], $sysIco[$g['id']] ?? 'gear-six', mb_strtolower($kw)];
+            }
+            foreach ([['keys', 'Verschlüsselung', 'lock-key', 'schlüssel verschlüsselung anfragen secret'], ['pools', __('Geteilte Medien'), 'images', 'pool geteilt medien'],
+                ['push', __('Push-Benachrichtigungen'), 'bell-ringing', 'push benachrichtigung mitteilung vapid cron'], ['umgebung', __('Umgebung'), 'hard-drives', 'staging testumgebung live production noindex'],
+                ['adminpath', __('Adresse der Verwaltung'), 'link', 'admin pfad adresse login verwaltung'], ['info', 'Systeminfo', 'info', 'system php version speicher']] as [$id, $l, $i, $k]) {
+                $more[] = [$l, __('Grundeinstellungen'), '/admin/system#' . $id, $i, $k];
+            }
+            if (\Core\Fonts::canManage()) $more[] = [__('Schriften'), __('Grundeinstellungen'), '/admin/system/fonts', 'text-t', 'schrift fonts google'];
+            if (\Core\KitPackages::canManage()) $more[] = [__('Kits'), __('Grundeinstellungen'), '/admin/system/kits', 'package', 'kit theme paket'];
+            if (\Core\Domains::available()) $more[] = [__('Domain'), __('Grundeinstellungen'), '/admin/system/domain', 'globe', 'domain adresse hauptadresse weiterleitung'];
+        }
+        if (\Core\Features::canView()) {
+            foreach (\Core\Features::catalog() as $key => $def) {
+                $more[] = [(string) $def[0], __('Funktionen & Erweiterungen'), '/admin/funktionen#f-' . preg_replace('~[^a-z0-9]~', '-', $key), 'toggle-right',
+                    mb_strtolower($key . ' ' . (string) (\Core\FeatureInfo::get($key)['desc'] ?? ''))];
+            }
+        }
+        foreach ([['profil', __('Profil'), 'name sprache darstellung'], ['anmeldedaten', __('Anmeldedaten'), 'passwort e-mail passkey'], ['zwei-faktor', __('Zwei-Faktor-Anmeldung'), '2fa totp passkey sicherheit'],
+            ['favoriten', __('Favoriten'), 'favoriten stern'], ['benachrichtigungen', __('Benachrichtigungen'), 'push mitteilungen geräte']] as [$a, $l, $k]) {
+            $more[] = [$l, __('Konto'), '/admin/account#' . $a, 'user', $k . ' konto'];
+        }
+        // Handbuch: Kapitel aus help/manual.php ($core) – Titel als Treffer, Sprung auf das Kapitel
+        static $chapters = null;
+        if ($chapters === null) {
+            $chapters = [];
+            $src = (string) @file_get_contents(ROOT . '/app/Admin/views/help/manual.php');
+            if (preg_match('~\$core = \[(.*?)\n\];~s', $src, $m) && preg_match_all("~'([a-z0-9-]+)' => '([^']+)'~u", $m[1], $mm, PREG_SET_ORDER)) {
+                foreach ($mm as [, $k, $t]) $chapters[$k] = $t;
+            }
+        }
+        foreach ($chapters as $k => $t) $more[] = [__($t), __('Handbuch'), '/admin/hilfe#' . $k, 'book-open', 'hilfe handbuch anleitung ' . $k];
+        if ($q !== '') {
+            $hits = [];
+            foreach ($more as [$t, $sub, $href, $icon, $kw]) {
+                $s = self::score($q, $t) * 3 + self::score($q, $t . ' ' . $kw);
+                if ($s > 0) $hits[] = ['title' => $t, 'sub' => $sub, 'url' => url($href), 'icon' => $icon, 's' => $s];
+            }
+            if ($hits) $groups[] = ['label' => __('Einstellungen & Hilfe'), 'items' => self::top($hits, 6)];
         }
         $items = [];
         foreach ($actions as [$t, $sub, $href, $icon, $kw]) {

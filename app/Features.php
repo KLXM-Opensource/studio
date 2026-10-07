@@ -89,7 +89,7 @@ final class Features
             'glossary' => ['Glossar: Fachbegriffe auf der Website erklären (Hinweis im Text, Übersicht A–Z)', []],
             // Push-Benachrichtigungen (Core\Push): Redaktion (Konto → Benachrichtigungen) und Besucher (Abo neuer Einträge je Datentabelle) –
             // Standard aus; VAPID-Schlüssel entstehen beim Einschalten (config.local.php)
-            'push' => ['Push-Benachrichtigungen (Redaktion und Abos neuer Einträge für Besucher)', []],
+            'push' => ['Push-Benachrichtigungen (Redaktion und Abos neuer Einträge für Besucher)', ['push.view', 'push.send']],
         ], self::$extra);
     }
 
