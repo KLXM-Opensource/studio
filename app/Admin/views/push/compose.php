@@ -64,7 +64,7 @@ $visitorsBlocked = !Push::visitorsAllowed();
           <div class="media-field" data-accept="image" data-pm-image><input type="hidden" id="pm-image" name="m[image]" value="<?= e((string) ($old['image'] ?? '')) ?>">
             <div class="media-field-preview"><?= Fields::mediaPreview(($old['image'] ?? '') !== '' ? (int) $old['image'] : null) ?></div>
             <button type="button" class="btn btn--small" data-media-pick><?= e(__('Auswählen …')) ?></button> <button type="button" class="btn btn--small btn--ghost" data-media-clear><?= e(__('Entfernen')) ?></button></div>
-          <p class="f-help"><?= e(__('Großes Bild in der Mitteilung – zeigen Chrome, Edge und Android; Safari und Firefox zeigen nur Titel, Text und das App-Icon.')) ?></p><?= $err('image') ?></div>
+          <p class="f-help"><?= e(__('Großes Bild in der Mitteilung – zeigen Chrome und Edge unter Windows sowie Android. macOS (auch Chrome auf dem Mac), iPhone/iPad, Safari und Firefox zeigen nur Titel, Text und das Symbol.')) ?></p><?= $err('image') ?></div>
       </div>
     </section>
 

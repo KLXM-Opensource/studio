@@ -6651,7 +6651,7 @@ return [
     'Gesendet' => 'Sent',
     'Gespeichert werden nur Tageszähler je Kanal (2 Jahre). „Abgelaufen“: Der Push-Dienst meldet das Abo als ungültig, es scheiterte mehrmals oder gehörte zu alten Schlüsseln.' => 'Only daily counters per channel are stored (2 years). “Expired”: the push service reports the subscription as invalid, it failed several times or belonged to old keys.',
     'Glocke' => 'Bell',
-    'Großes Bild in der Mitteilung – zeigen Chrome, Edge und Android; Safari und Firefox zeigen nur Titel, Text und das App-Icon.' => 'Large image in the notification – shown by Chrome, Edge and Android; Safari and Firefox only show title, text and the app icon.',
+    'Großes Bild in der Mitteilung – zeigen Chrome und Edge unter Windows sowie Android. macOS (auch Chrome auf dem Mac), iPhone/iPad, Safari und Firefox zeigen nur Titel, Text und das Symbol.' => 'Large image in the notification – shown by Chrome and Edge on Windows and by Android. macOS (including Chrome on a Mac), iPhone/iPad, Safari and Firefox only show title, text and the icon.',
     'Häufigste Fehler' => 'Most frequent errors',
     'Höchstens {n} Tage im Voraus.' => 'At most {n} days in advance.',
     'Jetzt senden' => 'Send now',
