@@ -3190,3 +3190,15 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .fx-fold>summary::after{order:3}
 .fx-checkgrp__c{color:var(--adm-t3);font-weight:600}
 .fx-fold>summary:has(.fx-add)::after{margin-left:6px}
+/* Grundeinstellungen: Unterseiten mit eigener Adresse (Schriften, Kits) unten in der Seitenleiste, abgesetzt durch eine Linie */
+.adm-tabs__sep{display:none}
+.adm-tabs__link{display:none;text-decoration:none}
+@media (min-width:1000px){
+  .adm-tabs-form--side .adm-tabs__sep{display:block;height:1px;margin:6px 8px;background:var(--fx-line,var(--adm-line))}
+  html.adm-ui .adm-tabs-form--side .adm-tabs .adm-tabs__link{display:flex;align-items:center;gap:9px;width:100%;min-height:30px;padding:4px 8px 4px 6px;
+    border-radius:7px;color:var(--adm-ink);font:500 13.5px/1.25 var(--adm-font)}
+  html.adm-ui .adm-tabs-form--side .adm-tabs .adm-tabs__link:hover{background:var(--adm-press);color:var(--adm-ink)}
+  .adm-tabs-form--side .adm-secnav a.is-warn .adm-tabs__ico{background:var(--adm-envwarn)}
+}
+/* Unterseiten mit Seitenleiste (Schriften, Kits): breite Tabellen scrollen in sich, nicht die Seite */
+.us-main .adm-table{display:block;max-width:100%;overflow-x:auto}

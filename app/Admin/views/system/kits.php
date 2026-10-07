@@ -12,6 +12,11 @@ $siteLabel = fn(string $k) => $k === \Core\Site::DEFAULT ? __('Hauptwebsite') . 
     <p class="adm-muted"><?= e(__('Kits bringen Gestaltung, Blöcke und Startinhalte einer Website mit. Sie gelten für die ganze Installation: Jede Website wählt ihr Kit unter Grundeinstellungen → Aktives Kit. Zusätzliche Kits lassen sich als Paket installieren – per Composer oder als ZIP-Datei.')) ?></p></div>
 </header>
 
+<div class="adm-tabs-form--side us-shell" data-secnav>
+<?php $current = 'kits'; include __DIR__ . '/_sidenav.php'; ?>
+  <div class="us-main">
+
+
 <section class="adm-card adm-card--flush" id="installiert" aria-labelledby="kits-h">
   <h2 id="kits-h" class="adm-sr"><?= e(__('Installierte Kits')) ?></h2>
   <table class="adm-table">
@@ -61,3 +66,5 @@ $siteLabel = fn(string $k) => $k === \Core\Site::DEFAULT ? __('Hauptwebsite') . 
   <?php endif; ?>
   <p class="f-help"><?= e(__('Geprüft werden: Größe, Pfade (keine absoluten Pfade, kein „..“, keine symbolischen Links), Kit-Name, Angaben label/version, die verlangte Core-Version (requires) und die PHP-Syntax. Hochgeladene Kits liegen unter storage/kits/{name}, ihre Assets unter public/assets/kits/{name}. Per Composer: Paket vom Typ klxm-studio-kit, danach php bin/console kits:publish.')) ?></p>
 </section>
+  </div>
+</div>

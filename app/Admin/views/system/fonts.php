@@ -18,6 +18,11 @@ $preview = fn(string $id) => url('/admin/system/fonts/preview/' . $id);
     <p class="adm-muted"><?= e(__('Schriften aus dem Google-Fonts-Katalog einmalig auf den Server laden und von der eigenen Domain ausliefern – ohne Verbindung der Besucher zu Google (DSGVO). Installierte Schriften stehen allen Websites dieser Installation im Style-Editor (Design) zur Verfügung.')) ?></p></div>
 </header>
 
+<div class="adm-tabs-form--side us-shell" data-secnav>
+<?php $current = 'fonts'; include __DIR__ . '/_sidenav.php'; ?>
+  <div class="us-main">
+
+
 <div class="fo-text f">
   <label for="fo-text"><?= e(__('Vorschautext')) ?></label>
   <input id="fo-text" type="text" value="<?= e($sample) ?>" maxlength="120" data-font-text form="fo-search" name="text">
@@ -118,3 +123,5 @@ $preview = fn(string $id) => url('/admin/system/fonts/preview/' . $id);
   <p class="f-help"><?= e(__('Katalog: Fontsource (Spiegel von Google Fonts), einmal täglich vom Server abgefragt. Vorschauen werden über diese Website geladen.')) ?></p>
   <?php endif; ?>
 </section>
+  </div>
+</div>

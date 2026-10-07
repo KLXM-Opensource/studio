@@ -155,7 +155,9 @@ $$('[data-tabs]').forEach(form => {
     const sel = d.createElement('select');
     sel.setAttribute('aria-label', list.getAttribute('aria-label') || '');
     tabs.forEach(t => sel.add(new Option(($('.adm-tabs__label', t)?.textContent || t.textContent.trim()) + (t.dataset.tabNote ? ' ● ' + t.dataset.tabNote : ''), t.dataset.tab)));
-    sel.addEventListener('change', () => select(sel.value));
+    // Unterseiten mit eigener Adresse (Schriften, Kits) – im Auswahlfeld als weitere Einträge, die dorthin wechseln
+    $$('[data-tab-link]', list).forEach(a => sel.add(new Option($('.adm-tabs__label', a)?.textContent || a.textContent.trim(), 'link:' + a.href)));
+    sel.addEventListener('change', () => { if (sel.value.startsWith('link:')) location.href = sel.value.slice(5); else select(sel.value); });
     picker.append(sel); list.before(picker); list.classList.add('has-select');
     picker = sel;
   }

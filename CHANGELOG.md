@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Grundeinstellungen: Schriften und Kits als Unterseiten
+- **Schriften** und **Kits** stehen unten in der Seitenleiste der Grundeinstellungen (statt Knöpfen im Kopf); ihre Seiten zeigen dieselbe Leiste (`system/_sidenav.php`, Links auf `/admin/system#bereich`), schmal im Auswahlfeld. Breite Tabellen scrollen dort in sich.
+
 ### Benutzer & Rollen: Unterseiten mit Übersicht, Rollen wieder als Karten
 - Bereichsleiste wie in den Grundeinstellungen, aber je Bereich eine eigene Adresse: **Übersicht** (`/admin/users`:
   Personen, ohne zweiten Faktor bzw. Pflicht noch nicht eingerichtet, Passkeys, offene Einladungen mit Ablauf, Personen je
