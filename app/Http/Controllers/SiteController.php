@@ -19,6 +19,7 @@ final class SiteController
 {
     public function home(Request $r): Response
     {
+        if ($wait = $this->onboarding()) return $wait;
         // Landing-Domain (Core\Landings): „/“ zeigt die Einstiegsseite der Landingpage
         if ($l = Landings::current()) return $this->landing($r, $l, '');
         $page = Pages::home() ?? throw new HttpException(404);
@@ -28,6 +29,7 @@ final class SiteController
     /** Seiten nach vollständigem Pfad, Detailseiten von Datentabellen, Weiterleitung alter Kurz-Adressen */
     public function page(Request $r, string $path): Response
     {
+        if ($wait = $this->onboarding()) return $wait;
         $path = trim($path, '/');
         if ($l = Landings::current()) return $this->landing($r, $l, $path);
         // Sprachpräfix /en/…: weitere Sprachen; die Standardsprache hat kein Präfix
@@ -278,6 +280,15 @@ final class SiteController
             "form-action 'self' https:",
             "frame-ancestors 'self'",
         ]);
+    }
+
+    /** Erststart noch offen (Core\Onboarding): Angemeldete in den Willkommen-Bildschirm, Besucher „wird eingerichtet“ (503) */
+    private function onboarding(): ?Response
+    {
+        if (!\Core\Onboarding::pending()) return null;
+        if (app()->auth->check()) return Response::redirect(url('/admin/willkommen'));
+        $html = \Core\Theme::capture(ROOT . '/app/Views/setup-pending.php', ['lang' => \Core\Lang::current()]);
+        return (new Response($html, 503))->header('Retry-After', '3600')->header('Cache-Control', 'no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
     private function maintenance(): Response

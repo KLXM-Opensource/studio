@@ -59,6 +59,8 @@ array_splice($dataList['fields'], (int) array_search('link_detail', array_column
 
 return [
     'label' => 'Editorial (Magazin & Verband)',
+    'description' => 'Für Magazine, Verbände und Kultur: Zeitungskopf, Rubriken, starke Aufmacher, Termine und Mitteilungen.',
+    'description_en' => 'For magazines, associations and culture: newspaper masthead, sections, strong lead stories, events and announcements.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

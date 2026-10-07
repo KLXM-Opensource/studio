@@ -181,7 +181,9 @@ final class NetworkController extends AdminController
         $user = $this->network($r);
         $key = strtolower($r->str('key'));
         try {
-            $res = Sites::create($key, preg_split('~[\s,]+~', $r->str('hosts')) ?: [], $r->str('theme'));
+            // Startinhalte: beim ersten Anmelden entscheiden (Willkommen-Bildschirm) oder hier vorgeben (Core\Onboarding)
+            $content = in_array($r->str('content'), ['ask', 'full', 'empty'], true) ? $r->str('content') : 'ask';
+            $res = Sites::create($key, preg_split('~[\s,]+~', $r->str('hosts')) ?: [], $r->str('theme'), ['seed' => $content]);
             Network::ensureKey();
         } catch (\InvalidArgumentException $e) {
             return $this->back('/admin/network#neu', 'error', $e->getMessage());

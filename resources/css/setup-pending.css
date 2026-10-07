@@ -1,0 +1,11 @@
+/* Hinweis „Hier entsteht eine neue Website“ (app/Views/setup-pending.php) – ohne Kit, hell und dunkel */
+:root{color-scheme:light dark;--sp-bg:#F6F5F2;--sp-ink:#1B1F28;--sp-muted:#5A606C;--sp-a:#314164}
+@media (prefers-color-scheme:dark){:root{--sp-bg:#14161B;--sp-ink:#EEF0F3;--sp-muted:#A6ADB8;--sp-a:#9DB0D8}}
+html,body{height:100%;margin:0}
+body{display:grid;place-items:center;padding:24px;box-sizing:border-box;background:var(--sp-bg);color:var(--sp-ink);font:400 1.0625rem/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.sp{display:grid;justify-items:center;gap:14px;max-width:34rem;text-align:center}
+.sp__mark{width:44px;height:44px;border-radius:50%;border:3px solid var(--sp-a);border-right-color:transparent;animation:sp 1.6s linear infinite}
+.sp h1{margin:8px 0 0;font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.2;font-weight:700;text-wrap:balance}
+.sp p{margin:0;color:var(--sp-muted)}
+@keyframes sp{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){.sp__mark{animation:none;border-right-color:var(--sp-a)}}

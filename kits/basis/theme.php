@@ -33,6 +33,8 @@ $days = ['1' => 'Montag', '2' => 'Dienstag', '3' => 'Mittwoch', '4' => 'Donnerst
 
 return [
     'label' => 'Basis (neutral)',
+    'description' => 'Neutrales Kit für Unternehmen und Organisationen: vier Navigationen, sieben Design-Vorlagen, Musterseiten für Leistungen, Team und Kontakt.',
+    'description_en' => 'Neutral kit for companies and organisations: four navigations, seven design presets, sample pages for services, team and contact.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

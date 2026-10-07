@@ -42,6 +42,7 @@ return [
     // ======================================================================================================== § 1 Meta
     'label' => 'Frameworks (Tailwind / UIkit)',
     'description' => 'Demo-Kit: dieselben Blöcke wahlweise mit Tailwind CSS v4 oder UIkit 3 – zeigt, wie ein Framework-Kit mit Bearbeiten auf der Website, Glossar, Datenlisten und Formularen zusammenspielt.',
+    'description_en' => 'Demo kit: the same blocks with Tailwind CSS v4 or UIkit 3 – shows how a framework-based kit works with on-page editing, glossary and forms.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

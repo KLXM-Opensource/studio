@@ -47,6 +47,7 @@ $link = fn(string $prefix = 'link', string $label = 'Link') => [
 return [
     'label' => 'Nature – organisch & ruhig',
     'description' => 'Warm, erdig und ruhig für Höfe, Gärtnereien, Naturschutz und Outdoor: Moos, Sand und Ton, weiche Serif, Blattmarken, Wellen und Höhenlinien, vier Jahreszeiten als Vorlagen, Waldnacht als dunkles Schema.',
+    'description_en' => 'Warm, earthy and calm for farms, garden centres, nature conservation and outdoor: moss, sand and clay, soft serif, generated landscapes per season.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

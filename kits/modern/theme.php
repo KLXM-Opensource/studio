@@ -44,6 +44,7 @@ $link = fn(string $prefix = 'link', string $label = 'Link') => [
 return [
     'label' => 'Modern – klar und selbstbewusst',
     'description' => 'Zeitgemäßes Kit für Studios, Beratungen und Unternehmen: große Grotesk-Typografie, viel Weißraum, kräftige Farbflächen, Bento-Raster und präzise Karten. Vier Navigationen, vier Farbvorlagen, hell und dunkel, WCAG 2.2 AA.',
+    'description_en' => 'Contemporary kit for studios, consultancies and companies: large grotesque type, lots of white space, strong colour areas and a bento grid.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

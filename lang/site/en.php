@@ -328,4 +328,8 @@ return [
     'mit {name}' => 'with {name}',
     'Andere Karten-App' => 'Other map app',
     '…' => '…',
+    // Erststart: Hinweis für Besucher
+    'Hier entsteht eine neue Website' => 'A new website is coming',
+    'Hier entsteht eine neue Website.' => 'A new website is coming soon.',
+    'Sie wird gerade eingerichtet – schauen Sie bald wieder vorbei.' => 'It is being set up right now – please check back soon.',
 ];

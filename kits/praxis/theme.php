@@ -51,6 +51,8 @@ $days = ['1' => 'Montag', '2' => 'Dienstag', '3' => 'Mittwoch', '4' => 'Donnerst
 
 return [
     'label' => 'Praxis – Arzt- und Fachpraxen',
+    'description' => 'Für Arzt- und Fachpraxen: Sprechzeiten, Praxisdaten und verschlüsselte Online-Anfragen für Rezepte, Überweisungen und Termine.',
+    'description_en' => 'For medical practices: opening hours, practice data and encrypted online requests for prescriptions, referrals and appointments.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',   // benötigte Core-Version
 

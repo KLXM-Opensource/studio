@@ -47,6 +47,7 @@ $link = fn(string $prefix = 'link', string $label = 'Link') => [
 return [
     'label' => 'Essenz – weniger, aber besser',
     'description' => 'Funktionaler Minimalismus, inspiriert von den zehn Thesen für gutes Design von Dieter Rams: warmes Hellgrau, Graphit, ein Signal, 8-Punkt-Raster, Karten wie Geräte-Paneele – ruhig, präzise, langlebig und leicht.',
+    'description_en' => 'Functional minimalism inspired by Dieter Rams’ ten principles of good design: warm light grey, a single signal colour, cards like device panels.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

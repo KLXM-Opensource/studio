@@ -68,9 +68,10 @@ final class App
         // KI (Symfony AI, config 'ai'): semantische Suche der Wissensdatenbank einsetzen, falls konfiguriert
         AI\Ai::boot();
 
-        // Erststart: Inhalte des Themes einspielen
-        if (!$app->db->fetchValue('SELECT COUNT(*) FROM pages')) {
-            (new Seeder($app))->run();
+        // Erststart: Inhalte des Kits einspielen – sobald Kit und Startinhalte entschieden sind (Core\Onboarding;
+        // sonst wählt die Administration beides im Willkommen-Bildschirm)
+        if (!$app->db->fetchValue('SELECT COUNT(*) FROM pages') && ($seedMode = Onboarding::mode($app)) !== null) {
+            (new Seeder($app))->run($seedMode);
         }
         // Datentabellen: neue Systemspalten (Mehrsprachigkeit) einmalig nachtragen
         if ((int) $app->settings->get('sys.data_schema', 0) < 2) {

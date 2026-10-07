@@ -20,6 +20,8 @@ final class DashboardController extends AdminController
     public function index(Request $r): Response
     {
         $user = $this->auth($r);
+        // Erststart noch offen: zuerst Kit und Startinhalte wählen (Core\Onboarding)
+        if (\Core\Onboarding::pending()) return Response::redirect(url('/admin/willkommen'));
         $cards = Dashboard::cards($user);
         $checks = Metrics::setupChecks();
         $ext = Dashboard::extensions($user);

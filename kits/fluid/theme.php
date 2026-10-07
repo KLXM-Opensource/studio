@@ -41,6 +41,8 @@ $link = fn(string $prefix = 'link', string $label = 'Link') => [
 
 return [
     'label' => 'Fluid (breakpointlos)',
+    'description' => 'Breakpointlos: Schrift, Abstände und Raster wachsen stufenlos mit der Bildschirmbreite – sehr viel über den Style-Editor einstellbar.',
+    'description_en' => 'Breakpoint-free: type, spacing and grid scale fluidly with the screen width – a lot can be set in the style editor.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

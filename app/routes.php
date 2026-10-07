@@ -26,6 +26,9 @@ return function (Router $r): void {
     $r->post('/admin/passwort-vergessen', [Admin\PasswordController::class, 'forgot']);
     $r->get('/admin/passwort/{token}', [Admin\PasswordController::class, 'resetForm']);
     $r->post('/admin/passwort/{token}', [Admin\PasswordController::class, 'reset']);
+    // Erststart: Kit und Startinhalte wählen (Core\Onboarding)
+    $r->get('/admin/willkommen', [Admin\WelcomeController::class, 'index']);
+    $r->post('/admin/willkommen', [Admin\WelcomeController::class, 'save']);
     $r->get('/admin/setup', [Admin\AuthController::class, 'setupForm']);
     $r->post('/admin/setup', [Admin\AuthController::class, 'setup']);
     $r->get('/admin/account', [Admin\UserController::class, 'account']);

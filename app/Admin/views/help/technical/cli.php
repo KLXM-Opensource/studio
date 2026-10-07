@@ -13,7 +13,7 @@ $__cmds = [
     ],
     'Websites & Netzwerk' => [
         ['site:list', 'Websites dieser Installation'],
-        ['site:create <key> <domain,…> [kit]', 'Neue Website (eigene Datenbank, Medien, Benutzer); gibt das Setup-Token aus'],
+        ['site:create <key> <domain,…> [kit] [--content=ask|full|empty]', 'Neue Website (eigene Datenbank, Medien, Benutzer); gibt das Setup-Token aus. Ohne Kit oder mit --content=ask wählt das erste Login Kit und Startinhalte (Willkommen-Bildschirm); mit Kit ohne --content sofort mit Startinhalten'],
         ['site:hosts <key> [add|remove <domain>] [--landing]', 'Domains einer Website anzeigen/ändern; --landing = Domain für Landingpages (ändert nur hosts bzw. landing_hosts in config/sites/{key}.php, Sicherung .bak) – siehe Landingpages'],
         ['network:list', 'Netzwerk-Konten und Websites'],
         ['network:user <email> [--invite|--create|--disable|--enable|--reset-2fa|--password] [--name="…"] [--lang=de|en]', 'Netzwerk-Admin einladen (E-Mail mit Link, 7 Tage, 2FA beim Annehmen; ohne Versand wird der Link angezeigt) bzw. Netzwerk-Konto anlegen, sperren, entsperren, 2FA zurücksetzen, Passwort setzen'],

@@ -64,6 +64,7 @@ return [
     // und kit:create lesen die Zeile per Muster, ohne die Datei auszuführen.
     'label' => 'Start-Kit',
     'description' => 'Das kleinste vollständige Kit: sechs kommentierte Beispielblöcke, Design-Tokens, hell und dunkel, mehrsprachig – der Ausgangspunkt für eigene Kits.',
+    'description_en' => 'The smallest complete kit for your own development: six commented sample blocks, design tokens, light and dark, multilingual.',
     'version' => '1.0.0',
     'requires' => '>=1.0.0',   // Core-Version (CMS_VERSION); passt sie nicht, warnt Verwaltung → System
     'source_lang' => 'de',     // Sprache der Quelltexte in lt() und __() – Übersetzungen in lang/ (§ 11)

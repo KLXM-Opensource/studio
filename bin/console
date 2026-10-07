@@ -25,7 +25,8 @@
  *
  * Websites & Netzwerk
  *   site:list                                         Websites dieser Installation
- *   site:create <key> <domain,…> [kit]                Neue Website (eigene Datenbank, Medien, Benutzer)
+ *   site:create <key> <domain,…> [kit] [--content=ask|full|empty]
+ *                                                     Neue Website (eigene Datenbank, Medien, Benutzer)
  *   site:hosts <key> [add|remove <domain>] [--landing]
  *                                                     Domains einer Website anzeigen/ändern (--landing: Domain für Landingpages)
  *   network:list                                      Netzwerk-Administration: Konten (Netzwerk-Website) und Websites
@@ -382,18 +383,24 @@ switch ($cmd) {
         break;
 
     case 'site:create':
-        [$key, $hosts, $theme] = [$args[0] ?? '', $args[1] ?? '', $args[2] ?? ''];
-        if ($key === '' || $hosts === '') { fwrite(STDERR, "Aufruf: site:create <key> <domain[,domain2]> [kit]\n"); exit(1); }
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        [$key, $hosts, $theme] = [$pos[0] ?? '', $pos[1] ?? '', $pos[2] ?? ''];
+        if ($key === '' || $hosts === '') { fwrite(STDERR, "Aufruf: site:create <key> <domain[,domain2]> [kit] [--content=ask|full|empty]\n"); exit(1); }
         try {
-            $r = Core\Sites::create($key, explode(',', $hosts), $theme);
+            // --content=ask|full|empty (Core\Onboarding): ohne Angabe mit Kit wie bisher sofort mit Startinhalten, ohne Kit im Willkommen-Bildschirm
+            $content = '';
+            foreach ($args as $a) if (str_starts_with($a, '--content=')) $content = substr($a, 10);
+            if ($content !== '' && !in_array($content, ['ask', 'full', 'empty'], true)) { fwrite(STDERR, "--content=ask|full|empty\n"); exit(1); }
+            $r = Core\Sites::create($key, explode(',', $hosts), $theme, $content !== '' ? ['seed' => $content] : []);
         } catch (InvalidArgumentException $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
         Core\Network\Network::ensureKey();   // Installationsschlüssel für die Netzwerk-Anmeldung (config.local.php)
         $first = explode(',', $hosts)[0];
         echo "Website „{$key}“ angelegt: " . str_replace(ROOT . '/', '', $r['file']) . "\n\n"
            . "1. Domain im Hosting auf denselben Ordner zeigen lassen (Plesk: Dokumentstamm = httpdocs/public).\n"
            . "2. Erstes Konto anlegen: https://{$first}/admin/setup  –  Setup-Token: {$r['setup_token']}\n"
+           . (($theme === '' || $content === 'ask') ? "   Danach fragt der Willkommen-Bildschirm nach Kit und Startinhalten.\n" : '')
            . "   oder: php bin/console user:create <email> admin --site={$key}\n"
-           . "Datenbank, Medienordner und Startinhalte des Kits entstehen beim ersten Aufruf.\n";
+           . "Datenbank und Medienordner entstehen beim ersten Aufruf" . (($theme === '' || $content === 'ask') ? '' : ', ebenso die ' . ($content === 'empty' ? 'leere Startseite und die Rechtstexte' : 'Startinhalte des Kits')) . ".\n";
         break;
 
     case 'site:hosts':

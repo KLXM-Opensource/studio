@@ -94,6 +94,8 @@ final class AuthController extends AdminController
         }
         app()->auth->createUser($email, $pw, 'admin', $r->str('name'));
         app()->auth->attempt($email, $pw, $r->ip());
+        // Erststart: zuerst Kit und Startinhalte wählen (Willkommen-Bildschirm), sonst direkt zu den Grundeinstellungen
+        if (\Core\Onboarding::pending()) return Response::redirect(url('/admin/willkommen'));
         app()->session->flash('success', 'Willkommen! Ihr Administrationskonto ist angelegt. Bitte richten Sie als Nächstes den E-Mail-Versand und den ' . term('key') . ' ein.');
         return Response::redirect(url('/admin/system'));
     }

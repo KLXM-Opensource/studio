@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Erststart mit Willkommen-Bildschirm: Kit und Startinhalte selbst wählen
+- Neue Websites ohne festgelegtes Kit spielen beim ersten Aufruf nichts mehr ein. Besucher sehen „Hier entsteht eine neue
+  Website“ (503, noindex); nach dem ersten Anmelden wählt die Administration im Willkommen-Bildschirm (`/admin/willkommen`)
+  das Kit (Karten mit Kurzbeschreibung, DE/EN) und ob Startinhalte eingespielt werden – oder ohne: leere Startseite, Impressum
+  und Datenschutz als Vorlagen, Beispiel-Angaben („(Demo)“, Platzhalter, `example.com`, Links auf Musterseiten) bleiben leer.
+- Gilt für Einzel-Installationen und jede Website eines Netzwerks. Netzwerk „Neue Website“ und `site:create` können Kit und
+  Inhalte vorgeben (`--content=ask|full|empty`, Konfiguration `'seed'`); mit fest eingetragenem Kit und ohne `seed` bleibt
+  alles wie bisher (sofort mit Startinhalten). `Core\Onboarding`, `Seeder::run('full'|'empty')`.
+
 ### Website herauslösen: `site:extract`
 - Eine Website einer Multi-Site als eigenständige, lauffähige Installation kopieren: Code, Kit, aktive Erweiterungen (Symlinks
   aufgelöst), Datenbank (SQLite per `VACUUM INTO`, MySQL als Dump), Medien, Suchindex, genutzte Medien-Pools und eine
