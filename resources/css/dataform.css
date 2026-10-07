@@ -28,6 +28,13 @@
   box-sizing:border-box;width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--dff-line);border-radius:var(--dff-radius);
   background:var(--dff-bg);color:var(--dff-ink);font:inherit;line-height:1.4}
 .dff select{height:48px;padding-block:0}
+/* Datum/Uhrzeit auf iPad und iPhone (Safari): ohne appearance:none und min-width:0 hat das native Feld eine eigene Mindestbreite
+   und ragt in die Nachbarspalte (halbe Breite); Text sonst mittig, leeres Feld ohne Höhe */
+.dff input,.dff select{min-width:0;max-width:100%}
+.dff input:is([type=date],[type=time],[type=datetime-local],[type=month]){-webkit-appearance:none;appearance:none;display:block;text-align:start}
+.dff input::-webkit-date-and-time-value{min-height:1.4em;text-align:start}
+.dff input::-webkit-datetime-edit{padding:0}
+
 .dff textarea{min-height:120px;resize:vertical}
 .dff input[type=color]{width:64px;height:44px;padding:2px;border:1.5px solid var(--dff-line);border-radius:var(--dff-radius);background:var(--dff-bg)}
 .dff input[type=file]{padding:9px 12px}

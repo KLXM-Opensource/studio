@@ -5,6 +5,12 @@
 .pfield{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:600;min-width:0}
 .pfield--full{grid-column:1/-1}
 .pfield input:not([type=checkbox]),.pfield select{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--c-input);background:#fff;color:var(--c-ink);font:400 16px var(--font)}
+/* Datum/Uhrzeit auf iPad und iPhone (Safari): das native Feld hat sonst eine eigene Mindestbreite nach seinem Inhalt und ragt
+   in die Nachbarspalte; Text mittig und Höhe 0 bei leerem Feld. appearance:none + min-width:0 hält es in seiner Spalte. */
+.pfield input,.pfield select{box-sizing:border-box;min-width:0;max-width:100%}
+.pfield input:is([type=date],[type=time],[type=datetime-local],[type=month]){-webkit-appearance:none;appearance:none;display:block;text-align:start}
+.pfield input::-webkit-date-and-time-value{min-height:1.4em;text-align:start}
+.pfield input::-webkit-datetime-edit{padding:0}
 .pfield input:focus,.pfield select:focus{border-color:var(--c-bordeaux);outline:none;box-shadow:0 0 0 3px rgba(122,31,53,.18)}
 .pfield [aria-invalid=true]{border-color:#B3261E!important}
 .pcheck{display:flex;gap:10px;align-items:flex-start;font-size:13px;font-weight:400;color:var(--c-text-2);line-height:1.45}
