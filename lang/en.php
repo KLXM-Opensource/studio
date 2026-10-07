@@ -6585,4 +6585,10 @@ return [
     'Was abonniert man, wie oft kommt etwas? Leer = Standardtext (ohne Anmeldung, ohne Tracking, jederzeit abbestellbar).' => 'What do people subscribe to, how often will something arrive? Empty = default text (no sign-up, no tracking, unsubscribe any time).',
     'Kasten mit Überschrift' => 'Box with heading',
     'Schlicht (Text und Button)' => 'Plain (text and button)',
+    // Push: Cronjob-Anleitung (system/_push.php)
+    'Plesk: Websites & Domains → diese Domain → „Geplante Aufgaben“ (Cron-Jobs) → „Aufgabe hinzufügen“.' => 'Plesk: Websites & Domains → this domain → “Scheduled Tasks” (cron jobs) → “Add Task”.',
+    'Aufgabentyp „Befehl ausführen“, den Befehl oben einfügen, Ausführung „Cron-Stil“ mit * * * * * (jede Minute; alle 5 Minuten reicht auch: */5 * * * *).' => 'Task type “Run a command”, paste the command above, run “Cron style” with * * * * * (every minute; every 5 minutes is fine too: */5 * * * *).',
+    'Benachrichtigungen per E-Mail: „Nicht senden“ bzw. nur bei Fehlern. Speichern.' => 'E-mail notifications: “Do not notify” or errors only. Save.',
+    'Ohne Plesk: denselben Befehl mit crontab -e für den Benutzer der Website eintragen, davor * * * * *.' => 'Without Plesk: add the same command via crontab -e for the website user, prefixed with * * * * *.',
+    'Prüfen: Nach ein, zwei Minuten steht oben bei „Letzter Versandlauf“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation (--all).' => 'Check: after a minute or two, “Last send run” above shows a current time. One task covers all websites of this installation (--all).',
 ];

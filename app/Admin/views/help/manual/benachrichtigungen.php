@@ -14,6 +14,16 @@
     <li><b>iPhone und iPad:</b> Mitteilungen gibt es dort nur in der installierten Web-App: in Safari <b>Teilen → „Zum Home-Bildschirm“</b>, die Website vom Home-Bildschirm öffnen, dann wie oben einschalten.</li>
     <li><b>Kommt nichts an?</b> Steht unter dem Schalter „im Browser blockiert“, erlauben Sie Mitteilungen in den Website-Einstellungen des Browsers (Schloss-Symbol neben der Adresse) und laden die Seite neu. Auch der Fokus- bzw. „Nicht stören“-Modus des Geräts kann Mitteilungen zurückhalten. Im privaten Fenster funktionieren Push-Mitteilungen nicht.</li>
   </ul>
+  <h3 id="push-cron">Einmalig für die Agentur: Cronjob einrichten</h3>
+  <p>Damit Mitteilungen pünktlich ankommen – auch wenn gerade niemand die Website aufruft und bei vielen Abos –, verschickt ein <b>Cronjob</b> die Warteschlange jede Minute. Ohne Cron gehen kleine Mengen nebenbei nach Seitenaufrufen raus; das ist nur ein Notbehelf. Den fertigen Befehl (mit dem richtigen Pfad und PHP) zeigt <b>Grundeinstellungen → Push-Benachrichtigungen</b> mit Knopf <b>Kopieren</b>.</p>
+  <ol class="doc-steps">
+    <li><b>Plesk:</b> Websites &amp; Domains → die Domain → <b>Geplante Aufgaben</b> → <b>Aufgabe hinzufügen</b>.</li>
+    <li>Aufgabentyp <b>„Befehl ausführen“</b>, Befehl einfügen, z. B. <code>cd ~/httpdocs &amp;&amp; /opt/plesk/php/8.5/bin/php bin/console push:send --all</code>.</li>
+    <li>Ausführung <b>Cron-Stil</b> <code>* * * * *</code> (jede Minute; <code>*/5 * * * *</code> genügt auch). E-Mail-Benachrichtigung: nicht senden bzw. nur bei Fehlern. Speichern.</li>
+    <li><b>Ohne Plesk:</b> <code>crontab -e</code> als Benutzer der Website und die Zeile <code>* * * * * cd /pfad/zur/installation &amp;&amp; php bin/console push:send --all</code> eintragen.</li>
+    <li><b>Prüfen:</b> In <b>Grundeinstellungen → Push-Benachrichtigungen</b> steht nach ein, zwei Minuten bei „Letzter Versandlauf“ eine aktuelle Zeit; <code>php bin/console push:status --all</code> zeigt dasselbe auf der Kommandozeile.</li>
+  </ol>
+  <p>Eine Aufgabe reicht für alle Websites der Installation. Ohne Push-Funktion oder ohne Abos tut der Lauf nichts und kostet kaum Zeit.</p>
   <h3 id="push-besucher">Für Besucher: neue Einträge abonnieren</h3>
   <ol class="doc-steps">
     <li><b>Tabelle freigeben:</b> unter <b>Daten</b> die Tabelle öffnen, <b>Felder &amp; Einstellungen</b>, Kasten <b>„Benachrichtigungen (Push)“</b> → „Besucher können neue Einträge abonnieren (Push)“ anhaken. Optional: <b>Titel der Mitteilung</b> (z. B. „Neu: {title}“), woher der <b>Kurztext</b> kommt und ein <b>Filter</b> (z. B. nur Einträge der Kategorie „presse“). Speichern.</li>

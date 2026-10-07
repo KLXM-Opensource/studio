@@ -3202,3 +3202,4 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 }
 /* Unterseiten mit Seitenleiste (Schriften, Kits): breite Tabellen scrollen in sich, nicht die Seite */
 .us-main .adm-table{display:block;max-width:100%;overflow-x:auto}
+.push-cron-steps{margin:10px 0 0;padding-left:1.2em;display:grid;gap:4px}
