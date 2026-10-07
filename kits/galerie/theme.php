@@ -45,6 +45,7 @@ return [
     'label' => 'Galerie',
     'description' => 'Für Galerien, Kunstvereine und Projekträume: Künstler, Ausstellungen und Werke als Daten, Viewing Room, Preise auf Anfrage.',
     'description_en' => 'For galleries, art associations and project spaces: artists, exhibitions and works as data, viewing room, prices on request.',
+    'category' => 'branch',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '0.1.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

@@ -22,6 +22,9 @@ final class Onboarding
     /** full = Startinhalte des Kits (Musterseiten, Beispieltexte, ggf. Demo) · empty = leere Startseite + Rechtstexte */
     public const MODES = ['full', 'empty'];
 
+    /** Gruppen der Kits im Willkommen-Bildschirm (Reihenfolge) */
+    public const CATEGORIES = ['general', 'branch', 'dev'];
+
     private static ?bool $pending = null;
 
     /** Wie eingespielt wird – null = noch offen (Kit oder Inhalte nicht entschieden) */
@@ -65,7 +68,8 @@ final class Onboarding
     /**
      * Kits zur Auswahl (erlaubte Kits der Website) mit Bezeichnung und Kurzbeschreibung aus theme.php ('label', 'description',
      * 'description_en') – gelesen ohne die Datei auszuführen (wie Theme::available).
-     * @return array<string, array{label: string, description: string}>
+     * Dazu 'category' (general | branch | dev – Gruppe im Willkommen-Bildschirm, Standard general) und 'recommended' (true = empfohlen).
+     * @return array<string, array{label: string, description: string, category: string, recommended: bool}>
      */
     public static function kits(): array
     {
@@ -75,7 +79,9 @@ final class Onboarding
             $src = (string) @file_get_contents((string) Kit::definitionFile(Kit::dir($name)));
             $get = fn(string $k) => preg_match("~^    '" . $k . "'\s*=>\s*'((?:[^'\\\\]|\\\\.)*)'~m", $src, $m) ? stripslashes($m[1]) : '';
             $desc = ($en ? $get('description_en') : '') ?: $get('description');
-            $out[$name] = ['label' => (string) $label, 'description' => $desc];
+            $cat = $get('category');
+            $out[$name] = ['label' => (string) $label, 'description' => $desc, 'category' => in_array($cat, self::CATEGORIES, true) ? $cat : 'general',
+                'recommended' => (bool) preg_match("~^    'recommended'\s*=>\s*true~m", $src)];
         }
         return $out;
     }

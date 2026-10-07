@@ -43,6 +43,8 @@ return [
     'label' => 'Fluid (breakpointlos)',
     'description' => 'Breakpointlos: Schrift, Abstände und Raster wachsen stufenlos mit der Bildschirmbreite – sehr viel über den Style-Editor einstellbar.',
     'description_en' => 'Breakpoint-free: type, spacing and grid scale fluidly with the screen width – a lot can be set in the style editor.',
+    'category' => 'general',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
+    'recommended' => true,   // im Willkommen-Bildschirm empfohlen und vorausgewählt
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

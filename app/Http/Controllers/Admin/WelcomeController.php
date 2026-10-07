@@ -25,7 +25,8 @@ final class WelcomeController extends AdminController
         [$kit, $content] = Onboarding::preset();
         if ($errors) { $kit = $r->str('kit'); $content = $r->str('content'); }
         $kits = Onboarding::kits();
-        if (!$kit && count($kits) === 1) $kit = (string) array_key_first($kits);
+        // Vorauswahl: einziges erlaubtes Kit, sonst das empfohlene (theme.php → 'recommended')
+        if (!$kit) $kit = count($kits) === 1 ? (string) array_key_first($kits) : (string) (array_key_first(array_filter($kits, fn($k) => $k['recommended'])) ?? '');
         return $this->view('welcome', [
             'user' => null, 'me' => $user, 'css' => ['css/welcome.css'], 'kits' => $kits, 'kit' => $kit, 'seed' => $content, 'errors' => $errors,
             'canSetup' => can('system.manage'), 'network' => Network::isNetworkUser(), 'siteKey' => site()->key,

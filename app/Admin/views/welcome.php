@@ -26,18 +26,25 @@ $name = trim((string) ($me['name'] ?? '')) ?: (string) ($me['email'] ?? '');
       <fieldset class="wel__set<?= isset($errors['kit']) ? ' f--error' : '' ?>"<?= isset($errors['kit']) ? ' aria-describedby="wel-err-kit"' : '' ?>>
         <legend><span class="wel__num" aria-hidden="true">1</span><?= e(__('Welches Kit soll die Website nutzen?')) ?></legend>
         <?= $err('kit') ?>
-        <div class="wel__kits">
-          <?php foreach ($kits as $k => $info): ?>
-          <label class="wel__kit">
-            <input type="radio" name="kit" value="<?= e($k) ?>"<?= $k === $kit ? ' checked' : '' ?> required>
-            <span class="wel__kit-body">
-              <span class="wel__kit-name"><?= e($info['label']) ?></span>
-              <?php if ($info['description'] !== ''): ?><span class="wel__kit-desc"><?= e($info['description']) ?></span><?php endif; ?>
-              <code class="wel__kit-key"><?= e($k) ?></code>
-            </span>
-          </label>
-          <?php endforeach; ?>
+        <p class="wel__hint"><?= e(__('Unsicher? Alle Kits mit Vorschau für Desktop und Handy, hell und dunkel:')) ?> <a href="<?= e(\Core\I18n::locale() === 'en' ? 'https://studio.klxm.de/en/kits' : 'https://studio.klxm.de/kit') ?>" target="_blank" rel="noopener"><?= e(__('Kits ansehen')) ?><span class="sr-only"> <?= e(__('(öffnet in neuem Tab)')) ?></span> ↗</a></p>
+        <?php $groups = ['general' => [__('Allgemein'), __('Für jede Art von Website – Unternehmen, Organisationen, Projekte.')], 'branch' => [__('Für Branchen und Themen'), __('Mit passenden Blöcken, Datentabellen und Musterseiten für einen bestimmten Zweck.')], 'dev' => [__('Für Entwickler'), __('Ausgangspunkt für eigene Kits.')]];
+        foreach ($groups as $g => [$gTitle, $gText]): $list = array_filter($kits, fn($i) => $i['category'] === $g); if (!$list) continue; ?>
+        <div class="wel__group">
+          <h3 class="wel__group-h"><?= e($gTitle) ?> <span><?= e($gText) ?></span></h3>
+          <div class="wel__kits">
+            <?php uasort($list, fn($a, $b) => $b['recommended'] <=> $a['recommended']); foreach ($list as $k => $info): ?>
+            <label class="wel__kit<?= $info['recommended'] ? ' wel__kit--rec' : '' ?>">
+              <input type="radio" name="kit" value="<?= e($k) ?>"<?= $k === $kit ? ' checked' : '' ?> required>
+              <span class="wel__kit-body">
+                <span class="wel__kit-name"><?= e($info['label']) ?><?php if ($info['recommended']): ?> <span class="wel__rec"><?= e(__('Empfohlen')) ?></span><?php endif; ?></span>
+                <?php if ($info['description'] !== ''): ?><span class="wel__kit-desc"><?= e($info['description']) ?></span><?php endif; ?>
+                <code class="wel__kit-key"><?= e($k) ?></code>
+              </span>
+            </label>
+            <?php endforeach; ?>
+          </div>
         </div>
+        <?php endforeach; ?>
       </fieldset>
       <fieldset class="wel__set<?= isset($errors['content']) ? ' f--error' : '' ?>"<?= isset($errors['content']) ? ' aria-describedby="wel-err-content"' : '' ?>>
         <legend><span class="wel__num" aria-hidden="true">2</span><?= e(__('Mit Startinhalten beginnen?')) ?></legend>

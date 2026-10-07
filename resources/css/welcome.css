@@ -24,3 +24,10 @@
 .wel__more h2{margin:0 0 8px;font-size:1rem}
 .wel__more ul{display:grid;gap:6px;margin:0;padding-left:1.2em;color:var(--adm-t2,#5b6270)}
 .wel__logout{justify-self:end;margin:0}
+.wel__group{display:grid;gap:10px}
+.wel__group+.wel__group{margin-top:10px}
+.wel__group-h{display:grid;gap:2px;margin:0;font-size:.98rem}
+.wel__group-h span{font-weight:400;font-size:.88rem;color:var(--adm-t2,#5b6270)}
+.wel__kit--rec{border-color:color-mix(in srgb,var(--adm-a,#2b4b9b) 55%,var(--adm-line,#d6d9df))}
+.wel__rec{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--adm-a,#2b4b9b);color:var(--adm-on-ink,#fff);font-size:.72rem;font-weight:600;vertical-align:1px}
+.wel__hint{margin:-4px 0 4px;color:var(--adm-t2,#5b6270);font-size:.92rem}

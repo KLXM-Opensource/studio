@@ -35,6 +35,7 @@ return [
     'label' => 'Basis (neutral)',
     'description' => 'Neutrales Kit für Unternehmen und Organisationen: vier Navigationen, sieben Design-Vorlagen, Musterseiten für Leistungen, Team und Kontakt.',
     'description_en' => 'Neutral kit for companies and organisations: four navigations, seven design presets, sample pages for services, team and contact.',
+    'category' => 'general',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

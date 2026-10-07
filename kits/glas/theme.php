@@ -46,6 +46,7 @@ return [
     'label' => 'Glas – Mattglas über Farbfeldern',
     'description' => 'Glassmorphism mit Lesbarkeit zuerst: matte, durchscheinende Glasflächen über einem weichen Farbfeld, Lichtkanten, eine ruhige Aurora im Einstieg – geprüfte Kontraste hell und dunkel, deckend bei „Transparenz reduzieren“.',
     'description_en' => 'Glassmorphism with readability first: matte, translucent glass panels over a soft colour field – opaque when “reduce transparency” is on.',
+    'category' => 'general',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

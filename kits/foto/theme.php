@@ -65,6 +65,7 @@ return [
     'label' => 'Foto',
     'description' => 'Für Fotografie und Portfolios: Bilder statt Worte – Bento-Bildstrom, Serien, Fotostrecken, Lightbox, Fotos und Videos per Drag & Drop.',
     'description_en' => 'For photography and portfolios: images instead of words – bento image stream, series, photo galleries, lightbox, photos and videos by drag & drop.',
+    'category' => 'branch',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '0.1.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

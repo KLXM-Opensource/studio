@@ -6206,4 +6206,14 @@ return [
     'Netzwerk-Konto angelegt – bitte anmelden.' => 'Network account created – please sign in.',
     'Sie werden Netzwerk-Administration: weitere Websites anlegen und alle zentral verwalten. Beim ersten Anmelden richten Sie die Zwei-Faktor-Anmeldung ein.' => 'You become the network administration: create further websites and manage all of them centrally. At the first sign-in you set up two-factor sign-in.',
     'eine Website, Sie werden Administrator dieser Website.' => 'one website, you become its administrator.',
+    // Willkommen-Bildschirm: Gruppen der Kits
+    'Allgemein' => 'General',
+    'Ausgangspunkt für eigene Kits.' => 'Starting point for your own kits.',
+    'Empfohlen' => 'Recommended',
+    'Für Branchen und Themen' => 'For industries and topics',
+    'Für Entwickler' => 'For developers',
+    'Für jede Art von Website – Unternehmen, Organisationen, Projekte.' => 'For any kind of website – companies, organisations, projects.',
+    'Mit passenden Blöcken, Datentabellen und Musterseiten für einen bestimmten Zweck.' => 'With matching blocks, data tables and sample pages for a specific purpose.',
+    'Unsicher? Alle Kits mit Vorschau für Desktop und Handy, hell und dunkel:' => 'Not sure? All kits with previews for desktop and mobile, light and dark:',
+    'Kits ansehen' => 'View kits',
 ];

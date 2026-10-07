@@ -61,6 +61,7 @@ return [
     'label' => 'Editorial (Magazin & Verband)',
     'description' => 'Für Magazine, Verbände und Kultur: Zeitungskopf, Rubriken, starke Aufmacher, Termine und Mitteilungen.',
     'description_en' => 'For magazines, associations and culture: newspaper masthead, sections, strong lead stories, events and announcements.',
+    'category' => 'branch',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '1.0.0',
     'requires' => '>=1.0.0',
     'source_lang' => 'de',

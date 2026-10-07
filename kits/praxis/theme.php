@@ -53,6 +53,7 @@ return [
     'label' => 'Praxis – Arzt- und Fachpraxen',
     'description' => 'Für Arzt- und Fachpraxen: Sprechzeiten, Praxisdaten und verschlüsselte Online-Anfragen für Rezepte, Überweisungen und Termine.',
     'description_en' => 'For medical practices: opening hours, practice data and encrypted online requests for prescriptions, referrals and appointments.',
+    'category' => 'branch',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
     'version' => '1.0.0',
     'requires' => '>=1.0.0',   // benötigte Core-Version
 
