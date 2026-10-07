@@ -67,10 +67,23 @@ abstract class AdminController
         if (is_string($perm) && !app()->auth->can($perm, $table)) {
             throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
         }
+        // Mehr Felder als max_input_vars: PHP hat den Rest verworfen – nichts speichern (vor CSRF: das Token kann mit fehlen)
+        if ($r->truncated && !in_array($r->method, ['GET', 'HEAD', 'OPTIONS'], true)) self::truncated($r);
         if ($csrf && !Csrf::valid($r)) {
             throw new HttpException(419, 'Sitzung abgelaufen. Bitte Seite neu laden.');
         }
         return $user;
+    }
+
+    /** Unvollständig angekommenes Formular (Request::$truncated): klare Meldung, zurück zum Formular – es wurde nichts gespeichert */
+    public static function truncated(Request $r): never
+    {
+        $msg = __('Das Formular hat zu viele Felder für die Einstellung „max_input_vars“ des Servers ({n}) – es wurde nichts gespeichert. Bitte die Seite neu laden und mit eingeschaltetem JavaScript erneut speichern (große Formulare werden dann gebündelt gesendet) oder max_input_vars erhöhen.', ['n' => (int) ini_get('max_input_vars')]);
+        if ($r->wantsJson()) throw new HttpException(413, $msg);
+        app()->session->flash('error', $msg);
+        $back = (string) ($r->server['HTTP_REFERER'] ?? '');
+        $same = $back !== '' && parse_url($back, PHP_URL_HOST) === parse_url('//' . $r->host(), PHP_URL_HOST);
+        throw new RedirectException($same ? $back : url('/admin'));
     }
 
     protected function view(string $view, array $vars = [], int $status = 200): Response

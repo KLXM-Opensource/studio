@@ -535,7 +535,7 @@ class Finder {
     r.innerHTML = `
       <aside class="fx-side" aria-label="Orte"></aside>
       <section class="fx-main">
-        <header class="fx-bar">
+        <header class="fx-bar"${this.mode === 'library' ? ' data-fav-slot="fx-tbtn"' : ''}>
           <button type="button" class="fx-tbtn fx-sidetoggle" data-sidetoggle aria-label="Seitenleiste ein-/ausblenden">${SVG.side}</button>
           <div class="fx-title"><strong data-title>Alle Medien</strong><small data-count></small></div>
           <div class="fx-seg" role="group" aria-label="Darstellung">
@@ -545,7 +545,7 @@ class Finder {
           </div>
           <input type="range" class="fx-size" min="88" max="220" step="4" value="${this.size}" aria-label="Symbolgröße" data-size>
           <label class="fx-search">${SVG.search}<input type="search" placeholder="Suchen" aria-label="Medien durchsuchen" data-q></label>
-          <button type="button" class="fx-tbtn fx-infotoggle" data-infotoggle aria-label="Informationen ein-/ausblenden">${SVG.info}</button>
+          <button type="button" class="fx-tbtn fx-infotoggle" data-infotoggle data-fav-before aria-label="Informationen ein-/ausblenden">${SVG.info}</button>
           <span class="fx-sources" data-sources hidden></span>
           <button type="button" class="adm-btn adm-btn--primary adm-btn--small fx-upbtn" data-upload>${SVG.up}<span>Hochladen</span></button>
         </header>

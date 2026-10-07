@@ -146,6 +146,16 @@ final class SchemaPanel
             }
         }
 
+        // Eingangsbestätigung: ausgeschaltet bleibt „kein Feld“ (stabiler Rundlauf), eingeschaltet ohne Feld = erstes E-Mail-Feld
+        $mailFields = [['name' => 'name', 'type' => 'text', 'label' => 'Name'], ['name' => 'mail', 'type' => 'email', 'label' => 'E-Mail']];
+        $re = [];
+        $eq('Eingangsbestätigung aus: kein Feld vorbelegt', DataForms::validateSettings(['receipt' => ['field' => '']], $mailFields, $re, null)['receipt']['field'], '');
+        $eq('Eingangsbestätigung an: erstes E-Mail-Feld', DataForms::validateSettings(['receipt' => ['enabled' => '1', 'field' => '']], $mailFields, $re, null)['receipt']['field'], 'mail');
+        $eq('Eingangsbestätigung: keine Fehler', $re, []);
+        $re = [];
+        DataForms::validateSettings(['receipt' => ['enabled' => '1']], [$mailFields[0]], $re, null);
+        $eq('Eingangsbestätigung ohne E-Mail-Feld: Fehler', isset($re['settings.form']), true);
+
         if ($readOnly) return ['ok' => $ok, 'fails' => $fails];     // --roundtrip: nur prüfen, nichts anlegen
         $sfx = bin2hex(random_bytes(3));
         $made = [];

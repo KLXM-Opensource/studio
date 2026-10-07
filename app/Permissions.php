@@ -81,7 +81,7 @@ final class Permissions
         return array_merge(...array_map('array_keys', array_values(self::catalog())));
     }
 
-    /** Vorgaben beim ersten Start (danach frei änderbar) */
+    /** Vorgaben beim ersten Start: Standardrollen – Rechte danach frei änderbar (außer admin/network), aber nie löschbar (builtin) */
     public static function defaults(): array
     {
         return [
@@ -90,17 +90,23 @@ final class Permissions
             'network' => ['name' => 'Netzwerk-Administration', 'description' => 'Alle Websites und alle Daten (zentral verwaltet)', 'permissions' => ['*'], 'builtin' => 1],
             'editor' => ['name' => 'Redaktion', 'description' => 'Inhalte pflegen und veröffentlichen',
                 'permissions' => ['pages.edit', 'pages.publish', 'pages.manage', 'settings.edit', 'media.upload', 'media.delete',
-                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use', 'push.view']],
+                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use', 'push.view'], 'builtin' => 1],
             'author' => ['name' => 'Autorin / Autor', 'description' => 'Entwürfe schreiben, nichts veröffentlichen',
-                'permissions' => ['pages.edit', 'media.upload', 'data.edit', 'support.report']],
+                'permissions' => ['pages.edit', 'media.upload', 'data.edit', 'support.report'], 'builtin' => 1],
             'requests' => ['name' => 'Anfragen bearbeiten', 'description' => 'Nur Online-Anfragen',
-                'permissions' => ['requests.read', 'requests.manage', 'support.report']],
+                'permissions' => ['requests.read', 'requests.manage', 'support.report'], 'builtin' => 1],
         ];
     }
 
-    /** Fehlende Standardrollen anlegen (idempotent) */
+    /**
+     * Fehlende Standardrollen anlegen und als Standardrolle markieren (idempotent). Ältere Installationen hatten nur admin und
+     * network als builtin – Redaktion, Autorin/Autor und Anfragen bearbeiten ließen sich dort löschen.
+     */
     public static function seed(Database $db): void
     {
+        $keys = array_keys(array_filter(self::defaults(), fn($r) => !empty($r['builtin'])));
+        $in = 'builtin = 0 AND rkey IN (' . implode(',', array_fill(0, count($keys), '?')) . ')';
+        if ($db->fetchValue("SELECT COUNT(*) FROM roles WHERE $in", $keys)) $db->query("UPDATE roles SET builtin = 1 WHERE $in", $keys);   // nur schreiben, wenn nötig (läuft bei jedem Start)
         foreach (self::defaults() as $key => $r) {
             if (!$db->fetchValue('SELECT COUNT(*) FROM roles WHERE rkey = ?', [$key])) {
                 $db->insert('roles', ['rkey' => $key, 'name' => $r['name'], 'description' => $r['description'],

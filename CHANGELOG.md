@@ -6,6 +6,23 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Korrekturen: große Formulare, Schalter, Standardrollen, Favoriten-Stern
+- **Große Formulare speichern zuverlässig:** „Felder & Einstellungen“ großer Datentabellen (z. B. Immobilien mit vielen Feldern),
+  Kit-Einstellungen mit Wiederholungen oder der Rollen-Editor überschritten die PHP-Grenze `max_input_vars` (meist 1000) – PHP verwarf
+  dann still den Rest der Felder. Die Verwaltung sendet solche Formulare jetzt gebündelt in einem Feld (`_packed`, `Core\Http\Request::unpack`);
+  ohne JavaScript erkennt der Server den Überlauf (auch `max_multipart_body_parts`) und speichert nichts, mit klarer Meldung.
+- **Schalter statt Kästchen** für Ein/Aus-Einstellungen in den Seiteneinstellungen (Verwaltung und Dialog auf der Website: „Im Hauptmenü
+  zeigen“, „Nicht in Suchmaschinen“) und bei den Weiterleitungen (Einstellungen, Import-Optionen, „Aktiv“) – wie in den Grundeinstellungen.
+  Auf dem Telefon bleiben kurze Werte und Schalter (z. B. „Aktuell“ mit Abzeichen und „Kopieren“) neben der Beschriftung; Beschriftungen
+  brechen nicht mehr mitten im Wort um („Statu|s“).
+- **Standardrollen nicht löschbar:** „Redaktion“, „Autorin / Autor“ und „Anfragen bearbeiten“ zeigten „Löschen“, weil nur Administration
+  und Netzwerk als Standardrolle markiert waren. Alle fünf Standardrollen sind jetzt markiert (bestehende Installationen beim Start), der
+  Server lehnt das Löschen auch bei falschem Kennzeichen ab.
+- **Favoriten-Stern auf ganzseitigen Ansichten:** Werkzeugleisten markieren mit `data-fav-slot` den Platz für den Stern (Mediathek nutzt es,
+  Erweiterungen wie ein Feedback-Eingang ebenso) – statt schwebend über der Ecke. Siehe Technik → Erweiterungen.
+- **Datentabellen:** Die Eingangsbestätigung belegt das E-Mail-Feld nur noch vor, wenn sie eingeschaltet ist – `data:selftest` meldete
+  sonst bei Tabellen mit E-Mail-Feld (Kit Immobilien: „team“) einen Fehler im Rundlauf.
+
 ### Mitteilungen: verfassen, planen, Kanäle, Statistik, Banner und Glocke
 - Neuer Bereich **Mitteilungen** im Hauptmenü (Rechte `push.view`, `push.send`): **Neue Mitteilung** mit Titel, Text, Ziel über die
   Linkauswahl, optional Bild, Vorschau Telefon/Computer, Empfänger (Kanäle, Rollen, Personen) mit erreichbaren Geräten, sofort oder

@@ -46,7 +46,7 @@ $codes = [301 => __('301 – dauerhaft verschoben (Standard, für Suchmaschinen)
       <label for="rd-note"><?= e(__('Notiz')) ?></label>
       <input id="rd-note" name="f[note]" value="<?= e((string) ($values['note'] ?? '')) ?>" maxlength="190" placeholder="<?= e(__('z. B. Umzug 2026, alte Referenzen')) ?>">
     </div>
-    <div class="adm-checks rd-active"><label class="rv-check"><input type="checkbox" name="f[active]" value="1"<?= !empty($values['active']) ? ' checked' : '' ?>> <span><?= e(__('Aktiv')) ?></span></label></div>
+    <div class="adm-checks rd-active"><label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="f[active]" value="1"<?= !empty($values['active']) ? ' checked' : '' ?>> <span><?= e(__('Aktiv')) ?></span></label></div>
     <div class="adm-form-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= e($isNew ? __('Weiterleitung anlegen') : __('Speichern')) ?></button></div>
   </form>
 

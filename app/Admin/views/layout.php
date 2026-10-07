@@ -102,7 +102,7 @@ if ($user && ($req = app()->request)) {
 <?= $user ? \Core\Extensions::adminHead((string) ($view ?? '')) /* CSS/JS aktiver Erweiterungen für diese Ansicht (Extension::adminAssets) – nach admin.js */ : '' ?>
 </head>
 <?php $drill = $user && !empty($drill) ? $drill : ''; ?>
-<body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $drill ? ' is-drill' : '' ?>">
+<body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $drill ? ' is-drill' : '' ?>" data-max-vars="<?= (int) ini_get('max_input_vars') ?>">
 <?= $user ? '' : \Core\AuthScreen::sky() ?>
 <?php if (environment() !== 'production'): ?><div class="adm-env adm-env--<?= e(environment()) ?>" role="note"><?= e(strtoupper(environment())) ?> · <?= e(__('Testumgebung – Änderungen hier gehen nicht auf die Live-Website. E-Mails werden umgeleitet, Suchmaschinen ausgesperrt.')) ?></div><?php endif; ?>
 <?php if ($user):

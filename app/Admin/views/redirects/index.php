@@ -131,9 +131,9 @@ $n404 = $count404;
         <div class="f"><label for="rd-file"><?= e(__('Datei (CSV oder JSON)')) ?></label><input id="rd-file" type="file" name="file" accept=".csv,.json,.txt,text/csv,application/json"></div>
         <div class="f"><label for="rd-text"><?= e(__('… oder Zeilen einfügen')) ?></label><textarea id="rd-text" name="text" rows="4" spellcheck="false" data-kia-off placeholder="/alte-seite/;/neue-seite/;301;<?= e(__('Notiz')) ?>"></textarea></div>
         <div class="adm-checks">
-          <label class="rv-check"><input type="checkbox" name="link" value="1" checked> <span><?= e(__('Ziele mit Seiten verknüpfen (folgen späteren Umbenennungen)')) ?></span></label>
-          <label class="rv-check"><input type="checkbox" name="overwrite" value="1"> <span><?= e(__('Vorhandene alte Adressen überschreiben')) ?></span></label>
-          <label class="rv-check"><input type="checkbox" name="dry" value="1"> <span><?= e(__('Nur prüfen (Probelauf)')) ?></span></label>
+          <label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="link" value="1" checked> <span><?= e(__('Ziele mit Seiten verknüpfen (folgen späteren Umbenennungen)')) ?></span></label>
+          <label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="overwrite" value="1"> <span><?= e(__('Vorhandene alte Adressen überschreiben')) ?></span></label>
+          <label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="dry" value="1"> <span><?= e(__('Nur prüfen (Probelauf)')) ?></span></label>
         </div>
         <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Importieren')) ?></button>
       </form>
@@ -144,9 +144,9 @@ $n404 = $count404;
       <?= csrf_field() ?>
       <h2><?= e(__('Einstellungen')) ?></h2>
       <div class="adm-checks">
-        <label class="rv-check"><input type="checkbox" name="auto" value="1"<?= $auto ? ' checked' : '' ?> aria-describedby="rd-auto-help"> <span><?= e(__('Beim Umbenennen und Verschieben automatisch weiterleiten')) ?></span></label>
+        <label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="auto" value="1"<?= $auto ? ' checked' : '' ?> aria-describedby="rd-auto-help"> <span><?= e(__('Beim Umbenennen und Verschieben automatisch weiterleiten')) ?></span></label>
         <p class="f-help" id="rd-auto-help"><?= e(__('Ändert sich die Adresse einer veröffentlichten Seite, führt die alte Adresse dauerhaft (301) zur Seite – auch nach weiteren Änderungen.')) ?></p>
-        <label class="rv-check"><input type="checkbox" name="log" value="1"<?= $log ? ' checked' : '' ?> aria-describedby="rd-log-help"> <span><?= e(__('404-Protokoll führen')) ?></span></label>
+        <label class="rv-check f-check--switch"><input type="checkbox" role="switch" name="log" value="1"<?= $log ? ' checked' : '' ?> aria-describedby="rd-log-help"> <span><?= e(__('404-Protokoll führen')) ?></span></label>
         <p class="f-help" id="rd-log-help"><?= e(__('Merkt sich die letzten {n} nicht gefundenen Adressen mit Anzahl – ohne IP-Adressen oder andere Angaben zu Besuchern.', ['n' => Redirects::MAX_404])) ?></p>
       </div>
       <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Speichern')) ?></button>

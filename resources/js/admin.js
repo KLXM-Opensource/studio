@@ -45,6 +45,7 @@ import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Ve
 import { initAssistant } from './_assistant.js';
 import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
 import { initPushAdmin } from './_pushadmin.js';   // Mitteilungen → Verfassen: Vorschau, erreichbare Geräte (Core\Push\Compose)
+import { initPack } from './_pack.js';   // Große Formulare gebündelt senden (max_input_vars, Core\Http\Request::unpack)
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
 const d = document;
@@ -55,6 +56,7 @@ const csrf = () => $('#adm-csrf')?.value || window.CMS_CSRF || '';
 // ------------------------------------------------------------ Website: Werkzeugleiste im Shadow DOM (_shadow.js, Verhalten: _bar.js)
 initBar();
 initToolbar();
+initPack();
 // Werkzeuge beim Bearbeiten (z. B. Quick-Glossar): Knöpfe, Tastenkürzel, Module erst beim Öffnen (_tools.js)
 initTools();
 

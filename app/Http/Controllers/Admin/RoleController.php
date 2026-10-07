@@ -54,7 +54,7 @@ final class RoleController extends AdminController
     {
         $this->auth($r, 'users.manage');
         $role = Permissions::role($key) ?? throw new HttpException(404);
-        if ($role['builtin']) {
+        if ($role['builtin'] || isset(Permissions::defaults()[$key])) {   // Standardrollen nie löschen (auch bei falsch gesetztem Kennzeichen)
             return $this->back('/admin/users/rollen', 'error', __('Diese Rolle kann nicht gelöscht werden.'));
         }
         $used = (int) app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE role = ?', [$key]);

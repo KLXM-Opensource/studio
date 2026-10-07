@@ -459,9 +459,12 @@ final class DataForms
     private static function validateReceipt(array $r, array $fields, array &$errors): array
     {
         $mails = array_column(array_filter($fields, fn($f) => ($f['type'] ?? '') === 'email'), 'name');
+        $enabled = !empty($r['enabled']);
+        // Erstes E-Mail-Feld nur vorbelegen, wenn die Bestätigung an ist: ausgeschaltet bleibt „kein Feld“ (Standard, auch für Tabellen
+        // ohne gespeicherte Einstellung – Tables::find ergänzt RECEIPT) erhalten, sonst wäre validate(toInput($t)) nicht stabil.
         $out = [
-            'enabled' => !empty($r['enabled']),
-            'field' => in_array((string) ($r['field'] ?? ''), $mails, true) ? (string) $r['field'] : ($mails[0] ?? ''),
+            'enabled' => $enabled,
+            'field' => in_array((string) ($r['field'] ?? ''), $mails, true) ? (string) $r['field'] : ($enabled ? ($mails[0] ?? '') : ''),
             'subject' => mb_substr(trim(strip_tags((string) ($r['subject'] ?? ''))), 0, 150),
             'text' => mb_substr(trim(strip_tags((string) ($r['text'] ?? ''))), 0, 3000),
             'include' => !empty($r['include']),

@@ -50,9 +50,9 @@ function render(ctx) {
         <option value="draft"${pg.status !== 'published' ? ' selected' : ''}>${esc(T('draft'))}</option>
         <option value="published"${pg.status === 'published' ? ' selected' : ''}>${esc(T('online'))}</option></select></div>` : ''}
       ${fixedSlug ? '' : `
-      <label class="f-check ps-check"><input type="checkbox" name="menu"${pg.menu ? ' checked' : ''}> <span>${esc(T('menu'))}</span></label>
+      <label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="menu"${pg.menu ? ' checked' : ''}> <span>${esc(T('menu'))}</span></label>
       <div class="f" data-ps-nav${pg.menu ? '' : ' hidden'}><label for="ps-nav">${esc(T('navTitle'))}</label><input id="ps-nav" name="nav_title" maxlength="60" autocomplete="off" value="${esc(pg.nav_title)}" placeholder="${esc(pg.title)}"></div>`}
-      ${pg.notFound ? '' : `<label class="f-check ps-check"><input type="checkbox" name="noindex"${pg.noindex ? ' checked' : ''}> <span>${esc(T('noindex'))}</span></label>`}
+      ${pg.notFound ? '' : `<label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="noindex"${pg.noindex ? ' checked' : ''}> <span>${esc(T('noindex'))}</span></label>`}
     </fieldset>
     <fieldset class="ps-col">
       <legend class="ps-h">${esc(T('search'))}</legend>

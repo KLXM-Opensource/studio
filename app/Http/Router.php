@@ -146,6 +146,7 @@ final class Router
         return static function (Request $req, mixed ...$params) use ($handler, $perms, $public, $csrf): mixed {
             $checkCsrf = $csrf && !in_array($req->method, self::SAFE, true);
             if ($public) {
+                if ($req->truncated && !in_array($req->method, self::SAFE, true)) throw new HttpException(413, __('Das Formular hat zu viele Felder – es wurde nichts gespeichert.'));
                 if ($checkCsrf && !\Core\Csrf::valid($req)) throw new HttpException(419, __('Sitzung abgelaufen – bitte Seite neu laden.'));
             } elseif (count($perms) > 1) {
                 // eines der Rechte genügt: erst Anmeldung, dann mit dem ersten vorhandenen Recht (sonst dem ersten → 403) prüfen

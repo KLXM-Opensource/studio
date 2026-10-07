@@ -76,11 +76,11 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
       <select id="status" name="status"><option value="draft"<?= ($old['status'] ?? '') !== 'published' ? ' selected' : '' ?>>Entwurf (nicht öffentlich)</option><option value="published"<?= ($old['status'] ?? '') === 'published' ? ' selected' : '' ?>>Online</option></select></div>
     <?php endif; ?>
     <?php if ($isNew || (!$page['is_home'] && !$nf)): ?>
-    <div class="f f--bool"><input type="hidden" name="menu" value="0"><label class="f-check"><input type="checkbox" name="menu" value="1"<?= !empty($old['menu']) ? ' checked' : '' ?>> <span>Im Hauptmenü zeigen</span></label></div>
+    <div class="f f--bool"><input type="hidden" name="menu" value="0"><label class="f-check f-check--switch"><input type="checkbox" role="switch" name="menu" value="1"<?= !empty($old['menu']) ? ' checked' : '' ?>> <span>Im Hauptmenü zeigen</span></label></div>
     <div class="f"><label for="nav_title">Beschriftung im Menü (optional)</label><input id="nav_title" name="nav_title" maxlength="60" value="<?= e($old['nav_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? 'wie der Titel') ?>"></div>
     <?php endif; ?>
     <?php if (!$nf): ?>
-    <div class="f f--bool"><input type="hidden" name="noindex" value="0"><label class="f-check"><input type="checkbox" name="noindex" value="1"<?= !empty($old['noindex']) ? ' checked' : '' ?>> <span>Nicht in Suchmaschinen / Sitemap aufnehmen</span></label></div>
+    <div class="f f--bool"><input type="hidden" name="noindex" value="0"><label class="f-check f-check--switch"><input type="checkbox" role="switch" name="noindex" value="1"<?= !empty($old['noindex']) ? ' checked' : '' ?>> <span>Nicht in Suchmaschinen / Sitemap aufnehmen</span></label></div>
     <?php endif; ?>
     <div class="adm-form-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= $isNew ? 'Seite anlegen' : 'Speichern' ?></button></div>
   </form>

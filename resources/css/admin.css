@@ -1620,6 +1620,8 @@ html.adm-ui[data-theme=dark]{--adm-star:#F2C14E}
 .adm-main{position:relative}
 .adm-star--float{position:absolute;top:2px;right:clamp(18px,2.6vw,40px);z-index:6;width:26px;height:22px;border-radius:6px}
 .adm-star--float svg{width:16px;height:16px}
+/* Stern in der Werkzeugleiste ganzseitiger App-Ansichten ([data-fav-slot], z. B. Mediathek, Erweiterungen) – Größe der Leiste */
+.adm-star--slot{flex:none;align-self:center}
 .doc-hero .adm-titlerow{margin:14px 0 10px;align-items:flex-end;gap:10px}
 .doc-hero .adm-titlerow h1{margin:0}
 .doc-hero .adm-star{color:rgba(255,255,255,.75)}
@@ -2907,6 +2909,10 @@ html.adm-ui[data-theme=dark]{--adm-switch-off:#4A4E5A}
   :is(input[type=checkbox],input[type=radio]):not(#\#):not(#\#){-webkit-appearance:auto;appearance:auto;background:none}
   select:not(#\#){-webkit-appearance:auto;appearance:auto;background-image:none}
 }
+/* Ein/Aus-Einstellung in Formularen (role="switch"): Text links, Schalter rechts – wie in den Grundeinstellungen (.set-list .f--bool) */
+.f-check--switch:not(#\#){display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:center;gap:16px;width:100%;line-height:1.35}
+.f-check--switch > input:not(#\#):not(#\#){margin:0;flex:none}
+.f-check--switch > span{flex:1;min-width:0;text-align:left}
 /* Beschriftungen mit Kästchen: Kästchen auf der ersten Zeile, Text daneben */
 .f-check{align-items:flex-start;gap:9px;line-height:1.45}
 .f-check > input:not(#\#){margin:2px 0 0}
@@ -3009,7 +3015,7 @@ html.adm-ui[data-theme=dark] .set-list{box-shadow:0 0 0 .5px rgba(255,255,255,.1
 .set-list > .set-row:first-child,.set-list > :first-child > .set-row:first-child{border-top:0}
 .set-list > .f + .set-row,.set-list > .set-row + .f{border-top:1px solid var(--adm-line)}
 .set-row__main{display:grid;gap:2px;flex:1 1 auto;min-width:0}
-.set-row__label{font-weight:500;overflow-wrap:anywhere}
+.set-row__label{font-weight:500;overflow-wrap:break-word}   /* nicht „anywhere“: sonst schrumpft die Beschriftung neben langen Werten bis „Statu|s“ */
 .set-row__sub{font-size:12px;line-height:1.4;color:var(--adm-t3);overflow-wrap:anywhere}
 .set-row__ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;flex:0 1 auto;min-width:0;text-align:right;color:var(--adm-t2)}
 .set-row__ctl code{word-break:normal;overflow-wrap:anywhere}
@@ -3035,10 +3041,14 @@ a.set-row--link::after{content:"";flex:none;width:7px;height:7px;border:solid va
 .set-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr));gap:8px 16px;margin:0;padding:0;border:0;min-width:0}
 .set-checks > legend{float:left;width:100%;padding:0;margin:0 0 6px;font-size:12px;font-weight:600;color:var(--adm-t3)}
 .set-checks > legend + *{clear:both}
-/* Schmal: nur Zeilen mit Bedienelementen umbrechen; kurze Werte (Zahl, Datum, Abzeichen) und Pfeil-Zeilen bleiben rechts */
+/* Schmal: Zeilen mit Bedienelementen dürfen umbrechen – kurze (Schalter, Abzeichen + kleiner Knopf, kurzer Code) bleiben neben der
+   Beschriftung, solange sie passen (Beschriftung mindestens 9rem), längere rutschen von selbst in die nächste Zeile; Eingabefelder bekommen
+   immer eine eigene Zeile. Reine Werte (Zahl, Datum, Text) und Pfeil-Zeilen bleiben rechts. */
 @media (max-width:560px){
   .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)){flex-wrap:wrap}
-  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)) > .set-row__ctl{flex:1 1 100%;justify-content:flex-start;text-align:left}
+  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)) > .set-row__main{flex:1 1 9rem}
+  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)) > .set-row__ctl{margin-left:auto}
+  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(input:not([type=checkbox],[type=radio],[type=hidden],[type=submit],[type=button]),select,textarea)) > .set-row__ctl{flex:1 1 100%;margin-left:0;justify-content:flex-start;text-align:left}
 }
 /* Geteilte Medien / Geteilte Daten in Gruppen-Bereichen: Karten als Gruppenkästen, Websites als Kästchen-Raster */
 .adm-panel--groups > p:not(.adm-flash){margin:0 4px;font-size:13px;line-height:1.5;color:var(--adm-t2);max-width:72ch;padding:0;background:none;box-shadow:none}

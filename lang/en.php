@@ -6772,4 +6772,7 @@ return [
     'Besucher abonnieren Push-Mitteilungen – zu neuen Einträgen einer Datentabelle (z. B. Aktuelles) oder zu mehreren Kanälen zur Auswahl. Erst erklären, dann fragt der Browser nach der Erlaubnis – nur nach Klick. Voraussetzung: Funktion „Push-Benachrichtigungen“; Kanäle unter Mitteilungen → Kanäle.' => 'Visitors subscribe to push notifications – about new entries of a data table (e.g. news) or to several channels to choose from. Explain first, then the browser asks for permission – only after a click. Requires the “Push notifications” feature; channels under Notifications → Channels.',
     // Globale Suche: Gruppe für Grundeinstellungen, Funktionen, Konto, Handbuch (SearchController)
     'Einstellungen & Hilfe' => 'Settings & help',
+    // Zu viele Formularfelder (max_input_vars, Core\Http\Request::$truncated)
+    'Das Formular hat zu viele Felder für die Einstellung „max_input_vars“ des Servers ({n}) – es wurde nichts gespeichert. Bitte die Seite neu laden und mit eingeschaltetem JavaScript erneut speichern (große Formulare werden dann gebündelt gesendet) oder max_input_vars erhöhen.' => 'The form has too many fields for the server setting “max_input_vars” ({n}) – nothing was saved. Please reload the page and save again with JavaScript enabled (large forms are then sent bundled) or increase max_input_vars.',
+    'Das Formular hat zu viele Felder – es wurde nichts gespeichert.' => 'The form has too many fields – nothing was saved.',
 ];

@@ -1,6 +1,7 @@
 /*
  * Favoriten je Benutzer (Core\Favorites, Endpunkte /admin/api/favorites…)
- * - Stern neben der H1 jeder Verwaltungsseite (ohne sichtbare H1: kleiner Stern oben rechts) – merkt Adresse inkl. #Hash
+ * - Stern neben der H1 jeder Verwaltungsseite bzw. in der Werkzeugleiste ganzseitiger Ansichten ([data-fav-slot], z. B. Mediathek;
+ *   ohne beides: kleiner Stern oben rechts) – merkt Adresse inkl. #Hash
  *   (Reiter der Einstellungen, geöffnete Datei der Mediathek #m123, Kapitel im Handbuch)
  * - Abschnitt „Favoriten“ in der Seitenleiste (views/layout.php): aufklappbar (je Benutzer in localStorage gemerkt),
  *   „Bearbeiten“: umbenennen, entfernen, ziehen oder Alt+↑/↓ zum Sortieren
@@ -85,20 +86,31 @@ export function initFavorites(csrf) {
     star.type = 'button';
     star.className = 'adm-star';
     star.innerHTML = STAR;
-    const h1 = $$('#main h1').find(h => !h.classList.contains('adm-sr') && h.getClientRects().length);
-    if (h1) {
+    // Platz für den Stern: 1. [data-fav-slot] – Werkzeugleiste ganzseitiger App-Ansichten (Mediathek, Erweiterungen wie ein
+    // Feedback-Eingang), Wert = zusätzliche Klassen für den Knopf, Kind [data-fav-before] = davor einsetzen; 2. neben der H1;
+    // 3. sonst klein oben rechts – erscheint der Slot erst später (per Skript aufgebaut), wandert der Stern dorthin
+    const toSlot = slot => {
+      star.className = 'adm-star adm-star--slot' + (slot.dataset.favSlot ? ' ' + slot.dataset.favSlot : '');
+      const before = $('[data-fav-before]', slot);
+      before && before.parentNode === slot ? slot.insertBefore(star, before) : slot.append(star);
+    };
+    const slot = $('#main [data-fav-slot]');
+    const h1 = slot ? null : $$('#main h1').find(h => !h.classList.contains('adm-sr') && h.getClientRects().length);
+    if (slot) toSlot(slot);
+    else if (h1) {
       const row = d.createElement('div');
       row.className = 'adm-titlerow';
       h1.before(row);
       row.append(h1, star);
-    } else if ($('.fx--library .fx-bar')) {
-      // Mediathek (keine sichtbare Überschrift): Stern in die Werkzeugleiste statt über die Ecke
-      const bar = $('.fx--library .fx-bar');
-      star.classList.add('fx-tbtn');
-      bar.insertBefore(star, $('[data-infotoggle]', bar));
     } else {
       star.classList.add('adm-star--float');
-      $('#main')?.prepend(star);
+      const main = $('#main');
+      main?.prepend(star);
+      if (main && 'MutationObserver' in window) {
+        const mo = new MutationObserver(() => { const s = $('[data-fav-slot]', main); if (s) { mo.disconnect(); toSlot(s); } });
+        mo.observe(main, { childList: true, subtree: true });
+        setTimeout(() => mo.disconnect(), 10000);
+      }
     }
     star.addEventListener('click', async () => {
       const url = here(), on = favs.some(f => f.url === url);
