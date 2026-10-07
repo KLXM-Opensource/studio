@@ -30,14 +30,21 @@ final class Onboarding
     /** Wie eingespielt wird – null = noch offen (Kit oder Inhalte nicht entschieden) */
     public static function mode(App $app): ?string
     {
-        $kit = (string) $app->settings->get('sys.theme', '') !== '' || (string) ($app->config->get('kit') ?: $app->config->get('theme')) !== '';
-        if (!$kit) return null;
-        $s = (string) $app->settings->get(self::SEED_KEY, '');
-        if (in_array($s, self::MODES, true)) return $s;
-        $c = $app->config->get('seed');
-        if ($c === true || $c === 'full') return 'full';
-        if ($c === false || $c === 'empty') return 'empty';
-        return $c === null ? 'full' : null;   // 'ask' → Willkommen-Bildschirm
+        return self::decide((string) $app->settings->get('sys.theme', ''), (string) $app->settings->get(self::SEED_KEY, ''),
+            (string) ($app->config->get('kit') ?: $app->config->get('theme')), $app->config->get('seed'));
+    }
+
+    /**
+     * Entscheidung aus Einstellungen (sys.theme, sys.seed) und Konfiguration ('kit'/'theme', 'seed') – auch für andere
+     * Websites des Netzwerks (Network\Stats). null = Erststart offen.
+     */
+    public static function decide(string $setTheme, string $setSeed, string $cfgKit, mixed $cfgSeed): ?string
+    {
+        if ($setTheme === '' && $cfgKit === '') return null;
+        if (in_array($setSeed, self::MODES, true)) return $setSeed;
+        if ($cfgSeed === true || $cfgSeed === 'full') return 'full';
+        if ($cfgSeed === false || $cfgSeed === 'empty') return 'empty';
+        return $cfgSeed === null ? 'full' : null;   // 'ask' → Willkommen-Bildschirm
     }
 
     /** Website noch ohne Seiten und Kit/Inhalte nicht entschieden? (je Anfrage gemerkt) */

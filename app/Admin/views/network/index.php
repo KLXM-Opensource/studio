@@ -52,6 +52,12 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
 </header>
 
 <?php // Zusammenfassung: eine Zeile, Nullen ruhig; Hinweise/Wartung/Nicht live filtern die Karten ?>
+<?php $netKey = \Core\Network\Network::siteKey(); if (!empty($stats[$netKey]['pending'])): ?>
+<div class="net-setup net-setup--top">
+  <p><strong><?= e(__('Willkommen! Als Erstes die Website „{site}“ einrichten.', ['site' => $stats[$netKey]['label'] ?? $netKey])) ?></strong> <?= e(__('Wählen Sie Kit und Startinhalte – danach legen Sie hier weitere Websites an.')) ?></p>
+  <a class="adm-btn adm-btn--primary adm-btn--small" href="<?= e(url('/admin/willkommen')) ?>"><?= e(__('Jetzt einrichten')) ?></a>
+</div>
+<?php endif; ?>
 <ul class="net-strip" aria-label="<?= e(__('Zusammenfassung')) ?>">
   <li class="net-strip__item net-strip__item--lead"><strong><?= count($stats) ?></strong> <span><?= e(__('Websites')) ?></span></li>
   <li class="net-strip__item<?= $nWarn ? ' is-warn' : ' is-calm' ?>"><a href="#websites" data-net-show="warn"><strong><?= $nWarn ?></strong> <span><?= e(__('mit Hinweisen')) ?></span></a></li>
@@ -87,6 +93,7 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
     $wOther = array_values(array_filter($w, fn($m) => $m !== __('Wartungsmodus an')));
     [$pill, $pillText] = match (true) {
         $broken => ['err', __('Störung')],
+        !empty($s['pending']) => ['warn', __('Einrichtung offen')],
         $maint => ['warn', __('Wartung')],
         (bool) $wOther => ['warn', count($wOther) === 1 ? __('1 Hinweis') : __('{n} Hinweise', ['n' => count($wOther)])],
         $offline => ['off', __('Nicht live')],
@@ -120,6 +127,12 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
         <?php if ($noindex): ?><span class="net-tag net-tag--muted" title="<?= e(__('Suchmaschinen sollen die Website nicht aufnehmen')) ?>">noindex</span><?php endif; ?>
         <?php if ($maint): ?><span class="net-tag net-tag--warn"><?= e(__('Wartungsmodus')) ?></span><?php endif; ?>
       </p>
+      <?php if (!empty($s['pending'])): ?>
+      <div class="net-setup">
+        <p><strong><?= e(__('Noch nicht eingerichtet')) ?></strong> – <?= e(__('Kit und Startinhalte wählen. Bis dahin sehen Besucher „Hier entsteht eine neue Website“.')) ?></p>
+        <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><input type="hidden" name="path" value="/admin/willkommen"><button class="adm-btn adm-btn--primary adm-btn--small" type="submit"<?= empty($s['initialized']) ? ' disabled' : '' ?>><?= e(__('Jetzt einrichten')) ?><span class="adm-sr"> – <?= e($name) ?></span></button></form>
+      </div>
+      <?php endif; ?>
       <?php if ($wOther || $broken): ?>
       <ul class="net-warn"><?php foreach ($wOther ?: $w as $msg): ?><li><?= icon('warning') ?><?= e($msg) ?></li><?php endforeach; ?></ul>
       <?php endif; ?>

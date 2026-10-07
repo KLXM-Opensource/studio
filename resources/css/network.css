@@ -149,3 +149,9 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
   .net-search input{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){.net-domains summary::before{transition:none}}
+
+/* Erststart offen (Core\Onboarding): Hinweis in der Karte und oben in der Übersicht */
+.net-setup{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:0 0 14px;padding:12px 14px;border:1.5px solid var(--adm-a);border-radius:10px;background:color-mix(in srgb,var(--adm-a) 7%,var(--adm-card,#fff))}
+.net-setup p{flex:1 1 260px;margin:0;line-height:1.45}
+.net-setup form{margin:0}
+.net-setup--top{margin:0 0 18px;padding:16px 18px}

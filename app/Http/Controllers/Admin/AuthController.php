@@ -45,7 +45,7 @@ final class AuthController extends AdminController
         }
         // Netzwerk-Administration landet auf der Netzwerk-Website in der Übersicht aller Websites
         if ($safe === '/admin' && \Core\Network\Network::isNetworkSite() && \Core\Network\Network::isNetworkUser()) {
-            $safe = '/admin/network';
+            $safe = \Core\Onboarding::pending() ? '/admin/willkommen' : '/admin/network';   // Erststart offen: zuerst Kit und Startinhalte
         }
         return Response::redirect(url($safe));
     }

@@ -6216,4 +6216,11 @@ return [
     'Mit passenden Blöcken, Datentabellen und Musterseiten für einen bestimmten Zweck.' => 'With matching blocks, data tables and sample pages for a specific purpose.',
     'Unsicher? Alle Kits mit Vorschau für Desktop und Handy, hell und dunkel:' => 'Not sure? All kits with previews for desktop and mobile, light and dark:',
     'Kits ansehen' => 'View kits',
+    // Netzwerk-Übersicht: Erststart offen
+    'Einrichtung offen' => 'Setup pending',
+    'Jetzt einrichten' => 'Set up now',
+    'Kit und Startinhalte wählen. Bis dahin sehen Besucher „Hier entsteht eine neue Website“.' => 'Choose kit and starter content. Until then visitors see “A new website is coming soon”.',
+    'Willkommen! Als Erstes die Website „{site}“ einrichten.' => 'Welcome! First set up the website “{site}”.',
+    'Wählen Sie Kit und Startinhalte – danach legen Sie hier weitere Websites an.' => 'Choose kit and starter content – afterwards you create further websites here.',
+    'noch nicht gewählt' => 'not chosen yet',
 ];

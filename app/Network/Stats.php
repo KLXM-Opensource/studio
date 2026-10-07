@@ -93,7 +93,7 @@ final class Stats
         if ($d['initialized']) {
             $db = $key === site()->key ? app()->db : new Database($dbCfg);
             $checks['db'] = (int) $db->fetchValue('SELECT 1') === 1;
-            $set = self::settings($db, ['sys.theme', 'sys.maintenance', 'sys.site_url', Features::UI_KEY, \Core\Extensions::UI_KEY, Features::DELEGATE_KEY,
+            $set = self::settings($db, ['sys.theme', \Core\Onboarding::SEED_KEY, 'sys.maintenance', 'sys.site_url', Features::UI_KEY, \Core\Extensions::UI_KEY, Features::DELEGATE_KEY,
                 'sys.noindex', 'sys.icon_version', 'sys.icon_bg', 'sys.icon_text']);
             // Schalter der Verwaltung (Funktionen & Erweiterungen) – Preset und 'features' der Konfiguration gehen vor
             $cfgF = array_merge(Features::PRESETS[$preset] ?? [], (array) $cfg->get('features', []));
@@ -118,6 +118,10 @@ final class Stats
             $hasNet = in_array('network_uid', $cols, true);
             $d['editors'] = (int) $db->fetchValue('SELECT COUNT(*) FROM users' . ($hasNet ? " WHERE network_uid IS NULL AND role != 'network'" : ''));
             $d['pages'] = (int) $db->fetchValue("SELECT COUNT(*) FROM pages WHERE type = 'page'");
+            // Erststart offen (Core\Onboarding): noch keine Seiten, Kit bzw. Startinhalte nicht gewählt → Willkommen-Bildschirm
+            $d['pending'] = !(int) $db->fetchValue('SELECT COUNT(*) FROM pages') && \Core\Onboarding::decide((string) ($set['sys.theme'] ?? ''),
+                (string) ($set[\Core\Onboarding::SEED_KEY] ?? ''), (string) ($cfg->get('kit') ?: $cfg->get('theme')), $cfg->get('seed')) === null;
+            if ($d['pending'] && (string) ($set['sys.theme'] ?? '') === '' && !($cfg->get('kit') ?: $cfg->get('theme'))) $d['theme'] = '';
             // [Platzhalter] in Seiten (wie die Übersicht der Website; bestätigte „Ist gewollt“-Klammern zählen nicht)
             $okPh = array_values(array_filter((array) (json_decode((string) $db->fetchValue('SELECT value_json FROM settings WHERE skey = ?', ['sys.placeholders_ok']), true) ?: []), 'is_string'));
             // Redaktionsnotizen [# … #] (öffentlich unsichtbar) getrennt zählen – gleiche Warnung, eigene Beschriftung
@@ -166,7 +170,7 @@ final class Stats
         $d['pools'] = self::sitePools($key, (array) $cfg->get('media_pools', []));
         $req = self::themeRequires($d['theme']);
         $checks['theme'] = $req === '' || !preg_match('~^(>=|>|<=|<|=|==)?\s*([\d.]+)$~', $req, $m) || version_compare(CMS_VERSION, $m[2], ($m[1] ?? '') ?: '>=');
-        $d['theme_label'] = Theme::available()[$d['theme']] ?? $d['theme'];
+        $d['theme_label'] = ($d['theme'] ?? '') === '' && !empty($d['pending']) ? __('noch nicht gewählt') : (Theme::available()[$d['theme']] ?? $d['theme']);
         $d['checks'] = $checks;
         $d['ok'] = !in_array(false, $checks, true);
         // Medien: Größe seltener neu zählen

@@ -161,7 +161,7 @@ final class TwoFactorController extends AdminController
         }
         (new RateLimiter(app()->db))->clear('2fa:' . hash_hmac('sha256', (string) (app()->request?->ip() ?? ''), app()->key()));
         $s->forget('_2fa_next');
-        if ($next === '/admin' && Network::isNetworkSite() && Network::isNetworkUser()) $next = '/admin/network';
+        if ($next === '/admin' && Network::isNetworkSite() && Network::isNetworkUser()) $next = \Core\Onboarding::pending() ? '/admin/willkommen' : '/admin/network';
         return url($next);
     }
 
