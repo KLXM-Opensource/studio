@@ -12,71 +12,75 @@ $post = fn(string $a) => e(url('/admin/system/domain/' . $a));
     <p class="adm-muted"><?= e(__('Unter welchen Adressen die Website erreichbar ist. Eine neue Domain richten Sie zuerst beim Hosting ein (DNS, in Plesk als Alias bzw. zusätzliche Domain, mit SSL-Zertifikat) und tragen sie dann hier ein.')) ?></p></div>
 </header>
 
-<section class="adm-card adm-card--flush" id="domains" aria-labelledby="dom-h">
-  <h2 id="dom-h" class="adm-sr"><?= e(__('Domains')) ?></h2>
+<div class="set-page dom-page">
+<section class="set-group" id="domains" aria-labelledby="dom-h">
+  <h2 id="dom-h" class="set-group__title"><?= e(__('Domains')) ?></h2>
   <?php if (!$hosts): ?>
   <p class="adm-flash adm-flash--info" role="note"><?= e(__('Noch keine Domain eingetragen – die Website antwortet unter jeder Domain, die auf diesen Server zeigt. Mit der ersten eingetragenen Domain wird die aktuell aufgerufene Adresse ({host}) zur Hauptadresse.', ['host' => $current])) ?></p>
   <?php else: ?>
-  <table class="adm-table">
-    <thead><tr><th scope="col"><?= e(__('Domain')) ?></th><th scope="col"><span class="adm-sr"><?= e(__('Aktionen')) ?></span></th></tr></thead>
-    <tbody>
+  <div class="set-list">
     <?php foreach ($hosts as $i => $h): $ok = $checked[$h] ?? null; $okFresh = $ok && (int) ($ok['at'] ?? 0) >= time() - 600; ?>
-      <tr>
-        <td><strong><?= e($h) ?></strong><br><?= $i === 0 ? '<span class="adm-badge">' . e(__('Hauptadresse')) . '</span>' : '<span class="adm-badge adm-badge--muted">' . e(__('weitere Domain')) . '</span>' ?><?php if ($h === $current): ?> <span class="adm-badge adm-badge--muted"><?= e(__('aktuell aufgerufen')) ?></span><?php endif; ?>
-          <?php if ($okFresh): ?><br><small class="adm-muted"><?= e(($ok['scheme'] ?? '') === 'https' ? __('geprüft: zeigt auf diese Website (HTTPS)') : __('geprüft: zeigt auf diese Website (nur HTTP)')) ?></small><?php endif; ?></td>
-        <td><div class="adm-actions">
-          <?php if ($i > 0): ?>
-          <form method="post" action="<?= $post('check') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
-            <button class="adm-btn adm-btn--small adm-btn--ghost" type="submit"><?= e(__('Erreichbarkeit prüfen')) ?></button></form>
-          <form method="post" action="<?= $post('primary') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
-            <button class="adm-btn adm-btn--small" type="submit" data-confirm="<?= e(__('{host} als Hauptadresse festlegen? Vorher wird geprüft, ob die Domain auf diese Website zeigt. Links in E-Mails, Sitemap und Canonical-Angaben nutzen danach die neue Adresse.', ['host' => $h])) ?>"><?= e(__('Als Hauptadresse festlegen')) ?></button></form>
-          <?php if ($h !== $current): ?>
-          <form method="post" action="<?= $post('remove') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
-            <button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" type="submit" data-confirm="<?= e(__('Domain {host} entfernen? Die Website ist darunter danach nicht mehr erreichbar (bzw. nur noch über den Rückfall der Installation).', ['host' => $h])) ?>"><?= e(__('Entfernen')) ?></button></form>
-          <?php else: ?>
-          <small class="adm-muted"><?= e(__('aktuell aufgerufen – nicht entfernbar')) ?></small>
-          <?php endif; ?>
-          <?php else: ?>
-          <small class="adm-muted"><?= e(__('Hauptadresse – nicht entfernbar')) ?></small>
-          <?php endif; ?>
-        </div></td>
-      </tr>
+    <div class="set-row">
+      <div class="set-row__main"><span class="set-row__label"><?= e($h) ?> <?= $i === 0 ? '<span class="adm-badge">' . e(__('Hauptadresse')) . '</span>' : '<span class="adm-badge adm-badge--muted">' . e(__('weitere Domain')) . '</span>' ?><?php if ($h === $current): ?> <span class="adm-badge adm-badge--muted"><?= e(__('aktuell aufgerufen')) ?></span><?php endif; ?></span>
+        <?php if ($okFresh): ?><span class="set-row__sub"><?= e(($ok['scheme'] ?? '') === 'https' ? __('geprüft: zeigt auf diese Website (HTTPS)') : __('geprüft: zeigt auf diese Website (nur HTTP)')) ?></span><?php endif; ?></div>
+      <div class="set-row__ctl">
+        <?php if ($i > 0): ?>
+        <form method="post" action="<?= $post('check') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
+          <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Erreichbarkeit prüfen')) ?></button></form>
+        <form method="post" action="<?= $post('primary') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
+          <button class="adm-btn adm-btn--small" type="submit" data-confirm="<?= e(__('{host} als Hauptadresse festlegen? Vorher wird geprüft, ob die Domain auf diese Website zeigt. Links in E-Mails, Sitemap und Canonical-Angaben nutzen danach die neue Adresse.', ['host' => $h])) ?>"><?= e(__('Als Hauptadresse festlegen')) ?></button></form>
+        <?php if ($h !== $current): ?>
+        <form method="post" action="<?= $post('remove') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
+          <button class="adm-btn adm-btn--small adm-btn--danger-text" type="submit" data-confirm="<?= e(__('Domain {host} entfernen? Die Website ist darunter danach nicht mehr erreichbar (bzw. nur noch über den Rückfall der Installation).', ['host' => $h])) ?>"><?= e(__('Entfernen')) ?></button></form>
+        <?php else: ?>
+        <small class="adm-muted"><?= e(__('aktuell aufgerufen – nicht entfernbar')) ?></small>
+        <?php endif; ?>
+        <?php else: ?>
+        <small class="adm-muted"><?= e(__('Hauptadresse – nicht entfernbar')) ?></small>
+        <?php endif; ?>
+      </div>
+    </div>
     <?php endforeach; ?>
     <?php foreach ($landing as $h): ?>
-      <tr><td><strong><?= e($h) ?></strong><br><span class="adm-badge adm-badge--muted"><?= e(__('Landing-Domain')) ?></span></td>
-        <td><div class="adm-actions"><small class="adm-muted"><?= e(__('verwaltet unter Landingpages')) ?></small></div></td></tr>
+    <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e($h) ?> <span class="adm-badge adm-badge--muted"><?= e(__('Landing-Domain')) ?></span></span></div>
+      <div class="set-row__ctl"><small class="adm-muted"><?= e(__('verwaltet unter Landingpages')) ?></small></div></div>
     <?php endforeach; ?>
-    </tbody>
-  </table>
+  </div>
   <?php endif; ?>
 </section>
 
-<section class="adm-card" id="hinzufuegen" aria-labelledby="dom-add-h">
-  <h2 id="dom-add-h"><?= e(__('Domain hinzufügen')) ?></h2>
-  <form method="post" action="<?= $post('add') ?>" class="adm-fields">
-    <?= csrf_field() ?>
-    <div class="f f--half"><label for="dom-host"><?= e(__('Domain')) ?></label>
+<form class="set-group" id="hinzufuegen" method="post" action="<?= $post('add') ?>" aria-labelledby="dom-add-h">
+  <?= csrf_field() ?>
+  <h2 id="dom-add-h" class="set-group__title"><?= e(__('Domain hinzufügen')) ?></h2>
+  <div class="set-list">
+    <div class="f f--inline"><label for="dom-host"><?= e(__('Domain')) ?></label>
       <input id="dom-host" name="host" required autocomplete="off" spellcheck="false" maxlength="253" placeholder="www.beispiel.de" aria-describedby="dom-host-help">
       <p class="f-help" id="dom-host-help"><?= e(__('Ohne https:// und ohne Pfad. Neue Domains kommen als weitere Domain hinzu; zur Hauptadresse werden sie erst nach erfolgreicher Prüfung.')) ?></p></div>
-    <div class="adm-row"><button class="adm-btn adm-btn--primary" type="submit"><?= icon('plus') ?> <?= e(__('Hinzufügen')) ?></button></div>
-  </form>
+  </div>
   <?php if ($siteUrl !== ''): ?>
-  <p class="f-help"><?= e(__('Kanonische Adresse (Grundeinstellungen): {url} – zeigt sie auf die bisherige Hauptadresse, wird sie beim Wechsel mit umgestellt.', ['url' => $siteUrl])) ?></p>
+  <p class="set-group__note"><?= e(__('Kanonische Adresse (Grundeinstellungen): {url} – zeigt sie auf die bisherige Hauptadresse, wird sie beim Wechsel mit umgestellt.', ['url' => $siteUrl])) ?></p>
   <?php endif; ?>
-</section>
+  <div class="set-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= icon('plus') ?> <?= e(__('Hinzufügen')) ?></button></div>
+</form>
 
-<section class="adm-card" id="weiterleitung" aria-labelledby="dom-redir-h">
-  <h2 id="dom-redir-h"><?= e(__('Weiterleitung')) ?></h2>
-  <form method="post" action="<?= $post('redirect') ?>">
-    <?= csrf_field() ?>
-    <input type="hidden" name="on" value="0">
-    <label class="f-check"><input type="checkbox" name="on" value="1"<?= $redirect ? ' checked' : '' ?>><span><?= e(__('Andere Adressen auf die Hauptadresse weiterleiten (301)')) ?></span></label>
-    <p class="f-help"><?= e(__('Gilt für alle weiteren Domains dieser Liste (nicht für Landing-Domains), Pfad und Parameter bleiben erhalten. Besucher und Suchmaschinen landen so immer auf {host}.', ['host' => $primary ?? '–'])) ?> <?= e(__('Die Verwaltung ist danach nur noch unter der Hauptadresse erreichbar – auf weiteren Domains melden Sie sich dort neu an. Lokale Adressen (localhost, *.test) werden nie weitergeleitet.')) ?></p>
-    <div class="adm-row"><button class="adm-btn" type="submit"><?= e(__('Speichern')) ?></button></div>
-  </form>
-</section>
+<form class="set-group" id="weiterleitung" method="post" action="<?= $post('redirect') ?>" aria-labelledby="dom-redir-h">
+  <?= csrf_field() ?>
+  <input type="hidden" name="on" value="0">
+  <h2 id="dom-redir-h" class="set-group__title"><?= e(__('Weiterleitung')) ?></h2>
+  <div class="set-list">
+    <div class="f f--bool"><label class="f-check"><input type="checkbox" role="switch" name="on" value="1" aria-describedby="dom-redir-help"<?= $redirect ? ' checked' : '' ?>><span><?= e(__('Andere Adressen auf die Hauptadresse weiterleiten (301)')) ?></span></label>
+      <p class="f-help" id="dom-redir-help"><?= e(__('Gilt für alle weiteren Domains dieser Liste (nicht für Landing-Domains), Pfad und Parameter bleiben erhalten. Besucher und Suchmaschinen landen so immer auf {host}.', ['host' => $primary ?? '–'])) ?></p></div>
+  </div>
+  <p class="set-group__note"><?= e(__('Die Verwaltung ist danach nur noch unter der Hauptadresse erreichbar – auf weiteren Domains melden Sie sich dort neu an. Lokale Adressen (localhost, *.test) werden nie weitergeleitet.')) ?></p>
+  <div class="set-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Speichern')) ?></button></div>
+</form>
 
-<section class="adm-card" aria-labelledby="dom-env-h">
-  <h2 id="dom-env-h"><?= e(__('Umgebung')) ?></h2>
-  <p><?= e(__('Livebetrieb oder Testumgebung (staging) stellen Sie unter Grundeinstellungen → Umgebung ein.')) ?> <a class="adm-link" href="<?= e(url('/admin/system#umgebung')) ?>"><?= e(__('Zur Umgebung')) ?></a></p>
+<section class="set-group" aria-labelledby="dom-env-h">
+  <h2 id="dom-env-h" class="set-group__title"><?= e(__('Umgebung')) ?></h2>
+  <div class="set-list">
+    <a class="set-row set-row--link" href="<?= e(url('/admin/system#umgebung')) ?>"><span class="set-row__main"><span class="set-row__label"><?= e(__('Zur Umgebung')) ?></span>
+      <span class="set-row__sub"><?= e(__('Livebetrieb oder Testumgebung (staging) stellen Sie unter Grundeinstellungen → Umgebung ein.')) ?></span></span>
+      <span class="set-row__ctl"><span class="adm-badge<?= environment() === 'production' ? '' : ' adm-badge--warn' ?>"><?= e(environment()) ?></span></span></a>
+  </div>
 </section>
+</div>

@@ -125,22 +125,46 @@ d.addEventListener('keydown', e => {
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
   const tabs = $$('[role=tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)
+  const list = $('[role=tablist]', form);
+  // Senkrechte Reiter-Navigation (.adm-tabs-form--side, breite Bildschirme): aria-orientation folgt dem Layout
+  const side = form.classList.contains('adm-tabs-form--side') ? matchMedia('(min-width: 1000px)') : null;
+  const orient = () => list?.setAttribute('aria-orientation', side?.matches ? 'vertical' : 'horizontal');
+  if (side) { orient(); side.addEventListener('change', orient); }
+  // Schmal: Bereiche als Auswahlfeld oben statt Reiterzeile (gleiche Ziele, Adresse #bereich bleibt)
+  let picker = null;
+  if (side && list) {
+    picker = d.createElement('label'); picker.className = 'adm-tabsel';
+    const sel = d.createElement('select');
+    sel.setAttribute('aria-label', list.getAttribute('aria-label') || '');
+    tabs.forEach(t => sel.add(new Option(($('.adm-tabs__label', t)?.textContent || t.textContent.trim()) + (t.dataset.tabNote ? ' ● ' + t.dataset.tabNote : ''), t.dataset.tab)));
+    sel.addEventListener('change', () => select(sel.value));
+    picker.append(sel); list.before(picker); list.classList.add('has-select');
+    picker = sel;
+  }
   const select = (id, focus) => {
     tabs.forEach(t => {
       const on = t.dataset.tab === id;
       t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
       d.getElementById(t.getAttribute('aria-controls')).hidden = !on;
       if (on && focus) t.focus();
+      // Waagerechte Reiterzeile (schmal) scrollt: gewählten Reiter sichtbar machen, ohne die Seite zu verschieben
+      if (on && list && list.scrollWidth > list.clientWidth) list.scrollLeft = Math.max(0, t.offsetLeft - list.offsetLeft - 16);
     });
     if (hidden) hidden.value = id;
+    if (picker) picker.value = id;
     history.replaceState(null, '', '#' + id);
     d.dispatchEvent(new Event('adm:location'));   // Favoriten-Stern: Reiter gehört zur Adresse
   };
   tabs.forEach((t, i) => {
     t.addEventListener('click', () => select(t.dataset.tab));
     t.addEventListener('keydown', e => {
-      const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
-      if (k) select(tabs[(i + k + tabs.length) % tabs.length].dataset.tab, true);
+      // Pfeiltasten je nach Ausrichtung (senkrecht: ↑/↓, waagerecht: ←/→), Pos1/Ende springen zum ersten/letzten Reiter
+      const vert = list?.getAttribute('aria-orientation') === 'vertical';
+      const k = (vert ? { ArrowDown: 1, ArrowUp: -1 } : { ArrowRight: 1, ArrowLeft: -1 })[e.key];
+      const to = k ? (i + k + tabs.length) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+      if (to < 0) return;
+      e.preventDefault();
+      select(tabs[to].dataset.tab, true);
     });
   });
   const hash = location.hash.slice(1);

@@ -487,7 +487,7 @@ const vthumbHtml = (m, cls = '') => `<span class="fx-vthumb${cls ? ' ' + cls : '
 // ============================================================ Finder
 // Symbole aus dem Sprite (Phosphor duotone, Core\Icons)
 const SVG = {
-  grid: ico('squares-four'), list: ico('list-bullets'), all: ico('folder'), image: ico('image'), pdf: ico('file-pdf'),
+  grid: ico('squares-four'), masonry: ico('layout'), list: ico('list-bullets'), all: ico('folder'), image: ico('image'), pdf: ico('file-pdf'),
   video: ico('video-camera'), warn: ico('warning'), col: ico('folders'), search: ico('magnifying-glass'),
   up: ico('upload-simple'), side: ico('sidebar-simple'), info: ico('info'),
 };
@@ -502,7 +502,7 @@ class Finder {
     if (pick) this.opts = { ...opts, onPick: async m => pick(this.pool ? (await api.use(m.id)).item : m) };
     this.src = { type: opts.kind === 'image' || opts.kind === 'visual' ? 'kind' : 'all', value: opts.kind === 'image' || opts.kind === 'visual' ? opts.kind : '' };
     this.q = ''; this.items = []; this.sel = new Set(); this.anchor = null; this.active = null; this.meta = null;
-    this.view = store.get('view', 'grid'); this.size = store.get('size', 132); this.sort = store.get('sort', { key: 'created_at', dir: -1 });
+    this.view = store.get('view', 'grid'); if (!['grid', 'masonry', 'list'].includes(this.view)) this.view = 'grid'; this.size = store.get('size', 132); this.sort = store.get('sort', { key: 'created_at', dir: -1 });
     // Zuletzt geöffneter Ort (Pool, Sammlung, Tag, Art) – gilt für Mediathek und Auswahl-Dialoge; nicht bei Sprüngen (#m12, #check=…)
     const restored = !/^#(m\d+|c\d+|check=)/.test(location.hash) && this.restoreLast();
     this.build();
@@ -540,6 +540,7 @@ class Finder {
           <div class="fx-title"><strong data-title>Alle Medien</strong><small data-count></small></div>
           <div class="fx-seg" role="group" aria-label="Darstellung">
             <button type="button" data-view="grid" aria-label="Symbole" title="Symbole">${SVG.grid}</button>
+            <button type="button" data-view="masonry" aria-label="Mauerwerk (Bilder im eigenen Seitenverhältnis)" title="Mauerwerk">${SVG.masonry}</button>
             <button type="button" data-view="list" aria-label="Liste" title="Liste">${SVG.list}</button>
           </div>
           <input type="range" class="fx-size" min="88" max="220" step="4" value="${this.size}" aria-label="Symbolgröße" data-size>
@@ -721,7 +722,7 @@ class Finder {
     this.root.dataset.view = this.view;
     this.root.style.setProperty('--fx-size', this.size + 'px');
     $$('[data-view]', this.root).forEach(b => b.setAttribute('aria-pressed', b.dataset.view === this.view));
-    $('[data-size]', this.root).hidden = this.view !== 'grid';
+    $('[data-size]', this.root).hidden = this.view === 'list';
   }
 
   // ---------------------------------------------------------- Daten
@@ -850,7 +851,7 @@ class Finder {
       const warn = m.missing_alt ? `<span class="fx-warn" title="Alt-Text fehlt">${SVG.warn}<span class="adm-sr">Alt-Text fehlt</span></span>` : '';
       const dots = m.tags.slice(0, 4).map(t => `<span class="fx-dot" style="background:${tagColor(t)}" title="${esc(t)}"></span>`).join('');
       const ext = hook('badge', m, this).join('');   // Erweiterungen: z. B. Poster, Fortschrittsring
-      return this.view === 'grid'
+      return this.view !== 'list'   // Symbole und Mauerwerk: Kachel; Liste: Zeile
         ? `<div class="fx-item" role="option" id="fx-i-${m.id}" data-id="${m.id}" aria-selected="false" draggable="true">
             <span class="fx-thumb">${this.thumb(m)}${m.kind === 'video' ? VBADGE : ''}${warn}${ext}</span>
             <span class="fx-name"><span>${esc(m.display)}</span></span>
@@ -892,7 +893,7 @@ class Finder {
     this.sel = new Set(ids.slice(Math.min(i, j), Math.max(i, j) + 1));
   }
   cols() {
-    const els = $$('[data-id]', this.$items); if (els.length < 2 || this.view === 'list') return 1;
+    const els = $$('[data-id]', this.$items); if (els.length < 2 || this.view !== 'grid') return 1;
     const top = els[0].offsetTop; let n = 0;
     for (const el of els) { if (el.offsetTop !== top) break; n++; }
     return n;

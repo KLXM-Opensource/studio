@@ -6420,4 +6420,19 @@ return [
     '{site} ist jetzt Testumgebung (staging): Suchmaschinen ausgesperrt, E-Mails nicht an echte Empfänger.' => '{site} is now a staging environment: search engines blocked, no emails to real recipients.',
     '{site} ist jetzt im Livebetrieb (production).' => '{site} is now live (production).',
     '{site} zur Testumgebung (staging) machen? Suchmaschinen werden ausgesperrt, E-Mails gehen nicht mehr an echte Empfänger.' => 'Make {site} a staging environment? Search engines will be blocked and emails will no longer go to real recipients.',
+    // Grundeinstellungen › Allgemein: Zwischenüberschriften, Reiter-Navigation (Formular-Durchgang 07.10.2026)
+    'Darstellung auf der Website' => 'Display on the website',
+    'Domains und Hauptadresse verwalten (System → Domain)' => 'Manage domains and main address (System → Domain)',
+    // Benutzer & Rollen, Systeminfo, Umgebung (Listen-Stil 07.10.2026)
+    'App-Code und alle Passkeys entfernen – bei Verlust des Geräts.' => 'Remove the app code and all passkeys – if the device was lost.',
+    'Einladungen' => 'Invitations',
+    'Ihr eigenes Konto' => 'Your own account',
+    'Installation' => 'Installation',
+    'Konto löschen' => 'Delete account',
+    'Letzte Anmeldung: {date}' => 'Last sign-in: {date}',
+    'Name, E-Mail, Passwort und Anmeldung ändern Sie unter „Konto“.' => 'Change your name, email, password and sign-in under “Account”.',
+    'Noch nie angemeldet' => 'Never signed in',
+    'Testumgebung aktiv' => 'Staging environment active',
+    '{n} Benutzer' => '{n} users',
+    '{n} Rechte' => '{n} permissions',
 ];

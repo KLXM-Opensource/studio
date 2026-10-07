@@ -25,13 +25,18 @@ final class SystemSchema
         $app = app()->theme->def['app']['defaults'] ?? [];
         $info = AppIcons::appInfo();
         return [
+            // Zwischenüberschriften gliedern den langen Reiter (Fields 'heading'; in der Verwaltung als Abschnitte mit Linie)
             ['id' => 'website', 'label' => 'Allgemein', 'fields' => [
+                ['type' => 'heading', 'label' => __('Website'),
+                    // Domains, Hauptadresse und Umgebung haben eine eigene Seite (nur Einzel-Installation, Core\Domains)
+                    'links' => Domains::available() ? [['label' => __('Domains und Hauptadresse verwalten (System → Domain)'), 'url' => '/admin/system/domain']] : []],
                 ['name' => 'sys.theme', 'label' => 'Aktives Kit', 'type' => 'select', 'required' => true,
                     'options' => site()->allowedThemes(), 'default' => site()->defaultTheme(),
                     'help' => 'Kits liegen unter /kits/{name} (Templates, Blöcke, Fragmente) und /public/assets/kits/{name} (Assets). Weitere Kits als Paket installieren: Grundeinstellungen → Kits.'],
                 ['name' => 'sys.site_url', 'label' => 'Kanonische Adresse (Domain)', 'type' => 'url',
                     'placeholder' => 'https://www.ihre-domain.de',
                     'help' => 'Für Canonical-Links, Sitemap und E-Mail-Links (auch aus Cron/Kommandozeile). Nur nötig, wenn die Website unter mehreren Domains erreichbar ist; leer = Domain aus der Konfiguration bzw. die aufgerufene.'],
+                ['type' => 'heading', 'label' => __('Verwaltung')],
                 ['name' => 'sys.admin_locale', 'label' => 'Sprache der Verwaltung (Standard)', 'type' => 'select', 'required' => true, 'default' => 'de',
                     'options' => I18n::available(), 'help' => 'Jede Person kann unter „Konto“ eine eigene Sprache wählen.'],
                 // Persönliche Akzentfarbe der Verwaltung (Core\Accent): welche Vorlagen die Personen unter „Konto“ wählen dürfen
@@ -43,11 +48,13 @@ final class SystemSchema
                 ['name' => 'sys.icon_topics', 'label' => 'Symbolbereiche in der Symbolauswahl', 'type' => 'multiselect',
                     'options' => Icons::topicOptions(),
                     'help' => 'Nichts angehakt = alle Bereiche. „Allgemein“ und „Bedienung“ sind immer dabei; über die Suche lassen sich weitere Bereiche einblenden. Auf der Website lädt ohnehin nur ein kleines Sprite mit den tatsächlich verwendeten Symbolen.'],
+                ['type' => 'heading', 'label' => __('Darstellung auf der Website')],
                 ['name' => 'sys.symbol_style', 'label' => 'Symbolstil auf der Website', 'type' => 'select', 'default' => 'duotone',
                     'options' => Icons::styleOptions(),
                     'help' => 'Gilt für alle Symbole der Website (Blöcke, Kit). Lucide und Tabler sind freie Linien-Sätze – Symbole, die es dort nicht gibt, kommen aus Phosphor „Linie“. Die Verwaltung bleibt unverändert.'],
                 ['name' => 'sys.phone_country', 'label' => 'Landesvorwahl', 'type' => 'text', 'width' => 'half', 'default' => '+49', 'max' => 5,
                     'help' => 'Für Anruf-Links und die internationale Schreibweise von Telefonnummern auf Seiten in weiteren Sprachen (z. B. „0211 …“ → „+49 211 …“).'],
+                ['type' => 'heading', 'label' => __('Wartung')],
                 ['name' => 'sys.maintenance', 'label' => 'Wartungsmodus – Website nur für eingeloggte Nutzer', 'type' => 'bool', 'default' => false],
                 ['name' => 'sys.maintenance_text', 'label' => 'Text im Wartungsmodus', 'type' => 'textarea', 'rows' => 2,
                     'default' => 'Unsere Website wird gerade überarbeitet. Telefonisch sind wir wie gewohnt für Sie da.'],

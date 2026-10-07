@@ -6,6 +6,31 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Medien: Hochkant-Bilder im Raster eingepasst, neue Ansicht „Mauerwerk“
+- Ansicht „Symbole“: Kacheln bleiben quadratisch, Hochkant-Bilder werden eingepasst (`.fx-thumb` mit `container-type:inline-size`,
+  `max-height:100cqw`) – die Reihen springen nicht mehr. Neu daneben **Mauerwerk** (Masonry, CSS-Spalten): Bilder im eigenen
+  Seitenverhältnis; Größenregler gilt für beide. Gewählte Ansicht bleibt je Browser gespeichert.
+
+### Verwaltung: Formulare und Einstellungen im Stil der macOS-Systemeinstellungen
+- Ein Satz Maße für alle Eingabefelder (Tokens `--adm-ctl-*` in `resources/css/admin.css`): Text, Zahl, Datum, Suche,
+  Auswahl, Textbereich, Datei, Farbe, Vorsatz-Gruppen und Feld-Hüllen haben dieselbe Höhe (36 px, in Einstellungslisten
+  32 px, Touch 40/36 px), denselben Rahmen, Radius (6 px), Innenabstand, dieselbe Schrift und denselben Fokusring.
+  Auswahlfelder als Pop-up mit eigenem ↕-Pfeil (hell/dunkel); Schaltflächen so hoch wie Felder. Schrift der Verwaltung:
+  Systemschrift (-apple-system/SF Pro, Segoe UI, Roboto).
+- Kontrollkästchen und Optionsfelder in eigener Optik (16 px, Akzentfarbe, weißer Haken, Zwischenzustand, Fokusring,
+  deaktiviert); Ja/Nein in Einstellungen und `role="switch"` als Schalter; Mehrfachauswahl als ruhiges Raster.
+- Grundeinstellungen: Bereiche als Seitenleiste mit Symbolen (schmal: Auswahlfeld oben; Pfeiltasten ↑/↓, Pos1/Ende,
+  Adressen wie `#umgebung` bleiben), Inhalte als gruppierte Listen (`Fields::renderGroups()`: Zwischenüberschriften =
+  Gruppen, Beschriftung links, Feld rechts, Hilfe grau). „Allgemein“ gegliedert in Website, Verwaltung, Darstellung auf
+  der Website und Wartung (Link zu System → Domain, wo verfügbar). Kurze Felder (Höchstlänge < 40) ohne Zeichenzähler,
+  dafür `maxlength`; Kürzel und Zahlen schmal. Verschlüsselung, Umgebung, Geteilte Medien/Daten, Adresse der Verwaltung
+  und Systeminfo im selben Stil.
+- Testumgebung (staging): „Umgebung“ in der Bereichs-Navigation orange mit sanft pulsierendem Punkt (ohne Animation bei
+  „Bewegung reduzieren“, Hinweis für Screenreader und im Auswahlfeld), oranger Punkt an „Grundeinstellungen“ im Menü.
+- Benutzer & Rollen, Rolle bearbeiten, Konto und System → Domain als gruppierte Listen: Personen mit Initialen, Rolle und
+  aufklappbaren Aktionen (Rolle, E-Mail, 2FA zurücksetzen, Löschen), Rechte je Bereich als Schalter.
+- Zentrale Angaben (/admin/settings): kein waagerechtes Scrollen der Seite mehr auf dem Handy.
+
 ### Text-Editor: Adressen automatisch verlinken
 - E-Mail-Adressen, Web-Adressen (`www.…`, `http(s)://…`) und Telefonnummern (beginnen mit `+`, `0` oder `(0`, 6–15 Ziffern;
   keine Datumsangaben) werden beim Tippen verlinkt (`mailto:`, `https://`, `tel:` wie `normalizeTel()`), sobald danach

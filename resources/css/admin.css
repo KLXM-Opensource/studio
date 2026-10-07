@@ -156,16 +156,17 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 /* Formulare */
 .f{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-width:0}
 .f label,.f .f-label,.f-heading{font-weight:600;font-size:14px}
-.f input:not([type=checkbox]):not([type=file]),.f select,.f textarea,.adm-row input,.adm-media input{width:100%;min-height:42px;padding:9px 12px;border-radius:6px;border:1.5px solid var(--adm-in);background:var(--adm-surface);color:var(--adm-ink);font:400 15px var(--adm-font)}
+/* Einheitliche Eingabefelder: Maße/Farben über die Tokens --adm-ctl-* (Abschnitt „Formular-System“ am Ende) */
+.f input:not([type=checkbox]):not([type=file]):not([type=radio]):not([type=color]):not([type=range]),.f select,.f textarea,.adm-row input,.adm-row select,.adm-media input{width:100%;min-height:var(--adm-ctl-h);padding:7px var(--adm-ctl-px);border-radius:var(--adm-ctl-r);border:1px solid var(--adm-ctl-bd);background-color:var(--adm-ctl-bg);color:var(--adm-ink);font:400 var(--adm-ctl-fs)/1.4 var(--adm-font)}
 .f textarea{resize:vertical;line-height:1.5}
-.f input:focus,.f select:focus,.f textarea:focus,.rte-area:focus,.adm-row input:focus,.adm-media input:focus{border-color:var(--adm-a);outline:none;box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .15)}
+.f input:focus,.f select:focus,.f textarea:focus,.rte-area:focus,.adm-row input:focus,.adm-row select:focus,.adm-media input:focus{border-color:var(--adm-a);outline:none;box-shadow:var(--adm-ring)}
 .f--error input,.f--error select,.f--error textarea,[aria-invalid=true]{border-color:var(--adm-err)!important}
 .f-error{color:var(--adm-err);font-weight:600;font-size:13px}
 .f-help{color:var(--adm-t3);font-size:13px}
 .f-count{align-self:flex-end;font-size:12px;color:var(--adm-t3)}
 .f-count.is-over{color:var(--adm-err);font-weight:700}
 .f-check{display:flex;gap:10px;align-items:flex-start;font-weight:500!important;cursor:pointer}
-.f-check input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--adm-a);flex:none}
+.f-check input{width:18px;height:18px;margin:2px 0 0;flex:none}
 .req{color:var(--adm-a-ink)}
 .f-heading{font-size:15px;margin:8px 0 2px;grid-column:1/-1}
 .adm-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
@@ -180,9 +181,10 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .rep-fields>.f--half{grid-column:auto}
 .rep-fields>.f-vis>:is(.f,.f-heading){grid-column:1/-1}.rep-fields>.f-vis>.f--half{grid-column:auto}
 @media (max-width:700px){.adm-fields,.rep-fields{grid-template-columns:1fr}.adm-fields>.f--half,.rep-fields>.f--half,.adm-fields>.f-vis>.f--half,.rep-fields>.f-vis>.f--half{grid-column:1/-1}}
-.adm-prefix{display:flex;align-items:stretch;border:1.5px solid var(--adm-in);border-radius:6px;overflow:hidden;background:var(--adm-surface)}
-.adm-prefix span{display:flex;align-items:center;padding:0 10px;background:var(--adm-fill);color:var(--adm-t3);font-size:13px;white-space:nowrap}
-.adm-prefix input{border:0!important;border-radius:0!important}
+.adm-prefix{display:flex;align-items:stretch;min-height:var(--adm-ctl-h);border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);overflow:hidden;background:var(--adm-ctl-bg)}
+.adm-prefix:focus-within{border-color:var(--adm-a);box-shadow:var(--adm-ring)}
+.adm-prefix span{display:flex;align-items:center;padding:0 10px;background:var(--adm-fill);color:var(--adm-t3);font-size:var(--adm-ctl-fs);white-space:nowrap;border-right:1px solid var(--adm-line)}
+.adm-prefix input{border:0!important;border-radius:0!important;box-shadow:none!important;min-height:0!important;height:calc(var(--adm-ctl-h) - 2px)}
 .adm-form-actions,.adm-savebar{display:flex;gap:14px;align-items:center}
 .adm-savebar{position:sticky;bottom:0;padding:14px 0;background:linear-gradient(transparent,var(--adm-bg) 30%);z-index:5}
 
@@ -239,7 +241,6 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .adm-dialog::backdrop{background:rgba(22,32,30,.5)}
 .adm-dialog--small{width:min(520px,calc(100vw - 32px))}
 .adm-dialog h2{margin-bottom:12px}
-.adm-dialog .f input{width:100%;min-height:42px;padding:9px 12px;border-radius:6px;border:1.5px solid var(--adm-in);font:inherit}
 .adm-dialog__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .adm-dialog__head h2{margin:0}
 
@@ -274,7 +275,7 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .setup-kind legend{margin-bottom:6px;font-weight:600}
 .setup-kind__opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--adm-line);border-radius:10px;font-weight:400;line-height:1.45;cursor:pointer}
 .setup-kind__opt:has(input:checked){border-color:var(--adm-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--adm-a) 18%,transparent)}
-.setup-kind .setup-kind__opt input[type=radio]{flex:none;width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;border:0;box-shadow:none;background:none;accent-color:var(--adm-a)}
+.setup-kind .setup-kind__opt input[type=radio]{flex:none;margin:2px 0 0}
 .setup-kind__opt>span{flex:1;min-width:0;font-weight:400}
 
 @media (max-width:900px){
@@ -365,10 +366,16 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 
 .fx-items{flex:1;overflow:auto;padding:16px;outline:none;align-content:start}
 .fx-items:focus-visible{box-shadow:inset 0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .25)}
+/* Mauerwerk: Spalten, Bilder im eigenen Seitenverhältnis (Reihenfolge läuft je Spalte von oben nach unten) */
+[data-view=masonry] .fx-items{display:block;columns:var(--fx-size) auto;column-gap:10px}
+[data-view=masonry] .fx-item{break-inside:avoid;margin-bottom:12px;width:100%}
+[data-view=masonry] .fx-thumb{aspect-ratio:auto;container-type:normal;min-height:calc(var(--fx-size) * .5)}
+[data-view=masonry] .fx-thumb img{max-height:none;width:100%;height:auto}
 [data-view=grid] .fx-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--fx-size),1fr));gap:18px 10px}
 .fx-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border-radius:6px;cursor:default;user-select:none;min-width:0}
 .fx-thumb{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:6px;padding:6px}
-.fx-thumb img{max-width:100%;max-height:100%;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);background:var(--adm-surface)}
+.fx-thumb{container-type:inline-size}   /* quadratisch: Höhe = Breite (cqw) – Hochkant-Bilder werden eingepasst, die Kachel wächst nicht */
+.fx-thumb img{max-width:100%;max-height:calc(100cqw - 12px);border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);background:var(--adm-surface)}
 .fx-item[aria-selected=true] .fx-thumb{background:var(--adm-press)}
 .fx-name{max-width:100%;text-align:center;line-height:1.3}
 .fx-name span{display:inline;padding:1px 6px;border-radius:5px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -1013,20 +1020,17 @@ html.adm-ui[data-theme=dark]{--ico-2-opacity:.3}
 /* Bedienelemente */
 .adm-main{padding:26px clamp(18px,2.6vw,40px) 80px}
 .adm-card{border-radius:10px;padding:20px;box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.05)}
-.adm-btn{min-height:30px;padding:0 13px;border-radius:6px;background:var(--adm-surface);color:var(--adm-ink);font:500 13px var(--adm-font);box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 1px 1px rgba(0,0,0,.07)}
+.adm-btn{min-height:var(--adm-ctl-h);padding:0 14px;border-radius:var(--adm-ctl-r);background:var(--adm-surface);color:var(--adm-ink);font:500 13px var(--adm-font);box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 1px 1px rgba(0,0,0,.07)}
 .adm-btn:hover{background:var(--adm-fill);color:var(--adm-ink)}
 .adm-btn:active{background:var(--adm-fill-2)}
 .adm-btn--primary{background:linear-gradient(#3C4E78,#314164);color:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.3),0 1px 1px rgba(0,0,0,.12),inset 0 .5px 0 rgba(255,255,255,.25)}
 .adm-btn--primary:hover{background:linear-gradient(#314164,#2A3A5C);color:#fff}
 .adm-btn--ghost{background:var(--adm-surface);box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 1px 1px rgba(0,0,0,.07)}
-.adm-btn--small{min-height:24px;padding:0 10px;font-size:12px}
+.adm-btn--small{min-height:28px;padding:0 10px;font-size:12px}
 .adm-btn--danger{background:linear-gradient(#C8352C,#B3261E);color:#fff}
 .adm-flash{border-radius:8px;font-weight:500;font-size:13.5px;padding:10px 14px}
-.f input:not([type=checkbox]):not([type=file]):not([type=radio]):not([type=color]),.f select,.f textarea,.adm-row input{min-height:30px;padding:5px 9px;border-radius:6px;border:1px solid var(--adm-in);font:400 13.5px var(--adm-font)}
-.f input:focus,.f select:focus,.f textarea:focus,.adm-row input:focus{border-color:var(--adm-a);box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .22)}
 .f label,.f legend{font-size:13px;font-weight:600}
 .f-help{font-size:12px}
-.f-check input,.adm input[type=checkbox],.adm input[type=radio]{accent-color:var(--adm-a)}
 
 /* Reiter als Segmentsteuerung */
 .adm-tabs{display:inline-flex;flex-wrap:wrap;gap:0;padding:2px;border-radius:8px;background:var(--adm-hover)}
@@ -1253,7 +1257,7 @@ body.adm:has(.adm-env){padding-bottom:26px}
 @font-face{font-family:Lato;font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:Lato;font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-700-italic.woff2) format("woff2")}
 :root{--klxm-navy:#314164;--klxm-mist:#E5E7EF;--klxm-sand:#EDE9E3;--klxm-gray:#6F6F6E;
-  --adm-font:Lato,"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+  --adm-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
   --adm-a:#314164;--adm-a-d:#243150;--adm-a-ink:#314164;--adm-accent-bg:#E3E8F2;
   --adm-ink:#1F2430;--adm-t2:#474746;--adm-t3:#5C5C5B;   /* #6F6F6E erreicht auf #E5E7EF nur 4,0:1 – für kleine Schrift dunkler */
   --adm-bg:#E5E7EF;--adm-card:#fff;--adm-surface:#fff;--adm-fill:#F1F2F6;--adm-fill-2:#E5E7EF;
@@ -2022,7 +2026,7 @@ html.adm-ui[data-theme=dark] .sp-dot,html.adm-ui[data-theme=dark] .sp-item.is-un
 .net-search{flex:1 1 200px;min-width:0}.net-search input{width:100%;max-width:320px}
 .net-actions .adm-btn{white-space:normal}
 @media (max-width:600px){.net-acc thead{display:none}.net-acc,.net-acc tbody,.net-acc tr,.net-acc td{display:block;width:100%}.net-acc td{padding:6px 0;border:0}.net-acc tr{padding:8px 0;border-bottom:1px solid var(--adm-line)}.net-acc .adm-actions{flex-direction:row;align-items:center;justify-content:flex-start}}
-.sp-form .f input[type=radio],.sp-form fieldset input[type=radio],.sp-form input[type=checkbox]{flex:none;width:16px;height:16px;min-height:0;margin:0;padding:0;border:0;box-shadow:none;background:none}
+.sp-form .f input[type=radio],.sp-form fieldset input[type=radio],.sp-form input[type=checkbox]{flex:none;margin:0}
 .sp-choice__opt input[type=radio]{margin-top:3px}
 .sp-prio .f-hint{margin:2px 0 0;font-size:12.5px;color:var(--adm-t3)}
 .sp-prefs .adm-link,.sp-owner .adm-link{color:var(--adm-a-ink);padding:0 4px}
@@ -2805,3 +2809,336 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
 .fx-dhead{gap:10px}
 .fx-dhint{flex:1;min-width:0;margin:0 8px;font-size:13px;line-height:1.35;color:var(--adm-t3)}
 @media (max-width:700px){.fx-dhint{display:none}}
+
+/* ================= Formular-System (07.10.2026) =================
+   Ein Satz Maße für alle Eingabefelder der Verwaltung: Text, Zahl, Datum, Suche, Auswahl, Textbereich, Datei, Farbe,
+   Vorsatz-Gruppen (.adm-prefix) und Feld-Hüllen (Suche in Medien/Symbolen, Schlagworte). Werte nur über die Tokens
+   --adm-ctl-*; Schaltflächen (.adm-btn, Auswahl-Knöpfe in Feldern) haben dieselbe Höhe.
+   Die Hautregel hebt ihre Spezifität mit :not(#\#) (wirkt wie eine ID, trifft jedes Element) über die vielen
+   Einzelregeln älterer Bereiche – Breiten, Abstände und Schriftart (z. B. Monospace für Code) bleiben deren Sache.
+   Bewusst ausgenommen: Felder in Hüllen (die Hülle trägt den Rahmen), Befehlspalette, Chat-Eingabe, Code-Editor,
+   Untertitel-Zeilen, Werkzeugleiste des Bildeditors und .is-bare. */
+:root{--adm-ctl-h:36px;--adm-ctl-r:6px;--adm-ctl-px:11px;--adm-ctl-fs:14px;--adm-ctl-lh:20px;--adm-ctl-bd:var(--adm-in);--adm-ctl-bg:var(--adm-surface);
+  --adm-ring:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .28);
+  --adm-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5 6.5L8 3.5l3 3M5 9.5l3 3 3-3' fill='none' stroke='%234B5263' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]){--adm-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5 6.5L8 3.5l3 3M5 9.5l3 3 3-3' fill='none' stroke='%23C7CAD3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}}
+html.adm-ui[data-theme=dark]{--adm-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5 6.5L8 3.5l3 3M5 9.5l3 3 3-3' fill='none' stroke='%23C7CAD3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (pointer:coarse){:root{--adm-ctl-h:40px}}
+.set-list{--adm-ctl-h:32px}
+@media (pointer:coarse){.set-list{--adm-ctl-h:36px}}
+
+/* Haut: Text-artige Felder, Auswahl, Textbereich */
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#){
+  height:var(--adm-ctl-h);min-height:0;padding:calc((var(--adm-ctl-h) - var(--adm-ctl-lh) - 2px) / 2) var(--adm-ctl-px);border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);
+  background-color:var(--adm-ctl-bg);color:var(--adm-ink);font-size:var(--adm-ctl-fs);line-height:var(--adm-ctl-lh);box-shadow:none;
+  transition:border-color .12s,box-shadow .12s}
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#):focus{
+  border-color:var(--adm-a);outline:none;box-shadow:var(--adm-ring)}
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#):is(:disabled,[readonly]){
+  background-color:var(--adm-fill);color:var(--adm-t2)}
+textarea:not(:is(.uc-compose,.cb-editor,.cap-cue) *):not(.is-bare):not(#\#):not(#\#){height:auto}
+select:is([multiple],[size]:not([size="1"])):not(#\#):not(#\#){height:auto;padding:4px}
+:is(input,textarea)::placeholder{color:var(--adm-t3);opacity:1}
+input[type=search]{-webkit-appearance:none;appearance:none}
+input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
+/* Auswahl: eigener Pfeil statt Systemoptik – gleiche Höhe, Schrift und Innenabstand wie Textfelder */
+select:not([multiple]):not([size]:not([size="1"])):not(:is(.ie-opts,.cap-cue) *):not(.is-bare):not(#\#){
+  -webkit-appearance:none;appearance:none;padding-right:28px;background-image:var(--adm-chev);background-repeat:no-repeat;
+  background-position:right 7px center;background-size:14px 14px;text-overflow:ellipsis;cursor:pointer}
+select:-moz-focusring{color:transparent;text-shadow:0 0 0 var(--adm-ink)}
+/* Datei und Farbe: gleicher Rahmen, Höhe und Radius */
+input[type=file]:not(#\#){max-width:100%;height:var(--adm-ctl-h);padding:3px;border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);background-color:var(--adm-ctl-bg);color:var(--adm-t2);font-size:var(--adm-ctl-fs);line-height:30px}
+input[type=file]::file-selector-button{height:30px;margin:0 10px 0 0;padding:0 12px;border:0;border-radius:3px;background:var(--adm-fill-2);color:var(--adm-ink);font:500 13px var(--adm-font);cursor:pointer}
+input[type=file]:hover::file-selector-button{background:var(--adm-press)}
+input[type=file]:focus-visible{outline:none;border-color:var(--adm-a);box-shadow:var(--adm-ring)}
+input[type=color]:not(:is(.ie-opts) *):not(#\#){height:var(--adm-ctl-h);min-height:0;padding:3px;border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);background-color:var(--adm-ctl-bg);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:0;border-radius:2px}
+input[type=color]::-moz-color-swatch{border:0;border-radius:2px}
+/* Hüllen mit Feld darin: die Hülle sieht aus wie ein Feld */
+:is(.fx-search,.icp__search,.icg__search):not(#\#){height:var(--adm-ctl-h);border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);background:var(--adm-ctl-bg);box-shadow:none}
+:is(.fx-search,.icp__search,.icg__search):not(#\#):focus-within{border-color:var(--adm-a);box-shadow:var(--adm-ring)}
+:is(.fx-search,.icp__search,.icg__search) input:not(#\#){height:auto;font-size:var(--adm-ctl-fs);line-height:var(--adm-ctl-lh)}
+.fx-tags:not(.fx-tags--ro):not(#\#){min-height:var(--adm-ctl-h);border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);background:var(--adm-ctl-bg)}
+.fx-tags:not(.fx-tags--ro):not(#\#):focus-within{border-color:var(--adm-a);box-shadow:var(--adm-ring)}
+.fx-tags input{font-size:var(--adm-ctl-fs)!important}
+.cb-editor{border-color:var(--adm-ctl-bd);border-radius:var(--adm-ctl-r)}
+/* Auswahl-Knöpfe in Feldern (Medien, Link, Ort, Sammlung, Wiederholgruppe) wie Schaltflächen neben Feldern */
+:is(.f,.media-field,.geo,.rep,.col-field,.f-link) .btn:not(#\#){min-height:var(--adm-ctl-h);padding:0 14px;border-radius:var(--adm-ctl-r);background:var(--adm-ctl-bg);box-shadow:inset 0 0 0 1px var(--adm-ctl-bd);color:var(--adm-ink);font:500 13.5px var(--adm-font)}
+:is(.f,.media-field,.geo,.rep,.col-field,.f-link) .btn:not(#\#):hover{background:var(--adm-fill)}
+:is(.f,.media-field,.geo,.rep,.col-field,.f-link) .btn--small:not(#\#){min-height:28px;padding:0 10px;font-size:12.5px}
+/* Schmale Felder (Kürzel, Vorwahl, Zahlen – Core\Fields setzt .f-in--short) */
+.f input.f-in--short{max-width:12rem}
+.f input[type=number]{max-width:14rem}
+.f-color input[type=text]{max-width:140px}
+
+/* Kontrollkästchen und Optionsfelder: eigene Optik in der Akzentfarbe (Haken weiß auf --adm-a: WCAG AA geprüft, Core\Accent).
+   Ausgenommen: Eingaben, die nur unsichtbar über einer eigenen Darstellung liegen (Schalter, Kacheln, Segmente). */
+:is(input[type=checkbox],input[type=radio]):not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#){
+  -webkit-appearance:none;appearance:none;flex:none;display:inline-block;width:16px;height:16px;min-height:0;padding:0;
+  border:1px solid var(--adm-ctl-bd);border-radius:4px;background:var(--adm-ctl-bg) center/12px 12px no-repeat;box-shadow:0 .5px 1px rgba(0,0,0,.08);
+  vertical-align:-3px;cursor:pointer;transition:background-color .12s,border-color .12s}
+input[type=radio]:not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#){border-radius:50%}
+:is(input[type=checkbox],input[type=radio]):not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#):hover:not(:disabled){border-color:var(--adm-a)}
+input[type=checkbox]:not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#):checked{
+  border-color:var(--adm-a);background-color:var(--adm-a);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+input[type=checkbox]:not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#):indeterminate{
+  border-color:var(--adm-a);background-color:var(--adm-a);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+input[type=radio]:not(:is(.pt-switch,.ds-switch,.ds-seg__o,.ds-card,.rr-day,.acc-opt,.ifx-pre,.ifit-bg,.tpl-pick__opt) input):not(#\#):checked{
+  border-color:var(--adm-a);background-color:var(--adm-a);background-image:radial-gradient(circle,#fff 0 3px,transparent 3.5px)}
+:is(input[type=checkbox],input[type=radio]):not(#\#):focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+:is(input[type=checkbox],input[type=radio]):not(#\#):disabled{opacity:.5;cursor:not-allowed}
+/* Schalter (macOS-artig): role="switch" und Ja/Nein-Felder in Einstellungslisten (.set-list) – an = Akzentfarbe */
+:is(input[type=checkbox][role=switch],.set-list .f--bool .f-check input[type=checkbox]):not(#\#):not(#\#){
+  width:34px;height:20px;border:0;border-radius:999px;background-color:var(--adm-switch-off);background-size:auto;
+  background-image:radial-gradient(circle at 10px 50%,#fff 0 8px,transparent 8.5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+  transition:background-color .18s,background-position .18s}
+:is(input[type=checkbox][role=switch],.set-list .f--bool .f-check input[type=checkbox]):not(#\#):not(#\#):checked{
+  background-color:var(--adm-a);background-image:radial-gradient(circle at calc(100% - 10px) 50%,#fff 0 8px,transparent 8.5px)}
+:is(input[type=checkbox][role=switch],.set-list .f--bool .f-check input[type=checkbox]):not(#\#):not(#\#):hover:not(:disabled){filter:brightness(.97)}
+:root{--adm-switch-off:#C9CBD1}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]){--adm-switch-off:#4A4E5A}}
+html.adm-ui[data-theme=dark]{--adm-switch-off:#4A4E5A}
+@media (forced-colors:active){
+  :is(input[type=checkbox],input[type=radio]):not(#\#):not(#\#){-webkit-appearance:auto;appearance:auto;background:none}
+  select:not(#\#){-webkit-appearance:auto;appearance:auto;background-image:none}
+}
+/* Beschriftungen mit Kästchen: Kästchen auf der ersten Zeile, Text daneben */
+.f-check{align-items:flex-start;gap:9px;line-height:1.45}
+.f-check > input:not(#\#){margin:2px 0 0}
+.f--multi legend{padding:0;margin-bottom:8px}
+/* Mehrfachauswahl: ruhiges Raster aus Kästchen mit Text (wie Listen in den macOS-Einstellungen) */
+.f-multi{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,10rem),1fr));gap:8px 16px}
+.f-multi .f-check{align-items:flex-start;margin:0;font-size:13.5px;line-height:1.35}
+.f-multi .f-check > input:not(#\#){margin:1px 0 0}
+.f-multi .f-check[hidden]{display:none}
+
+/* ================= Einstellungen im Stil der macOS-Systemeinstellungen (07.10.2026) =================
+   Fields::renderGroups(): .set-groups > .set-group (Titel, .set-list, Fußnote). Jede Zeile: Beschriftung (+ graue Hilfe) links,
+   Feld rechts, senkrecht mittig; lange Werte (Adressen, Textbereiche, Mehrfachauswahl, Medien) als eigene Zeile darunter.
+   Ja/Nein als Schalter. Bereiche: Seitenleiste mit Symbolen (breit) bzw. Auswahlfeld oben (schmal, admin.js). */
+.set-groups{display:grid;gap:24px}
+.set-group{margin:0;min-width:0}
+.set-group__title{margin:0 0 7px 4px;font-size:13px;font-weight:650;line-height:1.3;color:var(--adm-ink);letter-spacing:0;text-transform:none}
+.set-group__note{margin:7px 4px 0;font-size:12px;line-height:1.45;color:var(--adm-t3)}
+.set-group__title + .set-group__note{margin:-2px 4px 8px}
+details.set-group > summary.set-group__title{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;border-radius:var(--adm-ctl-r);padding:2px 4px;margin-left:0}
+details.set-group > summary::-webkit-details-marker{display:none}
+details.set-group > summary::before{content:"";width:7px;height:7px;border:solid var(--adm-t3);border-width:0 1.6px 1.6px 0;transform:rotate(-45deg);transition:transform .15s;margin:0 3px}
+details.set-group[open] > summary::before{transform:rotate(45deg)}
+.set-list{container-type:inline-size;padding:0 14px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) .set-list{box-shadow:0 0 0 .5px rgba(255,255,255,.1)}}
+html.adm-ui[data-theme=dark] .set-list{box-shadow:0 0 0 .5px rgba(255,255,255,.1)}
+.set-list > .f,.set-list > .f-vis > .f{display:flex;flex-direction:column;gap:6px;min-height:46px;margin:0;padding:10px 0;border:0;border-top:1px solid var(--adm-line);justify-content:center}
+.set-list > .f:first-child,.set-list > .f-vis:first-child > .f{border-top:0}
+.set-list .f > label,.set-list .f > legend,.set-list .f-check{font-size:13.5px;font-weight:500;line-height:1.35;color:var(--adm-ink)}
+.set-list .f > .f-help{margin:0;font-size:12px;line-height:1.4;color:var(--adm-t3)}
+.set-list .f > legend{float:left;width:100%;padding:0;margin:0 0 8px}
+.set-list .f > legend + *{clear:both}
+/* Kompakte Zeile: Beschriftung links, Feld rechts */
+.set-list .f.f--inline{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:20px;row-gap:2px;align-items:center}
+.set-list .f.f--inline > *{grid-column:1 / -1}
+.set-list .f.f--inline > label{grid-column:1;grid-row:1;align-self:end}
+.set-list .f.f--inline > .f-help{grid-column:1;grid-row:2;align-self:start}
+.set-list .f.f--inline:not(:has(> .f-help)) > label{grid-row:1 / span 2;align-self:center}
+.set-list .f.f--inline > :is(input,select,.f-color,.adm-prefix){grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:center}
+.set-list .f.f--inline > :is(input,select):not(#\#){width:min(300px,46cqi)}
+.set-list .f.f--inline > select:not(#\#){width:auto;min-width:min(170px,40cqi);max-width:min(360px,52cqi)}
+.set-list .f.f--inline > input:is(.f-in--short,[type=number]):not(#\#){width:min(120px,40cqi)}
+.set-list .f.f--inline > :is(.f-error,.f-count){grid-column:1 / -1}
+/* Ja/Nein: Text links, Schalter rechts */
+.set-list .f--bool > .f-check{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:center;gap:20px;width:100%}
+.set-list .f--bool > .f-check > input:not(#\#){margin:0}
+.set-list .f--bool > .f-check > span{flex:1;min-width:0;text-align:left}
+.set-list .f--bool > .f-help{padding-right:60px}
+/* Mehrfachauswahl in der Liste: Raster ohne eigene Rahmen */
+.set-list .f--multi .f-multi{margin-top:2px;grid-template-columns:repeat(auto-fill,minmax(min(100%,max(8.5rem,22cqi)),1fr))}
+.set-list .f--multi > .f-help{margin-top:4px}
+/* schmal: Textfelder unter die Beschriftung, Auswahl und kurze Felder bleiben rechts */
+@container (max-width:460px){
+  .set-list .f.f--inline:has(> input:not(.f-in--short,[type=number],[type=color])){grid-template-columns:minmax(0,1fr)}
+  .set-list .f.f--inline:has(> input:not(.f-in--short,[type=number],[type=color])) > input:not(#\#){grid-column:1;grid-row:auto;width:100%;justify-self:stretch;margin-top:6px}
+  .set-list .f.f--inline > select:not(#\#){max-width:56cqi;min-width:0}
+  .set-list .f.f--inline > :is(input,select,.f-color,.adm-prefix){grid-row:1}
+  .set-list .f.f--inline > label{grid-row:1;align-self:center}
+  .set-list .f.f--inline > .f-help{grid-column:1 / -1;margin-top:4px}
+}
+/* Bereich ohne Karte: Titel, darunter die Gruppen; weitere Kästen im Bereich (Vorschau, Test, Tabellen) wie Gruppen */
+.adm-panel--groups{padding:0;background:none;box-shadow:none;border-radius:0}
+.adm-panel--groups > h2{margin:2px 0 16px 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.adm-panel--groups{display:grid;gap:24px;align-content:start}
+.adm-panel--groups[hidden]{display:none}
+.adm-panel--groups > h2{margin-bottom:-8px!important}
+.adm-panel--groups > :not(h2,.set-groups,.set-group,.set-page__lead,.set-actions,.adm-flash,[hidden]){padding:14px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+.adm-tabs-form--side > .adm-panel:not(.adm-panel--groups){border-radius:10px}
+
+/* Bereichs-Navigation: Seitenleiste mit Symbolen (ab 1000 px), schmal ein Auswahlfeld (admin.js .adm-tabsel) */
+.adm-tabs__ico{display:none}
+.adm-tabsel{display:none}
+@media (max-width:999.98px){
+  .adm-tabs-form--side > .adm-tabs.has-select{display:none}
+  .adm-tabs-form--side > .adm-tabsel{display:block;margin:0 0 16px}
+  .adm-tabs-form--side > .adm-tabsel select:not(#\#){width:100%;font-weight:600}
+}
+@media (min-width:1000px){
+  .adm-tabs-form--side{display:grid;grid-template-columns:minmax(190px,220px) minmax(0,1fr);column-gap:28px;align-items:start}
+  .adm-tabs-form--side > *{grid-column:2;min-width:0}
+  .adm-tabs-form--side > .adm-tabs{grid-column:1;grid-row:1 / span 40;position:sticky;top:16px;display:flex;flex-direction:column;gap:1px;
+    margin:0;padding:6px;max-height:calc(100vh - 32px);overflow:hidden auto;border-radius:12px;background:var(--adm-hover);box-shadow:none}
+  html.adm-ui .adm-tabs-form--side .adm-tabs [role=tab]{display:flex;align-items:center;gap:9px;width:100%;min-height:30px;padding:4px 8px 4px 6px;
+    border-radius:7px;background:none;box-shadow:none;color:var(--adm-ink);font:500 13.5px/1.25 var(--adm-font);text-align:left;white-space:normal}
+  html.adm-ui .adm-tabs-form--side .adm-tabs [role=tab]:hover{background:var(--adm-press)}
+  html.adm-ui .adm-tabs-form--side .adm-tabs [role=tab][aria-selected=true]{background:var(--adm-a);color:#fff;font-weight:600;box-shadow:none}
+  .adm-tabs-form--side .adm-tabs__ico{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:var(--adm-a);color:#fff}
+  .adm-tabs-form--side .adm-tabs__ico svg{width:14px;height:14px}
+  .adm-tabs-form--side [aria-selected=true] .adm-tabs__ico{background:rgba(255,255,255,.22)}
+}
+/* Zeilen-Bausteine für handgeschriebene Einstellungsseiten (Grundeinstellungen-Reiter, Konto, Domain, Benutzer & Rollen):
+   <section class="set-group"><h3 class="set-group__title">…</h3><div class="set-list">
+     <div class="set-row"><div class="set-row__main"><span class="set-row__label">…</span><span class="set-row__sub">…</span></div><div class="set-row__ctl">…</div></div>
+   </div><p class="set-group__note">…</p><div class="set-actions">…</div></section>
+   .set-row--stack: Inhalt (Text, Liste, Tabelle) unter der Beschriftung; a.set-row--link: ganze Zeile klickbar mit Pfeil. */
+.set-page{display:grid;gap:24px;min-width:0}
+.set-page > h2,.set-page__title{margin:2px 0 -8px 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.set-page__lead{margin:0 4px;font-size:13px;line-height:1.5;color:var(--adm-t2);max-width:72ch}
+.set-row{display:flex;align-items:center;gap:8px 20px;min-height:46px;padding:9px 0;border-top:1px solid var(--adm-line);color:var(--adm-ink);font-size:13.5px;line-height:1.35}
+.set-list > .set-row:first-child,.set-list > :first-child > .set-row:first-child{border-top:0}
+.set-list > .f + .set-row,.set-list > .set-row + .f{border-top:1px solid var(--adm-line)}
+.set-row__main{display:grid;gap:2px;flex:1 1 auto;min-width:0}
+.set-row__label{font-weight:500;overflow-wrap:anywhere}
+.set-row__sub{font-size:12px;line-height:1.4;color:var(--adm-t3);overflow-wrap:anywhere}
+.set-row__ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;flex:0 1 auto;min-width:0;text-align:right;color:var(--adm-t2)}
+.set-row__ctl code{word-break:normal;overflow-wrap:anywhere}
+.set-row--stack{display:grid;align-items:start}
+.set-row--stack > .set-row__ctl{justify-content:flex-start;text-align:left}
+.set-row__body{font-size:13px;line-height:1.5;color:var(--adm-t2)}
+.set-row__body > :first-child{margin-top:0}.set-row__body > :last-child{margin-bottom:0}
+a.set-row--link{text-decoration:none;color:var(--adm-ink);margin:0 -14px;padding-left:14px;padding-right:12px}
+a.set-row--link:hover{background:var(--adm-hover);color:var(--adm-ink)}
+a.set-row--link::after{content:"";flex:none;width:7px;height:7px;border:solid var(--adm-t3);border-width:1.6px 1.6px 0 0;transform:rotate(45deg);margin-left:2px}
+.set-list > a.set-row--link:first-child{border-top-left-radius:10px;border-top-right-radius:10px}
+.set-list > a.set-row--link:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.set-list > .set-row + a.set-row--link,.set-list > a.set-row--link + a.set-row--link{border-top:1px solid var(--adm-line)}
+.set-avatar{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--adm-a);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.set-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 4px 0}
+.set-actions--end{justify-content:flex-end}
+.set-group > .adm-flash{margin:8px 0 0}
+.set-list .adm-table{margin:0}
+.set-list > .adm-table,.set-list > .set-scroll{margin:0 -14px}
+.set-scroll{overflow-x:auto}
+.set-list .adm-table th:first-child,.set-list .adm-table td:first-child{padding-left:14px}
+.set-list .adm-table th:last-child,.set-list .adm-table td:last-child{padding-right:14px}
+.set-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr));gap:8px 16px;margin:0;padding:0;border:0;min-width:0}
+.set-checks > legend{float:left;width:100%;padding:0;margin:0 0 6px;font-size:12px;font-weight:600;color:var(--adm-t3)}
+.set-checks > legend + *{clear:both}
+@media (max-width:560px){
+  .set-row:not(.set-row--keep){flex-wrap:wrap}
+  .set-row:not(.set-row--keep) > .set-row__ctl{flex:1 1 100%;justify-content:flex-start;text-align:left}
+}
+/* Geteilte Medien / Geteilte Daten in Gruppen-Bereichen: Karten als Gruppenkästen, Websites als Kästchen-Raster */
+.adm-panel--groups > p:not(.adm-flash){margin:0 4px;font-size:13px;line-height:1.5;color:var(--adm-t2);max-width:72ch;padding:0;background:none;box-shadow:none}
+.adm-panel--groups > .pl-card{margin:0;gap:12px}
+.adm-panel--groups .pl-sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr));gap:8px 16px;padding-top:10px;border-top:1px solid var(--adm-line)}
+.adm-panel--groups .pl-sites legend{float:left;width:100%;margin:0 0 2px;padding:0}
+.adm-panel--groups .pl-sites legend + *{clear:both}
+.adm-panel--groups .pl-card input:not([type=checkbox],[type=radio]):not(#\#){height:var(--adm-ctl-h)}
+.adm-panel--groups .pl-card > .adm-row,.adm-panel--groups .pl-new > .adm-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--adm-line)}
+/* Benutzer & Rollen im Listen-Stil: Person = aufklappbare Zeile (Rolle, E-Mail, 2FA, Löschen), Rollen als Zeilen, Rechte je Bereich mit Schaltern */
+.set-group__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 7px}
+.set-group__head > .set-group__title{margin-bottom:0}
+.set-group__title--sub{margin-top:14px;font-size:12px;font-weight:600;color:var(--adm-t3)}
+fieldset.set-group{border:0;padding:0;margin:0;min-width:0}
+fieldset.set-group > legend.set-group__title{float:left;width:100%;padding:0}
+fieldset.set-group > legend + *{clear:both}
+.set-group > .f-error{margin:0 4px 8px}
+.set-avatar--ghost{background:var(--adm-fill-2);color:var(--adm-t2)}
+.us-item{border-top:1px solid var(--adm-line)}
+.us-list > :first-child{border-top:0}
+.us-list > .us-netrow + .us-item,.us-list > .us-item + .us-netrow{border-top:1px solid var(--adm-line)}
+.us-item > summary{list-style:none;cursor:pointer;border-top:0;margin:0 -14px;padding-left:14px;padding-right:12px;border-radius:0}
+.us-item > summary::-webkit-details-marker{display:none}
+.us-item > summary::after{content:"";flex:none;width:7px;height:7px;border:solid var(--adm-t3);border-width:1.6px 1.6px 0 0;transform:rotate(45deg);transition:transform .15s;margin:0 2px}
+.us-item[open] > summary::after{transform:rotate(135deg)}
+.us-item > summary:hover{background:var(--adm-hover)}
+.us-list > .us-item:first-child > summary{border-top-left-radius:10px;border-top-right-radius:10px}
+.us-list > .us-item:last-child:not([open]) > summary{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.us-detail{margin:0 -14px;padding:0 14px 0 66px;background:var(--adm-fill)}
+.us-list > .us-item:last-child > .us-detail{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.us-detail .set-row__ctl input[type=email]:not(#\#){width:min(260px,100%)}
+.us-rolebadge{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
+.us-role{display:flex;gap:6px;align-items:center;margin:0}
+.us-role select:not(#\#){width:auto;min-width:160px}
+.us-forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:24px;align-items:start}
+.us-forms .set-list .f.f--inline > :is(input,select):not(#\#){width:min(240px,56cqi)}
+.us-rolelink{color:var(--adm-ink);text-decoration:none}
+.us-rolelink:hover{text-decoration:underline}
+.us-matrix{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:24px;align-items:start}
+.us-matrix fieldset{background:none;padding:0;border-radius:0;display:block}
+.us-matrix legend{font-size:13px}
+.us-radio{display:flex;align-items:center;gap:10px;cursor:pointer}
+.us-tablepick{margin:8px 0 0 26px}
+@media (max-width:560px){.us-detail{padding-left:14px}}
+/* Testumgebung: „Umgebung“ in der Bereichs-Navigation orange mit sanft pulsierendem Punkt; Punkt auch an „Grundeinstellungen“ im Menü */
+:root{--adm-envwarn:#C25A0A}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]){--adm-envwarn:#E07B2A}}
+html.adm-ui[data-theme=dark]{--adm-envwarn:#E07B2A}
+.adm-tabs__dot{flex:none;width:8px;height:8px;margin-left:auto;border-radius:50%;background:var(--adm-envwarn);animation:adm-envpulse 2.2s ease-in-out infinite}
+.adm-tabs [role=tab].is-warn .adm-tabs__label{color:inherit}
+@media (min-width:1000px){
+  .adm-tabs-form--side .adm-tabs [role=tab].is-warn .adm-tabs__ico{background:var(--adm-envwarn)}
+  html.adm-ui .adm-tabs-form--side .adm-tabs [role=tab].is-warn[aria-selected=true]{background:#B45309}   /* Weiß darauf 5:1 (AA) in Hell und Dunkel */
+  .adm-tabs-form--side .adm-tabs [role=tab].is-warn[aria-selected=true] .adm-tabs__dot{background:#fff}
+}
+@media (max-width:999.98px){.adm-tabs__dot{display:none}}
+html.adm-ui[data-env] .adm-side nav a[href$="/system"]::after{content:"";flex:none;width:8px;height:8px;margin-left:8px;border-radius:50%;background:#F59A4A;animation:adm-envpulse 2.2s ease-in-out infinite}
+@keyframes adm-envpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgb(224 123 42 / .55)}50%{opacity:.55;box-shadow:0 0 0 4px rgb(224 123 42 / 0)}}
+@media (prefers-reduced-motion:reduce){.adm-tabs__dot,html.adm-ui[data-env] .adm-side nav a[href$="/system"]::after{animation:none}}
+/* Konto im Listen-Stil: jede Gruppe ein Kasten, Inhalte als Zeilen mit Haarlinien */
+.acc-page{max-width:760px}
+.acc-group{margin:0}
+.acc-group > .set-group__title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.acc-box > *{margin:0;padding:12px 0;border-top:1px solid var(--adm-line)}
+.acc-box > :first-child{border-top:0}
+.acc-box > :is(input[type=hidden],script){display:none}
+.acc-box > p.adm-muted,.acc-box > p.f-help{font-size:12.5px;line-height:1.45;color:var(--adm-t3)}
+.acc-box > .f:not(.f--inline){padding:12px 0}
+.acc-box > :is(.adm-btn,button):not(#\#){justify-self:start;margin:10px 0 12px;padding:0 14px;border-top:0}
+.acc-box{display:grid}
+.acc-box > .acc-facts{border:0;border-radius:0;overflow:visible;padding:0;border-top:1px solid var(--adm-line)}
+.acc-box > .acc-facts:first-child{border-top:0}
+.acc-box > .acc-facts > div{padding:12px 0;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.acc-box > .acc-facts dt{font-size:13.5px;font-weight:500;color:var(--adm-ink)}
+.acc-box > .acc-facts dd{text-align:right;color:var(--adm-t2);font-size:13.5px}
+.acc-box > .acc-sub{margin:0;padding:0}
+.acc-box > .acc-sub > summary{min-height:46px;font-weight:500;font-size:13.5px}
+.acc-box > .acc-sub > summary::after{width:7px;height:7px;border-width:0 1.6px 1.6px 0;color:var(--adm-t3)}
+.acc-box > .acc-pending,.acc-box > .acc-step{margin:12px 0;border-top:0}
+.acc-box > .acc-grid{padding:12px 0}
+.acc-box > .acc-side{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:center;gap:20px;font-size:13.5px;font-weight:500!important}
+.acc-box > .acc-side > input:not(#\#){margin:0}
+.acc-box > .acc-pv{margin:12px 0}
+.acc-box > .adm-row{display:flex;flex-wrap:wrap;gap:8px}
+.acc-box > .pk-list{gap:0}
+.acc-box > .pk-list .pk-item{background:none;padding:10px 0;border-top:1px solid var(--adm-line);border-radius:0}
+.acc-box > .pk-list .pk-item:first-child{border-top:0}
+.acc-box > .pk-h3{font-size:13px;font-weight:650;padding-bottom:0}
+.acc-box > .acc-fav{margin:0}
+.acc-box > .tf-inline input:not(#\#){flex:1 1 200px;max-width:280px}
+@media (max-width:560px){.acc-box > .acc-facts > div{grid-template-columns:1fr}.acc-box > .acc-facts dd{text-align:left}}
+.dom-page{max-width:820px}
+.us-tico{width:15px;height:15px;vertical-align:-2px;color:var(--adm-a-ink)}
+/* Zentrale Angaben (/admin/settings) schmal: Grid-Spalte nicht breiter als der Bildschirm (Reiterzeile scrollt statt die Seite zu verbreitern) */
+.st-layout{grid-template-columns:minmax(0,1fr)}
+.st-layout > .adm-tabs-form{min-width:0}
+.st-bar > .adm-tabs{max-width:100%;flex:0 1 auto}
+.ft-list code,.set-group__note code,.set-row__sub code{word-break:normal;overflow-wrap:normal;white-space:nowrap}
+@media (max-width:560px){
+  .us-item > summary.set-row,.us-row.us-netrow{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;column-gap:12px;row-gap:4px}
+  .us-item > summary > .set-row__ctl,.us-netrow > .set-row__ctl{grid-column:2;grid-row:2;justify-content:flex-start}
+  .us-item > summary::after{grid-column:3;grid-row:1 / span 2}
+  .us-rolerow{flex-wrap:wrap}
+}
+/* Reiter mit eigenen Knöpfen (Umgebung, Adresse der Verwaltung, Systeminfo): allgemeines „Speichern“ ausblenden */
+.adm-tabs-form:has([data-nosave]:not([hidden])) .adm-savebar{display:none}

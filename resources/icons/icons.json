@@ -199,6 +199,11 @@
           "Dashboard",
           "kacheln raster start"
         ],
+        "layout": [
+          "Mauerwerk",
+          "Masonry",
+          "layout spalten raster bilder galerie"
+        ],
         "table": [
           "Tabelle",
           "Table",

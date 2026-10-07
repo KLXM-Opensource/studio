@@ -23,7 +23,7 @@ if ($part === 'forms'):
 <?php endforeach; endif;
     return;
 endif; ?>
-<section class="adm-card adm-panel" role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden>
+<section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden>
   <h2><?= e(__('Geteilte Daten')) ?></h2>
   <p class="adm-muted"><?= e(__('Datentabellen für mehrere Websites dieser Installation, z. B. Neuigkeiten oder Termine eines Verbands und seiner Vereine. Eine Website ist Eigentümerin und legt die Felder fest; jede beteiligte Website pflegt ihre eigenen Einträge und entscheidet, welche fremden Einträge sie zeigt. Bilder und Dateien der Einträge liegen automatisch in geteilten Medien – ein Pool je Tabelle, sobald sie Bild- oder Dateifelder hat.')) ?></p>
 

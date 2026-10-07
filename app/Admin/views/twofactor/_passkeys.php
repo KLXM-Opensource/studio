@@ -13,8 +13,9 @@ $pkReq = \Core\Mfa::requirement($pkRow);
 $pkDate = fn(?string $d) => $d ? date('d.m.Y H:i', (int) strtotime($d)) : null;
 if (!$pkPol['passkey'] && !$pkList) return;
 ?>
-<section class="adm-card adm-narrow" id="passkeys" aria-labelledby="pk-h">
-  <h2 id="pk-h"><?= e(__('Passkeys')) ?> <span class="adm-badge<?= $pkList ? '' : ' adm-badge--muted' ?>"><?= e($pkList ? __('{n} eingerichtet', ['n' => count($pkList)]) : __('keiner')) ?></span></h2>
+<section class="set-group acc-group" id="passkeys" aria-labelledby="pk-h">
+  <h2 class="set-group__title" id="pk-h"><?= e(__('Passkeys')) ?> <span class="adm-badge<?= $pkList ? '' : ' adm-badge--muted' ?>"><?= e($pkList ? __('{n} eingerichtet', ['n' => count($pkList)]) : __('keiner')) ?></span></h2>
+  <div class="set-list acc-box">
   <p class="adm-muted"><?= e(__('Anmelden mit Fingerabdruck, Gesicht oder Geräte-PIN statt mit einem Code – sicher gegen Phishing. Der Passkey bleibt auf Ihrem Gerät bzw. in Ihrem Passwortmanager; die Website speichert nur einen öffentlichen Schlüssel.')) ?>
     <?php if ($pkPol['passwordless']): ?><?= e(__('Mit einem Passkey können Sie sich auch ganz ohne Passwort anmelden.')) ?><?php endif; ?></p>
   <?php if ($pkNet): ?><p class="f-help"><?= e(__('Netzwerk-Konto: Passkeys gelten je Domain. Hier eingerichtete Passkeys gelten für {host}; über die Netzwerk-Übersicht („Öffnen“) brauchen Sie keinen.', ['host' => $pkRp])) ?></p><?php endif; ?>
@@ -47,4 +48,5 @@ if (!$pkPol['passkey'] && !$pkList) return;
     <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Neue Wiederherstellungscodes')) ?></button>
   </form>
   <?php endif; ?>
+  </div>
 </section>

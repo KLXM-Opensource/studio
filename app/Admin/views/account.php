@@ -7,13 +7,16 @@ $pendingEmail ??= null;
 $isShadow = !empty($user['network_uid']);
 ?>
 <header class="adm-head"><div><p class="adm-eyebrow"><?= e(__('Konto')) ?></p><h1><?= e(__('Mein Konto')) ?></h1><p class="adm-muted"><?= e($user['email']) ?> · <?= e(app()->auth->role()['name'] ?? '') ?></p></div></header>
+<div class="set-page acc-page">
 <?php if ($isShadow): // Schatten-Konto der Netzwerk-Administration: Anmeldedaten zentral ?>
-<section class="adm-card adm-narrow acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
-  <h2 id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-net"><?= e(__('Netzwerk')) ?></span></h2>
+<section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
+  <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-net"><?= e(__('Netzwerk')) ?></span></h2>
+  <div class="set-list acc-box">
   <p><?= e(__('Ihre Anmeldedaten verwalten Sie in der Netzwerk-Verwaltung.')) ?></p>
   <p class="adm-muted"><?= e(__('Sie sind mit Ihrem zentralen Netzwerk-Konto angemeldet. E-Mail-Adresse, Passwort, Name und Zwei-Faktor-Anmeldung ändern Sie dort – die Änderung gilt dann für alle Websites.')) ?></p>
   <dl class="acc-facts"><div><dt><?= e(__('E-Mail-Adresse')) ?></dt><dd><?= e($user['email']) ?></dd></div></dl>
   <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>"><input type="hidden" name="path" value="/admin/account"><button class="adm-btn adm-btn--small" type="submit"><?= e(__('Konto in der Netzwerk-Verwaltung öffnen')) ?> ↗</button></form>
+  </div>
 </section>
 <?php else:
   $acRow = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]) ?? [];
@@ -24,8 +27,9 @@ $isShadow = !empty($user['network_uid']);
   $acRecent = \Core\Mfa::recentAuth();
   $acNeedPk = !$acHasPw && !$acRecent;   // Konto ohne Passwort: vorher mit Passkey bestätigen
   $acDate = fn(int $ts) => date('d.m.Y, H:i', $ts); ?>
-<section class="adm-card adm-narrow acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
-  <h2 id="cred-h"><?= e(__('Anmeldedaten')) ?></h2>
+<section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
+  <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?></h2>
+  <div class="set-list acc-box">
   <p class="adm-muted"><?= e(__('Womit Sie sich bei dieser Website anmelden. Änderungen bestätigen Sie mit Ihrem Passwort bzw. Passkey; bei jeder Änderung erhalten Sie eine E-Mail.')) ?></p>
   <dl class="acc-facts">
     <div><dt><?= e(__('E-Mail-Adresse')) ?></dt><dd><strong><?= e($user['email']) ?></strong><?php if ($pendingEmail && !$pendingEmail['expired']): ?> <span class="adm-badge acc-badge-wait"><?= e(__('Änderung wartet')) ?></span><?php endif; ?></dd></div>
@@ -84,26 +88,31 @@ $isShadow = !empty($user['network_uid']);
       <p class="f-help"><?= e(__('Andere Sitzungen Ihres Kontos enden, diese bleibt angemeldet. Sie erhalten eine Hinweis-E-Mail.')) ?></p>
     </form>
   </details>
+  </div>
 </section>
 
-<form class="adm-card adm-narrow" id="profil" method="post" action="<?= e(url('/admin/account/profile')) ?>">
+<form class="set-group acc-group" id="profil" method="post" action="<?= e(url('/admin/account/profile')) ?>">
   <?= csrf_field() ?>
-  <h2><?= e(__('Profil')) ?></h2>
-  <div class="f"><label for="a-name"><?= e(__('Name')) ?></label><input id="a-name" name="name" maxlength="<?= \Core\Invites::NAME_MAX ?>" autocomplete="name" value="<?= e($user['name']) ?>" aria-describedby="a-name-h">
+  <h2 class="set-group__title"><?= e(__('Profil')) ?></h2>
+  <div class="set-list acc-box">
+  <div class="f f--inline"><label for="a-name"><?= e(__('Name')) ?></label><input id="a-name" name="name" maxlength="<?= \Core\Invites::NAME_MAX ?>" autocomplete="name" value="<?= e($user['name']) ?>" aria-describedby="a-name-h">
     <p class="f-help" id="a-name-h"><?= e(__('Erscheint u. a. im Chat, bei Freigaben und in Einladungen.')) ?></p></div>
   <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Name speichern')) ?></button>
+  </div>
 </form>
 <?php endif; ?>
-<form class="adm-card adm-narrow" method="post" action="<?= e(url('/admin/account/locale')) ?>">
+<form class="set-group acc-group" method="post" action="<?= e(url('/admin/account/locale')) ?>">
   <?= csrf_field() ?>
-  <h2><?= e(__('Darstellung & Sprache')) ?></h2>
-  <div class="f"><label for="a-app"><?= e(__('Darstellung')) ?></label><select id="a-app" name="appearance" data-autosubmit>
+  <h2 class="set-group__title"><?= e(__('Darstellung & Sprache')) ?></h2>
+  <div class="set-list acc-box">
+  <div class="f f--inline"><label for="a-app"><?= e(__('Darstellung')) ?></label><select id="a-app" name="appearance" data-autosubmit>
     <?php foreach (['' => __('Automatisch (wie das System)'), 'light' => __('Hell'), 'dark' => __('Dunkel')] as $k => $l): ?><option value="<?= e($k) ?>"<?= ($user['appearance'] ?? '') === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
   </select></div>
-  <div class="f"><label for="a-loc"><?= e(__('Sprache')) ?></label><select id="a-loc" name="locale" data-autosubmit>
+  <div class="f f--inline"><label for="a-loc"><?= e(__('Sprache')) ?></label><select id="a-loc" name="locale" data-autosubmit>
     <option value=""><?= e(__('Standard der Website')) ?></option>
     <?php foreach (\Core\I18n::available() as $k => $l): ?><option value="<?= e($k) ?>"<?= ($user['locale'] ?? '') === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
   </select></div>
+  </div>
 </form>
 <?php include __DIR__ . '/account/_accent.php'; // Akzentfarbe der Verwaltung (Core\Accent) ?>
 <?php if ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>
@@ -112,8 +121,9 @@ $isShadow = !empty($user['network_uid']);
   $tfNeed = \Core\Mfa::requirement($tfRow); $tfReq = $tfNeed !== null && !\Core\Mfa::satisfied(['totp_enabled' => 0] + $tfRow, $tfNeed, app()->db);
   $tfAllowed = \Core\Mfa::policy()['totp'] && $tfNeed !== 'passkey'; ?>
 <?php if ($tfAllowed || $tfOn): ?>
-<section class="adm-card adm-narrow" id="zwei-faktor" aria-labelledby="tf-h">
-  <h2 id="tf-h"><?= e(__('Zwei-Faktor-Anmeldung')) ?> <span class="adm-badge<?= $tfOn ? '' : ' adm-badge--muted' ?>"><?= e($tfOn ? __('aktiv') : __('aus')) ?></span></h2>
+<section class="set-group acc-group" id="zwei-faktor" aria-labelledby="tf-h">
+  <h2 class="set-group__title" id="tf-h"><?= e(__('Zwei-Faktor-Anmeldung')) ?> <span class="adm-badge<?= $tfOn ? '' : ' adm-badge--muted' ?>"><?= e($tfOn ? __('aktiv') : __('aus')) ?></span></h2>
+  <div class="set-list acc-box">
   <?php if ($tfOn): $left = count(json_decode((string) $tfRow['totp_recovery'], true) ?: []); ?>
   <p class="adm-muted"><?= e(__('Bei der Anmeldung fragen wir nach dem Passwort einen Code aus Ihrer Authenticator-App ab. Noch {n} Wiederherstellungscodes übrig.', ['n' => $left])) ?></p>
   <form method="post" action="<?= e(url('/admin/account/2fa/recovery')) ?>" class="tf-inline"><?= csrf_field() ?>
@@ -127,13 +137,15 @@ $isShadow = !empty($user['network_uid']);
   <a class="adm-btn adm-btn--primary adm-btn--small" href="<?= e(url('/admin/account/2fa')) ?>"><?= e(__('Einrichten')) ?></a>
   <?php endif; ?>
   <?php if (!$tfAllowed): ?><p class="f-help"><?= e($tfNeed === 'passkey' ? __('Für Ihr Konto ist ein Passkey vorgeschrieben.') : __('Die Authenticator-App ist auf dieser Website abgeschaltet. Richten Sie stattdessen einen Passkey ein.')) ?></p><?php endif; ?>
+  </div>
 </section>
 <?php endif; ?>
 <?php include __DIR__ . '/twofactor/_passkeys.php'; ?>
 <?php endif; ?>
 <?php $favs = \Core\Favorites::all((int) $user['id']); $fe = url('/admin/api/favorites'); ?>
-<section class="adm-card adm-narrow" id="favoriten" aria-labelledby="fav-h">
-  <h2 id="fav-h"><?= e(__('Favoriten')) ?></h2>
+<section class="set-group acc-group" id="favoriten" aria-labelledby="fav-h">
+  <h2 class="set-group__title" id="fav-h"><?= e(__('Favoriten')) ?></h2>
+  <div class="set-list acc-box">
   <p class="adm-muted"><?= e(__('Mit dem Stern ☆ oben auf jeder Seite merken Sie sich Seiten, Tabellen, Einträge oder Einstellungen. Sie stehen dann in der Seitenleiste – nur für Sie. Höchstens {n}.', ['n' => \Core\Favorites::MAX])) ?></p>
   <?php if (!$favs): ?>
   <p class="acc-fav__none"><?= e(__('Noch keine Favoriten.')) ?></p>
@@ -155,5 +167,7 @@ $isShadow = !empty($user['network_uid']);
     <?php endforeach; ?>
   </ol>
   <?php endif; ?>
+  </div>
 </section>
 <?= /* Erweiterungen (Extension::account, Core\Slots): eigene Abschnitte – escaped vom Core */ \Core\Extensions::accountSections((array) ($user ?? app()->auth->user() ?? [])) ?>
+</div>

@@ -198,7 +198,7 @@ html.adm-ui .kia-chk__i{color:var(--adm-on-ink,#fff)}
 .kia-w-target select{width:100%;min-height:38px;padding:0 10px;border-radius:6px;border:1.5px solid var(--adm-in);background:var(--adm-card,#fff);color:var(--adm-ink);font:inherit}
 .kia-w-target fieldset{border:0;padding:0;margin:0}
 .kia-dl dd{margin-bottom:8px}
-.kia-write .f .f-check input[type=radio]{width:18px;height:18px;min-height:0;padding:0;border:0;box-shadow:none;flex:none}
+.kia-write .f .f-check input[type=radio]{flex:none}
 .kia-write fieldset.f{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
 .adm-btn--primary .kia-spark{color:inherit}
 .kia-write [data-kia-w-open]{margin-top:8px}

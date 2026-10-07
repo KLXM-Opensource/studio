@@ -80,7 +80,7 @@ if ($user && ($req = app()->request)) {
         : (['role' => 'users', 'account' => 'account', 'help' => 'help'][$section] ?? $section);
 }
 ?><!doctype html>
-<html lang="<?= e(\Core\I18n::locale()) ?>" class="adm-ui" data-icons="<?= e(\Core\Icons::sprite()) ?>"<?= ($icoTopics = \Core\Icons::enabledTopics()) ? ' data-icons-topics="' . e(implode(' ', $icoTopics)) . '"' /* Symbolbereiche (Grundeinstellungen) */ : '' ?><?= in_array($user['appearance'] ?? '', ['light', 'dark'], true) ? ' data-theme="' . e($user['appearance']) . '"' : '' ?><?= !$user && \Core\AuthScreen::forceDark() ? ' data-theme="dark"' /* Anmeldung nachts immer dunkel */ : '' ?><?= $user ? \Core\Accent::attrs($user) /* persönliche Akzentfarbe (Konto) */ : '' ?>>
+<html lang="<?= e(\Core\I18n::locale()) ?>" class="adm-ui" data-icons="<?= e(\Core\Icons::sprite()) ?>"<?= ($icoTopics = \Core\Icons::enabledTopics()) ? ' data-icons-topics="' . e(implode(' ', $icoTopics)) . '"' /* Symbolbereiche (Grundeinstellungen) */ : '' ?><?= in_array($user['appearance'] ?? '', ['light', 'dark'], true) ? ' data-theme="' . e($user['appearance']) . '"' : '' ?><?= !$user && \Core\AuthScreen::forceDark() ? ' data-theme="dark"' /* Anmeldung nachts immer dunkel */ : '' ?><?= $user ? \Core\Accent::attrs($user) /* persönliche Akzentfarbe (Konto) */ : '' ?><?= $user && environment() !== 'production' ? ' data-env="' . e(environment()) . '"' /* Testumgebung: oranger Punkt an „Grundeinstellungen“ */ : '' ?>>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

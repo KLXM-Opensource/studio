@@ -345,6 +345,48 @@ final class Fields
         return $html;
     }
 
+    /**
+     * Einstellungen als gruppierte Listen (Grundeinstellungen, angelehnt an die macOS-Systemeinstellungen): jede Zwischenüberschrift
+     * ('heading') beginnt eine Gruppe – kleiner Titel, abgerundeter Kasten mit einer Zeile je Feld, Hilfe der Überschrift als
+     * Fußnote darunter. 'collapse' => true|'open' macht die Gruppe aufklappbar (bei Fehlern darin offen). Felder wie renderForm.
+     */
+    public static function renderGroups(array $fields, array $values, array $errors = [], string $prefix = 'f'): string
+    {
+        $html = '';
+        $g = null;   // ['head' => array|null, 'body' => string, 'err' => bool]
+        $flush = function () use (&$g, &$html): void {
+            if ($g === null) return;
+            $h = $g['head'];
+            if ($g['body'] === '' && $h === null) { $g = null; return; }
+            $title = $h !== null && trim((string) ($h['label'] ?? '')) !== '' ? e((string) $h['label']) : '';
+            $note = $h !== null ? (!empty($h['help']) ? '<p class="set-group__note">' . e((string) $h['help']) . '</p>' : '')
+                . (!empty($h['links']) ? '<p class="set-group__note">' . implode(' · ', array_map(fn($l) => '<a href="' . e(url((string) $l['url'])) . '">' . e((string) $l['label']) . '</a>', (array) $h['links'])) . '</p>' : '') : '';
+            $list = $g['body'] !== '' ? '<div class="set-list">' . $g['body'] . '</div>' : '';
+            $collapse = $h['collapse'] ?? false;
+            if ($collapse && $title !== '') {
+                $html .= '<details class="set-group set-group--collapse"' . ($collapse === 'open' || $g['err'] ? ' open' : '') . '><summary class="set-group__title">' . $title . '</summary>'
+                    . ($g['body'] !== '' ? $note . $list : $note) . '</details>';
+            } else {
+                $html .= '<section class="set-group">' . ($title !== '' ? '<h3 class="set-group__title">' . $title . '</h3>' : '')
+                    . ($g['body'] !== '' ? $list . $note : $note) . '</section>';
+            }
+            $g = null;
+        };
+        foreach ($fields as $f) {
+            if (($f['type'] ?? '') === 'heading') {
+                $flush();
+                $g = ['head' => $f, 'body' => '', 'err' => false];
+                continue;
+            }
+            $g ??= ['head' => null, 'body' => '', 'err' => false];
+            $g['body'] .= self::renderField($f, $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f)), $errors, $prefix);
+            $n = $f['name'] ?? null;
+            if ($n !== null && array_filter(array_keys($errors), fn($k) => $k === $n || str_starts_with((string) $k, $n . '.'))) $g['err'] = true;
+        }
+        $flush();
+        return $html;
+    }
+
     /** Bindungs-Kontext im Editor für Detailseiten-Vorlagen: ['table' => array, 'bound' => [feld => quelle]] */
     public static ?array $binding = null;
 
@@ -511,10 +553,15 @@ final class Fields
                 . ($type === 'link' ? ' list="cms-links"' : '')
                 // Zahlen: Dezimalwerte erlauben (sonst meldet der Browser „0.4“ als ungültig); eigene Schrittweite per 'step'
                 . ($type === 'number' ? ' step="' . e((string) ($f['step'] ?? 'any')) . '"' : '')
-                . (!empty($f['max']) ? ' data-max="' . (int) $f['max'] . '"' : '') . '>',
+                // Höchstlänge: kurze Felder (< 40 Zeichen) begrenzt der Browser selbst, ohne Zähler; längere zeigen „n/max“ (admin.js initCounters)
+                . (!empty($f['max']) ? ((int) $f['max'] < 40 ? ' maxlength="' . (int) $f['max'] . '"' : ' data-max="' . (int) $f['max'] . '"') : '')
+                // Schmale Felder (Kürzel, Vorwahl, Zahlen): feste Breite statt ganzer Spalte (admin.css .f-in--short)
+                . ((!empty($f['max']) && (int) $f['max'] <= 12) || $type === 'number' ? ' class="f-in--short"' : '') . '>',
         };
 
-        return '<div class="f' . $width . ($err ? ' f--error' : '') . '"><label for="' . $id . '" id="' . $id . '-l">' . $label . '</label>'
+        // Kompakte Felder: in Einstellungslisten (renderGroups) Beschriftung links, Feld rechts in derselben Zeile
+        $inline = in_array($type, ['select', 'number', 'color', 'date', 'time', 'datetime', 'text', 'email', 'tel', 'secret', 'iban'], true) && empty($f['relation']) ? ' f--inline' : '';
+        return '<div class="f' . $width . $inline . ($err ? ' f--error' : '') . '"><label for="' . $id . '" id="' . $id . '-l">' . $label . '</label>'
             . $control . $help . $errHtml . '</div>';
     }
 
