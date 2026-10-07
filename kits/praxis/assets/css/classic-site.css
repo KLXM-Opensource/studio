@@ -1,0 +1,484 @@
+/* ==========================================================================
+   Theme „praxis“ – Kit für Arzt- und Fachpraxen
+   Tokens aus dem Design-Handoff (Abschnitt 8). Schrift Hanken Grotesk über den Schriften-Manager (design.fonts → fontsource).
+   ========================================================================== */
+
+:root{
+  --c-bordeaux:#7A1F35; --c-bordeaux-dark:#5E1628; --c-bordeaux-hero:#6A1530;
+  --c-silk-1:#EC6E48; --c-silk-2:#D62456; --c-silk-3:#240310; --c-sheen:#FFDECC; --c-hero-shade:#260814;
+  --c-apricot:#F6C9A8; --c-apricot-2:#F0C4A6;
+  --c-ink:#16201E; --c-text-2:#3F4A47; --c-text-3:#5A6461;
+  --c-gray-50:#F2F2F3; --c-gray-100:#F0F0F2; --c-line:#E6E6E9; --c-ph:#E4E4E7; --c-ph-2:#DCDCE0;
+  --c-sep:#DADADD; --c-input:#D4D4D8; --c-white:#FFFFFF;
+  --c-rose-1:#FBE9EC; --c-rose-2:#F3E3E6; --c-rose-3:#EBC9CF; --c-on-dark:#D6DAD8;
+  --font:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --gutter:clamp(20px,4vw,40px);
+  --sec-y:clamp(72px,10vw,140px);
+  --sec-y-s:clamp(40px,6vw,80px);
+  --r-card:24px; --r-big:clamp(24px,3vw,40px);
+  --shadow-card:0 40px 80px -30px rgba(30,4,14,.65);
+  --gap-split:clamp(40px,6vw,96px);
+}
+
+/* ---------------------------------------------------------------- Basis */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--c-white);color:var(--c-ink);font-family:var(--font);font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%;height:auto}
+picture{display:contents}
+a{color:var(--c-bordeaux);text-underline-offset:3px}
+a:hover{color:var(--c-bordeaux-dark)}
+:focus-visible{outline:2px solid var(--c-bordeaux);outline-offset:3px;border-radius:6px}
+summary{list-style:none;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+h1,h2,h3{text-wrap:balance}
+p{text-wrap:pretty}
+p,h1,h2,h3,h4,figure,blockquote,dl,dd,ul,ol{margin:0}
+button{font:inherit}
+[hidden]{display:none!important}
+main:focus{outline:none}
+section[id],[id="anfahrt"]{scroll-margin-top:90px}
+
+.wrap{max-width:1280px;margin:0 auto;padding-inline:var(--gutter)}
+.wrap--narrow{max-width:760px}
+.wrap--text{max-width:900px}
+.dot{color:var(--c-bordeaux)}
+.muted{color:var(--c-text-2)}
+.lead{font-size:clamp(18px,1.4vw,20px);color:var(--c-text-2)}
+
+.skip{position:absolute;left:16px;top:-80px;z-index:100;background:var(--c-bordeaux);color:#fff;padding:12px 18px;border-radius:8px;font-weight:600;text-decoration:none}
+.skip:focus{top:12px;color:#fff}
+
+/* ---------------------------------------------------------------- Typo */
+.h2{font-size:clamp(38px,4.8vw,64px);line-height:1.02;letter-spacing:-.04em;font-weight:700}
+.h2--m{font-size:clamp(32px,3.8vw,48px);line-height:1.05}
+.h2--s{font-size:clamp(28px,3.2vw,40px);line-height:1.1;letter-spacing:-.035em}
+.h2--hinweise{font-size:clamp(38px,4.8vw,60px)}
+.h2 .light{display:block;font-weight:300;color:var(--c-text-2)}
+.light--inline{font-weight:300}
+.h3{font-size:clamp(24px,2.4vw,30px);line-height:1.15;letter-spacing:-.025em;font-weight:700}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.eyebrow--accent{color:var(--c-bordeaux)}
+.eyebrow-h{font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--c-apricot-2)}
+.eyebrow-h--accent{color:var(--c-bordeaux);margin-bottom:20px}
+.prose p+p,.prose ul,.prose ol,.prose h3,.prose h4{margin-top:1em}
+.prose ul,.prose ol{list-style:none;padding:0;display:grid;gap:.45em}
+.prose li{position:relative;padding-left:1.7em}
+.prose li>ul,.prose li>ol{margin-top:.45em}
+.prose ul>li::before{content:"—";position:absolute;left:0;color:var(--c-bordeaux);font-weight:700}
+.prose li li::before{opacity:.7}
+.prose ol{counter-reset:li}
+.prose ol>li{counter-increment:li}
+.prose ol>li::before{content:counter(li) ".";position:absolute;left:0;color:var(--c-bordeaux);font-weight:700;font-variant-numeric:tabular-nums}
+.prose ul.check>li::before{content:"";top:.3em;width:1.1em;height:1.1em;border-radius:50%;opacity:1;background:var(--c-bordeaux) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.2 8.4l2.4 2.4 5.2-5.3' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/78% no-repeat}
+.bg-bordeaux .prose li::before,.bg-dark .prose li::before{color:var(--c-apricot)}
+.bg-bordeaux .prose ul.check>li::before,.bg-dark .prose ul.check>li::before{background-color:var(--c-apricot)}
+.prose h3{font-size:22px;line-height:1.25;letter-spacing:-.02em;margin-top:1.6em}
+.prose h4{font-size:18px;margin-top:1.4em}
+.prose--stack{display:flex;flex-direction:column;gap:22px;padding-top:8px}
+.prose--stack p+p{margin-top:22px}
+.prose--long{max-width:48em}
+
+/* ---------------------------------------------------------------- Buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 24px;border-radius:var(--r-btn,999px);border:0;text-decoration:none;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.btn--primary{background:var(--c-bordeaux);color:#fff}
+.btn--primary:hover{background:var(--c-bordeaux-dark);color:#fff}
+.btn--light{background:#fff;color:var(--c-bordeaux-hero);font-weight:700;padding:0 28px;gap:12px}
+.btn--light:hover{background:var(--c-apricot);color:var(--c-bordeaux-hero)}
+.btn--outline-light{box-shadow:inset 0 0 0 1.5px #fff;color:#fff;padding:0 28px;background:transparent}
+.btn--outline-light:hover{background:#fff;color:var(--c-bordeaux-hero)}
+.btn--white{background:#fff;color:var(--c-ink);min-height:50px}
+.btn--white:hover{background:var(--c-apricot-2);color:var(--c-ink)}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:var(--c-gray-100);color:var(--c-ink);text-decoration:none;font-weight:600;font-size:15px}
+.pill:hover{background:var(--c-line);color:var(--c-ink)}
+.pill--primary{background:var(--c-bordeaux);color:#fff;padding:0 20px}
+.pill--primary:hover{background:var(--c-bordeaux-dark);color:#fff}
+
+/* ---------------------------------------------------------------- Kopf */
+.topnote{background:var(--c-bordeaux);color:#fff;font-size:15px;padding:10px 24px;text-align:center}
+.topnote a{color:#fff}
+.site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--c-line)}
+.site-nav{max-width:1280px;margin:0 auto;padding:0 var(--gutter);height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.wordmark{display:flex;flex-direction:column;line-height:1;text-decoration:none;color:var(--c-ink)}
+.wordmark:hover{color:var(--c-ink)}
+.wordmark__1{font-size:20px;font-weight:800;letter-spacing:-.035em}
+.wordmark__2{font-size:20px;font-weight:300;letter-spacing:-.02em;margin-top:2px}
+.site-header .wordmark__2{font-size:clamp(14px,.25rem + 1.15vw,20px);line-height:1.15;text-wrap:balance}
+/* Kopfleiste: Menüpunkte und Telefon brechen nie um; die Wortmarke gibt Platz ab (Unterzeile kleiner und umbrochen, z. B. lange Arztnamen) */
+.navlist a,.site-nav__actions .pill{white-space:nowrap}
+.site-nav__wide{flex:none}
+.site-nav>.wordmark{min-width:0;flex:0 1 auto}
+.site-nav__wide{display:flex;align-items:center;gap:24px}
+.navlist{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:2px}
+.navlist a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--c-ink);text-decoration:none;font-weight:500;font-size:16px}
+.navlist a:hover{color:var(--c-bordeaux)}
+.navlist a[aria-current]::after{content:"";position:absolute;left:12px;right:12px;bottom:6px;height:2px;border-radius:1px;background:var(--c-bordeaux)}
+.site-nav__actions{display:flex;align-items:center;gap:8px}
+.menu-btn{display:none;align-items:center;gap:12px;min-height:44px;min-width:44px;padding:0 18px 0 16px;border-radius:999px;border:0;background:var(--c-gray-100);color:var(--c-ink);font:600 16px var(--font);cursor:pointer}
+.menu-btn__bars{width:16px;height:2px;border-radius:2px;background:currentColor;box-shadow:0 -5px,0 5px}
+.bottombar{display:none}
+
+@media (max-width:1079.98px){
+  :root{--cms-chat-lift:76px} /* Besucher-Chat-Knopf über der Schnellkontakt-Leiste */
+  .site-nav__wide{display:none}
+  .menu-btn{display:inline-flex}
+  .bottombar{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;border-radius:999px;background:var(--c-ink);box-shadow:0 12px 32px rgba(22,32,30,.28)}
+  .bottombar a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:999px;color:#fff;text-decoration:none;font-weight:600;font-size:16px}
+  .bottombar .bottombar__call{background:var(--c-bordeaux)}
+  .site-footer{padding-bottom:88px}
+}
+
+/* ---------------------------------------------------------------- Abschnitte */
+.sec{padding-block:var(--sec-y)}
+.sec.pt-none{padding-top:0}.sec.pt-small{padding-top:var(--sec-y-s)}
+.sec.pb-none{padding-bottom:0}.sec.pb-small{padding-bottom:var(--sec-y-s)}
+.sec--divider{border-top:1px solid var(--c-line)}
+.bg-gray{background:var(--c-gray-50)}
+.bg-bordeaux{background:var(--c-bordeaux);color:#fff}
+.bg-dark{background:var(--c-ink);color:#fff}
+.bg-bordeaux .dot,.bg-dark .dot{color:var(--c-apricot)}
+.bg-bordeaux .h2 .light,.bg-dark .h2 .light{color:inherit}
+.bg-bordeaux .muted,.bg-dark .muted{color:var(--c-on-dark)}
+.bg-bordeaux a:not(.btn,.tile,.pill),.bg-dark a:not(.btn,.tile,.pill){color:#fff}
+/* Dunkle Abschnitte: gedämpfte Schrift hell. Eigene helle Flächen darin (Karten, Kacheln, Hinweise …) bekommen die
+   Seitenwerte zurück – --c0-* wird am :root berechnet und behält dort die Farben der Seite. */
+:root{--c0-text-2:var(--c-text-2);--c0-text-3:var(--c-text-3);--c0-sep:var(--c-sep)}
+.bg-bordeaux,.bg-dark{--c-text-2:var(--c-on-dark);--c-text-3:var(--c-on-dark);--c-sep:rgba(255,255,255,.2)}
+:is(.bg-bordeaux,.bg-dark) :is(.card,.doctor,.contact__card:not(.contact__card--primary),.notice--important,.notice--info,.steps li,.person,.tag:not(.tag--accent),.formpage__card,.ph){--c-text-2:var(--c0-text-2);--c-text-3:var(--c0-text-3);--c-sep:var(--c0-sep);color:var(--c-ink)}
+:is(.bg-bordeaux,.bg-dark) :is(.card,.doctor,.contact__card:not(.contact__card--primary),.notice,.steps li,.person,.formpage__card) :is(a:not([class]),.card__phone){color:var(--c-bordeaux)}
+:is(.bg-bordeaux,.bg-dark) .service__no{color:var(--c-apricot)}
+
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:32px var(--gap-split)}
+.split--compact{gap:24px var(--gap-split)}
+.split--start{align-items:start;gap:40px var(--gap-split)}
+.head-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px var(--gap-split);align-items:end;margin-bottom:clamp(48px,6vw,80px)}
+.head-split--services{margin-bottom:clamp(40px,5vw,72px)}
+
+/* ---------------------------------------------------------------- Hero */
+.hero{position:relative;scroll-margin-top:100px}
+.hero__stage{position:relative;z-index:2;isolation:isolate;background:var(--c-bordeaux-hero)}
+.silk{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background-color:var(--c-bordeaux-hero);animation:base 24s ease-in-out infinite alternate}
+.silk>span{position:absolute;top:-50%;bottom:-50%;left:-60%;width:220%;will-change:transform,opacity;backface-visibility:hidden}
+.silk__a{background:linear-gradient(115deg,color-mix(in srgb,var(--c-silk-1) 0%,transparent) 30%,color-mix(in srgb,var(--c-silk-1) 38%,transparent) 42%,color-mix(in srgb,var(--c-silk-1) 0%,transparent) 56%);animation:silkA 16s ease-in-out -4s infinite alternate}
+.silk__b{background:linear-gradient(115deg,color-mix(in srgb,var(--c-silk-2) 0%,transparent) 40%,color-mix(in srgb,var(--c-silk-2) 45%,transparent) 52%,color-mix(in srgb,var(--c-silk-2) 0%,transparent) 66%);animation:silkB 21s ease-in-out -9s infinite alternate}
+.silk__c{background:linear-gradient(115deg,color-mix(in srgb,var(--c-silk-3) 0%,transparent) 48%,color-mix(in srgb,var(--c-silk-3) 55%,transparent) 62%,color-mix(in srgb,var(--c-silk-3) 0%,transparent) 78%);animation:silkA 26s ease-in-out -13s infinite alternate-reverse}
+.silk__sheen{background:linear-gradient(115deg,color-mix(in srgb,var(--c-sheen) 0%,transparent) 44%,color-mix(in srgb,var(--c-sheen) 16%,transparent) 50%,color-mix(in srgb,var(--c-sheen) 0%,transparent) 56%);opacity:.2;animation:sheen 10s ease-in-out infinite alternate}
+.silk::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(255,255,255,.12)}
+@keyframes silkA{0%{transform:translate3d(-12%,0,0)}100%{transform:translate3d(12%,0,0)}}
+@keyframes silkB{0%{transform:translate3d(14%,0,0)}100%{transform:translate3d(-14%,0,0)}}
+@keyframes sheen{0%{opacity:.1;transform:translate3d(-18%,0,0)}100%{opacity:.8;transform:translate3d(18%,0,0)}}
+@keyframes base{0%,100%{background-color:var(--c-bordeaux-hero)}33%{background-color:var(--c-bordeaux)}66%{background-color:var(--c-bordeaux-dark)}}
+@media (prefers-reduced-motion:reduce){.silk,.silk>span{animation:none!important}.silk__sheen{opacity:.6}}
+
+.hero__grid{position:relative;max-width:1280px;margin:0 auto;padding:clamp(32px,4.5vw,64px) var(--gutter) clamp(36px,4.5vw,64px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(40px,6vw,80px);align-items:center}
+.hero__grid--solo{grid-template-columns:1fr}
+.hero__topics{display:flex;flex-direction:column;gap:22px;color:#fff}
+.hero__slides{display:grid}
+.slide{grid-area:1/1;align-self:center;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .6s ease,transform .8s ease,visibility 0s linear .6s}
+.slide.is-active{opacity:1;visibility:visible;transform:none;transition:opacity 1s ease .25s,transform 1.2s var(--ease) .25s,visibility 0s}
+.slide.is-before{transform:translateY(-14px)}
+/* Hauptthema mit der H1 bleibt für Screenreader immer lesbar (nur transparent, nie visibility:hidden/aria-hidden);
+   seine Knöpfe sind unsichtbar und nicht fokussierbar, solange ein anderes Thema läuft */
+.slide[data-main]{visibility:visible}
+.slide[data-main]:not(.is-active){pointer-events:none}
+.slide[data-main]:not(.is-active) .btn-row{visibility:hidden}
+.no-js .slide{transition:none}
+.hero .eyebrow--line{margin:0 0 16px;font-size:14px;color:var(--c-apricot)}
+.eyebrow--line::before{content:"";width:28px;height:1.5px;background:currentColor}
+.hero__title{font-weight:700;font-size:clamp(38px,5vw,68px);line-height:1;letter-spacing:-.045em;color:#fff}
+.hero__title .dot{color:var(--c-apricot)}
+.hero__sub{margin-top:16px;font-size:clamp(18px,1.5vw,21px);line-height:1.35;font-weight:300;letter-spacing:-.01em;max-width:24em;color:var(--c-rose-1)}
+.hero .btn-row{margin-top:26px}
+.hero .btn{min-height:48px}
+/* Mobil: Hero straffen, damit Status, Telefon und Termin/Rezept/Überweisung früh sichtbar sind (Text bleibt linksbündig) */
+@media (max-width:640px){
+  .hero__grid{padding-top:22px;padding-bottom:28px;gap:24px}
+  .hero__topics{gap:16px}
+  .hero .eyebrow--line{margin-bottom:10px;font-size:12.5px}
+  .hero__title{font-size:clamp(32px,9.4vw,40px)}
+  .hero__sub{margin-top:10px;font-size:17px}
+  .hero .btn-row{margin-top:18px;gap:8px}
+  .hero .btn{min-height:44px;padding:0 20px;font-size:15px}
+}
+.hero__controls{display:flex;align-items:center;gap:14px}
+/* Ohne JavaScript unsichtbar, Platz bleibt: sonst wächst der Hero beim Start des Skripts (Layout-Shift) */
+.no-js .hero__controls{visibility:hidden}
+.dots{display:flex;gap:6px}
+.dots__btn{position:relative;width:44px;height:28px;padding:0;border:0;background:transparent;cursor:pointer}
+.dots__btn>span{position:absolute;left:0;right:0;top:13px;height:2px;background:rgba(255,255,255,.28);overflow:hidden}
+.dots__btn>span>span{position:absolute;inset:0;background:#fff;transform-origin:left center;transform:scaleX(0)}
+.dots__btn[aria-current]>span>span{transform:scaleX(1)}
+.dots.is-running .dots__btn[aria-current]>span>span{animation:fill 7s linear forwards}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.hero__pause{min-height:32px;padding:0 12px;border-radius:999px;border:0;background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--font);cursor:pointer}
+.hero__pause:hover{background:rgba(255,255,255,.22)}
+.hero__card{width:100%;max-width:440px;justify-self:center}
+/* Desktop: Die Hero-Höhe richtet sich nur nach Text/Themen – die Kontaktkarte steht oben bündig und ragt nach unten über den
+   Hero-Rand in den nächsten Abschnitt (liegt darüber: .hero__stage z-index 2). Umdrehen/Aufklappen verschiebt nichts. */
+@media (min-width:1080px){
+  .hero__grid>.hero__card{position:relative;align-self:stretch}
+  .hero__grid>.hero__card>.flip{position:absolute;top:0;left:0;right:0}
+  /* Karte liegt frei – kein Platz für die jeweils andere Variante (geöffnet/geschlossen) nötig */
+  .hero__grid .flip [data-now-open][hidden],.hero__grid .flip [data-now-closed][hidden]{display:none!important}
+  /* Luft für die hineinragende Karte im folgenden Abschnitt */
+  .hero:has(.hero__card .flip)+.sec{padding-top:max(112px,var(--sec-y))}
+}
+
+/* ---------------------------------------------------------------- Flip-Kontaktkarte */
+.flip{perspective:1800px;scroll-margin-top:96px}
+/* Drehen: 3D um die Y-Achse, 600 ms, weich an- und auslaufend. Die Karte behält die Höhe der Vorderseite (der Hero springt
+   nicht); eine längere Rückseite (Formular) ragt als eigene Ebene über den folgenden Inhalt. */
+/* Symmetrische Kurve: 90° genau nach 300 ms = Moment des Seitenwechsels (visibility) – kein Aufblitzen der gespiegelten Seite (WebKit) */
+.flip__inner{--turn:.6s cubic-bezier(.65,0,.35,1);position:relative;display:grid;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}
+.flip.is-flipped,.hero__card:has(>.flip.is-flipped){position:relative;z-index:20}
+.card{border-radius:26px;background:#fff;color:var(--c-ink);box-shadow:var(--shadow-card);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.card--front{grid-area:1/1;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.card--back{position:absolute;top:0;left:0;right:0;min-height:100%;overflow:hidden;padding:22px 26px 26px;display:flex;flex-direction:column;gap:16px}
+/* Seitenwechsel genau in der Mitte der Drehung (90°) */
+.card--front{transition:transform var(--turn),visibility 0s linear .3s}
+.card--back{transform:rotateY(180deg);transition:transform var(--turn),visibility 0s linear .3s,height var(--turn)}
+/* Beide Seiten drehen einzeln (Vorderseite 0 → −180°, Rückseite 180° → 0); in Ruhe ohne transform – exakt pixelgenau, kein Nachrücken */
+.flip.is-flipped .card--front{transform:rotateY(-180deg)}
+.flip.is-flipped .card--back{transform:none}
+/* Rückseite dauerhaft auf eigener Ebene: sonst rastet sie nach der Drehung um Bruchteile eines Pixels ein (Chrome meldet Layout-Shift) */
+.card--back{will-change:transform}
+.card--back,.flip.is-flipped .card--front{visibility:hidden}
+.flip.is-flipped .card--back{visibility:visible}
+.card__top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--c-line)}
+.card__today{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c-bordeaux)}
+.card__phone{color:var(--c-bordeaux);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.card__main{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+/* Heute geöffnet / geschlossen: beide Varianten im selben Rasterfeld – Platz für die größere reserviert, kein Sprung */
+.card__now,.card__note{display:grid;width:100%}
+.card__now>*,.card__note>*{grid-area:1/1}
+.card__open{align-self:center}
+.flip [data-now-open][hidden],.flip [data-now-closed][hidden]{display:block!important;visibility:hidden}
+/* Heutige Zeiten bündig: Beginn rechtsbündig · Strich · Ende · „Uhr“ */
+.card__hours{display:grid;grid-template-columns:auto auto auto auto;justify-content:start;align-items:baseline;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.card__hours .trange{display:contents}
+.card__hours .trange__a{text-align:right}
+.card__hours .trange__d{padding:0 .12em;color:var(--c-text-3);font-weight:500}
+.card__uhr{margin-left:.35em;font-size:15px;font-weight:600;letter-spacing:0;color:var(--c-text-3)}
+.card__hours--text{display:block;font-size:22px}
+.card__hours-note{margin-top:4px;font-size:15px;color:var(--c-text-3)}
+/* Geschlossen: Bereitschaftsdienst und Notruf */
+.card__reopen{display:flex;flex-direction:column;font-size:13px;font-weight:600;line-height:1.25;color:var(--c-text-2)}
+.card__reopen b{min-height:1.25em;font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--c-ink)}
+.card__reopen.is-empty{visibility:hidden}
+.card__urgent{margin:2px 0 6px;font-size:13px;color:var(--c-text-2)}
+.card__sos-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;list-style:none;margin:0;padding:0}
+.sos{display:flex;flex-direction:column;justify-content:center;height:100%;min-height:60px;padding:6px 14px;border-radius:14px;background:var(--c-rose-1);color:var(--c-bordeaux);text-decoration:none;transition:background .2s,color .2s}
+.sos:hover{background:var(--c-bordeaux);color:#fff}
+.sos__num{order:-1;font-size:25px;font-weight:800;letter-spacing:-.01em;line-height:1.15;font-variant-numeric:tabular-nums}
+.sos__label{font-size:12.5px;font-weight:600;line-height:1.25}
+.sos--112{background:var(--c-bordeaux);color:#fff}
+.sos--112:hover{background:var(--c-bordeaux-dark)}
+.popover{position:relative;font-size:15px}
+.popover summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-block:-8px;color:var(--c-text-3);font-size:14px;font-weight:600;cursor:pointer;list-style:none}
+.popover summary::-webkit-details-marker{display:none}
+.popover summary:hover{color:var(--c-bordeaux)}
+.popover__chev{width:7px;height:7px;margin-top:-3px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .2s}
+.popover[open] .popover__chev{margin-top:3px;transform:rotate(-135deg)}
+.popover__panel{position:absolute;left:-12px;top:calc(100% + 6px);z-index:5;width:min(340px,calc(100vw - 48px));padding:14px 16px 12px;border-radius:16px;background:#fff;box-shadow:0 18px 40px -12px rgba(30,4,14,.35),0 0 0 1px var(--c-line)}
+.is-today{color:var(--c-bordeaux)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Sprechzeiten-Tabelle */
+.htable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.htable thead th{padding:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--c-text-3);text-align:left}
+.htable th[scope=row]{padding:9px 14px 9px 0;text-align:left;font-weight:600;white-space:nowrap;color:var(--c-ink)}
+.htable td{padding:9px 12px 9px 0;color:var(--c-text-2);white-space:nowrap}
+/* Zeitspanne bündig: Beginn rechtsbündig in fester Breite – die Striche stehen untereinander */
+.trange{display:inline-grid;grid-template-columns:4.6ch auto auto}
+.trange__a{text-align:right}
+.trange__d{padding:0 .15em}
+.htable tbody tr{border-top:1px solid var(--c-line)}
+.htable td.is-closed{color:var(--c-text-3);font-style:italic}
+.htable tr.is-today th,.htable tr.is-today td:not(.is-closed){color:var(--c-bordeaux)}
+.htable tr.is-today th{font-weight:700}
+.htable tr.is-today>*{background:color-mix(in srgb,var(--c-bordeaux) 6%,transparent)}
+.htable tr.is-today>:first-child{box-shadow:inset 3px 0 0 var(--c-bordeaux);padding-left:10px}
+.htable tr.htable__note{border-top:0}
+.htable tr.htable__note td{padding:0 0 9px;font-size:13px;white-space:normal;color:var(--c-text-3)}
+.htable__unit{margin-top:8px;font-size:12px;color:var(--c-text-3)}
+.htable--pop{font-size:15px}
+.htable--card{font-size:17px}
+.htable--card thead th{font-size:12px}
+.htable--card th[scope=row],.htable--card td{padding-block:11px}
+.bg-gray .htable tbody tr,.contact__card .htable tbody tr{border-color:var(--c-sep)}
+.contact__hhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-bottom:16px}
+.contact__hhead .eyebrow-h{margin:0}
+
+/* Live-Badge „Jetzt geöffnet“ */
+.openb{display:inline-flex;align-items:center;gap:8px;min-height:30px;padding:4px 12px 4px 10px;border-radius:999px;background:#E7F2EE;color:#1F4A3F;font-size:14px;font-weight:600;line-height:1.2}
+.openb__dot{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:#2E8B6A}
+.openb.is-open .openb__dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #2E8B6A;opacity:0;animation:openpulse 2.4s ease-out infinite}
+@keyframes openpulse{0%{transform:scale(.5);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+.openb.is-soon{background:#FDF0DC;color:#7A4700}.openb.is-soon .openb__dot{background:#C77A00}
+.openb.is-closed{background:var(--c-gray-100);color:var(--c-text-2)}.openb.is-closed .openb__dot{background:#8D9694}
+.openb.is-holiday{background:#FBEAEE;color:var(--c-bordeaux)}.openb.is-holiday .openb__dot{background:var(--c-bordeaux)}
+/* Platz schon vor dem Skript reservieren – der Status erscheint ohne Layout-Sprung (CLS) */
+.openb[hidden]{display:inline-flex!important;visibility:hidden}
+.contact__card .openb.is-closed{background:#fff}
+@media (prefers-reduced-motion:reduce){.openb.is-open .openb__dot::after{animation:none}}
+
+.card__services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.card__services--1{grid-template-columns:1fr}
+.card__services--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.svc{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;min-height:74px;padding:12px 14px;border-radius:16px;background:var(--c-gray-50);color:var(--c-bordeaux);text-decoration:none;font:600 16px var(--font);transition:background .25s,color .25s}
+.svc:hover{background:var(--c-bordeaux);color:#fff}
+.svc__icon{display:flex;line-height:1}
+.svc__ext{position:absolute;top:12px;right:12px;display:flex;opacity:.65}
+@media (max-width:420px){.svc{font-size:14px;padding:11px 10px;min-height:70px}.card--front{padding:18px;gap:12px}.card--back{padding:18px 18px 20px}.card__hours{font-size:24px}.card__services{gap:8px}}
+.svc__label{line-height:1.2}
+.svc__sub{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
+.card__note{padding-top:12px;border-top:1px solid var(--c-line);font-size:12.5px;line-height:1.45;color:var(--c-text-3)}
+.btn-back{min-height:40px;padding:0 14px;border-radius:999px;border:0;background:var(--c-gray-100);color:var(--c-ink);font:600 14px var(--font);cursor:pointer;flex:none}
+.btn-back:hover{background:var(--c-line)}
+.btn-wide{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;padding:0 22px;border-radius:999px;border:0;background:var(--c-bordeaux);color:#fff;text-decoration:none;font:700 16px var(--font);cursor:pointer}
+.btn-wide:hover{background:var(--c-bordeaux-dark);color:#fff}
+.btn-wide[aria-busy="true"]{opacity:.7;cursor:progress}
+
+
+/* Rückseite der Kontaktkarte (Überschrift, Termin-/Hinweis-Panel, Bewegung reduzieren): css/card-back.css – lädt site.js vor dem Umdrehen */
+
+/* ---------------------------------------------------------------- Formulare (öffentlich) */
+.opt{font-weight:400;color:var(--c-text-3)}
+.perr{font-size:13px;font-weight:600;color:#B3261E}
+/* Honeypot: ohne Versatz nach links – auf der gespiegelten Rückseite der Kontaktkarte (rotateY) läge er sonst 10 000 px rechts
+   und machte die Seite mobil breiter (Zoom, horizontales Scrollen) */
+.hp{position:absolute!important;left:0;top:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);opacity:0;pointer-events:none}
+.form-off{font-size:15px;color:var(--c-text-2)}
+
+/* ---------------------------------------------------------------- Teaser-Kacheln */
+.sec--teaser-tiles{padding-block:clamp(48px,6vw,80px) clamp(56px,8vw,104px)}
+.teaser-intro{margin:0 0 clamp(40px,5vw,64px);max-width:44em;color:var(--c-text-2);font-size:clamp(18px,1.4vw,20px)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.tile{display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:170px;padding:24px 26px;border-radius:22px;background:var(--c-gray-50);color:var(--c-ink);text-decoration:none;transition:background .3s,color .3s}
+.tile:hover{background:var(--c-bordeaux);color:#fff}
+.tile__body{display:contents}
+.tile__title{font-size:24px;font-weight:700;letter-spacing:-.025em;line-height:1.1}
+.tile__dot{opacity:.55}
+.tile__sub{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.4}
+.tile__arrow{font-size:20px;letter-spacing:0}
+.bg-gray .tile{background:#fff}
+
+/* ---------------------------------------------------------------- Zitat */
+.quote-inset{position:relative;margin:clamp(64px,8vw,112px) 0;padding:clamp(48px,7vw,96px) clamp(28px,6vw,96px);border-radius:var(--r-big);overflow:hidden;isolation:isolate}
+.quote-inset__bg{position:absolute;inset:0;background:var(--c-bordeaux);z-index:-2}
+.quote-inset blockquote{max-width:18em;font-size:clamp(32px,4.6vw,64px);line-height:1.05;letter-spacing:-.035em;font-weight:300;color:#fff}
+.quote-inset strong{font-weight:700;color:var(--c-apricot-2)}
+.quote-inset figcaption{margin-top:24px;font-size:15px;color:var(--c-rose-2)}
+
+/* ---------------------------------------------------------------- Ärzt:innen */
+.doctors{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(20px,2.5vw,32px)}
+.doctor{display:flex;flex-direction:column;background:#fff;border-radius:24px;overflow:hidden}
+.bg-white .doctor{background:var(--c-gray-50)}
+.doctor__photo{aspect-ratio:1/1}
+.doctor:nth-child(3n+2) .doctor__photo{background:var(--c-ph-2)}
+.doctor__body{padding:26px 26px 28px;display:flex;flex-direction:column;flex:1}
+.doctor__fach{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--c-bordeaux)}
+.doctor__name{margin-top:8px;font-size:26px;line-height:1.15;letter-spacing:-.025em;font-weight:700}
+.doctor__zusatz{margin-top:6px;font-size:16px;color:var(--c-text-3)}
+.doctor__text{margin-top:16px;font-size:17px;color:var(--c-text-2)}
+.doctor__foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-top:auto;padding-top:22px;font-size:15px}
+.doctor__hours{color:var(--c-text-3)}
+.doctor__foot a{font-weight:600;text-decoration:none}
+
+/* Fokuspunkt (Mediathek): Bildausschnitt bei object-fit: cover */
+img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
+.fx0{--fx:0%}.fx10{--fx:10%}.fx20{--fx:20%}.fx30{--fx:30%}.fx40{--fx:40%}.fx50{--fx:50%}.fx60{--fx:60%}.fx70{--fx:70%}.fx80{--fx:80%}.fx90{--fx:90%}.fx100{--fx:100%}
+.fy0{--fy:0%}.fy10{--fy:10%}.fy20{--fy:20%}.fy30{--fy:30%}.fy40{--fy:40%}.fy50{--fy:50%}.fy60{--fy:60%}.fy70{--fy:70%}.fy80{--fy:80%}.fy90{--fy:90%}.fy100{--fy:100%}
+
+/* Bild-Platzhalter wie im Design */
+.ph{position:relative;display:flex;align-items:flex-end;overflow:hidden;background:var(--c-ph)}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph-label{position:relative;margin:16px;font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--c-text-2);font-weight:500}
+
+/* ---------------------------------------------------------------- Leistungen */
+.services{border-top:1.5px solid var(--c-ink)}
+.service{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px var(--gap-split);padding:clamp(32px,4vw,48px) 0;border-bottom:1px solid var(--c-sep)}
+.service__head{display:flex;gap:20px;align-items:baseline}
+.service__no{font-size:15px;font-weight:600;color:var(--c-bordeaux);font-variant-numeric:tabular-nums}
+
+/* ---------------------------------------------------------------- Team */
+.teamphoto{aspect-ratio:2/1;min-height:260px;width:100%;border-radius:var(--r-big)}
+.teamphoto .ph-label{margin:20px;font-size:13px;padding:6px 12px}
+.teamphoto__text{margin-top:clamp(48px,6vw,80px)}
+.jobsbox{margin-top:clamp(48px,6vw,80px);padding:clamp(28px,4vw,44px);border-radius:24px;background:var(--c-ink);color:#fff;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 48px;align-items:center}
+.jobsbox .dot{color:var(--c-apricot-2)}
+.jobsbox p{margin-top:10px;color:var(--c-on-dark)}
+
+/* ---------------------------------------------------------------- Akkordeon / Hinweise */
+.accordion__intro{margin-top:28px}
+.notice{padding:22px 24px;border-radius:18px;display:grid;grid-template-columns:auto 1fr;gap:2px 16px;align-items:center}
+.notice--important{background:#fff;box-shadow:inset 0 0 0 1.5px var(--c-bordeaux)}
+.notice--emergency{margin-top:32px}
+.notice__icon{grid-row:span 2;width:40px;height:40px;border-radius:10px;background:var(--c-bordeaux);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.notice strong{font-weight:700}
+.notice__text{font-size:16px;color:var(--c-text-2)}
+.accordion{border-top:1.5px solid var(--c-ink)}
+.accordion details{border-bottom:1px solid var(--c-sep)}
+.accordion summary{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:68px;padding:12px 0;font-weight:600;font-size:19px;letter-spacing:-.01em}
+.accordion__icon{flex:none;width:32px;height:32px;border-radius:8px;background:var(--c-gray-50);color:var(--c-bordeaux);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;transition:transform .25s}
+.bg-gray .accordion__icon{background:#fff}
+.accordion details[open] .accordion__icon{transform:rotate(45deg)}
+.accordion__body{padding:0 48px 22px 0;color:var(--c-text-2)}
+.accordion__foot{margin-top:20px;font-size:15px;color:var(--c-text-2)}
+.accordion__foot a{font-weight:600}
+
+/* ---------------------------------------------------------------- Kontakt */
+.h2--contact{margin-bottom:clamp(40px,5vw,72px)}
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(12px,2vw,20px)}
+.contact__card{padding:clamp(28px,3vw,40px);border-radius:24px;background:var(--c-gray-50)}
+.contact__card--primary{background:var(--c-bordeaux);color:#fff;display:flex;flex-direction:column;gap:20px}
+.contact__phone{font-size:clamp(28px,3vw,36px);font-weight:700;letter-spacing:-.03em;color:#fff;text-decoration:none;line-height:1.1}
+.contact__phone:hover{text-decoration:underline;color:#fff}
+.contact__list{display:grid;gap:12px;font-size:16px}
+.contact__card--primary dt{color:var(--c-rose-3)}
+.contact__card--primary dd{font-weight:600}
+.contact__card--primary dd a{color:#fff}
+.contact__cta{margin-top:auto;align-self:flex-start;padding:0 22px}
+.contact__list--plain{margin-top:20px}
+.contact__list--plain dt{font-weight:600}
+.contact__list--plain dd{color:var(--c-text-2)}
+.contact__note{margin-top:24px;padding-top:16px;border-top:1px solid var(--c-sep);font-size:15px;color:var(--c-text-3)}
+.contact__address{font-size:17px;font-weight:600}
+.contact__address span{font-weight:400}
+.contact__foot{margin-top:20px;font-size:15px;color:var(--c-text-3);max-width:48em}
+
+/* Karte / Einwilligung */
+.cms-map{--cms-map-accent:var(--c-bordeaux);--cms-map-radius:24px;--cms-map-bg:#EBEBED;--cms-map-line:var(--c-ph-2);margin-top:clamp(12px,2vw,20px)}
+.map__title{margin-bottom:clamp(28px,4vw,48px)}
+
+/* ---------------------------------------------------------------- Footer */
+.site-footer{background:var(--c-ink);color:var(--c-on-dark);font-size:16px}
+.site-footer__inner{max-width:1280px;margin:0 auto;padding:48px var(--gutter);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px 48px}
+.site-footer__brand{display:flex;flex-wrap:wrap;align-items:center;gap:12px 32px}
+.wordmark--footer{color:#fff}
+.wordmark--footer .wordmark__1,.wordmark--footer .wordmark__2{font-size:18px}
+.wordmark--footer .dot{color:var(--c-apricot-2)}
+.site-footer ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 24px}
+.site-footer ul a{display:inline-flex;align-items:center;min-height:44px;color:#fff}
+
+/* ---------------------------------------------------------------- Reveal */
+.js [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform 1.05s var(--ease)}
+.js [data-reveal="grow"]{opacity:1;transform:scaleX(0);transform-origin:left center;transition:transform 1.5s var(--ease)}
+.js [data-reveal="scale"]{transform:scale(.86);transition:opacity 1.2s var(--ease),transform 1.4s var(--ease)}
+.js [data-reveal].is-in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js [data-reveal]{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* Ausgeblendete Blöcke (nur im Bearbeitungsmodus sichtbar) */
+.is-hidden-block{display:none}
+
+
+/* Logo einer Landing-Domain statt der Wortmarke (Core\Landings, partials/header.php) */
+.wordmark__img{display:block;max-height:44px;width:auto;max-width:220px}
+
+/* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*.
+   Praxis stellt Farben in Bändern direkt um (nicht über Tokens) – deshalb hier die Werte für Bordeaux- und Dunkel-Bänder. */
+:root{--kit-accent:var(--c-bordeaux);--kit-on-accent:var(--c-white);--kit-link:var(--c-bordeaux);--kit-ink:var(--c-ink);--kit-text:var(--c-ink);--kit-muted:var(--c-text-2);--kit-bg:var(--c-white);--kit-surface:var(--c-gray-50);--kit-line:var(--c-line);--kit-radius:var(--r-card);--kit-font:var(--font);--kit-font-head:var(--font)}
+:where(.bg-bordeaux,.bg-dark){--kit-accent:var(--c-apricot);--kit-on-accent:var(--c-ink);--kit-link:var(--c-apricot);--kit-ink:#FFFFFF;--kit-text:var(--c-on-dark);--kit-muted:var(--c-on-dark);--kit-line:rgb(255 255 255/.24);--kit-surface:rgb(255 255 255/.06)}

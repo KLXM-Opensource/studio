@@ -1,4 +1,6 @@
 <?php /** Eigenständige Formularseite /anfrage/{form} (Fallback ohne JS / direkte Links) – Eingangs-Tabelle, verschlüsselt. @var array $def  @var ?array $table */
+// Darstellung „Klassisch“: ursprüngliches Layout (templates/form-page-classic.php)
+if (praxis_classic()) { include __DIR__ . '/form-page-classic.php'; return; }
 $secure = trim(\Core\EditorNotes::strip((string) setting('formular_hinweis'))) ?: lt('Übermittlung verschlüsselt – Ihre Angaben sind nur in der Praxis lesbar.');
 $sos = trim(\Core\EditorNotes::strip((string) setting('notfall_kurz'))); ?>
 <section class="sec bg-gray formpage" aria-labelledby="formpage-title">

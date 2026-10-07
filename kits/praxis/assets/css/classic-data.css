@@ -1,0 +1,10 @@
+/* Praxis-Theme: Kern-Block „Datenliste“ im Stil der Kacheln. „Datensatz-Felder“ (Detailseiten): css/data-fields.css
+   (theme.php → conditional_css ['data_fields']) – die Startseite lädt nur den Listenteil. */
+@import "../../../../resources/css/_data-list.css";
+.dl,.df{--dl-accent:var(--c-bordeaux);--dl-surface:var(--c-gray-50);--dl-radius:22px;--dl-muted:var(--c-text-2)}
+.bg-gray .dl-item{background:var(--c-white)}
+.bg-bordeaux .dl,.bg-dark .dl{--dl-accent:var(--c-apricot);--dl-surface:rgba(255,255,255,.08);--dl-muted:var(--c-on-dark)}
+.dl-name{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.dl-item{transition:background .3s,transform .3s}
+.dl--cards .dl-item:hover{transform:translateY(-3px)}
+.dl-ph{background:var(--c-ph)}

@@ -74,6 +74,8 @@ return [
     ],
 
     'jsonld' => 'praxis_jsonld',
+    // Darstellung „Klassisch“ (Design → Darstellung): css/x.css → css/classic-x.css, siehe praxis_asset_variant()
+    'asset_variant' => 'praxis_asset_variant',
 
     // Link-Sonderwerte (aufgelöst in praxis_link): nutzen die Praxisdaten
     'link_keywords' => ['doctolib', 'telefon', 'rezept', 'ueberweisung'],
@@ -234,6 +236,14 @@ return [
                 ['name' => 'text_2', 'label' => 'Text gedämpft', 'type' => 'color', 'var' => '--c-text-2', 'default' => '#4A423B', 'dark' => '#D6CCC2', 'contrast' => ['with' => 'gray', 'min' => 4.5]],
                 ['name' => 'gray', 'label' => 'Grauer Hintergrund', 'type' => 'color', 'var' => '--c-gray-50', 'default' => '#F6F3EF', 'dark' => '#1A1512'],
             ]],
+            // Nur für „Darstellung: Klassisch“ (css/classic-*.css). Standardwerte = Originalverlauf.
+            ['id' => 'verlauf', 'label' => 'Verlauf (Darstellung Klassisch)', 'tokens' => [
+                ['name' => 'silk_1', 'label' => 'Verlauf hell', 'help' => 'Warmer Lichtstreifen im farbigen Kopfbereich', 'type' => 'color', 'var' => '--c-silk-1', 'default' => '#EC6E48', 'dark' => '#EC6E48'],
+                ['name' => 'silk_2', 'label' => 'Verlauf mittel', 'help' => 'Kräftiger Farbstreifen', 'type' => 'color', 'var' => '--c-silk-2', 'default' => '#D62456', 'dark' => '#D62456'],
+                ['name' => 'silk_3', 'label' => 'Verlauf dunkel', 'help' => 'Schattenstreifen', 'type' => 'color', 'var' => '--c-silk-3', 'default' => '#240310', 'dark' => '#240310'],
+                ['name' => 'sheen', 'label' => 'Glanz', 'help' => 'Feiner Schimmer über dem Verlauf', 'type' => 'color', 'var' => '--c-sheen', 'default' => '#FFDECC', 'dark' => '#FFDECC'],
+                ['name' => 'hero_shade', 'label' => 'Abdunklung Titelbild', 'help' => 'Farbe der Abdunklung über Hintergrundfotos im Kopfbereich', 'type' => 'color', 'var' => '--c-hero-shade', 'default' => '#260814', 'dark' => '#260814'],
+            ]],
             ['id' => 'formen', 'label' => 'Formen', 'tokens' => [
                 ['name' => 'buttons', 'label' => 'Buttons', 'type' => 'choice', 'var' => '--r-btn', 'preview' => 'radius', 'default' => 'soft',
                     'options' => ['pill' => 'Rund', 'soft' => 'Abgerundet', 'square' => 'Eckig'], 'values' => ['pill' => '999px', 'soft' => '10px', 'square' => '4px']],
@@ -242,13 +252,18 @@ return [
             ['id' => 'schrift', 'label' => 'Schrift', 'tokens' => [
                 ['name' => 'font', 'label' => 'Schriftart', 'type' => 'font', 'var' => '--font', 'default' => 'atkinson'],
             ]],
-            ['id' => 'modus', 'label' => 'Farbschema', 'tokens' => [
+            ['id' => 'modus', 'label' => 'Darstellung & Farbschema', 'tokens' => [
+                ['name' => 'look', 'label' => 'Darstellung', 'type' => 'choice', 'class' => 'look-{value}', 'default' => 'modern',
+                    'options' => ['modern' => 'Modern (Standard)', 'klassisch' => 'Klassisch – Wortmarke mit Punkt, Bordeaux-Verlauf, weiße Kontaktkarte'],
+                    'help' => 'Klassisch lädt die ursprünglichen Stylesheets des Kits (css/classic-*.css). Passende Farben und Schrift: Vorlage „Klassisch (Bordeaux)“.'],
                 ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
             ]],
         ],
         // Atkinson Hyperlegible Next: installiert der Schriften-Manager (Core\Fonts, fonts:sync) – das Kit liefert keine Dateien mit;
         // 'preload' => true: Hauptschnitt vorladen (Theme::fontPreloads, Offline-App)
         'fonts' => [
+            'hanken' => ['label' => 'Hanken Grotesk (Darstellung Klassisch)', 'stack' => '"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif',
+                'fontsource' => 'hanken-grotesk', 'variable' => false, 'weights' => [300, 400, 500, 600, 700, 800], 'preload' => [700, 400]],
             'atkinson' => ['label' => 'Atkinson Hyperlegible Next (Standard)', 'stack' => '"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif',
                 'fontsource' => 'atkinson-hyperlegible-next', 'styles' => ['normal', 'italic'], 'preload' => true],
             'system' => ['label' => 'Systemschrift', 'stack' => 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'],
@@ -257,6 +272,11 @@ return [
         ],
         'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark'],
         'presets' => [
+            // Ursprüngliche Gestaltung des Kits (Stand vor der Neugestaltung 2026-10) – zusammen mit Darstellung „Klassisch“ pixelgleich
+            'klassisch' => ['label' => 'Klassisch (Bordeaux)', 'values' => ['look' => 'klassisch', 'dark' => false, 'font' => 'hanken', 'buttons' => 'pill', 'radius' => 24,
+                'accent' => '#7A1F35', 'accent_dark' => '#5E1628', 'accent_hero' => '#6A1530', 'apricot' => '#F6C9A8', 'apricot_2' => '#F0C4A6',
+                'ink' => '#16201E', 'text_2' => '#3F4A47', 'gray' => '#F2F2F3',
+                'silk_1' => '#EC6E48', 'silk_2' => '#D62456', 'silk_3' => '#240310', 'sheen' => '#FFDECC', 'hero_shade' => '#260814']],
             'orange' => ['label' => 'Orange (Standard)', 'values' => ['accent@dark' => '#F29A55', 'accent_dark@dark' => '#F6B37E', 'accent_hero@dark' => '#7A3510', 'accent' => '#B4470F', 'accent_dark' => '#8F370B', 'accent_hero' => '#9E4210',
                 'apricot' => '#F4D9B4', 'apricot_2' => '#F4D9B4', 'ink' => '#1F1A16', 'text_2' => '#4A423B', 'gray' => '#F6F3EF']],
             'tanne' => ['label' => 'Tanne', 'values' => ['accent@dark' => '#6CC4A4', 'accent_dark@dark' => '#8AD3B8', 'accent_hero@dark' => '#1B4D3F', 'accent' => '#1F5C4A', 'accent_dark' => '#164536', 'accent_hero' => '#17483A',

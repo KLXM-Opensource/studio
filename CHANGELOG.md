@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Praxis: Darstellung „Klassisch“, einstellbare Verlaufsfarben
+- Kit Praxis hat im Style-Editor die Darstellung „Klassisch“ (Token `look`, Vorlage „Klassisch (Bordeaux)“): ursprüngliche
+  Gestaltung mit Wortmarke, Bordeaux-Verlauf und weißer Kontaktkarte. Alle Farben kommen aus dem Style-Editor, auch die
+  Verlaufsfarben des Kopfbereichs (Gruppe „Verlauf“: hell, mittel, dunkel, Glanz, Abdunklung Titelbild).
+- Neu in `theme.php`: `'asset_variant' => callable` – `Theme::asset()` kann Pfade auf eine Variante umlenken
+  (Praxis: `css/classic-*.css`, sofern vorhanden).
+
 ### Kit-Schriften über den Schriften-Manager statt im Kit mitgeliefert
 - Kits liefern keine Webfonts mehr mit, die der Schriften-Manager (`Core\Fonts`) aus dem Google-Fonts-Katalog beziehen
   kann. Sie erklären die Schrift nur noch in `design.fonts` mit `'fontsource' => id` (optional `variable`, `weights`,

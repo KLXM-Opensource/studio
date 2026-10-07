@@ -1,0 +1,16 @@
+/* Hero: Hintergrundbild, -video oder ruhige Farbfläche (nur geladen, wenn die Variante genutzt wird) */
+.hero__bg{position:absolute;inset:0;z-index:-1;overflow:hidden;background:var(--c-bordeaux-hero)}
+.hero__bgimg{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.hero__bgimg.is-active{opacity:1}
+.hero__bgimg picture,.hero__bgimg img,.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero__video{z-index:1}
+/* Abdunklung: links stärker (Text), zur Karte hin leichter */
+.hero__bg:not(.hero__bg--color)::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(100deg,color-mix(in srgb,var(--c-hero-shade) 86%,transparent) 0%,color-mix(in srgb,var(--c-hero-shade) 70%,transparent) 45%,color-mix(in srgb,var(--c-hero-shade) 45%,transparent) 100%)}
+.hero__bg--medium::after{background:linear-gradient(100deg,color-mix(in srgb,var(--c-hero-shade) 74%,transparent) 0%,color-mix(in srgb,var(--c-hero-shade) 52%,transparent) 45%,color-mix(in srgb,var(--c-hero-shade) 28%,transparent) 100%)!important}
+.hero__bg--light::after{background:linear-gradient(100deg,color-mix(in srgb,var(--c-hero-shade) 60%,transparent) 0%,color-mix(in srgb,var(--c-hero-shade) 36%,transparent) 50%,color-mix(in srgb,var(--c-hero-shade) 12%,transparent) 100%)!important}
+@media (max-width:760px){.hero__bg:not(.hero__bg--color)::after{background:linear-gradient(180deg,color-mix(in srgb,var(--c-hero-shade) 80%,transparent),color-mix(in srgb,var(--c-hero-shade) 66%,transparent))!important}}
+@media (prefers-reduced-motion:reduce){.hero__bgimg{transition:none}.hero__video{display:none}}
+/* Eigene Bilder je Thema über Verlauf/Farbfläche: Fläche und Abdunklung nur, solange ein Thema mit Bild aktiv ist */
+.hero__bg--slides{background:none}
+.hero__bg--slides::after{opacity:0;transition:opacity .9s ease}
+.hero__bg--slides:has(.is-active)::after{opacity:1}

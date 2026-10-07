@@ -502,6 +502,10 @@ final class Theme
 
     public function asset(string $path): string
     {
+        // Darstellungs-Varianten eines Kits (theme.php → 'asset_variant' => callable(string $pfad): string), z. B. eigener Satz
+        // Stylesheets für „Klassisch“ – nur wenn die Ersatzdatei existiert
+        if (is_callable($cb = $this->def['asset_variant'] ?? null) && ($alt = (string) $cb($path)) !== '' && $alt !== $path
+            && is_file(Kit::publicDir($this->name) . '/' . ltrim($alt, '/'))) $path = $alt;
         $file = Kit::publicDir($this->name) . '/' . ltrim($path, '/');
         $v = is_file($file) ? substr(md5((string) filemtime($file)), 0, 8) : CMS_VERSION;
         return Kit::url($this->name, $path) . '?v=' . $v;

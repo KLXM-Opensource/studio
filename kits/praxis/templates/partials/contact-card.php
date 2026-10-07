@@ -24,7 +24,7 @@ $style = ($style ?? '') ?: (setting('karte_stil') === 'karte' ? 'karte' : 'glas'
 $lazy = array_merge([theme_asset('css/card-back.css')], array_filter(['rezept', 'ueberweisung'], fn($k) => isset($services[$k]) && empty($services[$k]['external']))
     ? [theme_asset('css/form.css'), theme_asset('js/form.js'), asset('js/legal-dialog.js')] : []);
 ?>
-<div class="flip flip--<?= e($style) ?>" data-flipcard data-assets="<?= json_attr($lazy) ?>">
+<div class="flip<?= praxis_classic() ? '' : ' flip--' . e($style) ?>" data-flipcard data-assets="<?= json_attr($lazy) ?>">
   <div class="flip__inner">
     <aside class="card card--front" aria-label="<?= e(lt('Schnellkontakt')) ?>"<?= $central ?>>
       <div class="card__top">

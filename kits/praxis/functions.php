@@ -515,3 +515,16 @@ function praxis_public_info(): array
         'emergency' => setting('notfall_kurz'),
     ];
 }
+
+/** Darstellung „Klassisch“ (Design → Darstellung) aktiv? */
+function praxis_classic(): bool
+{
+    return (string) design('look') === 'klassisch';
+}
+
+/** Stylesheet-Satz der Darstellung: bei „Klassisch“ css/{name}.css → css/classic-{name}.css (Core\Theme::asset, 'asset_variant') */
+function praxis_asset_variant(string $path): string
+{
+    if (!str_starts_with($path, 'css/') || !str_ends_with($path, '.css') || str_starts_with($path, 'css/classic-') || !praxis_classic()) return $path;
+    return 'css/classic-' . substr($path, 4);
+}
