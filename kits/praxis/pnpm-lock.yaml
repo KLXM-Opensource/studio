@@ -8,23 +8,15 @@ importers:
 
   .:
     devDependencies:
-      '@expo-google-fonts/hanken-grotesk':
-        specifier: ^0.4.3
-        version: 0.4.3
-      '@fontsource/hanken-grotesk':
-        specifier: ^5.2.0
-        version: 5.3.0
+      '@expo-google-fonts/inter':
+        specifier: ^0.4.2
+        version: 0.4.2
 
 packages:
 
-  '@expo-google-fonts/hanken-grotesk@0.4.3':
-    resolution: {integrity: sha512-TZn/Ux+nCxEjG/zAenCFbEhOAPxSXN3lo2YU2jHcPsNBPFeicm8feQStL81igJuAwJLCn62VvEOdTtmVEBDl0g==}
-
-  '@fontsource/hanken-grotesk@5.3.0':
-    resolution: {integrity: sha512-eiqAvcMT88tCMCBzn6qKgMHGLJKq3NEXO3+0y9JXqzyty2U6KZnaGtbfiQgzRAXfwFp559hJQ0zBgJ6d89AuTA==}
+  '@expo-google-fonts/inter@0.4.2':
+    resolution: {integrity: sha512-syfiImMaDmq7cFi0of+waE2M4uSCyd16zgyWxdPOY7fN2VBmSLKEzkfbZgeOjJq61kSqPBNNtXjggiQiSD6gMQ==}
 
 snapshots:
 
-  '@expo-google-fonts/hanken-grotesk@0.4.3': {}
-
-  '@fontsource/hanken-grotesk@5.3.0': {}
+  '@expo-google-fonts/inter@0.4.2': {}

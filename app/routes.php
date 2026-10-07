@@ -243,6 +243,10 @@ return function (Router $r): void {
     $r->get('/admin/system/fonts/preview/{id}', [Admin\FontsController::class, 'preview']);
     $r->post('/admin/system/fonts/{id}/remove', [Admin\FontsController::class, 'remove']);
     $r->post('/admin/system/fonts/{id}/preload', [Admin\FontsController::class, 'preload']);
+    // Kits: installierte Kits, Kit-Paket (ZIP) hochladen, hochgeladene entfernen (Core\KitPackages)
+    $r->get('/admin/system/kits', [Admin\KitsController::class, 'index']);
+    $r->post('/admin/system/kits/install', [Admin\KitsController::class, 'install']);
+    $r->post('/admin/system/kits/{name}/remove', [Admin\KitsController::class, 'remove']);
     // Website-Suche und KI (Grundeinstellungen → Suche / KI)
     $r->post('/admin/system/search/rebuild', [Admin\AiSearchController::class, 'rebuild']);
     $r->post('/admin/system/search/misses-clear', [Admin\AiSearchController::class, 'missesClear']);

@@ -73,6 +73,8 @@ $thumbNav = function (string $k) use ($navAlias) {
 ?>
 <?php foreach ($fontCss as $href): ?><link rel="stylesheet" href="<?= e($href) ?>">
 <?php endforeach; ?>
+<?php if (($fontFaces ?? '') !== ''): /* Vorschau noch nicht installierter Kit-Schriften (von der eigenen Domain) */ ?><style><?= $fontFaces ?></style>
+<?php endif; ?>
 <div class="st-layout ds" data-st-preview="<?= e(url('/admin/api/design-preview')) ?>" data-ds data-ds-import="<?= e(url('/admin/api/design-import')) ?>">
 <form method="post" action="<?= e(url('/admin/design')) ?>" class="adm-tabs-form ds-form" data-tabs data-ds-form novalidate>
   <?= csrf_field() ?>
@@ -164,7 +166,7 @@ $thumbNav = function (string $k) use ($navAlias) {
         <div class="ds-tok__head"><label for="<?= e($id) ?>"><?= e($t['label'] ?? $n) ?></label><?= $help !== '' ? '<small class="adm-muted">' . e($help) . '</small>' : '' ?></div>
         <div class="ds-font">
           <select id="<?= e($id) ?>" name="v[<?= e($n) ?>]" data-ds-font>
-            <?php foreach ($fonts as $fk => $f): ?><option value="<?= e((string) $fk) ?>" data-stack="<?= e($f['stack']) ?>"<?= !empty($f['installed']) ? ' data-kb="' . (int) $f['kb'] . '"' : '' ?><?= (string) $v === (string) $fk ? ' selected' : '' ?>><?= e($f['label']) ?></option><?php endforeach; ?>
+            <?php foreach ($fonts as $fk => $f): if (!empty($f['dup']) && (string) $v !== (string) $fk) continue; ?><option value="<?= e((string) $fk) ?>" data-stack="<?= e($f['stack']) ?>"<?= !empty($f['installed']) ? ' data-kb="' . (int) $f['kb'] . '"' : '' ?><?= (string) $v === (string) $fk ? ' selected' : '' ?>><?= e($f['label']) ?></option><?php endforeach; ?>
           </select>
           <?php // Installierte Schrift (Core\Fonts): Hinweis, wenn sie viel lädt – resources/js/_design.js ?>
           <p class="ds-fontwarn" data-ds-fontwarn data-budget="<?= \Core\Fonts::BUDGET_KB ?>" data-text="<?= e(__('Diese Schrift lädt bis zu {kb} KB (lateinische Zeichen, alle installierten Schnitte). Für schnelle Seiten weniger Schnitte installieren oder die variable Fassung nutzen.')) ?>" role="status"<?= !empty($fonts[$v]['installed']) && (int) $fonts[$v]['kb'] > \Core\Fonts::BUDGET_KB ? '' : ' hidden' ?>><?= !empty($fonts[$v]['installed']) ? e(__('Diese Schrift lädt bis zu {kb} KB (lateinische Zeichen, alle installierten Schnitte). Für schnelle Seiten weniger Schnitte installieren oder die variable Fassung nutzen.', ['kb' => (int) $fonts[$v]['kb']])) : '' ?></p>

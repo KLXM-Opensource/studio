@@ -110,12 +110,12 @@ return [
         ]],
     ],
 
-    // Selbst gehostete Schriften (kits/modern/build.mjs erzeugt css/font-*.css) – variabel: eine Datei für alle Stärken
+    // Schriften: 'fontsource' = installiert der Schriften-Manager (Core\Fonts, fonts:sync; selbst gehostet, ohne externe Anfragen) – variabel: eine Datei für alle Stärken
     'fonts' => [
-        'jakarta' => ['label' => 'Plus Jakarta Sans (Grotesk, klar · variabel)', 'stack' => '"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-jakarta.css'],
-        'space-grotesk' => ['label' => 'Space Grotesk (markant, technisch · variabel)', 'stack' => '"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-space-grotesk.css'],
-        'inter-tight' => ['label' => 'Inter Tight (neutral, kompakt · variabel)', 'stack' => '"Inter Tight",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-inter-tight.css'],
-        'manrope' => ['label' => 'Manrope (geometrisch, rund · variabel)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-manrope.css'],
+        'jakarta' => ['label' => 'Plus Jakarta Sans (Grotesk, klar · variabel)', 'stack' => '"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'plus-jakarta-sans'],
+        'space-grotesk' => ['label' => 'Space Grotesk (markant, technisch · variabel)', 'stack' => '"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'space-grotesk'],
+        'inter-tight' => ['label' => 'Inter Tight (neutral, kompakt · variabel)', 'stack' => '"Inter Tight",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'inter-tight'],
+        'manrope' => ['label' => 'Manrope (geometrisch, rund · variabel)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'manrope'],
         'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
     ],
 

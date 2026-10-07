@@ -41,11 +41,11 @@ kits/modern/
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Demo mit erzeugten Bildern)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Demo, Design & Navigation, Tipps, alle Blöcke)
-├── package.json     @fontsource-variable/{plus-jakarta-sans,space-grotesk,inter-tight,manrope}, @expo-google-fonts/space-grotesk (TTF für App-Icons)
-└── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+├── package.json     @expo-google-fonts (TTF für App-Icons)
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/modern/{css,js,fonts}` (installiert die Kit-Pakete bei Bedarf selbst).
+Build: `cd tools && pnpm run build` → `public/assets/kits/modern/{css,js}` (installiert die Kit-Pakete bei Bedarf selbst).
 
 ## Blöcke
 
@@ -115,5 +115,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Plus Jakarta Sans, Space Grotesk, Inter Tight, Manrope – SIL Open Font License 1.1 (`public/assets/kits/modern/fonts/OFL-{key}.txt`,
+Plus Jakarta Sans, Space Grotesk, Inter Tight, Manrope – SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz in `public/assets/fonts/installed/{id}/LICENSE.txt`;
 TTF für App-Icons: `kits/modern/fonts/OFL.txt`). Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch erzeugt, frei verwendbar.

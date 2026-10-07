@@ -1,0 +1,12 @@
+/* Kit „praxis“ – nur in der Vorschau des Style-Editors (Verwaltung → Design → „Dunkel“): dieselben Werte wie der
+   Dunkelmodus in css/site.css, ausgelöst über die Klasse is-dark statt über prefers-color-scheme (theme.php → design.dark.force).
+   Die Farben aus dem Style-Editor setzt der Editor selbst. */
+html.is-dark{color-scheme:dark;
+  --c-bordeaux:#F29A55; --c-bordeaux-dark:#F6B37E; --c-bordeaux-hero:#7A3510; --c-ink:#F4EEE8; --c-text-2:#D6CCC2; --c-gray-50:#1A1512;
+  --c-bg:#15110E; --c-surface:#1F1915; --c-on-accent:#2A1404; --c-dark-sec:#0C0907;
+  --c-gray-100:#251E19; --c-line:#352C25; --c-ph:#2A221D; --c-ph-2:#30271F; --c-sep:#3B3129; --c-input:#5A4D42; --c-text-3:#B3A79C;
+  --c-rose-1:color-mix(in srgb,var(--c-bordeaux) 16%,var(--c-bg)); --c-rose-2:color-mix(in srgb,var(--c-bordeaux) 24%,var(--c-bg));
+  --c-rose-3:color-mix(in srgb,var(--c-bordeaux) 40%,var(--c-bg));
+  --shadow-card:0 30px 60px -28px rgb(0 0 0/.7)}
+html.is-dark .flip--glas{--g-blur:blur(30px) saturate(1.1);--g-grain:.05;--g-bg:color-mix(in srgb,var(--c-shade) 66%,transparent);--g-solid:color-mix(in srgb,var(--c-shade) 95%,transparent);--g-ink:#fff;--g-muted:var(--c-on-dark);
+  --g-line:rgb(255 255 255/.16);--g-edge:rgb(255 255 255/.16);--g-row:rgb(255 255 255/.08);--g-row-line:rgb(255 255 255/.08);--g-icon:rgb(255 255 255/.12);--g-hi:var(--c-apricot);--g-num:var(--c-apricot);--g-chip:rgb(255 255 255/.1)}

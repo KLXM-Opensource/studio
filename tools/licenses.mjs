@@ -16,7 +16,9 @@
  * in mitgelieferten Paketen und unbekannte Kennungen erzeugen eine Warnung; Copyleft in Build-Werkzeugen nur einen
  * Hinweis (wird nicht ausgeliefert). Ausnahmen mit Begründung: ALLOW.
  * npm-Pakete werden aus node_modules/.pnpm gelesen – vorher `pnpm install` (tools/build.mjs erledigt das für Themes).
- * Nicht erfasst (Hinweise in THIRD-PARTY-NOTICES.md): Schriften/Stimmen/Daten außerhalb von Paketmanagern.
+ * Nicht erfasst (Hinweise in THIRD-PARTY-NOTICES.md): Schriften/Stimmen/Daten außerhalb von Paketmanagern. Webfonts der Kits
+ * liefert der Schriften-Manager zur Laufzeit (Core\Fonts, je Schrift LICENSE.txt in public/assets/fonts/installed) – nur noch
+ * mitgelieferte Kit-Schriften (public/assets/kits/{kit}/fonts) werden hier auf ihre Lizenzdatei geprüft.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -192,7 +194,7 @@ for (const p of all) {
 
 if (fs.existsSync(path.join(ROOT, 'public/assets/vendor'))) {
   for (const f of REQUIRED_FILES) if (!fs.existsSync(path.join(ROOT, f))) problems.push(`Lizenzdatei fehlt: ${f} (pnpm --dir tools build)`);
-  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/assets/kits)
+  // Mitgelieferte Schriften der Kits (nur, was der Schriften-Manager nicht liefern kann): jede braucht eine Lizenzdatei
   for (const root of ['public/assets/kits']) {
     const pubThemes = path.join(ROOT, root);
     for (const t of fs.existsSync(pubThemes) ? fs.readdirSync(pubThemes) : []) {

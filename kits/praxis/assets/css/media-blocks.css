@@ -1,5 +1,5 @@
 /* Theme „praxis“ – Aussehen der Kern-Blöcke Bildergalerie, Slider, Stapelkarten (Grundlage: core css/media.css) */
-.cms-gallery,.cms-slider,.cms-stack,.cms-lb{--cms-accent:var(--c-bordeaux);--cms-on-accent:#fff;--cms-radius:18px;--cms-surface:var(--c-gray-100);--cms-muted:var(--c-text-2);--cms-line:var(--c-input);--cms-card-bg:#fff;--cms-card-line:var(--c-line);--cms-card-ink:var(--c-ink);--cms-shadow:0 40px 80px -40px rgba(30,4,14,.38);--cms-gallery-gap:clamp(12px,1.6vw,20px);--cms-stack-top:112px;--cms-stack-step:28px}
+.cms-gallery,.cms-slider,.cms-stack,.cms-lb{--cms-accent:var(--c-bordeaux);--cms-on-accent:var(--c-on-accent);--cms-radius:18px;--cms-surface:var(--c-gray-100);--cms-muted:var(--c-text-2);--cms-line:var(--c-input);--cms-card-bg:#fff;--cms-card-line:var(--c-line);--cms-card-ink:var(--c-ink);--cms-shadow:0 40px 80px -40px color-mix(in srgb,var(--c-shade) 38%,transparent);--cms-gallery-gap:clamp(12px,1.6vw,20px);--cms-stack-top:112px;--cms-stack-step:28px}
 :is(.bg-bordeaux,.bg-dark) :is(.cms-gallery,.cms-slider,.cms-stack){--cms-accent:var(--c-apricot);--cms-on-accent:var(--c-bordeaux-hero);--cms-muted:var(--c-on-dark);--cms-line:rgba(255,255,255,.4)}
 :is(.bg-bordeaux,.bg-dark) .cms-stack{--cms-accent:var(--c-bordeaux);--cms-muted:var(--c0-text-2);--cms-shadow:0 40px 80px -30px rgba(0,0,0,.55)}
 .bg-gray .cms-stack{--cms-card-line:transparent}
@@ -20,7 +20,7 @@
 .cms-slide:is(.cms-slide--ov-dark,.cms-slide--ov-none) .cms-slide__cta .btn--primary:hover{background:var(--c-apricot)}
 .cms-slide--ov-box .cms-slide__box{border-radius:var(--r-card)}
 .cms-slider__arrow{width:48px;height:48px}
-.cms-slider__play{background:rgba(94,22,40,.72)}
+.cms-slider__play{background:color-mix(in srgb,var(--c-shade) 72%,transparent)}
 .cms-slider__play:hover{background:var(--c-bordeaux-dark)}
 
 /* Stapelkarten */

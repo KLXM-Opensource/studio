@@ -2,14 +2,9 @@
   "name": "klxm-studio-kit-essenz",
   "private": true,
   "license": "MIT",
-  "description": "Build-Abhängigkeiten des Kits „essenz“ (selbst gehostete Schriften: Inter, Inter Tight, Manrope, Geist, Geist Mono – alle SIL OFL 1.1). Wird von tools/build.mjs automatisch installiert und über kits/essenz/build.mjs kopiert.",
+  "description": "Build-Abhängigkeiten des Kits „essenz“ (TTF für den App-Icon-Generator). Webfonts installiert der Schriften-Manager (design.fonts → fontsource). Wird von tools/build.mjs automatisch installiert und über kits/essenz/build.mjs kopiert.",
   "packageManager": "pnpm@10.29.2",
   "devDependencies": {
-    "@expo-google-fonts/inter": "^0.4.2",
-    "@fontsource-variable/geist": "^5.2.0",
-    "@fontsource-variable/geist-mono": "^5.2.0",
-    "@fontsource-variable/inter": "^5.2.0",
-    "@fontsource-variable/inter-tight": "^5.2.0",
-    "@fontsource-variable/manrope": "^5.2.0"
+    "@expo-google-fonts/inter": "^0.4.2"
   }
 }

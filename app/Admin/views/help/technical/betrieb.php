@@ -47,7 +47,7 @@ php bin/console site:extract neo --all-kits                 # alle Kits mitnehme
   </ul>
   <h3>Schreibrechte, Logs, Datenschutz</h3>
   <ul>
-    <li><b>Schreibrechte:</b> <code>storage/</code> (inkl. <code>sessions</code>, <code>cache</code>, <code>logs</code>, <code>backups</code>, <code>uploads</code>), <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>, <code>public/assets/ext</code> (<code>extensions:publish</code>), <code>public/assets/fonts/installed</code> (Schriften).</li>
+    <li><b>Schreibrechte:</b> <code>storage/</code> (inkl. <code>sessions</code>, <code>cache</code>, <code>logs</code>, <code>backups</code>, <code>uploads</code>), <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>, <code>public/assets/ext</code> (<code>extensions:publish</code>), <code>public/assets/kits</code> (<code>kits:publish</code>, Kit-Pakete), <code>storage/kits</code> (hochgeladene Kits), <code>public/assets/fonts/installed</code> (Schriften).</li>
     <li><b>Logs:</b> <code>storage/logs/php-error.log</code>, <code>{storage}/logs/spam.log</code> (je Website), <code>storage/logs/ai-jobs.log</code>; Protokolle in der Verwaltung: Anfragen → Protokoll, Netzwerk-Protokoll, <?= e($aiBrand) ?> → Verlauf/Eingereicht.</li>
     <li><b>Datenschutz:</b> Aufbewahrungsfrist je Eingang prüfen, API-Tokens mit Ablaufdatum vergeben und ungenutzte widerrufen, Datenschutzerklärung um genutzte externe Dienste (Videos, externer KI-Anbieter) ergänzen.</li>
   </ul>

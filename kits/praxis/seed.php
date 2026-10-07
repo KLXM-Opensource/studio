@@ -1,7 +1,9 @@
 <?php
 /*
  * Startinhalte – werden beim ersten Aufruf eingespielt.
- * Alle Angaben sind fiktiv („Praxis Beispiel“, Musterstadt). Inhalte in [eckigen Klammern] sind Platzhalter und müssen von der Praxis geliefert werden.
+ * Alle Angaben sind fiktiv („Praxis am Lindenplatz“, Musterstadt).
+ * Hero-Foto (demo/beratung.jpg): erwinbosman, Pixabay – https://pixabay.com/de/photos/arzt-patient-beratung-alter-klinik-10350071/ (Pixabay-Inhaltslizenz).
+ * Inhalte in [eckigen Klammern] sind Platzhalter und müssen von der Praxis geliefert werden.
  * (Platzhalter erscheinen NICHT im JSON-LD.)
  */
 
@@ -12,9 +14,9 @@ $morning = fn(string $tag) => ['tag' => $tag, 'von' => '07:30', 'bis' => '11:00'
 
 return [
     'settings' => [
-        'praxis_name' => '[Praxis Beispiel (fiktiv)]',
-        'wortmarke_1' => 'Praxis Beispiel',
-        'wortmarke_2' => 'Musterstadt',
+        'praxis_name' => '[Praxis am Lindenplatz (fiktiv)]',
+        'wortmarke_1' => 'Praxis am Lindenplatz',
+        'wortmarke_2' => 'Hausärzte · Musterstadt',
         'strasse' => '',
         'plz' => '',
         'ort' => 'Musterstadt',
@@ -59,14 +61,14 @@ return [
         'notfall_kurz' => 'Notfall 112 · Bereitschaftsdienst 116 117',
         'hero_slides' => [
             ['typ' => 'greeting', 'aktiv' => true, 'eyebrow' => 'Willkommen', 'titel' => '',
-                'text' => 'Schön, dass Sie da sind. Hier finden Sie alles Wichtige zu unserer Praxis – persönlich, verständlich und auf einen Blick.',
+                'text' => 'Schön, dass Sie vorbeischauen. Sprechzeiten, Online-Service und alles rund um Ihren Besuch finden Sie hier auf einen Blick.',
                 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '', 'von_datum' => '', 'bis_datum' => ''],
-            ['typ' => 'topic', 'aktiv' => true, 'eyebrow' => 'Aktuelles Thema', 'titel' => 'Jetzt an die Grippe­impfung denken',
-                'text' => 'Die beste Zeit für die Impfung ist der Herbst. Wir beraten Sie gern, ob die Impfung für Sie empfohlen ist. [Aktuelles Thema – im Backend pflegbar]',
-                'button_label' => 'Impftermin vereinbaren', 'button_link' => '#kontakt', 'button2_label' => '', 'button2_link' => '', 'von_datum' => '', 'bis_datum' => ''],
-            ['typ' => 'main', 'aktiv' => true, 'eyebrow' => 'Hausärztliche Praxis in Musterstadt (Beispiel)', 'titel' => 'Gemeinsam für Ihre Gesundheit',
-                'text' => 'Hausärztliche Medizin, die den ganzen Menschen im Blick behält.',
-                'button_label' => 'Praxis kennenlernen', 'button_link' => '#praxis', 'button2_label' => 'Kontakt und Sprechzeiten', 'button2_link' => '#kontakt',
+            ['typ' => 'topic', 'aktiv' => true, 'eyebrow' => 'Aktuelles Thema', 'titel' => 'Grippeschutz für die kalte Jahreszeit',
+                'text' => 'Oktober und November sind ideal für die Grippeimpfung. Wir prüfen gern, ob sie für Sie empfohlen ist. [Aktuelles Thema – im Backend pflegbar]',
+                'button_label' => 'Impftermin anfragen', 'button_link' => '#kontakt', 'button2_label' => '', 'button2_link' => '', 'von_datum' => '', 'bis_datum' => ''],
+            ['typ' => 'main', 'aktiv' => true, 'eyebrow' => 'Hausarztpraxis am Lindenplatz (Beispiel)', 'titel' => 'Gut begleitet durch jede Lebensphase',
+                'text' => 'Wir nehmen uns Zeit für Ihre Fragen – von der Vorsorge bis zur langfristigen Betreuung.',
+                'button_label' => 'Unsere Praxis', 'button_link' => '#praxis', 'button2_label' => 'Sprechzeiten & Kontakt', 'button2_link' => '#kontakt',
                 'von_datum' => '', 'bis_datum' => ''],
         ],
         'oepnv_text' => '',
@@ -75,10 +77,16 @@ return [
         'routenplaner_url' => '',
         'karte_aktiv' => true,
         'karte_geo' => '',
-        'site_title' => 'Hausärztliche Praxis in Musterstadt (Beispiel)',
+        'site_title' => 'Hausarztpraxis am Lindenplatz in Musterstadt (Beispiel)',
         'site_title_suffix' => '',
-        'default_meta_description' => 'Persönliche hausärztliche Betreuung in Musterstadt: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
+        'default_meta_description' => 'Hausärztliche Versorgung am Lindenplatz in Musterstadt: Vorsorge, Impfungen, Diagnostik und die Begleitung chronischer Erkrankungen – mit Zeit für Ihre Fragen.',
     ],
+
+    // Hero-Foto der Startseite in die Mediathek übernehmen und im Hero eintragen (Core\Seeder ruft 'after' nur bei „mit Startinhalten“ auf)
+    'after' => function () {
+        require_once __DIR__ . '/tools/demo-photo.php';
+        praxis_demo_photo();
+    },
 
     'page_refs' => [
         'impressum_seite' => 'impressum',
@@ -90,37 +98,37 @@ return [
         // ------------------------------------------------------------------ One-Pager
         [
             'slug' => 'home', 'title' => 'Startseite', 'is_home' => true,
-            'meta_description' => 'Persönliche hausärztliche Betreuung in Musterstadt: Vorsorge, Diagnostik und Begleitung bei chronischen Erkrankungen – ganzheitlich und im Team.',
+            'meta_description' => 'Hausärztliche Versorgung am Lindenplatz in Musterstadt: Vorsorge, Impfungen, Diagnostik und die Begleitung chronischer Erkrankungen – mit Zeit für Ihre Fragen.',
             'blocks' => [
-                ['type' => 'hero', 'data' => ['show_card' => true], 'tunes' => ['anchor' => 'top', 'background' => 'bordeaux']],
+                ['type' => 'hero', 'data' => ['show_card' => true, 'variant' => 'image', 'bg_overlay' => 'medium'], 'tunes' => ['anchor' => 'top']],
                 ['type' => 'teaser_tiles', 'data' => [
                     'variant' => 'plain',
-                    'intro' => 'In unserer Praxis verbinden wir medizinische Erfahrung mit persönlicher Betreuung. Wir nehmen uns Zeit, hören zu und betrachten Gesundheit nicht als einzelne Momentaufnahme. Gemeinsam mit unserem Praxisteam begleiten wir Sie verlässlich – bei akuten Beschwerden, in der Vorsorge und bei chronischen Erkrankungen.',
+                    'intro' => 'Am Lindenplatz kümmern wir uns als hausärztliches Team um Menschen jeden Alters. Ob akute Beschwerden, Vorsorge oder eine chronische Erkrankung: Bei uns finden Sie feste Ansprechpartner, kurze Wege und verständliche Erklärungen.',
                     'items' => [
-                        ['title' => 'Praxis', 'sub' => 'Medizin beginnt mit Zuhören', 'link' => '#praxis'],
-                        ['title' => 'Leistungen', 'sub' => 'Vorsorge, Diagnostik, DMP', 'link' => '#leistungen'],
-                        ['title' => 'Hinweise', 'sub' => 'Termin, Rezept, Vertretung', 'link' => '#hinweise'],
-                        ['title' => 'Kontakt', 'sub' => 'Sprechzeiten & Anfahrt', 'link' => '#kontakt'],
+                        ['title' => 'Praxis', 'sub' => 'Wer wir sind', 'link' => '#praxis'],
+                        ['title' => 'Leistungen', 'sub' => 'Vorsorge bis Labor', 'link' => '#leistungen'],
+                        ['title' => 'Hinweise', 'sub' => 'Termin, Rezept, Urlaub', 'link' => '#hinweise'],
+                        ['title' => 'Kontakt', 'sub' => 'Zeiten & Anfahrt', 'link' => '#kontakt'],
                     ],
                 ], 'tunes' => ['anchor' => 'ueberblick']],
                 ['type' => 'text_columns', 'data' => [
-                    'variant' => 'stacked', 'title_strong' => 'Praxis', 'title_light' => 'Medizin beginnt mit Zuhören.',
+                    'variant' => 'stacked', 'title_strong' => 'Unsere Praxis', 'title_light' => 'Zuhören ist der erste Befund.',
                     'columns' => $p(
-                        'Eine gute hausärztliche Versorgung beginnt für uns mit einem offenen Gespräch. Beschwerden lassen sich häufig nicht isoliert betrachten. Deshalb beziehen wir Ihre persönliche Situation, Ihre Vorgeschichte und bereits bestehende Erkrankungen in die medizinische Beurteilung ein.',
-                        'Unser Anspruch ist eine verständliche, sorgfältige und verlässliche Medizin. Wir erklären Befunde und Behandlungsmöglichkeiten nachvollziehbar und treffen die nächsten Entscheidungen gemeinsam mit Ihnen.'
+                        'Wer zu uns kommt, bringt mehr mit als ein Symptom. Deshalb fragen wir nach – nach Ihrem Alltag, Ihrer Vorgeschichte und dem, was Ihnen wichtig ist. Daraus entsteht eine Behandlung, die zu Ihnen passt.',
+                        'Befunde erklären wir in Ruhe und ohne Fachchinesisch. Welche Schritte als Nächstes sinnvoll sind, entscheiden wir gemeinsam mit Ihnen.'
                     ),
                 ], 'tunes' => ['anchor' => 'praxis', 'showInNav' => true, 'navLabel' => 'Praxis', 'divider' => true, 'spaceBottom' => 'none']],
                 ['type' => 'quote', 'data' => [
-                    'variant' => 'inset', 'text' => 'Wir behandeln nicht nur Beschwerden.', 'highlight' => 'Wir begleiten Menschen.',
+                    'variant' => 'inset', 'text' => 'Gute Medizin braucht Zeit.', 'highlight' => 'Wir nehmen sie uns.',
                 ], 'tunes' => ['spaceTop' => 'none', 'spaceBottom' => 'none']],
                 ['type' => 'text_columns', 'data' => [
-                    'variant' => 'compact', 'title_strong' => 'Ganzheitlich heißt: im Team', 'title_light' => '',
-                    'columns' => $p('Ganzheitliche Betreuung ist für uns zugleich Teamarbeit. Ärztinnen, Ärzte und medizinische Fachangestellte stimmen sich eng miteinander ab. So laufen Informationen zusammen, Abläufe bleiben verlässlich und Sie haben in unserer Praxis kompetente Ansprechpartnerinnen und Ansprechpartner.'),
+                    'variant' => 'compact', 'title_strong' => 'Kurze Wege im Team', 'title_light' => '',
+                    'columns' => $p('Ärztinnen, Ärzte und medizinische Fachangestellte arbeiten bei uns eng zusammen. Befunde, Termine und Rückfragen laufen an einer Stelle zusammen – so geht nichts verloren, und Sie wissen immer, an wen Sie sich wenden können.'),
                 ], 'tunes' => ['spaceTop' => 'none']],
                 ['type' => 'doctors', 'data' => [
-                    'title_strong' => 'Ärztinnen und Ärzte', 'title_light' => 'Persönlich für Sie da.',
-                    'intro' => 'In unserem ärztlichen Team verbinden sich unterschiedliche Erfahrungen und fachliche Perspektiven. Zugleich bleiben der persönliche Kontakt und eine kontinuierliche hausärztliche Begleitung erhalten.',
-                    'link_label' => 'Termin anfragen', 'link' => '#kontakt',
+                    'title_strong' => 'Ärztinnen und Ärzte', 'title_light' => 'Ihre Ansprechpartner am Lindenplatz.',
+                    'intro' => 'Unser ärztliches Team bringt unterschiedliche Schwerpunkte mit – und begleitet Sie trotzdem aus einer Hand, oft über viele Jahre.',
+                    'link_label' => 'Termin vereinbaren', 'link' => '#kontakt',
                     'items' => array_fill(0, 3, [
                         'fach' => '[Fachbezeichnung]', 'titel' => '[Akad. Titel]', 'name' => '[Name Ärztin/Arzt]',
                         'zusatz' => '[Zusatzqualifikationen]', 'text' => '[Persönlicher Vorstellungstext – zwei bis drei Sätze, max. ca. 400 Zeichen]',
@@ -128,39 +136,39 @@ return [
                     ]),
                 ], 'tunes' => ['anchor' => 'aerzte', 'showInNav' => true, 'navLabel' => 'Ärztinnen und Ärzte', 'background' => 'gray']],
                 ['type' => 'services', 'data' => [
-                    'title_strong' => 'Leistungen', 'title_light' => 'Gut versorgt – in jeder Lebensphase.',
-                    'intro' => 'Als hausärztliche Praxis sind wir für viele gesundheitliche Fragen die erste Anlaufstelle. Unser Angebot reicht von der Vorsorge über die moderne Diagnostik bis zur langfristigen Betreuung chronischer Erkrankungen.',
+                    'title_strong' => 'Leistungen', 'title_light' => 'Was wir für Sie tun.',
+                    'intro' => 'Als Hausarztpraxis sind wir Ihre erste Anlaufstelle. Wir behandeln selbst, was wir behandeln können, und vermitteln gezielt weiter, wenn eine Fachärztin oder ein Facharzt gefragt ist.',
                     'items' => [
-                        ['title' => 'Hausärztliche Versorgung', 'text' => 'Bei akuten Beschwerden, neuen gesundheitlichen Fragen oder länger bestehenden Erkrankungen sind wir persönlich für Sie da. Wir untersuchen sorgfältig, ordnen Beschwerden ein und koordinieren bei Bedarf die weitere fachärztliche Behandlung. Auch Hausbesuche können nach medizinischer Notwendigkeit und vorheriger Abstimmung erfolgen.'],
-                        ['title' => 'Vorsorge und Prävention', 'text' => 'Viele Erkrankungen lassen sich frühzeitig erkennen oder durch gezielte Vorsorge vermeiden. Wir bieten Gesundheits-Check-ups, Krebsvorsorgeuntersuchungen sowie eine individuelle Impfberatung mit den empfohlenen Impfungen an. Auch Jugendarbeitsschutzuntersuchungen gehören zu unserem Angebot.'],
-                        ['title' => 'Diagnostik', 'text' => 'Für eine fundierte Beurteilung stehen uns verschiedene diagnostische Möglichkeiten zur Verfügung. Dazu gehören Ruhe- und Belastungs-EKG, Langzeit-Blutdruckmessungen, Lungenfunktionsprüfungen, Ultraschalluntersuchungen und Laboruntersuchungen. Welche Untersuchung sinnvoll ist, entscheiden wir immer auf Grundlage Ihrer persönlichen Situation.'],
-                        ['title' => 'Chronische Erkrankungen und DMP', 'text' => 'Chronische Erkrankungen benötigen eine kontinuierliche und gut abgestimmte Betreuung. Im Rahmen strukturierter Behandlungsprogramme, der sogenannten Disease-Management-Programme, begleiten wir unter anderem Menschen mit Diabetes mellitus, koronarer Herzkrankheit und weiteren chronischen Erkrankungen. Regelmäßige Kontrollen helfen dabei, Veränderungen frühzeitig zu erkennen und die Behandlung gemeinsam anzupassen.'],
+                        ['title' => 'Akute Beschwerden', 'text' => 'Infekt, Rückenschmerzen oder ein unklares Symptom: Wir untersuchen gründlich und besprechen mit Ihnen, was hilft. Bei Bedarf kümmern wir uns um Überweisungen und behalten die Befunde im Blick. Hausbesuche sind nach Absprache möglich, wenn der Weg in die Praxis nicht geht.'],
+                        ['title' => 'Vorsorge und Impfungen', 'text' => 'Check-up ab 35, Krebsfrüherkennung, Hautkrebs-Screening und Impfungen nach den aktuellen Empfehlungen: Wir erinnern Sie gern an fällige Termine und sehen Ihren Impfpass durch.'],
+                        ['title' => 'Diagnostik und Labor', 'text' => 'EKG in Ruhe und unter Belastung, Langzeit-Blutdruck, Lungenfunktion, Ultraschall und Laboruntersuchungen – vieles klären wir direkt bei uns, ohne zusätzliche Wege.'],
+                        ['title' => 'Begleitung bei chronischen Erkrankungen', 'text' => 'Bei Diabetes, Bluthochdruck, Herz- oder Lungenerkrankungen begleiten wir Sie dauerhaft, auch in strukturierten Behandlungsprogrammen (DMP). Regelmäßige Kontrollen zeigen früh, ob die Behandlung angepasst werden sollte.'],
                     ],
                 ], 'tunes' => ['anchor' => 'leistungen', 'showInNav' => true, 'navLabel' => 'Leistungen']],
                 ['type' => 'team_photo', 'data' => [
-                    'title_strong' => 'Team', 'title_light' => 'Gute Medizin ist Teamarbeit.',
-                    'text' => '<p>Unser Praxisteam sorgt dafür, dass medizinische Betreuung und organisatorische Abläufe zuverlässig ineinandergreifen. Die Mitarbeiterinnen und Mitarbeiter am Empfang, in der Diagnostik und in der Behandlungsassistenz sind wichtige Ansprechpartner für unsere Patientinnen und Patienten.</p><p>Ein freundlicher, respektvoller Umgang ist uns dabei ebenso wichtig wie eine gute Abstimmung im Team. Denn eine Praxis funktioniert besonders gut, wenn alle Beteiligten miteinander und nicht nur nebeneinander arbeiten.</p>',
-                    'show_jobs_box' => true, 'jobs_title_strong' => 'Ausbildung', 'jobs_title_light' => 'Werden Sie Teil des Teams.',
+                    'title_strong' => 'Team', 'title_light' => 'Freundlich, erfahren, gut erreichbar.',
+                    'text' => '<p>Am Empfang, im Labor und in der Behandlung: Unser Praxisteam sorgt dafür, dass Ihr Besuch reibungslos läuft. Die medizinischen Fachangestellten sind oft Ihre ersten Ansprechpartner – am Telefon, bei Blutabnahmen und bei Fragen zu Rezepten.</p><p>Wir legen Wert auf einen ruhigen, respektvollen Umgang – miteinander und mit Ihnen. Viele von uns arbeiten seit Jahren zusammen, das merken Sie.</p>',
+                    'show_jobs_box' => true, 'jobs_title_strong' => 'Ausbildung und Stellen', 'jobs_title_light' => 'Verstärken Sie unser Team.',
                     'jobs_text' => '[Kurzer Text zu Ausbildung, Qualifikationen oder offenen Stellen, z. B. „Medizinische Fachangestellte (m/w/d)“]',
-                    'jobs_button_label' => 'Stellenangebote ansehen', 'jobs_link' => '#kontakt',
+                    'jobs_button_label' => 'Offene Stellen', 'jobs_link' => '#kontakt',
                 ], 'tunes' => ['anchor' => 'team', 'showInNav' => true, 'navLabel' => 'Team', 'spaceTop' => 'none']],
                 ['type' => 'accordion', 'data' => [
-                    'title_strong' => 'Hinweise', 'title_light' => 'Gut vorbereitet in die Praxis.',
-                    'intro' => '<p>Damit wir Ihren Besuch gut vorbereiten können, vereinbaren Sie nach Möglichkeit vorab einen Termin. Bei akuten Beschwerden setzen Sie sich bitte zunächst telefonisch mit uns in Verbindung. So können wir die Dringlichkeit einschätzen und unnötige Wartezeiten vermeiden.</p>',
+                    'title_strong' => 'Hinweise', 'title_light' => 'Gut vorbereitet zum Termin.',
+                    'intro' => '<p>Mit einem Termin planen wir genug Zeit für Sie ein. Bei akuten Beschwerden rufen Sie bitte zuerst an – dann sagen wir Ihnen, wann Sie am besten kommen, und Sie warten kürzer.</p>',
                     'show_emergency' => true,
                     'items' => [
-                        ['q' => 'Terminvereinbarung', 'a' => '<p>Damit wir Ihren Besuch gut vorbereiten können, vereinbaren Sie nach Möglichkeit vorab einen Termin – telefonisch unter [Telefonnummer] oder [Terminlink, falls vorhanden].</p>'],
-                        ['q' => 'Akutsprechstunde', 'a' => '<p>[Ablauf der Akutsprechstunde – noch zu bestätigen]. Bei akuten Beschwerden setzen Sie sich bitte zunächst telefonisch mit uns in Verbindung.</p>'],
-                        ['q' => 'Rezeptbestellung', 'a' => '<p>[Verfahren zur Rezeptbestellung – noch zu bestätigen].</p>', 'service' => 'rezept'],
-                        ['q' => 'Überweisungen', 'a' => '<p>[Verfahren für Überweisungen – noch zu bestätigen].</p>', 'service' => 'ueberweisung'],
-                        ['q' => 'Bitte mitbringen', 'a' => '<p>Ihre Versichertenkarte sowie [weitere Unterlagen, z. B. Medikationsplan, Vorbefunde – noch zu bestätigen].</p>'],
-                        ['q' => 'Vertretung und Urlaubszeiten', 'a' => '<p>[Aktuelle Urlaubszeiten und Vertretungspraxis mit Adresse und Telefonnummer].</p>'],
-                        ['q' => 'Außerhalb der Sprechzeiten', 'a' => '<p>Ärztlicher Bereitschaftsdienst: 116 117. In lebensbedrohlichen Notfällen: 112. [Ggf. nächstgelegene Notdienstpraxis ergänzen].</p>'],
+                        ['q' => 'Termine', 'a' => '<p>Termine vereinbaren Sie telefonisch unter [Telefonnummer] oder online [Terminlink, falls vorhanden].</p>'],
+                        ['q' => 'Akutsprechstunde', 'a' => '<p>[Zeiten und Ablauf der Akutsprechstunde – noch zu bestätigen]. Bitte melden Sie sich vorher telefonisch.</p>'],
+                        ['q' => 'Folgerezepte', 'a' => '<p>[Ablauf für Folgerezepte – noch zu bestätigen].</p>', 'service' => 'rezept'],
+                        ['q' => 'Überweisungen', 'a' => '<p>[Ablauf für Überweisungen – noch zu bestätigen].</p>', 'service' => 'ueberweisung'],
+                        ['q' => 'Was Sie mitbringen sollten', 'a' => '<p>Ihre Gesundheitskarte und [weitere Unterlagen, z. B. Medikationsplan, Arztbriefe – noch zu bestätigen].</p>'],
+                        ['q' => 'Urlaub und Vertretung', 'a' => '<p>[Aktuelle Urlaubszeiten und Vertretungspraxis mit Adresse und Telefonnummer].</p>'],
+                        ['q' => 'Nachts und am Wochenende', 'a' => '<p>Ärztlicher Bereitschaftsdienst: 116 117. In lebensbedrohlichen Notfällen: 112. [Ggf. nächstgelegene Notdienstpraxis ergänzen].</p>'],
                     ],
                     'footer' => 'Formulare: <a href="/bausteine#formulare"><b>[Download, z. B. Anamnesebogen (PDF)]</b></a>',
                 ], 'tunes' => ['anchor' => 'hinweise', 'background' => 'gray']],
                 ['type' => 'contact', 'data' => [
-                    'title_strong' => 'Kontakt', 'title_light' => 'Wir sind für Sie erreichbar.', 'show_map' => true,
+                    'title_strong' => 'Kontakt', 'title_light' => 'So erreichen Sie uns.', 'show_map' => true,
                 ], 'tunes' => ['anchor' => 'kontakt', 'showInNav' => true, 'navLabel' => 'Kontakt']],
             ],
         ],
@@ -173,7 +181,7 @@ return [
                 ['type' => 'text_image', 'data' => [
                     'variant' => 'right', 'ratio' => '4-3', 'title_style' => 'split',
                     'title_strong' => 'Vorsorge', 'title_light' => 'Früh erkennen, gezielt handeln.',
-                    'text' => '<p>Viele Erkrankungen lassen sich frühzeitig erkennen oder durch gezielte Vorsorge vermeiden. Wir bieten Gesundheits-Check-ups, Krebsvorsorgeuntersuchungen sowie eine individuelle Impfberatung an.</p>',
+                    'text' => '<p>Check-up ab 35, Krebsfrüherkennung und Impfungen nach den aktuellen Empfehlungen – wir erinnern Sie gern an fällige Termine.</p>',
                     'button_label' => 'Termin vereinbaren', 'button_link' => '/#kontakt',
                 ], 'tunes' => ['anchor' => 'vorsorge', 'divider' => false]],
                 ['type' => 'text_image', 'data' => [
@@ -188,14 +196,14 @@ return [
                     'consent_text' => 'Beim Abspielen werden Daten an [Videoanbieter] übertragen. Selbst gehostete Videos laden ohne Zustimmung.',
                 ], 'tunes' => ['divider' => true]],
                 ['type' => 'quote', 'data' => [
-                    'variant' => 'full', 'text' => 'Wir behandeln nicht nur Beschwerden.', 'highlight' => 'Wir begleiten Menschen.',
+                    'variant' => 'full', 'text' => 'Gute Medizin braucht Zeit.', 'highlight' => 'Wir nehmen sie uns.',
                     'source' => '[optionale Quelle / Name]',
                 ], 'tunes' => ['background' => 'bordeaux', 'spaceTop' => 'small', 'spaceBottom' => 'small']],
                 ['type' => 'text_columns', 'data' => [
-                    'variant' => 'columns', 'title_strong' => 'Praxis', 'title_light' => 'Medizin beginnt mit Zuhören.',
+                    'variant' => 'columns', 'title_strong' => 'Unsere Praxis', 'title_light' => 'Zuhören ist der erste Befund.',
                     'columns' => $p(
-                        'Eine gute hausärztliche Versorgung beginnt für uns mit einem offenen Gespräch. Beschwerden lassen sich häufig nicht isoliert betrachten. Deshalb beziehen wir Ihre persönliche Situation ein.',
-                        'Unser Anspruch ist eine verständliche, sorgfältige und verlässliche Medizin. Wir erklären Befunde nachvollziehbar und treffen die nächsten Entscheidungen gemeinsam mit Ihnen.'
+                        'Wer zu uns kommt, bringt mehr mit als ein Symptom. Deshalb fragen wir nach – nach Ihrem Alltag, Ihrer Vorgeschichte und dem, was Ihnen wichtig ist.',
+                        'Befunde erklären wir in Ruhe und ohne Fachchinesisch. Welche Schritte als Nächstes sinnvoll sind, entscheiden wir gemeinsam mit Ihnen.'
                     ),
                 ], 'tunes' => []],
                 ['type' => 'teaser_tiles', 'data' => [

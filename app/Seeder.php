@@ -75,6 +75,9 @@ final class Seeder
                 $this->app->settings->set($key, (int) $page['id']);
             }
         }
+        // Schriften des Kits (Core\Fonts): installieren beim nächsten Aufruf der Verwaltung bzw. mit fonts:sync – nie hier,
+        // denn der Erststart kann ein Seitenaufruf sein
+        Fonts::requestSync();
         // Optional: weitere Startinhalte des Themes (z. B. Seitenbaum, Datentabellen, Bilder) – seed.php → 'after' => callable
         if (is_callable($seed['after'] ?? null)) {
             // Ein Fehler in den Zusatz-Inhalten (Demo, Bilder …) darf die Website nicht lahmlegen – Grundinhalte stehen schon

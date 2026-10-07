@@ -205,6 +205,7 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
         <div class="f"><label for="t-form-notify"><?= e(__('Benachrichtigung an (E-Mail)')) ?></label>
           <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(__('leer = Empfänger aus den Grundeinstellungen')) ?>" autocomplete="off">
           <p class="f-help"><?= e(__('Mehrere Adressen mit Komma trennen. Die E-Mail enthält keine Inhalte – nur einen Link zum neuen Eintrag.')) ?></p></div>
+        <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => (array) ($def['fields'] ?? [])]) ?>
         <div class="f"><label for="t-form-success"><?= e(__('Text nach dem Absenden')) ?></label>
           <textarea id="t-form-success" name="settings[form][success]" rows="2" placeholder="<?= e(__('Vielen Dank – Ihre Angaben sind eingegangen.')) ?>"><?= e($fm['success']) ?></textarea></div>
         <div class="f"><label for="t-form-submit"><?= e(__('Beschriftung des Buttons')) ?></label>

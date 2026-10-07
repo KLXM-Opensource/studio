@@ -57,7 +57,7 @@ return [
     'version' => '1.0.0',
     'requires' => '>=1.0.0',   // benötigte Core-Version
 
-    'backgrounds' => ['white' => 'Weiß', 'gray' => 'Grau', 'bordeaux' => 'Bordeaux', 'dark' => 'Dunkel'],
+    'backgrounds' => ['white' => 'Weiß', 'gray' => 'Grau', 'bordeaux' => 'Akzentfarbe', 'dark' => 'Dunkel'],   // Schlüssel „bordeaux“ = Akzentfläche (gespeicherte Inhalte)
     'dark_backgrounds' => ['bordeaux', 'dark'],
 
     // Einstellungen, deren Host für iframes (nach Einwilligung) erlaubt wird – Karten laufen über den Proxy, daher leer
@@ -135,11 +135,10 @@ return [
             . "Bei Schmerzen, Beschwerden oder gesundheitlichen Fragen verweise auf die Sprechstunde bzw. den Kontakt. Bei einem Notfall (z. B. Brustschmerz, Atemnot, Bewusstlosigkeit, starke Blutung): sofort den Notruf 112 wählen; außerhalb der Sprechzeiten hilft der ärztliche Bereitschaftsdienst 116 117.",
     ]],
     // App-Icon & PWA: Vorgaben für den Icon-Generator (Grundeinstellungen → App-Icon & PWA) und Funktion für Name/Kurzbefehle
-    // Hausschrift: kopiert kits/praxis/build.mjs (pnpm build). preload = wichtigste Schnitte (auch für die Offline-App),
+    // Hausschrift: design.fonts → 'fontsource' (Schriften-Manager, vorgeladen über 'preload' => true dort);
     // icon = TTF für den App-Icon-Generator (liegt in kits/praxis/fonts, nicht öffentlich)
     'fonts' => [
-        'preload' => ['fonts/hanken-grotesk-latin-700-normal.woff2', 'fonts/hanken-grotesk-latin-400-normal.woff2'],
-        'icon' => 'fonts/HankenGrotesk_800ExtraBold.ttf',
+        'icon' => 'fonts/Inter_700Bold.ttf',
     ],
     'app' => [
         'defaults' => ['icon_text' => 'G', 'icon_bg' => '#7A1F35', 'icon_fg' => '#FFFFFF', 'icon_dot' => '#F6C9A8', 'icon_dot_enabled' => true],
@@ -217,45 +216,54 @@ return [
         ],
     ],
 
-    // Style-Editor (Verwaltung → Design): ändert die CSS-Variablen aus css/site.css (:root). Kein Dunkelmodus.
+    // Style-Editor (Verwaltung → Design): ändert die CSS-Variablen aus css/site.css (:root). Farben mit eigenem Dunkel-Wert ('dark');
+    // Dunkelmodus über „Dunkles Farbschema“ (Klasse has-dark), übrige Dunkel-Werte in css/site.css bzw. css/preview.css.
     'design' => [
         'groups' => [
             ['id' => 'farben', 'label' => 'Farben', 'tokens' => [
-                ['name' => 'accent', 'label' => 'Akzentfarbe', 'help' => 'Buttons, Links, Hervorhebungen', 'type' => 'color', 'var' => '--c-bordeaux', 'default' => '#7A1F35',
+                ['name' => 'accent', 'label' => 'Akzentfarbe', 'help' => 'Buttons, Links, Hervorhebungen', 'type' => 'color', 'var' => '--c-bordeaux', 'default' => '#B4470F', 'dark' => '#F29A55',
+                    'contrast' => ['with' => '#FFFFFF', 'dark_with' => '#2A1404', 'min' => 4.5]],
+                ['name' => 'accent_dark', 'label' => 'Akzent dunkel', 'help' => 'Hover-Zustände', 'type' => 'color', 'var' => '--c-bordeaux-dark', 'default' => '#8F370B', 'dark' => '#F6B37E',
+                    'contrast' => ['with' => '#FFFFFF', 'dark_with' => '#2A1404', 'min' => 4.5]],
+                ['name' => 'accent_hero', 'label' => 'Akzentfläche', 'help' => 'Große farbige Flächen (Kopfbereich, Abschnitte)', 'type' => 'color', 'var' => '--c-bordeaux-hero', 'default' => '#9E4210', 'dark' => '#7A3510',
                     'contrast' => ['with' => '#FFFFFF', 'min' => 4.5]],
-                ['name' => 'accent_dark', 'label' => 'Akzent dunkel', 'help' => 'Hover-Zustände', 'type' => 'color', 'var' => '--c-bordeaux-dark', 'default' => '#5E1628',
-                    'contrast' => ['with' => '#FFFFFF', 'min' => 4.5]],
-                ['name' => 'accent_hero', 'label' => 'Akzentfläche', 'help' => 'Große farbige Flächen (Kopfbereich, Abschnitte)', 'type' => 'color', 'var' => '--c-bordeaux-hero', 'default' => '#6A1530',
-                    'contrast' => ['with' => '#FFFFFF', 'min' => 4.5]],
-                ['name' => 'apricot', 'label' => 'Zweitfarbe', 'help' => 'Punkte, Flächen', 'type' => 'color', 'var' => '--c-apricot', 'default' => '#F6C9A8'],
-                ['name' => 'apricot_2', 'label' => 'Zweitfarbe auf Akzent', 'help' => 'Kleine Überschriften auf farbigen Flächen', 'type' => 'color', 'var' => '--c-apricot-2', 'default' => '#F0C4A6',
+                ['name' => 'apricot', 'label' => 'Zweitfarbe', 'help' => 'Punkte, Flächen', 'type' => 'color', 'var' => '--c-apricot', 'default' => '#F4D9B4', 'dark' => '#F4D9B4'],
+                ['name' => 'apricot_2', 'label' => 'Zweitfarbe auf Akzent', 'help' => 'Kleine Überschriften auf farbigen Flächen', 'type' => 'color', 'var' => '--c-apricot-2', 'default' => '#F4D9B4', 'dark' => '#F4D9B4',
                     'contrast' => ['with' => 'accent_hero', 'min' => 4.5]],
-                ['name' => 'ink', 'label' => 'Text', 'type' => 'color', 'var' => '--c-ink', 'default' => '#16201E', 'contrast' => ['with' => '#FFFFFF', 'min' => 4.5]],
-                ['name' => 'text_2', 'label' => 'Text gedämpft', 'type' => 'color', 'var' => '--c-text-2', 'default' => '#3F4A47', 'contrast' => ['with' => 'gray', 'min' => 4.5]],
-                ['name' => 'gray', 'label' => 'Grauer Hintergrund', 'type' => 'color', 'var' => '--c-gray-50', 'default' => '#F2F2F3'],
+                ['name' => 'ink', 'label' => 'Text', 'type' => 'color', 'var' => '--c-ink', 'default' => '#1F1A16', 'dark' => '#F4EEE8', 'contrast' => ['with' => '#FFFFFF', 'dark_with' => '#15110E', 'min' => 4.5]],
+                ['name' => 'text_2', 'label' => 'Text gedämpft', 'type' => 'color', 'var' => '--c-text-2', 'default' => '#4A423B', 'dark' => '#D6CCC2', 'contrast' => ['with' => 'gray', 'min' => 4.5]],
+                ['name' => 'gray', 'label' => 'Grauer Hintergrund', 'type' => 'color', 'var' => '--c-gray-50', 'default' => '#F6F3EF', 'dark' => '#1A1512'],
             ]],
             ['id' => 'formen', 'label' => 'Formen', 'tokens' => [
-                ['name' => 'buttons', 'label' => 'Buttons', 'type' => 'choice', 'var' => '--r-btn', 'preview' => 'radius', 'default' => 'pill',
-                    'options' => ['pill' => 'Rund', 'soft' => 'Abgerundet', 'square' => 'Eckig'], 'values' => ['pill' => '999px', 'soft' => '12px', 'square' => '4px']],
-                ['name' => 'radius', 'label' => 'Eckenradius Karten', 'type' => 'range', 'var' => '--r-card', 'default' => 24, 'min' => 0, 'max' => 40, 'step' => 2, 'unit' => 'px'],
+                ['name' => 'buttons', 'label' => 'Buttons', 'type' => 'choice', 'var' => '--r-btn', 'preview' => 'radius', 'default' => 'soft',
+                    'options' => ['pill' => 'Rund', 'soft' => 'Abgerundet', 'square' => 'Eckig'], 'values' => ['pill' => '999px', 'soft' => '10px', 'square' => '4px']],
+                ['name' => 'radius', 'label' => 'Eckenradius Karten', 'type' => 'range', 'var' => '--r-card', 'default' => 16, 'min' => 0, 'max' => 40, 'step' => 2, 'unit' => 'px'],
             ]],
             ['id' => 'schrift', 'label' => 'Schrift', 'tokens' => [
-                ['name' => 'font', 'label' => 'Schriftart', 'type' => 'font', 'var' => '--font', 'default' => 'hanken'],
+                ['name' => 'font', 'label' => 'Schriftart', 'type' => 'font', 'var' => '--font', 'default' => 'atkinson'],
+            ]],
+            ['id' => 'modus', 'label' => 'Farbschema', 'tokens' => [
+                ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
             ]],
         ],
-        // Hanken Grotesk steckt bereits in css/site.css (@font-face) – daher ohne eigene Schriftdatei
+        // Atkinson Hyperlegible Next: installiert der Schriften-Manager (Core\Fonts, fonts:sync) – das Kit liefert keine Dateien mit;
+        // 'preload' => true: Hauptschnitt vorladen (Theme::fontPreloads, Offline-App)
         'fonts' => [
-            'hanken' => ['label' => 'Hanken Grotesk (Original)', 'stack' => '"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif'],
+            'atkinson' => ['label' => 'Atkinson Hyperlegible Next (Standard)', 'stack' => '"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif',
+                'fontsource' => 'atkinson-hyperlegible-next', 'styles' => ['normal', 'italic'], 'preload' => true],
             'system' => ['label' => 'Systemschrift', 'stack' => 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'],
             'humanist' => ['label' => 'Humanistisch', 'stack' => 'Seravek,"Gill Sans Nova",Ubuntu,Calibri,"DejaVu Sans",sans-serif'],
             'serif' => ['label' => 'Serifenschrift', 'stack' => 'Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif'],
         ],
+        'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark'],
         'presets' => [
-            'bordeaux' => ['label' => 'Bordeaux (Original)', 'values' => ['accent' => '#7A1F35', 'accent_dark' => '#5E1628', 'accent_hero' => '#6A1530',
-                'apricot' => '#F6C9A8', 'apricot_2' => '#F0C4A6', 'ink' => '#16201E', 'text_2' => '#3F4A47', 'gray' => '#F2F2F3']],
-            'petrol' => ['label' => 'Petrol', 'values' => ['accent' => '#0F5E63', 'accent_dark' => '#0A4549', 'accent_hero' => '#0C5357',
+            'orange' => ['label' => 'Orange (Standard)', 'values' => ['accent@dark' => '#F29A55', 'accent_dark@dark' => '#F6B37E', 'accent_hero@dark' => '#7A3510', 'accent' => '#B4470F', 'accent_dark' => '#8F370B', 'accent_hero' => '#9E4210',
+                'apricot' => '#F4D9B4', 'apricot_2' => '#F4D9B4', 'ink' => '#1F1A16', 'text_2' => '#4A423B', 'gray' => '#F6F3EF']],
+            'tanne' => ['label' => 'Tanne', 'values' => ['accent@dark' => '#6CC4A4', 'accent_dark@dark' => '#8AD3B8', 'accent_hero@dark' => '#1B4D3F', 'accent' => '#1F5C4A', 'accent_dark' => '#164536', 'accent_hero' => '#17483A',
+                'apricot' => '#E8D6B0', 'apricot_2' => '#E8D6B0', 'ink' => '#13201B', 'text_2' => '#3B4A44', 'gray' => '#F1F4F1']],
+            'petrol' => ['label' => 'Petrol', 'values' => ['accent@dark' => '#6BC6CB', 'accent_dark@dark' => '#93D8DB', 'accent_hero@dark' => '#0E4F53', 'accent' => '#0F5E63', 'accent_dark' => '#0A4549', 'accent_hero' => '#0C5357',
                 'apricot' => '#F3D9B1', 'apricot_2' => '#F3D9B1', 'ink' => '#14201F', 'text_2' => '#3D4A49', 'gray' => '#EFF3F2']],
-            'nachtblau' => ['label' => 'Nachtblau', 'values' => ['accent' => '#1F3A68', 'accent_dark' => '#152A4E', 'accent_hero' => '#1A3160',
+            'nachtblau' => ['label' => 'Nachtblau', 'values' => ['accent@dark' => '#93B4EC', 'accent_dark@dark' => '#B6CDF2', 'accent_hero@dark' => '#1C3566', 'accent' => '#1F3A68', 'accent_dark' => '#152A4E', 'accent_hero' => '#1A3160',
                 'apricot' => '#F2C57C', 'apricot_2' => '#F2C57C', 'ink' => '#141B26', 'text_2' => '#3D4656', 'gray' => '#F0F2F6']],
         ],
     ],
@@ -326,6 +334,9 @@ return [
                 ['name' => 'notfall_kurz', 'label' => 'Notfall – Kurzform (Kontaktkarte)', 'type' => 'text', 'default' => 'Notfall 112 · Bereitschaftsdienst 116 117'],
             ]],
             ['id' => 'hero', 'label' => 'Hero-Themen', 'fields' => [
+                ['name' => 'karte_stil', 'translate' => false, 'label' => 'Gestaltung der Kontaktkarte', 'type' => 'select', 'default' => 'glas', 'required' => true,
+                    'options' => ['glas' => 'Glas (Standard) – mattes Glas über Bild oder Verlauf, Termin/Rezept/Überweisung als Zeilen', 'karte' => 'Karte (klassisch) – weiße Karte mit Kacheln'],
+                    'help' => 'Gilt für die Kontaktkarte im Hero und im Block „Schnellkontakt-Karte“. Funktionen sind in beiden gleich.'],
                 ['name' => 'hero_slides', 'translate' => true, 'preview' => true, 'label' => 'Rotierende Themen im Kopfbereich', 'type' => 'repeater', 'item_label' => 'Thema',
                     'title_field' => 'eyebrow', 'fields' => $slideFields,
                     'help' => 'Wechsel alle 7 Sekunden (pausierbar). Der Typ „Hauptthema“ ist die H1 der Seite.'],

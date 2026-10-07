@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- Schritte */
 .steps__title{margin-bottom:clamp(28px,4vw,48px)}
 .steps{padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
-.steps li{padding:24px;border-radius:20px;background:#fff;border-top:3px solid var(--c-bordeaux)}
+.steps li{padding:24px;border-radius:20px;background:var(--c-surface);border-top:3px solid var(--c-bordeaux)}
 .bg-white .steps li{background:var(--c-gray-50)}
 .steps__no{font-size:14px;font-weight:700;color:var(--c-bordeaux);font-variant-numeric:tabular-nums}
 .steps h3{margin:10px 0 6px;font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
@@ -28,7 +28,7 @@
 /* ---------------------------------------------------------------- CTA */
 .cta{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px 48px}
 .h2--cta{font-size:clamp(28px,3.4vw,44px);line-height:1.05;letter-spacing:-.035em}
-.bg-white .cta .btn--light,.bg-gray .cta .btn--light{background:var(--c-bordeaux);color:#fff}
+.bg-white .cta .btn--light,.bg-gray .cta .btn--light{background:var(--c-bordeaux);color:var(--c-on-accent)}
 .bg-white .cta .btn--outline-light,.bg-gray .cta .btn--outline-light{box-shadow:inset 0 0 0 1.5px var(--c-ink);color:var(--c-ink)}
 .bg-dark .cta .btn--light{color:var(--c-bordeaux)}
 .bg-dark .cta .btn--outline-light:hover{color:var(--c-ink)}
@@ -38,20 +38,20 @@
 .downloads__intro{margin-top:18px;max-width:28em}
 .downloads__item{display:flex;align-items:center;gap:16px;min-height:72px;padding:12px 0;border-bottom:1px solid var(--c-sep)}
 .downloads__icon{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:52px;border-radius:8px;background:var(--c-gray-50);color:var(--c-bordeaux);font-size:11px;font-weight:800;letter-spacing:.04em;box-shadow:inset 0 -3px 0 var(--c-bordeaux)}
-.bg-gray .downloads__icon{background:#fff}
+.bg-gray .downloads__icon{background:var(--c-surface)}
 .downloads__main{display:flex;flex-direction:column;flex:1;min-width:0}
 .downloads__name{font-weight:600;line-height:1.3}
 .downloads__meta{font-size:14px;color:var(--c-text-3)}
 .downloads__actions{display:flex;align-items:center;gap:8px;flex:none}
 .downloads__view{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--c-bordeaux);color:var(--c-bordeaux);font-size:15px;font-weight:600;text-decoration:none}
-.downloads__view:hover{background:var(--c-bordeaux);color:#fff}
-.downloads__dl{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--c-bordeaux);color:#fff;font-size:18px;font-weight:700;text-decoration:none}
-.downloads__dl:hover{background:var(--c-bordeaux-dark);color:#fff}
+.downloads__view:hover{background:var(--c-bordeaux);color:var(--c-on-accent)}
+.downloads__dl{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--c-bordeaux);color:var(--c-on-accent);font-size:18px;font-weight:700;text-decoration:none}
+.downloads__dl:hover{background:var(--c-bordeaux-dark);color:var(--c-on-accent)}
 
 /* ---------------------------------------------------------------- Personen */
 .people__head{margin-bottom:clamp(28px,4vw,48px)}
 .people{padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
-.person{display:flex;gap:16px;align-items:center;padding:14px;border-radius:18px;background:#fff}
+.person{display:flex;gap:16px;align-items:center;padding:14px;border-radius:18px;background:var(--c-surface)}
 .bg-white .person{background:var(--c-gray-50)}
 .person__photo{flex:none;width:72px;height:72px;border-radius:14px}
 .person__text{display:flex;flex-direction:column;line-height:1.3}
@@ -62,7 +62,7 @@
 .job{padding:clamp(28px,4vw,44px);border-radius:24px;box-shadow:inset 0 0 0 1.5px var(--c-ink);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 48px;align-items:center}
 .job__tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;background:var(--c-gray-50)}
-.tag--accent{background:var(--c-bordeaux);color:#fff}
+.tag--accent{background:var(--c-bordeaux);color:var(--c-on-accent)}
 .job__title{font-size:clamp(24px,2.6vw,32px);line-height:1.15;letter-spacing:-.03em;font-weight:700}
 .job .muted{margin-top:10px}
 
@@ -87,13 +87,9 @@
 
 /* ---------------------------------------------------------------- Hinweisbox (B10) & Formularseite */
 .notice--info{background:var(--c-gray-50);padding:24px;gap:4px 16px;align-items:start}
-.bg-gray .notice--info{background:#fff}
-.notice--info .notice__icon{background:var(--c-ink)}
+.bg-gray .notice--info{background:var(--c-surface)}
+.notice--info .notice__icon{background:var(--c-dark-sec)}
 .notices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
-.formpage .formpage__card{margin-top:32px;padding:clamp(24px,4vw,40px);border-radius:26px;background:#fff}
-.formpage__alt{margin-top:20px;font-size:15px;color:var(--c-text-2)}
-.formpage .eyebrow{color:var(--c-bordeaux)}
-
 /* ---------------------------------------------------------------- Varianten: Kacheln mit Bild (B06), Zitat Vollfläche (B04) */
 .quote-full blockquote{max-width:18em;line-height:1.05;letter-spacing:-.035em;font-weight:300;color:#fff}
 .tiles--image{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
@@ -113,13 +109,13 @@
 
 /* ---------------------------------------------------------------- Video mit Zwei-Klick-Lösung */
 .media-split__video{width:100%;min-width:0}
-.vembed{position:relative;width:100%;max-width:100%;border-radius:24px;overflow:hidden;background:var(--c-ink);color:#fff;isolation:isolate}
+.vembed{position:relative;width:100%;max-width:100%;border-radius:24px;overflow:hidden;background:var(--c-dark-sec);color:#fff;isolation:isolate}
 .vembed video,.vembed__frame,.vembed__poster{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
 .vembed__gate{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:14px;padding:clamp(16px,3vw,28px);background:linear-gradient(180deg,rgba(22,32,30,.1) 0%,rgba(22,32,30,.35) 40%,rgba(22,32,30,.9) 100%)}
-.vembed__play{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 24px 0 8px;border:0;border-radius:999px;background:#fff;color:var(--c-bordeaux);font:700 16px var(--font);cursor:pointer;box-shadow:0 20px 40px -18px rgba(0,0,0,.6);transition:background .2s,transform .2s}
+.vembed__play{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 24px 0 8px;border:0;border-radius:999px;background:#fff;color:var(--c-bordeaux-hero);font:700 16px var(--font);cursor:pointer;box-shadow:0 20px 40px -18px rgba(0,0,0,.6);transition:background .2s,transform .2s}
 .vembed__play:hover{background:var(--c-apricot)}
 .vembed__play:active{transform:scale(.97)}
-.vembed__icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--c-bordeaux);color:#fff}
+.vembed__icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--c-bordeaux);color:var(--c-on-accent)}
 .vembed__info{max-width:48em;font-size:13px;line-height:1.5;color:#E3E7E5}
 .vembed__title{margin-bottom:4px;font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em}
 .vembed__info a{color:#fff}
@@ -141,7 +137,7 @@
 @media (max-width:640px){
   .vembed:not(.is-loaded){aspect-ratio:auto;display:flex;flex-direction:column}
   .vembed:not(.is-loaded) .vembed__poster{position:relative;aspect-ratio:16/9;height:auto}
-  .vembed__gate{position:relative;inset:auto;background:var(--c-ink);padding:16px}
+  .vembed__gate{position:relative;inset:auto;background:var(--c-dark-sec);padding:16px}
   .vembed--empty{aspect-ratio:16/9}
 }
 
@@ -175,11 +171,11 @@
 .bg-dark .media-transcript__text{color:var(--c-on-dark)}
 /* Blöcke nebeneinander (Kern css/rows.css): Karten wie die Boxen des Kits; untereinander bis ca. 1080 px Fensterbreite (Inhalt < 1000 px) */
 .sec-row{--row-stack:1000px;--row-card-radius:24px;--row-card-pad:clamp(28px,4vw,44px)}
-.sec-row__cell--card.bg-white{background:#fff}
+.sec-row__cell--card.bg-white{background:var(--c-surface)}
 /* Block „Layout“ (Kern css/layout.css): Karten (Block mit eigener Fläche) wie die Boxen des Kits; untereinander wie bisher bei den
    Reihen bis ca. 1080 px Fensterbreite (Inhalt < 1000 px) – schmale Spalten wären für die großen Überschriften des Kits zu eng */
 .lay-grid{--lay-stack:1000px;--lay-stack-tablet:1000px;--lay-card-radius:24px;--lay-card-pad:clamp(28px,4vw,44px)}
-.lay-item--card.bg-white{background:#fff}
+.lay-item--card.bg-white{background:var(--c-surface)}
 /* Handlungsaufruf als Box (Variante „box“): Text links, Button rechts – schmal (z. B. ⅓ neben einem Text) untereinander.
    Allein bzw. mit gleichem Hintergrund wie der Abschnitt: helle Karte mit Rahmen; als Karte in einer Reihe (anderer Hintergrund) ohne eigene Fläche */
 .cta-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 48px;align-items:center}
@@ -195,7 +191,7 @@
 .cta-box--surface{padding:clamp(28px,4vw,44px);border-radius:24px}
 .cta-box--surface.bg-white{box-shadow:inset 0 0 0 1.5px var(--c-line)}
 /* Knöpfe richten sich nach der eigenen Fläche, nicht nach dem Abschnitt */
-.cta-surface:is(.bg-dark,.bg-bordeaux) .cta .btn--light{background:#fff;color:var(--c-bordeaux)}
+.cta-surface:is(.bg-dark,.bg-bordeaux) .cta .btn--light{background:#fff;color:var(--c-bordeaux-hero)}
 .cta-surface:is(.bg-dark,.bg-bordeaux) .cta .btn--outline-light{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6);color:#fff}
-.cta-surface.bg-white .cta .btn--light{background:var(--c-bordeaux);color:#fff}
+.cta-surface.bg-white .cta .btn--light{background:var(--c-bordeaux);color:var(--c-on-accent)}
 .cta-surface.bg-white .cta .btn--outline-light{box-shadow:inset 0 0 0 1.5px var(--c-ink);color:var(--c-ink)}

@@ -13,6 +13,14 @@ Kern-Regeln (Ebenen, CSP, Präfixe, Z-Skala, Bewegung): Entwicklerhandbuch › C
 ## 2. Tokens & Farben
 
 - Kit-Variablen: `--c-*` an `:root`.
+- Farbe „Orange“ (Vorlage „Tanne“ im Style-Editor), Schrift Atkinson Hyperlegible Next. Namen `--c-bordeaux*` bleiben aus Kompatibilität (= Akzentfarbe).
+- Flächen: `--c-bg` (Seite), `--c-surface` (Karten, Felder, Menüs), `--c-on-accent` (Text auf Akzentfüllungen),
+  `--c-dark-sec` (dunkle Abschnitte). Große Flächen mit weißem Text nutzen `--c-bordeaux-hero` (bleibt im Dunkelmodus dunkel).
+- Dunkelmodus: Style-Editor → „Dunkles Farbschema“ (Klasse `has-dark`, Gerät dunkel). Dunkel-Werte der Editor-Farben in
+  `theme.php` (`'dark'`), alle übrigen im Block `@media (prefers-color-scheme:dark){html.has-dark{…}}` in `css/site.css`;
+  dieselben Werte in `css/preview.css` für die Vorschau „Dunkel“ (`html.is-dark`).
+- Kontaktkarte: Praxisdaten → „Gestaltung der Kontaktkarte“ – `.flip--glas` (Standard: Milchglas mit `backdrop-filter`,
+  hell weiß, dunkel dunkel; Werte als `--g-*`) oder `.flip--karte` (klassische weiße Karte). Gleiches Markup und Skript.
 - Gesetzte Kern-Variablen: `--cal-accent`, `--cal-accent-ink`, `--cal-ev-bg`, `--cal-ev-ink`, `--cal-line`, `--cal-muted`, `--cal-radius`, `--cal-surface`, `--cal-today-bg`, `--cms-accent`, `--cms-card-bg`, `--cms-card-ink`, `--cms-card-line`, `--cms-chat-lift`, `--cms-gallery-gap`, `--cms-lb-bg`, `--cms-line`, `--cms-map-accent`, `--cms-map-bg`, `--cms-map-line`, `--cms-map-radius`, `--cms-muted`, `--cms-on-accent`, `--cms-radius` ….
 
 ## 3. Blöcke → Dateien
@@ -52,6 +60,7 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 - `css/hsearch.css` – templates/layout.php
 - `css/mnav.css` – templates/layout.php, templates/partials/header.php
 - `css/nav.css` – templates/layout.php
+- `css/preview.css` – templates/layout.php
 - `css/site.css` – templates/layout.php, templates/maintenance.php, templates/offline.php
 - `js/form.js` – templates/partials/contact-card.php, templates/partials/form.php
 - `js/site.js` – templates/layout.php
@@ -114,7 +123,7 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | Variable | erster Wert | an | weitere Werte |
 |---|---|---|---|
 | `--cal-accent` | `var(--c-bordeaux)` | `.cal` | 1 |
-| `--cal-accent-ink` | `var(--c-white)` | `.cal` | 1 |
+| `--cal-accent-ink` | `var(--c-on-accent)` | `.cal` | 1 |
 | `--cal-ev-bg` | `var(--c-rose-1)` | `.cal` | 1 |
 | `--cal-ev-ink` | `var(--c-ink)` | `.cal` | 1 |
 | `--cal-line` | `var(--c-line)` | `.cal` | 1 |
@@ -137,7 +146,7 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | Variable | erster Wert | an | weitere Werte |
 |---|---|---|---|
 | `--dff-accent` | `var(--c-bordeaux)` | `.dff-wrap` | 1 |
-| `--dff-bg` | `#fff` | `.dff-wrap` | 1 |
+| `--dff-bg` | `var(--c-surface)` | `.dff-wrap` | 1 |
 | `--dff-err` | `#A3201A` | `.dff-wrap` | 1 |
 | `--dff-err-bg` | `#FBEAEA` | `.dff-wrap` | 1 |
 | `--dff-err-ink` | `#3b0d0a` | `.dff-wrap` | 1 |
@@ -162,12 +171,50 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--cms-lb-bg` | `rgba(28,6,14,.96)` | `.cms-lb` | – |
 | `--cms-line` | `var(--c-input)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 1 |
 | `--cms-muted` | `var(--c-text-2)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 2 |
-| `--cms-on-accent` | `#fff` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 1 |
+| `--cms-on-accent` | `var(--c-on-accent)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 1 |
 | `--cms-radius` | `18px` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | – |
-| `--cms-shadow` | `0 40px 80px -40px rgba(30,4,14,.38)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 1 |
+| `--cms-shadow` | `0 40px 80px -40px color-mix(in srgb,var(--c-shade) 38%,transparent)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | 1 |
 | `--cms-stack-step` | `28px` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | – |
 | `--cms-stack-top` | `112px` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | – |
 | `--cms-surface` | `var(--c-gray-100)` | `.cms-gallery,.cms-slider,.cms-stack,.cms-lb` | – |
+
+**css/preview.css** (33)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--c-bg` | `#0F1714` | `html.is-dark` | – |
+| `--c-bordeaux` | `#6CC4A4` | `html.is-dark` | – |
+| `--c-bordeaux-dark` | `#8AD3B8` | `html.is-dark` | – |
+| `--c-bordeaux-hero` | `#1B4D3F` | `html.is-dark` | – |
+| `--c-dark-sec` | `#080D0B` | `html.is-dark` | – |
+| `--c-gray-100` | `#1C2924` | `html.is-dark` | – |
+| `--c-gray-50` | `#131D19` | `html.is-dark` | – |
+| `--c-ink` | `#EEF3F0` | `html.is-dark` | – |
+| `--c-input` | `#4A5B54` | `html.is-dark` | – |
+| `--c-line` | `#263530` | `html.is-dark` | – |
+| `--c-on-accent` | `#0B1F18` | `html.is-dark` | – |
+| `--c-ph` | `#1F2B27` | `html.is-dark` | – |
+| `--c-ph-2` | `#24322D` | `html.is-dark` | – |
+| `--c-rose-1` | `color-mix(in srgb,var(--c-bordeaux) 16%,var(--c-bg))` | `html.is-dark` | – |
+| `--c-rose-2` | `color-mix(in srgb,var(--c-bordeaux) 24%,var(--c-bg))` | `html.is-dark` | – |
+| `--c-rose-3` | `color-mix(in srgb,var(--c-bordeaux) 40%,var(--c-bg))` | `html.is-dark` | – |
+| `--c-sep` | `#2C3B35` | `html.is-dark` | – |
+| `--c-surface` | `#17221E` | `html.is-dark` | – |
+| `--c-text-2` | `#C3CEC8` | `html.is-dark` | – |
+| `--c-text-3` | `#A3B0AA` | `html.is-dark` | – |
+| `--g-bg` | `color-mix(in srgb,var(--c-shade) 66%,transparent)` | `html.is-dark .flip--glas` | – |
+| `--g-chip` | `rgb(255 255 255/.1)` | `html.is-dark .flip--glas` | – |
+| `--g-edge` | `rgb(255 255 255/.16)` | `html.is-dark .flip--glas` | – |
+| `--g-hi` | `var(--c-apricot)` | `html.is-dark .flip--glas` | – |
+| `--g-icon` | `rgb(255 255 255/.12)` | `html.is-dark .flip--glas` | – |
+| `--g-ink` | `#fff` | `html.is-dark .flip--glas` | – |
+| `--g-line` | `rgb(255 255 255/.16)` | `html.is-dark .flip--glas` | – |
+| `--g-muted` | `var(--c-on-dark)` | `html.is-dark .flip--glas` | – |
+| `--g-num` | `var(--c-apricot)` | `html.is-dark .flip--glas` | – |
+| `--g-row` | `rgb(255 255 255/.08)` | `html.is-dark .flip--glas` | – |
+| `--g-row-line` | `rgb(255 255 255/.08)` | `html.is-dark .flip--glas` | – |
+| `--g-solid` | `color-mix(in srgb,var(--c-shade) 95%,transparent)` | `html.is-dark .flip--glas` | – |
+| `--shadow-card` | `0 30px 60px -28px rgb(0 0 0/.7)` | `html.is-dark` | – |
 
 **css/prose.css** (5)
 
@@ -179,29 +226,35 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--rt-success` | `#1A7240` | `:root` | 1 |
 | `--rt-warning` | `#8A4B00` | `:root` | 1 |
 
-**css/site.css** (40)
+**css/site.css** (71)
 
 | Variable | erster Wert | an | weitere Werte |
 |---|---|---|---|
-| `--c-apricot` | `#F6C9A8` | `:root` | – |
-| `--c-apricot-2` | `#F0C4A6` | `:root` | – |
-| `--c-bordeaux` | `#7A1F35` | `:root` | – |
-| `--c-bordeaux-dark` | `#5E1628` | `:root` | – |
-| `--c-bordeaux-hero` | `#6A1530` | `:root` | – |
-| `--c-gray-100` | `#F0F0F2` | `:root` | – |
-| `--c-gray-50` | `#F2F2F3` | `:root` | – |
-| `--c-ink` | `#16201E` | `:root` | – |
-| `--c-input` | `#D4D4D8` | `:root` | – |
-| `--c-line` | `#E6E6E9` | `:root` | – |
-| `--c-on-dark` | `#D6DAD8` | `:root` | – |
-| `--c-ph` | `#E4E4E7` | `:root` | – |
-| `--c-ph-2` | `#DCDCE0` | `:root` | – |
-| `--c-rose-1` | `#FBE9EC` | `:root` | – |
-| `--c-rose-2` | `#F3E3E6` | `:root` | – |
-| `--c-rose-3` | `#EBC9CF` | `:root` | – |
-| `--c-sep` | `#DADADD` | `:root` | 2 |
-| `--c-text-2` | `#3F4A47` | `:root` | 2 |
-| `--c-text-3` | `#5A6461` | `:root` | 2 |
+| `--c-apricot` | `#E8D6B0` | `:root` | – |
+| `--c-apricot-2` | `#E8D6B0` | `:root` | – |
+| `--c-bg` | `#FFFFFF` | `:root` | 1 |
+| `--c-bordeaux` | `#1F5C4A` | `:root` | 1 |
+| `--c-bordeaux-dark` | `#164536` | `:root` | 1 |
+| `--c-bordeaux-hero` | `#17483A` | `:root` | 1 |
+| `--c-dark-sec` | `#13201B` | `:root` | 1 |
+| `--c-glow` | `color-mix(in srgb,var(--c-bordeaux) 55%,#fff)` | `:root` | – |
+| `--c-gray-100` | `#ECF1ED` | `:root` | 1 |
+| `--c-gray-50` | `#F1F4F1` | `:root` | 1 |
+| `--c-ink` | `#13201B` | `:root` | 1 |
+| `--c-input` | `#C3CEC8` | `:root` | 1 |
+| `--c-line` | `#DFE6E1` | `:root` | 1 |
+| `--c-on-accent` | `#FFFFFF` | `:root` | 1 |
+| `--c-on-dark` | `#D3DDD8` | `:root` | – |
+| `--c-ph` | `#E1E8E3` | `:root` | 1 |
+| `--c-ph-2` | `#D6DFD9` | `:root` | 1 |
+| `--c-rose-1` | `color-mix(in srgb,var(--c-bordeaux) 11%,#fff)` | `:root` | 1 |
+| `--c-rose-2` | `color-mix(in srgb,var(--c-bordeaux) 18%,#fff)` | `:root` | 1 |
+| `--c-rose-3` | `color-mix(in srgb,var(--c-bordeaux) 30%,#fff)` | `:root` | 1 |
+| `--c-sep` | `#D3DCD6` | `:root` | 3 |
+| `--c-shade` | `color-mix(in srgb,var(--c-bordeaux-hero) 45%,#000)` | `:root` | – |
+| `--c-surface` | `#FFFFFF` | `:root` | 1 |
+| `--c-text-2` | `#3B4A44` | `:root` | 4 |
+| `--c-text-3` | `#56645E` | `:root` | 4 |
 | `--c-white` | `#FFFFFF` | `:root` | – |
 | `--c0-sep` | `var(--c-sep)` | `:root` | – |
 | `--c0-text-2` | `var(--c-text-2)` | `:root` | – |
@@ -212,16 +265,41 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--cms-map-line` | `var(--c-ph-2)` | `.cms-map` | – |
 | `--cms-map-radius` | `24px` | `.cms-map` | – |
 | `--ease` | `cubic-bezier(.2,.7,.2,1)` | `:root` | – |
-| `--font` | `"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif` | `:root` | – |
+| `--font` | `"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif` | `:root` | – |
 | `--fx` | `0%` | `.fx0` | 10 |
 | `--fy` | `0%` | `.fy0` | 10 |
+| `--g-bg` | `rgb(255 255 255/.78)` | `.flip--glas` | 1 |
+| `--g-chip` | `color-mix(in srgb,var(--c-ink) 7%,transparent)` | `.flip--glas` | 1 |
+| `--g-edge` | `rgb(255 255 255/.7)` | `.flip--glas` | 1 |
+| `--g-hi` | `var(--c-bordeaux)` | `.flip--glas` | 1 |
+| `--g-icon` | `var(--c-rose-1)` | `.flip--glas` | 1 |
+| `--g-ink` | `var(--c-ink)` | `.flip--glas` | 1 |
+| `--g-line` | `color-mix(in srgb,var(--c-ink) 12%,transparent)` | `.flip--glas` | 1 |
+| `--g-muted` | `var(--c-text-2)` | `.flip--glas` | 1 |
+| `--g-num` | `var(--c-bordeaux)` | `.flip--glas` | 1 |
+| `--g-row` | `rgb(255 255 255/.55)` | `.flip--glas` | 1 |
+| `--g-row-line` | `rgb(255 255 255/.8)` | `.flip--glas` | 1 |
+| `--g-solid` | `rgb(255 255 255/.96)` | `.flip--glas` | 1 |
 | `--gap-split` | `clamp(40px,6vw,96px)` | `:root` | – |
 | `--gutter` | `clamp(20px,4vw,40px)` | `:root` | – |
-| `--r-big` | `clamp(24px,3vw,40px)` | `:root` | – |
-| `--r-card` | `24px` | `:root` | – |
+| `--kit-accent` | `var(--c-bordeaux)` | `:root` | 1 |
+| `--kit-bg` | `var(--c-bg)` | `:root` | – |
+| `--kit-font` | `var(--font)` | `:root` | – |
+| `--kit-font-head` | `var(--font)` | `:root` | – |
+| `--kit-ink` | `var(--c-ink)` | `:root` | 1 |
+| `--kit-line` | `var(--c-line)` | `:root` | 1 |
+| `--kit-link` | `var(--c-bordeaux)` | `:root` | 1 |
+| `--kit-muted` | `var(--c-text-2)` | `:root` | 1 |
+| `--kit-on-accent` | `var(--c-on-accent)` | `:root` | 1 |
+| `--kit-radius` | `var(--r-card)` | `:root` | – |
+| `--kit-surface` | `var(--c-surface)` | `:root` | 1 |
+| `--kit-text` | `var(--c-ink)` | `:root` | 1 |
+| `--r-big` | `clamp(16px,2vw,28px)` | `:root` | – |
+| `--r-btn` | `10px` | `:root` | – |
+| `--r-card` | `16px` | `:root` | – |
 | `--sec-y` | `clamp(72px,10vw,140px)` | `:root` | – |
 | `--sec-y-s` | `clamp(40px,6vw,80px)` | `:root` | – |
-| `--shadow-card` | `0 40px 80px -30px rgba(30,4,14,.65)` | `:root` | – |
+| `--shadow-card` | `0 30px 60px -28px color-mix(in srgb,var(--c-shade) 55%,transparent)` | `:root` | 1 |
 | `--turn` | `.6s cubic-bezier(.65,0,.35,1)` | `.flip__inner` | – |
 
 ### Bewegung & Barrierefreiheit je Datei
@@ -268,6 +346,7 @@ Globale Objekte: `praxisForm` (js/form.js)
 | `data-cms-map-load` | assets/js/site.js |
 | `data-css` | templates/partials/header.php, assets/js/site.js |
 | `data-delay` | blocks/accordion.php, blocks/contact.php, blocks/doctors.php, blocks/hero.php, blocks/quote.php … |
+| `data-design-preview` | templates/layout.php |
 | `data-flip` | templates/layout.php, templates/partials/contact-card.php, templates/partials/header.php, assets/js/site.js |
 | `data-flip-back` | templates/partials/contact-card.php, templates/partials/form.php, assets/js/site.js |
 | `data-flip-title` | templates/partials/contact-card.php, assets/js/site.js |

@@ -77,7 +77,9 @@ final class FontsController extends AdminController
     /** Vorschau-Schrift (woff2) – serverseitig geladen und zwischengespeichert, ausgeliefert von der eigenen Domain */
     public function preview(Request $r, string $id): Response
     {
-        $this->guard($r);
+        // Auch für den Style-Editor (Recht design.edit): Vorschau noch nicht installierter Kit-Schriften
+        $this->auth($r);
+        if (!(Features::on('fonts') && Fonts::canManage()) && !can('design.edit')) throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
         $file = Fonts::previewFile($id);
         if (!$file) throw new HttpException(404);
         return (new Response((string) file_get_contents($file), 200, ['Content-Type' => 'font/woff2']))

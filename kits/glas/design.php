@@ -124,12 +124,12 @@ return [
         ]],
     ],
 
-    // Selbst gehostete Schriften (kits/glas/build.mjs erzeugt css/font-*.css) – variable Schriften: ein Download für alle Stärken
+    // Schriften: 'fontsource' = installiert der Schriften-Manager (Core\Fonts, fonts:sync; selbst gehostet, ohne externe Anfragen) – variable Schriften: ein Download für alle Stärken
     'fonts' => [
-        'outfit' => ['label' => 'Outfit (geometrisch, klar · variabel)', 'stack' => 'Outfit,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-outfit.css'],
-        'figtree' => ['label' => 'Figtree (freundlich, gut lesbar · variabel)', 'stack' => 'Figtree,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-figtree.css'],
-        'sora' => ['label' => 'Sora (technisch-weit · variabel)', 'stack' => 'Sora,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-sora.css'],
-        'urbanist' => ['label' => 'Urbanist (geometrisch, elegant · variabel)', 'stack' => 'Urbanist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-urbanist.css'],
+        'outfit' => ['label' => 'Outfit (geometrisch, klar · variabel)', 'stack' => 'Outfit,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'outfit'],
+        'figtree' => ['label' => 'Figtree (freundlich, gut lesbar · variabel)', 'stack' => 'Figtree,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'figtree'],
+        'sora' => ['label' => 'Sora (technisch-weit · variabel)', 'stack' => 'Sora,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'sora'],
+        'urbanist' => ['label' => 'Urbanist (geometrisch, elegant · variabel)', 'stack' => 'Urbanist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'urbanist'],
         'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
     ],
 

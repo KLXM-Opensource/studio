@@ -35,11 +35,11 @@ kits/nature/
 ├── tools/           contrast.php (WCAG aller Vorlagen, --table) · patterns.php (SVG-Muster → opt-*.css) · demo.php + demo-content.php (--heroes: Musterseite „Hero-Varianten“)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, alle Blöcke)
-├── package.json     @fontsource-variable/{fraunces,nunito-sans,source-sans-3}, @fontsource/young-serif (OFL 1.1), @expo-google-fonts/fraunces (TTF für App-Icons)
-└── build.mjs        kopiert die Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+├── package.json     @expo-google-fonts (TTF für App-Icons)
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/nature/{css,js,fonts}`. Muster neu erzeugen: `php kits/nature/tools/patterns.php`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/nature/{css,js}`. Muster neu erzeugen: `php kits/nature/tools/patterns.php`.
 
 ## Budgets (minifiziert, gemessen auf der Demo-Startseite)
 
@@ -136,5 +136,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Fraunces, Nunito Sans, Young Serif, Source Sans 3 – SIL Open Font License 1.1 (`public/assets/kits/nature/fonts/OFL-{key}.txt`).
+Fraunces, Nunito Sans, Young Serif, Source Sans 3 – SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`).
 Symbole: Phosphor (Kern-Sprite, MIT). Illustrationen und Muster: im Kit erzeugt, frei verwendbar.

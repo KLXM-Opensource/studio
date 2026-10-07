@@ -54,6 +54,8 @@ final class Theme
         }
         $this->name = $name;
         $this->path = $path;
+        // Kit-Paket (Upload/Composer) ohne veröffentlichte Assets (z. B. nach composer install ohne kits:publish): einmal nachholen
+        if (!is_dir(Kit::publicDir($name)) && in_array(Kit::source($name), ['upload', 'composer'], true)) KitPackages::publish($name);
         $this->def = require $def;
 
         foreach ($this->def['blocks'] ?? [] as $type => $b) {
@@ -477,10 +479,13 @@ final class Theme
         return Kit::url($this->name, $path);
     }
 
-    /** <link rel="preload"> für die wichtigsten Schnitte (theme.php → 'fonts' → 'preload') */
+    /**
+     * <link rel="preload"> für die wichtigsten Schnitte (theme.php → 'fonts' → 'preload', Dateien des Kits) und für
+     * Kit-Schriften mit 'preload' in design.fonts (vom Schriften-Manager installiert, Core\Design::preloads)
+     */
     public function fontPreloads(): string
     {
-        $h = '';
+        $h = Design::preloads();
         foreach ((array) ($this->def['fonts']['preload'] ?? []) as $f) {
             $h .= '<link rel="preload" href="' . e($this->fontUrl($f)) . '" as="font" type="font/woff2" crossorigin>' . "\n";
         }

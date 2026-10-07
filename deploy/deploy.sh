@@ -80,8 +80,12 @@ if [[ "$TARGET" == "production" && "${SKIP_BACKUP:-0}" != "1" ]]; then
   echo "▸ Sicherung"; remote "cd '$REL' && $PHP bin/console site:backup $SITES >/dev/null && $PHP bin/console pool:backup --all >/dev/null && $PHP bin/console shared:backup --all >/dev/null"
 fi
 echo "▸ Migration & Prüfung"
-remote "cd '$REL' && $PHP bin/console migrate $SITES && $PHP bin/console extensions:publish >/dev/null && $PHP bin/console health $SITES" \
+remote "cd '$REL' && $PHP bin/console migrate $SITES && $PHP bin/console extensions:publish >/dev/null && $PHP bin/console kits:publish >/dev/null && $PHP bin/console health $SITES" \
   || { echo "✗ Prüfung fehlgeschlagen – Live-Stand bleibt unverändert ($REL wird entfernt)."; remote "rm -rf '$REL'"; exit 1; }
+# Schriften der Kits (Core\Fonts → shared/public/fonts): installieren, was die Websites brauchen – Kits liefern keine
+# Webfonts mehr mit. Ohne Netz kein Abbruch: die Websites zeigen die Ersatzschrift, health meldet „Schrift fehlt“.
+echo "▸ Schriften"
+remote "cd '$REL' && $PHP bin/console fonts:sync $SITES" || echo "  ! fonts:sync unvollständig – später erneut: php bin/console fonts:sync --all"
 
 # ── 5. Umschalten (atomar) + Caches ─────────────────────────────────────────
 echo "▸ Umschalten"

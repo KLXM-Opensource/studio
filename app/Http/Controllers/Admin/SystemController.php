@@ -58,6 +58,8 @@ final class SystemController extends AdminController
             return $this->edit($r, $errors, $values);
         }
         app()->settings->setMany($values);
+        // Kit gewechselt: dessen Schriften installieren (nächster Aufruf der Verwaltung – dann ist das neue Kit aktiv)
+        if (array_key_exists('sys.theme', $values) && (string) ($current['sys.theme'] ?? '') !== (string) $values['sys.theme']) \Core\Fonts::requestSync();
         // Icons neu erzeugen, wenn sich etwas am App-Icon geändert hat
         $iconKeys = array_filter(array_keys($values), fn($k) => str_starts_with($k, 'sys.icon_') || str_starts_with($k, 'sys.pwa'));
         foreach ($iconKeys as $k) {

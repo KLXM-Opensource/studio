@@ -16,13 +16,15 @@ $central = is_editing() ? ' data-central="Praxisdaten"' : '';
 $badge = praxis_open_badge('openb--card');
 $note = praxis_card_note_html();
 $newWin = '<span class="sr-only"> ' . e(lt('(externer Link, öffnet in neuem Fenster)')) . '</span>';
+// Gestaltung (Praxisdaten → Hero-Themen): „glas“ (Standard) oder „karte“ (klassisch) – gleiches Markup, nur CSS (.flip--glas)
+$style = ($style ?? '') ?: (setting('karte_stil') === 'karte' ? 'karte' : 'glas');
 ?>
 <?php
 // Stile der Rückseite und Formular-Stile/-Skripte lädt site.js erst beim Umdrehen (vorgeladen beim Zeigen/Fokussieren)
 $lazy = array_merge([theme_asset('css/card-back.css')], array_filter(['rezept', 'ueberweisung'], fn($k) => isset($services[$k]) && empty($services[$k]['external']))
     ? [theme_asset('css/form.css'), theme_asset('js/form.js'), asset('js/legal-dialog.js')] : []);
 ?>
-<div class="flip" data-flipcard data-assets="<?= json_attr($lazy) ?>">
+<div class="flip flip--<?= e($style) ?>" data-flipcard data-assets="<?= json_attr($lazy) ?>">
   <div class="flip__inner">
     <aside class="card card--front" aria-label="<?= e(lt('Schnellkontakt')) ?>"<?= $central ?>>
       <div class="card__top">

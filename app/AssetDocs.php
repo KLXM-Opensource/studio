@@ -422,13 +422,28 @@ final class AssetDocs
      * Ein Kit aus seinem Ordner (kits/{name} oder beliebiger Pfad, z. B. aus einer anderen Installation).
      * Lädt theme.php (bzw. kit.php) für die Definition – keine Datenbank, keine Website nötig.
      */
+    /** Erste Funktion, die das Kit deklariert und die es schon gibt (sonst null) – PHP-Dateien außer node_modules/vendor */
+    private static function functionClash(string $dir): ?string
+    {
+        $it = new \RecursiveIteratorIterator(new \RecursiveCallbackFilterIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            fn($f) => !in_array($f->getFilename(), ['node_modules', 'vendor', '.git'], true)));
+        foreach ($it as $f) {
+            if (strtolower($f->getExtension()) !== 'php') continue;
+            if (!preg_match_all('~^\s*function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(~m', (string) file_get_contents($f->getPathname()), $m)) continue;
+            foreach ($m[1] as $fn) if (function_exists($fn) && (new \ReflectionFunction($fn))->getFileName() !== $f->getPathname()) return $fn;
+        }
+        return null;
+    }
+
     public static function kit(string $dir): array
     {
         $dir = rtrim($dir, '/');
         $defFile = Kit::definitionFile($dir);
         $def = [];
         if ($defFile) {
-            try { $def = (array) (static fn($f) => require $f)($defFile); } catch (\Throwable $e) { $def = ['_error' => $e->getMessage()]; }
+            // Doppelte Funktionsnamen (z. B. zwei Kits mit gleichem Präfix) wären ein nicht abfangbarer Fehler – dann nicht laden
+            if ($clash = self::functionClash($dir)) $def = ['_error' => __('Nicht geladen: Funktion {fn}() gibt es schon (anderes Kit mit gleichen Namen).', ['fn' => $clash])];
+            else try { $def = (array) (static fn($f) => require $f)($defFile); } catch (\Throwable $e) { $def = ['_error' => $e->getMessage()]; }
         }
         $name = basename($dir);
         $assets = $dir . '/assets';

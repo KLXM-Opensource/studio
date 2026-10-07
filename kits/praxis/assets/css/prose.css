@@ -14,7 +14,7 @@
 .bg-bordeaux .t-lead,.bg-dark .t-lead{color:inherit}
 .t-small{font-size:.875em;line-height:1.55}
 .t-note{padding:.85em 1.1em;border-left:3px solid var(--rt-accent);border-radius:0 12px 12px 0;background:var(--c-gray-50)}
-.bg-gray .t-note{background:#fff}
+.bg-gray .t-note{background:var(--c-surface)}
 .bg-bordeaux .t-note,.bg-dark .t-note{background:rgba(255,255,255,.1)}
 mark{padding:0 .12em;border-radius:2px;background:#FFE58A;color:#16201E}
 .c-accent{color:var(--rt-accent)}.c-muted{color:var(--rt-muted)}.c-success{color:var(--rt-success)}.c-warning{color:var(--rt-warning)}.c-danger{color:var(--rt-danger)}

@@ -2,10 +2,9 @@
   "name": "klxm-studio-kit-praxis",
   "private": true,
   "license": "MIT",
-  "description": "Build-Abhängigkeiten des Kits „praxis“ (Hausschrift). Wird von tools/build.mjs automatisch installiert und über kits/praxis/build.mjs kopiert.",
+  "description": "Build-Abhängigkeiten des Kits „praxis“ (TTF für den App-Icon-Generator). Webfonts installiert der Schriften-Manager (design.fonts → fontsource). Wird von tools/build.mjs automatisch installiert und über kits/praxis/build.mjs kopiert.",
   "packageManager": "pnpm@10.29.2",
   "devDependencies": {
-    "@expo-google-fonts/hanken-grotesk": "^0.4.3",
-    "@fontsource/hanken-grotesk": "^5.2.0"
+    "@expo-google-fonts/inter": "^0.4.2"
   }
 }

@@ -23,24 +23,10 @@ function editorial_header(): string
     return in_array($v, ['masthead', 'compact', 'split', 'ressorts'], true) ? $v : 'masthead';
 }
 
-/** Dateien der Schriften (Paketname in public/assets/kits/editorial/fonts) – für <link rel="preload"> */
-const EDITORIAL_FONT_FILES = [
-    'newsreader' => 'newsreader-latin-wght-normal', 'fraunces' => 'fraunces-latin-wght-normal', 'playfair' => 'playfair-display-latin-wght-normal',
-    'literata' => 'literata-latin-wght-normal', 'source-serif' => 'source-serif-4-latin-wght-normal', 'dm-serif' => 'dm-serif-display-latin-400-normal',
-    'instrument' => 'instrument-serif-latin-400-normal', 'source-sans' => 'source-sans-3-latin-wght-normal', 'public-sans' => 'public-sans-latin-wght-normal',
-    'work-sans' => 'work-sans-latin-wght-normal', 'franklin' => 'libre-franklin-latin-wght-normal', 'plex-sans' => 'ibm-plex-sans-latin-wght-normal',
-    'inter' => 'inter-latin-wght-normal', 'plex-mono' => 'ibm-plex-mono-latin-400-normal', 'jetbrains' => 'jetbrains-mono-latin-wght-normal',
-];
-
-/** <link rel="preload"> für Fließtext- und Überschriftenschrift (latin, aufrecht) – muss exakt der URL in css/font-*.css entsprechen */
+/** <link rel="preload"> für die Hauptschnitte der gewählten Schriften (Kit-Schriften vom Schriften-Manager, Core\Design::preloads) */
 function editorial_font_preloads(): string
 {
-    $h = '';
-    foreach (array_unique([(string) design('font_body'), (string) design('font_display')]) as $font) {
-        if (!isset(EDITORIAL_FONT_FILES[$font])) continue;
-        $h .= '<link rel="preload" href="' . e(app()->theme->fontUrl('fonts/' . EDITORIAL_FONT_FILES[$font] . '.woff2')) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-    }
-    return $h;
+    return \Core\Design::preloads(['font_body', 'font_display']);
 }
 
 /** Name der Website (Kurzname für die Wortmarke) */

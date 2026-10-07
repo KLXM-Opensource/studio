@@ -54,3 +54,5 @@ deploy/targets/*.env
 /storage/fragments.json
 /storage/docs/
 /storage/live/
+/storage/kits/
+/storage/chat/

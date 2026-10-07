@@ -16,7 +16,7 @@ the single exception of the Liberation fonts inside PDF.js (GPL-2.0 with font ex
 (GPL-2.0-or-later) is no longer installed (see section 3). `node tools/licenses.mjs` re-checks the Composer and npm
 dependencies (see section 9).
 
-Legend – **Bundled**: shipped to servers/visitors (`vendor/`, `public/`, `themes/*/fonts`). **Build-only**: used on a
+Legend – **Bundled**: shipped to servers/visitors (`vendor/`, `public/`, `kits/*/fonts`). **Build-only**: used on a
 developer machine to produce `public/`, not deployed. **Optional**: installed or downloaded by the operator,
 not part of the distribution. **Service**: an online service contacted at runtime.
 
@@ -32,7 +32,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 | ISC | earcut, kdbush, potpack, quickselect, tinyqueue, geojson-vt, point-geometry, maplibre-gl-style-spec | Bundled |
 | CC0-1.0 | ICC colour profile in PDF.js | Bundled |
 | GPL-2.0 with font exception (Red Hat Liberation font license) | Liberation Sans fonts inside PDF.js (`standard_fonts/`) – separate font files, see 1.3 | Bundled |
-| SIL Open Font License 1.1 | Lato (admin) and all kit fonts | Bundled |
+| SIL Open Font License 1.1 | Lato (admin) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
 | CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube in kit demo content | Service / demo |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
@@ -109,75 +109,37 @@ MIT license of KLXM Studio's code; whoever redistributes them keeps `LICENSE_LIB
 
 All fonts are self-hosted (no requests to Google Fonts) and licensed under the **SIL Open Font License 1.1**
 (`OFL-1.1`). The license text ships next to the files; fonts can be used, bundled and redistributed with any
-software, but may not be sold on their own, and modified versions must not use Reserved Font Names. The npm
-packages are published by Fontsource (`@fontsource/*`, `@fontsource-variable/*`: `OFL-1.1`) and Expo
-(`@expo-google-fonts/*`: package code MIT, font files OFL-1.1). Copyright lines as in the fonts' own license
-files or name tables:
+software, but may not be sold on their own, and modified versions must not use Reserved Font Names.
+
+The kits no longer bundle web fonts that are available from the Google Fonts catalog: they only declare them
+(`design.fonts` → `'fontsource' => id`) and the core font manager installs them on the server when a site needs them
+(see 2.1 – each installation carries its own `LICENSE.txt`). What remains bundled is the admin font and the small TTF
+files the server-side app-icon generator renders with (never served to visitors). The npm packages are published by
+Fontsource (`@fontsource/*`: `OFL-1.1`) and Expo (`@expo-google-fonts/*`: package code MIT, font files OFL-1.1).
+Copyright lines as in the fonts' own license files or name tables:
 
 | Kit | Font | Package (version) | Copyright | License text |
 |---|---|---|---|---|
 | Admin (core) | Lato | `@fontsource/lato` 5.3.0 | © 2010-2011 tyPoland Łukasz Dziedzic, RFN “Lato” | `public/assets/fonts/OFL-Lato.txt` |
-| praxis | Hanken Grotesk | `@fontsource/hanken-grotesk` 5.3.0 | © 2021 The Hanken Grotesk Project Authors | `public/assets/kits/praxis/fonts/OFL.txt` |
-| praxis | Hanken Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/hanken-grotesk` 0.4.3 | as above | `themes/praxis/fonts/OFL.txt` |
-| basis | Inter | `@fontsource/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/assets/kits/basis/fonts/OFL-inter.txt` |
-| basis | Manrope | `@fontsource/manrope` 5.3.0 | © 2019 The Manrope Project Authors | `…/OFL-manrope.txt` |
-| basis | IBM Plex Sans | `@fontsource/ibm-plex-sans` 5.3.0 | © 2019 IBM Corp. | `…/OFL-plex.txt` |
-| basis | Source Serif 4 | `@fontsource/source-serif-4` 5.3.0 | © 2014-2021 Adobe Systems Incorporated, RFN “Source” | `…/OFL-source-serif.txt` |
-| basis | Lora | `@fontsource/lora` 5.3.0 | © 2011 The Lora Project Authors, RFN “Lora” | `…/OFL-lora.txt` |
-| basis | Fraunces | `@fontsource/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `…/OFL-fraunces.txt` |
-| basis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `themes/basis/fonts/OFL.txt` |
-| editorial | Fraunces (variable) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/assets/kits/editorial/fonts/OFL-fraunces.txt` |
-| editorial | IBM Plex Sans (variable) | `@fontsource-variable/ibm-plex-sans` 5.3.0 | © 2019 IBM Corp. | `…/OFL-plex-sans.txt` |
-| editorial | Inter (variable) | `@fontsource-variable/inter` 5.3.0 | © 2016 The Inter Project Authors | `…/OFL-inter.txt` |
-| editorial | JetBrains Mono (variable) | `@fontsource-variable/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `…/OFL-jetbrains.txt` |
-| editorial | Libre Franklin (variable) | `@fontsource-variable/libre-franklin` 5.3.0 | © 2020 The Libre Franklin Project Authors | `…/OFL-franklin.txt` |
-| editorial | Literata (variable) | `@fontsource-variable/literata` 5.3.0 | © 2017 The Literata Project Authors | `…/OFL-literata.txt` |
-| editorial | Newsreader (variable) | `@fontsource-variable/newsreader` 5.3.0 | © 2020 The Newsreader Project Authors | `…/OFL-newsreader.txt` |
-| editorial | Playfair Display (variable) | `@fontsource-variable/playfair-display` 5.3.0 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `…/OFL-playfair.txt` |
-| editorial | Public Sans (variable) | `@fontsource-variable/public-sans` 5.3.0 | © 2015 The Public Sans Project Authors | `…/OFL-public-sans.txt` |
-| editorial | Source Sans 3 (variable) | `@fontsource-variable/source-sans-3` 5.3.0 | © 2023 Adobe, RFN “Source” | `…/OFL-source-sans.txt` |
-| editorial | Source Serif 4 (variable) | `@fontsource-variable/source-serif-4` 5.3.0 | © 2014-2021 Adobe Systems Incorporated, RFN “Source” | `…/OFL-source-serif.txt` |
-| editorial | Work Sans (variable) | `@fontsource-variable/work-sans` 5.3.0 | © 2019 The Work Sans Project Authors | `…/OFL-work-sans.txt` |
-| editorial | DM Serif Display | `@fontsource/dm-serif-display` 5.3.0 | © 2014-2017 Adobe Systems Incorporated, RFN “Source”; © 2019 Google LLC | `…/OFL-dm-serif.txt` |
-| editorial | IBM Plex Mono | `@fontsource/ibm-plex-mono` 5.3.0 | © 2017 IBM Corp. | `…/OFL-plex-mono.txt` |
-| editorial | Instrument Serif | `@fontsource/instrument-serif` 5.3.0 | © 2022 The Instrument Serif Project Authors | `…/OFL-instrument.txt` |
-| editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `themes/editorial/fonts/OFL.txt` |
-| fluid | Inter (variable) | `@fontsource-variable/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/assets/kits/fluid/fonts/OFL-inter.txt` |
-| fluid | Instrument Sans (variable) | `@fontsource-variable/instrument-sans` 5.3.0 | © 2022 The Instrument Sans Project Authors | `…/OFL-instrument-sans.txt` |
-| fluid | Bricolage Grotesque (variable) | `@fontsource-variable/bricolage-grotesque` 5.3.0 | © 2022 The Bricolage Grotesque Project Authors | `…/OFL-bricolage.txt` |
-| fluid | DM Sans (variable) | `@fontsource-variable/dm-sans` 5.3.0 | © 2014 The DM Sans Project Authors | `…/OFL-dm-sans.txt` |
-| fluid | Space Grotesk (variable) | `@fontsource-variable/space-grotesk` 5.3.0 | © 2020 The Space Grotesk Project Authors | `…/OFL-space-grotesk.txt` |
-| fluid | Fraunces (variable) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `…/OFL-fraunces.txt` |
-| fluid | Newsreader (variable) | `@fontsource-variable/newsreader` 5.3.0 | © 2020 The Newsreader Project Authors | `…/OFL-newsreader.txt` |
-| fluid | Instrument Serif | `@fontsource/instrument-serif` 5.3.0 | © 2022 The Instrument Serif Project Authors | `…/OFL-instrument-serif.txt` |
-| fluid | JetBrains Mono (variable) | `@fontsource-variable/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `…/OFL-jetbrains-mono.txt` |
-| fluid | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `themes/fluid/fonts/OFL.txt` |
-| nature | Fraunces (variable: wght + SOFT, italic wght) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/assets/kits/nature/fonts/OFL-fraunces.txt` |
-| nature | Nunito Sans (variable) | `@fontsource-variable/nunito-sans` 5.3.0 | © 2016 The Nunito Sans Project Authors | `…/OFL-nunito-sans.txt` |
-| nature | Young Serif | `@fontsource/young-serif` 5.3.0 | © 2023 The Young Serif Project Authors | `…/OFL-young-serif.txt` |
-| nature | Source Sans 3 (variable) | `@fontsource-variable/source-sans-3` 5.3.0 | © 2023 Adobe, RFN “Source” | `…/OFL-source-sans-3.txt` |
-| nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2020 The Fraunces Project Authors | `themes/nature/fonts/OFL.txt` |
-| modern | Plus Jakarta Sans (variable) | `@fontsource-variable/plus-jakarta-sans` 5.3.0 | © 2020 The Plus Jakarta Sans Project Authors | `public/assets/kits/modern/fonts/OFL-jakarta.txt` |
-| modern | Space Grotesk (variable) | `@fontsource-variable/space-grotesk` 5.3.0 | © 2020 The Space Grotesk Project Authors | `…/OFL-space-grotesk.txt` |
-| modern | Inter Tight (variable) | `@fontsource-variable/inter-tight` 5.3.0 | © 2022 The Inter Project Authors | `…/OFL-inter-tight.txt` |
-| modern | Manrope (variable) | `@fontsource-variable/manrope` 5.3.0 | © 2019 The Manrope Project Authors | `…/OFL-manrope.txt` |
-| modern | Space Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/space-grotesk` 0.4.1 | © 2020 The Space Grotesk Project Authors | `themes/modern/fonts/OFL.txt` |
-| glas | Outfit (variable) | `@fontsource-variable/outfit` 5.3.0 | © 2021 The Outfit Project Authors | `public/assets/kits/glas/fonts/OFL-outfit.txt` |
-| glas | Figtree (variable) | `@fontsource-variable/figtree` 5.3.0 | © 2022 The Figtree Project Authors | `…/OFL-figtree.txt` |
-| glas | Sora (variable) | `@fontsource-variable/sora` 5.3.0 | © 2019 The Sora Project Authors | `…/OFL-sora.txt` |
-| glas | Urbanist (variable) | `@fontsource-variable/urbanist` 5.3.0 | © 2021 The Urbanist Project Authors | `…/OFL-urbanist.txt` |
-| glas | Outfit TTF (server-side, app icons – not public) | `@expo-google-fonts/outfit` 0.4.3 | © 2021 The Outfit Project Authors | `themes/glas/fonts/OFL.txt` |
+| basis, essenz, fluid, foto, galerie, immobilien, praxis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `kits/{kit}/fonts/OFL.txt` |
+| editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `kits/editorial/fonts/OFL.txt` |
+| nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2020 The Fraunces Project Authors | `kits/nature/fonts/OFL.txt` |
+| modern | Space Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/space-grotesk` 0.4.1 | © 2020 The Space Grotesk Project Authors | `kits/modern/fonts/OFL.txt` |
+| glas | Outfit TTF (server-side, app icons – not public) | `@expo-google-fonts/outfit` 0.4.3 | © 2021 The Outfit Project Authors | `kits/glas/fonts/OFL.txt` |
 
-RFN = Reserved Font Name. PDF.js additionally ships the Foxit and Liberation fonts listed in 1.3.
+RFN = Reserved Font Name. PDF.js additionally ships the Foxit and Liberation fonts listed in 1.3. A kit that has to
+ship a font the font manager cannot provide (`design.fonts` → `'css'`) keeps the font's license file next to it in
+`public/assets/kits/{kit}/fonts/` and lists it here; `node tools/licenses.mjs` checks that the license file exists.
 
 ### 2.1 Installed fonts (Runtime, not bundled)
 
 Administrators can install further fonts from the Google Fonts catalog (Grundeinstellungen → Schriften,
-`php bin/console fonts:install`, `Core\Fonts`). They are downloaded once by the server (Fontsource API
+`php bin/console fonts:install`, `Core\Fonts`); the fonts the kits declare are installed the same way (kit choice,
+style editor, `php bin/console fonts:sync`). They are downloaded once by the server (Fontsource API
 `api.fontsource.org`, files from `cdn.jsdelivr.net/fontsource`, fallback Google Fonts CSS2 API) and served from
-`public/fonts/{id}/` – visitors never contact Google, Fontsource or jsDelivr. Only `OFL-1.1`, `Apache-2.0` and
+`public/assets/fonts/installed/{id}/` – visitors never contact Google, Fontsource or jsDelivr. Only `OFL-1.1`, `Apache-2.0` and
 `UFL-1.0` fonts can be installed; each installation stores the package's license text as
-`public/fonts/{id}/LICENSE.txt` and its license and copyright line in `public/fonts/fonts.json`. They are not part of
+`public/assets/fonts/installed/{id}/LICENSE.txt` and its license and copyright line in `public/assets/fonts/installed/fonts.json`. They are not part of
 the distribution and therefore not listed here; the in-product page “Lizenzen & Danksagungen” lists them
 automatically in the section “Installierte Schriften”.
 

@@ -6,6 +6,7 @@ use Core\Fields;
   <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1>Grundeinstellungen</h1>
     <p class="adm-muted">Technische Einstellungen: Website, E-Mail-Versand (Symfony Mailer), Spamschutz und Verschlüsselung.</p></div>
   <?php if (\Core\Fonts::canManage()): // Schriften aus Google Fonts selbst hosten (Core\Fonts) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/fonts')) ?>"><?= icon('text-t') ?> <?= e(__('Schriften')) ?></a><?php endif; ?>
+  <?php if (\Core\KitPackages::canManage()): // Kits der Installation: Übersicht, Paket hochladen (Core\KitPackages) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/kits')) ?>"><?= icon('package') ?> <?= e(__('Kits')) ?></a><?php endif; ?>
 </header>
 
 <?php if ($newSecret): ?>

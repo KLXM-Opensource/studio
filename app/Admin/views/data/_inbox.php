@@ -66,6 +66,7 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
       <div class="f"><label for="t-form-notify"><?= e(__('Benachrichtigung an (E-Mail)')) ?></label>
         <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(__('leer = Empfänger aus den Grundeinstellungen')) ?>" autocomplete="off">
         <p class="f-help"><?= e(__('Die E-Mail enthält keine Inhalte – nur den Hinweis auf eine neue Anfrage und einen Link.')) ?></p></div>
+      <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => (array) ($def['fields'] ?? [])]) ?>
       <?php if ($hasFiles): ?>
       <div class="f"><label for="t-form-mb"><?= e(__('Dateien: höchstens (MB je Datei)')) ?></label>
         <input type="number" id="t-form-mb" name="settings[form][upload_mb]" min="1" max="<?= DataForms::MAX_MB ?>" value="<?= (int) $fm['upload_mb'] ?>">

@@ -18,9 +18,10 @@
 .leave{display:flex;gap:10px;padding:14px 16px;border-radius:14px;background:var(--c-rose-1);font-size:15px;line-height:1.45;color:var(--c-ink)}
 .leave__icon{flex:none;display:flex;padding-top:2px;color:var(--c-bordeaux)}
 .card__actions{display:grid;gap:8px;margin-top:auto}
-.btn-ghost{min-height:48px;padding:0 22px;border-radius:999px;border:1px solid var(--c-input);background:#fff;color:var(--c-ink);font:600 15px var(--font);cursor:pointer}
+.btn-ghost{min-height:48px;padding:0 22px;border-radius:999px;border:1px solid var(--c-input);background:var(--c-surface);color:var(--c-ink);font:600 15px var(--font);cursor:pointer}
 .btn-ghost:hover{border-color:var(--c-ink)}
 .btn-wide svg{flex:none}
 .card__panel>.btn-wide{margin-top:auto}
 /* Punkt der Überschrift als ::after (ein eigenes <span> meldete Chrome beim Umdrehen als Layout-Shift < 1 px) */
-[data-flip-title]::after{content:".";color:var(--c-bordeaux)}
+/* in dieser Fassung des Kits ohne Punkt (wie .dot) */
+[data-flip-title]::after{content:none}

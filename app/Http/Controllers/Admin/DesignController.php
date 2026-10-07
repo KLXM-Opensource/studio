@@ -33,8 +33,13 @@ final class DesignController extends AdminController
             foreach ((array) (Design::def()['fonts'] ?? []) as $f) {
                 if (!empty($f['css'])) $fontCss[$f['css']] = $theme->asset((string) $f['css']);
             }
-            // Installierte Schriften (Core\Fonts) für die Schriftproben
-            foreach (Design::fonts() as $f) if (!empty($f['href'])) $fontCss[$f['href']] = (string) $f['href'];
+            // Installierte Schriften (Core\Fonts) für die Schriftproben; noch nicht installierte Kit-Schriften ('fontsource')
+            // als Vorschau-Schnitt von der eigenen Domain (installiert wird beim Speichern)
+            $fontFaces = [];
+            foreach (Design::fonts() as $f) {
+                if (!empty($f['href'])) $fontCss[$f['href']] = (string) $f['href'];
+                elseif (!empty($f['fontsource']) && ($face = \Core\Fonts::previewFace($f)) !== '') $fontFaces[$face] = true;
+            }
             $vars += [
                 'schema' => Design::schema(),
                 'values' => $values,
@@ -43,6 +48,7 @@ final class DesignController extends AdminController
                 'history' => array_map(fn($h) => ['values' => Design::normalize((array) ($h['values'] ?? []))] + $h, Design::history()),
                 'pages' => self::previewPages(),
                 'fontCss' => array_values($fontCss),
+                'fontFaces' => implode("\n", array_keys($fontFaces)),
             ];
         }
         return $this->view('design', $vars);
@@ -52,10 +58,19 @@ final class DesignController extends AdminController
     {
         $this->guard($r);
         if (!Design::enabled()) return $this->back('/admin/design');
-        Design::save((array) ($r->post['v'] ?? []), (string) ($r->post['_note'] ?? ''));
+        @set_time_limit(180);
+        $fonts = Design::save((array) ($r->post['v'] ?? []), (string) ($r->post['_note'] ?? ''));
         $this->changed();
         $tab = preg_replace('~[^\w\-]~', '', (string) ($r->post['_tab'] ?? ''));
-        return $this->back('/admin/design' . ($tab !== '' ? '#' . $tab : ''), 'success', __('Design gespeichert. Die Website verwendet die neuen Werte ab dem nächsten Aufruf.'));
+        // Neu gewählte Kit-Schriften: installiert (Hinweis) bzw. nicht erreichbar (Website zeigt bis dahin die Ersatzschrift)
+        $done = array_keys(array_filter($fonts, fn($f) => $f['ok']));
+        $failed = array_keys(array_filter($fonts, fn($f) => !$f['ok']));
+        if ($failed) {
+            app()->session->flash('error', __('Schrift {fonts} konnte nicht installiert werden (Anbieter nicht erreichbar?). Bis dahin zeigt die Website die Ersatzschrift – erneut speichern oder php bin/console fonts:sync.', ['fonts' => implode(', ', $failed)]));
+        }
+        $msg = __('Design gespeichert. Die Website verwendet die neuen Werte ab dem nächsten Aufruf.')
+            . ($done ? ' ' . __('Schrift installiert: {fonts}.', ['fonts' => implode(', ', $done)]) : '');
+        return $this->back('/admin/design' . ($tab !== '' ? '#' . $tab : ''), 'success', $msg);
     }
 
     /** Live-Vorschau: Seite mit den ungespeicherten Werten (nur im Speicher); _dark = dunkle Werte erzwingen */

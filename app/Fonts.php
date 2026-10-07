@@ -20,6 +20,14 @@ namespace Core;
  *
  * Style-Editor (Core\Design): installierte Schriften erscheinen in jedem Token vom Typ „font“ als „Name (installiert)“,
  * sofern das Theme sie nicht mit 'design' => ['fonts_extra' => false] ausschließt; design_head() bindet font.css ein.
+ *
+ * Kit-Schriften: Kits liefern keine Webfonts mehr mit, die es hier gibt – sie erklären sie nur (design.php → fonts):
+ *   'inter' => ['label' => 'Inter', 'stack' => 'Inter,system-ui,sans-serif', 'fontsource' => 'inter',
+ *               'styles' => ['normal', 'italic'], 'variable' => true, 'weights' => [400, 700], 'axis' => 'wght']
+ * ensure() installiert, was fehlt (oder erweitert eine vorhandene Installation – nie verkleinert), needed() ermittelt
+ * die Schriften der Website (aktuelle Werte, Standardwerte des Kits, Landingpages). Ausgelöst von fonts:sync (Deploy),
+ * Design::save(), Kit-Wahl/Kit-Wechsel/Erststart (requestSync() → runPending() beim nächsten Aufruf der Verwaltung).
+ * Beim Seitenaufruf wird nie etwas geladen: fehlt eine Schrift, gilt der Ersatz-Stapel ('stack') bis zum nächsten Abgleich.
  */
 final class Fonts
 {
@@ -41,7 +49,17 @@ final class Fonts
         'caveat', 'jetbrains-mono', 'ibm-plex-mono'];
     private const GOOGLE_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
+    /** Einstellung (je Website): Abgleich der Kit-Schriften beim nächsten Aufruf der Verwaltung (Kit-Wahl, Erststart) */
+    public const PENDING = 'sys.fonts_pending';
+
     private static ?array $manifest = null;
+    /** Zähler für Zwischenspeicher anderer Klassen (Design::fonts) – ändert sich mit jeder Installation */
+    private static int $stamp = 0;
+
+    public static function stamp(): int
+    {
+        return self::$stamp;
+    }
 
     /** Proxy-Quelle (nur serverseitig) – aufgerufen von Proxy::sources() */
     public static function registerProxy(): void
@@ -112,6 +130,7 @@ final class Fonts
         file_put_contents($tmp, $json . "\n", LOCK_EX);
         rename($tmp, self::dir('fonts.json'));
         self::$manifest = $m;
+        self::$stamp++;
     }
 
     /** Installierte Schriften [id => Metadaten] */
@@ -186,8 +205,11 @@ final class Fonts
         return $out;
     }
 
-    /** Verwendung merken (nach dem Speichern im Style-Editor): Website · Theme → installierte Schriften */
-    public static function recordUsage(string $site, string $theme, array $values, array $tokens): void
+    /**
+     * Verwendung merken (nach dem Speichern im Style-Editor, fonts:sync): Website · Theme → installierte Schriften und
+     * Kit-Schriften ($fonts = Design::fonts(), Einträge mit 'fontsource')
+     */
+    public static function recordUsage(string $site, string $theme, array $values, array $tokens, array $fonts = []): void
     {
         $m = self::manifest();
         if (!$m['fonts'] && !$m['usage']) return;
@@ -195,7 +217,9 @@ final class Fonts
         $used = [];
         foreach ($tokens as $n => $t) {
             $v = (string) ($values[$n] ?? '');
-            if (($t['type'] ?? '') === 'font' && str_starts_with($v, self::PREFIX)) $used[substr($v, strlen(self::PREFIX))] = true;
+            if (($t['type'] ?? '') !== 'font') continue;
+            if (str_starts_with($v, self::PREFIX)) $used[substr($v, strlen(self::PREFIX))] = true;
+            elseif (($fs = (string) ($fonts[$v]['fontsource'] ?? '')) !== '' && self::validId($fs) && isset($m['fonts'][$fs])) $used[$fs] = true;
         }
         $changed = false;
         foreach (array_keys($m['usage']) as $id) {
@@ -338,7 +362,9 @@ final class Fonts
 
     /**
      * Schrift installieren (ersetzt eine vorhandene Installation derselben Familie).
-     * @param array{weights?: list<int|string>, styles?: list<string>, subsets?: list<string>, variable?: bool, preload?: bool} $opt
+     * 'axis' (nur variabel): Achsen-Datei der Fontsource-Pakete je Lage, z. B. 'opsz' (Fraunces mit optischen Größen),
+     * 'soft', 'full' (alle Achsen) – Text oder [normal => …, italic => …]; Standard 'wght'. Fehlt die Datei, gilt 'wght'.
+     * @param array{weights?: list<int|string>, styles?: list<string>, subsets?: list<string>, variable?: bool, preload?: bool, axis?: string|array<string, string>} $opt
      * @return array{ok: bool, message: string, font?: array}
      */
     public static function install(string $id, array $opt = [], string $by = ''): array
@@ -360,17 +386,25 @@ final class Fonts
             return ['ok' => false, 'message' => __('Zu viele Dateien – bitte weniger Schnitte oder Zeichensätze wählen.')];
         }
 
+        // Achsen-Datei je Lage (nur variabel): wght (Standard), opsz, soft, full …
+        $axisOf = function (string $st) use ($opt): string {
+            $a = $opt['axis'] ?? 'wght';
+            $k = strtolower((string) (is_array($a) ? ($a[$st] ?? 'wght') : $a));
+            return self::validAxis($k) ? $k : 'wght';
+        };
         // Dateien laden: Fontsource (jsDelivr), sonst Google Fonts CSS2
-        $plan = [];   // [file, url, style, weight|range, subset]
+        $plan = [];   // [file, url, style, weight|range, subset, achse]
         foreach ($styles as $st) {
             foreach ($subsets as $sub) {
                 if ($variable) {
-                    $plan[] = ["$sub-wght-$st.woff2", self::CDN . "/fontsource/fonts/$id:vf@latest/$sub-wght-$st.woff2", $st, $d['axes']['wght']['min'] . ' ' . $d['axes']['wght']['max'], $sub];
+                    $ax = $axisOf($st);
+                    $plan[] = ["$sub-$ax-$st.woff2", self::CDN . "/fontsource/fonts/$id:vf@latest/$sub-$ax-$st.woff2", $st, $d['axes']['wght']['min'] . ' ' . $d['axes']['wght']['max'], $sub, $ax];
                 } else {
-                    foreach ($weights as $w) $plan[] = ["$sub-$w-$st.woff2", self::CDN . "/fontsource/fonts/$id@latest/$sub-$w-$st.woff2", $st, (string) $w, $sub];
+                    foreach ($weights as $w) $plan[] = ["$sub-$w-$st.woff2", self::CDN . "/fontsource/fonts/$id@latest/$sub-$w-$st.woff2", $st, (string) $w, $sub, ''];
                 }
             }
         }
+        $axisUsed = [];
         $tmp = self::dir('.tmp-' . $id . '-' . bin2hex(random_bytes(4)));
         @mkdir($tmp, 0775, true);
         $source = 'fontsource';
@@ -378,8 +412,15 @@ final class Fonts
         $total = 0;
         $google = null;
         $fail = function (string $msg) use ($tmp): array { self::rmdir($tmp); return ['ok' => false, 'message' => $msg]; };
-        foreach ($plan as [$name, $url, $st, $w, $sub]) {
+        foreach ($plan as [$name, $url, $st, $w, $sub, $ax]) {
             $bin = self::download($url);
+            if ($bin === null && $ax !== '' && $ax !== 'wght') {
+                // Achsen-Datei fehlt (Schrift ohne diese Achse): normale variable Datei (wght)
+                $name = "$sub-wght-$st.woff2";
+                $bin = self::download(self::CDN . "/fontsource/fonts/$id:vf@latest/$name");
+                $ax = 'wght';
+            }
+            if ($ax !== '') $axisUsed[$st] = ($axisUsed[$st] ?? $ax) === $ax ? $ax : 'wght';
             if ($bin === null) {
                 // Ausweichweg: Google Fonts CSS2 (woff2) – dieselbe Familie, gleicher Schnitt und Zeichensatz
                 $google ??= self::googleFaces($d['family'], $variable ? [] : $weights, $styles, $variable ? $d['axes']['wght'] : null);
@@ -415,7 +456,11 @@ final class Fonts
             'copyright' => $copyright, 'source' => $source, 'version' => $d['version'], 'variable' => $variable,
             'axes' => $variable ? ['wght' => $d['axes']['wght']] : [], 'weights' => $variable ? array_values(array_filter($d['weights'], fn($w) => $w >= $d['axes']['wght']['min'] && $w <= $d['axes']['wght']['max'])) : $weights,
             'styles' => $styles, 'subsets' => $subsets, 'files' => array_map(fn($f) => ['file' => $f['file'], 'bytes' => $f['bytes']], $files),
-            'bytes' => $total, 'installed_at' => date('c'), 'by' => $by, 'preload' => !empty($opt['preload'])];
+            'bytes' => $total, 'installed_at' => date('c'), 'by' => $by, 'preload' => !empty($opt['preload']),
+            // Achsen-Datei je Lage (variabel) und die angeforderte Auswahl (für ensure(): erfüllt / zusammenführen)
+            'axis' => $variable ? $axisUsed : [],
+            'requested' => self::spec(['fontsource' => $id, 'variable' => !empty($opt['variable']), 'weights' => (array) ($opt['weights'] ?? [400, 700]),
+                'styles' => (array) ($opt['styles'] ?? ['normal']), 'subsets' => (array) ($opt['subsets'] ?? self::DEFAULT_SUBSETS), 'axis' => $opt['axis'] ?? 'wght'])];
         file_put_contents("$tmp/font.css", self::css($meta, $files, $d['unicodeRange']));
 
         // Atomar austauschen
@@ -509,6 +554,211 @@ final class Fonts
         @rmdir($real);
     }
 
+    // ------------------------------------------------------------------ Kit-Schriften: erklären, sicherstellen, abgleichen
+
+    private static function validAxis(string $a): bool
+    {
+        return (bool) preg_match('~^[a-z]{3,10}$~', $a);
+    }
+
+    /**
+     * Anforderung aus einer Schrift-Angabe des Kits (design.php → fonts → ['fontsource' => id, 'styles', 'variable',
+     * 'weights', 'axis', 'subsets']) – Standard: variabel (sonst Stärken 400/700), aufrecht, latin + latin-ext, Achse wght.
+     * @return array{id: string, variable: bool, weights: list<int>, styles: list<string>, subsets: list<string>, axis: array<string, string>}|null
+     */
+    public static function spec(array $f): ?array
+    {
+        $id = strtolower(trim((string) ($f['fontsource'] ?? '')));
+        if (!self::validId($id)) return null;
+        $styles = array_values(array_intersect(['normal', 'italic'], array_map('strval', (array) ($f['styles'] ?? ['normal'])))) ?: ['normal'];
+        $ax = $f['axis'] ?? 'wght';
+        $axis = [];
+        foreach ($styles as $st) {
+            $k = strtolower((string) (is_array($ax) ? ($ax[$st] ?? 'wght') : $ax));
+            $axis[$st] = self::validAxis($k) ? $k : 'wght';
+        }
+        $weights = array_values(array_unique(array_filter(array_map('intval', (array) ($f['weights'] ?? [400, 700])), fn($w) => $w >= 1 && $w <= 1000)));
+        sort($weights);
+        $subsets = array_values(array_unique(array_filter(array_map('strval', (array) ($f['subsets'] ?? self::DEFAULT_SUBSETS)), fn($s) => (bool) preg_match('~^[a-z0-9-]{1,40}$~', $s))));
+        sort($subsets);
+        return ['id' => $id, 'variable' => (bool) ($f['variable'] ?? true), 'weights' => $weights ?: [400], 'styles' => $styles,
+            'subsets' => $subsets ?: self::DEFAULT_SUBSETS, 'axis' => $axis];
+    }
+
+    /** Zwei Anforderungen derselben Schrift vereinen (Kursive, Stärken, Zeichensätze; verschiedene Achsen → 'full') */
+    public static function mergeSpec(array $a, array $b): array
+    {
+        $styles = array_values(array_intersect(['normal', 'italic'], [...$a['styles'], ...$b['styles']]));
+        $axis = [];
+        foreach ($styles as $st) {
+            $x = $a['axis'][$st] ?? null;
+            $y = $b['axis'][$st] ?? null;
+            $axis[$st] = match (true) {
+                $x === null => $y ?? 'wght', $y === null, $x === $y, $y === 'wght' => $x, $x === 'wght' => $y, default => 'full',
+            };
+        }
+        $weights = array_values(array_unique([...$a['weights'], ...$b['weights']]));
+        sort($weights);
+        $subsets = array_values(array_unique([...$a['subsets'], ...$b['subsets']]));
+        sort($subsets);
+        return ['id' => $a['id'], 'variable' => $a['variable'] || $b['variable'], 'weights' => $weights, 'styles' => $styles, 'subsets' => $subsets, 'axis' => $axis];
+    }
+
+    /** Erfüllt die Installation ($have) die Anforderung ($need)? */
+    public static function covers(array $have, array $need): bool
+    {
+        if (array_diff($need['subsets'], $have['subsets']) || array_diff($need['styles'], $have['styles'])) return false;
+        if ($need['variable'] && !$have['variable']) return false;
+        if (!$have['variable'] && array_diff($need['weights'], $have['weights'])) return false;
+        foreach ($need['styles'] as $st) {
+            $n = $need['axis'][$st] ?? 'wght';
+            $h = $have['axis'][$st] ?? 'wght';
+            if ($n !== 'wght' && $n !== $h && $h !== 'full') return false;
+        }
+        return true;
+    }
+
+    /** Was eine Installation abdeckt (angeforderte Auswahl, bei älteren Installationen aus den Dateien abgeleitet) */
+    private static function haveOf(string $id, array $meta): array
+    {
+        if (is_array($meta['requested'] ?? null) && isset($meta['requested']['styles'])) return $meta['requested'];
+        return self::spec(['fontsource' => $id, 'variable' => !empty($meta['variable']), 'weights' => (array) ($meta['weights'] ?? []),
+            'styles' => (array) ($meta['styles'] ?? ['normal']), 'subsets' => (array) ($meta['subsets'] ?? []), 'axis' => (array) ($meta['axis'] ?? [])])
+            ?? ['id' => $id, 'variable' => false, 'weights' => [], 'styles' => [], 'subsets' => [], 'axis' => []];
+    }
+
+    /**
+     * Schriften sicherstellen: fehlende installieren, unvollständige erweitern (mit der vorhandenen Installation
+     * zusammengeführt – nie verkleinert). Lädt nur, wenn etwas fehlt. Ohne Rechteprüfung (Systemaufgabe: Kit-Wahl,
+     * Style-Editor, fonts:sync) – die Oberfläche „Schriften“ prüft canManage() selbst.
+     * @param array<int|string, string|array> $fonts  Liste von IDs oder [id => Anforderung (spec() bzw. Kit-Angabe)]
+     * @return array<string, array{ok: bool, action: string, message: string}>  action: present | install | update (dry) | installed | updated | failed
+     */
+    public static function ensure(array $fonts, bool $dryRun = false, string $by = 'system'): array
+    {
+        $want = [];
+        foreach ($fonts as $k => $v) {
+            $s = is_array($v) ? self::spec(['fontsource' => $v['fontsource'] ?? $v['id'] ?? (is_string($k) ? $k : '')] + $v) : self::spec(['fontsource' => (string) $v]);
+            if ($s) $want[$s['id']] = isset($want[$s['id']]) ? self::mergeSpec($want[$s['id']], $s) : $s;
+        }
+        $out = [];
+        foreach ($want as $id => $s) {
+            $meta = self::get($id);
+            $have = $meta ? self::haveOf($id, $meta) : null;
+            if ($have && self::covers($have, $s)) {
+                $out[$id] = ['ok' => true, 'action' => 'present', 'message' => ''];
+                continue;
+            }
+            $opt = $have ? self::mergeSpec($have, $s) : $s;
+            if ($dryRun) {
+                $out[$id] = ['ok' => true, 'action' => $meta ? 'update' : 'install', 'message' => ''];
+                continue;
+            }
+            @set_time_limit(180);
+            try {
+                $r = self::install($id, $opt + ['preload' => !empty($meta['preload'])], $by);
+            } catch (\Throwable $e) {
+                $r = ['ok' => false, 'message' => $e->getMessage()];
+            }
+            if (!$r['ok']) error_log('[fonts] ' . $id . ': ' . strip_tags((string) $r['message']));
+            $out[$id] = ['ok' => (bool) $r['ok'], 'action' => $r['ok'] ? ($meta ? 'updated' : 'installed') : 'failed', 'message' => strip_tags((string) $r['message'])];
+        }
+        return $out;
+    }
+
+    /**
+     * Kit-Schriften, die die aktuelle Website braucht: Schriften mit 'fontsource' in den aktuellen Werten, den
+     * Standardwerten des Kits und den Überschreibungen der Landingpages (alle Tokens vom Typ „font“).
+     * @return array<string, array> [id => Anforderung]
+     */
+    public static function needed(): array
+    {
+        $tokens = array_filter(Design::tokens(), fn($t) => ($t['type'] ?? '') === 'font');
+        if (!$tokens) return [];
+        $fonts = Design::fonts();
+        $sets = [Design::values(), Design::defaults()];
+        $keys = [];
+        foreach (array_keys($tokens) as $n) {
+            foreach ($sets as $vals) $keys[(string) ($vals[$n] ?? '')] = true;
+            foreach (Landings::all() as $l) if (($v = $l->fontFor($n)) !== null) $keys[$v] = true;
+        }
+        $out = [];
+        foreach (array_keys($keys) as $k) {
+            if (empty($fonts[$k]['fontsource']) || !($s = self::spec($fonts[$k]))) continue;
+            $out[$s['id']] = isset($out[$s['id']]) ? self::mergeSpec($out[$s['id']], $s) : $s;
+        }
+        ksort($out);
+        return $out;
+    }
+
+    /** Benötigte, aber nicht (vollständig) installierte Kit-Schriften der aktuellen Website → IDs */
+    public static function missing(): array
+    {
+        $out = [];
+        foreach (self::needed() as $id => $s) {
+            $meta = self::get($id);
+            if (!$meta || !self::covers(self::haveOf($id, $meta), $s)) $out[] = $id;
+        }
+        return $out;
+    }
+
+    /** Kit-Schriften der aktuellen Website abgleichen (installieren, Verwendung merken) */
+    public static function syncSite(bool $dryRun = false, string $by = 'system'): array
+    {
+        $res = self::ensure(self::needed(), $dryRun, $by);
+        if (!$dryRun && $res) self::recordUsage(site()->key, app()->theme->name, Design::values(), Design::tokens(), Design::fonts());
+        return $res;
+    }
+
+    /** Zeile für `health` und die Übersicht: fehlende Kit-Schriften als Hinweis (nie Fehler – es gilt die Ersatzschrift) */
+    public static function health(): array
+    {
+        try {
+            $need = self::needed();
+            $miss = $need ? self::missing() : [];
+        } catch (\Throwable) {
+            return [];
+        }
+        if (!$need) return [];
+        if (!$miss) return [__('Schriften des Kits installiert ({n})', ['n' => count($need)]) => true];
+        return [__('Schrift fehlt: {fonts} – php bin/console fonts:sync (bis dahin zeigt die Website die Ersatzschrift)', ['fonts' => implode(', ', $miss)]) => null];
+    }
+
+    /** Abgleich vormerken (Kit gewählt/gewechselt, Erststart) – läuft beim nächsten Aufruf der Verwaltung bzw. mit fonts:sync */
+    public static function requestSync(): void
+    {
+        try {
+            app()->settings->set(self::PENDING, 1);
+        } catch (\Throwable) {
+        }
+    }
+
+    /** Vorgemerkten Abgleich ausführen (AdminController::view – nie bei Seitenaufrufen der Besucher) */
+    public static function runPending(): void
+    {
+        try {
+            if (!app()->settings->get(self::PENDING)) return;
+            // Vorher zurücksetzen: ohne Netz kein erneuter Versuch bei jedem Aufruf – health/Übersicht melden Fehlendes
+            app()->settings->set(self::PENDING, 0);
+            self::syncSite();
+        } catch (\Throwable $e) {
+            error_log('[fonts] Abgleich: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @font-face für die Vorschau einer (noch) nicht installierten Kit-Schrift im Style-Editor – Datei von der eigenen
+     * Domain (/admin/system/fonts/preview/{id}, ein Schnitt, lateinisch). Familie = erster Name im Stapel des Kits.
+     */
+    public static function previewFace(array $f): string
+    {
+        $id = (string) ($f['fontsource'] ?? '');
+        if (!self::validId($id) || !preg_match('~^\s*(?:"([^"]+)"|\'([^\']+)\'|([^,]+))~', (string) ($f['stack'] ?? ''), $m)) return '';
+        $family = self::cleanFamily(trim($m[1] ?: ($m[2] ?? '') ?: ($m[3] ?? '')));
+        if ($family === '') return '';
+        return '@font-face{font-family:"' . $family . '";font-style:normal;font-weight:400;font-display:swap;src:url(' . url('/admin/system/fonts/preview/' . $id) . ') format("woff2")}';
+    }
+
     // ------------------------------------------------------------------ Lizenzen & Danksagungen
 
     /** Abschnitt „Installierte Schriften“ für die Seite Lizenzen & Danksagungen (help/licenses.php) – leer ohne Schriften */
@@ -559,11 +809,28 @@ final class Fonts
                 $fonts = self::installed();
                 if (!$fonts) { echo "Keine Schriften installiert.\n"; return 0; }
                 foreach ($fonts as $id => $f) {
+                    $ax = array_unique(array_filter((array) ($f['axis'] ?? []), fn($a) => $a !== 'wght'));
                     printf("%-24s %-24s %-9s %8s  %s  %s\n", $id, $f['family'], $f['license'], Media::humanSize((int) $f['bytes']),
-                        $f['variable'] ? 'variabel ' . $f['axes']['wght']['min'] . '–' . $f['axes']['wght']['max'] : implode(',', $f['weights']),
+                        ($f['variable'] ? 'variabel ' . $f['axes']['wght']['min'] . '–' . $f['axes']['wght']['max'] . ($ax ? ' (' . implode('/', $ax) . ')' : '') : implode(',', $f['weights']))
+                        . (in_array('italic', (array) $f['styles'], true) ? ' +kursiv' : ''),
                         ($u = self::usage($id)) ? 'verwendet: ' . implode(', ', $u) : '');
                 }
                 return 0;
+            case 'fonts:sync':
+                // Kit-Schriften der Website (aktuelle Werte, Standardwerte, Landingpages) installieren bzw. ergänzen
+                $dry = isset($opt['dry-run']);
+                $label = site()->key . ' · ' . app()->theme->name;
+                $res = self::syncSite($dry, 'cli');
+                if (!$res) { echo "Keine Kit-Schriften nötig ($label).\n"; return 0; }
+                $fail = 0;
+                $words = ['present' => 'vorhanden', 'install' => 'wird installiert', 'update' => 'wird ergänzt', 'installed' => 'installiert', 'updated' => 'ergänzt', 'failed' => 'FEHLER'];
+                foreach ($res as $id => $r) {
+                    printf("  %-28s %s%s\n", $id, $words[$r['action']] ?? $r['action'], $r['ok'] || $r['message'] === '' ? '' : ' – ' . $r['message']);
+                    $fail += $r['ok'] ? 0 : 1;
+                }
+                echo $fail ? "$fail Schrift(en) nicht installiert ($label) – bis dahin gilt die Ersatzschrift.\n"
+                    : ($dry ? "Probelauf ($label) – nichts geändert.\n" : "Schriften aktuell ($label).\n");
+                return $fail ? 1 : 0;
             case 'fonts:remove':
                 $id = self::resolveId(implode(' ', $pos), true) ?? '';
                 $r = self::remove($id, isset($opt['force']));

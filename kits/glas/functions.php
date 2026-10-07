@@ -28,27 +28,10 @@ function glas_luminance(string $hex): float
     return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
 }
 
-/** Dateiname der variablen Schrift (latin) je Schlüssel – muss exakt der URL in css/font-*.css entsprechen (build.mjs) */
-function glas_font_files(): array
-{
-    return [
-        'outfit' => 'outfit-latin-wght-normal.woff2',
-        'figtree' => 'figtree-latin-wght-normal.woff2',
-        'sora' => 'sora-latin-wght-normal.woff2',
-        'urbanist' => 'urbanist-latin-wght-normal.woff2',
-    ];
-}
-
-/** <link rel="preload"> für Fließtext- und Überschriften-Schrift (je eine variable Datei, latin) */
+/** <link rel="preload"> für die Hauptschnitte der gewählten Schriften (Kit-Schriften vom Schriften-Manager, Core\Design::preloads) */
 function glas_font_preloads(): string
 {
-    $files = glas_font_files();
-    $h = '';
-    foreach (array_unique([(string) design('font_body'), (string) design('font_head')]) as $font) {
-        if (!isset($files[$font])) continue;
-        $h .= '<link rel="preload" href="' . e(app()->theme->fontUrl('fonts/' . $files[$font])) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-    }
-    return $h;
+    return \Core\Design::preloads(['font_body', 'font_head']);
 }
 
 /** Name der Website (Kurzname für die Wortmarke) */

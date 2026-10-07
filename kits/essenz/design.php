@@ -127,13 +127,13 @@ return [
         ]],
     ],
 
-    // Selbst gehostete Schriften (kits/essenz/build.mjs erzeugt css/font-*.css) – variable Schriften: ein Download für alle Stärken
+    // Schriften: 'fontsource' = installiert der Schriften-Manager (Core\Fonts, fonts:sync; selbst gehostet, ohne externe Anfragen) – variable Schriften: ein Download für alle Stärken
     'fonts' => [
-        'inter' => ['label' => 'Inter (Grotesk, neutral · variabel)', 'stack' => 'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-inter.css'],
-        'inter-tight' => ['label' => 'Inter Tight (Grotesk, eng – für Überschriften · variabel)', 'stack' => '"Inter Tight",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-inter-tight.css'],
-        'manrope' => ['label' => 'Manrope (Grotesk, geometrisch-warm · variabel)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-manrope.css'],
-        'geist' => ['label' => 'Geist (Grotesk, sachlich-technisch · variabel)', 'stack' => 'Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-geist.css'],
-        'geist-mono' => ['label' => 'Geist Mono (Beschriftung, Monospace · variabel)', 'stack' => '"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace', 'css' => 'css/font-geist-mono.css'],
+        'inter' => ['label' => 'Inter (Grotesk, neutral · variabel)', 'stack' => 'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'inter'],
+        'inter-tight' => ['label' => 'Inter Tight (Grotesk, eng – für Überschriften · variabel)', 'stack' => '"Inter Tight",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'inter-tight'],
+        'manrope' => ['label' => 'Manrope (Grotesk, geometrisch-warm · variabel)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'manrope'],
+        'geist' => ['label' => 'Geist (Grotesk, sachlich-technisch · variabel)', 'stack' => 'Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'geist'],
+        'geist-mono' => ['label' => 'Geist Mono (Beschriftung, Monospace · variabel)', 'stack' => '"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace', 'fontsource' => 'geist-mono'],
         'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
         'system-mono' => ['label' => 'System-Monospace (ohne Download)', 'stack' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace'],
     ],

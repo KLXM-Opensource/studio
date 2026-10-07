@@ -24,7 +24,12 @@
 @container hdr (min-width:90rem){.fit-90 .hdr__nav{display:flex}.fit-90 .menu-btn{display:none}}
 @container hdr (min-width:96rem){.fit-96 .hdr__nav{display:flex}.fit-96 .menu-btn{display:none}}
 @container hdr (min-width:102rem){.fit-102 .hdr__nav{display:flex}.fit-102 .menu-btn{display:none}}
-@container hdr (max-width:22rem){.menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{padding-inline:.75rem}.brand__name{font-size:1rem}}
+@container hdr (max-width:26rem){.menu-btn__label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{padding-inline:.75rem}.brand__name{font-size:1rem;white-space:normal;text-wrap:balance}}
+/* Lange Namen: Marke darf schrumpfen (zweizeilig), Suche und Menü bleiben im Bild */
+.hdr__brand,.brand{min-width:0}
+.brand__name{white-space:normal;text-wrap:balance}
+/* Schmale Kopfleiste: Handlungsaufruf nur noch im Menü-Blatt (.mnav__cta) – nach verfügbarem Platz, nicht nach Bildschirmbreite */
+@container hdr (max-width:46rem){.hdr .ha .ha-cta{display:none}}
 @supports (animation-timeline:scroll()){.hdr-sticky .hdr{animation:n-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}}
 @keyframes n-hdr{to{box-shadow:0 10px 28px -20px var(--n-sh2)}}
 

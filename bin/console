@@ -38,7 +38,13 @@
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
  *
  * Kits & Erweiterungen (Kits liegen unter kits/{name}/ – theme:* und kit:* gehen gleichermaßen)
- *   theme:list | kit:list                             Installierte Kits
+ *   theme:list | kit:list                             Installierte Kits: Herkunft (lokal, upload, composer), Version, nutzende Websites,
+ *                                                     verdeckte Kits gleichen Namens
+ *   kit:install <datei.zip|ordner> [--force]          Kit-Paket installieren (geprüft, nach storage/kits/{name}, Assets veröffentlichen;
+ *                                                     --force: hochgeladenes Kit gleichen Namens ersetzen) – enthält PHP-Code!
+ *   kit:remove <name>                                 Hochgeladenes Kit entfernen (nicht, solange eine Website es nutzt)
+ *   kits:publish [name]                               Fertige Assets der Kit-Pakete (public/) nach public/assets/kits kopieren
+ *                                                     (nach composer install bzw. jedem Deploy)
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
  *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung);
@@ -58,6 +64,8 @@
  *                                                     Schrift laden und selbst ausliefern (public/assets/fonts/installed, alle Websites)
  *   fonts:list                                        Installierte Schriften mit Größe, Lizenz und Verwendung
  *   fonts:remove <familie> [--force]                  Schrift entfernen (--force: auch wenn noch verwendet)
+ *   fonts:sync [--all] [--dry-run]                    Schriften der Kits installieren bzw. ergänzen (aktuelle Werte, Standardwerte,
+ *                                                     Landingpages; --all: alle Websites) – nach jedem Deploy
  *   accent:check                                      Akzentfarben der Verwaltung auf Kontrast prüfen (WCAG AA)
  *
  * Betrieb & Deploy
@@ -503,11 +511,42 @@ switch ($cmd) {
 
     case 'theme:list':
     case 'kit:list':
-        foreach (Core\Theme::available() as $n => $l) {
-            $def = (string) Core\Kit::definitionFile(Core\Kit::dir($n));
-            $v = preg_match("~'version'\s*=>\s*'([^']+)'~", (string) file_get_contents($def), $m) ? $m[1] : '–';
-            printf("%-14s %-30s %-8s %s\n", $n, $l, $v, Core\Kit::relative(Core\Kit::dir($n)));
+        // Herkunft: lokal (kits/, mitgeliefert bzw. selbst entwickelt), upload (storage/kits/), composer (vendor/); Verwendung je Website
+        foreach (Core\KitPackages::overview() as $n => $k) {
+            $src = ['local' => 'lokal', 'upload' => 'upload', 'composer' => 'composer'][$k['source']] ?? $k['source'];
+            printf("%-14s %s %-8s %-9s %-34s %s%s%s\n", $n, mb_str_pad(mb_strimwidth($k['label'], 0, 30, '…'), 30), $k['version'] ?: '–', $src, $k['dir'],
+                $k['used'] ? 'genutzt: ' . implode(', ', $k['used']) : '–', $k['compatible'] ? '' : ' · verlangt Core ' . $k['requires'],
+                $k['published'] === false ? ' · Assets fehlen (kits:publish)' : '');
+            foreach ($k['shadowed'] as $sh) echo "  ! verdeckt: " . Core\Kit::relative($sh['dir']) . " ({$sh['source']}) – es gilt " . $k['dir'] . "\n";
         }
+        break;
+
+    case 'kit:install':
+        // kit:install <datei.zip|ordner> [--force] – Kit-Paket prüfen, nach storage/kits/{name} legen, Assets veröffentlichen
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        if (($pos[0] ?? '') === '') { fwrite(STDERR, "Aufruf: kit:install <datei.zip|ordner> [--force]\n"); exit(1); }
+        echo "Hinweis: Ein Kit enthält PHP-Code, der auf allen Websites dieser Installation läuft – nur aus vertrauenswürdiger Quelle installieren.\n";
+        $res = Core\KitPackages::install($pos[0], in_array('--force', $args, true), 'cli:' . (get_current_user() ?: 'console'));
+        foreach ($res['warnings'] as $w) echo "  ! $w\n";
+        if (!$res['ok']) { fwrite(STDERR, $res['message'] . "\n"); exit(1); }
+        echo $res['message'] . "\n  " . Core\Kit::relative(Core\Kit::dir($res['name'])) . " · " . Core\Kit::relative(Core\Kit::publicDir($res['name'])) . "\n"
+           . "Verwenden: Verwaltung → Grundeinstellungen → Aktives Kit bzw. site:create <key> <domain> {$res['name']}\n";
+        break;
+
+    case 'kit:remove':
+        // kit:remove <name> – nur hochgeladene Kits, nie solange eine Website sie nutzt
+        $res = Core\KitPackages::remove((string) ($args[0] ?? ''));
+        if (!$res['ok']) { fwrite(STDERR, $res['message'] . "\n"); exit(1); }
+        echo $res['message'] . "\n";
+        break;
+
+    case 'kits:publish':
+    case 'kit:publish':
+        // Fertige Assets der Kit-Pakete (Upload, Composer) nach public/assets/kits/{name} kopieren – nach composer install bzw. Deploy
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $done = Core\KitPackages::publish($pos[0] ?? null);
+        foreach ($done as $n => $msg) echo str_pad($n, 14) . ' ' . $msg . "\n";
+        if (!$done) echo "Keine Kit-Pakete installiert (Kits unter kits/ baut tools/build.mjs).\n";
         break;
 
     case 'setup:token':
@@ -783,7 +822,9 @@ switch ($cmd) {
               + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
-                + Core\Fragments::health();    // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
+                + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
+                + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
+                + Core\Fonts::health();        // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
@@ -1060,6 +1101,19 @@ switch ($cmd) {
         passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --all');
         echo "Geteilte Tabelle „{$sk}“ eingespielt (" . ($man['created'] ?? '?') . ").\n";
         break;
+
+    case 'fonts:sync':
+        // Kit-Schriften (design.php → fonts → 'fontsource') installieren – je Website; --all: alle Websites der Installation
+        if (in_array('--all', $args, true)) {
+            $rest = array_values(array_filter($args, fn($a) => $a !== '--all'));
+            $fail = 0;
+            foreach (array_keys(Core\Sites::all()) as $k) {
+                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' fonts:sync ' . implode(' ', array_map('escapeshellarg', $rest)) . ' --site=' . escapeshellarg($k), $code);
+                $fail = $fail ?: $code;
+            }
+            exit($fail);
+        }
+        exit(Core\Fonts::console($cmd, $args));
 
     case 'fonts:search':
     case 'fonts:install':

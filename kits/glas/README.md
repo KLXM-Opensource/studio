@@ -42,11 +42,11 @@ kits/glas/
 ├── tools/           contrast.php (Glas-Kontrastmodell) · demo.php + demo-content.php (Musterseiten, GD-Bilder)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, Beschreibung aller Blöcke)
-├── package.json     @fontsource-variable/{outfit,figtree,sora,urbanist} (OFL 1.1), @expo-google-fonts/outfit (TTF für App-Icons)
-└── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+├── package.json     @expo-google-fonts (TTF für App-Icons)
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/glas/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/glas/{css,js}`.
 
 ## Budgets (minifiziert, gemessen)
 
@@ -138,6 +138,6 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Outfit, Figtree, Sora, Urbanist – SIL Open Font License 1.1 (`public/assets/kits/glas/fonts/OFL-{key}.txt`; Outfit-TTF für
+Outfit, Figtree, Sora, Urbanist – SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz in `public/assets/fonts/installed/{id}/LICENSE.txt`; Outfit-TTF für
 den Icon-Generator: `kits/glas/fonts/OFL.txt`). Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch
 erzeugt (GD), frei verwendbar.

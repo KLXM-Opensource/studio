@@ -37,7 +37,9 @@ $phone = praxis_phone();
 <?php endif; ?>
 <?php foreach ($extraCss ?? [] as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
 <?php endforeach; ?>
-<?= design_head() ?>
+<?= $designHead = design_head() ?>
+<?php if (str_contains($designHead, 'data-design-preview')): /* Vorschau im Style-Editor: Dunkel-Werte auch über html.is-dark */ ?><link rel="stylesheet" href="<?= e(theme_asset('css/preview.css')) ?>">
+<?php endif; ?>
 <?php if ($toolbar): ?><link rel="stylesheet" href="<?= e(asset('css/editor.css')) ?>">
 <?php endif; ?>
 <?php if (!$editor): ?><script src="<?= e(theme_asset('js/site.js')) ?>" defer></script>

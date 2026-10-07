@@ -186,4 +186,11 @@ return [
     // Karte (Core\Maps): Route planen
     'mit {name}' => 'with {name}',
     'Andere Karten-App' => 'Other map app',
+    // Formularseite (templates/form-page.php)
+    'Formular ausfüllen' => 'Fill in the form',
+    'Nur das Nötigste – Pflichtfelder sind markiert.' => 'Only what we need – required fields are marked.',
+    'Sicher absenden' => 'Send securely',
+    'Wir kümmern uns' => 'We take care of it',
+    'Nicht für Notfälle:' => 'Not for emergencies:',
+    'Übermittlung verschlüsselt – Ihre Angaben sind nur in der Praxis lesbar.' => 'Encrypted transmission – your details can only be read by the practice.',
 ];

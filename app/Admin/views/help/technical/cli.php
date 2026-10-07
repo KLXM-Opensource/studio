@@ -20,7 +20,10 @@ $__cmds = [
         ['support:stats [site]', 'Support-Meldungen: offen, neu, dringend, wartend, gesamt'],
     ],
     'Kits & Erweiterungen' => [
-        ['theme:list', 'Installierte Kits (Alias: kit:list)'],
+        ['theme:list', 'Installierte Kits mit Herkunft (lokal, upload, composer), Version, nutzenden Websites und verdeckten Kits gleichen Namens (Alias: kit:list)'],
+        ['kit:install <datei.zip|ordner> [--force]', 'Kit-Paket prüfen und installieren (storage/kits/{name}, Assets nach public/assets/kits/{name}); --force ersetzt ein hochgeladenes Kit gleichen Namens – ein Kit enthält PHP-Code'],
+        ['kit:remove <name>', 'Hochgeladenes Kit entfernen – nicht, solange eine Website es nutzt; mitgelieferte und Composer-Kits nie'],
+        ['kits:publish [name]', 'Fertige Assets der Kit-Pakete (Upload, Composer) aus ihrem Ordner public/ nach public/assets/kits/{name} kopieren (nach composer install und bei jedem Deploy)'],
         ['theme:create <name> <vorlage>', 'Neues Kit als Kopie (Präfix vorlage_* → name_*; Alias: kit:create)'],
         ['extensions:list', 'Installierte Erweiterungen: aktiv je Website, Quelle (config bzw. verwaltung); Verwaltungsrouten aktiver Erweiterungen – Altform ohne Recht und benannte Ausnahmen (csrf, public)'],
         ['extensions:selftest | db:selftest', 'Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten, Werkzeuge, Ereignisse, Verwaltungsrouten, Tabellen, Slots) | Selbsttest Core\\Db\\Table in einer Wegwerf-Datenbank (Exit-Code 1 bei Fehlern)'],

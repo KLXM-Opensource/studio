@@ -31,10 +31,10 @@ kits/foto/
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── package.json     Schriften (Fontsource): Inter, Manrope, DM Sans, Instrument Sans, Space Grotesk, Roboto Condensed, Fraunces,
 │                    Newsreader, Instrument Serif, JetBrains Mono
-└── build.mjs        kopiert die Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/foto/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/foto/{css,js}`.
 
 ## Design-Tokens
 
@@ -158,5 +158,5 @@ cd tools && pnpm run build
 
 ## Lizenzen
 
-Schriften: SIL Open Font License 1.1 (`public/assets/kits/foto/fonts/OFL-{key}.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
+Schriften: SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
 Demo-Bilder und -Videos: automatisch erzeugt, frei verwendbar.

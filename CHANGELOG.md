@@ -6,6 +6,44 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit-Schriften über den Schriften-Manager statt im Kit mitgeliefert
+- Kits liefern keine Webfonts mehr mit, die der Schriften-Manager (`Core\Fonts`) aus dem Google-Fonts-Katalog beziehen
+  kann. Sie erklären die Schrift nur noch in `design.fonts` mit `'fontsource' => id` (optional `variable`, `weights`,
+  `styles`, `axis` wie `opsz`/`soft`, `subsets`, `preload`); installiert wird sie einmal für die ganze Installation unter
+  `public/assets/fonts/installed/{id}/` samt `LICENSE.txt`. Schriften, die es dort nicht gibt, bleiben mit `'css'` im Kit.
+- Alle mitgelieferten Kits sind umgestellt (basis, editorial, essenz, fluid, foto, galerie, glas, immobilien, modern,
+  nature, praxis): ihre `build.mjs` kopieren nur noch die TTF-Dateien für den App-Icon-Generator, die `@fontsource`-Pakete
+  sind entfernt. `public/assets/kits` ist dadurch rund 15 MB kleiner.
+- `Fonts::ensure()` installiert fehlende Schriften und erweitert vorhandene (Kursive, Stärken, Zeichensätze und Achsen
+  werden zusammengeführt, nie verkleinert); `Fonts::needed()` ermittelt den Bedarf einer Website aus aktuellen Werten,
+  Standardwerten des Kits und Landingpages. Ausgelöst bei Kit-Wahl, Erststart und Kit-Wechsel (beim nächsten Aufruf der
+  Verwaltung), beim Speichern im Style-Editor (Fehler → Hinweis, gespeichert wird trotzdem) und mit
+  `php bin/console fonts:sync [--all] [--dry-run]`, das `deploy/deploy.sh` nach `migrate` aufruft.
+- Beim Seitenaufruf wird nie etwas geladen: Fehlt eine Schrift, gilt der Ersatz-Stapel des Kits; `health` und die Übersicht
+  melden „Schrift fehlt“. Der Style-Editor zeigt noch nicht installierte Schriften in Schriftprobe und Live-Vorschau über
+  `/admin/system/fonts/preview/{id}` (jetzt auch mit dem Recht `design.edit`).
+- Vorladen: `Core\Design::preloads(['font_body', 'font_head'])` bzw. `'preload' => true` an der Schrift (auch für den
+  Offline-Speicher der App); installierte Schriften, die das Kit selbst erklärt, erscheinen im Style-Editor nicht doppelt.
+- `THIRD-PARTY-NOTICES.md` nennt nur noch mitgelieferte Schriften; Entwicklerhandbuch → Kits & Design → „Kit-Schriften“
+  und → Schriften.
+
+### Kits als Pakete: Composer und ZIP-Upload
+- Zusätzliche Kits lassen sich wie Erweiterungen als Paket installieren: per Composer (Paket-Typ `klxm-studio-kit`,
+  `extra.klxm-studio.kit` und `public`) oder als ZIP-Datei unter Grundeinstellungen → **Kits** (`/admin/system/kits`)
+  bzw. `php bin/console kit:install <datei.zip|ordner> [--force]`. Die mitgelieferten Kits bleiben unter `kits/`.
+- Ein Paket bringt seine fertig gebauten Assets im Ordner `public/` mit (kein Node-Build auf dem Server); `kits:publish`
+  kopiert sie nach `public/assets/kits/{name}` – nur Web-Dateitypen, nie PHP. Läuft im Deploy nach `extensions:publish`
+  und wird beim ersten Laden eines Kits ohne Assets einmal nachgeholt.
+- Hochgeladene Kits liegen unter `storage/kits/{name}` (übersteht Deploys). Geprüft werden Größe, Pfade (kein `..`, keine
+  absoluten Pfade, keine Symlinks), Kit-Name, `label`, die verlangte Core-Version und die PHP-Syntax; entpackt wird in einen
+  Arbeitsordner und atomar umbenannt. Mitgelieferte und per Composer installierte Kits werden nie ersetzt.
+- Die Seite „Kits“ zeigt alle Kits mit Herkunft (mitgeliefert/lokal, hochgeladen, Composer), Version und nutzenden Websites;
+  hochgeladene, nicht verwendete Kits lassen sich entfernen (`kit:remove`). Recht wie bei Schriften (Integratoren,
+  Netzwerk-Administration, Administration der Netzwerk-Website); `'kit_upload' => false` schaltet das Hochladen ab.
+- `Core\Kit` findet Kits unter `kits/`, `storage/kits/` und in Composer-Paketen; bei gleichem Namen gilt diese Reihenfolge,
+  verdeckte Kits melden `kit:list` und `health`. `kit:list` nennt Herkunft und nutzende Websites. Entwicklerhandbuch →
+  Kits & Design → „Kit als Paket“.
+
 ### Erststart mit Willkommen-Bildschirm: Kit und Startinhalte selbst wählen
 - Ersteinrichtung (`/admin/setup`) fragt auf der Netzwerk-Website: **Einzelinstallation** (Administrationskonto) oder
   **Netzwerk** (erstes Konto der Netzwerk-Administration, Zwei-Faktor-Einrichtung bei der ersten Anmeldung).

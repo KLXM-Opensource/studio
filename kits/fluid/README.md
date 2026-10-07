@@ -56,11 +56,11 @@ kits/fluid/
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Showcase)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Kapitel: Breakpointlos, Design/Kopf/Fuß, Seiten-Tipps, Beschreibung aller Blöcke)
-├── package.json     @fontsource-variable/{inter,instrument-sans,bricolage-grotesque,dm-sans,space-grotesk,fraunces,newsreader,jetbrains-mono}, @fontsource/instrument-serif
-└── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+├── package.json     @expo-google-fonts (TTF für App-Icons)
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/fluid/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/fluid/{css,js}`.
 
 ## Budgets (minifiziert, gemessen)
 
@@ -104,7 +104,7 @@ Infoleiste) · Verband (Roboto Condensed in Versalien, Kopf in Markenfarbe, schr
 Hyperlegible, größere Grundschrift, runde Bilder) · Betrieb & Notdienst (Roboto/Roboto Slab, dunkler Kopf, rote Infoleiste) ·
 Kommune & Portal (Poppins, Violett/Petrol, Wellen, zentrierter Fuß) · Wissen & Kampagne (dunkel, Manrope, Verlaufs-Betonung).
 Alle 15 AA hell + dunkel. Zusätzliche Schriften: Open Sans, Source Sans 3, Lato, Roboto (+ Condensed, Slab), PT Sans, Poppins,
-Manrope, Atkinson Hyperlegible Next (selbst gehostet, Fontsource).
+Manrope, Atkinson Hyperlegible Next (selbst gehostet über den Schriften-Manager, Fontsource).
 
 ## Blöcke und Varianten
 
@@ -162,5 +162,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`. Verwaltungsb
 ## Lizenzen
 
 Inter, Instrument Sans, Bricolage Grotesque, DM Sans, Space Grotesk, Fraunces, Newsreader, Instrument Serif,
-JetBrains Mono – SIL Open Font License 1.1 (`public/assets/kits/fluid/fonts/OFL-{key}.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
+JetBrains Mono – SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
 Beispielbilder: automatisch erzeugt (GD), frei verwendbar.

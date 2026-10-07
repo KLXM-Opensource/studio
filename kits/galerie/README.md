@@ -25,10 +25,10 @@ kits/galerie/
 ├── docs/            manual.php + manual/*.php (Handbuch) · css-js.md
 ├── package.json     Fontsource: Inter, Manrope, Instrument Sans, Hanken Grotesk, Space Grotesk, Atkinson Hyperlegible Next,
 │                    Newsreader, Fraunces, Instrument Serif, EB Garamond, JetBrains Mono, IBM Plex Mono
-└── build.mjs        kopiert die Schriften (latin + latin-ext, Kursive für Werktitel) und erzeugt css/font-{key}.css
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/galerie/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/galerie/{css,js}`.
 
 ## Datenmodell
 
@@ -123,5 +123,5 @@ Prüfen: `CMS_SITE=… php bin/console i18n:missing en [--site-texts]`.
 
 ## Lizenzen
 
-Schriften: SIL Open Font License 1.1 (`public/assets/kits/galerie/fonts/OFL-{key}.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
+Schriften: SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`). Symbole: Phosphor (Kern-Sprite, MIT).
 Demo-Bilder und -Video: automatisch erzeugt, frei verwendbar.

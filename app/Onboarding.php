@@ -69,6 +69,7 @@ final class Onboarding
         if (!in_array($mode, self::MODES, true)) throw new \InvalidArgumentException(__('Bitte wählen, ob Startinhalte eingespielt werden sollen.'));
         app()->settings->set('sys.theme', $kit);
         app()->settings->set(self::SEED_KEY, $mode);
+        Fonts::requestSync();   // Schriften des Kits installieren (nächster Aufruf der Verwaltung, Core\Fonts)
         self::$pending = null;
     }
 

@@ -24,11 +24,11 @@ kits/basis/
 ├── tools/             contrast.php (WCAG-Prüfung aller Voreinstellungen) · demo.php + demo-content.php (Musterseiten)
 ├── lang/              en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php    Kapitel für das Handbuch der Redaktion (Array: eigene Kapitel in docs/manual/, Rest aus dem Core)
-├── package.json       @fontsource/{inter,manrope,ibm-plex-sans,source-serif-4,lora,fraunces} + Inter-TTF (Icons)
-└── build.mjs          kopiert die Schriften (latin + latin-ext, 400/600/700) und erzeugt css/font-{key}.css
+├── package.json       @expo-google-fonts (TTF für App-Icons)
+└── build.mjs          TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/basis/{css,js,fonts}` (installiert Kit-Pakete bei Bedarf).
+Build: `cd tools && pnpm run build` → `public/assets/kits/basis/{css,js}` (installiert Kit-Pakete bei Bedarf).
 
 **Budgets** (minifiziert, Stand des aktuellen Builds): immer geladenes CSS = site.css ≈ 27,5 KB + nav-*.css 0,9–4,8 KB
 + Schrift ≈ 2 KB (je Familie) + Design-Datei ≈ 1,3 KB (nur wenn vom Standard abweichend). Damit liegt die Startseite je nach
@@ -122,6 +122,6 @@ entfernen, wenn keine Musterseiten gewünscht sind), Blöcke ergänzen oder entf
 ## Lizenzen
 
 Inter, Manrope, IBM Plex Sans, Source Serif 4, Lora, Fraunces – SIL Open Font License 1.1
-(`public/assets/kits/basis/fonts/OFL-{key}.txt`). Beispielbilder der Musterseiten: automatisch erzeugt (GD), frei verwendbar.
+(installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`). Beispielbilder der Musterseiten: automatisch erzeugt (GD), frei verwendbar.
 Symbole des Kits (`basis_icon()`): eigene Pfade (24 × 24, Linie); zusätzlich stehen die Kern-Symbole (Phosphor duotone,
 MIT) über `icon()` zur Verfügung.

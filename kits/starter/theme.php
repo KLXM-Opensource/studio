@@ -127,12 +127,12 @@ return [
     ],
 
     // ======================================================================================================== § 5 Assets
-    // Schriften: Dieses Kit nutzt die Systemschrift (keine Datei, keine Anfrage). Eigene Schrift – ohne Build:
-    //     php bin/console fonts:install Inter --weights=400,700      (lädt einmalig, liefert selbst aus: public/assets/fonts/installed)
-    // Danach steht „Inter“ im Style-Editor bei „Schrift“ zur Auswahl (Core\Fonts, Schlüssel installed:{id}).
-    // Alternativ mit dem Kit ausliefern: build.mjs + package.json (siehe build.mjs) und hier 'preload' => ['fonts/…woff2'].
+    // Schriften: Dieses Kit nutzt die Systemschrift (keine Datei, keine Anfrage). Eigene Schrift: in design.fonts (§ Design)
+    // mit 'fontsource' => 'inter' erklären – der Schriften-Manager (Core\Fonts) installiert sie bei Kit-Wahl, Speichern im
+    // Style-Editor und mit php bin/console fonts:sync; das Kit liefert keine Webfont-Dateien mit.
+    // Nur Schriften, die es dort nicht gibt: selbst ausliefern (build.mjs + package.json, design.fonts → 'css') und hier
+    // 'preload' => ['fonts/…woff2'] (relativ zu public/assets/kits/{kit}/).
     'fonts' => [
-        // 'preload' => ['fonts/inter-latin-400-normal.woff2'],   // relativ zu public/assets/kits/{kit}/
         // 'icon' => 'fonts/Inter_700Bold.ttf',                    // TTF für den App-Icon-Generator (serverseitig)
     ],
     // Bildformate mit eigenem Zuschnitt in der Mediathek; Blöcke übergeben das Format: img($id, $sizes, ['ratio' => '4:3'])
@@ -215,8 +215,10 @@ return [
                 ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
             ]],
         ],
-        // Schriften für Tokens vom Typ „font“ – 'css' (relativ zu public/assets/kits/{kit}/) wird nur bei Auswahl eingebunden.
-        // Mit Kit-Schrift: 'inter' => ['label' => 'Inter', 'stack' => 'Inter,system-ui,sans-serif', 'css' => 'css/font-inter.css'].
+        // Schriften für Tokens vom Typ „font“ – nur die gewählten werden eingebunden. Schrift aus dem Google-Fonts-Katalog
+        // (installiert der Schriften-Manager, Fontsource-ID): 'inter' => ['label' => 'Inter', 'stack' => 'Inter,system-ui,sans-serif',
+        //   'fontsource' => 'inter', 'styles' => ['normal', 'italic'], 'preload' => true]   (variabel; feste Stärken: 'variable' => false, 'weights' => [400, 700])
+        // Nicht im Katalog: Datei mit dem Kit ausliefern, 'css' => 'css/font-x.css' (relativ zu public/assets/kits/{kit}/).
         'fonts' => [
             'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
             'serif' => ['label' => 'System-Serifenschrift (ohne Download)', 'stack' => 'ui-serif,Georgia,Cambria,"Times New Roman",serif'],

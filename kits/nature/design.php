@@ -139,12 +139,12 @@ return [
         ]],
     ],
 
-    // Selbst gehostete Schriften (kits/nature/build.mjs erzeugt css/font-*.css) – ohne externe Anfragen
+    // Schriften: 'fontsource' = installiert der Schriften-Manager (Core\Fonts, fonts:sync; selbst gehostet, ohne externe Anfragen) – ohne externe Anfragen
     'fonts' => [
-        'fraunces' => ['label' => 'Fraunces (weiche Serif · variabel)', 'stack' => 'Fraunces,"Iowan Old Style",Georgia,ui-serif,serif', 'css' => 'css/font-fraunces.css'],
-        'young-serif' => ['label' => 'Young Serif (freundliche Serif · eine Stärke)', 'stack' => '"Young Serif",Georgia,ui-serif,serif', 'css' => 'css/font-young-serif.css'],
-        'nunito-sans' => ['label' => 'Nunito Sans (freundliche Grotesk · variabel)', 'stack' => '"Nunito Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-nunito-sans.css'],
-        'source-sans-3' => ['label' => 'Source Sans 3 (klare Grotesk · variabel)', 'stack' => '"Source Sans 3",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-source-sans-3.css'],
+        'fraunces' => ['label' => 'Fraunces (weiche Serif · variabel)', 'stack' => 'Fraunces,"Iowan Old Style",Georgia,ui-serif,serif', 'fontsource' => 'fraunces', 'styles' => ['normal', 'italic'], 'axis' => ['normal' => 'soft', 'italic' => 'wght']],
+        'young-serif' => ['label' => 'Young Serif (freundliche Serif · eine Stärke)', 'stack' => '"Young Serif",Georgia,ui-serif,serif', 'fontsource' => 'young-serif'],
+        'nunito-sans' => ['label' => 'Nunito Sans (freundliche Grotesk · variabel)', 'stack' => '"Nunito Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'nunito-sans'],
+        'source-sans-3' => ['label' => 'Source Sans 3 (klare Grotesk · variabel)', 'stack' => '"Source Sans 3",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'source-sans-3'],
         'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
         'system-serif' => ['label' => 'System-Serif (ohne Download)', 'stack' => '"Iowan Old Style","Palatino Linotype",Georgia,ui-serif,serif'],
     ],

@@ -332,4 +332,11 @@ return [
     'Hier entsteht eine neue Website' => 'A new website is coming',
     'Hier entsteht eine neue Website.' => 'A new website is coming soon.',
     'Sie wird gerade eingerichtet – schauen Sie bald wieder vorbei.' => 'It is being set up right now – please check back soon.',
+    // Formulare: Eingangsbestätigung per E-Mail
+    'Eingangsbestätigung: {name}' => 'Confirmation of receipt: {name}',
+    'Eingegangen am {date} um {time} Uhr.' => 'Received on {date} at {time}.',
+    'Guten Tag,' => 'Hello,',
+    'Ihre Angaben:' => 'Your details:',
+    'Mit freundlichen Grüßen' => 'Kind regards',
+    'wir bestätigen den Eingang Ihrer Angaben.' => 'we confirm that we have received your details.',
 ];

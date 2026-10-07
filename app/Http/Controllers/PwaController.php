@@ -56,6 +56,7 @@ final class PwaController
                 $theme->asset('css/blocks.css'),
                 $theme->asset('js/site.js'),
                 ...array_map([$theme, 'fontUrl'], (array) ($theme->def['fonts']['preload'] ?? [])),
+                ...\Core\Design::preloadUrls(),   // Kit-Schriften mit 'preload' (Schriften-Manager)
                 AppIcons::url('icon-192.png'),
             ]));
             $version = substr(md5(CMS_VERSION . json_encode($precache) . AppIcons::version()), 0, 10);

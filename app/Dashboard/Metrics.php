@@ -556,7 +556,7 @@ final class Metrics
         } catch (\Throwable) {
         }
         foreach ([fn() => \Core\Data\Shared::health(), fn() => \Core\Search\Search::health(), fn() => \Core\AI\Ai::health(),
-            fn() => \Core\Sources\Sources::health(), fn() => \Core\Extensions::health(), fn() => \Core\Fragments::health()] as $fn) {
+            fn() => \Core\Sources\Sources::health(), fn() => \Core\Extensions::health(), fn() => \Core\Fragments::health(), fn() => \Core\Fonts::health()] as $fn) {
             try {
                 foreach ((array) $fn() as $l => $ok) $rows[(string) $l] = $ok === null ? null : (bool) $ok;
             } catch (\Throwable $e) {

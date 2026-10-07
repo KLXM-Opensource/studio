@@ -2,12 +2,12 @@
    Schließen), darunter Suche, Navigation mit Unterseiten als Akkordeon, Schnellzugriff, Kontakt, Sprache.
    Wird am Ende der Seite mit media="(max-width:1079.98px)" geladen und blockiert so das erste Rendern nicht. */
 html:has(.mnav[open]){overflow:hidden}
-.mnav{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;background:#fff;color:var(--c-ink);overflow:auto;overscroll-behavior:contain;opacity:0;transform:translateY(-10px);transition:opacity .22s var(--ease),transform .32s var(--ease),overlay .32s allow-discrete,display .32s allow-discrete}
+.mnav{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;background:var(--c-surface);color:var(--c-ink);overflow:auto;overscroll-behavior:contain;opacity:0;transform:translateY(-10px);transition:opacity .22s var(--ease),transform .32s var(--ease),overlay .32s allow-discrete,display .32s allow-discrete}
 .mnav[open]{opacity:1;transform:none}
 @starting-style{.mnav[open]{opacity:0;transform:translateY(-10px)}}
 .mnav::backdrop{background:rgba(22,32,30,.35)}
-.mnav__head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:calc(76px + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(var(--gutter),env(safe-area-inset-right)) 0 max(var(--gutter),env(safe-area-inset-left));border-bottom:1px solid var(--c-line);background:rgba(255,255,255,.94);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
-.mnav__close{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px 0 18px;border:0;border-radius:999px;background:var(--c-ink);color:#fff;font:600 16px var(--font);cursor:pointer}
+.mnav__head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:calc(76px + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(var(--gutter),env(safe-area-inset-right)) 0 max(var(--gutter),env(safe-area-inset-left));border-bottom:1px solid var(--c-line);background:color-mix(in srgb,var(--c-surface) 94%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
+.mnav__close{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px 0 18px;border:0;border-radius:999px;background:var(--c-dark-sec);color:#fff;font:600 16px var(--font);cursor:pointer}
 .mnav__close:hover{background:var(--c-bordeaux)}
 .mnav__body{max-width:640px;margin:0 auto;padding:20px max(var(--gutter),env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left))}
 .mnav__h{margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--c-text-3)}
@@ -22,7 +22,7 @@ html:has(.mnav[open]){overflow:hidden}
 .mnav__chev{display:grid;place-items:center;flex:none;width:40px;height:40px;margin-left:auto;border-radius:50%;background:var(--c-gray-100);transition:background .2s,transform .25s var(--ease)}
 .mnav__chev::before{content:"";width:8px;height:8px;margin-top:-4px;border:solid var(--c-ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
 .mnav__acc[open] .mnav__chev{background:var(--c-bordeaux);transform:rotate(180deg)}
-.mnav__acc[open] .mnav__chev::before{border-color:#fff}
+.mnav__acc[open] .mnav__chev::before{border-color:var(--c-on-accent)}
 .mnav__sub{display:grid;gap:2px;padding-bottom:16px}
 .mnav__sub a{display:flex;align-items:center;min-height:48px;padding:6px 16px;border-radius:14px;color:var(--c-text-2);font-size:18px;font-weight:500;line-height:1.3;text-decoration:none}
 .mnav__sub a:hover{background:var(--c-gray-50);color:var(--c-ink)}
@@ -35,8 +35,8 @@ html:has(.mnav[open]){overflow:hidden}
 .mnav__quick a{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 16px;border-radius:18px;background:var(--c-gray-50);color:var(--c-ink);font-size:16px;font-weight:600;line-height:1.2;text-decoration:none;overflow-wrap:anywhere}
 .mnav__quick svg{flex:none;color:var(--c-bordeaux)}
 .mnav__quick a:hover{background:var(--c-rose-1)}
-.mnav__quick a:first-child{background:var(--c-bordeaux);color:#fff}
-.mnav__quick a:first-child svg{color:#fff}
+.mnav__quick a:first-child{background:var(--c-bordeaux);color:var(--c-on-accent)}
+.mnav__quick a:first-child svg{color:var(--c-on-accent)}
 .mnav__quick a:first-child:hover{background:var(--c-bordeaux-dark)}
 .mnav__quick a:last-child:nth-child(odd){grid-column:1/-1}
 
@@ -49,7 +49,7 @@ html:has(.mnav[open]){overflow:hidden}
 .openb--menu{margin-bottom:6px}
 .mnav__lang{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
 .mnav__lang a{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--c-line);color:var(--c-ink);font-size:15px;font-weight:600;text-decoration:none}
-.mnav__lang a[aria-current]{background:var(--c-ink);box-shadow:none;color:#fff}
+.mnav__lang a[aria-current]{background:var(--c-dark-sec);box-shadow:none;color:#fff}
 
 /* Eintritt der Menüpunkte */
 .mnav[open] .mnav__nav>li{animation:mnav-in .45s var(--ease) both}

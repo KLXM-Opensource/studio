@@ -37,11 +37,11 @@ kits/essenz/
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Musterseiten; --heroes: nur /werkstatt/hero-varianten inkl. Demo-Video per ffmpeg)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Gestaltungsprinzip, Design/Kopf/Fuß, Beschreibung aller Blöcke)
-├── package.json     @fontsource-variable/{inter,inter-tight,manrope,geist,geist-mono} (alle OFL 1.1), @expo-google-fonts/inter (TTF für App-Icons)
-└── build.mjs        kopiert die variablen Schriften (latin + latin-ext) und erzeugt css/font-{key}.css
+├── package.json     @expo-google-fonts (TTF für App-Icons)
+└── build.mjs        TTF für den App-Icon-Generator; Webfonts: design.fonts → 'fontsource' (Schriften-Manager, fonts:sync)
 ```
 
-Build: `cd tools && pnpm run build` → `public/assets/kits/essenz/{css,js,fonts}`.
+Build: `cd tools && pnpm run build` → `public/assets/kits/essenz/{css,js}`.
 
 ## Budgets (minifiziert, gemessen)
 
@@ -111,5 +111,5 @@ Prüfen: `php bin/console i18n:missing en --site-texts --site=…`.
 
 ## Lizenzen
 
-Inter, Inter Tight, Manrope, Geist, Geist Mono – SIL Open Font License 1.1 (`public/assets/kits/essenz/fonts/OFL-{key}.txt`).
+Inter, Inter Tight, Manrope, Geist, Geist Mono – SIL Open Font License 1.1 (installiert vom Schriften-Manager, Lizenz je Schrift in `public/assets/fonts/installed/{id}/LICENSE.txt`).
 Symbole: Phosphor (Kern-Sprite, MIT). Beispielbilder: automatisch erzeugt (GD), frei verwendbar.

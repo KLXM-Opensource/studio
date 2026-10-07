@@ -45,18 +45,10 @@ function basis_design_migrate(): void
     app()->settings->set($key, \Core\Design::normalize($v));
 }
 
-/** <link rel="preload"> für die gewählte Fließtext-Schrift (400 + 600, latin) – muss exakt der URL in css/font-*.css entsprechen */
+/** <link rel="preload"> für die Hauptschnitte der gewählten Schriften (Kit-Schriften vom Schriften-Manager, Core\Design::preloads) */
 function basis_font_preloads(): string
 {
-    $pkg = ['inter' => 'inter', 'manrope' => 'manrope', 'plex' => 'ibm-plex-sans', 'source-serif' => 'source-serif-4', 'lora' => 'lora', 'fraunces' => 'fraunces'];
-    $h = '';
-    foreach (array_unique([(string) design('font_body'), (string) design('font_head')]) as $i => $font) {
-        if (!isset($pkg[$font])) continue;
-        foreach ($i === 0 ? [400, 600] : [(int) design('heading_weight') ?: 600] as $w) {
-            $h .= '<link rel="preload" href="' . e(app()->theme->fontUrl("fonts/{$pkg[$font]}-latin-$w-normal.woff2")) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-        }
-    }
-    return $h;
+    return \Core\Design::preloads(['font_body', 'font_head']);
 }
 
 /** Name der Website (Kurzname für die Wortmarke) */

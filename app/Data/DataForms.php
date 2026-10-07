@@ -26,7 +26,9 @@ use Core\SpamGuard;
 final class DataForms
 {
     public const DEFAULTS = ['enabled' => false, 'fields' => [], 'status' => 'draft', 'notify' => '', 'success' => '', 'submit' => '',
-        'uploads' => false, 'upload_mb' => 5];
+        'uploads' => false, 'upload_mb' => 5, 'receipt' => self::RECEIPT];
+    /** Eingangsbestätigung an die absendende Person (z. B. Pflicht beim Widerruf, § 356a BGB): E-Mail-Feld, Betreff, Text, Angaben mitsenden */
+    public const RECEIPT = ['enabled' => false, 'field' => '', 'subject' => '', 'text' => '', 'include' => false];
     /** Feldtypen, die Besucher ausfüllen können (Verknüpfungen, Rich-Text, Karte, Links und Wiederholungen bleiben der Redaktion vorbehalten) */
     public const TYPES = ['text', 'textarea', 'number', 'bool', 'date', 'datetime', 'time', 'select', 'multiselect', 'email', 'tel', 'color', 'iban', 'group'];
     public const UPLOAD_TYPES = ['media', 'file'];
@@ -175,6 +177,7 @@ final class DataForms
             'submit' => mb_substr(trim(strip_tags((string) ($s['submit'] ?? ''))), 0, 60),
             'uploads' => $uploads,
             'upload_mb' => max(1, min(self::MAX_MB, (int) ($s['upload_mb'] ?? $existing['upload_mb']))),
+            'receipt' => self::validateReceipt((array) ($s['receipt'] ?? $existing['receipt'] ?? []), $fields, $errors),
         ];
         // Eingang: welche Felder standen zur Wahl? (neue Felder sind im Formular, bis jemand sie abwählt – selected())
         if ($known !== null) $out['known'] = array_key_exists('fields', $s) ? array_values(array_map('strval', $known)) : ($existing['known'] ?? null);
@@ -452,6 +455,56 @@ final class DataForms
             . '<p class="sr-only" aria-live="polite" data-live></p></fieldset>';
     }
 
+    /** Einstellung „Eingangsbestätigung“ prüfen: E-Mail-Feld muss es geben, Texte gekürzt, ohne HTML */
+    private static function validateReceipt(array $r, array $fields, array &$errors): array
+    {
+        $mails = array_column(array_filter($fields, fn($f) => ($f['type'] ?? '') === 'email'), 'name');
+        $out = [
+            'enabled' => !empty($r['enabled']),
+            'field' => in_array((string) ($r['field'] ?? ''), $mails, true) ? (string) $r['field'] : ($mails[0] ?? ''),
+            'subject' => mb_substr(trim(strip_tags((string) ($r['subject'] ?? ''))), 0, 150),
+            'text' => mb_substr(trim(strip_tags((string) ($r['text'] ?? ''))), 0, 3000),
+            'include' => !empty($r['include']),
+        ];
+        if ($out['enabled'] && $out['field'] === '') $errors['settings.form'] = __('Eingangsbestätigung: Die Tabelle braucht ein Feld vom Typ „E-Mail“.');
+        return $out;
+    }
+
+    /**
+     * Eingangsbestätigung an die angegebene Adresse (Einstellung „receipt“) – nach dem erfolgreichen Speichern bzw. Zustellen.
+     * Mit „include“ stehen die eigenen Angaben in der E-Mail (Text, Zeitpunkt des Eingangs, Website) – sonst nur Text und Zeitpunkt.
+     */
+    private static function sendReceipt(array $t, array $values, array $fields): void
+    {
+        $r = (array) ($t['settings']['form']['receipt'] ?? []) + self::RECEIPT;
+        if (!$r['enabled'] || $r['field'] === '') return;
+        $to = trim((string) ($values[$r['field']] ?? ''));
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return;
+        $name = (string) (setting((string) project('name_setting', 'org_name')) ?: site()->label());
+        $subject = $r['subject'] !== '' ? lt($r['subject']) : lt('Eingangsbestätigung: {name}', ['name' => (string) ($t['singular'] ?? $t['name'])]);
+        $body = lt('Guten Tag,') . "\n\n" . ($r['text'] !== '' ? lt($r['text']) : lt('wir bestätigen den Eingang Ihrer Angaben.')) . "\n\n"
+            . lt('Eingegangen am {date} um {time} Uhr.', ['date' => date_local(time(), 'short'), 'time' => date('H:i')]) . "\n";
+        if ($r['include']) {
+            $lines = [];
+            foreach ($fields as $f) {
+                $n = (string) ($f['name'] ?? '');
+                if ($n === '' || !array_key_exists($n, $values) || in_array($f['type'] ?? '', ['file', 'media', 'group'], true)) continue;
+                $v = $values[$n];
+                $v = match ($f['type'] ?? '') {
+                    'bool' => $v ? lt('Ja') : lt('Nein'),
+                    'select' => Tables::optionLabel($f, (string) $v),
+                    'multiselect' => implode(', ', array_map(fn($k) => Tables::optionLabel($f, (string) $k), (array) $v)),
+                    default => trim((string) (is_array($v) ? implode(', ', $v) : $v)),
+                };
+                if ($v !== '') $lines[] = Tables::label($f) . ': ' . $v;
+            }
+            if ($lines) $body .= "\n" . lt('Ihre Angaben:') . "\n" . implode("\n", $lines) . "\n";
+        }
+        $body .= "\n" . lt('Mit freundlichen Grüßen') . "\n" . $name . "\n" . absolute_url('/') . "\n";
+        $err = Mailer::send($subject, $body, [$to]);
+        if ($err !== null) error_log('[Formular ' . $t['handle'] . '] Eingangsbestätigung nicht gesendet: ' . $err);
+    }
+
     // ================================================================= Annahme
 
     /**
@@ -551,6 +604,7 @@ final class DataForms
             if (!$acc['ok']) return ['ok' => false, 'message' => (string) ($acc['error'] ?? lt('Senden fehlgeschlagen.'))];
             $stored = (array) ($acc['stored'] ?? []);
             $id = (int) $acc['id'];
+            self::sendReceipt($t, $values, $fields);
             if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => $id, 'stored' => $stored];
             // Inhalt per E-Mail zugestellt (bzw. Rückfall mit eigener Warnung) → keine zusätzliche inhaltsfreie Benachrichtigung
             if (Delivery::mode($t) !== 'system') return ['ok' => true, 'message' => $success, 'id' => $id];
@@ -580,6 +634,7 @@ final class DataForms
             return ['ok' => false, 'errors' => array_intersect_key($saveErrors, array_flip(array_column($fields, 'name'))), 'message' => lt('Bitte prüfen Sie die markierten Felder.')];
         }
 
+        self::sendReceipt($t, $values, $fields);
         // Benachrichtigung OHNE Inhalte – nur Tabelle und Link zur Verwaltung
         $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;
         Mailer::send('Neuer Eintrag in ' . $t['name'],

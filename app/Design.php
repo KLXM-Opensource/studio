@@ -32,6 +32,8 @@ final class Design
 {
     private static ?array $values = null;
     private static ?array $override = null;
+    /** Bereits ausgegebene <link rel="preload"> dieser Anfrage (keine Doppelten aus Kit-Layout und design_head) */
+    private static array $preloaded = [];
 
     public static function def(): array
     {
@@ -41,12 +43,32 @@ final class Design
     /**
      * Schriften für Tokens vom Typ „font“: die des Themes ('fonts') + installierte Schriften (Core\Fonts, Schlüssel
      * „installed:{id}“), außer das Theme setzt 'design' => ['fonts_extra' => false] (oder 'fonts_extra' => false in theme.php).
+     *
+     * Kit-Schriften mit 'fontsource' => id (vom Schriften-Manager installiert, nicht im Kit): ist die Schrift installiert,
+     * kommt 'href' (font.css) dazu, sonst bleibt nur der Stapel (Ersatzschrift). Installierte Schriften, die das Kit
+     * selbst erklärt, tragen 'dup' (im Style-Editor ausgeblendet, gespeicherte Werte bleiben gültig).
      */
     public static function fonts(): array
     {
+        static $memo = [];
+        $key = app()->theme->name . '|' . Fonts::stamp() . '|' . spl_object_id(app());
+        if (isset($memo[$key])) return $memo[$key];
         $def = self::def();
         $def['fonts_extra'] ??= app()->theme->def['fonts_extra'] ?? true;
-        return (array) ($def['fonts'] ?? []) + Fonts::designOptions($def);
+        $kit = (array) ($def['fonts'] ?? []);
+        $own = [];
+        foreach ($kit as $k => $f) {
+            $id = (string) ($f['fontsource'] ?? '');
+            if ($id === '' || !Fonts::validId($id)) continue;
+            $own[$id] = true;
+            if (Fonts::get($id)) $kit[$k]['href'] = Fonts::cssUrl($id);
+        }
+        $extra = Fonts::designOptions($def);
+        foreach ($extra as $k => $f) {
+            if (isset($own[substr((string) $k, strlen(Fonts::PREFIX))])) $extra[$k]['dup'] = true;
+        }
+        if (count($memo) > 8) $memo = [];
+        return $memo[$key] = $kit + $extra;
     }
 
     public static function enabled(): bool
@@ -185,30 +207,37 @@ final class Design
     {
         if (!self::enabled()) return '';
         $fonts = self::fonts();
-        $used = $pre = [];
+        $used = $pre = $faces = [];
         $lp = self::$override === null ? Landings::current() : null;
         foreach (self::tokens() as $n => $t) {
             // Schrift der Landingpage (Überschreibung) statt der der Website
             $fv = ($t['type'] ?? '') === 'font' ? ($lp?->fontFor($n) ?? self::get($n)) : null;
             if ($fv === null || !($f = $fonts[$fv] ?? null)) continue;
-            // Installierte Schrift (Core\Fonts, public/assets/fonts/installed/…): eigene CSS-Datei, optional Vorladen des Hauptschnitts
+            // Installierte Schrift (Core\Fonts, public/assets/fonts/installed/…) – auch Kit-Schriften mit 'fontsource':
+            // eigene CSS-Datei, optional Vorladen des Hauptschnitts
             if (!empty($f['href'])) {
                 $used[(string) $f['href']] = true;
-                if (!empty($f['preload'])) $pre[(string) $f['preload']] = true;
+                if (is_string($f['preload'] ?? null) && $f['preload'] !== '') $pre[$f['preload']] = true;
+            } elseif (!empty($f['fontsource'])) {
+                // Kit-Schrift noch nicht installiert: nichts laden (Ersatz-Stapel); nur die Editor-Vorschau zeigt sie schon
+                if (self::$override !== null && ($face = Fonts::previewFace($f)) !== '') $faces[$face] = true;
             } elseif (!empty($f['css'])) {
                 $used[app()->theme->asset((string) $f['css'])] = true;
             }
         }
         $h = '';
         foreach (array_keys($pre) as $file) {
+            if (isset(self::$preloaded[$file])) continue;
+            self::$preloaded[$file] = true;
             $h .= '<link rel="preload" href="' . e($file) . '" as="font" type="font/woff2" crossorigin>' . "\n";
         }
         foreach (array_keys($used) as $href) {
             $h .= '<link rel="stylesheet" href="' . e($href) . '">' . "\n";
         }
         if (self::$override !== null) {
-            // Vorschau im Editor: Werte direkt (die Admin-CSP erlaubt Inline-Styles nur dort)
-            return $h . '<style data-design-preview>' . self::css() . '</style>';
+            // Vorschau im Editor: Werte direkt (die Admin-CSP erlaubt Inline-Styles nur dort); noch nicht installierte
+            // Kit-Schriften als Vorschau-Schnitt von der eigenen Domain (wird beim Speichern installiert)
+            return $h . '<style data-design-preview>' . implode('', array_keys($faces)) . self::css() . '</style>';
         }
         // Landing-Domain: Überschreibungen als eigene kleine Datei nach den Design-Variablen der Website
         $landing = ($lu = $lp?->designUrl()) ? "\n" . '<link rel="stylesheet" href="' . e($lu) . '">' : '';
@@ -218,10 +247,56 @@ final class Design
         return $h . ($url ? '<link rel="stylesheet" href="' . e($url) . '">' : '') . $landing;
     }
 
+    /**
+     * Adressen der Schriftdateien zum Vorladen: Hauptschnitt (lateinisch, aufrecht) der gewählten Schrift je Token.
+     * $tokens = Token-Namen (z. B. ['font_body', 'font_head']); leer = alle Schrift-Tokens, deren Schrift 'preload' => true trägt.
+     * Kit-Schrift mit 'fontsource': nur wenn installiert. Mitgelieferte Schrift ('css'): 'preload' => 'fonts/datei.woff2'.
+     * @return list<string>
+     */
+    public static function preloadUrls(array $tokens = []): array
+    {
+        if (!self::enabled()) return [];
+        $fonts = self::fonts();
+        $all = self::tokens();
+        $lp = self::$override === null ? Landings::current() : null;
+        $out = [];
+        foreach ($tokens ?: array_keys($all) as $n) {
+            if (($all[$n]['type'] ?? '') !== 'font') continue;
+            $f = $fonts[$lp?->fontFor($n) ?? self::get($n)] ?? null;
+            if (!$f || (!$tokens && empty($f['preload']))) continue;
+            if (($id = (string) ($f['fontsource'] ?? '')) !== '') {
+                if (!($meta = Fonts::get($id))) continue;
+                // 'preload' => [700, 400]: diese Stärken (feste Schnitte, lateinisch) – sonst der Hauptschnitt
+                $files = array_column((array) ($meta['files'] ?? []), 'file');
+                $want = is_array($f['preload'] ?? null) ? array_values(array_filter(array_map(fn($w) => 'latin-' . (int) $w . '-normal.woff2', $f['preload']), fn($x) => in_array($x, $files, true))) : [];
+                foreach ($want ?: array_filter([Fonts::primaryFile($meta)]) as $file) $out[] = Fonts::url($id . '/' . $file);
+            } elseif (!empty($f['css']) && is_string($f['preload'] ?? null)) {
+                $out[] = app()->theme->fontUrl($f['preload']);
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /** <link rel="preload"> für preloadUrls() – im Kit-Layout vor dem CSS (z. B. Design::preloads(['font_body', 'font_head'])) */
+    public static function preloads(array $tokens = []): string
+    {
+        $h = '';
+        foreach (self::preloadUrls($tokens) as $u) {
+            if (isset(self::$preloaded[$u])) continue;
+            self::$preloaded[$u] = true;
+            $h .= '<link rel="preload" href="' . e($u) . '" as="font" type="font/woff2" crossorigin>' . "\n";
+        }
+        return $h;
+    }
+
     // ------------------------------------------------------------------ Speichern
 
-    /** Werte speichern (mit Verlauf der letzten 10 Stände) */
-    public static function save(array $values, string $note = '', ?string $by = null): void
+    /**
+     * Werte speichern (mit Verlauf der letzten 10 Stände). Neu gewählte Kit-Schriften ('fontsource') werden danach
+     * installiert (Core\Fonts::ensure) – ein Fehler dabei verhindert das Speichern nicht.
+     * @return array<string, array{ok: bool, action: string, message: string}> Schriften, die installiert/ergänzt wurden oder fehlen
+     */
+    public static function save(array $values, string $note = '', ?string $by = null): array
     {
         $key = 'design.' . app()->theme->name;
         $clean = self::normalize($values);
@@ -232,9 +307,17 @@ final class Design
         }
         app()->settings->set($key . '.history', array_slice($hist, 0, 10));
         app()->settings->set($key, $clean);
-        Fonts::recordUsage(site()->key, app()->theme->name, $clean, self::tokens());   // Verwendung installierter Schriften (Core\Fonts)
         self::$values = null;
+        // Kit-Schriften der neuen Auswahl sicherstellen (lädt nur, was fehlt; ohne Netz: Hinweis, Website nutzt die Ersatzschrift)
+        $fonts = [];
+        try {
+            $fonts = array_filter(Fonts::ensure(Fonts::needed()), fn($r) => $r['action'] !== 'present');
+        } catch (\Throwable $e) {
+            error_log('[design] Schriften: ' . $e->getMessage());
+        }
+        Fonts::recordUsage(site()->key, app()->theme->name, $clean, self::tokens(), self::fonts());   // Verwendung (Core\Fonts)
         PageCache::clear();
+        return $fonts;
     }
 
     /** Standardwerte des Themes (normalisiert) */
@@ -255,7 +338,8 @@ final class Design
             'groups' => array_values(array_map(fn($g) => ['id' => (string) ($g['id'] ?? ''), 'label' => (string) ($g['label'] ?? ''),
                 'tokens' => array_values(array_filter((array) ($g['tokens'] ?? []), fn($t) => !empty($t['name'])))], (array) ($def['groups'] ?? []))),
             'fonts' => array_map(fn($f) => ['label' => (string) ($f['label'] ?? ''), 'stack' => (string) ($f['stack'] ?? '')]
-                + (!empty($f['installed']) ? ['installed' => true, 'kb' => (int) ($f['kb'] ?? 0), 'href' => (string) $f['href']] : []), self::fonts()),
+                + (!empty($f['installed']) ? ['installed' => true, 'kb' => (int) ($f['kb'] ?? 0), 'href' => (string) $f['href']] : [])
+                + (!empty($f['dup']) ? ['dup' => true] : []) + (!empty($f['fontsource']) ? ['fontsource' => (string) $f['fontsource']] : []), self::fonts()),
             'presets' => array_map(fn($p) => ['label' => (string) ($p['label'] ?? ''), 'values' => (array) ($p['values'] ?? [])], (array) ($def['presets'] ?? [])),
             'dark' => (array) ($def['dark'] ?? []) ?: null,
         ];

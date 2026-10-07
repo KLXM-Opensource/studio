@@ -1,8 +1,8 @@
 /* Praxis-Theme: Kalender-Blöcke im Stil der Kacheln (Bordeaux/Apricot) */
 @import "../../../../resources/css/calendar.css";
-.cal{--cal-accent:var(--c-bordeaux);--cal-accent-ink:var(--c-white);--cal-muted:var(--c-text-2);--cal-line:var(--c-line);
+.cal{--cal-accent:var(--c-bordeaux);--cal-accent-ink:var(--c-on-accent);--cal-muted:var(--c-text-2);--cal-line:var(--c-line);
   --cal-surface:var(--c-gray-50);--cal-ev-bg:var(--c-rose-1);--cal-ev-ink:var(--c-ink);--cal-today-bg:var(--c-rose-1);--cal-radius:22px}
-.bg-gray .cal{--cal-surface:var(--c-white)}
+.bg-gray .cal{--cal-surface:var(--c-surface)}
 .bg-bordeaux .cal,.bg-dark .cal{--cal-accent:var(--c-apricot);--cal-accent-ink:var(--c-ink);--cal-muted:var(--c-on-dark);--cal-line:rgba(255,255,255,.18);
   --cal-surface:rgba(255,255,255,.08);--cal-ev-bg:rgba(255,255,255,.14);--cal-ev-ink:var(--c-white);--cal-today-bg:rgba(255,255,255,.08)}
 .cal-month{font-size:clamp(24px,2.4vw,30px);font-weight:700;letter-spacing:-.02em}

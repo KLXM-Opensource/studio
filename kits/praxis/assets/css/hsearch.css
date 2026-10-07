@@ -3,12 +3,12 @@
 .sf-sr{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .hsearch__btn{display:inline-grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:999px;background:var(--c-gray-100);color:var(--c-ink);cursor:pointer}
 .hsearch__btn:hover{background:var(--c-line)}
-.hsearch__panel{position:fixed;inset:86px var(--gutter) auto auto;width:min(30rem,calc(100vw - 2 * var(--gutter)));margin:0;padding:14px 54px 14px 14px;border:1px solid var(--c-line);border-radius:22px;background:#fff;color:var(--c-ink);box-shadow:0 18px 48px rgba(22,32,30,.2);overflow:visible}
+.hsearch__panel{position:fixed;inset:86px var(--gutter) auto auto;width:min(30rem,calc(100vw - 2 * var(--gutter)));margin:0;padding:14px 54px 14px 14px;border:1px solid var(--c-line);border-radius:22px;background:var(--c-surface);color:var(--c-ink);box-shadow:0 18px 48px rgba(22,32,30,.2);overflow:visible}
 .hsearch__close{position:absolute;top:14px;right:8px;width:40px;height:48px;border:0;background:none;color:inherit;font-size:28px;cursor:pointer}
 /* Popover an der Lupe verankert (CSS Anchor Positioning; sonst rechts unter dem Kopf, search.js richtet es aus) */
 @supports (anchor-name:--a){.hsearch__btn{anchor-name:--hs}.hsearch__panel{position-anchor:--hs;position-area:bottom span-left;inset:auto;margin:26px -18px 0 0;max-width:calc(100% + 6px)}.hsearch__panel::before{content:"";position:absolute;top:-7px;right:33px;width:12px;height:12px;border:solid var(--c-line);border-width:1px 0 0 1px;border-top-left-radius:3px;background:inherit;transform:rotate(45deg)}}
-.sf__row{position:relative;display:flex;border:1.5px solid #8A8F98;border-radius:999px;background:#fff}
-.sf__row:focus-within{border-color:var(--c-bordeaux);box-shadow:0 0 0 3px rgba(122,31,53,.18)}
+.sf__row{position:relative;display:flex;border:1.5px solid #8A8F98;border-radius:999px;background:var(--c-surface)}
+.sf__row:focus-within{border-color:var(--c-bordeaux);box-shadow:0 0 0 3px color-mix(in srgb,var(--c-bordeaux) 18%,transparent)}
 .sf__input{flex:1;min-width:0;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:none;color:inherit;font:inherit;font-size:16px}
 .sf__input:focus{outline:none}
-.sf__btn{display:inline-flex;align-items:center;gap:8px;margin:3px;padding:0 13px;border:0;border-radius:999px;background:var(--c-bordeaux);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.sf__btn{display:inline-flex;align-items:center;gap:8px;margin:3px;padding:0 13px;border:0;border-radius:999px;background:var(--c-bordeaux);color:var(--c-on-accent);font:inherit;font-weight:600;cursor:pointer}

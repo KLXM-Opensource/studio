@@ -1,24 +1,15 @@
 /**
- * Theme-Vendoren „praxis“ – wird von tools/build.mjs aufgerufen (pnpm build).
+ * Kit-Vendoren „praxis“ – wird von tools/build.mjs aufgerufen (pnpm build).
  *
- *   Webfonts (WOFF2)  → public/assets/kits/praxis/fonts   (in css/site.css als ../fonts/… eingebunden)
- *   TTF für Icons     → kits/praxis/fonts          (nur serverseitig für den App-Icon-Generator, nicht öffentlich)
+ *   TTF für App-Icons  → kits/praxis/fonts   (nur serverseitig für den App-Icon-Generator, nicht öffentlich)
+ *
+ * Webfonts liefert das Kit nicht mehr mit: design.fonts erklärt sie mit 'fontsource' => id, der Schriften-Manager
+ * (Core\Fonts) installiert sie für die Installation (public/assets/fonts/installed – Kit-Wahl, Style-Editor, fonts:sync).
  */
 import path from 'node:path';
 
-export function vendors({ copy, pkg, themeDir, publicDir }) {
-  const web = path.join(publicDir, 'fonts');
-  for (const w of [300, 400, 500, 600, 700, 800]) {
-    for (const sub of ['latin', 'latin-ext']) {
-      const f = `hanken-grotesk-${sub}-${w}-normal.woff2`;
-      copy(pkg('@fontsource/hanken-grotesk/files', f), path.join(web, f));
-    }
-  }
-  copy(pkg('@fontsource/hanken-grotesk/LICENSE'), path.join(web, 'OFL.txt'));
-
+export function vendors({ copy, pkg, themeDir }) {
   const ttf = path.join(themeDir, 'fonts');
-  for (const w of ['700Bold', '800ExtraBold']) {
-    copy(pkg('@expo-google-fonts/hanken-grotesk', w, `HankenGrotesk_${w}.ttf`), path.join(ttf, `HankenGrotesk_${w}.ttf`));
-  }
-  copy(pkg('@expo-google-fonts/hanken-grotesk/LICENSE_FONT'), path.join(ttf, 'OFL.txt'));
+  copy(pkg('@expo-google-fonts/inter', '700Bold', 'Inter_700Bold.ttf'), path.join(ttf, 'Inter_700Bold.ttf'));
+  copy(pkg('@expo-google-fonts/inter/LICENSE_FONT'), path.join(ttf, 'OFL.txt'));
 }

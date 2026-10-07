@@ -97,14 +97,14 @@ return [
         ]],
     ],
 
-    // Selbst gehostete Schriften (kits/basis/build.mjs erzeugt css/font-*.css); 400/600/700 + latin-ext
+    // Schriften: 'fontsource' = installiert der Schriften-Manager (Core\Fonts, fonts:sync; selbst gehostet, ohne externe Anfragen); 400/600/700 + latin-ext
     'fonts' => [
-        'inter' => ['label' => 'Inter (Grotesk, neutral)', 'stack' => 'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'css' => 'css/font-inter.css'],
-        'manrope' => ['label' => 'Manrope (geometrisch, modern)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-manrope.css'],
-        'plex' => ['label' => 'IBM Plex Sans (technisch)', 'stack' => '"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'css' => 'css/font-plex.css'],
-        'source-serif' => ['label' => 'Source Serif 4 (Serifen, sachlich)', 'stack' => '"Source Serif 4",ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-source-serif.css'],
-        'lora' => ['label' => 'Lora (Serifen, warm)', 'stack' => 'Lora,ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-lora.css'],
-        'fraunces' => ['label' => 'Fraunces (Serifen, markant)', 'stack' => 'Fraunces,ui-serif,Georgia,Cambria,serif', 'css' => 'css/font-fraunces.css'],
+        'inter' => ['label' => 'Inter (Grotesk, neutral)', 'stack' => 'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', 'fontsource' => 'inter', 'variable' => false, 'weights' => [400, 600, 700]],
+        'manrope' => ['label' => 'Manrope (geometrisch, modern)', 'stack' => 'Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'manrope', 'variable' => false, 'weights' => [400, 600, 700]],
+        'plex' => ['label' => 'IBM Plex Sans (technisch)', 'stack' => '"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif', 'fontsource' => 'ibm-plex-sans', 'variable' => false, 'weights' => [400, 600, 700]],
+        'source-serif' => ['label' => 'Source Serif 4 (Serifen, sachlich)', 'stack' => '"Source Serif 4",ui-serif,Georgia,Cambria,serif', 'fontsource' => 'source-serif-4', 'variable' => false, 'weights' => [400, 600, 700]],
+        'lora' => ['label' => 'Lora (Serifen, warm)', 'stack' => 'Lora,ui-serif,Georgia,Cambria,serif', 'fontsource' => 'lora', 'variable' => false, 'weights' => [400, 600, 700]],
+        'fraunces' => ['label' => 'Fraunces (Serifen, markant)', 'stack' => 'Fraunces,ui-serif,Georgia,Cambria,serif', 'fontsource' => 'fraunces', 'variable' => false, 'weights' => [400, 600, 700]],
         'system' => ['label' => 'Systemschrift (ohne Download)', 'stack' => 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif'],
     ],
 

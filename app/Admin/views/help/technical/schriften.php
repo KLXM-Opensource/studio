@@ -14,10 +14,10 @@
   {id}/font.css              @font-face je Schnitt/Zeichensatz: font-display: swap, unicode-range, relative url()
   {id}/{subset}-{w}-{style}.woff2   bzw. {subset}-wght-{style}.woff2 (variabel: font-weight 300 700)
   {id}/LICENSE.txt           Lizenztext (OFL-1.1, Apache-2.0 oder UFL-1.0)</code></pre>
-  <p>Installationsweit, von allen Websites nutzbar. Beim Deploy (<code>deploy/deploy.sh</code>) liegt der Ordner wie <code>public/media</code> unter <code>shared/public/fonts</code> und wird im Release als <code>public/assets/fonts/installed</code> verlinkt; in Git ignoriert.</p>
+  <p>Installationsweit, von allen Websites nutzbar. Beim Deploy (<code>deploy/deploy.sh</code>) liegt der Ordner wie <code>public/media</code> unter <code>shared/public/fonts</code> und wird im Release als <code>public/assets/fonts/installed</code> verlinkt; in Git ignoriert. Nach <code>migrate</code> ruft <code>deploy.sh</code> <code>fonts:sync</code> auf – ohne Netz ohne Abbruch. Der Ordner muss für den Webserver <b>und</b> den Benutzer der Kommandozeile beschreibbar sein.</p>
   <h3>Sicherheit</h3>
   <ul>
-    <li>Nur <code>system.manage</code> (oder Integratoren) und Funktion <code>fonts</code> (<code>Core\Features</code>; in den Presets <code>content</code>/<code>minimal</code> aus).</li>
+    <li>Oberfläche „Schriften“: nur <code>system.manage</code> (oder Integratoren) und Funktion <code>fonts</code> (<code>Core\Features</code>; in den Presets <code>content</code>/<code>minimal</code> aus). Kit-Schriften installiert der Core unabhängig davon; die Vorschau-Route steht zusätzlich dem Recht <code>design.edit</code> offen (Style-Editor).</li>
     <li>IDs nur <code>[a-z0-9-]</code> (max. 64), Familiennamen bereinigt (<code>Fonts::cleanFamily</code>: Buchstaben, Ziffern, Leerzeichen, Punkt, Bindestrich); Dateinamen werden aus geprüften Teilen gebaut, nie aus Antworten übernommen; Löschen nur innerhalb von <code>public/assets/fonts/installed</code> (realpath-Prüfung).</li>
     <li>Jede Datei: woff2-Signatur <code>wOF2</code>, höchstens 2 MB; Auswahl höchstens 24 MB/120 Dateien. Nur Lizenzen <code>OFL-1.1</code>, <code>Apache-2.0</code>, <code>UFL-1.0</code> (Katalog) und ein als solcher erkannter Lizenztext – sonst wird nichts installiert.</li>
     <li>Installation in ein temporäres Verzeichnis, dann atomarer Austausch; Seiten-Cache wird geleert.</li>
@@ -27,8 +27,17 @@
   <pre><code>// theme.php
 'design' =&gt; ['fonts_extra' =&gt; false, 'groups' =&gt; [...], 'fonts' =&gt; [...]],</code></pre>
   <p>Überschreitet eine Schrift <?= \Core\Fonts::BUDGET_KB ?> KB (lateinische Dateien aller installierten Schnitte), zeigt der Style-Editor einen Hinweis. Beim Speichern im Style-Editor merkt sich <code>fonts.json</code>, welche Website bzw. welches Kit eine Schrift verwendet; Entfernen verlangt dann eine Bestätigung. Fehlt eine gewählte Schrift, gilt wieder der Standard des Kits. Landingpages (<code>Core\Landing</code>) sehen dieselbe Auswahl.</p>
+  <h3>Schriften der Kits</h3>
+  <p>Kits liefern Webfonts aus dem Katalog nicht mehr mit, sondern erklären sie in <code>design.fonts</code> (<code>'fontsource' =&gt; id</code>, optional <code>variable</code>, <code>weights</code>, <code>styles</code>, <code>axis</code>, <code>subsets</code>, <code>preload</code> – Details unter <b>Kits › Kit-Schriften</b>). <code>Design::fonts()</code> ergänzt installierte Kit-Schriften um <code>href</code>; nicht installierte bleiben beim Ersatz-Stapel. Installierte Schriften, die das Kit selbst erklärt, erscheinen im Style-Editor nicht doppelt.</p>
+  <ul>
+    <li><code>Fonts::ensure(array $fonts, bool $dryRun = false)</code> – installiert fehlende bzw. ergänzt vorhandene (Anforderungen werden zusammengeführt: Kursive, Stärken, Zeichensätze; verschiedene Achsen → <code>full</code>), ohne Rechteprüfung (Systemaufgabe). Rückgabe je ID: <code>present</code>, <code>installed</code>, <code>updated</code>, <code>failed</code>. Die angeforderte Auswahl steht in <code>fonts.json</code> (<code>requested</code>), damit nichts doppelt geladen wird.</li>
+    <li><code>Fonts::needed()</code> / <code>missing()</code> / <code>syncSite()</code> – Bedarf der aktuellen Website (aktuelle Werte, Standardwerte, Landingpages), Fehlendes, Abgleich samt Verwendung.</li>
+    <li>Auslöser: <code>Design::save()</code> (gibt neu installierte bzw. fehlgeschlagene Schriften zurück), <code>Onboarding::choose()</code>, <code>Seeder</code> und Kit-Wechsel in den Grundeinstellungen über <code>Fonts::requestSync()</code> (Einstellung <code>sys.fonts_pending</code>, ausgeführt in <code>AdminController::view()</code> – nie bei Seitenaufrufen), <code>fonts:sync</code>.</li>
+    <li><code>Fonts::health()</code> – Zeile für <code>bin/console health</code> und die Übersicht: „Schrift fehlt: …“ als Hinweis (blockiert keinen Deploy).</li>
+  </ul>
   <h3>Kommandozeile</h3>
-  <pre><code>php bin/console fonts:search grotesk [--category=serif]
+  <pre><code>php bin/console fonts:sync [--all] [--dry-run]       # Schriften der Kits installieren (nach jedem Deploy, deploy.sh)
+php bin/console fonts:search grotesk [--category=serif]
 php bin/console fonts:install "Space Grotesk" --variable
 php bin/console fonts:install lora --weights=400,700 --subsets=latin,latin-ext [--italic] [--preload]
 php bin/console fonts:list

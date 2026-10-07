@@ -6,9 +6,10 @@
  * CSS/JS baut der Core-Build ohnehin: assets/css/*.css und assets/js/*.js → public/assets/kits/{kit}/ (esbuild, minifiziert,
  * @import wird gebündelt; Dateien mit „_“ am Anfang sind nur Bausteine).
  *
- * Beispiel: Schrift mit dem Kit ausliefern (package.json im Kit-Ordner mit "@fontsource/inter" – installiert der Build
- * automatisch), dann in theme.php → design.fonts: 'inter' => [..., 'css' => 'css/font-inter.css'].
- * Einfacher, ohne Build: php bin/console fonts:install Inter (siehe theme.php § 5).
+ * Schriften aus dem Google-Fonts-Katalog NICHT mitliefern: in theme.php → design.fonts mit 'fontsource' => 'inter' erklären –
+ * der Schriften-Manager (Core\Fonts) installiert sie (Kit-Wahl, Style-Editor, php bin/console fonts:sync).
+ * Nur eine Schrift, die es dort nicht gibt, mit dem Kit ausliefern (package.json im Kit-Ordner – installiert der Build
+ * automatisch), dann in theme.php → design.fonts: 'x' => [..., 'css' => 'css/font-x.css']. Beispiel:
  *
  *   import fs from 'node:fs';
  *   import path from 'node:path';
