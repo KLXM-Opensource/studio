@@ -15,7 +15,7 @@
  */
 import { t } from './_i18n.js';
 import { aiBarHtml, aiExec } from './_ai.js';
-import { openLinkPicker } from './_links.js';
+import { openLinkPicker, normalizeTel } from './_links.js';
 import { layerBox } from './_shadow.js';
 import { looksLike, htmlIsPlain, toHtml, openImport, pasteTip, hideTip } from './_markdown.js';
 
@@ -38,6 +38,44 @@ const P_STYLES = ['t-lead', 't-small', 't-note'];
 const COLORS = ['accent', 'muted', 'success', 'warning', 'danger'];
 const HEADINGS = ['h2', 'h3', 'h4'];
 const MARK = '#010203';   // Hilfsfarbe: execCommand('foreColor') markiert die Auswahl, danach Klasse statt <font>
+// E-Mail-, Web-Adressen und Telefonnummern erkennen: markiert + „Link“ → sofort Link; beim Tippen nach Leerzeichen/Satzzeichen/Enter automatisch
+const EMAIL = /^[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[a-z]{2,}$/i;
+const URL_RE = /^(?:https?:\/\/[^\s<>"]+|www\.[\w-]+(?:\.[\w-]+)+(?:[/?#][^\s<>"]*)?)$/i;
+const DOMAIN = /^[\w-]+(?:\.[\w-]+)*\.[a-z]{2,}(?:[/?#][^\s<>"]*)?$/i;   // nur bei Markierung: klxm.de/kit
+// Telefon: beginnt mit + oder 0 (auch „(0…)“), Ziffern mit Leerzeichen, / - . ( ) – 6 bis 15 Ziffern (keine Jahreszahlen, Preise o. Ä.)
+const TEL = /^(?:\+|00|\(?0)[\d\s/().-]*\d$/;
+const TEL_END = /(?:\+|\(?0)[\d\s/().-]*\d$/;
+const telOk = v => { const n = v.replace(/\D/g, '').length; return n >= 6 && n <= 15 && !/\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(v) && !/\s{2,}/.test(v); };
+const END = /(?:[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[a-z]{2,}|https?:\/\/[^\s<>"]+|www\.[\w-]+(?:\.[\w-]+)+(?:[/?#][^\s<>"]*)?)$/i;
+/** Link-Ziel zu einer Adresse im Text (E-Mail → mailto:, www./Domain → https://) – sonst null */
+function hrefFor(text, domains = false) {
+  const v = String(text || '').trim();
+  if (EMAIL.test(v)) return 'mailto:' + v;
+  if (URL_RE.test(v)) return /^https?:/i.test(v) ? v : 'https://' + v;
+  if (TEL.test(v) && telOk(v)) { const r = normalizeTel(v); if (r.href) return r.href; }
+  if (domains && DOMAIN.test(v) && !/^\d+(\.\d+)+$/.test(v)) return 'https://' + v;
+  return null;
+}
+/** Text vor offset im Textknoten auf eine Adresse am Ende prüfen und als Link einpacken (nicht in vorhandenen Links) */
+function linkifyBefore(area, node, offset, tel = false, punct = false) {
+  if (!node || node.nodeType !== 3 || !area.contains(node)) return false;
+  for (let n = node.parentNode; n && n !== area; n = n.parentNode) if (n.tagName === 'A') return false;
+  const before = node.data.slice(0, offset).replace(/[\s.,;:!?)\]'"»“]+$/, '');
+  let m = before.match(END);
+  if (!m && tel) {
+    // Längste passende Nummer am Ende (z. B. „Tel. 02841 35656“ → „02841 35656“)
+    const t2 = before.match(TEL_END);
+    if (t2) { let v = t2[0].replace(/^[\s/.-]+/, ''); while (v && !(TEL.test(v) && telOk(v))) v = v.replace(/^\S+\s*/, ''); if (v) m = [v]; }
+  }
+  if (!m || /[\w.+@/-]/.test(before.charAt(before.length - m[0].length - 1) || ' ')) return false;
+  const href = hrefFor(m[0]); if (!href) return false;
+  if (punct && /^https?:/i.test(href)) return false;   // ? : ; ! ) können in Web-Adressen stehen – dort erst bei Leerzeichen/Enter
+  const r = d.createRange();
+  r.setStart(node, before.length - m[0].length); r.setEnd(node, before.length);
+  const a = d.createElement('a'); a.setAttribute('href', href);
+  r.surroundContents(a);
+  return true;
+}
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const MOD = isMac ? '⌘' : 'Strg+';
 const kbd = (k, shift) => `${MOD}${shift ? (isMac ? '⇧' : 'Umschalt+') : ''}${k}`;
@@ -341,6 +379,12 @@ const Rich = {
     const sel = selOf(area), range = rangeIn(area)?.cloneRange() || null;
     const a = up(area, n => n.tagName === 'A');
     const cur = a ? { href: a.getAttribute('href') || '', ref: a.dataset.link || '', newTab: a.target === '_blank', title: a.title || '' } : null;
+    const picked = range && !range.collapsed ? hrefFor(range.toString(), true) : null;
+    if (!a && picked) {   // markierte E-Mail- oder Web-Adresse: gleich verlinken (Betreff, neuer Tab o. Ä. später über „Link“)
+      Rich.insertLink(area, { href: picked, label: range.toString().trim() }, range);
+      area.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
     const res = await openLinkPicker({ mode: 'rich', current: cur, text: range ? range.toString() : '' });
     area.focus();
     if (range) { sel.removeAllRanges(); sel.addRange(range); }
@@ -552,6 +596,31 @@ const Rich = {
       else if (e.key === 'Enter' && !e.shiftKey) {
         // „Hervorgehoben“ ist ein Einstieg: der nächste Absatz ist wieder normal
         setTimeout(() => { const p = up(area, n => n.tagName === 'P'); if (p && p.classList.contains('t-lead') && !p.textContent.trim()) { p.removeAttribute('class'); area.dispatchEvent(new Event('input', { bubbles: true })); } }, 0);
+      }
+    });
+    // Getippte E-Mail- oder Web-Adresse verlinken, sobald danach Leerzeichen, Satzzeichen oder Enter folgt (Strg+Z macht es nicht rückgängig – Link entfernen über „Link“)
+    area.addEventListener('input', e => {
+      const ch = e.inputType === 'insertText' ? (e.data || '') : '';
+      const enter = e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak';
+      // Telefonnummern enthalten Leerzeichen: erst prüfen, wenn danach ein Wort beginnt („… 35656 o“), ein Satzzeichen oder Enter folgt
+      const sel0 = selOf(area), n0 = sel0.anchorNode;
+      const wordAfterSpace = /^[^\d\s+/().-]$/.test(ch) && n0?.nodeType === 3 && /\s$/.test(n0.data.slice(0, sel0.anchorOffset - ch.length));
+      const tel = enter || /^[,;:!?]$/.test(ch) || wordAfterSpace;
+      if (/^[\s,;:!?)]$/.test(ch) || enter || wordAfterSpace) {
+        const sel = selOf(area); if (!sel.rangeCount) return;
+        let node = sel.anchorNode, off = sel.anchorOffset;
+        if (e.inputType === 'insertText') { if (node?.nodeType !== 3) return; off -= (e.data || '').length; }
+        else {
+          // Enter: Adresse steht am Ende des vorigen Blocks bzw. vor dem <br>
+          const blk = e.inputType === 'insertParagraph' ? (up(area, n => /^(P|LI|H[1-6]|DIV)$/.test(n.tagName))?.previousElementSibling) : null;
+          const scope = blk || (node.nodeType === 3 ? node.parentNode : node);
+          const w = d.createTreeWalker(scope, NodeFilter.SHOW_TEXT); let last = null;
+          if (blk) { while (w.nextNode()) last = w.currentNode; }
+          else { const br = sel.anchorNode.nodeType === 3 ? sel.anchorNode.previousSibling : sel.anchorNode.childNodes[off - 1]; last = br?.previousSibling?.nodeType === 3 ? br.previousSibling : null; }
+          if (!last) return; node = last; off = last.data.length;
+        }
+        const r = sel.getRangeAt(0).cloneRange();
+        if (linkifyBefore(area, node, off, tel, /^[,;:!?)]$/.test(ch))) { sel.removeAllRanges(); sel.addRange(r); }
       }
     });
     area.addEventListener('paste', e => {

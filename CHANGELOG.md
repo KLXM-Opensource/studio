@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Text-Editor: Adressen automatisch verlinken
+- E-Mail-Adressen, Web-Adressen (`www.…`, `http(s)://…`) und Telefonnummern (beginnen mit `+`, `0` oder `(0`, 6–15 Ziffern;
+  keine Datumsangaben) werden beim Tippen verlinkt (`mailto:`, `https://`, `tel:` wie `normalizeTel()`), sobald danach
+  Leerzeichen, Satzzeichen oder Enter folgt – Web-Adressen nur bei Leerzeichen/Enter, Telefonnummern erst wenn das nächste
+  Wort beginnt. Markierte Adressen (auch `beispiel.de`) verlinkt „Link“/⌘K sofort ohne Dialog (`resources/js/_rte.js`).
+
 ### Seiteneinstellungen direkt auf der Website
 - Neu: Werkzeug **Seiteneinstellungen** im Menü „⋯“ der Werkzeugleiste (`Core\PageSettingsTool`, Modul
   `resources/js/page-settings.mjs`) – beim Ansehen und Bearbeiten, Modal im Stil von „Neue Seite“, Recht `pages.manage`.
