@@ -7,6 +7,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Erststart mit Willkommen-Bildschirm: Kit und Startinhalte selbst wählen
+- Ersteinrichtung (`/admin/setup`) fragt auf der Netzwerk-Website: **Einzelinstallation** (Administrationskonto) oder
+  **Netzwerk** (erstes Konto der Netzwerk-Administration, Zwei-Faktor-Einrichtung bei der ersten Anmeldung).
 - Neue Websites ohne festgelegtes Kit spielen beim ersten Aufruf nichts mehr ein. Besucher sehen „Hier entsteht eine neue
   Website“ (503, noindex); nach dem ersten Anmelden wählt die Administration im Willkommen-Bildschirm (`/admin/willkommen`)
   das Kit (Karten mit Kurzbeschreibung, DE/EN) und ob Startinhalte eingespielt werden – oder ohne: leere Startseite, Impressum

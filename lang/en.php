@@ -6199,4 +6199,11 @@ return [
     'danach führt die Übersicht mit einer Checkliste weiter: Verschlüsselung, E-Mail-Versand, Domain, Angaben der Website.' => 'then the overview continues with a checklist: encryption, e-mail sending, domain, website details.',
     'das Gestaltungs- und Funktionspaket der Website: Blöcke, Design, Musterseiten.' => 'the website’s design and feature package: blocks, design, sample pages.',
     'mit Musterseiten zum Ausprobieren oder leer zum eigenen Aufbau.' => 'with sample pages to try out or empty to build yourself.',
+    // Ersteinrichtung: Einzelinstallation oder Netzwerk
+    'Art der Installation' => 'Type of installation',
+    'Einzelinstallation' => 'Single installation',
+    'Netzwerk (mehrere Websites)' => 'Network (several websites)',
+    'Netzwerk-Konto angelegt – bitte anmelden.' => 'Network account created – please sign in.',
+    'Sie werden Netzwerk-Administration: weitere Websites anlegen und alle zentral verwalten. Beim ersten Anmelden richten Sie die Zwei-Faktor-Anmeldung ein.' => 'You become the network administration: create further websites and manage all of them centrally. At the first sign-in you set up two-factor sign-in.',
+    'eine Website, Sie werden Administrator dieser Website.' => 'one website, you become its administrator.',
 ];

@@ -63,7 +63,9 @@ final class AuthController extends AdminController
         if (!$this->noUsers()) {
             throw new HttpException(404);
         }
-        return $this->view('setup', ['user' => null, 'errors' => $errors, 'old' => $old], $errors ? 422 : 200);
+        // Auf der Netzwerk-Website, solange es noch kein Netzwerk-Konto gibt: Einzelinstallation oder Netzwerk wählen
+        $canNetwork = \Core\Network\Network::isNetworkSite() && !\Core\Network\Network::accounts();
+        return $this->view('setup', ['user' => null, 'errors' => $errors, 'old' => $old, 'canNetwork' => $canNetwork], $errors ? 422 : 200);
     }
 
     public function setup(Request $r): Response
@@ -89,8 +91,30 @@ final class AuthController extends AdminController
         } elseif ($pw !== (string) ($r->post['password2'] ?? '')) {
             $errors['password2'] = 'Die Passwörter stimmen nicht überein.';
         }
+        $network = $r->str('kind') === 'network' && \Core\Network\Network::isNetworkSite();
         if ($errors) {
-            return $this->setupForm($r, $errors, ['email' => $email, 'name' => $r->str('name')]);
+            return $this->setupForm($r, $errors, ['email' => $email, 'name' => $r->str('name'), 'kind' => $r->str('kind')]);
+        }
+        if ($network) {
+            // Netzwerk: erstes Konto der Netzwerk-Administration (Rolle network, Zwei-Faktor-Anmeldung bei der ersten Anmeldung)
+            \Core\Network\Network::ensureKey();
+            \Core\Network\Network::ensureSchema(app()->db);
+            try {
+                \Core\Network\Network::createAccount($email, $pw, $r->str('name'));
+            } catch (\InvalidArgumentException $e) {
+                return $this->setupForm($r, ['email' => $e->getMessage()], ['email' => $email, 'name' => $r->str('name'), 'kind' => 'network']);
+            }
+            \Core\Network\Network::log('account.create', null, 'setup', strtolower($email));
+            $err = app()->auth->attempt($email, $pw, $r->ip());
+            if ($err === \Core\Auth::PENDING_2FA) {
+                app()->session->set('_2fa_next', \Core\Onboarding::pending() ? '/admin/willkommen' : '/admin/network');
+                return Response::redirect(url('/admin/login/2fa'));
+            }
+            if ($err) {
+                app()->session->flash('success', __('Netzwerk-Konto angelegt – bitte anmelden.'));
+                return Response::redirect(url('/admin/login'));
+            }
+            return Response::redirect(url(\Core\Onboarding::pending() ? '/admin/willkommen' : '/admin/network'));
         }
         app()->auth->createUser($email, $pw, 'admin', $r->str('name'));
         app()->auth->attempt($email, $pw, $r->ip());

@@ -269,6 +269,13 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .adm-auth h1{font-size:24px;margin-bottom:16px}
 .adm-auth .adm-muted{margin:12px 0 16px;text-align:center}
 .adm-auth .adm-card .adm-muted{text-align:left;margin-top:0}
+/* Ersteinrichtung: Einzelinstallation oder Netzwerk (app/Admin/views/setup.php) */
+.setup-kind{display:grid;gap:8px;margin:0 0 6px;padding:0;border:0;text-align:left}
+.setup-kind legend{margin-bottom:6px;font-weight:600}
+.setup-kind__opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--adm-line);border-radius:10px;font-weight:400;line-height:1.45;cursor:pointer}
+.setup-kind__opt:has(input:checked){border-color:var(--adm-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--adm-a) 18%,transparent)}
+.setup-kind .setup-kind__opt input[type=radio]{flex:none;width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;border:0;box-shadow:none;background:none;accent-color:var(--adm-a)}
+.setup-kind__opt>span{flex:1;min-width:0;font-weight:400}
 
 @media (max-width:900px){
   body.adm{grid-template-columns:1fr}

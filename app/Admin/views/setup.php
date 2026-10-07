@@ -7,6 +7,13 @@ $aria = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="s
     <p class="adm-muted">Den Setup-Token finden Sie in <code>config/config.local.php</code> (Eintrag <code>setup_token</code>). Die Datei wurde beim ersten Aufruf automatisch erzeugt – im Plesk-Dateimanager unter <code>httpdocs/config/</code>.</p>
     <?= csrf_field() ?>
     <?= $err('form') ?>
+    <?php if (!empty($canNetwork)): $kind = ($old['kind'] ?? '') === 'network' ? 'network' : 'single'; ?>
+    <fieldset class="f setup-kind">
+      <legend><?= e(__('Art der Installation')) ?></legend>
+      <label class="setup-kind__opt"><input type="radio" name="kind" value="single"<?= $kind === 'single' ? ' checked' : '' ?>> <span><strong><?= e(__('Einzelinstallation')) ?></strong> – <?= e(__('eine Website, Sie werden Administrator dieser Website.')) ?></span></label>
+      <label class="setup-kind__opt"><input type="radio" name="kind" value="network"<?= $kind === 'network' ? ' checked' : '' ?>> <span><strong><?= e(__('Netzwerk (mehrere Websites)')) ?></strong> – <?= e(__('Sie werden Netzwerk-Administration: weitere Websites anlegen und alle zentral verwalten. Beim ersten Anmelden richten Sie die Zwei-Faktor-Anmeldung ein.')) ?></span></label>
+    </fieldset>
+    <?php endif; ?>
     <div class="f<?= isset($errors['token']) ? ' f--error' : '' ?>"><label for="token">Setup-Token</label><input id="token" name="token" autocomplete="off" required<?= $aria('token') ?>><?= $err('token') ?></div>
     <div class="f"><label for="name">Name</label><input id="name" name="name" value="<?= e($old['name'] ?? '') ?>"></div>
     <div class="f<?= isset($errors['email']) ? ' f--error' : '' ?>"><label for="email">E-Mail-Adresse</label><input id="email" name="email" type="email" required<?= $aria('email') ?> value="<?= e($old['email'] ?? '') ?>"><?= $err('email') ?></div>
