@@ -63,6 +63,23 @@ final class SearchController extends AdminController
         if ($isAdmin) {
             $actions[] = [__('Neue Datentabelle'), __('Eigenen Inhaltstyp anlegen'), '/admin/data/new', 'table', 'tabelle collection daten neu'];
         }
+        // Hauptmenü: Bereiche des Kerns und Inhalts-/Werkzeugseiten von Funktionen und Erweiterungen (Core\AdminPages::nav('main'),
+        // z. B. Feedback, Buchungen, Animationen) – gleiche Sichtbarkeit wie in der Seitenleiste (layout.php)
+        $netUser = \Core\Network\Network::isNetworkUser($user);
+        $main = [
+            ['/admin/network', __('Netzwerk'), 'network', $netUser && \Core\Network\Network::isNetworkSite(), 'netzwerk websites konten'],
+            ['/admin', __('Übersicht'), 'dashboard', true, 'übersicht start dashboard kennzahlen'],
+            ['/admin/pages', __('Seiten'), 'pages', can('pages.edit'), 'seiten seitenbaum navigation'],
+            ['/admin/entwuerfe', __('Entwürfe'), 'drafts', \Core\Review\Drafts::canView(), 'entwürfe veröffentlichen'],
+            ['/admin/data', __('Daten'), 'data', can('data.schema') || (bool) array_filter(Tables::content(), fn($t) => can('data.edit', $t['handle'])), 'daten tabellen einträge'],
+            ['/admin/chat', __('Chat'), 'chat', \Core\Chat\Chat::canUse(), 'chat nachrichten'],
+            ['/admin/ai', \Core\AI\Assist::brand(), 'ai', \Core\AI\Assist::navVisible(), 'ki assistent texte übersetzen seo'],
+            ['/admin/ai/eingereicht', __('Eingereicht'), 'review', \Core\Review\Queue::canReview(), 'eingereicht freigabe prüfen review'],
+        ];
+        foreach (\Core\AdminPages::nav('main') as [$href, $label, $key, $vis]) $main[] = [$href, $label, $key, $vis, mb_strtolower($label) . ' ' . $href];
+        foreach ($main as [$href, $label, $key, $vis, $kw]) {
+            if ($vis) $actions[] = [$label, __('Bereich'), $href, $key, $kw];
+        }
         // Administration: Punkte der Gruppen „Einstellungen“ und „Werkzeuge“ (Core\AdminPages::groups) – Untertitel = Gruppe wie im Menü
         $kwAdmin = ['system' => 'system einstellungen mail smtp spam icon favicon pwa', 'features' => 'funktionen erweiterungen schalten an aus',
             'prefs' => 'einstellungen funktionen erweiterungen konfiguration', 'users' => 'benutzer nutzer rollen rechte zugang passwort',
