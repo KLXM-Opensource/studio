@@ -755,8 +755,24 @@ final class Push
             'failed7' => (int) $db->fetchValue("SELECT COUNT(*) FROM push_queue WHERE status IN ('failed', 'expired') AND created_at > ?", [$since]),
             'gone7' => (int) $db->fetchValue("SELECT COUNT(*) FROM push_queue WHERE status = 'gone' AND created_at > ?", [$since]),
             'last_run' => (array) app()->settings->get('sys.push_last_run', []),
+            'cron_at' => self::cronAt(),
             'last_error' => $db->fetchValue("SELECT error FROM push_queue WHERE status IN ('failed', 'expired') AND error IS NOT NULL ORDER BY id DESC LIMIT 1"),
         ];
+    }
+
+    /** Cron-Herzschlag: push:send hält eine Datei aktuell (keine Einstellung – das würde den Seiten-Cache leeren) */
+    public static function cronBeat(): void
+    {
+        $dir = site()->storage('cache');
+        if (!is_dir($dir)) @mkdir($dir, 0775, true);
+        @touch($dir . '/push-cron.beat');
+    }
+
+    /** Letzter Lauf von push:send per Cron/Kommandozeile ('Y-m-d H:i:s') oder '' */
+    public static function cronAt(): string
+    {
+        $t = @filemtime(site()->storage('cache') . '/push-cron.beat');
+        return $t ? date('Y-m-d H:i:s', $t) : '';
     }
 
     /** Vorschlag für die Datenschutzerklärung (Grundeinstellungen → Push-Benachrichtigungen, Tabelleneinstellungen) */

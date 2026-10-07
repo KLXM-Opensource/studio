@@ -51,6 +51,7 @@ final class Console
             fwrite(STDERR, "Keine VAPID-Schlüssel – php bin/console push:keys --generate\n");
             return 1;
         }
+        Push::cronBeat();   // Herzschlag: Cron läuft (auch wenn nichts zu senden ist)
         $limit = 2000;
         foreach ($args as $a) if (preg_match('~^--limit=(\d+)$~', $a, $m)) $limit = max(1, (int) $m[1]);
         $st = Push::process($limit, 50.0);
@@ -75,6 +76,7 @@ final class Console
             'Warteschlange' => (string) $s['queued'],
             '7 Tage' => $s['sent7'] . ' gesendet, ' . $s['failed7'] . ' fehlgeschlagen, ' . $s['gone7'] . ' abgelaufen',
             'Letzter Lauf' => (string) ($s['last_run']['at'] ?? 'nie'),
+            'Cron zuletzt' => $s['cron_at'] ?: 'nie',
         ];
         foreach ($s['topics'] as $t => $n) $rows['Thema ' . $t] = (string) $n;
         if ($s['stale']) $rows['Veraltet'] = (string) $s['stale'];

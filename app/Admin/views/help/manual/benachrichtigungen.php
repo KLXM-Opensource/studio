@@ -21,7 +21,7 @@
     <li>Aufgabentyp <b>„Befehl ausführen“</b>, Befehl einfügen, z. B. <code>cd ~/httpdocs &amp;&amp; /opt/plesk/php/8.5/bin/php bin/console push:send --all</code>.</li>
     <li>Ausführung <b>Cron-Stil</b> <code>* * * * *</code> (jede Minute; <code>*/5 * * * *</code> genügt auch). E-Mail-Benachrichtigung: nicht senden bzw. nur bei Fehlern. Speichern.</li>
     <li><b>Ohne Plesk:</b> <code>crontab -e</code> als Benutzer der Website und die Zeile <code>* * * * * cd /pfad/zur/installation &amp;&amp; php bin/console push:send --all</code> eintragen.</li>
-    <li><b>Prüfen:</b> In <b>Grundeinstellungen → Push-Benachrichtigungen</b> steht nach ein, zwei Minuten bei „Letzter Versandlauf“ eine aktuelle Zeit; <code>php bin/console push:status --all</code> zeigt dasselbe auf der Kommandozeile.</li>
+    <li><b>Prüfen:</b> In <b>Grundeinstellungen → Push-Benachrichtigungen</b> steht nach ein, zwei Minuten bei „Cronjob zuletzt aktiv“ eine aktuelle Zeit (grün); <code>php bin/console push:status --all</code> zeigt dasselbe auf der Kommandozeile.</li>
   </ol>
   <p>Eine Aufgabe reicht für alle Websites der Installation. Ohne Push-Funktion oder ohne Abos tut der Lauf nichts und kostet kaum Zeit.</p>
   <h3 id="push-besucher">Für Besucher: neue Einträge abonnieren</h3>

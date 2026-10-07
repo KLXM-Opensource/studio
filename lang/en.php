@@ -6590,7 +6590,9 @@ return [
     'Aufgabentyp „Befehl ausführen“, den Befehl oben einfügen, Ausführung „Cron-Stil“ mit * * * * * (jede Minute; alle 5 Minuten reicht auch: */5 * * * *).' => 'Task type “Run a command”, paste the command above, run “Cron style” with * * * * * (every minute; every 5 minutes is fine too: */5 * * * *).',
     'Benachrichtigungen per E-Mail: „Nicht senden“ bzw. nur bei Fehlern. Speichern.' => 'E-mail notifications: “Do not notify” or errors only. Save.',
     'Ohne Plesk: denselben Befehl mit crontab -e für den Benutzer der Website eintragen, davor * * * * *.' => 'Without Plesk: add the same command via crontab -e for the website user, prefixed with * * * * *.',
-    'Prüfen: Nach ein, zwei Minuten steht oben bei „Letzter Versandlauf“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation (--all).' => 'Check: after a minute or two, “Last send run” above shows a current time. One task covers all websites of this installation (--all).',
+    'Prüfen: Nach ein, zwei Minuten steht oben bei „Cronjob zuletzt aktiv“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation (--all).' => 'Check: after a minute or two, “Cron job last active” above shows a current time. One task covers all websites of this installation (--all).',
+    'Cronjob zuletzt aktiv' => 'Cron job last active',
+    'Wird bei jedem Lauf von push:send aktualisiert – auch wenn nichts zu senden ist.' => 'Updated on every push:send run – even when there is nothing to send.',
     // Medien: Filter „Nicht verwendet“ (Media::usedIds)
     'Nicht verwendet' => 'Not used',
     // Mitteilungen (Core\Push, Stufe 2)
