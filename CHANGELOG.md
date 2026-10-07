@@ -18,6 +18,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Ansicht „Symbole“: Kacheln bleiben quadratisch, Hochkant-Bilder werden eingepasst (`.fx-thumb` mit `container-type:inline-size`,
   `max-height:100cqw`) – die Reihen springen nicht mehr. Neu daneben **Mauerwerk** (Masonry, CSS-Spalten): Bilder im eigenen
   Seitenverhältnis; Größenregler gilt für beide. Gewählte Ansicht bleibt je Browser gespeichert.
+- Seitenleiste: **Sammlungen** und **Tags** lassen sich wie „Prüfen“ zuklappen (Zustand je Browser gemerkt); Größenregler ab 1100 px Fensterbreite.
 
 ### Verwaltung: Formulare und Einstellungen im Stil der macOS-Systemeinstellungen
 - Ein Satz Maße für alle Eingabefelder (Tokens `--adm-ctl-*` in `resources/css/admin.css`): Text, Zahl, Datum, Suche,

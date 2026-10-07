@@ -627,13 +627,15 @@ class Finder {
     let t;
     $('[data-q]', r).addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { this.q = e.target.value; this.load(); }, 200); });
 
-    // Seitenleiste
+    // Seitenleiste – Sammlungen und Tags lassen sich zuklappen (Zustand je Browser)
+    this.$side.addEventListener('toggle', e => { const f = e.target.closest?.('[data-fold]'); if (f) store.set('fold-' + f.dataset.fold, f.open); }, true);
     this.$side.addEventListener('click', async e => {
       const sc = e.target.closest('[data-scope]');
       if (sc) { this.pool = POOL = sc.dataset.scope; this.src = { type: this.opts.kind === 'image' || this.opts.kind === 'visual' ? 'kind' : 'all', value: this.opts.kind === 'image' || this.opts.kind === 'visual' ? this.opts.kind : '' }; this.sel.clear(); this.load(); return; }
       const b = e.target.closest('[data-src]');
       if (b) { this.src = { type: b.dataset.src, value: b.dataset.value || '' }; this.sel.clear(); this.root.classList.remove('is-side-open'); if (inDrawer()) document.dispatchEvent(new CustomEvent('adm:drawer', { detail: 'close' })); this.load(); return; }
       if (e.target.closest('[data-newcol]')) {
+        e.preventDefault();   // „+“ steht in der Überschrift (summary): nicht zuklappen
         const n = prompt('Name der neuen Sammlung:');
         if (n?.trim()) { const res = await api.collection(n.trim()); this.src = { type: 'collection', value: String(res.id) }; this.load(); }
       }
@@ -780,10 +782,10 @@ class Finder {
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')}
       </ul>
       ${this.checksHtml(row)}
-      <h3>Sammlungen <button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></h3>
+      <details class="fx-checkgrp fx-fold" data-fold="collections"${store.get('fold-collections', true) ? ' open' : ''}><summary><span>Sammlungen</span><button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></summary>
       <ul>${collections.map(c => `<li class="fx-colrow">${row('collection', c.id, SVG.col, c.name, c.count, `data-name="${esc(c.name)}"`).slice(4, -5)}<button type="button" class="fx-more" data-colmenu="${c.id}" aria-label="Sammlung „${esc(c.name)}“ bearbeiten">${ico('dots-three')}</button></li>`).join('')
-        || '<li class="fx-empty">Noch keine – mit + anlegen, dann Dateien hineinziehen.</li>'}</ul>
-      ${Object.keys(tags).length ? `<h3>Tags</h3><ul>${Object.entries(tags).map(([t, n]) => row('tag', t, `<span class="fx-dot" style="background:${tagColor(t)}"></span>`, t, n)).join('')}</ul>` : ''}`;
+        || '<li class="fx-empty">Noch keine – mit + anlegen, dann Dateien hineinziehen.</li>'}</ul></details>
+      ${Object.keys(tags).length ? `<details class="fx-checkgrp fx-fold" data-fold="tags"${store.get('fold-tags', true) ? ' open' : ''}><summary><span>Tags</span><span class="fx-checkgrp__c">${Object.keys(tags).length}</span></summary><ul>${Object.entries(tags).map(([t, n]) => row('tag', t, `<span class="fx-dot" style="background:${tagColor(t)}"></span>`, t, n)).join('')}</ul></details>` : ''}`;
   }
   /**
    * Gruppe „Prüfen“ (Kontext Website bzw. Pool): zeigt nur Prüfungen mit Treffern. Ist alles in Ordnung,

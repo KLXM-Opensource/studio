@@ -3185,3 +3185,8 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 
 .us-roles{margin-top:0}
 .us-role-card header .adm-badge{flex:none;white-space:nowrap}
+/* Medien-Seitenleiste: Sammlungen und Tags zuklappbar (wie „Prüfen“) */
+.fx-fold>summary .fx-add{margin-left:auto;order:2}
+.fx-fold>summary::after{order:3}
+.fx-checkgrp__c{color:var(--adm-t3);font-weight:600}
+.fx-fold>summary:has(.fx-add)::after{margin-left:6px}
