@@ -107,6 +107,7 @@ final class MediaController extends AdminController
             'missing_lang' => $r->str('missing_lang'), 'notitle' => $r->str('notitle') === '1',
             'nocaptions' => $r->str('nocaptions') === '1', 'notranscript' => $r->str('notranscript') === '1',
             'check' => $r->str('check'),   // Prüf-Filter einer Erweiterung (Extension::mediaChecks)
+            'unused' => $r->str('unused') === '1',   // Nicht verwendet (Mediathek → „Nicht verwendet“)
         ];
         return Response::json([
             'items' => array_map([Media::class, 'toJson'], Media::all($f)),

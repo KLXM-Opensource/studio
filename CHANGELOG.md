@@ -39,6 +39,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Ansicht „Symbole“: Kacheln bleiben quadratisch, Hochkant-Bilder werden eingepasst (`.fx-thumb` mit `container-type:inline-size`,
   `max-height:100cqw`) – die Reihen springen nicht mehr. Neu daneben **Mauerwerk** (Masonry, CSS-Spalten): Bilder im eigenen
   Seitenverhältnis; Größenregler gilt für beide. Gewählte Ansicht bleibt je Browser gespeichert.
+- Seitenleiste: **Nicht verwendet** unter „Mediathek“ – Dateien, die weder auf Seiten (Blöcke, Vorschaubild, Links `media:ID`), in Datensätzen, Landingpages noch in Grund- oder Kit-Einstellungen vorkommen (`Media::usedIds`, ein Durchlauf; nicht für geteilte Medien).
 - Seitenleiste: **Sammlungen** und **Tags** lassen sich wie „Prüfen“ zuklappen (Zustand je Browser gemerkt); Größenregler ab 1100 px Fensterbreite.
 
 ### Verwaltung: Formulare und Einstellungen im Stil der macOS-Systemeinstellungen

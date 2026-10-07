@@ -732,6 +732,7 @@ class Finder {
     const p = { q: this.q };
     if (this.src.type === 'kind') p.kind = this.src.value;
     if (this.src.type === 'noalt') p.noalt = '1';
+    if (this.src.type === 'unused') p.unused = '1';
     // Prüf-Filter (Seitenleiste „Prüfen“): noalt, missing:en, notitle, nocaptions, notranscript
     if (this.src.type === 'check') { const [k, l] = this.src.value.split(':'); if (k === 'missing') p.missing_lang = l; else if (k === 'x') p.check = l; else p[k] = '1'; }
     if (this.src.type === 'collection') p.collection = this.src.value;
@@ -779,7 +780,8 @@ class Finder {
         ${this.opts.kind === 'visual' ? row('kind', 'visual', SVG.all, t('Bilder und Videos'), (counts.image || 0) + (counts.video || 0)) + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'video', SVG.video || SVG.all, 'Videos', counts.video) : img ? row('kind', 'image', SVG.image, 'Bilder', counts.image) : row('all', '', SVG.all, 'Alle Medien', counts.alle)
           + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'pdf', SVG.pdf, 'PDF-Dokumente', counts.pdf)
           + (counts.video ? row('kind', 'video', SVG.video, 'Videos', counts.video) : '')
-          + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')}
+          + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')
+          + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')}
       </ul>
       ${this.checksHtml(row)}
       <details class="fx-checkgrp fx-fold" data-fold="collections"${store.get('fold-collections', true) ? ' open' : ''}><summary><span>Sammlungen</span><button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></summary>

@@ -144,7 +144,8 @@ final class Media
      * Prüf-Filter (Seitenleiste „Prüfen“, API/MCP): noalt, missing_lang (Sprachkürzel: Bild ohne Alt-Text in dieser Sprache),
      * notitle, nocaptions (nicht dekorative Videos ohne veröffentlichte Untertitel), notranscript (Audio ohne veröffentlichtes Transkript),
      * check (Schlüssel eines Prüf-Filters einer Erweiterung, Extension::mediaChecks).
-     * @param array{q?: string, kind?: string, tag?: string, collection?: int, noalt?: bool, missing_lang?: string, notitle?: bool, nocaptions?: bool, notranscript?: bool} $f
+     * unused: Dateien, die nirgends verwendet werden (Media::usedIds; nur Mediathek der Website).
+     * @param array{q?: string, kind?: string, tag?: string, collection?: int, noalt?: bool, unused?: bool, missing_lang?: string, notitle?: bool, nocaptions?: bool, notranscript?: bool} $f
      */
     public static function all(string|array|null $f = null): array
     {
@@ -187,6 +188,11 @@ final class Media
         }
         if (!empty($f['notitle'])) {
             $where[] = "(m.title IS NULL OR m.title = '')";
+        }
+        // Nicht verwendet (nur Mediathek der Website – bei geteilten Medien ist die Verwendung auf anderen Websites unbekannt)
+        if (!empty($f['unused']) && self::$pool === null) {
+            $used = array_keys(self::usedIds());
+            if ($used) $where[] = 'm.id NOT IN (' . implode(',', array_map('intval', $used)) . ')';
         }
         if (!empty($f['nocaptions'])) {
             $where[] = self::NOCAPTIONS_SQL;
@@ -663,6 +669,14 @@ final class Media
             SUM(CASE WHEN title IS NULL OR title = '' THEN 1 ELSE 0 END) AS notitle
             FROM media" . (self::$pool === null ? ' WHERE pool_ref IS NULL' : '')) ?: [];
         $out = array_map('intval', $r);
+        if (self::$pool === null) {
+            try {
+                $used = array_keys(self::usedIds());
+                $out['unused'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE pool_ref IS NULL' . ($used ? ' AND id NOT IN (' . implode(',', array_map('intval', $used)) . ')' : ''));
+            } catch (\Throwable $e) {
+                error_log('[media] unused: ' . $e->getMessage());
+            }
+        }
         // Prüf-Filter mit Unterabfragen (je Sprache, Untertitel, Transkripte) – im Kontext Website bzw. Pool
         $scope = self::$pool === null ? ' AND m.pool_ref IS NULL' : '';
         try {
@@ -1098,6 +1112,74 @@ final class Media
             }
         }
         return $out;
+    }
+
+    /**
+     * IDs aller verwendeten Dateien dieser Website in einem Durchlauf – dieselben Stellen wie usages() (Seiten, Datensätze,
+     * Landingpages, Grundeinstellungen, Einstellungen des Kits) für den Filter „Nicht verwendet“. Je Anfrage einmal berechnet.
+     * @return array<int, true>
+     */
+    public static function usedIds(): array
+    {
+        static $memo = null;
+        if ($memo !== null) return $memo;
+        $ids = [];
+        $theme = app()->theme;
+        $links = function (string $json) use (&$ids): void {
+            if (preg_match_all('~\bmedia:(\d+)~', $json, $m)) foreach ($m[1] as $i) $ids[(int) $i] = true;
+        };
+        foreach (app()->db->fetchAll('SELECT * FROM pages') as $p) {
+            if ((int) $p['og_image'] > 0) $ids[(int) $p['og_image']] = true;
+            foreach (Layout::flatten(array_merge(Pages::blocks($p, false), Pages::blocks($p, true))) as $b) {
+                $def = $theme->block((string) ($b['type'] ?? ''));
+                $data = is_array($b['data'] ?? null) ? $b['data'] : [];
+                if ($def) self::fieldsCollect($def['fields'], $data, $ids);
+                if (($bg = (int) ($b['tunes']['section']['bgImage'] ?? 0)) > 0) $ids[$bg] = true;
+                $links((string) json_encode($data, JSON_UNESCAPED_SLASHES));
+            }
+        }
+        foreach (Data\Tables::content() as $t) {
+            try {
+                $rows = Data\Entries::query($t, ['status' => 'all'] + (Data\Tables::isShared($t) ? ['source' => 'own'] : []));
+            } catch (\Throwable) {
+                continue;
+            }
+            foreach ($rows as $e) {
+                self::fieldsCollect($t['fields'], $e, $ids);
+                $links((string) json_encode($e, JSON_UNESCAPED_SLASHES));
+            }
+        }
+        try {
+            foreach (app()->db->fetchAll('SELECT options_json FROM landings') as $l) {
+                $o = json_decode((string) $l['options_json'], true) ?: [];
+                foreach (['logo', 'favicon', 'og_image'] as $k) if ((int) ($o[$k] ?? 0) > 0) $ids[(int) $o[$k]] = true;
+            }
+        } catch (\Throwable) {
+            // Tabelle fehlt (Funktion nie benutzt)
+        }
+        foreach (SystemSchema::fields() as $f) {
+            if (in_array($f['type'] ?? '', ['media', 'file'], true) && is_string($f['name'] ?? null) && ($v = (int) setting($f['name'])) > 0) $ids[$v] = true;
+        }
+        foreach ($theme->settingsFields() as $f) {
+            if (!is_string($f['name'] ?? null) || $f['name'] === '') continue;
+            $v = setting($f['name']);
+            if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v > 0) $ids[(int) $v] = true;
+            elseif (is_string($v)) $links($v);
+            elseif (($f['type'] ?? '') === 'repeater' && is_array($v)) self::fieldsCollect([$f], [$f['name'] => $v], $ids);
+        }
+        return $memo = $ids;
+    }
+
+    /** Wie fieldsUse(), sammelt aber alle Datei-IDs der Felder (auch in Wiederholungen und Gruppen) */
+    private static function fieldsCollect(array $fields, array $data, array &$ids): void
+    {
+        foreach ($fields as $f) {
+            $v = $data[$f['name'] ?? ''] ?? null;
+            if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v > 0) $ids[(int) $v] = true;
+            if (in_array($f['type'] ?? '', ['repeater', 'group'], true) && is_array($v)) {
+                foreach (array_is_list($v) ? $v : [$v] as $item) if (is_array($item)) self::fieldsCollect($f['fields'] ?? [], $item, $ids);
+            }
+        }
     }
 
     /**

@@ -6591,4 +6591,6 @@ return [
     'Benachrichtigungen per E-Mail: „Nicht senden“ bzw. nur bei Fehlern. Speichern.' => 'E-mail notifications: “Do not notify” or errors only. Save.',
     'Ohne Plesk: denselben Befehl mit crontab -e für den Benutzer der Website eintragen, davor * * * * *.' => 'Without Plesk: add the same command via crontab -e for the website user, prefixed with * * * * *.',
     'Prüfen: Nach ein, zwei Minuten steht oben bei „Letzter Versandlauf“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation (--all).' => 'Check: after a minute or two, “Last send run” above shows a current time. One task covers all websites of this installation (--all).',
+    // Medien: Filter „Nicht verwendet“ (Media::usedIds)
+    'Nicht verwendet' => 'Not used',
 ];
