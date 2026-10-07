@@ -5,7 +5,7 @@ $perms = $role['permissions'] ?? [];
 $some = is_array($role['tables'] ?? null);
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/users#rollen')) ?>"><?= e(__('Benutzer & Rollen')) ?></a></p>
+  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/users/rollen')) ?>"><?= e(__('Benutzer & Rollen')) ?></a></p>
     <h1><?= $isNew ? e(__('Neue Rolle')) : e($role['name']) ?></h1></div>
 </header>
 <form method="post" action="<?= e(url($isNew ? '/admin/roles' : '/admin/roles/' . $role['key'])) ?>" class="us-form set-page" novalidate>
@@ -45,5 +45,5 @@ $some = is_array($role['tables'] ?? null);
     <p class="set-group__note"><?= e(__('Gilt für die Rechte im Bereich „Daten“ (außer „Tabellen und Felder ändern“) und für „Anfragen“ – z. B. nur eine Eingangs-Tabelle lesen.')) ?></p>
   </fieldset>
   <?php endif; ?>
-  <div class="adm-savebar"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Rolle speichern')) ?></button> <a class="adm-btn" href="<?= e(url('/admin/users#rollen')) ?>"><?= e(__('Abbrechen')) ?></a></div>
+  <div class="adm-savebar"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Rolle speichern')) ?></button> <a class="adm-btn" href="<?= e(url('/admin/users/rollen')) ?>"><?= e(__('Abbrechen')) ?></a></div>
 </form>

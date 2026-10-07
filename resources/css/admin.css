@@ -3033,9 +3033,10 @@ a.set-row--link::after{content:"";flex:none;width:7px;height:7px;border:solid va
 .set-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr));gap:8px 16px;margin:0;padding:0;border:0;min-width:0}
 .set-checks > legend{float:left;width:100%;padding:0;margin:0 0 6px;font-size:12px;font-weight:600;color:var(--adm-t3)}
 .set-checks > legend + *{clear:both}
+/* Schmal: nur Zeilen mit Bedienelementen umbrechen; kurze Werte (Zahl, Datum, Abzeichen) und Pfeil-Zeilen bleiben rechts */
 @media (max-width:560px){
-  .set-row:not(.set-row--keep){flex-wrap:wrap}
-  .set-row:not(.set-row--keep) > .set-row__ctl{flex:1 1 100%;justify-content:flex-start;text-align:left}
+  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)){flex-wrap:wrap}
+  .set-row:not(.set-row--keep):not(a):has(> .set-row__ctl :is(form,button,input,select,textarea,.adm-btn,code)) > .set-row__ctl{flex:1 1 100%;justify-content:flex-start;text-align:left}
 }
 /* Geteilte Medien / Geteilte Daten in Gruppen-Bereichen: Karten als Gruppenkästen, Websites als Kästchen-Raster */
 .adm-panel--groups > p:not(.adm-flash){margin:0 4px;font-size:13px;line-height:1.5;color:var(--adm-t2);max-width:72ch;padding:0;background:none;box-shadow:none}
@@ -3142,3 +3143,44 @@ html.adm-ui[data-env] .adm-side nav a[href$="/system"]::after{content:"";flex:no
 }
 /* Reiter mit eigenen Knöpfen (Umgebung, Adresse der Verwaltung, Systeminfo): allgemeines „Speichern“ ausblenden */
 .adm-tabs-form:has([data-nosave]:not([hidden])) .adm-savebar{display:none}
+/* Benutzer & Rollen: Unterseiten mit Bereichs-Seitenleiste (Links statt Reiter, .adm-secnav) */
+.us-main{min-width:0}
+.us-main__title{margin:2px 0 16px 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.adm-secnav a{text-decoration:none}
+@media (max-width:999.98px){.us-main__title{display:none}}
+@media (min-width:1000px){
+  html.adm-ui .adm-tabs-form--side .adm-secnav a{display:flex;align-items:center;gap:9px;width:100%;min-height:30px;padding:4px 8px 4px 6px;border-radius:7px;color:var(--adm-ink);font:500 13.5px/1.25 var(--adm-font)}
+  html.adm-ui .adm-tabs-form--side .adm-secnav a:hover{background:var(--adm-press);color:var(--adm-ink)}
+  html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page]{background:var(--adm-a);color:#fff;font-weight:600}
+  .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__ico{background:rgba(255,255,255,.22)}
+}
+/* Übersicht: Kennzahlen-Kacheln und zwei Spalten mit Listen */
+.us-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+.us-tile{display:grid;gap:2px;padding:14px 16px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04);color:var(--adm-ink);text-decoration:none}
+.us-tile:hover{box-shadow:0 0 0 1px var(--adm-a);color:var(--adm-ink)}
+.us-tile__n{font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.us-tile__l{font-size:12.5px;color:var(--adm-t3)}
+.us-tile.is-warn .us-tile__n{color:var(--adm-warn)}
+.us-dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px;align-items:start}
+.us-quick{margin:0}
+.us-quick .adm-btn svg{width:16px;height:16px}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px rgba(255,255,255,.1)}}
+html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px rgba(255,255,255,.1)}
+/* Rollen als Karten: welche Rolle welche Rechte hat – im Listen-Stil (Radius 10, Haarlinie, Systemschrift) */
+.us-roles > .set-group__head{align-items:flex-start;margin-bottom:14px}
+.us-roles > .set-group__head .set-page__lead{margin:0}
+.us-roles > .set-group__head .adm-btn{flex:none}
+.us-rolegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px;align-items:start}
+.us-role-card{display:grid;gap:10px;align-content:start;margin:0;padding:14px 16px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+.us-role-card header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--adm-line)}
+.us-role-card header strong{font-size:14.5px;font-weight:650}
+.us-role-card__desc{margin:0;font-size:12.5px;line-height:1.45;color:var(--adm-t3)}
+.us-role-card .us-perms{gap:4px;font-size:13px;line-height:1.35}
+.us-role-card .us-perms li{display:flex;gap:6px}
+.us-role-card .us-perms li::before{flex:none}
+.us-role-card .us-tables{margin:0;font-size:12px}
+.us-role-card__foot{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px solid var(--adm-line)}
+.us-role-card__foot form{margin:0}
+
+.us-roles{margin-top:0}
+.us-role-card header .adm-badge{flex:none;white-space:nowrap}

@@ -9,7 +9,18 @@ use Core\Http\Response;
 
 final class UserController extends AdminController
 {
-    public function index(Request $r, array $errors = [], array $old = []): Response
+    /** Unterseiten von Benutzer & Rollen (Seitenleiste wie die Grundeinstellungen, je Bereich eine Adresse) */
+    public const SECTIONS = ['personen', 'einladen', 'rollen', 'sicherheit'];
+
+    /** /admin/users/{section}: Personen, Einladen & Anlegen, Rollen, Anmeldung & Sicherheit */
+    public function section(Request $r, string $section): Response
+    {
+        if (!in_array($section, self::SECTIONS, true)) throw new \Core\Http\HttpException(404);
+        return $this->index($r, [], [], $section);
+    }
+
+    /** Übersicht (Dashboard) bzw. eine Unterseite; Formularfehler aus „Einladen & Anlegen“ landen wieder dort */
+    public function index(Request $r, array $errors = [], array $old = [], string $section = ''): Response
     {
         $this->auth($r, 'users.manage');
         $users = app()->db->fetchAll('SELECT id, email, name, role, created_at, last_login, network_uid, totp_enabled, disabled FROM users ORDER BY email');
@@ -18,9 +29,25 @@ final class UserController extends AdminController
         foreach ($users as &$u) $u['passkeys'] = $pk[(int) $u['id']] ?? 0;
         unset($u);
         // Einladungen (Core\Invites): offene Einladungen, erlaubte Rollen, Link einmal anzeigen, wenn die E-Mail nicht zugestellt wurde
-        $link = app()->session->get('_invite_link');
-        app()->session->forget('_invite_link');
-        return $this->view('users', ['users' => $users, 'errors' => $errors, 'old' => $old, 'policy' => \Core\Mfa::policy(),
+        // Übersicht: Konten, deren Rolle einen zweiten Faktor verlangt, die ihn aber noch nicht eingerichtet haben (Core\Mfa)
+        $mfaMissing = [];
+        if ($section === '') {
+            foreach ($users as $u) {
+                if ($u['role'] === 'network' || !empty($u['network_uid'])) continue;
+                try {
+                    $need = \Core\Mfa::requirement($u);
+                    if ($need !== null && !\Core\Mfa::satisfied($u, $need, app()->db)) $mfaMissing[] = (int) $u['id'];
+                } catch (\Throwable) {
+                }
+            }
+        }
+        // Link nur auf „Einladen & Anlegen“ zeigen (und erst dort verbrauchen)
+        $link = null;
+        if ($section === 'einladen') {
+            $link = app()->session->get('_invite_link');
+            app()->session->forget('_invite_link');
+        }
+        return $this->view('users', ['section' => $section, 'mfaMissing' => $mfaMissing, 'users' => $users, 'errors' => $errors, 'old' => $old, 'policy' => \Core\Mfa::policy(),
             'invites' => \Core\Invites::open(), 'inviteRoles' => \Core\Invites::roleOptions(app()->auth->role()), 'inviteLink' => is_array($link) ? $link : null,
             'css' => ['css/passkey.css', 'css/invite.css', 'css/account.css']], $errors ? 422 : 200);
     }
@@ -43,27 +70,27 @@ final class UserController extends AdminController
             $errors['role'] = __('Netzwerk-Konten werden in der Netzwerk-Verwaltung angelegt.');
         }
         if ($errors) {
-            return $this->index($r, $errors, ['email' => $email, 'name' => $r->str('name'), 'role' => $r->str('role')]);
+            return $this->index($r, $errors, ['email' => $email, 'name' => $r->str('name'), 'role' => $r->str('role')], 'einladen');
         }
         app()->auth->createUser($email, $pw, $r->str('role'), $r->str('name'));
-        return $this->back('/admin/users', 'success', "Benutzer $email angelegt.");
+        return $this->back('/admin/users/personen', 'success', "Benutzer $email angelegt.");
     }
 
     public function delete(Request $r, string $id): Response
     {
         $me = $this->auth($r, 'users.manage');
         if ((int) $id === (int) $me['id']) {
-            return $this->back('/admin/users', 'error', 'Sie können sich nicht selbst löschen.');
+            return $this->back('/admin/users/personen', 'error', 'Sie können sich nicht selbst löschen.');
         }
         if (self::isNetworkAccount((int) $id)) {
-            return $this->back('/admin/users', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
+            return $this->back('/admin/users/personen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
         }
         $admins = (int) app()->db->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id != ?", [(int) $id]);
         if ($admins < 1) {
-            return $this->back('/admin/users', 'error', 'Es muss mindestens ein Administrationskonto bestehen bleiben.');
+            return $this->back('/admin/users/personen', 'error', 'Es muss mindestens ein Administrationskonto bestehen bleiben.');
         }
         app()->db->query('DELETE FROM users WHERE id = ?', [(int) $id]);
-        return $this->back('/admin/users', 'success', 'Benutzer gelöscht.');
+        return $this->back('/admin/users/personen', 'success', 'Benutzer gelöscht.');
     }
 
     /** Zwei-Faktor-Anmeldung eines anderen lokalen Kontos zurücksetzen (z. B. Telefon verloren) – beendet dessen Sitzungen */
@@ -71,16 +98,16 @@ final class UserController extends AdminController
     {
         $me = $this->auth($r, 'users.manage');
         if ((int) $id === (int) $me['id']) {
-            return $this->back('/admin/users', 'error', __('Die eigene Zwei-Faktor-Anmeldung ändern Sie unter „Konto“.'));
+            return $this->back('/admin/users/personen', 'error', __('Die eigene Zwei-Faktor-Anmeldung ändern Sie unter „Konto“.'));
         }
         if (self::isNetworkAccount((int) $id)) {
-            return $this->back('/admin/users', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
+            return $this->back('/admin/users/personen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
         }
         $email = app()->db->fetchValue('SELECT email FROM users WHERE id = ?', [(int) $id]);
-        if (!$email) return $this->back('/admin/users', 'error', __('Benutzer nicht gefunden.'));
+        if (!$email) return $this->back('/admin/users/personen', 'error', __('Benutzer nicht gefunden.'));
         \Core\Totp::reset((int) $id);
         \Core\Network\Network::log('user.reset-2fa', site()->key, null, (string) $email);
-        return $this->back('/admin/users', 'success', __('Zwei-Faktor-Anmeldung von {email} zurückgesetzt.', ['email' => $email]));
+        return $this->back('/admin/users/personen', 'success', __('Zwei-Faktor-Anmeldung von {email} zurückgesetzt.', ['email' => $email]));
     }
 
     /** Netzwerk-Konto (Rolle network oder Schatten-Konto) – lokal nicht änderbar */
@@ -104,13 +131,13 @@ final class UserController extends AdminController
                 'req' => array_fill_keys(array_map('strval', (array) ($r->post['roles'] ?? [])), 'any')];
         }
         if ($err = \Core\Mfa::savePolicy($in, array_keys(\Core\Permissions::roles()))) {
-            return $this->back('/admin/users#zwei-faktor', 'error', $err);
+            return $this->back('/admin/users/sicherheit', 'error', $err);
         }
         $p = \Core\Mfa::policy();
         $detail = implode(', ', array_keys(array_filter(['totp' => $p['totp'], 'passkey' => $p['passkey'], 'passwordless' => $p['passwordless']])))
             . ' · ' . implode(', ', array_map(fn($k, $v) => "$k=$v", array_keys($p['roles']), $p['roles'])) . ' · ' . $p['grace_days'] . 'd';
         \Core\Network\Network::log('auth.policy', site()->key, (string) $me['email'], $detail);
-        return $this->back('/admin/users#zwei-faktor', 'success', __('Einstellung zur Zwei-Faktor-Anmeldung gespeichert.'));
+        return $this->back('/admin/users/sicherheit', 'success', __('Einstellung zur Zwei-Faktor-Anmeldung gespeichert.'));
     }
 
     public function account(Request $r, array $errors = [], array $old = []): Response
@@ -186,7 +213,7 @@ final class UserController extends AdminController
     public function changeEmail(Request $r, string $id): Response
     {
         $me = $this->auth($r, 'users.manage');
-        $back = '/admin/users';
+        $back = '/admin/users/personen';
         if ((int) $id === (int) $me['id']) {
             return $this->back($back, 'error', __('Ihre eigene Adresse ändern Sie unter „Konto › Anmeldedaten“ – mit Bestätigung.'));
         }

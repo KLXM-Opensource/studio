@@ -24,10 +24,10 @@ final class RoleController extends AdminController
         $this->auth($r, 'users.manage');
         $role = $key ? (Permissions::role($key) ?? throw new HttpException(404)) : null;
         if ($role && $role['key'] === 'admin') {
-            return $this->back('/admin/users#rollen', 'error', __('Die Rolle „Administration“ hat immer alle Rechte.'));
+            return $this->back('/admin/users/rollen', 'error', __('Die Rolle „Administration“ hat immer alle Rechte.'));
         }
         if ($role && $role['key'] === 'network') {
-            return $this->back('/admin/users#rollen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
+            return $this->back('/admin/users/rollen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
         }
         $name = mb_substr(trim(strip_tags($r->str('name'))), 0, 60);
         if ($name === '') {
@@ -47,7 +47,7 @@ final class RoleController extends AdminController
             for ($n = 2; Permissions::role($k); $n++) $k = $base . '_' . $n;
             app()->db->insert('roles', $data + ['rkey' => $k, 'builtin' => 0]);
         }
-        return $this->back('/admin/users#rollen', 'success', __('Rolle „{name}“ gespeichert.', ['name' => $name]));
+        return $this->back('/admin/users/rollen', 'success', __('Rolle „{name}“ gespeichert.', ['name' => $name]));
     }
 
     public function delete(Request $r, string $key): Response
@@ -55,14 +55,14 @@ final class RoleController extends AdminController
         $this->auth($r, 'users.manage');
         $role = Permissions::role($key) ?? throw new HttpException(404);
         if ($role['builtin']) {
-            return $this->back('/admin/users#rollen', 'error', __('Diese Rolle kann nicht gelöscht werden.'));
+            return $this->back('/admin/users/rollen', 'error', __('Diese Rolle kann nicht gelöscht werden.'));
         }
         $used = (int) app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE role = ?', [$key]);
         if ($used) {
-            return $this->back('/admin/users#rollen', 'error', __('Die Rolle ist noch {n} Benutzer(n) zugewiesen.', ['n' => $used]));
+            return $this->back('/admin/users/rollen', 'error', __('Die Rolle ist noch {n} Benutzer(n) zugewiesen.', ['n' => $used]));
         }
         app()->db->query('DELETE FROM roles WHERE rkey = ?', [$key]);
-        return $this->back('/admin/users#rollen', 'success', __('Rolle gelöscht.'));
+        return $this->back('/admin/users/rollen', 'success', __('Rolle gelöscht.'));
     }
 
     /** Rolle eines Benutzers ändern */
@@ -72,13 +72,13 @@ final class RoleController extends AdminController
         $role = Permissions::role($r->str('role')) ?? throw new HttpException(422, __('Unbekannte Rolle.'));
         // Netzwerk-Administration: weder vergeben noch entziehen (zentral, Core\Network)
         if ($role['key'] === 'network' || UserController::isNetworkAccount((int) $id)) {
-            return $this->back('/admin/users', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
+            return $this->back('/admin/users/personen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
         }
         if ((int) $id === (int) $me['id'] && $role['key'] !== 'admin' && $me['role'] === 'admin'
             && !(int) app()->db->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id != ?", [(int) $id])) {
-            return $this->back('/admin/users', 'error', __('Es muss mindestens ein Administrationskonto bestehen bleiben.'));
+            return $this->back('/admin/users/personen', 'error', __('Es muss mindestens ein Administrationskonto bestehen bleiben.'));
         }
         app()->db->update('users', ['role' => $role['key']], 'id = :id', ['id' => (int) $id]);
-        return $this->back('/admin/users', 'success', __('Rolle geändert.'));
+        return $this->back('/admin/users/personen', 'success', __('Rolle geändert.'));
     }
 }

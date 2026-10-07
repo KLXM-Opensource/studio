@@ -122,6 +122,24 @@ d.addEventListener('keydown', e => {
   $$('details.adm-tip[open]').forEach(t => { t.open = false; $('summary', t)?.focus(); });
 });
 
+// ------------------------------------------------------------ Bereichs-Navigation mit eigenen Adressen (z. B. Benutzer & Rollen)
+// Gleiche Seitenleiste wie die Reiter der Grundeinstellungen, aber Links; schmal ein Auswahlfeld, das zur Unterseite wechselt.
+$$('[data-secnav]').forEach(box => {
+  const nav = $('nav', box);
+  if (!nav) return;
+  // Alte Sprungmarken (/admin/users#rollen) auf die passende Unterseite umleiten
+  try {
+    const map = JSON.parse(box.dataset.oldHash || '{}'), h = location.hash.slice(1);
+    if (h && map[h]) { location.replace(map[h] + (['zwei-faktor', 'einladungen', 'einladung-link'].includes(h) ? '#' + h : '')); return; }
+  } catch {}
+  const wrap = d.createElement('label'), sel = d.createElement('select');
+  wrap.className = 'adm-tabsel';
+  sel.setAttribute('aria-label', nav.getAttribute('aria-label') || '');
+  $$('a', nav).forEach(a => { const o = new Option($('.adm-tabs__label', a)?.textContent || a.textContent.trim(), a.href); o.selected = a.getAttribute('aria-current') === 'page'; sel.add(o); });
+  sel.addEventListener('change', () => { location.href = sel.value; });
+  wrap.append(sel); nav.before(wrap); nav.classList.add('has-select');
+});
+
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
   const tabs = $$('[role=tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)

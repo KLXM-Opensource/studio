@@ -36,11 +36,11 @@ final class InviteController extends AdminController
         $key = 'invite-send:' . (int) $me['id'];
         $old = ['email' => $r->str('email'), 'name' => $r->str('name'), 'role' => $r->str('role'), 'message' => (string) ($r->post['message'] ?? ''), 'locale' => $r->str('locale')];
         if ($limiter->tooMany($key, 30, 3600)) {
-            return (new UserController())->index($r, ['invite' => __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.')], $old + ['_invite' => 1]);
+            return (new UserController())->index($r, ['invite' => __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.')], $old + ['_invite' => 1], 'einladen');
         }
         $res = Invites::create($old, $me, app()->auth->role());
         if (!isset($res['token'])) {
-            return (new UserController())->index($r, array_combine(array_map(fn($k) => 'inv_' . $k, array_keys($res)), $res), $old + ['_invite' => 1]);
+            return (new UserController())->index($r, array_combine(array_map(fn($k) => 'inv_' . $k, array_keys($res)), $res), $old + ['_invite' => 1], 'einladen');
         }
         $limiter->hit($key);
         $inv = Invites::get((int) $res['id']);
@@ -55,16 +55,16 @@ final class InviteController extends AdminController
         $inv = Invites::get((int) $id);
         // Nur in Rollen, in die man selbst einladen darf
         if (!$inv || !Invites::assignable(Permissions::role((string) $inv['role']), app()->auth->role())) {
-            return $this->back('/admin/users#einladungen', 'error', __('Einladung nicht gefunden.'));
+            return $this->back('/admin/users/einladen#einladungen', 'error', __('Einladung nicht gefunden.'));
         }
         $limiter = new RateLimiter(app()->db);
         $key = 'invite-send:' . (int) $me['id'];
-        if ($limiter->tooMany($key, 30, 3600)) return $this->back('/admin/users#einladungen', 'error', __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
+        if ($limiter->tooMany($key, 30, 3600)) return $this->back('/admin/users/einladen#einladungen', 'error', __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
         if (app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [strtolower((string) $inv['email'])])) {
-            return $this->back('/admin/users#einladungen', 'error', __('Diese E-Mail-Adresse ist bereits registriert.'));
+            return $this->back('/admin/users/einladen#einladungen', 'error', __('Diese E-Mail-Adresse ist bereits registriert.'));
         }
         $token = Invites::renew((int) $id);
-        if ($token === null) return $this->back('/admin/users#einladungen', 'error', __('Einladung nicht gefunden.'));
+        if ($token === null) return $this->back('/admin/users/einladen#einladungen', 'error', __('Einladung nicht gefunden.'));
         $limiter->hit($key);
         $inv = Invites::get((int) $id);
         $sent = Invites::send($inv, $token);
@@ -77,18 +77,18 @@ final class InviteController extends AdminController
         $me = $this->auth($r, 'users.manage');
         $inv = Invites::get((int) $id);
         if (!$inv || !Invites::assignable(Permissions::role((string) $inv['role']), app()->auth->role()) || !Invites::revoke((int) $id)) {
-            return $this->back('/admin/users#einladungen', 'error', __('Einladung nicht gefunden.'));
+            return $this->back('/admin/users/einladen#einladungen', 'error', __('Einladung nicht gefunden.'));
         }
         Invites::log('user.invite-revoke', (string) $me['email'], (string) $inv['email']);
-        return $this->back('/admin/users#einladungen', 'success', __('Einladung an {email} zurückgezogen – der Link gilt nicht mehr.', ['email' => $inv['email']]));
+        return $this->back('/admin/users/einladen#einladungen', 'success', __('Einladung an {email} zurückgezogen – der Link gilt nicht mehr.', ['email' => $inv['email']]));
     }
 
     /** Nach dem Versand: Erfolg – oder den Link einmal anzeigen (E-Mail nicht zugestellt) */
     private function after(array $inv, string $token, array $sent, string $ok): Response
     {
-        if ($sent['delivered']) return $this->back('/admin/users#einladungen', 'success', $ok);
+        if ($sent['delivered']) return $this->back('/admin/users/einladen#einladungen', 'success', $ok);
         app()->session->set('_invite_link', ['email' => (string) $inv['email'], 'url' => Invites::url($token), 'error' => $sent['error']]);
-        return $this->back('/admin/users#einladung-link');
+        return $this->back('/admin/users/einladen#einladung-link');
     }
 
     // ================================================================= Öffentlich: Einladung annehmen

@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Benutzer & Rollen: Unterseiten mit Übersicht, Rollen wieder als Karten
+- Bereichsleiste wie in den Grundeinstellungen, aber je Bereich eine eigene Adresse: **Übersicht** (`/admin/users`:
+  Personen, ohne zweiten Faktor bzw. Pflicht noch nicht eingerichtet, Passkeys, offene Einladungen mit Ablauf, Personen je
+  Rolle, zuletzt/nie angemeldet, Schnellzugriffe), **Personen** (`/admin/users/personen`), **Einladen & Anlegen**
+  (`/admin/users/einladen`), **Rollen** (`/admin/users/rollen`, eine Karte je Rolle mit ihren Rechten) und **Anmeldung &
+  Sicherheit** (`/admin/users/sicherheit`). Schmal: Auswahlfeld oben. Formulare, Rückmeldungen und Fehler landen auf der
+  jeweiligen Unterseite; alte Sprungmarken (`/admin/users#rollen`, `#zwei-faktor`, `#einladungen`) leiten weiter.
+
 ### Medien: Hochkant-Bilder im Raster eingepasst, neue Ansicht „Mauerwerk“
 - Ansicht „Symbole“: Kacheln bleiben quadratisch, Hochkant-Bilder werden eingepasst (`.fx-thumb` mit `container-type:inline-size`,
   `max-height:100cqw`) – die Reihen springen nicht mehr. Neu daneben **Mauerwerk** (Masonry, CSS-Spalten): Bilder im eigenen

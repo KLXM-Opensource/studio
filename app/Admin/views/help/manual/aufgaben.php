@@ -36,7 +36,7 @@
   </ol>
   <h3>Neue Kollegin oder neuen Kollegen einladen</h3>
   <ol class="doc-steps">
-    <li><b>Benutzer &amp; Rollen → Person einladen</b>: E-Mail-Adresse und Rolle eintragen → <b>Einladung senden</b>.</li>
+    <li><b>Benutzer &amp; Rollen → Einladen &amp; Anlegen</b>: E-Mail-Adresse und Rolle eintragen → <b>Einladung senden</b>.</li>
     <li>Die Person wählt beim Annehmen selbst Passkey und/oder Passwort. Einzelheiten: <a href="#einladen">Personen einladen</a>.</li>
   </ol>
   <h3>Schief fotografiertes Bild gerade rücken</h3>

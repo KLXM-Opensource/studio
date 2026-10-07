@@ -357,6 +357,7 @@ return function (Router $r): void {
     $r->post('/admin/requests/{table}/{id}/delete', [Admin\InboxController::class, 'delete']);
 
     $r->get('/admin/users', [Admin\UserController::class, 'index']);
+    $r->get('/admin/users/{section}', [Admin\UserController::class, 'section']);   // Personen, Einladen & Anlegen, Rollen, Anmeldung & Sicherheit
     $r->post('/admin/users', [Admin\UserController::class, 'store']);
     $r->post('/admin/users/{id}/delete', [Admin\UserController::class, 'delete']);
     $r->post('/admin/users/{id}/2fa-reset', [Admin\UserController::class, 'resetTwoFactor']);
