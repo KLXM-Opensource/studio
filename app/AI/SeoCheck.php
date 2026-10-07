@@ -18,6 +18,7 @@ use Core\Search\Text;
 final class SeoCheck
 {
     public const TITLE_MAX = 60;
+    public const TITLE_MIN_OWN = 30;   // Zeichen, die dem Seitentitel neben dem Titel-Zusatz mindestens bleiben (Assist::titleBudget)
     public const DESC_MIN = 70;
     public const DESC_MAX = 160;
     public const WORDS_MIN = 150;

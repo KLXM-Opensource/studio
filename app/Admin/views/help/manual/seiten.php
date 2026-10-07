@@ -8,6 +8,13 @@
   <p><b>Direkt auf der Website:</b> In der Werkzeugleiste oben öffnet <b>Neue Seite</b> (<kbd>⌥N</kbd> bzw. <kbd>Alt+N</kbd>) ein Fenster mit dem
     Seitenbaum. Seite wählen, dann <b>Darunter</b> (als Unterseite), <b>Davor</b> oder <b>Danach</b> – die Adresse der neuen Seite steht gleich darunter.
     Titel eingeben, bei Bedarf Vorlage und „Im Menü zeigen“ wählen, <b>Seite anlegen und bearbeiten</b>: Die Seite entsteht als Entwurf und öffnet sich im Editor.</p>
+  <p><b>Seiteneinstellungen direkt auf der Website:</b> Im Menü <b>⋯</b> der Werkzeugleiste öffnet <b>Seiteneinstellungen</b> ein Fenster –
+    beim Ansehen und beim Bearbeiten, ohne in die Verwaltung zu wechseln. Dort ändern Sie Titel, Adresse, Status, „Im Hauptmenü zeigen“
+    (mit Beschriftung), „Nicht in Suchmaschinen“, den <b>Titel</b> und die <b>Beschreibung für Suchmaschinen</b> (mit Zeichenzähler; mit KI-Assistent
+    auch per <b>Vorschlag</b>) sowie das <b>Vorschaubild für soziale Netzwerke</b> – aus der Mediathek wählen oder gleich hochladen. <b>Speichern</b>
+    übernimmt alles sofort: Titel und Vorschaubild im Seitenkopf sind direkt aktuell; ändern sich Status oder Menü, lädt die Seite neu (im Editor nur,
+    wenn nichts Ungespeichertes verloren geht). Eine neue Adresse zeigt vorher an, ob die alte automatisch weiterleitet. Übergeordnete Seite, Versionen
+    und alles Weitere: <b>Alle Einstellungen in der Verwaltung</b>. Nur mit dem Recht „Seiten anlegen, verschieben, löschen, Seiteneinstellungen“.</p>
   <table class="doc-table">
     <tr><th>Aktion</th><th>So geht’s</th></tr>
     <tr><td>Ordnen</td><td>Seite <b>ziehen</b>: auf eine andere Seite = wird deren Unterseite (blauer Rahmen), zwischen zwei Seiten = neue Reihenfolge (blaue Linie), auf die freie Fläche unter der letzten Zeile = ans Ende. Ohne Maus: Seite wählen und <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> (eine Stelle nach oben/unten), <kbd>Alt</kbd> + <kbd>→</kbd> (einrücken: Unterseite der Seite darüber), <kbd>Alt</kbd> + <kbd>←</kbd> (ausrücken: eine Ebene höher) – dieselben Befehle stehen im Menü „⋯“. Ändert sich dabei die Ebene, passen sich die Adressen automatisch an; alte Einzeladressen leiten weiter.</td></tr>

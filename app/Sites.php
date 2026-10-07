@@ -121,18 +121,53 @@ final class Sites
         } else {
             throw new \InvalidArgumentException('Aktion: add oder remove.');
         }
+        self::writeValue($key, $field, $hosts);
+        return $hosts;
+    }
+
+    /**
+     * Hauptadresse einer Website festlegen: $host (schon in 'hosts') an die erste Stelle, Reihenfolge der übrigen bleibt.
+     * Gleicher sicherer Schreibweg wie setHosts(). Ob die Domain auf diese Installation zeigt, prüft der Aufrufer (Core\Domains::check).
+     * @return list<string> neue Domains
+     */
+    public static function setPrimary(string $key, string $host): array
+    {
+        if (!isset(self::all()[$key])) throw new \InvalidArgumentException("Unbekannte Website „{$key}“.");
+        $h = self::normalizeHost($host) ?? throw new \InvalidArgumentException("Ungültige Domain: {$host}");
+        $hosts = array_values(array_map('strtolower', (array) (self::all()[$key]['hosts'] ?? [])));
+        if (!in_array($h, $hosts, true)) throw new \InvalidArgumentException("Domain {$h} ist für „{$key}“ nicht eingetragen.");
+        $hosts = array_values(array_merge([$h], array_filter($hosts, fn($x) => $x !== $h)));
+        self::writeValue($key, 'hosts', $hosts);
+        return $hosts;
+    }
+
+    /** Einfachen Wert (bool/string) in config/sites/{key}.php setzen, z. B. 'environment' oder 'redirect_to_primary' (Verwaltung → Domain) */
+    public static function setOption(string $key, string $field, bool|string $value): void
+    {
+        if (!isset(self::all()[$key])) throw new \InvalidArgumentException("Unbekannte Website „{$key}“.");
+        if (!preg_match('~^[a-z][a-z0-9_]{1,39}$~', $field) || in_array($field, ['hosts', 'landing_hosts', 'app_key', 'setup_token', 'db'], true)) {
+            throw new \InvalidArgumentException("Schlüssel „{$field}“ ist hier nicht änderbar.");
+        }
+        self::writeValue($key, $field, $value);
+    }
+
+    /**
+     * Einen Schlüssel in config/sites/{key}.php ersetzen bzw. ergänzen (Kommentare und übrige Werte bleiben) – fehlt die Datei
+     * (Website „default“), wird sie angelegt. Neue Datei zuerst prüfen (Syntax + Ergebnis), Sicherung {key}.php.bak, dann atomar ersetzen.
+     */
+    private static function writeValue(string $key, string $field, array|bool|string $value): void
+    {
         $file = self::dir() . "/$key.php";
-        $export = '[' . implode(', ', array_map(fn($x) => var_export($x, true), $hosts)) . ']';
+        $export = is_array($value) ? '[' . implode(', ', array_map(fn($x) => var_export($x, true), $value)) . ']' : var_export($value, true);
         if (is_file($file)) {
             $src = (string) file_get_contents($file);
             $new = self::replaceTopLevel($src, $field, $export) ?? throw new \RuntimeException("config/sites/{$key}.php hat kein erkennbares return-Array – bitte '{$field}' von Hand ändern.");
         } else {
-            $new = "<?php\n// Website „{$key}“ – Domains (angelegt von site:hosts am " . date('Y-m-d H:i') . ")\nreturn [\n    '{$field}' => {$export},\n];\n";
+            $new = "<?php\n// Website „{$key}“ – NICHT versionieren. Angelegt am " . date('Y-m-d H:i') . " (Domains/Umgebung)\nreturn [\n  '{$field}' => {$export},\n];\n";
         }
         if (!is_dir(self::dir())) mkdir(self::dir(), 0770, true);
-        // Neue Datei zuerst prüfen (Syntax + Ergebnis), dann atomar ersetzen
         $tmp = $file . '.tmp-' . bin2hex(random_bytes(4));
-        file_put_contents($tmp, $new, LOCK_EX);
+        if (@file_put_contents($tmp, $new, LOCK_EX) === false) throw new \RuntimeException("config/sites ist nicht beschreibbar – nichts geändert.");
         @chmod($tmp, 0640);
         try {
             $check = (static fn(string $__f) => require $__f)($tmp);
@@ -140,9 +175,11 @@ final class Sites
             @unlink($tmp);
             throw new \RuntimeException('Geänderte Konfiguration ist ungültig (' . $e->getMessage() . ') – nichts geändert.');
         }
-        if (!is_array($check) || array_values(array_map('strtolower', (array) ($check[$field] ?? []))) !== $hosts) {
+        $got = is_array($check) ? ($check[$field] ?? null) : null;
+        if (is_array($got)) $got = array_values(array_map(fn($x) => is_string($x) ? strtolower($x) : $x, $got));
+        if ($got !== $value) {
             @unlink($tmp);
-            throw new \RuntimeException('Geänderte Konfiguration liefert andere Domains als erwartet – nichts geändert.');
+            throw new \RuntimeException("Geänderte Konfiguration liefert für '{$field}' einen anderen Wert als erwartet – nichts geändert.");
         }
         if (is_file($file)) {
             @copy($file, $file . '.bak');
@@ -151,7 +188,6 @@ final class Sites
         rename($tmp, $file);
         if (function_exists('opcache_invalidate')) @opcache_invalidate($file, true);
         self::flush();
-        return $hosts;
     }
 
     /**

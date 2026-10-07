@@ -176,6 +176,8 @@ final class AdminPages
             // System: Betrieb der Installation – Grundeinstellungen, Funktionen, Personen
             ['key' => 'einstellungen', 'label' => __('System'), 'icon' => 'gear', 'items' => [
                 ['/admin/system', __('Grundeinstellungen'), 'system', can('system.manage')],
+                // Domain (Core\Domains): nur Einzel-Installation ohne Netzwerk – sonst verwaltet die Netzwerk-Administration die Domains
+                ['/admin/system/domain', __('Domain'), 'domain', can('system.manage') && \Core\Domains::available()],
                 // Funktionen & Erweiterungen (Core\Features): Haupt-Admin schaltet, im Netzwerk liest die Website-Administration mit
                 ['/admin/funktionen', __('Funktionen & Erweiterungen'), 'features', Features::canView()],
                 // Sammelseite (kind settings): Einstellungen der Funktionen & Erweiterungen – nur wenn es etwas zu zeigen gibt

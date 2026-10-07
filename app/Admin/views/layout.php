@@ -41,8 +41,12 @@ $hubKind = in_array($hubKind, ['settings', 'stats'], true) ? $hubKind : '';
 $hubPage = $hubKind !== '' ? \Core\AdminPages::match($reqPath) : null;
 if ($hubPage && in_array(rtrim($hubPage['href'], '/'), [\Core\AdminPages::HUB, \Core\AdminPages::STATS], true)) $hubPage = null;
 // Aktueller Menüpunkt: Sammelseite > Adresse (mit $href, Administration) > Bereich der Ansicht
-$isCur = function (string $key, string $href = '') use ($hubKind, $reqPath, $section): bool {
+// Genauester Menüpunkt zur Adresse (z. B. /admin/system/domain vor /admin/system) – der übergeordnete ist dann nicht aktuell
+$bestHref = '';
+foreach ($adminNav as $n) if ($reqPath !== '' && ($reqPath === $n[0] || str_starts_with($reqPath, $n[0] . '/')) && strlen($n[0]) > strlen($bestHref)) $bestHref = $n[0];
+$isCur = function (string $key, string $href = '') use ($hubKind, $reqPath, $section, $bestHref): bool {
     if ($hubKind !== '') return ($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats');
+    if ($href !== '' && $bestHref !== $href && str_starts_with($bestHref, $href . '/')) return false;
     if ($href !== '' && ($reqPath === $href || str_starts_with($reqPath, $href . '/'))) return true;
     if (in_array($key, ['prefs', 'stats'], true)) return false;   // beide Sammelseiten liegen in views/prefs – nur über die Adresse
     return $section === $key || ($key === 'users' && $section === 'role');

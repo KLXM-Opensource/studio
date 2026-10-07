@@ -1190,6 +1190,8 @@ async function openFx(tool, paths, id) {
 }
 // Schnittstelle für den Knopf „Anpassen“ am Bild (_media.js): Block und Feldpfade zu einem <img data-media-id>
 window.CMSEditor = Object.assign(window.CMSEditor || {}, {
+  // Ungespeicherte Änderungen? (z. B. Werkzeug „Seiteneinstellungen“: nur dann neu laden, wenn nichts verloren geht)
+  isDirty: () => dirty,
   fx: {
     target(img) {
       const tool = toolFor(img);

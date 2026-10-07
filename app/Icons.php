@@ -25,7 +25,7 @@ final class Icons
         'dashboard' => 'squares-four', 'pages' => 'files', 'page' => 'file-text', 'home' => 'house', 'settings' => 'sliders-horizontal',
         'media' => 'images', 'data' => 'database', 'requests' => 'tray', 'inbox' => 'tray', 'calendar' => 'calendar-dots', 'dav' => 'calendar-dots',
         'system' => 'gear-six', 'gear' => 'gear-six', 'features' => 'toggle-left', 'design' => 'palette', 'users' => 'users', 'role' => 'users', 'account' => 'user-circle',
-        'user' => 'user', 'api' => 'code', 'network' => 'network', 'globe' => 'globe', 'landings' => 'globe', 'support' => 'lifebuoy', 'chat' => 'chats', 'chatcfg' => 'chats', 'help' => 'question', 'review' => 'clipboard-text', 'drafts' => 'pencil-simple', 'pagetemplates' => 'stamp', 'redirects' => 'signpost', 'glossary' => 'book-open-text',
+        'user' => 'user', 'api' => 'code', 'network' => 'network', 'globe' => 'globe', 'landings' => 'globe', 'domain' => 'globe', 'support' => 'lifebuoy', 'chat' => 'chats', 'chatcfg' => 'chats', 'help' => 'question', 'review' => 'clipboard-text', 'drafts' => 'pencil-simple', 'pagetemplates' => 'stamp', 'redirects' => 'signpost', 'glossary' => 'book-open-text',
         'prefs' => 'sliders-horizontal', 'stats' => 'chart-bar', 'tools' => 'wrench',
         'fav' => 'star', 'star' => 'star', 'ext' => 'puzzle-piece', 'table' => 'table', 'image' => 'image', 'file' => 'file',
         'plus' => 'plus', 'upload' => 'upload-simple', 'blocks' => 'package', 'key' => 'key', 'search' => 'magnifying-glass',

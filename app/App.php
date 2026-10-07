@@ -161,6 +161,12 @@ final class App
         }
         $this->request = $request;
 
+        // Weitere Domains auf die Hauptadresse (System → Domain, config 'redirect_to_primary'; Core\Domains)
+        if ($to = Domains::redirectTarget($this->site, $request->method, $request->host(), $request->path,
+            (string) ($request->server['REQUEST_URI'] ?? '/'), $request->isSecure())) {
+            return Http\Response::redirect($to, 301);
+        }
+
         // Landing-Domains (Core\Landings): Verwaltung nur auf der Hauptdomain – dort gelten Sitzung, Cookies und Passkeys (RP-ID = Domain)
         if ($request->isAdminPath() && Landings::current()) {
             return Http\Response::redirect(Landings::mainOrigin() . url($request->path), 302);

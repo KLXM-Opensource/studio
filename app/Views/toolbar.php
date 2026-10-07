@@ -202,7 +202,8 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         if ($kind === 'page' && $b['hasPage'] && $b['canEditPages']): ?><?= $item(e(__('Versionen')) . '<small>' . e(__('frühere Stände ansehen und wiederherstellen')) . '</small>', 'clock-counter-clockwise', null, \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/pages/' . (int) $page['id'] . '/versions')) ?>
         <?php elseif ($kind === 'entry' && !empty($b['entryEditable']) && !$b['foreign']): ?><?= $item(e(__('Versionen')) . '<small>' . e(__('frühere Stände ansehen und wiederherstellen')) . '</small>', 'clock-counter-clockwise', null, \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/data/' . $b['table']['handle'] . '/' . (int) $b['entry']['id'] . '/versions')) ?>
         <?php endif; ?>
-        <?php if ($b['hasPage'] && $b['canManage']): ?><?= $item(e($kind === 'page' ? __('Seiteneinstellungen') : __('Einstellungen der Vorlagen-Seite')), 'gear-six', url('/admin/pages/' . $page['id'])) ?><?php endif; ?>
+        <?php // Seiteneinstellungen: auf Seiten als Werkzeug (Core\PageSettingsTool, oben bei den Werkzeugen), sonst Link in die Verwaltung
+        if ($b['hasPage'] && $b['canManage'] && !in_array(\Core\PageSettingsTool::ID, array_column($b['tools'], 'id'), true)): ?><?= $item(e($kind === 'page' ? __('Seiteneinstellungen') : __('Einstellungen der Vorlagen-Seite')), 'gear-six', url('/admin/pages/' . $page['id'])) ?><?php endif; ?>
         <?php if ($b['canSettings']): ?><?= $item(e($b['settingsTitle']), 'sliders-horizontal', url('/admin/settings')) ?><?php endif; ?>
         <?= $sep ?>
         <button type="button" role="menuitem" class="cms-menu__item cms-menu--phone" tabindex="-1" data-spotlight><span class="cms-menu__ico" aria-hidden="true"><?= icon('magnifying-glass') ?></span><span class="cms-menu__label"><?= e(__('Suchen')) ?></span><kbd data-kbd>⌘K</kbd></button>

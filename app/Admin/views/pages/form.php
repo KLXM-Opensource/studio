@@ -64,8 +64,9 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
       <?php endif; ?></div>
     <?php endif; ?>
     <div class="f"><label for="meta_title"><?= e(__('Titel für Suchmaschinen (optional)')) ?></label>
-      <input id="meta_title" name="meta_title" maxlength="120" data-max="<?= \Core\AI\SeoCheck::TITLE_MAX - mb_strlen(\Core\AI\Assist::titleSuffix()) ?>" value="<?= e($old['meta_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? '') ?>" aria-describedby="meta_title-h">
-      <p class="f-help" id="meta_title-h"><?= e(__('Leer = Seitentitel. Suchmaschinen zeigen etwa 60 Zeichen; angehängt wird „{suffix}“.', ['suffix' => trim(\Core\AI\Assist::titleSuffix(), ' |') ?: '–'])) ?></p></div>
+      <input id="meta_title" name="meta_title" maxlength="120" data-max="<?= \Core\AI\Assist::titleBudget() ?>" value="<?= e($old['meta_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? '') ?>" aria-describedby="meta_title-h">
+      <p class="f-help" id="meta_title-h"><?= e(__('Leer = Seitentitel. Suchmaschinen zeigen etwa 60 Zeichen; angehängt wird „{suffix}“.', ['suffix' => trim(\Core\AI\Assist::titleSuffix(), ' |') ?: '–'])) ?></p>
+      <?php if (\Core\AI\Assist::titleSuffixTooLong()): ?><p class="f-warn"><?= e(__('Der Titel-Zusatz ist mit {n} Zeichen sehr lang – Suchmaschinen kürzen ihn. Kürzer einstellen unter {where} → SEO.', ['n' => mb_strlen(trim(\Core\AI\Assist::titleSuffix(), ' |')), 'where' => app()->theme->settingsTitle()])) ?></p><?php endif; ?></div>
     <div class="f"><label for="meta_description">Beschreibung für Suchmaschinen</label>
       <textarea id="meta_description" name="meta_description" rows="3" maxlength="300" data-max="160"><?= e($old['meta_description'] ?? '') ?></textarea>
       <p class="f-help">Ideal 120–160 Zeichen. Leer = Standard aus <?= e(app()->theme->settingsTitle()) ?> → SEO.</p></div>

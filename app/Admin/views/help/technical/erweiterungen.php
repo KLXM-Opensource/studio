@@ -153,6 +153,15 @@ $x-&gt;dashboard(fn(array $user) =&gt; ['cards' =&gt; ['offen' =&gt; ['title' =&
     'texts' =&gt; ['insert' =&gt; __('Einfügen')],                 // übersetzte Texte (auf der Website gibt es kein Wörterbuch)
 ]);</code></pre>
   <p><b>Neue Seite (Core):</b> <code>Core\PageTool::definition()</code> – Knopf in der Werkzeugleiste (<code>Alt+N</code>, <code>perm</code> <code>pages.manage</code>, auch beim Ansehen), <code>'panel' =&gt; ['size' =&gt; 'modal']</code> (Dialog in der Mitte, abgedunkelter Hintergrund, Tab bleibt im Dialog), Modul <code>resources/js/new-page.mjs</code>, Endpunkte <code>GET /admin/api/pages/tree</code> und <code>POST /admin/api/pages/create</code> (<code>PageController::apiTree/apiCreate</code>, gleiche Prüfungen wie das Formular).</p>
+  <p><b>Seiteneinstellungen (Core):</b> <code>Core\PageSettingsTool::definition()</code> – Eintrag im Menü „⋯“ (<code>placement</code> <code>more</code>,
+    <code>perm</code> <code>pages.manage</code>, auch beim Ansehen, nur auf Seiten – <code>visible</code> über <code>PageSettingsTool::applies()</code>; ersetzt dort den
+    Link in die Verwaltung), Modal wie „Neue Seite“, Modul <code>resources/js/page-settings.mjs</code>. Endpunkte <code>GET</code> und <code>POST /admin/api/pages/{id}/settings</code>
+    (<code>PageController::apiSettings/apiSettingsSave</code>, JSON: <code>title</code>, <code>slug</code>, <code>meta_title</code>, <code>meta_description</code>,
+    <code>og_image</code>, <code>status</code>, <code>menu</code>, <code>nav_title</code>, <code>noindex</code> – nur übergebene Felder ändern sich). Gespeichert wird über
+    <code>PageController::saveSettings()</code>, denselben Weg wie das Formular der Verwaltung (Prüfungen, Startseite/404-Sonderfälle, Platzhalter-Sperre,
+    Status nur mit <code>pages.publish</code>, automatische Weiterleitung bei neuer Adresse, Seiten-Cache). Die Antwort liefert die neuen Werte, die Adresse und
+    <code>seo</code> (Titel, Beschreibung, Vorschaubild, Canonical) – das Modul führt damit <code>&lt;title&gt;</code> und Meta-Angaben ohne Neuladen nach.
+    Im Editor fragt es dafür <code>window.CMSEditor.isDirty()</code>.</p>
   <p><b>Quick-Glossar (Core, Referenz):</b> <code>Core\Glossary\QuickTool::definition()</code> liefert genau diese Angaben – <code>id</code> <code>glossary</code>, Kürzel <code>Alt+G</code>, <code>feature</code> <code>glossary</code>, <code>visible</code> = Tabelle eingerichtet und <code>data.edit</code> auf <code>glossar</code>, <code>'view' =&gt; true</code> mit <code>chip</code> „Als Glossar-Begriff“, drei Endpunkte (<code>GlossaryController::api*</code>), Modul <code>resources/js/quick-glossary.mjs</code>.</p>
   <table class="doc-table">
     <tr><th>Modi</th><th>Wann</th><th>Hinweise</th></tr>

@@ -149,13 +149,13 @@ final class AiController extends AdminController
                 $e = Entries::find($t, (int) ($entry['id'] ?? 0)) ?? throw new HttpException(404);
                 $title = $r->str('title') ?: Entries::title($t, $e);
                 $text = $r->str('text') ?: Assist::entryText($t, $e);
-                $s = Assist::seo($title, $text, Lang::norm($e['lang'] ?? null), SeoCheck::TITLE_MAX - mb_strlen(Assist::titleSuffix()), 155);
+                $s = Assist::seo($title, $text, Lang::norm($e['lang'] ?? null), Assist::titleBudget(), 155);
                 if (($e['status'] ?? '') === 'published' && $s['slug'] !== ($e['slug'] ?? '')) $warn[] = __('Der Eintrag ist online: Eine neue Adresse macht alte Links und Lesezeichen ungültig (keine automatische Weiterleitung).');
-                return ['suggest' => $s, 'current' => ['slug' => (string) ($e['slug'] ?? '')], 'notes' => $warn, 'titleMax' => SeoCheck::TITLE_MAX - mb_strlen(Assist::titleSuffix())];
+                return ['suggest' => $s, 'current' => ['slug' => (string) ($e['slug'] ?? '')], 'notes' => $warn, 'titleMax' => Assist::titleBudget()];
             }
             if (!can('pages.manage')) throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
             $p = Pages::find((int) ($r->post['page'] ?? 0)) ?? throw new HttpException(404);
-            $s = Assist::seo($p['title'], Assist::pageText($p), Lang::norm($p['lang']), SeoCheck::TITLE_MAX - mb_strlen(Assist::titleSuffix()), 155);
+            $s = Assist::seo($p['title'], Assist::pageText($p), Lang::norm($p['lang']), Assist::titleBudget(), 155);
             if ($p['is_home']) {
                 $s['slug'] = '';
             } else {

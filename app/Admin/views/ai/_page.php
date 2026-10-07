@@ -17,7 +17,7 @@ if (Lang::multi() && $lang !== Lang::default()) $src = Pages::translations($page
 $cfg = [
     'id' => (int) $page['id'], 'ai' => $ai, 'lang' => $lang, 'home' => (bool) $page['is_home'],
     'published' => $page['content_published'] !== null,
-    'titleMax' => SeoCheck::TITLE_MAX - mb_strlen(Assist::titleSuffix()), 'descMax' => 155,
+    'titleMax' => Assist::titleBudget(), 'descMax' => 155,
     'translate' => $src && $ai ? ['from' => Lang::default(), 'fromLabel' => Lang::all()[Lang::default()] ?? Lang::default(), 'toLabel' => Lang::all()[$lang] ?? $lang] : null,
 ];
 ?>

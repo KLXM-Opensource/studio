@@ -112,7 +112,7 @@ final class FrontendTools
     private static function coreTools(): array
     {
         $out = [];
-        foreach ([fn() => \Core\Glossary\QuickTool::definition(), fn() => PageTool::definition()] as $def) {
+        foreach ([fn() => \Core\Glossary\QuickTool::definition(), fn() => PageTool::definition(), fn() => PageSettingsTool::definition()] as $def) {
             try {
                 if ($t = self::normalize($def(), 'core')) $out[$t['id']] = $t;
             } catch (\Throwable $e) {

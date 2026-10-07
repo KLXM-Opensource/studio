@@ -76,10 +76,27 @@ final class PageController extends AdminController
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
         if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
-        [$data, $errors] = $this->validate($r, $page);
+        [$data, $errors, $warn] = $this->saveSettings($r, $page);
         if ($errors) {
             return $this->view('pages/form', ['page' => $page, 'errors' => $errors, 'old' => $data + $page, 'revisions' => Pages::revisions((int) $id)], 422);
         }
+        if ($warn !== null) app()->session->flash('error', $warn);
+        return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
+    }
+
+    /**
+     * Seiteneinstellungen prüfen und speichern – ein Weg für das Formular der Verwaltung (update) und die Website
+     * (apiSettingsSave, Werkzeug „Seiteneinstellungen“ Core\PageSettingsTool). Startseite: feste Adresse, immer online;
+     * 404-Seite: feste Adresse, nie im Menü/Index. Status nur mit Recht pages.publish änderbar. Adressänderungen legen über
+     * Pages::rebuildPaths() automatisch Weiterleitungen an (Core\Redirects), der Seiten-Cache wird geleert.
+     * @return array{0: array, 1: array<string,string>, 2: ?string} [Daten, Fehler je Feld, Hinweis (z. B. nicht veröffentlicht)]
+     */
+    private function saveSettings(Request $r, array $page): array
+    {
+        $id = (int) $page['id'];
+        [$data, $errors] = $this->validate($r, $page);
+        if ($errors) return [$data, $errors, null];
+        $warn = null;
         if ($page['is_home']) {
             $data['slug'] = $page['slug'];
             $data['status'] = 'published';
@@ -87,9 +104,10 @@ final class PageController extends AdminController
         if (NotFound::isPage($page)) {   // Seite „Nicht gefunden“: feste Adresse, nie im Menü oder in Suchmaschinen
             $data = ['slug' => $page['slug'], 'parent_id' => null, 'menu' => 0, 'nav_title' => '', 'noindex' => 1] + $data;
         }
+        if (!can('pages.publish')) $data['status'] = $page['status'];   // Online/Offline nur mit Recht „Veröffentlichen“
         if ($data['status'] === 'published' && $page['status'] !== 'published' && ($open = Pages::openMarkers($page['content_draft'] . ' ' . $data['title'] . ' ' . $data['meta_description']))) {
             $data['status'] = 'draft';   // offene Platzhalter „[bitte ergänzen: …]“ – nicht online stellen
-            app()->session->flash('error', __('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]));
+            $warn = __('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]);
         }
         if ($data['status'] === 'published' && $page['content_published'] === null) {
             $data['content_published'] = $page['content_draft'];
@@ -99,10 +117,10 @@ final class PageController extends AdminController
         if ($page['is_home']) {
             $data['parent_id'] = null;
         }
-        app()->db->update('pages', $data, 'id = :id', ['id' => (int) $id]);
+        app()->db->update('pages', $data, 'id = :id', ['id' => $id]);
         Pages::rebuildPaths();
         $this->changed();
-        return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
+        return [$data, [], $warn];
     }
 
     /** Systemadressen ganz oben (Ordner in public/, feste Routen) – zentrale Liste: Core\PublicPaths::RESERVED_SLUGS */
@@ -171,6 +189,87 @@ final class PageController extends AdminController
         $this->changed();
         $page = Pages::find($id);
         return Response::json(['ok' => true, 'id' => $id, 'url' => Pages::url($page) . '?edit=1', 'title' => $page['title']]);
+    }
+
+    // ------------------------------------------------------------------ Seiteneinstellungen auf der Website (Werkzeug Core\PageSettingsTool)
+
+    /** Seite für die Seiteneinstellungen – nur echte Seiten bzw. die 404-Seite; Seitenvorlagen nur für die Administration */
+    private function settingsPage(Request $r, string $id): array
+    {
+        $this->auth($r, 'pages.manage');
+        $page = Pages::find((int) $id) ?? throw new HttpException(404);
+        if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
+        if (($page['type'] ?? 'page') !== 'page' && !NotFound::isPage($page) && !\Core\PageTemplates::isTemplatePage($page)) throw new HttpException(404);
+        return $page;
+    }
+
+    /** Werte und Hinweise für das Formular „Seiteneinstellungen“ auf der Website (JSON) */
+    private function settingsJson(array $page): array
+    {
+        $nf = NotFound::isPage($page);
+        $og = $page['og_image'] ? \Core\Media::find((int) $page['og_image']) : null;
+        $url = Pages::url($page);
+        $parent = $page['parent_id'] ? (int) $page['parent_id'] : null;
+        return [
+            'page' => ['id' => (int) $page['id'], 'title' => (string) $page['title'], 'slug' => (string) $page['slug'],
+                'meta_title' => (string) ($page['meta_title'] ?? ''), 'meta_description' => (string) ($page['meta_description'] ?? ''),
+                'og_image' => $og ? (int) $og['id'] : null, 'status' => (string) $page['status'], 'menu' => (bool) $page['menu'],
+                'nav_title' => (string) ($page['nav_title'] ?? ''), 'noindex' => (bool) $page['noindex'],
+                'home' => (bool) $page['is_home'], 'notFound' => $nf, 'published' => $page['content_published'] !== null],
+            'og' => $og ? ['id' => (int) $og['id'], 'thumb' => str_starts_with((string) $og['mime'], 'image/') ? \Core\Media::url($og, 480) : null,
+                'label' => (string) ($og['alt'] ?: \Core\Media::displayName($og))] : null,
+            'url' => $url, 'prefix' => substr($url, 0, (int) strrpos(rtrim($url, '/'), '/') + 1),
+            'reserved' => !$page['is_home'] && !$nf && self::reservedSlug((string) $page['slug'], $parent, $page['lang'] ?: null),
+            // Adresse ändern: alte Adresse leitet automatisch weiter (Core\Redirects), sofern eingeschaltet und die Seite schon online war
+            'autoRedirect' => \Core\Redirects\Redirects::enabled() && (bool) app()->settings->get(\Core\Redirects\Redirects::SET_AUTO, true),
+            'canPublish' => can('pages.publish'),
+            'ai' => \Core\AI\Assist::available('text'),
+            'titleMax' => \Core\AI\Assist::titleBudget(), 'descMax' => 160,
+            'suffix' => trim(\Core\AI\Assist::titleSuffix(), ' |'),
+        ];
+    }
+
+    /** Seiteneinstellungen lesen (JSON) */
+    public function apiSettings(Request $r, string $id): Response
+    {
+        $page = $this->settingsPage($r, $id);
+        return Response::json(['ok' => true] + $this->settingsJson($page));
+    }
+
+    /**
+     * Seiteneinstellungen speichern (JSON): title, slug, meta_title, meta_description, og_image (ID | null), status, menu,
+     * nav_title, noindex – nur übergebene Felder ändern sich, der Rest bleibt (z. B. übergeordnete Seite). Gleicher Weg wie das
+     * Formular der Verwaltung (saveSettings). Antwort: neue Werte, Adresse, Titel/Beschreibung/Vorschaubild für den <head>.
+     */
+    public function apiSettingsSave(Request $r, string $id): Response
+    {
+        $page = $this->settingsPage($r, $id);
+        $p = $r->post;
+        $post = ['title' => (string) $page['title'], 'slug' => (string) $page['slug'], 'meta_title' => (string) ($page['meta_title'] ?? ''),
+            'meta_description' => (string) ($page['meta_description'] ?? ''), 'status' => (string) $page['status'],
+            'noindex' => $page['noindex'] ? '1' : '0', 'parent_id' => $page['parent_id'] ? (string) $page['parent_id'] : '',
+            'menu' => $page['menu'] ? '1' : '0', 'nav_title' => (string) ($page['nav_title'] ?? ''), 'x' => ['og_image' => (string) ($page['og_image'] ?? '')]];
+        foreach (['title', 'slug', 'meta_title', 'meta_description', 'status', 'nav_title'] as $k) {
+            if (array_key_exists($k, $p) && is_scalar($p[$k])) $post[$k] = (string) $p[$k];
+        }
+        foreach (['menu', 'noindex'] as $k) if (array_key_exists($k, $p)) $post[$k] = !empty($p[$k]) ? '1' : '0';
+        if (array_key_exists('og_image', $p)) $post['x']['og_image'] = is_scalar($p['og_image']) ? (string) $p['og_image'] : '';
+        $oldUrl = Pages::url($page);
+        [, $errors, $warn] = $this->saveSettings(new Request('POST', $r->path, [], $post, [], $r->server), $page);
+        if ($errors) return Response::json(['ok' => false, 'errors' => $errors, 'error' => implode(' ', $errors)], 422);
+        $fresh = Pages::find((int) $page['id']);
+        $out = $this->settingsJson($fresh);
+        try {   // <head> der offenen Seite ohne Neuladen nachführen (Titel, Beschreibung, Vorschaubild)
+            $seo = \Core\Seo::forPage($fresh);
+            $out['seo'] = ['title' => $seo['title'], 'description' => $seo['description'], 'og_image' => $seo['og_image'], 'canonical' => $seo['canonical']];
+        } catch (\Throwable $e) {
+            $out['seo'] = null;
+        }
+        $moved = $out['url'] !== $oldUrl;
+        $msg = __('Seiteneinstellungen gespeichert.');
+        if ($moved) $msg .= ' ' . ($out['autoRedirect'] && ($fresh['status'] === 'published' || $fresh['published_at'] !== null) ? __('Die alte Adresse leitet auf die neue weiter.') : __('Neue Adresse: {url}', ['url' => $out['url']]));
+        return Response::json(['ok' => true, 'message' => $msg, 'warning' => $warn, 'moved' => $moved,
+            'state' => Pages::state($fresh), 'drafts' => \Core\Review\Drafts::count()] + $out);
     }
 
     private function validate(Request $r, ?array $page): array

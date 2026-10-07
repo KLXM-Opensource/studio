@@ -6,6 +6,7 @@ use Core\Fields;
   <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1>Grundeinstellungen</h1>
     <p class="adm-muted">Technische Einstellungen: Website, E-Mail-Versand (Symfony Mailer), Spamschutz und Verschlüsselung.</p></div>
   <?php if (\Core\Fonts::canManage()): // Schriften aus Google Fonts selbst hosten (Core\Fonts) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/fonts')) ?>"><?= icon('text-t') ?> <?= e(__('Schriften')) ?></a><?php endif; ?>
+  <?php if (\Core\Domains::available()): // Domains, Hauptadresse, Umgebung – nur Einzel-Installation ohne Netzwerk (Core\Domains) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/domain')) ?>"><?= icon('globe') ?> <?= e(__('Domain')) ?></a><?php endif; ?>
   <?php if (\Core\KitPackages::canManage()): // Kits der Installation: Übersicht, Paket hochladen (Core\KitPackages) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/kits')) ?>"><?= icon('package') ?> <?= e(__('Kits')) ?></a><?php endif; ?>
 </header>
 
@@ -27,6 +28,7 @@ use Core\Fields;
     <button type="button" role="tab" id="tab-keys" aria-controls="panel-keys" data-tab="keys" aria-selected="false" tabindex="-1">Verschlüsselung</button>
     <button type="button" role="tab" id="tab-pools" aria-controls="panel-pools" data-tab="pools" aria-selected="false" tabindex="-1"><?= e(__('Geteilte Medien')) ?></button>
     <?php $sharedTab = \Core\Data\Shared::canManage() || \Core\Data\Shared::forSite(); if ($sharedTab): ?><button type="button" role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared" aria-selected="false" tabindex="-1"><?= e(__('Geteilte Daten')) ?></button><?php endif; ?>
+    <button type="button" role="tab" id="tab-umgebung" aria-controls="panel-umgebung" data-tab="umgebung" aria-selected="false" tabindex="-1"><?= e(__('Umgebung')) ?></button>
     <button type="button" role="tab" id="tab-adminpath" aria-controls="panel-adminpath" data-tab="adminpath" aria-selected="false" tabindex="-1"><?= e(__('Adresse der Verwaltung')) ?></button>
     <button type="button" role="tab" id="tab-info" aria-controls="panel-info" data-tab="info" aria-selected="false" tabindex="-1">Systeminfo</button>
   </div>
@@ -231,6 +233,10 @@ use Core\Fields;
   <?php // Adresse der Verwaltung (Core\AdminPath): eigenes Formular #adminpath unten, Felder per form-Attribut
     $apCustom = \Core\AdminPath::custom(); $apCan = \Core\AdminPath::canManage() && !\Core\AdminPath::fromEnv();
     $apHasPw = (string) (\Core\Mfa::row(app()->auth->user() ?? [])['password_hash'] ?? '') !== ''; ?>
+  <section class="adm-card adm-panel" role="tabpanel" id="panel-umgebung" aria-labelledby="tab-umgebung" hidden>
+<?php $env = environment(); include __DIR__ . '/system/_environment.php'; ?>
+  </section>
+
   <section class="adm-card adm-panel" role="tabpanel" id="panel-adminpath" aria-labelledby="tab-adminpath" hidden>
     <h2><?= e(__('Adresse der Verwaltung')) ?></h2>
     <p><?= e(__('Unter dieser Adresse melden Sie sich an. Standard ist /admin. Optional eine eigene Adresse: Sie hält automatische Login-Scanner fern – ersetzt aber keine starken Passwörter und keinen zweiten Faktor.')) ?></p>
@@ -298,6 +304,7 @@ use Core\Fields;
 <form id="testmail" method="post" action="<?= e(url('/admin/system/testmail')) ?>"><?= csrf_field() ?></form>
 <form id="keys" method="post" action="<?= e(url('/admin/system/keys')) ?>"><?= csrf_field() ?></form>
 <form id="proxy-clear" method="post" action="<?= e(url('/admin/system/proxy-clear')) ?>"><?= csrf_field() ?></form>
+<form id="environment" method="post" action="<?= e(url('/admin/system/environment')) ?>"><?= csrf_field() ?></form>
 <?php if (\Core\AdminPath::canManage()): ?><form id="adminpath" method="post" action="<?= e(url('/admin/system/admin-path')) ?>"><?= csrf_field() ?></form><?php endif; ?>
 <?php if (\Core\MediaPools::canManage()): ?>
 <form id="pool-new" method="post" action="<?= e(url('/admin/system/pools')) ?>"><?= csrf_field() ?></form>

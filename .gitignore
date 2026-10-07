@@ -13,6 +13,7 @@
 /kits/*/node_modules/
 /themes/*/node_modules/
 /config/sites/*.php
+/config/sites/*.bak
 /storage/sites/
 /public/sites/
 /storage/backups/

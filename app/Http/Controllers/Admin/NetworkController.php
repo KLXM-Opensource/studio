@@ -159,6 +159,18 @@ final class NetworkController extends AdminController
                     $msg = $op === 'add' ? __('Domain {host} zu {site} hinzugefügt. DNS und Hosting (Plesk-Alias) nicht vergessen.', ['host' => $h, 'site' => $key])
                         : __('Domain {host} von {site} entfernt.', ['host' => $h, 'site' => $key]);
                     break;
+                case 'environment':
+                    // Testumgebung (staging) setzen/aufheben – config/sites/{key}.php → 'environment' (Sicherung .bak)
+                    $env = $r->str('environment') === 'staging' ? 'staging' : 'production';
+                    $old = (string) Network::config($key)->get('environment', 'production');
+                    if ($env !== $old) {
+                        Sites::setOption($key, 'environment', $env);
+                        Stats::forget($key);
+                        Network::log('site.environment', $key, (string) $user['email'], $old . ' → ' . $env);
+                    }
+                    $msg = $env === 'staging' ? __('{site} ist jetzt Testumgebung (staging): Suchmaschinen ausgesperrt, E-Mails nicht an echte Empfänger.', ['site' => $key])
+                        : __('{site} ist jetzt im Livebetrieb (production).', ['site' => $key]);
+                    break;
                 case 'cache':
                     Stats::clearCache($key);
                     Network::log('cache.clear', $key, (string) $user['email']);

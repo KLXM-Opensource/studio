@@ -6,6 +6,36 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seiteneinstellungen direkt auf der Website
+- Neu: Werkzeug **Seiteneinstellungen** im Menü „⋯“ der Werkzeugleiste (`Core\PageSettingsTool`, Modul
+  `resources/js/page-settings.mjs`) – beim Ansehen und Bearbeiten, Modal im Stil von „Neue Seite“, Recht `pages.manage`.
+  Titel, Adresse (Hinweis auf automatische Weiterleitung bzw. Warnung), Status, Hauptmenü mit Beschriftung, „Nicht in
+  Suchmaschinen“, Titel und Beschreibung für Suchmaschinen mit Zeichenzähler und optionalem KI-Vorschlag, Vorschaubild für
+  soziale Netzwerke (Mediathek oder Hochladen); Link „Alle Einstellungen in der Verwaltung“. Ersetzt auf Seiten den
+  bisherigen Link in die Verwaltung.
+- Endpunkte `GET`/`POST /admin/api/pages/{id}/settings` (`PageController::apiSettings/apiSettingsSave`); Speichern läuft
+  über `PageController::saveSettings()`, den gemeinsamen Weg mit dem Formular der Verwaltung. Status ändert sich dort jetzt
+  nur noch mit dem Recht `pages.publish`.
+- Nach dem Speichern führt die Seite `<title>`, Meta-Angaben, Titel der Werkzeugleiste und Adresse ohne Neuladen nach;
+  bei geändertem Status oder Menü lädt sie neu (im Editor nur ohne ungespeicherte Änderungen, `CMSEditor.isDirty()`).
+
+### Testumgebung (staging) setzen und aufheben – Admins und Netzwerk-Administration
+- Grundeinstellungen → **Umgebung** (jede Website, auch im Netzwerk; Recht `system.manage`): Livebetrieb ↔ Testumgebung,
+  `POST /admin/system/environment` schreibt `'environment'` in `config/sites/{key}.php` (Sicherung `.bak`, Protokoll
+  `site.environment`). Netzwerk-Übersicht: je Website unter „Wartung“ **Als Testumgebung (staging)** bzw.
+  **Testumgebung aufheben (live)**. `config/sites/*.bak` steht in `.gitignore`.
+
+### Domain in der Verwaltung ändern (Einzel-Installation)
+- Neu: Grundeinstellungen → **Domain** (`/admin/system/domain`, `Core\Domains`, `Admin\DomainController`) – nur ohne
+  Netzwerk (eine Website, keine Netzwerk-Konten); sonst verwaltet die Netzwerk-Übersicht die Domains. Domains hinzufügen
+  und entfernen (nie die Hauptadresse oder die gerade aufgerufene Domain), **Als Hauptadresse festlegen** erst nach
+  erfolgreicher Erreichbarkeitsprüfung (`/health?domain_check=…` mit Zufallsfrage und -antwort, HTTPS vor HTTP),
+  optional 301-Weiterleitung weiterer Domains auf die Hauptadresse (`'redirect_to_primary'`, nicht für Landing-Domains
+  und lokale Adressen). Änderungen landen in `config/sites/{key}.php` (Sicherung `.bak`)
+  und im Protokoll `network_log`.
+- `Sites::setPrimary()` und `Sites::setOption()`; der sichere Schreibweg von `Sites::setHosts()` ist dafür in einen
+  gemeinsamen Helfer ausgelagert.
+
 ### Praxis: Darstellung „Klassisch“, einstellbare Verlaufsfarben
 - Kit Praxis hat im Style-Editor die Darstellung „Klassisch“ (Token `look`, Vorlage „Klassisch (Bordeaux)“): ursprüngliche
   Gestaltung mit Wortmarke, Bordeaux-Verlauf und weißer Kontaktkarte. Alle Farben kommen aus dem Style-Editor, auch die

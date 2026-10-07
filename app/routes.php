@@ -247,6 +247,14 @@ return function (Router $r): void {
     $r->get('/admin/system/kits', [Admin\KitsController::class, 'index']);
     $r->post('/admin/system/kits/install', [Admin\KitsController::class, 'install']);
     $r->post('/admin/system/kits/{name}/remove', [Admin\KitsController::class, 'remove']);
+    // Domain: Domains, Hauptadresse, Weiterleitung, Umgebung – nur Einzel-Installation ohne Netzwerk (Core\Domains)
+    $r->get('/admin/system/domain', [Admin\DomainController::class, 'index']);
+    $r->post('/admin/system/domain/add', [Admin\DomainController::class, 'add']);
+    $r->post('/admin/system/domain/remove', [Admin\DomainController::class, 'remove']);
+    $r->post('/admin/system/domain/check', [Admin\DomainController::class, 'check']);
+    $r->post('/admin/system/domain/primary', [Admin\DomainController::class, 'primary']);
+    $r->post('/admin/system/domain/redirect', [Admin\DomainController::class, 'redirect']);
+    $r->post('/admin/system/environment', [Admin\DomainController::class, 'environment']);   // Grundeinstellungen → Umgebung (jede Website, auch im Netzwerk)
     // Website-Suche und KI (Grundeinstellungen → Suche / KI)
     $r->post('/admin/system/search/rebuild', [Admin\AiSearchController::class, 'rebuild']);
     $r->post('/admin/system/search/misses-clear', [Admin\AiSearchController::class, 'missesClear']);
@@ -382,6 +390,8 @@ return function (Router $r): void {
     $r->post('/admin/api/data/{handle}/{id}/versions/{rev}/restore', [Admin\VersionsController::class, 'entryRestore']);
     $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);       // „Neue Seite“ auf der Website (Core\PageTool)
     $r->post('/admin/api/pages/create', [Admin\PageController::class, 'apiCreate']);
+    $r->get('/admin/api/pages/{id}/settings', [Admin\PageController::class, 'apiSettings']);   // „Seiteneinstellungen“ auf der Website (Core\PageSettingsTool)
+    $r->post('/admin/api/pages/{id}/settings', [Admin\PageController::class, 'apiSettingsSave']);
     $r->post('/admin/api/pages/{id}/save', [Admin\EditorController::class, 'save']);
     $r->post('/admin/api/pages/{id}/discard', [Admin\EditorController::class, 'discard']);
     $r->post('/admin/api/preview', [Admin\EditorController::class, 'preview']);
@@ -582,6 +592,8 @@ return function (Router $r): void {
         // Selbsttest einer Landing-Domain (Verwaltung → Landingpages → Status prüfen): Kennung nur mit passendem Prüf-Token
         $lp = \Core\Landings::current();
         if ($lp && is_string($t = app()->request?->query['landing'] ?? null) && hash_equals(\Core\Landings::healthToken($lp), $t)) $data['landing'] = $lp->id;
+        // Erreichbarkeit einer Domain (System → Domain, Core\Domains::check): Antwort nur zur gerade gestellten Frage
+        if (is_string($q = app()->request?->query['domain_check'] ?? null) && $q !== '' && ($a = \Core\Domains::answer($q)) !== null) $data['domain_check'] = $a;
         return (new \Core\Http\Response(json_encode($data), $ok ? 200 : 503,
             ['Content-Type' => 'application/json', 'Cache-Control' => 'no-store', 'X-Robots-Tag' => 'noindex']));
     });

@@ -399,6 +399,21 @@ final class Assist
     }
 
     /**
+     * Zeichen für den eigenen Titelteil (Suchmaschinen zeigen etwa SeoCheck::TITLE_MAX Zeichen inklusive Titel-Zusatz).
+     * Mindestens TITLE_MIN_OWN: ist der Zusatz selbst zu lang, kürzt Google ihn ohnehin – der Zähler bleibt dann brauchbar.
+     */
+    public static function titleBudget(): int
+    {
+        return max(SeoCheck::TITLE_MIN_OWN, SeoCheck::TITLE_MAX - mb_strlen(self::titleSuffix()));
+    }
+
+    /** Titel-Zusatz lässt weniger als TITLE_MIN_OWN Zeichen für den Seitentitel übrig */
+    public static function titleSuffixTooLong(): bool
+    {
+        return SeoCheck::TITLE_MAX - mb_strlen(self::titleSuffix()) < SeoCheck::TITLE_MIN_OWN;
+    }
+
+    /**
      * SEO-Vorschläge für einen Text. @return array{title: string, description: string, slug: string, focus: string, keywords: list<string>, warnings: list<string>}
      */
     public static function seo(string $title, string $text, string $lang, int $titleMax = 60, int $descMax = 155): array
