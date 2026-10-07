@@ -24,7 +24,7 @@ use Core\Fields;
   // Symbole der Bereiche in der Seitenleiste (Phosphor über icon(); unbekannte Bereiche, z. B. aus Erweiterungen: Zahnrad)
   $tabIco = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
       'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
-      'pools' => 'images', 'shared' => 'share-network', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info'];
+      'pools' => 'images', 'shared' => 'share-network', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info', 'push' => 'bell-ringing'];
   // Testumgebung (staging/development): „Umgebung“ orange mit sanft pulsierendem Punkt, Hinweis auch für Screenreader und im Auswahlfeld (schmal)
   $envWarn = environment() !== 'production' ? __('Testumgebung aktiv') : '';
   $tab = fn(string $id, string $label, bool $on = false) => '<button type="button" role="tab" id="tab-' . e($id) . '" aria-controls="panel-' . e($id) . '" data-tab="' . e($id) . '" aria-selected="' . ($on ? 'true' : 'false') . '"' . ($on ? '' : ' tabindex="-1"')
@@ -37,6 +37,7 @@ use Core\Fields;
     <?= $tab('keys', 'Verschlüsselung') ?>
     <?= $tab('pools', __('Geteilte Medien')) ?>
     <?php $sharedTab = \Core\Data\Shared::canManage() || \Core\Data\Shared::forSite(); if ($sharedTab): ?><?= $tab('shared', __('Geteilte Daten')) ?><?php endif; ?>
+    <?= $tab('push', __('Push-Benachrichtigungen')) ?>
     <?= $tab('umgebung', __('Umgebung')) ?>
     <?= $tab('adminpath', __('Adresse der Verwaltung')) ?>
     <?= $tab('info', 'Systeminfo') ?>
@@ -257,6 +258,10 @@ use Core\Fields;
   <?php // Adresse der Verwaltung (Core\AdminPath): eigenes Formular #adminpath unten, Felder per form-Attribut
     $apCustom = \Core\AdminPath::custom(); $apCan = \Core\AdminPath::canManage() && !\Core\AdminPath::fromEnv();
     $apHasPw = (string) (\Core\Mfa::row(app()->auth->user() ?? [])['password_hash'] ?? '') !== ''; ?>
+  <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-push" aria-labelledby="tab-push" data-nosave hidden>
+<?php include __DIR__ . '/system/_push.php'; // Push-Benachrichtigungen (Core\Push): Status, Abos, Versand, Test ?>
+  </section>
+
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-umgebung" aria-labelledby="tab-umgebung" data-nosave hidden>
 <?php $env = environment(); include __DIR__ . '/system/_environment.php'; ?>
   </section>
@@ -351,5 +356,7 @@ use Core\Fields;
 <form id="pool-del-<?= e($pk) ?>" method="post" action="<?= e(url('/admin/system/pools/' . $pk . '/delete')) ?>"><?= csrf_field() ?></form>
 <?php endforeach; endif; ?>
 <form id="cache" method="post" action="<?= e(url('/admin/system/cache')) ?>"><?= csrf_field() ?></form>
+<form id="push-keys" method="post" action="<?= e(url('/admin/system/push/keys')) ?>"><?= csrf_field() ?></form>
+<form id="push-test" method="post" action="<?= e(url('/admin/account/push/test')) ?>"><?= csrf_field() ?><input type="hidden" name="back" value="system"></form>
 <?= \Core\Theme::capture(ROOT . '/app/Admin/views/system/_search.php', ['part' => 'forms']) ?><?= \Core\Theme::capture(ROOT . '/app/Admin/views/system/_ai.php', ['part' => 'forms']) ?>
 <?php if ($sharedTab): ?><?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_shared_system.php', ['part' => 'forms']) ?><?php endif; ?>

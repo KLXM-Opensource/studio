@@ -6,6 +6,24 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Push-Benachrichtigungen (Web Push) für Redaktion und Besucher
+- Neue Funktion **`push`** (Standard aus, Kommunikation): echte Mitteilungen auf Telefon und Computer, auch bei geschlossenem Tab –
+  Web Push nach RFC 8030/8291/8292 (VAPID ES256, `aes128gcm`) **ohne neue Abhängigkeit** (`Core\Push\WebPush`: PHP openssl, `hash_hkdf`,
+  `curl_multi`), geprüft Byte für Byte gegen den Testvektor aus RFC 8291 (`php bin/console push:selftest`).
+- **Konto → Benachrichtigungen:** Mitteilungen auf diesem Gerät (Abfrage des Browsers erst beim Einschalten), Schalter je Anlass –
+  neue Online-Anfragen (ohne Inhalte), Einträge über Website-Formulare, Direktnachrichten und Erwähnungen im Chat (nicht, solange die
+  Verwaltung sichtbar offen ist), Einreichungen unter „Eingereicht“ –, angemeldete Geräte mit „Entfernen“, Testnachricht.
+- **Erweiterungen:** `$x->pushEvent('name.ereignis', 'Bezeichnung', 'recht')` und `Core\Push\Push::notifyUsers($wer, $inhalt, $ereignis)`.
+- **Besucher:** je Datentabelle „Besucher können neue Einträge abonnieren (Push)“ mit Titel-Vorlage, Kurztext und Filter; Block
+  **„Benachrichtigungen abonnieren“** bzw. `push_subscribe('tabelle')` im Kit (erst erklären, dann fragen; Abbestellen über denselben
+  Knopf; Hinweis für iPhone ohne installierte App). Mitteilung nur beim **ersten** Veröffentlichen, in der Sprache des Eintrags,
+  höchstens 10 je Stunde und Tabelle; keine Cookies, keine IP, Endpunkte nur bei bekannten Push-Diensten.
+- **Grundeinstellungen → Push-Benachrichtigungen:** Status (Funktion, VAPID-Schlüssel, Abos je Thema, Warteschlange, letzter Versand),
+  „Testnachricht an mich“, Cron-Zeile, Vorschlag für die Datenschutzerklärung. Testumgebung (staging): keine Nachrichten an Besucher.
+- Betrieb: VAPID-Schlüssel je Installation in `config/config.local.php`; Versand per Cron `php bin/console push:send --all` (sonst
+  nebenbei nach Aufrufen), `push:status`, `push:keys [--generate|--regenerate --force]`, `push:test <email>`. Neue Tabellen
+  `push_subscriptions`, `push_user_events`, `push_messages`, `push_queue` (über `migrate`).
+
 ### Grundeinstellungen: Schriften und Kits als Unterseiten
 - **Schriften** und **Kits** stehen unten in der Seitenleiste der Grundeinstellungen (statt Knöpfen im Kopf); ihre Seiten zeigen dieselbe Leiste (`system/_sidenav.php`, Links auf `/admin/system#bereich`), schmal im Auswahlfeld. Breite Tabellen scrollen dort in sich.
 

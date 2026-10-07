@@ -257,6 +257,10 @@ if ($user && ($req = app()->request)) {
 <input type="hidden" id="adm-csrf" value="<?= e(\Core\Csrf::token()) ?>">
 <div class="adm-sr" id="adm-live" role="status" aria-live="polite"></div>
 <datalist id="cms-links" data-endpoint="<?= e(url('/admin/api/links')) ?>"></datalist>
+<?php // Push-Benachrichtigungen (Core\Push): Abo dieses Geräts einmal am Tag auffrischen (resources/js/_push.js) – nur mit angemeldetem Gerät
+if (\Core\Push\Push::enabled() && app()->db->fetchValue('SELECT 1 FROM push_subscriptions WHERE user_id = ? LIMIT 1', [(int) $user['id']])): ?>
+<span hidden id="cms-push-cfg" data-key="<?= e(\Core\Push\Keys::publicB64()) ?>" data-sw="<?= e(url(\Core\Push\Push::SW_PATH)) ?>" data-scope="<?= e(url(\Core\Push\Push::SW_SCOPE)) ?>" data-subscribe="<?= e(url('/admin/api/push/subscribe')) ?>"></span>
+<?php endif; ?>
 <?php endif; ?>
 </body>
 </html>

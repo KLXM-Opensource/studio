@@ -12,7 +12,7 @@
     <tr><td>Website</td><td><code>blocks()</code>, <code>htmlFilter()</code>, <code>csp()</code>, <code>footerLinks()</code>, <code>frontendTool()</code>, <code>toolbar()</code></td><td>CSP nur Hosts (kein <code>'unsafe-inline'</code>), Werkzeuge nur angemeldet.</td></tr>
     <tr><td>Mediathek</td><td><code>mediaChecks()</code>, <code>mediaJson()</code>, <code>mediaTypes()</code>, <code>mediaPoster()</code> (+ im Browser <code>CMSMedia.extend()</code>)</td><td>siehe Kapitel <a href="#medien">Medien</a>.</td></tr>
     <tr><td>Ereignisse</td><td><code>on(PageSaved::class, …)</code></td><td><a href="#erweiterungen-hooks">Typisierte Ereignisse</a> (<code>Core\Events\*</code>); die Namen <code>'page.saved'</code> … bleiben als Alias.</td></tr>
-    <tr><td>Betrieb</td><td><code>command()</code>, <code>health()</code>, <code>afterAdminResponse()</code>, <code>proxy()</code>, <code>docs()</code>, <code>inbox()</code></td><td>Fehler einer Erweiterung werden protokolliert und brechen die Anfrage nicht ab.</td></tr>
+    <tr><td>Betrieb</td><td><code>command()</code>, <code>health()</code>, <code>afterAdminResponse()</code>, <code>proxy()</code>, <code>docs()</code>, <code>inbox()</code>, <code>pushEvent()</code> (+ <code>Core\Push\Push::notifyUsers()</code>, siehe <a href="#push">Push-Benachrichtigungen</a>)</td><td>Fehler einer Erweiterung werden protokolliert und brechen die Anfrage nicht ab.</td></tr>
   </table>
   <p><b>Regeln:</b></p>
   <ul>

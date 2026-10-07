@@ -222,6 +222,7 @@ $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label
     <?php endif; ?>
 
     <?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_search_settings.php', ['table' => $table, 'def' => $def]) /* Website-Suche je Tabelle */ ?>
+    <?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_push_settings.php', ['table' => $table, 'def' => $def]) /* Push: Besucher abonnieren neue Einträge (Core\Push\Topics) */ ?>
 
     <section class="adm-card">
       <h2>Verwaltung</h2>

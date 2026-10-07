@@ -158,6 +158,21 @@ return [
             ['name' => 'empty_text', 'label' => 'Text, wenn keine Termine', 'type' => 'text', 'default' => 'Zurzeit sind keine Termine geplant.'],
         ],
     ],
+    'push_subscribe' => [
+        'label' => 'Benachrichtigungen abonnieren', 'icon' => 'bell-ringing', 'group' => 'Daten',
+        'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
+        'help' => 'Besucher abonnieren Push-Mitteilungen zu neuen Einträgen einer Datentabelle (z. B. Aktuelles). Erst erklären, dann fragt der Browser nach der Erlaubnis – nur nach Klick. Voraussetzung: Funktion „Push-Benachrichtigungen“ und bei der Tabelle „Besucher können neue Einträge abonnieren“.',
+        'fields' => [
+            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'empty_label' => '– Tabelle der Detailseite –',
+                'help' => 'Leer = Tabelle des aufgerufenen Eintrags (Detailseiten-Vorlage).'],
+            ['name' => 'title', 'label' => 'Überschrift (optional)', 'type' => 'text', 'max' => 80, 'width' => 'half', 'placeholder' => 'Neue Einträge abonnieren'],
+            ['name' => 'button', 'label' => 'Beschriftung des Buttons (optional)', 'type' => 'text', 'max' => 40, 'width' => 'half', 'placeholder' => 'Benachrichtigungen abonnieren'],
+            ['name' => 'intro', 'label' => 'Erklärung (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400,
+                'help' => 'Was abonniert man, wie oft kommt etwas? Leer = Standardtext (ohne Anmeldung, ohne Tracking, jederzeit abbestellbar).'],
+            ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'default' => 'box', 'required' => true, 'width' => 'half',
+                'options' => ['box' => 'Kasten mit Überschrift', 'inline' => 'Schlicht (Text und Button)']],
+        ],
+    ],
     'not_found' => [
         'label' => '404-Vorschläge', 'icon' => 'signpost', 'group' => 'Navigation',
         'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift und Text, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite. Die Vorschläge erscheinen nur, wenn Besucher eine Adresse aufrufen, die es nicht gibt.',

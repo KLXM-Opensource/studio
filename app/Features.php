@@ -87,11 +87,14 @@ final class Features
             'sources' => ['Externe Quellen: Feeds, APIs und OpenImmo in Datentabellen übernehmen', ['sources.manage']],
             // Glossar (Core\Glossary): Fachbegriffe als Datentabelle, erstes Vorkommen im Text mit Erklärung, Übersicht A–Z – Standard aus
             'glossary' => ['Glossar: Fachbegriffe auf der Website erklären (Hinweis im Text, Übersicht A–Z)', []],
+            // Push-Benachrichtigungen (Core\Push): Redaktion (Konto → Benachrichtigungen) und Besucher (Abo neuer Einträge je Datentabelle) –
+            // Standard aus; VAPID-Schlüssel entstehen beim Einschalten (config.local.php)
+            'push' => ['Push-Benachrichtigungen (Redaktion und Abos neuer Einträge für Besucher)', []],
         ], self::$extra);
     }
 
     /** Funktionen, die ohne ausdrückliche Freigabe in der Konfiguration aus sind (Besucher-Texte gehen an einen KI-Anbieter) */
-    public const OFF_BY_DEFAULT = ['chat.visitor', 'glossary'];
+    public const OFF_BY_DEFAULT = ['chat.visitor', 'glossary', 'push'];
 
     /** UI-Schalter je Website (nur ausdrücklich gesetzte Werte): ['api' => false, 'mcp' => true] */
     public const UI_KEY = 'sys.features_ui';
@@ -299,6 +302,7 @@ final class Features
         if ($type === 'map' && !self::on('maps', false)) return false;
         if (in_array($type, ['calendar', 'upcoming'], true) && !self::on('calendar', false)) return false;
         if ($type === 'glossary' && !self::on('glossary', false)) return false;
+        if ($type === 'push_subscribe' && !self::on('push', false)) return false;
         // Formular-Block: für Inhaltstabellen (forms.data) oder Eingangs-Tabellen (requests)
         if ($type === 'data_form' && !self::on('forms.data', false) && !self::on('requests', false)) return false;
         return true;
@@ -310,6 +314,7 @@ final class Features
         if (str_starts_with($path, '/api/v1') && !in_array($path, ['/api/v1/public', '/api/v1', '/api/v1/openapi.json'], true)) return self::on('api', false);
         if ($path === '/mcp') return self::on('mcp', false);
         if (in_array($path, ['/manifest.webmanifest', '/sw.js'], true)) return self::on('pwa', false);
+        if ($path === '/push-sw.js' || str_starts_with($path, '/api/push/')) return self::on('push', false);
         if (str_starts_with($path, '/proxy/ofm/')) return self::on('maps', false);
         if (str_starts_with($path, '/kalender/') && str_ends_with($path, '.ics')) return self::on('calendar', false);
         if (str_starts_with($path, '/formular/')) return self::on('forms.data', false) || self::on('requests', false);

@@ -149,6 +149,12 @@ final class FeatureInfo
             'chat' => ['group' => 'communication', 'desc' => __('Chat zwischen Benutzern der Verwaltung (Direktnachrichten, Kanäle).'),
                 'effects' => ['menu' => __('Menüpunkt „Chat“, Chat-Einstellungen'), 'cron' => __('chat:purge (Aufbewahrung) und chat:digest (E-Mail-Hinweise)'),
                     'data' => __('Nachrichten und Bilder bis zur Aufbewahrungsfrist')]],
+            'push' => ['group' => 'communication', 'desc' => __('Push-Benachrichtigungen auf Telefon und Computer – auch bei geschlossenem Browser-Tab: für die Redaktion (neue Anfragen, Chat, Freigaben) und als Abo neuer Einträge für Besucher.'),
+                'effects' => ['menu' => __('Konto → Benachrichtigungen; Grundeinstellungen → Push-Benachrichtigungen; je Datentabelle „Besucher können neue Einträge abonnieren“'),
+                    'external' => __('Mitteilungen gehen verschlüsselt an die Push-Dienste der Browser-Hersteller (Google, Mozilla, Apple, Microsoft)'),
+                    'cron' => __('Versand: push:send --all (jede Minute bis alle 5 min empfohlen; sonst nebenbei nach Aufrufen)'),
+                    'frontend' => __('Block „Benachrichtigungen abonnieren“, /push-sw.js und /api/push/… (nur nach Klick der Besucher, keine Cookies)'),
+                    'data' => __('Abos (Zustelladresse und Schlüssel des Browsers, Themen, Sprache – keine IP), Versandprotokoll 14 Tage; VAPID-Schlüssel in config.local.php')]],
             'support' => ['group' => 'communication', 'desc' => __('Support & Wissensdatenbank: Probleme melden, Fragen & Antworten.'),
                 'effects' => ['menu' => __('„Problem melden“ und „Support“ unter Hilfe & Support'), 'data' => __('Meldungen in der zentralen Support-Datenbank der Installation')]],
 

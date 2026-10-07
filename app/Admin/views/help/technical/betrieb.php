@@ -8,6 +8,9 @@
 # Aufbewahrungsfristen: erledigte Anfragen und alte Protokolleinträge löschen
 15 4 * * *    cd /pfad/zur/installation &amp;&amp; php bin/console inbox:purge --all
 
+# Push-Benachrichtigungen (Funktion „push“): Warteschlange senden – ohne Cron nur nebenbei nach Aufrufen
+* * * * *     cd /pfad/zur/installation &amp;&amp; php bin/console push:send --all
+
 # KI-Aufträge (Transkription, Untertitel-Übersetzung) – Rückfall, falls die Verwaltung keine Hintergrundprozesse starten darf
 */5 * * * *   cd /pfad/zur/installation &amp;&amp; php bin/console ai:jobs --all
 

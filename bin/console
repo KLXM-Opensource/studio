@@ -36,6 +36,12 @@
  *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
+ *   push:send [--all] [--limit=N]                     Push-Benachrichtigungen: fällige Zustellungen senden (Cron: jede Minute bis alle 5 min)
+ *   push:status [--all]                               Push: Funktion, Schlüssel, Abos, Warteschlange, letzter Versand
+ *   push:keys [--generate | --regenerate --force]     Push: öffentlichen VAPID-Schlüssel zeigen bzw. anlegen (config.local.php, alle Websites);
+ *                                                     --regenerate: neues Paar – ALLE Abos werden ungültig
+ *   push:test <email>                                 Push: Testnachricht an alle Geräte eines Kontos
+ *   push:selftest                                     Selbsttest Web Push (RFC-8291-Testvektor, Rundlauf, VAPID-JWT, Endpunkte, Warteschlange)
  *
  * Kits & Erweiterungen (Kits liegen unter kits/{name}/ – theme:* und kit:* gehen gleichermaßen)
  *   theme:list | kit:list                             Installierte Kits: Herkunft (lokal, upload, composer), Version, nutzende Websites,
@@ -727,6 +733,14 @@ switch ($cmd) {
         echo "Chat: $n Nachricht(en) gelöscht (Aufbewahrung: " . ($d > 0 ? "$d Tage" : 'unbegrenzt') . ").\n";
         break;
 
+    case 'push:send':
+    case 'push:status':
+    case 'push:keys':
+    case 'push:test':
+    case 'push:selftest':
+        // Push-Benachrichtigungen (Core\Push): Versand, Stand, VAPID-Schlüssel der Installation, Test, Selbsttest
+        exit(Core\Push\Console::run($cmd, $args, __FILE__));
+
     case 'support:stats':
         // Kennzahlen der zentralen Support-Datenbank (Core\Support\Tickets::stats)
         $st = Core\Support\Tickets::stats(($args[0] ?? '') !== '' && !str_starts_with($args[0], '--') ? $args[0] : null);
@@ -819,7 +833,7 @@ switch ($cmd) {
                 'network_key gesetzt (Netzwerk-Anmeldung)' => !Core\Sites::multi() || strlen((string) (Core\Network\Network::install()['network_key'] ?? '')) >= 32,
                 'Kit kompatibel' => app()->theme->compatible(),
             ] + ['Verwaltung unter ' . Core\AdminPath::prefix() . (Core\AdminPath::custom() ? ' (eigene Adresse)' : '') => true]
-              + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
+              + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health() + Core\Push\Push::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)

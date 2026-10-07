@@ -38,6 +38,8 @@ namespace Core;
  *   $x->mediaPoster(fn(array $m): ?int => …)                           Vorschaubild (Bild-ID) für Videos ohne eigenes Poster (Themes, Player)
  *   $x->docs('manual'|'technical', ['key' => ['title' => …, 'file' => …, 'after' => 'medien']])   Kapitel im Handbuch/Entwicklerhandbuch
  *   $x->dashboard(fn(array $user) => ['tiles' => [...], 'cards' => [...]])   Kennzahlen-Kacheln und Karten der Übersicht (/admin)
+ *   $x->pushEvent('kalender.neu', 'Neue Termine', 'calendar.edit', ['help' => …])   Ereignis unter Konto → Benachrichtigungen;
+ *                                                                      senden mit Core\Push\Push::notifyUsers($wer, $inhalt, 'kalender.neu')
  * Slots der Verwaltung (Core\Slots – Daten statt HTML, der Core escaped; optional zweites Argument = Recht):
  *   $x->pageList(fn(array $page) => ['badges' => [['label' => …]], 'actions' => [['label' => …, 'href' => …]]])   Seitenbaum: Hinweis + Kontextmenü
  *   $x->pagePanel(fn(array $page) => ['title' => …, 'text' => …, 'lines' => [...], 'actions' => [...]])   Karte in den Seiteneinstellungen
@@ -164,6 +166,17 @@ final class Extension
     public function permissions(string $group, array $perms): self
     {
         $this->perms[$group] = array_merge($this->perms[$group] ?? [], $perms);
+        return $this;
+    }
+
+    /**
+     * Ereignis für Push-Benachrichtigungen der Verwaltung (Core\Push): erscheint unter Konto → Benachrichtigungen bei allen, die
+     * $perm haben (null = alle). Senden: Core\Push\Push::notifyUsers($wer, ['title' => …, 'body' => …, 'url' => '/admin/…'], $key).
+     * $o: help (Zeile unter dem Schalter), default (Schalter vorbelegt, Standard true), feature (nur mit dieser Funktion).
+     */
+    public function pushEvent(string $key, string $label, ?string $perm = null, array $o = []): self
+    {
+        \Core\Push\Push::registerEvent($key, $label, $perm, $o + ['owner' => $this->name]);
         return $this;
     }
 

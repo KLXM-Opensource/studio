@@ -371,6 +371,13 @@ return function (Router $r): void {
     $r->post('/admin/einladung/{token}/passkey/options', [Admin\InviteController::class, 'passkeyOptions']);
     $r->post('/admin/einladung/{token}/passkey', [Admin\InviteController::class, 'passkeyStore']);
     $r->post('/admin/account/locale', [Admin\UserController::class, 'saveLocale']);
+    // Push-Benachrichtigungen (Core\Push): Konto → Benachrichtigungen, Grundeinstellungen → Push-Benachrichtigungen
+    $r->post('/admin/api/push/subscribe', [Admin\PushController::class, 'subscribe']);
+    $r->post('/admin/api/push/unsubscribe', [Admin\PushController::class, 'unsubscribe']);
+    $r->post('/admin/account/push/events', [Admin\PushController::class, 'events']);
+    $r->post('/admin/account/push/devices/{id}/delete', [Admin\PushController::class, 'deleteDevice']);
+    $r->post('/admin/account/push/test', [Admin\PushController::class, 'test']);
+    $r->post('/admin/system/push/keys', [Admin\PushController::class, 'keys']);
     // Favoriten je Benutzer (Core\Favorites): Stern, Seitenleiste, Konto-Seite
     $r->post('/admin/api/favorites', [Admin\FavoriteController::class, 'add']);
     $r->post('/admin/api/favorites/remove', [Admin\FavoriteController::class, 'remove']);
@@ -565,6 +572,12 @@ return function (Router $r): void {
     $r->get('/apple-touch-icon.png', [PwaController::class, 'icon']);
     $r->get('/manifest.webmanifest', [PwaController::class, 'manifest']);
     $r->get('/sw.js', [PwaController::class, 'serviceWorker']);
+    // Push-Benachrichtigungen für Besucher (Funktion „push“, Core\Push): Service Worker und Abos (JSON, nur von dieser Website)
+    $r->get('/push-sw.js', [\Core\Http\Controllers\PushController::class, 'serviceWorker']);
+    $r->post('/api/push/subscribe', [\Core\Http\Controllers\PushController::class, 'subscribe']);
+    $r->post('/api/push/unsubscribe', [\Core\Http\Controllers\PushController::class, 'unsubscribe']);
+    $r->post('/api/push/status', [\Core\Http\Controllers\PushController::class, 'status']);
+    $r->post('/api/push/renew', [\Core\Http\Controllers\PushController::class, 'renew']);
     $r->get('/offline', [PwaController::class, 'offline']);
     $r->get('/proxy/{source}/{path*}', [ProxyController::class, 'handle']);
     // Geschützte Medien-Pools (Core\MediaPools::isProtected): nur mit Zugriff

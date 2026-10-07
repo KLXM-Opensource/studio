@@ -626,3 +626,14 @@ function language_links(): array
     }
     return $out;
 }
+
+/**
+ * Push-Abo neuer Einträge einer Datentabelle für Besucher (Core\Push\Visitor) – für Kits, z. B. in der Detailseiten-Vorlage:
+ *   <?= push_subscribe('aktuelles', ['layout' => 'inline']) ?>
+ * $table null = Tabelle des aufgerufenen Eintrags. $o: title, intro, button, unsubscribe, layout ('box'|'inline'), class.
+ * Gibt nichts aus, solange die Funktion „push“ aus ist oder die Tabelle kein Abo anbietet.
+ */
+function push_subscribe(?string $table = null, array $o = []): string
+{
+    return \Core\Push\Visitor::render($table, $o);
+}

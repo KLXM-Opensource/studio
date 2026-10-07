@@ -46,6 +46,13 @@ $__cmds = [
         ['i18n:missing en [--site-texts]', 'Fehlende Übersetzungen der Oberfläche bzw. der festen Website-Texte (lt())'],
         ['tutorials:export [--out=datei.json] [--videos=ordner]', 'Tutorial-Katalog als JSON für die Produkt-Website (Schritte DE/EN, Dauer, Dateien) – siehe Tutorials & Videos'],
     ],
+    'Push-Benachrichtigungen' => [
+        ['push:send [--all] [--limit=N]', 'Fällige Zustellungen senden (Cron jede Minute bis alle 5 min; --all = alle Websites)'],
+        ['push:status [--all]', 'Funktion, Schlüssel, Abos je Thema, Warteschlange, letzter Versand'],
+        ['push:keys [--generate | --regenerate --force]', 'VAPID-Schlüssel der Installation (config.local.php) zeigen bzw. anlegen; --regenerate macht alle Abos ungültig und leert die Seiten-Caches'],
+        ['push:test <email>', 'Testnachricht sofort an alle Geräte eines Kontos'],
+        ['push:selftest', 'Selbsttest Web Push: RFC-8291-Testvektor, Rundlauf, VAPID-JWT, Endpunkte, Abos und Warteschlange mit vorgetäuschtem Push-Dienst (zurückgerollt)'],
+    ],
     'Sicherungen' => [
         ['site:backup [--out=dir] [--keep=N] [--all]', 'Datenbank + Medien sichern (storage/backups); danach nur die neuesten N Sicherungen der Website behalten'],
         ['site:restore <datei> --force', 'Sicherung einspielen (überschreibt Inhalte und Konten der Website)'],

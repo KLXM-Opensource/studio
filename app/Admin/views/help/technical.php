@@ -19,7 +19,7 @@ $chapters = [
     'medien' => ['Medien, Pools & Untertitel', 2], 'sprachen' => ['Sprachen & Übersetzung', 2], 'glossar' => ['Glossar', 2],
     'suche' => ['Website-Suche', 3], 'ki' => [$aiBrand . ': KI-Dienst & Funktionen', 3], 'ki-chat' => ['KI-Chats: Assistent & Besucher-Chat (SSE)', 3], 'live' => ['Live-Aktualisierung für Besucher (SSE)', 3], 'freigabe' => ['Prüf-Ebene „Eingereicht“', 3],
     'api' => ['REST-API', 3], 'mcp' => ['MCP-Server', 3],
-    'verwaltung' => ['Verwaltungsoberfläche', 4], 'support' => ['Support & Wissensdatenbank', 4], 'chat' => ['Chat zwischen Benutzern (SSE)', 4], 'symbole' => ['Symbole (Icons)', 4],
+    'verwaltung' => ['Verwaltungsoberfläche', 4], 'support' => ['Support & Wissensdatenbank', 4], 'chat' => ['Chat zwischen Benutzern (SSE)', 4], 'push' => ['Push-Benachrichtigungen (Web Push)', 4], 'symbole' => ['Symbole (Icons)', 4],
     'karten' => ['Karten & Proxy', 4], 'pwa' => ['Favicon & PWA', 4], 'tutorials' => ['Tutorials & Videos', 4],
 ];
 // Kapitel aktiver Erweiterungen (Extension::docs('technical', ['key' => ['title', 'file', 'part', 'after']]))

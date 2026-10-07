@@ -65,6 +65,7 @@ final class ExtensionsSelfTest
             self::routes();
             self::tables();
             self::slots();
+            self::push();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -74,6 +75,25 @@ final class ExtensionsSelfTest
             foreach ($saved as $prop => $v) (new \ReflectionProperty($auth, $prop))->setValue($auth, $v);
         }
         return ['ok' => self::$ok, 'fails' => self::$fail];
+    }
+
+    // ================================================================= Push-Ereignisse (Extension::pushEvent → Konto → Benachrichtigungen)
+
+    private static function push(): void
+    {
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA-Erweiterung']);
+        $x->pushEvent('qa_selftest.neu', 'QA: Neues', 'pages.edit', ['help' => 'Hilfe', 'default' => false]);
+        $ev = \Core\Push\Push::events()['qa_selftest.neu'] ?? null;
+        self::eq('pushEvent: angemeldet mit Recht, Vorgabe und Herkunft', [$ev['perm'] ?? null, $ev['default'] ?? null, $ev['owner'] ?? null], ['pages.edit', false, 'qa_selftest']);
+        self::eq('pushEvent: sichtbar nur mit Recht', [isset(\Core\Push\Push::visibleEvents(['role' => 'admin'])['qa_selftest.neu']), isset(\Core\Push\Push::visibleEvents(['role' => 'requests'])['qa_selftest.neu'])], [true, false]);
+        self::eq('notifyUsers wirft nie (unbekanntes Ereignis bzw. Funktion aus)', \Core\Push\Push::notifyUsers([1], ['title' => 'x'], 'qa_selftest.gibtesnicht'), 0);
+        \Core\Push\Push::unregisterEvent('qa_selftest.neu');
+        try {
+            $x->pushEvent('BÖSE', 'x');
+            self::eq('pushEvent: ungültiger Schlüssel abgelehnt', false, true);
+        } catch (\InvalidArgumentException) {
+            self::eq('pushEvent: ungültiger Schlüssel abgelehnt', true, true);
+        }
     }
 
     // ================================================================= Verwaltungsseiten

@@ -117,6 +117,8 @@ final class Queue
             }
             $id = self::insert($ctx, $method, $args, $target, $before, $after, 'pending');
             self::notify();
+            // Push-Mitteilung an alle mit review.manage (Konto → Benachrichtigungen, Core\Push)
+            if ($row = self::find($id)) \Core\Push\Hooks::review($id, (string) ($row['summary'] ?? ''), (string) ($row['entity_label'] ?? ''));
             throw new Pending(self::pendingJson($id));
         }
         $out = $call();

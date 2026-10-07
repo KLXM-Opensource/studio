@@ -66,6 +66,13 @@ final class PwaController
                 '__OFFLINE__' => json_encode(url('/offline'), JSON_UNESCAPED_SLASHES),
                 '__BASE__' => json_encode(base_path(), JSON_UNESCAPED_SLASHES),
             ]);
+            // Push-Benachrichtigungen (Core\Push): dieselben Handler wie /push-sw.js – falls ein Abo an dieser Registrierung hängt
+            if (\Core\Push\Push::enabled()) {
+                $js .= "\n" . strtr((string) file_get_contents(ROOT . '/resources/sw/push.js'), [
+                    '__PUSH_KEY__' => json_encode(\Core\Push\Keys::publicB64()),
+                    '__PUSH_RENEW__' => json_encode(url(\Core\Push\Push::API . '/renew'), JSON_UNESCAPED_SLASHES),
+                ]);
+            }
         } else {
             $js = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>/^(klxm-studio|mycms)-/.test(n)).map(n=>caches.delete(n)))).then(()=>self.registration.unregister())));";
         }

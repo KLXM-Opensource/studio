@@ -65,3 +65,11 @@
   .acc-facts > div{grid-template-columns:1fr;gap:2px}
   .us-mail__form{position:static;width:auto;margin-top:8px}
 }
+
+/* Konto → Benachrichtigungen (Core\Push, app/Admin/views/account/_push.php) */
+.acc-push .set-avatar svg{width:18px;height:18px}
+.acc-push__sub{margin-top:18px}
+.acc-push__hint .set-row__body{color:var(--adm-ink)}
+.acc-push .set-actions{margin-top:10px}
+.acc-push .set-actions svg{width:16px;height:16px}
+@media (max-width:560px){.acc-push .set-avatar{display:none}}

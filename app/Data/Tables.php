@@ -394,6 +394,9 @@ final class Tables
         $settings['kind'] = $kind;
         // Website-Suche je Tabelle (Core\Search\TableSearch) – ohne Formularabschnitt bleibt die bisherige Einstellung
         $settings['search'] = \Core\Search\TableSearch::validate((array) ($s['search'] ?? ($existing['settings']['search'] ?? [])), $fields, $settings);
+        // Push-Benachrichtigungen: Besucher können neue Einträge abonnieren (Core\Push\Topics) – ohne Formularabschnitt bleibt die bisherige Einstellung
+        $push = \Core\Push\Topics::validate((array) ($s['push'] ?? ($existing['settings']['push'] ?? [])), $fields, $settings);
+        if ($push) $settings['push'] = $push;
         // Stellenangebote (schema.org JobPosting, Core\Data\Jobs): Bewerbungs-Eingang und Feld „Stelle“ – nur bei diesem Typ
         if ($settings['schema_type'] === Jobs::TYPE) {
             $settings['jobs'] = Jobs::validateSettings((array) ($s['jobs'] ?? []), $fields, $existing['settings']['jobs'] ?? null);

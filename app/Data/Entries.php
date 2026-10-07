@@ -475,6 +475,8 @@ final class Entries
             Revisions::record($table, $saved, $note);
         }
         self::events($table, (int) $id, $current, $status);
+        // Push: zum ersten Mal veröffentlicht → Mitteilung an die Abos der Tabelle (Core\Push\Topics, nur wenn eingeschaltet)
+        if ($status === 'published' && empty($current['published_at'])) \Core\Push\Topics::published($table, (int) $id, null);
         return [$id, []];
     }
 
@@ -587,6 +589,9 @@ final class Entries
         if (\Core\Extensions::listens($ev)) {
             foreach (array_map('intval', $ids) as $id) $before[$id] = $db->fetchValue("SELECT status FROM {$table['table']} WHERE id = ?", [$id]);
         }
+        // Push: Einträge, die jetzt zum ersten Mal veröffentlicht werden (published_at noch leer)
+        $first = $new === 'published' && \Core\Push\Push::on() && !empty($table['settings']['push']['enabled']) && $ids
+            ? array_map('intval', array_column($db->fetchAll("SELECT id FROM {$table['table']} WHERE published_at IS NULL AND id IN (" . implode(',', array_map('intval', $ids)) . ')' . ($own ? ' AND origin_site = :origin' : ''), $op), 'id')) : [];
         foreach (array_map('intval', $ids) as $id) {
             $upd = ['status' => $status === 'draft' ? 'draft' : 'published', 'updated_at' => now()];
             $db->update($table['table'], $upd, 'id = :id' . $own, ['id' => $id] + $op);
@@ -595,6 +600,7 @@ final class Entries
             }
         }
         self::changed($table);
+        foreach ($first as $id) \Core\Push\Topics::published($table, $id, null);
         // Ereignisse nur für Einträge, deren Status sich wirklich geändert hat (Erweiterungen, Extension::on)
         foreach ($before as $id => $was) {
             if ($was !== null && $was !== $new && ($e = self::find($table, $id)) && $e['status'] === $new) \Core\Extensions::emit($new === 'published' ? new \Core\Events\EntryPublished($table, $e) : new \Core\Events\EntryUnpublished($table, $e));

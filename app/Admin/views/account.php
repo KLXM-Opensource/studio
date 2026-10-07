@@ -1,5 +1,5 @@
 <?php
-/** Konto: Anmeldedaten (Core\EmailChange), Profil, Darstellung, Akzentfarbe, Zwei-Faktor, Passkeys, Favoriten.
+/** Konto: Anmeldedaten (Core\EmailChange), Profil, Darstellung, Akzentfarbe, Benachrichtigungen (Core\Push), Zwei-Faktor, Passkeys, Favoriten.
  * @var array $user  @var array $errors  @var array $old  @var ?array $pendingEmail */
 $err = fn($k) => isset($errors[$k]) ? '<p class="f-error" id="acc-err-' . e($k) . '">' . e($errors[$k]) . '</p>' : '';
 $old ??= [];
@@ -115,6 +115,7 @@ $isShadow = !empty($user['network_uid']);
   </div>
 </form>
 <?php include __DIR__ . '/account/_accent.php'; // Akzentfarbe der Verwaltung (Core\Accent) ?>
+<?php include __DIR__ . '/account/_push.php'; // Push-Benachrichtigungen (Core\Push): Gerät, Ereignisse, Geräteliste ?>
 <?php if ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>
 <?php else: $tfRow = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]); $tfOn = (int) ($tfRow['totp_enabled'] ?? 0);
   // Pflicht (Core\Mfa): App nicht abschaltbar, wenn die Pflicht sonst nicht erfüllt wäre (z. B. kein Passkey)

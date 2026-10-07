@@ -43,6 +43,7 @@ import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Lin
 import { initPagesFields, openPagesPicker } from './_pages.js';   // Seitenauswahl (Feldtyp „pages“, Core\PagePicker)
 import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles)
 import { initAssistant } from './_assistant.js';
+import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
 const d = document;
@@ -97,6 +98,7 @@ initAccent();
 initFonts();
 initFeatures();
 initDelivery();
+if (IN_ADMIN) initPush(csrf);
 
 // ------------------------------------------------------------ Neue Seite: Vorlage passend zur übergeordneten Seite vorwählen (Core\PageTemplates)
 $$('[data-tpl-map]').forEach(box => {

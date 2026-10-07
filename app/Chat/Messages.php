@@ -136,7 +136,10 @@ final class Messages
             return $id;
         });
         Chat::markRead((int) $room['id'], $id);
-        return [self::find($id), null];
+        $m = self::find($id);
+        // Push-Mitteilung (Direktnachricht bzw. Erwähnung) an die Geräte der Empfänger dieser Website (Core\Push\Hooks)
+        if ($m) \Core\Push\Hooks::chat($room, $m, $mentions);
+        return [$m, null];
     }
 
     public static function edit(array $m, string $body): ?string

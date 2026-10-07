@@ -606,6 +606,8 @@ final class DataForms
             $id = (int) $acc['id'];
             self::sendReceipt($t, $values, $fields);
             if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => $id, 'stored' => $stored];
+            // Push-Mitteilung an die Redaktion (Konto → Benachrichtigungen, ohne Inhalte; Core\Push)
+            \Core\Push\Hooks::request($t);
             // Inhalt per E-Mail zugestellt (bzw. Rückfall mit eigener Warnung) → keine zusätzliche inhaltsfreie Benachrichtigung
             if (Delivery::mode($t) !== 'system') return ['ok' => true, 'message' => $success, 'id' => $id];
             $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;
@@ -635,6 +637,7 @@ final class DataForms
         }
 
         self::sendReceipt($t, $values, $fields);
+        \Core\Push\Hooks::formEntry($t, (int) $id, (string) $values['status']);   // Push an die Redaktion (Core\Push)
         // Benachrichtigung OHNE Inhalte – nur Tabelle und Link zur Verwaltung
         $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;
         Mailer::send('Neuer Eintrag in ' . $t['name'],

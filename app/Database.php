@@ -244,6 +244,8 @@ final class Database
         Redirects\Redirects::ensureTable($this);
         // Entwürfe (Core\Review\Drafts): Notiz und zuständige Person je Entwurf, gesicherte verworfene Einträge
         Review\Drafts::ensureTable($this);
+        // Push-Benachrichtigungen (Core\Push): Abos, Schalter je Person, Nachrichten und Warteschlange
+        Push\Push::ensureTable($this);
 
         // Datentabellen (YForm-ähnlich): Definition; die Einträge liegen in eigenen Tabellen data_{handle}
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS data_tables (id $pk, handle VARCHAR(64) NOT NULL UNIQUE, name $str NOT NULL,

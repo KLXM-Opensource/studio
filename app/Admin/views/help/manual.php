@@ -56,6 +56,7 @@ $core = [
     'regeln' => 'Regeln für gute Inhalte',
     'support' => 'Hilfe & Support',
     'chat' => 'Chat im Team',
+    'benachrichtigungen' => 'Push-Benachrichtigungen',
     'faq' => 'Fragen & Probleme',
 ];
 $chapters = [];

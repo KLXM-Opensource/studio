@@ -82,11 +82,15 @@ final class FeaturesController extends AdminController
         if ($on && FeatureInfo::risky($key) && ($err = $this->confirm($r, $user))) return $this->back($back, 'error', $err);
         Features::setUi($key, $on);
         if ($key === 'chat' && $on && method_exists(\Core\Chat\Chat::class, 'ensureDefaultChannel')) \Core\Chat\Chat::ensureDefaultChannel();
+        // Push-Benachrichtigungen: VAPID-Schlüssel der Installation anlegen (config/config.local.php), falls sie fehlen
+        $pushWarn = $key === 'push' && $on && !\Core\Push\Keys::ensure();
+        \Core\Push\Push::flush();
         FeatureLog::add('feature', $key, $old, $on);
         $this->changed();
         $msg = $on ? __('„{label}“ ist eingeschaltet.', ['label' => $label]) : __('„{label}“ ist ausgeschaltet – Rechte, Menüpunkte und Schnittstellen dazu sind gesperrt.', ['label' => $label]);
         $sleep = array_keys(array_filter(Features::REQUIRES, fn($d, $k) => $d === $key && isset($catalog[$k]), ARRAY_FILTER_USE_BOTH));
         if (!$on && $sleep) $msg .= ' ' . __('Damit ruhen auch: {list}.', ['list' => implode(', ', array_map(fn($k) => __((string) $catalog[$k][0]), $sleep))]);
+        if ($pushWarn) $msg .= ' ' . __('Die VAPID-Schlüssel konnten nicht in config/config.local.php geschrieben werden (Datei nicht beschreibbar) – bitte php bin/console push:keys --generate ausführen.');
         return $this->back($back, 'success', $msg);
     }
 
