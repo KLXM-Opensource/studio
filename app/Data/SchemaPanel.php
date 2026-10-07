@@ -133,6 +133,12 @@ final class SchemaPanel
                 foreach (['labels', 'options_i18n'] as $k) {
                     if (isset($f[$k])) { $f[$k] = $langs((array) $f[$k]); if (!$f[$k]) unset($f[$k]); }
                 }
+                // Ältere Definitionen: Hilfetext mit Leerzeichen am Ende (wird beim Speichern getrimmt), Dateifeld ohne Typen/Höchstgröße (Standard)
+                if (isset($f['help']) && is_string($f['help'])) $f['help'] = trim($f['help']);
+                if (($f['type'] ?? '') === 'file') {
+                    if (!array_key_exists('accept', $f)) $f['accept'] = DataForms::FILE_KINDS_DEFAULT;
+                    if (!array_key_exists('max_mb', $f)) $f['max_mb'] = 0;
+                }
                 return $f;
             }, $t['fields']);
             $eq("Rundlauf {$t['handle']}: Felder", $def['fields'], $want);
