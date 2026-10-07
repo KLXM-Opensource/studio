@@ -78,11 +78,11 @@ final class Onboarding
      * Dazu 'category' (general | branch | dev – Gruppe im Willkommen-Bildschirm, Standard general) und 'recommended' (true = empfohlen).
      * @return array<string, array{label: string, description: string, category: string, recommended: bool}>
      */
-    public static function kits(): array
+    public static function kits(?array $themes = null): array
     {
         $en = I18n::locale() === 'en';
         $out = [];
-        foreach (site()->allowedThemes() as $name => $label) {
+        foreach ($themes ?? site()->allowedThemes() as $name => $label) {
             $src = (string) @file_get_contents((string) Kit::definitionFile(Kit::dir($name)));
             $get = fn(string $k) => preg_match("~^    '" . $k . "'\s*=>\s*'((?:[^'\\\\]|\\\\.)*)'~m", $src, $m) ? stripslashes($m[1]) : '';
             $desc = ($en ? $get('description_en') : '') ?: $get('description');
@@ -91,6 +91,12 @@ final class Onboarding
                 'recommended' => (bool) preg_match("~^    'recommended'\s*=>\s*true~m", $src)];
         }
         return $out;
+    }
+
+    /** Bezeichnungen der Gruppen (Willkommen-Bildschirm, Netzwerk „Neue Website“) */
+    public static function categoryLabel(string $cat): string
+    {
+        return match ($cat) { 'branch' => __('Für Branchen und Themen'), 'dev' => __('Für Entwickler'), default => __('Allgemein') };
     }
 
     public static function reset(): void

@@ -16,6 +16,7 @@
     <li><b>Mit oder ohne Startinhalte</b> – <b>mit</b>: Musterseiten und Beispieltexte zum Kennenlernen; <b>ohne</b>: eine leere Startseite sowie Impressum und Datenschutz als Vorlagen.</li>
   </ol>
   <p>Bis dahin sehen Besucher nur „Hier entsteht eine neue Website“. Danach führt die Übersicht mit ihrer Checkliste weiter (Verschlüsselung, E-Mail-Versand, Domain, Angaben der Website). Das Kit wechseln Sie später unter Grundeinstellungen; Startinhalte werden nur beim ersten Einrichten eingespielt.</p>
+  <p>Gleich danach begrüßt Sie ein Fenster <b>„Willkommen bei KLXM Studio“</b> mit den nächsten Schritten und ihrem Stand – Schlüssel, E-Mail-Versand, Angaben der Website, Domain, Platzhalter, tägliche Sicherung (im Netzwerk auch: weitere Websites anlegen). „Erledigen“ führt jeweils direkt zur passenden Stelle. Das Fenster erscheint einmal von selbst; wieder öffnen können Sie es jederzeit unter <b>Hilfe &amp; Support → Erste Schritte</b>.</p>
   <h3>Die Verwaltung</h3>
   <ul>
     <li><b>Seitenleiste:</b> links alle Bereiche, die Ihre Rolle nutzen darf. Große Bereiche wie <b>Daten</b>, <b>Medien</b>, <b>Support</b> und <b><?= e(\Core\AI\Assist::brand()) ?></b> zeigen beim Öffnen ihr eigenes Menü; <b>‹ Hauptmenü</b> führt zurück. Darunter fasst <b>Administration</b> zwei aufklappbare Gruppen zusammen: <b>Einstellungen</b> (Grundeinstellungen, Funktionen &amp; Erweiterungen, Einstellungen der Funktionen, Benutzer &amp; Rollen, Design) und <b>Werkzeuge</b> (Blöcke, Landingpages, Weiterleitungen, Statistiken, Werkzeuge der Erweiterungen).</li>

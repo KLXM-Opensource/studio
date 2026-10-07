@@ -1,0 +1,78 @@
+/* Begrüßungsfenster der Verwaltung (app/Admin/views/_welcome-modal.php, Core\Welcome) – Variablen der Verwaltung (--adm-*) */
+.wlc{box-sizing:border-box;width:min(780px,100vw - 32px);max-height:min(92dvh,900px);margin:auto;padding:30px 32px 24px;overflow:auto;border:0;border-radius:22px;background:var(--adm-card,#fff);color:var(--adm-ink,#1b1f28);box-shadow:0 40px 90px -30px rgba(15,20,40,.5),0 0 0 1px var(--adm-line,#e3e5ea)}
+.wlc:not([open]){display:none}
+.wlc::backdrop{background:rgba(18,22,34,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.wlc__glow{position:absolute;inset:0 0 auto;z-index:0;height:200px;overflow:hidden;pointer-events:none;border-radius:22px 22px 0 0;opacity:.55}
+.wlc__glow span{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(50px)}
+.wlc__glow span:nth-child(1){left:-60px;top:-120px;background:#ffb78a}
+.wlc__glow span:nth-child(2){left:42%;top:-150px;background:#f7a8d0}
+.wlc__glow span:nth-child(3){right:-70px;top:-110px;background:#8ee6dd}
+.wlc>:not(.wlc__glow):not(.wlc__x){position:relative}
+.wlc__x{position:absolute;top:14px;right:14px;z-index:2;margin:0}
+.wlc__close{display:grid;place-items:center;width:38px;height:38px;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--adm-card,#fff) 70%,transparent);color:var(--adm-ink,#1b1f28);cursor:pointer}
+.wlc__close:hover{background:var(--adm-fill,#f1f2f5)}
+.wlc__close:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.wlc__close svg{width:18px;height:18px}
+.wlc__head{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:start;margin-bottom:22px}
+.wlc__mark{display:grid;place-items:center;width:56px;height:56px;border-radius:16px;background:var(--adm-card,#fff);box-shadow:0 10px 26px -12px rgba(15,20,40,.45)}
+.wlc__mark svg{width:32px;height:32px;color:var(--adm-ink,#1b1f28)}
+.wlc__eyebrow{margin:2px 0 4px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--adm-t2,#5b6270)}
+.wlc__title{margin:0;outline:none;font-size:clamp(1.35rem,1rem + 1.4vw,1.8rem);line-height:1.2;text-wrap:balance}
+.wlc__lead{margin:8px 0 0;max-width:46ch;color:var(--adm-t2,#5b6270);line-height:1.5}
+.wlc__ring{position:relative;width:76px;height:76px;margin:0}
+.wlc__ring svg{width:100%;height:100%;rotate:-90deg}
+.wlc__ring circle{fill:none;stroke-width:6}
+.wlc__ring-bg{stroke:var(--adm-fill-2,#e6e8ee)}
+.wlc__ring-fg{stroke:var(--adm-a,#314164);stroke-linecap:round;stroke-dasharray:var(--wlc-c);stroke-dashoffset:calc(var(--wlc-c) * (1 - var(--wlc-p)))}
+.wlc__ring figcaption{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1.05}
+.wlc__ring strong{font-size:1.05rem}
+.wlc__ring figcaption span{font-size:.68rem;color:var(--adm-t2,#5b6270)}
+.wlc__steps{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.wlc__step{display:grid;grid-template-columns:28px 38px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--adm-line,#e3e5ea);border-radius:14px;background:var(--adm-card,#fff)}
+.wlc__step.is-done{background:var(--adm-fill,#f6f7f9);border-color:transparent}
+.wlc__state{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--adm-in,#c9ccd5);font-size:.78rem;font-weight:700;color:var(--adm-t2,#5b6270)}
+.wlc__step.is-done .wlc__state{border-color:transparent;background:var(--adm-ok,#1f7a4d);color:#fff}
+.wlc__state svg{width:15px;height:15px}
+.wlc__ico{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,var(--adm-a,#314164) 9%,transparent);color:var(--adm-a,#314164)}
+.wlc__ico svg{width:20px;height:20px}
+.wlc__txt{display:grid;gap:2px;min-width:0}
+.wlc__txt strong{font-size:.98rem}
+.wlc__txt>span{color:var(--adm-t2,#5b6270);font-size:.88rem;line-height:1.4}
+.wlc__step.is-done .wlc__txt strong{color:var(--adm-t2,#5b6270)}
+.wlc__go{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--adm-a,#314164);color:#fff;font-size:.86rem;font-weight:600;text-decoration:none;white-space:nowrap}
+.wlc__go svg{width:14px;height:14px}
+.wlc__step.is-done .wlc__go{background:transparent;color:var(--adm-ink,#1b1f28);box-shadow:inset 0 0 0 1px var(--adm-line,#e3e5ea)}
+.wlc__go:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.wlc__foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid var(--adm-line,#e3e5ea)}
+.wlc__foot form{margin:0}
+.wlc__links{display:flex;flex-wrap:wrap;gap:6px 16px}
+.wlc__links a{display:inline-flex;align-items:center;gap:6px;color:var(--adm-ink,#1b1f28);font-size:.9rem;text-decoration:none}
+.wlc__links a:hover{text-decoration:underline}
+.wlc__links svg{width:17px;height:17px;color:var(--adm-a,#314164)}
+@media (max-width:620px){
+  .wlc{padding:24px 18px 18px}
+  .wlc__head{grid-template-columns:auto 1fr;padding-right:34px}
+  .wlc__ring{grid-column:1/-1;justify-self:start;width:64px;height:64px}
+  .wlc__step{grid-template-columns:26px 1fr;row-gap:8px}
+  .wlc__ico{display:none}
+  .wlc__go{grid-column:2;justify-self:start}
+}
+/* Bewegung: Fenster gleitet ein, Marke springt, Ring füllt sich, Schritte erscheinen nacheinander */
+@media (prefers-reduced-motion:no-preference){
+  .wlc[open]{animation:wlc-in .45s cubic-bezier(.2,.8,.2,1)}
+  .wlc[open]::backdrop{animation:wlc-fade .35s ease}
+  .wlc[open] .wlc__mark{animation:wlc-pop .7s .15s cubic-bezier(.3,1.6,.5,1) both}
+  .wlc[open] .wlc__mark svg{animation:wlc-spin 1.2s .25s cubic-bezier(.3,.9,.3,1) both}
+  .wlc[open] .wlc__glow span{animation:wlc-drift 9s ease-in-out infinite alternate}
+  .wlc[open] .wlc__glow span:nth-child(2){animation-delay:-3s}
+  .wlc[open] .wlc__glow span:nth-child(3){animation-delay:-6s}
+  .wlc[open] .wlc__ring-fg{animation:wlc-ring 1.1s .35s cubic-bezier(.3,.8,.2,1) both}
+  .wlc[open] .wlc__step{animation:wlc-up .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 70ms + 300ms)}
+}
+@keyframes wlc-in{from{opacity:0;translate:0 18px;scale:.97}}
+@keyframes wlc-fade{from{opacity:0}}
+@keyframes wlc-pop{from{opacity:0;scale:.4}}
+@keyframes wlc-spin{from{rotate:-120deg}}
+@keyframes wlc-ring{from{stroke-dashoffset:var(--wlc-c)}}
+@keyframes wlc-up{from{opacity:0;translate:0 10px}}
+@keyframes wlc-drift{to{translate:30px 16px}}

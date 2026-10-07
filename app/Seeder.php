@@ -77,7 +77,12 @@ final class Seeder
         }
         // Optional: weitere Startinhalte des Themes (z. B. Seitenbaum, Datentabellen, Bilder) – seed.php → 'after' => callable
         if (is_callable($seed['after'] ?? null)) {
-            ($seed['after'])($this->app);
+            // Ein Fehler in den Zusatz-Inhalten (Demo, Bilder …) darf die Website nicht lahmlegen – Grundinhalte stehen schon
+            try {
+                ($seed['after'])($this->app);
+            } catch (\Throwable $e) {
+                error_log('[Seeder] Startinhalte des Kits „' . $this->app->theme->name . '“ unvollständig: ' . $e->getMessage());
+            }
         }
     }
 }

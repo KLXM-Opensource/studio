@@ -16,6 +16,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Gilt für Einzel-Installationen und jede Website eines Netzwerks. Netzwerk „Neue Website“ und `site:create` können Kit und
   Inhalte vorgeben (`--content=ask|full|empty`, Konfiguration `'seed'`); mit fest eingetragenem Kit und ohne `seed` bleibt
   alles wie bisher (sofort mit Startinhalten). `Core\Onboarding`, `Seeder::run('full'|'empty')`.
+- Begrüßungsfenster „Willkommen bei KLXM Studio“ (`Core\Welcome`): erscheint nach der Wahl einmal je Konto (alle mit
+  `system.manage`), listet die nächsten Schritte mit Stand und Fortschrittsring (Kit, Schlüssel, E-Mail, Angaben der Website,
+  Domain, Platzhalter, Sicherung; im Netzwerk „Weitere Websites anlegen“) und lässt sich über Hilfe & Support →
+  „Erste Schritte“ (`/admin?erste-schritte=1`) wieder öffnen. Gemerkt in `users.ui_prefs` (`welcome`); Animation nur ohne
+  „Bewegung reduzieren“.
+- Netzwerk „Neue Website“: Kit-Auswahl nach Allgemein / Branchen und Themen / Entwickler gruppiert, Fluid empfohlen.
 
 ### Website herauslösen: `site:extract`
 - Eine Website einer Multi-Site als eigenständige, lauffähige Installation kopieren: Code, Kit, aktive Erweiterungen (Symlinks

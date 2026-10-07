@@ -27,7 +27,7 @@ $name = trim((string) ($me['name'] ?? '')) ?: (string) ($me['email'] ?? '');
         <legend><span class="wel__num" aria-hidden="true">1</span><?= e(__('Welches Kit soll die Website nutzen?')) ?></legend>
         <?= $err('kit') ?>
         <p class="wel__hint"><?= e(__('Unsicher? Alle Kits mit Vorschau für Desktop und Handy, hell und dunkel:')) ?> <a href="<?= e(\Core\I18n::locale() === 'en' ? 'https://studio.klxm.de/en/kits' : 'https://studio.klxm.de/kit') ?>" target="_blank" rel="noopener"><?= e(__('Kits ansehen')) ?><span class="sr-only"> <?= e(__('(öffnet in neuem Tab)')) ?></span> ↗</a></p>
-        <?php $groups = ['general' => [__('Allgemein'), __('Für jede Art von Website – Unternehmen, Organisationen, Projekte.')], 'branch' => [__('Für Branchen und Themen'), __('Mit passenden Blöcken, Datentabellen und Musterseiten für einen bestimmten Zweck.')], 'dev' => [__('Für Entwickler'), __('Ausgangspunkt für eigene Kits.')]];
+        <?php $groups = ['general' => [\Core\Onboarding::categoryLabel('general'), __('Für jede Art von Website – Unternehmen, Organisationen, Projekte.')], 'branch' => [\Core\Onboarding::categoryLabel('branch'), __('Mit passenden Blöcken, Datentabellen und Musterseiten für einen bestimmten Zweck.')], 'dev' => [\Core\Onboarding::categoryLabel('dev'), __('Ausgangspunkt für eigene Kits.')]];
         foreach ($groups as $g => [$gTitle, $gText]): $list = array_filter($kits, fn($i) => $i['category'] === $g); if (!$list) continue; ?>
         <div class="wel__group">
           <h3 class="wel__group-h"><?= e($gTitle) ?> <span><?= e($gText) ?></span></h3>
