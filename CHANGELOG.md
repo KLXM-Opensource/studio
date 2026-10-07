@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Website herauslösen: `site:extract`
+- Eine Website einer Multi-Site als eigenständige, lauffähige Installation kopieren: Code, Kit, aktive Erweiterungen (Symlinks
+  aufgelöst), Datenbank (SQLite per `VACUUM INTO`, MySQL als Dump), Medien, Suchindex, genutzte Medien-Pools und eine
+  `config.local.php` mit dem eigenen `app_key` der Website. `--out`, `--archive` (tar.gz), `--all-kits`. Die Kopie wird mit
+  `health` geprüft; `EIGENE-INSTANZ.md` nennt die Schritte bis zur DNS-Umstellung. Geteilte Tabellen und Netzwerk-Konten
+  werden gemeldet, nicht kopiert. Entwicklerhandbuch → Betrieb → „Website herauslösen“.
+
 ### Kit-Vertrag: Grundwerte `--kit-*` für Kern-Bausteine und Erweiterungen
 - Jedes Kit setzt einen festen Satz Variablen – Pflicht: `--kit-accent`, `--kit-on-accent`, `--kit-link`, `--kit-muted`,
   `--kit-radius`; empfohlen: `--kit-ink`, `--kit-text`, `--kit-bg`, `--kit-surface`, `--kit-line`, `--kit-font`, `--kit-font-head`.

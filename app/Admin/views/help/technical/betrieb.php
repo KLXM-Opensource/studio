@@ -22,6 +22,24 @@
     <li>Nicht in den tar-Sicherungen enthalten und separat zu sichern: <code>config/config.local.php</code> (Schlüssel der Hauptwebsite, <code>network_key</code>), <code>storage/support/</code> (zentrale Support-Datenbank und Bildschirmfotos), <code>storage/ai/config.json</code>. Suchindizes (<code>{storage}/search</code>) sind abgeleitet und lassen sich mit <code>search:index --full</code> neu aufbauen.</li>
     <li>Ein Plesk-Backup des Abonnements erfasst alles; zusätzlich die tar-Sicherungen außerhalb des Servers aufbewahren.</li>
   </ul>
+  <h3 id="herausloesen">Website herauslösen – eigene Instanz aus einer Multi-Site (<code>site:extract</code>)</h3>
+  <p>Soll eine Website einer Multi-Site (z. B. eine von mehreren Kundenwebsites) künftig allein laufen – auf einem eigenen Server oder in einem eigenen Ordner –, erzeugt ein Befehl eine vollständige, sofort lauffähige Kopie. Das Original bleibt unverändert; in der Kopie ist die gewählte Website die einzige (Website „default“).</p>
+  <pre><code>php bin/console site:extract neo                         # → storage/exports/neo-&lt;zeit&gt;/
+php bin/console site:extract neo --out=/pfad/neo --archive  # eigener Ordner + neo.tar.gz zum Hochladen
+php bin/console site:extract neo --all-kits                 # alle Kits mitnehmen (sonst nur das der Website)</code></pre>
+  <table class="doc-table">
+    <tr><th>Kommt mit</th><th>Wie</th></tr>
+    <tr><td>Code</td><td>app, bin, lang, lib, resources, deploy, vendor, Doku; tools ohne <code>node_modules</code> und Arbeitsordner</td></tr>
+    <tr><td>Kit und Erweiterungen</td><td>das Kit der Website (bzw. ihre erlaubten Kits) und nur die aktiven Erweiterungen – Verweise (Symlinks) werden als echte Ordner kopiert</td></tr>
+    <tr><td>Daten</td><td>Datenbank (SQLite konsistent per <code>VACUUM INTO</code>, auch im laufenden Betrieb; MySQL als Dump <code>storage/database/import.sql</code>), Medien, Suchindex, Medien-Pools der Website (auch geschützte)</td></tr>
+    <tr><td>Konfiguration</td><td><code>config/config.local.php</code> aus Installation und Website – mit dem <b>eigenen <code>app_key</code></b> der Website (sonst wären verschlüsselte Einstellungen wie das SMTP-Passwort unlesbar), ohne Domains der Multi-Site, Erweiterungen fest eingetragen, neues Setup-Token</td></tr>
+  </table>
+  <ul>
+    <li><b>Nicht übernommen</b> (der Befehl meldet es): geteilte Datentabellen – vorher <code>data:unshare</code> im Eigentümer –, Netzwerk-Konten, zentrale Support-Daten, Sitzungen, Cache und Protokolle. Passkeys gelten weiter, solange die Domain gleich bleibt.</li>
+    <li>Nach dem Kopieren prüft der Befehl die neue Installation (<code>health</code>) und legt <code>EIGENE-INSTANZ.md</code> mit allen Schritten ab: hochladen (Dokumentstamm <code>public</code>), Cron einrichten, über eine Testdomain prüfen, DNS umstellen – erst dann im Original die Website entfernen.</li>
+    <li>MySQL: Die Kopie zeigt zunächst auf dieselbe Datenbank wie das Original – vor dem Start eine neue anlegen, den Dump einspielen und <code>db</code> in <code>config/config.local.php</code> anpassen.</li>
+  </ul>
+
   <h3>Updates</h3>
   <ul>
     <li>Code ersetzen (<code>app/</code>, <code>vendor/</code>, <code>resources/</code>, <code>public/assets/</code>, <code>bin/</code>, Kits) – am besten per <a href="#deploy">Deploy-Skript</a>. Danach <code>php bin/console migrate --all</code> und <code>health --all</code>; Website-Datenbanken migrieren sonst beim nächsten Aufruf selbst, geteilte, Netzwerk- und Support-Datenbanken nur über <code>migrate</code>.</li>

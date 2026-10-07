@@ -84,6 +84,9 @@
  * Sicherungen (storage/backups; --keep=N: nur die neuesten N behalten, Standard config 'backup_keep' = 14, 0 = alle)
  *   site:backup [--out=dir] [--keep=N] [--all]        Datenbank + Medien sichern
  *   site:restore <datei> --force                      Sicherung einspielen (z. B. Live-Inhalte auf Staging)
+ *   site:extract <key> [--out=ordner] [--archive] [--all-kits]
+ *                                                     Website als eigenständige Installation herauslösen (Kopie mit Code, Kit,
+ *                                                     Erweiterungen, Daten, Medien, Pools, Schlüsseln; Original bleibt unverändert)
  *   content:snapshot [--pushed=datei --publish]       Live-Stand der Seiten merken (nach dem Holen, deploy/content-pull.sh)
  *   content:export [--out=datei.json] [--all]        Seit dem Holen geänderte Seiten exportieren (Core\ContentSync)
  *   content:import <datei.json> [--dry-run] [--publish] [--force]
@@ -862,6 +865,29 @@ switch ($cmd) {
     case 'content:import':
         // Inhalte hin und zurück: live holen, lokal bearbeiten, geänderte Seiten ohne Überschreiben fremder Änderungen zurück (Core\ContentSync)
         exit(Core\ContentSync::console($cmd, $args));
+
+    case 'site:extract':
+        // Website als eigenständige Installation herauslösen (Core\SiteExtract) – läuft im Kontext dieser Website
+        $xkey = (string) (array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')))[0] ?? '');
+        if ($xkey === '' || !isset(Core\Sites::all()[$xkey])) {
+            fwrite(STDERR, "Aufruf: site:extract <key> [--out=ordner] [--archive] [--all-kits]\nWebsites: " . implode(', ', array_keys(Core\Sites::all())) . "\n"); exit(1);
+        }
+        if (site()->key !== $xkey) {
+            passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' site:extract ' . implode(' ', array_map('escapeshellarg', array_filter($args, fn($a) => !str_starts_with($a, '--site='))))
+                . ' --site=' . escapeshellarg($xkey), $code);
+            exit($code);
+        }
+        $xo = ['archive' => in_array('--archive', $args, true), 'all_kits' => in_array('--all-kits', $args, true)];
+        foreach ($args as $a) if (str_starts_with($a, '--out=')) $xo['out'] = substr($a, 6);
+        try {
+            $r = (new Core\SiteExtract(fn(string $l) => print($l . "\n")))->run($xo);
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        echo "\nEigenständige Installation „{$xkey}“: {$r['out']}\n"
+           . sprintf("  %d Dateien, %.1f MB%s\n", $r['files'], $r['bytes'] / 1048576, $r['archive'] ? " · Archiv: {$r['archive']}" : '')
+           . "  Prüfung der Kopie (health): {$r['health']}\n"
+           . "  Schritte und Hinweise: {$r['report']}\n";
+        foreach ($r['notes'] as $n) echo "  ! $n\n";
+        break;
 
     case 'site:restore':
         // Sicherung einspielen: Datenbank + Medien (z. B. Live-Inhalte auf Staging). Website-Konfiguration bleibt unangetastet.

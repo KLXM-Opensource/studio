@@ -47,6 +47,7 @@ $__cmds = [
     'Sicherungen' => [
         ['site:backup [--out=dir] [--keep=N] [--all]', 'Datenbank + Medien sichern (storage/backups); danach nur die neuesten N Sicherungen der Website behalten'],
         ['site:restore <datei> --force', 'Sicherung einspielen (überschreibt Inhalte und Konten der Website)'],
+        ['site:extract <key> [--out=ordner] [--archive] [--all-kits]', 'Website als eigenständige Installation herauslösen: Kopie mit Code, Kit, aktiven Erweiterungen, Datenbank, Medien, Pools und eigenem app_key; prüft die Kopie mit health und legt EIGENE-INSTANZ.md an. Original bleibt unverändert (Betrieb → „Website herauslösen“)'],
         ['pool:backup [key|--all] [--keep=N]', 'Geteilte Medien-Pools sichern; nur die neuesten N je Pool behalten'],
         ['pool:restore <datei> --force', 'Pool-Sicherung einspielen'],
         ['shared:backup [key|--all] [--keep=N]', 'Geteilte Datentabellen sichern (Bilder: pool:backup data-…); nur die neuesten N je Tabelle behalten'],
