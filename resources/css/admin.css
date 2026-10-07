@@ -2829,13 +2829,13 @@ html.adm-ui[data-theme=dark]{--adm-chev:url("data:image/svg+xml,%3Csvg xmlns='ht
 @media (pointer:coarse){.set-list{--adm-ctl-h:36px}}
 
 /* Haut: Text-artige Felder, Auswahl, Textbereich */
-:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#){
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field,.adm-side) *):not(.fx-i-title,.is-bare):not(#\#){
   height:var(--adm-ctl-h);min-height:0;padding:calc((var(--adm-ctl-h) - var(--adm-ctl-lh) - 2px) / 2) var(--adm-ctl-px);border:1px solid var(--adm-ctl-bd);border-radius:var(--adm-ctl-r);
   background-color:var(--adm-ctl-bg);color:var(--adm-ink);font-size:var(--adm-ctl-fs);line-height:var(--adm-ctl-lh);box-shadow:none;
   transition:border-color .12s,box-shadow .12s}
-:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#):focus{
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field,.adm-side) *):not(.fx-i-title,.is-bare):not(#\#):focus{
   border-color:var(--adm-a);outline:none;box-shadow:var(--adm-ring)}
-:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field) *):not(.fx-i-title,.is-bare):not(#\#):is(:disabled,[readonly]){
+:is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=hidden],[type=submit],[type=button],[type=reset],[type=image]),select,textarea):not(:is(.adm-prefix,.ap-input,.fx-search,.fx-tags,.icg__search,.icp__search,.sl-field,.uc-compose,.cb-editor,.cap-cue,.ie-opts,.ha-field,.adm-side) *):not(.fx-i-title,.is-bare):not(#\#):is(:disabled,[readonly]){
   background-color:var(--adm-fill);color:var(--adm-t2)}
 textarea:not(:is(.uc-compose,.cb-editor,.cap-cue) *):not(.is-bare):not(#\#):not(#\#){height:auto}
 select:is([multiple],[size]:not([size="1"])):not(#\#):not(#\#){height:auto;padding:4px}
