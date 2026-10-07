@@ -14,7 +14,7 @@
   {id}/font.css              @font-face je Schnitt/Zeichensatz: font-display: swap, unicode-range, relative url()
   {id}/{subset}-{w}-{style}.woff2   bzw. {subset}-wght-{style}.woff2 (variabel: font-weight 300 700)
   {id}/LICENSE.txt           Lizenztext (OFL-1.1, Apache-2.0 oder UFL-1.0)</code></pre>
-  <p>Installationsweit, von allen Websites nutzbar. Beim Deploy (<code>deploy/deploy.sh</code>) liegt der Ordner wie <code>public/media</code> unter <code>shared/public/fonts</code> und wird im Release als <code>public/assets/fonts/installed</code> verlinkt; in Git ignoriert. Früher lag er unter <code>public/fonts/</code> – solange ein Server nicht umgestellt ist, nutzt <code>Core\Fonts</code> diesen Ort weiter; <code>php bin/console assets:migrate</code> verschiebt ihn, alte Adressen <code>/fonts/…</code> leitet <code>public/index.php</code> mit 301 um.</p>
+  <p>Installationsweit, von allen Websites nutzbar. Beim Deploy (<code>deploy/deploy.sh</code>) liegt der Ordner wie <code>public/media</code> unter <code>shared/public/fonts</code> und wird im Release als <code>public/assets/fonts/installed</code> verlinkt; in Git ignoriert.</p>
   <h3>Sicherheit</h3>
   <ul>
     <li>Nur <code>system.manage</code> (oder Integratoren) und Funktion <code>fonts</code> (<code>Core\Features</code>; in den Presets <code>content</code>/<code>minimal</code> aus).</li>

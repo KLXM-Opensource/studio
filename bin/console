@@ -37,7 +37,7 @@
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
  *
- * Kits & Erweiterungen (Kits liegen unter kits/{name}/, Rückfall themes/{name}/ – theme:* und kit:* gehen gleichermaßen)
+ * Kits & Erweiterungen (Kits liegen unter kits/{name}/ – theme:* und kit:* gehen gleichermaßen)
  *   theme:list | kit:list                             Installierte Kits
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
@@ -52,9 +52,6 @@
  *                                                     In der Konfiguration festgelegte Funktionen/Erweiterungen an die Verwaltung
  *                                                     übergeben (Administration → Funktionen & Erweiterungen); Sicherung .bak + Diff
  *   extensions:publish                                Öffentliche Dateien der Erweiterungen nach public/assets/ext kopieren
- *   assets:migrate [--dry-run] [--no-backup]          Alte Ordner in public/ nach public/assets/ verschieben (kits, themes →
- *                                                     assets/kits · extensions → assets/ext · fonts → assets/fonts/installed);
- *                                                     Sicherung storage/backups/public-assets-<zeit>.tar.gz, meldet feste alte Adressen
  *   reseed --force                                    ALLE Inhalte löschen und Startinhalte neu einspielen
  *   fonts:search <name> [--category=serif]            Google-Fonts-Katalog durchsuchen (Fontsource, nur freie Lizenzen)
  *   fonts:install <familie> [--weights=400,700] [--subsets=latin,latin-ext] [--variable] [--italic] [--preload]
@@ -324,7 +321,7 @@ switch ($cmd) {
         foreach ($files as $file) if (is_file($file)) $have += (array) require $file;
         $found = [];
         // Kits: nur das aktive Kit (seine lang-Datei wird verglichen) – Texte anderer Kits prüft man auf deren Website (--site=…)
-        $kitRe = '(?:kits|themes)/' . preg_quote($theme->name, '~');
+        $kitRe = 'kits/' . preg_quote($theme->name, '~');
         $scan = $siteTexts ? '~/(app|' . $kitRe . ')/.*\.php$~' : '~/(app|' . $kitRe . '|resources/js)/.*\.(php|js|mjs)$~';
         $pattern = $siteTexts ? "~\\blt\\('((?:[^'\\\\]|\\\\.)*)'~" : "~(?:__|\\bt)\\('((?:[^'\\\\]|\\\\.)*)'~";
         if ($extDir) $scan = $siteTexts ? '~/(src|views|blocks)/.*\.php$|/extension\.php$~' : '~/(src|views|assets/js)/.*\.(php|js|mjs)$|/extension\.php$~';
@@ -509,7 +506,7 @@ switch ($cmd) {
         foreach (Core\Theme::available() as $n => $l) {
             $def = (string) Core\Kit::definitionFile(Core\Kit::dir($n));
             $v = preg_match("~'version'\s*=>\s*'([^']+)'~", (string) file_get_contents($def), $m) ? $m[1] : '–';
-            printf("%-14s %-30s %-8s %s\n", $n, $l, $v, Core\Kit::relative(Core\Kit::dir($n)) . (Core\Kit::isLegacy($n) ? '  (alter Ordner – nach kits/ verschieben)' : ''));
+            printf("%-14s %-30s %-8s %s\n", $n, $l, $v, Core\Kit::relative(Core\Kit::dir($n)));
         }
         break;
 
@@ -595,8 +592,8 @@ switch ($cmd) {
             if (!in_array($f->getExtension(), ['php', 'mjs', 'js', 'css', 'json', 'md'], true)) continue;
             $src = (string) file_get_contents($f->getPathname());
             $new = preg_replace('~\b' . preg_quote($from, '~') . '_~', $prefix, $src);
-            $new = str_replace(["mycms-theme-$from", "klxm-studio-kit-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "themes/$from/", "kits/$from/", "Kit „{$from}“", "Theme „{$from}“"],
-                ["klxm-studio-kit-$name", "klxm-studio-kit-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "kits/$name/", "kits/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
+            $new = str_replace(["mycms-theme-$from", "klxm-studio-kit-$from", "klxm-studio/kit-$from", "\"kit\": \"$from\"", "kits/$from/", "Kit „{$from}“", "Theme „{$from}“"],
+                ["klxm-studio-kit-$name", "klxm-studio-kit-$name", "klxm-studio/kit-$name", "\"kit\": \"$name\"", "kits/$name/", "Kit „{$name}“", "Kit „{$name}“"], $new);
             if ($new !== $src) file_put_contents($f->getPathname(), $new);
         }
         echo "Kit „{$name}“ angelegt – Kopie von „{$from}“, Präfix {$from}_ → {$prefix}\n"
@@ -786,10 +783,7 @@ switch ($cmd) {
               + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
-                + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
-                // Alte Ordner ganz oben in public/ (kits, themes, extensions, fonts): laufen weiter (Rückfall), sperren aber Seitenadressen
-                + (($legacy = Core\PublicPaths::legacyDirs()) ? ['Alte Ordner in public/ (' . implode(', ', $legacy) . ') – umstellen mit: php bin/console assets:migrate' => null]
-                    : ['public/: Kits, Erweiterungen und Schriften unter /assets/' => true]);
+                + Core\Fragments::health();    // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
@@ -1357,8 +1351,7 @@ switch ($cmd) {
         exit(Core\FeatureRelease::run($args, fn(string $l) => print($l . "\n")));
 
     case 'extensions:publish':
-        // Öffentliche Dateien der Erweiterungen nach public/assets/ext/{name} kopieren (auch ohne pnpm auf dem Server);
-        // liegt die Erweiterung noch am alten Ort public/extensions/{name} (Server nicht umgestellt), dorthin (Core\PublicPaths)
+        // Öffentliche Dateien der Erweiterungen nach public/assets/ext/{name} kopieren (auch ohne pnpm auf dem Server; Core\PublicPaths)
         foreach (Core\Extensions::available() as $n => $m) {
             $dst = Core\PublicPaths::dir(Core\PublicPaths::EXT, $n);
             // public/ (fertig gebaut) – sonst assets/ unverändert, aber nur wenn noch nichts veröffentlicht ist (z. B. Composer-Paket
@@ -1374,23 +1367,6 @@ switch ($cmd) {
             echo Core\Kit::relative($dst) . " aktualisiert.\n";
         }
         break;
-
-    case 'assets:migrate':
-        // Einmalige Umstellung: alte Ordner ganz oben in public/ → public/assets/ (Core\PublicPaths::migrate, idempotent)
-        $dry = in_array('--dry-run', $args, true);
-        echo "▸ public/: Code- und Design-Dateien nach /assets/" . ($dry ? ' (dry-run – nichts wird geändert)' : '') . "\n";
-        $res = Core\PublicPaths::migrate($dry, fn(string $l) => print($l . "\n"), !in_array('--no-backup', $args, true));
-        if ($res['findings']) {
-            echo "\n! Feste alte Adressen (bitte durch Kit::url()/Theme::asset()/Extension::asset() bzw. relative Pfade ersetzen –\n"
-               . "  bis dahin leitet public/index.php sie mit 301 um):\n";
-            foreach ($res['findings'] as $f) echo "  $f\n";
-        }
-        if (!$dry && $res['changes'] && !$res['errors']) {
-            passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --all >/dev/null', $code);
-            echo $code === 0 ? "▸ Seiten-Cache geleert (cache:clear --all)\n" : "! cache:clear --all fehlgeschlagen – bitte von Hand ausführen\n";
-        }
-        echo $res['errors'] ? "FEHLER ({$res['errors']})\n" : ($dry ? "Dry-run beendet.\n" : "✓ public/ umgestellt: " . implode(', ', array_map(fn($a) => '/' . $a[0], Core\PublicPaths::AREAS)) . "\n");
-        exit($res['errors'] ? 1 : 0);
 
     default:
         // Befehle aktiver Erweiterungen

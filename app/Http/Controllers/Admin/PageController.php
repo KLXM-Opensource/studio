@@ -108,7 +108,7 @@ final class PageController extends AdminController
     /** Systemadressen ganz oben (Ordner in public/, feste Routen) – zentrale Liste: Core\PublicPaths::RESERVED_SLUGS */
     public const RESERVED_SLUGS = \Core\PublicPaths::RESERVED_SLUGS;
 
-    /** Nur ohne übergeordnete Seite und ohne Sprachpräfix; dazu jeder Ordner, der (noch) in public/ liegt (z. B. kits vor assets:migrate) */
+    /** Nur ohne übergeordnete Seite und ohne Sprachpräfix; dazu jeder Ordner bzw. jede Datei in public/ */
     public static function reservedSlug(string $slug, ?int $parentId, ?string $lang): bool
     {
         return $parentId === null && ($lang === null || $lang === \Core\Lang::default()) && \Core\PublicPaths::isReserved($slug);

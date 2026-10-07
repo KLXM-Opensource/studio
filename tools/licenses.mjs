@@ -109,7 +109,7 @@ function composer() {
 // ------------------------------------------------------------------ npm (pnpm)
 function pnpmProjects() {
   const dirs = [path.join(ROOT, 'tools')];
-  for (const root of ['kits', 'themes']) {   // themes/ = alter Ordner (Rückfall)
+  for (const root of ['kits']) {
     const themes = path.join(ROOT, root);
     for (const t of fs.existsSync(themes) ? fs.readdirSync(themes).sort() : []) {
       if (fs.existsSync(path.join(themes, t, 'package.json'))) dirs.push(path.join(themes, t));
@@ -192,8 +192,8 @@ for (const p of all) {
 
 if (fs.existsSync(path.join(ROOT, 'public/assets/vendor'))) {
   for (const f of REQUIRED_FILES) if (!fs.existsSync(path.join(ROOT, f))) problems.push(`Lizenzdatei fehlt: ${f} (pnpm --dir tools build)`);
-  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/assets/kits, Rückfall public/kits, public/themes)
-  for (const root of ['public/assets/kits', 'public/kits', 'public/themes']) {
+  // Schriften der Kits: jede ausgelieferte Schrift braucht eine OFL-Datei (public/assets/kits)
+  for (const root of ['public/assets/kits']) {
     const pubThemes = path.join(ROOT, root);
     for (const t of fs.existsSync(pubThemes) ? fs.readdirSync(pubThemes) : []) {
       const fonts = path.join(pubThemes, t, 'fonts');

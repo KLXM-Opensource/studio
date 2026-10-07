@@ -156,12 +156,12 @@ final class Consent
         ];
     }
 
-    /** Öffentliche Adresse einer Datei der Erweiterung (public/assets/ext/consent_kit, nach pnpm build; ältere Kerne: /extensions/…) */
+    /** Öffentliche Adresse einer Datei der Erweiterung (public/assets/ext/consent_kit, nach pnpm build) */
     public static function asset(string $path): string
     {
         $x = Extensions::active()['consent_kit'] ?? null;
         if ($x) return $x->asset($path);
-        return class_exists(\Core\PublicPaths::class) ? \Core\PublicPaths::url('ext', 'consent_kit', $path) : base_path() . '/extensions/consent_kit/' . $path;
+        return \Core\PublicPaths::url('ext', 'consent_kit', $path);
     }
 
     // ------------------------------------------------------------------ Einwilligung (Cookie dieser Anfrage)

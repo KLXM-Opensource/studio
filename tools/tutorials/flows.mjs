@@ -1104,7 +1104,7 @@ add({
 const KIT_CREATE = `Kit „kanzlei“ angelegt – Kopie von „starter“, Präfix starter_ → kanzlei_
   kits/kanzlei/          theme.php, Blöcke, Templates, Fragmente, Startinhalte, lang/, tools/
   kits/kanzlei/assets/   CSS/JS-Quellen
-  public/kits/kanzlei/   gebaute Assets (Kopie – nach Änderungen neu bauen)
+  public/assets/kits/kanzlei/   gebaute Assets (Kopie – nach Änderungen neu bauen)
 
 Nächste Schritte:
   1. kits/kanzlei/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css

@@ -96,67 +96,28 @@ mit Ziel `production`.
 Alternative ohne CI: `deploy/deploy.sh` lokal ausführen, oder Plesk-Git mit „Zusätzliche Bereitstellungsaktionen“
 (`php bin/console migrate --all && php bin/console health --all`) – dann ohne Releases/Rollback.
 
-## Umstellung themes/ → kits/ (einmalig, bestehende Installationen)
+## Ablage in public/
 
-Kits liegen seit 1.0.0 unter `kits/{name}/` (vorher `themes/`), ihre gebauten Assets heute unter `public/assets/kits/{name}/`
-(siehe nächster Abschnitt; davor `public/kits/`, `public/themes/`). Der Kern liest beide Orte (`Core\Kit`: erst `kits/`, dann `themes/`), alte Asset-Adressen `/themes/…`
-leitet `public/index.php` mit 301 auf `/kits/…` um, sobald die Datei dort liegt – Apache (`FallbackResource`) und nginx
-(`try_files … /index.php`) brauchen dafür keine eigene Regel.
+Kits liegen unter `kits/{name}/`, ihre gebauten Assets unter `public/assets/kits/{name}/`. Jeder Ordner ganz oben in
+`public/` sperrt die gleichnamige Seitenadresse (Apache/nginx liefern den Ordner: 301 auf `/name/`, danach 403). Deshalb
+liegen Code- und Design-Dateien unter `/assets/` (zentrale Pfad-API `Core\PublicPaths`):
 
-- **Deploy mit Releases** (`deploy/deploy.sh`): nichts zu tun – jedes Release bringt `kits/` aus dem Repository mit.
-  Eigene Kits, die nur auf dem Server lagen, gehören ins Repository bzw. in `kits/`.
-- **Code direkt im Installationsordner** (ohne Releases, `APP_DIR` – z. B. Plesk-Upload): nach dem Hochladen des neuen
-  Codes einmal `deploy/migrate-kits.sh <ziel>` (vorher gern mit `--dry-run`). Das Skript sichert `themes/` und
-  `public/themes/` nach `storage/backups/themes-<zeit>.tar.gz`, verschiebt sie nach `kits/` bzw. `public/kits/`
-  (nur wenn dort noch nichts liegt; sonst nur fehlende Kits), legt Übergangs-Links `themes → kits` an
-  (`--no-symlink` ohne) und leert den Seiten-Cache (`cache:clear --all`, danach `health --all`).
-  Lokal: `deploy/migrate-kits.sh --local [ordner]`. Mehrfaches Ausführen ändert nichts.
-- Wer beim Hochladen per rsync `--delete` nutzt: `themes/` und `public/themes/` bis zur Umstellung ausnehmen, sonst
-  verschwinden eigene Kits, die nicht im hochgeladenen Stand liegen.
-
-## Umstellung public/ → /assets/ (einmalig, bestehende Installationen)
-
-Jeder Ordner ganz oben in `public/` sperrt die gleichnamige Seitenadresse (Apache/nginx liefern den Ordner: 301 auf
-`/kits/`, danach 403). Deshalb liegen Code- und Design-Dateien jetzt unter `/assets/` (zentrale Pfad-API `Core\PublicPaths`):
-
-| Früher | Jetzt |
+| Ordner | Inhalt |
 |---|---|
-| `public/kits/{kit}/`, `public/themes/{kit}/` | `public/assets/kits/{kit}/` (Adresse `/assets/kits/{kit}/…`) |
-| `public/extensions/{name}/` | `public/assets/ext/{name}/` (`pnpm build`, `extensions:publish`) |
-| `public/fonts/` (installierte Schriften) | `public/assets/fonts/installed/` (eigener Unterordner – `public/assets/fonts/` enthält Lato) |
-| `public/media/`, `public/pools/`, `public/sites/` | unverändert (Uploads, Adressen stehen in Inhalten) |
+| `public/assets/kits/{kit}/` | gebaute Assets der Kits (Adresse `/assets/kits/{kit}/…`) |
+| `public/assets/ext/{name}/` | öffentliche Dateien der Erweiterungen (`pnpm build`, `extensions:publish`) |
+| `public/assets/fonts/installed/` | installierte Schriften (eigener Unterordner – `public/assets/fonts/` enthält Lato) |
+| `public/media/`, `public/pools/`, `public/sites/` | Uploads (Adressen stehen in Inhalten) |
 
-Gesperrte Seitenadressen ganz oben danach: `admin`, `api`, `anfrage`, `assets`, `media`, `pools`, `sites`, `sitemap-xml`,
-`robots-txt`, `home`, `index-php` – plus jeder Ordner, der noch in `public/` liegt.
+Gesperrte Seitenadressen ganz oben: `admin`, `api`, `anfrage`, `assets`, `media`, `pools`, `sites`, `sitemap-xml`,
+`robots-txt`, `home`, `index-php` – plus jeder weitere Ordner bzw. jede Datei in `public/`.
 
-- **Rückfall:** Neuer Code auf einem Server mit alten Ordnern läuft ohne Umstellung weiter – was nur am alten Ort liegt,
-  bekommt Adressen dorthin (`health` zeigt einen Hinweis). Man kann also erst den Code ausrollen und dann umstellen.
-- **Deploy mit Releases** (`deploy/deploy.sh`): nichts zu tun. Jedes Release bringt `public/assets/` mit; installierte
+- **Deploy mit Releases** (`deploy/deploy.sh`): jedes Release bringt `kits/` und `public/assets/` mit; installierte
   Schriften bleiben in `shared/public/fonts` und werden als `public/assets/fonts/installed` verlinkt.
-- **Code direkt im Installationsordner** (ohne Releases, `APP_DIR`): nach dem Hochladen des neuen Codes einmal
-  ```bash
-  php bin/console assets:migrate --dry-run     # zeigt, was passiert
-  php bin/console assets:migrate               # Sicherung, verschieben, Links, Cache leeren
-  php bin/console health --all
-  ```
-  Sichert die alten Ordner nach `storage/backups/public-assets-<zeit>.tar.gz` (außerhalb des Webroots), verschiebt
-  `public/kits` + `public/themes` → `public/assets/kits`, `public/extensions` → `public/assets/ext`,
-  `public/fonts` → `public/assets/fonts/installed`; entfernt Übergangs-Links in `public/` (z. B. `public/themes → kits`)
-  und verlinkt Links nach außen neu. Liegt ein Kit an zwei Orten, gewinnt die neueste Fassung, die andere kommt nach
-  `storage/backups/public-assets-alt-<zeit>/`. Zum Schluss listet der Befehl fest eingetragene alte Adressen in Kits und
-  Erweiterungen. Mehrfaches Ausführen ändert nichts.
 - **Hochladen per rsync/tar:** `public/assets/` komplett mitnehmen (enthält Kits und Erweiterungen); `public/assets/fonts/installed`
-  ausnehmen (Laufzeitdaten wie `public/media`). Mit `rsync --delete` vor der Umstellung zusätzlich `public/kits`,
-  `public/themes`, `public/extensions`, `public/fonts` ausnehmen.
-- **Alte Adressen** (`/kits/…`, `/themes/…`, `/extensions/…`, `/fonts/…` in zwischengespeicherten Seiten, Stylesheets,
-  fremden Verweisen) leitet `public/index.php` mit 301 auf `/assets/…` um – nur wenn die Datei dort liegt; eine Seite
-  `/kits` bleibt erreichbar. Apache (`FallbackResource`) braucht keine Regel. Nur nginx: fehlende Dateien an PHP geben
-  (`location / { try_files $uri $uri/ /index.php$is_args$args; }`) und Cache-Regeln nur für `^/assets/` – eine Regel wie
-  `location ~* ^/(assets|kits|extensions)/…` ohne `try_files` beantwortet alte Adressen sonst mit 404.
-- **Seite mit der Adresse `/kits` (o. ä.) vor der Umstellung:** Solange `public/kits/` existiert, beantworten Apache und
-  nginx `/kits` selbst; nach `assets:migrate` ist die Seite wieder erreichbar. Wer nicht umstellen kann, braucht eine
-  Server-Regel für genau diese Adresse (Apache: `RewriteEngine On` + `RewriteRule ^/kits/?$ /index.php [L]` im vHost;
-  nginx: `location = /kits { rewrite ^ /index.php last; }`).
+  ausnehmen (Laufzeitdaten wie `public/media`).
+- **nginx:** fehlende Dateien an PHP geben (`location / { try_files $uri $uri/ /index.php$is_args$args; }`), Cache-Regeln
+  nur für `^/assets/`. Apache (`FallbackResource`) braucht keine Regel.
 
 ## Nützliche Befehle auf dem Server
 

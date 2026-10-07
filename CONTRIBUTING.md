@@ -11,7 +11,7 @@ Danke für Ihr Interesse! Fehlerberichte, Verbesserungsvorschläge und Pull Requ
 ## Pull Requests
 
 1. Forken, Branch anlegen, Änderung möglichst klein und in sich geschlossen halten.
-2. Lokal einrichten: `composer install`; nur wenn Sie CSS/JS-Quellen (`resources/`, `themes/*/assets`,
+2. Lokal einrichten: `composer install`; nur wenn Sie CSS/JS-Quellen (`resources/`, `kits/*/assets`,
    `extensions/*/assets`) ändern: `cd tools && pnpm install && pnpm run build` – die gebauten Dateien in `public/`
    gehören mit in den Commit.
 3. Vor dem Einreichen prüfen (dasselbe prüft die CI):

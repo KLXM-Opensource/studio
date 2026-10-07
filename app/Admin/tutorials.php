@@ -16,7 +16,7 @@
  * aufgenommen mit tools/tutorials/record.mjs (gleiche Kurznamen, Ausgabe TUT_OUT) und von dort mit php bin/console tutorials:export beschrieben.
  *
  * Agenturen ergänzen oder ersetzen Tutorials im Theme: kits/{name}/docs/tutorials.php gibt dasselbe Format zurück
- * (gleicher Kurzname = ersetzen, false = entfernen; eigene Videos mit 'video' => '/kits/{name}/tutorials/datei' ohne Endung).
+ * (gleicher Kurzname = ersetzen, false = entfernen; eigene Videos mit 'video' => '/assets/kits/{name}/tutorials/datei' ohne Endung).
  */
 return [
     'tracks' => [

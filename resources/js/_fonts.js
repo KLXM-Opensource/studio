@@ -1,7 +1,7 @@
 /*
  * Grundeinstellungen → Schriften (Core\Fonts): Schriftproben.
  * Jede Probe [data-font-sample] lädt ihre Schrift als FontFace von der EIGENEN Domain (data-font-src: Vorschau-Route
- * /admin/system/fonts/preview/{id} bzw. installierte Datei unter /fonts/…) – erst, wenn sie sichtbar wird.
+ * /admin/system/fonts/preview/{id} bzw. installierte Datei unter /assets/fonts/installed/…) – erst, wenn sie sichtbar wird.
  * Schrift per CSSOM (CSP: keine Inline-Styles). Der Vorschautext [data-font-text] gilt für alle Proben.
  */
 const d = document;

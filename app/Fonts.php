@@ -12,7 +12,7 @@ namespace Core;
  * Besucher haben nie Kontakt zu Google, Fontsource oder jsDelivr. Auch die Vorschau in der Verwaltung kommt von der
  * eigenen Domain (/admin/fonts/preview/{id}.woff2, zwischengespeichert unter storage/cache/fonts).
  *
- * Installation (für alle Websites der Installation): public/assets/fonts/installed/{id}/ (früher public/fonts/{id}/ – Rückfall, Core\PublicPaths)
+ * Installation (für alle Websites der Installation): public/assets/fonts/installed/{id}/ (Core\PublicPaths)
  *   *.woff2       nur geprüfte Dateien (woff2-Signatur „wOF2“, Größenlimit)
  *   font.css      @font-face je Schnitt/Zeichensatz (font-display: swap, unicode-range)
  *   LICENSE.txt   Lizenztext des Pakets (OFL-1.1, Apache-2.0 oder UFL-1.0 – andere Lizenzen werden abgelehnt)
@@ -65,13 +65,13 @@ final class Fonts
 
     // ------------------------------------------------------------------ Ablage
 
-    /** public/assets/fonts/installed (Rückfall public/fonts, solange nicht umgestellt – Core\PublicPaths) */
+    /** public/assets/fonts/installed (Core\PublicPaths) */
     public static function dir(string $sub = ''): string
     {
         return PublicPaths::dir(PublicPaths::FONTS) . ($sub !== '' ? '/' . $sub : '');
     }
 
-    /** /assets/fonts/installed/… (Rückfall /fonts/…) */
+    /** /assets/fonts/installed/… */
     public static function url(string $path): string
     {
         return base_path() . '/' . PublicPaths::relative(PublicPaths::FONTS) . '/' . ltrim($path, '/');

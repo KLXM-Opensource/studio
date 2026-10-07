@@ -38,11 +38,6 @@ deploy/targets/*.env
 /tools/trailer/.work/
 # Installierte Schriften (Core\Fonts, Grundeinstellungen → Schriften) – Laufzeitdaten wie public/media
 /public/assets/fonts/installed
-# Alte Orte vor /assets/ (Core\PublicPaths, bin/console assets:migrate) – nie wieder versionieren
-/public/fonts/
-/public/kits/
-/public/themes/
-/public/extensions/
 /tools/tutorials/__pycache__/
 # Chatterbox-TTS (Kandidat, nur Entwicklungswerkzeug): Python-venv, Modelle im Hugging-Face-Cache
 /tools/tutorials/.venv-chatterbox/

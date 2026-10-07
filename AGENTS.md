@@ -27,7 +27,7 @@ Entwicklerhandbuch (`/admin/hilfe/technik`).
 
 ## Begriffe und Sprache
 
-- Für Nutzer heißt es **„Kit“** (nicht „Theme“; technisch bleiben `Theme`-Klassen und `themes/` als Rückfall).
+- Für Nutzer heißt es **„Kit“** (nicht „Theme“; Ordner `kits/`; technisch bleiben Namen wie `Core\Theme`, `theme.php`, Konfiguration `theme`).
 - **„KI“** bzw. **„AI“** immer in Großbuchstaben; die KI heißt „KLXM AI“.
 - Verwaltung und Handbuch in der **Sie-Form**, Kommentare im Code auf Deutsch, Texte der Verwaltung über `__()` (Website: `lt()`).
 - Neue Texte der Verwaltung in `lang/en.php` übersetzen – `php bin/console i18n:missing en` muss 0 melden.

@@ -804,33 +804,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   wird beim nächsten Aufruf/`migrate` einmalig angewendet). Alte Anfragen mit der Gruppe zeigen weiter eine Tabelle mit den
   alten Beschriftungen (`Inbox::open` liest die frühere Definition aus `field_updates`). `form.js` prüft auch Textfelder.
 
-### public/: Kits, Erweiterungen und Schriften unter /assets/ – Seitenadressen /kits, /themes, /extensions, /fonts frei
-- Jeder Ordner ganz oben in `public/` sperrte die gleichnamige Seitenadresse (Apache/nginx: 301 → 403). Code- und
-  Design-Dateien liegen jetzt unter `/assets/`: Kits `public/assets/kits/{kit}/` (vorher `public/kits/`, `public/themes/`),
-  Erweiterungen `public/assets/ext/{name}/` (vorher `public/extensions/`), installierte Schriften
-  `public/assets/fonts/installed/` (vorher `public/fonts/`; eigener Unterordner neben der Kern-Schrift Lato in
-  `public/assets/fonts/`). Uploads (`media/`, `pools/`, `sites/`) bleiben unverändert.
-- Zentrale Pfad-API `Core\PublicPaths` (Bereiche, Rückfall, gesperrte Adressen, Umstellung); `Kit::publicDir()/url()`,
+### public/: Kits, Erweiterungen und Schriften unter /assets/
+- Jeder Ordner ganz oben in `public/` sperrt die gleichnamige Seitenadresse (Apache/nginx: 301 → 403). Code- und
+  Design-Dateien liegen deshalb unter `/assets/`: Kits `public/assets/kits/{kit}/`, Erweiterungen `public/assets/ext/{name}/`,
+  installierte Schriften `public/assets/fonts/installed/` (eigener Unterordner neben der Kern-Schrift Lato in
+  `public/assets/fonts/`). Uploads (`media/`, `pools/`, `sites/`) liegen ganz oben.
+- Zentrale Pfad-API `Core\PublicPaths` (Bereiche, gesperrte Adressen); `Kit::publicDir()/url()`,
   `Extension::asset()` + neu `publicDir()`, `Fonts::dir()/url()`, `extensions:publish`, `kit:create`, `tools/build.mjs`
   und `tools/licenses.mjs` nutzen sie. Gebaute Dateien liegen versioniert unter `public/assets/kits`, `public/assets/ext`.
-- **Rückfall:** Liegt etwas nur am alten Ort (Code ausgerollt, Server noch nicht umgestellt), zeigen die Adressen dorthin;
-  `health` meldet die alten Ordner als Hinweis.
-- **Umstellung:** `php bin/console assets:migrate [--dry-run] [--no-backup]` – Sicherung
-  `storage/backups/public-assets-<zeit>.tar.gz`, verschieben (bei doppelten Kits gewinnt die neueste Fassung, die andere
-  nach `storage/backups/public-assets-alt-<zeit>/`), Übergangs-Links entfernen bzw. Links nach außen neu anlegen,
-  Seiten-Cache leeren, fest eingetragene alte Adressen in Kits/Erweiterungen melden; idempotent. `deploy/deploy.sh`
-  verlinkt `shared/public/fonts` jetzt als `public/assets/fonts/installed`.
-- Alte Adressen `/kits/…`, `/themes/…`, `/extensions/…`, `/fonts/…` leitet `public/index.php` mit 301 auf `/assets/…` um,
-  sobald die Datei dort liegt – eine Seite `/kits` bleibt erreichbar. nginx-Beispiel: Cache-Regel nur noch `^/assets/`,
-  alte Präfixe an PHP.
+  `deploy/deploy.sh` verlinkt `shared/public/fonts` als `public/assets/fonts/installed`. nginx-Beispiel: Cache-Regel nur `^/assets/`.
 - Gesperrte Seitenadressen ganz oben: eine Liste (`PublicPaths::RESERVED_SLUGS`: admin, api, anfrage, assets, media, pools,
-  sites, sitemap-xml, robots-txt, home, index-php) plus jeder Ordner, der noch in `public/` liegt – genutzt von Seiten,
-  KI-Seitengenerator, SEO-Vorschlag, API/MCP und Routen der Datentabellen. Kit-Tutorials mit `'video' => '/kits/…'`
-  zeigen automatisch auf den neuen Ort.
+  sites, sitemap-xml, robots-txt, home, index-php) plus jeder weitere Ordner bzw. jede Datei in `public/` – genutzt von Seiten,
+  KI-Seitengenerator, SEO-Vorschlag, API/MCP und Routen der Datentabellen.
 
 ### Seiten: Systemadressen verständlich gesperrt
-- `/kits`, `/themes`, `/media`, `/pools`, `/assets` … sind Ordner in `public/` – der Webserver liefert dort den Ordner (301 → 403)
-  statt der Seite. Gesperrt nur noch ganz oben und in der Hauptsprache (`/en/kits`, `/leistungen/kits` sind frei); die Meldung
+- `/media`, `/pools`, `/assets` … sind Ordner in `public/` – der Webserver liefert dort den Ordner (301 → 403)
+  statt der Seite. Gesperrt nur noch ganz oben und in der Hauptsprache (`/en/media`, `/leistungen/media` sind frei); die Meldung
   nennt den Grund. Bestehende Seiten mit so einer Adresse speichern weiter, das Formular warnt aber, dass sie nicht erreichbar sind.
 
 ### Seiten-Editor: „Felder bearbeiten“ bei Formular-Blöcken; Hilfetext und Dateihinweis getrennt
@@ -1128,18 +1117,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Content-Sync: Export mit Pool-Medien brach ab (`Media::dir()` statt `Media::path()`); Pool-Verweise gehen als Verweis mit
   (live `MediaPools::mirror`, Kopie nur ohne Pool).
 
-### Kits unter `kits/` statt `themes/` – zentrale Pfad-API `Core\Kit`
-- Ordner `themes/` → `kits/`, `public/themes/` → `public/kits/`. Alle Pfade über `Core\Kit`: `Kit::dir($name)`,
+### Kits unter `kits/` – zentrale Pfad-API `Core\Kit`
+- Kits liegen unter `kits/{name}/`. Alle Pfade über `Core\Kit`: `Kit::dir($name)`,
   `Kit::publicDir($name)`, `Kit::url($name, $pfad)`, `Kit::all()`, `Kit::definitionFile()`, `Kit::fragment($name)` –
   genutzt von `Core\Theme`, Netzwerk-Kennzahlen, Suchseite, Kit-Layouts, `bin/console` (`kit:list` zeigt den Ordner,
   `kit:create` legt unter `kits/` an), `tools/build.mjs`, `tools/licenses.mjs`, Service Worker, reservierten Adressen.
-- **Rückfall:** Kits unter `themes/{name}` und Assets unter `public/themes/{name}` (ältere Installationen, Kits von Dritten)
-  werden weiter erkannt; alte Adressen `/themes/…` leitet `public/index.php` mit 301 auf `/kits/…` um (ohne App-Start).
-  nginx: `location ^~ /themes/ { try_files $uri /index.php$is_args$args; }` (Installationsanleitung).
 - **Aliase:** `kit.php` statt `theme.php`, Konfiguration `'kit'`/`'kits'` neben `'theme'`/`'themes'`, `app()->kit`.
   Unverändert aus Kompatibilitätsgründen: `theme.php`, `Core\Theme`, `app()->theme`, `sys.theme`, API-/MCP-Feld `theme`, `theme:*`.
-- Umstellung bestehender Server ohne Releases: `deploy/migrate-kits.sh <ziel>` (Sicherung, Verschieben, Übergangs-Links,
-  `cache:clear --all`, `health`); mit `deploy/deploy.sh` ist nichts zu tun.
 
 ### Kern-Fragmente statt Kopien in jedem Kit (`Core\Fragments`, `app/Views/fragments/`)
 - Kits bleiben eigenständige Projekte ohne Vererbung; zentrale Bausteine liegen einmal im Kern (wie REDAXO-Fragmente).

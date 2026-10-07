@@ -8,24 +8,19 @@ namespace Core;
  *
  *   kits/{name}/                 Kit (theme.php bzw. kit.php, Templates, Blöcke, Fragmente, Startinhalte, lang/)
  *   public/assets/kits/{name}/   öffentliche Assets (gebaut von tools/build.mjs aus kits/{name}/assets) – Ablage: Core\PublicPaths
- *   themes/{name}/               Rückfall: ältere Installationen und Kits von Dritten (vor der Umbenennung in kits/)
- *   public/kits/{name}/, public/themes/{name}/
- *                                Rückfall für Assets, solange der Server nicht umgestellt ist (bin/console assets:migrate);
- *                                alte Adressen /kits/… und /themes/… leitet public/index.php mit 301 auf /assets/kits/… um,
- *                                sobald die Datei dort liegt
  *
  * Technische Namen bleiben aus Kompatibilitätsgründen: Klasse Core\Theme, Datei theme.php (kit.php geht ebenso),
  * Konfiguration 'theme' (Alias 'kit'), app()->theme (Alias app()->kit), Einstellung sys.theme.
  *
- *   Kit::dir('praxis')            → /…/kits/praxis (oder /…/themes/praxis) · Kit::dir() → /…/kits
- *   Kit::publicDir('praxis')      → /…/public/assets/kits/praxis (oder public/kits|themes/praxis, falls nur dort vorhanden)
+ *   Kit::dir('praxis')            → /…/kits/praxis · Kit::dir() → /…/kits
+ *   Kit::publicDir('praxis')      → /…/public/assets/kits/praxis
  *   Kit::url('praxis', 'css/x')   → /assets/kits/praxis/css/x (ohne Versions-Parameter; Theme::asset() hängt ?v= an)
  *   Kit::fragment('brand')        → Datei des Fragments nach der Suchreihenfolge (Core\Fragments)
  */
 final class Kit
 {
-    /** Ordner der Kits, in dieser Reihenfolge durchsucht (themes = Rückfall für ältere Installationen) */
-    public const ROOTS = ['kits', 'themes'];
+    /** Ordner der Kits (relativ zur Installation) */
+    public const ROOTS = ['kits'];
     /** Dateiname der Kit-Definition (kit.php als gleichwertige Alternative) */
     public const DEFINITIONS = ['theme.php', 'kit.php'];
 
@@ -36,7 +31,7 @@ final class Kit
     }
 
     /**
-     * Ordner eines Kits (erster Treffer in kits/, dann themes/) – ohne Namen der Hauptordner kits/.
+     * Ordner eines Kits unter kits/ – ohne Namen der Hauptordner kits/.
      * Gibt es das Kit nicht, der Pfad unter kits/ (für Neuanlage und Fehlermeldungen).
      */
     public static function dir(string $name = ''): string
@@ -65,7 +60,7 @@ final class Kit
         return null;
     }
 
-    /** Alle installierten Kits: [name => ordner] (kits/ vor themes/, gleiche Namen nur einmal), alphabetisch */
+    /** Alle installierten Kits: [name => ordner] alphabetisch */
     public static function all(): array
     {
         $out = [];
@@ -79,20 +74,11 @@ final class Kit
         return $out;
     }
 
-    /** Liegt das Kit noch im alten Ordner themes/? (für Hinweise, bin/console kit:list) */
-    public static function isLegacy(string $name): bool
-    {
-        return str_starts_with(self::dir($name), ROOT . '/themes/');
-    }
-
-    /**
-     * Öffentlicher Asset-Ordner eines Kits: public/assets/kits/{name}, Rückfall public/kits/{name} bzw. public/themes/{name}
-     * (nur wenn allein dort vorhanden – Server noch nicht umgestellt). Ohne Namen der Hauptordner public/assets/kits.
-     */
+    /** Öffentlicher Asset-Ordner eines Kits: public/assets/kits/{name}; ohne Namen der Hauptordner public/assets/kits */
     public static function publicDir(string $name = ''): string
     {
         $name = self::clean($name);
-        return $name === '' ? PublicPaths::root() . '/' . PublicPaths::AREAS[PublicPaths::KITS][0] : PublicPaths::dir(PublicPaths::KITS, $name);
+        return PublicPaths::dir(PublicPaths::KITS, $name);
     }
 
     /** Öffentliche Adresse (ohne Versions-Parameter) einer Datei des Kits, z. B. für Schriften, die exakt der URL im CSS entsprechen müssen */

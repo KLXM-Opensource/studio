@@ -153,11 +153,10 @@ final class Design
         return "/* KLXM Studio Consent-Kit – Basis + Variablen dieser Website */\n" . self::varsCss($values) . $base;
     }
 
-    /** Gebautes Basis-CSS: public/assets/ext/consent_kit/css/consent.css (Rückfall public/extensions/…, Core\PublicPaths) */
+    /** Gebautes Basis-CSS: public/assets/ext/consent_kit/css/consent.css (Core\PublicPaths) */
     private static function builtCss(): string
     {
-        $dir = class_exists(\Core\PublicPaths::class) ? \Core\PublicPaths::dir('ext', 'consent_kit') : ROOT . '/public/extensions/consent_kit';
-        return $dir . '/css/consent.css';
+        return \Core\PublicPaths::dir('ext', 'consent_kit') . '/css/consent.css';
     }
 
     public static function version(): string

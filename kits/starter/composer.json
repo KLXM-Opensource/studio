@@ -1,5 +1,5 @@
 {
-    "_comment": "Stub – Paket-Installation von Kits ist GEPLANT, aber noch nicht umgesetzt: Der Core erkennt Kits unter kits/{name}/ (Rückfall themes/{name}/, Core\\Kit::all). Ein Composer-Installer sollte Kits nach kits/{name}/ legen. Erweiterungen gehen schon per Composer (type klxm-studio-extension). Bis dahin: Ordner nach kits/{name}/ kopieren.",
+    "_comment": "Stub – Paket-Installation von Kits ist GEPLANT, aber noch nicht umgesetzt: Der Core erkennt Kits unter kits/{name}/ (Core\\Kit::all). Ein Composer-Installer sollte Kits nach kits/{name}/ legen. Erweiterungen gehen schon per Composer (type klxm-studio-extension). Bis dahin: Ordner nach kits/{name}/ kopieren.",
     "name": "klxm-studio/kit-starter",
     "description": "Start-Kit für KLXM Studio – das kleinste vollständige Kit als Ausgangspunkt für eigene Kits",
     "type": "klxm-studio-kit",

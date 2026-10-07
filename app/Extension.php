@@ -473,7 +473,7 @@ final class Extension
         return PublicPaths::url(PublicPaths::EXT, $this->name, $path) . '?v=' . $v;
     }
 
-    /** Öffentlicher Ordner der Erweiterung: public/assets/ext/{name} (Rückfall public/extensions/{name}, siehe Core\PublicPaths) */
+    /** Öffentlicher Ordner der Erweiterung: public/assets/ext/{name} (Core\PublicPaths) */
     public function publicDir(): string
     {
         return PublicPaths::dir(PublicPaths::EXT, $this->name);

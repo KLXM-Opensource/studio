@@ -5,15 +5,14 @@
  *   pnpm watch         Assets bei Änderungen neu bauen
  *
  * Quellen:  resources/{css,js}          → public/assets/{css,js}          (Core: Admin + Editor)
- *           kits/{name}/assets/…        → public/assets/kits/{name}/…     (je Kit; Rückfall themes/{name}/assets)
+ *           kits/{name}/assets/…        → public/assets/kits/{name}/…     (je Kit)
  *           extensions/{name}/assets/…  → public/assets/ext/{name}/…      (je Erweiterung)
  *           Alles liegt unter public/assets/ – ganz oben in public/ würde jeder Ordner die gleichnamige Seitenadresse
- *           sperren (Core\PublicPaths; alte Orte public/kits, public/extensions: bin/console assets:migrate)
+ *           sperren (Core\PublicPaths)
  * Vendoren: node_modules                → public/assets/vendor              (Core: Editor.js, PDF.js, MapLibre)
  * Symbole:  resources/icons/icons.json    → public/assets/icons/{core,thema}.svg, icons.svg, icons-map.json, catalog.json (Phosphor duotone, tools/icons.mjs)
  * Kits:     kits/{name}/build.mjs       → eigene Vendoren des Kits (z. B. Schriften), Pakete aus
  *           kits/{name}/package.json    (wird bei Bedarf automatisch installiert)
- *           Ältere Kits unter themes/{name}/ werden ebenso gebaut (Ausgabe immer nach public/assets/kits/{name})
  *
  * Auf dem Server wird weder Node noch pnpm benötigt – die gebauten Dateien liegen in /public.
  */
@@ -117,11 +116,11 @@ async function vendors() {
 
 
 /**
- * Kits (Core\Kit): kits/{name} vor dem alten Ordner themes/{name}; gleiche Namen nur einmal. [name, ordner]
+ * Kits (Core\Kit): kits/{name} mit theme.php bzw. kit.php. [name, ordner]
  */
 function kits() {
   const out = new Map();
-  for (const root of ['kits', 'themes']) {
+  for (const root of ['kits']) {
     const base = path.join(ROOT, root);
     if (!fs.existsSync(base)) continue;
     for (const name of fs.readdirSync(base).sort()) {

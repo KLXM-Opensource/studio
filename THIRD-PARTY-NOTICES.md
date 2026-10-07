@@ -117,16 +117,16 @@ files or name tables:
 | Kit | Font | Package (version) | Copyright | License text |
 |---|---|---|---|---|
 | Admin (core) | Lato | `@fontsource/lato` 5.3.0 | © 2010-2011 tyPoland Łukasz Dziedzic, RFN “Lato” | `public/assets/fonts/OFL-Lato.txt` |
-| praxis | Hanken Grotesk | `@fontsource/hanken-grotesk` 5.3.0 | © 2021 The Hanken Grotesk Project Authors | `public/themes/praxis/fonts/OFL.txt` |
+| praxis | Hanken Grotesk | `@fontsource/hanken-grotesk` 5.3.0 | © 2021 The Hanken Grotesk Project Authors | `public/assets/kits/praxis/fonts/OFL.txt` |
 | praxis | Hanken Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/hanken-grotesk` 0.4.3 | as above | `themes/praxis/fonts/OFL.txt` |
-| basis | Inter | `@fontsource/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/themes/basis/fonts/OFL-inter.txt` |
+| basis | Inter | `@fontsource/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/assets/kits/basis/fonts/OFL-inter.txt` |
 | basis | Manrope | `@fontsource/manrope` 5.3.0 | © 2019 The Manrope Project Authors | `…/OFL-manrope.txt` |
 | basis | IBM Plex Sans | `@fontsource/ibm-plex-sans` 5.3.0 | © 2019 IBM Corp. | `…/OFL-plex.txt` |
 | basis | Source Serif 4 | `@fontsource/source-serif-4` 5.3.0 | © 2014-2021 Adobe Systems Incorporated, RFN “Source” | `…/OFL-source-serif.txt` |
 | basis | Lora | `@fontsource/lora` 5.3.0 | © 2011 The Lora Project Authors, RFN “Lora” | `…/OFL-lora.txt` |
 | basis | Fraunces | `@fontsource/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `…/OFL-fraunces.txt` |
 | basis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `themes/basis/fonts/OFL.txt` |
-| editorial | Fraunces (variable) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/themes/editorial/fonts/OFL-fraunces.txt` |
+| editorial | Fraunces (variable) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/assets/kits/editorial/fonts/OFL-fraunces.txt` |
 | editorial | IBM Plex Sans (variable) | `@fontsource-variable/ibm-plex-sans` 5.3.0 | © 2019 IBM Corp. | `…/OFL-plex-sans.txt` |
 | editorial | Inter (variable) | `@fontsource-variable/inter` 5.3.0 | © 2016 The Inter Project Authors | `…/OFL-inter.txt` |
 | editorial | JetBrains Mono (variable) | `@fontsource-variable/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `…/OFL-jetbrains.txt` |
@@ -142,7 +142,7 @@ files or name tables:
 | editorial | IBM Plex Mono | `@fontsource/ibm-plex-mono` 5.3.0 | © 2017 IBM Corp. | `…/OFL-plex-mono.txt` |
 | editorial | Instrument Serif | `@fontsource/instrument-serif` 5.3.0 | © 2022 The Instrument Serif Project Authors | `…/OFL-instrument.txt` |
 | editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `themes/editorial/fonts/OFL.txt` |
-| fluid | Inter (variable) | `@fontsource-variable/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/themes/fluid/fonts/OFL-inter.txt` |
+| fluid | Inter (variable) | `@fontsource-variable/inter` 5.3.0 | © 2016 The Inter Project Authors | `public/assets/kits/fluid/fonts/OFL-inter.txt` |
 | fluid | Instrument Sans (variable) | `@fontsource-variable/instrument-sans` 5.3.0 | © 2022 The Instrument Sans Project Authors | `…/OFL-instrument-sans.txt` |
 | fluid | Bricolage Grotesque (variable) | `@fontsource-variable/bricolage-grotesque` 5.3.0 | © 2022 The Bricolage Grotesque Project Authors | `…/OFL-bricolage.txt` |
 | fluid | DM Sans (variable) | `@fontsource-variable/dm-sans` 5.3.0 | © 2014 The DM Sans Project Authors | `…/OFL-dm-sans.txt` |
@@ -152,17 +152,17 @@ files or name tables:
 | fluid | Instrument Serif | `@fontsource/instrument-serif` 5.3.0 | © 2022 The Instrument Serif Project Authors | `…/OFL-instrument-serif.txt` |
 | fluid | JetBrains Mono (variable) | `@fontsource-variable/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `…/OFL-jetbrains-mono.txt` |
 | fluid | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `themes/fluid/fonts/OFL.txt` |
-| nature | Fraunces (variable: wght + SOFT, italic wght) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/themes/nature/fonts/OFL-fraunces.txt` |
+| nature | Fraunces (variable: wght + SOFT, italic wght) | `@fontsource-variable/fraunces` 5.3.0 | © 2020 The Fraunces Project Authors | `public/assets/kits/nature/fonts/OFL-fraunces.txt` |
 | nature | Nunito Sans (variable) | `@fontsource-variable/nunito-sans` 5.3.0 | © 2016 The Nunito Sans Project Authors | `…/OFL-nunito-sans.txt` |
 | nature | Young Serif | `@fontsource/young-serif` 5.3.0 | © 2023 The Young Serif Project Authors | `…/OFL-young-serif.txt` |
 | nature | Source Sans 3 (variable) | `@fontsource-variable/source-sans-3` 5.3.0 | © 2023 Adobe, RFN “Source” | `…/OFL-source-sans-3.txt` |
 | nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2020 The Fraunces Project Authors | `themes/nature/fonts/OFL.txt` |
-| modern | Plus Jakarta Sans (variable) | `@fontsource-variable/plus-jakarta-sans` 5.3.0 | © 2020 The Plus Jakarta Sans Project Authors | `public/themes/modern/fonts/OFL-jakarta.txt` |
+| modern | Plus Jakarta Sans (variable) | `@fontsource-variable/plus-jakarta-sans` 5.3.0 | © 2020 The Plus Jakarta Sans Project Authors | `public/assets/kits/modern/fonts/OFL-jakarta.txt` |
 | modern | Space Grotesk (variable) | `@fontsource-variable/space-grotesk` 5.3.0 | © 2020 The Space Grotesk Project Authors | `…/OFL-space-grotesk.txt` |
 | modern | Inter Tight (variable) | `@fontsource-variable/inter-tight` 5.3.0 | © 2022 The Inter Project Authors | `…/OFL-inter-tight.txt` |
 | modern | Manrope (variable) | `@fontsource-variable/manrope` 5.3.0 | © 2019 The Manrope Project Authors | `…/OFL-manrope.txt` |
 | modern | Space Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/space-grotesk` 0.4.1 | © 2020 The Space Grotesk Project Authors | `themes/modern/fonts/OFL.txt` |
-| glas | Outfit (variable) | `@fontsource-variable/outfit` 5.3.0 | © 2021 The Outfit Project Authors | `public/themes/glas/fonts/OFL-outfit.txt` |
+| glas | Outfit (variable) | `@fontsource-variable/outfit` 5.3.0 | © 2021 The Outfit Project Authors | `public/assets/kits/glas/fonts/OFL-outfit.txt` |
 | glas | Figtree (variable) | `@fontsource-variable/figtree` 5.3.0 | © 2022 The Figtree Project Authors | `…/OFL-figtree.txt` |
 | glas | Sora (variable) | `@fontsource-variable/sora` 5.3.0 | © 2019 The Sora Project Authors | `…/OFL-sora.txt` |
 | glas | Urbanist (variable) | `@fontsource-variable/urbanist` 5.3.0 | © 2021 The Urbanist Project Authors | `…/OFL-urbanist.txt` |

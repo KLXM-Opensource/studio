@@ -12,7 +12,6 @@ namespace Core;
  *   kits/{name}/blocks/{type}.php  Renderer je Blocktyp
  *   kits/{name}/seed.php           Startinhalte (Seiten + Einstellungen)
  *   public/assets/kits/{name}/     öffentliche Assets (CSS, JS, Bilder) – Ablage: Core\PublicPaths
- *   Rückfall: themes/{name}/ sowie public/kits/{name}/, public/themes/{name}/ (ältere Installationen, Kits von Dritten)
  *
  * Der Core kennt keine praxisspezifischen Inhalte – ein neues Projekt = neues Kit.
  */
@@ -90,7 +89,7 @@ final class Theme
     public static function available(): array
     {
         $out = [];
-        // Label ohne Ausführen der Datei lesen (Kits können gleichnamige Helfer definieren); kits/ vor themes/ (Core\Kit)
+        // Label ohne Ausführen der Datei lesen (Kits können gleichnamige Helfer definieren); Ordner über Core\Kit
         foreach (Kit::all() as $name => $dir) {
             $f = (string) Kit::definitionFile($dir);
             $out[$name] = preg_match("~^    'label'\s*=>\s*'([^']+)'~m", (string) file_get_contents($f), $m) ? $m[1] : $name;

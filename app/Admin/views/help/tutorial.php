@@ -3,7 +3,7 @@
  * Ein Tutorial: Ziel, Voraussetzungen, Link zum Video auf der Produkt-Website, Schritte (= Transkript), Tipps, Handbuch-Links, „Weiter zu …“.
  * HelpController::tutorial – Inhalte aus app/Admin/tutorials.php (Englisch: tutorials.en.php), Core\Tutorials. Keine Inline-Skripte/-Stile (CSP).
  * Kern-Videos liegen auf der Produkt-Website (config 'docs_url') – nur ein Link (neuer Tab), keine Einbettung, keine Anfrage nach außen.
- * Kits können eigene Videos lokal mitbringen ('video' => '/kits/{name}/tutorials/datei') – die werden hier eingebettet.
+ * Kits können eigene Videos lokal mitbringen ('video' => '/assets/kits/{name}/tutorials/datei') – die werden hier eingebettet.
  * @var string $slug  @var array $tut  @var array $track  @var array $tutorials  @var array $tracks  @var ?string $prev  @var ?string $next  @var string $recommended  @var string $docsHost
  */
 $helpTab = 'tutorials';

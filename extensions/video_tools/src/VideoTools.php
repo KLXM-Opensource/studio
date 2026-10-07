@@ -41,8 +41,8 @@ final class VideoTools
     {
         $x = Extensions::active()['video_tools'] ?? null;
         if ($x) return $x->asset($path);
-        // Ablage public/assets/ext/video_tools (Core\PublicPaths); ältere Kerne: /extensions/video_tools
-        return class_exists(\Core\PublicPaths::class) ? \Core\PublicPaths::url('ext', 'video_tools', $path) : base_path() . '/extensions/video_tools/' . $path;
+        // Ablage public/assets/ext/video_tools (Core\PublicPaths)
+        return \Core\PublicPaths::url('ext', 'video_tools', $path);
     }
 
     /** Symbol aus dem eigenen Sprite (Phosphor duotone, MIT) für Symbole, die der Kern nicht mitbringt */

@@ -75,10 +75,9 @@ final class Pages
     /** Slug auf gleicher Ebene schon vergeben? */
     public static function slugTaken(string $slug, ?int $parentId, ?int $exceptId = null, ?string $lang = null): bool
     {
-        // Oberste Ebene: Namen von Ordnern/Dateien in public/ (assets, media, pools, sites – vor assets:migrate auch kits, themes,
-        // extensions, fonts) liefert der Webserver selbst aus – eine Seite dort wäre nie erreichbar (Apache/nginx antworten mit
-        // 301/403). Solche Adressen gelten als vergeben. Ausnahme: eine bestehende Seite behält ihre Adresse.
-        // Siehe Core\PublicPaths und Entwicklerhandbuch → Staging & Deploy → Umstellung public/ → /assets/
+        // Oberste Ebene: Namen von Ordnern/Dateien in public/ (assets, media, pools, sites) liefert der Webserver selbst aus –
+        // eine Seite dort wäre nie erreichbar (Apache/nginx antworten mit 301/403). Solche Adressen gelten als vergeben.
+        // Ausnahme: eine bestehende Seite behält ihre Adresse. Siehe Core\PublicPaths
         if (!$parentId && $slug !== '' && file_exists(ROOT . '/public/' . $slug)
             && !($exceptId && ($own = self::find($exceptId)) && $own['slug'] === $slug && !$own['parent_id'])) return true;
         $sql = 'SELECT id FROM pages WHERE slug = ? AND ' . ($parentId ? 'parent_id = ?' : 'parent_id IS NULL') . ' AND ' . Lang::sql();
