@@ -112,7 +112,7 @@
   </ul>
 
   <h3>PDFs und Downloads</h3>
-  <p>PDFs öffnen sich auf der Website in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch.</p>
+  <p>PDFs öffnen sich auf der Website in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
 
   <?php $__sizes = $vars['image_sizes'] ?? null; if ($__sizes): ?>
   <table class="doc-table">

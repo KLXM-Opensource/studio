@@ -354,7 +354,7 @@ function initMedia(scope = d) {
       input.value = m.id;
       // Videos: Poster/Vorschaubild, sonst (mit ffmpeg) Platzhalter, der das Vorschaubild nachlädt (Core\VideoThumbs)
       prev.innerHTML = m.thumb ? `<img src="${esc(m.thumb)}" alt="" width="120"><span>${esc(m.alt || m.display)}</span>`
-        : m.kind === 'video' && m.thumb_gen ? window.CMSMedia.vthumbHtml(m, 'media-vthumb') + `<span>${esc(m.display)} · ${esc(m.size)}</span>`
+        : (m.kind === 'video' || m.kind === 'pdf') && m.thumb_gen ? window.CMSMedia.vthumbHtml(m, 'media-vthumb') + `<span>${esc(m.display)} · ${esc(m.size)}</span>`
         : `<span class="media-file">${esc(m.display)} · ${esc(m.size)}</span>`;
       window.CMSMedia.lazyThumbs(prev);
       input.dispatchEvent(new Event('input', { bubbles: true }));

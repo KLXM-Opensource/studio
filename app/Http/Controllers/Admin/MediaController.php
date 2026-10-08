@@ -165,7 +165,7 @@ final class MediaController extends AdminController
         $this->auth($r, 'media.upload');
         if ($e = $this->scope($r, false)) return $e;
         $m = ctype_digit($id) ? Media::find((int) $id) : null;
-        if (!$m || !\Core\VideoThumbs::isVideo($m)) throw new HttpException(404);
+        if (!$m || !\Core\VideoThumbs::handles($m)) throw new HttpException(404);
         $j = Media::toJson($m);
         if (!$j['thumb'] && \Core\VideoThumbs::pending($m)) {
             @set_time_limit(30);

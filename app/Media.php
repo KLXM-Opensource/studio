@@ -121,7 +121,7 @@ final class Media
     /** Automatisches Vorschaubild eines Videos als Bild-Datensatz (null = noch keins) */
     public static function autoPoster(?array $m): ?array
     {
-        $p = $m && VideoThumbs::isVideo($m) ? VideoThumbs::data($m) : null;
+        $p = $m && VideoThumbs::handles($m) ? VideoThumbs::data($m) : null;
         if (!$p) return null;
         $last = end($p['sizes']);
         return [
@@ -282,7 +282,7 @@ final class Media
         }
         PageCache::clear();
         Extensions::emit('media.imported', self::find($id));
-        VideoThumbs::queue(self::find($id));   // Video: Vorschaubild nach der Antwort (nur mit ffmpeg)
+        VideoThumbs::queue(self::find($id));   // Video/PDF: Vorschaubild nach der Antwort (nur mit ffmpeg bzw. pdftoppm)
         return [self::find($id), null];
     }
 
@@ -320,7 +320,7 @@ final class Media
         self::forget($id);
         PageCache::clear();
         Extensions::emit('media.replaced', self::find($id), $old);
-        VideoThumbs::queue(self::find($id));   // neues Video → neues Vorschaubild
+        VideoThumbs::queue(self::find($id));   // neues Video/PDF → neues Vorschaubild
         return [self::find($id), null];
     }
 
@@ -1479,14 +1479,15 @@ final class Media
     public static function toJson(array $m): array
     {
         $isImg = str_starts_with($m['mime'], 'image/');
-        // Video: gewähltes Poster > automatisches Vorschaubild > (mit ffmpeg) Adresse zum Erzeugen, sonst Platzhalter
-        $poster = !$isImg && VideoThumbs::isVideo($m) ? self::posterFor($m) : null;
+        // Video: gewähltes Poster > automatisches Vorschaubild > (mit ffmpeg) Adresse zum Erzeugen, sonst Platzhalter;
+        // PDF: 1. Seite als Vorschaubild (mit pdftoppm), ebenso lazy erzeugt
+        $poster = $isImg ? null : (VideoThumbs::isVideo($m) ? self::posterFor($m) : (VideoThumbs::isPdf($m) ? self::autoPoster($m) : null));
         $pic = $isImg ? $m : $poster;
         return [
             'id' => (int) $m['id'], 'url' => self::url($m), 'thumb' => $pic ? self::url($pic, 480) : null,
             'large' => $pic ? self::url($pic, 1200) : null,
             'poster' => $poster ? (!empty($poster['_auto_poster']) ? 'auto' : 'chosen') : null,
-            'thumb_gen' => !$poster && VideoThumbs::isVideo($m) && VideoThumbs::pending($m)
+            'thumb_gen' => !$poster && VideoThumbs::pending($m)
                 ? url('/admin/api/media/' . (int) $m['id'] . '/thumb') . (self::$pool !== null ? '?pool=' . rawurlencode(self::$pool) : '') : null,
             'alt' => (string) $m['alt'], 'decorative' => (bool) ($m['decorative'] ?? false),
             'title' => (string) ($m['title'] ?? ''), 'display' => self::displayName($m),

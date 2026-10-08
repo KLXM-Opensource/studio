@@ -498,7 +498,7 @@ function lazyThumbs(scope) {
 }
 // Kennzeichen „Video“ auf der Kachel (Standbild allein sieht wie ein Foto aus)
 const VBADGE = '<span class="fx-vbadge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg></span>';
-const vthumbHtml = (m, cls = '') => `<span class="fx-vthumb${cls ? ' ' + cls : ''}" data-vthumb="${esc(m.thumb_gen)}">${SVG.video}</span>`;
+const vthumbHtml = (m, cls = '') => `<span class="fx-vthumb${m.kind === 'pdf' ? ' fx-vthumb--doc' : ''}${cls ? ' ' + cls : ''}" data-vthumb="${esc(m.thumb_gen)}">${m.kind === 'pdf' ? SVG.pdf : SVG.video}</span>`;
 
 // ============================================================ Finder
 // Symbole aus dem Sprite (Phosphor duotone, Core\Icons)
@@ -880,7 +880,7 @@ class Finder {
   }
   thumb(m) {
     if (m.thumb) return `<img src="${esc(m.thumb)}" alt="" loading="lazy" draggable="false"${m.svg ? ' class="is-svg"' : ''} style="object-position:${m.focus.x}% ${m.focus.y}%">`;
-    if (m.kind === 'video' && m.thumb_gen) return vthumbHtml(m);   // Vorschaubild wird beim Sichtbarwerden erzeugt (ffmpeg)
+    if ((m.kind === 'video' || m.kind === 'pdf') && m.thumb_gen) return vthumbHtml(m);   // Vorschaubild wird beim Sichtbarwerden erzeugt (ffmpeg/pdftoppm)
     return `<span class="fx-doc fx-doc--${m.kind}"><b>${esc(m.type)}</b>${m.pages ? `<small>${m.pages} S.</small>` : ''}</span>`;
   }
   render() {
@@ -899,7 +899,7 @@ class Finder {
       const ext = hook('badge', m, this).join('');   // Erweiterungen: z. B. Poster, Fortschrittsring
       return this.view !== 'list'   // Symbole und Mauerwerk: Kachel; Liste: Zeile
         ? `<div class="fx-item" role="option" id="fx-i-${m.id}" data-id="${m.id}" aria-selected="false" draggable="true">
-            <span class="fx-thumb">${this.thumb(m)}${m.kind === 'video' ? VBADGE : ''}${warn}${ext}</span>
+            <span class="fx-thumb">${this.thumb(m)}${m.kind === 'video' ? VBADGE : m.kind === 'pdf' && (m.thumb || m.thumb_gen) ? `<span class="fx-pbadge" aria-hidden="true">PDF${m.pages ? ` · ${m.pages} S.` : ''}</span>` : ''}${warn}${ext}</span>
             <span class="fx-name"><span>${esc(m.display)}</span></span>
             <span class="fx-dots">${dots}</span></div>`
         : `<div class="fx-row" role="option" id="fx-i-${m.id}" data-id="${m.id}" aria-selected="false" draggable="true">

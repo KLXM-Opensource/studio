@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Core;
 
 /**
- * Automatische Vorschaubilder für Videos der Mediathek (nur mit ffmpeg auf dem Server, sonst wirkungslos).
+ * Automatische Vorschaubilder für Videos (mit ffmpeg) und PDF-Dokumente (1. Seite, mit pdftoppm aus poppler-utils) der
+ * Mediathek – ohne das jeweilige Programm wirkungslos. PDF: abschaltbar mit media.pdf_thumbs = false; Ablage, Sperren,
+ * Grenzen und Ablauf wie bei Videos (variants_json['poster'], Dateien {zufall}-p-{breite}.webp).
  *
  *  - Standbild bei ~10 % der Laufzeit (mindestens 1 s, höchstens 10 s; ffprobe liefert die Dauer), ffmpeg-Filter
  *    „thumbnail“ wählt unter den folgenden 24 Bildern das typischste (überspringt Schwarzblenden/Überblendungen).
@@ -36,6 +38,24 @@ final class VideoThumbs
         return $m !== null && str_starts_with((string) ($m['mime'] ?? ''), 'video/');
     }
 
+    public static function isPdf(?array $m): bool
+    {
+        return $m !== null && ($m['mime'] ?? '') === 'application/pdf';
+    }
+
+    /** Datei, für die es automatische Vorschaubilder gibt (Video oder PDF) */
+    public static function handles(?array $m): bool
+    {
+        return self::isVideo($m) || self::isPdf($m);
+    }
+
+    /** Für diese Datei eingeschaltet und das nötige Programm vorhanden? */
+    public static function enabledFor(array $m): bool
+    {
+        if (self::isPdf($m)) return app()->config->get('media.pdf_thumbs', true) !== false && Ffmpeg::pdfAvailable();
+        return self::isVideo($m) && self::enabled();
+    }
+
     /** Vorhandenes automatisches Vorschaubild: ['base', 'sizes' => [['w', 'f']], 'W', 'H', 'at'] oder null */
     public static function data(array $m): ?array
     {
@@ -55,7 +75,7 @@ final class VideoThumbs
     /** Fehlt ein Vorschaubild, das sich jetzt erzeugen ließe? */
     public static function pending(array $m): bool
     {
-        return self::isVideo($m) && !self::data($m) && !self::failedRecently($m) && self::enabled();
+        return self::handles($m) && !self::data($m) && !self::failedRecently($m) && self::enabledFor($m);
     }
 
     /** Dateien eines Vorschaubilds relativ zum Medienordner */
@@ -94,7 +114,7 @@ final class VideoThumbs
      */
     public static function generate(array $m, bool $wait = false, bool $force = false): string
     {
-        if (!self::isVideo($m) || !self::enabled()) return 'skip';
+        if (!self::handles($m) || !self::enabledFor($m)) return 'skip';
         [$db, $dir, $rid] = self::target($m);
         $lock = @fopen(self::lockDir() . '/m-' . md5($dir . '|' . $rid) . '.lock', 'c');
         if (!$lock) return 'busy';
@@ -102,14 +122,14 @@ final class VideoThumbs
         try {
             // frisch lesen: evtl. hat eine parallele Anfrage das Bild gerade erzeugt
             $row = $db->fetch('SELECT file, mime, variants_json FROM media WHERE id = ?', [$rid]);
-            if (!$row || $row['file'] !== $m['file'] || !self::isVideo($row)) return 'skip';
+            if (!$row || $row['file'] !== $m['file'] || !self::handles($row)) return 'skip';
             if (!$force && self::data($row)) return 'ok';
             if (!$force && self::failedRecently($row)) return 'failed';
             $file = self::source($dir, (string) $row['file']);
             $slot = $file !== null ? self::slot($wait) : null;
             if ($file !== null && !$slot) return 'busy';
             try {
-                $res = $file !== null ? self::render($file, $dir) : 'Datei fehlt';
+                $res = $file !== null ? (self::isPdf($row) ? self::renderPdf($file, $dir) : self::render($file, $dir)) : 'Datei fehlt';
             } finally {
                 if ($slot) { flock($slot, LOCK_UN); fclose($slot); }
             }
@@ -215,7 +235,35 @@ final class VideoThumbs
             if ($luma >= 24) break;   // hell genug
         }
         if (!$img) return 'Standbild nicht lesbar';
-        $at = $used;
+        return self::store($img, $cache, '-v', $used);
+    }
+
+    /** PDF: 1. Seite mit pdftoppm als Bild (höchstens MAX_W an der längeren Seite) → Angaben für variants_json['poster'] */
+    private static function renderPdf(string $file, string $dir): array|string
+    {
+        $timeout = max(3, min(60, (int) app()->config->get('media.video_thumbs_timeout', 10)));
+        $cache = $dir . '/cache';
+        if (!is_dir($cache)) @mkdir($cache, 0775, true);
+        $tmp = $cache . '/.pthumb-' . bin2hex(random_bytes(6));
+        try {
+            [$c, , $err] = Ffmpeg::exec([Ffmpeg::bin('pdftoppm'), '-f', '1', '-l', '1', '-singlefile', '-jpeg', '-jpegopt', 'quality=88',
+                '-scale-to', (string) self::MAX_W, $file, $tmp], $timeout, 10);
+            $out = $tmp . '.jpg';
+            if ($c !== 0 || !is_file($out) || filesize($out) < 100 || filesize($out) > 20 * 1024 * 1024) {
+                return 'pdftoppm: ' . (trim((string) strtok(trim((string) $err), "\n")) ?: 'exit ' . $c);
+            }
+            $info = @getimagesize($out);
+            $img = $info && $info[0] * $info[1] <= 16_000_000 ? @imagecreatefromjpeg($out) : false;
+            if (!$img) return 'Seite nicht lesbar';
+            return self::store($img, $cache, '-p', 0.0);
+        } finally {
+            @unlink($tmp . '.jpg');
+        }
+    }
+
+    /** Bild in den Breiten aus media.sizes (bis MAX_W) als WebP speichern → Angaben für variants_json['poster'] */
+    private static function store(\GdImage $img, string $cache, string $suffix, float $at): array|string
+    {
         $w = imagesx($img);
         $h = imagesy($img);
         $sizes = array_map('intval', (array) app()->config->get('media.sizes', [480, 800, 1200, 1600, 2400]));
@@ -223,7 +271,7 @@ final class VideoThumbs
         $targets[] = min($w, self::MAX_W);
         $targets = array_values(array_unique($targets));
         sort($targets);
-        $base = bin2hex(random_bytes(8)) . '-v';
+        $base = bin2hex(random_bytes(8)) . $suffix;
         $q = (int) app()->config->get('media.quality', 80);
         $list = [];
         foreach ($targets as $tw) {
@@ -285,14 +333,11 @@ final class VideoThumbs
     public static function console(array $args): int
     {
         Ffmpeg::refresh();
-        if (!Ffmpeg::available()) {
-            fwrite(STDERR, "ffmpeg/ffprobe nicht gefunden (config 'ffmpeg_path'/'ffprobe_path') oder proc_open gesperrt – nichts zu tun.\n");
-            return 0;
-        }
-        if (app()->config->get('media.video_thumbs', true) === false) {
-            echo "Vorschaubilder für Videos sind ausgeschaltet (config media.video_thumbs = false).\n";
-            return 0;
-        }
+        $video = self::enabled();
+        $pdf = app()->config->get('media.pdf_thumbs', true) !== false && Ffmpeg::pdfAvailable();
+        if (!$video) echo "Videos: ffmpeg/ffprobe nicht gefunden, proc_open gesperrt oder ausgeschaltet (media.video_thumbs) – übersprungen.\n";
+        if (!$pdf) echo "PDF: pdftoppm (poppler-utils) nicht gefunden, proc_open gesperrt oder ausgeschaltet (media.pdf_thumbs) – übersprungen.\n";
+        if (!$video && !$pdf) return 0;
         $force = in_array('--all', $args, true);
         $pool = null;
         foreach ($args as $a) if (str_starts_with($a, '--pool=')) $pool = substr($a, 7);
@@ -300,7 +345,7 @@ final class VideoThumbs
             if (!isset(MediaPools::all()[$pool])) { fwrite(STDERR, "Unbekannter Pool: $pool\n"); return 1; }
             Media::usePool($pool);
         }
-        $rows = Media::all(['kind' => 'video']);
+        $rows = array_merge($video ? Media::all(['kind' => 'video']) : [], $pdf ? Media::all(['kind' => 'pdf']) : []);
         $n = ['ok' => 0, 'failed' => 0, 'skip' => 0, 'busy' => 0];
         foreach ($rows as $m) {
             if (!$force && self::data($m)) { $n['skip']++; continue; }

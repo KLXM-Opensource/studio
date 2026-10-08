@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: PDFs mit Vorschau der ersten Seite
+- Mit **pdftoppm** (poppler-utils) auf dem Server zeigen Kacheln, Liste, Auswahl und Medienfelder bei PDFs die 1. Seite als Vorschaubild
+  (Kennzeichen „PDF“), erzeugt wie Video-Vorschaubilder (lazy, mit Sperren und Zeitlimit; `media:thumbs` erzeugt nach). Ohne poppler bleibt das Dokument-Symbol;
+  abschaltbar mit `media.pdf_thumbs = false`, `health` zeigt den Status.
+- Behoben: Vorschau rechts in der Mediathek fehlte (Hinweis „zu groß“ überschrieb die Bildadresse).
+
 ### Formatierungsleiste: weitere Absatz-Stile, Zitat mit Gestaltung
 - Neue Stile unter **Stil ▾**: **Tipp-Box** (`t-tip`), **Achtung-Box** (`t-warn`), **Dachzeile** (`t-kicker`, kleine Versalzeile über einer Überschrift),
   **Zentriert** (`t-center`) – Klassenvertrag Core\Sanitizer, Vorschau im Formularfeld und im Menü.

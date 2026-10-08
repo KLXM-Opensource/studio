@@ -403,6 +403,10 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .fx-vthumb.is-busy .ico{animation:fx-vt-pulse 1.4s ease-in-out infinite}
 .fx-vthumb img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;border-radius:0;box-shadow:none;opacity:0;transition:opacity .2s}
 .fx-vthumb.is-loaded img{opacity:1}
+.fx-vthumb--doc{aspect-ratio:3/4;width:auto;height:100%;max-width:100%}
+.media-vthumb--doc,.fx-vthumb--doc.media-vthumb{width:68px;aspect-ratio:3/4;object-position:top}
+.fx-pbadge{position:absolute;left:12px;bottom:12px;padding:2px 7px;border-radius:5px;background:#B42318;color:#fff;font:700 11px/1.5 var(--adm-font);letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none}
+@media (forced-colors:active){.fx-pbadge{border:1px solid CanvasText}}
 .fx-mini .fx-vthumb{width:26px;font-size:7px;border-radius:3px}
 .media-vthumb{flex:none;width:120px;height:auto;aspect-ratio:16/9;font-size:14px;border-radius:6px}
 img.media-vthumb{object-fit:cover}

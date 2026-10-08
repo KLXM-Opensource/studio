@@ -19,7 +19,8 @@ namespace Core;
  * 'ffmpeg_search' => false schaltet 2 und 3 ab (nur der konfigurierte Pfad zählt).
  * Ergebnis je Kandidatenliste in storage/cache/ffmpeg.json (gefunden: 1 Stunde, nicht gefunden: 10 Minuten),
  * damit nicht jede Anfrage Prozesse startet; `health` und `media:thumbs` prüfen frisch (refresh()).
- * Genutzt von Core\VideoThumbs (Vorschaubilder für Videos), Core\AI\Transcriber und der Erweiterung video_tools.
+ * Genutzt von Core\VideoThumbs (Vorschaubilder für Videos und – mit pdftoppm aus poppler-utils – PDF-Dokumente),
+ * Core\AI\Transcriber und der Erweiterung video_tools. pdftoppm wird genauso gesucht (Konfiguration 'pdftoppm_path').
  */
 final class Ffmpeg
 {
@@ -85,6 +86,12 @@ final class Ffmpeg
         return self::canExec() && self::bin('ffmpeg') !== '' && self::bin('ffprobe') !== '';
     }
 
+    /** pdftoppm (poppler-utils) gefunden und proc_open erlaubt? → Vorschaubild der 1. Seite von PDF-Dokumenten */
+    public static function pdfAvailable(): bool
+    {
+        return self::canExec() && self::bin('pdftoppm') !== '';
+    }
+
     /** Funktioniert genau dieser Aufruf? (z. B. Pfad aus einer anderen Konfiguration, Core\AI\Transcriber) */
     public static function works(string $bin, string $name = 'ffmpeg'): bool
     {
@@ -95,7 +102,7 @@ final class Ffmpeg
     private static function detect(string $name, string $override): array
     {
         $none = ['bin' => '', 'version' => '', 'bad_config' => false];
-        if (!in_array($name, ['ffmpeg', 'ffprobe'], true)) return $none;
+        if (!in_array($name, ['ffmpeg', 'ffprobe', 'pdftoppm'], true)) return $none;
         $cfg = $override !== '' ? $override : self::configured($name);
         $search = app()->config->get('ffmpeg_search', true) !== false;
         $key = $name . '|' . $cfg . '|' . ($search ? 1 : 0);
@@ -138,8 +145,9 @@ final class Ffmpeg
             self::$cache['probe:' . $bin] = '';
             return null;
         }
-        [$c, $out] = self::run([$bin, '-hide_banner', '-version'], 5);
-        $line = trim((string) strtok($out, "\n"));
+        // pdftoppm kennt kein -version: „pdftoppm -v“ schreibt die Version nach stderr
+        [$c, $out, $err] = $name === 'pdftoppm' ? self::run([$bin, '-v'], 5) : self::run([$bin, '-hide_banner', '-version'], 5);
+        $line = trim((string) strtok(trim($out) !== '' ? $out : (string) $err, "\n"));
         $ok = $c === 0 && str_starts_with($line, $name . ' version');
         self::$cache['probe:' . $bin] = $ok ? $line : '';
         return $ok ? $line : null;
@@ -256,5 +264,16 @@ final class Ffmpeg
             return [__('ffmpeg für Video-Vorschaubilder: gefunden ({path})', ['path' => (str_contains($bin, '/') ? $bin : $bin . ' via PATH') . $v]) => true];
         }
         return [__('ffmpeg für Video-Vorschaubilder: fehlt (optional) – {hint}', ['hint' => self::hint()]) => null];
+    }
+
+    /** Zeile für `health`: pdftoppm (poppler-utils) für PDF-Vorschaubilder – Warnung, nie Fehler */
+    public static function pdfHealth(): array
+    {
+        if (self::pdfAvailable()) {
+            $bin = self::bin('pdftoppm');
+            $v = preg_match('~version\s+(\S+)~', self::version('pdftoppm'), $m) ? ', ' . $m[1] : '';
+            return [__('pdftoppm für PDF-Vorschaubilder: gefunden ({path})', ['path' => (str_contains($bin, '/') ? $bin : $bin . ' via PATH') . $v]) => true];
+        }
+        return [__('pdftoppm für PDF-Vorschaubilder: fehlt (optional) – apt install poppler-utils (bzw. dnf install poppler-utils) oder pdftoppm_path setzen') => null];
     }
 }

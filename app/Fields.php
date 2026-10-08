@@ -720,11 +720,12 @@ final class Fields
             return '<img src="' . e(Media::url($m, 480)) . '" alt="" width="120" height="' . (int) round(120 * ($m['height'] ?: 1) / max(1, $m['width'])) . '"><span>' . e($m['alt'] ?: $m['original_name']) . '</span>';
         }
         // Video: Poster bzw. automatisches Vorschaubild; fehlt es (ffmpeg vorhanden), lädt die Verwaltung es nach (data-vthumb, _media.js)
-        if (str_starts_with($m['mime'], 'video/')) {
+        // PDF: 1. Seite als Vorschaubild (pdftoppm), sonst Dateiname
+        if (str_starts_with($m['mime'], 'video/') || $m['mime'] === 'application/pdf') {
             $j = Media::toJson($m);
             $label = '<span>' . e(Media::displayName($m)) . ' · ' . e(Media::humanSize((int) $m['size'])) . '</span>';
-            if ($j['thumb']) return '<img src="' . e($j['thumb']) . '" alt="" width="120" height="68" class="media-vthumb">' . $label;
-            if ($j['thumb_gen']) return '<span class="fx-vthumb media-vthumb" data-vthumb="' . e($j['thumb_gen']) . '">' . icon('video-camera') . '</span>' . $label;
+            if ($j['thumb']) return '<img src="' . e($j['thumb']) . '" alt="" width="120" height="68" class="media-vthumb' . ($m['mime'] === 'application/pdf' ? ' media-vthumb--doc' : '') . '">' . $label;
+            if ($j['thumb_gen']) return '<span class="fx-vthumb media-vthumb' . ($m['mime'] === 'application/pdf' ? ' fx-vthumb--doc' : '') . '" data-vthumb="' . e($j['thumb_gen']) . '">' . icon($m['mime'] === 'application/pdf' ? 'file-pdf' : 'video-camera') . '</span>' . $label;
         }
         return '<span class="media-file">' . e($m['original_name']) . ' · ' . e(Media::humanSize((int) $m['size'])) . '</span>';
     }

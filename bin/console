@@ -836,6 +836,7 @@ switch ($cmd) {
             ] + ['Verwaltung unter ' . Core\AdminPath::prefix() . (Core\AdminPath::custom() ? ' (eigene Adresse)' : '') => true]
               + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health() + Core\Push\Push::health()
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
+                + Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
