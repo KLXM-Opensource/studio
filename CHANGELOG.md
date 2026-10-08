@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Suche und Besucher-Chat: genauer mit kleinen lokalen Modellen
+- Suche: Impressum, Datenschutz und Barrierefreiheit erscheinen nur noch weit oben, wenn danach gesucht wird (sonst Beifang, `Ranker::legalLast`).
+- Besucher-Chat: je Quelle die passendsten Abschnitte statt eines zusammenhängenden Stücks (beste Quelle mit doppeltem Umfang) –
+  z. B. Kosten am Seitenende kommen mit; erprobt mit Ollama `qwen3:4b-instruct` + `nomic-embed-text` (Empfehlung im Entwicklerhandbuch → KI).
+
 ### Verwaltung: Profilbild, kompakter Kopf der Seitenleiste, Mitteilungen in Magenta
 - **Profilbild** unter Konto (quadratisch aus der Mitte, 256 px WebP, je E-Mail-Adresse in `storage/avatars/` – Netzwerk-Konten überall gleich;
   nur angemeldet über `/admin/avatar/{id}`), ohne Bild **Initialen** auf fester Farbe (`Core\Avatar`). Auch in der Benutzerverwaltung.

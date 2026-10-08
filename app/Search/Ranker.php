@@ -36,6 +36,20 @@ final class Ranker
         return array_map('strval', array_keys($score));
     }
 
+    /**
+     * Rechtsseiten (Impressum, Datenschutz, Barrierefreiheit) nennen fast alles einmal (Name, Adresse, Kontakt, Formulare) und
+     * landen sonst als Beifang weit oben – ans Ende, außer der Titel passt zur Suche („impressum“, „datenschutz“ …).
+     */
+    public static function legalLast(array $ranked, array $docs, array $words, array $legal): array
+    {
+        if (!$legal) return $ranked;
+        $front = $back = [];
+        foreach ($ranked as $id) {
+            if (isset($legal[$id]) && self::share((string) ($docs[$id]['title'] ?? ''), $words) === 0.0) $back[] = $id; else $front[] = $id;
+        }
+        return array_merge($front, $back);
+    }
+
     /** Anteil der Suchwörter, die (als Wortanfang) im Text vorkommen: 0…1 */
     public static function share(string $text, array $words): float
     {

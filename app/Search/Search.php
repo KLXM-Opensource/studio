@@ -45,6 +45,19 @@ final class Search
     }
 
     /** Einstellungen der Website (Grundeinstellungen → Suche, Core\Search\AdminSettings) */
+    /** Dokument-IDs von Impressum, Datenschutz und Barrierefreiheit (Core\Legal) – je Anfrage einmal */
+    public static function legalIds(): array
+    {
+        static $cache = [];
+        $key = site()->key;
+        if (isset($cache[$key])) return $cache[$key];
+        $ids = [];
+        foreach (\Core\Legal::KEYS as $keys) {
+            foreach ($keys as $k) if (($id = (int) setting($k)) > 0) $ids['p-' . $id] = true;
+        }
+        return $cache[$key] = $ids;
+    }
+
     public static function settings(): array
     {
         $s = app()->settings;
@@ -323,6 +336,7 @@ final class Search
         $docs = self::docRows($ids, $lang);
         $ids = array_values(array_filter($ids, fn($id) => isset($docs[$id])));
         $ranked = Ranker::fuse($lists, $docs, Text::words($q), self::settings()['boost'], self::RRF_K);
+        $ranked = Ranker::legalLast($ranked, $docs, Text::words($q), self::legalIds());
         // Landing-Domain: nur Seiten der Landingpage (Einstellung „Nur Seiten der Landingpage“)
         $landing = \Core\Landings::current();
         if ($landing) $ranked = array_values(array_filter($ranked, fn($id) => $landing->searchAllows($docs[$id])));

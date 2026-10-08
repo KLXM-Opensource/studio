@@ -252,7 +252,7 @@ final class VisitorChat
             $doc = method_exists($kw, 'document') ? $kw->document((string) $it['id']) : null;
             $text = $doc ? trim(implode("\n", array_filter([(string) ($doc['headings'] ?? ''), (string) ($doc['text'] ?? ''), (string) ($doc['extra'] ?? '')]))) : '';
             if ($text === '') $text = trim(html_entity_decode(strip_tags((string) $it['snippet']), ENT_QUOTES | ENT_HTML5));
-            $passage = self::passage($text, $words);
+            $passage = self::passage($text, $words, $out ? self::SOURCE_CHARS : self::SOURCE_CHARS * 2);   // beste Quelle: mehr Kontext
             if ($passage === '') continue;
             $out[] = ['n' => count($out) + 1, 'title' => (string) $it['title_plain'], 'kind' => (string) $it['badge'],
                 'url' => (string) $it['url'], 'text' => ($it['date_label'] ?? '') !== '' ? $it['date_label'] . ': ' . $passage : $passage];
@@ -265,24 +265,45 @@ final class VisitorChat
         return $out;
     }
 
-    /** Beste zusammenhängende Textstelle (Abschnitte à ~180 Wörter, gewertet nach Treffern der Suchwörter) */
-    private static function passage(string $text, array $words): string
+    /**
+     * Passendste Textstellen einer Quelle (Abschnitte à ~180 Wörter, gewertet nach Suchwörtern): die besten Abschnitte bis
+     * $max Zeichen, in der Reihenfolge der Seite, getrennt mit „…“ – so kommen z. B. „Kosten“ am Seitenende mit, auch wenn
+     * der Anfang ebenfalls passt.
+     */
+    private static function passage(string $text, array $words, int $max = self::SOURCE_CHARS): string
     {
         $text = trim((string) preg_replace('~\s+~u', ' ', $text));
-        if (mb_strlen($text) <= self::SOURCE_CHARS) return $text;
+        if (mb_strlen($text) <= $max) return $text;
         $chunks = Text::chunks($text, 180, 30);
-        $stems = array_map(fn($w) => mb_substr(Text::fold($w), 0, 5), $words);
-        $best = 0;
-        $bestScore = -1;
-        foreach ($chunks as $i => $c) {
-            $f = Text::fold($c);
-            $score = 0;
-            foreach ($stems as $st) if ($st !== '' && str_contains($f, $st)) $score += 1 + substr_count($f, $st) * 0.1;
-            if ($score > $bestScore) { $bestScore = $score; $best = $i; }
+        $stems = array_values(array_filter(array_map(fn($w) => mb_substr(Text::fold($w), 0, 5), $words)));
+        // Seltene Suchwörter zählen mehr (IDF über die Abschnitte): „Netzwerk…“ steht überall, „Übernachtung“ nur beim Preis
+        $folded = array_map(fn($c) => Text::fold($c), $chunks);
+        $n = count($chunks);
+        $idf = [];
+        foreach ($stems as $st) {
+            $df = count(array_filter($folded, fn($f) => str_contains($f, $st)));
+            $idf[$st] = $df ? log(1 + $n / $df) : 0.0;
         }
-        $out = $chunks[$best];
-        if (isset($chunks[$best + 1]) && mb_strlen($out) < self::SOURCE_CHARS * 0.6) $out .= ' ' . $chunks[$best + 1];
-        return mb_strimwidth($out, 0, self::SOURCE_CHARS, '…');
+        $score = [];
+        foreach ($folded as $i => $f) {
+            $sc = 0.0;
+            foreach ($stems as $st) if ($idf[$st] > 0 && str_contains($f, $st)) $sc += $idf[$st] * (1 + min(5, substr_count($f, $st)) * 0.1);
+            $score[$i] = $sc - $i * 0.001;   // gleichstand: früher zuerst
+        }
+        arsort($score);
+        $pick = [];
+        $len = 0;
+        foreach (array_keys($score) as $i) {
+            $l = mb_strlen($chunks[$i]) + 3;
+            if ($pick && $len + $l > $max) continue;
+            $pick[] = $i;
+            $len += $l;
+            if ($len >= $max * 0.9) break;
+        }
+        sort($pick);
+        $out = [];
+        foreach ($pick as $k => $i) $out[] = ($k > 0 && $pick[$k - 1] !== $i - 1 ? '… ' : '') . $chunks[$i];
+        return mb_strimwidth(implode(' ', $out), 0, $max, '…');
     }
 
     /** Öffentliche Angaben als Text (Name, Adresse, Telefon, E-Mail, Öffnungszeiten, aktueller Hinweis) */
