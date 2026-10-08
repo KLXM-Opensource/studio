@@ -591,26 +591,26 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-bar[data-bar] .cms-redo svg{transform:scaleX(-1)}
 .cms-bar[data-bar] .cms-btn--sq[aria-disabled="true"]{opacity:.4;cursor:default}
 
-/* Layout: Griff zwischen zwei Spalten (editor.js decorateResize) – ziehen ändert die Breiten, rastet auf Zwölftel ein */
-.cms-lay-resize__h{all:unset;box-sizing:border-box;position:absolute;inset:0;display:grid;place-items:center;cursor:col-resize;touch-action:none}
-.cms-lay-resize__h::before{content:"";width:4px;height:min(64px,40%);border-radius:4px;background:#314164;opacity:.35;box-shadow:0 0 0 2px #fff;transition:opacity .15s,height .15s,background-color .15s}
-.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag)::before{opacity:1;height:min(120px,70%);background:#3DD9A0}
-.cms-lay-resize__h:focus-visible{outline:2px solid #314164;outline-offset:2px;border-radius:6px}
-.cms-lay-resize__tip{position:absolute;top:50%;left:50%;translate:-50% calc(-50% - 52px);padding:4px 9px;border-radius:999px;background:#24314B;color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
-.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-lay-resize__tip{opacity:1}
-@media (prefers-reduced-motion:reduce){.cms-lay-resize__h::before,.cms-lay-resize__tip{transition:none}}
-
-/* Ziehen zum Einstellen (editor.js dragHandle): Abstand oben/unten (waagrechte Pille), Breiten (senkrechter Griff) */
-.cms-drag__h{all:unset;box-sizing:border-box;position:absolute;inset:0;display:grid;place-items:center;touch-action:none}
+/* Ziehen zum Einstellen (editor.js dragHandle, decorateResize): je Funktion eigene Farbe und Form, Symbol im Griff –
+   Abstand (violett, waagrechte Pille ⇕), Textbreite (bernstein ⇔), Bild/Text (pink ⇔), Spalten (mint ⇔) */
+.cms-drag__h,.cms-lay-resize__h{--k:#7C3AED;all:unset;box-sizing:border-box;position:absolute;inset:0;display:grid;place-items:center;touch-action:none}
 .cms-drag__h--y{cursor:row-resize}
-.cms-drag__h--x{cursor:col-resize}
-.cms-drag__h--y::before{content:"";width:44px;height:6px;border-radius:6px;background:#314164;opacity:.45;box-shadow:0 0 0 2px #fff;transition:opacity .15s,background-color .15s,width .15s}
-.cms-drag__h--x::before{content:"";width:4px;height:min(64px,40%);border-radius:4px;background:#314164;opacity:.45;box-shadow:0 0 0 2px #fff;transition:opacity .15s,height .15s,background-color .15s}
-.cms-drag__h:is(:hover,:focus-visible,.is-drag)::before{opacity:1;background:#3DD9A0}
-.cms-drag__h--y:is(:hover,:focus-visible,.is-drag)::before{width:64px}
-.cms-drag__h--x:is(:hover,:focus-visible,.is-drag)::before{height:min(120px,70%)}
-.cms-drag__h:focus-visible{outline:2px solid #314164;outline-offset:2px;border-radius:6px}
-.cms-drag__tip{position:absolute;left:0;top:-30px;padding:4px 9px;border-radius:999px;background:#24314B;color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
-.cms-drag__h--x .cms-drag__tip{top:50%;translate:-50% calc(-50% - 52px)}
-.cms-drag__h:is(:hover,:focus-visible,.is-drag) .cms-drag__tip{opacity:1}
-@media (prefers-reduced-motion:reduce){.cms-drag__h::before,.cms-drag__tip{transition:none}}
+.cms-drag__h--x,.cms-lay-resize__h{cursor:col-resize}
+.cms-drag__h[data-kind=width]{--k:#D97706}
+.cms-drag__h[data-kind=split]{--k:#DB2777}
+.cms-lay-resize__h{--k:#0F9F74}
+.cms-drag__grip svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cms-drag__grip{display:grid;place-items:center;border-radius:999px;background:var(--k);color:#fff;font:700 13px/1 system-ui,-apple-system,sans-serif;box-shadow:0 0 0 2px #fff,0 4px 12px rgb(0 0 0/.25);opacity:.7;transition:opacity .15s,scale .15s}
+.cms-drag__h--y .cms-drag__grip{width:44px;height:18px}
+.cms-drag__h--x .cms-drag__grip,.cms-lay-resize__h .cms-drag__grip{width:18px;height:44px}
+.cms-drag__h:is(:hover,:focus-visible,.is-drag) .cms-drag__grip,.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-drag__grip{opacity:1;scale:1.12}
+/* senkrechte Führungslinie bei Breiten-Griffen: zeigt, welche Kante bewegt wird */
+.cms-drag__h--x::before,.cms-lay-resize__h::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:var(--k);opacity:0;transition:opacity .15s}
+.cms-drag__h--x:is(:hover,:focus-visible,.is-drag)::before,.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag)::before{opacity:.55}
+.cms-drag__h--y::before{content:"";position:absolute;left:-28px;right:-600px;top:50%;height:2px;margin-top:-1px;background:var(--k);opacity:0;transition:opacity .15s;pointer-events:none}
+.cms-drag__h--y:is(:hover,:focus-visible,.is-drag)::before{opacity:.45}
+.cms-drag__h:focus-visible,.cms-lay-resize__h:focus-visible{outline:2px solid var(--k);outline-offset:3px;border-radius:8px}
+.cms-drag__tip,.cms-lay-resize__tip{position:absolute;left:0;top:-32px;padding:4px 9px;border-radius:999px;background:var(--k);color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 12px rgb(0 0 0/.2)}
+.cms-drag__h--x .cms-drag__tip,.cms-lay-resize__h .cms-lay-resize__tip{top:50%;left:50%;translate:-50% calc(-50% - 44px)}
+.cms-drag__h:is(:hover,:focus-visible,.is-drag) .cms-drag__tip,.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-lay-resize__tip{opacity:1}
+@media (prefers-reduced-motion:reduce){.cms-drag__grip,.cms-drag__tip,.cms-lay-resize__tip{transition:none}}

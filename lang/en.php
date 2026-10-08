@@ -7039,4 +7039,6 @@ return [
     '{label} ziehen – jetzt {v}. Pfeiltasten: kleiner/größer.' => 'Drag {label} – now {v}. Arrow keys: smaller/larger.',
     'Ziehen: {label} ändern' => 'Drag: change {label}',
     '{label}: {v} – noch nicht gespeichert.' => '{label}: {v} – not saved yet.',
+    'Spalten' => 'Columns',
+    'ziehen' => 'drag',
 ];

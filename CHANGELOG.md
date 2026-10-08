@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Zieh-Griffe deutlicher
+- Je Funktion eigene Farbe und Form mit Pfeil im Griff (Abstand violett ↕, Textbreite bernstein ↔, Bild/Text pink ↔, Spalten grün ↔),
+  Führungslinie an der bewegten Kante, Hinweis „… ziehen“ beim Zeigen.
+- Abstand-Griffe nur, wo der Abstand wirkt (der Editor probiert die Klassen vorher aus) – z. B. nicht am Hero mit eigenen Abständen.
+
 ### Handbuch ergänzt
 - Neues Kapitel **Grundeinstellungen** (Bereiche, Domain und Hauptadresse, Testumgebung/Livebetrieb, Warnpunkte im Menü).
 - **Bilder & Dateien:** Ansicht (Symbole, Mauerwerk, Liste, Symbolgröße), zuklappbare Bereiche, „Nicht verwendet“.

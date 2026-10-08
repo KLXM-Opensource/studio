@@ -1052,11 +1052,11 @@ function makeTool(type, def) {
         host.className = 'cms-lay-resize'; host.contentEditable = 'false';
         host.style.cssText = `position:absolute;top:0;bottom:0;right:${-(gap / 2) - 11}px;width:22px;z-index:6`;
         col.append(host);
-        const sr = S.shadowFor(host, `<button type="button" class="cms-lay-resize__h" role="separator" aria-orientation="vertical"><span class="cms-lay-resize__tip"></span></button>`);
+        const sr = S.shadowFor(host, `<button type="button" class="cms-lay-resize__h" role="separator" aria-orientation="vertical"><span class="cms-drag__grip cms-drag__grip--cols" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg></span><span class="cms-lay-resize__tip"></span></button>`);
         const h = sr.querySelector('.cms-lay-resize__h'), tip = sr.querySelector('.cms-lay-resize__tip');
         const label = w => w.map(frac).join(' · ');
         const aria = w => {
-          tip.textContent = label(w);
+          tip.textContent = `${T('Spalten')}: ${label(w)} · ↔ ${T('ziehen')}`;
           h.setAttribute('aria-label', T('Breite von Spalte {a} und {b} ziehen – jetzt {w}. Pfeiltasten: schmaler/breiter, Entf: zurück zum Raster.', { a: i + 1, b: i + 2, w: label(w) }));
           h.setAttribute('aria-valuenow', String(w[i])); h.setAttribute('aria-valuemin', String(MIN)); h.setAttribute('aria-valuemax', String(w[i] + w[i + 1] - MIN));
         };
@@ -1112,19 +1112,28 @@ function makeTool(type, def) {
     decorateDrags(pv) {
       const T = CMSAdmin.t;
       const sec = pv.matches?.('.sec') ? pv : pv.querySelector('.sec');
-      if (sec && cfg.spacing) {
+      // Wirkt der Abstand hier? (z. B. Kopfbereiche mit eigenen Abständen) – Klassen kurz ausprobieren, sonst kein Griff
+      const works = (pre, prop) => {
+        const keep = sec.className, vals = new Set();
+        for (const v of Object.keys(cfg.spacing)) { sec.classList.remove(...Object.keys(cfg.spacing).map(x => pre + x)); sec.classList.add(pre + v); vals.add(getComputedStyle(sec)[prop]); }
+        sec.className = keep;
+        return vals.size > 1;
+      };
+      if (sec && cfg.spacing) requestAnimationFrame(() => {
+        if (!sec.isConnected) return;
         for (const side of ['top', 'bottom']) {
           const key = side === 'top' ? 'spaceTop' : 'spaceBottom', pre = side === 'top' ? 'pt-' : 'pb-';
-          this.dragHandle({ host: sec, apply: sec, axis: 'y', side, options: cfg.spacing, order: ['none', 'small', 'normal', 'large'],
+          if (!works(pre, side === 'top' ? 'paddingTop' : 'paddingBottom')) continue;
+          this.dragHandle({ kind: 'space', host: sec, apply: sec, axis: 'y', side, options: cfg.spacing, order: ['none', 'small', 'normal', 'large'],
             get: () => this.tuneData[key] || 'normal', cls: v => pre + v, label: side === 'top' ? T('Abstand oben') : T('Abstand unten'),
             commit: v => { const tn = tunes.get(this.blockId); if (tn) tn.data = { ...tn.data, [key]: v }; markDirty(); this.refresh(); } });
         }
-      }
+      });
       for (const g of def.drags || []) {
         const target = pv.querySelector(g.target);
         if (!target || !Object.keys(g.options || {}).length) continue;
         const field = (def.fields || []).find(f => f.name === g.field);
-        this.dragHandle({ host: sec || pv, target, apply: g.apply ? target.closest(g.apply) || target : target, axis: 'x', side: 'auto', options: g.options,
+        this.dragHandle({ kind: g.kind || (g.apply ? 'split' : 'width'), host: sec || pv, target, apply: g.apply ? target.closest(g.apply) || target : target, axis: 'x', side: 'auto', options: g.options,
           order: Object.keys(g.options), get: () => this.data[g.field] ?? field?.default ?? Object.keys(g.options)[0],
           cls: v => g.class.replace('{v}', v), label: T(g.label || field?.label || g.field),
           commit: async v => { this.data[g.field] = v; markDirty(); if (drawerFor === this) syncDrawerField(g.field, v); await this.loadPreview(); } });
@@ -1156,11 +1165,11 @@ function makeTool(type, def) {
       }
       o.host.append(host);
       requestAnimationFrame(() => place());
-      const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__tip"></span></button>`);
+      const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" data-kind="${o.kind || 'width'}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__grip" aria-hidden="true">${o.axis === 'y' ? '<svg viewBox="0 0 24 24"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg>'}</span><span class="cms-drag__tip"></span></button>`);
       const h = sr.querySelector('.cms-drag__h'), tip = sr.querySelector('.cms-drag__tip');
       const cur = () => Math.max(0, values.indexOf(o.get()));
       const show = i => {
-        tip.textContent = `${o.label}: ${o.options[values[i]]}`;
+        tip.textContent = `${o.label}: ${o.options[values[i]]} · ${o.axis === 'y' ? '↕' : '↔'} ${T('ziehen')}`;
         h.setAttribute('aria-label', T('{label} ziehen – jetzt {v}. Pfeiltasten: kleiner/größer.', { label: o.label, v: o.options[values[i]] }));
         h.setAttribute('aria-valuenow', String(i)); h.setAttribute('aria-valuemin', '0'); h.setAttribute('aria-valuemax', String(values.length - 1));
         h.setAttribute('aria-valuetext', o.options[values[i]]);

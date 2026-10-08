@@ -101,7 +101,7 @@ $__sample = $vars['blocks_page'] ?? null;
     <li><b>Aufteilung Bild/Text</b> (Text + Bild, je nach Design): Griff am inneren Rand des Bildes.</li>
     <li><b>Spaltenbreiten</b> im Block „Layout (Spalten)“: Griff zwischen zwei Spalten (siehe unten).</li>
   </ul>
-  <p>Beim Ziehen zeigt eine kleine Anzeige den Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
+  <p>Jede Funktion hat ihre eigene Farbe: <b>violett ↕</b> = Abstand, <b>bernstein ↔</b> = Textbreite, <b>pink ↔</b> = Aufteilung Bild/Text, <b>grün ↔</b> = Spaltenbreiten. Beim Zeigen nennt der Griff, was er ändert, und den aktuellen Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Griffe erscheinen nur dort, wo die Einstellung auch wirkt – Kopfbereiche haben z. B. eigene Abstände, dort gibt es keinen Abstand-Griff. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
 
   <h3 id="layout">Layout: Blöcke in Spalten</h3>
   <p>Für Blöcke <b>nebeneinander</b> – z. B. ein Text (⅔) und daneben eine Box mit Button (⅓), zwei Texte je ½ oder drei kurze Blöcke je ⅓ – gibt es den Block <b>„Layout (Spalten)“</b>. Sie wählen ein <b>Raster</b> und stellen die Blöcke in die Spalten; der Rest der Seite bleibt davon unberührt.</p>
