@@ -125,3 +125,35 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 .logo-xl .brand__logo img{height:4.25rem;max-width:19rem}
 .logo-xl .brand__mark{width:3.4rem;height:3.4rem;font-size:1.7rem}
 .logo-xl .brand__name{font-size:1.5rem}
+
+/* ---------------------------------------------------------------- Linie über dem Fußbereich (design: footer_line, footer_line_color, footer_line_width)
+   html.fl-* (0,2,1) übersteuert Farbwirkung „Farbenfroh“ (Farbband) und Fußbereich-Hintergründe. „auto“ = wie bisher. */
+html{--fl-c:var(--f-line);--fl-w:1px;--fl-bw:5px}
+html.flc-accent{--fl-c:var(--f-a)}html.flc-secondary{--fl-c:var(--f-b)}html.flc-ink{--fl-c:var(--f-ink)}html.flc-white{--fl-c:#fff}
+html.flw-w1{--fl-w:1px;--fl-bw:1px}html.flw-w2{--fl-w:2px;--fl-bw:2px}html.flw-w4{--fl-w:4px;--fl-bw:4px}html.flw-w6{--fl-w:6px;--fl-bw:6px}html.flw-w10{--fl-w:10px;--fl-bw:10px}
+html.fl-none .ftr{border-top:0;background-image:none;box-shadow:none}
+html:is(.fl-line,.fl-shadow) .ftr{border-top:var(--fl-w) solid var(--fl-c);background-image:none}
+html.fl-shadow .ftr{box-shadow:inset 0 14px 14px -14px rgb(0 0 0/.28)}
+html.fl-emboss .ftr{border-top:var(--fl-w) solid color-mix(in srgb,var(--f-ink) 30%,transparent);background-image:none;box-shadow:inset 0 1px 0 rgb(255 255 255/.95),inset 0 2px 0 rgb(255 255 255/.35),0 -1px 0 rgb(255 255 255/.7)}
+@media (prefers-color-scheme:dark){html.has-dark.fl-emboss .ftr{border-top-color:rgb(0 0 0/.6);box-shadow:inset 0 1px 0 rgb(255 255 255/.12),0 -1px 0 rgb(255 255 255/.05)}}
+html.fl-band .ftr{border-top:0;background-image:linear-gradient(90deg,var(--f-a) 0 20%,var(--f-b) 20% 40%,var(--f-c3) 40% 60%,var(--f-c4) 60% 80%,var(--f-c5) 80%);background-size:100% var(--fl-bw);background-repeat:no-repeat}
+html.pal-colorful.flw-w1 .ftr,html.pal-colorful.flw-w2 .ftr,html.pal-colorful.flw-w4 .ftr,html.pal-colorful.flw-w6 .ftr,html.pal-colorful.flw-w10 .ftr{background-size:100% var(--fl-bw)}
+html.fl-auto:not(.pal-colorful):is(.flw-w2,.flw-w4,.flw-w6,.flw-w10) .ftr{border-top-width:var(--fl-w)}
+html.fl-auto:not(.pal-colorful):not(.flc-auto) .ftr{border-top-color:var(--fl-c)}
+
+/* ---------------------------------------------------------------- Höhe des Kopfbereichs (design: header_height) – größeres Logo;
+   beim Scrollen (html.is-scrolled, site.js) und in schmalen Köpfen (Container hdr ≤ 40 rem) wieder normal, mit Übergang */
+html.hh-tall{--hdr-h:6rem;--hdr-logo:4rem;--hdr-mark:3.2rem;--hdr-name:1.45rem}
+html.hh-xtall{--hdr-h:8rem;--hdr-logo:5.75rem;--hdr-mark:4rem;--hdr-name:1.8rem}
+html:is(.hh-tall,.hh-xtall) .hdr__bar{min-height:var(--hdr-h);transition:min-height .35s cubic-bezier(.2,.7,.2,1)}
+html:is(.hh-tall,.hh-xtall) .hdr .brand__logo img{height:var(--hdr-logo);max-width:min(24rem,55cqi);transition:height .35s cubic-bezier(.2,.7,.2,1)}
+html:is(.hh-tall,.hh-xtall) .hdr .brand__mark{width:var(--hdr-mark);height:var(--hdr-mark);font-size:calc(var(--hdr-mark) * .48);transition:width .35s,height .35s,font-size .35s}
+html:is(.hh-tall,.hh-xtall) .hdr .brand__name{font-size:var(--hdr-name);transition:font-size .35s}
+html.hdr-sticky.is-scrolled:is(.hh-tall,.hh-xtall){--hdr-h:4.25rem;--hdr-logo:2.75rem;--hdr-mark:2.35rem;--hdr-name:1.125rem}
+@container hdr (max-width:40rem){
+  html:is(.hh-tall,.hh-xtall) .hdr__bar{min-height:4.25rem}
+  html:is(.hh-tall,.hh-xtall) .hdr .brand__logo img{height:2.75rem}
+  html:is(.hh-tall,.hh-xtall) .hdr .brand__mark{width:2.35rem;height:2.35rem;font-size:1.15rem}
+  html:is(.hh-tall,.hh-xtall) .hdr .brand__name{font-size:1.125rem}
+}
+@media (prefers-reduced-motion:reduce){html:is(.hh-tall,.hh-xtall) .hdr :is(.hdr__bar,.brand__logo img,.brand__mark,.brand__name){transition:none}}

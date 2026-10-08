@@ -139,3 +139,12 @@ d.querySelectorAll('[data-bg-video]').forEach(v => {
 // ------------------------------------------------------------ Website-Suche: Vorschläge beim ersten Fokus laden (≈ 2 KB)
 let suggestJs;
 d.addEventListener('focusin', e => { const s = e.target.dataset?.suggestJs; s && !suggestJs && (suggestJs = d.head.append(Object.assign(d.createElement('script'), { src: s })) || 1); });
+
+// Kopfbereich „hoch“ (design: header_height): beim Scrollen html.is-scrolled → Kopf und Logo wieder normal (Übergang in _options.css)
+if (/\bhh-(x?tall)\b/.test(html.className)) {
+  let on = null;
+  // Schwelle mit Abstand (ein ab 80 px, aus unter 16 px), damit der schrumpfende Kopf nicht flackert
+  const upd = () => { const s = on ? scrollY > 16 : scrollY > 80; if (s !== on) { on = s; html.classList.toggle('is-scrolled', s); } };
+  addEventListener('scroll', upd, { passive: true });
+  upd();
+}

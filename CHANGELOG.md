@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: Kopfhöhe und Linie über dem Fußbereich einstellbar
+- Design → Kopf & Fuß → **Höhe des Kopfbereichs** (normal, hoch, sehr hoch) für große Logos – beim Scrollen und auf schmalen
+  Bildschirmen wieder normal hoch, mit weichem Übergang.
+- **Linie über dem Fußbereich**: wie Farbwirkung, keine, Linie, Linie mit Schatten nach unten, geprägt, Farbband – dazu **Farbe**
+  (Linienfarbe, Akzent, zweite Markenfarbe, Schriftfarbe, Weiß) und **Dicke** (1–10 px).
+
 ### Fluid: Zeitleiste einstellbar · Partner-Kacheln im Dunkelmodus
 - Block **Ablauf / Zeitleiste** (Fluid): neue Felder **Kreise** (wie Design, gefüllt, zart gefüllt mit Rand, nur Rand, kleiner Punkt),
   **Farben** (wie Design, farbig abwechselnd, eine Farbe, neutral) und **Animation** (wie Website, nacheinander einblenden,
