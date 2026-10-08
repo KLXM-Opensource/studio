@@ -1,5 +1,5 @@
 <?php
-/** PDF-Viewer (PDF.js). @var array $m  @var bool $embed */
+/** PDF-Viewer (PDF.js). @var array $m  @var bool $embed  @var bool $mini (?embed=mini: nur Blättern) */
 use Core\Media;
 $name = Media::displayName($m);
 $pages = Media::pages($m);
@@ -15,7 +15,7 @@ $fileUrl = Media::url($m);
 <link rel="stylesheet" href="<?= e(asset('css/pdfviewer.css')) ?>">
 <script type="module" src="<?= e(asset('js/pdfviewer.mjs')) ?>"></script>
 </head>
-<body class="pv<?= $embed ? ' pv--embed' : '' ?>">
+<body class="pv<?= $embed ? ' pv--embed' : '' ?><?= !empty($mini) ? ' pv--mini' : '' ?>">
 <header class="pv-bar">
   <?php if (!$embed): ?><button type="button" class="pv-btn pv-back" data-back aria-label="Zurück">←</button><?php endif; ?>
   <div class="pv-title"><strong><?= e($name) ?></strong><small>PDF<?= $pages ? ' · ' . $pages . ' ' . ($pages === 1 ? 'Seite' : 'Seiten') : '' ?> · <?= e(Media::humanSize((int) $m['size'])) ?></small></div>

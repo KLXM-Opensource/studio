@@ -40,7 +40,7 @@ final class PdfController
             if ($ok !== true) throw new HttpException(404);
         }
         $html = Theme::capture(ROOT . '/app/Views/pdf-viewer.php', [
-            'm' => $m, 'embed' => isset($r->query['embed']),
+            'm' => $m, 'embed' => isset($r->query['embed']), 'mini' => ($r->query['embed'] ?? '') === 'mini',   // mini: nur Blättern (Seitenleiste der Mediathek)
             'back' => isset($r->query['embed']) ? null : url('/'),
         ]);
         return (new Response($html))

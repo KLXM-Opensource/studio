@@ -20,6 +20,16 @@ body.pv{margin:0;display:flex;flex-direction:column;background:var(--bg);color:v
 .pv-dl{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:#fff;color:var(--bx);font-weight:700;text-decoration:none}
 .pv-dl:hover{background:#EDE9E3}
 .pv--embed .pv-bar{padding:6px 10px}
+/* Mini (?embed=mini, Seitenleiste der Mediathek): nur Blättern als schwebende Leiste unten */
+.pv--mini{--bg:#F2F2F4}
+.pv--mini .pv-bar{position:fixed;left:50%;bottom:8px;z-index:5;transform:translateX(-50%);padding:3px;border-radius:999px;background:rgba(22,32,30,.82);box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(6px)}
+.pv--mini :is(.pv-title,.pv-sep,[data-zoom-out],.pv-zoom,[data-zoom-in],.pv-dl){display:none}
+.pv--mini .pv-btn{min-width:28px;height:28px;padding:0 8px;border-radius:999px;font-size:15px;background:transparent}
+.pv--mini .pv-btn:hover{background:rgba(255,255,255,.15)}
+.pv--mini .pv-pagenum{gap:4px;font-size:12px}
+.pv--mini .pv-pagenum input{width:38px;height:24px;border-radius:999px;font-size:12px;-moz-appearance:textfield}
+.pv--mini .pv-pagenum input::-webkit-inner-spin-button{display:none}
+.pv--mini .pv-doc{padding:10px 10px 48px;gap:10px}
 
 .pv-doc{flex:1;overflow:auto;padding:16px 16px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;outline:none}
 .pv-page{position:relative;flex:none;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 12px 30px -18px rgba(0,0,0,.35)}
