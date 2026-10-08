@@ -16,6 +16,7 @@
   <ul>
     <li>Oben in der Leiste wählen Sie die <b>Darstellung</b>: <b>Symbole</b> (gleich große Kacheln – Hochkant-Bilder werden eingepasst, nicht beschnitten), <b>Mauerwerk</b> (jedes Bild im eigenen Seitenverhältnis, lückenlos untereinander – gut für Fotostrecken) oder <b>Liste</b> (mit Größe, Datum und Verwendung).</li>
     <li>Der Regler <b>Symbolgröße</b> daneben macht die Kacheln größer oder kleiner. Darstellung und Größe merkt sich die Mediathek je Browser.</li>
+    <li><b>Sortieren</b> in Symbolen und Mauerwerk über das Auswahlfeld daneben: neueste oder älteste zuerst, zuletzt geändert, Name A–Z bzw. Z–A, größte oder kleinste zuerst, Art. In der Liste sortieren die Spaltenköpfe – beide nutzen dieselbe Sortierung.</li>
     <li>Die Bereiche links (<b>Sammlungen</b>, <b>Tags</b> …) lassen sich mit dem Pfeil zuklappen, wenn die Liste lang wird.</li>
     <li>Beim Hochladen erscheint das Fenster mit Fortschritt und Alt-Texten in der Mitte des Bildschirms.</li>
   </ul>

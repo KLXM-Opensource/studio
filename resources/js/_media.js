@@ -544,6 +544,11 @@ class Finder {
             <button type="button" data-view="list" aria-label="Liste" title="Liste">${SVG.list}</button>
           </div>
           <input type="range" class="fx-size" min="88" max="220" step="4" value="${this.size}" aria-label="Symbolgröße" data-size>
+          <label class="fx-sort" data-sortwrap><span class="adm-sr">Sortieren</span><select data-sortsel aria-label="Sortieren">
+            <option value="created_at:-1">Neueste zuerst</option><option value="created_at:1">Älteste zuerst</option>
+            <option value="updated_at:-1">Zuletzt geändert</option><option value="name:1">Name A–Z</option><option value="name:-1">Name Z–A</option>
+            <option value="size:-1">Größte zuerst</option><option value="size:1">Kleinste zuerst</option><option value="type:1">Art</option>
+          </select></label>
           <label class="fx-search">${SVG.search}<input type="search" placeholder="Suchen" aria-label="Medien durchsuchen" data-q></label>
           <button type="button" class="fx-tbtn fx-infotoggle" data-infotoggle data-fav-before aria-label="Informationen ein-/ausblenden">${SVG.info}</button>
           <span class="fx-sources" data-sources hidden></span>
@@ -624,6 +629,11 @@ class Finder {
     }
     $$('[data-view]', r).forEach(b => b.addEventListener('click', () => { this.view = b.dataset.view; store.set('view', this.view); this.applyView(); this.render(); }));
     $('[data-size]', r).addEventListener('input', e => { this.size = +e.target.value; store.set('size', this.size); this.applyView(); });
+    // Sortieren in Symbolen und Mauerwerk (Liste: Spaltenköpfe) – dieselbe Sortierung, gemerkt je Browser
+    $('[data-sortsel]', r).addEventListener('change', e => {
+      const [key, dir] = e.target.value.split(':');
+      this.sort = { key, dir: +dir }; store.set('sort', this.sort); this.items = this.sorted(this.items); this.render();
+    });
     let t;
     $('[data-q]', r).addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { this.q = e.target.value; this.load(); }, 200); });
 
@@ -725,6 +735,7 @@ class Finder {
     this.root.style.setProperty('--fx-size', this.size + 'px');
     $$('[data-view]', this.root).forEach(b => b.setAttribute('aria-pressed', b.dataset.view === this.view));
     $('[data-size]', this.root).hidden = this.view === 'list';
+    $('[data-sortwrap]', this.root).hidden = this.view === 'list';
   }
 
   // ---------------------------------------------------------- Daten
@@ -848,6 +859,8 @@ class Finder {
     $('[data-count]', this.root).textContent = `${this.items.length} ${this.items.length === 1 ? 'Objekt' : 'Objekte'}`;
     const head = $('.fx-listhead', this.root);
     const sortBtn = (k, l) => `<button type="button" data-sort="${k}" class="${this.sort.key === k ? 'is-sorted' + (this.sort.dir < 0 ? ' is-desc' : '') : ''}">${l}</button>`;
+    const sel = $('[data-sortsel]', this.root), want = `${this.sort.key}:${this.sort.dir}`;
+    if (sel) { if (![...sel.options].some(o => o.value === want)) sel.add(new Option('Eigene Sortierung (Liste)', want)); sel.value = want; }
     head.innerHTML = this.view === 'list' ? sortBtn('name', 'Name') + sortBtn('type', 'Art') + sortBtn('size', 'Größe') + '<span>Tags</span>' + sortBtn('updated_at', 'Geändert') : '';
     head.removeAttribute('aria-hidden');
     head.onclick = e => { const b = e.target.closest('[data-sort]'); if (!b) return; const k = b.dataset.sort; this.sort = { key: k, dir: this.sort.key === k ? -this.sort.dir : (k === 'name' || k === 'type' ? 1 : -1) }; store.set('sort', this.sort); this.items = this.sorted(this.items); this.render(); };

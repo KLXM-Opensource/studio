@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: Sortieren auch in Symbolen und Mauerwerk
+- Auswahlfeld „Sortieren“ in der Werkzeugleiste (neueste/älteste, zuletzt geändert, Name A–Z/Z–A, Größe, Art); die Liste sortiert weiter über die Spaltenköpfe.
+
 ### Fluid: Fließtext blendet beim Scrollen ein (optional)
 - Fließtext: Feld **Einblenden, wenn der Text in den Blick kommt** – aus, ganzer Block, Absätze nacheinander (nutzt data-reveal und
   „Art des Einblendens“ aus dem Design; nicht im Editor).

@@ -356,6 +356,8 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .fx-seg button{display:grid;place-items:center;width:32px;height:24px;border:0;border-radius:6px;background:none;color:var(--adm-t3);cursor:pointer}
 .fx-seg button[aria-pressed=true]{background:var(--adm-surface);color:var(--adm-ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .fx-size{width:90px;accent-color:var(--adm-a)}
+.fx-sort select{min-height:28px;height:28px;padding:0 26px 0 8px;border-radius:7px;font-size:12.5px;max-width:150px}
+.fx-sort[hidden]{display:none}
 .fx-search{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;background:var(--adm-hover);color:var(--adm-t3);width:200px;flex:0 1 200px;min-width:110px}
 @media (max-width:1100px){.fx-size{display:none}}   /* Größenregler (Symbole, Mauerwerk) erst auf schmalen Fenstern ausblenden */
 @media (max-width:1560px){.fx-size{width:72px}.fx-search{flex-basis:160px;width:160px}}
