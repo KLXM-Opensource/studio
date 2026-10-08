@@ -27,6 +27,10 @@ final class Layout
         '1-1' => '½ + ½', '2-1' => '⅔ + ⅓', '1-2' => '⅓ + ⅔', '1-1-1' => '⅓ × 3', '1-1-1-1' => '¼ × 4', '1-3' => '¼ + ¾', '3-1' => '¾ + ¼',
     ];
 
+    /** Gezogene Spaltenbreiten (Editor: Griff zwischen den Spalten) in Zwölfteln; je Spalte mindestens MIN_UNITS */
+    public const UNITS = 12;
+    public const MIN_UNITS = 2;
+
     /** Verschachtelbare Blöcke, wenn ein Kit selbst nichts markiert (kein Block mit 'nestable') */
     public const DEFAULT_NESTABLE = ['richtext', 'text', 'quote', 'faq', 'downloads', 'notice'];
 
@@ -37,8 +41,8 @@ final class Layout
             'label' => 'Layout (Spalten)', 'icon' => '▥', 'group' => 'Layout', 'core' => true, 'nestable' => false,
             'help' => 'Blöcke in Spalten nebeneinander: Raster wählen, dann in jede Spalte Blöcke einfügen („+ Block in diese Spalte“). Auf schmalen Bildschirmen stehen die Spalten untereinander. Hintergrund, Abstände und Sprungmarke gelten für den ganzen Abschnitt.',
             'fields' => [
-                ['name' => 'preset', 'label' => 'Raster', 'type' => 'select', 'required' => true, 'default' => '1-1', 'options' => self::PRESET_LABELS,
-                    'help' => 'Weniger Spalten als bisher: Die Blöcke der wegfallenden Spalten wandern in die letzte Spalte – es geht nichts verloren.'],
+                ['name' => 'preset', 'label' => 'Raster', 'type' => 'select', 'required' => true, 'default' => '1-1', 'options' => self::PRESET_LABELS, 'tiles' => self::PRESETS,
+                    'help' => 'Breiten lassen sich auf der Seite mit dem Griff zwischen den Spalten ziehen (Doppelklick: zurück zum Raster). Weniger Spalten als bisher: Die Blöcke der wegfallenden Spalten wandern in die letzte Spalte – es geht nichts verloren.'],
                 ['name' => 'valign', 'label' => 'Ausrichtung vertikal', 'type' => 'select', 'required' => true, 'default' => 'top', 'width' => 'half',
                     'options' => ['top' => 'Oben', 'center' => 'Mitte', 'bottom' => 'Unten', 'stretch' => 'Gestreckt (gleich hoch)']],
                 ['name' => 'gap', 'label' => 'Abstand zwischen den Spalten', 'type' => 'select', 'required' => true, 'default' => 'normal', 'width' => 'half',
@@ -59,6 +63,31 @@ final class Layout
     {
         $p = (string) ($data['preset'] ?? '');
         return isset(self::PRESETS[$p]) ? $p : '1-1';
+    }
+
+    /** Gezogene Breiten prüfen: {preset, w: [Zwölftel je Spalte]} – nur gültig für dieses Raster (anderes Raster gewählt → verworfen) */
+    public static function cleanWidths(mixed $w, string $preset): ?array
+    {
+        if (!is_array($w) || ($w['preset'] ?? '') !== $preset || !is_array($w['w'] ?? null)) return null;
+        $v = array_map('intval', array_values($w['w']));
+        if (count($v) !== self::count($preset) || array_sum($v) !== self::UNITS) return null;
+        foreach ($v as $x) if ($x < self::MIN_UNITS || $x > self::UNITS - self::MIN_UNITS) return null;
+        return ['preset' => $preset, 'w' => $v];
+    }
+
+    /** Gewichte der Spalten: gezogene Breiten oder die des Rasters */
+    public static function weights(array $data): array
+    {
+        $p = self::preset($data);
+        return self::cleanWidths($data['widths'] ?? null, $p)['w'] ?? self::PRESETS[$p];
+    }
+
+    /** Breiten in Zwölfteln (für den Griff im Editor) */
+    public static function units(array $data): array
+    {
+        $w = self::weights($data);
+        $sum = array_sum($w);
+        return $sum === self::UNITS ? $w : array_map(fn($x) => (int) round($x * self::UNITS / $sum), $w);
     }
 
     public static function count(string $preset): int
@@ -132,8 +161,8 @@ final class Layout
         if (($d['stack'] ?? '') === 'tablet') $cls[] = 'lay-stack-tablet';
         if (!empty($d['reverse'])) $cls[] = 'lay-rev';
         $parentBg = $layout->bg();
-        $weights = self::PRESETS[$preset];
-        $html = '<div class="' . e(trim(implode(' ', $cls))) . '">' . "\n";
+        $weights = self::weights($d);
+        $html = '<div class="' . e(trim(implode(' ', $cls))) . '"' . ($editing ? ' data-lay-w="' . e(implode(',', self::units($d))) . '"' : '') . '>' . "\n";
         foreach ($cols as $ci => $col) {
             $items = '';
             foreach ($col['blocks'] as $bi => $c) {

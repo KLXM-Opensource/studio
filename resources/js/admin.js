@@ -32,6 +32,7 @@ import { initToolbar, bar_ } from './_bar.js';   // Redaktions-Werkzeugleiste: M
 import { initTools, tools_, emit, beforeSave } from './_tools.js';   // Werkzeuge beim Bearbeiten (Core\FrontendTools) + Ereignisse cms:*
 import { initAi } from './_ai.js';   // KI-Assistent (Core\AI) – ohne Konfiguration #cms-ai wirkungslos
 import { initIconPickers, initIconGallery } from './_iconpicker.js';
+import { initTiles } from './_tiles.js';   // Auswahl als Kacheln (z. B. Raster des Layout-Blocks)
 import { ico } from './_icons.js';   // Symbolauswahl (Feldtyp „icon“, Tabellensymbol)
 import { initAccent } from './_accent.js';   // Konto → Akzentfarbe: Live-Vorschau (Core\Accent)
 import { initFeatures } from './_features.js';   // Funktionen & Erweiterungen: Sicherheitsbestätigung (Core\Features)
@@ -247,7 +248,7 @@ function initRepeaters(scope = d) {
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
         uniqueIds(added);
-        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initShowIf(added); initIconPickers(added); initLinkFields(added); initPagesFields(added);
+        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initShowIf(added); initIconPickers(added); initTiles(added); initLinkFields(added); initPagesFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
         bar_.ask({ title: t('Eintrag entfernen?'), ok: t('Entfernen') }).then(ok => { if (!ok) return; const nx = item.nextElementSibling || item.previousElementSibling; item.remove(); rep.dispatchEvent(new Event('input', { bubbles: true })); ($('[data-rep=remove]', nx || rep) || $('[data-rep=add]', rep))?.focus(); });
@@ -954,7 +955,7 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 

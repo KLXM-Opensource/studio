@@ -7028,4 +7028,8 @@ return [
     'Zurückgesetzt: {n} Mitteilungen, Zahlen und {s} Abos gelöscht.' => 'Reset: {n} notifications, figures and {s} subscriptions deleted.',
     'Testumgebung (Staging) aktiv' => 'Test environment (staging) active',
     'Kein Schlüssel für verschlüsselte Anfragen' => 'No key for encrypted requests',
+    'Breite von Spalte {a} und {b} ziehen – jetzt {w}. Pfeiltasten: schmaler/breiter, Entf: zurück zum Raster.' => 'Drag the width of column {a} and {b} – now {w}. Arrow keys: narrower/wider, Delete: back to the grid.',
+    'Ziehen: Spaltenbreite ändern · Doppelklick: zurück zum Raster' => 'Drag: change column width · Double-click: back to the grid',
+    'Spaltenbreiten: {w} – noch nicht gespeichert.' => 'Column widths: {w} – not saved yet.',
+    'Spaltenbreiten zurück zum Raster – noch nicht gespeichert.' => 'Column widths back to the grid – not saved yet.',
 ];

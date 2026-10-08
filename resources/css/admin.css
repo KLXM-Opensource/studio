@@ -3239,3 +3239,18 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 @keyframes fx-up-dim{from{opacity:0}to{opacity:1}}
 .fx--library .fx-info:has(~ .fx-uploads:not([hidden])){padding-bottom:0}
 @media (prefers-reduced-motion:reduce){.fx-uploads:not([hidden]),.fx:has(> .fx-uploads:not([hidden]))::after{animation:none}}
+
+/* Auswahl als Kacheln (Core\Fields::renderTiles, resources/js/_tiles.js) – z. B. Raster des Layout-Blocks */
+.f-tiles{display:none}
+.f-tiles.is-ready{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:8px}
+.f-tiles__select.is-hidden{display:none}
+.f-tile{display:grid;gap:6px;justify-items:center;padding:8px 6px 6px;border:1px solid var(--adm-in);border-radius:10px;background:var(--adm-surface);color:var(--adm-t2);font:500 12px/1.2 var(--adm-font);cursor:pointer;transition:border-color .15s,box-shadow .15s,background-color .15s}
+.f-tile:hover{border-color:var(--adm-a);color:var(--adm-ink)}
+.f-tile:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.f-tile[aria-pressed=true]{border-color:var(--adm-a);box-shadow:0 0 0 1px var(--adm-a);background:var(--adm-accent-bg);color:var(--adm-ink);font-weight:650}
+.f-tile__grid{display:flex;gap:3px;width:100%;height:30px}
+.f-tile__c{flex-grow:1;border-radius:4px;background:color-mix(in srgb,var(--adm-a) 22%,var(--adm-surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--adm-a) 35%,transparent)}
+.f-tile[aria-pressed=true] .f-tile__c{background:var(--adm-a);box-shadow:none}
+.f-tile__c--w2{flex-grow:2}.f-tile__c--w3{flex-grow:3}.f-tile__c--w4{flex-grow:4}
+.f-tile__label{font-variant-numeric:tabular-nums}
+@media (forced-colors:active){.f-tile__c{border:1px solid CanvasText}.f-tile[aria-pressed=true]{outline:2px solid Highlight}}

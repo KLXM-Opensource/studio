@@ -96,7 +96,8 @@ $__sample = $vars['blocks_page'] ?? null;
   <h3 id="layout">Layout: Blöcke in Spalten</h3>
   <p>Für Blöcke <b>nebeneinander</b> – z. B. ein Text (⅔) und daneben eine Box mit Button (⅓), zwei Texte je ½ oder drei kurze Blöcke je ⅓ – gibt es den Block <b>„Layout (Spalten)“</b>. Sie wählen ein <b>Raster</b> und stellen die Blöcke in die Spalten; der Rest der Seite bleibt davon unberührt.</p>
   <ol class="doc-steps">
-    <li><b>+ Block einfügen</b> → <b>Layout (Spalten)</b>. Die Seitenleiste öffnet sich: <b>Raster</b> wählen – ½ + ½, ⅔ + ⅓, ⅓ + ⅔, ⅓ × 3, ¼ × 4, ¼ + ¾ oder ¾ + ¼.</li>
+    <li><b>+ Block einfügen</b> → <b>Layout (Spalten)</b>. Die Seitenleiste öffnet sich: <b>Raster</b> per Klick auf eine der Kacheln wählen – ½ + ½, ⅔ + ⅓, ⅓ + ⅔, ⅓ × 3, ¼ × 4, ¼ + ¾ oder ¾ + ¼.</li>
+    <li><b>Breiten fein einstellen:</b> Zwischen zwei Spalten sitzt ein schmaler <b>Griff</b>. Ziehen Sie ihn nach links oder rechts – die Spalte wird schmaler oder breiter, die Nachbarspalte gleicht aus. Der Griff rastet auf Zwölftel ein und zeigt die Aufteilung an (z. B. „⅓ · ⅔“ oder „5/12 · 7/12“). Mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Doppelklick (bzw. Entf) stellt die Breiten des Rasters wieder her; ein anderes Raster wählen ebenso.</li>
     <li>In jeder Spalte <b>+ Block in diese Spalte</b> wählen. Angeboten werden nur Blöcke, die in eine Spalte passen (z. B. Fließtext, Zitat, Hinweisbox, Handlungsaufruf als Box, Downloads, Video, Formular) – große Blöcke wie Kopfbereiche oder breite Bilder nicht.</li>
     <li>Texte schreiben Sie wie gewohnt direkt in der Seite. Über jedem Block in einer Spalte steht eine kleine Leiste: <b>↑ ↓</b> verschieben innerhalb der Spalte, <b>← →</b> in die Nachbarspalte, <b>Bearbeiten</b> öffnet alle Felder in der Seitenleiste, <b>✕</b> löscht den Block (mit Rückfrage).</li>
   </ol>

@@ -25,6 +25,8 @@
   display:flex;flex-direction:column;gap:var(--lay-item-gap,clamp(24px,3vw,40px))}
 .lay-stack-tablet>.lay-col{flex-basis:calc((var(--lay-stack-tablet,940px) - 100%) * 999)}
 .lay-col--w1{--lay-w:1}.lay-col--w2{--lay-w:2}.lay-col--w3{--lay-w:3}
+/* Gezogene Breiten in Zwölfteln (Core\Layout::cleanWidths) */
+.lay-col--w4{--lay-w:4}.lay-col--w5{--lay-w:5}.lay-col--w6{--lay-w:6}.lay-col--w7{--lay-w:7}.lay-col--w8{--lay-w:8}.lay-col--w9{--lay-w:9}.lay-col--w10{--lay-w:10}
 /* Gestreckt: Blöcke füllen die Spaltenhöhe (Karten gleich hoch) */
 .lay-v-stretch>.lay-col>.lay-item:last-child{flex-grow:1}
 /* Leere Spalte (Besucher): nimmt Platz ein, zeigt nichts */

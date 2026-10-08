@@ -22,7 +22,7 @@ $cls = ($marker !== 'auto' ? ' steps--m-' . $marker : '') . ($colors !== 'auto' 
   <?php if ($items): ?>
   <ol class="steps steps--<?= e($v) ?><?= $v === 'numbers' ? ' grid min-s' : '' ?><?= e($cls) ?>" role="list">
     <?php foreach ($items as $i => $it): ?>
-    <li class="step"<?= $motion === 'none' ? '' : ' data-reveal' ?><?= $motion === 'sequence' ? ' style="--i:' . $i . '"' : '' ?>>
+    <li class="step"<?= $motion === 'none' ? '' : ' data-reveal' ?>>
       <span class="step__num" aria-hidden="true"><?= !empty($it['icon']) ? icon((string) $it['icon']) : str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
       <div class="step__body">
         <?php if (trim((string) ($it['meta'] ?? '')) !== ''): ?><p class="step__meta"<?= $b->edit("items.$i.meta") ?>><?= e($it['meta']) ?></p><?php endif; ?>

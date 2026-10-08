@@ -590,3 +590,12 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-bar[data-bar] .cms-btn--sq svg{width:18px;height:18px}
 .cms-bar[data-bar] .cms-redo svg{transform:scaleX(-1)}
 .cms-bar[data-bar] .cms-btn--sq[aria-disabled="true"]{opacity:.4;cursor:default}
+
+/* Layout: Griff zwischen zwei Spalten (editor.js decorateResize) – ziehen ändert die Breiten, rastet auf Zwölftel ein */
+.cms-lay-resize__h{all:unset;box-sizing:border-box;position:absolute;inset:0;display:grid;place-items:center;cursor:col-resize;touch-action:none}
+.cms-lay-resize__h::before{content:"";width:4px;height:min(64px,40%);border-radius:4px;background:#314164;opacity:.35;box-shadow:0 0 0 2px #fff;transition:opacity .15s,height .15s,background-color .15s}
+.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag)::before{opacity:1;height:min(120px,70%);background:#3DD9A0}
+.cms-lay-resize__h:focus-visible{outline:2px solid #314164;outline-offset:2px;border-radius:6px}
+.cms-lay-resize__tip{position:absolute;top:50%;left:50%;translate:-50% calc(-50% - 52px);padding:4px 9px;border-radius:999px;background:#24314B;color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-lay-resize__tip{opacity:1}
+@media (prefers-reduced-motion:reduce){.cms-lay-resize__h::before,.cms-lay-resize__tip{transition:none}}

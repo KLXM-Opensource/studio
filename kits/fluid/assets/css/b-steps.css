@@ -60,6 +60,17 @@
 /* Animation: nacheinander einblenden (Verzögerung je Schritt), Linie wächst beim Scrollen (scroll-getrieben, ohne Skript) */
 @media (prefers-reduced-motion:no-preference){
   .has-motion.js .steps--a-sequence>li[data-reveal]{transition-delay:calc(var(--i,0) * 140ms)}
+  .steps--a-sequence>li:nth-child(2){--i:1}
+  .steps--a-sequence>li:nth-child(3){--i:2}
+  .steps--a-sequence>li:nth-child(4){--i:3}
+  .steps--a-sequence>li:nth-child(5){--i:4}
+  .steps--a-sequence>li:nth-child(6){--i:5}
+  .steps--a-sequence>li:nth-child(7){--i:6}
+  .steps--a-sequence>li:nth-child(8){--i:7}
+  .steps--a-sequence>li:nth-child(9){--i:8}
+  .steps--a-sequence>li:nth-child(10){--i:9}
+  .steps--a-sequence>li:nth-child(11){--i:10}
+  .steps--a-sequence>li:nth-child(12){--i:11}
   @supports (animation-timeline:view()){
     .steps--a-draw>li.step::before{transform-origin:50% 0;animation:steps-draw linear both;animation-timeline:view();animation-range:entry 40% cover 55%}
     .steps--a-draw>li.step .step__num{animation:steps-pop linear both;animation-timeline:view();animation-range:entry 30% entry 90%}

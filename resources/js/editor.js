@@ -1017,6 +1017,90 @@ function makeTool(type, def) {
         addHost.addEventListener('keydown', e => e.stopPropagation());
         if (this.focusAfter?.add === ci) { ab.focus({ preventScroll: true }); this.focusAfter = null; }
       });
+      this.decorateResize(pv);
+    }
+
+    /**
+     * Spaltenbreiten mit der Maus ziehen (Core\Layout::cleanWidths): Griff zwischen zwei Spalten, rastet auf Zwölftel ein
+     * (½, ⅓, ¼ … werden angezeigt), Nachbarspalte gleicht aus. Pfeiltasten: ein Zwölftel; Doppelklick bzw. Entf: zurück zum Raster.
+     * Gespeichert als data.widths = {preset, w} – ein anderes Raster verwirft die Breiten. Nur, solange die Spalten nebeneinander stehen.
+     */
+    decorateResize(pv) {
+      const T = CMSAdmin.t, E = CMSAdmin.esc;
+      const grid = pv.querySelector('.lay-grid[data-lay-w]');
+      if (!grid) return;
+      const cols = [...grid.children].filter(c => c.matches('[data-lay-col]'));
+      const units = grid.dataset.layW.split(',').map(Number);
+      if (cols.length < 2 || units.length !== cols.length) return;
+      if (cols[1].getBoundingClientRect().top > cols[0].getBoundingClientRect().top + 8) return;   // untereinander (schmal)
+      const U = 12, MIN = 2;
+      const frac = n => ({ 2: '⅙', 3: '¼', 4: '⅓', 6: '½', 8: '⅔', 9: '¾', 10: '⅚' })[n] || n + '/12';
+      const apply = w => cols.forEach((c, i) => c.style.setProperty('--lay-w', w[i]));
+      const commit = async (w, msg) => {
+        if (w) this.data.widths = { preset: this.data.preset || '1-1', w: [...w] }; else delete this.data.widths;
+        markDirty();
+        const st = S.ui('[data-editor-status]');
+        if (st) st.textContent = msg;
+        await this.loadPreview();
+      };
+      const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+      for (let i = 0; i < cols.length - 1; i++) {
+        const col = cols[i];
+        col.style.position = 'relative';
+        const host = d.createElement('div');
+        host.className = 'cms-lay-resize'; host.contentEditable = 'false';
+        host.style.cssText = `position:absolute;top:0;bottom:0;right:${-(gap / 2) - 11}px;width:22px;z-index:6`;
+        col.append(host);
+        const sr = S.shadowFor(host, `<button type="button" class="cms-lay-resize__h" role="separator" aria-orientation="vertical"><span class="cms-lay-resize__tip"></span></button>`);
+        const h = sr.querySelector('.cms-lay-resize__h'), tip = sr.querySelector('.cms-lay-resize__tip');
+        const label = w => w.map(frac).join(' · ');
+        const aria = w => {
+          tip.textContent = label(w);
+          h.setAttribute('aria-label', T('Breite von Spalte {a} und {b} ziehen – jetzt {w}. Pfeiltasten: schmaler/breiter, Entf: zurück zum Raster.', { a: i + 1, b: i + 2, w: label(w) }));
+          h.setAttribute('aria-valuenow', String(w[i])); h.setAttribute('aria-valuemin', String(MIN)); h.setAttribute('aria-valuemax', String(w[i] + w[i + 1] - MIN));
+        };
+        aria(units);
+        h.title = T('Ziehen: Spaltenbreite ändern · Doppelklick: zurück zum Raster');
+        let drag = null;
+        h.addEventListener('pointerdown', e => {
+          e.preventDefault(); e.stopPropagation();
+          h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+          const total = grid.getBoundingClientRect().width - gap * (cols.length - 1);
+          drag = { w: [...units], left: col.getBoundingClientRect().left, unit: total / U, pair: units[i] + units[i + 1], before: units.slice(0, i).reduce((a, b) => a + b, 0) };
+          apply(drag.w);
+        });
+        h.addEventListener('pointermove', e => {
+          if (!drag) return;
+          const x = e.clientX - drag.left;
+          const n = Math.max(MIN, Math.min(drag.pair - MIN, Math.round(x / drag.unit)));
+          if (n === drag.w[i]) return;
+          drag.w[i] = n; drag.w[i + 1] = drag.pair - n;
+          apply(drag.w); aria(drag.w);
+        });
+        const end = async e => {
+          if (!drag) return;
+          const w = drag.w; drag = null; h.classList.remove('is-drag');
+          if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
+          if (w.join() !== units.join()) await commit(w, T('Spaltenbreiten: {w} – noch nicht gespeichert.', { w: label(w) }));
+        };
+        h.addEventListener('pointerup', end);
+        h.addEventListener('pointercancel', end);
+        h.addEventListener('dblclick', e => { e.stopPropagation(); commit(null, T('Spaltenbreiten zurück zum Raster – noch nicht gespeichert.')); });
+        h.addEventListener('click', e => e.stopPropagation());
+        h.addEventListener('keydown', e => {
+          e.stopPropagation();
+          const step = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
+          if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); commit(null, T('Spaltenbreiten zurück zum Raster – noch nicht gespeichert.')); return; }
+          if (!step) return;
+          e.preventDefault();
+          const w = [...units], pair = w[i] + w[i + 1], n = Math.max(MIN, Math.min(pair - MIN, w[i] + step));
+          if (n === w[i]) return;
+          w[i] = n; w[i + 1] = pair - n;
+          this.focusAfter = { resize: i };
+          commit(w, T('Spaltenbreiten: {w} – noch nicht gespeichert.', { w: label(w) }));
+        });
+        if (this.focusAfter?.resize === i) { h.focus({ preventScroll: true }); this.focusAfter = null; }
+      }
     }
 
     /** Lage eines Blocks in den Spalten: [Spalte, Position] */

@@ -374,6 +374,8 @@ final class Pages
                 $preset = Layout::preset($data);
                 $cols = Layout::fitColumns(is_array($b['data']['columns'] ?? null) ? $b['data']['columns'] : [], Layout::count($preset));
                 $data['columns'] = array_map(fn($c) => ['blocks' => self::sanitizeBlocks($c['blocks'], $seen, true)], $cols);
+                // Gezogene Spaltenbreiten (Editor) – nur gültig für das gewählte Raster
+                if ($w = Layout::cleanWidths($b['data']['widths'] ?? null, $preset)) $data['widths'] = $w;
             }
             $id = preg_replace('~[^\w\-]~', '', (string) ($b['id'] ?? '')) ?: substr(bin2hex(random_bytes(6)), 0, 10);
             while (isset($seen[$id])) $id = substr(bin2hex(random_bytes(6)), 0, 10);

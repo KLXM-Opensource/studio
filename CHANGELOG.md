@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Layout (Spalten): Raster als Bild, Breiten mit der Maus ziehen
+- Das **Raster** wählt man jetzt über Kacheln mit Mini-Vorschau statt über eine Textliste (Feldoption `tiles`, für alle Auswahlfelder nutzbar).
+- Im Bearbeiten-Modus sitzt zwischen zwei Spalten ein **Griff**: ziehen ändert die Breiten (rastet auf Zwölftel ein, zeigt ½, ⅓, ¼ …),
+  die Nachbarspalte gleicht aus. Pfeiltasten: ein Zwölftel; Doppelklick bzw. Entf: zurück zum Raster. Gespeichert als `widths`
+  zum gewählten Raster – ein anderes Raster setzt die Breiten zurück.
+
 ### Fluid: moderne Varianten
 - **Buttons:** Farbverlauf mit Leuchten, Neo-Brutalismus. **Karten:** getönt, Verlaufsrahmen, Neo-Brutalismus.
 - **Seitenhintergrund:** Aurora (Farbschleier), Körnung (Grain), senkrechte Rasterlinien. **Farbige Abschnitte** als abgerundete Flächen.
