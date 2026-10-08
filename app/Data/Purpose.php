@@ -127,7 +127,8 @@ final class Purpose
                 : __('Dafür braucht es die Funktion „Anfragen per E-Mail zustellen“ (Funktionen & Erweiterungen).')),
             'inbox' => Inbox::available() ? null : __('Dafür braucht es die Funktion „Anfragen“ (Funktionen & Erweiterungen).'),
             'registration' => DataForms::available() ? null : __('Dafür braucht es die Funktion „Formulare für Datentabellen“ (Funktionen & Erweiterungen).'),
-            'source' => Features::on('sources') ? null : __('Dafür braucht es die Funktion „Externe Quellen“ (Funktionen & Erweiterungen).'),
+            'source' => !\Core\Sources\Sources::enabled() || !Features::on('data', false) ? __('Dafür braucht es die Funktion „Externe Quellen“ (Funktionen & Erweiterungen).')
+                : (\Core\Sources\Sources::canManage() ? null : __('Externe Quellen darf nur anlegen, wer das Recht „Externe Quellen verwalten“ hat.')),
             default => null,
         };
     }

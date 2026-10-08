@@ -7012,4 +7012,5 @@ return [
     'Zum Lesen über der Liste den geheimen {key} eingeben und „Entschlüsseln“ wählen. Er wird weder gespeichert noch protokolliert; nach dem Neuladen ist wieder alles verschlossen.' => 'To read, enter the secret {key} above the list and choose “Decrypt”. It is neither stored nor logged; after reloading everything is locked again.',
     'niemandem zugewiesen' => 'not assigned',
     '{n} Anfragen' => '{n} requests',
+    'Externe Quellen darf nur anlegen, wer das Recht „Externe Quellen verwalten“ hat.' => 'External sources can only be created with the “Manage external sources” permission.',
 ];

@@ -244,8 +244,8 @@ final class DataController extends AdminController
             }
             $purpose = $r->str('purpose');
             if (!\Core\Data\Purpose::valid($purpose)) return $this->wizardView('art', $st, ['purpose' => __('Bitte wählen Sie, was Sie anlegen möchten.')], 422);
-            if ($purpose === 'source') return Response::redirect(url('/admin/quellen/new'));
             if ($why = \Core\Data\Purpose::unavailable($purpose)) return $this->wizardView('art', $st, ['purpose' => $why], 422);
+            if ($purpose === 'source') return Response::redirect(url('/admin/quellen/new'));
             if (($st['purpose'] ?? '') !== $purpose) $st = ['purpose' => $purpose];
             app()->session->set(self::WIZARD, $st);
             return Response::redirect(url('/admin/data/new?schritt=vorlage'));
