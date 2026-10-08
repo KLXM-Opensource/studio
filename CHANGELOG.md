@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: Fließtext blendet beim Scrollen ein (optional)
+- Fließtext: Feld **Einblenden, wenn der Text in den Blick kommt** – aus, ganzer Block, Absätze nacheinander (nutzt data-reveal und
+  „Art des Einblendens“ aus dem Design; nicht im Editor).
+
 ### Fluid: Inhaltsverzeichnis läuft beim Scrollen mit (optional)
 - Fließtext „Artikel“: Feld **Beim Scrollen mitlaufen** – aus (Standard), aktuellen Abschnitt markieren (Markierung gleitet), markieren
   mit Lesefortschritt (Linie am Inhaltsverzeichnis). aria-current="location", langes Inhaltsverzeichnis scrollt mit; ohne Bewegung ohne Animation.

@@ -15,6 +15,8 @@ const html = d.documentElement;
 html.classList.replace('no-js', 'js');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
+// Fließtext „Absätze nacheinander“ (Feld reveal): jeder Absatz, jede Liste, jedes Bild einzeln einblenden
+d.querySelectorAll('[data-reveal-children]').forEach(p => { for (const c of p.children) c.setAttribute('data-reveal', ''); });
 // ------------------------------------------------------------ Einblenden beim Scrollen (einmalig; nur mit „Animationen“ und ohne „Bewegung reduzieren“ – CSS)
 if (html.classList.contains('has-motion') && !reduce.matches && 'IntersectionObserver' in window) {
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });

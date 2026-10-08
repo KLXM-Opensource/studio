@@ -11,10 +11,12 @@ if ($v === 'article') [$html, $toc] = fluid_toc($html, $b->domId());
 $showToc = $v === 'article' && !empty($d['toc']) && count(array_filter($toc, fn($t) => $t['level'] === 2)) >= 2;
 $meta = trim((string) ($d['meta'] ?? ''));
 $measure = in_array($d['measure'] ?? 'normal', ['narrow', 'wide', 'full'], true) && $v !== 'columns' ? ' prose--m-' . $d['measure'] : '';
-$prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') . ($v === 'columns' ? ' prose--columns' : '') . $measure . '"' . $b->edit('text', 'rich') . '>' . $html . '</div>';
+// Einblenden beim Scrollen (Feld reveal): ganzer Block bzw. Absätze nacheinander (site.js setzt data-reveal an die Absätze) – nicht im Editor
+$reveal = is_editing() ? 'off' : (string) ($d['reveal'] ?? 'off');
+$prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') . ($v === 'columns' ? ' prose--columns' : '') . $measure . '"' . ($reveal === 'paragraphs' ? ' data-reveal-children' : '') . $b->edit('text', 'rich') . '>' . $html . '</div>';
 ?>
 <?php if ($v === 'article'): ?>
-<div class="wrap article">
+<div class="wrap article"<?= $reveal === 'block' ? ' data-reveal' : '' ?>>
   <?= fluid_head($b, 'article__head') ?>
   <?php if ($meta !== '' || trim(strip_tags($html)) !== ''): ?>
   <p class="article__meta"><?php if ($meta !== ''): ?><span<?= $b->edit('meta') ?>><?= e($meta) ?></span><span aria-hidden="true"> · </span><?php endif; ?><?= e(lt('{n} Min. Lesezeit', ['n' => fluid_reading_time($html)])) ?></p>
@@ -33,7 +35,7 @@ $prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') 
   </div>
 </div>
 <?php else: ?>
-<div class="wrap<?= $v === 'columns' ? '' : ' wrap--text' ?>">
+<div class="wrap<?= $v === 'columns' ? '' : ' wrap--text' ?>"<?= $reveal === 'block' ? ' data-reveal' : '' ?>>
   <?= fluid_head($b) ?>
   <?= $prose ?>
 </div>
