@@ -49,6 +49,7 @@
   <ul>
     <li><b>Ablauf / Zeitleiste:</b> Felder <b>Kreise</b> (wie Design, gefüllt, zart gefüllt mit Rand, nur Rand, kleiner Punkt ohne Nummer), <b>Farben</b> (wie Design, farbig abwechselnd, eine Farbe, neutral) und <b>Animation</b> (wie Website, nacheinander einblenden, Linie wächst beim Scrollen, keine). Ohne Wahl richtet sich alles nach dem Design – bei „Farbenfroh“ sind die Kreise bunt.</li>
     <li><b>Zitat / Stimmen:</b> neue Darstellung <b>Laufband</b> – die Stimmen laufen langsam durch und halten an, wenn man mit der Maus darauf zeigt oder mit der Tastatur hineinspringt.</li>
+    <li><b>Fließtext „Artikel mit Inhaltsverzeichnis“:</b> Feld <b>Beim Scrollen mitlaufen</b> – „Aktuellen Abschnitt markieren“ lässt eine Markierung im Inhaltsverzeichnis weich zum Abschnitt gleiten, der gerade gelesen wird; „Markieren mit Lesefortschritt“ zeigt zusätzlich links eine Linie, die mit dem Lesen wächst. Standard: aus.</li>
     <li><b>Fließtext:</b> Feld <b>Textbreite</b> (schmal, Lesebreite, breit, volle Breite) – auch direkt auf der Seite am rechten Rand des Textes ziehbar.</li>
     <li><b>Text + Bild:</b> Feld <b>Aufteilung Bild/Text</b> (Text breiter, ausgewogen, Bild breiter, Bild deutlich breiter) – auch auf der Seite am inneren Bildrand ziehbar.</li>
     <li><b>Abstand oben/unten</b> jedes Abschnitts gibt es in Fluid zusätzlich als „Groß“ – in der Seitenleiste oder per Ziehen am Abschnittsrand (siehe <a href="<?= e(url('/admin/hilfe#ziehen')) ?>">Mit der Maus ziehen</a>).</li>

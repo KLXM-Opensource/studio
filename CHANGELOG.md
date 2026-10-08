@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: Inhaltsverzeichnis läuft beim Scrollen mit (optional)
+- Fließtext „Artikel“: Feld **Beim Scrollen mitlaufen** – aus (Standard), aktuellen Abschnitt markieren (Markierung gleitet), markieren
+  mit Lesefortschritt (Linie am Inhaltsverzeichnis). aria-current="location", langes Inhaltsverzeichnis scrollt mit; ohne Bewegung ohne Animation.
+
 ### Leere Felder beim Gestalten ausblenden
 - Menü ⋯ → **Leere Felder ausblenden**: Platzhalter „…“ leerer Felder (und ganz leere Überschriften-Bereiche) nehmen keinen Platz
   mehr ein – echte Abstände beurteilen. Ein Feld mit Fokus bleibt sichtbar.

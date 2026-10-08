@@ -21,7 +21,8 @@ $prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') 
   <?php endif; ?>
   <div class="article__body<?= $showToc ? ' has-toc' : '' ?>">
     <?php if ($showToc): ?>
-    <nav class="toc" aria-labelledby="<?= e($b->domId()) ?>-toc">
+    <?php $spy = in_array($d['scrollspy'] ?? 'off', ['mark', 'progress'], true) ? (string) $d['scrollspy'] : ''; ?>
+    <nav class="toc<?= $spy ? ' toc--spy toc--spy-' . e($spy) : '' ?>" aria-labelledby="<?= e($b->domId()) ?>-toc"<?= $spy ? ' data-scrollspy' : '' ?>>
       <p class="toc__title" id="<?= e($b->domId()) ?>-toc"><?= e(lt('Inhalt')) ?></p>
       <ol class="toc__list" role="list">
         <?php foreach ($toc as $t): ?><li class="toc__item toc__item--<?= (int) $t['level'] ?>"><a href="#<?= e($t['id']) ?>"><?= e($t['label']) ?></a></li><?php endforeach; ?>

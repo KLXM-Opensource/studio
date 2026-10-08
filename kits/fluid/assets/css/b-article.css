@@ -16,3 +16,17 @@
 .prose--columns{max-width:none;column-width:22rem;column-gap:var(--f-s-2xl);column-rule:1px solid var(--f-line)}
 .prose--columns>*{break-inside:avoid-column}
 .prose--columns :is(h3,h4){break-after:avoid-column}
+
+/* Scrollspy (Feld scrollspy, site.js): Markierung gleitet zum aktuellen Abschnitt; „progress“: Linie links wächst mit dem Lesefortschritt.
+   Ohne Skript bleibt das Inhaltsverzeichnis wie gewohnt. */
+.toc--spy .toc__list{position:relative}
+.toc__marker{position:absolute;left:0;right:0;top:0;height:0;border-radius:var(--f-r-s);background:var(--f-bg);box-shadow:inset 3px 0 0 var(--f-a);opacity:0;pointer-events:none;translate:0 var(--toc-y,0);transition:translate .35s cubic-bezier(.2,.7,.2,1),height .35s cubic-bezier(.2,.7,.2,1),opacity .2s}
+.toc__marker.is-on{opacity:1}
+.toc--spy .toc__item{position:relative;z-index:1}
+.toc--spy .toc__item a:hover,.toc--spy .toc__item a[aria-current]{background:transparent}
+.toc--spy .toc__item a[aria-current]{color:var(--f-ink);font-weight:600}
+.toc--spy .toc__item a[aria-current]::before{color:var(--f-a-strong,var(--f-a))}
+.toc--spy-progress .toc__list::before{content:"";position:absolute;left:-.6rem;top:0;bottom:0;width:2px;border-radius:2px;background:var(--f-line)}
+.toc--spy-progress .toc__list::after{content:"";position:absolute;left:-.6rem;top:0;width:2px;height:calc(var(--toc-p,0) * 100%);border-radius:2px;background:linear-gradient(var(--f-a),var(--f-b,var(--f-a)));transition:height .15s linear}
+@media (prefers-reduced-motion:reduce){.toc__marker,.toc--spy-progress .toc__list::after{transition:none}}
+html:not(.has-motion) :is(.toc__marker,.toc--spy-progress .toc__list::after){transition:none}
