@@ -35,9 +35,9 @@ $purpose = Purpose::valid($s['purpose'] ?? null) ? (string) $s['purpose'] : Purp
 if ($isNew) { $main = array_values(array_diff($main, ['einsetzen'])); $more = array_values(array_diff($more, ['einsetzen'])); }
 if (!$inbox && !\Core\Features::on('calendar')) { $main = array_values(array_diff($main, ['kalender'])); $more = array_values(array_diff($more, ['kalender'])); }
 $secLabel = ['allgemein' => __('Allgemein'), 'felder' => __('Felder'), 'website' => __('Auf der Website'), 'formular' => $inbox ? __('Formular & Eingang') : __('Formular'),
-    'benachrichtigungen' => __('Benachrichtigungen'), 'suche' => __('Suche'), 'kalender' => __('Kalender'), 'einsetzen' => __('Einsetzen'), 'erweitert' => __('Erweitert')];
+    'verschluesselung' => __('Verschlüsselung'), 'benachrichtigungen' => __('Benachrichtigungen'), 'suche' => __('Suche'), 'kalender' => __('Kalender'), 'einsetzen' => __('Einsetzen'), 'erweitert' => __('Erweitert')];
 $secIcon = ['allgemein' => 'gear-six', 'felder' => 'list-checks', 'website' => 'browser', 'formular' => $inbox ? 'tray' : 'clipboard-text',
-    'benachrichtigungen' => 'bell-ringing', 'suche' => 'magnifying-glass', 'kalender' => 'calendar-dots', 'einsetzen' => 'puzzle-piece', 'erweitert' => 'sliders-horizontal'];
+    'verschluesselung' => 'lock-key', 'benachrichtigungen' => 'bell-ringing', 'suche' => 'magnifying-glass', 'kalender' => 'calendar-dots', 'einsetzen' => 'puzzle-piece', 'erweitert' => 'sliders-horizontal'];
 // Fehler → Bereich (Punkt in der Seitenleiste; admin.js öffnet den ersten Bereich mit Fehler)
 $errSec = [];
 foreach (array_keys($errors) as $k) {
@@ -46,12 +46,15 @@ foreach (array_keys($errors) as $k) {
         str_starts_with($k, 'fields') || $k === '_drop' => ['felder'],
         $k === 'settings.route' => ['website'],
         $k === 'settings.calendar' => ['kalender'],
+        $k === 'settings.kind' || $k === 'settings.delivery.smime' => ['verschluesselung'],
         str_starts_with($k, 'settings.delivery') => ['formular'],
         $k === 'settings.form' => ['formular', 'benachrichtigungen'],
         default => ['allgemein'],
     };
     foreach ($sec as $x) $errSec[$x] = true;
 }
+// Verschlüsselt, aber noch kein zentraler Schlüssel: Warnpunkt am Bereich „Verschlüsselung“
+$noKey = $inbox && !\Core\FormCrypto::ready();
 $all = [...$main, ...$more];
 $first = $all[0];
 $posted = (string) (app()->request?->post['_tab'] ?? '');   // nach einem Fehler: zuletzt offener Bereich
@@ -59,7 +62,8 @@ if ($posted !== '' && in_array($posted, $all, true) && !$errSec) $first = $poste
 elseif ($errSec) foreach ($all as $x) if (isset($errSec[$x])) { $first = $x; break; }
 $tab = fn(string $id) => '<button type="button" role="tab" id="tab-' . e($id) . '" aria-controls="panel-' . e($id) . '" data-tab="' . e($id) . '" aria-selected="' . ($id === $first ? 'true' : 'false') . '"' . ($id === $first ? '' : ' tabindex="-1"') . '>'
     . '<span class="adm-tabs__ico" aria-hidden="true">' . icon($secIcon[$id]) . '</span><span class="adm-tabs__label">' . e($secLabel[$id]) . '</span>'
-    . (isset($errSec[$id]) ? '<span class="adm-dot" aria-hidden="true"> ●</span><span class="adm-sr"> – ' . e(__('mit Fehler')) . '</span>' : '') . '</button>';
+    . (isset($errSec[$id]) ? '<span class="adm-dot" aria-hidden="true"> ●</span><span class="adm-sr"> – ' . e(__('mit Fehler')) . '</span>'
+        : ($id === 'verschluesselung' && $noKey ? '<span class="adm-dot adm-dot--warn" aria-hidden="true"> ●</span><span class="adm-sr"> – ' . e(__('Schlüssel fehlt')) . '</span>' : '')) . '</button>';
 $panel = fn(string $id, string $extra = '') => '<section class="adm-card adm-panel adm-panel--groups dt-panel" role="tabpanel" id="panel-' . e($id) . '" aria-labelledby="tab-' . e($id) . '"'
     . ($id === $first ? '' : ' hidden') . $extra . '><h2>' . e($secLabel[$id]) . '</h2>';
 $sw = fn(string $name, bool $on, string $label, string $help = '', string $attrs = '') => '<div class="f f--bool"><input type="hidden" name="' . e($name) . '" value="0">'
@@ -123,18 +127,9 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
             <?php endforeach; ?>
           </select></div>
         <?php if ($inbox): ?>
-        <div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('„Nur per E-Mail“ und „Anfragen sammeln“ folgen der Zustellung (Bereich „Formular & Eingang“).')) ?></span></div></div>
+        <div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('„Nur per E-Mail“ und „Anfragen sammeln“ folgen der Wahl im Bereich „Verschlüsselung“.')) ?></span></div></div>
         <?php endif; ?>
-      <?php if ($empty && !$sharedT && \Core\Data\Inbox::available()): ?>
-        <div class="f f--inline"><label for="t-kind"><?= e(__('Art der Tabelle')) ?></label>
-          <p class="f-help"><?= e(__('Eingang: Einträge entstehen nur über das Formular und werden Ende-zu-Ende verschlüsselt (z. B. Gesundheitsdaten). Nur änderbar, solange die Tabelle leer ist; die passenden Einstellungen erscheinen nach dem Speichern.')) ?></p>
-          <select id="t-kind" name="settings[kind]">
-            <option value="content"<?= !$inbox ? ' selected' : '' ?>><?= e(__('Inhalte (erscheinen auf der Website)')) ?></option>
-            <option value="inbox"<?= $inbox ? ' selected' : '' ?>><?= e(__('Eingang (verschlüsselte Anfragen)')) ?></option>
-          </select><?= $err('settings.kind') ?></div>
-      <?php else: ?>
         <input type="hidden" name="settings[kind]" value="<?= $inbox ? 'inbox' : 'content' ?>">
-      <?php endif; ?>
       </div>
     </section>
 
@@ -294,6 +289,11 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
 <?php else: ?>
     <p class="set-page__lead"><?= e(__('Öffentliche Formulare für Datentabellen sind auf dieser Website aus (Funktionen & Erweiterungen → „Formulare für Datentabellen“).')) ?></p>
 <?php endif; ?>
+  </section>
+
+  <?php /* ================================================================ Verschlüsselung */ ?>
+  <?= $panel('verschluesselung') ?>
+    <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_crypto.php', ['s' => $s, 'table' => $table, 'err' => $err, 'empty' => $empty, 'sharedT' => $sharedT]) ?>
   </section>
 
   <?php /* ================================================================ Benachrichtigungen */ ?>

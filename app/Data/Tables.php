@@ -251,6 +251,12 @@ final class Tables
         }
         // Art der Tabelle: beim Anlegen wählbar; später nur, solange die Tabelle leer ist
         $s = (array) ($in['settings'] ?? []);
+        // Bereich „Verschlüsselung“: eine Wahl für Art der Tabelle und Zustellung (none = normale Tabelle, sonst Eingang mit diesem Modus)
+        if (isset($s['protection']) && in_array($p = (string) $s['protection'], ['none', ...Delivery::MODES], true)) {
+            $s['kind'] = $p === 'none' ? 'content' : 'inbox';
+            if ($p !== 'none') $s['inbox']['delivery']['mode'] = $p;
+        }
+        unset($s['protection']);
         $kind = ($s['kind'] ?? ($existing['settings']['kind'] ?? 'content')) === 'inbox' ? 'inbox' : 'content';
         if ($sharedOwner !== null && $kind === 'inbox') {
             $errors['settings.kind'] = __('Geteilte Tabellen können keine Eingangs-Tabellen sein.');

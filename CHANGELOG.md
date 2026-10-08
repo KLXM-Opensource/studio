@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Daten: Bereich „Verschlüsselung“
+- Neuer Bereich in **Felder & Einstellungen**: eine Wahl für die ganze Tabelle – **Keine Verschlüsselung**, **Zentraler Schlüssel**,
+  **Zentraler Schlüssel + Kopie per E-Mail**, **Nur per E-Mail** – jeweils mit „Wer kann mitlesen?“. Dazu Stand des zentralen
+  Schlüssels und **S/MIME** für die E-Mail an einer Stelle. Fehlt der Schlüssel, warnt der Bereich deutlich (Hinweis mit
+  „Schlüssel erzeugen“, Punkt in der Seitenleiste). Ersetzt „Art der Tabelle“ (Allgemein) und die Moduswahl unter „Zustellung“.
+- „Anmeldung“ im Assistenten nur noch mit der Funktion „Formulare für Datentabellen“ (vorher ins Leere, wenn nur „Anfragen“ an war).
+
 ### Daten: Assistent „Neue Tabelle oder Formular“, Einsetzen, Einstellungen mit Bereichen
 - **Assistent** unter Daten → „+ Neue Tabelle oder Formular“: fragt zuerst die **Art** (Inhalte auf der Website · Formular, das nur
   eine E-Mail schickt · Anfragen sammeln & bearbeiten · Anmeldung oder Bewerbung · Interne Liste · Aus externer Quelle), dann

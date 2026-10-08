@@ -9,7 +9,7 @@
   </ol>
   <p><b>Formularfelder ändern:</b> Daten → Eingang → <b>Felder &amp; Einstellungen</b> (Recht „Tabellen und Felder ändern“, Standard: Administration). Dort stehen auch Titel, Einleitung, Text nach dem Absenden, Benachrichtigung und die Löschfrist. Auf einer Seite fügen Sie ein solches Formular mit dem Block <b>Formular (Datentabelle)</b> ein. Einen neuen Eingang legen Sie unter Daten → <b>Neue Tabelle</b> mit der Vorlage „Anfragen“ an. Eingänge nehmen Dateien nur an, wenn sie per E-Mail zustellen (siehe unten), und erscheinen nie auf der Website, in der Suche oder über Schnittstellen im Klartext.</p>
   <h3 id="anfragen-mail">Anfragen per E-Mail zustellen</h3>
-  <p>Manche Praxen und Betriebe möchten Anfragen nicht im System bearbeiten, sondern in ihrer eigenen Lösung – etwa wegen Aufbewahrungspflichten. Dafür gibt es je Eingang die Einstellung <b>Zustellung der Anfragen</b> (Daten → Eingang → <b>Felder &amp; Einstellungen</b>, Recht „Anfragen verwalten“):</p>
+  <p>Manche Praxen und Betriebe möchten Anfragen nicht im System bearbeiten, sondern in ihrer eigenen Lösung – etwa wegen Aufbewahrungspflichten. Dafür wählen Sie je Eingang im Bereich <b>Verschlüsselung</b> (Daten → Eingang → <b>Felder &amp; Einstellungen</b>, Recht „Anfragen verwalten“), wohin Anfragen gehen; Empfänger, Betreff und Anhänge stehen unter „Formular &amp; Eingang → Zustellung“:</p>
   <ul>
     <li><b>Im System (verschlüsselt)</b> – wie bisher, Standard.</li>
     <li><b>Im System und per E-Mail</b> – gespeichert wie bisher und zusätzlich mit vollem Inhalt per E-Mail. Die Löschfrist gilt für die gespeicherte Fassung.</li>

@@ -31,7 +31,17 @@
   <p>Unter „Hier wird … verwendet“ sehen Sie jederzeit, auf welchen Seiten die Tabelle vorkommt. Welche Felder das Formular zeigt, wohin Einsendungen gehen und ob eine Bestätigung verschickt wird, stellen Sie bei der Tabelle ein – nicht im Block.</p>
 
   <h3 id="einstellungen">Felder &amp; Einstellungen</h3>
-  <p>Die Einstellungen einer Tabelle sind wie die Grundeinstellungen in Bereiche gegliedert (links, auf dem Telefon als Auswahl oben): <b>Allgemein</b> (Name, Symbol, Zweck), <b>Felder</b>, <b>Auf der Website</b> (Detailseiten, Darstellung, Suchmaschinen), <b>Formular</b> bzw. <b>Formular &amp; Eingang</b> (Zustellung, Datenschutz), <b>Benachrichtigungen</b> (E-Mail an die Redaktion, Bestätigung an die Absender, Push), <b>Suche</b>, <b>Kalender</b>, <b>Einsetzen</b> und <b>Erweitert</b> (Sortierung, Freigabe, Löschen). Welche Bereiche oben stehen, richtet sich nach dem <b>Zweck</b> (Allgemein → „Wofür ist diese Tabelle?“); die übrigen finden Sie unter „Weitere Bereiche“. Bei älteren Tabellen wird der Zweck aus den Einstellungen abgeleitet und beim nächsten Speichern übernommen. Ein Klick auf <b>Speichern</b> sichert alle Bereiche.</p>
+  <p>Die Einstellungen einer Tabelle sind wie die Grundeinstellungen in Bereiche gegliedert (links, auf dem Telefon als Auswahl oben): <b>Allgemein</b> (Name, Symbol, Zweck), <b>Felder</b>, <b>Auf der Website</b> (Detailseiten, Darstellung, Suchmaschinen), <b>Formular</b> bzw. <b>Formular &amp; Eingang</b> (Empfänger, Datenschutz), <b>Verschlüsselung</b>, <b>Benachrichtigungen</b> (E-Mail an die Redaktion, Bestätigung an die Absender, Push), <b>Suche</b>, <b>Kalender</b>, <b>Einsetzen</b> und <b>Erweitert</b> (Sortierung, Freigabe, Löschen). Welche Bereiche oben stehen, richtet sich nach dem <b>Zweck</b> (Allgemein → „Wofür ist diese Tabelle?“); die übrigen finden Sie unter „Weitere Bereiche“. Bei älteren Tabellen wird der Zweck aus den Einstellungen abgeleitet und beim nächsten Speichern übernommen. Ein Klick auf <b>Speichern</b> sichert alle Bereiche.</p>
+
+  <h3 id="verschluesselung">Verschlüsselung – wie Einsendungen geschützt werden</h3>
+  <p>Im Bereich <b>Verschlüsselung</b> wählen Sie für die ganze Tabelle eine von vier Möglichkeiten:</p>
+  <ul>
+    <li><b>Keine Verschlüsselung</b> – Einträge liegen normal in der Datenbank. Richtig für Inhalte der Website, Anmeldungen und Listen ohne vertrauliche Angaben.</li>
+    <li><b>Zentraler Schlüssel</b> – jede Einsendung wird beim Absenden verschlüsselt und ist nur unter <b>Anfragen</b> mit dem geheimen Schlüssel lesbar. Empfohlen für Gesundheitsdaten.</li>
+    <li><b>Zentraler Schlüssel + Kopie per E-Mail</b> – zusätzlich geht der volle Inhalt an die Empfänger (Formular &amp; Eingang → Zustellung).</li>
+    <li><b>Nur per E-Mail, nichts speichern</b> – die Website behält nur ein Zustellprotokoll ohne Inhalte.</li>
+  </ul>
+  <p>Der <b>zentrale Schlüssel</b> gilt für alle verschlüsselten Tabellen der Website und wird einmal unter <b>Grundeinstellungen → Verschlüsselung</b> erzeugt; der geheime Teil wird nur einmal angezeigt. Fehlt er noch, warnt der Bereich deutlich (roter Hinweis, Punkt in der Seitenleiste) – bis dahin nehmen verschlüsselte Formulare nichts an. Für E-Mails empfiehlt sich zusätzlich <b>S/MIME</b>: das Zertifikat der Empfänger im selben Bereich einfügen, dann ist auch die E-Mail Ende-zu-Ende verschlüsselt. Zwischen „Keine Verschlüsselung“ und den verschlüsselten Arten wechseln lässt sich nur, solange die Tabelle leer ist.</p>
 
   <h3>Verknüpfungen – echte Beziehungen zwischen Tabellen</h3>
   <p>Mit den Feldtypen <b>Verknüpfung (ein Eintrag)</b> und <b>Verknüpfung (mehrere)</b> verbinden Sie Tabellen miteinander – z. B.:</p>

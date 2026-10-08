@@ -3,7 +3,8 @@
  * Tabellen-Designer: Einstellungen einer Eingangs-Tabelle (verschlüsselte Anfragen, Core\Data\Inbox) – als Gruppen der
  * Einstellungsliste, aufgeteilt auf die Bereiche von „Felder & Einstellungen“:
  *   $part = 'form'      Formular (an/aus, Felder, Titel, Einleitung, Texte, Übersetzungen, Dateigröße) – Bereich „Formular & Eingang“
- *   $part = 'delivery'  Zustellung der Anfragen (System / System + E-Mail / nur E-Mail, Empfänger, S/MIME, Testmail)
+ *   $part = 'delivery'  Zustellung der Anfragen (Empfänger, Weiterleitung, Betreff, Anhänge, Testmail) – Modus und S/MIME im Bereich
+ *                       „Verschlüsselung“ (data/_crypto.php)
  *   $part = 'privacy'   Datenschutz (Löschfrist)
  *   $part = 'notify'    Benachrichtigung ohne Inhalte – Bereich „Benachrichtigungen“
  * Feldnamen unverändert (settings[form][…], settings[inbox][…]) – gespeichert wird wie bisher über Tables::validate.
@@ -38,10 +39,6 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
             <?php if ($themeForm): ?><?= e(__('Formular des Kits unter {url} (Anzeige und Link steuern die Einstellungen des Kits).', ['url' => '/anfrage/' . $ib['form']])) ?>
             <?php else: ?><?= e(__('Auf einer Seite mit dem Block „Formular (Datentabelle)“ einfügen.')) ?><?php endif; ?>
           </p></div>
-        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Verschlüsselung')) ?></span>
-          <span class="set-row__sub"><?= FormCrypto::ready() ? e(__('Verschlüsselung aktiv (Fingerabdruck {fp}).', ['fp' => FormCrypto::fingerprint()]))
-              : '<b>' . e(__('Kein öffentlicher Schlüssel – das Formular zeigt „noch nicht eingerichtet“.')) . '</b>' ?></span></div>
-          <div class="set-row__ctl"><?= FormCrypto::ready() ? '<span class="adm-badge">' . e(__('Aktiv')) . '</span>' : '<a href="' . e(url('/admin/system#keys')) . '">' . e(__('Schlüssel erzeugen')) . '</a>' ?></div></div>
         <fieldset class="f f--multi dt-form__fields"><legend><?= e(__('Felder im Formular')) ?></legend>
           <input type="hidden" name="settings[form][fields][]" value="">
           <?php if (!$fmAll): ?><p class="f-help"><?= e(__('Neue Felder erscheinen hier nach dem Speichern.')) ?></p><?php endif; ?>
@@ -96,32 +93,18 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
     </section>
 
 <?php elseif ($part === 'delivery'): if (!Delivery::available()) return;
-  $certs = $dv['smime'] !== '' ? Delivery::certs($dv['smime']) : [];
   $transport = Delivery::transport();
   $problems = $table ? Delivery::problems($table) : [];
   $alerts = $table ? Delivery::alerts([$table['handle']]) : []; ?>
-    <section class="set-group dt-delivery" id="zustellung" data-delivery aria-labelledby="t-dv-h">
+    <section class="set-group dt-delivery" id="zustellung" data-delivery data-delivery-mode="<?= e($dv['mode']) ?>" aria-labelledby="t-dv-h">
       <h3 class="set-group__title" id="t-dv-h"><?= e(__('Zustellung der Anfragen')) ?></h3>
       <?php foreach ($alerts as $a): ?>
       <p class="adm-flash adm-flash--error"><?= e(__('Zustellung fehlgeschlagen')) ?> (<?= e(date('d.m.Y H:i', strtotime((string) $a['at']))) ?>, <?= e((string) $a['ref']) ?>): <?= e((string) $a['reason']) ?> –
         <?= e(!empty($a['stored']) ? __('Anfrage verschlüsselt gesichert (unter „Anfragen“).') : __('Anfrage NICHT gesichert.')) ?></p>
       <?php endforeach; ?>
       <div class="set-list">
-      <?php if (!$canDeliver): ?>
         <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(Delivery::modeLabel($dv['mode'])) ?></span>
-          <span class="set-row__sub"><?= e(__('Zustellung: {mode}. Ändern darf, wer Anfragen verwalten darf.', ['mode' => Delivery::modeLabel($dv['mode'])])) ?></span></div></div>
-      <?php else: ?>
-        <fieldset class="f dt-modes"><legend><?= e(__('Wohin gehen neue Anfragen?')) ?></legend>
-          <?php foreach (Delivery::MODES as $m): if ($m === 'mail' && $managed) continue; ?>
-          <label class="f-check"><input type="radio" name="settings[inbox][delivery][mode]" value="<?= $m ?>"<?= $dv['mode'] === $m ? ' checked' : '' ?>> <span><b><?= e(Delivery::modeLabel($m)) ?></b><br><small class="adm-muted"><?= e(match ($m) {
-              'system' => __('Standard: verschlüsselt gespeichert, lesbar unter „Anfragen“ mit dem Schlüssel. Die Benachrichtigung enthält keine Inhalte.'),
-              'both' => __('Verschlüsselt gespeichert und zusätzlich mit vollem Inhalt per E-Mail. Die Löschfrist unten gilt für die gespeicherte Fassung.'),
-              'mail' => __('Nur die E-Mail mit vollem Inhalt – in der Datenbank bleibt nichts davon, nur ein Zustellprotokoll ohne Inhalte. Scheitert der Versand, wird die Anfrage verschlüsselt gesichert und die Administration gewarnt.'),
-          }) ?></small></span></label>
-          <?php endforeach; ?>
-          <?php if ($managed): ?><p class="f-help"><?= e(__('„Nur per E-Mail“ ist hier nicht möglich: Eine Erweiterung (z. B. Buchungen) braucht die gespeicherten Einträge.')) ?></p><?php endif; ?>
-        </fieldset>
-      <?php endif; ?>
+          <span class="set-row__sub"><?= e(__('Ob Anfragen gespeichert, per E-Mail verschickt oder beides, wählen Sie im Bereich „Verschlüsselung“.')) ?></span></div></div>
       </div>
 
       <?php if ($canDeliver): ?>
@@ -171,27 +154,6 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
             <input type="number" id="t-dv-mb" name="settings[inbox][delivery][attach_mb]" min="1" max="25" value="<?= (int) $dv['attach_mb'] ?>"></div>
         </div>
 
-        <details class="set-group dt-smime"<?= $certs ? ' open' : '' ?>>
-          <summary class="set-group__title"><?= e(__('Ende-zu-Ende-Verschlüsselung (S/MIME)')) ?> <span class="adm-muted"><?= e(__('empfohlen für Gesundheitsdaten')) ?></span></summary>
-          <div class="set-list">
-            <?php if ($certs): ?>
-            <div class="f"><ul class="dt-certs">
-              <?php foreach ($certs as $c): if (!$c) continue; ?>
-              <li><b><?= e($c['name']) ?></b><?= $c['emails'] ? ' &lt;' . e(implode(', ', $c['emails'])) . '&gt;' : '' ?> · <?= e(__('ausgestellt von {issuer}', ['issuer' => $c['issuer'] ?: '?'])) ?><?= $c['self_signed'] ? ' (' . e(__('selbst signiert')) . ')' : '' ?><br>
-                <span class="<?= $c['expired'] || $c['days_left'] < 30 ? 'adm-badge adm-badge--adm-warn' : 'adm-muted' ?>"><?= e($c['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', $c['valid_to'])]) : __('gültig bis {date} (noch {n} Tage)', ['date' => date('d.m.Y', $c['valid_to']), 'n' => $c['days_left']])) ?></span>
-                <br><small class="adm-muted adm-mono"><?= e(__('SHA-256')) ?> <?= e($c['fingerprint']) ?></small></li>
-              <?php endforeach; ?>
-            </ul></div>
-            <div class="f f--bool"><label class="f-check"><input type="checkbox" name="settings[inbox][delivery][smime_remove]" value="1"> <span><?= e(__('Zertifikat entfernen (E-Mails dann ohne S/MIME)')) ?></span></label></div>
-            <?php endif; ?>
-            <div class="f"><label for="t-dv-smime"><?= e($certs ? __('Neues Zertifikat (ersetzt das bisherige)') : __('Zertifikat der Empfänger (PEM)')) ?></label>
-              <textarea id="t-dv-smime" name="settings[inbox][delivery][smime]" rows="4" spellcheck="false" class="adm-mono" placeholder="-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----" data-pem-target></textarea>
-              <p class="f-help"><label><?= e(__('oder Datei wählen (.pem, .crt, .cer):')) ?> <input type="file" accept=".pem,.crt,.cer,.der,application/x-x509-ca-cert,application/pkix-cert" data-pem-file></label></p>
-              <p class="f-help"><?= e(__('Nur der öffentliche Teil (Zertifikat), nie den privaten Schlüssel. Mit Zertifikat wird jede E-Mail samt Anhängen mit S/MIME verschlüsselt (AES-256) – lesbar nur mit dem privaten Schlüssel im Mailprogramm der Empfänger. Mehrere Zertifikate (z. B. je Empfänger) nacheinander einfügen; jede E-Mail ist dann für alle lesbar. Ist das Zertifikat abgelaufen, wird nichts im Klartext versendet.')) ?></p>
-              <?= $err('settings.delivery.smime') ?></div>
-          </div>
-          <p class="set-group__note"><a href="<?= e(url('/admin/hilfe#smime')) ?>"><?= e(__('Anleitung: S/MIME einrichten')) ?></a> · <?= e(__('PGP wird nicht unterstützt (keine MIT-kompatible Umsetzung ohne externes Programm).')) ?></p>
-        </details>
 
         <?php if ($table): ?>
         <div class="set-actions"><button type="submit" class="adm-btn" formaction="<?= e(url('/admin/data/' . $table['handle'] . '/delivery-test')) ?>" formnovalidate><?= e(__('Testmail senden')) ?></button>

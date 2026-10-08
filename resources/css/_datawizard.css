@@ -196,3 +196,21 @@ html.adm-ui[data-theme=dark] :is(.pl-how,.pl-way,.pl-later,.pl-done){box-shadow:
 .dt-settings .adm-prefix{min-width:0}
 .set-group > .set-list + .set-list{margin-top:10px}
 .dt-settings .set-list .f.f--inline > .adm-prefix{width:min(300px,46cqi)}
+
+/* Bereich „Verschlüsselung“: Schutz der Einsendungen als Auswahlkarten (data/_crypto.php) */
+.adm-dot--warn{color:var(--adm-warn)}
+.dt-protect{border:0;margin:0;padding:0;display:grid;gap:8px}
+.dt-protect__opt{display:grid;grid-template-columns:auto auto 1fr;gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-card);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.dt-protect__opt:hover{border-color:var(--adm-in)}
+.dt-protect__opt:has(input:checked){border-color:var(--adm-a);box-shadow:0 0 0 1px var(--adm-a)}
+.dt-protect__opt:has(input:focus-visible){outline:2px solid var(--adm-a);outline-offset:2px}
+.dt-protect__opt.is-off{cursor:not-allowed;opacity:.6}
+.dt-protect__opt input{margin-top:3px}
+.dt-protect__ico{display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:var(--adm-bg);color:var(--adm-a);font-size:18px}
+.dt-protect__opt:has(input:checked) .dt-protect__ico{background:var(--adm-a);color:#fff}
+.dt-protect__body{display:grid;gap:3px;min-width:0;line-height:1.45}
+.dt-protect__body > span{color:var(--adm-t2);font-size:13px}
+.dt-protect__body small{color:var(--adm-t3);font-size:12px}
+.dt-protect__opt.is-off small{color:var(--adm-warn)}
+.dt-crypto__nokey{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:0 0 12px}
+.dt-crypto__nokey .adm-btn{margin-left:auto}

@@ -27,7 +27,7 @@ final class Purpose
     public const CONTENT = ['content', 'registration', 'internal', 'source'];
 
     /** Bereiche von „Felder & Einstellungen“ (Reihenfolge der Seitenleiste) */
-    public const SECTIONS = ['allgemein', 'felder', 'website', 'formular', 'benachrichtigungen', 'suche', 'kalender', 'einsetzen', 'erweitert'];
+    public const SECTIONS = ['allgemein', 'felder', 'website', 'formular', 'verschluesselung', 'benachrichtigungen', 'suche', 'kalender', 'einsetzen', 'erweitert'];
 
     /** Beschriftung, Symbol, Erklärung und Beispiele je Zweck */
     public static function all(): array
@@ -152,9 +152,9 @@ final class Purpose
     public static function sections(string $p, bool $inbox): array
     {
         $cal = Features::on('calendar');
-        if ($inbox) return [['allgemein', 'felder', 'formular', 'benachrichtigungen', 'einsetzen', 'erweitert'], []];
+        if ($inbox) return [['allgemein', 'felder', 'formular', 'verschluesselung', 'benachrichtigungen', 'einsetzen', 'erweitert'], []];
         $main = match ($p) {
-            'registration' => ['allgemein', 'felder', 'formular', 'benachrichtigungen', 'einsetzen', 'erweitert'],
+            'registration' => ['allgemein', 'felder', 'formular', 'verschluesselung', 'benachrichtigungen', 'einsetzen', 'erweitert'],
             'internal' => ['allgemein', 'felder', 'erweitert'],
             default => ['allgemein', 'felder', 'website', 'suche', 'benachrichtigungen', 'einsetzen', 'erweitert'],
         };
