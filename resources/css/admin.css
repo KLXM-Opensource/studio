@@ -2494,6 +2494,9 @@ html.adm-ui[data-theme=dark] .is-drill .adm-side{--drill-dim:rgba(0,0,0,.32)}
 /* Anfragen: Smaragd, Mintgrün */
 .is-drill .adm-side[data-area=requests]{--drill-deep:rgba(22,163,74,.30);--drill-mark:#6EE7A0;
   --drill-sheen:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.03) 38%,transparent 58%,rgba(110,231,160,.05) 82%,transparent)}
+/* Mitteilungen: Koralle, Lachs */
+.is-drill .adm-side[data-area=push]{--drill-deep:rgba(225,72,96,.26);--drill-mark:#FF9E8A;
+  --drill-sheen:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.03) 38%,transparent 58%,rgba(255,158,138,.05) 82%,transparent)}
 /* KLXM AI: Tiefblau, Azur */
 .is-drill .adm-side[data-area=ai]{--drill-deep:rgba(10,100,210,.28);--drill-mark:#7DB2FF}
 .is-drill .adm-side[data-area] .adm-drill{--adm-mint:var(--drill-mark,#3DD9A0)}

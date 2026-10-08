@@ -12,7 +12,7 @@ import { t } from './_i18n.js';
  *   back   Beschriftung des Knopfs bei geöffnetem Hauptmenü („Zurück zu Medien“)
  *   home   Container, in dem die Reiterleiste (vorne) steht
  *   box    vorhandenes, serverseitig gerendertes .adm-drill (Layout) – sonst wird es erzeugt
- *   area   Bereichskennung (media, data, support, ai) → eigener Farbton der Seitenleiste (admin.css data-area)
+ *   area   Bereichskennung (media, data, support, requests, push, ai) → eigener Farbton der Seitenleiste (admin.css data-area)
  */
 export function drill({ panel, title, label = '', back = '', home, box = null, area = '' }) {
   const d = document, body = d.body, side = d.querySelector('.adm-side'), nav = side?.querySelector(':scope > nav');
