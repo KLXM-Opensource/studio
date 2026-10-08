@@ -6,11 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
-### Verwaltung: Profilbild, kompakter Kopf der Seitenleiste, Mitteilungen in Koralle
+### Verwaltung: Profilbild, kompakter Kopf der Seitenleiste, Mitteilungen in Magenta
 - **Profilbild** unter Konto (quadratisch aus der Mitte, 256 px WebP, je E-Mail-Adresse in `storage/avatars/` – Netzwerk-Konten überall gleich;
   nur angemeldet über `/admin/avatar/{id}`), ohne Bild **Initialen** auf fester Farbe (`Core\Avatar`). Auch in der Benutzerverwaltung.
 - Seitenleiste: Werkzeugzeile mit Suche, Website ansehen, **Avatar (Konto)** und **Abmelden**; Netzwerk-Konten ohne doppeltes „Verwaltung“; Fuß mit Avatar, Name/Rolle und Abmelden-Symbol.
-- Bereich **Mitteilungen** mit eigener Farbe (Koralle) wie Medien, Daten und Anfragen.
+- Bereich **Mitteilungen** mit eigener Farbe (Magenta) wie Medien, Daten und Anfragen.
 - Bereiche mit eigenem Menü (Medien, Daten, Anfragen …): Favoriten und Netzwerk-Umschalter weichen dem Bereichsmenü; der **Stern** neben „Website ansehen“ (oder „‹ Hauptmenü“) blendet sie wieder ein.
 
 ### Mediathek: PDFs mit Vorschau der ersten Seite
