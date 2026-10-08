@@ -12,6 +12,17 @@
   <p>Die Mediathek merkt sich, wo Sie zuletzt waren (Sammlung, Tag, Dateiart, geteilte Medien) – beim nächsten Öffnen und in den
     Auswahlfenstern der Bildfelder geht es dort weiter.</p>
 
+  <h3 id="ansicht">Ansicht: Symbole, Mauerwerk, Liste</h3>
+  <ul>
+    <li>Oben in der Leiste wählen Sie die <b>Darstellung</b>: <b>Symbole</b> (gleich große Kacheln – Hochkant-Bilder werden eingepasst, nicht beschnitten), <b>Mauerwerk</b> (jedes Bild im eigenen Seitenverhältnis, lückenlos untereinander – gut für Fotostrecken) oder <b>Liste</b> (mit Größe, Datum und Verwendung).</li>
+    <li>Der Regler <b>Symbolgröße</b> daneben macht die Kacheln größer oder kleiner. Darstellung und Größe merkt sich die Mediathek je Browser.</li>
+    <li>Die Bereiche links (<b>Sammlungen</b>, <b>Tags</b> …) lassen sich mit dem Pfeil zuklappen, wenn die Liste lang wird.</li>
+    <li>Beim Hochladen erscheint das Fenster mit Fortschritt und Alt-Texten in der Mitte des Bildschirms.</li>
+  </ul>
+
+  <h3 id="nicht-verwendet">Aufräumen: „Nicht verwendet“</h3>
+  <p>Links unter den Orten zeigt <b>Nicht verwendet</b> alle Dateien, die nirgends eingebunden sind – weder auf Seiten noch in Datensätzen, Einstellungen oder als Link im Text. Die Zahl daneben verrät, wie viele es sind. Ideal zum Aufräumen: prüfen, mehrere auswählen, löschen. Dateien in Entwürfen gelten als verwendet.</p>
+
   <h3>Ordnen: Tags und Sammlungen</h3>
   <ul>
     <li><b>Tags</b> (farbige Punkte) tragen Sie rechts in den Informationen ein: Wort tippen, <kbd>Enter</kbd>. Links unter „Tags“ filtern Sie danach.</li>

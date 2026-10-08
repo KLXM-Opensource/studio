@@ -1,6 +1,6 @@
 <?php /** Handbuch „fluid“ · Kapitel „Design, Kopf & Fuß“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> stellen Sie Farben, Schriften, Formen, Kopf- und Fußbereich ein. Die Vorschau rechts zeigt jede Änderung sofort – hell und dunkel, auf dem Computer und dem Handy. Online geht sie erst mit <b>Speichern</b>; frühere Stände holen Sie über <b>Verlauf</b> zurück.</p>
-  <h3>Sechzehn Vorlagen</h3>
+  <h3>Vorlagen</h3>
   <p>Jede Vorlage setzt alle Werte auf einmal; danach passen Sie Einzelnes an. Alle Vorlagen sind hell und dunkel auf Lesbarkeit (WCAG 2.2 AA) geprüft.</p>
   <table class="doc-table">
     <tr><th>Vorlage</th><th>Charakter</th></tr>
@@ -20,6 +20,8 @@
     <tr><td>Kommune &amp; Portal · Freundlich</td><td>Einladend: Poppins, Violett und Petrol, runde Formen, Wellen zwischen Abschnitten, zentrierter Fuß.</td></tr>
     <tr><td>Wissen &amp; Kampagne · Dunkel</td><td>Atmosphärisch: dunkel von Anfang an, Manrope, Glas-Karten, Betonung im Farbverlauf.</td></tr>
     <tr><td>Netzwerk &amp; Bildung · Farbenfroh mit Seitenleiste</td><td>Lebendig und gut sortiert: Kopfbanner über die volle Breite mit großem Logo und Claim, darunter Seitenleiste mit Menübaum, fünf Farben im Wechsel, Nunito, runde Formen – für Netzwerke, Bildungsträger und Verbände mit vielen Mitgliedern.</td></tr>
+    <tr><td>Software &amp; Produkt · Aurora</td><td>Modern und leicht: Manrope, weicher Farbschleier im Hintergrund, Buttons im Farbverlauf, Karten mit Verlaufsrahmen, farbige Abschnitte als abgerundete Flächen, Lesefortschritt und „Nach oben“.</td></tr>
+    <tr><td>Studio · Neo-Brutalismus</td><td>Plakativ und verspielt: Space Grotesk, kräftige Konturen mit harten Schatten, Konturschrift für betonte Wörter, feine Körnung, Farbband über dem Fuß.</td></tr>
   </table>
   <h3>Die Einstellungen</h3>
   <ul>
@@ -30,6 +32,28 @@
     <li><b>Kopf &amp; Fuß:</b> Kopfbereich (siehe unten) und seine Farbe (Seite, getönt, Akzent, zweite Markenfarbe, dunkel, zarter Farbverlauf), <b>Größe von Logo bzw. Wortmarke</b> (normal, groß, sehr groß – auch für quadratische Logos), Breite der Seitenleiste und ob dort alle Unterseiten sichtbar sind, Stil des Menüs (schlicht, unterstrichen, Pille, Versalien), <b>Infoleiste</b> über dem Kopf mit Telefon, E-Mail, Social Media und einem kurzen Text (z. B. Notdienst – unter <?= e($settingsTitle) ?> → Darstellung), beim Scrollen sichtbar, Button im Kopfbereich (Beschriftung und Link unter <?= e($settingsTitle) ?> → Darstellung), Fußbereich (Spalten, schlicht, großer Schriftzug, zentriert) und seine Farbe, Seitenhintergrund (einfarbig, Raster, Punkte, Verlauf).</li>
     <li><b>Bewegung &amp; Farbschema:</b> dezente Animationen (Einblenden, Laufband) mit Stil (aufsteigen, einblenden, wachsen, scharfstellen) und dunkles Farbschema nach Geräte-Einstellung. „Bewegung reduzieren“ der Besucher hat immer Vorrang.</li>
   </ul>
+  <h3 id="fluid-modern">Neuere Varianten im Überblick</h3>
+  <ul>
+    <li><b>Buttons:</b> zusätzlich „Farbverlauf mit Leuchten“ und „Neo-Brutalismus“ (Kontur, harter versetzter Schatten, drückt sich beim Klick ein).</li>
+    <li><b>Karten:</b> „Getönt“, „Verlaufsrahmen“ (Rahmen im Verlauf der Markenfarben) und „Neo-Brutalismus“.</li>
+    <li><b>Seitenhintergrund:</b> „Aurora“ (weiche Farbschleier oben), „Feine Körnung“ (Grain) und „Senkrechte Rasterlinien“.</li>
+    <li><b>Farbige Abschnitte:</b> über die volle Breite (wie bisher) oder <b>als abgerundete Flächen mit Rand</b> – der moderne Karten-Look. Übergänge wie Welle oder Schräg entfallen dabei.</li>
+    <li><b>Betonung *Wort*</b> in Überschriften zusätzlich als <b>Konturschrift</b>; <b>verlinkte Karten</b> mit langsam zoomendem Bild; <b>Menüpunkte</b> mit Punkt unter dem aktiven.</li>
+    <li><b>Einblenden</b> zusätzlich „Aufdecken von unten“ und „Seitlich hereingleiten“.</li>
+    <li><b>Lesefortschritt</b> (dünne Linie oben, wächst beim Scrollen) und Schaltfläche <b>„Nach oben“</b> unten rechts – beide unter „Kopf &amp; Fuß“ zuschaltbar.</li>
+    <li><b>Höhe des Kopfbereichs:</b> normal, hoch oder sehr hoch – für große Logos. Beim Scrollen und auf schmalen Bildschirmen wird der Kopf mit weichem Übergang wieder normal hoch (nicht bei den Seitenleisten).</li>
+    <li><b>Linie über dem Fußbereich:</b> wie Farbwirkung, keine, Linie, Linie mit Schatten nach unten, geprägt oder Farbband – mit <b>Farbe</b> (Linienfarbe, Akzent, zweite Markenfarbe, Schriftfarbe, Weiß) und <b>Dicke</b> (1–10 px).</li>
+  </ul>
+
+  <h3 id="fluid-bloecke">Blöcke: Zeitleiste, Stimmen, Text und Bild</h3>
+  <ul>
+    <li><b>Ablauf / Zeitleiste:</b> Felder <b>Kreise</b> (wie Design, gefüllt, zart gefüllt mit Rand, nur Rand, kleiner Punkt ohne Nummer), <b>Farben</b> (wie Design, farbig abwechselnd, eine Farbe, neutral) und <b>Animation</b> (wie Website, nacheinander einblenden, Linie wächst beim Scrollen, keine). Ohne Wahl richtet sich alles nach dem Design – bei „Farbenfroh“ sind die Kreise bunt.</li>
+    <li><b>Zitat / Stimmen:</b> neue Darstellung <b>Laufband</b> – die Stimmen laufen langsam durch und halten an, wenn man mit der Maus darauf zeigt oder mit der Tastatur hineinspringt.</li>
+    <li><b>Fließtext:</b> Feld <b>Textbreite</b> (schmal, Lesebreite, breit, volle Breite) – auch direkt auf der Seite am rechten Rand des Textes ziehbar.</li>
+    <li><b>Text + Bild:</b> Feld <b>Aufteilung Bild/Text</b> (Text breiter, ausgewogen, Bild breiter, Bild deutlich breiter) – auch auf der Seite am inneren Bildrand ziehbar.</li>
+    <li><b>Abstand oben/unten</b> jedes Abschnitts gibt es in Fluid zusätzlich als „Groß“ – in der Seitenleiste oder per Ziehen am Abschnittsrand (siehe <a href="<?= e(url('/admin/hilfe#ziehen')) ?>">Mit der Maus ziehen</a>).</li>
+  </ul>
+
   <h3>Sieben Kopfbereiche</h3>
   <table class="doc-table">
     <tr><th>Variante</th><th>So sieht sie aus</th></tr>

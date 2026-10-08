@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Handbuch ergänzt
+- Neues Kapitel **Grundeinstellungen** (Bereiche, Domain und Hauptadresse, Testumgebung/Livebetrieb, Warnpunkte im Menü).
+- **Bilder & Dateien:** Ansicht (Symbole, Mauerwerk, Liste, Symbolgröße), zuklappbare Bereiche, „Nicht verwendet“.
+- **Alle Blöcke:** Partner-Kachel „Hell“ im Dunkeln gedämpft. **Fluid:** neue Vorlagen, neuere Varianten, Zeitleiste, Laufband,
+  Textbreite, Aufteilung Bild/Text, Abstand „Groß“.
+
 ### Mit der Maus ziehen: Abstände, Textbreite, Bild/Text
 - Im Bearbeiten-Modus erscheinen beim Zeigen auf einen Abschnitt Griffe: **Abstand oben/unten** (Kein, Klein, Normal, Groß – „Groß“,
   wenn das Kit es anbietet: theme.php `'space_large' => true`, Klassen `pt-large`/`pb-large`), in Fluid zusätzlich **Textbreite** beim
