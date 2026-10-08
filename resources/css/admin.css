@@ -2442,7 +2442,7 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .rte-menu{overflow:auto;overscroll-behavior:contain}
 .rte-menu.rte-menu--up{top:auto;bottom:calc(100% + 4px)}
 
-/* Bereichsmodus (Medien, Daten, Support, KLXM AI): Seitenleiste unterhalb der Favoriten in der Bereichsfarbe –
+/* Bereichsmodus (Medien, Daten, Anfragen, Support, KLXM AI): Seitenleiste unterhalb der Favoriten in der Bereichsfarbe –
    Grenze setzt _drill.js (--drill-top), der Bereich (data-area) die Farben:
    --drill-deep  tiefer Farbton, über die (immer dunkle) Leiste gelegt – Helligkeit bleibt fast gleich,
                  Schrift behält ≥ 10:1 (hell) bzw. ≥ 5,5:1 (gedämpft)
@@ -2452,11 +2452,15 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
   --drill-deep:transparent;--drill-sheen:linear-gradient(transparent,transparent);
   background-image:
     linear-gradient(to bottom,transparent var(--drill-top),color-mix(in srgb,var(--drill-mark,var(--adm-mint)) 55%,transparent) var(--drill-top),color-mix(in srgb,var(--drill-mark,var(--adm-mint)) 55%,transparent) calc(var(--drill-top) + 1px),transparent calc(var(--drill-top) + 1px)),
+    linear-gradient(var(--drill-dim,transparent),var(--drill-dim,transparent)),
     var(--drill-sheen),
     linear-gradient(var(--drill-deep),var(--drill-deep));
-  background-size:100% 100%,100% calc(100% - var(--drill-top) - 1px),100% calc(100% - var(--drill-top) - 1px);
-  background-position:0 0,0 calc(var(--drill-top) + 1px),0 calc(var(--drill-top) + 1px);
+  background-size:100% 100%,100% calc(100% - var(--drill-top) - 1px),100% calc(100% - var(--drill-top) - 1px),100% calc(100% - var(--drill-top) - 1px);
+  background-position:0 0,0 calc(var(--drill-top) + 1px),0 calc(var(--drill-top) + 1px),0 calc(var(--drill-top) + 1px);
   background-repeat:no-repeat;background-attachment:local}
+/* Dunkelmodus: Bereichsfarbe gedämpft (dunkle Schicht über der Tönung), Linie und Markierung bleiben */
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) .is-drill .adm-side{--drill-dim:rgba(0,0,0,.32)}}
+html.adm-ui[data-theme=dark] .is-drill .adm-side{--drill-dim:rgba(0,0,0,.32)}
 /* Medien: Anthrazit (neutral wie ein Leuchttisch), Bernstein */
 .is-drill .adm-side[data-area=media]{--drill-deep:rgba(18,20,24,.55);--drill-mark:#F5B454}
 /* Daten: Petrol mit feinem Schimmer, Türkis */
