@@ -6,6 +6,7 @@
  *  - Kopf: prüft, ob das Menü wirklich in die Leiste passt (sonst .is-overflow → Menü-Schaltfläche) – ResizeObserver
  *  - Seitenblatt: Fokus auf das erste Element, Fokusfalle (Tab), Rest der Seite inert, schließt bei Klick auf einen Link
  *  - Aufklappmenüs: nur eins offen, Klick daneben/Fokus verlassen schließt, Pfeiltasten, Pos1/Ende, Escape
+ *  - Seitenleiste mit Menübaum: Zweige außerhalb der aktuellen Seite zuklappen, Schaltflächen mit aria-expanded
  *  - Hintergrundvideo (Einstieg vollflächig): startet nur ohne „Bewegung reduzieren“, mit Pause-Schaltfläche
  *  - Website-Suche: Vorschläge (Kern-Skript search.js) erst beim ersten Fokus eines Suchfelds laden
  */
@@ -107,6 +108,17 @@ d.addEventListener('keydown', e => {
       move(list[(k + (e.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length]);
     }
   }
+});
+
+// ------------------------------------------------------------ Seitenleiste mit Menübaum: Zweige auf-/zuklappen
+// Ohne JavaScript ist der ganze Baum sichtbar; hier klappen die Zweige außerhalb der aktuellen Seite zu (nicht bei st-open)
+if (!html.classList.contains('st-open')) d.querySelectorAll('.snav__toggle').forEach(t => {
+  const list = d.getElementById(t.getAttribute('aria-controls'));
+  if (!list) return;
+  const set = open => { t.setAttribute('aria-expanded', String(open)); list.hidden = !open; };
+  set(t.getAttribute('aria-expanded') === 'true');
+  t.addEventListener('click', () => set(t.getAttribute('aria-expanded') !== 'true'));
+  t.addEventListener('keydown', e => { if (e.key === 'Escape' && t.getAttribute('aria-expanded') === 'true') { set(false); e.stopPropagation(); } });
 });
 
 // ------------------------------------------------------------ Hintergrundvideo (nur ohne „Bewegung reduzieren“)

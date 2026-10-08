@@ -4,6 +4,7 @@
 :root{
   --f-a:#4338CA;--f-a-strong:#3730A3;--f-a-on:#FFFFFF;--f-a2:#FDE68A;
   --f-b:#0F766E;--f-b-on:#FFFFFF;--f-ink:#0B0D17;--f-text:#2B2F3A;--f-muted:#565C6B;--f-bg:#FFFFFF;--f-surface:#F4F5F8;--f-line:#E2E4EB;--f-dark:#0E1022;
+  --f-c3:#B45309;--f-c4:#BE185D;--f-c5:#0369A1;
   --f-font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-font-head:var(--f-font);
   --f-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--f-font-label:var(--f-font);
   --f-fs-min:16;--f-fs-max:18.5;--f-ratio:1.25;--f-vw-min:360;--f-vw-max:1280;--f-hw:650;--f-track:-2;
@@ -63,7 +64,7 @@
 .is-darkbase{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
 /* Dunkles Farbschema: nur Farbwerte wechseln (Standardwerte hier, eigene in der Design-Datei); Vorschau: css/preview.css */
 @media (prefers-color-scheme:dark){
-  html.has-dark{--f-b:#5EEAD4;--f-b-on:#062B27;--f-a:#A5B4FC;--f-a-strong:#C7D2FE;--f-a-on:#14123A;--f-a2:#3A3470;--f-ink:#F3F4F8;--f-text:#D2D5DE;--f-muted:#9EA3B2;--f-bg:#0B0C14;--f-surface:#141621;--f-line:#272B3A;--f-dark:#1A1D33}
+  html.has-dark{--f-b:#5EEAD4;--f-b-on:#062B27;--f-a:#A5B4FC;--f-a-strong:#C7D2FE;--f-a-on:#14123A;--f-a2:#3A3470;--f-ink:#F3F4F8;--f-text:#D2D5DE;--f-muted:#9EA3B2;--f-bg:#0B0C14;--f-surface:#141621;--f-line:#272B3A;--f-dark:#1A1D33;--f-c3:#FCD34D;--f-c4:#F9A8D4;--f-c5:#7DD3FC}
   html.has-dark{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
   html.has-dark .brand__logo--light{display:none}
   html.has-dark .brand__logo--dark{display:block}

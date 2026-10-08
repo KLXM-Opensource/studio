@@ -66,4 +66,5 @@ return [
     'Zum Inhalt springen' => 'Skip to content',
     'Zur Startseite' => 'Go to home page',
     'Zurück' => 'Previous',
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

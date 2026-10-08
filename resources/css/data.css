@@ -2,3 +2,4 @@
    Teile: _data-list.css (Liste, Chips) und _data-fields.css (Detailseiten) – ein Kit kann sie einzeln importieren. */
 @import "./_data-list.css";
 @import "./_data-fields.css";
+@import "./_data-directory.css";   /* Verzeichnis, Besucher-Filter, A–Z, Profil, Kontaktkarte */

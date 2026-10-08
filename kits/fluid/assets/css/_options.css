@@ -113,3 +113,15 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 .ftr--centered :is(.ftr__inline .cluster,.ftr__bottom,.ftr__legal){justify-content:center}
 .ftr--centered .ftr__copy{margin-inline:0}
 .ftr--centered .ftr__text{margin-inline:auto;margin-block-start:1.25rem;max-width:40rem}
+
+/* Zarter Farbverlauf als Hintergrund des Kopfbereichs (hbg-gradient): beide Markenfarben leicht in den Hintergrund
+   gemischt – Schrift bleibt in Überschriften-/Textfarbe (Kontrast wie auf „Getönt“) */
+.hbg-gradient .hdr{--f-hdr-bg:linear-gradient(160deg,color-mix(in srgb,var(--f-a) 15%,var(--f-bg)),color-mix(in srgb,var(--f-b) 12%,var(--f-bg)));border-bottom-color:transparent}
+
+/* Größe von Logo bzw. Wortmarke (logo-*): „Normal“ = Werte aus _header.css */
+.logo-large .brand__logo img{height:3.25rem;max-width:16rem}
+.logo-large .brand__mark{width:2.85rem;height:2.85rem;font-size:1.4rem}
+.logo-large .brand__name{font-size:1.3rem}
+.logo-xl .brand__logo img{height:4.25rem;max-width:19rem}
+.logo-xl .brand__mark{width:3.4rem;height:3.4rem;font-size:1.7rem}
+.logo-xl .brand__name{font-size:1.5rem}

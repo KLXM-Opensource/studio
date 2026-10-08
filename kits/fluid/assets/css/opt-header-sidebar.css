@@ -1,0 +1,139 @@
+/* Theme „fluid“ – Kopfbereich „Seitenleiste mit Menübaum“ (lädt nur, wenn unter Design gewählt; templates/layout.php,
+   Markup: templates/partials/header-sidebar.php).
+   .page ist ein Container (fpage): Ist die Seite mindestens 62 rem breit, steht der Kopf als Leiste links über die volle
+   Höhe (sticky, eigener Bildlauf); sonst als Leiste oben mit Logo und Menü-Schaltfläche (Seitenblatt wie bei allen
+   Kopfbereichen). Breite: sw-*, Unterseiten: st-*, Hintergrund: hbg-*, Logo: logo-*. Keine Media-Queries für Breiten. */
+.hdr-sidebar{--side-w:18.5rem;--side-logo:3.75rem}
+.hdr-sidebar.sw-narrow{--side-w:16rem}
+.hdr-sidebar.sw-wide{--side-w:22rem}
+.hdr-sidebar.logo-large{--side-logo:5.5rem}
+.hdr-sidebar.logo-xl{--side-logo:8rem}
+.hdr-sidebar .page{container:fpage/inline-size;display:flex;flex-wrap:wrap;align-items:flex-start}
+.hdr-sidebar .page__main{flex:1 1 100%;min-width:0}
+.hdr--sidebar{flex:1 1 100%}
+
+/* Schmal: Leiste oben – Logo und Menü-Schaltfläche; Baum, Suche und Kontakt stehen im Seitenblatt */
+.side__in{display:flex;align-items:center;width:min(100% - 2 * var(--f-gutter),var(--f-wrap));min-height:4.25rem;margin-inline:auto}
+.side__top{display:flex;flex:1;align-items:center;gap:var(--f-s-s);min-width:0;padding-block:.5rem}
+.side__brand{margin-inline-end:auto}
+.side__brand .brand__logo img{height:3.25rem}   /* schmal: Logo kompakter als in der Leiste */
+.side__search,.side__nav,.side__foot{display:none}
+
+/* Breit: Leiste links über die volle Höhe */
+@container fpage (min-width:62rem){
+  .hdr-sidebar .page__main{flex:1 1 0}
+  .hdr-sticky .hdr.hdr--sidebar,.hdr.hdr--sidebar{position:sticky;top:0;flex:0 0 var(--side-w);width:var(--side-w);height:100vh;height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-bottom:0;border-inline-end:1px solid var(--f-line);backdrop-filter:none;animation:none}
+  .hbg-page .hdr--sidebar{--f-hdr-bg:var(--f-bg)}
+  :is(.hbg-accent,.hbg-secondary,.hbg-dark,.hbg-gradient) .hdr--sidebar{border-inline-end-color:transparent}
+  .side__in{flex-direction:column;align-items:stretch;gap:var(--f-s-l);width:auto;min-height:100%;margin:0;padding:clamp(1.25rem,3vh,2.25rem) 1.25rem 1.5rem}
+  .side__top{flex:none;padding:0}
+  .side__menu{display:none}
+  .side__search,.side__nav{display:block}
+  .side__foot{display:flex}
+  /* Großes Logo oben: auch quadratische oder hohe Logos (Höhe nach logo-*, Breite höchstens die Leiste) */
+  .side__brand{flex-direction:column;align-items:flex-start;gap:.75rem;margin:0}
+  .side__brand .brand__logo img{width:auto;max-width:100%;height:auto;max-height:var(--side-logo);object-position:left top}
+  .side__brand .brand__name{font-size:clamp(1.25rem,calc(var(--side-logo) * .3),2.1rem);line-height:1.1;white-space:normal}
+  .side__brand .brand__mark{width:calc(var(--side-logo) * .7);height:calc(var(--side-logo) * .7);font-size:calc(var(--side-logo) * .34);border-radius:calc(var(--f-radius) * 1.2)}
+}
+
+/* Suche in der Leiste (Grundstile wie im Seitenblatt – overlay.css lädt erst am Ende der Seite) */
+.side__search .sf__row{position:relative;display:flex;border:1.5px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:var(--f-bg)}
+.side__search .sf__row:focus-within{border-color:var(--f-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--f-a) 25%,transparent)}
+.side__search .sf__input{flex:1;width:100%;min-width:0;min-height:2.6rem;padding:0 .85rem;border:0;border-radius:var(--f-btn-r);background:none;color:var(--f-ink);font-size:.9375rem}
+.side__search .sf__input:focus{outline:none}
+.side__search .sf__btn{display:inline-flex;align-items:center;margin:3px;padding:0 .7rem;border:0;border-radius:max(0px,calc(var(--f-btn-r) - 3px));background:var(--f-btn-bg);color:var(--f-btn-ink);cursor:pointer}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .side__search .sf__row{background:var(--f-surface);border-color:var(--f-line-strong)}
+
+/* Menübaum: jede Seite ein Link; Unterseiten öffnet die Schaltfläche daneben (site.js, aria-expanded) */
+.snav__list{display:grid;gap:2px;margin:0;padding:0;list-style:none}
+.snav__list--2,.snav__list--3{margin:.15rem 0 .45rem .95rem;padding-inline-start:.6rem;border-inline-start:2px solid var(--f-line)}
+.snav__list[hidden]{display:none}
+.snav__row{display:flex;align-items:center;gap:2px}
+.snav__link{display:flex;flex:1;align-items:center;gap:.65rem;min-height:2.6rem;padding:.45rem .8rem;border-radius:min(var(--f-btn-r),1.3rem);color:var(--f-text);font:600 1rem/1.25 var(--f-font);text-decoration:none;overflow-wrap:anywhere;transition:background-color .15s,color .15s}
+.snav__list--2 .snav__link,.snav__list--3 .snav__link{min-height:2.35rem;padding-block:.35rem;font-weight:500;font-size:.9375rem}
+.snav__link:hover{background:var(--f-surface);color:var(--f-ink)}
+.snav__item.is-active>.snav__link,.snav__item.is-active>.snav__row>.snav__link{color:var(--f-ink)}
+.snav__link[aria-current=page]{position:relative;background:var(--f-a-soft);color:var(--f-ink);font-weight:700}
+/* Unterebenen: die aktuelle Seite markiert die Baumlinie im Farbton */
+.snav__list--2 .snav__link[aria-current=page]::after,.snav__list--3 .snav__link[aria-current=page]::after{content:"";position:absolute;inset:.35rem auto .35rem calc(-.6rem - 2px);width:2px;border-radius:2px;background:var(--f-tone,var(--f-a))}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .snav__link[aria-current=page]{background:var(--f-surface)}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .snav__link[aria-current=page]::after{background:currentColor}
+.snav__toggle{display:grid;flex:none;place-items:center;width:2.4rem;height:2.4rem;padding:0;border:0;border-radius:min(var(--f-btn-r),1.2rem);background:none;color:var(--f-muted);font-size:1rem;cursor:pointer}
+.snav__toggle:hover{background:var(--f-surface);color:var(--f-ink)}
+.snav__toggle[aria-expanded=true] .snav__chev{rotate:180deg}
+.st-open .snav__toggle{display:none}
+@media (prefers-reduced-motion:no-preference){.snav__chev{transition:rotate .2s}}
+
+/* Unten: Handlungsaufruf, Telefon/E-Mail, Social Media, Sprachen */
+.side__foot{flex-direction:column;gap:var(--f-s-s);margin-top:auto;padding-top:var(--f-s-m);border-top:1px solid var(--f-line)}
+.side__cta{justify-content:center;width:100%}
+.side__quick{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.side__quick a{display:flex;align-items:center;gap:.6rem;min-height:2.4rem;color:var(--f-text);font-size:.9375rem;text-decoration:none;overflow-wrap:anywhere}
+.side__quick a:hover{color:var(--f-ink);text-decoration:underline}
+.side__quick .ico{flex:none;color:var(--f-link);font-size:1.15em}
+.side__social{display:flex;flex-wrap:wrap;gap:.4rem;margin:0;padding:0;list-style:none}
+.side__social a{display:inline-flex;align-items:center;min-height:2.25rem;padding:0 .8rem;border-radius:999px;background:var(--f-surface);color:var(--f-ink);font-size:.8125rem;font-weight:600;text-decoration:none}
+.side__social a:hover{background:var(--f-a-soft)}
+
+/* ---------------------------------------------------------------- Kopfbanner über der Seitenleiste (sb-band, sb-image)
+   Banner (.side-banner, ein .hdr – Farben über hbg-*) über die volle Breite auf jeder Seite; darunter links die Seitenleiste
+   (.side--below, ohne Logo), rechts der Inhalt. Beim Scrollen läuft der Banner weg, die Leiste bleibt oben stehen
+   (sticky, höchstens Fensterhöhe, eigener Bildlauf). Schmal: Banner als Leiste mit Logo und Menü-Schaltfläche, die
+   Seitenleiste entfällt (Seitenblatt). Höhe sbh-{normal,tall}, auf Unterseiten (body.is-sub) automatisch niedriger. */
+.hdr-sidebar .hdr.side-banner{position:relative;top:auto;flex:1 1 100%;animation:none;isolation:isolate;overflow:hidden}
+.side-banner__in{position:relative;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-s) var(--f-s-l);width:min(100% - 2 * var(--f-gutter),var(--f-wrap) + var(--side-w));min-height:max(4.25rem,var(--banner-h,0rem));margin-inline:auto;padding-block:.6rem}
+.side-banner__brand{margin-inline-end:auto}
+.side-banner__brand .brand__logo img{height:3.25rem}
+.side-banner__claim{display:none;margin:0;color:var(--f-ink);font:var(--f-hw) var(--f-t1)/1.25 var(--f-font-head);letter-spacing:calc(var(--f-track) * .006em);text-wrap:balance}
+.side-banner__tools{display:flex;align-items:center;gap:.5rem}
+.side-banner__cta{display:none}
+.side--below{display:none}
+/* Bild (sb-image): in voller Breite und ganz gezeigt – das Bild bestimmt die Höhe des Banners (kein Beschnitt); Logo,
+   Claim und Button liegen darauf. Ohne Abdunkelung (sbo-none, Standard) stehen Logo und Claim auf einer hellen Fläche;
+   sbo-soft/strong dunkeln ab und setzen die Schrift weiß. Unterseiten: sehr hohe Bilder höchstens 22 rem (Fokuspunkt). */
+.side-banner__id{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-s) var(--f-s-l);min-width:0;margin-inline-end:auto}
+.side-banner__id .side-banner__brand{margin-inline-end:0}
+.side-banner--has-img{display:grid}
+.side-banner--has-img>*{grid-area:1/1}
+.side-banner__media{position:relative;z-index:-1}
+.side-banner__media picture{display:contents}
+.side-banner__media img{display:block;width:100%;height:auto;max-height:none}
+.is-sub .side-banner__media img{max-height:22rem;object-fit:cover}
+.side-banner--has-img .side-banner__in{align-self:center;width:min(100% - 2 * var(--f-gutter),var(--f-wrap) + var(--side-w));min-height:0}
+.side-banner--has-img .side-banner__id{padding:.5rem .9rem;border-radius:var(--f-r-l);background:color-mix(in srgb,var(--f0-bg,#FFFFFF) 94%,transparent);color:var(--f0-ink,#111111);box-shadow:0 8px 24px -12px rgb(0 0 0/.35)}
+.side-banner--has-img .side-banner__id{flex:0 1 auto}
+.side-banner--has-img .side-banner__claim{flex:0 1 auto;color:var(--f0-ink,#111111)}
+.side-banner--has-img .menu-btn{background:var(--f0-bg,#FFFFFF);color:var(--f0-ink,#111111)}
+:root{--f0-bg:var(--f-bg)}
+/* Optional abgedunkelt: Schrift weiß, nur das Logo auf heller Fläche */
+:is(.sbo-soft,.sbo-strong) .side-banner--has-img::before{content:"";grid-area:1/1;z-index:0;background:linear-gradient(90deg,rgb(0 0 0/.5),rgb(0 0 0/.3) 55%,rgb(0 0 0/.15))}
+.sbo-strong .side-banner--has-img::before{background:linear-gradient(90deg,rgb(0 0 0/.72),rgb(0 0 0/.45) 55%,rgb(0 0 0/.25))}
+:is(.sbo-soft,.sbo-strong) .side-banner--has-img .side-banner__id{padding:0;background:none;box-shadow:none}
+:is(.sbo-soft,.sbo-strong) .side-banner--has-img .side-banner__claim{color:#FFFFFF;text-shadow:0 1px 12px rgb(0 0 0/.4)}
+:is(.sbo-soft,.sbo-strong) .side-banner--has-img .side-banner__brand{padding:.5rem .8rem;border-radius:var(--f-r-l);background:var(--f0-bg,#FFFFFF)}
+
+@container fpage (min-width:40rem){
+  .side-banner__claim{display:block;flex:1 1 14rem;max-width:34rem}
+  .side-banner__tools{margin-inline-start:auto}
+}
+@container fpage (min-width:62rem){
+  .side-banner{--banner-h:9.5rem}
+  .sbh-tall .side-banner{--banner-h:14rem}
+  /* Unterseiten: derselbe Banner, etwas niedriger */
+  .is-sub .side-banner{--banner-h:7.5rem}
+  .sbh-tall .is-sub .side-banner{--banner-h:10rem}
+  .side-banner__in{gap:var(--f-s-m) var(--f-s-2xl);width:auto;margin:0;padding:var(--f-s-m) var(--f-gutter) var(--f-s-m) 1.25rem}
+  .side-banner--has-img .side-banner__in{width:auto;min-height:0}
+  .side-banner--has-img .side-banner__brand .brand__logo img{max-height:min(var(--side-logo),6rem)}
+  .side-banner__brand .brand__logo img{width:auto;max-width:22rem;height:auto;max-height:min(var(--side-logo),calc(var(--banner-h) - 1.5rem))}
+  .side-banner__brand .brand__name{font-size:clamp(1.4rem,calc(var(--side-logo) * .3),2.4rem);line-height:1.1}
+  .side-banner__brand .brand__mark{width:calc(var(--side-logo) * .7);height:calc(var(--side-logo) * .7);font-size:calc(var(--side-logo) * .34)}
+  .side-banner__claim{font-size:var(--f-t2)}
+  .side-banner__cta{display:inline-flex}
+  .side-banner .side__menu{display:none}
+  .side--below{display:block;position:sticky;top:0;flex:0 0 var(--side-w);width:var(--side-w);max-height:100vh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;align-self:flex-start}
+  .side--below .side__in{display:flex;flex-direction:column;gap:var(--f-s-l);padding:var(--f-s-l) 1.25rem 1.5rem}
+  .side--below .side__search,.side--below .side__nav{display:block}
+  .side--below .side__foot{display:flex;margin-top:0}
+}

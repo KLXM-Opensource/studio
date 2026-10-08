@@ -10,9 +10,9 @@ $lang = \Core\Lang::current();
 $ogLocale = ['de' => 'de_DE', 'en' => 'en_GB', 'fr' => 'fr_FR', 'it' => 'it_IT', 'es' => 'es_ES', 'nl' => 'nl_NL'][$lang] ?? str_replace('-', '_', $lang);
 $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
-// Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten) – nur das Gewählte
+// Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten, Farbenfroh) – nur das Gewählte
 $optCss = [];
-foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers'] as $opt) {
+foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette'] as $opt) {
     $file = 'css/opt-' . $opt . '-' . preg_replace('~[^a-z]~', '', (string) design($opt)) . '.css';
     if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
 }

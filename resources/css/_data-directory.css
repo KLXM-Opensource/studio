@@ -1,0 +1,35 @@
+/* Kern-Blöcke „Datenliste“ (Darstellung „Verzeichnis“, Besucher-Filter, A–Z) und „Datensatz-Felder“ (Profil, Kontaktkarte)
+   – neutral; Teil von data.css. Kits mit eigener data.css importieren diesen Teil oder gestalten die Klassen selbst.
+   Farben über den Kit-Vertrag (--kit-*), mit neutralem Rückfall. */
+.dl--directory .dl-items{--cols:3;grid-template-columns:repeat(auto-fill,minmax(min(100%,max(240px,calc((100% - (var(--cols) - 1) * var(--dl-gap)) / var(--cols)))),1fr))}
+.dl--directory .dl-cols-2{--cols:2}.dl--directory .dl-cols-4{--cols:4}
+.dl--directory .dl-f--chips{margin-top:auto;padding-top:4px}
+.dl-img--contain,.df-img--contain{background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.dl-img--contain img,.df-img--contain img{box-sizing:border-box;object-fit:contain;padding:10%}
+.dl-tools{display:grid;gap:14px;margin-bottom:var(--dl-gap,24px)}
+.dl-search__label{display:block;margin-bottom:6px;font-weight:600}
+.dl-search__row{display:flex;gap:8px;max-width:34rem}
+.dl-search__input{flex:1;min-width:0;min-height:44px;padding:0 12px;border:1px solid rgba(0,0,0,.4);border-radius:8px;background:var(--kit-bg,#fff);color:inherit;font:inherit}
+.dl-search__btn{min-height:44px;padding:0 18px;border:0;border-radius:8px;background:var(--kit-accent,#222);color:var(--kit-on-accent,#fff);font:inherit;font-weight:600;cursor:pointer}
+.dl-filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.dl-filter__label{color:var(--dl-muted);font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.dl-filter__list{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.dl-fchip{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border:1px solid rgba(0,0,0,.2);border-radius:999px;color:inherit;font-size:.9rem;font-weight:600;text-decoration:none}
+.dl-fchip:hover{border-color:currentColor}
+.dl-fchip[aria-current]{border-color:var(--kit-ink,#111);background:var(--kit-ink,#111);color:var(--kit-bg,#fff)}
+.dl-count{margin:0;color:var(--dl-muted);font-size:.9rem}
+.dl-az{margin-bottom:var(--dl-gap,24px)}
+.dl-az__list{display:flex;flex-wrap:wrap;gap:4px;margin:0;padding:0;list-style:none}
+.dl-az__list :is(a,span){display:grid;place-items:center;min-width:36px;min-height:36px;border-radius:8px;font-weight:600;text-decoration:none}
+.dl-az__list a{background:var(--dl-surface);color:inherit}
+.dl-az__list span{opacity:.35}
+.dl-az__head{margin:32px 0 14px;font-size:1.5rem;scroll-margin-top:96px}
+.dl-az__head:first-of-type{margin-top:0}
+.df-profile{display:flex;flex-wrap:wrap;align-items:center;gap:20px 32px}
+.df-profile__img{flex:0 0 min(14rem,100%)}
+.df-profile__body{display:grid;flex:1 1 min(22rem,100%);gap:12px}
+.df-profile__lead{margin:0;font-size:1.15rem;line-height:1.5}
+.df-contact{display:grid;gap:16px;max-width:46em;padding:20px 24px;border-radius:var(--dl-radius);background:var(--dl-surface)}
+.df-contact__addr{font-style:normal;line-height:1.6}
+.df-contact__list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.df-contact__list li{display:flex;align-items:center;gap:10px;overflow-wrap:anywhere}

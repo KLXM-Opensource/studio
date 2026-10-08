@@ -6,6 +6,35 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit Fluid: Seitenleiste mit Menübaum, großes Logo, „Farbenfroh“, Mitglieder-Verzeichnis
+- **Kopfbereich „Seitenleiste mit Menübaum“** (Design → Kopf & Fuß): Leiste links über die volle Höhe mit großem Logo, Suche,
+  Menübaum über alle Ebenen (aktueller Zweig offen, übrige per Schaltfläche mit `aria-expanded`; Option „Immer alle sichtbar“),
+  Handlungsaufruf, Telefon/E-Mail, Social Media und Sprachen; eigener Bildlauf; Breite schmal/normal/breit. Auf schmalen
+  Bildschirmen Leiste oben mit Menü-Schaltfläche und dem gewohnten Seitenblatt. Die bisherige „Seitenleiste“ bleibt unverändert.
+  Optional ein **Kopfbanner** über die volle Breite auf jeder Seite (`side_banner`: Farbband oder Bild – das Bild aus Website → Darstellung
+  „Bannerbild“ erscheint ganz, ohne Beschnitt, wahlweise abgedunkelt; Höhe des Farbbands normal/hoch, auf Unterseiten niedriger) mit Logo, Claim und Button – die Seitenleiste
+  beginnt darunter und bleibt beim Scrollen oben stehen.
+- **Größe von Logo bzw. Wortmarke** (normal, groß, sehr groß) für alle Kopfbereiche; **Hintergrund des Kopfbereichs** zusätzlich
+  „Zarter Farbverlauf“.
+- **Farbwirkung „Farbenfroh“:** Akzent, zweite Markenfarbe und drei neue Farben (`color3`–`color5`) wechseln sich in Karten,
+  Symbolen, Kennzahlen, Schritten, Listenpunkten, getönten Abschnitten, Etiketten und der Seitenleiste ab – nur als Grafik und
+  zarte Tönung, Schrift bleibt in Textfarbe; `tools/contrast.php` prüft die fünf Farben hell und dunkel.
+- **Vorlage „Netzwerk & Bildung · Farbenfroh mit Seitenleiste“** (Nunito, neu im Schriftenangebot) und Demo-Set
+  `php kits/fluid/tools/demo.php --network` (Mitglieder-Verzeichnis mit Detailseiten, Seitenbaum mit drei Ebenen, Logo).
+- Alle neuen Optionen sind aus, solange sie nicht gewählt werden – bestehende Fluid-Websites sehen unverändert aus
+  (Bildvergleich Standard und vier Vorlagen, Desktop und Telefon, hell und dunkel).
+
+### Datenliste: Verzeichnis, Filter für Besucher, A–Z; Datensatz-Felder: Profil und Kontaktkarte
+- **Datenliste:** Darstellung **„Verzeichnis“** (Bild eingepasst auf einer Kachel – Logos –, Auswahlfelder als farbige Etiketten
+  `dl-chip dl-tone-1…5`), Option **Bilder** (füllen/ganz zeigen) für alle Darstellungen, **Filter für Besucher**: bis zu zwei Reihen
+  Filter-Schaltflächen aus Auswahl-/Mehrfachauswahl-Feldern (`?{feld}={option}`), Suchfeld (`?q=`), **A–Z-Sprungleiste** mit
+  Gruppen nach Anfangsbuchstaben. Serverseitig per GET, ohne JavaScript, Blättern behält die Auswahl; ohne die neuen Optionen ist
+  die Ausgabe unverändert.
+- **Datensatz-Felder:** Darstellungen **„Profil“** (Logo/Bild auf Kachel, Titel als H1, Etiketten, Kurztext) und
+  **„Kontaktkarte“** (Adresse mit PLZ und Ort in einer Zeile, Telefon/E-Mail/Website als Links mit Symbol, Karte aus einem
+  Ort-Feld). Neutrale Stile in `resources/css/_data-directory.css` (Teil von `data.css`), Fluid gestaltet sie in seiner `data.css`.
+  Handbuch → Daten.
+
 ### Korrekturen: große Formulare, Schalter, Standardrollen, Favoriten-Stern
 - **Große Formulare speichern zuverlässig:** „Felder & Einstellungen“ großer Datentabellen (z. B. Immobilien mit vielen Feldern),
   Kit-Einstellungen mit Wiederholungen oder der Rollen-Editor überschritten die PHP-Grenze `max_input_vars` (meist 1000) – PHP verwarf

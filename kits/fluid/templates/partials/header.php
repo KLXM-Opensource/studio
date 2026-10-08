@@ -1,6 +1,7 @@
 <?php
 /**
- * Kopfbereich – Variante aus Verwaltung → Design → „Kopfbereich“ (design('header')): inline | centered | split | floating | rail.
+ * Kopfbereich – Variante aus Verwaltung → Design → „Kopfbereich“ (design('header')): inline | centered | split | floating | rail | minimal
+ * | sidebar (eigene Datei header-sidebar.php).
  *
  * Intrinsisch statt Breakpoints: Der Kopf ist ein Container (container-type: inline-size). Die Klasse fit-NN nennt die
  * geschätzte Breite in rem, die das Menü in einer Zeile braucht (fluid_nav_fit); ist der Kopf mindestens so breit,
@@ -12,6 +13,11 @@
  * Scrollen gesperrt per :has()); site.js ergänzt Fokusfalle, inerten Rest der Seite und den Fokus beim Öffnen.
  */
 $variant = preg_replace('~[^a-z]~', '', (string) design('header')) ?: 'inline';
+// „Seitenleiste mit Menübaum“: eigener Aufbau (großes Logo, Menübaum, Suche, Kontakt) – partials/header-sidebar.php
+if ($variant === 'sidebar') {
+    echo app()->theme->partial('header-sidebar');
+    return;
+}
 $menu = \Core\HeaderActions::menu(fluid_menu());   // Stil „Menüpunkt“: Ziel des Handlungsaufrufs nicht doppelt im Menü
 $langs = language_links();
 $cta = fluid_header_cta();

@@ -244,6 +244,8 @@ function fluid_nav_fit(array $menu, ?array $cta, array $langs, bool $search, str
     foreach ($menu as $m) $nav += $em((string) $m['label'], .9375) + 1.5 + ($m['children'] ? 1.05 : 0) + .25;
     $logo = (int) setting('logo');
     $brand = $logo ? 11.5 : 2.5 + .7 + $em(fluid_name(true), 1.125);
+    // Größeres Logo bzw. größere Wortmarke (Design → „Größe von Logo bzw. Wortmarke“)
+    $brand *= ['large' => 1.25, 'xl' => 1.5][(string) design('logo_size')] ?? 1;
     // Aktionen rechts (Suche, Handlungsaufruf, Kontakt-Chip …) schätzt Core\HeaderActions je nach Einstellung
     $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0);
     $gut = 2 * 2.4;                                                           // Seitenabstand bei ~60–80 rem
@@ -313,6 +315,37 @@ function fluid_nav_sheet(array $menu): string
                 . '<summary class="mnav__link"><span>' . e($m['label']) . '</span>' . $chev . '</summary>'
                 . '<div class="mnav__sub"><a class="mnav__link mnav__link--parent" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht: {name}', ['name' => $m['label']])) . '</a>'
                 . $level($m['children'], $depth + 1) . '</div></details></li>';
+        }
+        return $h . '</ul>';
+    };
+    return $level($menu, 1);
+}
+
+/**
+ * Menübaum der „Seitenleiste mit Menübaum“ (Kopfbereich „sidebar“): alle Ebenen als verschachtelte Listen.
+ * Jede Seite bleibt ein Link; Unterseiten öffnet eine eigene Schaltfläche daneben (aria-expanded, aria-controls).
+ * Der aktuelle Zweig ist offen. Ohne JavaScript ist der ganze Baum sichtbar; site.js klappt die übrigen Zweige zu
+ * (bei „Immer alle sichtbar“ – Klasse st-open – nicht). Oberste Ebene mit Farbton 1–5 (Farbwirkung „Farbenfroh“).
+ */
+function fluid_nav_tree(array $menu): string
+{
+    $cur = fn(array $m) => fluid_is_current($m) ? ' aria-current="page"' : '';
+    $chev = icon('caret-down', ['class' => 'snav__chev']);
+    $n = 0;
+    $level = function (array $items, int $depth, string $id = '') use (&$level, &$n, $cur, $chev): string {
+        $h = '<ul class="snav__list snav__list--' . min($depth, 3) . '" role="list"' . ($id !== '' ? ' id="' . e($id) . '"' : '') . '>';
+        foreach ($items as $i => $m) {
+            $cls = 'snav__item' . ($depth === 1 ? ' snav__item--t' . ($i % 5 + 1) : '') . ($m['active'] ? ' is-active' : '') . ($m['children'] ? ' has-sub' : '');
+            $link = '<a class="snav__link" href="' . e($m['href']) . '"' . $cur($m) . '>' . e($m['label']) . '</a>';
+            if (!$m['children']) {
+                $h .= '<li class="' . $cls . '">' . $link . '</li>';
+                continue;
+            }
+            $sid = 'snav-' . (++$n);
+            $h .= '<li class="' . $cls . '"><div class="snav__row">' . $link
+                . '<button type="button" class="snav__toggle" aria-expanded="' . ($m['active'] ? 'true' : 'false') . '" aria-controls="' . $sid . '">'
+                . $chev . '<span class="sr-only">' . e(lt('Unterseiten von {name}', ['name' => $m['label']])) . '</span></button></div>'
+                . $level($m['children'], $depth + 1, $sid) . '</li>';
         }
         return $h . '</ul>';
     };

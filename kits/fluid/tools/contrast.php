@@ -42,7 +42,8 @@ $verbose = in_array('-v', $argv, true);
 foreach ($design['presets'] as $key => $p) {
     foreach (['hell' => '', 'dunkel' => '@dark'] as $mode => $sfx) {
         // Zweite Markenfarbe: in älteren Vorlagen nicht gesetzt → Standard des Tokens
-        $def2 = ['secondary' => ['#0F766E', '#5EEAD4'], 'on_secondary' => ['#FFFFFF', '#062B27']];
+        $def2 = ['secondary' => ['#0F766E', '#5EEAD4'], 'on_secondary' => ['#FFFFFF', '#062B27'],
+            'color3' => ['#B45309', '#FCD34D'], 'color4' => ['#BE185D', '#F9A8D4'], 'color5' => ['#0369A1', '#7DD3FC']];
         $v = fn(string $k) => $p['values'][$k . $sfx] ?? $def2[$k][$sfx === '' ? 0 : 1];
         $soft = mix($v('accent'), 14, $v('background'));
         $white = '#FFFFFF';
@@ -71,8 +72,29 @@ foreach ($design['presets'] as $key => $p) {
             'Formularrahmen (Nebentext) / Hintergrund' => [$v('muted'), $v('background'), 3],
             'Fokusring (Akzent) / getönt' => [$v('accent'), $v('surface'), 3],
         ];
+        // Farbwirkung „Farbenfroh“ (opt-palette-colorful.css): fünf Farben als Grafik (≥ 3 : 1) und als zarte Tönung
+        // (14 % in den Hintergrund) unter Überschrift, Text, Nebentext und Links. Pflicht für Vorlagen mit palette = colorful;
+        // für die übrigen nur mit -v als Hinweis (die Farben dort sind Standardwerte, die erst beim Einschalten zählen).
+        $colorful = ($p['values']['palette'] ?? 'brand') === 'colorful';
+        if ($colorful || $verbose) {
+            foreach (['accent', 'secondary', 'color3', 'color4', 'color5'] as $n => $tk) {
+                $tone = $v($tk);
+                $tsoft = mix($tone, 14, $v('background'));
+                $pre = 'Farbe ' . ($n + 1) . ': ';
+                $checks[$pre . 'Grafik / Hintergrund'] = [$tone, $v('background'), 3];
+                $checks[$pre . 'Grafik / getönt'] = [$tone, $v('surface'), 3];
+                $checks[$pre . 'Überschrift auf Tönung'] = [$v('ink'), $tsoft, 4.5];
+                $checks[$pre . 'Fließtext auf Tönung'] = [$v('text'), $tsoft, 4.5];
+                $checks[$pre . 'Nebentext auf Tönung'] = [$v('muted'), $tsoft, 4.5];
+                $checks[$pre . 'Link auf Tönung'] = [$v('accent'), $tsoft, 4.5];
+            }
+        }
         foreach ($checks as $label => [$fg, $bg, $min]) {
             $r = ratio($fg, $bg);
+            if ($r < $min && !$colorful && str_starts_with($label, 'Farbe ')) {
+                printf("  Hinweis %-11s %-7s %-44s %5.2f < %.1f (nur bei „Farbenfroh“)\n", $key, $mode, $label, $r, $min);
+                continue;
+            }
             if ($r < $min) {
                 $fail++;
                 printf("✗ %-11s %-7s %-44s %5.2f < %.1f  (%s auf %s)\n", $key, $mode, $label, $r, $min, $fg, $bg);

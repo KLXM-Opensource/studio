@@ -373,4 +373,10 @@ return [
     'Nein, danke' => 'No, thanks',
     'Nichts mehr verpassen?' => 'Never miss anything?',
     'Wählen Sie, worüber wir Sie auf diesem Gerät benachrichtigen. Ohne Anmeldung und ohne Tracking – gespeichert wird nur die Zustelladresse Ihres Browsers. Ändern oder abbestellen jederzeit hier.' => 'Choose what we notify you about on this device. No sign-up and no tracking – only your browser’s delivery address is stored. Change or unsubscribe here at any time.',
+    'Alle anzeigen' => 'Show all',
+    'Filter zurücksetzen' => 'Reset filters',
+    'Filtern nach {label}' => 'Filter by {label}',
+    'In der Liste suchen' => 'Search this list',
+    'Keine Einträge für diese Auswahl.' => 'No entries for this selection.',
+    'Nach Anfangsbuchstaben springen' => 'Jump to initial letter',
 ];

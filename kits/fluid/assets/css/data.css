@@ -93,3 +93,67 @@ a.dl-chip:hover{background:var(--f-a2);color:var(--f0-ink)}
 .dt-media .media-transcript{margin-top:.6rem}
 .dt-media .media-transcript summary{display:flex;align-items:center;min-height:2.75rem;font-weight:600;cursor:pointer}
 .dt-media .media-transcript__for{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ---------------------------------------------------------------- Verzeichnis (Datenliste „Verzeichnis“) und Besucher-Filter
+   Logo-Kachel: Bild eingepasst auf heller Fläche (auch im dunklen Farbschema hell, damit dunkle Logos lesbar bleiben);
+   bei „Farbenfroh“ zart im Farbton des Eintrags. Etiketten: Farbton nach Option (dl-tone-1 … 5, opt-palette-colorful.css). */
+.dl--directory .dl-items{--cols:3;grid-template-columns:repeat(auto-fill,minmax(min(100%,max(var(--min,16rem),calc((100% - (var(--cols) - 1) * var(--dl-gap)) / var(--cols)))),1fr))}
+.dl--directory .dl-cols-2{--cols:2;--min:20rem}.dl--directory .dl-cols-4{--cols:4;--min:13rem}
+.dl--directory .dl-body{flex:1;gap:.4rem}
+.dl--directory .dl-f--chips{margin-top:auto;padding-top:.5rem}
+/* Schmaler Platz (Abschnitt ≤ 34 rem, z. B. Telefon): Logo-Kachel klein links neben dem Text – kürzere Liste */
+@container (max-width:34rem){
+  .dl--directory .dl-items{gap:var(--f-s-s)}
+  .dl--directory .dl-item{display:grid;grid-template-columns:5.5rem minmax(0,1fr);align-items:start}
+  .dl--directory .dl-img{grid-row:1/3;aspect-ratio:1;margin:.75rem 0 .75rem .75rem}
+  .dl--directory .dl-img img{padding:8%}
+  .dl--directory .dl-body{padding:.75rem var(--f-s-m) .9rem}
+}
+.dl-img--contain,.df-img--contain{--tile:#FFFFFF;background:color-mix(in srgb,var(--f-tone,var(--f-a)) var(--tile-tint,0%),var(--tile))}
+.pal-colorful :is(.dl-img--contain,.df-img--contain){--tile-tint:9%}
+.dl-img--contain{margin:.5rem .5rem 0;border-radius:calc(var(--f-r-l) - .3rem)}
+.dl-img--contain img,.df-img--contain img{box-sizing:border-box;object-fit:contain;padding:12%}
+.dl-item:hover .dl-img--contain img{scale:1.03}
+@media (prefers-color-scheme:dark){html.has-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}}
+html.is-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}
+.dl-tools{display:grid;gap:var(--f-s-s);margin-bottom:var(--f-s-xl)}
+.dl-search__label{display:block;margin-bottom:.4rem;color:var(--f-ink);font-weight:650}
+.dl-search__row{display:flex;max-width:34rem;border:1.5px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:var(--f-bg)}
+.dl-search__row:focus-within{border-color:var(--f-a);box-shadow:0 0 0 3px color-mix(in srgb,var(--f-a) 25%,transparent)}
+.dl-search__input{flex:1;min-width:0;min-height:2.75rem;padding:0 .9rem;border:0;border-radius:var(--f-btn-r);background:none;color:var(--f-ink);font:inherit}
+.dl-search__input:focus{outline:none}
+.dl-search__btn{margin:3px;padding:0 1rem;border:0;border-radius:max(0px,calc(var(--f-btn-r) - 3px));background:var(--f-btn-bg);color:var(--f-btn-ink);font-weight:600;cursor:pointer}
+.dl-search__btn:hover{background:var(--f-btn-hover)}
+.dl-filter{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .9rem}
+.dl-filter__label{color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
+.dl-filter__list{display:flex;flex-wrap:wrap;gap:.4rem;margin:0;padding:0;list-style:none}
+.dl-fchip{display:inline-flex;align-items:center;gap:.5rem;min-height:2.5rem;padding:0 1rem;border:1px solid var(--f-line-strong);border-radius:999px;background:var(--f-card);color:var(--f-ink);font-size:var(--f-t-1);font-weight:600;text-decoration:none;transition:background-color .15s,border-color .15s}
+.dl-fchip:hover{border-color:var(--f-ink)}
+.dl-fchip[aria-current]{border-color:var(--f-ink);background:var(--f-ink);color:var(--f-bg)}
+.pal-colorful .dl-fchip[class*=dl-tone-]::before{content:"";flex:none;width:.6rem;height:.6rem;border-radius:50%;background:var(--f-tone)}
+.pal-colorful .dl-fchip[class*=dl-tone-][aria-current]{border-color:var(--f-tone);background:var(--f-tone-soft);color:var(--f-ink);box-shadow:inset 0 0 0 1px var(--f-tone)}
+.dl-count{margin:0;color:var(--f-muted);font-size:var(--f-t-1)}
+.dl-count a{color:var(--f-link);font-weight:600}
+.dl-az{margin-bottom:var(--f-s-l)}
+.dl-az__list{display:flex;flex-wrap:wrap;gap:.25rem;margin:0;padding:0;list-style:none}
+.dl-az__list :is(a,span){display:grid;place-items:center;min-width:2.25rem;min-height:2.25rem;border-radius:min(var(--f-btn-r),.6rem);font:650 var(--f-t-1)/1 var(--f-font-label);text-decoration:none}
+.dl-az__list a{background:var(--f-surface);color:var(--f-ink)}
+.dl-az__list a:hover{background:var(--f-a-soft);color:var(--f-ink)}
+.dl-az__list span{color:var(--f-muted);opacity:.45}
+.dl-az__head{display:flex;align-items:center;gap:var(--f-s-s);margin:var(--f-s-2xl) 0 var(--f-s-m);color:var(--f-ink);font:var(--f-hw) var(--f-t3)/1 var(--f-font-head);scroll-margin-top:6rem}
+.dl-az__head::after{content:"";flex:1;height:1px;background:var(--f-line)}
+.dl-az+.dl-az__head{margin-top:0}
+
+/* ---------------------------------------------------------------- Datensatz-Felder „Profil“ und „Kontaktkarte“ */
+.df-profile{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-l) var(--f-s-2xl)}
+.df-profile__img{flex:0 0 min(15rem,100%);border-radius:var(--f-r-l);box-shadow:0 0 0 1px var(--f-line)}
+.df-profile__body{display:grid;flex:1 1 min(22rem,100%);gap:var(--f-s-s)}
+.df-profile .df-title{font-size:max(var(--f-t3),min(var(--f-t5),9cqi))}
+.df-profile__lead{margin:0;max-width:44rem;color:var(--f-text);font-size:var(--f-t1);line-height:1.5}
+.df-contact{display:grid;gap:var(--f-s-m);max-width:44rem;padding:var(--f-pad);border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);background:var(--f-card);box-shadow:var(--f-card-sh)}
+.df-contact__addr{color:var(--f-ink);font-style:normal;line-height:1.6}
+.df-contact__list{display:grid;gap:.15rem;margin:0;padding:0;list-style:none}
+.df-contact__list li{display:flex;align-items:center;gap:.7rem;min-height:2.5rem;overflow-wrap:anywhere}
+.df-contact__list .ico{flex:none;display:grid;place-items:center;width:2.25rem;height:2.25rem;padding:.5rem;border-radius:50%;background:var(--f-a-soft);color:var(--f-link)}
+.df-contact__list a{color:var(--f-link);font-weight:600}
+.df-contact__map{overflow:hidden;border-radius:var(--f-r-s)}
