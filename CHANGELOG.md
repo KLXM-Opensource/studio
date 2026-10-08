@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anfragen wie ein Mailprogramm
+- **Anfragen** aufgebaut wie Feedback bzw. Mail: Postfächer in der Seitenleiste (Eingänge mit Zahl neuer Anfragen, Neu ·
+  In Bearbeitung · Erledigt · Alle, Einrichtung), Liste in der Mitte, gewählte Anfrage rechts. Nach „Entschlüsseln“ zeigt die
+  Liste Namen und Auszug; Wechseln (Klick, ↑/↓), Status, Zuweisen und Löschen ohne Neuladen – die Ansicht bleibt entsperrt.
+  Suche über der Liste („/“), Drucken/Kopieren je Anfrage, auf dem Telefon Liste → Anfrage mit „‹ Zurück“.
+
 ### Daten: Bereich „Verschlüsselung“
 - Neuer Bereich in **Felder & Einstellungen**: eine Wahl für die ganze Tabelle – **Keine Verschlüsselung**, **Zentraler Schlüssel**,
   **Zentraler Schlüssel + Kopie per E-Mail**, **Nur per E-Mail** – jeweils mit „Wer kann mitlesen?“. Dazu Stand des zentralen

@@ -46,6 +46,7 @@ import { initAssistant } from './_assistant.js';
 import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
 import { initPushAdmin } from './_pushadmin.js';   // Mitteilungen → Verfassen: Vorschau, erreichbare Geräte (Core\Push\Compose)
 import { initPack } from './_pack.js';   // Große Formulare gebündelt senden (max_input_vars, Core\Http\Request::unpack)
+import { initRequests } from './_requests.js';   // Anfragen als Posteingang (Liste + Lesebereich)
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
 const d = document;
@@ -101,6 +102,7 @@ initAccent();
 initFonts();
 initFeatures();
 initDelivery();
+initRequests();
 if (IN_ADMIN) initPush(csrf);
 if (IN_ADMIN) initPushAdmin();
 
@@ -459,7 +461,7 @@ if (toc && 'IntersectionObserver' in window) {
   }), { rootMargin: '0px 0px -70% 0px' });
   links.forEach(a => { const s = d.getElementById(a.getAttribute('href').slice(1)); if (s) io.observe(s); });
 }
-d.addEventListener('click', e => { if (e.target.closest('[data-print]')) print(); });
+d.addEventListener('click', e => { if (e.target.closest('[data-print]:not([data-print^="#"])')) print(); });   // einzelner Eintrag: siehe oben
 
 // ------------------------------------------------------------ Datenblöcke: Feldauswahl passend zur gewählten Tabelle
 function initDataFields(scope = d) {

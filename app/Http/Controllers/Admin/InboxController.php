@@ -71,15 +71,22 @@ final class InboxController extends AdminController
         foreach ([...Inbox::statusKeys($t), 'alle'] as $st) $counts[$st] = Inbox::count($t, $st);
         $newCounts = [];
         foreach ($tables as $x) $newCounts[$x['handle']] = Inbox::count($x, 'neu');
-        return $this->view('requests/index', [
-            'tables' => $tables, 't' => $t, 'rows' => $rows, 'decrypted' => $decrypted, 'keyError' => $keyError,
+        // Gewählte Anfrage (rechts im Lesebereich): ?id= bzw. nach dem Entschlüsseln aus dem Formular; sonst die erste der Seite
+        $selId = (int) ($r->str('id') ?: ($r->post['id'] ?? 0));
+        if (!in_array($selId, array_map('intval', array_column($rows, 'id')), true)) $selId = (int) ($rows[0]['id'] ?? 0);
+        $vars = [
+            'tables' => $tables, 't' => $t, 'selId' => $selId, 'hasSel' => $r->str('id') !== '' || $r->isPost(), 'rows' => $rows, 'decrypted' => $decrypted, 'keyError' => $keyError,
             'unlocked' => $decrypted !== [], 'autoUnlocked' => $autoUnlocked, 'envKey' => FormCrypto::envSecret() !== null, 'status' => $status, 'page' => $page, 'pages' => (int) ceil($total / self::PER_PAGE),
             'counts' => $counts, 'newCounts' => $newCounts, 'users' => $this->assignees($t), 'canManage' => can('requests.manage', $t['handle']),
             'canLog' => self::canLog(), 'keyReady' => FormCrypto::ready(),
             // Zustellung per E-Mail (Core\Data\Delivery): Modus, Einrichtungshinweise, fehlgeschlagene Zustellungen, Rückfall-Einträge
             'delivery' => \Core\Data\Delivery::mode($t), 'deliveryProblems' => \Core\Data\Delivery::problems($t),
             'deliveryAlerts' => \Core\Data\Delivery::alerts(array_column($tables, 'handle')),
-        ]);
+        ];
+        // Postfächer in der Seitenleiste (wie Feedback und Medien): Eingänge, Status, Einrichtung
+        $vars['drill'] = \Core\Theme::capture(ROOT . '/app/Admin/views/requests/_nav.php', $vars);
+        $vars['drillTitle'] = __('Anfragen');
+        return $this->view('requests/index', $vars);
     }
 
     /** Benutzer, die Anfragen dieser Tabelle lesen dürfen (für „Zuweisen“) */
@@ -90,11 +97,14 @@ final class InboxController extends AdminController
             fn($u) => Permissions::allows($roles[$u['role']] ?? null, 'requests.read', $t['handle'])));
     }
 
-    private function back2(Request $r, string $handle, string $msg, string $type = 'success'): Response
+    private function back2(Request $r, string $handle, string $msg, string $type = 'success', array $extra = []): Response
     {
+        // Lesebereich (resources/js/_requests.js): Aktionen per fetch, damit entschlüsselte Inhalte auf der Seite bleiben
+        if ($r->wantsJson()) return Response::json(['ok' => $type !== 'error', 'message' => $msg] + $extra, $type === 'error' ? 422 : 200);
         $t = \Core\Data\Tables::find($handle);
         $status = in_array($r->str('back'), [...($t ? Inbox::statusKeys($t) : Inbox::STATUSES), 'alle'], true) ? $r->str('back') : 'neu';
-        return $this->back('/admin/requests?table=' . rawurlencode($handle) . '&status=' . $status, $type, $msg);
+        $id = (int) $r->str('id');
+        return $this->back('/admin/requests?table=' . rawurlencode($handle) . '&status=' . $status . ($id && $type !== 'deleted' ? '&id=' . $id : ''), $type === 'deleted' ? 'success' : $type, $msg);
     }
 
     /** Hinweise „Zustellung fehlgeschlagen“ (Core\Data\Delivery::alert) für die Tabellen des Benutzers ausblenden */
@@ -118,7 +128,9 @@ final class InboxController extends AdminController
         } catch (\InvalidArgumentException $e) {
             return $this->back2($r, $t['handle'], $e->getMessage(), 'error');   // Prüfung der Erweiterung (z. B. Zeitraum inzwischen belegt)
         }
-        return $this->back2($r, $t['handle'], __('Status: {status}.', ['status' => Inbox::statusLabel($st, $t)]));
+        $sd = Inbox::statuses($t)[$st] ?? [];
+        return $this->back2($r, $t['handle'], __('Status: {status}.', ['status' => Inbox::statusLabel($st, $t)]), 'success',
+            ['status' => $st, 'label' => Inbox::statusLabel($st, $t), 'tone' => (string) ($sd['tone'] ?? '')]);
     }
 
     public function assign(Request $r, string $table, string $id): Response
@@ -131,7 +143,9 @@ final class InboxController extends AdminController
             throw new HttpException(422, __('Diese Person darf die Anfragen dieser Tabelle nicht lesen.'));
         }
         Inbox::assign($t, (int) $id, $uid ?: null);
-        return $this->back2($r, $t['handle'], $uid ? __('Zugewiesen.') : __('Zuweisung entfernt.'));
+        $u = $uid ? (app()->db->fetchAll('SELECT name, email FROM users WHERE id = ?', [$uid])[0] ?? null) : null;
+        return $this->back2($r, $t['handle'], $uid ? __('Zugewiesen.') : __('Zuweisung entfernt.'), 'success',
+            ['assignee' => $u ? ((string) ($u['name'] ?: $u['email'])) : '']);
     }
 
     public function delete(Request $r, string $table, string $id): Response
@@ -140,7 +154,7 @@ final class InboxController extends AdminController
         $t = $this->table($table, Inbox::readable('requests.manage'));
         Inbox::find($t, (int) $id) ?? throw new HttpException(404);
         Inbox::delete($t, [(int) $id]);
-        return $this->back2($r, $t['handle'], __('Anfrage gelöscht.'));
+        return $this->back2($r, $t['handle'], __('Anfrage gelöscht.'), 'deleted');
     }
 
     // ================================================================= Protokoll

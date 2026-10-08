@@ -18,6 +18,7 @@
 @import "./_pages.css";   /* Feldtyp „pages“ (Core\PagePicker) + aufklappbare Abschnitte in Formularen */
 @import "./_aiset.css";   /* Grundeinstellungen → KI: Verbindungen, Verwendung, Modelle (Core\AI\Profiles) */
 @import "./_pushadmin.css";   /* Verwaltung → Mitteilungen (Core\Push, app/Admin/views/push/*) */
+@import "./_requests.css";   /* Anfragen als Posteingang (app/Admin/views/requests/*, resources/js/_requests.js) */
 @import "./_datawizard.css";   /* Daten: Assistent „Neue Tabelle“, Einsetzen, Felder & Einstellungen (Core\Data\Wizard, Core\Data\Placement) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 /* ==========================================================================
@@ -267,7 +268,7 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .adm-inbox-assign{display:flex;gap:6px;align-items:center}
 .adm-inbox-assign select{min-height:30px;max-width:220px}
 .adm-inbox-export{margin:0 0 10px}
-@media print{.adm-side,.adm-head,.adm-unlock,.adm-filter,.adm-inbox-actions,.adm-inbox-export,.adm-env,.dt-pager,.adm-flash{display:none!important}.is-print-one .adm-request:not(.is-print),.is-print-one .adm-main>:not(.adm-requests){display:none!important}.adm-request{box-shadow:none!important;border:0!important}}
+@media print{.adm-side,.adm-head,.adm-unlock,.adm-filter,.adm-inbox-actions,.adm-inbox-export,.adm-env,.dt-pager,.adm-flash{display:none!important}.is-print-one .adm-request:not(.is-print),.is-print-one .adm-main>:not(.adm-requests):not(.rq-inbox){display:none!important}.adm-request{box-shadow:none!important;border:0!important}}
 .adm-auth{max-width:440px;margin:10vh auto;padding:0 20px}
 .adm-auth h1{font-size:24px;margin-bottom:16px}
 .adm-auth .adm-muted{margin:12px 0 16px;text-align:center}
