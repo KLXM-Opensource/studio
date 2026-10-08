@@ -3117,9 +3117,14 @@ html.adm-ui[data-theme=dark]{--adm-envwarn:#E07B2A}
   .adm-tabs-form--side .adm-tabs [role=tab].is-warn[aria-selected=true] .adm-tabs__dot{background:#fff}
 }
 @media (max-width:999.98px){.adm-tabs__dot{display:none}}
-html.adm-ui[data-env] .adm-side nav a[href$="/system"]::after{content:"";flex:none;width:8px;height:8px;margin-left:8px;border-radius:50%;background:#F59A4A;animation:adm-envpulse 2.2s ease-in-out infinite}
+/* Warnpunkt an Unterpunkten der Einrichtung (layout.php $navWarn: Testumgebung, fehlender Schlüssel …) – die Gruppe zeigt ihn mit,
+   damit er auch bei zugeklappter Gruppe auffällt */
+.adm-side .adm-navwarn{flex:none;width:8px;height:8px;margin-left:auto;border-radius:50%;background:#F59A4A;animation:adm-envpulse 2.2s ease-in-out infinite}
+.adm-side .adm-navgrp__btn > .adm-navwarn{flex:0 0 8px;min-width:0;margin-left:auto;margin-right:2px}
+.adm-side .adm-navgrp__btn .adm-navwarn + .sr-only + .adm-navgrp__chev{margin-left:6px}
+.adm-side .adm-navgrp.is-open > .adm-navgrp__btn .adm-navwarn{opacity:.55;animation:none}
 @keyframes adm-envpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgb(224 123 42 / .55)}50%{opacity:.55;box-shadow:0 0 0 4px rgb(224 123 42 / 0)}}
-@media (prefers-reduced-motion:reduce){.adm-tabs__dot,html.adm-ui[data-env] .adm-side nav a[href$="/system"]::after{animation:none}}
+@media (prefers-reduced-motion:reduce){.adm-tabs__dot,.adm-side .adm-navwarn{animation:none}}
 /* Konto im Listen-Stil: jede Gruppe ein Kasten, Inhalte als Zeilen mit Haarlinien */
 .acc-page{max-width:760px}
 .acc-group{margin:0}

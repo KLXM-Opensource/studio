@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Warnungen im Menü auch an der Gruppe
+- Hat ein Unterpunkt der Einrichtung eine Warnung (Testumgebung aktiv, Schlüssel für verschlüsselte Anfragen fehlt), zeigt auch die
+  Gruppe („System“, „Website“) den Punkt – auffällig bei zugeklappter Gruppe, mit Hinweis beim Darüberfahren und für Screenreader.
+
 ### Fluid: Kopfhöhe und Linie über dem Fußbereich einstellbar
 - Design → Kopf & Fuß → **Höhe des Kopfbereichs** (normal, hoch, sehr hoch) für große Logos – beim Scrollen und auf schmalen
   Bildschirmen wieder normal hoch, mit weichem Übergang.

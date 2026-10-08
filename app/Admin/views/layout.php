@@ -55,6 +55,12 @@ $isCur = function (string $key, string $href = '') use ($hubKind, $reqPath, $sec
 };
 $newReq = 0;
 foreach ($inboxes as $ib) $newReq += \Core\Data\Inbox::count($ib, 'neu');
+// Warnungen an Unterpunkten der Einrichtung (Punkt am Unterpunkt, die Gruppe zeigt ihn mit): Schlüssel → Grund
+$navWarn = [];
+if ($user && can('system.manage')) {
+    if (environment() !== 'production') $navWarn['system'] = __('Testumgebung (Staging) aktiv');
+    elseif ($inboxes && !\Core\FormCrypto::ready()) $navWarn['system'] = __('Kein Schlüssel für verschlüsselte Anfragen');
+}
 [$chatN, $chatAt] = $user ? \Core\Chat\Chat::navCount() : [0, 0];   // Chat: ungelesen + Erwähnungen (live: resources/js/userchat.js)
 $supportN = $user ? \Core\Support\Support::navCount() : 0;   // ungelesene Antworten bzw. (Team) neue Meldungen
 $reviewN = $user && \Core\Review\Queue::canReview() ? \Core\Review\Queue::pendingCount() : 0;   // offene Einreichungen (API, MCP, KI)
@@ -191,12 +197,13 @@ if ($user && ($req = app()->request)) {
       <?php if (count($g['items']) === 1): [$href, $label, $key] = $g['items'][0]; $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); ?>
       <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $gOpen ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span></a></li>
       <?php else: $gId = 'adm-grp-' . $g['key']; ?>
-      <li class="adm-navgrp<?= $gOpen ? ' is-open is-current' : '' ?>" data-navgroup="<?= e($g['key']) ?>">
-        <button type="button" class="adm-navgrp__btn" aria-expanded="<?= $gOpen ? 'true' : 'false' ?>" aria-controls="<?= e($gId) ?>"><?= \Core\Icons::nav($g['icon'], 'adm-nav__ico') ?><span><?= e($g['label']) ?></span><span class="adm-navgrp__chev" aria-hidden="true"></span></button>
+      <?php $gWarn = array_values(array_filter(array_map(fn($n) => $navWarn[$n[2]] ?? null, $g['items']))); ?>
+      <li class="adm-navgrp<?= $gOpen ? ' is-open is-current' : '' ?><?= $gWarn ? ' has-warn' : '' ?>" data-navgroup="<?= e($g['key']) ?>">
+        <button type="button" class="adm-navgrp__btn" aria-expanded="<?= $gOpen ? 'true' : 'false' ?>" aria-controls="<?= e($gId) ?>"<?= $gWarn ? ' title="' . e(implode(' · ', $gWarn)) . '"' : '' ?>><?= \Core\Icons::nav($g['icon'], 'adm-nav__ico') ?><span><?= e($g['label']) ?></span><?php if ($gWarn): ?><span class="adm-navwarn" aria-hidden="true"></span><span class="sr-only"> – <?= e(implode(' · ', $gWarn)) ?></span><?php endif; ?><span class="adm-navgrp__chev" aria-hidden="true"></span></button>
         <ul class="adm-navgrp__list" id="<?= e($gId) ?>"<?= $gOpen ? '' : ' hidden' ?>>
           <?php foreach ($g['items'] as [$href, $label, $key]): ?>
           <?php $sub = $hubPage && (($key === 'prefs' && $hubKind === 'settings') || ($key === 'stats' && $hubKind === 'stats')); ?>
-          <li><a href="<?= e(url($href)) ?>" data-nav="<?= e($key) ?>"<?= $sub ? ' class="is-parent"' : ($isCur($key, $href) ? ' aria-current="page"' : '') ?>><span><?= e($label) ?></span></a>
+          <li><a href="<?= e(url($href)) ?>" data-nav="<?= e($key) ?>"<?= $sub ? ' class="is-parent"' : ($isCur($key, $href) ? ' aria-current="page"' : '') ?><?= isset($navWarn[$key]) ? ' data-warn title="' . e($navWarn[$key]) . '"' : '' ?>><span><?= e($label) ?></span><?php if (isset($navWarn[$key])): ?><span class="adm-navwarn" aria-hidden="true"></span><span class="sr-only"> – <?= e($navWarn[$key]) ?></span><?php endif; ?></a>
             <?php if ($sub): ?><ul class="adm-navgrp__sub"><li><a href="<?= e(url($hubPage['href'])) ?>" aria-current="page"><span><?= e($hubPage['label']) ?></span></a></li></ul><?php endif; ?></li>
           <?php endforeach; ?>
         </ul>

@@ -7026,4 +7026,6 @@ return [
     'Z. B. nach Tests: löscht alle gesendeten und geplanten Mitteilungen und die Statistik. Kanäle bleiben; Abos nur, wenn unten angehakt.' => 'E.g. after testing: deletes all sent and scheduled notifications and the statistics. Channels remain; subscriptions only if ticked below.',
     'Zurückgesetzt: {n} Mitteilungen und alle Zahlen gelöscht. Abos bleiben bestehen.' => 'Reset: {n} notifications and all figures deleted. Subscriptions remain.',
     'Zurückgesetzt: {n} Mitteilungen, Zahlen und {s} Abos gelöscht.' => 'Reset: {n} notifications, figures and {s} subscriptions deleted.',
+    'Testumgebung (Staging) aktiv' => 'Test environment (staging) active',
+    'Kein Schlüssel für verschlüsselte Anfragen' => 'No key for encrypted requests',
 ];
