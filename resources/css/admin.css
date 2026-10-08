@@ -2464,6 +2464,9 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
   --drill-sheen:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.035) 38%,transparent 58%,rgba(79,216,200,.04) 82%,transparent)}
 /* Support: Indigo-Violett, Lavendel */
 .is-drill .adm-side[data-area=support]{--drill-deep:rgba(92,52,168,.26);--drill-mark:#BBA2FF}
+/* Anfragen: Kupfer wie ein Briefkasten, Apricot */
+.is-drill .adm-side[data-area=requests]{--drill-deep:rgba(196,92,24,.30);--drill-mark:#FFB27A;
+  --drill-sheen:linear-gradient(118deg,transparent 15%,rgba(255,255,255,.03) 38%,transparent 58%,rgba(255,178,122,.05) 82%,transparent)}
 /* KLXM AI: Tiefblau, Azur */
 .is-drill .adm-side[data-area=ai]{--drill-deep:rgba(10,100,210,.28);--drill-mark:#7DB2FF}
 .is-drill .adm-side[data-area] .adm-drill{--adm-mint:var(--drill-mark,#3DD9A0)}

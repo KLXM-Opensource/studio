@@ -2,7 +2,6 @@
  * Anfragen als Posteingang (app/Admin/views/requests/index.php, resources/js/_requests.js) – Aufbau wie Feedback bzw. Mail:
  * Postfächer in der Seitenleiste (fx-side), Liste in der Mitte, gewählte Anfrage rechts. Nur Tokens von admin.css (hell/dunkel).
  */
-.is-drill .adm-side[data-area="requests"],.is-drill .adm-side[data-area="tray"]{--drill-deep:rgba(30,90,80,.22);--drill-mark:#7EE0C8}
 .adm-main:has(.rq-inbox){max-width:none;padding-bottom:16px}
 .rq-inbox{position:relative;display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);height:calc(100vh - 92px);height:calc(100dvh - 92px);min-height:520px;
   border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line),0 20px 50px -30px rgba(0,0,0,.35);overflow:hidden;font-size:13px;color:var(--adm-ink)}
