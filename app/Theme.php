@@ -191,8 +191,9 @@ final class Theme
         $out['visible'] = !isset($t['visible']) || filter_var($t['visible'], FILTER_VALIDATE_BOOL);
         $out['showInNav'] = filter_var($t['showInNav'] ?? false, FILTER_VALIDATE_BOOL);
         $out['navLabel'] = mb_substr(strip_tags((string) ($t['navLabel'] ?? '')), 0, 40);
-        $out['spaceTop'] = in_array($t['spaceTop'] ?? '', ['normal', 'small', 'none'], true) ? $t['spaceTop'] : 'normal';
-        $out['spaceBottom'] = in_array($t['spaceBottom'] ?? '', ['normal', 'small', 'none'], true) ? $t['spaceBottom'] : 'normal';
+        $sp = array_keys($this->spacing());
+        $out['spaceTop'] = in_array($t['spaceTop'] ?? '', $sp, true) ? $t['spaceTop'] : 'normal';
+        $out['spaceBottom'] = in_array($t['spaceBottom'] ?? '', $sp, true) ? $t['spaceBottom'] : 'normal';
         $out['divider'] = filter_var($t['divider'] ?? false, FILTER_VALIDATE_BOOL);
         // Vollbild-Abschnitt, Hintergrundbild mit Abdunkelung/Aufhellung, vertikale Ausrichtung
         $out['height'] = ($t['height'] ?? '') === 'screen' ? 'screen' : 'auto';
@@ -663,6 +664,19 @@ final class Theme
     }
 
     /** Editor-Konfiguration (für Editor.js-Tools) */
+    /** Optionen (Wert → Beschriftung) eines Auswahlfelds für das Ziehen im Editor */
+    private function dragOptions(array $def, string $field): array
+    {
+        foreach ((array) ($def['fields'] ?? []) as $f) if (($f['name'] ?? '') === $field) return (array) ($f['options'] ?? []);
+        return [];
+    }
+
+    /** Abstände eines Abschnitts (oben/unten): „Groß“ nur, wenn das Kit es anbietet (theme.php → 'space_large' => true, Klassen pt-large/pb-large) */
+    public function spacing(): array
+    {
+        return ['none' => __('Kein'), 'small' => __('Klein'), 'normal' => __('Normal')] + (!empty($this->def['space_large']) ? ['large' => __('Groß')] : []);
+    }
+
     public function editorConfig(): array
     {
         $blocks = [];
@@ -684,10 +698,12 @@ final class Theme
                 'formfields' => $ff ?: null,
                 'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“
                 'nestable' => $this->nestableVariants($type),   // in einer Spalte des Layouts erlaubt (true | Varianten | false)
+                // Mit der Maus ziehen (editor.js decorateDrags): Auswahlfeld + Zielelement + Klasse je Wert – theme.php → blocks → {typ} → 'drags'
+                'drags' => array_values(array_filter(array_map(fn($g) => is_array($g) && isset($g['field'], $g['target'], $g['class']) ? $g + ['options' => $this->dragOptions($b, (string) $g['field'])] : null, (array) ($b['drags'] ?? [])))),
             ];
         }
         // rows: nur noch Darstellung alter Reihen (Tune row) – die Option ist im Editor abgeschafft (Block „Layout“)
-        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false,
+        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false, 'spacing' => $this->spacing(),
             'layout' => isset($this->blocks[Layout::TYPE]) ? ['presets' => Layout::PRESETS] : null,
             'glossary' => Features::on('glossary', false)];   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
     }

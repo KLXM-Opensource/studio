@@ -41,6 +41,8 @@ $link = fn(string $prefix = 'link', string $label = 'Link') => [
 
 return [
     'label' => 'Fluid (breakpointlos)',
+    // Abstand „Groß“ für Abschnitte (Klassen pt-large/pb-large, assets/css/_base.css) – im Editor auch per Ziehen am Abschnittsrand
+    'space_large' => true,
     'description' => 'Breakpointlos: Schrift, Abstände und Raster wachsen stufenlos mit der Bildschirmbreite – sehr viel über den Style-Editor einstellbar.',
     'description_en' => 'Breakpoint-free: type, spacing and grid scale fluidly with the screen width – a lot can be set in the style editor.',
     'category' => 'general',   // Willkommen-Bildschirm: general (Allgemein) | branch (Branchen & Themen) | dev (Entwickler)
@@ -281,9 +283,14 @@ return [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: angenehme Lesebreite mit automatischem Inhaltsverzeichnis.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis', 'columns' => 'Mehrspaltig (Zeitungssatz)'],
+            // Im Editor: Griff am Rand des Textes ändert „Textbreite“ (Klasse je Wert, Core\Theme::editorConfig → drags)
+            'drags' => [['field' => 'measure', 'target' => '.prose:not(.prose--columns)', 'class' => 'prose--m-{v}', 'label' => 'Textbreite']],
             'fields' => [
                 ...$head(false),
                 ['name' => 'text', 'label' => 'Text', 'type' => 'richtext'],
+                ['name' => 'measure', 'label' => 'Textbreite', 'type' => 'select', 'required' => true, 'default' => 'normal', 'width' => 'half', 'variants' => ['standard', 'article'],
+                    'options' => ['narrow' => 'Schmal', 'normal' => 'Lesebreite', 'wide' => 'Breit', 'full' => 'Volle Breite'],
+                    'help' => 'Auch auf der Seite einstellbar: am rechten Rand des Textes ziehen.'],
                 ['name' => 'meta', 'label' => 'Angaben über dem Text (optional, bei „Artikel“)', 'type' => 'text', 'max' => 120, 'placeholder' => 'z. B. Redaktion · 12. März 2026'],
                 ['name' => 'dropcap', 'label' => 'Initiale (großer erster Buchstabe)', 'type' => 'bool', 'default' => false, 'width' => 'half'],
                 ['name' => 'toc', 'label' => 'Inhaltsverzeichnis anzeigen (bei „Artikel“)', 'type' => 'bool', 'default' => true, 'width' => 'half'],
@@ -300,7 +307,11 @@ return [
                 ...$buttons,
                 ['name' => 'image', 'label' => 'Bild', 'type' => 'media', 'width' => 'half', 'help' => 'Min. 1200 px breit.'],
                 ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '4:3', 'width' => 'half', 'options' => $ratios],
+                ['name' => 'split', 'label' => 'Aufteilung Bild/Text', 'type' => 'select', 'required' => true, 'default' => 'even', 'width' => 'half', 'variants' => ['auto', 'right', 'left'],
+                    'options' => ['text' => 'Text breiter', 'even' => 'Ausgewogen', 'media' => 'Bild breiter', 'mediaxl' => 'Bild deutlich breiter'],
+                    'help' => 'Auch auf der Seite einstellbar: am inneren Rand des Bildes ziehen.'],
             ],
+            'drags' => [['field' => 'split', 'target' => '.mt__media', 'class' => 'mt--s-{v}', 'apply' => '.mt', 'label' => 'Aufteilung']],
         ],
         'features' => [
             'label' => 'Merkmale / Leistungen', 'icon' => 'squares-four', 'group' => 'Inhalt',

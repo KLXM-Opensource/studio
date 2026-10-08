@@ -64,6 +64,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
 .bg-white:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-muted:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}
 .pt-small{padding-top:calc(var(--f-sec) * .45)}.pt-none{padding-top:0}
+.pt-large{padding-top:calc(var(--f-sec) * 1.6)}.pb-large{padding-bottom:calc(var(--f-sec) * 1.6)}
 .pb-small{padding-bottom:calc(var(--f-sec) * .45)}.pb-none{padding-bottom:0}
 .sec--divider>.wrap{border-top:1px solid var(--f-line);padding-top:var(--f-sec)}
 .sec--divider{padding-top:0}
@@ -85,6 +86,9 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .checks li{display:flex;gap:.6em;align-items:flex-start}
 .checks__ico{margin-top:.2em;color:var(--f-link);font-size:1.15em}
 .prose{max-width:68ch;color:var(--f-text)}
+/* Textbreite (Feld measure): schmal, breit, volle Breite – Lesebreite ist der Standard */
+.prose--m-narrow{max-width:54ch}.prose--m-wide{max-width:86ch}.prose--m-full{max-width:none}
+.wrap--text:has(>.prose--m-wide){width:min(100% - 2 * var(--f-gutter),58rem)}.wrap--text:has(>.prose--m-full){width:min(100% - 2 * var(--f-gutter),var(--f-wrap))}
 .prose>*+*{margin-top:1em}
 .prose :is(h2,h3,h4){line-height:1.2}
 .prose h3{margin-top:1.8em;font-size:var(--f-t2)}

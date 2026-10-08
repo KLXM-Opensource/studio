@@ -10,7 +10,8 @@ $toc = [];
 if ($v === 'article') [$html, $toc] = fluid_toc($html, $b->domId());
 $showToc = $v === 'article' && !empty($d['toc']) && count(array_filter($toc, fn($t) => $t['level'] === 2)) >= 2;
 $meta = trim((string) ($d['meta'] ?? ''));
-$prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') . ($v === 'columns' ? ' prose--columns' : '') . '"' . $b->edit('text', 'rich') . '>' . $html . '</div>';
+$measure = in_array($d['measure'] ?? 'normal', ['narrow', 'wide', 'full'], true) && $v !== 'columns' ? ' prose--m-' . $d['measure'] : '';
+$prose = '<div class="prose' . (!empty($d['dropcap']) ? ' prose--dropcap' : '') . ($v === 'columns' ? ' prose--columns' : '') . $measure . '"' . $b->edit('text', 'rich') . '>' . $html . '</div>';
 ?>
 <?php if ($v === 'article'): ?>
 <div class="wrap article">

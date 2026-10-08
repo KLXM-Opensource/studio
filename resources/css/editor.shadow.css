@@ -599,3 +599,18 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-lay-resize__tip{position:absolute;top:50%;left:50%;translate:-50% calc(-50% - 52px);padding:4px 9px;border-radius:999px;background:#24314B;color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
 .cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-lay-resize__tip{opacity:1}
 @media (prefers-reduced-motion:reduce){.cms-lay-resize__h::before,.cms-lay-resize__tip{transition:none}}
+
+/* Ziehen zum Einstellen (editor.js dragHandle): Abstand oben/unten (waagrechte Pille), Breiten (senkrechter Griff) */
+.cms-drag__h{all:unset;box-sizing:border-box;position:absolute;inset:0;display:grid;place-items:center;touch-action:none}
+.cms-drag__h--y{cursor:row-resize}
+.cms-drag__h--x{cursor:col-resize}
+.cms-drag__h--y::before{content:"";width:44px;height:6px;border-radius:6px;background:#314164;opacity:.45;box-shadow:0 0 0 2px #fff;transition:opacity .15s,background-color .15s,width .15s}
+.cms-drag__h--x::before{content:"";width:4px;height:min(64px,40%);border-radius:4px;background:#314164;opacity:.45;box-shadow:0 0 0 2px #fff;transition:opacity .15s,height .15s,background-color .15s}
+.cms-drag__h:is(:hover,:focus-visible,.is-drag)::before{opacity:1;background:#3DD9A0}
+.cms-drag__h--y:is(:hover,:focus-visible,.is-drag)::before{width:64px}
+.cms-drag__h--x:is(:hover,:focus-visible,.is-drag)::before{height:min(120px,70%)}
+.cms-drag__h:focus-visible{outline:2px solid #314164;outline-offset:2px;border-radius:6px}
+.cms-drag__tip{position:absolute;left:0;top:-30px;padding:4px 9px;border-radius:999px;background:#24314B;color:#fff;font:600 12px/1.2 system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.cms-drag__h--x .cms-drag__tip{top:50%;translate:-50% calc(-50% - 52px)}
+.cms-drag__h:is(:hover,:focus-visible,.is-drag) .cms-drag__tip{opacity:1}
+@media (prefers-reduced-motion:reduce){.cms-drag__h::before,.cms-drag__tip{transition:none}}

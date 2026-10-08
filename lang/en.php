@@ -7032,4 +7032,11 @@ return [
     'Ziehen: Spaltenbreite ändern · Doppelklick: zurück zum Raster' => 'Drag: change column width · Double-click: back to the grid',
     'Spaltenbreiten: {w} – noch nicht gespeichert.' => 'Column widths: {w} – not saved yet.',
     'Spaltenbreiten zurück zum Raster – noch nicht gespeichert.' => 'Column widths back to the grid – not saved yet.',
+    'Abstand oben' => 'Space above',
+    'Abstand unten' => 'Space below',
+    'Textbreite' => 'Text width',
+    'Aufteilung' => 'Split',
+    '{label} ziehen – jetzt {v}. Pfeiltasten: kleiner/größer.' => 'Drag {label} – now {v}. Arrow keys: smaller/larger.',
+    'Ziehen: {label} ändern' => 'Drag: change {label}',
+    '{label}: {v} – noch nicht gespeichert.' => '{label}: {v} – not saved yet.',
 ];

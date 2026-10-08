@@ -294,3 +294,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-editor .ce-block.is-dragging{opacity:.45}
 .cms-editor .ce-block.is-drop-before{box-shadow:0 -3px 0 #314164}
 .cms-editor .ce-block.is-drop-after{box-shadow:0 3px 0 #314164}
+
+/* Zieh-Griffe (editor.js dragHandle): nur beim Zeigen auf den Abschnitt bzw. mit Tastaturfokus sichtbar */
+.cms-drag{opacity:0;transition:opacity .15s}
+.sec:hover>.cms-drag,.cms-drag:focus-within{opacity:1}
+@media (hover:none){.cms-drag{opacity:1}}

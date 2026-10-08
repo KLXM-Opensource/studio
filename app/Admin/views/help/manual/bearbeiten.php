@@ -93,6 +93,16 @@ $__sample = $vars['blocks_page'] ?? null;
     <tr><td>Hintergrundbild, abdunkeln/aufhellen</td><td>Ein Bild aus der Mediathek hinter dem Abschnitt; „Abdunkeln“ sorgt für helle, „Aufhellen“ für dunkle, gut lesbare Schrift.</td></tr>
   </table>
 
+  <h3 id="ziehen">Mit der Maus ziehen</h3>
+  <p>Einige Einstellungen lassen sich direkt auf der Seite ziehen – zeigen Sie mit der Maus auf einen Abschnitt, dann erscheinen kleine Griffe:</p>
+  <ul>
+    <li><b>Abstand oben/unten:</b> waagrechter Griff links am oberen bzw. unteren Rand des Abschnitts. Nach unten ziehen = mehr Abstand (Kein, Klein, Normal, Groß – „Groß“ je nach Design).</li>
+    <li><b>Textbreite</b> (Fließtext, je nach Design): senkrechter Griff am rechten Rand des Textes – schmal, Lesebreite, breit, volle Breite.</li>
+    <li><b>Aufteilung Bild/Text</b> (Text + Bild, je nach Design): Griff am inneren Rand des Bildes.</li>
+    <li><b>Spaltenbreiten</b> im Block „Layout (Spalten)“: Griff zwischen zwei Spalten (siehe unten).</li>
+  </ul>
+  <p>Beim Ziehen zeigt eine kleine Anzeige den Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
+
   <h3 id="layout">Layout: Blöcke in Spalten</h3>
   <p>Für Blöcke <b>nebeneinander</b> – z. B. ein Text (⅔) und daneben eine Box mit Button (⅓), zwei Texte je ½ oder drei kurze Blöcke je ⅓ – gibt es den Block <b>„Layout (Spalten)“</b>. Sie wählen ein <b>Raster</b> und stellen die Blöcke in die Spalten; der Rest der Seite bleibt davon unberührt.</p>
   <ol class="doc-steps">

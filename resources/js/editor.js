@@ -862,6 +862,7 @@ function makeTool(type, def) {
       });
       $$('input,select,textarea,button:not(.cms-block__edit)', pv).forEach(i => { i.tabIndex = -1; });
       if (type === LAYOUT) this.decorateLayout(pv);
+      this.decorateDrags(pv);
       this.syncFormFields();
       BarPlace.soon();
     }
@@ -1101,6 +1102,107 @@ function makeTool(type, def) {
         });
         if (this.focusAfter?.resize === i) { h.focus({ preventScroll: true }); this.focusAfter = null; }
       }
+    }
+
+    /**
+     * Einstellungen mit der Maus ziehen: Abstand oben/unten am Rand des Abschnitts (cfg.spacing) und Felder, die der Block
+     * anbietet (def.drags: {field, target, class, apply?, label, options}). Ziehen um je ~56 px wechselt zum nächsten Wert (Vorschau
+     * sofort über die Klasse), Loslassen übernimmt; Pfeiltasten je ein Wert. Weg vom Element = größer.
+     */
+    decorateDrags(pv) {
+      const T = CMSAdmin.t;
+      const sec = pv.matches?.('.sec') ? pv : pv.querySelector('.sec');
+      if (sec && cfg.spacing) {
+        for (const side of ['top', 'bottom']) {
+          const key = side === 'top' ? 'spaceTop' : 'spaceBottom', pre = side === 'top' ? 'pt-' : 'pb-';
+          this.dragHandle({ host: sec, apply: sec, axis: 'y', side, options: cfg.spacing, order: ['none', 'small', 'normal', 'large'],
+            get: () => this.tuneData[key] || 'normal', cls: v => pre + v, label: side === 'top' ? T('Abstand oben') : T('Abstand unten'),
+            commit: v => { const tn = tunes.get(this.blockId); if (tn) tn.data = { ...tn.data, [key]: v }; markDirty(); this.refresh(); } });
+        }
+      }
+      for (const g of def.drags || []) {
+        const target = pv.querySelector(g.target);
+        if (!target || !Object.keys(g.options || {}).length) continue;
+        const field = (def.fields || []).find(f => f.name === g.field);
+        this.dragHandle({ host: sec || pv, target, apply: g.apply ? target.closest(g.apply) || target : target, axis: 'x', side: 'auto', options: g.options,
+          order: Object.keys(g.options), get: () => this.data[g.field] ?? field?.default ?? Object.keys(g.options)[0],
+          cls: v => g.class.replace('{v}', v), label: T(g.label || field?.label || g.field),
+          commit: async v => { this.data[g.field] = v; markDirty(); if (drawerFor === this) syncDrawerField(g.field, v); await this.loadPreview(); } });
+      }
+    }
+
+    dragHandle(o) {
+      const T = CMSAdmin.t;
+      const values = o.order.filter(v => v in o.options);
+      if (values.length < 2) return;
+      const host = d.createElement('div');
+      host.className = 'cms-drag cms-drag--' + o.axis; host.contentEditable = 'false';
+      if (getComputedStyle(o.host).position === 'static') o.host.style.position = 'relative';
+      let dir = 1, drag = null, place = () => {};
+      if (o.axis === 'y') {
+        host.style.cssText = `position:absolute;left:${o.side === 'top' ? 116 : 28}px;${o.side}:-12px;width:72px;height:24px;z-index:8`;   // links, gegeneinander versetzt (Grenze zweier Abschnitte); Mitte unten gehört „+ Block einfügen“
+      } else {
+        // Griff hängt am Abschnitt (nie im bearbeitbaren Text) und sitzt an der Kante des Zielelements – auch während des Ziehens
+        // Lage erst messen, wenn die Vorschau steht (nächster Bildaufbau, Zeigen auf den Abschnitt, Fenstergröße)
+        place = () => {
+          const t = o.target.getBoundingClientRect(), hr = o.host.getBoundingClientRect(), pr = (o.target.parentElement || o.target).getBoundingClientRect();
+          if (!t.width) return;
+          const leftEdge = (t.left + t.right) / 2 > (pr.left + pr.right) / 2 + 12;   // Element rechts → Griff links, nach links ziehen = größer
+          if (!drag) dir = leftEdge ? -1 : 1;
+          host.style.cssText = `position:absolute;top:${t.top - hr.top}px;height:${Math.max(48, t.height)}px;left:${(leftEdge ? t.left : t.right) - hr.left - 12}px;width:24px;z-index:8`;
+        };
+        o.host.addEventListener('pointerenter', () => { if (!drag) place(); });
+        addEventListener('resize', () => place(), { passive: true });
+      }
+      o.host.append(host);
+      requestAnimationFrame(() => place());
+      const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__tip"></span></button>`);
+      const h = sr.querySelector('.cms-drag__h'), tip = sr.querySelector('.cms-drag__tip');
+      const cur = () => Math.max(0, values.indexOf(o.get()));
+      const show = i => {
+        tip.textContent = `${o.label}: ${o.options[values[i]]}`;
+        h.setAttribute('aria-label', T('{label} ziehen – jetzt {v}. Pfeiltasten: kleiner/größer.', { label: o.label, v: o.options[values[i]] }));
+        h.setAttribute('aria-valuenow', String(i)); h.setAttribute('aria-valuemin', '0'); h.setAttribute('aria-valuemax', String(values.length - 1));
+        h.setAttribute('aria-valuetext', o.options[values[i]]);
+      };
+      const preview = i => { values.forEach(v => o.apply.classList.remove(o.cls(v))); o.apply.classList.add(o.cls(values[i])); show(i); place(); };
+      show(cur());
+      h.title = T('Ziehen: {label} ändern', { label: o.label });
+      h.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation();
+        h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+        drag = { x: e.clientX, y: e.clientY, i0: cur(), i: cur() };
+      });
+      h.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const delta = (o.axis === 'y' ? e.clientY - drag.y : e.clientX - drag.x) * dir;
+        const i = Math.max(0, Math.min(values.length - 1, drag.i0 + Math.round(delta / 56)));
+        if (i !== drag.i) { drag.i = i; preview(i); }
+      });
+      const end = e => {
+        if (!drag) return;
+        const { i, i0 } = drag; drag = null; h.classList.remove('is-drag');
+        if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
+        if (i !== i0) {
+          const st = S.ui('[data-editor-status]');
+          if (st) st.textContent = T('{label}: {v} – noch nicht gespeichert.', { label: o.label, v: o.options[values[i]] });
+          o.commit(values[i]);
+        }
+      };
+      h.addEventListener('pointerup', end);
+      h.addEventListener('pointercancel', end);
+      h.addEventListener('click', e => e.stopPropagation());
+      h.addEventListener('keydown', e => {
+        e.stopPropagation();
+        const up = o.axis === 'y' ? ['ArrowDown'] : [dir > 0 ? 'ArrowRight' : 'ArrowLeft'], down = o.axis === 'y' ? ['ArrowUp'] : [dir > 0 ? 'ArrowLeft' : 'ArrowRight'];
+        const step = up.includes(e.key) ? 1 : down.includes(e.key) ? -1 : 0;
+        if (!step) return;
+        e.preventDefault();
+        const i = Math.max(0, Math.min(values.length - 1, cur() + step));
+        if (i === cur()) return;
+        preview(i);
+        o.commit(values[i]);
+      });
     }
 
     /** Lage eines Blocks in den Spalten: [Spalte, Position] */
@@ -1452,7 +1554,7 @@ function renderTuneForm(tool) {
   const f = $('[data-drawer-tunes]', drawer);
   const t = tool.tuneData, bgs = cfg.backgrounds, E = CMSAdmin.esc, T = CMSAdmin.t;
   const opt = (o, v) => Object.entries(o).map(([k, l]) => `<option value="${E(k)}"${k === v ? ' selected' : ''}>${E(l)}</option>`).join('');
-  const sp = { normal: 'Normal', small: 'Klein', none: 'Kein' };
+  const sp = cfg.spacing || { normal: 'Normal', small: 'Klein', none: 'Kein' };
   const slug = v => v.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-');
   $('.cms-drawer__section>summary', drawer).textContent = tool.isChild ? T('In der Spalte') : T('Abschnitt & Navigation');
   // Block in einer Spalte: nur eigene Fläche (Karte), Sprungmarke, sichtbar – Abschnitt, Abstände, Navigation gelten fürs Layout

@@ -28,7 +28,7 @@ $body = fluid_head($b, 'mt__head')
   <div class="mt-over__card"><?= $body ?></div>
 </div>
 <?php else: ?>
-<div class="wrap mt mt--<?= e($side) ?>">
+<div class="wrap mt mt--<?= e($side) ?><?= in_array($d['split'] ?? 'even', ['text', 'media', 'mediaxl'], true) ? ' mt--s-' . e($d['split']) : '' ?>">
   <div class="mt__text"><?= $body ?></div>
   <?= fluid_image($d['image'] ?? null, '(min-width: 1080px) 600px, 100vw', $ratio, 'mt__media') ?>
 </div>

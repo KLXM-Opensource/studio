@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mit der Maus ziehen: Abstände, Textbreite, Bild/Text
+- Im Bearbeiten-Modus erscheinen beim Zeigen auf einen Abschnitt Griffe: **Abstand oben/unten** (Kein, Klein, Normal, Groß – „Groß“,
+  wenn das Kit es anbietet: theme.php `'space_large' => true`, Klassen `pt-large`/`pb-large`), in Fluid zusätzlich **Textbreite** beim
+  Fließtext (neues Feld `measure`) und **Aufteilung Bild/Text** bei „Text + Bild“ (neues Feld `split`). Vorschau sofort, Pfeiltasten
+  je ein Wert. Kits melden ziehbare Felder über `'drags' => [{field, target, class, apply?, label}]` am Block an.
+
 ### Layout (Spalten): Raster als Bild, Breiten mit der Maus ziehen
 - Das **Raster** wählt man jetzt über Kacheln mit Mini-Vorschau statt über eine Textliste (Feldoption `tiles`, für alle Auswahlfelder nutzbar).
 - Im Bearbeiten-Modus sitzt zwischen zwei Spalten ein **Griff**: ziehen ändert die Breiten (rastet auf Zwölftel ein, zeigt ½, ⅓, ¼ …),
