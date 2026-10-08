@@ -126,7 +126,7 @@ final class Purpose
             'mail' => Delivery::available() ? null : (!Inbox::available() ? __('Dafür braucht es die Funktion „Anfragen“ (Funktionen & Erweiterungen).')
                 : __('Dafür braucht es die Funktion „Anfragen per E-Mail zustellen“ (Funktionen & Erweiterungen).')),
             'inbox' => Inbox::available() ? null : __('Dafür braucht es die Funktion „Anfragen“ (Funktionen & Erweiterungen).'),
-            'registration' => DataForms::available() || Inbox::available() ? null : __('Dafür braucht es die Funktion „Formulare für Datentabellen“ (Funktionen & Erweiterungen).'),
+            'registration' => DataForms::available() ? null : __('Dafür braucht es die Funktion „Formulare für Datentabellen“ (Funktionen & Erweiterungen).'),
             'source' => Features::on('sources') ? null : __('Dafür braucht es die Funktion „Externe Quellen“ (Funktionen & Erweiterungen).'),
             default => null,
         };
