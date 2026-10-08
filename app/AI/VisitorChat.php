@@ -69,6 +69,48 @@ final class VisitorChat
         }
     }
 
+    /**
+     * KI-Antwort über den Suchergebnissen (Grundeinstellungen → Suche „sys.search_answer“): off | click (Knopf) |
+     * question (automatisch bei Fragen, sonst Knopf – Standard) | auto. Braucht KI (Texte) und Suche, nicht den Chat-Knopf.
+     */
+    public static function searchAnswerMode(): string
+    {
+        try {
+            $m = (string) app()->settings->get('sys.search_answer', 'question');
+            if (!in_array($m, ['off', 'click', 'question', 'auto'], true)) $m = 'question';
+            return $m !== 'off' && Features::on('ai', false) && Ai::enabled('text') && Search::enabled() ? $m : 'off';
+        } catch (\Throwable) {
+            return 'off';
+        }
+    }
+
+    /** Sieht die Suchanfrage wie eine Frage aus? (Fragezeichen, Fragewort am Anfang oder mindestens fünf Wörter) */
+    public static function looksLikeQuestion(string $q): bool
+    {
+        $q = trim(mb_strtolower($q));
+        if (str_ends_with($q, '?')) return true;
+        $w = '(was|wie|wo|wohin|woher|wann|wer|wen|wem|warum|wieso|weshalb|welche[rsmn]?|kann|darf|muss|gibt|ist|sind|habe|hat|brauche|what|how|where|when|who|why|which|can|do|does|is|are)';
+        return (bool) preg_match('~^' . $w . '\b~u', $q) || count(preg_split('~\s+~u', $q) ?: []) >= 5;
+    }
+
+    /** Kasten „Antwort“ für die Ergebnisseite (leer, wenn aus); lädt search-answer.js – ohne JavaScript unsichtbar */
+    public static function searchAnswerBox(string $q, array $result): string
+    {
+        $mode = self::searchAnswerMode();
+        if ($mode === 'off' || mb_strlen(trim($q)) < 3 || ($result['page'] ?? 1) > 1 || ($result['type'] ?? '') !== '') return '';
+        $auto = $mode === 'auto' || ($mode === 'question' && self::looksLikeQuestion($q));
+        $l = ['wait' => lt('Antwort wird erstellt …'), 'err' => lt('Das hat leider nicht geklappt. Bitte versuchen Sie es später noch einmal.'),
+            'src' => lt('Quellen'), 'go' => lt('Antwort erzeugen')];
+        $note = self::external() ? lt('Ihre Frage wird dafür (ohne IP-Adresse) an unseren KI-Dienstleister übermittelt.') : '';
+        return '<aside class="srch-ai" data-srch-ai hidden aria-labelledby="srch-ai-h" data-api="' . e(url('/api/chat')) . '" data-q="' . e($q) . '" data-lang="' . e(Lang::current()) . '"'
+            . ($auto ? ' data-auto' : '') . ' data-l="' . e(json_encode($l, JSON_UNESCAPED_UNICODE)) . '">'
+            . '<p class="srch-ai__h" id="srch-ai-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg>'
+            . e(lt('Antwort')) . ' <span class="srch-ai__tag">' . e(lt('KI')) . '</span></p>'
+            . '<div class="srch-ai__body" data-body aria-live="polite">' . ($auto ? '' : '<button type="button" class="srch-ai__go" data-go>' . e($l['go']) . '</button>') . '</div>'
+            . '<p class="srch-ai__note">' . e(lt('Automatisch aus den Inhalten dieser Website erstellt – bitte in den Quellen prüfen.')) . ($note !== '' ? ' ' . e($note) : '') . '</p>'
+            . '</aside>';
+    }
+
     /** Verlassen die Fragen den Server? (externer Text- oder Embedding-Anbieter) */
     public static function external(): bool
     {

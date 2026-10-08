@@ -4,6 +4,11 @@
  * Themes ergänzen/überschreiben in kits/{name}/lang/site/en.php. Fehlende finden: php bin/console i18n:missing en --site-texts
  */
 return [
+    'Antwort' => 'Answer',
+    'Antwort erzeugen' => 'Generate answer',
+    'Automatisch aus den Inhalten dieser Website erstellt – bitte in den Quellen prüfen.' => 'Generated automatically from the content of this website – please check the sources.',
+    'Ihre Frage wird dafür (ohne IP-Adresse) an unseren KI-Dienstleister übermittelt.' => 'For this, your question is sent to our AI provider (without your IP address).',
+    'KI' => 'AI',
     '(öffnet in neuem Tab)' => '(opens in a new tab)',
     'Bitte bestätigen Sie, dass Sie die Datenschutzhinweise gelesen haben.' => 'Please confirm that you have read the privacy notice.',
     'Bitte geben Sie keine Links oder Webadressen ein.' => 'Please do not enter links or web addresses.',

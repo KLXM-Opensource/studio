@@ -26,7 +26,9 @@ final class VisitorChatController
 
     public function ask(Request $r): Response
     {
-        if (!$this->lang($r) || !VisitorChat::available()) return self::json(['ok' => false, 'error' => lt('Der Chat ist gerade nicht verfügbar.')], 404);
+        // Auch für die KI-Antwort der Suchseite (src=search), wenn dort eingeschaltet – ohne Chat-Knopf
+        $viaSearch = ($r->post['src'] ?? '') === 'search';
+        if (!$this->lang($r) || !(VisitorChat::available() || ($viaSearch && VisitorChat::searchAnswerMode() !== 'off'))) return self::json(['ok' => false, 'error' => lt('Der Chat ist gerade nicht verfügbar.')], 404);
         if (!self::sameOrigin($r)) return self::json(['ok' => false, 'error' => 'Origin'], 403);
         $q = VisitorChat::clean((string) ($r->post['q'] ?? ''));
         if (mb_strlen($q) < 2) return self::json(['ok' => false, 'error' => lt('Bitte stellen Sie eine Frage.')], 422);

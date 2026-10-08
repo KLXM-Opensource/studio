@@ -34,6 +34,8 @@ $external = $r['mode'] === 'hybrid' && \Core\AI\Ai::capability('embed')['externa
       <p class="srch__status" role="status"><?= e($r['total'] === 1 ? lt('1 Treffer') : lt('{n} Treffer', ['n' => $r['total']])) ?><?php if ($r['pages'] > 1): ?>
         <span class="srch__pageinfo"> · <?= e(lt('Seite {page} von {pages}', ['page' => $r['page'], 'pages' => $r['pages']])) ?></span><?php endif; ?></p>
 
+      <?= \Core\AI\VisitorChat::searchAnswerBox($q, $r) // KI-Antwort (Grundeinstellungen → Suche) ?>
+
       <?php if (count($r['types']) > 1 || $r['type'] !== ''): ?>
       <nav class="srch__types" aria-label="<?= e(lt('Nach Art filtern')) ?>">
         <ul>

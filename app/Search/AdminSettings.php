@@ -40,6 +40,9 @@ final class AdminSettings
             }
             $fields[] = ['name' => 'sys.search_semantic', 'label' => __('Semantische Suche (KI): findet auch Inhalte mit anderen Worten'), 'type' => 'bool', 'default' => false,
                 'help' => __('Braucht KI mit Embeddings (Reiter „KI“). Bei einem externen Anbieter wird der Suchtext der Besucher dorthin übermittelt – Hinweis in der Datenschutzerklärung nötig.')];
+            $fields[] = ['name' => 'sys.search_answer', 'label' => __('KI-Antwort über den Treffern'), 'type' => 'select', 'default' => 'question',
+                'options' => ['question' => __('Automatisch bei Fragen, sonst auf Klick'), 'auto' => __('Immer automatisch'), 'click' => __('Nur auf Klick („Antwort erzeugen“)'), 'off' => __('Aus')],
+                'help' => __('Beantwortet Fragen wie „Was kostet die Teilnahme?“ direkt aus den Inhalten der Website, mit Quellen. Braucht KI für Texte (Reiter „KI“); zählt zum Tageslimit des Besucher-Chats.')];
             $fields[] = ['name' => 'sys.search_misses', 'label' => __('Suchbegriffe ohne Treffer zählen (anonym, für die Redaktion)'), 'type' => 'bool', 'default' => true,
                 'help' => __('Nur Begriff und Anzahl – keine IP-Adresse, keine Uhrzeit. Begriffe mit E-Mail-Adressen oder langen Zahlen werden nie gespeichert.')];
             $out[] = ['id' => 'suche', 'label' => __('Suche'), 'fields' => $fields];

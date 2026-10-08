@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Suche: KI-Antwort über den Treffern
+- Fragen wie „Was kostet die Teilnahme?“ beantwortet die Ergebnisseite direkt – Kasten **Antwort** mit Belegen [n] und Quellen,
+  aus derselben Antwortlogik wie der Besucher-Chat (nur Inhalte der Website, „weiß ich nicht“ mit Kontakt, Ratenbegrenzung, Tageslimit).
+- Grundeinstellungen → Suche → **KI-Antwort über den Treffern**: automatisch bei Fragen (Standard), immer, nur auf Klick, aus. Braucht KI für Texte, nicht den Chat-Knopf.
+- `search-answer.js` (1,6 KB) und `search-answer.css` laden nur auf der Ergebnisseite mit Kasten; ohne JavaScript bleibt er unsichtbar.
+  Der Suchtext wird einmal eingebettet (Vektor zwischengespeichert) – die Antwort ist die einzige zusätzliche KI-Anfrage.
+
 ### Suche und Besucher-Chat: genauer mit kleinen lokalen Modellen
 - Suche: Impressum, Datenschutz und Barrierefreiheit erscheinen nur noch weit oben, wenn danach gesucht wird (sonst Beifang, `Ranker::legalLast`).
 - Besucher-Chat: je Quelle die passendsten Abschnitte statt eines zusammenhängenden Stücks (beste Quelle mit doppeltem Umfang) –

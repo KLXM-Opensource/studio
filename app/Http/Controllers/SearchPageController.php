@@ -63,9 +63,12 @@ final class SearchPageController
         $seo['title'] = $title . (($s = self::suffix()) !== '' ? ' | ' . $s : '');
         $seo['noindex'] = true;
         $css = $theme->hasAsset('css/search.css') ? $theme->asset('css/search.css') : asset('css/search.css');
+        // KI-Antwort über den Treffern (Core\AI\VisitorChat::searchAnswerBox) – Stil und Skript nur dann
+        $ai = str_contains($content, 'data-srch-ai');
         $html = $theme->render('layout', [
             'page' => $pseudo, 'content' => $content, 'seo' => $seo, 'editor' => null, 'toolbar' => null,
-            'extraCss' => [$css], 'extraJs' => [],
+            'extraCss' => $ai ? [$css, $theme->hasAsset('css/search-answer.css') ? $theme->asset('css/search-answer.css') : asset('css/search-answer.css')] : [$css],
+            'extraJs' => $ai ? [asset('js/search-answer.js')] : [],
         ]);
         $res = (new SiteController())->respond(\Core\Icons::siteSprite($html), false, $limited ? 429 : 200);
         return $res->header('X-Robots-Tag', 'noindex, follow')->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'same-origin');
