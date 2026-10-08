@@ -156,6 +156,26 @@ final class Stats
     }
 
     /** Alte Zähler löschen (nach 2 Jahren) */
+    /**
+     * Verlauf zurücksetzen (Verwaltung → Mitteilungen → Statistik, nur Administration): alle Mitteilungen samt Warteschlange und
+     * Tageszähler; mit $subscriptions auch alle Abos (Geräte von Besuchern und Redaktion – sie müssen neu zustimmen).
+     * @return array{messages: int, subscriptions: int}
+     */
+    public static function reset(bool $subscriptions = false): array
+    {
+        $db = app()->db;
+        $n = (int) $db->fetchValue('SELECT COUNT(*) FROM push_messages');
+        $subs = 0;
+        $db->query('DELETE FROM push_queue');
+        $db->query('DELETE FROM push_messages');
+        $db->query('DELETE FROM push_stats');
+        if ($subscriptions) {
+            $subs = (int) $db->fetchValue('SELECT COUNT(*) FROM push_subscriptions');
+            $db->query('DELETE FROM push_subscriptions');
+        }
+        return ['messages' => $n, 'subscriptions' => $subs];
+    }
+
     public static function purge(?Database $db = null): void
     {
         ($db ?? app()->db)->query('DELETE FROM push_stats WHERE day < ?', [date('Y-m-d', strtotime('-730 days'))]);

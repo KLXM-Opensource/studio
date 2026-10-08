@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mitteilungen zurücksetzen
+- Mitteilungen → Statistik → **Zurücksetzen** (nur Administration): Verlauf, Warteschlange und Zahlen löschen, optional auch alle Abos.
+
 ### REST-API und MCP auf dem Stand der neuen Funktionen
 - **Tabellen:** `purpose` (Zweck), `protection` (Verschlüsselung: none/system/both/mail) und `placement` (passender Block, Seiten mit der
   Tabelle) je Tabelle; **Tabelle oder Formular anlegen** wie der Assistent (`POST /data`, `GET /data-templates`; MCP `create_table`,

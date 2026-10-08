@@ -111,5 +111,18 @@ $log = Stats::log(60);
       </div>
       <p class="set-group__note"><?= e(__('Gespeichert werden nur Tageszähler je Kanal (2 Jahre). „Abgelaufen“: Der Push-Dienst meldet das Abo als ungültig, es scheiterte mehrmals oder gehörte zu alten Schlüsseln.')) ?></p>
     </section>
+
+    <?php if (can('system.manage')): ?>
+    <section class="set-group pm-reset" id="zuruecksetzen" aria-labelledby="pm-reset-h">
+      <h3 class="set-group__title" id="pm-reset-h"><?= e(__('Zurücksetzen')) ?></h3>
+      <form class="set-list" method="post" action="<?= e(url('/admin/mitteilungen/zuruecksetzen')) ?>" data-confirm="<?= e(__('Verlauf und Zahlen der Mitteilungen endgültig löschen?')) ?>" data-confirm-ok="<?= e(__('Zurücksetzen')) ?>">
+        <?= csrf_field() ?><input type="hidden" name="confirm" value="1">
+        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Verlauf und Zahlen löschen')) ?></span>
+          <span class="set-row__sub"><?= e(__('Z. B. nach Tests: löscht alle gesendeten und geplanten Mitteilungen und die Statistik. Kanäle bleiben; Abos nur, wenn unten angehakt.')) ?></span></div>
+          <div class="set-row__ctl"><button class="adm-btn adm-btn--small adm-btn--danger"><?= e(__('Zurücksetzen')) ?></button></div></div>
+        <div class="f f--bool"><label class="f-check"><input type="checkbox" name="subscriptions" value="1"> <span><?= e(__('Auch alle Abos löschen (Besucher und Redaktion müssen Mitteilungen neu erlauben)')) ?></span></label></div>
+      </form>
+    </section>
+    <?php endif; ?>
   </div>
 </div>

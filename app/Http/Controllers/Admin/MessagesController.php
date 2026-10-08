@@ -155,6 +155,17 @@ final class MessagesController extends AdminController
 
     // ================================================================= Statistik, Website
 
+    /** Verlauf und Zahlen zurücksetzen (z. B. nach Tests) – nur Administration */
+    public function reset(Request $r): Response
+    {
+        $this->guard($r, 'system.manage');
+        if ($r->str('confirm') !== '1') return $this->back(self::BASE . '/statistik#zuruecksetzen', 'error', __('Bitte bestätigen Sie das Zurücksetzen.'));
+        $res = Stats::reset($r->str('subscriptions') === '1');
+        return $this->back(self::BASE, 'success', $res['subscriptions']
+            ? __('Zurückgesetzt: {n} Mitteilungen, Zahlen und {s} Abos gelöscht.', ['n' => $res['messages'], 's' => $res['subscriptions']])
+            : __('Zurückgesetzt: {n} Mitteilungen und alle Zahlen gelöscht. Abos bleiben bestehen.', ['n' => $res['messages']]));
+    }
+
     public function stats(Request $r): Response
     {
         $this->guard($r);

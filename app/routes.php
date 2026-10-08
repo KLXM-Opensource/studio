@@ -392,6 +392,7 @@ return function (Router $r): void {
     $r->post('/admin/mitteilungen/kanaele/{id}', [$mc, 'channelSave']);
     $r->post('/admin/mitteilungen/kanaele/{id}/archiv', [$mc, 'channelArchive']);
     $r->get('/admin/mitteilungen/statistik', [$mc, 'stats']);
+    $r->post('/admin/mitteilungen/zuruecksetzen', [$mc, 'reset']);
     $r->get('/admin/mitteilungen/website', [$mc, 'website']);
     $r->post('/admin/mitteilungen/website', [$mc, 'websiteSave']);
     $r->get('/admin/api/push/reach', [$mc, 'reach']);

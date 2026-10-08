@@ -7019,4 +7019,11 @@ return [
     'Mitteilung zurückziehen' => 'Withdraw notification',
     'Quelle abgleichen' => 'Sync source',
     'sofort' => 'immediately',
+    'Auch alle Abos löschen (Besucher und Redaktion müssen Mitteilungen neu erlauben)' => 'Also delete all subscriptions (visitors and editors must allow notifications again)',
+    'Bitte bestätigen Sie das Zurücksetzen.' => 'Please confirm the reset.',
+    'Verlauf und Zahlen der Mitteilungen endgültig löschen?' => 'Permanently delete the notification history and figures?',
+    'Verlauf und Zahlen löschen' => 'Delete history and figures',
+    'Z. B. nach Tests: löscht alle gesendeten und geplanten Mitteilungen und die Statistik. Kanäle bleiben; Abos nur, wenn unten angehakt.' => 'E.g. after testing: deletes all sent and scheduled notifications and the statistics. Channels remain; subscriptions only if ticked below.',
+    'Zurückgesetzt: {n} Mitteilungen und alle Zahlen gelöscht. Abos bleiben bestehen.' => 'Reset: {n} notifications and all figures deleted. Subscriptions remain.',
+    'Zurückgesetzt: {n} Mitteilungen, Zahlen und {s} Abos gelöscht.' => 'Reset: {n} notifications, figures and {s} subscriptions deleted.',
 ];
