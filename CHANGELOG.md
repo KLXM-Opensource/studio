@@ -9,7 +9,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Suche: KI-Antwort über den Treffern
 - Fragen wie „Was kostet die Teilnahme?“ beantwortet die Ergebnisseite direkt – Kasten **Antwort** mit Belegen [n] und Quellen,
   aus derselben Antwortlogik wie der Besucher-Chat (nur Inhalte der Website, „weiß ich nicht“ mit Kontakt, Ratenbegrenzung, Tageslimit).
-- Grundeinstellungen → Suche → **KI-Antwort über den Treffern**: automatisch bei Fragen (Standard), immer, nur auf Klick, aus. Braucht KI für Texte, nicht den Chat-Knopf.
+- Grundeinstellungen → Suche → **KI-Antwort über den Treffern**: aus (Standard), automatisch bei Fragen (empfohlen), immer, nur auf Klick. Braucht KI für Texte, nicht den Chat-Knopf.
 - `search-answer.js` (1,6 KB) und `search-answer.css` laden nur auf der Ergebnisseite mit Kasten; ohne JavaScript bleibt er unsichtbar.
   Der Suchtext wird einmal eingebettet (Vektor zwischengespeichert) – die Antwort ist die einzige zusätzliche KI-Anfrage.
 

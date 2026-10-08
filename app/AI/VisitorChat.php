@@ -71,13 +71,13 @@ final class VisitorChat
 
     /**
      * KI-Antwort über den Suchergebnissen (Grundeinstellungen → Suche „sys.search_answer“): off | click (Knopf) |
-     * question (automatisch bei Fragen, sonst Knopf – Standard) | auto. Braucht KI (Texte) und Suche, nicht den Chat-Knopf.
+     * question (automatisch bei Fragen, sonst Knopf) | auto. Standard: off (bewusst einschalten). Braucht KI (Texte) und Suche, nicht den Chat-Knopf.
      */
     public static function searchAnswerMode(): string
     {
         try {
-            $m = (string) app()->settings->get('sys.search_answer', 'question');
-            if (!in_array($m, ['off', 'click', 'question', 'auto'], true)) $m = 'question';
+            $m = (string) app()->settings->get('sys.search_answer', 'off');
+            if (!in_array($m, ['off', 'click', 'question', 'auto'], true)) $m = 'off';
             return $m !== 'off' && Features::on('ai', false) && Ai::enabled('text') && Search::enabled() ? $m : 'off';
         } catch (\Throwable) {
             return 'off';
