@@ -6,7 +6,7 @@ namespace Core;
 /**
  * Rich-Text-Stile für die Formatierungsleiste (resources/js/_rte.js): Namen der Stile und die Farbpalette des aktiven Themes.
  *
- * Klassenvertrag (Core\Sanitizer): <p class="t-lead|t-small|t-note">, <span class="c-accent|c-muted|c-success|c-warning|c-danger">,
+ * Klassenvertrag (Core\Sanitizer): <p class="t-lead|t-small|t-note|t-tip|t-warn|t-kicker|t-center">, <span class="c-accent|c-muted|c-success|c-warning|c-danger">,
  * <mark>, <sup>, <sub>. Das Aussehen bestimmt das Theme (CSS, am besten in einer Datei mit conditional_css „@rich“).
  *
  * Palette (nur Vorschau in der Verwaltung und Kontrastprüfung – auf der Website misst die Leiste die echten Theme-Farben):

@@ -10,7 +10,8 @@ namespace Core;
  * href nur https:, http: (wird zu https:), mailto:, tel:, #anker, /interne-pfade.
  *
  * Rich-Text-Stile (Klassenvertrag für Themes, Handbuch → Technik → „Rich-Text-Stile“) – nur genau diese Werte:
- *  - <p class="t-lead|t-small|t-note">   Hervorgehoben (größer, keine Überschrift), Klein, Hinweis-Box
+ *  - <p class="t-lead|t-small|t-note|t-tip|t-warn|t-kicker|t-center">   Hervorgehoben (größer, keine Überschrift), Klein,
+ *                                        Hinweis-Box, Tipp-Box, Achtung-Box, Dachzeile, Zentriert
  *  - <span class="c-accent|c-muted|c-success|c-warning|c-danger">   begrenzte Textfarben (Farben liefert das Theme)
  *  - <ul class="check">                   Häkchen-Liste
  * Links: href (s. o.), optional title, target="_blank" nur zusammen mit rel="noopener" (Option „In neuem Tab öffnen“),
@@ -23,16 +24,25 @@ final class Sanitizer
     private const INLINE = ['b', 'strong', 'i', 'em', 'a', 'br', 'mark', 'sup', 'sub', 'span'];
     private const BLOCK  = ['p', 'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'blockquote'];
     /** Erlaubte Absatz-Stile (<p class="…">) */
-    public const P_CLASSES = ['t-lead', 't-small', 't-note'];
+    public const P_CLASSES = ['t-lead', 't-small', 't-note', 't-tip', 't-warn', 't-kicker', 't-center'];
+    /** Neuere Absatz-Stile: Kits ohne eigene Regeln bekommen die neutrale Vorlage css/rich-extra.css (Core\Theme::conditionalCss) */
+    public const P_EXTRA = ['t-tip', 't-warn', 't-kicker', 't-center'];
     /** Erlaubte Textfarben (<span class="c-…">) */
     public const COLORS = ['accent', 'muted', 'success', 'warning', 'danger'];
     /** Tags/Klassen, für die Themes Zusatz-CSS brauchen (conditional_css „@rich“, Core\Theme::conditionalCss) */
     private static bool $styled = false;
+    private static bool $extra = false;
 
     /** Wurden in dieser Anfrage Rich-Text-Stile (h2–h4, Zitat, t-*, c-*, mark, sup/sub) ausgegeben? */
     public static function styled(): bool
     {
         return self::$styled;
+    }
+
+    /** Wurden neuere Absatz-Stile (P_EXTRA) ausgegeben? */
+    public static function extra(): bool
+    {
+        return self::$extra;
     }
 
     public static function inline(?string $html): string
@@ -160,6 +170,7 @@ final class Sanitizer
             }
             if ($cls !== null || in_array($tag, ['h2', 'h3', 'h4', 'blockquote', 'mark', 'sup', 'sub'], true)) {
                 self::$styled = true;
+                if ($cls !== null && in_array($cls, self::P_EXTRA, true)) self::$extra = true;
             }
             $out .= $cls !== null ? "<$tag class=\"$cls\">$inner</$tag>" : "<$tag>$inner</$tag>";
         }

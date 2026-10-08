@@ -57,7 +57,7 @@ TXT;
     /** Ausgabeformat je Feldart */
     private const FORMATS = [
         'rich' => 'Gib HTML zurück und verwende nur diese Tags: <p>, <ul>, <ol>, <li>, <h2>, <h3>, <h4>, <blockquote>, <b>, <strong>, <i>, <em>, <a href>, <br>, <mark>, <sup>, <sub>. '
-            . 'Einzige erlaubte Klassen: <p class="t-lead"> (hervorgehobener Einleitungsabsatz, sparsam, höchstens einer am Anfang), <p class="t-small">, <p class="t-note"> (Hinweis-Box), '
+            . 'Einzige erlaubte Klassen: <p class="t-lead"> (hervorgehobener Einleitungsabsatz, sparsam, höchstens einer am Anfang), <p class="t-small">, <p class="t-note"> (Hinweis-Box), <p class="t-tip"> (Tipp-Box), <p class="t-warn"> (Achtung-Box), <p class="t-kicker"> (Dachzeile direkt vor einer Überschrift), <p class="t-center"> (zentriert, selten), '
             . '<span class="c-accent|c-muted|c-success|c-warning|c-danger"> (Textfarbe, nur wenn der Text schon so formatiert war) und <ul class="check">. '
             . 'Vorhandene Klassen, <mark> und Link-Attribute (href, data-link, title, target) unverändert übernehmen; keine anderen Attribute, kein style. Kein Markdown, keine Codeblöcke.',
         'inline' => 'Gib einen einzelnen Absatz zurück. Erlaubt sind nur <b>, <strong>, <i>, <em>, <a href>, <br>, <mark>, <sup>, <sub> und <span class="c-accent|c-muted|c-success|c-warning|c-danger">. '

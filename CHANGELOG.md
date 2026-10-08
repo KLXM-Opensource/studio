@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formatierungsleiste: weitere Absatz-Stile, Zitat mit Gestaltung
+- Neue Stile unter **Stil ▾**: **Tipp-Box** (`t-tip`), **Achtung-Box** (`t-warn`), **Dachzeile** (`t-kicker`, kleine Versalzeile über einer Überschrift),
+  **Zentriert** (`t-center`) – Klassenvertrag Core\Sanitizer, Vorschau im Formularfeld und im Menü.
+- Kits ohne eigene Regeln bekommen bei Bedarf die neutrale Vorlage `css/rich-extra.css` (`:where`, Farben aus `--rt-*`); Kit-Regeln gewinnen.
+- Fluid, Foto, Galerie: **Zitat** im Fließtext abgesetzt (Linie in Akzentfarbe, größer, kursiv; Zitat-Blöcke unberührt) und eigene Regeln für die neuen Stile.
+
 ### Mediathek: Papierkorb, Bildrechte, doppelte und große Dateien, ZIP
 - **Papierkorb** (Grundeinstellungen → Mediathek: 7–90 Tage oder aus, Standard 30): Löschen legt in den Papierkorb, dort
   Wiederherstellen, endgültig löschen, Papierkorb leeren; abgelaufene Dateien werden beim Öffnen der Mediathek (einmal am Tag) gelöscht.

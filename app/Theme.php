@@ -565,6 +565,11 @@ final class Theme
         if ($types === null || in_array('not_found', $types, true)) {
             $out[] = $this->coreCss('notfound.css');
         }
+        // Neuere Absatz-Stile (Tipp, Achtung, Dachzeile, Zentriert) – neutrale Vorlage mit Null-Spezifität, Kit-Regeln gewinnen;
+        // eigene css/rich-extra.css des Kits ersetzt sie
+        if ($types === null || Sanitizer::extra()) {
+            $out[] = $this->coreCss('rich-extra.css');
+        }
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
         }

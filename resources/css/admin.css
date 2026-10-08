@@ -2324,15 +2324,19 @@ textarea.cb-code:not(.cb-editor textarea){min-height:120px;border:1px solid var(
 .rte-mi__h,.rte-mi__warn{grid-column:2;font-size:12px;font-weight:400;color:var(--adm-t3)}
 .rte-mi__warn{color:var(--adm-warn)}
 .rte-mi__i{grid-column:1;min-width:1.4em;text-align:center;font-weight:700;color:var(--adm-t2)}
-.rte-menu .rte-mi--p .rte-mi__t,.rte-menu .rte-mi--h2 .rte-mi__t,.rte-menu .rte-mi--h3 .rte-mi__t,.rte-menu .rte-mi--h4 .rte-mi__t,.rte-menu .rte-mi--t-lead .rte-mi__t,.rte-menu .rte-mi--t-small .rte-mi__t,.rte-menu .rte-mi--t-note .rte-mi__t,.rte-menu .rte-mi--blockquote .rte-mi__t{grid-column:1/3}
+.rte-menu .rte-mi--p .rte-mi__t,.rte-menu .rte-mi--h2 .rte-mi__t,.rte-menu .rte-mi--h3 .rte-mi__t,.rte-menu .rte-mi--h4 .rte-mi__t,.rte-menu .rte-mi--t-lead .rte-mi__t,.rte-menu .rte-mi--t-small .rte-mi__t,.rte-menu .rte-mi--t-note .rte-mi__t,.rte-menu :is(.rte-mi--t-tip,.rte-mi--t-warn,.rte-mi--t-kicker,.rte-mi--t-center) .rte-mi__t,.rte-menu .rte-mi--blockquote .rte-mi__t{grid-column:1/3}
 .rte-menu .rte-mi--h2 .rte-mi__t{font-size:18px;font-weight:700}
 .rte-menu .rte-mi--h3 .rte-mi__t{font-size:16px;font-weight:700}
 .rte-menu .rte-mi--h4 .rte-mi__t{font-size:14px;font-weight:700}
 .rte-menu .rte-mi--t-lead .rte-mi__t{font-size:16.5px}
 .rte-menu .rte-mi--t-small .rte-mi__t{font-size:12.5px}
 .rte-menu .rte-mi--t-note .rte-mi__t{padding:1px 6px;border-left:3px solid var(--adm-a);background:var(--adm-fill,#F2F2F4);border-radius:3px}
+.rte-menu :is(.rte-mi--t-tip,.rte-mi--t-warn) .rte-mi__t{padding:1px 6px;border-left:3px solid var(--rx);background:color-mix(in srgb,var(--rx) 12%,transparent);border-radius:3px}
+.rte-menu .rte-mi--t-tip{--rx:#1A7240}.rte-menu .rte-mi--t-warn{--rx:#A15C00}
+.rte-menu .rte-mi--t-kicker .rte-mi__t{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--adm-a-ink,var(--adm-a))}
+.rte-menu .rte-mi--t-center .rte-mi__t{text-align:center}
 .rte-menu .rte-mi--blockquote .rte-mi__t{font-style:italic;padding-left:8px;border-left:2px solid var(--adm-t3)}
-.rte-menu .rte-mi--t-lead .rte-mi__h,.rte-menu .rte-mi--t-small .rte-mi__h,.rte-menu .rte-mi--t-note .rte-mi__h{grid-column:1/3}
+.rte-menu .rte-mi--t-lead .rte-mi__h,.rte-menu .rte-mi--t-small .rte-mi__h,.rte-menu .rte-mi--t-note .rte-mi__h,.rte-menu :is(.rte-mi--t-tip,.rte-mi--t-warn,.rte-mi--t-kicker,.rte-mi--t-center) .rte-mi__h{grid-column:1/3}
 .rte-sw{grid-column:1;width:18px;height:18px;border-radius:50%;background:#888;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
 .rte-sw--none{background:linear-gradient(135deg,transparent 45%,var(--adm-err) 45% 55%,transparent 55%),var(--adm-card,#fff)!important;box-shadow:inset 0 0 0 1.5px var(--adm-in)}
 .rte-menu__sep{display:block;height:1px;margin:4px 6px;background:var(--adm-line)}
@@ -2348,6 +2352,10 @@ textarea.cb-code:not(.cb-editor textarea){min-height:120px;border:1px solid var(
 .rte-area .t-lead{font-size:1.18em;line-height:1.45}
 .rte-area .t-small{font-size:.85em}
 .rte-area .t-note{padding:.6em .8em;border-left:3px solid var(--adm-a);border-radius:4px;background:var(--adm-fill,#F2F2F4)}
+.rte-area :is(.t-tip,.t-warn){--rx:var(--rt-success-l,#1A7240);padding:.6em .8em;border-left:3px solid var(--rx);border-radius:4px;background:color-mix(in srgb,var(--rx) 11%,transparent)}
+.rte-area .t-warn{--rx:var(--rt-warning-l,#A15C00)}
+.rte-area .t-kicker{margin-bottom:.3em;color:var(--rt-accent-l,var(--adm-a));font-size:.78em;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.rte-area .t-center{text-align:center}
 .rte-area mark{padding:0 .1em;border-radius:2px;background:#FFE58A;color:#16201E}
 .rte-area .c-accent{color:var(--rt-accent-l,#0F6E68)}.rte-area .c-muted{color:var(--rt-muted-l,#59616B)}.rte-area .c-success{color:var(--rt-success-l,#1A7240)}.rte-area .c-warning{color:var(--rt-warning-l,#8A4B00)}.rte-area .c-danger{color:var(--rt-danger-l,#B42318)}
 @media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) .rte-area{--rt-accent-l:var(--rt-accent-d);--rt-muted-l:var(--rt-muted-d);--rt-success-l:var(--rt-success-d);--rt-warning-l:var(--rt-warning-d);--rt-danger-l:var(--rt-danger-d)}html.adm-ui:not([data-theme=light]) .rte-area mark{background:#6B5A12;color:#FFF7D6}}

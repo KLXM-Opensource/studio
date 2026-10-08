@@ -9,7 +9,7 @@
  * Tastatur: ⌘/Strg+B, +I, +K (Link), +⇧+H (Marker), Alt+F10 (zur Leiste), in Menüs ↑/↓/Pos1/Ende, Esc zurück in den Text.
  * Einfügen: immer als reiner Text – außer der Text sieht eindeutig nach Markdown aus (und die Zwischenablage hat keine echte
  * Formatierung): dann umgewandelt (_markdown.js), mit Hinweis „Als Text einfügen“; ⌘/Strg+Z macht es ebenfalls rückgängig.
- * Ergebnis (Whitelist Core\Sanitizer, keine style-Attribute): <p class="t-lead|t-small|t-note">, <span class="c-…">, <mark>, <sup>, <sub>.
+ * Ergebnis (Whitelist Core\Sanitizer, keine style-Attribute): <p class="t-lead|t-small|t-note|t-tip|t-warn|t-kicker|t-center">, <span class="c-…">, <mark>, <sup>, <sub>.
  * Farben: auf der Website aus den Theme-Variablen --rt-accent … (Kontrast gegen den echten Hintergrund), in Formularen aus der
  * Palette <script id="cms-rich"> (Core\RichText). Zu geringer Kontrast wird im Farbmenü angezeigt.
  */
@@ -29,12 +29,16 @@ const STYLES = [
   ['t-lead', 'Hervorgehoben', 'Hervorgeh.', 'Größerer Text, keine Überschrift'],
   ['t-small', 'Klein', 'Klein', 'Kleingedrucktes, Anmerkungen'],
   ['t-note', 'Hinweis-Box', 'Hinweis', 'Abgesetzter Kasten'],
+  ['t-tip', 'Tipp-Box', 'Tipp', 'Grüner Kasten für Tipps'],
+  ['t-warn', 'Achtung-Box', 'Achtung', 'Kasten für Warnungen'],
+  ['t-kicker', 'Dachzeile', 'Dachzeile', 'Kleine Zeile über einer Überschrift'],
+  ['t-center', 'Zentriert', 'Zentriert', 'Mittig gesetzter Absatz'],
   ['h2', 'Überschrift H2', 'H2', ''],
   ['h3', 'Zwischenüberschrift H3', 'H3', ''],
   ['h4', 'Unterüberschrift H4', 'H4', ''],
   ['blockquote', 'Zitat', 'Zitat', ''],
 ];
-const P_STYLES = ['t-lead', 't-small', 't-note'];
+const P_STYLES = ['t-lead', 't-small', 't-note', 't-tip', 't-warn', 't-kicker', 't-center'];
 const COLORS = ['accent', 'muted', 'success', 'warning', 'danger'];
 const HEADINGS = ['h2', 'h3', 'h4'];
 const MARK = '#010203';   // Hilfsfarbe: execCommand('foreColor') markiert die Auswahl, danach Klasse statt <font>
@@ -322,7 +326,7 @@ const Rich = {
     if (own && !ps.includes(own)) ps.push(own);
     return ps;
   },
-  /** Absatzstil: p (normal), t-lead/t-small/t-note, h2–h4, blockquote – erneut wählen hebt auf */
+  /** Absatzstil: p (normal), t-lead/t-small/t-note/t-tip/t-warn/t-kicker/t-center, h2–h4, blockquote – erneut wählen hebt auf */
   setStyle(area, s) {
     if (HEADINGS.includes(s)) { d.execCommand('formatBlock', false, Rich.blockTag(area) === s ? 'p' : s); return; }
     if (s === 'blockquote') { const q = Rich.closestQuote(area); if (q) Rich.unquote(q); else d.execCommand('formatBlock', false, 'blockquote'); return; }
