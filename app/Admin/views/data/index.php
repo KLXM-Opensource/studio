@@ -5,7 +5,7 @@ $isAdmin = can('data.schema'); ?>
   <h1>Daten</h1>
   <?php if ($isAdmin): ?><div class="adm-row">
     <?php if (\Core\AI\Assist::available('text') && can('data.schema') && \Core\Features::on('data.schema')): ?><a class="adm-btn kia-btn" href="<?= e(url('/admin/ai/tabellen')) ?>"><span class="kia-spark" aria-hidden="true"><?= icon('sparkle') ?></span> <?= e(__('Tabelle generieren')) ?></a><?php endif; ?>
-    <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/data/new')) ?>">+ Neue Tabelle</a></div><?php endif; ?>
+    <a class="adm-btn adm-btn--primary" href="<?= e(url('/admin/data/new')) ?>">+ <?= e(__('Neue Tabelle oder Formular')) ?></a></div><?php endif; ?>
 </header>
 
 <details class="adm-card dt-howto"<?= $tables ? '' : ' open' ?>>
@@ -26,7 +26,7 @@ $isAdmin = can('data.schema'); ?>
       <span class="dt-icon" aria-hidden="true"><?= icon($t['icon']) ?></span>
       <span><strong><?= e($t['name']) ?></strong><small><?= (int) $t['count'] ?> <?= $t['count'] === 1 ? 'Eintrag' : 'Einträge' ?> · <?= count($t['fields']) ?> Felder</small></span>
     </a>
-    <p class="dt-card__meta"><?= $t['settings']['route'] !== '' ? 'Detailseiten unter <code>/' . e($t['settings']['route']) . '/…</code>' : 'ohne Detailseiten' ?></p>
+    <p class="dt-card__meta"><?= e(\Core\Data\Purpose::label(\Core\Data\Purpose::of($t))) ?> · <?= $t['settings']['route'] !== '' ? 'Detailseiten unter <code>/' . e($t['settings']['route']) . '/…</code>' : 'ohne Detailseiten' ?></p>
     <div class="dt-card__actions">
       <a class="adm-btn adm-btn--small" href="<?= e(url('/admin/data/' . $t['handle'] . '/new')) ?>">+ <?= e($t['singular']) ?></a>
       <?php if ($isAdmin): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/data/' . $t['handle'] . '/schema')) ?>">Felder &amp; Einstellungen</a><?php endif; ?>
@@ -45,10 +45,11 @@ $isAdmin = can('data.schema'); ?>
       <span class="dt-icon" aria-hidden="true"><?= icon($t['icon']) ?></span>
       <span><strong><?= e($t['name']) ?></strong><small><?= e(__('{n} Anfragen · {new} neu', ['n' => (int) $t['count'], 'new' => (int) $t['new']])) ?></small></span>
     </a>
-    <p class="dt-card__meta"><?= icon('lock') ?> <?= e(__('Ende-zu-Ende verschlüsselt · nur über das Formular')) ?></p>
+    <p class="dt-card__meta"><?= icon(\Core\Data\Purpose::of($t) === 'mail' ? 'paper-plane-tilt' : 'lock') ?> <?= e(\Core\Data\Purpose::of($t) === 'mail' ? __('Nur per E-Mail · nichts gespeichert') : __('Ende-zu-Ende verschlüsselt · nur über das Formular')) ?></p>
     <div class="dt-card__actions">
       <?php if (can('requests.read', $t['handle'])): ?><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/requests?table=' . $t['handle'])) ?>"><?= e(__('Anfragen lesen')) ?></a><?php endif; ?>
-      <?php if ($isAdmin): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/data/' . $t['handle'] . '/schema')) ?>">Felder &amp; Einstellungen</a><?php endif; ?>
+      <?php if ($isAdmin): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/data/' . $t['handle'] . '/schema')) ?>">Felder &amp; Einstellungen</a>
+      <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/data/' . $t['handle'] . '/einsetzen')) ?>"><?= e(__('Einsetzen')) ?></a><?php endif; ?>
     </div>
   </article>
   <?php endforeach; ?>
@@ -65,7 +66,7 @@ $isAdmin = can('data.schema'); ?>
       <small><?= e(implode(', ', array_column(array_slice($p['fields'], 0, 4), 'label'))) ?> …</small></a>
     <?php endforeach; ?>
     <?php if (\Core\AI\Assist::available('text') && can('data.schema')): ?><a class="dt-preset dt-preset--ai" href="<?= e(url('/admin/ai/tabellen')) ?>"><span class="dt-icon" aria-hidden="true"><?= icon('sparkle') ?></span><strong><?= e(__('Mit KI generieren')) ?></strong><small><?= e(__('Beschreiben, was Sie brauchen')) ?></small></a><?php endif; ?>
-    <a class="dt-preset dt-preset--empty" href="<?= e(url('/admin/data/new')) ?>"><span class="dt-icon" aria-hidden="true"><?= icon('plus') ?></span><strong>Leere Tabelle</strong><small>Felder selbst festlegen</small></a>
+    <a class="dt-preset dt-preset--empty" href="<?= e(url('/admin/data/new')) ?>"><span class="dt-icon" aria-hidden="true"><?= icon('plus') ?></span><strong><?= e(__('Mit dem Assistenten')) ?></strong><small><?= e(__('Art wählen, Grundeinstellungen, einsetzen')) ?></small></a>
   </div>
 </section>
 <?php endif; ?>

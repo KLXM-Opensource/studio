@@ -2,7 +2,7 @@
 /**
  * Bereichsnavigation „Daten“: Tabellen (mit Anzahl Einträge), unter der aktuellen Tabelle ihre Ansichten und Einstellungen.
  * Das Layout zeigt sie links anstelle der Hauptnavigation (breite Bildschirme), sonst oben in der Seite (resources/js/_drill.js).
- * @var string $cur  index|list|calendar|entry|new-entry|schema|new  @var ?array $active  aktuelle Tabelle
+ * @var string $cur  index|list|calendar|entry|new-entry|schema|new|place  @var ?array $active  aktuelle Tabelle
  */
 use Core\Data\Entries;
 use Core\Data\Tables;
@@ -35,6 +35,8 @@ $ac = fn(bool $on, string $v = 'page') => $on ? ' aria-current="' . $v . '"' : '
               $subs[] = [url($base . '/display'), __('Anzeige auf dieser Website'), $cur === 'display'];
           }
           if ($schema && \Core\Data\Shared::canSchema($t)) $subs[] = [url($base . '/schema'), __('Felder & Einstellungen'), $cur === 'schema'];
+          // Einsetzen: Block auf einer Seite, Seite anlegen, Verwendungen (Core\Data\Placement) – nicht für interne Listen
+          if ($schema && \Core\Data\Placement::blockType($t) !== null) $subs[] = [url($base . '/einsetzen'), __('Einsetzen'), $cur === 'place'];
           // Einstellungsseiten von Funktionen/Erweiterungen zu dieser Tabelle (Core\AdminPages, 'table' => …), z. B. Glossar
           foreach (\Core\AdminPages::forTable($t['handle']) as $tp) $subs[] = [url($tp['href']), $tp['label'], $cur === 'page:' . $tp['id']];
       }

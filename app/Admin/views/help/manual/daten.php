@@ -1,14 +1,37 @@
 <?php /** Handbuch · Kapitel „Eigene Daten“ · @var callable $anchor */ ?>
   <p class="lead">Unter <a href="<?= e(url('/admin/data')) ?>">Daten</a> legen Sie eigene Inhaltstypen an – etwa Aktuelles, Team, Produkte, Termine oder Fragen &amp; Antworten. Ohne Programmieren, mit eigener Übersicht, Detailseiten und Ausgabe an beliebiger Stelle der Website.</p>
 
-  <h3>1. Tabelle anlegen <small>(Recht „Tabellen und Felder ändern“, Standard: Administration)</small></h3>
+  <h3 id="assistent">1. Tabelle oder Formular anlegen – mit dem Assistenten <small>(Recht „Tabellen und Felder ändern“, Standard: Administration)</small></h3>
+  <p><b>Daten → + Neue Tabelle oder Formular</b> öffnet einen Assistenten in vier Schritten. Er fragt zuerst, <em>was</em> Sie anlegen möchten, und richtet die passenden Grundeinstellungen ein – so müssen Sie sich nicht durch alle Einstellungen arbeiten.</p>
   <ol class="doc-steps">
-    <li><b>Daten</b> → Vorlage wählen (<b>Aktuelles</b>, <b>Team</b>, <b>Produkte</b>, <b>Termine</b>, <b>Fragen &amp; Antworten</b> oder <b>Anfragen</b> für einen verschlüsselten Eingang) oder <b>Leere Tabelle</b>. Mit eingeschalteter KI schlägt <b>✦ Felder vorschlagen</b> passende Felder aus einer kurzen Beschreibung vor; der <b>Tabellen-Generator</b> im KI-Bereich entwirft eine ganze Tabelle.</li>
-    <li>Felder anpassen: Bezeichnung, Typ (Text, Formatierter Text, Zahl, Ja/Nein, Datum, Datum &amp; Uhrzeit, Uhrzeit, Auswahl, Mehrfachauswahl, Bild, Datei, Link, E-Mail, Telefon, Webadresse, Farbe, Ort (Karte), Verknüpfung, Wiederholung, IBAN, Wiederholbare Gruppe), Pflichtfeld, „In der Liste zeigen“, „Durchsuchbar“ (Suche in der Verwaltungsliste). Reihenfolge mit ↑ ↓. Bezeichnungen und Auswahltexte lassen sich unter „Übersetzungen“ je Sprache pflegen.</li>
-    <li>Rechts unter <b>Tabelle</b> ein <b>Symbol</b> wählen: Klick auf das Symbol öffnet eine Auswahl nach Themen (Kalender &amp; Zeit, Personen &amp; Team, Gesundheit &amp; Medizin, Sport &amp; Verein …). Einfach tippen, z. B. „Termin“, „Team“ oder „Arzt“ – Vorschläge passend zum Tabellennamen stehen oben. Mit der Tastatur: ↓ ins Raster, Pfeiltasten, Enter übernimmt, Esc schließt. Das Symbol erscheint in der Seitenleiste, in Listen, Favoriten und in der Suche. Alle Symbole: <a href="<?= e(url('/admin/hilfe/symbole')) ?>">Symbole</a>.</li>
-    <li>Rechts unter <b>Website</b> die <b>Adresse der Detailseiten</b> festlegen, z. B. <code>aktuelles</code> – jeder Eintrag bekommt dann automatisch eine eigene Seite wie <code>/aktuelles/titel-des-beitrags</code>.</li>
-    <li><b>Tabelle anlegen</b>. Felder lassen sich später jederzeit ergänzen, umbenennen oder entfernen (beim Entfernen fragt das System nach, weil Inhalte verloren gehen).</li>
+    <li><b>Art wählen</b> – eine Karte anklicken:
+      <table class="doc-table">
+        <tr><th>Art</th><th>Wofür</th><th>Was der Assistent einstellt</th></tr>
+        <tr><td><b>Inhalte auf der Website</b></td><td>Aktuelles, Team, Termine, Verzeichnis, Produkte</td><td>Liste auf einer Seite, auf Wunsch eine Detailseite je Eintrag (mit Vorlage), Website-Suche</td></tr>
+        <tr><td><b>Formular, das nur eine E-Mail schickt</b></td><td>Kontakt, Rückrufbitte</td><td>Eingang mit Zustellung „Nur per E-Mail“: Jede Einsendung geht mit vollem Inhalt an die angegebenen Adressen, auf der Website wird nichts gespeichert (nur ein Zustellprotokoll ohne Inhalte). Keine Detailseite, kein Eingang.</td></tr>
+        <tr><td><b>Anfragen sammeln &amp; bearbeiten</b></td><td>Terminwunsch, Rezeptbestellung, Beratung</td><td>Verschlüsselter Eingang unter „Anfragen“ mit Status, Benachrichtigung ohne Inhalte und Löschfrist; auf Wunsch zusätzlich per E-Mail</td></tr>
+        <tr><td><b>Anmeldung oder Bewerbung</b></td><td>Kurse, Veranstaltungen, Bewerbungen</td><td>Öffentliches Formular, Einträge als Entwurf = Teilnehmerliste in der Verwaltung, Bestätigung an die Absender, optional <b>Obergrenze</b> (danach zeigt das Formular „ausgebucht“). Nicht in Suche und Sitemap. Bewerbungen sind ein verschlüsselter Eingang.</td></tr>
+        <tr><td><b>Interne Liste</b></td><td>Kontakte, Inventar, Aufgaben</td><td>Nur in der Verwaltung: keine Detailseiten, kein Formular, nicht in Suche und Sitemap</td></tr>
+        <tr><td><b>Aus externer Quelle</b></td><td>Feed, API, OpenImmo</td><td>führt zu <b>Externe Quellen</b> (eigener Ablauf)</td></tr>
+      </table>
+      Ausgegraute Arten brauchen eine Funktion, die auf dieser Website aus ist (Funktionen &amp; Erweiterungen). Mit eingeschalteter KI können Sie stattdessen <b>beschreiben, was Sie brauchen</b> – KLXM AI schlägt Art und Felder vor, Sie prüfen alles im nächsten Schritt.</li>
+    <li><b>Vorlage wählen</b> – passend zur Art (z. B. „Kontakt“ und „Rückrufbitte“ für E-Mail-Formulare) oder <b>Leer beginnen</b>.</li>
+    <li><b>Grundeinstellungen</b>: Name, Felder (übernehmen oder abwählen, umbenennen, Typ, Pflicht, mit ↑ ↓ ordnen, neue ergänzen) und – je nach Art – Detailseite ja/nein, Empfänger der E-Mail, Bestätigung an die Absender, Löschfrist, Obergrenze, Push. Der Spamschutz ist immer an. <b>Anlegen</b>.</li>
+    <li><b>Einsetzen</b> – siehe <a href="#<?= e($anchor('einsetzen')) ?>">Formular oder Liste einsetzen</a>.</li>
   </ol>
+  <p>Wer lieber alles selbst einstellt, nimmt oben <b>Ohne Assistent (Expertenmodus)</b>. Felder lassen sich später jederzeit unter <b>Felder &amp; Einstellungen</b> ergänzen, umbenennen oder entfernen (beim Entfernen fragt das System nach, weil Inhalte verloren gehen).</p>
+
+  <h3 id="einsetzen">Formular oder Liste einsetzen</h3>
+  <p>Eine Tabelle erscheint erst auf der Website, wenn ein <b>Block</b> sie auf einer Seite zeigt: Formulare (E-Mail, Anfragen, Anmeldungen) über den Block <b>„Formular (Datentabelle)“</b>, Inhalte über den Block <b>„Datenliste“</b>. Der Schritt <b>Einsetzen</b> – später unter <b>Daten → Tabelle → Einsetzen</b> bzw. im Bereich „Einsetzen“ der Einstellungen – nimmt Ihnen das ab:</p>
+  <ul>
+    <li><b>Neue Seite anlegen</b>: Titel, Platz im Seitenbaum („Unterhalb von“ über <b>Auswählen …</b>), „Im Menü zeigen“ und auf Wunsch gleich veröffentlichen. Die Seite enthält den passenden Block mit der richtigen Tabelle; bei Inhalten mit Detailseiten entsteht auf Wunsch auch die Detailseiten-Vorlage.</li>
+    <li><b>In bestehende Seite einfügen</b>: Seite über <b>Auswählen …</b> wählen – der Block kommt ans Ende (als Entwurf, auf Wunsch gleich veröffentlicht). Im Editor verschieben Sie ihn an die richtige Stelle.</li>
+    <li><b>Später selbst</b>: Seite bearbeiten → „+“ → Block „Formular (Datentabelle)“ bzw. „Datenliste“ → in der Seitenleiste bei <b>Tabelle</b> die Tabelle wählen → veröffentlichen.</li>
+  </ul>
+  <p>Unter „Hier wird … verwendet“ sehen Sie jederzeit, auf welchen Seiten die Tabelle vorkommt. Welche Felder das Formular zeigt, wohin Einsendungen gehen und ob eine Bestätigung verschickt wird, stellen Sie bei der Tabelle ein – nicht im Block.</p>
+
+  <h3 id="einstellungen">Felder &amp; Einstellungen</h3>
+  <p>Die Einstellungen einer Tabelle sind wie die Grundeinstellungen in Bereiche gegliedert (links, auf dem Telefon als Auswahl oben): <b>Allgemein</b> (Name, Symbol, Zweck), <b>Felder</b>, <b>Auf der Website</b> (Detailseiten, Darstellung, Suchmaschinen), <b>Formular</b> bzw. <b>Formular &amp; Eingang</b> (Zustellung, Datenschutz), <b>Benachrichtigungen</b> (E-Mail an die Redaktion, Bestätigung an die Absender, Push), <b>Suche</b>, <b>Kalender</b>, <b>Einsetzen</b> und <b>Erweitert</b> (Sortierung, Freigabe, Löschen). Welche Bereiche oben stehen, richtet sich nach dem <b>Zweck</b> (Allgemein → „Wofür ist diese Tabelle?“); die übrigen finden Sie unter „Weitere Bereiche“. Bei älteren Tabellen wird der Zweck aus den Einstellungen abgeleitet und beim nächsten Speichern übernommen. Ein Klick auf <b>Speichern</b> sichert alle Bereiche.</p>
 
   <h3>Verknüpfungen – echte Beziehungen zwischen Tabellen</h3>
   <p>Mit den Feldtypen <b>Verknüpfung (ein Eintrag)</b> und <b>Verknüpfung (mehrere)</b> verbinden Sie Tabellen miteinander – z. B.:</p>

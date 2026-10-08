@@ -176,6 +176,11 @@ final class Tables
         }
         $row['settings']['calendar'] = (array) ($row['settings']['calendar'] ?? []) + Calendar::DEFAULTS;
         $row['settings']['form'] = (array) ($row['settings']['form'] ?? []) + DataForms::DEFAULTS;
+        // Verwendungszweck (Core\Data\Purpose): ältere Tabellen ohne Angabe bekommen ihn abgeleitet – gespeichert erst beim nächsten Speichern
+        if (!Purpose::valid($row['settings']['purpose'] ?? null) || !Purpose::fits($row['settings']['purpose'], $row['settings'])) {
+            $row['settings']['purpose'] = Purpose::derive($row['settings']);
+            $row['purpose_derived'] = true;
+        }
         if ($row['settings']['title_field'] === '' || !self::field($row, $row['settings']['title_field'])) {
             foreach ($row['fields'] as $f) {
                 if (in_array($f['type'], ['text', 'textarea'], true)) { $row['settings']['title_field'] = $f['name']; break; }
@@ -413,6 +418,8 @@ final class Tables
             $settings['form']['status'] = 'draft';
             unset($errors['settings.route'], $errors['settings.calendar']);
         }
+        // Verwendungszweck (Assistent „Neue Tabelle“, Bereiche der Einstellungen) – passend zur Art und Zustellung, sonst abgeleitet
+        $settings['purpose'] = Purpose::clean($s['purpose'] ?? null, $settings, $existing);
         return [[
             'handle' => $handle, 'name' => $name, 'singular' => trim(strip_tags((string) ($in['singular'] ?? ''))) ?: $name,
             // Symbolname (Core\Icons, Phosphor duotone); alte Zeichen (◷ ✎ ▦ …) werden abgebildet, Unbekanntes → „table“

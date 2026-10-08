@@ -120,8 +120,9 @@
  *   data:share <handle> --members=a,b [--see-members] [--merge]
  *                                                     Tabelle dieser Website teilen (diese Website = Eigentümer, --site=…)
  *   data:unshare <handle> [--all-entries]             Freigabe beenden: wieder eigene Tabelle des Eigentümers
- *   data:selftest [--roundtrip]                       Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor
- *                                                     (vorübergehende Tabellen); --roundtrip: nur Rundlauf, ändert nichts
+ *   data:selftest [--roundtrip]                       Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor,
+ *                                                     Zweck (Ableitung) und Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen);
+ *                                                     --roundtrip: nur Rundlauf und Zweck, ändert nichts
  *   data:template <vorlage> [--handle=…] [--name="…"] [--slug=adresse] [--form=bewerbungen|new|none] [--with-detail-page]
  *                 [--with-list-page] [--dry-run]     Tabelle aus Vorlage anlegen bzw. ergänzen (wie „Neue Tabelle aus Vorlage“; wiederholbar):
  *                                                     blog, team, products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
@@ -1022,6 +1023,11 @@ switch ($cmd) {
     case 'data:selftest':
         // Core\Data\SchemaPanel: validate(toInput($t)) = $t für alle Tabellen; Seitenleiste „Felder bearbeiten“ mit vorübergehenden Tabellen
         $res = Core\Data\SchemaPanel::selftest(in_array('--roundtrip', $args, true));
+        // Verwendungszweck (Ableitung, Passung) und – ohne --roundtrip – der Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen)
+        foreach (in_array('--roundtrip', $args, true) ? [Core\Data\Purpose::selftest()] : [Core\Data\Purpose::selftest(), Core\Data\Wizard::selftest()] as $x) {
+            $res['ok'] += $x['ok'];
+            array_push($res['fails'], ...$x['fails']);
+        }
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);

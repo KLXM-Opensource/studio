@@ -26,7 +26,7 @@ use Core\SpamGuard;
 final class DataForms
 {
     public const DEFAULTS = ['enabled' => false, 'fields' => [], 'status' => 'draft', 'notify' => '', 'success' => '', 'submit' => '',
-        'uploads' => false, 'upload_mb' => 5, 'receipt' => self::RECEIPT];
+        'uploads' => false, 'upload_mb' => 5, 'receipt' => self::RECEIPT, 'max' => 0];
     /** Eingangsbestätigung an die absendende Person (z. B. Pflicht beim Widerruf, § 356a BGB): E-Mail-Feld, Betreff, Text, Angaben mitsenden */
     public const RECEIPT = ['enabled' => false, 'field' => '', 'subject' => '', 'text' => '', 'include' => false];
     /** Feldtypen, die Besucher ausfüllen können (Verknüpfungen, Rich-Text, Karte, Links und Wiederholungen bleiben der Redaktion vorbehalten) */
@@ -49,6 +49,8 @@ final class DataForms
     public const FILE_KINDS_INBOX = ['docx', 'odt'];
     /** Höchstgröße je Datei (MB) – Grenze der Tabelle und der Felder */
     public const MAX_MB = 10;
+    /** Obergrenze der Einsendungen (settings.form.max, nur Inhaltstabellen, z. B. Plätze einer Anmeldung): höchstens so viele */
+    public const MAX_ENTRIES = 100000;
 
     /** Zustand nach dem Absenden ohne JavaScript (Fehler, Werte, Meldung) je Tabelle – liest der Block */
     public static array $state = [];
@@ -71,6 +73,16 @@ final class DataForms
     {
         if (Inbox::is($t)) return Inbox::available() && !empty($t['settings']['form']['enabled']) && (!$direct || Inbox::directForm($t));
         return self::available() && !empty($t['settings']['form']['enabled']);
+    }
+
+    /**
+     * Obergrenze erreicht? (settings.form.max, nur Inhaltstabellen) – gezählt werden alle Einträge der Tabelle (auch Entwürfe,
+     * auch von Hand angelegte). Gelöschte Einträge geben ihren Platz wieder frei.
+     */
+    public static function full(array $t): bool
+    {
+        $max = (int) ($t['settings']['form']['max'] ?? 0);
+        return $max > 0 && !Inbox::is($t) && Entries::count($t, ['status' => 'all', 'lang' => 'all', 'source' => 'own']) >= $max;
     }
 
     /** Text nach dem Absenden: Block/Tabelle, bei Eingangs-Tabellen sonst der Text des Theme-Formulars */
@@ -178,6 +190,8 @@ final class DataForms
             'uploads' => $uploads,
             'upload_mb' => max(1, min(self::MAX_MB, (int) ($s['upload_mb'] ?? $existing['upload_mb']))),
             'receipt' => self::validateReceipt((array) ($s['receipt'] ?? $existing['receipt'] ?? []), $fields, $errors),
+            // Obergrenze (0 = keine): Anmeldungen schließen, sobald so viele Einträge da sind – zählt alle Einträge der Tabelle
+            'max' => max(0, min(self::MAX_ENTRIES, (int) ($s['max'] ?? $existing['max'] ?? 0))),
         ];
         // Eingang: welche Felder standen zur Wahl? (neue Felder sind im Formular, bis jemand sie abwählt – selected())
         if ($known !== null) $out['known'] = array_key_exists('fields', $s) ? array_values(array_map('strval', $known)) : ($existing['known'] ?? null);
@@ -246,6 +260,9 @@ final class DataForms
         }
         if (!empty($o['sent'])) {
             return '<div class="dff-done" role="status" tabindex="-1"><p>' . e($success) . '</p></div>';
+        }
+        if (self::full($t)) {
+            return '<p class="dff-off" role="note">' . e(lt('Die Anmeldung ist leider ausgebucht – es sind keine Plätze mehr frei.')) . '</p>';
         }
         $btn = app()->theme->def['button_class'] ?? 'btn btn--primary';
         $challenge = $o['challenge'] ?? null;
@@ -619,6 +636,10 @@ final class DataForms
                 . 'Die Inhalte sind verschlüsselt gespeichert und können nur im Verwaltungsbereich mit dem ' . term('key') . " gelesen werden:\n\n"
                 . absolute_url('/admin/requests?table=' . $t['handle']) . "\n\nDiese E-Mail enthält aus Datenschutzgründen keine Inhalte.\n", $to);
             return ['ok' => true, 'message' => $success, 'id' => (int) $id];
+        }
+        // Obergrenze: nach der Prüfung, damit Eingaben nicht verloren gehen, wenn gerade der letzte Platz vergeben wurde
+        if (self::full($t)) {
+            return ['ok' => false, 'message' => lt('Die Anmeldung ist leider ausgebucht – es sind keine Plätze mehr frei.')];
         }
         foreach ($uploads as $n => $file) {
             [$m, $err] = Media::import($file['tmp_name'], (string) ($file['name'] ?? 'datei'), '', [

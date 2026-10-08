@@ -202,12 +202,15 @@ return function (Router $r): void {
     $r->post('/admin/quellen/{id}/delete', [Admin\SourceController::class, 'delete']);
     $r->get('/admin/data', [Admin\DataController::class, 'index']);
     $r->get('/admin/data/new', [Admin\DataController::class, 'create']);
+    $r->post('/admin/data/new', [Admin\DataController::class, 'wizard']);   // Assistent „Neue Tabelle“ (Core\Data\Wizard)
     $r->post('/admin/data', [Admin\DataController::class, 'store']);
     $r->get('/admin/data/{handle}/schema', [Admin\DataController::class, 'schema']);
     $r->post('/admin/data/{handle}/schema', [Admin\DataController::class, 'update']);
     $r->post('/admin/data/{handle}/destroy', [Admin\DataController::class, 'destroy']);
     $r->post('/admin/data/{handle}/delivery-test', [Admin\DataController::class, 'deliveryTest']);
     $r->post('/admin/data/{handle}/template', [Admin\DataController::class, 'template']);
+    $r->get('/admin/data/{handle}/einsetzen', [Admin\DataController::class, 'place']);       // Einsetzen (Core\Data\Placement)
+    $r->post('/admin/data/{handle}/einsetzen', [Admin\DataController::class, 'placeSave']);
     $r->post('/admin/data/{handle}/bulk', [Admin\DataController::class, 'bulk']);
     $r->post('/admin/data/{handle}/quick', [Admin\DataController::class, 'quick']);
     // Geteilte Tabellen (Core\Data\Shared): fremde Einträge, Auswahl, Anzeige auf dieser Website – vor /{id}

@@ -379,4 +379,6 @@ return [
     'In der Liste suchen' => 'Search this list',
     'Keine Einträge für diese Auswahl.' => 'No entries for this selection.',
     'Nach Anfangsbuchstaben springen' => 'Jump to initial letter',
+    // Formular mit Obergrenze (Core\Data\DataForms::full)
+    'Die Anmeldung ist leider ausgebucht – es sind keine Plätze mehr frei.' => 'Unfortunately registration is fully booked – there are no places left.',
 ];

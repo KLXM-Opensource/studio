@@ -1,0 +1,198 @@
+/* ================= Daten: Assistent „Neue Tabelle“, „Einsetzen“, „Felder & Einstellungen“ (08.10.2026) =================
+   Assistent (app/Admin/views/data/wizard.php, Core\Data\Wizard): Fortschritt .wz-steps, Auswahlkarten .wz-card (Radio sichtbar oben
+   rechts, ganze Karte klickbar), Grundeinstellungen als .set-group/.set-list wie in den Grundeinstellungen, Feldzeilen .wz-field.
+   Einsetzen (data/place.php, Core\Data\Placement): Abbildung .pl-fig, zwei Wege .pl-way, Ergebnis .pl-done.
+   Felder & Einstellungen (data/schema.php): Seitenleiste mit Bereichen (.adm-tabs-form--side) – hier nur Ergänzungen. */
+
+/* Farben der Arten (Symbolkacheln wie in den macOS-Systemeinstellungen; weiße Symbole auf gesättigter Fläche, hell und dunkel gleich) */
+.wz-ico--content{background:#2F6FEB!important}
+.wz-ico--mail{background:#1F9D55!important}
+.wz-ico--inbox{background:#E07B12!important}
+.wz-ico--registration{background:#8B5CF6!important}
+.wz-ico--internal{background:#6B7280!important}
+.wz-ico--source{background:#0E9AA7!important}
+
+/* Kopf */
+.wz-head{align-items:flex-start}
+.wz-head .adm-eyebrow a{color:inherit}
+
+/* Fortschritt: Schritte mit Nummer, Verbindungslinie, aktueller Schritt in der Akzentfarbe */
+.wz-steps{margin:4px 0 22px}
+.wz-steps ol{display:flex;gap:0;margin:0;padding:0;list-style:none;counter-reset:wz}
+.wz-steps__item{position:relative;display:flex;flex:1 1 0;min-width:0;align-items:center;gap:8px;padding-right:12px;color:var(--adm-t3);font-size:13px;font-weight:500}
+.wz-steps__item:not(:last-child)::after{content:"";flex:1 1 auto;height:2px;min-width:12px;margin-left:4px;border-radius:2px;background:var(--adm-line)}
+.wz-steps__item.is-done:not(:last-child)::after{background:var(--adm-a)}
+.wz-steps__item > a{display:flex;align-items:center;gap:8px;min-width:0;color:inherit;text-decoration:none;border-radius:999px;padding:2px 6px 2px 2px;margin:-2px -6px -2px -2px}
+.wz-steps__item > a:hover{background:var(--adm-hover);color:var(--adm-ink)}
+.wz-steps__item > a:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.wz-steps__n{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--adm-card);box-shadow:inset 0 0 0 1.5px var(--adm-in);color:var(--adm-t2);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.wz-steps__n svg{width:14px;height:14px}
+.wz-steps__label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wz-steps__item.is-current{color:var(--adm-ink);font-weight:650}
+.wz-steps__item.is-current .wz-steps__n{background:var(--adm-a);color:#fff;box-shadow:0 0 0 4px rgb(var(--adm-a-rgb,49 65 100) / .18)}
+.wz-steps__item.is-done{color:var(--adm-t2)}
+.wz-steps__item.is-done .wz-steps__n{background:rgb(var(--adm-a-rgb,49 65 100) / .14);box-shadow:none;color:var(--adm-a-ink);font-size:14px}
+@media (max-width:640px){
+  .wz-steps__item:not(.is-current) .wz-steps__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .wz-steps__item:not(.is-current){flex:0 1 auto}
+  .wz-steps__item.is-current{flex:1 1 auto}
+}
+
+/* Formular des Assistenten */
+.wz{display:grid;gap:18px;max-width:980px}
+.wz-default{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.wz-intro{display:grid;gap:4px}
+.wz-q{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.wz-lead{margin:0;max-width:72ch;font-size:13.5px;line-height:1.5;color:var(--adm-t2)}
+.wz-note{margin:0 4px;font-size:12.5px;line-height:1.45;color:var(--adm-t3);display:flex;gap:6px;align-items:flex-start}
+.wz-note svg{flex:none;width:15px;height:15px;margin-top:1px}
+
+/* Auswahlkarten (Art, Vorlage): ganze Karte ist die Beschriftung des Radios */
+.wz-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px;margin:0;padding:0;border:0;min-width:0}
+.wz-card{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;align-items:start;padding:16px 40px 16px 16px;border-radius:12px;
+  background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04);cursor:pointer;transition:box-shadow .15s,background-color .15s}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) .wz-card{box-shadow:0 0 0 .5px rgba(255,255,255,.12)}}
+html.adm-ui[data-theme=dark] .wz-card{box-shadow:0 0 0 .5px rgba(255,255,255,.12)}
+.wz-card:hover{background:var(--adm-hover)}
+.wz-card:has(> input:checked){box-shadow:0 0 0 2px var(--adm-a),0 6px 18px -10px rgb(var(--adm-a-rgb,49 65 100) / .5);background:var(--adm-card)}
+.wz-card:has(> input:focus-visible){outline:2px solid var(--adm-a);outline-offset:3px}
+.wz-card > input:not(#\#){position:absolute;top:16px;right:14px;margin:0}
+.wz-card.is-off{cursor:not-allowed;opacity:.62}
+.wz-card.is-off:hover{background:var(--adm-card)}
+.wz-card__ico{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:var(--adm-a);color:#fff}
+.wz-card__ico svg{width:22px;height:22px}
+.wz-card__ico .ico,.wz-chosen__ico .ico,.pl-way__ico .ico{color:#fff}
+.wz-card__body{display:grid;gap:4px;min-width:0}
+.wz-card__title{font-size:14.5px;font-weight:650;line-height:1.3;color:var(--adm-ink)}
+.wz-card__lead{font-size:13px;line-height:1.45;color:var(--adm-t2)}
+.wz-card__ex{display:block;margin-top:4px;font-size:12px;color:var(--adm-t3)}
+.wz-card__why{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--adm-warn)}
+.wz-card__tag{display:inline-block;vertical-align:1px;margin-left:4px;padding:1px 7px;border-radius:999px;background:var(--adm-fill-2);font-size:11px;font-weight:600;color:var(--adm-t2)}
+.wz-cards--tpl .wz-card{grid-template-columns:36px minmax(0,1fr);padding:13px 40px 13px 14px}
+.wz-cards--tpl .wz-card__ico{width:36px;height:36px;border-radius:9px;background:var(--adm-fill-2);color:var(--adm-a-ink)}
+.wz-cards--tpl .wz-card__ico svg{width:19px;height:19px}
+.wz-cards--tpl .wz-card__ico .ico{color:inherit}
+.wz-cards--tpl .wz-card > input:not(#\#){top:14px}
+.wz-card--empty .wz-card__ico{background:none!important;box-shadow:inset 0 0 0 1.5px var(--adm-in);color:var(--adm-a-ink)}
+
+/* Gewählte Art als Hinweis über Schritt 2/3 */
+.wz-chosen{display:block;margin:-4px 0 0;line-height:1.6;font-size:13px;color:var(--adm-t2)}
+.wz-chosen__ico{display:inline-grid;place-items:center;vertical-align:-6px;margin-right:4px;width:22px;height:22px;border-radius:6px;background:var(--adm-a);color:#fff}
+.wz-chosen__ico svg{width:13px;height:13px}
+
+/* KI: „Lieber beschreiben?“ */
+.wz-ai{border-radius:12px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) .wz-ai{box-shadow:0 0 0 .5px rgba(255,255,255,.12)}}
+html.adm-ui[data-theme=dark] .wz-ai{box-shadow:0 0 0 .5px rgba(255,255,255,.12)}
+.wz-ai > summary{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;font-size:13.5px;font-weight:600;list-style:none;border-radius:12px}
+.wz-ai > summary::-webkit-details-marker{display:none}
+.wz-ai > summary:hover{background:var(--adm-hover)}
+.wz-ai > summary:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.wz-ai__body{display:grid;gap:8px;padding:0 16px 16px}
+.wz-ai__body label{font-size:13px;font-weight:600}
+.wz-ai__body textarea{width:100%}
+
+/* Navigation unten */
+.wz-nav{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;padding-top:6px}
+.wz-nav--end{justify-content:flex-end}
+.wz-nav .adm-btn--primary{min-width:160px;justify-content:center}
+
+/* Grundeinstellungen: Feldzeilen */
+.wz-groups{gap:22px}
+.wz-fields{padding:0 10px}
+.wz-field{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--adm-line)}
+.wz-fields > .wz-field:first-child{border-top:0}
+.wz-field__on{display:grid;place-items:center;width:28px;height:28px;margin:0;cursor:pointer}
+.wz-field__on svg{width:16px;height:16px;color:var(--adm-t3)}
+.wz-field__main{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.wz-field__label:not(#\#){flex:1 1 180px;min-width:0}
+.wz-field__type:not(#\#){flex:0 1 190px;min-width:0}
+.wz-field__req{flex:none;margin:0;font-size:13px;align-items:center}
+.wz-field__opts{display:grid;gap:4px;flex:1 1 100%;font-size:12px;font-weight:600;color:var(--adm-t3)}
+.wz-field__move{display:flex;gap:4px}
+.wz-field.is-off .wz-field__label,.wz-field.is-off .wz-field__type{opacity:.55}
+.wz-field.is-off .wz-field__label{text-decoration:line-through;text-decoration-color:var(--adm-t3)}
+.wz-field--new{border-top-style:dashed}
+.wz-field--new .wz-field__on{cursor:default}
+.wz-field:target{background:var(--adm-accent-bg);border-radius:8px;margin:0 -6px;padding-left:6px;padding-right:6px}
+@media (max-width:560px){
+  .wz-field{grid-template-columns:24px minmax(0,1fr);row-gap:6px}
+  .wz-field__move{grid-column:2;justify-content:flex-end}
+  .wz-field__type:not(#\#){flex:1 1 140px}
+  .wz-nav .adm-btn{flex:1 1 auto;justify-content:center}
+}
+
+/* ================= Einsetzen ================= */
+.pl{display:grid;gap:22px;max-width:1080px}
+.pl-how{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:24px;align-items:center;padding:18px 20px;border-radius:12px;background:var(--adm-card);
+  box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]) :is(.pl-how,.pl-way,.pl-later,.pl-done){box-shadow:0 0 0 .5px rgba(255,255,255,.12)}}
+html.adm-ui[data-theme=dark] :is(.pl-how,.pl-way,.pl-later,.pl-done){box-shadow:0 0 0 .5px rgba(255,255,255,.12)}
+.pl-how__text{display:grid;gap:6px}
+@media (max-width:760px){.pl-how{grid-template-columns:1fr}.pl-fig{max-width:260px}}
+/* Abbildung: Seite mit markiertem Block */
+.pl-fig{margin:0}
+.pl-fig__page{display:grid;gap:7px;padding:10px 12px 14px;border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line),0 10px 26px -18px rgba(0,0,0,.45)}
+.pl-fig__bar{display:flex;gap:4px;margin-bottom:4px}
+.pl-fig__bar i{width:7px;height:7px;border-radius:50%;background:var(--adm-fill-2)}
+.pl-fig__line{height:6px;width:70%;border-radius:3px;background:var(--adm-fill-2)}
+.pl-fig__line--h{height:9px;width:45%;background:var(--adm-t3);opacity:.45}
+.pl-fig__block{display:flex;align-items:center;gap:8px;margin-top:4px;padding:7px 8px;border-radius:8px;background:var(--adm-accent-bg);box-shadow:inset 0 0 0 1.5px var(--adm-a);font-size:11.5px;line-height:1.25;color:var(--adm-ink)}
+.pl-fig__block b{display:block;font-weight:700}
+.pl-fig__block small{display:block;color:var(--adm-t2)}
+.pl-fig__ico{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:6px;background:var(--adm-a);color:#fff}
+.pl-fig__ico svg{width:14px;height:14px}
+.pl-fig__ico .ico{color:#fff}
+.pl-fig__form,.pl-fig__cards{display:grid;gap:5px;padding:0 4px}
+.pl-fig__form i{height:9px;border-radius:3px;box-shadow:inset 0 0 0 1px var(--adm-in)}
+.pl-fig__form i.is-btn{width:38%;height:11px;background:var(--adm-a);box-shadow:none}
+.pl-fig__cards{grid-template-columns:repeat(3,1fr)}
+.pl-fig__cards i{height:30px;border-radius:5px;background:var(--adm-fill-2)}
+/* Ergebnis */
+.pl-done{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;padding:16px 18px;border-radius:12px;background:var(--adm-ok-bg,var(--adm-card));box-shadow:0 0 0 .5px rgba(0,0,0,.14)}
+.pl-done h2{margin:0 0 4px;font-size:16px}
+.pl-done p{margin:0 0 8px;font-size:13.5px;color:var(--adm-t2)}
+.pl-done .adm-row{flex-wrap:wrap;gap:8px;margin:6px 0 0}
+.pl-done__ico svg{width:30px;height:30px;color:var(--adm-ok)}
+/* Zwei Wege */
+.pl-ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start}
+.pl-way{display:grid;gap:10px;padding:16px;border-radius:12px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+.pl-way__title{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;font-weight:700}
+.pl-way__ico{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:8px;background:var(--adm-a);color:#fff}
+.pl-way__ico svg{width:17px;height:17px}
+.pl-way__lead{margin:0;font-size:13px;line-height:1.45;color:var(--adm-t2)}
+.pl-way .set-list{box-shadow:none;background:var(--adm-fill);padding:0 12px}
+.pl-way .set-list .f-link input:not(#\#){min-width:0}
+.pl-way__go{display:flex;justify-content:flex-end}
+/* Später: Anleitung */
+.pl-later{padding:12px 16px;border-radius:12px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+.pl-later > summary{cursor:pointer;font-size:13.5px;font-weight:650}
+.pl-later > summary:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.pl-steps{margin:10px 0 6px;padding-left:22px;display:grid;gap:6px;font-size:13.5px;line-height:1.5}
+.pl-later .f-help{margin:6px 0 0}
+
+/* ================= Felder & Einstellungen ================= */
+/* Seitenleiste: Überschrift „Weitere Bereiche“ (nur breit; schmal stehen alle Bereiche im Auswahlfeld) */
+.adm-tabs__cap{display:none}
+@media (min-width:1000px){
+  .adm-tabs-form--side .adm-tabs__cap{display:block;margin:2px 8px 4px;font-size:11px;font-weight:650;letter-spacing:.02em;color:var(--adm-t3)}
+}
+.dt-settings .dt-fieldsbox{padding:14px}
+.dt-settings .dt-fields{margin-top:0}
+.dt-settings .set-list > fieldset.f{min-width:0}
+.dt-settings .set-list .f-multi{margin-top:4px}
+.dt-settings .dt-form__opts{display:grid;gap:12px;margin-top:12px}
+.dt-settings .dt-form__opts[hidden],.dt-settings .dt-cal__map[hidden]{display:none}
+.dt-settings .dt-cal__map{margin-top:12px}
+.dt-settings .dt-delivery__mail{display:grid;gap:12px;margin-top:12px}
+.dt-settings .dt-delivery__mail[hidden]{display:none}
+.dt-settings .dt-delivery__mail > p{margin:0}
+.dt-settings .set-group > .dt-note,.dt-settings .set-group > .f-error{margin:8px 4px 0}
+.dt-settings .dt-modes{gap:12px}
+.dt-settings .dt-modes legend{margin-bottom:10px}
+.dt-settings .dt-routes{border-left:3px solid var(--adm-line);padding-left:12px}
+.dt-settings .dt-danger .set-row__body .adm-row{flex-wrap:wrap;gap:8px}
+.dt-settings .dt-danger .set-row__body p{margin:0 0 10px}
+.dt-settings .adm-prefix{min-width:0}
+.set-group > .set-list + .set-list{margin-top:10px}
+.dt-settings .set-list .f.f--inline > .adm-prefix{width:min(300px,46cqi)}

@@ -6,6 +6,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Daten: Assistent „Neue Tabelle oder Formular“, Einsetzen, Einstellungen mit Bereichen
+- **Assistent** unter Daten → „+ Neue Tabelle oder Formular“: fragt zuerst die **Art** (Inhalte auf der Website · Formular, das nur
+  eine E-Mail schickt · Anfragen sammeln & bearbeiten · Anmeldung oder Bewerbung · Interne Liste · Aus externer Quelle), dann
+  Vorlage und **Grundeinstellungen** (Felder übernehmen/umbenennen/ordnen, Detailseite ja/nein, Empfänger, Bestätigung an die
+  Absender, Löschfrist, Obergrenze, Push) und richtet alles passend ein. Ohne JavaScript bedienbar, Expertenmodus bleibt;
+  mit KI: „Beschreiben Sie kurz, was Sie brauchen“. Neue Vorlagen: Kontakt, Rückrufbitte (nur per E-Mail), Anmeldungen, Interne Liste.
+- **Einsetzen** (Schritt 4 und Daten → Tabelle → Einsetzen): Seite mit dem passenden Block anlegen (Platz im Seitenbaum über die
+  Linkauswahl, im Menü, gleich veröffentlichen) oder Block in eine bestehende Seite einfügen; Anleitung für später und Liste der
+  Seiten, die die Tabelle verwenden.
+- **Zweck je Tabelle** (`settings.purpose`, `Core\Data\Purpose`): ältere Tabellen bekommen ihn beim Lesen abgeleitet und beim nächsten
+  Speichern gespeichert – keine Migration.
+- **Felder & Einstellungen** im Stil der Grundeinstellungen: Bereiche in einer Seitenleiste (Allgemein, Felder, Auf der Website,
+  Formular & Eingang, Benachrichtigungen, Suche, Kalender, Einsetzen, Erweitert), nicht passende unter „Weitere Bereiche“;
+  gleiche Feldnamen, gleiches Speichern.
+- **Obergrenze für Formulare** (`settings.form.max`): danach zeigt das Formular „ausgebucht“. Handbuch → Daten, Entwicklerhandbuch → Datentabellen.
+
 ### Kit Fluid: Seitenleiste mit Menübaum, großes Logo, „Farbenfroh“, Mitglieder-Verzeichnis
 - **Kopfbereich „Seitenleiste mit Menübaum“** (Design → Kopf & Fuß): Leiste links über die volle Höhe mit großem Logo, Suche,
   Menübaum über alle Ebenen (aktueller Zweig offen, übrige per Schaltfläche mit `aria-expanded`; Option „Immer alle sichtbar“),
