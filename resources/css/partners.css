@@ -48,6 +48,12 @@
 .cms-partners--tile-soft .cms-partners__cell{background:var(--_tile);border-color:var(--_line)}
 .cms-partners--tile-light .cms-partners__cell{background:#fff;border-color:rgb(0 0 0/.1)}
 .cms-partners--tile-light .cms-partners__word{color:#1d232b}
+/* Helle Kachel auf dunklem Grund (dunkles Farbschema bzw. dunkler Abschnitt): ganze Kachel gedämpft – Fläche und Logo gemeinsam,
+   damit weiße Ränder von JPG-Logos nicht als Kasten erscheinen und farbige Logos ihre Farben behalten; bei Maus/Fokus heller */
+.cms-partners--tile-light:is(.is-dark-bg,.cms-partners--on-dark) .cms-partners__cell{filter:brightness(.8) saturate(.92);border-color:transparent;transition:filter .2s,border-color .2s,box-shadow .2s}
+.cms-partners--tile-light:is(.is-dark-bg,.cms-partners--on-dark) :is(a,button).cms-partners__cell:is(:hover,:focus-visible),
+.cms-partners--tile-light:is(.is-dark-bg,.cms-partners--on-dark) .cms-partners__cell[aria-expanded=true]{filter:brightness(.95)}
+.cms-partners-dialog.cms-partners--tile-light.is-dark-bg .cms-partners__dlogo{filter:brightness(.8) saturate(.92)}
 :is(a,button).cms-partners__cell{cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
 :is(a,button).cms-partners__cell:hover{border-color:color-mix(in srgb,var(--_ink) 40%,transparent)}
 .cms-partners__cell:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}

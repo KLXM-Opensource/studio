@@ -32,7 +32,7 @@ $hName = $group ? ($title !== '' ? 'h4' : 'h3') : ($title !== '' ? 'h3' : 'h2');
 
 $withDetails = fn(array $it): bool => $mode !== 'off' && ($it['info'] !== '' || $it['link'] !== '');
 $anyDetails = (bool) array_filter($items, $withDetails);
-$js = !$editing && $items && ($anyDetails || $sort === 'random' || $canInvert);
+$js = !$editing && $items && ($anyDetails || $sort === 'random' || $canInvert || $tile === 'light');   // helle Kachel: auf dunklem Grund dämpfen (partners.mjs misst)
 
 $cls = ['cms-partners', 'cms-partners--t-' . app()->theme->name, 'cms-partners--r-' . str_replace(':', '-', $ratio), 'cms-partners--c' . $cols,
     'cms-partners--tile-' . $tile];

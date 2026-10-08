@@ -18,7 +18,8 @@ d.querySelectorAll('[data-cms-partners]').forEach(root => {
     });
   }
   root.classList.add('is-ready');
-  if (root.hasAttribute('data-invert')) darkWatch(root);
+  // Dunkler Hintergrund: Invertieren einfarbiger Logos bzw. helle Kacheln dämpfen (partners.css)
+  if (root.hasAttribute('data-invert') || root.classList.contains('cms-partners--tile-light')) darkWatch(root);
   if (!store || mode === 'off') return;
   const close = root.dataset.close || 'Schließen';
   root.classList.add('is-enhanced');

@@ -397,7 +397,7 @@ return [
             ['name' => 'size', 'label' => 'Logogröße', 'type' => 'select', 'required' => true, 'default' => 'm', 'width' => 'half',
                 'options' => ['s' => 'Klein (viel Luft)', 'm' => 'Mittel', 'l' => 'Groß']],
             ['name' => 'tile', 'label' => 'Kachel', 'type' => 'select', 'required' => true, 'default' => 'soft', 'width' => 'half',
-                'options' => ['soft' => 'Dezente Fläche (passt sich an)', 'light' => 'Immer hell (für farbige Logos auf dunklem Grund)', 'none' => 'Ohne Fläche']],
+                'options' => ['soft' => 'Dezente Fläche (passt sich an)', 'light' => 'Hell (für farbige Logos; auf dunklem Grund gedämpft)', 'none' => 'Ohne Fläche']],
             ['name' => 'gray', 'label' => 'Graustufen – farbig bei Maus oder Tastaturfokus', 'type' => 'bool', 'default' => false, 'width' => 'half'],
             ['name' => 'invert', 'label' => 'Auf dunklem Hintergrund invertieren', 'type' => 'select', 'required' => true, 'default' => 'marked', 'width' => 'half',
                 'options' => ['marked' => 'Nur Logos mit „einfarbig“', 'all' => 'Alle Logos (nur wenn alle einfarbig sind)', 'off' => 'Nie'],

@@ -402,6 +402,14 @@ return [
             'variants' => ['numbers' => 'Nummerierte Schritte', 'timeline' => 'Zeitleiste', 'process' => 'Prozess mit Pfeilen'],
             'fields' => [
                 ...$head(),
+                // Darstellung der Kreise (Zeitleiste, Prozess); „Wie Design“ folgt der Farbwirkung unter Design (z. B. „Farbenfroh“)
+                ['name' => 'marker', 'label' => 'Kreise', 'type' => 'select', 'required' => true, 'default' => 'auto', 'width' => 'half', 'variants' => ['timeline', 'process'],
+                    'options' => ['auto' => 'Wie Design', 'filled' => 'Gefüllt', 'soft' => 'Zart gefüllt mit Rand', 'ring' => 'Nur Rand', 'dot' => 'Kleiner Punkt (ohne Nummer)']],
+                ['name' => 'colors', 'label' => 'Farben', 'type' => 'select', 'required' => true, 'default' => 'auto', 'width' => 'half', 'variants' => ['timeline', 'process', 'numbers'],
+                    'options' => ['auto' => 'Wie Design', 'alternate' => 'Farbig abwechselnd', 'accent' => 'Eine Farbe (Akzent)', 'neutral' => 'Neutral (Schriftfarbe)']],
+                ['name' => 'motion', 'label' => 'Animation', 'type' => 'select', 'required' => true, 'default' => 'auto', 'width' => 'half',
+                    'options' => ['auto' => 'Wie Website (einblenden)', 'sequence' => 'Nacheinander einblenden', 'draw' => 'Linie wächst beim Scrollen (Zeitleiste)', 'none' => 'Keine Animation'],
+                    'help' => 'Animationen entfallen, wenn Besucher in ihrem System „Bewegung reduzieren“ eingestellt haben. „Nacheinander einblenden“ braucht die Bewegung der Website (Design).'],
                 ['name' => 'items', 'label' => 'Schritte', 'type' => 'repeater', 'item_label' => 'Schritt', 'title_field' => 'title', 'max_items' => 12, 'fields' => [
                     ['name' => 'meta', 'label' => 'Phase / Datum (optional)', 'type' => 'text', 'max' => 40, 'width' => 'half', 'placeholder' => 'z. B. Woche 1'],
                     ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'max' => 80, 'width' => 'half'],

@@ -35,3 +35,37 @@
 .steps--process .step__num{background:var(--f-a);color:var(--f-a-on)}
 .steps--process .step:not(:last-child)::after{content:"";position:absolute;top:calc(var(--f-pad) + 1.1rem);right:calc(var(--f-s-l) * -.5 - .45rem);z-index:1;width:.9rem;height:.9rem;border:solid var(--f-line-strong);border-width:2px 2px 0 0;rotate:45deg;background:none}
 @container (max-width:28rem){.steps--process .step:not(:last-child)::after{top:auto;right:auto;bottom:calc(var(--f-s-l) * -.5 - .45rem);left:2.6rem;rotate:135deg}}
+
+/* Einstellungen des Blocks (blocks/steps.php): Farben steps--c-*, Kreise steps--m-*, Animation steps--a-*.
+   Spezifität (0,3,1) bzw. höher, damit sie die Farbwirkung „Farbenfroh“ (opt-palette-colorful.css) übersteuern. */
+.steps.steps--c-alternate>li.step{--f-tone:var(--f-a)}
+.steps.steps--c-alternate>li.step:nth-child(5n+2){--f-tone:var(--f-b)}
+.steps.steps--c-alternate>li.step:nth-child(5n+3){--f-tone:var(--f-c3)}
+.steps.steps--c-alternate>li.step:nth-child(5n+4){--f-tone:var(--f-c4)}
+.steps.steps--c-alternate>li.step:nth-child(5n+5){--f-tone:var(--f-c5)}
+.steps.steps--c-accent>li.step{--f-tone:var(--f-a)}
+.steps.steps--c-neutral>li.step{--f-tone:var(--f-ink)}
+.steps:is(.steps--c-alternate,.steps--c-accent,.steps--c-neutral)>li.step{--f-tone-soft:color-mix(in srgb,var(--f-tone) 14%,var(--f-bg))}
+.steps--numbers:is(.steps--c-alternate,.steps--c-accent,.steps--c-neutral)>li.step .step__num{color:var(--f-tone)}
+.steps--numbers:is(.steps--c-alternate,.steps--c-accent,.steps--c-neutral)>li.step{border-top-color:var(--f-tone)}
+/* Kreise: Füllung und Rand (--step-ring); Zeitleiste behält den Abstandsring zur Linie */
+.steps.steps--m-filled>li.step .step__num{background:var(--f-tone,var(--f-ink));color:var(--f-bg);--step-ring:0 0 0 0 transparent}
+.steps.steps--m-soft>li.step .step__num{background:var(--f-tone-soft,color-mix(in srgb,var(--f-ink) 10%,var(--f-bg)));color:var(--f-ink);--step-ring:inset 0 0 0 2px var(--f-tone,var(--f-ink))}
+.steps.steps--m-ring>li.step .step__num{background:var(--f-sec-bg,var(--f-bg));color:var(--f-ink);--step-ring:inset 0 0 0 2px var(--f-tone,var(--f-ink))}
+.steps.steps--m-dot>li.step .step__num{width:1.1rem;height:1.1rem;margin:.95rem;background:var(--f-tone,var(--f-ink));font-size:0;--step-ring:0 0 0 0 transparent}
+.steps.steps--m-dot>li.step .step__num>*{display:none}
+.steps:is(.steps--m-filled,.steps--m-soft,.steps--m-ring,.steps--m-dot)>li.step .step__num{box-shadow:var(--step-ring)}
+.steps.steps--timeline:is(.steps--m-filled,.steps--m-soft,.steps--m-ring,.steps--m-dot)>li.step .step__num{box-shadow:var(--step-ring),0 0 0 6px var(--f-sec-bg,var(--f-bg))}
+@container (min-width:40rem){.steps.steps--timeline.steps--m-dot>li.step .step__num{justify-self:center}}
+/* Animation: nacheinander einblenden (Verzögerung je Schritt), Linie wächst beim Scrollen (scroll-getrieben, ohne Skript) */
+@media (prefers-reduced-motion:no-preference){
+  .has-motion.js .steps--a-sequence>li[data-reveal]{transition-delay:calc(var(--i,0) * 140ms)}
+  @supports (animation-timeline:view()){
+    .steps--a-draw>li.step::before{transform-origin:50% 0;animation:steps-draw linear both;animation-timeline:view();animation-range:entry 40% cover 55%}
+    .steps--a-draw>li.step .step__num{animation:steps-pop linear both;animation-timeline:view();animation-range:entry 30% entry 90%}
+  }
+}
+@keyframes steps-draw{from{scale:1 0}to{scale:1 1}}
+@keyframes steps-pop{from{scale:.6;opacity:.3}to{scale:1;opacity:1}}
+/* Kleiner Punkt: Linie ohne Lücken von Punkt zu Punkt */
+.steps.steps--timeline.steps--m-dot>li.step::before{top:2.05rem;bottom:-.95rem}

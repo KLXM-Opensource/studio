@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: Zeitleiste einstellbar · Partner-Kacheln im Dunkelmodus
+- Block **Ablauf / Zeitleiste** (Fluid): neue Felder **Kreise** (wie Design, gefüllt, zart gefüllt mit Rand, nur Rand, kleiner Punkt),
+  **Farben** (wie Design, farbig abwechselnd, eine Farbe, neutral) und **Animation** (wie Website, nacheinander einblenden,
+  Linie wächst beim Scrollen, keine). Ohne Wahl bleibt alles wie bisher (z. B. Farbwirkung „Farbenfroh“ unter Design).
+- **Partner & Logos** mit „Kachel: hell“: auf dunklem Grund (dunkles Farbschema oder dunkler Abschnitt) wird die ganze Kachel
+  gedämpft – kein grelles Weiß mehr, farbige Logos und weiße Ränder von JPG-Logos bleiben stimmig.
+
 ### Mitteilungen zurücksetzen
 - Mitteilungen → Statistik → **Zurücksetzen** (nur Administration): Verlauf, Warteschlange und Zahlen löschen, optional auch alle Abos.
 
