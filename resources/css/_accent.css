@@ -36,6 +36,9 @@ html.adm-ui[data-accent=graphit][data-theme=dark]{--adm-a:#6E7684;--adm-a-d:#5A6
    auf schmalen Bildschirmen) in einem dunklen Ton der Vorlage – Text bleibt ≥ 11:1 */
 html.adm-ui[data-accent] .adm-side{--adm-a:var(--acc-side-a);--adm-mint:var(--acc-mark)}
 html.adm-ui[data-accent][data-side=tint] :is(.adm-side,.adm-top){background:var(--acc-side)}
+/* Dunkelmodus: getönte Seitenleiste tiefer (wie --adm-nav) */
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent][data-side=tint]:not([data-theme=light]) :is(.adm-side,.adm-top){background:color-mix(in srgb,var(--acc-side) 68%,#000)}}
+html.adm-ui[data-accent][data-side=tint][data-theme=dark] :is(.adm-side,.adm-top){background:color-mix(in srgb,var(--acc-side) 68%,#000)}
 /* Gemeinsam: Auswahl in der Mediathek, Fokusringe und Schatten mit Akzent-RGB (Standard: Navy in admin.css) */
 html.adm-ui[data-accent] .fx{--fx-sel:var(--adm-a);--fx-selbg:rgb(var(--adm-a-rgb) / .1)}
 /* Konto → Akzentfarbe: Auswahl mit Farbmustern (hell | dunkel | Seitenleiste) und Live-Vorschau (resources/js/_accent.js) */
