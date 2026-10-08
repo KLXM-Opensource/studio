@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Verwaltung: Profilbild, kompakter Kopf der Seitenleiste, Mitteilungen in Koralle
+- **Profilbild** unter Konto (quadratisch aus der Mitte, 256 px WebP, je E-Mail-Adresse in `storage/avatars/` – Netzwerk-Konten überall gleich;
+  nur angemeldet über `/admin/avatar/{id}`), ohne Bild **Initialen** auf fester Farbe (`Core\Avatar`). Auch in der Benutzerverwaltung.
+- Seitenleiste: Werkzeugzeile mit Suche, Website ansehen, **Avatar (Konto)** und **Abmelden**; Netzwerk-Konten ohne doppeltes „Verwaltung“; Fuß mit Avatar, Name/Rolle und Abmelden-Symbol.
+- Bereich **Mitteilungen** mit eigener Farbe (Koralle) wie Medien, Daten und Anfragen.
+
 ### Mediathek: PDFs mit Vorschau der ersten Seite
 - Mit **pdftoppm** (poppler-utils) auf dem Server zeigen Kacheln, Liste, Auswahl und Medienfelder bei PDFs die 1. Seite als Vorschaubild
   (Kennzeichen „PDF“), erzeugt wie Video-Vorschaubilder (lazy, mit Sperren und Zeitlimit; `media:thumbs` erzeugt nach). Ohne poppler bleibt das Dokument-Symbol;

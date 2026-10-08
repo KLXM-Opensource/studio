@@ -137,6 +137,9 @@ if ($user && ($req = app()->request)) {
       <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
       <?php endif; ?>
       <a class="adm-site-open" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?>" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?></a>
+      <?php // Konto (Profilbild oder Initialen, Core\Avatar) und Abmelden – rechts in der Werkzeugzeile ?>
+      <a class="adm-me-ava" href="<?= e(url('/admin/account')) ?>" title="<?= e(($user['name'] ?: $user['email']) . ' · ' . __('Konto')) ?>" aria-label="<?= e(__('Mein Konto')) ?>"><?= \Core\Avatar::html($user, 'adm-ava adm-ava--s') ?></a>
+      <form class="adm-brand-tools__out" method="post" action="<?= e(url('/admin/logout')) ?>"><?= csrf_field() ?><button type="submit" class="adm-site-open" title="<?= e(__('Abmelden')) ?>" aria-label="<?= e(__('Abmelden')) ?>"><?= icon('sign-out') ?></button></form>
     </div>
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
@@ -237,8 +240,10 @@ if ($user && ($req = app()->request)) {
       <?php endif; ?>
       </div>
     </details>
-    <a class="adm-me" href="<?= e(url('/admin/account')) ?>"><?= e($user['name'] ?: $user['email']) ?><small><?= e(app()->auth->role()["name"] ?? $user["role"]) ?> · <?= e(__("Konto")) ?></small></a>
-    <form method="post" action="<?= e(url('/admin/logout')) ?>"><?= csrf_field() ?><button class="adm-link" type="submit"><?= e(__('Abmelden')) ?></button></form>
+    <div class="adm-me-row">
+      <a class="adm-me" href="<?= e(url('/admin/account')) ?>"><?= \Core\Avatar::html($user, 'adm-ava adm-ava--m') ?><span class="adm-me__t"><?= e($user['name'] ?: $user['email']) ?><small><?= e(app()->auth->role()["name"] ?? $user["role"]) ?> · <?= e(__("Konto")) ?></small></span></a>
+      <form method="post" action="<?= e(url('/admin/logout')) ?>"><?= csrf_field() ?><button class="adm-me-out" type="submit" title="<?= e(__('Abmelden')) ?>"><?= icon('sign-out') ?><span class="adm-sr"><?= e(__('Abmelden')) ?></span></button></form>
+    </div>
   </div>
 </aside>
 <?php endif; ?>

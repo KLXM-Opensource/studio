@@ -36,6 +36,8 @@ return function (Router $r): void {
     $r->post('/admin/account/accent', [Admin\UserController::class, 'saveAccent']);   // Akzentfarbe (Core\Accent)
     // Anmeldedaten (Core\EmailChange): Name, E-Mail-Adresse mit Bestätigung (Links aus den E-Mails öffentlich, Token allein genügt)
     $r->post('/admin/account/profile', [Admin\AccountController::class, 'saveProfile']);
+    $r->post('/admin/account/avatar', [Admin\AccountController::class, 'saveAvatar']);   // Profilbild (Core\Avatar)
+    $r->get('/admin/avatar/{id}', [Admin\AccountController::class, 'avatar']);
     $r->post('/admin/account/email', [Admin\AccountController::class, 'requestEmail']);
     $r->post('/admin/account/email/resend', [Admin\AccountController::class, 'resendEmail']);
     $r->post('/admin/account/email/cancel', [Admin\AccountController::class, 'cancelEmail']);

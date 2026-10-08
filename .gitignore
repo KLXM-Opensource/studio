@@ -57,3 +57,4 @@ deploy/targets/*.env
 /storage/live/
 /storage/kits/
 /storage/chat/
+/storage/avatars/

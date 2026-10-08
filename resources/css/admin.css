@@ -2543,6 +2543,47 @@ html.adm-ui[data-theme=dark] .is-drill .adm-side{--drill-dim:rgba(0,0,0,.32)}
 @media (max-width:900px){.adm-brand-row{padding-right:48px}}   /* Schublade: Platz für × oben rechts */
 .adm-brand-row .adm-brand{overflow:hidden}
 .adm-brand-row .adm-brand span{overflow-wrap:break-word;hyphens:auto}   /* lange Namen umbrechen statt unter die Symbole laufen */
+/* Werkzeugzeile: Suche, Assistent, Website links – Konto (Avatar) und Abmelden rechts */
+.adm-brand-row .adm-brand-tools{flex:1 1 100%;margin:8px 0 0;padding:0 2px 0 4px;gap:2px}
+.adm-brand-tools__out{display:contents}
+.adm-me-ava{margin-left:auto;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;text-decoration:none}
+.adm-me-ava:hover .adm-ava,.adm-me-ava:focus-visible .adm-ava{box-shadow:0 0 0 2px var(--adm-side-bg,#24314B),0 0 0 4px var(--adm-mint,#3DD9A0)}
+/* Netzwerk-Konten: der Umschalter ist der Titel – kein zusätzliches „Verwaltung“, Werkzeuge oben */
+.adm-brand--net{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.adm-brand-row:has(.adm-brand--net) .adm-brand-tools{margin-top:0}
+.adm-netswitch summary{padding:7px 10px}
+/* Profilbild bzw. Initialen (Core\Avatar) – Farbe fest je Person, weiße Schrift ≥ 4,5:1 */
+.adm-ava{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;object-fit:cover;color:#fff;font:700 12px/1 var(--adm-font);letter-spacing:.03em;user-select:none;transition:box-shadow .15s}
+.adm-ava--s{width:28px;height:28px;font-size:11px}
+.adm-ava--m{width:36px;height:36px;font-size:13px}
+.adm-ava--xl{width:88px;height:88px;font-size:31px;letter-spacing:.02em}
+img.adm-ava{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.22)}
+.adm-ava--ini{box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 1px 2px rgba(0,0,0,.22);text-shadow:0 1px 1px rgba(0,0,0,.18)}
+.adm-ava.adm-ava--c0{background:linear-gradient(135deg,#4F6FD6,#2F4AA0)}
+.adm-ava.adm-ava--c1{background:linear-gradient(135deg,#14917F,#0B6457)}
+.adm-ava.adm-ava--c2{background:linear-gradient(135deg,#8E5CF0,#6232C4)}
+.adm-ava.adm-ava--c3{background:linear-gradient(135deg,#D9731E,#A24F0C)}
+.adm-ava.adm-ava--c4{background:linear-gradient(135deg,#DB4C86,#A82060)}
+.adm-ava.adm-ava--c5{background:linear-gradient(135deg,#2E86C9,#1A5E99)}
+.adm-ava.adm-ava--c6{background:linear-gradient(135deg,#3E9A4D,#256E33)}
+.adm-ava.adm-ava--c7{background:linear-gradient(135deg,#C2486B,#8C2848)}
+/* Fuß der Seitenleiste: Avatar + Name/Rolle, Abmelden als Symbol */
+.adm-side__foot{grid-template-columns:minmax(0,1fr)}
+.adm-me-row{display:flex;align-items:center;gap:2px;min-width:0}
+.adm-side .adm-me{flex:1 1 auto;flex-direction:row;align-items:center;gap:10px;min-width:0;padding:6px 8px}
+.adm-me__t{display:flex;flex-direction:column;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.adm-me__t small{overflow:hidden;text-overflow:ellipsis}
+.adm-me-out{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:8px;background:none;color:var(--adm-t2);cursor:pointer}
+.adm-me-out svg{width:19px;height:19px}
+.adm-me-out:hover{background:var(--adm-hover);color:var(--adm-ink)}
+/* Konto → Profilbild */
+.acc-ava{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.acc-ava__main{flex:1 1 220px;display:grid;gap:10px}
+.acc-ava__main .f-help{margin:0}
+.acc-ava__btns{display:flex;gap:8px;flex-wrap:wrap}
+.acc-ava__btns label{cursor:pointer}
+.acc-ava__btns label:focus-within{box-shadow:var(--adm-ring)}
+@media (forced-colors:active){.adm-ava--ini{border:1px solid CanvasText}}
 
 /* Mediathek: Video-Kennzeichen auf der Kachel (Play-Symbol unten links auf dem Standbild) */
 .fx-vbadge{position:absolute;left:12px;bottom:12px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;

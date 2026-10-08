@@ -7,7 +7,7 @@
   <?php foreach ($users as $u): $self = (int) $u['id'] === (int) $user['id']; $roleName = $roles[$u['role']]['name'] ?? $u['role']; ?>
     <?php if ($u['role'] === 'network' || !empty($u['network_uid'])): // Netzwerk-Administration: nur lesen (zentral verwaltet) ?>
     <div class="set-row us-row us-netrow">
-      <span class="set-avatar" aria-hidden="true"><?= e($initials($u)) ?></span>
+      <?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?>
       <div class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?> <span class="adm-badge us-net" title="<?= e(__('Zentral verwaltetes Konto der Netzwerk-Administration')) ?>"><?= e(__('Netzwerk')) ?></span></span>
         <span class="set-row__sub"><?= e($u['email']) ?> · <?= e($lastLogin($u)) ?></span></div>
       <div class="set-row__ctl"><span class="adm-badge adm-badge--muted"><?= e($roles['network']['name'] ?? __('Netzwerk-Administration')) ?></span>
@@ -17,7 +17,7 @@
     <?php $uPk = (int) ($u['passkeys'] ?? 0); $uMfa = (int) ($u['totp_enabled'] ?? 0) || $uPk > 0; ?>
     <details class="us-item">
       <summary class="set-row us-row">
-        <span class="set-avatar" aria-hidden="true"><?= e($initials($u)) ?></span>
+        <?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?>
         <span class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?><?php if ($self): ?> <span class="adm-badge"><?= e(__('Sie')) ?></span><?php endif; ?>
           <?php if ((int) ($u['totp_enabled'] ?? 0)): ?> <span class="adm-badge adm-badge--muted" title="<?= e(__('Zwei-Faktor-Anmeldung aktiv')) ?>">2FA</span><?php endif; ?><?php if ($uPk): ?> <span class="adm-badge adm-badge--muted" title="<?= e(__('{n} Passkey(s) eingerichtet', ['n' => $uPk])) ?>"><?= e(__('Passkey')) ?><?= $uPk > 1 ? ' ×' . $uPk : '' ?></span><?php endif; ?></span>
           <span class="set-row__sub"><?= e($u['email']) ?> · <?= e($lastLogin($u)) ?></span></span>

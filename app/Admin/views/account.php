@@ -8,6 +8,22 @@ $isShadow = !empty($user['network_uid']);
 ?>
 <header class="adm-head"><div><p class="adm-eyebrow"><?= e(__('Konto')) ?></p><h1><?= e(__('Mein Konto')) ?></h1><p class="adm-muted"><?= e($user['email']) ?> · <?= e(app()->auth->role()['name'] ?? '') ?></p></div></header>
 <div class="set-page acc-page">
+<?php $hasAva = \Core\Avatar::version($user) > 0; // Profilbild (Core\Avatar) – für alle Konten, Netzwerk-Konten auf allen Websites ?>
+<form class="set-group acc-group" id="profilbild" method="post" action="<?= e(url('/admin/account/avatar')) ?>" enctype="multipart/form-data">
+  <?= csrf_field() ?>
+  <h2 class="set-group__title"><?= e(__('Profilbild')) ?></h2>
+  <div class="set-list acc-box"><div class="acc-ava">
+    <?= \Core\Avatar::html($user, 'adm-ava adm-ava--xl') ?>
+    <div class="acc-ava__main">
+      <p class="f-help"><?= e($hasAva ? __('Erscheint in der Seitenleiste und in der Benutzerverwaltung.') : __('Noch kein Bild – angezeigt werden Ihre Initialen. Ein quadratischer Ausschnitt aus der Mitte wird verwendet (JPG, PNG, WebP; höchstens 8 MB).')) ?></p>
+      <div class="acc-ava__btns">
+        <label class="adm-btn adm-btn--small"><input class="adm-sr" type="file" name="avatar" accept="image/jpeg,image/png,image/webp,image/gif" data-autosubmit> <?= e($hasAva ? __('Anderes Bild wählen …') : __('Bild wählen …')) ?></label>
+        <?php if ($hasAva): ?><button class="adm-btn adm-btn--small adm-btn--ghost" type="submit" name="remove" value="1"><?= e(__('Entfernen')) ?></button><?php endif; ?>
+        <noscript><button class="adm-btn adm-btn--small" type="submit"><?= e(__('Hochladen')) ?></button></noscript>
+      </div>
+    </div>
+  </div></div>
+</form>
 <?php if ($isShadow): // Schatten-Konto der Netzwerk-Administration: Anmeldedaten zentral ?>
 <section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
   <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-net"><?= e(__('Netzwerk')) ?></span></h2>

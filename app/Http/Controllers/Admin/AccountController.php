@@ -29,6 +29,30 @@ final class AccountController extends AdminController
     // ================================================================= Konto (angemeldet)
 
     /** Name des eigenen Kontos */
+    /** Profilbild hochladen oder entfernen (Core\Avatar) – auch für Netzwerk-Konten (gilt dann auf allen Websites) */
+    public function saveAvatar(Request $r): Response
+    {
+        $user = $this->auth($r);
+        if (!empty($r->post['remove'])) {
+            \Core\Avatar::remove($user);
+            return $this->back('/admin/account#profilbild', 'success', __('Profilbild entfernt.'));
+        }
+        $f = $r->files['avatar'] ?? null;
+        $err = is_array($f) && !is_array($f['name'] ?? null) ? \Core\Avatar::store($user, $f) : __('Bitte ein Bild auswählen.');
+        return $this->back('/admin/account#profilbild', $err ? 'error' : 'success', $err ?? __('Profilbild gespeichert.'));
+    }
+
+    /** Profilbild ausliefern – nur angemeldet, privat; ?v= macht die Adresse unveränderlich */
+    public function avatar(Request $r, string $id): Response
+    {
+        $this->auth($r);
+        $u = ctype_digit($id) ? app()->db->fetch('SELECT id, email FROM users WHERE id = ?', [(int) $id]) : null;
+        $f = $u ? \Core\Avatar::path((string) $u['email']) : '';
+        if ($f === '' || !is_file($f)) return new Response('', 404, ['Cache-Control' => 'private, no-store']);
+        return new Response((string) file_get_contents($f), 200, ['Content-Type' => 'image/webp',
+            'Cache-Control' => 'private, max-age=31536000, immutable', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
     public function saveProfile(Request $r): Response
     {
         $user = $this->auth($r);

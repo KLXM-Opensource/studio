@@ -61,7 +61,7 @@ $who = fn(array $u) => (string) ($u['name'] ?: $u['email']);
     <div class="set-list">
       <?php if (!$recent): ?><div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('Noch niemand angemeldet.')) ?></span></div></div><?php endif; ?>
       <?php foreach (array_slice($recent, 0, 5) as $u): ?>
-      <div class="set-row"><span class="set-avatar" aria-hidden="true"><?= e($initials($u)) ?></span><div class="set-row__main"><span class="set-row__label"><?= e($who($u)) ?></span><span class="set-row__sub"><?= e($roles[$u['role']]['name'] ?? $u['role']) ?></span></div>
+      <div class="set-row"><?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?><div class="set-row__main"><span class="set-row__label"><?= e($who($u)) ?></span><span class="set-row__sub"><?= e($roles[$u['role']]['name'] ?? $u['role']) ?></span></div>
         <div class="set-row__ctl"><?= e(date('d.m.Y H:i', strtotime((string) $u['last_login']))) ?></div></div>
       <?php endforeach; ?>
       <?php if ($never): ?>
