@@ -1,0 +1,6 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Seitenhintergrund „Aurora“: mehrere weiche Farbschleier (Akzent, zweite Markenfarbe, Zusatzfarbe) oben auf der Seite */
+.pagebg-aurora body{background-image:
+  radial-gradient(45rem 28rem at 8% -4rem,color-mix(in srgb,var(--f-a) 22%,transparent),transparent 70%),
+  radial-gradient(40rem 26rem at 58% -8rem,color-mix(in srgb,var(--f-b) 20%,transparent),transparent 70%),
+  radial-gradient(36rem 24rem at 100% 6rem,color-mix(in srgb,var(--f-c4) 16%,transparent),transparent 70%);background-repeat:no-repeat}

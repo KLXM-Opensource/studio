@@ -1,0 +1,4 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Karten „getönt“: zarte Fläche in Akzent hell, ohne Rahmen */
+.cards-tinted{--f-card:var(--f-a-soft,color-mix(in srgb,var(--f-a) 10%,var(--f-bg)));--f-card-bd:transparent;--f-card-sh:none}
+.cards-tinted :is(.bg-tint,.bg-muted){--f-card:var(--f-bg)}

@@ -1,0 +1,9 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Buttons „Neo-Brutalismus“: kräftige Kontur in Schriftfarbe, harter versetzter Schatten; beim Zeigen „eingedrückt“ */
+.btn-brutal .btn{border:2px solid var(--f-ink);box-shadow:4px 4px 0 var(--f-ink);transition:translate .12s,box-shadow .12s,background-color .15s}
+.btn-brutal .btn--primary{background:var(--f-a);color:var(--f-a-on)}
+.btn-brutal .btn--primary:hover{background:var(--f-a);color:var(--f-a-on)}
+.btn-brutal .btn--secondary{background:var(--f-bg);color:var(--f-ink)}
+.btn-brutal .btn:hover{translate:2px 2px;box-shadow:2px 2px 0 var(--f-ink)}
+.btn-brutal .btn:active{translate:4px 4px;box-shadow:0 0 0 var(--f-ink)}
+.btn-brutal :is(.bg-accent,.bg-dark,.bg-secondary,.on-media) .btn{border-color:var(--f-fg);box-shadow:4px 4px 0 var(--f-fg)}

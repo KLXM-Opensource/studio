@@ -1,0 +1,3 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Seitenhintergrund „Rasterlinien“: senkrechte Linien im Abstand der Inhaltsbreite (Spaltenraster wie in Editorial-Layouts) */
+.pagebg-lines body{background-image:linear-gradient(90deg,var(--f-line) 1px,transparent 1px);background-size:calc(min(100% - 2 * var(--f-gutter),var(--f-wrap)) / 4) 100%;background-position:center top;background-attachment:fixed}

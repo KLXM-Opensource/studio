@@ -148,3 +148,16 @@ if (/\bhh-(x?tall)\b/.test(html.className)) {
   addEventListener('scroll', upd, { passive: true });
   upd();
 }
+
+// „Nach oben“ (design: totop): sichtbar ab 600 px Scrollweg; Klick scrollt sanft nach oben und setzt den Fokus auf „Zum Inhalt springen“
+const totop = d.querySelector('[data-totop]');
+if (totop) {
+  const vis = () => totop.classList.toggle('is-on', scrollY > 600);
+  addEventListener('scroll', vis, { passive: true });
+  vis();
+  totop.addEventListener('click', e => {
+    e.preventDefault();
+    scrollTo({ top: 0, behavior: reduce.matches ? 'auto' : 'smooth' });
+    d.getElementById('top')?.focus({ preventScroll: true });
+  });
+}

@@ -1,7 +1,8 @@
 <?php
 /**
  * Zitat / Stimmen: single (Pull-Quote, große Schrift in Container-Einheiten) · grid (Mauerwerk mit CSS-Spalten,
- * column-width – keine Spaltenzahl) · reel (wischbares Band, scroll-snap; js/reel.js ergänzt Pfeile).
+ * column-width – keine Spaltenzahl) · reel (wischbares Band, scroll-snap; js/reel.js ergänzt Pfeile) ·
+ * marquee (Laufband wie bei Logos: Liste doppelt, zweite Hälfte aria-hidden; hält bei Maus/Fokus; ohne Bewegung umbrechend).
  * @var \Core\Block $b  @var array $d
  */
 $v = $b->variant() ?: 'single';
@@ -32,6 +33,20 @@ $person = function (array $it, int $i) use ($b): string {
     <blockquote class="pull__text"><p<?= $b->edit('items.0.text') ?>><?= nl2br(e($it['text']), false) ?></p></blockquote>
     <?= $person($it, 0) ?>
   </figure>
+  <?php elseif ($items && $v === 'marquee' && !is_editing()): ?>
+  <div class="marquee quotes-marquee" role="region" aria-label="<?= e(trim((string) ($d['title'] ?? '')) ?: lt('Stimmen')) ?>" tabindex="0">
+    <?php foreach ([false, true] as $dup): ?>
+    <ul class="marquee__track quotes--marquee<?= $dup ? ' marquee__track--dup' : '' ?>" role="list"<?= $dup ? ' aria-hidden="true"' : '' ?>>
+      <?php foreach ($items as $i => $it): ?>
+      <li class="quote card"><figure>
+        <?= icon('quotes', ['class' => 'quote__mark']) ?>
+        <blockquote class="quote__text"><p><?= nl2br(e($it['text']), false) ?></p></blockquote>
+        <?= $dup ? preg_replace('~ data-cms-edit="[^"]*"~', '', $person($it, $i)) : $person($it, $i) ?>
+      </figure></li>
+      <?php endforeach; ?>
+    </ul>
+    <?php endforeach; ?>
+  </div>
   <?php elseif ($items): ?>
   <ul class="<?= $v === 'reel' ? 'reel quotes--reel' : 'quotes' ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(trim((string) $d['title']) ?: lt('Stimmen')) . '"' : '' ?>>
     <?php foreach ($items as $i => $it): ?>

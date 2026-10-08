@@ -1,0 +1,5 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Karten „Neo-Brutalismus“: 2 px Kontur in Schriftfarbe, harter versetzter Schatten */
+.cards-brutal{--f-card:var(--f-bg);--f-card-bd:var(--f-ink);--f-card-sh:5px 5px 0 var(--f-ink)}
+.cards-brutal .card{border-width:2px}
+.cards-brutal :is(.feat--link,.tcard--link.card,.tile):hover{translate:-2px -2px;box-shadow:7px 7px 0 var(--f-ink)}

@@ -1,0 +1,6 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Farbige Abschnitte „als Flächen“: Abschnitte mit Hintergrund rücken vom Rand ab und bekommen große Ecken – moderner Karten-Look.
+   Übergänge (dividers) entfallen, weil die Flächen getrennt stehen. */
+.secs-inset main>.sec:is(.bg-tint,.bg-muted,.bg-accent,.bg-dark,.bg-secondary){margin:clamp(.5rem,1.5vw,1rem) clamp(.5rem,1.5vw,1rem);border-radius:clamp(1rem,2.4vw,2rem);overflow:clip}
+.secs-inset main>.sec:is(.bg-tint,.bg-muted,.bg-accent,.bg-dark,.bg-secondary)::before,.secs-inset main>.sec:is(.bg-tint,.bg-muted,.bg-accent,.bg-dark,.bg-secondary)::after{display:none}
+.secs-inset main>.sec:is(.bg-tint,.bg-muted,.bg-accent,.bg-dark,.bg-secondary)+.sec:is(.bg-tint,.bg-muted,.bg-accent,.bg-dark,.bg-secondary){margin-top:0}

@@ -19,6 +19,8 @@ html.em-italic .hl{font-style:italic;color:inherit}
 html.em-bold .hl{font-style:normal;font-weight:max(800,calc(var(--f-hw) + 200));color:inherit}
 html.em-marker .hl{font-style:normal;color:inherit;background:linear-gradient(transparent 58%,var(--f-a2) 58%, var(--f-a2) 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.06em}
 html.em-underline .hl{font-style:normal;color:inherit;text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:.09em;text-underline-offset:.14em}
+html.em-outline .hl{font-style:normal;color:transparent;-webkit-text-stroke:max(1px,.028em) var(--f-a);paint-order:stroke}
+@media (forced-colors:active){html.em-outline .hl{color:CanvasText;-webkit-text-stroke:0}}
 html.em-gradient .hl{font-style:normal;background:linear-gradient(90deg,var(--f-a),var(--f-b));-webkit-background-clip:text;background-clip:text;color:transparent}
 @media (forced-colors:active){html.em-gradient .hl{color:CanvasText;background:none}}
 
@@ -47,6 +49,11 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 .has-motion.hov-none :is(.feat--link,.tcard--link,.tile):hover{translate:none}
 .hov-none .tcard--link:hover .frame img{scale:1}
 
+.hov-zoom :is(.tcard--link,.tile,.feat--link) .frame img{transition:scale .8s cubic-bezier(.2,.7,.2,1)}
+.has-motion.hov-zoom :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-zoom :is(.tcard--link,.tile,.feat--link):hover .frame img{scale:1.06}
+@media (prefers-reduced-motion:reduce){.hov-zoom :is(.tcard--link,.tile,.feat--link):hover .frame img{scale:1}}
+
 /* Symbole (Merkmale u. a.): getönt (Standard), Kreis, Kontur, schlicht */
 .ic-circle .feat__ico{border-radius:50%}
 .ic-outline .feat__ico{background:transparent;box-shadow:inset 0 0 0 1px var(--f-line-strong);--ico-2-opacity:0}
@@ -69,6 +76,10 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
   .has-motion.js.mo-scale [data-reveal]{transition:opacity .6s cubic-bezier(.2,.7,.2,1),scale .6s cubic-bezier(.2,.7,.2,1)}
   .has-motion.js.mo-blur [data-reveal]:not(.is-in){translate:none;filter:blur(8px)}
   .has-motion.js.mo-blur [data-reveal]{transition:opacity .7s ease,filter .7s ease}
+  .has-motion.js.mo-clip [data-reveal]:not(.is-in){translate:none;opacity:1;clip-path:inset(0 0 100% 0)}
+  .has-motion.js.mo-clip [data-reveal]{transition:clip-path .8s cubic-bezier(.2,.7,.2,1),opacity .6s}
+  .has-motion.js.mo-clip [data-reveal].is-in{clip-path:inset(0 0 0 0)}
+  .has-motion.js.mo-slide [data-reveal]:not(.is-in){translate:-2rem 0}
 }
 
 /* ---------------------------------------------------------------- Kopf & Fuß
@@ -90,6 +101,8 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 :is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr{background:var(--f-zone);border-top-color:transparent;color:var(--f-muted)}
 
 /* Menüpunkte (nl-*) */
+.nl-dot :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){position:relative;text-decoration:none}
+.nl-dot :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link)::after{content:"";position:absolute;left:50%;bottom:.2rem;width:.35rem;height:.35rem;margin-left:-.175rem;border-radius:50%;background:var(--f-a)}
 .nl-underline .hnav__link:hover{background:none;color:var(--f-ink);text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:2px;text-underline-offset:.5em}
 .nl-pill .hnav__link{border-radius:999px;padding-inline:1rem}
 .nl-pill :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){background:var(--f-a-soft);color:var(--f-ink);text-decoration:none}
@@ -157,3 +170,16 @@ html.hdr-sticky.is-scrolled:is(.hh-tall,.hh-xtall){--hdr-h:4.25rem;--hdr-logo:2.
   html:is(.hh-tall,.hh-xtall) .hdr .brand__name{font-size:1.125rem}
 }
 @media (prefers-reduced-motion:reduce){html:is(.hh-tall,.hh-xtall) .hdr :is(.hdr__bar,.brand__logo img,.brand__mark,.brand__name){transition:none}}
+
+/* ---------------------------------------------------------------- Lesefortschritt (design: progress) – scroll-getrieben, ohne Skript */
+@supports (animation-timeline:scroll()){
+  html.has-progress body::before{content:"";position:fixed;inset:0 0 auto 0;z-index:200;height:3px;background:linear-gradient(90deg,var(--f-a),var(--f-b));transform-origin:0 50%;scale:0 1;animation:f-progress linear both;animation-timeline:scroll(root);pointer-events:none}
+}
+@keyframes f-progress{to{scale:1 1}}
+
+/* ---------------------------------------------------------------- „Nach oben“ (design: totop; Markup templates/layout.php, Sichtbarkeit site.js) */
+.totop{position:fixed;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));z-index:150;display:grid;place-items:center;width:3rem;height:3rem;border:1px solid var(--f-line);border-radius:50%;background:color-mix(in srgb,var(--f-bg) 88%,transparent);color:var(--f-ink);box-shadow:var(--f-shadow);backdrop-filter:blur(10px);text-decoration:none;opacity:0;translate:0 .75rem;pointer-events:none;transition:opacity .25s,translate .25s}
+.totop.is-on{opacity:1;translate:none;pointer-events:auto}
+.totop:hover{border-color:var(--f-a);color:var(--f-a-strong,var(--f-ink))}
+.totop .ico{font-size:1.25rem}
+@media (prefers-reduced-motion:reduce){.totop{transition:none}}

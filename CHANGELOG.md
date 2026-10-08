@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: moderne Varianten
+- **Buttons:** Farbverlauf mit Leuchten, Neo-Brutalismus. **Karten:** getönt, Verlaufsrahmen, Neo-Brutalismus.
+- **Seitenhintergrund:** Aurora (Farbschleier), Körnung (Grain), senkrechte Rasterlinien. **Farbige Abschnitte** als abgerundete Flächen.
+- **Betonung** als Konturschrift, **Karten beim Zeigen** mit Bild-Zoom, **Menüpunkte** mit Punkt, **Einblenden** als Aufdecken oder seitlich.
+- **Lesefortschritt** oben (ohne Skript) und Schaltfläche **„Nach oben“**; Zitat-Block als **Laufband**.
+- Zwei neue Vorlagen: **Software & Produkt · Aurora** und **Studio · Neo-Brutalismus** (Kontrast AA hell/dunkel geprüft).
+
 ### Warnungen im Menü auch an der Gruppe
 - Hat ein Unterpunkt der Einrichtung eine Warnung (Testumgebung aktiv, Schlüssel für verschlüsselte Anfragen fehlt), zeigt auch die
   Gruppe („System“, „Website“) den Punkt – auffällig bei zugeklappter Gruppe, mit Hinweis beim Darüberfahren und für Screenreader.

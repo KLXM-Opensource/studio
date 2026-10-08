@@ -1,0 +1,7 @@
+/* Theme „fluid“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
+/* Buttons „Farbverlauf mit Leuchten“: Akzent → zweite Markenfarbe, weicher Schein in der Akzentfarbe, beim Zeigen etwas heller */
+.btn-gradient .btn--primary{background:linear-gradient(120deg,var(--f-a),var(--f-b));color:var(--f-a-on);border-color:transparent;box-shadow:0 8px 24px -10px color-mix(in srgb,var(--f-a) 70%,transparent)}
+.btn-gradient .btn--primary:hover{background:linear-gradient(120deg,color-mix(in srgb,var(--f-a) 88%,#fff),color-mix(in srgb,var(--f-b) 88%,#fff));color:var(--f-a-on);box-shadow:0 12px 30px -10px color-mix(in srgb,var(--f-a) 80%,transparent)}
+.btn-gradient .btn--secondary{border-radius:999px}
+.btn-gradient :is(.bg-accent,.bg-dark,.bg-secondary,.on-media) .btn--primary{background:var(--f-btn-bg);color:var(--f-btn-ink);box-shadow:none}
+@media (forced-colors:active){.btn-gradient .btn--primary{background:ButtonText;color:ButtonFace}}

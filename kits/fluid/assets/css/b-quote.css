@@ -16,3 +16,17 @@
 .quote__role{display:block;color:var(--f-muted);font-size:var(--f-t-1)}
 .quotes--reel{--min:22rem}
 .quotes--reel .quote{margin:0;height:auto}
+
+/* Laufband (variant marquee): wie beim Logo-Block – Liste doppelt, läuft endlos, hält bei Maus/Fokus. Ohne Bewegung (Design oder
+   „Bewegung reduzieren“) stehen die Stimmen umbrechend nebeneinander. */
+.quotes-marquee{display:flex;overflow:hidden;gap:var(--f-s-l);outline-offset:4px}
+.quotes--marquee{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--f-s-l);margin:0;padding:0;list-style:none}
+.quotes--marquee .quote{flex:0 0 min(22rem,80vw);margin:0}
+.quotes-marquee .marquee__track--dup{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .has-motion .quotes--marquee{flex:none;flex-wrap:nowrap;align-items:stretch;animation:f-qmarquee 60s linear infinite}
+  .has-motion .quotes-marquee .marquee__track--dup{display:flex}
+  .has-motion .quotes-marquee:is(:hover,:focus-within,:focus) .quotes--marquee{animation-play-state:paused}
+  .has-motion .quotes-marquee{mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+}
+@keyframes f-qmarquee{to{translate:calc(-100% - var(--f-s-l)) 0}}

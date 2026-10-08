@@ -1,0 +1,1 @@
+.cards-gradient{--f-card-bd:transparent;--f-card-sh:0 10px 30px -18px var(--f-sh2,rgb(0 0 0/.25))}.cards-gradient .card{border:1.5px solid transparent;background:linear-gradient(var(--f-card),var(--f-card)) padding-box,linear-gradient(135deg,var(--f-a),var(--f-b)) border-box}@media(forced-colors:active){.cards-gradient .card{border-color:CanvasText}}

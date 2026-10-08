@@ -12,7 +12,7 @@ $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
 // Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten, Farbenfroh) – nur das Gewählte
 $optCss = [];
-foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette'] as $opt) {
+foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette', 'sections'] as $opt) {
     $file = 'css/opt-' . $opt . '-' . preg_replace('~[^a-z]~', '', (string) design($opt)) . '.css';
     if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
 }
@@ -68,7 +68,7 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 </head>
 <body class="<?= !empty($page['is_home']) ? 'is-home' : 'is-sub' ?>">
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
-<a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
+<a class="skip" id="top" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?>
 <?= notice_open('topnote') ?><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>
@@ -91,5 +91,6 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange aus */ ?>
 <?= header_actions_late() /* Kopfbereich-Aktionen: Paneel des Kontakt-Menüs – nicht renderblockierend */ ?>
 <?= notice_late('topnote') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>
+<?php if (design('totop')): /* „Nach oben“ (design: totop) – sichtbar ab etwas Scrollweg (site.js) */ ?><a class="totop" href="#top" data-totop aria-label="<?= e(lt('Nach oben')) ?>"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></a><?php endif; ?>
 </body>
 </html>
