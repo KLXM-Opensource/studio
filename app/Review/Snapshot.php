@@ -162,6 +162,8 @@ final class Snapshot
             'design' => __('Design'),
             'pick' => (($t = Tables::find((string) ($target['table'] ?? ''))) ? $t['name'] : (string) ($target['table'] ?? '')) . ' · ' . __('Auswahl'),
             'table' => (string) ($state['name'] ?? $id),
+            'push' => (string) ($state['title'] ?? __('Mitteilung')),
+            'source' => (($src = $id ? \Core\Sources\Sources::find((int) $id) : null) ? (string) $src['name'] : __('Externe Quelle')),
             default => '',
         };
     }
@@ -187,6 +189,8 @@ final class Snapshot
             'media' => ['alt' => __('Alt-Text'), 'title' => __('Anzeigename'), 'credit' => __('Fotonachweis'), 'decorative' => __('Dekorativ'),
                 'tags' => __('Tags'), 'focus' => __('Fokuspunkt'), 'i18n' => __('Übersetzungen'), 'crops' => __('Zuschnitte'), 'collections' => __('Sammlungen')],
             'table' => ['name' => __('Name'), 'singular' => __('Einzahl'), 'fields' => __('Felder')],
+            'push' => ['title' => __('Titel'), 'body' => __('Text'), 'link' => __('Ziel'), 'to' => __('Empfänger'), 'at' => __('Zeitpunkt'), 'state' => __('Status')],
+            'source' => ['sync' => __('Abgleich')],
             default => [],
         };
         if (($target['type'] ?? '') === 'entry' && ($t = Tables::find((string) ($target['table'] ?? '')))) {

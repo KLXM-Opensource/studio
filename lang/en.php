@@ -7013,4 +7013,10 @@ return [
     'niemandem zugewiesen' => 'not assigned',
     '{n} Anfragen' => '{n} requests',
     'Externe Quellen darf nur anlegen, wer das Recht „Externe Quellen verwalten“ hat.' => 'External sources can only be created with the “Manage external sources” permission.',
+    'Abgleich' => 'Sync',
+    'Mitteilung' => 'Notification',
+    'Mitteilung senden' => 'Send notification',
+    'Mitteilung zurückziehen' => 'Withdraw notification',
+    'Quelle abgleichen' => 'Sync source',
+    'sofort' => 'immediately',
 ];

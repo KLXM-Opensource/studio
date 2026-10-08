@@ -552,6 +552,8 @@ return function (Router $r): void {
     $r->patch('/api/v1/media/{id}', [Api::class, 'mediaUpdate']);
     $r->delete('/api/v1/media/{id}', [Api::class, 'mediaDelete']);
     $r->get('/api/v1/data', [Api::class, 'dataTables']);
+    $r->post('/api/v1/data', [Api::class, 'dataTableCreate']);   // Tabelle/Formular anlegen wie der Assistent (Core\Data\Wizard)
+    $r->get('/api/v1/data-templates', [Api::class, 'dataTemplates']);
     $r->get('/api/v1/data/{table}', [Api::class, 'dataEntries']);
     $r->post('/api/v1/data/{table}', [Api::class, 'dataCreate']);
     $r->get('/api/v1/data/{table}/occurrences', [Api::class, 'dataOccurrences']);
@@ -566,7 +568,14 @@ return function (Router $r): void {
     $r->get('/api/v1/kb', [\Core\Http\Controllers\SupportApiController::class, 'kb']);   // Wissensdatenbank (Core\Support)
     $r->get('/api/v1/search', [Api::class, 'search']);   // Website-Suche wie für Besucher (Core\Search)
     $r->get('/api/v1/requests', [Api::class, 'requests']);
+    $r->get('/api/v1/requests/assignees', [Api::class, 'requestAssignees']);
     $r->patch('/api/v1/requests/{id}', [Api::class, 'requestUpdate']);
+    $r->delete('/api/v1/requests/{id}', [Api::class, 'requestDelete']);
+    $r->get('/api/v1/push', [Api::class, 'push']);   // Mitteilungen (Core\Push): Kanäle, Zahlen, Verlauf
+    $r->post('/api/v1/push', [Api::class, 'pushSend']);
+    $r->post('/api/v1/push/{id}/cancel', [Api::class, 'pushCancel']);
+    $r->get('/api/v1/sources', [Api::class, 'sources']);   // Externe Quellen (Core\Sources)
+    $r->post('/api/v1/sources/{id}/sync', [Api::class, 'sourceSync']);
     // Prüf-Ebene (Core\Review): Stand eingereichter Änderungen dieses Tokens
     $r->get('/api/v1/changes', [Api::class, 'changes']);
     $r->get('/api/v1/changes/{id}', [Api::class, 'change']);

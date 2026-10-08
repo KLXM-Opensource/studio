@@ -159,6 +159,10 @@ final class CmsService
             'forms' => array_map(fn($k) => ['key' => $k, 'enabled' => Forms::enabled($k), 'mode' => Forms::mode($k), 'table' => Forms::table($k)['handle'] ?? null], array_keys($theme->forms())),
             'inbox_tables' => array_column(\Core\Data\Inbox::tables(), 'handle'),
             'encryption_ready' => FormCrypto::ready(),
+            // Testumgebung: Website gesperrt für Suchmaschinen, E-Mails umgeleitet, keine Push-Mitteilungen an Besucher
+            'environment' => environment(), 'staging' => environment() !== 'production', 'domain' => (string) parse_url(absolute_url('/'), PHP_URL_HOST),
+            'modules' => ['push' => \Core\Push\Compose::available(), 'sources' => \Core\Sources\Sources::enabled(), 'requests' => \Core\Data\Inbox::available(),
+                'data_forms' => \Core\Data\DataForms::available(), 'search' => \Core\Features::on('search', false)],
             'hint' => 'Inhaltsänderungen werden als Entwurf gespeichert. Mit publish_page (bzw. POST /pages/{id}/publish) veröffentlichen.',
         ];
     }
@@ -800,9 +804,10 @@ final class CmsService
     public function mediaList(string|array|null $f = null): array
     {
         $f = is_array($f) ? $f : ['kind' => $f === 'image' ? 'image' : ''];
-        $f = array_intersect_key($f, ['kind' => 1, 'q' => 1, 'tag' => 1, 'collection' => 1, 'noalt' => 1, 'missing_lang' => 1, 'notitle' => 1, 'nocaptions' => 1, 'notranscript' => 1]);
-        // Prüf-Filter: Wahrheitswerte auch als "1"/"true" (REST-Query), missing_lang = Sprachkürzel (Bilder ohne Alt-Text in dieser Sprache)
-        foreach (['noalt', 'notitle', 'nocaptions', 'notranscript'] as $k) {
+        $f = array_intersect_key($f, ['kind' => 1, 'q' => 1, 'tag' => 1, 'collection' => 1, 'noalt' => 1, 'missing_lang' => 1, 'notitle' => 1, 'nocaptions' => 1, 'notranscript' => 1, 'unused' => 1]);
+        // Prüf-Filter: Wahrheitswerte auch als "1"/"true" (REST-Query), missing_lang = Sprachkürzel (Bilder ohne Alt-Text in dieser Sprache),
+        // unused = nirgends verwendet (wie Mediathek → „Nicht verwendet“)
+        foreach (['noalt', 'notitle', 'nocaptions', 'notranscript', 'unused'] as $k) {
             if (isset($f[$k])) $f[$k] = filter_var($f[$k], FILTER_VALIDATE_BOOLEAN);
         }
         if (($f['kind'] ?? '') === 'all') unset($f['kind']);
@@ -975,7 +980,7 @@ final class CmsService
             'public_form' => \Core\Data\DataForms::enabled($t) ? site_url() . url('/formular/' . $t['handle']) : null,
             'requests' => site_url() . url('/api/v1/requests?table=' . $t['handle']),
             'hint' => 'Eingangs-Tabelle: Inhalte Ende-zu-Ende verschlüsselt, nur Metadaten über /requests; anlegen nur über das öffentliche Formular.',
-        ] : [
+        ] + self::tableExtras($t) : [
             // icon: Symbolname (Phosphor duotone, Sprite /assets/icons/{datei}.svg#i-{icon}, Datei laut icons-map.json; ältere Tabellen ggf. ein Zeichen)
             'handle' => $t['handle'], 'name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'kind' => 'content',
             'entries' => \Core\Data\Entries::count($t, ['status' => 'all']),
@@ -1002,7 +1007,30 @@ final class CmsService
                 'sources' => \Core\Data\Shared::SOURCES, 'display' => array_diff_key(\Core\Data\Shared::localConfig($t['shared']['key']), ['detail_page_id' => 1]),
                 'hint' => 'Schreiben nur eigene Einträge (origin_site = ' . site()->key . '). Lesen: ?source=site (Standard, wie auf der Website), own, owner, members, all.',
             ] : null,
-        ], \Core\Data\Tables::all());
+        ] + self::tableExtras($t), \Core\Data\Tables::all());
+    }
+
+    /**
+     * Zweck, Schutz und Einsetzen einer Tabelle (wie „Felder & Einstellungen“ → Verschlüsselung bzw. Einsetzen):
+     * purpose content|mail|inbox|registration|internal|source · protection none|system|both|mail ·
+     * placement: passender Block (für add_block / POST /pages/{id}/blocks) und Seiten, die die Tabelle schon zeigen.
+     */
+    private static function tableExtras(array $t): array
+    {
+        $purpose = \Core\Data\Purpose::of($t);
+        $block = \Core\Data\Placement::blockType($t);
+        return [
+            'purpose' => $purpose, 'purpose_label' => (string) (\Core\Data\Purpose::all()[$purpose]['label'] ?? $purpose),
+            'protection' => \Core\Data\Inbox::is($t) ? \Core\Data\Delivery::mode($t) : 'none',
+            'placement' => [
+                'block' => $block, 'block_label' => $block ? \Core\Data\Placement::blockLabel($block) : null,
+                'block_data' => $block ? \Core\Data\Placement::blockData($t, $block) : null,
+                'used_on' => array_map(fn($u) => ['page' => $u['id'], 'title' => $u['title'], 'status' => $u['status'], 'url' => $u['url'] ? absolute_url($u['url']) : null,
+                    'blocks' => $u['blocks'], 'template' => $u['template']], \Core\Data\Placement::usages($t)),
+                'hint' => $block === null ? 'Interne Liste: erscheint nicht auf der Website.'
+                    : 'Einsetzen: Block „' . $block . '“ mit data.table = „' . $t['handle'] . '“ auf einer Seite einfügen (add_block bzw. POST /pages/{id}/blocks), dann veröffentlichen.',
+            ],
+        ];
     }
 
     /** Wiederholbare Gruppe: Unterfelder und Anzahl (Wert = Array von Objekten {unterfeld: wert}) – sonst null */
@@ -1278,6 +1306,52 @@ final class CmsService
         return array_slice($out, 0, 500);
     }
 
+    /** Eingangs-Tabelle einer Anfrage; ohne table wird die ID in allen gesucht (mehrdeutig → 409) */
+    private function requestTable(int $id, ?string $table): array
+    {
+        $hits = array_values(array_filter($this->inboxTables($table), fn($t) => \Core\Data\Inbox::find($t, $id) !== null));
+        if (!$hits) throw new ApiError(404, 'Anfrage nicht gefunden.');
+        if (count($hits) > 1) {
+            throw new ApiError(409, 'Die ID kommt in mehreren Eingangs-Tabellen vor – bitte table angeben: ' . implode(', ', array_column($hits, 'handle')) . '.');
+        }
+        return $hits[0];
+    }
+
+    /** Personen, denen Anfragen dieser Tabelle zugewiesen werden können (Recht requests.read für die Tabelle) */
+    public function requestAssignees(?string $table = null): array
+    {
+        $out = [];
+        foreach ($this->inboxTables($table) as $t) {
+            $roles = \Core\Permissions::roles();
+            $out[$t['handle']] = array_values(array_map(fn($u) => ['id' => (int) $u['id'], 'name' => (string) ($u['name'] ?: $u['email']), 'email' => (string) $u['email']],
+                array_filter(app()->db->fetchAll('SELECT id, name, email, role FROM users ORDER BY name, email'),
+                    fn($u) => \Core\Permissions::allows($roles[$u['role']] ?? null, 'requests.read', $t['handle']))));
+        }
+        return $out;
+    }
+
+    /** Anfrage zuweisen: $user = Benutzer-ID oder E-Mail, null/'' = Zuweisung entfernen */
+    public function requestAssign(int $id, int|string|null $user, ?string $table = null): array
+    {
+        $t = $this->requestTable($id, $table);
+        $uid = null;
+        if ($user !== null && $user !== '' && $user !== 0) {
+            $list = $this->requestAssignees($t['handle'])[$t['handle']];
+            foreach ($list as $u) if ($u['id'] === (int) $user || strcasecmp($u['email'], (string) $user) === 0) $uid = $u['id'];
+            if ($uid === null) throw new ApiError(422, 'Diese Person darf die Anfragen von „' . $t['name'] . '“ nicht lesen. Möglich: ' . (implode(', ', array_column($list, 'email')) ?: '–') . '.');
+        }
+        \Core\Data\Inbox::assign($t, $id, $uid);
+        return ['id' => $id, 'table' => $t['handle'], 'assignee' => $uid];
+    }
+
+    /** Anfrage endgültig löschen (wie in der Verwaltung; protokolliert in inbox_log) */
+    public function requestDelete(int $id, ?string $table = null): array
+    {
+        $t = $this->requestTable($id, $table);
+        \Core\Data\Inbox::delete($t, [$id]);
+        return ['deleted' => $id, 'table' => $t['handle']];
+    }
+
     /** Status setzen; ohne table wird die ID in allen Eingangs-Tabellen gesucht (mehrdeutig → 409) */
     public function requestStatus(int $id, string $status, ?string $table = null): array
     {
@@ -1298,5 +1372,143 @@ final class CmsService
             throw new ApiError(409, $e->getMessage());
         }
         return ['id' => $id, 'table' => $hits[0]['handle'], 'status' => $status];
+    }
+
+    // ================================================================= Mitteilungen (Web Push, Core\Push)
+
+    private function pushOn(): void
+    {
+        if (!\Core\Push\Compose::available()) throw new ApiError(403, 'Die Funktion „Mitteilungen“ (Push) ist auf dieser Website ausgeschaltet.');
+    }
+
+    /** Kanäle (mit Zahl der Abonnenten), aktuelle Zahlen und die letzten Mitteilungen */
+    public function pushInfo(int $limit = 30): array
+    {
+        $this->pushOn();
+        $channels = [];
+        foreach (\Core\Push\Channels::all() as $topic => $c) {
+            $channels[] = ['topic' => (string) $topic, 'label' => \Core\Push\Channels::label((string) $topic), 'subscribers' => \Core\Push\Channels::subscribers((string) $topic),
+                'archived' => !empty($c['archived'])] + array_intersect_key($c, ['name' => 1, 'public' => 1, 'kind' => 1, 'description' => 1]);
+        }
+        $rows = app()->db->fetchAll("SELECT * FROM push_messages WHERE kind != 'test' ORDER BY id DESC LIMIT " . max(1, min(200, $limit)));
+        return [
+            'visitors_allowed' => \Core\Push\Push::visitorsAllowed(),
+            'channels' => $channels,
+            'roles' => array_map(fn($r) => (string) ($r['name'] ?? ''), \Core\Permissions::roles()),
+            'stats' => \Core\Push\Stats::current(),
+            'messages' => array_map(fn($m) => ['id' => (int) $m['id'], 'title' => (string) $m['title'], 'kind' => (string) $m['kind'], 'state' => \Core\Push\Compose::state($m),
+                'to' => \Core\Push\Compose::summary($m), 'created_at' => $m['created_at'], 'scheduled_at' => $m['scheduled_at'] ? date('c', (int) $m['scheduled_at']) : null,
+                'recipients' => (int) $m['recipients'], 'sent' => (int) $m['sent'], 'failed' => (int) $m['failed']], $rows),
+            'hint' => 'Senden mit send_push (POST /push): title, body, link (page:ID, Pfad oder Adresse dieser Website), topics und/oder roles/users, optional at (geplant). Bei Prüf-Modus wird die Mitteilung erst nach Freigabe verschickt.',
+        ];
+    }
+
+    /** Mitteilung senden oder planen ($in wie Verwaltung → Mitteilungen → Verfassen; at = ISO-Zeitpunkt für „geplant“) */
+    public function pushSend(array $in): array
+    {
+        $this->pushOn();
+        $form = ['title' => $in['title'] ?? '', 'body' => $in['body'] ?? '', 'link' => $in['link'] ?? '', 'image' => $in['image'] ?? 0,
+            'topics' => (array) ($in['topics'] ?? []), 'roles' => (array) ($in['roles'] ?? []), 'users' => (array) ($in['users'] ?? []),
+            'when' => !empty($in['at']) ? 'later' : 'now', 'at' => (string) ($in['at'] ?? '')];
+        [$d, $errors] = \Core\Push\Compose::validate($form);
+        if ($errors) throw new ApiError(422, implode(' ', $errors));
+        $preview = ['title' => $d['title'], 'body' => $d['body'], 'link' => $d['url'], 'to' => \Core\Push\Compose::summary(['targets_json' => json_encode($d['targets']), 'kind' => 'manual']),
+            'at' => $d['at'] ? date('c', $d['at']) : __('sofort')];
+        if (($g = $this->gate(__FUNCTION__, [$in], ['type' => 'push', 'id' => null], fn() => $preview)) !== null) return $g['__gate'];
+        $id = \Core\Push\Compose::create($d, $this->userId());
+        $reach = \Core\Push\Compose::reach($d['targets']);
+        return ['id' => $id, 'state' => $d['at'] ? 'scheduled' : 'sending', 'reach' => $reach] + $preview;
+    }
+
+    /** Geplante Mitteilung zurückziehen */
+    public function pushCancel(int $id): array
+    {
+        $this->pushOn();
+        if (($g = $this->gate(__FUNCTION__, [$id], ['type' => 'push', 'id' => $id], fn() => ['state' => 'canceled'])) !== null) return $g['__gate'];
+        if (!\Core\Push\Compose::cancel($id)) throw new ApiError(409, 'Nur geplante Mitteilungen lassen sich zurückziehen.');
+        return ['id' => $id, 'state' => 'canceled'];
+    }
+
+    // ================================================================= Externe Quellen (Core\Sources)
+
+    private function sourcesOn(): void
+    {
+        if (!\Core\Sources\Sources::enabled()) throw new ApiError(403, 'Die Funktion „Externe Quellen“ ist auf dieser Website ausgeschaltet.');
+    }
+
+    private static function sourceOut(array $s): array
+    {
+        $log = \Core\Sources\Sources::logs($s['id'], 1)[0] ?? null;
+        return ['id' => $s['id'], 'name' => (string) $s['name'], 'format' => (string) $s['format'], 'url' => (string) $s['url'], 'active' => $s['active'],
+            'table' => $s['table']['handle'] ?? null, 'items' => $s['items'], 'schedule' => $s['options']['schedule'] ?? null,
+            'last_run' => $log ? array_intersect_key($log, array_flip(['started_at', 'finished_at', 'ok', 'message', 'created', 'updated', 'hidden', 'deleted', 'failed', 'via'])) : null];
+    }
+
+    /** Quellen (ohne Zugangsdaten) mit letztem Abgleich */
+    public function sourcesList(): array
+    {
+        $this->sourcesOn();
+        return array_map([self::class, 'sourceOut'], \Core\Sources\Sources::all());
+    }
+
+    /** Quelle jetzt abgleichen (wie „Jetzt abrufen“; höchstens 30 Abrufe je Stunde und Quelle) */
+    public function sourceSync(int $id): array
+    {
+        $this->sourcesOn();
+        $src = \Core\Sources\Sources::find($id) ?? throw new ApiError(404, 'Quelle nicht gefunden.');
+        if (!$src['table']) throw new ApiError(409, 'Die Quelle ist noch keiner Tabelle zugeordnet – bitte in der Verwaltung einrichten.');
+        if (($g = $this->gate(__FUNCTION__, [$id], ['type' => 'source', 'id' => $id], fn() => ['sync' => (string) $src['name']])) !== null) return $g['__gate'];
+        $limiter = new \Core\RateLimiter(app()->db);
+        $key = 'sources:sync:' . $src['id'];
+        if ($limiter->tooMany($key, 30, 3600)) throw new ApiError(429, 'Zu viele Abrufe in kurzer Zeit – bitte einige Minuten warten.');
+        $limiter->hit($key);
+        @set_time_limit(300);
+        $stats = \Core\Sources\Sync::run($src, 'manual', ['force' => true]);
+        return ['id' => $id, 'source' => self::sourceOut(\Core\Sources\Sources::find($id) ?? $src)] + array_diff_key($stats, ['details' => 1]);
+    }
+
+    // ================================================================= Tabelle oder Formular anlegen (wie der Assistent, Core\Data\Wizard)
+
+    /** Zwecke (mit Verfügbarkeit) und Vorlagen je Zweck */
+    public function tableTemplates(): array
+    {
+        $presets = \Core\Http\Controllers\Admin\DataController::presets();
+        $out = [];
+        foreach (\Core\Data\Purpose::all() as $k => $p) {
+            $out[] = ['purpose' => $k, 'label' => (string) $p['label'], 'description' => (string) ($p['lead'] ?? ''), 'unavailable' => \Core\Data\Purpose::unavailable($k),
+                'templates' => array_map(fn($key) => ['template' => $key, 'name' => (string) $presets[$key]['name'],
+                    'fields' => array_map(fn($f) => (string) $f['label'] . ' (' . (string) ($f['type'] ?? 'text') . ')', (array) ($presets[$key]['fields'] ?? []))],
+                    \Core\Data\Purpose::presetKeys($k, $presets))];
+        }
+        return ['purposes' => $out, 'hint' => 'Anlegen mit create_table (POST /data): purpose, optional template, name, fields [{label, type, required, options}], detail, to, mode, max, retention, notify, receipt. Externe Quellen richtet man in der Verwaltung ein.'];
+    }
+
+    /**
+     * Tabelle oder Formular anlegen – gleiche Prüfung wie der Assistent (Wizard::check + Tables::validate), Detailseiten-Vorlage bei Inhalten.
+     * $in: purpose, template (Vorlage, leer = leer beginnen), name, singular, icon, fields (ersetzt die Felder der Vorlage), detail, list,
+     *      to, mode (system|both|mail), retention, max, notify, receipt, push, route
+     */
+    public function tableCreate(array $in): array
+    {
+        $purpose = (string) ($in['purpose'] ?? '');
+        if (!\Core\Data\Purpose::valid($purpose) || $purpose === 'source') throw new ApiError(422, 'purpose muss content, mail, inbox, registration oder internal sein (externe Quellen in der Verwaltung).');
+        if ($why = \Core\Data\Purpose::unavailable($purpose)) throw new ApiError(403, $why);
+        $tpl = (string) ($in['template'] ?? '');
+        $presets = \Core\Http\Controllers\Admin\DataController::presets();
+        if ($tpl !== '' && !in_array($tpl, \Core\Data\Purpose::presetKeys($purpose, $presets), true)) {
+            throw new ApiError(422, 'Vorlage „' . $tpl . '“ passt nicht zu „' . $purpose . '“. Möglich: ' . implode(', ', \Core\Data\Purpose::presetKeys($purpose, $presets)) . '.');
+        }
+        $st = \Core\Data\Wizard::start($purpose, $tpl);
+        if (!empty($in['fields']) && is_array($in['fields'])) $st['fields'] = \Core\Data\Wizard::fieldRows(array_values($in['fields']), $st);
+        $st = \Core\Data\Wizard::apply($st, array_intersect_key($in, array_flip(['name', 'singular', 'icon', 'detail', 'list', 'receipt', 'push', 'mode', 'notify', 'to', 'retention', 'max', 'route'])));
+        $errors = \Core\Data\Wizard::check($st);
+        if ($errors) throw new ApiError(422, implode(' ', $errors));
+        $preview = ['name' => $st['name'], 'singular' => $st['singular'], 'fields' => implode(', ', array_column(array_filter($st['fields'], fn($f) => $f['on']), 'label'))];
+        if (($g = $this->gate(__FUNCTION__, [$in], ['type' => 'table', 'id' => null], fn() => $preview)) !== null) return $g['__gate'];
+        $r = \Core\Data\Wizard::create($st);
+        if ($r['errors']) throw new ApiError(422, implode(' ', array_map('strval', $r['errors'])));
+        $t = $r['table'];
+        return ['handle' => $t['handle'], 'id' => $t['handle'], 'name' => $t['name'], 'kind' => \Core\Data\Tables::isInbox($t) ? 'inbox' : 'content',
+            'admin' => site_url() . url('/admin/data/' . $t['handle'] . '/schema')] + self::tableExtras($t);
     }
 }

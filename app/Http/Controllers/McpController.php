@@ -242,7 +242,8 @@ final class McpController
             $schema(['kind' => $str('Dateiart', ['enum' => ['image', 'pdf', 'video', 'audio', 'all']]), 'q' => $str('Suchbegriff (Name, Titel, Alt-Text, Tag)'),
                 'tag' => $str('nur mit diesem Tag'), 'collection' => $int('nur aus dieser Sammlung (ID)'), 'noalt' => ['type' => 'boolean', 'description' => 'nur Bilder ohne Alt-Text'],
                 'missing_lang' => $str('nur Bilder ohne Alt-Text in dieser weiteren Sprache (Kürzel, z. B. en)'), 'notitle' => ['type' => 'boolean', 'description' => 'nur Dateien ohne Titel'],
-                'nocaptions' => ['type' => 'boolean', 'description' => 'nur Videos ohne veröffentlichte Untertitel'], 'notranscript' => ['type' => 'boolean', 'description' => 'nur Audio ohne veröffentlichtes Transkript']]),
+                'nocaptions' => ['type' => 'boolean', 'description' => 'nur Videos ohne veröffentlichte Untertitel'], 'notranscript' => ['type' => 'boolean', 'description' => 'nur Audio ohne veröffentlichtes Transkript'],
+                'unused' => ['type' => 'boolean', 'description' => 'nur Dateien, die nirgends verwendet werden (Seiten, Einträge, Einstellungen, Links)']]),
             $ro, false, fn($a) => ['media' => $s->mediaList($a)] + $s->mediaMeta());
         $add('list_data_tables', 'Datentabellen', 'Eigene Inhaltstypen (z. B. Aktuelles, Team, Produkte) mit Feldern, Typen und Auswahlwerten. Einträge erscheinen über den Block „data_list“ und auf Detailseiten. Tabellen mit kind = inbox sind Eingänge für verschlüsselte Anfragen: nur Metadaten (list_requests), keine Inhalte, kein Anlegen/Ändern. search = Such-Einstellungen der Tabelle (enabled, fields: Gewichtung je Feld high|normal|low|off, facets, title/summary/image/date, label, future, exclude). icon = Symbolname (Phosphor duotone, z. B. calendar-dots).',
             $schema([]), $ro, false, fn() => ['tables' => $s->dataTables()]);
@@ -392,6 +393,49 @@ final class McpController
             $schema(['id' => $int('Anfrage-ID'), 'status' => $str('neu|in_bearbeitung|erledigt', ['enum' => ['neu', 'in_bearbeitung', 'erledigt']]),
                 'table' => $str('Kurzname der Eingangs-Tabelle (aus list_requests)')], ['id', 'status']), $rw + ['idempotentHint' => true], true,
             fn($a) => $s->requestStatus((int) $a['id'], (string) $a['status'], isset($a['table']) ? (string) $a['table'] : null));
+        $add('assign_request', 'Anfrage zuweisen', 'Anfrage einer Person zuweisen (Benutzer-ID oder E-Mail; leer = Zuweisung entfernen). Wer möglich ist: list_request_assignees.',
+            $schema(['id' => $int('Anfrage-ID'), 'user' => $str('Benutzer-ID oder E-Mail; leer = niemand'), 'table' => $str('Kurzname der Eingangs-Tabelle (aus list_requests)')], ['id']),
+            $rw + ['idempotentHint' => true], true, fn($a) => $s->requestAssign((int) $a['id'], ($a['user'] ?? '') === '' ? null : $a['user'], isset($a['table']) ? (string) $a['table'] : null));
+        $add('list_request_assignees', 'Wer kann Anfragen bearbeiten?', 'Personen je Eingangs-Tabelle, denen Anfragen zugewiesen werden können.',
+            $schema(['table' => $str('Kurzname der Eingangs-Tabelle (optional)')]), $ro, false, fn($a) => $s->requestAssignees(isset($a['table']) ? (string) $a['table'] : null));
+        $add('delete_request', 'Anfrage löschen', 'Anfrage endgültig löschen (z. B. Spam oder nach Übernahme ins eigene System). Nicht rückgängig zu machen; wird protokolliert.',
+            $schema(['id' => $int('Anfrage-ID'), 'table' => $str('Kurzname der Eingangs-Tabelle (aus list_requests)')], ['id']), $del, true,
+            fn($a) => $s->requestDelete((int) $a['id'], isset($a['table']) ? (string) $a['table'] : null));
+
+        // Tabellen und Formulare anlegen (wie Daten → Neue Tabelle, Core\Data\Wizard)
+        $add('list_table_templates', 'Vorlagen für neue Tabellen', 'Zwecke (Inhalte, nur E-Mail, Anfragen sammeln, Anmeldung, intern) mit Verfügbarkeit und den passenden Vorlagen samt Feldern.',
+            $schema([]), $ro, false, fn() => $s->tableTemplates());
+        $add('create_table', 'Tabelle oder Formular anlegen', 'Legt eine Datentabelle bzw. ein Formular an wie der Assistent: purpose content (Inhalte mit Liste/Detailseite) | mail (Formular, das nur eine E-Mail schickt) | inbox (verschlüsselte Anfragen) | registration (Anmeldung mit Teilnehmerliste) | internal (interne Liste). Danach mit add_block einsetzen (siehe placement im Ergebnis).',
+            $schema(['purpose' => $str('Zweck', ['enum' => ['content', 'mail', 'inbox', 'registration', 'internal']]), 'template' => $str('Vorlage aus list_table_templates (leer = leer beginnen)'),
+                'name' => $str('Name, z. B. „Aktuelles“ oder „Kontakt“'), 'singular' => $str('Einzahl, z. B. „Meldung“'),
+                'fields' => ['type' => 'array', 'description' => 'Felder (ersetzen die der Vorlage): [{label, type, required, options}] – type z. B. text, textarea, email, tel, date, select, checkbox, number, image, richtext', 'items' => ['type' => 'object', 'additionalProperties' => true]],
+                'detail' => $bool('Inhalte: eigene Detailseite je Eintrag'), 'to' => $str('mail/inbox: E-Mail-Empfänger (bei Zustellung per E-Mail Pflicht)'),
+                'mode' => $str('Zustellung bei inbox: system (nur verschlüsselt speichern) | both (+ E-Mail) | mail (nur E-Mail)', ['enum' => ['system', 'both', 'mail']]),
+                'max' => $int('registration: höchstens so viele Anmeldungen (0 = unbegrenzt)'), 'retention' => $int('inbox: erledigte Anfragen nach Tagen löschen'),
+                'notify' => $str('Benachrichtigung an (E-Mail)'), 'receipt' => $bool('Bestätigung an die Absender (braucht ein E-Mail-Feld)')], ['purpose', 'name']),
+            $rw, true, fn($a) => $s->tableCreate($a));
+
+        // Mitteilungen (Web Push)
+        if (\Core\Push\Compose::available()) {
+            $add('push_overview', 'Mitteilungen', 'Push-Kanäle mit Zahl der Abonnenten, aktuelle Zahlen und die letzten Mitteilungen (Status: gesendet, geplant, abgebrochen).',
+                $schema(['limit' => $int('Anzahl der letzten Mitteilungen (Standard 30)')]), $ro, false, fn($a) => $s->pushInfo((int) ($a['limit'] ?? 30)));
+            $add('send_push', 'Mitteilung senden', 'Push-Mitteilung an Abonnenten von Kanälen (topics aus push_overview) und/oder Personen der Verwaltung (roles, users). Mit at geplant. In der Testumgebung gehen keine Mitteilungen an Besucher. Im Prüf-Modus erst nach Freigabe.',
+                $schema(['title' => $str('Titel (höchstens 120 Zeichen)'), 'body' => $str('Text (höchstens 240 Zeichen)'), 'link' => $str('Ziel: page:ID, Pfad oder Adresse dieser Website (leer = Startseite)'),
+                    'image' => $int('Bild aus der Mediathek (ID, optional)'), 'topics' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Kanäle (topic aus push_overview)'],
+                    'roles' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Rollen der Verwaltung (Schlüssel aus push_overview → roles)'],
+                    'users' => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Benutzer-IDs'], 'at' => $str('Zeitpunkt für geplanten Versand (ISO, z. B. 2026-10-12T09:00)')], ['title']),
+                ['readOnlyHint' => false, 'destructiveHint' => false, 'openWorldHint' => true], true, fn($a) => $s->pushSend($a));
+            $add('cancel_push', 'Geplante Mitteilung zurückziehen', 'Eine geplante, noch nicht gesendete Mitteilung abbrechen.',
+                $schema(['id' => $int('Mitteilungs-ID aus push_overview')], ['id']), $del, true, fn($a) => $s->pushCancel((int) $a['id']));
+        }
+
+        // Externe Quellen (Feeds, APIs, OpenImmo)
+        if (\Core\Sources\Sources::enabled()) {
+            $add('list_sources', 'Externe Quellen', 'Eingerichtete Quellen (Feed, API, OpenImmo) mit Zieltabelle, Zahl der Einträge und letztem Abgleich – ohne Zugangsdaten.',
+                $schema([]), $ro, false, fn() => $s->sourcesList());
+            $add('sync_source', 'Quelle abgleichen', 'Quelle jetzt abrufen und die Einträge der Zieltabelle abgleichen (neu, geändert, entfernt). Höchstens 30 Abrufe je Stunde.',
+                $schema(['id' => $int('Quellen-ID aus list_sources')], ['id']), ['readOnlyHint' => false, 'destructiveHint' => false, 'openWorldHint' => true], true, fn($a) => $s->sourceSync((int) $a['id']));
+        }
 
         // Support & Wissensdatenbank (Core\Support\Api)
         if (\Core\Features::on('support', false)) {

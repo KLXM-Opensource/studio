@@ -34,7 +34,21 @@
   </table></div>
   <p>Seiten akzeptieren beim Anlegen und Ändern <code>parent</code>, <code>menu</code>, <code>nav_title</code>, <code>position</code>; Unterseiten per ID adressieren. Einträge: <code>GET /data/{tabelle}/{id}</code> nimmt ID oder Slug, <code>PATCH</code>/<code>DELETE</code> nur die numerische ID.</p>
   <h3>Beispiele</h3>
-  <pre><code># Englische Fassung der Startseite anlegen und einen Text übersetzen
+  <pre><code># Kontaktformular anlegen, das nur eine E-Mail schickt, und auf der Seite „Kontakt“ einsetzen
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"purpose":"mail","template":"contact","name":"Kontakt","to":"info@example.de"}' <?= e($api) ?>/data
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"type":"data_form","data":{"table":"kontakt"},"publish":true}' <?= e($api) ?>/pages/kontakt/blocks
+
+# Mitteilung an alle Abonnenten des Kanals „news“ für Montag 9 Uhr planen
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"title":"Neu: Sommerprogramm","body":"Jetzt anmelden","link":"/programm","topics":["ch:news"],"at":"2026-10-12T09:00"}' <?= e($api) ?>/push
+
+# Anfrage zuweisen und auf „in Bearbeitung“ setzen
+curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"status":"in_bearbeitung","assignee":"praxis@example.de"}' <?= e($api) ?>/requests/42
+
+# Englische Fassung der Startseite anlegen und einen Text übersetzen
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"lang":"en"}' <?= e($api) ?>/pages/home/translate
 curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"data":{"title":"Welcome"}}' "<?= e($api) ?>/pages/home/blocks/BLOCK_ID?lang=en"

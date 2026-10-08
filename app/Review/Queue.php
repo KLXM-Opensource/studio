@@ -28,7 +28,7 @@ final class Queue
     /** Schreibaktionen, die eine Einreichung wieder einspielen darf (öffentliche Methoden von CmsService) */
     public const METHODS = ['settingsUpdate', 'designUpdate', 'pageCreate', 'pageUpdate', 'pageDelete', 'pageTranslate', 'publish', 'discard', 'restore',
         'blocksReplace', 'blockAdd', 'blockUpdate', 'blockRemove', 'blockMove', 'mediaUpdate', 'mediaCrop', 'mediaDelete',
-        'dataSave', 'dataDelete', 'dataTranslate', 'dataPick'];
+        'dataSave', 'dataDelete', 'dataTranslate', 'dataPick', 'pushSend', 'pushCancel', 'sourceSync', 'tableCreate'];
 
     /** Position des Arguments „publish“ (Blöcke) – „Bearbeiten & übernehmen“ übernimmt nur als Entwurf */
     private const PUBLISH_ARG = ['blocksReplace' => 2, 'blockAdd' => 6, 'blockUpdate' => 5, 'blockRemove' => 2, 'blockMove' => 3];
@@ -63,6 +63,8 @@ final class Queue
             'mediaUpdate' => __('Medien-Infos ändern'), 'mediaCrop' => __('Bild zuschneiden'), 'mediaDelete' => __('Datei löschen'),
             'mediaUpload' => __('Datei hochladen'), 'dataSave' => __('Eintrag speichern'), 'dataDelete' => __('Eintrag löschen'),
             'dataTranslate' => __('Eintrag übersetzen'), 'dataPick' => __('Auswahl setzen'), 'requestStatus' => __('Anfrage-Status setzen'),
+            'pushSend' => __('Mitteilung senden'), 'pushCancel' => __('Mitteilung zurückziehen'), 'sourceSync' => __('Quelle abgleichen'),
+            'tableCreate' => __('Tabelle anlegen'),
             'aiPageCreate' => __('Seite generieren'), 'aiTableCreate' => __('Tabelle generieren'), 'aiPageText' => __('Text in Seite einfügen'),
             'aiPageTranslate' => __('Übersetzung übernehmen'), 'aiAlt' => __('Alt-Text übernehmen'), 'aiSeo' => __('SEO-Beschreibung übernehmen'),
             default => $action,
@@ -91,7 +93,7 @@ final class Queue
     {
         return match ($t) {
             'page' => __('Seite'), 'entry' => __('Eintrag'), 'media' => __('Medien'), 'settings' => app()->theme->settingsTitle(),
-            'design' => __('Design'), 'pick' => __('Auswahl (geteilt)'), 'table' => __('Tabelle'), default => $t,
+            'design' => __('Design'), 'pick' => __('Auswahl (geteilt)'), 'table' => __('Tabelle'), 'push' => __('Mitteilung'), 'source' => __('Externe Quelle'), default => $t,
         };
     }
 
@@ -152,9 +154,10 @@ final class Queue
     /** Neu angelegte Gegenstände: ID aus dem Ergebnis übernehmen */
     private static function resolve(array $target, mixed $out): array
     {
-        if (($target['id'] ?? null) === null && is_array($out) && isset($out['id']) && in_array($target['type'], ['page', 'entry', 'media'], true)) {
+        if (($target['id'] ?? null) === null && is_array($out) && isset($out['id']) && in_array($target['type'], ['page', 'entry', 'media', 'push'], true)) {
             $target['id'] = (int) $out['id'];
         }
+        if (($target['id'] ?? null) === null && is_array($out) && isset($out['handle']) && $target['type'] === 'table') $target['id'] = (string) $out['handle'];
         return $target;
     }
 

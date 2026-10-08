@@ -146,7 +146,7 @@ final class OpenApi
                         'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['position'], 'properties' => ['position' => ['type' => 'integer']] + $publish]),
                         'responses' => ['200' => $ok($ref('Page'))] + $err])],
                 '/media' => [
-                    'get' => $op('Medien', 'Mediathek – Filter: ?kind=image|pdf|video|audio, ?q=, ?tag=, ?collection=ID, ?noalt=1, ?missing_lang=en, ?notitle=1, ?nocaptions=1, ?notranscript=1', ['responses' => ['200' => $ok(['type' => 'array', 'items' => $ref('Media')])] + $err]),
+                    'get' => $op('Medien', 'Mediathek – Filter: ?kind=image|pdf|video|audio, ?q=, ?tag=, ?collection=ID, ?noalt=1, ?missing_lang=en, ?notitle=1, ?nocaptions=1, ?notranscript=1, ?unused=1 (nirgends verwendet)', ['responses' => ['200' => $ok(['type' => 'array', 'items' => $ref('Media')])] + $err]),
                     'post' => $op('Medien', 'Datei hochladen (multipart „file“ + „alt“ oder JSON {filename, base64, alt})', [
                         'requestBody' => ['required' => true, 'content' => [
                             'multipart/form-data' => ['schema' => ['type' => 'object', 'properties' => ['file' => ['type' => 'string', 'format' => 'binary']] + $upOpt]],
@@ -173,7 +173,16 @@ final class OpenApi
                             'rect' => ['type' => ['object', 'null'], 'properties' => ['x' => ['type' => 'number'], 'y' => ['type' => 'number'], 'w' => ['type' => 'number'], 'h' => ['type' => 'number']]]]]),
                         'responses' => ['200' => $ok($ref('Media'))] + $err]),
                 ],
-                '/data' => ['get' => $op('Daten', 'Datentabellen mit Feld-Schema (kind: content | inbox – Eingangs-Tabellen nur mit Metadaten; GET /data/{inbox} liefert Status/Vorgangsnummer, POST/PATCH/DELETE → 403)', ['responses' => ['200' => $ok(['type' => 'array'])] + $err])],
+                '/data' => ['get' => $op('Daten', 'Datentabellen mit Feld-Schema (kind: content | inbox – Eingangs-Tabellen nur mit Metadaten; GET /data/{inbox} liefert Status/Vorgangsnummer, POST/PATCH/DELETE → 403). Je Tabelle: purpose (content|mail|inbox|registration|internal|source), protection (none|system|both|mail), placement (passender Block, block_data, Seiten mit der Tabelle)', ['responses' => ['200' => $ok(['type' => 'array'])] + $err]),
+                    'post' => $op('Daten', 'Tabelle oder Formular anlegen wie der Assistent (Vorlagen: GET /data-templates). Ergebnis mit placement zum Einsetzen per POST /pages/{id}/blocks', [
+                        'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['purpose', 'name'], 'properties' => [
+                            'purpose' => ['type' => 'string', 'enum' => ['content', 'mail', 'inbox', 'registration', 'internal']], 'template' => ['type' => 'string'], 'name' => ['type' => 'string'],
+                            'singular' => ['type' => 'string'], 'fields' => ['type' => 'array', 'items' => ['type' => 'object', 'properties' => ['label' => ['type' => 'string'], 'type' => ['type' => 'string'],
+                                'required' => ['type' => 'boolean'], 'options' => ['type' => 'string']]]], 'detail' => ['type' => 'boolean'], 'to' => ['type' => 'string'],
+                            'mode' => ['type' => 'string', 'enum' => ['system', 'both', 'mail']], 'max' => ['type' => 'integer'], 'retention' => ['type' => 'integer'],
+                            'notify' => ['type' => 'string'], 'receipt' => ['type' => 'boolean']]]),
+                        'responses' => ['201' => $ok(['type' => 'object'])] + $err])],
+                '/data-templates' => ['get' => $op('Daten', 'Zwecke mit Verfügbarkeit (unavailable = Grund) und Vorlagen samt Feldern für POST /data', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
                 '/data/{table}' => [
                     'parameters' => [['name' => 'table', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'string'], 'description' => 'Kurzname, z. B. aktuelles']],
                     'get' => $op('Daten', 'Einträge – ?q=, ?status=published|draft|all, ?filter[feld]=wert, ?sort=, ?dir=asc|desc, ?limit=, ?offset=; geteilte Tabellen zusätzlich ?source= (site = wie auf der Website [Standard], own, owner, members, own_owner, all, featured) – Einträge tragen dann origin_site, _foreign, _origin, _canonical, _pick', [
@@ -251,10 +260,25 @@ final class OpenApi
                 '/requests' => ['get' => $op('Anfragen','Anfragen aller Eingangs-Tabellen – nur Metadaten (id, table, ref, status, created_at …); Inhalte bleiben Ende-zu-Ende verschlüsselt (?status=neu|in_bearbeitung|erledigt|alle, ?table=, ?ciphertext=1)', [
                     'responses' => ['200' => $ok(['type' => 'array'])] + $err])],
                 '/requests/{id}' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
-                    'patch' => $op('Anfragen', 'Status setzen (protokolliert); table angeben, wenn die ID in mehreren Eingangs-Tabellen vorkommt (sonst 409)', [
-                        'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['status'], 'properties' => ['status' => ['type' => 'string', 'enum' => ['neu', 'in_bearbeitung', 'erledigt']],
-                            'table' => ['type' => 'string']]]),
-                        'responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                    'patch' => $op('Anfragen', 'Status setzen und/oder zuweisen (protokolliert); table angeben, wenn die ID in mehreren Eingangs-Tabellen vorkommt (sonst 409). assignee: Benutzer-ID oder E-Mail (GET /requests/assignees), null = entfernen', [
+                        'requestBody' => ['required' => true] + $json(['type' => 'object', 'properties' => ['status' => ['type' => 'string', 'enum' => ['neu', 'in_bearbeitung', 'erledigt']],
+                            'assignee' => ['type' => ['integer', 'string', 'null']], 'table' => ['type' => 'string']]]),
+                        'responses' => ['200' => $ok(['type' => 'object'])] + $err]),
+                    'delete' => $op('Anfragen', 'Anfrage endgültig löschen (protokolliert; ?table= bei mehrdeutiger ID)', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                '/requests/assignees' => ['get' => $op('Anfragen', 'Personen je Eingangs-Tabelle, denen Anfragen zugewiesen werden können (?table=)', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                // Mitteilungen (Core\Push)
+                '/push' => ['get' => $op('Mitteilungen', 'Kanäle mit Abonnenten, aktuelle Zahlen, letzte Mitteilungen (?limit=30); 403, wenn die Funktion aus ist', ['responses' => ['200' => $ok(['type' => 'object'])] + $err]),
+                    'post' => $op('Mitteilungen', 'Mitteilung senden oder planen (at = ISO-Zeitpunkt). Ziel link: page:ID, Pfad oder Adresse dieser Website. Empfänger: topics und/oder roles/users. Testumgebung: keine Besucher', [
+                        'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['title'], 'properties' => ['title' => ['type' => 'string', 'maxLength' => 120], 'body' => ['type' => 'string', 'maxLength' => 240],
+                            'link' => ['type' => 'string'], 'image' => ['type' => 'integer'], 'topics' => ['type' => 'array', 'items' => ['type' => 'string']], 'roles' => ['type' => 'array', 'items' => ['type' => 'string']],
+                            'users' => ['type' => 'array', 'items' => ['type' => 'integer']], 'at' => ['type' => 'string', 'format' => 'date-time']]]),
+                        'responses' => ['201' => $ok(['type' => 'object'])] + $err])],
+                '/push/{id}/cancel' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
+                    'post' => $op('Mitteilungen', 'Geplante Mitteilung zurückziehen', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                // Externe Quellen (Core\Sources)
+                '/sources' => ['get' => $op('Quellen', 'Externe Quellen (ohne Zugangsdaten) mit Zieltabelle und letztem Abgleich; 403, wenn die Funktion aus ist', ['responses' => ['200' => $ok(['type' => 'array'])] + $err])],
+                '/sources/{id}/sync' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
+                    'post' => $op('Quellen', 'Quelle jetzt abgleichen (höchstens 30 je Stunde, sonst 429); Ergebnis: Statistik des Abgleichs', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
                 // Prüf-Ebene (Core\Review\Queue)
                 '/changes' => ['get' => $op('Freigabe', 'Einreichungen und protokollierte Änderungen DIESES Tokens, neueste zuerst (?status=pending_review|applied|rejected); review_mode zeigt den Modus des Tokens', [
                     'parameters' => [['name' => 'status', 'in' => 'query', 'required' => false, 'schema' => ['type' => 'string', 'enum' => ['pending_review', 'applied', 'rejected']]]],

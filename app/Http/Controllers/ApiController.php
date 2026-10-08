@@ -298,11 +298,71 @@ final class ApiController
             isset($r->query['table']) ? (string) $r->query['table'] : null));
     }
 
+    /** Status und/oder Zuweisung (assignee: Benutzer-ID oder E-Mail, null = entfernen) */
     public function requestUpdate(Request $r, string $id): Response
     {
         $b = $this->body($r);
         $table = (string) ($b['table'] ?? $r->query['table'] ?? '');
-        return $this->run($r, true, fn(CmsService $s) => $s->requestStatus((int) $id, (string) ($b['status'] ?? ''), $table !== '' ? $table : null));
+        return $this->run($r, true, function (CmsService $s) use ($b, $id, $table) {
+            $tb = $table !== '' ? $table : null;
+            if (!array_key_exists('status', $b) && !array_key_exists('assignee', $b)) throw new \Core\Api\ApiError(422, 'status und/oder assignee angeben.');
+            $out = [];
+            if (array_key_exists('status', $b)) $out = $s->requestStatus((int) $id, (string) $b['status'], $tb);
+            if (array_key_exists('assignee', $b)) $out = $s->requestAssign((int) $id, $b['assignee'], $tb) + $out;
+            return $out;
+        });
+    }
+
+    public function requestDelete(Request $r, string $id): Response
+    {
+        $table = (string) ($r->query['table'] ?? '');
+        return $this->run($r, true, fn(CmsService $s) => $s->requestDelete((int) $id, $table !== '' ? $table : null));
+    }
+
+    public function requestAssignees(Request $r): Response
+    {
+        return $this->run($r, false, fn(CmsService $s) => $s->requestAssignees(isset($r->query['table']) ? (string) $r->query['table'] : null));
+    }
+
+    // ------------------------------------------------------------------ Mitteilungen (Push)
+
+    public function push(Request $r): Response
+    {
+        return $this->run($r, false, fn(CmsService $s) => $s->pushInfo((int) ($r->query['limit'] ?? 30)));
+    }
+
+    public function pushSend(Request $r): Response
+    {
+        return $this->run($r, true, fn(CmsService $s) => $s->pushSend($this->body($r)), 201);
+    }
+
+    public function pushCancel(Request $r, string $id): Response
+    {
+        return $this->run($r, true, fn(CmsService $s) => $s->pushCancel((int) $id));
+    }
+
+    // ------------------------------------------------------------------ Externe Quellen
+
+    public function sources(Request $r): Response
+    {
+        return $this->run($r, false, fn(CmsService $s) => $s->sourcesList());
+    }
+
+    public function sourceSync(Request $r, string $id): Response
+    {
+        return $this->run($r, true, fn(CmsService $s) => $s->sourceSync((int) $id));
+    }
+
+    // ------------------------------------------------------------------ Tabelle anlegen
+
+    public function dataTemplates(Request $r): Response
+    {
+        return $this->run($r, false, fn(CmsService $s) => $s->tableTemplates());
+    }
+
+    public function dataTableCreate(Request $r): Response
+    {
+        return $this->run($r, true, fn(CmsService $s) => $s->tableCreate($this->body($r)), 201);
     }
 
     // ------------------------------------------------------------------ Datentabellen

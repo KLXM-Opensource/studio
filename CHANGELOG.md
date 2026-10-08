@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### REST-API und MCP auf dem Stand der neuen Funktionen
+- **Tabellen:** `purpose` (Zweck), `protection` (Verschlüsselung: none/system/both/mail) und `placement` (passender Block, Seiten mit der
+  Tabelle) je Tabelle; **Tabelle oder Formular anlegen** wie der Assistent (`POST /data`, `GET /data-templates`; MCP `create_table`,
+  `list_table_templates`) mit denselben Prüfungen.
+- **Anfragen:** zuweisen (`PATCH /requests/{id}` mit `assignee`, MCP `assign_request`, `list_request_assignees`) und löschen
+  (`DELETE /requests/{id}`, MCP `delete_request`).
+- **Mitteilungen (Push):** Kanäle, Zahlen und Verlauf (`GET /push`, MCP `push_overview`), senden oder planen (`POST /push`, `send_push`),
+  geplante zurückziehen (`cancel_push`). Im Prüf-Modus erst nach Freigabe; in der Testumgebung keine Besucher.
+- **Externe Quellen:** Liste mit letztem Abgleich (`GET /sources`, `list_sources`) und Abgleich auslösen (`POST /sources/{id}/sync`, `sync_source`).
+- **Medien:** Filter `unused` (nirgends verwendet). **Website-Übersicht:** Umgebung (`environment`, `staging`), Domain und eingeschaltete Module.
+- Prüf-Ebene: neue Aktionen erscheinen verständlich unter „Eingereicht“ und lassen sich übernehmen.
+
 ### Anfragen wie ein Mailprogramm
 - **Anfragen** aufgebaut wie Feedback bzw. Mail: Postfächer in der Seitenleiste (Eingänge mit Zahl neuer Anfragen, Neu ·
   In Bearbeitung · Erledigt · Alle, Einrichtung), Liste in der Mitte, gewählte Anfrage rechts. Nach „Entschlüsseln“ zeigt die
