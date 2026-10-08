@@ -141,6 +141,11 @@ body.has-drawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):n
 /* Formatierungsleiste: Shadow DOM der Ebene (editor.shadow.css) */
 [data-edit].is-rich{min-height:1.6em;outline-offset:6px}
 [data-edit].is-rich:focus{box-shadow:0 0 0 2px #314164;background:rgba(246,201,168,.12);border-radius:6px}
+/* Absatzformate im direkt bearbeiteten Text erkennbar machen: „Hervorgehoben“ (größer) bzw. „Klein“ – nur im Bearbeiten-Modus */
+[data-edit].is-rich :is(p.t-lead,p.t-small){position:relative;box-shadow:-10px 0 0 -8px rgba(49,65,100,.45)}
+[data-edit].is-rich:is(:hover,:focus-within) :is(p.t-lead,p.t-small)::after{position:absolute;top:-1.4em;left:0;padding:1px 6px;border-radius:4px;background:#24314B;color:#fff;font:600 10.5px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:2}
+[data-edit].is-rich:is(:hover,:focus-within) p.t-lead::after{content:"Format: Hervorgehoben (größer)"}
+[data-edit].is-rich:is(:hover,:focus-within) p.t-small::after{content:"Format: Klein"}
 
 /* Aus dem Datensatz gebundene Stellen in der Vorlage */
 .cms-editor [data-bound]{outline:1.5px dashed #6F86C0;outline-offset:3px;border-radius:3px;cursor:default}

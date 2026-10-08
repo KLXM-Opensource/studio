@@ -217,6 +217,11 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .rte-area{min-height:90px;padding:10px 12px;outline:none;font-size:15px}
 .rte[data-mode=inline] .rte-area{min-height:44px}
 .rte-area p{margin:0 0 .7em}
+/* Absatzformate sichtbar machen (nur im Editor): „Hervorgehoben“, „Klein“ – Streifen links und Etikett, damit klar ist, warum ein Absatz anders aussieht */
+.rte-area :is(p.t-lead,p.t-small){position:relative;padding-left:10px;box-shadow:inset 2px 0 0 color-mix(in srgb,var(--adm-a) 45%,transparent)}
+.rte-area :is(p.t-lead,p.t-small)::after{position:absolute;top:-.15em;right:0;padding:0 5px;border-radius:4px;background:var(--adm-fill);color:var(--adm-t3);font:600 10px/1.6 var(--adm-font);letter-spacing:.03em;pointer-events:none}
+.rte-area p.t-lead::after{content:"Hervorgehoben"}
+.rte-area p.t-small::after{content:"Klein"}
 .rte-area h3{font-size:17px;margin:.8em 0 .4em}
 .rte-area ul,.rte-area ol{margin:.4em 0 .7em;padding-left:1.5em}
 .rte-area ul{list-style:"— "}
