@@ -3224,6 +3224,7 @@ return [
     'Größerer Text, keine Überschrift' => 'Larger text, not a heading',
     'Kleingedrucktes, Anmerkungen' => 'Fine print, remarks',
     'Abgesetzter Kasten' => 'Set-off box',
+    'Favoriten & Website wechseln' => 'Favourites & switch website',
     'Anderes Bild wählen …' => 'Choose another image …',
     'Bitte ein JPG-, PNG-, WebP- oder GIF-Bild wählen.' => 'Please choose a JPG, PNG, WebP or GIF image.',
     'Das Bild hat zu viele Pixel.' => 'The image has too many pixels.',

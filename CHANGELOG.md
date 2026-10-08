@@ -11,6 +11,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   nur angemeldet über `/admin/avatar/{id}`), ohne Bild **Initialen** auf fester Farbe (`Core\Avatar`). Auch in der Benutzerverwaltung.
 - Seitenleiste: Werkzeugzeile mit Suche, Website ansehen, **Avatar (Konto)** und **Abmelden**; Netzwerk-Konten ohne doppeltes „Verwaltung“; Fuß mit Avatar, Name/Rolle und Abmelden-Symbol.
 - Bereich **Mitteilungen** mit eigener Farbe (Koralle) wie Medien, Daten und Anfragen.
+- Bereiche mit eigenem Menü (Medien, Daten, Anfragen …): Favoriten und Netzwerk-Umschalter weichen dem Bereichsmenü; der **Stern** neben „Website ansehen“ (oder „‹ Hauptmenü“) blendet sie wieder ein.
 
 ### Mediathek: PDFs mit Vorschau der ersten Seite
 - Mit **pdftoppm** (poppler-utils) auf dem Server zeigen Kacheln, Liste, Auswahl und Medienfelder bei PDFs die 1. Seite als Vorschaubild

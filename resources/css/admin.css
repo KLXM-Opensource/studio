@@ -1550,6 +1550,10 @@ a.adm-drill__back{text-decoration:none}
 .adm-drill .fx-more:hover,.adm-drill .fx-add:hover{background:var(--adm-press);color:var(--adm-ink)}
 @media (min-width:901px){.is-drill .adm-side > nav{display:none}}
 .is-drill.is-drill-nav .adm-side > nav{display:block}
+/* Bereichsmenü hat Vorrang: Favoriten und Netzwerk-Umschalter ausgeblendet, Stern (data-drill-peek) oder „‹ Hauptmenü“ holen sie zurück */
+.is-drill:not(.is-drill-peek):not(.is-drill-nav) .adm-side > :is(.adm-fav,.adm-netswitch){display:none}
+.adm-brand-tools .adm-drill-peek[aria-expanded=true]{background:var(--adm-hover);color:var(--drill-mark,var(--adm-ink))}
+.is-drill-nav .adm-drill-peek{display:none}
 .is-drill.is-drill-nav .adm-drill > :not(.adm-drill__back){display:none}
 .is-drill .fx--library{grid-template-columns:minmax(0,1fr) 320px;height:calc(100vh - 52px)}   /* nur die Mediathek selbst – nicht der Auswahldialog (fx--pick) */
 .is-drill .fx.is-info-hidden{grid-template-columns:minmax(0,1fr) 0}

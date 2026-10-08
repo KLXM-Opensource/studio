@@ -137,6 +137,8 @@ if ($user && ($req = app()->request)) {
       <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
       <?php endif; ?>
       <a class="adm-site-open" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?>" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?></a>
+      <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
+      <button type="button" class="adm-site-open adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
       <?php // Konto (Profilbild oder Initialen, Core\Avatar) und Abmelden – rechts in der Werkzeugzeile ?>
       <a class="adm-me-ava" href="<?= e(url('/admin/account')) ?>" title="<?= e(($user['name'] ?: $user['email']) . ' · ' . __('Konto')) ?>" aria-label="<?= e(__('Mein Konto')) ?>"><?= \Core\Avatar::html($user, 'adm-ava adm-ava--s') ?></a>
       <form class="adm-brand-tools__out" method="post" action="<?= e(url('/admin/logout')) ?>"><?= csrf_field() ?><button type="submit" class="adm-site-open" title="<?= e(__('Abmelden')) ?>" aria-label="<?= e(__('Abmelden')) ?>"><?= icon('sign-out') ?></button></form>
