@@ -1511,7 +1511,7 @@ final class Media
             'license' => (string) ($m['license'] ?? ''), 'rights_until' => (string) ($m['rights_until'] ?? ''), 'consent' => (string) ($m['consent'] ?? ''),
             'deleted_at' => $m['deleted_at'] ?? null,
             'purge_at' => !empty($m['deleted_at']) && self::trashDays() > 0 ? date('Y-m-d', strtotime((string) $m['deleted_at'] . ' +' . self::trashDays() . ' days')) : null,
-            'large' => (int) $m['size'] > self::largeBytes(),
+            'oversize' => (int) $m['size'] > self::largeBytes(),
             'shrinkable' => $isImg && !in_array($m['mime'], [Svg::MIME, 'image/gif'], true),
             'missing_alt' => $isImg && trim((string) $m['alt']) === '' && empty($m['decorative']),
             'i18n' => (object) self::translations($m),

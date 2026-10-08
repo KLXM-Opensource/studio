@@ -1124,7 +1124,7 @@ class Finder {
         <button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-mpurge>${esc(t('{n} endgültig löschen', { n: items.length }))}</button></div>`
       : this.mode === 'library' ? `<div class="fx-i-actions">
         ${this.src.type === 'collection' ? '<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-muncol>Aus Sammlung entfernen</button>' : ''}
-        ${items.some(m => m.large && m.shrinkable) && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-mshrink>${esc(t('Große Bilder verkleinern'))}</button>` : ''}
+        ${items.some(m => m.oversize && m.shrinkable) && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-mshrink>${esc(t('Große Bilder verkleinern'))}</button>` : ''}
         <button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-mdel>${items.length} Dateien löschen</button></div>` : ''}`;
     const i = this.$info;
     lazyThumbs($('.fx-stack', i));
@@ -1142,7 +1142,7 @@ class Finder {
     });
     $('[data-mshrink]', i)?.addEventListener('click', async e => {
       e.target.disabled = true; e.target.textContent = t('Verkleinert …');
-      try { const r = await api.bulk({ ids: items.filter(m => m.large && m.shrinkable).map(m => m.id), action: 'shrink' }); toast(r.message); this.load(); } catch (ex) { toast(ex.message); }
+      try { const r = await api.bulk({ ids: items.filter(m => m.oversize && m.shrinkable).map(m => m.id), action: 'shrink' }); toast(r.message); this.load(); } catch (ex) { toast(ex.message); }
     });
     if (this.mode === 'library' && !this.ro) hook('multi', this, items, i, UI);
   }
@@ -1206,7 +1206,7 @@ class Finder {
     if (m.duplicates?.length) out.push(`<section class="fx-i-sec fx-i-dupe"><h3>${ico('copy')} ${esc(t('Gleiche Datei mehrfach'))}</h3>
       <p class="fx-i-hint">${esc(t('Diese Datei gibt es noch {n}×. Nicht verwendete Kopien können weg; verwendete zuerst durch diese ersetzen.', { n: m.duplicates.length }))}</p>
       <ul class="fx-usage">${m.duplicates.map(x => `<li><button type="button" class="adm-link" data-goto="${x.id}">${esc(x.name)} <small>#${x.id}</small></button></li>`).join('')}</ul></section>`);
-    if (m.large) out.push(`<section class="fx-i-sec fx-i-large"><h3>${ico('warning')} ${esc(t('Große Datei ({size})', { size: m.size }))}</h3>
+    if (m.oversize) out.push(`<section class="fx-i-sec fx-i-large"><h3>${ico('warning')} ${esc(t('Große Datei ({size})', { size: m.size }))}</h3>
       <p class="fx-i-hint">${esc(m.shrinkable ? t('Bilder lassen sich sparsamer speichern – Aussehen und Verwendungen bleiben.') : t('Bitte vor dem Hochladen verkleinern (z. B. PDF komprimieren, Video kürzer bzw. niedriger auflösen) und mit „Datei ersetzen“ austauschen.'))}</p>
       ${m.shrinkable && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-shrink>${esc(t('Verkleinern'))}</button>` : ''}</section>`);
     if (RIGHTS !== 'off' && !m.deleted_at) {
