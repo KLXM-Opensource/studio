@@ -34,6 +34,11 @@ final class Media
     private const NOTRANSCRIPT_SQL = "m.mime LIKE 'audio/%' AND (m.transcripts IS NULL OR m.transcripts NOT LIKE '%\"status\":\"published\"%')";
 
     /** Ab jetzt im Pool (bzw. mit null wieder in der Website) arbeiten – gilt für die laufende Anfrage */
+    /** Rechte-Prüfungen: ohne Lizenz/Quelle; Nutzungsrecht abgelaufen oder läuft in 30 Tagen ab (Parameter: Datum +30 Tage); Fotos ohne Angabe zur Einwilligung */
+    private const NORIGHTS_SQL = "(m.license IS NULL OR m.license = '')";
+    private const EXPIRING_SQL = "(m.rights_until IS NOT NULL AND m.rights_until != '' AND m.rights_until <= ?)";
+    private const NOCONSENT_SQL = "(m.mime LIKE 'image/%' AND m.mime != 'image/svg+xml' AND (m.consent IS NULL OR m.consent = '' OR m.consent = 'no'))";
+
     public static function usePool(?string $key): void
     {
         self::$pool = $key;
@@ -189,6 +194,20 @@ final class Media
         if (!empty($f['notitle'])) {
             $where[] = "(m.title IS NULL OR m.title = '')";
         }
+        // Papierkorb: nur gelöschte bzw. (sonst immer) nur nicht gelöschte Dateien
+        $where[] = !empty($f['trash']) ? 'm.deleted_at IS NOT NULL' : 'm.deleted_at IS NULL';
+        // Doppelte Dateien (gleiche Prüfsumme), zu große Dateien, Rechte (Lizenz fehlt, Nutzungsrecht läuft ab, Einwilligung fehlt)
+        if (!empty($f['dupes'])) {
+            self::ensureHashes();
+            $where[] = 'm.hash IN (SELECT hash FROM media WHERE hash IS NOT NULL AND deleted_at IS NULL' . (self::$pool === null ? ' AND pool_ref IS NULL' : '') . ' GROUP BY hash HAVING COUNT(*) > 1)';
+        }
+        if (!empty($f['large'])) {
+            $where[] = 'm.size > ?';
+            $params[] = self::largeBytes();
+        }
+        if (!empty($f['norights'])) $where[] = self::NORIGHTS_SQL;
+        if (!empty($f['expiring'])) { $where[] = self::EXPIRING_SQL; $params[] = date('Y-m-d', strtotime('+30 days')); }
+        if (!empty($f['noconsent'])) $where[] = self::NOCONSENT_SQL;
         // Nicht verwendet (nur Mediathek der Website – bei geteilten Medien ist die Verwendung auf anderen Websites unbekannt)
         if (!empty($f['unused']) && self::$pool === null) {
             $used = array_keys(self::usedIds());
@@ -210,7 +229,7 @@ final class Media
             $where[] = 'm.pool_ref IS NULL';
         }
         $sql .= ($where ? ' WHERE ' . implode(' AND ', $where) : '')
-            . (!empty($f['collection']) ? ' ORDER BY ci.sort, m.id DESC' : ' ORDER BY m.id DESC');
+            . (!empty($f['collection']) ? ' ORDER BY ci.sort, m.id DESC' : (!empty($f['dupes']) ? ' ORDER BY m.hash, m.id' : ' ORDER BY m.id DESC'));
         $rows = self::db()->fetchAll($sql, $params);
         if (self::$pool === null && !empty($f['collection'])) {
             $rows = array_values(array_filter(array_map(fn($r) => empty($r['pool_ref']) ? $r : self::find((int) $r['id']), $rows)));
@@ -257,7 +276,7 @@ final class Media
             'tags' => self::tagString($opt['tags'] ?? ''),
             'decorative' => !empty($opt['decorative']) ? 1 : 0,
             'focus_x' => 50, 'focus_y' => 50, 'created_at' => now(), 'updated_at' => now(),
-        ]);
+        ] + self::rightsFields($opt));
         if (!empty($opt['collection'])) {
             self::addToCollection((int) $opt['collection'], [$id]);
         }
@@ -303,6 +322,27 @@ final class Media
         Extensions::emit('media.replaced', self::find($id), $old);
         VideoThumbs::queue(self::find($id));   // neues Video → neues Vorschaubild
         return [self::find($id), null];
+    }
+
+    /** Rechte-Angaben aus Eingaben: license, rights_until (Y-m-d), consent (yes|none|no) – nur übergebene Schlüssel */
+    public static function rightsFields(array $in): array
+    {
+        $out = [];
+        if (array_key_exists('license', $in)) $out['license'] = mb_substr(trim(strip_tags((string) $in['license'])), 0, 250) ?: null;
+        if (array_key_exists('rights_until', $in)) $out['rights_until'] = preg_match('~^\d{4}-\d{2}-\d{2}$~', (string) $in['rights_until']) ? (string) $in['rights_until'] : null;
+        if (array_key_exists('consent', $in)) $out['consent'] = in_array($in['consent'], ['yes', 'none', 'no'], true) ? (string) $in['consent'] : null;
+        return $out;
+    }
+
+    /** Pflichtangaben bei „Rechte: Pflicht“ – Fehlertext oder null */
+    public static function rightsMissing(array $row): ?string
+    {
+        if (self::rightsMode() !== 'required') return null;
+        if (trim((string) ($row['license'] ?? '')) === '') return __('Bitte Lizenz bzw. Quelle angeben (Grundeinstellungen: Bildrechte sind Pflicht).');
+        if (str_starts_with((string) ($row['mime'] ?? ''), 'image/') && ($row['mime'] ?? '') !== Svg::MIME && !in_array($row['consent'] ?? '', ['yes', 'none'], true)) {
+            return __('Bitte angeben, ob abgebildete Personen eingewilligt haben (oder „keine Personen erkennbar“).');
+        }
+        return null;
     }
 
     /** Prüft, konvertiert und speichert die Datei. Liefert Spalten für die DB. */
@@ -402,6 +442,7 @@ final class Media
             'file' => $rel, 'original_name' => mb_substr($clean, 0, 180),
             'width' => $width, 'height' => $height, 'mime' => $mime,
             'size' => filesize(self::dir() . "/$rel"), 'variants_json' => json_encode($variants),
+            'hash' => sha1_file(self::dir() . "/$rel") ?: null,
         ], null];
     }
 
@@ -667,18 +708,32 @@ final class Media
             SUM(CASE WHEN mime LIKE 'image/%' AND (alt IS NULL OR alt = '') AND decorative = 0 THEN 1 ELSE 0 END) AS noalt,
             SUM(CASE WHEN mime LIKE 'audio/%' THEN 1 ELSE 0 END) AS audio,
             SUM(CASE WHEN title IS NULL OR title = '' THEN 1 ELSE 0 END) AS notitle
-            FROM media" . (self::$pool === null ? ' WHERE pool_ref IS NULL' : '')) ?: [];
+            FROM media WHERE deleted_at IS NULL" . (self::$pool === null ? ' AND pool_ref IS NULL' : '')) ?: [];
         $out = array_map('intval', $r);
+        $scopeW = self::$pool === null ? ' AND pool_ref IS NULL' : '';
+        try {
+            $out['trash'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE deleted_at IS NOT NULL' . $scopeW);
+            self::ensureHashes();
+            $out['dupes'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE deleted_at IS NULL AND hash IN (SELECT hash FROM media WHERE hash IS NOT NULL AND deleted_at IS NULL' . $scopeW . ' GROUP BY hash HAVING COUNT(*) > 1)' . $scopeW);
+            $out['large'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE deleted_at IS NULL AND size > ?' . $scopeW, [self::largeBytes()]);
+            if (self::rightsMode() !== 'off') {
+                $out['norights'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media m WHERE m.deleted_at IS NULL AND ' . self::NORIGHTS_SQL . $scopeW);
+                $out['expiring'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media m WHERE m.deleted_at IS NULL AND ' . self::EXPIRING_SQL . $scopeW, [date('Y-m-d', strtotime('+30 days'))]);
+                $out['noconsent'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media m WHERE m.deleted_at IS NULL AND ' . self::NOCONSENT_SQL . $scopeW);
+            }
+        } catch (\Throwable $e) {
+            error_log('[media] counts (Papierkorb/Prüfen): ' . $e->getMessage());
+        }
         if (self::$pool === null) {
             try {
                 $used = array_keys(self::usedIds());
-                $out['unused'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE pool_ref IS NULL' . ($used ? ' AND id NOT IN (' . implode(',', array_map('intval', $used)) . ')' : ''));
+                $out['unused'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media WHERE pool_ref IS NULL AND deleted_at IS NULL' . ($used ? ' AND id NOT IN (' . implode(',', array_map('intval', $used)) . ')' : ''));
             } catch (\Throwable $e) {
                 error_log('[media] unused: ' . $e->getMessage());
             }
         }
         // Prüf-Filter mit Unterabfragen (je Sprache, Untertitel, Transkripte) – im Kontext Website bzw. Pool
-        $scope = self::$pool === null ? ' AND m.pool_ref IS NULL' : '';
+        $scope = (self::$pool === null ? ' AND m.pool_ref IS NULL' : '') . ' AND m.deleted_at IS NULL';
         try {
             $out['nocaptions'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media m WHERE ' . self::NOCAPTIONS_SQL . $scope);
             $out['notranscript'] = (int) self::db()->fetchValue('SELECT COUNT(*) FROM media m WHERE ' . self::NOTRANSCRIPT_SQL . $scope);
@@ -925,9 +980,39 @@ final class Media
         }
     }
 
-    public static function delete(int $id): void
+    /** Tage im Papierkorb (Grundeinstellungen → Mediathek); 0 = sofort endgültig löschen */
+    public static function trashDays(): int
+    {
+        return max(0, min(365, (int) setting('sys.media_trash_days', 30)));
+    }
+
+    /** Bildrechte: off | optional | required (Grundeinstellungen → Mediathek) */
+    public static function rightsMode(): string
+    {
+        $m = (string) setting('sys.media_rights', 'optional');
+        return in_array($m, ['off', 'optional', 'required'], true) ? $m : 'optional';
+    }
+
+    /** Grenze für „Zu große Dateien“ in Bytes */
+    public static function largeBytes(): int
+    {
+        return max(1, (int) setting('sys.media_large_mb', 8)) * 1048576;
+    }
+
+    /**
+     * Löschen: mit Papierkorb (nur Mediathek der Website, nicht geteilte Pools) wird die Datei nur markiert und bleibt
+     * wiederherstellbar; $force bzw. ohne Papierkorb endgültig.
+     */
+    public static function delete(int $id, bool $force = false): void
     {
         $m = self::find($id);
+        if ($m && !$force && self::trashDays() > 0 && self::$pool === null && empty($m['pool_ref']) && empty($m['deleted_at'])) {
+            self::db()->update('media', ['deleted_at' => now()], 'id = :id', ['id' => $id]);
+            self::forget($id);
+            PageCache::clear();
+            Extensions::emit('media.trashed', $m);
+            return;
+        }
         if (!$m) {
             // Verweis, dessen Pool-Datei nicht mehr existiert
             self::db()->query('DELETE FROM media WHERE id = ? AND pool_ref IS NOT NULL', [$id]);
@@ -944,6 +1029,114 @@ final class Media
         self::forget($id);
         PageCache::clear();
         Live::touch(...$live);
+    }
+
+    /** Aus dem Papierkorb zurückholen */
+    public static function restore(int $id): bool
+    {
+        $ok = self::db()->update('media', ['deleted_at' => null, 'updated_at' => now()], 'id = :id AND deleted_at IS NOT NULL', ['id' => $id]) > 0;
+        self::forget($id);
+        PageCache::clear();
+        return $ok;
+    }
+
+    /** Abgelaufene Dateien im Papierkorb endgültig löschen ($all: alle, „Papierkorb leeren“); höchstens einmal am Tag automatisch */
+    public static function purgeTrash(bool $all = false): int
+    {
+        if (self::$pool !== null) return 0;
+        if (!$all) {
+            $last = (string) setting('sys.media_trash_purged', '');
+            if ($last === date('Y-m-d')) return 0;
+            app()->settings->set('sys.media_trash_purged', date('Y-m-d'));
+        }
+        $days = self::trashDays();
+        $sql = 'SELECT id FROM media WHERE deleted_at IS NOT NULL' . ($all ? '' : ' AND deleted_at < ?');
+        $ids = array_map('intval', array_column(self::db()->fetchAll($sql, $all ? [] : [date('Y-m-d H:i:s', strtotime('-' . max(1, $days) . ' days'))]), 'id'));
+        foreach ($ids as $id) self::delete($id, true);
+        return count($ids);
+    }
+
+    /** Prüfsummen nachtragen (ältere Dateien) – je Aufruf höchstens $limit, damit die Mediathek schnell bleibt */
+    public static function ensureHashes(int $limit = 400): void
+    {
+        try {
+            foreach (self::db()->fetchAll('SELECT id, file FROM media WHERE hash IS NULL AND pool_ref IS NULL LIMIT ' . $limit) as $r) {
+                $f = self::dir() . '/' . $r['file'];
+                self::db()->update('media', ['hash' => is_file($f) ? sha1_file($f) : '-'], 'id = :id', ['id' => (int) $r['id']]);
+            }
+        } catch (\Throwable $e) {
+            error_log('[media] hash: ' . $e->getMessage());
+        }
+    }
+
+    /** Andere Dateien mit gleichem Inhalt (ohne Papierkorb) */
+    public static function duplicatesOf(array $m): array
+    {
+        if (empty($m['hash']) || $m['hash'] === '-') return [];
+        return array_map(fn($r) => ['id' => (int) $r['id'], 'name' => self::displayName($r)],
+            self::db()->fetchAll('SELECT * FROM media WHERE hash = ? AND id != ? AND deleted_at IS NULL' . (self::$pool === null ? ' AND pool_ref IS NULL' : ''), [$m['hash'], (int) $m['id']]));
+    }
+
+    /**
+     * Zu großes Bild sparsamer speichern: PNG-Fotos ohne Transparenz → JPG, sonst neu komprimiert (höchstens 3200 px wie beim Hochladen).
+     * Ansichtsgrößen (WebP/AVIF) bleiben, Verwendungen und ID ebenso. @return array{0: bool, 1: string} [geändert, Meldung]
+     */
+    public static function shrink(int $id): array
+    {
+        $m = self::find($id);
+        if (!$m || !str_starts_with((string) $m['mime'], 'image/') || $m['mime'] === Svg::MIME || $m['mime'] === 'image/gif') return [false, __('Nur Fotos lassen sich verkleinern.')];
+        $path = self::dir() . '/' . $m['file'];
+        $img = is_file($path) ? self::load($path, (string) $m['mime']) : null;
+        if (!$img) return [false, __('Datei konnte nicht gelesen werden.')];
+        $before = (int) filesize($path);
+        $w = imagesx($img);
+        $img = self::resize($img, min($w, 3200));
+        $alpha = $m['mime'] === 'image/png' && ImageFit::edgeAlpha($img);
+        if ($m['mime'] === 'image/png' && $alpha) {
+            $tmp = $path . '.tmp';
+            imagepng($img, $tmp, 9);
+            $file = $m['file'];
+        } else {
+            $file = preg_replace('~\.[a-z0-9]+$~i', '.jpg', (string) $m['file']);
+            $tmp = self::dir() . '/' . $file . '.tmp';
+            $flat = imagecreatetruecolor(imagesx($img), imagesy($img));
+            imagefill($flat, 0, 0, imagecolorallocate($flat, 255, 255, 255));
+            imagecopy($flat, $img, 0, 0, 0, 0, imagesx($img), imagesy($img));
+            imagejpeg($flat, $tmp, 82);
+        }
+        $after = (int) @filesize($tmp);
+        if (!$after || $after >= $before * 0.95) { @unlink($tmp); return [false, __('Die Datei lässt sich nicht nennenswert verkleinern.')]; }
+        rename($tmp, self::dir() . '/' . $file);
+        if ($file !== $m['file']) @unlink($path);
+        self::db()->update('media', ['file' => $file, 'mime' => str_ends_with($file, '.jpg') ? 'image/jpeg' : $m['mime'], 'size' => $after,
+            'hash' => sha1_file(self::dir() . '/' . $file), 'updated_at' => now()], 'id = :id', ['id' => $id]);
+        self::forget($id);
+        PageCache::clear();
+        return [true, __('{a} → {b}', ['a' => self::humanSize($before), 'b' => self::humanSize($after)])];
+    }
+
+    /** Mehrere Dateien als ZIP (Originale, lesbare Namen) – Pfad der temporären Datei oder null */
+    public static function zip(array $ids): ?string
+    {
+        if (!class_exists(\ZipArchive::class)) return null;
+        $tmp = tempnam(sys_get_temp_dir(), 'mzip');
+        $zip = new \ZipArchive();
+        if ($zip->open($tmp, \ZipArchive::OVERWRITE) !== true) return null;
+        $used = [];
+        foreach (array_slice(array_values(array_unique(array_map('intval', $ids))), 0, 500) as $id) {
+            $m = self::find($id);
+            if (!$m) continue;
+            $src = self::localFile($m, null);
+            if (!is_file($src)) continue;
+            $ext = strtolower(pathinfo($src, PATHINFO_EXTENSION));
+            $base = trim(preg_replace('~[^\w\- äöüÄÖÜß()]+~u', '', pathinfo((string) ($m['title'] ?: $m['original_name']), PATHINFO_FILENAME))) ?: 'datei-' . $id;
+            $name = $base . '.' . $ext;
+            for ($i = 2; isset($used[mb_strtolower($name)]); $i++) $name = $base . '-' . $i . '.' . $ext;
+            $used[mb_strtolower($name)] = true;
+            $zip->addFile($src, $name);
+        }
+        $zip->close();
+        return $tmp;
     }
 
     // ================================================================= Tags
@@ -1314,6 +1507,12 @@ final class Media
             'original' => $isImg ? self::originalUrl($m) : null,
             'original_size' => $isImg ? ImageEdit::stored($m)['orig'] ?? ['w' => (int) $m['width'], 'h' => (int) $m['height']] : null,
             'created_at' => $m['created_at'], 'updated_at' => $m['updated_at'] ?? null,
+            // Rechte, Papierkorb, doppelt, zu groß
+            'license' => (string) ($m['license'] ?? ''), 'rights_until' => (string) ($m['rights_until'] ?? ''), 'consent' => (string) ($m['consent'] ?? ''),
+            'deleted_at' => $m['deleted_at'] ?? null,
+            'purge_at' => !empty($m['deleted_at']) && self::trashDays() > 0 ? date('Y-m-d', strtotime((string) $m['deleted_at'] . ' +' . self::trashDays() . ' days')) : null,
+            'large' => (int) $m['size'] > self::largeBytes(),
+            'shrinkable' => $isImg && !in_array($m['mime'], [Svg::MIME, 'image/gif'], true),
             'missing_alt' => $isImg && trim((string) $m['alt']) === '' && empty($m['decorative']),
             'i18n' => (object) self::translations($m),
             'pool' => $m['_pool'] ?? null,

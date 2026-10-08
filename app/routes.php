@@ -324,6 +324,8 @@ return function (Router $r): void {
     $r->post('/admin/api/media-use', [Admin\MediaController::class, 'useShared']);
     $r->post('/admin/api/media-share', [Admin\MediaController::class, 'share']);
     $r->post('/admin/api/media-bulk', [Admin\MediaController::class, 'bulk']);
+    $r->post('/admin/api/media-trash/empty', [Admin\MediaController::class, 'emptyTrash']);   // Papierkorb leeren
+    $r->get('/admin/media/zip', [Admin\MediaController::class, 'zip']);   // mehrere Dateien als ZIP (?ids=…)
     $r->get('/admin/api/media/{id}', [Admin\MediaController::class, 'detail']);
     $r->get('/admin/api/media/{id}/thumb', [Admin\MediaController::class, 'thumb']);   // Vorschaubild eines Videos (lazy, Core\VideoThumbs)
     $r->post('/admin/api/media/{id}', [Admin\MediaController::class, 'save']);

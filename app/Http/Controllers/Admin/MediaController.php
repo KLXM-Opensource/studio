@@ -88,6 +88,7 @@ final class MediaController extends AdminController
     public function index(Request $r): Response
     {
         $this->auth($r);
+        Media::purgeTrash();   // abgelaufene Dateien im Papierkorb endgültig löschen (höchstens einmal am Tag)
         return $this->view('media', [
             'css' => [],
             'maxMb' => (int) app()->config->get('media.max_upload_mb', 50),
@@ -108,6 +109,10 @@ final class MediaController extends AdminController
             'nocaptions' => $r->str('nocaptions') === '1', 'notranscript' => $r->str('notranscript') === '1',
             'check' => $r->str('check'),   // Prüf-Filter einer Erweiterung (Extension::mediaChecks)
             'unused' => $r->str('unused') === '1',   // Nicht verwendet (Mediathek → „Nicht verwendet“)
+            'trash' => $r->str('trash') === '1',     // Papierkorb
+            // Prüfen: doppelte Dateien, zu große Dateien, Rechte (ohne Lizenz, Nutzungsrecht läuft ab, ohne Einwilligung)
+            'dupes' => $r->str('dupes') === '1', 'large' => $r->str('large') === '1',
+            'norights' => $r->str('norights') === '1', 'expiring' => $r->str('expiring') === '1', 'noconsent' => $r->str('noconsent') === '1',
         ];
         return Response::json([
             'items' => array_map([Media::class, 'toJson'], Media::all($f)),
@@ -123,6 +128,9 @@ final class MediaController extends AdminController
             // Geteilte Medien: verfügbare Pools, aktueller Pool, darf die Person dort ändern?
             'pools' => array_map(fn($k, $l) => ['key' => $k, 'label' => $l, 'edit' => \Core\MediaPools::canEdit($k), 'protected' => \Core\MediaPools::isProtected($k)], array_keys(\Core\MediaPools::forSite()), \Core\MediaPools::forSite()),
             'pool' => Media::pool(),
+            // Papierkorb (Tage, 0 = aus), Bildrechte (off | optional | required), Grenze „zu groß“
+            'trash_days' => Media::pool() === null ? Media::trashDays() : 0, 'rights' => Media::rightsMode(), 'large_mb' => (int) (Media::largeBytes() / 1048576),
+            'zip' => class_exists(\ZipArchive::class),
             'can_edit' => Media::pool() === null ? can('media.upload') : \Core\MediaPools::canEdit(Media::pool()),
             'can_share' => (bool) array_filter(array_keys(\Core\MediaPools::forSite()), [\Core\MediaPools::class, 'canEdit']),
             // „Prüfen“: Untertitel-Funktion an? Schnellzugänge in den Bereich KLXM AI (nur mit eingeschalteter KI)
@@ -142,6 +150,7 @@ final class MediaController extends AdminController
         return Response::json(Media::toJson($m) + [
             'collections' => Media::collectionIds((int) $id),
             'usages' => Media::usages((int) $id),
+            'duplicates' => Media::duplicatesOf($m),   // gleiche Datei mehrfach (Prüfsumme)
             'edit_engine' => \Core\ImageEdit::engine(),   // Entzerren mit Imagick oder GD (Hinweis im Bildeditor)
         ]);
     }
@@ -193,6 +202,11 @@ final class MediaController extends AdminController
         ];
         if (isset($p['i18n'])) {
             $upd['i18n'] = Media::cleanTranslations($p['i18n']);
+        }
+        // Bildrechte (nur wenn mitgeschickt); „Pflicht“: Lizenz/Quelle und Einwilligung (Fotos) nötig
+        if (Media::rightsMode() !== 'off' && (array_key_exists('license', $p) || array_key_exists('consent', $p) || array_key_exists('rights_until', $p))) {
+            $upd += Media::rightsFields($p);
+            if ($why = Media::rightsMissing($upd + $m)) return Response::json(['ok' => false, 'error' => $why], 422);
         }
         if (isset($p['focus']['x'], $p['focus']['y'])) {
             $upd['focus_x'] = max(0, min(100, (int) $p['focus']['x']));
@@ -315,8 +329,12 @@ final class MediaController extends AdminController
         if ($used && ($msg = Media::deleteBlocked((int) $id, $used))) {
             return $r->wantsJson() ? Response::json(['ok' => false, 'error' => $msg, 'usages' => $used], 409) : $this->back('/admin/media', 'error', $msg);
         }
-        Media::delete((int) $id);
-        return $r->wantsJson() ? Response::json(['ok' => true]) : $this->back('/admin/media', 'success', 'Datei gelöscht.');
+        $m = Media::find((int) $id);
+        $force = $r->str('force') === '1' || !empty($m['deleted_at']);   // im Papierkorb: endgültig
+        Media::delete((int) $id, $force);
+        $trashed = !$force && !empty(Media::find((int) $id)['deleted_at']);
+        $msg = $trashed ? __('In den Papierkorb gelegt.') : __('Datei gelöscht.');
+        return $r->wantsJson() ? Response::json(['ok' => true, 'trashed' => $trashed, 'message' => $msg]) : $this->back('/admin/media', 'success', $msg);
     }
 
     /** Sammelaktionen: tag, untag, collect, uncollect, delete */
@@ -326,13 +344,14 @@ final class MediaController extends AdminController
         if ($e = $this->scope($r, true)) return $e;
         $ids = array_values(array_filter(array_map('intval', (array) ($r->post['ids'] ?? []))));
         $action = (string) ($r->post['action'] ?? '');
-        if (!can($action === 'delete' ? 'media.delete' : 'media.upload')) {
+        if (!can(in_array($action, ['delete', 'purge', 'restore'], true) ? 'media.delete' : 'media.upload')) {
             return Response::json(['ok' => false, 'error' => __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.')], 403);
         }
         if (!$ids) {
             return Response::json(['ok' => false, 'error' => 'Keine Dateien ausgewählt.'], 422);
         }
         $kept = [];
+        $shrunk = [];
         $used = $action === 'delete' ? Media::usagesForDelete($ids) : [];   // einmal für alle (geteilte Medien: je Website eine Abfrage)
         foreach ($ids as $id) {
             $m = Media::find($id);
@@ -346,7 +365,14 @@ final class MediaController extends AdminController
                 Media::forget($id);
             } elseif ($action === 'delete') {
                 if (isset($used[$id])) { $kept[] = trim(Media::title($m)) ?: (string) $m['original_name']; continue; }   // verwendet: bleibt
-                Media::delete($id);
+                Media::delete($id, !empty($m['deleted_at']));   // im Papierkorb: endgültig
+            } elseif ($action === 'restore') {
+                Media::restore($id);
+            } elseif ($action === 'purge') {
+                if (!empty($m['deleted_at'])) Media::delete($id, true);
+            } elseif ($action === 'shrink') {
+                [$ok, $note] = Media::shrink($id);
+                if ($ok) $shrunk[] = $note;
             }
         }
         $cid = (int) ($r->post['collection'] ?? 0);
@@ -356,11 +382,39 @@ final class MediaController extends AdminController
             Media::removeFromCollection($cid, $ids);
         }
         $this->changed();
+        if ($action === 'shrink') {
+            return Response::json(['ok' => true, 'message' => $shrunk ? __('{n} Datei(en) verkleinert.', ['n' => count($shrunk)]) . ' ' . implode(' · ', array_slice($shrunk, 0, 3)) : __('Keine Datei ließ sich nennenswert verkleinern.')]);
+        }
         if ($kept) {
             return Response::json(['ok' => true, 'kept' => count($kept), 'message' => __('{n} verwendete Datei(en) nicht gelöscht: {names}. Bitte zuerst dort entfernen, wo sie verwendet werden.',
                 ['n' => count($kept), 'names' => implode(', ', array_slice($kept, 0, 5)) . (count($kept) > 5 ? ' …' : '')])]);
         }
         return Response::json(['ok' => true]);
+    }
+
+    /** Papierkorb leeren (alle Dateien darin endgültig löschen) */
+    public function emptyTrash(Request $r): Response
+    {
+        $this->auth($r, 'media.delete');
+        if ($e = $this->scope($r, true)) return $e;
+        $n = Media::purgeTrash(true);
+        $this->changed();
+        return Response::json(['ok' => true, 'message' => __('{n} Datei(en) endgültig gelöscht.', ['n' => $n])]);
+    }
+
+    /** Mehrere Dateien als ZIP herunterladen (?ids=1,2,3) – Originale mit lesbaren Namen */
+    public function zip(Request $r): Response
+    {
+        $this->auth($r);
+        if ($e = $this->scope($r, false)) return $e;
+        $ids = array_values(array_filter(array_map('intval', explode(',', $r->str('ids')))));
+        if (!$ids) throw new HttpException(422, __('Keine Dateien ausgewählt.'));
+        $tmp = Media::zip($ids) ?? throw new HttpException(500, __('ZIP konnte nicht erstellt werden (PHP-Erweiterung zip fehlt?).'));
+        $data = (string) file_get_contents($tmp);
+        @unlink($tmp);
+        $name = 'medien-' . date('Y-m-d') . '.zip';
+        return new Response($data, 200, ['Content-Type' => 'application/zip', 'Content-Disposition' => 'attachment; filename="' . $name . '"',
+            'Cache-Control' => 'no-store', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     // ------------------------------------------------------------------ Sammlungen
@@ -476,7 +530,13 @@ final class MediaController extends AdminController
         $opt = [
             'decorative' => !empty($p['decorative']), 'title' => (string) ($p['title'] ?? ''),
             'tags' => (string) ($p['tags'] ?? ''), 'collection' => (int) ($p['collection'] ?? 0),
-        ];
+            'credit' => (string) ($p['credit'] ?? ''),
+        ] + (Media::rightsMode() !== 'off' ? Media::rightsFields(array_intersect_key($p, array_flip(['license', 'rights_until', 'consent']))) : []);
+        // „Bildrechte: Pflicht“ – neue Dateien nur mit Lizenz/Quelle und (Fotos) Angabe zur Einwilligung
+        if (empty($p['replace_id']) && Media::pool() === null
+            && ($why = Media::rightsMissing($opt + ['mime' => (new \finfo(FILEINFO_MIME_TYPE))->file("$path.part") ?: '']))) {
+            return Response::json(['ok' => false, 'error' => $why], 422);
+        }
         try {
             if (!empty($p['replace_id'])) {
                 $replaceOpt = ['reset_focus' => !empty($p['reset_focus'])];

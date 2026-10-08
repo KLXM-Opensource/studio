@@ -6,7 +6,7 @@
  */
 $ico = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
     'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
-    'pools' => 'images', 'shared' => 'share-network', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info'];
+    'pools' => 'images', 'shared' => 'share-network', 'medien' => 'images', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info'];
 $items = [];
 foreach (\Core\SystemSchema::groups() as $g) $items[] = [url('/admin/system#' . $g['id']), $g['label'], $ico[$g['id']] ?? 'gear-six', ''];
 $items[] = [url('/admin/system#keys'), 'Verschlüsselung', 'lock-key', ''];

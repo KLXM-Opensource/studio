@@ -5,6 +5,7 @@
   <ul>
     <li><b>Allgemein, Indexierung &amp; Crawler, App-Icon &amp; PWA, Karten &amp; externe Quellen, Sprachen, E-Mail-Versand, Spamschutz, Suche, KI</b> – jede Einstellung erklärt sich darunter.</li>
     <li><b>Verschlüsselung:</b> den <b>Schlüssel für verschlüsselte Anfragen</b> erzeugen. Der geheime Teil wird nur <b>einmal</b> angezeigt – sofort im Passwortmanager ablegen. Ohne Schlüssel nehmen verschlüsselte Formulare nichts an (siehe <a href="<?= e(url('/admin/hilfe#verschluesselung')) ?>">Eigene Daten → Verschlüsselung</a>).</li>
+    <li><b>Mediathek:</b> wie lange gelöschte Dateien im <b>Papierkorb</b> bleiben (oder „Aus“), ob <b>Bildrechte und Einwilligungen</b> ausgeblendet, optional oder Pflicht sind, und ab welcher Größe eine Datei als „zu groß“ gilt.</li>
     <li><b>Geteilte Medien</b> und <b>Geteilte Daten</b> – Bereiche, die mehrere Websites gemeinsam nutzen.</li>
     <li><b>Umgebung</b> – Livebetrieb oder Testumgebung (siehe unten).</li>
     <li><b>Adresse der Verwaltung</b> – statt <code>/admin</code> eine eigene, schwer zu erratende Adresse.</li>

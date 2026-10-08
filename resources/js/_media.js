@@ -94,6 +94,8 @@ const api = {
   fit: (id, fit) => http(`${BASE}/api/media/${id}/fit`, { method: 'POST', json: { fit } }),
   edit: (id, edit) => http(`${BASE}/api/media/${id}/edit`, { method: 'POST', json: { edit } }),
   bulk: body => http(BASE + '/api/media-bulk', { method: 'POST', json: body }),
+  emptyTrash: () => http(BASE + '/api/media-trash/empty', { method: 'POST', json: {} }),
+  delForce: id => http(`${BASE}/api/media/${id}/delete`, { method: 'POST', json: { force: '1' } }),
   collection: name => http(BASE + '/api/collections', { method: 'POST', json: { name } }),
   renameCollection: (id, name) => http(`${BASE}/api/collections/${id}`, { method: 'POST', json: { name } }),
   deleteCollection: id => http(`${BASE}/api/collections/${id}/delete`, { method: 'POST', json: {} }),
@@ -176,6 +178,10 @@ function pickFiles(accept, multiple = true) {
 }
 
 // ============================================================ Upload-Warteschlange mit Pflicht-Alt-Text
+// Bildrechte (Grundeinstellungen → Mediathek): off | optional | required – aus der Medienliste (MediaController::list)
+let RIGHTS = 'optional';
+const CONSENT = { '': 'Nicht angegeben', yes: 'Einwilligung liegt vor', none: 'Keine Personen erkennbar', no: 'Einwilligung fehlt' };
+
 class Uploader {
   /** opts: { accept: 'image'|null, collection(), tags(), onDone(media), onChange() } */
   constructor(root, opts = {}) {
@@ -189,7 +195,7 @@ class Uploader {
   choose() { pickFiles(this.types()).then(f => f.length && this.add(f)); }
   add(files) {
     for (const file of files) {
-      const item = { file, key: Math.random().toString(36).slice(2), alt: '', decorative: false, title: '', status: 'wait', progress: 0, error: '' };
+      const item = { file, key: Math.random().toString(36).slice(2), alt: '', decorative: false, title: '', license: '', consent: '', status: 'wait', progress: 0, error: '' };
       if (!this.types().includes(ftype(file))) item.error = 'Dateityp nicht erlaubt';
       else if (file.size > MAX_MB * 1048576) item.error = `Größer als ${MAX_MB} MB`;
       item.isImage = ftype(file).startsWith('image/');
@@ -201,7 +207,11 @@ class Uploader {
     $('.mu-item [data-alt]:not([disabled])', this.root)?.focus();
   }
   // KI-Vorschlag (_ai.js) zählt erst, wenn er geprüft ist (bearbeitet oder „Geprüft ✓“)
-  valid(i) { return !i.error && (!i.isImage || i.decorative || (i.alt.trim().length >= 3 && !i.aiPending)); }
+  valid(i) {
+    if (i.error) return false;
+    if (RIGHTS === 'required' && (!i.license.trim() || (i.isImage && !['yes', 'none'].includes(i.consent)))) return false;   // Bildrechte: Pflicht
+    return !i.isImage || i.decorative || (i.alt.trim().length >= 3 && !i.aiPending);
+  }
   render() {
     $('.mu-queue', this.root).innerHTML = this.items.map(i => `
       <li class="mu-item is-${i.status}${i.error ? ' is-error' : ''}" data-key="${i.key}">
@@ -214,6 +224,9 @@ class Uploader {
             <label class="mu-deco"><input type="checkbox" data-deco ${i.decorative ? 'checked' : ''}> dekorativ (ohne Aussage)</label>${window.CMSAi?.uploadSlot?.(i) || '' /* KI: Alt-Text vorschlagen */}`
           : i.status === 'wait' ? `<label class="mu-alt"><span>Titel (optional)</span><input type="text" data-title value="${esc(i.title)}" maxlength="180" placeholder="z. B. Anamnesebogen"></label>${i.file.type.startsWith('video/') ? `
             <label class="mu-deco" title="${esc(t(DECO_VIDEO_HINT))}"><input type="checkbox" data-deco ${i.decorative ? 'checked' : ''}> ${esc(t('dekorativ (ohne Aussage)'))}</label>` : ''}` : ''}
+          ${i.status === 'wait' && !i.error && RIGHTS === 'required' ? `<span class="mu-rights">
+            <label class="mu-alt"><span>${esc(t('Lizenz / Quelle'))} <b aria-hidden="true">*</b></span><input type="text" data-license value="${esc(i.license)}" maxlength="250" placeholder="${esc(t('z. B. eigenes Foto, Pixabay-Lizenz'))}" aria-required="true"></label>
+            ${i.isImage ? `<label class="mu-alt"><span>${esc(t('Personen auf dem Bild'))} <b aria-hidden="true">*</b></span><select data-consent aria-required="true">${Object.entries(CONSENT).map(([k, l]) => `<option value="${k}"${i.consent === k ? ' selected' : ''}>${esc(t(l))}</option>`).join('')}</select></label>` : ''}</span>` : ''}
           ${i.status !== 'wait' ? `<span class="mu-bar"><span style="width:${Math.round(i.progress * 100)}%"></span></span>` : ''}
           ${i.status === 'done' ? `<span class="mu-ok">✓ ${esc(i.note || 'Hochgeladen')}</span>` : ''}
           ${i.status === 'failed' ? `<span class="mu-err" role="alert">${esc(i.error)}</span>` : ''}
@@ -225,6 +238,8 @@ class Uploader {
       $('[data-alt]', li)?.addEventListener('input', e => { i.alt = e.target.value; this.updateActions(); });
       $('[data-alt]', li)?.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('[data-mu-start]', this.root).disabled) this.start(); });
       $('[data-title]', li)?.addEventListener('input', e => { i.title = e.target.value; });
+      $('[data-license]', li)?.addEventListener('input', e => { i.license = e.target.value; this.updateActions(); });
+      $('[data-consent]', li)?.addEventListener('change', e => { i.consent = e.target.value; this.updateActions(); });
       $('[data-deco]', li)?.addEventListener('change', e => { i.decorative = e.target.checked; const a = $('[data-alt]', li); if (a) a.disabled = i.decorative; this.updateActions(); });
       $('[data-remove]', li)?.addEventListener('click', () => { this.items = this.items.filter(x => x !== i); this.render(); this.opts.onChange?.(this.items.length); });
       window.CMSAi?.uploadBind?.(this, i, li);   // KI-Assistent (_ai.js)
@@ -239,7 +254,8 @@ class Uploader {
     btn.disabled = !!missing;
     btn.textContent = waiting.length > 1 ? `${waiting.length} Dateien hochladen` : 'Hochladen';
     const pending = waiting.filter(i => i.aiPending).length;   // KI-Vorschläge, die noch niemand geprüft hat
-    hint.textContent = pending ? t('KI-Vorschlag bei {n} Bild(ern) bitte prüfen und bestätigen.', { n: pending }) : missing ? `Alt-Text fehlt bei ${missing} ${missing === 1 ? 'Bild' : 'Bildern'} (mind. 3 Zeichen) – oder „dekorativ“ wählen.` : '';
+    const rightsMissing = RIGHTS === 'required' && waiting.some(i => !i.license.trim() || (i.isImage && !['yes', 'none'].includes(i.consent)));
+    hint.textContent = rightsMissing ? t('Bitte Lizenz/Quelle und (bei Bildern) die Angabe zu abgebildeten Personen ergänzen.') : pending ? t('KI-Vorschlag bei {n} Bild(ern) bitte prüfen und bestätigen.', { n: pending }) : missing ? `Alt-Text fehlt bei ${missing} ${missing === 1 ? 'Bild' : 'Bildern'} (mind. 3 Zeichen) – oder „dekorativ“ wählen.` : '';
     hint.classList.toggle('is-warn', !!missing);
   }
   async start() {
@@ -248,7 +264,7 @@ class Uploader {
     for (const i of queue) {
       i.status = 'up'; this.render();
       try {
-        const media = await uploadFile(i.file, { alt: i.alt, decorative: i.decorative ? 1 : 0, title: i.title, tags, collection },
+        const media = await uploadFile(i.file, { alt: i.alt, decorative: i.decorative ? 1 : 0, title: i.title, tags, collection, ...(RIGHTS === 'required' ? { license: i.license, consent: i.consent } : {}) },
           p => { i.progress = p; const bar = $(`[data-key="${i.key}"] .mu-bar span`, this.root); if (bar) bar.style.width = Math.round(p * 100) + '%'; });
         i.status = 'done'; i.progress = 1;
         if (media?.note) { i.note = media.note; toast(media.note); }   // SVG: bereinigt und optimiert (Größe vorher → nachher)
@@ -744,6 +760,7 @@ class Finder {
     if (this.src.type === 'kind') p.kind = this.src.value;
     if (this.src.type === 'noalt') p.noalt = '1';
     if (this.src.type === 'unused') p.unused = '1';
+    if (this.src.type === 'trash') p.trash = '1';
     // Prüf-Filter (Seitenleiste „Prüfen“): noalt, missing:en, notitle, nocaptions, notranscript
     if (this.src.type === 'check') { const [k, l] = this.src.value.split(':'); if (k === 'missing') p.missing_lang = l; else if (k === 'x') p.check = l; else p[k] = '1'; }
     if (this.src.type === 'collection') p.collection = this.src.value;
@@ -758,6 +775,7 @@ class Finder {
     this.opts.onLoad?.(this);   // z. B. Sammlungswahl: Knopf „übernehmen“ nachführen
     this.ro = data.can_edit === false;   // z. B. Pool ohne Recht „Geteilte Medien pflegen“: nur ansehen und verwenden
     this.root.classList.toggle('is-ro', this.ro);
+    RIGHTS = data.rights || 'optional';
     this.items = this.sorted(data.items);
     const ids = new Set(this.items.map(m => m.id));
     this.sel = new Set([...this.sel].filter(id => ids.has(id)));
@@ -792,7 +810,8 @@ class Finder {
           + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'pdf', SVG.pdf, 'PDF-Dokumente', counts.pdf)
           + (counts.video ? row('kind', 'video', SVG.video, 'Videos', counts.video) : '')
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')
-          + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')}
+          + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')
+          + (this.mode === 'library' && !this.pool && (this.meta.trash_days || counts.trash) ? row('trash', '', ico('trash'), t('Papierkorb'), counts.trash || 0) : '')}
       </ul>
       ${this.checksHtml(row)}
       <details class="fx-checkgrp fx-fold" data-fold="collections"${store.get('fold-collections', true) ? ' open' : ''}><summary><span>Sammlungen</span><button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></summary>
@@ -811,6 +830,13 @@ class Finder {
     chk('noalt', SVG.warn, t('Ohne Alt-Text'), c.noalt);
     Object.entries(this.meta.languages || {}).forEach(([code, label]) => chk('missing:' + code, ico('translate'), t('Alt-Text fehlt in {lang}', { lang: label }), c['missing_' + code]));
     chk('notitle', ico('text-t'), t('Ohne Titel'), c.notitle);
+    chk('dupes', ico('copy'), t('Doppelte Dateien'), c.dupes);
+    chk('large', ico('warning'), t('Zu große Dateien'), c.large);
+    if (this.meta.rights && this.meta.rights !== 'off') {
+      chk('norights', ico('copyright'), t('Ohne Lizenz/Quelle'), c.norights, this.meta.rights === 'required');   // optional: nicht aufdringlich
+      chk('expiring', ico('calendar-dots'), t('Nutzungsrecht läuft ab'), c.expiring);
+      chk('noconsent', ico('user-check'), t('Ohne Einwilligung (Fotos)'), c.noconsent, this.meta.rights === 'required');
+    }
     chk('nocaptions', ico('article'), t('Videos ohne Untertitel'), c.nocaptions, !img && ai.captions !== false);
     chk('notranscript', ico('music-notes'), t('Audio ohne Transkript'), c.notranscript, !img && ai.captions !== false && c.audio > 0);
     // Prüf-Filter aktiver Erweiterungen (Extension::mediaChecks, Anzahl in counts.x_{key})
@@ -843,10 +869,13 @@ class Finder {
       const [k, l] = s.value.split(':');
       return k === 'missing' ? t('Alt-Text fehlt in {lang}', { lang: m.languages?.[l] || l })
         : k === 'x' ? (m.ext_checks || []).find(x => x.key === l)?.label || ''
-        : { noalt: t('Ohne Alt-Text'), notitle: t('Ohne Titel'), nocaptions: t('Videos ohne Untertitel'), notranscript: t('Audio ohne Transkript') }[k] || '';
+        : { noalt: t('Ohne Alt-Text'), notitle: t('Ohne Titel'), nocaptions: t('Videos ohne Untertitel'), notranscript: t('Audio ohne Transkript'),
+          dupes: t('Doppelte Dateien'), large: t('Zu große Dateien'), norights: t('Ohne Lizenz/Quelle'), expiring: t('Nutzungsrecht läuft ab'), noconsent: t('Ohne Einwilligung (Fotos)') }[k] || '';
     }
     if (s.type === 'collection') return m.collections.find(c => String(c.id) === String(s.value))?.name || 'Sammlung';
     if (s.type === 'tag') return 'Tag: ' + s.value;
+    if (s.type === 'trash') return t('Papierkorb');
+    if (s.type === 'unused') return t('Nicht verwendet');
     return 'Alle Medien';
   }
   thumb(m) {
@@ -940,15 +969,19 @@ class Finder {
     if (ids.length === 1) { try { used = (await api.detail(ids[0])).usages; } catch (ex) { loadFailed(ex); return; } }
     // Verwendete Dateien lassen sich nicht löschen (Server prüft ebenso, Media::deleteBlocked)
     if (used.length) { await ask({ title: usedMsg(this.byId(ids[0]).display, used), ok: t('Verstanden'), danger: false, cancel: false }); return; }
-    const msg = ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien bleiben erhalten.`;
-    if (!(await ask({ title: msg, ok: 'Löschen' }))) return;
+    const toTrash = this.meta.trash_days > 0 && this.src.type !== 'trash' && !this.pool;
+    const msg = toTrash
+      ? (ids.length === 1 ? t('„{name}“ in den Papierkorb legen?', { name: this.byId(ids[0]).display }) : t('{n} Dateien in den Papierkorb legen?', { n: ids.length }) + '\n\n' + t('Verwendete Dateien bleiben erhalten.'))
+        + '\n\n' + t('Wiederherstellen ist {n} Tage lang möglich.', { n: this.meta.trash_days })
+      : ids.length === 1 ? `„${this.byId(ids[0]).display}“ endgültig löschen?` : `${ids.length} Dateien endgültig löschen?\n\nVerwendete Dateien bleiben erhalten.`;
+    if (!(await ask({ title: msg, ok: toTrash ? t('In den Papierkorb') : 'Löschen', danger: !toTrash }))) return;
     if (ids.length === 1) {
-      try { await api.del(ids[0]); this.sel.clear(); toast('Gelöscht'); this.load(); } catch (ex) { await this.deleteRefused(ex, this.byId(ids[0]).display); }
+      try { const r = await api.del(ids[0]); this.sel.clear(); toast(r?.message || 'Gelöscht'); this.load(); } catch (ex) { await this.deleteRefused(ex, this.byId(ids[0]).display); }
       return;
     }
     try {
       const res = await api.bulk({ ids, action: 'delete' });
-      this.sel.clear(); toast(res?.kept ? res.message : 'Gelöscht'); this.load();
+      this.sel.clear(); toast(res?.kept ? res.message : toTrash ? t('In den Papierkorb gelegt.') : 'Gelöscht'); this.load();
     } catch (ex) { toast(ex.message); }
   }
   /** Server lehnt ab (z. B. geteilte Datei auf einer anderen Website verwendet): Fundstellen wie beim Einzellöschen zeigen */
@@ -992,6 +1025,8 @@ class Finder {
     if (one?.kind === 'image' && !one.svg) e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
     if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
+    if (ids.length > 1 && this.meta.zip) e.push([t('Als ZIP herunterladen'), () => { location.href = this.zipUrl(ids); }]);
+    if (this.src.type === 'trash') e.push([t('Wiederherstellen'), async () => { await api.bulk({ ids, action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); }]);
     if (this.src.type === 'collection') e.push(['Aus Sammlung entfernen', async () => { await api.bulk({ ids, action: 'uncollect', collection: +this.src.value }); this.load(); }]);
     // Vorhandene Dateien der Website in einen geteilten Pool verschieben (Verwendungen bleiben erhalten)
     if (!this.pool && this.meta.can_share && ids.length) for (const p of (this.meta.pools || []).filter(p => p.edit)) {
@@ -1046,9 +1081,15 @@ class Finder {
         <div class="fx-i-big">${SVG.all}</div>
         <p><strong>${this.title()}</strong><br>${this.items.length} Objekte</p>
         ${c.noalt ? `<p class="fx-i-warn">${SVG.warn} ${c.noalt} ${c.noalt === 1 ? 'Bild' : 'Bilder'} ohne Alt-Text</p>` : ''}
+        ${this.src.type === 'trash' ? `<p class="fx-i-hint">${esc(this.meta.trash_days ? t('Dateien im Papierkorb werden nach {n} Tagen endgültig gelöscht. Auswählen, um sie wiederherzustellen.', { n: this.meta.trash_days }) : t('Der Papierkorb ist ausgeschaltet – gelöschte Dateien sind sofort weg.'))}</p>
+          ${this.items.length && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-emptytrash>${esc(t('Papierkorb leeren'))}</button>` : ''}` : ''}
         <p class="fx-i-hint">Dateien vom Computer einfach hierher ziehen oder mit ${isMac ? '⌘' : 'Strg'}+V einfügen – auch mehrere und große (bis ${MAX_MB} MB).<br>Auf Sammlungen links ziehen = einsortieren.</p>
         ${this.mode === 'library' ? `<p class="fx-i-hint">Bilder werden automatisch in 480–2400 px als ${esc($('[data-media-formats]')?.dataset.mediaFormats || 'WebP')} erzeugt. Alt-Texte sind beim Hochladen Pflicht (Barrierefreiheit).</p>` : ''}
         <dl class="fx-keys"><dt>Doppelklick / ↵</dt><dd>Bearbeiten</dd><dt>Leertaste</dt><dd>Quick Look</dd><dt>${isMac ? '⌘' : 'Strg'}-Klick / ⇧-Klick</dt><dd>Mehrere auswählen</dd><dt>${isMac ? '⌘' : 'Strg'} A</dt><dd>Alle auswählen</dd><dt>${isMac ? '⌘' : 'Strg'} V</dt><dd>Aus Zwischenablage einfügen</dd><dt>⌫ / Entf</dt><dd>Löschen</dd><dt>Rechtsklick</dt><dd>Weitere Aktionen</dd></dl></div>`;
+      $('[data-emptytrash]', this.$info)?.addEventListener('click', async () => {
+        if (!(await ask({ title: t('Papierkorb leeren? {n} Dateien werden endgültig gelöscht.', { n: this.items.length }), ok: t('Endgültig löschen') }))) return;
+        try { const r = await api.emptyTrash(); toast(r.message); this.load(); } catch (ex) { toast(ex.message); }
+      });
       window.CMSAi?.mediaSummary?.(this);   // KI: Alt-Texte für Bilder ohne Alt-Text vorschlagen (_ai.js)
       if (this.mode === 'library') hook('summary', this, $('.fx-i-empty', this.$info), UI);
       return;
@@ -1077,8 +1118,13 @@ class Finder {
         ${this.src.type === 'tag' ? `<button type="button" class="adm-link" data-muntag>Tag „${esc(this.src.value)}“ entfernen</button>` : ''}</section>
       ${cols.length ? `<section class="fx-i-sec"><h3>In Sammlung legen</h3><div class="fx-chips">${cols.map(c => `<button type="button" data-mcol="${c.id}">+ ${esc(c.name)}</button>`).join('')}</div>
         <p class="fx-i-hint">Tipp: Auswahl einfach links auf eine Sammlung ziehen.</p></section>` : ''}
-      ${this.mode === 'library' ? `<div class="fx-i-actions">
+      ${this.meta.zip ? `<a class="adm-btn adm-btn--small adm-btn--ghost fx-zipbtn" href="${esc(this.zipUrl(ids))}" download>${ico('file-zip')} ${esc(t('Als ZIP herunterladen'))}</a>` : ''}
+      ${this.mode === 'library' && this.src.type === 'trash' && !this.ro ? `<div class="fx-i-actions">
+        <button type="button" class="adm-btn adm-btn--small" data-mrestore>${ico('arrow-counter-clockwise')} ${esc(t('{n} wiederherstellen', { n: items.length }))}</button>
+        <button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-mpurge>${esc(t('{n} endgültig löschen', { n: items.length }))}</button></div>`
+      : this.mode === 'library' ? `<div class="fx-i-actions">
         ${this.src.type === 'collection' ? '<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-muncol>Aus Sammlung entfernen</button>' : ''}
+        ${items.some(m => m.large && m.shrinkable) && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-mshrink>${esc(t('Große Bilder verkleinern'))}</button>` : ''}
         <button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-mdel>${items.length} Dateien löschen</button></div>` : ''}`;
     const i = this.$info;
     lazyThumbs($('.fx-stack', i));
@@ -1089,6 +1135,15 @@ class Finder {
     $$('[data-mcol]', i).forEach(b => b.onclick = async () => { await api.bulk({ ids, action: 'collect', collection: +b.dataset.mcol }); toast('In Sammlung gelegt'); this.load(); });
     $('[data-muncol]', i)?.addEventListener('click', async () => { await api.bulk({ ids, action: 'uncollect', collection: +this.src.value }); this.load(); });
     $('[data-mdel]', i)?.addEventListener('click', () => this.deleteSel());
+    $('[data-mrestore]', i)?.addEventListener('click', async () => { const r = await api.bulk({ ids, action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); });
+    $('[data-mpurge]', i)?.addEventListener('click', async () => {
+      if (!(await ask({ title: t('{n} Dateien endgültig löschen?', { n: ids.length }), ok: t('Endgültig löschen') }))) return;
+      await api.bulk({ ids, action: 'purge' }); this.sel.clear(); toast(t('Endgültig gelöscht')); this.load();
+    });
+    $('[data-mshrink]', i)?.addEventListener('click', async e => {
+      e.target.disabled = true; e.target.textContent = t('Verkleinert …');
+      try { const r = await api.bulk({ ids: items.filter(m => m.large && m.shrinkable).map(m => m.id), action: 'shrink' }); toast(r.message); this.load(); } catch (ex) { toast(ex.message); }
+    });
     if (this.mode === 'library' && !this.ro) hook('multi', this, items, i, UI);
   }
 
@@ -1101,6 +1156,7 @@ class Finder {
         : m.kind === 'pdf' ? `<iframe src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
         : m.kind === 'video' ? `<video src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>`
         : m.kind === 'audio' ? `<audio src="${esc(m.url)}" controls preload="metadata"></audio>` : ''}</div>
+      ${m.deleted_at ? this.trashHtml(m) : ''}
       <form class="fx-i-form" novalidate>
         <input class="fx-i-title" name="title" value="${esc(m.title)}" placeholder="${esc(m.display)}" aria-label="Titel / Anzeigename" maxlength="180" title="Titel – klicken zum Ändern">
         <p class="fx-i-meta">${esc(m.type)} · ${esc(m.size)}${m.width ? ` · ${m.width} × ${m.height} px` : ''}${m.pages ? ` · ${m.pages} Seiten` : ''}</p>
@@ -1118,9 +1174,11 @@ class Finder {
       <button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-edit>Alle Details, Fokus &amp; Zuschnitt …</button>
       ${isImg && this.mode === 'library' && !this.ro ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-adjust>${esc(t('Bild anpassen …'))}</button>` : ''}
       ${m.collections.length ? `<section class="fx-i-sec"><h3>Sammlungen</h3><p>${this.meta.collections.filter(c => m.collections.includes(c.id)).map(c => esc(c.name)).join(', ')}</p></section>` : ''}
+      ${this.singleExtras(m)}
       <section class="fx-i-sec"><h3>Verwendet auf</h3>${m.usages.length ? '<ul class="fx-usage">' + m.usages.map(u => `<li>${u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.label)}</a>` : esc(u.label)}</li>`).join('') + '</ul>' : '<p class="fx-i-hint">Noch nirgends.</p>'}</section>
       <dl class="fx-i-dl"><dt>Datei</dt><dd>${esc(m.name)}</dd><dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}</dd>${m.updated_at && m.updated_at !== m.created_at ? `<dt>Geändert</dt><dd>${fmtDate(m.updated_at)}</dd>` : ''}</dl>`;
     $('[data-edit]', this.$info).onclick = () => this.edit(m.id);
+    this.bindSingleExtras(m);
     if (isImg) applyFx($('.fx-i-img', this.$info), m.adjust);
     $('[data-adjust]', this.$info)?.addEventListener('click', () => this.adjust(m));
     $('[data-pick]', this.$info)?.addEventListener('click', () => this.opts.onPick?.(this.byId(m.id) || m));
@@ -1131,6 +1189,66 @@ class Finder {
     // Erweiterungen (PHP, Extension::mediaPanel): fertige Abschnitte, vom Core escaped (Core\Slots::card)
     if (this.mode === 'library' && Array.isArray(m.panels) && m.panels.length) this.$info.insertAdjacentHTML('beforeend', m.panels.join(''));
     if (this.mode === 'library') hook('panel', this, m, UI);   // Erweiterungen (z. B. Video-Werkzeuge)
+  }
+
+  zipUrl(ids) { return `${BASE}/media/zip?ids=${ids.join(',')}${this.pool ? '&pool=' + encodeURIComponent(this.pool) : ''}`; }
+
+  trashHtml(m) {
+    return `<section class="fx-i-sec fx-i-trash"><h3>${ico('trash')} ${esc(t('Im Papierkorb'))}</h3>
+      <p>${esc(m.purge_at ? t('Wird am {date} endgültig gelöscht.', { date: fmtDate(m.purge_at) }) : t('Gelöscht.'))}</p>
+      ${this.ro ? '' : `<div class="fx-i-actions"><button type="button" class="adm-btn adm-btn--small" data-restore>${ico('arrow-counter-clockwise')} ${esc(t('Wiederherstellen'))}</button>
+        <button type="button" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" data-purge>${esc(t('Endgültig löschen'))}</button></div>`}</section>`;
+  }
+
+  /** Abschnitte rechts: Papierkorb, doppelte Datei, große Datei, Bildrechte (je nach Einstellung) */
+  singleExtras(m) {
+    const out = [];
+    if (m.duplicates?.length) out.push(`<section class="fx-i-sec fx-i-dupe"><h3>${ico('copy')} ${esc(t('Gleiche Datei mehrfach'))}</h3>
+      <p class="fx-i-hint">${esc(t('Diese Datei gibt es noch {n}×. Nicht verwendete Kopien können weg; verwendete zuerst durch diese ersetzen.', { n: m.duplicates.length }))}</p>
+      <ul class="fx-usage">${m.duplicates.map(x => `<li><button type="button" class="adm-link" data-goto="${x.id}">${esc(x.name)} <small>#${x.id}</small></button></li>`).join('')}</ul></section>`);
+    if (m.large) out.push(`<section class="fx-i-sec fx-i-large"><h3>${ico('warning')} ${esc(t('Große Datei ({size})', { size: m.size }))}</h3>
+      <p class="fx-i-hint">${esc(m.shrinkable ? t('Bilder lassen sich sparsamer speichern – Aussehen und Verwendungen bleiben.') : t('Bitte vor dem Hochladen verkleinern (z. B. PDF komprimieren, Video kürzer bzw. niedriger auflösen) und mit „Datei ersetzen“ austauschen.'))}</p>
+      ${m.shrinkable && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-shrink>${esc(t('Verkleinern'))}</button>` : ''}</section>`);
+    if (RIGHTS !== 'off' && !m.deleted_at) {
+      const isPhoto = m.kind === 'image' && !m.svg;
+      const missing = !m.license || (isPhoto && !['yes', 'none'].includes(m.consent));
+      const expired = m.rights_until && m.rights_until < new Date().toISOString().slice(0, 10);
+      out.push(`<details class="fx-i-sec fx-i-rights"${(RIGHTS === 'required' && missing) || expired ? ' open' : ''}><summary><h3>${ico('copyright')} ${esc(t('Rechte & Einwilligung'))}${(RIGHTS === 'required' && missing) || expired ? ` <span class="fx-trans-miss">${esc(expired ? t('abgelaufen') : t('fehlt'))}</span>` : ''}</h3></summary>
+        <form class="fx-rights" novalidate>
+          <label>${esc(t('Lizenz / Quelle'))}${RIGHTS === 'required' ? ' <span class="req">*</span>' : ''}<input name="license" value="${esc(m.license)}" maxlength="250" placeholder="${esc(t('z. B. eigenes Foto, Pixabay-Lizenz, Agentur XY'))}"></label>
+          <label>${esc(t('Nutzungsrecht bis'))}<input type="date" name="rights_until" value="${esc(m.rights_until)}"></label>
+          ${isPhoto ? `<label>${esc(t('Personen auf dem Bild'))}${RIGHTS === 'required' ? ' <span class="req">*</span>' : ''}<select name="consent">${Object.entries(CONSENT).map(([k, l]) => `<option value="${k}"${(m.consent || '') === k ? ' selected' : ''}>${esc(t(l))}</option>`).join('')}</select></label>` : ''}
+          <p class="fx-i-state" aria-live="polite"></p>
+        </form></details>`);
+    }
+    return out.join('');
+  }
+  bindSingleExtras(m) {
+    const i = this.$info;
+    $('[data-restore]', i)?.addEventListener('click', async () => { await api.bulk({ ids: [m.id], action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); });
+    $('[data-purge]', i)?.addEventListener('click', async () => {
+      if (!(await ask({ title: t('„{name}“ endgültig löschen?', { name: m.display }), ok: t('Endgültig löschen') }))) return;
+      await api.delForce(m.id); this.sel.clear(); toast(t('Endgültig gelöscht')); this.load();
+    });
+    $$('[data-goto]', i).forEach(b => b.addEventListener('click', () => { this.src = { type: 'all', value: '' }; this.load(+b.dataset.goto); }));
+    $('[data-shrink]', i)?.addEventListener('click', async e => {
+      e.target.disabled = true; e.target.textContent = t('Verkleinert …');
+      try { const r = await api.bulk({ ids: [m.id], action: 'shrink' }); toast(r.message); this.load(m.id); } catch (ex) { toast(ex.message); e.target.disabled = false; }
+    });
+    const f = $('.fx-rights', i);
+    if (f) {
+      if (this.ro) $$('input,select', f).forEach(x => { x.disabled = true; });
+      let timer;
+      const st = $('.fx-i-state', f);
+      const save = async () => {
+        const body = { license: f.license.value, rights_until: f.rights_until.value, ...(f.consent ? { consent: f.consent.value } : {}) };
+        st.className = 'fx-i-state'; st.textContent = t('Speichert …');
+        try { const r = await api.save(m.id, { title: m.title, alt: m.alt, decorative: m.decorative ? 1 : 0, credit: m.credit, tags: m.tags.join(','), focus: m.focus, ...body }); Object.assign(m, r.item); st.textContent = '✓ ' + t('Gespeichert'); this.patchItem(r.item); }
+        catch (ex) { st.className = 'fx-i-state is-err'; st.textContent = ex.message; }
+      };
+      f.addEventListener('input', () => { clearTimeout(timer); st.textContent = ''; timer = setTimeout(save, 700); });
+      f.addEventListener('change', () => { clearTimeout(timer); timer = setTimeout(save, 100); });
+    }
   }
 
   /** Titel, Alt-Text und Tags direkt in der Seitenleiste bearbeiten – speichert automatisch */

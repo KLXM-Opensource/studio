@@ -201,6 +201,11 @@ final class Database
             'adjust' => 'VARCHAR(80) NULL',   // Bild anpassen (Core\ImageFx): „sepia s120 c110“ – zerstörungsfrei per CSS-Filter
             'fit' => 'VARCHAR(40) NULL',   // Bild im Rahmen (Core\ImageFit): Standard „contain blur“, „original“ … – leer = automatisch
             'edit_json' => 'TEXT NULL',   // Bild bearbeiten (Core\ImageEdit): {"ops": {…}, "orig": {"w","h"}, "master": "cache/…-e.jpg"}
+            'deleted_at' => 'VARCHAR(25) NULL',   // Papierkorb (Media::delete, sys.media_trash_days) – Dateien bleiben bis zum endgültigen Löschen
+            'license' => "$str NULL",             // Rechte: Lizenz bzw. Quelle (z. B. „Pixabay-Lizenz“, „eigenes Foto“)
+            'rights_until' => 'VARCHAR(10) NULL', // Nutzungsrecht bis (Y-m-d), leer = unbefristet
+            'consent' => 'VARCHAR(10) NULL',      // Einwilligung abgebildeter Personen: yes | none (keine Personen) | no | NULL = nicht angegeben
+            'hash' => 'VARCHAR(40) NULL',         // SHA-1 der gespeicherten Datei – doppelte Dateien finden
         ]);
 
         // Seitenbaum: Eltern, Pfad, Menü, Seitentyp (page | template für Detailseiten von Datentabellen)

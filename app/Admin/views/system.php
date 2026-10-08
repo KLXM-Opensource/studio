@@ -24,7 +24,7 @@ use Core\Fields;
   // Symbole der Bereiche in der Seitenleiste (Phosphor über icon(); unbekannte Bereiche, z. B. aus Erweiterungen: Zahnrad)
   $tabIco = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
       'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
-      'pools' => 'images', 'shared' => 'share-network', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info', 'push' => 'bell-ringing'];
+      'pools' => 'images', 'shared' => 'share-network', 'medien' => 'images', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info', 'push' => 'bell-ringing'];
   // Testumgebung (staging/development): „Umgebung“ orange mit sanft pulsierendem Punkt, Hinweis auch für Screenreader und im Auswahlfeld (schmal)
   $envWarn = environment() !== 'production' ? __('Testumgebung aktiv') : '';
   $tab = fn(string $id, string $label, bool $on = false) => '<button type="button" role="tab" id="tab-' . e($id) . '" aria-controls="panel-' . e($id) . '" data-tab="' . e($id) . '" aria-selected="' . ($on ? 'true' : 'false') . '"' . ($on ? '' : ' tabindex="-1"')

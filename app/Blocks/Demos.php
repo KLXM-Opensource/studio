@@ -70,7 +70,7 @@ final class Demos
             $n = $f['name'];
             $v = $sample[$n] ?? null;
             if ($f['type'] === 'media' && !$v) {
-                $img ??= (int) app()->db->fetchValue("SELECT id FROM media WHERE mime LIKE 'image/%' AND mime <> 'image/svg+xml' ORDER BY id DESC LIMIT 1");
+                $img ??= (int) app()->db->fetchValue("SELECT id FROM media WHERE mime LIKE 'image/%' AND mime <> 'image/svg+xml' AND deleted_at IS NULL ORDER BY id DESC LIMIT 1");
                 $sample[$n] = $img ?: null;
             } elseif ($f['type'] === 'date' && !$v) {
                 $sample[$n] = date('Y-m-d', strtotime('+21 days'));

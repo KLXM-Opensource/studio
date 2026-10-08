@@ -410,8 +410,8 @@ final class Custom
     {
         static $img = null, $file = null;
         if ($img === null) {
-            $img = (int) app()->db->fetchValue("SELECT id FROM media WHERE mime LIKE 'image/%' ORDER BY id DESC LIMIT 1");
-            $file = (int) app()->db->fetchValue("SELECT id FROM media WHERE mime NOT LIKE 'image/%' ORDER BY id DESC LIMIT 1");
+            $img = (int) app()->db->fetchValue("SELECT id FROM media WHERE mime LIKE 'image/%' AND deleted_at IS NULL ORDER BY id DESC LIMIT 1");
+            $file = (int) app()->db->fetchValue("SELECT id FROM media WHERE mime NOT LIKE 'image/%' AND deleted_at IS NULL ORDER BY id DESC LIMIT 1");
         }
         $sfx = $n ? ' ' . $n : '';
         $out = [];

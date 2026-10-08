@@ -24,6 +24,22 @@
   <h3 id="nicht-verwendet">Aufräumen: „Nicht verwendet“</h3>
   <p>Links unter den Orten zeigt <b>Nicht verwendet</b> alle Dateien, die nirgends eingebunden sind – weder auf Seiten noch in Datensätzen, Einstellungen oder als Link im Text. Die Zahl daneben verrät, wie viele es sind. Ideal zum Aufräumen: prüfen, mehrere auswählen, löschen. Dateien in Entwürfen gelten als verwendet.</p>
 
+  <h3 id="papierkorb">Papierkorb</h3>
+  <p>Gelöschte Dateien landen im <b>Papierkorb</b> (links unter den Orten) und lassen sich dort mit <b>Wiederherstellen</b> zurückholen. Nach der eingestellten Zeit – Standard 30 Tage – werden sie endgültig gelöscht; im Papierkorb geht das auch sofort (<b>Endgültig löschen</b> bzw. <b>Papierkorb leeren</b>). Verwendete Dateien lassen sich wie bisher gar nicht erst löschen. Die Dauer – oder „Aus“ für sofortiges Löschen – legt die Administration unter <b>Grundeinstellungen → Mediathek</b> fest. Geteilte Medien haben keinen Papierkorb.</p>
+
+  <h3 id="aufraeumen">Doppelte und zu große Dateien</h3>
+  <ul>
+    <li><b>Prüfen → Doppelte Dateien</b> zeigt Dateien, die mehrfach hochgeladen wurden (gleicher Inhalt, auch unter anderem Namen). Rechts steht bei jeder Datei, wo die Kopie liegt. Nicht verwendete Kopien einfach löschen; ist eine Kopie irgendwo eingebunden, dort zuerst die andere Datei auswählen.</li>
+    <li><b>Prüfen → Zu große Dateien</b> listet Dateien über der Grenze aus den Grundeinstellungen (Standard 8 MB). Fotos lassen sich mit <b>Verkleinern</b> sparsamer speichern (PNG-Fotos ohne Transparenz werden zu JPG) – Aussehen, ID und Verwendungen bleiben. Große PDFs oder Videos bitte vorher verkleinern und mit <b>Datei ersetzen</b> austauschen.</li>
+  </ul>
+
+  <h3 id="rechte">Bildrechte und Einwilligungen</h3>
+  <p>Rechts unter <b>Rechte &amp; Einwilligung</b> (zugeklappt) tragen Sie zu jeder Datei ein: <b>Lizenz / Quelle</b> (z. B. „eigenes Foto“, „Pixabay-Lizenz“), <b>Nutzungsrecht bis</b> (leer = unbefristet) und bei Fotos, ob abgebildete Personen <b>eingewilligt</b> haben oder keine Personen erkennbar sind. Läuft ein Nutzungsrecht in 30 Tagen ab, erscheint die Datei unter <b>Prüfen → Nutzungsrecht läuft ab</b>.</p>
+  <p>Die Administration entscheidet unter <b>Grundeinstellungen → Mediathek</b>, wie streng das ist: <b>ausblenden</b>, <b>optional</b> (Standard – die Felder stehen zugeklappt bereit, nichts wird angemahnt) oder <b>Pflicht</b> – dann geht kein Hochladen ohne Lizenz/Quelle und Angabe zu den Personen, und „Prüfen“ zeigt alle Dateien, denen etwas fehlt.</p>
+
+  <h3 id="zip">Mehrere Dateien herunterladen</h3>
+  <p>Mehrere Dateien auswählen (<kbd>⌘</kbd>/<kbd>Strg</kbd>-Klick) → rechts <b>Als ZIP herunterladen</b> (auch im Rechtsklick-Menü). Das ZIP enthält die Originale mit lesbaren Dateinamen.</p>
+
   <h3>Ordnen: Tags und Sammlungen</h3>
   <ul>
     <li><b>Tags</b> (farbige Punkte) tragen Sie rechts in den Informationen ein: Wort tippen, <kbd>Enter</kbd>. Links unter „Tags“ filtern Sie danach.</li>

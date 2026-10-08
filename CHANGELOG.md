@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: Papierkorb, Bildrechte, doppelte und große Dateien, ZIP
+- **Papierkorb** (Grundeinstellungen → Mediathek: 7–90 Tage oder aus, Standard 30): Löschen legt in den Papierkorb, dort
+  Wiederherstellen, endgültig löschen, Papierkorb leeren; abgelaufene Dateien werden beim Öffnen der Mediathek (einmal am Tag) gelöscht.
+- **Bildrechte & Einwilligung** je Datei (Lizenz/Quelle, Nutzungsrecht bis, Einwilligung abgebildeter Personen), zugeklappt im Info-Bereich;
+  Modus ausblenden / optional / **Pflicht** (dann beim Hochladen und Speichern verlangt). Prüfen: Nutzungsrecht läuft ab, bei Pflicht auch ohne Lizenz bzw. Einwilligung.
+- **Doppelte Dateien** (Prüfsumme der gespeicherten Datei, ältere Dateien werden nachgetragen) mit Hinweis auf die Kopien.
+- **Zu große Dateien** (Grenze einstellbar, Standard 8 MB) und **Verkleinern** für Fotos (PNG-Fotos → JPG, sonst neu komprimiert).
+- **Als ZIP herunterladen** für mehrere Dateien (Originale mit lesbaren Namen).
+
 ### Mediathek: Sortieren auch in Symbolen und Mauerwerk
 - Auswahlfeld „Sortieren“ in der Werkzeugleiste (neueste/älteste, zuletzt geändert, Name A–Z/Z–A, Größe, Art); die Liste sortiert weiter über die Spaltenköpfe.
 

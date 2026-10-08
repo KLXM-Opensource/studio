@@ -124,6 +124,17 @@ final class SystemSchema
                         ['name' => 'active', 'label' => 'Aktiv (auf der Website sichtbar)', 'type' => 'bool', 'default' => true],
                     ]],
             ]],
+            ['id' => 'medien', 'label' => 'Mediathek', 'fields' => [
+                ['name' => 'sys.media_trash_days', 'label' => 'Papierkorb', 'type' => 'select', 'required' => true, 'default' => '30',
+                    'options' => ['0' => 'Aus – Löschen ist sofort endgültig', '7' => '7 Tage aufbewahren', '14' => '14 Tage aufbewahren', '30' => '30 Tage aufbewahren', '60' => '60 Tage aufbewahren', '90' => '90 Tage aufbewahren'],
+                    'help' => 'Gelöschte Dateien liegen so lange im Papierkorb der Mediathek und lassen sich wiederherstellen; danach werden sie endgültig gelöscht.'],
+                ['name' => 'sys.media_rights', 'label' => 'Bildrechte und Einwilligungen', 'type' => 'select', 'required' => true, 'default' => 'optional',
+                    'options' => ['off' => 'Ausblenden', 'optional' => 'Optional – Felder zugeklappt in den Details', 'required' => 'Pflicht – Lizenz/Quelle und Einwilligung beim Hochladen und Speichern'],
+                    'help' => 'Lizenz bzw. Quelle, „Nutzungsrecht bis“ und ob abgebildete Personen eingewilligt haben. Fehlende oder ablaufende Angaben zeigt die Mediathek unter „Prüfen“.'],
+                ['name' => 'sys.media_large_mb', 'label' => 'Als „zu groß“ gilt eine Datei ab (MB)', 'type' => 'number', 'width' => 'half', 'default' => 8],
+                ['name' => 'sys.media_large_px', 'label' => '… bzw. ein Bild ab (Pixel, längere Seite)', 'type' => 'number', 'width' => 'half', 'default' => 6000,
+                    'help' => 'Solche Dateien zeigt „Prüfen → Zu große Dateien“; Bilder lassen sich dort auf 4000 px verkleinern.'],
+            ]],
             ['id' => 'mail', 'label' => 'E-Mail-Versand', 'fields' => [
                 ['type' => 'heading', 'label' => 'Versand über Symfony Mailer',
                     'help' => 'Für Plesk empfohlen: SMTP mit dem Postfach der Domain (Port 587, STARTTLS). E-Mails enthalten NIE Formularinhalte – nur den Hinweis „Neue Anfrage liegt vor“.'],
