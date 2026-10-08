@@ -58,3 +58,5 @@ deploy/targets/*.env
 /storage/kits/
 /storage/chat/
 /storage/avatars/
+/storage/visual-diff/
+/.claude/settings.local.json

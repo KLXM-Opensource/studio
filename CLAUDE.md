@@ -34,6 +34,10 @@ php bin/console list | grep selftest       # Selbsttests (data, blocks, push, in
 php bin/console search:index --all         # Suchindex; search:query "…" testet wie Besucher
 ```
 
+Skills für Claude Code in `.claude/skills/`: `feature-fertig` (Abschluss-Checkliste), `deploy` (deploy/deploy.sh),
+`visual-check` (`node tools/visual-diff.mjs vorher|nachher <URL>` + `diff`), `ki-lokal` (Ollama), `release-check`.
+Hooks in `.claude/hooks/`: blockieren riskante Server-Befehle (Dateilisten, `config/`/`storage/` hochladen, Seed), `php -l` nach jeder PHP-Änderung.
+
 Eigene PHP-Skripte gegen eine Website: `$_SERVER['argv'] = $argv = ['console', 'x', '--site=key']; require 'app/bootstrap.php';`
 Browser-Tests: Playwright aus `tools/node_modules/playwright` (Shadow-DOM-Elemente über `page.locator()` erreichbar).
 
