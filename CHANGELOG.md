@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Leere Felder beim Gestalten ausblenden
+- Menü ⋯ → **Leere Felder ausblenden**: Platzhalter „…“ leerer Felder (und ganz leere Überschriften-Bereiche) nehmen keinen Platz
+  mehr ein – echte Abstände beurteilen. Beim Ziehen eines Griffs geschieht das automatisch. Ein Feld mit Fokus bleibt sichtbar.
+
 ### Zieh-Griffe deutlicher
 - Je Funktion eigene Farbe und Form mit Pfeil im Griff (Abstand violett ↕, Textbreite bernstein ↔, Bild/Text pink ↔, Spalten grün ↔),
   Führungslinie an der bewegten Kante, Hinweis „… ziehen“ beim Zeigen.

@@ -171,6 +171,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php if ($edit && $b['hasPage']): ?>
           <?= $item(e(__('Vorschau')) . '<small>' . e(__('ohne Bearbeitungsleisten – speichert vorher')) . '</small>', 'eye', $b['viewUrl'], ' data-editor-preview') ?>
           <button type="button" role="menuitemcheckbox" class="cms-menu__item" tabindex="-1" data-editor-compact aria-checked="false"><span class="cms-menu__ico" aria-hidden="true"><?= icon('list') ?></span><span class="cms-menu__label"><?= e(__('Kompakt')) ?><small><?= e(__('Blöcke einklappen – zum Umsortieren')) ?></small></span></button>
+          <button type="button" role="menuitemcheckbox" class="cms-menu__item" tabindex="-1" data-editor-hide-empty aria-checked="false"><span class="cms-menu__ico" aria-hidden="true"><?= icon('eye-slash') ?></span><span class="cms-menu__label"><?= e(__('Leere Felder ausblenden')) ?><small><?= e(__('echte Abstände sehen – zum Eintippen wieder einblenden')) ?></small></span></button>
           <?= $item(e(__('Markdown importieren …')) . '<small>' . e(__('Text oder .md-Datei als Textblöcke einfügen')) . '</small>', 'file-text', null, ' data-editor-md aria-haspopup="dialog"') ?>
         <?php endif; ?>
         <?php if ($kind === 'entry' && $b['entryPub']): ?>

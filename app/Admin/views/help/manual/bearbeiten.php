@@ -102,6 +102,7 @@ $__sample = $vars['blocks_page'] ?? null;
     <li><b>Spaltenbreiten</b> im Block „Layout (Spalten)“: Griff zwischen zwei Spalten (siehe unten).</li>
   </ul>
   <p>Jede Funktion hat ihre eigene Farbe: <b>violett ↕</b> = Abstand, <b>bernstein ↔</b> = Textbreite, <b>pink ↔</b> = Aufteilung Bild/Text, <b>grün ↔</b> = Spaltenbreiten. Beim Zeigen nennt der Griff, was er ändert, und den aktuellen Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Griffe erscheinen nur dort, wo die Einstellung auch wirkt – Kopfbereiche haben z. B. eigene Abstände, dort gibt es keinen Abstand-Griff. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
+  <p><b>Leere Felder und Abstände:</b> Im Bearbeiten-Modus zeigen leere Felder ein „…“, damit man schnell hineinschreiben kann – sie nehmen dabei Platz ein. Beim Ziehen eines Griffs verschwinden sie automatisch, damit Sie die echten Abstände sehen. Dauerhaft ausblenden: Menü <b>⋯ → Leere Felder ausblenden</b> (zum Eintippen wieder einschalten; der Browser merkt sich die Wahl). Ganz ohne Bearbeitungsleisten zeigt <b>⋯ → Vorschau</b> die Seite wie für Besucher.</p>
 
   <h3 id="layout">Layout: Blöcke in Spalten</h3>
   <p>Für Blöcke <b>nebeneinander</b> – z. B. ein Text (⅔) und daneben eine Box mit Button (⅓), zwei Texte je ½ oder drei kurze Blöcke je ⅓ – gibt es den Block <b>„Layout (Spalten)“</b>. Sie wählen ein <b>Raster</b> und stellen die Blöcke in die Spalten; der Rest der Seite bleibt davon unberührt.</p>

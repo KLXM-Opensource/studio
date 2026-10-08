@@ -7041,4 +7041,6 @@ return [
     '{label}: {v} – noch nicht gespeichert.' => '{label}: {v} – not saved yet.',
     'Spalten' => 'Columns',
     'ziehen' => 'drag',
+    'Leere Felder ausblenden' => 'Hide empty fields',
+    'echte Abstände sehen – zum Eintippen wieder einblenden' => 'see real spacing – show again to type',
 ];

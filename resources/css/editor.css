@@ -299,3 +299,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-drag{opacity:0;transition:opacity .15s}
 .sec:hover>.cms-drag,.cms-drag:focus-within{opacity:1}
 @media (hover:none){.cms-drag{opacity:1}}
+
+/* Leere Felder ausblenden (Menü ⋯ → „Leere Felder ausblenden“) und automatisch beim Ziehen eines Griffs: Platzhalter „…“ nehmen
+   keinen Platz ein, die Seite zeigt echte Abstände. Ein Feld mit Fokus bleibt sichtbar. */
+:is(.cms-hide-empty,.cms-measuring) [data-edit]:empty:not(:focus){display:none}
+:is(.cms-hide-empty,.cms-measuring) :is(.sec-head,.mt__head):not(:has(> :not([data-edit]:empty))):not(:focus-within){display:none}

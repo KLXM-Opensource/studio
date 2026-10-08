@@ -1066,6 +1066,7 @@ function makeTool(type, def) {
         h.addEventListener('pointerdown', e => {
           e.preventDefault(); e.stopPropagation();
           h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+          d.documentElement.classList.add('cms-measuring');
           const total = grid.getBoundingClientRect().width - gap * (cols.length - 1);
           drag = { w: [...units], left: col.getBoundingClientRect().left, unit: total / U, pair: units[i] + units[i + 1], before: units.slice(0, i).reduce((a, b) => a + b, 0) };
           apply(drag.w);
@@ -1081,6 +1082,7 @@ function makeTool(type, def) {
         const end = async e => {
           if (!drag) return;
           const w = drag.w; drag = null; h.classList.remove('is-drag');
+          d.documentElement.classList.remove('cms-measuring');
           if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
           if (w.join() !== units.join()) await commit(w, T('Spaltenbreiten: {w} – noch nicht gespeichert.', { w: label(w) }));
         };
@@ -1180,6 +1182,7 @@ function makeTool(type, def) {
       h.addEventListener('pointerdown', e => {
         e.preventDefault(); e.stopPropagation();
         h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+        d.documentElement.classList.add('cms-measuring');   // leere Felder während des Ziehens ausblenden – echte Abstände
         drag = { x: e.clientX, y: e.clientY, i0: cur(), i: cur() };
       });
       h.addEventListener('pointermove', e => {
@@ -1191,6 +1194,7 @@ function makeTool(type, def) {
       const end = e => {
         if (!drag) return;
         const { i, i0 } = drag; drag = null; h.classList.remove('is-drag');
+        d.documentElement.classList.remove('cms-measuring');
         if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
         if (i !== i0) {
           const st = S.ui('[data-editor-status]');
@@ -2007,6 +2011,17 @@ const setCompact = on => {
 };
 compactBtn?.addEventListener('click', () => setCompact(!holder().classList.contains('is-compact')));
 setCompact(store.get('cms-compact', false));
+// Leere Felder ausblenden (Platzhalter „…“ nehmen sonst Platz ein): Seite mit echten Abständen beurteilen; beim Ziehen eines
+// Griffs geschieht das automatisch (html.cms-measuring, dragHandle/decorateResize)
+const hideEmptyBtn = S.ui('[data-editor-hide-empty]');
+const setHideEmpty = on => {
+  d.documentElement.classList.toggle('cms-hide-empty', on);
+  hideEmptyBtn?.setAttribute('aria-checked', on ? 'true' : 'false');
+  store.set('cms-hide-empty', on);
+  BarPlace.soon();
+};
+hideEmptyBtn?.addEventListener('click', () => setHideEmpty(!d.documentElement.classList.contains('cms-hide-empty')));
+setHideEmpty(store.get('cms-hide-empty', false));
 // Alt/⌥ + ↑/↓ verschiebt den bearbeiteten Block (Seitenleiste offen) bzw. den Block unter der Maus / mit dem Fokus.
 // In Textfeldern bleibt ⌥+Pfeil die Cursor-Bewegung (macOS), solange keine Seitenleiste offen ist.
 d.addEventListener('keydown', e => {
