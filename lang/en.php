@@ -3224,6 +3224,7 @@ return [
     'Größerer Text, keine Überschrift' => 'Larger text, not a heading',
     'Kleingedrucktes, Anmerkungen' => 'Fine print, remarks',
     'Abgesetzter Kasten' => 'Set-off box',
+    'Im PDF-Betrachter öffnen' => 'Open in PDF viewer',
     'pdftoppm für PDF-Vorschaubilder: gefunden ({path})' => 'pdftoppm for PDF thumbnails: found ({path})',
     'pdftoppm für PDF-Vorschaubilder: fehlt (optional) – apt install poppler-utils (bzw. dnf install poppler-utils) oder pdftoppm_path setzen' => 'pdftoppm for PDF thumbnails: missing (optional) – apt install poppler-utils (or dnf install poppler-utils) or set pdftoppm_path',
     'Tipp-Box' => 'Tip box',

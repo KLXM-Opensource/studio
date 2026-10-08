@@ -1153,6 +1153,8 @@ class Finder {
     this.$info.innerHTML = `
       ${this.mode === 'pick' ? `<button type="button" class="adm-btn adm-btn--primary fx-pickbtn" data-pick>Diese Datei verwenden</button>` : ''}
       <div class="fx-i-prev">${isImg ? `<img class="fx-i-img" src="${esc(m.large)}" alt="">`
+        // PDF: 1. Seite als ruhiges Bild (pdftoppm) – Klick öffnet den Betrachter; ohne Vorschaubild der eingebettete Betrachter
+        : m.kind === 'pdf' && m.large ? `<a class="fx-i-doc" href="${esc(m.viewer)}" target="_blank" rel="noopener" title="${esc(t('Im PDF-Betrachter öffnen'))}"><img class="fx-i-img" src="${esc(m.large)}" alt=""><span class="fx-pbadge">PDF${m.pages ? ` · ${m.pages} S.` : ''} ↗</span></a>`
         : m.kind === 'pdf' ? `<iframe src="${esc(m.viewer)}?embed=1" title="Vorschau: ${esc(m.display)}"></iframe>`
         : m.kind === 'video' ? `<video src="${esc(m.url)}"${m.large ? ` poster="${esc(m.large)}"` : ''} controls preload="metadata"></video>`
         : m.kind === 'audio' ? `<audio src="${esc(m.url)}" controls preload="metadata"></audio>` : ''}</div>
