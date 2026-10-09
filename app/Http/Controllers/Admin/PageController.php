@@ -120,6 +120,7 @@ final class PageController extends AdminController
         app()->db->update('pages', $data, 'id = :id', ['id' => $id]);
         Pages::rebuildPaths();
         $this->changed();
+        \Core\Activity::log('settings', 'page', $id, (string) ($data['title'] ?? $page['title']), ['lang' => $page['lang'] ?? null]);   // Aktionslog
         return [$data, [], $warn];
     }
 

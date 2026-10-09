@@ -506,7 +506,7 @@ final class Entries
     {
         $was = $old['status'] ?? null;
         $pub = $status === 'published' && $was !== 'published' ? 'entry.published' : ($status !== 'published' && $was === 'published' ? 'entry.unpublished' : null);
-        if (!\Core\Extensions::listens('entry.saved') && !($pub && \Core\Extensions::listens($pub))) return;
+        // immer senden: Aktionslog (Core\Activity) und Erweiterungen
         $e = self::find($table, $id);
         if (!$e) return;
         \Core\Extensions::emit(new \Core\Events\EntrySaved($table, $e, $old));

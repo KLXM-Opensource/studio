@@ -210,6 +210,9 @@ $rotate = function (string $dir, string $prefix, int $default) use ($args): void
     foreach (array_slice($files, $keep) as $old) if (@unlink($old)) fwrite(STDERR, "  gelöscht (älter als die neuesten $keep): " . basename($old) . "\n");   // STDERR: letzte Ausgabezeile bleibt der Dateiname (deploy/sync-content.sh)
 };
 
+// Selbsttests legen Testdaten an und räumen sie ab – nicht ins Aktionslog (Core\Activity)
+if (str_ends_with((string) $cmd, ':selftest')) \Core\Activity::pause();
+
 switch ($cmd) {
     case 'user:create':
         $email = $args[0] ?? $ask('E-Mail: ');

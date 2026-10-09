@@ -178,6 +178,10 @@ final class Database
             // Funktionen & Erweiterungen: wer hat wann was geschaltet (Core\FeatureLog)
             'feature_log' => "id $pk, created_at VARCHAR(25) NOT NULL, user_id INT NULL, user_email $str NULL, kind VARCHAR(12) NOT NULL,
                 target VARCHAR(80) NOT NULL, old_value VARCHAR(12) NULL, new_value VARCHAR(12) NULL, detail $str NULL, ip_hash VARCHAR(32) NULL",
+            // Aktionslog (Core\Activity): wer hat wann Seiten, Einträge, Medien angelegt, geändert, veröffentlicht, gelöscht
+            'activity_log' => "id $pk, created_at VARCHAR(25) NOT NULL, user_id INT NULL, user_name $str NULL, action VARCHAR(16) NOT NULL,
+                type VARCHAR(12) NOT NULL, tbl VARCHAR(64) NULL, entity_id INT NOT NULL DEFAULT 0, label $str NULL, lang VARCHAR(8) NULL,
+                n INT NOT NULL DEFAULT 1, detail $str NULL",
             // Landingpages mit eigenen Domains (Core\Landings): Domain(s) → Seite bzw. Seitenzweig, Optionen/Marke als JSON
             'landings' => "id $pk, label $str NULL, hosts TEXT NOT NULL, page_id INT NOT NULL, include_subpages INT NOT NULL DEFAULT 1,
                 mode VARCHAR(10) NOT NULL DEFAULT 'own', options_json TEXT, active INT NOT NULL DEFAULT 1, created_at VARCHAR(25), updated_at VARCHAR(25)",
@@ -268,6 +272,8 @@ final class Database
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS pages_parent ON pages (parent_id, sort)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS inbox_log_time ON inbox_log (created_at)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS change_log_status ON change_log (status, id)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS activity_time ON activity_log (created_at)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS activity_entity ON activity_log (type, tbl, entity_id)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_tracks_media ON media_tracks (media_id, status)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_jobs_status ON media_jobs (status, id)');
         }

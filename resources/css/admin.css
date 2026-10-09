@@ -3387,3 +3387,53 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .mu-rights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:6px 10px;margin-top:6px}
 .mu-rights select{min-height:32px}
 @media (max-width:600px){.pt-h-hints{visibility:hidden}}   /* Seitenbaum schmal: Überschrift „Hinweise“ passt nicht, die Symbole haben Tooltips */
+
+/* ================= Aktionslog (System → Aktionslog, Core\Activity) ================= */
+.al-filter{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 12px;margin:0 0 16px}
+.al-filter .al-search{margin:0;flex:1 1 220px;max-width:320px}
+.al-sel{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--adm-t3)}
+.al-sel select{min-width:150px}
+.al-card{padding:0;overflow-x:auto}
+.al-table td,.al-table th{padding:10px 14px}
+.al-table td{vertical-align:top}
+.al-day th{padding:14px 14px 6px;background:var(--adm-fill);color:var(--adm-t2);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.al-time{white-space:nowrap;color:var(--adm-t3);font-variant-numeric:tabular-nums}
+.al-user{white-space:nowrap}
+.al-user .al-ava{width:24px;height:24px;font-size:10px;vertical-align:middle}
+.al-act{display:inline-block;padding:1px 0 1px 9px;border-left:3px solid var(--adm-line);font-weight:600;white-space:nowrap}
+.al-act--new{border-color:var(--adm-ok)}
+.al-act--live{border-color:var(--adm-a)}
+.al-act--off,.al-act--changed{border-color:var(--adm-t3)}
+.al-act--gone{border-color:#c0392b;color:var(--adm-t2)}
+.al-kind{white-space:nowrap;color:var(--adm-t2)}
+.al-kind svg,.al-view svg{width:15px;height:15px;vertical-align:-2px}
+.al-obj{min-width:220px}
+.al-obj a{font-weight:600}
+.al-gone{color:var(--adm-t3);text-decoration:line-through;text-decoration-thickness:1px}
+.al-view{color:var(--adm-t3)}
+.al-lang{padding:0 5px;border:1px solid var(--adm-line);border-radius:4px;color:var(--adm-t3);font-size:11px}
+.al-detail{display:block;margin-top:2px;color:var(--adm-t3)}
+.al-pager{display:flex;align-items:center;gap:12px;margin:14px 0}
+.al-pager>span:first-child{margin-right:auto}
+@media (max-width:700px){.al-sel select{min-width:0}.al-filter .al-search{max-width:none;flex-basis:100%}}
+.al-filter>.adm-btn{min-height:36px}
+
+/* ================= Seitenbaum ruhiger (09.10.2026) ================= */
+/* „Online“ ist der Normalfall – zurückhaltend; Offline/Entwurf bleiben kräftig (die Abweichung fällt auf) */
+.pt-status .dt-status--published{color:var(--adm-t3);font-weight:400}
+.pt-status .dt-status--offline,.pt-status .dt-status--draft{color:var(--adm-t1,var(--adm-ink));font-weight:600}
+/* Menü-Schalter leichter: aus = nur Umriss, an = zarte Akzentfläche mit Akzent-Knopf */
+.pt-switch{width:30px;height:18px}
+.pt-switch span{border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--adm-line)}
+.pt-switch span::after{left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--adm-t3);opacity:.55}
+.pt-switch input:checked + span{background:var(--adm-info-bg);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--adm-a) 45%,transparent)}
+.pt-switch input:checked + span::after{transform:translateX(12px);background:var(--adm-a);opacity:1}
+.pt-node[aria-selected=true] > .pt-row .pt-switch span{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)}
+.pt-node[aria-selected=true] > .pt-row .pt-switch span::after{background:#fff;opacity:1}
+/* Auge und „⋯“ nur bei Bedarf (Maus über der Zeile, Fokus, gewählte Zeile, Vorschau offen) – Touch: immer sichtbar */
+@media (hover:hover) and (pointer:fine){
+  .pt-row .pt-pvbtn,.pt-row .pt-morebtn{opacity:0;transition:opacity .12s}
+  .pt-row:hover :is(.pt-pvbtn,.pt-morebtn),.pt-row:focus-within :is(.pt-pvbtn,.pt-morebtn),.pt-node[aria-selected=true] > .pt-row :is(.pt-pvbtn,.pt-morebtn),
+  .pt-pvbtn[aria-pressed=true],.pt-pvbtn:focus-visible,.pt-morebtn:focus-visible,.pt-morebtn[aria-expanded=true]{opacity:1}
+}
+.pt-date{font-variant-numeric:tabular-nums}

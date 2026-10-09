@@ -397,7 +397,7 @@ final class Pages
         self::db()->update('pages', ['content_draft' => $json, 'updated_at' => now()], 'id = :id', ['id' => $id]);
         self::addRevision($id, $json, $userId, $note);
         // Ereignis für Erweiterungen (Extension::on): Entwurf gespeichert
-        if (Extensions::listens('page.saved') && ($p = self::find($id))) Extensions::emit(new Events\PageSaved($p, $userId));
+        if (($p = self::find($id))) Extensions::emit(new Events\PageSaved($p, $userId));
     }
 
     /** Offene Platzhalter „[bitte ergänzen: …]“ (KI-Assistent, Core\AI) im JSON bzw. Text einer Seite */
@@ -430,7 +430,7 @@ final class Pages
         ], 'id = :id', ['id' => $id]);
         PageCache::clear();
         Live::touch('page:' . $id);   // Live-Blöcke dieser Seite (Core\Live)
-        if (Extensions::listens('page.published') && ($p = self::find($id))) Extensions::emit(new Events\PagePublished($p, $userId));
+        if (($p = self::find($id))) Extensions::emit(new Events\PagePublished($p, $userId));
     }
 
     /**
@@ -448,7 +448,7 @@ final class Pages
             self::db()->update('pages', ['status' => 'draft', 'updated_at' => now()], 'id = :id', ['id' => $id]);
             PageCache::clear();   // Seiten-Cache + Suchindex (Core\Search::changed)
             Live::touch('page:' . $id);   // Live-Blöcke dieser Seite (Core\Live)
-            if (Extensions::listens('page.unpublished') && ($q = self::find($id))) Extensions::emit(new Events\PageUnpublished($q));
+            if (($q = self::find($id))) Extensions::emit(new Events\PageUnpublished($q));
         }
         return true;
     }
@@ -478,7 +478,7 @@ final class Pages
         }
         self::db()->update('pages', ['content_draft' => $p['content_published'], 'updated_at' => now()], 'id = :id', ['id' => $id]);
         self::addRevision($id, (string) $p['content_published'], $userId, $note);
-        if (Extensions::listens('page.discarded') && ($q = self::find($id))) Extensions::emit(new Events\PageDiscarded($q, $userId));
+        if (($q = self::find($id))) Extensions::emit(new Events\PageDiscarded($q, $userId));
         return true;
     }
 
@@ -521,6 +521,7 @@ final class Pages
             'updated_at' => now(), 'published_at' => $status === 'published' ? now() : null,
         ], $fields));
         self::rebuildPaths();
+        Activity::log('created', 'page', $id, (string) ($fields['title'] ?? ''), ['lang' => $fields['lang'] ?? null]);   // Aktionslog
         return $id;
     }
 }

@@ -24,7 +24,16 @@ $statusCell = function (array $p) use ($canPub): string {
         . ' aria-label="' . e(__('„{title}“: {status} – {action}', ['title' => $p['title'], 'status' => $label, 'action' => $act])) . '" title="' . e($act) . '">'
         . e($label) . '</button>';
 };
-$row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
+// Geändert: kurz und ruhig – „heute“, „gestern“, „3.10.“ (anderes Jahr: „3.10.2025“), genau im Tooltip
+$short = function (string $t): string {
+    $ts = (int) strtotime($t);
+    return match (date('Y-m-d', $ts)) {
+        date('Y-m-d') => __('heute') . ' ' . date('H:i', $ts),
+        date('Y-m-d', time() - 86400) => __('gestern'),
+        default => date('Y', $ts) === date('Y') ? date('j.n.', $ts) : date('j.n.Y', $ts),
+    };
+};
+$row = function (array $n) use (&$row, &$count, $multi, $statusCell, $short): string {
     $p = $n['page'];
     $count++;
     $url = Pages::url($p);
@@ -57,7 +66,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
             array_map(fn($b) => [$b['tone'], $b['icon'] ?: ['ok' => 'check-circle', 'warn' => 'warning'][$b['tone']] ?? 'info', $b['label'] . ($b['title'] !== '' ? ' – ' . $b['title'] : '')], $ext['badges'])
         ))) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
-        . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'
+        . '<span class="pt-date" title="' . e(date('d.m.Y H:i', strtotime((string) $p['updated_at']))) . '">' . e($short((string) $p['updated_at'])) . '</span>'
         . '<span class="pt-more"><button type="button" class="pt-morebtn" data-more aria-label="Aktionen für „' . e($p['title']) . '“">' . icon('dots-three') . '</button></span>'
         . '</div>';
     if ($kids) {

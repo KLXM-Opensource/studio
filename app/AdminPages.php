@@ -183,6 +183,8 @@ final class AdminPages
                 // Sammelseite (kind settings): Einstellungen der Funktionen & Erweiterungen – nur wenn es etwas zu zeigen gibt
                 [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
                 ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
+                // Aktionslog (Core\Activity): wer hat wann Seiten, Datensätze, Medien angelegt, geändert, veröffentlicht, gelöscht
+                ['/admin/aktionslog', __('Aktionslog'), 'activity', \Core\Activity::canView()],
                 // Werkzeuge/Infoseiten von Funktionen und Erweiterungen (nav('admin'), v. a. kind tool – z. B. Video-Werkzeuge)
                 ...self::nav('admin'),
             ]],

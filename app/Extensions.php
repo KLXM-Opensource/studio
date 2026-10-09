@@ -567,12 +567,14 @@ final class Extensions
     public static function emit(string|Events\Event $event, mixed ...$args): void
     {
         if (is_string($event)) {
+            if (str_starts_with($event, 'media.')) Activity::fromMedia($event, $args);   // Aktionslog
             foreach (self::$active as $x) {
                 foreach ($x->listeners[$event] ?? [] as $fn) self::safe($x, 'on ' . $event, fn() => $fn(...$args));
             }
             return;
         }
         Live::fromEvent($event);   // Live-Kanäle (page:{id}) – auch ohne Erweiterungen
+        Activity::fromEvent($event);   // Aktionslog – auch ohne Erweiterungen
         $name = $event->name();
         foreach (self::$active as $x) {
             foreach ($x->listeners[$event::class] ?? [] as $fn) self::safe($x, 'on ' . $name, fn() => $fn($event));

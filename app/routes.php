@@ -142,6 +142,7 @@ return function (Router $r): void {
     // Entwürfe: offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen, Notiz/Zuständigkeit (Core\Review\Drafts)
     $dr = Admin\DraftController::class;
     $r->get('/admin/entwuerfe', [$dr, 'index']);
+    $r->get('/admin/aktionslog', [Admin\ActivityController::class, 'index']);   // Aktionslog (Core\Activity)
     $r->get('/admin/entwuerfe/seite/{id}', [$dr, 'page']);
     $r->get('/admin/entwuerfe/eintrag/{table}/{id}', [$dr, 'entry']);
     $r->post('/admin/entwuerfe/notiz', [$dr, 'note']);

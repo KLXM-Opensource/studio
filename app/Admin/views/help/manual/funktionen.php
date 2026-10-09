@@ -17,6 +17,14 @@
     <li>„Fester Bestandteil“ kennzeichnet Erweiterungen, ohne die diese Website nicht funktioniert; sie lassen sich hier nicht abschalten.</li>
     <li>Erweiterungen sind eigene Pakete, die die Agentur per Composer installiert – z. B. <b>Entwurf teilen &amp; freigeben</b> (<code>klxm/studio-freigabe</code>): den Entwurf einer Seite per geheimem Link zeigen, Kommentare, Dateien und eine Freigabe einsammeln, ohne Konto für die Empfänger und ohne automatische Veröffentlichung.<?php if ($has('entwurf-teilen')): ?> Anleitung: <a href="#<?= e($anchor('entwurf-teilen')) ?>">Entwurf teilen und freigeben lassen</a>.<?php endif; ?> Eine aktive Erweiterung bringt ihr eigenes Kapitel in dieses Handbuch mit.</li>
   </ul>
+  <h3 id="aktionslog">Aktionslog: wer hat was geändert?</h3>
+  <p>Unter <b>System → Aktionslog</b> (nur Administration) steht, wer wann Seiten, Datensätze und Medien <b>angelegt</b>, <b>geändert</b>, <b>veröffentlicht</b>, <b>offline genommen</b> oder <b>gelöscht</b> hat – mit Link direkt zur Seite, zum Datensatz oder zum Medium (gelöschte erscheinen durchgestrichen). Seiten lassen sich über <?= icon('arrow-square-out', ['label' => 'Ansehen']) ?> gleich auf der Website öffnen.</p>
+  <ul>
+    <li><b>Filtern</b> nach Art (Reiter Seiten, Datensätze, Medien – mit Anzahl), Aktion (Neu, Geändert, Veröffentlicht/offline, Gelöscht), Person und Zeitraum; Suche im Namen.</li>
+    <li><b>Sortieren</b>: neueste oder älteste zuerst (nach Tagen gruppiert), nach Art oder nach Person.</li>
+    <li>Speichert jemand dieselbe Sache mehrmals innerhalb von 15 Minuten, erscheint das als ein Eintrag („geändert ×3“). Einträge bleiben ein Jahr erhalten. Beim ersten Aufruf übernimmt das Log die Versionen der letzten 90 Tage („aus Versionen“).</li>
+  </ul>
+
   <h3 id="einstellungen-sammelseite">Wo Seiten von Funktionen und Erweiterungen erscheinen</h3>
   <p>Damit die Seitenleiste übersichtlich bleibt, gilt eine feste Ordnung:</p>
   <ul>
