@@ -59,4 +59,8 @@ return [
     'öffnet {tag} um {zeit} Uhr' => 'opens {tag} at {zeit}',
     // Einstieg: Such-Einstieg, Standort
     'Häufig gesucht' => 'Frequently searched',
+    // Kern-Texte (Datenformulare, Hinweise)
+    '(optional)' => '(optional)',
+    'Anfahrt' => 'Directions',
+    'Datenschutzhinweise' => 'Privacy notice',
 ];
