@@ -346,4 +346,14 @@ return [
     'Optional. Ohne Bild zeigt das Paneel ein ruhiges Punktraster mit Regler (keine Datei nötig). Bei „Video im Geräterahmen“: Standbild.' => 'Optional. Without an image the panel shows a calm dot grid with a dial (no file needed). With “Video in a device frame”: still image.',
     'Kanäle: im Feld „Kennwerte“ je Zeile „Bezeichnung: Wert“ eintragen.' => 'Channels: enter one “Label: value” per line in the “Key figures” field.',
     'Bitte ein Video (MP4) wählen – das Bild dient als Standbild.' => 'Please choose a video (MP4) – the image serves as the still.',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the menu in the bar and in the side sheet (phone). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];

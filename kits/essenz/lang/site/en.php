@@ -60,4 +60,6 @@ return [
     'Seite nicht gefunden' => 'Page not found',
     'Zurück' => 'Back',
     '…' => '…',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];
