@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenverwaltung: Kennzeichen lesbar
+- „noindex“ und die Kennzeichen von Erweiterungen stehen jetzt direkt hinter dem Seitentitel statt in der schmalen Statusspalte,
+  wo sie zu „noin…“ abgeschnitten wurden. Etwas größer, lange Texte erst ab 140 px gekürzt (voller Text als Tooltip).
+
 ### Formulare: kompakte Fehleranzeige
 - Statt einer langen Liste ganzer Sätze zeigt die Übersicht oben „n Angaben fehlen“ und die **Feldnamen als Chips** (ab vier: „+ n weitere“);
   ein Klick springt zum Feld. Die vollständige Meldung steht weiter am Feld.

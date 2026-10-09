@@ -43,6 +43,9 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . ($kids ? '<button type="button" class="pt-twisty" tabindex="-1" aria-hidden="true" data-toggle></button>' : '<span class="pt-twisty pt-twisty--none"></span>')
         . '<span class="pt-icon pt-icon--' . ($p['is_home'] ? 'home' : ($kids ? 'folder' : 'page')) . '" aria-hidden="true"></span>'
         . '<a class="pt-title" href="' . e($url) . '?edit=1" tabindex="-1">' . e($p['title']) . '</a>'
+        // Kennzeichen (noindex, Erweiterungen über Extension::pageList) hinter dem Titel – dort ist Platz, die Statusspalte ist schmal
+        . (($tags = (!empty($p['noindex']) ? '<span class="pt-ext pt-ext--info" title="' . e(__('Nicht in Suchmaschinen und Sitemap')) . '">' . e(__('noindex')) . '</span>' : '')
+            . implode('', array_map(fn($b) => '<span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges']))) !== '' ? '<span class="pt-tags">' . $tags . '</span>' : '')
         . ($multi ? '<span class="pt-langs">' . implode('', array_map(fn($l) => '<span class="pt-lang' . (in_array($l, $trans, true) ? ' is-on' : '') . '" title="' . e(Lang::all()[$l]) . '">' . e(strtoupper($l)) . '</span>', array_keys(Lang::all()))) . '</span>' : '')
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
@@ -51,8 +54,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . ' <button type="button" class="pt-pvbtn" data-ptpv-row aria-pressed="false" aria-label="' . e(__('Vorschau: {title}', ['title' => $p['title']])) . '" title="' . e(__('Vorschau')) . '">' . icon('eye') . '</button>'
         // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
         . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
-        . (!empty($p['noindex']) ? ' <span class="pt-ext pt-ext--info" title="' . e(__('Nicht in Suchmaschinen und Sitemap')) . '">' . e(__('noindex')) . '</span>' : '')
-        . implode('', array_map(fn($b) => ' <span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges'])) . '</span>'
+        . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'
         . '<span class="pt-more"><button type="button" class="pt-morebtn" data-more aria-label="Aktionen für „' . e($p['title']) . '“">' . icon('dots-three') . '</button></span>'

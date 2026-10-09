@@ -2631,8 +2631,10 @@ img.adm-ava{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.22)}
 .fx-vbadge svg{width:13px;height:13px;margin-left:2px}
 @media (forced-colors:active){.fx-vbadge{border:1px solid CanvasText}}
 /* Seitenbaum: Hinweise von Erweiterungen in der Spalte „Status“ (Extension::pageList) */
-.pt-ext{display:inline-block;max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;margin-left:2px;
-  padding:0 6px;border-radius:999px;font-size:11px;font-weight:600;line-height:17px;background:var(--adm-fill);color:var(--adm-t2)}
+/* Kennzeichen hinter dem Seitentitel: schrumpfen nicht (der Titel kürzt sich), lange Texte ab 140px mit … und vollem Text im title */
+.pt-tags{display:flex;flex:none;gap:4px;min-width:0;max-width:45%}
+.pt-ext{display:inline-block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;
+  padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;line-height:17px;background:var(--adm-fill);color:var(--adm-t2)}
 .pt-ext--ok{background:var(--adm-ok-bg);color:var(--adm-ok)}
 .pt-ext--warn{background:var(--adm-warn-bg);color:var(--adm-warn)}
 .pt-ext--info{background:var(--adm-info-bg);color:var(--adm-a-ink)}
@@ -2919,7 +2921,7 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
 @media (max-width:600px){
   .pt-status{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden}
   .pt-status .pt-draft{flex:none;width:9px;height:9px;min-height:0;padding:0;border-radius:50%;background:var(--adm-warn);font-size:0;color:transparent;overflow:hidden}
-  .pt-status .pt-ext{display:none}
+  .pt-tags{display:none}
 }
 
 /* Feld „Sammlung“: Auswahl + „Medien öffnen …“ (Sammlung anlegen, füllen, übernehmen) */
