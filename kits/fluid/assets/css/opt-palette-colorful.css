@@ -21,7 +21,7 @@ html.pal-colorful{--f-p1:var(--f-a);--f-p2:var(--f-b);--f-p3:var(--f-c3);--f-p4:
 /* Dachzeilen: Strich, Punkt bzw. Etikett im Farbton des Abschnitts */
 .pal-colorful .eyebrow::before{background:var(--f-tone)}
 .pal-colorful.eb-dot .eyebrow::before{box-shadow:0 0 0 .22em var(--f-tone-soft,var(--f-a-soft))}
-.pal-colorful.eb-pill .eyebrow{background:var(--f-tone-soft,var(--f-a-soft))}
+.pal-colorful.eb-pill .eyebrow{background:color-mix(in srgb,var(--f-tone,var(--f-a)) 20%,var(--f-tone-soft,var(--f-a-soft)))}   /* kräftiger als die Tönung der Sektion – sonst unsichtbar */
 .pal-colorful :is(.bg-accent,.bg-dark,.bg-secondary,.on-media) .eyebrow::before{background:currentColor}
 
 /* Symbole, Karten, Kennzahlen, Schritte */

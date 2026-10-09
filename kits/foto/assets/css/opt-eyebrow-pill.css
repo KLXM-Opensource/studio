@@ -1,2 +1,3 @@
 /* Kit „foto“ – Design-Option (lädt nur, wenn unter Verwaltung → Design gewählt; templates/layout.php) */
-.eb-pill .eyebrow{padding:.4em .9em;border-radius:999px;background:var(--f-a-soft);color:var(--f-ink);letter-spacing:.02em;text-transform:none;font-weight:600}
+/* Fläche immer etwas kräftiger als der Hintergrund der Sektion (auf getönten Sektionen sonst unsichtbar – wirkt wie ein Einzug) */
+.eb-pill .eyebrow{padding:.4em .9em;border-radius:999px;background:color-mix(in srgb,var(--f-a) 18%,var(--f-sec-bg,var(--f-bg)));color:var(--f-ink);letter-spacing:.02em;text-transform:none;font-weight:600}
