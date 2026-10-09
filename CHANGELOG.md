@@ -16,6 +16,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   daneben die Unterseiten, kein Eintrag „Übersicht“ mehr), „Link + Pfeil, öffnet auch beim Überfahren“ oder wie bisher „Klick öffnet,
   mit Übersicht“; auch im Menü auf dem Telefon (eigene Pfeil-Schaltfläche je Zweig).
 - **Dritte Menüebene** im Aufklappmenü: „Eingerückt“ (mit Linie, kleiner – Standard) oder „Gruppiert“ (zweite Ebene als Zwischenüberschrift).
+- Gleiches Verhalten und dieselben zwei Design-Optionen in den Kits foto, galerie, essenz, nature, modern, glas, basis (auch Mega-Menü) und editorial;
+  starter und frameworks hatten schon Link + Hover ohne „Übersicht“. Dort und in den Kits mit eigener `*Wort*`-Hervorhebung ist sie beim Bearbeiten sichtbar.
 
 ### Verwaltung: Fehlermeldungen nicht mehr zu übersehen
 - Fehler erscheinen als auffällige rote Karte oben mittig (bleibt, bis man sie schließt), Erfolg und Hinweise unten – in der Verwaltung
