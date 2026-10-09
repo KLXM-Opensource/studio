@@ -6,7 +6,9 @@
  *  - Hülle .cms-cq-site um Kopf, Inhalt und Fuß (alle Kinder von <body> außer den Ebenen des Editors und Elementen mit
  *    position:fixed – die blieben sonst in der Hülle gefangen); sie ist ein Container („site“, inline-size).
  *  - Stylesheets der Seite (gleiche Domain, nicht die des Editors) werden geladen und umgeschrieben: @media-Abfragen, die nur die
- *    Breite prüfen, werden zu @container site (…); vw → cqi (Anteil der Seitenbreite); darin :root/html/body → .cms-cq-site>*
+ *    Breite prüfen, werden zu @container site (…); vw → calc(n * var(--cms-vw)) – 1 % der Seitenbreite in px, am <html> gesetzt
+ *    (ResizeObserver); nicht cqi: in Variablen wie Schriftskalen würde cqi erst am verwendenden Element und damit gegen den
+ *    nächsten (oft schmalen) Container gerechnet – Überschriften wurden im Editor kleiner; darin :root/html/body → .cms-cq-site>*
  *    (Variablen und Schriftgrößen der Haltepunkte); url(…) bleiben gültig. Das Original wird abgeschaltet (<link disabled>).
  *  - Abfragen mit anderen Merkmalen (prefers-*, hover, print, orientation …) bleiben unverändert.
  * Grenzen: Skripte des Kits, die die Fensterbreite abfragen (matchMedia), sehen weiter das Fenster; rem bezieht sich weiter auf <html>.
@@ -62,7 +64,7 @@ export function convertCss(css, base) {
     re.lastIndex = i;
   }
   out += css.slice(i);
-  return out.replace(/(-?\d*\.?\d+)vw\b/g, '$1cqi');
+  return out.replace(/(-?\d*\.?\d+)vw\b/g, 'calc($1 * var(--cms-vw, 1vw))');
 }
 
 const cache = new Map();   // Adresse → umgeschriebenes CSS (Promise) – Blöcke werden oft neu gezeichnet
@@ -97,6 +99,10 @@ export async function responsiveEditing() {
   wrap.className = 'cms-cq-site';
   kids[0].before(wrap);
   kids.forEach(k => wrap.append(k));
+  // 1 % der Seitenbreite als feste Länge (ersetzt vw in den umgeschriebenen Stylesheets) – folgt der Seitenleiste
+  const setVw = () => d.documentElement.style.setProperty('--cms-vw', wrap.clientWidth / 100 + 'px');
+  setVw();
+  if ('ResizeObserver' in window) new ResizeObserver(setVw).observe(wrap);
   [...d.querySelectorAll('link[rel~="stylesheet"][href]')].forEach(convertLink);
   // Später eingefügte Stylesheets (Blöcke bringen eigenes CSS in ihrer Vorschau mit, z. B. der Einstieg) ebenfalls umschreiben
   new MutationObserver(list => list.forEach(r => r.addedNodes.forEach(n => {
