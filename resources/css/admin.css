@@ -3424,8 +3424,8 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .pt-status .dt-status--offline,.pt-status .dt-status--draft{color:var(--adm-t1,var(--adm-ink));font-weight:600}
 /* Menü-Schalter leichter: aus = nur Umriss, an = zarte Akzentfläche mit Akzent-Knopf */
 .pt-switch{width:30px;height:18px}
-.pt-switch span{border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--adm-line)}
-.pt-switch span::after{left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--adm-t3);opacity:.55}
+.pt-switch span{border-radius:5px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--adm-line)}   /* eckig wie die übrigen Schalter der Verwaltung */
+.pt-switch span::after{left:3px;top:3px;width:12px;height:12px;border-radius:2px;background:var(--adm-t3);opacity:.55}
 .pt-switch input:checked + span{background:var(--adm-info-bg);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--adm-a) 45%,transparent)}
 .pt-switch input:checked + span::after{transform:translateX(12px);background:var(--adm-a);opacity:1}
 .pt-node[aria-selected=true] > .pt-row .pt-switch span{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)}

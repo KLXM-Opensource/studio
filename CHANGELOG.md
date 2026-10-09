@@ -15,7 +15,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   gesendet (auch ohne zuhörende Erweiterung). Selbsttests schreiben nicht ins Log.
 
 ### Seitenverwaltung ruhiger
-- „Online“ zurückhaltend grau, Offline und Entwurf hervorgehoben; Menü-Schalter leichter (aus = Umriss, an = zarte Akzentfläche).
+- „Online“ zurückhaltend grau, Offline und Entwurf hervorgehoben; Menü-Schalter leichter und eckig wie die übrigen Schalter (aus = Umriss, an = zarte Akzentfläche).
 - Vorschau-Auge und „⋯“ erscheinen mit der Maus erst beim Überfahren der Zeile (Tastatur: gewählte Zeile; Touch: immer).
 - „Geändert“ kurz: heute + Uhrzeit, gestern, „3.10.“ – genaues Datum im Tooltip.
 
