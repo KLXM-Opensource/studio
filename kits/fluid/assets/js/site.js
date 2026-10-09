@@ -83,6 +83,9 @@ d.addEventListener('click', e => subs.forEach(s => { if (s.open && inline(s) && 
 const tops = () => nav ? [...nav.querySelectorAll('.hnav__list > .hnav__item > .hnav__link, .hnav__list > .hnav__item > .hnav__sub > .hnav__link')] : [];
 d.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    // Akkordeon/Slide: erst die innerste offene Unterebene schließen, Fokus auf ihren Elterneintrag
+    const lvl = d.activeElement?.closest?.('.hnav__det[open]');
+    if (lvl) { lvl.open = false; lvl.parentElement.querySelector('a[href]').focus(); return; }
     const open = subs.find(s => s.open && inline(s));
     if (open) { open.open = false; open.querySelector('summary').focus(); }
     return;

@@ -23,7 +23,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Zeilen mit Rundung passend zur Menü-Ecke; die aktuelle Seite hat einen eigenen Strich mit Abstand zu den Ecken.
 - Fokusrahmen liegt innen und wird an den runden Ecken nicht mehr abgeschnitten.
 - Slide: Die Zurück-Zeile („‹ Elternseite“) ist ringsum gerundet wie die Einträge, die Trennlinie steht gerade darunter.
-- Tastatur (Akkordeon und Slide): **→** öffnet die Unterseiten und springt hinein, **←** schließt sie und springt zum Elterneintrag zurück; ↑ ↓ überspringen zugeklappte Ebenen.
+- Tastatur (Akkordeon und Slide): **→** öffnet die Unterseiten und springt hinein, **←** schließt sie und springt zum Elterneintrag zurück; ↑ ↓ überspringen zugeklappte Ebenen; **Esc** schließt erst die innerste Ebene, dann das Menü.
 
 ### Seitenverwaltung: Spalte „Hinweise“, Adressen auf Wunsch
 - Kennzeichen sind jetzt **Symbole in einer eigenen Spalte „Hinweise“** mit Tooltip: offener Entwurf (Stift), noindex (durchgestrichene Lupe),
