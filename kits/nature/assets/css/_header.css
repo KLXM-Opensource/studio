@@ -51,6 +51,14 @@
 .hnav__link[aria-current=page]::after,.hnav__link[data-active]::after,.hnav__sub[data-active]>.hnav__link::after{content:"";position:absolute;left:50%;bottom:.3rem;width:1.25rem;height:3px;margin-left:-.625rem;border-radius:3px;background:var(--n-a)}
 .hnav__chev{font-size:.85em;transition:rotate .2s}
 .hnav__sub[open]>.hnav__link .hnav__chev{rotate:180deg}
+/* Link + Pfeil (Design „Menüpunkte mit Unterseiten“): Menüpunkt öffnet seine Seite, der Pfeil daneben die Unterseiten */
+.hnav__item--split{display:flex;align-items:center}
+.hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.15rem;border-start-end-radius:0;border-end-end-radius:0}
+.hnav .hnav__item--split>.hnav__sub>.hnav__toggle{justify-content:center;min-width:1.6rem;padding:0 .45rem 0 .3rem;border-start-start-radius:0;border-end-start-radius:0}
+.hnav__item--split>.hnav__sub>.hnav__toggle{text-decoration:none}
+.hnav__item--split:hover>.hnav__link--top,.hnav__item--split:hover>.hnav__sub>.hnav__toggle{background:var(--n-surface)}
+.hnav .hnav__item--split:has(>.hnav__sub[open])>.hnav__link--top,.hnav .hnav__item--split>.hnav__sub[open]>.hnav__toggle{background:var(--n-a-soft);color:var(--n-ink)}
+.hnav__item--split>.hnav__sub>.hnav__toggle::after{content:none}
 
 /* Sprache: Kippschalter-Leiste */
 .langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(.5rem + 3px);background:var(--n-surface)}

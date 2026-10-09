@@ -66,4 +66,6 @@ return [
     'Sommer' => 'Summer',
     'Herbst' => 'Autumn',
     'Winter' => 'Winter',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

@@ -502,4 +502,14 @@ return [
     'Öffnungszeiten kommen aus „Website“. Ob gerade geöffnet ist, rechnet der Browser der Besucher aus – auch aus dem Seiten-Cache immer aktuell.' => 'Opening hours come from “Website”. Whether you are open right now is calculated in the visitor’s browser – always current, even from the page cache.',
     'Öffnungszeiten unter „Website“ eintragen – dann erscheinen sie hier mit „Jetzt geöffnet“.' => 'Enter opening hours under “Website” – they will then appear here with “Open now”.',
     'Bitte in der Seitenleiste eine Tabelle wählen – es erscheinen die nächsten Termine bzw. die neuesten Einträge.' => 'Please choose a table in the sidebar – the next dates or the latest entries will appear.',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the menu in the bar and in the side sheet (phone). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];
