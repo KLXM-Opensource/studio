@@ -78,7 +78,7 @@ $hasJs = false;
         if ($text !== '') $sr .= ', ' . $text;
     ?>
     <li class="cms-dial<?= $frac === null ? ' is-neutral' : '' ?>">
-      <span class="cms-dials__sr"><?= e($sr) ?></span>
+      <span class="cms-dials__sr"><?= e(strip_emphasis($sr)) ?></span>
       <div class="cms-dial__gauge" aria-hidden="true">
         <svg class="cms-dial__svg" viewBox="0 0 120 120" focusable="false">
           <?php if ($style === 'arc'): [$on, $off] = $ticks(58, 54.5, 52, null); ?>
@@ -96,8 +96,8 @@ $hasJs = false;
         </svg>
         <span class="cms-dial__value l<?= $lenClass ?>"><span class="cms-dial__num"<?= $b->edit("items.$i.value") ?>><?= $count ? e($count[0]) . '<span data-n>' . e($count[1]) . '</span>' . e($count[2]) : e($value) ?></span><?php if ($unit !== ''): ?><span class="cms-dial__unit"<?= $b->edit("items.$i.unit") ?>><?= e($unit) ?></span><?php endif; ?></span>
       </div>
-      <?php if ($caption !== '' || is_editing()): ?><p class="cms-dial__caption" aria-hidden="true"<?= $b->edit("items.$i.label") ?>><?= e($caption) ?></p><?php endif; ?>
-      <?php if ($text !== ''): ?><p class="cms-dial__text" aria-hidden="true"<?= $b->edit("items.$i.text") ?>><?= e($text) ?></p><?php endif; ?>
+      <?php if ($caption !== '' || is_editing()): ?><p class="cms-dial__caption" aria-hidden="true"<?= $b->edit("items.$i.label") ?>><?= emphasis($caption) ?></p><?php endif; ?>
+      <?php if ($text !== ''): ?><p class="cms-dial__text" aria-hidden="true"<?= $b->edit("items.$i.text") ?>><?= emphasis($text) ?></p><?php endif; ?>
     </li>
     <?php endforeach; ?>
   </ul>

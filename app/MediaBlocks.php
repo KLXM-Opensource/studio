@@ -37,9 +37,9 @@ final class MediaBlocks
             return '';
         }
         $h = '<header class="cms-head sec-head">';
-        if ($eyebrow !== '') $h .= '<p class="eyebrow eyebrow--accent"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>';
+        if ($eyebrow !== '') $h .= '<p class="eyebrow eyebrow--accent"' . $b->edit('eyebrow') . '>' . emphasis($eyebrow) . '</p>';
         if ($title !== '') $h .= '<h2 id="' . e($b->titleId()) . '" class="h2 h2--m"><span' . $b->edit('title') . '>' . emphasis($title) . '</span></h2>';
-        if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+        if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(emphasis($intro), false) . '</p>';
         return $h . '</header>';
     }
 

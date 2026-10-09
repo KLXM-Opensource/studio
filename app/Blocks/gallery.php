@@ -38,7 +38,7 @@ if ($layout === 'justified') $sizes = '(min-width: 860px) 40vw, 100vw';
         <?php else: ?>
         <div class="cms-gallery__link<?= $layout === 'grid' ? ' r-' . e(str_replace(':', '-', $ratio)) : '' ?>"><?= $pic ?></div>
         <?php endif; ?>
-        <?php if ($cap !== ''): ?><figcaption class="cms-gallery__cap"<?= $it['path'] ? $b->edit($it['path'] . '.caption') : '' ?>><?= e($cap) ?></figcaption><?php endif; ?>
+        <?php if ($cap !== ''): ?><figcaption class="cms-gallery__cap"<?= $it['path'] ? $b->edit($it['path'] . '.caption') : '' ?>><?= emphasis($cap) ?></figcaption><?php endif; ?>
       </figure>
     </li>
     <?php endforeach; ?>

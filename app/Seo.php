@@ -47,8 +47,8 @@ final class Seo
         $out = [
             'alternates' => $alternates,
             'lang' => Lang::current(),
-            'title' => $title,
-            'description' => $desc,
+            'title' => strip_emphasis($title),   // *Betonung* nur in der Seite, nie im <title>/Meta
+            'description' => strip_emphasis($desc),
             'canonical' => $canonical,
             // SVG zeigen soziale Netzwerke nicht als Vorschaubild
             'og_image' => $og && $og['mime'] !== Svg::MIME && !MediaPools::mediaProtected($og) ? site_url() . Media::url($og, 1200) : null,
@@ -65,10 +65,10 @@ final class Seo
         $seo = self::forPage($template + ['is_home' => 0]);
         $suffix = explode(' | ', $seo['title'], 2)[1] ?? '';
         $title = Data\Entries::title($table, $entry);
-        $seo['title'] = $title . ($suffix !== '' ? ' | ' . $suffix : '');
+        $seo['title'] = strip_emphasis($title) . ($suffix !== '' ? ' | ' . $suffix : '');
         if ($table['settings']['description_field'] !== '') {
             $d = Data\Entries::text($table, $entry, $table['settings']['description_field']);
-            if ($d !== '') $seo['description'] = mb_strimwidth(preg_replace('~\s+~', ' ', $d), 0, 160, '…');
+            if ($d !== '') $seo['description'] = mb_strimwidth(preg_replace('~\s+~', ' ', strip_emphasis($d)), 0, 160, '…');
         }
         $imgField = \Core\Data\Tables::imageField($table);
         $img = $imgField !== '' ? ($entry[$imgField] ?? null) : null;

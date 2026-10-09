@@ -71,7 +71,7 @@ final class StructuredData
     {
         $qs = [];
         foreach ($items as $it) {
-            $question = trim(strip_tags((string) ($it[$q] ?? '')));
+            $question = strip_emphasis(trim(strip_tags((string) ($it[$q] ?? ''))));
             $answer = self::plain((string) ($it[$a] ?? ''));
             if ($question !== '' && $answer !== '' && !str_contains($question . $answer, '[')) {
                 $qs[] = ['@type' => 'Question', 'name' => $question, 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $answer]];
@@ -84,7 +84,7 @@ final class StructuredData
     {
         $url = (string) ($d[$spec['url'] ?? 'video_url'] ?? '');
         $file = (int) ($d[$spec['file'] ?? 'video_file'] ?? 0);
-        $node = ['@type' => 'VideoObject', 'name' => trim(strip_tags((string) ($d[$spec['name'] ?? 'title'] ?? ''))) ?: lt('Video')];
+        $node = ['@type' => 'VideoObject', 'name' => strip_emphasis(trim(strip_tags((string) ($d[$spec['name'] ?? 'title'] ?? '')))) ?: lt('Video')];
         if (!empty($spec['description']) && filled($d[$spec['description']] ?? '')) $node['description'] = self::plain((string) $d[$spec['description']]);
         if ($v = Embeds::parse($url)) {
             $meta = Embeds::meta($v);
@@ -175,7 +175,7 @@ final class StructuredData
 
         $crumbs = self::breadcrumb($page, $table, $entry);
         $webpage = array_filter([
-            '@type' => 'WebPage', '@id' => $url . '#webpage', 'url' => $url, 'name' => $seo['title'] ?? $page['title'],
+            '@type' => 'WebPage', '@id' => $url . '#webpage', 'url' => $url, 'name' => strip_emphasis((string) ($seo['title'] ?? $page['title'])),
             'description' => ($seo['description'] ?? '') ?: null, 'inLanguage' => $lang, 'isPartOf' => ['@id' => $base . '/#website'],
             'breadcrumb' => $crumbs ? ['@id' => $url . '#breadcrumb'] : null,
             'primaryImageOfPage' => !empty($seo['og_image']) ? ['@type' => 'ImageObject', 'url' => $seo['og_image']] : null,
@@ -184,7 +184,7 @@ final class StructuredData
         ]);
         if ($crumbs) {
             $graph[] = ['@type' => 'BreadcrumbList', '@id' => $url . '#breadcrumb', 'itemListElement' => array_map(fn($c, $i) =>
-                ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $c[0], 'item' => $c[1]], $crumbs, array_keys($crumbs))];
+                ['@type' => 'ListItem', 'position' => $i + 1, 'name' => strip_emphasis((string) $c[0]), 'item' => $c[1]], $crumbs, array_keys($crumbs))];
         }
         // Detailseite: Hauptobjekt des Eintrags
         if ($table && $entry && ($main = self::entryNode($table, $entry, $url))) {
@@ -366,6 +366,6 @@ final class StructuredData
 
     private static function plain(string $html): string
     {
-        return trim(preg_replace('~\s+~u', ' ', html_entity_decode(strip_tags(str_replace(['<br>', '</p>', '</li>'], [' ', ' ', ' '], $html)), ENT_QUOTES | ENT_HTML5)));
+        return strip_emphasis(trim(preg_replace('~\s+~u', ' ', html_entity_decode(strip_tags(str_replace(['<br>', '</p>', '</li>'], [' ', ' ', ' '], $html)), ENT_QUOTES | ENT_HTML5))));
     }
 }

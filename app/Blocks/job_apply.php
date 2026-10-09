@@ -33,9 +33,9 @@ $align = ($d['form_align'] ?? '') === 'center' ? 'center' : 'left';
 <div class="<?= e($wrap) ?> dff-wrap dff-wrap--w-<?= $width ?> dff-wrap--a-<?= $align ?> job-apply" data-width="<?= $width ?>" data-align="<?= $align ?>">
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="dff-head<?= $align === 'center' ? ' sec-head--center' : '' ?>">
-    <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+    <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
     <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m dff-title"><span<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></span></h2><?php endif; ?>
-    <?php if (!empty($d['intro'])): ?><p class="muted dff-intro"<?= $b->edit('intro') ?>><?= e($d['intro']) ?></p><?php endif; ?>
+    <?php if (!empty($d['intro'])): ?><p class="muted dff-intro"<?= $b->edit('intro') ?>><?= emphasis((string) $d['intro']) ?></p><?php endif; ?>
   </header>
   <?php endif; ?>
   <?= DataForms::render($form, [

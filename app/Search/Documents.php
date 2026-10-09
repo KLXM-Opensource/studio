@@ -56,10 +56,11 @@ final class Documents
         }
     }
 
-    /** Dokument mit allen Feldern als Text – Redaktionsnotizen [# … #] entfernt (Titel, Überschriften, Text, Auszug …) */
+    /** Dokument mit allen Feldern als Text – Redaktionsnotizen [# … #] und *Betonung*-Sternchen entfernt (Titel, Überschriften, Text, Auszug …) */
     private static function doc(array $d): array
     {
-        return array_map(fn($v) => \Core\EditorNotes::strip((string) $v), $d + ['type' => 'page', 'table' => '', 'badge' => '', 'title' => '', 'headings' => '', 'keywords' => '',
+        // *Betonung*-Sternchen nie in Titel, Treffertext oder Auszug (strip_emphasis; Adresse/Bild bleiben unverändert)
+        return array_map(fn($v) => strip_emphasis(\Core\EditorNotes::strip((string) $v)), $d + ['type' => 'page', 'table' => '', 'badge' => '', 'title' => '', 'headings' => '', 'keywords' => '',
             'text' => '', 'extra' => '', 'summary' => '', 'image' => '', 'facets' => '', 'url' => '', 'date' => '', 'date_label' => '', 'origin' => '']);
     }
 

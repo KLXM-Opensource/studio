@@ -199,7 +199,7 @@ final class Format
     }
 
     /**
-     * Auszug als reiner Text: Tags entfernen (Rich-Text → Text, Entities aufgelöst), Leerraum zusammenfassen, an einer Wortgrenze
+     * Auszug als reiner Text: Tags entfernen (Rich-Text → Text, Entities aufgelöst), *Betonung*-Sternchen entfernen, Leerraum zusammenfassen, an einer Wortgrenze
      * kürzen, „ …“ anhängen. $html = false: Eingabe ist schon reiner Text – „<b>“ oder „&amp;“ bleiben dann stehen.
      */
     public function excerpt(?string $text, int $max = 160, bool $html = true): string
@@ -208,7 +208,7 @@ final class Format
         if ($html && (str_contains($s, '<') || str_contains($s, '&'))) {
             $s = html_entity_decode(strip_tags((string) preg_replace('~<(br|/p|/li|/h\d|/blockquote)\b[^>]*>~i', ' $0', $s)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
-        $s = trim((string) preg_replace('~\s+~u', ' ', $s));
+        $s = strip_emphasis(trim((string) preg_replace('~\s+~u', ' ', $s)));   // *Betonung* gibt es im Auszug nicht
         if ($max <= 0 || mb_strlen($s) <= $max) return $s;
         $cut = mb_substr($s, 0, $max);
         $sp = mb_strrpos($cut, ' ');

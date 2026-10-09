@@ -82,9 +82,9 @@ if ($set['hasDefinedTerm']) StructuredData::add($set);
 <div class="<?= e($wrap) ?> glx glx--list" data-glossary="off" data-glx-list>
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="glx-head">
-    <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+    <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
     <?php if (!empty($d['title'])): ?><h2 id="<?= e($b->titleId()) ?>" class="h2 h2--m glx-heading"><span<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></span></h2><?php endif; ?>
-    <?php if (!empty($d['intro'])): ?><p class="muted glx-intro"<?= $b->edit('intro') ?>><?= e($d['intro']) ?></p><?php endif; ?>
+    <?php if (!empty($d['intro'])): ?><p class="muted glx-intro"<?= $b->edit('intro') ?>><?= emphasis((string) $d['intro']) ?></p><?php endif; ?>
   </header>
   <?php endif; ?>
 

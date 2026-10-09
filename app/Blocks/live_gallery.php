@@ -57,7 +57,7 @@ $sizes = [
         <?php else: ?>
         <div class="<?= e($cls) ?>"><?= $pic ?></div>
         <?php endif; ?>
-        <?php if ($cap !== ''): ?><figcaption class="cms-gallery__cap"<?= $it['path'] ? $b->edit($it['path'] . '.caption') : '' ?>><?= e($cap) ?></figcaption><?php endif; ?>
+        <?php if ($cap !== ''): ?><figcaption class="cms-gallery__cap"<?= $it['path'] ? $b->edit($it['path'] . '.caption') : '' ?>><?= emphasis($cap) ?></figcaption><?php endif; ?>
       </figure>
     </li>
     <?php endforeach; ?>

@@ -296,22 +296,22 @@ function tel_href(?string $number): ?string
 /** Rich-Text (Absätze, Listen) sicher ausgeben */
 function rich(?string $html): string
 {
-    return \Core\Landings::rewriteLinks(Sanitizer::block($html));
+    return emphasis_rich(\Core\Landings::rewriteLinks(Sanitizer::block($html)));
 }
 
 /** Inline-Rich-Text (b, i, a, br) sicher ausgeben */
 function inline(?string $html): string
 {
-    return Sanitizer::inline($html);
+    return emphasis_rich(Sanitizer::inline($html));
 }
 
-/** Mehrzeiliger Text → Absätze */
+/** Mehrzeiliger Text → Absätze (*Wort* → <em class="hl">, wie emphasis_hl()) */
 function paragraphs(?string $text, string $attrs = ''): string
 {
     $out = '';
     foreach (preg_split('~\n\s*\n~', trim((string) $text)) as $p) {
         if (trim($p) !== '') {
-            $out .= "<p$attrs>" . nl2br(e(trim($p)), false) . '</p>';
+            $out .= "<p$attrs>" . emphasis_replace(nl2br(e(trim($p)), false), is_editing()) . '</p>';
         }
     }
     return $out;
@@ -334,11 +334,37 @@ function is_editing(): bool
 }
 
 /**
- * *Betonung* in kurzen Texten (Überschriften der Kern-Blöcke) wie in den Kits: Bringt das Kit eine Funktion {kit}_title()
- * mit (klxm_title, klxm_agentur_title, fluid_title … – Bindestrich im Namen → „_“), wird sie benutzt, damit Kern-Blöcke
- * aussehen wie die Blöcke des Kits (<strong> bzw. <em class="hl">). Sonst *…* → <em>…</em>. Ergebnis ist HTML, der Text
- * wird immer escaped. Im Bearbeiten-Modus: Hervorhebung sichtbar, die Sternchen bleiben als echte Zeichen in <span class="hl-mark">
- * (dezent per editor.css) – beim Auslesen (textContent) bleibt „*Wort*“ erhalten. Dafür nie die Kit-Funktion, die das evtl. nicht kennt.
+ * *Betonung*: Muster für „*Wort*“ – einmal für alle Wege (kurze Texte, Rich-Text, Kit-Funktionen {kit}_title(), Meta).
+ * Öffnendes „*“ nicht nach Buchstabe/Ziffer/„*“ und vor einem Nicht-Leerzeichen, schließendes „*“ nach einem Nicht-Leerzeichen
+ * und nicht vor Buchstabe/Ziffer/„*“, kein Zeilenumbruch dazwischen. So bleiben „Preis*“ (Fußnote), „Felder mit * sind Pflicht“,
+ * „5 * 3“ und „**fett**“ (Markdown-Import) unverändert. Gruppe 1 = der betonte Text.
+ */
+const EMPHASIS_RE = '~(?<![\p{L}\p{N}*])\*([^\s*](?:[^*\n]*[^\s*])?)\*(?![\p{L}\p{N}*])~u';
+
+/** *Wort* in bereits escaptem Text/HTML-Textknoten ersetzen; $edit = Sternchen als <span class="hl-mark"> behalten */
+function emphasis_replace(string $escaped, bool $edit = false): string
+{
+    if (!str_contains($escaped, '*')) return $escaped;
+    $to = $edit ? '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>' : '<em class="hl">$1</em>';
+    return preg_replace(EMPHASIS_RE, $to, $escaped) ?? $escaped;
+}
+
+/**
+ * Kurzer Text (Überschrift, Dachzeile, Einleitung, Kartentitel …) → HTML mit <em class="hl"> – Grundlage der Kit-Funktionen
+ * {kit}_title(). Der Text wird immer escaped. Im Bearbeiten-Modus: Hervorhebung sichtbar, die Sternchen bleiben als echte
+ * Zeichen in <span class="hl-mark"> (dezent per editor.css) – beim Auslesen (textContent) bleibt „*Wort*“ erhalten.
+ * Mehrzeilige Texte (Einleitung): nl2br(emphasis_hl($text), false) – eine Betonung reicht nie über einen Zeilenumbruch.
+ */
+function emphasis_hl(string $text): string
+{
+    return emphasis_replace(e($text), is_editing());
+}
+
+/**
+ * *Betonung* in kurzen Texten (Überschriften der Kern-Blöcke und Kits ohne eigene Funktion): Bringt das Kit eine Funktion
+ * {kit}_title() mit (fluid_title … – Bindestrich im Namen → „_“), wird sie benutzt, damit Kern-Blöcke aussehen wie die Blöcke
+ * des Kits. Sonst emphasis_hl() (<em class="hl">). Ergebnis ist HTML, der Text wird immer escaped. Im Bearbeiten-Modus immer
+ * emphasis_hl() mit sichtbaren Sternchen (nie die Kit-Funktion, die das evtl. nicht kennt).
  */
 function emphasis(string $text): string
 {
@@ -348,19 +374,42 @@ function emphasis(string $text): string
     $kit = app()->theme->name;
     $fn[$kit] ??= function_exists($f = str_replace('-', '_', $kit) . '_title') ? $f : '';
     if ($fn[$kit] !== '') return (string) ($fn[$kit])($text);
-    return preg_replace('~\*([^*]+)\*~u', '<em>$1</em>', e($text)) ?? e($text);
+    return emphasis_hl($text);
 }
 
 /** Bearbeiten-Modus: *Wort* → dezente Sternchen + <em class="hl">Wort</em> – Rundlauf über textContent liefert wieder „*Wort*“ */
 function emphasis_editing(string $text): string
 {
-    return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
+    return emphasis_replace(e($text), true);
 }
 
-/** Text ohne *Betonung*-Sternchen (für aria-label, title, Meta-Angaben) */
+/**
+ * Rich-Text (bereits durch Core\Sanitizer): *Wort* in Textknoten → <em class="hl">Wort</em> – nur für Besucher. Nie in Tags
+ * oder Attributen, nicht in <code>/<pre>. Im Bearbeiten-Modus unverändert: Der Rich-Editor speichert innerHTML, der Sanitizer
+ * würde Markierungen entfernen – die Redaktion sieht dort die rohen Sternchen. Gespeichert wird immer der Text mit Sternchen.
+ */
+function emphasis_rich(string $html, ?bool $editing = null): string
+{
+    // Direkt bearbeiten auf der Detailseite (app()->entryEdit) speichert ebenfalls innerHTML → auch dort roh
+    if (!str_contains($html, '*') || ($editing ?? (is_editing() || app()->entryEdit))) return $html;
+    $parts = preg_split('~(<[^>]*>)~', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if ($parts === false) return $html;
+    $skip = 0;
+    foreach ($parts as $i => $p) {
+        if ($i % 2) {
+            // Tag: <code>/<pre> (auch <script>/<style>, falls je durchgereicht) zählen
+            if (preg_match('~^<(/?)(code|pre|script|style|textarea)\b~i', $p, $m)) $skip = max(0, $skip + ($m[1] === '/' ? -1 : 1));
+        } elseif ($skip === 0 && $p !== '') {
+            $parts[$i] = emphasis_replace($p);
+        }
+    }
+    return implode('', $parts);
+}
+
+/** Text ohne *Betonung*-Sternchen (für aria-label, title, alt, Meta-Angaben, Suchindex, E-Mails) */
 function strip_emphasis(string $text): string
 {
-    return str_contains($text, '*') ? (string) preg_replace('~\*([^*]+)\*~u', '$1', $text) : $text;
+    return str_contains($text, '*') ? (string) (preg_replace(EMPHASIS_RE, '$1', $text) ?? $text) : $text;
 }
 
 /**

@@ -21,9 +21,9 @@ $more = trim((string) ($d['link_label'] ?? '')) !== '' && !empty($d['link']) ? l
 <div class="<?= e(trim($wrap . ' cms-404')) ?>">
   <?php if ($eyebrow !== '' || $title !== '' || $intro !== ''): ?>
   <header class="cms-404__head">
-    <?php if ($eyebrow !== ''): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= e($eyebrow) ?></p><?php endif; ?>
+    <?php if ($eyebrow !== ''): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= emphasis($eyebrow) ?></p><?php endif; ?>
     <?php if ($title !== ''): ?><h1 id="<?= e($b->titleId()) ?>" class="h1 cms-404__title"><span<?= $b->edit('title') ?>><?= emphasis($title) ?></span></h1><?php endif; ?>
-    <?php if ($intro !== ''): ?><p class="lead cms-404__lead"<?= $b->edit('intro') ?>><?= nl2br(e($intro), false) ?></p><?php endif; ?>
+    <?php if ($intro !== ''): ?><p class="lead cms-404__lead"<?= $b->edit('intro') ?>><?= nl2br(emphasis($intro), false) ?></p><?php endif; ?>
   </header>
   <?php endif; ?>
   <?= NotFound::boxes($b) ?>

@@ -56,7 +56,7 @@ if ($mp4) $ratio = $nearest((int) ($mp4['width'] ?? 0), (int) ($mp4['height'] ??
 elseif ($v) { $vm = Embeds::meta($v); $ratio = $nearest((int) ($vm['video_width'] ?? 0), (int) ($vm['video_height'] ?? 0)); }   // unbekannt (alter Abruf) → Einstellung
 $rcls = $rc !== '' ? ' ' . $rc . $ratio : '';
 $own = !empty($poster) ? media((int) $poster) : ($mp4 ? Media::posterFor($mp4) : null);   // ohne eigenes Poster: Vorschaubild einer Erweiterung (z. B. video_tools)
-$label = trim((string) ($label ?? ''));
+$label = strip_emphasis(trim((string) ($label ?? '')));   // Titel aus dem Block: ohne *Betonung*-Sternchen (Attribute, Screenreader)
 $note = trim((string) ($note ?? ''));
 ?>
 <?php if ($mp4): ?>

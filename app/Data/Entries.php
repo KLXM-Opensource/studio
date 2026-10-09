@@ -711,7 +711,7 @@ final class Entries
         $v = $e[$name] ?? null;
         if ($v === null || $v === '' || $v === []) return '';
         return match ($f['type']) {
-            'richtext' => Sanitizer::block((string) $v),
+            'richtext' => empty($o['plain']) ? emphasis_rich(Sanitizer::block((string) $v)) : Sanitizer::block((string) $v),   // *Wort* → <em class="hl"> (nur Besucher)
             'textarea' => nl2br(e((string) $v), false),
             'bool' => $v ? lt('Ja') : lt('Nein'),
             'number' => e(rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ',')),

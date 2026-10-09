@@ -251,7 +251,7 @@ final class Hero
         $items = array_values(array_filter(array_map('trim', preg_split('~\s*[·•|]\s*~u', $text) ?: []), fn($x) => $x !== ''));
         if (!$items) return '';
         $row = fn(bool $copy) => '<ul class="' . e($class) . '__row" role="list"' . ($copy ? ' aria-hidden="true"' : '') . '>'
-            . implode('', array_map(fn($x) => '<li>' . e($x) . '</li>', $items)) . '</ul>';
+            . implode('', array_map(fn($x) => '<li>' . emphasis($x) . '</li>', $items)) . '</ul>';
         return '<div class="' . e($class) . '" data-hero-marquee><div class="' . e($class) . '__track">' . $row(false) . $row(true) . '</div>'
             . '<button type="button" class="' . e($class) . '__toggle hx-toggle" data-hero-marquee-toggle hidden>' . self::pauseIcons()
             . '<span data-l-pause="' . e(lt('Laufzeile anhalten')) . '" data-l-play="' . e(lt('Laufzeile abspielen')) . '">' . e(lt('Laufzeile anhalten')) . '</span></button>'

@@ -27,9 +27,9 @@ $hTag = trim((string) ($d['title'] ?? '')) !== '' ? 'h3' : 'h2';
       <article class="cms-stack__inner<?= $pic !== '' ? ' has-img' : '' ?><?= $start ? ' img-start' : '' ?>"><?= $b->targetEdit($link, (string) ($c['title'] ?? '')) ?>
         <div class="cms-stack__body">
           <span class="cms-stack__num" aria-hidden="true"><?= sprintf('%02d', $i + 1) ?></span>
-          <?php if (!empty($c['eyebrow'])): ?><p class="cms-stack__eyebrow"<?= $b->edit("cards.$k.eyebrow") ?>><?= e($c['eyebrow']) ?></p><?php endif; ?>
-          <<?= $hTag ?> class="cms-stack__title"<?= $b->edit("cards.$k.title") ?>><?= e((string) ($c['title'] ?? '')) ?></<?= $hTag ?>>
-          <?php if (!empty($c['text'])): ?><p class="cms-stack__text"<?= $b->edit("cards.$k.text") ?>><?= nl2br(e($c['text']), false) ?></p><?php endif; ?>
+          <?php if (!empty($c['eyebrow'])): ?><p class="cms-stack__eyebrow"<?= $b->edit("cards.$k.eyebrow") ?>><?= emphasis((string) $c['eyebrow']) ?></p><?php endif; ?>
+          <<?= $hTag ?> class="cms-stack__title"<?= $b->edit("cards.$k.title") ?>><?= emphasis((string) ($c['title'] ?? '')) ?></<?= $hTag ?>>
+          <?php if (!empty($c['text'])): ?><p class="cms-stack__text"<?= $b->edit("cards.$k.text") ?>><?= nl2br(emphasis((string) $c['text']), false) ?></p><?php endif; ?>
           <?php if ($label !== '' && $link !== ''): ?><p class="cms-stack__more"><a class="cms-stack__link" href="<?= e(link_href($link)) ?>"<?= $b->edit("cards.$k.link_label") ?>><?= e($label) ?></a></p><?php endif; ?>
         </div>
         <?php if ($pic !== ''): ?><div class="cms-stack__media r-<?= e(str_replace(':', '-', $ratio)) ?>"><?= $pic ?></div><?php endif; ?>

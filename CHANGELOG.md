@@ -6,6 +6,23 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### *Hervorhebung* in allen Überschriften und Freitexten
+- `*Wort*` betont jetzt überall: Überschriften, Dachzeilen, Einleitungen, Karten-, Schritt-, Feature- und Listentitel, Zitate,
+  Bildunterschriften, Kennzahl-Beschriftungen, Formular-Abschnitte, Claims/Fuß-Statements aus den Einstellungen – in allen Kits
+  und den Kern-Blöcken (Kit praxis: eigene Blöcke unverändert; Kern-Blöcke und Freitexte dort ohne eigene `.hl`-Gestaltung, also kursiv). Besucher sehen `<em class="hl">`, das Kit gestaltet `.hl`.
+- **Freitexte** (Formatierter Text, Formular-Freitext, formatierte Datenfelder, `rich()`/`inline()`): `*Wort*` in Textknoten wird
+  für Besucher zu `em.hl` – nie in Tags, Attributen oder `code`/`pre`. Beim Bearbeiten bleiben die Sternchen roh stehen (der
+  Rich-Editor speichert innerHTML); gespeichert wird immer der Text mit Sternchen.
+- **Block-Designer:** `{{ feld }}` im Text betont automatisch, in Attributen nie.
+- Ein Muster für alle Wege (`EMPHASIS_RE`, `emphasis_hl()`, `emphasis_rich()`, `strip_emphasis()` in `app/helpers.php`); die
+  Kit-Funktionen `{kit}_title()` rufen `emphasis_hl()` auf. Nicht betont: `Preis*` (Fußnote), `Felder mit * sind Pflicht`, `5 * 3`,
+  `**fett**`, Sternchen mitten im Wort, über Zeilenumbrüche. Button-/Link-Beschriftungen, Navigation, Formular-Feldbeschriftungen
+  und Werte aus Datentabellen bleiben unverändert.
+- Keine Sternchen in `<title>`, Meta-Beschreibung, JSON-LD (FAQ, Video, Brotkrumen), Suchindex, Auszügen (`fmt()->excerpt()`),
+  `aria-label`/Screenreader-Texten und Video-Titeln.
+- Kits ohne eigene Betonung (basis, editorial, starter, frameworks) gestalten `.hl` jetzt (Akzentfarbe, nicht kursiv); fluid und
+  glas unterstreichen sie auf dunklen/akzentfarbigen Flächen. Selbsttest in `blocks:selftest`.
+
 ### Fluid: Schreibweise der Dachzeilen einstellbar
 - Design → **Schreibweise der Dachzeilen**: wie der Stil (Standard), Großbuchstaben, normal oder Kapitälchen – unabhängig vom Stil
   (Strich, Etikett, Punkt, schlicht). Das Etikett („Pille“) ist auf getönten Sektionen jetzt sichtbar statt nur eingerückt.

@@ -56,9 +56,9 @@ $icon = fn(string $p) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-h
         <div class="cms-slide__media"><?= img((int) $s['m']['id'], $sizes, ['ratio' => $height === 'screen' ? null : $height, 'eager' => $n === 0 && $b->prev === null] + ($s['path'] ? ['path' => $s['path'] . '.image'] : [])) ?></div>
         <?php if ($hasText): $p = $s['path']; ?>
         <div class="cms-slide__body<?= $bleed ? ' ' . e($wrap) : '' ?>"><div class="cms-slide__box">
-          <?php if ($s['eyebrow'] !== ''): ?><p class="cms-slide__eyebrow"<?= $p ? $b->edit("$p.eyebrow") : '' ?>><?= e($s['eyebrow']) ?></p><?php endif; ?>
-          <?php if ($s['title'] !== ''): ?><<?= $hTag ?> class="cms-slide__title"<?= $p ? $b->edit("$p.title") : '' ?>><?= e($s['title']) ?></<?= $hTag ?>><?php endif; ?>
-          <?php if ($s['text'] !== ''): ?><p class="cms-slide__text"<?= $p ? $b->edit("$p.text") : '' ?>><?= nl2br(e($s['text']), false) ?></p><?php endif; ?>
+          <?php if ($s['eyebrow'] !== ''): ?><p class="cms-slide__eyebrow"<?= $p ? $b->edit("$p.eyebrow") : '' ?>><?= emphasis($s['eyebrow']) ?></p><?php endif; ?>
+          <?php if ($s['title'] !== ''): ?><<?= $hTag ?> class="cms-slide__title"<?= $p ? $b->edit("$p.title") : '' ?>><?= emphasis($s['title']) ?></<?= $hTag ?>><?php endif; ?>
+          <?php if ($s['text'] !== ''): ?><p class="cms-slide__text"<?= $p ? $b->edit("$p.text") : '' ?>><?= nl2br(emphasis($s['text']), false) ?></p><?php endif; ?>
           <?php if ($s['button_label'] !== '' && $s['button_link'] !== ''): ?><p class="cms-slide__cta"><a class="<?= e($btn) ?>" href="<?= e(link_href($s['button_link'])) ?>"<?= $p ? $b->edit("$p.button_label") : '' ?>><?= e($s['button_label']) ?></a></p><?php endif; ?>
         </div></div>
         <?php endif; ?>

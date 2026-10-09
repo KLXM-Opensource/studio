@@ -384,7 +384,8 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <tr><td><code>setting('key')</code>, <code>filled($v)</code></td><td>Einstellung lesen; „befüllt und kein [Platzhalter]“</td></tr>
     <tr><td><code>url('/pfad')</code>, <code>link_href($link)</code>, <code>tel_href($nr)</code></td><td>URLs (Rewrite-sicher), Link-Felder, Telefon-Links</td></tr>
     <tr><td><code>fmt()-&gt;date($v)</code>, <code>-&gt;relative()</code>, <code>-&gt;number()</code>, <code>-&gt;bytes()</code> …</td><td>Werte formatieren in der Sprache der Seite (<code>Core\Format</code>) – Datum, Zahl, Betrag, Größe, Dauer, Telefon, Host, Auszug; siehe <a href="#format">Format</a>. <code>date_local($v, $stil)</code> und <code>phone_display()</code> bleiben als Kurzformen</td></tr>
-    <tr><td><code>paragraphs($text)</code></td><td>Mehrzeiligen Text (ohne HTML) in Absätze <code>&lt;p&gt;</code> mit <code>&lt;br&gt;</code> umwandeln (maskiert)</td></tr>
+    <tr><td><code>paragraphs($text)</code></td><td>Mehrzeiligen Text (ohne HTML) in Absätze <code>&lt;p&gt;</code> mit <code>&lt;br&gt;</code> umwandeln (maskiert, <code>*Wort*</code> betont)</td></tr>
+    <tr><td><code>emphasis($text)</code>, <code>{kit}_title($text)</code>, <code>strip_emphasis($text)</code></td><td><code>*Wort*</code>-Betonung für Überschriften und kurze Texte – siehe <a href="#betonung">Betonung</a></td></tr>
     <tr><td><code>vcard_url()</code>, <code>vcard_entry_url($table, $entry)</code></td><td>Visitenkarte der Organisation bzw. einer Person (<code>.vcf</code>) oder <code>null</code> – siehe <a href="#vcard">Visitenkarte</a></td></tr>
     <tr><td><code>img($id, $sizes, $opt)</code></td><td><code>&lt;picture&gt;</code> mit AVIF/WebP-srcset, width/height, lazy</td></tr>
     <tr><td><code>theme_asset()</code>, <code>asset()</code></td><td>Asset-URL mit Cache-Busting</td></tr>
@@ -393,5 +394,21 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <tr><td><code>app()-&gt;entry</code></td><td>Auf Detailseiten: <code>['table' =&gt; …, 'entry' =&gt; …]</code> des aufgerufenen Datensatzes</td></tr>
     <tr><td><code>$b-&gt;tune('anchor')</code>, <code>$b-&gt;variant()</code>, <code>$b-&gt;titleId()</code></td><td>Abschnitts-Optionen, Variante, ID für aria-labelledby</td></tr>
   </table>
+  <h3 id="betonung">Betonung <code>*Wort*</code> – in allen Überschriften und Texten</h3>
+  <p>Die Redaktion setzt Sternchen um ein Wort (<code>Die *Mitglieder*</code>); Besucher sehen <code>&lt;em class="hl"&gt;Mitglieder&lt;/em&gt;</code>, das Kit gestaltet <code>.hl</code> (Akzentfarbe, Textmarker, kursiv … – z. B. über die Design-Option „Betonung“). Gespeichert wird immer der Text mit Sternchen. Ein Muster für alle Wege: <code>EMPHASIS_RE</code> in <code>app/helpers.php</code> – öffnendes <code>*</code> nicht nach Buchstabe/Ziffer/<code>*</code> und vor einem Nicht-Leerzeichen, schließendes <code>*</code> nach einem Nicht-Leerzeichen und nicht vor Buchstabe/Ziffer/<code>*</code>, kein Zeilenumbruch dazwischen. <code>Preis*</code>, <code>Felder mit * sind Pflicht</code>, <code>5 * 3</code> und <code>**fett**</code> bleiben Text.</p>
+  <table class="doc-table">
+    <tr><th>Helfer</th><th>Wofür</th></tr>
+    <tr><td><code>emphasis_hl($text)</code></td><td>Kurzer Text → escaped HTML mit <code>em.hl</code>. Im Bearbeiten-Modus bleiben die Sternchen als <code>&lt;span class="hl-mark"&gt;*&lt;/span&gt;</code> stehen (dezent über <code>editor.css</code>), damit das direkte Bearbeiten über <code>textContent</code> wieder <code>*Wort*</code> liest.</td></tr>
+    <tr><td><code>{kit}_title($text)</code></td><td>Vertrag für Kits: gleiche Eingabe und Ausgabe wie <code>emphasis_hl()</code> (Text rein, escaped HTML raus, Bearbeiten-Modus mit <code>hl-mark</code>); die mitgelieferten Kits rufen einfach <code>emphasis_hl()</code> auf. Bindestrich im Kit-Namen → <code>_</code>.</td></tr>
+    <tr><td><code>emphasis($text)</code></td><td>Für Kern-Blöcke und Kits ohne eigene Funktion: nutzt <code>{kit}_title()</code>, falls vorhanden, sonst <code>emphasis_hl()</code>. Mehrzeilig: <code>nl2br(emphasis($text), false)</code>.</td></tr>
+    <tr><td><code>rich()</code>, <code>inline()</code>, <code>emphasis_rich($html)</code></td><td>Rich-Text: <code>*Wort*</code> in Textknoten (nie in Tags/Attributen, nicht in <code>code</code>/<code>pre</code>) → <code>em.hl</code>, nur für Besucher. Im Bearbeiten-Modus und beim direkten Bearbeiten auf Detailseiten bleibt der Text roh (der Rich-Editor speichert innerHTML). Formatierte Datenfelder (<code>Entries::html()</code>) und der Formular-Freitext laufen ebenso darüber.</td></tr>
+    <tr><td><code>strip_emphasis($text)</code></td><td>Sternchen weg – für <code>alt</code>, <code>aria-label</code>, <code>title</code>, <code>data-*</code>, JSON-LD. <code>Core\Seo</code> (Titel, Beschreibung), <code>Core\StructuredData</code> (FAQ, Video), der Suchindex und <code>fmt()-&gt;excerpt()</code> machen das schon selbst.</td></tr>
+  </table>
+  <ul>
+    <li><b>Anwenden auf:</b> Überschriften, Dachzeilen, Einleitungen, Karten-/Schritt-/Listen-Titel und -Texte, Zitate, Bildunterschriften, als Überschrift gelesene Einstellungen (Claim, Fuß-Statement). <b>Nicht</b> auf Button- und Link-Beschriftungen, Navigation, Formular-Feldbeschriftungen, Werte aus Datentabellen und Attribute.</li>
+    <li><b>Block-Designer:</b> <code>{{ feld }}</code> im Text betont automatisch, in Attributen nie; <code>| rich</code>, <code>| inline</code>, <code>| nl2br</code>, <code>| paragraphs</code> ebenso.</li>
+    <li><b>CSS:</b> Jedes Kit gestaltet <code>.hl</code> (mindestens <code>font-style:normal</code> und eine Akzentfarbe mit ausreichendem Kontrast, auf dunklen Flächen <code>color:inherit</code>). Ohne Regel erscheint <code>em</code> kursiv.</li>
+    <li><b>Test:</b> <code>php bin/console blocks:selftest</code> (Grenzfälle, Rich-Text, Bearbeiten-Modus, Meta).</li>
+  </ul>
   <h3>Aktuelle Blöcke im Kit „<?= e(app()->theme->label()) ?>“</h3>
   <p><?php foreach ($blocks as $type => $b): ?><code><?= e($type) ?></code> <?php endforeach; ?></p>

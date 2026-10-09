@@ -156,12 +156,15 @@ final class Runtime
 
     // ------------------------------------------------------------------ Ausgabe
 
-    /** Ausgabe im Text: escaped, SafeHtml unverändert */
+    /**
+     * Ausgabe im Text: escaped, SafeHtml unverändert. *Wort* → <em class="hl"> wie in den Kit-Blöcken (emphasis_replace;
+     * im Bearbeiten-Modus mit dezenten Sternchen, damit direktes Bearbeiten „*Wort*“ zurückliest). Attribute bleiben roh.
+     */
     public function text(mixed $v): string
     {
         if ($v instanceof SafeHtml) return $v->html;
         if ($v === null || is_bool($v) || is_array($v) || is_object($v)) return '';
-        return e((string) $v);
+        return emphasis_replace(e((string) $v), is_editing());
     }
 
     /** Ausgabe in einem Attributwert (in Anführungszeichen): immer escaped; class/id nur sichere Zeichen */
@@ -281,7 +284,7 @@ final class Runtime
             case 'lines':
                 return array_values(array_filter(array_map('trim', preg_split('~\R~', self::scalar($v)) ?: []), fn($l) => $l !== ''));
             case 'nl2br':
-                return new SafeHtml(nl2br(e(self::scalar($v)), false));
+                return new SafeHtml(emphasis_replace(nl2br(e(self::scalar($v)), false), is_editing()));
             case 'paragraphs':
                 return new SafeHtml(paragraphs(self::scalar($v)));
         }

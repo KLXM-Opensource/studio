@@ -29,6 +29,7 @@ final class SelfTest
         app()->editing = false;
         try {
             $t->escaping();
+            $t->emphasis();
             $t->rejects();
             $t->css();
             $t->export();
@@ -386,6 +387,64 @@ TPL;
         $this->assert(str_contains($ok, 'href="https://example.org/a?b=1&amp;c=2" target="_blank" rel="noopener"'), 'Links: externe Adresse mit target/rel');
         $this->assert(str_contains($ok, '<li>–</li>'), 'Schleife: {% else %} bei leerer Liste');
         $this->assert(str_contains($ok, '<svg class="ico"'), 'Filter icon: Symbol aus dem Sprite');
+    }
+
+    /**
+     * *Betonung* (app/helpers.php: EMPHASIS_RE, emphasis_hl, emphasis_rich, strip_emphasis): ein Muster für kurze Texte,
+     * Rich-Text, Vorlagen-Blöcke und Meta – Grenzfälle wie Fußnoten-Sternchen, „5 * 3“, „**fett**“ bleiben unverändert.
+     */
+    private function emphasis(): void
+    {
+        $app = app();
+        $hl = fn(string $t) => emphasis_hl($t);
+        $yes = ['*Wort*' => '<em class="hl">Wort</em>', 'Ein *schönes* Haus.' => 'Ein <em class="hl">schönes</em> Haus.',
+            '(*Wort*)!' => '(<em class="hl">Wort</em>)!', '*a*' => '<em class="hl">a</em>', '*zwei Wörter* und *mehr*' => '<em class="hl">zwei Wörter</em> und <em class="hl">mehr</em>',
+            'Preis* gilt *heute*' => 'Preis* gilt <em class="hl">heute</em>', 'Tom & *Jerry*' => 'Tom &amp; <em class="hl">Jerry</em>',
+            '*<b>x</b>*' => '<em class="hl">&lt;b&gt;x&lt;/b&gt;</em>'];
+        foreach ($yes as $in => $out) $this->assert($hl($in) === $out, "Betonung: „{$in}“ → em.hl");
+        $no = ['Preis*', 'Felder mit * sind Pflicht', '5 * 3', '**fett**', 'a*b*c', '* Fußnote*', '*Wort*s', "*zwei
+Zeilen*", '*Wort *', '***'];
+        foreach ($no as $in) $this->assert(!str_contains($hl($in), '<em'), 'Betonung: „' . str_replace("
+", '\n', $in) . '“ bleibt Text');
+        $this->assert(strip_emphasis('Ein *Wort*, Preis* und **fett**') === 'Ein Wort, Preis* und **fett**', 'Betonung: strip_emphasis für Meta/Attribute');
+
+        // Rich-Text: nur Textknoten, nie Attribute/Adressen, nicht in <code>/<pre>; Link-Text ja
+        $rich = rich('<p>Ein *Wort* <a href="https://example.org/a*b*">*Link*</a> <code>*c*</code></p><pre>*p*</pre><p class="lead">*d*</p>');
+        $this->assert(str_contains($rich, 'Ein <em class="hl">Wort</em>'), 'Betonung Rich-Text: Textknoten');
+        $this->assert(str_contains($rich, 'href="https://example.org/a*b*"'), 'Betonung Rich-Text: Adresse unverändert');
+        $this->assert(str_contains($rich, '><em class="hl">Link</em></a>'), 'Betonung Rich-Text: Link-Text');
+        $this->assert(str_contains($rich, '<em class="hl">d</em>'), 'Betonung Rich-Text: Absatz mit Klasse');
+        // code/pre lässt der Sanitizer heute nicht durch – emphasis_rich() überspringt sie trotzdem (falls es sie je gibt)
+        $code = emphasis_rich('<p><code>*c*</code> *e*</p><pre>*p*</pre>', false);
+        $this->assert($code === '<p><code>*c*</code> <em class="hl">e</em></p><pre>*p*</pre>', 'Betonung Rich-Text: nicht in code/pre');
+        $this->assert(emphasis_rich('<p title="*x*">y</p>') === '<p title="*x*">y</p>', 'Betonung Rich-Text: nie in Attributen');
+        $this->assert(str_contains(inline('*kurz*'), '<em class="hl">kurz</em>'), 'Betonung: inline()');
+        $this->assert(str_contains(paragraphs("Zeile *eins*\n\n*zwei*"), '<p><em class="hl">zwei</em></p>'), 'Betonung: paragraphs()');
+
+        // Vorlagen-Blöcke: Text-Ausgabe ja, Attribute nie
+        $tpl = $this->render(['title' => 'Ein *Wort*', 'text' => '<p>*r*</p>', 'short' => '', 'link' => '', 'symbol' => '', 'items' => []]);
+        $this->assert(str_contains($tpl, '>Ein <em class="hl">Wort</em></h2>') && str_contains($tpl, 'title="Ein *Wort*"'), 'Betonung Vorlagen-Block: Text ja, Attribut roh');
+        $this->assert(str_contains($tpl, '<p><em class="hl">r</em></p>'), 'Betonung Vorlagen-Block: Filter rich');
+
+        // Bearbeiten-Modus: kurze Texte mit sichtbaren Sternchen (textContent = Original), Rich-Text roh (Editor speichert innerHTML)
+        $app->editing = true;
+        try {
+            $ed = emphasis_hl('Ein *Wort*');
+            $this->assert($ed === 'Ein <span class="hl-mark">*</span><em class="hl">Wort</em><span class="hl-mark">*</span>', 'Betonung Bearbeiten: hl-mark');
+            $this->assert(html_entity_decode(strip_tags($ed)) === 'Ein *Wort*', 'Betonung Bearbeiten: textContent bleibt „*Wort*“');
+            $this->assert(emphasis('Ein *Wort*') === $ed, 'Betonung Bearbeiten: emphasis() nutzt nie die Kit-Funktion');
+            $this->assert(rich('<p>Ein *Wort*</p>') === '<p>Ein *Wort*</p>', 'Betonung Bearbeiten: Rich-Text bleibt roh');
+            $tpl = $this->render(['title' => '*T*', 'text' => '<p>*r*</p>', 'short' => '', 'link' => '', 'symbol' => '', 'items' => []]);
+            $this->assert(str_contains($tpl, '<span class="hl-mark">*</span><em class="hl">T</em>') && str_contains($tpl, '<p>*r*</p>'), 'Betonung Bearbeiten: Vorlagen-Block');
+        } finally {
+            $app->editing = false;
+        }
+
+        // Meta: <title>/Beschreibung ohne Sternchen; Suchauszug ohne Sternchen
+        $seo = \Core\Seo::forPage(['id' => 0, 'is_home' => 0, 'title' => 'Ein *Wort*', 'meta_title' => '', 'meta_description' => 'Eine *Beschreibung*',
+            'og_image' => null, 'noindex' => 1, 'status' => 'draft', 'slug' => 'x', 'lang' => \Core\Lang::current(), 'parent_id' => null, 'type' => 'page']);
+        $this->assert(!str_contains($seo['title'], '*') && !str_contains($seo['description'], '*'), 'Betonung: Seitentitel/Meta ohne Sternchen');
+        $this->assert(\Core\Format::for()->excerpt('<p>Ein *Wort*</p>') === 'Ein Wort', 'Betonung: Auszug ohne Sternchen');
     }
 
     /** Ausgabe als DOM prüfen: keine Skript-/Einbettungs-Elemente, keine Ereignis-Attribute, keine javascript:/data:-Links */

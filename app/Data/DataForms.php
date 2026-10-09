@@ -329,8 +329,8 @@ final class DataForms
                 $sid = $uid . '-' . $sec['name'];
                 $desc = trim((string) ($sec['help'] ?? ''));
                 $h .= '<fieldset class="dff-sec dff-sec--' . (($sec['style'] ?? '') === 'fieldset' ? 'fieldset' : 'heading') . '" id="' . e($sid) . '"'
-                    . ($desc !== '' ? ' aria-describedby="' . e($sid) . '-d"' : '') . '><legend class="dff-sec__title">' . e(Tables::label($sec)) . '</legend>'
-                    . ($desc !== '' ? '<p class="dff-sec__desc" id="' . e($sid) . '-d">' . e($desc) . '</p>' : '');
+                    . ($desc !== '' ? ' aria-describedby="' . e($sid) . '-d"' : '') . '><legend class="dff-sec__title">' . emphasis(Tables::label($sec)) . '</legend>'
+                    . ($desc !== '' ? '<p class="dff-sec__desc" id="' . e($sid) . '-d">' . emphasis($desc) . '</p>' : '');   // Abschnitt: *Wort* wie in Überschriften
             }
             $h .= '<div class="dff-grid">';
             foreach ($items as $f) {
