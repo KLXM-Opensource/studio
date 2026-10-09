@@ -89,6 +89,65 @@ final class DesignController extends AdminController
         return Response::json(['ok' => true, 'html' => $html, 'checks' => Design::checks($values)]);
     }
 
+    /**
+     * Werkzeug „Design“ der Werkzeugleiste (Core\DesignTool): Schema (übersetzt), gespeicherte Werte, Standardwerte und der
+     * Live-Stand der gespeicherten Werte (Klassen, Varianten-Stylesheets …) – die Seite merkt sich damit, was sie zurücksetzt.
+     */
+    public function live(Request $r): Response
+    {
+        $this->guard($r);
+        if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
+        $values = Design::values();
+        return Response::json(['ok' => true, 'schema' => self::translatedSchema(), 'values' => $values, 'defaults' => Design::defaults(),
+            'markup' => Design::markupTokens(), 'saved' => Design::live($values)]);
+    }
+
+    /**
+     * Live-Vorschau bzw. Speichern aus der Werkzeugleiste: v = Werte (wie die Vorschau der Verwaltung), save = 1 speichert für die
+     * ganze Website (Design::save: Verlauf, Schriften, Seiten-Cache). Antwort: Design::live() der normalisierten Werte (Vorschau:
+     * Markup-Tokens mit gespeichertem Wert), values = die übergebenen Werte (normalisiert).
+     */
+    public function liveApply(Request $r): Response
+    {
+        $this->guard($r);
+        if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
+        $values = Design::normalize(is_array($r->post['v'] ?? null) ? $r->post['v'] : []);
+        $out = ['ok' => true, 'values' => $values];
+        if (!empty($r->post['save'])) {
+            @set_time_limit(180);
+            $fonts = Design::save($values, __('Werkzeugleiste der Website'));
+            $this->changed();
+            $out['fontsFailed'] = array_keys(array_filter($fonts, fn($f) => !$f['ok']));
+            $values = Design::values();
+            $out['values'] = $values;
+            return Response::json($out + Design::live($values));
+        }
+        // Vorschau: Tokens, die das Markup ändern (Kopf-/Fußvariante …), behalten den gespeicherten Wert – sonst passte das
+        // Markup der Seite nicht mehr zu Klassen und Stylesheets; sie erscheinen nach dem Speichern (die Seite lädt dann neu)
+        $saved = Design::values();
+        foreach (Design::markupTokens() as $n) $values[$n] = $saved[$n] ?? $values[$n];
+        return Response::json($out + Design::live($values));
+    }
+
+    /** Schema mit Bezeichnungen in der Sprache der Verwaltung (Texte aus theme.php sind deutsch) */
+    private static function translatedSchema(): array
+    {
+        $schema = Design::schema();
+        $tr = fn($s) => is_string($s) && $s !== '' ? __($s) : $s;
+        foreach ($schema['groups'] as $gi => $g) {
+            $schema['groups'][$gi]['label'] = $tr($g['label']);
+            foreach ($g['tokens'] as $ti => $t) {
+                foreach (['label', 'help'] as $k) if (isset($t[$k])) $schema['groups'][$gi]['tokens'][$ti][$k] = $tr($t[$k]);
+                if (isset($t['options'])) $schema['groups'][$gi]['tokens'][$ti]['options'] = array_map($tr, (array) $t['options']);
+            }
+        }
+        foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = $tr($p['label'] ?? '');
+        foreach ((array) (Design::def()['presets'] ?? []) as $key => $p) {
+            if (isset($schema['presets'][$key]) && !empty($p['description'])) $schema['presets'][$key]['description'] = $tr((string) $p['description']);
+        }
+        return $schema;
+    }
+
     /** Import prüfen: JSON (Export oder reine Werte) → normalisierte Werte + Hinweise */
     public function import(Request $r): Response
     {

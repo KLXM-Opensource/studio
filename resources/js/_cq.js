@@ -90,7 +90,20 @@ async function convertLink(l) {
   } catch { /* Original bleibt */ }
 }
 
-/** Hülle anlegen und Stylesheets umschreiben – einmal beim Start des Editors */
+/**
+ * Später eingefügtes bzw. ausgetauschtes Stylesheet (z. B. Varianten-Stylesheet des Werkzeugs „Design“) genauso umschreiben –
+ * nur wenn die Hülle besteht. dropSheet() entfernt ein Stylesheet samt umgeschriebener Fassung.
+ */
+export function convertSheet(l) {
+  if (d.querySelector('.cms-cq-site')) return convertLink(l);
+}
+export function dropSheet(l) {
+  const href = l.getAttribute('href');
+  d.querySelectorAll('style[data-cq-from]').forEach(st => { if (st.dataset.cqFrom === href) st.remove(); });
+  l.remove();
+}
+
+/** Hülle anlegen und Stylesheets umschreiben – einmal beim Start des Editors (bzw. beim Öffnen einer Seitenleiste „drawer“) */
 export async function responsiveEditing() {
   if (d.querySelector('.cms-cq-site') || !('container' in d.documentElement.style || CSS.supports?.('container-type', 'inline-size'))) return;
   const kids = [...d.body.children].filter(el => !el.matches(SKIP_HOST) && getComputedStyle(el).position !== 'fixed');

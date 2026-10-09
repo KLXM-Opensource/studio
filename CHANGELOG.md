@@ -6,6 +6,22 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Website-Werkzeugleiste: Style-Editor „Design“ mit Live-Vorschau
+- Neuer Knopf **Design** (Palette) in der Werkzeugleiste der Website – beim Ansehen und Bearbeiten, nur mit Recht `design.edit`
+  und Funktion „design“ (auf Telefonen im Menü „⋯“). Öffnet rechts eine Seitenleiste wie die des Blocks: die Website rückt nach
+  links und folgt ihrer neuen Breite (`_cq.js`, jetzt auch beim Ansehen); Telefone: Blatt unten.
+- Inhalt: Vorlagen als Kacheln (vier Farbpunkte + Name), alle Gruppen aufklappbar (Farbe hell + dunkel mit Hex, Regler, Auswahl,
+  Schrift, Schalter), Kontrastwarnungen. Jede Änderung erscheint **sofort auf der aktuellen Seite** – ohne iframe, ohne Neuladen:
+  Klassen am `<html>` (auch abgeleitete wie `is-darkbase`), Variablen hell + dunkel per CSSOM (`adoptedStyleSheets`, CSP-konform),
+  Schriften und Varianten-Stylesheets (`css/opt-{token}-{wert}.css`, im Bearbeiten-Modus mit umgeschriebenen Haltepunkten).
+- **Speichern** gilt für die ganze Website (`Design::save()`: Verlauf, Schriften, Seiten-Cache), **Abbrechen**/Schließen zeigt wieder
+  den gespeicherten Stand, **Standard** setzt die Kit-Werte ein. Verwaltung → Design bleibt unverändert; beide ändern dieselben Werte.
+- Tokens mit `'markup' => true` (Kopf-/Fußvariante, Menü, Infoleiste, Kopfbereich-Aktionen): Vorschau mit gespeichertem Wert und Hinweis
+  „Vollständig nach dem Speichern“ – nach dem Speichern lädt die Seite neu (im Editor nur ohne ungespeicherte Änderungen).
+- Technik: `Core\DesignTool` (Werkzeug), `GET`/`POST /admin/api/design-live` (`DesignController::live/liveApply`, Recht + CSRF),
+  `Design::live()`, `htmlClasses()`, `optionCss()`, `fontAssets()`, `markupTokens()`, `classes(?array)`; Werkzeuge kennen die
+  Seitenleisten-Art `'panel' => ['size' => 'drawer']` (`body.has-tdrawer`). Besucher bekommen kein zusätzliches Markup oder CSS.
+
 ### *Hervorhebung* in allen Überschriften und Freitexten
 - `*Wort*` betont jetzt überall: Überschriften, Dachzeilen, Einleitungen, Karten-, Schritt-, Feature- und Listentitel, Zitate,
   Bildunterschriften, Kennzahl-Beschriftungen, Formular-Abschnitte, Claims/Fuß-Statements aus den Einstellungen – in allen Kits

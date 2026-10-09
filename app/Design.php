@@ -27,6 +27,11 @@ namespace Core;
  * 'design' => ['fonts_extra' => false].
  *
  * Im Theme: design('nav') liest einen Wert, design_classes() liefert Klassen für <html>, design_head() die <link>-Tags.
+ *
+ * Live auf der Website (Werkzeug „Design“ der Werkzeugleiste, Core\DesignTool): live() liefert Variablen, Klassen (auch die
+ * abgeleiteten aus {kit}_html_class()), Schriften und Varianten-Stylesheets (css/opt-{token}-{wert}.css). Tokens mit
+ * 'markup' => true ändern das Markup (z. B. Kopf- und Fußvariante): die Vorschau behält dafür den gespeicherten Wert (das Markup
+ * der Seite passt sonst nicht zu Klassen und Stylesheets) und zeigt „Vollständig nach dem Speichern“ – danach lädt die Seite neu.
  */
 final class Design
 {
@@ -169,13 +174,14 @@ final class Design
         return $out . "\n";
     }
 
-    /** Klassen für <html> aus choice-/bool-Werten mit 'class' */
-    public static function classes(): string
+    /** Klassen für <html> aus choice-/bool-Werten mit 'class' ($values: andere Werte statt der gespeicherten, z. B. Live-Vorschau) */
+    public static function classes(?array $values = null): string
     {
         $out = [];
+        $vals = $values !== null ? self::normalize($values) : null;
         foreach (self::tokens() as $n => $t) {
             if (empty($t['class'])) continue;
-            $v = self::get($n);
+            $v = $vals !== null ? ($vals[$n] ?? null) : self::get($n);
             if (($t['type'] ?? '') === 'bool') { if ($v) $out[] = (string) $t['class']; continue; }
             $out[] = str_replace('{value}', preg_replace('~[^a-z0-9_-]~i', '', (string) $v), (string) $t['class']);
         }
@@ -287,6 +293,92 @@ final class Design
             $h .= '<link rel="preload" href="' . e($u) . '" as="font" type="font/woff2" crossorigin>' . "\n";
         }
         return $h;
+    }
+
+    // ------------------------------------------------------------------ Live-Vorschau auf der Website (Core\DesignTool)
+
+    /**
+     * Alle Klassen, die das Kit für diese Werte an <html> setzt: Funktion {kit}_html_class() des Kits (z. B. fluid_html_class()
+     * mit abgeleiteten Klassen wie is-darkbase, head-serif) – sonst nur classes(). Ohne no-js/js (setzt das Skript des Kits).
+     */
+    public static function htmlClasses(array $values): string
+    {
+        $fn = preg_replace('~[^a-z0-9_]~', '_', strtolower(app()->theme->name)) . '_html_class';
+        $saved = self::$override;
+        self::override($values);
+        try {
+            $cls = function_exists($fn) ? (string) $fn() : self::classes();
+        } finally {
+            self::$override = $saved;
+        }
+        $out = array_filter(preg_split('~\s+~', $cls) ?: [], fn($c) => $c !== '' && !in_array($c, ['no-js', 'js'], true));
+        return implode(' ', array_values(array_unique($out)));
+    }
+
+    /**
+     * Stylesheets der gewählten Varianten (Kit-Konvention css/opt-{token}-{wert}.css, z. B. opt-header-sidebar.css) – nur
+     * Auswahl-Tokens, deren Datei im Kit liegt; Kits ohne solche Dateien: []. Eigene Regel: theme.php → 'design' =>
+     * ['option_css' => fn(array $values): array] (Liste von Asset-Pfaden des Kits).
+     * @return list<string> Adressen wie theme_asset()
+     */
+    public static function optionCss(?array $values = null): array
+    {
+        $values = self::normalize($values ?? self::values());
+        $theme = app()->theme;
+        $cb = self::def()['option_css'] ?? null;
+        if (is_callable($cb)) {
+            return array_values(array_map(fn($f) => $theme->asset((string) $f), array_filter((array) $cb($values), fn($f) => is_string($f) && $theme->hasAsset($f))));
+        }
+        $out = [];
+        foreach (self::tokens() as $n => $t) {
+            if (($t['type'] ?? '') !== 'choice' || !preg_match('~^[a-z0-9_]+$~', (string) $n)) continue;
+            $file = 'css/opt-' . $n . '-' . preg_replace('~[^a-z]~', '', (string) ($values[$n] ?? '')) . '.css';
+            if ($theme->hasAsset($file)) $out[] = $theme->asset($file);
+        }
+        return $out;
+    }
+
+    /**
+     * Schriften für die Live-Vorschau: Stylesheets (installierte Schriften, Schrift-CSS des Kits) und @font-face-Regeln für noch
+     * nicht installierte Kit-Schriften (Vorschau-Schnitt von der eigenen Domain, installiert wird beim Speichern).
+     * @return array{links: list<string>, faces: string}
+     */
+    public static function fontAssets(array $values): array
+    {
+        $values = self::normalize($values);
+        $fonts = self::fonts();
+        $links = $faces = [];
+        foreach (self::tokens() as $n => $t) {
+            if (($t['type'] ?? '') !== 'font' || !($f = $fonts[(string) ($values[$n] ?? '')] ?? null)) continue;
+            if (!empty($f['href'])) $links[(string) $f['href']] = true;
+            elseif (!empty($f['fontsource'])) { if (($face = Fonts::previewFace($f)) !== '') $faces[$face] = true; }
+            elseif (!empty($f['css'])) $links[app()->theme->asset((string) $f['css'])] = true;
+        }
+        return ['links' => array_keys($links), 'faces' => implode('', array_keys($faces))];
+    }
+
+    /** Tokens, deren Wert das Markup der Seite ändert ('markup' => true, z. B. Kopfvariante) – in der Live-Vorschau erst nach dem Speichern */
+    public static function markupTokens(): array
+    {
+        return array_keys(array_filter(self::tokens(), fn($t) => !empty($t['markup'])));
+    }
+
+    /**
+     * Alles, was die Website für diese Werte live braucht (Werkzeug „Design“ der Werkzeugleiste): css (Variablen hell + dunkel,
+     * davor @font-face der Vorschau-Schriften), classes (<html>), fonts (Stylesheets), opt (Varianten-Stylesheets), checks (nur
+     * nicht bestandene Kontrastprüfungen).
+     */
+    public static function live(array $values): array
+    {
+        $values = self::normalize($values);
+        $fa = self::fontAssets($values);
+        return [
+            'css' => $fa['faces'] . self::css($values),
+            'classes' => self::htmlClasses($values),
+            'fonts' => $fa['links'],
+            'opt' => self::optionCss($values),
+            'checks' => array_values(array_filter(self::checks($values), fn($c) => !$c['ok'])),
+        ];
     }
 
     // ------------------------------------------------------------------ Speichern

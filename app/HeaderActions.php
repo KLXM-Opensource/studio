@@ -120,7 +120,8 @@ final class HeaderActions
         ];
         $exclude = (array) ($opt['exclude'] ?? []);
         return ['id' => 'kopfaktionen', 'label' => (string) ($opt['label'] ?? $t('Kopfbereich: Suche & Aktionen')),
-            'tokens' => array_values(array_filter($tokens, fn($x) => !in_array($x['name'], $exclude, true)))];
+            // markup: Aktionen werden serverseitig ausgegeben – die Live-Vorschau der Werkzeugleiste zeigt sie erst nach dem Speichern
+            'tokens' => array_values(array_map(fn($x) => $x + ['markup' => true], array_filter($tokens, fn($x) => !in_array($x['name'], $exclude, true))))];
     }
 
     /** Felder für Website → Darstellung (ersetzen die bisherigen zwei Felder des Buttons; Namen bleiben gleich) */

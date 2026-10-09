@@ -88,7 +88,7 @@ return [
                 'options' => ['square' => 'Mit Farbquadrat', 'index' => 'Nummeriert (01, 02 …)', 'plain' => 'Schlicht']],
         ]],
         ['id' => 'navigation', 'label' => 'Navigation', 'tokens' => [
-            ['name' => 'nav', 'label' => 'Navigation', 'type' => 'choice', 'class' => 'nav-{value}', 'default' => 'modern', 'preview' => 'nav',
+            ['name' => 'nav', 'markup' => true, 'label' => 'Navigation', 'type' => 'choice', 'class' => 'nav-{value}', 'default' => 'modern', 'preview' => 'nav',
                 'thumbs' => ['modern' => 'floating', 'classic' => 'left', 'minimal' => 'burger', 'extended' => 'split'],
                 'options' => [
                     'modern' => 'Modern – schwebende Leiste',
@@ -98,13 +98,13 @@ return [
                 ],
                 'help' => 'Alle Varianten sind per Tastatur bedienbar; auf Mobilgeräten öffnet die Menü-Schaltfläche ein Seitenblatt.'],
             ['name' => 'nav_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'nav-sticky', 'default' => true],
-            ['name' => 'nav_parent', 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
+            ['name' => 'nav_parent', 'markup' => true, 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
                 'options' => ['split' => 'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten', 'hover' => 'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus', 'overview' => 'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite'],
                 'help' => 'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.'],
             ['name' => 'nav_levels', 'label' => 'Dritte Menüebene im Aufklappmenü', 'type' => 'choice', 'class' => 'nv-{value}', 'default' => 'indent',
                 'options' => ['indent' => 'Eingerückt – mit Linie, etwas kleiner', 'groups' => 'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter'],
                 'help' => 'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.'],
-            ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'big',
+            ['name' => 'footer', 'markup' => true, 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'big',
                 'options' => ['big' => 'Großer Schriftzug mit Spalten', 'columns' => 'Spalten', 'simple' => 'Schlicht in einer Zeile']],
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: geteilte Aktion (Anfrage + Anruf) + aufziehende Suche

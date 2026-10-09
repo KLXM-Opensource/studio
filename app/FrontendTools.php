@@ -20,7 +20,8 @@ namespace Core;
  * modes (['page', 'entry'] – Seiten-Editor inkl. Vorlage bzw. Eintrag direkt im Text; 'view' = auch beim Ansehen, angemeldet),
  * view (true = Kurzform für 'view' zusätzlich zu den Bearbeiten-Modi), chip (Beschriftung eines schwebenden Knopfs neben markiertem
  * Text der Seite – nur beim Ansehen), panel (['title' => …, 'size' => 'narrow'|'wide'|'modal'] – modal: Dialog in der Mitte mit
- * abgedunkeltem Hintergrund, z. B. „Neue Seite“ Core\PageTool),
+ * abgedunkeltem Hintergrund, z. B. „Neue Seite“ Core\PageTool; drawer: Seitenleiste in voller Höhe rechts, die Website wird
+ * schmaler und reagiert auf ihre neue Breite – z. B. „Design“ Core\DesignTool),
  * endpoints (['name' => '/admin/api/…'] → absolute Pfade), data (array oder fn(array $bar): array – frei für das Modul),
  * texts (übersetzte Texte für das Modul – auf der Website gibt es kein Wörterbuch der Verwaltung).
  * Rechte der Endpunkte prüft der Server bei JEDEM Aufruf selbst; die Angaben hier steuern nur die Anzeige.
@@ -78,7 +79,7 @@ final class FrontendTools
             'visible' => is_callable($def['visible'] ?? null) ? $def['visible'] : null,
             'modes' => $modes,
             'chip' => in_array('view', $modes, true) ? trim((string) ($def['chip'] ?? '')) : '',
-            'panel' => ['title' => trim((string) ($def['panel']['title'] ?? $label)), 'size' => in_array($def['panel']['size'] ?? '', ['wide', 'modal'], true) ? $def['panel']['size'] : 'narrow'],
+            'panel' => ['title' => trim((string) ($def['panel']['title'] ?? $label)), 'size' => in_array($def['panel']['size'] ?? '', ['wide', 'modal', 'drawer'], true) ? $def['panel']['size'] : 'narrow'],
             'endpoints' => $endpoints,
             'data' => $def['data'] ?? [],
             'texts' => array_map('strval', (array) ($def['texts'] ?? [])),
@@ -112,7 +113,7 @@ final class FrontendTools
     private static function coreTools(): array
     {
         $out = [];
-        foreach ([fn() => \Core\Glossary\QuickTool::definition(), fn() => PageTool::definition(), fn() => PageSettingsTool::definition()] as $def) {
+        foreach ([fn() => \Core\Glossary\QuickTool::definition(), fn() => PageTool::definition(), fn() => PageSettingsTool::definition(), fn() => DesignTool::definition()] as $def) {
             try {
                 if ($t = self::normalize($def(), 'core')) $out[$t['id']] = $t;
             } catch (\Throwable $e) {

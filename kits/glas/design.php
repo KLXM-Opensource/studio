@@ -101,7 +101,7 @@ return [
                 'help' => '1 rem = 16 px.'],
         ]],
         ['id' => 'navigation', 'label' => 'Kopf & Fuß', 'tokens' => [
-            ['name' => 'header', 'label' => 'Kopfbereich', 'type' => 'choice', 'class' => 'hdr-{value}', 'default' => 'dock', 'preview' => 'nav',
+            ['name' => 'header', 'markup' => true, 'label' => 'Kopfbereich', 'type' => 'choice', 'class' => 'hdr-{value}', 'default' => 'dock', 'preview' => 'nav',
                 'thumbs' => ['dock' => 'floating', 'floating' => 'left', 'bar' => 'left', 'centered' => 'center', 'index' => 'burger'],
                 'options' => [
                     'dock' => 'Glas-Dock – mittige Glasinsel mit gleitender Linse, auf Telefonen Tab-Leiste unten',
@@ -112,13 +112,13 @@ return [
                 ],
                 'help' => 'Das Menü steht in der Leiste, solange es hineinpasst – sonst öffnet eine Schaltfläche das Menü als Glasblatt. „Glas-Dock“: Unterseiten als Glaspanel mit Symbol und Kurzbeschreibung (Meta-Beschreibung der Seite); auf Telefonen Start, drei Hauptseiten und „Mehr“ als Tab-Leiste am unteren Rand.'],
             ['name' => 'header_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'hdr-sticky', 'default' => true],
-            ['name' => 'nav_parent', 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
+            ['name' => 'nav_parent', 'markup' => true, 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
                 'options' => ['split' => 'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten', 'hover' => 'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus', 'overview' => 'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite'],
                 'help' => 'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.'],
             ['name' => 'nav_levels', 'label' => 'Dritte Menüebene im Aufklappmenü', 'type' => 'choice', 'class' => 'nv-{value}', 'default' => 'indent',
                 'options' => ['indent' => 'Eingerückt – mit Linie, etwas kleiner', 'groups' => 'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter'],
                 'help' => 'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.'],
-            ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'glass',
+            ['name' => 'footer', 'markup' => true, 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'glass',
                 'options' => ['glass' => 'Glaspaneel (Seiten, Kontakt, Zeiten)', 'panel' => 'Aussage (Satz, Button, darunter Seiten)', 'simple' => 'Schlicht in einer Zeile']],
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Befehlsfeld „Suchen … ⌘K“ aus Glas im Dock + Kontakt-Menü als Glastaste mit Glaspaneel

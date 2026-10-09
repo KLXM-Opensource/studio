@@ -393,6 +393,8 @@ export function use(handlers) {
 
 export const bar_ = {
   get mode() { return mode; },
+  /** Ungespeicherte Änderungen im Editor (Seite bzw. Eintrag)? – z. B. vor einem Neuladen durch ein Werkzeug */
+  get dirty() { return !!H?.dirty?.(); },
   setMode, use, state: barState, cancel, confirm: confirmDiscard, ask,
   get texts() { return cfg.texts || {}; },
   get viewUrl() { return cfg.viewUrl || ''; },

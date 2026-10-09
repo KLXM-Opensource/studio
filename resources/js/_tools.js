@@ -24,6 +24,7 @@ import { layerBox, barRoot, deepActive, uiAll } from './_shadow.js';
 import { Rich } from './_rte.js';
 import { ico } from './_icons.js';
 import { toast } from './_toast.js';
+import { responsiveEditing } from './_cq.js';   // Seitenleiste „drawer“: Website reagiert auf ihre neue Breite
 
 const d = document;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -256,6 +257,9 @@ export async function open(id) {
   current = id;
   st.panel.el.hidden = false;
   d.documentElement.classList.add('cms-has-tpanel');
+  // Seitenleiste in voller Höhe (panel size 'drawer'): Website wird schmaler (editor.css body.has-tdrawer) und ihre
+  // Haltepunkte folgen der neuen Breite (_cq.js – wie im Seiten-Editor, auch beim Ansehen)
+  if (def.panel?.size === 'drawer') { d.body.classList.add('has-tdrawer'); responsiveEditing(); }
   buttons(id).forEach(b => b.setAttribute('aria-expanded', 'true'));
   if (!st.mounted) {
     st.panel.body.innerHTML = `<p class="cms-tpanel__wait" role="status">${esc(cfg.texts.loading)}</p>`;
@@ -283,6 +287,7 @@ export function close(id = current, refocus = true) {
   st.panel.el.hidden = true;
   if (current === id) current = null;
   if (!current) d.documentElement.classList.remove('cms-has-tpanel');
+  if (defs.get(id)?.panel?.size === 'drawer') d.body.classList.remove('has-tdrawer');
   buttons(id).forEach(b => b.setAttribute('aria-expanded', 'false'));
   impls.get(id)?.hide?.(st.ctx);
   emit('cms:tool-close', { id });

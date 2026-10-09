@@ -90,7 +90,7 @@ return [
                 'values' => ['compact' => 'clamp(40px,5.5vw,72px)', 'normal' => 'clamp(56px,7.5vw,112px)', 'airy' => 'clamp(72px,10vw,152px)']],
         ]],
         ['id' => 'navigation', 'label' => 'Kopf & Navigation', 'tokens' => [
-            ['name' => 'header', 'label' => 'Kopfbereich', 'type' => 'choice', 'class' => 'head-{value}', 'default' => 'masthead', 'preview' => 'nav',
+            ['name' => 'header', 'markup' => true, 'label' => 'Kopfbereich', 'type' => 'choice', 'class' => 'head-{value}', 'default' => 'masthead', 'preview' => 'nav',
                 'thumbs' => ['masthead' => 'center', 'compact' => 'left', 'split' => 'split', 'ressorts' => 'burger'],
                 'options' => [
                     'masthead' => 'Titelkopf – Name groß zentriert, Datumszeile',
@@ -100,15 +100,15 @@ return [
                 ],
                 'help' => 'Alle Varianten sind per Tastatur bedienbar; mobil öffnet ein Menü-Blatt mit Suche, Rubriken und Sprache.'],
             ['name' => 'nav_sticky', 'label' => 'Navigation beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'nav-sticky', 'default' => true],
-            ['name' => 'nav_parent', 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
+            ['name' => 'nav_parent', 'markup' => true, 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
                 'options' => ['split' => 'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten', 'hover' => 'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus', 'overview' => 'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite'],
                 'help' => 'Gilt für das Menü in der Leiste und im Menü-Blatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.'],
             ['name' => 'nav_levels', 'label' => 'Dritte Menüebene im Aufklappmenü', 'type' => 'choice', 'class' => 'nv-{value}', 'default' => 'indent',
                 'options' => ['indent' => 'Eingerückt – mit Linie, etwas kleiner', 'groups' => 'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter'],
                 'help' => 'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.'],
-            ['name' => 'dateline', 'label' => 'Datumszeile mit Ausgabe (Titelkopf, Geteilt)', 'type' => 'bool', 'default' => true,
+            ['name' => 'dateline', 'markup' => true, 'label' => 'Datumszeile mit Ausgabe (Titelkopf, Geteilt)', 'type' => 'bool', 'default' => true,
                 'help' => 'Wochentag, Datum und – falls eingetragen – die Ausgabe (Website → Darstellung).'],
-            ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'foot-{value}', 'default' => 'sitemap',
+            ['name' => 'footer', 'markup' => true, 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'foot-{value}', 'default' => 'sitemap',
                 'options' => ['sitemap' => 'Sitemap in Spalten', 'simple' => 'Schlicht in einer Zeile']],
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Befehlsfeld „Suchen … ⌘K“ + Newsletter als Textlink (zur Datumszeile)

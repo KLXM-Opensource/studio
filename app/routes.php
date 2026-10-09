@@ -155,6 +155,9 @@ return function (Router $r): void {
     $r->post('/admin/design', [Admin\DesignController::class, 'save']);
     $r->post('/admin/api/design-preview', [Admin\DesignController::class, 'preview']);
     $r->post('/admin/api/design-import', [Admin\DesignController::class, 'import']);
+    // Werkzeug „Design“ der Website-Werkzeugleiste (Core\DesignTool): Schema + Live-Vorschau/Speichern
+    $r->get('/admin/api/design-live', [Admin\DesignController::class, 'live']);
+    $r->post('/admin/api/design-live', [Admin\DesignController::class, 'liveApply']);
     // Block-Designer (Core\Blocks\Custom): eigene Blöcke – feste Pfade vor /{key}
     $cb = Admin\BlockController::class;
     $r->get('/admin/blocks', [$cb, 'index']);
