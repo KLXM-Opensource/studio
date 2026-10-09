@@ -152,7 +152,7 @@ final class Activity
         return match ($r['type']) {
             'page' => Pages::find($id) ? url('/admin/pages/' . $id) : null,
             'entry' => ($t = Data\Tables::find((string) $r['tbl'])) && Data\Entries::find($t, $id) ? url('/admin/data/' . $t['handle'] . '/' . $id) : null,
-            'media' => ($m = Media::find($id)) && empty($m['deleted_at']) ? url('/admin/media?m=' . $id) : null,
+            'media' => ($m = Media::find($id)) && empty($m['deleted_at']) ? url('/admin/media') . '#m' . $id   /* öffnet die Datei mit ihren Infos (resources/js/_media.js) */ : null,
             default => null,
         };
     }

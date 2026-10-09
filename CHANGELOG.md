@@ -8,7 +8,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Aktionslog (System → Aktionslog)
 - Neue Übersicht für die Administration: wer hat wann **Seiten, Datensätze und Medien** angelegt, geändert, veröffentlicht, offline genommen,
-  verworfen oder gelöscht – mit Link zum Objekt (Seiten zusätzlich „Auf der Website ansehen“), Gelöschtes durchgestrichen.
+  verworfen oder gelöscht – mit Link zum Objekt (Medien öffnen direkt mit ihren Infos, Seiten zusätzlich „Auf der Website ansehen“), Gelöschtes durchgestrichen.
 - Filter nach **Art** (Reiter mit Anzahl), **Aktion**, **Person**, **Zeitraum** und Name; sortierbar nach Zeit, Art oder Person; nach Tagen gruppiert.
 - Mehrfaches Speichern derselben Sache innerhalb von 15 Minuten wird zusammengefasst („×3“); Aufbewahrung ein Jahr; beim ersten Aufruf
   aus den Versionen der letzten 90 Tage gefüllt. `Core\Activity`, Tabelle `activity_log`; Seiten- und Eintragsereignisse werden jetzt immer
