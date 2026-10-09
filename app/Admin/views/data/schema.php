@@ -156,13 +156,18 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     <?php else: ?>
     <p class="set-page__lead">Jedes Feld wird eine Spalte der Tabelle. Reihenfolge mit ↑ ↓ ändern. Den <b>Kurznamen</b> brauchen Sie für Platzhalter wie <code>{{titel}}</code>.</p>
     <?php endif; ?>
+    <?php
+    // Felder, die im öffentlichen Formular nicht erscheinen (nur Redaktion) – Hinweis am Feld, wenn die Tabelle ein Formular hat
+    $formOn = !$isNew && \Core\Data\DataForms::enabled($table, false);
+    $noForm = $formOn ? array_values(array_diff(array_keys(Tables::TYPES), \Core\Data\DataForms::TYPES, \Core\Data\DataForms::UPLOAD_TYPES, Tables::LAYOUT)) : [];
+    ?>
     <div class="dt-fieldsbox">
       <ol class="dt-fields" data-fields>
         <?php foreach ($defAll as $i => $f): ?>
-        <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => $i, 'f' => $f, 'tables' => $allTables, 'err' => $errors["fields.$i"] ?? null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox]) ?>
+        <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => $i, 'f' => $f, 'tables' => $allTables, 'err' => $errors["fields.$i"] ?? null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox, 'noForm' => $noForm ?? []]) ?>
         <?php endforeach; ?>
       </ol>
-      <template data-field-template><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => '__i__', 'f' => ['type' => 'text', 'label' => '', 'name' => ''], 'tables' => $allTables, 'err' => null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox]) ?></template>
+      <template data-field-template><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => '__i__', 'f' => ['type' => 'text', 'label' => '', 'name' => ''], 'tables' => $allTables, 'err' => null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox, 'noForm' => $noForm ?? []]) ?></template>
       <template data-rule-template="cond"><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_rule.php', ['p' => '__P__', 'r' => [], 'kind' => 'cond', 'all' => [], 'self' => '']) ?></template>
       <template data-rule-template="cmp"><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_rule.php', ['p' => '__P__', 'r' => [], 'kind' => 'cmp', 'all' => [], 'self' => '']) ?></template>
       <div class="dt-addfield">
@@ -267,6 +272,16 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
             <?php endforeach; ?>
             </div>
             <p class="f-help"><?= e(__('Nichts angehakt = alle passenden Felder. Verknüpfungen, formatierter Text, Karte, Links und Wiederholungen füllt nur die Redaktion aus.')) ?></p>
+            <?php
+            // Abschnitte, die im Formular leer bleiben (keins ihrer Felder ist für Besucher ausfüllbar bzw. angehakt) – werden ausgeblendet
+            $hiddenSecs = [];
+            if (!$isNew && !empty($table['settings']['form'])) {
+                $shown = array_map(fn($g) => $g[0]['name'] ?? '', \Core\Data\DataForms::sections(\Core\Data\DataForms::items($table)));
+                foreach (Tables::allFields($table) as $f) if (($f['type'] ?? '') === 'section' && !in_array($f['name'], $shown, true)) $hiddenSecs[] = '„' . Tables::label($f) . '“';
+            }
+            if ($hiddenSecs): ?>
+            <p class="dt-field__noform"><?= icon('warning') ?> <?= e(__('Diese Abschnitte erscheinen nicht im Formular, weil keins ihrer Felder dort steht: {list}. Felder anhaken bzw. einen Feldtyp wählen, den Besucher ausfüllen können.', ['list' => implode(', ', $hiddenSecs)])) ?></p>
+            <?php endif; ?>
           </fieldset>
           <div class="f f--inline"><label for="t-form-status"><?= e(__('Neue Einträge')) ?></label>
             <select id="t-form-status" name="settings[form][status]">

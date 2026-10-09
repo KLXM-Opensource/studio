@@ -3,6 +3,7 @@
 use Core\Data\Tables;
 $types ??= array_keys(Tables::TYPES);
 $inbox ??= false;
+$noForm ??= [];
 $n = 'fields[' . $i . ']';
 $opts = is_array($f['options'] ?? null) ? implode("\n", array_map(fn($k, $v) => Tables::normName((string) $v) === (string) $k ? $v : "$k=$v", array_keys($f['options']), $f['options'])) : (string) ($f['options'] ?? '');
 $type = $f['type'] ?? 'text';
@@ -18,6 +19,7 @@ $type = $f['type'] ?? 'text';
         <?php foreach (Tables::TYPES as $k => [$l]): if (!in_array($k, $types, true) && $k !== $type) continue; ?><option value="<?= e($k) ?>"<?= $k === $type ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
       </select></label>
     </div>
+    <?php if ($noForm): ?><p class="dt-field__noform" data-show-for="<?= e(implode(' ', $noForm)) ?>"<?= in_array($type, $noForm, true) ? '' : ' hidden' ?>><?= icon('warning') ?> <?= e(__('Erscheint nicht im öffentlichen Formular – Besucher können diesen Feldtyp nicht ausfüllen (nur die Redaktion). Für Fragen an Besucher z. B. „Ja / Nein“, „Auswahl“ oder „Text (mehrzeilig)“ wählen.')) ?></p><?php endif; ?>
     <div class="dt-field__row dt-field__flags" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
       <?php foreach ($inbox ? ['required' => 'Pflichtfeld'] : ['required' => 'Pflichtfeld', 'in_list' => 'In der Liste zeigen', 'searchable' => 'Durchsuchbar'] as $k => $l): ?>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[<?= $k ?>]" value="1"<?= !empty($f[$k]) ? ' checked' : '' ?>> <span><?= $l ?></span></label>

@@ -985,7 +985,7 @@ function revealField(f) {
 }
 {
   const main = $('#main') || d;
-  const errFlash = $$('.adm-flash--error', main).map(x => x.textContent.trim()).filter(Boolean);
+  const errFlash = $$('.adm-flash--error[data-flash]', main).map(x => x.textContent.trim()).filter(Boolean);   // nur Meldungen nach dem Absenden – keine festen Hinweise der Seite
   const bad = $$('.f--error', main);
   const first = bad[0];
   const detail = first && ($('.f-error', first)?.textContent.trim() || '');
@@ -998,7 +998,7 @@ function revealField(f) {
     });
     if (first) revealField(first);
   } else {
-    const ok = $('.adm-flash--success', main)?.textContent.trim();
+    const ok = $('.adm-flash--success[data-flash]', main)?.textContent.trim();
     if (ok) toast(ok, 'ok', 5000);
   }
 }

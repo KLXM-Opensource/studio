@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: verständlichere Rückmeldungen im Tabellen-Designer
+- Feldtypen, die Besucher nicht ausfüllen können (formatierter Text, Verknüpfungen, Karte …), zeigen im Designer einen Hinweis am Feld,
+  sobald die Tabelle ein öffentliches Formular hat. Abschnitte, die deshalb leer bleiben und im Formular fehlen, nennt der Bereich „Formular“.
+- **Webadresse** ist jetzt im öffentlichen Formular möglich (Eingabe mit Prüfung).
+- Behoben: Der Hinweis „Noch kein zentraler Schlüssel“ erschien als rote Meldung, obwohl keine Verschlüsselung gewählt war;
+  die auffällige Fehlermeldung erscheint nur noch nach dem Speichern, nicht für feste Hinweise einer Seite.
+
 ### Editor: Kompaktansicht – einzelne Blöcke aufklappen
 - In der Kompaktansicht hat jeder Block den Knopf **Aufklappen**: dieser Block erscheint vollständig und ist normal bearbeitbar,
   die übrigen bleiben Zeilen. Beim Layout „Spalten aufklappen (n Spalten · n Blöcke)“ – die Spalten waren in der Kompaktansicht vorher nicht erreichbar.

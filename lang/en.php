@@ -3243,6 +3243,8 @@ return [
     'Größerer Text, keine Überschrift' => 'Larger text, not a heading',
     'Kleingedrucktes, Anmerkungen' => 'Fine print, remarks',
     'Abgesetzter Kasten' => 'Set-off box',
+    'Diese Abschnitte erscheinen nicht im Formular, weil keins ihrer Felder dort steht: {list}. Felder anhaken bzw. einen Feldtyp wählen, den Besucher ausfüllen können.' => 'These sections do not appear in the form because none of their fields is in it: {list}. Tick fields or choose a field type visitors can fill in.',
+    'Erscheint nicht im öffentlichen Formular – Besucher können diesen Feldtyp nicht ausfüllen (nur die Redaktion). Für Fragen an Besucher z. B. „Ja / Nein“, „Auswahl“ oder „Text (mehrzeilig)“ wählen.' => 'Not shown in the public form – visitors cannot fill in this field type (editors only). For questions to visitors choose e.g. “Yes / No”, “Choice” or “Text (multi-line)”.',
     'Diese Einstellung ändert den Aufbau der Seite – für die Vorschau lädt die Seite neu (nur für Sie sichtbar, bis Sie speichern).' => 'This setting changes the page structure – the preview reloads the page (visible only to you until you save).',
     'Erst die Änderungen an der Seite speichern oder verwerfen – die Vorschau dieser Einstellung lädt die Seite neu.' => 'Save or discard your page changes first – previewing this setting reloads the page.',
     'Vorschau lädt die Seite neu' => 'Preview reloads the page',

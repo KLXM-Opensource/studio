@@ -257,7 +257,7 @@ if ($user && ($req = app()->request)) {
   </nav>
   <?php endif; ?>
   <?php foreach ($flash as [$type, $msg]): ?>
-  <div class="adm-flash adm-flash--<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($msg) ?></div>
+  <div class="adm-flash adm-flash--<?= e($type) ?>" data-flash role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($msg) ?></div>
   <?php endforeach; ?>
   <?php // Hinweise zu diesem Projekt für diesen Bereich (Core\Guide, Front Matter „bereich:“) – kleiner Link über dem Inhalt
   $guideT = isset($t) && is_array($t) ? $t : (isset($table) && is_array($table) ? $table : null);

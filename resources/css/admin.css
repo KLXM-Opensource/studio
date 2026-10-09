@@ -769,6 +769,9 @@ img.media-vthumb{object-fit:cover}
 .dt-field__main{display:grid;gap:10px;min-width:0}
 .dt-field__row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.1fr);gap:10px}
 .dt-field__flags{display:flex;flex-wrap:wrap;gap:6px 16px}
+.dt-field__noform{display:flex;gap:8px;align-items:flex-start;margin:0;padding:8px 10px;border-radius:8px;background:var(--adm-warn-bg,#FFF4E5);color:var(--adm-ink);font-size:13px;line-height:1.4}
+.dt-field__noform[hidden]{display:none}
+.dt-field__noform svg{flex:none;width:16px;height:16px;margin-top:1px;color:var(--adm-warn)}
 .dt-field__flags .f-check{font-size:13px}
 .dt-in{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--adm-t3)}
 /* Freitext im Tabellen-Designer: Formatierungsleiste in normaler Schrift (nicht fett wie die Beschriftung) */

@@ -41,7 +41,7 @@ $why = function (string $o) use ($inbox, $switch, $managed, $sharedT): ?string {
     <section class="set-group dt-crypto" data-delivery data-delivery-mode="<?= e($cur) ?>" aria-labelledby="t-cr-h">
       <h3 class="set-group__title" id="t-cr-h"><?= e(__('Schutz der Einsendungen')) ?></h3>
       <?php if (!FormCrypto::ready()): ?>
-      <div class="adm-flash adm-flash--error dt-crypto__nokey" data-delivery-when="system both mail" role="alert">
+      <div class="adm-flash adm-flash--error dt-crypto__nokey" data-delivery-when="system both mail"<?= in_array($cur, ['system', 'both', 'mail'], true) ? ' role="alert"' : ' hidden' ?>>
         <b><?= e(__('Noch kein zentraler Schlüssel hinterlegt.')) ?></b>
         <?= e(__('Bis er erzeugt ist, nimmt das Formular keine Einsendungen an und zeigt „noch nicht eingerichtet“. Bei „Nur per E-Mail“ fehlt sonst die Sicherung, falls der Versand scheitert.')) ?>
         <?php if (can('system.manage')): ?><a class="adm-btn adm-btn--sm" href="<?= e(url('/admin/system#keys')) ?>"><?= e(__('Schlüssel erzeugen')) ?></a>

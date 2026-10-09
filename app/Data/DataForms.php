@@ -30,7 +30,7 @@ final class DataForms
     /** Eingangsbestätigung an die absendende Person (z. B. Pflicht beim Widerruf, § 356a BGB): E-Mail-Feld, Betreff, Text, Angaben mitsenden */
     public const RECEIPT = ['enabled' => false, 'field' => '', 'subject' => '', 'text' => '', 'include' => false];
     /** Feldtypen, die Besucher ausfüllen können (Verknüpfungen, Rich-Text, Karte, Links und Wiederholungen bleiben der Redaktion vorbehalten) */
-    public const TYPES = ['text', 'textarea', 'number', 'bool', 'date', 'datetime', 'time', 'select', 'multiselect', 'email', 'tel', 'color', 'iban', 'group'];
+    public const TYPES = ['text', 'textarea', 'number', 'bool', 'date', 'datetime', 'time', 'select', 'multiselect', 'email', 'tel', 'url', 'color', 'iban', 'group'];
     public const UPLOAD_TYPES = ['media', 'file'];
     public const PRIVACY = '_privacy';
     /**
@@ -417,6 +417,7 @@ final class DataForms
         $auto = match (true) {
             $type === 'email' => 'email',
             $type === 'tel' => 'tel',
+            $type === 'url' => 'url',
             in_array($n, ['name', 'vollstaendiger_name', 'full_name'], true) => 'name',
             in_array($n, ['vorname', 'first_name'], true) => 'given-name',
             in_array($n, ['nachname', 'last_name'], true) => 'family-name',
@@ -448,8 +449,8 @@ final class DataForms
             'iban' => '<input type="text" id="' . $id . '" name="' . e($n) . '" value="' . e($sv !== '' ? \Core\Iban::format($sv) : '') . '" maxlength="42" autocomplete="off" spellcheck="false" autocapitalize="characters" data-iban' . $aria . '>',
             'datetime' => '<input type="datetime-local" id="' . $id . '" name="' . e($n) . '" value="' . e(str_replace(' ', 'T', $sv)) . '"' . $aria . '>',
             'color' => '<input type="color" id="' . $id . '" name="' . e($n) . '" value="' . e($sv ?: '#000000') . '"' . $aria . '>',
-            default => '<input type="' . match ($type) { 'email' => 'email', 'tel' => 'tel', 'number' => 'number', 'date' => 'date', 'time' => 'time', default => 'text' } . '" id="' . $id . '" name="' . e($n) . '" value="' . e($sv) . '"'
-                . ($type === 'number' ? ' step="any" inputmode="decimal"' : '') . (in_array($type, ['text', 'email', 'tel'], true) ? ' maxlength="255" autocomplete="' . $auto . '"' : '') . $aria . '>',
+            default => '<input type="' . match ($type) { 'email' => 'email', 'tel' => 'tel', 'url' => 'url', 'number' => 'number', 'date' => 'date', 'time' => 'time', default => 'text' } . '" id="' . $id . '" name="' . e($n) . '" value="' . e($sv) . '"'
+                . ($type === 'number' ? ' step="any" inputmode="decimal"' : '') . ($type === 'url' ? ' placeholder="https://"' : '') . (in_array($type, ['text', 'email', 'tel', 'url'], true) ? ' maxlength="255" autocomplete="' . $auto . '"' : '') . $aria . '>',
         };
         return '<div class="' . $cls . '" data-cf="' . e($n) . '"><label for="' . $id . '">' . $label . $mark . '</label>' . $helpHtml . $control . $errHtml . '</div>';
     }
@@ -613,7 +614,7 @@ final class DataForms
         $schema = [];
         foreach ($fields as $f) {
             $def = ['name' => $f['name'], 'label' => Tables::label($f), 'type' => $f['type'], 'required' => $f['required'], 'options' => $f['options'] ?? []];
-            if (in_array($f['type'], ['text', 'email', 'tel'], true)) $def['max'] = 255;
+            if (in_array($f['type'], ['text', 'email', 'tel', 'url'], true)) $def['max'] = 255;
             if ($f['type'] === 'textarea') $def['max'] = 5000;
             if ($f['type'] === 'group') $def = Entries::groupSchema($f, true) + $def;
             $schema[] = $def;
