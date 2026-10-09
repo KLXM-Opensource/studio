@@ -7,11 +7,11 @@
 /* Einträge im Aufklappmenü: gerade Zeilen statt Pills – Fläche beim Überfahren über die volle Breite,
    aktuelle Seite mit Akzentstrich links. Ebenen nur eingerückt, keine abgerundeten Linien. */
 .hnav__panel>li{position:relative}
-.hnav__sublink{display:block;padding:.6rem .85rem;border-radius:0;color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none;box-shadow:inset 3px 0 0 transparent}
+.hnav__sublink{display:block;padding:.6rem .85rem;border-radius: 3px;color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none;box-shadow:inset 3px 0 0 transparent}
 .hnav__sublink:hover{background:var(--f-surface);color:var(--f-ink)}
 .hnav__sublink[aria-current=page]{background:var(--f-a-soft);color:var(--f-ink);font-weight:600;box-shadow:inset 3px 0 0 var(--f-a)}
 .hnav__sublink--parent{color:var(--f-muted);font-size:.875rem}
-.hnav__panel{padding:.35rem 0;overflow:hidden}
+ul.hnav__panel{padding:.4rem;overflow:hidden}   /* ul.: schlägt ul[role=list]{padding:0} aus site.css – Zeilen bleiben innerhalb der runden Ecken */
 /* Dritte Ebene „Eingerückt“ (nv-indent): immer sichtbar, eingerückt, etwas kleiner */
 .hnav__nested{margin:0;padding:0;list-style:none}
 .hnav__nested .hnav__sublink{padding-block:.45rem;padding-inline-start:1.75rem;color:var(--f-muted);font-size:.875rem}

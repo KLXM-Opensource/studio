@@ -12,6 +12,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Unterseiten ins Menü, oben steht „‹ Elternseite“ zum Zurückgehen. Beides über `<details name>`, ohne JavaScript; beliebig tief.
 - Einträge im Aufklappmenü sind gerade Zeilen statt abgerundeter Flächen; die aktuelle Seite hat einen Akzentstrich links,
   Unterebenen werden eingerückt statt mit abgerundeten Linien markiert. „Eingerückt“ und „Gruppiert“ bleiben wählbar.
+- Behoben: Das Aufklappmenü hatte keinen Innenabstand (`ul[role=list]` aus site.css war spezifischer) – die erste Zeile lief in die runde Ecke, der Akzentstrich wurde abgeschnitten.
 
 ### Seitenverwaltung: Kennzeichen lesbar
 - „noindex“ und die Kennzeichen von Erweiterungen stehen jetzt direkt hinter dem Seitentitel statt in der schmalen Statusspalte,
