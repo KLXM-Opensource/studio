@@ -137,6 +137,9 @@ body.has-tdrawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):
 .is-compact{max-width:1100px;margin:24px auto;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #E6E6E9}
 .is-compact .cms-block{outline:0}
 .is-compact .cms-block:hover>.cms-block__bar.cms-block__bar{background:#F4EEF0}
+/* Kompaktansicht: einzelnen Block aufklappen (Knopf „Aufklappen“) – Vorschau sichtbar und normal bearbeitbar */
+.is-compact .cms-block.is-expanded>.cms-block__preview{display:block}
+.is-compact .cms-block.is-expanded{box-shadow:inset 3px 0 0 #8B5CF6}
 .cms-block.is-moved{animation:cms-moved 1s ease}
 @keyframes cms-moved{0%{box-shadow:inset 0 0 0 3px #EDE9E3}100%{box-shadow:inset 0 0 0 3px rgba(246,201,168,0)}}
 @media (prefers-reduced-motion:reduce){.cms-block.is-moved{animation:none}}

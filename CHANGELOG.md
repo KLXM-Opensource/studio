@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Editor: Kompaktansicht – einzelne Blöcke aufklappen
+- In der Kompaktansicht hat jeder Block den Knopf **Aufklappen**: dieser Block erscheint vollständig und ist normal bearbeitbar,
+  die übrigen bleiben Zeilen. Beim Layout „Spalten aufklappen (n Spalten · n Blöcke)“ – die Spalten waren in der Kompaktansicht vorher nicht erreichbar.
+
 ### Website-Werkzeugleiste: Style-Editor „Design“ mit Live-Vorschau
 - Neuer Knopf **Design** (Palette) in der Werkzeugleiste der Website – beim Ansehen und Bearbeiten, nur mit Recht `design.edit`
   und Funktion „design“ (auf Telefonen im Menü „⋯“). Öffnet rechts eine Seitenleiste wie die des Blocks: die Website rückt nach

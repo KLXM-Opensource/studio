@@ -349,7 +349,7 @@ const BarPlace = (() => {
   const R = r => ({ l: r.left, t: r.top, r: r.right, b: r.bottom });
   const area = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
   const less = (a, b) => { const i = a.findIndex((v, k) => v !== b[k]); return i >= 0 && a[i] < b[i]; };
-  const off = el => !el || el.closest('.is-collapsed,.is-compact') || !el.isConnected;
+  const off = el => !el || el.closest('.is-collapsed') || (el.closest('.is-compact') && !el.closest('.cms-block.is-expanded')) || !el.isConnected;
   const visibleEl = el => { if (!el) return false; const s = getComputedStyle(el); return s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0; };
 
   /** Hindernisse im Band [top, bottom] (Viewport) – Text zeilenweise, Felder/Knöpfe als Kasten, Bilder weich */
@@ -735,6 +735,7 @@ function makeTool(type, def) {
           <span class="cms-block__summary"></span>
           <span class="cms-block__flags"></span>
           <span class="cms-block__hint" hidden></span>
+          <button type="button" class="cms-block__fields cms-block__expand" hidden data-compact-only aria-expanded="false"></button>
           ${def.formfields ? `<button type="button" class="cms-block__fields" hidden>${CMSAdmin.esc(CMSAdmin.t('Felder'))}<span class="cms-block__fields-more"> ${CMSAdmin.esc(CMSAdmin.t('bearbeiten'))}</span></button>` : ''}
           <span class="cms-block__tools">
             <button type="button" class="cms-iconbtn" data-move="up" aria-label="${CMSAdmin.esc(CMSAdmin.t('Block nach oben'))}" title="${CMSAdmin.esc(CMSAdmin.t('Nach oben'))} (Alt+↑)">↑</button>
@@ -754,7 +755,25 @@ function makeTool(type, def) {
       addEl.addEventListener('keydown', e => e.stopPropagation());
       sr.querySelector('.cms-block__edit').addEventListener('click', e => { e.stopPropagation(); this.openDrawer(); });
       // Formular-Blöcke: Felder der gewählten Tabelle direkt bearbeiten (nur mit Recht „Tabellen und Felder ändern“, cfg.formFields)
-      sr.querySelector('.cms-block__fields')?.addEventListener('click', e => { e.stopPropagation(); this.openFormFields(e.currentTarget); });
+      sr.querySelector('.cms-block__fields:not(.cms-block__expand)')?.addEventListener('click', e => { e.stopPropagation(); this.openFormFields(e.currentTarget); });
+      // Kompaktansicht: einen Block aufklappen und normal bearbeiten (z. B. die Spalten eines Layouts) – die übrigen bleiben Zeilen
+      const expBtn = sr.querySelector('.cms-block__expand');
+      const expLabel = open => {
+        if (type !== LAYOUT) return open ? CMSAdmin.t('Zuklappen') : CMSAdmin.t('Aufklappen');
+        const cols = this.data.columns || [];
+        const n = cols.reduce((s, c) => s + ((c && c.blocks) || []).length, 0);
+        return open ? CMSAdmin.t('Zuklappen') : CMSAdmin.t('Spalten aufklappen') + ' (' + CMSAdmin.t('{c} Spalten · {n} Blöcke', { c: cols.length, n }) + ')';
+      };
+      expBtn.textContent = expLabel(false);
+      expBtn.hidden = !holder().classList.contains('is-compact');
+      expBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = !this.el.classList.contains('is-expanded');
+        this.el.classList.toggle('is-expanded', open);
+        expBtn.setAttribute('aria-expanded', String(open));
+        expBtn.textContent = expLabel(open);
+        if (open) requestAnimationFrame(() => this.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+      });
       // Eingeklappte Zeile: Klick auf den Titel klappt auf
       sr.querySelector('[data-move="up"]').addEventListener('click', e => { e.stopPropagation(); this.move(-1); });
       sr.querySelector('[data-move="down"]').addEventListener('click', e => { e.stopPropagation(); this.move(1); });
@@ -2002,6 +2021,10 @@ S.ui('[data-editor-preview]')?.addEventListener('click', async e => {
 const compactBtn = S.ui('[data-editor-compact]');
 const setCompact = on => {
   holder().classList.toggle('is-compact', on);
+  // Knöpfe nur für die Kompaktansicht (Layout: „Spalten bearbeiten“) – im Shadow DOM der Block-Leisten
+  holder().querySelectorAll('.cms-block__bar').forEach(b => b.shadowRoot?.querySelectorAll('[data-compact-only]').forEach(x => { x.hidden = !on; }));
+  // Beim Verlassen: aufgeklappte Blöcke zurücksetzen (sonst stimmt die Beschriftung beim nächsten Mal nicht)
+  if (!on) holder().querySelectorAll('.cms-block.is-expanded').forEach(b => b.querySelector(':scope>.cms-block__bar')?.shadowRoot?.querySelector('.cms-block__expand')?.click());
   compactBtn?.setAttribute(compactBtn.getAttribute('role') === 'menuitemcheckbox' ? 'aria-checked' : 'aria-pressed', on ? 'true' : 'false');
   store.set('cms-compact', on);
 };
