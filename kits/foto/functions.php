@@ -514,11 +514,12 @@ function foto_public_info(): array
 
 /**
  * Überschrift mit Hervorhebung: *Wort* → <em class="hl">Wort</em> (Akzentfarbe bzw. kursiv bei Serifen).
- * Im Editor bleibt der Rohtext stehen, damit die Sternchen beim direkten Bearbeiten erhalten bleiben.
+ * Im Editor ist die Hervorhebung sichtbar, die Sternchen bleiben als dezente Textzeichen stehen (span.hl-mark, Gestaltung im
+ * Kern: resources/css/editor.css) – innerText liefert beim Speichern weiter „*Wort*“.
  */
 function foto_title(string $text): string
 {
-    if (is_editing()) return e($text);
+    if (is_editing()) return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
     return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
 }
 
