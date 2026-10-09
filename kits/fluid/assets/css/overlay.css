@@ -7,11 +7,13 @@
 /* Einträge im Aufklappmenü: gerade Zeilen statt Pills – Fläche beim Überfahren über die volle Breite,
    aktuelle Seite mit Akzentstrich links. Ebenen nur eingerückt, keine abgerundeten Linien. */
 .hnav__panel>li{position:relative}
-.hnav__sublink{display:block;padding:.6rem .85rem;border-radius: 3px;color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none;box-shadow:inset 3px 0 0 transparent}
+.hnav__sublink{position:relative;display:block;padding:.6rem .85rem;border-radius:max(3px,calc(var(--f-r-l) - .4rem));color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none}   /* Rundung konzentrisch zur Menü-Ecke (Radius minus Innenabstand) */
 .hnav__sublink:hover{background:var(--f-surface);color:var(--f-ink)}
-.hnav__sublink[aria-current=page]{background:var(--f-a-soft);color:var(--f-ink);font-weight:600;box-shadow:inset 3px 0 0 var(--f-a)}
+.hnav__sublink[aria-current=page]{background:var(--f-a-soft);color:var(--f-ink);font-weight:600}
+/* Aktuelle Seite: eigener Strich mit Abstand zu den Ecken – folgt keiner Rundung, wird nicht angeschnitten */
+.hnav__sublink[aria-current=page]::before{content:"";position:absolute;inset-block:.5rem;inset-inline-start:.3rem;width:3px;border-radius:3px;background:var(--f-a)}
 .hnav__sublink--parent{color:var(--f-muted);font-size:.875rem}
-ul.hnav__panel{padding:.4rem;overflow:hidden}   /* ul.: schlägt ul[role=list]{padding:0} aus site.css – Zeilen bleiben innerhalb der runden Ecken */
+ul.hnav__panel{padding:.4rem}   /* ul.: schlägt ul[role=list]{padding:0} aus site.css – Zeilen bleiben innerhalb der runden Ecken */
 /* Dritte Ebene „Eingerückt“ (nv-indent): immer sichtbar, eingerückt, etwas kleiner */
 .hnav__nested{margin:0;padding:0;list-style:none}
 .hnav__nested .hnav__sublink{padding-block:.45rem;padding-inline-start:1.75rem;color:var(--f-muted);font-size:.875rem}
@@ -28,7 +30,7 @@ ul.hnav__panel{padding:.4rem;overflow:hidden}   /* ul.: schlägt ul[role=list]{p
 .hnav__nested li,.hnav__panel>li{position:relative}
 .hnav__det>summary{list-style:none}
 .hnav__det>summary::-webkit-details-marker{display:none}
-.hnav__more{position:absolute;inset:0 0 auto auto;display:grid;place-items:center;width:2.75rem;height:2.55rem;border-inline-start:1px solid var(--f-line);color:var(--f-muted);cursor:pointer}
+.hnav__more{position:absolute;inset:0 0 auto auto;display:grid;place-items:center;width:2.75rem;height:2.55rem;border-inline-start:1px solid var(--f-line);border-start-end-radius:max(3px,calc(var(--f-r-l) - .4rem));border-end-end-radius:max(3px,calc(var(--f-r-l) - .4rem));color:var(--f-muted);cursor:pointer}
 .hnav__more:hover{background:var(--f-surface);color:var(--f-ink)}
 .hnav__more:focus-visible{outline:2px solid var(--f-focus);outline-offset:-2px}
 .hnav__morechev{width:.9rem;height:.9rem;transition:rotate .2s}
@@ -91,3 +93,7 @@ html:has(.mnav:popover-open){overflow:hidden}
 .quick a{display:inline-flex;align-items:center;gap:.6rem;min-height:2.75rem;color:var(--f-ink);text-decoration:none;overflow-wrap:anywhere}
 .quick .ico{color:var(--f-link);font-size:1.2em}
 .nv-accordion .hnav__panel,.nv-slide .hnav__panel{min-width:17.5rem}
+/* Fokusrahmen im Aufklappmenü nach innen: folgt der Zeilen-Rundung und wird an den runden Ecken des Menüs nicht abgeschnitten */
+.hnav__panel :is(.hnav__sublink,.hnav__more):focus-visible{outline:2px solid var(--f-focus);outline-offset:-2px}
+.hnav__panel .hnav__sublink:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}   /* _base.css setzt beim Fokus 2px */
+.hnav__panel .hnav__more:focus-visible{border-radius:0 max(3px,calc(var(--f-r-l) - .4rem)) max(3px,calc(var(--f-r-l) - .4rem)) 0}
