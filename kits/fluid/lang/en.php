@@ -538,4 +538,8 @@ return [
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    'Schreibweise der Dachzeilen' => 'Eyebrow lettering',
+    'Wie der Stil' => 'As the style',
+    'Großbuchstaben (gesperrt)' => 'Capitals (tracked)',
+    '„Wie der Stil“: Etikett in normaler Schreibweise, die übrigen in Großbuchstaben.' => '“As the style”: label in normal lettering, the others in capitals.',
 ];

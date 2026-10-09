@@ -41,6 +41,7 @@
     <li><b>Betonung *Wort*</b> in Überschriften zusätzlich als <b>Konturschrift</b>; <b>verlinkte Karten</b> mit langsam zoomendem Bild; <b>Menüpunkte</b> mit Punkt unter dem aktiven.</li>
     <li><b>Einblenden</b> zusätzlich „Aufdecken von unten“ und „Seitlich hereingleiten“.</li>
     <li><b>Lesefortschritt</b> (dünne Linie oben, wächst beim Scrollen) und Schaltfläche <b>„Nach oben“</b> unten rechts – beide unter „Kopf &amp; Fuß“ zuschaltbar.</li>
+    <li><b>Schreibweise der Dachzeilen:</b> unabhängig vom Stil der Dachzeile – „Wie der Stil“ (Standard), Großbuchstaben (gesperrt), normal oder Kapitälchen.</li>
     <li><b>Menüpunkte mit Unterseiten:</b> „Link + Pfeil“ (Standard) – der Menüpunkt führt zu seiner Seite, der kleine Pfeil daneben öffnet die Unterseiten; „Link + Pfeil, öffnet auch beim Überfahren“ – zusätzlich mit der Maus; „Klick öffnet die Unterseiten“ – das frühere Verhalten mit dem Eintrag „Übersicht: …“. Gilt auch für das Menü auf dem Telefon.</li>
     <li><b>Dritte Menüebene:</b> „Eingerückt“ (Standard) – Unterseiten von Unterseiten stehen eingerückt mit Linie und etwas kleiner; „Gruppiert“ – die zweite Ebene wird zur kleinen Zwischenüberschrift, die dritte steht darunter.</li>
     <li><b>Höhe des Kopfbereichs:</b> normal, hoch oder sehr hoch – für große Logos. Beim Scrollen und auf schmalen Bildschirmen wird der Kopf mit weichem Übergang wieder normal hoch (nicht bei den Seitenleisten).</li>

@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Fluid: Schreibweise der Dachzeilen einstellbar
+- Design → **Schreibweise der Dachzeilen**: wie der Stil (Standard), Großbuchstaben, normal oder Kapitälchen – unabhängig vom Stil
+  (Strich, Etikett, Punkt, schlicht). Das Etikett („Pille“) ist auf getönten Sektionen jetzt sichtbar statt nur eingerückt.
+
 ### Formulare: Abschnitte (Überschrift/Gruppe) und Freitext zwischen den Feldern
 - Zwei neue Elemente im Tabellen-Designer, die keine Daten speichern: **Abschnitt (Überschrift)** – Überschrift mit optionaler
   Beschreibung, Darstellung „Zwischenüberschrift“ oder „Gruppe mit Rahmen“; die folgenden Felder gehören dazu bis zum nächsten
