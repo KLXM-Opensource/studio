@@ -13,25 +13,25 @@ $items = array_values(array_filter((array) $d['items'], fn($i) => trim((string) 
     ?>
     <li class="plan card<?= $hl ? ' plan--hl' : '' ?>">
       <div class="plan__top">
-        <h3 class="plan__name"<?= $b->edit("items.$i.name") ?>><?= e($it['name']) ?></h3>
-        <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><p class="plan__badge"<?= $b->edit("items.$i.badge") ?>><?= e($it['badge']) ?></p><?php endif; ?>
+        <h3 class="plan__name"<?= $b->edit("items.$i.name") ?>><?= emphasis((string) $it['name']) ?></h3>
+        <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><p class="plan__badge"<?= $b->edit("items.$i.badge") ?>><?= emphasis((string) $it['badge']) ?></p><?php endif; ?>
       </div>
       <?php if (trim((string) ($it['price'] ?? '')) !== ''): ?>
       <p class="plan__price"><span class="plan__amount"<?= $b->edit("items.$i.price") ?>><?= e($it['price']) ?></span>
         <?php if (trim((string) ($it['period'] ?? '')) !== ''): ?><span class="plan__period"<?= $b->edit("items.$i.period") ?>><?= e($it['period']) ?></span><?php endif; ?></p>
       <?php endif; ?>
-      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="plan__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="plan__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(emphasis((string) $it['text']), false) ?></p><?php endif; ?>
       <?php if ($list): ?>
       <ul class="checks plan__list">
-        <?php foreach ($list as $li): ?><li><?= basis_icon('check', 'checks__icon') ?><span><?= e($li) ?></span></li><?php endforeach; ?>
+        <?php foreach ($list as $li): ?><li><?= basis_icon('check', 'checks__icon') ?><span><?= emphasis((string) $li) ?></span></li><?php endforeach; ?>
       </ul>
       <?php endif; ?>
       <?php if ($label !== '' && $link !== ''): ?>
-      <a class="btn <?= $hl ? 'btn--primary' : 'btn--secondary' ?> plan__btn" <?= basis_link_attrs($link) ?>><span<?= $b->edit("items.$i.button_label") ?>><?= e($label) ?></span><span class="sr-only">: <?= e($it['name']) ?></span></a>
+      <a class="btn <?= $hl ? 'btn--primary' : 'btn--secondary' ?> plan__btn" <?= basis_link_attrs($link) ?>><span<?= $b->edit("items.$i.button_label") ?>><?= e($label) ?></span><span class="sr-only">: <?= e(strip_emphasis($it['name'])) ?></span></a>
       <?php endif; ?>
     </li>
     <?php endforeach; ?>
   </ul>
-  <?php if (trim((string) $d['note']) !== ''): ?><p class="plans__note"<?= $b->edit('note') ?>><?= e($d['note']) ?></p><?php endif; ?>
+  <?php if (trim((string) $d['note']) !== ''): ?><p class="plans__note"<?= $b->edit('note') ?>><?= emphasis((string) $d['note']) ?></p><?php endif; ?>
   <?php elseif (is_editing()): ?><p class="empty-hint">Noch keine Pakete – in der Seitenleiste hinzufügen.</p><?php endif; ?>
 </div>

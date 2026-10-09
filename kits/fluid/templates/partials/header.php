@@ -34,7 +34,7 @@ $hasSheet = $menu || $langs || $cta || $searchMenu !== '';
       $mText = trim((string) setting('topbar_text')); $mPhone = fluid_phone(); $mTel = fluid_phone_href(); $mMail = fluid_email(); $mSocial = fluid_social(); ?>
   <div class="hdr__meta">
     <div class="hdr__meta-in">
-      <?php if ($mText !== ''): ?><p class="hdr__meta-text"><?= e($mText) ?></p><?php endif; ?>
+      <?php if ($mText !== ''): ?><p class="hdr__meta-text"><?= fluid_title($mText) ?></p><?php endif; ?>
       <ul class="hdr__meta-list" role="list">
         <?php if ($mPhone !== '' && $mTel): ?><li><a href="<?= e($mTel) ?>"><?= icon('phone') ?><span><?= e($mPhone) ?></span></a></li><?php endif; ?>
         <?php if ($mMail !== ''): ?><li class="hdr__meta-mail"><a href="mailto:<?= e($mMail) ?>"><?= icon('envelope-simple') ?><span><?= e($mMail) ?></span></a></li><?php endif; ?>

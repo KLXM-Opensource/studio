@@ -17,9 +17,9 @@ if ($b->variant() === 'search'):
     $chips = Hero::chips($d);
 ?>
 <div class="wrap hero hero--search">
-  <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-  <h1 id="<?= e($b->titleId()) ?>"<?= $b->edit('title') ?>><?= e($d['title']) ?></h1>
-  <?php if (filled($d['text']) || is_editing()): ?><p class="lead"<?= $b->edit('text') ?>><?= nl2br(e($d['text']), false) ?></p><?php endif; ?>
+  <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
+  <h1 id="<?= e($b->titleId()) ?>"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h1>
+  <?php if (filled($d['text']) || is_editing()): ?><p class="lead"<?= $b->edit('text') ?>><?= nl2br(emphasis((string) $d['text']), false) ?></p><?php endif; ?>
   <?= $form ?>
   <?php if ($chips): /* eigene Navigation mit Namen – Screenreader finden sie über die Landmarke */ ?>
   <nav class="hero__chips" aria-label="<?= e(lt('Häufig gesucht')) ?>">
@@ -36,9 +36,9 @@ $image = $split ? img((int) $d['image'] ?: null, '(min-width: 1100px) 560px, 100
 ?>
 <div class="wrap hero<?= $image !== '' ? ' hero--split' : '' ?>">
   <div class="hero__text">
-    <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-    <h1 id="<?= e($b->titleId()) ?>"<?= $b->edit('title') ?>><?= e($d['title']) ?></h1>
-    <?php if (filled($d['text']) || is_editing()): ?><p class="lead"<?= $b->edit('text') ?>><?= nl2br(e($d['text']), false) ?></p><?php endif; ?>
+    <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
+    <h1 id="<?= e($b->titleId()) ?>"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h1>
+    <?php if (filled($d['text']) || is_editing()): ?><p class="lead"<?= $b->edit('text') ?>><?= nl2br(emphasis((string) $d['text']), false) ?></p><?php endif; ?>
     <?= starter_buttons($b) ?>
   </div>
   <?php if ($image !== ''): ?><div class="media r-4-3"><?= $image ?></div><?php endif; ?>

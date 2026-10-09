@@ -21,8 +21,8 @@ $tag = nature_htag($d);
       <?php if ($img !== ''): ?><?= $img ?><?php elseif (!empty($it['icon'])): ?><span class="knob feat__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
       <?php if ($v !== 'list'): ?><span class="feat__n" aria-hidden="true"><?= nature_num($i + 1) ?></span><?php endif; ?>
       <div class="feat__body">
-        <<?= $tag ?> class="feat__title"><?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="cover-link" <?= nature_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <<?= $tag ?> class="feat__title"><?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="cover-link" <?= nature_link_attrs($link) ?>><?= nature_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= nature_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(nature_title((string) $it['text']), false) ?></p><?php endif; ?>
         <?php if ($link !== '' && $label !== ''): ?><a class="more feat__more" <?= nature_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?></a><?php endif; ?>
       </div>
     </li>

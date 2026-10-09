@@ -20,8 +20,8 @@ $eager = ['eager' => true];
 $eyebrow = trim((string) ($d['eyebrow'] ?? ''));
 
 $title = '<h1 id="' . e($b->titleId()) . '" class="h1 hero__title"' . $b->edit('title') . '>' . essenz_title((string) $d['title']) . '</h1>';
-$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>' : '';
-$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>' : '';
+$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . essenz_title($eyebrow) . '</p>' : '';
+$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(essenz_title($text), false) . '</p>' : '';
 
 /** Kennwerte: „Bezeichnung: Wert“ → zwei Spalten, sonst eine Zeile; nummeriert */
 $readout = function (string $class) use ($points): string {
@@ -29,7 +29,7 @@ $readout = function (string $class) use ($points): string {
     $h = '<ol class="' . $class . '" role="list">';
     foreach ($points as $i => $p) {
         [$k, $val] = str_contains($p, ':') ? array_map('trim', explode(':', $p, 2)) : [$p, ''];
-        $h .= '<li><span class="rd__n" aria-hidden="true">' . essenz_num($i + 1) . '</span><span class="rd__k">' . e($k) . '</span>'
+        $h .= '<li><span class="rd__n" aria-hidden="true">' . essenz_num($i + 1) . '</span><span class="rd__k">' . essenz_title($k) . '</span>'
             . ($val !== '' ? '<span class="rd__v">' . e($val) . '</span>' : '') . '</li>';
     }
     return $h . '</ol>';
@@ -54,7 +54,7 @@ $motif = function (): string {
 };
 
 /** Beschriftung des Geräts (Feld „Beschriftung des Paneels“, sonst Kurzname) */
-$devLabel = fn(): string => '<span class="label"' . $b->edit('panel_label') . '>' . e(trim((string) ($d['panel_label'] ?? '')) ?: essenz_name(true)) . '</span>';
+$devLabel = fn(): string => '<span class="label"' . $b->edit('panel_label') . '>' . (trim((string) ($d['panel_label'] ?? '')) !== '' ? essenz_title(trim((string) $d['panel_label'])) : e(essenz_name(true))) . '</span>';
 
 if ($v === 'console'):
     // Pegel aus dem Wert: „87 %“ → 87, „4 / 5“ oder „4 von 5“ → 80; sonst null (dann Drehregler als Dekor)
@@ -79,7 +79,7 @@ if ($v === 'console'):
     <div class="hz-cn__top"><?= $devLabel() ?><span class="hz-cn__leds" aria-hidden="true"><i class="is-on"></i><i></i><i></i></span></div>
     <?php if ($dispVal !== '' || is_editing()): ?>
     <p class="hz-cn__disp">
-      <span class="hz-cn__dlabel"<?= $b->edit('display_label') ?>><?= e($dispLabel) ?></span>
+      <span class="hz-cn__dlabel"<?= $b->edit('display_label') ?>><?= essenz_title($dispLabel) ?></span>
       <span class="hz-cn__dval"><span class="hz-cn__ghost" aria-hidden="true"><?= e(preg_replace('~\d~', '8', $dispVal) ?? '') ?></span><span class="hz-cn__dnum"<?= $b->edit('display_value') ?>><?= e($dispVal) ?></span></span>
     </p>
     <?php endif; ?>
@@ -91,7 +91,7 @@ if ($v === 'console'):
           $lv = $val !== '' ? $level($val) : null;
       ?>
       <div class="hz-ch">
-        <dt class="hz-ch__k"><span class="hz-ch__n" aria-hidden="true"><?= essenz_num($i + 1) ?></span><?= e($k) ?></dt>
+        <dt class="hz-ch__k"><span class="hz-ch__n" aria-hidden="true"><?= essenz_num($i + 1) ?></span><?= essenz_title($k) ?></dt>
         <dd class="hz-ch__d">
           <?php if ($lv !== null): $on = (int) round($lv / 10); ?>
           <span class="hz-meter" aria-hidden="true"><?php for ($s = 1; $s <= 10; $s++): ?><i<?= $s <= $on ? ' class="is-on"' : '' ?>></i><?php endfor; ?></span>
@@ -156,7 +156,7 @@ if ($v === 'console'):
     <?= essenz_buttons($b, 'hero__actions') ?>
   </div>
   <div class="dev panel">
-    <div class="dev__top"><span class="label"<?= $b->edit('panel_label') ?>><?= e($label !== '' ? $label : essenz_name(true)) ?></span><span class="dev__led" aria-hidden="true"></span></div>
+    <div class="dev__top"><span class="label"<?= $b->edit('panel_label') ?>><?= $label !== '' ? essenz_title($label) : e(essenz_name(true)) ?></span><span class="dev__led" aria-hidden="true"></span></div>
     <?= $media !== '' ? $media : '<div class="dev__motif">' . $motif() . '</div>' ?>
     <?= $readout('rd dev__read') ?>
   </div>

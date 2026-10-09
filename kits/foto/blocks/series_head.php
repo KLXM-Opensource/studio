@@ -30,7 +30,7 @@ if ($backLabel !== '') {
   <div class="sh__main">
     <header class="sh__head">
       <?php if ($backHref !== ''): ?><a class="sh__back" href="<?= e($backHref) ?>"><?= icon('arrow-right', ['class' => 'flip-x']) ?><span<?= $b->edit('back_label') ?>><?= e($backLabel) ?></span></a><?php endif; ?>
-      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= foto_title((string) $d['eyebrow']) ?></p><?php endif; ?>
       <h1 id="<?= e($b->titleId()) ?>" class="h1 sh__title"<?= $b->edit('title') ?>><?= foto_title((string) ($d['title'] ?? '')) ?></h1>
     </header>
     <?php if ($facts || $statement): ?>

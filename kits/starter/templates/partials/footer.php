@@ -16,8 +16,8 @@ $text = trim((string) setting('footer_text'));
   <div class="wrap ftr__grid">
     <div class="ftr__about">
       <p class="ftr__name"><?= e(starter_name()) ?></p>
-      <?php if (filled(setting('tagline'))): ?><p><?= e((string) setting('tagline')) ?></p><?php endif; ?>
-      <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+      <?php if (filled(setting('tagline'))): ?><p><?= emphasis((string) setting('tagline')) ?></p><?php endif; ?>
+      <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
     </div>
     <?php if ($address || filled($phone) || $email !== ''): ?>
     <div>

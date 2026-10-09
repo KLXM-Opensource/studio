@@ -14,6 +14,6 @@ $embed = app()->theme->partial('video-embed', ['url' => $d['video_url'], 'file' 
   <?php endif; ?>
   <figure class="video<?= $side ? ' duo__fig' : '' ?>">
     <?= $embed ?>
-    <?php if (trim((string) $d['caption']) !== '' || is_editing()): ?><figcaption class="cap"><span class="cap__text"<?= $b->edit('caption') ?>><?= e($d['caption']) ?></span></figcaption><?php endif; ?>
+    <?php if (trim((string) $d['caption']) !== '' || is_editing()): ?><figcaption class="cap"><span class="cap__text"<?= $b->edit('caption') ?>><?= emphasis((string) $d['caption']) ?></span></figcaption><?php endif; ?>
   </figure>
 </div>

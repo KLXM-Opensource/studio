@@ -28,7 +28,7 @@ $head = foto_head($b);
     ?>
     <li class="sx-list__item">
       <?php if ($it['href'] !== '' && !is_editing()): ?><a class="sx-list__link" href="<?= e($it['href']) ?>"><?php else: ?><div class="sx-list__link"><?php endif; ?>
-        <span class="sx-list__title"<?= $ed($it, 'title') ?>><?= e(strip_emphasis($it['title'])) ?></span>
+        <span class="sx-list__title"<?= $ed($it, 'title') ?>><?= foto_title($it['title']) ?></span>
         <?php if ($meta && ($it['year'] !== '' || $it['category'] !== '')): ?><span class="sx-list__meta"><?= foto_meta_line([$it['category'], $it['year']]) ?></span><?php endif; ?>
         <?php if ($pic !== ''): ?><span class="sx-list__thumb <?= e(foto_ratio_class($ratio)) ?>" aria-hidden="true"><?= $pic ?></span><?php endif; ?>
       <?php if ($it['href'] !== '' && !is_editing()): ?></a><?php else: ?></div><?php endif; ?>
@@ -43,7 +43,7 @@ $head = foto_head($b);
       <?= $it['image'] ? foto_photo(media($it['image']) ?? [], ['sizes' => '(min-width: 1000px) 55vw, 100vw', 'ratio' => $ratio, 'class' => 'sx-row__media', 'alt' => '']) : foto_photo_empty($ratio) ?>
       <div class="sx-row__text">
         <?php if ($meta && ($it['year'] !== '' || $it['category'] !== '')): ?><p class="sx-meta"><?= foto_meta_line([$it['category'], $it['year']]) ?></p><?php endif; ?>
-        <<?= $tag ?> class="sx-row__title"><?php if ($it['href'] !== '' && !is_editing()): ?><a class="cover-link" href="<?= e($it['href']) ?>"><?= e(strip_emphasis($it['title'])) ?></a><?php else: ?><span<?= $ed($it, 'title') ?>><?= e(strip_emphasis($it['title'])) ?></span><?php endif; ?></<?= $tag ?>>
+        <<?= $tag ?> class="sx-row__title"><?php if ($it['href'] !== '' && !is_editing()): ?><a class="cover-link" href="<?= e($it['href']) ?>"><?= foto_title($it['title']) ?></a><?php else: ?><span<?= $ed($it, 'title') ?>><?= foto_title($it['title']) ?></span><?php endif; ?></<?= $tag ?>>
         <?php if ($it['place'] !== ''): ?><p class="sx-row__place"><?= e($it['place']) ?></p><?php endif; ?>
         <?php if ($it['href'] !== ''): ?><span class="more" aria-hidden="true"><?= e(lt('Serie ansehen')) ?><?= icon('arrow-right', ['class' => 'more__ico']) ?></span><?php endif; ?>
       </div>
@@ -56,7 +56,7 @@ $head = foto_head($b);
     <li class="sx-card" data-reveal>
       <?= $it['image'] ? foto_photo(media($it['image']) ?? [], ['sizes' => match ($cols) { '2' => '(min-width: 700px) 50vw, 100vw', '4' => '(min-width: 1100px) 25vw, (min-width: 600px) 50vw, 100vw', default => '(min-width: 1100px) 33vw, (min-width: 600px) 50vw, 100vw' }, 'ratio' => $ratio, 'class' => 'sx-card__media', 'alt' => '']) : foto_photo_empty($ratio) ?>
       <div class="sx-card__body">
-        <<?= $tag ?> class="sx-card__title"><?php if ($it['href'] !== '' && !is_editing()): ?><a class="cover-link" href="<?= e($it['href']) ?>"><?= e(strip_emphasis($it['title'])) ?></a><?php else: ?><span<?= $ed($it, 'title') ?>><?= e(strip_emphasis($it['title'])) ?></span><?php endif; ?></<?= $tag ?>>
+        <<?= $tag ?> class="sx-card__title"><?php if ($it['href'] !== '' && !is_editing()): ?><a class="cover-link" href="<?= e($it['href']) ?>"><?= foto_title($it['title']) ?></a><?php else: ?><span<?= $ed($it, 'title') ?>><?= foto_title($it['title']) ?></span><?php endif; ?></<?= $tag ?>>
         <?php if ($meta && ($it['year'] !== '' || $it['category'] !== '')): ?><p class="sx-meta"><?= foto_meta_line([$it['category'], $it['year']]) ?></p><?php endif; ?>
       </div>
     </li>

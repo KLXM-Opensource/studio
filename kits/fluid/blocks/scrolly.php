@@ -26,9 +26,9 @@ $tag = fluid_htag($d);
       <li class="scrolly__step<?= $i === 0 ? ' is-active' : '' ?>" data-step="<?= $i ?>">
         <?= !empty($it['image']) ? fluid_image((int) $it['image'], '100vw', $ratio, 'scrolly__inline') : '' ?>
         <span class="scrolly__num" aria-hidden="true"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
-        <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= e($it['eyebrow']) ?></p><?php endif; ?>
-        <<?= $tag ?> class="scrolly__title"<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="scrolly__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= fluid_title((string) $it['eyebrow']) ?></p><?php endif; ?>
+        <<?= $tag ?> class="scrolly__title"<?= $b->edit("items.$i.title") ?>><?= fluid_title((string) ($it['title'] ?? '')) ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="scrolly__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(fluid_title((string) $it['text']), false) ?></p><?php endif; ?>
       </li>
       <?php endforeach; ?>
     </ol>

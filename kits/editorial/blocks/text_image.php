@@ -9,7 +9,7 @@ $caption = trim((string) ($d['caption'] ?? ''));
   <div class="duo__text">
     <?= editorial_head($b) ?>
     <?php if (trim(strip_tags((string) $d['text'])) !== '' || is_editing()): ?><div class="prose"<?= $b->edit('text', 'rich') ?>><?= rich((string) $d['text']) ?></div><?php endif; ?>
-    <?php if ($items): ?><ul class="ticks"><?php foreach ($items as $it): ?><li><?= e($it) ?></li><?php endforeach; ?></ul><?php endif; ?>
+    <?php if ($items): ?><ul class="ticks"><?php foreach ($items as $it): ?><li><?= emphasis($it) ?></li><?php endforeach; ?></ul><?php endif; ?>
     <?php if (trim((string) $d['button_label']) !== '' && trim((string) $d['button_link']) !== ''): ?>
     <p class="duo__more"><a class="more" <?= editorial_link_attrs((string) $d['button_link']) ?>><span<?= $b->edit('button_label') ?>><?= e($d['button_label']) ?></span> <span aria-hidden="true">→</span><?= editorial_ext_note(editorial_link((string) $d['button_link'])) ?></a></p>
     <?php endif; ?>

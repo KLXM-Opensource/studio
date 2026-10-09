@@ -13,7 +13,7 @@ $open = is_editing() ? ' open' : '';
       <?php foreach ($d['items'] as $i => $it): ?>
       <details class="group"<?= $open ?>>
         <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-lg font-semibold text-slate-900 hover:text-accent dark:text-white [&::-webkit-details-marker]:hidden">
-          <span<?= $b->edit("items.$i.q") ?>><?= e($it['q']) ?></span>
+          <span<?= $b->edit("items.$i.q") ?>><?= emphasis((string) $it['q']) ?></span>
           <?= icon('caret-down', ['class' => 'size-5 shrink-0 motion-safe:transition-transform group-open:rotate-180']) ?>
         </summary>
         <div class="prose prose-slate max-w-none px-5 pb-5 dark:prose-invert prose-a:text-accent"<?= $b->edit("items.$i.a", 'rich') ?>><?= rich($it['a']) ?></div>

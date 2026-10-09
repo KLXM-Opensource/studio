@@ -16,9 +16,9 @@ use Core\Media;
         $info = Media::typeLabel($m['mime']) . ($pages ? ' · ' . ($pages === 1 ? lt('1 Seite') : lt('{n} Seiten', ['n' => $pages])) : '') . ' · ' . Media::humanSize((int) $m['size']); ?>
     <li class="download">
       <?= icon($m['mime'] === 'application/pdf' ? 'file-pdf' : 'file') ?>
-      <span class="download__main"><span class="download__name"<?= $b->edit("files.$i.label") ?>><?= e($label) ?></span> <span class="download__meta"><?= e($info) ?></span></span>
-      <?php if ($m['mime'] === 'application/pdf' && ($view = Media::viewerUrl($m))): ?><a href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e($label) ?></span></a><?php endif; ?>
-      <a href="<?= e(Media::url($m)) ?>" download><?= e(lt('Herunterladen')) ?><span class="sr-only">: <?= e($label) ?> (<?= e($info) ?>)</span></a>
+      <span class="download__main"><span class="download__name"<?= $b->edit("files.$i.label") ?>><?= emphasis($label) ?></span> <span class="download__meta"><?= e($info) ?></span></span>
+      <?php if ($m['mime'] === 'application/pdf' && ($view = Media::viewerUrl($m))): ?><a href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e(strip_emphasis($label)) ?></span></a><?php endif; ?>
+      <a href="<?= e(Media::url($m)) ?>" download><?= e(lt('Herunterladen')) ?><span class="sr-only">: <?= e(strip_emphasis($label)) ?> (<?= e($info) ?>)</span></a>
     </li>
     <?php endforeach; ?>
   </ul>

@@ -67,7 +67,7 @@ $c = $b->central();
     <div class="contact__main">
       <?php if ($form !== ''): ?>
       <div class="contact__form dff-wrap card">
-        <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h3 class="contact__formtitle h3"<?= $b->edit('form_title') ?>><?= e($d['form_title']) ?></h3><?php endif; ?>
+        <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h3 class="contact__formtitle h3"<?= $b->edit('form_title') ?>><?= galerie_title((string) $d['form_title']) ?></h3><?php endif; ?>
         <?php if ($prefill !== ''): ?><p class="contact__about"><?= e(lt('Ihre Anfrage zu: {werk}', ['werk' => $prefill])) ?></p><?php endif; ?>
         <?= $form ?>
       </div>
@@ -76,5 +76,5 @@ $c = $b->central();
     </div>
     <?php endif; ?>
   </div>
-  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= e($d['note']) ?></p><?php endif; ?>
+  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= galerie_title((string) $d['note']) ?></p><?php endif; ?>
 </div>

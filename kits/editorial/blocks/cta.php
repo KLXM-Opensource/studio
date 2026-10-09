@@ -28,9 +28,9 @@ if ($v === 'newsletter') {
 <div class="wrap">
   <div class="cta cta--<?= e($v) ?>">
     <div class="cta__text">
-      <?php if ($eyebrow !== ''): ?><p class="kicker"<?= $b->edit('eyebrow') ?>><?= e($eyebrow) ?></p><?php endif; ?>
-      <h2 id="<?= e($b->titleId()) ?>" class="cta__title"<?= $b->edit('title') ?>><?= e($d['title']) ?></h2>
-      <?php if ($text !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(e($text), false) ?></p><?php endif; ?>
+      <?php if ($eyebrow !== ''): ?><p class="kicker"<?= $b->edit('eyebrow') ?>><?= emphasis($eyebrow) ?></p><?php endif; ?>
+      <h2 id="<?= e($b->titleId()) ?>" class="cta__title"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h2>
+      <?php if ($text !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
     </div>
     <?php if ($v === 'newsletter'): ?>
     <div class="cta__form dff-wrap"><?= $form ?></div>

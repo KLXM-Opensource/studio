@@ -13,9 +13,9 @@ $text = trim((string) ($d['text'] ?? ''));
     <?php if ($v === 'aurora'): ?><span class="cta__field" aria-hidden="true"></span><?php endif; ?>
     <div class="cta__inner<?= $v === 'aurora' ? ' glass glass--strong' : '' ?>">
       <div class="cta__text">
-        <?php if ($eyebrow !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($eyebrow) ?></p><?php endif; ?>
+        <?php if ($eyebrow !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= glas_title($eyebrow) ?></p><?php endif; ?>
         <h2 id="<?= e($b->titleId()) ?>" class="h2 cta__title"<?= $b->edit('title') ?>><?= glas_title((string) $d['title']) ?></h2>
-        <?php if ($text !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(e($text), false) ?></p><?php endif; ?>
+        <?php if ($text !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(glas_title($text), false) ?></p><?php endif; ?>
       </div>
       <?= glas_buttons($b, 'cta__actions') ?>
     </div>

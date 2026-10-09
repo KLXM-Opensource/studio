@@ -7,9 +7,9 @@ $pic = $v === 'split' ? modern_image($d['image'] ?? null, '(min-width: 1080px) 5
   <div class="cta cta--<?= e($v) ?><?= $pic !== '' ? ' cta--media' : '' ?>">
     <div class="cta__main">
     <div class="cta__text">
-      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= modern_title((string) $d['eyebrow']) ?></p><?php endif; ?>
       <h2 id="<?= e($b->titleId()) ?>" class="<?= $v === 'big' ? 'cta__big' : 'h2' ?> cta__title"<?= $b->edit('title') ?>><?= modern_title((string) $d['title']) ?></h2>
-      <?php if ($d['text'] !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(e($d['text']), false) ?></p><?php endif; ?>
+      <?php if ($d['text'] !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(modern_title((string) $d['text']), false) ?></p><?php endif; ?>
     </div>
     <?= modern_buttons($b, 'cta__actions') ?>
     </div>

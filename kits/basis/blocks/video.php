@@ -1,7 +1,7 @@
 <?php /** Video (YouTube/Vimeo mit Zwei-Klick-Lösung, MP4 direkt) – breit oder mit Text daneben. @var \Core\Block $b  @var array $d */
 $side = $b->variant() === 'text';
 $embed = app()->theme->partial('video-embed', ['url' => $d['video_url'], 'file' => $d['video_file'], 'poster' => $d['poster'],
-    'ratio' => $d['ratio'] ?: '16-9', 'label' => trim((string) $d['title'])]);
+    'ratio' => $d['ratio'] ?: '16-9', 'label' => strip_emphasis(trim((string) $d['title']))]);
 ?>
 <div class="wrap<?= $side ? ' split video-split' : '' ?>">
   <?php if ($side): ?>
@@ -14,6 +14,6 @@ $embed = app()->theme->partial('video-embed', ['url' => $d['video_url'], 'file' 
   <?php endif; ?>
   <figure class="video">
     <?= $embed ?>
-    <?php if (trim((string) $d['caption']) !== '' || is_editing()): ?><figcaption class="video__cap"<?= $b->edit('caption') ?>><?= e($d['caption']) ?></figcaption><?php endif; ?>
+    <?php if (trim((string) $d['caption']) !== '' || is_editing()): ?><figcaption class="video__cap"<?= $b->edit('caption') ?>><?= emphasis((string) $d['caption']) ?></figcaption><?php endif; ?>
   </figure>
 </div>

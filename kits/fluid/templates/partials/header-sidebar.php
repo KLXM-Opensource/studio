@@ -30,7 +30,7 @@ if ($banner === 'band' || $banner === 'image'):
   <div class="side-banner__in">
     <div class="side-banner__id">
       <?= app()->theme->partial('brand', ['href' => $brandHref, 'class' => 'hdr__brand side-banner__brand']) ?>
-      <?php if ($claim !== ''): ?><p class="side-banner__claim"><?= e($claim) ?></p><?php endif; ?>
+      <?php if ($claim !== ''): ?><p class="side-banner__claim"><?= fluid_title($claim) ?></p><?php endif; ?>
     </div>
     <div class="side-banner__tools">
       <?php if ($cta): ?><a class="btn btn--primary side-banner__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?></a><?php endif; ?>

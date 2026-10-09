@@ -124,7 +124,7 @@ function foto_checks(array $lines, string $class = ''): string
 {
     if (!$lines) return '';
     $h = '<ul class="checks' . ($class !== '' ? ' ' . e($class) : '') . '" role="list">';
-    foreach ($lines as $l) $h .= '<li>' . icon('check-circle', ['class' => 'checks__ico']) . '<span>' . e($l) . '</span></li>';
+    foreach ($lines as $l) $h .= '<li>' . icon('check-circle', ['class' => 'checks__ico']) . '<span>' . foto_title($l) . '</span></li>';
     return $h . '</ul>';
 }
 
@@ -379,9 +379,9 @@ function foto_head(\Core\Block $b, string $class = '', string $tag = 'h2'): stri
     $intro = trim((string) ($d['intro'] ?? ''));
     if ($eyebrow === '' && $title === '' && $intro === '' && !is_editing()) return '';
     $h = '<header class="sec-head' . ($class !== '' ? ' ' . e($class) : '') . '">';
-    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>';
-    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . e($title) . '</' . $tag . '>';
-    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . foto_title($eyebrow) . '</p>';
+    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . foto_title($title) . '</' . $tag . '>';
+    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(foto_title($intro), false) . '</p>';
     return $h . '</header>';
 }
 
@@ -519,8 +519,8 @@ function foto_public_info(): array
  */
 function foto_title(string $text): string
 {
-    if (is_editing()) return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
-    return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
+    // *Wort* → <em class="hl"> (Kern: emphasis_hl – ein Muster für alle Kits; Bearbeiten: Sternchen dezent sichtbar)
+    return emphasis_hl($text);
 }
 
 
@@ -578,12 +578,12 @@ function foto_photo(array $m, array $o = []): string
     $lb = $o['lightbox'] && !is_editing();
     if ($lb) {
         $label = $alt !== '' ? '<span class="sr-only"> ' . e(lt('(vergrößern)')) . '</span>' : '<span class="sr-only">' . e(lt('Bild {n} vergrößern', ['n' => (int) $o['n']])) . '</span>';
-        $box = '<a class="ph__box"' . \Core\MediaBlocks::lightboxLink($m, $caption) . ' data-lb>' . $img . $label . '</a>';
+        $box = '<a class="ph__box"' . \Core\MediaBlocks::lightboxLink($m, strip_emphasis($caption)) . ' data-lb>' . $img . $label . '</a>';
     } else {
         $box = '<span class="ph__box">' . $img . ($o['extra'] ?? '') . '</span>';
     }
     $cap = $caption !== '' || ($o['capEdit'] !== '' && is_editing())
-        ? '<figcaption class="ph__cap"' . $o['capEdit'] . '>' . e($caption) . '</figcaption>' : '';
+        ? '<figcaption class="ph__cap"' . $o['capEdit'] . '>' . foto_title($caption) . '</figcaption>' : '';
     return '<figure class="ph' . ($o['class'] !== '' ? ' ' . e((string) $o['class']) : '') . ($cap !== '' ? ' ph--cap' : '') . '">' . $box . $cap . '</figure>';
 }
 
@@ -666,19 +666,19 @@ function foto_video(array $m, array $o): string
     $poster = \Core\Media::posterFor($m);
     $ratio = (string) $o['ratio'] !== '' ? (string) $o['ratio'] : foto_nearest_ratio((int) ($m['width'] ?? 0), (int) ($m['height'] ?? 0));
     $posterUrl = $poster ? \Core\Media::url($poster, 1600) : '';
-    $title = trim((string) ($o['caption'] ?? '')) ?: trim(\Core\Media::title($m));
+    $title = strip_emphasis(trim((string) ($o['caption'] ?? '')) ?: trim(\Core\Media::title($m)));
     $caption = trim((string) $o['caption']);
     $video = fn(string $cls, string $preload) => '<video class="' . $cls . '" controls playsinline preload="' . $preload . '"' . ($posterUrl !== '' ? ' poster="' . e($posterUrl) . '"' : '')
         . ($title !== '' ? ' aria-label="' . e($title) . '"' : '') . '><source src="' . e(\Core\Media::url($m)) . '" type="' . e((string) $m['mime']) . '">'
         . \Core\MediaTracks::trackTags($m) . '</video>';
-    $cap = $caption !== '' || ($o['capEdit'] !== '' && is_editing()) ? '<figcaption class="ph__cap"' . $o['capEdit'] . '>' . e($caption) . '</figcaption>' : '';
+    $cap = $caption !== '' || ($o['capEdit'] !== '' && is_editing()) ? '<figcaption class="ph__cap"' . $o['capEdit'] . '>' . foto_title($caption) . '</figcaption>' : '';
     $frame = 'ph__img ' . foto_ratio_class($ratio);
     if ($o['lightbox'] && !is_editing()) {
         static $n = 0;
         $tpl = 'flb-v' . (++$n);
         $pic = $poster ? \Core\Media::pictureOf($poster, (string) $o['sizes'], ['ratio' => $ratio, 'alt' => ''] + ($o['eager'] ? ['eager' => true] : [])) : '';
         $box = '<a class="ph__box ph__box--video" href="' . e(\Core\Media::url($m)) . '" data-lb data-lb-video="' . e($tpl) . '"'
-            . ' data-w="' . (int) ($m['width'] ?? 0) . '" data-h="' . (int) ($m['height'] ?? 0) . '"' . ($caption !== '' ? ' data-caption="' . e($caption) . '"' : '') . '>'
+            . ' data-w="' . (int) ($m['width'] ?? 0) . '" data-h="' . (int) ($m['height'] ?? 0) . '"' . ($caption !== '' ? ' data-caption="' . e(strip_emphasis($caption)) . '"' : '') . '>'
             . '<span class="' . e($frame) . '">' . $pic . '</span><span class="ph__play" aria-hidden="true"></span>'
             . '<span class="sr-only">' . e($title !== '' ? lt('Video abspielen: {title}', ['title' => $title]) : lt('Video abspielen')) . '</span></a>'
             . '<template id="' . e($tpl) . '">' . $video('flb__video', 'metadata') . \Core\MediaTracks::transcriptHtml($m) . '</template>';
@@ -692,8 +692,8 @@ function foto_video(array $m, array $o): string
 function foto_embed(string $url, array $o): string
 {
     $caption = trim((string) ($o['caption'] ?? ''));
-    $embed = app()->theme->partial('video-embed', ['url' => $url, 'file' => null, 'poster' => $o['poster'] ?? null, 'ratio' => '16-9', 'label' => $caption]);
-    $cap = $caption !== '' || (($o['capEdit'] ?? '') !== '' && is_editing()) ? '<figcaption class="ph__cap"' . ($o['capEdit'] ?? '') . '>' . e($caption) . '</figcaption>' : '';
+    $embed = app()->theme->partial('video-embed', ['url' => $url, 'file' => null, 'poster' => $o['poster'] ?? null, 'ratio' => '16-9', 'label' => strip_emphasis($caption)]);
+    $cap = $caption !== '' || (($o['capEdit'] ?? '') !== '' && is_editing()) ? '<figcaption class="ph__cap"' . ($o['capEdit'] ?? '') . '>' . foto_title($caption) . '</figcaption>' : '';
     return '<figure class="ph ph--embed' . (!empty($o['class']) ? ' ' . e((string) $o['class']) : '') . '"><span class="ph__box">' . $embed . '</span>' . $cap . '</figure>';
 }
 
@@ -922,14 +922,14 @@ function foto_lb_link(array $m, string $caption, string $class, string $inner, b
         static $n = 0;
         $tpl = 'mo-v' . (++$n);
         $poster = \Core\Media::posterFor($m);
-        $title = $caption !== '' ? $caption : trim(\Core\Media::title($m));
+        $title = strip_emphasis($caption !== '' ? $caption : trim(\Core\Media::title($m)));
         $video = '<video class="flb__video" controls playsinline preload="metadata"' . ($poster ? ' poster="' . e(\Core\Media::url($poster, 1600)) . '"' : '')
             . ($title !== '' ? ' aria-label="' . e($title) . '"' : '') . '><source src="' . e(\Core\Media::url($m)) . '" type="' . e((string) $m['mime']) . '">'
             . \Core\MediaTracks::trackTags($m) . '</video>' . \Core\MediaTracks::transcriptHtml($m);
         return '<a href="' . e(\Core\Media::url($m)) . '"' . $attrs . ' data-lb-video="' . e($tpl) . '" data-w="' . (int) ($m['width'] ?? 0) . '" data-h="' . (int) ($m['height'] ?? 0) . '"'
-            . ($caption !== '' ? ' data-caption="' . e($caption) . '"' : '') . '>' . $inner . '</a><template id="' . e($tpl) . '">' . $video . '</template>';
+            . ($caption !== '' ? ' data-caption="' . e(strip_emphasis($caption)) . '"' : '') . '>' . $inner . '</a><template id="' . e($tpl) . '">' . $video . '</template>';
     }
-    return '<a' . \Core\MediaBlocks::lightboxLink($m, $caption) . $attrs . '>' . $inner . '</a>';
+    return '<a' . \Core\MediaBlocks::lightboxLink($m, strip_emphasis($caption)) . $attrs . '>' . $inner . '</a>';
 }
 
 /**

@@ -21,7 +21,7 @@ $id = $b->domId() . '-reel';
   </div>
   <?php else: ?><?= foto_head($b) ?><?php endif; ?>
   <?php if ($items): ?>
-  <ul class="<?= $v === 'reel' ? 'reel ' : 'grid ' ?><?= e(foto_min($d)) ?> cards cards--<?= e($v) ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(trim((string) $d['title']) ?: lt('Karten')) . '"' : '' ?>>
+  <ul class="<?= $v === 'reel' ? 'reel ' : 'grid ' ?><?= e(foto_min($d)) ?> cards cards--<?= e($v) ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(trim(strip_emphasis((string) $d['title'])) ?: lt('Karten')) . '"' : '' ?>>
     <?php foreach ($items as $i => $it):
         $link = trim((string) ($it['link'] ?? ''));
         $label = trim((string) ($it['link_label'] ?? ''));
@@ -31,9 +31,9 @@ $id = $b->domId() . '-reel';
       <div class="tcard__in">
         <?= $pic ?>
         <div class="tcard__body">
-          <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="tcard__eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= e($it['eyebrow']) ?></p><?php endif; ?>
-          <<?= $tag ?> class="tcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= foto_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-          <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+          <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="tcard__eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= foto_title((string) $it['eyebrow']) ?></p><?php endif; ?>
+          <<?= $tag ?> class="tcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= foto_link_attrs($link) ?>><?= foto_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= foto_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+          <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(foto_title((string) $it['text']), false) ?></p><?php endif; ?>
           <?php if ($link !== '' && $label !== ''): ?><span class="more tcard__more" aria-hidden="true"><?= e($label) ?><?= icon('arrow-right', ['class' => 'more__ico']) ?></span><?php endif; ?>
         </div>
       </div>

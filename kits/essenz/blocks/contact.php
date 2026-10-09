@@ -56,7 +56,7 @@ $c = $b->central();
     <div class="contact__main">
       <?php if ($form !== ''): ?>
       <div class="contact__form dff-wrap panel">
-        <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h3 class="contact__formtitle h3"<?= $b->edit('form_title') ?>><?= e($d['form_title']) ?></h3><?php endif; ?>
+        <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h3 class="contact__formtitle h3"<?= $b->edit('form_title') ?>><?= essenz_title((string) $d['form_title']) ?></h3><?php endif; ?>
         <?= $form ?>
       </div>
       <?php endif; ?>
@@ -64,5 +64,5 @@ $c = $b->central();
     </div>
     <?php endif; ?>
   </div>
-  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= e($d['note']) ?></p><?php endif; ?>
+  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= essenz_title((string) $d['note']) ?></p><?php endif; ?>
 </div>

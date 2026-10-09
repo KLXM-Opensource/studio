@@ -21,8 +21,8 @@ $eager = ['eager' => true];
 $eyebrow = trim((string) ($d['eyebrow'] ?? ''));
 
 $title = '<h1 id="' . e($b->titleId()) . '" class="h1 hero__title"' . $b->edit('title') . '>' . nature_title((string) $d['title']) . '</h1>';
-$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>' : '';
-$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>' : '';
+$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . nature_title($eyebrow) . '</p>' : '';
+$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(nature_title($text), false) . '</p>' : '';
 
 /** Kennwerte: „Bezeichnung: Wert“ → zwei Spalten, sonst eine Zeile; nummeriert */
 $readout = function (string $class) use ($points): string {
@@ -30,7 +30,7 @@ $readout = function (string $class) use ($points): string {
     $h = '<ol class="' . $class . '" role="list">';
     foreach ($points as $i => $p) {
         [$k, $val] = str_contains($p, ':') ? array_map('trim', explode(':', $p, 2)) : [$p, ''];
-        $h .= '<li><span class="rd__n" aria-hidden="true">' . nature_num($i + 1) . '</span><span class="rd__k">' . e($k) . '</span>'
+        $h .= '<li><span class="rd__n" aria-hidden="true">' . nature_num($i + 1) . '</span><span class="rd__k">' . nature_title($k) . '</span>'
             . ($val !== '' ? '<span class="rd__v">' . e($val) . '</span>' : '') . '</li>';
     }
     return $h . '</ol>';
@@ -46,7 +46,7 @@ if ($v === 'panel'):
     <?= nature_buttons($b, 'hero__actions') ?>
   </div>
   <div class="tafel panel">
-    <div class="tafel__top"><span class="label"<?= $b->edit('panel_label') ?>><?= e($label !== '' ? $label : nature_name(true)) ?></span><span class="tafel__leaf" aria-hidden="true"></span></div>
+    <div class="tafel__top"><span class="label"<?= $b->edit('panel_label') ?>><?= $label !== '' ? nature_title($label) : e(nature_name(true)) ?></span><span class="tafel__leaf" aria-hidden="true"></span></div>
     <?= $media !== '' ? $media : '<div class="tafel__motif">' . nature_landscape() . '</div>' ?>
     <?= $readout('rd tafel__read') ?>
   </div>
@@ -254,7 +254,7 @@ if ($v === 'panel'):
       </div>
       <?php if ($hours): ?>
       <div class="hs__sign"<?= $b->central() ?>>
-        <p class="hs__sign-top"><span class="hs__sign-name"<?= $b->edit('sign_label') ?>><?= e($sign !== '' ? $sign : nature_name(true)) ?></span><span class="hs__season"><?= e($seasonName) ?></span></p>
+        <p class="hs__sign-top"><span class="hs__sign-name"<?= $b->edit('sign_label') ?>><?= $sign !== '' ? nature_title($sign) : e(nature_name(true)) ?></span><span class="hs__season"><?= e($seasonName) ?></span></p>
         <?= app()->theme->partial('hours', ['hours' => $hours, 'state' => true]) ?>
       </div>
       <?php elseif (is_editing()): ?>
@@ -286,7 +286,7 @@ if ($v === 'panel'):
   </div>
   <?php if ($items): ?>
   <section class="hd__board" aria-labelledby="<?= e($b->domId()) ?>-dates">
-    <h2 class="hd__head label" id="<?= e($b->domId()) ?>-dates"<?= $b->edit('dates_title') ?>><?= e($listTitle !== '' ? $listTitle : lt('Die nächsten Termine')) ?></h2>
+    <h2 class="hd__head label" id="<?= e($b->domId()) ?>-dates"<?= $b->edit('dates_title') ?>><?= $listTitle !== '' ? nature_title($listTitle) : e(lt('Die nächsten Termine')) ?></h2>
     <div class="hd__line">
       <?= $branch ?>
       <ol class="hd__tags hd__tags--<?= $n ?>" role="list">
@@ -322,9 +322,9 @@ if ($v === 'panel'):
   </div>
   <div class="hf__paper dff-wrap">
     <span class="hf__tape hf__tape--l" aria-hidden="true"></span><span class="hf__tape hf__tape--r" aria-hidden="true"></span>
-    <?php if ($formTitle !== ''): ?><h2 class="hf__title"<?= $b->edit('form_title') ?>><?= e($formTitle) ?></h2><?php endif; ?>
+    <?php if ($formTitle !== ''): ?><h2 class="hf__title"<?= $b->edit('form_title') ?>><?= nature_title($formTitle) ?></h2><?php endif; ?>
     <?= Hero::form($b, $d) ?>
-    <?php if ($note !== ''): ?><p class="hf__note"<?= $b->edit('form_note') ?>><?= e($note) ?></p><?php endif; ?>
+    <?php if ($note !== ''): ?><p class="hf__note"<?= $b->edit('form_note') ?>><?= nature_title($note) ?></p><?php endif; ?>
   </div>
 </div>
 <?php else:

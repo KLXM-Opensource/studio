@@ -8,12 +8,12 @@ $legal = frameworks_legal_links();
 $text = trim((string) setting('footer_text'));
 $a = 'text-slate-300 underline decoration-slate-500 underline-offset-4 hover:text-white hover:decoration-white';
 ?>
-<footer class="bg-slate-900 py-14 text-slate-300 dark:bg-black">
+<footer class="fw-footer bg-slate-900 py-14 text-slate-300 dark:bg-black">
   <div class="wrap grid gap-10 md:grid-cols-3">
     <div>
       <p class="text-lg font-bold text-white"><?= e(frameworks_name()) ?></p>
-      <?php if (filled(setting('tagline'))): ?><p class="mt-2"><?= e((string) setting('tagline')) ?></p><?php endif; ?>
-      <?php if ($text !== ''): ?><p class="mt-4 text-sm text-slate-400"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+      <?php if (filled(setting('tagline'))): ?><p class="mt-2"><?= emphasis((string) setting('tagline')) ?></p><?php endif; ?>
+      <?php if ($text !== ''): ?><p class="mt-4 text-sm text-slate-400"><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
     </div>
     <?php if ($address || filled($phone) || $email !== ''): ?>
     <div>

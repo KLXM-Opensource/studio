@@ -23,9 +23,9 @@ $tag = galerie_htag($d);
       <?php elseif ($v === 'numbered'): ?><span class="feat__num" aria-hidden="true"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
       <?php elseif (!empty($it['icon'])): ?><span class="feat__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
       <div class="feat__body">
-        <<?= $tag ?> class="feat__title"><?php if ($cover): ?><a class="cover-link" <?= galerie_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (($it['text'] ?? '') !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
-        <?php if ($link !== '' && $label !== ''): ?><a class="more" <?= galerie_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?><span class="sr-only">: <?= e($it['title']) ?></span></a><?php endif; ?>
+        <<?= $tag ?> class="feat__title"><?php if ($cover): ?><a class="cover-link" <?= galerie_link_attrs($link) ?>><?= galerie_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= galerie_title((string) $it['title']) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (($it['text'] ?? '') !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(galerie_title((string) $it['text']), false) ?></p><?php endif; ?>
+        <?php if ($link !== '' && $label !== ''): ?><a class="more" <?= galerie_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?><span class="sr-only">: <?= e(strip_emphasis((string) $it['title'])) ?></span></a><?php endif; ?>
       </div>
     </li>
     <?php endforeach; ?>

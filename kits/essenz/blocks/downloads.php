@@ -24,13 +24,13 @@ if (($d['source'] ?? 'manual') === 'collection' && !empty($d['collection'])) {
     <li class="download">
       <span class="download__type" aria-hidden="true"><?= e($m ? Media::typeLabel($m['mime']) : '–') ?></span>
       <span class="download__main">
-        <span class="download__name"<?= $row['path'] ? $b->edit($row['path']) : '' ?>><?= e($row['label']) ?></span>
+        <span class="download__name"<?= $row['path'] ? $b->edit($row['path']) : '' ?>><?= essenz_title((string) $row['label']) ?></span>
         <span class="download__meta"><?= e(implode(' · ', array_filter([$meta, $row['note']]))) ?></span>
       </span>
       <?php if ($m): ?>
       <span class="download__actions">
-        <?php if ($pdf && !empty($d['show_viewer']) && ($view = Media::viewerUrl($m))): ?><a class="download__view" href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e($row['label']) ?></span></a><?php endif; ?>
-        <a class="download__dl" href="<?= e(Media::url($m)) ?>" download><?= icon("download-simple") ?><span class="sr-only"><?= e(lt('{name} herunterladen ({info})', ['name' => $row['label'], 'info' => $meta])) ?></span></a>
+        <?php if ($pdf && !empty($d['show_viewer']) && ($view = Media::viewerUrl($m))): ?><a class="download__view" href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e(strip_emphasis((string) $row['label'])) ?></span></a><?php endif; ?>
+        <a class="download__dl" href="<?= e(Media::url($m)) ?>" download><?= icon("download-simple") ?><span class="sr-only"><?= e(lt('{name} herunterladen ({info})', ['name' => strip_emphasis((string) $row['label']), 'info' => $meta])) ?></span></a>
       </span>
       <?php endif; ?>
     </li>

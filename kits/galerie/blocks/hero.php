@@ -14,9 +14,9 @@ $eager = ['eager' => true];
 
 $textHtml = function (string $class = '') use ($b, $d, $text, $points): string {
     $h = '<div class="hero__text' . ($class !== '' ? ' ' . $class : '') . '">';
-    if (($d['eyebrow'] ?? '') !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($d['eyebrow']) . '</p>';
+    if (($d['eyebrow'] ?? '') !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . galerie_title((string) $d['eyebrow']) . '</p>';
     $h .= '<h1 id="' . e($b->titleId()) . '" class="h1 hero__title"' . $b->edit('title') . '>' . galerie_title((string) $d['title']) . '</h1>';
-    if ($text !== '' || is_editing()) $h .= '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>';
+    if ($text !== '' || is_editing()) $h .= '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(galerie_title($text), false) . '</p>';
     $h .= galerie_buttons($b, 'hero__actions');
     $h .= galerie_checks($points, 'hero__points');
     return $h . '</div>';
@@ -40,10 +40,10 @@ if ($v === 'fullbleed'):
 </div>
 <?php elseif ($v === 'type'): ?>
 <div class="wrap hero-type">
-  <?php if (($d['eyebrow'] ?? '') !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+  <?php if (($d['eyebrow'] ?? '') !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= galerie_title((string) $d['eyebrow']) ?></p><?php endif; ?>
   <h1 id="<?= e($b->titleId()) ?>" class="hero-type__title"<?= $b->edit('title') ?>><?= galerie_title((string) $d['title']) ?></h1>
   <div class="hero-type__foot">
-    <?php if ($text !== '' || is_editing()): ?><p class="hero__lead"<?= $b->edit('text') ?>><?= nl2br(e($text), false) ?></p><?php endif; ?>
+    <?php if ($text !== '' || is_editing()): ?><p class="hero__lead"<?= $b->edit('text') ?>><?= nl2br(galerie_title($text), false) ?></p><?php endif; ?>
     <?= galerie_buttons($b, 'hero__actions') ?>
   </div>
   <?= galerie_checks($points, 'hero__points') ?>
@@ -61,8 +61,8 @@ if ($v === 'fullbleed'):
       <?php foreach ($cards as $i => $c): ?>
       <li class="hero-card">
         <?php if (!empty($c['icon'])): ?><span class="hero-card__ico"><?= icon((string) $c['icon']) ?></span><?php endif; ?>
-        <span class="hero-card__body"><strong class="hero-card__title"<?= $b->edit("cards.$i.title") ?>><?= e($c['title']) ?></strong>
-        <?php if (trim((string) ($c['text'] ?? '')) !== ''): ?><span class="hero-card__text"<?= $b->edit("cards.$i.text") ?>><?= e($c['text']) ?></span><?php endif; ?></span>
+        <span class="hero-card__body"><strong class="hero-card__title"<?= $b->edit("cards.$i.title") ?>><?= galerie_title((string) $c['title']) ?></strong>
+        <?php if (trim((string) ($c['text'] ?? '')) !== ''): ?><span class="hero-card__text"<?= $b->edit("cards.$i.text") ?>><?= galerie_title((string) $c['text']) ?></span><?php endif; ?></span>
       </li>
       <?php endforeach; ?>
     </ul>
@@ -87,7 +87,7 @@ if ($v === 'fullbleed'):
   <div class="hx-collage hx-collage--n<?= count($pics) ?>">
     <?= $textHtml('hx-collage__card') ?>
     <?php foreach ($pics as $k => $t): ?>
-    <figure class="hx-collage__tile hx-collage__tile--<?= $k + 1 ?>"><?= $t['pic'] ?><?php if ($t['caption'] !== ''): ?><figcaption class="hx-collage__cap"<?= $b->edit($t['edit']) ?>><?= e($t['caption']) ?></figcaption><?php endif; ?></figure>
+    <figure class="hx-collage__tile hx-collage__tile--<?= $k + 1 ?>"><?= $t['pic'] ?><?php if ($t['caption'] !== ''): ?><figcaption class="hx-collage__cap"<?= $b->edit($t['edit']) ?>><?= galerie_title($t['caption']) ?></figcaption><?php endif; ?></figure>
     <?php endforeach; ?>
     <?php if (!$pics && is_editing()): ?><div class="frame frame--empty hx-collage__tile hx-collage__tile--1"><span><?= e(__('Bild')) ?> + <?= e(__('Weitere Bilder (2–4)')) ?></span></div><?php endif; ?>
   </div>

@@ -17,9 +17,9 @@ $items = array_values(array_filter((array) ($d['items'] ?? []), fn($it) => trim(
       <?php if ($v === 'list'): ?><span class="tz__num" aria-hidden="true"><?= $i + 1 ?></span><?php endif; ?>
       <?= $pic ?>
       <div class="tz__body">
-        <?php if (trim((string) ($it['kicker'] ?? '')) !== ''): ?><p class="kicker tz__kicker"<?= $b->edit("items.$i.kicker") ?>><?= e($it['kicker']) ?></p><?php endif; ?>
-        <<?= $hTag ?> class="tz__title"><?php if ($href): ?><a class="tz__link" href="<?= e($href) ?>"<?= ext_attrs($href) ?>><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?= editorial_ext_note($href) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?></<?= $hTag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== '' && $v !== 'list'): ?><p class="tz__dek"<?= $b->edit("items.$i.text") ?>><?= e($it['text']) ?></p><?php endif; ?>
+        <?php if (trim((string) ($it['kicker'] ?? '')) !== ''): ?><p class="kicker tz__kicker"<?= $b->edit("items.$i.kicker") ?>><?= emphasis((string) $it['kicker']) ?></p><?php endif; ?>
+        <<?= $hTag ?> class="tz__title"><?php if ($href): ?><a class="tz__link" href="<?= e($href) ?>"<?= ext_attrs($href) ?>><span<?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></span><?= editorial_ext_note($href) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></span><?php endif; ?></<?= $hTag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== '' && $v !== 'list'): ?><p class="tz__dek"<?= $b->edit("items.$i.text") ?>><?= emphasis((string) $it['text']) ?></p><?php endif; ?>
         <?php if (trim((string) ($it['meta'] ?? '')) !== ''): ?><p class="tz__meta"<?= $b->edit("items.$i.meta") ?>><?= e($it['meta']) ?></p><?php endif; ?>
       </div>
     </li>

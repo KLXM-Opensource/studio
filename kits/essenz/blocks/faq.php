@@ -7,7 +7,7 @@ $v = $b->variant() === 'stacked' ? 'stacked' : 'split';
   <div class="faq__list">
     <?php foreach ((array) $d['items'] as $i => $it): ?>
     <details class="faq__item" name="<?= e($b->domId()) ?>-faq">
-      <summary class="faq__q"><span class="faq__n" aria-hidden="true"><?= essenz_num($i + 1) ?></span><span class="faq__qt"<?= $b->edit("items.$i.q") ?>><?= e($it['q']) ?></span><span class="faq__pm" aria-hidden="true"></span></summary>
+      <summary class="faq__q"><span class="faq__n" aria-hidden="true"><?= essenz_num($i + 1) ?></span><span class="faq__qt"<?= $b->edit("items.$i.q") ?>><?= essenz_title((string) $it['q']) ?></span><span class="faq__pm" aria-hidden="true"></span></summary>
       <div class="faq__a prose"<?= $b->edit("items.$i.a", 'rich') ?>><?= rich($it['a']) ?></div>
     </details>
     <?php endforeach; ?>

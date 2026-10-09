@@ -15,10 +15,10 @@ $tag = essenz_htag($d);
     <?php foreach ($items as $i => $it): $meta = trim((string) ($it['meta'] ?? '')); ?>
     <li class="st__item" data-reveal>
       <span class="st__node" aria-hidden="true"><span class="st__n"><?= essenz_num($i + 1) ?></span></span>
-      <?php if ($meta !== '' || is_editing()): ?><p class="st__meta label"<?= $b->edit("items.$i.meta") ?>><?= e($meta) ?></p><?php endif; ?>
+      <?php if ($meta !== '' || is_editing()): ?><p class="st__meta label"<?= $b->edit("items.$i.meta") ?>><?= essenz_title($meta) ?></p><?php endif; ?>
       <div class="st__body">
-        <<?= $tag ?> class="st__title"<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="st__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <<?= $tag ?> class="st__title"<?= $b->edit("items.$i.title") ?>><?= essenz_title((string) ($it['title'] ?? '')) ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="st__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(essenz_title((string) $it['text']), false) ?></p><?php endif; ?>
       </div>
     </li>
     <?php endforeach; ?>

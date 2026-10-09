@@ -5,9 +5,9 @@
   <dl class="stats cols-<?= min(4, max(2, count($d['items']))) ?>">
     <?php foreach ($d['items'] as $i => $it): ?>
     <div class="stat">
-      <dt class="stat__label"<?= $b->edit("items.$i.label") ?>><?= e($it['label']) ?></dt>
+      <dt class="stat__label"<?= $b->edit("items.$i.label") ?>><?= emphasis((string) $it['label']) ?></dt>
       <dd class="stat__value"<?= $b->edit("items.$i.value") ?>><?= e($it['value']) ?></dd>
-      <?php if (($it['text'] ?? '') !== ''): ?><dd class="stat__text"<?= $b->edit("items.$i.text") ?>><?= e($it['text']) ?></dd><?php endif; ?>
+      <?php if (($it['text'] ?? '') !== ''): ?><dd class="stat__text"<?= $b->edit("items.$i.text") ?>><?= emphasis((string) $it['text']) ?></dd><?php endif; ?>
     </div>
     <?php endforeach; ?>
   </dl>

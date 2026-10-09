@@ -4,9 +4,9 @@
   <dl class="nums n-<?= count((array) $d['items']) ?>">
     <?php foreach ((array) $d['items'] as $i => $it): ?>
     <div class="num">
-      <dt class="num__label"<?= $b->edit("items.$i.label") ?>><?= e($it['label']) ?></dt>
+      <dt class="num__label"<?= $b->edit("items.$i.label") ?>><?= emphasis((string) $it['label']) ?></dt>
       <dd class="num__value"<?= $b->edit("items.$i.value") ?>><?= e($it['value']) ?></dd>
-      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><dd class="num__text"<?= $b->edit("items.$i.text") ?>><?= e($it['text']) ?></dd><?php endif; ?>
+      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><dd class="num__text"<?= $b->edit("items.$i.text") ?>><?= emphasis((string) $it['text']) ?></dd><?php endif; ?>
     </div>
     <?php endforeach; ?>
   </dl>

@@ -29,7 +29,7 @@ $ea = fn(string $f) => entry_edit_attr($t, $x, $f);
 
 $text = function (string $cls) use ($b, $x, $href, $tag, $eyebrow, $sub, $artists, $dates, $opening, $place, $lead, $more, $ea, $t): string {
     $h = '<div class="xf__text ' . $cls . '">';
-    $h .= $eyebrow !== '' ? '<p class="eyebrow xf__eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>' : '<p class="xf__eyebrow">' . galerie_status_badge($x) . '</p>';
+    $h .= $eyebrow !== '' ? '<p class="eyebrow xf__eyebrow"' . $b->edit('eyebrow') . '>' . galerie_title($eyebrow) . '</p>' : '<p class="xf__eyebrow">' . galerie_status_badge($x) . '</p>';
     $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="xf__title"><span' . $ea('titel') . '>' . e(Entries::title($t, $x)) . '</span></' . $tag . '>';
     if ($sub !== '') $h .= '<p class="xf__sub"' . $ea('untertitel') . '>' . e($sub) . '</p>';
     if ($artists !== '') $h .= '<p class="xf__artists">' . $artists . '</p>';

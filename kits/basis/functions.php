@@ -394,11 +394,11 @@ function basis_head(\Core\Block $b, string $class = '', string $tag = 'h2'): str
         return '';
     }
     $h = '<header class="sec-head' . ($class !== '' ? ' ' . e($class) : '') . '">';
-    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>';
+    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . emphasis($eyebrow) . '</p>';
     if ($title !== '' || is_editing()) {
-        $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . e($title) . '</' . $tag . '>';
+        $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . emphasis($title) . '</' . $tag . '>';
     }
-    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(emphasis($intro), false) . '</p>';
     return $h . '</header>';
 }
 

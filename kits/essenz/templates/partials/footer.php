@@ -30,7 +30,7 @@ $socialList = function () use ($social): string {
   <div class="wrap">
   <?php if ($variant === 'panel'): ?>
     <div class="ftr__panel">
-      <p class="ftr__big"><?= e($statement) ?></p>
+      <p class="ftr__big"><?= essenz_title($statement) ?></p>
       <?php if ($cta): ?><a class="btn btn--primary ftr__cta" <?= essenz_link_attrs($cta['link']) ?>><?= e($cta['label']) ?><?= icon('arrow-right') ?></a><?php endif; ?>
       <span class="ftr__grille" aria-hidden="true"></span>
     </div>
@@ -44,8 +44,8 @@ $socialList = function () use ($social): string {
     <div class="ftr__grid">
       <div class="ftr__about">
         <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
-        <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= e($tagline) ?></p><?php endif; ?>
-        <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+        <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= essenz_title($tagline) ?></p><?php endif; ?>
+        <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(essenz_title($text), false) ?></p><?php endif; ?>
         <?php if ($social): ?><ul class="cluster ftr__social" role="list" aria-label="<?= e(lt('Social Media')) ?>"><?= $socialList() ?></ul><?php endif; ?>
       </div>
       <?php if ($pages): ?>

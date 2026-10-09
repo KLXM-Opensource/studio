@@ -122,7 +122,7 @@ function modern_checks(array $lines, string $class = ''): string
 {
     if (!$lines) return '';
     $h = '<ul class="checks' . ($class !== '' ? ' ' . e($class) : '') . '" role="list">';
-    foreach ($lines as $l) $h .= '<li>' . icon('check-circle', ['class' => 'checks__ico']) . '<span>' . e($l) . '</span></li>';
+    foreach ($lines as $l) $h .= '<li>' . icon('check-circle', ['class' => 'checks__ico']) . '<span>' . modern_title($l) . '</span></li>';
     return $h . '</ul>';
 }
 
@@ -362,9 +362,9 @@ function modern_head(\Core\Block $b, string $class = '', string $tag = 'h2'): st
     $intro = trim((string) ($d['intro'] ?? ''));
     if ($eyebrow === '' && $title === '' && $intro === '' && !is_editing()) return '';
     $h = '<header class="sec-head' . ($class !== '' ? ' ' . e($class) : '') . '">';
-    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>';
+    if ($eyebrow !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . modern_title($eyebrow) . '</p>';
     if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . modern_title($title) . '</' . $tag . '>';
-    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(modern_title($intro), false) . '</p>';
     return $h . '</header>';
 }
 
@@ -502,8 +502,8 @@ function modern_public_info(): array
  */
 function modern_title(string $text): string
 {
-    if (is_editing()) return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
-    return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
+    // *Wort* → <em class="hl"> (Kern: emphasis_hl – ein Muster für alle Kits; Bearbeiten: Sternchen dezent sichtbar)
+    return emphasis_hl($text);
 }
 
 /** Initialen für Porträt-Platzhalter (Team ohne Foto): „Mara Beispiel“ → „MB“ */

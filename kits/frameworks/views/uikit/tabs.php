@@ -11,8 +11,8 @@ $id = $b->domId() . '-sw';
 <div class="uk-container">
   <?php include __DIR__ . '/_head.php'; ?>
   <?php if ($js): ?>
-  <ul uk-tab="connect: #<?= e($id) ?>; animation: uk-animation-fade" aria-label="<?= e((string) ($d['title'] ?: lt('Reiter'))) ?>">
-    <?php foreach ($items as $i => $it): ?><li<?= $i === 0 ? ' class="uk-active"' : '' ?>><a href><?= e($it['label']) ?></a></li><?php endforeach; ?>
+  <ul uk-tab="connect: #<?= e($id) ?>; animation: uk-animation-fade" aria-label="<?= e(strip_emphasis((string) ($d['title'] ?: lt('Reiter')))) ?>">
+    <?php foreach ($items as $i => $it): ?><li<?= $i === 0 ? ' class="uk-active"' : '' ?>><a href><?= emphasis((string) $it['label']) ?></a></li><?php endforeach; ?>
   </ul>
   <div id="<?= e($id) ?>" class="uk-switcher uk-margin">
     <?php foreach ($items as $it): ?><div class="fw-prose uk-width-2xlarge"><?= rich((string) ($it['text'] ?? '')) ?></div><?php endforeach; ?>
@@ -20,7 +20,7 @@ $id = $b->domId() . '-sw';
   <?php else: ?>
   <?php foreach ($items as $i => $it): ?>
   <div class="uk-margin-medium uk-width-2xlarge">
-    <h3 class="uk-h4"<?= $b->edit("items.$i.label") ?>><?= e($it['label']) ?></h3>
+    <h3 class="uk-h4"<?= $b->edit("items.$i.label") ?>><?= emphasis((string) $it['label']) ?></h3>
     <div class="fw-prose"<?= $b->edit("items.$i.text", 'rich') ?>><?= rich((string) ($it['text'] ?? '')) ?></div>
   </div>
   <?php endforeach; ?>

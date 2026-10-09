@@ -23,10 +23,10 @@ $eager = ['eager' => true];
 $statValue = trim((string) ($d['stat_value'] ?? ''));
 $statLabel = trim((string) ($d['stat_label'] ?? ''));
 
-$eyebrow = fn() => ($d['eyebrow'] ?? '') !== '' ? '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($d['eyebrow']) . '</p>' : '';
-$lead = fn() => ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>' : '';
+$eyebrow = fn() => ($d['eyebrow'] ?? '') !== '' ? '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . modern_title((string) $d['eyebrow']) . '</p>' : '';
+$lead = fn() => ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(modern_title($text), false) . '</p>' : '';
 $stat = fn(string $class) => $statValue !== '' || is_editing()
-    ? '<p class="' . $class . '"><span class="hstat__value"' . $b->edit('stat_value') . '>' . e($statValue) . '</span><span class="hstat__label"' . $b->edit('stat_label') . '>' . e($statLabel) . '</span></p>' : '';
+    ? '<p class="' . $class . '"><span class="hstat__value"' . $b->edit('stat_value') . '>' . e($statValue) . '</span><span class="hstat__label"' . $b->edit('stat_label') . '>' . modern_title($statLabel) . '</span></p>' : '';
 $textHtml = function (string $class = '') use ($b, $d, $points, $eyebrow, $lead): string {
     return '<div class="hero__text' . ($class !== '' ? ' ' . $class : '') . '">' . $eyebrow()
         . '<h1 id="' . e($b->titleId()) . '" class="h1 hero__title"' . $b->edit('title') . '>' . modern_title((string) $d['title']) . '</h1>'
@@ -75,9 +75,9 @@ if ($v === 'statement'): ?>
   <?php if ($main !== '' || $price !== '' || $badge !== ''): ?>
   <div class="hpr__stage">
     <?= $main ?>
-    <?php if ($badge !== '' || is_editing()): ?><p class="hpr__badge"<?= $b->edit('badge') ?>><?= e($badge) ?></p><?php endif; ?>
+    <?php if ($badge !== '' || is_editing()): ?><p class="hpr__badge"<?= $b->edit('badge') ?>><?= modern_title($badge) ?></p><?php endif; ?>
     <?php if ($price !== '' || is_editing()): ?>
-    <p class="hpr__tag"><span class="hpr__price"<?= $b->edit('price') ?>><?= e($price) ?></span><?php if ($priceNote !== '' || is_editing()): ?><span class="hpr__note"<?= $b->edit('price_note') ?>><?= e($priceNote) ?></span><?php endif; ?></p>
+    <p class="hpr__tag"><span class="hpr__price"<?= $b->edit('price') ?>><?= e($price) ?></span><?php if ($priceNote !== '' || is_editing()): ?><span class="hpr__note"<?= $b->edit('price_note') ?>><?= modern_title($priceNote) ?></span><?php endif; ?></p>
     <?php endif; ?>
   </div>
   <?php endif; ?>
@@ -85,7 +85,7 @@ if ($v === 'statement'): ?>
   <section class="hpr__sheet bg-dark" aria-labelledby="<?= e($b->titleId()) ?>-spec">
     <div class="hpr__sheet-head">
       <p class="hpr__kicker" aria-hidden="true"><?= e(lt('Datenblatt')) ?></p>
-      <h2 id="<?= e($b->titleId()) ?>-spec" class="hpr__sheet-title"<?= $b->edit('spec_title') ?>><?= $specTitle !== '' ? e($specTitle) : e(lt('Datenblatt')) ?></h2>
+      <h2 id="<?= e($b->titleId()) ?>-spec" class="hpr__sheet-title"<?= $b->edit('spec_title') ?>><?= $specTitle !== '' ? modern_title($specTitle) : e(lt('Datenblatt')) ?></h2>
     </div>
     <?php if ($specs): ?>
     <dl class="hpr__specs">

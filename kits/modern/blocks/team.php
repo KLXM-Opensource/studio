@@ -23,16 +23,16 @@ $tones = ['pop', 'tint', 'dark'];
     ?>
     <li class="member member--<?= e($v) ?><?= $cover ? ' member--link' : '' ?><?= $v === 'grid' ? ' card' : '' ?>" data-reveal><?= $b->targetEdit($link, $name) ?>
       <div class="member__pic<?= $pic === '' ? ' member__pic--initials member__pic--' . $tones[$i % 3] : '' ?>"<?= $pic === '' ? ' aria-hidden="true"' : '' ?>>
-        <?= $pic !== '' ? $pic : '<span>' . e(modern_initials($name)) . '</span>' ?>
+        <?= $pic !== '' ? $pic : '<span>' . e(modern_initials(strip_emphasis($name))) . '</span>' ?>
       </div>
       <div class="member__body">
-        <<?= $tag ?> class="member__name"><?php if ($cover): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= e($name) ?></a><?php else: ?><span<?= $b->edit("items.$i.name") ?>><?= e($name) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['role'] ?? '')) !== ''): ?><p class="member__role"<?= $b->edit("items.$i.role") ?>><?= e($it['role']) ?></p><?php endif; ?>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="member__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <<?= $tag ?> class="member__name"><?php if ($cover): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= modern_title($name) ?></a><?php else: ?><span<?= $b->edit("items.$i.name") ?>><?= modern_title($name) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['role'] ?? '')) !== ''): ?><p class="member__role"<?= $b->edit("items.$i.role") ?>><?= modern_title((string) $it['role']) ?></p><?php endif; ?>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="member__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(modern_title((string) $it['text']), false) ?></p><?php endif; ?>
         <?php if ($email !== '' || ($link !== '' && $label !== '')): ?>
         <p class="member__links">
-          <?php if ($email !== ''): ?><a class="member__mail" href="mailto:<?= e($email) ?>"><?= icon('envelope-simple') ?><span class="sr-only"><?= e(lt('E-Mail an {name}', ['name' => $name])) ?>: </span><span class="member__addr"><?= e($email) ?></span></a><?php endif; ?>
-          <?php if ($link !== '' && $label !== ''): ?><a class="more" <?= modern_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?><span class="sr-only">: <?= e($name) ?></span></a><?php endif; ?>
+          <?php if ($email !== ''): ?><a class="member__mail" href="mailto:<?= e($email) ?>"><?= icon('envelope-simple') ?><span class="sr-only"><?= e(lt('E-Mail an {name}', ['name' => strip_emphasis($name)])) ?>: </span><span class="member__addr"><?= e($email) ?></span></a><?php endif; ?>
+          <?php if ($link !== '' && $label !== ''): ?><a class="more" <?= modern_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?><span class="sr-only">: <?= e(strip_emphasis($name)) ?></span></a><?php endif; ?>
         </p>
         <?php endif; ?>
       </div>

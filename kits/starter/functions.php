@@ -109,11 +109,11 @@ function starter_head(Block $b, string $tag = 'h2'): string
 {
     $d = $b->data;
     $h = '';
-    if (filled($d['eyebrow'] ?? '')) $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($d['eyebrow']) . '</p>';
+    if (filled($d['eyebrow'] ?? '')) $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . emphasis((string) $d['eyebrow']) . '</p>';
     if (filled($d['title'] ?? '') || is_editing()) {
-        $h .= '<' . $tag . ' id="' . e($b->titleId()) . '"' . $b->edit('title') . '>' . e((string) ($d['title'] ?? '')) . '</' . $tag . '>';
+        $h .= '<' . $tag . ' id="' . e($b->titleId()) . '"' . $b->edit('title') . '>' . emphasis((string) ($d['title'] ?? '')) . '</' . $tag . '>';
     }
-    if (filled($d['intro'] ?? '')) $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($d['intro']), false) . '</p>';
+    if (filled($d['intro'] ?? '')) $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(emphasis((string) $d['intro']), false) . '</p>';
     return $h === '' ? '' : '<header class="sec-head">' . $h . '</header>';
 }
 

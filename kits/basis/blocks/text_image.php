@@ -9,7 +9,7 @@ $media = basis_image($d['image'] ?? null, '(min-width: 1080px) 560px, 100vw', $r
     <?php if ($d['text'] !== '' || is_editing()): ?><div class="prose"<?= $b->edit('text', 'rich') ?>><?= rich($d['text']) ?></div><?php endif; ?>
     <?php if ($list): ?>
     <ul class="checks">
-      <?php foreach ($list as $li): ?><li><?= basis_icon('check', 'checks__icon') ?><span><?= e($li) ?></span></li><?php endforeach; ?>
+      <?php foreach ($list as $li): ?><li><?= basis_icon('check', 'checks__icon') ?><span><?= emphasis((string) $li) ?></span></li><?php endforeach; ?>
     </ul>
     <?php endif; ?>
     <?php if ($d['button_label'] !== '' && $d['button_link'] !== ''): ?>

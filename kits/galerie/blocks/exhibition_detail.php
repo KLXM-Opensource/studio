@@ -107,7 +107,7 @@ $heroImg = $imgId ? img($imgId, $v === 'bleed' ? '100vw' : '(min-width: 1080px) 
 
   <?php if ($works): ?>
   <section class="wrap xd__works" aria-labelledby="<?= e($b->domId()) ?>-works">
-    <h2 class="xd__h" id="<?= e($b->domId()) ?>-works"<?= $b->edit('works_title') ?>><?= e(trim((string) ($d['works_title'] ?? '')) ?: lt('Werke in der Ausstellung')) ?></h2>
+    <h2 class="xd__h" id="<?= e($b->domId()) ?>-works"<?= $b->edit('works_title') ?>><?= galerie_title(trim((string) ($d['works_title'] ?? '')) ?: lt('Werke in der Ausstellung')) ?></h2>
     <ul class="aws aws--grid min-m" role="list">
       <?php foreach ($works as $w): ?><?= galerie_work_card($w, ['enquiry' => true, 'artist' => count($artistIds) !== 1]) ?><?php endforeach; ?>
     </ul>

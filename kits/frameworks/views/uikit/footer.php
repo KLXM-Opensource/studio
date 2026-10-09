@@ -12,8 +12,8 @@ $text = trim((string) setting('footer_text'));
     <div class="uk-child-width-1-3@m uk-grid-large" uk-grid>
       <div>
         <p class="uk-text-large uk-text-bold uk-margin-small"><?= e(frameworks_name()) ?></p>
-        <?php if (filled(setting('tagline'))): ?><p class="uk-margin-small"><?= e((string) setting('tagline')) ?></p><?php endif; ?>
-        <?php if ($text !== ''): ?><p class="uk-text-small"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+        <?php if (filled(setting('tagline'))): ?><p class="uk-margin-small"><?= emphasis((string) setting('tagline')) ?></p><?php endif; ?>
+        <?php if ($text !== ''): ?><p class="uk-text-small"><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
       </div>
       <?php if ($address || filled($phone) || $email !== ''): ?>
       <div>

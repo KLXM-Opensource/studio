@@ -23,9 +23,9 @@ $tag = essenz_htag($d);
       <?= $pic ?>
       <?php if ($v === 'service' && !empty($it['icon'])): ?><span class="knob pcard__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
       <div class="pcard__body">
-        <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="pcard__eyebrow label"<?= $b->edit("items.$i.eyebrow") ?>><?= e($it['eyebrow']) ?></p><?php endif; ?>
-        <<?= $tag ?> class="pcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= essenz_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="pcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="pcard__eyebrow label"<?= $b->edit("items.$i.eyebrow") ?>><?= essenz_title((string) $it['eyebrow']) ?></p><?php endif; ?>
+        <<?= $tag ?> class="pcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= essenz_link_attrs($link) ?>><?= essenz_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= essenz_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="pcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(essenz_title((string) $it['text']), false) ?></p><?php endif; ?>
       </div>
       <?php if ($meta !== '' || $link !== ''): ?>
       <div class="pcard__foot">

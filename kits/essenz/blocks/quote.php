@@ -8,22 +8,22 @@ $who = function (array $it, int $i) use ($b): string {
     $role = trim((string) ($it['role'] ?? ''));
     if ($name === '' && $role === '' && empty($it['image'])) return '';
     $img = !empty($it['image']) ? img((int) $it['image'], '64px', ['ratio' => '1:1', 'alt' => '', 'class' => 'q__img']) : '';
-    return '<figcaption class="q__who">' . $img . '<span><span class="q__name"' . $b->edit("items.$i.name") . '>' . e($name) . '</span>'
-        . ($role !== '' ? '<span class="q__role"' . $b->edit("items.$i.role") . '>' . e($role) . '</span>' : '') . '</span></figcaption>';
+    return '<figcaption class="q__who">' . $img . '<span><span class="q__name"' . $b->edit("items.$i.name") . '>' . essenz_title($name) . '</span>'
+        . ($role !== '' ? '<span class="q__role"' . $b->edit("items.$i.role") . '>' . essenz_title($role) . '</span>' : '') . '</span></figcaption>';
 };
 ?>
 <div class="wrap">
   <?= essenz_head($b) ?>
   <?php if ($v === 'single' && $items): $it = $items[0]; ?>
   <figure class="q q--single">
-    <blockquote class="q__text"<?= $b->edit('items.0.text') ?>><p><?= nl2br(e($it['text']), false) ?></p></blockquote>
+    <blockquote class="q__text"<?= $b->edit('items.0.text') ?>><p><?= nl2br(essenz_title((string) $it['text']), false) ?></p></blockquote>
     <?= $who($it, 0) ?>
   </figure>
   <?php elseif ($items): ?>
   <ul class="grid min-m qs" role="list">
     <?php foreach ($items as $i => $it): ?>
     <li class="card" data-reveal><figure class="q q--card">
-      <blockquote class="q__text"<?= $b->edit("items.$i.text") ?>><p><?= nl2br(e($it['text']), false) ?></p></blockquote>
+      <blockquote class="q__text"<?= $b->edit("items.$i.text") ?>><p><?= nl2br(essenz_title((string) $it['text']), false) ?></p></blockquote>
       <?= $who($it, $i) ?>
     </figure></li>
     <?php endforeach; ?>

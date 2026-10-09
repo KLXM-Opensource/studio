@@ -20,8 +20,8 @@ $tag = glas_htag($d);
     <li class="feat<?= $v === 'cards' ? ' card glass' : '' ?>" data-reveal>
       <?php if ($img !== ''): ?><?= $img ?><?php elseif (!empty($it['icon'])): ?><span class="orb feat__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
       <div class="feat__body">
-        <<?= $tag ?> class="feat__title"><?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="cover-link" <?= glas_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <<?= $tag ?> class="feat__title"><?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="cover-link" <?= glas_link_attrs($link) ?>><?= glas_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= glas_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="feat__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(glas_title((string) $it['text']), false) ?></p><?php endif; ?>
         <?php if ($link !== '' && $label !== ''): ?><a class="more feat__more" <?= glas_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= icon('arrow-right', ['class' => 'more__ico']) ?></a><?php endif; ?>
       </div>
     </li>

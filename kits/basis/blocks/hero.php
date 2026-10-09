@@ -11,9 +11,9 @@ use Core\Blocks\Hero;
 $v = $b->variant() ?: 'split';
 $textHtml = function (bool $buttons = true) use ($b, $d): string {
     $h = '<div class="hero__text">';
-    if ($d['eyebrow'] !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . e($d['eyebrow']) . '</p>';
-    $h .= '<h1 id="' . e($b->titleId()) . '" class="h1"' . $b->edit('title') . '>' . e($d['title']) . '</h1>';
-    if ($d['text'] !== '' || is_editing()) $h .= '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($d['text']), false) . '</p>';
+    if ($d['eyebrow'] !== '') $h .= '<p class="eyebrow"' . $b->edit('eyebrow') . '>' . emphasis((string) $d['eyebrow']) . '</p>';
+    $h .= '<h1 id="' . e($b->titleId()) . '" class="h1"' . $b->edit('title') . '>' . emphasis((string) $d['title']) . '</h1>';
+    if ($d['text'] !== '' || is_editing()) $h .= '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(emphasis((string) $d['text']), false) . '</p>';
     return $h . ($buttons ? basis_buttons($b, 'hero__actions') : '') . '</div>';
 };
 
@@ -40,13 +40,13 @@ if ($v === 'search'):
 <div class="wrap hero hx-form">
   <div class="hx-form__text">
     <?= $textHtml(false) ?>
-    <?php if ($points): ?><ul class="hx-checks" role="list"><?php foreach ($points as $p): ?><li><?= basis_icon('check', 'hx-checks__ico') ?><span><?= e($p) ?></span></li><?php endforeach; ?></ul><?php endif; ?>
+    <?php if ($points): ?><ul class="hx-checks" role="list"><?php foreach ($points as $p): ?><li><?= basis_icon('check', 'hx-checks__ico') ?><span><?= emphasis((string) $p) ?></span></li><?php endforeach; ?></ul><?php endif; ?>
     <?= basis_buttons($b, 'hero__actions') ?>
   </div>
   <div class="hx-form__card dff-wrap">
-    <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h2 class="hx-form__title"<?= $b->edit('form_title') ?>><?= e($d['form_title']) ?></h2><?php endif; ?>
+    <?php if (trim((string) ($d['form_title'] ?? '')) !== ''): ?><h2 class="hx-form__title"<?= $b->edit('form_title') ?>><?= emphasis((string) $d['form_title']) ?></h2><?php endif; ?>
     <?= Hero::form($b, $d) ?>
-    <?php if (trim((string) ($d['form_note'] ?? '')) !== ''): ?><p class="hx-form__note"<?= $b->edit('form_note') ?>><?= e($d['form_note']) ?></p><?php endif; ?>
+    <?php if (trim((string) ($d['form_note'] ?? '')) !== ''): ?><p class="hx-form__note"<?= $b->edit('form_note') ?>><?= emphasis((string) $d['form_note']) ?></p><?php endif; ?>
   </div>
 </div>
 <?php elseif ($v === 'map'):
@@ -67,7 +67,7 @@ if ($v === 'search'):
         <?php if ($email !== ''): ?><li><a href="mailto:<?= e($email) ?>"><?= basis_icon('mail') ?><span><?= e($email) ?></span></a></li><?php endif; ?>
       </ul>
       <?php if ($hours): ?><details class="hx-map__hours"><summary><?= e(lt('Öffnungszeiten')) ?></summary><?= app()->theme->partial('hours', ['hours' => $hours]) ?></details><?php endif; ?>
-      <?php if (trim((string) ($d['map_note'] ?? '')) !== ''): ?><p class="hx-map__note"<?= $b->edit('map_note') ?>><?= e($d['map_note']) ?></p><?php endif; ?>
+      <?php if (trim((string) ($d['map_note'] ?? '')) !== ''): ?><p class="hx-map__note"<?= $b->edit('map_note') ?>><?= emphasis((string) $d['map_note']) ?></p><?php endif; ?>
     </div>
   </div>
 </div>
@@ -78,9 +78,9 @@ if ($v === 'search'):
 ?>
 <div class="wrap hero<?= $media !== '' ? ' hero--media' : '' ?>">
   <div class="hero__text">
-    <?php if ($d['eyebrow'] !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-    <h1 id="<?= e($b->titleId()) ?>" class="h1"<?= $b->edit('title') ?>><?= e($d['title']) ?></h1>
-    <?php if ($d['text'] !== '' || is_editing()): ?><p class="hero__lead"<?= $b->edit('text') ?>><?= nl2br(e($d['text']), false) ?></p><?php endif; ?>
+    <?php if ($d['eyebrow'] !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
+    <h1 id="<?= e($b->titleId()) ?>" class="h1"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h1>
+    <?php if ($d['text'] !== '' || is_editing()): ?><p class="hero__lead"<?= $b->edit('text') ?>><?= nl2br(emphasis((string) $d['text']), false) ?></p><?php endif; ?>
     <?= basis_buttons($b, 'hero__actions') ?>
   </div>
   <?= $media ?>

@@ -8,7 +8,7 @@ $v = $b->variant() === 'text' ? 'text' : 'wide';
 $embed = app()->theme->partial('video-embed', ['url' => $d['video_url'], 'file' => $d['video_file'], 'poster' => $d['poster'],
     'ratio' => $d['ratio'] ?: '16-9', 'label' => trim((string) $d['title'])]);
 $fig = '<figure class="video">' . $embed
-    . ((trim((string) $d['caption']) !== '' || is_editing()) ? '<figcaption class="video__cap"' . $b->edit('caption') . '>' . e($d['caption']) . '</figcaption>' : '')
+    . ((trim((string) $d['caption']) !== '' || is_editing()) ? '<figcaption class="video__cap"' . $b->edit('caption') . '>' . essenz_title((string) $d['caption']) . '</figcaption>' : '')
     . '</figure>';
 ?>
 <?php if ($v === 'text'): ?>

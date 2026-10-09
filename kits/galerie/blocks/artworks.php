@@ -52,7 +52,7 @@ $id = $b->domId();
   <?php if (!$works): ?>
     <?php if (is_editing()): ?><p class="empty-hint">Keine passenden Werke (Quelle: <?= e($src) ?>). Auf Detailseiten erscheinen hier automatisch die passenden Werke.</p><?php endif; ?>
   <?php elseif ($v === 'room'): ?>
-  <ol class="vr" role="list" aria-label="<?= e(trim((string) ($d['title'] ?? '')) ?: lt('Viewing Room')) ?>">
+  <ol class="vr" role="list" aria-label="<?= e(trim(strip_emphasis((string) ($d['title'] ?? ''))) ?: lt('Viewing Room')) ?>">
     <?php foreach ($works as $i => $w):
         $href = $link ? Entries::href($t, $w) : null;
         $enq = $enquiry && ($w['verfuegbarkeit'] ?? '') !== 'verkauft' ? galerie_enquiry_href($w) : null;

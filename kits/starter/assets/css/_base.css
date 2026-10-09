@@ -41,6 +41,9 @@ main:focus{outline:none}
 .sec-head>:last-child{margin-bottom:0}
 .eyebrow{margin:0 0 .75rem;color:var(--s-link);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .lead{color:var(--s-mut);font-size:1.15em}
+/* *Betonung* in Überschriften und kurzen Texten (emphasis() → em.hl): Linkfarbe; auf Akzent/dunkel unterstrichen */
+.hl{font-style:normal;color:var(--s-link)}
+:is(.bg-accent,.bg-dark) .hl{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.14em}
 
 /* Buttons – Rollen --s-btn-* stellen sich je Abschnitt um; Rahmen bleibt im Kontrastmodus sichtbar */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.75rem;padding:.55rem 1.25rem;border:2px solid transparent;border-radius:var(--s-btn-r);

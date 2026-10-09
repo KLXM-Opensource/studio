@@ -98,6 +98,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .h2{font-size:max(var(--g-t3),min(var(--g-t4),7.5cqi));line-height:1.08}
 .h3{font-size:var(--g-t2);line-height:1.2;letter-spacing:calc(var(--g-track) * .006em)}
 .hl{font-style:normal;color:var(--g-link)}
+/* Auf dunklen/akzentfarbigen Flächen ist die Linkfarbe = Textfarbe → Betonung zusätzlich unterstreichen */
+:is(.bg-accent,.bg-dark,.sec--ov-dark) .hl{text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.14em}
 .lead{color:var(--g-muted);font-size:var(--g-t1);line-height:1.5;max-width:38em;text-wrap:pretty}
 .label,.eyebrow{font:600 var(--g-label)/1.3 var(--g-font-label);letter-spacing:.04em}
 .label{color:var(--g-muted)}

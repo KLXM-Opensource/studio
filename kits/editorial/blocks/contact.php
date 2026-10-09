@@ -27,5 +27,5 @@ $c = $b->central();
     </dl>
     <?php if ($map !== ''): ?><div class="contact__map"><?= $map ?></div><?php endif; ?>
   </div>
-  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= e($d['note']) ?></p><?php endif; ?>
+  <?php if ($d['note'] !== '' || is_editing()): ?><p class="contact__foot"<?= $b->edit('note') ?>><?= emphasis((string) $d['note']) ?></p><?php endif; ?>
 </div>

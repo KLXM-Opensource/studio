@@ -34,23 +34,23 @@ $pageList = function () use ($pages): string {
   <div class="wrap">
   <?php if ($variant === 'statement'): ?>
     <div class="ftr__statement">
-      <p class="ftr__big"><?= e($statement) ?></p>
+      <p class="ftr__big"><?= fluid_title($statement) ?></p>
       <?php if ($cta): ?><a class="btn btn--primary ftr__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?><?= icon('arrow-right') ?></a><?php endif; ?>
     </div>
   <?php endif; ?>
   <?php if ($variant === 'simple' || $variant === 'centered'): ?>
     <div class="ftr__row">
       <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
-      <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= e($tagline) ?></p><?php endif; ?>
+      <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= fluid_title($tagline) ?></p><?php endif; ?>
       <?php if ($pages): ?><nav aria-label="<?= e(lt('Seiten')) ?>" class="ftr__inline"><ul class="cluster" role="list"><?= $pageList() ?></ul></nav><?php endif; ?>
     </div>
-    <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+    <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(fluid_title($text), false) ?></p><?php endif; ?>
   <?php else: ?>
     <div class="ftr__grid">
       <div class="ftr__about">
         <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
-        <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= e($tagline) ?></p><?php endif; ?>
-        <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+        <?php if ($tagline !== ''): ?><p class="ftr__tagline"><?= fluid_title($tagline) ?></p><?php endif; ?>
+        <?php if ($text !== ''): ?><p class="ftr__text"><?= nl2br(fluid_title($text), false) ?></p><?php endif; ?>
       </div>
       <?php if ($address || filled($phone) || $email !== ''): ?>
       <div class="ftr__col">

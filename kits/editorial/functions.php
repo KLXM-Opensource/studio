@@ -321,9 +321,9 @@ function editorial_head(\Core\Block $b, string $class = '', string $tag = 'h2'):
     $intro = trim((string) ($d['intro'] ?? ''));
     if ($eyebrow === '' && $title === '' && $intro === '' && !is_editing()) return '';
     $h = '<header class="sec-head' . ($class !== '' ? ' ' . e($class) : '') . '">';
-    if ($eyebrow !== '') $h .= '<p class="kicker"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>';
-    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . e($title) . '</' . $tag . '>';
-    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+    if ($eyebrow !== '') $h .= '<p class="kicker"' . $b->edit('eyebrow') . '>' . emphasis($eyebrow) . '</p>';
+    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . emphasis($title) . '</' . $tag . '>';
+    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(emphasis($intro), false) . '</p>';
     return $h . '</header>';
 }
 
@@ -350,7 +350,7 @@ function editorial_credit(?int $id): string
 function editorial_caption(string $caption, string $credit = '', string $edit = ''): string
 {
     if ($caption === '' && $credit === '' && $edit === '') return '';
-    return '<figcaption class="cap">' . ($caption !== '' || $edit !== '' ? '<span class="cap__text"' . $edit . '>' . e($caption) . '</span>' : '')
+    return '<figcaption class="cap">' . ($caption !== '' || $edit !== '' ? '<span class="cap__text"' . $edit . '>' . emphasis($caption) . '</span>' : '')
         . ($credit !== '' ? ' <span class="cap__credit">' . e($credit) . '</span>' : '') . '</figcaption>';
 }
 

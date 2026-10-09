@@ -33,8 +33,8 @@ $level = function (array $it): ?float {
       <span class="stat__value"<?= $b->edit("items.$i.value") ?>><?= e((string) $it['value']) ?></span>
       <?php if ($l !== null): ?><svg class="stat__bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="stat__track" width="100" height="4" rx="2"/><rect class="stat__fill" width="<?= e((string) round($l, 1)) ?>" height="4" rx="2"/></svg><?php endif; ?>
       <?php endif; ?>
-      <p class="stat__label"<?= $b->edit("items.$i.label") ?>><?= e((string) ($it['label'] ?? '')) ?></p>
-      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="stat__text"<?= $b->edit("items.$i.text") ?>><?= e($it['text']) ?></p><?php endif; ?>
+      <p class="stat__label"<?= $b->edit("items.$i.label") ?>><?= nature_title((string) ($it['label'] ?? '')) ?></p>
+      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="stat__text"<?= $b->edit("items.$i.text") ?>><?= nature_title((string) $it['text']) ?></p><?php endif; ?>
     </li>
     <?php endforeach; ?>
   </ul>

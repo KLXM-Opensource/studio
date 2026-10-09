@@ -12,8 +12,8 @@ $js = !is_editing();
   <ul class="uk-accordion uk-accordion-default fw-accordion"<?= $js ? ' uk-accordion="multiple: true"' : '' ?>>
     <?php foreach ($d['items'] as $i => $it): ?>
     <li<?= $js ? '' : ' class="uk-open"' ?>>
-      <?php if ($js): ?><a class="uk-accordion-title" href><span><?= e($it['q']) ?></span><?= icon('caret-down', ['class' => 'fw-acc-icon']) ?></a>
-      <?php else: ?><h3 class="uk-accordion-title uk-margin-remove"><span<?= $b->edit("items.$i.q") ?>><?= e($it['q']) ?></span></h3><?php endif; ?>
+      <?php if ($js): ?><a class="uk-accordion-title" href><span><?= emphasis((string) $it['q']) ?></span><?= icon('caret-down', ['class' => 'fw-acc-icon']) ?></a>
+      <?php else: ?><h3 class="uk-accordion-title uk-margin-remove"><span<?= $b->edit("items.$i.q") ?>><?= emphasis((string) $it['q']) ?></span></h3><?php endif; ?>
       <div class="uk-accordion-content fw-prose"<?= $b->edit("items.$i.a", 'rich') ?>><?= rich($it['a']) ?></div>
     </li>
     <?php endforeach; ?>

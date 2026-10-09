@@ -25,8 +25,8 @@ $eager = ['eager' => true];
 $eyebrow = trim((string) ($d['eyebrow'] ?? ''));
 
 $title = '<h1 id="' . e($b->titleId()) . '" class="h1 hero__title"' . $b->edit('title') . '>' . glas_title((string) $d['title']) . '</h1>';
-$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>' : '';
-$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>' : '';
+$eb = $eyebrow !== '' ? '<p class="eyebrow hero__eyebrow"' . $b->edit('eyebrow') . '>' . glas_title($eyebrow) . '</p>' : '';
+$lead = ($text !== '' || is_editing()) ? '<p class="hero__lead"' . $b->edit('text') . '>' . nl2br(glas_title($text), false) . '</p>' : '';
 $aurora = '<div class="aurora" aria-hidden="true" data-aurora><span class="aurora__b aurora__b--1"></span><span class="aurora__b aurora__b--2"></span>'
     . '<span class="aurora__b aurora__b--3"></span><span class="aurora__ribbon"></span></div>';
 
@@ -36,7 +36,7 @@ $tiles = function (string $class) use ($points): string {
     $h = '<ul class="' . $class . '" role="list">';
     foreach ($points as $i => $p) {
         [$k, $val] = str_contains($p, ':') ? array_map('trim', explode(':', $p, 2)) : [$p, ''];
-        $h .= '<li class="tile glass">' . ($val !== '' ? '<span class="tile__v">' . e($val) . '</span>' : '') . '<span class="tile__k">' . e($k) . '</span></li>';
+        $h .= '<li class="tile glass">' . ($val !== '' ? '<span class="tile__v">' . e($val) . '</span>' : '') . '<span class="tile__k">' . glas_title($k) . '</span></li>';
     }
     return $h . '</ul>';
 };
@@ -147,8 +147,8 @@ if ($v === 'aurora'):
     ?>
     <li class="gstack__card glass glass--strong<?= $link !== '' ? ' gstack__card--link' : '' ?>">
       <?php if (!empty($c['icon'])): ?><span class="gstack__ico"><?= icon((string) $c['icon']) ?></span><?php endif; ?>
-      <p class="gstack__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= glas_link_attrs($link) ?>><?= e($ctitle) ?><?= glas_ext_note(glas_link($link)) ?></a><?php else: ?><span<?= $b->edit("cards.$i.title") ?>><?= e($ctitle) ?></span><?php endif; ?></p>
-      <?php if (trim((string) ($c['text'] ?? '')) !== ''): ?><p class="gstack__text"<?= $b->edit("cards.$i.text") ?>><?= e($c['text']) ?></p><?php endif; ?>
+      <p class="gstack__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= glas_link_attrs($link) ?>><?= glas_title($ctitle) ?><?= glas_ext_note(glas_link($link)) ?></a><?php else: ?><span<?= $b->edit("cards.$i.title") ?>><?= glas_title($ctitle) ?></span><?php endif; ?></p>
+      <?php if (trim((string) ($c['text'] ?? '')) !== ''): ?><p class="gstack__text"<?= $b->edit("cards.$i.text") ?>><?= glas_title((string) $c['text']) ?></p><?php endif; ?>
       <?php if ($link !== ''): ?><span class="gstack__go" aria-hidden="true"><?= $label !== '' ? '<span>' . e($label) . '</span>' : '' ?><?= icon('arrow-right') ?></span><?php endif; ?>
     </li>
     <?php endforeach; ?>

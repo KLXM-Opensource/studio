@@ -75,6 +75,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .h3{font-size:var(--f-t2);line-height:1.2}
 .hl{font-style:normal;color:var(--f-link)}
 .head-serif .hl{font-style:italic;color:inherit}
+/* Auf dunklen/akzentfarbigen Flächen ist die Linkfarbe = Textfarbe → Betonung zusätzlich unterstreichen (nur Standard „Akzentfarbe“) */
+:is(html.em-accent,html:not([class*="em-"])) :is(.bg-accent,.bg-secondary,.bg-dark,.on-media,.sec--ov-dark) .hl{text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.14em}
 .eyebrow{display:inline-flex;align-items:center;gap:.6em;width:fit-content;color:var(--f-link);font:600 var(--f-t-1)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
 /* Schreibweise der Dachzeilen (Design „Schreibweise der Dachzeilen“, ebc-*) – gilt für alle Stile; ebc-auto lässt den Stil entscheiden */
 html.ebc-upper .eyebrow{text-transform:uppercase;font-variant-caps:normal;letter-spacing:.08em}

@@ -54,6 +54,6 @@ $lv = trim((string) ($d['title'] ?? '')) !== '' ? 'h3' : 'h2';
       <?php endforeach; ?>
     </div>
     <?php elseif (is_editing()): ?><p class="empty-hint">Adresse und Öffnungszeiten unter Website → Stammdaten eintragen; weitere Orte unter Website → Galerie.</p><?php endif; ?>
-    <?php if ($note !== '' || is_editing()): ?><p class="vis__extra"<?= $b->edit('note') ?>><?= e($note) ?></p><?php endif; ?>
+    <?php if ($note !== '' || is_editing()): ?><p class="vis__extra"<?= $b->edit('note') ?>><?= galerie_title($note) ?></p><?php endif; ?>
   </div>
 </div>

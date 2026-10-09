@@ -7,9 +7,9 @@ $pic = $v === 'split' ? foto_image($d['image'] ?? null, '(min-width: 1080px) 560
   <div class="cta cta--<?= e($v) ?><?= $pic !== '' ? ' cta--media' : '' ?>">
     <div class="cta__main">
     <div class="cta__text">
-      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
+      <?php if (trim((string) ($d['eyebrow'] ?? '')) !== ''): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= foto_title((string) $d['eyebrow']) ?></p><?php endif; ?>
       <h2 id="<?= e($b->titleId()) ?>" class="<?= $v === 'big' ? 'cta__big' : 'h2' ?> cta__title"<?= $b->edit('title') ?>><?= foto_title((string) $d['title']) ?></h2>
-      <?php if ($d['text'] !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(e($d['text']), false) ?></p><?php endif; ?>
+      <?php if ($d['text'] !== '' || is_editing()): ?><p class="cta__lead"<?= $b->edit('text') ?>><?= nl2br(foto_title((string) $d['text']), false) ?></p><?php endif; ?>
     </div>
     <?= foto_buttons($b, 'cta__actions') ?>
     </div>

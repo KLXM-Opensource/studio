@@ -15,12 +15,12 @@ $style = in_array($d['style'] ?? '', ['grid', 'cards', 'plain'], true) ? $d['sty
       <?php if ($pic !== ''): ?><?= $pic ?>
       <?php elseif (!empty($it['icon'])): ?><span class="feature__icon"><?= basis_icon((string) $it['icon']) ?></span><?php endif; ?>
       <h3 class="feature__title">
-        <?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="feature__cover" <?= basis_link_attrs($link) ?>><?= e($it['title']) ?></a>
-        <?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?>
+        <?php if ($link !== '' && $label === '' && !is_editing()): ?><a class="feature__cover" <?= basis_link_attrs($link) ?>><?= emphasis((string) $it['title']) ?></a>
+        <?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></span><?php endif; ?>
       </h3>
-      <?php if (($it['text'] ?? '') !== ''): ?><p class="feature__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+      <?php if (($it['text'] ?? '') !== ''): ?><p class="feature__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(emphasis((string) $it['text']), false) ?></p><?php endif; ?>
       <?php if ($link !== '' && $label !== ''): ?>
-      <a class="more feature__more" <?= basis_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= basis_icon('arrow', 'more__icon') ?><span class="sr-only">: <?= e($it['title']) ?></span></a>
+      <a class="more feature__more" <?= basis_link_attrs($link) ?>><span<?= $b->edit("items.$i.link_label") ?>><?= e($label) ?></span><?= basis_icon('arrow', 'more__icon') ?><span class="sr-only">: <?= e(strip_emphasis($it['title'])) ?></span></a>
       <?php endif; ?>
     </li>
     <?php endforeach; ?>

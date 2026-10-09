@@ -14,8 +14,8 @@ $h = filled($d['title']) ? 'h3' : 'h2';   // √úberschriften-Hierarchie ohne Spr√
     <li class="card"><?= $b->targetEdit((string) ($it['link'] ?? ''), (string) ($it['title'] ?? '')) ?>
       <?php if (!empty($it['image'])): ?><div class="media r-3-2"><?= img((int) $it['image'], '(min-width: 1100px) 360px, 100vw', ['ratio' => '3:2', 'alt' => '']) ?></div>
       <?php elseif (filled($it['icon'] ?? '')): ?><span class="card__icon"><?= icon($it['icon']) ?></span><?php endif; ?>
-      <<?= $h ?> class="card__title"><?php if ($href !== ''): ?><a href="<?= e($href) ?>"<?= ext_attrs($href) ?><?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?></<?= $h ?>>
-      <?php if (filled($it['text'] ?? '')): ?><p<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+      <<?= $h ?> class="card__title"><?php if ($href !== ''): ?><a href="<?= e($href) ?>"<?= ext_attrs($href) ?><?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></span><?php endif; ?></<?= $h ?>>
+      <?php if (filled($it['text'] ?? '')): ?><p<?= $b->edit("items.$i.text") ?>><?= nl2br(emphasis((string) $it['text']), false) ?></p><?php endif; ?>
     </li>
     <?php endforeach; ?>
   </ul>

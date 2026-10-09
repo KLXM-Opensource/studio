@@ -22,9 +22,9 @@ $tag = modern_htag($d);
       <div class="tcard__in">
         <?= $pic ?>
         <div class="tcard__body">
-          <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="tcard__eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= e($it['eyebrow']) ?></p><?php endif; ?>
-          <<?= $tag ?> class="tcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-          <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+          <?php if (trim((string) ($it['eyebrow'] ?? '')) !== ''): ?><p class="tcard__eyebrow"<?= $b->edit("items.$i.eyebrow") ?>><?= modern_title((string) $it['eyebrow']) ?></p><?php endif; ?>
+          <<?= $tag ?> class="tcard__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= modern_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= modern_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+          <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tcard__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(modern_title((string) $it['text']), false) ?></p><?php endif; ?>
           <?php if ($link !== '' && $label !== ''): ?><span class="more tcard__more" aria-hidden="true"><?= e($label) ?><?= icon('arrow-right', ['class' => 'more__ico']) ?></span><?php endif; ?>
         </div>
       </div>

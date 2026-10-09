@@ -101,6 +101,9 @@ main:focus{outline:none}
   --e-surface:color-mix(in srgb,var(--e-fg) 8%,transparent);--e-surface-2:color-mix(in srgb,var(--e-fg) 14%,transparent);--e-box:var(--e-surface);
   --e-link:var(--e-fg);--e-focus:var(--e-fg);--e-btn-bg:var(--e-fg);--e-btn-bg-hover:color-mix(in srgb,var(--e-fg) 86%,var(--e-sec-bg));--e-a-soft:color-mix(in srgb,var(--e-fg) 12%,transparent)
 }
+/* *Betonung* in Überschriften und kurzen Texten (emphasis() → em.hl): Akzent; auf dunklen/Akzent-Flächen unterstrichen */
+.hl{font-style:normal;color:var(--e-link)}
+:is(.bg-accent,.bg-dark,.sec--ov-dark,.aufm--cover) .hl{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.14em}
 .sec--ov-dark{--e-fg:var(--e-on-dark);--e-muted:color-mix(in srgb,var(--e-fg) 90%,transparent);--e-kick:var(--e-fg);--e-btn-ink:var(--e-night)}
 .sec:first-child:not(.sec--has-bg,.sec--screen){padding-top:clamp(28px,4vw,56px)}
 .bg-white:not(.sec--has-bg)+.bg-white:not(.sec--divider,.sec--has-bg),.bg-muted:not(.sec--has-bg)+.bg-muted:not(.sec--divider,.sec--has-bg){padding-top:0}

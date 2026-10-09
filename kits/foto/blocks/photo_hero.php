@@ -38,7 +38,7 @@ $cls = 'stage stage--' . $height . ' stage--' . $pos . ' stage--ov-' . $overlay 
 <div class="<?= e($cls) ?>"<?= $multi || $hasVideo ? ' data-stage' . ($auto ? ' data-autoplay="' . $interval . '"' : '') : '' ?>>
   <div class="stage__text<?= $show ? '' : ' sr-only' ?>">
     <h1 id="<?= e($b->titleId()) ?>" class="stage__title"<?= $b->edit('title') ?>><?= $title !== '' ? foto_title($title) : e($pageTitle) ?></h1>
-    <?php if ($show && ($text !== '' || is_editing())): ?><p class="stage__lead"<?= $b->edit('text') ?>><?= e($text) ?></p><?php endif; ?>
+    <?php if ($show && ($text !== '' || is_editing())): ?><p class="stage__lead"<?= $b->edit('text') ?>><?= foto_title($text) ?></p><?php endif; ?>
   </div>
   <div class="stage__media">
     <?php foreach ($slides as $k => $s): ?>
@@ -51,7 +51,7 @@ $cls = 'stage stage--' . $height . ' stage--' . $pos . ' stage--ov-' . $overlay 
       <?php else: ?>
       <?= img((int) $s['m']['id'], '100vw', ['eager' => $k === 0] + ($s['path'] !== '' ? ['path' => $s['path'] . '.image'] : ['path' => 'image'])) ?>
       <?php endif; ?>
-      <?php if ($s['caption'] !== ''): ?><figcaption class="stage__cap"<?= $b->edit($s['path'] . '.caption') ?>><?= e($s['caption']) ?></figcaption><?php endif; ?>
+      <?php if ($s['caption'] !== ''): ?><figcaption class="stage__cap"<?= $b->edit($s['path'] . '.caption') ?>><?= foto_title($s['caption']) ?></figcaption><?php endif; ?>
     </figure>
     <?php endforeach; ?>
     <?php if (!$slides && is_editing()): ?><div class="stage__slide is-active frame--empty"><span><?= e($v === 'slideshow' ? 'Bilder der Folge in der Seitenleiste wählen' : 'Bild in der Seitenleiste wählen') ?></span></div><?php endif; ?>

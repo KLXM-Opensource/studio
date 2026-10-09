@@ -15,8 +15,8 @@ $h = filled($d['title']) ? 'h3' : 'h2';
         <?php if (!empty($it['image'])): ?><div class="uk-card-media-top"><?= frameworks_image($it['image'], '(min-width: 960px) 360px, (min-width: 640px) 50vw, 100vw', '3:2', 'fw-media--flat', ['alt' => '']) ?></div><?php endif; ?>
         <div class="uk-card-body">
           <?php if (empty($it['image']) && filled($it['icon'] ?? '')): ?><span class="fw-icon"><?= icon($it['icon']) ?></span><?php endif; ?>
-          <<?= $h ?> class="uk-card-title"><?php if ($href !== ''): ?><a class="uk-link-heading fw-cover" href="<?= e($href) ?>"<?= ext_attrs($href) ?><?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span><?php endif; ?></<?= $h ?>>
-          <?php if (filled($it['text'] ?? '') || is_editing()): ?><p<?= $b->edit("items.$i.text") ?>><?= nl2br(e((string) ($it['text'] ?? '')), false) ?></p><?php endif; ?>
+          <<?= $h ?> class="uk-card-title"><?php if ($href !== ''): ?><a class="uk-link-heading fw-cover" href="<?= e($href) ?>"<?= ext_attrs($href) ?><?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= emphasis((string) $it['title']) ?></span><?php endif; ?></<?= $h ?>>
+          <?php if (filled($it['text'] ?? '') || is_editing()): ?><p<?= $b->edit("items.$i.text") ?>><?= nl2br(emphasis((string) ($it['text'] ?? '')), false) ?></p><?php endif; ?>
         </div>
       </div>
     </li>

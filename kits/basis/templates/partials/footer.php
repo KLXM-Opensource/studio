@@ -22,7 +22,7 @@ $simple = design('footer') === 'simple';
   <div class="wrap site-footer__row">
     <div class="site-footer__about">
       <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
-      <?php if ($tagline !== ''): ?><p class="site-footer__tagline"><?= e($tagline) ?></p><?php endif; ?>
+      <?php if ($tagline !== ''): ?><p class="site-footer__tagline"><?= emphasis($tagline) ?></p><?php endif; ?>
     </div>
     <?php if ($pages): ?>
     <nav aria-label="<?= e(lt('Seiten')) ?>">
@@ -32,13 +32,13 @@ $simple = design('footer') === 'simple';
     </nav>
     <?php endif; ?>
   </div>
-  <?php if ($text !== ''): ?><div class="wrap"><p class="site-footer__text"><?= nl2br(e($text), false) ?></p></div><?php endif; ?>
+  <?php if ($text !== ''): ?><div class="wrap"><p class="site-footer__text"><?= nl2br(emphasis($text), false) ?></p></div><?php endif; ?>
   <?php else: ?>
   <div class="wrap site-footer__grid">
     <div class="site-footer__about">
       <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--footer']) ?>
-      <?php if ($tagline !== ''): ?><p class="site-footer__tagline"><?= e($tagline) ?></p><?php endif; ?>
-      <?php if ($text !== ''): ?><p class="site-footer__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+      <?php if ($tagline !== ''): ?><p class="site-footer__tagline"><?= emphasis($tagline) ?></p><?php endif; ?>
+      <?php if ($text !== ''): ?><p class="site-footer__text"><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
     </div>
     <?php if ($address || filled($phone) || $email !== ''): ?>
     <div class="site-footer__col">

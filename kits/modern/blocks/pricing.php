@@ -21,7 +21,7 @@ $button = function (array $it, int $i, string $class = '') use ($b): string {
     $link = trim((string) ($it['button_link'] ?? ''));
     if ($label === '' || $link === '') return '';
     return '<a class="btn ' . (!empty($it['highlight']) ? 'btn--primary' : 'btn--secondary') . ($class !== '' ? ' ' . $class : '') . '" ' . modern_link_attrs($link) . '><span' . $b->edit("items.$i.button_label") . '>'
-        . e($label) . '</span><span class="sr-only">: ' . e($it['name']) . '</span></a>';
+        . e($label) . '</span><span class="sr-only">: ' . e(strip_emphasis($it['name'])) . '</span></a>';
 };
 ?>
 <div class="wrap">
@@ -33,8 +33,8 @@ $button = function (array $it, int $i, string $class = '') use ($b): string {
         <tr><td class="cmp__corner"></td>
           <?php foreach ($items as $i => $it): ?>
           <th scope="col" class="cmp__plan<?= !empty($it['highlight']) ? ' is-hl' : '' ?>">
-            <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><span class="badge"<?= $b->edit("items.$i.badge") ?>><?= e($it['badge']) ?></span><?php endif; ?>
-            <span class="cmp__name"<?= $b->edit("items.$i.name") ?>><?= e($it['name']) ?></span>
+            <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><span class="badge"<?= $b->edit("items.$i.badge") ?>><?= modern_title((string) $it['badge']) ?></span><?php endif; ?>
+            <span class="cmp__name"<?= $b->edit("items.$i.name") ?>><?= modern_title((string) $it['name']) ?></span>
             <?php if (trim((string) ($it['price'] ?? '')) !== ''): ?><span class="cmp__price"><span<?= $b->edit("items.$i.price") ?>><?= e($it['price']) ?></span> <small<?= $b->edit("items.$i.period") ?>><?= e((string) ($it['period'] ?? '')) ?></small></span><?php endif; ?>
           </th>
           <?php endforeach; ?>
@@ -42,7 +42,7 @@ $button = function (array $it, int $i, string $class = '') use ($b): string {
       </thead>
       <tbody>
         <?php foreach ($rows as $r): $vals = preg_split('~\R~', (string) ($r['values'] ?? '')); ?>
-        <tr><th scope="row"><?= e($r['label']) ?></th>
+        <tr><th scope="row"><?= modern_title((string) $r['label']) ?></th>
           <?php foreach ($items as $k => $it): ?><td class="<?= !empty($it['highlight']) ? 'is-hl' : '' ?>"><?= $cell((string) ($vals[$k] ?? '')) ?></td><?php endforeach; ?>
         </tr>
         <?php endforeach; ?>
@@ -55,19 +55,19 @@ $button = function (array $it, int $i, string $class = '') use ($b): string {
     <?php foreach ($items as $i => $it): $hl = !empty($it['highlight']); $list = modern_lines($it['features'] ?? ''); ?>
     <li class="plan card<?= $hl ? ' plan--hl' : '' ?>" data-reveal>
       <div class="plan__top">
-        <<?= $tag ?> class="plan__name"<?= $b->edit("items.$i.name") ?>><?= e($it['name']) ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><p class="badge"<?= $b->edit("items.$i.badge") ?>><?= e($it['badge']) ?></p><?php endif; ?>
+        <<?= $tag ?> class="plan__name"<?= $b->edit("items.$i.name") ?>><?= modern_title((string) $it['name']) ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['badge'] ?? '')) !== ''): ?><p class="badge"<?= $b->edit("items.$i.badge") ?>><?= modern_title((string) $it['badge']) ?></p><?php endif; ?>
       </div>
       <?php if (trim((string) ($it['price'] ?? '')) !== ''): ?>
       <p class="plan__price"><span class="plan__amount"<?= $b->edit("items.$i.price") ?>><?= e($it['price']) ?></span>
         <?php if (trim((string) ($it['period'] ?? '')) !== ''): ?><span class="plan__period"<?= $b->edit("items.$i.period") ?>><?= e($it['period']) ?></span><?php endif; ?></p>
       <?php endif; ?>
-      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="plan__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+      <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="plan__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(modern_title((string) $it['text']), false) ?></p><?php endif; ?>
       <?= modern_checks($list, 'plan__list') ?>
       <?= $button($it, $i, 'plan__btn') ?>
     </li>
     <?php endforeach; ?>
   </ul>
   <?php elseif (is_editing()): ?><p class="empty-hint">Noch keine Pakete – in der Seitenleiste hinzufügen.</p><?php endif; ?>
-  <?php if (trim((string) ($d['note'] ?? '')) !== ''): ?><p class="plans__note"<?= $b->edit('note') ?>><?= e($d['note']) ?></p><?php endif; ?>
+  <?php if (trim((string) ($d['note'] ?? '')) !== ''): ?><p class="plans__note"<?= $b->edit('note') ?>><?= modern_title((string) $d['note']) ?></p><?php endif; ?>
 </div>

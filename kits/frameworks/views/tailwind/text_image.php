@@ -9,8 +9,8 @@ $left = $b->variant() === 'left';
 ?>
 <div class="wrap<?= $media !== '' ? ' grid items-center gap-12 md:grid-cols-2' : '' ?>">
   <div class="<?= $left && $media !== '' ? 'md:order-2' : '' ?>">
-    <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= e($d['eyebrow']) ?></p><?php endif; ?>
-    <h2 id="<?= e($b->titleId()) ?>" class="text-3xl font-bold tracking-tight sm:text-4xl"<?= $b->edit('title') ?>><?= e($d['title']) ?></h2>
+    <?php if (filled($d['eyebrow'])): ?><p class="eyebrow"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
+    <h2 id="<?= e($b->titleId()) ?>" class="text-3xl font-bold tracking-tight sm:text-4xl"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h2>
     <div class="prose prose-slate mt-6 max-w-none dark:prose-invert prose-a:text-accent"<?= $b->edit('text', 'rich') ?>><?= rich($d['text']) ?></div>
     <?php if (filled($d['button_label']) && $d['button_link'] !== ''): ?>
     <p class="mt-8"><a class="btn btn-secondary" <?= frameworks_link_attrs($d['button_link']) ?>><span<?= $b->edit('button_label') ?>><?= e($d['button_label']) ?></span></a></p>

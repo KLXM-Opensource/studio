@@ -53,6 +53,9 @@ ul[role=list],ol[role=list]{list-style:none;padding:0}
 a{color:var(--b-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
 a:hover{text-decoration-thickness:2px}
 strong,b{font-weight:600;color:var(--b-ink)}
+/* *Wort*-Hervorhebung in Überschriften und kurzen Texten (emphasis()); auf dunklen/Akzent-Flächen unterstrichen */
+.hl{font-style:normal;color:var(--b-link)}
+:is(.bg-accent,.bg-dark,.sec--ov-dark) .hl{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.15em}
 address{font-style:normal}
 button{font:inherit;color:inherit}
 ::selection{background:var(--b-a-soft);color:var(--b-ink)}

@@ -16,9 +16,9 @@ $tag = modern_htag($d);
     <li class="step" data-reveal>
       <span class="step__num" aria-hidden="true"><?= !empty($it['icon']) ? icon((string) $it['icon']) : str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
       <div class="step__body">
-        <?php if (trim((string) ($it['meta'] ?? '')) !== ''): ?><p class="step__meta"<?= $b->edit("items.$i.meta") ?>><?= e($it['meta']) ?></p><?php endif; ?>
-        <<?= $tag ?> class="step__title"><span class="sr-only"><?= e(lt('Schritt {nr}:', ['nr' => $i + 1])) ?> </span><span<?= $b->edit("items.$i.title") ?>><?= e($it['title']) ?></span></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="step__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <?php if (trim((string) ($it['meta'] ?? '')) !== ''): ?><p class="step__meta"<?= $b->edit("items.$i.meta") ?>><?= modern_title((string) $it['meta']) ?></p><?php endif; ?>
+        <<?= $tag ?> class="step__title"><span class="sr-only"><?= e(lt('Schritt {nr}:', ['nr' => $i + 1])) ?> </span><span<?= $b->edit("items.$i.title") ?>><?= modern_title((string) $it['title']) ?></span></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="step__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(modern_title((string) $it['text']), false) ?></p><?php endif; ?>
       </div>
     </li>
     <?php endforeach; ?>

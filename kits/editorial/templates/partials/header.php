@@ -20,13 +20,13 @@ $tagline = trim((string) setting('tagline'));
 $dateline = design('dateline') && in_array($variant, ['masthead', 'split'], true);
 ?>
 <?php if ($dateline): ?>
-<div class="dateline"><div class="wrap dateline__inner"><?= editorial_dateline() ?><?php if ($variant === 'split' && $tagline !== ''): ?><p class="dateline__claim"><?= e($tagline) ?></p><?php endif; ?></div></div>
+<div class="dateline"><div class="wrap dateline__inner"><?= editorial_dateline() ?><?php if ($variant === 'split' && $tagline !== ''): ?><p class="dateline__claim"><?= emphasis($tagline) ?></p><?php endif; ?></div></div>
 <?php endif; ?>
 <?php if ($variant === 'masthead'): ?>
 <div class="masthead">
   <div class="wrap masthead__inner">
     <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--mast']) ?>
-    <?php if ($tagline !== ''): ?><p class="masthead__claim"><?= e($tagline) ?></p><?php endif; ?>
+    <?php if ($tagline !== ''): ?><p class="masthead__claim"><?= emphasis($tagline) ?></p><?php endif; ?>
   </div>
 </div>
 <?php endif; ?>

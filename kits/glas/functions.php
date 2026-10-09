@@ -122,7 +122,7 @@ function glas_checks(array $lines, string $class = ''): string
 {
     if (!$lines) return '';
     $h = '<ul class="checks' . ($class !== '' ? ' ' . e($class) : '') . '" role="list">';
-    foreach ($lines as $l) $h .= '<li><span>' . e($l) . '</span></li>';
+    foreach ($lines as $l) $h .= '<li><span>' . glas_title((string) $l) . '</span></li>';
     return $h . '</ul>';
 }
 
@@ -452,9 +452,9 @@ function glas_head(\Core\Block $b, string $class = '', string $tag = 'h2'): stri
     $intro = trim((string) ($d['intro'] ?? ''));
     if ($eyebrow === '' && $title === '' && $intro === '' && !is_editing()) return '';
     $h = '<header class="sec-head' . ($class !== '' ? ' ' . e($class) : '') . '">';
-    if ($eyebrow !== '') $h .= '<p class="eyebrow"><span' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</span></p>';
-    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . e($title) . '</' . $tag . '>';
-    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(e($intro), false) . '</p>';
+    if ($eyebrow !== '') $h .= '<p class="eyebrow"><span' . $b->edit('eyebrow') . '>' . glas_title($eyebrow) . '</span></p>';
+    if ($title !== '' || is_editing()) $h .= '<' . $tag . ' id="' . e($b->titleId()) . '" class="h2"' . $b->edit('title') . '>' . glas_title($title) . '</' . $tag . '>';
+    if ($intro !== '') $h .= '<p class="lead"' . $b->edit('intro') . '>' . nl2br(glas_title($intro), false) . '</p>';
     return $h . '</header>';
 }
 
@@ -592,6 +592,6 @@ function glas_public_info(): array
  */
 function glas_title(string $text): string
 {
-    if (is_editing()) return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
-    return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
+    // *Wort* → <em class="hl"> (Kern: emphasis_hl – ein Muster für alle Kits; Bearbeiten: Sternchen dezent sichtbar)
+    return emphasis_hl($text);
 }

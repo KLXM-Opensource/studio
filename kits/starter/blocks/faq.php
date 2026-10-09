@@ -10,7 +10,7 @@
   <div class="faq">
     <?php foreach ($d['items'] as $i => $it): ?>
     <details class="faq__item">
-      <summary<?= $b->edit("items.$i.q") ?>><?= e($it['q']) ?></summary>
+      <summary<?= $b->edit("items.$i.q") ?>><?= emphasis((string) $it['q']) ?></summary>
       <div class="prose"<?= $b->edit("items.$i.a", 'rich') ?>><?= rich($it['a']) ?></div>
     </details>
     <?php endforeach; ?>

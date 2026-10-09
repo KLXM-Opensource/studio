@@ -54,8 +54,8 @@ $icons = ['gallery' => 'images', 'page' => 'arrow-right'];
       }
       $txt = $t['title'] !== '' || $t['text'] !== '' || $editing
           ? '<span class="mo__lbl">'
-            . ($t['title'] !== '' || ($editing && $t['path']) ? '<span class="mo__ti"' . ($editing && $t['path'] ? $b->edit($t['path'] . '.title') : '') . '>' . e($t['title']) . '</span>' : '')
-            . ($t['text'] !== '' || ($editing && $t['path']) ? '<span class="mo__tx"' . ($editing && $t['path'] ? $b->edit($t['path'] . '.text') : '') . '>' . e($t['text']) . '</span>' : '')
+            . ($t['title'] !== '' || ($editing && $t['path']) ? '<span class="mo__ti"' . ($editing && $t['path'] ? $b->edit($t['path'] . '.title') : '') . '>' . foto_title($t['title']) . '</span>' : '')
+            . ($t['text'] !== '' || ($editing && $t['path']) ? '<span class="mo__tx"' . ($editing && $t['path'] ? $b->edit($t['path'] . '.text') : '') . '>' . foto_title($t['text']) . '</span>' : '')
             . '</span>'
           : '';
       $badge = $t['open'] === 'gallery'
@@ -79,7 +79,7 @@ $icons = ['gallery' => 'images', 'page' => 'arrow-right'];
       }
       $pause = $t['video'] && !$editing ? '<button type="button" class="mo__pause" data-mo-pause hidden aria-pressed="false"><span class="sr-only">' . e(lt('Video anhalten')) . '</span></button>' : '';
   ?>
-    <li class="<?= e($cls) ?>" data-mo-tile<?= $t['open'] === 'gallery' || $t['open'] === 'zoom' ? ' data-lb-group' : '' ?><?= $t['title'] !== '' ? ' data-mo-title="' . e($t['title']) . '"' : '' ?>><?= $body ?><?= $pause ?></li>
+    <li class="<?= e($cls) ?>" data-mo-tile<?= $t['open'] === 'gallery' || $t['open'] === 'zoom' ? ' data-lb-group' : '' ?><?= $t['title'] !== '' ? ' data-mo-title="' . e(strip_emphasis($t['title'])) . '"' : '' ?>><?= $body ?><?= $pause ?></li>
   <?php endforeach; ?>
   </ul>
   <?php if (!$editing && $more !== 'all' && count($tiles) > $batch): ?>

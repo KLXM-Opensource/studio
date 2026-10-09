@@ -24,6 +24,10 @@ html.is-dark{color-scheme:dark}
 .bg-ink,.bg-band{--rt-accent:currentColor;--rt-muted:currentColor}
 /* Dunkler Abschnitt auf heller Seite: helle Fassung der Akzentfarbe (fest – der Style-Editor kennt je Token nur hell/dunkel der Seite) */
 .bg-ink{--fw-accent:#AFC2FF;--fw-on-accent:#0B1533}
+/* *Betonung* in Überschriften und kurzen Texten (emphasis() → em.hl), beide Frameworks (UIkit färbt <em> sonst rosa):
+   Akzentfarbe; auf Akzent-/dunklen Flächen und im dunklen Fuß Schriftfarbe mit Unterstreichung */
+.hl{font-style:normal;color:var(--fw-accent)}
+:is(.bg-band,.bg-ink,.uk-light,.fw-footer) .hl{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.14em}
 
 /* Sprunglink, Hinweisbalken – Kit-eigene Klassen mit Präfix fw- (kollidieren mit keinem Framework) */
 .fw-skip{position:absolute;z-index:1100;left:1rem;top:-10rem;padding:.75rem 1rem;border-radius:8px;background:#111418;color:#fff;text-decoration:underline}

@@ -16,7 +16,7 @@ $prose = '<div class="prose"' . $b->edit('text', 'rich') . '>' . $html . '</div>
 <div class="wrap article">
   <?= nature_head($b, 'article__head') ?>
   <?php if ($meta !== '' || trim(strip_tags($html)) !== ''): ?>
-  <p class="article__meta label"><?php if ($meta !== ''): ?><span<?= $b->edit('meta') ?>><?= e($meta) ?></span><span aria-hidden="true"> · </span><?php endif; ?><?= e(lt('{n} Min. Lesezeit', ['n' => nature_reading_time($html)])) ?></p>
+  <p class="article__meta label"><?php if ($meta !== ''): ?><span<?= $b->edit('meta') ?>><?= nature_title($meta) ?></span><span aria-hidden="true"> · </span><?php endif; ?><?= e(lt('{n} Min. Lesezeit', ['n' => nature_reading_time($html)])) ?></p>
   <?php endif; ?>
   <div class="article__body<?= $showToc ? ' has-toc' : '' ?>">
     <?php if ($showToc): ?>

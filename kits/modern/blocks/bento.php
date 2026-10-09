@@ -25,9 +25,9 @@ $tones = ['card', 'tint', 'pop', 'accent', 'dark', 'image'];
       <?php if ($img !== ''): ?><div class="tile__img"<?= $tone === 'image' ? ' aria-hidden="true"' : '' ?>><?= $img ?></div><?php endif; ?>
       <div class="tile__body">
         <?php if (!empty($it['icon'])): ?><span class="tile__ico"><?= icon((string) $it['icon']) ?></span><?php endif; ?>
-        <?php if ($eyebrow !== ''): ?><p class="<?= $big ? 'tile__num' : 'tile__eyebrow' ?>"<?= $b->edit("items.$i.eyebrow") ?>><?= e($eyebrow) ?></p><?php endif; ?>
-        <<?= $tag ?> class="tile__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= e($it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= e((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
-        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tile__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p><?php endif; ?>
+        <?php if ($eyebrow !== ''): ?><p class="<?= $big ? 'tile__num' : 'tile__eyebrow' ?>"<?= $b->edit("items.$i.eyebrow") ?>><?= modern_title($eyebrow) ?></p><?php endif; ?>
+        <<?= $tag ?> class="tile__title"><?php if ($link !== '' && !is_editing()): ?><a class="cover-link" <?= modern_link_attrs($link) ?>><?= modern_title((string) $it['title']) ?></a><?php else: ?><span<?= $b->edit("items.$i.title") ?>><?= modern_title((string) ($it['title'] ?? '')) ?></span><?php endif; ?></<?= $tag ?>>
+        <?php if (trim((string) ($it['text'] ?? '')) !== ''): ?><p class="tile__text"<?= $b->edit("items.$i.text") ?>><?= nl2br(modern_title((string) $it['text']), false) ?></p><?php endif; ?>
         <?php if ($link !== ''): ?><span class="tile__go" aria-hidden="true"><?= icon('arrow-up-right') ?></span><?php endif; ?>
       </div>
     </li>

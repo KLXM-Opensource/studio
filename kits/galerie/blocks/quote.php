@@ -12,8 +12,8 @@ $person = function (array $it, int $i) use ($b): string {
     if (trim(($it['name'] ?? '') . ($it['role'] ?? '')) === '') return '';
     $pic = !empty($it['image']) ? img((int) $it['image'], '56px', ['ratio' => '1:1', 'alt' => '']) : '';
     return '<figcaption class="quote__by">' . ($pic !== '' ? '<span class="quote__avatar">' . $pic . '</span>' : '')
-        . '<span><span class="quote__name"' . $b->edit("items.$i.name") . '>' . e($it['name'] ?? '') . '</span>'
-        . (($it['role'] ?? '') !== '' ? '<span class="quote__role"' . $b->edit("items.$i.role") . '>' . e($it['role']) . '</span>' : '') . '</span></figcaption>';
+        . '<span><span class="quote__name"' . $b->edit("items.$i.name") . '>' . galerie_title((string) ($it['name'] ?? '')) . '</span>'
+        . (($it['role'] ?? '') !== '' ? '<span class="quote__role"' . $b->edit("items.$i.role") . '>' . galerie_title((string) $it['role']) . '</span>' : '') . '</span></figcaption>';
 };
 ?>
 <div class="wrap">
@@ -29,15 +29,15 @@ $person = function (array $it, int $i) use ($b): string {
   <?php if ($v === 'single' && $items): $it = $items[0]; ?>
   <figure class="pull">
     <?= icon('quotes', ['class' => 'pull__mark']) ?>
-    <blockquote class="pull__text"><p<?= $b->edit('items.0.text') ?>><?= nl2br(e($it['text']), false) ?></p></blockquote>
+    <blockquote class="pull__text"><p<?= $b->edit('items.0.text') ?>><?= nl2br(galerie_title((string) $it['text']), false) ?></p></blockquote>
     <?= $person($it, 0) ?>
   </figure>
   <?php elseif ($items): ?>
-  <ul class="<?= $v === 'reel' ? 'reel quotes--reel' : 'quotes' ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(trim((string) $d['title']) ?: lt('Stimmen')) . '"' : '' ?>>
+  <ul class="<?= $v === 'reel' ? 'reel quotes--reel' : 'quotes' ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(trim(strip_emphasis((string) $d['title'])) ?: lt('Stimmen')) . '"' : '' ?>>
     <?php foreach ($items as $i => $it): ?>
     <li class="quote card" data-reveal><figure>
       <?= icon('quotes', ['class' => 'quote__mark']) ?>
-      <blockquote class="quote__text"><p<?= $b->edit("items.$i.text") ?>><?= nl2br(e($it['text']), false) ?></p></blockquote>
+      <blockquote class="quote__text"><p<?= $b->edit("items.$i.text") ?>><?= nl2br(galerie_title((string) $it['text']), false) ?></p></blockquote>
       <?= $person($it, $i) ?>
     </figure></li>
     <?php endforeach; ?>

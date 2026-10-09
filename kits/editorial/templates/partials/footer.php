@@ -22,7 +22,7 @@ $simple = design('footer') === 'simple';
   <div class="wrap">
     <div class="site-footer__top">
       <?= app()->theme->partial('brand', ['href' => $home, 'class' => 'brand--foot']) ?>
-      <?php if ($tagline !== ''): ?><p class="site-footer__claim"><?= e($tagline) ?></p><?php endif; ?>
+      <?php if ($tagline !== ''): ?><p class="site-footer__claim"><?= emphasis($tagline) ?></p><?php endif; ?>
     </div>
     <?php if ($simple): ?>
       <?php if ($pages): ?>
@@ -57,7 +57,7 @@ $simple = design('footer') === 'simple';
       <?php endif; ?>
     </div>
     <?php endif; ?>
-    <?php if ($text !== ''): ?><p class="site-footer__text"><?= nl2br(e($text), false) ?></p><?php endif; ?>
+    <?php if ($text !== ''): ?><p class="site-footer__text"><?= nl2br(emphasis($text), false) ?></p><?php endif; ?>
     <div class="site-footer__bottom">
       <p class="site-footer__copy">© <?= e(date('Y')) ?> <?= e(editorial_name()) ?></p>
       <?php if ($legal): ?>

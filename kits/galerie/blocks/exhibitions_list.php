@@ -97,7 +97,7 @@ $empty = trim((string) ($d['empty_text'] ?? ''));
 <div class="wrap">
   <?= galerie_head($b) ?>
   <?php if (!$groups): ?>
-    <?php if ($empty !== '' || is_editing()): ?><p class="xl-empty"<?= $b->edit('empty_text') ?>><?= e($empty !== '' ? $empty : 'Keine passenden Ausstellungen.') ?></p><?php endif; ?>
+    <?php if ($empty !== '' || is_editing()): ?><p class="xl-empty"<?= $b->edit('empty_text') ?>><?= galerie_title($empty !== '' ? $empty : 'Keine passenden Ausstellungen.') ?></p><?php endif; ?>
   <?php elseif ($show === 'tabs' && count($groups) > 1): ?>
   <div class="xl-tabs" data-tabs>
     <div class="xl-tabs__list" role="tablist"<?= trim((string) $d['title']) !== '' ? ' aria-labelledby="' . e($b->titleId()) . '"' : ' aria-label="' . e(lt('Ausstellungen')) . '"' ?> hidden>

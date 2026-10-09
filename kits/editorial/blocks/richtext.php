@@ -20,12 +20,12 @@ $side = $tocNav !== '' || $aside !== '';
     <?php endif; ?>
   </div>
   <?php if ($side): ?>
-  <aside class="story__side" aria-label="<?= e($asideTitle !== '' ? $asideTitle : lt('Ergänzungen')) ?>">
+  <aside class="story__side" aria-label="<?= e($asideTitle !== '' ? strip_emphasis($asideTitle) : lt('Ergänzungen')) ?>">
     <?= $tocNav ?>
     <?php if ($aside !== ''): ?>
     <div class="note">
-      <?php if ($asideTitle !== ''): ?><p class="note__title"<?= $b->edit('aside_title') ?>><?= e($asideTitle) ?></p><?php endif; ?>
-      <p class="note__text"<?= $b->edit('aside') ?>><?= nl2br(e($aside), false) ?></p>
+      <?php if ($asideTitle !== ''): ?><p class="note__title"<?= $b->edit('aside_title') ?>><?= emphasis($asideTitle) ?></p><?php endif; ?>
+      <p class="note__text"<?= $b->edit('aside') ?>><?= nl2br(emphasis($aside), false) ?></p>
     </div>
     <?php endif; ?>
   </aside>

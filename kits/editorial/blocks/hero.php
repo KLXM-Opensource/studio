@@ -22,10 +22,10 @@ $eager = $b->prev === null;
 $caption = trim((string) ($d['caption'] ?? ''));
 $credit = editorial_credit($image);
 
-$kicker = $eyebrow !== '' || is_editing() ? '<p class="kicker"' . $b->edit('eyebrow') . '>' . e($eyebrow) . '</p>' : '';
-$h1 = '<h1 id="' . e($b->titleId()) . '" class="display"' . $b->edit('title') . '>' . e((string) $d['title']) . '</h1>';
-$dek = $text !== '' || is_editing() ? '<p class="aufm__dek"' . $b->edit('text') . '>' . nl2br(e($text), false) . '</p>' : '';
-$by = $byline !== '' ? '<p class="byline"' . $b->edit('byline') . '>' . e($byline) . '</p>' : '';
+$kicker = $eyebrow !== '' || is_editing() ? '<p class="kicker"' . $b->edit('eyebrow') . '>' . emphasis($eyebrow) . '</p>' : '';
+$h1 = '<h1 id="' . e($b->titleId()) . '" class="display"' . $b->edit('title') . '>' . emphasis((string) $d['title']) . '</h1>';
+$dek = $text !== '' || is_editing() ? '<p class="aufm__dek"' . $b->edit('text') . '>' . nl2br(emphasis($text), false) . '</p>' : '';
+$by = $byline !== '' ? '<p class="byline"' . $b->edit('byline') . '>' . emphasis($byline) . '</p>' : '';
 $btns = editorial_buttons($b);
 
 if ($v === 'compact'):
@@ -33,7 +33,7 @@ if ($v === 'compact'):
 ?>
 <div class="wrap rhead">
   <?= $kicker ?>
-  <h1 id="<?= e($b->titleId()) ?>" class="rhead__title"<?= $b->edit('title') ?>><?= e((string) $d['title']) ?></h1>
+  <h1 id="<?= e($b->titleId()) ?>" class="rhead__title"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h1>
   <?php if ($dek !== '' || $btns !== ''): ?><div class="rhead__foot"><?= $dek ?><?= $btns ?></div><?php endif; ?>
   <?php if (count($tabs) > 1): ?>
   <nav class="rhead__tabs" aria-label="<?= e(lt('Unterseiten')) ?>"><?= editorial_tab_links($tabs, 'tabs__list') ?></nav>
@@ -50,7 +50,7 @@ if ($v === 'issue'):
 ?>
 <div class="wrap issue<?= $media === '' ? ' issue--noimg' : '' ?>">
   <?php if ($issue !== '' || $eyebrow !== '' || is_editing()): ?>
-  <p class="issue__line"><span class="issue__no"<?= $b->edit('issue') ?>><?= e($issue) ?></span><?php if ($eyebrow !== '' || is_editing()): ?><span class="issue__rubric"<?= $b->edit('eyebrow') ?>><?= e($eyebrow) ?></span><?php endif; ?></p>
+  <p class="issue__line"><span class="issue__no"<?= $b->edit('issue') ?>><?= emphasis($issue) ?></span><?php if ($eyebrow !== '' || is_editing()): ?><span class="issue__rubric"<?= $b->edit('eyebrow') ?>><?= emphasis($eyebrow) ?></span><?php endif; ?></p>
   <?php endif; ?>
   <?php if ($media !== ''): ?>
   <figure class="issue__fig"><?= $media ?><?= editorial_caption($caption, $credit, is_editing() ? $b->edit('caption') : '') ?></figure>
@@ -59,12 +59,12 @@ if ($v === 'issue'):
     <div class="issue__head"><?= $h1 ?><?= $dek ?><?= $by ?><?= $btns ?></div>
     <?php if ($more): ?>
     <section class="issue__more" aria-labelledby="<?= e($moreId) ?>">
-      <h2 id="<?= e($moreId) ?>" class="issue__more-title"<?= $b->edit('issue_more_title') ?>><?= e($moreTitle) ?></h2>
+      <h2 id="<?= e($moreId) ?>" class="issue__more-title"<?= $b->edit('issue_more_title') ?>><?= emphasis($moreTitle) ?></h2>
       <ol class="issue__list" role="list">
         <?php foreach ($more as $m): $href = editorial_link((string) ($m['link'] ?? '')); $k = trim((string) ($m['kicker'] ?? '')); $meta = trim((string) ($m['meta'] ?? '')); ?>
         <li class="issue__item">
-          <?php if ($k !== ''): ?><span class="issue__kick"><?= e($k) ?></span><?php endif; ?>
-          <?php if ($href !== ''): ?><a class="issue__link" <?= editorial_link_attrs((string) $m['link']) ?>><?= e((string) $m['title']) ?><?= editorial_ext_note($href) ?></a><?php else: ?><span class="issue__link"><?= e((string) $m['title']) ?></span><?php endif; ?>
+          <?php if ($k !== ''): ?><span class="issue__kick"><?= emphasis($k) ?></span><?php endif; ?>
+          <?php if ($href !== ''): ?><a class="issue__link" <?= editorial_link_attrs((string) $m['link']) ?>><?= emphasis((string) $m['title']) ?><?= editorial_ext_note($href) ?></a><?php else: ?><span class="issue__link"><?= emphasis((string) $m['title']) ?></span><?php endif; ?>
           <?php if ($meta !== ''): ?><span class="issue__meta"><?= e($meta) ?></span><?php endif; ?>
         </li>
         <?php endforeach; ?>
@@ -91,7 +91,7 @@ if ($v === 'agenda'):
   <?php if ($items || is_editing()): ?>
   <section class="agd__board" aria-labelledby="<?= e($listId) ?>">
     <div class="agd__bar">
-      <h2 id="<?= e($listId) ?>" class="agd__title"<?= $b->edit('dates_title') ?>><?= e($listTitle) ?></h2>
+      <h2 id="<?= e($listId) ?>" class="agd__title"<?= $b->edit('dates_title') ?>><?= emphasis($listTitle) ?></h2>
       <?php if ($moreLabel !== '' && $moreLink !== ''): ?><a class="agd__all" <?= editorial_link_attrs($moreLink) ?>><?= e($moreLabel) ?> <span aria-hidden="true">→</span></a><?php endif; ?>
     </div>
     <?php if (!$items): ?>
@@ -127,15 +127,15 @@ if ($v === 'voice'):
     $starSvg = '<svg viewBox="0 0 120 24" width="120" height="24" focusable="false">' . implode('', array_map(fn($i) => '<path transform="translate(' . ($i * 24) . ' 0)" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5 1.4-7.1-5.3-5 7.2-.9z"/>', range(0, 4))) . '</svg>';
 ?>
 <div class="wrap voice">
-  <div class="voice__text"><?= $kicker ?><h1 id="<?= e($b->titleId()) ?>" class="h1 voice__title"<?= $b->edit('title') ?>><?= e((string) $d['title']) ?></h1><?= $dek ?><?= $btns ?></div>
+  <div class="voice__text"><?= $kicker ?><h1 id="<?= e($b->titleId()) ?>" class="h1 voice__title"<?= $b->edit('title') ?>><?= emphasis((string) $d['title']) ?></h1><?= $dek ?><?= $btns ?></div>
   <figure class="voice__quote">
-    <?php if ($quote !== '' || is_editing()): ?><blockquote class="voice__q"><p<?= $b->edit('quote') ?>><?= nl2br(e($quote), false) ?></p></blockquote><?php endif; ?>
+    <?php if ($quote !== '' || is_editing()): ?><blockquote class="voice__q"><p<?= $b->edit('quote') ?>><?= nl2br(emphasis($quote), false) ?></p></blockquote><?php endif; ?>
     <?php if ($name !== '' || $role !== '' || $stars !== ''): ?>
     <figcaption class="voice__by">
       <?php if ($ini !== ''): ?><span class="voice__ini" aria-hidden="true"><?= e($ini) ?></span><?php endif; ?>
       <span class="voice__who">
-        <?php if ($name !== ''): ?><span class="voice__name"><?= e($name) ?></span><?php endif; ?>
-        <?php if ($role !== ''): ?><span class="voice__role"><?= e($role) ?></span><?php endif; ?>
+        <?php if ($name !== ''): ?><span class="voice__name"><?= emphasis($name) ?></span><?php endif; ?>
+        <?php if ($role !== ''): ?><span class="voice__role"><?= emphasis($role) ?></span><?php endif; ?>
       </span>
       <?php if ($stars !== ''): ?>
       <span class="voice__rating">
@@ -156,7 +156,7 @@ if ($v === 'cover'):
   <?php if ($pic !== ''): ?><div class="aufm__bg media" aria-hidden="true"><?= $pic ?></div><?php endif; ?>
   <div class="wrap aufm__inner">
     <div class="aufm__text"><?= $kicker ?><?= $h1 ?><?= $dek ?><?= $by ?><?= $btns ?></div>
-    <?php if ($caption !== '' || $credit !== ''): ?><p class="aufm__credit"><?= e(implode(' · ', array_filter([$caption, $credit]))) ?></p><?php endif; ?>
+    <?php if ($caption !== '' || $credit !== ''): ?><p class="aufm__credit"><?= implode(' · ', array_filter([emphasis($caption), e($credit)])) ?></p><?php endif; ?>
   </div>
 </div>
 <?php return; endif;
