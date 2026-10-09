@@ -82,4 +82,6 @@ return [
     'Mehr zeigen' => 'Show more',
     'Video anhalten' => 'Pause video',
     '{n} weitere Bilder geladen' => '{n} more images loaded',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

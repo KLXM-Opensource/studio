@@ -734,4 +734,14 @@ return [
     'Damit die Bilder wirken: Die Navigation tritt zurück und ist beim Hochscrollen sofort wieder da. „Ganz leise“ mit Navigation „Minimal“: Menü links, Name in der Mitte.' => 'So the images can work: the navigation recedes and is back immediately when scrolling up. “Very quiet” with navigation “Minimal”: menu on the left, name in the centre.',
     'Bildstrom' => 'Image stream',
     'Bilder statt Worte: weißer Grund, ganz leise Navigation (Menü links, Name in der Mitte, verschwindet beim Scrollen), Newsreader für die wenigen Titel, Korallrot für Farbflächen, kleiner Bildabstand, randlose Mosaike.' => 'Images instead of words: white ground, very quiet navigation (menu left, name centred, disappears while scrolling), Newsreader for the few titles, coral for colour surfaces, small image gap, edge-to-edge mosaics.',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the menu in the bar and in the side sheet (phone). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];
