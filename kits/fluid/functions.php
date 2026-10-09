@@ -277,25 +277,40 @@ function fluid_nav_parent(): string
  * Pfeiltasten, Escape, Klick daneben, Öffnen beim Überfahren). Design „Menüpunkte mit Unterseiten“:
  *  - split/hover: der Menüpunkt bleibt ein Link, daneben öffnet ein Pfeil (<summary>) die Unterseiten – kein „Übersicht“-Eintrag
  *  - overview: der Menüpunkt öffnet das Menü, erster Eintrag „Übersicht: …“ führt zur Seite (bisheriges Verhalten)
- * Dritte Ebene: .hnav__nested (Design „Dritte Menüebene“: eingerückt bzw. gruppiert – nur CSS, Klassen nv-*).
+ * Dritte Ebene: .hnav__nested (Design „Dritte Menüebene“, Klassen nv-*): eingerückt bzw. gruppiert (immer sichtbar, nur CSS)
+ * oder Akkordeon bzw. Slide – dann klappt ein Pfeil neben dem Link die Unterseiten auf (<details name> – je Ebene eins offen,
+ * ohne JavaScript). Slide: die Unterebene ersetzt den Inhalt des Aufklappmenüs, der Pfeil wird zur Zeile „‹ Elternseite“ (zurück).
+ * Akkordeon: der Zweig der aktuellen Seite ist offen.
  */
+function fluid_nav_levels(): string
+{
+    $v = (string) design('nav_levels');
+    return in_array($v, ['accordion', 'slide', 'indent', 'groups'], true) ? $v : 'accordion';
+}
+
 function fluid_nav_inline(array $menu): string
 {
     $cur = fn(array $m) => fluid_is_current($m) ? ' aria-current="page"' : '';
     $chev = icon('caret-down', ['class' => 'hnav__chev']);
     $split = fluid_nav_parent() !== 'overview';
-    $nested = function (array $items) use (&$nested, $cur): string {
-        if (!$items) return '';
-        $h = '<ul class="hnav__nested" role="list">';
-        foreach ($items as $c) $h .= '<li><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children']) . '</li>';
-        return $h . '</ul>';
+    $mode = fluid_nav_levels();
+    $fold = $mode === 'accordion' || $mode === 'slide';
+    $grp = 0;
+    // Ein Eintrag im Aufklappmenü – mit Unterseiten je nach Design immer sichtbar oder per <details> aufklappbar
+    $item = function (array $c, string $name, bool $top = false) use (&$item, $cur, $fold, $mode, &$grp): string {
+        $li = '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>';
+        if (!$c['children']) return $li . '</li>';
+        $sub = 'nv-' . (++$grp);
+        $list = '<ul class="hnav__nested" role="list">' . implode('', array_map(fn($x) => $item($x, $sub), $c['children'])) . '</ul>';
+        if (!$fold) return $li . $list . '</li>';
+        return $li . '<details class="hnav__det" name="' . $name . '"' . ($mode === 'accordion' && !empty($c['active']) ? ' open' : '') . '>'
+            . '<summary class="hnav__more" aria-label="' . e(lt('Unterseiten von {name}', ['name' => $c['label']])) . '">'
+            . icon('caret-down', ['class' => 'hnav__morechev']) . '<span class="hnav__more-t" aria-hidden="true">' . e($c['label']) . '</span></summary>'
+            . $list . '</details></li>';
     };
-    $children = function (array $m) use ($nested, $cur): string {
-        $h = '';
-        foreach ($m['children'] as $c) {
-            $h .= '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children']) . '</li>';
-        }
-        return $h;
+    $children = function (array $m) use ($item, &$grp): string {
+        $name = 'nv-' . (++$grp);
+        return implode('', array_map(fn($c) => $item($c, $name), $m['children']));
     };
     $h = '<ul class="hnav__list" role="list">';
     foreach ($menu as $m) {

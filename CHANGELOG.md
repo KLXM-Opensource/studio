@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Aufklappmenü mit Akkordeon oder Slide, ohne Pills
+- Design „Dritte Menüebene im Aufklappmenü“ hat zwei neue Varianten: **Akkordeon** (neuer Standard) – ein Pfeil rechts neben dem Link
+  klappt die Unterseiten auf, je Ebene ist eins offen, der Zweig der aktuellen Seite ist offen; **Slide** – der Pfeil schiebt die
+  Unterseiten ins Menü, oben steht „‹ Elternseite“ zum Zurückgehen. Beides über `<details name>`, ohne JavaScript; beliebig tief.
+- Einträge im Aufklappmenü sind gerade Zeilen statt abgerundeter Flächen; die aktuelle Seite hat einen Akzentstrich links,
+  Unterebenen werden eingerückt statt mit abgerundeten Linien markiert. „Eingerückt“ und „Gruppiert“ bleiben wählbar.
+
 ### Seitenverwaltung: Kennzeichen lesbar
 - „noindex“ und die Kennzeichen von Erweiterungen stehen jetzt direkt hinter dem Seitentitel statt in der schmalen Statusspalte,
   wo sie zu „noin…“ abgeschnitten wurden. Etwas größer, lange Texte erst ab 140 px gekürzt (voller Text als Tooltip).

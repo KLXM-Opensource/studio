@@ -4,21 +4,55 @@
    Scrollen gesperrt per :has(); site.js ergänzt Fokusfalle und inerten Rest der Seite. */
 .hnav__panel{position:absolute;top:calc(100% + .5rem);left:0;z-index:5;display:grid;gap:1px;min-width:15rem;margin:0;padding:.4rem;list-style:none;border:1px solid var(--f-line);border-radius:var(--f-r-l);background:var(--f-bg);box-shadow:0 18px 40px -16px var(--f-sh2)}
 .hnav__item:last-child .hnav__panel,.hnav__item:nth-last-child(2) .hnav__panel{inset-inline:auto 0}
-.hnav__sublink{display:block;padding:.55rem .75rem;border-radius:var(--f-r-s);color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none}
+/* Einträge im Aufklappmenü: gerade Zeilen statt Pills – Fläche beim Überfahren über die volle Breite,
+   aktuelle Seite mit Akzentstrich links. Ebenen nur eingerückt, keine abgerundeten Linien. */
+.hnav__panel>li{position:relative}
+.hnav__sublink{display:block;padding:.6rem .85rem;border-radius:0;color:var(--f-text);font-size:.9375rem;line-height:1.35;text-decoration:none;box-shadow:inset 3px 0 0 transparent}
 .hnav__sublink:hover{background:var(--f-surface);color:var(--f-ink)}
-.hnav__sublink[aria-current=page]{background:var(--f-a-soft);color:var(--f-ink);font-weight:600}
+.hnav__sublink[aria-current=page]{background:var(--f-a-soft);color:var(--f-ink);font-weight:600;box-shadow:inset 3px 0 0 var(--f-a)}
 .hnav__sublink--parent{color:var(--f-muted);font-size:.875rem}
-/* Dritte Ebene (Design „Dritte Menüebene“): eingerückt mit Linie (nv-indent, Standard) oder gruppiert (nv-groups) */
-.hnav__nested{margin:0 0 .3rem .95rem;padding:0 0 0 .45rem;list-style:none;border-inline-start:2px solid var(--f-line)}
-.hnav__nested .hnav__sublink{padding-block:.42rem;color:var(--f-muted);font-size:.875rem}
+.hnav__panel{padding:.35rem 0;overflow:hidden}
+/* Dritte Ebene „Eingerückt“ (nv-indent): immer sichtbar, eingerückt, etwas kleiner */
+.hnav__nested{margin:0;padding:0;list-style:none}
+.hnav__nested .hnav__sublink{padding-block:.45rem;padding-inline-start:1.75rem;color:var(--f-muted);font-size:.875rem}
+.hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:2.75rem}
 .hnav__nested .hnav__sublink:hover,.hnav__nested .hnav__sublink[aria-current=page]{color:var(--f-ink)}
+/* „Gruppiert“ (nv-groups): zweite Ebene als Zwischenüberschrift */
 .nv-groups .hnav__panel>li.has-nested{margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--f-line)}
 .nv-groups .hnav__panel>li.has-nested:first-child{margin-top:0;padding-top:0;border-top:0}
 .nv-groups .hnav__panel>li.has-nested+li:not(.has-nested){margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--f-line)}
 .nv-groups .hnav__panel>li.has-nested>.hnav__sublink{padding-block:.45rem .2rem;color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
 .nv-groups .hnav__panel>li.has-nested>.hnav__sublink:hover{background:none;color:var(--f-link)}
-.nv-groups .hnav__nested{margin:0;padding:0;border:0}
-.nv-groups .hnav__nested .hnav__sublink{padding-block:.55rem;color:var(--f-text);font-size:.9375rem}
+.nv-groups .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
+/* „Akkordeon“ (nv-accordion) und „Slide“ (nv-slide): Pfeil rechts neben dem Link (<summary>), Unterseiten in <details> */
+.hnav__nested li,.hnav__panel>li{position:relative}
+.hnav__det>summary{list-style:none}
+.hnav__det>summary::-webkit-details-marker{display:none}
+.hnav__more{position:absolute;inset:0 0 auto auto;display:grid;place-items:center;width:2.75rem;height:2.55rem;border-inline-start:1px solid var(--f-line);color:var(--f-muted);cursor:pointer}
+.hnav__more:hover{background:var(--f-surface);color:var(--f-ink)}
+.hnav__more:focus-visible{outline:2px solid var(--f-focus);outline-offset:-2px}
+.hnav__morechev{width:.9rem;height:.9rem;transition:rotate .2s}
+.hnav__more-t{display:none}
+li:has(>.hnav__det)>.hnav__sublink{padding-inline-end:3.25rem}
+.hnav__nested li:has(>.hnav__det)>.hnav__sublink{padding-block:.45rem}
+.hnav__nested .hnav__more{height:2.2rem}
+/* Akkordeon: offene Unterebene als leicht getönter Block, Pfeil dreht sich */
+.nv-accordion .hnav__det[open]>.hnav__more .hnav__morechev{rotate:180deg}
+.nv-accordion .hnav__det[open]>.hnav__more{color:var(--f-ink)}
+.nv-accordion .hnav__det>.hnav__nested{background:color-mix(in srgb,var(--f-surface) 70%,transparent);border-block:1px solid var(--f-line)}
+/* Slide: der Pfeil zeigt nach rechts; offen ersetzt die Unterebene die Liste, der Pfeil wird zur Zeile „‹ Elternseite“ */
+.nv-slide .hnav__morechev{rotate:-90deg}
+.nv-slide ul:has(>li>.hnav__det[open])>li:not(:has(>.hnav__det[open])),
+.nv-slide li:has(>.hnav__det[open])>.hnav__sublink,
+.nv-slide .hnav__det[open]:has(.hnav__det[open])>.hnav__more{display:none}
+.nv-slide .hnav__det[open]>.hnav__more{position:static;display:flex;justify-content:flex-start;gap:.5rem;width:auto;height:auto;margin-bottom:.25rem;padding:.55rem .85rem;border:0;border-bottom:1px solid var(--f-line);color:var(--f-ink);font:600 var(--f-t-1)/1.3 var(--f-font-label);letter-spacing:.06em;text-transform:uppercase}
+.nv-slide .hnav__det[open]>.hnav__more .hnav__morechev{rotate:90deg}
+.nv-slide .hnav__det[open]>.hnav__more .hnav__more-t{display:inline}
+.nv-slide .hnav__nested .hnav__sublink,.nv-slide .hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
+.nv-slide .hnav__nested li:has(>.hnav__det)>.hnav__sublink{padding-block:.6rem}
+.nv-slide .hnav__nested .hnav__more{height:2.55rem}
+@media (prefers-reduced-motion:no-preference){.nv-slide .hnav__det[open]>.hnav__nested{animation:nv-slide .22s ease-out}}
+@keyframes nv-slide{from{opacity:0;translate:1.25rem 0}}
 .hsearch__panel{position:fixed;inset:5rem var(--f-gutter) auto auto;width:min(32rem,100vw - 2 * var(--f-gutter));margin:0;padding:.9rem 3.5rem .9rem .9rem;border:1px solid var(--f-line);border-radius:var(--f-r-l);background:var(--f-bg);color:var(--f-text);box-shadow:0 24px 48px -20px var(--f-sh2);overflow:visible}
 .hsearch__close{position:absolute;inset:.9rem .5rem auto auto;width:2.5rem;height:3rem;border:0;background:none;color:inherit;font-size:1.75rem;cursor:pointer}
 @supports (anchor-name:--a){.hsearch__btn{anchor-name:--hs}.hsearch__panel{position-anchor:--hs;position-area:bottom span-left;position-try-fallbacks:flip-inline;inset:auto;margin:.75rem -.5rem 0 0}}
@@ -56,3 +90,4 @@ html:has(.mnav:popover-open){overflow:hidden}
 .quick{display:grid;gap:.25rem;margin:0;padding:0;list-style:none}
 .quick a{display:inline-flex;align-items:center;gap:.6rem;min-height:2.75rem;color:var(--f-ink);text-decoration:none;overflow-wrap:anywhere}
 .quick .ico{color:var(--f-link);font-size:1.2em}
+.nv-accordion .hnav__panel,.nv-slide .hnav__panel{min-width:17.5rem}
