@@ -125,4 +125,6 @@ return [
     '{n} von {total}' => '{n} of {total}',
     'Vergrößern' => 'Enlarge',
     'Bild {n} vergrößern' => 'Enlarge image {n}',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

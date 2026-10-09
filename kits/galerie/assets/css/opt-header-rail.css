@@ -12,6 +12,9 @@
   .hdr--rail .hnav__list{flex-direction:column;align-items:stretch;gap:0}
   .hdr--rail .hnav__link{justify-content:space-between;width:100%;padding-inline:.6rem;font-size:1rem}
   .hdr--rail .hnav__panel{position:static;min-width:0;margin:0 0 .5rem .6rem;padding:0 0 0 .5rem;border:0;border-inline-start:2px solid var(--f-line);border-radius:0;box-shadow:none;background:none}
+  .hdr--rail .hnav__item--split{display:block;position:relative}
+  .hdr--rail .hnav__item--split>.hnav__link--top{padding-inline-end:2.75rem;border-radius:var(--f-r-s)}
+  .hdr--rail .hnav__item--split>.hnav__sub>.hnav__toggle{position:absolute;inset:0 0 auto auto;width:2.5rem;min-width:0;border-radius:var(--f-r-s)}
   .hdr--rail .hdr__tools{flex-wrap:wrap;margin-top:auto;padding-top:var(--f-s-m);border-top:1px solid var(--f-line)}
   .hdr--rail .hdr__cta{display:inline-flex;flex:1 1 100%}
   .hdr--rail .menu-btn{display:none}
