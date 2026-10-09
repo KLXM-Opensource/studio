@@ -169,7 +169,13 @@ main:focus{outline:none}
 .subnav__link{display:flex;align-items:center;min-height:40px;padding:4px 12px;border-radius:calc(var(--b-radius) * .7);color:var(--b-text);font-size:.9375rem;text-decoration:none}
 .subnav__link:hover{background:var(--b-surface);color:var(--b-ink)}
 .subnav__link[aria-current=page]{color:var(--b-ink);font-weight:600}
-.subnav--nested{padding-left:12px}
+/* Dritte Ebene (Design „Dritte Menüebene“): eingerückt mit Linie (nv-indent, Standard) oder gruppiert (nv-groups, nur Desktop) */
+.subnav--nested{margin:0 0 4px 14px;padding-left:6px;border-left:2px solid var(--b-line)}
+.subnav--nested .subnav__link{color:var(--b-muted)}
+.subnav--nested .subnav__link:hover,.subnav--nested .subnav__link[aria-current=page]{color:var(--b-ink)}
+/* Link + Pfeil (Design „Menüpunkte mit Unterseiten“): Menüpunkt öffnet seine Seite, der Pfeil daneben die Unterseiten */
+.nav__item--split{display:flex;align-items:center}
+.nav .nav__link--toggle{justify-content:center;min-width:28px;padding:0 10px 0 6px;text-decoration:none}
 .site-nav__end{display:flex;align-items:center;gap:12px}
 /* Kopfbereich-Aktionen (Core\HeaderActions): hier nur der Standard „Menüpunkt“ (Klassen nav__link nav__link--cta aus theme.php,
    ohne Kern-Datei; die Aktionen reihen sich per display:contents in .site-nav__end ein) – Trennlinie per Schatten, Linkfarbe, Pfeil; mobil hervorgehobener letzter Menüpunkt. Alles Weitere:
@@ -207,6 +213,18 @@ main:focus{outline:none}
 html.menu-open{overflow:hidden}
 @media (min-width:960px){
   .nav__sub>.subnav{position:absolute;top:calc(100% + 8px);left:0;z-index:60;min-width:240px;padding:8px;border:1px solid var(--b-line);border-radius:var(--b-radius-l);background:var(--b-bg);box-shadow:var(--b-shadow)}
+  .nav .nav__item--split>.nav__link--top{padding-right:4px;border-top-right-radius:0;border-bottom-right-radius:0}
+  .nav .nav__item--split>.nav__sub>.nav__link--toggle{border-top-left-radius:0;border-bottom-left-radius:0}
+  .nav__item--split:hover>.nav__link--top,.nav__item--split:hover>.nav__sub>.nav__link--toggle{background:var(--b-surface)}
+  .nav .nav__item--split:has(>.nav__sub[open])>.nav__link--top,.nav .nav__item--split>.nav__sub[open]>.nav__link--toggle{background:var(--b-a-soft);color:var(--b-ink)}
+  .subnav--nested .subnav__link{min-height:34px;font-size:.875rem}
+  .nv-groups .nav__sub>.subnav>li.has-nested{margin-top:4px;padding-top:6px;border-top:1px solid var(--b-line)}
+  .nv-groups .nav__sub>.subnav>li.has-nested:first-child{margin-top:0;padding-top:0;border-top:0}
+  .nv-groups .nav__sub>.subnav>li.has-nested+li:not(.has-nested){margin-top:4px;padding-top:6px;border-top:1px solid var(--b-line)}
+  .nv-groups .nav__sub>.subnav>li.has-nested>.subnav__link{min-height:30px;padding-top:6px;color:var(--b-muted);font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+  .nv-groups .nav__sub>.subnav>li.has-nested>.subnav__link:hover{background:none;color:var(--b-link)}
+  .nv-groups .subnav--nested{margin:0;padding:0;border:0}
+  .nv-groups .subnav--nested .subnav__link{min-height:40px;color:var(--b-text);font-size:.9375rem}
   .langswitch--mobile{display:none}
 }
 /* Öffnungsstatus (Infoleiste, Mobilmenü) */
@@ -236,6 +254,9 @@ html.menu-open{overflow:hidden}
   .nav__link[aria-current=page],.nav__link[data-active],.nav__sub[data-active]>.nav__link{color:var(--b-link);text-decoration:none}
   .nav__sub>.nav__link .nav__chev{box-sizing:content-box;width:14px;height:14px;padding:9px;border-radius:50%;background:var(--b-surface);transition:transform .25s,background-color .2s}
   .nav__sub[open]>.nav__link .nav__chev{background:var(--b-a-soft);color:var(--b-link)}
+  .nav__item--split{display:block;position:relative}
+  .nav .nav__item--split>.nav__link--top{padding-right:52px}
+  .nav .nav__item--split>.nav__sub>.nav__link--toggle{position:absolute;top:6px;right:0;width:44px;min-width:0;min-height:44px;padding:0}
   .nav__sub>.subnav{margin:0 0 14px 2px;padding:2px 0 2px 12px;border-left:2px solid var(--b-line)}
   .nav__sub[open]>.subnav{animation:b-sub .25s ease-out}
   .subnav__link{min-height:44px;font-size:1rem}

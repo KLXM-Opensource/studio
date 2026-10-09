@@ -68,7 +68,7 @@ d.addEventListener('keydown', e => {
   if (!nav || minimal || !desktop.matches || !nav.contains(e.target) || e.altKey || e.ctrlKey || e.metaKey) return;
   const list = tops();
   const i = list.indexOf(e.target);
-  const sub = e.target.closest('.nav__sub');
+  const sub = e.target.closest('.nav__sub') || (e.target.matches('.nav__link--top') ? e.target.parentElement.querySelector('.nav__sub') : null);
   const move = el => { if (el) { e.preventDefault(); el.focus(); } };
   if (i > -1) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -92,6 +92,16 @@ d.addEventListener('keydown', e => {
       move(list[(k + (e.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length]);
     }
   }
+});
+
+// Design „Link + Pfeil, öffnet auch beim Überfahren“ (np-hover): nur mit Maus, kurze Verzögerung beim Verlassen;
+// der erste Klick auf den Pfeil nach dem Öffnen per Maus schließt nicht gleich wieder
+if (html.classList.contains('np-hover') && matchMedia('(hover:hover) and (pointer:fine)').matches) d.querySelectorAll('.nav__item--split').forEach(li => {
+  const s = li.querySelector('.nav__sub');
+  let t = 0, o = 0;
+  li.addEventListener('mouseenter', () => { clearTimeout(t); if (desktop.matches && !s.open) s.open = o = 1; });
+  s.firstElementChild.addEventListener('click', e => { if (s.open && o) e.preventDefault(); o = 0; });
+  li.addEventListener('mouseleave', () => { t = setTimeout(() => { if (desktop.matches && !s.contains(d.activeElement)) s.open = false; }, 250); });
 });
 
 // ------------------------------------------------------------ „Modern“ über dem ersten Abschnitt: beim Scrollen deckend

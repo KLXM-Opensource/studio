@@ -244,12 +244,24 @@ function basis_page_info(mixed $id): array
     return $cache[$id];
 }
 
+/** Menüpunkte mit Unterseiten: „split“ (Link + Pfeil, Standard), „hover“ (dazu Öffnen beim Überfahren), „overview“ (Klick öffnet, mit „Übersicht“) */
+function basis_nav_parent(): string
+{
+    $v = (string) design('nav_parent');
+    return in_array($v, ['split', 'hover', 'overview'], true) ? $v : 'split';
+}
+
 /**
  * Hauptmenü als Liste. $mode: 'dropdown' (Aufklappmenü), 'mega' (Mega-Menü mit Beschreibungen), 'overlay' (Vollbild, alles offen).
  * Aufklappen über <details>/<summary> – funktioniert ohne JavaScript; site.js ergänzt Pfeiltasten, Escape und Hover.
+ * Design „Menüpunkte mit Unterseiten“ (Aufklapp- und Mega-Menü, auch im Mobilmenü):
+ *  - split/hover: der Menüpunkt bleibt ein Link, daneben öffnet ein Pfeil (<summary>) die Unterseiten – kein „Übersicht“-Eintrag
+ *  - overview: der Menüpunkt öffnet das Menü, erster Eintrag „Übersicht“ führt zur Seite (bisheriges Verhalten)
+ * Dritte Ebene im Aufklappmenü: .subnav--nested (Design „Dritte Menüebene“: eingerückt bzw. gruppiert – nur CSS, Klassen nv-*).
  */
 function basis_nav_list(array $menu, string $mode = 'dropdown'): string
 {
+    $split = basis_nav_parent() !== 'overview';
     $currentId = (int) (app()->currentPage['id'] ?? 0);
     $cur = fn(array $m) => is_int($m['id']) && $m['id'] === $currentId ? ' aria-current="page"' : '';
     $chev = '<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="m3 4.5 3 3 3-3"/></svg>';
@@ -278,12 +290,15 @@ function basis_nav_list(array $menu, string $mode = 'dropdown'): string
                 . $tog . $sub . '</li>';
             continue;
         }
-        $h .= '<li class="nav__item has-sub"><details class="nav__sub' . ($mode === 'mega' ? ' nav__sub--mega' : '') . '"' . $active . '>'
-            . '<summary class="nav__link"><span>' . e($m['label']) . '</span>' . $chev . '</summary>';
+        $sub = '<details class="nav__sub' . ($mode === 'mega' ? ' nav__sub--mega' : '') . '"' . $active . '>';
+        $h .= $split
+            ? '<li class="nav__item has-sub nav__item--split"><a class="nav__link nav__link--top" href="' . e($m['href']) . '"' . $cur($m) . $active . '>' . e($m['label']) . '</a>'
+                . $sub . '<summary class="nav__link nav__link--toggle" aria-label="' . e(lt('Unterseiten von {name}', ['name' => $m['label']])) . '">' . $chev . '</summary>'
+            : '<li class="nav__item has-sub">' . $sub . '<summary class="nav__link"><span>' . e($m['label']) . '</span>' . $chev . '</summary>';
         if ($mode !== 'mega') {
-            $h .= '<ul class="subnav"><li><a class="subnav__link" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . '</a></li>';
+            $h .= '<ul class="subnav">' . ($split ? '' : '<li><a class="subnav__link" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . '</a></li>');
             foreach ($m['children'] as $c) {
-                $h .= '<li><a class="subnav__link" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children'], 'subnav subnav--nested') . '</li>';
+                $h .= '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="subnav__link" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children'], 'subnav subnav--nested') . '</li>';
             }
             $h .= '</ul></details></li>';
             continue;
@@ -292,7 +307,7 @@ function basis_nav_list(array $menu, string $mode = 'dropdown'): string
         $info = basis_page_info($m['id']);
         $h .= '<div class="mega"><div class="wrap mega__inner"><div class="mega__intro"><p class="mega__title">' . e($m['label']) . '</p>'
             . ($info['desc'] !== '' ? '<p class="mega__text">' . e($info['desc']) . '</p>' : '')
-            . '<a class="more" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . basis_icon('arrow', 'more__icon') . '</a></div><ul class="mega__list">';
+            . ($split ? '' : '<a class="more" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . basis_icon('arrow', 'more__icon') . '</a>') . '</div><ul class="mega__list">';
         $feature = null;
         foreach ($m['children'] as $c) {
             $ci = basis_page_info($c['id']);

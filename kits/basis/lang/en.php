@@ -85,4 +85,14 @@ return [
     'Standort (Karte, Kontakt, Öffnungszeiten)' => 'Location (map, contact, opening hours)',
     'Kurze Pluspunkte (eine pro Zeile, optional)' => 'Short benefits (one per line, optional)',
     'Erscheinen mit Häkchen unter dem Text, z. B. „Rückruf am selben Tag“.' => 'Shown with ticks below the text, e.g. “Callback the same day”.',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für Aufklapp- und Mega-Menü sowie das Mobilmenü (nicht für „Minimal“). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the dropdown and mega menu as well as the mobile menu (not to “Minimal”). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];
