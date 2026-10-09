@@ -13,3 +13,5 @@
 .dnav__lens.is-on{opacity:1}
 .dnav__lens.is-ready{transition:translate .38s cubic-bezier(.3,.8,.25,1),width .38s cubic-bezier(.3,.8,.25,1),opacity .2s}
 @media (prefers-reduced-motion:reduce){.dnav__lens.is-ready{transition:opacity .01ms}}
+/* Link + Pfeil im Dock: die Linse markiert Link und Pfeil gemeinsam (site.js), keine eigene Fläche beim Zeigen */
+.dnav.has-lens .hnav__list>.hnav__item--split,.dnav.has-lens .hnav__item--split:hover>.hnav__link--top,.dnav.has-lens .hnav__item--split:hover>.hnav__sub>.hnav__toggle{background:none;box-shadow:none}

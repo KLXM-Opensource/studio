@@ -88,6 +88,7 @@ if (lens) {
   const home = () => lensNav.querySelector('.hnav__list > .hnav__item > [aria-current], .hnav__list > .hnav__item > [data-active], .hnav__sub[data-active] > .hnav__link');
   let target = null;
   const place = el => {
+    el = el?.closest('.hnav__item--split') || el;                         // Link + Pfeil: Linse über beide
     target = el;
     if (!el || !el.offsetWidth) { lens.classList.remove('is-on'); return; }
     const r = el.getBoundingClientRect(), n = lensNav.getBoundingClientRect();
@@ -150,7 +151,7 @@ d.addEventListener('keydown', e => {
   if (!nav || !nav.contains(e.target) || e.altKey || e.ctrlKey || e.metaKey) return;
   const list = tops();
   const i = list.indexOf(e.target);
-  const sub = e.target.closest('.hnav__sub');
+  const sub = e.target.closest('.hnav__sub') || (e.target.matches('.hnav__link--top') ? e.target.parentElement.querySelector('.hnav__sub') : null);
   const move = el => { if (el) { e.preventDefault(); el.focus(); } };
   const vertical = getComputedStyle(nav).flexDirection === 'column';
   const [next, prev] = vertical ? ['ArrowDown', 'ArrowUp'] : ['ArrowRight', 'ArrowLeft'];
@@ -170,6 +171,24 @@ d.addEventListener('keydown', e => {
       move(list[(k + (e.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length]);
     }
   }
+});
+
+// Design „Link + Pfeil, öffnet auch beim Überfahren“ (np-hover): nur mit Maus, kurze Verzögerung beim Verlassen
+if (html.classList.contains('np-hover') && matchMedia('(hover:hover) and (pointer:fine)').matches) d.querySelectorAll('.hnav__item--split').forEach(li => {
+  const s = li.querySelector('.hnav__sub');
+  let t = 0, o = 0;
+  li.addEventListener('mouseenter', () => { clearTimeout(t); if (inline(s) && !s.open) s.open = o = 1; });
+  // Der erste Klick auf den Pfeil nach dem Öffnen per Maus schließt nicht gleich wieder
+  s.firstElementChild.addEventListener('click', e => { if (s.open && o) e.preventDefault(); o = 0; });
+  li.addEventListener('mouseleave', () => { t = setTimeout(() => { if (inline(s) && !s.contains(d.activeElement)) s.open = false; }, 250); });
+});
+// Seitenblatt mit „Link + Pfeil“: Unterseiten per Schaltfläche (ohne JavaScript alles sichtbar)
+d.querySelectorAll('.mnav__toggle').forEach(t => {
+  const box = d.getElementById(t.getAttribute('aria-controls'));
+  if (!box) return;
+  const set = o => { t.setAttribute('aria-expanded', String(o)); box.hidden = !o; };
+  set(t.getAttribute('aria-expanded') === 'true');
+  t.addEventListener('click', () => set(t.getAttribute('aria-expanded') !== 'true'));
 });
 
 // ------------------------------------------------------------ Such-Popover an der Lupe (Fallback ohne anchor-name)

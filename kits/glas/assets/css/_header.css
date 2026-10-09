@@ -52,6 +52,17 @@
 .hnav__link[aria-current=page]::after,.hnav__link[data-active]::after,.hnav__sub[data-active]>.hnav__link::after{content:"";position:absolute;left:50%;bottom:.3rem;width:1rem;height:2px;margin-left:-.5rem;border-radius:1px;background:linear-gradient(90deg,var(--g-f2),var(--g-a))}
 .hnav__chev{font-size:.85em;transition:rotate .2s}
 .hnav__sub[open]>.hnav__link .hnav__chev{rotate:180deg}
+/* Link + Pfeil (Design „Menüpunkte mit Unterseiten“): Menüpunkt öffnet seine Seite, der Pfeil daneben die Unterseiten */
+.hnav__item--split{display:flex;align-items:center}
+.hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.15rem;border-start-end-radius:0;border-end-end-radius:0}
+.hnav .hnav__item--split>.hnav__sub>.hnav__toggle{justify-content:center;min-width:1.6rem;padding:0 .45rem 0 .3rem;border-start-start-radius:0;border-end-start-radius:0}
+.hnav__item--split>.hnav__sub>.hnav__toggle{text-decoration:none}
+.hnav__item--split:hover>.hnav__link--top,.hnav__item--split:hover>.hnav__sub>.hnav__toggle{background:var(--g-surface-2)}
+.hnav .hnav__item--split:has(>.hnav__sub[open])>.hnav__link--top,.hnav .hnav__item--split>.hnav__sub[open]>.hnav__toggle{background:var(--g-a-soft);color:var(--g-ink)}
+/* Glas: Markierung der aktiven Seite (Glasfläche, Linie) einmal für Link + Pfeil zusammen */
+.hnav__item--split>.hnav__sub>.hnav__toggle::after{content:none}
+.hnav .hnav__item--split>.hnav__link--top[data-active],.hnav .hnav__item--split>.hnav__sub[data-active]>.hnav__toggle{background:none;box-shadow:none}
+.hnav__item--split:has(>.hnav__link--top[data-active]){border-radius:var(--g-btn-r);background:color-mix(in srgb,var(--g-glass) 70%,transparent);box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-edge)}
 
 /* Menü-Schaltfläche und Lupe: kleine Glastasten */
 .menu-btn,.hsearch__btn{display:inline-flex;align-items:center;justify-content:center;gap:.625rem;min-width:2.75rem;height:2.75rem;padding:0 1rem;border:1px solid var(--g-edge);border-radius:var(--g-btn-r);background:color-mix(in srgb,var(--g-glass) 60%,transparent);color:var(--g-ink);font:600 .9375rem/1 var(--g-font);cursor:pointer;box-shadow:inset 0 1px 0 var(--g-hi),0 0 0 1px var(--g-rim)}

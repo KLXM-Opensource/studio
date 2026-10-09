@@ -35,7 +35,7 @@ $base = [
     'fs_min' => 16, 'fs_max' => 18, 'ratio' => 1.25, 'heading_weight' => 600, 'heading_tracking' => -2,
     'density' => 'standard', 'blur' => 20, 'field' => 'soft', 'grain' => true, 'solid' => false,
     'radius' => 20, 'buttons' => 'soft', 'space' => 'normal', 'wrap' => 76,
-    'header' => 'dock', 'header_sticky' => true, 'footer' => 'glass',
+    'header' => 'dock', 'header_sticky' => true, 'nav_parent' => 'split', 'nav_levels' => 'indent', 'footer' => 'glass',
     'motion' => true, 'dark' => true,
 ];
 
@@ -112,6 +112,12 @@ return [
                 ],
                 'help' => 'Das Menü steht in der Leiste, solange es hineinpasst – sonst öffnet eine Schaltfläche das Menü als Glasblatt. „Glas-Dock“: Unterseiten als Glaspanel mit Symbol und Kurzbeschreibung (Meta-Beschreibung der Seite); auf Telefonen Start, drei Hauptseiten und „Mehr“ als Tab-Leiste am unteren Rand.'],
             ['name' => 'header_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'hdr-sticky', 'default' => true],
+            ['name' => 'nav_parent', 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
+                'options' => ['split' => 'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten', 'hover' => 'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus', 'overview' => 'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite'],
+                'help' => 'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.'],
+            ['name' => 'nav_levels', 'label' => 'Dritte Menüebene im Aufklappmenü', 'type' => 'choice', 'class' => 'nv-{value}', 'default' => 'indent',
+                'options' => ['indent' => 'Eingerückt – mit Linie, etwas kleiner', 'groups' => 'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter'],
+                'help' => 'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.'],
             ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'glass',
                 'options' => ['glass' => 'Glaspaneel (Seiten, Kontakt, Zeiten)', 'panel' => 'Aussage (Satz, Button, darunter Seiten)', 'simple' => 'Schlicht in einer Zeile']],
         ]],

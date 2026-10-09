@@ -67,4 +67,6 @@ return [
     'öffnen' => 'open',
     'schließen' => 'close',
     'Hintergrundbewegung anhalten' => 'Pause background motion',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

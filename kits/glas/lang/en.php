@@ -321,4 +321,14 @@ return [
     'Noch keine Karten – in der Seitenleiste unter „Karten“ hinzufügen.' => 'No cards yet – add them in the sidebar under “Cards”.',
     'Bitte in der Seitenleiste ein Video (MP4) wählen – bis dahin erscheint ein Farbverlauf bzw. das Bild.' => 'Please choose a video (MP4) in the sidebar – until then a gradient or the image is shown.',
     '„Aurora“: erscheint im Glasrahmen statt der Plättchen. Ohne Bild genügt das Farbfeld – keine Datei nötig. „Video“: Standbild (bei „Bewegung reduzieren“ und bis das Video lädt).' => '“Aurora”: appears in a glass frame instead of the tiles. Without an image the colour field is enough – no file needed. “Video”: still image (with “Reduce motion” and until the video loads).',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the menu in the bar and in the side sheet (phone). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];
