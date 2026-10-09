@@ -459,6 +459,13 @@ if (toc && 'IntersectionObserver' in window) {
   const io = new IntersectionObserver(es => es.forEach(en => {
     if (!en.isIntersecting) return;
     links.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === '#' + en.target.id));
+    // aktives Kapitel in der (eigenen) Bildlaufleiste des Inhaltsverzeichnisses sichtbar halten – ohne die Seite zu bewegen
+    const a = links.find(x => x.classList.contains('is-active'));
+    if (a && toc.scrollHeight > toc.clientHeight) {
+      const top = a.offsetTop, pad = 40;
+      if (top < toc.scrollTop + pad) toc.scrollTop = top - pad;
+      else if (top + a.offsetHeight > toc.scrollTop + toc.clientHeight - pad) toc.scrollTop = top + a.offsetHeight - toc.clientHeight + pad;
+    }
   }), { rootMargin: '0px 0px -70% 0px' });
   links.forEach(a => { const s = d.getElementById(a.getAttribute('href').slice(1)); if (s) io.observe(s); });
 }

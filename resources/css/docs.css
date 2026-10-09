@@ -23,7 +23,8 @@
 
 /* Raster: Inhalt + Inhaltsverzeichnis */
 .doc-layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:40px;align-items:start}
-.doc-toc{position:sticky;top:24px;padding:18px 18px 18px 20px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line);font-size:14px}
+.doc-toc{position:sticky;top:24px;padding:18px 18px 18px 20px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line);font-size:14px;
+  max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent}   /* lange Inhaltsverzeichnisse: eigene Bildlaufleiste statt abgeschnitten */
 .doc-toc p{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bx)}
 .doc-toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:toc}
 .doc-toc li{counter-increment:toc}
@@ -31,7 +32,7 @@
 .doc-toc a::before{content:counter(toc,decimal-leading-zero);color:var(--bx);font-variant-numeric:tabular-nums;font-size:12px;padding-top:1px}
 .doc-toc a:hover,.doc-toc a.is-active{background:var(--g);color:var(--ink)}
 .doc-toc .doc-print{margin-top:12px;width:100%}
-@media (max-width:1100px){.doc-layout{grid-template-columns:1fr}.doc-toc{position:static;order:-1}}
+@media (max-width:1100px){.doc-layout{grid-template-columns:1fr}.doc-toc{position:static;order:-1;max-height:none;overflow:visible}}
 
 /* Kapitel */
 .doc-ch{background:#fff;border-radius:24px;padding:clamp(22px,3vw,40px);margin-bottom:22px;box-shadow:0 0 0 1px var(--line);scroll-margin-top:20px}

@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Handbuch: Inhaltsverzeichnis auf kleinen Bildschirmen
+- Das Inhaltsverzeichnis rechts (Handbuch, Entwicklerhandbuch) ist höchstens so hoch wie das Fenster und scrollt für sich;
+  das gerade gelesene Kapitel läuft darin sichtbar mit. Vorher waren auf kleinen Bildschirmen die hinteren Kapitel nicht erreichbar.
+
 ### Suche: KI-Antwort über den Treffern
 - Fragen wie „Was kostet die Teilnahme?“ beantwortet die Ergebnisseite direkt – Kasten **Antwort** mit Belegen [n] und Quellen,
   aus derselben Antwortlogik wie der Besucher-Chat (nur Inhalte der Website, „weiß ich nicht“ mit Kontakt, Ratenbegrenzung, Tageslimit).
