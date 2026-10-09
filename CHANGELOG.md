@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: Abschnitte übersichtlicher
+- **Tabellen-Designer:** Felder unter einem Abschnitt sind eingerückt, mit Verbindungslinie und der Farbe ihres Abschnitts verbunden;
+  der Abschnittskopf ist farbig hinterlegt und lässt sich zuklappen („▾ n Elemente“). Die Zuordnung folgt sofort beim Verschieben oder Typwechsel.
+- **Öffentliches Formular:** Abschnitte als „Rahmen“ sind jetzt eine ruhige Karte mit leichtem Hintergrund; die Überschrift steht
+  innen mit Trennlinie, statt die Rahmenlinie zu unterbrechen.
+
 ### Formulare: verständlichere Rückmeldungen im Tabellen-Designer
 - Feldtypen, die Besucher nicht ausfüllen können (formatierter Text, Verknüpfungen, Karte …), zeigen im Designer einen Hinweis am Feld,
   sobald die Tabelle ein öffentliches Formular hat. Abschnitte, die deshalb leer bleiben und im Formular fehlen, nennt der Bereich „Formular“.

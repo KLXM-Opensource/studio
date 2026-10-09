@@ -494,7 +494,34 @@ const schema = $('[data-schema]');
 if (schema) {
   const list = $('[data-fields]', schema), tpl = $('[data-field-template]', schema);
   const slug = v => v.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^(\d)/, 'f_$1').slice(0, 40);
-  const renumber = () => $$('[data-field]', list).forEach((li, i) => $$('[name^="fields["]', li).forEach(inp => { inp.name = inp.name.replace(/^fields\[[^\]]*\]/, `fields[${i}]`); }));
+  /*
+   * Abschnitte sichtbar gliedern: Felder nach einem Abschnitt (bis zum nächsten) rücken ein und tragen die Farbe ihres Abschnitts
+   * (data-sec 0–5); der Abschnitt zeigt die Zahl seiner Elemente und lässt sich zuklappen (nur Anzeige – Felder bleiben im Formular).
+   */
+  const groupSections = () => {
+    const lis = $$('[data-field]', list);
+    let sec = null, n = -1;
+    const counts = new Map();
+    lis.forEach(li => {
+      li.classList.remove('is-sec-last');
+      if (li.dataset.type === 'section') { sec = li; n++; li.dataset.sec = String(n % 6); li.classList.remove('in-sec'); counts.set(li, 0); return; }
+      if (sec) { li.classList.add('in-sec'); li.dataset.sec = sec.dataset.sec; li.hidden = sec.classList.contains('is-folded'); counts.set(sec, counts.get(sec) + 1); if (li.nextElementSibling?.dataset.type === 'section' || !li.nextElementSibling) li.classList.add('is-sec-last'); }
+      else { li.classList.remove('in-sec'); delete li.dataset.sec; li.hidden = false; }
+    });
+    counts.forEach((c, s) => {
+      let b = $(':scope > [data-sec-fold]', s);
+      if (!b) {
+        b = d.createElement('button'); b.type = 'button'; b.className = 'dt-sec__fold'; b.dataset.secFold = '';
+        b.addEventListener('click', () => { s.classList.toggle('is-folded'); groupSections(); });
+        s.append(b);
+      }
+      const folded = s.classList.contains('is-folded');
+      b.setAttribute('aria-expanded', String(!folded));
+      b.textContent = (folded ? '▸ ' : '▾ ') + t(c === 1 ? '1 Element' : '{n} Elemente', { n: c });
+    });
+    lis.filter(li => li.dataset.type !== 'section').forEach(li => $(':scope > [data-sec-fold]', li)?.remove());
+  };
+  const renumber = () => { $$('[data-field]', list).forEach((li, i) => $$('[name^="fields["]', li).forEach(inp => { inp.name = inp.name.replace(/^fields\[[^\]]*\]/, `fields[${i}]`); })); groupSections(); };
   const sync = li => {
     const type = $('[data-type]', li).value;
     li.dataset.type = type;
@@ -514,7 +541,7 @@ if (schema) {
   });
   schema.addEventListener('change', e => {
     const li = e.target.closest('[data-field]');
-    if (li && e.target.matches('[data-type]')) { sync(li); if (li.dataset.type === 'group' && !$('[data-sub]', li)) addSub(li); }
+    if (li && e.target.matches('[data-type]')) { sync(li); if (li.dataset.type === 'group' && !$('[data-sub]', li)) addSub(li); groupSections(); }
     if (e.target.matches('[data-sub-type]')) $('[data-sub-opts]', e.target.closest('[data-sub]')).hidden = e.target.value !== 'select';
   });
   // Wiederholbare Gruppe: Unterfelder hinzufügen, verschieben, entfernen (Kurzname folgt der Bezeichnung, bis er geändert wird)
@@ -566,6 +593,7 @@ if (schema) {
   });
   // Bedingungen je Feld (anzeigen wenn · Pflicht wenn · Vergleich)
   initRuleBuilder(schema, list, slug);
+  groupSections();
 }
 
 // Daten: Eintrag bearbeiten – Felder abhängig von anderen Feldern ein-/ausblenden (Core\Data\Rules)

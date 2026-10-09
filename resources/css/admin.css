@@ -764,6 +764,20 @@ img.media-vthumb{object-fit:cover}
 .dt-schema__side h2{font-size:16px;margin-bottom:10px}
 .dt-fields{list-style:none;margin:16px 0;padding:0;display:grid;gap:10px;counter-reset:f}
 .dt-field{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:14px;padding:14px;border-radius:8px;background:var(--adm-fill);box-shadow:0 0 0 1px var(--adm-line)}
+/* Abschnitte im Designer: Kopfzeile in der Farbe des Abschnitts, zugehörige Felder eingerückt mit Linie (admin.js groupSections) */
+.dt-field{position:relative}
+.dt-field[data-sec="0"]{--sec:#6366F1}.dt-field[data-sec="1"]{--sec:#0EA5E9}.dt-field[data-sec="2"]{--sec:#10B981}
+.dt-field[data-sec="3"]{--sec:#F59E0B}.dt-field[data-sec="4"]{--sec:#EC4899}.dt-field[data-sec="5"]{--sec:#8B5CF6}
+.dt-field[data-type=section]{margin-top:14px;background:color-mix(in srgb,var(--sec,#6366F1) 13%,var(--adm-card));box-shadow:0 0 0 1px color-mix(in srgb,var(--sec,#6366F1) 45%,transparent),inset 5px 0 0 var(--sec,#6366F1)}
+.dt-field[data-type=section] .dt-field__icon{color:var(--sec,#6366F1)}
+.dt-field.in-sec{margin-left:30px}
+.dt-field.in-sec::before{content:"";position:absolute;left:-18px;top:-10px;bottom:0;width:3px;border-radius:2px;background:var(--sec)}
+.dt-field.in-sec.is-sec-last::before{bottom:50%}
+.dt-field.in-sec::after{content:"";position:absolute;left:-18px;top:calc(50% - 1px);width:14px;height:3px;border-radius:2px;background:var(--sec)}
+.dt-sec__fold{grid-column:1 / -1;justify-self:start;margin:-4px 0 0;padding:4px 10px;border:0;border-radius:999px;background:color-mix(in srgb,var(--sec,#6366F1) 18%,transparent);color:var(--adm-ink);font:600 12.5px var(--adm-font);cursor:pointer}
+.dt-sec__fold:hover{background:color-mix(in srgb,var(--sec,#6366F1) 28%,transparent)}
+.dt-field.is-folded{box-shadow:0 0 0 1px color-mix(in srgb,var(--sec,#6366F1) 45%,transparent),inset 5px 0 0 var(--sec,#6366F1),0 4px 0 -1px var(--adm-card),0 5px 0 0 color-mix(in srgb,var(--sec,#6366F1) 45%,transparent)}
+@media (max-width:640px){.dt-field.in-sec{margin-left:16px}.dt-field.in-sec::before,.dt-field.in-sec::after{left:-11px}.dt-field.in-sec::after{width:8px}}
 .dt-field.is-error{box-shadow:0 0 0 1.5px #E7B4B0;background:var(--adm-err-bg)}
 .dt-field__icon{display:grid;place-items:center;width:40px;height:40px;border-radius:6px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line);font-weight:800;color:var(--adm-a-ink)}
 .dt-field__main{display:grid;gap:10px;min-width:0}
