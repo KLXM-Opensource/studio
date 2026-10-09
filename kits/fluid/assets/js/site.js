@@ -99,9 +99,14 @@ d.addEventListener('keydown', e => {
     else if (e.key === 'Home' || e.key === 'End') move(list[e.key === 'Home' ? 0 : list.length - 1]);
     else if (e.key === 'ArrowDown' && sub && !vertical) { sub.open = true; move(sub.querySelector('a[href]')); }
   } else if (sub && !vertical) {
-    const links = [...sub.querySelectorAll('a[href]')];
+    // nur sichtbare Einträge (Akkordeon/Slide: zugeklappte Ebenen auslassen)
+    const links = [...sub.querySelectorAll('a[href]')].filter(a => a.checkVisibility ? a.checkVisibility() : a.getClientRects().length);
     const j = links.indexOf(e.target);
     const top = sub.querySelector('summary');
+    // Akkordeon/Slide (<details class="hnav__det">): → öffnet die Unterebene, ← schließt sie und springt zum Elterneintrag
+    const li = e.target.closest('li'), det = li?.querySelector(':scope>.hnav__det'), up = e.target.closest('.hnav__det');
+    if (e.key === 'ArrowRight' && det) { det.open = true; move(det.querySelector('a[href]')); return; }
+    if (e.key === 'ArrowLeft' && up) { up.open = false; move(up.parentElement.querySelector('a[href]')); return; }
     if (e.key === 'ArrowDown') move(links[j + 1] || links[0]);
     else if (e.key === 'ArrowUp') move(j > 0 ? links[j - 1] : top);
     else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
