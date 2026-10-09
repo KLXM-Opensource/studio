@@ -1,0 +1,15 @@
+/* Kern-Block „Formular (Datentabelle)“ – kompakte Fehleranzeige (resources/js/dataform.js), Kits schalten sie mit diesem Import ein.
+   Übersicht oben: „9 Angaben fehlen“ + Feldnamen als Chips (ab 4: „+ n weitere“); schwebender Knopf „Noch n offen · Nächstes ↓“
+   springt von Fehler zu Fehler und zählt beim Ausfüllen herunter. Ohne Import (z. B. praxis) bleibt die Liste mit ganzen Sätzen.
+   Farben aus der Übersicht (currentColor), der Knopf übernimmt die Klassen des Absenden-Knopfs. */
+.dff{--dff-errors:compact}
+.dff-summary ul.dff-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0 0;padding:0;list-style:none}
+.dff-chips li{min-width:0;max-width:100%;margin:0}
+.dff-summary .dff-chips :is(a,button){display:block;max-width:100%;box-sizing:border-box;min-height:2.1rem;padding:.3rem .8rem;border:1px solid color-mix(in srgb,currentColor 32%,transparent);border-radius:99px;background:color-mix(in srgb,currentColor 7%,transparent);color:inherit;font:inherit;font-size:.9em;font-weight:600;line-height:1.4;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:border-color .15s,background-color .15s}
+.dff-summary .dff-chips :is(a,button):hover{border-color:currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
+.dff-summary .dff-chips .dff-more button{border-style:dashed;background:transparent;font-weight:500}
+.dff-chips.is-short li:nth-child(n+4):not(.dff-more),.dff-chips:not(.is-short) .dff-more{display:none}
+.dff-next{position:fixed;z-index:60;left:max(16px,env(safe-area-inset-left,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));max-width:calc(100vw - 32px);margin:0;white-space:nowrap;box-shadow:0 8px 28px rgb(0 0 0/.28)}
+.dff-next__n{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.dff-next{animation:dff-next-in .25s ease-out}}
+@keyframes dff-next-in{from{opacity:0;translate:0 12px}}

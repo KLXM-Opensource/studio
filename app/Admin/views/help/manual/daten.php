@@ -128,6 +128,7 @@
     <li>Seite öffnen → <b>+</b> → Block <b>Formular (Datentabelle)</b> → Tabelle wählen.</li>
     <li>Optional: <b>Dachzeile</b>, <b>Überschrift</b> und <b>Einleitung</b> über dem Formular. Unter <b>Darstellung</b> legen Sie die <b>Breite</b> fest – <b>Textbreite</b> (Standard: in derselben Spalte wie die Fließtexte darüber), <b>Normal</b> (schmales Formular im Inhaltsbereich) oder <b>Volle Breite</b> – und die <b>Ausrichtung</b>: <b>Linksbündig</b> (Standard) oder <b>Mittig</b> (Überschrift, Einleitung und Button zentriert).</li>
   </ol>
+  <p><b>Fehlende Angaben:</b> Schickt jemand das Formular unvollständig ab, steht oben eine kurze Übersicht („9 Angaben fehlen“) mit den Feldnamen zum Anklicken; am Rand schwebt der Knopf <b>„Noch 9 offen · Nächstes ↓“</b>, der von Feld zu Feld springt. Jedes ausgefüllte Feld verschwindet sofort aus der Zählung. Die Darstellung kommt aus dem Kit.</p>
   <h4 id="felder-im-editor">Felder direkt auf der Seite ändern</h4>
   <p>Mit dem Recht „Tabellen und Felder ändern“ (Standard: Administration) zeigt die Leiste des Blocks im Bearbeitungsmodus zusätzlich <b>Felder bearbeiten</b>. Es öffnet rechts eine Seitenleiste mit den Feldern der gewählten Tabelle – Sie müssen die Seite dafür nicht verlassen:</p>
   <ul>

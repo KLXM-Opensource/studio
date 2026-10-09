@@ -3,6 +3,7 @@
    Fehler-, Erfolgs- und Pflichtfeld-Zustände aus den Tokens; Fehlerfarbe: festes Rot, mit der Überschriftenfarbe gemischt
    (dunkel auf hellem, hell auf dunklem Grund, ≥ 4.5:1). Bedingungen, IBAN, Gruppen: resources/js/dataform.js. */
 @import "../../../../resources/css/_dataform-layout.css";   /* Breite + Ausrichtung (Block-Optionen) */
+@import "../../../../resources/css/_dataform-errors.css";   /* kompakte Fehleranzeige */
 .dff-wrap{--f-danger:color-mix(in srgb,#E5484D 66%,var(--f-ink));--dff-gap:var(--f-s-m)}
 .dff-head{display:flex;flex-direction:column;gap:var(--f-s-s);max-width:48rem;margin-bottom:var(--f-s-xl)}
 .dff-intro{color:var(--f-muted);font-size:var(--f-t1)}

@@ -1,6 +1,7 @@
 /* Theme „basis“: Kern-Block „Formular (Datentabelle)“ mit den Design-Tokens (hell und dunkel ohne eigene Regeln).
    Fehlerfarbe: fester Rotton, mit der Überschriftenfarbe gemischt – dunkel auf hellem, hell auf dunklem Grund (≥ 4.5:1). */
 @import "../../../../resources/css/dataform.css";
+@import "../../../../resources/css/_dataform-errors.css";   /* kompakte Fehleranzeige */
 .dff-wrap{--b-danger:color-mix(in srgb,#E5484D 68%,var(--b-ink));
   --dff-accent:var(--b-a);--dff-line:var(--b-muted);--dff-bg:var(--b-bg);--dff-ink:var(--b-ink);--dff-muted:var(--b-muted);--dff-radius:var(--b-radius);--dff-focus:var(--b-focus);
   --dff-err:var(--b-danger);--dff-err-bg:color-mix(in srgb,var(--b-danger) 10%,var(--b-bg))}

@@ -1,6 +1,7 @@
 /* Theme „editorial“: öffentliche Formulare (Kern-Block „Formular“, Newsletter im Handlungsaufruf) – Felder mit Unterstrich,
    Beschriftung in Mono, Fehlerfarbe aus einem festen Rotton gemischt mit der Überschriftenfarbe (hell auf dunkel, dunkel auf hell ≥ 4.5:1). */
 @import "../../../../resources/css/dataform.css";
+@import "../../../../resources/css/_dataform-errors.css";   /* kompakte Fehleranzeige */
 .dff-wrap{--e-danger:color-mix(in srgb,#E5484D 66%,var(--e-ink));
   --dff-accent:var(--e-a);--dff-line:var(--e-muted);--dff-bg:var(--e-sec-bg,var(--e-bg));--dff-ink:var(--e-ink);--dff-muted:var(--e-muted);--dff-radius:var(--e-radius);--dff-focus:var(--e-focus);
   --dff-err:var(--e-danger);--dff-err-bg:color-mix(in srgb,var(--e-danger) 10%,var(--e-sec-bg,var(--e-bg)))}

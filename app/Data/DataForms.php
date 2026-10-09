@@ -307,7 +307,12 @@ final class DataForms
             . ($upload ? ' enctype="multipart/form-data"' : '')
             . ($cond ? ' data-cond="' . e(json_encode($cond, JSON_UNESCAPED_UNICODE)) . '"' : '')
             . ' data-success="' . e(!empty($o['server_message']) ? '' : $success) . '" data-failed="' . e(lt('Senden fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.')) . '"'
-            . ' data-check="' . e(lt('Bitte prüfen Sie die markierten Felder.')) . '">';
+            . ' data-check="' . e(lt('Bitte prüfen Sie die markierten Felder.')) . '"'
+            // Texte der kompakten Fehleranzeige (resources/css/_dataform-errors.css + dataform.js)
+            . ' data-texts="' . e(json_encode([
+                'one' => lt('1 Angabe fehlt'), 'many' => lt('{n} Angaben fehlen'), 'more' => lt('+ {n} weitere'),
+                'open' => lt('Noch {n} offen'), 'next' => lt('Nächstes'), 'done' => lt('Alles ergänzt – bitte erneut absenden.'),
+            ], JSON_UNESCAPED_UNICODE)) . '">';
         // Fehlerübersicht (auch ohne JavaScript): Links zu den Feldern
         $h .= '<div class="dff-summary" role="alert" tabindex="-1" data-dff-summary' . ($errors || !empty($o['message']) ? '' : ' hidden') . '>'
             . '<p class="dff-summary__title">' . e((string) ($o['message'] ?? '') ?: lt('Bitte prüfen Sie die markierten Felder.')) . '</p><ul>';

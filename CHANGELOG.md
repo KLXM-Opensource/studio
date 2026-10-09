@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: kompakte Fehleranzeige
+- Statt einer langen Liste ganzer Sätze zeigt die Übersicht oben „n Angaben fehlen“ und die **Feldnamen als Chips** (ab vier: „+ n weitere“);
+  ein Klick springt zum Feld. Die vollständige Meldung steht weiter am Feld.
+- Schwebender Knopf **„Noch n offen · Nächstes ↓“** (im Stil des Absenden-Knopfs) springt von Fehler zu Fehler, solange die Übersicht nicht im Bild ist;
+  ausgefüllte Felder fallen sofort aus Zählung und Übersicht. Kein Modal, kein Toast – die Übersicht bleibt für Screenreader die Meldung (`role=alert`).
+- Kits schalten es per `@import` von `resources/css/_dataform-errors.css` ein: fluid, foto, galerie, essenz, nature, modern, glas, basis, editorial.
+  praxis (eingefroren) sowie starter/frameworks (Kern-Stil) behalten die bisherige Liste.
+
 ### Formulare: Abschnitte übersichtlicher
 - **Tabellen-Designer:** Felder unter einem Abschnitt sind eingerückt, mit Verbindungslinie und der Farbe ihres Abschnitts verbunden;
   der Abschnittskopf ist farbig hinterlegt und lässt sich zuklappen („▾ n Elemente“). Die Zuordnung folgt sofort beim Verschieben oder Typwechsel.
