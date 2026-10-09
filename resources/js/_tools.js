@@ -420,6 +420,11 @@ export function initTools() {
       metaKey: e.metaKey, shiftKey: e.shiftKey, bubbles: true, cancelable: true, composed: false });
     if (!e.composedPath()[0].dispatchEvent(copy)) e.preventDefault();
   }, true);
+  // Werkzeug nach dem Neuladen wieder öffnen (z. B. Design: Vorschau einer Kopf-/Fußvariante lädt die Seite neu)
+  try {
+    const again = sessionStorage.getItem('cms-tool-reopen');
+    if (again) { sessionStorage.removeItem('cms-tool-reopen'); if (defs.has(again)) open(again); }
+  } catch { /* privates Fenster */ }
 }
 
 /** Tastenkürzel eines Werkzeugs? Dann öffnen bzw. zwischen Text und Seitenleiste springen → true */

@@ -102,6 +102,28 @@ final class Design
         return self::$values = self::normalize($saved);
     }
 
+    /** Sitzungsschlüssel der persönlichen Vorschau (Style-Editor der Website, Varianten mit anderem Markup) */
+    public const PREVIEW_KEY = 'design_preview';
+
+    /**
+     * Persönliche Vorschau aus der Sitzung anwenden: ungespeicherte Werte, die das Markup ändern (Kopf-/Fußvariante …), rendert
+     * die Seite vollständig – nur für die angemeldete Person mit Recht „design.edit“, nie für Besucher, nie im Seiten-Cache
+     * (angemeldete Aufrufe werden nicht gecacht). Rückgabe: true, wenn eine Vorschau aktiv ist.
+     */
+    public static function applySessionPreview(): bool
+    {
+        try {
+            if (!app()->auth->check() || !can('design.edit') || !Features::on('design') || !self::enabled()) return false;
+            $v = app()->session->get(self::PREVIEW_KEY);
+            if (!is_array($v) || ($v['_kit'] ?? '') !== app()->theme->name) return false;
+            unset($v['_kit']);
+            self::override($v);
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     /** Werte nur für diese Anfrage ersetzen (Vorschau im Editor) */
     public static function override(?array $values): void
     {

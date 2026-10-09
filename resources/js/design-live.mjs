@@ -10,8 +10,10 @@
  *  - Variablen hell + dunkel per CSSOM (document.adoptedStyleSheets – CSP-konform, kein <style>, kein style-Attribut)
  *  - Schriften: fehlende <link> ergänzen; Varianten-Stylesheets (link[data-design-opt]) austauschen – im Bearbeiten-Modus
  *    über _cq.js umgeschrieben wie alle Stylesheets der Seite
- * Tokens mit 'markup' (Kopf-/Fußvariante …): die Vorschau behält den gespeicherten Wert, Hinweis „Vollständig nach dem Speichern“;
- * nach dem Speichern lädt die Seite neu (im Bearbeiten-Modus nur ohne ungespeicherte Änderungen).
+ * Tokens mit 'markup' (Kopf-/Fußvariante …): ändern den Aufbau der Seite – der Server merkt die Werte als persönliche Vorschau der
+ * Sitzung (Design::applySessionPreview), die Seite lädt neu und rendert vollständig, das Werkzeug öffnet sich wieder
+ * (sessionStorage „cms-tool-reopen“). „Speichern“ übernimmt für alle, „Abbrechen“/Schließen verwirft die Vorschau (Neuladen).
+ * Im Bearbeiten-Modus nur ohne ungespeicherte Änderungen am Inhalt.
  * „Standard“ = Werte des Kits, „Abbrechen“ (und Schließen) = gespeicherter Stand wieder live, „Speichern“ = für die ganze Website.
  */
 import { convertSheet, dropSheet } from './_cq.js';
@@ -30,6 +32,7 @@ const hex = v => {
 let S = null;          // Antwort beim Laden: schema, values, defaults, markup, saved (Live-Stand der gespeicherten Werte)
 let values = {};       // aktuelle (ungespeicherte) Werte
 let saved = {};        // gespeicherte Werte
+let rendered = {};     // Werte, mit denen die Seite gerendert ist (gespeichert bzw. persönliche Vorschau – Markup-Tokens)
 let base = null;       // Live-Stand der gespeicherten Werte (für „Abbrechen“)
 let tokens = {};       // name → Token
 let timer = 0, seq = 0, sheet = null, styleEl = null, optAnchor = null, busy = false;
@@ -89,7 +92,22 @@ function adopt(res) {
 }
 
 // ------------------------------------------------------------------ Server
+/** Markup-Token geändert: Werte als Vorschau der Sitzung merken, Seite neu laden, Werkzeug wieder öffnen */
+async function markupPreview(ctx) {
+  if (window.CMSAdmin?.bar?.dirty) {
+    (S.markup || []).forEach(n => { values[n] = rendered[n]; });
+    sync(ctx); marks(ctx);
+    ctx.toast(tx(ctx, 'editorDirty'), 'info', 7000);
+    return;
+  }
+  try {
+    await ctx.fetch(ctx.tool.data.endpoint, { json: { v: values, preview: 1 } });
+    try { sessionStorage.setItem('cms-tool-reopen', ctx.tool.id || 'design'); } catch { /* */ }
+    location.reload();
+  } catch (e) { ctx.toast(e.message, 'error'); }
+}
 async function preview(ctx) {
+  if ((S.markup || []).some(n => String(values[n]) !== String(rendered[n]))) return markupPreview(ctx);
   const my = ++seq;
   try {
     const res = await ctx.fetch(ctx.tool.data.endpoint, { json: { v: values } });
@@ -239,6 +257,11 @@ function bind(ctx) {
 /** Gespeicherten Stand wieder live zeigen (ohne Server) */
 function revert(ctx, say = false) {
   clearTimeout(timer); seq++;
+  // Persönliche Vorschau einer Kopf-/Fußvariante aktiv: verwerfen und mit den gespeicherten Werten neu laden
+  if ((S.markup || []).some(n => String(rendered[n]) !== String(saved[n]))) {
+    ctx.fetch(ctx.tool.data.endpoint, { json: { clear: 1 } }).finally(() => location.reload());
+    return;
+  }
   const was = isDirty();
   values = { ...saved };
   if (base) apply(base);
@@ -256,11 +279,13 @@ async function save(ctx) {
   try {
     const res = await ctx.fetch(ctx.tool.data.endpoint, { json: { v: values, save: 1 } });
     saved = { ...res.values }; values = { ...res.values }; base = res;
+    const wasPreview = (S.markup || []).some(n => String(rendered[n]) !== String(saved[n]) || String(before[n]) !== String(saved[n]));
+    rendered = { ...saved };
     if (my === seq) apply(res);
     sync(ctx); marks(ctx);
     if (res.fontsFailed?.length) ctx.toast(tx(ctx, 'fontsFailed', { fonts: res.fontsFailed.join(', ') }), 'error');
     // Markup-Varianten geändert: Seite neu laden (Meldung erscheint danach) – nicht, solange der Editor Ungespeichertes hat
-    const markupChanged = (S.markup || []).some(n => String(before[n]) !== String(saved[n]));
+    const markupChanged = wasPreview || (S.markup || []).some(n => String(before[n]) !== String(saved[n]));
     if (markupChanged && !window.CMSAdmin?.bar?.dirty) {
       window.CMSAdmin?.toastNext?.(tx(ctx, 'saved'));
       location.reload();
@@ -294,10 +319,20 @@ export default {
     }
     tokens = {};
     S.schema.groups.forEach(g => g.tokens.forEach(t => { tokens[t.name] = t; }));
-    saved = { ...S.values }; values = { ...S.values }; base = S.saved;
-    adopt(base);
+    saved = { ...S.values }; values = { ...(S.pending || S.values) }; base = S.saved;
+    rendered = { ...(S.pending || S.values) };
+    adopt(S.current || base);
     render(ctx);
-    checks(base.checks || []);
+    checks((S.current || base).checks || []);
+    if (S.pending) {
+      ctx.toast(tx(ctx, 'previewing'), 'info', 7000);
+      // Abschnitt der geänderten Kopf-/Fußvariante aufgeklappt lassen – gleich die nächste Variante vergleichen
+      (S.markup || []).filter(n => String(S.pending[n]) !== String(saved[n])).forEach(n => {
+        const el = P.querySelector(`[data-token="${CSS.escape(n)}"]`);
+        el?.closest('details')?.setAttribute('open', '');
+        el?.scrollIntoView({ block: 'center' });
+      });
+    }
   },
   show(ctx) {
     if (!S) return this.mount(ctx);

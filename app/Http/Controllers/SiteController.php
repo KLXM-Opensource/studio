@@ -144,6 +144,8 @@ final class SiteController
         $app = app();
         $loggedIn = $app->auth->check();
         $error = $status !== 200;
+        // Style-Editor der Website: persönliche Vorschau ungespeicherter Kopf-/Fußvarianten (nur angemeldet, Recht design.edit)
+        if ($loggedIn) \Core\Design::applySessionPreview();
 
         $ctx = $app->entry;
         if ($page['status'] !== 'published' && !$loggedIn && !$ctx) {

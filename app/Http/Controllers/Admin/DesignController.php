@@ -98,8 +98,12 @@ final class DesignController extends AdminController
         $this->guard($r);
         if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
         $values = Design::values();
+        // Persönliche Vorschau (Kopf-/Fußvariante): die Seite ist damit gerendert – Werkzeug zeigt diese Werte als ungespeichert
+        $pending = app()->session->get(Design::PREVIEW_KEY);
+        $pending = is_array($pending) && ($pending['_kit'] ?? '') === app()->theme->name ? Design::normalize(array_diff_key($pending, ['_kit' => 1])) : null;
         return Response::json(['ok' => true, 'schema' => self::translatedSchema(), 'values' => $values, 'defaults' => Design::defaults(),
-            'markup' => Design::markupTokens(), 'saved' => Design::live($values)]);
+            'markup' => Design::markupTokens(), 'saved' => Design::live($values), 'pending' => $pending,
+            'current' => $pending !== null ? Design::live($pending) : null]);
     }
 
     /**
@@ -111,9 +115,20 @@ final class DesignController extends AdminController
     {
         $this->guard($r);
         if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
+        // Persönliche Vorschau verwerfen („Abbrechen“, Schließen)
+        if (!empty($r->post['clear'])) {
+            app()->session->forget(Design::PREVIEW_KEY);
+            return Response::json(['ok' => true]);
+        }
         $values = Design::normalize(is_array($r->post['v'] ?? null) ? $r->post['v'] : []);
         $out = ['ok' => true, 'values' => $values];
+        // Varianten mit anderem Markup (Kopf, Fuß …): Werte für diese Sitzung merken, das Werkzeug lädt die Seite neu
+        if (!empty($r->post['preview'])) {
+            app()->session->set(Design::PREVIEW_KEY, $values + ['_kit' => app()->theme->name]);
+            return Response::json($out);
+        }
         if (!empty($r->post['save'])) {
+            app()->session->forget(Design::PREVIEW_KEY);
             @set_time_limit(180);
             $fonts = Design::save($values, __('Werkzeugleiste der Website'));
             $this->changed();
@@ -124,7 +139,9 @@ final class DesignController extends AdminController
         }
         // Vorschau: Tokens, die das Markup ändern (Kopf-/Fußvariante …), behalten den gespeicherten Wert – sonst passte das
         // Markup der Seite nicht mehr zu Klassen und Stylesheets; sie erscheinen nach dem Speichern (die Seite lädt dann neu)
-        $saved = Design::values();
+        // Bezug: was die Seite gerade zeigt – gespeicherte Werte bzw. die persönliche Vorschau der Sitzung
+        $pv = app()->session->get(Design::PREVIEW_KEY);
+        $saved = is_array($pv) && ($pv['_kit'] ?? '') === app()->theme->name ? Design::normalize(array_diff_key($pv, ['_kit' => 1])) : Design::values();
         foreach (Design::markupTokens() as $n) $values[$n] = $saved[$n] ?? $values[$n];
         return Response::json($out + Design::live($values));
     }

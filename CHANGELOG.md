@@ -20,8 +20,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   Schriften und Varianten-Stylesheets (`css/opt-{token}-{wert}.css`, im Bearbeiten-Modus mit umgeschriebenen Haltepunkten).
 - **Speichern** gilt für die ganze Website (`Design::save()`: Verlauf, Schriften, Seiten-Cache), **Abbrechen**/Schließen zeigt wieder
   den gespeicherten Stand, **Standard** setzt die Kit-Werte ein. Verwaltung → Design bleibt unverändert; beide ändern dieselben Werte.
-- Tokens mit `'markup' => true` (Kopf-/Fußvariante, Menü, Infoleiste, Kopfbereich-Aktionen): Vorschau mit gespeichertem Wert und Hinweis
-  „Vollständig nach dem Speichern“ – nach dem Speichern lädt die Seite neu (im Editor nur ohne ungespeicherte Änderungen).
+- Tokens mit `'markup' => true` (Kopf-/Fußvariante, Menü, Infoleiste, Kopfbereich-Aktionen): **persönliche Vorschau** – die Werte
+  kommen in die Sitzung (`Design::applySessionPreview()`, nur für die angemeldete Person), die Seite lädt neu und rendert vollständig,
+  das Werkzeug öffnet sich wieder. „Speichern“ übernimmt für alle, „Abbrechen“/Schließen verwirft (im Editor nur ohne ungespeicherte Änderungen).
 - Technik: `Core\DesignTool` (Werkzeug), `GET`/`POST /admin/api/design-live` (`DesignController::live/liveApply`, Recht + CSRF),
   `Design::live()`, `htmlClasses()`, `optionCss()`, `fontAssets()`, `markupTokens()`, `classes(?array)`; Werkzeuge kennen die
   Seitenleisten-Art `'panel' => ['size' => 'drawer']` (`body.has-tdrawer`). Besucher bekommen kein zusätzliches Markup oder CSS.

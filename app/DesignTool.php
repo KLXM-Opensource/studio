@@ -30,8 +30,10 @@ final class DesignTool
             'texts' => [
                 'presets' => __('Vorlagen'), 'presetsHelp' => __('Ein Klick zeigt die Vorlage sofort auf dieser Seite – gespeichert wird erst mit „Speichern“.'),
                 'light' => __('hell'), 'dark' => __('dunkel'), 'darkTitle' => __('Im dunklen Farbschema'),
-                'markup' => __('Vollständig nach dem Speichern'),
-                'markupHelp' => __('Diese Einstellung ändert den Aufbau der Seite – sie erscheint nach dem Speichern (die Seite lädt dann neu).'),
+                'markup' => __('Vorschau lädt die Seite neu'),
+                'markupHelp' => __('Diese Einstellung ändert den Aufbau der Seite – für die Vorschau lädt die Seite neu (nur für Sie sichtbar, bis Sie speichern).'),
+                'editorDirty' => __('Erst die Änderungen an der Seite speichern oder verwerfen – die Vorschau dieser Einstellung lädt die Seite neu.'),
+                'previewing' => __('Vorschau nur für Sie – „Speichern“ übernimmt sie für alle, „Abbrechen“ verwirft sie.'),
                 'contrast' => __('Kontrast prüfen'), 'contrastLine' => __('{label} ({mode}): {ratio} : 1 – mindestens {min} : 1'),
                 'defaults' => __('Standard'), 'defaultsTitle' => __('Standardwerte des Kits'), 'cancel' => __('Abbrechen'),
                 'save' => __('Speichern'), 'saving' => __('Wird gespeichert …'),
