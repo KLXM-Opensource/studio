@@ -335,8 +335,24 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-entry-errtip{position:absolute;max-width:min(420px,calc(100vw - 16px));padding:5px 10px;border-radius:6px;background:#B3261E;color:#fff;font:600 13px/1.35 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.2)}
 
 /* Kurze Meldung nach dem Speichern */
-.cms-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:calc(100vw - 32px);padding:10px 18px;border-radius:999px;background:#1E2840;color:#fff;font:600 14px/1.3 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-@media (prefers-reduced-motion:no-preference){.cms-toast{animation:cms-toast .25s ease-out}@keyframes cms-toast{from{opacity:0;transform:translate(-50%,8px)}}}
+.cms-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;width:max-content;max-width:min(560px,calc(100vw - 32px));padding:12px 14px 12px 12px;border-radius:14px;background:#1E2840;color:#fff;font:600 14.5px/1.4 Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;box-shadow:0 14px 40px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.06)}
+.cms-toast__ico{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.16);font-weight:800;font-size:15px}
+.cms-toast__body{display:grid;gap:2px;min-width:0;overflow-wrap:anywhere}
+.cms-toast__body strong{font-weight:800}
+.cms-toast__body strong+span{font-weight:500}
+.cms-toast__act{flex:none;padding:7px 12px;border:0;border-radius:8px;background:#fff;color:#1E2840;font:700 13px/1 inherit;font-family:inherit;cursor:pointer}
+.cms-toast__x{flex:none;display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:transparent;color:inherit;font:400 22px/1 system-ui,sans-serif;cursor:pointer;opacity:.85}
+.cms-toast__x:hover,.cms-toast__x:focus-visible{background:rgba(255,255,255,.16);opacity:1}
+.cms-toast--ok .cms-toast__ico{background:#2E9D63}
+.cms-toast--info{background:#314164}
+/* Fehler: oben mittig, rot, nicht zu übersehen */
+.cms-toast--error{top:max(16px,env(safe-area-inset-top));bottom:auto;padding:14px 14px 14px 14px;background:#B3261E;font-size:15px;box-shadow:0 18px 50px rgba(120,0,0,.35),0 0 0 3px rgba(255,255,255,.9)}
+.cms-toast--error .cms-toast__ico{width:32px;height:32px;background:#fff;color:#B3261E;font-size:18px}
+.cms-toast--error .cms-toast__act{color:#B3261E}
+@media (prefers-reduced-motion:no-preference){.cms-toast{animation:cms-toast .25s ease-out}.cms-toast--error{animation:cms-toast-err .35s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes cms-toast{from{opacity:0;transform:translate(-50%,8px)}}@keyframes cms-toast-err{from{opacity:0;transform:translate(-50%,-16px)}}}
+@media (forced-colors:active){.cms-toast{border:2px solid CanvasText}}
+.cms-toast--error{top:calc(var(--cms-bar-h,48px) + 12px)}   /* auf der Website unter der Werkzeugleiste */
 /* Produktmarke KLXM Studio: Logo + Wortmarke */
 .cms-mark{gap:.3em;align-items:center}
 .cms-mark__logo{width:1.15em;height:1.15em;flex:none;fill:currentColor}
@@ -546,7 +562,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .qg-done .ico{width:16px;height:16px;vertical-align:-3px}
 .qg-intro{margin:0 0 6px;font-size:13px;color:var(--adm-t2,#3F4A47)}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-.cms-toast--error{background:#B3261E}.cms-toast--info{background:#314164}
+
 
 /* Block-Menü (editor.js BlockMenu): Stil wie „+ Block einfügen“, mit Titel, Trennern, Tastenhinweis und Löschen in Rot */
 .cms-blockmenu{width:min(280px,calc(100vw - 16px));max-height:min(520px,calc(100vh - 16px));overflow:auto;gap:2px}

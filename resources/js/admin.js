@@ -966,6 +966,37 @@ function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); in
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 
+// ------------------------------------------------------------ Meldungen nach dem Absenden gut sichtbar machen
+// Fehler-/Erfolgsstreifen (.adm-flash) stehen oben – nach dem Speichern ist man aber meist unten. Deshalb zusätzlich als Toast;
+// bei Feldfehlern mit der Meldung des ersten Felds und „Zum Feld“ (öffnet Reiter und zugeklappte Bereiche, scrollt, setzt den Cursor).
+function revealField(f) {
+  if (!f) return;
+  for (let x = f.parentElement?.closest('details'); x; x = x.parentElement?.closest('details')) x.open = true;
+  const panel = f.closest('[role=tabpanel][hidden]');
+  if (panel) $(`[role=tab][aria-controls="${panel.id}"]`)?.click();
+  const input = $('[aria-invalid="true"], input:not([type=hidden]), select, textarea, [contenteditable="true"]', f) || f;
+  requestAnimationFrame(() => { f.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); input.focus?.({ preventScroll: true }); });
+}
+{
+  const main = $('#main') || d;
+  const errFlash = $$('.adm-flash--error', main).map(x => x.textContent.trim()).filter(Boolean);
+  const bad = $$('.f--error', main);
+  const first = bad[0];
+  const detail = first && ($('.f-error', first)?.textContent.trim() || '');
+  if (errFlash.length || bad.length) {
+    const more = bad.length > 1 ? ' ' + t('(und {n} weitere)', { n: bad.length - 1 }) : '';
+    toast(detail ? detail + more : errFlash.join(' '), 'error', 0, {
+      title: detail ? (errFlash[0] || t('Nicht gespeichert – bitte prüfen')) : t('Das hat nicht geklappt'),
+      action: first ? { label: t('Zum Feld'), fn: () => revealField(first) } : null,
+      sticky: true,
+    });
+    if (first) revealField(first);
+  } else {
+    const ok = $('.adm-flash--success', main)?.textContent.trim();
+    if (ok) toast(ok, 'ok', 5000);
+  }
+}
+
 // Versionen von Seiten und Einträgen: Knopf [data-versions="<Endpunkt>"] in Verwaltung und Werkzeugleiste (auch im Shadow DOM)
 // – lädt resources/js/versions.mjs erst beim Öffnen (data-versions-module)
 d.addEventListener('click', e => {

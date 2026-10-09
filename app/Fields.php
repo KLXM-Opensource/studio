@@ -121,7 +121,10 @@ final class Fields
             if ($err === null && !empty($f['required']) && ($empty || ($type === 'bool' && !$val))) {
                 $err = $type === 'bool' ? self::msg('Bitte bestätigen: {label}.', ['label' => $label]) : self::msg('Bitte „{label}“ ausfüllen.', ['label' => $label]);
             }
-            if ($err === null && !empty($f['max']) && is_string($val) && mb_strlen(strip_tags($val)) > (int) $f['max']) {
+            // Länge nur bei geänderten Werten prüfen: ein schon gespeicherter, zu langer Text (z. B. vor einer neuen Grenze im Kit)
+            // soll das Speichern anderer Felder nicht blockieren – die Zeichenanzeige am Feld weist trotzdem darauf hin
+            $unchanged = array_key_exists($name, $current) && is_string($current[$name]) && $current[$name] === $val;
+            if ($err === null && !$unchanged && !empty($f['max']) && is_string($val) && mb_strlen(strip_tags($val)) > (int) $f['max']) {
                 $err = self::msg('„{label}“ ist zu lang (max. {max} Zeichen).', ['label' => $label, 'max' => $f['max']]);
             }
             if ($err !== null) {

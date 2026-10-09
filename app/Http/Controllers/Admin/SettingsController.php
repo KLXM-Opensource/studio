@@ -100,7 +100,10 @@ final class SettingsController extends AdminController
         if ($lang !== '') {
             $fields = array_values(array_filter(Fields::forTranslation($fields), fn($f) => isset($f['name'])));
         }
-        [$values, $errors] = Fields::sanitize($fields, (array) ($r->post['f'] ?? []));
+        // Bisherige Werte: unveränderte, schon gespeicherte Texte über der Längengrenze blockieren das Speichern nicht
+        $current = [];
+        foreach ($fields as $f) if (isset($f['name'])) $current[$f['name']] = app()->settings->get($f['name'] . ($lang !== '' ? '@' . $lang : ''));
+        [$values, $errors] = Fields::sanitize($fields, (array) ($r->post['f'] ?? []), $current);
         if ($errors) {
             app()->session->flash('error', __('Bitte prüfen Sie die markierten Felder – es wurde nichts gespeichert.'));
             return $this->edit($r, $errors, $values);

@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Verwaltung: Fehlermeldungen nicht mehr zu übersehen
+- Fehler erscheinen als auffällige rote Karte oben mittig (bleibt, bis man sie schließt), Erfolg und Hinweise unten – in der Verwaltung
+  und beim Bearbeiten auf der Website (`CMSAdmin.toast(msg, kind, ms, {title, action, sticky})`).
+- Nach fehlgeschlagenem Speichern nennt die Meldung das erste fehlerhafte Feld; die Seite öffnet Reiter und zugeklappte Bereiche,
+  scrollt zum Feld und setzt den Cursor hinein („Zum Feld“). Der rote Streifen oben ist kräftiger.
+- Ein schon gespeicherter, zu langer Text (z. B. Seitentitel über der Grenze des Kits) blockiert das Speichern anderer Felder nicht mehr;
+  die Länge wird geprüft, sobald man das Feld selbst ändert.
+
 ### Handbuch: Inhaltsverzeichnis auf kleinen Bildschirmen
 - Das Inhaltsverzeichnis rechts (Handbuch, Entwicklerhandbuch) ist höchstens so hoch wie das Fenster und scrollt für sich;
   das gerade gelesene Kapitel läuft darin sichtbar mit. Vorher waren auf kleinen Bildschirmen die hinteren Kapitel nicht erreichbar.
