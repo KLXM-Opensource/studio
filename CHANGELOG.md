@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Skiplink auch für angemeldete Personen zuerst
+- „Zum Inhalt springen“ steht in allen Kits vor der Werkzeugleiste der Redaktion (vorher kam man angemeldet erst nach der ganzen Leiste hin)
+  und erscheint beim Fokus unter der Leiste statt dahinter (`resources/css/editor.css`). Für Besucher unverändert.
+
 ### Aktionslog (System → Aktionslog)
 - Neue Übersicht für die Administration: wer hat wann **Seiten, Datensätze und Medien** angelegt, geändert, veröffentlicht, offline genommen,
   verworfen oder gelöscht – mit Link zum Objekt (Medien öffnen direkt mit ihren Infos, Seiten zusätzlich „Auf der Website ansehen“), Gelöschtes durchgestrichen.

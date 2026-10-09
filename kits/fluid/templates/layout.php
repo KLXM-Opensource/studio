@@ -67,8 +67,8 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?php endif; ?>
 </head>
 <body class="<?= !empty($page['is_home']) ? 'is-home' : 'is-sub' ?>">
+<a class="skip" id="top" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>   <?php /* Skiplink zuerst – auch vor der Werkzeugleiste der Redaktion (Tab-Reihenfolge) */ ?>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
-<a class="skip" id="top" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?>
 <?= notice_open('topnote') ?><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>

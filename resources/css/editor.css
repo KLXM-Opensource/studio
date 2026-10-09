@@ -261,6 +261,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    den das Kit im Bearbeiten nicht kleben lässt, bleibt an seinem Platz (sonst rutschte er um die Leistenhöhe nach unten).
    !important: Frameworks setzen top teils inline (UIkit). */
 :is(html.cms-has-bar,html:has(.cms-bar-host)){--cms-toolbar-h:var(--cms-bar-offset,var(--cms-bar-h,52px))}
+/* Skiplink der Kits (a.skip, a.fw-skip) erscheint beim Fokus unter der Werkzeugleiste, nicht dahinter */
+:is(html.cms-has-bar,html:has(.cms-bar-host)) :is(a.skip,a.fw-skip):is(:focus,:focus-visible){top:calc(var(--cms-toolbar-h,52px) + .75rem);z-index:2147483301}
 :is(html.cms-has-bar,html:has(.cms-bar-host)) :is(.sticky-top,.fixed-top,.navbar.fixed-top,.uk-sticky,.uk-sticky-fixed,[uk-sticky],.sticky.top-0,.fixed.top-0,[data-cms-pinned]):not(.cms-bar-host){top:var(--cms-bar-offset,var(--cms-bar-h,52px))!important}
 /* Overlays der Frameworks (UIkit uk-offcanvas/uk-modal, Bootstrap .offcanvas/.modal, z-index ~1000–1055) lägen sonst unter dem
    angehobenen Kopf des Kits (2147483050): Z-Skala oben. Seitenmenüs zusätzlich um die sichtbare Leistenhöhe einrücken, sonst

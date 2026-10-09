@@ -56,8 +56,8 @@ $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 <?php endif; ?>
 </head>
 <body>
+<a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>   <?php /* Skiplink zuerst – auch vor der Werkzeugleiste der Redaktion (Tab-Reihenfolge) */ ?>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) /* ohne eigenes Partial rendert der Core die Leiste */ ?><?php endif; ?>
-<a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?><?= notice_open('notice') ?><div class="wrap"><?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>
 <?= $theme->partial('header') ?>

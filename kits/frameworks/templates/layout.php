@@ -57,8 +57,8 @@ $fw = frameworks_assets();
 <?php endif; ?>
 </head>
 <body>
+<a class="fw-skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>   <?php /* Skiplink zuerst – auch vor der Werkzeugleiste der Redaktion */ ?>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
-<a class="fw-skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?><?= notice_open('fw-notice') ?><?= inline((string) setting('notice_text')) ?></div>
 <?php endif; ?>
 <?= $theme->partial('header') ?>

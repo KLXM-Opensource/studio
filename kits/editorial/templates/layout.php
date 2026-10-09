@@ -59,8 +59,8 @@ $isEntry = app()->entry !== null;
 <?php endif; ?>
 </head>
 <body class="<?= !empty($page['is_home']) ? 'is-home' : 'is-sub' ?><?= $isEntry ? ' is-entry' : '' ?>">
+<a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>   <?php /* Skiplink zuerst – auch vor der Werkzeugleiste der Redaktion (Tab-Reihenfolge) */ ?>
 <?php if ($toolbar): ?><?= $theme->partial('toolbar', $toolbar) ?><?php endif; ?>
-<a class="skip" href="#main"><?= e(lt('Zum Inhalt springen')) ?></a>
 <?php if ($notice): ?>
 <?= notice_open('topnote') ?><div class="wrap"><span class="topnote__label"><?= e(lt('Hinweis')) ?></span> <?= inline((string) setting('notice_text')) ?></div></div>
 <?php endif; ?>
