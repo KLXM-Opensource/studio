@@ -9,6 +9,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Skiplink auch für angemeldete Personen zuerst
 - „Zum Inhalt springen“ steht in allen Kits vor der Werkzeugleiste der Redaktion (vorher kam man angemeldet erst nach der ganzen Leiste hin)
   und erscheint beim Fokus unter der Leiste statt dahinter (`resources/css/editor.css`). Für Besucher unverändert.
+- Behoben: Im Bearbeiten-Modus rutschte die Werkzeugleiste dadurch ans Seitenende (oben blieb ein leerer Streifen) – die Hülle für die
+  Container-Abfragen (`resources/js/_cq.js`) steht jetzt hinter der Leiste, der Skiplink bleibt außerhalb.
 
 ### Aktionslog (System → Aktionslog)
 - Neue Übersicht für die Administration: wer hat wann **Seiten, Datensätze und Medien** angelegt, geändert, veröffentlicht, offline genommen,

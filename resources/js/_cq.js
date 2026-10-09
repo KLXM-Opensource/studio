@@ -14,7 +14,7 @@
  * Grenzen: Skripte des Kits, die die Fensterbreite abfragen (matchMedia), sehen weiter das Fenster; rem bezieht sich weiter auf <html>.
  */
 const d = document;
-const SKIP_HOST = '.cms-bar-host,#cms-layer-host,#cms-epanel-host,script,style,link,template,noscript';
+const SKIP_HOST = '.cms-bar-host,#cms-layer-host,#cms-epanel-host,a.skip,a.fw-skip,script,style,link,template,noscript';   // Skiplink bleibt vor der Leiste
 const WIDTH = /\(\s*(?:min-|max-)?width\s*[:<>=]|\(\s*[\d.]+[a-z%]*\s*[<>]=?\s*width|\bwidth\s*[<>]=?/i;
 const OTHER = /\(\s*(?!(?:min-|max-)?width\b)[a-z-]+\s*[:)]|\b(print|speech)\b/i;
 
@@ -110,7 +110,9 @@ export async function responsiveEditing() {
   if (!kids.length) return;
   const wrap = d.createElement('div');
   wrap.className = 'cms-cq-site';
-  kids[0].before(wrap);
+  // Hülle hinter die Werkzeugleiste (sonst rutscht die Leiste ans Seitenende, wenn der Skiplink vor ihr steht)
+  const bar = d.querySelector('body>.cms-bar-host');
+  if (bar && bar.compareDocumentPosition(kids[0]) & Node.DOCUMENT_POSITION_FOLLOWING) bar.after(wrap); else kids[0].before(wrap);
   kids.forEach(k => wrap.append(k));
   // 1 % der Seitenbreite als feste Länge (ersetzt vw in den umgeschriebenen Stylesheets) – folgt der Seitenleiste
   const setVw = () => d.documentElement.style.setProperty('--cms-vw', wrap.clientWidth / 100 + 'px');
