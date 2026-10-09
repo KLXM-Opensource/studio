@@ -81,6 +81,8 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 
 /* Menüpunkte (nl-*) */
 .nl-underline .hnav__link:hover{background:none;color:var(--f-ink);text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:2px;text-underline-offset:.5em}
+/* Link + Pfeil bei „Unterstrichen“: keine Fläche beim Zeigen bzw. Öffnen, nur Linie */
+.nl-underline .hnav .hnav__item--split:is(:hover,:has(>.hnav__sub[open]))>.hnav__link--top,.nl-underline .hnav .hnav__item--split:is(:hover,:has(>.hnav__sub[open]))>.hnav__sub>.hnav__toggle{background:none}
 .nl-pill .hnav__link{border-radius:999px;padding-inline:1rem}
 .nl-pill :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){background:var(--f-a-soft);color:var(--f-ink);text-decoration:none}
 :is(.hbg-accent,.hbg-secondary,.hbg-dark).nl-pill :is(.hnav__link[aria-current=page],.hnav__link[data-active]){background:var(--f-surface)}

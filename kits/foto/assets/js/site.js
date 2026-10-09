@@ -131,8 +131,10 @@ d.addEventListener('keydown', e => {
 // Design „Link + Pfeil, öffnet auch beim Überfahren“ (np-hover): nur mit Maus, kurze Verzögerung beim Verlassen
 if (html.classList.contains('np-hover') && matchMedia('(hover:hover) and (pointer:fine)').matches) d.querySelectorAll('.hnav__item--split').forEach(li => {
   const s = li.querySelector('.hnav__sub');
-  let t = 0;
-  li.addEventListener('mouseenter', () => { clearTimeout(t); if (inline(s)) s.open = true; });
+  let t = 0, o = 0;
+  li.addEventListener('mouseenter', () => { clearTimeout(t); if (inline(s) && !s.open) s.open = o = 1; });
+  // Der erste Klick auf den Pfeil nach dem Öffnen per Maus schließt nicht gleich wieder
+  s.firstElementChild.addEventListener('click', e => { if (s.open && o) e.preventDefault(); o = 0; });
   li.addEventListener('mouseleave', () => { t = setTimeout(() => { if (inline(s) && !s.contains(d.activeElement)) s.open = false; }, 250); });
 });
 // Seitenblatt mit „Link + Pfeil“: Unterseiten per Schaltfläche (ohne JavaScript alles sichtbar)
