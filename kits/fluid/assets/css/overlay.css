@@ -47,7 +47,7 @@ li:has(>.hnav__det)>.hnav__sublink{padding-inline-end:3.25rem}
 .nv-slide ul:has(>li>.hnav__det[open])>li:not(:has(>.hnav__det[open])),
 .nv-slide li:has(>.hnav__det[open])>.hnav__sublink,
 .nv-slide .hnav__det[open]:has(.hnav__det[open])>.hnav__more{display:none}
-.nv-slide .hnav__det[open]>.hnav__more{position:static;display:flex;justify-content:flex-start;gap:.5rem;width:auto;height:auto;margin-bottom:.25rem;padding:.55rem .85rem;border:0;border-bottom:1px solid var(--f-line);color:var(--f-ink);font:600 var(--f-t-1)/1.3 var(--f-font-label);letter-spacing:.06em;text-transform:uppercase}
+.nv-slide .hnav__det[open]>.hnav__more{position:static;display:flex;justify-content:flex-start;gap:.5rem;width:auto;height:auto;margin-bottom:.3rem;padding:.55rem .85rem;border:0;border-radius:max(3px,calc(var(--f-r-l) - .4rem));color:var(--f-ink);font:600 var(--f-t-1)/1.3 var(--f-font-label);letter-spacing:.06em;text-transform:uppercase}
 .nv-slide .hnav__det[open]>.hnav__more .hnav__morechev{rotate:90deg}
 .nv-slide .hnav__det[open]>.hnav__more .hnav__more-t{display:inline}
 .nv-slide .hnav__nested .hnav__sublink,.nv-slide .hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
@@ -97,3 +97,6 @@ html:has(.mnav:popover-open){overflow:hidden}
 .hnav__panel :is(.hnav__sublink,.hnav__more):focus-visible{outline:2px solid var(--f-focus);outline-offset:-2px}
 .hnav__panel .hnav__sublink:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}   /* _base.css setzt beim Fokus 2px */
 .hnav__panel .hnav__more:focus-visible{border-radius:0 max(3px,calc(var(--f-r-l) - .4rem)) max(3px,calc(var(--f-r-l) - .4rem)) 0}
+/* Slide: Zurück-Zeile ringsum gerundet wie die Einträge; die Trennlinie gehört zur Liste darunter (biegt sich nicht in die Rundung) */
+.nv-slide .hnav__det[open]>.hnav__nested{padding-top:.3rem;border-top:1px solid var(--f-line)}
+.nv-slide .hnav__det[open]>.hnav__more:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}
