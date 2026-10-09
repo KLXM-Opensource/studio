@@ -90,4 +90,6 @@ return [
     '5 von 5' => '5 out of 5',
     '4,5 von 5' => '4.5 out of 5',
     '4 von 5' => '4 out of 5',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

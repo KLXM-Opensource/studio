@@ -121,4 +121,14 @@ return [
     'Magazin-Startseite oder neue Ausgabe: Titelgeschichte mit Ausgabe-Zeile und zwei, drei Anrissen weiterer Beiträge.' => 'Magazine home page or new issue: cover story with issue line and two or three teasers for further articles.',
     'Verband, Kulturhaus, Verein mit vielen Terminen oder Meldungen: Das Nächste steht sofort oben, aktuell aus der Datentabelle.' => 'Association, arts centre or club with many events or news items: what’s next is right at the top, live from the data table.',
     'Mitglieder, Publikum oder Partner kommen zu Wort: ein Zitat als Einstieg, z. B. für Mitmachen, Spenden oder Ehrenamt.' => 'Members, audience or partners have their say: a quote as the opener, e.g. for joining, donating or volunteering.',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Menüpunkte mit Unterseiten' => 'Menu items with subpages',
+    'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten' => 'Link + arrow – the menu item opens its page, the arrow the subpages',
+    'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus' => 'Link + arrow, subpages also open on mouse hover',
+    'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite' => 'Click opens the subpages, the entry “Overview” leads to the page',
+    'Gilt für das Menü in der Leiste und im Menü-Blatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.' => 'Applies to the menu in the bar and in the menu sheet (phone). “Link + arrow” needs no extra “Overview” entry.',
+    'Dritte Menüebene im Aufklappmenü' => 'Third menu level in the dropdown',
+    'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
+    'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
+    'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
 ];

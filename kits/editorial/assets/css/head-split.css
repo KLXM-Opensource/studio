@@ -14,6 +14,8 @@
   .site-header--split .nav{gap:2px}
   .site-header--split .nav__link{min-height:50px;padding:0 16px 0 0;margin-right:10px;font:600 .8125rem/1 var(--e-font);letter-spacing:.08em;text-transform:uppercase;border-bottom:3px solid transparent;text-decoration:none!important}
   .site-header--split .nav__link[aria-current=page],.site-header--split .nav__link[data-active],.site-header--split .nav__sub[data-active]>.nav__link{border-bottom-color:var(--e-a);color:var(--e-ink)}
+  .site-header--split .nav .nav__item--split>.nav__link--top{margin-right:0;padding-right:4px}
+  .site-header--split .nav .nav__item--split>.nav__sub>.nav__link--toggle{min-width:0;padding:0 14px 0 2px}
 }
 @media (max-width:959.98px){
   .strip--tabs{display:block;border-top:1px solid var(--e-line)}

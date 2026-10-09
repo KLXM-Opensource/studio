@@ -210,12 +210,24 @@ function editorial_chev(): string
     return '<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="m3 4.5 3 3 3-3"/></svg>';
 }
 
+/** Menüpunkte mit Unterseiten: „split“ (Link + Pfeil, Standard), „hover“ (dazu Öffnen beim Überfahren), „overview“ (Klick öffnet, mit „Übersicht“) */
+function editorial_nav_parent(): string
+{
+    $v = (string) design('nav_parent');
+    return in_array($v, ['split', 'hover', 'overview'], true) ? $v : 'split';
+}
+
 /**
  * Hauptmenü als Liste: Unterseiten aufklappbar über <details>/<summary> – funktioniert ohne JavaScript;
- * site.js ergänzt Pfeiltasten, Escape, „nur eins offen“ und schließt beim Klick daneben. Mobil = Akkordeon im Menü-Blatt.
+ * site.js ergänzt Pfeiltasten, Escape, „nur eins offen“, Öffnen beim Überfahren und schließt beim Klick daneben.
+ * Mobil = Akkordeon im Menü-Blatt. Design „Menüpunkte mit Unterseiten“:
+ *  - split/hover: die Rubrik bleibt ein Link, daneben öffnet ein Pfeil (<summary>) die Unterseiten – kein „Übersicht“-Eintrag
+ *  - overview: die Rubrik öffnet das Menü, erster Eintrag „Übersicht“ führt zur Seite (bisheriges Verhalten)
+ * Dritte Ebene: .subnav--nested (Design „Dritte Menüebene“: eingerückt bzw. gruppiert – nur CSS, Klassen nv-*).
  */
 function editorial_nav_list(array $menu): string
 {
+    $split = editorial_nav_parent() !== 'overview';
     $currentId = (int) (app()->currentPage['id'] ?? 0);
     $cur = fn(array $m) => is_int($m['id']) && $m['id'] === $currentId ? ' aria-current="page"' : '';
     $nested = function (array $items, string $cls) use (&$nested, $cur): string {
@@ -233,11 +245,17 @@ function editorial_nav_list(array $menu): string
             $h .= '<li class="nav__item"><a class="nav__link" href="' . e($m['href']) . '"' . $cur($m) . $active . '>' . e($m['label']) . '</a></li>';
             continue;
         }
-        $h .= '<li class="nav__item has-sub"><details class="nav__sub"' . $active . '>'
-            . '<summary class="nav__link"><span>' . e($m['label']) . '</span>' . editorial_chev() . '</summary>'
-            . '<ul class="subnav"><li><a class="subnav__link subnav__link--all" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . '<span class="sr-only">: ' . e($m['label']) . '</span></a></li>';
+        if ($split) {
+            $h .= '<li class="nav__item has-sub nav__item--split"><a class="nav__link nav__link--top" href="' . e($m['href']) . '"' . $cur($m) . $active . '>' . e($m['label']) . '</a>'
+                . '<details class="nav__sub"' . $active . '><summary class="nav__link nav__link--toggle" aria-label="' . e(lt('Unterseiten von {name}', ['name' => $m['label']])) . '">'
+                . editorial_chev() . '</summary><ul class="subnav">';
+        } else {
+            $h .= '<li class="nav__item has-sub"><details class="nav__sub"' . $active . '>'
+                . '<summary class="nav__link"><span>' . e($m['label']) . '</span>' . editorial_chev() . '</summary>'
+                . '<ul class="subnav"><li><a class="subnav__link subnav__link--all" href="' . e($m['href']) . '"' . $cur($m) . '>' . e(lt('Übersicht')) . '<span class="sr-only">: ' . e($m['label']) . '</span></a></li>';
+        }
         foreach ($m['children'] as $c) {
-            $h .= '<li><a class="subnav__link" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children'], 'subnav subnav--nested') . '</li>';
+            $h .= '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="subnav__link" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children'], 'subnav subnav--nested') . '</li>';
         }
         $h .= '</ul></details></li>';
     }
