@@ -21,6 +21,8 @@
     <tr><td>Auf- und zuklappen</td><td>Dreieck vor der Seite oder <kbd>→</kbd>/<kbd>←</kbd>. „Alle aufklappen/zuklappen“ oben.</td></tr>
     <tr><td>Öffnen</td><td>Doppelklick oder <kbd>Enter</kbd> öffnet den Editor.</td></tr>
     <tr><td>Weitere Aktionen</td><td>Rechtsklick oder <b><?= icon('dots-three', ['label' => 'Mehr']) ?></b>: Seiteneinstellungen, Ansehen, Neue Unterseite, Duplizieren, Änderungen veröffentlichen, Löschen (Unterseiten rücken dann eine Ebene nach oben).</td></tr>
+    <tr><td>Hinweise</td><td>Symbole in der Spalte <b>Hinweise</b> – Maus darauf zeigt die Erklärung: <?= icon('pencil-simple', ['label' => 'Stift']) ?> unveröffentlichte Änderungen (unter „Entwürfe“ vergleichen), durchgestrichene <?= icon('magnifying-glass', ['label' => 'Lupe']) ?> nicht in Suchmaschinen (noindex), weitere von Erweiterungen (z. B. Schloss für geschützte Bereiche).</td></tr>
+    <tr><td>Adressen</td><td>Die Adresse einer Seite zeigt der Tooltip am Titel. Als eigene Spalte: Knopf <b>Adressen</b> über der Liste (bleibt eingeschaltet, bis Sie ihn wieder ausschalten).</td></tr>
     <tr><td>Menü</td><td>Schalter in der Spalte <b>Menü</b>: Seite erscheint im Hauptmenü, Unterseiten als Aufklappmenü.</td></tr>
     <tr><td>Online / Offline</td><td>Klick auf den Status (oder Rechtsklick → <b>Offline nehmen</b> / <b>Online stellen</b>) schaltet direkt um, ohne die Seite neu zu laden. <b>Offline nehmen</b> fragt vorher nach. Mit der Tastatur: <kbd>Tab</kbd> bis zum Status, <kbd>Enter</kbd>. Nur mit dem Recht „Seiten veröffentlichen“; die Startseite ist immer online.</td></tr>
   </table>

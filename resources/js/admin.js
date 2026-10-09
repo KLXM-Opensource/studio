@@ -724,7 +724,7 @@ if (pt) {
     const now = res.state || (online ? 'online' : 'offline');
     n.dataset.state = now;
     paintStatus(btn, now, title);
-    if (online) { n.dataset.dirty = '0'; n.dataset.published = '1'; $(':scope > .pt-row .pt-draft', n)?.remove(); }
+    if (online) { n.dataset.dirty = '0'; n.dataset.published = '1'; $(':scope > .pt-row .pt-hint--draft', n)?.remove(); }
     setDraftsBadge(res.drafts);
     note(res.message || t(online ? '„{title}“ ist online.' : '„{title}“ ist offline.', { title }));
   };
@@ -768,6 +768,13 @@ if (pt) {
     else $$('.pt-hit-parent', tree).forEach(n => n.classList.remove('pt-hit-parent'));
   });
   $('[data-expand-all]', pt).onclick = () => $$('.pt-node[aria-expanded]', tree).forEach(n => setExp(n, true));
+  // Adressen als eigene Spalte nur auf Wunsch (gemerkt im Browser); sonst Tooltip am Titel
+  const pathBtn = $('[data-paths-toggle]', pt);
+  if (pathBtn) {
+    const setPaths = on => { pt.classList.toggle('is-paths', on); pathBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); };
+    try { setPaths(localStorage.getItem('pt-paths') === '1'); } catch {}
+    pathBtn.onclick = () => { const on = !pt.classList.contains('is-paths'); setPaths(on); try { localStorage.setItem('pt-paths', on ? '1' : '0'); } catch {} };
+  }
   $('[data-collapse-all]', pt).onclick = () => $$('.pt-node[aria-expanded]', tree).forEach(n => setExp(n, false));
 
   // Verschieben. Die Stelle geht als Nachbarseite an den Server (before_id/after_id), nicht als Index: Auf derselben Ebene

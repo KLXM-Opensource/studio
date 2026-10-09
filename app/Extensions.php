@@ -715,6 +715,7 @@ final class Extensions
                 foreach ((array) ($d['badges'] ?? []) as $b) {
                     if (!is_array($b) || trim((string) ($b['label'] ?? '')) === '') continue;
                     $badges[] = ['label' => (string) $b['label'], 'title' => (string) ($b['title'] ?? ''),
+                        'icon' => preg_match('~^[a-z][a-z0-9-]{0,40}$~', (string) ($b['icon'] ?? '')) ? (string) $b['icon'] : '',   // Symbol in der Spalte „Hinweise“
                         'tone' => in_array($b['tone'] ?? '', ['ok', 'warn', 'info', 'muted'], true) ? (string) $b['tone'] : 'info'];
                 }
                 foreach ((array) ($d['actions'] ?? []) as $a) {

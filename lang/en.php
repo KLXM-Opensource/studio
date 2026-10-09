@@ -7173,4 +7173,6 @@ return [
     'Gruppe mit Rahmen' => 'Group with frame',
     'Text im Formular' => 'Text in the form',
     'Zwischenüberschrift' => 'Subheading',
+    'Adressen' => 'Addresses',
+    'Adressen der Seiten als eigene Spalte zeigen' => 'Show page addresses as a column',
 ];

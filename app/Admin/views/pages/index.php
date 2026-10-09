@@ -42,19 +42,20 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell): string {
         . '<span class="pt-name" style="--depth:' . $n['depth'] . '">'
         . ($kids ? '<button type="button" class="pt-twisty" tabindex="-1" aria-hidden="true" data-toggle></button>' : '<span class="pt-twisty pt-twisty--none"></span>')
         . '<span class="pt-icon pt-icon--' . ($p['is_home'] ? 'home' : ($kids ? 'folder' : 'page')) . '" aria-hidden="true"></span>'
-        . '<a class="pt-title" href="' . e($url) . '?edit=1" tabindex="-1">' . e($p['title']) . '</a>'
-        // Kennzeichen (noindex, Erweiterungen über Extension::pageList) hinter dem Titel – dort ist Platz, die Statusspalte ist schmal
-        . (($tags = (!empty($p['noindex']) ? '<span class="pt-ext pt-ext--info" title="' . e(__('Nicht in Suchmaschinen und Sitemap')) . '">' . e(__('noindex')) . '</span>' : '')
-            . implode('', array_map(fn($b) => '<span class="pt-ext pt-ext--' . e($b['tone']) . '"' . ($b['title'] !== '' ? ' title="' . e($b['title']) . '"' : '') . '>' . e($b['label']) . '</span>', $ext['badges']))) !== '' ? '<span class="pt-tags">' . $tags . '</span>' : '')
+        . '<a class="pt-title" href="' . e($url) . '?edit=1" tabindex="-1" title="' . e($p['is_home'] ? '/' : '/' . $p['path']) . '">' . e($p['title']) . '</a>'
         . ($multi ? '<span class="pt-langs">' . implode('', array_map(fn($l) => '<span class="pt-lang' . (in_array($l, $trans, true) ? ' is-on' : '') . '" title="' . e(Lang::all()[$l]) . '">' . e(strtoupper($l)) . '</span>', array_keys(Lang::all()))) . '</span>' : '')
         . '</span>'
         . '<span class="pt-path">' . e($p['is_home'] ? '/' : '/' . $p['path']) . '</span>'
         . '<span class="pt-status">' . $statusCell($p)
         // Vorschau (Seitenleiste, resources/js/_ptpreview.js) direkt neben Online/Offline
         . ' <button type="button" class="pt-pvbtn" data-ptpv-row aria-pressed="false" aria-label="' . e(__('Vorschau: {title}', ['title' => $p['title']])) . '" title="' . e(__('Vorschau')) . '">' . icon('eye') . '</button>'
-        // Veröffentlichte Seite mit offenem Entwurf (Verwaltung → Entwürfe, Core\Review\Drafts)
-        . ($dirty ? ' <span class="pt-draft" title="' . e(__('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')) . '">' . e(__('Entwurf offen')) . '</span>' : '')
         . '</span>'
+        // Hinweise als Symbole mit Tooltip: offener Entwurf (Core\Review\Drafts), noindex, Kennzeichen von Erweiterungen (Extension::pageList)
+        . '<span class="pt-hints">' . implode('', array_map(fn($x) => '<span class="pt-hint pt-hint--' . $x[0] . '" tabindex="-1" role="img" aria-label="' . e($x[2]) . '" title="' . e($x[2]) . '">' . icon($x[1]) . '</span>', array_merge(
+            $dirty ? [['draft', 'pencil-simple', __('Entwurf offen') . ' – ' . __('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')]] : [],
+            !empty($p['noindex']) ? [['noindex', 'magnifying-glass', __('noindex') . ' – ' . __('Nicht in Suchmaschinen und Sitemap')]] : [],
+            array_map(fn($b) => [$b['tone'], $b['icon'] ?: ['ok' => 'check-circle', 'warn' => 'warning'][$b['tone']] ?? 'info', $b['label'] . ($b['title'] !== '' ? ' – ' . $b['title'] : '')], $ext['badges'])
+        ))) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
         . '<span class="pt-date">' . e(date('d.m.Y', strtotime((string) $p['updated_at']))) . '</span>'
         . '<span class="pt-more"><button type="button" class="pt-morebtn" data-more aria-label="Aktionen für „' . e($p['title']) . '“">' . icon('dots-three') . '</button></span>'
@@ -122,8 +123,10 @@ $canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pa
     <label class="fx-search dt-search"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3 9l3.3 3.3 1-1L11 10A5 5 0 0 0 7 2zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></svg><input type="search" placeholder="Seiten filtern" aria-label="Seiten filtern" data-filter></label>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-expand-all>Alle aufklappen</button>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-collapse-all>Alle zuklappen</button>
+    <?php // Adressen nur auf Wunsch (admin.js → Seitenbaum: aria-pressed, gemerkt im Browser); sonst als Tooltip am Titel ?>
+    <button type="button" class="adm-btn adm-btn--small adm-btn--ghost pt-pathbtn" data-paths-toggle aria-pressed="false" title="<?= e(__('Adressen der Seiten als eigene Spalte zeigen')) ?>"><?= icon('link') ?> <?= e(__('Adressen')) ?></button>
   </div>
-  <div class="pt-head" aria-hidden="true"><span>Name</span><span>Adresse</span><span>Status</span><span>Menü</span><span>Geändert</span><span></span></div>
+  <div class="pt-head" aria-hidden="true"><span>Name</span><span class="pt-h-path">Adresse</span><span>Status</span><span class="pt-h-hints"><?= e(__('Hinweise')) ?></span><span>Menü</span><span class="pt-h-date">Geändert</span><span></span></div>
   <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"><?= $html ?></ul>
   <footer class="dt-foot"><span><?= $count ?> Seiten</span><span data-pt-msg aria-live="polite"></span></footer>
 </div>

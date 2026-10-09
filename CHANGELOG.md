@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenverwaltung: Spalte „Hinweise“, Adressen auf Wunsch
+- Kennzeichen sind jetzt **Symbole in einer eigenen Spalte „Hinweise“** mit Tooltip: offener Entwurf (Stift), noindex (durchgestrichene Lupe),
+  Kennzeichen von Erweiterungen (Farbe nach `tone`, Symbol über das neue optionale `icon` in `Extension::pageList`). Keine Pills mehr am Titel.
+- Die **Adresse** ist standardmäßig ausgeblendet – als Tooltip am Titel, als Spalte über den Knopf **Adressen** (merkt sich der Browser).
+- Behoben: Status und Vorschau-Auge der Startseite standen nicht bündig mit den übrigen Zeilen.
+
 ### Kit fluid: Aufklappmenü mit Akkordeon oder Slide, ohne Pills
 - Design „Dritte Menüebene im Aufklappmenü“ hat zwei neue Varianten: **Akkordeon** (neuer Standard) – ein Pfeil rechts neben dem Link
   klappt die Unterseiten auf, je Ebene ist eins offen, der Zweig der aktuellen Seite ist offen; **Slide** – der Pfeil schiebt die

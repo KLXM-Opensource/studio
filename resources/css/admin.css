@@ -888,7 +888,7 @@ img.media-vthumb{object-fit:cover}
 .adm-main:has(.pt){max-width:1400px}
 .pt{border-radius:8px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line),0 20px 50px -30px rgba(0,0,0,.35);overflow:hidden;font-size:14px}
 .pt-bar .dt-search{margin-left:0;margin-right:auto}
-.pt-head,.pt-row{display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,1.5fr) 130px 70px 96px 40px;gap:10px;align-items:center}
+.pt-head,.pt-row{display:grid;grid-template-columns:minmax(0,1fr) 130px 64px 70px 96px 40px;gap:10px;align-items:center}
 .pt-head{padding:6px 14px;border-bottom:1px solid var(--adm-line);font-size:12px;font-weight:600;color:var(--adm-t3)}
 .pt-tree,.pt-tree ul{list-style:none;margin:0;padding:0}
 .pt-tree{outline:none;max-height:calc(100vh - 300px);overflow:auto}
@@ -935,7 +935,7 @@ img.media-vthumb{object-fit:cover}
 .pt-tree.is-filtering .pt-node:not(.pt-hit):not(.pt-hit-parent) > .pt-row{display:none}
 .pt-templates{margin-top:20px}
 .pt-templates small{color:var(--adm-t3);font-family:ui-monospace,Menlo,monospace}
-@media (max-width:900px){.pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 90px 50px 34px}.pt-head span:nth-child(2),.pt-head span:nth-child(5),.pt-path,.pt-date{display:none}}
+@media (max-width:900px){.pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 90px 56px 50px 34px}.pt-h-path,.pt-h-date,.pt-path,.pt-date{display:none}}
 .dt-search svg{width:14px;height:14px;flex:none;fill:currentColor}
 .f-reltools{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .f-reltools input{flex:1;max-width:260px;min-height:34px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--adm-in);font:400 14px var(--adm-font)}
@@ -2181,7 +2181,7 @@ html.adm-ui[data-theme=dark] .sp-dot,html.adm-ui[data-theme=dark] .sp-item.is-un
 @media (max-width:900px){.st-pv.is-sheet .st-pv__close{display:inline-flex}}
 @media (max-width:600px){
   /* Seitenbaum: Sprachkürzel ausblenden, schmalere Statusspalte */
-  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 72px 40px 30px;gap:6px}
+  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 72px 56px 40px 30px;gap:6px}
   .pt-row{padding:2px 8px}
   .pt-head{padding:6px 8px}
   .pt-langs{display:none}
@@ -2631,15 +2631,23 @@ img.adm-ava{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.22)}
 .fx-vbadge svg{width:13px;height:13px;margin-left:2px}
 @media (forced-colors:active){.fx-vbadge{border:1px solid CanvasText}}
 /* Seitenbaum: Hinweise von Erweiterungen in der Spalte „Status“ (Extension::pageList) */
-/* Kennzeichen hinter dem Seitentitel: schrumpfen nicht (der Titel kürzt sich), lange Texte ab 140px mit … und vollem Text im title */
-.pt-tags{display:flex;flex:none;gap:4px;min-width:0;max-width:45%}
-.pt-ext{display:inline-block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;
-  padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;line-height:17px;background:var(--adm-fill);color:var(--adm-t2)}
-.pt-ext--ok{background:var(--adm-ok-bg);color:var(--adm-ok)}
-.pt-ext--warn{background:var(--adm-warn-bg);color:var(--adm-warn)}
-.pt-ext--info{background:var(--adm-info-bg);color:var(--adm-a-ink)}
-.pt-node[aria-selected=true] > .pt-row .pt-ext{background:rgba(255,255,255,.22);color:#fff}
-@media (forced-colors:active){.pt-ext{border:1px solid CanvasText}}
+/* Spalte „Hinweise“: Symbole mit Tooltip (title + aria-label) – offener Entwurf, noindex, Kennzeichen von Erweiterungen */
+.pt-hints{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
+.pt-hint{display:inline-grid;flex:none;place-items:center;position:relative;width:18px;height:18px;color:var(--adm-t3);cursor:help}
+.pt-hint svg{width:16px;height:16px}
+.pt-hint--draft,.pt-hint--warn{color:var(--adm-warn)}
+.pt-hint--ok{color:var(--adm-ok)}
+.pt-hint--info{color:var(--adm-a-ink)}
+.pt-hint--noindex::after{content:"";position:absolute;left:1px;right:1px;top:50%;height:1.5px;background:currentColor;rotate:-45deg;box-shadow:0 0 0 1px var(--adm-surface)}   /* durchgestrichene Lupe */
+.pt-node[aria-selected=true] > .pt-row .pt-hint{color:rgba(255,255,255,.9)}
+.pt-node[aria-selected=true] > .pt-row .pt-hint--noindex::after{box-shadow:none}
+/* Adressen nur auf Wunsch („Adressen“ in der Leiste); sonst Tooltip am Titel */
+.pt:not(.is-paths) :is(.pt-path,.pt-h-path){display:none}
+.pt-pathbtn svg{width:14px;height:14px}
+.pt-pathbtn[aria-pressed=true]{background:var(--adm-info-bg);color:var(--adm-a-ink)}
+@media (max-width:900px){.pt-pathbtn{display:none}}
+/* Status bündig: auch der Status der Startseite (kein Knopf) hat den Innenabstand des Knopfs */
+.pt-status>.dt-status:not(.pt-stbtn){padding:3px 8px}
 /* Seiten: Adresse liegt auf einem Systemordner (PageController::reservedSlug) */
 .f-warn{margin:.4em 0 0;color:var(--adm-warn);font-weight:600}
 
@@ -2753,7 +2761,8 @@ html.has-ptpv .adm-main{margin-right:var(--ptpv-w);max-width:none}
 .pt-status{display:flex;align-items:center;gap:2px;min-width:0}
 .pt-status .pt-pvbtn{order:-1;margin:0 2px 0 -6px}
 .pt-status .pt-stbtn{margin-left:0}
-@media (min-width:901px){.pt-head,.pt-row{grid-template-columns:minmax(0,2.4fr) minmax(0,1.5fr) 150px 70px 96px 40px}}
+@media (min-width:901px){.pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 150px 64px 70px 96px 40px}
+  .pt.is-paths .pt-head,.pt.is-paths .pt-row{grid-template-columns:minmax(0,2.4fr) minmax(0,1.5fr) 150px 64px 70px 96px 40px}}
 /* Vorschau: Breite ziehbar (Griff links), Desktop automatisch breiter */
 html.has-ptpv.ptpv-wide{--ptpv-w:min(980px,60vw)}
 html.has-ptpv[style*="--ptpv-user"]{--ptpv-w:var(--ptpv-user)}
@@ -2769,11 +2778,11 @@ html.has-ptpv[style*="--ptpv-user"]{--ptpv-w:var(--ptpv-user)}
 /* ================= Usability-Durchgang 02.10.2026 (Desktop/Tablet/Mobil) ================= */
 /* Seitenbaum schmal: Status-Spalte passt sich an (Auge + Status), kein negativer Rand */
 @media (max-width:900px){
-  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) auto 50px 40px}
+  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) auto 56px 50px 40px}
   .pt-status .pt-pvbtn{margin:0}
 }
 @media (max-width:600px){
-  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) auto 44px 40px;gap:6px}
+  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) auto 56px 44px 40px;gap:6px}
   .pt-status .dt-status{font-size:12px}
 }
 /* Tabellen in Karten: horizontal scrollbar statt abgeschnitten */
@@ -2842,8 +2851,8 @@ body.adm:has(.adm-env){--adm-env-h:26px}
 /* Vorschau-Seitenleiste: Inhalt wirklich schmaler machen (statt darunter zu laufen); Seitenbaum dann kompakt */
 html.has-ptpv .adm-main{width:auto;min-width:0}
 @media (min-width:901px){
-  html.has-ptpv .pt-head,html.has-ptpv .pt-row{grid-template-columns:minmax(0,1fr) 120px 56px 40px}
-  html.has-ptpv .pt-head span:nth-child(2),html.has-ptpv .pt-head span:nth-child(5),html.has-ptpv .pt-path,html.has-ptpv .pt-date{display:none}
+  html.has-ptpv .pt-head,html.has-ptpv .pt-row{grid-template-columns:minmax(0,1fr) 120px 56px 56px 40px}
+  html.has-ptpv .pt-h-path,html.has-ptpv .pt-h-date,html.has-ptpv .pt-path,html.has-ptpv .pt-date{display:none}
 }
 /* Medien mobil: Werkzeugleiste umbrechen, Suche immer eigene volle Zeile */
 @media (max-width:600px){.fx-bar{flex-wrap:wrap;row-gap:8px}.fx-search{order:99;flex:1 0 100%;width:auto;min-width:0}}
@@ -2851,11 +2860,11 @@ html.has-ptpv .adm-main{width:auto;min-width:0}
 @media (min-width:901px){.adm-tabs{flex-wrap:wrap;overflow:visible}}
 /* Seitenbaum schmal: feste Status-Spalte (bündig), mobil nur Punkt statt Wort, kein eigener Scrollbereich */
 @media (max-width:900px){
-  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 116px 50px 40px}
+  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 116px 56px 50px 40px}
   .pt-tree{max-height:none;overflow:visible}
 }
 @media (max-width:600px){
-  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 84px 44px 40px}
+  .pt-head,.pt-row{grid-template-columns:minmax(0,1fr) 84px 52px 44px 40px}
   .pt-status .pt-stbtn,.pt-status .dt-status{font-size:0;gap:0;min-width:40px;justify-content:center}
   .pt-status .dt-status::before{width:10px;height:10px}
 }
@@ -2920,8 +2929,6 @@ html.adm-ui[data-theme=dark] .adm-tabs [role=tab][aria-selected=true]{background
 /* Seitenbaum schmal: Statusspalte ohne Überlauf – „Entwurf offen“ als oranger Punkt (Text für Screenreader), weitere Kennzeichen aus */
 @media (max-width:600px){
   .pt-status{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden}
-  .pt-status .pt-draft{flex:none;width:9px;height:9px;min-height:0;padding:0;border-radius:50%;background:var(--adm-warn);font-size:0;color:transparent;overflow:hidden}
-  .pt-tags{display:none}
 }
 
 /* Feld „Sammlung“: Auswahl + „Medien öffnen …“ (Sammlung anlegen, füllen, übernehmen) */
@@ -3379,3 +3386,4 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .fx-zipbtn svg{width:15px;height:15px}
 .mu-rights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:6px 10px;margin-top:6px}
 .mu-rights select{min-height:32px}
+@media (max-width:600px){.pt-h-hints{visibility:hidden}}   /* Seitenbaum schmal: Überschrift „Hinweise“ passt nicht, die Symbole haben Tooltips */
