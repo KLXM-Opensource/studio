@@ -21,7 +21,7 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
 <form method="post" action="<?= e(url($isNew ? $base . '/new' : $base . '/' . $e['id'])) ?>" class="dt-entry" novalidate<?php if ($cond = \Core\Data\Rules::client($t['fields'])): ?> data-conditions="<?= e(json_encode($cond, JSON_UNESCAPED_UNICODE)) ?>"<?php endif; ?>>
   <?= csrf_field() ?>
   <section class="adm-card dt-entry__main">
-    <div class="adm-fields"><?= Fields::renderForm(Entries::schema($t), $values, $errors, 'f') ?></div>
+    <div class="adm-fields"><?= Fields::renderForm(Entries::formSchema($t), $values, $errors, 'f') ?></div>
   </section>
   <aside class="dt-entry__side">
     <section class="adm-card">

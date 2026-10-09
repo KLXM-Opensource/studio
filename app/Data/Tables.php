@@ -42,7 +42,15 @@ final class Tables
         'iban' => ['IBAN (Bankverbindung)', 'string', 'bank'],
         // Wiederholbare Gruppe: Liste gleichartiger Einträge (z. B. mehrere Medikamente) – JSON-Array von Objekten
         'group' => ['Wiederholbare Gruppe', 'text', 'copy'],
+        // Gestaltung des Formulars (keine Daten, keine Spalte – Spaltentyp „layout“): Abschnitt mit Überschrift, Freitext
+        'section' => ['Abschnitt (Überschrift)', 'layout', 'layout'],
+        'content' => ['Freitext', 'layout', 'article'],
     ];
+
+    /** Gestaltungs-Elemente: speichern nichts, haben keine Spalte – nur in Formularen (öffentlich und Redaktion) sichtbar */
+    public const LAYOUT = ['section', 'content'];
+    /** Darstellung eines Abschnitts: Zwischenüberschrift (ohne Rahmen) oder Gruppe mit Rahmen – beides <fieldset> mit <legend> */
+    public const SECTION_STYLES = ['heading', 'fieldset'];
 
     /** Erlaubte Typen der Unterfelder einer wiederholbaren Gruppe */
     public const GROUP_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'email', 'tel', 'bool', 'iban'];
@@ -166,7 +174,9 @@ final class Tables
 
     private static function hydrate(array $row): array
     {
-        $row['fields'] = json_decode((string) $row['fields_json'], true) ?: [];
+        // fields = nur Datenfelder (eine Spalte je Feld); fields_all = Reihenfolge samt Abschnitten und Freitext (allFields)
+        $row['fields_all'] = array_values(json_decode((string) $row['fields_json'], true) ?: []);
+        $row['fields'] = self::dataFields($row['fields_all']);
         $row['settings'] = (json_decode((string) $row['settings_json'], true) ?: []) + [
             'route' => '', 'title_field' => '', 'image_field' => '', 'description_field' => '',
             'sort_field' => 'sort', 'sort_dir' => 'asc', 'detail_page_id' => null, 'workflow' => true, 'per_page' => 50, 'kind' => 'content',
@@ -213,6 +223,39 @@ final class Tables
     {
         $lang ??= \Core\Lang::current();
         return (string) ($f['options_i18n'][$lang][$key] ?? $f['options'][$key] ?? $key);
+    }
+
+    /** Gestaltungs-Element (Abschnitt, Freitext) statt Datenfeld? */
+    public static function isLayout(array $f): bool
+    {
+        return in_array($f['type'] ?? '', self::LAYOUT, true);
+    }
+
+    /**
+     * Alle Elemente der Definition in ihrer Reihenfolge – Datenfelder und Gestaltungs-Elemente (Abschnitte, Freitext).
+     * $t['fields'] enthält nach dem Laden (hydrate) nur die Datenfelder: Listen, Filter, Suche, Export, Schnittstellen,
+     * Detailseiten, Prüfung … sehen Gestaltungs-Elemente so nie. Diese Liste brauchen nur Tabellen-Designer, Formulare und
+     * die Eingabemaske der Redaktion. Für Definitionen aus validate() (dort stehen alle Elemente in 'fields') gilt dasselbe.
+     * Maßgeblich für die Datenfelder bleibt $t['fields'] (Aufrufer dürfen es ändern, z. B. ['fields' => …] + $t): aus fields_all
+     * kommen nur die Gestaltungs-Elemente und die Reihenfolge; dort fehlende Datenfelder stehen am Ende.
+     */
+    public static function allFields(array $t): array
+    {
+        $data = array_values((array) ($t['fields'] ?? []));
+        if (!isset($t['fields_all'])) return $data;
+        $byName = array_column($data, null, 'name');
+        $out = [];
+        foreach ((array) $t['fields_all'] as $f) {
+            if (self::isLayout((array) $f)) $out[] = $f;
+            elseif (isset($byName[$f['name'] ?? ''])) { $out[] = $byName[$f['name']]; unset($byName[$f['name']]); }
+        }
+        return [...$out, ...array_values($byName)];
+    }
+
+    /** Nur die Datenfelder einer Feldliste (ohne Abschnitte und Freitext) */
+    public static function dataFields(array $fields): array
+    {
+        return array_values(array_filter($fields, fn($f) => !self::isLayout((array) $f)));
     }
 
     public static function field(array $table, string $name): ?array
@@ -277,7 +320,7 @@ final class Tables
             $fname = self::normName((string) ($f['name'] ?? '') ?: $label);
             $type = (string) ($f['type'] ?? 'text');
             if (!isset(self::TYPES[$type])) $type = 'text';
-            if ($inbox && !in_array($type, [...DataForms::TYPES, 'file'], true)) {
+            if ($inbox && !in_array($type, [...DataForms::TYPES, 'file', ...self::LAYOUT], true)) {
                 $errors["fields.$i"] = "Feld „{$label}“: Der Feldtyp „" . self::TYPES[$type][0] . '“ ist in Eingangs-Tabellen nicht möglich (keine Bilder, Verknüpfungen, Karten oder formatierten Texte; Dateien nur bei Zustellung per E-Mail).';
                 continue;
             }
@@ -290,6 +333,14 @@ final class Tables
                 continue;
             }
             $seen[$fname] = true;
+            if (in_array($type, self::LAYOUT, true)) {
+                // Gestaltung: keine Spalte, keine Pflicht, keine Bedingungen; Kurzname nur zur Unterscheidung (eindeutig wie bei Feldern)
+                $def = self::layoutDef($f, $type, $fname, $label);
+                if (!empty($def['_error'])) $errors["fields.$i"] = $def['_error'];
+                unset($def['_error']);
+                $fields[] = $def;
+                continue;
+            }
             $def = [
                 'id' => preg_match('~^[a-z0-9]{6,16}$~', (string) ($f['id'] ?? '')) ? $f['id'] : bin2hex(random_bytes(4)),
                 'name' => $fname, 'label' => $label ?: $fname, 'type' => $type,
@@ -352,13 +403,17 @@ final class Tables
             $fields[] = $def;
             $rawFields[$fname] = [$f, $i];
         }
+        $all = $fields;                                   // samt Abschnitten und Freitext (Reihenfolge des Designers)
+        $fields = self::dataFields($all);                 // Einstellungen, Bedingungen, Titel-Feld … beziehen sich nur auf Datenfelder
         if (!$fields && !$errors) $errors['fields'] = 'Bitte mindestens ein Feld anlegen.';
         // Bedingungen (anzeigen wenn, Pflicht wenn, Vergleich) – erst jetzt, weil sie auf spätere Felder verweisen dürfen
         $types = array_column($fields, 'type', 'name');
-        foreach ($fields as $k => $def) {
+        foreach ($all as $k => $def) {
+            if (self::isLayout($def)) continue;
             [$raw, $i] = $rawFields[$def['name']];
-            $fields[$k] = Rules::normalize((array) $raw, $def, $types, $errors, "fields.$i");
+            $all[$k] = Rules::normalize((array) $raw, $def, $types, $errors, "fields.$i");
         }
+        $fields = self::dataFields($all);
 
         $route = trim((string) preg_replace('~[^a-z0-9\-/]+~', '-', strtolower(trim((string) ($s['route'] ?? ''), '/ '))), '-/');
         // Gesperrt: Systemadressen (Core\PublicPaths, inkl. Ordnern, die noch in public/ liegen) und feste Routen der App
@@ -380,7 +435,7 @@ final class Tables
         // Formular: im Eingang bestimmt die Zustellung, ob Dateien angenommen werden (nicht der Schalter aus dem Formular) – so bleibt ein
         // angehaktes Dateifeld in der Auswahl. Zur Wahl standen die Felder der gespeicherten Tabelle (neue sind dabei: DataForms::selected).
         $formUploads = $inbox ? ($inboxFiles && $dmode !== 'system') : null;
-        $formKnown = $inbox ? array_column((array) ($existing['fields'] ?? []), 'name') : null;
+        $formKnown = $inbox ? array_column($existing ? self::allFields($existing) : [], 'name') : null;
         $settings = [
             'route' => $route,
             'title_field' => $pick('title_field'),
@@ -400,7 +455,8 @@ final class Tables
             // Kalender: Feldzuordnung (Beginn, Ende, ganztägig, Wiederholung, Ort …) – siehe Core\Data\Calendar
             'calendar' => Calendar::validateSettings((array) ($s['calendar'] ?? []), $fields, $errors, $existing['settings']['calendar'] ?? null),
             // Öffentliches Formular (Besucher legen Einträge an) – siehe Core\Data\DataForms
-            'form' => DataForms::validateSettings((array) ($s['form'] ?? []), $fields, $errors, $existing['settings']['form'] ?? null, $formUploads, $formKnown),
+            // Formular: Abschnitte und Freitext sind wählbar wie Felder (DataForms::eligible)
+            'form' => DataForms::validateSettings((array) ($s['form'] ?? []), $all, $errors, $existing['settings']['form'] ?? null, $formUploads, $formKnown),
         ];
         $settings['kind'] = $kind;
         // Website-Suche je Tabelle (Core\Search\TableSearch) – ohne Formularabschnitt bleibt die bisherige Einstellung
@@ -431,7 +487,7 @@ final class Tables
             // Symbolname (Core\Icons, Phosphor duotone); alte Zeichen (◷ ✎ ▦ …) werden abgebildet, Unbekanntes → „table“
             'icon' => \Core\Icons::clean((string) ($in['icon'] ?? '')),
             'description' => mb_substr(trim(strip_tags((string) ($in['description'] ?? ''))), 0, 500),
-            'fields' => $fields, 'settings' => $settings,
+            'fields' => $all, 'settings' => $settings,
         ], $errors];
     }
 
@@ -449,7 +505,7 @@ final class Tables
         if (isset($s['search']['enabled'])) $s['search']['enabled'] = $s['search']['enabled'] ? '1' : '0';
         unset($s['inbox']['delivery']['smime'], $s['form']['known']);
         return ['name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'description' => (string) ($t['description'] ?? ''),
-            'handle' => $t['handle'], 'fields' => array_map([self::class, 'fieldInput'], $t['fields']), 'settings' => $s];
+            'handle' => $t['handle'], 'fields' => array_map([self::class, 'fieldInput'], self::allFields($t)), 'settings' => $s];
     }
 
     /** Ein gespeichertes Feld im Eingabeformat von validate(): Auswahlmöglichkeiten als Zeilen „kurzname=Text“ */
@@ -459,6 +515,31 @@ final class Tables
             $f['options'] = implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys($f['options']), $f['options']));
         }
         return $f;
+    }
+
+    /**
+     * Gestaltungs-Element bereinigen. section: label = Überschrift, help = Beschreibung darunter (optional), style heading|fieldset.
+     * content: text = formatierter Text (Core\Sanitizer, Regeln für Blöcke), label nur als Name im Designer. Fehler in $def['_error'].
+     */
+    public static function layoutDef(array $f, string $type, string $name, string $label): array
+    {
+        $def = ['id' => preg_match('~^[a-z0-9]{6,16}$~', (string) ($f['id'] ?? '')) ? $f['id'] : bin2hex(random_bytes(4)),
+            'name' => $name, 'label' => $label ?: $name, 'type' => $type, 'required' => false, 'in_list' => false, 'searchable' => false];
+        if ($type === 'section') {
+            $def['help'] = mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 500);
+            $def['style'] = in_array($f['style'] ?? '', self::SECTION_STYLES, true) ? (string) $f['style'] : 'heading';
+            $labels = [];
+            foreach ((array) ($f['labels'] ?? []) as $lc => $lv) {
+                $lv = trim(strip_tags((string) $lv));
+                if ($lv !== '' && \Core\Lang::valid((string) $lc)) $labels[$lc] = $lv;
+            }
+            if ($labels) $def['labels'] = $labels;
+            return $def;
+        }
+        $text = \Core\Sanitizer::block(mb_substr((string) ($f['text'] ?? ''), 0, 20000));
+        if (trim(strip_tags($text)) === '') $def['_error'] = __('Freitext „{label}“: Bitte einen Text eingeben.', ['label' => $label ?: $name]);
+        $def['text'] = $text;
+        return $def;
     }
 
     /**
@@ -572,7 +653,8 @@ final class Tables
     public static function droppedFields(array $table, array $def): array
     {
         if (self::isInbox($table)) return [];             // Eingang: Werte stecken im verschlüsselten payload und bleiben erhalten
-        $keep = array_column($def['fields'], 'id');
+        // Nur Datenfelder behalten ihre Spalte – ein Feld, das zum Abschnitt oder Freitext wird, verliert seine Inhalte
+        $keep = array_column(self::dataFields($def['fields']), 'id');
         return array_values(array_filter($table['fields'], fn($f) => !in_array($f['id'], $keep, true)));
     }
 
@@ -635,7 +717,7 @@ final class Tables
         }
         foreach ($table['fields'] as $f) {
             $kind = self::TYPES[$f['type']][1] ?? 'string';
-            if ($kind === 'pivot') continue;              // eigene Verknüpfungstabelle, keine Spalte
+            if ($kind === 'pivot' || $kind === 'layout') continue;   // eigene Verknüpfungstabelle bzw. Gestaltung – keine Spalte
             match ($kind) {
                 'string' => $t->addColumn($f['name'], 'string', ['length' => 255, 'notnull' => false]),
                 'string10' => $t->addColumn($f['name'], 'string', ['length' => 10, 'notnull' => false]),

@@ -110,6 +110,14 @@
   <h3 id="gruppe">Mehrere gleichartige Angaben (Wiederholbare Gruppe)</h3>
   <p>Der Feldtyp <b>Wiederholbare Gruppe</b> fasst mehrere Unterfelder zu einer Zeile zusammen, die sich im Formular beliebig oft hinzufügen lässt – z. B. mehrere Medikamente mit Stärke und Packungsgröße oder mehrere Ansprechpersonen. Im Tabellen-Designer legen Sie die Unterfelder (Text, Zahl, Auswahl, Datum, E-Mail, Telefon, Ja/Nein, IBAN …), die Mindest- und Höchstzahl sowie die Beschriftungen („Medikament“, „+ Weiteres Medikament“) fest. Leere Zeilen werden beim Speichern ignoriert; in der Liste steht eine Kurzfassung wie „Ibuprofen, Paracetamol +1“.</p>
 
+  <h3 id="abschnitte">Formulare gliedern: Abschnitte und Freitext</h3>
+  <p>Längere Formulare werden übersichtlicher, wenn Sie sie in Abschnitte teilen. Im Tabellen-Designer gibt es dafür unter <b>Feld hinzufügen</b> zwei Elemente, die <b>keine Daten speichern</b> – sie gestalten nur das Formular:</p>
+  <ul>
+    <li><b>Abschnitt (Überschrift)</b> – die <b>Bezeichnung</b> ist die Überschrift im Formular, der <b>Hilfetext</b> steht als kurze Erklärung darunter. Alle Felder danach gehören zum Abschnitt, bis der nächste Abschnitt beginnt; Felder vor dem ersten Abschnitt stehen ohne Überschrift. Unter <b>Darstellung</b> wählen Sie <b>Zwischenüberschrift</b> (nur die Überschrift) oder <b>Gruppe mit Rahmen</b> (die Felder stehen in einem umrandeten Kasten). Screenreader lesen die Überschrift bei jedem Feld des Abschnitts mit vor.</li>
+    <li><b>Freitext</b> – formatierter Text an dieser Stelle im Formular, z. B. ein Hinweis zu den Terminen oder eine kurze Anleitung. Den Text schreiben Sie mit der gewohnten Formatierungsleiste (fett, Listen, Links, Hinweis-Box …); die Bezeichnung dient nur im Designer als Name.</li>
+  </ul>
+  <p>Reihenfolge wie bei Feldern mit ↑ ↓. Abschnitte und Freitext stehen immer im Formular (nicht unter „Felder im Formular“); ein Abschnitt, dessen Felder Sie alle abgewählt haben, entfällt. In der <b>Eingabemaske der Redaktion</b> sehen Sie dieselbe Gliederung (Abschnitte als Zwischenüberschrift, Freitext als Hinweis). In Listen, Filtern, der Suche, auf Detailseiten, in Schnittstellen und E-Mails kommen sie nicht vor. Hinzufügen und Entfernen ist jederzeit möglich, ohne dass Einträge verloren gehen – machen Sie aber aus einem Feld mit Inhalten einen Abschnitt, fragt der Designer nach, weil die Inhalte des Feldes gelöscht würden. In der Seitenleiste „Felder bearbeiten“ des Seiten-Editors lassen sich Abschnitte anlegen und verschieben; den Text eines Freitexts ändern Sie im Tabellen-Designer.</p>
+
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>
 

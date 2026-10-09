@@ -18,16 +18,19 @@ $err = fn(string $k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$
 $allTables = array_column(Tables::content(), 'name', 'handle');
 // Eingang (verschlüsselte Anfragen): eingeschränkte Feldtypen, keine Website-/Kalender-/Verwaltungs-Einstellungen
 $inbox = ($s['kind'] ?? 'content') === 'inbox';
-$types = $inbox ? [...\Core\Data\DataForms::TYPES, 'file'] : array_keys(Tables::TYPES);   // Eingang: Datei nur bei Zustellung per E-Mail (Tables::validate)
+$types = $inbox ? [...\Core\Data\DataForms::TYPES, 'file', ...Tables::LAYOUT] : array_keys(Tables::TYPES);   // Eingang: Datei nur bei Zustellung per E-Mail (Tables::validate)
+// Designer: alle Elemente (Datenfelder, Abschnitte, Freitext); Auswahllisten (Titel-Feld, Kalender, Bedingungen …): nur Datenfelder
+$defAll = Tables::allFields($def);
+$defData = Tables::dataFields($defAll);
 $empty = $isNew || !(int) Tables::db($table)->fetchValue("SELECT COUNT(*) FROM {$table['table']}");
 // Geteilte Tabelle: gilt für alle beteiligten Websites; Verknüpfungen nur zu geteilten Tabellen derselben Website
 $sharedT = !$isNew && Tables::isShared($table);
 if ($sharedT) $allTables = array_column(array_filter(Tables::content(), fn($x) => ($x['shared']['owner'] ?? null) === $table['shared']['owner']), 'name', 'handle');
 $tplPage = !$isNew && !empty($s['detail_page_id']) ? Pages::find((int) $s['detail_page_id']) : null;
-$fieldOpts = fn(array $types = []) => array_filter($def['fields'] ?? [], fn($f) => !$types || in_array($f['type'], $types, true));
+$fieldOpts = fn(array $types = []) => array_filter($defData, fn($f) => !$types || in_array($f['type'], $types, true));
 // Felder für die Auswahl in „Bedingungen“ (das Skript hält die Liste beim Bearbeiten aktuell)
 $ruleFields = array_map(fn($f) => ['name' => (string) ($f['name'] ?? ''), 'label' => (string) ($f['label'] ?? ''), 'type' => (string) ($f['type'] ?? 'text'),
-    'options' => is_array($f['options'] ?? null) ? $f['options'] : []], array_values($def['fields'] ?? []));
+    'options' => is_array($f['options'] ?? null) ? $f['options'] : []], $defData);
 
 // Zweck und Bereiche
 $purpose = Purpose::valid($s['purpose'] ?? null) ? (string) $s['purpose'] : Purpose::derive($s);
@@ -155,7 +158,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     <?php endif; ?>
     <div class="dt-fieldsbox">
       <ol class="dt-fields" data-fields>
-        <?php foreach (array_values($def['fields'] ?? []) as $i => $f): ?>
+        <?php foreach ($defAll as $i => $f): ?>
         <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => $i, 'f' => $f, 'tables' => $allTables, 'err' => $errors["fields.$i"] ?? null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox]) ?>
         <?php endforeach; ?>
       </ol>
@@ -246,7 +249,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_inbox.php', ['s' => $s, 'def' => $def, 'table' => $table, 'err' => $err, 'part' => 'form']) ?>
     <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_inbox.php', ['s' => $s, 'def' => $def, 'table' => $table, 'err' => $err, 'part' => 'delivery']) ?>
     <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_inbox.php', ['s' => $s, 'def' => $def, 'table' => $table, 'err' => $err, 'part' => 'privacy']) ?>
-<?php elseif (\Core\Data\DataForms::available()): $fmAll = array_filter($def['fields'] ?? [], fn($f) => \Core\Data\DataForms::eligible($f, true)); ?>
+<?php elseif (\Core\Data\DataForms::available()): $fmAll = array_filter($defData, fn($f) => \Core\Data\DataForms::eligible($f, true)); ?>
     <section class="set-group dt-form" data-form-settings aria-labelledby="t-g-form">
       <h3 class="set-group__title" id="t-g-form"><?= e(__('Öffentliches Formular')) ?></h3>
       <div class="set-list">
@@ -300,7 +303,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
   <?= $panel('benachrichtigungen') ?>
 <?php if ($inbox): ?>
     <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_inbox.php', ['s' => $s, 'def' => $def, 'table' => $table, 'err' => $err, 'part' => 'notify']) ?>
-    <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => (array) ($def['fields'] ?? [])]) ?>
+    <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => $defData]) ?>
 <?php else: ?>
     <?php if (\Core\Data\DataForms::available()): ?>
     <section class="set-group" aria-labelledby="t-g-notify">
@@ -312,7 +315,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
           <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(__('leer = Empfänger aus den Grundeinstellungen')) ?>" autocomplete="off"></div>
       </div>
     </section>
-    <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => (array) ($def['fields'] ?? [])]) ?>
+    <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => $defData]) ?>
     <?php endif; ?>
     <?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_push_settings.php', ['table' => $table, 'def' => $def]) /* Push: Besucher abonnieren neue Einträge (Core\Push\Topics) */ ?>
 <?php endif; ?>

@@ -8,7 +8,7 @@ use Core\Search\TableSearch;
 
 if (!\Core\Features::on('search')) return;
 $s = (array) ($def['settings']['search'] ?? []);
-$probe = ['fields' => (array) ($def['fields'] ?? []), 'settings' => ($def['settings'] ?? []) + ['title_field' => '', 'route' => '', 'kind' => 'content', 'image_field' => '', 'description_field' => '']];
+$probe = ['fields' => \Core\Data\Tables::dataFields((array) ($def['fields'] ?? [])), 'settings' => ($def['settings'] ?? []) + ['title_field' => '', 'route' => '', 'kind' => 'content', 'image_field' => '', 'description_field' => '']];
 if (($probe['settings']['title_field'] ?? '') === '') {
     foreach ($probe['fields'] as $f) if (in_array($f['type'] ?? '', ['text', 'textarea'], true)) { $probe['settings']['title_field'] = $f['name']; break; }
 }

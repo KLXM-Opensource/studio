@@ -499,6 +499,8 @@ if (schema) {
     const type = $('[data-type]', li).value;
     li.dataset.type = type;
     $$('[data-show-for]', li).forEach(x => { x.hidden = !x.dataset.showFor.split(' ').includes(type); });
+    $$('[data-hide-for]', li).forEach(x => { x.hidden = x.dataset.hideFor.split(' ').includes(type); });   // z. B. Pflicht/Bedingungen bei Abschnitt und Freitext
+    if (type === 'content') initRte(li);                        // Freitext: Formatierungsleiste erst bei Bedarf
     const opt = $('[data-type] option:checked', li);
     const icons = JSON.parse(schema.dataset.icons || '{}');
     $('[data-type-icon]', li).innerHTML = icons[type] || '';   // Symbol (SVG aus dem Sprite) des Feldtyps
@@ -544,7 +546,11 @@ if (schema) {
       $('[data-type]', li).value = add.dataset.addField; sync(li);
       if (add.dataset.addField === 'group') addSub(li);
       $('[data-label]', li).value = add.textContent.trim().replace(/^\S+\s/, '');
-      $('[data-name]', li).value = slug($('[data-label]', li).value);
+      // Kurzname eindeutig (zweiter Abschnitt, Freitext … → _2, _3)
+      const taken = new Set($$('[data-name]', list).filter(x => x !== $('[data-name]', li)).map(x => x.value));
+      let nm = slug($('[data-label]', li).value), k = 2; const base = nm;
+      while (taken.has(nm)) nm = `${base}_${k++}`;
+      $('[data-name]', li).value = nm;
       $('[data-label]', li).focus(); $('[data-label]', li).select();
       renumber(); return;
     }

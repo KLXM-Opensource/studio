@@ -589,14 +589,14 @@ final class Inbox
                 if (!$t) continue;                                               // Tabelle (noch) nicht vorhanden – später erneut
                 $new = (array) ($u['field'] ?? []);
                 $newName = Tables::normName((string) (($new['name'] ?? '') ?: ($new['label'] ?? '')));
-                $names = array_column($t['fields'], 'name');
+                $names = array_column(Tables::allFields($t), 'name');   // samt Abschnitten und Freitext (bleiben erhalten)
                 $pos = array_search((string) ($u['replace'] ?? ''), $names, true);
                 if (in_array($newName, $names, true)) {
                     $log[] = "Formular „{$key}“: Feld „{$newName}“ vorhanden – Änderung {$id} übersprungen.";
                 } elseif ($pos === false) {
                     $log[] = "Formular „{$key}“: Feld „" . ($u['replace'] ?? '') . "“ fehlt – Änderung {$id} übersprungen (Tabelle wurde angepasst).";
                 } else {
-                    $fields = $t['fields'];
+                    $fields = Tables::allFields($t);
                     $fields[$pos] = $new;
                     $in = ['name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'description' => $t['description'],
                         'fields' => array_map(fn($f) => isset($f['options']) && is_array($f['options']) && ($f['type'] ?? '') !== 'group'

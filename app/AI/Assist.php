@@ -598,7 +598,7 @@ final class Assist
         $all = \Core\Data\Tables::TYPES + ['textarea' => ['Text (mehrzeilig)'], 'richtext' => ['Formatierter Text'], 'number' => ['Zahl']];
         $allowed = [];
         foreach ($types as $k) if (isset($all[$k])) $allowed[$k] = $all[$k][0];
-        unset($allowed['relation'], $allowed['relations'], $allowed['group']);   // brauchen Zieltabellen/Unterfelder – von Hand
+        unset($allowed['relation'], $allowed['relations'], $allowed['group'], $allowed['section'], $allowed['content']);   // brauchen Zieltabellen/Unterfelder bzw. sind Gestaltung – von Hand
         if (!$allowed) throw new AiException(__('Keine Feldtypen verfügbar.'));
         $fake = json_encode(['fields' => [['label' => 'Titel', 'type' => 'text', 'required' => true, 'help' => ''], ['label' => 'Beschreibung', 'type' => isset($allowed['textarea']) ? 'textarea' : 'text', 'required' => false, 'help' => 'Test-KI']]], JSON_UNESCAPED_UNICODE);
         $d = self::json(self::call('text', Prompts::schema(mb_substr($description, 0, 2000), $allowed, self::ctx()), (string) $fake)['text']);

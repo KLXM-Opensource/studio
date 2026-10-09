@@ -93,25 +93,57 @@ final class DataForms
         return $s['success'] !== '' ? $s['success'] : lt('Vielen Dank – Ihre Angaben sind eingegangen.');
     }
 
-    /** Darf der Feldtyp ins öffentliche Formular? */
+    /** Darf der Feldtyp ins öffentliche Formular? Abschnitte und Freitext (Tables::LAYOUT) immer */
     public static function eligible(array $f, bool $uploads): bool
     {
-        return in_array($f['type'], self::TYPES, true) || ($uploads && in_array($f['type'], self::UPLOAD_TYPES, true));
+        return in_array($f['type'], self::TYPES, true) || in_array($f['type'], Tables::LAYOUT, true)
+            || ($uploads && in_array($f['type'], self::UPLOAD_TYPES, true));
     }
 
-    /** Felder des Formulars (Reihenfolge wie in der Tabelle): gewählte + alle Pflichtfelder; nichts gewählt = alle geeigneten */
+    /** Datenfelder des Formulars (Reihenfolge wie in der Tabelle): gewählte + alle Pflichtfelder; nichts gewählt = alle geeigneten */
     public static function fields(array $t): array
+    {
+        return Tables::dataFields(self::items($t));
+    }
+
+    /**
+     * Alle Elemente des Formulars in der Reihenfolge der Tabelle: Datenfelder wie fields() und dazwischen die gewählten
+     * Abschnitte und Freitexte (Tables::LAYOUT). Für die Ausgabe (render) – Annahme und Prüfung nutzen nur fields().
+     */
+    public static function items(array $t): array
     {
         $s = $t['settings']['form'];
         // Eingang: Dateien nur bei Zustellung per E-Mail (Anhang bzw. versiegelt) – Gesundheitsdaten nie in die öffentliche Mediathek
         $inbox = Inbox::is($t);
         $uploads = !empty($s['uploads']) && (!$inbox || Delivery::mails($t));
-        return array_values(array_filter($t['fields'], fn($f) => self::eligible($f, $uploads) && (!$inbox || $f['type'] !== 'media')
+        return array_values(array_filter(Tables::allFields($t), fn($f) => self::eligible($f, $uploads) && (!$inbox || $f['type'] !== 'media')
             && self::selected($t, $f)));
     }
 
     /**
-     * Steht das Feld in der Auswahl „Felder im Formular“? Nichts gewählt = alle; Pflichtfelder immer.
+     * Elemente in Abschnitte gliedern: [[Abschnitt|null, [Elemente …]], …] – Felder vor dem ersten Abschnitt stehen ohne Abschnitt.
+     * Leere Abschnitte (nichts dahinter oder alle Felder abgewählt und kein Freitext) entfallen.
+     */
+    public static function sections(array $items): array
+    {
+        $out = [[null, []]];
+        foreach ($items as $f) {
+            if (($f['type'] ?? '') === 'section') { $out[] = [$f, []]; continue; }
+            $out[count($out) - 1][1][] = $f;
+        }
+        return array_values(array_filter($out, fn($g) => $g[1] !== []));
+    }
+
+    /** Freitext im Formular: formatierter Text (Whitelist Core\Sanitizer), ohne Beschriftung */
+    public static function contentHtml(array $f): string
+    {
+        $html = rich((string) ($f['text'] ?? ''));
+        return trim(strip_tags($html)) === '' ? '' : '<div class="dff-text prose">' . $html . '</div>';
+    }
+
+    /**
+     * Steht das Feld in der Auswahl „Felder im Formular“? Nichts gewählt = alle; Pflichtfelder, Abschnitte und Freitext immer
+     * (Gestaltung gibt es nur fürs Formular; ein Abschnitt, dessen Felder alle abgewählt sind, entfällt – sections()).
      * Eingang (die Felder bilden das Formular): Felder, die bei der letzten Auswahl noch nicht zur Wahl standen (settings.form.known –
      * z. B. im selben Schritt neu angelegt), sind dabei, bis jemand sie abwählt. Ältere Einstellungen ohne known: nicht gewählte
      * Dateifelder sind dabei – sie wurden nach der Auswahl angelegt und gingen sonst still verloren.
@@ -120,7 +152,7 @@ final class DataForms
     {
         $s = (array) ($t['settings']['form'] ?? []);
         $sel = (array) ($s['fields'] ?? []);
-        if (!$sel || in_array($f['name'], $sel, true) || !empty($f['required'])) return true;
+        if (!$sel || in_array($f['name'], $sel, true) || !empty($f['required']) || Tables::isLayout($f)) return true;
         if (!Inbox::is($t)) return false;
         $known = $s['known'] ?? null;
         return is_array($known) ? !in_array($f['name'], $known, true) : ($f['type'] ?? '') === 'file';
@@ -176,7 +208,8 @@ final class DataForms
         $existing = ($existing ?? []) + self::DEFAULTS;
         if (!$s) return $existing;                                 // z. B. API ohne Formular-Angaben: unverändert
         $uploads ??= !empty($s['uploads']);
-        $eligible = array_column(array_filter($fields, fn($f) => self::eligible($f, $uploads)), 'name');
+        // Auswahl „Felder im Formular“: nur Datenfelder – Abschnitte und Freitext gibt es nur fürs Formular, sie stehen immer darin
+        $eligible = array_column(array_filter(Tables::dataFields($fields), fn($f) => self::eligible($f, $uploads)), 'name');
         $sel = array_key_exists('fields', $s)
             ? array_values(array_intersect($eligible, array_map('strval', (array) $s['fields'])))
             : array_values(array_intersect($eligible, (array) $existing['fields']));
@@ -288,13 +321,28 @@ final class DataForms
             if (preg_match('~^[a-z_][a-z0-9_]{0,40}$~i', (string) $hn)) $h .= '<input type="hidden" name="' . e((string) $hn) . '" value="' . e((string) $hv) . '">';
         }
         $legend = trim((string) ($o['fields_legend'] ?? ''));
-        $h .= ($legend !== '' ? '<fieldset class="dff-set"><legend class="dff-set__legend">' . e($legend) . '</legend>' : '') . '<div class="dff-grid">';
-        foreach ($fields as $f) {
-            $h .= $f['type'] === 'group'
-                ? self::group(Entries::groupSchema($f, true) + ['label' => Tables::label($f)] + $f, $uid, $values[$f['name']] ?? null, $errors)
-                : self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s, $inbox, isset($locked[$f['name']]));
+        $h .= $legend !== '' ? '<fieldset class="dff-set"><legend class="dff-set__legend">' . e($legend) . '</legend>' : '';
+        // Abschnitte (Tables::LAYOUT): je Abschnitt ein <fieldset> mit <legend> (Zwischenüberschrift ohne Rahmen oder Gruppe mit Rahmen),
+        // Beschreibung darunter; Freitext an seiner Stelle im Raster. Felder vor dem ersten Abschnitt ohne Fieldset.
+        foreach (self::sections(self::items($t)) as [$sec, $items]) {
+            if ($sec) {
+                $sid = $uid . '-' . $sec['name'];
+                $desc = trim((string) ($sec['help'] ?? ''));
+                $h .= '<fieldset class="dff-sec dff-sec--' . (($sec['style'] ?? '') === 'fieldset' ? 'fieldset' : 'heading') . '" id="' . e($sid) . '"'
+                    . ($desc !== '' ? ' aria-describedby="' . e($sid) . '-d"' : '') . '><legend class="dff-sec__title">' . e(Tables::label($sec)) . '</legend>'
+                    . ($desc !== '' ? '<p class="dff-sec__desc" id="' . e($sid) . '-d">' . e($desc) . '</p>' : '');
+            }
+            $h .= '<div class="dff-grid">';
+            foreach ($items as $f) {
+                $h .= match ($f['type']) {
+                    'content' => self::contentHtml($f),
+                    'group' => self::group(Entries::groupSchema($f, true) + ['label' => Tables::label($f)] + $f, $uid, $values[$f['name']] ?? null, $errors),
+                    default => self::field($f, $uid, $values[$f['name']] ?? null, $errors[$f['name']] ?? null, $s, $inbox, isset($locked[$f['name']])),
+                };
+            }
+            $h .= '</div>' . ($sec ? '</fieldset>' : '');
         }
-        $h .= '</div>' . ($legend !== '' ? '</fieldset>' : '');
+        $h .= $legend !== '' ? '</fieldset>' : '';
         // Datenschutz (Pflicht)
         $pid = $uid . '-' . self::PRIVACY;
         $perr = $errors[self::PRIVACY] ?? null;

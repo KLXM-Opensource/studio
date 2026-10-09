@@ -59,3 +59,5 @@
 .dff [hidden],.dff-wrap [hidden]{display:none!important}
 /* Formular unter einem zweispaltigen Abschnittskopf: bündig mit der Überschrift */
 .dff-intro{max-width:40em}
+/* Abschnitte im Formular (resources/css/_dataform-layout.css): Rahmen wie die Gruppen-Zeilen, Schrift aus den Tokens */
+.dff-wrap{--dff-ink:var(--g-ink);--dff-muted:var(--g-muted);--dff-sec-line:var(--g-line);--dff-sec-radius:var(--g-r-l);--dff-sec-bg:var(--g-surface)}

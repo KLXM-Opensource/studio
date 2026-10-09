@@ -23,7 +23,7 @@ final class Generator
     {
         $out = [];
         foreach (Tables::TYPES as $k => $t) {
-            if ($k === 'group') continue;
+            if ($k === 'group' || in_array($k, Tables::LAYOUT, true)) continue;   // Abschnitte/Freitext gestaltet man im Designer
             if (in_array($k, ['relation', 'relations'], true) && !Tables::content()) continue;
             $out[$k] = $t[0];
         }

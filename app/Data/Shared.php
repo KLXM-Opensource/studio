@@ -785,7 +785,7 @@ final class Shared
             $settings['detail_page_id'] = null;
             self::db($handle)->insert('data_tables', [
                 'handle' => $handle, 'name' => $local['name'], 'singular' => $local['singular'], 'icon' => $local['icon'], 'description' => $local['description'],
-                'fields_json' => json_encode($local['fields'], JSON_UNESCAPED_UNICODE), 'settings_json' => json_encode($settings, JSON_UNESCAPED_UNICODE),
+                'fields_json' => json_encode(Tables::allFields($local), JSON_UNESCAPED_UNICODE), 'settings_json' => json_encode($settings, JSON_UNESCAPED_UNICODE),
                 'sort' => 0, 'created_at' => now(), 'updated_at' => now(),
             ]);
             $shared = self::hydrateRaw($handle);
@@ -1006,7 +1006,7 @@ final class Shared
         $settings = $t['settings'];
         $settings['detail_page_id'] = $detail;
         $def = ['handle' => $key, 'name' => $t['name'], 'singular' => $t['singular'], 'icon' => $t['icon'], 'description' => (string) $t['description'],
-            'fields' => $t['fields'], 'settings' => $settings];
+            'fields' => Tables::allFields($t), 'settings' => $settings];   // samt Abschnitten und Freitext
         $media = array_column(array_filter($t['fields'], fn($f) => in_array($f['type'], ['media', 'file'], true)), 'name');
         $pivots = [];
         foreach ($t['fields'] as $f) if ($f['type'] === 'relations') $pivots[$f['name']] = self::db($key)->fetchAll('SELECT * FROM ' . Tables::pivot($t, $f['name']));

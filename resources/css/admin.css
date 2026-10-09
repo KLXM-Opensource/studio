@@ -175,6 +175,8 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .f-heading{font-size:15px;margin:8px 0 2px;grid-column:1/-1}
 .adm-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
 .adm-fields>.f,.adm-fields>.f-heading,.adm-fields>.f-help{grid-column:1/-1}
+/* Freitext einer Datentabelle in der Eingabemaske (Entries::formSchema): Hinweis in gedämpfter Schrift */
+.f-richnote{max-width:46rem}.f-richnote>:first-child{margin-top:0}.f-richnote>:last-child{margin-bottom:0}
 .adm-fields>.f--half{grid-column:auto}
 /* Felder nur für bestimmte Varianten eines Blocks (Core\Fields: 'variants'; editor.js blendet aus) */
 .f-vis{display:contents}.f-vis[hidden]{display:none}
@@ -769,6 +771,8 @@ img.media-vthumb{object-fit:cover}
 .dt-field__flags{display:flex;flex-wrap:wrap;gap:6px 16px}
 .dt-field__flags .f-check{font-size:13px}
 .dt-in{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--adm-t3)}
+/* Freitext im Tabellen-Designer: Formatierungsleiste in normaler Schrift (nicht fett wie die Beschriftung) */
+.dt-in--rich .rte{font:400 14px/1.5 var(--adm-font);color:var(--adm-ink)}
 .dt-in input,.dt-in select,.dt-in textarea{width:100%;min-width:0;min-height:36px;padding:6px 10px;border-radius:6px;border:1.5px solid var(--adm-in);background:var(--adm-surface);font:400 14px/1.4 var(--adm-font);color:var(--adm-ink)}
 .dt-in input:focus,.dt-in select:focus,.dt-in textarea:focus{outline:none;border-color:var(--adm-a);box-shadow:0 0 0 3px rgb(var(--adm-a-rgb,49 65 100) / .15)}
 .dt-in--name input{font-family:ui-monospace,Menlo,monospace;font-size:13px}

@@ -38,7 +38,7 @@ $row = function (int|string $i, array $f, ?string $err) use ($t, $inbox, $kindLa
     <p class="ff-note" data-ff-typenote hidden><?= e($count > 0
         ? __('Typ geändert: Beim Speichern werden die vorhandenen Inhalte dieses Feldes in {n} Einträgen umgewandelt – was nicht zum neuen Typ passt, geht verloren.', ['n' => $count])
         : __('Typ geändert – wirksam nach dem Speichern.')) ?></p>
-    <div class="dt-field__row dt-field__flags">
+    <div class="dt-field__row dt-field__flags" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[required]" value="1"<?= !empty($f['required']) ? ' checked' : '' ?>> <span><?= e(__('Pflichtfeld')) ?></span></label>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[width]" value="half"<?= ($f['width'] ?? '') === 'half' ? ' checked' : '' ?>> <span><?= e(__('Halbe Breite')) ?></span></label>
     </div>
@@ -56,8 +56,16 @@ $row = function (int|string $i, array $f, ?string $err) use ($t, $inbox, $kindLa
       <p class="f-help"><?= e($inbox ? __('Geprüft wird der Inhalt der Datei, nicht nur die Endung. Dateien nimmt das Formular nur bei Zustellung per E-Mail an.')
           : __('Geprüft wird der Inhalt der Datei, nicht nur die Endung. Word und OpenDocument gibt es nur in Eingangs-Tabellen.')) ?></p>
     </div>
+    <div class="dt-field__extra" data-show-for="section"<?= $type === 'section' ? '' : ' hidden' ?>>
+      <label class="dt-in"><span><?= e(__('Darstellung')) ?></span><select name="<?= $n ?>[style]"<?= $type === 'section' ? '' : ' disabled' ?>>
+        <option value="heading"<?= ($f['style'] ?? 'heading') !== 'fieldset' ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
+        <option value="fieldset"<?= ($f['style'] ?? '') === 'fieldset' ? ' selected' : '' ?>><?= e(__('Gruppe mit Rahmen')) ?></option>
+      </select></label>
+      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?></p>
+    </div>
+    <p class="f-help" data-show-for="content"<?= $type === 'content' ? '' : ' hidden' ?>><?= e(__('Den Text des Freitexts ändern Sie unter „Alle Einstellungen der Tabelle“.')) ?></p>
     <p class="f-help" data-show-for="group"<?= $type === 'group' ? '' : ' hidden' ?>><?= e(__('Unterfelder, Anzahl und Beschriftungen der Gruppe ändern Sie unter „Alle Einstellungen der Tabelle“.')) ?></p>
-    <label class="dt-in dt-in--help"><span><?= e(__('Hilfetext (optional)')) ?></span><input name="<?= $n ?>[help]" value="<?= e((string) ($f['help'] ?? '')) ?>" maxlength="200"></label>
+    <label class="dt-in dt-in--help" data-hide-for="content"<?= $type === 'content' ? ' hidden' : '' ?>><span><?= e(__('Hilfetext (optional)')) ?></span><input name="<?= $n ?>[help]" value="<?= e((string) ($f['help'] ?? '')) ?>" maxlength="<?= $type === 'section' ? 500 : 200 ?>"></label>
     <?php if ($err): ?><p class="f-error" id="<?= $uid ?>-err"><?= e($err) ?></p><?php endif; ?>
     <div class="ff-confirm" data-ff-confirm role="group" aria-label="<?= e(__('Feld entfernen?')) ?>" hidden>
       <p><?= $inbox || $id === '' ? e(__('Feld entfernen?')) : e(__('Feld entfernen? Beim Speichern werden seine Inhalte gelöscht.')) ?></p>
@@ -76,7 +84,7 @@ $row = function (int|string $i, array $f, ?string $err) use ($t, $inbox, $kindLa
 
 // „Felder im Formular“: gespeicherte, fürs Formular geeignete Felder (neue kommen beim Speichern automatisch dazu)
 $selT = ['settings' => ['kind' => $inbox ? 'inbox' : 'content', 'form' => $form]];
-$eligible = array_filter($fields, fn($f) => (string) ($f['id'] ?? '') !== '' && isset($f['type'])
+$eligible = array_filter(Tables::dataFields($fields), fn($f) => (string) ($f['id'] ?? '') !== '' && isset($f['type'])
     && ($inbox ? DataForms::eligible($f, false) || $f['type'] === 'file' : DataForms::eligible($f, true)));
 ?>
 <form class="cms-epanel__body ff" data-ff-form novalidate>

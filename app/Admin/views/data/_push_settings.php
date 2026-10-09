@@ -17,7 +17,7 @@ if (!\Core\Push\Push::on()): // Funktion aus: Hinweis statt nichts – wer Funkt
 </section>
 <?php return; endif;
 $p = (array) ($def['settings']['push'] ?? []);
-$pf = (array) ($def['fields'] ?? []);
+$pf = \Core\Data\Tables::dataFields((array) ($def['fields'] ?? []));
 $pOpts = fn(array $types) => array_column(array_filter($pf, fn($f) => in_array($f['type'] ?? '', $types, true)), 'label', 'name');
 $pRoute = ($def['settings']['route'] ?? '') !== '' && !empty($def['settings']['detail_page_id']);
 $pCount = $table && !empty($table['id']) ? Topics::subscribers($table) : 0;

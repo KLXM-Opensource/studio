@@ -22,7 +22,8 @@ final class SchemaPanel
     /** Feldtypen, die die Seitenleiste anbietet (Formular-Felder; Gruppen nur, wenn schon vorhanden – Unterfelder in der Verwaltung) */
     public static function types(array $t, string $current = ''): array
     {
-        $types = Tables::isInbox($t) ? [...DataForms::TYPES, 'file'] : [...DataForms::TYPES, ...DataForms::UPLOAD_TYPES];
+        // Abschnitt: auch hier anlegbar; Freitext nur, wenn schon vorhanden (formatierter Text im Tabellen-Designer)
+        $types = Tables::isInbox($t) ? [...DataForms::TYPES, 'file', 'section'] : [...DataForms::TYPES, ...DataForms::UPLOAD_TYPES, 'section'];
         $types = array_values(array_filter($types, fn($x) => $x !== 'group' || $current === 'group'));
         if ($current !== '' && !in_array($current, $types, true)) $types[] = $current;   // bestehender Typ bleibt wählbar
         return array_values(array_filter(array_keys(Tables::TYPES), fn($x) => in_array($x, $types, true)));
@@ -53,7 +54,7 @@ final class SchemaPanel
             if (!is_array($pf)) continue;
             $id = (string) ($pf['id'] ?? '');
             $f = $id !== '' && isset($old[$id]) ? $old[$id] : ['id' => ''];
-            foreach (['label', 'name', 'type', 'help'] as $k) {
+            foreach (['label', 'name', 'type', 'help', 'style'] as $k) {
                 if (array_key_exists($k, $pf)) $f[$k] = (string) $pf[$k];
             }
             $f['required'] = !empty($pf['required']);
@@ -140,7 +141,7 @@ final class SchemaPanel
                     if (!array_key_exists('max_mb', $f)) $f['max_mb'] = 0;
                 }
                 return $f;
-            }, $t['fields']);
+            }, Tables::allFields($t));                                    // samt Abschnitten und Freitext
             $eq("Rundlauf {$t['handle']}: Felder", $def['fields'], $want);
             $want = $t['settings'];
             if (isset($want['inbox'])) $want['inbox']['delivery'] = (array) ($want['inbox']['delivery'] ?? []) + Delivery::DEFAULTS;   // ältere Eingänge ohne Zustellung

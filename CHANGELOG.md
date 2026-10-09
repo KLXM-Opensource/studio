@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: Abschnitte (Überschrift/Gruppe) und Freitext zwischen den Feldern
+- Zwei neue Elemente im Tabellen-Designer, die keine Daten speichern: **Abschnitt (Überschrift)** – Überschrift mit optionaler
+  Beschreibung, Darstellung „Zwischenüberschrift“ oder „Gruppe mit Rahmen“; die folgenden Felder gehören dazu bis zum nächsten
+  Abschnitt – und **Freitext** – formatierter Text (Formatierungsleiste, `Core\Sanitizer`) an seiner Stelle im Formular.
+- Öffentliche Formulare: je Abschnitt `<fieldset>` mit `<legend>` (wird vorgelesen), Freitext als `.dff-text`; Stile in
+  `_dataform-layout.css` für alle Kits (Rahmen über `--dff-sec-*`). Eingabemaske der Redaktion mit derselben Gliederung.
+- Keine Spalte, kein Wert: `$t['fields']` enthält nur Datenfelder (Listen, Filter, Suche, Schnittstelle/MCP, Detailseiten, Prüfung,
+  E-Mails unverändert), `Tables::allFields()` alle Elemente; Hinzufügen/Entfernen ändert das Datenbankschema nicht. Selbsttest in `data:selftest`.
+
 ### Überschriften: *Hervorhebung* auch beim Bearbeiten sichtbar
 - Beim Bearbeiten auf der Website zeigen Überschriften mit `*Wort*` die Hervorhebung wie für Besucher; die Sternchen bleiben als echte
   Zeichen stehen, klein, hochgestellt und blass (`emphasis_editing()`, `.hl-mark` in editor.css) – gespeichert wird weiter `*Wort*`.

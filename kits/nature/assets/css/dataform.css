@@ -60,3 +60,5 @@
 /* Formular unter einem zweispaltigen Abschnittskopf: bündig mit der Überschrift */
 @container (min-width:60rem){.dff-head:not(.sec-head--center):has(>.eyebrow)~*{margin-inline-start:calc((100% - var(--n-s-l)) / 4 + var(--n-s-l))}}
 .dff-intro{max-width:40em}
+/* Abschnitte im Formular (resources/css/_dataform-layout.css): Rahmen wie die Gruppen-Zeilen, Schrift aus den Tokens */
+.dff-wrap{--dff-ink:var(--n-ink);--dff-muted:var(--n-muted);--dff-sec-line:var(--n-line);--dff-sec-radius:var(--n-r-l);--dff-sec-bg:var(--n-surface)}

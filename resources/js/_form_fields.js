@@ -90,8 +90,9 @@ function sync(li) {
   qa('[data-show-for]', li).forEach(x => {
     const on = x.dataset.showFor.split(' ').includes(type);
     x.hidden = !on;
-    qa('textarea,input,fieldset', x).forEach(i => { i.disabled = !on; });
+    qa('textarea,input,select,fieldset', x).forEach(i => { i.disabled = !on; });
   });
+  qa('[data-hide-for]', li).forEach(x => { x.hidden = x.dataset.hideFor.split(' ').includes(type); });   // Abschnitt/Freitext: ohne Pflicht, Breite …
   const note = li.querySelector('[data-ff-typenote]');
   if (note) note.hidden = !li.dataset.origType || li.dataset.origType === type;
 }

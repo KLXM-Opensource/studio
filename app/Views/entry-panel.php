@@ -41,7 +41,7 @@ $readonly = $reason !== null;
   <?php elseif (!$isNew && $status === 'published'): ?>
   <p class="cms-epanel__hint"><span class="dt-status dt-status--published"><?= e(__('Online')) ?></span> <?= e(__('Änderungen sind nach dem Speichern sofort sichtbar.')) ?></p>
   <?php endif; ?>
-  <fieldset class="adm-fields cms-epanel__fields"<?= $readonly ? ' disabled' : '' ?>><legend class="adm-sr"><?= e(__('Felder')) ?></legend><?= Fields::renderForm(Entries::schema($t), $values, $errors, 'f') ?></fieldset>
+  <fieldset class="adm-fields cms-epanel__fields"<?= $readonly ? ' disabled' : '' ?>><legend class="adm-sr"><?= e(__('Felder')) ?></legend><?= Fields::renderForm(Entries::formSchema($t), $values, $errors, 'f') ?></fieldset>
   <details class="cms-epanel__more"<?= isset($errors['slug']) ? ' open' : '' ?>>
     <summary><?= e(__('Adresse & Sprache')) ?></summary>
     <div class="f"><label for="cms-ep-slug"><?= e(__('Adresse')) ?></label>

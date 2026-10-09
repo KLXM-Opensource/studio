@@ -18,11 +18,28 @@ $type = $f['type'] ?? 'text';
         <?php foreach (Tables::TYPES as $k => [$l]): if (!in_array($k, $types, true) && $k !== $type) continue; ?><option value="<?= e($k) ?>"<?= $k === $type ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
       </select></label>
     </div>
-    <div class="dt-field__row dt-field__flags">
+    <div class="dt-field__row dt-field__flags" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
       <?php foreach ($inbox ? ['required' => 'Pflichtfeld'] : ['required' => 'Pflichtfeld', 'in_list' => 'In der Liste zeigen', 'searchable' => 'Durchsuchbar'] as $k => $l): ?>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[<?= $k ?>]" value="1"<?= !empty($f[$k]) ? ' checked' : '' ?>> <span><?= $l ?></span></label>
       <?php endforeach; ?>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[width]" value="half"<?= ($f['width'] ?? '') === 'half' ? ' checked' : '' ?>> <span>Halbe Breite</span></label>
+    </div>
+    <?php
+    // Gestaltung des Formulars (keine Spalte): Abschnitt – Darstellung; Freitext – formatierter Text (Formatierungsleiste wie im Rich-Text-Feld)
+    $sid = 'dts-' . preg_replace('~[^a-z0-9_]~i', '', (string) $i);
+    $text = (string) ($f['text'] ?? '');
+    ?>
+    <div class="dt-field__extra" data-show-for="section"<?= $type === 'section' ? '' : ' hidden' ?>>
+      <label class="dt-in"><span><?= e(__('Darstellung')) ?></span><select name="<?= $n ?>[style]">
+        <option value="heading"<?= ($f['style'] ?? 'heading') !== 'fieldset' ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
+        <option value="fieldset"<?= ($f['style'] ?? '') === 'fieldset' ? ' selected' : '' ?>><?= e(__('Gruppe mit Rahmen')) ?></option>
+      </select></label>
+      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?></p>
+    </div>
+    <div class="dt-field__extra" data-show-for="content"<?= $type === 'content' ? '' : ' hidden' ?>>
+      <div class="dt-in dt-in--rich"><span id="<?= $sid ?>-l"><?= e(__('Text im Formular')) ?></span>
+        <div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="<?= e(__('Formatierung')) ?>"></div><div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="<?= $sid ?>-l"><?= \Core\Sanitizer::block($text) ?></div><input type="hidden" name="<?= $n ?>[text]" value="<?= e($text) ?>"></div></div>
+      <p class="f-help"><?= e(__('Erscheint an dieser Stelle im Formular, z. B. als Hinweis zwischen den Feldern. Die Bezeichnung dient nur hier im Designer als Name. Speichert keine Daten.')) ?></p>
     </div>
     <div class="dt-field__extra" data-show-for="select multiselect">
       <label class="dt-in"><span>Auswahlmöglichkeiten (eine pro Zeile)</span><textarea name="<?= $n ?>[options]" rows="3" placeholder="Neuigkeiten&#10;Hinweise&#10;Veranstaltungen"><?= e($opts) ?></textarea></label>
@@ -100,7 +117,7 @@ $type = $f['type'] ?? 'text';
     $rules = fn(string $kind, string $group, array $list) => implode('', array_map(fn($r, $k) => Core\Theme::capture(__DIR__ . '/_rule.php',
         ['p' => $n . '[' . $group . ']' . ($kind === 'cmp' ? '' : '[rules]') . '[' . $k . ']', 'r' => $r, 'kind' => $kind, 'all' => $all, 'self' => $self]), $list, array_keys($list)));
     ?>
-    <details class="dt-cond" data-cond<?= $nCond ? ' open' : '' ?>>
+    <details class="dt-cond" data-cond<?= $nCond ? ' open' : '' ?> data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
       <summary><?= e(__('Bedingungen')) ?> <span class="dt-cond__count" data-cond-count><?= $nCond ? '(' . $nCond . ')' : '' ?></span></summary>
       <?php foreach (['visible_if' => __('Feld nur anzeigen, wenn …'), 'required_if' => __('Pflichtfeld, wenn …')] as $g => $legend): $grp = (array) ($f[$g] ?? []); ?>
       <fieldset class="dt-cond__grp" data-cond-grp="<?= $g ?>">
@@ -120,7 +137,7 @@ $type = $f['type'] ?? 'text';
         <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-rule-add="compare">+ <?= e(__('Vergleich')) ?></button>
       </fieldset>
     </details>
-    <label class="dt-in dt-in--help"><span>Hilfetext (optional)</span><input name="<?= $n ?>[help]" value="<?= e($f['help'] ?? '') ?>"></label>
+    <label class="dt-in dt-in--help" data-hide-for="content"<?= $type === 'content' ? ' hidden' : '' ?>><span>Hilfetext (optional)</span><input name="<?= $n ?>[help]" value="<?= e($f['help'] ?? '') ?>"></label>
     <?php if (\Core\Lang::multi()): ?>
     <details class="dt-trans"<?= !empty($f['labels']) || !empty($f['options_i18n']) ? ' open' : '' ?>><summary><?= e(__('Übersetzungen')) ?></summary>
       <?php foreach (\Core\Lang::all() as $lc => $ll): if ($lc === \Core\Lang::default()) continue;

@@ -7132,4 +7132,14 @@ return [
     'Einwilligung liegt vor' => 'Consent given',
     'Keine Personen erkennbar' => 'No recognisable people',
     'Einwilligung fehlt' => 'Consent missing',
+    // Formulare: Abschnitte und Freitext
+    'Abschnitt (Überschrift)' => 'Section (heading)',
+    'Freitext' => 'Free text',
+    'Den Text des Freitexts ändern Sie unter „Alle Einstellungen der Tabelle“.' => 'Change the free text under “All table settings”.',
+    'Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.' => 'The following fields belong to this section – up to the next section. The label is the heading in the form, the help text appears below it. Stores no data.',
+    'Erscheint an dieser Stelle im Formular, z. B. als Hinweis zwischen den Feldern. Die Bezeichnung dient nur hier im Designer als Name. Speichert keine Daten.' => 'Appears at this position in the form, e.g. as a note between the fields. The label is only used as a name here in the designer. Stores no data.',
+    'Freitext „{label}“: Bitte einen Text eingeben.' => 'Free text “{label}”: please enter a text.',
+    'Gruppe mit Rahmen' => 'Group with frame',
+    'Text im Formular' => 'Text in the form',
+    'Zwischenüberschrift' => 'Subheading',
 ];

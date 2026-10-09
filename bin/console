@@ -1025,7 +1025,8 @@ switch ($cmd) {
         // Core\Data\SchemaPanel: validate(toInput($t)) = $t für alle Tabellen; Seitenleiste „Felder bearbeiten“ mit vorübergehenden Tabellen
         $res = Core\Data\SchemaPanel::selftest(in_array('--roundtrip', $args, true));
         // Verwendungszweck (Ableitung, Passung) und – ohne --roundtrip – der Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen)
-        foreach (in_array('--roundtrip', $args, true) ? [Core\Data\Purpose::selftest()] : [Core\Data\Purpose::selftest(), Core\Data\Wizard::selftest()] as $x) {
+        // … dazu Abschnitte und Freitext im Formular (Core\Data\LayoutSelfTest, vorübergehende Tabelle)
+        foreach (in_array('--roundtrip', $args, true) ? [Core\Data\Purpose::selftest()] : [Core\Data\Purpose::selftest(), Core\Data\Wizard::selftest(), Core\Data\LayoutSelfTest::run()] as $x) {
             $res['ok'] += $x['ok'];
             array_push($res['fails'], ...$x['fails']);
         }

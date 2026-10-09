@@ -299,6 +299,24 @@ final class Entries
     }
 
     /**
+     * Eingabemaske der Redaktion (Verwaltung, Seitenleiste „Eintrag bearbeiten“): Datenfelder wie schema(), dazwischen die
+     * Abschnitte als Zwischenüberschrift (Beschreibung als Hilfe) und Freitext als Hinweis – gleiche Gliederung wie das Formular.
+     * Gespeichert und geprüft wird weiter mit schema() (Gestaltung hat keine Werte; Fields überspringt 'heading').
+     */
+    public static function formSchema(array $table): array
+    {
+        $data = array_column(self::schema($table), null, 'name');
+        $out = [];
+        foreach (Tables::allFields($table) as $f) {
+            $type = $f['type'] ?? '';
+            if ($type === 'section') $out[] = ['type' => 'heading', 'label' => (string) $f['label'], 'help' => (string) ($f['help'] ?? '')];
+            elseif ($type === 'content') $out[] = ['type' => 'heading', 'label' => '', 'html' => \Core\Sanitizer::block((string) ($f['text'] ?? ''))];
+            elseif (isset($f['name'], $data[$f['name']])) $out[] = $data[$f['name']];
+        }
+        return $out;
+    }
+
+    /**
      * Wiederholbare Gruppe als Fields-Schema: fields (Unterfelder), min, max, item_label, add_label.
      * $site = true: Beschriftungen in der Sprache der Seite (Übersetzung der Definition, sonst lt()) – für öffentliche Formulare.
      */

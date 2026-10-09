@@ -56,3 +56,5 @@
 .dff-row__rm:hover,.dff-row__add:hover{border-color:var(--f-a)}
 .dff-wrap .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .dff [hidden],.dff-wrap [hidden]{display:none!important}
+/* Abschnitte im Formular (resources/css/_dataform-layout.css): Rahmen wie die Gruppen-Zeilen, Schrift aus den Tokens */
+.dff-wrap{--dff-ink:var(--f-ink);--dff-muted:var(--f-muted);--dff-sec-line:var(--f-line-strong);--dff-sec-radius:var(--f-radius)}

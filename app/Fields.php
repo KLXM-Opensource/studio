@@ -435,7 +435,9 @@ final class Fields
         }
         $type = $f['type'] ?? 'text';
         if ($type === 'heading') {
-            return '<h3 class="f-heading">' . e($f['label']) . '</h3>'
+            // Ohne Beschriftung nur der Hinweis; 'html' = bereits bereinigter Rich-Text (z. B. Freitext einer Datentabelle, Core\Sanitizer)
+            return (trim((string) ($f['label'] ?? '')) !== '' ? '<h3 class="f-heading">' . e($f['label']) . '</h3>' : '')
+                . (!empty($f['html']) ? '<div class="f-help f-richnote">' . $f['html'] . '</div>' : '')
                 . (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '')
                 // Optionale Links unter der Überschrift: 'links' => [['label' => …, 'url' => '/admin/…'], …]
                 . (!empty($f['links']) ? '<p class="f-help">' . implode(' · ', array_map(fn($l) => '<a href="' . e(url((string) $l['url'])) . '">' . e((string) $l['label']) . '</a>', (array) $f['links'])) . '</p>' : '');
