@@ -247,19 +247,37 @@ function modern_is_current(array $m): bool
     return is_int($m['id']) && $m['id'] === (int) (app()->currentPage['id'] ?? 0);
 }
 
+/** Menüpunkte mit Unterseiten: „split“ (Link + Pfeil, Standard), „hover“ (dazu Öffnen beim Überfahren), „overview“ (Klick öffnet, mit „Übersicht“) */
+function modern_nav_parent(): string
+{
+    $v = (string) design('nav_parent');
+    return in_array($v, ['split', 'hover', 'overview'], true) ? $v : 'split';
+}
+
 /**
  * Hauptmenü in der Leiste: Unterseiten als Aufklappmenü (<details> – ohne JavaScript bedienbar; site.js ergänzt
- * Pfeiltasten, Escape, Klick daneben). $rail: Seitenleiste (Unterseiten als Akkordeon untereinander).
+ * Pfeiltasten, Escape, Klick daneben, Öffnen beim Überfahren). Design „Menüpunkte mit Unterseiten“:
+ *  - split/hover: der Menüpunkt bleibt ein Link, daneben öffnet ein Pfeil (<summary>) die Unterseiten – kein „Übersicht“-Eintrag
+ *  - overview: der Menüpunkt öffnet das Menü, erster Eintrag „Übersicht: …“ führt zur Seite (bisheriges Verhalten)
+ * Dritte Ebene: .hnav__nested (Design „Dritte Menüebene“: eingerückt bzw. gruppiert – nur CSS, Klassen nv-*).
  */
 function modern_nav_inline(array $menu): string
 {
     $cur = fn(array $m) => modern_is_current($m) ? ' aria-current="page"' : '';
     $chev = icon('caret-down', ['class' => 'hnav__chev']);
+    $split = modern_nav_parent() !== 'overview';
     $nested = function (array $items) use (&$nested, $cur): string {
         if (!$items) return '';
         $h = '<ul class="hnav__nested" role="list">';
         foreach ($items as $c) $h .= '<li><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children']) . '</li>';
         return $h . '</ul>';
+    };
+    $children = function (array $m) use ($nested, $cur): string {
+        $h = '';
+        foreach ($m['children'] as $c) {
+            $h .= '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children']) . '</li>';
+        }
+        return $h;
     };
     $h = '<ul class="hnav__list" role="list">';
     foreach ($menu as $m) {
@@ -268,30 +286,43 @@ function modern_nav_inline(array $menu): string
             $h .= '<li class="hnav__item"><a class="hnav__link" href="' . e($m['href']) . '"' . $cur($m) . $active . '>' . e($m['label']) . '</a></li>';
             continue;
         }
+        if ($split) {
+            $h .= '<li class="hnav__item hnav__item--split"><a class="hnav__link hnav__link--top" href="' . e($m['href']) . '"' . $cur($m) . $active . '>' . e($m['label']) . '</a>'
+                . '<details class="hnav__sub"' . $active . '><summary class="hnav__link hnav__toggle" aria-label="' . e(lt('Unterseiten von {name}', ['name' => $m['label']])) . '">' . $chev . '</summary>'
+                . '<ul class="hnav__panel" role="list">' . $children($m) . '</ul></details></li>';
+            continue;
+        }
         $h .= '<li class="hnav__item"><details class="hnav__sub"' . $active . '><summary class="hnav__link"><span>' . e($m['label']) . '</span>' . $chev . '</summary>'
             . '<ul class="hnav__panel" role="list"><li><a class="hnav__sublink hnav__sublink--parent" href="' . e($m['href']) . '"' . $cur($m) . '>'
-            . e(lt('Übersicht: {name}', ['name' => $m['label']])) . '</a></li>';
-        foreach ($m['children'] as $c) {
-            $h .= '<li><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>' . $nested($c['children']) . '</li>';
-        }
-        $h .= '</ul></details></li>';
+            . e(lt('Übersicht: {name}', ['name' => $m['label']])) . '</a></li>' . $children($m) . '</ul></details></li>';
     }
     return $h . '</ul>';
 }
 
 /**
- * Hauptmenü im Seitenblatt (Menü-Schaltfläche): Unterseiten als Akkordeon (<details name> – nur eins offen, ohne JavaScript).
- * Der aktive Zweig ist geöffnet.
+ * Hauptmenü im Seitenblatt (Menü-Schaltfläche). „overview“: Unterseiten als Akkordeon (<details name> – nur eins offen,
+ * ohne JavaScript), erster Eintrag „Übersicht: …“. „split“/„hover“: jede Seite bleibt ein Link, die Unterseiten öffnet
+ * eine eigene Schaltfläche daneben (aria-expanded; ohne JavaScript ist alles sichtbar, site.js klappt zu). Aktiver Zweig offen.
  */
 function modern_nav_sheet(array $menu): string
 {
     $cur = fn(array $m) => modern_is_current($m) ? ' aria-current="page"' : '';
     $chev = icon('caret-down', ['class' => 'mnav__chev']);
-    $level = function (array $items, int $depth) use (&$level, $cur, $chev): string {
+    $split = modern_nav_parent() !== 'overview';
+    $n = 0;
+    $level = function (array $items, int $depth) use (&$level, &$n, $cur, $chev, $split): string {
         $h = '<ul class="mnav__list mnav__list--' . $depth . '" role="list">';
         foreach ($items as $m) {
             if (!$m['children']) {
                 $h .= '<li><a class="mnav__link" href="' . e($m['href']) . '"' . $cur($m) . '>' . e($m['label']) . '</a></li>';
+                continue;
+            }
+            if ($split) {
+                $id = 'mnav-sub-' . (++$n);
+                $h .= '<li><div class="mnav__row"><a class="mnav__link" href="' . e($m['href']) . '"' . $cur($m) . '>' . e($m['label']) . '</a>'
+                    . '<button type="button" class="mnav__toggle" aria-expanded="' . ($m['active'] ? 'true' : 'false') . '" aria-controls="' . $id . '">'
+                    . $chev . '<span class="sr-only">' . e(lt('Unterseiten von {name}', ['name' => $m['label']])) . '</span></button></div>'
+                    . '<div class="mnav__sub" id="' . $id . '">' . $level($m['children'], $depth + 1) . '</div></li>';
                 continue;
             }
             $h .= '<li><details class="mnav__acc" name="mnav-' . $depth . '"' . ($m['active'] ? ' open' : '') . '>'
@@ -466,11 +497,12 @@ function modern_public_info(): array
 
 /**
  * Überschrift mit Hervorhebung: *Wort* → <em class="hl">Wort</em> (Akzentfarbe mit Blockfarben-Unterstrich).
- * Im Editor bleibt der Rohtext stehen, damit die Sternchen beim direkten Bearbeiten erhalten bleiben.
+ * Im Editor ist die Hervorhebung sichtbar, die Sternchen bleiben als dezente Textzeichen stehen (span.hl-mark, Gestaltung im
+ * Kern: resources/css/editor.css) – innerText liefert beim Speichern weiter „*Wort*“.
  */
 function modern_title(string $text): string
 {
-    if (is_editing()) return e($text);
+    if (is_editing()) return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
     return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
 }
 

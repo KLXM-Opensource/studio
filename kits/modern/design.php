@@ -32,7 +32,7 @@ $color = fn(string $name, string $label, string $var, string $light, string $dar
 $base = [
     'font_body' => 'jakarta', 'font_head' => 'space-grotesk', 'base_size' => 17, 'ratio' => 1.3, 'heading_weight' => 600, 'heading_tracking' => -3.5,
     'display' => 'large', 'radius' => 14, 'buttons' => 'solid', 'cards' => 'outlined', 'space' => 'normal', 'wrap' => 80, 'eyebrow' => 'square',
-    'nav' => 'modern', 'nav_sticky' => true, 'footer' => 'big', 'motion' => true, 'dark' => true,
+    'nav' => 'modern', 'nav_sticky' => true, 'nav_parent' => 'split', 'nav_levels' => 'indent', 'footer' => 'big', 'motion' => true, 'dark' => true,
 ];
 
 return [
@@ -98,6 +98,12 @@ return [
                 ],
                 'help' => 'Alle Varianten sind per Tastatur bedienbar; auf Mobilgeräten öffnet die Menü-Schaltfläche ein Seitenblatt.'],
             ['name' => 'nav_sticky', 'label' => 'Kopfbereich beim Scrollen sichtbar halten', 'type' => 'bool', 'class' => 'nav-sticky', 'default' => true],
+            ['name' => 'nav_parent', 'label' => 'Menüpunkte mit Unterseiten', 'type' => 'choice', 'class' => 'np-{value}', 'default' => 'split',
+                'options' => ['split' => 'Link + Pfeil – der Menüpunkt öffnet seine Seite, der Pfeil die Unterseiten', 'hover' => 'Link + Pfeil, Unterseiten öffnen auch beim Überfahren mit der Maus', 'overview' => 'Klick öffnet die Unterseiten, Eintrag „Übersicht“ führt zur Seite'],
+                'help' => 'Gilt für das Menü in der Leiste und im Seitenblatt (Telefon). „Link + Pfeil“ kommt ohne zusätzlichen Eintrag „Übersicht“ aus.'],
+            ['name' => 'nav_levels', 'label' => 'Dritte Menüebene im Aufklappmenü', 'type' => 'choice', 'class' => 'nv-{value}', 'default' => 'indent',
+                'options' => ['indent' => 'Eingerückt – mit Linie, etwas kleiner', 'groups' => 'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter'],
+                'help' => 'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.'],
             ['name' => 'footer', 'label' => 'Fußbereich', 'type' => 'choice', 'class' => 'ft-{value}', 'default' => 'big',
                 'options' => ['big' => 'Großer Schriftzug mit Spalten', 'columns' => 'Spalten', 'simple' => 'Schlicht in einer Zeile']],
         ]],

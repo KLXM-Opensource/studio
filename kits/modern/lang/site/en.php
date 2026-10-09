@@ -70,4 +70,6 @@ return [
     'Zur Startseite' => 'Go to home page',
     'Zurück' => 'Previous',
     'Datenblatt' => 'Spec sheet',
+    // Menü: Link + Pfeil, dritte Ebene
+    'Unterseiten von {name}' => 'Subpages of {name}',
 ];

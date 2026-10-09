@@ -8,7 +8,17 @@
 .hnav__sublink:hover{background:var(--m-surface);color:var(--m-ink)}
 .hnav__sublink[aria-current=page]{background:var(--m-a-soft);color:var(--m-ink);font-weight:600}
 .hnav__sublink--parent{color:var(--m-muted);font-size:.875rem}
-.hnav__nested{margin:0;padding:0 0 0 .75rem;list-style:none}
+/* Dritte Ebene (Design „Dritte Menüebene“): eingerückt mit Linie (nv-indent, Standard) oder gruppiert (nv-groups) */
+.hnav__nested{margin:0 0 .3rem .95rem;padding:0 0 0 .45rem;list-style:none;border-inline-start:2px solid var(--m-line)}
+.hnav__nested .hnav__sublink{padding-block:.42rem;color:var(--m-muted);font-size:.875rem}
+.hnav__nested .hnav__sublink:hover,.hnav__nested .hnav__sublink[aria-current=page]{color:var(--m-ink)}
+.nv-groups .hnav__panel>li.has-nested{margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--m-line)}
+.nv-groups .hnav__panel>li.has-nested:first-child{margin-top:0;padding-top:0;border-top:0}
+.nv-groups .hnav__panel>li.has-nested+li:not(.has-nested){margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--m-line)}
+.nv-groups .hnav__panel>li.has-nested>.hnav__sublink{padding-block:.45rem .2rem;color:var(--m-muted);font:600 var(--m-t-2)/1.3 var(--m-font-label);letter-spacing:.08em;text-transform:uppercase}
+.nv-groups .hnav__panel>li.has-nested>.hnav__sublink:hover{background:none;color:var(--m-link)}
+.nv-groups .hnav__nested{margin:0;padding:0;border:0}
+.nv-groups .hnav__nested .hnav__sublink{padding-block:.55rem;color:var(--m-text);font-size:.9375rem}
 .hsearch__panel{position:fixed;inset:5rem var(--m-gutter) auto auto;width:min(32rem,100vw - 2 * var(--m-gutter));margin:0;padding:.9rem 3.5rem .9rem .9rem;border:1px solid var(--m-line);border-radius:12px;background:var(--m-bg);color:var(--m-text);box-shadow:0 24px 48px -20px var(--m-sh2);overflow:visible}
 .hsearch__panel.is-anchored{inset:auto}
 .hsearch__close{position:absolute;inset:.9rem .5rem auto auto;width:2.5rem;height:3rem;border:0;background:none;color:inherit;font-size:1.75rem;cursor:pointer}
@@ -38,6 +48,10 @@ html:has(.mnav:popover-open){overflow:hidden}
 .mnav__sub{margin:0 0 .75rem .25rem;padding-inline-start:.9rem;border-inline-start:2px solid var(--m-a-soft)}
 .mnav__sub .mnav__link,.mnav__list--2 .mnav__link{min-height:2.75rem;color:var(--m-text);font:400 var(--m-t0)/1.3 var(--m-font);letter-spacing:0}
 .mnav__link--parent{color:var(--m-muted)!important;font-size:var(--m-t-1)!important}
+.mnav__row{display:flex;align-items:center;gap:.5rem}
+.mnav__row>.mnav__link{flex:1}
+.mnav__toggle{flex:none;display:grid;place-items:center;min-width:2.75rem;min-height:2.75rem;padding:0;border:0;background:none;color:var(--m-ink);cursor:pointer}
+.mnav__toggle[aria-expanded=true] .mnav__chev{rotate:180deg;background:var(--m-a-soft)}
 .mnav__label{margin-bottom:.5rem;color:var(--m-muted);font:600 var(--m-t-2)/1 var(--m-font-label);letter-spacing:.1em;text-transform:uppercase}
 .mnav__cta{width:100%}
 .quick{display:grid;gap:.25rem;margin:0;padding:0;list-style:none}
