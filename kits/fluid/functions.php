@@ -550,6 +550,7 @@ function fluid_public_info(): array
  */
 function fluid_title(string $text): string
 {
-    if (is_editing()) return e($text);
+    // Bearbeiten: Hervorhebung sichtbar, Sternchen dezent (editor.css .hl-mark) – beim Auslesen bleibt „*Wort*“ erhalten
+    if (is_editing()) return emphasis_editing($text);
     return preg_replace('~\*([^*]+)\*~u', '<em class="hl">$1</em>', e($text)) ?? e($text);
 }

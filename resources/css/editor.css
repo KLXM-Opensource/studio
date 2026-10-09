@@ -17,6 +17,8 @@
 
 /* Editor-Hülle */
 .is-editing main{padding-bottom:120px}
+/* *Wort*-Hervorhebung in Überschriften: beim Bearbeiten sichtbar, die Sternchen (echte Zeichen, emphasis_editing()) nur angedeutet */
+.is-editing .hl-mark{font-size:.4em;font-style:normal;font-weight:400;vertical-align:super;opacity:.4}
 .cms-editor .codex-editor__redactor{padding-bottom:160px!important}
 .cms-editor .ce-block__content,.cms-editor .ce-toolbar__content{max-width:none;margin:0}
 /* Griff „+ ⠿“ über der Blockkante statt auf dem Inhalt; die Block-Leiste (BarPlace) weicht ihm aus */

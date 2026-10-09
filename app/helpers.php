@@ -337,16 +337,24 @@ function is_editing(): bool
  * *Betonung* in kurzen Texten (Überschriften der Kern-Blöcke) wie in den Kits: Bringt das Kit eine Funktion {kit}_title()
  * mit (klxm_title, klxm_agentur_title, fluid_title … – Bindestrich im Namen → „_“), wird sie benutzt, damit Kern-Blöcke
  * aussehen wie die Blöcke des Kits (<strong> bzw. <em class="hl">). Sonst *…* → <em>…</em>. Ergebnis ist HTML, der Text
- * wird immer escaped; im Bearbeiten-Modus Rohtext (die Sternchen bleiben sichtbar und editierbar).
+ * wird immer escaped. Im Bearbeiten-Modus: Hervorhebung sichtbar, die Sternchen bleiben als echte Zeichen in <span class="hl-mark">
+ * (dezent per editor.css) – beim Auslesen (textContent) bleibt „*Wort*“ erhalten. Dafür nie die Kit-Funktion, die das evtl. nicht kennt.
  */
 function emphasis(string $text): string
 {
-    if (is_editing() || !str_contains($text, '*')) return e($text);
+    if (!str_contains($text, '*')) return e($text);
+    if (is_editing()) return emphasis_editing($text);
     static $fn = [];
     $kit = app()->theme->name;
     $fn[$kit] ??= function_exists($f = str_replace('-', '_', $kit) . '_title') ? $f : '';
     if ($fn[$kit] !== '') return (string) ($fn[$kit])($text);
     return preg_replace('~\*([^*]+)\*~u', '<em>$1</em>', e($text)) ?? e($text);
+}
+
+/** Bearbeiten-Modus: *Wort* → dezente Sternchen + <em class="hl">Wort</em> – Rundlauf über textContent liefert wieder „*Wort*“ */
+function emphasis_editing(string $text): string
+{
+    return preg_replace('~\*([^*]+)\*~u', '<span class="hl-mark">*</span><em class="hl">$1</em><span class="hl-mark">*</span>', e($text)) ?? e($text);
 }
 
 /** Text ohne *Betonung*-Sternchen (für aria-label, title, Meta-Angaben) */

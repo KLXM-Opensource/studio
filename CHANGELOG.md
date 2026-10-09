@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Überschriften: *Hervorhebung* auch beim Bearbeiten sichtbar
+- Beim Bearbeiten auf der Website zeigen Überschriften mit `*Wort*` die Hervorhebung wie für Besucher; die Sternchen bleiben als echte
+  Zeichen stehen, klein, hochgestellt und blass (`emphasis_editing()`, `.hl-mark` in editor.css) – gespeichert wird weiter `*Wort*`.
+  Kern-Blöcke (`emphasis()`) und Fluid; weitere Kits mit eigener Hervorhebung folgen demselben Muster. Besucher-Markup unverändert.
+
 ### Kits: Menüpunkte mit Unterseiten als Link + Pfeil, dritte Menüebene unterscheidbar
 - Fluid (Design → Kopf & Fuß): **Menüpunkte mit Unterseiten** – „Link + Pfeil“ (Standard: der Menüpunkt öffnet seine Seite, der Pfeil
   daneben die Unterseiten, kein Eintrag „Übersicht“ mehr), „Link + Pfeil, öffnet auch beim Überfahren“ oder wie bisher „Klick öffnet,
