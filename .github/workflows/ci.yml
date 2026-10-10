@@ -24,7 +24,7 @@ jobs:
       matrix:
         php: ['8.4', '8.5']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
@@ -39,7 +39,7 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - name: Composer-Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ runner.os }}-php${{ matrix.php }}-${{ hashFiles('composer.lock') }}
@@ -56,13 +56,13 @@ jobs:
           echo "$(grep -c '^No syntax errors' /tmp/lint.log) Dateien ohne Syntaxfehler."
 
       - name: pnpm einrichten
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           # Version aus "packageManager" (pnpm 10)
           package_json_file: tools/package.json
 
       - name: Node einrichten
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
