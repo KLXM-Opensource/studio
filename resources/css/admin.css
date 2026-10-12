@@ -3490,3 +3490,9 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .mt-seg__opts input:checked+span{background:var(--adm-surface);color:var(--adm-ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .mt-seg__opts input:focus-visible+span{outline:2px solid var(--adm-a);outline-offset:1px}
 .mt-wrap{display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:5px}
+
+/* Tabellen-Designer: „+“ am Feld → Menü der Feldtypen, neues Feld direkt darunter */
+.dt-field__tools{position:relative}
+.dt-iconbtn--add{font-weight:700}
+.dt-addmenu{position:absolute;z-index:30;top:calc(100% + 6px);right:0;display:flex;flex-wrap:wrap;gap:6px;width:min(560px,calc(100vw - 48px));max-height:60vh;overflow:auto;padding:10px;border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line),0 18px 40px -12px rgba(0,0,0,.35)}
+.dt-addmenu .dt-typebtn{font-size:13px}

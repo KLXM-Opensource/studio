@@ -159,6 +159,7 @@ $type = $f['type'] ?? 'text';
     <?php if ($err): ?><p class="f-error"><?= e($err) ?></p><?php endif; ?>
   </div>
   <div class="dt-field__tools">
+    <button type="button" class="cms-iconbtn dt-iconbtn dt-iconbtn--add" data-add-after aria-haspopup="menu" aria-expanded="false" aria-label="<?= e(__('Feld darunter einfügen')) ?>" title="<?= e(__('Feld darunter einfügen')) ?>">+</button>
     <button type="button" class="cms-iconbtn dt-iconbtn" data-move="-1" aria-label="Nach oben">↑</button>
     <button type="button" class="cms-iconbtn dt-iconbtn" data-move="1" aria-label="Nach unten">↓</button>
     <button type="button" class="cms-iconbtn dt-iconbtn dt-iconbtn--danger" data-remove-field aria-label="Feld entfernen">✕</button>

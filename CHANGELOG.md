@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Tabellen-Designer: Feld direkt unter einem anderen einfügen
+- **+** an jedem Feld öffnet die Feldtypen als Menü (Pfeiltasten, Esc) – das neue Feld kommt direkt darunter statt ans Ende.
+- Behoben: Neue Felder bekamen eine verstümmelte Bezeichnung (das erste Wort fehlte, z. B. „+ Text“ statt „Medien + Text“) – die
+  Bezeichnung kommt jetzt aus dem Typ, nicht aus dem Knopftext.
+
 ### Handbuch: Kapitel „Neuerungen“ und neue Kurzanleitungen
 - Neues Kapitel **Neuerungen** (gleich nach dem Überblick): die letzten Änderungen in Alltagssprache, je mit Link zur Anleitung.
 - **Häufige Aufgaben**: viele Bilder hochladen, Medien + Text, Design für später speichern, im Aktionslog nachsehen.

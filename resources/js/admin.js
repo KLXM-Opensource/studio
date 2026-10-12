@@ -604,6 +604,34 @@ if (schema) {
     if (sub && e.target.matches('[data-sub-label]')) { const nm = $('[data-sub-name]', sub); if (!nm.dataset.touched) nm.value = slug(e.target.value); }
     if (sub && e.target.matches('[data-sub-name]')) e.target.dataset.touched = '1';
   });
+  // Menü „Feld darunter einfügen“ (Knopf „+“ je Feld): Kopie der Typ-Knöpfe, Esc/Klick daneben schließt
+  let addMenuEl = null;
+  function closeAddMenu() {
+    if (!addMenuEl) return;
+    addMenuEl._btn?.setAttribute('aria-expanded', 'false');
+    addMenuEl.remove(); addMenuEl = null;
+  }
+  function addMenu(btn) {
+    const open = addMenuEl?._btn === btn;
+    closeAddMenu();
+    if (open) return;
+    const li = btn.closest('[data-field]');
+    const m = d.createElement('div');
+    m.className = 'dt-addmenu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', t('Feld darunter einfügen'));
+    m.innerHTML = $$('.dt-addfield [data-add-field]', schema).map(b => b.outerHTML.replace('class="dt-typebtn"', 'class="dt-typebtn" role="menuitem"')).join('');
+    m._after = li; m._btn = btn;
+    btn.setAttribute('aria-expanded', 'true');
+    btn.closest('.dt-field__tools').append(m);
+    addMenuEl = m;
+    m.querySelector('button')?.focus();
+    m.addEventListener('keydown', ev => {
+      const items = $$('button', m), i = items.indexOf(d.activeElement);
+      if (ev.key === 'Escape') { ev.preventDefault(); closeAddMenu(); btn.focus(); }
+      else if (ev.key === 'ArrowDown' || ev.key === 'ArrowRight') { ev.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (ev.key === 'ArrowUp' || ev.key === 'ArrowLeft') { ev.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    });
+  }
+  d.addEventListener('click', ev => { if (addMenuEl && !addMenuEl.contains(ev.target) && !ev.target.closest('[data-add-after]')) closeAddMenu(); });
   schema.addEventListener('click', e => {
     const sb = e.target.closest('[data-sub-add],[data-sub-move],[data-sub-remove]');
     if (sb) {
@@ -613,14 +641,19 @@ if (schema) {
       else { const to = +sb.dataset.subMove < 0 ? sub.previousElementSibling : sub.nextElementSibling?.nextElementSibling; if (+sb.dataset.subMove < 0 ? to : sub.nextElementSibling) sub.parentNode.insertBefore(sub, to || null); sb.focus(); }
       return;
     }
+    // „+“ am Feld: Menü mit allen Feldtypen (Knöpfe der Leiste „Feld hinzufügen“) – das neue Feld kommt direkt darunter
+    const plus = e.target.closest('[data-add-after]');
+    if (plus) { addMenu(plus); return; }
     const add = e.target.closest('[data-add-field]');
     if (add) {
       const html = tpl.innerHTML.replaceAll('__i__', String($$('[data-field]', list).length));
-      list.insertAdjacentHTML('beforeend', html);
-      const li = list.lastElementChild;
+      const after = add.closest('.dt-addmenu')?._after;
+      closeAddMenu();
+      if (after) after.insertAdjacentHTML('afterend', html); else list.insertAdjacentHTML('beforeend', html);
+      const li = after ? after.nextElementSibling : list.lastElementChild;
       $('[data-type]', li).value = add.dataset.addField; sync(li);
       if (add.dataset.addField === 'group') addSub(li);
-      $('[data-label]', li).value = add.textContent.trim().replace(/^\S+\s/, '');
+      $('[data-label]', li).value = add.dataset.label || add.title || '';   // Bezeichnung des Typs (nicht aus dem Knopftext – davor steht ein Symbol)
       // Kurzname eindeutig (zweiter Abschnitt, Freitext … → _2, _3)
       const taken = new Set($$('[data-name]', list).filter(x => x !== $('[data-name]', li)).map(x => x.value));
       let nm = slug($('[data-label]', li).value), k = 2; const base = nm;

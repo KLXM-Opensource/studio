@@ -96,6 +96,7 @@
   <div class="doc-note doc-note--info"><strong>Suchmaschinen</strong><p>Detailseiten erhalten automatisch Titel, Beschreibung (aus dem gewählten Beschreibungs-Feld), Vorschaubild und stehen in der Sitemap. Einträge im Entwurf sind nur für Angemeldete sichtbar.</p></div>
 
   <h3 id="bedingungen">Felder, die nur manchmal gebraucht werden (Bedingungen)</h3>
+  <p><b>Neues Feld an der richtigen Stelle:</b> Das <b>+</b> rechts an jedem Feld öffnet die Liste der Feldtypen – das neue Feld erscheint direkt darunter (Pfeiltasten wählen, <kbd>Esc</kbd> schließt). Die Leiste <b>Feld hinzufügen</b> am Ende hängt Felder unten an.</p>
   <p>Im Tabellen-Designer hat jedes Feld den aufklappbaren Bereich <b>Bedingungen</b>. Dort formulieren Sie Sätze wie „Feld nur anzeigen, wenn <b>Anrede</b> <b>ist gleich</b> <b>Firma</b>“.</p>
   <ul>
     <li><b>Feld nur anzeigen, wenn …</b> – sonst ist das Feld im Formular ausgeblendet; ein Wert darin wird beim Speichern verworfen. Mehrere Bedingungen: „alle treffen zu“ oder „eine davon trifft zu“.</li>

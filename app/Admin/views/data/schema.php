@@ -173,7 +173,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
       <div class="dt-addfield">
         <span class="adm-muted">Feld hinzufügen:</span>
         <?php foreach (Tables::TYPES as $type => [$label, , $icon]): if (!in_array($type, $types, true)) continue; ?>
-        <button type="button" class="dt-typebtn" data-add-field="<?= e($type) ?>" title="<?= e($label) ?>"><?= icon($icon) ?> <?= e($label) ?></button>
+        <button type="button" class="dt-typebtn" data-add-field="<?= e($type) ?>" data-label="<?= e(__($label)) ?>" title="<?= e(__($label)) ?>"><?= icon($icon) ?> <?= e(__($label)) ?></button>
         <?php endforeach; ?>
       </div>
       <?= $err('fields') ?>

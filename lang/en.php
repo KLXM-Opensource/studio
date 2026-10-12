@@ -7251,4 +7251,5 @@ return [
     'Bildformat' => 'Image format',
     'Original' => 'Original',
     'Alle Neuerungen im Handbuch →' => 'All changes in the manual →',
+    'Feld darunter einfügen' => 'Insert field below',
 ];
