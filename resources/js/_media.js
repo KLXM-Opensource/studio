@@ -46,7 +46,10 @@ const MAX_MB = +($('[data-media-max]')?.dataset.mediaMax || 50);
 // SVG: nimmt der Server nur bereinigt an (Core\Svg) – ist die Funktion aus, kommt eine klare Meldung zurück
 const ACCEPT = { image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'], pdf: ['application/pdf'], video: ['video/mp4'], audio: ['audio/mpeg', 'audio/mp4', 'audio/x-m4a'] };
 const ALL_TYPES = [...ACCEPT.image, ...ACCEPT.pdf, ...ACCEPT.video, ...ACCEPT.audio];
-const ftype = f => f.type || (/\.svg$/i.test(f.name) ? 'image/svg+xml' : '');
+const OFFICE_EXT = { docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', odt: 'application/vnd.oasis.opendocument.text',
+  ods: 'application/vnd.oasis.opendocument.spreadsheet', odp: 'application/vnd.oasis.opendocument.presentation' };
+const ftype = f => f.type || (/\.svg$/i.test(f.name) ? 'image/svg+xml' : OFFICE_EXT[(f.name.split('.').pop() || '').toLowerCase()] || '');
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const store = {
   // Schlüssel klxm-studio-media-*; mycms-media-* (historisch) wird noch gelesen und beim Schreiben entfernt
@@ -172,7 +175,8 @@ async function uploadFile(file, meta, onProgress) {
 function pickFiles(accept, multiple = true) {
   return new Promise(resolve => {
     const i = d.createElement('input');
-    i.type = 'file'; i.accept = accept.join(','); i.multiple = multiple;
+    const ext = Object.entries(OFFICE_EXT).filter(([, m]) => accept.includes(m)).map(([e]) => '.' + e);   // Endungen dazu – manche Systeme kennen die Office-Typen nicht
+    i.type = 'file'; i.accept = [...accept, ...ext].join(','); i.multiple = multiple;
     i.onchange = () => resolve([...i.files]);
     i.click();
   });
@@ -793,6 +797,8 @@ class Finder {
     this.ro = data.can_edit === false;   // z. B. Pool ohne Recht „Geteilte Medien pflegen“: nur ansehen und verwenden
     this.root.classList.toggle('is-ro', this.ro);
     RIGHTS = data.rights || 'optional';
+    // Office-Dokumente (Grundeinstellungen → Mediathek): erlaubte Typen kommen mit der Liste
+    for (const t of data.office || []) if (!ALL_TYPES.includes(t)) ALL_TYPES.push(t);
     this.items = this.sorted(data.items);
     const ids = new Set(this.items.map(m => m.id));
     this.sel = new Set([...this.sel].filter(id => ids.has(id)));

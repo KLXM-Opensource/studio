@@ -7210,4 +7210,6 @@ return [
     'Lädt hoch …' => 'Uploading …',
     'Schon vorhanden – vorhandene Datei verwendet.' => 'Already uploaded – using the existing file.',
     'wird verarbeitet …' => 'processing …',
+    'Dieses Office-Dokument wird nicht angenommen: nur DOCX, XLSX, PPTX, ODT, ODS, ODP ohne Makros.' => 'This Office document is not accepted: only DOCX, XLSX, PPTX, ODT, ODS, ODP without macros.',
+    'Office-Dokumente sind in der Mediathek nicht erlaubt – bitte als PDF speichern und hochladen.' => 'Office documents are not allowed in the media library – please save as PDF and upload that.',
 ];

@@ -113,6 +113,7 @@
 
   <h3>PDFs und Downloads</h3>
   <p>PDFs öffnen sich auf der Website in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
+  <p><b>Word, Excel, PowerPoint:</b> Standardmäßig nimmt die Mediathek keine Office-Dokumente an – speichern Sie sie als PDF (sicher und auf jedem Gerät lesbar). Die Administration kann unter <b>Grundeinstellungen → Mediathek → „Office-Dokumente erlauben“</b> moderne Formate zulassen: DOCX, XLSX, PPTX, ODT, ODS, ODP. Alte Formate (DOC, XLS, PPT) und Dateien mit Makros werden immer abgelehnt.</p>
 
   <?php $__sizes = $vars['image_sizes'] ?? null; if ($__sizes): ?>
   <table class="doc-table">

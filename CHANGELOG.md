@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: Office-Dokumente nur auf Wunsch (Standard aus)
+- Neue Grundeinstellung **Mediathek → „Office-Dokumente erlauben“**: DOCX, XLSX, PPTX, ODT, ODS, ODP. Geprüft am Inhalt (ZIP-Container mit
+  passender Kennung, `Media::officeMime()`); alte Formate (DOC/XLS/PPT) und Dateien mit Makros (vbaProject, macroEnabled, Basic/, Scripts/)
+  werden immer abgelehnt. Ausgeschaltet erscheint beim Hochladen der Hinweis, die Datei als PDF zu speichern.
+
 ### Mediathek: stabiles Hochladen vieler Dateien
 - Behoben: Beim Hochladen mehrerer Dateien entstanden Doppelte (bis zu fünffach). Ursache: jedes Enter im Alt-Text-Feld und jeder weitere
   Klick auf „Hochladen“ startete einen zusätzlichen Durchlauf über dieselben Dateien. Jetzt läuft nur ein Durchlauf, der Knopf zeigt

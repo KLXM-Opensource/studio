@@ -129,7 +129,7 @@ final class MediaController extends AdminController
             'pools' => array_map(fn($k, $l) => ['key' => $k, 'label' => $l, 'edit' => \Core\MediaPools::canEdit($k), 'protected' => \Core\MediaPools::isProtected($k)], array_keys(\Core\MediaPools::forSite()), \Core\MediaPools::forSite()),
             'pool' => Media::pool(),
             // Papierkorb (Tage, 0 = aus), Bildrechte (off | optional | required), Grenze „zu groß“
-            'trash_days' => Media::pool() === null ? Media::trashDays() : 0, 'rights' => Media::rightsMode(), 'large_mb' => (int) (Media::largeBytes() / 1048576),
+            'trash_days' => Media::pool() === null ? Media::trashDays() : 0, 'rights' => Media::rightsMode(), 'office' => Media::officeOn() ? array_keys(Media::OFFICE_MIMES) : [], 'large_mb' => (int) (Media::largeBytes() / 1048576),
             'zip' => class_exists(\ZipArchive::class),
             'can_edit' => Media::pool() === null ? can('media.upload') : \Core\MediaPools::canEdit(Media::pool()),
             'can_share' => (bool) array_filter(array_keys(\Core\MediaPools::forSite()), [\Core\MediaPools::class, 'canEdit']),

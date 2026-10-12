@@ -131,6 +131,8 @@ final class SystemSchema
                 ['name' => 'sys.media_rights', 'label' => 'Bildrechte und Einwilligungen', 'type' => 'select', 'required' => true, 'default' => 'optional',
                     'options' => ['off' => 'Ausblenden', 'optional' => 'Optional – Felder zugeklappt in den Details', 'required' => 'Pflicht – Lizenz/Quelle und Einwilligung beim Hochladen und Speichern'],
                     'help' => 'Lizenz bzw. Quelle, „Nutzungsrecht bis“ und ob abgebildete Personen eingewilligt haben. Fehlende oder ablaufende Angaben zeigt die Mediathek unter „Prüfen“.'],
+                ['name' => 'sys.media_office', 'label' => 'Office-Dokumente erlauben (Word, Excel, PowerPoint, OpenDocument)', 'type' => 'bool', 'default' => false,
+                    'help' => 'Nur moderne Formate: DOCX, XLSX, PPTX, ODT, ODS, ODP. Alte Formate (DOC, XLS, PPT) und Dateien mit Makros werden immer abgelehnt. Empfehlung: Dokumente als PDF hochladen – sicher und auf jedem Gerät lesbar.'],
                 ['name' => 'sys.media_large_mb', 'label' => 'Als „zu groß“ gilt eine Datei ab (MB)', 'type' => 'number', 'width' => 'half', 'default' => 8],
                 ['name' => 'sys.media_large_px', 'label' => '… bzw. ein Bild ab (Pixel, längere Seite)', 'type' => 'number', 'width' => 'half', 'default' => 6000,
                     'help' => 'Solche Dateien zeigt „Prüfen → Zu große Dateien“; Bilder lassen sich dort auf 4000 px verkleinern.'],

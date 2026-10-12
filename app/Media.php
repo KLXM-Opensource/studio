@@ -23,6 +23,24 @@ final class Media
 {
     public const IMAGE_MIMES = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
     public const FILE_MIMES = ['application/pdf' => 'pdf', 'video/mp4' => 'mp4', 'audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'audio/x-m4a' => 'm4a'];
+    /**
+     * Office-Dokumente (Grundeinstellungen → Mediathek → „Office-Dokumente erlauben“, Standard aus): nur moderne Formate (ZIP-Container),
+     * geprüft am Inhalt – alte Formate (DOC/XLS/PPT) und Dateien mit Makros werden abgelehnt (officeMime()).
+     */
+    public const OFFICE_MIMES = [
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+        'application/vnd.oasis.opendocument.text' => 'odt',
+        'application/vnd.oasis.opendocument.spreadsheet' => 'ods',
+        'application/vnd.oasis.opendocument.presentation' => 'odp',
+    ];
+    /** Hauptteil im [Content_Types].xml je OOXML-Endung (ohne „macroEnabled“) */
+    private const OOXML_MAIN = [
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml',
+    ];
 
     private static array $cache = [];
     /** Geteilter Pool, in dem gerade gearbeitet wird (null = Mediathek der Website) */
@@ -101,7 +119,40 @@ final class Media
     /** Erlaubte Nicht-Bild-Typen: FILE_MIMES plus Typen aktiver Erweiterungen (Extension::mediaTypes, z. B. video/webm) */
     public static function fileMimes(): array
     {
-        return self::FILE_MIMES + array_map(fn($d) => (string) $d['ext'], Extensions::mediaTypes());
+        return self::FILE_MIMES + (self::officeOn() ? self::OFFICE_MIMES : []) + array_map(fn($d) => (string) $d['ext'], Extensions::mediaTypes());
+    }
+
+    /** Office-Dokumente in der Mediathek erlaubt? (Grundeinstellungen → Mediathek, Standard aus) */
+    public static function officeOn(): bool
+    {
+        return (bool) setting('sys.media_office', false) && class_exists(\ZipArchive::class);
+    }
+
+    /**
+     * Office-Datei am Inhalt prüfen: Endung passt, ZIP-Container mit erwarteter Kennung, keine Makros
+     * (vbaProject.bin, Basic/, Scripts/, macroEnabled). Entpackt nichts, liest nur kleine Steuerdateien. @return MIME-Typ oder null
+     */
+    public static function officeMime(string $path, string $name): ?string
+    {
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $mime = array_search($ext, self::OFFICE_MIMES, true);
+        if ($mime === false || !class_exists(\ZipArchive::class)) return null;
+        $z = new \ZipArchive();
+        if ($z->open($path, \ZipArchive::RDONLY) !== true) return null;
+        try {
+            if ($z->numFiles < 1 || $z->numFiles > 20000) return null;
+            for ($i = 0; $i < $z->numFiles; $i++) {
+                $n = strtolower((string) $z->getNameIndex($i));
+                if (str_ends_with($n, 'vbaproject.bin') || str_ends_with($n, 'vbadata.xml') || str_starts_with($n, 'basic/') || str_starts_with($n, 'scripts/')) return null;
+            }
+            if (isset(self::OOXML_MAIN[$ext])) {
+                $ct = (string) $z->getFromName('[Content_Types].xml', 512 * 1024);
+                return str_contains($ct, self::OOXML_MAIN[$ext]) && !preg_match('~macroEnabled|vbaProject~i', $ct) ? $mime : null;
+            }
+            return trim((string) $z->getFromName('mimetype', 200)) === $mime ? $mime : null;
+        } finally {
+            $z->close();
+        }
     }
 
     /**
@@ -349,6 +400,14 @@ final class Media
     private static function process(string $path, string $originalName, string $alt, array $opt): array
     {
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: '';
+        // Office-Dokumente (nur wenn erlaubt): finfo meldet oft nur application/zip – Typ am Inhalt bestimmen, Makros ablehnen
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (in_array($ext, self::OFFICE_MIMES, true) || in_array($ext, ['doc', 'docm', 'xls', 'xlsm', 'ppt', 'pptm', 'dotm', 'xltm', 'potm'], true)) {
+            if (!self::officeOn()) return [null, __('Office-Dokumente sind in der Mediathek nicht erlaubt – bitte als PDF speichern und hochladen.')];
+            $om = self::officeMime($path, $originalName);
+            if (!$om) return [null, __('Dieses Office-Dokument wird nicht angenommen: nur DOCX, XLSX, PPTX, ODT, ODS, ODP ohne Makros.')];
+            $mime = $om;
+        }
         if (filesize($path) > self::maxBytes()) {
             return [null, 'Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).'];
         }
@@ -1464,6 +1523,7 @@ final class Media
             $mime === 'audio/mpeg' => 'MP3',
             $mime === 'audio/mp4' => 'M4A',
             $mime === Svg::MIME => 'SVG',
+            isset(self::OFFICE_MIMES[$mime]) => strtoupper(self::OFFICE_MIMES[$mime]),
             str_starts_with($mime, 'image/') => strtoupper(substr($mime, 6)) === 'JPEG' ? 'JPG' : strtoupper(substr($mime, 6)),
             isset(Extensions::mediaTypes()[$mime]) => (string) (Extensions::mediaTypes()[$mime]['label'] ?? strtoupper((string) Extensions::mediaTypes()[$mime]['ext'])),
             default => 'Datei',
