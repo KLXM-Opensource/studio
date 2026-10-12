@@ -138,7 +138,7 @@ final class Entries
         }
         $q = trim((string) ($o['q'] ?? ''));
         if ($q !== '') {
-            $cols = array_column(array_filter($table['fields'], fn($f) => !empty($f['searchable']) || in_array($f['type'], ['text'], true)), 'name');
+            $cols = array_column(array_filter($table['fields'], fn($f) => !empty($f['searchable']) || in_array($f['type'], ['text', 'mediatext'], true)), 'name');
             $cols[] = 'slug';
             $or = array_map(fn($c) => "$c LIKE ?", $cols);
             array_push($params, ...array_fill(0, count($cols), '%' . $q . '%'));
@@ -267,6 +267,8 @@ final class Entries
                 $r[$f['name']] = json_decode((string) ($r[$f['name']] ?? ''), true) ?: [];
             } elseif ($f['type'] === 'group') {
                 $r[$f['name']] = self::groupRows($f, $r[$f['name']] ?? null);
+            } elseif ($f['type'] === 'mediatext') {
+                $r[$f['name']] = \Core\Fields::mediaTextSections($r[$f['name']] ?? null, !empty($f['sections']));
             } elseif ($f['type'] === 'bool') {
                 $r[$f['name']] = (bool) ($r[$f['name']] ?? false);
             } elseif (in_array($f['type'], ['media', 'file', 'relation'], true)) {
@@ -296,6 +298,7 @@ final class Entries
             if ($f['type'] === 'group') {
                 $def = self::groupSchema($f) + $def;
             }
+            if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
             if ($f['type'] === 'recurrence') {
                 // Regel-Editor liest Beginn (Wochentag, Tag im Monat) und „ganztägig“ aus dem Formular
                 $cal = Calendar::config($table);
@@ -450,6 +453,7 @@ final class Entries
             $row[$f['name']] = match (true) {
                 $f['type'] === 'multiselect' => json_encode(array_values((array) $v), JSON_UNESCAPED_UNICODE),
                 $f['type'] === 'group' => $v ? json_encode(array_values((array) $v), JSON_UNESCAPED_UNICODE) : null,
+                $f['type'] === 'mediatext' => ($secs = \Core\Fields::mediaTextSections($v, !empty($f['sections']))) ? json_encode($secs, JSON_UNESCAPED_UNICODE) : null,
                 $f['type'] === 'bool' => $v ? 1 : 0,
                 in_array($f['type'], ['media', 'file', 'relation'], true) => $v !== null && $v !== '' ? (int) $v : null,
                 $f['type'] === 'number' => $v === null || $v === '' ? null : (float) $v,
@@ -752,6 +756,8 @@ final class Entries
             'geo' => ($o['plain'] ?? false) ? e((string) $v) : \Core\Maps::render(['point' => $v, 'label' => self::title($table, $e), 'height' => 's']),
             'relation', 'relations' => self::relationHtml($f, is_array($v) ? $v : [(int) $v], $o),
             'group' => self::groupHtml($f, $v),
+            'mediatext' => !empty($o['plain']) ? implode("\n", array_map(fn($s) => ($s['title'] !== '' ? '<p>' . e($s['title']) . '</p>' : '') . $s['text'], \Core\Fields::mediaTextSections($v)))
+                : \Core\MediaText::sections(\Core\Fields::mediaTextSections($v, !empty($f['sections'])), ['label' => self::title($table, $e)]),
             default => e((string) $v),
         };
     }

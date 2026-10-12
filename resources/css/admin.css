@@ -3448,3 +3448,45 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .ds-preset--add{box-shadow:inset 0 0 0 1.5px var(--adm-line);background:transparent;color:var(--adm-t2);border:1.5px dashed transparent}
 .ds-preset--add:hover{color:var(--adm-a-ink);box-shadow:inset 0 0 0 1.5px var(--adm-a)}
 .ds-preset__plus{display:grid;place-items:center;width:28px;height:28px;border-radius:6px;background:var(--adm-fill);font-size:18px;font-weight:600;line-height:1}
+
+/* ================= Mediathek: Mehrfachauswahl (CMSMedia.pickMany) ================= */
+.fx-dialog--many{display:flex;flex-direction:column}
+.fx-dialog--many[open]{display:flex}
+.fx-dhint{flex:none!important;margin:0;padding:8px 16px;border-bottom:1px solid var(--adm-line);color:var(--adm-t2);font-size:13px}
+.fx-dfoot{flex:none;display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--adm-line);background:var(--adm-surface)}
+.fx-dfoot__n{margin-right:auto;color:var(--adm-t2);font-weight:600;font-variant-numeric:tabular-nums}
+.fx-dialog--many .fx-item{position:relative;cursor:pointer}
+.fx-dialog--many .fx-item .fx-thumb{position:relative}
+.fx-dialog--many .fx-item::after{content:"";position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 2px var(--adm-line),0 1px 3px rgba(0,0,0,.25);pointer-events:none}
+.fx-dialog--many .fx-item[aria-selected=true]::after{content:attr(data-order);display:grid;place-items:center;background:var(--fx-sel,var(--adm-a));box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.3);color:#fff;font:700 12px/24px system-ui,sans-serif;text-align:center}
+.fx-dialog--many .fx-item[aria-selected=true] .fx-thumb{box-shadow:0 0 0 3px var(--fx-sel,var(--adm-a))}
+
+/* ================= Feld „Medien + Text“ (Core\Fields::renderMediaText) ================= */
+.mt-sections{display:grid;gap:12px}
+.mt-field{display:grid;gap:12px;padding:12px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-surface)}
+.mt-sec .mt-field{border:0;padding:0;background:none}
+.mt-title{display:grid;gap:4px;font-size:13px;font-weight:600}
+.mt-field__media{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mt-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.mt-list:empty{display:none}
+.mt-item{position:relative;width:88px;height:66px;overflow:hidden;border-radius:8px;background:var(--adm-fill);box-shadow:inset 0 0 0 1px var(--adm-line);cursor:grab}
+.mt-item img{display:block;width:100%;height:100%;object-fit:cover}
+.mt-item__ph{display:grid;place-items:center;width:100%;height:100%;color:var(--adm-t3);font-size:22px}
+.mt-item__badge{position:absolute;left:6px;bottom:6px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:9px}
+.mt-item__x{position:absolute;top:4px;right:4px;display:grid;place-items:center;width:22px;height:22px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:11px;cursor:pointer;opacity:0;transition:opacity .15s}
+.mt-item:hover .mt-item__x,.mt-item:focus-within .mt-item__x,.mt-item__x:focus-visible{opacity:1}
+.mt-item:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.mt-item.is-drag{opacity:.4}
+@media (hover:none){.mt-item__x{opacity:1}}
+.mt-field__opts{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+.mt-field__opts[hidden],.mt-side[hidden]{display:none}
+.mt-side{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+.mt-seg{margin:0;padding:0;border:0;min-width:0}
+.mt-seg legend{margin-bottom:4px;padding:0;color:var(--adm-t3);font-size:12px;font-weight:600}
+.mt-seg__opts{display:inline-flex;padding:2px;border-radius:8px;background:var(--adm-fill)}
+.mt-seg__opts label{position:relative}
+.mt-seg__opts input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.mt-seg__opts span{display:block;padding:5px 10px;border-radius:6px;color:var(--adm-t2);font-size:13px;font-weight:600;white-space:nowrap}
+.mt-seg__opts input:checked+span{background:var(--adm-surface);color:var(--adm-ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.mt-seg__opts input:focus-visible+span{outline:2px solid var(--adm-a);outline-offset:1px}
+.mt-wrap{display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:5px}

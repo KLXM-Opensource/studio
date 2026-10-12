@@ -1,0 +1,42 @@
+/* Feldtyp „Medien + Text“ (Core\MediaText) – Medien über dem Text oder links/rechts daneben, Liste, Raster oder Slider.
+   Kit-neutral: Abstände in em, Radius/Linie aus den Variablen der Medien-Blöcke (--cms-radius, --cms-line). Raster-Großansicht und
+   Slider: css/media.css + js/media.mjs (Core\MediaBlocks). Unter 700 px stehen die Medien immer über dem Text. */
+.mt{--mt-gap:clamp(1rem,2.4vw,1.75rem);--mt-r:var(--cms-radius,10px);display:grid;gap:var(--mt-gap);margin-block:1em}
+/* Jeder Abschnitt steht für sich: schwebende Medien (Textumlauf) enden im eigenen Abschnitt, nichts fließt in den nächsten */
+.mt-part{display:flow-root;margin-block:1.75em}
+.mt-part:first-child{margin-top:0}
+.mt-part__h{margin:0 0 .6em}
+.mt__media{display:grid;gap:.75em;min-width:0}
+.mt__fig{margin:0}
+.mt__fig img,.mt__fig picture,.mt__video{display:block;width:100%;height:auto;border-radius:var(--mt-r)}
+.mt__cap{margin-top:.35em;font-size:.85em;opacity:.75}
+.mt__text{min-width:0}
+.mt__text>:first-child{margin-top:0}
+.mt__text>:last-child{margin-bottom:0}
+/* Raster mit Großansicht */
+.mt__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,9rem),1fr));gap:.5em}
+.mt--left .mt__grid,.mt--right .mt__grid{grid-template-columns:repeat(2,1fr)}
+.mt__cell{display:block;overflow:hidden;border-radius:var(--mt-r);aspect-ratio:1}
+.mt__cell img,.mt__cell picture{display:block;width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.mt__cell:hover img{transform:scale(1.04)}
+.mt__cell:focus-visible{outline:3px solid var(--cms-accent,currentColor);outline-offset:2px}
+.mt__cell--video{aspect-ratio:auto}
+@media (prefers-reduced-motion:reduce){.mt__cell img{transition:none}.mt__cell:hover img{transform:none}}
+/* Slider: Folien im Format 4:3, Bilder vollständig sichtbar */
+.mt__slider .cms-slide{background:transparent}
+.mt__slider .cms-slide__media img{object-fit:cover}
+/* Daneben als Spalten (ohne Textumlauf) */
+@media (min-width:700px){
+  .mt--cols.mt--w-third{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+  .mt--cols.mt--w-half{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .mt--cols.mt--right .mt__media{order:2}
+  .mt--cols{align-items:start}
+  .mt--only{grid-template-columns:minmax(0,1fr)!important}
+  /* Textumlauf: Medien schweben, der Text fließt darunter weiter */
+  .mt--wrap{display:flow-root}   /* hält die schwebenden Medien in diesem Feld bzw. Abschnitt */
+  .mt--wrap .mt__media{width:calc(33.333% - var(--mt-gap) / 2);margin-bottom:var(--mt-gap)}
+  .mt--wrap.mt--w-half .mt__media{width:calc(50% - var(--mt-gap) / 2)}
+  .mt--wrap.mt--left .mt__media{float:left;margin-right:var(--mt-gap)}
+  .mt--wrap.mt--right .mt__media{float:right;margin-left:var(--mt-gap)}
+  .mt--wrap .mt__text{display:block}
+}

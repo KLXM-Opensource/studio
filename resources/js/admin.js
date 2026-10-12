@@ -248,7 +248,7 @@ function initRepeaters(scope = d) {
         items.insertAdjacentHTML('beforeend', html);
         const added = items.lastElementChild;
         uniqueIds(added);
-        initRepeaters(added); initRte(added); initMedia(added); initCollectionFields(added); initShowIf(added); initIconPickers(added); initTiles(added); initLinkFields(added); initPagesFields(added);
+        initRepeaters(added); initRte(added); initMedia(added); initMediaText(added); initCollectionFields(added); initShowIf(added); initIconPickers(added); initTiles(added); initLinkFields(added); initPagesFields(added);
         $('input,select,textarea,[contenteditable]', added)?.focus();
       } else if (act === 'remove') {
         bar_.ask({ title: t('Eintrag entfernen?'), ok: t('Entfernen') }).then(ok => { if (!ok) return; const nx = item.nextElementSibling || item.previousElementSibling; item.remove(); rep.dispatchEvent(new Event('input', { bubbles: true })); ($('[data-rep=remove]', nx || rep) || $('[data-rep=add]', rep))?.focus(); });
@@ -340,6 +340,54 @@ function initCollectionFields(scope = d) {
       sel.value = String(c.id);
       sel.dispatchEvent(new Event('input', { bubbles: true })); sel.dispatchEvent(new Event('change', { bubbles: true }));
     });
+  });
+}
+
+// ------------------------------------------------------------ Medien + Text (Core\Fields::renderMediaText)
+// Medienleiste: „Medien hinzufügen …“ = Mehrfachauswahl (CMSMedia.pickMany, schon gewählte vorausgewählt, Reihenfolge der Auswahl),
+// Ziehen bzw. Alt + ←/→ sortiert, ✕ entfernt. Anordnung: Breite/Textumlauf nur bei „Links“/„Rechts“, Optionen erst mit Medien.
+function initMediaText(scope = d) {
+  $$('[data-mt]', scope).forEach(mt => {
+    if (mt._init || mt.closest('template')) return; mt._init = true;
+    const list = $('[data-mt-list]', mt), name = mt.dataset.name, opts = $('[data-mt-opts]', mt), side = $('[data-mt-side]', mt);
+    const changed = () => { opts.hidden = !list.children.length; mt.dispatchEvent(new Event('input', { bubbles: true })); };
+    const item = m => {
+      const li = d.createElement('li');
+      li.className = 'mt-item'; li.draggable = true; li.tabIndex = 0; li.dataset.id = m.id;
+      const video = m.kind === 'video';
+      li.innerHTML = (m.thumb ? `<img src="${esc(m.thumb)}" alt="" loading="lazy">` : `<span class="mt-item__ph">${video ? '▶' : '▣'}</span>`)
+        + (video ? '<span class="mt-item__badge" aria-hidden="true">▶</span>' : '')
+        + `<span class="sr-only">${esc(m.display || m.alt || '#' + m.id)}</span><input type="hidden" name="${esc(name)}[media][]" value="${+m.id}">`
+        + `<button type="button" class="mt-item__x" data-mt-remove aria-label="${esc(t('„{name}“ entfernen', { name: m.display || '#' + m.id }))}">✕</button>`;
+      return li;
+    };
+    $$('.mt-item', list).forEach(li => { li.tabIndex = 0; });
+    $('[data-mt-pick]', mt).addEventListener('click', async () => {
+      const have = new Map($$('.mt-item', list).map(li => [+li.dataset.id, li]));
+      const res = await window.CMSMedia?.pickMany?.('visual', [...have.keys()]);
+      if (!res) return;
+      list.replaceChildren(...res.map(m => have.get(+m.id) || item(m)));
+      changed();
+    });
+    list.addEventListener('click', e => { const x = e.target.closest('[data-mt-remove]'); if (x) { x.closest('.mt-item').remove(); changed(); list.querySelector('.mt-item')?.focus(); } });
+    // Sortieren: Ziehen …
+    let drag = null;
+    list.addEventListener('dragstart', e => { drag = e.target.closest('.mt-item'); drag?.classList.add('is-drag'); e.dataTransfer.effectAllowed = 'move'; });
+    list.addEventListener('dragend', () => { drag?.classList.remove('is-drag'); drag = null; changed(); });
+    list.addEventListener('dragover', e => {
+      if (!drag) return; e.preventDefault();
+      const over = e.target.closest('.mt-item');
+      if (!over || over === drag) return;
+      const r = over.getBoundingClientRect();
+      over.parentNode.insertBefore(drag, e.clientX > r.left + r.width / 2 ? over.nextSibling : over);
+    });
+    // … oder Tastatur: Alt + ←/→
+    list.addEventListener('keydown', e => {
+      const li = e.target.closest('.mt-item'); if (!li || !e.altKey) return;
+      if (e.key === 'ArrowLeft' && li.previousElementSibling) { e.preventDefault(); list.insertBefore(li, li.previousElementSibling); li.focus(); changed(); }
+      else if (e.key === 'ArrowRight' && li.nextElementSibling) { e.preventDefault(); list.insertBefore(li.nextElementSibling, li); li.focus(); changed(); }
+    });
+    $$('[data-mt-pos] input', mt).forEach(r => r.addEventListener('change', () => { side.hidden = r.value === 'top' && r.checked; }));
   });
 }
 
@@ -1003,7 +1051,7 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 

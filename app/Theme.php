@@ -536,10 +536,13 @@ final class Theme
         if ($types === null || array_intersect(['data_list', 'data_fields'], $types)) {
             $out[] = $this->hasAsset('css/data.css') ? $this->asset('css/data.css') : asset('css/data.css');
         }
+        // Feld „Medien + Text“ in Datentabellen (Core\MediaText): eigene Stile, dazu die der Medien-Blöcke (Großansicht, Slider)
+        $mediaText = ($types === null || array_intersect(['data_list', 'data_fields'], $types)) && \Core\Data\Tables::usesType('mediatext');
         // Medien-Blöcke (Galerie, Slider, Stapelkarten) und Abschnitte mit Vollbild/Hintergrundbild – ebenso überschreibbar
-        if ($types === null || array_intersect(['gallery', 'slideshow', 'stack_cards'], $types)) {
+        if ($types === null || $mediaText || array_intersect(['gallery', 'slideshow', 'stack_cards'], $types)) {
             $out[] = $this->coreCss('media.css');
         }
+        if ($mediaText) $out[] = $this->coreCss('mediatext.css');
         // Kalender-Blöcke (Monatsübersicht, Nächste Termine) – Theme kann css/calendar.css mitbringen
         if ($types === null || array_intersect(['calendar', 'upcoming'], $types)) {
             $out[] = $this->coreCss('calendar.css');

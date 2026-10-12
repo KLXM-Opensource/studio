@@ -322,3 +322,13 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
    Abstände. Ein Feld mit Fokus bleibt sichtbar. */
 .cms-hide-empty [data-edit]:empty:not(:focus){display:none}
 .cms-hide-empty :is(.sec-head,.mt__head):not(:has(> :not([data-edit]:empty))):not(:focus-within){display:none}
+/* Medien + Text (Modus „panel“, _entry_edit.js panelButtons): Knopf je Abschnitt öffnet die Seitenleiste an dieser Stelle.
+   Sichtbar beim Überfahren, mit Tastaturfokus und im Bearbeiten-Modus; per Tab immer erreichbar (nur Deckkraft, nie display:none). */
+.cms-mt-target{position:relative}
+.cms-mt-edit{all:initial;position:absolute;z-index:20;top:6px;right:6px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:#1E2840;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.25);font:600 13px/1.2 Lato,"Segoe UI",system-ui,sans-serif;cursor:pointer;opacity:0;transform:translateY(-2px);transition:opacity .15s,transform .15s}
+.cms-mt-edit:hover{background:#2C3A5C}
+.cms-mt-target:hover>.cms-mt-edit,.cms-mt-edit:focus-visible,.cms-entry-editing .cms-mt-edit{opacity:1;transform:none}
+.cms-mt-edit:focus-visible{outline:3px solid #6B8AF0;outline-offset:2px}
+.cms-entry-editing [data-entry-mode=panel]{cursor:default}
+.cms-entry-editing .cms-mt-target{outline:1.5px dashed rgba(49,65,100,.28);outline-offset:6px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){.cms-mt-edit{transition:none;transform:none}}

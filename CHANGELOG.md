@@ -6,6 +6,18 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Datentabellen: Feldtyp „Medien + Text“ und Mehrfachauswahl der Mediathek
+- Neuer Feldtyp **Medien + Text**: formatierter Text mit Bildern und Videos darüber oder links/rechts daneben (⅓ oder ½, wahlweise mit
+  Textumlauf), Ansicht untereinander, **Raster mit Großansicht** oder **Slider** (Bausteine der Bildergalerie). Medien nie im Text selbst;
+  auf dem Telefon immer über dem Text. Ohne Medien ein normales Textfeld.
+- Option **Mehrere Abschnitte**: beliebig viele Abschnitte je Eintrag, jeder mit Zwischenüberschrift, Text, Medien und Anordnung –
+  jeder Abschnitt steht für sich (keine schwebenden Medien in den nächsten).
+- Neue **Mehrfachauswahl der Mediathek** (`CMSMedia.pickMany`): Klick wählt aus/ab, Nummer = Reihenfolge, Auswahl bleibt beim Wechsel
+  von Ordner/Filter, Hochgeladenes kommt dazu, „n übernehmen“.
+- **Auf der Website bearbeiten**: „Abschnitt bearbeiten“ an jedem Abschnitt öffnet die Seitenleiste genau dort.
+- Behoben: Die Detailvorlage (Block „Datenfelder“, Darstellung Fließtext) setzte unbekannte Feldtypen in ein `<p>` – Block-Inhalte stehen
+  jetzt in einem eigenen Container.
+
 ### Design: eigene Designs speichern und wechseln
 - Verwaltung → Design → **Eigene Designs**: „Aktuelles Design speichern …“ legt den Stand des Formulars unter einem Namen ab (die Website
   ändert sich nicht). Ein Klick auf die Kachel füllt das Formular, online mit „Speichern“; ✕ löscht (Rückfrage). Gleicher Name ersetzt.

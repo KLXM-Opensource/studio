@@ -30,6 +30,8 @@ final class Tables
         'multiselect' => ['Mehrfachauswahl', 'text', 'list-checks'],
         'media' => ['Bild', 'integer', 'image'],
         'file' => ['Datei', 'integer', 'paperclip'],
+        // Medien + Text: formatierter Text und mehrere Bilder/Videos daneben bzw. darüber (Anordnung je Eintrag) – JSON (Core\Fields::mediaText)
+        'mediatext' => ['Medien + Text', 'text', 'images'],
         'link' => ['Link', 'string', 'link'],
         'email' => ['E-Mail', 'string', 'at'],
         'tel' => ['Telefon', 'string', 'phone'],
@@ -201,6 +203,18 @@ final class Tables
     }
 
     /** Bild-Feld der Tabelle: eingestellt oder – bei „automatisch“ – das erste Bildfeld */
+    /** Kommt der Feldtyp in einer Tabelle dieser Website vor? (z. B. bedingtes CSS für „Medien + Text“) */
+    public static function usesType(string $type): bool
+    {
+        static $memo = [];
+        if (isset($memo[$type])) return $memo[$type];
+        try {
+            foreach (self::all() as $t) foreach ((array) ($t['fields'] ?? []) as $f) if (($f['type'] ?? '') === $type) return $memo[$type] = true;
+        } catch (\Throwable) {
+        }
+        return $memo[$type] = false;
+    }
+
     public static function imageField(array $table): string
     {
         $f = (string) ($table['settings']['image_field'] ?? '');
@@ -392,6 +406,8 @@ final class Tables
                 $def['accept'] = $acc ?: DataForms::FILE_KINDS_DEFAULT;
                 $def['max_mb'] = max(0, min(DataForms::MAX_MB, (int) ($f['max_mb'] ?? 0)));
             }
+            // Medien + Text: mehrere Abschnitte (je mit Zwischenüberschrift) statt einem
+            if ($type === 'mediatext') $def['sections'] = !empty($f['sections']);
             // IBAN: in Listen und Ausgaben maskieren (Standard: an)
             if ($type === 'iban') $def['mask'] = !array_key_exists('mask', $f) || !empty($f['mask']);
             // Wiederholbare Gruppe: Unterfelder, Anzahl, Beschriftungen

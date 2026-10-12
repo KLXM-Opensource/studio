@@ -175,7 +175,7 @@ const Panel = (() => {
     return form;
   }
 
-  async function open(endpoint, from) {
+  async function open(endpoint, from, focus = null) {
     if (host && !host.hidden && dirty && url !== endpoint && (await askDiscard(T.discardPanel || T.leave, false)) !== 'discard') return;
     // Aus einem Menü der Werkzeugleiste: Fokus kehrt später zum Menü-Knopf zurück (der Eintrag ist dann ausgeblendet)
     const menu = from?.closest?.('[role=menu]');
@@ -199,8 +199,25 @@ const Panel = (() => {
     const form = mount(res);
     host.hidden = false; place();
     d.body.classList.add('has-epanel');
+    // Von einem Abschnitt der Seite geöffnet (Medien + Text): genau diesen Abschnitt aufklappen, zeigen und fokussieren
+    const target = focus && form ? focusSection(form, focus) : null;
+    if (target) return;
     const first = form && form.querySelector('input:not([type=hidden]):not(:disabled),select:not(:disabled),textarea:not(:disabled),[contenteditable=true]');
     (first || q('#ep-title')).focus({ preventScroll: true });
+  }
+
+  /** Feld (und Abschnitt) im Formular der Seitenleiste ansteuern – focus = { field, section } */
+  function focusSection(form, focus) {
+    const wrap = [...form.querySelectorAll('[data-mt-field]')].find(x => x.dataset.mtField === focus.field);
+    if (!wrap) return null;
+    const secs = [...wrap.querySelectorAll(':scope > .rep-items > .mt-sec')];
+    const sec = secs[focus.section ?? 0] || secs[0] || wrap;
+    const tog = sec.querySelector(':scope > legend .rep-toggle');
+    if (tog && tog.getAttribute('aria-expanded') === 'false') tog.click();
+    requestAnimationFrame(() => sec.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+    const el = sec.querySelector('[data-mt-title]') || sec.querySelector('.rte-area') || sec.querySelector('[data-mt-pick]');
+    el?.focus({ preventScroll: true });
+    return el || sec;
   }
 
   async function close() {
@@ -408,6 +425,23 @@ const Inline = (() => {
     if (!a || a === d.body || nodes.includes(a) || a === barHost() || a.id === 'cms-layer-host') editBtn()?.focus();
   }
 
+  // Medien + Text (Modus „panel“): je Abschnitt ein Knopf „Bearbeiten“ (sichtbar im Bearbeiten-Modus und beim Überfahren) –
+  // öffnet die Seitenleiste mit allen Feldern direkt an diesem Abschnitt (Panel.open … focus)
+  function panelButtons(n) {
+    const parts = n.querySelectorAll('.mt-part[data-mt-index]');
+    const targets = parts.length ? [...parts] : [n];
+    targets.forEach((el, i) => {
+      const idx = el.dataset.mtIndex !== undefined ? +el.dataset.mtIndex : i;
+      const b = d.createElement('button');
+      b.type = 'button'; b.className = 'cms-mt-edit';
+      b.innerHTML = '<span aria-hidden="true">✎</span> ' + window.CMSAdmin.esc(parts.length ? (T.mtEditSection || 'Abschnitt bearbeiten') : (T.mtEdit || 'Bearbeiten'));
+      b.setAttribute('aria-label', (parts.length ? (T.mtEditSection || 'Abschnitt bearbeiten') : (T.mtEdit || 'Bearbeiten')) + ': ' + (el.querySelector('.mt-part__h')?.textContent || n.dataset.entryLabel || ''));
+      b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); Panel.open(cfg.endpoint, b, { field: n.dataset.entryField, section: idx }); });
+      el.classList.add('cms-mt-target');
+      el.prepend(b);
+    });
+  }
+
   // Schwebende Formatierungsleiste (gleiche Befehle wie im Seiten-Editor)
   function showBar(n) {
     const R = window.CMSAdmin?.Rich;
@@ -459,6 +493,7 @@ const Inline = (() => {
 
   function bind(n) {
     const mode = n.dataset.entryMode;
+    if (mode === 'panel') { panelButtons(n); return; }
     n._orig = read(n); n._html = n.innerHTML; n._title = n.getAttribute('title') || '';
     if (mode === 'media') {
       // Klick aufs Bild im Bearbeiten-Modus: Auswahl statt Großansicht/Link

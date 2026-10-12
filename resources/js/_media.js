@@ -606,7 +606,7 @@ class Finder {
       accept: this.opts.kind === 'image' || this.opts.kind === 'visual' ? this.opts.kind : null,
       collection: () => (this.src.type === 'collection' ? +this.src.value : 0),
       tags: () => (this.src.type === 'tag' ? this.src.value : ''),
-      onDone: m => { this.load(m.id); if (this.mode === 'pick' && this.uploader.items.filter(i => i.status === 'wait' || i.status === 'up').length === 0) this.opts.onPick?.(m); },
+      onDone: m => { this.load(m.id); if (this.mode === 'pick' && !this.opts.multi && this.uploader.items.filter(i => i.status === 'wait' || i.status === 'up').length === 0) this.opts.onPick?.(m); },
       onChange: n => { $('.fx-uploads', r).hidden = !n; this.updateUploadDest(); },
     });
     this.bind();
@@ -712,12 +712,12 @@ class Finder {
       if (!it) { if (e.target === this.$items) { this.sel.clear(); this.syncSel(); } return; }
       const id = +it.dataset.id;
       if (e.shiftKey && this.anchor != null) this.selectRange(this.anchor, id);
-      else if (e.metaKey || e.ctrlKey) { this.sel.has(id) ? this.sel.delete(id) : this.sel.add(id); this.anchor = id; }
+      else if (this.opts.multi || e.metaKey || e.ctrlKey) { this.sel.has(id) ? this.sel.delete(id) : this.sel.add(id); this.anchor = id; }   // Mehrfach-Auswahl (pickMany): Klick = an/aus
       else { this.sel = new Set([id]); this.anchor = id; }
       this.active = id; this.syncSel();
     });
     this.$items.addEventListener('dblclick', e => {
-      const it = e.target.closest('[data-id]'); if (!it) return;
+      const it = e.target.closest('[data-id]'); if (!it || this.opts.multi) return;   // Mehrfach: Klick schaltet schon um
       const m = this.byId(+it.dataset.id);
       this.mode === 'pick' ? this.opts.onPick?.(m) : this.edit(m.id);
     });
@@ -801,8 +801,8 @@ class Finder {
     for (const t of data.office || []) if (!ALL_TYPES.includes(t)) ALL_TYPES.push(t);
     this.items = this.sorted(data.items);
     const ids = new Set(this.items.map(m => m.id));
-    this.sel = new Set([...this.sel].filter(id => ids.has(id)));
-    if (selectId && ids.has(selectId)) { this.sel = new Set([selectId]); this.anchor = this.active = selectId; }
+    if (!this.opts.multi) this.sel = new Set([...this.sel].filter(id => ids.has(id)));   // Mehrfach: Auswahl gilt über Ordner/Filter hinweg
+    if (selectId && ids.has(selectId)) { if (this.opts.multi) this.sel.add(selectId); else this.sel = new Set([selectId]); this.anchor = this.active = selectId; }
     hook('loaded', this, data);
     if (this.src.type !== 'check') store.set('last', { pool: this.pool, src: this.src });   // Ort für das nächste Öffnen merken
     this.renderSide(); this.render(); this.updateUploadDest(); this.renderSources();
@@ -935,8 +935,11 @@ class Finder {
     this.syncSel();
   }
   syncSel() {
+    const order = [...this.sel];
+    if (this.opts.multi) { this.picked ||= new Map(); order.forEach(id => { const m = this.byId(id); if (m) this.picked.set(id, m); }); }
     $$('[data-id]', this.$items).forEach(el => {
       const on = this.sel.has(+el.dataset.id);
+      if (this.opts.multi) el.dataset.order = on ? order.indexOf(+el.dataset.id) + 1 : '';   // Reihenfolge der Auswahl (pickMany)
       el.setAttribute('aria-selected', on);
       el.classList.toggle('is-active', +el.dataset.id === this.active);
     });
@@ -954,6 +957,7 @@ class Finder {
       }
     }
     const n = this.sel.size, bytes = [...this.sel].reduce((s, id) => s + (this.byId(id)?.bytes || 0), 0);
+    this.opts.onSel?.(this);
     $('.fx-status', this.root).textContent = n ? `${n} von ${this.items.length} ausgewählt · ${(bytes / 1048576).toFixed(1).replace('.', ',')} MB` : `${this.items.length} ${this.items.length === 1 ? 'Objekt' : 'Objekte'}`;
     this.renderInfo();
   }
@@ -976,12 +980,15 @@ class Finder {
       e.preventDefault();
       if (this.active == null) i = -step > 0 ? ids.length : -1;
       const next = ids[Math.max(0, Math.min(ids.length - 1, i + step))];
-      if (e.shiftKey) { this.selectRange(this.anchor ?? next, next); } else { this.sel = new Set([next]); this.anchor = next; }
+      if (e.shiftKey) { this.selectRange(this.anchor ?? next, next); } else if (!this.opts.multi) { this.sel = new Set([next]); this.anchor = next; }
       this.active = next; this.syncSel();
     } else if (e.key === ' ') { e.preventDefault(); if (this.active) this.quickLook(this.active); }
     else if (mod && e.key.toLowerCase() === 'a') { e.preventDefault(); this.sel = new Set(ids); this.syncSel(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && this.sel.size && this.mode === 'library' && !this.ro) { e.preventDefault(); this.deleteSel(); }
-    else if (e.key === 'Enter' && this.active) {
+    else if (e.key === 'Enter' && this.active && this.opts.multi) {
+      e.preventDefault();
+      this.sel.has(this.active) ? this.sel.delete(this.active) : this.sel.add(this.active); this.syncSel();
+    } else if (e.key === 'Enter' && this.active) {
       e.preventDefault();
       this.mode === 'pick' ? this.opts.onPick?.(this.byId(this.active)) : this.edit(this.active);
     } else if (e.key === 'Escape' && this.sel.size) { this.sel.clear(); this.syncSel(); }
@@ -1587,6 +1594,37 @@ function pick(kind = 'image', opts = {}) {
   });
 }
 
+/**
+ * Mehrere Medien auswählen (Feld „Medien + Text“ u. a.): Klick hakt an/ab (Nummer = Reihenfolge), Auswahl bleibt beim Wechsel von
+ * Ordner/Filter, Hochgeladenes kommt dazu. selected = schon gewählte IDs (vorausgewählt). Ergebnis: Liste {id, …Datei} in
+ * Auswahl-Reihenfolge oder null (abgebrochen). Bei Dateien, die nicht geladen wurden, nur {id}.
+ */
+function pickMany(kind = 'visual', selected = []) {
+  return new Promise(resolve => {
+    const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog fx-dialog--many" aria-label="Mediathek"></dialog>');
+    let chosen = null;
+    dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(kind === 'image' ? t('Bilder auswählen') : t('Bilder und Videos auswählen'))}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div>
+      <p class="fx-dhint">${esc(t('Anklicken wählt aus oder ab – die Nummer zeigt die Reihenfolge. Hochgeladene Dateien kommen automatisch dazu.'))}</p>
+      <div class="fx-host"></div>
+      <div class="fx-dfoot"><span class="fx-dfoot__n" aria-live="polite"></span><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-clear>${esc(t('Auswahl aufheben'))}</button><button type="button" class="adm-btn adm-btn--primary" data-take></button></div>`;
+    const take = $('[data-take]', dlg), num = $('.fx-dfoot__n', dlg);
+    const foot = f => {
+      const n = f.sel.size;
+      num.textContent = n ? (n === 1 ? t('1 ausgewählt') : t('{n} ausgewählt', { n })) : t('Nichts ausgewählt');
+      take.textContent = n ? (n === 1 ? t('1 übernehmen') : t('{n} übernehmen', { n })) : t('Übernehmen');
+    };
+    const f = new Finder($('.fx-host', dlg), { mode: 'pick', multi: true, kind: kind === 'image' || kind === 'visual' ? kind : null, onSel: foot });
+    f.sel = new Set(selected.map(Number).filter(Boolean)); f.syncSel?.();
+    foot(f);
+    take.onclick = () => { chosen = [...f.sel].map(id => f.picked?.get(id) || f.byId(id) || { id }); dlg.close(); };
+    $('[data-clear]', dlg).onclick = () => { f.sel.clear(); f.syncSel(); };
+    $('[data-close]', dlg).onclick = () => dlg.close();
+    dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; };
+    dlg.showModal();
+    $('.fx-items', dlg)?.focus();
+  });
+}
+
 // ============================================================ Zuschneiden & Anpassen direkt auf der Seite (Bearbeiten-Modus)
 /*
  * Knöpfe oben rechts am Bild (Shadow-DOM-Ebene): „Zuschneiden“ für Bilder mit Bildformat (data-ratio), „Anpassen“ für Bilder
@@ -1756,7 +1794,7 @@ d.addEventListener('paste', e => {
 
 // Nach außen immer im Kontext dieser Website (local) – die Mediathek selbst nutzt api/crop intern mit ihrem Pool
 const localApi = new Proxy(api, { get: (o, k) => typeof o[k] === 'function' ? (...a) => local(() => o[k](...a)) : o[k] });
-window.CMSMedia = { pick, pickCollection, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
+window.CMSMedia = { pick, pickMany: (k, sel) => local(() => pickMany(k, sel)), pickCollection, crop: (...a) => local(() => crop(...a)), Finder, Uploader, api: localApi, extend, ui: UI, finders: FINDERS, lazyThumbs, vthumbHtml,
   adjust: o => local(() => adjustDialog(o)), fxLabel, fit: o => local(() => fitDialog({ base: BASE, ...o })), fitLabel,
   // Für Bilder ohne Block-Einbindung (z. B. Bildfelder von Einträgen auf der Detailseite): wirkt wie in der Mediathek für alle Verwendungen
   adjustAll: id => local(async () => {

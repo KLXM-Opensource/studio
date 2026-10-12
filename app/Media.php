@@ -1488,12 +1488,23 @@ final class Media
         return array_keys($ids);
     }
 
+    /** IDs eines Wertes von „Medien + Text“ (Array oder JSON) */
+    private static function mediaTextIds(mixed $v): array
+    {
+        if (is_string($v)) $v = json_decode($v, true);
+        if (!is_array($v)) return [];
+        $ids = [];
+        foreach (isset($v['media']) || isset($v['text']) ? [$v] : array_values($v) as $sec) if (is_array($sec)) foreach ((array) ($sec['media'] ?? []) as $i) if ((int) $i > 0) $ids[] = (int) $i;   // Abschnitte (bzw. einzelner Abschnitt)
+        return $ids;
+    }
+
     /** Wie fieldsUse(), sammelt aber alle Datei-IDs der Felder (auch in Wiederholungen und Gruppen) */
     private static function fieldsCollect(array $fields, array $data, array &$ids): void
     {
         foreach ($fields as $f) {
             $v = $data[$f['name'] ?? ''] ?? null;
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v > 0) $ids[(int) $v] = true;
+            if (($f['type'] ?? '') === 'mediatext') foreach (self::mediaTextIds($v) as $i) $ids[$i] = true;
             if (in_array($f['type'] ?? '', ['repeater', 'group'], true) && is_array($v)) {
                 foreach (array_is_list($v) ? $v : [$v] as $item) if (is_array($item)) self::fieldsCollect($f['fields'] ?? [], $item, $ids);
             }
@@ -1540,6 +1551,10 @@ final class Media
         foreach ($fields as $f) {
             $v = $data[$f['name'] ?? ''] ?? null;
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v === $id) {
+                return true;
+            }
+            // Medien + Text: Liste der Medien (gespeichert als JSON bzw. schon gelesen)
+            if (($f['type'] ?? '') === 'mediatext' && in_array($id, self::mediaTextIds($v), true)) {
                 return true;
             }
             // Wiederholbare Felder und Gruppen (Datensätze: einzeln oder als Liste)

@@ -23,7 +23,7 @@ use Core\Network\Network;
 final class EntryEdit
 {
     /** Inline editierbare Feldtypen → Bearbeitungsart */
-    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media'];
+    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media', 'mediatext' => 'panel'];   // panel: Knopf je Abschnitt → Seitenleiste an dieser Stelle
 
     /** Darf der angemeldete Nutzer diese Tabelle überhaupt auf der Website bearbeiten? */
     public static function canTable(array $t): bool
@@ -88,7 +88,8 @@ final class EntryEdit
         // Bildfelder nur als Bild (Knopf am Element), Textfelder nie als Bild
         if ($auto === 'media' || $mode === 'media') $mode = $auto === 'media' ? 'media' : '';
         $mode ??= $auto;
-        if (!in_array($mode, ['plain', 'lines', 'rich', 'media'], true) || ($mode === 'rich' && $auto !== 'rich')) return '';
+        if ($auto === 'panel') $mode = 'panel';   // Medien + Text: nie direkt im Text, immer über die Seitenleiste
+        if (!in_array($mode, ['plain', 'lines', 'rich', 'media', 'panel'], true) || ($mode === 'rich' && $auto !== 'rich')) return '';
         $f = Tables::field($t, $field);
         $extra = $mode === 'media' ? ' data-entry-value="' . (int) ($e[$field] ?? 0) . '" data-entry-kind="visual"'
             . (empty($f['required']) ? ' data-entry-optional' : '') : '';
@@ -201,6 +202,7 @@ final class EntryEdit
             'mediaRemove' => __('Bild entfernen'),
             'mediaNone' => __('Kein Bild – „Bild wählen …“'),
             'mediaHint' => __('Klicken, um ein anderes Bild zu wählen: {label}'),
+            'mtEditSection' => __('Abschnitt bearbeiten'), 'mtEdit' => __('Bearbeiten'),
         ];
     }
 

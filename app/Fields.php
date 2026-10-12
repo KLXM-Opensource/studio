@@ -17,7 +17,7 @@ namespace Core;
 final class Fields
 {
     public const TYPES = ['text', 'textarea', 'richtext', 'inline', 'email', 'tel', 'url', 'link', 'number',
-        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'pages', 'media', 'file', 'collection', 'repeater', 'group', 'secret', 'heading'];
+        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'pages', 'media', 'file', 'collection', 'mediatext', 'repeater', 'group', 'secret', 'heading'];
 
     /** Standardwerte eines Schemas als flaches Array */
     public static function defaults(array $fields): array
@@ -80,6 +80,15 @@ final class Fields
                     $errors[$p] = self::msg('Bitte mindestens einen Eintrag für „{label}“ anlegen.', ['label' => $label]);
                 }
                 $values[$name] = $items;
+                continue;
+            }
+
+            if ($type === 'mediatext') {
+                // Medien + Text: Abschnitte aus formatiertem Text (ohne Medien) und Bildern/Videos mit Anordnung
+                $values[$name] = self::mediaTextSections($raw, !empty($f['sections']));
+                if (!empty($f['required']) && !$values[$name]) {
+                    $errors[$p] = self::msg('Bitte „{label}“ ausfüllen.', ['label' => $label]);
+                }
                 continue;
             }
 
@@ -544,7 +553,8 @@ final class Fields
             'datatable' => self::renderSelect($id, $inputName, array_column(!empty($f['inbox']) ? array_values(array_filter(\Core\Data\Tables::all(),
                 fn($t) => !\Core\Data\Tables::isInbox($t) || \Core\Data\Inbox::available())) : \Core\Data\Tables::content(), 'name', 'handle'), $v, $aria . ' data-datatable', !$req),
             'datafield' => self::renderDataField($id, $inputName, $v, $aria, $f),
-            'media', 'file' => '<div class="media-field" data-accept="' . ($type === 'media' ? (($f['accept'] ?? '') === 'visual' ? 'visual' : 'image') : 'file') . '">'
+            'mediatext' => self::renderMediaText($id, $inputName, $value, $aria, $f),
+            'media', 'file' => '<div class="media-field" data-accept=""' . ($type === 'media' ? (($f['accept'] ?? '') === 'visual' ? 'visual' : 'image') : 'file') . '">'
                 . '<input type="hidden" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '">'
                 . '<div class="media-field-preview">' . self::mediaPreview($v === '' ? null : (int) $v) . '</div>'
                 . '<button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> '
@@ -714,6 +724,133 @@ final class Fields
             $o[$r['id']] = $r['title'] . ' (/' . ($r['slug'] === 'home' ? '' : $r['slug']) . ')';
         }
         return $o;
+    }
+
+    // ------------------------------------------------------------------ Medien + Text (Feldtyp „mediatext“)
+
+    /** Anordnung der Medien: über dem Text, links oder rechts daneben */
+    public const MT_POS = ['top', 'left', 'right'];
+    /** Breite der Medien neben dem Text */
+    public const MT_WIDTH = ['third', 'half'];
+    /** Ansicht: untereinander, Raster mit Großansicht, Slider */
+    public const MT_VIEW = ['stack', 'grid', 'slider'];
+    /** Höchstzahl der Abschnitte („Mehrere Abschnitte“) */
+    public const MT_MAX = 30;
+
+    /**
+     * Ein Abschnitt von „Medien + Text“: title (Zwischenüberschrift, optional, nur bei mehreren Abschnitten), text (Rich-Text,
+     * nie Bilder – Core\Sanitizer), media (IDs vorhandener Bilder/Videos in gewählter Reihenfolge, höchstens 40), pos, width,
+     * wrap (Text fließt unter den Medien weiter), view. Nur Text (ohne Medien) ist erlaubt.
+     */
+    public static function mediaText(mixed $raw): array
+    {
+        if (is_string($raw)) $raw = json_decode($raw, true);
+        $raw = is_array($raw) ? $raw : [];
+        $ids = [];
+        foreach ((array) ($raw['media'] ?? []) as $id) {
+            $id = (int) $id;
+            if ($id <= 0 || isset($ids[$id]) || count($ids) >= 40) continue;
+            $m = Media::find($id);
+            if ($m && (str_starts_with((string) $m['mime'], 'image/') || str_starts_with((string) $m['mime'], 'video/'))) $ids[$id] = true;
+        }
+        $pick = fn(string $k, array $allowed) => in_array($raw[$k] ?? '', $allowed, true) ? (string) $raw[$k] : $allowed[0];
+        $pos = $pick('pos', self::MT_POS);
+        return [
+            'title' => mb_substr(trim(strip_tags((string) ($raw['title'] ?? ''))), 0, 150),
+            'text' => trim(Sanitizer::block((string) ($raw['text'] ?? ''))),
+            'media' => array_keys($ids),
+            'pos' => $pos,
+            'width' => $pick('width', self::MT_WIDTH),
+            'wrap' => $pos !== 'top' && in_array($raw['wrap'] ?? false, [true, 1, '1', 'on', 'true'], true),
+            'view' => $pick('view', self::MT_VIEW),
+        ];
+    }
+
+    /**
+     * Wert von „Medien + Text“: Liste von Abschnitten (gespeichert als JSON). Nimmt Formular, JSON, eine Liste oder einen einzelnen
+     * Abschnitt (frühere Form). Leere Abschnitte fallen weg; $multi = false: nur der erste.
+     */
+    public static function mediaTextSections(mixed $raw, bool $multi = true): array
+    {
+        if (is_string($raw)) $raw = json_decode($raw, true);
+        if (!is_array($raw) || !$raw) return [];
+        $out = [];
+        // Ein einzelner Abschnitt (frühere Form) hat eigene Schlüssel; sonst Liste – auch mit Formular-Schlüsseln wie „n5“ (neu hinzugefügt)
+        $single = (bool) array_intersect(['title', 'text', 'media', 'pos', 'width', 'wrap', 'view'], array_keys($raw));
+        foreach ($single ? [$raw] : array_values($raw) as $sec) {
+            if (!is_array($sec)) continue;
+            $v = self::mediaText($sec);
+            if ($v['title'] === '' && $v['text'] === '' && !$v['media']) continue;
+            if (!$multi) $v['title'] = '';
+            $out[] = $v;
+            if (!$multi || count($out) >= self::MT_MAX) break;
+        }
+        return $out;
+    }
+
+    /** Eingabe „Medien + Text“: je Abschnitt Text mit Formatierungsleiste, Medienleiste (sortierbar, Mehrfachauswahl), Anordnung; mehrere Abschnitte wie eine Wiederholgruppe (resources/js/admin.js initMediaText) */
+    private static function renderMediaText(string $id, string $name, mixed $value, string $aria, array $f): string
+    {
+        $multi = !empty($f['sections']);
+        $secs = self::mediaTextSections($value, $multi) ?: [self::mediaText([])];
+        $fattr = ' data-mt-field="' . e((string) ($f['name'] ?? '')) . '"';   // Seitenleiste auf der Website springt hierher (_entry_edit.js focusSection)
+        if (!$multi) return '<div class="mt-sections"' . $fattr . '>' . self::renderMediaTextSection($id, $name . '[0]', $secs[0], false, $aria) . '</div>';
+        $item = fn(array $sec, string $idx) => '<fieldset class="rep-item mt-sec" data-index="' . $idx . '"><legend>'
+            . '<button type="button" class="rep-toggle" data-rep="toggle" aria-expanded="true"><span class="rep-chev" aria-hidden="true"></span><span class="rep-title">' . e($sec['title'] !== '' ? $sec['title'] : __('Abschnitt')) . '</span></button></legend>'
+            . '<span class="rep-meta" data-rep-meta aria-hidden="true"></span>'
+            . '<div class="rep-tools"><button type="button" class="icon-btn" data-rep="up" aria-label="' . e(__('Nach oben')) . '">↑</button>'
+            . '<button type="button" class="icon-btn" data-rep="down" aria-label="' . e(__('Nach unten')) . '">↓</button>'
+            . '<button type="button" class="icon-btn icon-btn--danger" data-rep="remove" aria-label="' . e(__('Abschnitt entfernen')) . '">✕</button></div>'
+            . '<div class="rep-fields">' . self::renderMediaTextSection($id . '-' . $idx, $name . '[' . $idx . ']', $sec, true, '') . '</div></fieldset>';
+        $h = '<div class="mt-sections rep"' . $fattr . ' data-name="' . e($name) . '"><div class="rep-items">';
+        foreach ($secs as $i => $sec) $h .= $item($sec, (string) $i);
+        return $h . '</div><template>' . $item(self::mediaText([]), '__i__') . '</template>'
+            . '<button type="button" class="btn btn--small btn--ghost" data-rep="add">+ ' . e(__('Abschnitt hinzufügen')) . '</button></div>';
+    }
+
+    private static function renderMediaTextSection(string $id, string $name, array $v, bool $multi, string $aria): string
+    {
+        $seg = function (string $key, array $opts, string $label) use ($name, $v): string {
+            $h = '<fieldset class="mt-seg" data-mt-' . $key . '><legend>' . e($label) . '</legend><span class="mt-seg__opts">';
+            foreach ($opts as $k => $l) {
+                $h .= '<label><input type="radio" name="' . e($name) . '[' . $key . ']" value="' . e($k) . '"' . ((string) $v[$key] === $k ? ' checked' : '') . '><span>' . e($l) . '</span></label>';
+            }
+            return $h . '</span></fieldset>';
+        };
+        $items = '';
+        foreach ($v['media'] as $mid) $items .= self::mediaTextItem($mid, $name);
+        return '<div class="mt-field" data-mt data-name="' . e($name) . '">'
+            . ($multi ? '<label class="mt-title"><span>' . e(__('Zwischenüberschrift (optional)')) . '</span><input type="text" name="' . e($name) . '[title]" value="' . e($v['title']) . '" maxlength="150" data-mt-title></label>' : '')
+            . '<div class="mt-field__media"><ul class="mt-list" data-mt-list aria-label="' . e(__('Medien (ziehen zum Sortieren)')) . '">' . $items . '</ul>'
+            . '<button type="button" class="btn btn--small" data-mt-pick>' . icon('plus') . ' ' . e(__('Medien hinzufügen …')) . '</button>'
+            . '<input type="hidden" name="' . e($name) . '[media][]" value=""></div>'
+            . '<div class="mt-field__opts"' . ($v['media'] ? '' : ' hidden') . ' data-mt-opts>'
+            . $seg('pos', ['top' => __('Über dem Text'), 'left' => __('Links'), 'right' => __('Rechts')], __('Anordnung'))
+            . '<span class="mt-side"' . ($v['pos'] === 'top' ? ' hidden' : '') . ' data-mt-side>'
+            . $seg('width', ['third' => '⅓', 'half' => '½'], __('Breite'))
+            . '<label class="mt-wrap"><input type="checkbox" name="' . e($name) . '[wrap]" value="1"' . ($v['wrap'] ? ' checked' : '') . '> ' . e(__('Text fließt unter den Medien weiter')) . '</label></span>'
+            . $seg('view', ['stack' => __('Untereinander'), 'grid' => __('Raster mit Großansicht'), 'slider' => __('Slider')], __('Ansicht'))
+            . '</div>'
+            . '<div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="Formatierung"></div>'
+            . '<div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' . e(__('Text')) . '">' . $v['text'] . '</div>'
+            . '<input type="hidden" id="' . e($id) . '" name="' . e($name) . '[text]" value="' . e($v['text']) . '"' . $aria . '></div>'
+            . '</div>';
+    }
+
+    /** Ein Medium in der Leiste von „Medien + Text“ (auch für admin.js: gleiche Struktur) */
+    public static function mediaTextItem(int $mid, string $name): string
+    {
+        $m = Media::find($mid);
+        if (!$m) return '';
+        $j = Media::toJson($m);
+        $thumb = $j['thumb'] ?? null;
+        $isVideo = str_starts_with((string) $m['mime'], 'video/');
+        return '<li class="mt-item" draggable="true" data-id="' . $mid . '">'
+            . ($thumb ? '<img src="' . e($thumb) . '" alt="" loading="lazy">' : '<span class="mt-item__ph">' . icon($isVideo ? 'play-circle' : 'image') . '</span>')
+            . ($isVideo ? '<span class="mt-item__badge">' . icon('play-circle') . '</span>' : '')
+            . '<span class="sr-only">' . e(Media::displayName($m)) . '</span>'
+            . '<input type="hidden" name="' . e($name) . '[media][]" value="' . $mid . '">'
+            . '<button type="button" class="mt-item__x" data-mt-remove aria-label="' . e(__('„{name}“ entfernen', ['name' => Media::displayName($m)])) . '">✕</button></li>';
     }
 
     public static function mediaPreview(?int $id): string

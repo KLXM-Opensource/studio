@@ -109,7 +109,12 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
     <?php foreach ($fields as $f): $h = $f === '_title' ? e(Entries::title($t, $e)) : Entries::html($t, $e, $f, ['ratio' => $ratio]); if ($h === '') continue; $tp = $type($f); $ea = entry_edit_attr($t, $e, $f); ?>
     <div class="df-f df-f--<?= e($tp) ?>">
       <?php if (!empty($d['show_labels'])): ?><p class="df-label"><?= e($label($f)) ?></p><?php endif; ?>
-      <?= in_array($tp, ['richtext'], true) ? '<div class="prose"' . $ea . '>' . $h . '</div>' : ($tp === 'media' ? '<div class="df-img ratio-' . e(str_replace(':', '-', $ratio)) . '">' . $h . '</div>' : '<p' . $ea . '>' . $h . '</p>') ?>
+      <?= match (true) {
+          $tp === 'richtext' => '<div class="prose"' . $ea . '>' . $h . '</div>',
+          $tp === 'mediatext' => '<div class="df-mt"' . $ea . '>' . $h . '</div>',   // Medien + Text: Block-Inhalt, nie in <p>
+          $tp === 'media' => '<div class="df-img ratio-' . e(str_replace(':', '-', $ratio)) . '">' . $h . '</div>',
+          default => '<p' . $ea . '>' . $h . '</p>',
+      } ?>
     </div>
     <?php endforeach; ?>
   </div>

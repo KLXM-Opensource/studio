@@ -118,6 +118,17 @@
   </ul>
   <p>Reihenfolge wie bei Feldern mit ↑ ↓. Abschnitte und Freitext stehen immer im Formular (nicht unter „Felder im Formular“); ein Abschnitt, dessen Felder Sie alle abgewählt haben, entfällt. In der <b>Eingabemaske der Redaktion</b> sehen Sie dieselbe Gliederung (Abschnitte als Zwischenüberschrift, Freitext als Hinweis). In Listen, Filtern, der Suche, auf Detailseiten, in Schnittstellen und E-Mails kommen sie nicht vor. Hinzufügen und Entfernen ist jederzeit möglich, ohne dass Einträge verloren gehen – machen Sie aber aus einem Feld mit Inhalten einen Abschnitt, fragt der Designer nach, weil die Inhalte des Feldes gelöscht würden. In der Seitenleiste „Felder bearbeiten“ des Seiten-Editors lassen sich Abschnitte anlegen und verschieben; den Text eines Freitexts ändern Sie im Tabellen-Designer.</p>
 
+  <h3 id="medien-text">Medien + Text: Text mit Bildern und Videos</h3>
+  <p>Der Feldtyp <b>Medien + Text</b> ersetzt ein einfaches Textfeld, wenn zu einem Text Bilder oder Videos gehören – z. B. ein Merkblatt, ein Bericht oder eine Projektbeschreibung. Medien landen dabei nie im Text selbst, sondern stehen daneben oder darüber:</p>
+  <ul>
+    <li><b>Medien hinzufügen …</b> öffnet die Mediathek mit Mehrfachauswahl: Anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, auch neu Hochgeladenes kommt dazu. In der Leiste sortieren Sie per Ziehen (Tastatur: <kbd>Alt</kbd> + <kbd>←</kbd>/<kbd>→</kbd>), ✕ entfernt.</li>
+    <li><b>Anordnung:</b> über dem Text, links oder rechts daneben – daneben in ⅓ oder ½ der Breite, wahlweise mit <b>Textumlauf</b> (der Text fließt unter den Medien weiter). Auf dem Telefon stehen die Medien immer über dem Text.</li>
+    <li><b>Ansicht:</b> untereinander, <b>Raster mit Großansicht</b> (Klick öffnet das Bild groß, blättern mit Pfeilen) oder <b>Slider</b>. Bilder und Videos lassen sich mischen.</li>
+    <li>Ohne Medien ist es ein ganz normales Textfeld.</li>
+    <li><b>Mehrere Abschnitte</b> (Einstellung im Tabellen-Designer): Ein Eintrag besteht dann aus beliebig vielen Abschnitten, jeder mit optionaler Zwischenüberschrift, eigenem Text, eigenen Medien und eigener Anordnung. Jeder Abschnitt steht für sich – nichts fließt in den nächsten.</li>
+    <li><b>Auf der Website bearbeiten:</b> Angemeldet zeigt jeder Abschnitt beim Überfahren (und im Modus „Bearbeiten“) den Knopf <b>Abschnitt bearbeiten</b> – die Seitenleiste öffnet sich genau an dieser Stelle.</li>
+  </ul>
+
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>
 

@@ -106,6 +106,11 @@ $type = $f['type'] ?? 'text';
           ? __('Geprüft wird der Inhalt der Datei, nicht nur die Endung; Word-Dateien mit Makros (DOCM) werden abgelehnt. Leer = Grenze der Tabelle; mehr als die Tabelle erlaubt, geht nicht. Dateien werden nur bei Zustellung per E-Mail angenommen – als Anhang bzw. versiegelt.')
           : __('Gilt für Uploads über das öffentliche Formular; geprüft wird der Inhalt der Datei, nicht nur die Endung. Leer = Grenze der Tabelle; mehr als die Tabelle erlaubt, geht nicht. Word und OpenDocument gibt es nur in Eingangs-Tabellen (Zustellung per E-Mail) – die Mediathek speichert sie nicht.')) ?></p>
     </div>
+    <div class="dt-field__extra" data-show-for="mediatext">
+      <input type="hidden" name="<?= $n ?>[sections]" value="0">
+      <label class="f-check"><input type="checkbox" name="<?= $n ?>[sections]" value="1"<?= !empty($f['sections']) ? ' checked' : '' ?>> <span><?= e(__('Mehrere Abschnitte (je mit Zwischenüberschrift)')) ?></span></label>
+      <p class="f-help"><?= e(__('Text mit Bildern und Videos darüber oder daneben – ohne Medien ein normales Textfeld. Anordnung, Breite, Textumlauf und Ansicht (untereinander, Raster mit Großansicht, Slider) wählt die Redaktion je Eintrag.')) ?></p>
+    </div>
     <div class="dt-field__extra" data-show-for="iban">
       <input type="hidden" name="<?= $n ?>[mask]" value="0">
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[mask]" value="1"<?= ($f['mask'] ?? true) ? ' checked' : '' ?>> <span><?= e(__('In Listen maskieren')) ?></span></label>
