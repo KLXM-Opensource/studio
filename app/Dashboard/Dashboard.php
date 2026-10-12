@@ -232,7 +232,7 @@ final class Dashboard
                     $version = trim(substr($line, 3));
                 } elseif ($version !== '' && str_starts_with($line, '### ')) {
                     $news[] = trim(str_replace(['**', '`'], '', substr($line, 4)));
-                    if (count($news) === 4) break;
+                    if (count($news) === 6) break;
                 }
             }
             $news = ['version' => $version, 'items' => $news];

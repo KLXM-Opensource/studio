@@ -7250,4 +7250,5 @@ return [
     'Abschnitt bearbeiten' => 'Edit section',
     'Bildformat' => 'Image format',
     'Original' => 'Original',
+    'Alle Neuerungen im Handbuch →' => 'All changes in the manual →',
 ];

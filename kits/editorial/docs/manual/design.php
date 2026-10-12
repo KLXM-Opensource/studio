@@ -1,5 +1,6 @@
 <?php /** Handbuch „editorial“ · Kapitel „Design, Kopf & Raster“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> legen Sie fest, wie Ihre Ausgabe aussieht: Farben, drei Schriften, Skala, Raster, Bilder, Linien und der Kopfbereich. Die Vorschau zeigt jede Änderung sofort – hell und als Nachtausgabe, auf dem Computer und dem Handy. Online geht sie erst mit <b>Speichern</b>.</p>
+  <?php include ROOT . '/app/Admin/views/help/manual/_design_mine.php';   // Eigene Designs (Kern) ?>
   <h3>Vorlagen</h3>
   <p>Sieben Vorlagen setzen alle Werte auf einmal. Alle sind hell und dunkel auf Lesbarkeit (WCAG 2.2 AA, Fließtext AAA) geprüft.</p>
   <table class="doc-table">

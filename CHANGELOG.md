@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Handbuch: Kapitel „Neuerungen“ und neue Kurzanleitungen
+- Neues Kapitel **Neuerungen** (gleich nach dem Überblick): die letzten Änderungen in Alltagssprache, je mit Link zur Anleitung.
+- **Häufige Aufgaben**: viele Bilder hochladen, Medien + Text, Design für später speichern, im Aktionslog nachsehen.
+- Startseite der Verwaltung: „Was ist neu“ zeigt sechs statt vier Neuerungen und verlinkt auf das Kapitel.
+- „Eigene Designs“ steht auch in den Design-Kapiteln der Kits (gemeinsamer Baustein `manual/_design_mine.php`).
+
 ### Datentabellen: Feldtyp „Medien + Text“ und Mehrfachauswahl der Mediathek
 - Neuer Feldtyp **Medien + Text**: formatierter Text mit Bildern und Videos darüber oder links/rechts daneben (⅓ oder ½, wahlweise mit
   Textumlauf), Ansicht untereinander, **Raster mit Großansicht** oder **Slider** (Bausteine der Bildergalerie). Medien nie im Text selbst;

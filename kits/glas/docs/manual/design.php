@@ -1,5 +1,6 @@
 <?php /** Handbuch „glas“ · Kapitel „Design, Kopf & Fuß“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> stellen Sie Farbfeld, Glas, Schriften, Kopf- und Fußbereich ein. Die Vorschau zeigt jede Änderung sofort – hell und dunkel. Online geht sie erst mit <b>Speichern</b>; frühere Stände holen Sie über <b>Verlauf</b> zurück.</p>
+  <?php include ROOT . '/app/Admin/views/help/manual/_design_mine.php';   // Eigene Designs (Kern) ?>
   <h3>Vier Vorlagen</h3>
   <p>Jede Vorlage setzt alle Werte auf einmal; danach passen Sie Einzelnes an. Alle sind hell und dunkel, in jeder Glasdichte auf Lesbarkeit (WCAG 2.2 AA) geprüft.</p>
   <table class="doc-table">

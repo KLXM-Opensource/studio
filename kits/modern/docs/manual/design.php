@@ -1,5 +1,6 @@
 <?php /** Handbuch „modern“ · Kapitel „Design & Navigation“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> stellen Sie Farben, Schriften, Formen, Navigation und Fußbereich ein. Die Vorschau rechts zeigt jede Änderung sofort – hell und dunkel, auf dem Computer und dem Handy. Online geht sie erst mit <b>Speichern</b>; frühere Stände holen Sie über <b>Verlauf</b> zurück.</p>
+  <?php include ROOT . '/app/Admin/views/help/manual/_design_mine.php';   // Eigene Designs (Kern) ?>
   <h3>Vier Vorlagen</h3>
   <p>Jede Vorlage setzt alle Werte auf einmal; danach passen Sie Einzelnes an. Alle Vorlagen sind hell und dunkel auf Lesbarkeit (WCAG 2.2 AA) geprüft.</p>
   <table class="doc-table">

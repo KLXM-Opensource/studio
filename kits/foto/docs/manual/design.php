@@ -1,5 +1,6 @@
 <?php /** Handbuch „foto“ · Kapitel „Design: Vorlagen, Bilder, Kopf & Fuß“ · @var string $settingsTitle */ ?>
   <p class="lead">Unter <b>Verwaltung → Design</b> stellen Sie Farben, Schriften, Bilder &amp; Galerien, Kopf- und Fußbereich ein. Die Vorschau zeigt jede Änderung sofort – hell und dunkel, auf Computer und Handy. Online geht sie erst mit <b>Speichern</b>; frühere Stände holen Sie über <b>Verlauf</b> zurück.</p>
+  <?php include ROOT . '/app/Admin/views/help/manual/_design_mine.php';   // Eigene Designs (Kern) ?>
   <h3>Vorlagen für Fotografie</h3>
   <p>Jede Vorlage setzt alle Werte auf einmal; danach passen Sie Einzelnes an. Alle sind hell und dunkel auf Lesbarkeit (WCAG 2.2 AA) geprüft.</p>
   <table class="doc-table">

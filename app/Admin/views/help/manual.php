@@ -27,6 +27,7 @@ $figures = ($themeDoc['figures'] ?? true) !== false;
 $img = fn(string $file, string $alt, string $caption) => $figures ? '<figure class="doc-fig"><img src="' . e(asset('docs/' . $file)) . '" alt="' . e($alt) . '" loading="lazy" width="1440" height="900"><figcaption>' . $caption . '</figcaption></figure>' : '';
 $core = [
     'start' => 'Überblick',
+    'neuerungen' => 'Neuerungen',
     'uebersicht' => 'Die Übersicht (Startseite der Verwaltung)',
     'anmelden' => 'Anmelden & Konto',
     'bearbeiten' => 'Inhalte bearbeiten',
@@ -109,6 +110,7 @@ $tutorials = $__router->match('GET', '/admin/hilfe/tutorials') === '/admin/hilfe
     <div class="doc-hero__links">
       <?php if ($guide): ?><a href="#projekt"><?= e(\Core\Guide::title()) ?> →</a><?php endif; ?>
       <a href="#<?= e($anchor('aufgaben')) ?>"<?= $guide ? ' class="ghost"' : '' ?>>Häufige Aufgaben<?= $guide ? '' : ' →' ?></a>
+      <a href="#<?= e($anchor('neuerungen')) ?>" class="ghost">Neuerungen</a>
       <?php if ($tutorials): ?><a href="<?= e($tutorials) ?>" class="ghost">Tutorials</a><?php endif; ?>
       <a href="<?= e(url('/')) ?>?edit=1" class="ghost">Startseite bearbeiten</a>
       <a href="<?= e(url('/admin/hilfe/technik')) ?>" class="ghost">Technische Dokumentation</a>

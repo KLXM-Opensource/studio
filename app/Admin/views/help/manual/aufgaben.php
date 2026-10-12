@@ -7,6 +7,28 @@
     <li><b>Daten</b> → Tabelle (z. B. „Aktuelles“) → <b>+ Beitrag</b>.</li>
     <li>Titel, Text und Bild eintragen, Status „Online“ → <b>Speichern</b>. Listen und Detailseite sind sofort aktuell.</li>
   </ol>
+  <h3>Viele Bilder auf einmal hochladen</h3>
+  <ol class="doc-steps">
+    <li><b>Medien</b> → Dateien in die Mediathek ziehen oder <b>Hochladen</b> → alle auswählen.</li>
+    <li>Je Bild einen Alt-Text eintragen (Enter springt nicht weiter, sondern startet nichts doppelt) oder „dekorativ“ wählen → <b>n Dateien hochladen</b>.</li>
+    <li>Warten, bis jede Datei „✓ Hochgeladen“ zeigt – große Fotos stehen kurz auf „wird verarbeitet …“. Doppelte prüfen: <b>Prüfen → Doppelte Dateien</b>.</li>
+  </ol>
+  <h3>Text mit Bildern daneben (Medien + Text)</h3>
+  <ol class="doc-steps">
+    <li>Eintrag öffnen (Verwaltung oder auf der Website <b>Abschnitt bearbeiten</b>) → im Feld „Medien + Text“ <b>Medien hinzufügen …</b>.</li>
+    <li>Bilder/Videos anklicken (Nummer = Reihenfolge) → <b>übernehmen</b>. Anordnung (über dem Text, links, rechts), Ansicht und Bildformat wählen.</li>
+    <li><b>Speichern</b>. Weitere Teile mit <b>+ Abschnitt hinzufügen</b>, sofern die Tabelle „Mehrere Abschnitte“ erlaubt.</li>
+  </ol>
+  <h3>Ein Design für später speichern</h3>
+  <ol class="doc-steps">
+    <li><b>Design</b> öffnen und anpassen (oder den jetzigen Stand nehmen) → <b>Aktuelles Design speichern …</b> → Namen eingeben.</li>
+    <li>Später: Kachel unter <b>Eigene Designs</b> anklicken → Vorschau prüfen → <b>Speichern</b>.</li>
+  </ol>
+  <h3>Nachsehen, wer etwas geändert hat</h3>
+  <ol class="doc-steps">
+    <li><b>System → Aktionslog</b> (Administration) → Reiter Seiten, Datensätze oder Medien, ggf. Person und Zeitraum wählen.</li>
+    <li>Auf den Namen klicken öffnet die Seite, den Datensatz oder das Medium direkt.</li>
+  </ol>
   <h3>Bild austauschen</h3>
   <ol class="doc-steps">
     <li><b>Medien</b> → Bild doppelklicken → <b>Datei ersetzen …</b></li>
