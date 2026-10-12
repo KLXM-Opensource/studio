@@ -22,6 +22,15 @@ final class GuideController extends AdminController
         return $this->view('help/guide/index', ['title' => __('Projekt-Hinweise'), 'notes' => Guide::all(), 'kitDir' => Guide::kitDir()]);
     }
 
+    /** „Lesen“ in „Was ist zu tun?“: Hinweis im Handbuch öffnen und für diese Person abhaken (jede angemeldete Person) */
+    public function task(Request $r, string $key): Response
+    {
+        $u = $this->auth($r);
+        $note = Guide::find($key) ?? throw new HttpException(404);
+        Guide::markDone((int) $u['id'], $note['key']);
+        return Response::redirect(Guide::url($note));
+    }
+
     public function edit(Request $r, string $key = '', ?string $src = null, array $errors = []): Response
     {
         $this->auth($r, 'system.manage');

@@ -171,6 +171,10 @@ final class Metrics
             $add('review', 2, 'warn', 'clipboard-text', \Core\Review\Queue::pendingCount(), __('Eingereichte Änderungen prüfen'),
                 __('Von API, MCP oder KI vorgeschlagen – erst nach Ihrer Freigabe online.'), '/admin/ai/eingereicht', __('Prüfen'));
         }
+        // Hinweise zum Projekt mit „aufgabe: ja“ (Core\Guide): bis die Person sie über „Lesen“ geöffnet hat
+        foreach (\Core\Guide::tasks((int) ($user['id'] ?? 0)) as $n) {
+            $add('guide-' . $n['key'], 2, 'info', 'lightbulb', 1, $n['title'], \Core\Guide::plain($n, 180), '/admin/hilfe/aufgabe/' . rawurlencode($n['key']), __('Lesen'));
+        }
         if (\Core\Support\Support::canReport()) {
             $add('support', 3, 'info', 'lifebuoy', \Core\Support\Support::navCount(), __('Antworten im Support'),
                 \Core\Support\Support::isStaff() ? __('Neue oder unbeantwortete Meldungen.') : __('Das Support-Team hat Ihnen geantwortet.'), '/admin/support', __('Lesen'));

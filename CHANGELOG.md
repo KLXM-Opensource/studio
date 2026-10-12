@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Projekt-Hinweise als Aufgabe in „Was ist zu tun?“
+- Hinweise zum Projekt (Handbuch → Projekt-Hinweise) mit der Kopfzeile `aufgabe: ja` erscheinen zusätzlich als Punkt in **Was ist zu tun?**
+  auf der Übersicht. **Lesen** öffnet den Hinweis im Handbuch und hakt ihn für diese Person ab.
+
 ### Medien + Text: Buttons unter dem Text
 - Je Abschnitt bis zu vier **Buttons** (Beschriftung, Ziel über den Link-Dialog – Seiten, Einträge, Dokumente, Adressen –, Haupt- oder Zweitbutton
   im Stil des Kits). Verlinkte PDFs öffnen immer im PDF-Viewer. Neue Kit-Angabe `button_class_secondary` (editorial, frameworks).

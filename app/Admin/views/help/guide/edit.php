@@ -48,6 +48,7 @@ include ROOT . '/app/Admin/views/support/_helptabs.php';
         <li><code>block: hero, stage</code> – <?= e(__('Link im Formular dieser Blocktypen.')) ?></li>
         <li><code>titel: …</code> – <?= e(__('statt der ersten Überschrift.')) ?></li>
         <li><code>ausblenden: ja</code> – <?= e(__('Hinweis (z. B. aus dem Kit) für diese Website ausblenden.')) ?></li>
+        <li><code>aufgabe: ja</code> – <?= e(__('Zusätzlich als Punkt in „Was ist zu tun?“ auf der Übersicht, bis die Person ihn über „Lesen“ geöffnet hat.')) ?></li>
       </ul>
     </section>
   </div>

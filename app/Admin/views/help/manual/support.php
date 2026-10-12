@@ -11,6 +11,7 @@
   <ol class="doc-steps">
     <li>Die Administration öffnet <b>Handbuch → Projekt-Hinweise</b> (<a href="<?= e(url('/admin/hilfe/projekt')) ?>">/admin/hilfe/projekt</a>). Die Liste zeigt alle Hinweise mit Herkunft (Kit oder Website) und Bezug.</li>
     <li><b>Neuer Hinweis</b> legt einen eigenen Hinweis dieser Website an: Text in Markdown (erste Zeile <code># Titel</code>, dann Absätze, Listen, <code>**fett**</code>, Links; kein HTML). Die Zahl vorn im Dateinamen (<code>10-…</code>, <code>20-…</code>) bestimmt die Reihenfolge. Optional verknüpfen Sie ihn in den Kopfzeilen mit einem Bereich der Verwaltung oder einem Block.</li>
+    <li>Mit der Kopfzeile <code>aufgabe: ja</code> erscheint ein Hinweis zusätzlich als Punkt in <b>Was ist zu tun?</b> auf der Übersicht – z. B. „Neuerungen und Antworten auf Ihre Fragen“. Wer ihn über <b>Lesen</b> öffnet, sieht den Punkt danach nicht mehr.</li>
     <li>Hinweise aus dem Kit passen Sie mit <b>Für diese Website anpassen</b> an oder blenden sie für diese Website aus (Kopfzeile <code>ausblenden: ja</code>); <b>Anpassung entfernen</b> stellt den Hinweis des Kits wieder her.</li>
   </ol>
   <h3>Problem melden</h3>

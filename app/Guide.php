@@ -21,6 +21,7 @@ use Core\Support\Markdown;
  *   bereich: medien, daten/arbeiten  Bereich(e) der Verwaltung → kleiner Hinweis-Link dort
  *   block: stage, hero               Blocktyp(en) → Hinweis-Link im Block-Formular
  *   ausblenden: ja                   Hinweis (z. B. aus dem Kit) für diese Website ausblenden
+ *   aufgabe: ja                      zusätzlich als Punkt in „Was ist zu tun?“ (Übersicht), bis die Person ihn gelesen hat
  *   ---
  * Inhalt: Markdown-lite wie Support (Core\Support\Markdown, HTML nie erlaubt, Links über Sanitizer::safeHref);
  * Überschriften im Text werden Zwischentitel, Bilder als eigene Zeile ![Alt](datei.png) aus dem guide-Ordner.
@@ -154,8 +155,9 @@ final class Guide
         if ($title === '') $title = ucfirst(str_replace(['-', '_'], ' ', (string) preg_replace('~^\d+[-_]~', '', $key)));
         $list = fn(string $k) => array_values(array_filter(array_map(fn($v) => mb_strtolower(trim($v)), explode(',', (string) ($meta[$k] ?? ''))), fn($v) => $v !== ''));
         $hidden = in_array(mb_strtolower((string) ($meta['ausblenden'] ?? $meta['hidden'] ?? '')), ['ja', 'yes', 'true', '1'], true);
+        $task = in_array(mb_strtolower((string) ($meta['aufgabe'] ?? $meta['task'] ?? '')), ['ja', 'yes', 'true', '1'], true);
         return ['key' => $key, 'anchor' => self::anchor($key), 'title' => mb_substr($title, 0, 160), 'areas' => $list('bereich') ?: $list('area'),
-            'blocks' => $list('block') ?: $list('blocks'), 'hidden' => $hidden, 'body' => trim($src, "\n"), 'meta' => $meta];
+            'blocks' => $list('block') ?: $list('blocks'), 'hidden' => $hidden, 'task' => $task, 'body' => trim($src, "\n"), 'meta' => $meta];
     }
 
     /** HTML eines Hinweises (Bilder aus dem guide-Ordner über die Verwaltung) */
@@ -238,6 +240,22 @@ final class Guide
     }
 
     /** Link auf einen Hinweis im Handbuch */
+    /** Hinweise mit „aufgabe: ja“, die diese Person noch nicht gelesen hat (Übersicht → Was ist zu tun?) @return list<array> */
+    public static function tasks(int $userId): array
+    {
+        $done = (array) (app()->settings->get('guide.done', [])[$userId] ?? []);
+        return array_values(array_filter(self::notes(), fn($n) => !empty($n['task']) && !in_array($n['key'], $done, true)));
+    }
+
+    /** Aufgabe für diese Person abhaken (beim Öffnen über „Lesen“) */
+    public static function markDone(int $userId, string $key): void
+    {
+        $all = (array) app()->settings->get('guide.done', []);
+        $mine = array_values(array_unique([...(array) ($all[$userId] ?? []), $key]));
+        $all[$userId] = array_slice($mine, -200);
+        app()->settings->set('guide.done', $all);
+    }
+
     public static function url(array $note): string
     {
         return url('/admin/hilfe') . '#' . $note['anchor'];

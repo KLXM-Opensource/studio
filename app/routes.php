@@ -457,6 +457,7 @@ return function (Router $r): void {
     $r->get('/admin/hilfe/projekt/neu', [$gd, 'edit']);
     $r->post('/admin/hilfe/projekt/neu', [$gd, 'save']);
     $r->get('/admin/hilfe/projekt/bild/{file}', [$gd, 'image']);
+    $r->get('/admin/hilfe/aufgabe/{key}', [$gd, 'task']);   // Aufgabe aus „Was ist zu tun?“ öffnen und für diese Person abhaken
     $r->get('/admin/hilfe/projekt/{key}', [$gd, 'edit']);
     $r->post('/admin/hilfe/projekt/{key}', [$gd, 'save']);
     $r->post('/admin/hilfe/projekt/{key}/loeschen', [$gd, 'delete']);
