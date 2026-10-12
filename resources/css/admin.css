@@ -3496,3 +3496,11 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .dt-iconbtn--add{font-weight:700}
 .dt-addmenu{position:absolute;z-index:30;top:calc(100% + 6px);right:0;display:flex;flex-wrap:wrap;gap:6px;width:min(560px,calc(100vw - 48px));max-height:60vh;overflow:auto;padding:10px;border-radius:10px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line),0 18px 40px -12px rgba(0,0,0,.35)}
 .dt-addmenu .dt-typebtn{font-size:13px}
+/* Medien + Text: Buttons unter dem Text */
+.mt-btns{display:grid;gap:8px}
+.mt-btns__h{color:var(--adm-t3);font-size:12px;font-weight:600}
+.mt-btns__list{display:grid;gap:8px}
+.mt-btns__list:empty{display:none}
+.mt-btn{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:start;padding:10px;border-radius:8px;background:var(--adm-fill)}
+.mt-btn .f-link{grid-column:1/-1;grid-row:2;min-width:0}   /* Ziel über die volle Breite unter Beschriftung und Stil */
+.mt-btns [data-mt-btn-add]{justify-self:start}

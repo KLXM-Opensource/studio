@@ -126,6 +126,7 @@
     <li><b>Anordnung:</b> über dem Text, links oder rechts daneben – daneben in ⅓ oder ½ der Breite, wahlweise mit <b>Textumlauf</b> (der Text fließt unter den Medien weiter). Auf dem Telefon stehen die Medien immer über dem Text.</li>
     <li><b>Ansicht:</b> untereinander, <b>Raster mit Großansicht</b> (Klick öffnet das Bild groß, blättern mit Pfeilen) oder <b>Slider</b>. Bilder und Videos lassen sich mischen.</li>
     <li><b>Bildformat</b> (optional): Original oder ein Format des Kits wie 16:9, 4:3, 1:1, 3:4 – genutzt werden die Zuschnitte aus der Mediathek, sonst der Fokuspunkt. Im Raster ist „Original“ quadratisch, im Slider 4:3. Videos behalten ihr Format.</li>
+    <li><b>Buttons unter dem Text</b> (optional, bis zu vier je Abschnitt): Beschriftung, Ziel über <b>Auswählen …</b> (Seite, Eintrag, Dokument oder Adresse) und Stil – Hauptbutton oder Zweitbutton, gestaltet vom Kit. Verlinkte PDFs öffnen immer im PDF-Viewer.</li>
     <li>Ohne Medien ist es ein ganz normales Textfeld.</li>
     <li><b>Mehrere Abschnitte</b> (Einstellung im Tabellen-Designer): Ein Eintrag besteht dann aus beliebig vielen Abschnitten, jeder mit optionaler Zwischenüberschrift, eigenem Text, eigenen Medien und eigener Anordnung. Jeder Abschnitt steht für sich – nichts fließt in den nächsten.</li>
     <li><b>Auf der Website bearbeiten:</b> Angemeldet zeigt jeder Abschnitt beim Überfahren (und im Modus „Bearbeiten“) den Knopf <b>Abschnitt bearbeiten</b> – die Seitenleiste öffnet sich genau an dieser Stelle.</li>

@@ -48,3 +48,6 @@
   .mt--wrap.mt--right .mt__media{float:right;margin-left:var(--mt-gap)}
   .mt--wrap .mt__text{display:block}
 }
+/* Buttons unter dem Text (Klassen des Kits) */
+.mt__btns{display:flex;flex-wrap:wrap;gap:.6em;margin-top:1.1em}
+.mt__btns:first-child{margin-top:0}

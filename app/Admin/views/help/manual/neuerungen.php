@@ -2,7 +2,7 @@
   <p class="lead">Was sich zuletzt geändert hat – kurz erklärt, mit Link zur ausführlichen Anleitung. Die technische Liste aller Änderungen steht im Entwicklerhandbuch (CHANGELOG).</p>
 
   <h3>Texte mit Bildern und Videos: „Medien + Text“</h3>
-  <p>Für Einträge in eigenen Tabellen (z. B. eine Kompetenzsammlung oder Merkblätter) gibt es das Feld <b>Medien + Text</b>: Bilder und Videos stehen über dem Text oder links/rechts daneben, wahlweise mit Textumlauf, als Liste, Raster mit Großansicht oder Slider – optional in einem festen Bildformat. Mit „Mehrere Abschnitte“ besteht ein Eintrag aus beliebig vielen Teilen, jeder mit Zwischenüberschrift. Auf der Website öffnet <b>Abschnitt bearbeiten</b> die Seitenleiste genau an dieser Stelle. <a href="#medien-text">Zur Anleitung →</a></p>
+  <p>Für Einträge in eigenen Tabellen (z. B. eine Kompetenzsammlung oder Merkblätter) gibt es das Feld <b>Medien + Text</b>: Bilder und Videos stehen über dem Text oder links/rechts daneben, wahlweise mit Textumlauf, als Liste, Raster mit Großansicht oder Slider – optional in einem festen Bildformat. Mit „Mehrere Abschnitte“ besteht ein Eintrag aus beliebig vielen Teilen, jeder mit Zwischenüberschrift. Unter dem Text lassen sich bis zu vier <b>Buttons</b> setzen (z. B. „Merkblatt öffnen“ – PDFs öffnen im Viewer). Auf der Website öffnet <b>Abschnitt bearbeiten</b> die Seitenleiste genau an dieser Stelle. <a href="#medien-text">Zur Anleitung →</a></p>
 
   <h3>Mehrere Medien auf einmal auswählen</h3>
   <p>Wo mehrere Bilder oder Videos gebraucht werden, öffnet sich die Mediathek mit <b>Mehrfachauswahl</b>: anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, Hochgeladenes kommt gleich dazu, „3 übernehmen“ schließt ab. <a href="#medien-text">Mehr dazu →</a></p>

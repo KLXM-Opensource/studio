@@ -73,6 +73,7 @@ return [
 
     'container_class' => 'wrap',
     'button_class' => 'btn btn--primary',
+    'button_class_secondary' => 'btn btn--ghost',   // Zweitbutton (z. B. Buttons in „Medien + Text“)
 
     'seo' => [
         'home_title' => 'site_title',

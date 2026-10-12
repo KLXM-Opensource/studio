@@ -388,6 +388,18 @@ function initMediaText(scope = d) {
       else if (e.key === 'ArrowRight' && li.nextElementSibling) { e.preventDefault(); list.insertBefore(li.nextElementSibling, li); li.focus(); changed(); }
     });
     $$('[data-mt-pos] input', mt).forEach(r => r.addEventListener('change', () => { side.hidden = r.value === 'top' && r.checked; }));
+    // Buttons unter dem Text: hinzufügen (höchstens 4) / entfernen; Linkauswahl wie überall (Seiten, Einträge, Dokumente)
+    const btns = $('[data-mt-btns]', mt);
+    if (btns) {
+      const blist = $('[data-mt-btn-list]', btns), badd = $('[data-mt-btn-add]', btns), btpl = $('[data-mt-btn-tpl]', btns);
+      const limit = () => { badd.hidden = blist.children.length >= 4; };
+      badd.addEventListener('click', () => {
+        blist.insertAdjacentHTML('beforeend', btpl.innerHTML.replaceAll('__b__', 'n' + (uid++)));
+        const row = blist.lastElementChild; uniqueIds(row); initLinkFields(row); limit();
+        $('input', row)?.focus(); changed();
+      });
+      btns.addEventListener('click', e => { const x = e.target.closest('[data-mt-btn-remove]'); if (x) { x.closest('[data-mt-btn]').remove(); limit(); badd.focus(); changed(); } });
+    }
   });
 }
 

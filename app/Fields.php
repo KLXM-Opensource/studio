@@ -765,7 +765,24 @@ final class Fields
             'view' => $pick('view', self::MT_VIEW),
             // Bildformat der Bilder: '' = Original, sonst ein Format des Kits (Zuschnitte der Mediathek bzw. Fokuspunkt)
             'ratio' => isset(Media::ratios()[(string) ($raw['ratio'] ?? '')]) ? (string) $raw['ratio'] : '',
+            'buttons' => self::mediaTextButtons($raw['buttons'] ?? []),
         ];
+    }
+
+    /** Buttons unter dem Text: [label, link (Seite/Eintrag/Datei wie im Link-Dialog oder Adresse), style primary|secondary], höchstens 4 */
+    private static function mediaTextButtons(mixed $raw): array
+    {
+        $out = [];
+        foreach (is_array($raw) ? array_values($raw) : [] as $b) {
+            if (!is_array($b)) continue;
+            $label = mb_substr(trim(strip_tags((string) ($b['label'] ?? ''))), 0, 60);
+            $link = trim((string) ($b['link'] ?? ''));
+            if ($link !== '' && !\Core\Links::isRef($link) && !in_array($link, (array) (app()->theme->def['link_keywords'] ?? []), true)) $link = (string) (Sanitizer::safeHref($link) ?? '');
+            if ($label === '' || $link === '') continue;
+            $out[] = ['label' => $label, 'link' => $link, 'style' => ($b['style'] ?? '') === 'secondary' ? 'secondary' : 'primary'];
+            if (count($out) >= 4) break;
+        }
+        return $out;
     }
 
     /**
@@ -782,7 +799,7 @@ final class Fields
         foreach ($single ? [$raw] : array_values($raw) as $sec) {
             if (!is_array($sec)) continue;
             $v = self::mediaText($sec);
-            if ($v['title'] === '' && $v['text'] === '' && !$v['media']) continue;
+            if ($v['title'] === '' && $v['text'] === '' && !$v['media'] && !$v['buttons']) continue;
             if (!$multi) $v['title'] = '';
             $out[] = $v;
             if (!$multi || count($out) >= self::MT_MAX) break;
@@ -837,7 +854,26 @@ final class Fields
             . '<div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="Formatierung"></div>'
             . '<div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' . e(__('Text')) . '">' . $v['text'] . '</div>'
             . '<input type="hidden" id="' . e($id) . '" name="' . e($name) . '[text]" value="' . e($v['text']) . '"' . $aria . '></div>'
+            . self::renderMediaTextButtons($id, $name, $v['buttons'])
             . '</div>';
+    }
+
+    /** Buttons eines Abschnitts: Beschriftung, Ziel (Link-Dialog: Seiten, Einträge, Dokumente – PDFs öffnen im Viewer), Stil */
+    private static function renderMediaTextButtons(string $id, string $name, array $buttons): string
+    {
+        $row = function (array $b, string $k) use ($id, $name): string {
+            $n = $name . '[buttons][' . $k . ']';
+            return '<div class="mt-btn" data-mt-btn>'
+                . '<input type="text" name="' . e($n) . '[label]" value="' . e($b['label'] ?? '') . '" maxlength="60" placeholder="' . e(__('Beschriftung, z. B. Merkblatt öffnen')) . '" aria-label="' . e(__('Beschriftung')) . '">'
+                . self::renderLink($id . '-b' . $k, e($n) . '[link]', (string) ($b['link'] ?? ''), ' aria-label="' . e(__('Ziel')) . '" placeholder="' . e(__('Seite, Eintrag, Dokument oder Adresse')) . '"')
+                . '<select name="' . e($n) . '[style]" aria-label="' . e(__('Stil')) . '"><option value="primary"' . (($b['style'] ?? '') !== 'secondary' ? ' selected' : '') . '>' . e(__('Hauptbutton')) . '</option>'
+                . '<option value="secondary"' . (($b['style'] ?? '') === 'secondary' ? ' selected' : '') . '>' . e(__('Zweitbutton')) . '</option></select>'
+                . '<button type="button" class="icon-btn icon-btn--danger" data-mt-btn-remove aria-label="' . e(__('Button entfernen')) . '">✕</button></div>';
+        };
+        $h = '<div class="mt-btns" data-mt-btns><span class="mt-btns__h">' . e(__('Buttons unter dem Text (optional)')) . '</span><div class="mt-btns__list" data-mt-btn-list>';
+        foreach (array_values($buttons) as $i => $b) $h .= $row($b, (string) $i);
+        return $h . '</div><template data-mt-btn-tpl>' . $row([], '__b__') . '</template>'
+            . '<button type="button" class="btn btn--small btn--ghost" data-mt-btn-add' . (count($buttons) >= 4 ? ' hidden' : '') . '>+ ' . e(__('Button')) . '</button></div>';
     }
 
     /** Ein Medium in der Leiste von „Medien + Text“ (auch für admin.js: gleiche Struktur) */

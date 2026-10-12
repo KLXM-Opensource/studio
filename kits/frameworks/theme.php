@@ -56,6 +56,7 @@ return [
     // Kern-Blöcke (Datenliste, Formular, Karte …) bekommen Klassen beider Frameworks – geladen ist immer nur eines
     'container_class' => 'wrap uk-container',
     'button_class' => 'btn btn-primary uk-button uk-button-primary',
+    'button_class_secondary' => 'btn btn-secondary uk-button uk-button-default',   // Zweitbutton (z. B. Buttons in „Medien + Text“)
     'button_secondary_class' => 'btn btn-secondary uk-button uk-button-default',
     'frame_hosts' => [],
 

@@ -31,9 +31,10 @@ final class MediaText
     public static function html(array $v, array $o = []): string
     {
         $v = Fields::mediaText($v);
-        $text = $v['text'] !== '' ? '<div class="mt__text prose">' . emphasis_rich($v['text']) . '</div>' : '';
+        $btns = self::buttons($v['buttons']);
+        $text = $v['text'] !== '' || $btns !== '' ? '<div class="mt__text prose">' . ($v['text'] !== '' ? emphasis_rich($v['text']) : '') . $btns . '</div>' : '';
         $items = array_values(array_filter(array_map(fn($id) => Media::find((int) $id), $v['media'])));
-        if (!$items) return $text;
+        if (!$items) return $text !== '' ? '<div class="mt mt--only">' . $text . '</div>' : '';
         $side = $v['pos'] !== 'top';
         $sizes = !$side ? '(min-width: 1080px) 800px, 100vw' : ($v['width'] === 'half' ? '(min-width: 900px) 420px, 100vw' : '(min-width: 900px) 300px, 100vw');
         $ratio = $v['ratio'];   // '' = Original
@@ -44,6 +45,31 @@ final class MediaText
         };
         $cls = 'mt mt--' . $v['pos'] . ($side ? ' mt--w-' . $v['width'] . ($v['wrap'] ? ' mt--wrap' : ' mt--cols') : '') . ' mt--' . $v['view'] . ($text === '' ? ' mt--only' : '');
         return '<div class="' . $cls . '"><div class="mt__media">' . $media . '</div>' . $text . '</div>';
+    }
+
+    /** Buttons unter dem Text (Klassen des Kits: button_class bzw. button_class_secondary); Dokumente immer im PDF-Viewer */
+    private static function buttons(array $buttons): string
+    {
+        if (!$buttons) return '';
+        $def = app()->theme->def;
+        $primary = (string) ($def['button_class'] ?? 'btn btn--primary');
+        $secondary = (string) ($def['button_class_secondary'] ?? str_replace('btn--primary', 'btn--secondary', $primary));
+        $h = '';
+        foreach ($buttons as $b) {
+            $href = self::href((string) $b['link']);
+            if ($href === '' || $href === '#') continue;
+            $h .= '<a class="' . e($b['style'] === 'secondary' ? $secondary : $primary) . '" href="' . e($href) . '"' . ext_attrs($href) . '>' . e((string) $b['label']) . '</a>';
+        }
+        return $h !== '' ? '<p class="mt__btns">' . $h . '</p>' : '';
+    }
+
+    /** Linkziel – eine PDF-Datei („media:ID“) öffnet immer im PDF-Viewer, nie als Download */
+    public static function href(string $link): string
+    {
+        if (preg_match('~^media:(\d+)$~', $link, $m) && ($f = Media::find((int) $m[1])) && ($f['mime'] ?? '') === 'application/pdf') {
+            return (string) (Media::viewerUrl($f) ?? link_href($link));
+        }
+        return link_href($link);
     }
 
     /** Ein Medium: Bild (Bildunterschrift = Fotonachweis wie in der Mediathek) oder Video mit Player (Untertitel, Transkript) */

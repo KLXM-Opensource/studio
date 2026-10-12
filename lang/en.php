@@ -7252,4 +7252,12 @@ return [
     'Original' => 'Original',
     'Alle Neuerungen im Handbuch →' => 'All changes in the manual →',
     'Feld darunter einfügen' => 'Insert field below',
+    'Beschriftung' => 'Label',
+    'Beschriftung, z. B. Merkblatt öffnen' => 'Label, e.g. Open fact sheet',
+    'Button entfernen' => 'Remove button',
+    'Buttons unter dem Text (optional)' => 'Buttons below the text (optional)',
+    'Hauptbutton' => 'Primary button',
+    'Seite, Eintrag, Dokument oder Adresse' => 'Page, entry, document or address',
+    'Stil' => 'Style',
+    'Zweitbutton' => 'Secondary button',
 ];

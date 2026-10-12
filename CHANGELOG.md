@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Medien + Text: Buttons unter dem Text
+- Je Abschnitt bis zu vier **Buttons** (Beschriftung, Ziel über den Link-Dialog – Seiten, Einträge, Dokumente, Adressen –, Haupt- oder Zweitbutton
+  im Stil des Kits). Verlinkte PDFs öffnen immer im PDF-Viewer. Neue Kit-Angabe `button_class_secondary` (editorial, frameworks).
+
 ### Tabellen-Designer: Feld direkt unter einem anderen einfügen
 - **+** an jedem Feld öffnet die Feldtypen als Menü (Pfeiltasten, Esc) – das neue Feld kommt direkt darunter statt ans Ende.
 - Behoben: Neue Felder bekamen eine verstümmelte Bezeichnung (das erste Wort fehlte, z. B. „+ Text“ statt „Medien + Text“) – die
