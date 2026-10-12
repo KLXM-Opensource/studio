@@ -75,6 +75,17 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
     <div class="f"><label for="status">Status</label>
       <select id="status" name="status"><option value="draft"<?= ($old['status'] ?? '') !== 'published' ? ' selected' : '' ?>>Entwurf (nicht öffentlich)</option><option value="published"<?= ($old['status'] ?? '') === 'published' ? ' selected' : '' ?>>Online</option></select></div>
     <?php endif; ?>
+    <?php if (!$isNew && !$page['is_home'] && !$nf && can('pages.publish')): // Zeitplan (Core\Schedule)
+      $sFrom = \Core\Schedule::input(\Core\Schedule::norm($old['online_from'] ?? '') ?? ''); $sUntil = \Core\Schedule::input(\Core\Schedule::norm($old['online_until'] ?? '') ?? ''); ?>
+    <fieldset class="pg-plan"><legend><?= e(__('Zeitplan')) ?></legend>
+      <div class="f<?= isset($errors['online_from']) ? ' f--error' : '' ?>"><label for="online_from"><?= e(__('Online ab')) ?></label>
+        <input type="datetime-local" id="online_from" name="online_from" value="<?= e($sFrom) ?>" aria-describedby="online_from-h"><?= $err('online_from') ?>
+        <p class="f-help" id="online_from-h"><?= e(__('Bis dahin bleibt die Seite offline – auch wenn „Online“ gewählt ist. Leer = sofort.')) ?></p></div>
+      <div class="f<?= isset($errors['online_until']) ? ' f--error' : '' ?>"><label for="online_until"><?= e(__('Offline ab')) ?></label>
+        <input type="datetime-local" id="online_until" name="online_until" value="<?= e($sUntil) ?>" aria-describedby="online_until-h"><?= $err('online_until') ?>
+        <p class="f-help" id="online_until-h"><?= e(__('Danach ist die Seite nicht mehr aufrufbar und erscheint nicht mehr in Menü, Suche und Sitemap. Leer = unbegrenzt.')) ?></p></div>
+    </fieldset>
+    <?php endif; ?>
     <?php if ($isNew || (!$page['is_home'] && !$nf)): ?>
     <div class="f f--bool"><input type="hidden" name="menu" value="0"><label class="f-check f-check--switch"><input type="checkbox" role="switch" name="menu" value="1"<?= !empty($old['menu']) ? ' checked' : '' ?>> <span>Im Hauptmenü zeigen</span></label></div>
     <div class="f"><label for="nav_title">Beschriftung im Menü (optional)</label><input id="nav_title" name="nav_title" maxlength="60" value="<?= e($old['nav_title'] ?? '') ?>" placeholder="<?= e($old['title'] ?? 'wie der Titel') ?>"></div>

@@ -631,6 +631,11 @@ final class DataController extends AdminController
             }
             $in['status'] = 'draft';
         }
+        // Zeitplan „Online ab“ / „Offline ab“ (Core\Schedule): nur mit Veröffentlichungsrecht und Status-Auswahl
+        if ($t['settings']['workflow'] && can('data.publish', $handle) && array_key_exists('online_from', $r->post)) {
+            $in['online_from'] = $r->str('online_from');
+            $in['online_until'] = $r->str('online_until');
+        }
         [$newId, $errors] = Entries::save($t, $id !== null ? (int) $id : null, $in);
         if ($errors) {
             app()->session->flash('error', 'Bitte prüfen Sie die markierten Felder – es wurde nichts gespeichert.');
@@ -639,7 +644,9 @@ final class DataController extends AdminController
         }
         $this->changed();
         $to = $r->str('then') === 'new' ? "/admin/data/$handle/new" : ($r->str('then') === 'list' ? "/admin/data/$handle" : "/admin/data/$handle/$newId");
-        return $this->back($to, 'success', $t['singular'] . ' gespeichert.');
+        $saved = Entries::find($t, (int) $newId);
+        $plan = $saved && \Core\Schedule::pending($saved) ? ' ' . __('Geht automatisch online: {date}.', ['date' => fmt()->datetime($saved['online_from'])]) : '';
+        return $this->back($to, 'success', $t['singular'] . ' gespeichert.' . $plan);
     }
 
     public function entryDelete(Request $r, string $handle, string $id): Response
@@ -691,6 +698,8 @@ final class DataController extends AdminController
         $t = $this->table($handle);
         if (Tables::isInbox($t)) return Response::json(['ok' => false, 'error' => __('Eingangs-Tabelle: Anfragen unter „Anfragen“ bearbeiten.')], 403);
         $ids = array_map('intval', (array) ($r->post['ids'] ?? []));
+        // „Online ab“ in der Zukunft (Core\Schedule): bleiben offline – Hinweis statt „ist online“
+        $waiting = ($r->post['action'] ?? '') === 'publish' ? array_values(array_filter(array_map(fn($id) => Entries::find($t, $id), $ids), fn($e) => $e && \Core\Schedule::pending($e))) : [];
         match ($r->post['action'] ?? '') {
             'publish' => Entries::setStatus($t, $ids, 'published'),
             'draft' => Entries::setStatus($t, $ids, 'draft'),
@@ -699,7 +708,9 @@ final class DataController extends AdminController
             default => throw new HttpException(422, 'Unbekannte Aktion.'),
         };
         // drafts: Zähler „Entwürfe“ der Seitenleiste (Status-Knopf der Eintragsliste aktualisiert ihn ohne Neuladen)
-        return $r->wantsJson() ? Response::json(['ok' => true, 'drafts' => \Core\Review\Drafts::count()]) : $this->back("/admin/data/$handle", 'success', 'Erledigt.');
+        $wait = $waiting ? __('Geplant – geht automatisch online: {date}.', ['date' => fmt()->datetime($waiting[0]['online_from'])]) : null;
+        return $r->wantsJson() ? Response::json(['ok' => true, 'drafts' => \Core\Review\Drafts::count()] + ($wait ? ['waiting' => count($waiting), 'message' => $wait] : []))
+            : $this->back("/admin/data/$handle", 'success', __('Erledigt.') . ($wait ? ' ' . $wait : ''));
     }
 
     // ================================================================= Geteilte Tabellen (Core\Data\Shared)

@@ -412,7 +412,7 @@ final class Pages
     }
 
     /**
-     * Veröffentlichen. Enthält der Entwurf noch Platzhalter „[bitte ergänzen: …]“ (z. B. aus dem Seiten-Generator), wird nicht
+     * Veröffentlichen – bei „Online ab“ in der Zukunft nur die Fassung übernehmen (geplant, Core\Schedule). Enthält der Entwurf noch Platzhalter „[bitte ergänzen: …]“ (z. B. aus dem Seiten-Generator), wird nicht
      * veröffentlicht: \RuntimeException mit Liste – der Entwurf bleibt gespeichert.
      */
     public static function publish(int $id, ?int $userId): void
@@ -423,6 +423,12 @@ final class Pages
         }
         if ($open = self::openMarkers(($p['content_draft'] ?? $p['content_published']) . ' ' . $p['title'] . ' ' . $p['meta_description'])) {
             throw new \RuntimeException(__('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]));
+        }
+        // „Online ab“ in der Zukunft (Core\Schedule): Fassung übernehmen, online geht die Seite erst zum geplanten Zeitpunkt
+        if (Schedule::pending($p)) {
+            self::db()->update('pages', ['content_published' => $p['content_draft'] ?? $p['content_published'], 'status' => 'draft', 'updated_at' => now()], 'id = :id', ['id' => $id]);
+            PageCache::clear();
+            return;
         }
         self::db()->update('pages', [
             'content_published' => $p['content_draft'] ?? $p['content_published'],

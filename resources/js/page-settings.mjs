@@ -49,6 +49,9 @@ function render(ctx) {
       <div class="f"><label for="ps-status">${esc(T('status'))}</label><select id="ps-status" name="status">
         <option value="draft"${pg.status !== 'published' ? ' selected' : ''}>${esc(T('draft'))}</option>
         <option value="published"${pg.status === 'published' ? ' selected' : ''}>${esc(T('online'))}</option></select></div>` : ''}
+      ${fixedSlug || !S.canPublish ? '' : `
+      <div class="f"><label for="ps-from">${esc(T('planFrom'))}</label><input type="datetime-local" id="ps-from" name="online_from" value="${esc(pg.online_from)}" aria-describedby="ps-from-h"><p class="f-help" id="ps-from-h">${esc(T('planFromHelp'))}</p></div>
+      <div class="f"><label for="ps-until">${esc(T('planUntil'))}</label><input type="datetime-local" id="ps-until" name="online_until" value="${esc(pg.online_until)}" aria-describedby="ps-until-h"><p class="f-help" id="ps-until-h">${esc(T('planUntilHelp'))}</p></div>`}
       ${fixedSlug ? '' : `
       <label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="menu"${pg.menu ? ' checked' : ''}> <span>${esc(T('menu'))}</span></label>
       <div class="f" data-ps-nav${pg.menu ? '' : ' hidden'}><label for="ps-nav">${esc(T('navTitle'))}</label><input id="ps-nav" name="nav_title" maxlength="60" autocomplete="off" value="${esc(pg.nav_title)}" placeholder="${esc(pg.title)}"></div>`}
@@ -154,6 +157,7 @@ function render(ctx) {
     const body = { title: title.value.trim(), meta_title: $('#ps-mt').value.trim(), meta_description: $('#ps-md').value.trim(), og_image: st.og ? st.og.id : null };
     if (slug) body.slug = slug.value.trim();
     if (form.status) body.status = form.status.value;
+    if (form.online_from) { body.online_from = form.online_from.value; body.online_until = form.online_until.value; }
     if (form.menu) { body.menu = form.menu.checked; body.nav_title = $('#ps-nav').value.trim(); }
     if (form.noindex) body.noindex = form.noindex.checked;
     st.busy = true; go.disabled = true; go.querySelector('span').textContent = T('saving');

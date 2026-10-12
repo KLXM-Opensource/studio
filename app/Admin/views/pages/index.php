@@ -61,6 +61,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell, $short): st
         . '</span>'
         // Hinweise als Symbole mit Tooltip: offener Entwurf (Core\Review\Drafts), noindex, Kennzeichen von Erweiterungen (Extension::pageList)
         . '<span class="pt-hints">' . implode('', array_map(fn($x) => '<span class="pt-hint pt-hint--' . $x[0] . '" tabindex="-1" role="img" aria-label="' . e($x[2]) . '" title="' . e($x[2]) . '">' . icon($x[1]) . '</span>', array_merge(
+            ($plan = \Core\Schedule::label($p)) !== '' ? [['plan', 'clock', __('Zeitplan') . ' – ' . $plan]] : [],
             $dirty ? [['draft', 'pencil-simple', __('Entwurf offen') . ' – ' . __('Unveröffentlichte Änderungen – unter „Entwürfe“ vergleichen und veröffentlichen')]] : [],
             !empty($p['noindex']) ? [['noindex', 'magnifying-glass', __('noindex') . ' – ' . __('Nicht in Suchmaschinen und Sitemap')]] : [],
             array_map(fn($b) => [$b['tone'], $b['icon'] ?: ['ok' => 'check-circle', 'warn' => 'warning'][$b['tone']] ?? 'info', $b['label'] . ($b['title'] !== '' ? ' – ' . $b['title'] : '')], $ext['badges'])

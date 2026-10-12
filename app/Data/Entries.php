@@ -480,6 +480,16 @@ final class Entries
         $row['slug'] = $slug;
         $status = ($in['status'] ?? ($current['status'] ?? 'published')) === 'draft' ? 'draft' : 'published';
         if (!$table['settings']['workflow']) $status = 'published';
+        // Zeitplan (Core\Schedule): „Online ab“ in der Zukunft hält den Eintrag offline, bis der Zeitpunkt erreicht ist
+        if (array_key_exists('online_from', $in) || array_key_exists('online_until', $in)) {
+            [$from, $until, $sErr] = \Core\Schedule::check($in['online_from'] ?? ($current['online_from'] ?? null), $in['online_until'] ?? ($current['online_until'] ?? null));
+            if ($sErr) return [null, $sErr];
+            \Core\Schedule::ensure($table);
+            $row['online_from'] = $from;
+            $row['online_until'] = $until;
+            $scheduled = true;
+        }
+        if (\Core\Schedule::pending($row + ($current ?? []))) $status = 'draft';
         $row['status'] = $status;
         $row['updated_at'] = now();
         if ($status === 'published' && empty($current['published_at'])) {
@@ -508,6 +518,7 @@ final class Entries
             }
         }
         self::changed($table);
+        if (!empty($scheduled)) \Core\Schedule::refresh();
         if ($versioned && ($saved = self::find($table, (int) $id))) {
             $was = $current['status'] ?? null;
             $note = $note !== '' ? $note : (!$current ? __('Angelegt') : ($was !== $status ? ($status === 'published' ? __('Veröffentlicht') : __('Als Entwurf gespeichert')) : ''));
@@ -631,6 +642,12 @@ final class Entries
         // Push: Einträge, die jetzt zum ersten Mal veröffentlicht werden (published_at noch leer)
         $first = $new === 'published' && \Core\Push\Push::on() && !empty($table['settings']['push']['enabled']) && $ids
             ? array_map('intval', array_column($db->fetchAll("SELECT id FROM {$table['table']} WHERE published_at IS NULL AND id IN (" . implode(',', array_map('intval', $ids)) . ')' . ($own ? ' AND origin_site = :origin' : ''), $op), 'id')) : [];
+        // „Online ab“ in der Zukunft (Core\Schedule): bleibt offline bis zum geplanten Zeitpunkt
+        if ($new === 'published' && $ids && \Core\Schedule::ensure($table)) {
+            $wait = array_map('intval', array_column($db->fetchAll("SELECT id FROM {$table['table']} WHERE online_from > ? AND id IN (" . implode(',', array_map('intval', $ids)) . ')', [now()]), 'id'));
+            $ids = array_values(array_diff(array_map('intval', $ids), $wait));
+            $first = array_values(array_diff($first, $wait));
+        }
         foreach (array_map('intval', $ids) as $id) {
             $upd = ['status' => $status === 'draft' ? 'draft' : 'published', 'updated_at' => now()];
             $db->update($table['table'], $upd, 'id = :id' . $own, ['id' => $id] + $op);

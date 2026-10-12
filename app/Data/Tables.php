@@ -57,7 +57,7 @@ final class Tables
     /** Erlaubte Typen der Unterfelder einer wiederholbaren Gruppe */
     public const GROUP_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'email', 'tel', 'bool', 'iban'];
 
-    public const SYSTEM = ['id', 'slug', 'status', 'sort', 'created_at', 'updated_at', 'published_at', 'lang', 'translation_group'];
+    public const SYSTEM = ['id', 'slug', 'status', 'sort', 'created_at', 'updated_at', 'published_at', 'lang', 'translation_group', 'online_from', 'online_until'];
 
     private static array $cache = [];
     /** Geteilte Tabellen dieser Website (je Anfrage zwischengespeichert) */
@@ -723,6 +723,9 @@ final class Tables
         $t->addColumn('created_at', 'string', ['length' => 25, 'notnull' => false]);
         $t->addColumn('updated_at', 'string', ['length' => 25, 'notnull' => false]);
         $t->addColumn('published_at', 'string', ['length' => 25, 'notnull' => false]);
+        // Zeitgesteuert veröffentlichen (Core\Schedule): „Online ab“ / „Offline ab“
+        $t->addColumn('online_from', 'string', ['length' => 25, 'notnull' => false]);
+        $t->addColumn('online_until', 'string', ['length' => 25, 'notnull' => false]);
         // Mehrsprachigkeit: Sprache (NULL = Standardsprache) und Übersetzungsgruppe
         $t->addColumn('lang', 'string', ['length' => 10, 'notnull' => false]);
         $t->addColumn('translation_group', 'integer', ['notnull' => false]);

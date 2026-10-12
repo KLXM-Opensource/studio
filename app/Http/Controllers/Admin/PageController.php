@@ -81,7 +81,8 @@ final class PageController extends AdminController
             return $this->view('pages/form', ['page' => $page, 'errors' => $errors, 'old' => $data + $page, 'revisions' => Pages::revisions((int) $id)], 422);
         }
         if ($warn !== null) app()->session->flash('error', $warn);
-        return $this->back('/admin/pages/' . $id, 'success', 'Seiteneinstellungen gespeichert.');
+        $fresh = Pages::find((int) $id);
+        return $this->back('/admin/pages/' . $id, 'success', __('Seiteneinstellungen gespeichert.') . ($fresh && \Core\Schedule::pending($fresh) ? ' ' . __('Geht automatisch online: {date}.', ['date' => fmt()->datetime($fresh['online_from'])]) : ''));
     }
 
     /**
@@ -105,6 +106,15 @@ final class PageController extends AdminController
             $data = ['slug' => $page['slug'], 'parent_id' => null, 'menu' => 0, 'nav_title' => '', 'noindex' => 1] + $data;
         }
         if (!can('pages.publish')) $data['status'] = $page['status'];   // Online/Offline nur mit Recht „Veröffentlichen“
+        // Zeitplan „Online ab“ / „Offline ab“ (Core\Schedule) – nicht für Start- und 404-Seite; „Online ab“ in der Zukunft hält die Seite offline
+        $plan = array_key_exists('online_from', $r->post) && can('pages.publish') && !$page['is_home'] && !NotFound::isPage($page);
+        if ($plan) {
+            [$from, $until, $sErr] = \Core\Schedule::check($r->str('online_from'), $r->str('online_until'));
+            if ($sErr) return [$data + ['online_from' => $r->str('online_from'), 'online_until' => $r->str('online_until')], $sErr, null];
+            $data['online_from'] = $from;
+            $data['online_until'] = $until;
+        }
+        if (\Core\Schedule::pending($data + $page)) $data['status'] = 'draft';
         if ($data['status'] === 'published' && $page['status'] !== 'published' && ($open = Pages::openMarkers($page['content_draft'] . ' ' . $data['title'] . ' ' . $data['meta_description']))) {
             $data['status'] = 'draft';   // offene Platzhalter „[bitte ergänzen: …]“ – nicht online stellen
             $warn = __('Nicht veröffentlicht: Die Seite enthält noch {n} Platzhalter, z. B. {list}. Bitte ergänzen oder entfernen.', ['n' => count($open), 'list' => implode(' · ', array_slice($open, 0, 3))]);
@@ -118,6 +128,7 @@ final class PageController extends AdminController
             $data['parent_id'] = null;
         }
         app()->db->update('pages', $data, 'id = :id', ['id' => $id]);
+        if ($plan) \Core\Schedule::refresh();
         Pages::rebuildPaths();
         $this->changed();
         \Core\Activity::log('settings', 'page', $id, (string) ($data['title'] ?? $page['title']), ['lang' => $page['lang'] ?? null]);   // Aktionslog
@@ -216,7 +227,8 @@ final class PageController extends AdminController
                 'meta_title' => (string) ($page['meta_title'] ?? ''), 'meta_description' => (string) ($page['meta_description'] ?? ''),
                 'og_image' => $og ? (int) $og['id'] : null, 'status' => (string) $page['status'], 'menu' => (bool) $page['menu'],
                 'nav_title' => (string) ($page['nav_title'] ?? ''), 'noindex' => (bool) $page['noindex'],
-                'home' => (bool) $page['is_home'], 'notFound' => $nf, 'published' => $page['content_published'] !== null],
+                'home' => (bool) $page['is_home'], 'notFound' => $nf, 'published' => $page['content_published'] !== null,
+                'online_from' => \Core\Schedule::input($page['online_from'] ?? null), 'online_until' => \Core\Schedule::input($page['online_until'] ?? null)],
             'og' => $og ? ['id' => (int) $og['id'], 'thumb' => str_starts_with((string) $og['mime'], 'image/') ? \Core\Media::url($og, 480) : null,
                 'label' => (string) ($og['alt'] ?: \Core\Media::displayName($og))] : null,
             'url' => $url, 'prefix' => substr($url, 0, (int) strrpos(rtrim($url, '/'), '/') + 1),
@@ -250,6 +262,10 @@ final class PageController extends AdminController
             'meta_description' => (string) ($page['meta_description'] ?? ''), 'status' => (string) $page['status'],
             'noindex' => $page['noindex'] ? '1' : '0', 'parent_id' => $page['parent_id'] ? (string) $page['parent_id'] : '',
             'menu' => $page['menu'] ? '1' : '0', 'nav_title' => (string) ($page['nav_title'] ?? ''), 'x' => ['og_image' => (string) ($page['og_image'] ?? '')]];
+        if (array_key_exists('online_from', $p) || array_key_exists('online_until', $p)) {   // Zeitplan (Core\Schedule)
+            $post['online_from'] = is_scalar($p['online_from'] ?? null) ? (string) $p['online_from'] : (string) ($page['online_from'] ?? '');
+            $post['online_until'] = is_scalar($p['online_until'] ?? null) ? (string) $p['online_until'] : (string) ($page['online_until'] ?? '');
+        }
         foreach (['title', 'slug', 'meta_title', 'meta_description', 'status', 'nav_title'] as $k) {
             if (array_key_exists($k, $p) && is_scalar($p[$k])) $post[$k] = (string) $p[$k];
         }
@@ -267,7 +283,7 @@ final class PageController extends AdminController
             $out['seo'] = null;
         }
         $moved = $out['url'] !== $oldUrl;
-        $msg = __('Seiteneinstellungen gespeichert.');
+        $msg = __('Seiteneinstellungen gespeichert.') . (\Core\Schedule::pending($fresh) ? ' ' . __('Geht automatisch online: {date}.', ['date' => fmt()->datetime($fresh['online_from'])]) : '');
         if ($moved) $msg .= ' ' . ($out['autoRedirect'] && ($fresh['status'] === 'published' || $fresh['published_at'] !== null) ? __('Die alte Adresse leitet auf die neue weiter.') : __('Neue Adresse: {url}', ['url' => $out['url']]));
         return Response::json(['ok' => true, 'message' => $msg, 'warning' => $warn, 'moved' => $moved,
             'state' => Pages::state($fresh), 'drafts' => \Core\Review\Drafts::count()] + $out);
@@ -343,10 +359,13 @@ final class PageController extends AdminController
             if ($r->wantsJson()) return Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
             return $this->back('/admin/pages', 'error', $e->getMessage());
         }
+        $p = Pages::find((int) $id);
+        // „Online ab“ in der Zukunft (Core\Schedule): Fassung übernommen, online erst zum geplanten Zeitpunkt
+        $msg = $p && \Core\Schedule::pending($p) ? __('„{title}“ geht automatisch online: {date}.', ['title' => (string) $p['title'], 'date' => fmt()->datetime($p['online_from'])]) : null;
         if ($r->wantsJson()) {
-            return Response::json(['ok' => true, 'state' => 'online', 'drafts' => \Core\Review\Drafts::count(), 'message' => __('„{title}“ ist online.', ['title' => (string) (Pages::find((int) $id)['title'] ?? '')])]);
+            return Response::json(['ok' => true, 'state' => $p ? Pages::state($p) : 'online', 'drafts' => \Core\Review\Drafts::count(), 'message' => $msg ?? __('„{title}“ ist online.', ['title' => (string) ($p['title'] ?? '')])]);
         }
-        return $this->back('/admin/pages', 'success', 'Seite veröffentlicht.');
+        return $this->back('/admin/pages', 'success', $msg ?? 'Seite veröffentlicht.');
     }
 
     /**

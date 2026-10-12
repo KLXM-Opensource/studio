@@ -785,6 +785,10 @@ switch ($cmd) {
             }
             // Geteilte Datentabellen (storage/shared): Datenbanken anlegen, Spalten abgleichen, Medien-Pool – idempotent
             foreach (Core\Data\Shared::migrate() as $line) echo "  $line\n";
+            // Zeitgesteuert veröffentlichen (Core\Schedule): Spalten online_from/online_until in allen Datentabellen – idempotent
+            foreach (Core\Data\Tables::all() as $t) {
+                try { Core\Schedule::ensure($t); } catch (Throwable $e) { fwrite(STDERR, "  Zeitplan {$t['handle']}: " . $e->getMessage() . "\n"); }
+            }
             // Symbole der Datentabellen: alte Unicode-Zeichen → Symbolnamen (Core\Icons) – idempotent
             foreach (Core\Icons::migrateTables() as $line) echo "  $line\n";
             if (Core\Icons::catalog()['icons']) $app->settings->set('sys.icons', 1);

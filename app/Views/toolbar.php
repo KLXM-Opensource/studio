@@ -47,6 +47,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <span class="cms-chip__dot" aria-hidden="true"></span><span class="cms-chip__t"><?= e($chip[0]) ?></span>
       </button>
       <span class="cms-pop" id="cms-chip-pop" hidden><strong data-bar-chip-title><?= e($chip[0]) ?></strong> <span data-bar-chip-text><?= e($chip[1]) ?></span>
+        <?php if ($b['plan'] !== ''): ?><span class="cms-pop__hint"><?= e(__('Zeitplan') . ': ' . $b['plan']) ?></span><?php endif; ?>
         <?php if ($b['toggle']): // Online/Offline umschalten (_bar.js initToggle); sichtbar je nach Zustand ?>
         <span class="cms-pop__err" data-bar-toggle-err role="alert" hidden></span>
         <span class="cms-pop__hint" data-bar-pending hidden><?= e($T['pendingHint']) ?></span>

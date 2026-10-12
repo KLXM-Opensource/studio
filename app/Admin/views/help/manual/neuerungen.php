@@ -1,6 +1,9 @@
 <?php /** Handbuch · Kapitel „Neuerungen“: was sich zuletzt geändert hat – in Alltagssprache, mit Link zur Anleitung. Neueste oben. @var callable $anchor */ ?>
   <p class="lead">Was sich zuletzt geändert hat – kurz erklärt, mit Link zur ausführlichen Anleitung. Die technische Liste aller Änderungen steht im Entwicklerhandbuch (CHANGELOG).</p>
 
+  <h3>Zeitgesteuert veröffentlichen</h3>
+  <p>Seiten und Einträge (z. B. Aktuelles) bekommen einen <b>Zeitplan</b>: „Online ab“ veröffentlicht automatisch zum gewünschten Zeitpunkt, „Offline ab“ nimmt den Inhalt automatisch heraus – er ist dann nicht mehr aufrufbar und verschwindet aus Menü, Listen, Suche und Sitemap. Eine Uhr in den Listen zeigt, was geplant ist. <a href="#zeitplan">Zur Anleitung →</a></p>
+
   <h3>Texte mit Bildern und Videos: „Medien + Text“</h3>
   <p>Für Einträge in eigenen Tabellen (z. B. eine Kompetenzsammlung oder Merkblätter) gibt es das Feld <b>Medien + Text</b>: Bilder und Videos stehen über dem Text oder links/rechts daneben, wahlweise mit Textumlauf, als Liste, Raster mit Großansicht oder Slider – optional in einem festen Bildformat. Mit „Mehrere Abschnitte“ besteht ein Eintrag aus beliebig vielen Teilen, jeder mit Zwischenüberschrift. Unter dem Text lassen sich bis zu vier <b>Buttons</b> setzen (z. B. „Merkblatt öffnen“ – PDFs öffnen im Viewer). Auf der Website öffnet <b>Abschnitt bearbeiten</b> die Seitenleiste genau an dieser Stelle. <a href="#medien-text">Zur Anleitung →</a></p>
 

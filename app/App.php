@@ -187,6 +187,8 @@ final class App
         if ($gate = $this->stagingGate($request)) {
             return $gate;
         }
+        // Zeitgesteuert veröffentlichen: fällige „Online ab“/„Offline ab“ vor jeder Auslieferung ausführen (Core\Schedule, ohne Cron)
+        Schedule::tick();
         try {
             if (!Features::allowsPath($request->path)) {
                 throw new Http\HttpException(404);

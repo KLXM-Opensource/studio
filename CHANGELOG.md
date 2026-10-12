@@ -6,6 +6,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Zeitgesteuert veröffentlichen: „Online ab“ und „Offline ab“
+- Seiten (Verwaltung und Seiteneinstellungen auf der Website) und Einträge von Tabellen mit Freigabe erhalten einen **Zeitplan**.
+  „Online ab“ hält den Inhalt bis zum Zeitpunkt offline und veröffentlicht ihn dann automatisch; „Offline ab“ nimmt ihn automatisch
+  heraus – danach 404 und nicht mehr in Menü, Listen, Sitemap, Suche, Kalender-Abos, Feeds und API.
+- Ohne Cron: `Core\Schedule::tick()` prüft je Anfrage vor dem Routing den nächsten fälligen Zeitpunkt (`sys.schedule_next`) und führt
+  fällige Aktionen unter Sperre aus (`Pages::publish/unpublish`, `Entries::setStatus`), leert Seiten-Cache und Suchindex.
+- Neue Spalten `online_from`/`online_until` (additiv) an `pages` und allen Datentabellen (`migrate` ergänzt bestehende Tabellen).
+- Hinweise: Uhr mit Datum im Seitenbaum (Spalte „Hinweise“), in Eintragslisten, im Status der Werkzeugleiste und in der Eintrags-Seitenleiste.
+
 ### Galerie & Slider mit Mehrfachauswahl, große Fotos schneller, PDFs immer im Viewer
 - Wiederholgruppen mit `pick_many` (Galerie, Live-Galerie, Slider): Knopf **Bilder auswählen …** öffnet die Mehrfachauswahl (vorhandene
   Bilder vorausgewählt) und legt je neuem Bild einen Eintrag an; Höchstzahl wird beachtet.

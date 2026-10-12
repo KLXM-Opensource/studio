@@ -21,7 +21,7 @@
     <tr><td>Auf- und zuklappen</td><td>Dreieck vor der Seite oder <kbd>→</kbd>/<kbd>←</kbd>. „Alle aufklappen/zuklappen“ oben.</td></tr>
     <tr><td>Öffnen</td><td>Doppelklick oder <kbd>Enter</kbd> öffnet den Editor.</td></tr>
     <tr><td>Weitere Aktionen</td><td>Rechtsklick oder <b><?= icon('dots-three', ['label' => 'Mehr']) ?></b>: Seiteneinstellungen, Ansehen, Neue Unterseite, Duplizieren, Änderungen veröffentlichen, Löschen (Unterseiten rücken dann eine Ebene nach oben).</td></tr>
-    <tr id="hinweise"><td>Hinweise</td><td>Symbole in der Spalte <b>Hinweise</b> – Maus darauf zeigt die Erklärung: <?= icon('pencil-simple', ['label' => 'Stift']) ?> unveröffentlichte Änderungen (unter „Entwürfe“ vergleichen), durchgestrichene <?= icon('magnifying-glass', ['label' => 'Lupe']) ?> nicht in Suchmaschinen (noindex), weitere von Erweiterungen (z. B. Schloss für geschützte Bereiche).</td></tr>
+    <tr id="hinweise"><td>Hinweise</td><td>Symbole in der Spalte <b>Hinweise</b> – Maus darauf zeigt die Erklärung: <?= icon('pencil-simple', ['label' => 'Stift']) ?> unveröffentlichte Änderungen (unter „Entwürfe“ vergleichen), durchgestrichene <?= icon('magnifying-glass', ['label' => 'Lupe']) ?> nicht in Suchmaschinen (noindex), <?= icon('clock', ['label' => 'Uhr']) ?> Zeitplan „Online ab“/„Offline ab“ (<a href="#zeitplan">Zeitgesteuert veröffentlichen</a>), weitere von Erweiterungen (z. B. Schloss für geschützte Bereiche).</td></tr>
     <tr><td>Adressen</td><td>Die Adresse einer Seite zeigt der Tooltip am Titel. Als eigene Spalte: Knopf <b>Adressen</b> über der Liste (bleibt eingeschaltet, bis Sie ihn wieder ausschalten).</td></tr>
     <tr><td>Menü</td><td>Schalter in der Spalte <b>Menü</b>: Seite erscheint im Hauptmenü, Unterseiten als Aufklappmenü.</td></tr>
     <tr><td>Online / Offline</td><td>Klick auf den Status (oder Rechtsklick → <b>Offline nehmen</b> / <b>Online stellen</b>) schaltet direkt um, ohne die Seite neu zu laden. <b>Offline nehmen</b> fragt vorher nach. Mit der Tastatur: <kbd>Tab</kbd> bis zum Status, <kbd>Enter</kbd>. Nur mit dem Recht „Seiten veröffentlichen“; die Startseite ist immer online.</td></tr>
@@ -33,6 +33,16 @@
     <tr><td><b>Entwurf</b></td><td>Noch nie veröffentlicht. Ein Klick auf den Status veröffentlicht sie (wie <b>Veröffentlichen</b> im Editor).</td></tr>
   </table>
   <div class="doc-note doc-note--info"><strong>Online stellen und Platzhalter</strong><p>Enthält die Seite noch Platzhalter wie <code>[bitte ergänzen: …]</code> (z. B. aus dem Seiten-Generator), bleibt sie offline; die Meldung erscheint über der Liste. Hat eine offline genommene Seite inzwischen unveröffentlichte Änderungen, fragt „Online stellen“ nach – dabei werden die Änderungen mit veröffentlicht.</p></div>
+  <h3 id="zeitplan">Zeitgesteuert veröffentlichen (Online ab / Offline ab)</h3>
+  <p>Für Aktionen, Veranstaltungshinweise oder Nachrichten mit Sperrfrist planen Sie, wann eine Seite oder ein Eintrag online geht und wann er wieder verschwindet – ohne zur richtigen Uhrzeit am Rechner zu sitzen.</p>
+  <ul>
+    <li><b>Seiten:</b> Verwaltung → Seite → <b>Zeitplan</b> oder auf der Website über <b>Seiteneinstellungen</b>. <b>Einträge</b> (z. B. Aktuelles): im Eintrag rechts unter dem Status → <b>Zeitplan</b> (bei Tabellen mit Entwurf/Online).</li>
+    <li><b>Online ab:</b> Bis zu diesem Zeitpunkt bleibt der Inhalt offline – auch wenn Sie „Online“ wählen oder „Veröffentlichen“ klicken. Danach geht er automatisch online (Abonnenten von Mitteilungen erhalten sie erst dann). Leer = sofort.</li>
+    <li><b>Offline ab:</b> Ab diesem Zeitpunkt ist der Inhalt <b>nicht mehr aufrufbar</b> (Besucher erhalten „Nicht gefunden“) und verschwindet aus Menü, Listen, Sitemap, Suche, Kalender-Abos und Feeds. Der Inhalt bleibt erhalten; „Online stellen“ bringt ihn zurück. Leer = unbegrenzt.</li>
+    <li>Geplante Inhalte zeigen in den Listen eine <?= icon('clock', ['label' => 'Uhr']) ?> mit Datum (Maus darauf), auf der Website steht der Zeitplan im Status der Werkzeugleiste. Angemeldete sehen den Inhalt jederzeit.</li>
+    <li>Ist ein Zeitpunkt erreicht, wird das Feld wieder leer – der Zeitplan ist erledigt. Die Startseite und die Seite „Nicht gefunden“ sind immer online.</li>
+  </ul>
+  <div class="doc-note doc-note--info"><strong>Ohne Zeitschaltuhr auf dem Server</strong><p>Die Umstellung passiert beim ersten Aufruf der Website nach dem geplanten Zeitpunkt – bevor irgendetwas ausgeliefert wird. Besucher, Suchmaschinen und die Sitemap sehen also immer den richtigen Stand.</p></div>
   <table class="doc-table">
     <tr><th>Einstellung</th><th>Bedeutung</th></tr>
     <tr><td>Übergeordnete Seite</td><td>Legt die Ebene fest (auch per Ziehen änderbar).</td></tr>

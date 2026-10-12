@@ -774,6 +774,7 @@ if (entries) {
     try { res = await post({ action: online ? 'publish' : 'draft', ids: [+tr.dataset.id] }); } catch { res = { ok: false }; }
     btn.removeAttribute('aria-busy');
     if (!res?.ok) { const m = res?.error || t('Status konnte nicht geändert werden.'); statusFlash(entries, 'error', m); return; }   // role=alert
+    if (res.waiting) { statusFlash(entries, 'error', res.message); return; }   // Zeitplan: „Online ab“ liegt in der Zukunft
     statusFlash(entries, '', '');
     paintStatus(btn, online ? 'online' : 'offline', title);
     count('published', online ? 1 : -1); count('draft', online ? -1 : 1);

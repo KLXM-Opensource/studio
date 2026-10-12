@@ -32,7 +32,12 @@ $ownerPicks = \Core\Data\Tables::isShared($t) && !\Core\Data\Shared::isOwner($t)
 $extOrigin = \Core\Sources\Sources::originMap($t, array_column($rows, 'id'));
 // Status je Zeile: Online | Offline (war schon online) | Entwurf (nie veröffentlicht); mit data.publish ein Knopf (admin.js → Einträge)
 $canPub = $t['settings']['workflow'] && can('data.publish', $t['handle']) && !Tables::isInbox($t);
-$statusCell = function (array $e) use ($t, $canPub, $extOrigin): string {
+// Zeitplan (Core\Schedule): Uhr mit „Online ab …“ / „Offline ab …“ neben dem Status
+$statusCell = function (array $e) use (&$statusBtn): string {
+    $plan = \Core\Schedule::label($e);
+    return $statusBtn($e) . ($plan !== '' ? ' <span class="dt-planhint" role="img" aria-label="' . e(__('Zeitplan') . ': ' . $plan) . '" title="' . e($plan) . '">' . icon('clock') . '</span>' : '');
+};
+$statusBtn = function (array $e) use ($t, $canPub, $extOrigin): string {
     $st = $e['status'] === 'published' ? 'online' : (!empty($e['published_at']) ? 'offline' : 'draft');
     $label = ['online' => __('Online'), 'offline' => __('Offline'), 'draft' => __('Entwurf')][$st];
     $cls = 'dt-status dt-status--' . ['online' => 'published', 'offline' => 'offline', 'draft' => 'draft'][$st];

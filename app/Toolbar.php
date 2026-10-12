@@ -119,6 +119,8 @@ final class Toolbar
         }
         $b['status'] = $status;
         $b['dirtyDraft'] = $dirty;
+        // Zeitplan (Core\Schedule): „Online ab …“ / „Offline ab …“ im Status-Hinweis
+        $b['plan'] = $kind === 'entry' ? Schedule::label((array) ($e ?? [])) : ($hasPage ? Schedule::label((array) $page) : '');
 
         // Umschalter: [key, Beschriftung, Symbol, Adresse|null (= ohne Neuladen), aktiv]
         $modes = [];

@@ -876,6 +876,16 @@ img.media-vthumb{object-fit:cover}
 .dt-statuspick{display:flex;gap:16px;border:0;padding:0;margin:0 0 14px}
 .dt-statuspick legend{font-weight:600;margin-bottom:8px}
 .dt-statuspick label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.dt-planhint{display:inline-flex;vertical-align:middle;color:var(--adm-warn)}
+.dt-planhint svg{width:16px;height:16px}
+.pg-plan{border:0;padding:0;margin:0}
+.pg-plan legend{font-weight:600;margin-bottom:8px}
+.dt-plan{margin:0 0 14px;border-top:1px solid var(--adm-line);padding-top:10px}
+.dt-plan summary{cursor:pointer;font-weight:600;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.dt-plan__sum{font-weight:400;font-size:13px;color:var(--adm-t2)}
+.dt-plan[open] summary{margin-bottom:10px}
+.dt-plan .f{margin-bottom:10px}
+.dt-plan input[type=datetime-local]{max-width:100%}
 .f--multi{border:0;padding:0;margin:0}
 .f--multi legend{font-weight:600;margin-bottom:6px}
 .f-multi{display:flex;flex-wrap:wrap;gap:6px 18px}
@@ -2635,7 +2645,7 @@ img.adm-ava{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.22)}
 .pt-hints{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
 .pt-hint{display:inline-grid;flex:none;place-items:center;position:relative;width:18px;height:18px;color:var(--adm-t3);cursor:help}
 .pt-hint svg{width:16px;height:16px}
-.pt-hint--draft,.pt-hint--warn{color:var(--adm-warn)}
+.pt-hint--draft,.pt-hint--warn,.pt-hint--plan{color:var(--adm-warn)}
 .pt-hint--ok{color:var(--adm-ok)}
 .pt-hint--info{color:var(--adm-a-ink)}
 .pt-hint--noindex::after{content:"";position:absolute;left:1px;right:1px;top:50%;height:1.5px;background:currentColor;rotate:-45deg;box-shadow:0 0 0 1px var(--adm-surface)}   /* durchgestrichene Lupe */

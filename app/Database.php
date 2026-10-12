@@ -226,6 +226,9 @@ final class Database
             'lang' => 'VARCHAR(10) NULL',
             'translation_group' => 'INT NULL',
             'meta_title' => "$str NULL",   // eigener Titel für Suchmaschinen (sonst Seitentitel), SEO/KI-Assistent
+            // Zeitgesteuert veröffentlichen (Core\Schedule): geplante Aktionen „Online ab“ / „Offline ab“
+            'online_from' => 'VARCHAR(25) NULL',
+            'online_until' => 'VARCHAR(25) NULL',
         ]);
         $this->dropUniqueSlug();
         // API-Tokens: Änderungen direkt übernehmen oder zur Freigabe einreichen (Core\Review), zuletzt gemeldeter MCP-Client
