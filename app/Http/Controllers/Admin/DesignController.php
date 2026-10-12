@@ -40,8 +40,10 @@ final class DesignController extends AdminController
                 if (!empty($f['href'])) $fontCss[$f['href']] = (string) $f['href'];
                 elseif (!empty($f['fontsource']) && ($face = \Core\Fonts::previewFace($f)) !== '') $fontFaces[$face] = true;
             }
+            $schema = Design::schema();
+            $schema['presets'] = (array) ($schema['presets'] ?? []) + Design::minePresets();   // eigene Designs wie Vorlagen anwendbar
             $vars += [
-                'schema' => Design::schema(),
+                'schema' => $schema,
                 'values' => $values,
                 'defaults' => Design::defaults(),
                 'checks' => Design::checks($values),
@@ -71,6 +73,27 @@ final class DesignController extends AdminController
         $msg = __('Design gespeichert. Die Website verwendet die neuen Werte ab dem nächsten Aufruf.')
             . ($done ? ' ' . __('Schrift installiert: {fonts}.', ['fonts' => implode(', ', $done)]) : '');
         return $this->back('/admin/design' . ($tab !== '' ? '#' . $tab : ''), 'success', $msg);
+    }
+
+    /** Eigenes Design speichern: aktuelle Werte des Formulars (v) unter _mine_name – gleicher Name ersetzt */
+    public function mineSave(Request $r): Response
+    {
+        $this->guard($r);
+        if (!Design::enabled()) return $this->back('/admin/design');
+        try {
+            $name = (string) ($r->post['_mine_name'] ?? '');
+            Design::storeMine($name, (array) ($r->post['v'] ?? []));
+        } catch (\Throwable $e) {
+            return $this->back('/admin/design', 'error', $e->getMessage());
+        }
+        return $this->back('/admin/design', 'success', __('Design „{name}“ gespeichert – unter „Eigene Designs“ jederzeit wieder anwendbar. Online ist weiter das bisherige Design, bis Sie eines anwenden und speichern.', ['name' => trim($name)]));
+    }
+
+    public function mineDelete(Request $r, string $id): Response
+    {
+        $this->guard($r);
+        $name = (string) (Design::mine()[$id]['name'] ?? '');
+        return Design::deleteMine($id) ? $this->back('/admin/design', 'success', __('Eigenes Design „{name}“ gelöscht.', ['name' => $name])) : $this->back('/admin/design');
     }
 
     /** Live-Vorschau: Seite mit den ungespeicherten Werten (nur im Speicher); _dark = dunkle Werte erzwingen */
@@ -162,6 +185,7 @@ final class DesignController extends AdminController
         foreach ((array) (Design::def()['presets'] ?? []) as $key => $p) {
             if (isset($schema['presets'][$key]) && !empty($p['description'])) $schema['presets'][$key]['description'] = $tr((string) $p['description']);
         }
+        $schema['presets'] = Design::minePresets() + (array) ($schema['presets'] ?? []);   // eigene Designs zuerst (Namen unübersetzt)
         return $schema;
     }
 

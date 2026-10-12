@@ -183,6 +183,14 @@ export function initDesign() {
     d?.showModal();
   }));
   $$('[data-ds-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+  // Eigenes Design speichern: Enter im Namensfeld speichert unter dem Namen (nicht das Design der Website); ohne Namen nichts senden
+  const mineName = $('[data-ds-mine-name]'), mineGo = $('[data-ds-mine-go]');
+  mineName?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); mineGo.click(); } });
+  mineGo?.addEventListener('click', e => {
+    if (!mineName.value.trim()) { e.preventDefault(); mineName.focus(); mineName.setAttribute('aria-invalid', 'true'); return; }
+    dirty = false;   // Formular wird für das Speichern unter dem Namen gesendet – kein „Seite verlassen?“
+  });
+  $('[data-ds-open="mine"]')?.addEventListener('click', () => setTimeout(() => mineName?.focus(), 30));
   $$('[data-ds-restore]').forEach(b => b.addEventListener('click', () => {
     set(data.history[+b.dataset.dsRestore] || {});
     b.closest('dialog').close();

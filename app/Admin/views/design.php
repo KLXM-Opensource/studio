@@ -13,7 +13,10 @@ foreach ((array) ($schema['groups'] ?? []) as $gi => $g) {
         if (isset($t['options'])) $schema['groups'][$gi]['tokens'][$ti]['options'] = array_map($tr, (array) $t['options']);
     }
 }
-foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = $tr($p['label'] ?? '');
+foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = empty($p['mine']) ? $tr($p['label'] ?? '') : (string) $p['label'];
+// Eigene Designs (Core\Design::minePresets, Schlüssel „mine:{id}“) eigener Abschnitt; Kit-Vorlagen wie bisher
+$kitPresets = array_filter((array) ($schema['presets'] ?? []), fn($p) => empty($p['mine']));
+$minePresets = array_filter((array) ($schema['presets'] ?? []), fn($p) => !empty($p['mine']));
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1><?= e(__('Design')) ?></h1>
@@ -76,15 +79,34 @@ $thumbNav = function (string $k) use ($navAlias) {
 <?php if (($fontFaces ?? '') !== ''): /* Vorschau noch nicht installierter Kit-Schriften (von der eigenen Domain) */ ?><style><?= $fontFaces ?></style>
 <?php endif; ?>
 <div class="st-layout ds" data-st-preview="<?= e(url('/admin/api/design-preview')) ?>" data-ds data-ds-import="<?= e(url('/admin/api/design-import')) ?>">
-<form method="post" action="<?= e(url('/admin/design')) ?>" class="adm-tabs-form ds-form" data-tabs data-ds-form novalidate>
+<form method="post" action="<?= e(url('/admin/design')) ?>" class="adm-tabs-form ds-form" id="ds-form" data-tabs data-ds-form novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="_tab" value="">
 
-  <?php if ($schema['presets']): ?>
+  <?php // Eigene Designs: anklicken füllt das Formular (wie eine Vorlage), ✕ löscht, „+“ speichert den Stand des Formulars unter einem Namen ?>
+  <section class="ds-presets ds-mine" aria-labelledby="ds-mine-h">
+    <h2 id="ds-mine-h" class="ds-h"><?= e(__('Eigene Designs')) ?> <small class="adm-muted"><?= e(__('Gespeicherte Stände zum Wechseln – anklicken füllt das Formular, online erst mit „Speichern“.')) ?></small></h2>
+    <div class="ds-presets__list">
+      <?php foreach ($minePresets as $key => $p): $cols = array_values(array_filter($p['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains($k, '@'), ARRAY_FILTER_USE_BOTH)); ?>
+      <span class="ds-mine__item">
+        <button type="button" class="ds-preset" data-ds-preset="<?= e($key) ?>" title="<?= e((string) ($p['description'] ?? '')) ?>">
+          <span class="ds-preset__sw" aria-hidden="true"><?php foreach (array_slice($cols, 0, 5) as $c): ?><i style="background:<?= e((string) \Core\Design::color($c)) ?>"></i><?php endforeach; ?></span>
+          <span class="ds-preset__l"><?= e($p['label']) ?></span>
+        </button>
+        <button type="submit" class="ds-mine__del" formaction="<?= e(url('/admin/design/eigene/' . substr($key, 5) . '/loeschen')) ?>" formnovalidate
+          data-confirm="<?= e(__('Eigenes Design „{name}“ löschen? Das aktuelle Design der Website bleibt unverändert.', ['name' => $p['label']])) ?>" data-confirm-ok="<?= e(__('Löschen')) ?>"
+          aria-label="<?= e(__('„{name}“ löschen', ['name' => $p['label']])) ?>" title="<?= e(__('Löschen')) ?>">✕</button>
+      </span>
+      <?php endforeach; ?>
+      <button type="button" class="ds-preset ds-preset--add" data-ds-open="mine"><span class="ds-preset__plus" aria-hidden="true">+</span><span class="ds-preset__l"><?= e(__('Aktuelles Design speichern …')) ?></span></button>
+    </div>
+  </section>
+
+  <?php if ($kitPresets): ?>
   <section class="ds-presets" aria-labelledby="ds-presets-h">
     <h2 id="ds-presets-h" class="ds-h"><?= e(__('Vorlagen')) ?> <small class="adm-muted"><?= e(__('Füllt das Formular – gespeichert wird erst mit „Speichern“.')) ?></small></h2>
     <div class="ds-presets__list">
-      <?php foreach ($schema['presets'] as $key => $p): $cols = array_values(array_filter($p['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains($k, '@'), ARRAY_FILTER_USE_BOTH)); ?>
+      <?php foreach ($kitPresets as $key => $p): $cols = array_values(array_filter($p['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains($k, '@'), ARRAY_FILTER_USE_BOTH)); ?>
       <button type="button" class="ds-preset" data-ds-preset="<?= e($key) ?>">
         <span class="ds-preset__sw" aria-hidden="true"><?php foreach (array_slice($cols, 0, 5) as $c): ?><i style="background:<?= e((string) \Core\Design::color($c)) ?>"></i><?php endforeach; ?></span>
         <span class="ds-preset__l"><?= e($p['label']) ?></span>
@@ -227,6 +249,13 @@ $thumbNav = function (string $k) use ($navAlias) {
     <?php endforeach; ?>
   </ol>
   <?php endif; ?>
+</dialog>
+
+<dialog class="adm-dialog adm-dialog--small ds-dlg" data-ds-dialog="mine" aria-labelledby="ds-mine-dlg-h">
+  <div class="adm-dialog__head"><h2 id="ds-mine-dlg-h"><?= e(__('Design speichern unter …')) ?></h2><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-ds-close><?= e(__('Schließen')) ?></button></div>
+  <p class="adm-muted"><?= e(__('Speichert die Werte im Formular (auch ungespeicherte Änderungen) unter einem Namen – z. B. „Sommer“ oder „Weihnachten“. Das Design der Website ändert sich dadurch nicht. Gleicher Name ersetzt das bisherige.')) ?></p>
+  <label class="adm-field"><span><?= e(__('Name')) ?></span><input type="text" name="_mine_name" form="ds-form" maxlength="60" placeholder="<?= e(__('z. B. Sommer 2027')) ?>" data-ds-mine-name></label>
+  <div class="adm-row"><button type="submit" form="ds-form" formaction="<?= e(url('/admin/design/eigene')) ?>" formnovalidate class="adm-btn adm-btn--primary adm-btn--small" data-ds-mine-go><?= e(__('Speichern')) ?></button></div>
 </dialog>
 
 <dialog class="adm-dialog adm-dialog--small ds-dlg" data-ds-dialog="export" aria-labelledby="ds-exp-h">

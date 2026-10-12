@@ -490,6 +490,56 @@ final class Design
         return $out;
     }
 
+    // ------------------------------------------------------------------ Eigene Designs (benannte Stände je Kit)
+
+    /** Höchstzahl eigener Designs je Kit */
+    public const MINE_MAX = 30;
+
+    /** Eigene Designs dieses Kits: id => [name, values, at, by] (neueste zuerst) */
+    public static function mine(): array
+    {
+        $all = array_filter((array) app()->settings->get('design.' . app()->theme->name . '.mine', []), 'is_array');
+        uasort($all, fn($a, $b) => strcmp((string) ($b['at'] ?? ''), (string) ($a['at'] ?? '')));
+        return $all;
+    }
+
+    /** Aktuelle bzw. übergebene Werte unter einem Namen speichern – gleicher Name (ohne Groß/klein) ersetzt den bisherigen. @return string id */
+    public static function storeMine(string $name, array $values): string
+    {
+        $name = mb_substr(trim(strip_tags($name)), 0, 60);
+        if ($name === '') throw new \InvalidArgumentException(__('Bitte einen Namen angeben.'));
+        $all = self::mine();
+        $id = '';
+        foreach ($all as $k => $d) if (mb_strtolower((string) ($d['name'] ?? '')) === mb_strtolower($name)) $id = (string) $k;
+        if ($id === '' && count($all) >= self::MINE_MAX) throw new \RuntimeException(__('Höchstens {n} eigene Designs – bitte zuerst eines löschen.', ['n' => self::MINE_MAX]));
+        $id = $id !== '' ? $id : substr(bin2hex(random_bytes(6)), 0, 10);
+        $u = isset(app()->auth) ? app()->auth->user() : null;
+        $all[$id] = ['name' => $name, 'values' => self::normalize($values), 'at' => now(), 'by' => $u ? (string) ($u['name'] ?: $u['email']) : ''];
+        app()->settings->set('design.' . app()->theme->name . '.mine', $all);
+        return $id;
+    }
+
+    public static function deleteMine(string $id): bool
+    {
+        $all = self::mine();
+        if (!isset($all[$id])) return false;
+        unset($all[$id]);
+        app()->settings->set('design.' . app()->theme->name . '.mine', $all);
+        return true;
+    }
+
+    /** Eigene Designs als Vorlagen (Schlüssel „mine:{id}“) – Verwaltung und Werkzeug „Design“ wenden sie wie Kit-Vorlagen an */
+    public static function minePresets(): array
+    {
+        $out = [];
+        foreach (self::mine() as $id => $d) {
+            $out['mine:' . $id] = ['label' => (string) $d['name'], 'values' => self::normalize((array) ($d['values'] ?? [])), 'mine' => true,
+                'description' => __('Eigenes Design · gespeichert am {date}', ['date' => date('d.m.Y', strtotime((string) ($d['at'] ?? '')) ?: time())])
+                    . (($d['by'] ?? '') !== '' ? ' · ' . $d['by'] : '')];
+        }
+        return $out;
+    }
+
     public static function history(): array
     {
         return (array) app()->settings->get('design.' . app()->theme->name . '.history', []);

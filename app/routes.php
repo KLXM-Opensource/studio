@@ -154,6 +154,8 @@ return function (Router $r): void {
     $r->post('/admin/api/settings-preview', [Admin\SettingsController::class, 'preview']);
     $r->get('/admin/design', [Admin\DesignController::class, 'edit']);
     $r->post('/admin/design', [Admin\DesignController::class, 'save']);
+    $r->post('/admin/design/eigene', [Admin\DesignController::class, 'mineSave']);   // eigenes Design speichern (Core\Design::storeMine)
+    $r->post('/admin/design/eigene/{id}/loeschen', [Admin\DesignController::class, 'mineDelete']);
     $r->post('/admin/api/design-preview', [Admin\DesignController::class, 'preview']);
     $r->post('/admin/api/design-import', [Admin\DesignController::class, 'import']);
     // Werkzeug „Design“ der Website-Werkzeugleiste (Core\DesignTool): Schema + Live-Vorschau/Speichern

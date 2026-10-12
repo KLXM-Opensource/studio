@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Design: eigene Designs speichern und wechseln
+- Verwaltung → Design → **Eigene Designs**: „Aktuelles Design speichern …“ legt den Stand des Formulars unter einem Namen ab (die Website
+  ändert sich nicht). Ein Klick auf die Kachel füllt das Formular, online mit „Speichern“; ✕ löscht (Rückfrage). Gleicher Name ersetzt.
+- Im Werkzeug **Design** der Website stehen die eigenen Designs als erste Vorlagen (Live-Vorschau wie Kit-Vorlagen).
+- Technisch: `Design::mine()/storeMine()/deleteMine()/minePresets()`, je Kit in `design.{kit}.mine`, höchstens 30.
+
 ### Suche: PDFs mit Inhalt – nur verwendete
 - PDFs werden beim Hochladen mit **pdftotext** (poppler-utils) ausgelesen (`media.text_content`, `Media::pdfText()`); ältere PDFs holen den
   Text beim ersten Bedarf nach.
