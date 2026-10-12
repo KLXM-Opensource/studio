@@ -1069,6 +1069,15 @@ final class Media
         }
     }
 
+    /** Dieselbe Datei (Prüfsumme) in den letzten $minutes Minuten hochgeladen? – gegen doppeltes Hochladen (MediaController::finalize) */
+    public static function recentDuplicate(string $hash, int $minutes = 30): ?array
+    {
+        if ($hash === '') return null;
+        $r = self::db()->fetch('SELECT id FROM media WHERE (upload_hash = ? OR hash = ?) AND deleted_at IS NULL AND created_at >= ?' . (self::$pool === null ? ' AND pool_ref IS NULL' : '')
+            . ' ORDER BY id DESC LIMIT 1', [$hash, $hash, date('Y-m-d H:i:s', time() - $minutes * 60)]);
+        return $r ? self::find((int) $r['id']) : null;
+    }
+
     /** Andere Dateien mit gleichem Inhalt (ohne Papierkorb) */
     public static function duplicatesOf(array $m): array
     {

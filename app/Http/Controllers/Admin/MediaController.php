@@ -537,6 +537,20 @@ final class MediaController extends AdminController
             && ($why = Media::rightsMissing($opt + ['mime' => (new \finfo(FILEINFO_MIME_TYPE))->file("$path.part") ?: '']))) {
             return Response::json(['ok' => false, 'error' => $why], 422);
         }
+        // Doppelt hochgeladen (zweiter Klick, Wiederholung nach Zeitüberschreitung)? Dieselbe Datei aus den letzten 30 Minuten
+        // zurückgeben statt neu anzulegen – unter Sperre, damit gleichzeitige Anfragen nicht beide anlegen.
+        $lock = null;
+        $hash = '';
+        if (empty($p['replace_id']) && ($hash = (string) sha1_file("$path.part")) !== '') {
+            $lock = fopen(sys_get_temp_dir() . '/klxm-media-' . md5(site()->key . '|' . $hash) . '.lock', 'c');
+            if ($lock) flock($lock, LOCK_EX);
+            if ($same = Media::recentDuplicate($hash, 30)) {
+                if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+                @unlink("$path.part");
+                @unlink("$path.json");
+                return Response::json(['ok' => true, 'success' => 1, 'file' => ['note' => __('Schon vorhanden – vorhandene Datei verwendet.')] + Media::toJson($same)]);
+            }
+        }
         try {
             if (!empty($p['replace_id'])) {
                 $replaceOpt = ['reset_focus' => !empty($p['reset_focus'])];
@@ -544,10 +558,13 @@ final class MediaController extends AdminController
                 [$m, $err] = Media::replace((int) $p['replace_id'], "$path.part", $name, $replaceOpt);
             } else {
                 [$m, $err] = Media::import("$path.part", $name, $alt, $opt);
+                // Prüfsumme des Originals noch unter der Sperre speichern (recentDuplicate)
+                if ($m && $hash !== '') app()->db->update('media', ['upload_hash' => $hash], 'id = :id', ['id' => (int) $m['id']]);
             }
         } finally {
             @unlink("$path.part");
             @unlink("$path.json");
+            if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
         }
         if (!$m) {
             return Response::json(['ok' => false, 'error' => $err], 422);

@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: stabiles Hochladen vieler Dateien
+- Behoben: Beim Hochladen mehrerer Dateien entstanden Doppelte (bis zu fünffach). Ursache: jedes Enter im Alt-Text-Feld und jeder weitere
+  Klick auf „Hochladen“ startete einen zusätzlichen Durchlauf über dieselben Dateien. Jetzt läuft nur ein Durchlauf, der Knopf zeigt
+  „Lädt hoch …“, dieselbe Datei kommt nicht zweimal in die Liste.
+- Schutz auf dem Server: Kommt dieselbe Datei (Prüfsumme des Originals, neue Spalte `media.upload_hash`) innerhalb von 30 Minuten erneut an,
+  wird die vorhandene verwendet („Schon vorhanden“) – auch nach Zeitüberschreitung oder Doppelklick, gesperrt gegen gleichzeitige Anfragen.
+- Nach der Übertragung zeigt jede Datei „wird verarbeitet …“, solange der Server die Ansichtsgrößen erzeugt (große Fotos), statt scheinbar zu hängen.
+
 ### Skiplink auch für angemeldete Personen zuerst
 - „Zum Inhalt springen“ steht in allen Kits vor der Werkzeugleiste der Redaktion (vorher kam man angemeldet erst nach der ganzen Leiste hin)
   und erscheint beim Fokus unter der Leiste statt dahinter (`resources/css/editor.css`). Für Besucher unverändert.

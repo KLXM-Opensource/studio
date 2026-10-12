@@ -7207,4 +7207,7 @@ return [
     'offline genommen' => 'taken offline',
     'Ältere' => 'Older',
     'Älteste zuerst' => 'Oldest first',
+    'Lädt hoch …' => 'Uploading …',
+    'Schon vorhanden – vorhandene Datei verwendet.' => 'Already uploaded – using the existing file.',
+    'wird verarbeitet …' => 'processing …',
 ];

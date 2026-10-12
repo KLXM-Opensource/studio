@@ -165,6 +165,7 @@ async function uploadFile(file, meta, onProgress) {
     }
     onProgress?.((i + 1) / total);
   }
+  onProgress?.(1, 'finalize');   // Server erzeugt jetzt die Ansichtsgrößen – kann bei großen Fotos dauern
   return (await http(BASE + '/media/finalize', { method: 'POST', json: { upload_id: uploadId, name: file.name, ...meta } })).file;
 }
 
@@ -194,7 +195,9 @@ class Uploader {
   types() { return this.opts.accept === 'image' ? ACCEPT.image : this.opts.accept === 'visual' ? [...ACCEPT.image, ...ACCEPT.video] : ALL_TYPES; }
   choose() { pickFiles(this.types()).then(f => f.length && this.add(f)); }
   add(files) {
+    const same = f => this.items.some(i => i.status !== 'done' && i.file.name === f.name && i.file.size === f.size && i.file.lastModified === f.lastModified);
     for (const file of files) {
+      if (same(file)) continue;   // schon in der Liste (z. B. zweimal ausgewählt oder hineingezogen)
       const item = { file, key: Math.random().toString(36).slice(2), alt: '', decorative: false, title: '', license: '', consent: '', status: 'wait', progress: 0, error: '' };
       if (!this.types().includes(ftype(file))) item.error = 'Dateityp nicht erlaubt';
       else if (file.size > MAX_MB * 1048576) item.error = `Größer als ${MAX_MB} MB`;
@@ -251,28 +254,42 @@ class Uploader {
     const btn = $('[data-mu-start]', this.root), hint = $('.mu-hint', this.root);
     $('.mu-actions', this.root).hidden = !waiting.length;
     const missing = waiting.filter(i => !this.valid(i)).length;
-    btn.disabled = !!missing;
-    btn.textContent = waiting.length > 1 ? `${waiting.length} Dateien hochladen` : 'Hochladen';
+    btn.disabled = !!missing || !!this.busy;
+    btn.textContent = this.busy ? t('Lädt hoch …') : waiting.length > 1 ? `${waiting.length} Dateien hochladen` : 'Hochladen';
     const pending = waiting.filter(i => i.aiPending).length;   // KI-Vorschläge, die noch niemand geprüft hat
     const rightsMissing = RIGHTS === 'required' && waiting.some(i => !i.license.trim() || (i.isImage && !['yes', 'none'].includes(i.consent)));
     hint.textContent = rightsMissing ? t('Bitte Lizenz/Quelle und (bei Bildern) die Angabe zu abgebildeten Personen ergänzen.') : pending ? t('KI-Vorschlag bei {n} Bild(ern) bitte prüfen und bestätigen.', { n: pending }) : missing ? `Alt-Text fehlt bei ${missing} ${missing === 1 ? 'Bild' : 'Bildern'} (mind. 3 Zeichen) – oder „dekorativ“ wählen.` : '';
     hint.classList.toggle('is-warn', !!missing);
   }
+  // Nur ein Durchlauf gleichzeitig: weitere Klicks bzw. Enter im Alt-Text-Feld starten keinen zweiten (sonst entstanden Doppelte).
+  // Jede Datei wird vor dem Hochladen als „up“ markiert; Dateien, die während des Hochladens fertig ausgefüllt werden, folgen im selben Durchlauf.
   async start() {
-    const queue = this.items.filter(i => i.status === 'wait' && this.valid(i));
+    if (this.busy) return;
+    this.busy = true;
     const collection = this.opts.collection?.() || 0, tags = this.opts.tags?.() || '';
-    for (const i of queue) {
-      i.status = 'up'; this.render();
-      try {
-        const media = await uploadFile(i.file, { alt: i.alt, decorative: i.decorative ? 1 : 0, title: i.title, tags, collection, ...(RIGHTS === 'required' ? { license: i.license, consent: i.consent } : {}) },
-          p => { i.progress = p; const bar = $(`[data-key="${i.key}"] .mu-bar span`, this.root); if (bar) bar.style.width = Math.round(p * 100) + '%'; });
-        i.status = 'done'; i.progress = 1;
-        if (media?.note) { i.note = media.note; toast(media.note); }   // SVG: bereinigt und optimiert (Größe vorher → nachher)
-        this.opts.onDone?.(media);
-      } catch (e) { i.status = 'failed'; i.error = e.message; }
-      this.render();
+    let notes = false;
+    try {
+      for (let i; (i = this.items.find(x => x.status === 'wait' && this.valid(x)));) {
+        i.status = 'up'; this.render();
+        try {
+          const media = await uploadFile(i.file, { alt: i.alt, decorative: i.decorative ? 1 : 0, title: i.title, tags, collection, ...(RIGHTS === 'required' ? { license: i.license, consent: i.consent } : {}) },
+            (p, phase) => {
+              i.progress = p;
+              const li = $(`[data-key="${i.key}"]`, this.root), bar = $('.mu-bar span', li);
+              if (bar) bar.style.width = Math.round(p * 100) + '%';
+              if (phase === 'finalize' && li && !$('.mu-proc', li)) $('.mu-main', li)?.insertAdjacentHTML('beforeend', `<span class="mu-proc">${esc(t('wird verarbeitet …'))}</span>`);
+            });
+          i.status = 'done'; i.progress = 1;
+          if (media?.note) { i.note = media.note; notes = true; toast(media.note); }   // SVG bereinigt, schon vorhanden …
+          this.opts.onDone?.(media);
+        } catch (e) { i.status = 'failed'; i.error = e.message; }
+        this.render();
+      }
+    } finally {
+      this.busy = false;
+      this.updateActions();
     }
-    setTimeout(() => { this.items = this.items.filter(i => i.status !== 'done'); this.render(); this.opts.onChange?.(this.items.length); }, queue.some(i => i.note) ? 6000 : 2000);
+    setTimeout(() => { this.items = this.items.filter(i => i.status !== 'done'); this.render(); this.opts.onChange?.(this.items.length); }, notes ? 6000 : 2000);
   }
 }
 

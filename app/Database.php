@@ -192,6 +192,7 @@ final class Database
         }
         // Neue Spalten in bestehenden Installationen ergänzen
         $this->ensureColumns('media', [
+            'upload_hash' => 'VARCHAR(40) NULL',   // Prüfsumme der hochgeladenen Datei (vor dem Verkleinern) – gegen doppeltes Hochladen
             'title' => "$str NULL",
             'tags' => 'TEXT NULL',
             'focus_x' => 'INT NOT NULL DEFAULT 50',
