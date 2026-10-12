@@ -709,7 +709,14 @@ final class Fields
         foreach (array_values($items) as $i => $item) {
             $h .= $renderItem(is_array($item) ? $item : [], (string) $i);
         }
-        $h .= '</div><template>' . $renderItem([], '__i__') . '</template>'
+        // Mehrfachauswahl ('pick_many' => Name des Bildfeldes der Zeile): je gewähltem Bild eine neue Zeile (resources/js/admin.js initRepeaters)
+        $many = '';
+        if (!empty($f['pick_many'])) {
+            $mf = array_values(array_filter((array) ($f['fields'] ?? []), fn($x) => ($x['name'] ?? '') === $f['pick_many']))[0] ?? [];
+            $many = '<button type="button" class="btn btn--small" data-rep="many" data-rep-sub="' . e((string) $f['pick_many']) . '" data-accept="' . (($mf['accept'] ?? '') === 'visual' ? 'visual' : 'image') . '"'
+                . (!empty($f['max_items']) ? ' data-max="' . (int) $f['max_items'] . '"' : '') . '>' . icon('images') . ' ' . e(__('Bilder auswählen …')) . '</button> ';
+        }
+        $h .= '</div><template>' . $renderItem([], '__i__') . '</template>' . $many
             . '<button type="button" class="btn btn--small btn--ghost" data-rep="add">+ ' . (($f['add_label'] ?? '') !== '' ? e($f['add_label']) : e($itemLabel) . ' hinzufügen') . '</button>'
             . (($f['type'] ?? '') === 'group' && !empty($f['max']) ? '<p class="f-help">' . e(__('{min}–{max} Einträge', ['min' => (int) ($f['min'] ?? 0), 'max' => (int) $f['max']])) . '</p>' : '')
             . $errHtml . '</div></div>';

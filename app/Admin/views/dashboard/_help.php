@@ -10,6 +10,14 @@
   </div>
 </form>
 <?php endif; ?>
+<?php // „Was ist neu“ (nur Administration) zuerst – vor Tutorials und Hinweisen ?>
+<?php if (!empty($help['news']['items'])): ?>
+<h3 class="dash-h3"><?= e(__('Was ist neu')) ?> <span class="adm-muted"><?= e($help['news']['version']) ?></span></h3>
+<ul class="dash-news" role="list">
+  <?php foreach ($help['news']['items'] as $n): ?><li><?= e($n) ?></li><?php endforeach; ?>
+  <li class="dash-news__all"><a href="<?= e(url('/admin/hilfe')) ?>#neuerungen"><?= e(__('Alle Neuerungen im Handbuch →')) ?></a></li>
+</ul>
+<?php endif; ?>
 <h3 class="dash-h3"><?= e(__('Neu hier?')) ?> <span class="adm-muted"><?= e($help['track']) ?></span></h3>
 <?php // Videos und Trailer liegen auf der Produkt-Website (config 'docs_url') – nur Links (neuer Tab), keine Anfrage nach außen
 $__ext = fn(string $host) => '<span aria-hidden="true">↗</span><span class="sr-only"> (' . e(__('öffnet {host} in einem neuen Tab', ['host' => $host])) . ')</span>'; ?>
@@ -27,11 +35,4 @@ $__ext = fn(string $host) => '<span aria-hidden="true">↗</span><span class="sr
 <?php endif; ?>
 <?php if (($hint = (string) project('dashboard_hint', '')) !== ''): ?>
 <p class="dash-tip"><?= icon('lightbulb') ?><span><b><?= e(app()->theme->settingsTitle()) ?>:</b> <?= e(__($hint)) ?></span></p>
-<?php endif; ?>
-<?php if (!empty($help['news']['items'])): ?>
-<h3 class="dash-h3"><?= e(__('Was ist neu')) ?> <span class="adm-muted"><?= e($help['news']['version']) ?></span></h3>
-<ul class="dash-news" role="list">
-  <?php foreach ($help['news']['items'] as $n): ?><li><?= e($n) ?></li><?php endforeach; ?>
-  <li class="dash-news__all"><a href="<?= e(url('/admin/hilfe')) ?>#neuerungen"><?= e(__('Alle Neuerungen im Handbuch →')) ?></a></li>
-</ul>
 <?php endif; ?>

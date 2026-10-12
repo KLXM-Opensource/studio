@@ -745,7 +745,7 @@ final class Entries
             'media' => Media::picture((int) $v, $o['sizes'] ?? '(min-width: 1080px) 800px, 100vw', array_filter(['ratio' => $o['ratio'] ?? null])),
             // Video/Audio: Player mit Untertiteln und Transkript (Core\MediaTracks), sonst Download-Link
             'file' => ($m = Media::find((int) $v)) && empty($o['plain']) && \Core\MediaTracks::supports($m) ? \Core\MediaTracks::player($m, ['class' => 'dt-media'])
-                : (($m = Media::find((int) $v)) ? '<a href="' . e(Media::url($m)) . '" download>' . e(Media::displayName($m)) . ' (' . e(Media::typeLabel($m['mime'])) . ', ' . e(Media::humanSize((int) $m['size'])) . ')</a>' : ''),
+                : (($m = Media::find((int) $v)) ? '<a href="' . e(Media::viewerUrl($m) ?? Media::url($m)) . '"' . (Media::viewerUrl($m) ? '' : ' download') . '>' . e(Media::displayName($m)) . ' (' . e(Media::typeLabel($m['mime'])) . ', ' . e(Media::humanSize((int) $m['size'])) . ')</a>' : ''),
             'link' => '<a href="' . e(link_href((string) $v)) . '"' . ext_attrs(link_href((string) $v)) . '>' . e(preg_replace('~^https?://(www\.)?~', '', (string) $v)) . '</a>',
             'url' => '<a href="' . e((string) $v) . '" rel="noopener" target="_blank">' . e(preg_replace('~^https?://(www\.)?~', '', (string) $v)) . '</a>',
             'email' => '<a href="mailto:' . e((string) $v) . '">' . e((string) $v) . '</a>',

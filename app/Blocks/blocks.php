@@ -220,7 +220,7 @@ return [
                 'options' => ['manual' => 'Einzelne Bilder auswählen', 'collection' => 'Alle Bilder einer Sammlung']],
             ['name' => 'collection', 'label' => 'Sammlung', 'type' => 'collection', 'width' => 'half',
                 'help' => 'Neue Bilder in der Sammlung erscheinen automatisch (Medien → Sammlungen).'],
-            ['name' => 'images', 'label' => 'Bilder (bei „Einzelne Bilder“)', 'type' => 'repeater', 'item_label' => 'Bild', 'title_field' => 'caption', 'fields' => [
+            ['name' => 'images', 'label' => 'Bilder (bei „Einzelne Bilder“)', 'type' => 'repeater', 'item_label' => 'Bild', 'title_field' => 'caption', 'pick_many' => 'image', 'fields' => [
                 ['name' => 'image', 'label' => 'Bild', 'type' => 'media', 'required' => true, 'width' => 'half'],
                 ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'width' => 'half'],
             ]],
@@ -247,7 +247,7 @@ return [
                 'options' => ['collection' => 'Alle Bilder einer Sammlung', 'manual' => 'Einzelne Bilder auswählen']],
             ['name' => 'collection', 'label' => 'Sammlung', 'type' => 'collection', 'width' => 'half',
                 'help' => 'Medien → Sammlungen. Bilder, die in diese Sammlung kommen (auch beim Hochladen), erscheinen live.'],
-            ['name' => 'images', 'label' => 'Bilder (bei „Einzelne Bilder“)', 'type' => 'repeater', 'item_label' => 'Bild', 'title_field' => 'caption',
+            ['name' => 'images', 'label' => 'Bilder (bei „Einzelne Bilder“)', 'type' => 'repeater', 'item_label' => 'Bild', 'title_field' => 'caption', 'pick_many' => 'image',
                 'help' => 'Neue Bilder erscheinen bei Besuchern, sobald Sie die Seite veröffentlichen.', 'fields' => [
                 ['name' => 'image', 'label' => 'Bild', 'type' => 'media', 'required' => true, 'width' => 'half'],
                 ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'width' => 'half'],
@@ -302,7 +302,7 @@ return [
             ['name' => 'source', 'label' => 'Quelle', 'type' => 'select', 'required' => true, 'default' => 'manual', 'width' => 'half',
                 'options' => ['manual' => 'Folien einzeln anlegen', 'collection' => 'Alle Bilder einer Sammlung']],
             ['name' => 'collection', 'label' => 'Sammlung', 'type' => 'collection', 'width' => 'half'],
-            ['name' => 'slides', 'label' => 'Folien (bei „einzeln anlegen“)', 'type' => 'repeater', 'item_label' => 'Folie', 'title_field' => 'title', 'max_items' => 12, 'fields' => [
+            ['name' => 'slides', 'label' => 'Folien (bei „einzeln anlegen“)', 'type' => 'repeater', 'item_label' => 'Folie', 'title_field' => 'title', 'max_items' => 12, 'pick_many' => 'image', 'fields' => [
                 ['name' => 'image', 'label' => 'Bild', 'type' => 'media', 'required' => true],
                 ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'width' => 'half'],
                 ['name' => 'title', 'label' => 'Titel (optional)', 'type' => 'text', 'max' => 90, 'width' => 'half'],

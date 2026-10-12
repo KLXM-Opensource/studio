@@ -235,6 +235,36 @@ function uniqueIds(el) {
   }));
 }
 
+/**
+ * Wiederholgruppe mit 'pick_many' (Galerie, Slider …): „Bilder auswählen …“ öffnet die Mehrfachauswahl der Mediathek (vorhandene
+ * Bilder vorausgewählt) und legt je neu gewähltem Bild eine Zeile an – Bildfeld gesetzt, Vorschau sofort. Höchstzahl (data-max) beachtet.
+ */
+async function pickManyRows(rep, btn) {
+  const items = $('.rep-items', rep), tpl = $(':scope > template', rep), sub = btn.dataset.repSub;
+  const field = row => $(`.media-field input[type=hidden][name$="[${sub}]"]`, row);
+  const rows = () => [...items.children].filter(r => r.classList.contains('rep-item'));
+  const have = rows().map(r => +(field(r)?.value || 0)).filter(Boolean);
+  const res = await window.CMSMedia?.pickMany?.(btn.dataset.accept || 'image', have);
+  if (!res) return;
+  const max = +btn.dataset.max || 0;
+  let added = 0, skipped = 0;
+  for (const m of res) {
+    if (have.includes(+m.id)) continue;
+    if (max && rows().length >= max) { skipped++; continue; }
+    items.insertAdjacentHTML('beforeend', tpl.innerHTML.replaceAll('__i__', 'n' + (uid++)));
+    const row = items.lastElementChild;
+    uniqueIds(row);
+    initRepeaters(row); initRte(row); initMedia(row); initMediaText(row); initCollectionFields(row); initShowIf(row); initIconPickers(row); initTiles(row); initLinkFields(row); initPagesFields(row);
+    const input = field(row), prev = input?.closest('.media-field')?.querySelector('.media-field-preview');
+    if (input) input.value = m.id;
+    if (prev) prev.innerHTML = m.thumb ? `<img src="${esc(m.thumb)}" alt="" width="120"><span>${esc(m.alt || m.display || '')}</span>` : `<span class="media-file">${esc(m.display || '#' + m.id)}</span>`;
+    added++;
+  }
+  if (added) rep.dispatchEvent(new Event('input', { bubbles: true }));
+  if (skipped) toast(t('{n} Bilder nicht übernommen – höchstens {max} Einträge.', { n: skipped, max }), 'warn');
+  else if (added) toast(added === 1 ? t('1 Bild hinzugefügt.') : t('{n} Bilder hinzugefügt.', { n: added }));
+}
+
 function initRepeaters(scope = d) {
   $$('.rep', scope).forEach(rep => {
     if (rep._init) return; rep._init = true;
@@ -243,6 +273,7 @@ function initRepeaters(scope = d) {
       const b = e.target.closest('[data-rep]');
       if (!b || b.closest('.rep') !== rep) return;
       const act = b.dataset.rep, item = b.closest('.rep-item');
+      if (act === 'many') { pickManyRows(rep, b); return; }
       if (act === 'add') {
         const html = tpl.innerHTML.replaceAll('__i__', 'n' + (uid++));
         items.insertAdjacentHTML('beforeend', html);

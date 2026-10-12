@@ -153,8 +153,36 @@ function extend(plugin) {
 // Meldungen: gemeinsame Lösung (_toast.js) – kürzer als sonst, die Mediathek meldet oft hintereinander
 const toast = (text, kind = 'ok') => sharedToast(text, kind, 2600);
 
+// ============================================================ Große Fotos vor dem Hochladen verkleinern
+// Der Server speichert Bilder ohnehin mit höchstens 3200 px (Media::process) – große Handyfotos (8–15 MB) werden deshalb schon im
+// Browser auf 3200 px gebracht: deutlich schneller hochgeladen, weniger Zeitüberschreitungen. Lage aus EXIF wird angewendet,
+// die übrigen Kameradaten (auch GPS) fallen weg. Kleine Dateien, GIF und SVG bleiben unverändert; ist das Ergebnis nicht kleiner,
+// wird das Original hochgeladen.
+const SHRINK_SIDE = 3200, SHRINK_MIN = 1.5 * 1048576;
+async function shrinkImage(file) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || typeof createImageBitmap !== 'function') return file;
+  if (file.size < SHRINK_MIN) return file;
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { return file; }
+  try {
+    const s = Math.min(1, SHRINK_SIDE / Math.max(bmp.width, bmp.height));
+    if (s === 1 && file.type !== 'image/jpeg') return file;   // schon klein genug – PNG/WebP nicht unnötig umwandeln
+    const w = Math.round(bmp.width * s), h = Math.round(bmp.height * s);
+    const c = d.createElement('canvas'); c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, w, h);
+    const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';   // PNG behält Transparenz
+    const blob = await new Promise(r => c.toBlob(r, type, 0.9));
+    if (!blob || blob.size >= file.size) return file;
+    const name = type === 'image/jpeg' ? file.name.replace(/\.(webp|jpe?g)$/i, '') + '.jpg' : file.name;
+    return new File([blob], name, { type, lastModified: file.lastModified });
+  } finally { bmp.close?.(); }
+}
+
 // ============================================================ Upload in Stücken
 async function uploadFile(file, meta, onProgress) {
+  file = await shrinkImage(file);
   const uploadId = (crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^a-zA-Z0-9-]/g, '');
   const total = Math.max(1, Math.ceil(file.size / CHUNK));
   for (let i = 0; i < total; i++) {
@@ -1601,7 +1629,8 @@ function pick(kind = 'image', opts = {}) {
  */
 function pickMany(kind = 'visual', selected = []) {
   return new Promise(resolve => {
-    const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog fx-dialog--many" aria-label="Mediathek"></dialog>');
+    const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
+    dlg.classList.add('fx-dialog--many');   // dasselbe Element nutzt auch pick() – Klasse beim Schließen wieder entfernen
     let chosen = null;
     dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(kind === 'image' ? t('Bilder auswählen') : t('Bilder und Videos auswählen'))}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div>
       <p class="fx-dhint">${esc(t('Anklicken wählt aus oder ab – die Nummer zeigt die Reihenfolge. Hochgeladene Dateien kommen automatisch dazu.'))}</p>
@@ -1619,7 +1648,7 @@ function pickMany(kind = 'visual', selected = []) {
     take.onclick = () => { chosen = [...f.sel].map(id => f.picked?.get(id) || f.byId(id) || { id }); dlg.close(); };
     $('[data-clear]', dlg).onclick = () => { f.sel.clear(); f.syncSel(); };
     $('[data-close]', dlg).onclick = () => dlg.close();
-    dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; };
+    dlg.onclose = () => { resolve(chosen); dlg.innerHTML = ''; dlg.classList.remove('fx-dialog--many'); };
     dlg.showModal();
     $('.fx-items', dlg)?.focus();
   });

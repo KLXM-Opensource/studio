@@ -19,6 +19,8 @@
     <li><b>Sortieren</b> in Symbolen und Mauerwerk über das Auswahlfeld daneben: neueste oder älteste zuerst, zuletzt geändert, Name A–Z bzw. Z–A, größte oder kleinste zuerst, Art. In der Liste sortieren die Spaltenköpfe – beide nutzen dieselbe Sortierung.</li>
     <li>Die Bereiche links (<b>Sammlungen</b>, <b>Tags</b> …) lassen sich mit dem Pfeil zuklappen, wenn die Liste lang wird.</li>
     <li>Beim Hochladen erscheint das Fenster mit Fortschritt und Alt-Texten in der Mitte des Bildschirms.</li>
+    <li><b>Große Fotos</b> (z. B. vom Handy) verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – das geht viel schneller. Die Lage des Fotos bleibt richtig, Kameradaten wie der Aufnahmeort werden dabei entfernt.</li>
+  <li><b>Galerie und Slider:</b> Im Block steht neben „+ Bild“ der Knopf <b>Bilder auswählen …</b> – mehrere Bilder anklicken (die Nummer zeigt die Reihenfolge) und übernehmen; je Bild entsteht ein Eintrag.</li>
   </ul>
 
   <h3 id="nicht-verwendet">Aufräumen: „Nicht verwendet“</h3>
@@ -112,7 +114,7 @@
   </ul>
 
   <h3>PDFs und Downloads</h3>
-  <p>PDFs öffnen sich auf der Website in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
+  <p>PDFs öffnen sich auf der Website <b>immer</b> in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten, egal ob über einen Link im Text, einen Button, ein Datei-Feld oder den Block Downloads; dort steht zusätzlich der Knopf zum Herunterladen. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
   <p id="office"><b>Word, Excel, PowerPoint:</b> Standardmäßig nimmt die Mediathek keine Office-Dokumente an – speichern Sie sie als PDF (sicher und auf jedem Gerät lesbar). Die Administration kann unter <b>Grundeinstellungen → Mediathek → „Office-Dokumente erlauben“</b> moderne Formate zulassen: DOCX, XLSX, PPTX, ODT, ODS, ODP. Alte Formate (DOC, XLS, PPT) und Dateien mit Makros werden immer abgelehnt.</p>
 
   <?php $__sizes = $vars['image_sizes'] ?? null; if ($__sizes): ?>

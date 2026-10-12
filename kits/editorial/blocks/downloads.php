@@ -29,7 +29,7 @@ if (($d['source'] ?? 'manual') === 'collection' && !empty($d['collection'])) {
       </span>
       <?php if ($m): ?>
       <span class="download__actions">
-        <?php if ($pdf && !empty($d['show_viewer']) && ($view = Media::viewerUrl($m))): ?><a class="download__view" href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e(strip_emphasis((string) $row['label'])) ?></span></a><?php endif; ?>
+        <?php if ($pdf && ($view = Media::viewerUrl($m))): ?><a class="download__view" href="<?= e($view) ?>"><?= e(lt('Ansehen')) ?><span class="sr-only">: <?= e(strip_emphasis((string) $row['label'])) ?></span></a><?php endif; ?>
         <a class="download__dl" href="<?= e(Media::url($m)) ?>" download><?= '<svg class="ico-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>' ?><span class="sr-only"><?= e(lt('{name} herunterladen ({info})', ['name' => strip_emphasis((string) $row['label']), 'info' => $meta])) ?></span></a>
       </span>
       <?php endif; ?>

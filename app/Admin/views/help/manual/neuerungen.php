@@ -4,8 +4,14 @@
   <h3>Texte mit Bildern und Videos: „Medien + Text“</h3>
   <p>Für Einträge in eigenen Tabellen (z. B. eine Kompetenzsammlung oder Merkblätter) gibt es das Feld <b>Medien + Text</b>: Bilder und Videos stehen über dem Text oder links/rechts daneben, wahlweise mit Textumlauf, als Liste, Raster mit Großansicht oder Slider – optional in einem festen Bildformat. Mit „Mehrere Abschnitte“ besteht ein Eintrag aus beliebig vielen Teilen, jeder mit Zwischenüberschrift. Unter dem Text lassen sich bis zu vier <b>Buttons</b> setzen (z. B. „Merkblatt öffnen“ – PDFs öffnen im Viewer). Auf der Website öffnet <b>Abschnitt bearbeiten</b> die Seitenleiste genau an dieser Stelle. <a href="#medien-text">Zur Anleitung →</a></p>
 
+  <h3>Große Fotos laden schneller hoch</h3>
+  <p>Fotos vom Handy verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – ein 20-MB-Foto braucht nur noch einen Bruchteil der Zeit. Kameradaten wie der Aufnahmeort werden dabei entfernt. <a href="#medien">Mehr dazu →</a></p>
+
+  <h3>PDFs öffnen immer im Betrachter</h3>
+  <p>Ob Link im Text, Button, Datei-Feld oder Downloads-Block: PDFs öffnen auf der Website immer im eingebauten Betrachter; herunterladen lassen sie sich dort ebenso. <a href="#medien">Mehr dazu →</a></p>
+
   <h3>Mehrere Medien auf einmal auswählen</h3>
-  <p>Wo mehrere Bilder oder Videos gebraucht werden, öffnet sich die Mediathek mit <b>Mehrfachauswahl</b>: anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, Hochgeladenes kommt gleich dazu, „3 übernehmen“ schließt ab. <a href="#medien-text">Mehr dazu →</a></p>
+  <p>Wo mehrere Bilder oder Videos gebraucht werden, öffnet sich die Mediathek mit <b>Mehrfachauswahl</b>: anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, Hochgeladenes kommt gleich dazu, „3 übernehmen“ schließt ab. Das gilt jetzt auch für <b>Galerie und Slider</b> („Bilder auswählen …“). <a href="#medien-text">Mehr dazu →</a></p>
 
   <h3>Hochladen ohne doppelte Dateien</h3>
   <p>Beim Hochladen vieler Dateien entstehen keine Doppelten mehr – auch nicht, wenn Sie nach einem Alt-Text Enter drücken oder noch einmal auf „Hochladen“ klicken. Kommt dieselbe Datei kurz danach noch einmal, verwendet die Mediathek die vorhandene („Schon vorhanden“). Große Fotos zeigen „wird verarbeitet …“, solange der Server die Größen berechnet. Schon vorhandene Doppelte finden Sie unter <b>Medien → Prüfen → Doppelte Dateien</b>. <a href="#aufraeumen">Aufräumen →</a></p>

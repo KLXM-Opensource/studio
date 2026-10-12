@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Galerie & Slider mit Mehrfachauswahl, große Fotos schneller, PDFs immer im Viewer
+- Wiederholgruppen mit `pick_many` (Galerie, Live-Galerie, Slider): Knopf **Bilder auswählen …** öffnet die Mehrfachauswahl (vorhandene
+  Bilder vorausgewählt) und legt je neuem Bild einen Eintrag an; Höchstzahl wird beachtet.
+- **Große Fotos** verkleinert der Browser vor dem Hochladen auf höchstens 3200 px (JPEG 90 %, PNG bleibt PNG, EXIF-Lage angewendet,
+  Kameradaten inkl. GPS entfernt) – Dateien unter 1,5 MB unverändert. Ein 20-MB-Foto überträgt statt 22 nur noch 4 Stücke.
+- **PDFs immer im Viewer**: `media:ID` einer PDF führt stets zu `/pdf/ID` (Links, Buttons), Datei-Felder verlinken PDFs auf den Viewer,
+  Downloads-Blöcke der Kits zeigen „Ansehen“ immer (Option „PDFs zusätzlich ansehen“ entfällt; praxis unverändert).
+- Übersicht: „Was ist neu“ steht für die Administration oben in „Hilfe & Einstieg“.
+- Behoben: Nach „übernehmen“ in der Mehrfachauswahl blieb ein leeres Dialogfenster sichtbar.
+
 ### Projekt-Hinweise als Aufgabe in „Was ist zu tun?“
 - Hinweise zum Projekt (Handbuch → Projekt-Hinweise) mit der Kopfzeile `aufgabe: ja` erscheinen zusätzlich als Punkt in **Was ist zu tun?**
   auf der Übersicht. **Lesen** öffnet den Hinweis im Handbuch und hakt ihn für diese Person ab.

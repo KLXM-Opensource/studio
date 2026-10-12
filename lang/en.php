@@ -7261,4 +7261,8 @@ return [
     'Stil' => 'Style',
     'Zweitbutton' => 'Secondary button',
     'Zusätzlich als Punkt in „Was ist zu tun?“ auf der Übersicht, bis die Person ihn über „Lesen“ geöffnet hat.' => 'Also shown as an item in “What needs doing?” on the overview until the person has opened it via “Read”.',
+    '1 Bild hinzugefügt.' => '1 image added.',
+    'Bilder auswählen …' => 'Select images …',
+    '{n} Bilder hinzugefügt.' => '{n} images added.',
+    '{n} Bilder nicht übernommen – höchstens {max} Einträge.' => '{n} images not added – at most {max} entries.',
 ];

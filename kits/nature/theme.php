@@ -481,7 +481,6 @@ return [
                     ['name' => 'file', 'label' => 'Datei', 'type' => 'file', 'width' => 'half'],
                     ['name' => 'note', 'label' => 'Hinweis (optional)', 'type' => 'text'],
                 ]],
-                ['name' => 'show_viewer', 'label' => 'PDFs zusätzlich im Browser ansehen lassen (PDF.js)', 'type' => 'bool', 'default' => true],
             ],
         ],
         'video' => [
