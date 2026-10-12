@@ -763,6 +763,8 @@ final class Fields
             'width' => $pick('width', self::MT_WIDTH),
             'wrap' => $pos !== 'top' && in_array($raw['wrap'] ?? false, [true, 1, '1', 'on', 'true'], true),
             'view' => $pick('view', self::MT_VIEW),
+            // Bildformat der Bilder: '' = Original, sonst ein Format des Kits (Zuschnitte der Mediathek bzw. Fokuspunkt)
+            'ratio' => isset(Media::ratios()[(string) ($raw['ratio'] ?? '')]) ? (string) $raw['ratio'] : '',
         ];
     }
 
@@ -830,6 +832,7 @@ final class Fields
             . $seg('width', ['third' => '⅓', 'half' => '½'], __('Breite'))
             . '<label class="mt-wrap"><input type="checkbox" name="' . e($name) . '[wrap]" value="1"' . ($v['wrap'] ? ' checked' : '') . '> ' . e(__('Text fließt unter den Medien weiter')) . '</label></span>'
             . $seg('view', ['stack' => __('Untereinander'), 'grid' => __('Raster mit Großansicht'), 'slider' => __('Slider')], __('Ansicht'))
+            . $seg('ratio', ['' => __('Original')] + array_combine(array_keys(Media::ratios()), array_map('strval', array_keys(Media::ratios()))), __('Bildformat'))
             . '</div>'
             . '<div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="Formatierung"></div>'
             . '<div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' . e(__('Text')) . '">' . $v['text'] . '</div>'

@@ -9,7 +9,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Datentabellen: Feldtyp „Medien + Text“ und Mehrfachauswahl der Mediathek
 - Neuer Feldtyp **Medien + Text**: formatierter Text mit Bildern und Videos darüber oder links/rechts daneben (⅓ oder ½, wahlweise mit
   Textumlauf), Ansicht untereinander, **Raster mit Großansicht** oder **Slider** (Bausteine der Bildergalerie). Medien nie im Text selbst;
-  auf dem Telefon immer über dem Text. Ohne Medien ein normales Textfeld.
+  auf dem Telefon immer über dem Text. Ohne Medien ein normales Textfeld. Optional **Bildformat** je Abschnitt (Original oder Format des Kits,
+  mit den Zuschnitten der Mediathek).
 - Option **Mehrere Abschnitte**: beliebig viele Abschnitte je Eintrag, jeder mit Zwischenüberschrift, Text, Medien und Anordnung –
   jeder Abschnitt steht für sich (keine schwebenden Medien in den nächsten).
 - Neue **Mehrfachauswahl der Mediathek** (`CMSMedia.pickMany`): Klick wählt aus/ab, Nummer = Reihenfolge, Auswahl bleibt beim Wechsel

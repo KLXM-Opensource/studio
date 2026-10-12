@@ -7248,4 +7248,6 @@ return [
     '{n} übernehmen' => 'Use {n}',
     'Über dem Text' => 'Above the text',
     'Abschnitt bearbeiten' => 'Edit section',
+    'Bildformat' => 'Image format',
+    'Original' => 'Original',
 ];

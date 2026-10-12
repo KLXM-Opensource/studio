@@ -16,7 +16,15 @@
 /* Raster mit Großansicht */
 .mt__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,9rem),1fr));gap:.5em}
 .mt--left .mt__grid,.mt--right .mt__grid{grid-template-columns:repeat(2,1fr)}
-.mt__cell{display:block;overflow:hidden;border-radius:var(--mt-r);aspect-ratio:1}
+.mt__cell{display:block;overflow:hidden;border-radius:var(--mt-r);aspect-ratio:var(--mt-ar,1)}
+/* Bildformat (Option je Abschnitt): Raster-Zellen und Slider-Folien im gewählten Seitenverhältnis */
+.mt__grid--r-16-9,.mt__slider--r-16-9{--mt-ar:16/9}
+.mt__grid--r-4-3,.mt__slider--r-4-3{--mt-ar:4/3}
+.mt__grid--r-3-2,.mt__slider--r-3-2{--mt-ar:3/2}
+.mt__grid--r-1-1,.mt__slider--r-1-1{--mt-ar:1}
+.mt__grid--r-3-4,.mt__slider--r-3-4{--mt-ar:3/4}
+.mt__grid--r-21-9,.mt__slider--r-21-9{--mt-ar:21/9}
+.mt__slider .cms-slide{aspect-ratio:var(--mt-ar,4/3)}
 .mt__cell img,.mt__cell picture{display:block;width:100%;height:100%;object-fit:cover;transition:transform .3s}
 .mt__cell:hover img{transform:scale(1.04)}
 .mt__cell:focus-visible{outline:3px solid var(--cms-accent,currentColor);outline-offset:2px}
