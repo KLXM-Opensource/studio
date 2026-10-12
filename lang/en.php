@@ -7212,4 +7212,6 @@ return [
     'wird verarbeitet …' => 'processing …',
     'Dieses Office-Dokument wird nicht angenommen: nur DOCX, XLSX, PPTX, ODT, ODS, ODP ohne Makros.' => 'This Office document is not accepted: only DOCX, XLSX, PPTX, ODT, ODS, ODP without macros.',
     'Office-Dokumente sind in der Mediathek nicht erlaubt – bitte als PDF speichern und hochladen.' => 'Office documents are not allowed in the media library – please save as PDF and upload that.',
+    'Nur PDFs, die auf veröffentlichten Seiten oder in veröffentlichten Einträgen verwendet werden – nie aus Entwürfen, geschützten Bereichen oder unbenutzte Dateien. Den Text liest pdftotext (poppler-utils) aus; gescannte PDFs ohne Text werden nur über Titel und Dateiname gefunden.' => 'Only PDFs used on published pages or in published entries – never from drafts, protected areas or unused files. The text is read with pdftotext (poppler-utils); scanned PDFs without text are only found by title and file name.',
+    'PDF-Dokumente finden (Titel und Inhalt)' => 'Find PDF documents (title and content)',
 ];

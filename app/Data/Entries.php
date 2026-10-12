@@ -140,8 +140,25 @@ final class Entries
         if ($q !== '') {
             $cols = array_column(array_filter($table['fields'], fn($f) => !empty($f['searchable']) || in_array($f['type'], ['text'], true)), 'name');
             $cols[] = 'slug';
-            $where[] = '(' . implode(' OR ', array_map(fn($c) => "$c LIKE ?", $cols)) . ')';
+            $or = array_map(fn($c) => "$c LIKE ?", $cols);
             array_push($params, ...array_fill(0, count($cols), '%' . $q . '%'));
+            // Angehängte PDFs (Dateifelder): Titel, Dateiname und Inhalt (Media::pdfText) – fehlender Text wird vorher nachgeholt
+            $fileCols = array_column(array_filter($table['fields'], fn($f) => in_array($f['type'], ['file', 'media'], true)), 'name');
+            if ($fileCols) {
+                try {
+                    $ids = [];
+                    foreach (app()->db->fetchAll('SELECT ' . implode(', ', $fileCols) . " FROM {$table['table']}" . ($status !== 'all' ? " WHERE status = 'published'" : '')) as $r) {
+                        foreach ($r as $v) if ((int) $v > 0) $ids[] = (int) $v;
+                    }
+                    if ($ids) \Core\Media::pdfTextBackfill($ids);
+                } catch (\Throwable) {
+                }
+                foreach ($fileCols as $c) {
+                    $or[] = "$c IN (SELECT id FROM media WHERE mime = 'application/pdf' AND deleted_at IS NULL AND (title LIKE ? OR original_name LIKE ? OR text_content LIKE ?))";
+                    array_push($params, '%' . $q . '%', '%' . $q . '%', '%' . $q . '%');
+                }
+            }
+            $where[] = '(' . implode(' OR ', $or) . ')';
         }
         array_push($where, ...self::conditions($table, (array) ($o['where'] ?? []), $params));
         // Stellenangebote (Core\Data\Jobs): abgelaufene („Gültig bis“ vor heute) erscheinen auf der Website nicht – in Listen, Sitemap,

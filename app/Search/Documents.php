@@ -30,9 +30,13 @@ final class Documents
     private const HEADING = '~^(title|titel|heading|headline|ueberschrift|title_strong|title_light|subtitle|untertitel|q|frage|question)$~';
     private const TEXT_TYPES = ['text', 'textarea', 'richtext', 'inline'];
 
+    /** Dateien, die auf aufgenommenen Seiten bzw. in aufgenommenen Einträgen verwendet werden (beim Aufbau gesammelt) – nur sie sind als Dokument suchbar */
+    private static array $used = [];
+
     /** @return array<string, array> id => Dokument */
     public static function build(string $lang): array
     {
+        self::$used = [];
         $prev = app()->lang;
         $notes = \Core\EditorNotes::$show;
         \Core\EditorNotes::$show = false;   // Redaktionsnotizen [# … #] nie in den Index (auch beim Neuaufbau aus der Verwaltung)
@@ -71,6 +75,7 @@ final class Documents
         $rows = app()->db->fetchAll("SELECT * FROM pages WHERE status = 'published' AND type = 'page' AND noindex = 0 AND " . Lang::sql(), [$lang]);
         foreach ($rows as $p) {
             if (\Core\PageAccess::restricted($p)) continue;   // geschützter Bereich (Erweiterung): nie im Suchindex
+            foreach (Media::idsInBlocks(Pages::blocks($p)) as $mid) self::$used[$mid] = true;
             [$head, $text] = self::blocksText(Pages::blocks($p), $p);
             yield self::doc([
                 'id' => 'p-' . $p['id'], 'type' => 'page', 'badge' => lt('Seite'),
@@ -183,6 +188,7 @@ final class Documents
                 if ($cfg['exclude'] && self::matches($t, $e, $cfg['exclude'])) continue;
                 $url = Entries::href($t, $e);
                 if (!$url) continue;
+                foreach (Media::idsInEntry($t, $e) as $mid) self::$used[$mid] = true;
                 $bucket = ['high' => [], 'normal' => [], 'low' => []];
                 foreach ($t['fields'] as $f) {
                     $w = $cfg['fields'][$f['name']] ?? 'off';
@@ -301,14 +307,21 @@ final class Documents
 
     // ------------------------------------------------------------------ Dokumente (PDF)
 
+    /**
+     * PDFs, die auf einer aufgenommenen Seite oder in einem aufgenommenen Eintrag verwendet werden (also veröffentlicht, nicht
+     * „noindex“, nicht geschützt) – Titel, Alt-Text, Dateiname, Schlagwörter und Inhalt (pdftotext, Media::pdfText).
+     * PDFs, die nur in Entwürfen, auf geschützten Seiten oder gar nicht verwendet werden, sind nie suchbar.
+     */
     private static function files(): \Generator
     {
         foreach (Media::all(['kind' => 'pdf']) as $m) {
+            if (!isset(self::$used[(int) $m['id']])) continue;
             if (\Core\MediaPools::mediaProtected($m)) continue;   // geschützter Pool: nie im Suchindex
             $url = Media::viewerUrl($m) ?? Media::url($m);
             yield self::doc([
                 'id' => 'm-' . $m['id'], 'type' => 'file', 'badge' => lt('Dokument'),
-                'title' => Media::displayName($m), 'text' => trim(Media::alt($m) . ' ' . (string) $m['original_name'] . ' ' . str_replace(',', ' ', (string) ($m['tags'] ?? ''))),
+                'title' => Media::displayName($m), 'headings' => trim(Media::alt($m) . ' ' . str_replace(',', ' ', (string) ($m['tags'] ?? ''))),
+                'text' => trim((string) $m['original_name'] . ' ' . mb_substr(Media::pdfText(Media::find((int) $m['id']) ?? $m), 0, 60000)),
                 'url' => $url, 'date' => substr((string) ($m['created_at'] ?? ''), 0, 10),
             ]);
         }

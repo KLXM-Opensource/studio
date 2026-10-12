@@ -92,6 +92,20 @@ final class Ffmpeg
         return self::canExec() && self::bin('pdftoppm') !== '';
     }
 
+    /** pdftotext (poppler-utils) gefunden? → Volltext von PDF-Dokumenten für die Suche (Media::pdfText) */
+    public static function pdfTextAvailable(): bool
+    {
+        return self::canExec() && self::bin('pdftotext') !== '';
+    }
+
+    /** Text eines PDFs (UTF-8, höchstens 200 Seiten, ohne Seitenumbruch-Zeichen) – leer bei Fehler, verschlüsselten oder gescannten PDFs */
+    public static function pdfText(string $file): string
+    {
+        if (!self::pdfTextAvailable() || !is_file($file)) return '';
+        [$c, $out] = self::run([self::bin('pdftotext'), '-enc', 'UTF-8', '-nopgbrk', '-q', '-l', '200', $file, '-'], 60);
+        return $c === 0 ? (string) $out : '';
+    }
+
     /** Funktioniert genau dieser Aufruf? (z. B. Pfad aus einer anderen Konfiguration, Core\AI\Transcriber) */
     public static function works(string $bin, string $name = 'ffmpeg'): bool
     {
@@ -102,7 +116,7 @@ final class Ffmpeg
     private static function detect(string $name, string $override): array
     {
         $none = ['bin' => '', 'version' => '', 'bad_config' => false];
-        if (!in_array($name, ['ffmpeg', 'ffprobe', 'pdftoppm'], true)) return $none;
+        if (!in_array($name, ['ffmpeg', 'ffprobe', 'pdftoppm', 'pdftotext'], true)) return $none;
         $cfg = $override !== '' ? $override : self::configured($name);
         $search = app()->config->get('ffmpeg_search', true) !== false;
         $key = $name . '|' . $cfg . '|' . ($search ? 1 : 0);
@@ -146,7 +160,7 @@ final class Ffmpeg
             return null;
         }
         // pdftoppm kennt kein -version: „pdftoppm -v“ schreibt die Version nach stderr
-        [$c, $out, $err] = $name === 'pdftoppm' ? self::run([$bin, '-v'], 5) : self::run([$bin, '-hide_banner', '-version'], 5);
+        [$c, $out, $err] = in_array($name, ['pdftoppm', 'pdftotext'], true) ? self::run([$bin, '-v'], 5) : self::run([$bin, '-hide_banner', '-version'], 5);
         $line = trim((string) strtok(trim($out) !== '' ? $out : (string) $err, "\n"));
         $ok = $c === 0 && str_starts_with($line, $name . ' version');
         self::$cache['probe:' . $bin] = $ok ? $line : '';

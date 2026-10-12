@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Suche: PDFs mit Inhalt – nur verwendete
+- PDFs werden beim Hochladen mit **pdftotext** (poppler-utils) ausgelesen (`media.text_content`, `Media::pdfText()`); ältere PDFs holen den
+  Text beim ersten Bedarf nach.
+- **Website-Suche** (Grundeinstellungen → Suche → „PDF-Dokumente finden“, weiter Standard aus): Titel, Beschreibung, Dateiname, Tags und
+  **Inhalt** – aber nur PDFs, die auf aufgenommenen Seiten bzw. in aufgenommenen Einträgen verwendet werden (veröffentlicht, nicht „noindex“,
+  nicht geschützt). Vorher waren es alle PDFs der Mediathek, ohne Inhalt.
+- **„In der Liste suchen“** (Datenliste) findet Einträge auch über angehängte PDFs (Titel, Dateiname, Inhalt) – z. B. eine Kompetenzsammlung.
+
 ### Mediathek: Office-Dokumente nur auf Wunsch (Standard aus)
 - Neue Grundeinstellung **Mediathek → „Office-Dokumente erlauben“**: DOCX, XLSX, PPTX, ODT, ODS, ODP. Geprüft am Inhalt (ZIP-Container mit
   passender Kennung, `Media::officeMime()`); alte Formate (DOC/XLS/PPT) und Dateien mit Makros (vbaProject, macroEnabled, Basic/, Scripts/)

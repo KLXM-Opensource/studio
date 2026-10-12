@@ -1128,6 +1128,39 @@ final class Media
         }
     }
 
+    /** Höchstlänge des gespeicherten PDF-Textes (Zeichen) */
+    public const TEXT_MAX = 200000;
+
+    /**
+     * Volltext eines PDFs für die Suche: gespeichert in media.text_content (beim Hochladen, sonst beim ersten Bedarf nachgeholt).
+     * Leer, wenn kein PDF, pdftotext fehlt oder das PDF keinen Text enthält (Scan). Nie für geschützte Pools.
+     */
+    public static function pdfText(array $m, bool $extract = true): string
+    {
+        if (($m['mime'] ?? '') !== 'application/pdf') return '';
+        if (!empty($m['text_at'])) return (string) ($m['text_content'] ?? '');
+        if (!$extract || !Ffmpeg::pdfTextAvailable()) return '';
+        $txt = Ffmpeg::pdfText(self::dir() . '/' . $m['file']);
+        $txt = mb_substr(trim((string) preg_replace('~[ \t\x{00A0}]+~u', ' ', (string) preg_replace('~\R{3,}~u', "\n\n", $txt))), 0, self::TEXT_MAX);
+        try {
+            self::db()->update('media', ['text_content' => $txt !== '' ? $txt : null, 'text_at' => now()], 'id = :id', ['id' => (int) $m['id']]);
+            unset(self::$cache[(int) $m['id']]);
+        } catch (\Throwable $e) {
+            error_log('[media] pdf text: ' . $e->getMessage());
+        }
+        return $txt;
+    }
+
+    /** PDFs ohne ausgelesenen Text nachholen (höchstens $limit je Aufruf) – z. B. vor einer Listensuche */
+    public static function pdfTextBackfill(array $ids, int $limit = 15): void
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (!$ids || !Ffmpeg::pdfTextAvailable()) return;
+        $rows = self::db()->fetchAll("SELECT * FROM media WHERE mime = 'application/pdf' AND text_at IS NULL AND deleted_at IS NULL AND id IN ("
+            . implode(',', $ids) . ') LIMIT ' . max(1, $limit));
+        foreach ($rows as $m) self::pdfText($m);
+    }
+
     /** Dieselbe Datei (Prüfsumme) in den letzten $minutes Minuten hochgeladen? – gegen doppeltes Hochladen (MediaController::finalize) */
     public static function recentDuplicate(string $hash, int $minutes = 30): ?array
     {
@@ -1429,6 +1462,30 @@ final class Media
             elseif (($f['type'] ?? '') === 'repeater' && is_array($v)) self::fieldsCollect([$f], [$f['name'] => $v], $ids);
         }
         return $memo = $ids;
+    }
+
+    /** Datei-IDs in Blöcken (Felder der Blöcke, Hintergrundbild, Links „media:ID“ im Text) – für die Suche (Search\Documents) */
+    public static function idsInBlocks(array $blocks): array
+    {
+        $ids = [];
+        $theme = app()->theme;
+        foreach (Layout::flatten($blocks) as $b) {
+            $def = $theme->block((string) ($b['type'] ?? ''));
+            $data = is_array($b['data'] ?? null) ? $b['data'] : [];
+            if ($def) self::fieldsCollect($def['fields'], $data, $ids);
+            if (($bg = (int) ($b['tunes']['section']['bgImage'] ?? 0)) > 0) $ids[$bg] = true;
+            if (preg_match_all('~\bmedia:(\d+)~', (string) json_encode($data, JSON_UNESCAPED_SLASHES), $m)) foreach ($m[1] as $i) $ids[(int) $i] = true;
+        }
+        return array_keys($ids);
+    }
+
+    /** Datei-IDs eines Eintrags (Bild-/Dateifelder, Gruppen, Links im Text) */
+    public static function idsInEntry(array $table, array $e): array
+    {
+        $ids = [];
+        self::fieldsCollect($table['fields'], $e, $ids);
+        if (preg_match_all('~\bmedia:(\d+)~', (string) json_encode($e, JSON_UNESCAPED_SLASHES), $m)) foreach ($m[1] as $i) $ids[(int) $i] = true;
+        return array_keys($ids);
     }
 
     /** Wie fieldsUse(), sammelt aber alle Datei-IDs der Felder (auch in Wiederholungen und Gruppen) */

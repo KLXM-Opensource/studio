@@ -561,6 +561,11 @@ final class MediaController extends AdminController
                 // Prüfsumme des Originals noch unter der Sperre speichern (recentDuplicate)
                 if ($m && $hash !== '') app()->db->update('media', ['upload_hash' => $hash], 'id = :id', ['id' => (int) $m['id']]);
             }
+            // PDF: Text für Suche und Listensuche gleich auslesen (Ersetzen: neu auslesen)
+            if ($m && ($m['mime'] ?? '') === 'application/pdf') {
+                if (!empty($p['replace_id'])) $m['text_at'] = null;
+                Media::pdfText($m);
+            }
         } finally {
             @unlink("$path.part");
             @unlink("$path.json");
