@@ -61,17 +61,14 @@ final class MediaText
         foreach ($buttons as $b) {
             $href = self::href((string) $b['link']);
             if ($href === '' || $href === '#') continue;
-            $h .= '<a class="' . e($b['style'] === 'secondary' ? $secondary : $primary) . '" href="' . e($href) . '"' . ext_attrs($href) . '>' . e((string) $b['label']) . '</a>';
+            $h .= '<a class="' . e($b['style'] === 'secondary' ? $secondary : $primary) . '" href="' . e($href) . '"' . ext_attrs($href) . (preg_match('~^media:\d+$~', (string) $b['link']) ? ' download' : '') . '>' . e((string) $b['label']) . '</a>';
         }
         return $h !== '' ? '<p class="mt__btns">' . $h . '</p>' : '';
     }
 
-    /** Linkziel – eine PDF-Datei („media:ID“) öffnet immer im PDF-Viewer, nie als Download */
+    /** Linkziel wie gewählt: „Anzeigen“ (media:ID:viewer) öffnet den PDF-Viewer, „Download“ (media:ID) die Datei */
     public static function href(string $link): string
     {
-        if (preg_match('~^media:(\d+)$~', $link, $m) && ($f = Media::find((int) $m[1])) && ($f['mime'] ?? '') === 'application/pdf') {
-            return (string) (Media::viewerUrl($f) ?? link_href($link));
-        }
         return link_href($link);
     }
 

@@ -184,7 +184,9 @@ function build() {
       </div>
       <div class="lp__opts">
         <p class="lp__picked" data-lp-picked aria-live="polite" hidden></p>
-        <label class="lp__check" data-lp-viewer-wrap hidden><input type="checkbox" data-lp-viewer checked> ${esc(t('PDF im Viewer öffnen (sonst Datei direkt)'))}</label>
+        <fieldset class="lp__pdf" data-lp-viewer-wrap hidden><legend>${esc(t('PDF öffnen'))}</legend>
+          <label><input type="radio" name="cms-lp-pdf" data-lp-viewer checked> <span>${ico('eye')} ${esc(t('Anzeigen'))}</span></label>
+          <label><input type="radio" name="cms-lp-pdf" data-lp-download> <span>${ico('download-simple')} ${esc(t('Download'))}</span></label></fieldset>
         <label class="lp__check" data-lp-richonly><input type="checkbox" data-lp-blank> ${esc(t('In neuem Tab öffnen'))}</label>
         <label class="f lp__title" data-lp-richonly><span>${esc(t('Linktitel (optional, erscheint beim Überfahren)'))}</span><input type="text" data-lp-title maxlength="200"></label>
       </div>
@@ -275,6 +277,7 @@ function wire() {
   q('[data-lp-mail]').addEventListener('input', () => hint('mail'));
   q('[data-lp-tel]').addEventListener('input', () => hint('tel'));
   q('[data-lp-viewer]').addEventListener('change', () => showPicked());
+  q('[data-lp-download]').addEventListener('change', () => showPicked());
   qa('[data-lp-cancel]').forEach(b => b.addEventListener('click', () => dlg.close('cancel')));
   q('[data-lp-remove]').addEventListener('click', () => { state.result = { remove: true }; dlg.close('ok'); });
   q('form').addEventListener('submit', e => {
@@ -321,7 +324,17 @@ async function loadFiles() {
   if (n !== fseq || !state) return;
   list.removeAttribute('aria-busy');
   state.fitems = items;
+  // Aktuelles Ziel (Datei-Link bearbeiten) vormerken – samt Wahl „Anzeigen“ bzw. „Download“
+  const cur = /^media:(\d+)(:viewer)?$/.exec(state.current?.ref || '');
+  if (!state.fitems.some(x => x.file === `media:${cur?.[1]}`) && cur) {
+    try { const one = (await fetchGroups({ group: 'files', media: cur[1] }))[0]?.items?.[0]; if (one && state) state.fitems.unshift(one); } catch {}
+  }
   renderFiles();
+  if (cur && !state.picked) {
+    const i = state.fitems.findIndex(x => x.file === `media:${cur[1]}`);
+    const o = i >= 0 ? q(`[data-lp-flist] [data-i="${i}"]`) : null;
+    if (o) { choose(o, false); q(cur[2] ? '[data-lp-viewer]' : '[data-lp-download]').checked = true; showPicked(); }
+  }
 }
 /** Mediathek öffnen (upload: gleich mit der Dateiauswahl) – die gewählte bzw. hochgeladene Datei wird zum Ziel */
 async function fromLibrary(upload) {
@@ -687,7 +700,7 @@ function choose(o, apply) {
 function showPicked() {
   if (!state) return;
   const p = q('[data-lp-picked]'), it = state.tab === 'search' || state.tab === 'file' ? state.picked : null;
-  q('[data-lp-viewer-wrap]').hidden = true;   // PDFs öffnen auf der Website immer im Viewer (Core\Links) – keine Wahl mehr
+  q('[data-lp-viewer-wrap]').hidden = !(it && it.pdf);   // PDF: „Anzeigen“ (Viewer) oder „Download“ (Datei)
   if (!it) { p.hidden = true; return; }
   const href = it.pdf && !q('[data-lp-viewer]').checked ? it.fileHref : it.href;
   p.hidden = false;
@@ -744,6 +757,7 @@ export function openLinkPicker(opts = {}) {
     q('[data-lp-blank]').onchange = () => { if (state) state.blankTouched = true; };
     q('[data-lp-title]').value = cur?.title || '';
     for (const k of ['q', 'filter', 'url', 'mail', 'subject', 'tel', 'file']) q(`[data-lp-${k}]`).value = '';
+    q('[data-lp-viewer]').checked = true;   // PDF: Standard „Anzeigen“
     q('[data-lp-flist]').innerHTML = '';
     // Hochladen und Mediathek nur, wo die Mediathek geladen ist
     q('[data-lp-up]').hidden = q('[data-lp-lib]').hidden = !window.CMSMedia?.pick;

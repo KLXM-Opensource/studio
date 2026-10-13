@@ -207,7 +207,8 @@ final class Sanitizer
         return '<a href="' . htmlspecialchars($href, ENT_QUOTES) . '"'
             . ($ref !== '' ? ' data-link="' . htmlspecialchars($ref, ENT_QUOTES) . '"' : '')
             . ($title !== '' ? ' title="' . htmlspecialchars(mb_substr($title, 0, 200), ENT_QUOTES) . '"' : '')
-            . ($blank ? ' target="_blank" rel="noopener"' : '') . '>' . $inner . '</a>';
+            . ($blank ? ' target="_blank" rel="noopener"' : '')
+            . (preg_match('~^media:\d+$~', $ref) ? ' download' : '') . '>' . $inner . '</a>';   // Datei-Link „Download“ (PDF „Anzeigen“: media:ID:viewer)
     }
 
     /** Aktuelle Adresse eines Verweises (null: Ziel fehlt oder keine Datenbank → href bleibt) */

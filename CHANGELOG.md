@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PDF-Links: wieder „Anzeigen“ oder „Download“
+- Linkdialog: bei PDFs Segmentschalter **Anzeigen | Download** (statt fest im Viewer). `media:ID` ist wieder die Datei – im Text
+  und bei Buttons mit `download`-Attribut –, `media:ID:viewer` der PDF-Viewer. Bestehende Datei-Links öffnen mit ihrer Wahl.
+
 ### Behoben: „Fließtext / Artikel“ auf einer leeren Seite
 - Einfügen in Texte direkt im Seiten-Editor: Editor.js verarbeitete das Einfügen zusätzlich – Inhalte erschienen doppelt.
 - Auf einer neuen Seite schien die Wahl „Fließtext / Artikel“ nichts zu tun: Der leere Fließtext ersetzte den Platzhalter

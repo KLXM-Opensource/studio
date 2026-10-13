@@ -7311,4 +7311,6 @@ return [
     'Ansprechperson' => 'Contact person',
     'Downloads' => 'Downloads',
     'Medien + Text' => 'Media + text',
+    'Download' => 'Download',
+    'PDF öffnen' => 'Open PDF',
 ];

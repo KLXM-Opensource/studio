@@ -2480,6 +2480,14 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .lp__picked{margin:0;padding:8px 12px;border-radius:8px;background:var(--adm-ok-bg,#E7F2EE);font-size:13.5px;overflow-wrap:anywhere}
 .lp__picked .lp__meta{white-space:normal}
 .lp__check{display:flex;align-items:center;gap:8px;min-height:32px;font-size:14px;font-weight:600;cursor:pointer}
+/* PDF: Anzeigen (Viewer) | Download – Segmentschalter */
+.lp__pdf{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0;padding:0;border:0}
+.lp__pdf legend{float:left;margin-right:4px;padding:0;font-size:14px;font-weight:600}
+.lp__pdf label{position:relative;cursor:pointer}
+.lp__pdf input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.lp__pdf span{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:1px solid var(--adm-line);border-radius:6px;font-size:14px;font-weight:600;color:var(--adm-t2)}
+.lp__pdf input:checked+span{border-color:var(--adm-a);background:var(--adm-fill);color:var(--adm-ink);box-shadow:inset 0 0 0 1px var(--adm-a)}
+.lp__pdf input:focus-visible+span{outline:2px solid var(--adm-a);outline-offset:2px}
 .lp__check input{width:18px;height:18px;margin:0;accent-color:var(--adm-a)}
 .lp__title{margin:0}
 .lp__msg{margin:0}

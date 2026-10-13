@@ -13,7 +13,7 @@ use Core\Glossary\Glossary;
  * Verweise (in Link-Feldern als Wert, im Rich-Text als data-link am <a>) überleben geänderte Adressen:
  *   page:12            Seite 12              page:12#anker   Anker auf Seite 12
  *   entry:news:5       Eintrag 5 der Tabelle „news“ (Detailseite)
- *   media:9            Datei 9 (PDF: immer im PDF-Viewer /pdf/9, sonst direkt) – media:9:viewer gleichbedeutend
+ *   media:9            Datei 9 (direkt, als Download)      media:9:viewer  PDF 9 im PDF-Viewer (/pdf/9)
  */
 final class Links
 {
@@ -47,8 +47,8 @@ final class Links
         [$id, $viewer] = array_pad(explode(':', $rest), 2, '');
         $m = Media::find((int) $id);
         if (!$m) return null;
-        // PDFs öffnen immer im PDF-Viewer (auch „media:ID“ ohne „:viewer“) – Herunterladen bietet der Viewer selbst an
-        return Media::viewerUrl($m) ?? Media::url($m);
+        // Linkauswahl „Anzeigen“ = media:ID:viewer (PDF-Viewer), „Download“ = media:ID (Datei, mit download-Attribut im Text)
+        return ($viewer !== '' ? Media::viewerUrl($m) : null) ?? Media::url($m);
     }
 
     /**
