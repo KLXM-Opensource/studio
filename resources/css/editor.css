@@ -179,6 +179,9 @@ body.has-tdrawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):
 .cms-entry-editing [data-entry-field]:empty::before{content:"…";opacity:.4}
 .cms-entry-editing :is(.bg-bordeaux,.bg-dark,.hero) [data-entry-field]:is(:hover,:focus){outline-color:#EDE9E3}
 .cms-entry-editing [data-entry-field] a{cursor:text}
+/* Medien + Text: der Rahmen um das ganze Feld entfällt – bearbeitbar ist der Text jedes Abschnitts (data-mt-body) */
+.cms-entry-editing [data-entry-mode=panel]{outline:0;cursor:auto}
+.cms-entry-editing [data-mt-body]{min-height:1.6em}
 /* Bildfelder (mode media): Klick wählt ein anderes Bild; ohne Bild ein Platzhalter */
 .cms-entry-editing [data-entry-mode=media]{cursor:pointer}
 .cms-entry-editing [data-entry-mode=media] a{cursor:pointer}

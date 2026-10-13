@@ -50,6 +50,18 @@ final class EntryEditController extends AdminController
         if ($partial && $e) {
             $in = array_intersect_key($in, array_flip(array_column($t['fields'], 'name')));
         }
+        // Medien + Text direkt im Text: mt[feld][abschnitt] = Text – übrige Abschnitte, Medien und Buttons bleiben unverändert
+        if ($e && is_array($r->post['mt'] ?? null)) {
+            foreach ($r->post['mt'] as $name => $texts) {
+                $f = \Core\Data\Tables::field($t, (string) $name);
+                if (!$f || $f['type'] !== 'mediatext' || !is_array($texts)) continue;
+                $secs = \Core\Fields::mediaTextSections($e[$f['name']] ?? null, !empty($f['sections'])) ?: [\Core\Fields::mediaText([])];
+                foreach ($texts as $i => $html) {
+                    if (isset($secs[(int) $i]) && is_string($html)) $secs[(int) $i]['text'] = $html;
+                }
+                $in[$f['name']] = $secs;
+            }
+        }
         if (array_key_exists('slug', $r->post)) $in['slug'] = $r->str('slug');
         $status = $r->str('status');
         if (in_array($status, ['draft', 'published'], true)) {

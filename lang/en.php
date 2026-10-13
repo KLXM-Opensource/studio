@@ -7292,4 +7292,5 @@ return [
     'Keine Datei gefunden.' => 'No file found.',
     'Mediathek öffnen …' => 'Open media library …',
     'Noch keine Dokumente – über „Hochladen …“ hinzufügen.' => 'No documents yet – add one via “Upload …”.',
+    'Bilder & Buttons' => 'Images & buttons',
 ];

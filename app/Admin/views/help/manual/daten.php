@@ -131,7 +131,7 @@
     <li><b>Buttons</b> (optional, bis zu vier je Abschnitt): Beschriftung, Ziel über <b>Auswählen …</b> (Seite, Eintrag, Dokument oder Adresse) und Stil – Hauptbutton oder Zweitbutton, gestaltet vom Kit. Verlinkte PDFs öffnen immer im PDF-Viewer.</li>
     <li>Ohne Medien ist es ein ganz normales Textfeld.</li>
     <li><b>Mehrere Abschnitte</b> (Einstellung im Tabellen-Designer): Ein Eintrag besteht dann aus beliebig vielen Abschnitten, jeder mit optionaler Zwischenüberschrift, eigenem Text, eigenen Medien und eigener Anordnung. Jeder Abschnitt steht für sich – nichts fließt in den nächsten.</li>
-    <li><b>Auf der Website bearbeiten:</b> Angemeldet zeigt jeder Abschnitt beim Überfahren (und im Modus „Bearbeiten“) den Knopf <b>Abschnitt bearbeiten</b> – die Seitenleiste öffnet sich genau an dieser Stelle.</li>
+    <li><b>Auf der Website bearbeiten:</b> Im Modus „Bearbeiten“ schreiben Sie den Text jedes Abschnitts direkt auf der Seite – mit derselben Formatierungsleiste, gespeichert wird mit „Speichern“ (<kbd>⌘</kbd>/<kbd>Strg</kbd>+<kbd>S</kbd>). Bilder, Darstellung und Buttons ändert der Knopf <b>Bilder &amp; Buttons</b> am Abschnitt: Die Seitenleiste öffnet sich genau dort, und nach dem Speichern zeigt die Seite die Änderung sofort – ohne Neuladen, die Seitenleiste bleibt offen.</li>
   </ul>
 
   <h3 id="ort">Orte auf der Karte</h3>

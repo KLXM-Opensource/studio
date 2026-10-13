@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Medien + Text: Text direkt auf der Seite, Live-Ansicht nach dem Speichern
+- Auf der Detailseite ist der Text jedes Abschnitts direkt bearbeitbar (Formatierungsleiste, „Speichern“); gespeichert wird nur dieser
+  Text (`mt[feld][abschnitt]`), Medien, Buttons und übrige Abschnitte bleiben. Knopf am Abschnitt heißt jetzt **Bilder & Buttons**.
+- Speichern in der Seitenleiste (ohne Statuswechsel) tauscht nur `<main>` aus – kein Neuladen, Seitenleiste bleibt offen; neues
+  Ereignis `cms:content-replaced`, auf das `media.mjs` Slider und Großansicht neu startet.
+
 ### Linkauswahl: Reiter „Datei“ mit Hochladen und Mediathek
 - Neuer Reiter **Datei**: neueste Dokumente, Suche über alle Dateien, **Hochladen …** und **Mediathek öffnen …** (`CMSMedia.pick`);
   die gewählte bzw. hochgeladene Datei ist sofort das Ziel. Gilt für Rich-Text, Link-Felder und Buttons von „Medien + Text“.

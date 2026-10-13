@@ -15,7 +15,7 @@
   </ol>
   <h3>Text mit Bildern daneben (Medien + Text)</h3>
   <ol class="doc-steps">
-    <li>Eintrag öffnen (Verwaltung oder auf der Website <b>Abschnitt bearbeiten</b>) → im Feld „Medien + Text“ <b>Bilder &amp; Videos</b> → <b>Medien hinzufügen …</b>.</li>
+    <li>Eintrag öffnen (Verwaltung oder auf der Website <b>Bilder &amp; Buttons</b>) → im Feld „Medien + Text“ <b>Bilder &amp; Videos</b> → <b>Medien hinzufügen …</b>.</li>
     <li>Bilder/Videos anklicken (Nummer = Reihenfolge) → <b>übernehmen</b>. Anordnung (über dem Text, links, rechts), Ansicht und Bildformat wählen.</li>
     <li><b>Speichern</b>. Weitere Teile mit <b>+ Abschnitt hinzufügen</b>, sofern die Tabelle „Mehrere Abschnitte“ erlaubt.</li>
   </ol>

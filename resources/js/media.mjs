@@ -14,8 +14,32 @@ const swipe = (el, fn) => {
 };
 
 // ------------------------------------------------------------------ Lightbox
-const dlg = d.querySelector('dialog.cms-lb'), img = dlg?.querySelector('img'), [txt, cnt] = dlg ? dlg.querySelectorAll('figcaption span') : [];
+// Dialog bei Bedarf suchen: nach einem Austausch des Inhalts (Bearbeiten, Ereignis cms:content-replaced) ist es ein neues Element
+let dlg = null, img, txt, cnt;
 let items = [], idx = 0, opener;
+function lb() {
+  const el = d.querySelector('dialog.cms-lb');
+  if (el && el !== dlg) {
+    dlg = el; img = dlg.querySelector('img'); [txt, cnt] = dlg.querySelectorAll('figcaption span');
+    dlg.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (b) b.dataset.d ? show(idx + +b.dataset.d) : dlg.close();
+      else if (e.target === dlg || e.target.classList.contains('cms-lb__fig')) dlg.close();
+    });
+    dlg.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); if (items.length > 1) show(idx + (e.key === 'ArrowLeft' ? -1 : 1)); }
+      else if (e.key === 'Tab') { // Fokus im Dialog halten
+        const f = $$('button:not([hidden])', dlg), first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && d.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && d.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+    swipe(dlg, dir => items.length > 1 && show(idx + dir));
+    dlg.addEventListener('close', () => opener?.focus());
+  }
+  $$('[data-cms-lightbox] a').forEach(a => a.setAttribute('aria-haspopup', 'dialog'));
+  return dlg;
+}
 function show(i) {
   idx = (i + items.length) % items.length;
   const a = items[idx];
@@ -26,34 +50,17 @@ function show(i) {
   txt.textContent = a.dataset.caption || '';
   cnt.textContent = ' ' + dlg.dataset.count.replace('{n}', idx + 1).replace('{total}', items.length);
 }
-if (dlg) {
-  dlg.addEventListener('click', e => {
-    const b = e.target.closest('button');
-    if (b) b.dataset.d ? show(idx + +b.dataset.d) : dlg.close();
-    else if (e.target === dlg || e.target.classList.contains('cms-lb__fig')) dlg.close();
-  });
-  dlg.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); if (items.length > 1) show(idx + (e.key === 'ArrowLeft' ? -1 : 1)); }
-    else if (e.key === 'Tab') { // Fokus im Dialog halten
-      const f = $$('button:not([hidden])', dlg), first = f[0], last = f[f.length - 1];
-      if (e.shiftKey && d.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && d.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-  });
-  swipe(dlg, dir => items.length > 1 && show(idx + dir));
-  dlg.addEventListener('close', () => opener?.focus());
-  $$('[data-cms-lightbox] a').forEach(a => a.setAttribute('aria-haspopup', 'dialog'));
-  d.addEventListener('click', e => {
-    const a = e.target.closest?.('[data-cms-lightbox] a');
-    if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    items = $$('a', a.closest('[data-cms-lightbox]'));
-    opener = a;
-    $$('[data-d]', dlg).forEach(b => { b.hidden = items.length < 2; });
-    show(items.indexOf(a));
-    dlg.showModal();
-  });
-}
+lb();
+d.addEventListener('click', e => {
+  const a = e.target.closest?.('[data-cms-lightbox] a');
+  if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || !lb()) return;
+  e.preventDefault();
+  items = $$('a', a.closest('[data-cms-lightbox]'));
+  opener = a;
+  $$('[data-d]', dlg).forEach(b => { b.hidden = items.length < 2; });
+  show(items.indexOf(a));
+  dlg.showModal();
+});
 
 // ------------------------------------------------------------------ Slider
 function slider(el) {
@@ -106,4 +113,7 @@ function slider(el) {
   set(0, false);
   tick();
 }
-$$('[data-cms-slider]').forEach(slider);
+// Neue Slider nach einem Austausch des Inhalts (Bearbeiten auf der Website) ebenfalls starten – jeden nur einmal
+const scan = () => $$('[data-cms-slider]').forEach(el => { if (!el.cmsSlider) { el.cmsSlider = true; slider(el); } });
+scan();
+d.addEventListener('cms:content-replaced', () => { lb(); scan(); });

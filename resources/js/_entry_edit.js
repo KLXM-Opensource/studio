@@ -267,11 +267,48 @@ const Panel = (() => {
     if (/\/new$/.test(url) && res.url && !$('#cms-editor')) { reloadKeepScroll(msg, res.url); return; }
     const onThis = cfg && url === cfg.endpoint;
     if (onThis && res.url && new URL(res.url, location.href).pathname !== location.pathname) { reloadKeepScroll(msg, res.url); return; }
+    // Gleiche Seite, Status unverändert: nur den Inhalt austauschen (Live-Ansicht) – Seitenleiste bleibt offen
+    if (!status && await liveRefresh()) { toast(msg); return; }
     reloadKeepScroll(msg);
   }
 
   return { open, close, get open_() { return !!host && !host.hidden; } };
 })();
+
+// ------------------------------------------------------------------ Live-Ansicht
+/**
+ * Inhalt der Seite (<main>) durch die frisch gerenderte Fassung ersetzen, ohne neu zu laden: fehlende Stile/Skripte (z. B. erster
+ * Slider) werden nachgeladen, Felder im Text neu gebunden, cms:content-replaced startet Slider/Großansicht (media.mjs) neu.
+ * false = nicht möglich (kein <main>, Seiten-Editor offen, ungespeicherte Änderungen im Text) – dann lädt der Aufrufer neu.
+ */
+async function liveRefresh() {
+  const cur = $('main');
+  if (!cur || $('#cms-editor') || Inline.dirty()) return false;
+  try {
+    const r = await fetch(location.href, { credentials: 'same-origin', headers: { Accept: 'text/html' } });
+    if (!r.ok || r.redirected) return false;
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    const next = doc.querySelector('main');
+    if (!next) return false;
+    const has = (sel, attr, v) => [...d.querySelectorAll(sel)].some(x => x.getAttribute(attr) === v);
+    doc.querySelectorAll('link[rel=stylesheet][href]').forEach(l => { if (!has('link[rel=stylesheet]', 'href', l.getAttribute('href'))) d.head.append(d.importNode(l, true)); });
+    doc.querySelectorAll('script[src]').forEach(sc => {
+      if (has('script[src]', 'src', sc.getAttribute('src'))) return;
+      const n = d.createElement('script');
+      [...sc.attributes].forEach(a => n.setAttribute(a.name, a.value));
+      d.body.append(n);
+    });
+    const y = scrollY;
+    Inline.detach(cur);
+    const fresh = d.importNode(next, true);
+    cur.replaceWith(fresh);
+    scrollTo(0, y);
+    if (doc.title) d.title = doc.title;
+    Inline.attach(fresh);
+    d.dispatchEvent(new CustomEvent('cms:content-replaced', { detail: { root: fresh } }));
+    return true;
+  } catch { return false; }
+}
 
 // ------------------------------------------------------------------ Felder direkt im Text
 const Inline = (() => {
@@ -434,11 +471,18 @@ const Inline = (() => {
       const idx = el.dataset.mtIndex !== undefined ? +el.dataset.mtIndex : i;
       const b = d.createElement('button');
       b.type = 'button'; b.className = 'cms-mt-edit';
-      b.innerHTML = '<span aria-hidden="true">✎</span> ' + window.CMSAdmin.esc(parts.length ? (T.mtEditSection || 'Abschnitt bearbeiten') : (T.mtEdit || 'Bearbeiten'));
-      b.setAttribute('aria-label', (parts.length ? (T.mtEditSection || 'Abschnitt bearbeiten') : (T.mtEdit || 'Bearbeiten')) + ': ' + (el.querySelector('.mt-part__h')?.textContent || n.dataset.entryLabel || ''));
+      b.innerHTML = '<span aria-hidden="true">✎</span> ' + window.CMSAdmin.esc(parts.length ? (T.mtEditSection || 'Bilder & Buttons') : (T.mtEdit || 'Bilder & Buttons'));
+      b.setAttribute('aria-label', (parts.length ? (T.mtEditSection || 'Bilder & Buttons') : (T.mtEdit || 'Bilder & Buttons')) + ': ' + (el.querySelector('.mt-part__h')?.textContent || n.dataset.entryLabel || ''));
       b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); Panel.open(cfg.endpoint, b, { field: n.dataset.entryField, section: idx }); });
       el.classList.add('cms-mt-target');
       el.prepend(b);
+      // Text des Abschnitts direkt im Text bearbeiten (gespeichert als mt[feld][abschnitt]); Medien und Buttons über den Knopf
+      const body = el.querySelector('[data-mt-body]');
+      if (body && !body.dataset.entryMode) {
+        body.dataset.entryField = n.dataset.entryField; body.dataset.entryMode = 'rich'; body.dataset.entrySection = String(idx);
+        body.dataset.entryLabel = (n.dataset.entryLabel || '') + (el.querySelector('.mt-part__h') ? ': ' + el.querySelector('.mt-part__h').textContent : '');
+        bind(body);
+      }
     });
   }
 
@@ -528,14 +572,17 @@ const Inline = (() => {
     if (!list.length && !status) return;
     if (status === 'published' && !(await askPublish())) return;
     if (status === 'draft' && !(await askDraft())) return;
-    const f = {};
-    list.forEach(n => { f[n.dataset.entryField] = read(n); });
+    const f = {}, mt = {};
+    list.forEach(n => {
+      if (n.dataset.entrySection !== undefined) (mt[n.dataset.entryField] ||= {})[n.dataset.entrySection] = read(n);   // Medien + Text
+      else f[n.dataset.entryField] = read(n);
+    });
     // cms:before-save: Werkzeuge/Erweiterungen dürfen prüfen und abbrechen (auch asynchron, detail.waitUntil)
     const gate = await beforeSave({ kind: 'entry', status, entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: f });
     if (!gate.ok) { setStatus(gate.reason || T.dirty, 'is-dirty'); if (gate.reason) alert(gate.reason); return; }
     setStatus(T.saving, 'is-busy');
     let res;
-    try { res = await request(cfg.endpoint, { method: 'POST', json: { f, partial: 1, ...(status ? { status } : {}) } }); }
+    try { res = await request(cfg.endpoint, { method: 'POST', json: { f, ...(Object.keys(mt).length ? { mt } : {}), partial: 1, ...(status ? { status } : {}) } }); }
     catch (e) { res = { ok: false, error: e.message }; }
     if (!res.ok) {
       setStatus(T.error, 'is-error');
@@ -588,6 +635,23 @@ const Inline = (() => {
       }
     },
     pending: () => changed().map(n => [n.dataset.entryField, read(n), n.dataset.entryMode]),
+    dirty: () => dirty,
+    // Live-Ansicht: Felder im alten Inhalt lösen (samt Knöpfen/Hinweisen in der Ebene), im neuen binden – im Bearbeiten-Modus gleich editierbar
+    detach(root) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        if (!root.contains(n)) continue;
+        n._mui?.remove(); n._err?.remove();
+        if (barTarget === n && bar) { bar.hidden = true; barTarget = null; }
+        nodes.splice(i, 1);
+      }
+    },
+    attach(root) {
+      const before = nodes.length;
+      $$('[data-entry-field][data-entry-mode]', root).forEach(bind);
+      if (editing) nodes.slice(before).forEach(n => editable(n, true));
+      refresh();
+    },
     reset() { dirty = false; nodes.forEach(n => { n._orig = read(n); }); },
   };
 })();

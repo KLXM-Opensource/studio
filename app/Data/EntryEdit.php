@@ -202,7 +202,7 @@ final class EntryEdit
             'mediaRemove' => __('Bild entfernen'),
             'mediaNone' => __('Kein Bild – „Bild wählen …“'),
             'mediaHint' => __('Klicken, um ein anderes Bild zu wählen: {label}'),
-            'mtEditSection' => __('Abschnitt bearbeiten'), 'mtEdit' => __('Bearbeiten'),
+            'mtEditSection' => __('Bilder & Buttons'), 'mtEdit' => __('Bilder & Buttons'),   // Text bearbeitet man direkt im Text
         ];
     }
 

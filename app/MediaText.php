@@ -32,7 +32,10 @@ final class MediaText
     {
         $v = Fields::mediaText($v);
         $btns = self::buttons($v['buttons']);
-        $text = $v['text'] !== '' || $btns !== '' ? '<div class="mt__text prose">' . ($v['text'] !== '' ? emphasis_rich($v['text']) : '') . $btns . '</div>' : '';
+        // Bearbeiten auf der Detailseite (Core\Data\EntryEdit): Text in eigenem Rahmen – direkt bearbeitbar, getrennt von den Buttons
+        $edit = !empty(app()->entryEdit);
+        $body = $edit ? '<div class="mt__body" data-mt-body>' . emphasis_rich($v['text']) . '</div>' : ($v['text'] !== '' ? emphasis_rich($v['text']) : '');
+        $text = $v['text'] !== '' || $btns !== '' || $edit ? '<div class="mt__text prose">' . $body . $btns . '</div>' : '';
         $items = array_values(array_filter(array_map(fn($id) => Media::find((int) $id), $v['media'])));
         if (!$items) return $text !== '' ? '<div class="mt mt--only">' . $text . '</div>' : '';
         $side = $v['pos'] !== 'top';
