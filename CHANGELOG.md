@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Behoben: „Fließtext / Artikel“ auf einer leeren Seite
+- Auf einer neuen Seite schien die Wahl „Fließtext / Artikel“ nichts zu tun: Der leere Fließtext ersetzte den Platzhalter
+  „Leere Seite“ und wurde selbst wieder als Platzhalter gezeigt. Jetzt wird der Platzhalter übernommen, der Text ist sofort bereit.
+
 ### Datentabellen: Kombifelder Ansprechperson, Fragen & Antworten, Adresse, Downloads
 - Vier neue Feldtypen (`Core\Combo`): Eingabe als Wiederholer mit festen Unterfeldern, Darstellung als Kontaktkarte, Aufklappliste
   (`<details>`), Anschrift mit OpenStreetMap-Link bzw. Dateiliste (PDF im Viewer, Art und Größe) – mit schema.org-Microdata,

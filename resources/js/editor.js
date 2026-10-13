@@ -201,7 +201,8 @@ function blankState() {
   if (!editor?.blocks) return false;
   const els = blockEls();
   const only = els.length === 1 ? tools.get(editor.blocks.getBlockByIndex(0)?.id) : null;
-  const blank = !!only && only.type === DEFAULT_TYPE && !hasContent(only.def, only.data);
+  // chosen: der Fließtext wurde ausdrücklich gewählt („+ Block einfügen“) – dann ist er kein Platzhalter mehr, auch wenn er noch leer ist
+  const blank = !!only && !only.chosen && only.type === DEFAULT_TYPE && !hasContent(only.def, only.data);
   els.forEach(b => b.querySelector('.cms-block')?.classList.toggle('is-blank', blank));
   return blank;
 }
@@ -540,6 +541,20 @@ const BlockPicker = (() => {
       if (wasBlank) editor.blocks.delete(idx);
       editorStatus(T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[c.type].label }));
       return;
+    }
+    // Leere Seite und Fließtext gewählt: den Platzhalter selbst übernehmen – ein neuer leerer Fließtext sähe wieder wie
+    // „Leere Seite“ aus, es schiene nichts zu passieren
+    if (wasBlank && type === DEFAULT_TYPE) {
+      const only = tools.get(editor.blocks.getBlockByIndex(0)?.id);
+      if (only) {
+        only.chosen = true;
+        markDirty();
+        blankState();
+        requestAnimationFrame(() => (only.el.querySelector('[contenteditable="true"]') || only.el).focus?.());
+        const st = S.ui('[data-editor-status]');
+        if (st) st.textContent = T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type });
+        return;
+      }
     }
     editor.blocks.insert(type, {}, undefined, idx + 1, false);
     if (wasBlank) editor.blocks.delete(idx);   // Platzhalter „Leere Seite“ ersetzen
