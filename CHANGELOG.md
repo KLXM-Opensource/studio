@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Linkauswahl: Reiter „Datei“ mit Hochladen und Mediathek
+- Neuer Reiter **Datei**: neueste Dokumente, Suche über alle Dateien, **Hochladen …** und **Mediathek öffnen …** (`CMSMedia.pick`);
+  die gewählte bzw. hochgeladene Datei ist sofort das Ziel. Gilt für Rich-Text, Link-Felder und Buttons von „Medien + Text“.
+- Linktext ohne Markierung: „Name (PDF, 240 KB)“. Vorhandene Datei-Links öffnen im Reiter „Datei“. `Links::sources` kennt `media` (ID).
+- Die Wahl „PDF direkt statt Viewer“ entfällt – PDFs öffnen immer im Viewer.
+
 ### Medien + Text: Text über die volle Breite, Einstellungen in einer Leiste
 - Der Abschnitt-Editor nutzt die volle Breite (vorher nur die erste Spalte der Wiederholgruppe). Unter dem Text liegt eine Leiste
   **Bilder & Videos · Darstellung · Buttons** mit Zahl; je ein Bereich klappt auf, die übrigen bleiben zu.

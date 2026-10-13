@@ -2490,6 +2490,8 @@ html.adm-ui[data-theme=dark] .rte-area mark{background:#6B5A12;color:#FFF7D6}
 .lp__remove{margin-left:auto;color:var(--adm-err)}
 .lp__keys{margin:0;font-size:12px}
 .lp__bar{display:flex;align-items:center;gap:8px;min-width:0}
+.lp__fbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+[data-lp-panel=file] > .lp__q{width:100%;margin-bottom:8px}
 .lp__bar .lp__q{flex:1 1 auto;min-width:0}
 .lp__seg{flex:none;display:flex;gap:2px;padding:3px;border-radius:9px;background:var(--adm-fill,#F2F2F4)}
 .lp__seg button{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border:0;border-radius:7px;background:none;color:var(--adm-t2);font:600 13px var(--adm-font);cursor:pointer}

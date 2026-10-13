@@ -7283,4 +7283,13 @@ return [
     'Kompaktansicht' => 'Compact view',
     'Bilder & Videos' => 'Images & videos',
     'Erscheinen unter dem Text – höchstens vier.' => 'Shown below the text – up to four.',
+    // Linkauswahl: Reiter „Datei“
+    'Bitte eine Datei wählen oder hochladen.' => 'Please choose or upload a file.',
+    'Dateien' => 'Files',
+    'Dateien suchen' => 'Search files',
+    'Dateien suchen – ohne Suchbegriff die neuesten Dokumente' => 'Search files – without a term: the latest documents',
+    'Hochladen …' => 'Upload …',
+    'Keine Datei gefunden.' => 'No file found.',
+    'Mediathek öffnen …' => 'Open media library …',
+    'Noch keine Dokumente – über „Hochladen …“ hinzufügen.' => 'No documents yet – add one via “Upload …”.',
 ];

@@ -135,6 +135,7 @@ function build() {
       <p class="lp__current" data-lp-current hidden></p>
       <div class="lp__tabs" role="tablist" aria-label="${esc(t('Art des Linkziels'))}">
         <button type="button" role="tab" id="cms-lp-tab-search" aria-controls="cms-lp-p-search" data-lp-tab="search">${ico('magnifying-glass')} ${esc(t('Seiten & Inhalte'))}</button>
+        <button type="button" role="tab" id="cms-lp-tab-file" aria-controls="cms-lp-p-file" data-lp-tab="file">${ico('paperclip')} ${esc(t('Datei'))}</button>
         <button type="button" role="tab" id="cms-lp-tab-url" aria-controls="cms-lp-p-url" data-lp-tab="url">${ico('globe')} ${esc(t('Web-Adresse'))}</button>
         <button type="button" role="tab" id="cms-lp-tab-mail" aria-controls="cms-lp-p-mail" data-lp-tab="mail">${ico('at')} ${esc(t('E-Mail'))}</button>
         <button type="button" role="tab" id="cms-lp-tab-tel" aria-controls="cms-lp-p-tel" data-lp-tab="tel">${ico('phone')} ${esc(t('Telefon'))}</button>
@@ -158,6 +159,15 @@ function build() {
         <div class="lp__list" id="cms-lp-list" role="listbox" aria-label="${esc(t('Linkziele'))}" data-lp-list></div>
         <div class="lp__list" id="cms-lp-dlist" role="listbox" aria-label="${esc(t('Einträge'))}" data-lp-dlist hidden></div>
         <ul class="lp__list lp__tree" id="cms-lp-tree" role="tree" aria-label="${esc(t('Seitenbaum'))}" tabindex="0" data-lp-tree hidden></ul>
+      </div>
+      <div class="lp__panel" role="tabpanel" id="cms-lp-p-file" aria-labelledby="cms-lp-tab-file" data-lp-panel="file" hidden>
+        <div class="lp__fbar">
+          <button type="button" class="adm-btn adm-btn--small" data-lp-up>${ico('upload-simple')} ${esc(t('Hochladen …'))}</button>
+          <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-lp-lib>${ico('folder-open')} ${esc(t('Mediathek öffnen …'))}</button>
+        </div>
+        <input type="search" class="lp__q" data-lp-file role="combobox" aria-expanded="true" aria-controls="cms-lp-flist" aria-autocomplete="list"
+          aria-label="${esc(t('Dateien suchen'))}" autocomplete="off" spellcheck="false" placeholder="${esc(t('Dateien suchen – ohne Suchbegriff die neuesten Dokumente'))}">
+        <div class="lp__list" id="cms-lp-flist" role="listbox" aria-label="${esc(t('Dateien'))}" data-lp-flist></div>
       </div>
       <div class="lp__panel" role="tabpanel" id="cms-lp-p-url" aria-labelledby="cms-lp-tab-url" data-lp-panel="url" hidden>
         <label class="f"><span>${esc(t('Adresse'))}</span><input type="url" inputmode="url" data-lp-url autocomplete="off" spellcheck="false" placeholder="https://beispiel.de/seite" aria-describedby="cms-lp-url-msg"></label>
@@ -228,6 +238,13 @@ function wire() {
     state.data.src = e.target.value;
     loadData();
   });
+  // Reiter „Datei“: suchen, hochladen oder in der Mediathek wählen – das Ergebnis ist gleich als Ziel gewählt
+  const fin = q('[data-lp-file]');
+  let fltimer;
+  fin.addEventListener('input', () => { clearTimeout(fltimer); fltimer = setTimeout(() => loadFiles(), 160); });
+  listKeys(fin, q('[data-lp-flist]'));
+  q('[data-lp-up]').addEventListener('click', () => fromLibrary(true));
+  q('[data-lp-lib]').addEventListener('click', () => fromLibrary(false));
   // Ansicht Suche | Struktur | Daten
   qa('[data-lp-view]').forEach(b => b.addEventListener('click', () => view(b.dataset.lpView, true)));
   // Seitenbaum
@@ -275,6 +292,7 @@ function tab(name, focusField) {
   state.tab = name;
   qa('[role=tab]').forEach(b => { const on = b.dataset.lpTab === name; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
   qa('[data-lp-panel]').forEach(p => { p.hidden = p.dataset.lpPanel !== name; });
+  if (name === 'file' && !state.fitems) loadFiles();
   err('');
   showPicked();
   if (focusField) (name === 'search' ? viewField() : q(`[data-lp-${name}]`))?.focus();
@@ -288,6 +306,36 @@ function hint(kind) {
   el.textContent = r.error || r.warn || (kind === 'tel' ? t('Wird gewählt als: {n}', { n: r.href.slice(4) }) : t('Linkziel: {h}', { h: r.href }));
   if (kind === 'url' && !r.error) q('[data-lp-blank]').checked = state.blankTouched ? q('[data-lp-blank]').checked : /^https:\/\//.test(r.href) && !sameHost(r.href);
 }
+// ------------------------------------------------------------------ Reiter „Datei“
+let fseq = 0;
+function renderFiles() {
+  const list = q('[data-lp-flist]'), items = state.fitems || [];
+  list.innerHTML = items.length ? items.map((it, i) => optHtml(it, 'cms-lp-f' + i, i, kindIcon(it, {}))).join('')
+    : `<p class="lp__empty">${esc(q('[data-lp-file]').value.trim() ? t('Keine Datei gefunden.') : t('Noch keine Dokumente – über „Hochladen …“ hinzufügen.'))}</p>`;
+}
+async function loadFiles() {
+  const n = ++fseq, list = q('[data-lp-flist]');
+  list.setAttribute('aria-busy', 'true');
+  let items = [];
+  try { items = (await fetchGroups({ group: 'files', q: q('[data-lp-file]').value.trim(), limit: 50 }))[0]?.items || []; } catch {}
+  if (n !== fseq || !state) return;
+  list.removeAttribute('aria-busy');
+  state.fitems = items;
+  renderFiles();
+}
+/** Mediathek öffnen (upload: gleich mit der Dateiauswahl) – die gewählte bzw. hochgeladene Datei wird zum Ziel */
+async function fromLibrary(upload) {
+  const m = await window.CMSMedia?.pick?.('file', { upload });
+  if (!m || !state) return;
+  let it = null;
+  try { it = (await fetchGroups({ group: 'files', media: m.id }))[0]?.items?.[0] || null; } catch {}
+  if (!it || !state) return;
+  state.fitems = [it, ...(state.fitems || []).filter(x => x.value !== it.value)];
+  renderFiles();
+  const o = q('[data-lp-flist] [role=option]');
+  choose(o, false);
+  q('[data-lp-ok]').focus();
+}
 const sameHost = h => { try { return new URL(h).host === location.host; } catch { return false; } };
 
 // ------------------------------------------------------------------ Ansicht Suche | Struktur | Daten
@@ -298,6 +346,7 @@ function viewField() {
 /** Liste und zugehöriges Eingabefeld (aria-activedescendant) eines Elements in der Ansicht */
 function boxOf(o) {
   if (o.closest('[data-lp-tree]')) return { box: q('[data-lp-tree]'), items: state.titems, owner: q('[data-lp-tree]'), sel: '[data-lp-tree] [role=treeitem]' };
+  if (o.closest('[data-lp-flist]')) return { box: q('[data-lp-flist]'), items: state.fitems || [], owner: q('[data-lp-file]'), sel: '[data-lp-flist] [role=option]' };
   if (o.closest('[data-lp-dlist]')) return { box: q('[data-lp-dlist]'), items: state.data.items, owner: q('[data-lp-filter]'), sel: '[data-lp-dlist] [role=option]' };
   return { box: q('[data-lp-list]'), items: state.items, owner: q('[data-lp-q]'), sel: '[data-lp-list] [role=option]' };
 }
@@ -637,8 +686,8 @@ function choose(o, apply) {
 }
 function showPicked() {
   if (!state) return;
-  const p = q('[data-lp-picked]'), it = state.tab === 'search' ? state.picked : null;
-  q('[data-lp-viewer-wrap]').hidden = !(it && it.pdf);
+  const p = q('[data-lp-picked]'), it = state.tab === 'search' || state.tab === 'file' ? state.picked : null;
+  q('[data-lp-viewer-wrap]').hidden = true;   // PDFs öffnen auf der Website immer im Viewer (Core\Links) – keine Wahl mehr
   if (!it) { p.hidden = true; return; }
   const href = it.pdf && !q('[data-lp-viewer]').checked ? it.fileHref : it.href;
   p.hidden = false;
@@ -648,8 +697,9 @@ function showPicked() {
 /** Ergebnis des Dialogs: {href, ref, value, label, kind, newTab, title} oder {error} */
 function result() {
   const extra = { newTab: q('[data-lp-blank]').checked, title: q('[data-lp-title]').value.trim() };
-  if (state.tab === 'search') {
+  if (state.tab === 'search' || state.tab === 'file') {
     let it = state.picked;
+    if (!it && state.tab === 'file') return state.current ? { ...state.current, ...extra, keep: true } : { error: t('Bitte eine Datei wählen oder hochladen.') };
     if (!it) {
       const guess = guessDirect(q('[data-lp-q]').value);
       if (guess) it = guess;
@@ -660,7 +710,9 @@ function result() {
     const direct = it.pdf && !q('[data-lp-viewer]').checked;
     const ref = direct ? it.file : it.value;
     const href = direct ? it.fileHref : it.href;
-    return { href, ref: REF.test(ref || '') ? ref : '', value: ref || href, label: it.label, kind: it.kind, ...extra };
+    // Linktext für Dateien mit Art und Größe, z. B. „Merkblatt (PDF, 240 KB)“ – nur, wenn kein Text markiert war (Rich-Text)
+    const label = it.kind === 'file' && it.meta && state.mode === 'rich' ? `${it.label} (${it.meta.replace(' · ', ', ')})` : it.label;
+    return { href, ref: REF.test(ref || '') ? ref : '', value: ref || href, label, kind: it.kind, ...extra };
   }
   const kind = state.tab;
   const v = q(`[data-lp-${kind}]`).value;
@@ -682,7 +734,7 @@ export function openLinkPicker(opts = {}) {
     const mode = opts.mode === 'field' ? 'field' : 'rich';
     const cur = opts.current || (opts.value ? { href: opts.value, ref: REF.test(opts.value) ? opts.value : '' } : null);
     state = { resolve, mode, current: cur && (cur.href || cur.ref) ? cur : null, picked: null, items: [], titems: [], groups: null, q: '',
-      tab: 'search', view: 'search', tree: null, treeLang: '', treeSeq: 0, blankTouched: false,
+      tab: 'search', view: 'search', tree: null, fitems: null, treeLang: '', treeSeq: 0, blankTouched: false,
       data: { sources: null, src: '', items: [], total: 0, filter: '', seq: 0, loading: false } };
     q('#cms-lp-t').textContent = state.current ? t('Link bearbeiten') : t('Link einfügen');
     qa('[data-lp-richonly]').forEach(n => { n.hidden = mode !== 'rich'; });
@@ -691,7 +743,10 @@ export function openLinkPicker(opts = {}) {
     q('[data-lp-blank]').checked = !!cur?.newTab;
     q('[data-lp-blank]').onchange = () => { if (state) state.blankTouched = true; };
     q('[data-lp-title]').value = cur?.title || '';
-    for (const k of ['q', 'filter', 'url', 'mail', 'subject', 'tel']) q(`[data-lp-${k}]`).value = '';
+    for (const k of ['q', 'filter', 'url', 'mail', 'subject', 'tel', 'file']) q(`[data-lp-${k}]`).value = '';
+    q('[data-lp-flist]').innerHTML = '';
+    // Hochladen und Mediathek nur, wo die Mediathek geladen ist
+    q('[data-lp-up]').hidden = q('[data-lp-lib]').hidden = !window.CMSMedia?.pick;
     ['url', 'mail', 'tel'].forEach(hint);
     err('');
     // Aktuelles Ziel anzeigen und passenden Reiter öffnen
@@ -702,6 +757,7 @@ export function openLinkPicker(opts = {}) {
       const v = state.current.ref || state.current.href || '';
       curBox.innerHTML = `${esc(t('Aktuelles Ziel'))}: <span class="lp__cur">…</span>`;
       describe(v).then(x => { if (state && curBox.isConnected) curBox.querySelector('.lp__cur').innerHTML = `<b>${esc(x.type)}</b> · ${esc(x.label)}${x.missing ? ` <span class="lp__warn">${esc(t('Ziel nicht gefunden'))}</span>` : ''}`; });
+      if (/^media:/.test(state.current.ref || '')) start = 'file';   // Datei-Link bearbeiten: gleich im Reiter „Datei“
       if (!state.current.ref) {
         const h = state.current.href;
         if (/^mailto:/i.test(h)) { start = 'mail'; const [addr, qs] = h.slice(7).split('?'); q('[data-lp-mail]').value = decodeURIComponent(addr); q('[data-lp-subject]').value = new URLSearchParams(qs || '').get('subject') || ''; }

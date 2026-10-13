@@ -1,6 +1,9 @@
 <?php /** Handbuch · Kapitel „Neuerungen“: was sich zuletzt geändert hat – in Alltagssprache, mit Link zur Anleitung. Neueste oben. @var callable $anchor */ ?>
   <p class="lead">Was sich zuletzt geändert hat – kurz erklärt, mit Link zur ausführlichen Anleitung. Die technische Liste aller Änderungen steht im Entwicklerhandbuch (CHANGELOG).</p>
 
+  <h3>Dateien direkt beim Verlinken hochladen</h3>
+  <p>Der Linkdialog hat den Reiter <b>Datei</b>: neueste Dokumente, Suche, <b>Hochladen …</b> und <b>Mediathek öffnen …</b> – die Datei ist danach gleich das Linkziel. Gilt im Text, in Link-Feldern und bei Buttons. <a href="#link-datei">Zur Anleitung →</a></p>
+
   <h3>Zeitgesteuert veröffentlichen</h3>
   <p>Seiten und Einträge (z. B. Aktuelles) bekommen einen <b>Zeitplan</b>: „Online ab“ veröffentlicht automatisch zum gewünschten Zeitpunkt, „Offline ab“ nimmt den Inhalt automatisch heraus – er ist dann nicht mehr aufrufbar und verschwindet aus Menü, Listen, Suche und Sitemap. Eine Uhr in den Listen zeigt, was geplant ist. <a href="#zeitplan">Zur Anleitung →</a></p>
 

@@ -143,7 +143,7 @@ final class EditorController extends AdminController
             return Response::json(['groups' => \Core\Links::sources([
                 'q' => mb_substr($r->str('q'), 0, 80), 'page' => (int) $r->str('page'), 'mode' => $r->str('mode'),
                 'group' => mb_substr($r->str('group'), 0, 60), 'offset' => (int) $r->str('offset'), 'limit' => (int) $r->str('limit') ?: null,
-                'literal' => $r->str('literal') === '1',
+                'literal' => $r->str('literal') === '1', 'media' => (int) $r->str('media'),
             ])]);
         }
         if ($r->str('format') === 'sources') {

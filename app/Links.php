@@ -105,6 +105,7 @@ final class Links
      * Quellen für die Linkauswahl, nach Art gruppiert.
      * $o: q (Suche), page (ID der aktuellen Seite → deren Anker zuerst), mode (rich|field; field = mit Sonderzielen des Kits), limit,
      *     group (nur diese Gruppe, z. B. „pages“, „entries:news“, „recent-entries“, „files“ – zum Weiterblättern), offset (ab dem n-ten Treffer),
+     *     media (mit group=files: nur die Datei mit dieser ID),
      *     literal (mit group=entries:…: q nur als Filter – ohne „Suchbegriff = Tabellenname → alle Einträge“; Ansicht „Daten“)
      * Einträge je Tabelle: neueste zuerst (Datumsfeld der Sortierung bzw. Anlagedatum), mit kurzem Datum.
      * Jede Gruppe: id, label, icon, items, total (alle Treffer), offset. Ohne Suche: „Neueste Einträge“ über alle Inhaltstabellen
@@ -183,7 +184,9 @@ final class Links
         // Dateien: ohne Suche die neuesten Dokumente, mit Suche alle Arten
         if ($want('files')) {
             $files = [];
-            foreach (Media::all($q !== '' ? ['q' => $q] : []) as $m) {
+            if (($mid = (int) ($o['media'] ?? 0)) > 0) {   // genau diese Datei (Reiter „Datei“: eben hochgeladen bzw. in der Mediathek gewählt)
+                if ($m = Media::find($mid)) $files[] = $m;
+            } else foreach (Media::all($q !== '' ? ['q' => $q] : []) as $m) {
                 if ($q === '' && str_starts_with((string) $m['mime'], 'image/')) continue;
                 $files[] = $m;
             }
