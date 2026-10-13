@@ -122,12 +122,13 @@
 
   <h3 id="medien-text">Medien + Text: Text mit Bildern und Videos</h3>
   <p>Der Feldtyp <b>Medien + Text</b> ersetzt ein einfaches Textfeld, wenn zu einem Text Bilder oder Videos gehören – z. B. ein Merkblatt, ein Bericht oder eine Projektbeschreibung. Medien landen dabei nie im Text selbst, sondern stehen daneben oder darüber:</p>
+  <p>Der Text steht über die volle Breite. Darunter liegt eine Leiste mit <b>Bilder &amp; Videos</b>, <b>Darstellung</b> (erscheint, sobald Medien gewählt sind) und <b>Buttons</b> – ein Klick klappt den Bereich auf, ein zweiter wieder zu; die Zahl zeigt, wie viele Medien bzw. Buttons der Abschnitt hat.</p>
   <ul>
-    <li><b>Medien hinzufügen …</b> öffnet die Mediathek mit Mehrfachauswahl: Anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, auch neu Hochgeladenes kommt dazu. In der Leiste sortieren Sie per Ziehen (Tastatur: <kbd>Alt</kbd> + <kbd>←</kbd>/<kbd>→</kbd>), ✕ entfernt.</li>
-    <li><b>Anordnung:</b> über dem Text, links oder rechts daneben – daneben in ⅓ oder ½ der Breite, wahlweise mit <b>Textumlauf</b> (der Text fließt unter den Medien weiter). Auf dem Telefon stehen die Medien immer über dem Text.</li>
+    <li><b>Bilder &amp; Videos → Medien hinzufügen …</b> öffnet die Mediathek mit Mehrfachauswahl: Anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, auch neu Hochgeladenes kommt dazu. In der Leiste sortieren Sie per Ziehen (Tastatur: <kbd>Alt</kbd> + <kbd>←</kbd>/<kbd>→</kbd>), ✕ entfernt.</li>
+    <li><b>Darstellung → Anordnung:</b> über dem Text, links oder rechts daneben – daneben in ⅓ oder ½ der Breite, wahlweise mit <b>Textumlauf</b> (der Text fließt unter den Medien weiter). Auf dem Telefon stehen die Medien immer über dem Text.</li>
     <li><b>Ansicht:</b> untereinander, <b>Raster mit Großansicht</b> (Klick öffnet das Bild groß, blättern mit Pfeilen) oder <b>Slider</b>. Bilder und Videos lassen sich mischen.</li>
     <li><b>Bildformat</b> (optional): Original oder ein Format des Kits wie 16:9, 4:3, 1:1, 3:4 – genutzt werden die Zuschnitte aus der Mediathek, sonst der Fokuspunkt. Im Raster ist „Original“ quadratisch, im Slider 4:3. Videos behalten ihr Format.</li>
-    <li><b>Buttons unter dem Text</b> (optional, bis zu vier je Abschnitt): Beschriftung, Ziel über <b>Auswählen …</b> (Seite, Eintrag, Dokument oder Adresse) und Stil – Hauptbutton oder Zweitbutton, gestaltet vom Kit. Verlinkte PDFs öffnen immer im PDF-Viewer.</li>
+    <li><b>Buttons</b> (optional, bis zu vier je Abschnitt): Beschriftung, Ziel über <b>Auswählen …</b> (Seite, Eintrag, Dokument oder Adresse) und Stil – Hauptbutton oder Zweitbutton, gestaltet vom Kit. Verlinkte PDFs öffnen immer im PDF-Viewer.</li>
     <li>Ohne Medien ist es ein ganz normales Textfeld.</li>
     <li><b>Mehrere Abschnitte</b> (Einstellung im Tabellen-Designer): Ein Eintrag besteht dann aus beliebig vielen Abschnitten, jeder mit optionaler Zwischenüberschrift, eigenem Text, eigenen Medien und eigener Anordnung. Jeder Abschnitt steht für sich – nichts fließt in den nächsten.</li>
     <li><b>Auf der Website bearbeiten:</b> Angemeldet zeigt jeder Abschnitt beim Überfahren (und im Modus „Bearbeiten“) den Knopf <b>Abschnitt bearbeiten</b> – die Seitenleiste öffnet sich genau an dieser Stelle.</li>

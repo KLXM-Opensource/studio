@@ -7281,4 +7281,6 @@ return [
     '„Offline ab“ muss nach „Online ab“ liegen.' => '“Offline from” must be after “Online from”.',
     '„{title}“ geht automatisch online: {date}.' => '“{title}” goes online automatically: {date}.',
     'Kompaktansicht' => 'Compact view',
+    'Bilder & Videos' => 'Images & videos',
+    'Erscheinen unter dem Text – höchstens vier.' => 'Shown below the text – up to four.',
 ];

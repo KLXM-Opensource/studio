@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Medien + Text: Text über die volle Breite, Einstellungen in einer Leiste
+- Der Abschnitt-Editor nutzt die volle Breite (vorher nur die erste Spalte der Wiederholgruppe). Unter dem Text liegt eine Leiste
+  **Bilder & Videos · Darstellung · Buttons** mit Zahl; je ein Bereich klappt auf, die übrigen bleiben zu.
+
 ### Tabellen-Designer: Kompaktansicht
 - Tabellen-Designer: **Kompaktansicht** (eine Zeile je Feld, Einstellungen beim Bearbeiten; im Browser gemerkt).
 - Behoben: Lupe im Suchfeld der Netzwerk-Übersicht überdeckte den Platzhalter.

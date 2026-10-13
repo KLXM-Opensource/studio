@@ -845,23 +845,28 @@ final class Fields
         };
         $items = '';
         foreach ($v['media'] as $mid) $items .= self::mediaTextItem($mid, $name);
+        // Text über die volle Breite; Medien, Darstellung und Buttons in einer Leiste darunter – je ein aufklappbarer Bereich (admin.js initMediaText)
+        $tab = fn(string $key, string $ico, string $label, int $n = -1, bool $hidden = false): string => '<button type="button" class="mt-tab" data-mt-tab="' . $key . '" aria-expanded="false"' . ($hidden ? ' hidden' : '') . '>'
+            . icon($ico) . '<span>' . e($label) . '</span>' . ($n >= 0 ? '<span class="mt-tab__n" data-mt-n' . ($n ? '' : ' hidden') . '>' . $n . '</span>' : '') . '</button>';
         return '<div class="mt-field" data-mt data-name="' . e($name) . '">'
             . ($multi ? '<label class="mt-title"><span>' . e(__('Zwischenüberschrift (optional)')) . '</span><input type="text" name="' . e($name) . '[title]" value="' . e($v['title']) . '" maxlength="150" data-mt-title></label>' : '')
-            . '<div class="mt-field__media"><ul class="mt-list" data-mt-list aria-label="' . e(__('Medien (ziehen zum Sortieren)')) . '">' . $items . '</ul>'
+            . '<div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="Formatierung"></div>'
+            . '<div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' . e(__('Text')) . '">' . $v['text'] . '</div>'
+            . '<input type="hidden" id="' . e($id) . '" name="' . e($name) . '[text]" value="' . e($v['text']) . '"' . $aria . '></div>'
+            . '<div class="mt-tabs">' . $tab('media', 'images', __('Bilder & Videos'), count($v['media'])) . $tab('layout', 'layout', __('Darstellung'), -1, !$v['media'])
+            . $tab('buttons', 'link', __('Buttons'), count($v['buttons'])) . '</div>'
+            . '<div class="mt-panel" data-mt-panel="media" hidden><div class="mt-field__media"><ul class="mt-list" data-mt-list aria-label="' . e(__('Medien (ziehen zum Sortieren)')) . '">' . $items . '</ul>'
             . '<button type="button" class="btn btn--small" data-mt-pick>' . icon('plus') . ' ' . e(__('Medien hinzufügen …')) . '</button>'
-            . '<input type="hidden" name="' . e($name) . '[media][]" value=""></div>'
-            . '<div class="mt-field__opts"' . ($v['media'] ? '' : ' hidden') . ' data-mt-opts>'
+            . '<input type="hidden" name="' . e($name) . '[media][]" value=""></div></div>'
+            . '<div class="mt-panel" data-mt-panel="layout" hidden><div class="mt-field__opts" data-mt-opts>'
             . $seg('pos', ['top' => __('Über dem Text'), 'left' => __('Links'), 'right' => __('Rechts')], __('Anordnung'))
             . '<span class="mt-side"' . ($v['pos'] === 'top' ? ' hidden' : '') . ' data-mt-side>'
             . $seg('width', ['third' => '⅓', 'half' => '½'], __('Breite'))
             . '<label class="mt-wrap"><input type="checkbox" name="' . e($name) . '[wrap]" value="1"' . ($v['wrap'] ? ' checked' : '') . '> ' . e(__('Text fließt unter den Medien weiter')) . '</label></span>'
             . $seg('view', ['stack' => __('Untereinander'), 'grid' => __('Raster mit Großansicht'), 'slider' => __('Slider')], __('Ansicht'))
             . $seg('ratio', ['' => __('Original')] + array_combine(array_keys(Media::ratios()), array_map('strval', array_keys(Media::ratios()))), __('Bildformat'))
-            . '</div>'
-            . '<div class="rte" data-mode="richtext"><div class="rte-bar" role="toolbar" aria-label="Formatierung"></div>'
-            . '<div class="rte-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' . e(__('Text')) . '">' . $v['text'] . '</div>'
-            . '<input type="hidden" id="' . e($id) . '" name="' . e($name) . '[text]" value="' . e($v['text']) . '"' . $aria . '></div>'
-            . self::renderMediaTextButtons($id, $name, $v['buttons'])
+            . '</div></div>'
+            . '<div class="mt-panel" data-mt-panel="buttons" hidden>' . self::renderMediaTextButtons($id, $name, $v['buttons']) . '</div>'
             . '</div>';
     }
 
@@ -877,7 +882,7 @@ final class Fields
                 . '<option value="secondary"' . (($b['style'] ?? '') === 'secondary' ? ' selected' : '') . '>' . e(__('Zweitbutton')) . '</option></select>'
                 . '<button type="button" class="icon-btn icon-btn--danger" data-mt-btn-remove aria-label="' . e(__('Button entfernen')) . '">✕</button></div>';
         };
-        $h = '<div class="mt-btns" data-mt-btns><span class="mt-btns__h">' . e(__('Buttons unter dem Text (optional)')) . '</span><div class="mt-btns__list" data-mt-btn-list>';
+        $h = '<div class="mt-btns" data-mt-btns><span class="mt-btns__h">' . e(__('Erscheinen unter dem Text – höchstens vier.')) . '</span><div class="mt-btns__list" data-mt-btn-list>';
         foreach (array_values($buttons) as $i => $b) $h .= $row($b, (string) $i);
         return $h . '</div><template data-mt-btn-tpl>' . $row([], '__b__') . '</template>'
             . '<button type="button" class="btn btn--small btn--ghost" data-mt-btn-add' . (count($buttons) >= 4 ? ' hidden' : '') . '>+ ' . e(__('Button')) . '</button></div>';

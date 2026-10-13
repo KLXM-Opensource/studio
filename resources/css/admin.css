@@ -3485,6 +3485,20 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .mt-sections{display:grid;gap:12px}
 .mt-field{display:grid;gap:12px;padding:12px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-surface)}
 .mt-sec .mt-field{border:0;padding:0;background:none}
+.mt-sec > .rep-meta{display:none}   /* Kurzfassung der Wiederholgruppe (z. B. Stil eines Buttons) hilft hier nicht – der Titel reicht */
+.mt-field__media .btn{display:inline-flex;align-items:center;gap:6px}
+.rep-fields > .mt-field{grid-column:1/-1}   /* Abschnitt über die volle Breite (nicht nur die erste Spalte) */
+.mt-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.mt-tab{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 10px;border:1px solid var(--adm-line);border-radius:6px;background:var(--adm-surface);color:var(--adm-t2);font:600 13px var(--adm-font);cursor:pointer}
+.mt-tab[hidden]{display:none}
+.mt-tab svg{width:16px;height:16px}
+.mt-tab:hover{background:var(--adm-fill);color:var(--adm-ink)}
+.mt-tab[aria-expanded=true]{background:var(--adm-fill);border-color:var(--adm-a);color:var(--adm-ink)}
+.mt-tab:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.mt-tab__n{min-width:18px;padding:0 5px;border-radius:9px;background:var(--adm-a);color:#fff;font-size:11px;line-height:18px;text-align:center}
+.mt-tab__n[hidden]{display:none}
+.mt-panel{padding:12px;border-radius:8px;background:var(--adm-fill)}
+.mt-panel[hidden]{display:none}
 .mt-title{display:grid;gap:4px;font-size:13px;font-weight:600}
 .mt-field__media{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .mt-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}

@@ -380,8 +380,20 @@ function initCollectionFields(scope = d) {
 function initMediaText(scope = d) {
   $$('[data-mt]', scope).forEach(mt => {
     if (mt._init || mt.closest('template')) return; mt._init = true;
-    const list = $('[data-mt-list]', mt), name = mt.dataset.name, opts = $('[data-mt-opts]', mt), side = $('[data-mt-side]', mt);
-    const changed = () => { opts.hidden = !list.children.length; mt.dispatchEvent(new Event('input', { bubbles: true })); };
+    const list = $('[data-mt-list]', mt), name = mt.dataset.name, side = $('[data-mt-side]', mt);
+    // Leiste unter dem Text: je Bereich ein Knopf, der ihn auf- und zuklappt (immer nur einer offen); Zahl = Medien bzw. Buttons
+    const tabs = $$('[data-mt-tab]', mt), panel = k => $(`[data-mt-panel="${k}"]`, mt), tab = k => $(`[data-mt-tab="${k}"]`, mt);
+    tabs.forEach(b => { const p = panel(b.dataset.mtTab); p.id = 'mt-p' + (uid++); b.setAttribute('aria-controls', p.id); });
+    const open = (k, on) => tabs.forEach(b => { const me = b.dataset.mtTab === k && on; b.setAttribute('aria-expanded', String(me)); panel(b.dataset.mtTab).hidden = !me; });
+    tabs.forEach(b => b.addEventListener('click', () => open(b.dataset.mtTab, b.getAttribute('aria-expanded') !== 'true')));
+    const count = (k, n) => { const c = $('[data-mt-n]', tab(k)); if (c) { c.textContent = n; c.hidden = !n; } };
+    const changed = () => {
+      const n = list.children.length;
+      count('media', n);
+      tab('layout').hidden = !n;   // Darstellung erst mit Medien
+      if (!n && tab('layout').getAttribute('aria-expanded') === 'true') open('layout', false);
+      mt.dispatchEvent(new Event('input', { bubbles: true }));
+    };
     const item = m => {
       const li = d.createElement('li');
       li.className = 'mt-item'; li.draggable = true; li.tabIndex = 0; li.dataset.id = m.id;
@@ -423,7 +435,7 @@ function initMediaText(scope = d) {
     const btns = $('[data-mt-btns]', mt);
     if (btns) {
       const blist = $('[data-mt-btn-list]', btns), badd = $('[data-mt-btn-add]', btns), btpl = $('[data-mt-btn-tpl]', btns);
-      const limit = () => { badd.hidden = blist.children.length >= 4; };
+      const limit = () => { badd.hidden = blist.children.length >= 4; count('buttons', blist.children.length); };
       badd.addEventListener('click', () => {
         blist.insertAdjacentHTML('beforeend', btpl.innerHTML.replaceAll('__b__', 'n' + (uid++)));
         const row = blist.lastElementChild; uniqueIds(row); initLinkFields(row); limit();
