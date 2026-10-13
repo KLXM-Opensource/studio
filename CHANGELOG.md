@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Tabellen-Designer: Kompaktansicht
+- Tabellen-Designer: **Kompaktansicht** (eine Zeile je Feld, Einstellungen beim Bearbeiten; im Browser gemerkt).
+- Behoben: Lupe im Suchfeld der Netzwerk-Übersicht überdeckte den Platzhalter.
+
 ### Zeitgesteuert veröffentlichen: „Online ab“ und „Offline ab“
 - Seiten (Verwaltung und Seiteneinstellungen auf der Website) und Einträge von Tabellen mit Freigabe erhalten einen **Zeitplan**.
   „Online ab“ hält den Inhalt bis zum Zeitpunkt offline und veröffentlicht ihn dann automatisch; „Offline ab“ nimmt ihn automatisch

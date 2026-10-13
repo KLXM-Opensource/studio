@@ -584,6 +584,13 @@ function initDataFields(scope = d) {
 const schema = $('[data-schema]');
 if (schema) {
   const list = $('[data-fields]', schema), tpl = $('[data-field-template]', schema);
+  // Kompaktansicht: je Feld nur Bezeichnung, Kurzname, Typ; Einstellungen erscheinen beim Bearbeiten des Feldes (CSS :has/:focus-within)
+  const compactBtn = $('[data-fields-compact]', schema);
+  if (compactBtn) {
+    const setCompact = on => { list.classList.toggle('is-compact', on); compactBtn.setAttribute('aria-pressed', String(on)); };
+    try { setCompact(localStorage.getItem('dt.compact') === '1'); } catch {}
+    compactBtn.addEventListener('click', () => { const on = !list.classList.contains('is-compact'); setCompact(on); try { localStorage.setItem('dt.compact', on ? '1' : '0'); } catch {} });
+  }
   const slug = v => v.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^(\d)/, 'f_$1').slice(0, 40);
   /*
    * Abschnitte sichtbar gliedern: Felder nach einem Abschnitt (bis zum nächsten) rücken ein und tragen die Farbe ihres Abschnitts

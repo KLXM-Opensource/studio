@@ -97,6 +97,7 @@
 
   <h3 id="bedingungen">Felder, die nur manchmal gebraucht werden (Bedingungen)</h3>
   <p><b>Neues Feld an der richtigen Stelle:</b> Das <b>+</b> rechts an jedem Feld öffnet die Liste der Feldtypen – das neue Feld erscheint direkt darunter (Pfeiltasten wählen, <kbd>Esc</kbd> schließt). Die Leiste <b>Feld hinzufügen</b> am Ende hängt Felder unten an.</p>
+  <p>Bei vielen Feldern hilft die <b>Kompaktansicht</b> (Knopf über der Feldliste): Jedes Feld steht in einer Zeile mit Bezeichnung, Kurzname und Typ; die übrigen Einstellungen klappen auf, sobald Sie in das Feld klicken. Der Browser merkt sich die Wahl.</p>
   <p>Im Tabellen-Designer hat jedes Feld den aufklappbaren Bereich <b>Bedingungen</b>. Dort formulieren Sie Sätze wie „Feld nur anzeigen, wenn <b>Anrede</b> <b>ist gleich</b> <b>Firma</b>“.</p>
   <ul>
     <li><b>Feld nur anzeigen, wenn …</b> – sonst ist das Feld im Formular ausgeblendet; ein Wert darin wird beim Speichern verworfen. Mehrere Bedingungen: „alle treffen zu“ oder „eine davon trifft zu“.</li>

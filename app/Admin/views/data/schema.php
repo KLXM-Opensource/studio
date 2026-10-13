@@ -162,6 +162,8 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     $noForm = $formOn ? array_values(array_diff(array_keys(Tables::TYPES), \Core\Data\DataForms::TYPES, \Core\Data\DataForms::UPLOAD_TYPES, Tables::LAYOUT)) : [];
     ?>
     <div class="dt-fieldsbox">
+      <?php // Kompaktansicht: je Feld eine Zeile, Einstellungen erst beim Bearbeiten (admin.js, gemerkt im Browser) ?>
+      <p class="dt-fieldsbar"><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-fields-compact aria-pressed="false"><?= icon('list') ?> <span><?= e(__('Kompaktansicht')) ?></span></button></p>
       <ol class="dt-fields" data-fields>
         <?php foreach ($defAll as $i => $f): ?>
         <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => $i, 'f' => $f, 'tables' => $allTables, 'err' => $errors["fields.$i"] ?? null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox, 'noForm' => $noForm ?? []]) ?>

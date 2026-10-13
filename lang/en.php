@@ -7280,4 +7280,5 @@ return [
     '„Offline ab“ liegt in der Vergangenheit.' => '“Offline from” is in the past.',
     '„Offline ab“ muss nach „Online ab“ liegen.' => '“Offline from” must be after “Online from”.',
     '„{title}“ geht automatisch online: {date}.' => '“{title}” goes online automatically: {date}.',
+    'Kompaktansicht' => 'Compact view',
 ];
