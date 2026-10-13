@@ -209,7 +209,15 @@ const Panel = (() => {
   /** Feld (und Abschnitt) im Formular der Seitenleiste ansteuern – focus = { field, section } */
   function focusSection(form, focus) {
     const wrap = [...form.querySelectorAll('[data-mt-field]')].find(x => x.dataset.mtField === focus.field);
-    if (!wrap) return null;
+    if (!wrap) {
+      // Kombifelder (Wiederholer f[feld]): zum Feld springen, erstes Eingabefeld
+      const rep = [...form.querySelectorAll('.rep[data-name]')].find(x => x.dataset.name === `f[${focus.field}]`);
+      if (!rep) return null;
+      requestAnimationFrame(() => rep.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+      const el = rep.querySelector('.rep-item input:not([type=hidden]), .rep-item .rte-area') || rep.querySelector('[data-rep=add]');
+      el?.focus({ preventScroll: true });
+      return el || rep;
+    }
     const secs = [...wrap.querySelectorAll(':scope > .rep-items > .mt-sec')];
     const sec = secs[focus.section ?? 0] || secs[0] || wrap;
     const tog = sec.querySelector(':scope > legend .rep-toggle');
@@ -467,12 +475,15 @@ const Inline = (() => {
   function panelButtons(n) {
     const parts = n.querySelectorAll('.mt-part[data-mt-index]');
     const targets = parts.length ? [...parts] : [n];
+    // Medien + Text: „Bilder & Buttons“; Kombifelder (Ansprechperson, Fragen & Antworten, Adresse, Downloads): „Bearbeiten“
+    const mtField = !!n.querySelector('.mt');
     targets.forEach((el, i) => {
       const idx = el.dataset.mtIndex !== undefined ? +el.dataset.mtIndex : i;
       const b = d.createElement('button');
       b.type = 'button'; b.className = 'cms-mt-edit';
-      b.innerHTML = '<span aria-hidden="true">✎</span> ' + window.CMSAdmin.esc(parts.length ? (T.mtEditSection || 'Bilder & Buttons') : (T.mtEdit || 'Bilder & Buttons'));
-      b.setAttribute('aria-label', (parts.length ? (T.mtEditSection || 'Bilder & Buttons') : (T.mtEdit || 'Bilder & Buttons')) + ': ' + (el.querySelector('.mt-part__h')?.textContent || n.dataset.entryLabel || ''));
+      const lbl = parts.length ? (T.mtEditSection || 'Bilder & Buttons') : mtField ? (T.mtEdit || 'Bilder & Buttons') : (T.comboEdit || 'Bearbeiten');
+      b.innerHTML = '<span aria-hidden="true">✎</span> ' + window.CMSAdmin.esc(lbl);
+      b.setAttribute('aria-label', lbl + ': ' + (el.querySelector('.mt-part__h')?.textContent || n.dataset.entryLabel || ''));
       b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); Panel.open(cfg.endpoint, b, { field: n.dataset.entryField, section: idx }); });
       el.classList.add('cms-mt-target');
       el.prepend(b);

@@ -23,7 +23,7 @@ use Core\Network\Network;
 final class EntryEdit
 {
     /** Inline editierbare Feldtypen → Bearbeitungsart */
-    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media', 'mediatext' => 'panel'];   // panel: Knopf je Abschnitt → Seitenleiste an dieser Stelle
+    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media', 'mediatext' => 'panel', 'person' => 'panel', 'faq' => 'panel', 'address' => 'panel', 'downloads' => 'panel'];   // panel: Knopf je Abschnitt → Seitenleiste an dieser Stelle
 
     /** Darf der angemeldete Nutzer diese Tabelle überhaupt auf der Website bearbeiten? */
     public static function canTable(array $t): bool
@@ -202,7 +202,7 @@ final class EntryEdit
             'mediaRemove' => __('Bild entfernen'),
             'mediaNone' => __('Kein Bild – „Bild wählen …“'),
             'mediaHint' => __('Klicken, um ein anderes Bild zu wählen: {label}'),
-            'mtEditSection' => __('Bilder & Buttons'), 'mtEdit' => __('Bilder & Buttons'),   // Text bearbeitet man direkt im Text
+            'mtEditSection' => __('Bilder & Buttons'), 'mtEdit' => __('Bilder & Buttons'), 'comboEdit' => __('Bearbeiten'),   // Text bearbeitet man direkt im Text
         ];
     }
 

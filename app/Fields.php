@@ -554,7 +554,7 @@ final class Fields
                 fn($t) => !\Core\Data\Tables::isInbox($t) || \Core\Data\Inbox::available())) : \Core\Data\Tables::content(), 'name', 'handle'), $v, $aria . ' data-datatable', !$req),
             'datafield' => self::renderDataField($id, $inputName, $v, $aria, $f),
             'mediatext' => self::renderMediaText($id, $inputName, $value, $aria, $f),
-            'media', 'file' => '<div class="media-field" data-accept=""' . ($type === 'media' ? (($f['accept'] ?? '') === 'visual' ? 'visual' : 'image') : 'file') . '">'
+            'media', 'file' => '<div class="media-field" data-accept="' . ($type === 'media' ? (($f['accept'] ?? '') === 'visual' ? 'visual' : 'image') : 'file') . '">'
                 . '<input type="hidden" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '">'
                 . '<div class="media-field-preview">' . self::mediaPreview($v === '' ? null : (int) $v) . '</div>'
                 . '<button type="button" class="btn btn--small" data-media-pick>Auswählen …</button> '
@@ -713,8 +713,9 @@ final class Fields
         $many = '';
         if (!empty($f['pick_many'])) {
             $mf = array_values(array_filter((array) ($f['fields'] ?? []), fn($x) => ($x['name'] ?? '') === $f['pick_many']))[0] ?? [];
-            $many = '<button type="button" class="btn btn--small" data-rep="many" data-rep-sub="' . e((string) $f['pick_many']) . '" data-accept="' . (($mf['accept'] ?? '') === 'visual' ? 'visual' : 'image') . '"'
-                . (!empty($f['max_items']) ? ' data-max="' . (int) $f['max_items'] . '"' : '') . '>' . icon('images') . ' ' . e(__('Bilder auswählen …')) . '</button> ';
+            $files = ($mf['type'] ?? '') === 'file';   // Downloads (Core\Combo): beliebige Dateien
+            $many = '<button type="button" class="btn btn--small" data-rep="many" data-rep-sub="' . e((string) $f['pick_many']) . '" data-accept="' . ($files ? 'file' : (($mf['accept'] ?? '') === 'visual' ? 'visual' : 'image')) . '"'
+                . (!empty($f['max_items']) ? ' data-max="' . (int) $f['max_items'] . '"' : '') . '>' . icon($files ? 'files' : 'images') . ' ' . e($files ? __('Dateien auswählen …') : __('Bilder auswählen …')) . '</button> ';
         }
         $h .= '</div><template>' . $renderItem([], '__i__') . '</template>' . $many
             . '<button type="button" class="btn btn--small btn--ghost" data-rep="add">+ ' . (($f['add_label'] ?? '') !== '' ? e($f['add_label']) : e($itemLabel) . ' hinzufügen') . '</button>'

@@ -1505,6 +1505,7 @@ final class Media
             $v = $data[$f['name'] ?? ''] ?? null;
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v > 0) $ids[(int) $v] = true;
             if (($f['type'] ?? '') === 'mediatext') foreach (self::mediaTextIds($v) as $i) $ids[$i] = true;
+            if (Combo::is((string) ($f['type'] ?? ''))) foreach (Combo::mediaIds($f, $v) as $i) $ids[$i] = true;   // Fotos, Downloads
             if (in_array($f['type'] ?? '', ['repeater', 'group'], true) && is_array($v)) {
                 foreach (array_is_list($v) ? $v : [$v] as $item) if (is_array($item)) self::fieldsCollect($f['fields'] ?? [], $item, $ids);
             }
@@ -1555,6 +1556,9 @@ final class Media
             }
             // Medien + Text: Liste der Medien (gespeichert als JSON bzw. schon gelesen)
             if (($f['type'] ?? '') === 'mediatext' && in_array($id, self::mediaTextIds($v), true)) {
+                return true;
+            }
+            if (Combo::is((string) ($f['type'] ?? '')) && in_array($id, Combo::mediaIds($f, $v), true)) {
                 return true;
             }
             // Wiederholbare Felder und Gruppen (Datensätze: einzeln oder als Liste)

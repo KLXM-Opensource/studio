@@ -134,6 +134,17 @@
     <li><b>Auf der Website bearbeiten:</b> Im Modus „Bearbeiten“ schreiben Sie den Text jedes Abschnitts direkt auf der Seite – mit derselben Formatierungsleiste, gespeichert wird mit „Speichern“ (<kbd>⌘</kbd>/<kbd>Strg</kbd>+<kbd>S</kbd>). Bilder, Darstellung und Buttons ändert der Knopf <b>Bilder &amp; Buttons</b> am Abschnitt: Die Seitenleiste öffnet sich genau dort, und nach dem Speichern zeigt die Seite die Änderung sofort – ohne Neuladen, die Seitenleiste bleibt offen.</li>
   </ul>
 
+  <h3 id="kombifelder">Kombifelder: Ansprechperson, Fragen &amp; Antworten, Adresse, Downloads</h3>
+  <p>Kombifelder fassen zusammengehörige Angaben zu einem Feld zusammen und bringen eine fertige Darstellung auf der Website mit – jedes Kit gestaltet sie passend. Im Tabellen-Designer unter <b>Feld hinzufügen</b> wählen; im Eintrag lassen sich beliebig viele Personen, Fragen, Adressen bzw. Dateien hinzufügen, sortieren und einklappen.</p>
+  <table class="doc-table">
+    <tr><th>Feld</th><th>Angaben</th><th>Auf der Website</th></tr>
+    <tr><td><b>Ansprechperson</b></td><td>Name, Funktion, Foto, Telefon, E-Mail, Hinweis (z. B. Sprechzeiten)</td><td>Kontaktkarte mit rundem Foto; Telefon und E-Mail anklickbar</td></tr>
+    <tr><td><b>Fragen &amp; Antworten</b></td><td>Frage, formatierte Antwort</td><td>Aufklappliste – ohne Skript, mit Tastatur bedienbar; Suchmaschinen erkennen sie als FAQ</td></tr>
+    <tr><td><b>Adresse</b></td><td>Bezeichnung (optional), Straße, PLZ, Ort, Land</td><td>Anschrift mit Link „Auf der Karte ansehen“ (OpenStreetMap, öffnet erst beim Klick). Eine eingebettete Karte liefert weiterhin das Feld <a href="#ort">Ort (Karte)</a>.</td></tr>
+    <tr><td><b>Downloads</b></td><td>Datei, Titel (sonst Dateiname), Beschreibung</td><td>Dateiliste mit Art und Größe; PDFs öffnen im Viewer. <b>Dateien auswählen …</b> übernimmt mehrere Dateien auf einmal.</td></tr>
+  </table>
+  <p>Alle Angaben sind in der Website-Suche und in der Suche der Liste auffindbar; Suchmaschinen erhalten die passende Auszeichnung (schema.org). Auf der Website öffnet <b>Bearbeiten</b> am Feld die Seitenleiste genau dort – nach dem Speichern zeigt die Seite die Änderung sofort.</p>
+
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>
 

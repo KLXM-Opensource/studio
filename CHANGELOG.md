@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Datentabellen: Kombifelder Ansprechperson, Fragen & Antworten, Adresse, Downloads
+- Vier neue Feldtypen (`Core\Combo`): Eingabe als Wiederholer mit festen Unterfeldern, Darstellung als Kontaktkarte, Aufklappliste
+  (`<details>`), Anschrift mit OpenStreetMap-Link bzw. Dateiliste (PDF im Viewer, Art und Größe) – mit schema.org-Microdata,
+  Stile in `css/combo.css`. Suche, Medienverwendung, Bearbeiten auf der Website (Seitenleiste am Feld), Selbsttest.
+- Downloads: **Dateien auswählen …** übernimmt mehrere Dateien auf einmal (`pick_many` für Dateifelder).
+- Behoben: Bild- und Dateifelder schrieben ein fehlerhaftes `data-accept` – die Mediathek zeigte bei Bildfeldern auch Dokumente.
+
 ### Medien + Text: Text direkt auf der Seite, Live-Ansicht nach dem Speichern
 - Auf der Detailseite ist der Text jedes Abschnitts direkt bearbeitbar (Formatierungsleiste, „Speichern“); gespeichert wird nur dieser
   Text (`mt[feld][abschnitt]`), Medien, Buttons und übrige Abschnitte bleiben. Knopf am Abschnitt heißt jetzt **Bilder & Buttons**.

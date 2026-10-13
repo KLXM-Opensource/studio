@@ -32,6 +32,11 @@ final class Tables
         'file' => ['Datei', 'integer', 'paperclip'],
         // Medien + Text: formatierter Text und mehrere Bilder/Videos daneben bzw. darüber (Anordnung je Eintrag) – JSON (Core\Fields::mediaText)
         'mediatext' => ['Medien + Text', 'text', 'images'],
+        // Kombifelder (Core\Combo): Liste fester Unterfelder als JSON, eigene Darstellung mit schema.org-Auszeichnung
+        'person' => ['Ansprechperson', 'text', 'user'],
+        'faq' => ['Fragen & Antworten', 'text', 'question'],
+        'address' => ['Adresse', 'text', 'address-book'],
+        'downloads' => ['Downloads', 'text', 'download-simple'],
         'link' => ['Link', 'string', 'link'],
         'email' => ['E-Mail', 'string', 'at'],
         'tel' => ['Telefon', 'string', 'phone'],

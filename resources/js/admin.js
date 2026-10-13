@@ -261,8 +261,9 @@ async function pickManyRows(rep, btn) {
     added++;
   }
   if (added) rep.dispatchEvent(new Event('input', { bubbles: true }));
-  if (skipped) toast(t('{n} Bilder nicht übernommen – höchstens {max} Einträge.', { n: skipped, max }), 'warn');
-  else if (added) toast(added === 1 ? t('1 Bild hinzugefügt.') : t('{n} Bilder hinzugefügt.', { n: added }));
+  const files = btn.dataset.accept === 'file';
+  if (skipped) toast(files ? t('{n} Dateien nicht übernommen – höchstens {max} Einträge.', { n: skipped, max }) : t('{n} Bilder nicht übernommen – höchstens {max} Einträge.', { n: skipped, max }), 'warn');
+  else if (added) toast(files ? (added === 1 ? t('1 Datei hinzugefügt.') : t('{n} Dateien hinzugefügt.', { n: added })) : added === 1 ? t('1 Bild hinzugefügt.') : t('{n} Bilder hinzugefügt.', { n: added }));
 }
 
 function initRepeaters(scope = d) {

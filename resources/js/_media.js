@@ -1632,7 +1632,7 @@ function pickMany(kind = 'visual', selected = []) {
     const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
     dlg.classList.add('fx-dialog--many');   // dasselbe Element nutzt auch pick() – Klasse beim Schließen wieder entfernen
     let chosen = null;
-    dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(kind === 'image' ? t('Bilder auswählen') : t('Bilder und Videos auswählen'))}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div>
+    dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(kind === 'image' ? t('Bilder auswählen') : kind === 'file' ? t('Dateien auswählen') : t('Bilder und Videos auswählen'))}</h2><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div>
       <p class="fx-dhint">${esc(t('Anklicken wählt aus oder ab – die Nummer zeigt die Reihenfolge. Hochgeladene Dateien kommen automatisch dazu.'))}</p>
       <div class="fx-host"></div>
       <div class="fx-dfoot"><span class="fx-dfoot__n" aria-live="polite"></span><button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-clear>${esc(t('Auswahl aufheben'))}</button><button type="button" class="adm-btn adm-btn--primary" data-take></button></div>`;

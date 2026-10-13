@@ -232,6 +232,7 @@ final class Documents
             }
             return implode(' ', $out);
         }
+        if (\Core\Combo::is((string) ($f['type'] ?? ''))) return \Core\Combo::text($f, $e[$n] ?? null);
         if (($f['type'] ?? '') === 'mediatext') return trim((string) preg_replace('~\s+~u', ' ', implode(' ', array_map(fn($s) => $s['title'] . ' ' . Text::plain($s['text']), \Core\Fields::mediaTextSections($e[$n] ?? null)))));
         $v = in_array($f['type'], ['relation', 'relations', 'richtext'], true) ? Text::plain(Entries::html($t, $e, $n, ['link' => false])) : Entries::text($t, $e, $n);
         if ($f['type'] === 'file' && is_numeric($e[$n] ?? null)) $v .= ' ' . self::transcript((int) $e[$n]);

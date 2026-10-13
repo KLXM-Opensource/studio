@@ -112,6 +112,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
       <?= match (true) {
           $tp === 'richtext' => '<div class="prose"' . $ea . '>' . $h . '</div>',
           $tp === 'mediatext' => '<div class="df-mt"' . $ea . '>' . $h . '</div>',   // Medien + Text: Block-Inhalt, nie in <p>
+          \Core\Combo::is($tp) => '<div class="df-combo df-combo--' . e($tp) . '"' . $ea . '>' . $h . '</div>',   // Kombifelder: Block-Inhalt
           $tp === 'media' => '<div class="df-img ratio-' . e(str_replace(':', '-', $ratio)) . '">' . $h . '</div>',
           default => '<p' . $ea . '>' . $h . '</p>',
       } ?>
