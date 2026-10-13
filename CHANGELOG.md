@@ -7,6 +7,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Behoben: „Fließtext / Artikel“ auf einer leeren Seite
+- Einfügen in Texte direkt im Seiten-Editor: Editor.js verarbeitete das Einfügen zusätzlich – Inhalte erschienen doppelt.
 - Auf einer neuen Seite schien die Wahl „Fließtext / Artikel“ nichts zu tun: Der leere Fließtext ersetzte den Platzhalter
   „Leere Seite“ und wurde selbst wieder als Platzhalter gezeigt. Jetzt wird der Platzhalter übernommen, der Text ist sofort bereit.
 

@@ -865,8 +865,10 @@ function makeTool(type, def) {
       $$('[data-edit]', pv).forEach(n => {
         const mode = n.dataset.editMode || 'plain';
         n.spellcheck = true;
-        // Editor.js soll Tasten in unseren Feldern nicht abfangen (Enter, Backspace, Tab …)
+        // Editor.js soll Tasten in unseren Feldern nicht abfangen (Enter, Backspace, Tab …) – und auch kein Einfügen:
+        // sein Paste-Modul fügte den Inhalt sonst ein zweites Mal ein (unser Feld hat ihn schon als Text eingesetzt)
         n.addEventListener('keydown', e => e.stopPropagation());
+        n.addEventListener('paste', e => e.stopPropagation());
         if (mode === 'plain') {
           n.contentEditable = 'plaintext-only';
           if (n.contentEditable !== 'plaintext-only') n.contentEditable = 'true';
