@@ -208,7 +208,19 @@ final class Sanitizer
             . ($ref !== '' ? ' data-link="' . htmlspecialchars($ref, ENT_QUOTES) . '"' : '')
             . ($title !== '' ? ' title="' . htmlspecialchars(mb_substr($title, 0, 200), ENT_QUOTES) . '"' : '')
             . ($blank ? ' target="_blank" rel="noopener"' : '')
-            . (preg_match('~^media:\d+$~', $ref) ? ' download' : '') . '>' . $inner . '</a>';   // Datei-Link „Download“ (PDF „Anzeigen“: media:ID:viewer)
+            . (preg_match('~^media:\d+$~', $ref) ? ' download' : '')   // Datei-Link „Download“ (PDF „Anzeigen“: media:ID:viewer)
+            . self::pdfAttrs($ref) . '>' . $inner . '</a>';
+    }
+
+    /** PDF der Mediathek: beide Ziele für die Auswahl „Anzeigen | Herunterladen“ auf der Website (Core\PdfLinks) */
+    private static function pdfAttrs(string $ref): string
+    {
+        if (!str_starts_with($ref, 'media:')) return '';
+        try {
+            return PdfLinks::attrsForRef($ref);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     /** Aktuelle Adresse eines Verweises (null: Ziel fehlt oder keine Datenbank → href bleibt) */

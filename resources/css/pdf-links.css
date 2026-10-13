@@ -1,0 +1,19 @@
+/* PDF-Links: Karte „Ansehen | Herunterladen“ (Core\PdfLinks, js/pdf-links.mjs). Farben und Rundung aus dem Kit-Vertrag (--kit-*),
+   Knöpfe mit den Klassen des Kits. */
+.cms-pdfpop{position:absolute;z-index:1000;display:flex;gap:1.1rem;align-items:flex-start;width:min(31rem,calc(100vw - 24px));padding:1.1rem 2.6rem 1.1rem 1.1rem;
+  border:1px solid var(--kit-line,rgb(0 0 0/.12));border-radius:calc(var(--kit-radius,10px) + 4px);background:var(--kit-surface,#fff);color:var(--kit-ink,#1b1f24);
+  box-shadow:0 18px 50px -12px rgb(0 0 0/.28),0 2px 8px rgb(0 0 0/.06);font-size:1rem;line-height:1.4;text-align:left}
+.cms-pdfpop__thumb{flex:none;display:block;width:5.5rem;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:top;border-radius:4px;box-shadow:0 1px 4px rgb(0 0 0/.2);background:#fff}
+.cms-pdfpop__thumb--none{display:grid;place-items:center;font-weight:700;color:#b42318;background:var(--kit-bg,#f4f4f5)}
+.cms-pdfpop__body{min-width:0;display:grid;gap:.45rem}
+.cms-pdfpop__body p{margin:0}
+.cms-pdfpop__title{font-family:var(--kit-font-head,inherit);font-weight:700;font-size:1.1em;overflow-wrap:anywhere}
+.cms-pdfpop__meta{display:flex;align-items:center;gap:.5em;color:var(--kit-muted,#5b6470);font-size:.95em}
+.cms-pdfpop__badge{padding:.1em .45em;border-radius:4px;background:#b42318;color:#fff;font-size:.8em;font-weight:700;letter-spacing:.03em}
+.cms-pdfpop__act{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.35rem!important}
+.cms-pdfpop__act a{margin:0;white-space:nowrap}
+.cms-pdfpop__x{position:absolute;top:.4rem;right:.4rem;width:2rem;height:2rem;padding:0;border:0;border-radius:50%;background:none;color:inherit;font-size:1.4rem;line-height:1;cursor:pointer;opacity:.6}
+.cms-pdfpop__x:hover,.cms-pdfpop__x:focus-visible{opacity:1;background:var(--kit-bg,rgb(0 0 0/.06))}
+.cms-pdfpop a:focus-visible,.cms-pdfpop__x:focus-visible{outline:3px solid var(--kit-accent,currentColor);outline-offset:2px}
+@media (max-width:420px){.cms-pdfpop{flex-direction:column}.cms-pdfpop__thumb{width:4.5rem}}
+@media (prefers-color-scheme:dark){.cms-pdfpop__thumb{box-shadow:0 1px 4px rgb(0 0 0/.5)}}

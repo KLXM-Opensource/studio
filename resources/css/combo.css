@@ -45,3 +45,4 @@
 .dlf__link{font-weight:600;overflow-wrap:anywhere}
 .dlf__meta{font-size:.85em;opacity:.7}
 .dlf__note{font-size:.92em}
+.dlf__thumb{flex:none;width:2.8em;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:top;border-radius:3px;box-shadow:0 1px 3px rgb(0 0 0/.18);background:#fff}

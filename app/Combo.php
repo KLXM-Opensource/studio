@@ -152,7 +152,7 @@ final class Combo
             if ($q === '') continue;
             $h .= '<details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">'
                 . '<summary class="faq__q"><span itemprop="name">' . e($q) . '</span></summary>'
-                . '<div class="faq__a" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><div class="prose" itemprop="text">' . emphasis_rich((string) ($i['answer'] ?? '')) . '</div></div>'
+                . '<div class="faq__a" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><div class="prose" itemprop="text">' . rich((string) ($i['answer'] ?? '')) . '</div></div>'
                 . '</details>';
         }
         return $h . '</div>';
@@ -190,8 +190,9 @@ final class Combo
             if (!$m) continue;
             $pdf = $m['mime'] === 'application/pdf';
             $href = $pdf ? (string) (Media::viewerUrl($m) ?? Media::url($m)) : Media::url($m);
-            $h .= '<li class="dlf__item"><span class="dlf__ico" aria-hidden="true">' . icon($pdf ? 'file-pdf' : 'file') . '</span>'
-                . '<span class="dlf__body"><a class="dlf__link" href="' . e($href) . '"' . ($pdf ? '' : ' download') . '>' . e(self::fileTitle($i, $m)) . '</a>'
+            $thumb = $pdf ? PdfLinks::thumb($m, 160) : null;   // erste Seite als Vorschau (sonst Symbol)
+            $h .= '<li class="dlf__item">' . ($thumb !== null ? '<img class="dlf__thumb" src="' . e($thumb) . '" alt="" width="56" height="72" loading="lazy">' : '<span class="dlf__ico" aria-hidden="true">' . icon($pdf ? 'file-pdf' : 'file') . '</span>')
+                . '<span class="dlf__body"><a class="dlf__link" href="' . e($href) . '"' . ($pdf ? PdfLinks::attrs($m) : ' download') . '>' . e(self::fileTitle($i, $m)) . '</a>'
                 . '<span class="dlf__meta">' . e(Media::typeLabel((string) $m['mime']) . ' · ' . Media::humanSize((int) $m['size'])) . '</span>'
                 . (($n = trim((string) ($i['note'] ?? ''))) !== '' ? '<span class="dlf__note">' . nl2br(e($n), false) . '</span>' : '')
                 . '</span></li>';

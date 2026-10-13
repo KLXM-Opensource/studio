@@ -223,6 +223,8 @@ final class SiteController
         }
         // Push-Benachrichtigungen (Core\Push\Visitor): Banner und Glocke – für alle gleich, das Skript entscheidet im Browser
         if (!$app->editing) $html = \Core\Push\Visitor::inject($html);
+        // PDF-Links: Auswahl „Anzeigen | Herunterladen“ (Core\PdfLinks) – Skript nur, wenn die Seite solche Links hat
+        if (!$app->editing) $html = \Core\PdfLinks::inject($html);
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);
         // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);

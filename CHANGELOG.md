@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PDF-Links: Auswahl „Ansehen | Herunterladen“ für Besucher
+- Klick auf einen PDF-Link zeigt eine Karte mit Vorschau der ersten Seite, Titel, Größe und den Knöpfen **Ansehen** (Viewer) und
+  **Herunterladen** – Knöpfe im Stil des Kits, Tastatur (Esc, Fokus bleibt in der Karte). `Core\PdfLinks`, `js/pdf-links.mjs`
+  (nur auf Seiten mit PDF-Links). Ohne Skript bzw. mit Strg/⌘ gilt das im Linkdialog gewählte Ziel.
+- Downloads-Kombifeld zeigt bei PDFs die Vorschau der ersten Seite statt des Symbols; Text von „Medien + Text“ und Antworten der
+  FAQ laufen durch `rich()` (aktuelle Link-Adressen).
+
 ### PDF-Links: wieder „Anzeigen“ oder „Download“
 - Linkdialog: bei PDFs Segmentschalter **Anzeigen | Download** (statt fest im Viewer). `media:ID` ist wieder die Datei – im Text
   und bei Buttons mit `download`-Attribut –, `media:ID:viewer` der PDF-Viewer. Bestehende Datei-Links öffnen mit ihrer Wahl.

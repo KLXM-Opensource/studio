@@ -394,4 +394,5 @@ return [
     'Die Anmeldung ist leider ausgebucht – es sind keine Plätze mehr frei.' => 'Unfortunately registration is fully booked – there are no places left.',
     'Bilder: {title}' => 'Images: {title}',
     'Auf der Karte ansehen' => 'View on map',
+    'Herunterladen' => 'Download',
 ];

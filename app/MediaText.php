@@ -34,7 +34,7 @@ final class MediaText
         $btns = self::buttons($v['buttons']);
         // Bearbeiten auf der Detailseite (Core\Data\EntryEdit): Text in eigenem Rahmen – direkt bearbeitbar, getrennt von den Buttons
         $edit = !empty(app()->entryEdit);
-        $body = $edit ? '<div class="mt__body" data-mt-body>' . emphasis_rich($v['text']) . '</div>' : ($v['text'] !== '' ? emphasis_rich($v['text']) : '');
+        $body = $edit ? '<div class="mt__body" data-mt-body>' . emphasis_rich($v['text']) . '</div>' : ($v['text'] !== '' ? rich($v['text']) : '');
         $text = $v['text'] !== '' || $btns !== '' || $edit ? '<div class="mt__text prose">' . $body . $btns . '</div>' : '';
         $items = array_values(array_filter(array_map(fn($id) => Media::find((int) $id), $v['media'])));
         if (!$items) return $text !== '' ? '<div class="mt mt--only">' . $text . '</div>' : '';
@@ -61,7 +61,7 @@ final class MediaText
         foreach ($buttons as $b) {
             $href = self::href((string) $b['link']);
             if ($href === '' || $href === '#') continue;
-            $h .= '<a class="' . e($b['style'] === 'secondary' ? $secondary : $primary) . '" href="' . e($href) . '"' . ext_attrs($href) . (preg_match('~^media:\d+$~', (string) $b['link']) ? ' download' : '') . '>' . e((string) $b['label']) . '</a>';
+            $h .= '<a class="' . e($b['style'] === 'secondary' ? $secondary : $primary) . '" href="' . e($href) . '"' . ext_attrs($href) . (preg_match('~^media:\d+$~', (string) $b['link']) ? ' download' : '') . PdfLinks::attrsForRef((string) $b['link']) . '>' . e((string) $b['label']) . '</a>';
         }
         return $h !== '' ? '<p class="mt__btns">' . $h . '</p>' : '';
     }

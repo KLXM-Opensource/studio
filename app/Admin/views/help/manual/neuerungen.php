@@ -16,8 +16,8 @@
   <h3>Große Fotos laden schneller hoch</h3>
   <p>Fotos vom Handy verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – ein 20-MB-Foto braucht nur noch einen Bruchteil der Zeit. Kameradaten wie der Aufnahmeort werden dabei entfernt. <a href="#medien">Mehr dazu →</a></p>
 
-  <h3>PDF-Links: Anzeigen oder Download</h3>
-  <p>Beim Verlinken einer PDF wählen Sie im Linkdialog <b>Anzeigen</b> (öffnet im eingebauten Betrachter) oder <b>Download</b> (lädt die Datei herunter). Datei-Felder und Downloads-Blöcke bieten weiterhin „Ansehen“ im Betrachter an. <a href="#link-datei">Mehr dazu →</a></p>
+  <h3>PDF-Links: Besucher wählen „Ansehen“ oder „Herunterladen“</h3>
+  <p>Ein Klick auf einen PDF-Link zeigt Besuchern eine kleine Karte mit Vorschau der ersten Seite, Titel und Größe sowie den Knöpfen <b>Ansehen</b> (eingebauter Betrachter) und <b>Herunterladen</b>. Im Linkdialog legen Sie fest, wohin der Link ohne diese Auswahl führt (<b>Anzeigen</b> oder <b>Download</b>, z. B. bei „In neuem Tab öffnen“). Datei-Felder und Downloads-Blöcke bieten weiterhin „Ansehen“ im Betrachter an. <a href="#link-datei">Mehr dazu →</a></p>
 
   <h3>Mehrere Medien auf einmal auswählen</h3>
   <p>Wo mehrere Bilder oder Videos gebraucht werden, öffnet sich die Mediathek mit <b>Mehrfachauswahl</b>: anklicken wählt aus oder ab, die Nummer zeigt die Reihenfolge, Hochgeladenes kommt gleich dazu, „3 übernehmen“ schließt ab. Das gilt jetzt auch für <b>Galerie und Slider</b> („Bilder auswählen …“). <a href="#medien-text">Mehr dazu →</a></p>
