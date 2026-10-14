@@ -54,11 +54,11 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 
 /* Farben: Leiste immer dunkel; Menüs/Erklärungen hell bzw. in der dunklen Darstellung der Verwaltung dunkel */
 :host(.cms-bar-host){--b-bg:#1E2840;--b-line:rgba(255,255,255,.12);--b-ink:#fff;--b-mute:#BCC3D1;--b-fill:rgba(255,255,255,.08);--b-fill-h:rgba(255,255,255,.16);--b-pri:#fff;--b-pri-ink:#1E2840;--b-pri-h:#E3E8F3;--b-focus:#FFD28A;--b-ok:#5FD3A2;--b-warn:#F5BD55;--b-bad:#FF9585;--b-info:#9CBEFF;
-  --m-bg:#fff;--m-ink:#16201E;--m-mute:#586170;--m-line:#E3E6EC;--m-hover:#EEF1F8;--m-ico:#314164;--m-on:#fff;--m-shadow:0 18px 44px -12px rgba(16,24,40,.38),0 0 0 1px rgba(16,24,40,.08)}
+  --m-bg:#fff;--m-ink:#16201E;--m-mute:#586170;--m-line:#E3E6EC;--m-hover:#EEF1F8;--m-ico:#314164;--m-on:#fff;--m-shadow:0 10px 28px -14px rgba(16,24,40,.24),0 2px 6px -2px rgba(16,24,40,.08),0 0 0 1px rgba(16,24,40,.07)}
 :host(.cms-bar-host[data-theme=dark]){--b-bg:#0F1522;--b-line:rgba(255,255,255,.1);--b-mute:#A8B0C0;--b-pri:#E6EAF3;--b-pri-ink:#0F1522;--b-pri-h:#fff;
-  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 18px 44px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.08)}
+  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}
 @media (prefers-color-scheme:dark){:host(.cms-bar-host:not([data-theme=light])){--b-bg:#0F1522;--b-line:rgba(255,255,255,.1);--b-mute:#A8B0C0;--b-pri:#E6EAF3;--b-pri-ink:#0F1522;--b-pri-h:#fff;
-  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 18px 44px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.08)}}
+  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}}
 
 /* Drei Zonen in einer Zeile: Kontext | Modus | Aktionen */
 .cms-bar[data-bar]{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(max-content,1fr);align-items:center;gap:16px;min-height:52px;padding:8px 12px 8px 10px;background:var(--b-bg);color:var(--b-ink);box-shadow:inset 0 -1px 0 var(--b-line)}
@@ -201,10 +201,10 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 @media (prefers-reduced-motion:no-preference){
   .cms-pop:not([hidden]){animation:cms-in .14s ease-out}
   @keyframes cms-in{from{opacity:0;transform:translateY(-4px)}}
-  /* Menüs gleiten aus dem Knopf: von oben nach unten aufgedeckt, leicht nachrückend (rechtsbündige Menüs ab der rechten Ecke) */
-  .cms-menu:not([hidden]){transform-origin:top left;animation:cms-menu-in .22s cubic-bezier(.2,.8,.2,1)}
-  .cms-menu--end:not([hidden]){transform-origin:top right}
-  @keyframes cms-menu-in{from{opacity:0;clip-path:inset(0 0 100% 0 round 12px);transform:translateY(-6px) scale(.98)}60%{opacity:1}to{opacity:1;clip-path:inset(0 0 0 0 round 12px);transform:none}}
+  /* Menüs gleiten unter der Leiste hervor: das ganze Menü fährt um seine Höhe nach unten, alles oberhalb seiner Endposition
+     bleibt abgeschnitten (Oberkante wirkt wie die Kante, aus der es kommt). Seiten/unten frei für den Schatten. Kurz, stark gebremst. */
+  .cms-menu:not([hidden]){animation:cms-menu-slide .18s cubic-bezier(.16,1,.3,1)}
+  @keyframes cms-menu-slide{from{transform:translateY(-100%);clip-path:inset(100% -40px -40px -40px)}to{transform:none;clip-path:inset(0 -40px -40px -40px)}}
 }
 
 /* < 1024 px: Modus ins Menü „⋯“, Status als Punkt */
