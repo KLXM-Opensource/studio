@@ -598,6 +598,33 @@ final class Extensions
     }
 
     /**
+     * Filter anwenden (Extension::filter): Wert durch alle Erweiterungen reichen. null = unverändert, false = verworfen
+     * (Aufrufer entscheidet, ob das erlaubt ist), Fehler → Wert unverändert (Protokoll).
+     */
+    public static function filter(string $name, mixed $value, array $ctx = []): mixed
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->filters[$name] ?? [] as $fn) {
+                if ($value === false) return false;
+                try {
+                    $out = $fn($value, $ctx);
+                    if ($out !== null) $value = $out;
+                } catch (\Throwable $e) {
+                    error_log('[Erweiterung ' . $x->name . '] filter ' . $name . ': ' . $e->getMessage());
+                }
+            }
+        }
+        return $value;
+    }
+
+    /** Hat eine aktive Erweiterung einen Filter für diesen Namen? – teure Vorbereitung nur dann */
+    public static function filters(string $name): bool
+    {
+        foreach (self::$active as $x) if (!empty($x->filters[$name])) return true;
+        return false;
+    }
+
+    /**
      * Hört eine aktive Erweiterung auf das Ereignis? – teure Angaben (z. B. Eintrag neu laden) nur dann berechnen.
      * $event: Name ('page.saved') oder Klasse (PageSaved::class) – beide Schreibweisen zählen.
      */

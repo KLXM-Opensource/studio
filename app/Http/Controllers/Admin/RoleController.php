@@ -78,7 +78,9 @@ final class RoleController extends AdminController
             && !(int) app()->db->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id != ?", [(int) $id])) {
             return $this->back('/admin/users/personen', 'error', __('Es muss mindestens ein Administrationskonto bestehen bleiben.'));
         }
+        $old = (string) app()->db->fetchValue('SELECT role FROM users WHERE id = ?', [(int) $id]);
         app()->db->update('users', ['role' => $role['key']], 'id = :id', ['id' => (int) $id]);
+        if ($old !== $role['key']) \Core\Extensions::emit(new \Core\Events\UserRoleChanged((int) $id, $role['key'], $old));   // Erweiterungen
         return $this->back('/admin/users/personen', 'success', __('Rolle geändert.'));
     }
 }

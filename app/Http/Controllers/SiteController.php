@@ -357,24 +357,22 @@ final class SiteController
 
     public function sitemap(Request $r): Response
     {
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $urls = [];   // [{loc, lastmod?}] – Erweiterungen ändern sie über den Filter „sitemap.urls“
+        $mod = fn(?string $d) => substr((string) $d, 0, 10);
         // Landing-Domain: nur ihre Seiten (Modus „Eigene Domain“; Spiegel und „nicht in Suchmaschinen“ → leer)
         if ($l = Landings::current()) {
             foreach ($l->mode === 'own' && !$l->noindex ? $l->pages() : [] as $p) {
                 if ($p['noindex'] || \Core\PageAccess::restricted($p)) continue;
-                $mod = substr((string) ($p['published_at'] ?? $p['updated_at']), 0, 10);
-                $xml .= '  <url><loc>' . e((string) $l->absUrl($p)) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+                $urls[] = ['loc' => (string) $l->absUrl($p), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at'])];
             }
-            return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->sitemapXml($urls);
         }
         foreach (Pages::published() as $p) {
             // Seiten einer Landingpage mit eigener Domain stehen in deren Sitemap
             if ($p['noindex'] || Landings::owner($p) || \Core\PageAccess::restricted($p)) {
                 continue;
             }
-            $loc = abs_url(Pages::url($p));
-            $mod = substr((string) ($p['published_at'] ?? $p['updated_at']), 0, 10);
-            $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+            $urls[] = ['loc' => abs_url(Pages::url($p)), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at'])];
         }
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
             if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])
@@ -384,12 +382,23 @@ final class SiteController
             foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
                 $loc = site_url() . Entries::url($t, $e);
                 if (Tables::isShared($t) && Entries::absUrl($t, $e) !== $loc) continue;
-                $mod = substr((string) ($e['updated_at'] ?? $e['published_at']), 0, 10);
-                $xml .= '  <url><loc>' . e($loc) . '</loc>' . ($mod ? "<lastmod>$mod</lastmod>" : '') . "</url>\n";
+                $urls[] = ['loc' => $loc, 'lastmod' => $mod($e['updated_at'] ?? $e['published_at'])];
             }
         }
-        $xml .= '</urlset>' . "\n";
-        return new Response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->sitemapXml($urls);
+    }
+
+    /** sitemap.xml aus Adressen – vorher Filter „sitemap.urls“ (Extension::filter) */
+    private function sitemapXml(array $urls): Response
+    {
+        $urls = \Core\Extensions::filter('sitemap.urls', $urls, ['host' => (string) (app()->request?->host() ?? '')]);
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach (is_array($urls) ? $urls : [] as $u) {
+            if (!is_array($u) || trim((string) ($u['loc'] ?? '')) === '') continue;
+            $m = (string) ($u['lastmod'] ?? '');
+            $xml .= '  <url><loc>' . e((string) $u['loc']) . '</loc>' . ($m !== '' ? '<lastmod>' . e($m) . '</lastmod>' : '') . "</url>\n";
+        }
+        return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8']);
     }
 
     public function robots(Request $r): Response

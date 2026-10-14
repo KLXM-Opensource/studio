@@ -113,6 +113,18 @@ final class Mailer
         if (!$dump && !filter_var($from, FILTER_VALIDATE_EMAIL)) {
             return 'Keine gültige Absender-Adresse eingetragen.';
         }
+        // Erweiterungen (Extension::filter 'mail.message'): ändern oder mit false unterdrücken – nie Mails zur Kontosicherheit;
+        // Test-Umleitung und Staging-Schutz gelten danach weiter
+        if (empty($o['account']) && Extensions::filters('mail.message')) {
+            $m = Extensions::filter('mail.message', ['subject' => $subject, 'text' => $text, 'to' => $to, 'options' => $o], ['account' => false]);
+            if ($m === false) { self::$outcome = 'logged'; return null; }
+            if (is_array($m)) {
+                $subject = (string) ($m['subject'] ?? $subject);
+                $text = (string) ($m['text'] ?? $text);
+                $to = array_values(array_filter((array) ($m['to'] ?? $to), fn($a) => is_string($a) && filter_var($a, FILTER_VALIDATE_EMAIL))) ?: $to;
+                $o = is_array($m['options'] ?? null) ? $m['options'] : $o;
+            }
+        }
         $redirected = false;
         // Test-Umleitung (Grundeinstellungen → E-Mail-Versand, auch live): alle E-Mails an die Test-Adresse(n) – nie Mails zur
         // Kontosicherheit ($o['account']: Passwort, Einladung, E-Mail-Änderung), sonst sperrt man sich beim Testen aus.

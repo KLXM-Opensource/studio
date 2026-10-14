@@ -67,6 +67,7 @@ final class ExtensionsSelfTest
             self::slots();
             self::push();
             self::blockHooks();
+            self::filtersAndEvents();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -106,6 +107,61 @@ final class ExtensionsSelfTest
             self::activate(null);
         }
     }
+
+    // ================================================================= Filter (Extension::filter) und weitere Ereignisse
+
+    private static function filtersAndEvents(): void
+    {
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+        $x->filter('gibt.es.nicht', fn($v) => 'x');   // unbekannt → nicht registriert (Protokoll)
+        $x->filter('ext:qa_selftest.zahl', fn(int $v) => $v + 1);
+        $x->filter('ext:qa_selftest.zahl', fn(int $v) => null);                          // null = unverändert
+        $x->filter('ext:qa_selftest.zahl', fn() => throw new \RuntimeException('kaputt')); // Fehler = unverändert
+        $x->filter('ext:qa_selftest.weg', fn() => false);
+        $x->filter('ext:qa_selftest.weg', fn() => 'nie erreicht');
+        $x->filter('menu.items', fn(array $items) => [...$items, ['id' => 0, 'label' => 'QA-Menü', 'href' => '/qa', 'active' => false, 'children' => [], 'draft' => false]]);
+        $x->filter('seo.meta', fn(array $m, array $c) => ['title' => 'QA: ' . $m['title']] + $m);
+        $x->filter('search.document', fn(array $d, array $c) => ($c['page_id'] ?? 0) === self::$qaPage ? false : $d);
+        $x->filter('mail.message', fn(array $m) => str_contains($m['subject'], 'QA-unterdrücken') ? false : $m);
+        $got = [];
+        foreach (['page.created', 'page.moved', 'user.login_failed', 'settings.saved', 'table.schema_changed'] as $ev) {
+            $x->on($ev, function (\Core\Events\Event $e) use (&$got) { $got[] = $e->name(); });
+        }
+        self::activate($x);
+        self::eq('filter: unbekannter Name nicht registriert', isset($x->filters['gibt.es.nicht']), false);
+        self::eq('filter: Kette, null und Fehler lassen den Wert', Extensions::filter('ext:qa_selftest.zahl', 1), 2);
+        self::eq('filter: false verwirft, weitere Filter laufen nicht', Extensions::filter('ext:qa_selftest.weg', 'a'), false);
+        self::eq('filter: ohne Filter unverändert', Extensions::filter('sitemap.urls', [['loc' => 'x']]), [['loc' => 'x']]);
+        self::eq('Filters::ALL – Namen bekannt', Filters::known('form.validate') && Filters::known('ext:abc.def') && !Filters::known('abc'), true);
+        self::eq('menu.items: Eintrag ergänzt', array_column(Pages::menu(), 'label')[count(Pages::menu()) - 1] ?? null, 'QA-Menü');
+        $pdo = app()->db->pdo;
+        $pdo->beginTransaction();
+        try {
+            $id = Pages::create(['slug' => 'ext-filter-qa', 'title' => 'Filter QA', 'lang' => Lang::default(), 'sort' => 9999, 'status' => 'published']);
+            self::$qaPage = $id;
+            self::eq('page.created ausgelöst', in_array('page.created', $got, true), true);
+            Pages::move($id, null, 0);
+            self::eq('page.moved ausgelöst', in_array('page.moved', $got, true), true);
+            self::eq('seo.meta: Titel geändert', str_starts_with(Seo::forPage(Pages::find($id))['title'], 'QA: '), true);
+            $docs = \Core\Search\Documents::build(Lang::default());
+            self::eq('search.document: Seite mit false aus der Suche', isset($docs['p-' . $id]), false);
+            self::eq('search.document: andere Seiten bleiben', count($docs) > 0, true);
+            app()->auth->attempt('qa-niemand@example.org', 'falsch', '192.0.2.1');
+            self::eq('user.login_failed ausgelöst', in_array('user.login_failed', $got, true), true);
+            Mailer::$testDump = sys_get_temp_dir() . '/klxm-qa-mail';
+            self::eq('mail.message: false unterdrückt', [Mailer::send('QA-unterdrücken', 'x', ['qa@example.org']), Mailer::$outcome], [null, 'logged']);
+        } finally {
+            Mailer::$testDump = null;
+            $pdo->rollBack();
+            self::activate(null);
+        }
+        foreach (\Core\Events\Event::ALL as $name => $class) {
+            if ($class::NAME !== $name) self::$fail[] = 'Ereignis ' . $class . ': NAME ≠ ' . $name;
+        }
+        self::eq('Ereignisse: Name = Klasse (' . count(\Core\Events\Event::ALL) . ')', true, true);
+    }
+
+    private static int $qaPage = 0;
 
     // ================================================================= Push-Ereignisse (Extension::pushEvent → Konto → Benachrichtigungen)
 

@@ -12,7 +12,8 @@
     <tr><td>Website</td><td><code>blocks()</code>, <code>htmlFilter()</code>, <code>csp()</code>, <code>footerLinks()</code>, <code>frontendTool()</code>, <code>toolbar()</code></td><td>CSP nur Hosts (kein <code>'unsafe-inline'</code>), Werkzeuge nur angemeldet.</td></tr>
     <tr><td>Blöcke &amp; Editor</td><td><code>blocksResolve()</code>, <code>blocksBeforeSave()</code>, <code>blockPresets()</code>, im Browser <code>CMSAdmin.editorExt</code></td><td><b>blocksResolve</b> <code>fn(array $blocks, array $ctx): array</code> – Blöcke auflösen – <code>$ctx['purpose']</code>: <code>render</code> (Ausgabe der Seite, <code>Theme::renderBlocks</code>, nicht im Bearbeiten-Modus), <code>preview</code> (Vorschau eines Blocks im Editor; ein aufgelöster Block anderen Typs ist dort nicht direkt bearbeitbar), <code>search</code>/<code>api</code>/<code>export</code> (Leser über <code>Pages::readBlocks($page, $draft, $purpose)</code>). Der Editor bekommt immer die rohen Blöcke. <b>blocksBeforeSave</b> – vor jedem <code>Pages::saveDraft</code> (Editor, API/MCP, KI, Import), <code>$ctx</code>: <code>page_id</code>, <code>user_id</code>. <b>blockPresets</b> <code>fn(): list&lt;{type, label, data, group?, hint?, icon?}&gt;</code> – vorbelegte Blöcke in der Blockauswahl, nach Gruppe. Fehler einer Erweiterung lassen die Blöcke unverändert (Protokoll). Browser: <code>CMSAdmin.editorExt.addBlockAction({id, label, icon?, when?(b), run(b)})</code> (Block-Menü ⋯), <code>addBadge(b =&gt; text|null)</code> (Kennzeichen in der Block-Leiste), <code>blocks()</code> (Seitenreihenfolge), <code>refreshBadges()</code>, <code>api(url, body)</code> (POST mit CSRF), <code>readForm(form)</code> (Felder <code>f[…]</code> → Daten), <code>pageId</code>; <code>b</code> = <code>{id, type, index, data, label, update(data), replace(type, data)}</code> – <code>replace</code> behält die Abschnitts-Einstellungen. Skript über <code>toolbar()</code> laden; bereit nach <code>cms:editor-ready</code>. Blockdefinition (<code>blocks()</code>): <code>'sanitize' =&gt; fn(array $data): array</code> prüft die Daten selbst statt nach dem Feldschema (Ausnahme = Block entfällt), <code>'listed' =&gt; false</code> zeigt den Typ nur über Vorlagen (<code>blockPresets</code>). Vorschau im Editor (Seitenstart und je Block): <code>Theme::previewBlock()</code>.</td></tr>
     <tr><td>Mediathek</td><td><code>mediaChecks()</code>, <code>mediaJson()</code>, <code>mediaTypes()</code>, <code>mediaPoster()</code> (+ im Browser <code>CMSMedia.extend()</code>)</td><td>siehe Kapitel <a href="#medien">Medien</a>.</td></tr>
-    <tr><td>Ereignisse</td><td><code>on(PageSaved::class, …)</code></td><td><a href="#erweiterungen-hooks">Typisierte Ereignisse</a> (<code>Core\Events\*</code>); die Namen <code>'page.saved'</code> … bleiben als Alias.</td></tr>
+    <tr><td>Ereignisse</td><td><code>on(PageSaved::class, …)</code></td><td><a href="#erweiterungen-hooks">Typisierte Ereignisse</a> (<code>Core\Events\*</code>) für Seiten, Einträge, Formulare, Konten, Einstellungen und Tabellen; die Namen <code>'page.saved'</code> … bleiben als Alias. Nur Mitteilung <b>danach</b>.</td></tr>
+    <tr><td>Filter</td><td><code>filter('seo.meta', …)</code></td><td><a href="#erweiterungen-filter">Werte an festen Stellen ändern</a> (<code>Core\Filters::ALL</code>): Suche, Sitemap, Menü, SEO, Formular-Prüfung, E-Mails, Datenliste – Ergebnis wirkt.</td></tr>
     <tr><td>Betrieb</td><td><code>command()</code>, <code>health()</code>, <code>afterAdminResponse()</code>, <code>proxy()</code>, <code>docs()</code>, <code>inbox()</code>, <code>pushEvent()</code> (+ <code>Core\Push\Push::notifyUsers()</code>, siehe <a href="#push">Push-Benachrichtigungen</a>)</td><td>Fehler einer Erweiterung werden protokolliert und brechen die Anfrage nicht ab.</td></tr>
   </table>
   <p><b>Regeln:</b></p>
@@ -242,6 +243,22 @@ document.addEventListener('cms:before-save', e =&gt; {
     <tr><td><code>EntrySaved</code></td><td><code>entry.saved</code></td><td><code>definition</code>, <code>entry</code>, <code>created</code>, <code>old</code></td><td>nach Status</td><td><code>array $table, array $entry, bool $created, ?array $old</code></td><td>Eintrag angelegt/geändert (<code>Entries::save</code>, auch Quellen-Abgleich und Formulare)</td></tr>
     <tr><td><code>EntryPublished</code>, <code>EntryUnpublished</code></td><td><code>entry.published</code>, <code>entry.unpublished</code></td><td><code>definition</code>, <code>entry</code></td><td>live / draft</td><td><code>array $table, array $entry</code></td><td>Status wechselt (<code>save</code>, <code>setStatus</code> – nur bei echter Änderung)</td></tr>
     <tr><td><code>EntryDeleted</code></td><td><code>entry.deleted</code></td><td><code>definition</code>, <code>entry</code> (Stand vor dem Löschen, sonst <code>null</code>)</td><td>live</td><td><code>array $table, int $id</code></td><td>Eintrag gelöscht</td></tr>
+    <tr><td><code>PageCreated</code></td><td><code>page.created</code></td><td><code>page</code></td><td>draft</td><td><code>array $page</code></td><td>Seite angelegt (<code>Pages::create</code> – Verwaltung, API/MCP, KI, Vorlagen, Import, Übersetzung)</td></tr>
+    <tr><td><code>PageMoved</code></td><td><code>page.moved</code></td><td><code>page</code> (neuer Stand), <code>oldParentId</code>, <code>reparented()</code></td><td>live</td><td><code>array $page</code></td><td>Seitenbaum, Seiteneinstellungen („Übergeordnete Seite“), API/MCP</td></tr>
+    <tr><td><code>PageTranslated</code></td><td><code>page.translated</code></td><td><code>page</code> (neue Sprachfassung), <code>sourceId</code></td><td>draft</td><td><code>array $page</code></td><td>Übersetzung angelegt (<code>Pages::translate</code>); davor kommt <code>page.created</code></td></tr>
+    <tr><td><code>PageRestored</code></td><td><code>page.restored</code></td><td><code>page</code>, <code>revisionId</code></td><td>draft</td><td><code>array $page</code></td><td>Version als Entwurf wiederhergestellt (Verwaltung, API/MCP); davor kommt <code>page.saved</code></td></tr>
+  </table>
+  <p><b>Weitere typisierte Ereignisse</b> (Basis <code>Core\Events\InfoEvent</code> – kein Datensatz als Gegenstand; Listener mit dem Namen ohne Typ bekommen das Objekt selbst):</p>
+  <table class="doc-table">
+    <tr><th>Klasse</th><th>Name</th><th>Angaben (<code>readonly</code>)</th><th>Auslöser</th></tr>
+    <tr><td><code>FormSubmitted</code></td><td><code>form.submitted</code></td><td><code>definition</code>, <code>table</code>, <code>values</code> (geprüft, <b>Klartext</b> – auch bei verschlüsselten Anfragen; nie protokollieren), <code>entryId</code> bzw. <code>ref</code>, <code>inbox</code></td><td>Formular der Website nach Prüfung, Spamschutz und Speichern (<code>DataForms::submit</code>)</td></tr>
+    <tr><td><code>UserLoggedIn</code></td><td><code>user.login</code></td><td><code>id</code>, <code>email</code>, <code>role</code>, <code>ip</code></td><td>jede erfolgreiche Anmeldung (<code>Auth::login</code> – Passwort, Zwei-Faktor, Passkey, Einladung, Netzwerk)</td></tr>
+    <tr><td><code>UserLoggedOut</code></td><td><code>user.logout</code></td><td><code>id</code></td><td>Abmeldung, Sitzung noch offen</td></tr>
+    <tr><td><code>LoginFailed</code></td><td><code>user.login_failed</code></td><td><code>email</code> (wie eingegeben), <code>ip</code>, <code>reason</code>: <code>password</code> | <code>disabled</code> | <code>limited</code></td><td>abgelehnte Anmeldung (<code>Auth::attempt</code>)</td></tr>
+    <tr><td><code>UserCreated</code></td><td><code>user.created</code></td><td><code>id</code>, <code>email</code>, <code>role</code>, <code>via</code>: <code>admin</code> | <code>setup</code> | <code>invite</code></td><td>Konto der Website angelegt</td></tr>
+    <tr><td><code>UserRoleChanged</code></td><td><code>user.role_changed</code></td><td><code>id</code>, <code>role</code>, <code>oldRole</code></td><td>Verwaltung → Rollen</td></tr>
+    <tr><td><code>SettingsSaved</code></td><td><code>settings.saved</code></td><td><code>area</code>: <code>settings</code> | <code>system</code> | <code>design</code>; <code>keys</code> (nur geänderte, ohne Werte; Sprachfassungen als <code>schlüssel@en</code>)</td><td>Website-Einstellungen, Grundeinstellungen, Design (Verwaltung, Live-Design, API/MCP)</td></tr>
+    <tr><td><code>TableSchemaChanged</code></td><td><code>table.schema_changed</code></td><td><code>definition</code>, <code>table</code>, <code>action</code>: <code>created</code> | <code>updated</code> | <code>deleted</code>; <code>added</code>, <code>dropped</code> (Feldnamen; umbenannt = beides)</td><td>Datentabelle angelegt, Felder geändert, gelöscht (<code>Core\Data\Tables</code>)</td></tr>
   </table>
   <pre><code>use Core\Events\{EntryPublished, PageSaved};
 
@@ -251,7 +268,81 @@ $x-&gt;on(EntryPublished::class, function (EntryPublished $e): void {
 $x-&gt;on('page.saved', fn(PageSaved $e) =&gt; Log::draft($e-&gt;id, $e-&gt;userId));   // Name als Alias – am Typ erkannt
 $x-&gt;on('page.saved', fn(array $page, ?int $uid) =&gt; …);                      // Altform: bisherige Argumente</code></pre>
   <p><b>Rückwärtskompatibel:</b> Listener, die mit dem Namen angemeldet sind und am ersten Parameter keinen Ereignis-Typ haben, bekommen weiter die bisherigen Argumente. Das Objekt erlaubt zusätzlich Array-Zugriff zum Lesen (<code>$e['id']</code>, <code>$e['title']</code> = Feld des Datensatzes); Schreiben wirft eine <code>LogicException</code>.</p>
-  <p><b>Ohne Typ</b> (nur Name, Argumente wie bisher): <code>media.imported</code> (<code>array $m</code>), <code>media.replaced</code> und <code>media.edited</code> (<code>array $neu, array $alt</code>), <code>media.deleted</code> (<code>array $m</code>), <code>inbox.status</code> und <code>inbox.deleted</code> (siehe <a href="#inbox-hooks">Eingangs-Tabellen</a>). Weitere Ereignisse kommen nur dazu, wenn eine Erweiterung sie wirklich braucht.</p>
+  <p><b>Ohne Typ</b> (nur Name, Argumente wie bisher): <code>media.imported</code> (<code>array $m</code>), <code>media.replaced</code> und <code>media.edited</code> (<code>array $neu, array $alt</code>), <code>media.deleted</code> (<code>array $m</code>), <code>inbox.status</code> und <code>inbox.deleted</code> (siehe <a href="#inbox-hooks">Eingangs-Tabellen</a>). </p>
+
+  <p><b>Beispiele</b> (alle in <code>boot</code> einer Erweiterung, <code>$x</code> = <code>Core\Extension</code>):</p>
+  <pre><code>use Core\Events\{FormSubmitted, LoginFailed, PageMoved, SettingsSaved, TableSchemaChanged, UserLoggedIn};
+
+// Neue Anmeldung zu einem Termin → eigene Warteliste pflegen
+$x-&gt;on(FormSubmitted::class, function (FormSubmitted $e): void {
+    if ($e-&gt;table === 'anmeldungen' &amp;&amp; $e-&gt;entryId) Warteliste::pruefen($e-&gt;entryId);
+});
+
+// Sicherheit: nach fünf Fehlversuchen derselben Adresse an die Administration melden
+$x-&gt;on(LoginFailed::class, fn(LoginFailed $e) =&gt; $e-&gt;reason === 'password' ? Wache::zaehlen($e-&gt;ip) : null);
+$x-&gt;on(UserLoggedIn::class, fn(UserLoggedIn $e) =&gt; Wache::zuruecksetzen($e-&gt;ip));
+
+// Seite verschoben → externe Verlinkung (z. B. Kurz-URL-Dienst) nachziehen
+$x-&gt;on(PageMoved::class, function (PageMoved $e): void {
+    if ($e-&gt;reparented()) KurzUrl::aktualisieren($e-&gt;id, \Core\Pages::url($e-&gt;page));
+});
+
+// Design geändert → eigenes, vorab erzeugtes CSS neu bauen
+$x-&gt;on(SettingsSaved::class, fn(SettingsSaved $e) =&gt; $e-&gt;area === 'design' ? MeinCss::neu() : null);
+
+// Feld einer Tabelle gelöscht → eigene Zuordnung aufräumen
+$x-&gt;on(TableSchemaChanged::class, fn(TableSchemaChanged $e) =&gt; Zuordnung::entfernen($e-&gt;table, $e-&gt;dropped));</code></pre>
+  <p><b>Faustregeln:</b> Ereignisse sind Mitteilungen <b>nach</b> der Änderung – sie können nichts verhindern (dafür gibt es Filter wie <code>form.validate</code> bzw. <code>blocksBeforeSave</code>). Listener kurz halten; Langes (Mails an viele, fremde Dienste) über <code>afterAdminResponse()</code> oder einen eigenen Auftrag nach der Antwort. Nie Werte aus <code>FormSubmitted::$values</code> ins Protokoll schreiben (Datenschutz, verschlüsselte Anfragen).</p>
+
+  <h3 id="erweiterungen-filter">Filter (<code>$x-&gt;filter()</code>, <code>Core\Filters</code>)</h3>
+  <p>Wo Ereignisse nur mitteilen, ändern Filter ein <b>Ergebnis</b>: Der Core reicht einen Wert durch alle Erweiterungen (<code>Extensions::filter($name, $wert, $ctx)</code>). Regeln: <code>fn($wert, array $ctx)</code> gibt den neuen Wert zurück; <code>null</code> = unverändert (ein vergessenes <code>return</code> schadet nicht); <code>false</code> = verwerfen, nur wo die Tabelle es erlaubt; Fehler einer Erweiterung lassen den Wert unverändert (Protokoll). Unbekannte Namen werden nicht angemeldet (Protokoll). Eigene Filter einer Erweiterung heißen <code>ext:{erweiterung}.{name}</code> – andere Erweiterungen können sie dann genauso nutzen.</p>
+  <ul class="doc-list">
+    <li><b><code>search.document</code></b> – Dokument ändern oder mit <code>false</code> aus der Website-Suche (und damit dem Besucher-Chat) nehmen – unabhängig von „noindex“. Wirkt beim nächsten Abgleich (<code>search:index</code>).<br><small>Wert: Dokument (<code>id</code>, <code>type</code>, <code>title</code>, <code>text</code>, <code>url</code> …) · <code>$ctx</code>: <code>type</code> (<code>page</code>|<code>entry</code>|<code>file</code>), <code>lang</code>, <code>page_id</code> bzw. <code>table</code> + <code>entry_id</code></small></li>
+    <li><b><code>sitemap.urls</code></b> – Adressen der <code>sitemap.xml</code> ergänzen (eigene Routen einer Erweiterung), ändern, entfernen.<br><small>Wert: <code>list&lt;{loc, lastmod?}&gt;</code> · <code>$ctx</code>: <code>host</code></small></li>
+    <li><b><code>menu.items</code></b> – Navigation aller Kits (<code>Pages::menu</code>) – Einträge ergänzen, umbenennen, ausblenden. Steht im Seiten-Cache: nur Angaben, die für alle Besucher gleich sind.<br><small>Wert: Baum <code>{id, label, href, active, children, draft}</code> · <code>$ctx</code>: <code>drafts</code></small></li>
+    <li><b><code>seo.meta</code></b> – Angaben für den Kopf der Seite. Nur ein Array mit <code>title</code> wird übernommen.<br><small>Wert: <code>{title, description, canonical, og_image, noindex, alternates, jsonld}</code> · <code>$ctx</code>: <code>page</code>; Detailseiten zusätzlich <code>table</code>, <code>entry</code></small></li>
+    <li><b><code>form.validate</code></b> – Eigene Prüfung vor dem Speichern (nach Feldern und Bedingungen, vor dem Spamschutz). Fehler je Feld oder <code>'_form'</code> als Meldung über dem Formular brechen das Absenden ab.<br><small>Wert: <code>array $errors</code> (Feld → Meldung) · <code>$ctx</code>: <code>table</code>, <code>values</code>, <code>ip</code></small></li>
+    <li><b><code>mail.message</code></b> – Ausgehende E-Mail ändern oder mit <code>false</code> unterdrücken. Mails zur Kontosicherheit (Passwort, Einladung, E-Mail-Änderung) laufen nie durch den Filter; Test-Umleitung und Staging-Schutz gelten danach weiter. Ungültige Empfänger werden verworfen.<br><small>Wert: <code>{subject, text, to, options}</code> · <code>$ctx</code>: <code>account</code> (immer <code>false</code>)</small></li>
+    <li><b><code>data_list.query</code></b> – Abfrage des Blocks „Datenliste“ – z. B. zusätzliche Bedingung. Gilt auch für die Seitenzahl beim Blättern.<br><small>Wert: Optionen für <code>Entries::query</code> (<code>where</code>, <code>sort</code>, <code>limit</code>, <code>q</code> …) · <code>$ctx</code>: <code>table</code>, <code>block</code> (Daten des Blocks)</small></li>
+  </ul>
+  <p><b>Beispiele:</b></p>
+  <pre><code>// Interne Notizen-Tabelle nie in der Website-Suche, auch wenn ihre Detailseiten öffentlich sind
+$x-&gt;filter('search.document', fn(array $doc, array $c) =&gt; ($c['table'] ?? '') === 'notizen' ? false : $doc);
+
+// Eigene Seiten einer Erweiterung (Route /termine/{id}) in die Sitemap
+$x-&gt;filter('sitemap.urls', function (array $urls): array {
+    foreach (Termine::oeffentlich() as $t) $urls[] = ['loc' =&gt; abs_url('/termine/' . $t['id']), 'lastmod' =&gt; substr($t['updated_at'], 0, 10)];
+    return $urls;
+});
+
+// Menüpunkt „Mitglieder“ nur, solange es Mitglieder gibt
+$x-&gt;filter('menu.items', fn(array $items) =&gt; Mitglieder::anzahl() ? $items : array_values(array_filter($items, fn($i) =&gt; $i['href'] !== url('/mitglieder'))));
+
+// Titel von Veranstaltungs-Detailseiten mit Datum
+$x-&gt;filter('seo.meta', function (array $m, array $c): ?array {
+    if (($c['table']['handle'] ?? '') !== 'termine') return null;   // null = unverändert
+    return ['title' =&gt; fmt()-&gt;date($c['entry']['datum']) . ' · ' . $m['title']] + $m;
+});
+
+// Anmeldung nur mit Mitgliedsnummer aus der eigenen Liste
+$x-&gt;filter('form.validate', function (array $errors, array $c): array {
+    if ($c['table']['handle'] === 'anmeldungen' &amp;&amp; !Mitglieder::nummerGueltig($c['values']['mitgliedsnummer'] ?? '')) {
+        $errors['mitgliedsnummer'] = lt('Diese Mitgliedsnummer kennen wir nicht.');
+    }
+    return $errors;
+});
+
+// Fußzeile mit Abmeldehinweis unter alle Benachrichtigungen
+$x-&gt;filter('mail.message', fn(array $m) =&gt; ['text' =&gt; $m['text'] . "\n\n-- \nVerein Musterstadt e. V."] + $m);
+
+// Datenliste: abgesagte Termine ausblenden
+$x-&gt;filter('data_list.query', fn(array $o, array $c) =&gt; $c['table']['handle'] === 'termine'
+    ? ['where' =&gt; [...($o['where'] ?? []), ['abgesagt', '=', 0]]] + $o : $o);
+
+// Eigener Filter einer Erweiterung, den andere nutzen können
+$preis = \Core\Extensions::filter('ext:buchung.preis', $grundpreis, ['termin' =&gt; $t]);</code></pre>
+  <p><b>Wann was?</b> Etwas soll <i>danach</i> passieren (Mail, Abgleich, Protokoll) → Ereignis. Ein Ergebnis soll anders aussehen oder etwas soll verhindert werden → Filter. Blöcke haben eigene Haken (<code>blocksResolve</code>, <code>blocksBeforeSave</code>, <code>blockPresets</code>, siehe oben). Fehlt eine Stelle: Vorschlag für einen neuen Filter im Core (Name in <code>Core\Filters::ALL</code>, Aufruf, Selbsttest, diese Tabelle).</p>
+  <p>Selbsttest: <code>php bin/console extensions:selftest</code> (Filterkette, <code>null</code>/<code>false</code>/Fehler, Menü, SEO, Suche, E-Mail, Ereignisse beim Anlegen/Verschieben/Fehlanmelden, Namen ↔ Klassen).</p>
 
   <h3 id="erweiterungen-zugriff">Geschützte Bereiche (<code>Core\PageAccess</code>, <code>$x-&gt;pageAccess()</code>, <code>$x-&gt;mediaAccess()</code>)</h3>
   <p>Für Mitgliederbereiche u. Ä. – die Erweiterung entscheidet, der Core setzt durch:</p>

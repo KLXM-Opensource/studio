@@ -116,7 +116,7 @@ final class AuthController extends AdminController
             }
             return Response::redirect(url(\Core\Onboarding::pending() ? '/admin/willkommen' : '/admin/network'));
         }
-        app()->auth->createUser($email, $pw, 'admin', $r->str('name'));
+        app()->auth->createUser($email, $pw, 'admin', $r->str('name'), 'setup');
         app()->auth->attempt($email, $pw, $r->ip());
         // Erststart: zuerst Kit und Startinhalte wählen (Willkommen-Bildschirm), sonst direkt zu den Grundeinstellungen
         if (\Core\Onboarding::pending()) return Response::redirect(url('/admin/willkommen'));

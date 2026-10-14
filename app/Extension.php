@@ -119,6 +119,8 @@ final class Extension
     /** @var list<array> Werkzeuge für das Bearbeiten auf der Website (Core\FrontendTools::normalize) */
     public array $frontendTools = [];
     private array $migrations = [];
+    /** @var array<string, list<callable>> Filter (filter()) */
+    public array $filters = [];
     /** @var array<string, callable(Db\Table): mixed> Tabellen (table()) */
     private array $tables = [];
 
@@ -342,13 +344,30 @@ final class Extension
     }
 
     /**
+     * Filter an einer festen Stelle des Cores (Core\Filters::ALL): fn(mixed $wert, array $ctx): mixed – neuer Wert, null =
+     * unverändert, false = verwerfen (wo erlaubt). Beispiel: $x->filter('seo.meta', fn(array $m, array $c) => ['title' => $m['title'] . ' | Verein'] + $m).
+     * Eigene Filter der Erweiterung: 'ext:{name}.…' (auslösen mit Extensions::filter()).
+     */
+    public function filter(string $name, callable $fn): self
+    {
+        if (!Filters::known($name)) {
+            error_log('[Erweiterung ' . $this->name . '] filter: unbekannter Name „' . $name . '“ (Core\Filters::ALL oder ext:{name}.…)');
+            return $this;
+        }
+        $this->filters[$name][] = $fn;
+        return $this;
+    }
+
+    /**
      * Ereignis des Cores abonnieren. Typisiert (empfohlen): on(Core\Events\PageSaved::class, fn(PageSaved $e) => …) – Seiten:
      * PageSaved, PagePublished, PageUnpublished, PageDiscarded, PageDeleted; Einträge: EntrySaved, EntryPublished, EntryUnpublished,
      * EntryDeleted (readonly: table, id, lang, userId, state 'draft'|'live' + Datensatz). Der Name ('page.saved') ist ein Alias:
      * Listener mit Ereignis-Typ am ersten Parameter bekommen das Objekt, alle anderen die bisherigen Argumente (Altform):
      * page.saved (array $page, ?int $userId), page.published|unpublished|discarded|deleted (array $page), entry.saved (array $table,
      * array $entry, bool $created, ?array $old), entry.published|unpublished (array $table, array $entry), entry.deleted (array $table,
-     * int $id). Ohne Typ (nur Name): media.imported (array $m), media.replaced (array $neu, array $alt), media.edited, media.deleted
+     * int $id). Weitere typisiert (Objekt auch beim Namen ohne Typ): page.created, page.moved, page.translated, page.restored,
+     * form.submitted, user.login, user.logout, user.login_failed, user.created, user.role_changed, settings.saved,
+     * table.schema_changed (Core\Events\Event::ALL). Ohne Typ (nur Name): media.imported (array $m), media.replaced (array $neu, array $alt), media.edited, media.deleted
      * (array $m), inbox.status, inbox.deleted.
      */
     public function on(string $event, callable $fn): self

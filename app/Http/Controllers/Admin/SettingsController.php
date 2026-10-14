@@ -116,6 +116,9 @@ final class SettingsController extends AdminController
         } else {
             app()->settings->setMany($values);
         }
+        // Erweiterungen (Extension::on 'settings.saved'): nur geänderte Schlüssel, ohne Werte
+        $changed = array_keys(array_filter($values, fn($v, $k) => $v != ($current[$k] ?? null), ARRAY_FILTER_USE_BOTH));
+        if ($changed) \Core\Extensions::emit(new \Core\Events\SettingsSaved('settings', $lang !== '' ? array_map(fn($k) => $k . '@' . $lang, $changed) : $changed));
         $this->changed();
         $q = $lang !== '' ? '?lang=' . $lang : '';
         return $this->back('/admin/settings' . $q . ($r->str('_tab') ? '#' . preg_replace('~[^\w\-]~', '', $r->str('_tab')) : ''),

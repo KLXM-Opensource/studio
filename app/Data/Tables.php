@@ -659,6 +659,7 @@ final class Tables
         ]);
         self::$cache = [];
         self::sync(self::find($id));
+        if ($t = self::find($id)) \Core\Extensions::emit(new \Core\Events\TableSchemaChanged($t, 'created', array_column(self::dataFields($t['fields']), 'name')));
         return $id;
     }
 
@@ -693,6 +694,12 @@ final class Tables
             Shared::ensurePool($table['shared']['key']);   // erstes Bild-/Dateifeld: jetzt den Pool „data-{key}“ anlegen
             Shared::clearCaches($table['shared']['key']);
         }
+        // Erweiterungen (Extension::on 'table.schema_changed'): neue und weggefallene Datenfelder (Namen; umbenannt = beides)
+        if (\Core\Extensions::listens('table.schema_changed') && ($now = self::find((int) $table['id']))) {
+            $before = array_column(self::dataFields($table['fields']), 'name');
+            $after = array_column(self::dataFields($now['fields']), 'name');
+            \Core\Extensions::emit(new \Core\Events\TableSchemaChanged($now, 'updated', array_values(array_diff($after, $before)), array_values(array_diff($before, $after))));
+        }
     }
 
     /** Welche Spalten fielen beim Speichern weg? (Warnung vor Datenverlust) */
@@ -724,6 +731,7 @@ final class Tables
         }
         self::$cache = [];
         PageCache::clear();
+        \Core\Extensions::emit(new \Core\Events\TableSchemaChanged($table, 'deleted', [], array_column(self::dataFields($table['fields']), 'name')));
     }
 
     /** Datenbanktabelle an die Definition anpassen */

@@ -422,6 +422,9 @@ final class Design
         app()->settings->set($key . '.history', array_slice($hist, 0, 10));
         app()->settings->set($key, $clean);
         self::$values = null;
+        // Erweiterungen (Extension::on 'settings.saved', Bereich „design“): geänderte Design-Werte
+        $changed = array_keys(array_filter($clean, fn($v, $k) => $v != (((array) $prev)[$k] ?? null), ARRAY_FILTER_USE_BOTH));
+        if ($changed) Extensions::emit(new Events\SettingsSaved('design', $changed));
         // Kit-Schriften der neuen Auswahl sicherstellen (lädt nur, was fehlt; ohne Netz: Hinweis, Website nutzt die Ersatzschrift)
         $fonts = [];
         try {

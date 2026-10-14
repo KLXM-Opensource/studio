@@ -85,6 +85,16 @@ final class Auth
         $this->loaded = false;
         // Anmelde-Richtlinie: zweiter Faktor verlangt, aber (noch) nicht eingerichtet → Einrichtung bzw. Erinnerung (Core\Mfa)
         Mfa::afterLogin($uid);
+        // Erweiterungen (Extension::on 'user.login')
+        if (Extensions::listens('user.login') && ($u = $this->db->fetch('SELECT email, role FROM users WHERE id = ?', [$uid]))) {
+            Extensions::emit(new Events\UserLoggedIn($uid, (string) $u['email'], (string) $u['role'], (string) (app()->request?->ip() ?? '')));
+        }
+    }
+
+    /** Abgelehnte Anmeldung an Erweiterungen melden (Extension::on 'user.login_failed') */
+    private function failed(string $email, string $ip, string $reason): void
+    {
+        if (Extensions::listens('user.login_failed')) Extensions::emit(new Events\LoginFailed(mb_substr(trim($email), 0, 191), $ip, $reason));
     }
 
     /** Rückgabe von attempt(): Passwort stimmt, zweiter Faktor steht aus (→ /admin/login/2fa) */
@@ -143,6 +153,7 @@ final class Auth
         $limiter = new RateLimiter($this->db);
         $key = 'login:' . hash_hmac('sha256', $ip, app()->key());
         if ($limiter->tooMany($key, 8, 900)) {
+            $this->failed($email, $ip, 'limited');
             return 'Zu viele Anmeldeversuche. Bitte warten Sie 15 Minuten.';
         }
 
@@ -151,6 +162,7 @@ final class Auth
         if (($net = $this->networkAttempt($row, $email, $password)) !== null) {
             if (is_string($net)) {
                 $limiter->hit($key);
+                $this->failed($email, $ip, 'password');
                 return $net;
             }
             $limiter->clear($key);
@@ -160,6 +172,7 @@ final class Auth
         $hash = $row['password_hash'] ?? '$2y$12$yaNnm6RkwijxMHDaR.bX5eCLU2vn8HWPVSNJ0WE.fRaZHEEdIQoim';
         if (!password_verify($password, $hash) || !$row) {
             $limiter->hit($key);
+            $this->failed($email, $ip, 'password');
             return 'E-Mail-Adresse oder Passwort ist falsch.';
         }
 
@@ -168,6 +181,7 @@ final class Auth
         }
         if ((int) ($row['disabled'] ?? 0)) {
             $limiter->hit($key);
+            $this->failed($email, $ip, 'disabled');
             return __('Dieses Konto ist gesperrt.');
         }
         $limiter->clear($key);
@@ -182,13 +196,16 @@ final class Auth
 
     public function logout(): void
     {
+        $uid = (int) ($this->session->get('uid') ?? 0);
+        if ($uid) Extensions::emit(new Events\UserLoggedOut($uid));   // Erweiterungen (Extension::on 'user.logout'), Sitzung noch offen
         $this->user = null;
         $this->session->destroy();
     }
 
-    public function createUser(string $email, string $password, string $role = 'editor', string $name = ''): int
+    /** Konto anlegen; $via für Erweiterungen (user.created): 'admin' | 'setup' */
+    public function createUser(string $email, string $password, string $role = 'editor', string $name = '', string $via = 'admin'): int
     {
-        return $this->db->insert('users', [
+        $id = $this->db->insert('users', [
             'email'         => strtolower(trim($email)),
             'name'          => $name,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
@@ -196,6 +213,9 @@ final class Auth
             'role'          => $role !== 'network' && Permissions::role($role) ? $role : 'editor',
             'created_at'    => now(),
         ]);
+        $u = $this->db->fetch('SELECT email, role FROM users WHERE id = ?', [$id]) ?? [];
+        Extensions::emit(new Events\UserCreated($id, (string) ($u['email'] ?? ''), (string) ($u['role'] ?? ''), $via));
+        return $id;
     }
 
     public static function passwordProblem(string $pw): ?string

@@ -27,6 +27,11 @@ abstract class Event implements \ArrayAccess
         'page.discarded' => PageDiscarded::class, 'page.deleted' => PageDeleted::class,
         'entry.saved' => EntrySaved::class, 'entry.published' => EntryPublished::class, 'entry.unpublished' => EntryUnpublished::class,
         'entry.deleted' => EntryDeleted::class,
+        'page.created' => PageCreated::class, 'page.moved' => PageMoved::class, 'page.translated' => PageTranslated::class,
+        'page.restored' => PageRestored::class, 'form.submitted' => FormSubmitted::class,
+        'user.login' => UserLoggedIn::class, 'user.logout' => UserLoggedOut::class, 'user.login_failed' => LoginFailed::class,
+        'user.created' => UserCreated::class, 'user.role_changed' => UserRoleChanged::class,
+        'settings.saved' => SettingsSaved::class, 'table.schema_changed' => TableSchemaChanged::class,
     ];
 
     public readonly ?int $userId;

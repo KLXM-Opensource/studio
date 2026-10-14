@@ -132,6 +132,11 @@ final class PageController extends AdminController
         Pages::rebuildPaths();
         $this->changed();
         \Core\Activity::log('settings', 'page', $id, (string) ($data['title'] ?? $page['title']), ['lang' => $page['lang'] ?? null]);   // Aktionslog
+        // Übergeordnete Seite geändert → wie Verschieben im Seitenbaum (Erweiterungen, Extension::on 'page.moved')
+        $oldParent = $page['parent_id'] !== null ? (int) $page['parent_id'] : null;
+        if (array_key_exists('parent_id', $data) && ($data['parent_id'] !== null ? (int) $data['parent_id'] : null) !== $oldParent && ($moved = Pages::find($id))) {
+            \Core\Extensions::emit(new \Core\Events\PageMoved($moved, $oldParent));
+        }
         return [$data, [], $warn];
     }
 
@@ -426,6 +431,7 @@ final class PageController extends AdminController
         $row = app()->db->fetch('SELECT * FROM revisions WHERE id = ? AND page_id = ?', [(int) $rev, (int) $id]) ?? throw new HttpException(404);
         $blocks = json_decode((string) $row['blocks_json'], true)['blocks'] ?? [];
         Pages::saveDraft((int) $id, Pages::sanitizeBlocks($blocks), (int) $user['id'], 'Wiederhergestellt (Stand ' . $row['created_at'] . ')');
+        if ($p = Pages::find((int) $id)) \Core\Extensions::emit(new \Core\Events\PageRestored($p, (int) $row['id'], (int) $user['id']));
         // Versionen (JSON): Entwurf angelegt – die Seite öffnet danach im Editor
         if ($r->wantsJson()) return Response::json(['ok' => true, 'message' => __('Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.'), 'url' => Pages::url(Pages::find((int) $id)) . '?edit=1']);
         return $this->back('/admin/pages/' . $id, 'success', 'Stand wiederhergestellt – als Entwurf. Prüfen und dann veröffentlichen.');

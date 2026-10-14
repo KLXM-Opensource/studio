@@ -78,6 +78,9 @@ $layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table', 'di
 // A–Z: nur ohne Blättern (Sprungmarken auf dieser Seite) und nicht als Tabelle; sortiert nach dem Titel
 $az = !empty($d['az_index']) && empty($d['paginate']) && $layout !== 'table';
 if ($az && ($tf = (string) ($t['settings']['title_field'] ?? '')) !== '') { $o['sort'] = $tf; $o['dir'] = 'asc'; }
+// Erweiterungen (Extension::filter 'data_list.query'): Abfrage ändern, z. B. zusätzliche Bedingung
+$o2 = \Core\Extensions::filter('data_list.query', $o, ['table' => $t, 'block' => $d]);
+if (is_array($o2)) $o = $o2;
 $rows = Entries::query($t, $o);   // Stellenangebote: abgelaufene fehlen schon hier (Core\Data\Jobs, Entries::where)
 // „Abschnitt ausblenden, wenn nichts da ist“: für Besucher keine Ausgabe – die Hülle (partials/section) entfällt dann
 if (!$rows && !empty($d['hide_empty']) && !is_editing() && !$filtering) return;

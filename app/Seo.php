@@ -6,7 +6,7 @@ namespace Core;
 /** Meta-Daten, Canonical, Open Graph und JSON-LD (JSON-LD liefert das Theme). */
 final class Seo
 {
-    public static function forPage(array $page): array
+    public static function forPage(array $page, bool $filter = true): array
     {
         $s = app()->settings;
         $theme = app()->theme->def;
@@ -56,13 +56,14 @@ final class Seo
         ];
         // schema.org-Graph: Organisation (Theme), WebSite, WebPage, Brotkrumen + Daten der Blöcke (Spiegel: wie auf der Hauptdomain)
         $out['jsonld'] = $mirror ? Landings::suspend(fn() => StructuredData::graph($page, null, null, $out)) : StructuredData::graph($page, null, null, $out);
-        return $out;
+        // Erweiterungen (Extension::filter 'seo.meta'); Detailseiten filtern erst in forEntry
+        return $filter ? self::filtered($out, ['page' => $page]) : $out;
     }
 
     /** Detailseite eines Datensatzes: Titel, Beschreibung, Bild und Canonical aus dem Eintrag */
     public static function forEntry(array $template, array $table, array $entry): array
     {
-        $seo = self::forPage($template + ['is_home' => 0]);
+        $seo = self::forPage($template + ['is_home' => 0], false);
         $suffix = explode(' | ', $seo['title'], 2)[1] ?? '';
         $title = Data\Entries::title($table, $entry);
         $seo['title'] = strip_emphasis($title) . ($suffix !== '' ? ' | ' . $suffix : '');
@@ -88,7 +89,14 @@ final class Seo
             if (count($seo['alternates']) < 2) $seo['alternates'] = [];
         }
         $seo['jsonld'] = StructuredData::graph($template, $table, $entry, $seo);
-        return $seo;
+        return self::filtered($seo, ['page' => $template, 'table' => $table, 'entry' => $entry]);
+    }
+
+    /** Filter „seo.meta“ – nur ein Array mit Titel ersetzt die Angaben */
+    private static function filtered(array $seo, array $ctx): array
+    {
+        $out = Extensions::filter('seo.meta', $seo, $ctx);
+        return is_array($out) && isset($out['title']) ? $out : $seo;
     }
 
     public static function forError(int $code): array

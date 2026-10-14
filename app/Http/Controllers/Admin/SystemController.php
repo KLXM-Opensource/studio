@@ -58,6 +58,9 @@ final class SystemController extends AdminController
             return $this->edit($r, $errors, $values);
         }
         app()->settings->setMany($values);
+        // Erweiterungen (Extension::on 'settings.saved'): nur geänderte Schlüssel, ohne Werte (Geheimnisse bleiben in den Einstellungen)
+        $changed = array_keys(array_filter($values, fn($v, $k) => $v != ($current[$k] ?? null), ARRAY_FILTER_USE_BOTH));
+        if ($changed) \Core\Extensions::emit(new \Core\Events\SettingsSaved('system', $changed));
         // Kit gewechselt: dessen Schriften installieren (nächster Aufruf der Verwaltung – dann ist das neue Kit aktiv)
         if (array_key_exists('sys.theme', $values) && (string) ($current['sys.theme'] ?? '') !== (string) $values['sys.theme']) \Core\Fonts::requestSync();
         // Icons neu erzeugen, wenn sich etwas am App-Icon geändert hat

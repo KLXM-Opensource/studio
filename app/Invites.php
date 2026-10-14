@@ -296,7 +296,7 @@ final class Invites
     {
         $db = app()->db;
         try {
-            return $db->transaction(function (Database $db) use ($inv, $name, $password, $method, $uid, $then): int|string {
+            $res = $db->transaction(function (Database $db) use ($inv, $name, $password, $method, $uid, $then): int|string {
                 // Erneut prüfen (gleichzeitige Anfragen): noch dieselbe, unbenutzte Einladung?
                 $now = $db->fetch('SELECT * FROM user_invites WHERE id = ?', [(int) $inv['id']]);
                 if (!$now || !hash_equals((string) $inv['token_hash'], (string) $now['token_hash']) || !self::usable($now)) {
@@ -318,6 +318,11 @@ final class Invites
                     'token_hash' => 'used-' . bin2hex(random_bytes(16))], 'id = :id', ['id' => (int) $now['id']]);
                 return $id;
             });
+            // Erweiterungen (Extension::on 'user.created') – erst nach der Transaktion
+            if (is_int($res) && ($u = $db->fetch('SELECT email, role FROM users WHERE id = ?', [$res]))) {
+                Extensions::emit(new Events\UserCreated($res, (string) $u['email'], (string) $u['role'], 'invite'));
+            }
+            return $res;
         } catch (\RuntimeException $e) {
             return $e->getMessage();
         } catch (\Throwable $e) {

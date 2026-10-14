@@ -69,7 +69,9 @@ final class Pages
             // Vorlagen (Detailseiten, Seite „Nicht gefunden“ – Core\NotFound) bleiben Vorlagen
             'type' => $p['type'] ?? 'page', 'template_for' => $p['template_for'] ?? null],
             self::blocks($p, true));
-        return self::find($newId);
+        $new = self::find($newId);
+        if ($new) Extensions::emit(new Events\PageTranslated($new, (int) $p['id']));
+        return $new;
     }
 
     /** Slug auf gleicher Ebene schon vergeben? */
@@ -193,6 +195,7 @@ final class Pages
         });
         self::rebuildPaths();
         PageCache::clear();
+        if (($moved = self::find($id))) Extensions::emit(new Events\PageMoved($moved, $page['parent_id'] !== null ? (int) $page['parent_id'] : null));
         return null;
     }
 
@@ -256,7 +259,9 @@ final class Pages
         $tree = self::tree(false, Lang::current());
         // Landing-Domain: Menü = Unterseiten der Landingpage
         if ($l = Landings::current()) $tree = $l->subtree($tree, Lang::current());
-        return $walk($tree);
+        // Erweiterungen (Extension::filter 'menu.items'): Einträge ergänzen, umbenennen, ausblenden
+        $items = Extensions::filter('menu.items', $walk($tree), ['drafts' => $includeDrafts]);
+        return is_array($items) ? array_values($items) : [];
     }
 
     /** Startseite der Sprache (Standard: aktuelle Sprache; Rückfall auf die Startseite der Standardsprache) */
@@ -547,6 +552,7 @@ final class Pages
         ], $fields));
         self::rebuildPaths();
         Activity::log('created', 'page', $id, (string) ($fields['title'] ?? ''), ['lang' => $fields['lang'] ?? null]);   // Aktionslog
+        if (Extensions::listens('page.created') && ($p = self::find($id))) Extensions::emit(new Events\PageCreated($p));
         return $id;
     }
 }

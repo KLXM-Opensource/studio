@@ -671,6 +671,13 @@ final class DataForms
             unset($values2[self::PRIVACY]);
             $errors += (array) ($o['check'])($values2);
         }
+        // Erweiterungen (Extension::filter 'form.validate'): eigene Prüfung – Fehler (Feld → Meldung, '_form' = allgemein) brechen ab
+        if (\Core\Extensions::filters('form.validate')) {
+            $values2 = $values;
+            unset($values2[self::PRIVACY]);
+            $extErr = \Core\Extensions::filter('form.validate', [], ['table' => $t, 'values' => $values2, 'ip' => $ip]);
+            foreach (is_array($extErr) ? $extErr : [] as $k => $msg) if (is_string($k) && is_string($msg) && $msg !== '') $errors[$k] ??= $msg;
+        }
         foreach ($uploads as $n => $_) {
             if (!array_key_exists($n, $values) || $values[$n] === null) unset($uploads[$n]);   // Feld ausgeblendet → Datei verwerfen
         }
@@ -692,7 +699,10 @@ final class DataForms
             $order = array_flip([...array_column($fields, 'name'), self::PRIVACY]);
             $pos = fn($k) => $order[explode('.', (string) $k)[0]] ?? -1;           // Zeilen einer Gruppe („feld.1.unterfeld“) beim Feld; Fehler aus 'check' (prepend) zuerst
             uksort($errors, fn($a, $b) => $pos($a) <=> $pos($b));
-            return ['ok' => false, 'errors' => $errors, 'message' => lt('Bitte prüfen Sie die markierten Felder.')];
+            // Allgemeiner Fehler einer Erweiterung ('_form', Filter form.validate) als Meldung über dem Formular
+            $general = $errors['_form'] ?? null;
+            unset($errors['_form']);
+            return ['ok' => false, 'errors' => $errors, 'message' => $general ?? lt('Bitte prüfen Sie die markierten Felder.')];
         }
 
         // Spamschutz erst nach der Feldprüfung – so bleibt das Token bei Eingabefehlern gültig (wie Core\Forms)
@@ -710,6 +720,7 @@ final class DataForms
             $stored = (array) ($acc['stored'] ?? []);
             $id = (int) $acc['id'];
             self::sendReceipt($t, $values, $fields);
+            \Core\Extensions::emit(new \Core\Events\FormSubmitted($t, $values, null, isset($acc['ref']) ? (string) $acc['ref'] : null, true));
             if (($o['notify'] ?? true) === false) return ['ok' => true, 'message' => (string) ($stored['message'] ?? $success), 'id' => $id, 'stored' => $stored];
             // Push-Mitteilung an die Redaktion (Konto → Benachrichtigungen, ohne Inhalte; Core\Push)
             \Core\Push\Hooks::request($t);
@@ -746,6 +757,7 @@ final class DataForms
         }
 
         self::sendReceipt($t, $values, $fields);
+        \Core\Extensions::emit(new \Core\Events\FormSubmitted($t, $values, (int) $id));
         \Core\Push\Hooks::formEntry($t, (int) $id, (string) $values['status']);   // Push an die Redaktion (Core\Push)
         // Benachrichtigung OHNE Inhalte – nur Tabelle und Link zur Verwaltung
         $to = $s['notify'] !== '' ? array_map('trim', explode(',', $s['notify'])) : null;

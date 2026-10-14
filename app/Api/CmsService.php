@@ -261,6 +261,7 @@ final class CmsService
                 $v === null || $v === '' || $v === [] ? app()->settings->delete($k . '@' . $this->lang) : app()->settings->set($k . '@' . $this->lang, $v);
             }
             PageCache::clear();
+            \Core\Extensions::emit(new \Core\Events\SettingsSaved('settings', array_map(fn($k) => $k . '@' . $this->lang, array_keys($clean))));
             return $clean + ['_lang' => $this->lang];
         }
         [$clean, $errors] = Fields::sanitize($fields, $values);
@@ -269,6 +270,7 @@ final class CmsService
         }
         app()->settings->setMany($clean);
         PageCache::clear();
+        \Core\Extensions::emit(new \Core\Events\SettingsSaved('settings', array_keys($clean)));
         return $clean;
     }
 
@@ -626,6 +628,7 @@ final class CmsService
         }
         $blocks = json_decode((string) $row['blocks_json'], true)['blocks'] ?? [];
         Pages::saveDraft((int) $p['id'], Pages::sanitizeBlocks($blocks), $this->userId(), $this->note('Version ' . $row['created_at'] . ' wiederhergestellt'));
+        if ($q = Pages::find((int) $p['id'])) \Core\Extensions::emit(new \Core\Events\PageRestored($q, (int) $row['id'], $this->userId()));
         return $this->pageGet((int) $p['id']);
     }
 

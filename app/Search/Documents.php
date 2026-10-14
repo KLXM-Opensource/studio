@@ -48,6 +48,17 @@ final class Documents
             if (Search::settings()['media']) {
                 foreach (self::files() as $d) $docs[$d['id']] = $d;
             }
+            // Erweiterungen (Extension::filter 'search.document'): Dokument ändern oder mit false aus der Suche nehmen
+            if (\Core\Extensions::filters('search.document')) {
+                foreach ($docs as $k => $d) {
+                    $ctx = ['type' => (string) ($d['type'] ?? ''), 'lang' => $lang];
+                    if (preg_match('~^p-(\d+)$~', (string) $k, $m)) $ctx['page_id'] = (int) $m[1];
+                    elseif (preg_match('~^e-(.+)-(\d+)$~', (string) $k, $m)) $ctx += ['table' => $m[1], 'entry_id' => (int) $m[2]];
+                    $out = \Core\Extensions::filter('search.document', $d, $ctx);
+                    if (!is_array($out)) unset($docs[$k]);
+                    else $docs[$k] = ['id' => $d['id']] + $out;
+                }
+            }
             $syn = Search::synonyms($lang);
             foreach ($docs as &$d) {
                 $d['keywords'] = $syn ? self::expand($d, $syn) : '';
