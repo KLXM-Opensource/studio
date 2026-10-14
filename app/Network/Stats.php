@@ -63,7 +63,8 @@ final class Stats
     {
         $cfg = Sites::all()[$key] ?? [];
         $site = new Site($key, $cfg);
-        return ['key' => $key, 'label' => $key === Site::DEFAULT && empty($cfg['label']) ? __('Hauptwebsite') : $site->label(),
+        $own = trim((string) ($cfg['label'] ?? ''));
+        return ['key' => $key, 'label' => $own === '' && $key === Site::DEFAULT ? __('Hauptwebsite') : $site->label(), 'label_own' => $own,
             'hosts' => $site->hosts(), 'url' => Network::siteUrl($key), 'network' => $key === Network::siteKey(), 'at' => time()];
     }
 
@@ -94,7 +95,10 @@ final class Stats
             $db = $key === site()->key ? app()->db : new Database($dbCfg);
             $checks['db'] = (int) $db->fetchValue('SELECT 1') === 1;
             $set = self::settings($db, ['sys.theme', \Core\Onboarding::SEED_KEY, 'sys.maintenance', 'sys.site_url', Features::UI_KEY, \Core\Extensions::UI_KEY, Features::DELEGATE_KEY,
-                'sys.noindex', 'sys.icon_version', 'sys.icon_bg', 'sys.icon_text']);
+                'sys.noindex', 'sys.icon_version', 'sys.icon_bg', 'sys.icon_text', 'site_name', 'org_name']);
+            // Ohne eigenen Namen (config 'label', Netzwerk-Übersicht → Name ändern): Name der Website aus den Einstellungen
+            $sn = trim(strip_tags((string) (($set['org_name'] ?? '') ?: ($set['site_name'] ?? ''))));   // Kits: project 'name_setting' (meist org_name)
+            if ($d['label_own'] === '' && $sn !== '') $d['label'] = $sn;
             // Schalter der Verwaltung (Funktionen & Erweiterungen) – Preset und 'features' der Konfiguration gehen vor
             $cfgF = array_merge(Features::PRESETS[$preset] ?? [], (array) $cfg->get('features', []));
             foreach ((array) ($set[Features::UI_KEY] ?? []) as $fk => $on) if (!array_key_exists($fk, $cfgF)) $state[$fk] = (bool) $on;

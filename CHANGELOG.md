@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Netzwerk: Namen der Websites ändern
+- In der Netzwerk-Übersicht ändert der Stift am Namen den Anzeigenamen einer Website (`'label'` in der Konfiguration, Sicherung `.bak`, Aktionslog). Ohne eigenen Namen erscheint der Name aus den Einstellungen der Website statt der Domain; der Kurzname (`default`, `haupt2` …) steht klein unter „Betrieb“.
+
 ### Werkzeugleiste: Konto und Abmelden
 - Unten im Menü ⋯ der Werkzeugleiste: Avatar (Foto oder Initialen) mit Name und Rolle → Konto, darunter **Abmelden** – wie unten in der Seitenleiste der Verwaltung.
 

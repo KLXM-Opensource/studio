@@ -7396,4 +7396,13 @@ return [
     'Ort' => 'City',
     'PLZ' => 'Postcode',
     'Straße und Hausnummer' => 'Street and number',
+    // Netzwerk: Name der Website ändern
+    'Der Name darf höchstens 60 Zeichen lang sein.' => 'The name may be at most 60 characters long.',
+    'Eigener Name von {site} entfernt.' => 'Custom name of {site} removed.',
+    'Leer lassen: Name der Website aus den Einstellungen bzw. die Domain.' => 'Leave empty to use the website name from the settings or the domain.',
+    'Name geändert' => 'Name changed',
+    'Name in der Übersicht' => 'Name in the overview',
+    'Name von {site} geändert: {name}' => 'Name of {site} changed: {name}',
+    'Name ändern' => 'Change name',
+    'Technischer Kurzname (Konfiguration, Kommandozeile --site=…) – nicht änderbar' => 'Technical key (configuration, command line --site=…) – cannot be changed',
 ];

@@ -48,7 +48,8 @@ final class Site
 
     public function label(): string
     {
-        return (string) ($this->cfg['label'] ?? ($this->hosts()[0] ?? $this->key));
+        $l = trim((string) ($this->cfg['label'] ?? ''));   // leer = kein eigener Name (Netzwerk-Übersicht → Name ändern)
+        return $l !== '' ? $l : (string) ($this->hosts()[0] ?? $this->key);
     }
 
     /** Beschreibbarer Datenordner (Datenbank, Seiten-Cache, Uploads, Logs) */

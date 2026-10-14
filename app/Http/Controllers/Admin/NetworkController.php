@@ -159,6 +159,18 @@ final class NetworkController extends AdminController
                     $msg = $op === 'add' ? __('Domain {host} zu {site} hinzugefügt. DNS und Hosting (Plesk-Alias) nicht vergessen.', ['host' => $h, 'site' => $key])
                         : __('Domain {host} von {site} entfernt.', ['host' => $h, 'site' => $key]);
                     break;
+                case 'label':
+                    // Anzeigename der Website (config/sites/{key}.php → 'label', Sicherung .bak) – leer = Name aus den Einstellungen bzw. Domain
+                    $label = trim(preg_replace('~\s+~u', ' ', strip_tags($r->str('label'))) ?? '');
+                    if (mb_strlen($label) > 60) throw new \RuntimeException(__('Der Name darf höchstens 60 Zeichen lang sein.'));
+                    $old = trim((string) (Sites::all()[$key]['label'] ?? ''));
+                    if ($label !== $old) {
+                        Sites::setOption($key, 'label', $label);
+                        Stats::forget($key);
+                        Network::log('site.label', $key, (string) $user['email'], ($old !== '' ? $old : '–') . ' → ' . ($label !== '' ? $label : '–'));
+                    }
+                    $msg = $label !== '' ? __('Name von {site} geändert: {name}', ['site' => $key, 'name' => $label]) : __('Eigener Name von {site} entfernt.', ['site' => $key]);
+                    break;
                 case 'environment':
                     // Testumgebung (staging) setzen/aufheben – config/sites/{key}.php → 'environment' (Sicherung .bak)
                     $env = $r->str('environment') === 'staging' ? 'staging' : 'production';

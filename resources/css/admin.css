@@ -1784,7 +1784,18 @@ html.adm-ui[data-theme=dark]{--adm-star:#F2C14E}
 .net-card.has-warn{box-shadow:0 0 0 1px var(--adm-line),inset 3px 0 0 var(--adm-warn)}
 .net-card__head{display:flex;gap:10px;align-items:flex-start}
 .net-card__title{min-width:0;flex:1}
-.net-card__title h3{margin:0;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.net-card__title{position:relative}
+.net-card__title h3{display:inline;margin:0;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.net-rename{display:inline}
+.net-rename>summary{display:inline-grid;place-items:center;width:26px;height:26px;margin-left:4px;vertical-align:-5px;border-radius:6px;color:var(--adm-t3,#5A6461);cursor:pointer;list-style:none}
+.net-rename>summary::-webkit-details-marker{display:none}
+.net-rename>summary:hover,.net-rename[open]>summary{background:var(--adm-hover,rgba(0,0,0,.06));color:inherit}
+.net-rename>summary .ico{width:16px;height:16px}
+.net-rename__form{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:8px 0 4px}
+.net-rename__form label{flex-basis:100%;font-size:13px;font-weight:600}
+.net-rename__form input{flex:1 1 180px;min-width:0}
+.net-rename__form p{flex-basis:100%;margin:0;font-size:12px}
+.net-card__title .net-card__host{display:block}
 .net-card__title p{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px}
 .net-dot{flex:none;width:10px;height:10px;margin-top:6px;border-radius:50%;background:var(--adm-ok);box-shadow:0 0 0 3px var(--adm-ok-bg)}
 .net-dot.is-warn{background:var(--adm-warn);box-shadow:0 0 0 3px var(--adm-warn-bg)}

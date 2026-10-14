@@ -114,6 +114,15 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
         <img class="net-ico<?= $ico['fallback'] ? ' net-ico--letters' : '' ?>" src="<?= e($ico['src']) ?>" width="44" height="44" alt="" decoding="async">
         <div class="net-card__title">
           <h3 id="net-h-<?= e($k) ?>"><?= e($name) ?></h3>
+          <details class="net-rename">
+            <summary title="<?= e(__('Name ändern')) ?>"><?= icon('pencil-simple') ?><span class="adm-sr"><?= e(__('Name ändern')) ?> – <?= e($name) ?></span></summary>
+            <form method="post" action="<?= e($actionUrl($k, 'label')) ?>" class="net-rename__form"><?= csrf_field() ?>
+              <label for="net-label-<?= e($k) ?>"><?= e(__('Name in der Übersicht')) ?></label>
+              <input id="net-label-<?= e($k) ?>" name="label" maxlength="60" value="<?= e((string) ($s['label_own'] ?? '')) ?>" placeholder="<?= e($name) ?>" autocomplete="off">
+              <button type="submit" class="adm-btn adm-btn--small adm-btn--primary"><?= e(__('Speichern')) ?></button>
+              <p class="adm-muted"><?= e(__('Leer lassen: Name der Website aus den Einstellungen bzw. die Domain.')) ?></p>
+            </form>
+          </details>
           <?php if ($primary !== ''): ?>
           <a class="net-card__host" href="<?= e($pub . '/') ?>" target="_blank" rel="noopener noreferrer"><?= e($primary) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
           <?php else: ?><span class="net-card__host adm-muted"><?= e(__('alle übrigen Domains')) ?></span><?php endif; ?>
@@ -121,7 +130,6 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
         <span class="net-pill net-pill--<?= e($pill) ?>"><?= icon($pill === 'ok' ? 'check-circle' : ($pill === 'off' ? 'eye' : 'warning')) ?><?= e($pillText) ?></span>
       </header>
       <p class="net-tags">
-        <code class="net-key" title="<?= e(__('Kurzname der Website')) ?>"><?= e($k) ?></code>
         <?php if (!empty($s['network'])): ?><span class="net-tag net-tag--net"><?= e(__('Netzwerk-Website')) ?></span><?php endif; ?>
         <span class="net-tag<?= $env === 'production' ? ' net-tag--live' : ' net-tag--warn' ?>"><?= e($envLabel[$env] ?? $env) ?></span>
         <?php if ($noindex): ?><span class="net-tag net-tag--muted" title="<?= e(__('Suchmaschinen sollen die Website nicht aufnehmen')) ?>">noindex</span><?php endif; ?>
@@ -152,6 +160,7 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
         <section class="net-fact net-fact--wide" aria-labelledby="net-f3-<?= e($k) ?>">
           <h4 id="net-f3-<?= e($k) ?>" class="net-fact__h"><?= icon('gear-six') ?><?= e(__('Betrieb')) ?></h4>
           <dl class="net-ops">
+            <dt><?= e(__('Kurzname')) ?></dt><dd><code class="net-key" title="<?= e(__('Technischer Kurzname (Konfiguration, Kommandozeile --site=…) – nicht änderbar')) ?>"><?= e($k) ?></code></dd>
             <dt><?= e(__('Kit')) ?></dt><dd><?= e($s['theme_label'] ?? ($s['theme'] ?? '–')) ?></dd>
             <dt><?= e(__('Funktionen')) ?></dt><dd title="<?= e(implode(', ', $s['features_off'] ?? [])) ?>"><?= e(ucfirst((string) ($s['preset'] ?? 'full'))) ?><?= !empty($s['features_off']) ? ' · ' . e(__('{n} aus', ['n' => count($s['features_off'])])) : '' ?><?= !empty($s['extensions']) ? ' · ' . e(implode(', ', $s['extensions'])) : '' ?><?= !empty($s['features_delegated']) ? ' · ' . e(__('Website schaltet selbst')) : '' ?></dd>
             <dt><?= e(__('Speicher')) ?></dt><dd><?= e($size(isset($s['db_size']) ? (int) $s['db_size'] : null)) ?> <?= e(__('DB')) ?> · <?= e($size((int) ($s['media_size'] ?? 0))) ?> <?= e(__('eigene Medien')) ?>
@@ -325,7 +334,7 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
     <h2 id="net-log-h"><?= e(__('Protokoll')) ?></h2>
     <?php if (!$log): ?><p class="adm-muted"><?= e(__('Noch keine Einträge.')) ?></p><?php else: ?>
     <?php $labels = ['sso.issue' => __('Website geöffnet'), 'sso.login' => __('Angemeldet per Netzwerk'), 'login' => __('Angemeldet'),
-        'maintenance.on' => __('Wartungsmodus an'), 'maintenance.off' => __('Wartungsmodus aus'), 'backup' => __('Sicherung'), 'cache.clear' => __('Cache geleert'), 'hosts.add' => __('Domain hinzugefügt'), 'hosts.remove' => __('Domain entfernt'),
+        'maintenance.on' => __('Wartungsmodus an'), 'maintenance.off' => __('Wartungsmodus aus'), 'backup' => __('Sicherung'), 'cache.clear' => __('Cache geleert'), 'hosts.add' => __('Domain hinzugefügt'), 'hosts.remove' => __('Domain entfernt'), 'site.label' => __('Name geändert'),
         'site.create' => __('Website angelegt'), 'account.create' => __('Konto angelegt'), 'account.disable' => __('Konto gesperrt'), 'account.enable' => __('Konto entsperrt'),
         'account.reset-2fa' => __('2FA zurückgesetzt'), '2fa.enable' => __('2FA eingerichtet'), 'password' => __('Passwort geändert'),
         'user.reset-2fa' => __('2FA zurückgesetzt'), 'passkey.add' => __('Passkey hinzugefügt'), 'passkey.remove' => __('Passkey gelöscht'),
