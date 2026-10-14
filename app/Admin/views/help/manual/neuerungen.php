@@ -16,6 +16,9 @@
   <h3>Große Fotos laden schneller hoch</h3>
   <p>Fotos vom Handy verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – ein 20-MB-Foto braucht nur noch einen Bruchteil der Zeit. Kameradaten wie der Aufnahmeort werden dabei entfernt. <a href="#medien">Mehr dazu →</a></p>
 
+  <h3>Inhaltsblöcke in Tabellen</h3>
+  <p>Einträge lassen sich jetzt wie Seiten aus Blöcken des Kits gestalten – Fließtext, Text + Bild, Galerie, Zitat und mehr. Neuer Feldtyp <b>Inhaltsblöcke</b>, auf der Detailseite über den Block „Inhaltsblöcke des Eintrags“. <a href="#inhaltsbloecke">Zur Anleitung →</a></p>
+
   <h3>PDF-Links: Besucher wählen „Ansehen“ oder „Herunterladen“</h3>
   <p>Ein Klick auf einen PDF-Link zeigt Besuchern eine kleine Karte mit Vorschau der ersten Seite, Titel und Größe sowie den Knöpfen <b>Ansehen</b> (eingebauter Betrachter) und <b>Herunterladen</b>. Im Linkdialog legen Sie fest, wohin der Link ohne diese Auswahl führt (<b>Anzeigen</b> oder <b>Download</b>, z. B. bei „In neuem Tab öffnen“). Datei-Felder und Downloads-Blöcke bieten weiterhin „Ansehen“ im Betrachter an. <a href="#link-datei">Mehr dazu →</a></p>
 

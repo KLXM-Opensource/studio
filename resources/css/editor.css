@@ -335,3 +335,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-entry-editing [data-entry-mode=panel]{cursor:default}
 .cms-entry-editing .cms-mt-target{outline:1.5px dashed rgba(49,65,100,.28);outline-offset:6px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){.cms-mt-edit{transition:none;transform:none}}
+
+/* Inhaltsblöcke des Eintrags (Core\Data\EntryBlocks): Vorschau in der Detailvorlage, Hülle auf der Detailseite (Knopf „Bearbeiten“) */
+.eb-preview__note{display:flex;align-items:center;gap:8px;margin:12px auto;padding:10px 14px;border:1px dashed color-mix(in srgb,currentColor 35%,transparent);border-radius:10px;font:500 14px/1.4 system-ui,sans-serif;opacity:.85}
+.eb-preview__note svg{width:18px;height:18px;flex:none}
+.eb-entry{position:relative}

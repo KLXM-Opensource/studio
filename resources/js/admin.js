@@ -1148,7 +1148,46 @@ d.addEventListener('click', e => {
   if (day && !e.target.closest('a,button')) day.querySelector('[data-cal-add]')?.click();
 });
 
-function init(scope = d) { initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
+// ------------------------------------------------------------ Inhaltsblöcke (Datentabellen, Core\Data\EntryBlocks)
+// „+ Block hinzufügen“ → Menü der erlaubten Blöcke → Vorlage des Typs (template[data-blk-tpl]) einsetzen; ↑ ↓ ✕, Auf-/Zuklappen
+function initBlockFields(scope = d) {
+  $$('[data-blocks]', scope).forEach(box => {
+    if (box._init || box.closest('template')) return; box._init = true;
+    const items = $('[data-blk-items]', box), btn = $('[data-blk-add]', box), menu = $('.blk-menu', box);
+    const changed = () => box.dispatchEvent(new Event('input', { bubbles: true }));
+    const show = on => { menu.hidden = !on; btn.setAttribute('aria-expanded', String(on)); if (on) menu.querySelector('button')?.focus(); };
+    btn.addEventListener('click', () => show(menu.hidden));
+    menu.addEventListener('keydown', e => {
+      const all = [...menu.querySelectorAll('button')], i = all.indexOf(d.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); show(false); btn.focus(); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); all[(i + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length]?.focus(); }
+    });
+    d.addEventListener('click', e => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+    menu.addEventListener('click', e => {
+      const b = e.target.closest('[data-blk-type]'); if (!b) return;
+      const tpl = $(`template[data-blk-tpl="${CSS.escape(b.dataset.blkType)}"]`, box); if (!tpl) return;
+      items.insertAdjacentHTML('beforeend', tpl.innerHTML.replaceAll('__blk__', 'n' + (uid++)));
+      const row = items.lastElementChild;
+      uniqueIds(row); init(row);
+      show(false);
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $('input:not([type=hidden]),select,textarea,.rte-area', $('.blk-fields', row))?.focus({ preventScroll: true });
+      changed();
+    });
+    items.addEventListener('click', e => {
+      const a = e.target.closest('[data-blk]'); if (!a) return;
+      const row = a.closest('[data-blk-item]'); if (!row || row.parentElement !== items) return;
+      const act = a.dataset.blk;
+      if (act === 'toggle') { const open = a.getAttribute('aria-expanded') !== 'true'; a.setAttribute('aria-expanded', String(open)); row.classList.toggle('is-collapsed', !open); return; }
+      if (act === 'up' && row.previousElementSibling) items.insertBefore(row, row.previousElementSibling);
+      else if (act === 'down' && row.nextElementSibling) items.insertBefore(row.nextElementSibling, row);
+      else if (act === 'remove') { const next = row.nextElementSibling || row.previousElementSibling; row.remove(); (next?.querySelector('[data-blk=toggle]') || btn).focus(); changed(); return; }
+      a.focus(); changed();
+    });
+  });
+}
+
+function init(scope = d) { initBlockFields(scope); initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 

@@ -268,6 +268,17 @@ final class Theme
 
     public function renderBlocks(array $blocks): string
     {
+        // Detailseite: „Inhaltsblöcke des Eintrags“ (entry_blocks) → Blöcke des Eintrags als eigene Abschnitte (Core\Data\EntryBlocks);
+        // im Seiten-Editor bleibt der Block stehen (Vorschau, app/Blocks/entry_blocks.php)
+        if (!app()->editing) {
+            foreach ($blocks as $i => $b) {
+                if (($b['type'] ?? '') !== 'entry_blocks') continue;
+                $eb = ($b['tunes']['section']['visible'] ?? true) === false ? [] : \Core\Data\EntryBlocks::forContext((array) ($b['data'] ?? []));
+                $mid = $eb ? $this->renderBlocks($eb) : '';
+                if ($mid !== '' && ($attr = \Core\Data\EntryBlocks::editAttr((array) ($b['data'] ?? []))) !== '') $mid = '<div class="eb-entry"' . $attr . '>' . $mid . '</div>';
+                return $this->renderBlocks(array_slice($blocks, 0, $i)) . $mid . $this->renderBlocks(array_slice($blocks, $i + 1));
+            }
+        }
         $html = '';
         $prev = null;
         $row = [];   // laufende Reihe: erster Block = Kopf (Abschnitt), weitere mit Tune „row“

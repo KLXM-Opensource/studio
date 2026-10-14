@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Datentabellen: Inhaltsblöcke – Einträge aus Blöcken des Kits
+- Neuer Feldtyp **Inhaltsblöcke** (`Core\Data\EntryBlocks`): je Eintrag eine Folge von Blöcken wie auf Seiten, erlaubte Blöcke je
+  Feld (Standard: Inhalt und Medien). Eingabe in der Verwaltung mit den Feldern der Seitenleiste, Menü „+ Block hinzufügen“,
+  verschieben, entfernen, zugeklappt mit Auszug.
+- Kern-Block **Inhaltsblöcke des Eintrags** (`entry_blocks`) für Detailvorlagen: setzt die Blöcke als eigene Abschnitte der Seite ein;
+  „Bearbeiten“ auf der Website öffnet die Seitenleiste am Feld. Suche, Medienverwendung, Kurzfassung in Listen.
+
 ### PDF-Links: Auswahl „Ansehen | Herunterladen“ für Besucher
 - Klick auf einen PDF-Link zeigt eine Karte mit Vorschau der ersten Seite, Titel, Größe und den Knöpfen **Ansehen** (Viewer) und
   **Herunterladen** – Knöpfe im Stil des Kits, Tastatur (Esc, Fokus bleibt in der Karte). `Core\PdfLinks`, `js/pdf-links.mjs`

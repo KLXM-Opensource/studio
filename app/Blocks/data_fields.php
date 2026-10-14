@@ -29,7 +29,7 @@ foreach ((array) ($d['fields'] ?? []) as $v) {
 $layout = $d['layout'] ?? 'prose';
 if (!$fields) {
     $fields = $layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
-        : array_values(array_filter(array_column($t['fields'], 'name'), fn($n) => $n !== $t['settings']['title_field']));
+        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks'), 'name'), fn($n) => $n !== $t['settings']['title_field']));   // Inhaltsblöcke: eigener Block entry_blocks
 }
 $label = fn(string $f) => $f === '_title' ? lt('Titel') : ($f === '_when' ? lt('Termin') : ($f === 'published_at' ? lt('Veröffentlicht') : Tables::label(Tables::field($t, $f) ?? ['label' => $f])));
 $type = fn(string $f) => Tables::field($t, $f)['type'] ?? ($f === '_title' ? 'title' : 'date');
@@ -112,6 +112,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
       <?= match (true) {
           $tp === 'richtext' => '<div class="prose"' . $ea . '>' . $h . '</div>',
           $tp === 'mediatext' => '<div class="df-mt"' . $ea . '>' . $h . '</div>',   // Medien + Text: Block-Inhalt, nie in <p>
+          $tp === 'blocks' => '<div class="df-blocks"' . $ea . '>' . $h . '</div>',
           \Core\Combo::is($tp) => '<div class="df-combo df-combo--' . e($tp) . '"' . $ea . '>' . $h . '</div>',   // Kombifelder: Block-Inhalt
           $tp === 'media' => '<div class="df-img ratio-' . e(str_replace(':', '-', $ratio)) . '">' . $h . '</div>',
           default => '<p' . $ea . '>' . $h . '</p>',

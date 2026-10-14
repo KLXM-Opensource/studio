@@ -111,6 +111,15 @@ $type = $f['type'] ?? 'text';
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[sections]" value="1"<?= !empty($f['sections']) ? ' checked' : '' ?>> <span><?= e(__('Mehrere Abschnitte (je mit Zwischenüberschrift)')) ?></span></label>
       <p class="f-help"><?= e(__('Text mit Bildern und Videos darüber oder daneben – ohne Medien ein normales Textfeld. Anordnung, Breite, Textumlauf und Ansicht (untereinander, Raster mit Großansicht, Slider) wählt die Redaktion je Eintrag.')) ?></p>
     </div>
+    <?php $blkSel = (array) ($f['blocks'] ?? []); $blkDef = \Core\Data\EntryBlocks::defaults(); // Inhaltsblöcke: erlaubte Blöcke des Kits ?>
+    <div class="dt-field__extra" data-show-for="blocks"><fieldset class="dt-kinds"><legend><?= e(__('Erlaubte Blöcke')) ?></legend>
+      <input type="hidden" name="<?= $n ?>[blocks][]" value="">
+      <?php foreach (\Core\Data\EntryBlocks::choices() as $bt => $bl): ?>
+      <label class="f-check"><input type="checkbox" name="<?= $n ?>[blocks][]" value="<?= e($bt) ?>"<?= in_array($bt, $blkSel ?: $blkDef, true) ? ' checked' : '' ?>> <span><?= e($bl) ?></span></label>
+      <?php endforeach; ?>
+      </div>
+      <p class="f-help"><?= e(__('Die Redaktion stellt den Inhalt jedes Eintrags aus diesen Blöcken zusammen – wie auf einer Seite. Auf der Detailseite erscheinen sie über den Block „Inhaltsblöcke des Eintrags“ in der Vorlage.')) ?></p>
+    </div>
     <div class="dt-field__extra" data-show-for="iban">
       <input type="hidden" name="<?= $n ?>[mask]" value="0">
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[mask]" value="1"<?= ($f['mask'] ?? true) ? ' checked' : '' ?>> <span><?= e(__('In Listen maskieren')) ?></span></label>

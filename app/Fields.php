@@ -17,7 +17,7 @@ namespace Core;
 final class Fields
 {
     public const TYPES = ['text', 'textarea', 'richtext', 'inline', 'email', 'tel', 'url', 'link', 'number',
-        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'pages', 'media', 'file', 'collection', 'mediatext', 'repeater', 'group', 'secret', 'heading'];
+        'bool', 'select', 'multiselect', 'iban', 'datatable', 'datafield', 'datafields', 'date', 'datetime', 'time', 'recurrence', 'color', 'icon', 'geo', 'page', 'pages', 'media', 'file', 'collection', 'mediatext', 'blocks', 'repeater', 'group', 'secret', 'heading'];
 
     /** Standardwerte eines Schemas als flaches Array */
     public static function defaults(array $fields): array
@@ -36,7 +36,7 @@ final class Fields
     {
         return match ($f['type'] ?? 'text') {
             'bool' => false,
-            'repeater', 'group', 'multiselect', 'datafields' => [],
+            'repeater', 'group', 'multiselect', 'datafields', 'blocks' => [],
             'pages' => ($f['store'] ?? 'ids') === 'paths' ? '' : [],
             'number', 'media', 'file', 'page', 'collection' => null,
             default => '',
@@ -80,6 +80,15 @@ final class Fields
                     $errors[$p] = self::msg('Bitte mindestens einen Eintrag für „{label}“ anlegen.', ['label' => $label]);
                 }
                 $values[$name] = $items;
+                continue;
+            }
+
+            if ($type === 'blocks') {
+                // Inhaltsblöcke (Datentabellen, Core\Data\EntryBlocks): Blöcke des Kits wie auf Seiten
+                $values[$name] = \Core\Data\EntryBlocks::sanitize($f, $raw);
+                if (!empty($f['required']) && !$values[$name]) {
+                    $errors[$p] = self::msg('Bitte mindestens einen Block für „{label}“ anlegen.', ['label' => $label]);
+                }
                 continue;
             }
 
@@ -464,6 +473,10 @@ final class Fields
         $errHtml = $err ? '<p class="f-error" id="' . $id . '-e">' . e($err) . '</p>' : '';
         $width = ($f['width'] ?? 'full') === 'half' ? ' f--half' : '';
         $ph = !empty($f['placeholder']) ? ' placeholder="' . e($f['placeholder']) . '"' : '';
+
+        if ($type === 'blocks') {
+            return \Core\Data\EntryBlocks::renderInput($f, $inputName, $value, $errors, $p, $label, $errHtml);
+        }
 
         if ($type === 'repeater' || $type === 'group') {
             // Gruppe mit altem Einzelwert (Feld war früher Text): als erste Zeile übernehmen

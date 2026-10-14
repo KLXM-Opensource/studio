@@ -211,10 +211,10 @@ const Panel = (() => {
     const wrap = [...form.querySelectorAll('[data-mt-field]')].find(x => x.dataset.mtField === focus.field);
     if (!wrap) {
       // Kombifelder (Wiederholer f[feld]): zum Feld springen, erstes Eingabefeld
-      const rep = [...form.querySelectorAll('.rep[data-name]')].find(x => x.dataset.name === `f[${focus.field}]`);
+      const rep = [...form.querySelectorAll('.rep[data-name], [data-blocks][data-name]')].find(x => x.dataset.name === `f[${focus.field}]`);
       if (!rep) return null;
       requestAnimationFrame(() => rep.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
-      const el = rep.querySelector('.rep-item input:not([type=hidden]), .rep-item .rte-area') || rep.querySelector('[data-rep=add]');
+      const el = rep.querySelector('.rep-item input:not([type=hidden]), .rep-item .rte-area') || rep.querySelector('[data-rep=add], [data-blk-add]');
       el?.focus({ preventScroll: true });
       return el || rep;
     }

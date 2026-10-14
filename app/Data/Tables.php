@@ -37,6 +37,8 @@ final class Tables
         'faq' => ['Fragen & Antworten', 'text', 'question'],
         'address' => ['Adresse', 'text', 'address-book'],
         'downloads' => ['Downloads', 'text', 'download-simple'],
+        // Inhaltsblöcke: eigene Folge von Blöcken des Kits je Eintrag (Core\Data\EntryBlocks) – JSON wie der Inhalt einer Seite
+        'blocks' => ['Inhaltsblöcke', 'text', 'squares-four'],
         'link' => ['Link', 'string', 'link'],
         'email' => ['E-Mail', 'string', 'at'],
         'tel' => ['Telefon', 'string', 'phone'],
@@ -413,6 +415,8 @@ final class Tables
             }
             // Medien + Text: mehrere Abschnitte (je mit Zwischenüberschrift) statt einem
             if ($type === 'mediatext') $def['sections'] = !empty($f['sections']);
+            // Inhaltsblöcke: erlaubte Blocktypen (leer = Inhalt und Medien des Kits)
+            if ($type === 'blocks') $def['blocks'] = array_values(array_intersect(array_keys(EntryBlocks::choices()), array_map('strval', (array) ($f['blocks'] ?? []))));
             // IBAN: in Listen und Ausgaben maskieren (Standard: an)
             if ($type === 'iban') $def['mask'] = !array_key_exists('mask', $f) || !empty($f['mask']);
             // Wiederholbare Gruppe: Unterfelder, Anzahl, Beschriftungen

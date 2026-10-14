@@ -75,6 +75,14 @@ return [
             ['name' => 'back_link', 'label' => 'Zurück zu', 'type' => 'link'],
         ],
     ],
+    'entry_blocks' => [
+        'label' => 'Inhaltsblöcke des Eintrags', 'icon' => 'squares-four', 'group' => 'Daten',
+        'help' => 'Für Detailseiten-Vorlagen: An dieser Stelle erscheinen die Blöcke aus dem Feld „Inhaltsblöcke“ des aufgerufenen Eintrags – als eigene Abschnitte der Seite.',
+        'fields' => [
+            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true],
+            ['name' => 'field', 'label' => 'Feld', 'type' => 'datafield', 'types' => ['blocks'], 'empty_label' => '– erstes Feld „Inhaltsblöcke“ –'],
+        ],
+    ],
     'data_form' => [
         'label' => 'Formular (Datentabelle)', 'icon' => 'clipboard-text', 'group' => 'Daten',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)

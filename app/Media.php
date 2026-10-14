@@ -1506,6 +1506,7 @@ final class Media
             if (in_array($f['type'] ?? '', ['media', 'file'], true) && (int) $v > 0) $ids[(int) $v] = true;
             if (($f['type'] ?? '') === 'mediatext') foreach (self::mediaTextIds($v) as $i) $ids[$i] = true;
             if (Combo::is((string) ($f['type'] ?? ''))) foreach (Combo::mediaIds($f, $v) as $i) $ids[$i] = true;   // Fotos, Downloads
+            if (($f['type'] ?? '') === Data\EntryBlocks::TYPE) foreach (Data\EntryBlocks::mediaIds($v) as $i) $ids[(int) $i] = true;   // Inhaltsblöcke
             if (in_array($f['type'] ?? '', ['repeater', 'group'], true) && is_array($v)) {
                 foreach (array_is_list($v) ? $v : [$v] as $item) if (is_array($item)) self::fieldsCollect($f['fields'] ?? [], $item, $ids);
             }
@@ -1559,6 +1560,9 @@ final class Media
                 return true;
             }
             if (Combo::is((string) ($f['type'] ?? '')) && in_array($id, Combo::mediaIds($f, $v), true)) {
+                return true;
+            }
+            if (($f['type'] ?? '') === Data\EntryBlocks::TYPE && in_array($id, array_map('intval', Data\EntryBlocks::mediaIds($v)), true)) {
                 return true;
             }
             // Wiederholbare Felder und Gruppen (Datensätze: einzeln oder als Liste)

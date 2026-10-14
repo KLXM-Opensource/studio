@@ -23,7 +23,7 @@ use Core\Network\Network;
 final class EntryEdit
 {
     /** Inline editierbare Feldtypen → Bearbeitungsart */
-    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media', 'mediatext' => 'panel', 'person' => 'panel', 'faq' => 'panel', 'address' => 'panel', 'downloads' => 'panel'];   // panel: Knopf je Abschnitt → Seitenleiste an dieser Stelle
+    private const MODES = ['text' => 'plain', 'textarea' => 'lines', 'richtext' => 'rich', 'media' => 'media', 'mediatext' => 'panel', 'person' => 'panel', 'faq' => 'panel', 'address' => 'panel', 'downloads' => 'panel', 'blocks' => 'panel'];   // panel: Knopf je Abschnitt → Seitenleiste an dieser Stelle
 
     /** Darf der angemeldete Nutzer diese Tabelle überhaupt auf der Website bearbeiten? */
     public static function canTable(array $t): bool

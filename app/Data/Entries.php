@@ -271,6 +271,8 @@ final class Entries
                 $r[$f['name']] = \Core\Fields::mediaTextSections($r[$f['name']] ?? null, !empty($f['sections']));
             } elseif (\Core\Combo::is($f['type'])) {
                 $r[$f['name']] = \Core\Combo::items($r[$f['name']] ?? null);
+            } elseif ($f['type'] === EntryBlocks::TYPE) {
+                $r[$f['name']] = EntryBlocks::items($r[$f['name']] ?? null);
             } elseif ($f['type'] === 'bool') {
                 $r[$f['name']] = (bool) ($r[$f['name']] ?? false);
             } elseif (in_array($f['type'], ['media', 'file', 'relation'], true)) {
@@ -301,7 +303,8 @@ final class Entries
                 $def = self::groupSchema($f) + $def;
             }
             if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
-            if (\Core\Combo::is($f['type'])) $def = \Core\Combo::schema($f) + $def;   // Kombifeld: Eingabe als Wiederholer mit festen Unterfeldern
+            if (\Core\Combo::is($f['type'])) $def = \Core\Combo::schema($f) + $def;
+            if ($f['type'] === EntryBlocks::TYPE) $def['blocks'] = (array) ($f['blocks'] ?? []);   // erlaubte Blocktypen   // Kombifeld: Eingabe als Wiederholer mit festen Unterfeldern
             if ($f['type'] === 'recurrence') {
                 // Regel-Editor liest Beginn (Wochentag, Tag im Monat) und „ganztägig“ aus dem Formular
                 $cal = Calendar::config($table);
@@ -455,7 +458,7 @@ final class Entries
             }
             $row[$f['name']] = match (true) {
                 $f['type'] === 'multiselect' => json_encode(array_values((array) $v), JSON_UNESCAPED_UNICODE),
-                $f['type'] === 'group', \Core\Combo::is($f['type']) => $v ? json_encode(array_values((array) $v), JSON_UNESCAPED_UNICODE) : null,
+                $f['type'] === 'group', \Core\Combo::is($f['type']), $f['type'] === EntryBlocks::TYPE => $v ? json_encode(array_values((array) $v), JSON_UNESCAPED_UNICODE) : null,
                 $f['type'] === 'mediatext' => ($secs = \Core\Fields::mediaTextSections($v, !empty($f['sections']))) ? json_encode($secs, JSON_UNESCAPED_UNICODE) : null,
                 $f['type'] === 'bool' => $v ? 1 : 0,
                 in_array($f['type'], ['media', 'file', 'relation'], true) => $v !== null && $v !== '' ? (int) $v : null,
@@ -776,6 +779,7 @@ final class Entries
             'geo' => ($o['plain'] ?? false) ? e((string) $v) : \Core\Maps::render(['point' => $v, 'label' => self::title($table, $e), 'height' => 's']),
             'relation', 'relations' => self::relationHtml($f, is_array($v) ? $v : [(int) $v], $o),
             'group' => self::groupHtml($f, $v),
+            EntryBlocks::TYPE => !empty($o['plain']) ? e(EntryBlocks::summary($v)) : EntryBlocks::render(EntryBlocks::items($v)),
             'person', 'faq', 'address', 'downloads' => !empty($o['plain']) ? e(\Core\Combo::summary($f, $v)) : \Core\Combo::html($f, $v),
             'mediatext' => !empty($o['plain']) ? implode("\n", array_map(fn($s) => ($s['title'] !== '' ? '<p>' . e($s['title']) . '</p>' : '') . $s['text'], \Core\Fields::mediaTextSections($v)))
                 : \Core\MediaText::sections(\Core\Fields::mediaTextSections($v, !empty($f['sections'])), ['label' => self::title($table, $e)]),

@@ -7313,4 +7313,13 @@ return [
     'Medien + Text' => 'Media + text',
     'Download' => 'Download',
     'PDF öffnen' => 'Open PDF',
+    // Inhaltsblöcke (Core\Data\EntryBlocks)
+    'Block hinzufügen' => 'Add block',
+    'Block „{label}“ entfernen' => 'Remove block “{label}”',
+    'Die Redaktion stellt den Inhalt jedes Eintrags aus diesen Blöcken zusammen – wie auf einer Seite. Auf der Detailseite erscheinen sie über den Block „Inhaltsblöcke des Eintrags“ in der Vorlage.' => 'Editors compose the content of each entry from these blocks – like on a page. On the detail page they appear via the block “Content blocks of the entry” in the template.',
+    'Hier erscheinen die Inhaltsblöcke des jeweiligen Eintrags. Der Vorschau-Eintrag hat noch keine.' => 'The content blocks of each entry appear here. The preview entry has none yet.',
+    'Inhaltsblöcke des Eintrags – Vorschau ({n} Blöcke). Bearbeitet werden sie im Eintrag.' => 'Content blocks of the entry – preview ({n} blocks). They are edited in the entry.',
+    'Variante' => 'Variant',
+    'Inhaltsblöcke' => 'Content blocks',
+    'Bitte mindestens einen Block für „{label}“ anlegen.' => 'Please add at least one block for “{label}”.',
 ];

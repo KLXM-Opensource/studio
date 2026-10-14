@@ -3497,7 +3497,20 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .mt-sec .mt-field{border:0;padding:0;background:none}
 .mt-sec > .rep-meta{display:none}   /* Kurzfassung der Wiederholgruppe (z. B. Stil eines Buttons) hilft hier nicht – der Titel reicht */
 .mt-field__media .btn{display:inline-flex;align-items:center;gap:6px}
-.rep-fields > .mt-field{grid-column:1/-1}   /* Abschnitt über die volle Breite (nicht nur die erste Spalte) */
+.rep-fields > .mt-field{grid-column:1/-1}
+/* Inhaltsblöcke (Datentabellen): Blöcke wie Wiederholungen, Menü „+ Block hinzufügen“ */
+.f--blocks{grid-column:1/-1}
+.blk-items{display:grid;gap:10px;margin:6px 0 10px}
+.blk-item legend .rep-title{display:inline-flex;align-items:center;gap:6px}
+.blk-item legend svg{width:16px;height:16px}
+.blk-peek{font-weight:400;color:var(--adm-t3);overflow:hidden;text-overflow:ellipsis}
+.blk-add{position:relative;display:inline-block}
+.blk-add > .btn{display:inline-flex;align-items:center;gap:6px}
+.blk-menu{position:absolute;z-index:30;left:0;top:calc(100% + 6px);display:grid;min-width:240px;max-height:min(60vh,420px);overflow:auto;padding:6px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-surface);box-shadow:0 12px 30px -8px rgb(0 0 0/.25)}
+.blk-menu[hidden]{display:none}
+.blk-menu button{display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:6px;background:none;color:var(--adm-ink);font:500 14px var(--adm-font);text-align:left;cursor:pointer}
+.blk-menu button:hover,.blk-menu button:focus-visible{background:var(--adm-fill);outline:none}
+.blk-menu svg{width:18px;height:18px;flex:none;color:var(--adm-t2)}   /* Abschnitt über die volle Breite (nicht nur die erste Spalte) */
 .mt-tabs{display:flex;flex-wrap:wrap;gap:6px}
 .mt-tab{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 10px;border:1px solid var(--adm-line);border-radius:6px;background:var(--adm-surface);color:var(--adm-t2);font:600 13px var(--adm-font);cursor:pointer}
 .mt-tab[hidden]{display:none}
