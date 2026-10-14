@@ -61,3 +61,4 @@ deploy/targets/*.env
 /storage/visual-diff/
 /.claude/settings.local.json
 /storage/branding/
+/storage/presence/
