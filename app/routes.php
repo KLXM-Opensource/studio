@@ -69,6 +69,9 @@ return function (Router $r): void {
     $r->post('/admin/account/passkeys/{id}/delete', [Admin\PasskeyController::class, 'delete']);
     $r->post('/admin/network/auth-policy', [Admin\NetworkController::class, 'authPolicy']);
     $r->get('/admin/sso',[Admin\NetworkController::class, 'sso']);
+    // Domainwechsel: angemeldet auf eine andere Domain derselben Website (Core\HostHandover) – Passkey dort anlegen
+    $r->post('/admin/account/domain', [Admin\HandoverController::class, 'start']);
+    $r->get('/admin/sso/domain', [Admin\HandoverController::class, 'land']);
     $r->get('/admin/network/media-usages', [Admin\NetworkController::class, 'mediaUsages']);   // signiert, zwischen Websites (MediaPools::usagesElsewhere)
     $r->get('/admin/network', [Admin\NetworkController::class, 'index']);
     $r->post('/admin/network/open', [Admin\NetworkController::class, 'open']);

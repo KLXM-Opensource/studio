@@ -40,6 +40,19 @@ if (!$pkPol['passkey'] && !$pkList) return;
   </ul>
   <?php endif; ?>
   <?php if ($pkPol['passkey']): ?><h3 class="pk-h3"><?= e(__('Neuen Passkey hinzufügen')) ?></h3><?php include __DIR__ . '/_passkey_add.php'; ?><?php endif; ?>
+  <?php // Domainwechsel (Core\HostHandover): Passkeys gelten je Domain – auf den anderen Domains dieser Website anmelden und dort anlegen
+  $pkTargets = $pkPol['passkey'] && $pkAvail ? \Core\HostHandover::targets() : [];
+  if ($pkTargets): $pkHosts = \Core\HostHandover::passkeyHosts($user); ?>
+  <h3 class="pk-h3"><?= e(__('Weitere Domains dieser Website')) ?></h3>
+  <p class="adm-muted"><?= e(__('Ein Passkey gilt nur für die Domain, auf der er angelegt wurde. Vor einem Domainwechsel melden Sie sich hier auf der neuen Domain an und legen dort einen Passkey an – danach erst die Hauptadresse umstellen.')) ?></p>
+  <ul class="pk-hosts">
+    <?php foreach ($pkTargets as $h): $has = in_array(\Core\HostHandover::rp($h), $pkHosts, true); ?>
+    <li><code><?= e($h) ?></code> <span class="adm-badge<?= $has ? '' : ' adm-badge--muted' ?>"><?= e($has ? __('Passkey vorhanden') : __('kein Passkey')) ?></span>
+      <form method="post" action="<?= e(url('/admin/account/domain')) ?>" class="tf-inline"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
+        <button class="adm-btn adm-btn--small" type="submit"><?= e($has ? __('Dort anmelden') : __('Dort anmelden und Passkey anlegen')) ?><span class="adm-sr"> – <?= e($h) ?></span></button></form></li>
+    <?php endforeach; ?>
+  </ul>
+  <?php endif; ?>
   <?php if ($pkList && !$pkNet && !(int) ($pkRow['totp_enabled'] ?? 0)): $left = count(json_decode((string) ($pkRow['totp_recovery'] ?? ''), true) ?: []); ?>
   <h3 class="pk-h3"><?= e(__('Wiederherstellungscodes')) ?></h3>
   <p class="adm-muted"><?= e(__('Für den Fall, dass Sie keinen Passkey zur Hand haben. Noch {n} Codes übrig.', ['n' => $left])) ?></p>

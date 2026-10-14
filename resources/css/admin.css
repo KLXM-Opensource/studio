@@ -3607,3 +3607,11 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .brand-logo__prev--dark{background:#1E2840}
 .brand-logo__prev img{display:block;max-width:220px;max-height:56px}
 .brand-preview{display:flex;align-items:center;gap:12px;margin:6px 0 0}
+/* Konto → Passkeys: weitere Domains der Website (Core\HostHandover) */
+.pk-hosts{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.pk-hosts li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.pk-hosts form{margin-left:auto}
+.dom-pk{display:inline-flex;align-items:center;gap:4px;color:var(--adm-warn,#9A5B00)}
+.dom-pk .ico{width:14px;height:14px}
+.net-pk form{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;color:var(--adm-warn,#9A5B00);font-size:13px}
+.net-pk .ico{width:14px;height:14px;vertical-align:-2px}

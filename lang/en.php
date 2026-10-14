@@ -7405,4 +7405,18 @@ return [
     'Name von {site} geändert: {name}' => 'Name of {site} changed: {name}',
     'Name ändern' => 'Change name',
     'Technischer Kurzname (Konfiguration, Kommandozeile --site=…) – nicht änderbar' => 'Technical key (configuration, command line --site=…) – cannot be changed',
+    // Domainwechsel: Passkeys je Domain (Core\HostHandover)
+    'Achtung: Für {host} haben Sie noch keinen Passkey – Ihre Passkeys gelten nur für die bisherige Domain. Legen Sie vorher über „Dort anmelden und Passkey anlegen“ einen an, sonst brauchen Sie zum Anmelden Passwort und Code bzw. Wiederherstellungscodes.' => 'Note: you do not have a passkey for {host} yet – your passkeys only work on the current domain. Create one first via “Sign in there and add a passkey”, otherwise you will need your password and code or recovery codes to sign in.',
+    'Anmeldung auf {host} …' => 'Signing in on {host} …',
+    'Der Anmelde-Link ist ungültig oder abgelaufen. Bitte auf der bisherigen Domain erneut starten.' => 'The sign-in link is invalid or has expired. Please start again on the previous domain.',
+    'Diese Domain gehört nicht zu dieser Website.' => 'This domain does not belong to this website.',
+    'Dort anmelden' => 'Sign in there',
+    'Dort anmelden und Passkey anlegen' => 'Sign in there and add a passkey',
+    'Ein Passkey gilt nur für die Domain, auf der er angelegt wurde. Vor einem Domainwechsel melden Sie sich hier auf der neuen Domain an und legen dort einen Passkey an – danach erst die Hauptadresse umstellen.' => 'A passkey only works on the domain where it was created. Before changing domains, sign in on the new domain here and add a passkey there – only then switch the primary address.',
+    'Ihr Passkey gilt auf {host} noch nicht.' => 'Your passkey does not work on {host} yet.',
+    'Ihr Passkey gilt hier noch nicht.' => 'Your passkey does not work here yet.',
+    'Passkey vorhanden' => 'Passkey set up',
+    'Sie sind jetzt auf {host} angemeldet. Legen Sie hier einen Passkey für diese Domain an.' => 'You are now signed in on {host}. Add a passkey for this domain here.',
+    'Weitere Domains dieser Website' => 'Other domains of this website',
+    'kein Passkey' => 'no passkey',
 ];

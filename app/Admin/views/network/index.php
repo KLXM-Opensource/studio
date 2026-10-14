@@ -44,6 +44,9 @@ $poolBytes = array_sum(array_map(fn($p) => (int) ($p['size'] ?? 0), $pools));
 $bytes = array_sum(array_map(fn($s) => (int) ($s['db_size'] ?? 0) + (int) ($s['media_size'] ?? 0), $stats)) + $poolBytes;
 $oldest = min(array_map(fn($s) => (int) ($s['at'] ?? time()), $stats) ?: [time()]);
 $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' . $a);
+// Passkeys des Netzwerk-Kontos je Domain (Core\HostHandover) – Hinweis an Domains ohne Passkey
+$me = app()->auth->user() ?? [];
+$pkHosts = \Core\HostHandover::passkeyHosts($me);
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Netzwerk-Administration')) ?></p><h1><?= e(__('Alle Websites')) ?></h1>
@@ -176,6 +179,12 @@ $actionUrl = fn(string $k, string $a) => url('/admin/network/site/' . $k . '/' .
         <summary class="adm-link"><?= $others ? e(__('+{n} weitere Adressen', ['n' => count($others)])) : e(__('Domains bearbeiten')) ?><span class="adm-sr"> – <?= e($name) ?></span></summary>
         <ul class="net-domains__list">
         <?php foreach (array_merge($hosts, $landingHosts) as $h): ?>
+          <?php // Netzwerk-Website: dort meldet sich die Netzwerk-Administration direkt an – Passkey gilt je Domain (andere Websites: „Öffnen“ ohne Passkey)
+          if (!empty($s['network']) && in_array($h, $hosts, true) && \Core\HostHandover::rp($h) !== \Core\HostHandover::rp((string) app()->request?->host()) && \Core\HostHandover::missing($me, $h, $pkHosts)): ?>
+          <li class="net-pk"><form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><input type="hidden" name="host" value="<?= e($h) ?>"><input type="hidden" name="path" value="/admin/account">
+            <span><?= icon('warning') ?> <?= e(__('Ihr Passkey gilt auf {host} noch nicht.', ['host' => $h])) ?></span>
+            <button type="submit" class="adm-btn adm-btn--small"><?= e(__('Dort anmelden und Passkey anlegen')) ?></button></form></li>
+          <?php endif; ?>
           <li><form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" data-confirm="<?= e(__('Domain {host} von {site} entfernen?', ['host' => $h, 'site' => $name])) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="remove"><input type="hidden" name="host" value="<?= e($h) ?>"><code><?= e($h) ?></code><?= $h === $primary ? ' <span class="net-tag net-tag--muted">' . e(__('Hauptadresse')) . '</span>' : '' ?><?= in_array($h, $landingHosts, true) ? ' <span class="net-tag net-tag--muted">' . e(__('Landing')) . '</span>' : '' ?> <button type="submit" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Entfernen')) ?><span class="adm-sr"> <?= e($h) ?></span></button></form></li>
         <?php endforeach; ?>
         </ul>

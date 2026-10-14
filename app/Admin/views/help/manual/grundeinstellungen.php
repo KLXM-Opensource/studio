@@ -22,6 +22,19 @@
   </ol>
   <p>Gehört die Website zu einem Netzwerk, verwaltet die Netzwerk-Administration die Domains.</p>
 
+  <h3 id="domainumzug">Domainumzug: neue Hauptadresse ohne Aussperren</h3>
+  <p><b>Passkeys gelten nur für die Domain, auf der sie angelegt wurden.</b> Das ist eine Regel der Browser (Schutz gegen Phishing). Wer sich bisher nur per Passkey anmeldet, kann ihn nach einem Domainwechsel auf der neuen Adresse nicht verwenden. Gehen Sie deshalb in dieser Reihenfolge vor:</p>
+  <ol class="doc-steps">
+    <li><b>Neue Domain beim Hosting einrichten</b> (DNS, in Plesk als Alias bzw. zusätzliche Domain, mit SSL-Zertifikat) und unter <b>Domain</b> als <b>weitere Domain</b> eintragen – die bisherige Adresse bleibt Hauptadresse und funktioniert weiter.</li>
+    <li><b>Erreichbarkeit prüfen.</b></li>
+    <li><b>Dort anmelden und Passkey anlegen</b>: Neben jeder Domain, für die Sie noch keinen Passkey haben, steht dieser Knopf (auch unter <b>Konto › Passkeys › Weitere Domains dieser Website</b>). Er meldet Sie ohne erneute Eingabe auf der neuen Domain an und öffnet dort Ihr Konto – legen Sie unter <b>Passkeys</b> einen neuen an.</li>
+    <li>Erst dann <b>Als Hauptadresse festlegen</b>. Fehlt Ihnen für die neue Domain noch ein Passkey, weist die Rückfrage darauf hin.</li>
+    <li>Weitere Personen mit Passkey legen nach dem Wechsel auf der neuen Adresse einen neuen an – über ihr Konto („Dort anmelden …“), solange die alte Adresse noch erreichbar ist, oder nach der Anmeldung mit Passwort und App-Code bzw. Wiederherstellungscode.</li>
+    <li>Die alte Domain erst entfernen, wenn alle umgezogen sind.</li>
+  </ol>
+  <div class="doc-note doc-note--info"><strong>Netzwerk: eigene Verwaltungsdomain</strong><p>Mit mehreren Websites meldet sich die Netzwerk-Administration auf der <b>Netzwerk-Website</b> an und wechselt von dort per „Öffnen“ bzw. „Website wechseln“ in die anderen Websites – dafür braucht es keinen Passkey der jeweiligen Domain. Behält die Netzwerk-Website eine feste Adresse (z. B. eine Verwaltungsdomain der Agentur), können die Domains aller anderen Websites wechseln, ohne dass sich an der Anmeldung etwas ändert. In der Netzwerk-Übersicht steht bei Domains der Netzwerk-Website ohne Passkey ebenfalls „Dort anmelden und Passkey anlegen“.</p></div>
+  <div class="doc-note doc-note--warn"><strong>Notfall: ausgesperrt</strong><p>Wer gar nicht mehr hineinkommt, bittet die Administration um „2FA zurücksetzen“ (Benutzer &amp; Rollen). Für Netzwerk-Konten setzt die Agentur den zweiten Faktor auf dem Server zurück (<code>php bin/console network:user &lt;E-Mail&gt; --reset-2fa</code>); bei der nächsten Anmeldung wird er neu eingerichtet. Halten Sie deshalb neben dem Passkey immer die Wiederherstellungscodes bereit – mit der Richtlinie „nur Passkey“ ist der Notfallweg über den Server der einzige.</p></div>
+
   <h3 id="branding">Branding & Support (Agentur)</h3>
   <p>Unter <b>System → Branding &amp; Support</b> hinterlegt die betreuende Agentur ihr <b>Logo</b> (SVG, PNG, JPG oder WebP; optional eine Fassung für die dunkle Darstellung), ihren <b>Namen</b> und ihre <b>Support-Angaben</b> – Ansprechpartner, Telefon, E-Mail, Website, Erreichbarkeit und einen Hinweis. Das Logo ersetzt die Produktmarke auf der Anmeldeseite, bei Einrichtung und Begrüßung und in der Werkzeugleiste der Website; klein darunter steht auf Wunsch „Technik: KLXM Studio“. Die Support-Angaben erscheinen unter Hilfe &amp; Support, in „Hilfe &amp; Einstieg“ der Übersicht, bei „Neue Meldung“ und als kurze Zeile auf der Anmeldeseite.</p>
   <p>Das Branding gilt für die ganze Installation. In einer Einzel-Installation pflegt es die Administration; mit mehreren Websites die Netzwerk-Administration (gibt es keine Netzwerk-Konten, die Administration der Haupt-Website) – es gilt dann für alle Websites.</p>

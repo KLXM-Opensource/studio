@@ -5,6 +5,9 @@
  * @var list<string> $hosts  @var list<string> $landing  @var string $current  @var bool $redirect  @var string $env  @var string $siteUrl  @var array $checked
  */
 $primary = $hosts[0] ?? null;
+// Passkeys gelten je Domain (Core\HostHandover): Hinweis an Domains, für die das eigene Konto noch keinen Passkey hat
+$me = app()->auth->user() ?? [];
+$pkHosts = \Core\HostHandover::passkeyHosts($me);
 $post = fn(string $a) => e(url('/admin/system/domain/' . $a));
 ?>
 <header class="adm-head">
@@ -22,13 +25,19 @@ $post = fn(string $a) => e(url('/admin/system/domain/' . $a));
     <?php foreach ($hosts as $i => $h): $ok = $checked[$h] ?? null; $okFresh = $ok && (int) ($ok['at'] ?? 0) >= time() - 600; ?>
     <div class="set-row">
       <div class="set-row__main"><span class="set-row__label"><?= e($h) ?> <?= $i === 0 ? '<span class="adm-badge">' . e(__('Hauptadresse')) . '</span>' : '<span class="adm-badge adm-badge--muted">' . e(__('weitere Domain')) . '</span>' ?><?php if ($h === $current): ?> <span class="adm-badge adm-badge--muted"><?= e(__('aktuell aufgerufen')) ?></span><?php endif; ?></span>
+        <?php if ($i > 0 && $h !== $current && \Core\HostHandover::missing($me, $h, $pkHosts)): ?><span class="set-row__sub dom-pk"><?= icon('warning') ?> <?= e(__('Ihr Passkey gilt hier noch nicht.')) ?></span><?php endif; ?>
         <?php if ($okFresh): ?><span class="set-row__sub"><?= e(($ok['scheme'] ?? '') === 'https' ? __('geprüft: zeigt auf diese Website (HTTPS)') : __('geprüft: zeigt auf diese Website (nur HTTP)')) ?></span><?php endif; ?></div>
       <div class="set-row__ctl">
         <?php if ($i > 0): ?>
         <form method="post" action="<?= $post('check') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
           <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Erreichbarkeit prüfen')) ?></button></form>
+        <?php $pkMiss = $h !== $current && \Core\HostHandover::missing($me, $h, $pkHosts); ?>
+        <?php if ($pkMiss): ?>
+        <form method="post" action="<?= e(url('/admin/account/domain')) ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>"><input type="hidden" name="back" value="domain">
+          <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Dort anmelden und Passkey anlegen')) ?><span class="adm-sr"> – <?= e($h) ?></span></button></form>
+        <?php endif; ?>
         <form method="post" action="<?= $post('primary') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
-          <button class="adm-btn adm-btn--small" type="submit" data-confirm="<?= e(__('{host} als Hauptadresse festlegen? Vorher wird geprüft, ob die Domain auf diese Website zeigt. Links in E-Mails, Sitemap und Canonical-Angaben nutzen danach die neue Adresse.', ['host' => $h])) ?>"><?= e(__('Als Hauptadresse festlegen')) ?></button></form>
+          <button class="adm-btn adm-btn--small" type="submit" data-confirm="<?= e(__('{host} als Hauptadresse festlegen? Vorher wird geprüft, ob die Domain auf diese Website zeigt. Links in E-Mails, Sitemap und Canonical-Angaben nutzen danach die neue Adresse.', ['host' => $h]) . ($pkMiss ? ' ' . __('Achtung: Für {host} haben Sie noch keinen Passkey – Ihre Passkeys gelten nur für die bisherige Domain. Legen Sie vorher über „Dort anmelden und Passkey anlegen“ einen an, sonst brauchen Sie zum Anmelden Passwort und Code bzw. Wiederherstellungscodes.', ['host' => $h]) : '')) ?>"><?= e(__('Als Hauptadresse festlegen')) ?></button></form>
         <?php if ($h !== $current): ?>
         <form method="post" action="<?= $post('remove') ?>"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>">
           <button class="adm-btn adm-btn--small adm-btn--danger-text" type="submit" data-confirm="<?= e(__('Domain {host} entfernen? Die Website ist darunter danach nicht mehr erreichbar (bzw. nur noch über den Rückfall der Installation).', ['host' => $h])) ?>"><?= e(__('Entfernen')) ?></button></form>

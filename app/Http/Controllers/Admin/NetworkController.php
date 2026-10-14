@@ -64,7 +64,14 @@ final class NetworkController extends AdminController
         $key = $this->siteOr404($r->str('site'));
         // Ziel ohne Pfad: auf der Netzwerk-Website die Übersicht aller Websites, sonst die Übersicht der Website
         $path = Network::safePath($r->str('path') ?: ($key === Network::siteKey() ? '/admin/network' : '/admin'));
-        if ($key === site()->key) return Response::redirect(url($path));
+        // Bestimmte Domain der Website (Domainwechsel: dort einen Passkey anlegen) – nur eingetragene Domains
+        $host = '';
+        if ($r->str('host') !== '') {
+            $host = (string) Sites::normalizeHost($r->str('host'));
+            if (!in_array($host, (new \Core\Site($key, Sites::all()[$key]))->hosts(), true)) throw new HttpException(404);
+            if ($host === Sites::normalizeHost($r->host())) $host = '';
+        }
+        if ($key === site()->key && $host === '') return Response::redirect(url($path));
         $limiter = Network::limiter();
         $lk = 'sso-issue:' . Network::uid($user);
         if ($limiter->tooMany($lk, 30, 600)) {
@@ -75,7 +82,9 @@ final class NetworkController extends AdminController
         Network::log('sso.issue', $key, (string) $user['email'], 'von ' . site()->key . ' → ' . $path);
         // Keine 303-Weiterleitung: Browser wenden „form-action 'self'“ (CSP der Verwaltung) auch auf Weiterleitungen nach
         // einem Formular an. Stattdessen eine Zwischenseite mit <meta refresh> (kein Skript, Token nur in dieser Antwort, no-store).
-        $to = Network::siteLink($key, '/admin/sso') . '?t=' . rawurlencode($token);
+        $to = Network::siteLink($key, '/admin/sso');
+        if ($host !== '' && ($pu = parse_url($to)) && isset($pu['scheme'], $pu['host'])) $to = $pu['scheme'] . '://' . $host . ($pu['path'] ?? '');
+        $to .= '?t=' . rawurlencode($token);
         $label = (new \Core\Site($key, Sites::all()[$key]))->label();
         $html = '<!doctype html><html lang="' . e(\Core\I18n::locale()) . '" class="adm-ui"><head><meta charset="utf-8">'
             . '<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer">'
