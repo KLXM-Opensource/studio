@@ -185,6 +185,18 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-menu__item kbd{margin-left:auto;align-self:center;padding:2px 6px;border-radius:5px;background:var(--m-hover);color:var(--m-mute);font:600 11px -apple-system,system-ui,sans-serif}
 .cms-menu__sep{flex:none;height:1px;margin:6px 4px;background:var(--m-line)}
 .cms-menu>.cms-menu__sep:first-child,.cms-menu__sep+.cms-menu__sep,.cms-menu>.cms-menu__sep:last-child{display:none}
+/* Menü „⋯“ in zwei Spalten (toolbar.php): links „Diese Seite“, rechts allgemein – ab 1024 px nebeneinander, sonst untereinander */
+#cms-more-menu{max-height:calc(100dvh - 72px);overflow:auto;overscroll-behavior:contain}   /* lange Menüs (Telefon): scrollen statt abgeschnitten */
+.cms-menu__col{display:flex;flex-direction:column;min-width:0}
+.cms-menu__col>.cms-menu__sep:first-child,.cms-menu__col>.cms-menu__sep:last-child{display:none}
+.cms-menu__col--page:not(:has(.cms-menu__item)){display:none}
+.cms-menu__col--page+.cms-menu__col--site{margin-top:6px;padding-top:6px;border-top:1px solid var(--m-line)}
+.cms-menu__col--page:not(:has(.cms-menu__item))+.cms-menu__col--site{margin-top:0;padding-top:0;border-top:0}
+@media (min-width:1024px){
+  #cms-more-menu.cms-menu:has(.cms-menu__col--page .cms-menu__item){display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,1fr);max-width:min(600px,calc(100vw - 16px));column-gap:6px}
+  #cms-more-menu.cms-menu[hidden]{display:none}
+  #cms-more-menu .cms-menu__col--page+.cms-menu__col--site{margin-top:0;padding-top:0;border-top:0;padding-left:6px;border-left:1px solid var(--m-line)}
+}
 .cms-menu--narrow,.cms-menu--phone{display:none}
 @media (prefers-reduced-motion:no-preference){.cms-menu:not([hidden]),.cms-pop:not([hidden]){animation:cms-in .14s ease-out}@keyframes cms-in{from{opacity:0;transform:translateY(-4px)}}}
 
@@ -772,6 +784,18 @@ button.pp-fold:focus-visible{outline:2px solid var(--adm-a,#314164);outline-offs
 .cms-bar__presence[hidden]{display:none}
 /* In der Leiste nur Avatare und Symbole – Texte stehen im Tooltip (title) und für Screenreader (versteckt) */
 .cms-bar__presence .cms-presence__t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Anzeige als Knopf (Antippen/Klicken öffnet das Info-Feld) */
+.cms-presence__btn{all:unset;display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 4px;border-radius:999px;cursor:pointer}
+.cms-presence__btn:hover{background:rgba(255,255,255,.08)}
+.cms-presence__btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.cms-presence-pop{position:fixed;z-index:2147483600;width:max-content;max-width:min(340px,calc(100vw - 16px));padding:10px 12px;border-radius:10px;background:#fff;color:#1E2840;box-shadow:0 10px 30px rgba(15,23,42,.25);font:500 13px/1.45 system-ui,sans-serif}
+.cms-presence-pop[hidden]{display:none}
+.cms-presence-pop__l{display:flex;gap:8px;align-items:flex-start;margin:0}
+.cms-presence-pop__l + .cms-presence-pop__l{margin-top:6px}
+.cms-presence-pop .cms-presence__ico{flex:none;margin-top:2px;width:14px;height:14px;fill:currentColor;color:#4F5B78}
+/* Infozeile „Zuletzt gespeichert“ oben im Menü ⋯ (presence.mjs) */
+.cms-menu__info{display:flex;gap:8px;align-items:flex-start;margin:0;padding:6px 10px;font-size:12px;line-height:1.4;color:var(--m-mute)}
+.cms-menu__info .cms-presence__ico{flex:none;margin-top:2px}
 .cms-presence__last{display:inline-grid;place-items:center;width:24px;height:24px;color:var(--bar-mute,#B8C2D6)}
 /* Symbole (Icon-Satz, presence.mjs ico()) und Bearbeitungssperre (Core\EditLock): in der Leiste nur Avatar + Schloss, Text in der Hinweiszeile */
 .cms-presence__ico{display:block;width:14px;height:14px;fill:currentColor}

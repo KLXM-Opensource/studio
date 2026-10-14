@@ -165,16 +165,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
     <span class="cms-menuwrap">
       <button type="button" class="cms-ibtn" data-bar-more aria-haspopup="menu" aria-expanded="false" aria-controls="cms-more-menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" title="<?= e(__('Weitere Aktionen')) ?>"><?= icon('dots-three') ?></button>
       <span class="cms-menu cms-menu--end" id="cms-more-menu" role="menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" hidden>
-        <?php if ($b['netSites']): // Netzwerk-Konten: andere Website öffnen – angemeldet per Einmal-Anmeldung (Startseite der Ziel-Website) ?>
-        <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="cms-menu__grp cms-bar__form" role="group" aria-label="<?= e(__('Website wechseln')) ?>">
-          <?= csrf_field() ?><input type="hidden" name="path" value="/">
-          <span class="cms-menu__head" aria-hidden="true"><?= e(__('Website wechseln')) ?></span>
-          <?php foreach ($b['netSites'] as $ns): ?>
-          <button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1" name="site" value="<?= e($ns['key']) ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ns['home'] ? 'tree-structure' : 'globe') ?></span><span class="cms-menu__label"><?= e($ns['label']) ?><?php if ($ns['home']): ?><small><?= e(__('Netzwerk-Website')) ?></small><?php endif; ?></span></button>
-          <?php endforeach; ?>
-        </form>
-        <?= $sep ?>
-        <?php endif; ?>
+        <span class="cms-menu__col cms-menu__col--page"><?php // Spalte „Diese Seite“ (ab 1024 px zweispaltig, sonst untereinander) ?>
         <?php if ($b['modes']): ?>
         <span class="cms-menu__grp cms-menu--narrow" role="group" aria-label="<?= e(__('Modus')) ?>">
           <span class="cms-menu__head" aria-hidden="true"><?= e(__('Modus')) ?></span>
@@ -223,6 +214,18 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php endif; ?>
         <?php // Seiteneinstellungen: auf Seiten als Werkzeug (Core\PageSettingsTool, oben bei den Werkzeugen), sonst Link in die Verwaltung
         if ($b['hasPage'] && $b['canManage'] && !in_array(\Core\PageSettingsTool::ID, array_column($b['tools'], 'id'), true)): ?><?= $item(e($kind === 'page' ? __('Seiteneinstellungen') : __('Einstellungen der Vorlagen-Seite')), 'gear-six', url('/admin/pages/' . $page['id'])) ?><?php endif; ?>
+        </span>
+        <span class="cms-menu__col cms-menu__col--site"><?php // Spalte allgemein: Website wechseln, Einstellungen, KI, Hilfe, Konto ?>
+        <?php if ($b['netSites']): // Netzwerk-Konten: andere Website öffnen – angemeldet per Einmal-Anmeldung (Startseite der Ziel-Website) ?>
+        <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="cms-menu__grp cms-bar__form" role="group" aria-label="<?= e(__('Website wechseln')) ?>">
+          <?= csrf_field() ?><input type="hidden" name="path" value="/">
+          <span class="cms-menu__head" aria-hidden="true"><?= e(__('Website wechseln')) ?></span>
+          <?php foreach ($b['netSites'] as $ns): ?>
+          <button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1" name="site" value="<?= e($ns['key']) ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ns['home'] ? 'tree-structure' : 'globe') ?></span><span class="cms-menu__label"><?= e($ns['label']) ?><?php if ($ns['home']): ?><small><?= e(__('Netzwerk-Website')) ?></small><?php endif; ?></span></button>
+          <?php endforeach; ?>
+        </form>
+        <?= $sep ?>
+        <?php endif; ?>
         <?php if ($b['canSettings']): ?><?= $item(e($b['settingsTitle']), 'sliders-horizontal', url('/admin/settings')) ?><?php endif; ?>
         <?= $sep ?>
         <button type="button" role="menuitem" class="cms-menu__item cms-menu--phone" tabindex="-1" data-spotlight><span class="cms-menu__ico" aria-hidden="true"><?= icon('magnifying-glass') ?></span><span class="cms-menu__label"><?= e(__('Suchen')) ?></span><kbd data-kbd>⌘K</kbd></button>
@@ -233,6 +236,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <a role="menuitem" class="cms-menu__item cms-menu__me" tabindex="-1" href="<?= e(url('/admin/account')) ?>"><?= \Core\Avatar::html($b['me'], 'adm-ava adm-ava--s') ?><span class="cms-menu__label"><?= e($b['me']['name'] ?: $b['me']['email']) ?><small><?= e(($b['meRole'] !== '' ? $b['meRole'] . ' · ' : '') . __('Konto')) ?></small></span></a>
         <form method="post" action="<?= e(url('/admin/logout')) ?>" class="cms-bar__form"><?= csrf_field() ?><button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1"><span class="cms-menu__ico" aria-hidden="true"><?= icon('sign-out') ?></span><span class="cms-menu__label"><?= e(__('Abmelden')) ?></span></button></form>
         <?php endif; ?>
+        </span>
       </span>
     </span>
   </div>

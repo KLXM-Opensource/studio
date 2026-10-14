@@ -7488,4 +7488,6 @@ return [
     '{name} bearbeitet diese Seite gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.' => '{name} is editing this page right now. You only see the view – saving is locked until {name} is done.',
     '{name} bearbeitet diesen Eintrag gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.' => '{name} is editing this entry right now. You only see the view – saving is locked until {name} is done.',
     'Bearbeitung übernommen' => 'took over editing',
+    'Wer arbeitet hier?' => 'Who is working here?',
+    'seit {ago}' => 'since {ago}',
 ];

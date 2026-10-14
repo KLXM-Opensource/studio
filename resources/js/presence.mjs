@@ -30,7 +30,7 @@ const T0 = {
   now: 'gerade eben', min: 'vor {n} Min.', hour: 'vor {n} Std.', day: 'am {date}',
   conflict: '{name} hat inzwischen gespeichert', conflictShort: 'Inzwischen gespeichert', conflictTitle: 'Inzwischen von {name} gespeichert',
   conflictBody: 'Seit Sie diese Seite geöffnet haben, hat {name} gespeichert ({ago}). Wenn Sie jetzt speichern, kann das diese Änderungen überschreiben – der vorige Stand bleibt als Version erhalten.',
-  conflictOk: 'Trotzdem speichern', cancel: 'Abbrechen', board: '{name} · {label}',
+  conflictOk: 'Trotzdem speichern', cancel: 'Abbrechen', board: '{name} · {label}', since: 'seit {ago}', you: 'Sie', info: 'Wer arbeitet hier?',
 };
 const ago = (t, T) => {
   const s = Math.max(0, Date.now() / 1000 - t);
@@ -80,13 +80,20 @@ function here(el) {
     } else if (others.length) {
       h += `<span class="cms-presence__avas">${others.slice(0, 4).map(badge).join('')}</span>`
         + `<span class="cms-presence__t">${esc(fill(others.length === 1 ? T.editing1 : T.editingN, { names: names(others) }))}</span>`;
-    } else if (last && !last.self && last.name) {
-      // Zuletzt gespeichert: in der Leiste nur ein Uhr-Symbol, Text im Tooltip
-      h += `<span class="cms-presence__last">${ico('clock-counter-clockwise')}<span class="cms-presence__t cms-presence__t--muted">${esc(fill(T.last, { name: last.name, ago: ago(last.at, T) }))}</span></span>`;
     }
-    if (conflict) h = `<span class="cms-presence__warn" title="${esc(fill(T.conflict, { name: last.name || '?' }))}">${ico('warning')}<span class="cms-presence__sr">${esc(fill(T.conflict, { name: last.name || '?' }))}</span></span>` + h;
-    el.innerHTML = h;
+    // Zuletzt gespeichert: als Infozeile oben im Menü ⋯ (#cms-more-menu), nicht in der Leiste
+    menuInfo(last && last.name ? fill(T.last, { name: last.self ? T.you : last.name, ago: ago(last.at, T) }) : '');
+    if (conflict) h = `<span class="cms-presence__warn">${ico('warning')}<span class="cms-presence__sr">${esc(fill(T.conflict, { name: last.name || '?' }))}</span></span>` + h;
+    // Klartext für das Info-Feld (Antippen/Klicken – Tooltips gibt es auf Touch-Geräten nicht)
+    const lines = [];
+    if (conflict) lines.push(['warning', fill(T.conflictTitle, { name: last.name || '?' }) + ' (' + ago(last.at, T) + ')']);
+    if (lockedHere) lines.push(['lock', fill(el.dataset.presenceType === 'entry' ? T.lockedNoteEntry : T.lockedNotePage, { name: lock.by.name })]);
+    others.forEach((p) => lines.push(['user', fill(T.editing1, { names: p.name }) + ' – ' + fill(T.since, { ago: ago(p.since, T) })]));
+    if (last && last.name && !conflict) lines.push(['clock-counter-clockwise', fill(T.last, { name: last.self ? T.you : last.name, ago: ago(last.at, T) })]);
+    info = lines;
+    el.innerHTML = h ? `<button type="button" class="cms-presence__btn" aria-expanded="${pop && !pop.hidden ? 'true' : 'false'}" aria-label="${esc(T.info)}">${h}</button>` : '';
     el.hidden = !h;
+    if (!h) closePop(); else if (pop && !pop.hidden) fillPop();
     el.classList.toggle('is-conflict', conflict);
     el.classList.toggle('is-locked', !!lockedHere);
     if (lockedHere) el.title = fill(T.locked, { name: lock.by.name });
@@ -95,10 +102,51 @@ function here(el) {
       + (lock.canTake ? `<button type="button" class="cms-lock-note__btn" data-presence-take>${esc(T.take)}</button>` : ''));
     else if (lock?.on && !lock.by && el.dataset.presenceLocked && !editing()) note(`<span>${esc(T.freeNote)}</span><a class="cms-lock-note__btn" href="${esc(editUrl())}">${esc(T.editNow)}</a>`, true);
     else note(null);
-    el.title = [conflict ? fill(T.conflict, { name: last.name || '?' }) : '',
-      others.length ? fill(others.length === 1 ? T.editing1 : T.editingN, { names: names(others) }) : (last && !last.self && last.name ? fill(T.last, { name: last.name, ago: ago(last.at, T) }) : ''),
-      ...others.map((p) => p.name + ' – ' + ago(p.since, T))].filter(Boolean).join('\n');
+    el.title = lines.map((l) => l[1]).join('\n');
   };
+
+  // Infozeile oben im Menü „Weitere Aktionen“ (Schatten-Wurzel der Leiste)
+  const menuInfo = (text) => {
+    const box = el.getRootNode().querySelector?.('#cms-more-menu');
+    const menu = box?.querySelector('.cms-menu__col--site') || box;   // rechte Spalte („allgemein“), sonst das Menü selbst
+    if (!menu) return;
+    let row = menu.querySelector(':scope > .cms-menu__info');
+    if (!text) { row?.remove(); menu.querySelector(':scope > .cms-menu__sep[data-presence-sep]')?.remove(); return; }
+    if (!row) {
+      row = d.createElement('p');
+      row.className = 'cms-menu__info';
+      const sep = d.createElement('span'); sep.className = 'cms-menu__sep'; sep.dataset.presenceSep = '1'; sep.setAttribute('role', 'separator');
+      menu.prepend(row, sep);
+    }
+    row.innerHTML = `${ico('clock-counter-clockwise')}<span>${esc(text)}</span>`;
+  };
+
+  // Info-Feld unter der Anzeige (in der Schatten-Wurzel der Leiste, fest positioniert – die Leiste schneidet nichts ab)
+  let info = [], pop = null;
+  const fillPop = () => { if (pop) pop.innerHTML = info.map(([i, t]) => `<p class="cms-presence-pop__l">${ico(i)}<span>${esc(t)}</span></p>`).join(''); };
+  const placePop = () => {
+    if (!pop || pop.hidden) return;
+    const r = el.getBoundingClientRect(), w = pop.offsetWidth;
+    pop.style.top = Math.round(r.bottom + 8) + 'px';
+    pop.style.left = Math.round(Math.max(8, Math.min(r.right - w, innerWidth - w - 8))) + 'px';
+  };
+  const closePop = () => { if (!pop || pop.hidden) return; pop.hidden = true; el.querySelector('.cms-presence__btn')?.setAttribute('aria-expanded', 'false'); };
+  const openPop = () => {
+    if (!pop) {
+      pop = d.createElement('div');
+      pop.className = 'cms-presence-pop';
+      pop.setAttribute('role', 'status');
+      pop.hidden = true;
+      (el.getRootNode() instanceof ShadowRoot ? el.getRootNode() : d.body).append(pop);
+    }
+    fillPop(); pop.hidden = false; placePop();
+    el.querySelector('.cms-presence__btn')?.setAttribute('aria-expanded', 'true');
+  };
+  el.addEventListener('click', (e) => { if (e.target.closest('.cms-presence__btn')) { e.stopPropagation(); pop && !pop.hidden ? closePop() : openPop(); } });
+  d.addEventListener('click', (e) => { if (pop && !pop.hidden && !e.composedPath().includes(pop)) closePop(); });
+  d.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pop && !pop.hidden) { closePop(); el.querySelector('.cms-presence__btn')?.focus(); } });
+  addEventListener('resize', placePop);
+  addEventListener('scroll', placePop, { passive: true });
 
   const tick = async (peek = !editing()) => {
     clearTimeout(timer);

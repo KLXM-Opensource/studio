@@ -45,6 +45,7 @@ final class PresenceController extends AdminController
             'taken' => __('{name} hat die Bearbeitung übernommen'), 'takenBody' => __('Sie können nicht mehr speichern. Kopieren Sie wichtige, noch nicht gespeicherte Änderungen, bevor Sie die Seite verlassen.'),
             'lockedNotePage' => __('{name} bearbeitet diese Seite gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.'),
             'lockedNoteEntry' => __('{name} bearbeitet diesen Eintrag gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.'),
+            'since' => __('seit {ago}'), 'you' => __('Sie'), 'info' => __('Wer arbeitet hier?'),
             'freeNote' => __('Wieder frei – niemand bearbeitet gerade.'), 'editNow' => __('Jetzt bearbeiten'), 'ok' => __('Verstanden')];
     }
 
