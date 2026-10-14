@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Behoben: Tabellen-Designer
+- Ein falsches schließendes Tag in der Option „Erlaubte Blöcke“ zerlegte die Feldliste (alle Optionen sichtbar, Spalten verrutscht). Neuer Selbsttest prüft die Feldvorlage für jeden Feldtyp.
+
 ### Seitenstruktur auf der Website: Werkzeug „Seiten“
 - Knopf **Seiten** in der Werkzeugleiste (⌥P, `Core\PagesTool`, `js/pages-panel.mjs`): Seitenbaum als Seitenleiste neben der Website –
   ziehen (davor/danach/als Unterseite) oder ↑ ↓ ← →, Online/Offline, Menü, Unterseite anlegen, löschen; aktuelle Seite markiert,

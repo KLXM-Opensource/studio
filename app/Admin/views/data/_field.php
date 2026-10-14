@@ -123,7 +123,7 @@ $type = $f['type'] ?? 'text';
       <?php foreach (\Core\Data\EntryBlocks::choices() as $bt => $bl): ?>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[blocks][]" value="<?= e($bt) ?>"<?= in_array($bt, $blkSel ?: $blkDef, true) ? ' checked' : '' ?>> <span><?= e($bl) ?></span></label>
       <?php endforeach; ?>
-      </div>
+      </fieldset>
       <p class="f-help"><?= e(__('Die Redaktion stellt den Inhalt jedes Eintrags aus diesen Blöcken zusammen – wie auf einer Seite. Auf der Detailseite erscheinen sie über den Block „Inhaltsblöcke des Eintrags“ in der Vorlage.')) ?></p>
     </div>
     <div class="dt-field__extra" data-show-for="iban">

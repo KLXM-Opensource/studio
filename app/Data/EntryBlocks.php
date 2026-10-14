@@ -222,4 +222,24 @@ final class EntryBlocks
         foreach ((array) ($t['fields'] ?? []) as $f) if (($f['type'] ?? '') === self::TYPE) $out[(string) $f['name']] = (string) $f['label'];
         return $out;
     }
+
+    /**
+     * Selbsttest (Teil von `php bin/console data:selftest`): Feldvorlage des Tabellen-Designers (data/_field.php) für jeden Feldtyp
+     * rendern – öffnende und schließende div/fieldset müssen übereinstimmen (ein falsches Tag zerlegt sonst die ganze Feldliste).
+     */
+    public static function selftest(): array
+    {
+        $ok = 0;
+        $fails = [];
+        foreach (array_keys(Tables::TYPES) as $type) {
+            $html = \Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => 0, 'f' => ['type' => $type, 'label' => 'X', 'name' => 'x'], 'tables' => [], 'err' => null, 'all' => [], 'types' => array_keys(Tables::TYPES), 'inbox' => false, 'noForm' => []]);
+            foreach (['div', 'fieldset', 'details', 'label'] as $tag) {
+                $open = preg_match_all('~<' . $tag . '[\s>]~i', $html);
+                $close = substr_count(strtolower($html), '</' . $tag . '>');
+                if ($open === $close) $ok++;
+                else $fails[] = "Designer-Feldvorlage ($type): <$tag> $open× geöffnet, $close× geschlossen";
+            }
+        }
+        return ['ok' => $ok, 'fails' => $fails];
+    }
 }
