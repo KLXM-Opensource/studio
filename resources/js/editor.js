@@ -912,7 +912,7 @@ function makeTool(type, def) {
 
     /** Knopf „Felder bearbeiten“: nur mit gewählter Tabelle, deren Felder diese Rolle ändern darf */
     syncFormFields() {
-      const b = this.bar.querySelector('.cms-block__fields');
+      const b = this.bar.querySelector('.cms-block__fields:not(.cms-block__expand)');   // nicht „Aufklappen“ der Kompaktansicht (gleiche Klasse)
       if (!b) return;
       const handle = String(this.data?.[def.formfields] || '');
       b.hidden = !handle || !(cfg.formFields || []).includes(handle);
