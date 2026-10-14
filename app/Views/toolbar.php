@@ -59,6 +59,21 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
       </span>
     </span>
     <?php endif; ?>
+    <?php if ($b['langs']): $lc = array_values(array_filter($b['langs'], fn($l) => $l['current']))[0] ?? $b['langs'][0];
+      $lst = ['online' => __('online'), 'draft' => __('Entwurf'), 'missing' => __('noch nicht angelegt')]; ?>
+    <span class="cms-menuwrap cms-bar__lang">
+      <button type="button" class="cms-pick" aria-haspopup="menu" aria-expanded="false" aria-controls="cms-lang-menu" aria-label="<?= e(__('Sprache: {lang}', ['lang' => $lc['label']])) ?>" title="<?= e(__('Sprache wechseln oder Übersetzung anlegen')) ?>">
+        <?= icon('globe') ?><span class="cms-pick__t"><?= e(strtoupper($lc['code'])) ?></span> <?= icon('caret-down') ?>
+      </button>
+      <span class="cms-menu" id="cms-lang-menu" role="menu" aria-label="<?= e(__('Sprache')) ?>" hidden>
+        <?php foreach ($b['langs'] as $l): $sub = '<small>' . e($l['current'] ? __('diese Seite') . ' · ' . $lst[$l['state']] : $lst[$l['state']]) . '</small>'; ?>
+          <?php if ($l['url']): ?><a role="menuitemradio" class="cms-menu__item" tabindex="-1" href="<?= e($l['url']) ?>" hreflang="<?= e($l['code']) ?>" aria-checked="<?= $l['current'] ? 'true' : 'false' ?>"><span class="cms-menu__ico" aria-hidden="true"><?= $l['current'] ? icon('check') : '' ?></span><span class="cms-menu__label"><?= e($l['label']) ?><?= $sub ?></span></a>
+          <?php elseif (can('pages.manage')): ?><button type="button" role="menuitem" class="cms-menu__item" tabindex="-1" data-bar-translate="<?= e($l['code']) ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon('plus') ?></span><span class="cms-menu__label"><?= e(__('{lang} anlegen', ['lang' => $l['label']])) ?><small><?= e(__('Kopie dieser Seite als Entwurf – dann übersetzen')) ?></small></span></button>
+          <?php endif; ?>
+        <?php endforeach; ?>
+      </span>
+    </span>
+    <?php endif; ?>
     <?php if ($kind === 'template' && count($b['others']) > 1): $cur = array_values(array_filter($b['others'], fn($o) => $o['current']))[0] ?? $b['others'][0]; ?>
     <span class="cms-menuwrap cms-bar__pick">
       <button type="button" class="cms-pick" aria-label="<?= e(__('Vorschau mit') . ': ' . $cur['title']) ?>" aria-haspopup="menu" aria-expanded="false" aria-controls="cms-pick-menu" title="<?= e(__('Vorlage mit anderem Eintrag ansehen')) ?>">

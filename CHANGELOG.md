@@ -10,6 +10,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Noch nicht veröffentlicht:** Bearbeiten verlassen mit gespeichertem, unveröffentlichtem Entwurf einer Seite fragt nach (Veröffentlichen / Weiter bearbeiten / Später veröffentlichen; ohne Freigaberecht ein Hinweis).
 - **Pos1/Ende** in einzeiligen Texten auf der Seite springen an Anfang/Ende des ganzen Textes (mit Umschalt markieren).
 - **RSS-Feed** je Tabelle mit Detailseiten: `/feed/{handle}.xml` (`Core\Data\Feed`), `<link rel="alternate">` auf Detail- und Listenseite.
+- **Sprachwahl in der Werkzeugleiste** (mehrere Sprachen): Sprachen der Seite mit Zustand, Wechsel zur Übersetzung (beim Bearbeiten im Editor), fehlende Übersetzung per Klick anlegen (`Pages::translate`, Kopie als Entwurf).
 - **Block „Vor / Zurück“** für Detailvorlagen: vorheriger/nächster Eintrag in der Reihenfolge der Tabelle (`app/Blocks/entry_nav.php`, `css/entry-nav.css`).
 
 ### Formulare: Auswahl aus zentral gepflegten Tabellen

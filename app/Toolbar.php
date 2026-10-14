@@ -45,6 +45,26 @@ final class Toolbar
         return $out;
     }
 
+    /**
+     * Sprachwahl der Seite (mehrere Sprachen): je Sprache die Übersetzung mit Zustand (online/Entwurf) oder „anlegen“
+     * (Pages::translate – Kopie als Entwurf, Recht pages.manage). Leer bei einer Sprache oder ohne Seite.
+     * @return list<array{code:string,label:string,current:bool,url:?string,state:string}>
+     */
+    private static function langs(?array $page, string $kind, bool $editing): array
+    {
+        if ($kind !== 'page' || empty($page['id']) || !\Core\Lang::multi()) return [];
+        $tr = \Core\Pages::translations($page);
+        $cur = \Core\Lang::norm($page['lang'] ?? null);
+        $out = [];
+        foreach (\Core\Lang::all() as $code => $label) {
+            $p = $tr[$code] ?? null;
+            $out[] = ['code' => $code, 'label' => $label, 'current' => $code === $cur,
+                'url' => $p ? \Core\Pages::url($p) . ($editing ? '?edit=1' : '') : null,
+                'state' => !$p ? 'missing' : (($p['status'] ?? '') === 'published' ? 'online' : 'draft')];
+        }
+        return $out;
+    }
+
     /** Alles, was die Ansicht braucht (Rechte, Adressen, Zustände) */
     public static function context(array $v): array
     {
@@ -64,6 +84,7 @@ final class Toolbar
             'help' => url('/admin/hilfe') . '#' . ($kind === 'page' ? 'bearbeiten' : 'daten'),
             'origin' => null, 'site' => '', 'others' => [],
             'netSites' => self::netSites(),
+            'langs' => self::langs($page, $kind, $editing),
             // Konto unten im Menü ⋯: Avatar, Name, Rolle, Abmelden – wie unten in der Seitenleiste der Verwaltung
             'me' => app()->auth->user(), 'meRole' => (string) (app()->auth->role()['name'] ?? ''),
         ];
@@ -143,7 +164,7 @@ final class Toolbar
 
         $b['config'] = [
             'kind' => $kind, 'mode' => $b['mode'], 'status' => $status, 'viewUrl' => $viewUrl,
-            'hasPublished' => $b['canDiscard'], 'canPublish' => $kind === 'page' ? $b['canPublish'] : null, 'texts' => self::texts($kind),
+            'hasPublished' => $b['canDiscard'], 'translate' => $b['langs'] && can('pages.manage') ? ['url' => url('/admin/pages/' . (int) $page['id'] . '/translate'), 'csrf' => \Core\Csrf::token()] : null, 'canPublish' => $kind === 'page' ? $b['canPublish'] : null, 'texts' => self::texts($kind),
         ];
         // Status-Chip: „Offline nehmen“ / „Online stellen“ ohne Neuladen (_bar.js). Seiten: Recht pages.publish, nicht die
         // Startseite; Einträge: Freigabe-Ablauf + data.publish, nur eigene (nicht von einer anderen Website geteilte) Einträge.

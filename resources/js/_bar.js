@@ -366,6 +366,27 @@ export async function cancel(href = null) {
   H.exit(href);
 }
 
+// ------------------------------------------------------------------ Sprachwahl: fehlende Übersetzung anlegen (Pages::translate)
+function initLang() {
+  R.addEventListener('click', async e => {
+    const b = e.target.closest('[data-bar-translate]');
+    if (!b || !cfg.translate) return;
+    if (H?.dirty?.() && !(await H.save())) return;   // erst speichern – sonst fehlt Ungespeichertes in der Kopie
+    b.setAttribute('aria-busy', 'true');
+    try {
+      const r = await fetch(cfg.translate.url, { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'X-CSRF-Token': cfg.translate.csrf },
+        body: new URLSearchParams({ lang: b.dataset.barTranslate, _csrf: cfg.translate.csrf }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error(j.error || r.statusText);
+      if (H) H.discard?.();
+      location.href = j.url;
+    } catch (err) {
+      b.removeAttribute('aria-busy');
+      ask({ title: t('Übersetzung konnte nicht angelegt werden.'), body: String(err.message || err), cancel: false });
+    }
+  });
+}
+
 function initModes() {
   R.addEventListener('click', e => {
     const m = e.target.closest('[data-bar-mode]');
@@ -424,5 +445,6 @@ export function initToolbar() {
   initChip();
   initToggle();
   initModes();
+  initLang();
   setMode(mode);
 }

@@ -7435,4 +7435,12 @@ return [
     'Ihre Änderungen sind als Entwurf gespeichert. Veröffentlichen kann jemand mit Freigaberecht – Besucher sehen bis dahin die bisherige Fassung.' => 'Your changes are saved as a draft. Someone with publishing rights can publish them – until then visitors see the previous version.',
     'Noch nicht veröffentlicht' => 'Not published yet',
     'Später veröffentlichen' => 'Publish later',
+    // Werkzeugleiste: Sprachwahl
+    'Kopie dieser Seite als Entwurf – dann übersetzen' => 'Copy of this page as a draft – then translate',
+    'Sprache wechseln oder Übersetzung anlegen' => 'Switch language or create a translation',
+    'Sprache: {lang}' => 'Language: {lang}',
+    'noch nicht angelegt' => 'not created yet',
+    'online' => 'online',
+    '{lang} anlegen' => 'Create {lang}',
+    'Übersetzung konnte nicht angelegt werden.' => 'The translation could not be created.',
 ];
