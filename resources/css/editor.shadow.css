@@ -767,6 +767,12 @@ button.pp-fold:focus-visible{outline:2px solid var(--adm-a,#314164);outline-offs
 .cms-presence.is-conflict .cms-presence__t{display:none}
 .cms-presence__sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cms-presence__warn{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;padding:0;border-radius:50%;max-width:none;font-size:13px}
+/* Präsenz rechts vor den Werkzeugen: Abstand zur Bearbeiten-Gruppe, feiner Trenner zu den Symbolen */
+.cms-bar__presence{margin-inline:12px 6px;padding-inline-end:12px;border-inline-end:1px solid rgba(255,255,255,.16);min-height:24px}
+.cms-bar__presence[hidden]{display:none}
+/* In der Leiste nur Avatare und Symbole – Texte stehen im Tooltip (title) und für Screenreader (versteckt) */
+.cms-bar__presence .cms-presence__t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cms-presence__last{display:inline-grid;place-items:center;width:24px;height:24px;color:var(--bar-mute,#B8C2D6)}
 /* Symbole (Icon-Satz, presence.mjs ico()) und Bearbeitungssperre (Core\EditLock): in der Leiste nur Avatar + Schloss, Text in der Hinweiszeile */
 .cms-presence__ico{display:block;width:14px;height:14px;fill:currentColor}
 .cms-presence__lock{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:#FDE68A;color:#3D2700}

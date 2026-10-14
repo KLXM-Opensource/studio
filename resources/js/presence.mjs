@@ -81,7 +81,8 @@ function here(el) {
       h += `<span class="cms-presence__avas">${others.slice(0, 4).map(badge).join('')}</span>`
         + `<span class="cms-presence__t">${esc(fill(others.length === 1 ? T.editing1 : T.editingN, { names: names(others) }))}</span>`;
     } else if (last && !last.self && last.name) {
-      h += `<span class="cms-presence__t cms-presence__t--muted">${esc(fill(T.last, { name: last.name, ago: ago(last.at, T) }))}</span>`;
+      // Zuletzt gespeichert: in der Leiste nur ein Uhr-Symbol, Text im Tooltip
+      h += `<span class="cms-presence__last">${ico('clock-counter-clockwise')}<span class="cms-presence__t cms-presence__t--muted">${esc(fill(T.last, { name: last.name, ago: ago(last.at, T) }))}</span></span>`;
     }
     if (conflict) h = `<span class="cms-presence__warn" title="${esc(fill(T.conflict, { name: last.name || '?' }))}">${ico('warning')}<span class="cms-presence__sr">${esc(fill(T.conflict, { name: last.name || '?' }))}</span></span>` + h;
     el.innerHTML = h;
@@ -94,7 +95,9 @@ function here(el) {
       + (lock.canTake ? `<button type="button" class="cms-lock-note__btn" data-presence-take>${esc(T.take)}</button>` : ''));
     else if (lock?.on && !lock.by && el.dataset.presenceLocked && !editing()) note(`<span>${esc(T.freeNote)}</span><a class="cms-lock-note__btn" href="${esc(editUrl())}">${esc(T.editNow)}</a>`, true);
     else note(null);
-    el.title = [conflict ? fill(T.conflict, { name: last.name || '?' }) : '', ...others.map((p) => p.name + ' – ' + ago(p.since, T))].filter(Boolean).join('\n');
+    el.title = [conflict ? fill(T.conflict, { name: last.name || '?' }) : '',
+      others.length ? fill(others.length === 1 ? T.editing1 : T.editingN, { names: names(others) }) : (last && !last.self && last.name ? fill(T.last, { name: last.name, ago: ago(last.at, T) }) : ''),
+      ...others.map((p) => p.name + ' – ' + ago(p.since, T))].filter(Boolean).join('\n');
   };
 
   const tick = async (peek = !editing()) => {

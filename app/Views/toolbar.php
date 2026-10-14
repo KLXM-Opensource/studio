@@ -59,7 +59,6 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
       </span>
     </span>
     <?php endif; ?>
-    <?php if ($pra = \Core\Http\Controllers\Admin\PresenceController::hereAttrs($b)): // Präsenz: wer bearbeitet gerade (presence.mjs) ?><span class="cms-presence" role="status"<?= $pra ?> hidden></span><?php endif; ?>
     <?php if ($b['langs']): $lc = array_values(array_filter($b['langs'], fn($l) => $l['current']))[0] ?? $b['langs'][0];
       $lst = ['online' => __('online'), 'draft' => __('Entwurf'), 'missing' => __('noch nicht angelegt')]; ?>
     <span class="cms-menuwrap cms-bar__lang">
@@ -154,6 +153,8 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
     </span>
     <?php endif; ?>
 
+    <?php // Präsenz (presence.mjs): wer bearbeitet gerade, Bearbeitungssperre – rechts vor den Werkzeugen, abgesetzt
+    if ($pra = \Core\Http\Controllers\Admin\PresenceController::hereAttrs($b)): ?><span class="cms-presence cms-bar__presence" role="status"<?= $pra ?> hidden></span><?php endif; ?>
     <?php // Werkzeuge (Core\FrontendTools, resources/js/_tools.js): Knöpfe „main“ – Eintrag: je nach Modus des Werkzeugs ($toolWhen)
     foreach ($b['tools'] as $tl): if ($tl['placement'] !== 'main') continue; $sc = $tl['shortcut']; ?>
     <button type="button" class="cms-ibtn cms-bar__tool" data-cms-tool="<?= e($tl['id']) ?>" aria-label="<?= e($tl['label']) ?>" title="<?= e($tl['label'] . ($sc ? ' (' . $sc['label'] . ')' : '')) ?>" aria-haspopup="dialog" aria-expanded="false"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $toolWhen($tl) ?>><?= icon($tl['icon']) ?></button>
