@@ -3589,8 +3589,9 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .brand-support a{display:inline-flex;align-items:center;gap:6px}
 .brand-support svg{width:16px;height:16px;flex:none}
 .brand-support__hours,.brand-support__note{color:var(--adm-t2)}
-.brand-support--line{display:block;margin:10px 0 0;color:var(--adm-t2);font-size:13px;text-align:center}
-.sp-helptabs + .brand-support--line,.dash-ask + .brand-support--line{text-align:left;margin:4px 0 12px}
+.brand-support--line{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:4px 0 12px;color:var(--adm-t2);font-size:13px}
+.brand-support--line svg{width:14px;height:14px}
+.adm-product + .brand-support--line{justify-content:center;margin:10px 0 0}
 .brand-logo__prev{display:inline-block;margin:4px 0;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--adm-line)}
 .brand-logo__prev--dark{background:#1E2840}
 .brand-logo__prev img{display:block;max-width:220px;max-height:56px}

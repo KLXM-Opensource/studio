@@ -181,13 +181,13 @@ final class Branding
         $tel = $s['phone'] !== '' ? tel_href($s['phone']) : null;
         $web = $s['web'] !== '' ? (preg_match('~^https?://~i', $s['web']) ? $s['web'] : 'https://' . $s['web']) : '';
         $parts = array_filter([
-            $tel ? '<a href="' . e($tel) . '">' . icon('phone') . ' ' . e($s['phone']) . '</a>' : ($s['phone'] !== '' ? e($s['phone']) : ''),
+            $tel ? '<a href="' . e($tel) . '">' . icon('phone') . ' ' . e($s['phone']) . '</a>' : ($s['phone'] !== '' ? '<span>' . e($s['phone']) . '</span>' : ''),
             $s['email'] !== '' && filter_var($s['email'], FILTER_VALIDATE_EMAIL) ? '<a href="mailto:' . e($s['email']) . '">' . icon('envelope-simple') . ' ' . e($s['email']) . '</a>' : '',
             $web !== '' ? '<a href="' . e($web) . '" target="_blank" rel="noopener">' . icon('globe') . ' ' . e((string) preg_replace('~^https?://~i', '', rtrim($s['web'], '/'))) . '</a>' : '',
         ]);
         $who = $s['name'] !== '' ? $s['name'] : self::get()['name'];
         if ($compact) {
-            return '<p class="brand-support brand-support--line">' . e(__('Fragen? {who}', ['who' => $who !== '' ? $who : __('Ihr Support')])) . ' · ' . implode(' · ', $parts) . '</p>';
+            return '<p class="brand-support brand-support--line"><span>' . e(__('Fragen? {who}', ['who' => $who !== '' ? $who : __('Ihr Support')])) . '</span>' . implode('', $parts) . '</p>';
         }
         return '<section class="adm-card brand-support" aria-labelledby="brand-support-h"><h2 id="brand-support-h">' . icon('lifebuoy') . ' ' . e(__('Ihr Support')) . '</h2>'
             . ($who !== '' ? '<p class="brand-support__who"><b>' . e($who) . '</b></p>' : '')
