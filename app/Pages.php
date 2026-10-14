@@ -299,6 +299,12 @@ final class Pages
         return is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
     }
 
+    /** Blöcke für Leser (Suche, REST/MCP, Export) – nach Extension::blocksResolve; gerendert wird weiter mit blocks() */
+    public static function readBlocks(array $page, bool $draft = false, string $purpose = 'search'): array
+    {
+        return Extensions::resolveBlocks(self::blocks($page, $draft), ['page' => $page, 'draft' => $draft, 'purpose' => $purpose]);
+    }
+
     public static function hasUnpublished(array $page): bool
     {
         return ($page['content_draft'] ?? null) !== null && $page['content_draft'] !== ($page['content_published'] ?? null);
@@ -392,6 +398,8 @@ final class Pages
 
     public static function saveDraft(int $id, array $blocks, ?int $userId, string $note = 'Gespeichert'): void
     {
+        // Erweiterungen prüfen/ändern die Blöcke vor dem Speichern (Extension::blocksBeforeSave)
+        $blocks = Extensions::filterBlocksBeforeSave($blocks, ['page_id' => $id, 'user_id' => $userId]);
         $json = json_encode(['time' => (int) (microtime(true) * 1000), 'blocks' => $blocks, 'version' => '2.31'],
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         self::db()->update('pages', ['content_draft' => $json, 'updated_at' => now()], 'id = :id', ['id' => $id]);

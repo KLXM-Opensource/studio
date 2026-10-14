@@ -110,6 +110,12 @@ final class Extension
     public array $accountProviders = [];
     /** @var list<callable(array): ?array> */
     public array $inboxProviders = [];
+    /** @var list<callable(array, array): array> Blöcke für Leser auflösen (Suche, API, Export): blocksResolve() */
+    public array $blockResolvers = [];
+    /** @var list<callable(array, array): array> Blöcke vor dem Speichern prüfen/ändern: blocksBeforeSave() */
+    public array $blockSaveFilters = [];
+    /** @var list<callable(): array> Vorlagen in der Blockauswahl: blockPresets() */
+    public array $blockPresetProviders = [];
     /** @var list<array> Werkzeuge für das Bearbeiten auf der Website (Core\FrontendTools::normalize) */
     public array $frontendTools = [];
     private array $migrations = [];
@@ -233,6 +239,37 @@ final class Extension
     public function command(string $name, string $description, callable $run): self
     {
         $this->commands[$name] = [$description, $run];
+        return $this;
+    }
+
+    /**
+     * Blöcke für Leser auflösen – Suche, REST/MCP, Export lesen die Blöcke einer Seite nach diesem Filter (gerendert wird über die
+     * Blocktypen selbst). fn(array $blocks, array $ctx): array – $ctx: page, draft (bool), purpose ('search'|'api'|'export').
+     * Beispiel: Verweis-Blöcke (gemeinsame Bausteine) durch den Inhalt ihres Originals ersetzen. Fehler → Blöcke unverändert.
+     */
+    public function blocksResolve(callable $fn): self
+    {
+        $this->blockResolvers[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Blöcke vor dem Speichern eines Seiten-Entwurfs (Pages::saveDraft – Editor, API/MCP, KI, Import) prüfen oder ändern:
+     * fn(array $blocks, array $ctx): array – $ctx: page_id, user_id. Beispiel: gesperrte Felder aus Abweichungen entfernen.
+     */
+    public function blocksBeforeSave(callable $fn): self
+    {
+        $this->blockSaveFilters[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Vorlagen in der Blockauswahl des Editors (vorbelegte Blöcke): fn(): list<array{type: string, label: string, data: array,
+     * group?: string, hint?: string, icon?: string}> – je Aufruf der Editor-Konfiguration (z. B. gespeicherte Bausteine).
+     */
+    public function blockPresets(callable $fn): self
+    {
+        $this->blockPresetProviders[] = $fn;
         return $this;
     }
 

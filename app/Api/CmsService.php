@@ -489,7 +489,7 @@ final class CmsService
         return $this->pageMeta($p) + [
             'version' => $published ? 'published' : 'draft',
             // Veröffentlichte Fassung = was Besucher sehen: ohne Redaktionsnotizen [# … #]; der Entwurf behält sie
-            'blocks' => array_map([self::class, 'exportBlock'], $published ? \Core\EditorNotes::stripData(Pages::blocks($p)) : Pages::blocks($p, true)),
+            'blocks' => array_map([self::class, 'exportBlock'], $published ? \Core\EditorNotes::stripData(Pages::readBlocks($p, false, 'api')) : Pages::readBlocks($p, true, 'api')),
         ];
     }
 

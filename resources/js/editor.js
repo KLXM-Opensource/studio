@@ -494,7 +494,17 @@ const BlockPicker = (() => {
   layerBox().append(el);
   const q = $('.cms-addpop__q', el), list = $('.cms-addpop__list', el), none = $('.cms-addpop__none', el);
   const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false);
+  // Vorlagen der Erweiterungen (Extension::blockPresets): vorbelegte Blöcke, nach Gruppe – unter den Blocktypen
+  const presets = (cfg.presets || []).filter((p) => cfg.blocks[p.type]);
   list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
+  if (presets.length) {
+    let grp = null, h = '';
+    presets.forEach((p, n) => {
+      if (p.group !== grp) { grp = p.group; h += `<p class="cms-addpop__group" role="presentation">${CMSAdmin.esc(grp || T('Vorlagen'))}</p>`; }
+      h += `<button type="button" class="cms-addpop__item cms-addpop__item--preset" role="option" data-type="${CMSAdmin.esc(p.type)}" data-preset="${n}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${p.icon ? CMSAdmin.icon?.(p.icon) || blockIcon(cfg.blocks[p.type]) : blockIcon(cfg.blocks[p.type])}</span><span>${CMSAdmin.esc(p.label)}${p.hint ? `<small>${CMSAdmin.esc(p.hint)}</small>` : ''}</span></button>`;
+    });
+    list.insertAdjacentHTML('beforeend', h);
+  }
   // Kopierter Block (oben, nur außerhalb von Spalten)
   const pasteBtn = d.createElement('button');
   pasteBtn.type = 'button'; pasteBtn.className = 'cms-addpop__item cms-addpop__item--paste'; pasteBtn.setAttribute('role', 'option');
@@ -518,6 +528,8 @@ const BlockPicker = (() => {
   const filter = () => {
     const v = q.value.trim().toLowerCase();
     $$('.cms-addpop__item', list).forEach(b => { b.hidden = b.dataset.off === '1' || (b === pasteBtn ? !!v : (only && !only.has(b.dataset.type)) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v))); });
+    // Gruppen-Überschriften der Vorlagen nur mit sichtbaren Einträgen darunter
+    $$('.cms-addpop__group', list).forEach(g => { let n = g.nextElementSibling, any = false; while (n && !n.matches('.cms-addpop__group')) { if (!n.hidden) any = true; n = n.nextElementSibling; } g.hidden = !any; });
     none.hidden = items().length > 0;
     mark(items()[0]);
     place();
@@ -528,7 +540,7 @@ const BlockPicker = (() => {
     if (back) opener?.focus({ preventScroll: true });
     opener = null; tool = null; only = null; column = null;
   };
-  const insert = type => {
+  const insert = (type, preset = null) => {
     const t = tool, col = column;
     close(false);
     if (col != null && type && t?.addChild) { t.addChild(col, type); return; }
@@ -556,14 +568,15 @@ const BlockPicker = (() => {
         return;
       }
     }
-    editor.blocks.insert(type, {}, undefined, idx + 1, false);
+    editor.blocks.insert(type, preset ? structuredClone(preset.data || {}) : {}, undefined, idx + 1, false);
     if (wasBlank) editor.blocks.delete(idx);   // Platzhalter „Leere Seite“ ersetzen
     markDirty();
     requestAnimationFrame(refreshMoveButtons);
     const st = S.ui('[data-editor-status]');
     if (st) st.textContent = T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type });
   };
-  list.addEventListener('click', e => { const b = e.target.closest('.cms-addpop__item'); if (b) insert(b.dataset.type); });
+  const presetOf = b => b?.dataset.preset != null ? presets[+b.dataset.preset] : null;
+  list.addEventListener('click', e => { const b = e.target.closest('.cms-addpop__item'); if (b) insert(b.dataset.type, presetOf(b)); });
   q.addEventListener('input', filter);
   el.addEventListener('keydown', e => {
     e.stopPropagation();
@@ -573,7 +586,7 @@ const BlockPicker = (() => {
       e.preventDefault();
       const n = all[(cur + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length];
       if (n) { mark(n); n.scrollIntoView({ block: 'nearest' }); }
-    } else if (e.key === 'Enter') { e.preventDefault(); insert(all[Math.max(0, cur)]?.dataset.type); }
+    } else if (e.key === 'Enter') { e.preventDefault(); const b = all[Math.max(0, cur)]; insert(b?.dataset.type, presetOf(b)); }
     else if (e.key === 'Tab') close(false);
   });
   // Klick außerhalb schließt
@@ -636,6 +649,11 @@ const BlockMenu = (() => {
   const close = (back = true) => { if (el.hidden) return; el.hidden = true; if (back) opener?.focus?.({ preventScroll: true }); tool = null; opener = null; armed = false; };
   const index = () => blockEls().indexOf(tool?.el.closest('.ce-block'));
   const item = (key, ico, label, opts = {}) => `<button type="button" class="cms-addpop__item${opts.danger ? ' is-danger' : ''}" role="menuitem" data-act="${key}"${opts.disabled ? ' disabled aria-disabled="true"' : ''}><span class="cms-addpop__ico" aria-hidden="true">${ico}</span><span>${CMSAdmin.esc(label)}</span>${opts.kbd ? `<kbd>${opts.kbd}</kbd>` : ''}</button>`;
+  // Einträge der Erweiterungen (CMSAdmin.editorExt.addBlockAction), nur wenn when(b) zutrifft
+  const extItems = () => {
+    const b = extBlock(tool), list = EXT.actions.filter(a => { try { return !a.when || a.when(b); } catch { return false; } });
+    return list.length ? '<hr>' + list.map(a => item('ext:' + a.id, a.icon || '◆', a.label)).join('') : '';
+  };
   const render = () => {
     const i = index(), n = blockEls().length, c = clipboard(), folded = tool.el.classList.contains('is-collapsed');
     el.innerHTML = `<p class="cms-blockmenu__title">${CMSAdmin.esc(tool.def.label)}</p>`
@@ -648,12 +666,19 @@ const BlockMenu = (() => {
       + '<hr>'
       + item('fold', folded ? '▸' : '▾', folded ? T('Ausklappen') : T('Einklappen'))
       + item('section', '▭', T('Abschnitt & Navigation …'))
+      + extItems()
       + '<hr>'
       + item('delete', '✕', armed ? T('Wirklich löschen?') : T('Löschen'), { danger: true });
   };
   const run = act => {
     const t = tool, i = index();
     if (!t) return;
+    if (act.startsWith('ext:')) {
+      const a = EXT.actions.find(x => 'ext:' + x.id === act);
+      close(false);
+      try { a?.run(extBlock(t)); } catch (e) { console.error('[editorExt]', e); }
+      return;
+    }
     if (act === 'delete') {
       if (!armed) { armed = true; render(); el.querySelector('[data-act="delete"]')?.focus(); return; }
       close(false); editor.blocks.delete(i); markDirty(); requestAnimationFrame(refreshMoveButtons);
@@ -704,6 +729,41 @@ holder()?.addEventListener('click', e => {
   if (t) BlockMenu.open(grip, t);
 }, true);
 
+// ------------------------------------------------------------------ Schnittstelle für Erweiterungen (CMSAdmin.editorExt)
+/**
+ * Erweiterungen (Skripte über Extension::toolbar) ergänzen den Seiten-Editor, ohne seinen Code zu kennen:
+ *   CMSAdmin.editorExt.addBlockAction({ id, label, icon?, when?(b), run(b) })   Eintrag im Block-Menü ⋯
+ *   CMSAdmin.editorExt.addBadge(b => 'Text' | null)                             Kennzeichen in der Block-Leiste
+ *   CMSAdmin.editorExt.blocks()                                                  alle Blöcke der Seite (Liste von b)
+ *   CMSAdmin.editorExt.refreshBadges()                                           Kennzeichen neu zeichnen (z. B. nach Laden von Zahlen)
+ * b = { id, type, index, data (Kopie), label, update(data), replace(type, data) } – update/replace markieren die Seite als geändert.
+ * Ereignis „cms:editor-ready“ am document, sobald der Editor bereit ist (detail: { page }).
+ */
+const EXT = { actions: [], badges: [] };
+const extBlock = t => ({
+  id: t.blockId, type: t.type, label: t.def.label,
+  get index() { return blockEls().indexOf(t.el?.closest('.ce-block')); },
+  get data() { return structuredClone(t.data); },
+  update(data) { t.data = structuredClone(data || {}); markDirty(); t.loadPreview(); },
+  replace(type, data) {
+    const i = blockEls().indexOf(t.el?.closest('.ce-block'));
+    if (i < 0 || !cfg.blocks[type]) return false;
+    editor.blocks.insert(type, structuredClone(data || {}), undefined, i + 1, false);
+    editor.blocks.delete(i);
+    markDirty();
+    requestAnimationFrame(refreshMoveButtons);
+    return true;
+  },
+});
+const extBadges = t => EXT.badges.map(fn => { try { const r = fn(extBlock(t)); return r ? `<span class="cms-flag cms-flag--ext">${CMSAdmin.esc(String(r))}</span>` : ''; } catch { return ''; } }).join('');
+window.CMSAdmin = window.CMSAdmin || {};
+CMSAdmin.editorExt = {
+  addBlockAction(a) { if (a && a.id && typeof a.run === 'function') EXT.actions.push(a); },
+  addBadge(fn) { if (typeof fn === 'function') { EXT.badges.push(fn); CMSAdmin.editorExt.refreshBadges(); } },
+  blocks() { return [...tools.values()].filter(t => t.el?.isConnected).map(extBlock); },
+  refreshBadges() { tools.forEach(t => t.paintExt?.()); },
+};
+
 // ------------------------------------------------------------------ Generisches Block-Tool
 function makeTool(type, def) {
   return class BlockTool {
@@ -749,6 +809,7 @@ function makeTool(type, def) {
           <span class="cms-block__label" draggable="true" data-drag title="${CMSAdmin.esc(CMSAdmin.t('Ziehen zum Verschieben'))} – ${CMSAdmin.esc(def.label)}"><span class="cms-block__grip" aria-hidden="true">⠿</span><span aria-hidden="true">${blockIcon(def)}</span><span class="cms-block__name"> ${CMSAdmin.esc(def.label)}</span></span>
           <span class="cms-block__summary"></span>
           <span class="cms-block__flags"></span>
+          <span class="cms-block__ext"></span>
           <span class="cms-block__hint" hidden></span>
           <button type="button" class="cms-block__fields cms-block__expand" hidden data-compact-only aria-expanded="false"></button>
           ${def.formfields ? `<button type="button" class="cms-block__fields" hidden>${CMSAdmin.esc(CMSAdmin.t('Felder'))}<span class="cms-block__fields-more"> ${CMSAdmin.esc(CMSAdmin.t('bearbeiten'))}</span></button>` : ''}
@@ -836,7 +897,11 @@ function makeTool(type, def) {
       return el;
     }
 
+    /** Kennzeichen der Erweiterungen (CMSAdmin.editorExt.addBadge) */
+    paintExt() { const x = this.bar?.querySelector('.cms-block__ext'); if (x) x.innerHTML = extBadges(this); }
+
     setPreview(html) {
+      this.paintExt();
       const pv = this.el.querySelector('.cms-block__preview');
       pv.innerHTML = html;
       // Skripte der Vorschau (z. B. Karte, Slider: <script type="module" src>) laufen per innerHTML nicht – einmal je Datei nachladen;

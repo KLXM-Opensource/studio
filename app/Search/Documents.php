@@ -75,8 +75,9 @@ final class Documents
         $rows = app()->db->fetchAll("SELECT * FROM pages WHERE status = 'published' AND type = 'page' AND noindex = 0 AND " . Lang::sql(), [$lang]);
         foreach ($rows as $p) {
             if (\Core\PageAccess::restricted($p)) continue;   // geschützter Bereich (Erweiterung): nie im Suchindex
-            foreach (Media::idsInBlocks(Pages::blocks($p)) as $mid) self::$used[$mid] = true;
-            [$head, $text] = self::blocksText(Pages::blocks($p), $p);
+            $rb = Pages::readBlocks($p);   // Erweiterungen (z. B. gemeinsame Bausteine) aufgelöst
+            foreach (Media::idsInBlocks($rb) as $mid) self::$used[$mid] = true;
+            [$head, $text] = self::blocksText($rb, $p);
             yield self::doc([
                 'id' => 'p-' . $p['id'], 'type' => 'page', 'badge' => lt('Seite'),
                 'title' => $p['title'], 'headings' => implode(' · ', array_unique($head)),

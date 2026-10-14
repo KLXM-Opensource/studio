@@ -415,6 +415,58 @@ final class Extensions
     }
 
     /** HTML-Ausgabe der Website durch die Filter aktiver Erweiterungen schicken (Fehler einer Erweiterung brechen die Seite nicht) */
+    /** Blöcke für Leser auflösen (Extension::blocksResolve) – $ctx: page, draft, purpose */
+    public static function resolveBlocks(array $blocks, array $ctx = []): array
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->blockResolvers as $fn) {
+                try {
+                    $out = $fn($blocks, $ctx);
+                    if (is_array($out)) $blocks = array_values($out);
+                } catch (\Throwable $e) {
+                    error_log('[Erweiterung ' . $x->name . '] blocksResolve: ' . $e->getMessage());
+                }
+            }
+        }
+        return $blocks;
+    }
+
+    /** Blöcke vor dem Speichern (Extension::blocksBeforeSave) – $ctx: page_id, user_id */
+    public static function filterBlocksBeforeSave(array $blocks, array $ctx = []): array
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->blockSaveFilters as $fn) {
+                try {
+                    $out = $fn($blocks, $ctx);
+                    if (is_array($out)) $blocks = array_values($out);
+                } catch (\Throwable $e) {
+                    error_log('[Erweiterung ' . $x->name . '] blocksBeforeSave: ' . $e->getMessage());
+                }
+            }
+        }
+        return $blocks;
+    }
+
+    /** Vorlagen für die Blockauswahl (Extension::blockPresets), nur für vorhandene Blocktypen */
+    public static function blockPresets(array $types): array
+    {
+        $out = [];
+        foreach (self::$active as $x) {
+            foreach ($x->blockPresetProviders as $fn) {
+                try {
+                    foreach ((array) $fn() as $p) {
+                        if (!is_array($p) || !isset($p['type'], $p['label']) || !in_array($p['type'], $types, true)) continue;
+                        $out[] = ['type' => (string) $p['type'], 'label' => (string) $p['label'], 'data' => (array) ($p['data'] ?? []),
+                            'group' => (string) ($p['group'] ?? ''), 'hint' => (string) ($p['hint'] ?? ''), 'icon' => (string) ($p['icon'] ?? '')];
+                    }
+                } catch (\Throwable $e) {
+                    error_log('[Erweiterung ' . $x->name . '] blockPresets: ' . $e->getMessage());
+                }
+            }
+        }
+        return $out;
+    }
+
     public static function filterHtml(string $html, array $ctx = []): string
     {
         foreach (self::$active as $x) {

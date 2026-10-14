@@ -66,6 +66,7 @@ final class ExtensionsSelfTest
             self::tables();
             self::slots();
             self::push();
+            self::blockHooks();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -75,6 +76,31 @@ final class ExtensionsSelfTest
             foreach ($saved as $prop => $v) (new \ReflectionProperty($auth, $prop))->setValue($auth, $v);
         }
         return ['ok' => self::$ok, 'fails' => self::$fail];
+    }
+
+    // ================================================================= Block-Haken (blocksResolve, blocksBeforeSave, blockPresets)
+
+    private static function blockHooks(): void
+    {
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+        $x->blocksResolve(fn(array $b, array $ctx) => array_map(fn($k) => ($k['type'] ?? '') === 'qa_ref' ? ['type' => 'paragraph', 'data' => ['text' => 'aufgelöst:' . $ctx['purpose']]] : $k, $b));
+        $x->blocksBeforeSave(fn(array $b) => array_map(fn($k) => ($k['type'] ?? '') === 'paragraph' ? ['type' => 'paragraph', 'data' => ['text' => 'geprüft']] + $k : $k, $b));
+        $x->blocksResolve(fn() => throw new \RuntimeException('Fehler in einer Erweiterung'));   // darf nichts kaputt machen
+        $x->blockPresets(fn() => [['type' => 'paragraph', 'label' => 'Vorlage', 'data' => ['text' => 'v'], 'group' => 'QA'], ['type' => 'gibt_es_nicht', 'label' => 'X']]);
+        self::activate($x);
+        self::eq('blocksResolve: Verweis aufgelöst, Fehler ignoriert', Extensions::resolveBlocks([['type' => 'qa_ref', 'data' => []]], ['purpose' => 'search']), [['type' => 'paragraph', 'data' => ['text' => 'aufgelöst:search']]]);
+        $p = Extensions::blockPresets(['paragraph']);
+        self::eq('blockPresets: nur vorhandene Typen', [count($p), $p[0]['label'] ?? null, $p[0]['group'] ?? null], [1, 'Vorlage', 'QA']);
+        $pdo = app()->db->pdo;
+        $pdo->beginTransaction();
+        try {
+            $id = Pages::create(['slug' => 'ext-blockhaken', 'title' => 'Block-Haken', 'lang' => Lang::default(), 'sort' => 9999]);
+            Pages::saveDraft($id, [['type' => 'paragraph', 'data' => ['text' => 'x']]], null);
+            self::eq('blocksBeforeSave: vor dem Speichern angewendet', Pages::blocks(Pages::find($id), true)[0]['data']['text'] ?? null, 'geprüft');
+        } finally {
+            $pdo->rollBack();
+            self::activate(null);
+        }
     }
 
     // ================================================================= Push-Ereignisse (Extension::pushEvent → Konto → Benachrichtigungen)

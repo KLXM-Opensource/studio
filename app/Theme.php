@@ -750,6 +750,8 @@ final class Theme
         }
         // rows: nur noch Darstellung alter Reihen (Tune row) – die Option ist im Editor abgeschafft (Block „Layout“)
         return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false, 'spacing' => $this->spacing(),
+            // Vorlagen der Erweiterungen (Extension::blockPresets) – vorbelegte Blöcke in der Blockauswahl
+            'presets' => Extensions::blockPresets(array_keys(array_filter($blocks, fn($b) => !empty($b['insertable'])))),
             'layout' => isset($this->blocks[Layout::TYPE]) ? ['presets' => Layout::PRESETS] : null,
             'glossary' => Features::on('glossary', false)];   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
     }
