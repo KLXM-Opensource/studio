@@ -22,7 +22,8 @@ final class DesignTool
     {
         return [
             'id' => self::ID, 'label' => __('Design'), 'icon' => 'palette', 'module' => asset('js/design-live.mjs'),
-            'placement' => 'main', 'hint' => __('Farben, Schriften und Formen der Website'),
+            // selten gebraucht: im Menü ⋯, rechte Spalte (gilt für die ganze Website)
+            'placement' => 'more', 'scope' => 'site', 'hint' => __('Farben, Schriften und Formen der Website'),
             'modes' => FrontendTools::ALL_MODES, 'perm' => 'design.edit', 'feature' => 'design',
             'visible' => fn(array $bar) => Design::enabled(),
             'panel' => ['title' => __('Design'), 'size' => 'drawer'],

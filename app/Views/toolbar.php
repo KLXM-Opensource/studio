@@ -200,7 +200,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php endif; ?>
         <?= $sep ?>
         <?php if ($kind !== 'page' && $b['canTable'] && !$b['foreign']): ?><?= $item(e(__('In der Verwaltung öffnen')), 'arrow-square-out', $b['adminUrl']) ?><?php endif; ?>
-        <?php foreach ($b['tools'] as $tl): // Werkzeuge (Core\FrontendTools): „more“ immer hier, „main“ nur auf Telefonen (Knopf ist dort ausgeblendet)
+        <?php foreach ($b['tools'] as $tl): if (($tl['scope'] ?? 'page') === 'site') continue; // Werkzeuge (Core\FrontendTools): „more“ immer hier, „main“ nur auf Telefonen (Knopf ist dort ausgeblendet); 'scope' site → rechte Spalte
           $sc = $tl['shortcut']; $when = $toolWhen($tl); ?>
           <button type="button" role="menuitem" class="cms-menu__item<?= $tl['placement'] === 'main' ? ' cms-menu--phone' : '' ?>" tabindex="-1" data-cms-tool="<?= e($tl['id']) ?>" aria-haspopup="dialog"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $when ?>><span class="cms-menu__ico" aria-hidden="true"><?= icon($tl['icon']) ?></span><span class="cms-menu__label"><?= e($tl['label']) ?><?php if ($tl['hint'] !== ''): ?><small><?= e($tl['hint']) ?></small><?php endif; ?></span><?php if ($sc): ?><kbd><?= e($sc['label']) ?></kbd><?php endif; ?></button>
         <?php endforeach; ?>
@@ -226,6 +226,10 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         </form>
         <?= $sep ?>
         <?php endif; ?>
+        <?php foreach ($b['tools'] as $tl): if (($tl['scope'] ?? 'page') !== 'site') continue; // Werkzeuge für die ganze Website (z. B. Design)
+          $sc = $tl['shortcut']; $when = $toolWhen($tl); ?>
+          <button type="button" role="menuitem" class="cms-menu__item<?= $tl['placement'] === 'main' ? ' cms-menu--phone' : '' ?>" tabindex="-1" data-cms-tool="<?= e($tl['id']) ?>" aria-haspopup="dialog"<?= $sc ? ' aria-keyshortcuts="' . e($sc['keys']) . '"' : '' ?><?= $when ?>><span class="cms-menu__ico" aria-hidden="true"><?= icon($tl['icon']) ?></span><span class="cms-menu__label"><?= e($tl['label']) ?><?php if ($tl['hint'] !== ''): ?><small><?= e($tl['hint']) ?></small><?php endif; ?></span><?php if ($sc): ?><kbd><?= e($sc['label']) ?></kbd><?php endif; ?></button>
+        <?php endforeach; ?>
         <?php if ($b['canSettings']): ?><?= $item(e($b['settingsTitle']), 'sliders-horizontal', url('/admin/settings')) ?><?php endif; ?>
         <?= $sep ?>
         <button type="button" role="menuitem" class="cms-menu__item cms-menu--phone" tabindex="-1" data-spotlight><span class="cms-menu__ico" aria-hidden="true"><?= icon('magnifying-glass') ?></span><span class="cms-menu__label"><?= e(__('Suchen')) ?></span><kbd data-kbd>⌘K</kbd></button>

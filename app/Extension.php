@@ -506,7 +506,7 @@ final class Extension
 
     /**
      * Werkzeug für das Bearbeiten auf der Website (Core\FrontendTools): Knopf in der Werkzeugleiste ('placement' => 'main') bzw.
-     * Eintrag im Menü „⋯“ ('more'), optional Tastenkürzel ('shortcut' => 'Alt+G'). 'module' => 'js/x.mjs' aus {dir}/assets wird
+     * Eintrag im Menü „⋯“ ('more'; 'scope' => 'site' = allgemeine Spalte statt „Diese Seite“), optional Tastenkürzel ('shortcut' => 'Alt+G'). 'module' => 'js/x.mjs' aus {dir}/assets wird
      * erst beim ersten Öffnen geladen (ES-Modul: export default { mount(ctx), unmount(ctx) }). Nur angemeldet, nur beim Bearbeiten,
      * nur mit Recht ('perm', 'table', 'feature', 'visible' => fn(array $bar): bool). Endpunkte prüfen Rechte und CSRF selbst.
      */

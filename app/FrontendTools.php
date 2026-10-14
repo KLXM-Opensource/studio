@@ -71,6 +71,8 @@ final class FrontendTools
         return [
             'id' => $id, 'label' => $label, 'icon' => (string) (($def['icon'] ?? '') ?: 'puzzle-piece'), 'module' => $module,
             'placement' => ($def['placement'] ?? 'main') === 'more' ? 'more' : 'main',
+            // Menü ⋯: 'site' = rechte Spalte (gilt für die ganze Website, z. B. Design), sonst „Diese Seite“
+            'scope' => ($def['scope'] ?? 'page') === 'site' ? 'site' : 'page',
             'shortcut' => self::shortcut((string) ($def['shortcut'] ?? '')),
             'hint' => trim((string) ($def['hint'] ?? '')),
             'perm' => isset($def['perm']) && $def['perm'] !== '' ? (string) $def['perm'] : null,
@@ -202,7 +204,7 @@ final class FrontendTools
                     continue;
                 }
             }
-            $out[] = ['id' => $t['id'], 'label' => $t['label'], 'icon' => $t['icon'], 'module' => $t['module'], 'placement' => $t['placement'],
+            $out[] = ['id' => $t['id'], 'label' => $t['label'], 'icon' => $t['icon'], 'module' => $t['module'], 'placement' => $t['placement'], 'scope' => $t['scope'] ?? 'page', 'scope' => $t['scope'] ?? 'page',
                 'shortcut' => $t['shortcut'], 'hint' => $t['hint'], 'panel' => $t['panel'], 'when' => $when, 'chip' => $t['chip'], 'texts' => $t['texts'], 'source' => $t['source'],
                 'endpoints' => array_map(fn($p) => url($p), $t['endpoints']), 'data' => is_array($data) ? $data : []];
         }
