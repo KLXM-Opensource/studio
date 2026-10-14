@@ -681,7 +681,10 @@ if (schema) {
     const li = btn.closest('[data-field]');
     const m = d.createElement('div');
     m.className = 'dt-addmenu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', t('Feld darunter einfügen'));
-    m.innerHTML = $$('.dt-addfield [data-add-field]', schema).map(b => b.outerHTML.replace('class="dt-typebtn"', 'class="dt-typebtn" role="menuitem"')).join('');
+    // Gruppen wie in der Palette (Formulare · nur Redaktion · Gestaltung) – Überschriften sind keine Menüpunkte
+    const groups = $$('.dt-addfield [data-add-group]', schema);
+    const btns = box => $$('[data-add-field]', box).map(b => b.outerHTML.replace('class="dt-typebtn"', 'class="dt-typebtn" role="menuitem"')).join('');
+    m.innerHTML = groups.length ? groups.map(g => `<p class="dt-addmenu__h" role="presentation">${esc(g.dataset.addGroup)}</p>${btns(g)}`).join('') : btns($('.dt-addfield', schema));
     m._after = li; m._btn = btn;
     btn.setAttribute('aria-expanded', 'true');
     btn.closest('.dt-field__tools').append(m);

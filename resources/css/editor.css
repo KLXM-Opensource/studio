@@ -340,3 +340,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .eb-preview__note{display:flex;align-items:center;gap:8px;margin:12px auto;padding:10px 14px;border:1px dashed color-mix(in srgb,currentColor 35%,transparent);border-radius:10px;font:500 14px/1.4 system-ui,sans-serif;opacity:.85}
 .eb-preview__note svg{width:18px;height:18px;flex:none}
 .eb-entry{position:relative}
+/* Modus „Inhalt“ (?edit=inhalt): Vorlage davor/danach nur als Vorschau, Hinweis über den bearbeitbaren Blöcken */
+.eb-static{opacity:.5;filter:saturate(.6)}
+.eb-static,.eb-static *{cursor:default}
+.eb-edit-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 16px;background:#1E2840;color:#fff;font:500 14px/1.4 system-ui,sans-serif;text-align:center}
+.eb-edit-note svg{width:18px;height:18px;flex:none}

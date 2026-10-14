@@ -184,6 +184,26 @@ final class EntryBlocks
         return '';
     }
 
+    /**
+     * Modus „Inhalt“ der Detailseite: Feld, Stelle in der Vorlage und Rechte – null, wenn nicht möglich (kein Feld „Inhaltsblöcke“,
+     * keine Berechtigung, Eintrag einer anderen Website). at = Index des Blocks entry_blocks (ohne: ans Ende der Vorlage).
+     */
+    public static function contentEdit(array $ctx, array $templateBlocks): ?array
+    {
+        $t = $ctx['table'];
+        if (!EntryEdit::canEdit($t, $ctx['entry']) || EntryEdit::reason($t, $ctx['entry']) !== null) return null;
+        $at = count($templateBlocks);
+        $data = [];
+        foreach ($templateBlocks as $i => $b) {
+            if (($b['type'] ?? '') === 'entry_blocks') { $at = $i; $data = (array) ($b['data'] ?? []); break; }
+        }
+        $want = (string) ($data['field'] ?? '');
+        $name = str_starts_with($want, $t['handle'] . '.') ? substr($want, strlen($t['handle']) + 1) : (array_key_first(self::fieldsOf($t)) ?? '');
+        $f = $name !== '' ? Tables::field($t, $name) : null;
+        if (!$f || $f['type'] !== self::TYPE) return null;
+        return ['table' => $t['handle'], 'id' => (int) $ctx['entry']['id'], 'field' => $name, 'label' => (string) $f['label'], 'allowed' => self::allowed($f), 'at' => $at];
+    }
+
     /** Bearbeiten auf der Detailseite: Attribute für die Hülle der eingesetzten Blöcke (Knopf „Bearbeiten“ → Seitenleiste am Feld) */
     public static function editAttr(array $data): string
     {

@@ -7,6 +7,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Datentabellen: Inhaltsblöcke – Einträge aus Blöcken des Kits
+- Modus **Inhalt** auf Detailseiten (`?edit=inhalt`): Inhaltsblöcke des Eintrags direkt im Seiten-Editor – „+ Block einfügen“, Text
+  tippen, ziehen; Vorlage davor/danach als Vorschau; Speichern ins Feld des Eintrags (`EntryEditController::saveBlocks`).
+- Tabellen-Designer: Feldtypen gruppiert nach **Für Formulare und Ausgabe**, **Nur Inhalte der Redaktion** und **Gestaltung des
+  Formulars** (`Tables::typeGroups`) – in Palette, „+“-Menü und Typauswahl; Hinweis am Feld für Typen, die Besucher nicht ausfüllen.
 - Behoben: Karten erschienen nach der Live-Ansicht (Speichern in der Seitenleiste) und in Vorschauen des Seiten-Editors nicht – `map.mjs`/`media.mjs` reagieren auf `cms:content-replaced` und `cms:block-preview`, der Editor lädt Modul-Skripte aus Vorschauen nach. Menü „+ Block hinzufügen“ in der Seitenleiste der Website schloss sich sofort.
 - Neuer Feldtyp **Inhaltsblöcke** (`Core\Data\EntryBlocks`): je Eintrag eine Folge von Blöcken wie auf Seiten, erlaubte Blöcke je
   Feld (Standard: Inhalt und Medien). Eingabe in der Verwaltung mit den Feldern der Seitenleiste, Menü „+ Block hinzufügen“,

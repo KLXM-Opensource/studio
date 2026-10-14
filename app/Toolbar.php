@@ -53,7 +53,8 @@ final class Toolbar
         $live = !empty($v['live']);
         $dirty = !empty($v['dirty']);
         $ctx = app()->entry;
-        $kind = $ctx ? ($editing ? 'template' : 'entry') : 'page';
+        // content: Modus „Inhalt“ – Inhaltsblöcke des Eintrags im Seiten-Editor (?edit=inhalt, Core\Data\EntryBlocks)
+        $kind = $ctx ? ($editing ? (app()->contentEdit ? 'content' : 'template') : 'entry') : 'page';
         $hasPage = !empty($page['id']);
         $b = [
             'kind' => $kind, 'editing' => $editing, 'live' => $live, 'page' => $page, 'hasPage' => $hasPage,
@@ -104,10 +105,10 @@ final class Toolbar
         $b['canDiscard'] = $hasPage && ($page['content_published'] ?? null) !== null;
 
         // Modus und EIN Status
-        $b['mode'] = $kind === 'template' ? 'template' : ($editing ? 'edit' : 'view');
+        $b['mode'] = $kind === 'template' ? 'template' : ($kind === 'content' ? 'content' : ($editing ? 'edit' : 'view'));
         if ($live) {
             $status = 'live';
-        } elseif ($kind === 'entry') {
+        } elseif ($kind === 'entry' || $kind === 'content') {
             // offline = war schon online (published_at gesetzt), Status „Entwurf“
             $status = $b['entryDraft'] ? (!empty($e['published_at']) ? 'offline' : 'draft') : 'published';
         } elseif (!$hasPage) {
@@ -132,6 +133,8 @@ final class Toolbar
         } else {
             $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry'];
             if ($b['entryEditable']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten', false];
+            // Inhalt: Inhaltsblöcke des Eintrags direkt auf der Seite (nur mit Feld „Inhaltsblöcke“ und Recht am Eintrag)
+            if (!$live && $b['entryEditable'] && \Core\Data\EntryBlocks::fieldsOf($t)) $modes[] = ['content', __('Inhalt'), 'article', $viewUrl . '?edit=inhalt', $kind === 'content'];
             if ($b['canEditPages'] && !$live) $modes[] = ['template', __('Vorlage'), 'squares-four', $viewUrl . '?edit=1', $kind === 'template'];
         }
         $b['modes'] = count($modes) > 1 ? $modes : [];

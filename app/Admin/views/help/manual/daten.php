@@ -145,6 +145,9 @@
   </table>
   <p>Alle Angaben sind in der Website-Suche und in der Suche der Liste auffindbar; Suchmaschinen erhalten die passende Auszeichnung (schema.org). Auf der Website öffnet <b>Bearbeiten</b> am Feld die Seitenleiste genau dort – nach dem Speichern zeigt die Seite die Änderung sofort.</p>
 
+  <h3 id="feldtypen">Welche Felder für Formulare – welche nur für Inhalte?</h3>
+  <p>Der Tabellen-Designer ordnet die Feldtypen in drei Gruppen: <b>Für Formulare und Ausgabe</b> (Text, Zahl, Auswahl, Datum, E-Mail, Bild, Datei … – Besucher können sie auch in einem öffentlichen Formular ausfüllen), <b>Nur Inhalte der Redaktion</b> (formatierter Text, Medien + Text, Inhaltsblöcke, Kombifelder, Verknüpfungen, Ort, Wiederholung – für die Ausgabe wie bei Beiträgen, News oder Infos; in öffentlichen Formularen nicht ausfüllbar) und <b>Gestaltung des Formulars</b> (Abschnitt, Freitext). Felder der zweiten Gruppe tragen im Designer den Hinweis „Nur Inhalte der Redaktion“.</p>
+
   <h3 id="inhaltsbloecke">Inhaltsblöcke: Einträge aus Blöcken gestalten</h3>
   <p>Mit dem Feldtyp <b>Inhaltsblöcke</b> gestalten Sie den Inhalt eines Eintrags wie eine Seite – aus den Blöcken des Kits, z. B. Fließtext, Text + Bild, Galerie, Zitat, Downloads oder Video. Gut für Beiträge, Projekte oder Referenzen, die unterschiedlich aufgebaut sind.</p>
   <ol class="doc-steps">
@@ -152,7 +155,7 @@
     <li><b>Detailseite:</b> In der Vorlage der Detailseite den Block <b>Inhaltsblöcke des Eintrags</b> an die gewünschte Stelle setzen. Dort erscheinen die Blöcke des jeweiligen Eintrags als eigene Abschnitte – mit Hintergrund, Breite und Abständen wie auf normalen Seiten.</li>
     <li><b>Eintrag:</b> <b>+ Block hinzufügen</b> wählt einen Block; seine Felder sind dieselben wie in der Seitenleiste des Seiten-Editors. Mit ↑ ↓ verschieben, ✕ entfernen; vorhandene Blöcke sind zugeklappt und zeigen einen kurzen Auszug.</li>
   </ol>
-  <p>Auf der Website öffnet <b>Bearbeiten</b> an den Blöcken die Seitenleiste – nach dem Speichern zeigt die Seite die Änderung sofort. Inhalte der Blöcke sind in der Suche auffindbar, verwendete Bilder und Dateien zählen in der Mediathek. Blöcke gehören zum Kit: Nach einem Kit-Wechsel erscheinen nur Blöcke, die das neue Kit kennt.</p>
+  <p><b>Direkt auf der Seite:</b> Auf der Detailseite wählen Sie in der Werkzeugleiste <b>Inhalt</b>. Dann arbeiten Sie mit den Blöcken des Eintrags wie im Seiten-Editor – „+ Block einfügen“, Text direkt tippen, Bilder tauschen, Blöcke verschieben; die Vorlage darüber und darunter ist nur Vorschau. <b>Speichern</b> schreibt in den Eintrag (bei veröffentlichten Einträgen sofort sichtbar, Versionen halten jeden Stand fest). Alternativ öffnet <b>Bearbeiten</b> an den Blöcken die Seitenleiste – nach dem Speichern zeigt die Seite die Änderung sofort. Inhalte der Blöcke sind in der Suche auffindbar, verwendete Bilder und Dateien zählen in der Mediathek. Blöcke gehören zum Kit: Nach einem Kit-Wechsel erscheinen nur Blöcke, die das neue Kit kennt.</p>
 
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>

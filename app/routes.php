@@ -187,6 +187,7 @@ return function (Router $r): void {
 
     // Daten (Tabellen-Designer + Einträge) – spezifische Routen vor {handle}/{id}
     $r->get('/admin/api/search', [Admin\SearchController::class, 'search']);
+    $r->post('/admin/api/entries/{handle}/{id}/blocks/{field}', [Admin\EntryEditController::class, 'saveBlocks']);   // Modus „Inhalt“ (Core\Data\EntryBlocks)
     $r->get('/admin/api/geocode', [Admin\SearchController::class, 'geocode']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);
     $r->post('/admin/system/admin-path', [Admin\SystemController::class, 'adminPath']);   // Adresse der Verwaltung (Core\AdminPath)

@@ -77,6 +77,26 @@ final class Tables
         Shared::flush();
     }
 
+    /**
+     * Feldtypen nach Verwendung – für Palette und Typauswahl im Tabellen-Designer:
+     * form = auch im öffentlichen Formular ausfüllbar (DataForms), output = nur Redaktion (Inhalte für die Ausgabe), layout = Gestaltung.
+     * @param list<string> $types erlaubte Typen (z. B. Eingangs-Tabelle) @return list<array{key:string,label:string,help:string,types:list<string>}>
+     */
+    public static function typeGroups(array $types): array
+    {
+        $form = array_merge(DataForms::TYPES, DataForms::UPLOAD_TYPES);
+        $groups = [
+            ['key' => 'form', 'label' => __('Für Formulare und Ausgabe'), 'help' => __('Besucher können diese Felder auch in einem öffentlichen Formular ausfüllen.'), 'types' => []],
+            ['key' => 'output', 'label' => __('Nur Inhalte der Redaktion'), 'help' => __('Für die Ausgabe auf der Website (z. B. Beiträge, News, Infos) – in öffentlichen Formularen nicht ausfüllbar.'), 'types' => []],
+            ['key' => 'layout', 'label' => __('Gestaltung des Formulars'), 'help' => __('Speichern keine Daten.'), 'types' => []],
+        ];
+        foreach (array_keys(self::TYPES) as $t) {
+            if (!in_array($t, $types, true)) continue;
+            $groups[in_array($t, self::LAYOUT, true) ? 2 : (in_array($t, $form, true) ? 0 : 1)]['types'][] = $t;
+        }
+        return array_values(array_filter($groups, fn($g) => $g['types']));
+    }
+
     /** Alle Tabellen: eigene (data_tables) und geteilte, an denen die Website teilnimmt (Core\Data\Shared) */
     public static function all(): array
     {

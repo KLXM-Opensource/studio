@@ -173,9 +173,17 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
       <template data-rule-template="cond"><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_rule.php', ['p' => '__P__', 'r' => [], 'kind' => 'cond', 'all' => [], 'self' => '']) ?></template>
       <template data-rule-template="cmp"><?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_rule.php', ['p' => '__P__', 'r' => [], 'kind' => 'cmp', 'all' => [], 'self' => '']) ?></template>
       <div class="dt-addfield">
-        <span class="adm-muted">Feld hinzufügen:</span>
-        <?php foreach (Tables::TYPES as $type => [$label, , $icon]): if (!in_array($type, $types, true)) continue; ?>
-        <button type="button" class="dt-typebtn" data-add-field="<?= e($type) ?>" data-label="<?= e(__($label)) ?>" title="<?= e(__($label)) ?>"><?= icon($icon) ?> <?= e(__($label)) ?></button>
+        <p class="dt-addfield__h"><?= e(__('Feld hinzufügen')) ?></p>
+        <?php // Gruppen nach Verwendung: Formular-tauglich, nur Redaktion (Ausgabe), Gestaltung – Tables::typeGroups
+        foreach (Tables::typeGroups($types) as $g): ?>
+        <div class="dt-addgroup dt-addgroup--<?= e($g['key']) ?>" data-add-group="<?= e($g['label']) ?>">
+          <p class="dt-addgroup__h"><b><?= e($g['label']) ?></b> <span><?= e($g['help']) ?></span></p>
+          <div class="dt-addgroup__btns">
+          <?php foreach ($g['types'] as $type): [$label, , $icon] = Tables::TYPES[$type]; ?>
+          <button type="button" class="dt-typebtn" data-add-field="<?= e($type) ?>" data-label="<?= e(__($label)) ?>" title="<?= e(__($label)) ?>"><?= icon($icon) ?> <?= e(__($label)) ?></button>
+          <?php endforeach; ?>
+          </div>
+        </div>
         <?php endforeach; ?>
       </div>
       <?= $err('fields') ?>

@@ -218,7 +218,7 @@ export function barState(s, msg = '') {
   else if (s === 'saved') {
     // Seite offline mit gespeichertem Entwurf: „Online stellen“ entfällt, „Veröffentlichen“ bringt sie mit den Änderungen zurück
     if (cfg.toggle && cfg.kind === 'page') cfg.toggle.pending = true;
-    setChip(cfg.kind === 'entry' || cfg.status === 'draft' || cfg.status === 'offline' ? cfg.status : 'changed');
+    setChip(cfg.kind === 'entry' || cfg.kind === 'content' || cfg.status === 'draft' || cfg.status === 'offline' ? cfg.status : 'changed');
   }
   else if (s === 'clean') setChip(cfg.status);
   // Speichern-Knopf: „Speichern“ · „Speichere …“ · „Gespeichert ✓“ (aria-disabled, solange nichts zu speichern ist)

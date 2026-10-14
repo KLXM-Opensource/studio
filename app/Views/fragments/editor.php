@@ -3,8 +3,9 @@
  * Kern-Fragment „editor“ (nur Kern – Kits können es nicht ersetzen, Core\Fragments::CORE_ONLY):
  * Editor-Mount für Inline-Editing (Editor.js, Seitenleiste „Block“, Konfiguration). Aufruf im Layout des Kits:
  * <?= $theme->partial('editor', $editor) ?> – Aussehen: resources/css/editor.css (Kern).
- * @var array $page  @var array $blocks  @var array $previews
+ * @var array $page  @var array $blocks  @var array $previews  @var ?array $content (Modus „Inhalt“: Inhaltsblöcke eines Eintrags)
  */
+$content ??= null;
 $config = app()->theme->editorConfig();
 $config['page'] = ['id' => (int) $page['id'], 'title' => $page['title']];
 $config['endpoints'] = [
@@ -26,8 +27,19 @@ $config['csrf'] = \Core\Csrf::token();
 $config['settingsTitle'] = app()->theme->settingsTitle();
 // Detailseiten-Vorlage: Vorschau mit dem aufgerufenen Eintrag
 $config['entry'] = app()->entry ? ['table' => app()->entry['table']['handle'], 'id' => (int) app()->entry['entry']['id']] : null;
+// Modus „Inhalt“: Speichern ins Feld des Eintrags, nur die erlaubten Blöcke einfügbar, kein Entwurf/Verwerfen
+if ($content) {
+    $config['content'] = ['table' => $content['table'], 'id' => $content['id'], 'field' => $content['field'], 'label' => $content['label']];
+    $config['endpoints']['save'] = url('/admin/api/entries/' . $content['table'] . '/' . $content['id'] . '/blocks/' . $content['field']);
+    unset($config['endpoints']['discard']);
+    foreach ($config['blocks'] as $t => &$bd) $bd['insertable'] = !empty($bd['insertable']) && in_array($t, $content['allowed'], true);
+    unset($bd);
+}
 ?>
+<?php if ($content): ?><div class="eb-static" inert><?= $content['before'] ?></div>
+<p class="eb-edit-note" role="note"><?= icon('article') ?> <?= e(__('Inhaltsblöcke von „{entry}“ – „{field}“. Vorlage darüber und darunter: nur Vorschau.', ['entry' => \Core\Data\Entries::title(app()->entry['table'], app()->entry['entry']), 'field' => $content['label']])) ?></p><?php endif; ?>
 <div id="cms-editor" class="cms-editor"></div>
+<?php if ($content): ?><div class="eb-static" inert><?= $content['after'] ?></div><?php endif; ?>
 <script type="application/json" id="cms-editor-config"><?= json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script type="application/json" id="cms-editor-data"><?= json_encode(['blocks' => $blocks, 'previews' => $previews], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script src="<?= e(asset('vendor/editorjs/editorjs.umd.js')) ?>" defer></script>

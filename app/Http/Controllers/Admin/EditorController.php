@@ -50,9 +50,22 @@ final class EditorController extends AdminController
     }
 
     /** Rendert einen einzelnen Block (Live-Vorschau im Editor). */
+    /**
+     * Seiten-Editor: Recht pages.edit – oder im Modus „Inhalt“ (Inhaltsblöcke eines Eintrags, Core\Data\EntryBlocks) das Recht,
+     * die Tabelle des mitgesendeten Eintrags zu bearbeiten.
+     */
+    private function editorAuth(Request $r): void
+    {
+        $this->auth($r);
+        if (can('pages.edit')) return;
+        $e = (array) ($r->post['entry'] ?? []);
+        $t = !empty($e['table']) ? \Core\Data\Tables::findContent((string) $e['table']) : null;
+        if (!$t || !can('data.edit', $t['handle']) || !\Core\Data\EntryBlocks::fieldsOf($t)) throw new HttpException(403);
+    }
+
     public function preview(Request $r): Response
     {
-        $this->auth($r, 'pages.edit');
+        $this->editorAuth($r);
         $pageId = (int) ($r->post['page'] ?? 0);
         app()->currentPage = $pageId ? Pages::find($pageId) : Pages::home();
         app()->editing = true;
@@ -80,7 +93,7 @@ final class EditorController extends AdminController
     /** Feldformular eines Blocks für die Seitenleiste (gleicher Renderer wie im Admin). */
     public function form(Request $r): Response
     {
-        $this->auth($r, 'pages.edit');
+        $this->editorAuth($r);
         $type = (string) ($r->post['type'] ?? '');
         $def = app()->theme->block($type) ?? throw new HttpException(404);
         $data = array_replace(\Core\Fields::defaults($def['fields']), (array) ($r->post['data'] ?? []));

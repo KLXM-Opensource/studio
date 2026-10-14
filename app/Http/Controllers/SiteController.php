@@ -177,7 +177,9 @@ final class SiteController
 
         $app->currentPage = $page;
         \Core\StructuredData::reset();
-        $app->editing = $loggedIn && isset($r->query['edit']) && can('pages.edit');
+        // Modus „Inhalt“ (?edit=inhalt): Inhaltsblöcke des Eintrags im Seiten-Editor – Recht am Eintrag statt pages.edit
+        $app->contentEdit = $loggedIn && $ctx && ($r->query['edit'] ?? '') === 'inhalt' ? \Core\Data\EntryBlocks::contentEdit($ctx, Pages::blocks($page, true)) : null;
+        $app->editing = $app->contentEdit !== null || ($loggedIn && isset($r->query['edit']) && ($r->query['edit'] ?? '') !== 'inhalt' && can('pages.edit'));
         // Eingeloggte sehen den Arbeitsstand (Entwurf) – mit ?live=1 die veröffentlichte Fassung wie Besucher
         $live = $loggedIn && isset($r->query['live']) && !$app->editing;
         // Redaktionsnotizen [# … #]: Redaktion sieht sie als Hinweis (nicht in der Ansicht „wie Besucher“), sonst entfernt
@@ -190,7 +192,21 @@ final class SiteController
         $theme = $app->theme;
 
         $editor = null;
-        if ($app->editing) {
+        if ($app->contentEdit) {
+            // Vorlage davor/danach als feste Vorschau (wie für Besucher), dazwischen der Editor mit den Blöcken des Eintrags
+            $ce = $app->contentEdit;
+            $app->editing = false;
+            $before = $theme->renderBlocks(array_slice($blocks, 0, $ce['at']));
+            $after = $ce['at'] < count($blocks) ? $theme->renderBlocks(array_slice($blocks, $ce['at'] + 1)) : '';
+            $app->editing = true;
+            $own = \Core\Data\EntryBlocks::items($ctx['entry'][$ce['field']] ?? null);
+            $previews = [];
+            foreach ($own as $b) {
+                if ($block = $theme->makeBlock($b)) $previews[$b['id']] = $theme->renderBlock($block);
+            }
+            $editor = ['page' => $page, 'blocks' => $own, 'previews' => $previews, 'content' => $ce + ['before' => $before, 'after' => $after]];
+            $content = '';
+        } elseif ($app->editing) {
             $previews = [];
             foreach ($blocks as $b) {
                 $block = $theme->makeBlock($b);

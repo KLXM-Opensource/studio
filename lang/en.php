@@ -7322,4 +7322,13 @@ return [
     'Variante' => 'Variant',
     'Inhaltsblöcke' => 'Content blocks',
     'Bitte mindestens einen Block für „{label}“ anlegen.' => 'Please add at least one block for “{label}”.',
+    'Besucher können diese Felder auch in einem öffentlichen Formular ausfüllen.' => 'Visitors can also fill in these fields in a public form.',
+    'Feld hinzufügen' => 'Add field',
+    'Für Formulare und Ausgabe' => 'For forms and output',
+    'Für die Ausgabe auf der Website (z. B. Beiträge, News, Infos) – in öffentlichen Formularen nicht ausfüllbar.' => 'For output on the website (e.g. posts, news, info) – cannot be filled in public forms.',
+    'Gestaltung des Formulars' => 'Form layout',
+    'Inhaltsblöcke von „{entry}“ – „{field}“. Vorlage darüber und darunter: nur Vorschau.' => 'Content blocks of “{entry}” – “{field}”. Template above and below: preview only.',
+    'Nur Inhalte der Redaktion' => 'Editorial content only',
+    'Nur Inhalte der Redaktion – für die Ausgabe, nicht in öffentlichen Formularen ausfüllbar.' => 'Editorial content only – for output, cannot be filled in public forms.',
+    'Speichern keine Daten.' => 'Store no data.',
 ];

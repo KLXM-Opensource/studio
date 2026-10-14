@@ -16,9 +16,15 @@ $type = $f['type'] ?? 'text';
       <label class="dt-in dt-in--label"><span>Bezeichnung</span><input name="<?= $n ?>[label]" value="<?= e($f['label'] ?? '') ?>" placeholder="z. B. Titel" data-label></label>
       <label class="dt-in dt-in--name"><span>Kurzname</span><input name="<?= $n ?>[name]" value="<?= e($f['name'] ?? '') ?>" pattern="[a-z][a-z0-9_]*" data-name<?= !empty($f['id']) ? ' data-locked' : '' ?>></label>
       <label class="dt-in dt-in--type"><span>Typ</span><select name="<?= $n ?>[type]" data-type>
-        <?php foreach (Tables::TYPES as $k => [$l]): if (!in_array($k, $types, true) && $k !== $type) continue; ?><option value="<?= e($k) ?>"<?= $k === $type ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
+        <?php foreach (Tables::typeGroups(array_values(array_unique(array_merge($types, [$type])))) as $g): ?><optgroup label="<?= e($g['label']) ?>">
+        <?php foreach ($g['types'] as $k): ?><option value="<?= e($k) ?>"<?= $k === $type ? ' selected' : '' ?>><?= e(__(Tables::TYPES[$k][0])) ?></option><?php endforeach; ?></optgroup>
+        <?php endforeach; ?>
       </select></label>
     </div>
+    <?php // Nur Redaktion: kurzer Hinweis am Feld (immer), damit klar ist, dass Besucher es nicht ausfüllen
+    $outTypes = Tables::typeGroups(array_keys(Tables::TYPES));
+    $outTypes = array_values(array_filter($outTypes, fn($g) => $g['key'] === 'output'))[0]['types'] ?? []; ?>
+    <p class="dt-field__out" data-show-for="<?= e(implode(' ', $outTypes)) ?>"<?= in_array($type, $outTypes, true) ? '' : ' hidden' ?>><?= icon('eye') ?> <?= e(__('Nur Inhalte der Redaktion – für die Ausgabe, nicht in öffentlichen Formularen ausfüllbar.')) ?></p>
     <?php if ($noForm): ?><p class="dt-field__noform" data-show-for="<?= e(implode(' ', $noForm)) ?>"<?= in_array($type, $noForm, true) ? '' : ' hidden' ?>><?= icon('warning') ?> <?= e(__('Erscheint nicht im öffentlichen Formular – Besucher können diesen Feldtyp nicht ausfüllen (nur die Redaktion). Für Fragen an Besucher z. B. „Ja / Nein“, „Auswahl“ oder „Text (mehrzeilig)“ wählen.')) ?></p><?php endif; ?>
     <div class="dt-field__row dt-field__flags" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
       <?php foreach ($inbox ? ['required' => 'Pflichtfeld'] : ['required' => 'Pflichtfeld', 'in_list' => 'In der Liste zeigen', 'searchable' => 'Durchsuchbar'] as $k => $l): ?>

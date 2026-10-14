@@ -90,6 +90,24 @@ final class EntryEditController extends AdminController
             'title' => $saved ? Entries::title($t, $saved) : '', 'saved_at' => date('H:i')]);
     }
 
+    /**
+     * Modus „Inhalt“ der Detailseite (Seiten-Editor): Inhaltsblöcke eines Eintrags speichern – JSON {blocks}. Nur dieses Feld ändert sich,
+     * der Status bleibt (Einträge haben keinen Entwurf: Speichern ist bei veröffentlichten Einträgen sofort sichtbar).
+     */
+    public function saveBlocks(Request $r, string $handle, string $id, string $field): Response
+    {
+        $t = $this->table($r, $handle);
+        $e = Entries::find($t, (int) $id) ?? throw new HttpException(404);
+        if (($why = EntryEdit::reason($t, $e)) !== null) return Response::json(['ok' => false, 'error' => $why], 403);
+        $f = \Core\Data\Tables::field($t, $field);
+        if (!$f || $f['type'] !== \Core\Data\EntryBlocks::TYPE) throw new HttpException(404);
+        $blocks = is_array($r->post['blocks'] ?? null) ? $r->post['blocks'] : [];
+        [$newId, $errors] = Entries::save($t, (int) $e['id'], [$field => $blocks, 'status' => $e['status']]);
+        if ($errors) return Response::json(['ok' => false, 'error' => implode(' ', $errors), 'errors' => $errors], 422);
+        $this->changed();
+        return Response::json(['ok' => true, 'saved_at' => date('H:i'), 'count' => count(Entries::find($t, (int) $newId)[$field] ?? [])]);
+    }
+
     /** Formular + Kopfdaten für die Seitenleiste */
     private function payload(array $t, ?array $e, array $values, array $errors): array
     {

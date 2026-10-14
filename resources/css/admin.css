@@ -785,6 +785,18 @@ img.media-vthumb{object-fit:cover}
 .dt-field__flags{display:flex;flex-wrap:wrap;gap:6px 16px}
 .dt-field__noform{display:flex;gap:8px;align-items:flex-start;margin:0;padding:8px 10px;border-radius:8px;background:var(--adm-warn-bg,#FFF4E5);color:var(--adm-ink);font-size:13px;line-height:1.4}
 .dt-field__noform[hidden]{display:none}
+/* Feldtypen nach Verwendung (Tables::typeGroups): Palette in Gruppen, Hinweis „Nur Inhalte der Redaktion“ am Feld */
+.dt-field__out{display:flex;gap:6px;align-items:center;margin:0;color:var(--adm-t2);font-size:12.5px}
+.dt-field__out[hidden]{display:none}
+.dt-field__out svg{flex:none;width:14px;height:14px;color:var(--adm-t3)}
+.dt-addfield__h{width:100%;margin:0 0 4px;font-weight:600}
+.dt-addgroup{width:100%;display:grid;gap:6px;padding:10px 12px;border-radius:8px;background:var(--adm-fill)}
+.dt-addgroup--output{background:color-mix(in srgb,var(--adm-a) 7%,var(--adm-fill))}
+.dt-addgroup__h{margin:0;font-size:13px;line-height:1.4}
+.dt-addgroup__h span{color:var(--adm-t3)}
+.dt-addgroup__btns{display:flex;flex-wrap:wrap;gap:6px}
+.dt-addmenu__h{margin:6px 8px 2px;font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--adm-t3)}
+.dt-addmenu__h:first-child{margin-top:2px}
 .dt-field__noform svg{flex:none;width:16px;height:16px;margin-top:1px;color:var(--adm-warn)}
 .dt-field__flags .f-check{font-size:13px}
 .dt-in{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--adm-t3)}
