@@ -480,7 +480,8 @@ final class Tables
         // Formular: im Eingang bestimmt die Zustellung, ob Dateien angenommen werden (nicht der Schalter aus dem Formular) – so bleibt ein
         // angehaktes Dateifeld in der Auswahl. Zur Wahl standen die Felder der gespeicherten Tabelle (neue sind dabei: DataForms::selected).
         $formUploads = $inbox ? ($inboxFiles && $dmode !== 'system') : null;
-        $formKnown = $inbox ? array_column($existing ? self::allFields($existing) : [], 'name') : null;
+        // Felder, die beim Speichern schon da waren – neu hinzugefügte stehen im Formular, bis jemand sie abwählt (DataForms::selected)
+        $formKnown = array_column($existing ? self::allFields($existing) : [], 'name');
         $settings = [
             'route' => $route,
             'title_field' => $pick('title_field'),

@@ -153,9 +153,10 @@ final class DataForms
         $s = (array) ($t['settings']['form'] ?? []);
         $sel = (array) ($s['fields'] ?? []);
         if (!$sel || in_array($f['name'], $sel, true) || !empty($f['required']) || Tables::isLayout($f)) return true;
-        if (!Inbox::is($t)) return false;
+        // Später hinzugefügte Felder (nicht in 'known' – Felder, die bei der letzten Auswahl zur Wahl standen) gehören dazu
         $known = $s['known'] ?? null;
-        return is_array($known) ? !in_array($f['name'], $known, true) : ($f['type'] ?? '') === 'file';
+        if (is_array($known)) return !in_array($f['name'], $known, true);
+        return Inbox::is($t) && ($f['type'] ?? '') === 'file';
     }
 
     /** Erlaubte Dateitypen eines Upload-Feldes (Schlüssel aus FILE_KINDS); Bildfeld: nur Bilder, ohne Eingang kein DOCX/ODT */
@@ -226,7 +227,7 @@ final class DataForms
             // Obergrenze (0 = keine): Anmeldungen schließen, sobald so viele Einträge da sind – zählt alle Einträge der Tabelle
             'max' => max(0, min(self::MAX_ENTRIES, (int) ($s['max'] ?? $existing['max'] ?? 0))),
         ];
-        // Eingang: welche Felder standen zur Wahl? (neue Felder sind im Formular, bis jemand sie abwählt – selected())
+        // Welche Felder standen zur Wahl? (neue Felder sind im Formular, bis jemand sie abwählt – selected())
         if ($known !== null) $out['known'] = array_key_exists('fields', $s) ? array_values(array_map('strval', $known)) : ($existing['known'] ?? null);
         if (($out['known'] ?? 0) === null) unset($out['known']);
         $mails = array_values(array_filter(array_map('trim', preg_split('~[,;\s]+~', (string) ($s['notify'] ?? '')))));

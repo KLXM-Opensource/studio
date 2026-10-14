@@ -243,6 +243,10 @@ final class SchemaPanel
                 $r = self::save($ti2, ['fields' => array_slice(array_map(fn($f) => ['id' => $f['id'], 'label' => $f['label'], 'name' => $f['name'], 'type' => $f['type']], $ti2['fields']), 0, 2)]);
                 $eq('Eingang: Löschen ohne Rückfrage', [$r['askDrop'], $r['errors']], [false, []]);
             }
+            // Datentabelle mit Formular: später hinzugefügte Felder stehen im Formular, abgewählte nicht (settings.form.known)
+            $tc = ['settings' => ['kind' => 'content', 'form' => ['fields' => ['name'], 'known' => ['name', 'alt']]]];
+            $eq('Formular: neues Feld dabei, abgewähltes nicht, ohne known wie bisher', [DataForms::selected($tc, ['name' => 'neu', 'type' => 'text']),
+                DataForms::selected($tc, ['name' => 'alt', 'type' => 'text']), DataForms::selected(['settings' => ['form' => ['fields' => ['name']]]], ['name' => 'neu', 'type' => 'text'])], [true, false, false]);
         } catch (\Throwable $e) {
             $fails[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {

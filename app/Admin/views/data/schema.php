@@ -281,7 +281,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
             <?php if (!$fmAll): ?><p class="f-help"><?= e(__('Neue Felder erscheinen hier nach dem Speichern.')) ?></p><?php endif; ?>
             <div class="f-multi">
             <?php foreach ($fmAll as $f): $upl = in_array($f['type'], \Core\Data\DataForms::UPLOAD_TYPES, true); ?>
-            <label class="f-check"<?= $upl ? ' data-form-upload' : '' ?>><input type="checkbox" name="settings[form][fields][]" value="<?= e($f['name']) ?>"<?= !$fm['fields'] || in_array($f['name'], $fm['fields'], true) || !empty($f['required']) ? ' checked' : '' ?><?= !empty($f['required']) ? ' disabled' : '' ?>><?php if (!empty($f['required'])): ?><input type="hidden" name="settings[form][fields][]" value="<?= e($f['name']) ?>"><?php endif; ?>
+            <label class="f-check"<?= $upl ? ' data-form-upload' : '' ?>><input type="checkbox" name="settings[form][fields][]" value="<?= e($f['name']) ?>"<?= \Core\Data\DataForms::selected(['settings' => ['form' => $fm]], $f) ? ' checked' : '' ?><?= !empty($f['required']) ? ' disabled' : '' ?>><?php if (!empty($f['required'])): ?><input type="hidden" name="settings[form][fields][]" value="<?= e($f['name']) ?>"><?php endif; ?>
               <span><?= e($f['label']) ?><?= !empty($f['required']) ? ' <small class="adm-muted">(' . e(__('Pflichtfeld – immer dabei')) . ')</small>' : '' ?><?= $upl ? ' <small class="adm-muted">(' . e(__('nur mit Datei-Uploads')) . ')</small>' : '' ?></span></label>
             <?php endforeach; ?>
             </div>
