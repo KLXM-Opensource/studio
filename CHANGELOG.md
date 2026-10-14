@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### E-Mail-Test-Umleitung
+- Grundeinstellungen → E-Mail-Versand → **Test-Umleitung**: alle E-Mails der Website an Test-Adressen (auch live), Betreff „[TEST]“, ursprüngliche Empfänger in der Nachricht; Mails zur Kontosicherheit ausgenommen (`Mailer::send(…, ['account' => true])`). Streifen in der Verwaltung, solange aktiv. `mail_dump` zeigt die Umleitung ebenfalls.
+
 ### Formulare: „Nur per E-Mail“ ohne zentralen Schlüssel
 - Eingänge mit Zustellung „Nur per E-Mail“ nehmen Einsendungen auch ohne zentralen Schlüssel an (bisher „noch nicht eingerichtet“). Verschlüsselung ist ein Angebot: Schlüssel nur nötig, wenn verschlüsselt gespeichert wird (`Inbox::needsKey()`); Hinweise, Warnpunkt und Einrichtungs-Prüfung entsprechend.
 

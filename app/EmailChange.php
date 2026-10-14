@@ -356,7 +356,7 @@ final class EmailChange
     {
         [$subject, $text, $html, $inline] = self::compose($user, $kind, $v);
         if (self::$mute) return ['delivered' => false, 'error' => null];
-        $err = Mailer::send($subject, $text, [$to], ['html' => $html, 'inline' => $inline]);
+        $err = Mailer::send($subject, $text, [$to], ['html' => $html, 'inline' => $inline, 'account' => true]);   // Kontosicherheit: nie umleiten
         return ['delivered' => $err === null && Mailer::$delivered, 'error' => $err];
     }
 

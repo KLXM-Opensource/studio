@@ -110,6 +110,7 @@ if ($user && ($req = app()->request)) {
 <?php $drill = $user && !empty($drill) ? $drill : ''; ?>
 <body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $drill ? ' is-drill' : '' ?>" data-max-vars="<?= (int) ini_get('max_input_vars') ?>">
 <?= $user ? '' : \Core\AuthScreen::sky() ?>
+<?php if (environment() === 'production' && ($mr = \Core\Mailer::testRedirect())): // Test-Umleitung aktiv – nicht vergessen ?><div class="adm-env adm-env--mail" role="note"><?= e(__('E-MAIL-TEST')) ?> · <?= e(__('Alle E-Mails gehen an {to} statt an die eigentlichen Empfänger.', ['to' => implode(', ', $mr)])) ?> <?php if (can('system.manage')): ?><a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('Ausschalten')) ?></a><?php endif; ?></div><?php endif; ?>
 <?php if (environment() !== 'production'): ?><div class="adm-env adm-env--<?= e(environment()) ?>" role="note"><?= e(strtoupper(environment())) ?> · <?= e(__('Testumgebung – Änderungen hier gehen nicht auf die Live-Website. E-Mails werden umgeleitet, Suchmaschinen ausgesperrt.')) ?></div><?php endif; ?>
 <?php if ($user):
   // Schmale Bildschirme (≤ 900 px): schlanke Kopfleiste, Seitenleiste als Schublade (resources/js/_drawer.js; ohne JavaScript per #adm-side)

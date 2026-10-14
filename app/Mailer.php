@@ -91,6 +91,13 @@ final class Mailer
      *        require_tls: SMTP nur mit TLS (siehe dsn())
      * @return string|null Fehlermeldung oder null bei Erfolg
      */
+    /** Test-Umleitung aus den Grundeinstellungen (sys.mail_redirect): gültige Adressen, leer = aus */
+    public static function testRedirect(): array
+    {
+        $raw = (string) (app()->settings->get('sys.mail_redirect', '') ?? '');
+        return array_values(array_filter(array_map('trim', preg_split('~[,;\s]+~', $raw) ?: []), fn($a) => filter_var($a, FILTER_VALIDATE_EMAIL)));
+    }
+
     public static function send(string $subject, string $text, ?array $to = null, array $o = []): ?string
     {
         self::$delivered = false;
@@ -102,27 +109,34 @@ final class Mailer
             return 'Kein Empfänger eingetragen (System → E-Mail-Versand).';
         }
         // Lokale Tests: als Datei ablegen statt versenden (config 'mail_dump' => true bzw. Ordner) – nie an echte Empfänger
-        if ($dump = self::$testDump ?? app()->config->get('mail_dump')) {
-            return self::dump($dump === true ? site()->storage('mail') : (string) $dump, $subject, $text, $to,
-                filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o);
-        }
-        if (!filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        $dump = self::$testDump ?? app()->config->get('mail_dump');
+        if (!$dump && !filter_var($from, FILTER_VALIDATE_EMAIL)) {
             return 'Keine gültige Absender-Adresse eingetragen.';
         }
         $redirected = false;
-        // Staging/Entwicklung: nie an echte Empfänger – umleiten (config 'mail_redirect') oder nur protokollieren
-        if (environment() !== 'production') {
-            $redirect = array_filter(array_map('trim', explode(',', (string) app()->config->get('mail_redirect', ''))));
-            error_log('[Mailer] ' . environment() . ': „' . $subject . '“ an ' . implode(', ', $to) . ($redirect ? ' → umgeleitet an ' . implode(', ', $redirect) : ' → nicht versendet'));
-            if (!$redirect) { self::$outcome = 'logged'; return null; }
-            $note = 'Ursprüngliche Empfänger: ' . implode(', ', $to);
-            $subject = '[' . strtoupper(environment()) . '] ' . $subject;
-            $text = $note . "\n\n" . $text;
-            if (isset($o['html'])) {
-                $o['html'] = preg_replace('~<body[^>]*>~i', '$0<p style="margin:0;padding:8px 12px;background:#FFF3C4;color:#111;font:13px sans-serif">' . htmlspecialchars($note) . '</p>', (string) $o['html'], 1);
+        // Test-Umleitung (Grundeinstellungen → E-Mail-Versand, auch live): alle E-Mails an die Test-Adresse(n) – nie Mails zur
+        // Kontosicherheit ($o['account']: Passwort, Einladung, E-Mail-Änderung), sonst sperrt man sich beim Testen aus.
+        // Staging/Entwicklung: nie an echte Empfänger – umleiten (Test-Umleitung bzw. config 'mail_redirect') oder nur protokollieren
+        $prod = environment() === 'production';
+        $test = empty($o['account']) ? self::testRedirect() : [];
+        if (!$prod || $test) {
+            $redirect = $test ?: array_filter(array_map('trim', explode(',', (string) app()->config->get('mail_redirect', ''))));
+            if (!$dump) error_log('[Mailer] ' . ($prod ? 'Test-Umleitung' : environment()) . ': „' . $subject . '“ an ' . implode(', ', $to) . ($redirect ? ' → umgeleitet an ' . implode(', ', $redirect) : ' → nicht versendet'));
+            if (!$redirect && !$dump) { self::$outcome = 'logged'; return null; }
+            if ($redirect) {
+                $note = 'Ursprüngliche Empfänger: ' . implode(', ', $to);
+                $subject = '[' . ($prod ? 'TEST' : strtoupper(environment())) . '] ' . $subject;
+                $text = $note . "\n\n" . $text;
+                if (isset($o['html'])) {
+                    $o['html'] = preg_replace('~<body[^>]*>~i', '$0<p style="margin:0;padding:8px 12px;background:#FFF3C4;color:#111;font:13px sans-serif">' . htmlspecialchars($note) . '</p>', (string) $o['html'], 1);
+                }
+                $to = $redirect;
+                $redirected = true;
             }
-            $to = $redirect;
-            $redirected = true;
+        }
+        if ($dump) {
+            return self::dump($dump === true ? site()->storage('mail') : (string) $dump, $subject, $text, $to,
+                filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o);
         }
         try {
             $mailer = new SymfonyMailer(Transport::fromDsn(self::dsn(!empty($o['require_tls']))));

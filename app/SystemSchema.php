@@ -154,6 +154,8 @@ final class SystemSchema
                 ['name' => 'sys.mail_from_name', 'label' => 'Absender-Name', 'type' => 'text', 'width' => 'half', 'default' => 'Website'],
                 ['name' => 'sys.mail_to', 'label' => 'Empfänger für Benachrichtigungen', 'type' => 'text',
                     'help' => 'Mehrere Adressen mit Komma trennen.', 'placeholder' => 'info@ihre-domain.de'],
+                ['name' => 'sys.mail_redirect', 'label' => 'Test-Umleitung: alle E-Mails an', 'type' => 'text', 'placeholder' => 'test@ihre-domain.de',
+                    'help' => 'Zum Testen: Alle E-Mails dieser Website (Formulare, Eingangsbestätigungen, Benachrichtigungen, Anfragen) gehen stattdessen an diese Adresse(n) – Betreff mit [TEST], die eigentlichen Empfänger stehen in der Nachricht. Mails zur Kontosicherheit (Passwort, Einladung) gehen weiter an die Person. Leer lassen = aus.'],
             ]],
             ['id' => 'spam', 'label' => 'Spamschutz', 'fields' => [
                 ['type' => 'heading', 'label' => 'Mehrstufiger Schutz ohne externe Dienste',

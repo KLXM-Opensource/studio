@@ -7454,4 +7454,7 @@ return [
     'Die Einsendung geht nur per E-Mail hinaus; auf der Website bleibt nichts außer einem Zustellprotokoll ohne Inhalte. Scheitert der Versand, wird sie verschlüsselt gesichert – sofern ein zentraler Schlüssel hinterlegt ist, sonst sieht der Besucher eine Fehlermeldung.' => 'The submission is only sent by email; nothing remains on the website except a delivery log without content. If sending fails, it is stored encrypted – provided a central key exists, otherwise the visitor sees an error message.',
     'Für diese Wahl braucht es den zentralen Schlüssel.' => 'This option requires the central key.',
     'Ohne zentralen Schlüssel gibt es keine Sicherung: Scheitert der Versand, sieht der Besucher eine Fehlermeldung und kann es erneut versuchen.' => 'Without a central key there is no backup: if sending fails, the visitor sees an error message and can try again.',
+    // E-Mail-Test-Umleitung
+    'Alle E-Mails gehen an {to} statt an die eigentlichen Empfänger.' => 'All emails go to {to} instead of the actual recipients.',
+    'E-MAIL-TEST' => 'EMAIL TEST',
 ];

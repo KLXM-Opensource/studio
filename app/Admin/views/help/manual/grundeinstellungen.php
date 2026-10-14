@@ -12,6 +12,7 @@
     <li><b>Systeminfo</b> – Version, PHP, Speicher, Cache leeren, Testmail.</li>
     <li>Eigene Unterseiten: <b>Schriften</b> (Schriften vom eigenen Server verwalten) und <b>Kits</b> (Designs installieren und aktualisieren).</li>
   </ul>
+  <p id="mail-test"><b>E-Mails testen:</b> Unter <b>E-Mail-Versand → Test-Umleitung</b> tragen Sie eine (oder mehrere) eigene Adressen ein. Dann gehen <b>alle</b> E-Mails der Website – Formulare, Eingangsbestätigungen, Benachrichtigungen, Anfragen – stattdessen dorthin, mit „[TEST]“ im Betreff und den eigentlichen Empfängern in der Nachricht. Mails zur Kontosicherheit (Passwort zurücksetzen, Einladung, E-Mail-Änderung) gehen weiter an die Person. Solange die Umleitung an ist, zeigt ein violetter Streifen unten in der Verwaltung darauf hin („Ausschalten“ führt zur Einstellung). In Testumgebungen (Staging) werden E-Mails ohnehin nie an echte Empfänger geschickt.</p>
 
   <h3 id="domain">Domain und Hauptadresse</h3>
   <p>Bei einer einzelnen Website (ohne Netzwerk) öffnet oben rechts der Knopf <b>Domain</b> die Liste der Adressen dieser Website:</p>
