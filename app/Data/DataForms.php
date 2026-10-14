@@ -605,7 +605,7 @@ final class DataForms
             if ($lines) $body .= "\n" . lt('Ihre Angaben:') . "\n" . implode("\n", $lines) . "\n";
         }
         $body .= "\n" . lt('Mit freundlichen Grüßen') . "\n" . $name . "\n" . absolute_url('/') . "\n";
-        $err = Mailer::send($subject, $body, [$to]);
+        $err = Mailer::send($subject, $body, [$to], ['purpose' => 'visitor']);   // Eingangsbestätigung an Besucher
         if ($err !== null) error_log('[Formular ' . $t['handle'] . '] Eingangsbestätigung nicht gesendet: ' . $err);
     }
 

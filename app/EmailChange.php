@@ -356,7 +356,10 @@ final class EmailChange
     {
         [$subject, $text, $html, $inline] = self::compose($user, $kind, $v);
         if (self::$mute) return ['delivered' => false, 'error' => null];
-        $err = Mailer::send($subject, $text, [$to], ['html' => $html, 'inline' => $inline, 'account' => true]);   // Kontosicherheit: nie umleiten
+        // Netzwerk-Konten (Rolle network, Schatten-Konten, Hinweis auf die Netzwerk-Website): nur über das Netzwerk-Konto – nie über
+        // den Absender einer Kunden-Website (Core\Mail\Accounts)
+        $network = ($user['role'] ?? '') === 'network' || !empty($user['network_uid']) || str_ends_with($kind, '-network');
+        $err = Mailer::send($subject, $text, [$to], ['html' => $html, 'inline' => $inline, 'account' => true, 'purpose' => 'account', 'network' => $network]);   // Kontosicherheit: nie umleiten
         return ['delivered' => $err === null && Mailer::$delivered, 'error' => $err];
     }
 

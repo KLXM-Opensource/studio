@@ -192,6 +192,13 @@ return function (Router $r): void {
     $r->get('/admin/api/search', [Admin\SearchController::class, 'search']);
     $r->post('/admin/api/entries/{handle}/{id}/blocks/{field}', [Admin\EntryEditController::class, 'saveBlocks']);   // Modus „Inhalt“ (Core\Data\EntryBlocks)
     $r->get('/admin/api/geocode', [Admin\SearchController::class, 'geocode']);
+    // E-Mail-Konten (Core\Mail\Accounts): weitere Konten, Verwendung je Zweck, Testnachricht, Netzwerk-Konto
+    $r->get('/admin/system/mail', [Admin\MailAccountsController::class, 'index']);
+    $r->post('/admin/system/mail/konto', [Admin\MailAccountsController::class, 'save']);
+    $r->post('/admin/system/mail/konto/{id}/loeschen', [Admin\MailAccountsController::class, 'delete']);
+    $r->post('/admin/system/mail/verwendung', [Admin\MailAccountsController::class, 'routes']);
+    $r->post('/admin/system/mail/test/{id}', [Admin\MailAccountsController::class, 'test']);
+    $r->post('/admin/system/mail/netzwerk', [Admin\MailAccountsController::class, 'network']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);
     $r->post('/admin/system/admin-path', [Admin\SystemController::class, 'adminPath']);   // Adresse der Verwaltung (Core\AdminPath)
     $r->post('/admin/system/pools', [Admin\SystemController::class, 'poolCreate']);

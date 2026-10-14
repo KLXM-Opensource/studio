@@ -513,7 +513,7 @@ final class Delivery
             error_log('[inbox] Zustellung: Nachricht nicht erstellt: ' . $e->getMessage());
             return $fail(__('Die E-Mail konnte nicht erstellt werden.'));
         }
-        $from = (string) app()->settings->get('sys.mail_from', '');
+        $from = (string) \Core\Mail\Accounts::route('notify')['from'];   // Message-ID mit der Domain des verwendeten Kontos
         $domain = str_contains($from, '@') ? substr($from, strrpos($from, '@') + 1) : 'localhost';
         $mid = bin2hex(random_bytes(8)) . '.' . strtolower(str_replace('-', '', $ref)) . '@' . ($domain !== '' ? $domain : 'localhost');
         $err = Mailer::send($m['subject'], $m['text'], $to, ['html' => $m['html'], 'attach' => $m['attach'], 'reply_to' => $m['reply_to'],

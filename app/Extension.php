@@ -121,6 +121,10 @@ final class Extension
     private array $migrations = [];
     /** @var array<string, list<callable>> Filter (filter()) */
     public array $filters = [];
+    /** @var array<string, array{label: string, help: string}> E-Mail-Zwecke (mailPurpose()) */
+    public array $mailPurposes = [];
+    /** @var array<string, array{label: string, factory: callable}> E-Mail-Versandwege (mailTransport()) */
+    public array $mailTransports = [];
     /** @var array<string, callable(Db\Table): mixed> Tabellen (table()) */
     private array $tables = [];
 
@@ -340,6 +344,29 @@ final class Extension
     public function afterAdminResponse(callable $fn): self
     {
         $this->afterAdmin[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Eigener Zweck für den E-Mail-Versand (Core\Mail\Purposes) – die Website wählt dafür ein Konto (Grundeinstellungen →
+     * E-Mail-Konten). Name wird „ext:{erweiterung}.{key}“. Versand: Mailer::send($betreff, $text, $an, ['purpose' => 'ext:newsletter.kampagne']).
+     */
+    public function mailPurpose(string $key, string $label, string $help = ''): self
+    {
+        if (!preg_match('~^[a-z0-9_-]{1,40}$~', $key)) { error_log('[Erweiterung ' . $this->name . '] mailPurpose: ungültiger Schlüssel'); return $this; }
+        $this->mailPurposes['ext:' . $this->name . '.' . $key] = ['label' => $label, 'help' => $help];
+        return $this;
+    }
+
+    /**
+     * Eigener Versandweg für E-Mail-Konten, z. B. die API eines Newsletter-Dienstes: fn(array $konto): Symfony\Component\Mailer\Transport\TransportInterface.
+     * Erscheint als Versandart „{label}“ (Konto-Feld transport = „ext:{schema}“); Zugangsdaten stehen in $konto (user/pass/host/dsn).
+     * Für Dienste mit Symfony-Bridge genügt meist die Versandart „DSN“ (z. B. „brevo+api://SCHLÜSSEL@default“, Paket symfony/brevo-mailer).
+     */
+    public function mailTransport(string $scheme, string $label, callable $factory): self
+    {
+        if (!preg_match('~^[a-z0-9_-]{1,40}$~', $scheme)) { error_log('[Erweiterung ' . $this->name . '] mailTransport: ungültiges Schema'); return $this; }
+        $this->mailTransports[$scheme] = ['label' => $label, 'factory' => $factory];
         return $this;
     }
 

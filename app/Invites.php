@@ -360,7 +360,8 @@ final class Invites
     public static function send(array $inv, string $token): array
     {
         [$subject, $text, $html, $inline] = self::mail($inv, $token);
-        $err = Mailer::send($subject, $text, [(string) $inv['email']], ['html' => $html, 'inline' => $inline, 'account' => true]);   // Kontosicherheit: nie umleiten
+        // Einladung als Netzwerk-Administration: nur über das Netzwerk-Konto (Core\Mail\Accounts)
+        $err = Mailer::send($subject, $text, [(string) $inv['email']], ['html' => $html, 'inline' => $inline, 'account' => true, 'purpose' => 'account', 'network' => self::isNetwork($inv)]);   // Kontosicherheit: nie umleiten
         $delivered = $err === null && Mailer::$delivered;
         app()->db->query('UPDATE user_invites SET sends = sends + 1, sent_at = ? WHERE id = ?', [$delivered ? now() : null, (int) $inv['id']]);
         return ['delivered' => $delivered, 'error' => $err];

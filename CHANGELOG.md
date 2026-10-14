@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### E-Mail-Konten: mehrere Konten, Zwecke, Netzwerk-Konto
+- Grundeinstellungen → E-Mail-Versand → **E-Mail-Konten** (`/admin/system/mail`): neben „Standard“ weitere Konten (SMTP oder Dienst per Symfony-DSN, z. B. Mailjet, Mailchimp Transactional, Brevo, Postmark – Geheimnisse verschlüsselt), **Verwendung je Zweck** (Konto & Sicherheit, Redaktion, Besucher, Newsletter; Erweiterungen ergänzen Zwecke), Testnachricht je Konto mit verständlicher Meldung (z. B. fehlendes Paket).
+- **Netzwerk-Konto** für die ganze Installation (nur Netzwerk-Administration): Mails an Netzwerk-Konten nur darüber, Websites ohne eigenes Konto nutzen es – nie das Konto einer anderen Website. Absender, Antwortadresse und Message-ID kommen vom verwendeten Konto. Health weist auf ein fehlendes Netzwerk-Konto hin.
+- Erweiterungen: `Extension::mailPurpose()`, `Extension::mailTransport()`, `Mailer::send(…, ['purpose' => …, 'network' => …, 'headers' => ['List-Unsubscribe' => …]])`. Versandarten sendmail und PHP-mail() entfernt (keine Website nutzte sie). Selbsttest `mail:selftest`.
+- *EN:* Email accounts: several accounts per website (SMTP or API services via Symfony DSN), account per purpose, an installation-wide network account with a neutral sender (network mails never use a client website's account), extension hooks for purposes and transports; sendmail and PHP mail() removed.
+
 ### Bearbeitungssperre (optional)
 - Grundeinstellungen → Allgemein → **„Bearbeitungssperre“** (Standard aus): Wer eine Seite oder einen Eintrag zuerst bearbeitet, sperrt sie für andere – sie sehen nur die Ansicht mit Hinweiszeile unter der Leiste; Speichern ist gesperrt (Editor, Verwaltung, KI, REST/MCP – HTTP 423). Frei spätestens 45 s nach dem Verlassen; Administratoren können **übernehmen**. Aufgebaut auf der Präsenz (`Core\EditLock`, keine eigene Tabelle). Leiste: Symbole statt Zeichen (Schloss, Warnzeichen). Selbsttest in `presence:selftest`.
 - *EN:* Optional editing lock: whoever edits first locks the page or entry; others get a view-only notice below the toolbar, saving is rejected everywhere (HTTP 423); administrators can take over.

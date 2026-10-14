@@ -86,6 +86,11 @@ use Core\Fields;
     <?php endif; ?>
     <?php if ($g['id'] === 'mail'): ?>
       <div class="adm-inline-box">
+        <strong><?= e(__('Weitere Konten und Verwendung')) ?></strong>
+        <p class="adm-muted"><?= e(__('Eigene Konten für Newsletter oder Besucher-Mails (auch Dienste wie Mailjet oder Mailchimp Transactional per API), welches Konto wofür versendet, Netzwerk-Konto.')) ?></p>
+        <a class="adm-btn" href="<?= e(url('/admin/system/mail')) ?>"><?= e(__('E-Mail-Konten')) ?></a>
+      </div>
+      <div class="adm-inline-box">
         <strong>Testnachricht senden</strong>
         <p class="adm-muted">Erst speichern, dann testen.</p>
         <div class="adm-row"><input type="email" form="testmail" name="to" placeholder="<?= e($user['email']) ?>" aria-label="Empfänger der Testnachricht"><button class="adm-btn" form="testmail" type="submit">Test senden</button></div>

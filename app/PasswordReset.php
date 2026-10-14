@@ -133,7 +133,7 @@ final class PasswordReset
                 self::log('user.password-reset-request', $email, 'Netzwerk-Konto gesperrt – keine E-Mail');
                 return 'disabled';
             }
-            if (!Mailer::ready()) return self::noMail($email, 'Netzwerk-Konto');
+            if (!Mailer::ready('account', true)) return self::noMail($email, 'Netzwerk-Konto');
             $url = Network::siteLink(Network::siteKey(), '/admin/passwort-vergessen');
             self::queue($email, $n, 'reset-network', ['url' => $url, 'network' => Network::siteUrl(Network::siteKey())]);
             self::log('user.password-reset-request', $email, 'Netzwerk-Konto → Hinweis auf die Netzwerk-Website');

@@ -12,58 +12,24 @@ use Symfony\Component\Mime\Email;
 final class Mailer
 {
     /** $requireTls: SMTP mit STARTTLS nur verschlüsselt (bricht ab, wenn der Server kein TLS anbietet) – für Inhalte (Core\Data\Delivery) */
-    public static function dsn(bool $requireTls = false): string
+    /** DSN des Kontos für einen Zweck (Core\Mail\Accounts) – Standard: Konto & Sicherheit der Website */
+    public static function dsn(bool $requireTls = false, string $purpose = 'account', bool $network = false): string
     {
-        $s = app()->settings;
-        $t = (string) $s->get('sys.mail_transport', 'smtp');
-        return match ($t) {
-            'sendmail' => 'sendmail://default',
-            'native' => 'native://default',
-            'null' => 'null://null',
-            default => self::smtpDsn($requireTls),
-        };
+        return Mail\Accounts::dsn(Mail\Accounts::route($purpose, $network), $requireTls);
     }
 
     /**
-     * Versand eingerichtet? Gültiger Absender und SMTP-Server (bzw. sendmail/native); lokal genügt config 'mail_dump'.
-     * Versandart „Deaktiviert“ (null) gilt als nicht eingerichtet. Ohne Verbindungstest – z. B. für „Passwort vergessen“.
+     * Versand für einen Zweck eingerichtet? Gültiger Absender und Versandweg des gewählten Kontos (Core\Mail\Accounts); lokal
+     * genügt config 'mail_dump'. Versandart „Deaktiviert“ gilt als nicht eingerichtet. Ohne Verbindungstest – z. B. „Passwort vergessen“.
      */
-    public static function ready(): bool
+    public static function ready(string $purpose = 'account', bool $network = false): bool
     {
         if (self::$testDump !== null || app()->config->get('mail_dump')) return true;
-        $s = app()->settings;
-        if (!filter_var((string) $s->get('sys.mail_from', ''), FILTER_VALIDATE_EMAIL)) return false;
-        return match ((string) $s->get('sys.mail_transport', 'smtp')) {
-            'null' => false,
-            'sendmail', 'native' => true,
-            default => (string) $s->get('sys.mail_host', '') !== '',
-        };
+        return Mail\Accounts::ready(Mail\Accounts::route($purpose, $network));
     }
 
-    private static function smtpDsn(bool $requireTls = false): string
-    {
-        $s = app()->settings;
-        $host = (string) $s->get('sys.mail_host', '');
-        if ($host === '') {
-            throw new \RuntimeException('Kein SMTP-Server eingetragen (System → E-Mail-Versand).');
-        }
-        $enc = (string) $s->get('sys.mail_encryption', 'tls');
-        $scheme = $enc === 'ssl' ? 'smtps' : 'smtp';
-        $user = rawurlencode((string) $s->get('sys.mail_user', ''));
-        $pass = rawurlencode((string) $s->get('sys.mail_pass', ''));
-        $auth = $user !== '' ? "$user:$pass@" : '';
-        $port = (int) ($s->get('sys.mail_port') ?: ($enc === 'ssl' ? 465 : 587));
-        $q = [];
-        if (!$s->get('sys.mail_verify_peer', true)) {
-            $q[] = 'verify_peer=0';
-        }
-        if ($enc === 'none') {
-            $q[] = 'auto_tls=false';
-        } elseif ($enc === 'tls' && $requireTls) {
-            $q[] = 'require_tls=true';
-        }
-        return "$scheme://$auth$host:$port" . ($q ? '?' . implode('&', $q) : '');
-    }
+    /** Konto des letzten Versands (id, Beschreibung) – für Protokolle und Tests */
+    public static ?array $account = null;
 
     /**
      * Zuletzt versendete E-Mail wirklich an die Empfänger übergeben? false: nur protokolliert, umgeleitet (außerhalb der
@@ -104,7 +70,12 @@ final class Mailer
         self::$outcome = 'failed';
         $s = app()->settings;
         $to ??= array_filter(array_map('trim', explode(',', (string) $s->get('sys.mail_to', ''))));
-        $from = (string) $s->get('sys.mail_from', '');
+        // Konto je Zweck (Core\Mail\Accounts): Absender, Antwortadresse und Versandweg kommen vom Konto. Netzwerk-Konten
+        // (network: true) nur über das Netzwerk-Konto – nie über das Konto einer Website.
+        $purpose = (string) ($o['purpose'] ?? (!empty($o['account']) ? 'account' : 'notify'));
+        $acc = Mail\Accounts::route($purpose, !empty($o['network']));
+        self::$account = ['id' => $acc['id'], 'scope' => $acc['scope'], 'purpose' => $purpose];
+        $from = $acc['from'];
         if (!$to) {
             return 'Kein Empfänger eingetragen (System → E-Mail-Versand).';
         }
@@ -116,7 +87,7 @@ final class Mailer
         // Erweiterungen (Extension::filter 'mail.message'): ändern oder mit false unterdrücken – nie Mails zur Kontosicherheit;
         // Test-Umleitung und Staging-Schutz gelten danach weiter
         if (empty($o['account']) && Extensions::filters('mail.message')) {
-            $m = Extensions::filter('mail.message', ['subject' => $subject, 'text' => $text, 'to' => $to, 'options' => $o], ['account' => false]);
+            $m = Extensions::filter('mail.message', ['subject' => $subject, 'text' => $text, 'to' => $to, 'options' => $o], ['account' => false, 'purpose' => $purpose, 'mail_account' => $acc['id']]);
             if ($m === false) { self::$outcome = 'logged'; return null; }
             if (is_array($m)) {
                 $subject = (string) ($m['subject'] ?? $subject);
@@ -148,12 +119,12 @@ final class Mailer
         }
         if ($dump) {
             return self::dump($dump === true ? site()->storage('mail') : (string) $dump, $subject, $text, $to,
-                filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o);
+                filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o + ['_account' => $acc]);
         }
         try {
-            $mailer = new SymfonyMailer(Transport::fromDsn(self::dsn(!empty($o['require_tls']))));
-            $mailer->send(self::build($from, $subject, $text, $to, $o));
-            $null = (string) $s->get('sys.mail_transport', 'smtp') === 'null';
+            $mailer = new SymfonyMailer(Mail\Accounts::transport($acc, !empty($o['require_tls'])));
+            $mailer->send(self::build($from, $subject, $text, $to, $o + ['_account' => $acc]));
+            $null = $acc['transport'] === 'null';
             self::$delivered = !$redirected && !$null;
             self::$outcome = $null ? 'logged' : ($redirected ? 'redirected' : 'sent');
             return null;
@@ -165,8 +136,9 @@ final class Mailer
 
     private static function build(string $from, string $subject, string $text, array $to, array $o): \Symfony\Component\Mime\Message
     {
+        $acc = (array) ($o['_account'] ?? []);
         $email = (new Email())
-            ->from(new Address($from, (string) app()->settings->get('sys.mail_from_name', 'Website')))
+            ->from(new Address($from, (string) ($acc['from_name'] ?? app()->settings->get('sys.mail_from_name', 'Website'))))
             ->subject($subject)
             ->text($text);
         if (isset($o['html']) && $o['html'] !== '') {
@@ -182,7 +154,12 @@ final class Mailer
         foreach ($to as $addr) {
             $email->addTo($addr);
         }
-        if (!empty($o['reply_to']) && filter_var((string) $o['reply_to'], FILTER_VALIDATE_EMAIL)) $email->replyTo((string) $o['reply_to']);
+        $reply = (string) ($o['reply_to'] ?? '') ?: (string) ($acc['reply_to'] ?? '');   // eigene Antwortadresse, sonst die des Kontos
+        if ($reply !== '' && filter_var($reply, FILTER_VALIDATE_EMAIL)) $email->replyTo($reply);
+        // Zusätzliche Kopfzeilen (z. B. List-Unsubscribe für Newsletter-Erweiterungen) – nur einfache Textwerte, keine Adressfelder
+        foreach ((array) ($o['headers'] ?? []) as $hn => $hv) {
+            if (is_string($hn) && preg_match('~^(List-[A-Za-z-]+|X-[A-Za-z0-9-]+|Precedence)$~', $hn) && is_scalar($hv)) $email->getHeaders()->addTextHeader($hn, (string) $hv);
+        }
         if (!empty($o['message_id'])) $email->getHeaders()->addIdHeader('Message-ID', (string) $o['message_id']);
         if (!empty($o['smime'])) return self::encrypt($email, (string) $o['smime']);
         return $email;

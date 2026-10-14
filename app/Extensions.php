@@ -624,6 +624,27 @@ final class Extensions
         return false;
     }
 
+    /** E-Mail-Zwecke der Erweiterungen (Extension::mailPurpose): Schlüssel → {label, help, owner} */
+    public static function mailPurposes(): array
+    {
+        $out = [];
+        foreach (self::$active as $x) foreach ($x->mailPurposes as $k => $p) $out[$k] = $p + ['owner' => $x->name];
+        return $out;
+    }
+
+    /** Versandweg einer Erweiterung (Extension::mailTransport) bzw. null; ohne Schema: alle (schema → {label, factory, owner}) */
+    public static function mailTransport(string $scheme): ?array
+    {
+        return self::mailTransports()[$scheme] ?? null;
+    }
+
+    public static function mailTransports(): array
+    {
+        $out = [];
+        foreach (self::$active as $x) foreach ($x->mailTransports as $k => $t) $out[$k] ??= $t + ['owner' => $x->name];
+        return $out;
+    }
+
     /**
      * Hört eine aktive Erweiterung auf das Ereignis? – teure Angaben (z. B. Eintrag neu laden) nur dann berechnen.
      * $event: Name ('page.saved') oder Klasse (PageSaved::class) – beide Schreibweisen zählen.
