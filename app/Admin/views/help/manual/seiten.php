@@ -40,6 +40,7 @@
     <li><b>↑ ↓ ← →</b> (beim Überfahren bzw. mit der Tastatur): sortieren, eine Ebene höher, unter die Seite darüber.</li>
     <li><b>Punkt</b>: Online (grün), Offline (hohl), Entwurf (orange) – ein Klick schaltet um; <b>≡</b>: im Menü zeigen; <b>+</b>: Unterseite anlegen (als Entwurf); <b>×</b>: löschen (Unterseiten rücken eine Ebene nach oben).</li>
     <li>Seiten, die eine Datentabelle zeigen, haben darunter z. B. <b>18 Einträge · Mitglieder ▸</b> – aufklappen zeigt die neuesten Einträge.</li>
+    <li><b>▾ / ▸</b> klappt die Unterseiten einer Seite zu und auf, <b>Alle zuklappen</b> oben für den ganzen Baum – der Browser merkt es sich. Die Seitenleiste lässt sich am linken Rand <b>breiter ziehen</b> (auch mit ←/→ auf dem Griff).</li>
   </ul>
   <p>Es gelten dieselben Regeln wie in der Seitenliste: neue Adressen leiten automatisch weiter, die Startseite ist immer online. Menü und Navigation der Seite zeigen die Änderungen nach dem Schließen der Seitenleiste (die Seite lädt neu; im Bearbeiten-Modus erst beim nächsten Laden).</p>
 

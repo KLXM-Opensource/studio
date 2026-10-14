@@ -23,7 +23,7 @@ final class PagesTool
             'id' => self::ID, 'label' => __('Seiten'), 'icon' => 'tree-structure', 'module' => asset('js/pages-panel.mjs'),
             'placement' => 'main', 'shortcut' => 'Alt+P', 'hint' => __('Seitenstruktur: sortieren, verschieben, anlegen'),
             'view' => true, 'perm' => 'pages.manage',
-            'panel' => ['title' => __('Seiten'), 'size' => 'drawer'],
+            'panel' => ['title' => __('Seiten'), 'size' => 'drawer', 'width' => 560],
             'endpoints' => ['tree' => '/admin/api/pages/tree', 'create' => '/admin/api/pages/create', 'base' => '/admin/pages'],
             'data' => fn(array $bar) => [
                 'current' => !empty($bar['page']['id']) && ($bar['page']['type'] ?? 'page') === 'page' ? (int) $bar['page']['id'] : null,
@@ -46,7 +46,9 @@ final class PagesTool
                 'offTitle' => __('Seite offline nehmen?'), 'offBody' => __('Besucher sehen sie dann nicht mehr; sie verschwindet aus Menü, Sitemap und Suche. Die veröffentlichte Fassung bleibt erhalten.'),
                 'offOk' => __('Offline nehmen'), 'entries' => __('{n} Einträge'), 'entriesAll' => __('Alle in der Verwaltung'),
                 'reloadHint' => __('Menü und Navigation der Seite zeigen Änderungen nach dem Neuladen.'),
-                'manage' => __('Seitenliste in der Verwaltung'), 'draftBadge' => __('Entwurf'), 'noindex' => __('Nicht in Suchmaschinen'), 'none' => __('Keine Seite gefunden.'),
+                'manage' => __('Seitenliste in der Verwaltung'), 'draftBadge' => __('Entwurf'),
+                'foldIt' => __('Unterseiten von „{title}“ zuklappen'), 'unfold' => __('Unterseiten von „{title}“ aufklappen'),
+                'foldAll' => __('Alle zuklappen'), 'unfoldAll' => __('Alle aufklappen'), 'noindex' => __('Nicht in Suchmaschinen'), 'none' => __('Keine Seite gefunden.'),
             ],
         ];
     }

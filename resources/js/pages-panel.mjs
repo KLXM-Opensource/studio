@@ -12,6 +12,12 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const ico = n => window.CMSAdmin?.ico?.(n) || '';
 
 let S = { pages: [], open: new Set(), add: null, changed: false, moved: null, q: '' };
+// Zugeklappte Seiten (mit Unterseiten) – im Browser gemerkt
+const FOLD_KEY = 'cms-pp-fold';
+const fold = new Set((() => { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '[]'); } catch { return []; } })());
+const saveFold = () => { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...fold])); } catch {} };
+/** Liegt die Seite unter einer zugeklappten Seite? */
+const hiddenByFold = p => { for (let x = S.pages.find(y => y.id === p.parent); x; x = S.pages.find(y => y.id === x.parent)) if (fold.has(x.id)) return true; return false; };
 
 // Einrückung per Klasse (CSP der Website: keine style-Attribute)
 const dc = n => 'pp-d' + Math.min(Math.max(n, 0), 6);
@@ -28,14 +34,15 @@ function row(ctx, p, i) {
   const T = ctx.t, t = { title: p.title };
   const sib = sibs(S.pages, p), si = sib.indexOf(p), D = ctx.tool.data;
   const cur = p.id === D.current;
-  const btn = (act, icon, label, on = true, extra = '') => on
-    ? `<button type="button" class="pp-b" data-pp="${act}" aria-label="${esc(label)}" title="${esc(label)}"${extra}>${icon}</button>`
-    : '<span class="pp-b pp-b--off" aria-hidden="true"></span>';
+  // Nicht möglich (z. B. ↑ bei der ersten Seite): deaktivierter Knopf statt Lücke – gleiche Positionen in jeder Zeile
+  const btn = (act, icon, label, on = true, extra = '') => `<button type="button" class="pp-b" data-pp="${act}" aria-label="${esc(label)}" title="${esc(label)}"${extra}${on ? '' : ' disabled'}>${icon}</button>`;
+  const hasKids = S.pages.some(x => x.parent === p.id), folded = fold.has(p.id);
   const stateLbl = p.home ? T('homeOnline') : T(p.state === 'online' ? 'online' : p.state === 'offline' ? 'offline' : 'draft', t);
   const hints = (p.noindex ? `<span class="pp-hint" title="${esc(T('noindex'))}">${ico('magnifying-glass')}</span>` : '')
     + (p.plan ? `<span class="pp-hint pp-hint--plan" title="${esc(p.plan)}">${ico('clock')}</span>` : '');
   let h = `<li class="pp-row ${dc(p.depth)}${cur ? ' is-current' : ''}${p.home ? ' is-home' : ''}" data-id="${p.id}"${p.home ? '' : ' draggable="true"'}>`
     + `<span class="pp-grip" aria-hidden="true">${p.home ? '' : '⠿'}</span>`
+    + (hasKids && !S.q ? `<button type="button" class="pp-fold" data-pp="fold" aria-expanded="${!folded}" aria-label="${esc(T(folded ? 'unfold' : 'foldIt', t))}" title="${esc(T(folded ? 'unfold' : 'foldIt', t))}">${folded ? '▸' : '▾'}</button>` : '<span class="pp-fold" aria-hidden="true"></span>')
     + `<span class="pp-name"><a class="pp-title" href="${esc(p.url)}"${cur ? ' aria-current="page"' : ''}>${p.home ? ico('house') + ' ' : ''}${esc(p.title)}</a>${hints}</span>`
     // Mitte: Art (Startseite/Menü/Seite); beim Überfahren bzw. mit Fokus in der Zeile stattdessen ↑ ↓ ← →
     + `<span class="pp-mid"><span class="pp-kind">${esc(p.home ? T('home') : p.menu ? T('inMenu') : T('page'))}</span>`
@@ -44,8 +51,8 @@ function row(ctx, p, i) {
       + btn('left', '←', T('left', t), p.parent !== null) + btn('right', '→', T('right', t), si > 0 && !sib[si - 1].home)
       + `</span></span>`)
     + `<button type="button" class="pp-dot pp-dot--${esc(p.home ? 'online' : p.state)}" data-pp="status" aria-label="${esc(stateLbl)}" title="${esc(stateLbl)}"${p.home ? ' disabled' : ''}></button>`
-    + (p.home ? '<span class="pp-b pp-b--off" aria-hidden="true"></span>' : btn('menu', '≡', T(p.menu ? 'menuOn' : 'menuOff', t), true, ` aria-pressed="${p.menu}"`))
-    + btn('add', '+', T('add', t)) + (p.home ? '<span class="pp-b pp-b--off" aria-hidden="true"></span>' : btn('del', '×', T('del', t)))
+    + btn('menu', '≡', T(p.menu ? 'menuOn' : 'menuOff', t), !p.home, ` aria-pressed="${p.menu}"`)
+    + btn('add', '+', T('add', t)) + btn('del', '×', T('del', t), !p.home)
     + '</li>';
   for (const e of p.entries || []) {
     const k = p.id + ':' + e.admin, open = S.open.has(k);
@@ -69,10 +76,10 @@ function addForm(ctx, depth) {
 function render(ctx) {
   const P = ctx.panel.body, T = ctx.t;
   const q = S.q.trim().toLowerCase();
-  const list = q ? S.pages.filter(p => p.title.toLowerCase().includes(q) || p.path.includes(q)) : S.pages;
+  const list = q ? S.pages.filter(p => p.title.toLowerCase().includes(q) || p.path.includes(q)) : S.pages.filter(p => !hiddenByFold(p));
   P.innerHTML = `<div class="pp">
     <p class="pp-help">${esc(T('help'))}</p>
-    <p class="pp-bar"><input type="search" class="pp-q" data-pp-q value="${esc(S.q)}" placeholder="${esc(T('filter'))}" aria-label="${esc(T('filter'))}">
+    <p class="pp-bar"><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-pp="foldall">${esc(T(fold.size ? 'unfoldAll' : 'foldAll'))}</button><input type="search" class="pp-q" data-pp-q value="${esc(S.q)}" placeholder="${esc(T('filter'))}" aria-label="${esc(T('filter'))}">
       <button type="button" class="adm-btn adm-btn--small" data-pp="addtop">${ico('plus')} ${esc(T('addTop'))}</button></p>
     <ul class="pp-list" role="list">${list.length ? list.map((p, i) => row(ctx, p, i)).join('') : `<li class="pp-none">${esc(T('none'))}</li>`}${S.add === 0 ? addForm(ctx, 0) : ''}</ul>
     <p class="pp-foot">${S.changed ? `<span class="pp-note" role="status">${esc(T('reloadHint'))}</span>` : ''}<a href="${esc(ctx.tool.data.admin)}">${esc(T('manage'))} ↗</a></p></div>`;
@@ -121,6 +128,15 @@ async function act(ctx, act, p, focusSel) {
       S.changed = true;
       if (p.id === ctx.tool.data.current) S.moved = '/';
       ctx.toast(T('deleted', t));
+    } else if (act === 'foldall') {
+      if (fold.size) fold.clear(); else S.pages.forEach(x => { if (S.pages.some(y => y.parent === x.id)) fold.add(x.id); });
+      saveFold(); render(ctx); ctx.panel.body.querySelector('[data-pp="foldall"]')?.focus();
+      return;
+    } else if (act === 'fold') {
+      fold.has(p.id) ? fold.delete(p.id) : fold.add(p.id);
+      saveFold(); render(ctx);
+      ctx.panel.body.querySelector(focusSel)?.focus();
+      return;
     } else if (act === 'add' || act === 'addtop') {
       S.add = act === 'addtop' ? 0 : p.id;
       render(ctx);

@@ -7358,4 +7358,7 @@ return [
     '„{title}“ gelöscht.' => '“{title}” deleted.',
     '„{title}“ löschen' => 'Delete “{title}”',
     '„{title}“ löschen?' => 'Delete “{title}”?',
+    'Breite ändern (ziehen oder ←/→)' => 'Change width (drag or ←/→)',
+    'Unterseiten von „{title}“ aufklappen' => 'Expand subpages of “{title}”',
+    'Unterseiten von „{title}“ zuklappen' => 'Collapse subpages of “{title}”',
 ];

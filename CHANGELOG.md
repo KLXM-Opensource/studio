@@ -10,6 +10,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Ein falsches schließendes Tag in der Option „Erlaubte Blöcke“ zerlegte die Feldliste (alle Optionen sichtbar, Spalten verrutscht). Neuer Selbsttest prüft die Feldvorlage für jeden Feldtyp.
 
 ### Seitenstruktur auf der Website: Werkzeug „Seiten“
+- Seitenleiste breiter ziehbar (Griff am linken Rand, ←/→; Startbreite je Werkzeug `panel.width`, im Browser gemerkt), Unterseiten zu-/aufklappen, nicht mögliche Aktionen ausgegraut statt leer.
 - Knopf **Seiten** in der Werkzeugleiste (⌥P, `Core\PagesTool`, `js/pages-panel.mjs`): Seitenbaum als Seitenleiste neben der Website –
   ziehen (davor/danach/als Unterseite) oder ↑ ↓ ← →, Online/Offline, Menü, Unterseite anlegen, löschen; aktuelle Seite markiert,
   Hinweise (noindex, Zeitplan), bei Seiten mit Datentabelle „N Einträge ▸“ mit den neuesten Einträgen. Gleiche Endpunkte und Regeln

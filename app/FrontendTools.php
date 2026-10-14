@@ -79,7 +79,9 @@ final class FrontendTools
             'visible' => is_callable($def['visible'] ?? null) ? $def['visible'] : null,
             'modes' => $modes,
             'chip' => in_array('view', $modes, true) ? trim((string) ($def['chip'] ?? '')) : '',
-            'panel' => ['title' => trim((string) ($def['panel']['title'] ?? $label)), 'size' => in_array($def['panel']['size'] ?? '', ['wide', 'modal', 'drawer'], true) ? $def['panel']['size'] : 'narrow'],
+            // width (nur drawer): Startbreite in px – die Redaktion zieht sie am linken Rand breiter/schmaler (im Browser gemerkt)
+            'panel' => ['title' => trim((string) ($def['panel']['title'] ?? $label)), 'size' => in_array($def['panel']['size'] ?? '', ['wide', 'modal', 'drawer'], true) ? $def['panel']['size'] : 'narrow']
+                + (isset($def['panel']['width']) ? ['width' => max(320, min(900, (int) $def['panel']['width']))] : []),
             'endpoints' => $endpoints,
             'data' => $def['data'] ?? [],
             'texts' => array_map('strval', (array) ($def['texts'] ?? [])),
@@ -217,7 +219,7 @@ final class FrontendTools
             'page' => !empty($page['id']) ? ['id' => (int) $page['id'], 'title' => (string) ($page['title'] ?? ''), 'lang' => Lang::norm($page['lang'] ?? null)] : null,
             'entry' => isset($bar['entry'], $bar['table']) ? ['table' => (string) $bar['table']['handle'], 'id' => (int) $bar['entry']['id']] : null,
             'lang' => Lang::current(), 'csrf' => Csrf::token(),
-            'texts' => ['close' => __('Schließen'), 'noText' => __('Bitte zuerst in einen Text klicken – dort wird eingefügt.'),
+            'texts' => ['close' => __('Schließen'), 'resize' => __('Breite ändern (ziehen oder ←/→)'), 'noText' => __('Bitte zuerst in einen Text klicken – dort wird eingefügt.'),
                 'noLinks' => __('Dieses Feld kennt keine Links – eingefügt wird nur der Text.'), 'error' => __('Das hat nicht geklappt.'),
                 'loading' => __('Wird geladen …'), 'backToText' => __('Zurück zum Text'),
                 'viewOnly' => __('Beim Ansehen nicht möglich – zum Einfügen in den Bearbeiten-Modus wechseln.')],

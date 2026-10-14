@@ -154,6 +154,43 @@ function announce(msg) {
 }
 
 // ------------------------------------------------------------------ Seitenleiste in der Ebene
+/**
+ * Seitenleiste in voller Höhe: Griff am linken Rand zieht sie breiter/schmaler (auch ←/→ mit Fokus auf dem Griff). Die Breite gilt
+ * über --cms-tdrawer-w für Leiste und Website (editor.css has-tdrawer) und wird je Werkzeug im Browser gemerkt.
+ */
+const DRAWER_KEY = id => 'cms-drawer-w-' + id;
+function drawerWidth(def, w) {
+  const max = Math.max(320, Math.min(960, innerWidth - 360));
+  const v = Math.round(Math.max(320, Math.min(max, w)));
+  d.documentElement.style.setProperty('--cms-tdrawer-w', v + 'px');
+  return v;
+}
+function drawerResize(el, def) {
+  const h = d.createElement('div');
+  h.className = 'cms-tpanel__resize'; h.tabIndex = 0;
+  h.setAttribute('role', 'separator'); h.setAttribute('aria-orientation', 'vertical');
+  h.setAttribute('aria-label', cfg.texts.resize || 'Breite ändern');
+  el.append(h);
+  const save = v => { try { localStorage.setItem(DRAWER_KEY(def.id), String(v)); } catch {} };
+  h.addEventListener('pointerdown', e => {
+    e.preventDefault(); h.setPointerCapture(e.pointerId); el.classList.add('is-resizing');
+    const move = ev => drawerWidth(def, innerWidth - ev.clientX);
+    const up = () => { h.removeEventListener('pointermove', move); el.classList.remove('is-resizing'); save(el.offsetWidth); responsiveEditing(); };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up, { once: true });
+  });
+  h.addEventListener('keydown', e => {
+    const k = { ArrowLeft: 24, ArrowRight: -24 }[e.key]; if (!k) return;
+    e.preventDefault(); save(drawerWidth(def, el.offsetWidth + k)); responsiveEditing();
+  });
+}
+function drawerOpen(def) {
+  let w = 0;
+  try { w = +localStorage.getItem(DRAWER_KEY(def.id)) || 0; } catch {}
+  if (w || def.panel?.width) drawerWidth(def, w || def.panel.width);
+  else d.documentElement.style.removeProperty('--cms-tdrawer-w');
+}
+
 function panelFor(def) {
   const box = layerBox();
   const el = d.createElement('section');
@@ -170,6 +207,7 @@ function panelFor(def) {
       <button type="button" class="cms-tpanel__x" data-tpanel-close aria-label="${esc(cfg.texts.close)}" title="${esc(cfg.texts.close)} (Esc)">${ico('x')}</button></header>
     <div class="cms-tpanel__body"></div>`;
   box.append(el);
+  if (def.panel?.size === 'drawer') drawerResize(el, def);
   if (modal) {
     // Modal: abgedunkelter Hintergrund folgt der Sichtbarkeit des Dialogs; Klick daneben schließt, Tab bleibt im Dialog
     const bd = d.createElement('div');
@@ -259,7 +297,7 @@ export async function open(id) {
   d.documentElement.classList.add('cms-has-tpanel');
   // Seitenleiste in voller Höhe (panel size 'drawer'): Website wird schmaler (editor.css body.has-tdrawer) und ihre
   // Haltepunkte folgen der neuen Breite (_cq.js – wie im Seiten-Editor, auch beim Ansehen)
-  if (def.panel?.size === 'drawer') { d.body.classList.add('has-tdrawer'); responsiveEditing(); }
+  if (def.panel?.size === 'drawer') { drawerOpen(def); d.body.classList.add('has-tdrawer'); responsiveEditing(); }
   buttons(id).forEach(b => b.setAttribute('aria-expanded', 'true'));
   if (!st.mounted) {
     st.panel.body.innerHTML = `<p class="cms-tpanel__wait" role="status">${esc(cfg.texts.loading)}</p>`;
