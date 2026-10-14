@@ -106,7 +106,7 @@ httpdocs/
 | [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) | Mitgelieferte Drittsoftware und Lizenzen |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) | Mitwirken · Sicherheitslücken vertraulich melden |
 
-## REST-API & MCP in Kürze
+## REST-API & MCP auf einen Blick
 
 Tokens: Verwaltung → **API & MCP** (Stufe `read`/`write`, Ablaufdatum, Modus „Direkt übernehmen“ oder „Zur Freigabe“);
 gespeichert wird nur ein SHA-256-Hash. Header `Authorization: Bearer cms_…` (Rückfall `X-Api-Key`). 300 Anfragen je 5 Minuten und Token.
