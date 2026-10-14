@@ -101,6 +101,9 @@ final class SiteController
     /** Blocktypen der Seite für conditional_css (Stylesheets und Skripte): „typ“ und „typ:variante“ */
     private static function types(array $blocks): array
     {
+        // Wie ausgegeben: Erweiterungen lösen Blöcke auf (Extension::blocksResolve, z. B. gemeinsame Bausteine → Typ des Originals),
+        // sonst fehlte das bedingte CSS/JS des tatsächlich gerenderten Blocktyps
+        $blocks = \Core\Extensions::resolveBlocks($blocks, ['page' => app()->currentPage, 'draft' => false, 'purpose' => 'render']);
         $blocks = \Core\Layout::flatten($blocks);   // auch Blöcke in Spalten (Stylesheets/Skripte je Typ)
         return array_merge(array_column($blocks, 'type'), array_map(fn($b) => $b['type'] . ':' . ($b['data']['variant'] ?? ''), $blocks));
     }
