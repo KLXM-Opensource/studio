@@ -55,6 +55,7 @@
     <li>Im Formular wählen Sie verknüpfte Einträge aus – oder legen mit <b>+ … neu</b> direkt einen neuen an (z. B. ein neues Schlagwort), ohne die Seite zu verlassen.</li>
     <li>Rechts im Formular zeigt <b>Verknüpft mit</b>, wo ein Eintrag verwendet wird (z. B. alle Beiträge einer Person).</li>
     <li>Wird ein Eintrag gelöscht, verschwinden die Verknüpfungen automatisch – es bleiben keine toten Verweise.</li>
+    <li><b>Auch im öffentlichen Formular:</b> Besucher wählen aus zentral gepflegten Einträgen – z. B. Ort, Kategorie oder Thema. „Ein Eintrag“ erscheint als Auswahlliste, „mehrere“ als Ankreuzfelder; angeboten werden nur <b>veröffentlichte</b> Einträge der verknüpften Tabelle. Neue Orte oder Themen legen Sie einfach in dieser Tabelle an – sie stehen sofort im Formular. (Nicht in verschlüsselten Eingängen.)</li>
     <li>In der <b>Datenliste</b> filtern Sie nach Verknüpfungen: „Kategorie ist gleich Neuigkeiten“ – oder auf Detailseiten mit <b>verknüpft mit dem aufgerufenen Eintrag</b> (Beiträge dieser Person / dieser Kategorie) bzw. <b>gleich wie beim aufgerufenen Eintrag</b> plus „Aufgerufenen Eintrag ausblenden“ (= „Weitere Beiträge aus dieser Kategorie“).</li>
   </ul>
 

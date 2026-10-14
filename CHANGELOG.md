@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: Auswahl aus zentral gepflegten Tabellen
+- Verknüpfungsfelder (ein Eintrag / mehrere) lassen sich ins öffentliche Formular einer Datentabelle aufnehmen: Besucher wählen aus den veröffentlichten Einträgen der verknüpften Tabelle (z. B. Orte, Kategorien, Themen) – als Auswahlliste bzw. Ankreuzfelder, gespeichert als echte Verknüpfung (`DataForms::REL_TYPES`, `relationOptions()`). Nicht in verschlüsselten Eingängen.
+- Tabellen-Designer: „+ Feld am Anfang“ verdeckt das erste Feld nicht mehr.
+
 ### Downloads-Block: Dateien leichter wählen
 - In allen Kits: „Dateien auswählen …“ übernimmt mehrere Dateien (PDFs usw.) aus der Mediathek auf einmal; Sammlung bzw. Dateiliste erscheinen nur passend zur „Quelle“; „Medien öffnen …“ bei der Sammlung zeigt alle Dateien statt nur Bilder (`Theme::downloadFields`, Sammlungsfeld `'kind' => 'file'`).
 

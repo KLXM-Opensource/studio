@@ -32,6 +32,8 @@ final class DataForms
     /** Feldtypen, die Besucher ausfüllen können (Verknüpfungen, Rich-Text, Karte, Links und Wiederholungen bleiben der Redaktion vorbehalten) */
     public const TYPES = ['text', 'textarea', 'number', 'bool', 'date', 'datetime', 'time', 'select', 'multiselect', 'email', 'tel', 'url', 'color', 'iban', 'group'];
     public const UPLOAD_TYPES = ['media', 'file'];
+    /** Verknüpfungen (nur Datentabellen, nicht im Eingang): Besucher wählen aus den veröffentlichten Einträgen der Zieltabelle */
+    public const REL_TYPES = ['relation', 'relations'];
     public const PRIVACY = '_privacy';
     /**
      * Dateitypen der Dateifelder (Feld-Einstellung accept): MIME-Typen (erkannt am Inhalt mit finfo) und Dateiendungen.
@@ -96,8 +98,33 @@ final class DataForms
     /** Darf der Feldtyp ins öffentliche Formular? Abschnitte und Freitext (Tables::LAYOUT) immer */
     public static function eligible(array $f, bool $uploads): bool
     {
-        return in_array($f['type'], self::TYPES, true) || in_array($f['type'], Tables::LAYOUT, true)
+        return in_array($f['type'], self::TYPES, true) || in_array($f['type'], Tables::LAYOUT, true) || in_array($f['type'], self::REL_TYPES, true)
             || ($uploads && in_array($f['type'], self::UPLOAD_TYPES, true));
+    }
+
+    /**
+     * Auswahl für ein Verknüpfungsfeld im Formular: veröffentlichte Einträge der Zieltabelle (aktuelle Sprache), alphabetisch – id => Titel.
+     * Zentral gepflegte Kategorien, Orte, Termine … erscheinen so als Auswahlliste bzw. Ankreuzfelder.
+     */
+    public static function relationOptions(array $f): array
+    {
+        static $cache = [];
+        $h = (string) ($f['target'] ?? '');
+        if (isset($cache[$h])) return $cache[$h];
+        $target = $h !== '' ? Tables::findContent($h) : null;
+        $out = [];
+        if ($target) {
+            foreach (Entries::query($target, ['limit' => 500]) as $e) $out[(string) $e['id']] = Entries::title($target, $e);
+            uasort($out, fn($a, $b) => strnatcasecmp($a, $b));
+        }
+        return $cache[$h] = $out;
+    }
+
+    /** Verknüpfungsfeld als Auswahl (ein Eintrag) bzw. Mehrfachauswahl (mehrere) mit den Einträgen der Zieltabelle */
+    private static function asChoice(array $f): array
+    {
+        if (!in_array($f['type'] ?? '', self::REL_TYPES, true)) return $f;
+        return ['type' => $f['type'] === 'relation' ? 'select' : 'multiselect', 'options' => self::relationOptions($f), 'options_i18n' => []] + $f;
     }
 
     /** Datenfelder des Formulars (Reihenfolge wie in der Tabelle): gewählte + alle Pflichtfelder; nichts gewählt = alle geeigneten */
@@ -388,6 +415,7 @@ final class DataForms
 
     private static function field(array $f, string $uid, mixed $v, ?string $err, array $s, bool $inbox = false, bool $locked = false): string
     {
+        $f = self::asChoice($f);   // Verknüpfung → Auswahl aus der Zieltabelle
         $n = $f['name'];
         $id = $uid . '-' . $n;
         $type = $f['type'];
@@ -565,6 +593,7 @@ final class DataForms
                 $n = (string) ($f['name'] ?? '');
                 if ($n === '' || !array_key_exists($n, $values) || in_array($f['type'] ?? '', ['file', 'media', 'group'], true)) continue;
                 $v = $values[$n];
+                $f = self::asChoice($f);
                 $v = match ($f['type'] ?? '') {
                     'bool' => $v ? lt('Ja') : lt('Nein'),
                     'select' => Tables::optionLabel($f, (string) $v),
@@ -619,7 +648,8 @@ final class DataForms
         }
         $schema = [];
         foreach ($fields as $f) {
-            $def = ['name' => $f['name'], 'label' => Tables::label($f), 'type' => $f['type'], 'required' => $f['required'], 'options' => $f['options'] ?? []];
+            $c = self::asChoice($f);   // Verknüpfung: nur veröffentlichte Einträge der Zieltabelle zulässig
+            $def = ['name' => $f['name'], 'label' => Tables::label($f), 'type' => $c['type'], 'required' => $f['required'], 'options' => $c['options'] ?? []];
             if (in_array($f['type'], ['text', 'email', 'tel', 'url'], true)) $def['max'] = 255;
             if ($f['type'] === 'textarea') $def['max'] = 5000;
             if ($f['type'] === 'group') $def = Entries::groupSchema($f, true) + $def;

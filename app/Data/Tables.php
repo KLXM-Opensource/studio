@@ -84,7 +84,7 @@ final class Tables
      */
     public static function typeGroups(array $types): array
     {
-        $form = array_merge(DataForms::TYPES, DataForms::UPLOAD_TYPES);
+        $form = array_merge(DataForms::TYPES, DataForms::UPLOAD_TYPES, DataForms::REL_TYPES);
         $groups = [
             ['key' => 'form', 'label' => __('Für Formulare und Ausgabe'), 'help' => __('Besucher können diese Felder auch in einem öffentlichen Formular ausfüllen.'), 'types' => []],
             ['key' => 'output', 'label' => __('Nur Inhalte der Redaktion'), 'help' => __('Für die Ausgabe auf der Website (z. B. Beiträge, News, Infos) – in öffentlichen Formularen nicht ausfüllbar.'), 'types' => []],

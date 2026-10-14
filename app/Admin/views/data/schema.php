@@ -159,7 +159,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     <?php
     // Felder, die im öffentlichen Formular nicht erscheinen (nur Redaktion) – Hinweis am Feld, wenn die Tabelle ein Formular hat
     $formOn = !$isNew && \Core\Data\DataForms::enabled($table, false);
-    $noForm = $formOn ? array_values(array_diff(array_keys(Tables::TYPES), \Core\Data\DataForms::TYPES, \Core\Data\DataForms::UPLOAD_TYPES, Tables::LAYOUT)) : [];
+    $noForm = $formOn ? array_values(array_diff(array_keys(Tables::TYPES), \Core\Data\DataForms::TYPES, \Core\Data\DataForms::UPLOAD_TYPES, \Core\Data\DataForms::REL_TYPES, Tables::LAYOUT)) : [];
     ?>
     <?php if (!empty($askDrop)): // Rückfrage direkt oben (nicht erst unter der Feldliste): bestätigen oder Änderungen verwerfen ?>
     <div class="adm-flash adm-flash--error dt-dropask" role="alert">
