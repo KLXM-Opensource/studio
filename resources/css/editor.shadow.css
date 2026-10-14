@@ -198,7 +198,14 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
   #cms-more-menu .cms-menu__col--page+.cms-menu__col--site{margin-top:0;padding-top:0;border-top:0;padding-left:6px;border-left:1px solid var(--m-line)}
 }
 .cms-menu--narrow,.cms-menu--phone{display:none}
-@media (prefers-reduced-motion:no-preference){.cms-menu:not([hidden]),.cms-pop:not([hidden]){animation:cms-in .14s ease-out}@keyframes cms-in{from{opacity:0;transform:translateY(-4px)}}}
+@media (prefers-reduced-motion:no-preference){
+  .cms-pop:not([hidden]){animation:cms-in .14s ease-out}
+  @keyframes cms-in{from{opacity:0;transform:translateY(-4px)}}
+  /* Menüs gleiten aus dem Knopf: von oben nach unten aufgedeckt, leicht nachrückend (rechtsbündige Menüs ab der rechten Ecke) */
+  .cms-menu:not([hidden]){transform-origin:top left;animation:cms-menu-in .22s cubic-bezier(.2,.8,.2,1)}
+  .cms-menu--end:not([hidden]){transform-origin:top right}
+  @keyframes cms-menu-in{from{opacity:0;clip-path:inset(0 0 100% 0 round 12px);transform:translateY(-6px) scale(.98)}60%{opacity:1}to{opacity:1;clip-path:inset(0 0 0 0 round 12px);transform:none}}
+}
 
 /* < 1024 px: Modus ins Menü „⋯“, Status als Punkt */
 @media (max-width:1023px){
