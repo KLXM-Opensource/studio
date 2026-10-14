@@ -170,7 +170,7 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     <?php endif; ?>
     <div class="dt-fieldsbox">
       <?php // Kompaktansicht: je Feld eine Zeile, Einstellungen erst beim Bearbeiten (admin.js, gemerkt im Browser) ?>
-      <p class="dt-fieldsbar"><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-fields-compact aria-pressed="false"><?= icon('list') ?> <span><?= e(__('Kompaktansicht')) ?></span></button></p>
+      <p class="dt-fieldsbar"><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-add-after data-add-first aria-haspopup="menu" aria-expanded="false"><?= icon('plus') ?> <span><?= e(__('Feld am Anfang')) ?></span></button> <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-fields-compact aria-pressed="false"><?= icon('list') ?> <span><?= e(__('Kompaktansicht')) ?></span></button></p>
       <ol class="dt-fields" data-fields>
         <?php foreach ($defAll as $i => $f): ?>
         <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_field.php', ['i' => $i, 'f' => $f, 'tables' => $allTables, 'err' => $errors["fields.$i"] ?? null, 'all' => $ruleFields, 'types' => $types, 'inbox' => $inbox, 'noForm' => $noForm ?? []]) ?>

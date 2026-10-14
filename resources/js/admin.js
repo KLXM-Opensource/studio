@@ -699,9 +699,9 @@ if (schema) {
     const groups = $$('.dt-addfield [data-add-group]', schema);
     const btns = box => $$('[data-add-field]', box).map(b => b.outerHTML.replace('class="dt-typebtn"', 'class="dt-typebtn" role="menuitem"')).join('');
     m.innerHTML = groups.length ? groups.map(g => `<p class="dt-addmenu__h" role="presentation">${esc(g.dataset.addGroup)}</p>${btns(g)}`).join('') : btns($('.dt-addfield', schema));
-    m._after = li; m._btn = btn;
+    m._after = li; m._btn = btn; m._first = btn.hasAttribute('data-add-first');   // „+ Feld am Anfang“ (über dem ersten Feld)
     btn.setAttribute('aria-expanded', 'true');
-    btn.closest('.dt-field__tools').append(m);
+    (btn.closest('.dt-field__tools') || btn.parentElement).append(m);
     addMenuEl = m;
     m.querySelector('button')?.focus();
     m.addEventListener('keydown', ev => {
@@ -727,10 +727,10 @@ if (schema) {
     const add = e.target.closest('[data-add-field]');
     if (add) {
       const html = tpl.innerHTML.replaceAll('__i__', String($$('[data-field]', list).length));
-      const after = add.closest('.dt-addmenu')?._after;
+      const after = add.closest('.dt-addmenu')?._after, first = add.closest('.dt-addmenu')?._first;
       closeAddMenu();
-      if (after) after.insertAdjacentHTML('afterend', html); else list.insertAdjacentHTML('beforeend', html);
-      const li = after ? after.nextElementSibling : list.lastElementChild;
+      if (first) list.insertAdjacentHTML('afterbegin', html); else if (after) after.insertAdjacentHTML('afterend', html); else list.insertAdjacentHTML('beforeend', html);
+      const li = first ? list.firstElementChild : after ? after.nextElementSibling : list.lastElementChild;
       $('[data-type]', li).value = add.dataset.addField; sync(li);
       if (add.dataset.addField === 'group') addSub(li);
       $('[data-label]', li).value = add.dataset.label || add.title || '';   // Bezeichnung des Typs (nicht aus dem Knopftext – davor steht ein Symbol)
