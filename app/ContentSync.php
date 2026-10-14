@@ -24,7 +24,7 @@ namespace Core;
 final class ContentSync
 {
     /** Seitenfelder, die neben den Blöcken mitgehen */
-    private const FIELDS = ['title', 'meta_title', 'meta_description', 'nav_title', 'noindex', 'menu'];
+    private const FIELDS = ['title', 'meta_title', 'meta_description', 'nav_title', 'noindex', 'menu', 'search_exclude'];
 
     public static function console(string $cmd, array $args): int
     {

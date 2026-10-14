@@ -59,6 +59,7 @@ final class PageSettingsTool
                 'planUntilHelp' => __('Danach ist die Seite nicht mehr aufrufbar und erscheint nicht mehr in Menü, Suche und Sitemap. Leer = unbegrenzt.'),
                 'menu' => __('Im Hauptmenü zeigen'), 'navTitle' => __('Beschriftung im Menü (optional)'),
                 'noindex' => __('Nicht in Suchmaschinen / Sitemap aufnehmen'),
+                'searchExclude' => __('Nicht in der Website-Suche zeigen'),
                 'ai' => __('Vorschlag für Titel und Beschreibung'), 'aiBusy' => __('Vorschlag wird erstellt …'),
                 'aiDone' => __('Vorschlag eingesetzt – bitte prüfen und speichern.'),
                 'save' => __('Speichern'), 'saving' => __('Wird gespeichert …'), 'cancel' => __('Abbrechen'),

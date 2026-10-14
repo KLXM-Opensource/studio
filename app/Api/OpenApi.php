@@ -95,7 +95,7 @@ final class OpenApi
                     'post' => $op('Seiten', 'Seite anlegen (optional mit Blöcken)', [
                         'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['title'], 'properties' => [
                             'title' => ['type' => 'string'], 'slug' => ['type' => 'string'], 'status' => ['type' => 'string', 'enum' => ['draft', 'published']],
-                            'meta_description' => ['type' => 'string'], 'noindex' => ['type' => 'boolean'],
+                            'meta_description' => ['type' => 'string'], 'noindex' => ['type' => 'boolean'], 'search_exclude' => ['type' => 'boolean'],
                             'blocks' => ['type' => 'array', 'items' => $ref('Block')]]]),
                         'responses' => ['201' => $ok($ref('Page'), 'Angelegt')] + $err]),
                 ],
@@ -107,7 +107,7 @@ final class OpenApi
                     'patch' => $op('Seiten', 'Seiteneinstellungen ändern (Titel, Slug, Status, SEO)', [
                         'requestBody' => ['required' => true] + $json(['type' => 'object', 'properties' => [
                             'title' => ['type' => 'string'], 'slug' => ['type' => 'string'], 'status' => ['type' => 'string', 'enum' => ['draft', 'published']],
-                            'meta_description' => ['type' => 'string'], 'noindex' => ['type' => 'boolean']]]),
+                            'meta_description' => ['type' => 'string'], 'noindex' => ['type' => 'boolean'], 'search_exclude' => ['type' => 'boolean']]]),
                         'responses' => ['200' => $ok($ref('PageMeta'))] + $err]),
                     'delete' => $op('Seiten', 'Seite löschen (nicht die Startseite)', ['responses' => ['200' => $ok(['type' => 'object'])] + $err]),
                 ],
@@ -327,7 +327,7 @@ final class OpenApi
                         'data' => ['type' => 'object', 'description' => 'Felder laut /block-types'], 'section' => $ref('Section')]],
                     'PageMeta' => ['type' => 'object', 'properties' => [
                         'id' => ['type' => 'integer'], 'slug' => ['type' => 'string'], 'title' => ['type' => 'string'], 'url' => ['type' => 'string'],
-                        'status' => ['type' => 'string'], 'is_home' => ['type' => 'boolean'], 'noindex' => ['type' => 'boolean'],
+                        'status' => ['type' => 'string'], 'is_home' => ['type' => 'boolean'], 'noindex' => ['type' => 'boolean'], 'search_exclude' => ['type' => 'boolean'],
                         'has_unpublished_changes' => ['type' => 'boolean'], 'updated_at' => ['type' => 'string'], 'published_at' => ['type' => ['string', 'null']],
                         'lang' => ['type' => 'string'], 'translations' => ['type' => ['object', 'null'], 'description' => 'Sprache → Seiten-ID', 'additionalProperties' => ['type' => 'integer']]]],
                     'Page' => ['allOf' => [$ref('PageMeta'), ['type' => 'object', 'properties' => [

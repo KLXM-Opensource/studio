@@ -92,6 +92,7 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
     <?php endif; ?>
     <?php if (!$nf): ?>
     <div class="f f--bool"><input type="hidden" name="noindex" value="0"><label class="f-check f-check--switch"><input type="checkbox" role="switch" name="noindex" value="1"<?= !empty($old['noindex']) ? ' checked' : '' ?>> <span>Nicht in Suchmaschinen / Sitemap aufnehmen</span></label></div>
+    <div class="f f--bool"><input type="hidden" name="search_exclude" value="0"><label class="f-check f-check--switch"><input type="checkbox" role="switch" name="search_exclude" value="1"<?= !empty($old['search_exclude']) ? ' checked' : '' ?>> <span><?= e(__('Nicht in der Website-Suche zeigen')) ?></span></label><p class="f-help"><?= e(__('Die Seite bleibt erreichbar und für Suchmaschinen sichtbar, erscheint aber nicht in der Suche und im Besucher-Chat dieser Website.')) ?></p></div>
     <?php endif; ?>
     <div class="adm-form-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= $isNew ? 'Seite anlegen' : 'Speichern' ?></button></div>
   </form>

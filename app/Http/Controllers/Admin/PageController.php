@@ -248,6 +248,7 @@ final class PageController extends AdminController
                 'meta_title' => (string) ($page['meta_title'] ?? ''), 'meta_description' => (string) ($page['meta_description'] ?? ''),
                 'og_image' => $og ? (int) $og['id'] : null, 'status' => (string) $page['status'], 'menu' => (bool) $page['menu'],
                 'nav_title' => (string) ($page['nav_title'] ?? ''), 'noindex' => (bool) $page['noindex'],
+                'search_exclude' => (bool) ($page['search_exclude'] ?? false),
                 'home' => (bool) $page['is_home'], 'notFound' => $nf, 'published' => $page['content_published'] !== null,
                 'online_from' => \Core\Schedule::input($page['online_from'] ?? null), 'online_until' => \Core\Schedule::input($page['online_until'] ?? null)],
             'og' => $og ? ['id' => (int) $og['id'], 'thumb' => str_starts_with((string) $og['mime'], 'image/') ? \Core\Media::url($og, 480) : null,
@@ -272,7 +273,7 @@ final class PageController extends AdminController
 
     /**
      * Seiteneinstellungen speichern (JSON): title, slug, meta_title, meta_description, og_image (ID | null), status, menu,
-     * nav_title, noindex – nur übergebene Felder ändern sich, der Rest bleibt (z. B. übergeordnete Seite). Gleicher Weg wie das
+     * nav_title, noindex, search_exclude – nur übergebene Felder ändern sich, der Rest bleibt (z. B. übergeordnete Seite). Gleicher Weg wie das
      * Formular der Verwaltung (saveSettings). Antwort: neue Werte, Adresse, Titel/Beschreibung/Vorschaubild für den <head>.
      */
     public function apiSettingsSave(Request $r, string $id): Response
@@ -281,7 +282,7 @@ final class PageController extends AdminController
         $p = $r->post;
         $post = ['title' => (string) $page['title'], 'slug' => (string) $page['slug'], 'meta_title' => (string) ($page['meta_title'] ?? ''),
             'meta_description' => (string) ($page['meta_description'] ?? ''), 'status' => (string) $page['status'],
-            'noindex' => $page['noindex'] ? '1' : '0', 'parent_id' => $page['parent_id'] ? (string) $page['parent_id'] : '',
+            'noindex' => $page['noindex'] ? '1' : '0', 'search_exclude' => !empty($page['search_exclude']) ? '1' : '0', 'parent_id' => $page['parent_id'] ? (string) $page['parent_id'] : '',
             'menu' => $page['menu'] ? '1' : '0', 'nav_title' => (string) ($page['nav_title'] ?? ''), 'x' => ['og_image' => (string) ($page['og_image'] ?? '')]];
         if (array_key_exists('online_from', $p) || array_key_exists('online_until', $p)) {   // Zeitplan (Core\Schedule)
             $post['online_from'] = is_scalar($p['online_from'] ?? null) ? (string) $p['online_from'] : (string) ($page['online_from'] ?? '');
@@ -290,7 +291,7 @@ final class PageController extends AdminController
         foreach (['title', 'slug', 'meta_title', 'meta_description', 'status', 'nav_title'] as $k) {
             if (array_key_exists($k, $p) && is_scalar($p[$k])) $post[$k] = (string) $p[$k];
         }
-        foreach (['menu', 'noindex'] as $k) if (array_key_exists($k, $p)) $post[$k] = !empty($p[$k]) ? '1' : '0';
+        foreach (['menu', 'noindex', 'search_exclude'] as $k) if (array_key_exists($k, $p)) $post[$k] = !empty($p[$k]) ? '1' : '0';
         if (array_key_exists('og_image', $p)) $post['x']['og_image'] = is_scalar($p['og_image']) ? (string) $p['og_image'] : '';
         $oldUrl = Pages::url($page);
         [, $errors, $warn] = $this->saveSettings(new Request('POST', $r->path, [], $post, [], $r->server), $page);
@@ -325,6 +326,7 @@ final class PageController extends AdminController
             'meta_title' => mb_substr(strip_tags($r->str('meta_title')), 0, 120) ?: null,
             'status' => $r->str('status') === 'published' ? 'published' : 'draft',
             'noindex' => $r->str('noindex') === '1' ? 1 : 0,
+            'search_exclude' => $r->str('search_exclude') === '1' ? 1 : 0,   // nicht in der Website-Suche
             'og_image' => ctype_digit($og = (string) ($r->post['x']['og_image'] ?? '')) ? (int) $og : null,
             'parent_id' => $parentId,
             'menu' => $r->str('menu') === '1' ? 1 : 0,

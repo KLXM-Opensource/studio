@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Core\Search;
 
 use Core\AI\Ai;
+use Core\Lang;
+use Core\Pages;
 use Core\Sites;
 
 /**
@@ -34,9 +36,51 @@ final class Console
             'search:index' => $opt('help') ? self::help(!$opt('no-vectors')) : self::index($opt('full'), !$opt('no-vectors'), $opt('kb')),
             'search:status' => self::status(),
             'search:query' => self::query(implode(' ', $pos), $args),
+            'search:selftest' => self::selftest(),
             'ai:test' => self::aiTest(array_values(array_filter(array_map(fn($a) => str_starts_with($a, '--cap=') ? substr($a, 6) : null, $args)))),
             default => 1,
         };
+    }
+
+    /**
+     * Selbsttest: Ausschluss aus der Website-Suche – Seite (search_exclude), Abschnitt (Tune noSearch, auch Spalten eines
+     * Layouts), noindex; in einer Transaktion, die zurückgerollt wird.
+     */
+    private static function selftest(): int
+    {
+        $fail = 0;
+        $eq = function (string $name, mixed $got, mixed $want) use (&$fail): void {
+            $ok = $got === $want;
+            if (!$ok) $fail++;
+            echo ($ok ? '  ✓ ' : '  ✗ ') . $name . ($ok ? '' : ' – erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true)) . "\n";
+        };
+        $type = null;
+        foreach (['richtext', 'text'] as $t) if (app()->theme->block($t)) { $type = $t; break; }
+        if (!$type) { echo "  – Kit ohne Textblock, übersprungen\n"; return 0; }
+        $para = fn(string $txt, array $tunes = []) => ['id' => substr(md5($txt), 0, 8), 'type' => $type, 'data' => ['text' => '<p>' . $txt . '</p>'], 'tunes' => ['section' => $tunes]];
+        $pdo = app()->db->pdo;
+        $pdo->beginTransaction();
+        try {
+            $lang = Lang::default();
+            $mk = fn(string $slug, array $blocks, array $f = []) => Pages::create($f + ['slug' => $slug, 'title' => 'Suchtest ' . $slug, 'status' => 'published', 'lang' => null, 'sort' => 9999], $blocks);
+            $a = $mk('suchtest-a', [$para('Sichtbarwort'), $para('Versteckwort', ['noSearch' => true])]);
+            $b = $mk('suchtest-b', [$para('Ausgeschlossenwort')], ['search_exclude' => 1]);
+            $c = $mk('suchtest-c', [$para('Noindexwort')], ['noindex' => 1]);
+            $docs = Documents::build($lang);
+            $text = (string) ($docs['p-' . $a]['text'] ?? '');
+            $eq('Seite im Index', isset($docs['p-' . $a]), true);
+            $eq('Abschnitt sichtbar → durchsucht', str_contains($text, 'Sichtbarwort'), true);
+            $eq('Abschnitt „Nicht in der Website-Suche“ → nicht durchsucht', str_contains($text, 'Versteckwort'), false);
+            $eq('Seite „Nicht in der Website-Suche“ → nicht im Index', isset($docs['p-' . $b]), false);
+            $eq('noindex → nicht im Index', isset($docs['p-' . $c]), false);
+            [, $lt] = Documents::blocksText([['type' => 'layout', 'data' => ['columns' => [['blocks' => [$para('Spaltenwort')]]]], 'tunes' => ['section' => ['noSearch' => true]]]]);
+            $eq('Layout „Nicht in der Website-Suche“ → Spalten nicht durchsucht', str_contains(implode(' ', $lt), 'Spaltenwort'), false);
+            $eq('Tune wird gespeichert (Theme::sanitizeTunes)', app()->theme->sanitizeTunes(['noSearch' => '1'], app()->theme->block($type))['noSearch'], true);
+        } finally {
+            $pdo->rollBack();
+        }
+        echo $fail ? "\n{$fail} Fehler\n" : "\nAlles in Ordnung\n";
+        return $fail ? 1 : 0;
     }
 
     /** Hilfe-Index des Assistenten (Core\AI\HelpIndex): Handbuch, Technik, Tutorials – Stichwörter + Vektoren */

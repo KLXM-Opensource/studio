@@ -7468,4 +7468,9 @@ return [
     '{names} bearbeitet gerade' => '{names} is editing',
     '{name} hat inzwischen gespeichert' => '{name} has saved in the meantime',
     'Inzwischen gespeichert' => 'Saved meanwhile',
+    'Der Abschnitt bleibt sichtbar, sein Text wird aber nicht durchsucht (z. B. wiederkehrende Hinweise, Werbetexte). Gilt auch für Spalten eines Layouts.' => 'The section stays visible, but its text is not searched (e.g. recurring notices, promotional copy). Also applies to the columns of a layout.',
+    'Die Seite bleibt erreichbar und für Suchmaschinen sichtbar, erscheint aber nicht in der Suche und im Besucher-Chat dieser Website.' => 'The page stays reachable and visible to search engines but does not appear in this website’s search or visitor chat.',
+    'Nicht in der Website-Suche' => 'Not in website search',
+    'Nicht in der Website-Suche zeigen' => 'Hide from website search',
+    'nicht in der Suche' => 'not in search',
 ];

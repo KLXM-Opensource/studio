@@ -55,7 +55,8 @@ function render(ctx) {
       ${fixedSlug ? '' : `
       <label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="menu"${pg.menu ? ' checked' : ''}> <span>${esc(T('menu'))}</span></label>
       <div class="f" data-ps-nav${pg.menu ? '' : ' hidden'}><label for="ps-nav">${esc(T('navTitle'))}</label><input id="ps-nav" name="nav_title" maxlength="60" autocomplete="off" value="${esc(pg.nav_title)}" placeholder="${esc(pg.title)}"></div>`}
-      ${pg.notFound ? '' : `<label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="noindex"${pg.noindex ? ' checked' : ''}> <span>${esc(T('noindex'))}</span></label>`}
+      ${pg.notFound ? '' : `<label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="noindex"${pg.noindex ? ' checked' : ''}> <span>${esc(T('noindex'))}</span></label>
+      <label class="f-check f-check--switch ps-check"><input type="checkbox" role="switch" name="search_exclude"${pg.search_exclude ? ' checked' : ''}> <span>${esc(T('searchExclude'))}</span></label>`}
     </fieldset>
     <fieldset class="ps-col">
       <legend class="ps-h">${esc(T('search'))}</legend>
@@ -160,6 +161,7 @@ function render(ctx) {
     if (form.online_from) { body.online_from = form.online_from.value; body.online_until = form.online_until.value; }
     if (form.menu) { body.menu = form.menu.checked; body.nav_title = $('#ps-nav').value.trim(); }
     if (form.noindex) body.noindex = form.noindex.checked;
+    if (form.search_exclude) body.search_exclude = form.search_exclude.checked;
     st.busy = true; go.disabled = true; go.querySelector('span').textContent = T('saving');
     try {
       const prev = S.page;

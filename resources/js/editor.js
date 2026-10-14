@@ -64,7 +64,7 @@ const previews = initial.previews || {};
 const tools = new Map();      // blockId → Tool-Instanz
 const tunes = new Map();      // blockId → Tune-Instanz
 const initialTunes = Object.fromEntries((initial.blocks || []).map(b => [b.id, b.tunes?.section || {}]));
-const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false };
+const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false, noSearch: false };
 let editor, dirty = false, drawerFor = null, drawerSnap = null;
 let History = null;   // Rückgängig/Wiederholen (unten)
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
@@ -933,6 +933,7 @@ function makeTool(type, def) {
         t.bgImage && '<span class="cms-flag">Hintergrundbild</span>',
         t.row && `<span class="cms-flag cms-flag--row">${CMSAdmin.esc(CMSAdmin.t('Reihe: {w}', { w: CMSAdmin.t(ROW_LABEL[t.row] || t.row) }))}</span>`,
         cfg.glossary && t.noGlossary && `<span class="cms-flag">${CMSAdmin.esc(CMSAdmin.t('ohne Glossar'))}</span>`,
+        t.noSearch && `<span class="cms-flag">${CMSAdmin.esc(CMSAdmin.t('nicht in der Suche'))}</span>`,
       ].filter(Boolean).join('');
       layoutRows();
       // Kits/Erweiterungen: Block ist (neu) gezeichnet – Skripte für Videos, Animationen usw. können ihn jetzt einrichten
@@ -1732,7 +1733,9 @@ function renderTuneForm(tool) {
     ${t.row ? `<div class="f"><input type="hidden" name="row" value="${E(t.row)}"><p class="f-help" id="t-row-h">${E(T('Dieser Block steht noch in einer alten Reihe neben dem vorigen Block. Für Spalten gibt es jetzt den Block „Layout“ – die Umstellung erledigt php bin/console layout:migrate-rows.'))}</p>
       <button type="button" class="btn btn--small" data-row-clear aria-describedby="t-row-h">${E(T('Aus der Reihe lösen (eigener Abschnitt)'))}</button></div>` : ''}
     ${cfg.glossary ? `<div class="f"><label class="f-check"><input type="checkbox" name="noGlossary"${t.noGlossary ? ' checked' : ''} aria-describedby="t-gl-h"> <span>${E(CMSAdmin.t('Glossar-Begriffe hier nicht markieren'))}</span></label>
-      <p class="f-help" id="t-gl-h">${E(CMSAdmin.t('Begriffe aus dem Glossar bekommen in diesem Abschnitt keine Erklärung zum Aufklappen (z. B. in Zitaten oder Werbetexten).'))}</p></div>` : ''}`;
+      <p class="f-help" id="t-gl-h">${E(CMSAdmin.t('Begriffe aus dem Glossar bekommen in diesem Abschnitt keine Erklärung zum Aufklappen (z. B. in Zitaten oder Werbetexten).'))}</p></div>` : ''}
+    <div class="f"><label class="f-check"><input type="checkbox" name="noSearch"${t.noSearch ? ' checked' : ''} aria-describedby="t-ns-h"> <span>${E(CMSAdmin.t('Nicht in der Website-Suche'))}</span></label>
+      <p class="f-help" id="t-ns-h">${E(CMSAdmin.t('Der Abschnitt bleibt sichtbar, sein Text wird aber nicht durchsucht (z. B. wiederkehrende Hinweise, Werbetexte). Gilt auch für Spalten eines Layouts.'))}</p></div>`;
   f.classList.add('adm-fields');
   CMSAdmin.init(f);
   f.oninput = f.onchange = () => {
@@ -1744,6 +1747,7 @@ function renderTuneForm(tool) {
       height: f.height.value, align: f.align.value, bgImage: +f.bgImage.value || null, overlay: f.overlay.value,
       row: f.row ? f.row.value : '',
       noGlossary: f.noGlossary ? f.noGlossary.checked : !!tune?.data?.noGlossary,
+      noSearch: f.noSearch ? f.noSearch.checked : !!tune?.data?.noSearch,
     };
     f.align.disabled = data.height !== 'screen';
     if (tune) tune.data = data;

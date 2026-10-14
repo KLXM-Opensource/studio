@@ -451,7 +451,7 @@ final class CmsService
             'id' => (int) $p['id'], 'slug' => $p['slug'], 'path' => $p['is_home'] ? '' : (string) ($p['path'] ?? $p['slug']),
             'parent_id' => $p['parent_id'] !== null ? (int) $p['parent_id'] : null, 'menu' => (bool) ($p['menu'] ?? false),
             'nav_title' => (string) ($p['nav_title'] ?? ''), 'title' => $p['title'], 'url' => site_url() . Pages::url($p),
-            'status' => $p['status'], 'is_home' => (bool) $p['is_home'], 'noindex' => (bool) $p['noindex'],
+            'status' => $p['status'], 'is_home' => (bool) $p['is_home'], 'noindex' => (bool) $p['noindex'], 'search_exclude' => (bool) ($p['search_exclude'] ?? false),
             'meta_description' => (string) $p['meta_description'],
             'has_unpublished_changes' => Pages::hasUnpublished($p),
             'lang' => Lang::norm($p['lang'] ?? null),
@@ -513,6 +513,7 @@ final class CmsService
             'meta_description' => mb_substr(strip_tags((string) ($in['meta_description'] ?? '')), 0, 300),
             'status' => ($in['status'] ?? 'draft') === 'published' ? 'published' : 'draft',
             'noindex' => !empty($in['noindex']) ? 1 : 0,
+            'search_exclude' => !empty($in['search_exclude']) ? 1 : 0,
             'lang' => $lang === Lang::default() ? null : $lang,
         ], $blocks);
         PageCache::clear();
@@ -555,6 +556,7 @@ final class CmsService
         if (isset($in['meta_title'])) {
             $upd['meta_title'] = mb_substr(trim(strip_tags((string) $in['meta_title'])), 0, 120) ?: null;
         }
+        if (isset($in['search_exclude'])) $upd['search_exclude'] = $in['search_exclude'] ? 1 : 0;   // nicht in der Website-Suche
         if (isset($in['noindex'])) {
             $upd['noindex'] = $in['noindex'] ? 1 : 0;
         }

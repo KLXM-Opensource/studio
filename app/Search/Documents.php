@@ -83,7 +83,7 @@ final class Documents
 
     private static function pages(string $lang): \Generator
     {
-        $rows = app()->db->fetchAll("SELECT * FROM pages WHERE status = 'published' AND type = 'page' AND noindex = 0 AND " . Lang::sql(), [$lang]);
+        $rows = app()->db->fetchAll("SELECT * FROM pages WHERE status = 'published' AND type = 'page' AND noindex = 0 AND search_exclude = 0 AND " . Lang::sql(), [$lang]);
         foreach ($rows as $p) {
             if (\Core\PageAccess::restricted($p)) continue;   // geschützter Bereich (Erweiterung): nie im Suchindex
             $rb = Pages::readBlocks($p);   // Erweiterungen (z. B. gemeinsame Bausteine) aufgelöst
@@ -103,6 +103,8 @@ final class Documents
     {
         $theme = app()->theme;
         $head = $text = [];
+        // Abschnitts-Option „Nicht in der Website-Suche“ (Tune noSearch): Abschnitt samt Spalten überspringen
+        $blocks = array_filter($blocks, fn($b) => is_array($b) && empty($b['tunes']['section']['noSearch']));
         foreach (\Core\Layout::flatten($blocks) as $b) {   // auch Blöcke in Spalten eines Layouts
             $type = (string) ($b['type'] ?? '');
             if (in_array($type, self::SKIP_BLOCKS, true) || !(($b['tunes']['section']['visible'] ?? true))) continue;

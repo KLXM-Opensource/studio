@@ -7,6 +7,15 @@
     <li><b>Einstellungen</b> (Administration): <b>Grundeinstellungen → Suche</b> – Tabellen ausnehmen, PDFs einbeziehen, Gewichtung von Titeln und Überschriften, <b>Synonyme</b> (z. B. „Öffnungszeiten, Sprechzeiten, geöffnet“), semantische Suche, Suchbegriffe ohne Treffer, Index neu aufbauen.</li>
     <li><b>Je Tabelle</b>: <b>Daten → Tabelle → Felder &amp; Einstellungen → Suche</b> – Tabelle an/aus, welche Felder wie stark zählen, Filter (z. B. Kategorie) auf der Ergebnisseite, Kurztext/Bild/Datum im Treffer, nur künftige Termine.</li>
   </ul>
+  <h3 id="aus-der-suche">Inhalte aus der Website-Suche nehmen</h3>
+  <p>Manches soll auf der Website stehen, aber nicht gefunden werden – etwa eine Danke-Seite nach einem Formular, ein wiederkehrender Hinweis oder ein Werbetext. Dafür gibt es eigene Schalter; Suchmaschinen wie Google sind davon nicht betroffen (dafür gilt weiter „Nicht in Suchmaschinen / Sitemap aufnehmen“).</p>
+  <ul>
+    <li><b>Ganze Seite:</b> Seiteneinstellungen (Werkzeugleiste ⋯ → Seiteneinstellungen oder Verwaltung → Seiten) → <b>Nicht in der Website-Suche zeigen</b>. Die Seite bleibt erreichbar und im Menü, erscheint aber weder in der Suche noch im Besucher-Chat.</li>
+    <li><b>Einzelner Abschnitt:</b> am Block ⋯ → <b>Abschnitt &amp; Navigation …</b> → <b>Nicht in der Website-Suche</b>. Der Abschnitt bleibt sichtbar, sein Text wird nicht durchsucht; die Block-Leiste zeigt „nicht in der Suche“. Bei einem Layout gilt das für alle Spalten.</li>
+    <li><b>Ganze Tabelle oder einzelne Felder:</b> Daten → Tabelle → Felder &amp; Einstellungen → Suche – Tabelle aus, ein Feld auf „nicht durchsuchen“.</li>
+    <li><b>Einzelne Einträge:</b> ebenda unter „Welche Einträge?“ → „Nicht finden, wenn Feld …“ eine Regel nach Feldwert (z. B. ein Ja/Nein-Feld „Nicht in der Suche“).</li>
+  </ul>
+  <p>Die Änderung wirkt spätestens bei der nächsten Suche. Geschützte Bereiche (Mitglieder) sind ohnehin nie in der Suche.</p>
   <div class="doc-note doc-note--tip"><strong>Suchbegriffe ohne Treffer</strong><p>Unter Grundeinstellungen → Suche sehen Sie anonym, wonach Besucher vergeblich gesucht haben. Ergänzen Sie dafür ein Synonym oder legen Sie passende Inhalte an.</p></div>
   <h3>Antwort über den Treffern (KI)</h3>
   <p>Ist KI für Texte eingerichtet, beantwortet die Suche Fragen direkt: Über den Treffern erscheint ein Kasten <b>Antwort</b> – z. B. auf „Was kostet die Teilnahme?“ mit Betrag und den Seiten als Quellen (kleine Nummern verlinken die Belege). Unter <b>Grundeinstellungen → Suche → KI-Antwort über den Treffern</b> wählen Sie: <b>aus</b> (Standard), <b>automatisch bei Fragen</b> (empfohlen – bei bloßen Stichworten erscheint der Knopf „Antwort erzeugen“), <b>immer automatisch</b> oder <b>nur auf Klick</b>. Die KI antwortet nur aus den Inhalten Ihrer Website; findet sie nichts Passendes, sagt sie das und nennt Ihre Kontaktdaten. Antworten zählen zum Tageslimit des Besucher-Chats. Der Chat-Knopf selbst ist dafür nicht nötig.</p>

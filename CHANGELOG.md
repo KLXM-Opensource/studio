@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Website-Suche: Inhalte gezielt ausnehmen
+- Seiteneinstellung **„Nicht in der Website-Suche zeigen“** (`pages.search_exclude`, Verwaltung, Seitenleiste auf der Website, REST/MCP, Content-Sync) – unabhängig von noindex; Suchmaschinen und Sitemap bleiben.
+- Abschnitts-Option **„Nicht in der Website-Suche“** (Tune `noSearch`, Kennzeichen in der Block-Leiste) – auch für alle Spalten eines Layouts.
+- Tabellen, Felder und einzelne Einträge gingen schon (Suche je Tabelle); Erweiterungen über den Filter `search.document`. Handbuch → Website-Suche, Selbsttest `search:selftest`.
+- *EN:* Exclude content from the website search: page setting “Hide from website search”, section option “Not in website search” (also for layout columns); independent of noindex.
+
 ### Erweiterungen: Ereignisse, Filter, Haken für Blöcke und Editor
 - **Ereignisse und Filter für Erweiterungen:** neue typisierte Ereignisse `page.created`, `page.moved`, `page.translated`, `page.restored`, `form.submitted`, `user.login`, `user.logout`, `user.login_failed`, `user.created`, `user.role_changed`, `settings.saved`, `table.schema_changed` (`Core\Events\*`, Basis `InfoEvent`). Neu `Extension::filter()` mit festen Namen (`Core\Filters::ALL`): `search.document` (Dokument ändern oder aus der Suche nehmen), `sitemap.urls`, `menu.items`, `seo.meta`, `form.validate` (eigene Prüfung, `'_form'` = allgemeine Meldung), `mail.message` (nie Konto-Mails), `data_list.query`; eigene Filter als `ext:{name}.…`. Entwicklerhandbuch → Erweiterungen mit Beispielen; Selbsttest in `extensions:selftest`. Sitemap intern als Liste aufgebaut.
 - *EN:* Extension events and filters: new typed events (page created/moved/translated/restored, form submitted, login/logout/login failed, user created, role changed, settings saved, table schema changed) and `Extension::filter()` with named filter points (`search.document`, `sitemap.urls`, `menu.items`, `seo.meta`, `form.validate`, `mail.message`, `data_list.query`, own `ext:{name}.…`). Documented with examples in the developer handbook.

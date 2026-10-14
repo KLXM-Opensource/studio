@@ -173,6 +173,7 @@
  *                                                     Suchindex abgleichen (Cron: alle 15 min; --full nachts; --kb Wissensdatenbank; --help Hilfe-Index des Assistenten)
  *   search:status [--all]                             Stand des Suchindex und des KI-Anbieters
  *   search:query "<text>" [--lang=en]                 Testsuche wie Besucher
+ *   search:selftest                                   Website-Suche: Ausschluss (Seite, Abschnitt, Filter), Dokumente
  *   ai:test [--cap=text|embed|vision|transcribe]      KI-Anbieter je Fähigkeit prüfen (Symfony AI, Core\AI\Ai)
  *   ai:selftest                                       Selbsttest Verbindungen/Verwendung (altes Format, Ebenen, Sperren), Prüfen und
  *                                                     Modelle ohne Netz (Ollama, OpenAI, Mistral, Anthropic), Feldtyp „pages“
@@ -704,6 +705,7 @@ switch ($cmd) {
     case 'search:index':
     case 'search:status':
     case 'search:query':
+    case 'search:selftest':
     case 'ai:test':
         // Website-Suche und KI (Core\Search\Console)
         exit(Core\Search\Console::run($cmd, $args, __FILE__));

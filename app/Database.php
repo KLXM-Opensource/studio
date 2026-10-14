@@ -229,6 +229,8 @@ final class Database
             // Zeitgesteuert veröffentlichen (Core\Schedule): geplante Aktionen „Online ab“ / „Offline ab“
             'online_from' => 'VARCHAR(25) NULL',
             'online_until' => 'VARCHAR(25) NULL',
+            // Nicht in der Website-Suche (unabhängig von noindex – Suchmaschinen und Sitemap bleiben), Core\Search\Documents
+            'search_exclude' => 'INT NOT NULL DEFAULT 0',
         ]);
         $this->dropUniqueSlug();
         // API-Tokens: Änderungen direkt übernehmen oder zur Freigabe einreichen (Core\Review), zuletzt gemeldeter MCP-Client

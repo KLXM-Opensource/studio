@@ -29,6 +29,8 @@ final class Theme
         'height' => 'auto', 'bgImage' => null, 'overlay' => 'none', 'align' => 'center', 'row' => '',
         // Glossar (Core\Glossary): in diesem Abschnitt keine Begriffe markieren
         'noGlossary' => false,
+        // Website-Suche (Core\Search\Documents): Abschnitt nicht durchsuchen – auch alle Blöcke in seinen Spalten
+        'noSearch' => false,
     ];
 
     /**
@@ -227,6 +229,7 @@ final class Theme
         $row = ($t['row'] ?? '') === true ? 'auto' : (string) ($t['row'] ?? '');
         $out['row'] = array_key_exists($row, self::ROW_WIDTHS) ? $row : '';
         $out['noGlossary'] = filter_var($t['noGlossary'] ?? false, FILTER_VALIDATE_BOOL);
+        $out['noSearch'] = filter_var($t['noSearch'] ?? false, FILTER_VALIDATE_BOOL);
         return $out;
     }
 
