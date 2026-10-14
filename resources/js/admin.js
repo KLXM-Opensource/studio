@@ -652,7 +652,21 @@ if (schema) {
   });
   schema.addEventListener('change', e => {
     const li = e.target.closest('[data-field]');
-    if (li && e.target.matches('[data-type]')) { sync(li); if (li.dataset.type === 'group' && !$('[data-sub]', li)) addSub(li); groupSections(); }
+    if (li && e.target.matches('[data-type]')) {
+      const was = li.dataset.type, now = e.target.value, saved = $('input[name$="[id]"]', li)?.value;
+      // Bestehendes Datenfeld → Abschnitt/Freitext: die Spalte samt Inhalten fiele weg – nachfragen, sonst zurück
+      if (saved && !['section', 'content'].includes(was) && ['section', 'content'].includes(now)) {
+        const label = $('[data-label]', li).value || t('ohne Namen');
+        bar_.ask({ title: t('„{label}“ in {type} umwandeln?', { label, type: $('option:checked', e.target).textContent.trim() }),
+          body: t('Das Feld verliert dabei seine Inhalte (beim Speichern). Einen neuen Abschnitt oder Freitext fügen Sie stattdessen mit „+“ am Feld darüber ein.'),
+          ok: t('Umwandeln'), danger: true }).then(ok => {
+          if (!ok) { e.target.value = was; return; }
+          sync(li); groupSections();
+        });
+        return;
+      }
+      sync(li); if (li.dataset.type === 'group' && !$('[data-sub]', li)) addSub(li); groupSections();
+    }
     if (e.target.matches('[data-sub-type]')) $('[data-sub-opts]', e.target.closest('[data-sub]')).hidden = e.target.value !== 'select';
   });
   // Wiederholbare Gruppe: Unterfelder hinzufügen, verschieben, entfernen (Kurzname folgt der Bezeichnung, bis er geändert wird)
@@ -729,6 +743,22 @@ if (schema) {
       renumber(); return;
     }
     const mv = e.target.closest('[data-move]');
+    if (mv && mv.closest('[data-field]')?.dataset.type === 'section') {
+      // Abschnitt: mit allen Feldern bis zum nächsten Abschnitt verschieben – über das vorige bzw. nächste Element hinweg
+      // (ein Feld ohne Abschnitt oder einen ganzen Abschnitt)
+      const li = mv.closest('[data-field]');
+      const block = sec => { const out = [sec]; let n = sec.nextElementSibling; while (n && n.dataset.type !== 'section') { out.push(n); n = n.nextElementSibling; } return out; };
+      const mine = block(li);
+      if (+mv.dataset.move < 0) {
+        let prev = li.previousElementSibling;
+        if (prev && prev.classList.contains('in-sec')) { while (prev && prev.dataset.type !== 'section') prev = prev.previousElementSibling; }
+        if (prev) mine.forEach(x => list.insertBefore(x, prev));
+      } else {
+        const next = mine[mine.length - 1].nextElementSibling;
+        if (next) { const unit = next.dataset.type === 'section' ? block(next) : [next]; const after = unit[unit.length - 1].nextElementSibling; mine.forEach(x => list.insertBefore(x, after)); }
+      }
+      renumber(); mv.focus(); li.scrollIntoView({ block: 'nearest' }); return;
+    }
     if (mv) {
       const li = mv.closest('[data-field]');
       const to = +mv.dataset.move < 0 ? li.previousElementSibling : li.nextElementSibling?.nextElementSibling;

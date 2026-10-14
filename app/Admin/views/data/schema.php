@@ -161,6 +161,13 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
     $formOn = !$isNew && \Core\Data\DataForms::enabled($table, false);
     $noForm = $formOn ? array_values(array_diff(array_keys(Tables::TYPES), \Core\Data\DataForms::TYPES, \Core\Data\DataForms::UPLOAD_TYPES, Tables::LAYOUT)) : [];
     ?>
+    <?php if (!empty($askDrop)): // Rückfrage direkt oben (nicht erst unter der Feldliste): bestätigen oder Änderungen verwerfen ?>
+    <div class="adm-flash adm-flash--error dt-dropask" role="alert">
+      <p><?= e($errors['_drop'] ?? '') ?></p>
+      <label class="f-check dt-confirmdrop"><input type="checkbox" name="confirm_drop" value="1"> <span><b><?= e(__('Felder wirklich löschen')) ?></b> (<?= e(__('Inhalte gehen verloren')) ?>) – <?= e(__('danach erneut speichern')) ?></span></label>
+      <p><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/data/' . $table['handle'] . '/schema#felder')) ?>"><?= e(__('Änderungen verwerfen')) ?></a> <span class="adm-muted"><?= e(__('lädt die gespeicherten Felder neu – nichts wird gelöscht')) ?></span></p>
+    </div>
+    <?php endif; ?>
     <div class="dt-fieldsbox">
       <?php // Kompaktansicht: je Feld eine Zeile, Einstellungen erst beim Bearbeiten (admin.js, gemerkt im Browser) ?>
       <p class="dt-fieldsbar"><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-fields-compact aria-pressed="false"><?= icon('list') ?> <span><?= e(__('Kompaktansicht')) ?></span></button></p>
@@ -187,9 +194,6 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
         <?php endforeach; ?>
       </div>
       <?= $err('fields') ?>
-      <?php if (!empty($askDrop)): ?>
-      <label class="f-check dt-confirmdrop"><input type="checkbox" name="confirm_drop" value="1"> <span><b>Felder wirklich löschen</b> (Inhalte gehen verloren)</span></label>
-      <?php endif; ?>
     </div>
   </section>
 

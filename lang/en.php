@@ -7419,4 +7419,11 @@ return [
     'Sie sind jetzt auf {host} angemeldet. Legen Sie hier einen Passkey für diese Domain an.' => 'You are now signed in on {host}. Add a passkey for this domain here.',
     'Weitere Domains dieser Website' => 'Other domains of this website',
     'kein Passkey' => 'no passkey',
+    // Tabellen-Designer: Umwandeln und Löschen von Feldern
+    'Das Feld verliert dabei seine Inhalte (beim Speichern). Einen neuen Abschnitt oder Freitext fügen Sie stattdessen mit „+“ am Feld darüber ein.' => 'The field loses its content when you save. To add a new section or free text instead, use “+” on the field above.',
+    'Umwandeln' => 'Convert',
+    'danach erneut speichern' => 'then save again',
+    'lädt die gespeicherten Felder neu – nichts wird gelöscht' => 'reloads the saved fields – nothing is deleted',
+    'Änderungen verwerfen' => 'Discard changes',
+    '„{label}“ in {type} umwandeln?' => 'Convert “{label}” to {type}?',
 ];

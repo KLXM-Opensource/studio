@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Tabellen-Designer: Abschnitte verschieben, sicheres Umwandeln
+- ↑ ↓ an einem Abschnitt verschiebt ihn mit allen seinen Feldern. Umwandeln eines bestehenden Feldes in Abschnitt/Freitext fragt nach (Inhalte gingen verloren). Die Rückfrage „Felder wirklich löschen“ steht oben im Bereich Felder, mit „Änderungen verwerfen“. Im Menü „+“ stehen die Gruppen-Überschriften in einer eigenen Zeile.
+
 ### Domainwechsel ohne Aussperren (Passkeys je Domain)
 - **„Dort anmelden und Passkey anlegen“** (`Core\HostHandover`): angemeldet auf eine andere Domain derselben Website wechseln (Einmal-Token, 60 s) und dort einen Passkey anlegen – auf der Domain-Seite, unter Konto → Passkeys („Weitere Domains dieser Website“) und in der Netzwerk-Übersicht für Domains der Netzwerk-Website. Die Rückfrage beim Festlegen der Hauptadresse warnt, wenn für die neue Domain noch kein Passkey besteht.
 - Handbuch: Grundeinstellungen → „Domainumzug“ (Reihenfolge, Verwaltungsdomain im Netzwerk, Notfall).
