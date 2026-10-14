@@ -1162,7 +1162,8 @@ function initBlockFields(scope = d) {
       if (e.key === 'Escape') { e.preventDefault(); show(false); btn.focus(); }
       else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); all[(i + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length]?.focus(); }
     });
-    d.addEventListener('click', e => { if (!menu.hidden && !box.contains(e.target)) show(false); });
+    // Klick daneben schließt – composedPath: auch in der Seitenleiste der Website (Shadow DOM, e.target wäre dort der Host)
+    d.addEventListener('click', e => { if (!menu.hidden && !e.composedPath().includes(box)) show(false); });
     menu.addEventListener('click', e => {
       const b = e.target.closest('[data-blk-type]'); if (!b) return;
       const tpl = $(`template[data-blk-tpl="${CSS.escape(b.dataset.blkType)}"]`, box); if (!tpl) return;

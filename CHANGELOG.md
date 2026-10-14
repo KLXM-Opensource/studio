@@ -7,6 +7,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Datentabellen: Inhaltsblöcke – Einträge aus Blöcken des Kits
+- Behoben: Karten erschienen nach der Live-Ansicht (Speichern in der Seitenleiste) und in Vorschauen des Seiten-Editors nicht – `map.mjs`/`media.mjs` reagieren auf `cms:content-replaced` und `cms:block-preview`, der Editor lädt Modul-Skripte aus Vorschauen nach. Menü „+ Block hinzufügen“ in der Seitenleiste der Website schloss sich sofort.
 - Neuer Feldtyp **Inhaltsblöcke** (`Core\Data\EntryBlocks`): je Eintrag eine Folge von Blöcken wie auf Seiten, erlaubte Blöcke je
   Feld (Standard: Inhalt und Medien). Eingabe in der Verwaltung mit den Feldern der Seitenleiste, Menü „+ Block hinzufügen“,
   verschieben, entfernen, zugeklappt mit Auszug.

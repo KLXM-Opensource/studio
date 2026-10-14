@@ -96,10 +96,18 @@ const start = el => { el.classList.add('is-started'); init(el); };
 const io = 'IntersectionObserver' in window && new IntersectionObserver(entries => {
   for (const en of entries) if (en.isIntersecting) { io.unobserve(en.target); init(en.target); }
 }, { rootMargin: '300px 0px' });
-for (const el of maps) {
-  if (el.dataset.go) { start(el); continue; }
-  if (saveData || el.dataset.click !== undefined || !io) {
-    const b = el.querySelector('[data-cms-map-load]');
-    if (b && !b.dataset.bound) { b.dataset.bound = '1'; b.hidden = false; b.addEventListener('click', () => start(el), { once: true }); }
-  } else io.observe(el);
-}
+// Karten einrichten – beim Laden und nach einem Austausch des Inhalts (Live-Ansicht beim Bearbeiten, Ereignis cms:content-replaced)
+const scan = list => {
+  for (const el of list) {
+    if (el.cmsMapSeen) continue;
+    el.cmsMapSeen = true;
+    if (el.dataset.go) { start(el); continue; }
+    if (saveData || el.dataset.click !== undefined || !io) {
+      const b = el.querySelector('[data-cms-map-load]');
+      if (b && !b.dataset.bound) { b.dataset.bound = '1'; b.hidden = false; b.addEventListener('click', () => start(el), { once: true }); }
+    } else io.observe(el);
+  }
+};
+scan(maps);
+document.addEventListener('cms:content-replaced', () => scan(document.querySelectorAll('[data-cms-map]:not([data-ready])')));
+document.addEventListener('cms:block-preview', () => scan(document.querySelectorAll('[data-cms-map]:not([data-ready])')));   // Seiten-Editor: Block neu gezeichnet

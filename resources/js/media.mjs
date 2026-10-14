@@ -117,3 +117,4 @@ function slider(el) {
 const scan = () => $$('[data-cms-slider]').forEach(el => { if (!el.cmsSlider) { el.cmsSlider = true; slider(el); } });
 scan();
 d.addEventListener('cms:content-replaced', () => { lb(); scan(); });
+d.addEventListener('cms:block-preview', () => { lb(); scan(); });   // Seiten-Editor: Block neu gezeichnet

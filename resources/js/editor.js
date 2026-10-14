@@ -839,6 +839,13 @@ function makeTool(type, def) {
     setPreview(html) {
       const pv = this.el.querySelector('.cms-block__preview');
       pv.innerHTML = html;
+      // Skripte der Vorschau (z. B. Karte, Slider: <script type="module" src>) laufen per innerHTML nicht – einmal je Datei nachladen;
+      // danach reagieren die Module auf cms:block-preview
+      pv.querySelectorAll('script[type="module"][src]').forEach(sc => {
+        const src = sc.getAttribute('src');
+        if ([...d.querySelectorAll('script[type="module"][src]')].some(x => x !== sc && !pv.contains(x) && x.getAttribute('src') === src)) return;
+        const n = d.createElement('script'); n.type = 'module'; n.src = src; d.head.append(n);
+      });
       const t = this.tuneData;
       this.el.classList.toggle('is-hidden', !t.visible);
       this.bar.querySelector('.cms-block__summary').textContent = summarize(this.data) || '(ohne Titel)';
