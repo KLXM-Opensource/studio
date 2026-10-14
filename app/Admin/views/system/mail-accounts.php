@@ -1,87 +1,82 @@
 <?php
 /**
- * Grundeinstellungen → E-Mail-Konten (MailAccountsController, Core\Mail\Accounts): Konten, Verwendung je Zweck, Netzwerk-Konto.
- * @var array $accounts  @var array $extra  @var array $routes  @var array $purposes  @var ?array $network  @var bool $canNetwork
- * @var array $fields  @var array $netFields  @var array $errors  @var ?array $draft  @var string $draftId  @var array $me
+ * Grundeinstellungen → E-Mail-Versand → E-Mail-Konten (MailAccountsController, Core\Mail\Accounts): Seitenleiste der
+ * Grundeinstellungen, Liste der Konten (Zeilen wie die Grundeinstellungen), darunter – nur bei „Bearbeiten“ bzw. „Konto
+ * hinzufügen“ – eine Karte mit dem Formular.
+ * @var array $accounts  @var array $extra  @var ?array $network  @var bool $canNetwork  @var array $fields  @var array $stdFields
+ * @var array $errors  @var ?array $draft  @var string $draftId  @var array $me
  */
 use Core\Fields;
 use Core\Mail\Accounts;
 
 $base = '/admin/system/mail';
-$state = fn(array $a) => Accounts::ready($a) ? ['ok', __('bereit')] : ['warn', __('nicht eingerichtet')];
 $noPort = fn(array $a) => ['port' => !empty($a['port']) ? $a['port'] : ''] + $a;   // leerer Port statt „0“ (dann üblicher Port)
-$values = fn(string $id, array $cur) => $noPort($draftId === $id && $draft !== null ? $draft : $cur);
-$testForm = function (string $id) use ($base, $me): string {
-    return '<form method="post" action="' . e(url($base . '/test/' . $id)) . '" class="mk-test">' . csrf_field()
-        . '<label class="adm-sr" for="mk-to-' . e($id) . '">' . e(__('Empfänger der Testnachricht')) . '</label>'
-        . '<input type="email" id="mk-to-' . e($id) . '" name="to" placeholder="' . e((string) $me['email']) . '">'
-        . '<button class="adm-btn adm-btn--small">' . e(__('Testnachricht')) . '</button></form>';
-};
+$edit = $draftId !== '' && ($draftId === 'neu' || $draftId === 'standard' || isset($extra[$draftId])) ? $draftId : '';
+$formFields = []; $formValues = []; $formTitle = '';
+if ($edit === 'standard') {
+    $formFields = $stdFields;
+    foreach ($formFields as $i => $f) if ($f['name'] === 'transport') $formFields[$i]['options'] = array_intersect_key($f['options'], ['smtp' => 1, 'null' => 1]);
+    $formValues = $noPort($draft ?? $accounts['standard']);
+    $formTitle = __('Konto „{name}“ bearbeiten', ['name' => __('Standard')]);
+} elseif ($edit !== '') {
+    $formFields = $fields;
+    $formValues = $noPort($draft ?? ($edit === 'neu' ? ['transport' => 'smtp', 'verify_peer' => true, 'encryption' => 'tls'] : $extra[$edit]));
+    $formTitle = $edit === 'neu' ? __('Neues Konto') : __('Konto „{name}“ bearbeiten', ['name' => $extra[$edit]['label']]);
+    // Neues Konto: „Leer lassen = unverändert“ ergibt keinen Sinn
+    if ($edit === 'neu') foreach ($formFields as $i => $f) if ($f['name'] === 'pass') unset($formFields[$i]['help']); elseif ($f['name'] === 'dsn') $formFields[$i]['help'] = str_replace([' Verschlüsselt gespeichert; leer lassen = unverändert.'], [' ' . __('Verschlüsselt gespeichert.')], $f['help']);
+}
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('E-Mail-Konten')) ?></h1>
-    <p class="adm-muted"><?= e(__('Weitere Konten anlegen und testen. Welches Konto wofür versendet, legen Sie in den Grundeinstellungen unter E-Mail-Versand → Verwendung fest.')) ?></p></div>
-  <a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('Zur Verwendung')) ?></a>
+  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a> › <a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('E-Mail-Versand')) ?></a></p><h1><?= e(__('E-Mail-Konten')) ?></h1>
+    <p class="adm-muted"><?= e(__('Konten anlegen, bearbeiten und testen. Welches Konto wofür versendet, wählen Sie unter E-Mail-Versand → Verwendung.')) ?></p></div>
 </header>
 
-<div class="set-page mk-page">
-
-<section class="set-group" id="konten" aria-labelledby="mk-h">
-  <h2 id="mk-h" class="set-group__title"><?= e(__('Konten')) ?></h2>
-  <ul class="mk-list" role="list">
-    <?php foreach ($accounts as $id => $a): [$cls, $st] = $state($a); ?>
-    <li class="mk-item" id="konto-<?= e($id) ?>">
-      <div class="mk-item__head">
-        <strong><?= e($a['label']) ?></strong>
-        <span class="adm-badge adm-badge--<?= $cls ?>"><?= e($st) ?></span>
-        <?php if ($id === 'network'): ?><span class="adm-badge"><?= e(__('für alle Websites')) ?></span><?php endif; ?>
-        <span class="adm-muted mk-item__desc"><?= e(Accounts::describe($a)) ?></span>
+<div class="adm-tabs-form--side us-shell" data-secnav>
+<?php $current = 'mail'; include __DIR__ . '/_sidenav.php'; ?>
+  <div class="us-main">
+  <div class="set-page mk-page">
+  <section class="set-group" id="konten">
+    <h2 class="set-group__title"><?= e(__('Konten')) ?></h2>
+    <div class="set-list">
+      <?php foreach ($accounts as $id => $a): $ready = Accounts::ready($a); ?>
+      <div class="f f--inline mk-row<?= $edit === $id ? ' is-current' : '' ?>" id="konto-<?= e($id) ?>">
+        <span class="mk-row__label"><strong><?= e($a['label']) ?></strong>
+          <span class="f-help"><?= e(Accounts::describe($a)) ?><?= $id === 'network' ? ' · ' . e(__('für alle Websites, im Netzwerk-Dashboard')) : '' ?></span></span>
+        <span class="mk-row__act">
+          <span class="adm-badge adm-badge--<?= $ready ? 'ok' : 'warn' ?>"><?= e($ready ? __('bereit') : __('nicht eingerichtet')) ?></span>
+          <?php if ($ready): ?>
+          <form method="post" action="<?= e(url($base . '/test/' . $id)) ?>"><?= csrf_field() ?>
+            <button class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('Testnachricht an {to}', ['to' => (string) $me['email']])) ?>"><?= e(__('Testnachricht')) ?></button></form>
+          <?php endif; ?>
+          <?php if ($id === 'network'): ?>
+            <?php if ($canNetwork): ?><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/network#email')) ?>"><?= e(__('Bearbeiten')) ?></a><?php endif; ?>
+          <?php else: ?>
+            <a class="adm-btn adm-btn--small" href="<?= e(url($base . '?konto=' . $id . '#formular')) ?>"><?= e(__('Bearbeiten')) ?></a>
+          <?php endif; ?>
+        </span>
       </div>
-      <div class="mk-item__act">
-        <?= $testForm($id) ?>
-      </div>
-      <?php if ($id === 'standard'): ?>
-      <details class="mk-edit"<?= $draftId === 'standard' ? ' open' : '' ?>>
-        <summary><?= e(__('Bearbeiten')) ?></summary>
-        <form method="post" action="<?= e(url($base . '/konto')) ?>" class="adm-fields" novalidate>
-          <?= csrf_field() ?><input type="hidden" name="id" value="standard">
-          <?php $sf = $stdFields; foreach ($sf as $i => $f) if ($f['name'] === 'transport') $sf[$i]['options'] = array_intersect_key($f['options'], ['smtp' => 1, 'null' => 1]); ?>
-          <?= Fields::renderForm($sf, $values('standard', $a), $draftId === 'standard' ? $errors : [], 'f') ?>
-          <div class="adm-form-actions"><button class="adm-btn adm-btn--primary"><?= e(__('Speichern')) ?></button></div>
-        </form>
-      </details>
+      <?php endforeach; ?>
+    </div>
+    <p class="set-group__note"><a class="adm-btn adm-btn--small" href="<?= e(url($base . '?neu=1#formular')) ?>"><?= icon('plus') ?> <?= e(__('Konto hinzufügen')) ?></a>
+      <span class="adm-muted"><?= e(__('z. B. für Newsletter – per SMTP oder über einen Dienst wie Mailjet, Mailchimp Transactional oder Brevo.')) ?></span></p>
+  </section>
+
+  <?php if ($edit !== ''): ?>
+  <form method="post" action="<?= e(url($base . '/konto')) ?>" id="formular" class="mk-form" novalidate>
+    <?= csrf_field() ?><input type="hidden" name="id" value="<?= e($edit === 'neu' ? '' : $edit) ?>">
+    <?= Fields::renderGroups(array_merge([['type' => 'heading', 'label' => $formTitle]], $formFields), $formValues, $errors, 'f') ?>
+    <div class="mk-form__bar">
+      <button class="adm-btn adm-btn--primary"><?= e($edit === 'neu' ? __('Konto anlegen') : __('Speichern')) ?></button>
+      <a class="adm-btn adm-btn--ghost" href="<?= e(url($base)) ?>"><?= e(__('Abbrechen')) ?></a>
+      <?php if (isset($extra[$edit])): ?>
+      <button class="adm-btn adm-btn--ghost adm-btn--danger-text mk-form__del" type="submit" form="mk-del" formnovalidate><?= e(__('Konto entfernen')) ?></button>
       <?php endif; ?>
-      <?php if (isset($extra[$id])): ?>
-      <details class="mk-edit"<?= $draftId === $id ? ' open' : '' ?>>
-        <summary><?= e(__('Bearbeiten')) ?></summary>
-        <form method="post" action="<?= e(url($base . '/konto')) ?>" class="adm-fields" novalidate>
-          <?= csrf_field() ?><input type="hidden" name="id" value="<?= e($id) ?>">
-          <?= Fields::renderForm($fields, $values($id, $a), $draftId === $id ? $errors : [], 'f') ?>
-          <div class="adm-form-actions"><button class="adm-btn adm-btn--primary"><?= e(__('Speichern')) ?></button></div>
-        </form>
-        <form method="post" action="<?= e(url($base . '/konto/' . $id . '/loeschen')) ?>" data-confirm="<?= e(__('Konto „{name}“ entfernen? Zwecke, die es nutzen, versenden danach über „Standard“.', ['name' => $a['label']])) ?>">
-          <?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Konto entfernen')) ?></button>
-        </form>
-      </details>
-      <?php endif; ?>
-    </li>
-    <?php endforeach; ?>
-  </ul>
-  <details class="mk-edit mk-new" id="neu"<?= $draftId === 'neu' ? ' open' : '' ?>>
-    <summary class="adm-btn"><?= icon('plus') ?> <?= e(__('Konto hinzufügen')) ?></summary>
-    <form method="post" action="<?= e(url($base . '/konto')) ?>" class="adm-fields" novalidate>
-      <?= csrf_field() ?><input type="hidden" name="id" value="">
-      <?= Fields::renderForm($fields, $draftId === 'neu' && $draft !== null ? $draft : ['transport' => 'smtp', 'verify_peer' => true, 'encryption' => 'tls'], $draftId === 'neu' ? $errors : [], 'f') ?>
-      <div class="adm-form-actions"><button class="adm-btn adm-btn--primary"><?= e(__('Konto anlegen')) ?></button></div>
-    </form>
-  </details>
-</section>
-
-
-
-<?php if ($canNetwork || $network): ?>
-<p class="adm-muted mk-note"><?= e(__('Das E-Mail-Konto des Netzwerks gilt für die ganze Installation und wird im Netzwerk-Dashboard verwaltet.')) ?>
-  <?php if ($canNetwork): ?><a href="<?= e(url('/admin/network#email')) ?>"><?= e(__('Zum Netzwerk-Dashboard')) ?></a><?php endif; ?></p>
-<?php endif; ?>
-
+    </div>
+  </form>
+  <?php if (isset($extra[$edit])): ?>
+  <form method="post" id="mk-del" action="<?= e(url($base . '/konto/' . $edit . '/loeschen')) ?>" data-confirm="<?= e(__('Konto „{name}“ entfernen? Zwecke, die es nutzen, versenden danach über „Standard“.', ['name' => $extra[$edit]['label']])) ?>"><?= csrf_field() ?></form>
+  <?php endif; ?>
+  <?php endif; ?>
+  </div>
+  </div>
 </div>

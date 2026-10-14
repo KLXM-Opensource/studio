@@ -7566,4 +7566,10 @@ return [
     'für alle Websites, im Netzwerk-Dashboard' => 'for all websites, in the network dashboard',
     'z. B. für Newsletter – per SMTP oder über einen Dienst wie Mailjet, Mailchimp Transactional oder Brevo.' => 'e.g. for newsletters – via SMTP or a service such as Mailjet, Mailchimp Transactional or Brevo.',
     'Über dieses Konto („Standard“) versendet die Website, bis Sie weitere Konten anlegen. Für Plesk empfohlen: SMTP mit dem Postfach der Domain (Port 587, STARTTLS).' => 'The website sends via this account (“Standard”) until you add more accounts. Recommended for Plesk: SMTP with the domain mailbox (port 587, STARTTLS).',
+    'E-Mail-Versand' => 'Email sending',
+    'Konten anlegen, bearbeiten und testen. Welches Konto wofür versendet, wählen Sie unter E-Mail-Versand → Verwendung.' => 'Create, edit and test accounts. Which account sends what is chosen under Email sending → Usage.',
+    'Konto „{name}“ bearbeiten' => 'Edit account “{name}”',
+    'Neues Konto' => 'New account',
+    'Testnachricht an {to}' => 'Test message to {to}',
+    'Verschlüsselt gespeichert.' => 'Stored encrypted.',
 ];

@@ -3641,23 +3641,16 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .net-presence small{color:var(--adm-t3)}
 
 /* Grundeinstellungen → E-Mail-Konten (system/mail-accounts.php) */
-.mk-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.mk-item{padding:12px 14px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-card,#fff)}
-.mk-item__head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
-.mk-item__desc{flex:1 1 100%;font-size:13px}
-.mk-item__act{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
 .mk-test{display:flex;gap:6px;align-items:center}
 .mk-test input{width:min(240px,50vw)}
-.mk-edit{margin-top:10px}
-.mk-edit>summary{cursor:pointer;font-weight:600}
-.mk-edit[open]>summary{margin-bottom:10px}
-.mk-new{margin-top:14px}
-.mk-new>summary{list-style:none;display:inline-flex}
-.mk-new>summary::-webkit-details-marker{display:none}
-.mk-routes select{min-width:180px}
-.mk-note{margin-top:8px}
 /* Grundeinstellungen → E-Mail-Versand: Zeilen der Konten-Liste wie Feldzeilen (Name + Beschreibung links, Zustand + Bearbeiten rechts) */
 .set-list .mk-row.f.f--inline{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
 .mk-row__label{display:flex;flex-direction:column;gap:2px;min-width:min(260px,100%);flex:1 1 0}
 .mk-row__label .f-help{margin:0;overflow-wrap:anywhere}
 .mk-row__act{display:flex;align-items:center;gap:8px;flex:none}
+/* E-Mail-Konten: aktuelles Konto hervorheben, Formular-Karte mit Aktionsleiste */
+.mk-row.is-current{background:var(--adm-hover,#F2F4F8)}
+.mk-row__act form{display:contents}
+.mk-form{display:grid;gap:12px}
+.mk-form__bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mk-form__del{margin-inline-start:auto}
