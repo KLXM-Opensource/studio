@@ -24,7 +24,7 @@ $opts = [
         __('Mitlesen können: nur Personen mit dem geheimen Schlüssel und dem Recht „Anfragen lesen“. Jedes Öffnen wird protokolliert.')],
     'both' => [__('Zentraler Schlüssel + Kopie per E-Mail'), 'envelope-simple', __('Wie „Zentraler Schlüssel“, zusätzlich geht der volle Inhalt per E-Mail an die Empfänger (unter „Formular & Eingang → Zustellung“).'),
         __('Die E-Mail ist ohne S/MIME nur auf dem Weg verschlüsselt und liegt lesbar im Postfach.')],
-    'mail' => [__('Nur per E-Mail, nichts speichern'), 'paper-plane-tilt', __('Die Einsendung geht nur per E-Mail hinaus; auf der Website bleibt nichts außer einem Zustellprotokoll ohne Inhalte. Scheitert der Versand, wird sie verschlüsselt gesichert.'),
+    'mail' => [__('Nur per E-Mail, nichts speichern'), 'paper-plane-tilt', __('Die Einsendung geht nur per E-Mail hinaus; auf der Website bleibt nichts außer einem Zustellprotokoll ohne Inhalte. Scheitert der Versand, wird sie verschlüsselt gesichert – sofern ein zentraler Schlüssel hinterlegt ist, sonst sieht der Besucher eine Fehlermeldung.'),
         __('Ohne S/MIME liegt die E-Mail lesbar im Postfach – mit S/MIME (unten) nur für die Empfänger lesbar.')],
 ];
 // Warum eine Wahl gerade nicht geht (null = wählbar)
@@ -41,9 +41,9 @@ $why = function (string $o) use ($inbox, $switch, $managed, $sharedT): ?string {
     <section class="set-group dt-crypto" data-delivery data-delivery-mode="<?= e($cur) ?>" aria-labelledby="t-cr-h">
       <h3 class="set-group__title" id="t-cr-h"><?= e(__('Schutz der Einsendungen')) ?></h3>
       <?php if (!FormCrypto::ready()): ?>
-      <div class="adm-flash adm-flash--error dt-crypto__nokey" data-delivery-when="system both mail"<?= in_array($cur, ['system', 'both', 'mail'], true) ? ' role="alert"' : ' hidden' ?>>
-        <b><?= e(__('Noch kein zentraler Schlüssel hinterlegt.')) ?></b>
-        <?= e(__('Bis er erzeugt ist, nimmt das Formular keine Einsendungen an und zeigt „noch nicht eingerichtet“. Bei „Nur per E-Mail“ fehlt sonst die Sicherung, falls der Versand scheitert.')) ?>
+      <div class="adm-flash adm-flash--info dt-crypto__nokey" data-delivery-when="system both"<?= in_array($cur, ['system', 'both'], true) ? '' : ' hidden' ?>>
+        <b><?= e(__('Für diese Wahl braucht es den zentralen Schlüssel.')) ?></b>
+        <?= e(__('Bis er erzeugt ist, nimmt das Formular keine Einsendungen an und zeigt „noch nicht eingerichtet“.')) ?>
         <?php if (can('system.manage')): ?><a class="adm-btn adm-btn--sm" href="<?= e(url('/admin/system#keys')) ?>"><?= e(__('Schlüssel erzeugen')) ?></a>
         <?php else: ?><?= e(__('Bitte die Administration bitten, den Schlüssel zu erzeugen.')) ?><?php endif; ?></div>
       <?php endif; ?>

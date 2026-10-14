@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formulare: „Nur per E-Mail“ ohne zentralen Schlüssel
+- Eingänge mit Zustellung „Nur per E-Mail“ nehmen Einsendungen auch ohne zentralen Schlüssel an (bisher „noch nicht eingerichtet“). Verschlüsselung ist ein Angebot: Schlüssel nur nötig, wenn verschlüsselt gespeichert wird (`Inbox::needsKey()`); Hinweise, Warnpunkt und Einrichtungs-Prüfung entsprechend.
+
 ### Redaktion: Ideen aus fluid
 - **Noch nicht veröffentlicht:** Bearbeiten verlassen mit gespeichertem, unveröffentlichtem Entwurf einer Seite fragt nach (Veröffentlichen / Weiter bearbeiten / Später veröffentlichen; ohne Freigaberecht ein Hinweis).
 - **Pos1/Ende** in einzeiligen Texten auf der Seite springen an Anfang/Ende des ganzen Textes (mit Umschalt markieren).

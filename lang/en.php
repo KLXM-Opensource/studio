@@ -7449,4 +7449,9 @@ return [
     'RSS-Feed' => 'RSS feed',
     'RSS-Feed dieser Tabelle (öffnet in neuem Tab)' => 'RSS feed of this table (opens in a new tab)',
     'die 30 neuesten veröffentlichten Einträge, für Feed-Reader und Newsletter-Dienste. Detail- und Listenseite verweisen automatisch darauf.' => 'the 30 latest published entries, for feed readers and newsletter services. Detail and list pages link to it automatically.',
+    // Verschlüsselung als Angebot: „Nur per E-Mail“ ohne Schlüssel
+    'Bis er erzeugt ist, nimmt das Formular keine Einsendungen an und zeigt „noch nicht eingerichtet“.' => 'Until it is created, the form accepts no submissions and shows “not set up yet”.',
+    'Die Einsendung geht nur per E-Mail hinaus; auf der Website bleibt nichts außer einem Zustellprotokoll ohne Inhalte. Scheitert der Versand, wird sie verschlüsselt gesichert – sofern ein zentraler Schlüssel hinterlegt ist, sonst sieht der Besucher eine Fehlermeldung.' => 'The submission is only sent by email; nothing remains on the website except a delivery log without content. If sending fails, it is stored encrypted – provided a central key exists, otherwise the visitor sees an error message.',
+    'Für diese Wahl braucht es den zentralen Schlüssel.' => 'This option requires the central key.',
+    'Ohne zentralen Schlüssel gibt es keine Sicherung: Scheitert der Versand, sieht der Besucher eine Fehlermeldung und kann es erneut versuchen.' => 'Without a central key there is no backup: if sending fails, the visitor sees an error message and can try again.',
 ];

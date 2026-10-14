@@ -219,7 +219,7 @@ $heads = [
           $kind === 'inbox' => __('Datenschutz: Alle Angaben werden Ende-zu-Ende verschlüsselt gespeichert und sind nur unter „Anfragen“ mit dem geheimen Schlüssel lesbar.'),
           default => __('Datenschutz: Anmeldungen werden nicht verschlüsselt gespeichert und erscheinen als Entwurf in der Teilnehmerliste – nicht auf der Website, nicht in der Suche. Für vertrauliche Angaben lieber „Anfragen sammeln“ wählen.'),
       }) ?></p>
-      <?php if ($kind === 'inbox' && !\Core\FormCrypto::ready()): ?>
+      <?php if ($kind === 'inbox' && $p !== 'mail' && !\Core\FormCrypto::ready()): // „Nur per E-Mail“ braucht keinen Schlüssel ?>
       <p class="adm-flash adm-flash--error"><?= e(__('Noch kein Schlüssel für verschlüsselte Formulare – bis dahin zeigt das Formular „noch nicht eingerichtet“.')) ?> <?php if (can('system.manage')): ?><a href="<?= e(url('/admin/system#keys')) ?>"><?= e(__('Schlüssel erzeugen')) ?></a><?php endif; ?></p>
       <?php endif; ?>
       <?php if ($kind === 'inbox' && $mode !== 'system' && ($tr = Delivery::transport()) && $tr['level'] !== 'ok'): ?>

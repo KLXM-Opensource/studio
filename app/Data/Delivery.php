@@ -283,7 +283,10 @@ final class Delivery
             }
         }
         if (!FormCrypto::ready()) {
-            $out[] = ['level' => 'error', 'text' => __('Kein öffentlicher Schlüssel – ohne ihn nimmt das Formular nichts an (auch der Rückfall-Speicher braucht ihn).')];
+            // „Nur per E-Mail“ läuft ohne Schlüssel – er wäre nur die Sicherung bei einem Zustellfehler (Entscheidung der Administration)
+            $out[] = self::mode($t) === 'mail'
+                ? ['level' => 'info', 'text' => __('Ohne zentralen Schlüssel gibt es keine Sicherung: Scheitert der Versand, sieht der Besucher eine Fehlermeldung und kann es erneut versuchen.')]
+                : ['level' => 'error', 'text' => __('Kein öffentlicher Schlüssel – ohne ihn nimmt das Formular nichts an (auch der Rückfall-Speicher braucht ihn).')];
         }
         return $out;
     }

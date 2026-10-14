@@ -59,7 +59,7 @@ foreach ($inboxes as $ib) $newReq += \Core\Data\Inbox::count($ib, 'neu');
 $navWarn = [];
 if ($user && can('system.manage')) {
     if (environment() !== 'production') $navWarn['system'] = __('Testumgebung (Staging) aktiv');
-    elseif ($inboxes && !\Core\FormCrypto::ready()) $navWarn['system'] = __('Kein Schlüssel für verschlüsselte Anfragen');
+    elseif ($inboxes && !\Core\FormCrypto::ready() && \Core\Data\Inbox::anyNeedsKey()) $navWarn['system'] = __('Kein Schlüssel für verschlüsselte Anfragen');
 }
 [$chatN, $chatAt] = $user ? \Core\Chat\Chat::navCount() : [0, 0];   // Chat: ungelesen + Erwähnungen (live: resources/js/userchat.js)
 $supportN = $user ? \Core\Support\Support::navCount() : 0;   // ungelesene Antworten bzw. (Team) neue Meldungen

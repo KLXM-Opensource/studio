@@ -316,7 +316,7 @@ final class DataForms
         $fields = self::fields($t);
         $inbox = Inbox::is($t);
         $success = trim((string) ($o['success'] ?? '')) ?: self::successText($t);
-        if ($inbox && !\Core\FormCrypto::ready()) {
+        if (Inbox::needsKey($t) && !\Core\FormCrypto::ready()) {   // „Nur per E-Mail“ geht ohne Schlüssel
             return '<p class="dff-off" role="note">' . e(lt('Das Online-Formular ist noch nicht eingerichtet. Bitte rufen Sie uns an.')) . '</p>';
         }
         if (!empty($o['sent'])) {
@@ -627,7 +627,7 @@ final class DataForms
             return ['ok' => false, 'message' => lt('Dieses Formular ist derzeit nicht verfügbar.')];
         }
         $inbox = Inbox::is($t);
-        if ($inbox && !\Core\FormCrypto::ready()) {
+        if (Inbox::needsKey($t) && !\Core\FormCrypto::ready()) {   // „Nur per E-Mail“ geht ohne Schlüssel
             return ['ok' => false, 'message' => lt('Das Online-Formular ist noch nicht eingerichtet. Bitte rufen Sie uns an.')];
         }
         $s = $t['settings']['form'];

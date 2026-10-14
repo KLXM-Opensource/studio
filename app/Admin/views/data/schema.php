@@ -57,7 +57,7 @@ foreach (array_keys($errors) as $k) {
     foreach ($sec as $x) $errSec[$x] = true;
 }
 // Verschlüsselt, aber noch kein zentraler Schlüssel: Warnpunkt am Bereich „Verschlüsselung“
-$noKey = $inbox && !\Core\FormCrypto::ready();
+$noKey = $inbox && \Core\Data\Inbox::needsKey($table ?? []) && !\Core\FormCrypto::ready();   // „Nur per E-Mail“ braucht keinen
 $all = [...$main, ...$more];
 $first = $all[0];
 $posted = (string) (app()->request?->post['_tab'] ?? '');   // nach einem Fehler: zuletzt offener Bereich

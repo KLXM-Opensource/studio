@@ -40,6 +40,23 @@ final class Inbox
         return ($t['settings']['kind'] ?? 'content') === 'inbox';
     }
 
+    /**
+     * Braucht der Eingang den zentralen Schlüssel? Nur, wenn er Einsendungen verschlüsselt speichert (Zustellung „Im System“ bzw.
+     * „Im System und per E-Mail“). „Nur per E-Mail“ läuft ohne – der Schlüssel ist dort nur die Sicherung, falls der Versand scheitert.
+     * Verschlüsselung ist ein Angebot: die Administration entscheidet, Formulare werden nur gesperrt, wo verschlüsselt gespeichert werden soll.
+     */
+    public static function needsKey(array $t): bool
+    {
+        return self::is($t) && Delivery::mode($t) !== 'mail';
+    }
+
+    /** Gibt es einen Eingang, der verschlüsselt speichert? (Warnpunkt, Einrichtungs-Prüfung) */
+    public static function anyNeedsKey(): bool
+    {
+        foreach (Tables::all() as $t) if (self::needsKey($t)) return true;
+        return false;
+    }
+
     /** Funktion „requests“ (Anfragen) für diese Website eingeschaltet? */
     public static function available(): bool
     {

@@ -270,7 +270,8 @@ final class Metrics
     {
         $s = app()->settings;
         $checks = [
-            ['ok' => FormCrypto::ready(), 'label' => __('{key} für verschlüsselte Formulare erzeugt', ['key' => term('key')]), 'link' => '/admin/system#keys', 'admin' => true],
+            // Schlüssel nur prüfen, wenn ein Eingang verschlüsselt speichern soll (Verschlüsselung ist ein Angebot – Core\Data\Inbox::needsKey)
+            ...(\Core\Data\Inbox::anyNeedsKey() ? [['ok' => FormCrypto::ready(), 'label' => __('{key} für verschlüsselte Formulare erzeugt', ['key' => term('key')]), 'link' => '/admin/system#keys', 'admin' => true]] : []),
             ['ok' => (string) $s->get('sys.mail_to') !== '' && (string) $s->get('sys.mail_from') !== '', 'label' => __('E-Mail-Versand eingerichtet'), 'link' => '/admin/system#mail', 'admin' => true],
         ];
         // Kit-Prüfungen (theme.php → project.setup_checks): Feld ausgefüllt, optional nur bei aktivem Schalter – z. B. „Impressum zugeordnet“
@@ -548,7 +549,7 @@ final class Metrics
             __('Medienordner beschreibbar') => is_writable(site()->mediaDir()) || !is_dir(site()->mediaDir()),
             __('app_key gesetzt') => strlen((string) $cfg->get('app_key')) >= 32,
             __('Kit kompatibel') => app()->theme->compatible(),
-            __('Schlüssel für verschlüsselte Formulare') => FormCrypto::ready() ?: null,
+            __('Schlüssel für verschlüsselte Formulare') => FormCrypto::ready() ?: (\Core\Data\Inbox::anyNeedsKey() ? null : true),
         ];
         if (app()->settings->get('sys.maintenance')) $rows[__('Wartungsmodus ist eingeschaltet')] = null;
         if (environment() === 'production') {
