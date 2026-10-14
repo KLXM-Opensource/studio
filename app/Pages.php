@@ -358,7 +358,18 @@ final class Pages
                 self::$rejected[] = $type;
                 continue;
             }
-            [$data] = Fields::sanitize($def['fields'] ?? [], is_array($b['data'] ?? null) ? $b['data'] : []);
+            // Block mit eigener Prüfung (Erweiterungen, Definition 'sanitize' => fn(array $data): array) – z. B. Daten, deren Schema
+            // von einem anderen Block abhängt (gemeinsame Bausteine); sonst nach dem Feldschema
+            if (isset($def['sanitize']) && is_callable($def['sanitize'])) {
+                try {
+                    $data = (array) ($def['sanitize'])(is_array($b['data'] ?? null) ? $b['data'] : []);
+                } catch (\Throwable $e) {
+                    error_log('[Block ' . $type . '] sanitize: ' . $e->getMessage());
+                    continue;
+                }
+            } else {
+                [$data] = Fields::sanitize($def['fields'] ?? [], is_array($b['data'] ?? null) ? $b['data'] : []);
+            }
             // Feldbindungen für Detailseiten-Vorlagen: {blockfeld: datensatzfeld}
             $bind = [];
             $names = array_column($def['fields'] ?? [], 'name');

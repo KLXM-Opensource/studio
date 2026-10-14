@@ -91,6 +91,10 @@ final class ExtensionsSelfTest
         self::eq('blocksResolve: Verweis aufgelöst, Fehler ignoriert', Extensions::resolveBlocks([['type' => 'qa_ref', 'data' => []]], ['purpose' => 'search']), [['type' => 'paragraph', 'data' => ['text' => 'aufgelöst:search']]]);
         $p = Extensions::blockPresets(['paragraph']);
         self::eq('blockPresets: nur vorhandene Typen', [count($p), $p[0]['label'] ?? null, $p[0]['group'] ?? null], [1, 'Vorlage', 'QA']);
+        // Blockdefinition mit eigener Prüfung ('sanitize'): Daten außerhalb des Feldschemas bleiben, Ausnahme → Block entfällt
+        app()->theme->addBlocks(['qa_ref' => ['label' => 'QA-Verweis', 'listed' => false, 'sanitize' => fn(array $d) => isset($d['ref']) ? ['ref' => (string) $d['ref'], 'over' => (array) ($d['over'] ?? [])] : throw new \InvalidArgumentException('ohne Verweis')]], __DIR__, 'qa_selftest');
+        $s = Pages::sanitizeBlocks([['type' => 'qa_ref', 'data' => ['ref' => 'abc', 'over' => ['title' => 'T'], 'fremd' => 1]], ['type' => 'qa_ref', 'data' => []]]);
+        self::eq('Blockdefinition sanitize: eigenes Schema, ungültig entfällt', [count($s), $s[0]['data'] ?? null], [1, ['ref' => 'abc', 'over' => ['title' => 'T']]]);
         $pdo = app()->db->pdo;
         $pdo->beginTransaction();
         try {

@@ -454,6 +454,22 @@ final class Theme
     /** Versionen-Vorschau (Admin\VersionsController, ?mark=1): Block-ID → 'new' | 'changed' – als data-vdiff am äußersten Element */
     public static array $vdiff = [];
 
+    /**
+     * Vorschau eines Blocks im Editor (Seitenstart und EditorController::preview): Erweiterungen lösen ihn auf (Extension::blocksResolve,
+     * Zweck „preview“, Entwurf). Ein aufgelöster Block anderen Typs ist nicht direkt bearbeitbar (seine Felder gehören z. B. dem Original
+     * eines gemeinsamen Bausteins) – data-edit-Attribute entfallen. null = unbekannter Typ.
+     */
+    public function previewBlock(array $b): ?string
+    {
+        $res = Extensions::resolveBlocks([$b], ['page' => app()->currentPage, 'draft' => true, 'purpose' => 'preview']);
+        $show = (is_array($res[0] ?? null) && isset($res[0]['type'])) ? $res[0] + ['id' => $b['id'] ?? null] : $b;
+        $block = $this->makeBlock($show) ?? $this->makeBlock($b);
+        if (!$block) return null;
+        $html = $this->renderBlock($block);
+        if (($show['type'] ?? '') !== ($b['type'] ?? '')) $html = (string) preg_replace('~\sdata-edit(?:-mode|-label)?="[^"]*"~', '', $html);
+        return $html;
+    }
+
     public function renderBlock(Block $block): string
     {
         $inner = $this->renderInner($block);
@@ -744,6 +760,7 @@ final class Theme
                 'central' => $b['central'] ?? null, 'background' => $b['background'] ?? 'white',
                 'help' => $b['help'] ?? null,
                 'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
+                'listed' => ($b['listed'] ?? true) !== false,   // false: nicht in der Blockauswahl, nur über Vorlagen (Extension::blockPresets)
                 'formfields' => $ff ?: null,
                 'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“
                 'nestable' => $this->nestableVariants($type),   // in einer Spalte des Layouts erlaubt (true | Varianten | false)

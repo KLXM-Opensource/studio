@@ -493,7 +493,7 @@ const BlockPicker = (() => {
     <p class="cms-addpop__none" hidden>${CMSAdmin.esc(T('Nichts gefunden.'))}</p>`;
   layerBox().append(el);
   const q = $('.cms-addpop__q', el), list = $('.cms-addpop__list', el), none = $('.cms-addpop__none', el);
-  const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false);
+  const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false && def.listed !== false);   // listed: false → nur über Vorlagen
   // Vorlagen der Erweiterungen (Extension::blockPresets): vorbelegte Blöcke, nach Gruppe – unter den Blocktypen
   const presets = (cfg.presets || []).filter((p) => cfg.blocks[p.type]);
   list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
@@ -736,6 +736,9 @@ holder()?.addEventListener('click', e => {
  *   CMSAdmin.editorExt.addBadge(b => 'Text' | null)                             Kennzeichen in der Block-Leiste
  *   CMSAdmin.editorExt.blocks()                                                  alle Blöcke der Seite (Liste von b)
  *   CMSAdmin.editorExt.refreshBadges()                                           Kennzeichen neu zeichnen (z. B. nach Laden von Zahlen)
+ *   CMSAdmin.editorExt.api(url, body)                                            POST als JSON mit CSRF-Token → Promise<Antwort>
+ *   CMSAdmin.editorExt.readForm(form, prefix = 'f')                              Felder (Core\Fields, name="f[…]") → Daten wie im Editor
+ *   CMSAdmin.editorExt.pageId                                                    bearbeitete Seite
  * b = { id, type, index, data (Kopie), label, update(data), replace(type, data) } – update/replace markieren die Seite als geändert.
  * Ereignis „cms:editor-ready“ am document, sobald der Editor bereit ist (detail: { page }).
  */
@@ -748,8 +751,10 @@ const extBlock = t => ({
   replace(type, data) {
     const i = blockEls().indexOf(t.el?.closest('.ce-block'));
     if (i < 0 || !cfg.blocks[type]) return false;
-    editor.blocks.insert(type, structuredClone(data || {}), undefined, i + 1, false);
-    editor.blocks.delete(i);
+    // Abschnitts-Einstellungen (Hintergrund, Anker, Abstände) bleiben am neuen Block
+    const id = newBlockId();
+    initialTunes[id] = structuredClone(t.tuneData || {});
+    editor.blocks.insert(type, structuredClone(data || {}), undefined, i, false, true, id);
     markDirty();
     requestAnimationFrame(refreshMoveButtons);
     return true;
@@ -760,15 +765,18 @@ window.CMSAdmin = window.CMSAdmin || {};
 CMSAdmin.editorExt = {
   addBlockAction(a) { if (a && a.id && typeof a.run === 'function') EXT.actions.push(a); },
   addBadge(fn) { if (typeof fn === 'function') { EXT.badges.push(fn); CMSAdmin.editorExt.refreshBadges(); } },
-  blocks() { return [...tools.values()].filter(t => t.el?.isConnected).map(extBlock); },
+  blocks() { return [...tools.values()].filter(t => t.el?.isConnected).map(extBlock).sort((a, b) => a.index - b.index); },   // in Seitenreihenfolge
   refreshBadges() { tools.forEach(t => t.paintExt?.()); },
+  api: (url, body) => api(url, body),
+  readForm: (form, prefix = 'f') => formToObject(form, prefix),
+  get pageId() { return cfg.page?.id ?? null; },
 };
 
 // ------------------------------------------------------------------ Generisches Block-Tool
 function makeTool(type, def) {
   return class BlockTool {
     // Für dieses Projekt gesperrte Blocktypen: bestehende bleiben bearbeitbar, neue lassen sich nicht einfügen
-    static get toolbox() { return def.insertable === false ? undefined : { title: def.label, icon: `<span class="cms-tool-icon">${blockIcon(def)}</span>` }; }
+    static get toolbox() { return def.insertable === false || def.listed === false ? undefined : { title: def.label, icon: `<span class="cms-tool-icon">${blockIcon(def)}</span>` }; }
     static get enableLineBreaks() { return true; }
     static get isReadOnlySupported() { return true; }
 

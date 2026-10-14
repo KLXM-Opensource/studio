@@ -202,17 +202,14 @@ final class SiteController
             $own = \Core\Data\EntryBlocks::items($ctx['entry'][$ce['field']] ?? null);
             $previews = [];
             foreach ($own as $b) {
-                if ($block = $theme->makeBlock($b)) $previews[$b['id']] = $theme->renderBlock($block);
+                if (($html = $theme->previewBlock($b)) !== null) $previews[$b['id']] = $html;
             }
             $editor = ['page' => $page, 'blocks' => $own, 'previews' => $previews, 'content' => $ce + ['before' => $before, 'after' => $after]];
             $content = '';
         } elseif ($app->editing) {
             $previews = [];
             foreach ($blocks as $b) {
-                $block = $theme->makeBlock($b);
-                if ($block) {
-                    $previews[$b['id']] = $theme->renderBlock($block);
-                }
+                if (($html = $theme->previewBlock($b)) !== null) $previews[$b['id']] = $html;   // aufgelöst wie EditorController::preview
             }
             $editor = ['page' => $page, 'blocks' => $blocks, 'previews' => $previews];
             $content = '';
