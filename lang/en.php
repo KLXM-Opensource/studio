@@ -7490,4 +7490,5 @@ return [
     'Bearbeitung übernommen' => 'took over editing',
     'Wer arbeitet hier?' => 'Who is working here?',
     'seit {ago}' => 'since {ago}',
+    'Dieser Eintrag' => 'This entry',
 ];

@@ -108,7 +108,7 @@ function here(el) {
   // Infozeile oben im Menü „Weitere Aktionen“ (Schatten-Wurzel der Leiste)
   const menuInfo = (text) => {
     const box = el.getRootNode().querySelector?.('#cms-more-menu');
-    const menu = box?.querySelector('.cms-menu__col--site') || box;   // rechte Spalte („allgemein“), sonst das Menü selbst
+    const menu = box?.querySelector('.cms-menu__col--page') || box;   // linke Spalte „Diese Seite“ (betrifft die Seite), sonst das Menü selbst
     if (!menu) return;
     let row = menu.querySelector(':scope > .cms-menu__info');
     if (!text) { row?.remove(); menu.querySelector(':scope > .cms-menu__sep[data-presence-sep]')?.remove(); return; }
@@ -116,7 +116,8 @@ function here(el) {
       row = d.createElement('p');
       row.className = 'cms-menu__info';
       const sep = d.createElement('span'); sep.className = 'cms-menu__sep'; sep.dataset.presenceSep = '1'; sep.setAttribute('role', 'separator');
-      menu.prepend(row, sep);
+      const head = menu.querySelector(':scope > .cms-menu__head');   // unter der Überschrift „Diese Seite“
+      head ? head.after(row, sep) : menu.prepend(row, sep);
     }
     row.innerHTML = `${ico('clock-counter-clockwise')}<span>${esc(text)}</span>`;
   };
