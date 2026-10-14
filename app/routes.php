@@ -430,7 +430,10 @@ return function (Router $r): void {
     $r->get('/admin/pages/{id}/versions/{rev}/vorschau', [Admin\VersionsController::class, 'pagePreview']);
     $r->get('/admin/api/data/{handle}/{id}/versions', [Admin\VersionsController::class, 'entryVersions']);
     $r->post('/admin/api/data/{handle}/{id}/versions/{rev}/restore', [Admin\VersionsController::class, 'entryRestore']);
-    $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);       // „Neue Seite“ auf der Website (Core\PageTool)
+    $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);
+    // Präsenz der Redaktion: wer arbeitet gerade wo (Core\Presence, Entwicklerhandbuch → Präsenz)
+    $r->post('/admin/api/presence', [Admin\PresenceController::class, 'beat']);
+    $r->get('/admin/api/presence', [Admin\PresenceController::class, 'index']);       // „Neue Seite“ auf der Website (Core\PageTool)
     $r->post('/admin/api/pages/create', [Admin\PageController::class, 'apiCreate']);
     $r->get('/admin/api/pages/{id}/settings', [Admin\PageController::class, 'apiSettings']);   // „Seiteneinstellungen“ auf der Website (Core\PageSettingsTool)
     $r->post('/admin/api/pages/{id}/settings', [Admin\PageController::class, 'apiSettingsSave']);

@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Präsenz der Redaktion: wer arbeitet gerade wo
+- Werkzeugleiste: wer dieselbe Seite bzw. denselben Eintrag gerade bearbeitet (Kürzel/Profilbild), sonst „zuletzt gespeichert von … vor …“; ⚠ und Rückfrage vor dem Speichern, wenn jemand anderes inzwischen gespeichert hat (keine Sperre). Seitenbaum, Eintragslisten, Übersicht („Gerade aktiv“) und Netzwerk-Übersicht (alle Websites, Klick führt per Einmal-Anmeldung dorthin). Eigenständig und übertragbar: `Core\Presence` (nur site/type/id/user + Zeit), Transport `Core\Live` (Kanal `presence:{site}`), Modul `presence.mjs`; Einstellung `sys.presence` (Standard an), Selbsttest `presence:selftest`.
+- *EN:* Editorial presence – who is editing what: avatars in the toolbar, "last saved by …", a warning and confirmation before saving when someone else saved in the meantime (no locking), markers in page tree, entry lists, dashboard and the network overview (all sites, click opens via single sign-on). Portable: `Core\Presence`, transport via `Core\Live`, standalone `presence.mjs`; setting `sys.presence`, self-test `presence:selftest`.
+
 ### Live: Neu laden auf Aktion (Filtern, Blättern, Live-Suche)
 - Blöcke mit `'reload' => true` laden auf Klick, Absenden oder Eingabe neu – ohne Seitenwechsel, über denselben Weg wie die Live-Aktualisierung (`Core\Live::region()`, `data-live-region`/`data-live-nav`/`data-live-input`, `live.js`). Adresse und Verlauf wandern mit (Zurück/Teilen), Fokus und Ansage bleiben sauber, ohne JavaScript normale Links. Datenliste: Filter-Knöpfe, Suche, Zurücksetzen und Blättern.
 - *EN:* Blocks with `'reload' => true` reload on click, submit or input without a page change, via the same path as live updates (`Core\Live::region()`, `live.js`). URL/history, focus and announcements handled; plain links without JavaScript. Data list: filter chips, search, reset and paging.

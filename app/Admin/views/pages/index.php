@@ -48,7 +48,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell, $short): st
         . ($ext['actions'] ? ' data-ext-actions="' . json_attr(array_map(fn($a) => [$a['label'], url($a['href'])], $ext['actions'])) . '"' : '')
         . ($kids ? ' aria-expanded="true"' : '') . ' aria-selected="false">'
         . '<div class="pt-row" draggable="' . ($p['is_home'] ? 'false' : 'true') . '">'
-        . '<span class="pt-name" style="--depth:' . $n['depth'] . '">'
+        . '<span class="pt-name" data-presence-slot style="--depth:' . $n['depth'] . '">'
         . ($kids ? '<button type="button" class="pt-twisty" tabindex="-1" aria-hidden="true" data-toggle></button>' : '<span class="pt-twisty pt-twisty--none"></span>')
         . '<span class="pt-icon pt-icon--' . ($p['is_home'] ? 'home' : ($kids ? 'folder' : 'page')) . '" aria-hidden="true"></span>'
         . '<a class="pt-title" href="' . e($url) . '?edit=1" tabindex="-1" title="' . e($p['is_home'] ? '/' : '/' . $p['path']) . '">' . e($p['title']) . '</a>'
@@ -137,7 +137,7 @@ $canSpecial = $canSpecial404 || ($templates && can('data.schema')) || !empty($pa
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost pt-pathbtn" data-paths-toggle aria-pressed="false" title="<?= e(__('Adressen der Seiten als eigene Spalte zeigen')) ?>"><?= icon('link') ?> <?= e(__('Adressen')) ?></button>
   </div>
   <div class="pt-head" aria-hidden="true"><span>Name</span><span class="pt-h-path">Adresse</span><span>Status</span><span class="pt-h-hints"><?= e(__('Hinweise')) ?></span><span>Menü</span><span class="pt-h-date">Geändert</span><span></span></div>
-  <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"><?= $html ?></ul>
+  <ul class="pt-tree" role="tree" aria-label="Seitenbaum" tabindex="0"<?= ($pl = \Core\Http\Controllers\Admin\PresenceController::listAttrs('page')) ? ' data-presence-list' . $pl : '' ?>><?= $html ?></ul>
   <footer class="dt-foot"><span><?= $count ?> Seiten</span><span data-pt-msg aria-live="polite"></span></footer>
 </div>
 

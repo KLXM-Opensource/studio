@@ -59,6 +59,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
       </span>
     </span>
     <?php endif; ?>
+    <?php if ($pra = \Core\Http\Controllers\Admin\PresenceController::hereAttrs($b)): // Präsenz: wer bearbeitet gerade (presence.mjs) ?><span class="cms-presence" role="status"<?= $pra ?> hidden></span><?php endif; ?>
     <?php if ($b['langs']): $lc = array_values(array_filter($b['langs'], fn($l) => $l['current']))[0] ?? $b['langs'][0];
       $lst = ['online' => __('online'), 'draft' => __('Entwurf'), 'missing' => __('noch nicht angelegt')]; ?>
     <span class="cms-menuwrap cms-bar__lang">
@@ -238,6 +239,8 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
 <!--cms-bar-end-->
 <?php if ($b['tools']): // Werkzeuge beim Bearbeiten: Konfiguration für resources/js/_tools.js (Module erst beim Öffnen) ?>
 <script type="application/json" id="cms-tools"><?= json_encode(\Core\FrontendTools::config($b, $b['tools']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<?php endif; ?>
+<?php if (!empty($pra)): ?><script type="module" src="<?= e(asset('js/presence.mjs')) ?>"></script>
 <?php endif; ?>
 <?php foreach ($b['ext']['scripts'] ?? [] as $xs): // Skripte der Erweiterungen (Extension::toolbar) – nur 'self' ?><script src="<?= e($xs['src']) ?>"<?= $xs['module'] ? ' type="module"' : ' defer' ?>></script>
 <?php endforeach; ?>

@@ -105,6 +105,7 @@ if ($user && ($req = app()->request)) {
 <?= $user ? \Core\Chat\Chat::head() /* Chat zwischen Benutzern (resources/js/userchat.js, css/userchat.css) – leer ohne Recht */ : '' ?>
 <?= $user ? \Core\RichText::clientScript() /* Formatierungsleiste: Stile und Farben des Kits (resources/js/_rte.js) */ : '' ?>
 <script src="<?= e(asset('js/admin.js')) ?>" defer></script>
+<?php if ($user && \Core\Http\Controllers\Admin\PresenceController::on()): // Präsenz der Redaktion (eigenständiges Modul) ?><script type="module" src="<?= e(asset('js/presence.mjs')) ?>"></script><?php endif; ?>
 <?= $user ? \Core\Extensions::adminHead((string) ($view ?? '')) /* CSS/JS aktiver Erweiterungen für diese Ansicht (Extension::adminAssets) – nach admin.js */ : '' ?>
 </head>
 <?php $drill = $user && !empty($drill) ? $drill : ''; ?>

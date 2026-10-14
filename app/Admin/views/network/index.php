@@ -138,6 +138,15 @@ $pkHosts = \Core\HostHandover::passkeyHosts($me);
         <?php if ($noindex): ?><span class="net-tag net-tag--muted" title="<?= e(__('Suchmaschinen sollen die Website nicht aufnehmen')) ?>">noindex</span><?php endif; ?>
         <?php if ($maint): ?><span class="net-tag net-tag--warn"><?= e(__('Wartungsmodus')) ?></span><?php endif; ?>
       </p>
+      <?php // Präsenz: wer arbeitet gerade auf dieser Website (Core\Presence) – Klick meldet per Einmal-Anmeldung an und öffnet den Ort
+      $act = \Core\Http\Controllers\Admin\PresenceController::on() ? \Core\Presence::list(['site' => $k]) : []; if ($act): ?>
+      <ul class="net-presence" aria-label="<?= e(__('Gerade aktiv')) ?>">
+        <?php foreach (array_slice($act, 0, 5) as $pe): $mins = max(0, (int) round((time() - (int) $pe['since']) / 60)); ?>
+        <li><form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><input type="hidden" name="path" value="<?= e((string) ($pe['url'] ?? '') ?: '/admin') ?>">
+          <button type="submit" class="net-presence__b"><span class="net-presence__ava" aria-hidden="true"><?= e((string) ($pe['initials'] ?? '?')) ?></span><span><b><?= e((string) ($pe['name'] ?? '')) ?></b> · <?= e((string) ($pe['label'] ?? '') ?: $pe['type'] . ' ' . $pe['id']) ?> <small><?= e($mins < 1 ? __('gerade eben') : __('seit {n} Min.', ['n' => $mins])) ?></small></span></button></form></li>
+        <?php endforeach; ?>
+      </ul>
+      <?php endif; ?>
       <?php if (!empty($s['pending'])): ?>
       <div class="net-setup">
         <p><strong><?= e(__('Noch nicht eingerichtet')) ?></strong> – <?= e(__('Kit und Startinhalte wählen. Bis dahin sehen Besucher „Hier entsteht eine neue Website“.')) ?></p>

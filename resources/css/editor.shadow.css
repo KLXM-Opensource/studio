@@ -756,3 +756,15 @@ button.pp-fold:focus-visible{outline:2px solid var(--adm-a,#314164);outline-offs
 .cms-bar[data-bar] .cms-bar__brand--own .cms-mark__logo--img{display:block;width:auto;max-width:96px;height:22px;object-fit:contain}
 .cms-bar[data-bar] .cms-bar__brand--own .brand-dark{display:none}
 .cms-bar__brand--own .cms-mark__logo--txt{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;color:#1E2840;box-shadow:inset 0 0 0 1.5px currentColor;font:800 12px/1 system-ui,sans-serif}
+/* Präsenz (presence.mjs): wer bearbeitet gerade – Avatare/Initialen, Hinweis „zuletzt gespeichert“, Konflikt */
+.cms-presence{display:inline-flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;max-width:260px;overflow:hidden;font-size:12px;color:var(--bar-mute,#B8C2D6)}
+.cms-presence__avas{display:inline-flex;flex:none}
+.cms-presence__ava{display:inline-grid;place-items:center;width:24px;height:24px;margin-left:-6px;border-radius:50%;border:2px solid var(--bar-bg,#1E2840);object-fit:cover;background:#4F6FD6;color:#fff;font:700 10px/1 system-ui,sans-serif}
+.cms-presence__ava:first-child{margin-left:0}
+.cms-presence__t{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cms-presence__t--muted{opacity:.8}
+.cms-presence__warn{flex:0 1 auto;min-width:0;max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:2px 8px;border-radius:999px;background:#FDE68A;color:#5B3A00;font-weight:700}
+.cms-presence.is-conflict .cms-presence__t{display:none}
+.cms-presence__sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cms-presence__warn{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;padding:0;border-radius:50%;max-width:none;font-size:13px}
+@media (max-width:900px){.cms-presence__t{display:none}}

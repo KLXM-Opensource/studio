@@ -387,7 +387,11 @@ final class Network
     public static function safePath(string $p): string
     {
         if ($p === '/') return '/';
-        return preg_match('~^/admin(/[\w\-/]*)?$~', $p) && !str_starts_with($p, '/admin/sso') && !str_starts_with($p, '/admin/login') ? $p : '/admin';
+        if (str_starts_with($p, '/admin')) {
+            return preg_match('~^/admin(/[\w\-/]*)?$~', $p) && !str_starts_with($p, '/admin/sso') && !str_starts_with($p, '/admin/login') ? $p : '/admin';
+        }
+        // Seite der Website (Präsenz „direkt dorthin“): nur ein Pfad, optional ?edit=1 – keine fremden Hosts, kein „..“
+        return preg_match('~^/[\p{L}\p{N}_\-/.]*(\?edit=1)?$~u', $p) && !str_contains($p, '..') && !str_starts_with($p, '//') ? $p : '/admin';
     }
 
     /**

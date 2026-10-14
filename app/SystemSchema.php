@@ -56,6 +56,8 @@ final class SystemSchema
                     'help' => 'Für Anruf-Links und die internationale Schreibweise von Telefonnummern auf Seiten in weiteren Sprachen (z. B. „0211 …“ → „+49 211 …“).'],
                 ['type' => 'heading', 'label' => __('Wartung')],
                 ['name' => 'sys.maintenance', 'label' => 'Wartungsmodus – Website nur für eingeloggte Nutzer', 'type' => 'bool', 'default' => false],
+                ['name' => 'sys.presence', 'label' => 'Anzeigen, wer gerade wo arbeitet (Redaktion)', 'type' => 'bool', 'default' => true,
+                    'help' => 'Angemeldete sehen in der Werkzeugleiste, im Seitenbaum, in Eintragslisten und auf der Übersicht, wer gerade dieselbe Seite oder denselben Eintrag bearbeitet, und werden vor dem Speichern gewarnt, wenn jemand anderes inzwischen gespeichert hat. Nur Name/Avatar und Zeitpunkt, keine Protokollierung. Besucher sehen nichts davon.'],
                 ['name' => 'sys.maintenance_text', 'label' => 'Text im Wartungsmodus', 'type' => 'textarea', 'rows' => 2,
                     'default' => 'Unsere Website wird gerade überarbeitet. Telefonisch sind wir wie gewohnt für Sie da.'],
             ]],

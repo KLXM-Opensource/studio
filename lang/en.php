@@ -7457,4 +7457,15 @@ return [
     // E-Mail-Test-Umleitung
     'Alle E-Mails gehen an {to} statt an die eigentlichen Empfänger.' => 'All emails go to {to} instead of the actual recipients.',
     'E-MAIL-TEST' => 'EMAIL TEST',
+    // Präsenz der Redaktion (Core\Presence, presence.mjs)
+    'Gerade aktiv' => 'Active now',
+    'Inzwischen von {name} gespeichert' => 'Saved by {name} in the meantime',
+    'Seit Sie dies geöffnet haben, hat {name} gespeichert ({ago}). Wenn Sie jetzt speichern, kann das diese Änderungen überschreiben – der vorige Stand bleibt als Version erhalten.' => 'Since you opened this, {name} has saved ({ago}). Saving now may overwrite those changes – the previous state is kept as a version.',
+    'Trotzdem speichern' => 'Save anyway',
+    'Zuletzt gespeichert: {name}, {ago}' => 'Last saved: {name}, {ago}',
+    'seit {n} Min.' => 'for {n} min',
+    '{names} bearbeiten gerade' => '{names} are editing',
+    '{names} bearbeitet gerade' => '{names} is editing',
+    '{name} hat inzwischen gespeichert' => '{name} has saved in the meantime',
+    'Inzwischen gespeichert' => 'Saved meanwhile',
 ];

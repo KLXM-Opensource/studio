@@ -158,6 +158,7 @@
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
  *   live:selftest                                     Selbsttest der Live-Aktualisierung (Versionen, signierte Abos, Live-Blöcke)
+ *   presence:selftest                                 Selbsttest der Präsenz (melden, auflisten, ablaufen, abmelden; sicherer Netzwerk-Zielpfad)
  *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
  *   links:selftest                                    Selbsttest der Linkauswahl (Seitenbaum, Daten-Quellen, Glossar, Weitere laden, Rechte)
  *   targetedit:selftest                               Selbsttest „Ziel bearbeiten“ an Karten (edit_link: Auflösen, Rechte, keine Ausgabe für Besucher)
@@ -1183,6 +1184,15 @@ switch ($cmd) {
         if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'presence:selftest':
+        // Präsenz der Redaktion (Core\Presence): melden, auflisten, ablaufen; Network::safePath für „direkt dorthin“
+        $res = Core\Presence::selftest();
+        $sp = ['/die-seite?edit=1' => '/die-seite?edit=1', '/admin/sso?t=x' => '/admin', '//evil.example' => '/admin', '/a/../admin/sso' => '/admin', 'https://evil.example/' => '/admin', '/admin/pages' => '/admin/pages'];
+        foreach ($sp as $in => $want) { $got = Core\Network\Network::safePath($in); if ($got === $want) $res['ok']++; else $res['fails'][] = "safePath($in): erwartet $want, erhalten $got"; }
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'live:selftest':

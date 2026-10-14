@@ -45,6 +45,9 @@ $fmtTrend = function (?array $t): string {
   <p class="dash-bar__hint adm-muted" data-dash-hint<?= $customize ? '' : ' hidden' ?>><?= e(__('Karten mit den Pfeilen oder per Ziehen am Griff verschieben, mit dem Auge aus- und einblenden.')) ?></p>
 </div>
 
+<?php if ($pl = \Core\Http\Controllers\Admin\PresenceController::listAttrs()): // Präsenz: wer arbeitet gerade wo (presence.mjs, ausgeblendet ohne Aktive) ?>
+<section class="cms-presence-board" data-presence-board-box hidden aria-labelledby="presence-h"><h2 id="presence-h"><?= e(__('Gerade aktiv')) ?></h2><ul data-presence-board<?= $pl ?>></ul></section>
+<?php endif; ?>
 <div class="dash-wrap">
 <div class="dash-grid<?= $customize ? ' is-customizing' : '' ?>" id="dash" data-dash data-endpoint="<?= e(url('/admin/api/dashboard')) ?>">
 <?php foreach ($cards as $key => $c):
