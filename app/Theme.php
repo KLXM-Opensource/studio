@@ -291,6 +291,9 @@ final class Theme
 
     public function renderBlocks(array $blocks): string
     {
+        // Erweiterungen lösen Blöcke vor der Ausgabe auf (Extension::blocksResolve, Zweck „render“) – z. B. gemeinsame Bausteine;
+        // im Bearbeiten-Modus nicht (dort Vorschau je Block, EditorController::preview, Zweck „preview“)
+        if (!app()->editing) $blocks = Extensions::resolveBlocks($blocks, ['page' => app()->currentPage, 'draft' => false, 'purpose' => 'render']);
         // Detailseite: „Inhaltsblöcke des Eintrags“ (entry_blocks) → Blöcke des Eintrags als eigene Abschnitte (Core\Data\EntryBlocks);
         // im Seiten-Editor bleibt der Block stehen (Vorschau, app/Blocks/entry_blocks.php)
         if (!app()->editing) {

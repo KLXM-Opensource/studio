@@ -81,8 +81,13 @@ final class EditorController extends AdminController
         if (!$blocks) {
             return Response::json(['ok' => false, 'error' => 'Unbekannter Blocktyp'], 422);
         }
-        $block = app()->theme->makeBlock($blocks[0]);
+        // Erweiterungen (Extension::blocksResolve, Zweck „preview“): z. B. Ableger eines gemeinsamen Bausteins als Original zeigen.
+        // Ein aufgelöster Block anderen Typs ist in der Vorschau nicht direkt bearbeitbar (seine Felder gehören dem Original).
+        $res = \Core\Extensions::resolveBlocks([$blocks[0]], ['page' => isset($page) ? $page : null, 'draft' => true, 'purpose' => 'preview']);
+        $show = (is_array($res[0] ?? null) && isset($res[0]['type'])) ? $res[0] + ['id' => $blocks[0]['id'] ?? null] : $blocks[0];
+        $block = app()->theme->makeBlock($show) ?? app()->theme->makeBlock($blocks[0]);
         $html = app()->theme->renderBlock($block);
+        if (($show['type'] ?? '') !== ($blocks[0]['type'] ?? '')) $html = (string) preg_replace('~\sdata-edit(?:-mode|-label)?="[^"]*"~', '', $html);
         // Bild im Rahmen (Core\ImageFit): erzeugte Regeln (Farbe, unscharfer Hintergrund) für die Vorschau mitliefern
         $html .= \Core\ImageFit::rulesLink();
         \Core\ImageFit::reset();
