@@ -365,7 +365,7 @@ function initCollectionFields(scope = d) {
     btn.addEventListener('click', async () => {
       const sel = btn.closest('.col-field')?.querySelector('select');
       if (!sel || !window.CMSMedia?.pickCollection) return;
-      const c = await window.CMSMedia.pickCollection(+sel.value || 0);
+      const c = await window.CMSMedia.pickCollection(+sel.value || 0, btn.dataset.kind || 'image');
       if (!c) return;
       if (![...sel.options].some(o => o.value === String(c.id))) sel.add(new Option(c.name, String(c.id)));
       else [...sel.options].find(o => o.value === String(c.id)).textContent = c.name;

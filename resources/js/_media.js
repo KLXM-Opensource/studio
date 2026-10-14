@@ -1583,12 +1583,12 @@ class Finder {
  * Sammlung wählen oder anlegen (Feld „Sammlung“): volle Mediathek im Dialog – Sammlung anlegen (+), Bilder hochladen und
  * hineinziehen – dann „übernehmen“. Ergebnis {id, name} oder null. Nur Sammlungen dieser Website (nicht in geteilten Medien).
  */
-function pickCollection(current = 0) {
+function pickCollection(current = 0, kind = 'image') {
   return local(() => new Promise(resolve => {
     const dlg = inBox('media-dialog', '<dialog id="media-dialog" class="fx-dialog" aria-label="Mediathek"></dialog>');
     let chosen = null, f = null;
     dlg.innerHTML = `<div class="fx-dhead"><h2>${esc(t('Sammlung wählen oder anlegen'))}</h2>
-      <p class="fx-dhint">${esc(t('Links unter „Sammlungen“ mit + anlegen, Bilder hochladen und auf die Sammlung ziehen – dann übernehmen.'))}</p>
+      <p class="fx-dhint">${esc(kind === 'file' ? t('Links unter „Sammlungen“ mit + anlegen, Dateien hochladen und auf die Sammlung ziehen – dann übernehmen.') : t('Links unter „Sammlungen“ mit + anlegen, Bilder hochladen und auf die Sammlung ziehen – dann übernehmen.'))}</p>
       <button type="button" class="adm-btn adm-btn--primary adm-btn--small" data-take disabled>${esc(t('Sammlung wählen'))}</button>
       <button type="button" class="adm-btn adm-btn--ghost adm-btn--small" data-close>${esc(t('Abbrechen'))}</button></div><div class="fx-host"></div>`;
     const take = $('[data-take]', dlg);
@@ -1598,7 +1598,7 @@ function pickCollection(current = 0) {
       take.textContent = c ? t('„{name}“ übernehmen', { name: c.name }) : fx.pool ? t('Nur Sammlungen dieser Website') : t('Sammlung wählen');
       take._c = c;
     };
-    f = new Finder($('.fx-host', dlg), { mode: 'library', embedded: true, kind: 'image', onLoad: sync });
+    f = new Finder($('.fx-host', dlg), { mode: 'library', embedded: true, kind: kind === 'file' ? null : kind, onLoad: sync });   // Downloads: alle Dateien
     if (current) { f.src = { type: 'collection', value: String(current) }; f.load(); }
     take.onclick = () => { if (take._c) { chosen = { id: +take._c.id, name: take._c.name }; dlg.close(); } };
     $('[data-close]', dlg).onclick = () => dlg.close();

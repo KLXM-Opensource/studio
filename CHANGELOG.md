@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Downloads-Block: Dateien leichter wählen
+- In allen Kits: „Dateien auswählen …“ übernimmt mehrere Dateien (PDFs usw.) aus der Mediathek auf einmal; Sammlung bzw. Dateiliste erscheinen nur passend zur „Quelle“; „Medien öffnen …“ bei der Sammlung zeigt alle Dateien statt nur Bilder (`Theme::downloadFields`, Sammlungsfeld `'kind' => 'file'`).
+
 ### Tabellen-Designer: Abschnitte verschieben, sicheres Umwandeln
 - ↑ ↓ an einem Abschnitt verschiebt ihn mit allen seinen Feldern. Umwandeln eines bestehenden Feldes in Abschnitt/Freitext fragt nach (Inhalte gingen verloren). Die Rückfrage „Felder wirklich löschen“ steht oben im Bereich Felder, mit „Änderungen verwerfen“. Im Menü „+“ stehen die Gruppen-Überschriften in einer eigenen Zeile.
 - Formular einer Datentabelle: später im Designer hinzugefügte Felder stehen automatisch unter „Felder im Formular“ (bisher nur bei Eingängen) – vorher fehlten sie auf der Website, bis man sie anhakte.

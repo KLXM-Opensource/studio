@@ -37,7 +37,7 @@
   <h3>Datei zum Download anbieten</h3>
   <ol class="doc-steps">
     <li>PDF unter <b>Medien</b> hochladen (optional in eine Sammlung legen).</li>
-    <li>Im Editor einen Block <b>Downloads</b> einfügen und die Datei oder die Sammlung wählen → <b>Veröffentlichen</b>.</li>
+    <li>Im Editor einen Block <b>Downloads</b> einfügen. Bei <b>Quelle „Einzelne Dateien auswählen“</b> öffnet <b>Dateien auswählen …</b> die Mediathek – PDFs und andere Dateien anklicken (mehrere möglich), je Datei entsteht eine Zeile. Bei <b>„Alle Dateien einer Sammlung“</b> die Sammlung wählen bzw. über <b>Medien öffnen …</b> anlegen und füllen → <b>Veröffentlichen</b>.</li>
   </ol>
   <h3 id="video">YouTube- oder Vimeo-Video einbinden</h3>
   <ol class="doc-steps">

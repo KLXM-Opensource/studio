@@ -7426,4 +7426,5 @@ return [
     'lädt die gespeicherten Felder neu – nichts wird gelöscht' => 'reloads the saved fields – nothing is deleted',
     'Änderungen verwerfen' => 'Discard changes',
     '„{label}“ in {type} umwandeln?' => 'Convert “{label}” to {type}?',
+    'Links unter „Sammlungen“ mit + anlegen, Dateien hochladen und auf die Sammlung ziehen – dann übernehmen.' => 'Create a collection with + under “Collections” on the left, upload files and drag them onto the collection – then apply.',
 ];

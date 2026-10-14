@@ -60,6 +60,7 @@ final class Theme
 
         foreach ($this->def['blocks'] ?? [] as $type => $b) {
             $this->blocks[$type] = $b + ['type' => $type, 'fields' => [], 'label' => $type];
+            $this->blocks[$type]['fields'] = self::downloadFields($this->blocks[$type]['fields']);
         }
         // Kern-Blöcke (Datenliste, Datensatz-Felder) – Theme kann sie abschalten oder die Ausgabe überschreiben
         if ($this->def['core_blocks'] ?? true) {
@@ -102,6 +103,28 @@ final class Theme
     public function label(): string
     {
         return $this->def['label'] ?? $this->name;
+    }
+
+    /**
+     * Downloads-Block der Kits (Felder source manual|collection, collection, files[…file]): Sammlung und Dateiliste nur je nach
+     * „Quelle“ zeigen, Sammlung mit allen Dateien (nicht nur Bildern) wählen, „Dateien auswählen …“ legt je Datei eine Zeile an.
+     * Zentral, damit alle Kits es haben, ohne ihre theme.php zu ändern; eigene Angaben des Kits gehen vor.
+     */
+    private static function downloadFields(array $fields): array
+    {
+        $by = array_column($fields, null, 'name');
+        $src = $by['source'] ?? null;
+        if (!$src || ($src['type'] ?? '') !== 'select' || !isset($src['options']['manual'], $src['options']['collection'])
+            || ($by['collection']['type'] ?? '') !== 'collection' || ($by['files']['type'] ?? '') !== 'repeater') return $fields;
+        $fileSub = array_values(array_filter((array) ($by['files']['fields'] ?? []), fn($x) => ($x['type'] ?? '') === 'file'))[0]['name'] ?? null;
+        foreach ($fields as &$f) {
+            if (($f['name'] ?? '') === 'collection') $f += ['show_if' => ['source' => ['collection']], 'kind' => 'file'];
+            if (($f['name'] ?? '') === 'files') {
+                $f += ['show_if' => ['source' => ['manual', '']]];
+                if ($fileSub) $f += ['pick_many' => $fileSub];
+            }
+        }
+        return $fields;
     }
 
     public function blocks(): array

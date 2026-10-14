@@ -562,7 +562,7 @@ final class Fields
             'page' => self::renderSelect($id, $inputName, self::pageOptions(), $v, $aria, true),
             // Sammlung: Auswahl + Mediathek öffnen (anlegen, füllen, übernehmen – CMSMedia.pickCollection, resources/js/admin.js)
             'collection' => '<div class="col-field">' . self::renderSelect($id, $inputName, array_column(Media::collections(), 'name', 'id'), $v, $aria, true)
-                . '<button type="button" class="btn btn--small" data-col-pick>' . e(__('Medien öffnen …')) . '</button></div>',
+                . '<button type="button" class="btn btn--small" data-col-pick' . (($f['kind'] ?? '') === 'file' ? ' data-kind="file"' : '') . '>' . e(__('Medien öffnen …')) . '</button></div>',
             'datatable' => self::renderSelect($id, $inputName, array_column(!empty($f['inbox']) ? array_values(array_filter(\Core\Data\Tables::all(),
                 fn($t) => !\Core\Data\Tables::isInbox($t) || \Core\Data\Inbox::available())) : \Core\Data\Tables::content(), 'name', 'handle'), $v, $aria . ' data-datatable', !$req),
             'datafield' => self::renderDataField($id, $inputName, $v, $aria, $f),
