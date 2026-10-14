@@ -37,6 +37,9 @@ function open(btn, focus = 'first') {
   const cur = list.find(i => i.getAttribute('aria-checked') === 'true');
   (focus === 'last' ? list.at(-1) : (cur && focus === 'current' ? cur : list[0]))?.focus();
 }
+// Zuletzt geschlossen (Menü + Zeit): Safari fokussiert Knöpfe beim Klick nicht – das Menü schließt dann schon beim Drücken
+// (focusout) und der folgende Klick auf denselben Knopf würde es wieder öffnen. So bleibt der Knopf ein Umschalter.
+let lastClosed = { menu: null, t: 0 };
 function close(menu = openMenu, refocus = true) {
   if (!menu) return;
   menu.hidden = true;
@@ -48,7 +51,12 @@ function close(menu = openMenu, refocus = true) {
 
 function initMenus() {
   R.querySelectorAll('[aria-haspopup=menu][aria-controls]').forEach(btn => {
-    btn.addEventListener('click', () => (btn.getAttribute('aria-expanded') === 'true' ? close() : open(btn, 'current')));
+    btn.addEventListener('click', () => {
+      if (btn.getAttribute('aria-expanded') === 'true') { close(); return; }
+      const m = R.getElementById(btn.getAttribute('aria-controls'));
+      if (lastClosed.menu === m && performance.now() - lastClosed.t < 300) return;   // eben beim Drücken dieses Knopfs geschlossen (Fokusverlust)
+      open(btn, 'current');
+    });
     btn.addEventListener('keydown', e => {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(btn, e.key === 'ArrowUp' ? 'last' : 'first'); }
     });
@@ -79,7 +87,7 @@ function initMenus() {
       // Fokus zurück zum Menü-Knopf, damit er nach Dialogen/Seitenleisten wieder dort landet
       if (it.tagName !== 'A') btnFor(menu)?.focus({ preventScroll: true });
     });
-    menu.addEventListener('focusout', e => { if (openMenu === menu && !menu.contains(e.relatedTarget) && e.relatedTarget !== btnFor(menu)) setTimeout(() => { if (!menu.contains(R.activeElement)) close(menu, false); }); });
+    menu.addEventListener('focusout', e => { if (openMenu === menu && !menu.contains(e.relatedTarget) && e.relatedTarget !== btnFor(menu)) setTimeout(() => { if (!menu.contains(R.activeElement)) { lastClosed = { menu, t: performance.now() }; close(menu, false); } }); });
   });
   d.addEventListener('pointerdown', e => {
     const path = e.composedPath();
