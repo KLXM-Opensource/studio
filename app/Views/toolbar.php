@@ -211,6 +211,11 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <button type="button" role="menuitem" class="cms-menu__item cms-menu--phone" tabindex="-1" data-spotlight><span class="cms-menu__ico" aria-hidden="true"><?= icon('magnifying-glass') ?></span><span class="cms-menu__label"><?= e(__('Suchen')) ?></span><kbd data-kbd>⌘K</kbd></button>
         <?php if ($b['ai']): ?><?= $item(e($b['aiBrand']), 'sparkle', $b['ai']['area']) ?><?php endif; ?>
         <?= $item(e(__('Hilfe')), 'question', $b['help'], ' target="_blank" rel="noopener"') ?>
+        <?php if ($b['me']): // Konto: Avatar + Name → Konto, darunter Abmelden (wie die Seitenleiste der Verwaltung) ?>
+        <?= $sep ?>
+        <a role="menuitem" class="cms-menu__item cms-menu__me" tabindex="-1" href="<?= e(url('/admin/account')) ?>"><?= \Core\Avatar::html($b['me'], 'adm-ava adm-ava--s') ?><span class="cms-menu__label"><?= e($b['me']['name'] ?: $b['me']['email']) ?><small><?= e(($b['meRole'] !== '' ? $b['meRole'] . ' · ' : '') . __('Konto')) ?></small></span></a>
+        <form method="post" action="<?= e(url('/admin/logout')) ?>" class="cms-bar__form"><?= csrf_field() ?><button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1"><span class="cms-menu__ico" aria-hidden="true"><?= icon('sign-out') ?></span><span class="cms-menu__label"><?= e(__('Abmelden')) ?></span></button></form>
+        <?php endif; ?>
       </span>
     </span>
   </div>

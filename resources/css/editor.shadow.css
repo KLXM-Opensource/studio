@@ -167,6 +167,18 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-menu__ico{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:6px;color:var(--m-ico)}
 .cms-bar[data-bar] .cms-menu__ico .ico{width:18px;height:18px;--ico-2-opacity:.25}
 .cms-menu__label{display:flex;flex-direction:column;gap:2px;min-width:0}
+/* Konto im Menü ⋯: Avatar wie in der Verwaltung (Foto oder Initialen mit fester Farbe je Person, Core\Avatar) */
+.cms-menu__me{align-items:center}
+.cms-menu__me .adm-ava{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;margin:-4px;border-radius:50%;object-fit:cover;color:#fff;font:700 11px/1 system-ui,sans-serif;letter-spacing:.03em;user-select:none}
+.cms-menu__me img.adm-ava{background:#fff}
+.cms-menu__me .adm-ava--c0{background:linear-gradient(135deg,#4F6FD6,#2F4AA0)}
+.cms-menu__me .adm-ava--c1{background:linear-gradient(135deg,#14917F,#0B6457)}
+.cms-menu__me .adm-ava--c2{background:linear-gradient(135deg,#8E5CF0,#6232C4)}
+.cms-menu__me .adm-ava--c3{background:linear-gradient(135deg,#D9731E,#A24F0C)}
+.cms-menu__me .adm-ava--c4{background:linear-gradient(135deg,#DB4C86,#A82060)}
+.cms-menu__me .adm-ava--c5{background:linear-gradient(135deg,#2E86C9,#1A5E99)}
+.cms-menu__me .adm-ava--c6{background:linear-gradient(135deg,#3E9A4D,#256E33)}
+.cms-menu__me .adm-ava--c7{background:linear-gradient(135deg,#C2486B,#8C2848)}
 .cms-menu__label small{font-size:12px;font-weight:400;line-height:1.35;color:var(--m-mute)}
 .cms-menu__item[role=menuitemcheckbox][aria-checked=true] .cms-menu__ico{background:var(--m-ico);color:var(--m-on)}
 .cms-menu__item[role=menuitemradio][aria-checked=true]{font-weight:700}

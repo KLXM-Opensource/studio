@@ -7389,4 +7389,11 @@ return [
     'z. B. Mo–Fr 9–17 Uhr' => 'e.g. Mon–Fri 9am–5pm',
     'z. B. Muster Webdesign' => 'e.g. Example Web Design',
     'z. B. Support Muster Webdesign' => 'e.g. Example Web Design support',
+    // Kombifelder (Core\Combo)
+    'Buttons' => 'Buttons',
+    'Hinweis (optional)' => 'Note (optional)',
+    'Land (optional)' => 'Country (optional)',
+    'Ort' => 'City',
+    'PLZ' => 'Postcode',
+    'Straße und Hausnummer' => 'Street and number',
 ];

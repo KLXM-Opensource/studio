@@ -64,6 +64,8 @@ final class Toolbar
             'help' => url('/admin/hilfe') . '#' . ($kind === 'page' ? 'bearbeiten' : 'daten'),
             'origin' => null, 'site' => '', 'others' => [],
             'netSites' => self::netSites(),
+            // Konto unten im Menü ⋯: Avatar, Name, Rolle, Abmelden – wie unten in der Seitenleiste der Verwaltung
+            'me' => app()->auth->user(), 'meRole' => (string) (app()->auth->role()['name'] ?? ''),
         ];
 
         if ($ctx) {

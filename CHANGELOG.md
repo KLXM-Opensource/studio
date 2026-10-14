@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Werkzeugleiste: Konto und Abmelden
+- Unten im Menü ⋯ der Werkzeugleiste: Avatar (Foto oder Initialen) mit Name und Rolle → Konto, darunter **Abmelden** – wie unten in der Seitenleiste der Verwaltung.
+
 ### Branding der Agentur: eigenes Logo und Support-Angaben
 - **System → Branding & Support** (`Core\Branding`, installationsweit in `storage/branding/`): Name, Logo (SVG bereinigt, PNG/JPG/WebP;
   optional dunkle Fassung), „Technik: KLXM Studio“ ein/aus, Support (Ansprechpartner, Telefon, E-Mail, Website, Erreichbarkeit, Hinweis).
