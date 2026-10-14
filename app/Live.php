@@ -25,6 +25,13 @@ use Core\Http\Sse;
  * meldet sie in [data-live-status] (aria-live). Ohne data-live-src: nur das Ereignis „cms:live“ am Element (eigenes JS).
  * Abos sind signiert (HMAC) – Besucher können keine beliebigen Kanäle abfragen.
  *
+ * Neu laden auf Aktion (ohne Seitenwechsel – Filtern, Sortieren, Blättern, „Mehr laden“, Live-Suche):
+ *   <div<?= Live::region($b) ?>> … <a href="?seite=2#…" data-live-nav> … <form method="get" data-live-nav> <input data-live-input>
+ * Der Block braucht 'reload' => true. live.js holt ihn mit den Parametern des Links bzw. Formulars über denselben Weg
+ * (data-live-src → JSON {html}) neu und tauscht [data-live-region] aus; Adresse/Verlauf (pushState, bei Eingabe replaceState),
+ * Zurück/Vor, Fokus und eine Ansage (aria-live) inklusive. Ohne JavaScript bleiben es normale Links und Formulare.
+ * Die Parameter prüft der Block selbst (wie beim normalen Seitenaufruf); p und b sind reserviert.
+ *
  * Betrieb: jeder offene Stream belegt einen PHP-Worker – deshalb kurz (config 'live_stream_seconds', 5–25, Standard 20) und
  * höchstens 'live_max_streams' (Standard 16) gleichzeitig je Installation; darüber und auf dem Entwicklungsserver (php -S)
  * antwortet der Endpunkt sofort mit den Versionen und längerem retry – EventSource fragt dann einfach seltener nach.
@@ -114,7 +121,7 @@ final class Live
         self::$assets = true;
         return '<link rel="stylesheet" href="' . e(asset('css/live.css')) . '"><script src="' . e(asset('js/live.js')) . '" defer'
             . ' data-live-endpoint="' . e(url('/api/live')) . '"'
-            . ' data-l-new="' . e(lt('{n} neue Einträge')) . '" data-l-new1="' . e(lt('Ein neuer Eintrag')) . '"></script>';
+            . ' data-l-new="' . e(lt('{n} neue Einträge')) . '" data-l-new1="' . e(lt('Ein neuer Eintrag')) . '" data-l-updated="' . e(lt('Inhalt aktualisiert')) . '"></script>';
     }
 
     /** Pause-Schalter und Statuszeile (WCAG 2.2.2: sich selbst aktualisierende Inhalte anhalten können) */
@@ -124,6 +131,17 @@ final class Live
         return '<div class="cms-live-bar"><span class="cms-live-dot" aria-hidden="true"></span><span class="cms-live-label">' . e(lt('Live')) . '</span>'
             . '<button type="button" class="cms-live-pause" data-live-pause aria-pressed="false" data-l-pause="' . e(lt('Live-Aktualisierung anhalten')) . '" data-l-play="' . e(lt('Live-Aktualisierung fortsetzen')) . '" data-l-play-text="' . e(lt('Fortsetzen')) . '">'
             . e(lt('Anhalten')) . '</button><span class="cms-live-status" data-live-status role="status" aria-live="polite"></span></div>';
+    }
+
+    /**
+     * Neu laden auf Aktion: Attribute für das äußere Element eines Blocks mit 'reload' => true (Kennung = domId, Adresse wie
+     * blockSrc). Links/Formulare darin mit data-live-nav, Eingabefelder mit data-live-input (Verzögerung data-live-delay, ms).
+     * Im Bearbeiten und ohne veröffentlichte Seite leer – dann normale Links/Formulare.
+     */
+    public static function region(Block $b): string
+    {
+        if (is_editing() || ($src = self::blockSrc($b)) === '') return '';
+        return ' data-live-region="' . e($b->domId()) . '" data-live-src="' . e($src) . '"';
     }
 
     /** Adresse, unter der ein Block der veröffentlichten Seite neu gerendert wird */
@@ -194,7 +212,10 @@ final class Live
         return null;
     }
 
-    /** GET /api/live/block?p=…&b=… – Block der veröffentlichten Seite neu rendern (nur Blöcke mit 'live' => true) */
+    /**
+     * GET /api/live/block?p=…&b=…[&weitere] – Block der veröffentlichten Seite neu rendern (nur Blöcke mit 'live' bzw. 'reload').
+     * Weitere Parameter (Filter, Seite, Suche) liest der Block wie beim normalen Aufruf aus der Anfrage und prüft sie selbst.
+     */
     public static function block(Request $r): Response
     {
         $page = Pages::find((int) ($r->query['p'] ?? 0));
@@ -204,7 +225,7 @@ final class Live
         $raw = self::findBlock(Pages::blocks($page), $id);
         $theme = app()->theme;
         $def = $raw ? ($theme->blocks()[(string) ($raw['type'] ?? '')] ?? null) : null;
-        if (!$raw || empty($def['live'])) return Response::json(['error' => 'Nicht gefunden.'], 404);
+        if (!$raw || (empty($def['live']) && empty($def['reload']))) return Response::json(['error' => 'Nicht gefunden.'], 404);
         app()->currentPage = $page;
         if (!empty($page['lang']) && Lang::valid((string) $page['lang'])) app()->lang = (string) $page['lang'];
         $block = $theme->makeBlock($raw);
@@ -260,7 +281,10 @@ final class Live
             $eq("Block „{$type}“ vorhanden", $def !== null, true);
             $eq("Block „{$type}“ ist live", !empty($def['live']), true);
         }
-        $eq('Blöcke ohne live werden nicht nachgeliefert', !empty(app()->theme->blocks()['gallery']['live']), false);
+        $eq('Blöcke ohne live werden nicht nachgeliefert', !empty(app()->theme->blocks()['gallery']['live']) || !empty(app()->theme->blocks()['gallery']['reload']), false);
+        $eq('Datenliste lädt auf Aktion neu (reload)', !empty(app()->theme->blocks()['data_list']['reload']), true);
+        $js = (string) @file_get_contents(ROOT . '/public/assets/js/live.js');
+        $eq('live.js kennt data-live-region/-nav/-input', str_contains($js, 'data-live-region') && str_contains($js, 'data-live-nav') && str_contains($js, 'data-live-input'), true);
         return ['ok' => $ok, 'fails' => $fails];
     }
 }

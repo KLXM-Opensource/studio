@@ -129,7 +129,9 @@ $colLabel = fn(string $f) => match (true) {
     default => $f,
 };
 ?>
-<div class="<?= e($wrap) ?> dl dl--<?= e($layout) ?>">
+<?php // Filtern, Suche, Blättern ohne Seitenwechsel (Core\Live::region – Links/Formulare mit data-live-nav, ohne JS normale Links)
+$reload = ($pages > 1 || $vfilters || !empty($d['visitor_search'])) ? \Core\Live::region($b) : ''; ?>
+<div class="<?= e($wrap) ?> dl dl--<?= e($layout) ?>"<?= $reload ?>>
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="dl-head">
     <?php if (!empty($d['eyebrow'])): ?><p class="eyebrow eyebrow--accent"<?= $b->edit('eyebrow') ?>><?= emphasis((string) $d['eyebrow']) ?></p><?php endif; ?>
@@ -141,22 +143,22 @@ $colLabel = fn(string $f) => match (true) {
   <?php if ($vfilters || !empty($d['visitor_search'])): $qid = $b->domId() . '-q'; ?>
   <div class="dl-tools">
     <?php if (!empty($d['visitor_search'])): ?>
-    <form class="dl-search" role="search" method="get" action="<?= e($here . '#' . $b->domId()) ?>">
+    <form class="dl-search" role="search" method="get" data-live-nav action="<?= e($here . '#' . $b->domId()) ?>">
       <label class="dl-search__label" for="<?= e($qid) ?>"><?= e(lt('In der Liste suchen')) ?></label>
-      <span class="dl-search__row"><input class="dl-search__input" id="<?= e($qid) ?>" type="search" name="q" value="<?= e($vq) ?>" maxlength="80" autocomplete="off" enterkeyhint="search"><?php foreach ($vfilters as $vn => $vf): if ($vf['sel'] === null) continue; ?><input type="hidden" name="<?= e($vn) ?>" value="<?= e($vf['sel']) ?>"><?php endforeach; ?><button class="dl-search__btn" type="submit"><?= e(lt('Suchen')) ?></button></span>
+      <span class="dl-search__row"><input class="dl-search__input" id="<?= e($qid) ?>" type="search" name="q" value="<?= e($vq) ?>" maxlength="80" autocomplete="off" enterkeyhint="search" data-live-input><?php foreach ($vfilters as $vn => $vf): if ($vf['sel'] === null) continue; ?><input type="hidden" name="<?= e($vn) ?>" value="<?= e($vf['sel']) ?>"><?php endforeach; ?><button class="dl-search__btn" type="submit"><?= e(lt('Suchen')) ?></button></span>
     </form>
     <?php endif; ?>
     <?php foreach ($vfilters as $vn => $vf): $vl = Tables::label($vf['field']); ?>
     <nav class="dl-filter" aria-label="<?= e(lt('Filtern nach {label}', ['label' => $vl])) ?>">
       <span class="dl-filter__label" aria-hidden="true"><?= e($vl) ?></span>
       <ul class="dl-filter__list" role="list">
-        <li><a class="dl-fchip" href="<?= e($qs([$vn => null])) ?>" rel="nofollow"<?= $vf['sel'] === null ? ' aria-current="true"' : '' ?>><?= e(lt('Alle')) ?></a></li>
-        <?php foreach ($vf['options'] as $k => $l): ?><li><a class="dl-fchip <?= e($tone($vf['field'], (string) $k)) ?>" href="<?= e($qs([$vn => (string) $k])) ?>" rel="nofollow"<?= $vf['sel'] === (string) $k ? ' aria-current="true"' : '' ?>><?= e(Tables::optionLabel($vf['field'], (string) $k)) ?></a></li><?php endforeach; ?>
+        <li><a class="dl-fchip" href="<?= e($qs([$vn => null])) ?>" data-live-nav rel="nofollow"<?= $vf['sel'] === null ? ' aria-current="true"' : '' ?>><?= e(lt('Alle')) ?></a></li>
+        <?php foreach ($vf['options'] as $k => $l): ?><li><a class="dl-fchip <?= e($tone($vf['field'], (string) $k)) ?>" href="<?= e($qs([$vn => (string) $k])) ?>" data-live-nav rel="nofollow"<?= $vf['sel'] === (string) $k ? ' aria-current="true"' : '' ?>><?= e(Tables::optionLabel($vf['field'], (string) $k)) ?></a></li><?php endforeach; ?>
       </ul>
     </nav>
     <?php endforeach; ?>
     <?php if ($filtering): $total = $limit ? Entries::count($t, $o) : count($rows); ?>
-    <p class="dl-count" role="status"><?= e($total === 1 ? lt('1 Treffer') : lt('{n} Treffer', ['n' => $total])) ?> · <a href="<?= e($here . '#' . $b->domId()) ?>"><?= e(lt('Filter zurücksetzen')) ?></a></p>
+    <p class="dl-count" role="status"><span data-live-count><?= e($total === 1 ? lt('1 Treffer') : lt('{n} Treffer', ['n' => $total])) ?></span> · <a href="<?= e($here . '#' . $b->domId()) ?>" data-live-nav><?= e(lt('Filter zurücksetzen')) ?></a></p>
     <?php endif; ?>
   </div>
   <?php endif; ?>
@@ -210,9 +212,9 @@ $colLabel = fn(string $f) => match (true) {
 
   <?php if ($pages > 1): $base = app()->currentPage ? \Core\Pages::url(app()->currentPage) : url('/'); ?>
   <nav class="dl-pager" aria-label="<?= e(lt('Seiten')) ?>">
-    <?php if ($page > 1): ?><a href="<?= e($keep ? $qs(['seite' => $page > 2 ? $page - 1 : null]) : $base . ($page > 2 ? '?seite=' . ($page - 1) : '')) ?>" rel="prev">← <?= e(lt('Neuere')) ?></a><?php endif; ?>
+    <?php if ($page > 1): ?><a href="<?= e($keep ? $qs(['seite' => $page > 2 ? $page - 1 : null]) : $base . ($page > 2 ? '?seite=' . ($page - 1) : '')) ?>" data-live-nav rel="prev">← <?= e(lt('Neuere')) ?></a><?php endif; ?>
     <span><?= e(lt('Seite {page} von {pages}', ['page' => $page, 'pages' => $pages])) ?></span>
-    <?php if ($page < $pages): ?><a href="<?= e($keep ? $qs(['seite' => $page + 1]) : $base . '?seite=' . ($page + 1)) ?>" rel="next"><?= e(lt('Ältere')) ?> →</a><?php endif; ?>
+    <?php if ($page < $pages): ?><a href="<?= e($keep ? $qs(['seite' => $page + 1]) : $base . '?seite=' . ($page + 1)) ?>" data-live-nav rel="next"><?= e(lt('Ältere')) ?> →</a><?php endif; ?>
   </nav>
   <?php endif; ?>
 
@@ -220,3 +222,4 @@ $colLabel = fn(string $f) => match (true) {
   <p class="dl-more"><a class="<?= e($btn) ?>" href="<?= e(link_href((string) $d['more_link'])) ?>"<?= $b->edit('more_label') ?>><?= e($d['more_label']) ?></a></p>
   <?php endif; ?>
 <?= \Core\Data\EntryEdit::newButton($t) ?></div>
+<?= $reload !== '' ? \Core\Live::assets() : '' /* live.js nur, wenn die Liste nachladen kann */ ?>

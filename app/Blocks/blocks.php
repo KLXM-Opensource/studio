@@ -6,6 +6,7 @@
 return [
     'data_list' => [
         'label' => 'Datenliste', 'icon' => 'list-bullets', 'group' => 'Daten',
+        'reload' => true,   // Filtern, Suche, Blättern ohne Seitenwechsel (Core\Live::region, live.js)
         'help' => 'Gibt Einträge einer Datentabelle aus (z. B. Aktuelles, Team, Produkte) – mit Feldauswahl, Filter, Sortierung und Link zur Detailseite.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],

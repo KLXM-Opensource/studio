@@ -37,3 +37,8 @@
 .cms-livetext--latest .cms-livetext__title{font-size:clamp(1.5rem,1.1rem + 2vw,2.5rem);line-height:1.15}
 .cms-livetext--latest .cms-livetext__text{font-size:1.125rem}
 @media (max-width:520px){.cms-livetext__item{grid-template-columns:1fr}.cms-livetext__body{grid-column:1}}
+
+/* Neu laden auf Aktion (Core\Live::region): kurz gedämpft während des Ladens, Ansage nur für Screenreader */
+[data-live-region][aria-busy=true]{opacity:.55;transition:opacity .15s}
+[data-live-region]:focus{outline:none}
+.cms-live-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}

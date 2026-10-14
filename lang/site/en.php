@@ -399,4 +399,6 @@ return [
     'Nächster Eintrag' => 'Next entry',
     'Vorheriger Eintrag' => 'Previous entry',
     'Weitere Einträge' => 'More entries',
+    // Neu laden auf Aktion (Core\Live::region)
+    'Inhalt aktualisiert' => 'Content updated',
 ];

@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Live: Neu laden auf Aktion (Filtern, Blättern, Live-Suche)
+- Blöcke mit `'reload' => true` laden auf Klick, Absenden oder Eingabe neu – ohne Seitenwechsel, über denselben Weg wie die Live-Aktualisierung (`Core\Live::region()`, `data-live-region`/`data-live-nav`/`data-live-input`, `live.js`). Adresse und Verlauf wandern mit (Zurück/Teilen), Fokus und Ansage bleiben sauber, ohne JavaScript normale Links. Datenliste: Filter-Knöpfe, Suche, Zurücksetzen und Blättern.
+- *EN:* Blocks with `'reload' => true` reload on click, submit or input without a page change, via the same path as live updates (`Core\Live::region()`, `live.js`). URL/history, focus and announcements handled; plain links without JavaScript. Data list: filter chips, search, reset and paging.
+
 ### E-Mail-Test-Umleitung
 - Grundeinstellungen → E-Mail-Versand → **Test-Umleitung**: alle E-Mails der Website an Test-Adressen (auch live), Betreff „[TEST]“, ursprüngliche Empfänger in der Nachricht; Mails zur Kontosicherheit ausgenommen (`Mailer::send(…, ['account' => true])`). Streifen in der Verwaltung, solange aktiv. `mail_dump` zeigt die Umleitung ebenfalls.
 
