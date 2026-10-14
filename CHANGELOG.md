@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Seitenstruktur auf der Website: Werkzeug „Seiten“
+- Knopf **Seiten** in der Werkzeugleiste (⌥P, `Core\PagesTool`, `js/pages-panel.mjs`): Seitenbaum als Seitenleiste neben der Website –
+  ziehen (davor/danach/als Unterseite) oder ↑ ↓ ← →, Online/Offline, Menü, Unterseite anlegen, löschen; aktuelle Seite markiert,
+  Hinweise (noindex, Zeitplan), bei Seiten mit Datentabelle „N Einträge ▸“ mit den neuesten Einträgen. Gleiche Endpunkte und Regeln
+  wie die Seitenliste; `apiTree` liefert mit `full=1` Status, Adresse, Hinweise und Einträge.
+
 ### Datentabellen: Inhaltsblöcke – Einträge aus Blöcken des Kits
 - Modus **Inhalt** auf Detailseiten (`?edit=inhalt`): Inhaltsblöcke des Eintrags direkt im Seiten-Editor – „+ Block einfügen“, Text
   tippen, ziehen; Vorlage davor/danach als Vorschau; Speichern ins Feld des Eintrags (`EntryEditController::saveBlocks`).

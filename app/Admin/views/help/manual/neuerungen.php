@@ -16,6 +16,9 @@
   <h3>Große Fotos laden schneller hoch</h3>
   <p>Fotos vom Handy verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – ein 20-MB-Foto braucht nur noch einen Bruchteil der Zeit. Kameradaten wie der Aufnahmeort werden dabei entfernt. <a href="#medien">Mehr dazu →</a></p>
 
+  <h3>Seitenstruktur direkt auf der Website</h3>
+  <p>Der Knopf <b>Seiten</b> in der Werkzeugleiste zeigt den Seitenbaum neben der Website: sortieren und verschieben (ziehen oder mit Pfeilen), Menü und Online/Offline schalten, Unterseiten anlegen, löschen – ohne Wechsel in die Verwaltung. <a href="#seiten-website">Zur Anleitung →</a></p>
+
   <h3>Inhaltsblöcke in Tabellen</h3>
   <p>Einträge lassen sich jetzt wie Seiten aus Blöcken des Kits gestalten – Fließtext, Text + Bild, Galerie, Zitat und mehr. Neuer Feldtyp <b>Inhaltsblöcke</b>, auf der Detailseite über den Block „Inhaltsblöcke des Eintrags“ – bearbeitet direkt auf der Seite im Modus <b>Inhalt</b> der Werkzeugleiste. Der Tabellen-Designer zeigt außerdem, welche Feldtypen für Formulare taugen und welche nur für Inhalte der Redaktion. <a href="#feldtypen">Feldtypen →</a> <a href="#inhaltsbloecke">Zur Anleitung →</a></p>
 

@@ -33,6 +33,16 @@
     <tr><td><b>Entwurf</b></td><td>Noch nie veröffentlicht. Ein Klick auf den Status veröffentlicht sie (wie <b>Veröffentlichen</b> im Editor).</td></tr>
   </table>
   <div class="doc-note doc-note--info"><strong>Online stellen und Platzhalter</strong><p>Enthält die Seite noch Platzhalter wie <code>[bitte ergänzen: …]</code> (z. B. aus dem Seiten-Generator), bleibt sie offline; die Meldung erscheint über der Liste. Hat eine offline genommene Seite inzwischen unveröffentlichte Änderungen, fragt „Online stellen“ nach – dabei werden die Änderungen mit veröffentlicht.</p></div>
+  <h3 id="seiten-website">Seitenstruktur auf der Website</h3>
+  <p>Auf der Website öffnet der Knopf <b>Seiten</b> in der Werkzeugleiste (<kbd>⌥</kbd>/<kbd>Alt</kbd>+<kbd>P</kbd>) den Seitenbaum als Seitenleiste – die aktuelle Seite ist markiert, ein Klick auf einen Titel öffnet die Seite. Je Seite:</p>
+  <ul>
+    <li><b>Ziehen</b> am Griff ⠿: auf eine Seite fallen lassen = als Unterseite einordnen, an die obere bzw. untere Kante = davor bzw. danach.</li>
+    <li><b>↑ ↓ ← →</b> (beim Überfahren bzw. mit der Tastatur): sortieren, eine Ebene höher, unter die Seite darüber.</li>
+    <li><b>Punkt</b>: Online (grün), Offline (hohl), Entwurf (orange) – ein Klick schaltet um; <b>≡</b>: im Menü zeigen; <b>+</b>: Unterseite anlegen (als Entwurf); <b>×</b>: löschen (Unterseiten rücken eine Ebene nach oben).</li>
+    <li>Seiten, die eine Datentabelle zeigen, haben darunter z. B. <b>18 Einträge · Mitglieder ▸</b> – aufklappen zeigt die neuesten Einträge.</li>
+  </ul>
+  <p>Es gelten dieselben Regeln wie in der Seitenliste: neue Adressen leiten automatisch weiter, die Startseite ist immer online. Menü und Navigation der Seite zeigen die Änderungen nach dem Schließen der Seitenleiste (die Seite lädt neu; im Bearbeiten-Modus erst beim nächsten Laden).</p>
+
   <h3 id="zeitplan">Zeitgesteuert veröffentlichen (Online ab / Offline ab)</h3>
   <p>Für Aktionen, Veranstaltungshinweise oder Nachrichten mit Sperrfrist planen Sie, wann eine Seite oder ein Eintrag online geht und wann er wieder verschwindet – ohne zur richtigen Uhrzeit am Rechner zu sitzen.</p>
   <ul>

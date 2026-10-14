@@ -153,7 +153,11 @@ final class PageController extends AdminController
         $lang = \Core\Lang::valid($r->str('lang')) ? \Core\Lang::norm($r->str('lang')) : null;
         $tpls = \Core\PageTemplates::all();
         $out = [];
-        $walk = function (array $nodes) use (&$walk, &$out, $tpls) {
+        // full=1 (Werkzeug „Seiten“, Core\PagesTool): Status, Adresse, Hinweise und Einträge von Datentabellen je Seite
+        $full = $r->str('full') === '1';
+        $byRoute = [];
+        if ($full) foreach (\Core\Data\Tables::content() as $t) if (($t['settings']['route'] ?? '') !== '') $byRoute[$t['settings']['route']][] = $t;
+        $walk = function (array $nodes) use (&$walk, &$out, $tpls, $full, $byRoute) {
             foreach ($nodes as $n) {
                 $p = $n['page'];
                 if (NotFound::isPage($p)) continue;
@@ -162,6 +166,18 @@ final class PageController extends AdminController
                 $out[] = ['id' => (int) $p['id'], 'parent' => $p['parent_id'] ? (int) $p['parent_id'] : null, 'depth' => $n['depth'],
                     'title' => (string) (($p['nav_title'] ?? '') ?: $p['title']), 'status' => (string) $p['status'], 'menu' => (bool) $p['menu'],
                     'home' => (bool) $p['is_home'], 'path' => '/' . ltrim((string) ($p['path'] ?? ''), '/'), 'suggest' => $sug];
+                if ($full) {
+                    $i = array_key_last($out);
+                    $out[$i] += ['state' => Pages::state($p), 'url' => Pages::url($p), 'noindex' => (bool) $p['noindex'], 'plan' => \Core\Schedule::label($p), 'entries' => []];
+                    foreach ($byRoute[(string) ($p['path'] ?? '')] ?? [] as $t) {
+                        if (\Core\Data\Tables::isInbox($t) || !can('data.edit', $t['handle'])) continue;
+                        $items = [];
+                        foreach (\Core\Data\Entries::query($t, ['status' => 'all', 'limit' => 8, 'sort' => 'updated_at', 'dir' => 'desc']) as $e) {
+                            $items[] = ['title' => \Core\Data\Entries::title($t, $e), 'url' => \Core\Data\Entries::url($t, $e), 'draft' => $e['status'] !== 'published'];
+                        }
+                        $out[$i]['entries'][] = ['label' => (string) $t['name'], 'count' => \Core\Data\Entries::count($t, ['status' => 'all']), 'admin' => url('/admin/data/' . $t['handle']), 'items' => $items];
+                    }
+                }
                 $walk($n['children']);
             }
         };
