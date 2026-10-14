@@ -23,3 +23,4 @@ $tabs[] = ['/admin/hilfe/lizenzen', __('Lizenzen'), 'licenses'];   // Lizenzen &
   <a class="sp-helptabs__report" href="<?= e(url('/admin/support/neu')) ?>" data-support-report><?= e(__('Problem melden')) ?></a>
   <?php endif; ?>
 </nav>
+<?= \Core\Branding::supportHtml(true) /* Support der Agentur (Core\Branding) */ ?>

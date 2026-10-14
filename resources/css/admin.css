@@ -3573,3 +3573,25 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 .mt-btn{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:start;padding:10px;border-radius:8px;background:var(--adm-fill)}
 .mt-btn .f-link{grid-column:1/-1;grid-row:2;min-width:0}   /* Ziel über die volle Breite unter Beschriftung und Stil */
 .mt-btns [data-mt-btn-add]{justify-self:start}
+/* Branding der Agentur (Core\Branding): Logo statt Produktmarke, helle/dunkle Fassung, Support-Angaben */
+.cms-mark--brand{flex-direction:column;align-items:center;gap:.4em}
+.cms-mark__img{display:block;max-width:220px;max-height:56px;width:auto;height:auto}
+.cms-mark__by{font-size:12px;font-weight:500;letter-spacing:0;opacity:.7}
+.cms-mark__logo--img{width:auto!important;max-width:28px;height:20px!important;object-fit:contain}
+.cms-mark__logo--txt{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;box-shadow:inset 0 0 0 1.5px currentColor;font-weight:800;font-size:12px}
+.brand-dark{display:none!important}
+html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[data-theme=dark] .brand-light{display:none!important}
+@media (prefers-color-scheme:dark){html.adm-ui:not([data-theme=light]) .brand-dark{display:block!important}html.adm-ui:not([data-theme=light]) .brand-light{display:none!important}}
+.brand-support{display:grid;gap:8px}
+.brand-support h2{display:flex;align-items:center;gap:8px;font-size:16px;margin:0}
+.brand-support p{margin:0}
+.brand-support__links{display:flex;flex-wrap:wrap;gap:6px 18px}
+.brand-support a{display:inline-flex;align-items:center;gap:6px}
+.brand-support svg{width:16px;height:16px;flex:none}
+.brand-support__hours,.brand-support__note{color:var(--adm-t2)}
+.brand-support--line{display:block;margin:10px 0 0;color:var(--adm-t2);font-size:13px;text-align:center}
+.sp-helptabs + .brand-support--line,.dash-ask + .brand-support--line{text-align:left;margin:4px 0 12px}
+.brand-logo__prev{display:inline-block;margin:4px 0;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--adm-line)}
+.brand-logo__prev--dark{background:#1E2840}
+.brand-logo__prev img{display:block;max-width:220px;max-height:56px}
+.brand-preview{display:flex;align-items:center;gap:12px;margin:6px 0 0}

@@ -1,6 +1,7 @@
 <?php
 /** Übersicht · „Hilfe & Einstieg“: Assistent fragen, Tutorials (Top 3 der Rolle), Trailer, Projekt-Hinweise (Core\Guide), Hinweis des Kits, „Was ist neu“. @var array $help */
 ?>
+<?= \Core\Branding::supportHtml(true) /* Support der Agentur (Core\Branding) */ ?>
 <?php if ($help['ai']): ?>
 <form class="dash-ask" method="get" action="<?= e(url('/admin/ai/assistent')) ?>" data-dash-ask role="search" aria-label="<?= e(__('Assistent fragen')) ?>">
   <label class="dash-ask__label" for="dash-ask-q"><?= e(__('Fragen Sie {brand}', ['brand' => $help['brand']])) ?></label>

@@ -6,6 +6,13 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Branding der Agentur: eigenes Logo und Support-Angaben
+- **System → Branding & Support** (`Core\Branding`, installationsweit in `storage/branding/`): Name, Logo (SVG bereinigt, PNG/JPG/WebP;
+  optional dunkle Fassung), „Technik: KLXM Studio“ ein/aus, Support (Ansprechpartner, Telefon, E-Mail, Website, Erreichbarkeit, Hinweis).
+- Logo statt Produktmarke auf Anmeldung, Einrichtung, Begrüßung und in der Werkzeugleiste der Website (`cms_mark()`, `cms_logo()`);
+  Support-Angaben in Hilfe & Support, Übersicht, „Neue Meldung“ und auf der Anmeldeseite.
+- Pflege: Einzel-Installation Administration, Netzwerk Netzwerk-Administration (ohne Netzwerk-Konten: Administration der Haupt-Website).
+
 ### Behoben: Tabellen-Designer
 - Ein falsches schließendes Tag in der Option „Erlaubte Blöcke“ zerlegte die Feldliste (alle Optionen sichtbar, Spalten verrutscht). Neuer Selbsttest prüft die Feldvorlage für jeden Feldtyp.
 

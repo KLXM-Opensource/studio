@@ -22,4 +22,5 @@
   <?php if ($pkLogin): ?><script src="<?= e(asset('js/passkey.js')) ?>" defer></script><?php endif; ?>
   <p class="adm-muted"><a href="<?= e(url('/')) ?>">← <?= e(__('Zur Website')) ?></a></p>
   <p class="adm-product"><?= cms_mark() ?></p>
+  <?= \Core\Branding::supportHtml(true) /* Support der Agentur (System → Branding & Support) */ ?>
 </div>

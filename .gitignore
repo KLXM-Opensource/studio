@@ -60,3 +60,4 @@ deploy/targets/*.env
 /storage/avatars/
 /storage/visual-diff/
 /.claude/settings.local.json
+/storage/branding/

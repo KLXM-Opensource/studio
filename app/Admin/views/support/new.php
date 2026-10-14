@@ -18,6 +18,7 @@ $inv = fn(string $k, string $hint = '') => isset($errors[$k]) ? ' aria-invalid="
 <?php if ($errors): ?><div class="adm-flash adm-flash--error" role="alert"><?= e(__('Bitte prüfen Sie die markierten Felder.')) ?></div><?php endif; ?>
 
 <div class="sp-report">
+  <?= \Core\Branding::supportHtml() /* Support der Agentur: Telefon, E-Mail, Erreichbarkeit (Core\Branding) */ ?>
   <form class="adm-card sp-form" method="post" action="<?= e(url('/admin/support/neu')) ?>" enctype="multipart/form-data" data-support-form novalidate>
     <?= csrf_field() ?>
     <input type="hidden" name="from" value="<?= e($from) ?>">

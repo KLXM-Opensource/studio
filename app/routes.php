@@ -260,6 +260,8 @@ return function (Router $r): void {
     $r->post('/admin/system/kits/install', [Admin\KitsController::class, 'install']);
     $r->post('/admin/system/kits/{name}/remove', [Admin\KitsController::class, 'remove']);
     // Domain: Domains, Hauptadresse, Weiterleitung, Umgebung – nur Einzel-Installation ohne Netzwerk (Core\Domains)
+    $r->get('/admin/system/branding', [Admin\BrandingController::class, 'index']);   // Branding & Support (Core\Branding)
+    $r->post('/admin/system/branding', [Admin\BrandingController::class, 'save']);
     $r->get('/admin/system/domain', [Admin\DomainController::class, 'index']);
     $r->post('/admin/system/domain/add', [Admin\DomainController::class, 'add']);
     $r->post('/admin/system/domain/remove', [Admin\DomainController::class, 'remove']);
@@ -606,6 +608,9 @@ return function (Router $r): void {
     $r->get('/api/live', fn(\Core\Http\Request $req) => \Core\Live::stream($req));
     $r->get('/api/live/block', fn(\Core\Http\Request $req) => \Core\Live::block($req));
     $r->get('/pdf/{id}', [PdfController::class, 'show']);
+    // Branding der Agentur (Core\Branding): Logo öffentlich – auch auf der Anmeldeseite
+    $r->get('/branding/logo', [Admin\BrandingController::class, 'logo']);
+    $r->get('/branding/logo-dark', [Admin\BrandingController::class, 'logoDark']);
     $r->get('/pdf/pool/{pool}/{id}', [PdfController::class, 'showPool']);
     $r->get('/favicon.ico', [PwaController::class, 'icon']);
     $r->get('/apple-touch-icon.png', [PwaController::class, 'icon']);

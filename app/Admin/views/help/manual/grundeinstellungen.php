@@ -22,6 +22,10 @@
   </ol>
   <p>Gehört die Website zu einem Netzwerk, verwaltet die Netzwerk-Administration die Domains.</p>
 
+  <h3 id="branding">Branding & Support (Agentur)</h3>
+  <p>Unter <b>System → Branding &amp; Support</b> hinterlegt die betreuende Agentur ihr <b>Logo</b> (SVG, PNG, JPG oder WebP; optional eine Fassung für die dunkle Darstellung), ihren <b>Namen</b> und ihre <b>Support-Angaben</b> – Ansprechpartner, Telefon, E-Mail, Website, Erreichbarkeit und einen Hinweis. Das Logo ersetzt die Produktmarke auf der Anmeldeseite, bei Einrichtung und Begrüßung und in der Werkzeugleiste der Website; klein darunter steht auf Wunsch „Technik: KLXM Studio“. Die Support-Angaben erscheinen unter Hilfe &amp; Support, in „Hilfe &amp; Einstieg“ der Übersicht, bei „Neue Meldung“ und als kurze Zeile auf der Anmeldeseite.</p>
+  <p>Das Branding gilt für die ganze Installation. In einer Einzel-Installation pflegt es die Administration; mit mehreren Websites die Netzwerk-Administration (gibt es keine Netzwerk-Konten, die Administration der Haupt-Website) – es gilt dann für alle Websites.</p>
+
   <h3 id="umgebung">Testumgebung (Staging) und Livebetrieb</h3>
   <ul>
     <li><b>Testumgebung (staging):</b> Suchmaschinen sind ausgesperrt, E-Mails gehen nicht an echte Empfänger, Push-Mitteilungen nicht an Besucher; auf der Website steht unten ein Hinweisbalken. Gut für den Aufbau einer neuen Website.</li>

@@ -16,6 +16,9 @@
   <h3>Große Fotos laden schneller hoch</h3>
   <p>Fotos vom Handy verkleinert schon der Browser auf höchstens 3200 Pixel, bevor sie hochgeladen werden – ein 20-MB-Foto braucht nur noch einen Bruchteil der Zeit. Kameradaten wie der Aufnahmeort werden dabei entfernt. <a href="#medien">Mehr dazu →</a></p>
 
+  <h3>Branding für Agenturen</h3>
+  <p>Unter <b>System → Branding &amp; Support</b> setzt die Agentur ihr eigenes Logo statt der Produktmarke ein und hinterlegt ihre Support-Angaben – für eine Website oder alle Websites eines Netzwerks. <a href="#branding">Mehr dazu →</a></p>
+
   <h3>Seitenstruktur direkt auf der Website</h3>
   <p>Der Knopf <b>Seiten</b> in der Werkzeugleiste zeigt den Seitenbaum neben der Website: sortieren und verschieben (ziehen oder mit Pfeilen), Menü und Online/Offline schalten, Unterseiten anlegen, löschen – ohne Wechsel in die Verwaltung. <a href="#seiten-website">Zur Anleitung →</a></p>
 

@@ -34,7 +34,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
 ?>
 <div class="cms-bar cms-bar--<?= e($kind) ?><?= $edit ? ' is-edit' : '' ?>" role="region" aria-label="<?= e(__('Redaktion')) ?>" data-bar="<?= json_attr($b['config']) ?>" data-mode="<?= e($mode) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>">
   <div class="cms-bar__ctx">
-    <a class="cms-bar__brand" href="<?= e(url('/admin')) ?>" aria-label="<?= e(CMS_NAME) ?> – <?= e(__('Verwaltung')) ?>" title="<?= e(CMS_NAME) ?> – <?= e(__('Verwaltung')) ?>"><?= cms_logo() ?></a>
+    <a class="cms-bar__brand<?= \Core\Branding::active() ? ' cms-bar__brand--own' : '' ?>" href="<?= e(url('/admin')) ?>" aria-label="<?= e(\Core\Branding::name()) ?> – <?= e(__('Verwaltung')) ?>" title="<?= e(\Core\Branding::name()) ?> – <?= e(__('Verwaltung')) ?>"><?= cms_logo() ?></a>
     <span class="cms-bar__obj" aria-hidden="true"><?= icon($kind === 'page' ? 'file-text' : ($kind === 'template' ? 'squares-four' : ($b['table']['icon'] ?: 'table'))) ?></span>
     <span class="cms-bar__titles">
       <span class="cms-bar__kind"><?php if ($kind === 'page'): ?><?= e(\Core\NotFound::isPage($page) ? __('Nicht gefunden (404) – für alle unbekannten Adressen') : __('Seite')) ?><?php elseif ($kind === 'template'): ?><?= e(__('Gilt für alle Einträge')) ?><?php else: ?><?= e($b['table']['name']) ?><?php if ($b['foreign']): ?> · <?= e(__('von {site}', ['site' => $b['site']])) ?><?php endif; ?><?php endif; ?></span>
