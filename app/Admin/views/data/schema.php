@@ -213,6 +213,16 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
           <span class="set-row__sub"><?= $tplPage ? 'Die Vorlage gilt für alle Einträge. Gestaltet wird sie wie jede Seite – mit echten Inhalten eines Eintrags.' : 'Noch keine Vorlage vorhanden.' ?></span></div>
           <div class="set-row__ctl"><button class="adm-btn adm-btn--small" form="tplform"><?= $tplPage ? 'Detailseite gestalten ↗' : 'Vorlage anlegen' ?></button></div></div>
         <?php endif; ?>
+        <?php if (!$isNew && !$inbox): // RSS-Feed (Core\Data\Feed): Adresse zum Weitergeben bzw. warum es keinen gibt ?>
+        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= icon('rss') ?> <?= e(__('RSS-Feed')) ?></span>
+          <?php if (\Core\Data\Feed::available($table)): $feedUrl = site_url() . url(\Core\Data\Feed::path($table)); ?>
+          <span class="set-row__sub"><code id="t-feed"><?= e($feedUrl) ?></code> – <?= e(__('die 30 neuesten veröffentlichten Einträge, für Feed-Reader und Newsletter-Dienste. Detail- und Listenseite verweisen automatisch darauf.')) ?></span></div>
+          <div class="set-row__ctl"><button type="button" class="adm-btn adm-btn--small" data-copy="#t-feed"><?= e(__('Kopieren')) ?></button> <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e($feedUrl) ?>" target="_blank" rel="noopener"><?= e(__('Öffnen')) ?> ↗</a></div>
+          <?php else: ?>
+          <span class="set-row__sub"><?= e(!empty($s['noindex']) ? __('Kein Feed, solange „Detailseiten nicht indexieren“ an ist.') : __('Entsteht automatisch, sobald die Tabelle Detailseiten hat (Adresse und Vorlage).')) ?></span></div>
+          <?php endif; ?>
+        </div>
+        <?php endif; ?>
       </div>
     </section>
     <?php $sel = function (string $name, string $label, array $opts, string $help = '') use ($s) {

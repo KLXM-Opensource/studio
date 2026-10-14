@@ -90,7 +90,7 @@
   <ul>
     <li>Block <b>Datensatz-Felder</b>: gibt mehrere Felder auf einmal aus (Kopf, Fließtext, Steckbrief).</li>
     <li>Block <b>Vor / Zurück</b>: Links zum vorherigen und nächsten Eintrag in der Reihenfolge der Tabelle (z. B. „älterer / neuerer Beitrag“), Beschriftungen frei wählbar.</li>
-    <li><b>RSS-Feed:</b> Jede Tabelle mit Detailseiten hat automatisch einen Feed unter <code>/feed/{kurzname}.xml</code> (die 30 neuesten veröffentlichten Einträge, Beschreibung aus dem Beschreibungsfeld). Die Seiten der Tabelle verweisen darauf, sodass Feed-Reader ihn finden. Tabellen mit „Nicht indexieren“ haben keinen Feed.</li>
+    <li><b>RSS-Feed:</b> Jede Tabelle mit Detailseiten hat automatisch einen Feed unter <code>/feed/{kurzname}.xml</code> (die 30 neuesten veröffentlichten Einträge, Beschreibung aus dem Beschreibungsfeld). Die Seiten der Tabelle verweisen darauf, sodass Feed-Reader ihn finden. Die Adresse steht unter <b>Felder &amp; Einstellungen → Auf der Website</b> (zum Kopieren) und als „RSS“ in der Daten-Übersicht. Tabellen mit „Nicht indexieren“ haben keinen Feed.</li>
     <li>Block <b>Datenliste</b> auf der Vorlage: „verknüpft mit dem aufgerufenen Eintrag“ für „Beiträge dieser Person“ oder „Weitere Beiträge aus dieser Kategorie“.</li>
     <li>Für Fortgeschrittene: In Texten funktionieren auch Platzhalter wie <code>{{titel}}</code> – etwa „Beiträge von {{name}}“.</li>
   </ul>

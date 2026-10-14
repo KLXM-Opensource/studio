@@ -7443,4 +7443,10 @@ return [
     'online' => 'online',
     '{lang} anlegen' => 'Create {lang}',
     'Übersetzung konnte nicht angelegt werden.' => 'The translation could not be created.',
+    // RSS-Feed in Tabellen-Einstellungen und Daten-Übersicht
+    'Entsteht automatisch, sobald die Tabelle Detailseiten hat (Adresse und Vorlage).' => 'Created automatically once the table has detail pages (address and template).',
+    'Kein Feed, solange „Detailseiten nicht indexieren“ an ist.' => 'No feed while “Do not index detail pages” is on.',
+    'RSS-Feed' => 'RSS feed',
+    'RSS-Feed dieser Tabelle (öffnet in neuem Tab)' => 'RSS feed of this table (opens in a new tab)',
+    'die 30 neuesten veröffentlichten Einträge, für Feed-Reader und Newsletter-Dienste. Detail- und Listenseite verweisen automatisch darauf.' => 'the 30 latest published entries, for feed readers and newsletter services. Detail and list pages link to it automatically.',
 ];

@@ -26,7 +26,7 @@ $isAdmin = can('data.schema'); ?>
       <span class="dt-icon" aria-hidden="true"><?= icon($t['icon']) ?></span>
       <span><strong><?= e($t['name']) ?></strong><small><?= (int) $t['count'] ?> <?= $t['count'] === 1 ? 'Eintrag' : 'Einträge' ?> · <?= count($t['fields']) ?> Felder</small></span>
     </a>
-    <p class="dt-card__meta"><?= e(\Core\Data\Purpose::label(\Core\Data\Purpose::of($t))) ?> · <?= $t['settings']['route'] !== '' ? 'Detailseiten unter <code>/' . e($t['settings']['route']) . '/…</code>' : 'ohne Detailseiten' ?></p>
+    <p class="dt-card__meta"><?= e(\Core\Data\Purpose::label(\Core\Data\Purpose::of($t))) ?> · <?= $t['settings']['route'] !== '' ? 'Detailseiten unter <code>/' . e($t['settings']['route']) . '/…</code>' : 'ohne Detailseiten' ?><?php if (\Core\Data\Feed::available($t)): ?> · <a class="dt-feed" href="<?= e(url(\Core\Data\Feed::path($t))) ?>" target="_blank" rel="noopener" title="<?= e(__('RSS-Feed dieser Tabelle (öffnet in neuem Tab)')) ?>"><?= icon('rss') ?> RSS</a><?php endif; ?></p>
     <div class="dt-card__actions">
       <a class="adm-btn adm-btn--small" href="<?= e(url('/admin/data/' . $t['handle'] . '/new')) ?>">+ <?= e($t['singular']) ?></a>
       <?php if ($isAdmin): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/data/' . $t['handle'] . '/schema')) ?>">Felder &amp; Einstellungen</a><?php endif; ?>
