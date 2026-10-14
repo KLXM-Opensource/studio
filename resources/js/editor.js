@@ -739,10 +739,11 @@ holder()?.addEventListener('click', e => {
  *   CMSAdmin.editorExt.api(url, body)                                            POST als JSON mit CSRF-Token → Promise<Antwort>
  *   CMSAdmin.editorExt.readForm(form, prefix = 'f')                              Felder (Core\Fields, name="f[…]") → Daten wie im Editor
  *   CMSAdmin.editorExt.pageId                                                    bearbeitete Seite
+ *   CMSAdmin.editorExt.onEdit(type, b => …)                                      „Bearbeiten“ für einen eigenen Blocktyp übernehmen (statt Seitenleiste)
  * b = { id, type, index, data (Kopie), label, update(data), replace(type, data) } – update/replace markieren die Seite als geändert.
  * Ereignis „cms:editor-ready“ am document, sobald der Editor bereit ist (detail: { page }).
  */
-const EXT = { actions: [], badges: [] };
+const EXT = { actions: [], badges: [], edit: {} };
 const extBlock = t => ({
   id: t.blockId, type: t.type, label: t.def.label,
   get index() { return blockEls().indexOf(t.el?.closest('.ce-block')); },
@@ -765,6 +766,7 @@ window.CMSAdmin = window.CMSAdmin || {};
 CMSAdmin.editorExt = {
   addBlockAction(a) { if (a && a.id && typeof a.run === 'function') EXT.actions.push(a); },
   addBadge(fn) { if (typeof fn === 'function') { EXT.badges.push(fn); CMSAdmin.editorExt.refreshBadges(); } },
+  onEdit(type, fn) { if (typeof type === 'string' && typeof fn === 'function') EXT.edit[type] = fn; },
   blocks() { return [...tools.values()].filter(t => t.el?.isConnected).map(extBlock).sort((a, b) => a.index - b.index); },   // in Seitenreihenfolge
   refreshBadges() { tools.forEach(t => t.paintExt?.()); },
   api: (url, body) => api(url, body),
@@ -1073,7 +1075,12 @@ function makeTool(type, def) {
 
     syncDrawerField(path, value, rich = false) { syncDrawerField(path, value, rich); }
 
-    openDrawer(focusSection = false) { return openDrawer(this, focusSection); }
+    openDrawer(focusSection = false) {
+      // Erweiterung übernimmt „Bearbeiten“ für ihren Blocktyp (CMSAdmin.editorExt.onEdit) – Abschnitt & Navigation bleibt beim Core
+      const ext = !focusSection && EXT.edit[this.type];
+      if (ext) { try { ext(extBlock(this)); return; } catch (e) { console.error('[editorExt]', e); } }
+      return openDrawer(this, focusSection);
+    }
 
     /** Direkt bearbeiteter Text → Seitenleiste angleichen (auch für einen Block in einer Spalte, dessen Felder gerade offen sind) */
     syncInline(path, value, rich = false) {
