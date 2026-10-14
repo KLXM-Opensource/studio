@@ -34,6 +34,11 @@ final class Auth
                     $this->logout();
                     return null;
                 }
+                // Ansicht als Rolle bzw. Person (Core\Impersonation): wirksames Konto statt des echten – Sitzung bleibt die echte
+                if ($this->user && ($imp = $this->session->get('imp')) && is_array($imp)) {
+                    $eff = Impersonation::effective($this->user, $imp, $this->db);
+                    if ($eff) $this->user = $eff; else $this->session->forget('imp');
+                }
                 $this->role = $this->user ? (Permissions::role((string) $this->user['role']) ?? Permissions::role('author')) : null;
                 // Absolute Timeout-Prüfung
                 if ($this->user && time() - (int) $this->session->get('login_at', 0) > 60 * 60 * 12) {
@@ -42,6 +47,14 @@ final class Auth
             }
         }
         return $this->user;
+    }
+
+    /** Anmeldung neu lesen (z. B. nach dem Ende einer Ansicht als Rolle/Person) */
+    public function reset(): void
+    {
+        $this->loaded = false;
+        $this->user = null;
+        $this->role = null;
     }
 
     /** Kennung der Website für die Sitzung (aus dem Schlüssel der Website – nicht übertragbar) */

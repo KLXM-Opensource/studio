@@ -62,6 +62,13 @@
     <li><b>Rollen</b>: eine Karte je Rolle mit ihren Rechten; <b>Rechte bearbeiten</b> öffnet die Rolle mit einem Schalter je Recht, <b>Neue Rolle</b> legt eine eigene an.</li>
     <li><b>Anmeldung &amp; Sicherheit</b>: erlaubte Verfahren, zweiter Faktor je Rolle, Übergangsfrist.</li>
   </ul>
+  <h4 id="als-rolle-person">Als Rolle oder Person arbeiten</h4>
+  <p>Zum Prüfen von Rechten oder für Support kann die Administration die Verwaltung und die Website so sehen wie andere:</p>
+  <ul>
+    <li><b>Als Rolle ansehen</b> (Bereich <b>Rollen</b>, auf der Karte einer Rolle): Sie bleiben Sie selbst, haben aber nur die Rechte dieser Rolle – ideal, um zu prüfen, was z. B. die Redaktion sieht und darf.</li>
+    <li><b>Als Person anmelden</b> (Bereich <b>Personen</b>, Person aufklappen): Sie sehen und bearbeiten alles wie diese Person. <b>Änderungen werden unter ihrem Namen gespeichert.</b></li>
+  </ul>
+  <p>Solange die Ansicht läuft, zeigt ein violetter Hinweis oben in der Verwaltung und unter der Leiste der Website, als wer Sie arbeiten; <b>Zurück zu meinem Konto</b> beendet sie. Sie endet außerdem nach einer Stunde und beim Abmelden. Während der Ansicht sind Konto, Benutzer &amp; Rollen, API-Tokens, Grundeinstellungen und das Netzwerk gesperrt. Andere Administrationskonten, Netzwerk-Konten und gesperrte Konten sind ausgenommen (die Netzwerk-Administration darf in Administrationskonten wechseln). Beginn und Ende stehen im Protokoll des Netzwerk-Dashboards.</p>
   <h3 id="einladen">Personen einladen</h3>
   <p>Statt ein Konto mit Startpasswort anzulegen, laden Sie neue Kolleginnen und Kollegen unter <b>Benutzer &amp; Rollen › Einladen &amp; Anlegen</b> ein. Die Person legt dann selbst fest, wie sie sich anmeldet – niemand muss ein Passwort weitergeben.</p>
   <ol class="doc-steps">

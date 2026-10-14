@@ -160,6 +160,7 @@
  *   live:selftest                                     Selbsttest der Live-Aktualisierung (Versionen, signierte Abos, Live-Blöcke)
  *   presence:selftest                                 Selbsttest der Präsenz (melden, auflisten, ablaufen, abmelden; sicherer Netzwerk-Zielpfad)
  *   mail:selftest                                     Selbsttest der E-Mail-Konten (Zwecke, Netzwerk-Konto, Versandwege, Absender)
+ *   impersonate:selftest                              Selbsttest „Als Rolle/Person arbeiten“ (Regeln, Sperren, Zeitlimit)
  *   vcard:selftest                                    Selbsttest der Visitenkarten /vcard.vcf (Aufbau, Maskierung, Faltung, CRLF, Bild)
  *   links:selftest                                    Selbsttest der Linkauswahl (Seitenbaum, Daten-Quellen, Glossar, Weitere laden, Rechte)
  *   targetedit:selftest                               Selbsttest „Ziel bearbeiten“ an Karten (edit_link: Auflösen, Rechte, keine Ausgabe für Besucher)
@@ -1188,6 +1189,12 @@ switch ($cmd) {
         if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Rastern für App-Icons: " . (Core\Svg::canRasterize() ? 'Imagick' : 'nicht verfügbar') . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'impersonate:selftest':
+        // Ansicht als Rolle/Person (Core\Impersonation): wer darf wen, wirksames Konto, Sperren, Zeitlimit
+        $res = Core\Impersonation::selftest();
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'mail:selftest':

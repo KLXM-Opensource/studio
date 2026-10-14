@@ -42,6 +42,12 @@
           <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Zwei-Faktor-Anmeldung')) ?></span><span class="set-row__sub"><?= e(__('App-Code und alle Passkeys entfernen – bei Verlust des Geräts.')) ?></span></div>
             <div class="set-row__ctl"><form method="post" action="<?= e(url('/admin/users/' . $u['id'] . '/2fa-reset')) ?>" data-confirm="<?= e(__('Zwei-Faktor-Anmeldung von {email} zurücksetzen (App-Code und alle Passkeys)? Alle Sitzungen des Kontos enden; verlangt die Rolle 2FA, wird sie bei der nächsten Anmeldung neu eingerichtet.', ['email' => $u['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small"><?= e(__('2FA zurücksetzen')) ?></button></form></div></div>
           <?php endif; ?>
+          <?php if (\Core\Impersonation::canUser($user, $u)): // Ansicht als diese Person (Core\Impersonation) ?>
+          <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Als diese Person arbeiten')) ?></span>
+            <span class="set-row__sub"><?= e(__('Sehen und bearbeiten, was {name} sieht – z. B. für Support. Änderungen werden unter diesem Namen gespeichert; endet nach einer Stunde.', ['name' => $u['name'] ?: $u['email']])) ?></span></div>
+            <div class="set-row__ctl"><form method="post" action="<?= e(url('/admin/impersonate')) ?>"><?= csrf_field() ?><input type="hidden" name="mode" value="user"><input type="hidden" name="value" value="<?= (int) $u['id'] ?>">
+              <button class="adm-btn adm-btn--small"><?= icon('user-circle') ?> <?= e(__('Als Person anmelden')) ?></button></form></div></div>
+          <?php endif; ?>
           <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Konto löschen')) ?></span></div>
             <div class="set-row__ctl"><form method="post" action="<?= e(url('/admin/users/' . $u['id'] . '/delete')) ?>" data-confirm="<?= e(__('Benutzer {email} löschen?', ['email' => $u['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--danger-text"><?= e(__('Löschen')) ?></button></form></div></div>
         <?php else: ?>

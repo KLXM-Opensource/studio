@@ -252,6 +252,12 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
   </div>
 </div>
 <!--cms-bar-end-->
+<?php if (!empty(($impU = app()->auth->user())['_imp'])): $imp = $impU['_imp']; // Ansicht als Rolle/Person (Core\Impersonation) – Hinweis unter der Leiste ?>
+<div class="cms-entry-note cms-imp-note" role="status">
+  <span><?= e($imp['mode'] === 'role' ? __('Sie sehen die Website mit den Rechten der Rolle „{name}“.', ['name' => $imp['label']]) : __('Sie arbeiten als {name} – Änderungen werden unter diesem Namen gespeichert.', ['name' => $imp['label']])) ?></span>
+  <form method="post" action="<?= e(url('/admin/impersonate/stop')) ?>"><?= csrf_field() ?><input type="hidden" name="back" value="<?= e((string) (app()->request?->path ?? '/')) ?>"><button class="cms-lock-note__btn"><?= e(__('Zurück zu meinem Konto')) ?></button></form>
+</div>
+<?php endif; ?>
 <?php if ($b['tools']): // Werkzeuge beim Bearbeiten: Konfiguration für resources/js/_tools.js (Module erst beim Öffnen) ?>
 <script type="application/json" id="cms-tools"><?= json_encode(\Core\FrontendTools::config($b, $b['tools']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <?php endif; ?>

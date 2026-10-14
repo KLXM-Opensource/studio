@@ -352,3 +352,8 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .eb-static,.eb-static *{cursor:default}
 .eb-edit-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 16px;background:#1E2840;color:#fff;font:500 14px/1.4 system-ui,sans-serif;text-align:center}
 .eb-edit-note svg{width:18px;height:18px;flex:none}
+/* Ansicht als Rolle/Person (Core\Impersonation): Hinweis unter der Leiste */
+.cms-entry-note.cms-imp-note.cms-imp-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#3B2A6E;color:#fff;border-bottom-color:#2A1D52}
+.cms-imp-note form{display:inline}
+.cms-imp-note .cms-lock-note__btn{all:unset;box-sizing:border-box;padding:3px 12px;border-radius:999px;background:#fff;color:#3B2A6E;font-weight:700;font-size:13px;cursor:pointer}
+.cms-imp-note .cms-lock-note__btn:focus-visible{outline:2px solid #fff;outline-offset:2px}

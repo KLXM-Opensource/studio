@@ -252,6 +252,14 @@ if ($user && ($req = app()->request)) {
 </aside>
 <?php endif; ?>
 <main class="adm-main" id="main">
+  <?php if (!empty(($impU = app()->auth->user())['_imp'])): $imp = $impU['_imp']; // Ansicht als Rolle/Person (Core\Impersonation) ?>
+  <div class="adm-imp" role="status">
+    <span class="adm-imp__ico" aria-hidden="true"><?= icon('user-circle') ?></span>
+    <span class="adm-imp__t"><?= e($imp['mode'] === 'role' ? __('Sie sehen die Verwaltung mit den Rechten der Rolle „{name}“.', ['name' => $imp['label']]) : __('Sie arbeiten als {name} – Änderungen werden unter diesem Namen gespeichert.', ['name' => $imp['label']])) ?>
+      <small><?= e(__('Bis {time} · Konto, Benutzer und Grundeinstellungen sind gesperrt.', ['time' => date('H:i', (int) $imp['until'])])) ?></small></span>
+    <form method="post" action="<?= e(url('/admin/impersonate/stop')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small"><?= e(__('Zurück zu meinem Konto')) ?></button></form>
+  </div>
+  <?php endif; ?>
   <?php if ($hubPage): // Rückweg von einer Einstellungs-/Statistikseite zur Sammelseite (und zur Datentabelle, falls sie dazugehört) ?>
   <nav class="adm-backbar" aria-label="<?= e(__('Zurück')) ?>">
     <a href="<?= e(url($hubKind === 'stats' ? \Core\AdminPages::STATS : \Core\AdminPages::HUB)) ?>"><span aria-hidden="true">←</span> <?= e($hubKind === 'stats' ? __('Statistiken') : __('Einstellungen der Funktionen')) ?></a>

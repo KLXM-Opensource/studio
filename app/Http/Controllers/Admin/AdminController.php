@@ -49,9 +49,14 @@ abstract class AdminController
             $keep = array_filter(['tod' => $r->str('tod'), 'weekend' => $r->str('weekend')], fn($v) => $v !== '' && preg_match('~^[a-z0-9]{1,10}$~', $v));
             throw new RedirectException(url('/admin/login') . '?next=' . rawurlencode($r->path) . ($keep ? '&' . http_build_query($keep) : ''));
         }
+        // Ansicht als Rolle/Person (Core\Impersonation): Konto-Sicherheit, Benutzer, Tokens, Grundeinstellungen, Netzwerk gesperrt
+        if (!empty($user['_imp']) && \Core\Impersonation::blocked($r->path)) {
+            app()->session->flash('error', __('Während Sie als „{name}“ arbeiten, ist dieser Bereich gesperrt. Zurück zu Ihrem Konto über den Hinweis oben.', ['name' => $user['_imp']['label']]));
+            throw new RedirectException(url('/admin'));
+        }
         // Zweiter Faktor ist für die Rolle verlangt, aber noch nicht eingerichtet → erst einrichten; während einer
-        // Übergangsfrist einmal je Anmeldung daran erinnern (Core\Mfa, Core\Totp, Core\Passkeys)
-        if (($need = app()->session->get('2fa_setup')) && !in_array($r->path, \Core\Mfa::SETUP_PATHS, true)) {
+        // Übergangsfrist einmal je Anmeldung daran erinnern (Core\Mfa, Core\Totp, Core\Passkeys) – nicht während einer Ansicht
+        if (empty($user['_imp']) && ($need = app()->session->get('2fa_setup')) && !in_array($r->path, \Core\Mfa::SETUP_PATHS, true)) {
             if (\Core\Mfa::satisfied($user, is_array($need) ? ($need['req'] ?? null) : null)) {
                 app()->session->forget('2fa_setup');
             } elseif (\Core\Mfa::due($need)) {

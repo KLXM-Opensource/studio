@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Als Rolle oder Person arbeiten
+- Benutzer & Rollen: **„Als Rolle ansehen“** (Karte der Rolle – eigenes Konto mit den Rechten der Rolle) und **„Als Person anmelden“** (Person aufklappen – Rechte und Speichern als diese Person), nur für Administration und Netzwerk-Administration. Hinweis mit **„Zurück zu meinem Konto“** in Verwaltung und Leiste der Website; endet nach einer Stunde oder beim Abmelden. Konto, Benutzer, API-Tokens, Grundeinstellungen und Netzwerk bleiben gesperrt; nie in Netzwerk-, Schatten- oder gesperrte Konten, Administration nicht in Administration. Beginn/Ende im Netzwerk-Protokoll (`Core\Impersonation`). Selbsttest `impersonate:selftest`.
+
 ### E-Mail-Konten: mehrere Konten, Zwecke, Netzwerk-Konto
 - Grundeinstellungen → E-Mail-Versand → **E-Mail-Konten** (`/admin/system/mail`): neben „Standard“ weitere Konten (SMTP oder Dienst per Symfony-DSN, z. B. Mailjet, Mailchimp Transactional, Brevo, Postmark – Geheimnisse verschlüsselt), **Verwendung je Zweck** (Konto & Sicherheit, Redaktion, Besucher, Newsletter; Erweiterungen ergänzen Zwecke), Testnachricht je Konto mit verständlicher Meldung (z. B. fehlendes Paket).
 - **E-Mail-Konto des Netzwerks** im Netzwerk-Dashboard (nur Netzwerk-Administration), gilt für die ganze Installation: Mails an Netzwerk-Konten nur darüber, Websites ohne eigenes Konto nutzen es – nie das Konto einer anderen Website. Absender, Antwortadresse und Message-ID kommen vom verwendeten Konto. Health weist auf ein fehlendes Netzwerk-Konto hin.

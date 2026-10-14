@@ -383,6 +383,9 @@ return function (Router $r): void {
     $r->post('/admin/requests/{table}/{id}/assign', [Admin\InboxController::class, 'assign']);
     $r->post('/admin/requests/{table}/{id}/delete', [Admin\InboxController::class, 'delete']);
 
+    // Ansicht als Rolle bzw. Person (Core\Impersonation) – nur Administration; beenden immer erlaubt
+    $r->post('/admin/impersonate', [Admin\ImpersonateController::class, 'start']);
+    $r->post('/admin/impersonate/stop', [Admin\ImpersonateController::class, 'stop']);
     $r->get('/admin/users', [Admin\UserController::class, 'index']);
     $r->get('/admin/users/{section}', [Admin\UserController::class, 'section']);   // Personen, Einladen & Anlegen, Rollen, Anmeldung & Sicherheit
     $r->post('/admin/users', [Admin\UserController::class, 'store']);

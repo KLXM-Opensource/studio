@@ -3654,3 +3654,11 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .mk-form{display:grid;gap:12px}
 .mk-form__bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .mk-form__del{margin-inline-start:auto}
+
+/* Ansicht als Rolle/Person (Core\Impersonation): deutlicher Hinweis oben im Inhalt */
+.adm-imp{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 16px;padding:10px 14px;border-radius:10px;background:#3B2A6E;color:#fff}
+.adm-imp__ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.14);flex:none}
+.adm-imp__ico svg{width:16px;height:16px;fill:currentColor}
+.adm-imp__t{flex:1 1 280px;font-weight:600;line-height:1.35}
+.adm-imp__t small{display:block;font-weight:400;opacity:.85}
+.adm-imp .adm-btn{background:#fff;color:#3B2A6E;border-color:#fff}
