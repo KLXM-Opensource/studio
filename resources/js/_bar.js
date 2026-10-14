@@ -251,7 +251,7 @@ export function confirmDiscard(o = {}) {
   dlg.innerHTML = `<h2 id="cms-confirm-t">${esc(t.title)}</h2>
     <div id="cms-confirm-b"><p>${esc(t.body)}</p>${t.note ? `<p class="cms-confirm__note">${esc(t.note)}</p>` : ''}</div>
     <div class="cms-confirm__foot">
-      <button type="button" class="adm-btn adm-btn--ghost adm-btn--danger-text" data-r="discard">${esc(t.discard)}</button>
+      <button type="button" class="adm-btn adm-btn--ghost${o.plain ? '' : ' adm-btn--danger-text'}" data-r="discard">${esc(t.discard)}</button>
       <span class="cms-confirm__right">
         ${t.save ? `<button type="button" class="adm-btn" data-r="save">${esc(t.save)}</button>` : ''}
         <button type="button" class="adm-btn adm-btn--primary" data-r="keep" autofocus>${esc(t.keep)}</button>
@@ -346,10 +346,24 @@ function bottomBar() {
 /** Bearbeiten verlassen (zurück zu „Ansehen“ oder zu href) – mit Rückfrage bei ungespeicherten Änderungen */
 export async function cancel(href = null) {
   if (!H) { if (href) location.href = href; return; }
-  if (!H.dirty()) { H.exit(href); return; }
-  const r = await confirmDiscard();
-  if (r === 'save') { if (await H.save()) H.exit(href); }
-  else if (r === 'discard') { H.discard(); H.exit(href); }
+  if (H.dirty()) {
+    const r = await confirmDiscard();
+    if (r === 'keep') return;
+    if (r === 'save' && !(await H.save())) return;
+    if (r === 'discard') H.discard();
+  }
+  // Gespeicherter, aber unveröffentlichter Entwurf (Seite): erinnern – sonst gilt „gespeichert“ leicht als „online“
+  const st = R?.querySelector('[data-bar-chip]')?.dataset.state;
+  if (cfg.kind === 'page' && H.publish && (st === 'changed' || st === 'draft')) {
+    if (cfg.canPublish) {
+      const r = await confirmDiscard({ title: T('unpubTitle'), body: T('unpubBody'), note: '', keep: T('keep'), save: T('unpubPublish'), discard: T('unpubLater'), plain: true });
+      if (r === 'keep') return;
+      if (r === 'save' && !(await H.publish())) return;
+    } else {
+      await ask({ title: T('unpubInfoTitle'), body: T('unpubInfoBody'), ok: T('unpubInfoOk'), cancel: false });
+    }
+  }
+  H.exit(href);
 }
 
 function initModes() {
@@ -386,7 +400,7 @@ function initModes() {
   });
 }
 
-/** Wer bearbeitet: { dirty(): bool, save(): Promise<bool>, discard(), exit(href), start?() } */
+/** Wer bearbeitet: { dirty(): bool, save(): Promise<bool>, discard(), exit(href), start?(), publish?(): Promise<bool> } */
 export function use(handlers) {
   H = handlers;
 }

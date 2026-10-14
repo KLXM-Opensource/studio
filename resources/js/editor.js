@@ -879,7 +879,18 @@ function makeTool(type, def) {
         if (mode === 'plain') {
           n.contentEditable = 'plaintext-only';
           if (n.contentEditable !== 'plaintext-only') n.contentEditable = 'true';
-          n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); n.blur(); } });
+          n.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); n.blur(); return; }
+            // Pos1/Ende: an Anfang/Ende des ganzen Feldes – nicht der sichtbaren Zeile (große Überschriften brechen um,
+            // mit Silbentrennung sogar mitten im Wort); mit Umschalt wird markiert
+            if ((e.key === 'Home' || e.key === 'End') && !e.altKey && !e.ctrlKey && !e.metaKey) {
+              e.preventDefault();
+              const sel = n.getRootNode().getSelection?.() || getSelection(), r = d.createRange();
+              r.selectNodeContents(n); r.collapse(e.key === 'Home');
+              if (e.shiftKey && sel.rangeCount) sel.extend(r.startContainer, r.startOffset);
+              else { sel.removeAllRanges(); sel.addRange(r); }
+            }
+          });
           n.addEventListener('input', () => {
             const v = fieldValue(n, false);
             setPath(this.data, n.dataset.edit, v);
@@ -2102,6 +2113,7 @@ addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.retur
 Bar?.use({
   dirty: () => dirty,
   save: () => save(false),
+  publish: () => save(true),   // „Noch nicht veröffentlicht“ beim Verlassen (_bar.js cancel)
   discard: () => { dirty = false; },
   exit: href => { dirty = false; location.href = href || Bar.viewUrl || location.pathname; },
 });

@@ -7428,4 +7428,11 @@ return [
     '„{label}“ in {type} umwandeln?' => 'Convert “{label}” to {type}?',
     'Links unter „Sammlungen“ mit + anlegen, Dateien hochladen und auf die Sammlung ziehen – dann übernehmen.' => 'Create a collection with + under “Collections” on the left, upload files and drag them onto the collection – then apply.',
     'Feld am Anfang' => 'Field at the top',
+    // Bearbeiten verlassen mit unveröffentlichtem Entwurf; Block „Vor / Zurück“
+    'Bitte eine Tabelle mit Detailseiten wählen (oder den Block in deren Detailvorlage setzen).' => 'Please choose a table with detail pages (or place the block in its detail template).',
+    'Entwurf gespeichert' => 'Draft saved',
+    'Ihre Änderungen sind als Entwurf gespeichert – Besucher sehen sie erst nach dem Veröffentlichen.' => 'Your changes are saved as a draft – visitors will only see them once published.',
+    'Ihre Änderungen sind als Entwurf gespeichert. Veröffentlichen kann jemand mit Freigaberecht – Besucher sehen bis dahin die bisherige Fassung.' => 'Your changes are saved as a draft. Someone with publishing rights can publish them – until then visitors see the previous version.',
+    'Noch nicht veröffentlicht' => 'Not published yet',
+    'Später veröffentlichen' => 'Publish later',
 ];

@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Redaktion: Ideen aus fluid
+- **Noch nicht veröffentlicht:** Bearbeiten verlassen mit gespeichertem, unveröffentlichtem Entwurf einer Seite fragt nach (Veröffentlichen / Weiter bearbeiten / Später veröffentlichen; ohne Freigaberecht ein Hinweis).
+- **Pos1/Ende** in einzeiligen Texten auf der Seite springen an Anfang/Ende des ganzen Textes (mit Umschalt markieren).
+- **RSS-Feed** je Tabelle mit Detailseiten: `/feed/{handle}.xml` (`Core\Data\Feed`), `<link rel="alternate">` auf Detail- und Listenseite.
+- **Block „Vor / Zurück“** für Detailvorlagen: vorheriger/nächster Eintrag in der Reihenfolge der Tabelle (`app/Blocks/entry_nav.php`, `css/entry-nav.css`).
+
 ### Formulare: Auswahl aus zentral gepflegten Tabellen
 - Verknüpfungsfelder (ein Eintrag / mehrere) lassen sich ins öffentliche Formular einer Datentabelle aufnehmen: Besucher wählen aus den veröffentlichten Einträgen der verknüpften Tabelle (z. B. Orte, Kategorien, Themen) – als Auswahlliste bzw. Ankreuzfelder, gespeichert als echte Verknüpfung (`DataForms::REL_TYPES`, `relationOptions()`). Nicht in verschlüsselten Eingängen.
 - Tabellen-Designer: „+ Feld am Anfang“ verdeckt das erste Feld nicht mehr.

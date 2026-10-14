@@ -395,4 +395,8 @@ return [
     'Bilder: {title}' => 'Images: {title}',
     'Auf der Karte ansehen' => 'View on map',
     'Herunterladen' => 'Download',
+    // Block „Vor / Zurück“ (Detailseiten)
+    'Nächster Eintrag' => 'Next entry',
+    'Vorheriger Eintrag' => 'Previous entry',
+    'Weitere Einträge' => 'More entries',
 ];

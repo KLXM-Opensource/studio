@@ -143,7 +143,7 @@ final class Toolbar
 
         $b['config'] = [
             'kind' => $kind, 'mode' => $b['mode'], 'status' => $status, 'viewUrl' => $viewUrl,
-            'hasPublished' => $b['canDiscard'], 'texts' => self::texts($kind),
+            'hasPublished' => $b['canDiscard'], 'canPublish' => $kind === 'page' ? $b['canPublish'] : null, 'texts' => self::texts($kind),
         ];
         // Status-Chip: „Offline nehmen“ / „Online stellen“ ohne Neuladen (_bar.js). Seiten: Recht pages.publish, nicht die
         // Startseite; Einträge: Freigabe-Ablauf + data.publish, nur eigene (nicht von einer anderen Website geteilte) Einträge.
@@ -199,6 +199,13 @@ final class Toolbar
                 : __('Sie haben Änderungen, die noch nicht gespeichert sind. „Verwerfen“ stellt den zuletzt gespeicherten Stand wieder her.'),
             'discardNote' => $entry ? '' : __('Ein bereits gespeicherter Entwurf bleibt erhalten, veröffentlicht wird nichts.'),
             'keep' => __('Weiter bearbeiten'), 'discard' => __('Verwerfen'), 'saveExit' => __('Speichern & beenden'),
+            // Bearbeiten verlassen mit gespeichertem, aber unveröffentlichtem Entwurf (Seiten)
+            'unpubTitle' => __('Noch nicht veröffentlicht'),
+            'unpubBody' => __('Ihre Änderungen sind als Entwurf gespeichert – Besucher sehen sie erst nach dem Veröffentlichen.'),
+            'unpubPublish' => __('Veröffentlichen'), 'unpubLater' => __('Später veröffentlichen'),
+            'unpubInfoTitle' => __('Entwurf gespeichert'),
+            'unpubInfoBody' => __('Ihre Änderungen sind als Entwurf gespeichert. Veröffentlichen kann jemand mit Freigaberecht – Besucher sehen bis dahin die bisherige Fassung.'),
+            'unpubInfoOk' => __('Verstanden'),
             'blockTitle' => __('Änderungen an diesem Block verwerfen?'),
             'blockBody' => __('Der Block wird auf den Stand beim Öffnen der Seitenleiste zurückgesetzt. Andere Änderungen an der Seite bleiben erhalten.'),
             'done' => __('Fertig'), 'close' => __('Schließen'), 'cancel' => __('Abbrechen'), 'ok' => __('Bestätigen'),

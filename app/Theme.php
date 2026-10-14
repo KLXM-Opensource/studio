@@ -579,6 +579,8 @@ final class Theme
         if ($mediaText) $out[] = $this->coreCss('mediatext.css');
         // Kombifelder (Core\Combo: Ansprechperson, Fragen & Antworten, Adresse, Downloads) – Kit kann css/combo.css mitbringen
         if (($types === null || array_intersect(['data_list', 'data_fields'], $types)) && array_filter(\Core\Combo::TYPES, fn($c) => \Core\Data\Tables::usesType($c))) $out[] = $this->coreCss('combo.css');
+        // Vor / Zurück auf Detailseiten (Kern-Block entry_nav) – Kit kann css/entry-nav.css mitbringen
+        if ($types === null || in_array('entry_nav', $types, true)) $out[] = $this->coreCss('entry-nav.css');
         // Kalender-Blöcke (Monatsübersicht, Nächste Termine) – Theme kann css/calendar.css mitbringen
         if ($types === null || array_intersect(['calendar', 'upcoming'], $types)) {
             $out[] = $this->coreCss('calendar.css');

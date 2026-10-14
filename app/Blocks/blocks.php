@@ -57,6 +57,16 @@ return [
                 'help' => 'Ohne Einträge erscheint für Besucher gar nichts – z. B. „Offene Stellen“ auf einer allgemeinen Karriereseite.'],
         ],
     ],
+    'entry_nav' => [
+        'label' => 'Vor / Zurück', 'icon' => 'arrow-right', 'group' => 'Daten',
+        'nestable' => true,
+        'help' => 'Für Detailseiten-Vorlagen: Links zum vorherigen und nächsten Eintrag derselben Tabelle – in der Reihenfolge der Tabelle (z. B. älterer / neuerer Beitrag).',
+        'fields' => [
+            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'help' => 'Leer = Tabelle des aufgerufenen Eintrags.'],
+            ['name' => 'prev_label', 'label' => 'Beschriftung „zurück“', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Vorheriger Eintrag'],
+            ['name' => 'next_label', 'label' => 'Beschriftung „weiter“', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Nächster Eintrag'],
+        ],
+    ],
     'data_fields' => [
         'label' => 'Datensatz-Felder', 'icon' => 'table', 'group' => 'Daten',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)

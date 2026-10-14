@@ -660,6 +660,15 @@ return function (Router $r): void {
     });
     // Kalender: iCal-Feed und einzelne Termine (Funktion „calendar“, nur Tabellen mit Kalender + Feed)
     $r->get('/kalender/{handle}.ics', [\Core\Http\Controllers\CalendarController::class, 'feed']);
+    // RSS-Feed einer Tabelle mit Detailseiten (Beiträge, News …, Core\Data\Feed) – ?lang=en für eine weitere Sprache
+    $r->get('/feed/{handle}.xml', function (\Core\Http\Request $req, string $handle) {
+        $t = \Core\Data\Tables::findContent($handle);
+        if (!\Core\Data\Feed::available($t)) throw new \Core\Http\HttpException(404);
+        $lang = strtolower((string) ($req->query['lang'] ?? ''));
+        if ($lang !== '' && \Core\Lang::valid($lang)) app()->lang = $lang;
+        return new \Core\Http\Response(\Core\Data\Feed::xml($t), 200, ['Content-Type' => 'application/rss+xml; charset=utf-8',
+            'Cache-Control' => 'public, max-age=900', 'X-Robots-Tag' => 'noindex']);
+    });
     $r->get('/kalender/{handle}/{slug}.ics', [\Core\Http\Controllers\CalendarController::class, 'event']);
     // Visitenkarten (Core\VCard, vCard 3.0): Organisation der Website und Personen aus Tabellen mit Schema-Typ „Person“
     $r->get(\Core\VCard::ORG_PATH, [\Core\Http\Controllers\VCardController::class, 'org']);

@@ -241,6 +241,8 @@ final class SiteController
         if (!$app->editing) $html = \Core\Push\Visitor::inject($html);
         // PDF-Links: Auswahl „Anzeigen | Herunterladen“ (Core\PdfLinks) – Skript nur, wenn die Seite solche Links hat
         if (!$app->editing) $html = \Core\PdfLinks::inject($html);
+        // RSS-Feed der Tabelle (Detailseite bzw. Seite unter der URL-Basis) im Kopf verlinken (Core\Data\Feed)
+        if (!$app->editing && !$error) $html = \Core\Data\Feed::inject($html, $page, $ctx['table'] ?? null);
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);
         // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);
