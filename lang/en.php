@@ -7552,4 +7552,11 @@ return [
     'Eingangsbestätigungen von Formularen und Zustellung von Anfragen per E-Mail.' => 'Form receipts and delivery of requests by email.',
     'Newsletter und Massenversand' => 'Newsletters and bulk sending',
     'Für Erweiterungen (z. B. Newsletter) – viele Empfänger; oft ein eigener Dienst über eine API.' => 'For extensions (e.g. newsletters) – many recipients; often a separate service via an API.',
+    'Das E-Mail-Konto des Netzwerks gilt für die ganze Installation und wird im Netzwerk-Dashboard verwaltet.' => 'The network email account applies to the whole installation and is managed in the network dashboard.',
+    'E-Mail-Konto des Netzwerks' => 'Network email account',
+    'Für die ganze Installation: Mails an Netzwerk-Konten (Einladungen, Passwort) und die Mails von Websites ohne eigenes Konto. Mit neutralem Absender verrät keine Mail einem Kunden, welche anderen Kunden die Installation nutzen. Websites wählen ihre eigenen Konten in den Grundeinstellungen.' => 'For the whole installation: mails to network accounts (invitations, password) and mails from websites without their own account. With a neutral sender no mail reveals to a client which other clients use the installation. Websites choose their own accounts in their settings.',
+    'Konto bearbeiten' => 'Edit account',
+    'Konto einrichten' => 'Set up account',
+    'Noch kein E-Mail-Konto des Netzwerks: Mails an Netzwerk-Konten gehen bis dahin über das Konto der jeweiligen Website.' => 'No network email account yet: until then, mails to network accounts go via the account of the respective website.',
+    'Zum Netzwerk-Dashboard' => 'Go to the network dashboard',
 ];

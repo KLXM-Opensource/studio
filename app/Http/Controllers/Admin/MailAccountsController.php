@@ -126,47 +126,69 @@ final class MailAccountsController extends AdminController
     {
         $u = $this->guard($r);
         $acc = Accounts::find($id) ?? throw new HttpException(404);
-        $to = trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email'];
-        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return $this->back(self::BASE, 'error', __('Ungültige Empfängeradresse.'));
+        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email']);
+        return $this->back(self::BASE . '#konto-' . $id, $type, $msg);
+    }
+
+    /** Testnachricht über das E-Mail-Konto des Netzwerks (Netzwerk-Dashboard) */
+    public function networkTest(Request $r): Response
+    {
+        $u = $this->networkGuard($r);
+        $acc = Accounts::network() ?? throw new HttpException(404);
+        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email']);
+        return $this->back('/admin/network#email', $type, $msg);
+    }
+
+    /** @return array{0: string, 1: string} Meldungstyp und Text */
+    private static function sendTest(array $acc, string $to): array
+    {
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return ['error', __('Ungültige Empfängeradresse.')];
         // Versandweg zuerst aufbauen – meldet z. B. ein fehlendes Paket für Mailjet auch in der Testumgebung
         try {
             Accounts::transport($acc);
         } catch (\Throwable $e) {
-            return $this->back(self::BASE . '#konto-' . $id, 'error', $e->getMessage());
+            return ['error', $e->getMessage()];
         }
-        // Kurzzeitig nur dieses Konto: Zweck „Test“ über eine eigene Zuordnung
+        // Kurzzeitig nur dieses Konto für „Redaktion“ (Netzwerk-Konto über network: true)
         $routes = app()->settings->get('sys.mail_routes', []);
-        app()->settings->set('sys.mail_routes', ['notify' => $id] + (array) $routes);
+        if ($acc['id'] !== 'network') app()->settings->set('sys.mail_routes', ['notify' => $acc['id']] + (array) $routes);
         try {
             $err = Mailer::send(__('Testnachricht: Konto „{name}“', ['name' => $acc['label']]),
                 __('Diese Testnachricht wurde über das E-Mail-Konto „{name}“ versendet ({how}).', ['name' => $acc['label'], 'how' => Accounts::describe($acc)]) . "\n\n" . absolute_url('/'),
-                [$to], ['purpose' => 'notify', 'network' => $id === 'network']);
+                [$to], ['purpose' => 'notify', 'network' => $acc['id'] === 'network']);
         } finally {
-            app()->settings->set('sys.mail_routes', $routes);
+            if ($acc['id'] !== 'network') app()->settings->set('sys.mail_routes', $routes);
         }
-        $msg = $err ?? match (Mailer::$outcome) {
-            'sent' => __('Testnachricht an {to} übergeben.', ['to' => $to]),
-            'redirected' => __('Testnachricht an die Test-Umleitung gesendet (statt an {to}).', ['to' => $to]),
-            'dumped' => __('Testnachricht als Datei abgelegt (lokaler Test, mail_dump).'),
-            'logged' => $acc['transport'] === 'null' ? __('Versand ist bei diesem Konto deaktiviert – nur protokolliert.')
-                : __('Testumgebung: nicht versendet, nur protokolliert. Zum Testen eine Test-Umleitung eintragen (Grundeinstellungen → E-Mail-Versand). Der Versandweg ist eingerichtet.'),
-            default => __('Nicht zugestellt.'),
+        if ($err) return ['error', $err];
+        return match (Mailer::$outcome) {
+            'sent' => ['success', __('Testnachricht an {to} übergeben.', ['to' => $to])],
+            'redirected' => ['success', __('Testnachricht an die Test-Umleitung gesendet (statt an {to}).', ['to' => $to])],
+            'dumped' => ['success', __('Testnachricht als Datei abgelegt (lokaler Test, mail_dump).')],
+            'logged' => ['info', $acc['transport'] === 'null' ? __('Versand ist bei diesem Konto deaktiviert – nur protokolliert.')
+                : __('Testumgebung: nicht versendet, nur protokolliert. Zum Testen eine Test-Umleitung eintragen (Grundeinstellungen → E-Mail-Versand). Der Versandweg ist eingerichtet.')],
+            default => ['error', __('Nicht zugestellt.')],
         };
-        return $this->back(self::BASE . '#konto-' . $id, $err || !in_array(Mailer::$outcome, ['sent', 'redirected', 'dumped'], true) ? ($err ? 'error' : 'info') : 'success', $msg);
     }
 
-    /** Netzwerk-Konto speichern bzw. entfernen (Netzwerk-Administration, Netzwerk-Website) */
+    /** Netzwerk-Administration auf der Netzwerk-Website */
+    private function networkGuard(Request $r): array
+    {
+        $u = $this->auth($r);
+        if (!self::canNetwork($u)) throw new HttpException(403, __('Nur für die Netzwerk-Administration auf der Netzwerk-Website.'));
+        return $u;
+    }
+
+    /** E-Mail-Konto des Netzwerks speichern bzw. entfernen (Netzwerk-Dashboard) */
     public function network(Request $r): Response
     {
-        $u = $this->guard($r);
-        if (!self::canNetwork($u)) throw new HttpException(403, __('Nur für die Netzwerk-Administration auf der Netzwerk-Website.'));
+        $this->networkGuard($r);
         if (!empty($r->post['remove'])) {
             Accounts::saveNetwork(null);
-            return $this->back(self::BASE . '#netzwerk', 'success', __('Netzwerk-Konto entfernt – Netzwerk-Mails nutzen wieder das Konto der jeweiligen Website.'));
+            return $this->back('/admin/network#email', 'success', __('Netzwerk-Konto entfernt – Netzwerk-Mails nutzen wieder das Konto der jeweiligen Website.'));
         }
         [$v, $errors] = Fields::sanitize(self::fields(true), (array) ($r->post['n'] ?? []), Accounts::network() ?? []);
-        if ($errors) return $this->index($r, $errors, $v, 'network');
+        if ($errors) return $this->back('/admin/network#email', 'error', implode(' ', array_unique(array_map('strval', $errors))));
         Accounts::saveNetwork($v);
-        return $this->back(self::BASE . '#netzwerk', 'success', __('Netzwerk-Konto gespeichert.'));
+        return $this->back('/admin/network#email', 'success', __('Netzwerk-Konto gespeichert.'));
     }
 }

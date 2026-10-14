@@ -89,21 +89,9 @@ $testForm = function (string $id) use ($base, $me): string {
   </form>
 </section>
 
-<?php if ($canNetwork): ?>
-<section class="set-group" id="netzwerk" aria-labelledby="mk-net-h">
-  <h2 id="mk-net-h" class="set-group__title"><?= e(__('Netzwerk-Konto')) ?></h2>
-  <p class="adm-muted"><?= e(__('Gilt für die ganze Installation: Mails an Netzwerk-Konten und Websites ohne eigenes Konto. Mit neutralem Absender (z. B. Name des Systems) verrät eine Mail nie, welche anderen Kunden die Installation nutzen.')) ?></p>
-  <form method="post" action="<?= e(url($base . '/netzwerk')) ?>" class="adm-fields" novalidate>
-    <?= csrf_field() ?>
-    <?= Fields::renderForm($netFields, $noPort($draftId === 'network' && $draft !== null ? $draft : ($network ?? ['transport' => 'smtp', 'verify_peer' => true, 'encryption' => 'tls'])), $draftId === 'network' ? $errors : [], 'n') ?>
-    <div class="adm-form-actions">
-      <button class="adm-btn adm-btn--primary"><?= e(__('Netzwerk-Konto speichern')) ?></button>
-      <?php if ($network): ?><button class="adm-btn adm-btn--ghost adm-btn--danger-text" name="remove" value="1" formnovalidate data-confirm="<?= e(__('Netzwerk-Konto entfernen? Netzwerk-Mails gehen dann über das Konto der jeweiligen Website.')) ?>"><?= e(__('Entfernen')) ?></button><?php endif; ?>
-    </div>
-  </form>
-</section>
-<?php elseif ($network): ?>
-<p class="adm-muted"><?= e(__('Das Netzwerk-Konto verwaltet die Netzwerk-Administration.')) ?></p>
+<?php if ($canNetwork || $network): ?>
+<p class="adm-muted mk-note"><?= e(__('Das E-Mail-Konto des Netzwerks gilt für die ganze Installation und wird im Netzwerk-Dashboard verwaltet.')) ?>
+  <?php if ($canNetwork): ?><a href="<?= e(url('/admin/network#email')) ?>"><?= e(__('Zum Netzwerk-Dashboard')) ?></a><?php endif; ?></p>
 <?php endif; ?>
 
 </div>

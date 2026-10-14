@@ -75,6 +75,8 @@ return function (Router $r): void {
     $r->get('/admin/network/media-usages', [Admin\NetworkController::class, 'mediaUsages']);   // signiert, zwischen Websites (MediaPools::usagesElsewhere)
     $r->get('/admin/network', [Admin\NetworkController::class, 'index']);
     $r->post('/admin/network/open', [Admin\NetworkController::class, 'open']);
+    $r->post('/admin/network/mail', [Admin\MailAccountsController::class, 'network']);        // E-Mail-Konto des Netzwerks (Core\Mail\Accounts)
+    $r->post('/admin/network/mail/test', [Admin\MailAccountsController::class, 'networkTest']);
     $r->post('/admin/network/sites', [Admin\NetworkController::class, 'createSite']);
     $r->post('/admin/network/accounts', [Admin\NetworkController::class, 'accountCreate']);
     // Weitere Netzwerk-Administratoren einladen (Core\Invites, Rolle network – nur Netzwerk-Website, nur Netzwerk-Konten)
@@ -198,7 +200,6 @@ return function (Router $r): void {
     $r->post('/admin/system/mail/konto/{id}/loeschen', [Admin\MailAccountsController::class, 'delete']);
     $r->post('/admin/system/mail/verwendung', [Admin\MailAccountsController::class, 'routes']);
     $r->post('/admin/system/mail/test/{id}', [Admin\MailAccountsController::class, 'test']);
-    $r->post('/admin/system/mail/netzwerk', [Admin\MailAccountsController::class, 'network']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);
     $r->post('/admin/system/admin-path', [Admin\SystemController::class, 'adminPath']);   // Adresse der Verwaltung (Core\AdminPath)
     $r->post('/admin/system/pools', [Admin\SystemController::class, 'poolCreate']);

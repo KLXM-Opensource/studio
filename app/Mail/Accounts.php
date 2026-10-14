@@ -254,7 +254,7 @@ final class Accounts
         try {
             if (\Core\Sites::multi() && Network::isNetworkSite()) {
                 $n = self::network();
-                $out[$n ? 'E-Mail: Netzwerk-Konto eingerichtet (' . $n['from'] . ')' : 'E-Mail: Netzwerk-Konto fehlt – Mails an Netzwerk-Konten gehen über das Konto dieser Website (Grundeinstellungen → E-Mail-Konten)']
+                $out[$n ? 'E-Mail: Netzwerk-Konto eingerichtet (' . $n['from'] . ')' : 'E-Mail: Netzwerk-Konto fehlt – Mails an Netzwerk-Konten gehen über das Konto dieser Website (Netzwerk-Dashboard → E-Mail-Konto des Netzwerks)']
                     = $n ? self::ready($n) : null;
             }
             $all = self::all();
