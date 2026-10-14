@@ -67,9 +67,11 @@ final class MailAccountsController extends AdminController
     public function index(Request $r, array $errors = [], ?array $draft = null, string $draftId = ''): Response
     {
         $u = $this->guard($r);
+        if ($draftId === '') $draftId = isset($r->query['neu']) ? 'neu' : (string) ($r->query['konto'] ?? '');   // Links aus den Grundeinstellungen
         return $this->view('system/mail-accounts', [
             'accounts' => Accounts::all(), 'extra' => Accounts::extra(), 'routes' => Accounts::routes(), 'purposes' => Purposes::all(),
             'network' => Accounts::network(), 'canNetwork' => self::canNetwork($u), 'fields' => self::fields(), 'netFields' => self::fields(true),
+            'stdFields' => array_values(array_filter(self::fields(true), fn($f) => $f['name'] !== 'dsn' && $f['name'] !== 'reply_to')),
             'errors' => $errors, 'draft' => $draft, 'draftId' => $draftId, 'me' => $u,
         ], $errors ? 422 : 200);
     }
@@ -79,6 +81,13 @@ final class MailAccountsController extends AdminController
     {
         $this->guard($r);
         $id = (string) ($r->post['id'] ?? '');
+        if ($id === 'standard') {   // Konto „Standard“ = Grundeinstellungen sys.mail_* (ohne Namen, Versandart SMTP oder deaktiviert)
+            $fields = array_values(array_filter(self::fields(true), fn($f) => $f['name'] !== 'dsn' && $f['name'] !== 'reply_to'));
+            [$v, $errors] = Fields::sanitize($fields, (array) ($r->post['f'] ?? []), Accounts::standard());
+            if ($errors) return $this->index($r, $errors, $v, 'standard');
+            Accounts::saveStandard($v + Accounts::standard());
+            return $this->back(self::BASE . '#konto-standard', 'success', __('Konto „{name}“ gespeichert.', ['name' => __('Standard')]));
+        }
         $all = Accounts::extra();
         $cur = $id !== '' ? ($all[$id] ?? throw new HttpException(404)) : [];
         [$v, $errors] = Fields::sanitize(self::fields(), (array) ($r->post['f'] ?? []), $cur);

@@ -7559,4 +7559,11 @@ return [
     'Konto einrichten' => 'Set up account',
     'Noch kein E-Mail-Konto des Netzwerks: Mails an Netzwerk-Konten gehen bis dahin über das Konto der jeweiligen Website.' => 'No network email account yet: until then, mails to network accounts go via the account of the respective website.',
     'Zum Netzwerk-Dashboard' => 'Go to the network dashboard',
+    'Erstes E-Mail-Konto einrichten' => 'Set up the first email account',
+    'Hat das gewählte Konto keinen gültigen Absender, versendet das E-Mail-Konto des Netzwerks (falls eingerichtet). Mails an Netzwerk-Konten gehen immer darüber.' => 'If the chosen account has no valid sender, the network email account sends (if set up). Mails to network accounts always go through it.',
+    'Weitere Konten anlegen und testen. Welches Konto wofür versendet, legen Sie in den Grundeinstellungen unter E-Mail-Versand → Verwendung fest.' => 'Create and test accounts. Which account sends what is set in Settings under Email sending → Usage.',
+    'Zur Verwendung' => 'Go to usage',
+    'für alle Websites, im Netzwerk-Dashboard' => 'for all websites, in the network dashboard',
+    'z. B. für Newsletter – per SMTP oder über einen Dienst wie Mailjet, Mailchimp Transactional oder Brevo.' => 'e.g. for newsletters – via SMTP or a service such as Mailjet, Mailchimp Transactional or Brevo.',
+    'Über dieses Konto („Standard“) versendet die Website, bis Sie weitere Konten anlegen. Für Plesk empfohlen: SMTP mit dem Postfach der Domain (Port 587, STARTTLS).' => 'The website sends via this account (“Standard”) until you add more accounts. Recommended for Plesk: SMTP with the domain mailbox (port 587, STARTTLS).',
 ];

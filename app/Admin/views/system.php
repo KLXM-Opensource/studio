@@ -53,7 +53,14 @@ use Core\Fields;
     <?php if ($g['id'] === 'ki'): /* KI: Übersicht, Verbindungen und Verwendung der Installation vor den Schaltern der Website */ ?>
       <?= \Core\Theme::capture(ROOT . '/app/Admin/views/system/_ai.php', ['part' => 'top']) ?>
     <?php endif; ?>
-    <div class="set-groups"><?= Fields::renderGroups($g['fields'], $values, $errors, 'f') ?></div>
+    <?php $gFields = $g['fields'];
+    if ($g['id'] === 'mail'): // E-Mail-Versand: Konten-Liste (bzw. erstes Konto) und Verwendung vor den übrigen Feldern (system/_mail.php)
+      $std = array_values(\Core\Mail\Accounts::STANDARD_KEYS);
+      $stdFields = array_values(array_filter($gFields, fn($f) => in_array($f['name'] ?? '', $std, true) || (($f['type'] ?? '') === 'heading' && ($f['label'] ?? '') === 'Konto „Standard“')));
+      $gFields = array_values(array_filter($gFields, fn($f) => !in_array($f, $stdFields, true)));
+      echo \Core\Theme::capture(ROOT . '/app/Admin/views/system/_mail.php', ['stdFields' => $stdFields, 'values' => $values, 'errors' => $errors]);
+    endif; ?>
+    <div class="set-groups"><?= Fields::renderGroups($gFields, $values, $errors, 'f') ?></div>
     <?php if ($g['id'] === 'app'): ?>
       <div class="ai-preview" data-icon-preview="<?= e(url('/admin/system/icon-preview')) ?>" aria-live="polite">
         <strong class="ai-title">Vorschau</strong>
@@ -85,11 +92,6 @@ use Core\Fields;
       </div>
     <?php endif; ?>
     <?php if ($g['id'] === 'mail'): ?>
-      <div class="adm-inline-box">
-        <strong><?= e(__('Weitere Konten und Verwendung')) ?></strong>
-        <p class="adm-muted"><?= e(__('Eigene Konten für Newsletter oder Besucher-Mails (auch Dienste wie Mailjet oder Mailchimp Transactional per API), welches Konto wofür versendet, Netzwerk-Konto.')) ?></p>
-        <a class="adm-btn" href="<?= e(url('/admin/system/mail')) ?>"><?= e(__('E-Mail-Konten')) ?></a>
-      </div>
       <div class="adm-inline-box">
         <strong>Testnachricht senden</strong>
         <p class="adm-muted">Erst speichern, dann testen.</p>

@@ -52,12 +52,28 @@ final class SystemController extends AdminController
         foreach ((array) ($r->post['f'] ?? []) as $k => $v) {
             $input[preg_replace('~^sys_~', 'sys.', (string) $k)] = $v;
         }
-        [$values, $errors] = Fields::sanitize(SystemSchema::fields(), $input, $current);
+        // Konto „Standard“ bearbeitet die Seite E-Mail-Konten; hier nur, solange noch kein Konto eingerichtet ist (Feld mail_std_inline)
+        $schema = SystemSchema::fields();
+        if (empty($r->post['mail_std_inline'])) {
+            $std = array_values(\Core\Mail\Accounts::STANDARD_KEYS);
+            $schema = array_values(array_filter($schema, fn($f) => !in_array($f['name'] ?? '', $std, true)));
+        }
+        [$values, $errors] = Fields::sanitize($schema, $input, $current);
         if ($errors) {
             app()->session->flash('error', 'Bitte prüfen Sie die markierten Felder – es wurde nichts gespeichert.');
             return $this->edit($r, $errors, $values);
         }
         app()->settings->setMany($values);
+        // Verwendung je Zweck (Core\Mail\Accounts, Reiter E-Mail-Versand): mail_routes[zweck] = Konto; „standard“ = keine Zuordnung
+        if (is_array($r->post['mail_routes'] ?? null)) {
+            $acc = \Core\Mail\Accounts::all();
+            $routes = [];
+            foreach (\Core\Mail\Purposes::all() as $pk => $_) {
+                $v = (string) ($r->post['mail_routes'][preg_replace('~[^a-z0-9_]~', '_', $pk)] ?? 'standard');
+                if ($v !== 'standard' && isset($acc[$v])) $routes[$pk] = $v;
+            }
+            if ($routes != \Core\Mail\Accounts::routes()) { app()->settings->set('sys.mail_routes', $routes); $values['sys.mail_routes'] = $routes; }
+        }
         // Erweiterungen (Extension::on 'settings.saved'): nur geänderte Schlüssel, ohne Werte (Geheimnisse bleiben in den Einstellungen)
         $changed = array_keys(array_filter($values, fn($v, $k) => $v != ($current[$k] ?? null), ARRAY_FILTER_USE_BOTH));
         if ($changed) \Core\Extensions::emit(new \Core\Events\SettingsSaved('system', $changed));

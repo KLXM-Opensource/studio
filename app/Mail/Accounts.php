@@ -29,6 +29,9 @@ final class Accounts
     /** Versandarten: SMTP, Dienst per Symfony-DSN (API), deaktiviert – sendmail/PHP-mail() bewusst nicht (Zustellbarkeit, kein SPF/DKIM) */
     public const TRANSPORTS = ['smtp', 'dsn', 'null'];
     public const SECRET_KEYS = ['pass', 'dsn'];
+    /** Konto „Standard“ = diese Grundeinstellungen (Feld des Kontos → Einstellung) */
+    public const STANDARD_KEYS = ['transport' => 'sys.mail_transport', 'host' => 'sys.mail_host', 'port' => 'sys.mail_port', 'user' => 'sys.mail_user',
+        'pass' => 'sys.mail_pass', 'encryption' => 'sys.mail_encryption', 'verify_peer' => 'sys.mail_verify_peer', 'from' => 'sys.mail_from', 'from_name' => 'sys.mail_from_name'];
     private const NET_TABLE = 'network_mail';
 
     /** Konto „Standard“ aus den Grundeinstellungen (bisheriger Einzel-Versand) */
@@ -40,6 +43,16 @@ final class Accounts
             'port' => (int) ($s->get('sys.mail_port') ?: 0), 'user' => (string) $s->get('sys.mail_user', ''), 'pass' => (string) $s->get('sys.mail_pass', ''),
             'encryption' => (string) $s->get('sys.mail_encryption', 'tls'), 'verify_peer' => (bool) $s->get('sys.mail_verify_peer', true),
             'dsn' => '', 'from' => (string) $s->get('sys.mail_from', ''), 'from_name' => (string) $s->get('sys.mail_from_name', 'Website'), 'reply_to' => ''];
+    }
+
+    /** Konto „Standard“ speichern (Grundeinstellungen sys.mail_*; Passwort verschlüsselt über Settings) */
+    public static function saveStandard(array $a): void
+    {
+        $a = self::normalize($a);
+        $out = [];
+        foreach (self::STANDARD_KEYS as $k => $setting) $out[$setting] = $a[$k];
+        if (!in_array($out['sys.mail_transport'], ['smtp', 'null'], true)) $out['sys.mail_transport'] = 'smtp';
+        app()->settings->setMany($out);
     }
 
     /** Weitere Konten der Website (ohne Standard) – Geheimnisse entschlüsselt */
