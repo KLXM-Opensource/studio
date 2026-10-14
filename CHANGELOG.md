@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Live: nachgeladene Inhalte sichtbar, Live-Suche wartet
+- Neu laden auf Aktion: nachgeladene `[data-reveal]`-Elemente der Kits erscheinen sofort (blieben mit Einblend-Animation unsichtbar). Live-Suche erst nach 600 ms Pause und ab 2 Zeichen (`data-live-delay`, `data-live-min`); Leeren lädt sofort.
+- *EN:* Reloaded `[data-reveal]` elements are shown immediately; live search waits 600 ms and needs 2 characters.
+
 ### Präsenz der Redaktion: wer arbeitet gerade wo
 - Werkzeugleiste: wer dieselbe Seite bzw. denselben Eintrag gerade bearbeitet (Kürzel/Profilbild), sonst „zuletzt gespeichert von … vor …“; ⚠ und Rückfrage vor dem Speichern, wenn jemand anderes inzwischen gespeichert hat (keine Sperre). Seitenbaum, Eintragslisten, Übersicht („Gerade aktiv“) und Netzwerk-Übersicht (alle Websites, Klick führt per Einmal-Anmeldung dorthin). Eigenständig und übertragbar: `Core\Presence` (nur site/type/id/user + Zeit), Transport `Core\Live` (Kanal `presence:{site}`), Modul `presence.mjs`; Einstellung `sys.presence` (Standard an), Selbsttest `presence:selftest`.
 - *EN:* Editorial presence – who is editing what: avatars in the toolbar, "last saved by …", a warning and confirmation before saving when someone else saved in the meantime (no locking), markers in page tree, entry lists, dashboard and the network overview (all sites, click opens via single sign-on). Portable: `Core\Presence`, transport via `Core\Live`, standalone `presence.mjs`; setting `sys.presence`, self-test `presence:selftest`.

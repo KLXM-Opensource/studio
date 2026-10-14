@@ -6,7 +6,7 @@
  *
  * Neu laden auf Aktion (Core\Live::region): [data-live-region] mit data-live-src. Links [data-live-nav] und GET-Formulare
  * [data-live-nav] holen den Block mit ihren Parametern neu und tauschen ihn aus (pushState); Eingabefelder [data-live-input]
- * nach einer Pause (data-live-delay, Standard 350 ms, replaceState). Zurück/Vor lädt passend nach. Fokus bleibt im Feld bzw.
+ * nach einer Pause (data-live-delay, Standard 600 ms; ab data-live-min Zeichen, Standard 2; replaceState). Zurück/Vor lädt passend nach. Fokus bleibt im Feld bzw.
  * geht an den Block, Ansage über eine Statuszeile (aria-live). Fehler → normaler Seitenaufruf.
  */
 (() => {
@@ -125,6 +125,8 @@ function cmsLiveRegions(me) {
       if (how === 'push') history.pushState({ cmsLive: 1 }, '', url);
       else if (how === 'replace') history.replaceState({ cmsLive: 1 }, '', url);
       lastSearch = location.search;
+      // Einblenden beim Scrollen der Kits ([data-reveal] → is-in): Nachgeladenes sofort zeigen, sonst bliebe es unsichtbar
+      [fresh, ...fresh.querySelectorAll('[data-reveal]')].forEach((x) => { if (x.matches('[data-reveal]')) x.classList.add('is-in'); });
       fresh.dispatchEvent(new CustomEvent('cms:content-replaced', { bubbles: true }));
       const again = keep && document.getElementById(keep);
       if (again) { again.focus({ preventScroll: true }); if (sel) try { again.setSelectionRange(sel[0], sel[1]); } catch { /* kein Textfeld */ } }
@@ -165,7 +167,10 @@ function cmsLiveRegions(me) {
     const f = inp?.form, region = inp && regionOf(inp);
     if (!f || !region || !f.matches('[data-live-nav]')) return;
     clearTimeout(timer);
-    timer = setTimeout(() => load(regionOf(document.getElementById(inp.id) || inp) || region, formUrl(f), 'replace', false), +inp.dataset.liveDelay || 350);
+    // Erst tippen lassen: Pause (data-live-delay, Standard 600 ms), mindestens 2 Zeichen – Leeren lädt sofort die volle Liste
+    const v = inp.value.trim();
+    if (v.length > 0 && v.length < (+inp.dataset.liveMin || 2)) return;
+    timer = setTimeout(() => load(regionOf(document.getElementById(inp.id) || inp) || region, formUrl(f), 'replace', false), v === '' ? 0 : (+inp.dataset.liveDelay || 600));
   });
   addEventListener('popstate', () => {
     if (location.search === lastSearch) return;   // nur Sprungmarke geändert
