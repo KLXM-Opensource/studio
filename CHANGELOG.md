@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bearbeitungssperre (optional)
+- Grundeinstellungen → Allgemein → **„Bearbeitungssperre“** (Standard aus): Wer eine Seite oder einen Eintrag zuerst bearbeitet, sperrt sie für andere – sie sehen nur die Ansicht mit Hinweiszeile unter der Leiste; Speichern ist gesperrt (Editor, Verwaltung, KI, REST/MCP – HTTP 423). Frei spätestens 45 s nach dem Verlassen; Administratoren können **übernehmen**. Aufgebaut auf der Präsenz (`Core\EditLock`, keine eigene Tabelle). Leiste: Symbole statt Zeichen (Schloss, Warnzeichen). Selbsttest in `presence:selftest`.
+- *EN:* Optional editing lock: whoever edits first locks the page or entry; others get a view-only notice below the toolbar, saving is rejected everywhere (HTTP 423); administrators can take over.
+
 ### Website-Suche: Inhalte gezielt ausnehmen
 - Seiteneinstellung **„Nicht in der Website-Suche zeigen“** (`pages.search_exclude`, Verwaltung, Seitenleiste auf der Website, REST/MCP, Content-Sync) – unabhängig von noindex; Suchmaschinen und Sitemap bleiben.
 - Abschnitts-Option **„Nicht in der Website-Suche“** (Tune `noSearch`, Kennzeichen in der Block-Leiste) – auch für alle Spalten eines Layouts.

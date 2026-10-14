@@ -58,6 +58,8 @@ final class SystemSchema
                 ['name' => 'sys.maintenance', 'label' => 'Wartungsmodus – Website nur für eingeloggte Nutzer', 'type' => 'bool', 'default' => false],
                 ['name' => 'sys.presence', 'label' => 'Anzeigen, wer gerade wo arbeitet (Redaktion)', 'type' => 'bool', 'default' => true,
                     'help' => 'Angemeldete sehen in der Werkzeugleiste, im Seitenbaum, in Eintragslisten und auf der Übersicht, wer gerade dieselbe Seite oder denselben Eintrag bearbeitet, und werden vor dem Speichern gewarnt, wenn jemand anderes inzwischen gespeichert hat. Nur Name/Avatar und Zeitpunkt, keine Protokollierung. Besucher sehen nichts davon.'],
+                ['name' => 'sys.edit_lock', 'label' => 'Bearbeitungssperre: wer zuerst bearbeitet, sperrt für andere', 'type' => 'bool', 'default' => false,
+                    'help' => 'Bearbeitet jemand eine Seite oder einen Eintrag, können andere sie nur ansehen, bis die Person fertig ist (spätestens 45 Sekunden nach dem Schließen frei). Speichern ist für andere gesperrt – auch über KI, REST-API und MCP. Administratoren können die Bearbeitung übernehmen. Braucht „Anzeigen, wer gerade wo arbeitet“.'],
                 ['name' => 'sys.maintenance_text', 'label' => 'Text im Wartungsmodus', 'type' => 'textarea', 'rows' => 2,
                     'default' => 'Unsere Website wird gerade überarbeitet. Telefonisch sind wir wie gewohnt für Sie da.'],
             ]],

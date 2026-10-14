@@ -426,6 +426,10 @@ final class Entries
         if ($id && !$current) {
             return [null, ['_' => 'Eintrag nicht gefunden.']];
         }
+        // Bearbeitungssperre (Core\EditLock): jemand anderes bearbeitet diesen Eintrag gerade
+        if ($id && ($lockedBy = \Core\EditLock::blockedFor('entry', $table['handle'] . ':' . $id))) {
+            return [null, ['_' => \Core\EditLock::message($lockedBy)]];
+        }
         // Geteilte Tabelle: jede Website ändert nur ihre eigenen Einträge
         $shared = Tables::isShared($table);
         if ($current && $shared && Shared::isForeign($table, $current)) {

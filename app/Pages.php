@@ -414,6 +414,7 @@ final class Pages
 
     public static function saveDraft(int $id, array $blocks, ?int $userId, string $note = 'Gespeichert'): void
     {
+        EditLock::assert('page', (string) $id, $userId ?? EditLock::apiActor());   // Bearbeitungssperre (sys.edit_lock); ohne Person (Zeitplan, Import) keine Sperre
         // Erweiterungen prüfen/ändern die Blöcke vor dem Speichern (Extension::blocksBeforeSave)
         $blocks = Extensions::filterBlocksBeforeSave($blocks, ['page_id' => $id, 'user_id' => $userId]);
         $json = json_encode(['time' => (int) (microtime(true) * 1000), 'blocks' => $blocks, 'version' => '2.31'],
@@ -441,6 +442,7 @@ final class Pages
      */
     public static function publish(int $id, ?int $userId): void
     {
+        EditLock::assert('page', (string) $id, $userId ?? EditLock::apiActor());   // Bearbeitungssperre (sys.edit_lock); ohne Person (Zeitplan, Import) keine Sperre
         $p = self::find($id);
         if (!$p) {
             return;
@@ -499,6 +501,7 @@ final class Pages
      */
     public static function discardDraft(int $id, ?int $userId, string $note = 'Entwurf verworfen'): bool
     {
+        EditLock::assert('page', (string) $id, $userId ?? EditLock::apiActor());   // Bearbeitungssperre (sys.edit_lock); ohne Person (Zeitplan, Import) keine Sperre
         $p = self::find($id);
         if (!$p || $p['content_published'] === null) {
             return false;

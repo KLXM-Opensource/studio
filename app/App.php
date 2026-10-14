@@ -204,6 +204,10 @@ final class App
                 ? Http\Response::json(['ok' => false, 'error' => 'Nicht angemeldet.'], 401)
                 : Http\Response::redirect($e->to);
         } catch (Http\HttpException $e) {
+            // Bearbeitungssperre (Core\EditLock) bei JSON-Aufrufen (Editor, Seitenleisten): Meldung statt Fehlerseite
+            if ($e instanceof EditLocked && !str_starts_with($request->path, '/api/') && $request->wantsJson()) {
+                return Http\Response::json(['ok' => false, 'locked' => true, 'error' => $e->getMessage()], 423);
+            }
             if (str_starts_with($request->path, '/api/') || $request->path === '/mcp') {
                 return Http\Controllers\ApiController::fail(new Api\ApiError($e->getCode() ?: 404,
                     $e->getCode() === 405 ? 'Methode nicht erlaubt.' : 'Unbekannter API-Endpunkt. Übersicht: ' . absolute_url('/api/v1/openapi.json')));

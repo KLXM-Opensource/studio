@@ -1191,6 +1191,8 @@ switch ($cmd) {
     case 'presence:selftest':
         // Präsenz der Redaktion (Core\Presence): melden, auflisten, ablaufen; Network::safePath für „direkt dorthin“
         $res = Core\Presence::selftest();
+        $lk = Core\EditLock::selftest();   // Bearbeitungssperre (Core\EditLock)
+        $res['ok'] += $lk['ok']; $res['fails'] = array_merge($res['fails'], $lk['fails']);
         $sp = ['/die-seite?edit=1' => '/die-seite?edit=1', '/admin/sso?t=x' => '/admin', '//evil.example' => '/admin', '/a/../admin/sso' => '/admin', 'https://evil.example/' => '/admin', '/admin/pages' => '/admin/pages'];
         foreach ($sp as $in => $want) { $got = Core\Network\Network::safePath($in); if ($got === $want) $res['ok']++; else $res['fails'][] = "safePath($in): erwartet $want, erhalten $got"; }
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";

@@ -483,6 +483,8 @@ final class McpController
             ];
         } catch (ApiError $e) {
             return self::toolError($e->getMessage() . ($e->details ? "\n" . json_encode($e->details, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : ''));
+        } catch (\Core\EditLocked $e) {
+            return self::toolError($e->getMessage());   // Bearbeitungssperre (Core\EditLock)
         }
         $structured = is_array($data) && !array_is_list($data) ? $data : ['items' => $data];
         return [

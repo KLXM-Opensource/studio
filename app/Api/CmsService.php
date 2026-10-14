@@ -24,7 +24,11 @@ final class CmsService
     /** Sprachkontext der Anfrage (API: ?lang=en, MCP: Parameter lang); null = Standardsprache bzw. alle */
     private ?string $lang = null;
 
-    public function __construct(private readonly array $token) {}
+    public function __construct(private readonly array $token)
+    {
+        // Bearbeitungssperre (Core\EditLock): Schreiben über API/MCP gilt als Handeln des Token-Nutzers (ohne Person: immer fremd)
+        \Core\EditLock::setActor(isset($token['user_id']) && $token['user_id'] !== null ? (int) $token['user_id'] : 0);
+    }
 
     /** Sprache für diese Anfrage setzen – wirkt auf Seiten, Einträge, Einstellungen und Medientexte */
     public function useLang(?string $lang): void

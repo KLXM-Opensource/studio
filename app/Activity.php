@@ -44,7 +44,7 @@ final class Activity
     {
         return [
             'created' => __('angelegt'), 'updated' => __('geändert'), 'settings' => __('Einstellungen geändert'),
-            'published' => __('veröffentlicht'), 'unpublished' => __('offline genommen'), 'discarded' => __('Entwurf verworfen'),
+            'published' => __('veröffentlicht'), 'unpublished' => __('offline genommen'), 'discarded' => __('Entwurf verworfen'), 'lock_taken' => __('Bearbeitung übernommen'),
             'uploaded' => __('hochgeladen'), 'replaced' => __('ersetzt'), 'edited' => __('bearbeitet'),
             'trashed' => __('in den Papierkorb'), 'deleted' => __('gelöscht'),
         ][$a] ?? $a;

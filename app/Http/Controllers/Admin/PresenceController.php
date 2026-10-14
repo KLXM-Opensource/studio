@@ -37,7 +37,15 @@ final class PresenceController extends AdminController
             'now' => __('gerade eben'), 'min' => __('vor {n} Min.'), 'hour' => __('vor {n} Std.'), 'day' => __('am {date}'),
             'conflict' => __('{name} hat inzwischen gespeichert'), 'conflictShort' => __('Inzwischen gespeichert'), 'conflictTitle' => __('Inzwischen von {name} gespeichert'),
             'conflictBody' => __('Seit Sie dies geöffnet haben, hat {name} gespeichert ({ago}). Wenn Sie jetzt speichern, kann das diese Änderungen überschreiben – der vorige Stand bleibt als Version erhalten.'),
-            'conflictOk' => __('Trotzdem speichern'), 'cancel' => __('Abbrechen')];
+            'conflictOk' => __('Trotzdem speichern'), 'cancel' => __('Abbrechen'),
+            'locked' => __('{name} bearbeitet gerade – nur Ansehen'), 'lockedTitle' => __('Gesperrt: {name} bearbeitet gerade'),
+            'lockedBody' => __('Solange {name} diese Seite bearbeitet, können Sie sie nur ansehen. Die Sperre endet, sobald {name} fertig ist.'),
+            'take' => __('Übernehmen'), 'takeAsk' => __('Bearbeitung von {name} übernehmen?'),
+            'takeBody' => __('{name} kann danach nicht mehr speichern; nicht gespeicherte Änderungen von {name} gehen nicht verloren, werden aber auch nicht übernommen.'),
+            'taken' => __('{name} hat die Bearbeitung übernommen'), 'takenBody' => __('Sie können nicht mehr speichern. Kopieren Sie wichtige, noch nicht gespeicherte Änderungen, bevor Sie die Seite verlassen.'),
+            'lockedNotePage' => __('{name} bearbeitet diese Seite gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.'),
+            'lockedNoteEntry' => __('{name} bearbeitet diesen Eintrag gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.'),
+            'freeNote' => __('Wieder frei – niemand bearbeitet gerade.'), 'editNow' => __('Jetzt bearbeiten'), 'ok' => __('Verstanden')];
     }
 
     /** Attribute für [data-presence-here] in der Werkzeugleiste (Seite bzw. Eintrag) – leer, wenn aus oder ohne Objekt */
@@ -57,7 +65,8 @@ final class PresenceController extends AdminController
         $link = $type === 'page' ? Pages::url($b['page']) . '?edit=1' : (string) ($b['entryUrl'] ?? '');
         return ' data-presence-here data-presence-endpoint="' . e(url('/admin/api/presence')) . '" data-presence-type="' . e($type) . '" data-presence-id="' . e($id) . '"'
             . ' data-presence-label="' . e($label) . '" data-presence-url="' . e($link) . '" data-presence-csrf="' . e(\Core\Csrf::token()) . '"'
-            . ' data-presence-live="' . e(url('/api/live')) . '" data-presence-texts="' . e(json_encode(self::texts(), JSON_UNESCAPED_UNICODE)) . '"';
+            . ' data-presence-live="' . e(url('/api/live')) . '" data-presence-texts="' . e(json_encode(self::texts(), JSON_UNESCAPED_UNICODE)) . '"'
+            . (\Core\EditLock::blockedFor($type, $id) ? ' data-presence-locked="1"' : '');   // Bearbeitungssperre: nur Ansehen, auch mit ?edit
     }
 
     /** Attribute für Übersichten ([data-presence-list] bzw. [data-presence-board]) */
@@ -111,11 +120,23 @@ final class PresenceController extends AdminController
         $me = (int) $u['id'];
         $who = ['site' => site()->key, 'type' => $type, 'id' => $id, 'user' => (string) $me];
         if (!empty($in['leave'])) { Presence::leave($who); return Response::json(['on' => true, 'left' => true]); }
+        // Bearbeitungssperre übernehmen (Administration): melden und vor den bisherigen Inhaber rücken
+        $take = !empty($in['take']) && \Core\EditLock::on() && \Core\EditLock::canTake();
         // peek: nur nachsehen (Ansehen-Modus) – ohne sich selbst als „bearbeitet gerade“ zu melden
-        if (empty($in['peek'])) Presence::beat($who, self::person($u) + ['label' => (string) ($in['label'] ?? ''), 'url' => (string) ($in['url'] ?? '')]);
+        if (empty($in['peek']) || $take) Presence::beat($who, self::person($u) + ['label' => (string) ($in['label'] ?? ''), 'url' => (string) ($in['url'] ?? '')]);
+        if ($take) \Core\EditLock::take($type, $id, $me);
         $here = array_map(fn($e) => self::out($e, $me), Presence::list(['site' => site()->key, 'type' => $type, 'id' => $id]));
         return Response::json(['on' => true, 'me' => (string) $me, 'here' => $here, 'last' => self::last($type, $id, $me),
-            'live' => Live::token(['presence:' . site()->key])])->header('Cache-Control', 'no-store');
+            'lock' => self::lock($type, $id, $me), 'live' => Live::token(['presence:' . site()->key])])->header('Cache-Control', 'no-store');
+    }
+
+    /** Stand der Bearbeitungssperre: {on, by: Person|null (fremder Inhaber), mine, canTake} */
+    private static function lock(string $type, string $id, int $me): array
+    {
+        if (!\Core\EditLock::on()) return ['on' => false];
+        $h = \Core\EditLock::holder($type, $id);
+        $mine = $h && (string) $h['user'] === (string) $me;
+        return ['on' => true, 'by' => $h && !$mine ? self::out($h, $me) : null, 'mine' => $mine, 'canTake' => \Core\EditLock::canTake()];
     }
 
     public function index(Request $r): Response

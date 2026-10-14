@@ -34,6 +34,8 @@ final class ApiController
             return self::ok($e->data, 202)->header('Content-Location', $e->data['status_url']);
         } catch (ApiError $e) {
             return self::fail($e);
+        } catch (\Core\EditLocked $e) {
+            return self::fail(new ApiError(423, $e->getMessage()));   // Bearbeitungssperre: jemand bearbeitet gerade
         } catch (\Throwable $e) {
             error_log('[API] ' . $e);
             return self::fail(new ApiError(500, app()->config->get('debug') ? $e->getMessage() : 'Interner Fehler.'));

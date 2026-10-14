@@ -305,7 +305,7 @@ export function ask(o = {}) {
     dlg.onclick = e => { const b = e.target.closest('[data-r]'); if (b) { result = b.dataset.r === 'ok'; dlg.close(); } };
     dlg.onclose = () => { res(result); if (before?.isConnected) before.focus?.({ preventScroll: true }); };
     dlg.showModal();
-    dlg.querySelector('[data-r=cancel]').focus();
+    (dlg.querySelector('[data-r=cancel]') || dlg.querySelector('[data-r=ok]')).focus();   // ohne Abbrechen (cancel: false): OK
   });
 }
 

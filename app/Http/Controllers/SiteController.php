@@ -183,6 +183,8 @@ final class SiteController
         // Modus „Inhalt“ (?edit=inhalt): Inhaltsblöcke des Eintrags im Seiten-Editor – Recht am Eintrag statt pages.edit
         $app->contentEdit = $loggedIn && $ctx && ($r->query['edit'] ?? '') === 'inhalt' ? \Core\Data\EntryBlocks::contentEdit($ctx, Pages::blocks($page, true)) : null;
         $app->editing = $app->contentEdit !== null || ($loggedIn && isset($r->query['edit']) && ($r->query['edit'] ?? '') !== 'inhalt' && can('pages.edit'));
+        // Bearbeitungssperre (Core\EditLock): bearbeitet jemand anderes diese Seite, nur Ansehen (Hinweis und „Übernehmen“ in der Leiste)
+        if ($app->editing && $app->contentEdit === null && !empty($page['id']) && \Core\EditLock::blockedFor('page', (string) (int) $page['id'])) $app->editing = false;
         // Eingeloggte sehen den Arbeitsstand (Entwurf) – mit ?live=1 die veröffentlichte Fassung wie Besucher
         $live = $loggedIn && isset($r->query['live']) && !$app->editing;
         // Redaktionsnotizen [# … #]: Redaktion sieht sie als Hinweis (nicht in der Ansicht „wie Besucher“), sonst entfernt
