@@ -54,11 +54,11 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 
 /* Farben: Leiste immer dunkel; Menüs/Erklärungen hell bzw. in der dunklen Darstellung der Verwaltung dunkel */
 :host(.cms-bar-host){--b-bg:#1E2840;--b-line:rgba(255,255,255,.12);--b-ink:#fff;--b-mute:#BCC3D1;--b-fill:rgba(255,255,255,.08);--b-fill-h:rgba(255,255,255,.16);--b-pri:#fff;--b-pri-ink:#1E2840;--b-pri-h:#E3E8F3;--b-focus:#FFD28A;--b-ok:#5FD3A2;--b-warn:#F5BD55;--b-bad:#FF9585;--b-info:#9CBEFF;
-  --m-bg:#fff;--m-ink:#16201E;--m-mute:#586170;--m-line:#E3E6EC;--m-hover:#EEF1F8;--m-ico:#314164;--m-on:#fff;--m-shadow:0 10px 28px -14px rgba(16,24,40,.24),0 2px 6px -2px rgba(16,24,40,.08),0 0 0 1px rgba(16,24,40,.07)}
+  --m-bg:#fff;--m-ink:#16201E;--m-mute:#586170;--m-line:#E3E6EC;--m-hover:#EEF1F8;--m-soft:#F5F7FA;--m-soft-hover:#E7EBF3;--m-ico:#314164;--m-on:#fff;--m-shadow:0 10px 28px -14px rgba(16,24,40,.24),0 2px 6px -2px rgba(16,24,40,.08),0 0 0 1px rgba(16,24,40,.07)}
 :host(.cms-bar-host[data-theme=dark]){--b-bg:#0F1522;--b-line:rgba(255,255,255,.1);--b-mute:#A8B0C0;--b-pri:#E6EAF3;--b-pri-ink:#0F1522;--b-pri-h:#fff;
-  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}
+  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-soft:#202839;--m-soft-hover:#2B3550;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}
 @media (prefers-color-scheme:dark){:host(.cms-bar-host:not([data-theme=light])){--b-bg:#0F1522;--b-line:rgba(255,255,255,.1);--b-mute:#A8B0C0;--b-pri:#E6EAF3;--b-pri-ink:#0F1522;--b-pri-h:#fff;
-  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}}
+  --m-bg:#1A2131;--m-ink:#E8EBF1;--m-mute:#A8B0C0;--m-line:#2D3649;--m-hover:#263049;--m-soft:#202839;--m-soft-hover:#2B3550;--m-ico:#B4C6F2;--m-on:#0F1522;--m-shadow:0 10px 28px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.08)}}
 
 /* Drei Zonen in einer Zeile: Kontext | Modus | Aktionen */
 .cms-bar[data-bar]{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(max-content,1fr);align-items:center;gap:16px;min-height:52px;padding:8px 12px 8px 10px;background:var(--b-bg);color:var(--b-ink);box-shadow:inset 0 -1px 0 var(--b-line)}
@@ -190,12 +190,15 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-menu__col{display:flex;flex-direction:column;min-width:0}
 .cms-menu__col>.cms-menu__sep:first-child,.cms-menu__col>.cms-menu__sep:last-child{display:none}
 .cms-menu__col--page:not(:has(.cms-menu__item)){display:none}
-.cms-menu__col--page+.cms-menu__col--site{margin-top:6px;padding-top:6px;border-top:1px solid var(--m-line)}
-.cms-menu__col--page:not(:has(.cms-menu__item))+.cms-menu__col--site{margin-top:0;padding-top:0;border-top:0}
+.cms-menu__col--page+.cms-menu__col--site{margin-top:6px}
+/* rechte Spalte „Website“ leicht hinterlegt – trennt sie von „Diese Seite“ ohne Linie */
+.cms-menu__col--site{padding:2px 4px 4px;border-radius:9px;background:var(--m-soft)}
+.cms-menu__col--site .cms-menu__item:hover,.cms-menu__col--site .cms-menu__item:focus{background:var(--m-soft-hover)}
+.cms-menu__col--page:not(:has(.cms-menu__item))+.cms-menu__col--site{margin-top:0}
 @media (min-width:1024px){
   #cms-more-menu.cms-menu:has(.cms-menu__col--page .cms-menu__item){display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,1fr);max-width:min(600px,calc(100vw - 16px));column-gap:6px}
   #cms-more-menu.cms-menu[hidden]{display:none}
-  #cms-more-menu .cms-menu__col--page+.cms-menu__col--site{margin-top:0;padding-top:0;border-top:0;padding-left:6px;border-left:1px solid var(--m-line)}
+  #cms-more-menu .cms-menu__col--page+.cms-menu__col--site{margin-top:0}
 }
 .cms-menu--narrow,.cms-menu--phone{display:none}
 @media (prefers-reduced-motion:no-preference){

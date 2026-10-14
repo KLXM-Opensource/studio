@@ -170,7 +170,6 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
       <button type="button" class="cms-ibtn" data-bar-more aria-haspopup="menu" aria-expanded="false" aria-controls="cms-more-menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" title="<?= e(__('Weitere Aktionen')) ?>"><?= icon('dots-three') ?></button>
       <span class="cms-menu cms-menu--end" id="cms-more-menu" role="menu" aria-label="<?= e(__('Weitere Aktionen')) ?>" hidden>
         <span class="cms-menu__col cms-menu__col--page"><?php // Spalte „Diese Seite“ (ab 1024 px zweispaltig, sonst untereinander) ?>
-        <span class="cms-menu__head" aria-hidden="true"><?= e($kind === 'entry' ? __('Dieser Eintrag') : __('Diese Seite')) ?></span>
         <?php if ($b['modes']): ?>
         <span class="cms-menu__grp cms-menu--narrow" role="group" aria-label="<?= e(__('Modus')) ?>">
           <span class="cms-menu__head" aria-hidden="true"><?= e(__('Modus')) ?></span>
@@ -181,6 +180,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         </span>
         <span class="cms-menu__sep cms-menu--narrow" role="separator"></span>
         <?php endif; ?>
+        <span class="cms-menu__head" aria-hidden="true"><?= e($kind === 'entry' ? __('Dieser Eintrag') : __('Diese Seite')) ?></span>
 
         <?php if ($edit && $b['hasPage']): ?>
           <?= $item(e(__('Vorschau')) . '<small>' . e(__('ohne Bearbeitungsleisten – speichert vorher')) . '</small>', 'eye', $b['viewUrl'], ' data-editor-preview') ?>

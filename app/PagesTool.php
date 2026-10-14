@@ -21,7 +21,7 @@ final class PagesTool
     {
         return [
             'id' => self::ID, 'label' => __('Seiten'), 'icon' => 'tree-structure', 'module' => asset('js/pages-panel.mjs'),
-            'placement' => 'main', 'shortcut' => 'Alt+P', 'hint' => __('Seitenstruktur: sortieren, verschieben, anlegen'),
+            'placement' => 'main', 'scope' => 'site', 'shortcut' => 'Alt+P', 'hint' => __('Seitenstruktur: sortieren, verschieben, anlegen'),
             'view' => true, 'perm' => 'pages.manage',
             'panel' => ['title' => __('Seiten'), 'size' => 'drawer', 'width' => 560],
             'endpoints' => ['tree' => '/admin/api/pages/tree', 'create' => '/admin/api/pages/create', 'base' => '/admin/pages'],

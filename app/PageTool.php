@@ -18,7 +18,7 @@ final class PageTool
     {
         return [
             'id' => 'newpage', 'label' => __('Neue Seite'), 'icon' => 'file-plus', 'module' => asset('js/new-page.mjs'),
-            'placement' => 'main', 'shortcut' => 'Alt+N', 'hint' => __('Seite im Seitenbaum anlegen'),
+            'placement' => 'main', 'scope' => 'site', 'shortcut' => 'Alt+N', 'hint' => __('Seite im Seitenbaum anlegen'),
             'view' => true, 'perm' => 'pages.manage',
             'panel' => ['title' => __('Neue Seite anlegen'), 'size' => 'modal'],
             'endpoints' => ['tree' => '/admin/api/pages/tree', 'create' => '/admin/api/pages/create'],
