@@ -112,7 +112,7 @@ final class HeaderActions
                 'help' => $t('Am Kontakt-Chip und am Statuspunkt – berechnet aus den Öffnungszeiten. Bezeichnung (z. B. „Hofladen“): Website → Darstellung.')],
             ['name' => 'ha_lang', 'label' => $t('Sprachumschalter'), 'type' => 'choice', 'default' => $d['ha_lang'],
                 'options' => ['code' => $t('Kürzel'), 'dropdown' => $t('Aufklappliste'), 'text' => $t('Namen')],
-                'help' => $t('Kürzel („DE · EN“), Aufklappliste oder Sprachnamen als Text. Nur bei mehreren Sprachen. Bewusst ohne Flaggen – Sprachen sind keine Länder.')],
+                'help' => $t('Kürzel („DE · EN“), Aufklappliste oder Sprachnamen als Text. Nur bei mehreren Sprachen; ab drei Sprachen immer als Aufklappliste. Bewusst ohne Flaggen – Sprachen sind keine Länder.')],
             ['name' => 'ha_social', 'label' => $t('Social-Media-Symbole im Kopfbereich'), 'type' => 'bool', 'default' => (bool) $d['ha_social'],
                 'help' => $t('Profile aus Website → Social Media (höchstens vier); mobil im Fußbereich.')],
             ['name' => 'ha_account', 'label' => $t('Link „Anmelden“ (Mitgliederbereich)'), 'type' => 'bool', 'default' => (bool) $d['ha_account'],
@@ -437,8 +437,8 @@ final class HeaderActions
         }
         if ($m['contact']) array_push($css, 'contact', 'dot');
         if ($m['status'] && ($m['contact'] || $m['menu'] || ($m['cta'] && $c['ha_cta_style'] === 'chip'))) $js[] = 'status';
-        if ($m['social'] || $m['account'] || ($c['ha_lang'] === 'dropdown' && Lang::multi())) $css[] = 'extra';
-        if ($c['ha_lang'] === 'dropdown' && Lang::multi()) $js[] = 'menu';
+        if ($m['social'] || $m['account'] || (self::langStyle() === 'dropdown' && Lang::multi())) $css[] = 'extra';
+        if (self::langStyle() === 'dropdown' && Lang::multi()) $js[] = 'menu';
         $css = array_values(array_unique($css));
         // Kit mit 'header_actions' => ['base_css' => false]: schlichte Auswahl (Button bzw. Menüpunkt mit Kit-Klassen + Lupe)
         // braucht keine Kern-Datei – das Kit-CSS enthält dann selbst .ha{display:flex…} und die Ecken (z. B. basis, starter)
@@ -546,18 +546,31 @@ final class HeaderActions
      * Sprachumschalter im Stil aus Design („Kürzel“, „Aufklappliste“, „Sprachnamen“) – ohne Flaggen.
      * $langs aus language_links(); $class wird an die Liste gehängt (Kit-Stil „langswitch“ bleibt erhalten).
      */
+    /** Ab so vielen Sprachen wird der Umschalter im Kopf immer zur Aufklappliste (sonst zu breit, Kürzel schwer lesbar) */
+    public const LANG_MENU_FROM = 3;
+
+    /** Wirksamer Stil: Einstellung „Sprachumschalter“, ab LANG_MENU_FROM Sprachen immer „dropdown“ */
+    public static function langStyle(): string
+    {
+        $style = (string) self::config()['ha_lang'];
+        return count(Lang::all()) >= self::LANG_MENU_FROM ? 'dropdown' : $style;
+    }
+
     public static function lang(array $langs, string $class = ''): string
     {
         if (count($langs) < 2) return '';
-        $style = (string) self::config()['ha_lang'];
+        $style = count($langs) >= self::LANG_MENU_FROM ? 'dropdown' : (string) self::config()['ha_lang'];
         $cur = null;
         foreach ($langs as $l) if (!empty($l['active'])) $cur = $l;
         $cur ??= $langs[0];
         $items = '';
         foreach ($langs as $l) {
-            $text = $style === 'code'
-                ? '<span aria-hidden="true">' . e(strtoupper((string) $l['code'])) . '</span><span class="sf-sr">' . e((string) $l['label']) . '</span>'
-                : e((string) $l['label']);
+            $text = match ($style) {
+                'code' => '<span aria-hidden="true">' . e(strtoupper((string) $l['code'])) . '</span><span class="sf-sr">' . e((string) $l['label']) . '</span>',
+                // Menü: Name links, Kürzel rechts
+                'dropdown' => '<span class="ha-lang__name">' . e((string) $l['label']) . '</span><span class="ha-lang__code" aria-hidden="true">' . e(strtoupper((string) $l['code'])) . '</span>',
+                default => e((string) $l['label']),
+            };
             $items .= '<li><a href="' . e((string) $l['url']) . '" hreflang="' . e((string) $l['code']) . '" lang="' . e((string) $l['code']) . '"'
                 . (!empty($l['active']) ? ' aria-current="true"' : '') . '>' . $text . '</a></li>';
         }

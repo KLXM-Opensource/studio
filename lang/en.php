@@ -4042,7 +4042,7 @@ return [
     'Kein' => 'None',
     'Kontur' => 'Outline',
     'Kürzel' => 'Codes',
-    'Kürzel („DE · EN“), Aufklappliste oder Sprachnamen als Text. Nur bei mehreren Sprachen. Bewusst ohne Flaggen – Sprachen sind keine Länder.' => 'Codes (“DE · EN”), drop-down list or language names as text. Only with several languages. Deliberately without flags – languages are not countries.',
+    'Kürzel („DE · EN“), Aufklappliste oder Sprachnamen als Text. Nur bei mehreren Sprachen; ab drei Sprachen immer als Aufklappliste. Bewusst ohne Flaggen – Sprachen sind keine Länder.' => 'Codes (“DE · EN”), drop-down list or language names as text. Only with several languages; from three languages always as a dropdown. Deliberately without flags – languages are not countries.',
     'Lupe' => 'Magnifier',
     'Lupe mit Feld darunter, Suchfeld in der Leiste mit Vorschlägen, Lupe, die sich zum Feld aufzieht, Befehlsfeld „Suchen … ⌘K“ oder Suchleiste über die ganze Breite unter dem Kopf. Nur bei eingeschalteter Website-Suche; „/“ oder ⌘K bzw. Strg+K springt hinein, Escape schließt. Mobil: Lupe bzw. Feld im Menü.' => 'Magnifier with a field below, search field in the bar with suggestions, magnifier that expands into a field, command field “Search … ⌘K” or a full-width search bar below the header. Only with the website search switched on; “/” or ⌘K / Ctrl+K jumps in, Escape closes. On phones: magnifier or field in the menu.',
     'Namen' => 'Names',

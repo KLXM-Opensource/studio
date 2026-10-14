@@ -206,7 +206,7 @@ main:focus{outline:none}
 .sf__input::placeholder{color:var(--e-muted);opacity:1}
 .sf__input:focus{outline:none}
 .sf__btn{display:inline-flex;align-items:center;gap:8px;margin:4px 0;padding:0 14px;border:0;border-radius:var(--e-radius);background:var(--e-btn-bg);color:var(--e-btn-ink);font-weight:650;cursor:pointer}
-.langswitch{display:flex;gap:2px;margin:0;padding:0;list-style:none;font:500 .75rem var(--e-font-mono);letter-spacing:.06em}
+.langswitch{display:flex;flex-wrap:wrap;max-width:100%;gap:2px;margin:0;padding:0;list-style:none;font:500 .75rem var(--e-font-mono);letter-spacing:.06em}
 .langswitch a{display:grid;place-items:center;min-width:36px;min-height:36px;padding:0 4px;color:var(--e-muted);text-decoration:none}
 .langswitch a:hover{color:var(--e-ink)}
 .langswitch a[aria-current]{color:var(--e-ink);text-decoration:underline;text-decoration-color:var(--e-a);text-decoration-thickness:2px;text-underline-offset:.45em}

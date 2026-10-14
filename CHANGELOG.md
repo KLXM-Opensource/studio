@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Sprachwahl: ab drei Sprachen als Menü, lesbar in allen Kits
+- Ab drei Sprachen zeigt der Kopf immer die Aufklappliste (`HeaderActions::LANG_MENU_FROM`): Name links, Kürzel rechts, aktuelle Sprache umgekehrt eingefärbt (Schrift-/Hintergrundfarbe vertauscht – lesbar auch in farbigen Köpfen; Regeln spezifischer als die Sprachlisten der Kits). Klappt nach oben bzw. am Knopf ausgerichtet auf, wenn unten (auch in scrollenden Seitenleisten) oder rechts kein Platz ist. Variablen `--ha-*` gelten jetzt auch außerhalb der Kopf-Aktionen (Seitenleiste, Fuß). Sprachlisten in Menü und Fuß brechen um (alle Kits außer praxis). Kontrast in allen Kits geprüft, hell/dunkel, normal/:hover/:focus-visible: mindestens 13,5 : 1.
+- *EN:* From three languages the header always shows the dropdown (name left, code right, current language inverted), flips up/aligns when space is short, `--ha-*` defined outside header actions, language lists wrap in menus and footers; contrast checked in all kits (≥ 13.5:1).
+
 ### Live: nachgeladene Inhalte sichtbar, Live-Suche wartet
 - Neu laden auf Aktion: nachgeladene `[data-reveal]`-Elemente der Kits erscheinen sofort (blieben mit Einblend-Animation unsichtbar). Live-Suche erst nach 600 ms Pause und ab 2 Zeichen (`data-live-delay`, `data-live-min`); Leeren lädt sofort.
 - *EN:* Reloaded `[data-reveal]` elements are shown immediately; live search waits 600 ms and needs 2 characters.

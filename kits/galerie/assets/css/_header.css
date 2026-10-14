@@ -59,7 +59,7 @@
 .hnav .hnav__item--split:has(>.hnav__sub[open])>.hnav__link--top,.hnav .hnav__item--split>.hnav__sub[open]>.hnav__toggle{background:var(--f-a-soft);color:var(--f-ink)}
 
 /* Sprache */
-.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(var(--f-btn-r) + 3px);background:var(--f-surface)}
+.langswitch{display:flex;flex-wrap:wrap;max-width:100%;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(var(--f-btn-r) + 3px);background:var(--f-surface)}
 .btn-sharp .langswitch{border-radius:0}
 .langswitch a{display:grid;place-items:center;min-width:2.25rem;min-height:2rem;padding:0 .5rem;border-radius:var(--f-btn-r);color:var(--f-muted);font:600 .8125rem/1 var(--f-font);letter-spacing:.04em;text-decoration:none}
 .langswitch a:hover{color:var(--f-ink)}

@@ -11,9 +11,17 @@
 .ha-caret{width:.8em;height:.8em;transition:transform .15s}
 .ha-lang--dropdown[open] .ha-caret{transform:rotate(180deg)}
 .ha-lang__list{position:absolute;z-index:40;top:calc(100% + 6px);right:0;min-width:11rem;margin:0;padding:6px;list-style:none;border:1px solid var(--ha-line);border-radius:var(--ha-r);background:var(--ha-bg);box-shadow:0 12px 32px rgba(0,0,0,.14)}
-.ha-lang__list a{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:calc(var(--ha-r) - 3px);color:var(--ha-ink);text-decoration:none}
-.ha-lang__list a:hover{background:var(--ha-surface)}
-.ha-lang__list a[aria-current]{font-weight:700}
-.ha-lang__list a[aria-current]::after{content:"✓";margin-left:auto;padding-left:12px;color:var(--ha-accent)}
+.ha-lang__list{max-height:min(70vh,26rem);overflow-y:auto}
+/* Platz (header-actions-menu.js): nach oben bzw. linksbündig aufklappen */
+.ha-lang--dropdown.is-up .ha-lang__list{top:auto;bottom:calc(100% + 6px)}
+.ha-lang--dropdown.is-start .ha-lang__list{right:auto;left:0}
+.ha-lang.ha-lang--dropdown .ha-lang__list a{display:flex;align-items:center;gap:16px;min-height:40px;padding:0 12px;border-radius:calc(var(--ha-r) - 3px);color:var(--ha-ink);text-decoration:none}
+.ha-lang.ha-lang--dropdown .ha-lang__list a:hover{background:var(--ha-surface);color:var(--ha-ink);text-decoration:none}
+.ha-lang__code{margin-left:auto;font-size:.8em;font-weight:600;letter-spacing:.06em;opacity:.8}
+/* Aktuelle Sprache umgekehrt eingefärbt (Schrift-/Hintergrundfarbe des Kopfs vertauscht) – lesbar auch im farbigen Kopf */
+/* spezifischer als Sprachlisten der Kits (z. B. .langs a[aria-current]) – im Menü gelten immer diese Farben */
+.ha-lang.ha-lang--dropdown .ha-lang__list a[aria-current],.ha-lang.ha-lang--dropdown .ha-lang__list a[aria-current]:hover{background:var(--ha-ink);color:var(--ha-bg);font-weight:700;text-decoration:none}
+.ha-lang.ha-lang--dropdown .ha-lang__list a[aria-current] .ha-lang__code{opacity:1}
+.ha-lang.ha-lang--dropdown .ha-lang__list a:focus-visible{outline:2px solid var(--ha-accent);outline-offset:2px}
 @media (max-width:29.99em){.ha--compact :is(.ha-social,.ha-acct){display:none}}
 @media (prefers-reduced-motion:reduce){.ha-caret{transition:none}}

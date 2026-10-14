@@ -61,7 +61,7 @@
 .hnav__item--split>.hnav__sub>.hnav__toggle::after{content:none}
 
 /* Sprache: Kippschalter-Leiste */
-.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(.5rem + 3px);background:var(--n-surface)}
+.langswitch{display:flex;flex-wrap:wrap;max-width:100%;gap:2px;margin:0;padding:3px;list-style:none;border-radius:calc(.5rem + 3px);background:var(--n-surface)}
 .langswitch a{display:grid;place-items:center;min-width:2.25rem;min-height:2rem;padding:0 .5rem;border-radius:.5rem;color:var(--n-muted);font:700 .8125rem/1 var(--n-font);letter-spacing:.04em;text-decoration:none}
 .langswitch a:hover{color:var(--n-ink)}
 .langswitch a[aria-current]{background:var(--n-panel);color:var(--n-ink);box-shadow:0 1px 3px var(--n-sh2)}

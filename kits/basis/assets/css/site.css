@@ -202,7 +202,7 @@ main:focus{outline:none}
 .site-nav__search{display:none}
 .overlay__search{margin-bottom:24px}
 @media (max-width:959.98px){.site-nav__search{display:block}.site-nav__end .hsearch__btn{display:none}}
-.langswitch{display:flex;gap:2px;margin:0;padding:3px;list-style:none;border-radius:var(--b-radius);background:var(--b-surface)}
+.langswitch{display:flex;flex-wrap:wrap;max-width:100%;gap:2px;margin:0;padding:3px;list-style:none;border-radius:var(--b-radius);background:var(--b-surface)}
 .langswitch a{display:grid;place-items:center;min-width:36px;min-height:32px;padding:0 6px;border-radius:calc(var(--b-radius) * .7);color:var(--b-muted);font-size:.8125rem;font-weight:600;letter-spacing:.04em;text-decoration:none}
 .langswitch a:hover{color:var(--b-ink)}
 .langswitch a[aria-current]{background:var(--b-bg);color:var(--b-ink);box-shadow:0 0 0 1px var(--b-line)}
