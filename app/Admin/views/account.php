@@ -200,7 +200,7 @@ ob_start();
 <?php $sw('erweiterungen'); ?>
 <?= /* Erweiterungen (Extension::account, Core\Slots): eigene Abschnitte – escaped vom Core */ \Core\Extensions::accountSections((array) ($user ?? app()->auth->user() ?? [])) ?>
 <?php
-$sw('');
+$buf[$cur] = ($buf[$cur] ?? '') . ob_get_clean();   // letzten Bereich abschließen – kein neuer Puffer (sonst rutscht der Seitenkopf vor das Layout)
 $secs = ['profil' => [__('Profil'), 'user-circle'], 'sicherheit' => [__('Anmeldung & Sicherheit'), 'shield-check'], 'darstellung' => [__('Darstellung'), 'paint-brush'],
     'mitteilungen' => [__('Mitteilungen'), 'bell-ringing'], 'favoriten' => [__('Favoriten'), 'star'], 'erweiterungen' => [__('Weitere'), 'puzzle-piece']];
 $sections = [];
