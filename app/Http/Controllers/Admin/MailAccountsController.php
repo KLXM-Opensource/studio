@@ -135,7 +135,7 @@ final class MailAccountsController extends AdminController
     {
         $u = $this->guard($r);
         $acc = Accounts::find($id) ?? throw new HttpException(404);
-        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email']);
+        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email'], !empty($r->post['real']));
         return $this->back(self::BASE . '#konto-' . $id, $type, $msg);
     }
 
@@ -144,12 +144,12 @@ final class MailAccountsController extends AdminController
     {
         $u = $this->networkGuard($r);
         $acc = Accounts::network() ?? throw new HttpException(404);
-        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email']);
+        [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email'], !empty($r->post['real']));
         return $this->back('/admin/network#email', $type, $msg);
     }
 
-    /** @return array{0: string, 1: string} Meldungstyp und Text */
-    private static function sendTest(array $acc, string $to): array
+    /** @return array{0: string, 1: string} Meldungstyp und Text; $real: Testumgebung/Test-Umleitung umgehen (nur diese eine Adresse) */
+    private static function sendTest(array $acc, string $to, bool $real = false): array
     {
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return ['error', __('Ungültige Empfängeradresse.')];
         // Versandweg zuerst aufbauen – meldet z. B. ein fehlendes Paket für Mailjet auch in der Testumgebung
@@ -164,7 +164,7 @@ final class MailAccountsController extends AdminController
         try {
             $err = Mailer::send(__('Testnachricht: Konto „{name}“', ['name' => $acc['label']]),
                 __('Diese Testnachricht wurde über das E-Mail-Konto „{name}“ versendet ({how}).', ['name' => $acc['label'], 'how' => Accounts::describe($acc)]) . "\n\n" . absolute_url('/'),
-                [$to], ['purpose' => 'notify', 'network' => $acc['id'] === 'network']);
+                [$to], ['purpose' => 'notify', 'network' => $acc['id'] === 'network', 'force_real' => $real]);
         } finally {
             if ($acc['id'] !== 'network') app()->settings->set('sys.mail_routes', $routes);
         }

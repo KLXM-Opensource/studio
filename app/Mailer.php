@@ -102,7 +102,13 @@ final class Mailer
         // Staging/Entwicklung: nie an echte Empfänger – umleiten (Test-Umleitung bzw. config 'mail_redirect') oder nur protokollieren
         $prod = environment() === 'production';
         $test = empty($o['account']) ? self::testRedirect() : [];
-        if (!$prod || $test) {
+        // Testnachricht „Testumgebung umgehen“ (E-Mail-Konten, Netzwerk-Dashboard): wirklich an genau diese eine Adresse senden,
+        // um Zugangsdaten auch auf Staging zu prüfen – ohne Umleitung, mit Hinweis im Protokoll
+        $real = !empty($o['force_real']) && count($to) === 1;
+        if ($real && (!$prod || $test)) {
+            error_log('[Mailer] ' . ($prod ? 'Test-Umleitung' : environment()) . ' umgangen (Testnachricht): „' . $subject . '“ an ' . $to[0]);
+        }
+        if (!$real && (!$prod || $test)) {
             $redirect = $test ?: array_filter(array_map('trim', explode(',', (string) app()->config->get('mail_redirect', ''))));
             if (!$dump) error_log('[Mailer] ' . ($prod ? 'Test-Umleitung' : environment()) . ': „' . $subject . '“ an ' . implode(', ', $to) . ($redirect ? ' → umgeleitet an ' . implode(', ', $redirect) : ' → nicht versendet'));
             if (!$redirect && !$dump) { self::$outcome = 'logged'; return null; }

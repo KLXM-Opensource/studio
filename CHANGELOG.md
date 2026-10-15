@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### E-Mail-Konten: Testnachricht auch auf Testumgebungen
+- Auf Staging zeigen die E-Mail-Konten einen Hinweis, dass nichts verschickt wird. Häkchen **„wirklich senden“** (Website-Konten) bzw. **„Testumgebung umgehen – wirklich senden“** (Netzwerk-Konto): nur die Testnachricht geht tatsächlich an genau die eine Adresse, mit echter Fehlermeldung des Servers (`Mailer::send(…, ['force_real' => true])`, Eintrag im Protokoll).
+
 ### Netzwerk von jeder Website erreichbar
 - Netzwerk-Administration: Unter dem Website-Umschalter steht auf jeder Website **„Netzwerk – Alle Websites“** (Einmal-Anmeldung zur Netzwerk-Website); im Umschalter heißt der erste Eintrag „Alle Websites“.
 

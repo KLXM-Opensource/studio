@@ -10,6 +10,7 @@ use Core\Fields;
 use Core\Mail\Accounts;
 
 $base = '/admin/system/mail';
+$staging = environment() !== 'production';   // Testumgebung: Mailer versendet nicht (Testnachricht kann es mit „wirklich senden“)
 $noPort = fn(array $a) => ['port' => !empty($a['port']) ? $a['port'] : ''] + $a;   // leerer Port statt „0“ (dann üblicher Port)
 $edit = $draftId !== '' && ($draftId === 'neu' || $draftId === 'standard' || isset($extra[$draftId])) ? $draftId : '';
 $formFields = []; $formValues = []; $formTitle = '';
@@ -37,6 +38,7 @@ if ($edit === 'standard') {
   <div class="set-page mk-page">
   <section class="set-group" id="konten">
     <h2 class="set-group__title"><?= e(__('Konten')) ?></h2>
+    <?php if ($staging): ?><p class="adm-flash adm-flash--info mk-staging" role="note"><?= e(__('Diese Website ist eine Testumgebung ({env}): Sie verschickt keine E-Mails, sondern protokolliert sie nur. Mit „wirklich senden“ geht nur die Testnachricht an Ihre Adresse – so prüfen Sie die Zugangsdaten.', ['env' => environment()])) ?></p><?php endif; ?>
     <div class="set-list">
       <?php foreach ($accounts as $id => $a): $ready = Accounts::ready($a); ?>
       <div class="f f--inline mk-row<?= $edit === $id ? ' is-current' : '' ?>" id="konto-<?= e($id) ?>">
@@ -45,7 +47,8 @@ if ($edit === 'standard') {
         <span class="mk-row__act">
           <span class="adm-badge adm-badge--<?= $ready ? 'ok' : 'warn' ?>"><?= e($ready ? __('bereit') : __('nicht eingerichtet')) ?></span>
           <?php if ($ready): ?>
-          <form method="post" action="<?= e(url($base . '/test/' . $id)) ?>"><?= csrf_field() ?>
+          <form method="post" action="<?= e(url($base . '/test/' . $id)) ?>" class="mk-row__test"><?= csrf_field() ?>
+            <?php if ($staging): // Testumgebung: nur die Testnachricht wirklich senden (Mailer force_real) ?><label class="mk-test__real"><input type="checkbox" name="real" value="1" checked> <?= e(__('wirklich senden')) ?></label><?php endif; ?>
             <button class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('Testnachricht an {to}', ['to' => (string) $me['email']])) ?>"><?= e(__('Testnachricht')) ?></button></form>
           <?php endif; ?>
           <?php if ($id === 'network'): ?>

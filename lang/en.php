@@ -7592,4 +7592,8 @@ return [
     'Zurück zu meinem Konto' => 'Back to my account',
     'Datei ersetzen …' => 'Replace file …',
     'Original öffnen' => 'Open original',
+    'Diese Website ist eine Testumgebung ({env}) und verschickt sonst keine E-Mails. Mit dieser Option geht nur die Testnachricht wirklich an die eingegebene Adresse – so lassen sich die Zugangsdaten prüfen.' => 'This website is a test environment ({env}) and otherwise sends no emails. With this option only the test message is really sent to the address entered – so you can check the credentials.',
+    'Diese Website ist eine Testumgebung ({env}): Sie verschickt keine E-Mails, sondern protokolliert sie nur. Mit „wirklich senden“ geht nur die Testnachricht an Ihre Adresse – so prüfen Sie die Zugangsdaten.' => 'This website is a test environment ({env}): it sends no emails but only logs them. With “really send” only the test message goes to your address – so you can check the credentials.',
+    'Testumgebung umgehen – wirklich senden' => 'Bypass test environment – really send',
+    'wirklich senden' => 'really send',
 ];

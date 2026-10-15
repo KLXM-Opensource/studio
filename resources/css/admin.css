@@ -3648,7 +3648,11 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .net-presence small{color:var(--adm-t3)}
 
 /* Grundeinstellungen → E-Mail-Konten (system/mail-accounts.php) */
-.mk-test{display:flex;gap:6px;align-items:center}
+.mk-test{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mk-test__real{display:inline-flex;align-items:center;gap:6px;flex-basis:100%;font-size:13px;color:var(--adm-t2)}
+.mk-row__test{display:inline-flex;align-items:center;gap:8px}
+.mk-row__test .mk-test__real{flex-basis:auto;font-size:12px;white-space:nowrap}
+.mk-staging{margin:0 0 10px}
 .mk-test input{width:min(240px,50vw)}
 /* Grundeinstellungen → E-Mail-Versand: Zeilen der Konten-Liste wie Feldzeilen (Name + Beschreibung links, Zustand + Bearbeiten rechts) */
 .set-list .mk-row.f.f--inline{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
