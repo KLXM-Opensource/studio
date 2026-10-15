@@ -127,6 +127,7 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-tabs__n{min-width:20px;padding:0 6px;border-radius:999px;background:var(--adm-fill);color:var(--adm-t2);font-size:12px;line-height:20px;text-align:center;font-variant-numeric:tabular-nums}
 .net-tabs__dot{width:8px;height:8px;border-radius:50%;background:var(--adm-warn)}
 .net-page--administratoren,.net-page--email,.net-page--neu,.net-page--geteilt{max-width:760px}
+.us-main .net-page > .adm-card:first-child{margin-top:0}
 .net-page > .adm-card + .adm-card{margin-top:18px}
 
 /* ---------- Ruhigere Zusammenfassung ---------- */

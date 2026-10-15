@@ -10,9 +10,14 @@ $items = [
 $current = in_array($tab, ['service', 'templates'], true) ? 'services' : ($tab === 'revision' ? 'log' : $tab);
 ?>
 <header class="adm-head ck-head">
-  <div><p class="adm-eyebrow"><?= e(__('Erweiterung')) ?> · Consent-Kit</p><h1><?= e(__('Cookie-Einwilligung')) ?></h1></div>
+  <div><p class="adm-eyebrow"><?= e(__('Erweiterung')) ?> · Consent-Kit</p><h1><?= e(__('Cookie-Einwilligung')) ?></h1>
+    <p class="adm-muted"><?= e(__('Dienste, die eine Einwilligung brauchen, Banner-Texte und -Design, Nachweise.')) ?></p></div>
+  <div class="adm-head__actions"><a class="adm-btn adm-btn--ghost adm-btn--small" href="<?= e(url('/admin/hilfe/technik#consent')) ?>"><?= icon('question') ?> <?= e(__('Technik-Hilfe')) ?></a></div>
 </header>
-<nav class="ck-nav" aria-label="<?= e(__('Cookie-Einwilligung')) ?>">
-  <?php foreach ($items as $k => [$href, $label]): ?><a href="<?= e(url($href)) ?>"<?= $k === $current ? ' aria-current="page"' : '' ?>><?= e($label) ?></a><?php endforeach; ?>
-  <a class="ck-nav__help" href="<?= e(url('/admin/hilfe/technik#consent')) ?>"><?= e(__('Technik-Hilfe')) ?></a>
-</nav>
+<?php
+// Bereichsliste links wie Grundeinstellungen (Core\AdminUi); geschlossen im AdminController::page
+$icons = ['services' => 'plugs-connected', 'settings' => 'gear-six', 'design' => 'palette', 'log' => 'clock-counter-clockwise', 'io' => 'stamp'];
+$navItems = [];
+foreach ($items as $k => [$href, $label]) $navItems[$k] = ['href' => url($href), 'label' => $label, 'icon' => $icons[$k] ?? 'circle'];
+echo \Core\AdminUi::open($navItems, $current, __('Cookie-Einwilligung'), false);
+?>

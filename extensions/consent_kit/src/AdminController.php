@@ -30,7 +30,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $vars['css'] = [];
         $vars['user'] = app()->auth->user();
         $dir = dirname(__DIR__) . '/views/';
-        $content = Theme::capture($dir . '_nav.php', $vars) . Theme::capture($dir . $view . '.php', $vars)
+        $content = Theme::capture($dir . '_nav.php', $vars) . Theme::capture($dir . $view . '.php', $vars) . \Core\AdminUi::close()
             . '<link rel="stylesheet" href="' . e(Consent::asset('css/consent-admin.css')) . '">'
             . '<script src="' . e(Consent::asset('js/consent-admin.js')) . '" defer></script>';
         $html = Theme::capture(ROOT . '/app/Admin/views/layout.php', $vars + ['content' => $content, 'view' => 'consent', 'title' => ($vars['title'] ?? __('Cookie-Einwilligung'))]);

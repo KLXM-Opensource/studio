@@ -67,11 +67,16 @@ $oldHash = ['konten' => 'administratoren', 'net-invite' => 'administratoren', 'n
     <?php if ($section !== 'neu'): ?><a class="adm-btn adm-btn--primary adm-btn--small" href="<?= e($secUrl('neu')) ?>"><?= icon('plus') ?> <?= e(__('Neue Website')) ?></a><?php endif; ?>
   </div>
 </header>
-<nav class="net-tabs" aria-label="<?= e(__('Bereiche des Netzwerks')) ?>"<?= $section === '' ? ' data-net-oldhash="' . e(json_encode(array_map($secUrl, $oldHash), JSON_UNESCAPED_SLASHES)) . '"' : '' ?>>
-  <?php foreach ($secs as $k => [$label, $ico, $badge]): ?>
-  <a href="<?= e($secUrl($k)) ?>"<?= $section === $k ? ' aria-current="page"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span><?php if ($badge === '!'): ?><span class="net-tabs__dot" title="<?= e(__('Noch nicht eingerichtet')) ?>"><span class="adm-sr"><?= e(__('Noch nicht eingerichtet')) ?></span></span><?php elseif ($badge !== ''): ?><span class="net-tabs__n"><?= e($badge) ?></span><?php endif; ?></a>
-  <?php endforeach; ?>
-</nav>
+<?php
+// Bereichsliste links wie Grundeinstellungen (Core\AdminUi) – eine Adresse je Bereich
+$items = [];
+foreach ($secs as $k => [$label, $ico, $badge]) {
+    $items[$k] = ['href' => $secUrl($k), 'label' => $label, 'icon' => $ico, 'badge' => $badge !== '!' ? $badge : null, 'warn' => $badge === '!' ? __('Noch nicht eingerichtet') : ''];
+}
+?>
+<?php if ($section === ''): // alte Sprungmarken (/admin/network#email …) leiten um – resources/js/_network.js ?><span hidden data-net-oldhash="<?= e(json_encode(array_map($secUrl, $oldHash), JSON_UNESCAPED_SLASHES)) ?>"></span><?php endif; ?>
+<?= \Core\AdminUi::open($items, $section === 'neu' ? '' : $section, __('Bereiche des Netzwerks'), false) ?>
 <div class="net-page net-page--<?= e($section === '' ? 'websites' : $section) ?>">
 <?php include __DIR__ . '/_' . ($section === '' ? 'websites' : ($section === 'administratoren' ? 'admins' : $section)) . '.php'; ?>
 </div>
+<?= \Core\AdminUi::close() ?>
