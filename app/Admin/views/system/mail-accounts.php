@@ -52,7 +52,7 @@ if ($edit === 'standard') {
             <button class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('Testnachricht an {to}', ['to' => (string) $me['email']])) ?>"><?= e(__('Testnachricht')) ?></button></form>
           <?php endif; ?>
           <?php if ($id === 'network'): ?>
-            <?php if ($canNetwork): ?><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/network#email')) ?>"><?= e(__('Bearbeiten')) ?></a><?php endif; ?>
+            <?php if ($canNetwork): ?><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/network/email')) ?>"><?= e(__('Bearbeiten')) ?></a><?php endif; ?>
           <?php else: ?>
             <a class="adm-btn adm-btn--small" href="<?= e(url($base . '?konto=' . $id . '#formular')) ?>"><?= e(__('Bearbeiten')) ?></a>
           <?php endif; ?>

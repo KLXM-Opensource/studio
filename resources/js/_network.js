@@ -6,6 +6,14 @@
 import { t } from './_i18n.js';
 
 export function initNetwork() {
+  // Alte Sprungmarken (/admin/network#email …) führen in den passenden Bereich (/admin/network/email)
+  const nav = document.querySelector('[data-net-oldhash]');
+  if (nav && location.hash) {
+    try {
+      const to = JSON.parse(nav.dataset.netOldhash)[location.hash.slice(1)];
+      if (to) { location.replace(to + (location.hash.startsWith('#net-') ? location.hash : '')); return; }
+    } catch { /* ungültige Daten: bleiben */ }
+  }
   const grid = document.querySelector('[data-net-grid]');
   if (!grid) return;
   const cards = [...grid.querySelectorAll('[data-net-card]')];

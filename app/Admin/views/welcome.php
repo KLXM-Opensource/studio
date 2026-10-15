@@ -68,7 +68,7 @@ $name = trim((string) ($me['name'] ?? '')) ?: (string) ($me['email'] ?? '');
       <ul>
         <li><?= e(__('Bis zur Einrichtung sehen Besucher den Hinweis „Diese Website wird gerade eingerichtet“ – die Website wird nicht von Suchmaschinen erfasst.')) ?></li>
         <?php if ($network): ?>
-        <li><?= e(__('Weitere Websites legen Sie in der Netzwerk-Übersicht an („Neue Website“) – dort lassen sich Kit und Startinhalte auch gleich vorgeben.')) ?> <a href="<?= e(url('/admin/network#neu')) ?>"><?= e(__('Zur Netzwerk-Übersicht')) ?></a></li>
+        <li><?= e(__('Weitere Websites legen Sie in der Netzwerk-Übersicht an („Neue Website“) – dort lassen sich Kit und Startinhalte auch gleich vorgeben.')) ?> <a href="<?= e(url('/admin/network/neu')) ?>"><?= e(__('Zur Netzwerk-Übersicht')) ?></a></li>
         <?php endif; ?>
         <li><?= e(__('Das Kit lässt sich später unter Grundeinstellungen wechseln; Startinhalte werden nur beim ersten Einrichten eingespielt.')) ?></li>
         <li><?= e(__('Anleitungen: Handbuch & Hilfe in der Verwaltung, für Technik das Entwicklerhandbuch.')) ?> <a href="<?= e(url('/admin/hilfe')) ?>"><?= e(__('Zur Hilfe')) ?></a></li>

@@ -69,7 +69,7 @@ final class Welcome
         if ($site !== null) unset($steps[$site]['missing']);
         if (Network\Network::isNetworkSite() && Network\Network::isNetworkUser()) {
             $steps[] = ['ok' => count(Sites::all()) > 1, 'label' => __('Weitere Websites anlegen'), 'hint' => __('In der Netzwerk-Übersicht: Kurzname, Domain – Kit und Startinhalte wählt, wer die Website zuerst öffnet.'),
-                'link' => '/admin/network#neu', 'icon' => 'buildings'];
+                'link' => '/admin/network/neu', 'icon' => 'buildings'];
         }
         $steps[] = ['ok' => self::recentBackup(), 'label' => __('Tägliche Sicherung einrichten'), 'hint' => __('Per Cron jede Nacht Datenbank und Medien sichern – Befehle im Entwicklerhandbuch.'),
             'link' => '/admin/hilfe/technik#sicherung', 'icon' => 'archive'];

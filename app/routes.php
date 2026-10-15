@@ -74,6 +74,7 @@ return function (Router $r): void {
     $r->get('/admin/sso/domain', [Admin\HandoverController::class, 'land']);
     $r->get('/admin/network/media-usages', [Admin\NetworkController::class, 'mediaUsages']);   // signiert, zwischen Websites (MediaPools::usagesElsewhere)
     $r->get('/admin/network', [Admin\NetworkController::class, 'index']);
+    $r->get('/admin/network/{section}', [Admin\NetworkController::class, 'section']);   // Bereiche (NetworkController::SECTIONS)
     $r->post('/admin/network/open', [Admin\NetworkController::class, 'open']);
     $r->post('/admin/network/mail', [Admin\MailAccountsController::class, 'network']);        // E-Mail-Konto des Netzwerks (Core\Mail\Accounts)
     $r->post('/admin/network/mail/test', [Admin\MailAccountsController::class, 'networkTest']);

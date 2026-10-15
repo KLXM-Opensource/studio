@@ -145,7 +145,7 @@ final class MailAccountsController extends AdminController
         $u = $this->networkGuard($r);
         $acc = Accounts::network() ?? throw new HttpException(404);
         [$type, $msg] = self::sendTest($acc, trim((string) ($r->post['to'] ?? '')) ?: (string) $u['email'], !empty($r->post['real']));
-        return $this->back('/admin/network#email', $type, $msg);
+        return $this->back('/admin/network/email', $type, $msg);
     }
 
     /** @return array{0: string, 1: string} Meldungstyp und Text; $real: Testumgebung/Test-Umleitung umgehen (nur diese eine Adresse) */
@@ -193,11 +193,11 @@ final class MailAccountsController extends AdminController
         $this->networkGuard($r);
         if (!empty($r->post['remove'])) {
             Accounts::saveNetwork(null);
-            return $this->back('/admin/network#email', 'success', __('Netzwerk-Konto entfernt – Netzwerk-Mails nutzen wieder das Konto der jeweiligen Website.'));
+            return $this->back('/admin/network/email', 'success', __('Netzwerk-Konto entfernt – Netzwerk-Mails nutzen wieder das Konto der jeweiligen Website.'));
         }
         [$v, $errors] = Fields::sanitize(self::fields(true), (array) ($r->post['n'] ?? []), Accounts::network() ?? []);
-        if ($errors) return $this->back('/admin/network#email', 'error', implode(' ', array_unique(array_map('strval', $errors))));
+        if ($errors) return $this->back('/admin/network/email', 'error', implode(' ', array_unique(array_map('strval', $errors))));
         Accounts::saveNetwork($v);
-        return $this->back('/admin/network#email', 'success', __('Netzwerk-Konto gespeichert.'));
+        return $this->back('/admin/network/email', 'success', __('Netzwerk-Konto gespeichert.'));
     }
 }

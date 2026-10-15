@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Netzwerk-Dashboard neu geordnet
+- Bereichsleiste **Websites · Administratoren · E-Mail · Geteilt · Protokoll** (eigene Adressen `/admin/network/{bereich}`, alte Sprungmarken leiten um), **Neue Website** als Knopf oben.
+- Websites: oben **„Braucht Aufmerksamkeit“** – alle Hinweise aller Websites als eine Liste mit „Öffnen“; Karten ruhig (Status, eine Zeile Kennzahlen, Aktivität nur wenn offen), Betrieb und Domains unter „Details“, Aktionen unter ⋯. Seite etwa ein Drittel so lang.
+- Protokoll: alle Aktionen lesbar benannt (auch Ansicht als Rolle/Person, E-Mail-Änderung, Passwort vergessen), nach Tagen gruppiert, Suche und Filter nach Website, bis 200 Einträge.
+
 ### Style-Editor: „Dunkelmodus anbieten“ vorn
 - Der Schalter für das dunkle Farbschema (in allen Kits vorhanden, stand meist weit unten) steht jetzt im Style-Editor der Verwaltung und der Website ganz oben im ersten Bereich, mit Erklärung (`Design::darkFirst()`).
 

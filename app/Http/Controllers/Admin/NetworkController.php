@@ -33,7 +33,16 @@ final class NetworkController extends AdminController
         return $key;
     }
 
-    public function index(Request $r): Response
+    /** Bereiche unter /admin/network/{bereich} (ohne Bereich: Websites) */
+    public const SECTIONS = ['administratoren', 'email', 'neu', 'geteilt', 'protokoll'];
+
+    public function section(Request $r, string $section): Response
+    {
+        if (!in_array($section, self::SECTIONS, true)) throw new HttpException(404);
+        return $this->index($r, $section);
+    }
+
+    public function index(Request $r, string $section = ''): Response
     {
         $user = $this->network($r);
         Network::rememberUrl();
@@ -51,7 +60,8 @@ final class NetworkController extends AdminController
         app()->session->forget('_net_invite_old');
         return $this->view('network/index', ['stats' => $stats, 'warn' => $warn, 'accounts' => Network::accounts(),
             'invites' => \Core\Invites::open(true), 'inviteLink' => is_array($inviteLink) ? $inviteLink : null, 'inviteOld' => is_array($old) ? $old : null,
-            'log' => Network::recentLog(20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
+            'log' => Network::recentLog($section === 'protokoll' ? 200 : 20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
+            'section' => $section, 'logSite' => $r->str('website'), 'logQ' => $r->str('q'),
             'css' => ['css/passkey.css', 'css/invite.css', 'css/network.css']]);
     }
 
@@ -219,11 +229,11 @@ final class NetworkController extends AdminController
             $res = Sites::create($key, preg_split('~[\s,]+~', $r->str('hosts')) ?: [], $r->str('theme'), ['seed' => $content]);
             Network::ensureKey();
         } catch (\InvalidArgumentException $e) {
-            return $this->back('/admin/network#neu', 'error', $e->getMessage());
+            return $this->back('/admin/network/neu', 'error', $e->getMessage());
         }
         Network::log('site.create', $key, (string) $user['email'], $r->str('hosts'));
         app()->session->set('_net_newsite', ['key' => $key, 'token' => $res['setup_token'], 'file' => str_replace(ROOT . '/', '', $res['file'])]);
-        return $this->back('/admin/network#neu', 'success', __('Website „{site}“ angelegt.', ['site' => $key]));
+        return $this->back('/admin/network/neu', 'success', __('Website „{site}“ angelegt.', ['site' => $key]));
     }
 
     // ================================================================= Netzwerk-Konten
@@ -235,10 +245,10 @@ final class NetworkController extends AdminController
         try {
             Network::createAccount($r->str('email'), $pw, $r->str('name'));
         } catch (\InvalidArgumentException $e) {
-            return $this->back('/admin/network#konten', 'error', $e->getMessage());
+            return $this->back('/admin/network/administratoren', 'error', $e->getMessage());
         }
         Network::log('account.create', null, (string) $user['email'], strtolower($r->str('email')));
-        return $this->back('/admin/network#konten', 'success', __('Netzwerk-Konto {email} angelegt. Bei der ersten Anmeldung wird die Zwei-Faktor-Anmeldung eingerichtet.', ['email' => strtolower($r->str('email'))]));
+        return $this->back('/admin/network/administratoren', 'success', __('Netzwerk-Konto {email} angelegt. Bei der ersten Anmeldung wird die Zwei-Faktor-Anmeldung eingerichtet.', ['email' => strtolower($r->str('email'))]));
     }
 
     // ================================================================= Netzwerk-Administratoren einladen (Core\Invites)
@@ -264,15 +274,15 @@ final class NetworkController extends AdminController
     {
         $user = $this->inviter($r);
         $inv = \Core\Invites::get((int) $id);
-        if (!$inv || !\Core\Invites::isNetwork($inv)) return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+        if (!$inv || !\Core\Invites::isNetwork($inv)) return $this->back('/admin/network/administratoren', 'error', __('Einladung nicht gefunden.'));
         $limiter = Network::limiter();
         $key = 'net-invite:' . (int) $user['id'];
-        if ($limiter->tooMany($key, 20, 3600)) return $this->back('/admin/network#konten', 'error', __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
+        if ($limiter->tooMany($key, 20, 3600)) return $this->back('/admin/network/administratoren', 'error', __('Zu viele Einladungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
         if (app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [strtolower((string) $inv['email'])])) {
-            return $this->back('/admin/network#konten', 'error', __('Diese E-Mail-Adresse ist auf der Netzwerk-Website bereits registriert.'));
+            return $this->back('/admin/network/administratoren', 'error', __('Diese E-Mail-Adresse ist auf der Netzwerk-Website bereits registriert.'));
         }
         $token = \Core\Invites::renew((int) $id);
-        if ($token === null) return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+        if ($token === null) return $this->back('/admin/network/administratoren', 'error', __('Einladung nicht gefunden.'));
         // Wer erneut sendet, lädt ein (das ursprünglich einladende Konto kann inzwischen gesperrt sein)
         app()->db->update('user_invites', ['invited_by' => (int) $user['id'], 'invited_by_name' => (string) ($user['name'] ?: $user['email'])], 'id = :id', ['id' => (int) $id]);
         $limiter->hit($key);
@@ -287,10 +297,10 @@ final class NetworkController extends AdminController
         $user = $this->inviter($r);
         $inv = \Core\Invites::get((int) $id);
         if (!$inv || !\Core\Invites::isNetwork($inv) || !\Core\Invites::revoke((int) $id)) {
-            return $this->back('/admin/network#konten', 'error', __('Einladung nicht gefunden.'));
+            return $this->back('/admin/network/administratoren', 'error', __('Einladung nicht gefunden.'));
         }
         Network::log('network.invite-revoke', null, (string) $user['email'], (string) $inv['email']);
-        return $this->back('/admin/network#konten', 'success', __('Einladung an {email} zurückgezogen – der Link gilt nicht mehr.', ['email' => $inv['email']]));
+        return $this->back('/admin/network/administratoren', 'success', __('Einladung an {email} zurückgezogen – der Link gilt nicht mehr.', ['email' => $inv['email']]));
     }
 
     /** Netzwerk-Konto auf der Netzwerk-Website, das einladen darf (aktiv, kein Schatten-Konto) */
@@ -304,25 +314,25 @@ final class NetworkController extends AdminController
     private function inviteError(array $old, array $errors): Response
     {
         app()->session->set('_net_invite_old', $old + ['errors' => $errors]);
-        return $this->back('/admin/network#net-invite', 'error', (string) reset($errors));
+        return $this->back('/admin/network/administratoren#net-invite', 'error', (string) reset($errors));
     }
 
     /** Nach dem Versand: Erfolg – oder den Link einmal anzeigen (E-Mail nicht zugestellt) */
     private function afterInvite(array $inv, string $token, array $sent, string $ok): Response
     {
-        if ($sent['delivered']) return $this->back('/admin/network#konten', 'success', $ok);
+        if ($sent['delivered']) return $this->back('/admin/network/administratoren', 'success', $ok);
         app()->session->set('_net_invite_link', ['email' => (string) $inv['email'], 'url' => \Core\Invites::url($token), 'error' => $sent['error']]);
-        return $this->back('/admin/network#net-invite-link');
+        return $this->back('/admin/network/administratoren#net-invite-link');
     }
 
     /** Anmelde-Richtlinie der Netzwerk-Konten: erlaubte Verfahren, „nur Passkey“ (Core\Mfa, Einstellung sys.net_auth) */
     public function authPolicy(Request $r): Response
     {
         $user = $this->network($r);
-        if ($err = \Core\Mfa::saveNetPolicy($r->post)) return $this->back('/admin/network#konten', 'error', $err);
+        if ($err = \Core\Mfa::saveNetPolicy($r->post)) return $this->back('/admin/network/administratoren', 'error', $err);
         $p = \Core\Mfa::netPolicy();
         Network::log('auth.policy', null, (string) $user['email'], implode(', ', array_keys(array_filter($p))));
-        return $this->back('/admin/network#konten', 'success', __('Anmelde-Richtlinie der Netzwerk-Konten gespeichert.'));
+        return $this->back('/admin/network/administratoren', 'success', __('Anmelde-Richtlinie der Netzwerk-Konten gespeichert.'));
     }
 
     public function accountAction(Request $r, string $id, string $action): Response
@@ -330,7 +340,7 @@ final class NetworkController extends AdminController
         $user = $this->network($r);
         $acc = Network::accountById((int) $id) ?? throw new HttpException(404);
         if ((int) $acc['id'] === (int) $user['id'] && $action !== 'enable') {
-            return $this->back('/admin/network#konten', 'error', __('Das eigene Konto können Sie hier nicht sperren oder zurücksetzen.'));
+            return $this->back('/admin/network/administratoren', 'error', __('Das eigene Konto können Sie hier nicht sperren oder zurücksetzen.'));
         }
         switch ($action) {
             case 'disable':
@@ -347,6 +357,6 @@ final class NetworkController extends AdminController
                 throw new HttpException(404);
         }
         Network::log('account.' . $action, null, (string) $user['email'], (string) $acc['email']);
-        return $this->back('/admin/network#konten', 'success', $msg);
+        return $this->back('/admin/network/administratoren', 'success', $msg);
     }
 }
