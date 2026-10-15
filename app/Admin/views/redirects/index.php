@@ -11,7 +11,7 @@ $qs = fn(array $p) => url($base) . '?' . http_build_query(array_filter($p + ['q'
 $filtered = $f['q'] !== '' || $f['code'] !== '' || $f['origin'] !== '';
 $origins = ['manual' => __('Von Hand'), 'auto' => __('Automatisch'), 'import' => __('Import')];
 $when = fn(?string $t) => $t ? date_local($t, 'short') : '–';
-$tab = 'list';
+$tab = $part;
 $nRules = Redirects::count();
 $n404 = $count404;
 ?>
@@ -24,7 +24,7 @@ $n404 = $count404;
 
 <?php include __DIR__ . '/_tabs.php'; ?>
 
-<div class="adm-grid2 adm-grid2--wide rd-grid">
+<?php if ($part === 'list'): ?>
   <div class="rd-main">
     <form class="rv-toolbar" method="get" action="<?= e(url($base)) ?>" role="search" aria-label="<?= e(__('Weiterleitungen filtern')) ?>">
       <div class="f rv-toolbar__q"><label for="rd-q"><?= e(__('Suche')) ?></label><input id="rd-q" type="search" name="q" value="<?= e($f['q']) ?>" placeholder="<?= e(__('Alte Adresse, Ziel, Notiz …')) ?>"></div>
@@ -79,7 +79,7 @@ $n404 = $count404;
               <?php else: ?><span class="rd-target__label"><?= e($d['label']) ?></span><?php if ($d['href'] !== '' && $d['href'] !== $d['label']): ?> <span class="rd-target__href"><?= e($d['href']) ?></span><?php endif; ?>
                 <?php if ($d['missing']): ?> <span class="adm-badge adm-badge--adm-warn"><?= e(__('Ziel fehlt')) ?></span><?php endif; ?><?php endif; ?></td>
             <td class="rd-num"><?= (int) $r['hits'] ?><span class="rd-last"><?= e($when($r['last_hit'])) ?></span></td>
-            <td><div class="adm-actions"><a class="adm-btn adm-btn--small" href="<?= e(url($base . '/' . $rid)) ?>"><?= e(__('Bearbeiten')) ?><span class="sr-only"> <?= e($r['source']) ?></span></a></div></td>
+            <td><div class="adm-actions"><a class="adm-btn adm-btn--small adm-btn--icon rd-edit" href="<?= e(url($base . '/' . $rid)) ?>" title="<?= e(__('Bearbeiten')) ?>"><?= icon('pencil-simple') ?><span class="sr-only"><?= e(__('Bearbeiten')) ?> <?= e($r['source']) ?></span></a></div></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
@@ -96,10 +96,12 @@ $n404 = $count404;
     <?php endif; ?>
   </div>
 
+<?php endif; ?>
   <div class="rd-side">
+    <?php if ($part === 'test'): ?>
     <section class="adm-card" id="test" aria-labelledby="rd-test-h">
       <h2 id="rd-test-h"><?= e(__('Adresse testen')) ?></h2>
-      <form method="get" action="<?= e(url($base)) ?>#test">
+      <form method="get" action="<?= e(url($base)) ?>"><input type="hidden" name="bereich" value="test">
         <div class="f"><label for="rd-test"><?= e(__('Wohin führt …')) ?></label>
           <input id="rd-test" name="test" value="<?= e($test) ?>" placeholder="/alte-seite/" spellcheck="false" autocomplete="off" aria-describedby="rd-test-help">
           <p class="f-help" id="rd-test-help"><?= e(__('Pfad oder vollständige Adresse, gern mit ?parameter.')) ?></p></div>
@@ -115,6 +117,7 @@ $n404 = $count404;
       <?php endif; ?>
     </section>
 
+    <?php endif; if ($part === 'import'): ?>
     <section class="adm-card" id="import" aria-labelledby="rd-imp-h">
       <h2 id="rd-imp-h"><?= e(__('Import & Export')) ?></h2>
       <p class="adm-muted"><?= e(__('CSV mit Semikolon (alte Adresse;Ziel;Code;Notiz) oder JSON wie aus einem Umzugs-Mapping:')) ?></p>
@@ -140,6 +143,7 @@ $n404 = $count404;
       <p class="rd-export"><?= e(__('Exportieren:')) ?> <a href="<?= e(url($base . '/export') . '?format=csv') ?>">CSV</a> · <a href="<?= e(url($base . '/export') . '?format=json') ?>">JSON</a></p>
     </section>
 
+    <?php endif; if ($part === 'einstellungen'): ?>
     <form class="adm-card" id="einstellungen" method="post" action="<?= e(url($base . '/einstellungen')) ?>">
       <?= csrf_field() ?>
       <h2><?= e(__('Einstellungen')) ?></h2>
@@ -151,5 +155,6 @@ $n404 = $count404;
       </div>
       <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Speichern')) ?></button>
     </form>
+    <?php endif; ?>
   </div>
-</div>
+<?= \Core\AdminUi::close() ?>

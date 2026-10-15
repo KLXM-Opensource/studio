@@ -29,7 +29,8 @@ final class RedirectController extends AdminController
         $test = trim((string) ($r->query['test'] ?? ''));
         $import = app()->session->get('_redirects_import');   // Ergebnis des letzten Imports einmal anzeigen
         app()->session->forget('_redirects_import');
-        return $this->view('redirects/index', ['f' => $f, 'list' => Redirects::list($f), 'test' => $test, 'result' => $test !== '' ? Redirects::explain($test) : null,
+        $part = in_array($b = (string) ($r->query['bereich'] ?? ''), ['test', 'import', 'einstellungen'], true) ? $b : ($test !== '' ? 'test' : 'list');
+        return $this->view('redirects/index', ['part' => $part, 'f' => $f, 'list' => Redirects::list($f), 'test' => $test, 'result' => $test !== '' ? Redirects::explain($test) : null,
             'count404' => Redirects::notFoundCount(), 'import' => $import,
             'auto' => (bool) app()->settings->get(Redirects::SET_AUTO, true), 'log' => Redirects::logEnabled()]);
     }
@@ -104,15 +105,15 @@ final class RedirectController extends AdminController
         $name = '';
         $file = $r->files['file'] ?? null;
         if (is_array($file) && ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && is_uploaded_file((string) $file['tmp_name'])) {
-            if ((int) $file['size'] > 5 * 1024 * 1024) return $this->back('/admin/weiterleitungen#import', 'error', __('Die Datei ist zu groß (höchstens 5 MB).'));
+            if ((int) $file['size'] > 5 * 1024 * 1024) return $this->back('/admin/weiterleitungen?bereich=import', 'error', __('Die Datei ist zu groß (höchstens 5 MB).'));
             $text = (string) file_get_contents((string) $file['tmp_name']);
             $name = (string) $file['name'];
         }
-        if (trim($text) === '') return $this->back('/admin/weiterleitungen#import', 'error', __('Bitte eine CSV- oder JSON-Datei wählen oder Zeilen einfügen.'));
+        if (trim($text) === '') return $this->back('/admin/weiterleitungen?bereich=import', 'error', __('Bitte eine CSV- oder JSON-Datei wählen oder Zeilen einfügen.'));
         try {
             $rows = Redirects::parse($text, $name);
         } catch (\RuntimeException $e) {
-            return $this->back('/admin/weiterleitungen#import', 'error', $e->getMessage());
+            return $this->back('/admin/weiterleitungen?bereich=import', 'error', $e->getMessage());
         }
         $dry = !empty($r->post['dry']);
         $res = Redirects::import($rows, ['dry' => $dry, 'overwrite' => !empty($r->post['overwrite']), 'link' => !empty($r->post['link'])]);
@@ -122,7 +123,7 @@ final class RedirectController extends AdminController
         $msg = $dry
             ? __('Probelauf: {c} neu, {u} geändert, {s} übersprungen – nichts gespeichert.', ['c' => $res['created'], 'u' => $res['updated'], 's' => $res['skipped']])
             : __('Import: {c} neu, {u} geändert, {s} übersprungen.', ['c' => $res['created'], 'u' => $res['updated'], 's' => $res['skipped']]);
-        return $this->back('/admin/weiterleitungen#import', $res['errors'] && !$res['created'] && !$res['updated'] ? 'error' : 'success', $msg);
+        return $this->back('/admin/weiterleitungen?bereich=import', $res['errors'] && !$res['created'] && !$res['updated'] ? 'error' : 'success', $msg);
     }
 
     public function export(Request $r): Response
@@ -141,7 +142,7 @@ final class RedirectController extends AdminController
         $this->gate($r);
         app()->settings->set(Redirects::SET_AUTO, !empty($r->post['auto']));
         app()->settings->set(Redirects::SET_LOG, !empty($r->post['log']));
-        return $this->back('/admin/weiterleitungen#einstellungen', 'success', __('Einstellungen gespeichert.'));
+        return $this->back('/admin/weiterleitungen?bereich=einstellungen', 'success', __('Einstellungen gespeichert.'));
     }
 
     // ------------------------------------------------------------------ 404-Protokoll

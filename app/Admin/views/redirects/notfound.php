@@ -25,7 +25,7 @@ $n404 = Redirects::notFoundCount();
 <?php include __DIR__ . '/_tabs.php'; ?>
 
 <?php if (!$log): ?>
-<div class="adm-flash adm-flash--info" role="status"><?= e(__('Das 404-Protokoll ist ausgeschaltet – neue Adressen kommen nicht hinzu.')) ?> <a href="<?= e(url($base)) ?>#einstellungen"><?= e(__('Einstellungen')) ?></a></div>
+<div class="adm-flash adm-flash--info" role="status"><?= e(__('Das 404-Protokoll ist ausgeschaltet – neue Adressen kommen nicht hinzu.')) ?> <a href="<?= e(url($base . '?bereich=einstellungen')) ?>"><?= e(__('Einstellungen')) ?></a></div>
 <?php endif; ?>
 
 <form class="rv-toolbar" method="get" action="<?= e(url($base . '/404')) ?>" role="search" aria-label="<?= e(__('404-Protokoll durchsuchen')) ?>">
@@ -83,3 +83,4 @@ $n404 = Redirects::notFoundCount();
 <form id="rd404-c-<?= $rid ?>" method="post" action="<?= e(url($base . '/404')) ?>" hidden><?= csrf_field() ?><input type="hidden" name="op" value="create"><input type="hidden" name="source" value="<?= e($r['path']) ?>"><input type="hidden" name="target" value="<?= e($suggest[$rid]['target']) ?>"></form>
 <?php endforeach; ?>
 <?php endif; ?>
+<?= \Core\AdminUi::close() ?>

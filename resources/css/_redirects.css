@@ -13,12 +13,12 @@
 .rd-table td{vertical-align:top}
 .rd-table tr.is-selected td{background:var(--adm-accent-bg)}
 .rd-table code{word-break:normal;overflow-wrap:anywhere}
-.rd-src{min-width:200px}
+.rd-src{min-width:160px}
 .rd-src > a{text-decoration:none}
 .rd-src > a:hover code,.rd-src > a:focus-visible code{text-decoration:underline}
 .rd-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:6px}
 .rd-note{display:block;font-size:13px;color:var(--adm-t2);margin-top:4px}
-.rd-target{min-width:170px;overflow-wrap:anywhere}
+.rd-target{min-width:140px;overflow-wrap:anywhere}
 .rd-target__label{font-weight:600}
 .rd-target__href{display:block;font-size:12.5px;color:var(--adm-t3)}
 .rd-code{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;margin-right:6px;border-radius:5px;font:700 11.5px var(--adm-font);font-variant-numeric:tabular-nums;background:var(--adm-fill);color:var(--adm-t2)}
@@ -41,3 +41,20 @@ td.rd-num .rd-last{margin-top:2px}
 .rd-pre code{background:none;padding:0}
 .rd-errors{margin:.4em 0 0;padding-left:1.2em;font-size:13px}
 .rd-export{margin:14px 0 0}
+
+/* Spalte „Bearbeiten“ als Symbolknopf, damit die Liste neben der Bereichsliste in die Spalte passt */
+.rd-table td:last-child,.rd-table th:last-child{width:1%;padding-inline:6px 12px}
+.rd-edit .ico{width:16px;height:16px}
+/* Handy: jede Weiterleitung als Eintrag (Auswahl links, Bearbeiten rechts, Adresse/Ziel/Treffer untereinander) */
+@media (max-width:700px){
+  .rd-table thead{display:none}
+  .rd-table,.rd-table tbody,.rd-table td{display:block;width:auto}
+  .rd-table tr{display:grid;grid-template-columns:34px minmax(0,1fr) auto;column-gap:8px;row-gap:6px;padding:12px 14px;border-bottom:1px solid var(--adm-line)}
+  .rd-table td{padding:0;border:0;min-width:0}
+  .rd-table td.rv-table__sel{grid-row:1 / span 3}
+  .rd-table td.rd-src,.rd-table td.rd-target,.rd-table td.rd-num{grid-column:2}
+  .rd-table td:last-child{grid-column:3;grid-row:1;width:auto;padding:0}
+  .rd-table td.rd-num{text-align:left;font-size:13px;color:var(--adm-t3)}
+  .rd-table td.rd-num .rd-last{display:inline;margin:0 0 0 6px}
+  .rd-tablewrap{overflow:visible}
+}

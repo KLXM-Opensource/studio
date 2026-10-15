@@ -1,5 +1,15 @@
-<?php /** Administration → Weiterleitungen: Reiter (Liste | 404-Protokoll). @var string $tab  @var int $nRules  @var int $n404 */ ?>
-<nav class="adm-filter rv-tabs" aria-label="<?= e(__('Bereich')) ?>">
-  <a href="<?= e(url('/admin/weiterleitungen')) ?>"<?= $tab === 'list' ? ' aria-current="page"' : '' ?>><?= e(__('Weiterleitungen')) ?> <small class="rv-tabs__n"><?= (int) $nRules ?></small></a>
-  <a href="<?= e(url('/admin/weiterleitungen/404')) ?>"<?= $tab === '404' ? ' aria-current="page"' : '' ?>><?= e(__('Nicht gefunden (404)')) ?> <small class="rv-tabs__n"><?= (int) $n404 ?></small></a>
-</nav>
+<?php
+/**
+ * Administration → Weiterleitungen: Bereichsliste links (Core\AdminUi) – Liste, 404-Protokoll, Adresse testen, Import & Export,
+ * Einstellungen. Der Rahmen wird am Ende der Ansicht mit AdminUi::close() geschlossen.
+ * @var string $tab  list|404|test|import|einstellungen  @var int $nRules  @var int $n404
+ */
+$b = '/admin/weiterleitungen';
+echo \Core\AdminUi::open([
+    'list' => ['href' => url($b), 'label' => __('Weiterleitungen'), 'icon' => 'signpost', 'badge' => (int) $nRules],
+    '404' => ['href' => url($b . '/404'), 'label' => __('Nicht gefunden (404)'), 'icon' => 'warning', 'badge' => (int) $n404],
+    '-',
+    'test' => ['href' => url($b . '?bereich=test'), 'label' => __('Adresse testen'), 'icon' => 'magnifying-glass'],
+    'import' => ['href' => url($b . '?bereich=import'), 'label' => __('Import & Export'), 'icon' => 'download-simple'],
+    'einstellungen' => ['href' => url($b . '?bereich=einstellungen'), 'label' => __('Einstellungen'), 'icon' => 'gear-six'],
+], $tab, __('Weiterleitungen'), false);
