@@ -40,7 +40,7 @@ final class PresenceController extends AdminController
             'conflictOk' => __('Trotzdem speichern'), 'cancel' => __('Abbrechen'),
             'locked' => __('{name} bearbeitet gerade – nur Ansehen'), 'lockedTitle' => __('Gesperrt: {name} bearbeitet gerade'),
             'lockedBody' => __('Solange {name} diese Seite bearbeitet, können Sie sie nur ansehen. Die Sperre endet, sobald {name} fertig ist.'),
-            'take' => __('Übernehmen'), 'takeAsk' => __('Bearbeitung von {name} übernehmen?'),
+            'take' => __('Übernehmen'), 'chat' => __('Nachricht schreiben'), 'chatText' => __('Hallo, ich würde gern an dieser Seite arbeiten: {url}'), 'takeAsk' => __('Bearbeitung von {name} übernehmen?'),
             'takeBody' => __('{name} kann danach nicht mehr speichern; nicht gespeicherte Änderungen von {name} gehen nicht verloren, werden aber auch nicht übernommen.'),
             'taken' => __('{name} hat die Bearbeitung übernommen'), 'takenBody' => __('Sie können nicht mehr speichern. Kopieren Sie wichtige, noch nicht gespeicherte Änderungen, bevor Sie die Seite verlassen.'),
             'lockedNotePage' => __('{name} bearbeitet diese Seite gerade. Sie sehen nur die Ansicht – Speichern ist gesperrt, bis {name} fertig ist.'),
@@ -81,7 +81,9 @@ final class PresenceController extends AdminController
 
     private static function person(array $u): array
     {
-        return ['name' => (string) ($u['name'] ?: $u['email']), 'initials' => Avatar::initials($u), 'avatar' => (string) (Avatar::url($u) ?? '')];
+        $chat = '';
+        try { if (\Core\Chat\Chat::canUse()) $chat = \Core\Chat\Chat::keyFor($u); } catch (\Throwable) {}
+        return ['name' => (string) ($u['name'] ?: $u['email']), 'initials' => Avatar::initials($u), 'avatar' => (string) (Avatar::url($u) ?? ''), 'chat' => $chat];
     }
 
     /** Darf die Person das Objekt bearbeiten? (sonst keine Meldung) */
@@ -131,13 +133,17 @@ final class PresenceController extends AdminController
             'lock' => self::lock($type, $id, $me), 'live' => Live::token(['presence:' . site()->key])])->header('Cache-Control', 'no-store');
     }
 
-    /** Stand der Bearbeitungssperre: {on, by: Person|null (fremder Inhaber), mine, canTake} */
+    /** Stand der Bearbeitungssperre: {on, by: Person|null (fremder Inhaber), mine, canTake, chat: Adresse „Nachricht schreiben“|null} */
     private static function lock(string $type, string $id, int $me): array
     {
         if (!\Core\EditLock::on()) return ['on' => false];
         $h = \Core\EditLock::holder($type, $id);
         $mine = $h && (string) $h['user'] === (string) $me;
-        return ['on' => true, 'by' => $h && !$mine ? self::out($h, $me) : null, 'mine' => $mine, 'canTake' => \Core\EditLock::canTake()];
+        $by = $h && !$mine ? self::out($h, $me) : null;
+        // „Nachricht schreiben“: Chat mit dem Inhaber öffnen, wenn beide den Chat nutzen können
+        $chat = null;
+        try { if ($by && !empty($h['chat']) && \Core\Chat\Chat::canUse()) $chat = url('/admin/chat') . '?an=' . rawurlencode((string) $h['chat']); } catch (\Throwable) {}
+        return ['on' => true, 'by' => $by, 'mine' => $mine, 'canTake' => \Core\EditLock::canTake(), 'chat' => $chat];
     }
 
     public function index(Request $r): Response

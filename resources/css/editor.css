@@ -175,6 +175,8 @@ body.has-tdrawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):
 .cms-lock-note .cms-lock-note__btn{all:unset;box-sizing:border-box;padding:3px 12px;border-radius:999px;background:#1E2840;color:#fff;font-weight:700;font-size:13px;cursor:pointer;text-decoration:none}
 .cms-lock-note .cms-lock-note__btn:hover{background:#2E3B5C}
 .cms-lock-note .cms-lock-note__btn:focus-visible{outline:2px solid #1E2840;outline-offset:2px}
+.cms-lock-note .cms-lock-note__btn--ghost{background:transparent;color:#1E2840;box-shadow:inset 0 0 0 1.5px #1E2840}
+.cms-lock-note .cms-lock-note__btn--ghost:hover{background:rgba(30,40,64,.08)}
 
 /* Felder des Eintrags direkt im Text – nur im Modus „Bearbeiten“ der Werkzeugleiste (html.cms-entry-editing, _entry_edit.js) */
 .cms-entry-editing [data-entry-field]{cursor:text;border-radius:4px;outline:1.5px dashed rgba(49,65,100,.28);outline-offset:3px;transition:outline-color .15s,box-shadow .15s}

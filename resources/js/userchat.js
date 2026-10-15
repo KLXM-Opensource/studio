@@ -843,7 +843,11 @@ function init() {
   // ------------------------------------------------------------------ Start
   const b0 = $('[data-chat-badge]');
   if (b0 && !b0.hidden) lastUnread = parseInt(b0.textContent.replace(/\D+/g, ''), 10) || 0;
-  if (pageHost) openPanel(+pageHost.dataset.room || 0);
+  if (pageHost) openPanel(+pageHost.dataset.room || 0).then(() => {
+    // Entwurf aus ?text= (z. B. Link zur gesperrten Seite) – nur vorbelegen, nicht senden
+    const draft = pageHost.dataset.draft;
+    if (draft && S.active && !el.text.value) { el.text.value = draft; grow(el.text); el.text.focus(); el.text.setSelectionRange(draft.length, draft.length); }
+  });
   else if (store.get('uc-open') === '1' && !mqSmall.matches) openPanel();
   else startBadge();
   window.addEventListener('pagehide', stopLive);

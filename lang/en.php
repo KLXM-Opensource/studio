@@ -7596,4 +7596,6 @@ return [
     'Diese Website ist eine Testumgebung ({env}): Sie verschickt keine E-Mails, sondern protokolliert sie nur. Mit „wirklich senden“ geht nur die Testnachricht an Ihre Adresse – so prüfen Sie die Zugangsdaten.' => 'This website is a test environment ({env}): it sends no emails but only logs them. With “really send” only the test message goes to your address – so you can check the credentials.',
     'Testumgebung umgehen – wirklich senden' => 'Bypass test environment – really send',
     'wirklich senden' => 'really send',
+    'Hallo, ich würde gern an dieser Seite arbeiten: {url}' => 'Hi, I would like to work on this page: {url}',
+    'Nachricht schreiben' => 'Send a message',
 ];

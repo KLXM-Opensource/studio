@@ -30,7 +30,7 @@ const T0 = {
   now: 'gerade eben', min: 'vor {n} Min.', hour: 'vor {n} Std.', day: 'am {date}',
   conflict: '{name} hat inzwischen gespeichert', conflictShort: 'Inzwischen gespeichert', conflictTitle: 'Inzwischen von {name} gespeichert',
   conflictBody: 'Seit Sie diese Seite geöffnet haben, hat {name} gespeichert ({ago}). Wenn Sie jetzt speichern, kann das diese Änderungen überschreiben – der vorige Stand bleibt als Version erhalten.',
-  conflictOk: 'Trotzdem speichern', cancel: 'Abbrechen', board: '{name} · {label}', since: 'seit {ago}', you: 'Sie', info: 'Wer arbeitet hier?',
+  conflictOk: 'Trotzdem speichern', cancel: 'Abbrechen', board: '{name} · {label}', since: 'seit {ago}', you: 'Sie', info: 'Wer arbeitet hier?', chat: 'Nachricht schreiben', chatText: 'Hallo, ich würde gern an dieser Seite arbeiten: {url}',
 };
 const ago = (t, T) => {
   const s = Math.max(0, Date.now() / 1000 - t);
@@ -99,6 +99,7 @@ function here(el) {
     if (lockedHere) el.title = fill(T.locked, { name: lock.by.name });
     // Hinweiszeile unter der Leiste: gesperrt (mit „Übernehmen“ für die Administration) bzw. wieder frei
     if (lockedHere) note(`${ico('lock')}<span>${esc(fill(el.dataset.presenceType === 'entry' ? T.lockedNoteEntry : T.lockedNotePage, { name: lock.by.name }))}</span>`
+      + (lock.chat ? `<a class="cms-lock-note__btn cms-lock-note__btn--ghost" href="${esc(lock.chat + '&text=' + encodeURIComponent(fill(T.chatText, { url: location.origin + location.pathname })))}" target="_blank" rel="noopener">${esc(T.chat)}</a>` : '')
       + (lock.canTake ? `<button type="button" class="cms-lock-note__btn" data-presence-take>${esc(T.take)}</button>` : ''));
     else if (lock?.on && !lock.by && el.dataset.presenceLocked && !editing()) note(`<span>${esc(T.freeNote)}</span><a class="cms-lock-note__btn" href="${esc(editUrl())}">${esc(T.editNow)}</a>`, true);
     else note(null);

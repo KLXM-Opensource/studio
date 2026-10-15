@@ -49,7 +49,16 @@ final class ChatController extends AdminController
     public function page(Request $r): Response
     {
         $this->gate($r);
-        return $this->view('chat/index', ['title' => __('Chat'), 'room' => (int) $r->str('raum')]);
+        $room = (int) $r->str('raum');
+        // ?an=Personen-Schlüssel: Direktnachricht öffnen (z. B. „Nachricht schreiben“ an die Person, die eine Seite gesperrt hat);
+        // ?text=…: Entwurf im Eingabefeld (nicht gesendet)
+        if (!$room && ($an = $r->str('an')) !== '') {
+            foreach (['site', 'network'] as $scope) {
+                try { $room = (int) Chat::openDm($an, $scope)['id']; break; } catch (\InvalidArgumentException $e) { $err = $e->getMessage(); }
+            }
+            if (!$room && !empty($err)) app()->session->flash('error', $err);
+        }
+        return $this->view('chat/index', ['title' => __('Chat'), 'room' => $room, 'draft' => mb_substr($r->str('text'), 0, 500)]);
     }
 
     public function settings(Request $r): Response

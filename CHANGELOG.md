@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Bearbeitungssperre: „Nachricht schreiben“
+- Im Hinweis „… bearbeitet diese Seite gerade“ öffnet **Nachricht schreiben** eine Direktnachricht im Chat an diese Person, mit Link zur Seite im Eingabefeld (nur wenn beide den Chat nutzen können). Chat-Seite: `/admin/chat?an={Person}&text={Entwurf}`.
+
 ### E-Mail-Konten: Testnachricht auch auf Testumgebungen
 - Auf Staging zeigen die E-Mail-Konten einen Hinweis, dass nichts verschickt wird. Häkchen **„wirklich senden“** (Website-Konten) bzw. **„Testumgebung umgehen – wirklich senden“** (Netzwerk-Konto): nur die Testnachricht geht tatsächlich an genau die eine Adresse, mit echter Fehlermeldung des Servers (`Mailer::send(…, ['force_real' => true])`, Eintrag im Protokoll).
 
