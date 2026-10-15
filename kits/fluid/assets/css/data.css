@@ -75,7 +75,7 @@ a.dl-chip:hover{background:var(--f-a2);color:var(--f0-ink)}
 .df-title{margin:0;color:var(--f-ink);font-family:var(--f-font-head);font-weight:var(--f-hw);font-size:max(var(--f-t3),min(var(--f-t6),12cqi));line-height:1.02;letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance;hyphens:auto}
 .df-title .dot{color:var(--f-link)}
 .df-meta{display:flex;flex-wrap:wrap;gap:.25rem .75rem;color:var(--f-link);font:600 var(--f-t-1)/1.4 var(--f-font-label);letter-spacing:.06em;text-transform:uppercase}
-.df-img{overflow:hidden;border-radius:var(--f-r-l);background:var(--f-surface-2)}
+.df-img{overflow:hidden;border-radius:var(--f-img-r,var(--f-r-l));background:var(--f-surface-2)}
 .df-img img{display:block;width:100%;height:100%;object-fit:cover}
 .df-img picture{display:contents}
 .df-img.ratio-16-9{aspect-ratio:16/9}.df-img.ratio-21-9{aspect-ratio:21/9}.df-img.ratio-4-3{aspect-ratio:4/3}.df-img.ratio-1-1{aspect-ratio:1}.df-img.ratio-3-4{aspect-ratio:3/4}
@@ -88,7 +88,7 @@ a.dl-chip:hover{background:var(--f-a2);color:var(--f0-ink)}
 .df-dl dd{flex:999 1 0;min-width:min(100%,60%);margin:0;color:var(--f-text)}
 /* Video/Audio in Datei-Feldern (Core\MediaTracks::player) */
 .dt-media{margin:0}
-.dt-media video{display:block;width:100%;height:auto;border-radius:var(--f-r-l);background:#000}
+.dt-media video{display:block;width:100%;height:auto;border-radius:var(--f-img-r,var(--f-r-l));background:#000}
 .dt-media audio{display:block;width:100%}
 .dt-media .media-transcript{margin-top:.6rem}
 .dt-media .media-transcript summary{display:flex;align-items:center;min-height:2.75rem;font-weight:600;cursor:pointer}
@@ -146,7 +146,7 @@ html.is-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}
 
 /* ---------------------------------------------------------------- Datensatz-Felder „Profil“ und „Kontaktkarte“ */
 .df-profile{display:flex;flex-wrap:wrap;align-items:center;gap:var(--f-s-l) var(--f-s-2xl)}
-.df-profile__img{flex:0 0 min(15rem,100%);border-radius:var(--f-r-l);box-shadow:0 0 0 1px var(--f-line)}
+.df-profile__img{flex:0 0 min(15rem,100%);border-radius:var(--f-img-r,var(--f-r-l));box-shadow:0 0 0 1px var(--f-line)}
 .df-profile__body{display:grid;flex:1 1 min(22rem,100%);gap:var(--f-s-s)}
 .df-profile .df-title{font-size:max(var(--f-t3),min(var(--f-t5),9cqi))}
 .df-profile__lead{margin:0;max-width:44rem;color:var(--f-text);font-size:var(--f-t1);line-height:1.5}

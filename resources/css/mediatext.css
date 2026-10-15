@@ -9,6 +9,8 @@
 .mt__media{display:grid;gap:.75em;min-width:0}
 .mt__fig{margin:0}
 .mt__fig img,.mt__fig picture,.mt__video{display:block;width:100%;height:auto;border-radius:var(--mt-r)}
+/* Video im Player-Rahmen (figure.mt__video): das Video selbst rundet mit, sonst bleiben seine Ecken eckig */
+.mt__video video{display:block;width:100%;height:auto;border-radius:inherit}
 .mt__cap{margin-top:.35em;font-size:.85em;opacity:.75}
 .mt__text{min-width:0}
 .mt__text>:first-child{margin-top:0}

@@ -38,7 +38,9 @@
 .brand{display:inline-flex;align-items:center;gap:.7rem;min-height:2.75rem;color:var(--f-ink);text-decoration:none}
 .brand__mark{display:grid;place-items:center;flex:none;width:2.35rem;height:2.35rem;border-radius:calc(var(--f-radius) * .8);background:var(--f-ink);color:var(--f-bg);font:var(--f-hw) 1.15rem/1 var(--f-font-head);box-shadow:inset 0 -3px 0 var(--f-a)}
 .brand__name{font:var(--f-hw) 1.125rem/1.15 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);white-space:nowrap}
-.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+/* Logo schrumpft mit, wenn die Leiste schmal ist (Handy, großes Logo) – Suche und Menü bleiben frei */
+.brand__logo{display:block;min-width:0;max-width:100%}
+.brand__logo img{width:auto;max-width:min(100%,13rem);height:2.5rem;object-fit:contain;object-position:left center}
 .brand__logo--dark{display:none}
 
 /* Menü in der Leiste (Aufklappmenüs mit <details>) */

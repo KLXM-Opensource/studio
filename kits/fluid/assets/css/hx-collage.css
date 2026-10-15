@@ -5,7 +5,7 @@
 .sec--hero.v-collage{padding-block:calc(var(--f-sec) * .6) var(--f-sec)}
 .hx-collage-wrap{container-name:hxc}
 .hx-collage{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8.5rem),1fr));gap:var(--f-s-s)}
-.hx-collage__tile{position:relative;margin:0;aspect-ratio:1;overflow:hidden;border-radius:var(--f-r-l);background:var(--f-surface-2)}
+.hx-collage__tile{position:relative;margin:0;aspect-ratio:1;overflow:hidden;border-radius:var(--f-img-r,var(--f-r-l));background:var(--f-surface-2)}
 .hx-collage__tile picture{display:contents}
 .hx-collage__tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hx-collage__tile--1{order:-1;grid-column:1/-1;aspect-ratio:16/10}

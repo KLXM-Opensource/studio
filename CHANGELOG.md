@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Design-Optionen durchgeprüft
+- Alle Werte des Style-Editors einzeln geprüft (Desktop und Handy). Behoben: Großes Logo überdeckte auf dem Handy Suche und Menü (alle Kopf-Varianten) – das Logo schrumpft jetzt mit; „Geteilt“ teilt die Leiste so, dass die Aktionen rechts Platz behalten.
+- „Ecken der Bilder“ gilt jetzt auch für Videos (Video-Block, Medien + Text, Datenfelder) und für Bilder in Datenlisten, Profilbild und Collage (`--f-img-r`). In „Medien + Text“ rundet das Video selbst mit.
+- Betonung „Marker“: auf getönten Abschnitten kräftiger, vorher kaum sichtbar.
+
 ### Kits fluid/galerie: Bildwirkung „Versetzter Rahmen“
 - Bilder blieben im abgerundeten Rahmen eckig (die Rundung wurde über `<picture>` mit `display:contents` nicht weitergegeben).
 

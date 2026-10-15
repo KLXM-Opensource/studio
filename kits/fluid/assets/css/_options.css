@@ -17,7 +17,9 @@ html:is(.sec2-details,.sec2-all){--f-ico-bg:color-mix(in srgb,var(--f-b) 16%,var
 /* Betonung *Wort* in Überschriften (.hl) */
 html.em-italic .hl{font-style:italic;color:inherit}
 html.em-bold .hl{font-style:normal;font-weight:max(800,calc(var(--f-hw) + 200));color:inherit}
-html.em-marker .hl{font-style:normal;color:inherit;background:linear-gradient(transparent 58%,var(--f-a2) 58%, var(--f-a2) 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.06em}
+/* Getönte Abschnitte: Marker kräftiger, sonst verschwindet er in der Tönung */
+html.em-marker .bg-tint{--f-mark:color-mix(in srgb,var(--f-a2) 62%,var(--f-a))}
+html.em-marker .hl{font-style:normal;color:inherit;background:linear-gradient(transparent 58%,var(--f-mark,var(--f-a2)) 58%, var(--f-mark,var(--f-a2)) 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.06em}
 html.em-underline .hl{font-style:normal;color:inherit;text-decoration:underline;text-decoration-color:var(--f-a);text-decoration-thickness:.09em;text-underline-offset:.14em}
 html.em-outline .hl{font-style:normal;color:transparent;-webkit-text-stroke:max(1px,.028em) var(--f-a);paint-order:stroke}
 @media (forced-colors:active){html.em-outline .hl{color:CanvasText;-webkit-text-stroke:0}}
@@ -31,8 +33,9 @@ html.ln-marker main a:not([class]){color:inherit;text-decoration:none;background
 html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 
 /* Bilder: Ecken und Wirkung (Rahmen .frame) */
-.img-sharp .frame{border-radius:0}
-.img-round .frame{border-radius:calc(var(--f-radius) * 2.4 + 8px)}
+/* Ecken der Bilder – gilt auch für Videos (Video-Block, Medien + Text, Datenfelder) über --f-img-r */
+.img-sharp{--f-img-r:0}
+.img-round{--f-img-r:calc(var(--f-radius) * 2.4 + 8px)}
 .img-arch .frame{border-radius:999px 999px var(--f-r-l) var(--f-r-l)}
 .imgfx-mono .frame img{filter:grayscale(1);transition:filter .4s}
 .imgfx-mono :is(a,.tcard,.tile,.feat):hover .frame img,.imgfx-mono .frame:hover img{filter:none}
@@ -135,10 +138,10 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 .hbg-gradient .hdr{--f-hdr-bg:linear-gradient(160deg,color-mix(in srgb,var(--f-a) 15%,var(--f-bg)),color-mix(in srgb,var(--f-b) 12%,var(--f-bg)));border-bottom-color:transparent}
 
 /* Größe von Logo bzw. Wortmarke (logo-*): „Normal“ = Werte aus _header.css */
-.logo-large .brand__logo img{height:3.25rem;max-width:16rem}
+.logo-large .brand__logo img{height:3.25rem;max-width:min(100%,16rem)}
 .logo-large .brand__mark{width:2.85rem;height:2.85rem;font-size:1.4rem}
 .logo-large .brand__name{font-size:1.3rem}
-.logo-xl .brand__logo img{height:4.25rem;max-width:19rem}
+.logo-xl .brand__logo img{height:4.25rem;max-width:min(100%,19rem)}
 .logo-xl .brand__mark{width:3.4rem;height:3.4rem;font-size:1.7rem}
 .logo-xl .brand__name{font-size:1.5rem}
 
