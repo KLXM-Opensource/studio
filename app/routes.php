@@ -469,6 +469,7 @@ return function (Router $r): void {
     $r->get('/admin/hilfe', [Admin\HelpController::class, 'manual']);
     $r->get('/admin/hilfe/technik', [Admin\HelpController::class, 'technical']);
     $r->get('/admin/hilfe/symbole', [Admin\HelpController::class, 'icons']);
+    $r->get('/admin/hilfe/ui', [Admin\HelpController::class, 'ui']);   // Musterseite der Verwaltungsbausteine (Core\AdminUi)
     $r->get('/admin/hilfe/lizenzen', [Admin\HelpController::class, 'licenses']);   // Lizenzen & Danksagungen (THIRD-PARTY-NOTICES.md)
     // Tutorials als Text (app/Admin/tutorials.php, Core\Tutorials); Videos auf der Produkt-Website (config docs_url, Aufnahme tools/tutorials/record.mjs)
     $r->get('/admin/hilfe/tutorials', [Admin\HelpController::class, 'tutorials']);

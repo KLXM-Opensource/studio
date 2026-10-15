@@ -38,6 +38,15 @@ final class HelpController extends AdminController
         return $this->view('help/icons', ['title' => __('Symbole'), 'catalog' => \Core\Icons::catalog()]);
     }
 
+    /** Musterseite: alle Bausteine von Core\AdminUi live, mit Code – Vorlage für Kernseiten und Erweiterungen (?teil=…) */
+    public function ui(Request $r): Response
+    {
+        $this->auth($r);
+        $parts = ['aufbau', 'zeilen', 'formular', 'navigation'];
+        $part = in_array($t = (string) $r->str('teil'), $parts, true) ? $t : 'aufbau';
+        return $this->view('help/ui', ['title' => __('Oberfläche'), 'css' => ['css/docs.css'], 'part' => $part]);
+    }
+
     /** Lizenzen & Danksagungen: Projektlizenz (LICENSE, COPYRIGHT) und THIRD-PARTY-NOTICES.md (Drittsoftware, Schriften, Daten, Medien) */
     public function licenses(Request $r): Response
     {

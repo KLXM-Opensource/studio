@@ -3168,7 +3168,7 @@ html.adm-ui[data-theme=dark] .set-list{box-shadow:0 0 0 .5px rgba(255,255,255,.1
 .adm-panel--groups{display:grid;gap:24px;align-content:start}
 .adm-panel--groups[hidden]{display:none}
 .adm-panel--groups > h2{margin-bottom:-8px!important}
-.adm-panel--groups > :not(h2,.set-groups,.set-group,.set-page__lead,.set-actions,.adm-flash,[hidden]){padding:14px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
+.adm-panel--groups > :not(h2,.set-groups,.set-group,.set-page__lead,.set-actions,.adm-flash,.adm-savebar,[hidden]){padding:14px;border-radius:10px;background:var(--adm-card);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.04)}
 .adm-tabs-form--side > .adm-panel:not(.adm-panel--groups){border-radius:10px}
 
 /* Bereichs-Navigation: Seitenleiste mit Symbolen (ab 1000 px), schmal ein Auswahlfeld (admin.js .adm-tabsel) */
@@ -3729,3 +3729,11 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .adm-tabs__badge{flex:none;min-width:20px;margin-left:auto;padding:0 6px;border-radius:999px;background:var(--adm-fill);color:var(--adm-t2);font-size:11.5px;font-weight:600;line-height:19px;text-align:center;font-variant-numeric:tabular-nums}
 html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__badge{background:rgba(255,255,255,.22);color:#fff}
 @media (max-width:999.98px){.adm-tabs__badge{display:none}}
+
+/* Musterseite der Bausteine (/admin/hilfe/ui, Core\AdminUi) */
+.ui-h3{margin:22px 0 8px 4px;font-size:13px;font-weight:650;color:var(--adm-t3)}
+.ui-code{margin:0 0 22px;padding:14px 16px;border-radius:10px;background:var(--adm-fill);border:1px solid var(--adm-line);font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-x:auto;white-space:pre;max-width:100%}
+.ui-code code{padding:0;border:0;background:none;font:inherit;color:inherit}
+.ui-demo-toggle{display:inline-flex;gap:6px;align-items:center}
+/* Gruppen direkt im Rahmen von AdminUi::open() (ohne .adm-panel--groups) */
+.us-main > .set-group + .set-group,.us-main > .set-group + .ui-h3,.us-main > .ui-code + .set-group,.us-main > form + .ui-h3{margin-top:24px}

@@ -16,7 +16,7 @@ namespace Core;
  *   toolbar()       Werkzeugzeile über dem Inhalt (z. B. Vorschau, Kontrast, Sprache)
  *   savebar()       feste Speichern-Leiste unten (in einem <form>)
  *   Formularfelder: Fields::renderGroups($fields, $values, $errors) ergibt dieselben Gruppen und Zeilen.
- *   Musterseite mit allen Bausteinen: Entwicklerhandbuch → Oberfläche (/admin/hilfe/ui).
+ *   Musterseite mit allen Bausteinen live: /admin/hilfe/ui · Regeln: Entwicklerhandbuch → Oberfläche (#oberflaeche).
  *
  *   echo AdminUi::head('Mitglieder', 'Erweiterung', 'Einladen, Gruppen und geschützte Seiten', $actionsHtml);
  *   echo AdminUi::open([

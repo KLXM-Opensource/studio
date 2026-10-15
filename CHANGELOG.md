@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Einheitliche Oberfläche der Verwaltung (`Core\AdminUi`)
+- Alle Bereiche nach dem Vorbild der macOS-Systemeinstellungen: Kopf mit einer Zeile Beschreibung, **Bereichsliste links** mit Symbolen (auf dem Handy ein Auswahlfeld), Inhalt als gruppierte Zeilen. Umgestellt: Netzwerk, Grundeinstellungen, Style-Editor, **Konto** (Profil · Anmeldung & Sicherheit · Darstellung · Mitteilungen · Favoriten · Erweiterungen), Cookie-Einwilligung sowie die Erweiterungen Mitglieder und AVV.
+- `Core\AdminUi`: `head()`, `open()`/`close()` (eine Adresse je Bereich), `tabs()` (Bereiche auf einer Seite, `#bereich`, Bereiche mit Fehlern öffnen beim Laden), `group()`, `row()`, `link()`, `toolbar()`, `savebar()`. Musterseite mit allen Bausteinen live: **Handbuch & Hilfe → Oberfläche** (`/admin/hilfe/ui`); Regeln für Erweiterungen (Anmelden mit `adminPage()` und Art, ein Menüpunkt, Unterseiten in der Bereichsliste) im Entwicklerhandbuch → Oberfläche.
+- Sprungmarken wie `/admin/account#passkeys` öffnen den passenden Bereich auch beim Wechsel auf derselben Seite.
+
 ### Vorschau in drei Größen
 - Style-Editor, Grundeinstellungen und Block-Designer: Vorschau **Mobil** (390 px), **Laptop** (1280 px) und **Groß** (1920 px) – auf großen Bildschirmen erscheint auch ein langes Kopfmenü in der Leiste.
 
