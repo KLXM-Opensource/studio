@@ -1,7 +1,7 @@
 /**
  * Engine „echarts“ für Core\Charts – die einzige Datei, die ECharts kennt (Apache ECharts, Apache-2.0, gebündelt und selbst
  * gehostet, nur Linie/Balken/Torte, Canvas). Vertrag jeder Engine:
- *   export function render(el, spec, theme) → { update(theme), resize(), dispose() }
+ *   export function render(el, spec, theme) → { update(theme), resize(), dispose(), image()? }
  * spec = Core\Charts::normalize() (type, labels, series[{name, data}], title, description, format, unit, stacked, height, locale)
  * theme = { colors[], ink, muted, grid, bg, font, dark } aus CSS-Variablen (resources/js/charts.mjs).
  * Tooltip: eigenes HTML nur mit Klassen (keine style-Attribute – strenge CSP der Website), Farbpunkt über .cms-chart-c{0…7}.
@@ -80,6 +80,7 @@ export function render(el, spec, t) {
   return {
     update: (nt) => chart.setOption(option(spec, nt), true),
     resize: () => chart.resize(),
+    image: () => chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: 'transparent' }),   // Druck (Papier statt Kartenfarbe)
     dispose: () => chart.dispose(),
   };
 }

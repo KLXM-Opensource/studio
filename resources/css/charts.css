@@ -32,3 +32,6 @@
 html.adm-ui .cms-chart{--chart-ink:var(--adm-ink);--chart-muted:var(--adm-t3);--chart-grid:var(--adm-line);--chart-bg:var(--adm-card);--chart-dark:0}
 @media (prefers-color-scheme:dark){html.adm-ui:not([data-theme=light]) .cms-chart{--chart-dark:1}}
 html.adm-ui[data-theme=dark] .cms-chart{--chart-dark:1}
+/* Druck: Bild statt Canvas (charts.mjs setzt es vor dem Drucken ein), skaliert mit der Papierbreite */
+.cms-chart__print{display:none}
+@media print{.cms-chart:has(.cms-chart__print) .cms-chart__canvas{display:none!important}.cms-chart__print{display:block;width:100%;height:auto;max-width:100%}.cms-chart__table{display:none}}

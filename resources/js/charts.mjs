@@ -2,7 +2,7 @@
  * Diagramme (Core\Charts) – Lader, unabhängig von der Engine.
  * Findet <figure data-chart>, lädt die Engine (data-chart-engine, ES-Modul) erst in Sichtweite und ruft
  *   render(el, spec, theme) → { update(theme), resize(), dispose() }
- * auf. theme = Farben aus CSS-Variablen der Figur (--chart-1 … --chart-8, --chart-ink, --chart-muted, --chart-grid, --chart-bg)
+ * auf (optional image() → Bild-URL für den Druck). theme = Farben aus CSS-Variablen der Figur (--chart-1 … --chart-8, --chart-ink, --chart-muted, --chart-grid, --chart-bg)
  * und Schrift – so folgen Diagramme Kit, Akzent und Hell/Dunkel. Nachgeladene Inhalte (z. B. Karten der Übersicht) erkennt
  * ein MutationObserver; Wechsel von Hell/Dunkel zeichnet neu. Ohne JavaScript bleibt die Tabelle.
  */
@@ -42,7 +42,7 @@ async function draw(fig) {
     const inst = engine.render(box, spec, theme(fig));
     live.add({ fig, inst });
     fig.dataset.chartState = 'ready';
-    if ('ResizeObserver' in window) new ResizeObserver(() => inst.resize?.()).observe(box);
+    if ('ResizeObserver' in window) new ResizeObserver(() => { if (box.offsetWidth > 0) inst.resize?.(); }).observe(box);
   } catch (e) {
     fig.dataset.chartState = 'error';
     fig.querySelector('.cms-chart__table')?.setAttribute('open', '');   // Engine fehlt: Werte als Tabelle
@@ -67,4 +67,20 @@ const refresh = () => { for (const { fig, inst } of live) if (fig.isConnected) i
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', refresh);
 new MutationObserver(refresh).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-accent', 'class'] });
 
-window.cmsCharts = { scan };
+// Drucken: Canvas-Diagramme passen sich der Papierbreite nicht zuverlässig an (der Browser setzt das Druckformat erst danach).
+// Deshalb vor dem Drucken je Diagramm ein scharfes Bild (Engine: image(), optional) einsetzen, das im Druck mit der Breite skaliert.
+const toPrint = () => {
+  for (const { fig, inst } of live) {
+    if (!fig.isConnected || !inst.image) continue;
+    let img = fig.querySelector(':scope > .cms-chart__print');
+    const box = fig.querySelector('.cms-chart__canvas');
+    if (img && (!box || box.offsetWidth < 40 || matchMedia('print').matches)) continue;   // schon erzeugt, Fläche im Druck ausgeblendet
+    if (!img) { img = document.createElement('img'); img.className = 'cms-chart__print'; img.alt = ''; fig.querySelector('.cms-chart__canvas')?.after(img); }
+    try { img.src = inst.image(); } catch (e) { img.remove(); }
+  }
+};
+const resizeAll = () => { for (const { fig, inst } of live) if (fig.isConnected) inst.resize?.(); };
+addEventListener('beforeprint', toPrint);
+addEventListener('afterprint', resizeAll);
+
+window.cmsCharts = { scan, resize: resizeAll, print: toPrint };
