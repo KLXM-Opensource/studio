@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kits fluid/galerie: Bildwirkung „Versetzter Rahmen“
+- Bilder blieben im abgerundeten Rahmen eckig (die Rundung wurde über `<picture>` mit `display:contents` nicht weitergegeben).
+
 ### Kit fluid: Slide-Menü klarer
 - „Dritte Menüebene: Slide“: Die Zeile oben heißt jetzt „‹ Zurück“, darunter steht die Elternseite fett als Link – vorher war sie in der Unterebene nicht erreichbar und der Rückweg nicht als solcher erkennbar.
 

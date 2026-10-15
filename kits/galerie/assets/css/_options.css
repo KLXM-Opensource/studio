@@ -38,7 +38,8 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
 .imgfx-tint :is(a,.tcard,.tile):hover .frame::after{opacity:0}
 .imgfx-frame .frame{overflow:visible;isolation:isolate}
 .imgfx-frame .frame::before{content:"";position:absolute;inset:0;translate:.6rem .6rem;z-index:-1;border:2px solid var(--f-a);border-radius:inherit}
-.imgfx-frame .frame :is(img,video){border-radius:inherit}
+/* picture hat display:contents – erbt aber im DOM weiter; ohne picture in der Kette bliebe das Bild eckig */
+.imgfx-frame .frame :is(picture,img,video){border-radius:inherit}
 @media (forced-colors:active){.imgfx-tint .frame::after{display:none}}
 
 /* Hover der Karten: Anheben (Standard, has-motion), Leuchten oder ruhig */
