@@ -40,6 +40,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createHmac } from 'node:crypto';
 import { chromium } from 'playwright';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -55,6 +56,16 @@ const FFPROBE = FFMPEG.replace(/ffmpeg$/, 'ffprobe');
 const W = 1280, H = 720, DPR = 1.5, FPS = 30;                // Fenster (CSS-Pixel) × Pixeldichte = 1920 × 1080
 const VOICE_AT = 0.35;                                         // Sprecher setzt so viele Sekunden nach Shot-Beginn ein
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/** TOTP-Code (RFC 6238, SHA-1, 6 Stellen, 30 s) aus einem Base32-Geheimnis – Netzwerk-Konto der Testkopie */
+function totp(secret, now = Date.now()) {
+  const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const bits = secret.toUpperCase().replace(/[\s=-]/g, '').split('').map((c) => B32.indexOf(c).toString(2).padStart(5, '0')).join('');
+  const key = Buffer.from(bits.match(/.{8}/g).map((b) => parseInt(b, 2)));
+  const msg = Buffer.alloc(8); msg.writeBigUInt64BE(BigInt(Math.floor(now / 30000)));
+  const h = createHmac('sha1', key).update(msg).digest();
+  const o = h[19] & 15;
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1e6).padStart(6, '0');
+}
 /** Shot abbrechen, wenn er hängt (Seite reagiert nicht, Element fehlt …) */
 const watchdog = (p, id, s = 240) => Promise.race([p, sleep(s * 1000).then(() => { throw new Error(`${id}: nach ${s} s abgebrochen`); })]);
 const DEBUG = !!process.env.TRAILER_DEBUG;
@@ -442,7 +453,7 @@ add({ id: 'theme-essenz', section: 'themes', kind: 'stage', xfade: 0.5,
     await frameScroll(f[0], 900, 1500);
   } });
 add({ id: 'theme-trio', section: 'themes', kind: 'stage', xfade: 0.5,
-  vo: [['Nine kits are included, from modern to nature.', 'Neun Kits sind dabei, von modern bis nature.', 'Priloženih je devet kompletov, od »modern« do »nature«.']],
+  vo: [['A good selection of kits is included, from modern to nature.', 'Eine gute Auswahl an Kits ist dabei, von modern bis nature.', 'Priložen je lep izbor kompletov, od »modern« do »nature«.']],
   stage: () => stageHtml([
     { url: U('modern', '/'), title: 'Kit “modern” · Studio Nordlicht (fictional)', style: 'left:40px;top:40px;width:720px;height:470px;opacity:0;transform:translateY(40px);transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s' },
     { url: U('glas', '/'), title: 'Kit “glas” · Lumen Labs (fictional)', style: 'left:280px;top:130px;width:720px;height:470px;opacity:0;transform:translateY(40px);transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s' },
@@ -527,12 +538,15 @@ add({ id: 'edit-media', section: 'edit', kind: 'app', speed: 2.0, xfade: 0.4, ne
   async run(s) {
     await s.label('Media library' + small('pick an image'));
     const blk = blockOf(s, 'Text + Bild');
-    await s.click(blk.locator('.cms-block__preview').first(), { dx: 820, dy: 30, after: 900 });
+    // Felder des Blocks über „Bearbeiten“ in der Block-Leiste öffnen (ein Klick in die Vorschau öffnet sie nicht mehr)
+    await s.hover(blk.locator('.cms-block__preview').first(), 300, { dx: 820, dy: 30 });
+    await s.click(blk.locator('.cms-block__edit').first(), { after: 900 });
     const pick = s.page.locator('#cms-drawer button[data-media-pick]').first();
     await pick.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
     await s.wait(700);
     await s.click(pick, { after: 1000 });
-    await s.click(s.page.locator('dialog[open] [role=option]:has-text("Netti2")').first(), { after: 700 });
+    // nur erzeugte Beispielbilder (Showcase der Website „fluid“), keine Fotos
+    await s.click(s.page.locator('dialog[open] [role=option]:has-text("Ringe in Blau und Gelb")').first(), { after: 700 });
     await s.click(s.page.locator('dialog[open] button:has-text("Diese Datei verwenden")').first(), { after: 1300 });
     await s.click(s.page.locator('#cms-drawer button:has-text("Fertig")').first(), { after: 900 });
     await s.moveXY(980, 470);
@@ -564,13 +578,13 @@ add({ id: 'edit-block', section: 'edit', kind: 'app', speed: 2.1, xfade: 0.4, ne
     await s.label('Add a block' + small('key figures with scale'));
     const quote = blockOf(s, 'Zitat');
     await s.scrollTo(quote, 70, 1300);
-    await s.hover(quote.locator('.cms-block__preview').first(), 500, { dx: 300, dy: -40 });
-    const plus = s.page.locator('.ce-toolbar__plus').first();
+    // „+ Block einfügen“ unter dem Block (Leiste im Shadow DOM, Locator durchdringt sie)
+    const plus = quote.locator('button.cms-addbtn').first();
     await plus.waitFor({ state: 'visible', timeout: 5000 });
     await s.click(plus, { after: 700 });
     await s.type('Skala', 90);
     await s.wait(400);
-    await s.click(s.page.locator('.ce-popover-item:visible:has-text("Kennzahlen mit Skala")').first(), { after: 1500 });
+    await s.click(s.page.locator(':is(button, [role=option], li):visible', { hasText: 'Kennzahlen mit Skala' }).last(), { after: 1500 });
     const dr = s.page.locator('#cms-drawer');
     await dr.evaluate((el) => { [el, ...el.querySelectorAll('*')].forEach((n) => { if (n.scrollHeight > n.clientHeight + 20 && /(auto|scroll)/.test(getComputedStyle(n).overflowY)) n.scrollTop = 0; }); });
     await s.wait(300);
@@ -620,8 +634,8 @@ add({ id: 'adm-media', section: 'admin', kind: 'app', speed: 1.8, xfade: 0.5,
     await s.clickNav('#adm-mainnav a[href$="/admin/media"]', { settle: 900 });
     await s.label('Media library' + small('collections, tags, quick look'));
     await s.click('.adm-side button[data-src="collection"]', { after: 900 });
-    await s.click('.adm-side button[data-src="tag"][data-value="katze"]', { after: 800 });
-    await s.click('[data-media-library] [role=option]:has-text("Netti")', { after: 400 });
+    await s.click('.adm-side button[data-src="tag"][data-value="showcase-demo"]', { after: 800 });
+    await s.click('[data-media-library] [role=option]:has-text("Ringe in Blau und Gelb")', { after: 400 });
     await s.page.keyboard.press('Space');
     await s.wait(1700);
     await s.page.keyboard.press('Escape');
@@ -676,7 +690,8 @@ add({ id: 'adm-search', section: 'admin', kind: 'app', speed: 1.3, xfade: 0.4,
   } });
 add({ id: 'adm-blocks', section: 'admin', kind: 'app', speed: 1.5, xfade: 0.4,
   vo: [['Admins can build custom blocks, with a live preview.', 'Eigene Blöcke bauen Admins selbst, mit Live-Vorschau.', 'Skrbniki lahko sestavijo lastne bloke, s sprotnim predogledom.']],
-  async prep(s) { await s.go(A('fluid', '/admin/blocks/beispiel_preistabelle')); },
+  // Beispiel-Block aus „blocks:demos“ (Testkopie: php bin/console blocks:demos --all --site=fluid)
+  async prep(s) { await s.go(A('fluid', '/admin/blocks/kennzahlen')); },
   async run(s) {
     await s.label('Block designer' + small('fields, template, CSS'));
     await s.click('main [role=tab]:has-text("Vorlage"), main button:has-text("Vorlage")', { after: 800 });
@@ -826,7 +841,7 @@ if (toRecord.length) {
 
     // --- Verwaltung/Website: angemeldet, schreibende Anfragen werden abgefangen
     const appCtx = await browser.newContext({ ...common, bypassCSP: true }); own.push(appCtx);   // bypassCSP: Stil-Einblendung (Cookie-Hinweis aus) trotz CSP
-    const PASS = /\/admin\/(login|api\/(block-form|preview|blocks\/preview|blocks\/sample-form|design-preview|settings-preview|search|ai\/text|ai\/page-propose|ai\/table-propose))$/;
+    const PASS = /\/admin\/(login(\/2fa)?|api\/(block-form|preview|blocks\/preview|blocks\/sample-form|design-preview|settings-preview|search|ai\/text|ai\/page-propose|ai\/table-propose))$/;
     const blocked = [];
     await appCtx.route('**/*', (route) => {
       const r = route.request();
@@ -857,6 +872,12 @@ if (toRecord.length) {
         await appPage.fill('#email', acc.email);
         await appPage.fill('#password', acc.password);
         await Promise.all([appPage.waitForURL((u) => !u.pathname.endsWith('/login'), { timeout: 15000 }).catch(() => {}), appPage.click('button[type=submit]')]);
+        // Zweiter Faktor (Netzwerk-Konto): Code aus „totp“ im Zugang, notfalls nächsten Zeitschritt abwarten (Code nur einmal gültig)
+        for (let i = 0; i < 3 && appPage.url().includes('/login/2fa') && acc.totp; i++) {
+          if (i) await sleep((30 - (Math.floor(Date.now() / 1000) % 30)) * 1000 + 500);
+          await appPage.fill('input[name=code]', totp(acc.totp));
+          await Promise.all([appPage.waitForLoadState('load').catch(() => {}), appPage.click('button[type=submit]')]);
+        }
         if (appPage.url().includes('/login')) throw new Error('Anmeldung fehlgeschlagen: ' + k);
       }
     }

@@ -17,7 +17,8 @@
  *
  * Voraussetzungen: Playwright (devDependency in tools/package.json, `pnpm --dir tools exec playwright install chromium`),
  * ffmpeg (FFMPEG=/pfad/ffmpeg, Standard: ffmpeg im PATH bzw. /opt/homebrew/bin/ffmpeg) und eine TESTKOPIE mit Beispielinhalten.
- * Zugänge stehen NICHT im Repository, sondern in tools/tutorials/accounts.local.json (Vorlage: accounts.example.json)
+ * Zugänge stehen NICHT im Repository, sondern in tools/tutorials/accounts.local.json (Vorlage: accounts.example.json;
+ * Netzwerk-Konto mit Zwei-Faktor: „totp“ = Base32-Geheimnis der Authenticator-App der Testkopie)
  * oder in der Datei aus TUT_ACCOUNTS. Die Aufnahmen legen Inhalte an und räumen sie danach wieder ab (cleanup je Ablauf).
  *
  * Ausgabe: NICHT ins CMS (die Videos werden nicht mit ausgeliefert), sondern in die Produkt-Website studio.klxm.de:
@@ -33,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createHmac } from 'node:crypto';
 import { chromium } from 'playwright';
 import { flows } from './flows.mjs';
 const { Narrator, buildTrack, VOICES } = process.argv.includes('--voice') ? await import('./speech.mjs') : {};
@@ -317,7 +319,25 @@ async function login(page, acc) {
   await page.fill('#email', acc.email);
   await page.fill('#password', acc.password);
   await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login'), { timeout: 15000 }).catch(() => {}), page.click('button[type=submit]')]);
+  // Zweiter Faktor (Netzwerk-Konten: immer): Code aus dem Authenticator-Geheimnis im Zugang („totp“, Base32) – jeder Code gilt nur
+  // einmal, deshalb notfalls den nächsten Zeitschritt abwarten
+  for (let i = 0; i < 3 && page.url().includes('/login/2fa') && acc.totp; i++) {
+    if (i) await page.waitForTimeout((30 - (Math.floor(Date.now() / 1000) % 30)) * 1000 + 500);
+    await page.fill('input[name=code]', totp(acc.totp));
+    await Promise.all([page.waitForLoadState('load').catch(() => {}), page.click('button[type=submit]')]);
+  }
   if (page.url().includes('/login')) throw new Error('Anmeldung fehlgeschlagen: ' + acc.email);
+}
+
+/** TOTP-Code (RFC 6238, SHA-1, 6 Stellen, 30 s) aus einem Base32-Geheimnis */
+function totp(secret, now = Date.now()) {
+  const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const bits = secret.toUpperCase().replace(/[\s=-]/g, '').split('').map((c) => B32.indexOf(c).toString(2).padStart(5, '0')).join('');
+  const key = Buffer.from(bits.match(/.{8}/g).map((b) => parseInt(b, 2)));
+  const msg = Buffer.alloc(8); msg.writeBigUInt64BE(BigInt(Math.floor(now / 30000)));
+  const h = createHmac('sha1', key).update(msg).digest();
+  const o = h[19] & 15;
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1e6).padStart(6, '0');
 }
 
 const vtt = (cues, end, lang) => 'WEBVTT\n\n' + cues.map((c, i) => {
@@ -473,6 +493,8 @@ for (const f of selected) {
     }
   }
   const sz = (e) => (fs.existsSync(base + e) ? fs.statSync(base + e).size : 0);
+  // --no-transcode (Probelauf): kein fertiges Video – Liste videos.json bleibt unverändert, Rohvideo bleibt in .raw/{slug}
+  if (flag('--no-transcode')) { console.log(`  ✓ Probelauf · ${cues.length} Schritte · Rohvideo: ${path.relative(ROOT, src)}`); continue; }
   manifest[f.slug] = {
     duration: Math.round(probe(base + '.mp4')), width: size.width, height: size.height,
     mp4: sz('.mp4'), webm: sz('.webm'), jpg: sz('.jpg'), cues: cues.length, recorded: new Date().toISOString().slice(0, 10),

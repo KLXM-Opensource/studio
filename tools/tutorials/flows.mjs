@@ -30,7 +30,7 @@ add({
     await t.ring('.adm-brand-row', 1800);
     await t.step('Links steht das Menü – z. B. „Daten“ für Termine, Team oder Beiträge.', 'The menu is on the left – e.g. “Daten” (data) for events, team or posts.');
     await t.click('#adm-mainnav a[href$="/admin/data"]', { after: 1200 });
-    await t.step('Jeder Bereich hat eine eigene Farbe. „Zurück zu …“ oben führt ins Hauptmenü.', 'Every area has its own colour. “Zurück zu …” (back to) at the top leads to the main menu.');
+    await t.step('Jeder Bereich hat eine eigene Farbe. „← Hauptmenü“ oben führt zurück.', 'Every area has its own colour. “← Hauptmenü” (main menu) at the top leads back.');
     await t.ring('.adm-drill__back', 1500).catch(() => {});
     await t.click('main a[href$="/admin/data/termine"]', { after: 1200 });
     await t.step('Oft gebraucht? Mit dem Stern ☆ neben der Überschrift als Favorit merken.', 'Need it often? Click the star ☆ next to the heading to add a favourite.');
@@ -44,10 +44,12 @@ add({
     await t.page.keyboard.type('Benutzer', { delay: 110 });
     await t.wait(1200);
     await t.step('Treffer: Seiten, Einträge, Medien, Einstellungen – oder den Assistenten fragen. Pfeiltasten wählen, ↵ öffnet.', 'Results: pages, entries, media, settings – or ask the assistant. Arrow keys select, ↵ opens.');
-    await t.keys('ArrowDown', '↓');
+    // Pfeiltasten bis zum Treffer „Benutzer & Rollen“ (Bereich System) – Reihenfolge der Treffer kann sich ändern
+    const hit = await t.page.evaluate(() => [...document.querySelectorAll('[role=option]')].findIndex((o) => /^Benutzer & Rollen/.test(o.textContent.trim())));
+    for (let i = 0; i < Math.max(1, hit); i++) await t.keys('ArrowDown', '↓');
     await t.keys('Enter', '↵');
     await t.wait(1500);
-    await t.step('Unten links „Hilfe & Support“: Handbuch, Tutorials, Assistent und „Problem melden“.', 'Bottom left, “Hilfe & Support” (help & support): manual, tutorials, assistant and “Problem melden” (report a problem).');
+    await t.step('Unten links „Hilfe & Support“: Support, Handbuch & Hilfe, Erste Schritte, Assistent und „Problem melden“.', 'Bottom left, “Hilfe & Support” (help & support): support, manual & help, first steps, assistant and “Problem melden” (report a problem).');
     await t.click('.adm-helpbox__sum', { after: 1200 });
     await t.ring('.adm-helpbox', 2000);
   },
@@ -57,11 +59,17 @@ add({
   },
 });
 
+/** ID einer Seite über ihren Pfad (Seitenbaum der Verwaltung, /admin/api/pages/tree) */
+async function pageIdOf(t, path) {
+  const tree = await t.getJson('/admin/api/pages/tree');
+  const p = (tree.pages || []).find((x) => x.path === path);
+  if (!p) throw new Error('Seite nicht gefunden: ' + path);
+  return p.id;
+}
+
 /** Probeseite: Kopie einer vorhandenen Seite (Entwurf) mit neutralem Titel – cleanup löscht sie wieder */
 async function probePage(t, state, from = '/ueber-uns', title = 'Über uns – Probeseite', slug = 'probeseite') {
-  await t.goto(from);
-  const src = await t.page.locator('a[href*="/admin/pages/"]').first().getAttribute('href');
-  const id = src.match(/pages\/(\d+)/)[1];
+  const id = await pageIdOf(t, from);
   const r = await t.post(`/admin/pages/${id}/duplicate`, {});
   state.pageId = JSON.parse(r.text).id;
   await t.goto(`/admin/pages/${state.pageId}`);
@@ -208,9 +216,9 @@ add({
     await t.type(t.page.getByLabel(/^Titel/), 'Offene Sprechstunde', { delay: 70 });
     await t.step('Beginn und Ende wählen – Datum und Uhrzeit.', 'Choose start and end – date and time.');
     const begin = t.page.getByLabel(/^Beginn/);
-    await t.click(begin, { after: 200 }); await begin.fill('2026-10-06T16:00'); await t.wait(500);
+    await t.click(begin, { after: 200 }); await begin.fill('2026-11-03T16:00'); await t.wait(500);
     const end = t.page.getByLabel(/^Ende/).first();
-    await t.click(end, { after: 200 }); await end.fill('2026-10-06T18:00'); await t.wait(700);
+    await t.click(end, { after: 200 }); await end.fill('2026-11-03T18:00'); await t.wait(700);
     await t.step('Wiederholung: z. B. „wöchentlich“ – dann Wochentag und Ende der Serie festlegen.', 'Repeat: e.g. “wöchentlich” (weekly) – then choose the weekday and when the series ends.');
     await t.select(t.page.getByLabel('Wiederholen', { exact: true }), { label: 'wöchentlich' });
     await t.wait(800);
@@ -250,23 +258,26 @@ add({
 add({
   slug: 'r-anfragen', title: 'Anfragen im Posteingang lesen', account: 'praxis',
   async run(t, s) {
+    const read = 'main article.rq-read:visible';
     await t.goto('/admin');
     await t.step('Neue Online-Anfragen zeigt die Zahl neben „Anfragen“ im Menü.', 'New online requests are counted next to “Anfragen” in the menu.');
     await t.click('#adm-mainnav a[href$="/admin/requests"]', { after: 1200 });
-    await t.step('Oben den Eingang wählen, z. B. Rezeptanfragen. Die Inhalte sind verschlüsselt gespeichert.', 'Choose the inbox at the top, e.g. prescription requests. Contents are stored encrypted.');
-    await t.ring('nav[aria-label="Eingänge"]', 1400);
+    await t.step('Links die Eingänge, z. B. Rezeptanfragen, mit „Neu“, „In Bearbeitung“ und „Erledigt“. Die Inhalte sind verschlüsselt gespeichert.', 'On the left the inboxes, e.g. prescription requests, with “Neu” (new), “In Bearbeitung” (in progress) and “Erledigt” (done). Contents are stored encrypted.');
+    await t.ring('nav[aria-label="Postfächer"]', 1600).catch(() => {});
+    await t.ring('main ul:has(> li.rq-row)', 1400).catch(() => {});
     await t.step('Geheimen Schlüssel aus dem Passwortmanager einfügen und „Entschlüsseln“.', 'Paste the secret key from your password manager and click “Entschlüsseln” (decrypt).');
     await t.click('#secret', { after: 200 });
     await t.page.fill('#secret', t.acc.requestKey || '');
     await t.keys(meta + '+v', process.platform === 'darwin' ? '⌘ V' : 'Strg V');
-    await t.click('form.adm-unlock button[type=submit]', { after: 1800 });
+    await t.click('form.rq-unlock button', { after: 1800 });
     t.poster();
-    await t.step('Jetzt sind die Angaben lesbar – nur in dieser Ansicht, nach dem Neuladen wieder verschlossen.', 'The details are now readable – only in this view; after reloading they are locked again.');
-    await t.hover('main article >> nth=0', 1500);
+    await t.step('Jetzt sind die Angaben lesbar – in der Liste und rechts im Detail. Nach dem Neuladen ist alles wieder verschlossen.', 'The details are now readable – in the list and in the detail view on the right. After reloading everything is locked again.');
+    await t.ring(read, 1600);
+    await t.click('main li.rq-row >> nth=1', { after: 1400 }).catch(() => {});
     await t.step('„Drucken“ und „Kopieren“ helfen beim Übertragen in Ihr Verwaltungssystem.', '“Drucken” (print) and “Kopieren” (copy) help to transfer it into your management system.');
-    await t.hover('main article button:has-text("Kopieren")', 1200);
-    await t.step('Status setzen: „In Bearbeitung“ oder „Als erledigt markieren“. „Zuweisen“ zeigt, wer sich kümmert.', 'Set the status: “In Bearbeitung” (in progress) or “Als erledigt markieren” (done). “Zuweisen” shows who takes care.');
-    const form = t.page.locator('main article form:has(button:has-text("In Bearbeitung"))').first();
+    await t.hover(`${read} button:has-text("Kopieren")`, 1200).catch(() => {});
+    await t.step('Status setzen: „In Bearbeitung“ oder „Als erledigt markieren“. „Zuweisen an“ zeigt, wer sich kümmert.', 'Set the status: “In Bearbeitung” (in progress) or “Als erledigt markieren” (done). “Zuweisen an” (assign to) shows who takes care.');
+    const form = t.page.locator(`${read} form:has(button:has-text("In Bearbeitung"))`).first();
     s.statusUrl = await form.getAttribute('action');
     await t.click(form.locator('button'), { after: 1800 });
     await t.step('Erledigte Anfragen löscht das System nach der eingestellten Frist automatisch.', 'Completed requests are deleted automatically after the configured period.', 2400);
@@ -373,7 +384,7 @@ add({
   slug: 'a-benutzer-rollen', title: 'Benutzer & Rollen, 2FA verlangen', account: 'demo',
   async setup(t, s) {
     // Richtlinie „Anmeldung & Sicherheit“ (Core\Mfa) merken – cleanup stellt sie exakt wieder her
-    await t.goto('/admin/users');
+    await t.goto('/admin/users/sicherheit');
     s.pol = await t.page.evaluate(() => {
       const f = document.querySelector('#zwei-faktor'), d = { methods: '1' };
       for (const n of ['totp', 'passkey', 'passwordless']) if (f.querySelector(`input[name=${n}]`)?.checked) d[n] = '1';
@@ -383,9 +394,12 @@ add({
     });
   },
   async run(t) {
+    const side = (path) => `main nav.adm-secnav a[href$="${path}"]`;
     await t.goto('/admin/users');
-    await t.step('Administration › Benutzer & Rollen: Jede Person bekommt ein eigenes Konto.', 'Administration › Benutzer & Rollen (users & roles): everyone gets their own account.');
-    await t.step('Erst eine passende Rolle: „+ Neue Rolle“, Namen eintragen und Rechte anhaken.', 'First a suitable role: “+ Neue Rolle” (new role), enter a name and tick the permissions.');
+    await t.step('System › Benutzer & Rollen: Jede Person bekommt ein eigenes Konto. Links: Übersicht, Personen, Einladen & Anlegen, Rollen, Anmeldung & Sicherheit.', 'System › Benutzer & Rollen (users & roles): everyone gets their own account. On the left: overview, people, invite & create, roles, sign-in & security.');
+    await t.ring('main nav.adm-secnav', 1800);
+    await t.step('Erst eine passende Rolle: „Rollen“ › „+ Neue Rolle“, Namen eintragen und Rechte anhaken.', 'First a suitable role: “Rollen” (roles) › “+ Neue Rolle” (new role), enter a name and tick the permissions.');
+    await t.click(side('/admin/users/rollen'), { after: 1200 });
     await t.click('main a[href$="/admin/roles/new"]', { after: 1200 });
     await t.type('#r-name', 'Praktikum', { delay: 80 });
     await t.type('#r-desc', 'Entwürfe schreiben, Bilder hochladen', { delay: 45 });
@@ -395,16 +409,17 @@ add({
     t.poster();
     await t.step('Was nicht angehakt ist, sieht die Rolle nicht – z. B. kein „Veröffentlichen“.', 'Whatever is not ticked stays hidden for the role – e.g. no “Veröffentlichen” (publish).');
     await t.click('main button:has-text("Rolle speichern")', { after: 1500 });
-    await t.step('„Neuen Benutzer anlegen“: Name, E-Mail, Startpasswort (persönlich übergeben) und Rolle.', '“Neuen Benutzer anlegen” (new user): name, email, initial password (hand over in person) and role.');
+    await t.step('„Einladen & Anlegen“: per E-Mail einladen – oder direkt anlegen mit Name, E-Mail, Startpasswort (persönlich übergeben) und Rolle.', '“Einladen & Anlegen” (invite & create): invite by email – or create directly with name, email, initial password (hand over in person) and role.');
+    await t.click(side('/admin/users/einladen'), { after: 1200 });
     await t.page.locator('#u-name').scrollIntoViewIfNeeded();
     await t.type('#u-name', 'Erika Beispiel', { delay: 70 });
     await t.type('#u-email', 'erika@example.test', { delay: 55 });
     await t.blur('#u-pw');
     await t.type('#u-pw', 'Nur-fuer-die-Aufnahme-' + Math.random().toString(36).slice(2, 10), { delay: 25 });
     await t.select('#u-role', { label: 'Praktikum' });
-    await t.click('main form[action$="/admin/users"] button[type=submit]', { after: 1500 });
-    await t.page.locator('#zwei-faktor').scrollIntoViewIfNeeded();
+    await t.click('main form#anlegen button[type=submit]', { after: 1500 });
     await t.step('„Anmeldung & Sicherheit“: erlaubte Verfahren – Authenticator-App, Passkeys, Anmeldung ohne Passwort.', '“Anmeldung & Sicherheit” (sign-in & security): allowed methods – authenticator app, passkeys, passwordless sign-in.');
+    await t.click(side('/admin/users/sicherheit'), { after: 1200 });
     await t.ring('#zwei-faktor fieldset >> nth=0', 1400);
     await t.step('Je Rolle den zweiten Faktor wählen – z. B. Redaktion: „verlangt (App oder Passkey)“.', 'Choose the second factor per role – e.g. Redaktion (editors): “verlangt (App oder Passkey)” (required).');
     await t.select('#us-req-editor', 'any');
@@ -413,9 +428,17 @@ add({
     await t.step('Betroffene richten App oder Passkey bei der nächsten Anmeldung ein. Netzwerk-Konten haben 2FA immer.', 'Those affected set up an app or passkey at their next sign-in. Network accounts always use 2FA.', 2600);
   },
   async cleanup(t, s) {
-    await t.goto('/admin/users');
-    const del = await t.page.locator('tr:has-text("erika@example.test") form[action*="/delete"]').first().getAttribute('action').catch(() => null);
+    await t.goto('/admin/users/personen');
+    // Lösch-Formular der Person „erika@example.test“: kleinster Bereich um das Formular, der die Adresse enthält
+    const del = await t.page.evaluate(() => {
+      for (const f of document.querySelectorAll('main form[action$="/delete"]')) {
+        let el = f; while (el && !/@/.test(el.textContent)) el = el.parentElement;
+        if (el && el.textContent.includes('erika@example.test')) return f.getAttribute('action');
+      }
+      return null;
+    });
     if (del) await t.post(del, {});
+    else console.warn('  ! Konto erika@example.test nicht gefunden (Aufräumen)');
     await t.post('/admin/roles/praktikum/delete', {});
     if (s.pol) await t.post('/admin/users/2fa', s.pol);
   },
@@ -426,18 +449,19 @@ add({
   async setup(t, s) { await t.goto('/admin/settings'); s.claim = await t.page.getByLabel('Kurzbeschreibung (Claim)').inputValue(); },
   async run(t) {
     await t.goto('/admin/settings');
-    await t.step('Website: Name, Adresse, Telefon, Öffnungszeiten – einmal gepflegt, überall auf der Website.', 'Website data: name, address, phone, opening hours – maintained once, shown everywhere.');
-    await t.step('„Vorschau“ zeigt rechts, wo die Angabe auf der Website erscheint.', '“Vorschau” (preview) shows on the right where the value appears on the website.', 1200);
+    await t.step('Einrichtung › Website: Name, Adresse, Kontakt – einmal gepflegt, überall auf der Website. Links die Bereiche: Stammdaten, Darstellung, Hinweisbalken, Social Media, Recht, SEO.', 'Setup › Website: name, address, contact – maintained once, shown everywhere. On the left the areas: master data, appearance, notice bar, social media, legal, SEO.');
+    await t.ring('main nav.adm-secnav, main [role=tablist]', 1800).catch(() => {});
+    await t.step('„Vorschau“ zeigt rechts, wo die Angabe auf der Website erscheint – als Mobil, Laptop oder Groß.', '“Vorschau” (preview) shows on the right where the value appears on the website – as mobile, laptop or large.', 1200);
     await t.click('main [data-st-pvtoggle]', { after: 1800 });
     await t.type(t.page.getByLabel('Kurzbeschreibung (Claim)'), 'Beratung, Planung und Umsetzung – aus einer Hand.', { clear: true, delay: 45 });
     await t.wait(1200);
     t.poster();
     await t.step('„Speichern“ – diese Angaben gelten sofort, ohne Veröffentlichen.', '“Speichern” (save) – these values apply immediately, without publishing.');
     await t.click('main .adm-savebar button[type=submit]', { after: 1600 });
-    await t.step('Zweite Sprache: oben „EN English“ – hier nur die Texte übersetzen, Telefon & Adresse gelten für alle.', 'Second language: “EN English” at the top – translate only the texts; phone & address apply to all.');
+    await t.step('Zweite Sprache: oben „EN“ – hier nur die Texte übersetzen, Telefon & Adresse gelten für alle.', 'Second language: “EN” at the top – translate only the texts; phone & address apply to all.');
     await t.click('main nav[aria-label="Sprache"] a:has-text("English")', { after: 1600 });
     await t.ring('main .st-trans', 1600).catch(() => {});
-    await t.step('Welche Sprachen es gibt, legen Sie unter Grundeinstellungen › Sprachen fest.', 'Which languages exist is set under Grundeinstellungen › Sprachen (languages).');
+    await t.step('Welche Sprachen es gibt, legen Sie unter System › Grundeinstellungen fest – in der Liste links „Sprachen“.', 'Which languages exist is set under System › Grundeinstellungen (basic settings) – “Sprachen” (languages) in the list on the left.');
     await t.goto('/admin/system#sprachen');
     await t.click('main [role=tab]:has-text("Sprachen")', { after: 1200 });
     await t.hover('main button:has-text("+ Sprache hinzufügen")', 1200);
@@ -454,24 +478,34 @@ add({
 add({
   slug: 'a-design', title: 'Design: Style-Editor, Vorlagen, Navigation', account: 'demo',
   async run(t) {
+    const tab = (label) => t.page.locator('main [role=tab]', { hasText: label }).first();
+    const btn = (label) => t.page.locator('main button:visible', { hasText: new RegExp('^\\s*' + label + '\\s*$') }).first();
     await t.goto('/admin/design');
-    await t.step('Administration › Design: Farben, Schrift und Formen des Kits für diese Website.', 'Administration › Design: colours, fonts and shapes of the kit for this website.');
-    await t.step('Vorlagen füllen das Formular mit einem stimmigen Satz – die Vorschau rechts zeigt es sofort.', 'Presets fill the form with a matching set – the preview on the right shows it right away.', 1400);
-    await t.click('main button:has-text("Mint Tech")', { after: 2200 });
-    await t.click('main button:has-text("Warm Handwerk")', { after: 2200 });
+    await t.step('Einrichtung › Website › Design: Farben, Schrift und Formen des Kits – links die Bereiche, rechts die Vorschau.', 'Setup › Website › Design: colours, fonts and shapes of the kit – areas on the left, preview on the right.');
+    await t.ring('main [role=tablist]', 1600).catch(() => {});
+    await t.step('„Vorlagen & eigene Designs“: stimmige Sätze als Karten – ein Klick füllt alle Werte, die Vorschau zeigt es sofort.', '“Vorlagen & eigene Designs” (presets & own designs): matching sets as cards – one click fills all values, the preview shows it right away.', 1400);
+    await t.click(tab('Vorlagen & eigene Designs'), { after: 1200 });
+    await t.click(t.page.locator('main .ds-pcard', { hasText: 'Mint Tech' }).first(), { after: 2200 });
+    await t.click(t.page.locator('main .ds-pcard', { hasText: 'Warm Handwerk' }).first(), { after: 2200 });
     t.poster();
+    await t.step('Eigene Designs: „Aktuelles Design speichern …“ legt den jetzigen Stand als weitere Karte ab.', 'Own designs: “Aktuelles Design speichern …” (save current design) stores the current state as another card.');
+    await t.hover(t.page.locator('main .ds-pcard--add').first(), 1400).catch(() => {});
     await t.step('Jede Farbe mit Kontrastprüfung (AA/AAA) – für helle und dunkle Darstellung.', 'Every colour with a contrast check (AA/AAA) – for light and dark mode.');
-    await t.ring('main [role=tabpanel] >> nth=0', 1600).catch(() => {});
-    await t.step('Reiter „Typografie“, „Navigation“, „Kopfbereich: Suche & Aktionen“ – Schrift, Menü, Suchfeld und Button oben.', 'Tabs “Typografie”, “Navigation”, “Kopfbereich: Suche & Aktionen” (header: search & actions) – fonts, menu, search field and button at the top.');
-    await t.click('main [role=tab]:has-text("Typografie")', { after: 1500 });
-    await t.click('main [role=tab]:has-text("Navigation")', { after: 1600 });
-    await t.click('main [role=tab]:has-text("Kopfbereich")', { after: 1800 });
-    await t.step('Vorschau prüfen: Seite wählen, „Mobil“ und „Dunkel“ umschalten.', 'Check the preview: pick a page, switch to “Mobil” (mobile) and “Dunkel” (dark).');
-    await t.click('main button:has-text("Mobil")', { after: 1600 });
-    await t.click('main button:has-text("Dunkel")', { after: 1800 });
+    await t.click(tab('Farben'), { after: 1000 });
+    await t.ring('main [role=tabpanel]:visible', 1600).catch(() => {});
+    await t.step('„Typografie“, „Navigation“, „Kopfbereich: Suche & Aktionen“ – Schrift, Menü, Suchfeld und Button oben.', '“Typografie”, “Navigation”, “Kopfbereich: Suche & Aktionen” (header: search & actions) – fonts, menu, search field and button at the top.');
+    await t.click(tab('Typografie'), { after: 1500 });
+    await t.click(tab('Navigation'), { after: 1600 });
+    await t.click(tab('Kopfbereich'), { after: 1800 });
+    await t.step('Vorschau prüfen: Seite wählen, Größe „Mobil“, „Laptop“ oder „Groß“ – dazu „Hell“ und „Dunkel“.', 'Check the preview: pick a page, size “Mobil” (mobile), “Laptop” or “Groß” (large) – plus “Hell” (light) and “Dunkel” (dark).');
+    await t.click(btn('Mobil'), { after: 1600 });
+    await t.click(btn('Dunkel'), { after: 1800 });
+    await t.click(btn('Groß'), { after: 1400 });
+    await t.click(btn('Hell'), { after: 900 });
+    await t.click(btn('Laptop'), { after: 900 });
     await t.step('„Speichern“ stellt das Design online, „Verlauf“ holt frühere Stände zurück. Hier: „Verwerfen“.', '“Speichern” puts the design online, “Verlauf” (history) restores earlier versions. Here: “Verwerfen” (discard).');
-    await t.hover('main button:has-text("Speichern")', 900);
-    await t.click('main button:has-text("Verwerfen")', { after: 1800 });
+    await t.hover(btn('Speichern'), 900);
+    await t.click(btn('Verwerfen'), { after: 1800 });
   },
 });
 
@@ -479,46 +513,48 @@ add({
   slug: 'a-datentabelle', title: 'Datentabelle anlegen', account: 'demo',
   async run(t) {
     await t.goto('/admin/data');
-    await t.step('Daten › „+ Neue Tabelle“: eigene Inhalte wie Kurse, Produkte oder Stellen.', 'Data › “+ Neue Tabelle” (new table): your own content such as courses, products or jobs.');
+    await t.step('Daten › „+ Neue Tabelle oder Formular“: eigene Inhalte wie Kurse, Produkte oder Stellen – ein Assistent in vier Schritten.', 'Data › “+ Neue Tabelle oder Formular” (new table or form): your own content such as courses, products or jobs – a four-step assistant.');
     await t.click('main a[href$="/admin/data/new"]', { after: 1400 });
-    await t.type(t.page.getByLabel(/^Name \(Mehrzahl\)/), 'Kurse', { delay: 80 });
-    await t.type(t.page.getByLabel('Einzahl', { exact: true }), 'Kurs', { delay: 80 });
-    await t.step('Symbol wählen: suchen, z. B. „Schule“ – erscheint in Menü und Listen.', 'Choose an icon: search, e.g. “Schule” (school) – shown in the menu and lists.');
-    await t.click('main .icp__btn', { after: 700 });
-    await t.page.keyboard.type('Schule', { delay: 110 });
-    await t.wait(900);
-    await t.click('.icp__pop [role=option] >> nth=0', { after: 900 });
-    await t.step('Felder hinzufügen: unten den Typ wählen und benennen – Datum, Ja/Nein, Link …', 'Add fields: choose the type below and name it – date, yes/no, link …');
-    const addField = async (type, label) => {
-      await t.click(t.page.locator(`main button[data-add-field="${type}"]`), { after: 700 });
-      const last = t.page.locator('main li.dt-field').last();
-      await t.type(last.locator('input[data-label]'), label, { delay: 70, clear: true });
-      await last.locator('input[data-label]').dispatchEvent('input');   // Kurzname steht – Auswahl der Bedingungen aktualisieren
-      return last;
-    };
-    await addField('datetime', 'Beginn');
-    await addField('bool', 'Online-Kurs');
-    const link = await addField('url', 'Link zum Raum');
+    await t.step('1. Art: z. B. „Inhalte auf der Website“ – oder Formular, Anfragen, Anmeldung, interne Liste, externe Quelle.', '1. Type: e.g. “Inhalte auf der Website” (content on the website) – or form, requests, registration, internal list, external source.');
+    await t.ring('main form', 1400).catch(() => {});
+    await t.click('main label:has-text("Inhalte auf der Website")', { after: 700 });
+    await t.click('main button:has-text("Weiter")', { after: 1400 });
+    await t.step('2. Vorlage: Aktuelles, Team, Produkte, Termine … mit passenden Feldern – oder „Leer beginnen“.', '2. Template: news, team, products, events … with matching fields – or “Leer beginnen” (start empty).');
+    await t.click('main label:has-text("Leer beginnen")', { after: 700 });
+    await t.click('main button:has-text("Weiter")', { after: 1400 });
+    await t.step('3. Grundeinstellungen: Name und Einzahl, dann Felder – Bezeichnung eintragen, Typ wählen, „Hinzufügen“.', '3. Basic settings: name and singular, then fields – enter a label, choose the type, “Hinzufügen” (add).');
+    await t.type('main input[name=name]', 'Kurse', { delay: 80 });
+    await t.type('main input[name=singular]', 'Kurs', { delay: 80 });
+    for (const [label, type] of [['Beginn', 'datetime'], ['Online-Kurs', 'bool'], ['Link zum Raum', 'url']]) {
+      await t.type('main input[name=new_label]', label, { delay: 70 });
+      await t.select('main select[name=new_type]', type);
+      await t.click('main button:has-text("Hinzufügen")', { after: 900 });
+    }
     t.poster();
+    await t.step('Auf der Website: Übersicht als Liste, eigene Detailseite je Eintrag und deren Adresse, z. B. /kurse.', 'On the website: overview as a list, a detail page per entry and its address, e.g. /kurse.');
+    await t.type('main input[name=route]', 'kurse', { delay: 90, clear: true });
+    await t.click('main button:has-text("Tabelle anlegen")', { after: 1800 });
+    await t.step('4. Einsetzen: neue Seite mit der Liste anlegen oder den Block „Datenliste“ in eine bestehende Seite einfügen – oder später.', '4. Insert: create a new page with the list or add the “Datenliste” (data list) block to an existing page – or later.');
+    await t.ring('main section, main .adm-card', 1600).catch(() => {});
+    await t.step('Feinschliff unter „Felder & Einstellungen“ – links die Bereiche: Allgemein, Felder, Auf der Website, Suche, Kalender …', 'Fine-tuning under “Felder & Einstellungen” (fields & settings) – areas on the left: general, fields, on the website, search, calendar …');
+    await t.goto('/admin/data/kurse/schema');
+    await t.ring('main [role=tablist]', 1600).catch(() => {});
+    await t.click('main [role=tab]:has-text("Felder")', { after: 1200 });
     await t.step('Bedingungen: „Link zum Raum“ nur zeigen, wenn „Online-Kurs“ = Ja.', 'Conditions: show “Link zum Raum” only when “Online-Kurs” = yes.');
+    const link = t.page.locator('main li.dt-field', { has: t.page.locator('input[data-label][value="Link zum Raum"]') }).first();
+    await link.scrollIntoViewIfNeeded();
     await t.click(link.locator('summary:has-text("Bedingungen")'), { after: 700 });
     await t.click(link.locator('button[data-rule-add="visible_if"]'), { after: 700 });
     const rule = link.locator('[data-cond-grp="visible_if"] [data-rule]').first();
     await t.select(rule.locator('select').first(), { label: 'Online-Kurs' });
     const val = rule.locator('[data-rule-val] select, [data-rule-val] input').first();
     if (await val.evaluate((e) => e.tagName === 'SELECT')) await t.select(val, { label: 'Ja' }); else await t.type(val, 'Ja');
-    await t.step('Rechts: Adresse der Detailseiten, öffentliches Formular und Website-Suche.', 'On the right: detail-page address, public form and website search.');
-    await t.type(t.page.getByLabel('Adresse der Detailseiten'), 'kurse', { delay: 90 });
-    await t.click(t.page.getByLabel('Besucher können Einträge anlegen'), { after: 700 });
-    await t.hover(t.page.getByLabel('In der Website-Suche'), 1000);
-    await t.step('„Tabelle anlegen“ – danach steht sie links im Menü und ist sofort nutzbar.', '“Tabelle anlegen” (create table) – it then appears in the menu on the left, ready to use.');
-    await t.click('main button:has-text("Tabelle anlegen")', { after: 2200 });
-    await t.step('Kalender: unter „Felder & Einstellungen“ „Als Kalender nutzen“ und das Feld „Beginn“ wählen.', 'Calendar: in “Felder & Einstellungen” (fields & settings) tick “Als Kalender nutzen” and choose the “Beginn” field.');
-    await t.click('a[href$="/admin/data/kurse/schema"]', { after: 1500 });
+    await t.step('Kalender: „Als Kalender nutzen“ und das Feld „Beginn“ wählen – dann „Speichern“.', 'Calendar: tick “Als Kalender nutzen” (use as calendar) and choose the “Beginn” field – then “Speichern” (save).');
+    await t.click('main [role=tab]:has-text("Kalender")', { after: 1200 });
     await t.click(t.page.getByLabel('Als Kalender nutzen'), { after: 800 });
     await t.select('select[name="settings[calendar][start]"]', { label: 'Beginn' });
-    await t.click('main .dt-save button[type=submit]', { after: 2000 });
-    await t.step('Jetzt gibt es Kalenderansicht, Wiederholungen und ein iCal-Abo für diese Tabelle.', 'Now the table has a calendar view, repetitions and an iCal subscription.', 2400);
+    await t.click('main [role=tabpanel]:visible button[type=submit]:has-text("Speichern"), main button[type=submit]:visible:has-text("Speichern")', { after: 2000 });
+    await t.step('Jetzt gibt es Kalenderansicht, Wiederholungen und ein iCal-Abo für diese Tabelle – links im Menü unter Daten.', 'Now the table has a calendar view, repetitions and an iCal subscription – in the menu on the left under data.', 2400);
   },
   async cleanup(t) {
     await t.goto('/admin/data/kurse/schema');
@@ -601,13 +637,12 @@ const setPageField = async (t, id, sel, value) => {
 add({
   slug: 'a-api-freigabe', title: 'API-Token & „Eingereicht“ (Freigabe)', account: 'demo',
   async setup(t, s) {
-    await t.goto('/ueber-uns');
-    s.pageId = (await t.page.locator('a[href*="/admin/pages/"]').first().getAttribute('href')).match(/pages\/(\d+)/)[1];
+    s.pageId = await pageIdOf(t, '/ueber-uns');
     s.meta = await pageField(t, s.pageId, '#meta_description');
   },
   async run(t, s) {
     await t.goto('/admin/api-tokens');
-    await t.step('API & MCP: Zugänge für Automatisierungen und KI-Assistenten wie Claude.', 'API & MCP: access for automations and AI assistants such as Claude.');
+    await t.step('System › Einstellungen der Funktionen › API & MCP: Zugänge für Automatisierungen und KI-Assistenten wie Claude.', 'System › Einstellungen der Funktionen (feature settings) › API & MCP: access for automations and AI assistants such as Claude.');
     await t.page.locator('main h2:has-text("Neuen Token erzeugen")').scrollIntoViewIfNeeded();
     await t.type(t.page.getByLabel(/^Name/).last(), 'Claude – Redaktion', { delay: 70 });
     await t.select(t.page.getByLabel('Berechtigung', { exact: true }), { label: 'Lesen und ändern' });
@@ -644,8 +679,7 @@ add({
 add({
   slug: 'a-seo', title: 'SEO-Übersicht', account: 'fluid',
   async setup(t, s) {
-    await t.goto('/datenschutz');
-    s.pageId = (await t.page.locator('a[href*="/admin/pages/"]').first().getAttribute('href')).match(/pages\/(\d+)/)[1];
+    s.pageId = await pageIdOf(t, '/datenschutz');
     s.meta = await pageField(t, s.pageId, '#meta_description');
   },
   async run(t, s) {
@@ -680,41 +714,52 @@ add({
   slug: 'n-netzwerk', title: 'Netzwerk-Dashboard & Website öffnen', account: 'network',
   async run(t) {
     await t.goto('/admin/network');
-    await t.step('Netzwerk › Alle Websites: Zustand, Anfragen, Freigaben, Speicher und Sicherung auf einen Blick.', 'Network › all websites: status, requests, approvals, storage and backups at a glance.');
-    await t.ring('main h1 ~ * >> nth=1', 1600).catch(() => {});
-    await t.step('Suchen und filtern: „Mit Hinweisen“, „Wartung“, „Nicht live“.', 'Search and filter: “Mit Hinweisen” (with warnings), “Wartung” (maintenance), “Nicht live” (not live).');
-    await t.type(t.page.getByLabel('Websites durchsuchen'), 'verein', { delay: 110 });
+    await t.step('Netzwerk › Alle Websites. Links die Bereiche: Websites, Administratoren, E-Mail, Geteilt und Protokoll.', 'Network › all websites. On the left the areas: websites, administrators, email, shared and log.');
+    await t.ring('main nav.adm-secnav', 1800);
+    await t.step('„Gerade online“ zeigt, wer jetzt in welcher Website arbeitet – darunter die Kennzahlen aller Websites.', '“Gerade online” (online now) shows who is working in which website right now – below it the figures of all websites.');
+    await t.ring('main .net-online', 1500).catch(() => {});
+    await t.ring('main .net-strip', 1500).catch(() => {});
+    await t.step('„Braucht Aufmerksamkeit“: offene Hinweise je Website – „Öffnen“ führt direkt dorthin.', '“Braucht Aufmerksamkeit” (needs attention): open issues per website – “Öffnen” (open) takes you straight there.');
+    await t.page.locator('main .net-att').evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    await t.wait(900);
+    await t.ring('main .net-att', 1800);
+    await t.step('Alle Websites suchen und filtern: „Mit Hinweisen“, „Wartung“, „Nicht live“.', 'Search and filter all websites: “Mit Hinweisen” (with warnings), “Wartung” (maintenance), “Nicht live” (not live).');
+    await t.page.locator('#websites').evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    await t.wait(900);
+    await t.type(t.page.getByLabel('Websites durchsuchen'), 'muster', { delay: 110 });
     await t.wait(1200);
     await t.type(t.page.getByLabel('Websites durchsuchen'), '', { clear: true });
-    await t.click('main [role=group][aria-label="Filter"] button:has-text("Mit Hinweisen")', { after: 1600 });
+    await t.click('main [role=group][aria-label="Filter"] button:has-text("Nicht live")', { after: 1600 });
     await t.click('main [role=group][aria-label="Filter"] button:has-text("Alle")', { after: 1000 });
     t.poster();
     await t.step('„Öffnen“ meldet Sie per Einmal-Token (SSO) in der Verwaltung dieser Website an – ohne zweites Passwort.', '“Öffnen” (open) signs you in to that website’s admin with a one-time token (SSO) – no second password.');
-    const demo = t.page.locator('main article', { has: t.page.locator('h3', { hasText: 'demo.localhost' }) }).first();
+    const demo = t.page.locator('#site-demo');
     await t.hover(demo.locator('button:has-text("Öffnen")'), 1800);
-    await t.step('Dort arbeiten Sie mit den Rechten der Agentur; „Website wechseln“ in der Seitenleiste führt zur nächsten.', 'There you work with agency rights; “Website wechseln” (switch website) in the sidebar leads to the next one.');
-    await t.step('Unten: Netzwerk-Konten (immer mit Zwei-Faktor-Anmeldung), neue Website, geteilte Ressourcen, Protokoll.', 'Below: network accounts (always with two-factor sign-in), new website, shared resources, log.');
-    await t.page.locator('#konten').scrollIntoViewIfNeeded();
-    await t.ring('#konten', 2000);
-    await t.step('Sperren Sie ein Netzwerk-Konto, enden seine Sitzungen auf allen Websites sofort.', 'Disabling a network account ends its sessions on all websites immediately.', 2400);
-    await t.scroll(500, 1600);
+    await t.step('„Details“ zeigt Kit, Funktionsumfang, Speicher und Sicherung; „⋯“ bietet Wartung, Sicherung und Funktionen.', '“Details” shows kit, feature set, storage and backup; “⋯” offers maintenance, backup and features.');
+    await t.click(demo.locator('summary.adm-link'), { after: 1600 });
+    await t.click(demo.locator('summary[aria-label^="Weitere Aktionen"]'), { after: 1800 });
+    if (await demo.locator('details:has(> summary[aria-label^="Weitere Aktionen"])').evaluate((d) => d.open).catch(() => false)) await t.click(demo.locator('summary[aria-label^="Weitere Aktionen"]'), { after: 400 });
+    await t.step('Administratoren: Netzwerk-Konten haben immer die Zwei-Faktor-Anmeldung. Gesperrte Konten verlieren sofort alle Sitzungen.', 'Administrators: network accounts always use two-factor sign-in. Disabled accounts lose all sessions immediately.');
+    await t.click('main nav.adm-secnav a[href$="/admin/network/administratoren"]', { after: 1800 });
+    await t.step('„Protokoll“ hält jede Netzwerk-Aktion fest – wer hat wann welche Website geöffnet oder geändert.', '“Protokoll” (log) records every network action – who opened or changed which website and when.', 2400);
+    await t.click('main nav.adm-secnav a[href$="/admin/network/protokoll"]', { after: 2000 });
   },
 });
 
 add({
   slug: 'n-website-anlegen', title: 'Neue Website anlegen', account: 'network',
   async run(t) {
-    await t.goto('/admin/network#neu');
-    await t.step('Netzwerk › „Neue Website“: Kurzname, Domains und Kit – wie „site:create“ auf der Kommandozeile.', 'Network › “Neue Website” (new website): short name, domains and kit – like “site:create” on the command line.');
-    await t.page.locator('#neu').scrollIntoViewIfNeeded();
+    await t.goto('/admin/network');
+    await t.step('Netzwerk › „+ Neue Website“: Kurzname, Domains, Kit und Startinhalte – wie „site:create“ auf der Kommandozeile.', 'Network › “+ Neue Website” (new website): short name, domains, kit and starter content – like “site:create” on the command line.');
+    await t.click('main .adm-head :is(a, button):has-text("Neue Website")', { after: 1400 });
     await t.type('#ns-key', 'probe', { delay: 90 });
     await t.type('#ns-hosts', 'www.probe.example, probe.localhost', { delay: 55 });
     await t.select('#ns-theme', { label: 'Basis (neutral)' }).catch(() => t.select('#ns-theme', { index: 1 }));
-    await t.click('#neu button[type=submit]', { after: 1800 });
+    await t.select('#ns-content', 'full').catch(() => {});
+    await t.click('main form[action$="/admin/network/sites"] button[type=submit]', { after: 1800 });
     t.poster();
     await t.step('Angelegt: eigene Konfiguration mit eigenen Schlüsseln. Die nächsten Schritte stehen im Kasten.', 'Created: its own configuration with its own keys. The next steps are shown in the box.');
-    await t.page.locator('#neu').scrollIntoViewIfNeeded();
-    await t.ring('#neu .net-created', 2400).catch(() => {});
+    await t.ring('main .net-created', 2400).catch(() => {});
     await t.step('Domain im Hosting auf denselben Ordner (httpdocs/public) zeigen lassen – der erste Aufruf legt alles an.', 'Point the domain to the same folder (httpdocs/public) in your hosting – the first request creates everything.');
     await t.step('Dann „Öffnen“ – oder erstes lokales Konto über /admin/setup mit dem Setup-Token (hier unkenntlich).', 'Then “Öffnen” (open) – or create the first local account via /admin/setup with the setup token (blurred here).', 2800);
   },
@@ -730,21 +775,36 @@ add({
 
 add({
   slug: 'n-funktionen', title: 'Pakete & Funktionen je Projekt', account: 'network',
+  // Vorher einmal per SSO in „kunde“ – das Begrüßungsfenster („Willkommen“, einmal je Konto und Website) erscheint dann nicht in der Aufnahme
+  async setup(t) { await t.post('/admin/network/open', { site: 'kunde', path: '/admin' }); },
   async run(t) {
     await t.goto('/admin/network');
     await t.step('Jede Website hat einen Funktionsumfang: Preset „full“, „content“ oder „minimal“ plus einzelne Schalter.', 'Every website has a feature set: preset “full”, “content” or “minimal” plus individual switches.');
-    const card = t.page.locator('main article', { has: t.page.locator('h3', { hasText: 'kunde' }) }).first();
-    await t.ring(card.locator('dl'), 2200);
-    await t.step('Die Agentur legt ihn in config/sites/{website}.php fest – die Kundschaft kann ihn nicht ändern.', 'The agency sets it in config/sites/{website}.php – customers cannot change it.');
-    await t.hover(card.locator('dd[title]').first(), 1800).catch(() => {});
-    await t.goto('/admin/system#info');
-    await t.click('main [role=tab]:has-text("Systeminfo")', { after: 1200 });
+    const card = t.page.locator('#site-kunde');
+    await card.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+    await t.wait(900);
+    await t.click(card.locator('summary.adm-link'), { after: 1200 });
+    await t.ring(card.locator('dl').first(), 2200).catch(() => {});
+    await t.step('Die Agentur legt ihn in config/sites/{website}.php fest – oder schaltet ihn in der Verwaltung: „⋯“ › „Funktionen & Erweiterungen“.', 'The agency sets it in config/sites/{website}.php – or switches it in the admin: “⋯” › “Funktionen & Erweiterungen” (features & extensions).');
+    await t.click(card.locator('summary[aria-label^="Weitere Aktionen"]'), { after: 1200 });
+    await t.click(card.locator('button:has-text("Funktionen & Erweiterungen")'), { after: 2200 });
+    await t.page.waitForURL(/\/admin\/funktionen/, { timeout: 15000 });
+    await t.wait(900);
     t.poster();
-    await t.step('In jeder Website zeigt Grundeinstellungen › Systeminfo, was dort an- oder abgeschaltet ist.', 'In every website, Grundeinstellungen › Systeminfo shows what is switched on or off there.');
-    const fx = t.page.locator('main :text("Funktionsumfang dieser Website")').first();
-    await fx.scrollIntoViewIfNeeded();
-    await t.ring(fx.locator('xpath=..'), 2600).catch(() => {});
-    await t.step('Abgeschaltete Funktionen sperren Menüs, Rechte, API und MCP – auch für die Administration der Website.', 'Disabled features lock menus, permissions, API and MCP – even for the website’s own admins.');
+    await t.step('Links die Gruppen – Inhalte, Daten, Medien, KI, Schnittstellen, Kommunikation, Sicherheit & Betrieb – mit Zähler „an/gesamt“.', 'On the left the groups – content, data, media, AI, interfaces, communication, security & operations – with an “on/total” counter.');
+    await t.ring('main [role=tablist], main nav.adm-secnav', 1800).catch(() => {});
+    const group = (label) => t.page.locator('main :is([role=tab], nav.adm-secnav a)', { hasText: label }).first();
+    await t.click(group('Daten'), { after: 1400 });
+    await t.click(group('Schnittstellen'), { after: 1400 });
+    await t.step('Jeder Schalter erklärt unter „Was passiert beim Einschalten“, was die Funktion freigibt. Festgelegtes aus der Konfiguration ist gekennzeichnet.', 'Every switch explains under “Was passiert beim Einschalten” (what happens when switched on) what it unlocks. Values fixed in the configuration are marked.');
+    const more = t.page.locator('main [role=tabpanel]:visible summary, main .us-main summary').first();
+    await t.click(more, { after: 1800 }).catch(() => {});
+    await t.step('„Freigabe für die Website-Administration“: Erst dann darf die Website selbst schalten – Standard: aus.', '“Freigabe für die Website-Administration” (release to website admins): only then may the website switch features itself – default: off.');
+    await t.page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    await t.wait(900);
+    await t.ring(t.page.locator('main section, main .set-group', { hasText: 'Freigabe für die Website-Administration' }).first(), 2000).catch(() => {});
+    await t.step('Abgeschaltete Funktionen sperren Menüs, Rechte, API und MCP – auch für die Administration der Website. „Letzte Änderungen“ zeigt, wer was geschaltet hat.', 'Disabled features lock menus, permissions, API and MCP – even for the website’s own admins. “Letzte Änderungen” (recent changes) shows who switched what.');
+    await t.click(group('Letzte Änderungen'), { after: 2000 });
     await t.step('Alle Schalter und Beispiele: Technische Dokumentation › Funktionsumfang & Erweiterungen.', 'All switches and examples: technical documentation › features & extensions.');
     await t.goto('/admin/hilfe/technik#funktionen');
     await t.wait(800);
@@ -782,20 +842,26 @@ add({
   async run(t, s, ACC) {
     await t.goto('/admin/system#pools');
     await t.click('main [role=tab]:has-text("Geteilte Medien")', { after: 1200 });
-    await t.step('Grundeinstellungen › Geteilte Medien: zentrale Mediatheken (z. B. Logos, Markenbilder) für mehrere Websites.', 'Grundeinstellungen › Geteilte Medien (shared media): central libraries (e.g. logos, brand images) for several websites.');
+    await t.step('System › Grundeinstellungen › Geteilte Medien: zentrale Mediatheken (z. B. Logos, Markenbilder) für mehrere Websites.', 'System › Grundeinstellungen › Geteilte Medien (shared media): central libraries (e.g. logos, brand images) for several websites.');
     const box = t.page.locator('#panel-pools .pl-new');
     await box.scrollIntoViewIfNeeded();
     await t.step('„Neuen Pool anlegen“: Name, Kurzname und die Websites, die ihn nutzen dürfen.', '“Neuen Pool anlegen” (new pool): name, short name and the websites allowed to use it.');
     await t.type(box.locator('input[name=label]'), 'Beispiel-Pool (Demo)', { delay: 60 });
     await t.type(box.locator('input[name=key]'), POOL, { delay: 70 });
     await t.click(box.locator('label:has(input[value="fluid"])'), { after: 400 });
+    // Mitte des Fensters: unten liegt die feste Speichern-Leiste der Grundeinstellungen (sonst trifft der Klick sie)
+    await box.locator('button[type=submit]').evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+    await t.wait(700);
     await t.click(box.locator('button[type=submit]'), { after: 1600 });
     s.created = true;
     await t.click('main [role=tab]:has-text("Geteilte Medien")', { after: 800 }).catch(() => {});
     const card = t.page.locator('#panel-pools .pl-card', { has: t.page.locator(`code:text-is("${POOL}")`) }).first();
-    await card.scrollIntoViewIfNeeded();
+    await card.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+    await t.wait(900);
     await t.step('Je Pool: „Genutzt von“ (welche Websites) und „Pflegen dürfen“ – alle anderen verwenden die Dateien nur.', 'Per pool: “Genutzt von” (used by) and “Pflegen dürfen” (may maintain) – everyone else only uses the files.');
     await t.click(card.locator('fieldset:nth-of-type(2) label:has(input[value="fluid"])'), { after: 400 });
+    await card.locator('button[type=submit]:has-text("Speichern")').evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+    await t.wait(600);
     await t.click(card.locator('button[type=submit]:has-text("Speichern")'), { after: 1600 });
     // Auf der Website „fluid“ (Sitzung aus setup): Datei in den Pool verschieben
     await t.goto(ACC.fluid.url.replace(/\/$/, '') + '/admin/media');
@@ -823,9 +889,9 @@ add({
     await t.step('Geteilte Daten: Eine Website (z. B. der Verband) besitzt die Tabelle, Mitglieder (Vereine) sehen und ergänzen Einträge.', 'Shared data: one website (e.g. the association) owns the table, members (clubs) see and add entries.');
     await t.scroll(200, 1600);
     await t.step('Beim Verein erscheinen die Einträge des Verbands in derselben Tabelle – nur lesbar, eigene bleiben bearbeitbar.', 'At the club the association’s entries appear in the same table – read-only, its own stay editable.');
-    await t.goto('/admin/network#geteilt');
-    await t.page.locator('#geteilt').scrollIntoViewIfNeeded();
-    await t.ring('#geteilt', 2400);
+    await t.step('Netzwerk › Geteilt zeigt alle Pools und geteilten Tabellen auf einen Blick.', 'Network › Geteilt (shared) shows all pools and shared tables at a glance.');
+    await t.goto('/admin/network/geteilt');
+    await t.ring('main .us-main', 2400).catch(() => {});
     await t.step('Befehle für Sicherungen: pool:backup und shared:backup (siehe Technische Dokumentation › Geteilte Datentabellen).', 'Backup commands: pool:backup and shared:backup (see technical documentation › shared data tables).', 2600);
   },
   cleanup: dropPool,
@@ -834,22 +900,31 @@ add({
 add({
   slug: 'n-ki', title: 'KI einrichten (Ollama, whisper.cpp, Datenschutz)', account: 'network',
   async run(t) {
+    const sec = (label) => t.page.locator('#panel-ki details > summary', { hasText: label }).first();
+    const scrollTo = async (loc) => { await loc.evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'smooth' })); await t.wait(900); };
     await t.goto('/admin/system#ki');
     await t.click('main [role=tab]:has-text("KI")', { after: 1200 });
-    await t.step('Grundeinstellungen › KI: je Website einschalten und Fähigkeiten wählen – Texte, Bilder, Suche, Untertitel.', 'Grundeinstellungen › KI: switch on per website and choose capabilities – text, images, search, captions.');
-    await t.ring('main [role=tabpanel]:visible h3 >> nth=0', 1600).catch(() => {});
-    await t.step('Tageslimit, Hinweise zu Zielgruppe und Stil sowie ein Glossar steuern den Assistenten.', 'A daily limit, notes on audience and style, and a glossary steer the assistant.');
-    await t.hover(t.page.getByLabel('Hinweise für die KI (Zielgruppe, Anrede, Stil)'), 1600);
-    await t.step('„Fähigkeiten“: Anbieter und Modell legt die Agentur in der Konfiguration fest – z. B. Ollama und whisper.cpp.', '“Fähigkeiten” (capabilities): provider and model are set by the agency in the configuration – e.g. Ollama and whisper.cpp.');
-    const table = t.page.locator('main [role=tabpanel]:visible table').first();
-    await table.scrollIntoViewIfNeeded();
+    await t.step('System › Grundeinstellungen › KI: die Übersicht je Zweck – Texte, Besucher-Chat, Suche, Alt-Texte, Untertitel – mit Verbindung und Modell.', 'System › Grundeinstellungen › KI: the overview per purpose – texts, visitor chat, search, alt texts, captions – with connection and model.');
+    const table = t.page.locator('#panel-ki table').first();
     await t.ring(table, 2000);
     t.poster();
-    await t.step('„Bleibt auf dem Server“: Mit lokalen Modellen verlassen Inhalte das Haus nicht. Externe Dienste sind gekennzeichnet.', '“Bleibt auf dem Server” (stays on the server): with local models content never leaves your premises. External services are marked.');
+    await t.step('„Bleibt auf dem Server“: Mit lokalen Modellen (z. B. Ollama, whisper.cpp) verlassen Inhalte das Haus nicht. Externe Dienste sind gekennzeichnet.', '“Bleibt auf dem Server” (stays on the server): with local models (e.g. Ollama, whisper.cpp) content never leaves your premises. External services are marked.');
     await t.cut(async () => {
       await t.click(table.locator('button:has-text("Verbindung testen")').first(), { after: 300 });
       await t.wait(4000);
     });
+    await t.step('„Verbindungen“ und „Verwendung“: Anbieter für die ganze Installation – je Zweck eine Verbindung und ein Modell, auf Wunsch mit Ersatz.', '“Verbindungen” (connections) and “Verwendung” (usage): providers for the whole installation – one connection and model per purpose, optionally with a fallback.');
+    await scrollTo(sec('Verbindungen'));
+    await t.wait(1200);
+    await scrollTo(sec('Verwendung'));
+    await t.wait(1200);
+    await t.step('„Diese Website“: KI und einzelne Fähigkeiten an- oder abschalten. Tageslimit, Hinweise zu Zielgruppe und Stil sowie ein Glossar steuern den Assistenten.', '“Diese Website” (this website): switch AI and single capabilities on or off. A daily limit, notes on audience and style and a glossary steer the assistant.');
+    await scrollTo(sec('Diese Website'));
+    await t.wait(1000);
+    await t.click(sec('KI-Assistent der Redaktion'), { after: 900 });
+    await t.hover(t.page.getByLabel('Hinweise für die KI (Zielgruppe, Anrede, Stil)'), 1600).catch(() => {});
+    await t.step('„Datenschutz“ zeigt, wohin Daten gehen – und den Text für die Datenschutzerklärung.', '“Datenschutz” (privacy) shows where data goes – and the text for the privacy policy.');
+    await t.click(sec('Datenschutz'), { after: 1600 });
     await t.step('Konfiguration und Befehle (ai:test, search:index) stehen in der Technischen Dokumentation › KLXM AI.', 'Configuration and commands (ai:test, search:index) are in the technical documentation › KLXM AI.');
     await t.goto('/admin/hilfe/technik#ki');
     await t.wait(900);
@@ -861,14 +936,17 @@ add({
   slug: 'n-staging-deploy', title: 'Staging & Deploy', account: 'network',
   async run(t) {
     await t.goto('/admin/network');
+    await t.page.locator('#websites').evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    await t.wait(900);
     await t.step('Staging ist eine eigene Installation mit Kopie der Live-Inhalte. Das Netzwerk zeigt, was nicht live ist.', 'Staging is a separate installation with a copy of the live content. The network shows what is not live.');
-    await t.click('main [role=group][aria-label="Filter"] button:has-text("Nicht live")', { after: 1600 });
-    await t.click('main [role=group][aria-label="Filter"] button:has-text("Alle")', { after: 900 });
-    await t.step('Vor Eingriffen: „Wartung ▾“ – Sicherung jetzt, Wartungsmodus, Seiten-Cache leeren.', 'Before interventions: “Wartung ▾” – backup now, maintenance mode, clear page cache.');
-    await t.click(t.page.locator('main article summary:has-text("Wartung")').first(), { after: 1800 });
+    await t.click('main [role=group][aria-label="Filter"] button:has-text("Nicht live")', { after: 1800 });
+    const card = t.page.locator('#site-kunde');
+    await t.step('Vor Eingriffen: „⋯“ – Wartungsmodus, Testumgebung (staging), Sicherung jetzt, Seiten-Cache leeren.', 'Before interventions: “⋯” – maintenance mode, test environment (staging), backup now, clear page cache.');
+    await t.click(card.locator('summary[aria-label^="Weitere Aktionen"]'), { after: 2000 });
     t.poster();
-    await t.page.keyboard.press('Escape');
-    await t.click(t.page.locator('main article summary:has-text("Wartung")').first(), { after: 600 });
+    // Menü wieder schließen (nur wenn noch offen)
+    if (await card.locator('details:has(> summary[aria-label^="Weitere Aktionen"])').evaluate((d) => d.open).catch(() => false)) await t.click(card.locator('summary[aria-label^="Weitere Aktionen"]'), { after: 400 });
+    await t.click('main [role=group][aria-label="Filter"] button:has-text("Alle")', { after: 900 });
     await t.step('Gesundheitsprüfung für Deploys: /health antwortet ohne Geheimnisse (ok, Version, Umgebung).', 'Health check for deploys: /health answers without secrets (ok, version, environment).');
     await t.goto('/health');
     await t.wait(2000);
@@ -950,7 +1028,7 @@ add({
 add({
   slug: 'a-quellen', title: 'Externe Quellen anbinden', account: 'demo',
   async run(t) {
-    await dryRun(t, /^\/admin\/quellen\/\d+(\/.*)?$/, (req) => /(^|&|\b)do=preview\b|name="do"\r?\n\r?\npreview/.test(req.postData() || ''));   // Speichern/Abrufen nur zeigen – „Vorschau & Test“ speichert nichts
+    await dryRun(t, /^\/admin\/quellen\/\d+(\/.*)?$/, (req) => /(^|&|\b)do=(preview|dryrun)\b|name="do"\r?\n\r?\n(preview|dryrun)/.test(req.postData() || ''));   // Speichern/Abrufen nur zeigen – Vorschau und Probeabruf speichern nichts
     await t.goto('/admin/quellen');
     await t.step('Daten › Externe Quellen: RSS-Feeds, JSON-APIs, XML und OpenImmo als Einträge einer Datentabelle.', 'Data › Externe Quellen (external sources): RSS feeds, JSON APIs, XML and OpenImmo as entries of a data table.');
     await t.ring('main table, main .src-list', 1800).catch(() => {});
@@ -959,7 +1037,7 @@ add({
     await t.hover('main a[href*="preset=rss"] >> nth=1', 700);
     await t.hover('main a[href*="preset=openimmo"] >> nth=0', 900);
     await t.step('Das Beispiel „Immobilien“ liest eine OpenImmo-Datei aus einer Makler-Software.', 'The example “Immobilien” (real estate) reads an OpenImmo file from estate-agent software.');
-    await t.click('main a[href$="/admin/quellen/3"]:has-text("Bearbeiten")', { after: 1400 });
+    await t.click(t.page.locator('main a[href*="/admin/quellen/"]', { hasText: /Immobilien|Bearbeiten/ }).first(), { after: 1400 });
     await t.step('Quelle: Name, Format und Adresse – oder die Datei rechts hochladen. Anmeldedaten werden verschlüsselt gespeichert.', 'Source: name, format and address – or upload the file on the right. Credentials are stored encrypted.');
     await t.ring('main form section >> nth=0', 1800).catch(() => {});
     await t.step('Abruf: Zeitplan, Zwischenspeicher und was mit Einträgen geschieht, die in der Quelle fehlen.', 'Fetching: schedule, cache and what happens to entries missing from the source.');
@@ -970,13 +1048,16 @@ add({
     await t.wait(1200);
     await t.scroll(420, 1600);
     t.poster();
-    await t.step('„Vorschau & Test“ zeigt die ersten Einträge so, wie sie in der Tabelle ankämen – ohne zu speichern.', '“Vorschau & Test” (preview & test) shows the first entries as they would arrive in the table – without saving.');
-    await t.click('main button:has-text("Vorschau & Test")', { after: 2000 });
-    await t.ring('main [class*=preview], main table >> nth=0', 1800).catch(() => {});
-    await t.step('Rechts: Stand, „Jetzt abrufen“ und das Protokoll der letzten Abrufe.', 'On the right: status, “Jetzt abrufen” (fetch now) and the log of recent fetches.');
+    await t.step('„Probeabruf“ zeigt die ersten Einträge so, wie sie in der Tabelle ankämen – ohne zu speichern.', '“Probeabruf” (test fetch) shows the first entries as they would arrive in the table – without saving.');
+    await t.click('main button[value="dryrun"]', { after: 2000 });
+    await t.page.locator('main h3:has-text("Probeabruf")').first().evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'smooth' })).catch(() => {});
+    await t.wait(1200);
+    await t.step('Rechts: Stand, OpenImmo-Datei hochladen und das Protokoll der letzten Abrufe. In der Liste der Quellen: „Jetzt abrufen“.', 'On the right: status, OpenImmo file upload and the log of recent fetches. In the list of sources: “Jetzt abrufen” (fetch now).');
     await t.page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
     await t.wait(900);
-    await t.hover('main button:has-text("Jetzt abrufen")', 1200);
+    await t.ring('main section:has(h2:has-text("Stand")), main :is(div,aside):has(> h2:has-text("Stand"))', 1400).catch(() => {});
+    await t.goto('/admin/quellen');
+    await t.hover('main button:has-text("Jetzt abrufen")', 1200).catch(() => {});
     await t.step('Übernommene Einträge stehen in „Immobilien“ – nur lesbar, weil die Quelle sie pflegt.', 'Imported entries are in “Immobilien” – read-only, because the source maintains them.');
     await t.goto('/admin/data/immobilien');
     await t.wait(1600);
@@ -988,13 +1069,15 @@ add({
   async run(t) {
     await dryRun(t, /./);   // alle schreibenden Anfragen abfangen: Einstellungen und Einwilligungen nur zeigen
     await t.goto('/admin/consent');
-    await t.step('Cookie-Einwilligung (Erweiterung Consent Kit): Ohne einwilligungspflichtige Dienste gibt es keinen Hinweis – cookiefrei ab Werk.', 'Cookie consent (Consent Kit extension): without services that need consent there is no notice – cookie-free out of the box.');
+    await t.step('System › Einstellungen der Funktionen › Cookie-Einwilligung (Erweiterung Consent Kit): links Dienste, Einstellungen, Design, Protokoll und eigene Vorlagen.', 'System › Einstellungen der Funktionen (feature settings) › Cookie-Einwilligung (Consent Kit extension): on the left services, settings, design, log and own templates.');
+    await t.ring('main nav.adm-secnav', 1600).catch(() => {});
+    await t.step('Ohne einwilligungspflichtige Dienste gibt es keinen Hinweis – cookiefrei ab Werk.', 'Without services that need consent there is no notice – cookie-free out of the box.');
     await t.step('Dienste: z. B. Statistik (Matomo) oder externe Medien (YouTube) – je Domain an- und abschaltbar.', 'Services: e.g. statistics (Matomo) or external media (YouTube) – switchable per domain.');
     await t.ring('main table >> nth=0', 1800).catch(() => {});
     await t.step('„Dienst hinzufügen“: Vorlagen mit Anbieter, Zweck, Cookies und Datenschutz-Link.', '“Dienst hinzufügen” (add service): templates with provider, purpose, cookies and privacy link.');
     await t.click('main a[href$="/admin/consent/templates"]', { after: 1600 });
     await t.scroll(300, 1400);
-    await t.step('Design: Farben kommen aus dem Design der Website. Vorschau als Box, Leiste oder Dialog – hell und dunkel.', 'Design: colours come from the website design. Preview as box, bar or dialog – light and dark.');
+    await t.step('Design: Farben kommen aus dem Design der Website. Vorschau als Box, Leiste, Dialog oder Off-Canvas – hell und dunkel.', 'Design: colours come from the website design. Preview as box, bar, dialog or off-canvas – light and dark.');
     await t.goto('/admin/consent/design');
     const pv = (label) => t.page.locator('main button', { hasText: new RegExp('^' + label + '$') }).first();
     await t.click(pv('Leiste'), { after: 1200 });
@@ -1100,7 +1183,7 @@ add({
   },
 });
 
-/** Ausgabe von „php bin/console kit:create kanzlei“ (Testkopie, 25.09.2026) */
+/** Ausgabe von „php bin/console kit:create kanzlei“ (Testkopie, 15.10.2026) */
 const KIT_CREATE = `Kit „kanzlei“ angelegt – Kopie von „starter“, Präfix starter_ → kanzlei_
   kits/kanzlei/          theme.php, Blöcke, Templates, Fragmente, Startinhalte, lang/, tools/
   kits/kanzlei/assets/   CSS/JS-Quellen
@@ -1109,9 +1192,10 @@ const KIT_CREATE = `Kit „kanzlei“ angelegt – Kopie von „starter“, Prä
 Nächste Schritte:
   1. kits/kanzlei/theme.php öffnen: label, description, version; Farben in § 6 und assets/css/_tokens.css
   2. Bauen:      cd tools && pnpm run build
-  3. Testen:     php bin/console site:create <key> <domain> kanzlei
-  4. Prüfen:     php bin/console health --site=<key> · php kits/kanzlei/tools/contrast.php
-  Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“`;
+  3. Testen:     php bin/console site:create <key> <domain> kanzlei   (oder Verwaltung → Grundeinstellungen → Aktives Kit)
+  4. Prüfen:     php bin/console health --site=<key> · php kits/kanzlei/tools/contrast.php (falls vorhanden)
+                 php bin/console i18n:missing en --site-texts --site=<key> · node tools/licenses.mjs
+  Anleitung:    Verwaltung → Hilfe → Technik → Kits & Design → „Eigenes Kit entwickeln“; kits/kanzlei/README.md`;
 
 /** Terminal-Karte (nur in der Aufnahme): Befehl wird getippt, dann erscheint die Ausgabe */
 const terminalHtml = (cmd, lines) => {
@@ -1152,7 +1236,10 @@ add({
     await t.step('„Daten“, „Medien“, „Anfragen“ … wie am Computer. Favoriten stehen ganz oben.', '“Daten”, “Medien”, “Anfragen” … just like on a computer. Favourites are at the top.');
     await t.click('#adm-mainnav a[href$="/admin/data"]', { after: 1600 });
     await t.step('Die Lupe oben rechts öffnet die Suche – Seiten, Einträge, Medien und Einstellungen.', 'The magnifier at the top right opens search – pages, entries, media and settings.');
-    await t.click('.adm-top__search', { after: 900 });
+    await t.click('.adm-top__search', { after: 600 });
+    // erst tippen, wenn das Suchfeld den Fokus hat (sonst landet der erste Buchstabe vor dem Öffnen im Feld und wird geleert)
+    await t.page.waitForFunction(() => document.activeElement?.matches?.('input[type=search]'), null, { timeout: 5000 }).catch(() => {});
+    await t.wait(400);
     await t.page.keyboard.type('Kontakt', { delay: 120 });
     await t.wait(2000);
     await t.page.keyboard.press('Escape');
@@ -1203,20 +1290,21 @@ add({
 add({
   slug: 'r-anfragen-mobil', title: 'Anfragen auf dem Smartphone lesen', account: 'praxis', mobile: true,
   async run(t, s) {
+    const read = 'main article.rq-read:visible';
     await t.goto('/admin');
     await t.step('Neue Anfragen zeigt die Übersicht ganz oben – antippen öffnet den Posteingang.', 'The dashboard shows new requests at the top – tap to open the inbox.');
-    await t.click('main a[href$="/admin/requests"]', { after: 1600 });
+    await t.click('main a[href*="/admin/requests"]', { after: 1600 });
     await t.step('Anfragen lassen sich auch am Smartphone lesen – Schlüssel aus dem Passwortmanager einfügen.', 'Requests can be read on a smartphone too – paste the key from your password manager.');
     await t.click('#secret', { after: 200 });
     await t.page.fill('#secret', t.acc.requestKey || '');
-    await t.click('form.adm-unlock button[type=submit]', { after: 1800 });
+    await t.click('form.rq-unlock button', { after: 1800 });
     t.poster();
-    await t.step('Die Angaben stehen untereinander; darunter Drucken, Kopieren und der Status.', 'The details are listed one below the other; below them print, copy and the status.');
-    await t.page.locator('main article').first().scrollIntoViewIfNeeded();
-    await t.wait(1500);
+    await t.step('Die Angaben stehen untereinander; oben Status, Drucken und Kopieren, „‹ Neu“ führt zurück zur Liste.', 'The details are listed one below the other; status, print and copy at the top, “‹ Neu” leads back to the list.');
+    await t.wait(1200);
     await t.scroll(260, 2000);
+    await t.scroll(-260, 800);
     await t.step('Status setzen: „In Bearbeitung“ – so sehen alle, dass sich jemand kümmert.', 'Set the status: “In Bearbeitung” (in progress) – so everyone sees someone is on it.');
-    const form = t.page.locator('main article form:has(button:has-text("In Bearbeitung"))').first();
+    const form = t.page.locator(`${read} form:has(button:has-text("In Bearbeitung"))`).first();
     s.statusUrl = await form.getAttribute('action');
     await t.click(form.locator('button'), { after: 1800 });
     await t.step('Nach dem Neuladen ist alles wieder verschlossen – der Schlüssel wird nie gespeichert.', 'After reloading everything is locked again – the key is never stored.', 2400);

@@ -3,5 +3,6 @@
   "praxis": { "url": "http://127.0.0.1:8089", "email": "admin@example.test", "password": "…", "requestKey": "Schlüssel der Testkopie für Anfragen (optional)" },
   "demo": { "url": "http://demo.localhost:8089", "email": "demo@example.test", "password": "…" },
   "fluid": { "url": "http://fluid.localhost:8089", "email": "admin@fluid.test", "password": "…" },
-  "network": { "url": "http://127.0.0.1:8089", "email": "netzwerk@example.test", "password": "…", "root": "/pfad/zur/testkopie (optional, zum Aufräumen von n-website-anlegen)" }
+  "network": { "url": "http://127.0.0.1:8089", "email": "netzwerk@example.test", "password": "…", "totp": "Base32-Geheimnis der Authenticator-App (Netzwerk-Konten haben immer 2FA; ohne: Öffnen/SSO scheitert)", "root": "/pfad/zur/testkopie (optional, zum Aufräumen von n-website-anlegen)" },
+  "starter": { "url": "http://starter.localhost:8089", "email": "admin@starter.test", "password": "…" }
 }
