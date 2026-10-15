@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PDF-Viewer für Erweiterungen
+- `PdfController::file($url, $name, …)`: der PDF-Viewer des Kerns für beliebige PDF-Adressen derselben Website (z. B. geschützte PDFs der AVV-Erweiterung), gleiche CSP, immer privat.
+
 ### Style-Editor neu geordnet
 - Bereichsliste links wie in den Grundeinstellungen (auf dem Handy ein Auswahlfeld), Kontrast und Vorschau oben. Vorlagen und eigene Designs in einem eigenen Bereich als Karten mit Schriftprobe, Farben, Knopffarbe, Branche und Beschreibung – statt der langen Liste über allen Einstellungen.
 

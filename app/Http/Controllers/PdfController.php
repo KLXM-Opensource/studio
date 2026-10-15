@@ -47,17 +47,35 @@ final class PdfController
         return (new Response($html))
             ->header('Cache-Control', $private ? 'private, no-store' : 'public, max-age=300')
             ->header('X-Robots-Tag', 'noindex')
-            ->header('Content-Security-Policy', implode('; ', [
-                "default-src 'self'",
-                "script-src 'self' 'wasm-unsafe-eval'",   // PDF.js-Bilddecoder (WebAssembly)
-                "worker-src 'self' blob:",
-                "style-src 'self'",
-                "img-src 'self' data: blob:",
-                "font-src 'self' data: blob:",
-                "connect-src 'self'",
-                "object-src 'none'",
-                "base-uri 'self'",
-                "frame-ancestors 'self'",
-            ]));
+            ->header('Content-Security-Policy', self::csp());
+    }
+
+    /** CSP des Viewers (PDF.js braucht WebAssembly und Worker) */
+    private static function csp(): string
+    {
+        return implode('; ', [
+            "default-src 'self'",
+            "script-src 'self' 'wasm-unsafe-eval'",   // PDF.js-Bilddecoder (WebAssembly)
+            "worker-src 'self' blob:",
+            "style-src 'self'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data: blob:",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "frame-ancestors 'self'",
+        ]);
+    }
+
+    /**
+     * Viewer für eine beliebige PDF-Adresse derselben Website – für Dateien außerhalb der Mediathek, z. B. geschützte PDFs
+     * einer Erweiterung (Zugriff prüft der Aufrufer, die Adresse liefert die Datei mit denselben Cookies). Immer privat.
+     * Beispiel: return PdfController::file(url('/admin/x/5/pdf?inline=1'), 'Vertrag.pdf', filesize($p), null, url('/admin/x/5'));
+     */
+    public static function file(string $url, string $name, int $size = 0, ?int $pages = null, ?string $back = null): Response
+    {
+        $html = Theme::capture(ROOT . '/app/Views/pdf-viewer.php', ['m' => null, 'file' => ['url' => $url, 'name' => $name, 'size' => $size, 'pages' => $pages],
+            'embed' => false, 'mini' => false, 'modal' => false, 'back' => $back]);
+        return (new Response($html))->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex')->header('Content-Security-Policy', self::csp());
     }
 }

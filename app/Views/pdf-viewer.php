@@ -1,9 +1,19 @@
 <?php
-/** PDF-Viewer (PDF.js). @var array $m  @var bool $embed  @var bool $mini (?embed=mini: nur Blättern)  @var bool $modal (?embed=modal: im Modal der Website, mit Schließen) */
+/**
+ * PDF-Viewer (PDF.js). @var ?array $m  @var bool $embed  @var bool $mini (?embed=mini: nur Blättern)  @var bool $modal (?embed=modal: im Modal der Website, mit Schließen)
+ * @var ?array $file  statt Mediathek-Datei (PdfController::file – z. B. geschützte PDFs einer Erweiterung): url, name, size, pages, back
+ */
 use Core\Media;
-$name = Media::displayName($m);
-$pages = Media::pages($m);
-$fileUrl = Media::url($m);
+if (!empty($file)) {
+    $name = (string) $file['name'];
+    $pages = isset($file['pages']) ? (int) $file['pages'] : null;
+    $fileUrl = (string) $file['url'];
+    $m = ['size' => (int) ($file['size'] ?? 0)];
+} else {
+    $name = Media::displayName($m);
+    $pages = Media::pages($m);
+    $fileUrl = Media::url($m);
+}
 ?><!doctype html>
 <html lang="de">
 <head>
