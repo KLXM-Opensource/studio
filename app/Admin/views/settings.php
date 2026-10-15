@@ -38,7 +38,7 @@ $groupIcon = function (array $g): string {
   <div class="adm-tabs" role="tablist" aria-label="<?= e(__('Bereiche')) ?>">
     <?php foreach ($groups as $i => $g): ?>
     <button type="button" role="tab" id="tab-<?= e($g['id']) ?>" aria-controls="panel-<?= e($g['id']) ?>" data-tab="<?= e($g['id']) ?>"
-      aria-selected="<?= $i === 0 ? 'true' : 'false' ?>"<?= $i === 0 ? '' : ' tabindex="-1"' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($groupIcon($g)) ?></span><span class="adm-tabs__label"><?= e($g['label']) ?></span><?= $groupHasError($g) ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e(__('Fehler')) . '</span>' : '' ?></button>
+      aria-selected="<?= $i === 0 ? 'true' : 'false' ?>"<?= $i === 0 ? '' : ' tabindex="-1"' ?><?= $groupHasError($g) ? ' data-tab-error' : '' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($groupIcon($g)) ?></span><span class="adm-tabs__label"><?= e($g['label']) ?></span><?= $groupHasError($g) ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e(__('Fehler')) . '</span>' : '' ?></button>
     <?php endforeach; ?>
   </div>
   <div class="ds-top">

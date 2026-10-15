@@ -198,6 +198,7 @@ $$('[data-tabs]').forEach(form => {
       select(tabs[to].dataset.tab, true);
     });
   });
+  const fromHash = () => {
   const hash = location.hash.slice(1);
   if (hash && tabs.some(t => t.dataset.tab === hash)) select(hash);
   else if (hash) {
@@ -210,9 +211,14 @@ $$('[data-tabs]').forEach(form => {
       requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }));
     }
   }
+  };
+  fromHash();
+  // Sprung innerhalb der Seite (Link auf #bereich bzw. #element): Bereich wechseln, ohne neu zu laden
+  addEventListener('hashchange', fromHash);
+
   // Beim Absenden: ersten Reiter mit Fehler öffnen
   // … und das erste fehlerhafte Feld zeigen (sonst wirkt es, als sei man nur im falschen Reiter gelandet)
-  const errTab = tabs.find(t => $('.adm-dot', t));
+  const errTab = tabs.find(t => t.hasAttribute('data-tab-error') || $('.adm-dot', t));
   if (errTab) {
     select(errTab.dataset.tab);
     const panel = d.getElementById(errTab.getAttribute('aria-controls'));

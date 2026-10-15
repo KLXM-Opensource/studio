@@ -7,7 +7,12 @@ $pendingEmail ??= null;
 $isShadow = !empty($user['network_uid']);
 ?>
 <header class="adm-head"><div><p class="adm-eyebrow"><?= e(__('Konto')) ?></p><h1><?= e(__('Mein Konto')) ?></h1><p class="adm-muted"><?= e($user['email']) ?> · <?= e(app()->auth->role()['name'] ?? '') ?></p></div></header>
-<div class="set-page acc-page">
+<?php
+// Bereiche wie die Systemeinstellungen (Core\AdminUi::tabs): Inhalte sammeln und am Ende in Bereiche setzen; $sw wechselt den Bereich
+$buf = []; $cur = 'profil';
+$sw = function (string $k) use (&$buf, &$cur): void { $buf[$cur] = ($buf[$cur] ?? '') . ob_get_clean(); $cur = $k; ob_start(); };
+ob_start();
+?>
 <?php $hasAva = \Core\Avatar::version($user) > 0; // Profilbild (Core\Avatar) – für alle Konten, Netzwerk-Konten auf allen Websites ?>
 <form class="set-group acc-group" id="profilbild" method="post" action="<?= e(url('/admin/account/avatar')) ?>" enctype="multipart/form-data">
   <?= csrf_field() ?>
@@ -24,6 +29,7 @@ $isShadow = !empty($user['network_uid']);
     </div>
   </div></div>
 </form>
+<?php $sw('sicherheit'); ?>
 <?php if ($isShadow): // Schatten-Konto der Netzwerk-Administration: Anmeldedaten zentral ?>
 <section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
   <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-net"><?= e(__('Netzwerk')) ?></span></h2>
@@ -107,6 +113,7 @@ $isShadow = !empty($user['network_uid']);
   </div>
 </section>
 
+<?php $sw('profil'); ?>
 <form class="set-group acc-group" id="profil" method="post" action="<?= e(url('/admin/account/profile')) ?>">
   <?= csrf_field() ?>
   <h2 class="set-group__title"><?= e(__('Profil')) ?></h2>
@@ -117,6 +124,7 @@ $isShadow = !empty($user['network_uid']);
   </div>
 </form>
 <?php endif; ?>
+<?php $sw('darstellung'); ?>
 <form class="set-group acc-group" method="post" action="<?= e(url('/admin/account/locale')) ?>">
   <?= csrf_field() ?>
   <h2 class="set-group__title"><?= e(__('Darstellung & Sprache')) ?></h2>
@@ -131,7 +139,9 @@ $isShadow = !empty($user['network_uid']);
   </div>
 </form>
 <?php include __DIR__ . '/account/_accent.php'; // Akzentfarbe der Verwaltung (Core\Accent) ?>
+<?php $sw('mitteilungen'); ?>
 <?php include __DIR__ . '/account/_push.php'; // Push-Benachrichtigungen (Core\Push): Gerät, Ereignisse, Geräteliste ?>
+<?php $sw('sicherheit'); ?>
 <?php if ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>
 <?php else: $tfRow = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]); $tfOn = (int) ($tfRow['totp_enabled'] ?? 0);
   // Pflicht (Core\Mfa): App nicht abschaltbar, wenn die Pflicht sonst nicht erfüllt wäre (z. B. kein Passkey)
@@ -159,6 +169,7 @@ $isShadow = !empty($user['network_uid']);
 <?php endif; ?>
 <?php include __DIR__ . '/twofactor/_passkeys.php'; ?>
 <?php endif; ?>
+<?php $sw('favoriten'); ?>
 <?php $favs = \Core\Favorites::all((int) $user['id']); $fe = url('/admin/api/favorites'); ?>
 <section class="set-group acc-group" id="favoriten" aria-labelledby="fav-h">
   <h2 class="set-group__title" id="fav-h"><?= e(__('Favoriten')) ?></h2>
@@ -186,5 +197,16 @@ $isShadow = !empty($user['network_uid']);
   <?php endif; ?>
   </div>
 </section>
+<?php $sw('erweiterungen'); ?>
 <?= /* Erweiterungen (Extension::account, Core\Slots): eigene Abschnitte – escaped vom Core */ \Core\Extensions::accountSections((array) ($user ?? app()->auth->user() ?? [])) ?>
-</div>
+<?php
+$sw('');
+$secs = ['profil' => [__('Profil'), 'user-circle'], 'sicherheit' => [__('Anmeldung & Sicherheit'), 'shield-check'], 'darstellung' => [__('Darstellung'), 'paint-brush'],
+    'mitteilungen' => [__('Mitteilungen'), 'bell-ringing'], 'favoriten' => [__('Favoriten'), 'star'], 'erweiterungen' => [__('Weitere'), 'puzzle-piece']];
+$sections = [];
+foreach ($secs as $k => [$label, $ico]) {
+    if (trim(strip_tags((string) ($buf[$k] ?? ''), '<form><input><section><button><select><a>')) === '') continue;   // leere Bereiche (z. B. ohne Mitteilungen) weglassen
+    $sections[$k] = ['label' => $label, 'icon' => $ico, 'html' => '<div class="set-page acc-page">' . $buf[$k] . '</div>'];
+}
+echo \Core\AdminUi::tabs($sections, [], __('Konto'));
+?>

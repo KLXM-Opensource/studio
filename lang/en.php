@@ -7646,4 +7646,5 @@ return [
     'Vorlagen & eigene Designs' => 'Templates & own designs',
     'Vorlagen des Kits' => 'Kit templates',
     'Laptop' => 'Laptop',
+    'Weitere' => 'More',
 ];
