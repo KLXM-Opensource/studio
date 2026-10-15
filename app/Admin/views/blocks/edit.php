@@ -233,8 +233,9 @@ $cfg = [
   <header class="st-pv__bar">
     <strong><?= e(__('Vorschau')) ?></strong>
     <div class="fx-seg" role="group" aria-label="<?= e(__('Gerät')) ?>">
-      <button type="button" data-st-device="desktop" aria-pressed="true"><?= e(__('Desktop')) ?></button>
-      <button type="button" data-st-device="mobile" aria-pressed="false"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="mobile" aria-pressed="false" title="390 px"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="desktop" aria-pressed="true" title="1280 px"><?= e(__('Laptop')) ?></button>
+      <button type="button" data-st-device="wide" aria-pressed="false" title="1920 px"><?= e(__('Groß')) ?></button>
     </div>
     <label class="adm-sr" for="cb-pv-bg"><?= e(__('Hintergrund')) ?></label>
     <select id="cb-pv-bg" class="ds-pvpage" data-cb-pvbg><option value=""><?= e(__('Hintergrund: Standard')) ?></option>

@@ -54,8 +54,9 @@ $groupHasError = function (array $g) use ($errors) {
     <strong><?= e(__('Vorschau')) ?></strong>
     <span class="st-pv__single" data-st-single hidden><?= e(__('Nur dieser Eintrag')) ?> · <button type="button" class="adm-link" data-st-all><?= e(__('Alle zeigen')) ?></button></span>
     <div class="fx-seg" role="group" aria-label="<?= e(__('Gerät')) ?>">
-      <button type="button" data-st-device="desktop" aria-pressed="true"><?= e(__('Desktop')) ?></button>
-      <button type="button" data-st-device="mobile" aria-pressed="false"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="mobile" aria-pressed="false" title="390 px"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="desktop" aria-pressed="true" title="1280 px"><?= e(__('Laptop')) ?></button>
+      <button type="button" data-st-device="wide" aria-pressed="false" title="1920 px"><?= e(__('Groß')) ?></button>
     </div>
     <span class="st-pv__state" data-st-state aria-live="polite"></span>
   </header>

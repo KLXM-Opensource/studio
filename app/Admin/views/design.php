@@ -240,8 +240,9 @@ $thumbNav = function (string $k) use ($navAlias) {
       <?php foreach ($pages as $p): ?><option value="<?= $p['home'] ? '' : (int) $p['id'] ?>"<?= $p['home'] ? ' selected' : '' ?>><?= $p['sample'] ? e(__('Muster')) . ' – ' : '' ?><?= str_repeat('– ', $p['sample'] ? 0 : $p['depth']) ?><?= e($p['title']) ?><?= $p['home'] ? ' (' . e(__('Startseite')) . ')' : '' ?></option><?php endforeach; ?>
     </select>
     <div class="fx-seg" role="group" aria-label="<?= e(__('Gerät')) ?>">
-      <button type="button" data-st-device="desktop" aria-pressed="true"><?= e(__('Desktop')) ?></button>
-      <button type="button" data-st-device="mobile" aria-pressed="false"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="mobile" aria-pressed="false" title="390 px"><?= e(__('Mobil')) ?></button>
+      <button type="button" data-st-device="desktop" aria-pressed="true" title="1280 px"><?= e(__('Laptop')) ?></button>
+      <button type="button" data-st-device="wide" aria-pressed="false" title="1920 px"><?= e(__('Groß')) ?></button>
     </div>
     <?php if ($hasDark): ?>
     <div class="fx-seg" role="group" aria-label="<?= e(__('Farbschema')) ?>">

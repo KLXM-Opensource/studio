@@ -1,6 +1,6 @@
 /*
  * Live-Vorschau-Panel (Einstellungen, Design): rechts eine skalierte Website im iframe (srcdoc),
- * Desktop/Mobil, verzögertes Neuladen bei Eingaben. Markup: .st-pv mit [data-st-frame], [data-st-stage], [data-st-state],
+ * Mobil/Laptop/Groß (390 · 1280 · 1920 px, verkleinert dargestellt), verzögertes Neuladen bei Eingaben. Markup: .st-pv mit [data-st-frame], [data-st-stage], [data-st-state],
  * Umschalter [data-st-pvtoggle], Geräte [data-st-device]. Der Endpunkt liefert {ok, html} (+ beliebige Zusatzdaten).
  */
 import { t } from './_i18n.js';
@@ -31,13 +31,15 @@ export function livePreview({ wrap, endpoint, body, key = 'st', onData, openDefa
   const st = store(key);
   let timer = null, seq = 0, device = st.get('device', 'desktop');
 
+  // Drei Stufen: Mobil, Laptop (desktop – Schlüssel bleibt für gespeicherte Wahl), Großer Bildschirm (dort passt auch ein langes Kopfmenü)
+  const SIZES = { mobile: [390, 844], desktop: [1280, 800], wide: [1920, 1080] };
   const fit = () => {
-    const w = device === 'mobile' ? 390 : 1280;
+    const [w, h] = SIZES[device] || SIZES.desktop;
     const avail = stage.clientWidth || w;
     const scale = Math.min(1, avail / w);
-    // Höhe wie ein echter Bildschirm (Desktop 1280 × 800, Mobil 390 × 844), höchstens Fensterhöhe – im Vollbild-Blatt per CSS
+    // Höhe wie ein echter Bildschirm, höchstens Fensterhöhe – im Vollbild-Blatt per CSS
     stage.style.height = pane.classList.contains('is-sheet') ? ''
-      : Math.max(260, Math.min(innerHeight - 170, Math.round((device === 'mobile' ? 844 : 800) * scale))) + 'px';
+      : Math.max(260, Math.min(innerHeight - 170, Math.round(h * scale))) + 'px';
     frame.style.width = w + 'px';
     frame.style.height = Math.round((stage.clientHeight || 700) / scale) + 'px';
     frame.style.transform = `scale(${scale})`;

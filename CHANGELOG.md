@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Vorschau in drei Größen
+- Style-Editor, Grundeinstellungen und Block-Designer: Vorschau **Mobil** (390 px), **Laptop** (1280 px) und **Groß** (1920 px) – auf großen Bildschirmen erscheint auch ein langes Kopfmenü in der Leiste.
+
 ### PDF-Viewer für Erweiterungen
 - `PdfController::file($url, $name, …)`: der PDF-Viewer des Kerns für beliebige PDF-Adressen derselben Website (z. B. geschützte PDFs der AVV-Erweiterung), gleiche CSP, immer privat.
 
