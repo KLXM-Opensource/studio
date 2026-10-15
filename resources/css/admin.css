@@ -3683,3 +3683,39 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .adm-imp__t{flex:1 1 280px;font-weight:600;line-height:1.35}
 .adm-imp__t small{display:block;font-weight:400;opacity:.85}
 .adm-imp .adm-btn{background:#fff;color:#3B2A6E;border-color:#fff}
+
+/* ---------- Style-Editor: Bereichsliste (wie Grundeinstellungen), Vorlagen als Karten ---------- */
+.ds-side__sep{display:block;height:1px;margin:6px 6px;background:var(--adm-line)}
+.ds-side__ico--alt{background:var(--adm-t3)!important}
+.ds-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;margin:0 0 12px}
+.ds-top .ico{width:15px;height:15px}
+.ds-presets__lead{margin:-4px 0 14px}
+.ds-h3{margin:18px 0 10px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--adm-t3)}
+.ds-h3:first-of-type{margin-top:6px}
+.ds-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ds-card-wrap{position:relative;display:grid}
+.ds-pcard{display:flex;flex-direction:column;min-width:0;padding:0;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-card);color:var(--adm-ink);font:inherit;text-align:left;cursor:pointer;overflow:hidden;transition:border-color .12s,box-shadow .12s}
+.ds-pcard:hover{border-color:var(--adm-t3);box-shadow:0 4px 14px -8px rgba(0,0,0,.25)}
+.ds-pcard:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.ds-pcard[aria-pressed=true]{border-color:var(--adm-a);box-shadow:0 0 0 2px var(--adm-a)}
+.ds-pcard__pv{position:relative;display:block;height:84px;border-bottom:1px solid var(--adm-line)}
+.ds-pcard__aa{position:absolute;left:14px;top:10px;font-size:30px;font-weight:700;line-height:1}
+.ds-pcard__btn{position:absolute;left:14px;bottom:14px;width:46px;height:12px;border-radius:999px}
+.ds-pcard__sw{position:absolute;right:10px;top:10px;bottom:10px;display:flex;flex-direction:column;gap:3px;width:18px}
+.ds-pcard__sw i{flex:1;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.ds-pcard__body{display:grid;gap:2px;padding:10px 12px 12px}
+.ds-pcard__branch{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--adm-t3)}
+.ds-pcard__name{font-size:14px;font-weight:700;line-height:1.3}
+.ds-pcard__desc{font-size:12.5px;line-height:1.4;color:var(--adm-t2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ds-pcard--add{align-items:flex-start;justify-content:center;gap:4px;min-height:150px;padding:14px;border-style:dashed;background:none}
+.ds-pcard--add .ds-pcard__name,.ds-pcard--add .ds-pcard__desc{padding:0}
+.ds-pcard__plus{display:grid;place-items:center;width:30px;height:30px;margin-bottom:6px;border-radius:8px;background:var(--adm-fill)}
+.ds-pcard__plus .ico{width:16px;height:16px}
+.ds-card-wrap .ds-mine__del{position:absolute;top:6px;right:6px;margin:0;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:7px;background:rgba(255,255,255,.9);color:var(--adm-err);cursor:pointer;opacity:0;transition:opacity .12s}
+.ds-card-wrap:hover .ds-mine__del,.ds-card-wrap .ds-mine__del:focus-visible{opacity:1}
+.ds-card-wrap .ds-mine__del .ico{width:15px;height:15px}
+@media (hover:none){.ds-card-wrap .ds-mine__del{opacity:1}}
+/* Style-Editor mit Bereichsliste: Vorschau etwas schmaler, damit die Einstellungen Platz haben; Speichern-Leiste in einer Zeile */
+@media (min-width:1101px){.st-layout.ds.has-preview{grid-template-columns:minmax(0,1fr) minmax(320px,34%)}}
+.ds-savebar{gap:8px}
+.ds-savebar [data-ds-reset]{margin-left:auto}

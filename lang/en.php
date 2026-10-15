@@ -7640,4 +7640,9 @@ return [
     '{n} Personen online' => '{n} people online',
     'Auf der Website ansehen' => 'View on website',
     'Auf der Website bearbeiten' => 'Edit on website',
+    'Den jetzigen Stand unter einem Namen sichern, um später zurückzuwechseln.' => 'Save the current state under a name to switch back later.',
+    'Eigenes Design' => 'Own design',
+    'Eine Vorlage füllt alle Einstellungen auf einmal – rechts in der Vorschau sehen Sie das Ergebnis. Online geht es erst mit „Speichern“.' => 'A template fills in all settings at once – the preview on the right shows the result. It only goes live with “Save”.',
+    'Vorlagen & eigene Designs' => 'Templates & own designs',
+    'Vorlagen des Kits' => 'Kit templates',
 ];

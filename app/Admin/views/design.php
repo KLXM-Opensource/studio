@@ -69,6 +69,36 @@ $hasDark = !empty($schema['dark']);
 $navAlias = ['classic' => 'left', 'standard' => 'left', 'default' => 'left', 'klassisch' => 'left', 'centered' => 'center', 'zentriert' => 'center', 'mitte' => 'center',
     'minimal' => 'burger', 'compact' => 'burger', 'kompakt' => 'burger', 'hamburger' => 'burger', 'side' => 'sidebar', 'vertical' => 'sidebar', 'seitlich' => 'sidebar',
     'pill' => 'floating', 'boxed' => 'floating', 'schwebend' => 'floating', 'overlay' => 'transparent', 'transparent' => 'transparent', 'tabbar' => 'bottom', 'unten' => 'bottom', 'geteilt' => 'split'];
+// Symbol je Bereich (Kits benennen ihre Bereiche unterschiedlich – nach Kennung und Bezeichnung)
+$groupIcon = function (array $g): string {
+    $t = mb_strtolower(($g['id'] ?? '') . ' ' . ($g['label'] ?? ''));
+    foreach (['farb' => 'palette', 'typo' => 'text-t', 'schrift' => 'text-t', 'navigation' => 'layout', 'kopf' => 'layout', 'modus' => 'square-half', 'farbschema' => 'square-half',
+        'form' => 'squares-four', 'raster' => 'squares-four', 'bild' => 'image', 'galerie' => 'images', 'hero' => 'flag-banner', 'glas' => 'drop', 'hinweis' => 'megaphone', 'framework' => 'code'] as $k => $ico) {
+        if (str_contains($t, $k)) return $ico;
+    }
+    return 'sliders-horizontal';
+};
+// Karte einer Vorlage: Farbstreifen, Schriftprobe in der Überschriftenschrift, Branche · Name, Beschreibung
+$presetCard = function (string $key, array $p, bool $mine) use ($tokensByName, $schema): string {
+    $vals = (array) ($p['values'] ?? []);
+    $cols = array_values(array_filter($vals, fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains((string) $k, '@'), ARRAY_FILTER_USE_BOTH));
+    $font = '';
+    foreach ($vals as $k => $v) if (($tokensByName[$k]['type'] ?? '') === 'font' && str_contains((string) $k, 'head')) $font = (string) ($schema['fonts'][$v]['stack'] ?? '');
+    if ($font === '') foreach ($vals as $k => $v) if (($tokensByName[$k]['type'] ?? '') === 'font') { $font = (string) ($schema['fonts'][$v]['stack'] ?? ''); break; }
+    $label = (string) $p['label'];
+    [$branch, $name] = str_contains($label, ' · ') ? explode(' · ', $label, 2) : ['', $label];
+    $bg = (string) (\Core\Design::color($vals['background'] ?? '') ?? '#ffffff');
+    $ink = (string) (\Core\Design::color($vals['ink'] ?? '') ?? '#111111');
+    $acc = (string) (\Core\Design::color($vals['accent'] ?? ($cols[0] ?? '')) ?? '#333333');
+    return '<button type="button" class="ds-pcard" data-ds-preset="' . e($key) . '">'
+        . '<span class="ds-pcard__pv" aria-hidden="true" style="background:' . e($bg) . ';color:' . e($ink) . '">'
+        . '<span class="ds-pcard__aa"' . ($font !== '' ? ' style="font-family:' . e($font) . '"' : '') . '>Aa</span>'
+        . '<span class="ds-pcard__btn" style="background:' . e($acc) . '"></span>'
+        . '<span class="ds-pcard__sw">' . implode('', array_map(fn($c) => '<i style="background:' . e((string) \Core\Design::color($c)) . '"></i>', array_slice($cols, 0, 6))) . '</span></span>'
+        . '<span class="ds-pcard__body">' . ($branch !== '' ? '<span class="ds-pcard__branch">' . e($branch) . '</span>' : ($mine ? '<span class="ds-pcard__branch">' . e(__('Eigenes Design')) . '</span>' : ''))
+        . '<span class="ds-pcard__name">' . e($name) . '</span>'
+        . (trim((string) ($p['description'] ?? '')) !== '' ? '<span class="ds-pcard__desc">' . e((string) $p['description']) . '</span>' : '') . '</span></button>';
+};
 $thumbNav = function (string $k) use ($navAlias) {
     $k = strtolower($k);
     $k = $navAlias[$k] ?? (in_array($k, ['left', 'center', 'split', 'burger', 'sidebar', 'floating', 'transparent', 'bottom'], true) ? $k : 'left');
@@ -80,55 +110,48 @@ $thumbNav = function (string $k) use ($navAlias) {
 <?php if (($fontFaces ?? '') !== ''): /* Vorschau noch nicht installierter Kit-Schriften (von der eigenen Domain) */ ?><style><?= $fontFaces ?></style>
 <?php endif; ?>
 <div class="st-layout ds" data-st-preview="<?= e(url('/admin/api/design-preview')) ?>" data-ds data-ds-import="<?= e(url('/admin/api/design-import')) ?>">
-<form method="post" action="<?= e(url('/admin/design')) ?>" class="adm-tabs-form ds-form" id="ds-form" data-tabs data-ds-form novalidate>
+<form method="post" action="<?= e(url('/admin/design')) ?>" class="adm-tabs-form adm-tabs-form--side ds-form" id="ds-form" data-tabs data-ds-form novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="_tab" value="">
 
-  <?php // Eigene Designs: anklicken füllt das Formular (wie eine Vorlage), ✕ löscht, „+“ speichert den Stand des Formulars unter einem Namen ?>
-  <section class="ds-presets ds-mine" aria-labelledby="ds-mine-h">
-    <h2 id="ds-mine-h" class="ds-h"><?= e(__('Eigene Designs')) ?> <small class="adm-muted"><?= e(__('Gespeicherte Stände zum Wechseln – anklicken füllt das Formular, online erst mit „Speichern“.')) ?></small></h2>
-    <div class="ds-presets__list">
-      <?php foreach ($minePresets as $key => $p): $cols = array_values(array_filter($p['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains($k, '@'), ARRAY_FILTER_USE_BOTH)); ?>
-      <span class="ds-mine__item">
-        <button type="button" class="ds-preset" data-ds-preset="<?= e($key) ?>" title="<?= e((string) ($p['description'] ?? '')) ?>">
-          <span class="ds-preset__sw" aria-hidden="true"><?php foreach (array_slice($cols, 0, 5) as $c): ?><i style="background:<?= e((string) \Core\Design::color($c)) ?>"></i><?php endforeach; ?></span>
-          <span class="ds-preset__l"><?= e($p['label']) ?></span>
-        </button>
+  <?php // Bereichsliste wie die Grundeinstellungen (macOS-Systemeinstellungen): Bereiche des Kits, darunter „Vorlagen & eigene Designs" ?>
+  <div class="adm-tabs ds-side" role="tablist" aria-label="<?= e(__('Bereiche')) ?>">
+    <?php foreach ($schema['groups'] as $i => $g): ?>
+    <button type="button" role="tab" id="tab-<?= e($g['id']) ?>" aria-controls="panel-<?= e($g['id']) ?>" data-tab="<?= e($g['id']) ?>"
+      aria-selected="<?= $i === 0 ? 'true' : 'false' ?>"<?= $i === 0 ? '' : ' tabindex="-1"' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($groupIcon($g)) ?></span><span class="adm-tabs__label"><?= e($g['label']) ?></span><span class="ds-tabdot" data-ds-tabdot="<?= e($g['id']) ?>" hidden aria-label="<?= e(__('Kontrastproblem')) ?>"> ●</span></button>
+    <?php endforeach; ?>
+    <span class="ds-side__sep" aria-hidden="true"></span>
+    <button type="button" role="tab" id="tab-vorlagen" aria-controls="panel-vorlagen" data-tab="vorlagen" aria-selected="false" tabindex="-1"><span class="adm-tabs__ico ds-side__ico--alt" aria-hidden="true"><?= icon('paint-brush') ?></span><span class="adm-tabs__label"><?= e(__('Vorlagen & eigene Designs')) ?></span></button>
+  </div>
+
+  <div class="ds-top">
+    <button type="button" class="ds-sum<?= $fails ? ' is-fail' : ' is-ok' ?>" data-ds-summary<?= $checks ? '' : ' hidden' ?>><?= e($fails ? ($fails === 1 ? __('1 Kontrastproblem') : __('{n} Kontrastprobleme', ['n' => $fails])) : __('Kontrast in Ordnung')) ?></button>
+    <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-st-pvtoggle aria-pressed="false"><?= icon('eye') ?> <?= e(__('Vorschau')) ?></button>
+  </div>
+
+  <?php // Vorlagen & eigene Designs: Karten mit Farben, Schriftprobe und Beschreibung – anklicken füllt das Formular (gespeichert erst mit „Speichern“) ?>
+  <section class="adm-card adm-panel ds-panel ds-panel--presets" role="tabpanel" id="panel-vorlagen" aria-labelledby="tab-vorlagen" hidden>
+    <h2><?= e(__('Vorlagen & eigene Designs')) ?></h2>
+    <p class="adm-muted ds-presets__lead"><?= e(__('Eine Vorlage füllt alle Einstellungen auf einmal – rechts in der Vorschau sehen Sie das Ergebnis. Online geht es erst mit „Speichern“.')) ?></p>
+    <h3 class="ds-h3"><?= e(__('Eigene Designs')) ?></h3>
+    <div class="ds-cards">
+      <?php foreach ($minePresets as $key => $p): ?>
+      <div class="ds-card-wrap">
+        <?= $presetCard($key, $p, true) ?>
         <button type="submit" class="ds-mine__del" formaction="<?= e(url('/admin/design/eigene/' . substr($key, 5) . '/loeschen')) ?>" formnovalidate
           data-confirm="<?= e(__('Eigenes Design „{name}“ löschen? Das aktuelle Design der Website bleibt unverändert.', ['name' => $p['label']])) ?>" data-confirm-ok="<?= e(__('Löschen')) ?>"
-          aria-label="<?= e(__('„{name}“ löschen', ['name' => $p['label']])) ?>" title="<?= e(__('Löschen')) ?>">✕</button>
-      </span>
+          aria-label="<?= e(__('„{name}“ löschen', ['name' => $p['label']])) ?>" title="<?= e(__('Löschen')) ?>"><?= icon('trash') ?></button>
+      </div>
       <?php endforeach; ?>
-      <button type="button" class="ds-preset ds-preset--add" data-ds-open="mine"><span class="ds-preset__plus" aria-hidden="true">+</span><span class="ds-preset__l"><?= e(__('Aktuelles Design speichern …')) ?></span></button>
+      <button type="button" class="ds-pcard ds-pcard--add" data-ds-open="mine"><span class="ds-pcard__plus" aria-hidden="true"><?= icon('plus') ?></span><span class="ds-pcard__name"><?= e(__('Aktuelles Design speichern …')) ?></span><span class="ds-pcard__desc"><?= e(__('Den jetzigen Stand unter einem Namen sichern, um später zurückzuwechseln.')) ?></span></button>
     </div>
+    <?php if ($kitPresets): ?>
+    <h3 class="ds-h3"><?= e(__('Vorlagen des Kits')) ?></h3>
+    <div class="ds-cards">
+      <?php foreach ($kitPresets as $key => $p): ?><?= $presetCard($key, $p, false) ?><?php endforeach; ?>
+    </div>
+    <?php endif; ?>
   </section>
-
-  <?php if ($kitPresets): ?>
-  <section class="ds-presets" aria-labelledby="ds-presets-h">
-    <h2 id="ds-presets-h" class="ds-h"><?= e(__('Vorlagen')) ?> <small class="adm-muted"><?= e(__('Füllt das Formular – gespeichert wird erst mit „Speichern“.')) ?></small></h2>
-    <div class="ds-presets__list">
-      <?php foreach ($kitPresets as $key => $p): $cols = array_values(array_filter($p['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color' && !str_contains($k, '@'), ARRAY_FILTER_USE_BOTH)); ?>
-      <button type="button" class="ds-preset" data-ds-preset="<?= e($key) ?>">
-        <span class="ds-preset__sw" aria-hidden="true"><?php foreach (array_slice($cols, 0, 5) as $c): ?><i style="background:<?= e((string) \Core\Design::color($c)) ?>"></i><?php endforeach; ?></span>
-        <span class="ds-preset__l"><?= e($p['label']) ?></span>
-      </button>
-      <?php endforeach; ?>
-    </div>
-  </section>
-  <?php endif; ?>
-
-  <div class="st-bar">
-    <div class="adm-tabs" role="tablist" aria-label="<?= e(__('Bereiche')) ?>">
-      <?php foreach ($schema['groups'] as $i => $g): ?>
-      <button type="button" role="tab" id="tab-<?= e($g['id']) ?>" aria-controls="panel-<?= e($g['id']) ?>" data-tab="<?= e($g['id']) ?>"
-        aria-selected="<?= $i === 0 ? 'true' : 'false' ?>"<?= $i === 0 ? '' : ' tabindex="-1"' ?>><?= e($g['label']) ?><span class="ds-tabdot" data-ds-tabdot="<?= e($g['id']) ?>" hidden aria-label="<?= e(__('Kontrastproblem')) ?>"> ●</span></button>
-      <?php endforeach; ?>
-    </div>
-    <div class="st-tools">
-      <button type="button" class="ds-sum<?= $fails ? ' is-fail' : ' is-ok' ?>" data-ds-summary<?= $checks ? '' : ' hidden' ?>><?= e($fails ? ($fails === 1 ? __('1 Kontrastproblem') : __('{n} Kontrastprobleme', ['n' => $fails])) : __('Kontrast in Ordnung')) ?></button>
-      <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-st-pvtoggle aria-pressed="false"><?= e(__('Vorschau')) ?></button>
-    </div>
-  </div>
 
   <?php foreach ($schema['groups'] as $i => $g): ?>
   <section class="adm-card adm-panel ds-panel" role="tabpanel" id="panel-<?= e($g['id']) ?>" aria-labelledby="tab-<?= e($g['id']) ?>"<?= $i === 0 ? '' : ' hidden' ?>>

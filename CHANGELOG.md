@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Style-Editor neu geordnet
+- Bereichsliste links wie in den Grundeinstellungen (auf dem Handy ein Auswahlfeld), Kontrast und Vorschau oben. Vorlagen und eigene Designs in einem eigenen Bereich als Karten mit Schriftprobe, Farben, Knopffarbe, Branche und Beschreibung – statt der langen Liste über allen Einstellungen.
+
 ### Gerade online
 - Übersicht jeder Website und Netzwerk-Übersicht zeigen, wer gerade angemeldet ist und wo (Seite der Website bzw. Bereich der Verwaltung, vor wie vielen Minuten); im Netzwerk oben für alle Websites und je Karte, Klick wechselt per Einmal-Anmeldung an den Ort (`Presence::ONLINE`, Herzschlag `/admin/api/online`).
 - Netzwerk-Übersicht: „Öffnen“ führt immer zur Übersicht der Website (bei der Netzwerk-Website landete man vorher wieder in der Netzwerk-Übersicht).
