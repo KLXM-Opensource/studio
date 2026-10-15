@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Slide-Menü klarer
+- „Dritte Menüebene: Slide“: Die Zeile oben heißt jetzt „‹ Zurück“, darunter steht die Elternseite fett als Link – vorher war sie in der Unterebene nicht erreichbar und der Rückweg nicht als solcher erkennbar.
+
 ### PDF-Links: Karte überall, Betrachter im Modal
 - Die Auswahl „Ansehen | Herunterladen“ erscheint bei allen Links auf PDFs der Website, auch bei Buttons von Kits (`PdfLinks::enhance()`). „Ansehen“ öffnet den Viewer in einem Modal statt der ganzen Seite; in Slidern (bzw. `[data-pdf-direct]`) öffnet der Klick direkt das Modal.
 

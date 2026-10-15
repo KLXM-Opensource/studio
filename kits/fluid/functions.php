@@ -279,7 +279,8 @@ function fluid_nav_parent(): string
  *  - overview: der Menüpunkt öffnet das Menü, erster Eintrag „Übersicht: …“ führt zur Seite (bisheriges Verhalten)
  * Dritte Ebene: .hnav__nested (Design „Dritte Menüebene“, Klassen nv-*): eingerückt bzw. gruppiert (immer sichtbar, nur CSS)
  * oder Akkordeon bzw. Slide – dann klappt ein Pfeil neben dem Link die Unterseiten auf (<details name> – je Ebene eins offen,
- * ohne JavaScript). Slide: die Unterebene ersetzt den Inhalt des Aufklappmenüs, der Pfeil wird zur Zeile „‹ Elternseite“ (zurück).
+ * ohne JavaScript). Slide: die Unterebene ersetzt den Inhalt des Aufklappmenüs, der Pfeil wird zur Zeile „‹ Zurück“, darunter die
+ * Elternseite als Link (.hnav__slidehead).
  * Akkordeon: der Zweig der aktuellen Seite ist offen.
  */
 function fluid_nav_levels(): string
@@ -301,11 +302,13 @@ function fluid_nav_inline(array $menu): string
         $li = '<li' . ($c['children'] ? ' class="has-nested"' : '') . '><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a>';
         if (!$c['children']) return $li . '</li>';
         $sub = 'nv-' . (++$grp);
-        $list = '<ul class="hnav__nested" role="list">' . implode('', array_map(fn($x) => $item($x, $sub), $c['children'])) . '</ul>';
+        // Slide: oben „‹ Zurück“, darunter die Elternseite als Link (sonst wäre sie in der Unterebene nicht erreichbar)
+        $head = $mode === 'slide' ? '<li class="hnav__slidehead"><a class="hnav__sublink" href="' . e($c['href']) . '"' . $cur($c) . '>' . e($c['label']) . '</a></li>' : '';
+        $list = '<ul class="hnav__nested" role="list">' . $head . implode('', array_map(fn($x) => $item($x, $sub), $c['children'])) . '</ul>';
         if (!$fold) return $li . $list . '</li>';
         return $li . '<details class="hnav__det" name="' . $name . '"' . ($mode === 'accordion' && !empty($c['active']) ? ' open' : '') . '>'
             . '<summary class="hnav__more" aria-label="' . e(lt('Unterseiten von {name}', ['name' => $c['label']])) . '">'
-            . icon('caret-down', ['class' => 'hnav__morechev']) . '<span class="hnav__more-t" aria-hidden="true">' . e($c['label']) . '</span></summary>'
+            . icon('caret-down', ['class' => 'hnav__morechev']) . '<span class="hnav__more-t" aria-hidden="true">' . e($mode === 'slide' ? lt('Zurück') : $c['label']) . '</span></summary>'
             . $list . '</details></li>';
     };
     $children = function (array $m) use ($item, &$grp): string {
