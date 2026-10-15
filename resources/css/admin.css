@@ -1624,7 +1624,7 @@ a.adm-drill__back{text-decoration:none}
 @media (min-width:901px){.is-drill .adm-side > nav{display:none}}
 .is-drill.is-drill-nav .adm-side > nav{display:block}
 /* Bereichsmenü hat Vorrang: Favoriten und Netzwerk-Umschalter ausgeblendet, Stern (data-drill-peek) oder „‹ Hauptmenü“ holen sie zurück */
-.is-drill:not(.is-drill-peek):not(.is-drill-nav) .adm-side > :is(.adm-fav,.adm-netswitch){display:none}
+.is-drill:not(.is-drill-peek):not(.is-drill-nav) .adm-side > :is(.adm-fav,.adm-netswitch,.adm-netlink){display:none}
 .adm-brand-tools .adm-drill-peek[aria-expanded=true]{background:var(--adm-hover);color:var(--drill-mark,var(--adm-ink))}
 .is-drill-nav .adm-drill-peek{display:none}
 .is-drill.is-drill-nav .adm-drill > :not(.adm-drill__back){display:none}
@@ -1864,6 +1864,12 @@ html.adm-ui[data-theme=dark]{--adm-star:#F2C14E}
 .adm-netswitch__menu .is-home{font-weight:700;text-decoration:none}
 .adm-netswitch__site{display:inline-flex;align-items:center;gap:8px;min-width:0}
 .adm-netswitch__ico{flex:none;width:16px;height:16px;border-radius:4px;object-fit:contain}
+/* „Netzwerk – Alle Websites“ unter dem Umschalter (nur außerhalb der Netzwerk-Website) – wie ein Eintrag der Hauptnavigation */
+.adm-netlink{margin:4px 2px 0}
+.adm-netlink button{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:6px;background:none;color:var(--adm-ink);font:600 14px var(--adm-font);text-align:left;cursor:pointer}
+.adm-netlink button:hover,.adm-netlink button:focus-visible{background:var(--adm-hover)}
+.adm-netlink small{margin-left:auto;color:var(--adm-t3);font-size:11px;font-weight:500}
+.adm-netlink .adm-nav__ico{flex:none;width:18px;height:18px;opacity:.85}
 
 /* Zwei-Faktor-Anmeldung */
 .tf-code{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em;text-align:center}

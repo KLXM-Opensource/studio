@@ -153,9 +153,9 @@ if ($user && ($req = app()->request)) {
       <?= csrf_field() ?>
       <p class="adm-netswitch__h"><?= e(__('Website wechseln')) ?></p>
       <?php if (\Core\Network\Network::isNetworkSite()): ?>
-      <a href="<?= e(url('/admin/network')) ?>" class="is-home"><?= e(__('Netzwerk-Übersicht')) ?></a>
+      <a href="<?= e(url('/admin/network')) ?>" class="is-home"><span class="adm-netswitch__site"><?= icon('network', ['class' => 'adm-netswitch__ico']) ?><?= e(__('Alle Websites')) ?></span><small><?= e(__('Netzwerk')) ?></small></a>
       <?php else: ?>
-      <button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>" class="is-home"><?= e(__('Netzwerk-Übersicht')) ?></button>
+      <button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>" class="is-home"><span class="adm-netswitch__site"><?= icon('network', ['class' => 'adm-netswitch__ico']) ?><?= e(__('Alle Websites')) ?></span><small><?= e(__('Netzwerk')) ?></small></button>
       <?php endif; ?>
       <?php foreach (\Core\Sites::all() as $sk => $sc): if ($sk === site()->key) continue; $st = new \Core\Site($sk, $sc); ?>
       <?php $sIco = \Core\Network\SiteIcon::for($sk, \Core\Network\Stats::cached($sk)); // App-Icon wie in der Netzwerk-Übersicht ?>
@@ -163,6 +163,11 @@ if ($user && ($req = app()->request)) {
       <?php endforeach; ?>
     </form>
   </details>
+  <?php if (!\Core\Network\Network::isNetworkSite()): // Netzwerk von jeder Website aus erreichbar (auf der Netzwerk-Website steht es in der Hauptnavigation) ?>
+  <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netlink"><?= csrf_field() ?>
+    <button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>"><?= \Core\Icons::nav('network', 'adm-nav__ico') ?><span><?= e(__('Netzwerk')) ?></span><small><?= e(__('Alle Websites')) ?></small></button>
+  </form>
+  <?php endif; ?>
   <?php endif; ?>
   <?php // Favoriten: immer sichtbar (auch im Drill-down), aufklappbar, bearbeitbar – resources/js/_favorites.js ?>
   <section class="adm-fav<?= $favs ? '' : ' is-empty' ?>" id="adm-fav" aria-labelledby="adm-fav-h" data-fav-endpoint="<?= e(url('/admin/api/favorites')) ?>"

@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Netzwerk von jeder Website erreichbar
+- Netzwerk-Administration: Unter dem Website-Umschalter steht auf jeder Website **„Netzwerk – Alle Websites“** (Einmal-Anmeldung zur Netzwerk-Website); im Umschalter heißt der erste Eintrag „Alle Websites“.
+
 ### Kit fluid: Design-Optionen durchgeprüft
 - Alle Werte des Style-Editors einzeln geprüft (Desktop und Handy). Behoben: Großes Logo überdeckte auf dem Handy Suche und Menü (alle Kopf-Varianten) – das Logo schrumpft jetzt mit; „Geteilt“ teilt die Leiste so, dass die Aktionen rechts Platz behalten.
 - „Ecken der Bilder“ gilt jetzt auch für Videos (Video-Block, Medien + Text, Datenfelder) und für Bilder in Datenlisten, Profilbild und Collage (`--f-img-r`). In „Medien + Text“ rundet das Video selbst mit.
