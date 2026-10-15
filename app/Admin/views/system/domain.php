@@ -15,6 +15,9 @@ $post = fn(string $a) => e(url('/admin/system/domain/' . $a));
     <p class="adm-muted"><?= e(__('Unter welchen Adressen die Website erreichbar ist. Eine neue Domain richten Sie zuerst beim Hosting ein (DNS, in Plesk als Alias bzw. zusätzliche Domain, mit SSL-Zertifikat) und tragen sie dann hier ein.')) ?></p></div>
 </header>
 
+<div class="adm-tabs-form--side us-shell" data-secnav>
+<?php $current = 'domain'; include __DIR__ . '/_sidenav.php'; ?>
+  <div class="us-main">
 <div class="set-page dom-page">
 <section class="set-group" id="domains" aria-labelledby="dom-h">
   <h2 id="dom-h" class="set-group__title"><?= e(__('Domains')) ?></h2>
@@ -92,4 +95,6 @@ $post = fn(string $a) => e(url('/admin/system/domain/' . $a));
       <span class="set-row__ctl"><span class="adm-badge<?= environment() === 'production' ? '' : ' adm-badge--warn' ?>"><?= e(environment()) ?></span></span></a>
   </div>
 </section>
+</div>
+  </div>
 </div>

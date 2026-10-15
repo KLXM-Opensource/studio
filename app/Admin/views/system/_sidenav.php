@@ -1,8 +1,8 @@
 <?php
 /**
- * Seitenleiste der Grundeinstellungen auf deren Unterseiten mit eigener Adresse (Schriften, Kits): dieselben Bereiche wie die
+ * Seitenleiste der Grundeinstellungen auf deren Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Kits): dieselben Bereiche wie die
  * Reiter von /admin/system (Links auf /admin/system#bereich) plus die Unterseiten; schmal ein Auswahlfeld (admin.js, data-secnav).
- * @var string $current  fonts | kits | Bereich der Grundeinstellungen (z. B. mail für E-Mail-Konten)
+ * @var string $current  domain | branding | fonts | kits | Bereich der Grundeinstellungen (z. B. mail für E-Mail-Konten)
  */
 $ico = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
     'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
@@ -12,10 +12,13 @@ foreach (\Core\SystemSchema::groups() as $g) $items[] = [url('/admin/system#' . 
 $items[] = [url('/admin/system#keys'), 'Verschlüsselung', 'lock-key', ''];
 $items[] = [url('/admin/system#pools'), __('Geteilte Medien'), 'images', ''];
 if (\Core\Data\Shared::canManage() || \Core\Data\Shared::forSite()) $items[] = [url('/admin/system#shared'), __('Geteilte Daten'), 'share-network', ''];
+$items[] = [url('/admin/system#push'), __('Push-Benachrichtigungen'), 'bell-ringing', ''];
 $items[] = [url('/admin/system#umgebung'), __('Umgebung'), 'hard-drives', environment() !== 'production' ? __('Testumgebung aktiv') : ''];
 $items[] = [url('/admin/system#adminpath'), __('Adresse der Verwaltung'), 'link', ''];
 $items[] = [url('/admin/system#info'), 'Systeminfo', 'info', ''];
 $sub = [];
+if (\Core\Domains::available()) $sub['domain'] = [url('/admin/system/domain'), __('Domain'), 'globe', ''];
+if (\Core\Branding::canEdit()) $sub['branding'] = [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush', ''];
 if (\Core\Fonts::canManage()) $sub['fonts'] = [url('/admin/system/fonts'), __('Schriften'), 'text-t', ''];
 if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
 ?>

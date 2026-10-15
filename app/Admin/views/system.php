@@ -5,7 +5,6 @@ use Core\Fields;
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Administration')) ?> › <?= e(__('Einstellungen')) ?></p><h1>Grundeinstellungen</h1>
     <p class="adm-muted">Technische Einstellungen: Website, E-Mail-Versand (Symfony Mailer), Spamschutz und Verschlüsselung.</p></div>
-  <?php if (\Core\Domains::available()): // Domains, Hauptadresse, Umgebung – nur Einzel-Installation ohne Netzwerk (Core\Domains) ?><a class="adm-btn adm-btn--ghost" href="<?= e(url('/admin/system/domain')) ?>"><?= icon('globe') ?> <?= e(__('Domain')) ?></a><?php endif; ?>
 </header>
 
 <?php if ($newSecret): ?>
@@ -41,8 +40,10 @@ use Core\Fields;
     <?= $tab('umgebung', __('Umgebung')) ?>
     <?= $tab('adminpath', __('Adresse der Verwaltung')) ?>
     <?= $tab('info', 'Systeminfo') ?>
-    <?php // Unterseiten mit eigener Adresse (Schriften, Kits): Links unten in derselben Leiste (dort: system/_sidenav.php)
-    $subLinks = array_filter(['fonts' => \Core\Fonts::canManage() ? [url('/admin/system/fonts'), __('Schriften'), 'text-t'] : null,
+    <?php // Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Kits): Links unten in derselben Leiste (dort: system/_sidenav.php)
+    $subLinks = array_filter(['domain' => \Core\Domains::available() ? [url('/admin/system/domain'), __('Domain'), 'globe'] : null,
+        'branding' => \Core\Branding::canEdit() ? [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush'] : null,
+        'fonts' => \Core\Fonts::canManage() ? [url('/admin/system/fonts'), __('Schriften'), 'text-t'] : null,
         'kits' => \Core\KitPackages::canManage() ? [url('/admin/system/kits'), __('Kits'), 'package'] : null]);
     if ($subLinks): ?><span class="adm-tabs__sep" role="separator"></span><?php endif;
     foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>

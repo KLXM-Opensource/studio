@@ -7,12 +7,15 @@
 $s = $b['support'];
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('System')) ?></a></p><h1><?= e(__('Branding & Support')) ?></h1>
+  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Branding & Support')) ?></h1>
     <p class="adm-muted"><?= e($network
       ? __('Ihr Logo und Ihre Support-Angaben für alle Websites dieser Installation – auf der Anmeldeseite, in der Werkzeugleiste der Website und unter Hilfe & Support. Nur die Netzwerk-Administration kann sie ändern.')
       : __('Ihr Logo und Ihre Support-Angaben – auf der Anmeldeseite, in der Werkzeugleiste der Website und unter Hilfe & Support.')) ?></p></div>
 </header>
 
+<div class="adm-tabs-form--side us-shell" data-secnav>
+<?php $current = 'branding'; include __DIR__ . '/_sidenav.php'; ?>
+  <div class="us-main">
 <form class="set-page brand-page" method="post" action="<?= e(url('/admin/system/branding')) ?>" enctype="multipart/form-data" novalidate>
   <?= csrf_field() ?>
   <section class="set-group" aria-labelledby="br-h">
@@ -47,5 +50,7 @@ $s = $b['support'];
       <div class="f"><label for="bs-note"><?= e(__('Hinweis (optional)')) ?></label><textarea id="bs-note" name="support[note]" rows="3" maxlength="600"><?= e($s['note']) ?></textarea></div>
     </div>
   </section>
-  <div class="adm-form-actions"><button class="adm-btn adm-btn--primary"><?= e(__('Speichern')) ?></button></div>
+  <?= \Core\AdminUi::savebar() ?>
 </form>
+  </div>
+</div>
