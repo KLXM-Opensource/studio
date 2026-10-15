@@ -62,3 +62,10 @@ deploy/targets/*.env
 /.claude/settings.local.json
 /storage/branding/
 /storage/presence/
+
+# Alles Weitere unter storage/ (Laufzeitdaten, z. B. von Erweiterungen wie storage/avv/) – nie ins Repository.
+# Nur die Platzhalter der Grundordner bleiben versioniert.
+/storage/*
+!/storage/database/
+!/storage/logs/
+!/storage/sessions/
