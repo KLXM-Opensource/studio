@@ -5,7 +5,7 @@
  */
 use Core\AdminUi;
 
-$helpTab = 'technical';
+$helpTab = 'ui';
 include ROOT . '/app/Admin/views/support/_helptabs.php';
 $code = fn(string $s): string => '<pre class="ui-code"><code>' . e(trim($s)) . '</code></pre>';
 $href = fn(string $t): string => url('/admin/hilfe/ui' . ($t === 'aufbau' ? '' : '?teil=' . $t));
