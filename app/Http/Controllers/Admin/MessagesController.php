@@ -42,7 +42,7 @@ final class MessagesController extends AdminController
         $vars['drillTitle'] = __('Mitteilungen');
         $vars['title'] ??= match ($view) { 'compose' => __('Neue Mitteilung'), 'channels' => __('Kanäle'), 'stats' => __('Statistik'), 'website' => __('Auf der Website'), default => __('Mitteilungen') }
             . ' · ' . __('Mitteilungen');
-        $vars['css'] = ['css/dashboard.css'];   // Säulen und Achsen der Statistik (Core\Dashboard\Dashboard::bars)
+        $vars['css'] = ['css/dashboard.css'];   // Karten und Kennzahlen der Statistik (Diagramme: Core\Charts)
         return $this->view('push/' . $view, $vars, $status);
     }
 

@@ -7706,4 +7706,7 @@ return [
     '{n} Seiten veröffentlicht' => '{n} pages published',
     'Änderungen je Tag, letzte 30 Tage: insgesamt {n}' => 'Changes per day, last 30 days: {n} in total',
     'Anfragen je Monat' => 'Requests per month',
+    'Woche ab' => 'Week from',
+    'abgemeldet' => 'unsubscribed',
+    'neue Abos' => 'new subscriptions',
 ];

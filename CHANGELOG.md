@@ -10,7 +10,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Einheitliche Diagramme für Verwaltung und Website: Balken (auch waagerecht), Linie, Fläche, Ring, Torte – in einem eigenen, schlichten Format (`Charts::render([...])`), gezeichnet von einer austauschbaren Engine. Standard: Apache ECharts (Apache-2.0), gebündelt und selbst gehostet, lädt erst, wenn ein Diagramm sichtbar wird.
 - Engine tauschen über `Charts::registerEngine()` und `'charts' => ['engine' => …]` (Kit: `chart_engine`) – Aufrufer ändern sich nicht. Farben aus CSS-Variablen `--chart-1 … --chart-8` (geprüfte Palette, hell/dunkel), Tooltip ohne Inline-Stile (strenge CSP der Website), „Als Tabelle anzeigen“ unter jedem Diagramm und ohne JavaScript.
 - Neuer Block **Diagramm**: Werte von Hand („1.250“, „12,5“) oder aus einer Datenquelle, die eine Erweiterung anmeldet (`Charts::registerSource()`).
-- Übersicht: „Aktivität (30 Tage)“ als gestapelte Balken mit Legende und Tooltip. Musterseite unter Oberfläche → Diagramme, Kapitel im Entwicklerhandbuch, Selbsttest `charts:selftest`.
+- Verwaltung durchgängig mit `Core\Charts`: Übersicht „Aktivität (30 Tage)“, „Anfragen je Woche“, „Mitteilungen“ (neue Abos und Abmeldungen) sowie die Statistik der Mitteilungen (Zu- und Abgänge unter/über der Nulllinie, Versand je Woche) – mit Legende und Tooltip. Musterseite unter Oberfläche → Diagramme, Kapitel im Entwicklerhandbuch, Selbsttest `charts:selftest`.
 
 ### Zweiter KLXM-Stil „KLXM Neo“
 - Neue Vorlage unter Konto → Darstellung: Aubergine wie neo.klxm.de, Seitenleiste in Marineblau, im hellen Modus auf Leinen mit warmen Karten und Linien; dunkel mit den dunklen Grundfarben der Verwaltung. Werkzeugleiste der Website eingefärbt. Alle Kontraste nach WCAG AA geprüft (`accent:check`).

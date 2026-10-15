@@ -170,7 +170,7 @@ final class Charts
         ];
     }
 
-    /** Diagramm ausgeben. $opt: class (zusätzliche Klasse), table (true = Tabelle aufgeklappt), caption (false = ohne Titel) */
+    /** Diagramm ausgeben. $opt: class (zusätzliche Klasse), table (true = Tabelle aufgeklappt, 'none' = ohne, wenn die Seite die Werte schon als Tabelle zeigt), caption (false = ohne Titel) */
     public static function render(array $spec, array $opt = []): string
     {
         $s = self::normalize($spec);
@@ -182,7 +182,7 @@ final class Charts
             . (($opt['caption'] ?? true) && $s['title'] !== '' ? '<figcaption class="cms-chart__title">' . e($s['title']) . '</figcaption>' : '')
             . '<div class="cms-chart__canvas cms-chart__h' . (int) (round($s['height'] / 40) * 40) . '" role="img" aria-label="' . e($label) . '"></div>'
             . '<script type="application/json" class="cms-chart__data">' . $json . '</script>'
-            . '<details class="cms-chart__table"' . (!empty($opt['table']) ? ' open' : '') . '><summary>' . e(self::t('Als Tabelle anzeigen')) . '</summary>' . self::table($s) . '</details>'
+            . (($opt['table'] ?? null) === 'none' ? '' : '<details class="cms-chart__table"' . (($opt['table'] ?? false) === true ? ' open' : '') . '><summary>' . e(self::t('Als Tabelle anzeigen')) . '</summary>' . self::table($s) . '</details>')   // 'none': die Seite zeigt die Werte schon selbst als Tabelle
             . '</figure>';
         if (!self::$loader) {   // einmal je Seite: Lader (und auf der Website die Stile; die Verwaltung hat sie in admin.css)
             self::$loader = true;

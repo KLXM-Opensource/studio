@@ -52,15 +52,14 @@ $log = Stats::log(60);
       <div class="set-list pm-chartbox">
         <p class="pm-chart__sum"><span class="pm-key pm-key--up"></span> <?= e(__('{n} neue Abos', ['n' => $sumIn])) ?> <span class="pm-key pm-key--down"></span> <?= e(__('{n} abbestellt oder abgelaufen', ['n' => $sumOut])) ?>
           <span class="adm-muted"> · <?= e($topic === '' ? __('alle Kanäle') : $label($topic)) ?></span></p>
-        <figure class="pm-chart">
-          <div class="pm-chart__axis" aria-hidden="true"><span style="top:0"><?= $sc['up'] ?></span><span style="top:<?= Stats::zero($rows) ?>%">0</span><?php if ($sc['down']): ?><span style="top:100%">−<?= $sc['down'] ?></span><?php endif; ?></div>
-          <?= Stats::chart($labelled, __('Zu- und Abgänge: {in} neu, {out} weg', ['in' => $sumIn, 'out' => $sumOut])) ?>
-          <figcaption class="dash-axis" aria-hidden="true"><span><?= e((string) array_key_first($labelled)) ?></span><span><?= e((string) array_key_last($labelled)) ?></span></figcaption>
-        </figure>
-        <details class="dash-table"><summary><?= e(__('Als Tabelle anzeigen')) ?></summary>
-          <table class="adm-table"><thead><tr><th scope="col"><?= e($days === 90 ? __('Woche') : __('Tag')) ?></th><th scope="col"><?= e(__('Neu')) ?></th><th scope="col"><?= e(__('Weg')) ?></th></tr></thead><tbody>
-          <?php foreach (array_reverse($labelled, true) as $l => $v): ?><tr><th scope="row"><?= e($l) ?></th><td><?= (int) $v['sub'] ?></td><td><?= (int) $v['lost'] ?></td></tr><?php endforeach; ?>
-          </tbody></table></details>
+        <?= \Core\Charts::render([
+            'type' => 'bar', 'stacked' => true, 'height' => 240,
+            'labels' => array_map('strval', array_keys($labelled)),
+            'series' => [['name' => __('Neu'), 'data' => array_map(fn($v) => (int) $v['sub'], array_values($labelled))],
+                ['name' => __('Weg'), 'data' => array_map(fn($v) => -(int) $v['lost'], array_values($labelled))]],   // Abgänge unter der Nulllinie
+            'title' => $days === 90 ? __('Woche') : __('Tag'),
+            'description' => __('Zu- und Abgänge: {in} neu, {out} weg', ['in' => $sumIn, 'out' => $sumOut]),
+        ], ['caption' => false, 'class' => 'dash-chart']) ?>
       </div>
     </section>
 
@@ -91,9 +90,13 @@ $log = Stats::log(60);
     <section class="set-group">
       <h3 class="set-group__title"><?= e(__('Versand je Woche')) ?></h3>
       <div class="set-list pm-chartbox">
-        <?php $dRows = array_map(fn($k, $w) => [__('Woche ab {date}', ['date' => date('d.m.', strtotime($k))]) . ' · ' . __('{n} Mitteilungen', ['n' => $w['messages']]), $w['sent']], array_keys($deliv), $deliv); ?>
-        <figure class="dash-chart dash-chart--small"><?= Dashboard::bars($dRows, __('Zugestellte Mitteilungen je Woche, letzte 12 Wochen')) ?>
-          <figcaption class="dash-axis" aria-hidden="true"><span><?= e(date('d.m.', strtotime((string) array_key_first($deliv)))) ?></span><span><?= e(__('diese Woche')) ?></span></figcaption></figure>
+        <?= \Core\Charts::render([
+            'type' => 'bar', 'stacked' => true, 'height' => 200,
+            'labels' => array_map(fn($k) => date('d.m.', strtotime($k)), array_keys($deliv)),
+            'series' => [['name' => __('zugestellt'), 'data' => array_map(fn($w) => (int) $w['sent'], array_values($deliv))],
+                ['name' => __('nicht zugestellt'), 'data' => array_map(fn($w) => (int) $w['lost'], array_values($deliv))]],
+            'description' => __('Zugestellte Mitteilungen je Woche, letzte 12 Wochen'),
+        ], ['caption' => false, 'table' => 'none', 'class' => 'dash-chart']) ?>
         <table class="adm-table pm-table"><thead><tr><th scope="col"><?= e(__('Woche')) ?></th><th scope="col"><?= e(__('Mitteilungen')) ?></th><th scope="col"><?= e(__('zugestellt')) ?></th><th scope="col"><?= e(__('nicht zugestellt')) ?></th><th scope="col"><?= e(__('Quote')) ?></th></tr></thead><tbody>
         <?php foreach (array_reverse($deliv, true) as $k => $w): if (!$w['messages']) continue; ?><tr><th scope="row"><?= e(date('d.m.Y', strtotime($k))) ?></th><td><?= $w['messages'] ?></td><td><?= $w['sent'] ?></td><td><?= $w['lost'] ?></td><td><?= $w['rate'] === null ? '–' : $w['rate'] . ' %' ?></td></tr><?php endforeach; ?>
         </tbody></table>
