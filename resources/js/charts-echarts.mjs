@@ -56,7 +56,8 @@ function option(spec, t) {
       data: spec.labels.map((l, i) => ({ name: l, value: spec.series[0]?.data[i] ?? 0 })) }] };
   }
   const cat = { type: 'category', data: spec.labels, axisLine: { lineStyle: { color: t.grid } }, axisTick: { show: false }, axisLabel: { ...text, hideOverlap: true } };
-  const val = { type: 'value', splitLine: { lineStyle: { color: t.grid } }, axisLabel: { ...text, formatter: (v) => fmt(v) } };
+  const whole = spec.series.every((x) => x.data.every((v) => v === null || Number.isInteger(v)));   // nur ganze Zahlen → keine 0,2-Schritte
+  const val = { type: 'value', minInterval: whole && spec.format !== 'percent' ? 1 : undefined, splitLine: { lineStyle: { color: t.grid } }, axisLabel: { ...text, formatter: (v) => fmt(v) } };
   const dots = spec.labels.length <= 31;
   return {
     ...base,
