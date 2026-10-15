@@ -1232,11 +1232,18 @@ class Finder {
       </form>
       <button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-edit>Alle Details, Fokus &amp; Zuschnitt …</button>
       ${isImg && this.mode === 'library' && !this.ro ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--small fx-editbtn" data-adjust>${esc(t('Bild anpassen …'))}</button>` : ''}
+      ${this.mode === 'library' && !m.deleted_at ? `<div class="fx-i-actions fx-i-fileacts">
+        ${this.ro ? '' : `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-replace>${esc(t('Datei ersetzen …'))}</button>`}
+        <a class="adm-btn adm-btn--small adm-btn--ghost" href="${esc(m.kind === 'pdf' ? m.viewer : m.url)}" target="_blank" rel="noopener">${esc(t('Original öffnen'))}</a>
+        <button type="button" class="adm-btn adm-btn--small adm-btn--ghost fx-i-more" data-more aria-haspopup="menu" title="${esc(t('Weitere Aktionen'))}" aria-label="${esc(t('Weitere Aktionen'))}">${ico('dots-three')}</button></div>` : ''}
       ${m.collections.length ? `<section class="fx-i-sec"><h3>Sammlungen</h3><p>${this.meta.collections.filter(c => m.collections.includes(c.id)).map(c => esc(c.name)).join(', ')}</p></section>` : ''}
       ${this.singleExtras(m)}
       <section class="fx-i-sec"><h3>Verwendet auf</h3>${m.usages.length ? '<ul class="fx-usage">' + m.usages.map(u => `<li>${u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.label)}</a>` : esc(u.label)}</li>`).join('') + '</ul>' : '<p class="fx-i-hint">Noch nirgends.</p>'}</section>
       <dl class="fx-i-dl"><dt>Datei</dt><dd>${esc(m.name)}</dd><dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}</dd>${m.updated_at && m.updated_at !== m.created_at ? `<dt>Geändert</dt><dd>${fmtDate(m.updated_at)}</dd>` : ''}</dl>`;
     $('[data-edit]', this.$info).onclick = () => this.edit(m.id);
+    // Datei ersetzen und weitere Aktionen auch ohne Rechtsklick (gleiches Menü wie das Kontextmenü)
+    $('[data-replace]', this.$info)?.addEventListener('click', () => this.replace(m));
+    $('[data-more]', this.$info)?.addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); this.contextMenu(r.left, r.bottom + 4); });
     this.bindSingleExtras(m);
     if (isImg) applyFx($('.fx-i-img', this.$info), m.adjust);
     $('[data-adjust]', this.$info)?.addEventListener('click', () => this.adjust(m));

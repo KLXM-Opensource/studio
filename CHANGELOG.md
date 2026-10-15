@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Mediathek: Aktionen in der Seitenleiste
+- Rechts unter der Vorschau: **Datei ersetzen …**, **Original öffnen** und **⋯** (dasselbe Menü wie der Rechtsklick) – Aktionen nicht mehr nur per Rechtsklick auffindbar.
+
 ### Als Rolle oder Person arbeiten
 - Benutzer & Rollen: **„Als Rolle ansehen“** (Karte der Rolle – eigenes Konto mit den Rechten der Rolle) und **„Als Person anmelden“** (Person aufklappen – Rechte und Speichern als diese Person), nur für Administration und Netzwerk-Administration. Hinweis mit **„Zurück zu meinem Konto“** in Verwaltung und Leiste der Website; endet nach einer Stunde oder beim Abmelden. Konto, Benutzer, API-Tokens, Grundeinstellungen und Netzwerk bleiben gesperrt; nie in Netzwerk-, Schatten- oder gesperrte Konten, Administration nicht in Administration. Beginn/Ende im Netzwerk-Protokoll (`Core\Impersonation`). Selbsttest `impersonate:selftest`.
 

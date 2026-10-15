@@ -514,6 +514,7 @@ img.media-vthumb{object-fit:cover}
 .fx-info .fx-i-sec{margin-top:6px}
 .fx-info textarea{min-height:52px}
 .fx-editbtn{width:100%;margin:10px 0 4px}
+.fx-i-fileacts{margin:6px 0 4px;flex-wrap:nowrap}.fx-i-fileacts .adm-btn{flex:1 1 0;min-width:0;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fx-i-fileacts .fx-i-more{flex:0 0 auto;padding:0 8px}
 .fx-i-sec p{font-size:13px;overflow-wrap:anywhere}
 .fx-tags--ro{border:0;padding:0;min-height:0;background:none;cursor:default}
 .fx-tags--ro .fx-tag{padding-right:8px}

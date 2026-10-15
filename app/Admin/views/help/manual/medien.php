@@ -98,7 +98,7 @@
     <b>Bild wählen …</b> am Bild oder ein Klick aufs Bild.</p>
 
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
-  <p>Datei auswählen → <b>Datei ersetzen …</b> (im Bearbeitungsfenster oder per Rechtsklick) → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
+  <p>Datei auswählen → <b>Datei ersetzen …</b> (rechts in der Seitenleiste, im Bearbeitungsfenster oder per Rechtsklick). Daneben öffnet <b>⋯</b> alle weiteren Aktionen – dasselbe Menü wie der Rechtsklick → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
 
   <h3 id="svg">SVG-Grafiken</h3>
   <p>Logos, Icons und Illustrationen laden Sie am besten als <b>SVG</b> hoch: Sie sind klein und in jeder Größe gestochen scharf. Eine SVG ist aber kein Bild wie ein Foto, sondern ein kleines Programm aus Text – darin könnten Skripte oder Verweise auf fremde Server stecken. Deshalb <b>bereinigt und optimiert</b> die Mediathek jede SVG beim Hochladen und speichert nur das Ergebnis (nie die Originaldatei). Die Meldung nach dem Hochladen zeigt, was passiert ist, z. B. „SVG bereinigt und optimiert: 48 KB → 12 KB, 3 unsichere Elemente entfernt“.</p>

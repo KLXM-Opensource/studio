@@ -7590,4 +7590,6 @@ return [
     'Unbekannte Ansicht.' => 'Unknown view.',
     'Während Sie als „{name}“ arbeiten, ist dieser Bereich gesperrt. Zurück zu Ihrem Konto über den Hinweis oben.' => 'While you are working as “{name}”, this area is locked. Switch back to your account via the notice at the top.',
     'Zurück zu meinem Konto' => 'Back to my account',
+    'Datei ersetzen …' => 'Replace file …',
+    'Original öffnen' => 'Open original',
 ];
