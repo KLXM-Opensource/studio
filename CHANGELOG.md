@@ -7,7 +7,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Zweiter KLXM-Stil „KLXM Neo“
-- Neue Vorlage unter Konto → Darstellung: Aubergine wie neo.klxm.de, Seitenleiste im Aubergine-Band, im hellen Modus auf Leinen mit warmen Karten und Linien; dunkel mit den dunklen Grundfarben der Verwaltung. Werkzeugleiste der Website eingefärbt. Alle Kontraste nach WCAG AA geprüft (`accent:check`).
+- Neue Vorlage unter Konto → Darstellung: Aubergine wie neo.klxm.de, Seitenleiste in Marineblau, im hellen Modus auf Leinen mit warmen Karten und Linien; dunkel mit den dunklen Grundfarben der Verwaltung. Werkzeugleiste der Website eingefärbt. Alle Kontraste nach WCAG AA geprüft (`accent:check`).
+- Bereichsfarben (Daten, Medien, Anfragen, Support, Mitteilungen, KLXM AI) haben Vorrang vor der Akzentfarbe: Mit „Seitenleiste mitfärben“ überdeckte die Tönung bisher die Bereichstönung (z. B. Daten bordeaux statt Petrol).
 
 ### Speicher aufgeschlüsselt
 - Übersicht jeder Website: Karte **Speicher** (nur Administration) mit Balken wie in den macOS-Speicher-Einstellungen – Bilder, Videos, Audio, Dokumente, Sonstige Dateien, Papierkorb der Mediathek, Bildgrößen & Vorschaubilder, Datenbank, Suchindex, KI, Zwischenspeicher, Erweiterungen (je Ordner benannt) und Sicherungen; genutzte Medien-Pools als Hinweis.

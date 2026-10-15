@@ -28,9 +28,9 @@ final class Accent
     public const PRESETS = [
         'navy' => ['label' => 'KLXM Navy', 'a' => '#314164', 'ad' => '#243150', 'ink' => '#314164', 'bg' => '#E3E8F2',
             'da' => '#5B73AD', 'dad' => '#4C6399', 'dink' => '#A9BCE8', 'dbg' => '#232C42', 'side' => '#24314B', 'sa' => '#B4C4E8', 'mark' => '#3DD9A0'],
-        // Zweiter KLXM-Stil nach neo.klxm.de: Aubergine, Seitenleiste im Aubergine-Band, hell auf Leinen (n* = eigene Grundfarben, nur hell)
+        // Zweiter KLXM-Stil nach neo.klxm.de: Aubergine, Seitenleiste in Marineblau (Band von neo), hell auf Leinen (n* = eigene Grundfarben, nur hell)
         'neo' => ['label' => 'KLXM Neo', 'a' => '#581D47', 'ad' => '#46163A', 'ink' => '#581D47', 'bg' => '#F1E4EC',
-            'da' => '#B35196', 'dad' => '#96417D', 'dink' => '#E2B3D4', 'dbg' => '#3A1531', 'side' => '#4A1A3D', 'sa' => '#E2B3D4', 'mark' => '#F2B8DD',
+            'da' => '#B35196', 'dad' => '#96417D', 'dink' => '#E2B3D4', 'dbg' => '#3A1531', 'side' => '#314164', 'sa' => '#E2B3D4', 'mark' => '#F2B8DD',
             'nbg' => '#EDE9E3', 'ncard' => '#F8F6F2', 'nline' => '#D9D3CA'],
         'petrol' => ['label' => 'Petrol', 'a' => '#0E6470', 'ad' => '#0A4D56', 'ink' => '#0B5A65', 'bg' => '#DDEFF0',
             'da' => '#2D7F8B', 'dad' => '#236A74', 'dink' => '#8FD3DC', 'dbg' => '#17363B', 'side' => '#143C43', 'sa' => '#9ED8DF', 'mark' => '#5FE0CF'],
