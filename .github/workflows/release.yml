@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Version aus dem Tag
         id: v
@@ -43,12 +43,12 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-progress --no-interaction
 
       - name: pnpm einrichten
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           package_json_file: tools/package.json
 
       - name: Node einrichten
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -107,7 +107,7 @@ jobs:
             "${{ steps.v.outputs.name }}" >> dist/notes.md
 
       - name: GitHub-Release anlegen
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: KLXM Studio ${{ steps.v.outputs.version }}
           body_path: dist/notes.md
