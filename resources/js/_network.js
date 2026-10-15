@@ -38,6 +38,13 @@ export function initNetwork() {
   q?.addEventListener('input', apply);
   btns.forEach(b => b.addEventListener('click', () => { filter = b.dataset.netFilter; apply(); }));
   document.querySelectorAll('[data-net-show]').forEach(a => a.addEventListener('click', () => { filter = a.dataset.netShow; apply(); }));
+  // Hinweise einer Karte auf- und zuklappen (Status-Knopf)
+  document.querySelectorAll('[data-net-hints]').forEach(b => b.addEventListener('click', () => {
+    const list = document.getElementById(b.getAttribute('aria-controls'));
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    b.setAttribute('aria-expanded', String(open));
+    if (list) list.hidden = !open;
+  }));
   // Aktionsmenüs: nur eines offen, Escape schließt
   const menus = [...document.querySelectorAll('.net-more')];
   menus.forEach(m => m.addEventListener('toggle', () => { if (m.open) menus.forEach(o => { if (o !== m) o.open = false; }); }));

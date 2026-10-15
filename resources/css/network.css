@@ -238,3 +238,17 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-online__who small{color:var(--adm-t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .net-card__online{display:flex;align-items:baseline;gap:8px;margin:0;font-size:13px;color:var(--adm-t2)}
 .net-card__online .net-online__dot{align-self:center}
+
+/* Status mit Hinweisen: Knopf, klappt die Liste in der Karte auf */
+.net-pill--btn{border:0;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.net-pill--btn:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.net-pill__chev{width:12px!important;height:12px!important;transition:transform .15s}
+.net-pill--btn[aria-expanded="true"] .net-pill__chev{transform:rotate(180deg)}
+.net-hints{display:grid;gap:6px;margin:0;padding:10px 12px;list-style:none;border-radius:8px;background:var(--adm-warn-bg);color:var(--adm-ink);font-size:13px}
+.net-hints li{display:flex;gap:8px;align-items:flex-start}
+.net-hints .ico{flex:none;width:15px;height:15px;margin-top:2px;color:var(--adm-warn)}
+/* Gerade online: ruhige Karte statt Pille */
+.net-online__b{border-radius:10px;padding:6px 12px 6px 8px}
+.net-online__who b{display:inline}
+.net-online__who .net-tag{margin-left:6px;vertical-align:1px;min-height:18px;padding:0 6px;font-size:11px}
+.net-online__line{display:flex;align-items:center;flex-wrap:wrap}

@@ -44,7 +44,7 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
   <?php foreach ($onlinePeople as $o): $sk = (string) $o['site']; ?>
     <li><form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($sk) ?>"><input type="hidden" name="path" value="<?= e((string) ($o['url'] ?? '') ?: '/admin') ?>">
       <button type="submit" class="net-online__b" title="<?= e(__('Dorthin wechseln')) ?>"><span class="net-presence__ava" aria-hidden="true"><?= e((string) ($o['initials'] ?? '?')) ?></span>
-        <span class="net-online__who"><b><?= e((string) ($o['name'] ?? '')) ?></b><?= !empty($o['net']) ? ' <span class="net-tag net-tag--net">' . e(__('Netzwerk')) . '</span>' : '' ?>
+        <span class="net-online__who"><span class="net-online__line"><b><?= e((string) ($o['name'] ?? '')) ?></b><?= !empty($o['net']) ? '<span class="net-tag net-tag--net">' . e(__('Netzwerk')) . '</span>' : '' ?></span>
         <small><?= e((string) ($stats[$sk]['label'] ?? $sk)) ?> · <?= e((string) ($o['label'] ?? '') ?: __('Verwaltung')) ?> · <?= e($onlineText($o)) ?></small></span></button></form></li>
   <?php endforeach; ?>
   </ul>
@@ -130,8 +130,15 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
           <a class="net-card__host" href="<?= e($pub . '/') ?>" target="_blank" rel="noopener noreferrer"><?= e($primary) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
           <?php else: ?><span class="net-card__host adm-muted"><?= e(__('alle übrigen Domains')) ?></span><?php endif; ?>
         </div>
+        <?php if ($nHints): // Hinweise: Klick auf den Status klappt sie in der Karte auf ?>
+        <button type="button" class="net-pill net-pill--<?= e($pill) ?> net-pill--btn" aria-expanded="false" aria-controls="net-hints-<?= e($k) ?>" data-net-hints><?= icon('warning') ?><?= e($pillText) ?><?= icon('caret-down', ['class' => 'net-pill__chev']) ?></button>
+        <?php else: ?>
         <span class="net-pill net-pill--<?= e($pill) ?>"><?= icon($pill === 'ok' ? 'check-circle' : ($pill === 'off' ? 'eye' : 'warning')) ?><?= e($pillText) ?></span>
+        <?php endif; ?>
       </header>
+      <?php if ($nHints): ?>
+      <ul class="net-hints" id="net-hints-<?= e($k) ?>" hidden><?php foreach ($attention[$k]['msgs'] as $msg): ?><li><?= icon('warning') ?><span><?= e($msg) ?></span></li><?php endforeach; ?></ul>
+      <?php endif; ?>
       <?php if (!empty($onlineBySite[$k])): $on = $onlineBySite[$k]; ?>
       <p class="net-card__online"><span class="net-online__dot" aria-hidden="true"></span><span><?= e(count($on) === 1 ? __('1 Person online') : __('{n} Personen online', ['n' => count($on)])) ?>:
         <?= e(implode(', ', array_map(fn($o) => (string) $o['name'] . ((string) ($o['label'] ?? '') !== '' ? ' (' . $o['label'] . ')' : ''), array_slice($on, 0, 4)))) ?><?= count($on) > 4 ? ' …' : '' ?></span></p>
