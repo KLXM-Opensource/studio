@@ -415,6 +415,12 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 :host(.cms-bar-host[data-accent=violett][data-side=tint]){--b-bg:#271E42;--b-pri-ink:#271E42}
 :host(.cms-bar-host[data-accent=violett][data-side=tint][data-theme=dark]){--b-bg:#150F26;--b-pri-ink:#150F26}
 @media (prefers-color-scheme:dark){:host(.cms-bar-host[data-accent=violett][data-side=tint]:not([data-theme=light])){--b-bg:#150F26;--b-pri-ink:#150F26}}
+:host(.cms-bar-host[data-accent=neo]){--m-ico:#581D47}
+:host(.cms-bar-host[data-accent=neo][data-theme=dark]){--m-ico:#E2B3D4}
+@media (prefers-color-scheme:dark){:host(.cms-bar-host[data-accent=neo]:not([data-theme=light])){--m-ico:#E2B3D4}}
+:host(.cms-bar-host[data-accent=neo][data-side=tint]){--b-bg:#3A1531;--b-pri-ink:#3A1531}
+:host(.cms-bar-host[data-accent=neo][data-side=tint][data-theme=dark]){--b-bg:#220A1C;--b-pri-ink:#220A1C}
+@media (prefers-color-scheme:dark){:host(.cms-bar-host[data-accent=neo][data-side=tint]:not([data-theme=light])){--b-bg:#220A1C;--b-pri-ink:#220A1C}}
 :host(.cms-bar-host[data-accent=bordeaux]){--m-ico:#822A41}
 :host(.cms-bar-host[data-accent=bordeaux][data-theme=dark]){--m-ico:#F0AFC0}
 @media (prefers-color-scheme:dark){:host(.cms-bar-host[data-accent=bordeaux]:not([data-theme=light])){--m-ico:#F0AFC0}}

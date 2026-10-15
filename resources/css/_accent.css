@@ -20,6 +20,13 @@ html.adm-ui[data-accent=gruen][data-theme=dark]{--adm-a:#408351;--adm-a-d:#336B4
 html.adm-ui[data-accent=violett]{--adm-a:#5B3F95;--adm-a-d:#48317A;--adm-a-ink:#553A8C;--adm-accent-bg:#ECE6F7;--adm-a-rgb:91 63 149;--adm-hover:rgb(91 63 149 / .06);--adm-press:rgb(91 63 149 / .11);--adm-info-line:rgb(91 63 149 / .28);--acc-side:#312651;--acc-side-a:#CBBDF2;--acc-mark:#C9A8FF}
 @media (prefers-color-scheme: dark){html.adm-ui[data-accent=violett]:not([data-theme=light]){--adm-a:#7F67BA;--adm-a-d:#6750A3;--adm-a-ink:#C8B8F0;--adm-accent-bg:#2C2442;--adm-a-rgb:127 103 186;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(127 103 186 / .45)}}
 html.adm-ui[data-accent=violett][data-theme=dark]{--adm-a:#7F67BA;--adm-a-d:#6750A3;--adm-a-ink:#C8B8F0;--adm-accent-bg:#2C2442;--adm-a-rgb:127 103 186;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(127 103 186 / .45)}
+/* neo – zweiter KLXM-Stil nach neo.klxm.de: Aubergine, Seitenleiste im Aubergine-Band, hell auf Leinen */
+html.adm-ui[data-accent=neo]{--adm-a:#581D47;--adm-a-d:#46163A;--adm-a-ink:#581D47;--adm-accent-bg:#F1E4EC;--adm-a-rgb:88 29 71;--adm-hover:rgb(88 29 71 / .06);--adm-press:rgb(88 29 71 / .11);--adm-info-line:rgb(88 29 71 / .28);--acc-side:#4A1A3D;--acc-side-a:#E2B3D4;--acc-mark:#F2B8DD}
+@media (prefers-color-scheme: dark){html.adm-ui[data-accent=neo]:not([data-theme=light]){--adm-a:#B35196;--adm-a-d:#96417D;--adm-a-ink:#E2B3D4;--adm-accent-bg:#3A1531;--adm-a-rgb:179 81 150;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(179 81 150 / .45)}}
+/* Leinen-Grund nur im hellen Modus (Dunkel behält die Grundfarben der Verwaltung) */
+@media (prefers-color-scheme: light){html.adm-ui[data-accent=neo]:not([data-theme=dark]){--adm-bg:#EDE9E3;--adm-card:#F8F6F2;--adm-line:#D9D3CA}}
+html.adm-ui[data-accent=neo][data-theme=light]{--adm-bg:#EDE9E3;--adm-card:#F8F6F2;--adm-line:#D9D3CA}
+html.adm-ui[data-accent=neo][data-theme=dark]{--adm-a:#B35196;--adm-a-d:#96417D;--adm-a-ink:#E2B3D4;--adm-accent-bg:#3A1531;--adm-a-rgb:179 81 150;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(179 81 150 / .45)}
 /* bordeaux */
 html.adm-ui[data-accent=bordeaux]{--adm-a:#8A2E45;--adm-a-d:#6F2337;--adm-a-ink:#822A41;--adm-accent-bg:#F6E4E8;--adm-a-rgb:138 46 69;--adm-hover:rgb(138 46 69 / .06);--adm-press:rgb(138 46 69 / .11);--adm-info-line:rgb(138 46 69 / .28);--acc-side:#4A1E2B;--acc-side-a:#F2B8C6;--acc-mark:#FF9EB5}
 @media (prefers-color-scheme: dark){html.adm-ui[data-accent=bordeaux]:not([data-theme=light]){--adm-a:#B8556E;--adm-a-d:#963D54;--adm-a-ink:#F0AFC0;--adm-accent-bg:#3A1F27;--adm-a-rgb:184 85 110;--adm-hover:rgba(255,255,255,.06);--adm-press:rgba(255,255,255,.11);--adm-info-line:rgb(184 85 110 / .45)}}
@@ -58,6 +65,7 @@ html.adm-ui[data-accent] .fx{--fx-sel:var(--adm-a);--fx-selbg:rgb(var(--adm-a-rg
 .acc-sw[data-sw=petrol]{--sw-l:#0E6470;--sw-d:#2D7F8B;--sw-s:#143C43}
 .acc-sw[data-sw=gruen]{--sw-l:#2E6B3F;--sw-d:#408351;--sw-s:#1C3D28}
 .acc-sw[data-sw=violett]{--sw-l:#5B3F95;--sw-d:#7F67BA;--sw-s:#312651}
+.acc-sw[data-sw=neo]{--sw-l:#581D47;--sw-d:#B35196;--sw-s:#4A1A3D}
 .acc-sw[data-sw=bordeaux]{--sw-l:#8A2E45;--sw-d:#B8556E;--sw-s:#4A1E2B}
 .acc-sw[data-sw=orange]{--sw-l:#A34A0B;--sw-d:#B75C1D;--sw-s:#4A2812}
 .acc-sw[data-sw=graphit]{--sw-l:#3D434D;--sw-d:#6E7684;--sw-s:#2A2D33}

@@ -7698,4 +7698,5 @@ return [
     '{n} Websites und die gemeinsamen Daten der Installation – ohne Programmdateien.' => '{n} websites and the installation’s shared data – excluding program files.',
     '{n} weitere' => '{n} more',
     '1 Sicherung' => '1 backup',
+    'KLXM Neo' => 'KLXM Neo',
 ];
