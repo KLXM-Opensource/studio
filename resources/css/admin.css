@@ -3719,3 +3719,8 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 @media (min-width:1101px){.st-layout.ds.has-preview{grid-template-columns:minmax(0,1fr) minmax(320px,34%)}}
 .ds-savebar{gap:8px}
 .ds-savebar [data-ds-reset]{margin-left:auto}
+/* Style-Editor: Felder bleiben in der (schmaleren) mittleren Spalte – Schriftauswahl und Proben schrumpfen mit */
+.ds-panel,.ds-panel .ds-toks,.ds-tok{min-width:0}
+.ds-font{grid-template-columns:minmax(0,1fr);max-width:min(560px,100%)}
+.ds-font select{width:100%;min-width:0;text-overflow:ellipsis}
+.ds-sample{min-width:0;overflow-wrap:anywhere}
