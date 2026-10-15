@@ -58,7 +58,7 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
   <li class="net-strip__item<?= $nMaint ? ' is-warn' : ' is-calm' ?>"><a href="#websites" data-net-show="maintenance"><strong><?= $nMaint ?></strong> <span><?= e(__('im Wartungsmodus')) ?></span></a></li>
   <li class="net-strip__item<?= $inbox ? ' is-hot' : ' is-calm' ?>"><strong><?= $inbox ?></strong> <span><?= e(__('neue Anfragen')) ?></span></li>
   <li class="net-strip__item<?= $review ? ' is-hot' : ' is-calm' ?>"><strong><?= $review ?></strong> <span title="<?= e(__('Änderungen zur Freigabe (API, MCP, KI)')) ?>"><?= e(__('zur Freigabe')) ?></span></li>
-  <li class="net-strip__item net-strip__item--end is-calm"><strong><?= e($size($bytes)) ?></strong> <span title="<?= e(__('Datenbanken, Medien der Websites und geteilte Pools')) ?>"><?= e(__('Speicher')) ?></span></li>
+  <li class="net-strip__item net-strip__item--end is-calm"><a href="<?= e(url('/admin/network/speicher')) ?>" title="<?= e(__('Datenbanken, Medien der Websites und geteilte Pools – aufschlüsseln')) ?>"><strong><?= e($size($bytes)) ?></strong> <span><?= e(__('Speicher')) ?></span></a></li>
 </ul>
 
 <?php if ($attention): ?>
@@ -173,7 +173,7 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
           <dt><?= e(__('Umgebung')) ?></dt><dd><?= e($envLabel[$env] ?? $env) ?><?= $noindex ? ' · noindex' : '' ?><?= $maint ? ' · ' . e(__('Wartungsmodus')) : '' ?></dd>
           <dt><?= e(__('Kit')) ?></dt><dd><?= e($s['theme_label'] ?? ($s['theme'] ?? '–')) ?></dd>
           <dt><?= e(__('Funktionen')) ?></dt><dd title="<?= e(implode(', ', $s['features_off'] ?? [])) ?>"><?= e(ucfirst((string) ($s['preset'] ?? 'full'))) ?><?= !empty($s['features_off']) ? ' · ' . e(__('{n} aus', ['n' => count($s['features_off'])])) : '' ?><?= !empty($s['extensions']) ? ' · ' . e(implode(', ', $s['extensions'])) : '' ?><?= !empty($s['features_delegated']) ? ' · ' . e(__('Website schaltet selbst')) : '' ?></dd>
-          <dt><?= e(__('Speicher')) ?></dt><dd><?= e($size(isset($s['db_size']) ? (int) $s['db_size'] : null)) ?> <?= e(__('DB')) ?> · <?= e($size((int) ($s['media_size'] ?? 0))) ?> <?= e(__('eigene Medien')) ?>
+          <dt><?= e(__('Speicher')) ?></dt><dd><?= e($size(isset($s['db_size']) ? (int) $s['db_size'] : null)) ?> <?= e(__('DB')) ?> · <?= e($size((int) ($s['media_size'] ?? 0))) ?> <?= e(__('eigene Medien')) ?> · <a href="<?= e(url('/admin/network/speicher') . '#su-' . $k) ?>"><?= e(__('aufschlüsseln')) ?></a>
             <?php foreach ((array) ($s['pools'] ?? []) as $pk): $p = $pools[$pk] ?? null; if (!$p) continue; $pn = count($p['sites']); ?>
             <span class="net-pool"><?= icon('images') ?><span><?= e(__('Pool „{pool}“', ['pool' => $p['label']])) ?> <?= e($size((int) ($p['size'] ?? 0))) ?> · <?= e($pn > 1 ? __('geteilt mit {n} Websites', ['n' => $pn]) : __('nur diese Website')) ?></span></span>
             <?php endforeach; ?></dd>

@@ -35,6 +35,8 @@ final class Dashboard
             'upcoming' => [__('Termine (7 Tage)'), 'calendar-dots', 'third', true],
             'search' => [__('Gesucht, nicht gefunden'), 'magnifying-glass', 'half', true],
             'health' => [__('Technik & Betrieb'), 'heartbeat', 'half', true],
+            // Speicher der Website aufgeschlüsselt (Core\StorageUsage) – nur Administration
+            'storage' => [__('Speicher'), 'hard-drives', 'half', true],
             // Push-Benachrichtigungen (Core\Push\Stats): Abos, Zu-/Abgänge, letzte Mitteilung – nur Zähler
             'push' => [__('Mitteilungen'), 'bell-ringing', 'third', true],
         ];
@@ -56,7 +58,7 @@ final class Dashboard
             'top' => $pages,
             'upcoming' => Features::on('calendar', false) && array_filter(\Core\Data\Calendar::tables(), fn($t) => can('data.edit', $t['handle'])) !== [],
             'search' => $pages && Metrics::searchMisses(1) !== null,
-            'health' => self::isAdmin($user),
+            'health', 'storage' => self::isAdmin($user),
             'push' => \Core\Push\Push::on() && can('push.view'),
             default => false,
         };
@@ -170,6 +172,7 @@ final class Dashboard
             'upcoming' => fn() => Metrics::upcoming(),
             'search' => fn() => Metrics::searchMisses(),
             'push' => fn() => \Core\Push\Stats::card(),
+            'storage' => fn() => \Core\StorageUsage::site(site()->key),
             'health' => fn() => array_map(fn($l, $v) => [$l, $v], array_keys($h = Metrics::health()), $h),
             default => null,
         };

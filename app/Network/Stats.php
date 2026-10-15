@@ -373,7 +373,7 @@ final class Stats
         return $found;
     }
 
-    private static function db(string $key): Database
+    public static function db(string $key): Database
     {
         if ($key === site()->key) return app()->db;
         $cfg = (array) Network::config($key)->get('db');

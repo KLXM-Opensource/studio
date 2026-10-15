@@ -34,7 +34,7 @@ final class NetworkController extends AdminController
     }
 
     /** Bereiche unter /admin/network/{bereich} (ohne Bereich: Websites) */
-    public const SECTIONS = ['administratoren', 'email', 'neu', 'geteilt', 'protokoll'];
+    public const SECTIONS = ['administratoren', 'email', 'neu', 'geteilt', 'speicher', 'protokoll'];
 
     public function section(Request $r, string $section): Response
     {
@@ -49,6 +49,9 @@ final class NetworkController extends AdminController
         $fresh = $r->str('refresh') === '1';
         $stats = Stats::all($fresh);
         if ($fresh) return Response::redirect(url('/admin/network'));
+        // Speicher: aufgeschlüsselt je Website (Core\StorageUsage, stündlich), „Neu zählen“ verwirft den Zwischenspeicher
+        if ($section === 'speicher' && $r->str('neu') === '1') { \Core\StorageUsage::forget(); return Response::redirect(url('/admin/network/speicher')); }
+        $usage = $section === 'speicher' ? array_map(fn($k) => \Core\StorageUsage::site((string) $k), array_combine(array_keys($stats), array_keys($stats))) : [];
         $warn = [];
         foreach ($stats as $k => $s) $warn[$k] = Stats::warnings($s);
         $newSite = app()->session->get('_net_newsite');
@@ -61,7 +64,7 @@ final class NetworkController extends AdminController
         return $this->view('network/index', ['stats' => $stats, 'warn' => $warn, 'accounts' => Network::accounts(),
             'invites' => \Core\Invites::open(true), 'inviteLink' => is_array($inviteLink) ? $inviteLink : null, 'inviteOld' => is_array($old) ? $old : null,
             'log' => Network::recentLog($section === 'protokoll' ? 200 : 20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
-            'section' => $section, 'logSite' => $r->str('website'), 'logQ' => $r->str('q'),
+            'section' => $section, 'usage' => $usage, 'install' => $section === 'speicher' ? \Core\StorageUsage::installation() : null, 'logSite' => $r->str('website'), 'logQ' => $r->str('q'),
             'css' => ['css/passkey.css', 'css/invite.css', 'css/network.css']]);
     }
 

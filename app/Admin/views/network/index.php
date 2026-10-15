@@ -54,10 +54,10 @@ $section ??= '';
 $nm = \Core\Mail\Accounts::network();
 $secs = ['' => [__('Websites'), 'globe', (string) count($stats)], 'administratoren' => [__('Administratoren'), 'users-three', (string) count($accounts)],
     'email' => [__('E-Mail'), 'envelope-simple', $nm && \Core\Mail\Accounts::ready($nm) ? '' : '!'], 'geteilt' => [__('Geteilt'), 'share-network', ''],
-    'protokoll' => [__('Protokoll'), 'clock-counter-clockwise', '']];
+    'speicher' => [__('Speicher'), 'hard-drives', ''], 'protokoll' => [__('Protokoll'), 'clock-counter-clockwise', '']];
 $secUrl = fn(string $k) => url('/admin/network' . ($k === '' ? '' : '/' . $k));
 // Alte Sprungmarken (/admin/network#konten …) auf die Bereiche umleiten (resources/js/_network.js)
-$oldHash = ['konten' => 'administratoren', 'net-invite' => 'administratoren', 'net-auth' => 'administratoren', 'email' => 'email', 'neu' => 'neu', 'geteilt' => 'geteilt', 'protokoll' => 'protokoll'];
+$oldHash = ['konten' => 'administratoren', 'net-invite' => 'administratoren', 'net-auth' => 'administratoren', 'email' => 'email', 'neu' => 'neu', 'geteilt' => 'geteilt', 'speicher' => 'speicher', 'protokoll' => 'protokoll'];
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><?= e(__('Netzwerk-Administration')) ?></p><h1><?= e(match ($section) { '' => __('Alle Websites'), 'neu' => __('Neue Website'), 'email' => __('E-Mail-Konto des Netzwerks'), default => $secs[$section][0] }) ?></h1>

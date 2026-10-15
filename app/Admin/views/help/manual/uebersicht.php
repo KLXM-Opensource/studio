@@ -41,6 +41,7 @@
     <li><b>Anfragen je Woche</b>, <b>Meistbearbeitete Seiten</b> und <b>Termine</b> der nächsten 7 Tage aus Kalender-Tabellen.</li>
     <li><b>Gesucht, nicht gefunden:</b> Suchbegriffe auf der Website ohne Treffer – nur, wenn die Suche sie zählt (Grundeinstellungen → Suche); gespeichert werden nur Begriff und Anzahl, nichts über die Besucher.</li>
     <li><b>Technik &amp; Betrieb</b> (nur Administration): Datenbank, Ordner, Schlüssel, Sicherung, Suche, KI, externe Quellen.</li>
+    <li><b>Speicher</b> (nur Administration): wie viel Platz die Website belegt – aufgeteilt in Bilder, Videos, Dokumente, Papierkorb, automatisch erzeugte Bildgrößen, Datenbank, Suchindex, Zwischenspeicher, Erweiterungen und Sicherungen. Wird stündlich neu gezählt. Die Netzwerk-Administration sieht alle Websites unter <b>Netzwerk → Speicher</b>.</li>
   </ul>
   <p>Diese Karten laden kurz nach der Seite; die Zahlen sind höchstens 5 Minuten alt.</p>
 

@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Speicher aufgeschlüsselt
+- Übersicht jeder Website: Karte **Speicher** (nur Administration) mit Balken wie in den macOS-Speicher-Einstellungen – Bilder, Videos, Audio, Dokumente, Sonstige Dateien, Papierkorb der Mediathek, Bildgrößen & Vorschaubilder, Datenbank, Suchindex, KI, Zwischenspeicher, Erweiterungen (je Ordner benannt) und Sicherungen; genutzte Medien-Pools als Hinweis.
+- Netzwerk → **Speicher** (`/admin/network/speicher`): alle Websites nach Größe mit Balken, je Website aufklappbar aufgeschlüsselt, dazu der gemeinsame Speicher der Installation (geteilte Pools, Protokolle, Sitzungen, Chat, Support, hochgeladene Kits, Sicherungen ohne Website); „Neu zählen“. Die Zahl „Speicher“ oben in der Netzwerk-Übersicht und „aufschlüsseln“ in den Details jeder Website führen dorthin.
+- `Core\StorageUsage::site($key)` / `installation()` (stündlich in `storage/cache/storage-usage/` zwischengespeichert, `forget()`); Medien nach Art aus der Mediathek (Summe der Originale), Bildgrößen = Rest des Medienordners.
+
 ### Einheitliche Oberfläche der Verwaltung (`Core\AdminUi`)
 - Alle Bereiche nach dem Vorbild der macOS-Systemeinstellungen: Kopf mit einer Zeile Beschreibung, **Bereichsliste links** mit Symbolen (auf dem Handy ein Auswahlfeld), Inhalt als gruppierte Zeilen. Umgestellt: Netzwerk, Grundeinstellungen, Style-Editor, **Konto** (Profil · Anmeldung & Sicherheit · Darstellung · Mitteilungen · Favoriten · Erweiterungen), Cookie-Einwilligung sowie die Erweiterungen Mitglieder und AVV.
 - `Core\AdminUi`: `head()`, `open()`/`close()` (eine Adresse je Bereich), `tabs()` (Bereiche auf einer Seite, `#bereich`, Bereiche mit Fehlern öffnen beim Laden), `group()`, `row()`, `link()`, `toolbar()`, `savebar()`. Musterseite mit allen Bausteinen live: **Handbuch & Hilfe → Oberfläche** (`/admin/hilfe/ui`); Regeln für Erweiterungen (Anmelden mit `adminPage()` und Art, ein Menüpunkt, Unterseiten in der Bereichsliste) im Entwicklerhandbuch → Oberfläche.

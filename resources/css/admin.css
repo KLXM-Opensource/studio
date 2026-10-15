@@ -3736,4 +3736,32 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .ui-code code{padding:0;border:0;background:none;font:inherit;color:inherit}
 .ui-demo-toggle{display:inline-flex;gap:6px;align-items:center}
 /* Gruppen direkt im Rahmen von AdminUi::open() (ohne .adm-panel--groups) */
-.us-main > .set-group + .set-group,.us-main > .set-group + .ui-h3,.us-main > .ui-code + .set-group,.us-main > form + .ui-h3{margin-top:24px}
+.us-main .set-group + .set-group,.us-main .set-group + section.set-group,.us-main > .set-group + .ui-h3,.us-main > .ui-code + .set-group,.us-main > form + .ui-h3{margin-top:24px}
+
+/* Speicher (Core\StorageUsage): Balken wie in den macOS-Speicher-Einstellungen – Übersicht (Karte) und Netzwerk → Speicher */
+:root{--su-1:#3B82C4;--su-2:#8E5BC7;--su-3:#C2589A;--su-4:#D9822B;--su-5:#8A8F98;--su-6:#C9524A;--su-7:#4FB3BF;--su-8:#2F9E7A;--su-9:#C7A23A;--su-10:#5C6BC0;--su-11:#B0B6BF;--su-12:#6D8F3F;--su-13:#7A6A58}
+.su{display:grid;gap:10px}
+.su-total{margin:0;font-size:13px}.su-total strong{font-size:22px;font-weight:700;margin-right:4px;font-variant-numeric:tabular-nums}
+.su-bar,.su-mini{display:flex;overflow:hidden;border-radius:6px;background:var(--adm-fill);gap:1.5px}
+.su-bar{height:14px}
+.su-mini{height:6px;margin-top:6px;max-width:420px;background:transparent}
+.su-seg{display:block;min-width:2px;height:100%}
+.su-t1{background:var(--su-1)}.su-t2{background:var(--su-2)}.su-t3{background:var(--su-3)}.su-t4{background:var(--su-4)}.su-t5{background:var(--su-5)}.su-t6{background:var(--su-6)}.su-t7{background:var(--su-7)}
+.su-t8{background:var(--su-8)}.su-t9{background:var(--su-9)}.su-t10{background:var(--su-10)}.su-t11{background:var(--su-11)}.su-t12{background:var(--su-12)}.su-t13{background:var(--su-13)}
+.su-list{list-style:none;margin:0;padding:0;display:grid}
+.su-row{display:grid;grid-template-columns:10px 20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--adm-line)}
+.su-list > .su-row:first-child{border-top:0}
+.su-dot{width:10px;height:10px;border-radius:3px}
+.su-row__ico{display:flex;color:var(--adm-t3)}.su-row__ico .ico{width:18px;height:18px}
+.su-row__main{display:grid;min-width:0}.su-row__label{font-size:14px}.su-row__sub{font-size:12px;color:var(--adm-t3);overflow-wrap:anywhere}
+.su-row__val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
+.su-row__val small{display:block;font-size:11.5px;color:var(--adm-t3)}
+.su-more > summary{cursor:pointer;font-size:13px;color:var(--adm-a-ink, var(--adm-a));padding:4px 0}
+.su-note{margin:0;font-size:12.5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.su-note .ico{width:15px;height:15px}
+.su-site > summary{cursor:pointer;list-style:none}.su-site > summary::-webkit-details-marker{display:none}
+.su-site > summary .set-row__ctl strong{font-variant-numeric:tabular-nums}
+.su-site + .su-site{border-top:1px solid var(--adm-line)}
+.su-site__body{padding:4px 16px 16px}
+.su-site[open] > summary{background:var(--adm-hover)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--su-11:#6B7280;--su-13:#9C8A74}}
+:root[data-theme=dark]{--su-11:#6B7280;--su-13:#9C8A74}
