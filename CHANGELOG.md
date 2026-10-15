@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Style-Editor: „Dunkelmodus anbieten“ vorn
+- Der Schalter für das dunkle Farbschema (in allen Kits vorhanden, stand meist weit unten) steht jetzt im Style-Editor der Verwaltung und der Website ganz oben im ersten Bereich, mit Erklärung (`Design::darkFirst()`).
+
 ### Bearbeitungssperre: „Nachricht schreiben“
 - Im Hinweis „… bearbeitet diese Seite gerade“ öffnet **Nachricht schreiben** eine Direktnachricht im Chat an diese Person, mit Link zur Seite im Eingabefeld (nur wenn beide den Chat nutzen können). Chat-Seite: `/admin/chat?an={Person}&text={Entwurf}`.
 

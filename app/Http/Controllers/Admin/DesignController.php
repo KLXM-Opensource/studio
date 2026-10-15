@@ -182,6 +182,7 @@ final class DesignController extends AdminController
             }
         }
         foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = $tr($p['label'] ?? '');
+        $schema = Design::darkFirst($schema);
         foreach ((array) (Design::def()['presets'] ?? []) as $key => $p) {
             if (isset($schema['presets'][$key]) && !empty($p['description'])) $schema['presets'][$key]['description'] = $tr((string) $p['description']);
         }

@@ -13,6 +13,7 @@ foreach ((array) ($schema['groups'] ?? []) as $gi => $g) {
         if (isset($t['options'])) $schema['groups'][$gi]['tokens'][$ti]['options'] = array_map($tr, (array) $t['options']);
     }
 }
+$schema = \Core\Design::darkFirst($schema);   // „Dunkelmodus anbieten“ vorn im ersten Bereich
 foreach (['presets', 'fonts'] as $k) foreach ((array) ($schema[$k] ?? []) as $key => $p) $schema[$k][$key]['label'] = empty($p['mine']) ? $tr($p['label'] ?? '') : (string) $p['label'];
 // Eigene Designs (Core\Design::minePresets, Schlüssel „mine:{id}“) eigener Abschnitt; Kit-Vorlagen wie bisher
 $kitPresets = array_filter((array) ($schema['presets'] ?? []), fn($p) => empty($p['mine']));

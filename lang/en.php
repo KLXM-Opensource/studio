@@ -7598,4 +7598,6 @@ return [
     'wirklich senden' => 'really send',
     'Hallo, ich würde gern an dieser Seite arbeiten: {url}' => 'Hi, I would like to work on this page: {url}',
     'Nachricht schreiben' => 'Send a message',
+    'Dunkelmodus anbieten' => 'Offer dark mode',
+    'Ist das Gerät der Besucher auf dunkel gestellt, erscheint die Website in dunklen Farben. Aus: Die Website bleibt immer hell – sinnvoll, wenn Logo oder Bilder auf dunklem Grund nicht gut aussehen.' => 'If the visitor’s device is set to dark, the website appears in dark colours. Off: the website always stays light – useful if the logo or images do not look good on a dark background.',
 ];

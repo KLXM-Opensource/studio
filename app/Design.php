@@ -93,6 +93,28 @@ final class Design
         return $out;
     }
 
+    /**
+     * Style-Editor (Verwaltung und Website): Schalter „dark“ (alle Kits) ganz vorn in den ersten Bereich, einheitlich benannt
+     * und erklärt – in den Kits steht er sonst weit unten (z. B. „Bewegung & Farbschema“) und wird übersehen.
+     */
+    public static function darkFirst(array $schema): array
+    {
+        $tok = null;
+        foreach ((array) ($schema['groups'] ?? []) as $gi => $g) foreach ((array) ($g['tokens'] ?? []) as $ti => $t) {
+            if (($t['name'] ?? '') === 'dark' && ($t['type'] ?? '') === 'bool') {
+                $tok = $t;
+                unset($schema['groups'][$gi]['tokens'][$ti]);
+                $schema['groups'][$gi]['tokens'] = array_values($schema['groups'][$gi]['tokens']);
+                break 2;
+            }
+        }
+        if (!$tok || empty($schema['groups'])) return $schema;
+        $tok['label'] = __('Dunkelmodus anbieten');
+        $tok['help'] = __('Ist das Gerät der Besucher auf dunkel gestellt, erscheint die Website in dunklen Farben. Aus: Die Website bleibt immer hell – sinnvoll, wenn Logo oder Bilder auf dunklem Grund nicht gut aussehen.');
+        array_unshift($schema['groups'][0]['tokens'], $tok);
+        return $schema;
+    }
+
     /** Gespeicherte Werte der Website (theme-bezogen), ergänzt um Standardwerte */
     public static function values(): array
     {
