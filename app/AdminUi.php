@@ -70,7 +70,7 @@ final class AdminUi
     }
 
     /**
-     * Bereiche auf derselben Seite (Wechsel ohne Neuladen, Adresse #bereich): $sections id => [label, icon, html, warn?, error?].
+     * Bereiche auf derselben Seite (Wechsel ohne Neuladen, Adresse #bereich): $sections id => [label, icon, html, badge?, warn?, error?] oder '-' (Trennlinie).
      * $form: ['action' => …, 'savebar' => true|'Text'] umschließt alles mit einem Formular (sonst bringt jeder Bereich eigene mit).
      */
     public static function tabs(array $sections, array $form = [], string $label = ''): string
@@ -87,6 +87,7 @@ final class AdminUi
             $h .= '<button type="button" role="tab" id="tab-' . e($id) . '" aria-controls="panel-' . e($id) . '" data-tab="' . e($id) . '" aria-selected="' . ($i === 0 ? 'true' : 'false') . '"'
                 . ($i === 0 ? '' : ' tabindex="-1"') . ($warn !== '' ? ' class="is-warn" title="' . e($warn) . '"' : '') . ($err ? ' data-tab-error' : '') . '>'
                 . '<span class="adm-tabs__ico" aria-hidden="true">' . icon((string) ($sec['icon'] ?? 'circle')) . '</span><span class="adm-tabs__label">' . e((string) $sec['label']) . '</span>'
+                . (($sec['badge'] ?? '') !== '' && ($sec['badge'] ?? null) !== null ? '<span class="adm-tabs__badge">' . e((string) $sec['badge']) . '</span>' : '')
                 . ($warn !== '' ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e($warn) . '</span>' : '') . '</button>';
             $i++;
         }

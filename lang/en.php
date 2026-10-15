@@ -7660,4 +7660,5 @@ return [
     'Server' => 'Server',
     'Wird beim Speichern geprüft' => 'Checked on save',
     'Öffnet eine Unterseite' => 'Opens a subpage',
+    'Installierte Erweiterungen' => 'Installed extensions',
 ];

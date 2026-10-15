@@ -51,17 +51,10 @@ $sw = function (bool $on, bool $disabled, string $label) {
 </section>
 <?php endif; ?>
 
-<nav class="ft-toc" aria-label="<?= e(__('Gruppen')) ?>">
-  <?php foreach ($groups as $gk => [$gl, $gi]): if (empty($rows[$gk])) continue; ?>
-  <a href="#g-<?= e($gk) ?>"><?= icon($gi) ?> <?= e($gl) ?> <small><?= count(array_filter($rows[$gk], fn($x) => $x['on'])) ?>/<?= count($rows[$gk]) ?></small></a>
-  <?php endforeach; ?>
-  <a href="#erweiterungen"><?= icon('puzzle-piece') ?> <?= e(__('Erweiterungen')) ?> <small><?= $extOn ?>/<?= count($exts) ?></small></a>
-  <a href="#protokoll"><?= icon('clock') ?> <?= e(__('Protokoll')) ?></a>
-</nav>
-
+<?php $secs = []; ?>
 <?php foreach ($groups as $gk => [$gl, $gi]): if (empty($rows[$gk])) continue; ?>
-<section class="adm-card ft-group" id="g-<?= e($gk) ?>" aria-labelledby="g-<?= e($gk) ?>-h">
-  <h2 id="g-<?= e($gk) ?>-h"><?= icon($gi) ?> <?= e($gl) ?></h2>
+<?php ob_start(); ?>
+<div class="adm-card ft-group">
   <?php foreach ($rows[$gk] as $row):
     $id = 'f-' . preg_replace('~[^a-z0-9]~', '-', $row['key']);
     $locked = $row['lock'] !== null;
@@ -120,11 +113,12 @@ $sw = function (bool $on, bool $disabled, string $label) {
     </div>
   </article>
   <?php endforeach; ?>
-</section>
-<?php endforeach; ?>
+</div>
+<?php $secs['g-' . $gk] = ['label' => $gl, 'icon' => $gi, 'html' => ob_get_clean(),
+    'badge' => count(array_filter($rows[$gk], fn($x) => $x['on'])) . '/' . count($rows[$gk])]; endforeach; ?>
 
-<section class="adm-card ft-group" id="erweiterungen" aria-labelledby="ft-ext-h">
-  <h2 id="ft-ext-h"><?= icon('puzzle-piece') ?> <?= e(__('Erweiterungen')) ?></h2>
+<?php ob_start(); ?>
+<div class="adm-card ft-group">
   <p class="adm-muted"><?= e(__('Installiert im Ordner extensions/ oder per Composer. Abschalten ist nicht destruktiv: Daten und Einstellungen bleiben, die Erweiterung wird nur nicht mehr gestartet.')) ?></p>
   <?php if (!$exts): ?><p><?= e(__('Keine Erweiterungen installiert.')) ?></p><?php endif; ?>
   <?php foreach ($exts as $name => $x):
@@ -194,10 +188,11 @@ $sw = function (bool $on, bool $disabled, string $label) {
     </div>
   </article>
   <?php endforeach; ?>
-</section>
+</div>
+<?php $secs['-'] = '-'; $secs['erweiterungen'] = ['label' => __('Installierte Erweiterungen'), 'icon' => 'puzzle-piece', 'html' => ob_get_clean(), 'badge' => $extOn . '/' . count($exts)]; ?>
 
-<section class="adm-card" id="protokoll" aria-labelledby="ft-log-h">
-  <h2 id="ft-log-h"><?= icon('clock') ?> <?= e(__('Letzte Änderungen')) ?></h2>
+<?php ob_start(); ?>
+<div class="adm-card">
   <?php if (!$log): ?><p class="adm-muted"><?= e(__('Noch keine Änderungen über diese Seite.')) ?></p><?php else: ?>
   <table class="adm-table ft-log">
     <thead><tr><th><?= e(__('Zeit')) ?></th><th><?= e(__('Wer')) ?></th><th><?= e(__('Was')) ?></th><th><?= e(__('Änderung')) ?></th></tr></thead>
@@ -210,7 +205,9 @@ $sw = function (bool $on, bool $disabled, string $label) {
     </tbody>
   </table>
   <?php endif; ?>
-</section>
+</div>
+<?php $secs['protokoll'] = ['label' => __('Letzte Änderungen'), 'icon' => 'clock', 'html' => ob_get_clean()]; ?>
+<?= \Core\AdminUi::tabs($secs, [], __('Gruppen')) ?>
 
 <dialog class="adm-dialog adm-dialog--small ft-dialog" id="ft-dialog" aria-labelledby="ft-dialog-h">
   <form method="dialog" class="ft-dialog__form">
