@@ -48,3 +48,4 @@ body.pv{margin:0;display:flex;flex-direction:column;background:var(--bg);color:v
 .textLayer br::selection{background:transparent}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:0;cursor:default;user-select:none}
 .textLayer.selecting .endOfContent{top:0}
+.pv-newtab{text-decoration:none}.pv-close{font-size:22px}

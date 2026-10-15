@@ -1,5 +1,5 @@
 <?php
-/** PDF-Viewer (PDF.js). @var array $m  @var bool $embed  @var bool $mini (?embed=mini: nur Blättern) */
+/** PDF-Viewer (PDF.js). @var array $m  @var bool $embed  @var bool $mini (?embed=mini: nur Blättern)  @var bool $modal (?embed=modal: im Modal der Website, mit Schließen) */
 use Core\Media;
 $name = Media::displayName($m);
 $pages = Media::pages($m);
@@ -29,6 +29,7 @@ $fileUrl = Media::url($m);
     <button type="button" class="pv-btn" data-zoom-in aria-label="Vergrößern">+</button>
   </div>
   <a class="pv-dl" href="<?= e($fileUrl) ?>" download>Herunterladen <span aria-hidden="true">↓</span></a>
+  <?php if (!empty($modal)): ?><a class="pv-btn pv-newtab" href="<?= e((string) Media::viewerUrl($m)) ?>" target="_blank" rel="noopener" aria-label="<?= e(lt('In neuem Tab öffnen')) ?>" title="<?= e(lt('In neuem Tab öffnen')) ?>">↗</a><button type="button" class="pv-btn pv-close" data-close aria-label="<?= e(lt('Schließen')) ?>" title="<?= e(lt('Schließen')) ?>">×</button><?php endif; ?>
 </header>
 <main class="pv-doc" data-pdf="<?= e($fileUrl) ?>" tabindex="0" aria-label="Dokument: <?= e($name) ?>">
   <p class="pv-status" data-status role="status">Dokument wird geladen …</p>

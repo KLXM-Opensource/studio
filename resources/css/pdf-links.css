@@ -17,3 +17,11 @@
 .cms-pdfpop a:focus-visible,.cms-pdfpop__x:focus-visible{outline:3px solid var(--kit-accent,currentColor);outline-offset:2px}
 @media (max-width:420px){.cms-pdfpop{flex-direction:column}.cms-pdfpop__thumb{width:4.5rem}}
 @media (prefers-color-scheme:dark){.cms-pdfpop__thumb{box-shadow:0 1px 4px rgb(0 0 0/.5)}}
+/* Viewer im Modal: deutlich kleiner als das Fenster, Seite dahinter abgedunkelt sichtbar */
+.cms-pdfdlg{width:min(68rem,calc(100vw - 4rem));height:calc(100dvh - 4rem);max-width:none;max-height:none;margin:auto;padding:0;border:0;
+  border-radius:calc(var(--kit-radius,10px) + 4px);overflow:hidden;background:#525659;color:#fff;box-shadow:0 30px 80px -20px rgb(0 0 0/.55);display:flex;flex-direction:column}
+.cms-pdfdlg:not([open]){display:none}
+.cms-pdfdlg::backdrop{background:rgb(15 18 22/.62);backdrop-filter:blur(2px)}
+.cms-pdfdlg__frame{flex:1;width:100%;border:0;background:#525659}
+.cms-pdfdlg-open{overflow:hidden}
+@media (max-width:640px){.cms-pdfdlg{width:calc(100vw - 1.5rem);height:calc(100dvh - 1.5rem)}}

@@ -1,6 +1,8 @@
 /*
  * PDF-Links auf der Website (Core\PdfLinks): Klick öffnet eine Karte mit Vorschau der ersten Seite, Titel, „PDF · Größe“ und
  * den Knöpfen „Ansehen“ (PDF-Viewer) und „Herunterladen“ (Datei) – im Stil des Kits (Klassen aus data-btn / data-btn2).
+ * „Ansehen“ öffnet den Viewer in einem Modal (<dialog>, nicht fensterfüllend, damit klar ist: die Seite liegt dahinter).
+ * In Slidern ([data-cms-slider]) und Bereichen mit [data-pdf-direct] öffnet der Klick gleich das Modal – ohne Karte.
  * Ohne Skript, mit Strg/⌘/Umschalt oder mittlerer Maustaste gilt das href des Links (Wahl im Linkdialog).
  * Tastatur: Fokus auf „Ansehen“, Tab bleibt in der Karte, Esc schließt und kehrt zum Link zurück.
  */
@@ -10,7 +12,29 @@ if (cfg.css && !d.querySelector('link[data-cms-pdf-css]')) {
   const l = d.createElement('link'); l.rel = 'stylesheet'; l.href = cfg.css; l.dataset.cmsPdfCss = ''; d.head.append(l);
 }
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-let pop = null, opener = null;
+let pop = null, opener = null, dlg = null;
+const DIRECT = '[data-cms-slider],[data-pdf-direct]';
+
+/** Viewer im Modal (eigene Seite /pdf/ID?embed=1 im iframe); Esc, Klick daneben oder × schließen, Fokus zurück zum Link */
+function viewer(a) {
+  const x = a.dataset, back = a;
+  close(false);
+  dlg?.remove();
+  dlg = d.createElement('dialog');
+  dlg.className = 'cms-pdfdlg';
+  dlg.setAttribute('aria-label', x.pdfTitle || a.textContent.trim());
+  const src = x.pdfView + (x.pdfView.includes('?') ? '&' : '?') + 'embed=modal';   // Viewer bringt Schließen + Neuer Tab mit
+  dlg.innerHTML = `<iframe class="cms-pdfdlg__frame" src="${esc(src)}" title="${esc(x.pdfTitle || 'PDF')}"></iframe>`;
+  d.body.append(dlg);
+  const shut = () => dlg?.close();
+  const onMsg = e => { if (e.origin === location.origin && e.data?.cmsPdf === 'close') shut(); };
+  addEventListener('message', onMsg);
+  dlg.addEventListener('click', e => { if (e.target === dlg) shut(); });   // Klick auf den abgedunkelten Rand
+  dlg.addEventListener('close', () => { removeEventListener('message', onMsg); dlg?.remove(); dlg = null; d.documentElement.classList.remove('cms-pdfdlg-open'); back.focus({ preventScroll: true }); });
+  d.documentElement.classList.add('cms-pdfdlg-open');
+  dlg.showModal();
+  dlg.querySelector('iframe').focus();
+}
 
 function close(back) {
   if (!pop) return;
@@ -49,6 +73,8 @@ function open(a) {
   pop.querySelector('a')?.focus({ preventScroll: true });
   pop.querySelector('.cms-pdfpop__x').addEventListener('click', () => close(true));
   pop.querySelector('a[download]').addEventListener('click', () => setTimeout(() => close(false), 0));
+  const view = pop.querySelector('a:not([download])');
+  view.addEventListener('click', e => { if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return; e.preventDefault(); viewer(a); });
   pop.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); close(true); }
     else if (e.key === 'Tab') {   // Fokus in der Karte halten
@@ -65,6 +91,7 @@ d.addEventListener('click', e => {
   if (pop && !pop.contains(e.target) && a !== opener) close(false);
   if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || a.closest('[contenteditable="true"]')) return;
   e.preventDefault();
+  if (a.closest(DIRECT)) { viewer(a); return; }   // Slider u. Ä.: gleich der Viewer, keine Karte über laufender Bewegung
   if (a === opener) { close(true); return; }
   open(a);
 });

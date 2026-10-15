@@ -41,6 +41,7 @@ final class PdfController
         }
         $html = Theme::capture(ROOT . '/app/Views/pdf-viewer.php', [
             'm' => $m, 'embed' => isset($r->query['embed']), 'mini' => ($r->query['embed'] ?? '') === 'mini',   // mini: nur Blättern (Seitenleiste der Mediathek)
+            'modal' => ($r->query['embed'] ?? '') === 'modal',   // modal: im Modal der Website (js/pdf-links.mjs) – mit Schließen und Neuer Tab
             'back' => isset($r->query['embed']) ? null : url('/'),
         ]);
         return (new Response($html))

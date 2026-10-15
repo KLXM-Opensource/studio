@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PDF-Links: Karte überall, Betrachter im Modal
+- Die Auswahl „Ansehen | Herunterladen“ erscheint bei allen Links auf PDFs der Website, auch bei Buttons von Kits (`PdfLinks::enhance()`). „Ansehen“ öffnet den Viewer in einem Modal statt der ganzen Seite; in Slidern (bzw. `[data-pdf-direct]`) öffnet der Klick direkt das Modal.
+
 ### Mediathek: Aktionen in der Seitenleiste
 - Rechts unter der Vorschau: **Datei ersetzen …**, **Original öffnen** und **⋯** (dasselbe Menü wie der Rechtsklick) – Aktionen nicht mehr nur per Rechtsklick auffindbar.
 

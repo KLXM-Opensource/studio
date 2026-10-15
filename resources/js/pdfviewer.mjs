@@ -16,6 +16,10 @@ const ZOOMS = [0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 let pdf, pages = [], scale = 1, fit = true, current = 1;
 
 $('[data-back]')?.addEventListener('click', () => (history.length > 1 ? history.back() : (location.href = '/')));
+// Im Modal der Website (?embed=modal): Schließen und Esc an die Seite melden (js/pdf-links.mjs)
+const closeModal = () => parent !== window && parent.postMessage({ cmsPdf: 'close' }, location.origin);
+$('[data-close]')?.addEventListener('click', closeModal);
+if ($('[data-close]')) document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 async function start() {
   try {
