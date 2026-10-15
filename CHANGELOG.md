@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Gerade online
+- Übersicht jeder Website und Netzwerk-Übersicht zeigen, wer gerade angemeldet ist und wo (Seite der Website bzw. Bereich der Verwaltung, vor wie vielen Minuten); im Netzwerk oben für alle Websites und je Karte, Klick wechselt per Einmal-Anmeldung an den Ort (`Presence::ONLINE`, Herzschlag `/admin/api/online`).
+- Netzwerk-Übersicht: „Öffnen“ führt immer zur Übersicht der Website (bei der Netzwerk-Website landete man vorher wieder in der Netzwerk-Übersicht).
+- Seiteneinstellungen: Knöpfe **Auf der Website ansehen** und **Auf der Website bearbeiten**.
+
 ### Netzwerk-Dashboard neu geordnet
 - Bereichsleiste **Websites · Administratoren · E-Mail · Geteilt · Protokoll** (eigene Adressen `/admin/network/{bereich}`, alte Sprungmarken leiten um), **Neue Website** als Knopf oben.
 - Websites: oben **„Braucht Aufmerksamkeit“** – alle Hinweise aller Websites als eine Liste mit „Öffnen“; Karten ruhig (Status, eine Zeile Kennzahlen, Aktivität nur wenn offen), Betrieb und Domains unter „Details“, Aktionen unter ⋯. Seite etwa ein Drittel so lang.

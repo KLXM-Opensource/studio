@@ -30,6 +30,39 @@ final class PresenceController extends AdminController
         return (bool) app()->settings->get('sys.presence', true);
     }
 
+    /** Personen-Schlüssel für „online“: Netzwerk-Konten installationsweit gleich (net:{uid}), sonst {website}:{id} */
+    public static function personKey(array $u): string
+    {
+        if (\Core\Network\Network::isNetworkUser($u) && ($uid = \Core\Network\Network::uid($u)) > 0) return 'net:' . $uid;
+        return site()->key . ':' . (int) $u['id'];
+    }
+
+    /**
+     * Angemeldete Person ist online – Ort = $label (Seitentitel), $url (Pfad). Aufgerufen von jeder Verwaltungsseite (Layout),
+     * von der Website (angemeldet) und vom Herzschlag (POST /admin/api/online). Während „Als Rolle/Person arbeiten“ zählt die echte Person.
+     */
+    public static function seen(string $label, string $url): void
+    {
+        try {
+            $u = app()->auth->user();
+            if (!$u || !self::on()) return;
+            if (!empty($u['_imp']) && ($real = app()->db->fetch('SELECT * FROM users WHERE id = ?', [(int) $u['_imp']['real_id']]))) $u = $real;
+            Presence::online(site()->key, self::personKey($u), self::person($u) + ['label' => mb_substr($label, 0, 120), 'url' => mb_substr($url, 0, 300),
+                'role' => (string) ($u['role'] ?? ''), 'net' => \Core\Network\Network::isNetworkUser($u) ? '1' : '']);
+        } catch (\Throwable) {
+        }
+    }
+
+    /** Herzschlag der offenen Seite (alle 2 Minuten, nur sichtbarer Tab) */
+    public function online(Request $r): Response
+    {
+        $this->auth($r);
+        $path = (string) ($r->post['url'] ?? '');
+        if (!str_starts_with($path, '/') || str_starts_with($path, '//')) $path = '/admin';
+        self::seen((string) ($r->post['label'] ?? ''), $path);
+        return Response::json(['ok' => true])->header('Cache-Control', 'no-store');
+    }
+
     /** Texte für presence.mjs (Verwaltungssprache) */
     public static function texts(): array
     {

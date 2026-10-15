@@ -21,6 +21,35 @@ final class Presence
 {
     public const TTL = 45;
     public const KEYS = ['site', 'type', 'id', 'user'];
+    /** „Online“ (type online, id „-“): angemeldet und in Verwaltung bzw. auf der Website unterwegs – Ort = zuletzt geöffnete Seite */
+    public const ONLINE = 'online';
+    public const ONLINE_TTL = 300;
+    /** Höchstens so oft je Person und Website schreiben (jede Seite meldet sich, die Datei soll nicht bei jedem Aufruf neu entstehen) */
+    public const ONLINE_EVERY = 45;
+
+    private static function ttl(array $e): int
+    {
+        return ($e['type'] ?? '') === self::ONLINE ? self::ONLINE_TTL : self::TTL;
+    }
+
+    /**
+     * Online melden: $user = Personen-Schlüssel (Netzwerk-Konten installationsweit gleich, sonst {site}:{id}), $meta wie beat()
+     * (name, initials, avatar, label = Ort, url). Schreibt nur, wenn sich der Ort ändert oder die letzte Meldung älter ist.
+     */
+    public static function online(string $site, string $user, array $meta, ?int $now = null): void
+    {
+        $now ??= time();
+        $who = ['site' => $site, 'type' => self::ONLINE, 'id' => '-', 'user' => $user];
+        $cur = self::read()[self::key($who)] ?? null;
+        if ($cur && (int) $cur['at'] > $now - self::ONLINE_EVERY && (string) ($cur['url'] ?? '') === (string) ($meta['url'] ?? '')) return;
+        self::beat($who, $meta, $now);
+    }
+
+    /** Wer ist online (alle Websites oder eine), neueste Meldung zuerst */
+    public static function onlineList(?string $site = null): array
+    {
+        return self::list(array_filter(['type' => self::ONLINE, 'site' => $site], fn($v) => $v !== null));
+    }
 
     private static function file(): string
     {
@@ -80,7 +109,9 @@ final class Presence
         $now ??= time();
         $out = [];
         foreach (self::read() as $e) {
-            if ((int) ($e['at'] ?? 0) < $now - self::TTL) continue;
+            if ((int) ($e['at'] ?? 0) < $now - self::ttl($e)) continue;
+            // Ohne Typ-Filter nur Bearbeiten-Einträge (Seite/Eintrag) – „online“ fragt man gezielt ab (onlineList)
+            if (!isset($filter['type']) && ($e['type'] ?? '') === self::ONLINE) continue;
             foreach ($filter as $fk => $fv) if ((string) ($e[$fk] ?? '') !== (string) $fv) continue 2;
             $out[] = $e;
         }
@@ -113,7 +144,7 @@ final class Presence
             flock($h, LOCK_EX);
             $raw = stream_get_contents($h);
             $all = $raw ? (json_decode($raw, true) ?: []) : [];
-            $all = array_filter($all, fn($e) => is_array($e) && (int) ($e['at'] ?? 0) >= $now - self::TTL);
+            $all = array_filter($all, fn($e) => is_array($e) && (int) ($e['at'] ?? 0) >= $now - self::ttl($e));
             $all = $fn($all);
             ftruncate($h, 0);
             rewind($h);

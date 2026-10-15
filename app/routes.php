@@ -445,6 +445,7 @@ return function (Router $r): void {
     $r->get('/admin/api/pages/tree', [Admin\PageController::class, 'apiTree']);
     // Präsenz der Redaktion: wer arbeitet gerade wo (Core\Presence, Entwicklerhandbuch → Präsenz)
     $r->post('/admin/api/presence', [Admin\PresenceController::class, 'beat']);
+    $r->post('/admin/api/online', [Admin\PresenceController::class, 'online']);   // Herzschlag „online“ (Core\Presence::ONLINE)
     $r->get('/admin/api/presence', [Admin\PresenceController::class, 'index']);       // „Neue Seite“ auf der Website (Core\PageTool)
     $r->post('/admin/api/pages/create', [Admin\PageController::class, 'apiCreate']);
     $r->get('/admin/api/pages/{id}/settings', [Admin\PageController::class, 'apiSettings']);   // „Seiteneinstellungen“ auf der Website (Core\PageSettingsTool)

@@ -15,9 +15,18 @@ foreach ($stats as $k => $s) {
 }
 uasort($attention, fn($a, $b) => [$b['broken'], $b['pending'], count($b['msgs'])] <=> [$a['broken'], $a['pending'], count($a['msgs'])]);
 $attShow = 5;
+// Wer ist gerade online (Core\Presence::ONLINE) – je Person die jüngste Meldung über alle Websites; je Website die Personen dort
+$onlineAll = \Core\Http\Controllers\Admin\PresenceController::on() ? \Core\Presence::onlineList() : [];
+$onlineBySite = [];
+foreach ($onlineAll as $o) $onlineBySite[(string) $o['site']][] = $o;
+$onlinePeople = [];
+foreach ($onlineAll as $o) $onlinePeople[(string) $o['user']] ??= $o;   // Liste ist nach Zeit sortiert – erste Meldung = aktuell
+$mins = fn(array $o) => max(0, (int) floor((time() - (int) $o['at']) / 60));
+$onlineText = fn(array $o) => $mins($o) < 1 ? __('gerade eben') : __('vor {n} Min.', ['n' => $mins($o)]);
 $openForm = function (string $k, string $label, string $path = '', string $cls = 'adm-btn adm-btn--small', bool $disabled = false): string {
+    // Immer mit Ziel: ohne Pfad landete die Netzwerk-Website wieder hier (open() → /admin/network) – „Öffnen“ heißt: Übersicht der Website
     return '<form method="post" action="' . e(url('/admin/network/open')) . '">' . csrf_field() . '<input type="hidden" name="site" value="' . e($k) . '">'
-        . ($path !== '' ? '<input type="hidden" name="path" value="' . e($path) . '">' : '')
+        . '<input type="hidden" name="path" value="' . e($path !== '' ? $path : '/admin') . '">'
         . '<button class="' . e($cls) . '" type="submit"' . ($disabled ? ' disabled' : '') . '>' . $label . '</button></form>';
 };
 ?>
@@ -26,6 +35,20 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
   <p><strong><?= e(__('Willkommen! Als Erstes die Website „{site}“ einrichten.', ['site' => $stats[$netKey]['label'] ?? $netKey])) ?></strong> <?= e(__('Wählen Sie Kit und Startinhalte – danach legen Sie hier weitere Websites an.')) ?></p>
   <a class="adm-btn adm-btn--primary adm-btn--small" href="<?= e(url('/admin/willkommen')) ?>"><?= e(__('Jetzt einrichten')) ?></a>
 </div>
+<?php endif; ?>
+
+<?php if ($onlinePeople): ?>
+<section class="net-online" aria-labelledby="net-online-h">
+  <h2 id="net-online-h" class="net-online__h"><span class="net-online__dot" aria-hidden="true"></span><?= e(__('Gerade online')) ?> <span class="net-online__n"><?= count($onlinePeople) ?></span></h2>
+  <ul class="net-online__list">
+  <?php foreach ($onlinePeople as $o): $sk = (string) $o['site']; ?>
+    <li><form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($sk) ?>"><input type="hidden" name="path" value="<?= e((string) ($o['url'] ?? '') ?: '/admin') ?>">
+      <button type="submit" class="net-online__b" title="<?= e(__('Dorthin wechseln')) ?>"><span class="net-presence__ava" aria-hidden="true"><?= e((string) ($o['initials'] ?? '?')) ?></span>
+        <span class="net-online__who"><b><?= e((string) ($o['name'] ?? '')) ?></b><?= !empty($o['net']) ? ' <span class="net-tag net-tag--net">' . e(__('Netzwerk')) . '</span>' : '' ?>
+        <small><?= e((string) ($stats[$sk]['label'] ?? $sk)) ?> · <?= e((string) ($o['label'] ?? '') ?: __('Verwaltung')) ?> · <?= e($onlineText($o)) ?></small></span></button></form></li>
+  <?php endforeach; ?>
+  </ul>
+</section>
 <?php endif; ?>
 
 <?php // Kennzahlen: eine ruhige Zeile; Nullen gedämpft ?>
@@ -109,6 +132,10 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
         </div>
         <span class="net-pill net-pill--<?= e($pill) ?>"><?= icon($pill === 'ok' ? 'check-circle' : ($pill === 'off' ? 'eye' : 'warning')) ?><?= e($pillText) ?></span>
       </header>
+      <?php if (!empty($onlineBySite[$k])): $on = $onlineBySite[$k]; ?>
+      <p class="net-card__online"><span class="net-online__dot" aria-hidden="true"></span><span><?= e(count($on) === 1 ? __('1 Person online') : __('{n} Personen online', ['n' => count($on)])) ?>:
+        <?= e(implode(', ', array_map(fn($o) => (string) $o['name'] . ((string) ($o['label'] ?? '') !== '' ? ' (' . $o['label'] . ')' : ''), array_slice($on, 0, 4)))) ?><?= count($on) > 4 ? ' …' : '' ?></span></p>
+      <?php endif; ?>
       <?php // Präsenz: wer arbeitet gerade auf dieser Website (Core\Presence) – Klick meldet per Einmal-Anmeldung an und öffnet den Ort
       $act = \Core\Http\Controllers\Admin\PresenceController::on() ? \Core\Presence::list(['site' => $k]) : []; if ($act): ?>
       <ul class="net-presence" aria-label="<?= e(__('Gerade aktiv')) ?>">

@@ -21,6 +21,7 @@ import { initFavorites } from './_favorites.js';
 import { initNavGroups } from './_navgroups.js';   // Seitenleiste → Administration: aufklappbare Gruppen
 import { initSupport } from './_support.js';
 import { initNetwork } from './_network.js';
+import { initOnline } from './_online.js';   // „online“-Herzschlag (Core\Presence::ONLINE)
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
 import { initSources } from './_sources.js';   // Daten → Externe Quellen: Zuordnung mit Auswahl, Beispiel und Probeabruf (Core\Sources)
@@ -91,6 +92,7 @@ initFavorites(csrf);
 initSupport(csrf);
 // Netzwerk-Übersicht: Filter und Suche (_network.js)
 initNetwork();
+initOnline();
 // Eingereicht: Sammelauswahl (_review.js)
 initReview();
 initRedirects();

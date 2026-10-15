@@ -252,6 +252,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
   </div>
 </div>
 <!--cms-bar-end-->
+<?php if (\Core\Http\Controllers\Admin\PresenceController::on()): // Herzschlag „online“ (resources/js/_online.js) – außerhalb der Schatten-Wurzel ?><span hidden data-online-endpoint="<?= e(url('/admin/api/online')) ?>" data-online-csrf="<?= e(\Core\Csrf::token()) ?>"></span><?php endif; ?>
 <?php if (!empty(($impU = app()->auth->user())['_imp'])): $imp = $impU['_imp']; // Ansicht als Rolle/Person (Core\Impersonation) – Hinweis unter der Leiste ?>
 <div class="cms-entry-note cms-imp-note" role="status">
   <span><?= e($imp['mode'] === 'role' ? __('Sie sehen die Website mit den Rechten der Rolle „{name}“.', ['name' => $imp['label']]) : __('Sie arbeiten als {name} – Änderungen werden unter diesem Namen gespeichert.', ['name' => $imp['label']])) ?></span>

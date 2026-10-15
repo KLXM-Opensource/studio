@@ -3635,6 +3635,16 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .cms-presence__ava{display:inline-grid;place-items:center;width:22px;height:22px;margin-left:-5px;border-radius:50%;border:2px solid var(--adm-surface,#fff);object-fit:cover;background:#4F6FD6;color:#fff;font:700 9.5px/1 var(--adm-font)}
 .cms-presence__ava:first-child{margin-left:0}
 .cms-presence-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Übersicht: Gerade online (Core\Presence::ONLINE) */
+/* Knöpfe rechts im Seitenkopf (mehrere) */
+.adm-head__actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.adm-head__actions .ico{width:15px;height:15px}
+.dash-online{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line)}
+.dash-online h2{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px}
+.dash-online__n{padding:0 8px;border-radius:999px;background:var(--adm-ok-bg);color:var(--adm-ok);font-size:12px;line-height:20px}
+.dash-online__dot{width:9px;height:9px;border-radius:50%;background:var(--adm-ok);box-shadow:0 0 0 3px var(--adm-ok-bg)}
+.dash-online ul{display:grid;gap:6px;margin:0;padding:0;list-style:none;font-size:13.5px}
+.dash-online li{display:flex;align-items:center;gap:8px}
 .cms-presence-board{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:var(--adm-surface);box-shadow:0 0 0 1px var(--adm-line)}
 .cms-presence-board h2{margin:0 0 8px;font-size:14px}
 .cms-presence-board ul{display:grid;gap:6px;margin:0;padding:0;list-style:none}

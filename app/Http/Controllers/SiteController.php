@@ -222,6 +222,8 @@ final class SiteController
             $content = $theme->renderBlocks($blocks);
         }
 
+        // Angemeldet auf der Website unterwegs: „online“ mit Ort (Core\Presence::ONLINE) – Besucher nie
+        if ($loggedIn) \Core\Http\Controllers\Admin\PresenceController::seen((string) ($ctx['entry']['title'] ?? $page['title'] ?? ''), (string) $r->path);
         $html = $theme->render(Landings::template(), [
             'page' => $page,
             'content' => $content,

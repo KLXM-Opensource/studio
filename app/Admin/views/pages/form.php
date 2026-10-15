@@ -7,7 +7,10 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/pages' . ($nf ? '#sonderseiten' : ''))) ?>">Seiten</a><?= $nf ? ' · ' . e(__('Nicht gefunden (404)')) : '' ?></p><h1><?= $isNew ? 'Neue Seite' : e($page['title']) ?></h1></div>
-  <?php if (!$isNew): ?><a class="adm-btn adm-btn--primary" href="<?= e(\Core\Pages::url($page)) ?>?edit=1">Inhalte bearbeiten</a><?php endif; ?>
+  <?php if (!$isNew): // Auf der Website: ansehen (neuer Tab) bzw. Inhalte direkt dort bearbeiten ?><div class="adm-head__actions">
+    <a class="adm-btn adm-btn--ghost" href="<?= e(\Core\Pages::url($page)) ?>" target="_blank" rel="noopener"><?= icon('arrow-square-out') ?> <?= e(__('Auf der Website ansehen')) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
+    <a class="adm-btn adm-btn--primary" href="<?= e(\Core\Pages::url($page)) ?>?edit=1"><?= icon('pencil-simple') ?> <?= e(__('Auf der Website bearbeiten')) ?></a>
+  </div><?php endif; ?>
 </header>
 
 <?php if (!empty($placeholders)): // [Platzhalter] dieser Seite (Core\Dashboard\Metrics) – Inhalte bearbeitet der Frontend-Editor, daher dorthin je Block ?>

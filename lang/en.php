@@ -7634,4 +7634,10 @@ return [
     'Änderung der E-Mail-Adresse abgebrochen' => 'Email address change cancelled',
     'Änderung der E-Mail-Adresse angefragt' => 'Email address change requested',
     '„Öffnen“ meldet Sie mit Ihrem Netzwerk-Konto in der Verwaltung der jeweiligen Website an.' => '“Open” signs you in to that website’s admin with your network account.',
+    '1 Person online' => '1 person online',
+    'Dorthin wechseln' => 'Go there',
+    'Gerade online' => 'Online now',
+    '{n} Personen online' => '{n} people online',
+    'Auf der Website ansehen' => 'View on website',
+    'Auf der Website bearbeiten' => 'Edit on website',
 ];

@@ -45,6 +45,22 @@ $fmtTrend = function (?array $t): string {
   <p class="dash-bar__hint adm-muted" data-dash-hint<?= $customize ? '' : ' hidden' ?>><?= e(__('Karten mit den Pfeilen oder per Ziehen am Griff verschieben, mit dem Auge aus- und einblenden.')) ?></p>
 </div>
 
+<?php // Gerade online auf dieser Website (Core\Presence::ONLINE): wer, wo, wie lange her – ohne die eigene Person
+$onl = []; $meKey = $user ? \Core\Http\Controllers\Admin\PresenceController::personKey(!empty($user['_imp']) ? (app()->db->fetch('SELECT * FROM users WHERE id = ?', [(int) $user['_imp']['real_id']]) ?: $user) : $user) : '';
+if (\Core\Http\Controllers\Admin\PresenceController::on()) foreach (\Core\Presence::onlineList(site()->key) as $o) if ((string) $o['user'] !== $meKey) $onl[(string) $o['user']] ??= $o;
+if ($onl): ?>
+<section class="dash-online" aria-labelledby="dash-online-h">
+  <h2 id="dash-online-h"><span class="dash-online__dot" aria-hidden="true"></span><?= e(__('Gerade online')) ?> <span class="dash-online__n"><?= count($onl) ?></span></h2>
+  <ul>
+  <?php foreach ($onl as $o): $m = max(0, (int) floor((time() - (int) $o['at']) / 60)); $u = (string) ($o['url'] ?? ''); ?>
+    <li><span class="net-presence__ava" aria-hidden="true"><?= e((string) ($o['initials'] ?? '?')) ?></span>
+      <span><b><?= e((string) ($o['name'] ?? '')) ?></b><?= !empty($o['net']) ? ' <span class="adm-badge adm-badge--muted">' . e(__('Netzwerk')) . '</span>' : '' ?> ·
+      <?php if ($u !== '' && !str_starts_with($u, '/admin')): ?><a href="<?= e(url($u)) ?>"><?= e((string) ($o['label'] ?? '') ?: $u) ?></a><?php else: ?><?= e((string) ($o['label'] ?? '') ?: __('Verwaltung')) ?><?php endif; ?>
+      <small class="adm-muted"> · <?= e($m < 1 ? __('gerade eben') : __('vor {n} Min.', ['n' => $m])) ?></small></span></li>
+  <?php endforeach; ?>
+  </ul>
+</section>
+<?php endif; ?>
 <?php if ($pl = \Core\Http\Controllers\Admin\PresenceController::listAttrs()): // Präsenz: wer arbeitet gerade wo (presence.mjs, ausgeblendet ohne Aktive) ?>
 <section class="cms-presence-board" data-presence-board-box hidden aria-labelledby="presence-h"><h2 id="presence-h"><?= e(__('Gerade aktiv')) ?></h2><ul data-presence-board<?= $pl ?>></ul></section>
 <?php endif; ?>

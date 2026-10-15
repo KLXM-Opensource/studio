@@ -118,8 +118,6 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-setup--top{margin:0 0 18px;padding:16px 18px}
 
 /* ---------- Bereichsleiste (Websites · Administratoren · E-Mail · Geteilt · Protokoll) ---------- */
-.adm-head__actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.adm-head__actions .ico{width:15px;height:15px}
 .net-tabs{position:relative;display:flex;gap:2px;margin:0 0 22px;border-bottom:1px solid var(--adm-line);overflow-x:auto;scrollbar-width:none}
 .net-tabs a{display:inline-flex;align-items:center;gap:7px;padding:10px 14px 11px;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--adm-t2);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap}
 .net-tabs a .ico{width:17px;height:17px;opacity:.8}
@@ -225,3 +223,18 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-att__msg:has(.net-att__all[open]){display:block}
 .net-log__day + .net-log__row{border-top:0}
 .net-cli{max-width:100%;overflow-x:auto}
+
+/* ---------- Gerade online (Core\Presence::ONLINE) ---------- */
+.net-online{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:var(--adm-card);box-shadow:0 0 0 1px var(--adm-line)}
+.net-online__h{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px}
+.net-online__n{padding:0 8px;border-radius:999px;background:var(--adm-ok-bg);color:var(--adm-ok);font-size:12px;line-height:20px}
+.net-online__dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--adm-ok);box-shadow:0 0 0 3px var(--adm-ok-bg)}
+.net-online__list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.net-online__list form{margin:0}
+.net-online__b{display:flex;align-items:center;gap:8px;max-width:100%;padding:5px 12px 5px 5px;border:1px solid var(--adm-line);border-radius:999px;background:var(--adm-bg);color:var(--adm-ink);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.net-online__b:hover{background:var(--adm-hover)}
+.net-online__b:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px}
+.net-online__who{display:grid;min-width:0;line-height:1.25}
+.net-online__who small{color:var(--adm-t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.net-card__online{display:flex;align-items:baseline;gap:8px;margin:0;font-size:13px;color:var(--adm-t2)}
+.net-card__online .net-online__dot{align-self:center}
