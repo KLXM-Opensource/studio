@@ -3,10 +3,10 @@
    --chart-muted (Achsen, Beschriftung), --chart-grid (Raster, Linien), --chart-bg (Fläche hinter dem Diagramm, Tooltip),
    --chart-dark (1 = dunkle Stufen). Standard: geprüfte Palette (Farbfehlsichtigkeit, Kontrast), hell und dunkel eigens gestuft. */
 .cms-chart{--chart-1:#2A78D6;--chart-2:#EB6834;--chart-3:#1BAF7A;--chart-4:#EDA100;--chart-5:#E87BA4;--chart-6:#008300;--chart-7:#6250D6;--chart-8:#E34948;
-  --chart-ink:#1F2328;--chart-muted:#5A6066;--chart-grid:#E3E5E8;--chart-bg:#FFFFFF;--chart-dark:0;
+  --chart-d1:#3987E5;--chart-d2:#D95926;--chart-d3:#199E70;--chart-d4:#C98500;--chart-d5:#D55181;--chart-d6:#008300;--chart-d7:#9085E9;--chart-d8:#E66767;
   margin:0;display:grid;gap:8px;min-width:0}
-html.is-dark .cms-chart,:is(.bg-dark,.bg-accent,.is-dark) .cms-chart{--chart-1:#3987E5;--chart-2:#D95926;--chart-3:#199E70;--chart-4:#C98500;--chart-5:#D55181;--chart-6:#008300;--chart-7:#9085E9;--chart-8:#E66767;
-  --chart-ink:#F0EFEC;--chart-muted:#B9BCC2;--chart-grid:rgba(255,255,255,.14);--chart-bg:#1E2129;--chart-dark:1}
+/* Text, Linien und Fläche leitet der Lader aus Schriftfarbe und Hintergrund ab (hell/dunkel automatisch). Kits können sie festlegen:
+   --chart-ink, --chart-muted, --chart-grid, --chart-bg, --chart-dark (1/0) sowie --chart-1 … 8 (hell) und --chart-d1 … d8 (dunkel). */
 .cms-chart__title{font-weight:650;font-size:.95em}
 .cms-chart__canvas{width:100%;height:280px;min-width:0}
 .cms-chart__h160{height:160px}.cms-chart__h200{height:200px}.cms-chart__h240{height:240px}.cms-chart__h280{height:280px}.cms-chart__h320{height:320px}
@@ -14,12 +14,12 @@ html.is-dark .cms-chart,:is(.bg-dark,.bg-accent,.is-dark) .cms-chart{--chart-1:#
 .cms-chart__h560{height:560px}.cms-chart__h600{height:600px}.cms-chart__h640{height:640px}.cms-chart__h680{height:680px}.cms-chart__h720{height:720px}
 /* Ohne JavaScript (kein data-chart-state) oder Fehler der Engine: keine leere Fläche, die Tabelle bleibt */
 .cms-chart:is(:not([data-chart-state]),[data-chart-state=error]) .cms-chart__canvas{display:none}
-.cms-chart__table > summary{cursor:pointer;font-size:.8em;color:var(--chart-muted);width:max-content}
+.cms-chart__table > summary{cursor:pointer;font-size:.8em;opacity:.75;width:max-content}
 .cms-chart__scroll{overflow-x:auto;max-width:100%}
 .cms-chart__table table{border-collapse:collapse;font-size:.85em;font-variant-numeric:tabular-nums;margin-top:6px}
-.cms-chart__table :is(th,td){padding:4px 10px;border-bottom:1px solid var(--chart-grid);text-align:right;white-space:nowrap}
+.cms-chart__table :is(th,td){padding:4px 10px;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent);text-align:right;white-space:nowrap}
 .cms-chart__table th[scope=row],.cms-chart__table thead th:first-child{text-align:left}
-.cms-chart__empty{color:var(--chart-muted,#5A6066);font-size:.9em}
+.cms-chart__empty{opacity:.75;font-size:.9em}
 /* Tooltip (vom Engine-Modul mit Klassen gebaut – keine style-Attribute) */
 .cms-chart-tip{font-variant-numeric:tabular-nums;box-shadow:0 6px 18px rgba(0,0,0,.12);border-radius:8px!important}
 .cms-chart-tip__h{font-weight:650;margin-bottom:4px}
@@ -29,6 +29,6 @@ html.is-dark .cms-chart,:is(.bg-dark,.bg-accent,.is-dark) .cms-chart{--chart-1:#
 .cms-chart-c0{background:var(--chart-1)}.cms-chart-c1{background:var(--chart-2)}.cms-chart-c2{background:var(--chart-3)}.cms-chart-c3{background:var(--chart-4)}
 .cms-chart-c4{background:var(--chart-5)}.cms-chart-c5{background:var(--chart-6)}.cms-chart-c6{background:var(--chart-7)}.cms-chart-c7{background:var(--chart-8)}
 /* Verwaltung: Text und Linien aus den Tokens der Verwaltung, dunkle Stufen im Dunkelmodus */
-html.adm-ui .cms-chart{--chart-ink:var(--adm-ink);--chart-muted:var(--adm-t3);--chart-grid:var(--adm-line);--chart-bg:var(--adm-card)}
-@media (prefers-color-scheme:dark){html.adm-ui:not([data-theme=light]) .cms-chart{--chart-1:#3987E5;--chart-2:#D95926;--chart-3:#199E70;--chart-4:#C98500;--chart-5:#D55181;--chart-6:#008300;--chart-7:#9085E9;--chart-8:#E66767;--chart-dark:1}}
-html.adm-ui[data-theme=dark] .cms-chart{--chart-1:#3987E5;--chart-2:#D95926;--chart-3:#199E70;--chart-4:#C98500;--chart-5:#D55181;--chart-6:#008300;--chart-7:#9085E9;--chart-8:#E66767;--chart-dark:1}
+html.adm-ui .cms-chart{--chart-ink:var(--adm-ink);--chart-muted:var(--adm-t3);--chart-grid:var(--adm-line);--chart-bg:var(--adm-card);--chart-dark:0}
+@media (prefers-color-scheme:dark){html.adm-ui:not([data-theme=light]) .cms-chart{--chart-dark:1}}
+html.adm-ui[data-theme=dark] .cms-chart{--chart-dark:1}

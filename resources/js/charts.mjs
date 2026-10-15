@@ -9,13 +9,25 @@
 const engines = new Map();
 const live = new Set();
 
+// Farben: gesetzte Variablen (Kit, Verwaltung) haben Vorrang; sonst aus der Umgebung abgeleitet – Schriftfarbe und Hintergrund
+// dort, wo das Diagramm steht. So passt es in jedes Kit und jeden Abschnitt, hell wie dunkel, ohne dessen Dunkelmodus zu kennen.
+const rgb = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+const lum = ([r, g, b]) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const alpha = (c, a) => { const [r, g, b] = rgb(c); return `rgba(${r},${g},${b},${a})`; };
+const background = (el) => {
+  for (let n = el; n && n.nodeType === 1; n = n.parentElement) { const bg = getComputedStyle(n).backgroundColor; const p = rgb(bg); if (p.length >= 3 && (p.length < 4 || p[3] > 0.5)) return bg; }
+  return 'rgb(255,255,255)';
+};
 const theme = (el) => {
   const cs = getComputedStyle(el);
   const v = (n) => cs.getPropertyValue(n).trim();
+  const text = cs.color;
+  const forced = v('--chart-dark');
+  const dark = forced !== '' ? forced === '1' : lum(rgb(text)) > 0.4;   // helle Schrift = dunkler Grund
   const colors = [];
-  for (let i = 1; i <= 8; i++) { const c = v('--chart-' + i); if (c) colors.push(c); }
-  return { colors, ink: v('--chart-ink'), muted: v('--chart-muted'), grid: v('--chart-grid'), bg: v('--chart-bg'), font: cs.fontFamily,
-    dark: v('--chart-dark') === '1' };
+  for (let i = 1; i <= 8; i++) { const c = v((dark ? '--chart-d' : '--chart-') + i) || v('--chart-' + i); if (c) colors.push(c); }
+  return { colors, dark, font: cs.fontFamily,
+    ink: v('--chart-ink') || text, muted: v('--chart-muted') || alpha(text, 0.72), grid: v('--chart-grid') || alpha(text, 0.16), bg: v('--chart-bg') || background(el) };
 };
 
 async function draw(fig) {
