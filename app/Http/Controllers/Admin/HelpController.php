@@ -42,7 +42,7 @@ final class HelpController extends AdminController
     public function ui(Request $r): Response
     {
         $this->auth($r);
-        $parts = ['aufbau', 'zeilen', 'formular', 'navigation'];
+        $parts = ['aufbau', 'zeilen', 'formular', 'diagramme', 'navigation'];
         $part = in_array($t = (string) $r->str('teil'), $parts, true) ? $t : 'aufbau';
         return $this->view('help/ui', ['title' => __('Oberfläche'), 'css' => ['css/docs.css'], 'part' => $part]);
     }

@@ -88,6 +88,11 @@ async function vendors() {
   }
   copy(nm('@fontsource/lato/LICENSE'), path.join(lato, 'OFL-Lato.txt'));
 
+  // Apache ECharts (Diagramme, Core\Charts): gebündelt in resources/js/charts-echarts.mjs – hier nur Lizenz, NOTICE und eingebettete Pakete
+  const ec = path.join(PUB, 'assets/vendor/echarts');
+  copy(nm('echarts/LICENSE'), path.join(ec, 'LICENSE.txt'));
+  copy(nm('echarts/NOTICE'), path.join(ec, 'NOTICE.txt'));
+  bundledLicenses('echarts', path.join(ec, 'THIRD-PARTY-LICENSES.txt'));
   // MapLibre GL (Karten; lädt Kacheln über den eigenen Proxy /proxy/ofm)
   const ml = path.join(PUB, 'assets/vendor/maplibre');
   for (const f of ['maplibre-gl.mjs', 'maplibre-gl-shared.mjs', 'maplibre-gl-worker.mjs', 'maplibre-gl.css']) {
@@ -192,6 +197,7 @@ const options = ([src, outdir]) => ({
   entryPoints: [src],
   outdir,
   bundle: true,
+  nodePaths: [path.join(TOOLS, 'node_modules')],   // Pakete aus tools/node_modules (z. B. echarts für resources/js/charts-echarts.mjs)
   // *.mjs = ES-Modul (z. B. PDF-Viewer, importiert PDF.js zur Laufzeit)
   format: src.endsWith('.mjs') ? 'esm' : 'iife',
   outExtension: src.endsWith('.mjs') ? { '.js': '.mjs' } : {},

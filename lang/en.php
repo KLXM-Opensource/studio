@@ -7699,4 +7699,11 @@ return [
     '{n} weitere' => '{n} more',
     '1 Sicherung' => '1 backup',
     'KLXM Neo' => 'KLXM Neo',
+    'Besucher je Tag' => 'Visitors per day',
+    'Besucher je Tag (30 Tage)' => 'Visitors per day (30 days)',
+    'Keine Daten für dieses Diagramm.' => 'No data for this chart.',
+    'Reihe {n}' => 'Series {n}',
+    '{n} Seiten veröffentlicht' => '{n} pages published',
+    'Änderungen je Tag, letzte 30 Tage: insgesamt {n}' => 'Changes per day, last 30 days: {n} in total',
+    'Anfragen je Monat' => 'Requests per month',
 ];

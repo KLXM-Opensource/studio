@@ -402,4 +402,7 @@ return [
     'Weitere Einträge' => 'More entries',
     // Neu laden auf Aktion (Core\Live::region)
     'Inhalt aktualisiert' => 'Content updated',
+    'Als Tabelle anzeigen' => 'Show as table',
+    'Keine Daten für dieses Diagramm.' => 'No data for this chart.',
+    'Reihe {n}' => 'Series {n}',
 ];

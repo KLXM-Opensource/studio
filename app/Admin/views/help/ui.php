@@ -17,6 +17,7 @@ echo AdminUi::open([
     'aufbau' => ['href' => $href('aufbau'), 'label' => 'Seitenaufbau', 'icon' => 'layout'],
     'zeilen' => ['href' => $href('zeilen'), 'label' => 'Gruppen & Zeilen', 'icon' => 'list-bullets'],
     'formular' => ['href' => $href('formular'), 'label' => 'Formulare', 'icon' => 'pencil-simple', 'badge' => 2],
+    'diagramme' => ['href' => $href('diagramme'), 'label' => 'Diagramme', 'icon' => 'chart-bar'],
     '-',
     'navigation' => ['href' => $href('navigation'), 'label' => 'Hauptnavigation', 'icon' => 'sidebar-simple', 'warn' => 'Beispiel für einen Hinweis'],
 ], $part, 'Bausteine');
@@ -124,6 +125,48 @@ PHP) ?>
 <?= AdminUi::group('Live-Beispiele für tabs()', [
     AdminUi::link('Konto', url('/admin/account'), 'Mehrere Formulare, je Bereich eines'),
     AdminUi::link('Style-Editor', url('/admin/design'), 'Ein Formular mit Vorschau'),
+]) ?>
+
+<?php elseif ($part === 'diagramme'): ?>
+<?php
+$days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+$demo = [
+    ['Linie', ['type' => 'line', 'labels' => $days, 'series' => [['name' => 'Besucher', 'data' => [120, 132, 101, 134, 190, 230, 210]], ['name' => 'Vorwoche', 'data' => [98, 110, 115, 120, 150, 160, 170]]], 'description' => 'Besucher je Tag, diese Woche und Vorwoche']],
+    ['Fläche, gestapelt', ['type' => 'area', 'stacked' => true, 'labels' => $days, 'series' => [['name' => 'Mobil', 'data' => [60, 70, 55, 72, 110, 150, 140]], ['name' => 'Desktop', 'data' => [60, 62, 46, 62, 80, 80, 70]]], 'description' => 'Besucher je Gerät']],
+    ['Balken', ['type' => 'bar', 'labels' => ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun'], 'series' => [['name' => 'Anfragen', 'data' => [12, 19, 15, 22, 30, 27]]], 'description' => 'Anfragen je Monat']],
+    ['Balken waagerecht', ['type' => 'hbar', 'labels' => ['/', '/leistungen', '/kontakt', '/team', '/blog'], 'series' => [['name' => 'Aufrufe', 'data' => [940, 420, 310, 180, 150]]], 'description' => 'Meistbesuchte Seiten']],
+    ['Ring', ['type' => 'donut', 'labels' => ['Mobil', 'Desktop', 'Tablet'], 'series' => [['name' => 'Geräte', 'data' => [61, 33, 6]]], 'format' => 'percent', 'description' => 'Anteil der Geräte']],
+    ['Torte, Speicher', ['type' => 'pie', 'labels' => ['Bilder', 'Videos', 'Datenbank'], 'series' => [['name' => 'Speicher', 'data' => [10802613, 5242880, 1540096]]], 'format' => 'bytes', 'description' => 'Speicher nach Art']],
+];
+?>
+<div class="ui-charts">
+  <?php foreach ($demo as [$name, $spec]): ?>
+  <section class="adm-card ui-chart"><h3 class="ui-h3"><?= e($name) ?></h3><?= \Core\Charts::render($spec + ['height' => 240]) ?></section>
+  <?php endforeach; ?>
+</div>
+
+<h3 class="ui-h3">Code</h3>
+<?= $code(<<<'PHP'
+// Eigenes, schlichtes Format – kein ECharts-Format. Die Engine (Standard: ECharts) lässt sich tauschen, ohne Aufrufer zu ändern.
+echo \Core\Charts::render([
+    'type'        => 'line',                    // line | area | bar | hbar | pie | donut
+    'labels'      => ['Mo', 'Di', 'Mi'],
+    'series'      => [['name' => __('Besucher'), 'data' => [120, 132, 101]]],
+    'title'       => __('Besucher'),            // sichtbarer Titel (optional)
+    'description' => __('Besucher je Tag'),     // für Screenreader
+    'format'      => 'number',                  // number | percent | bytes | duration
+    'stacked'     => false, 'height' => 280,
+]);
+
+// Andere Engine anmelden (Erweiterung oder Kit) und wählen: 'charts' => ['engine' => 'meine'] bzw. theme.php 'chart_engine'
+\Core\Charts::registerEngine('meine', asset('ext/meine/charts-meine.mjs'));
+// charts-meine.mjs: export function render(el, spec, theme) { …; return { update(theme) {}, resize() {}, dispose() {} }; }
+PHP) ?>
+<?= AdminUi::group('Regeln', [
+    AdminUi::row('Eine Achse', '', 'Nie zwei Skalen in einem Diagramm – zwei Werte mit verschiedener Größe gehören in zwei Diagramme.'),
+    AdminUi::row('Feste Farben', '', 'Reihen bekommen die Farben in fester Reihenfolge (--chart-1 … --chart-8); mehr als acht Reihen zu „Sonstige“ zusammenfassen.'),
+    AdminUi::row('Tabelle', '', 'Jedes Diagramm hat „Als Tabelle anzeigen“ – ohne JavaScript bleibt nur die Tabelle.'),
+    AdminUi::row('Laden', '', 'Die Engine lädt erst, wenn ein Diagramm sichtbar wird; ohne Diagramm lädt nichts.'),
 ]) ?>
 
 <?php else: ?>

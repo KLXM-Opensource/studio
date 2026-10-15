@@ -26,8 +26,8 @@ not part of the distribution. **Service**: an online service contacted at runtim
 |---|---|---|
 | MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
-| Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper) | Bundled |
-| BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
+| Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper), Apache ECharts | Bundled |
+| BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, ZRender (ECharts), pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
 | BSD-2-Clause | OpenJPEG (PDF.js), @mapbox/tiny-sdf, @mapbox/unitbezier | Bundled |
 | ISC | earcut, kdbush, potpack, quickselect, tinyqueue, geojson-vt, point-geometry, maplibre-gl-style-spec | Bundled |
 | CC0-1.0 | ICC colour profile in PDF.js | Bundled |
@@ -61,6 +61,8 @@ are written next to the files by the build.
 | editorjs-drag-drop, © 2021 kommitters Open Source | 1.1.16 | MIT | `public/assets/vendor/editorjs/drag-drop.js` | `LICENSE-drag-drop.txt` |
 | MapLibre GL JS (`maplibre-gl`), © 2023 MapLibre contributors; contains code © 2020 Mapbox (BSD-3-Clause), glfx.js © 2011 Evan Wallace (MIT), d3-color © 2010-2016 Mike Bostock (BSD-3-Clause) | 6.11.2 | BSD-3-Clause | `public/assets/vendor/maplibre/` | `LICENSE.txt` |
 | – bundled: @mapbox/point-geometry, @maplibre/geojson-vt, @maplibre/maplibre-gl-style-spec, earcut, kdbush, potpack, quickselect, tinyqueue (ISC); @mapbox/tiny-sdf, @mapbox/unitbezier (BSD-2-Clause); @mapbox/vector-tile, pbf (BSD-3-Clause); @maplibre/mlt (MIT OR Apache-2.0); @maplibre/vt-pbf, bidi-js, gl-matrix, murmurhash-js, @mapbox/jsonlint-lines-primitives, json-stringify-pretty-compact and others (MIT) | | see left | inside the MapLibre bundle | `THIRD-PARTY-LICENSES.txt` (generated) |
+| Apache ECharts (`echarts`), © The Apache Software Foundation – diagrams (`Core\Charts`, engine `echarts`), tree-shaken: line, bar, pie, canvas | 6.1.0 | Apache-2.0 | `public/assets/js/charts-echarts.mjs` | `public/assets/vendor/echarts/LICENSE.txt`, `NOTICE.txt` |
+| – bundled: `zrender` 6.1.0 (BSD-3-Clause), `tslib` 2.3.0 (0BSD) | | see left | inside `charts-echarts.mjs` | `public/assets/vendor/echarts/THIRD-PARTY-LICENSES.txt` (generated) |
 | Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.3.289 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
 | Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI) | `public/assets/fonts/OFL-Lato.txt` |
 | Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (Symbolstil der Website) | `public/assets/icons/LICENSE.txt` |

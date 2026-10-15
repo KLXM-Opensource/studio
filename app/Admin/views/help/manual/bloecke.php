@@ -36,6 +36,17 @@
   </ul>
   <p>Größe (klein/mittel/groß) und Skala (Bogen mit Strichen, nur Striche, schlichter Ring) stellen Sie in der Seitenleiste ein. „Hochzählen“ lässt Bogen und ganze Zahlen beim ersten Erscheinen einmal anlaufen – nicht bei „Bewegung reduzieren“. Screenreader lesen jede Kennzahl als Satz vor, z. B. „92 % – Weiterempfehlung, Beispielumfrage“. Farben und Schrift kommen aus dem Design. Bitte nur belegbare Zahlen verwenden.</p>
   <?php endif; ?>
+  <?php if (isset($blocks['chart'])): ?>
+  <h3 id="diagramm">Diagramm</h3>
+  <p>Zeigt Zahlen als <b>Balken</b> (senkrecht oder waagerecht), <b>Linie</b>, <b>Fläche</b>, <b>Ring</b> oder <b>Torte</b> – die Farben kommen aus dem Design der Website, hell und dunkel passend.</p>
+  <ul>
+    <li><b>Beschriftungen:</b> eine je Zeile, z. B. die Monate.</li>
+    <li><b>Reihen:</b> je Reihe ein Name und die Werte in derselben Reihenfolge, getrennt mit Semikolon oder Zeilenumbruch (z. B. <code>12; 19; 15</code>). Zahlen dürfen wie gewohnt geschrieben werden: „1.250“ oder „12,5“. Bis zu acht Reihen.</li>
+    <li><b>Daten:</b> statt von Hand auch aus einer Quelle der Website, sofern eine Funktion oder Erweiterung eine anbietet – dann bleiben die Werte aktuell.</li>
+    <li><b>Zahlen:</b> als Zahl, Prozent, Dateigröße oder Dauer; dazu eine Einheit wie „€“.</li>
+    <li><b>Beschreibung für Screenreader:</b> ein Satz, was das Diagramm zeigt. Unter jedem Diagramm steht „Als Tabelle anzeigen“ mit allen Werten – auch ohne JavaScript.</li>
+  </ul>
+  <?php endif; ?>
   <?php if (isset($blocks['partners'])): ?>
   <h3 id="partner-logos">Partner &amp; Logos</h3>
   <p>Zeigt Logos von Partnern, Kunden oder Förderern in gleich großen Kacheln. Breite Schriftzüge, quadratische Zeichen und hohe Logos wirken dabei gleich schwer: Das System gibt jedem Logo ungefähr dieselbe Fläche – nicht dieselbe Höhe. Kurzinfo und Link erscheinen erst, wenn jemand auf ein Logo klickt (oder es mit der Tastatur auswählt). Bitte nur Logos verwenden, für die eine Freigabe vorliegt.</p>

@@ -20,6 +20,9 @@ importers:
       '@tabler/icons':
         specifier: ^3.49.0
         version: 3.49.0
+      echarts:
+        specifier: ^6.1.0
+        version: 6.1.0
       editorjs-drag-drop:
         specifier: ^1.1.16
         version: 1.1.16
@@ -337,6 +340,9 @@ packages:
   earcut@3.2.3:
     resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
 
+  echarts@6.1.0:
+    resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
+
   editorjs-drag-drop@1.1.16:
     resolution: {integrity: sha512-yOyKZqqZepkdbDQbAw1bZr3mQewkT4a9QgufWW3Aoy1qcTka8uHR01T/dGHqrpyYrF56ykyidPyp0LX79LEHHQ==}
 
@@ -408,6 +414,12 @@ packages:
 
   tinyqueue@3.0.0:
     resolution: {integrity: sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g==}
+
+  tslib@2.3.0:
+    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
+
+  zrender@6.1.0:
+    resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
 
 snapshots:
 
@@ -610,6 +622,11 @@ snapshots:
 
   earcut@3.2.3: {}
 
+  echarts@6.1.0:
+    dependencies:
+      tslib: 2.3.0
+      zrender: 6.1.0
+
   editorjs-drag-drop@1.1.16: {}
 
   esbuild@0.25.12:
@@ -706,3 +723,9 @@ snapshots:
       protocol-buffers-schema: 3.6.1
 
   tinyqueue@3.0.0: {}
+
+  tslib@2.3.0: {}
+
+  zrender@6.1.0:
+    dependencies:
+      tslib: 2.3.0

@@ -1,3 +1,4 @@
+@import "charts.css";
 @import "./_spotlight.css";
 @import "./_ai.css";   /* KI-Assistent (resources/js/_ai.js) */
 @import "./_captions.css";   /* Mediathek „Prüfen“ + Untertitel & Transkripte (resources/js/_captions.js) */
@@ -3733,8 +3734,10 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 /* Musterseite der Bausteine (/admin/hilfe/ui, Core\AdminUi) */
 .ui-h3{margin:22px 0 8px 4px;font-size:13px;font-weight:650;color:var(--adm-t3)}
 .ui-code{margin:0 0 22px;padding:14px 16px;border-radius:10px;background:var(--adm-fill);border:1px solid var(--adm-line);font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-x:auto;white-space:pre;max-width:100%}
-.ui-code code{padding:0;border:0;background:none;font:inherit;color:inherit}
+.ui-code code{padding:0;border:0;background:transparent!important;font:inherit;color:inherit;box-shadow:none}
 .ui-demo-toggle{display:inline-flex;gap:6px;align-items:center}
+.ui-charts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.ui-chart .ui-h3{margin-top:0}
 /* Gruppen direkt im Rahmen von AdminUi::open() (ohne .adm-panel--groups) */
 .us-main .set-group + .set-group,.us-main .set-group + section.set-group,.us-main > .set-group + .ui-h3,.us-main > .ui-code + .set-group,.us-main > form + .ui-h3{margin-top:24px}
 

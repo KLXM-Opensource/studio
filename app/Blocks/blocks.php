@@ -219,6 +219,16 @@ return [
             ...\Core\NotFound::blockFields(),
         ],
     ],
+    // Diagramm (Core\Charts): Balken, Linie, Fläche, Ring, Torte – Werte von Hand oder aus einer angemeldeten Quelle; Engine austauschbar
+    'chart' => [
+        'label' => 'Diagramm', 'icon' => 'chart-bar', 'group' => 'Inhalt',
+        'nestable' => true,
+        'help' => 'Zahlen als Balken, Linie, Fläche, Ring oder Torte – Farben aus dem Design, mit Tabelle für Screenreader und ohne JavaScript.',
+        'fields' => [
+            ...\Core\MediaBlocks::headFields(),
+            ...\Core\Charts::blockFields(),
+        ],
+    ],
     'map' => [
         'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Medien',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
