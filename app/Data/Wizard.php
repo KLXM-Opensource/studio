@@ -330,10 +330,7 @@ final class Wizard
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $sfx = bin2hex(random_bytes(2));
         $made = [];
         $cases = [

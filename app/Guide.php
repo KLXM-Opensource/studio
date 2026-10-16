@@ -304,10 +304,7 @@ final class Guide
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $has = fn(string $what, string $hay, string $needle, bool $want = true) => $eq($what, str_contains($hay, $needle), $want);
 
         $n = self::parse("---\nbereich: Medien, daten/arbeiten\nblock: stage,hero\n---\n# Startseite pflegen\n\nText **fett**.\n", '10-startseite');

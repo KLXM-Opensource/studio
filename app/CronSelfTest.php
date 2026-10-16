@@ -15,10 +15,7 @@ final class CronSelfTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . json_encode($want, JSON_UNESCAPED_UNICODE) . ', erhalten ' . json_encode($got, JSON_UNESCAPED_UNICODE);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $eq('gültige Ausdrücke', array_map([Cron::class, 'valid'], ['* * * * *', '*/15 * * * *', '30 3 * * *', '0 4 1 * *', '0 8-18/2 * * 1-5', '5,35 * * * 7']), [true, true, true, true, true, true]);
         $eq('ungültige Ausdrücke', array_map([Cron::class, 'valid'], ['', '* * * *', '60 * * * *', '* 24 * * *', '* * 0 * *', 'x * * * *', '5-1 * * * *', '* * * * * *']), array_fill(0, 8, false));
         $t = mktime(3, 30, 0, 10, 16, 2026);   // Freitag, 16.10.2026 03:30

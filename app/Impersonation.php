@@ -127,10 +127,7 @@ final class Impersonation
     public static function selftest(): array
     {
         $ok = 0; $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; echo "  ✓ $what\n"; return; }
-            $fails[] = $what; echo "  ✗ $what – erwartet " . var_export($want, true) . ', erhalten ' . var_export($got, true) . "\n";
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails, '', true);
         $db = app()->db;
         $db->pdo->beginTransaction();
         try {

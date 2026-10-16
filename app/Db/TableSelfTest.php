@@ -17,10 +17,7 @@ final class TableSelfTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . json_encode($want, JSON_UNESCAPED_UNICODE) . ', erhalten ' . json_encode($got, JSON_UNESCAPED_UNICODE);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $file = sys_get_temp_dir() . '/klxm-db-selftest-' . bin2hex(random_bytes(4)) . '.sqlite';
         try {
             $db = new Database(['driver' => 'sqlite', 'path' => $file]);

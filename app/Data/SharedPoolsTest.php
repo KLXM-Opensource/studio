@@ -17,10 +17,7 @@ final class SharedPoolsTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = 'Geteilte Pools – ' . $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails, 'Geteilte Pools – ');
         $sfx = bin2hex(random_bytes(3));
         $keys = [];
         $pools = [];

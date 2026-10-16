@@ -118,10 +118,7 @@ final class SchemaPanel
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         // Rundlauf aller Tabellen, deren Felder diese Website ändern darf. Erlaubte Abweichungen = was auch der Tabellen-Designer
         // beim Speichern bereinigt: fehlende Einstellungen älterer Tabellen (Standardwert), Übersetzungen in Sprachen, die die
         // Website nicht (mehr) hat, das automatisch ergänzte Titel-Feld.

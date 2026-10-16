@@ -260,10 +260,7 @@ final class PasswordReset
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = 'Passwort vergessen · ' . $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails, 'Passwort vergessen · ');
         $t = self::newToken();
         $eq('Token 43 Zeichen base64url (32 Byte)', self::wellFormed($t), true);
         $eq('Token zufällig', $t === self::newToken(), false);

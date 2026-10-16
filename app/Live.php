@@ -252,10 +252,7 @@ final class Live
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $c = 'ext:selftest:' . bin2hex(random_bytes(4));
         $eq('unbekannter Kanal hat Version 0', self::version($c), 0);
         self::touch($c);

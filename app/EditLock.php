@@ -98,10 +98,7 @@ final class EditLock
     public static function selftest(): array
     {
         $ok = 0; $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = 'Sperre – ' . $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails, 'Sperre – ');
         $s = app()->settings;
         $prev = [$s->get('sys.edit_lock', false), $s->get('sys.presence', true)];
         $pdo = app()->db->pdo;

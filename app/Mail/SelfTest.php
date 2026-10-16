@@ -19,10 +19,7 @@ final class SelfTest
     public static function run(): int
     {
         $ok = 0; $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; echo "  ✓ $what\n"; return; }
-            $fails[] = $what; echo "  ✗ $what – erwartet " . var_export($want, true) . ', erhalten ' . var_export($got, true) . "\n";
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails, '', true);
         $s = app()->settings;
         $keys = ['sys.mail_accounts', 'sys.mail_routes', 'sys.mail_transport', 'sys.mail_host', 'sys.mail_from', 'sys.mail_from_name', 'sys.mail_redirect'];
         $prev = [];

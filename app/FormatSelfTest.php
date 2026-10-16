@@ -16,10 +16,7 @@ final class FormatSelfTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . json_encode($want, JSON_UNESCAPED_UNICODE) . ', erhalten ' . json_encode($got, JSON_UNESCAPED_UNICODE);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $de = Format::for('de');
         $en = Format::for('en');
         $ts = strtotime('2026-09-24 14:05:00');

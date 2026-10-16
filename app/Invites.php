@@ -492,10 +492,7 @@ final class Invites
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $t = self::newToken();
         $eq('Token 43 Zeichen base64url', self::wellFormed($t), true);
         $eq('Token zufällig', $t === self::newToken(), false);

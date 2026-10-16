@@ -15,10 +15,7 @@ final class ChartsSelfTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . json_encode($want, JSON_UNESCAPED_UNICODE) . ', erhalten ' . json_encode($got, JSON_UNESCAPED_UNICODE);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $n = Charts::normalize(['type' => 'kaputt', 'labels' => ['A', 'B'], 'series' => [['name' => '', 'data' => ['3', 'x', 2.5]]], 'height' => 5000, 'format' => 'nix', 'stacked' => true]);
         $eq('unbekannter Typ → Balken', $n['type'], 'bar');
         $eq('Zahlen geprüft (Text → null)', $n['series'][0]['data'], [3, null, 2.5]);

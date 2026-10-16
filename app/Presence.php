@@ -162,10 +162,7 @@ final class Presence
     public static function selftest(): array
     {
         $ok = 0; $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $site = 'selftest-' . bin2hex(random_bytes(3));
         $a = ['site' => $site, 'type' => 'page', 'id' => '1', 'user' => 'a'];
         $b = ['site' => $site, 'type' => 'page', 'id' => '1', 'user' => 'b'];

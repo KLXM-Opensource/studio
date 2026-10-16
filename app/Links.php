@@ -409,10 +409,7 @@ final class Links
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $byId = function (array $groups, string $id): ?array {
             foreach ($groups as $g) if ($g['id'] === $id) return $g;
             return null;

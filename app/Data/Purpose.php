@@ -172,10 +172,7 @@ final class Purpose
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
         $mail = ['kind' => 'inbox', 'inbox' => ['delivery' => ['mode' => 'mail']]];
         $sys = ['kind' => 'inbox', 'inbox' => ['delivery' => ['mode' => 'system']]];
         $eq('Ableitung: Eingang nur per E-Mail', self::derive($mail), 'mail');

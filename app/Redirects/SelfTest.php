@@ -15,10 +15,7 @@ final class SelfTest
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
 
         // Normalisieren
         $eq('Domain entfernt', Redirects::normalize('https://www.example.de/Alte-Seite/?a=1#x'), '/Alte-Seite/?a=1');

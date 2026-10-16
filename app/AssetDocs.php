@@ -809,10 +809,7 @@ final class AssetDocs
     {
         $ok = 0;
         $fails = [];
-        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails): void {
-            if ($got === $want) { $ok++; return; }
-            $fails[] = $what . ': erwartet ' . var_export($want, true) . ', erhalten ' . var_export($got, true);
-        };
+        $eq = \Core\Testing\Check::eq($ok, $fails);
 
         // --- CSS-Fixture: Kommentare, Zeichenketten, url(data:…;…), verschachtelte var(), @media, Verschachtelung, private --_x
         $css = <<<'CSS'
