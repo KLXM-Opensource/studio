@@ -4,6 +4,7 @@
  * Combobox nach ARIA APG: role=combobox, aria-expanded, aria-controls, aria-activedescendant; ↑/↓, Enter, Escape.
  * Keine Cookies, keine Speicherung; Anfragen nur an die eigene Domain (JSON, 180 ms entprellt).
  */
+import { esc } from './_html.js';
 (() => {
   const d = document, me = d.currentScript, set = (el, o) => { for (const k in o) el.setAttribute(k, o[k]); };
   if (window.cmsSearch) return;
@@ -11,7 +12,6 @@
   // Stil der Vorschlagsliste (auf der Ergebnisseite schon geladen)
   if (me && !d.querySelector('link[href*="/search.css"]')) d.head.append(Object.assign(d.createElement('link'), { rel: 'stylesheet', href: me.src.replace(/js\/search\.js.*/, 'css/search.css') }));
   let n = 0;
-  const esc = s => String(s).replace(/[&<>"]/g, c => '&#' + c.charCodeAt(0) + ';');
 
   const init = input => {
     if (input.dataset.ready) return;

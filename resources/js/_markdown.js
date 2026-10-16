@@ -18,8 +18,8 @@
  * Alles Übrige wird maskiert; der Server säubert beim Speichern ohnehin noch einmal (Fields::sanitize → Sanitizer::block/inline).
  */
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const LIST = /^( *)([-*+]|\d{1,9}[.)])(?: +|$)(.*)$/;
 const FENCE = /^ {0,3}(`{3,}|~{3,})/;
 const HEAD = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;

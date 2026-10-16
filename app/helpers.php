@@ -151,14 +151,33 @@ function site_url(): string
     if ($l = \Core\Landings::matched()) {
         return \Core\Landings::current() ? $l->origin() : \Core\Landings::mainOrigin();
     }
-    $u = rtrim((string) app()->settings->get('sys.site_url', ''), '/');
-    if ($u === '') {
-        $u = rtrim((string) app()->config->get('base_url', ''), '/');
+    if (($u = trusted_site_url()) !== null) return $u;
+    // Letzter Rückfall (frische Installation ohne bekannte Domain): Host der Anfrage
+    $r = app()->request;
+    return $r ? ($r->isSecure() ? 'https://' : 'http://') . $r->host() : '';
+}
+
+/**
+ * Vertrauenswürdige Adresse der Website für absolute Links (E-Mails, Feeds, Sitemaps): eingestellte Adresse (sys.site_url, base_url),
+ * sonst der Host der Anfrage nur, wenn er zur Website gehört, sonst ihre erste Domain bzw. die zuletzt gesehene Adresse der Verwaltung.
+ * Nie ein beliebiger Host-Header – sonst könnten Besucher E-Mails mit Links auf fremde Domains auslösen. null = nichts bekannt.
+ */
+function trusted_site_url(): ?string
+{
+    foreach ([(string) app()->settings->get('sys.site_url', ''), (string) app()->config->get('base_url', '')] as $u) {
+        if (preg_match('~^https?://[^/\s]+~i', $u)) return rtrim($u, '/');
     }
-    if ($u === '' && ($r = app()->request)) {
-        $u = ($r->isSecure() ? 'https://' : 'http://') . $r->host();
+    $hosts = site()->hosts();
+    $r = app()->request;
+    $host = $r ? strtolower((string) preg_replace('~:\d+$~', '', $r->host())) : '';
+    if ($r && $host !== '' && in_array($host, $hosts, true)) return ($r->isSecure() ? 'https://' : 'http://') . $r->host();
+    if ($hosts) {
+        $h = $hosts[0];
+        $local = $h === 'localhost' || str_ends_with($h, '.localhost') || str_starts_with($h, '127.');
+        return ($local ? 'http://' : 'https://') . $h;
     }
-    return $u;
+    $admin = (string) app()->settings->get('sys.admin_url', '');   // zuletzt gesehene Adresse der Verwaltung (Network::rememberUrl)
+    return preg_match('~^https?://[^/\s]+~i', $admin) ? rtrim($admin, '/') : null;
 }
 
 function absolute_url(string $path = '/'): string

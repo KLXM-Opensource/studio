@@ -3,7 +3,8 @@
  * Text wird immer escaped; erlaubt sind nur **fett**, `Code`, Listen („- “, „1. “), Absätze und Belege [n],
  * die zu Links auf die Quellen werden. Links, die die KI selbst schreibt, bleiben reiner Text.
  */
-export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+export { esc } from './_html.js';
+import { esc } from './_html.js';
 
 /** $sources: [{n, title, url}] · label(n, title): Text für aria-label des Belegs */
 export function renderMd(text, sources = [], label = (n, t) => `${n}: ${t}`) {

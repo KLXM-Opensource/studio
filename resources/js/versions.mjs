@@ -12,7 +12,7 @@
  * Einträge sofort (Status bleibt) – der bisherige Stand bleibt als Version; Meldung nach dem Neuladen (CMSAdmin.toastNext).
  * Eigene Shadow-DOM-Wurzel mit css/versions.css (hell/dunkel nach Systemeinstellung).
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import { esc } from './_html.js';
 const fill = (s, p = {}) => Object.entries(p).reduce((x, [k, v]) => x.replaceAll('{' + k + '}', String(v)), String(s ?? ''));
 const SVG = {
   // Uhr im Kopf: Zifferblatt mit Strichen, Stunden- und Minutenzeiger (drehen per JS zur Zeit des gewählten Stands)

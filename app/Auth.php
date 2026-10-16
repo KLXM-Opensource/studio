@@ -170,6 +170,13 @@ final class Auth
             return 'Zu viele Anmeldeversuche. Bitte warten Sie 15 Minuten.';
         }
 
+        // Zusätzlich je Konto (viele IP-Adressen gegen ein Konto); höher als je IP, damit Dritte niemanden leicht aussperren
+        $acct = 'login-acct:' . hash_hmac('sha256', strtolower(trim($email)), app()->key());
+        if ($limiter->tooMany($acct, 20, 900)) {
+            $this->failed($email, $ip, 'limited');
+            return 'Zu viele Anmeldeversuche. Bitte warten Sie 15 Minuten.';
+        }
+
         $row = $this->db->fetch('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [$email]);
         // Netzwerk-Administration: Anmeldung mit den zentralen Zugangsdaten auf jeder Website (immer mit zweitem Faktor)
         if (($net = $this->networkAttempt($row, $email, $password)) !== null) {
@@ -185,6 +192,7 @@ final class Auth
         $hash = $row['password_hash'] ?? '$2y$12$yaNnm6RkwijxMHDaR.bX5eCLU2vn8HWPVSNJ0WE.fRaZHEEdIQoim';
         if (!password_verify($password, $hash) || !$row) {
             $limiter->hit($key);
+            $limiter->hit($acct);
             $this->failed($email, $ip, 'password');
             return 'E-Mail-Adresse oder Passwort ist falsch.';
         }
@@ -198,6 +206,7 @@ final class Auth
             return __('Dieses Konto ist gesperrt.');
         }
         $limiter->clear($key);
+        $limiter->clear($acct);
         // Zweiter Faktor (Core\Totp, Core\Passkeys): eingerichtet → abfragen; verlangt, aber noch nicht eingerichtet →
         // Einrichtung verlangen bzw. daran erinnern (Mfa::afterLogin in login())
         if (Mfa::hasFactor($row, $this->db)) {

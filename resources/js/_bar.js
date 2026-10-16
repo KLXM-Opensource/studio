@@ -11,6 +11,7 @@
  */
 import { barRoot, layerBox, openDialog, deepActive, uiAll } from './_shadow.js';
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
 const d = document;
 let R = null, bar = null, cfg = { texts: {} }, H = null, mode = 'view', openMenu = null;
@@ -248,7 +249,6 @@ let dlg = null;
 export function confirmDiscard(o = {}) {
   const t = { title: T('discardTitle'), body: T('discardBody'), note: T('discardNote'), keep: T('keep'), discard: T('discard'), save: T('saveExit') };
   for (const [k, v] of Object.entries(o)) if (v !== undefined && v !== null) t[k] = v;
-  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   if (!dlg) {
     dlg = d.createElement('dialog');
     dlg.className = 'adm-dialog adm-dialog--small cms-confirm';
@@ -291,7 +291,6 @@ export function ask(o = {}) {
   else if (!o.body && /\?\s+\S/.test(title)) { const i = title.indexOf('?') + 1; body = title.slice(i).trim(); title = title.slice(0, i); }
   const lab = k => cfg.texts?.[k] || t(k === 'cancel' ? 'Abbrechen' : 'Bestätigen');
   const danger = o.danger ?? /lösch|verwerf|widerruf|sperr|entfern|zurücksetz|delete|discard|revoke|remove/i.test(String(o.ok || '') + ' ' + title);
-  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   if (!dlg) {
     dlg = d.createElement('dialog');
     dlg.className = 'adm-dialog adm-dialog--small cms-confirm';

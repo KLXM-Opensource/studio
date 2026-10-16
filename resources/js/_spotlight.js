@@ -5,9 +5,9 @@
 import { t } from './_i18n.js';
 import { layerBox, pathClosest, ui } from './_shadow.js';
 import { ico } from './_icons.js';
+import { esc } from './_html.js';
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 // Symbole kommen aus dem Sprite (Core\Icons; der Server liefert je Treffer „ico“) – ohne Namen: Dokument
 const svg = () => ico('file-text');

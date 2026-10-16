@@ -7,11 +7,11 @@ import { t } from './_i18n.js';
 import { livePreview } from './_preview.js';
 import { ask } from './_bar.js';
 import { ico } from './_icons.js';
+import { esc } from './_html.js';
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const slug = s => String(s || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^(\d)/, 'f_$1').slice(0, 40);
 const debounce = (fn, ms) => { let tm; return (...a) => { clearTimeout(tm); tm = setTimeout(() => fn(...a), ms); }; };

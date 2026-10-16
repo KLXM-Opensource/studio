@@ -45,6 +45,7 @@ import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Lin
 import { initPagesFields, openPagesPicker } from './_pages.js';   // Seitenauswahl (Feldtyp „pages“, Core\PagePicker)
 import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles)
 import { initAssistant } from './_assistant.js';
+import { esc } from './_html.js';
 import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
 import { initPushAdmin } from './_pushadmin.js';   // Mitteilungen → Verfassen: Vorschau, erreichbare Geräte (Core\Push\Compose)
 import { initPack } from './_pack.js';   // Große Formulare gebündelt senden (max_input_vars, Core\Http\Request::unpack)
@@ -340,7 +341,6 @@ function loadLinks() {
 }
 d.addEventListener('focusin', e => { if (pathTarget(e)?.matches('[list=cms-links]')) loadLinks(); });
 
-function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
 
 // ------------------------------------------------------------ Medienauswahl (Mediathek-Modul, _media.js)
 const openMediaPicker = (kind = 'image') => window.CMSMedia.pick(kind);

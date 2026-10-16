@@ -246,6 +246,9 @@ final class Redirects
     public static function targetUrl(string $target, string $rest = ''): ?string
     {
         $t = trim($target);
+        // Eingesetzter Rest aus der aufgerufenen Adresse darf nie auf eine andere Website führen: kein Backslash (Browser lesen
+        // „/\host“ wie „//host“), Pfad-Ziele nicht „//…“, absolute Ziele behalten ihren Host („https://host*“ + „@fremd“)
+        if (str_contains($rest, '\\')) return null;
         switch (self::targetKind($t)) {
             case 'ref':
                 if (preg_match('~^page:(\d+)~', $t, $m)) {
@@ -254,9 +257,11 @@ final class Redirects
                 }
                 return Links::href($t);
             case 'url':
-                return str_replace('*', $rest, $t);
+                $u = str_replace('*', $rest, $t);
+                return strtolower((string) parse_url($u, PHP_URL_HOST)) === strtolower((string) parse_url(str_replace('*', '', $t), PHP_URL_HOST)) ? $u : null;
             case 'path':
-                return url(str_replace('*', $rest, $t));
+                $p = str_replace('*', $rest, $t);
+                return str_starts_with($p, '//') ? null : url($p);   // immer ein Pfad dieser Website
         }
         return null;
     }

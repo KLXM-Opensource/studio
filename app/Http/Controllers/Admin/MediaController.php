@@ -72,7 +72,7 @@ final class MediaController extends AdminController
     /** Pool-Datei auf dieser Website verwenden → Verweis-Eintrag (lokale ID) */
     public function useShared(Request $r): Response
     {
-        $this->auth($r);
+        $this->auth($r, 'media.upload');   // übernimmt Dateien in die Mediathek der Website
         $pool = $r->str('pool');
         if (!\Core\MediaPools::available($pool)) {
             return Response::json(['ok' => false, 'error' => 'Unbekannter Medien-Pool.'], 404);

@@ -3,6 +3,7 @@ import { toast as sharedToast } from './_toast.js';
 import { drill } from './_drill.js';
 import { layerBox, inPath, topInset } from './_shadow.js';
 import { ico } from './_icons.js';
+import { esc } from './_html.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
@@ -25,7 +26,6 @@ const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
 const FINDERS = [];   // geöffnete Mediatheken (Seite + Auswahldialoge) – für Einfügen aus der Zwischenablage
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Übersetzungen von Titel/Alt-Text je weiterer Inhaltssprache (meta.languages)
 const transHtml = (m, meta, isImg) => Object.entries(meta?.languages || {}).map(([code, label]) => {

@@ -2,11 +2,11 @@
  * KI-Antwort über den Suchergebnissen (Core\AI\VisitorChat::searchAnswerBox): fragt POST /api/chat (src=search, JSON)
  * automatisch oder nach Klick, zeigt die Antwort mit Belegen [n] als Links und die Quellen. Keine Cookies, keine Inline-Styles.
  */
+import { esc } from './_html.js';
 (() => {
   const box = document.querySelector('[data-srch-ai]');
   if (!box || !window.fetch) return;
   const d = box.dataset, body = box.querySelector('[data-body]'), L = JSON.parse(d.l || '{}');
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const render = j => {
     const by = {};
     (j.sources || []).forEach(s => { by[s.n] = s; });

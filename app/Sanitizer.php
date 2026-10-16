@@ -61,7 +61,7 @@ final class Sanitizer
         if ($href === '') {
             return null;
         }
-        if (preg_match('~^(#[\w\-]*|/(?!/)[^\s]*)$~u', $href)) {
+        if (preg_match('~^(#[\w\-]*|/(?![/\x5c])[^\s\x5c]*)$~u', $href)) {   // lokal: nicht „//host“ und nie „\“ (Browser: „/\host“ = fremde Website)
             return $href;
         }
         if (preg_match('~^(mailto:|tel:)[^\s<>"]+$~i', $href)) {

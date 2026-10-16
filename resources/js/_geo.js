@@ -3,6 +3,7 @@
  * oder in die Karte klicken / Markierung ziehen. MapLibre lädt erst, wenn das Feld sichtbar wird.
  */
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
 let lib = null;
 function loadLib(cfg, node) {
@@ -21,7 +22,6 @@ const parse = s => {
   return m && Math.abs(+m[1]) <= 85 && Math.abs(+m[2]) <= 180 ? [+m[1], +m[2]] : null;
 };
 const fmt = n => String(+n.toFixed(6));
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 export function initGeo(scope = document) {
   scope.querySelectorAll('[data-geo]:not([data-geo-ready])').forEach(box => {

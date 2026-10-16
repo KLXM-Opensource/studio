@@ -9,11 +9,11 @@
  * Ohne JavaScript: Speichern und Löschen funktionieren als Formulare, Prüfen/Modelle brauchen das Skript.
  */
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const csrf = () => $('#adm-csrf')?.value || $('input[name=_csrf]')?.value || '';
 const CAPS = { chat: 'Text', vision: 'Bilder', embed: 'Embeddings', audio: 'Audio' };
 const NEED = { text: 'chat', chat: 'chat', vision: 'vision', embed: 'embed', transcribe: 'audio' };

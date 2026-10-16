@@ -10,7 +10,8 @@
     <li>Ohne <code>pages.publish</code> bzw. <code>data.publish</code> wird nur als Entwurf gespeichert; veröffentlichte Einträge bleiben dann unveränderbar.</li>
     <li>Einmalige Ergänzungen bestehender Rollen: <code>support.report</code> für alle und <code>support.answer</code> für die Redaktion (<code>sys.support_roles</code>), <code>ai.use</code> für die Redaktion (<code>sys.ai_roles</code>). <code>review.manage</code> hat standardmäßig nur, wer <code>*</code> hat.</li>
     <li>Im Code: <code>can('pages.publish')</code>, <code>can('data.edit', 'aktuelles')</code>; in Admin-Controllern <code>$this-&gt;auth($r, 'media.delete')</code>. Navigation, Werkzeugleiste, Spotlight, API und MCP blenden aus, was die Rolle nicht darf. Erweiterungen melden eigene Rechte mit <code>$x-&gt;permissions()</code> an.</li>
-    <li>API-/MCP-Tokens gehören zu einem Benutzer, haben zusätzlich ihre eigene Stufe (read / write) und werden unter <b>API &amp; MCP</b> vergeben (Recht <code>api.manage</code>).</li>
+    <li>API-/MCP-Tokens gehören zu einem Benutzer, haben zusätzlich ihre eigene Stufe (read / write) und werden unter <b>API &amp; MCP</b> vergeben (Recht <code>api.manage</code>). Ein Token gilt nur, solange sein Konto besteht, nicht gesperrt ist und <code>api.manage</code> hat; <b>schreibende</b> Tokens verlangen ein Konto mit allen Rechten (die API prüft keine Tabellen- oder Einzelrechte). Beim Löschen eines Kontos fallen seine Tokens weg (Erweiterungen räumen über das Ereignis <code>user.deleted</code> auf, z. B. App-Passwörter).</li>
+    <li><b>Keine Rechte über die eigenen hinaus:</b> Wer <code>users.manage</code> hat, vergibt nur Rollen, deren Rechte die eigene Rolle hat, und ändert, löscht oder setzt den zweiten Faktor nur bei solchen Konten zurück. Im Rollen-Editor lassen sich nur eigene Rechte vergeben (Ausnahme: Rollen mit allen Rechten).</li>
   </ul>
   <h3 id="zwei-faktor">Zwei-Faktor-Anmeldung</h3>
   <ul>

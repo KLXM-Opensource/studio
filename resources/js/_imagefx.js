@@ -1,5 +1,6 @@
 import { t } from './_i18n.js';
 import { layerBox } from './_shadow.js';
+import { esc } from './_html.js';
 /*
  * Bild anpassen (Core\ImageFx) – Effekte, Sättigung, Helligkeit, Kontrast, Schärfe; zerstörungsfrei per CSS-Klassen.
  *  - Gleicher Dialog für die Mediathek (global je Bild) und den Seiten-Editor (je Einbindung im Block, data._fx).
@@ -15,7 +16,6 @@ export const FX_PRESETS = ['gray', 'sepia', 'warm', 'cool', 'muted', 'vivid', 'c
 const RANGES = { s: [0, 200], b: [50, 150], c: [50, 150] };
 const STEP = 10;
 const SHARP = [-100, 100], BLUR_PX = 0.4, SHARPEN = 0.06;   // wie Core\ImageFx::SHARP, BLUR_PX, SHARPEN
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const presetLabels = () => ({ gray: t('S/W'), sepia: t('Sepia'), warm: t('Warm'), cool: t('Kühl'), muted: t('Entsättigt'), vivid: t('Kräftig'), contrast: t('Kontrast') });
 
 /** Anpassung zerlegen (tolerant: Ungültiges wird ignoriert) → { p, s, b, c, none } */

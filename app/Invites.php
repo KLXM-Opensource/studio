@@ -74,12 +74,7 @@ final class Invites
     /** Adresse der Website (sys.site_url bzw. aufgerufene Domain; Kommandozeile ohne sys.site_url: erste Domain der Website) */
     public static function base(): string
     {
-        $base = site_url();
-        if ($base === '') {
-            $host = (string) (site()->hosts()[0] ?? 'localhost');
-            $base = (str_contains($host, 'localhost') || str_starts_with($host, '127.') ? 'http://' : 'https://') . $host;
-        }
-        return $base;
+        return trusted_site_url() ?? 'http://localhost';   // wie beim Zurücksetzen des Passworts: nur vertrauenswürdige Adressen
     }
 
     // ================================================================= Rollen

@@ -9,7 +9,7 @@
  * Menü, lädt die Seite neu – im Bearbeiten-Modus nur, wenn keine ungespeicherten Änderungen im Editor stehen.
  * Endpunkte: data.endpoint (GET/POST, Recht pages.manage), data.ai (KI-Vorschlag, Recht ai.use).
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import { esc } from './_html.js';
 const ico = n => window.CMSAdmin?.ico?.(n) || '';
 const slugify = s => String(s).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

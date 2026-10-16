@@ -52,6 +52,21 @@ final class UserController extends AdminController
             'css' => ['css/passkey.css', 'css/invite.css', 'css/account.css']], $errors ? 422 : 200);
     }
 
+    /**
+     * Darf die angemeldete Person ein Konto mit dieser Rolle anlegen, ändern, löschen bzw. diese Rolle vergeben? Nur Rollen, deren Rechte
+     * sie selbst hat (Core\Invites::assignable) – sonst könnte sich jemand mit „Benutzer verwalten“ zur Administration machen.
+     */
+    public static function mayManageRole(?string $roleKey): bool
+    {
+        return \Core\Invites::assignable(\Core\Permissions::role((string) $roleKey), app()->auth->role());
+    }
+
+    /** Rolle eines Kontos (leer, wenn es nicht existiert) */
+    public static function roleOf(int $id): string
+    {
+        return (string) app()->db->fetchValue('SELECT role FROM users WHERE id = ?', [$id]);
+    }
+
     public function store(Request $r): Response
     {
         $this->auth($r, 'users.manage');
@@ -62,12 +77,16 @@ final class UserController extends AdminController
             $errors['email'] = 'Ungültige E-Mail-Adresse.';
         } elseif (app()->db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ?', [$email])) {
             $errors['email'] = 'Diese E-Mail-Adresse ist bereits registriert.';
+        } elseif (\Core\Features::integratorEmail($email) && !\Core\Features::integrator()) {
+            $errors['email'] = __('Diese Adresse ist der Agentur (Integrator) vorbehalten – bitte per Einladung anlegen.');
         }
         if ($p = Auth::passwordProblem($pw)) {
             $errors['password'] = $p;
         }
         if ($r->str('role') === 'network') {
             $errors['role'] = __('Netzwerk-Konten werden in der Netzwerk-Verwaltung angelegt.');
+        } elseif (!self::mayManageRole($r->str('role'))) {
+            $errors['role'] = __('Diese Rolle können Sie nicht vergeben – sie hat Rechte, die Ihre eigene Rolle nicht hat.');
         }
         if ($errors) {
             return $this->index($r, $errors, ['email' => $email, 'name' => $r->str('name'), 'role' => $r->str('role')], 'einladen');
@@ -85,11 +104,17 @@ final class UserController extends AdminController
         if (self::isNetworkAccount((int) $id)) {
             return $this->back('/admin/users/personen', 'error', __('Netzwerk-Konten werden zentral in der Netzwerk-Verwaltung verwaltet.'));
         }
+        if (!self::mayManageRole(self::roleOf((int) $id))) {
+            return $this->back('/admin/users/personen', 'error', __('Dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann es ändern.'));
+        }
         $admins = (int) app()->db->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id != ?", [(int) $id]);
         if ($admins < 1) {
             return $this->back('/admin/users/personen', 'error', 'Es muss mindestens ein Administrationskonto bestehen bleiben.');
         }
         app()->db->query('DELETE FROM users WHERE id = ?', [(int) $id]);
+        // Zugänge des Kontos entfernen: API-Tokens und (Erweiterung dav) App-Passwörter
+        app()->db->query('DELETE FROM api_tokens WHERE user_id = ?', [(int) $id]);
+        \Core\Extensions::emit(new \Core\Events\UserDeleted((int) $id));
         return $this->back('/admin/users/personen', 'success', 'Benutzer gelöscht.');
     }
 
@@ -105,6 +130,9 @@ final class UserController extends AdminController
         }
         $email = app()->db->fetchValue('SELECT email FROM users WHERE id = ?', [(int) $id]);
         if (!$email) return $this->back('/admin/users/personen', 'error', __('Benutzer nicht gefunden.'));
+        if (!self::mayManageRole(self::roleOf((int) $id))) {
+            return $this->back('/admin/users/personen', 'error', __('Dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann es ändern.'));
+        }
         \Core\Totp::reset((int) $id);
         \Core\Network\Network::log('user.reset-2fa', site()->key, null, (string) $email);
         return $this->back('/admin/users/personen', 'success', __('Zwei-Faktor-Anmeldung von {email} zurückgesetzt.', ['email' => $email]));
@@ -229,6 +257,9 @@ final class UserController extends AdminController
         $key = 'email-admin:' . (int) $me['id'];
         if ($limiter->tooMany($key, 30, 3600)) return $this->back($back, 'error', __('Zu viele Änderungen in kurzer Zeit. Bitte warten Sie eine Stunde.'));
         $new = strtolower(trim($r->str('email')));
+        if (\Core\Features::integratorEmail($new) && !\Core\Features::integrator()) {
+            return $this->back($back, 'error', __('Diese Adresse ist der Agentur (Integrator) vorbehalten – bitte per Einladung anlegen.'));
+        }
         if ($err = \Core\EmailChange::adminChange($target, $new, (string) $me['email'])) {
             return $this->back($back, 'error', $err);
         }

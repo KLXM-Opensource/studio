@@ -34,6 +34,13 @@ final class RoleController extends AdminController
             return $this->back($key ? "/admin/roles/$key" : '/admin/roles/new', 'error', __('Bitte einen Namen angeben.'));
         }
         $perms = array_values(array_intersect((array) ($r->post['perms'] ?? []), Permissions::all()));
+        // Ohne alle Rechte (*): nur Rechte vergeben, die die eigene Rolle hat – und keine Rolle ändern, die mehr darf
+        $mine = app()->auth->role();
+        if ($mine !== null && !in_array('*', $mine['permissions'], true)) {
+            if (array_diff($perms, $mine['permissions']) || ($role && !UserController::mayManageRole($role['key']))) {
+                return $this->back('/admin/users/rollen', 'error', __('Sie können nur Rechte vergeben, die Ihre eigene Rolle hat.'));
+            }
+        }
         $tables = $r->str('tables_mode') === 'some'
             ? json_encode(array_values(array_intersect((array) ($r->post['tables'] ?? []), array_column(Tables::all(), 'handle'))))
             : null;
@@ -78,7 +85,11 @@ final class RoleController extends AdminController
             && !(int) app()->db->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id != ?", [(int) $id])) {
             return $this->back('/admin/users/personen', 'error', __('Es muss mindestens ein Administrationskonto bestehen bleiben.'));
         }
-        $old = (string) app()->db->fetchValue('SELECT role FROM users WHERE id = ?', [(int) $id]);
+        $old = UserController::roleOf((int) $id);
+        // Nur Rollen vergeben bzw. Konten ändern, deren Rechte man selbst hat (sonst: Selbst-Beförderung zur Administration)
+        if ($old === '' || !UserController::mayManageRole($role['key']) || !UserController::mayManageRole($old)) {
+            return $this->back('/admin/users/personen', 'error', __('Diese Rolle bzw. dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann das ändern.'));
+        }
         app()->db->update('users', ['role' => $role['key']], 'id = :id', ['id' => (int) $id]);
         if ($old !== $role['key']) \Core\Extensions::emit(new \Core\Events\UserRoleChanged((int) $id, $role['key'], $old));   // Erweiterungen
         return $this->back('/admin/users/personen', 'success', __('Rolle geändert.'));

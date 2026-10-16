@@ -9,8 +9,8 @@
  */
 import { ui } from './_shadow.js';
 import MAP from '../../public/assets/icons/icons-map.json';
+import { esc } from './_html.js';
 
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const NAME = /^[a-z][a-z0-9-]{0,39}$/;
 
 let sprite = null;

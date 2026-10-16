@@ -89,7 +89,8 @@ final class LoupeIndex implements KeywordIndex
         if ($q === '' || $this->count() === 0) return ['total' => 0, 'hits' => []];
         $filters = [];
         foreach (['type' => 'type', 'table' => 'tbl'] as $k => $attr) {
-            if (!empty($filter[$k])) $filters[] = $attr . " = '" . str_replace("'", '', (string) $filter[$k]) . "'";
+            // Nur Kennungen (Typ, Tabellen-Handle) – nie Anführungszeichen oder Backslash im Filterausdruck
+            if (!empty($filter[$k]) && preg_match('~^[a-z0-9_.:-]{1,64}$~i', (string) $filter[$k])) $filters[] = $attr . " = '" . $filter[$k] . "'";
         }
         $params = SearchParameters::create()
             ->withQuery($q)

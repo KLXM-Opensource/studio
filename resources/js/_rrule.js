@@ -6,6 +6,7 @@
  * Gespeichert wird „FREQ=…;…“ und optional eine Zeile „EXDATE:JJJJ-MM-TT,…“ (Server normalisiert UNTIL nach UTC).
  */
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
 const DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 const dayName = i => [t('Montag'), t('Dienstag'), t('Mittwoch'), t('Donnerstag'), t('Freitag'), t('Samstag'), t('Sonntag')][i];
@@ -17,7 +18,6 @@ const pad = n => String(n).padStart(2, '0');
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString(locale(), { day: '2-digit', month: '2-digit', year: 'numeric' }); };
 const list = a => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' ' + t('und') + ' ' + a[a.length - 1];
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 /** Rohwert → Zustand */
 export function parse(raw) {

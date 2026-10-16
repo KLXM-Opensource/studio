@@ -13,9 +13,9 @@
  */
 import { t } from './_i18n.js';
 import { ico, icoOrGlyph, icoLazy, lazyIcons, enabledTopics, loadCatalog, NAME } from './_icons.js';
+import { esc } from './_html.js';
 
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
 const EN = () => (d.documentElement.lang || '').toLowerCase().startsWith('en');
 const RECENT = 'cms.icons.recent';

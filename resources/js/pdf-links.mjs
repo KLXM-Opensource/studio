@@ -6,12 +6,12 @@
  * Ohne Skript, mit Strg/⌘/Umschalt oder mittlerer Maustaste gilt das href des Links (Wahl im Linkdialog).
  * Tastatur: Fokus auf „Ansehen“, Tab bleibt in der Karte, Esc schließt und kehrt zum Link zurück.
  */
+import { esc } from './_html.js';
 const d = document;
 const cfg = d.querySelector('script[data-cms-pdf-links]')?.dataset || {};
 if (cfg.css && !d.querySelector('link[data-cms-pdf-css]')) {
   const l = d.createElement('link'); l.rel = 'stylesheet'; l.href = cfg.css; l.dataset.cmsPdfCss = ''; d.head.append(l);
 }
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 let pop = null, opener = null, dlg = null;
 const DIRECT = '[data-cms-slider],[data-pdf-direct]';
 

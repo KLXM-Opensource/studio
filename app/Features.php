@@ -265,15 +265,25 @@ final class Features
         return self::all()[$key] ?? true;
     }
 
-    /** Angemeldetes Konto steht in 'integrators' (z. B. die Agentur) */
+    /**
+     * Angemeldetes Konto steht in 'integrators' (z. B. die Agentur). In Installationen mit mehreren Websites gilt die Adresse nur auf der
+     * Netzwerk-Website – auf den anderen Websites zählen nur Netzwerk-Konten. Sonst könnte die Administration einer Website ein lokales
+     * Konto mit der Adresse der Agentur anlegen und damit Kits (PHP) für alle Websites installieren.
+     */
     public static function integrator(): bool
     {
         // Netzwerk-Administration (Core\Network) hat auf jeder Website die Rechte der Agentur
         if (isset(app()->auth) && Network\Network::isNetworkUser()) return true;
-        $list = array_map('strtolower', (array) app()->config->get('integrators', []));
-        if (!$list || !isset(app()->auth)) return false;
+        if (!isset(app()->auth) || (Sites::multi() && !Network\Network::isNetworkSite())) return false;
         $u = app()->auth->user();
-        return $u && in_array(strtolower((string) $u['email']), $list, true);
+        return $u && self::integratorEmail((string) $u['email']);
+    }
+
+    /** Steht die Adresse in 'integrators'? Solche Konten legt nur an bzw. benennt nur um, wer selbst Integrator ist. */
+    public static function integratorEmail(string $email): bool
+    {
+        $list = array_map('strtolower', (array) app()->config->get('integrators', []));
+        return $email !== '' && in_array(strtolower(trim($email)), $list, true);
     }
 
     /** Darf ein Recht auf dieser Website überhaupt vergeben werden? */

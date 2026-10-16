@@ -1,6 +1,6 @@
 # PHP-API-Referenz – KLXM Studio 1.0.0
 
-Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 357 Klassen.
+Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 358 Klassen.
 Schnittstellen für Erweiterungen und Kits sind mit **API** markiert; alles andere ist intern und kann sich ändern.
 Weitere Schnittstellen: REST-API (OpenAPI unter `/api/v1/openapi.json`), MCP-Server, Kommandozeile – Entwicklerhandbuch in der Verwaltung.
 
@@ -687,7 +687,8 @@ Konstanten: `OFF_BY_DEFAULT`, `UI_KEY`, `DELEGATE_KEY`, `SWITCH_KEYS`, `REQUIRES
 - `static delegated(): bool` – Hat die Netzwerk-Administration der Website-Administration das Schalten freigegeben?
 - `static dormant(string $key): bool` – Eingestellt „an“, wirkt aber nicht, weil die Voraussetzung (REQUIRES) aus ist
 - `static flush(): void` – Zwischenspeicher verwerfen (nach dem Umschalten in der Verwaltung, Erweiterungen)
-- `static integrator(): bool` – Angemeldetes Konto steht in 'integrators' (z. B. die Agentur)
+- `static integrator(): bool` – Angemeldetes Konto steht in 'integrators' (z. B. die Agentur). In Installationen mit mehreren Websites gilt die Adresse nur auf der
+- `static integratorEmail(string $email): bool` – Steht die Adresse in 'integrators'? Solche Konten legt nur an bzw. benennt nur um, wer selbst Integrator ist.
 - `static lock(string $key): ?array` – Legt die Konfiguration den Wert fest? ['via' => 'features'|'preset', 'file' => 'config/sites/kunde.php', 'value' => bool] oder null.
 - `static networked(): bool` – Netzwerk-Installation (mehrere Websites): Schalten nur mit Freigabe der Netzwerk-Administration
 - `static on(string $key, bool $respectIntegrator = true): bool` – Ist die Funktion auf dieser Website verfügbar? (Integratoren: immer)
@@ -3727,6 +3728,14 @@ Konstanten: `NAME`
 
 - `__construct(int $id, string $email, string $role, string $via = 'admin')`
 
+### **API** `UserDeleted` (class, `app/Events/UserDeleted.php`)
+
+user.deleted: Konto gelöscht (Verwaltung → Benutzer) – Erweiterungen entfernen ihre Zugänge des Kontos (z. B. App-Passwörter).
+
+Konstanten: `NAME`
+
+- `__construct(int $id)`
+
 ### **API** `UserLoggedIn` (class, `app/Events/UserLoggedIn.php`)
 
 user.login: Anmeldung in der Verwaltung erfolgreich (Auth::login – Passwort, Zwei-Faktor, Passkey, Einladung, Netzwerk).
@@ -4856,7 +4865,9 @@ Konstanten: `SECTIONS`
 - `delete(Http\Request $r, string $id): Http\Response`
 - `index(Http\Request $r, array $errors = [], array $old = [], string $section = ''): Http\Response` – Übersicht (Dashboard) bzw. eine Unterseite; Formularfehler aus „Einladen & Anlegen“ landen wieder dort
 - `static isNetworkAccount(int $id): bool` – Netzwerk-Konto (Rolle network oder Schatten-Konto) – lokal nicht änderbar
+- `static mayManageRole(?string $roleKey): bool` – Darf die angemeldete Person ein Konto mit dieser Rolle anlegen, ändern, löschen bzw. diese Rolle vergeben? Nur Rollen, deren Rechte
 - `resetTwoFactor(Http\Request $r, string $id): Http\Response` – Zwei-Faktor-Anmeldung eines anderen lokalen Kontos zurücksetzen (z. B. Telefon verloren) – beendet dessen Sitzungen
+- `static roleOf(int $id): string` – Rolle eines Kontos (leer, wenn es nicht existiert)
 - `saveAccent(Http\Request $r): Http\Response` – Persönliche Akzentfarbe der Verwaltung (Core\Accent)
 - `saveAccount(Http\Request $r): Http\Response` – Passwort ändern – oder als erstes Passwort festlegen (Konten nur mit Passkey, z. B. aus einer Einladung: statt des
 - `saveLocale(Http\Request $r): Http\Response` – Oberflächensprache des eigenen Kontos
@@ -4931,6 +4942,7 @@ Netzwerk-Administration: zentrale Konten für alle Websites einer Installation.
 Konstanten: `USER_COLUMNS`, `TOKEN_TTL`
 
 - `static account(string $email): ?array` – Netzwerk-Konto nach E-Mail (nur Rolle network)
+- `static accountActive(int $uid): bool` – Ist das Netzwerk-Konto (Netzwerk-Website) noch vorhanden und nicht gesperrt? – z. B. für App-Passwörter ohne Sitzung
 - `static accountById(int $id): ?array`
 - `static accounts(): array`
 - `static appKey(): string` – app_key der Netzwerk-Website (verschlüsselt die 2FA-Geheimnisse der Netzwerk-Konten)
@@ -4957,7 +4969,7 @@ Konstanten: `USER_COLUMNS`, `TOKEN_TTL`
 - `static siteKey(): string`
 - `static siteLink(string $key, string $path): string` – Adresse eines Pfads auf einer anderen Website (berücksichtigt url_rewrite der Ziel-Website)
 - `static siteUrl(string $key): string` – Basisadresse einer Website (config base_url → erste Domain; http nur für lokale Test-Domains ohne HTTPS)
-- `static stillValid(int $uid, int $ver): bool` – Gilt die Sitzung eines Schatten-Kontos noch? (Netzwerk-Konto vorhanden, nicht gesperrt, auth_ver unverändert)
+- `static stillValid(int $uid, int $ver): bool`
 - `static syncShadowEmail(int $nid, string $email): array` – Neue E-Mail-Adresse eines Netzwerk-Kontos sofort in die Schatten-Konten der anderen Websites übernehmen
 - `static uaHash(string $ua): string`
 - `static uid(array $u): int` – ID des Netzwerk-Kontos zum angemeldeten Konto

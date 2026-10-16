@@ -17,9 +17,9 @@
  * „Standard“ = Werte des Kits, „Abbrechen“ (und Schließen) = gespeicherter Stand wieder live, „Speichern“ = für die ganze Website.
  */
 import { convertSheet, dropSheet } from './_cq.js';
+import { esc } from './_html.js';
 
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 /** Text des Werkzeugs (Core\DesignTool → texts) */
 const tx = (ctx, k, p) => ctx.t(k, p);
 const hex = v => {

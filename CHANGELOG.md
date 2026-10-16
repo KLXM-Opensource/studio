@@ -6,6 +6,14 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Sicherheit vor dem Start
+- **Rechte:** Wer Benutzer verwalten darf, vergibt nur noch Rollen mit eigenen Rechten und ändert nur solche Konten (vorher war die Selbst-Beförderung zur Administration möglich). Rollen-Editor: nur eigene Rechte vergeben.
+- **Integratoren** gelten in Installationen mit mehreren Websites nur noch auf der Netzwerk-Website; Konten mit Integrator-Adresse legt nur ein Integrator direkt an.
+- **API-Tokens** gelten nur, solange ihr Konto besteht, nicht gesperrt ist und die API verwalten darf; schreibende Tokens verlangen ein Konto mit allen Rechten. Gelöschte Konten verlieren Tokens und (Erweiterung dav) App-Passwörter; gesperrte Konten – auch Netzwerk-Konten – erhalten keinen DAV-Zugang mehr. Neues Ereignis `user.deleted`.
+- **Absolute Links** (E-Mails, Feeds) nur noch zu Domains der Website (`trusted_site_url()`), nie aus einem fremden Host-Header; Einladungen und Passwort-Links nutzen dieselbe Regel.
+- Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
+- Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
+
 ### PHP-API-Referenz und statische Analyse
 - **PHP-API-Referenz** live aus dem Code (`Core\ApiReference`): Entwicklerhandbuch → PHP-API-Referenz (stabile Schnittstellen für Erweiterungen und Kits), alle Klassen unter Hilfe → PHP-API-Referenz, als Markdown mit `php bin/console docs:api` (`docs/php-api.md`).
 - **PHPStan** Stufe 5 ohne Funde (`tools/phpstan`, Baseline nur für belegte Fehlalarme). Behoben u. a.: Wiederherstellen aus dem Papierkorb der Mediathek meldete immer einen Fehler (`Database::update()` liefert jetzt die Zahl der geänderten Zeilen).

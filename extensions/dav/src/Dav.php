@@ -84,7 +84,7 @@ final class Dav
         $limiter = new \Core\RateLimiter(app()->db);
         $key = 'dav:' . hash_hmac('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), app()->key());
         if ($limiter->tooMany($key, 20, 900)) return false;
-        $user = app()->db->fetch('SELECT id, email, name, role FROM users WHERE LOWER(email) = LOWER(?)', [trim($email)]);
+        $user = app()->db->fetch('SELECT id, email, name, role, disabled, network_uid FROM users WHERE LOWER(email) = LOWER(?)', [trim($email)]);
         $prefix = substr(str_replace('-', '', $password), 0, 5);
         $row = $user ? app()->db->fetch('SELECT * FROM dav_passwords WHERE user_id = ? AND prefix = ? ORDER BY id DESC', [(int) $user['id'], $prefix]) : null;
         if (!$row || !password_verify($password, (string) $row['hash'])) {
@@ -92,6 +92,9 @@ final class Dav
             $limiter->hit($key);
             return false;
         }
+        // Gesperrte Konten (auch Netzwerk-Konten, gesperrt auf der Netzwerk-Website) haben keinen Zugang mehr
+        if ((int) ($user['disabled'] ?? 0) || (!empty($user['network_uid']) && !\Core\Network\Network::accountActive((int) $user['network_uid']))) return false;
+        unset($user['disabled'], $user['network_uid']);
         $role = Permissions::role((string) $user['role']);
         if (!$role || !Permissions::allows($role, 'dav.use')) return false;
         if (($row['last_used_at'] ?? '') < date('Y-m-d H:i', time() - 300)) {

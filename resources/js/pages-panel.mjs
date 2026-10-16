@@ -8,7 +8,7 @@
  * Endpunkte der Seitenliste (gleiche Rechte und Prüfungen): tree?full=1, create, {base}/{id}/move|quick|publish|offline|delete.
  * Nach Änderungen: Baum neu laden; beim Schließen lädt die Seite neu (Menü, Adresse) – im Editor nur mit Hinweis.
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import { esc } from './_html.js';
 const ico = n => window.CMSAdmin?.ico?.(n) || '';
 
 let S = { pages: [], open: new Set(), add: null, changed: false, moved: null, q: '' };

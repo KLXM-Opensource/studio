@@ -18,12 +18,12 @@
  * frei geworden → „Jetzt bearbeiten“, übernommen während der eigenen Bearbeitung → einmalige Meldung. Der Server setzt durch.
  * Wurzeln: document und offene Schatten-Wurzeln (z. B. die Werkzeugleiste).
  */
+import { esc } from './_html.js';
 const d = document;
 const BEAT = 15000, LIST = 30000;
 
 const roots = () => [d, ...[...d.querySelectorAll('*')].filter((x) => x.shadowRoot).map((x) => x.shadowRoot)];
 const all = (sel) => roots().flatMap((r) => [...r.querySelectorAll(sel)]);
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fill = (s, v) => String(s || '').replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
 const T0 = {
   editing1: '{names} bearbeitet gerade', editingN: '{names} bearbeiten gerade', last: 'Zuletzt gespeichert: {name}, {ago}',

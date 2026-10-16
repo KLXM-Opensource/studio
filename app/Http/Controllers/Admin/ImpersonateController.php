@@ -37,6 +37,6 @@ final class ImpersonateController extends AdminController
         Impersonation::stop();
         app()->session->flash('success', __('Sie arbeiten wieder mit Ihrem eigenen Konto.'));
         $back = (string) ($r->post['back'] ?? '');
-        return Response::redirect($back !== '' && str_starts_with($back, '/') && !str_starts_with($back, '//') ? $back : url('/admin/users'), 303);
+        return Response::redirect($back !== '' && str_starts_with($back, '/') && !str_starts_with($back, '//') && !str_contains($back, '\\') ? $back : url('/admin/users'), 303);
     }
 }

@@ -16,9 +16,9 @@ import { layerBox } from './_shadow.js';
 import { t } from './_i18n.js';
 import { ico } from './_icons.js';
 import { linksUrl } from './_links.js';
+import { esc } from './_html.js';
 
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fold = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
 const SUB_KEY = 'cms-pages-sub';   // Vorgabe „mit Unterseiten“ (nur Komfort)
 

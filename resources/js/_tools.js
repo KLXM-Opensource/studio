@@ -24,10 +24,10 @@ import { layerBox, barRoot, deepActive, uiAll } from './_shadow.js';
 import { Rich } from './_rte.js';
 import { ico } from './_icons.js';
 import { toast } from './_toast.js';
+import { esc } from './_html.js';
 import { responsiveEditing } from './_cq.js';   // Seitenleiste „drawer“: Website reagiert auf ihre neue Breite
 
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fill = (s, p = {}) => Object.entries(p).reduce((x, [k, v]) => x.replaceAll('{' + k + '}', String(v)), String(s ?? ''));
 
 let cfg = null;                 // Konfiguration vom Server

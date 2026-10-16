@@ -30,7 +30,7 @@ abstract class Event implements \ArrayAccess
         'page.created' => PageCreated::class, 'page.moved' => PageMoved::class, 'page.translated' => PageTranslated::class,
         'page.restored' => PageRestored::class, 'form.submitted' => FormSubmitted::class,
         'user.login' => UserLoggedIn::class, 'user.logout' => UserLoggedOut::class, 'user.login_failed' => LoginFailed::class,
-        'user.created' => UserCreated::class, 'user.role_changed' => UserRoleChanged::class,
+        'user.created' => UserCreated::class, 'user.role_changed' => UserRoleChanged::class, 'user.deleted' => UserDeleted::class,
         'settings.saved' => SettingsSaved::class, 'table.schema_changed' => TableSchemaChanged::class,
     ];
 

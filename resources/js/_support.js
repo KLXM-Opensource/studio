@@ -7,11 +7,11 @@
  * Ohne JavaScript funktioniert alles über normale Formulare.
  */
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const MAX_FILES = 5, MAX_BYTES = 8 * 1024 * 1024, TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 export function initSupport(csrf) {

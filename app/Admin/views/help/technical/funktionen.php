@@ -6,6 +6,7 @@
 'blocks'      =&gt; ['deny' =&gt; ['video']],             // oder 'allow' =&gt; [...] als Positivliste
 'extensions'  =&gt; ['dav'],
 'integrators' =&gt; ['team@agentur.de'],               // diese Konten sehen immer alles</code></pre>
+  <p><b>Integratoren</b> erkennt der Kern an der E-Mail-Adresse. In Installationen mit mehreren Websites gilt das nur auf der Netzwerk-Website – auf den anderen Websites haben nur Netzwerk-Konten diese Rechte (sonst könnte die Administration einer Website ein Konto mit der Adresse der Agentur anlegen und Kits mit PHP-Code für alle Websites installieren). Konten mit einer Integrator-Adresse legt nur an bzw. benennt nur um, wer selbst Integrator ist; per Einladung (mit Bestätigung des Postfachs) geht es immer.</p>
   <table class="doc-table">
     <tr><th>Preset</th><th>Wirkung</th></tr>
     <tr><td><code>full</code></td><td>Alles an (Standard, bisheriges Verhalten).</td></tr>

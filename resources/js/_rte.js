@@ -18,10 +18,10 @@ import { aiBarHtml, aiExec } from './_ai.js';
 import { openLinkPicker, normalizeTel } from './_links.js';
 import { layerBox } from './_shadow.js';
 import { looksLike, htmlIsPlain, toHtml, openImport, pasteTip, hideTip } from './_markdown.js';
+import { esc } from './_html.js';
 
 const d = document;
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 const STYLES = [
   // [Wert, Name im Menü, Kurzname in der Leiste, Erläuterung]

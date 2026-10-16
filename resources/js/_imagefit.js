@@ -1,5 +1,6 @@
 import { t } from './_i18n.js';
 import { layerBox } from './_shadow.js';
+import { esc } from './_html.js';
 /*
  * Bild im Rahmen (Core\ImageFit) – füllen (zuschneiden), einpassen (mit Hintergrund) oder Originalformat.
  *  - Gleicher Dialog für die Mediathek (Standard des Bildes, Spalte media.fit) und den Seiten-Editor (je Einbindung, data._fit).
@@ -8,7 +9,6 @@ import { layerBox } from './_shadow.js';
  *  - Vorschau mit denselben Klassen wie auf der Website (resources/css/image-fit.css, Teil von admin.css / admin.shadow.css)
  *    in einem Rahmen mit dem Seitenverhältnis der Stelle.
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const MODES = ['cover', 'contain', 'original'];
 let presetCache = null;
 

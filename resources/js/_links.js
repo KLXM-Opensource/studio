@@ -24,9 +24,9 @@
 import { layerBox, ui } from './_shadow.js';
 import { t } from './_i18n.js';
 import { ico } from './_icons.js';
+import { esc } from './_html.js';
 
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const RECENT_KEY = 'cms-links-recent';
 const VIEW_KEY = 'cms-links-view';   // zuletzt gewählte Ansicht: search | tree | data (nur Komfort)
 const SRC_KEY = 'cms-links-source';  // zuletzt gewählte Quelle der Ansicht „Daten“ (z. B. entries:news)

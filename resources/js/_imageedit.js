@@ -1,6 +1,7 @@
 import { t } from './_i18n.js';
 import { layerBox } from './_shadow.js';
 import { ask } from './_bar.js';
+import { esc } from './_html.js';
 /*
  * Bild bearbeiten (Core\ImageEdit) – zerstörungsfrei: Zuschneiden · Drehen · Spiegeln · Ausrichten · Entzerren.
  *  - Das Original bleibt unverändert; gespeichert werden nur Parameter (media.edit_json). Der Server erzeugt daraus die
@@ -12,7 +13,6 @@ import { ask } from './_bar.js';
  *  - Pool-Dateien: Bearbeitung wirkt auf allen Websites, die das Bild nutzen (Hinweis im Dialog).
  */
 const d = document;
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const EDIT_TOOLS = ['crop', 'rotate', 'flip', 'straighten', 'perspective'];
 export const EDIT_RATIOS = ['free', '1:1', '4:3', '3:2', '16:9', '16:10', '4:5', '9:16'];
 const MAX_ANGLE = 45;

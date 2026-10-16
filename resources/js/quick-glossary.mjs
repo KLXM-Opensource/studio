@@ -14,7 +14,7 @@
  * schwebende Knopf „Als Glossar-Begriff“) öffnet „Neuer Begriff“ vorbelegt und prüft „Gibt es schon?“. Nach dem Anlegen: Hinweis
  * auf die automatische Markierung und „Seite neu laden“. „Einfügen“ gibt es nur beim Bearbeiten – beim Ansehen „Öffnen“ (Verwaltung).
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import { esc } from './_html.js';
 const ico = n => window.CMSAdmin?.ico?.(n) || '';
 const TABS = ['search', 'new', 'page'];
 

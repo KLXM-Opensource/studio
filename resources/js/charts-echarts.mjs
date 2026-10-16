@@ -10,10 +10,10 @@ import { init, use } from 'echarts/core';
 import { LineChart, BarChart, PieChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { esc } from './_html.js';
 
 use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 function formatter(spec) {
   const nf = (d) => new Intl.NumberFormat(spec.locale || 'de', { maximumFractionDigits: d });

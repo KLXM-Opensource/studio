@@ -94,6 +94,12 @@ final class SelfTest
         $k = Redirects::parse("/a,/b\n/c,/d");
         $eq('CSV Komma ohne Kopf', [count($k), $k[1]['target'] ?? null], [2, '/d']);
 
+        // Platzhalter: der eingesetzte Rest führt nie auf eine andere Website (offene Weiterleitung)
+        $eq('Platzhalter: Backslash abgewiesen', Redirects::targetUrl('/*', '\\evil.example'), null);
+        $eq('Platzhalter: „//“ abgewiesen', Redirects::targetUrl('/*', '/evil.example'), null);
+        $eq('Platzhalter: Pfad mit Schrägstrich erlaubt', Redirects::targetUrl('/news*', '/a/b'), url('/news/a/b'));
+        $eq('Platzhalter: Host bleibt gleich', [Redirects::targetUrl('https://example.org/*', 'x'), Redirects::targetUrl('https://example.org*', '@evil.example')], ['https://example.org/x', null]);
+
         return ['ok' => $ok, 'fails' => $fails];
     }
 }

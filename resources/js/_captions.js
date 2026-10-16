@@ -1,4 +1,5 @@
 import { t } from './_i18n.js';
+import { esc } from './_html.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 /*
  * Untertitel, Kapitel und Transkripte für Videos/Audio (KLXM Studio, Core\MediaTracks)
@@ -12,7 +13,6 @@ import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const COMMON = { de: 'Deutsch', en: 'English', fr: 'Français', es: 'Español', it: 'Italiano', nl: 'Nederlands', pl: 'Polski', tr: 'Türkçe', ar: 'العربية', uk: 'Українська', ru: 'Русский' };
 
 /** Zeit in ms → „00:01:02.500“ (kurz: „01:02.500“) */

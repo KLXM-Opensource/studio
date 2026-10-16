@@ -393,7 +393,7 @@ final class Extension
      * page.saved (array $page, ?int $userId), page.published|unpublished|discarded|deleted (array $page), entry.saved (array $table,
      * array $entry, bool $created, ?array $old), entry.published|unpublished (array $table, array $entry), entry.deleted (array $table,
      * int $id). Weitere typisiert (Objekt auch beim Namen ohne Typ): page.created, page.moved, page.translated, page.restored,
-     * form.submitted, user.login, user.logout, user.login_failed, user.created, user.role_changed, settings.saved,
+     * form.submitted, user.login, user.logout, user.login_failed, user.created, user.role_changed, user.deleted, settings.saved,
      * table.schema_changed (Core\Events\Event::ALL). Ohne Typ (nur Name): media.imported (array $m), media.replaced (array $neu, array $alt), media.edited, media.deleted
      * (array $m), inbox.status, inbox.deleted.
      */

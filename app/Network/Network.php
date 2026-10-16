@@ -202,6 +202,18 @@ final class Network
      * Gilt die Sitzung eines Schatten-Kontos noch? (Netzwerk-Konto vorhanden, nicht gesperrt, auth_ver unverändert)
      * Eine Abfrage je Anfrage auf die Netzwerk-Datenbank (SQLite: Datei öffnen + Primärschlüssel).
      */
+    /** Ist das Netzwerk-Konto (Netzwerk-Website) noch vorhanden und nicht gesperrt? – z. B. für App-Passwörter ohne Sitzung */
+    public static function accountActive(int $uid): bool
+    {
+        try {
+            $row = self::db()->fetch("SELECT disabled FROM users WHERE id = ? AND role = 'network'", [$uid]);
+            return $row !== null && !(int) $row['disabled'];
+        } catch (\Throwable $e) {
+            error_log('[network] ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public static function stillValid(int $uid, int $ver): bool
     {
         if (!isset(self::$valid[$uid])) {

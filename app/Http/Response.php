@@ -52,6 +52,10 @@ final class Response
                 'X-Frame-Options'        => 'SAMEORIGIN',
                 'Permissions-Policy'     => 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
             ];
+            // HTTPS erzwingen (HSTS) – nur über HTTPS und im Produktivbetrieb; ohne includeSubDomains (fremde Subdomains bleiben frei)
+            if (function_exists('app') && app()->request?->isSecure() && function_exists('environment') && environment() === 'production') {
+                $defaults['Strict-Transport-Security'] = 'max-age=31536000';
+            }
             foreach (array_replace($defaults, $this->headers) as $k => $v) {
                 header("$k: $v");
             }

@@ -89,6 +89,7 @@ final class Tokens
         if ($row['expires_at'] && $row['expires_at'] < date('Y-m-d')) {
             throw new ApiError(401, 'API-Token ist abgelaufen.');
         }
+        self::checkOwner($row);
         $limiter = new RateLimiter(app()->db);
         $key = 'api:' . $row['id'];
         if ($limiter->tooMany($key, self::RATE_LIMIT, self::RATE_WINDOW)) {
@@ -99,6 +100,23 @@ final class Tokens
             app()->db->update('api_tokens', ['last_used_at' => now()], 'id = :id', ['id' => $row['id']]);
         }
         return $row;
+    }
+
+    /**
+     * Das Konto hinter dem Token muss noch bestehen, darf nicht gesperrt sein und muss „API verwalten“ dürfen. Schreibende Tokens
+     * verlangen ein Konto mit allen Rechten: die API prüft keine feineren Rollenrechte (Tabellen, Einstellungen, Löschen).
+     * Tokens ohne Konto (Kommandozeile) bleiben gültig.
+     */
+    private static function checkOwner(array $row): void
+    {
+        if (empty($row['user_id'])) return;
+        $u = app()->db->fetch('SELECT id, role, disabled FROM users WHERE id = ?', [(int) $row['user_id']]);
+        if (!$u || (int) ($u['disabled'] ?? 0)) throw new ApiError(401, 'API-Token ist ungültig: das Konto wurde gelöscht oder gesperrt.');
+        $role = \Core\Permissions::role((string) $u['role']);
+        if (!\Core\Permissions::allows($role, 'api.manage')) throw new ApiError(401, 'API-Token ist ungültig: das Konto darf die API nicht mehr verwalten.');
+        if ($row['scope'] === 'write' && !in_array('*', (array) ($role['permissions'] ?? []), true)) {
+            throw new ApiError(403, 'Schreibende API-Tokens setzen ein Konto mit allen Rechten (Administration) voraus.');
+        }
     }
 
     public static function requireWrite(array $token): void

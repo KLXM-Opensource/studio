@@ -583,6 +583,11 @@ final class DataForms
         if (!$r['enabled'] || $r['field'] === '') return;
         $to = trim((string) ($values[$r['field']] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return;
+        // Höchstens 3 Bestätigungen je Empfänger und Stunde – das Formular ist kein Weg, fremden Adressen Post zu schicken
+        $limiter = new \Core\RateLimiter(app()->db);
+        $rkey = 'receipt:' . hash_hmac('sha256', strtolower($to), app()->key());
+        if ($limiter->tooMany($rkey, 3, 3600)) return;
+        $limiter->hit($rkey);
         $name = (string) (setting((string) project('name_setting', 'org_name')) ?: site()->label());
         $subject = $r['subject'] !== '' ? lt($r['subject']) : lt('Eingangsbestätigung: {name}', ['name' => (string) ($t['singular'] ?? $t['name'])]);
         $body = lt('Guten Tag,') . "\n\n" . ($r['text'] !== '' ? lt($r['text']) : lt('wir bestätigen den Eingang Ihrer Angaben.')) . "\n\n"

@@ -4,6 +4,7 @@
  */
 import { t } from './_i18n.js';
 import { livePreview } from './_preview.js';
+import { esc } from './_html.js';
 
 const $ = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
@@ -22,7 +23,6 @@ function metaFor(item) {
   if (dates.length) parts.push(`<span class="rep-when">${esc(dates.join(' – '))}</span>`);
   return (img ? `<img src="${esc(img.getAttribute('src'))}" alt="">` : '') + parts.join('');
 }
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function setOpen(item, open) {
   item.classList.toggle('is-collapsed', !open);

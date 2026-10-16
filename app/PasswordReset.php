@@ -80,20 +80,7 @@ final class PasswordReset
      */
     public static function base(): ?string
     {
-        foreach ([(string) app()->settings->get('sys.site_url', ''), (string) app()->config->get('base_url', '')] as $u) {
-            if (preg_match('~^https?://[^/\s]+~i', $u)) return rtrim($u, '/');
-        }
-        $hosts = site()->hosts();
-        $r = app()->request;
-        $host = $r ? strtolower(preg_replace('~:\d+$~', '', $r->host()) ?? '') : '';
-        if ($r && $host !== '' && in_array($host, $hosts, true)) return ($r->isSecure() ? 'https://' : 'http://') . $r->host();
-        if ($hosts) {
-            $h = $hosts[0];
-            $local = $h === 'localhost' || str_ends_with($h, '.localhost') || str_starts_with($h, '127.');
-            return ($local ? 'http://' : 'https://') . $h;
-        }
-        $admin = (string) app()->settings->get('sys.admin_url', '');   // zuletzt gesehene Adresse der Verwaltung (Network::rememberUrl)
-        return preg_match('~^https?://[^/\s]+~i', $admin) ? rtrim($admin, '/') : null;
+        return trusted_site_url();   // nie der Host-Header der Anfrage, wenn er nicht zur Website gehört
     }
 
     public static function url(string $token): ?string

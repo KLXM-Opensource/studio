@@ -12,6 +12,7 @@
 import { addRoot, setUiCss, barHost } from './_shadow.js';
 import { ico } from './_icons.js';
 import { confirmDiscard } from './_bar.js';
+import { esc } from './_html.js';
 
 const d = document;
 const T = {
@@ -22,7 +23,6 @@ const T = {
   added: 'Feld „{label}“ hinzugefügt.', noname: 'ohne Namen',
 };
 const tx = (k, p = {}) => Object.entries(p).reduce((s, [a, b]) => s.replaceAll('{' + a + '}', String(b)), T[k] ?? k);
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // Kurzname aus der Bezeichnung – wie im Tabellen-Designer (admin.js) und Tables::normName
 const slug = v => v.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^(\d)/, 'f_$1').slice(0, 40);
 

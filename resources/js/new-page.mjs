@@ -8,7 +8,7 @@
  * solange sie nicht von Hand geändert wurde. Angelegt wird ein Entwurf; danach öffnet die neue Seite im Bearbeiten-Modus.
  * Endpunkte: tree (GET, PageController::apiTree), create (POST JSON, PageController::apiCreate) – Recht pages.manage.
  */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import { esc } from './_html.js';
 const ico = n => window.CMSAdmin?.ico?.(n) || '';
 // Grobe Vorschau der Adresse (der Server bildet sie verbindlich)
 const slugify = s => String(s).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')

@@ -7789,4 +7789,9 @@ return [
     'Namespaces' => 'Namespaces',
     'PHP-API-Referenz' => 'PHP API reference',
     '{n} Klassen des Kerns mit ihren öffentlichen Methoden – live aus dem Code. Mit „API“ markiert: stabile Schnittstellen für Erweiterungen und Kits; alles andere ist intern.' => '{n} core classes with their public methods – live from the code. Marked “API”: stable interfaces for extensions and kits; everything else is internal.',
+    'Diese Adresse ist der Agentur (Integrator) vorbehalten – bitte per Einladung anlegen.' => 'This address is reserved for the agency (integrator) – please add it by invitation.',
+    'Diese Rolle bzw. dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann das ändern.' => 'This role or account has permissions your own role does not have – only the administration can change this.',
+    'Diese Rolle können Sie nicht vergeben – sie hat Rechte, die Ihre eigene Rolle nicht hat.' => 'You cannot assign this role – it has permissions your own role does not have.',
+    'Dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann es ändern.' => 'This account has permissions your own role does not have – only the administration can change it.',
+    'Sie können nur Rechte vergeben, die Ihre eigene Rolle hat.' => 'You can only grant permissions your own role has.',
 ];

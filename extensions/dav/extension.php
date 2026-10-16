@@ -31,6 +31,8 @@ return [
         $x->migration(1, fn(Core\Database $db) => MyCms\Dav\Dav::migrate($db));
         // Persönliche Einrichtung (App-Passwörter) über den Slot „Konto“; Einstellungen je Tabelle auf der Sammelseite „Einstellungen“
         $x->account(fn(array $user) => MyCms\Dav\Dav::accountCard($user), 'dav.use');
+        // Konto gelöscht: seine App-Passwörter entfernen
+        $x->on(Core\Events\UserDeleted::class, fn(Core\Events\UserDeleted $e) => app()->db->query('DELETE FROM dav_passwords WHERE user_id = ?', [$e->id]));
         $x->adminPage(['href' => '/admin/dav', 'label' => 'Kalender & Kontakte in Apps', 'kind' => 'settings', 'icon' => 'dav',
             'perm' => 'data.schema', 'feature' => 'dav', 'visible' => fn(): bool => can('dav.use') && MyCms\Dav\Dav::enabled(),
             'description' => 'Tabellen als Kalender bzw. Adressbuch für Apps bereitstellen, App-Passwörter']);
