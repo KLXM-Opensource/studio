@@ -83,7 +83,12 @@ const toPrint = () => {
     const box = fig.querySelector('.cms-chart__canvas');
     if (img && (!box || box.offsetWidth < 40 || matchMedia('print').matches)) continue;   // schon erzeugt, Fläche im Druck ausgeblendet
     if (!img) { img = document.createElement('img'); img.className = 'cms-chart__print'; img.alt = ''; fig.querySelector('.cms-chart__canvas')?.after(img); }
-    try { img.src = inst.image(); } catch (e) { img.remove(); }
+    try {
+      const t = theme(fig);
+      inst.update?.(t, { animation: false, print: true });   // Papierfassung: Legende vollständig
+      img.src = inst.image();
+      inst.update?.(t, { animation: false });
+    } catch (e) { img.remove(); }
   }
 };
 const resizeAll = () => { for (const { fig, inst } of live) if (fig.isConnected) inst.resize?.(); };
