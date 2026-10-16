@@ -12,15 +12,9 @@ $invites ??= [];
 $inviteOld ??= null;
 $invErr = (array) ($inviteOld['errors'] ?? []);
 $title = __('Netzwerk');
-$size = function (?int $b): string {
-    if ($b === null) return '–';
-    foreach ([__('B'), 'KB', 'MB', 'GB'] as $i => $u) {
-        if ($b < 1024 ** ($i + 1) || $u === 'GB') return ($i ? number_format($b / 1024 ** $i, $i > 1 ? 1 : 0, ',', '.') : (string) $b) . ' ' . $u;
-    }
-    return (string) $b;
-};
+$size = fn(?int $b): string => $b === null ? '–' : \Core\Format::admin()->bytes($b);
 $ts = fn($t): int => is_int($t) ? $t : (int) strtotime((string) $t);
-$when = fn($t) => $t ? date('d.m.Y H:i', $ts($t)) : '–';
+$when = fn($t) => $t ? \Core\Format::admin()->datetime($ts($t)) : '–';
 // Relative Zeitangabe („vor 3 Std.“) mit genauem Datum als <time> + title
 $ago = function ($t) use ($ts, $when): string {
     if (!$t) return '–';
@@ -31,7 +25,7 @@ $ago = function ($t) use ($ts, $when): string {
         $d < 86400 => __('vor {n} Std.', ['n' => (int) round($d / 3600)]),
         $d < 2 * 86400 => __('gestern'),
         $d < 45 * 86400 => __('vor {n} Tagen', ['n' => (int) floor($d / 86400)]),
-        default => date('d.m.Y', $ts($t)),
+        default => \Core\Format::admin()->date($ts($t)),
     };
     return '<time datetime="' . e(date('c', $ts($t))) . '" title="' . e($when($t)) . '">' . e($txt) . '</time>';
 };

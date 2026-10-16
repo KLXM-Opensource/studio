@@ -67,7 +67,7 @@ $row = function (array $n) use (&$row, &$count, $multi, $statusCell, $short): st
             array_map(fn($b) => [$b['tone'], $b['icon'] ?: ['ok' => 'check-circle', 'warn' => 'warning'][$b['tone']] ?? 'info', $b['label'] . ($b['title'] !== '' ? ' – ' . $b['title'] : '')], $ext['badges'])
         ))) . '</span>'
         . '<span class="pt-menu">' . ($p['is_home'] ? '' : '<label class="pt-switch" title="Im Hauptmenü zeigen"><input type="checkbox" data-menu' . ($p['menu'] ? ' checked' : '') . ' aria-label="„' . e($p['title']) . '“ im Menü zeigen"><span></span></label>') . '</span>'
-        . '<span class="pt-date" title="' . e(date('d.m.Y H:i', strtotime((string) $p['updated_at']))) . '">' . e($short((string) $p['updated_at'])) . '</span>'
+        . '<span class="pt-date" title="' . e(\Core\Format::admin()->datetime(strtotime((string) $p['updated_at']))) . '">' . e($short((string) $p['updated_at'])) . '</span>'
         . '<span class="pt-more"><button type="button" class="pt-morebtn" data-more aria-label="Aktionen für „' . e($p['title']) . '“">' . icon('dots-three') . '</button></span>'
         . '</div>';
     if ($kids) {

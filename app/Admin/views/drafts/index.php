@@ -23,9 +23,9 @@ $ago = function ($t) use ($ts): string {
         $d < 86400 => __('vor {n} Std.', ['n' => (int) round($d / 3600)]),
         $d < 2 * 86400 => __('gestern'),
         $d < 45 * 86400 => __('vor {n} Tagen', ['n' => (int) floor($d / 86400)]),
-        default => date('d.m.Y', $ts($t)),
+        default => \Core\Format::admin()->date($ts($t)),
     };
-    return '<time datetime="' . e(date('c', $ts($t))) . '" title="' . e(date('d.m.Y H:i', $ts($t))) . '">' . e($txt) . '</time>';
+    return '<time datetime="' . e(date('c', $ts($t))) . '" title="' . e(\Core\Format::admin()->datetime($ts($t))) . '">' . e($txt) . '</time>';
 };
 $typeLabel = fn(array $i) => $i['type'] === 'page' ? __('Seite') : (string) ($i['table']['singular'] ?: $i['table']['name']);
 $showUrl = fn(array $i) => $i['type'] === 'page' ? '/admin/entwuerfe/seite/' . $i['id'] : '/admin/entwuerfe/eintrag/' . $i['table']['handle'] . '/' . $i['id'];

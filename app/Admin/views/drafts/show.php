@@ -7,7 +7,7 @@ use Core\Http\Controllers\Admin\DraftController;
 use Core\Lang;
 use Core\Review\Drafts;
 
-$when = fn(?string $t) => $t ? date('d.m.Y H:i', (int) strtotime($t)) : '–';
+$when = fn(?string $t) => $t ? \Core\Format::admin()->datetime((int) strtotime($t)) : '–';
 $self = $i['type'] === 'page' ? '/admin/entwuerfe/seite/' . $i['id'] : '/admin/entwuerfe/eintrag/' . $i['table']['handle'] . '/' . $i['id'];
 $isNew = $i['state'] !== 'changed';
 ?>

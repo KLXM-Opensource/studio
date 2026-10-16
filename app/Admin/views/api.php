@@ -26,17 +26,17 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '
       <tbody>
       <?php foreach ($tokens as $t): $expired = $t['expires_at'] && $t['expires_at'] < date('Y-m-d'); ?>
         <tr>
-          <td><strong><?= e($t['name']) ?></strong><br><span class="adm-muted"><code><?= e($t['prefix']) ?>…</code> · angelegt <?= e(date('d.m.Y', strtotime($t['created_at']))) ?><?= $t['email'] ? ' von ' . e($t['email']) : '' ?></span>
+          <td><strong><?= e($t['name']) ?></strong><br><span class="adm-muted"><code><?= e($t['prefix']) ?>…</code> · angelegt <?= e(\Core\Format::admin()->date(strtotime($t['created_at']))) ?><?= $t['email'] ? ' von ' . e($t['email']) : '' ?></span>
             <?php if (!empty($t['mcp_client'])): ?><br><span class="adm-muted"><?= e(__('Client: {name}', ['name' => $t['mcp_client']])) ?></span><?php endif; ?></td>
           <td><span class="adm-badge<?= $t['scope'] === 'write' ? ' adm-badge--warn' : '' ?>"><?= e(Tokens::SCOPES[$t['scope']] ?? $t['scope']) ?></span>
-            <?php if ($t['expires_at']): ?><br><span class="adm-muted"><?= $expired ? 'abgelaufen' : 'bis ' . e(date('d.m.Y', strtotime($t['expires_at']))) ?></span><?php endif; ?>
+            <?php if ($t['expires_at']): ?><br><span class="adm-muted"><?= $expired ? 'abgelaufen' : 'bis ' . e(\Core\Format::admin()->date(strtotime($t['expires_at']))) ?></span><?php endif; ?>
             <?php if ($t['scope'] === 'write' && \Core\Review\Queue::enabled()): $rm = ($t['review_mode'] ?? 'direct') === 'review' ? 'review' : 'direct'; // Prüf-Ebene (Core\Review) ?>
             <form class="rv-tokmode" method="post" action="<?= e(url('/admin/api-tokens/' . $t['id'] . '/mode')) ?>"><?= csrf_field() ?>
               <label class="rv-tokmode__l" for="rm-<?= (int) $t['id'] ?>"><?= e(__('Änderungen')) ?><span class="sr-only"> <?= e(__('von „{name}“', ['name' => $t['name']])) ?></span></label>
               <select id="rm-<?= (int) $t['id'] ?>" name="review_mode"><?php foreach (Tokens::MODES as $k => $l): ?><option value="<?= $k ?>"<?= $rm === $k ? ' selected' : '' ?>><?= e(__($l)) ?></option><?php endforeach; ?></select>
               <button class="adm-btn adm-btn--small adm-btn--ghost" type="submit"><?= e(__('Ändern')) ?></button></form>
             <?php endif; ?></td>
-          <td class="adm-muted"><?= $t['last_used_at'] ? e(date('d.m.Y H:i', strtotime($t['last_used_at']))) : 'nie' ?></td>
+          <td class="adm-muted"><?= $t['last_used_at'] ? e(\Core\Format::admin()->datetime(strtotime($t['last_used_at']))) : 'nie' ?></td>
           <td class="adm-actions"><form method="post" action="<?= e(url('/admin/api-tokens/' . $t['id'] . '/delete')) ?>" data-confirm="Token „<?= e($t['name']) ?>“ widerrufen?"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text">Widerrufen</button></form></td>
         </tr>
       <?php endforeach; ?>

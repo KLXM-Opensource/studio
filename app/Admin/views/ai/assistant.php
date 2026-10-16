@@ -6,7 +6,7 @@
  */
 use Core\AI\Assist;
 
-$fmt = fn(string $ts) => date('d.m.Y H:i', strtotime($ts));
+$fmt = fn(string $ts) => \Core\Format::admin()->datetime(strtotime($ts));
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/ai')) ?>"><?= e(Assist::brand()) ?></a></p><h1><?= e(__('Assistent')) ?></h1>

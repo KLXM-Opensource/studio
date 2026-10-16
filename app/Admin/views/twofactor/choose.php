@@ -7,7 +7,7 @@ $offerTotp = $pol['totp'] && $req !== 'passkey' && !$factors['totp'];
   <p class="adm-muted"><?php if ($req === 'passkey'): ?><?= e(__('Für Ihr Konto ist ein Passkey vorgeschrieben – er schützt zuverlässig vor gefälschten Anmeldeseiten. Eine Authenticator-App genügt hier nicht.')) ?>
   <?php elseif ($req !== null): ?><?= e(__('Für Ihr Konto ist ein zweiter Faktor vorgeschrieben. Wählen Sie ein Verfahren – danach geht es weiter.')) ?>
   <?php else: ?><?= e(__('Schützen Sie Ihr Konto zusätzlich zum Passwort.')) ?><?php endif; ?></p>
-  <?php if (!$forced && $until > 0): ?><p class="adm-flash pk-warn" role="status"><?= e(__('Bitte bis {date} einrichten – danach ist die Anmeldung ohne zweiten Faktor nicht mehr möglich.', ['date' => date('d.m.Y', $until)])) ?></p><?php endif; ?>
+  <?php if (!$forced && $until > 0): ?><p class="adm-flash pk-warn" role="status"><?= e(__('Bitte bis {date} einrichten – danach ist die Anmeldung ohne zweiten Faktor nicht mehr möglich.', ['date' => \Core\Format::admin()->date($until)])) ?></p><?php endif; ?>
 </div></header>
 <div class="pk-choose">
   <?php if ($pol['passkey']): ?>

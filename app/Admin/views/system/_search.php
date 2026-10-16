@@ -21,7 +21,7 @@ try {
 }
 $set = Search::settings();
 $embed = Ai::capability('embed');
-$fmt = fn(?string $iso) => $iso ? date('d.m.Y H:i', strtotime($iso)) : __('noch nie');
+$fmt = fn(?string $iso) => $iso ? \Core\Format::admin()->datetime(strtotime($iso)) : __('noch nie');
 ?>
 <div class="adm-inline-box" id="search-status">
   <strong><?= e(__('Suchindex')) ?></strong>
@@ -71,7 +71,7 @@ $fmt = fn(?string $iso) => $iso ? date('d.m.Y H:i', strtotime($iso)) : __('noch 
   <?php if ($misses): ?>
   <table class="adm-table px-table">
     <thead><tr><th><?= e(__('Begriff')) ?></th><th><?= e(__('Sprache')) ?></th><th class="num"><?= e(__('Anzahl')) ?></th><th><?= e(__('Zuletzt')) ?></th></tr></thead>
-    <tbody><?php foreach ($misses as $m): ?><tr><td><?= e($m['term']) ?></td><td><code><?= e($m['lang']) ?></code></td><td class="num"><?= (int) $m['n'] ?></td><td><?= e(date('d.m.Y', strtotime((string) $m['last']))) ?></td></tr><?php endforeach; ?></tbody>
+    <tbody><?php foreach ($misses as $m): ?><tr><td><?= e($m['term']) ?></td><td><code><?= e($m['lang']) ?></code></td><td class="num"><?= (int) $m['n'] ?></td><td><?= e(\Core\Format::admin()->date(strtotime((string) $m['last']))) ?></td></tr><?php endforeach; ?></tbody>
   </table>
   <button class="adm-btn adm-btn--small adm-btn--ghost" type="submit" form="search-misses" data-confirm="<?= e(__('Liste der Suchbegriffe ohne Treffer leeren?')) ?>"><?= e(__('Liste leeren')) ?></button>
   <?php else: ?><p><?= e(__('Bisher keine.')) ?></p><?php endif; ?>

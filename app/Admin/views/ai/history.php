@@ -16,7 +16,7 @@ $status = ['suggested' => [__('Vorschlag'), 'info'], 'applied' => [__('Übernomm
   <div class="kia-tablewrap"><table class="adm-table">
     <thead><tr><th scope="col"><?= e(__('Zeit')) ?></th><th scope="col"><?= e(__('Bereich')) ?></th><th scope="col"><?= e(__('Ziel')) ?></th><th scope="col"><?= e(__('Status')) ?></th><th scope="col"><?= e(__('Modell')) ?></th><th scope="col" class="num"><?= e(__('Dauer')) ?></th></tr></thead>
     <tbody><?php foreach ($rows as $r): [$sl, $sc] = $status[$r['status']] ?? [$r['status'], 'info']; ?>
-      <tr><td><?= e(date('d.m.Y H:i', strtotime($r['ts']))) ?></td><td><?= e($kinds[$r['kind']] ?? $r['kind']) ?><?= $r['action'] !== '' ? ' <small class="adm-muted">· ' . e($r['action']) . '</small>' : '' ?></td>
+      <tr><td><?= e(\Core\Format::admin()->datetime(strtotime($r['ts']))) ?></td><td><?= e($kinds[$r['kind']] ?? $r['kind']) ?><?= $r['action'] !== '' ? ' <small class="adm-muted">· ' . e($r['action']) . '</small>' : '' ?></td>
         <td><?= e($r['target'] ?: '–') ?></td><td><span class="kia-chk kia-chk--<?= e($sc) ?>"><?= e($sl) ?></span></td><td><?= e($r['model'] ?: '–') ?></td>
         <td class="num"><?= $r['ms'] ? e(number_format($r['ms'] / 1000, 1, ',', '.') . ' s') : '–' ?></td></tr>
     <?php endforeach; ?></tbody>

@@ -429,8 +429,7 @@ final class Inbox
     /** Datei als Text: „befund.pdf (120 KB)“ */
     public static function fileLabel(array $v): string
     {
-        $kb = max(1, (int) round(((int) ($v['size'] ?? 0)) / 1024));
-        return (string) ($v['file'] ?? '') . ' (' . ($kb >= 1024 ? number_format($kb / 1024, 1, ',', '.') . ' MB' : $kb . ' KB') . ')';
+        return (string) ($v['file'] ?? '') . ' (' . \Core\Format::admin()->bytes((int) ($v['size'] ?? 0)) . ')';
     }
 
     /** Wert als Klartext (Verwaltung, Standardsprache) */
@@ -440,12 +439,12 @@ final class Inbox
         return match ($f['type']) {
             'bool' => $v ? __('Ja') : __('Nein'),
             'date' => preg_match('~^(\d{4})-(\d{2})-(\d{2})$~', (string) $v, $m) ? "$m[3].$m[2].$m[1]" : (string) $v,
-            'datetime' => ($ts = strtotime((string) $v)) ? date('d.m.Y H:i', $ts) : (string) $v,
+            'datetime' => ($ts = strtotime((string) $v)) ? \Core\Format::admin()->datetime($ts) : (string) $v,
             'select' => Tables::optionLabel($f, (string) $v, $lang),
             'multiselect' => implode(', ', array_map(fn($k) => Tables::optionLabel($f, (string) $k, $lang), (array) $v)),
             'iban' => \Core\Iban::format((string) $v),
             'file', 'media' => is_array($v) ? self::fileLabel($v) : (string) $v,
-            'number' => rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ','),
+            'number' => \Core\Format::admin()->decimal($v),
             default => is_array($v) ? implode(', ', array_map('strval', $v)) : (string) $v,
         };
     }

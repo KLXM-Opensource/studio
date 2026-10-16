@@ -54,7 +54,7 @@ $back = $base . '/' . $e['id'];
       <dl class="md-info">
         <dt><?= e(__('Website')) ?></dt><dd><?= $info['url'] !== '' ? '<a href="' . e($info['url']) . '" target="_blank" rel="noopener">' . e($info['name']) . '</a>' : e($info['name']) ?></dd>
         <?php if (!empty($e['suggest'])): ?><dt><?= e(__('Vorgeschlagen')) ?></dt><dd><?= e(__('ja')) ?></dd><?php endif; ?>
-        <dt><?= e(__('Geändert')) ?></dt><dd><?= e(date('d.m.Y H:i', strtotime((string) $e['updated_at']))) ?></dd>
+        <dt><?= e(__('Geändert')) ?></dt><dd><?= e(\Core\Format::admin()->datetime(strtotime((string) $e['updated_at']))) ?></dd>
         <dt>ID</dt><dd><?= (int) $e['id'] ?></dd>
       </dl>
     </section>

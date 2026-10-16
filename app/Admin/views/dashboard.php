@@ -13,7 +13,7 @@ $first = trim(explode(' ', trim((string) ($user['name'] ?? '')))[0] ?? '');
 $loc = \Core\I18n::locale();
 $today = class_exists(\IntlDateFormatter::class)
     ? (string) (new \IntlDateFormatter($loc, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, date_default_timezone_get(), null, str_starts_with($loc, 'de') ? 'EEEE, d. MMMM y' : 'EEEE, d MMMM y'))->format(time())
-    : date('d.m.Y');
+    : \Core\Format::admin()->date(time());
 $visible = array_filter($cards, fn($c) => !$c['hidden']);
 $hiddenCards = array_filter($cards, fn($c) => $c['hidden']);
 $keys = array_keys($cards);

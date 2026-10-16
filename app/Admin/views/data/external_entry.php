@@ -44,8 +44,8 @@ $published = $e['status'] === 'published';
       <dl class="md-info">
         <dt><?= e(__('Quelle')) ?></dt><dd><?= $canSrc ? '<a href="' . e(url('/admin/quellen/' . (int) $origin['source_id'])) . '">' . e($origin['source_name']) . '</a>' : e($origin['source_name']) ?></dd>
         <dt><?= e(__('Externe ID')) ?></dt><dd><code><?= e(mb_strimwidth((string) $origin['ext_id'], 0, 60, '…')) ?></code></dd>
-        <dt><?= e(__('Zuletzt gesehen')) ?></dt><dd><?= e($origin['last_seen'] ? date('d.m.Y H:i', strtotime((string) $origin['last_seen'])) : '–') ?></dd>
-        <dt><?= e(__('Geändert')) ?></dt><dd><?= e(date('d.m.Y H:i', strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></dd>
+        <dt><?= e(__('Zuletzt gesehen')) ?></dt><dd><?= e($origin['last_seen'] ? \Core\Format::admin()->datetime(strtotime((string) $origin['last_seen'])) : '–') ?></dd>
+        <dt><?= e(__('Geändert')) ?></dt><dd><?= e(\Core\Format::admin()->datetime(strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></dd>
         <dt>ID</dt><dd><?= (int) $e['id'] ?></dd>
       </dl>
     </section>

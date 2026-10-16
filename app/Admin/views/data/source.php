@@ -117,7 +117,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
     <?php if ($preview && !$preview['ok']): ?>
     <p class="adm-flash adm-flash--error" role="alert"><?= icon('warning') ?> <?= e((string) $preview['error']) ?></p>
     <?php elseif ($preview): ?>
-    <p class="adm-flash adm-flash--success" role="status"><?= icon('check-circle') ?> <?= e(__('{n} Einträge gelesen ({kb} KB{cached}).', ['n' => $preview['total'], 'kb' => number_format($preview['bytes'] / 1024, 1, ',', '.'),
+    <p class="adm-flash adm-flash--success" role="status"><?= icon('check-circle') ?> <?= e(__('{n} Einträge gelesen ({kb} KB{cached}).', ['n' => $preview['total'], 'kb' => \Core\Format::admin()->number($preview['bytes'] / 1024, 1),
         'cached' => $preview['cached'] ? ', ' . __('aus dem Zwischenspeicher') : ($preview['ms'] ? ', ' . $preview['ms'] . ' ms' : '')])) ?>
       <?php if (!empty($preview['meta']['partial'])): ?> <?= e(__('OpenImmo-Teilabgleich: fehlende Objekte bleiben unverändert.')) ?><?php endif; ?></p>
     <?php endif; ?>
@@ -129,7 +129,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
         <tbody><?php foreach ($sfields as $sf): ?><tr><td><?= $sf['label'] !== '' ? e($sf['label']) : '<span class="adm-muted">–</span>' ?></td><td><code><?= e($sf['path']) ?></code></td><td><?= e($sf['sample']) ?></td></tr><?php endforeach; ?></tbody>
       </table>
     </div>
-    <p class="adm-muted src-fields__meta"><?= e(__('{n} Felder · Stand der Vorschau: {when}', ['n' => count($sfields), 'when' => date('d.m.Y H:i', (int) $sample['at'])])) ?></p>
+    <p class="adm-muted src-fields__meta"><?= e(__('{n} Felder · Stand der Vorschau: {when}', ['n' => count($sfields), 'when' => \Core\Format::admin()->datetime((int) $sample['at'])])) ?></p>
     <?php else: ?>
     <p class="src-empty"><?= icon('info') ?> <span><?= e($fmt === 'openimmo' && !$isNew ? __('Noch keine Felder bekannt: OpenImmo-Datei hochladen (rechts) oder Adresse eintragen und „Vorschau laden“.') : __('Erst Adresse eintragen und „Vorschau laden“ – dann erscheinen hier alle Felder der Quelle mit einem Beispielwert.')) ?></span></p>
     <?php endif; ?>
@@ -267,9 +267,9 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
     <h2 id="src-h-st"><?= e(__('Stand')) ?></h2>
     <?php if ($src['last_error']): ?><p class="adm-flash adm-flash--error"><?= icon('warning') ?> <?= e((string) $src['last_error']) ?></p><?php endif; ?>
     <dl class="md-info">
-      <dt><?= e(__('Letzter Abruf')) ?></dt><dd><?= e($src['last_run_at'] ? date('d.m.Y H:i', strtotime((string) $src['last_run_at'])) : __('noch nie')) ?></dd>
-      <dt><?= e(__('Zuletzt erfolgreich')) ?></dt><dd><?= e($src['last_ok_at'] ? date('d.m.Y H:i', strtotime((string) $src['last_ok_at'])) : '–') ?></dd>
-      <dt><?= e(__('Nächster Abruf')) ?></dt><dd><?= e(!$src['active'] ? __('pausiert') : ($src['next_due'] ? date('d.m.Y H:i', (int) $src['next_due']) : __('nur manuell'))) ?></dd>
+      <dt><?= e(__('Letzter Abruf')) ?></dt><dd><?= e($src['last_run_at'] ? \Core\Format::admin()->datetime(strtotime((string) $src['last_run_at'])) : __('noch nie')) ?></dd>
+      <dt><?= e(__('Zuletzt erfolgreich')) ?></dt><dd><?= e($src['last_ok_at'] ? \Core\Format::admin()->datetime(strtotime((string) $src['last_ok_at'])) : '–') ?></dd>
+      <dt><?= e(__('Nächster Abruf')) ?></dt><dd><?= e(!$src['active'] ? __('pausiert') : ($src['next_due'] ? \Core\Format::admin()->datetime((int) $src['next_due']) : __('nur manuell'))) ?></dd>
       <dt><?= e(__('Einträge')) ?></dt><dd><?= (int) $src['items'] ?></dd>
     </dl>
     <?php if ($src['table'] && ($smiss = Mapper::missingRequired($src['table'], $src['mapping']))): ?>
@@ -288,7 +288,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
       <button class="adm-btn adm-btn--block"<?= $src['table'] ? '' : ' disabled' ?>><?= icon('upload-simple') ?> <?= e(__('Hochladen und einlesen')) ?></button>
       <?php if (!$src['table']): ?><p class="f-help"><?= e(__('Zuerst eine Zieltabelle wählen.')) ?></p><?php endif; ?>
     </form>
-    <?php if ($upload): ?><p class="f-help"><?= e(__('Zuletzt hochgeladen: {when} – „Jetzt abrufen“ liest diese Datei erneut ein, solange keine Adresse eingetragen ist.', ['when' => date('d.m.Y H:i', (int) filemtime($upload))])) ?></p><?php endif; ?>
+    <?php if ($upload): ?><p class="f-help"><?= e(__('Zuletzt hochgeladen: {when} – „Jetzt abrufen“ liest diese Datei erneut ein, solange keine Adresse eingetragen ist.', ['when' => \Core\Format::admin()->datetime((int) filemtime($upload))])) ?></p><?php endif; ?>
     <p class="f-help"><?= e(__('Die Datei wird geprüft entpackt (nur XML und Bilder, keine Pfade, begrenzte Größe). Adressen ohne Freigabe (objektadresse_freigeben) werden ohne Straße und Hausnummer übernommen.')) ?></p>
   </section>
   <?php endif; ?>

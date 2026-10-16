@@ -77,7 +77,7 @@ $row = function (array $m, string $what) use ($can, $cfgLang): string {
       <tr data-cap-job="<?= (int) $j['id'] ?>" data-status="<?= e($j['status']) ?>">
         <td><?= $jm ? '<a href="' . e(url('/admin/media') . ($j['pool'] ? '' : '#c' . $j['media_id'])) . '">' . e(Media::displayName($jm)) . '</a>' : '–' ?><?= $j['pool'] ? ' <small class="adm-muted">⇄ ' . e($j['pool']) . '</small>' : '' ?></td>
         <td><?= e($j['type'] === 'translate' ? __('Übersetzen nach {lang}', ['lang' => MediaTracks::langLabel((string) $j['target'])]) : __('Transkription ({lang})', ['lang' => $j['lang'] === 'auto' ? __('automatisch') : MediaTracks::langLabel((string) $j['lang'])])) ?>
-          <br><small class="adm-muted"><?= e(date('d.m.Y H:i', strtotime((string) $j['created_at']))) ?></small></td>
+          <br><small class="adm-muted"><?= e(\Core\Format::admin()->datetime(strtotime((string) $j['created_at']))) ?></small></td>
         <td><span class="kia-chk kia-chk--<?= e($sc) ?>" data-cap-status><?= e($sl) ?><?= in_array($j['status'], ['queued', 'running'], true) ? ' · ' . ($j['status'] === 'queued' ? e(__('Position {n}', ['n' => $j['position']])) : (int) $j['progress'] . ' %') : '' ?></span></td>
         <td data-cap-msg><?= e($j['message']) ?></td>
       </tr>

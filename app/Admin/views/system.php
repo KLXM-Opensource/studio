@@ -114,7 +114,7 @@ use Core\Fields;
       <div class="set-list">
         <div class="set-row"><div class="set-row__main"><span class="set-row__label">Status</span></div><div class="set-row__ctl"><?= $keyReady ? '<span class="adm-badge">Aktiv</span>' : '<span class="adm-badge adm-badge--warn">Kein Schlüssel – Formulare sind deaktiviert</span>' ?></div></div>
         <div class="set-row"><div class="set-row__main"><span class="set-row__label">Fingerabdruck</span></div><div class="set-row__ctl"><code><?= e($fingerprint) ?></code></div></div>
-        <?php if ($ts = setting('sys.form_key_created')): ?><div class="set-row"><div class="set-row__main"><span class="set-row__label">Erzeugt</span></div><div class="set-row__ctl"><?= e(date('d.m.Y H:i', strtotime((string) $ts))) ?></div></div><?php endif; ?>
+        <?php if ($ts = setting('sys.form_key_created')): ?><div class="set-row"><div class="set-row__main"><span class="set-row__label">Erzeugt</span></div><div class="set-row__ctl"><?= e(\Core\Format::admin()->datetime(strtotime((string) $ts))) ?></div></div><?php endif; ?>
         <?php if ($keyReady && $__env['state'] !== 'off'): ?>
         <div class="set-row"><div class="set-row__main"><span class="set-row__label">Automatisch entschlüsseln</span></div><div class="set-row__ctl"><?= match ($__env['state']) {
             'active' => '<span class="adm-badge">Aktiv</span> <span>Schlüssel aus <code>' . e($__env['name']) . '</code></span>',

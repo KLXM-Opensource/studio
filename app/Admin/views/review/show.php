@@ -13,7 +13,7 @@ $target = (array) $row['target'];
 $method = (string) ($row['payload']['method'] ?? $row['action']);
 $args = array_values((array) ($row['payload']['args'] ?? []));
 $diff = (array) ($row['diff'] ?? []);
-$when = fn(?string $t) => $t ? date('d.m.Y H:i', (int) strtotime($t)) : '–';
+$when = fn(?string $t) => $t ? \Core\Format::admin()->datetime((int) strtotime($t)) : '–';
 $isPageBlocks = ($target['type'] ?? '') === 'page' && is_array($row['after']['blocks'] ?? null);
 $editArg = Queue::EDIT_ARG[$method] ?? null;
 $editable = $pending && $editArg !== null && is_array($args[$editArg] ?? null) ? array_filter($args[$editArg], 'is_string') : [];

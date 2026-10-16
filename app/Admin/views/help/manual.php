@@ -127,7 +127,7 @@ $tutorials = $__router->match('GET', '/admin/hilfe/tutorials') === '/admin/hilfe
 </section>
 
 <?php endforeach; ?>
-      <p class="doc-foot">Handbuch · Stand <?= e(date('d.m.Y')) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · Kit „<?= e(app()->theme->label()) ?>“<?php if (!$guide && \Core\Guide::canEdit()): ?> · <a href="<?= e(url('/admin/hilfe/projekt')) ?>">Projekt-Hinweise anlegen</a><?php endif; ?></p>
+      <p class="doc-foot">Handbuch · Stand <?= e(\Core\Format::admin()->date(time())) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · Kit „<?= e(app()->theme->label()) ?>“<?php if (!$guide && \Core\Guide::canEdit()): ?> · <a href="<?= e(url('/admin/hilfe/projekt')) ?>">Projekt-Hinweise anlegen</a><?php endif; ?></p>
     </div>
 
     <nav class="doc-toc" aria-label="Inhalt" data-doc-toc>

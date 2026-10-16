@@ -282,7 +282,7 @@ final class SupportController extends AdminController
         $a = Knowledge::find($this->int($id)) ?? throw new HttpException(404);
         $v = Support::db()->fetch('SELECT * FROM article_revisions WHERE id = ? AND article_id = ?', [$this->int($rev), (int) $a['id']]) ?? throw new HttpException(404);
         Knowledge::save((int) $a['id'], ['title' => $v['title'], 'body' => $v['body'], 'tags' => Support::tagList((string) $v['tags']), 'visibility' => $v['visibility'],
-            'sites' => Support::tagList((string) $v['sites']), 'status' => $a['status']], __('Version vom {date} wiederhergestellt', ['date' => date('d.m.Y H:i', strtotime((string) $v['created_at']))]));
+            'sites' => Support::tagList((string) $v['sites']), 'status' => $a['status']], __('Version vom {date} wiederhergestellt', ['date' => \Core\Format::admin()->datetime(strtotime((string) $v['created_at']))]));
         return $this->back('/admin/support/wissen/' . $a['id'], 'success', __('Version wiederhergestellt.'));
     }
 

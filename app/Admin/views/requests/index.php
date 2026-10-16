@@ -56,7 +56,7 @@ $boxTitle = $status === 'alle' ? __('Alle') : Inbox::statusLabel($status, $t);
 <div class="adm-flash adm-flash--error" role="alert">
   <p><b><?= e(__('Zustellung fehlgeschlagen – Anfrage verschlüsselt gesichert')) ?></b></p>
   <ul><?php foreach (array_slice($deliveryAlerts, 0, 5) as $a): ?>
-    <li><?= e(date('d.m.Y H:i', strtotime((string) $a['at']))) ?> · <?= e($tableNames[$a['table']] ?? $a['table']) ?> · <span class="adm-mono"><?= e((string) $a['ref']) ?></span> – <?= e((string) $a['reason']) ?><?= empty($a['stored']) ? ' – <b>' . e(__('NICHT gesichert')) . '</b>' : '' ?></li>
+    <li><?= e(\Core\Format::admin()->datetime(strtotime((string) $a['at']))) ?> · <?= e($tableNames[$a['table']] ?? $a['table']) ?> · <span class="adm-mono"><?= e((string) $a['ref']) ?></span> – <?= e((string) $a['reason']) ?><?= empty($a['stored']) ? ' – <b>' . e(__('NICHT gesichert')) . '</b>' : '' ?></li>
   <?php endforeach; ?></ul>
   <?php if ($canManage): ?><form method="post" action="<?= e(url('/admin/requests/alerts/clear')) ?>"><?= csrf_field() ?><input type="hidden" name="table" value="<?= e($t['handle']) ?>">
     <button class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('Gelesen – Hinweise ausblenden')) ?></button></form><?php endif; ?>
@@ -109,7 +109,7 @@ $boxTitle = $status === 'alle' ? __('Alle') : Inbox::statusLabel($status, $t);
       <ul class="rq-rows" data-rq-list aria-label="<?= e(__('Anfragen')) ?>">
         <?php foreach ($rows as $row): $id = (int) $row['id']; $data = $decrypted[$id] ?? null; [$name, $ex] = $summary($data); $on = $id === $selId;
           $au = $row['assignee'] ? ($userNames[$row['assignee']] ?? null) : null; $auName = $au ? ($au['name'] ?: $au['email']) : ($row['assignee'] ? '#' . $row['assignee'] : '');
-          $search = mb_strtolower(implode(' ', [$row['ref'], date('d.m.Y', strtotime((string) $row['created_at'])), $auName, Inbox::statusLabel($row['status'], $t), $data ? implode(' ', array_column($data['fields'], 'value')) : ''])); ?>
+          $search = mb_strtolower(implode(' ', [$row['ref'], \Core\Format::admin()->date(strtotime((string) $row['created_at'])), $auName, Inbox::statusLabel($row['status'], $t), $data ? implode(' ', array_column($data['fields'], 'value')) : ''])); ?>
         <li class="rq-row<?= $row['status'] === 'neu' ? ' is-unread' : '' ?><?= $on ? ' is-sel' : '' ?>" id="rq-row-<?= $id ?>" data-id="<?= $id ?>" data-search="<?= e($search) ?>">
           <a class="rq-row__a" href="<?= e($qs(['id' => $id, 'seite' => $page > 1 ? $page : null])) ?>"<?= $on ? ' aria-current="true"' : '' ?>>
             <span class="rq-row__dot" aria-hidden="true"></span>
@@ -189,7 +189,7 @@ $boxTitle = $status === 'alle' ? __('Alle') : Inbox::statusLabel($status, $t);
             <?php elseif (filter_var(trim((string) $f['value']), FILTER_VALIDATE_EMAIL)): ?><a href="mailto:<?= e(trim((string) $f['value'])) ?>"><?= e($f['value']) ?></a>
             <?php else: ?><?= nl2br(e($f['value']), false) ?><?php endif; ?></dd><?php endforeach; ?>
           </dl>
-          <pre id="<?= $rid ?>-copy" hidden><?= e($t['singular'] . ' ' . $row['ref'] . ' · ' . date('d.m.Y H:i', strtotime((string) $row['created_at'])) . "\n" . implode("\n", array_map(fn($f) => $f['label'] . ':' . (!empty($f['table']) ? "\n" : ' ') . $f['value'], $data['fields']))) ?></pre>
+          <pre id="<?= $rid ?>-copy" hidden><?= e($t['singular'] . ' ' . $row['ref'] . ' · ' . \Core\Format::admin()->datetime(strtotime((string) $row['created_at'])) . "\n" . implode("\n", array_map(fn($f) => $f['label'] . ':' . (!empty($f['table']) ? "\n" : ' ') . $f['value'], $data['fields']))) ?></pre>
         <?php elseif ($unlocked): ?>
           <p class="adm-flash adm-flash--error"><?= e(__('Diese Anfrage konnte mit dem Schlüssel nicht entschlüsselt werden (evtl. mit einem älteren Schlüssel verschlüsselt).')) ?></p>
         <?php else: ?>

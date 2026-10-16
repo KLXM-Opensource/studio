@@ -29,7 +29,7 @@ $initials = function (array $u): string {
     $parts = preg_split('~\s+~u', $n) ?: [$n];
     return mb_strtoupper(mb_substr($parts[0], 0, 1) . (count($parts) > 1 ? mb_substr((string) end($parts), 0, 1) : ''));
 };
-$lastLogin = fn(array $u) => $u['last_login'] ? __('Letzte Anmeldung: {date}', ['date' => date('d.m.Y H:i', strtotime($u['last_login']))]) : __('Noch nie angemeldet');
+$lastLogin = fn(array $u) => $u['last_login'] ? __('Letzte Anmeldung: {date}', ['date' => \Core\Format::admin()->datetime(strtotime($u['last_login']))]) : __('Noch nie angemeldet');
 ?>
 <?php
 // Unterseiten wie die Bereiche der Grundeinstellungen – hier je Bereich eine eigene Adresse (UserController::section)

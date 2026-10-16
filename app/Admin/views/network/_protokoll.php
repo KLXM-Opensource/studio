@@ -47,8 +47,8 @@ $rows = array_values(array_filter($log, fn($l) => ($logSite === '' || (string) $
   </form>
   <?php if (!$rows): ?><p class="adm-muted"><?= e($log ? __('Kein Eintrag passt zum Filter.') : __('Noch keine Einträge.')) ?></p><?php else: ?>
   <ol class="net-log">
-    <?php $day = ''; foreach ($rows as $l): $t = (int) strtotime((string) $l['created_at']); $d = date('d.m.Y', $t); $a = (string) $l['action']; ?>
-    <?php if ($d !== $day): $day = $d; ?><li class="net-log__day"><?= e($d === date('d.m.Y') ? __('Heute') : ($d === date('d.m.Y', time() - 86400) ? __('Gestern') : $d)) ?></li><?php endif; ?>
+    <?php $day = ''; foreach ($rows as $l): $t = (int) strtotime((string) $l['created_at']); $d = \Core\Format::admin()->date($t); $a = (string) $l['action']; ?>
+    <?php if ($d !== $day): $day = $d; ?><li class="net-log__day"><?= e($d === \Core\Format::admin()->date(time()) ? __('Heute') : ($d === \Core\Format::admin()->date(time() - 86400) ? __('Gestern') : $d)) ?></li><?php endif; ?>
     <li class="net-log__row<?= ($tn = $tone($a)) ? ' is-' . $tn : '' ?>"><time datetime="<?= e(date('c', $t)) ?>"><?= e(date('H:i', $t)) ?></time>
       <span class="net-log__what"><strong><?= e($label($a)) ?></strong><?= $l['site'] ? ' <span class="net-log__site">' . e((string) ($stats[$l['site']]['label'] ?? $l['site'])) . '</span>' : '' ?><?= $l['detail'] ? '<span class="net-log__detail">' . e((string) $l['detail']) . '</span>' : '' ?></span>
       <small class="adm-muted"><?= e((string) $l['user_email']) ?></small></li>

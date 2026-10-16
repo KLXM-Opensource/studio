@@ -98,7 +98,7 @@ $log = Stats::log(60);
             'description' => __('Zugestellte Mitteilungen je Woche, letzte 12 Wochen'),
         ], ['caption' => false, 'table' => 'none', 'class' => 'dash-chart']) ?>
         <table class="adm-table pm-table"><thead><tr><th scope="col"><?= e(__('Woche')) ?></th><th scope="col"><?= e(__('Mitteilungen')) ?></th><th scope="col"><?= e(__('zugestellt')) ?></th><th scope="col"><?= e(__('nicht zugestellt')) ?></th><th scope="col"><?= e(__('Quote')) ?></th></tr></thead><tbody>
-        <?php foreach (array_reverse($deliv, true) as $k => $w): if (!$w['messages']) continue; ?><tr><th scope="row"><?= e(date('d.m.Y', strtotime($k))) ?></th><td><?= $w['messages'] ?></td><td><?= $w['sent'] ?></td><td><?= $w['lost'] ?></td><td><?= $w['rate'] === null ? '–' : $w['rate'] . ' %' ?></td></tr><?php endforeach; ?>
+        <?php foreach (array_reverse($deliv, true) as $k => $w): if (!$w['messages']) continue; ?><tr><th scope="row"><?= e(\Core\Format::admin()->date(strtotime($k))) ?></th><td><?= $w['messages'] ?></td><td><?= $w['sent'] ?></td><td><?= $w['lost'] ?></td><td><?= $w['rate'] === null ? '–' : $w['rate'] . ' %' ?></td></tr><?php endforeach; ?>
         </tbody></table>
       </div>
     </section>
@@ -108,7 +108,7 @@ $log = Stats::log(60);
       <div class="set-list">
         <?php if (!$log): ?><div class="set-row"><span class="set-row__sub"><?= e(__('Noch keine Zu- oder Abgänge.')) ?></span></div><?php else: ?>
         <div class="set-scroll"><table class="adm-table pm-table"><thead><tr><th scope="col"><?= e(__('Tag')) ?></th><th scope="col"><?= e(__('Kanal')) ?></th><th scope="col"><?= e(__('abonniert')) ?></th><th scope="col"><?= e(__('abbestellt')) ?></th><th scope="col"><?= e(__('abgelaufen')) ?></th></tr></thead><tbody>
-        <?php foreach ($log as $l): ?><tr><td><?= e(date('d.m.Y', strtotime($l['day']))) ?></td><td><?= e($label($l['topic'])) ?></td><td><?= $l['sub'] ? '+' . $l['sub'] : '–' ?></td><td><?= $l['unsub'] ? '−' . $l['unsub'] : '–' ?></td><td><?= $l['gone'] ? '−' . $l['gone'] : '–' ?></td></tr><?php endforeach; ?>
+        <?php foreach ($log as $l): ?><tr><td><?= e(\Core\Format::admin()->date(strtotime($l['day']))) ?></td><td><?= e($label($l['topic'])) ?></td><td><?= $l['sub'] ? '+' . $l['sub'] : '–' ?></td><td><?= $l['unsub'] ? '−' . $l['unsub'] : '–' ?></td><td><?= $l['gone'] ? '−' . $l['gone'] : '–' ?></td></tr><?php endforeach; ?>
         </tbody></table></div>
         <?php endif; ?>
       </div>

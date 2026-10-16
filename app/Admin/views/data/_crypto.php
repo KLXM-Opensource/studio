@@ -84,7 +84,7 @@ $why = function (string $o) use ($inbox, $switch, $managed, $sharedT): ?string {
           <div class="f"><ul class="dt-certs">
             <?php foreach ($certs as $c): if (!$c) continue; ?>
             <li><b><?= e($c['name']) ?></b><?= $c['emails'] ? ' &lt;' . e(implode(', ', $c['emails'])) . '&gt;' : '' ?> · <?= e(__('ausgestellt von {issuer}', ['issuer' => $c['issuer'] ?: '?'])) ?><?= $c['self_signed'] ? ' (' . e(__('selbst signiert')) . ')' : '' ?><br>
-              <span class="<?= $c['expired'] || $c['days_left'] < 30 ? 'adm-badge adm-badge--adm-warn' : 'adm-muted' ?>"><?= e($c['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', $c['valid_to'])]) : __('gültig bis {date} (noch {n} Tage)', ['date' => date('d.m.Y', $c['valid_to']), 'n' => $c['days_left']])) ?></span>
+              <span class="<?= $c['expired'] || $c['days_left'] < 30 ? 'adm-badge adm-badge--adm-warn' : 'adm-muted' ?>"><?= e($c['expired'] ? __('abgelaufen am {date}', ['date' => \Core\Format::admin()->date($c['valid_to'])]) : __('gültig bis {date} (noch {n} Tage)', ['date' => \Core\Format::admin()->date($c['valid_to']), 'n' => $c['days_left']])) ?></span>
               <br><small class="adm-muted adm-mono"><?= e(__('SHA-256')) ?> <?= e($c['fingerprint']) ?></small></li>
             <?php endforeach; ?>
           </ul></div>

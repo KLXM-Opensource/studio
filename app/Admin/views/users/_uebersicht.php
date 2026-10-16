@@ -50,7 +50,7 @@ $who = fn(array $u) => (string) ($u['name'] ?: $u['email']);
       <?php if (!$invites): ?><div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('Keine offenen Einladungen.')) ?></span></div></div><?php endif; ?>
       <?php foreach (array_slice($invites, 0, 5) as $iv): ?>
       <a class="set-row set-row--link" href="<?= e(url('/admin/users/einladen#einladungen')) ?>"><span class="set-row__main"><span class="set-row__label"><?= e($iv['name'] ?: $iv['email']) ?></span>
-        <span class="set-row__sub"><?= e($roles[$iv['role']]['name'] ?? $iv['role']) ?> · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])])) ?></span></span>
+        <span class="set-row__sub"><?= e($roles[$iv['role']]['name'] ?? $iv['role']) ?> · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])])) ?></span></span>
         <?php if ($iv['expired']): ?><span class="set-row__ctl"><span class="adm-badge adm-badge--muted"><?= e(__('Einladung abgelaufen')) ?></span></span><?php endif; ?></a>
       <?php endforeach; ?>
     </div>
@@ -62,7 +62,7 @@ $who = fn(array $u) => (string) ($u['name'] ?: $u['email']);
       <?php if (!$recent): ?><div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('Noch niemand angemeldet.')) ?></span></div></div><?php endif; ?>
       <?php foreach (array_slice($recent, 0, 5) as $u): ?>
       <div class="set-row"><?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?><div class="set-row__main"><span class="set-row__label"><?= e($who($u)) ?></span><span class="set-row__sub"><?= e($roles[$u['role']]['name'] ?? $u['role']) ?></span></div>
-        <div class="set-row__ctl"><?= e(date('d.m.Y H:i', strtotime((string) $u['last_login']))) ?></div></div>
+        <div class="set-row__ctl"><?= e(\Core\Format::admin()->datetime(strtotime((string) $u['last_login']))) ?></div></div>
       <?php endforeach; ?>
       <?php if ($never): ?>
       <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Noch nie angemeldet')) ?></span><span class="set-row__sub"><?= e(implode(', ', array_map($who, array_slice($never, 0, 6))) . (count($never) > 6 ? ' …' : '')) ?></span></div>

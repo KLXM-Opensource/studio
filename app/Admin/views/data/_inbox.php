@@ -99,7 +99,7 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
     <section class="set-group dt-delivery" id="zustellung" data-delivery data-delivery-mode="<?= e($dv['mode']) ?>" aria-labelledby="t-dv-h">
       <h3 class="set-group__title" id="t-dv-h"><?= e(__('Zustellung der Anfragen')) ?></h3>
       <?php foreach ($alerts as $a): ?>
-      <p class="adm-flash adm-flash--error"><?= e(__('Zustellung fehlgeschlagen')) ?> (<?= e(date('d.m.Y H:i', strtotime((string) $a['at']))) ?>, <?= e((string) $a['ref']) ?>): <?= e((string) $a['reason']) ?> –
+      <p class="adm-flash adm-flash--error"><?= e(__('Zustellung fehlgeschlagen')) ?> (<?= e(\Core\Format::admin()->datetime(strtotime((string) $a['at']))) ?>, <?= e((string) $a['ref']) ?>): <?= e((string) $a['reason']) ?> –
         <?= e(!empty($a['stored']) ? __('Anfrage verschlüsselt gesichert (unter „Anfragen“).') : __('Anfrage NICHT gesichert.')) ?></p>
       <?php endforeach; ?>
       <div class="set-list">

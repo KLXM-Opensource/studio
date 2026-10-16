@@ -384,8 +384,8 @@ final class Entries
         return match ($sf['type'] ?? 'text') {
             'bool' => $v ? '✓' : '',
             'select' => Tables::optionLabel($sf, (string) $v, $lang),
-            'date' => preg_match('~^(\d{4})-(\d{2})-(\d{2})$~', (string) $v, $m) ? "$m[3].$m[2].$m[1]" : (string) $v,
-            'number' => rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ','),
+            'date' => preg_match('~^\d{4}-\d{2}-\d{2}$~', (string) $v) ? ($lang ? \Core\Format::for($lang) : fmt())->date((string) $v) : (string) $v,
+            'number' => ($lang ? \Core\Format::for($lang) : fmt())->decimal($v),
             'iban' => \Core\Iban::format((string) $v),
             default => is_scalar($v) ? (string) $v : '',
         };
@@ -762,7 +762,7 @@ final class Entries
             'richtext' => empty($o['plain']) ? emphasis_rich(Sanitizer::block((string) $v)) : Sanitizer::block((string) $v),   // *Wort* → <em class="hl"> (nur Besucher)
             'textarea' => nl2br(e((string) $v), false),
             'bool' => $v ? lt('Ja') : lt('Nein'),
-            'number' => e(rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ',')),
+            'number' => e(fmt()->decimal($v)),
             'date' => ($ts = strtotime((string) $v)) ? e(isset($o['date_format']) ? date($o['date_format'], $ts) : date_local($ts, $o['date_style'] ?? 'short')) : e((string) $v),
             'time' => e(ltrim((string) $v, '0') ?: (string) $v),
             'datetime' => ($ts = strtotime((string) $v)) ? e((isset($o['date_format']) ? date($o['date_format'], $ts) : date_local($ts, $o['date_style'] ?? 'short')) . ', ' . lt('{time} Uhr', ['time' => date('H:i', $ts)])) : e((string) $v),

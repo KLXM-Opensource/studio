@@ -33,9 +33,9 @@ final class Ui
             $d < 3600 => __('vor {n} Min.', ['n' => (int) floor($d / 60)]),
             $d < 86400 && date('Y-m-d', $ts) === date('Y-m-d') => __('heute, {time}', ['time' => date('H:i', $ts)]),
             $d < 172800 && date('Y-m-d', $ts) === date('Y-m-d', time() - 86400) => __('gestern, {time}', ['time' => date('H:i', $ts)]),
-            default => date('d.m.Y', $ts),
+            default => \Core\Format::admin()->date($ts),
         };
-        return '<time datetime="' . e(date('c', $ts)) . '" title="' . e(date('d.m.Y H:i', $ts)) . '">' . e($txt) . '</time>';
+        return '<time datetime="' . e(date('c', $ts)) . '" title="' . e(\Core\Format::admin()->datetime($ts)) . '">' . e($txt) . '</time>';
     }
 
     public static function tags(string $stored, string $base = '/admin/support/wissen'): string

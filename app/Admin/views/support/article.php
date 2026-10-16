@@ -59,7 +59,7 @@ $isStaff = Support::isStaff();
       <h2 class="sp-h3" id="rev-h"><?= e(__('Versionen')) ?></h2>
       <ol class="sp-revs">
         <?php foreach ($revisions as $i => $v): ?>
-        <li><span><?= e(date('d.m.Y H:i', strtotime((string) $v['created_at']))) ?> · <?= e($v['editor_name'] ?: '–') ?><?php if ($v['note']): ?><br><small><?= e($v['note']) ?></small><?php endif; ?></span>
+        <li><span><?= e(\Core\Format::admin()->datetime(strtotime((string) $v['created_at']))) ?> · <?= e($v['editor_name'] ?: '–') ?><?php if ($v['note']): ?><br><small><?= e($v['note']) ?></small><?php endif; ?></span>
           <?php if ($i === 0): ?><small class="adm-muted"><?= e(__('aktuell')) ?></small><?php else: ?>
           <form method="post" action="<?= e(url('/admin/support/wissen/' . $a['id'] . '/version/' . $v['id'])) ?>" data-confirm="<?= e(__('Diese Version wiederherstellen? Der aktuelle Stand bleibt als Version erhalten.')) ?>"><?= csrf_field() ?>
             <button class="adm-link"><?= e(__('Wiederherstellen')) ?></button></form><?php endif; ?></li>

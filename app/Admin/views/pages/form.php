@@ -134,7 +134,7 @@ $inv = fn($k) => isset($errors[$k]) ? ' aria-invalid="true" aria-describedby="' 
       <?php if ($revisions): ?><p><button type="button" class="adm-btn adm-btn--small"<?= \Core\Http\Controllers\Admin\VersionsController::attrs('/admin/api/pages/' . (int) $page['id'] . '/versions') ?>><?= icon('clock-counter-clockwise') ?> <?= e(__('Versionen ansehen')) ?></button></p><?php endif; ?>
       <ul class="adm-list adm-list--rev">
         <?php foreach ($revisions as $i => $rv): ?>
-        <li><span><?= e(date('d.m.Y H:i', strtotime($rv['created_at']))) ?> · <?= e($rv['note']) ?><small><?= e($rv['email'] ?? 'System') ?></small></span>
+        <li><span><?= e(\Core\Format::admin()->datetime(strtotime($rv['created_at']))) ?> · <?= e($rv['note']) ?><small><?= e($rv['email'] ?? 'System') ?></small></span>
           <?php if ($i > 0): ?><form method="post" action="<?= e(url('/admin/pages/' . $page['id'] . '/restore/' . $rv['id'])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--ghost">Wiederherstellen</button></form><?php else: ?><span class="adm-badge">aktuell</span><?php endif; ?></li>
         <?php endforeach; ?>
         <?php if (!$revisions): ?><li class="adm-muted">Noch keine Versionen.</li><?php endif; ?>

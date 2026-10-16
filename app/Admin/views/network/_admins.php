@@ -28,8 +28,8 @@
       <tbody id="net-einladungen" class="inv-rows">
       <?php foreach ($invites as $iv): ?>
         <tr class="inv-row<?= $iv['expired'] ? ' is-expired' : '' ?>"><td><strong><?= e($iv['name'] ?: $iv['email']) ?></strong><br><span class="adm-muted"><?= e($iv['email']) ?></span>
-            <br><small class="adm-muted inv-meta"><?= e(__('Eingeladen am {date}', ['date' => date('d.m.Y', strtotime((string) $iv['created_at']))])) ?><?php if ($iv['invited_by_name']): ?> · <?= e(__('von {name}', ['name' => $iv['invited_by_name']])) ?><?php endif; ?>
-            · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])])) ?></small></td>
+            <br><small class="adm-muted inv-meta"><?= e(__('Eingeladen am {date}', ['date' => \Core\Format::admin()->date(strtotime((string) $iv['created_at']))])) ?><?php if ($iv['invited_by_name']): ?> · <?= e(__('von {name}', ['name' => $iv['invited_by_name']])) ?><?php endif; ?>
+            · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])])) ?></small></td>
           <td><?php if ($iv['expired']): ?><span class="adm-badge adm-badge--muted inv-badge is-expired"><?= e(__('Einladung abgelaufen')) ?></span>
             <?php else: ?><span class="adm-badge inv-badge"><?= e(__('Eingeladen – wartet')) ?></span><?php endif; ?></td>
           <td class="adm-actions">

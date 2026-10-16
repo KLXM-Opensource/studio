@@ -11,7 +11,7 @@ $qs = fn(array $p) => url('/admin/ai/eingereicht') . '?' . http_build_query(arra
 $tabs = ['pending' => __('Offen'), 'applied' => __('Übernommen'), 'rejected' => __('Abgelehnt'), 'all' => __('Alle')];
 $pending = $f['status'] === 'pending';
 $filtered = $f['channel'] !== '' || $f['token'] !== '' || $f['type'] !== '' || $f['q'] !== '';
-$when = fn(?string $t) => $t ? date('d.m.Y H:i', (int) strtotime($t)) : '–';
+$when = fn(?string $t) => $t ? \Core\Format::admin()->datetime((int) strtotime($t)) : '–';
 $source = function (array $r): string {
     $out = '<span class="rv-ch rv-ch--' . e($r['channel']) . '">' . e(Queue::channelLabel((string) $r['channel'])) . '</span> ';
     $name = $r['channel'] === 'ai' ? Queue::featureLabel($r['feature']) : (string) $r['token_name'];

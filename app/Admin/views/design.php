@@ -267,7 +267,7 @@ $thumbNav = function (string $k) use ($navAlias) {
     <?php foreach ($history as $i => $h): $sw = array_slice(array_values(array_filter($h['values'], fn($v, $k) => ($tokensByName[$k]['type'] ?? '') === 'color', ARRAY_FILTER_USE_BOTH)), 0, 6); ?>
     <li>
       <span class="ds-preset__sw" aria-hidden="true"><?php foreach ($sw as $c): ?><i style="background:<?= e((string) $c) ?>"></i><?php endforeach; ?></span>
-      <span class="ds-hist__t"><strong><?= e(__('Stand bis {date}', ['date' => date('d.m.Y H:i', strtotime((string) $h['at']) ?: time())])) ?></strong>
+      <span class="ds-hist__t"><strong><?= e(__('Stand bis {date}', ['date' => \Core\Format::admin()->datetime(strtotime((string) $h['at']) ?: time())])) ?></strong>
         <small class="adm-muted"><?= e(__('ersetzt von {who}', ['who' => ($h['by'] ?? '') !== '' ? $h['by'] : __('unbekannt')])) ?><?= ($h['note'] ?? '') !== '' ? ' · ' . e($h['note']) : '' ?></small></span>
       <button type="button" class="adm-btn adm-btn--small" data-ds-restore="<?= (int) $i ?>"><?= e(__('Wiederherstellen')) ?></button>
     </li>

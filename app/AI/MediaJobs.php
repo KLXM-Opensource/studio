@@ -207,7 +207,7 @@ final class MediaJobs
         }
         self::db()->update('media_jobs', ['result_track' => (int) $t['id']], 'id = :id', ['id' => $id]);
         return __('{n} Untertitel aus {s} erkannt ({model}, {sec} s Rechenzeit) – Entwurf bitte prüfen.', [
-            'n' => count($res['cues']), 's' => self::duration($res['seconds']), 'model' => $res['model'], 'sec' => number_format($res['ms'] / 1000, 1, ',', '.')]);
+            'n' => count($res['cues']), 's' => self::duration($res['seconds']), 'model' => $res['model'], 'sec' => \Core\Format::admin()->number($res['ms'] / 1000, 1)]);
     }
 
     /** Untertitel Cue für Cue übersetzen – Zeiten bleiben gleich, Ergebnis = Entwurf in der Zielsprache */

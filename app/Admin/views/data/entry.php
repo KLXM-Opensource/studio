@@ -81,9 +81,9 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
       </div>
       <?php if (!$isNew): ?>
       <dl class="md-info">
-        <dt>Angelegt</dt><dd><?= e(date('d.m.Y H:i', strtotime((string) $e['created_at']))) ?></dd>
-        <dt>Geändert</dt><dd><?= e(date('d.m.Y H:i', strtotime((string) $e['updated_at']))) ?></dd>
-        <?php if ($e['published_at']): ?><dt>Veröffentlicht</dt><dd><?= e(date('d.m.Y', strtotime((string) $e['published_at']))) ?></dd><?php endif; ?>
+        <dt>Angelegt</dt><dd><?= e(\Core\Format::admin()->datetime(strtotime((string) $e['created_at']))) ?></dd>
+        <dt>Geändert</dt><dd><?= e(\Core\Format::admin()->datetime(strtotime((string) $e['updated_at']))) ?></dd>
+        <?php if ($e['published_at']): ?><dt>Veröffentlicht</dt><dd><?= e(\Core\Format::admin()->date(strtotime((string) $e['published_at']))) ?></dd><?php endif; ?>
         <dt>ID</dt><dd><?= (int) $e['id'] ?></dd>
       </dl>
       <?php endif; ?>

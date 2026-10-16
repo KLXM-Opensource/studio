@@ -554,7 +554,7 @@ final class Metrics
         if (app()->settings->get('sys.maintenance')) $rows[__('Wartungsmodus ist eingeschaltet')] = null;
         if (environment() === 'production') {
             $b = \Core\Network\Stats::lastBackup(site()->key);
-            $rows[$b ? __('Letzte Sicherung: {date}', ['date' => date('d.m.Y', $b['at'])]) : __('Keine Sicherung gefunden (site:backup)')] = $b && $b['at'] > time() - 7 * 86400 ? true : null;
+            $rows[$b ? __('Letzte Sicherung: {date}', ['date' => \Core\Format::admin()->date($b['at'])]) : __('Keine Sicherung gefunden (site:backup)')] = $b && $b['at'] > time() - 7 * 86400 ? true : null;
         }
         try {
             if (Inbox::needsMigration()) $rows[__('Anfragen: Übernahme in Eingangs-Tabellen ausstehend')] = null;

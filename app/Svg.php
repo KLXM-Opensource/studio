@@ -129,17 +129,11 @@ final class Svg
     public static function note(array $stats): string
     {
         $n = (int) ($stats['unsafe'] ?? 0);
-        $msg = __('SVG bereinigt und optimiert: {in} → {out}', ['in' => self::size((int) ($stats['in'] ?? 0)), 'out' => self::size((int) ($stats['out'] ?? 0))]);
+        $msg = __('SVG bereinigt und optimiert: {in} → {out}', ['in' => Format::admin()->bytes((int) ($stats['in'] ?? 0)), 'out' => Format::admin()->bytes((int) ($stats['out'] ?? 0))]);
         if ($n > 0) $msg .= ', ' . ($n === 1 ? __('1 unsicheres Element entfernt') : __('{n} unsichere Elemente entfernt', ['n' => $n]));
         return $msg;
     }
 
-    private static function size(int $b): string
-    {
-        if ($b < 1024) return $b . ' B';
-        if ($b < 1048576) return number_format($b / 1024, $b < 10240 ? 1 : 0, ',', '.') . ' KB';
-        return number_format($b / 1048576, 1, ',', '.') . ' MB';
-    }
 
     /**
      * Kopfzeilen für direkt aufgerufene .svg-Dateien im Medienordner (Apache, .htaccess): CSP mit sandbox + nosniff.

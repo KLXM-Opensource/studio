@@ -120,7 +120,7 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
         </div></td>
         <?php foreach ($cols as $c): ?><td data-label="<?= e($c['label']) ?>"><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
         <?php if ($t['settings']['workflow']): ?><td class="dt-c-status" data-label="Status"><?= $statusCell($e) ?></td><?php endif; ?>
-        <td class="adm-muted dt-c-date" data-label="Geändert"><?= e(date('d.m.Y', strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
+        <td class="adm-muted dt-c-date" data-label="Geändert"><?= e(\Core\Format::admin()->date(strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
       </tr>
     <?php endforeach; ?>
     </tbody>

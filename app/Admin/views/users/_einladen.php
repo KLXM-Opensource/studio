@@ -44,8 +44,8 @@
       <div class="set-row__main"><span class="set-row__label"><?= e($iv['name'] ?: $iv['email']) ?>
           <?php if ($iv['expired']): ?><span class="adm-badge adm-badge--muted inv-badge is-expired"><?= e(__('Einladung abgelaufen')) ?></span>
           <?php else: ?><span class="adm-badge inv-badge"><?= e(__('Eingeladen – wartet')) ?></span><?php endif; ?></span>
-        <span class="set-row__sub"><?= e($iv['email']) ?> · <?= e($ivRole) ?> · <?= e(date('d.m.Y', strtotime((string) $iv['created_at']))) ?><?php if ($iv['invited_by_name']): ?> <?= e(__('von {name}', ['name' => $iv['invited_by_name']])) ?><?php endif; ?>
-          · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => date('d.m.Y', (int) $iv['expires_at'])])) ?></span></div>
+        <span class="set-row__sub"><?= e($iv['email']) ?> · <?= e($ivRole) ?> · <?= e(\Core\Format::admin()->date(strtotime((string) $iv['created_at']))) ?><?php if ($iv['invited_by_name']): ?> <?= e(__('von {name}', ['name' => $iv['invited_by_name']])) ?><?php endif; ?>
+          · <?= e($iv['expired'] ? __('abgelaufen am {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])]) : __('gültig bis {date}', ['date' => \Core\Format::admin()->date((int) $iv['expires_at'])])) ?></span></div>
       <div class="set-row__ctl"><?php if (isset($inviteRoles[$iv['role']])): ?>
         <form method="post" action="<?= e(url('/admin/users/invites/' . $iv['id'] . '/resend')) ?>" data-confirm="<?= e(__('Einladung an {email} erneut senden? Der bisherige Link gilt dann nicht mehr.', ['email' => $iv['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small"><?= e(__('Erneut senden')) ?></button></form>
         <form method="post" action="<?= e(url('/admin/users/invites/' . $iv['id'] . '/revoke')) ?>" data-confirm="<?= e(__('Einladung an {email} zurückziehen? Der Link gilt dann nicht mehr.', ['email' => $iv['email']])) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small adm-btn--danger-text"><?= e(__('Zurückziehen')) ?></button></form>

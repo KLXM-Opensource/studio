@@ -106,7 +106,7 @@ $who = fn(array $p) => Support::authorLabel((string) $p['author_key'], $p['autho
         <dt><?= e(__('Priorität')) ?></dt><dd><?= e(Support::priorityLabel($issue['priority'])) ?></dd>
         <dt><?= e(__('Website')) ?></dt><dd><?= e(Support::siteLabel($issue['site'])) ?></dd>
         <?php if (!$isReporter): ?><dt><?= e(__('Gemeldet von')) ?></dt><dd><?= e($issue['reporter_name']) ?><?php if ($issue['reporter_email']): ?><br><a href="mailto:<?= e($issue['reporter_email']) ?>"><?= e($issue['reporter_email']) ?></a><?php endif; ?></dd><?php endif; ?>
-        <dt><?= e(__('Gemeldet')) ?></dt><dd><?= e(date('d.m.Y H:i', strtotime((string) $issue['created_at']))) ?></dd>
+        <dt><?= e(__('Gemeldet')) ?></dt><dd><?= e(\Core\Format::admin()->datetime(strtotime((string) $issue['created_at']))) ?></dd>
         <?php if ($isStaff || $issue['assignee_name']): ?><dt><?= e(__('Zuständig')) ?></dt><dd><?= e($issue['assignee_name'] ?: __('noch niemand')) ?></dd><?php endif; ?>
         <?php if ($article): ?><dt><?= e(__('Wissensartikel')) ?></dt><dd><a href="<?= e(url('/admin/support/wissen/' . $article['id'])) ?>"><?= e($article['title']) ?></a></dd><?php endif; ?>
       </dl>

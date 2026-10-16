@@ -10,7 +10,7 @@ $pkRecent = \Core\Mfa::recentAuth();
 $pkAvail = \Core\Passkeys::available();
 $pkBack = '';
 $pkReq = \Core\Mfa::requirement($pkRow);
-$pkDate = fn(?string $d) => $d ? date('d.m.Y H:i', (int) strtotime($d)) : null;
+$pkDate = fn(?string $d) => $d ? \Core\Format::admin()->datetime((int) strtotime($d)) : null;
 if (!$pkPol['passkey'] && !$pkList) return;
 ?>
 <section class="set-group acc-group" id="passkeys" aria-labelledby="pk-h">

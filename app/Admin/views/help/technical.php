@@ -83,7 +83,7 @@ $fieldInfo = [
 </section>
 
 <?php endforeach; ?>
-      <p class="doc-foot">Entwicklerhandbuch · Stand <?= e(date('d.m.Y')) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · PHP <?= e(PHP_VERSION) ?></p>
+      <p class="doc-foot">Entwicklerhandbuch · Stand <?= e(\Core\Format::admin()->date(time())) ?> · <?= e(CMS_NAME) ?> <?= e(CMS_VERSION) ?> · PHP <?= e(PHP_VERSION) ?></p>
     </div>
     <nav class="doc-toc" aria-label="Inhalt" data-doc-toc>
       <p>Inhalt</p>
