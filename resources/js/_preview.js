@@ -10,9 +10,9 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 
 export function store(prefix) {
   return {
-    // Schlüssel klxm-studio-{prefix}-*; mycms-{prefix}-* (historisch) wird noch gelesen und beim Schreiben entfernt
-    get(k, d) { try { const v = localStorage.getItem(`klxm-studio-${prefix}-` + k) ?? localStorage.getItem(`mycms-${prefix}-` + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(`klxm-studio-${prefix}-` + k, JSON.stringify(v)); localStorage.removeItem(`mycms-${prefix}-` + k); } catch {} },
+    // Schlüssel klxm-studio-{prefix}-*
+    get(k, d) { try { const v = localStorage.getItem(`klxm-studio-${prefix}-` + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(`klxm-studio-${prefix}-` + k, JSON.stringify(v)); } catch {} },
   };
 }
 

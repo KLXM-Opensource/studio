@@ -52,9 +52,9 @@ const OFFICE_EXT = { docx: 'application/vnd.openxmlformats-officedocument.wordpr
 const ftype = f => f.type || (/\.svg$/i.test(f.name) ? 'image/svg+xml' : OFFICE_EXT[(f.name.split('.').pop() || '').toLowerCase()] || '');
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const store = {
-  // Schlüssel klxm-studio-media-*; mycms-media-* (historisch) wird noch gelesen und beim Schreiben entfernt
-  get(k, def) { try { const v = localStorage.getItem('klxm-studio-media-' + k) ?? localStorage.getItem('mycms-media-' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
-  set(k, v) { try { localStorage.setItem('klxm-studio-media-' + k, JSON.stringify(v)); localStorage.removeItem('mycms-media-' + k); } catch {} },
+  // Schlüssel klxm-studio-media-*
+  get(k, def) { try { const v = localStorage.getItem('klxm-studio-media-' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
+  set(k, v) { try { localStorage.setItem('klxm-studio-media-' + k, JSON.stringify(v)); } catch {} },
 };
 const TAG_COLORS = ['#FF5F57', '#FF9F0A', '#FFD60A', '#32D74B', '#0A84FF', '#BF5AF2', '#8E8E93'];
 const tagColor = t => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TAG_COLORS[h % TAG_COLORS.length]; };

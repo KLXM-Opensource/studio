@@ -8,7 +8,7 @@ namespace Core;
  *
  * Fundorte:
  *   extensions/{name}/extension.php                  projektspezifisch, liegt im Projekt
- *   vendor/{hersteller}/{paket}/extension.php         per Composer: "type": "klxm-studio-extension" (Altname "mycms-extension" wird weiter erkannt)
+ *   vendor/{hersteller}/{paket}/extension.php         per Composer: "type": "klxm-studio-extension"
  *
  * Aktiv ist eine Erweiterung, wenn die Website sie einschaltet:
  *   - Konfiguration config/sites/{key}.php (bzw. config/config.local.php): 'extensions' => ['kalender', 'dav'] (an) oder
@@ -57,10 +57,9 @@ final class Extensions
         if (is_file($installed)) {
             $data = json_decode((string) file_get_contents($installed), true);
             foreach ((array) ($data['packages'] ?? $data ?? []) as $p) {
-                // Paket-Typ „klxm-studio-extension“; „mycms-extension“ (historische technische Kennung) bleibt still gültig
-                if (!in_array($p['type'] ?? '', ['klxm-studio-extension', 'mycms-extension'], true)) continue;
+                if (($p['type'] ?? '') !== 'klxm-studio-extension') continue;
                 $dir = realpath(ROOT . '/vendor/composer/' . ($p['install-path'] ?? ('../' . ($p['name'] ?? ''))));
-                $entry = (string) ($p['extra']['klxm-studio']['entry'] ?? $p['extra']['mycms']['entry'] ?? 'extension.php');
+                $entry = (string) ($p['extra']['klxm-studio']['entry'] ?? 'extension.php');
                 if ($dir && is_file("$dir/$entry")) {
                     self::add($out, "$dir/$entry", 'composer: ' . $p['name'] . ' ' . ($p['version'] ?? ''), $p);
                 }
