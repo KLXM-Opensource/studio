@@ -573,13 +573,6 @@ final class Design
     /** Kontrast nach WCAG 2.x zwischen zwei Farben (1–21) */
     public static function contrast(string $a, string $b): float
     {
-        $l = function (string $hex): float {
-            $hex = ltrim($hex, '#');
-            $c = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
-            $c = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : (($x + 0.055) / 1.055) ** 2.4, $c);
-            return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
-        };
-        [$x, $y] = [$l($a), $l($b)];
-        return round((max($x, $y) + 0.05) / (min($x, $y) + 0.05), 2);
+        return Contrast::ratio($a, $b);
     }
 }

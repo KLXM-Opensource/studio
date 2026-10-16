@@ -25,9 +25,7 @@ function foto_luminance(string $hex): float
 {
     $hex = ltrim($hex, '#');
     if (strlen($hex) !== 6) return 1.0;
-    $c = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
-    $c = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : (($x + 0.055) / 1.055) ** 2.4, $c);
-    return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
+    return \Core\Contrast::luminance($hex);
 }
 
 /** <link rel="preload"> für die Hauptschnitte der gewählten Schriften (Kit-Schriften vom Schriften-Manager, Core\Design::preloads) */

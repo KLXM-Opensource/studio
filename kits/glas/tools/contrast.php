@@ -20,6 +20,11 @@
  */
 declare(strict_types=1);
 
+use Core\Contrast;
+
+// Kern-Klassen (design.php nutzt Kopfbereich-Aktionen, Core\Contrast) – Autoloader des Projekts laden, falls vorhanden
+if (is_file($al = dirname(__DIR__, 3) . '/vendor/autoload.php')) require_once $al;
+require_once dirname(__DIR__, 3) . '/app/Contrast.php';
 $design = require dirname(__DIR__) . '/design.php';
 
 const FF = ['light' => ['soft' => 0.58, 'rich' => 0.78], 'dark' => ['soft' => 0.42, 'rich' => 0.6]];
@@ -29,12 +34,13 @@ const ALPHA = ['light' => ['light' => 0.62, 'standard' => 0.72, 'dense' => 0.84]
 const HEADER = ['light' => 0.8, 'dark' => 0.82];
 const HILITE_DARK = 0.05;
 const ON_DARK = '#F4F3FF';
+/** Schwelle der sRGB-Linearisierung: das Glas-Modell rechnet mit der sRGB-Norm (0,04045) statt WCAG 2.x (0,03928) */
+const SRGB = 0.04045;
 
 /** @return array{float,float,float} */
 function rgb(string $hex): array
 {
-    $h = ltrim($hex, '#');
-    return [hexdec(substr($h, 0, 2)) / 255, hexdec(substr($h, 2, 2)) / 255, hexdec(substr($h, 4, 2)) / 255];
+    return Contrast::rgb($hex);
 }
 function hex(array $c): string
 {
@@ -42,13 +48,11 @@ function hex(array $c): string
 }
 function lum(array $c): float
 {
-    $c = array_map(fn($x) => $x <= 0.04045 ? $x / 12.92 : (($x + 0.055) / 1.055) ** 2.4, $c);
-    return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
+    return Contrast::relative($c, SRGB);
 }
 function ratio(array $a, array $b): float
 {
-    [$x, $y] = [lum($a), lum($b)];
-    return (max($x, $y) + 0.05) / (min($x, $y) + 0.05);
+    return Contrast::ratioRgb($a, $b, SRGB);
 }
 /** a über b mit Deckkraft $p (0–1) – wie color-mix(in srgb) bzw. Alpha-Überlagerung */
 function over(array $a, float $p, array $b): array
@@ -66,10 +70,7 @@ function sat(array $c, float $s): array
     ]);
 }
 
-$defaults = [];
-foreach ($design['groups'] as $g) foreach ($g['tokens'] as $t) {
-    if (($t['type'] ?? '') === 'color') { $defaults[$t['name']] = $t['default']; $defaults[$t['name'] . '@dark'] = $t['dark']; }
-}
+$defaults = Contrast::tokenDefaults($design);
 
 $fail = 0;
 $verbose = in_array('-v', $argv, true);

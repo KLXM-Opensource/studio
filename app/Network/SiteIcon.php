@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Core\Network;
 
+use Core\Contrast;
 use Core\Site;
 use Core\Sites;
 
@@ -59,10 +60,6 @@ final class SiteIcon
     /** Relative Helligkeit (WCAG) einer #rrggbb-Farbe */
     private static function luminance(string $hex): float
     {
-        $c = array_map(function (string $h): float {
-            $v = hexdec($h) / 255;
-            return $v <= 0.03928 ? $v / 12.92 : (($v + 0.055) / 1.055) ** 2.4;
-        }, str_split(substr($hex, 1), 2));
-        return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
+        return Contrast::luminance($hex);
     }
 }
