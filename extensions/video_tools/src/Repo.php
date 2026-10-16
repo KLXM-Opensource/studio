@@ -46,18 +46,53 @@ final class Repo
         return (int) app()->settings->get('ext.video_tools.schema', 0) >= 1;
     }
 
-    /** Video der Mediathek dieser Website (kein Pool, kein Verweis) oder null */
+    /** Video dieser Website – eigene Datei oder Verweis auf eine Datei eines geteilten Pools – oder null */
     public static function video(int $id): ?array
     {
         Media::usePool(null);
         $m = Media::find($id);
-        if (!$m || !str_starts_with((string) $m['mime'], 'video/') || !empty($m['_pool']) || !empty($m['pool_ref'])) return null;
+        if (!$m || !str_starts_with((string) $m['mime'], 'video/') || (!empty($m['_pool']) && empty($m['pool_ref']))) return null;
         return $m;
     }
 
+    /**
+     * Video zu einer Referenz der Oberfläche: Zahl = Medien-ID dieser Website; „p-{pool}-{id}“ = Datei eines geteilten Pools
+     * (Ansicht des Pools in der Mediathek) → Verweis auf dieser Website wird bei Bedarf angelegt (MediaPools::mirror).
+     */
+    public static function resolve(string|int $ref): ?array
+    {
+        $ref = (string) $ref;
+        if (preg_match('~^p-([a-z][a-z0-9-]{1,31})-(\d+)$~', $ref, $mm)) {
+            if (!\Core\MediaPools::available($mm[1]) || !\Core\MediaPools::row($mm[1], (int) $mm[2])) return null;
+            return self::video(\Core\MediaPools::mirror($mm[1], (int) $mm[2]));
+        }
+        return ctype_digit($ref) ? self::video((int) $ref) : null;
+    }
+
+    /** Vorhandener Verweis dieser Website auf eine Pool-Datei (ohne ihn anzulegen) */
+    public static function refId(string $pool, int $poolId): ?int
+    {
+        $id = app()->db->fetchValue('SELECT id FROM media WHERE pool_ref = ?', [$pool . ':' . $poolId]);
+        return $id ? (int) $id : null;
+    }
+
+    /** Pool einer Verweis-Datei (null = eigene Datei der Website) */
+    public static function pool(array $m): ?string
+    {
+        return !empty($m['pool_ref']) && !empty($m['_pool']) ? (string) $m['_pool'] : null;
+    }
+
+    /** Darf die angemeldete Person die Datei ändern? Eigene Dateien immer, Pool-Dateien nur, wer den Pool pflegen darf */
+    public static function canWrite(array $m): bool
+    {
+        $p = self::pool($m);
+        return $p === null || \Core\MediaPools::canEdit($p);
+    }
+
+    /** Datei auf der Platte – auch für Verweise auf geteilte Pools */
     public static function path(array $m): string
     {
-        return rtrim(Media::dir(), '/') . '/' . $m['file'];
+        return Media::path($m);
     }
 
     private static function sig(array $m): string
@@ -127,11 +162,14 @@ final class Repo
     public static function ensureAll(int $limit = 40): void
     {
         if (!self::ready()) return;
-        $rows = app()->db->fetchAll("SELECT m.*, v.sig AS vt_sig FROM media m LEFT JOIN video_meta v ON v.media_id = m.id WHERE m.mime LIKE 'video/%' AND m.pool_ref IS NULL");
-        $rows = array_slice(array_filter($rows, fn($m) => $m['vt_sig'] !== self::sig($m)), 0, max(1, $limit));
-        foreach ($rows as $m) {
-            unset($m['vt_sig']);
+        // auch Verweise auf geteilte Pools (Inhalte über Media::find aus dem Pool)
+        $rows = app()->db->fetchAll("SELECT m.id, v.sig AS vt_sig FROM media m LEFT JOIN video_meta v ON v.media_id = m.id WHERE m.mime LIKE 'video/%' AND m.deleted_at IS NULL");
+        $n = 0;
+        foreach ($rows as $r) {
+            $m = Media::find((int) $r['id']);
+            if (!$m || $r['vt_sig'] === self::sig($m)) continue;
             try { self::meta($m); } catch (\Throwable $e) { error_log('[video_tools] meta ' . $m['id'] . ': ' . $e->getMessage()); }
+            if (++$n >= max(1, $limit)) break;
         }
     }
 
@@ -185,7 +223,7 @@ final class Repo
     /** Aufräumen, wenn eine Datei gelöscht wird (Ereignis media.deleted) */
     public static function forgetMedia(array $m): void
     {
-        if (!self::ready() || !empty($m['_pool'])) return;
+        if (!self::ready() || Media::pool() !== null) return;   // Ereignis aus dem Pool selbst: Daten liegen je Website am Verweis
         $id = (int) $m['id'];
         $row = app()->db->fetch('SELECT preview FROM video_meta WHERE media_id = ?', [$id]);
         if (!empty($row['preview'])) @unlink(rtrim(Media::dir(), '/') . '/' . $row['preview']);
@@ -201,7 +239,7 @@ final class Repo
     /** Datei ersetzt (media.replaced): Analyse und animierte Vorschau neu */
     public static function replaced(array $m): void
     {
-        if (!self::ready() || !empty($m['_pool'])) return;
+        if (!self::ready() || Media::pool() !== null) return;
         $row = app()->db->fetch('SELECT preview FROM video_meta WHERE media_id = ?', [(int) $m['id']]);
         if (!empty($row['preview'])) {
             @unlink(rtrim(Media::dir(), '/') . '/' . $row['preview']);

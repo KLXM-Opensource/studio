@@ -57,7 +57,22 @@ final class VideoTools
     /** Extension::mediaJson – kurze Angaben je Video für die Liste (ohne Analyse-Lauf) */
     public static function mediaJson(array $m): ?array
     {
-        if (!str_starts_with((string) $m['mime'], 'video/') || !empty($m['_pool']) || !empty($m['pool_ref']) || !self::on()) return null;
+        if (!str_starts_with((string) $m['mime'], 'video/') || !self::on()) return null;
+        // Ansicht eines geteilten Pools: Daten am Verweis dieser Website (falls schon vorhanden), Referenz „p-{pool}-{id}“ für die Oberfläche
+        $pool = Media::pool();
+        if ($pool !== null) {
+            $ref = Repo::refId($pool, (int) $m['id']);
+            $row = $ref ? (Repo::allMeta()[$ref] ?? null) : null;
+            return [
+                'ref' => $ref ? (string) $ref : 'p-' . $pool . '-' . (int) $m['id'],
+                'score' => $row && $row['score'] !== null ? (int) $row['score'] : null,
+                'optimized' => $row ? (bool) $row['optimized'] : null,
+                'faststart' => $row && $row['faststart'] !== null ? (bool) $row['faststart'] : null,
+                'poster' => null, 'preview' => null, 'job' => $ref ? (Jobs::openByMedia()[$ref] ?? null) : null,
+                'pool' => $pool, 'can_edit' => \Core\MediaPools::canEdit($pool),
+            ];
+        }
+        if (!empty($m['_pool']) && empty($m['pool_ref'])) return null;
         $row = Repo::allMeta()[(int) $m['id']] ?? null;
         $poster = !empty($row['poster_id']) ? Media::find((int) $row['poster_id']) : null;
         return [
@@ -67,6 +82,7 @@ final class VideoTools
             'poster' => $poster ? Media::url($poster, 480) : null,
             'preview' => !empty($row['preview']) && Ffmpeg::config()['preview'] ? site()->mediaUrl((string) $row['preview']) : null,
             'job' => Jobs::openByMedia()[(int) $m['id']] ?? null,
+            'ref' => (string) (int) $m['id'], 'pool' => Repo::pool($m), 'can_edit' => Repo::canWrite($m),
         ];
     }
 
@@ -86,7 +102,7 @@ final class VideoTools
     /** Extension::mediaPoster – Poster eines Videos für Themes und Player */
     public static function poster(array $m): ?int
     {
-        if (!self::on() || !empty($m['_pool'])) return null;
+        if (!self::on() || Media::pool() !== null || (!empty($m['_pool']) && empty($m['pool_ref']))) return null;
         return Repo::posterId($m);
     }
 

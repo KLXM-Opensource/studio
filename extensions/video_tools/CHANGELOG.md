@@ -1,5 +1,9 @@
 # Changelog – Video-Werkzeuge (`video_tools`)
 
+## 1.2.0 – 2026-10-16
+
+- **Videos aus geteilten Medien:** Analyse, Optimieren, Schneiden und Poster auch für Dateien geteilter Pools – in der Ansicht des Pools (Referenz `p-{pool}-{id}`) und über Verweise der Website. Ändern dürfen alle, die den Pool pflegen (`MediaPools::canEdit`); Ergebnisse entstehen im Pool und gelten auf allen Websites. Wer den Pool nur nutzt, sieht die Analyse und einen Hinweis. Original löschen ist bei Pool-Dateien abgeschaltet.
+
 ## 1.1.0 – 2026-10-02
 
 Angepasst an die Integrationspunkte von KLXM Studio 1.0 (Entwicklerhandbuch → Erweiterungen → „Integrationspunkte und Regeln“):

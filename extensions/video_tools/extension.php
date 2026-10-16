@@ -31,7 +31,7 @@ use Klxm\VideoTools\VideoTools;
 return [
     'name' => 'video_tools',
     'label' => 'Video-Werkzeuge (ffmpeg)',
-    'version' => '1.1.0',
+    'version' => '1.2.0',
     'requires' => '>=1.0.0',
     'description' => 'Videos in der Mediathek prüfen, fürs Web optimieren, schneiden und mit Poster versehen – im Hintergrund mit ffmpeg.',
     // Angaben für Administration → Funktionen & Erweiterungen (Autor/Lizenz zusätzlich aus composer.json)

@@ -92,7 +92,10 @@ video:jobs [--open] [--cancel=ID] [--retry=ID] [--log=ID]
 ## Technik
 
 - Tabellen (Datenbank der Website): `video_jobs`, `video_meta` (Analyse-Cache, Poster, Vorschau), `video_links`
-  (Version/Ausschnitt/Poster von …). Nur die Mediathek der Website; geteilte Pools werden nicht bearbeitet.
+  (Version/Ausschnitt/Poster von …) – je Website, auch für Dateien geteilter Pools (am Verweis dieser Website).
+- Geteilte Pools: In der Ansicht eines Pools haben Videos die Referenz `p-{pool}-{id}` (`Repo::resolve`, Verweis per
+  `MediaPools::mirror` bei Bedarf). Ändern (Optimieren, Schneiden, Poster) nur mit `MediaPools::canEdit()`; Ergebnisse entstehen im Pool
+  (`Output::inTarget`) und gelten auf allen Websites, die ihn nutzen. Original löschen ist bei Pool-Dateien abgeschaltet.
 - Arbeiter: losgelöst per `nohup php bin/console video:work --site=…` (Log `storage/logs/video-jobs.log`), Rückfall
   nach Verwaltungsaufrufen (`Extension::afterAdminResponse`) und per Cron. Plätze `storage/video/slot-{n}.lock`,
   Sperre je Auftrag `storage/video/locks/{site}-{id}.lock` (freie Sperre bei „läuft“ = Prozess weg → fehlgeschlagen).

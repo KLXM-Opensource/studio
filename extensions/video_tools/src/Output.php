@@ -28,6 +28,32 @@ final class Output
         };
     }
 
+    /**
+     * Im Ziel des Originals arbeiten: eigene Mediathek bzw. – bei Verweisen auf geteilte Pools – im Pool (gilt für alle Websites,
+     * die ihn nutzen). $fn(int $srcId) läuft im passenden Kontext und gibt [Datensatz|null, Fehler] zurück; Ergebnis ist immer der
+     * Datensatz dieser Website (bei Pools: Verweis über MediaPools::mirror).
+     */
+    private static function inTarget(array $m, callable $fn): array
+    {
+        $pool = Repo::pool($m);
+        if ($pool === null) {
+            [$new, $err] = $fn((int) $m['id']);
+            if (!$new) throw new JobException((string) $err);
+            return $new;
+        }
+        $prev = Media::pool();
+        Media::usePool($pool);
+        try {
+            [$new, $err] = $fn((int) $m['_pool_id']);
+        } finally {
+            Media::usePool($prev);
+        }
+        if (!$new) throw new JobException((string) $err);
+        $sid = \Core\MediaPools::mirror($pool, (int) $new['id']);
+        Media::forget($sid);
+        return Media::find($sid) ?? throw new JobException(__('Datei im Pool angelegt, aber nicht verknüpft.'));
+    }
+
     private static function check(string $file): void
     {
         $info = Ffmpeg::probe($file);
@@ -47,7 +73,15 @@ final class Output
         $bytes = (int) filesize($file);
         $before = (int) $m['size'];
         if ($j['mode'] === 'replace') {
-            [$r, $err] = Media::replace((int) $m['id'], $file, self::baseName($m) . '.' . $ext);
+            if (Repo::pool($m) !== null) {
+                // Pool-Datei ersetzen: im Pool (ID dort), Verweis hier bleibt
+                $prev = Media::pool();
+                Media::usePool(Repo::pool($m));
+                try { [$r, $err] = Media::replace((int) $m['_pool_id'], $file, self::baseName($m) . '.' . $ext); } finally { Media::usePool($prev); }
+                if ($r) { Media::forget((int) $m['id']); $r = ['id' => (int) $m['id']] + $r; }
+            } else {
+                [$r, $err] = Media::replace((int) $m['id'], $file, self::baseName($m) . '.' . $ext);
+            }
             if (!$r) throw new JobException((string) $err);
             Repo::link((int) $m['id'], (int) $m['id'], 'optimized', $preset, Presets::label($preset));
             return [(int) $r['id'], __('Ersetzt ({preset}): {saved}.', ['preset' => Presets::label($preset), 'saved' => self::saved($before, $bytes)]), $bytes];
@@ -103,19 +137,22 @@ final class Output
     /** Neue Mediendatei mit den Angaben des Originals (Beschreibung, Übersetzungen, Fotonachweis, Tags, Sammlungen, Transkripte) */
     private static function import(array $m, string $file, string $name, string $title): array
     {
-        [$new, $err] = Media::import($file, $name, (string) $m['alt'], [
-            'title' => mb_substr($title, 0, 180), 'credit' => (string) ($m['credit'] ?? ''), 'tags' => Media::tagList($m['tags'] ?? ''), 'require_alt' => false,
-        ]);
-        if (!$new) throw new JobException((string) $err);
-        $id = (int) $new['id'];
-        if (!empty($m['i18n'])) {
-            $i18n = Media::translations($m);
-            foreach ($i18n as $l => &$row) if (isset($row['title'])) $row['title'] = mb_substr($row['title'] . ' ' . mb_substr($title, mb_strlen(Media::displayName($m))), 0, 180);
-            Media::db()->update('media', ['i18n' => json_encode($i18n, JSON_UNESCAPED_UNICODE)], 'id = :id', ['id' => $id]);
-        }
-        foreach (Media::collectionIds((int) $m['id']) as $cid) Media::addToCollection($cid, [$id]);
-        Media::forget($id);
-        return Media::find($id);
+        return self::inTarget($m, function (int $src) use ($m, $file, $name, $title): array {
+            [$new, $err] = Media::import($file, $name, (string) $m['alt'], [
+                'title' => mb_substr($title, 0, 180), 'credit' => (string) ($m['credit'] ?? ''), 'tags' => Media::tagList($m['tags'] ?? ''), 'require_alt' => false,
+            ]);
+            if (!$new) return [null, $err];
+            $id = (int) $new['id'];
+            if (!empty($m['i18n'])) {
+                $i18n = Media::translations($m);
+                foreach ($i18n as $l => &$row) if (isset($row['title'])) $row['title'] = mb_substr($row['title'] . ' ' . mb_substr($title, mb_strlen(Media::displayName($m))), 0, 180);
+                unset($row);
+                Media::db()->update('media', ['i18n' => json_encode($i18n, JSON_UNESCAPED_UNICODE)], 'id = :id', ['id' => $id]);
+            }
+            foreach (Media::collectionIds($src) as $cid) Media::addToCollection($cid, [$id]);   // Sammlungen des Originals (im Pool: dort)
+            Media::forget($id);
+            return [Media::find($id), null];
+        });
     }
 
     private static function poster(array $m, string $file, int $at): array
@@ -127,10 +164,9 @@ final class Output
     /** Poster-Bild übernehmen (auch für Standbilder aus dem Browser, wenn ffmpeg fehlt) */
     public static function storePoster(array $m, string $file, ?int $at): array
     {
-        [$img, $err] = Media::import($file, self::baseName($m) . '-poster.jpg', '', [
+        $img = self::inTarget($m, fn(int $src): array => Media::import($file, self::baseName($m) . '-poster.jpg', '', [
             'decorative' => true, 'title' => mb_substr(__('Poster: {name}', ['name' => Media::displayName($m)]), 0, 180), 'tags' => ['poster'],
-        ]);
-        if (!$img) throw new JobException((string) $err);
+        ]));
         Repo::setPoster((int) $m['id'], (int) $img['id'], $at);
         return [(int) $img['id'], __('Poster gesetzt ({at}).', ['at' => $at !== null ? Jobs::clock($at) : __('Standbild')]), (int) $img['size']];
     }

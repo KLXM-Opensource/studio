@@ -42,7 +42,8 @@ final class Jobs
     public static function create(string $type, array $m, array $params = [], ?string $preset = null, string $mode = 'new', ?string $batch = null, bool $spawn = true): array
     {
         if (!in_array($type, self::TYPES, true)) throw new JobException(__('Unbekannter Auftrag.'));
-        if (!empty($m['_pool']) || !empty($m['pool_ref'])) throw new JobException(__('Geteilte Medien lassen sich hier nicht bearbeiten.'));
+        if (!empty($m['_pool']) && empty($m['pool_ref'])) throw new JobException(__('Geteilte Medien bitte in der Mediathek der Website bearbeiten.'));
+        if (!Repo::canWrite($m)) throw new JobException(__('Diese Datei liegt in geteilten Medien. Ändern dürfen nur Personen, die den Pool pflegen.'));
         if (!str_starts_with((string) $m['mime'], 'video/')) throw new JobException(__('Nur Videos lassen sich bearbeiten.'));
         if (!Ffmpeg::available()) throw new JobException(__('ffmpeg ist auf diesem Server nicht verfügbar.'));
         $mode = $mode === 'replace' ? 'replace' : 'new';
@@ -50,7 +51,8 @@ final class Jobs
             if (!Presets::exists((string) $preset)) throw new JobException(__('Unbekanntes Preset.'));
             if (!(Presets::all()[$preset]['available'] ?? false)) throw new JobException(__('Dieses Preset ist mit dem ffmpeg dieses Servers nicht möglich.'));
             if ($preset === 'webm' && $mode === 'replace') throw new JobException(__('WebM nur als zusätzliche Version – die Kits erwarten MP4.'));
-            $params = ['delete_original' => !empty($params['delete_original']) && $mode === 'new'];
+            // Original löschen nie bei Pool-Dateien (andere Websites verwenden sie vielleicht)
+            $params = ['delete_original' => !empty($params['delete_original']) && $mode === 'new' && Repo::pool($m) === null];
         } else {
             $mode = 'new';
             $preset = null;

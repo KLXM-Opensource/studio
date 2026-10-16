@@ -321,4 +321,10 @@ return [
     'Erkennung per Aufruf – /usr/bin muss nicht enthalten sein' => 'detected by running it – /usr/bin does not need to be included',
     'wartet auf Hintergrunddienst' => 'waiting for the background service',
     'Wartende Video-Aufträge abarbeiten' => 'Process waiting video jobs',
+    'Datei aus geteilten Medien – ändern dürfen nur Personen, die den Pool pflegen. Die Analyse sehen alle.' => 'File from shared media – only people who maintain the pool can change it. Everyone can see the analysis.',
+    'Datei aus geteilten Medien – neue Versionen, Ausschnitte und Poster entstehen im Pool und gelten auf allen Websites, die ihn nutzen.' => 'File from shared media – new versions, clips and posters are created in the pool and apply to every website that uses it.',
+    'Geteilte Medien bitte in der Mediathek der Website bearbeiten.' => 'Please edit shared media in the website’s media library.',
+    'Diese Datei liegt in geteilten Medien. Ändern dürfen nur Personen, die den Pool pflegen.' => 'This file is in shared media. Only people who maintain the pool can change it.',
+    'Datei im Pool angelegt, aber nicht verknüpft.' => 'File created in the pool but not linked.',
+    'Video nicht gefunden.' => 'Video not found.',
 ];

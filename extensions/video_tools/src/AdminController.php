@@ -27,7 +27,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
 
     private function video(string $id): array
     {
-        return Repo::video((int) $id) ?? throw new HttpException(404, __('Video nicht gefunden (nur Videos der Mediathek dieser Website).'));
+        return Repo::resolve($id) ?? throw new HttpException(404, __('Video nicht gefunden.'));
     }
 
     private static function fail(\Throwable $e, int $status = 422): Response
@@ -75,8 +75,9 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
             'preview' => !empty($row['preview']) && Ffmpeg::config()['preview'] ? site()->mediaUrl((string) $row['preview']) : null,
             'presets' => array_values($presets), 'relations' => Repo::relations((int) $m['id']), 'jobs' => Jobs::list(['media' => (int) $m['id']], 10),
             'captions' => count(\Core\MediaTracks::forMedia($m)),
-            'can' => ['process' => Ffmpeg::available(), 'replace' => VideoTools::canReplace(), 'admin' => $admin, 'loudness' => Ffmpeg::available(),
-                'status' => url('/admin/video-tools')],
+            'can' => ['process' => Ffmpeg::available() && Repo::canWrite($m), 'replace' => VideoTools::canReplace() && Repo::canWrite($m), 'admin' => $admin,
+                'loudness' => Ffmpeg::available(), 'edit' => Repo::canWrite($m), 'status' => url('/admin/video-tools')],
+            'pool' => Repo::pool($m),
         ]);
     }
 
@@ -189,6 +190,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
     {
         $this->guard($r);
         $m = $this->video($id);
+        if (!Repo::canWrite($m)) return Response::fail(__('Diese Datei liegt in geteilten Medien. Ändern dürfen nur Personen, die den Pool pflegen.'), 403);
         $file = $r->files['image'] ?? null;
         if ($file) {
             if (($file['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $file['tmp_name']) || (int) $file['size'] > 12 * 1048576) {
@@ -218,6 +220,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
     {
         $this->guard($r);
         $m = $this->video($id);
+        if (!Repo::canWrite($m)) return Response::fail(__('Diese Datei liegt in geteilten Medien. Ändern dürfen nur Personen, die den Pool pflegen.'), 403);
         Repo::setPoster((int) $m['id'], null, null);
         return Response::json(['ok' => true]);
     }
@@ -228,8 +231,8 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $this->guard($r);
         if (!Ffmpeg::available() || !Ffmpeg::config()['preview']) return Response::json(['ok' => true, 'queued' => 0]);
         $n = 0;
-        foreach (array_slice(array_map('intval', (array) ($r->post['ids'] ?? [])), 0, 12) as $id) {
-            $m = Repo::video($id);
+        foreach (array_slice(array_map('strval', (array) ($r->post['ids'] ?? [])), 0, 12) as $id) {   // ID oder „p-{pool}-{id}“
+            $m = Repo::resolve($id);
             if (!$m) continue;
             $row = Repo::meta($m)['row'];
             if (!empty($row['preview'])) continue;
@@ -249,9 +252,9 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
     {
         $this->guard($r);
         $preset = (string) ($r->post['preset'] ?? '');
-        $ids = array_map('intval', (array) ($r->post['ids'] ?? []));
+        $ids = array_map('strval', (array) ($r->post['ids'] ?? []));   // ID oder „p-{pool}-{id}“ (Repo::resolve)
         if (!$ids && ($r->post['check'] ?? '') !== '') {
-            $ids = array_map(fn($m) => (int) $m['id'], Media::all(['check' => (string) $r->post['check']]));
+            $ids = array_map(fn($m) => (string) (int) $m['id'], Media::all(['check' => (string) $r->post['check']]));
         }
         $ids = array_slice(array_values(array_unique(array_filter($ids))), 0, 200);
         if (!$ids) return Response::fail(__('Keine Videos ausgewählt.'));
@@ -259,7 +262,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $jobs = [];
         $skipped = [];
         foreach ($ids as $id) {
-            $m = Repo::video($id);
+            $m = Repo::resolve($id);
             if (!$m) continue;
             // „Nur faststart“ lohnt nur, wo es fehlt; bereits optimierte Videos nicht erneut kodieren
             $meta = Repo::meta($m);

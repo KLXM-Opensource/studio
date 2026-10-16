@@ -34,6 +34,8 @@
   <h3>Prüfen und alle auf einmal</h3>
   <p>Links unter <b>Prüfen</b> finden Sie <b>Videos nicht optimiert</b> und <b>Videos ohne Poster</b>. Ist einer der Filter gewählt (ohne Auswahl), bietet die rechte Spalte <b>Alle optimieren</b> mit einem Preset bzw. <b>Poster für alle erzeugen</b> an. Mehrere markierte Videos optimieren Sie über die Mehrfachauswahl oder den Rechtsklick.</p>
 
+  <h3>Videos aus geteilten Medien</h3>
+  <p>Auch Videos eines geteilten Pools lassen sich prüfen und bearbeiten: In der Mediathek oben auf den Pool umschalten und das Video wählen. Ändern – optimieren, schneiden, Poster setzen – dürfen alle, die den Pool pflegen (Recht „Geteilte Medien pflegen“ auf einer Website, die den Pool pflegt). Neue Versionen, Ausschnitte und Poster entstehen dann im Pool und stehen allen Websites zur Verfügung, die ihn nutzen. Wer den Pool nur verwendet, sieht die Analyse.</p>
   <h3>Aufträge</h3>
   <p>Der Knopf mit der Warteschlange in der Werkzeugleiste der Mediathek (bzw. <b>Alle Video-Aufträge</b> rechts) zeigt alle Aufträge mit Stand: <b>Abbrechen</b> (auch während er läuft), <b>Wiederholen</b> nach einem Fehler, <b>Anzeigen</b> springt zum Ergebnis. Die Administration sieht zusätzlich das <b>Protokoll</b>.</p>
 

@@ -78,8 +78,10 @@
   let pollT = null, pollFast = 0;
   const previewAsked = new Set();
 
+  // Referenz für die API: eigene Datei = ID, Datei eines geteilten Pools (Ansicht des Pools) = „p-{pool}-{id}“ (mediaJson → ref)
+  const R = id => finder?.byId?.(id)?.ext?.video_tools?.ref || id;
   const loadInfo = async (id, refresh = false) => {
-    const r = await http(`${API}/media/${id}${refresh ? '?refresh=1' : ''}`);
+    const r = await http(`${API}/media/${R(id)}${refresh ? '?refresh=1' : ''}`);
     info.set(id, r);
     return r;
   };
@@ -216,12 +218,14 @@
       <ul class="vt-recs">${items.map(it => `<li class="is-${it.level}">${M.ui.ico(lvl[it.level] || 'info')}<span>${esc(it.text)}</span>${it.preset && can.process && !f.ro ? `<button type="button" class="adm-link" data-vt-fix="${esc(it.preset)}">${esc(t('Beheben …'))}</button>` : ''}</li>`).join('')}</ul>
       <dl class="vt-facts">${facts(r)}</dl>
       ${can.loudness && !r.loud && (r.info.streams || []).some(s => s.type === 'audio') ? `<button type="button" class="adm-link vt-loud" data-vt-loud>${ico('speaker-high')} ${esc(t('Lautheit messen (EBU R128)'))}</button>` : ''}
-      ${can.process ? '' : `<p class="vt-note">${M.ui.ico('info')} <span>${esc(t('ffmpeg ist auf diesem Server nicht verfügbar – nur Analyse aus dem Dateikopf. Poster lassen sich trotzdem aus dem Browser setzen.'))} <a href="${esc(can.status)}">${esc(t('Status & Einrichtung'))}</a></span></p>`}
-      ${f.ro ? '' : `<div class="vt-actions">
+      ${can.edit === false ? `<p class="vt-note">${M.ui.ico('lock')} <span>${esc(t('Datei aus geteilten Medien – ändern dürfen nur Personen, die den Pool pflegen. Die Analyse sehen alle.'))}</span></p>`
+        : can.process ? '' : `<p class="vt-note">${M.ui.ico('info')} <span>${esc(t('ffmpeg ist auf diesem Server nicht verfügbar – nur Analyse aus dem Dateikopf. Poster lassen sich trotzdem aus dem Browser setzen.'))} <a href="${esc(can.status)}">${esc(t('Status & Einrichtung'))}</a></span></p>`}
+      ${r.pool && can.edit !== false ? `<p class="vt-note">${M.ui.ico('share-network')} <span>${esc(t('Datei aus geteilten Medien – neue Versionen, Ausschnitte und Poster entstehen im Pool und gelten auf allen Websites, die ihn nutzen.'))}</span></p>` : ''}
+      ${f.ro || can.edit === false ? '' : `<div class="vt-actions">
         <button type="button" class="adm-btn adm-btn--small adm-btn--primary" data-vt-opt ${can.process ? '' : 'disabled'}>${ico('gauge')} ${esc(t('Für Web optimieren …'))}</button>
         <button type="button" class="adm-btn adm-btn--small" data-vt-trim ${can.process ? '' : 'disabled'}>${ico('scissors')} ${esc(t('Schneiden …'))}</button>
         <button type="button" class="adm-btn adm-btn--small" data-vt-poster>${ico('frame-corners')} ${esc(t('Poster …'))}</button></div>`}
-      ${r.poster ? `<div class="vt-posterrow"><img src="${esc(r.poster.thumb)}" alt="" width="96" height="54"><span><b>${esc(t('Poster'))}</b><small>${r.poster.at != null ? esc(t('Standbild bei {at}', { at: clock(r.poster.at, false) })) : esc(t('Standbild'))} · ${esc(t('wird von Video-Blöcken ohne eigenes Vorschaubild verwendet'))}</small></span>${f.ro ? '' : `<button type="button" class="adm-link" data-vt-posterclear>${esc(t('Entfernen'))}</button>`}</div>` : ''}
+      ${r.poster ? `<div class="vt-posterrow"><img src="${esc(r.poster.thumb)}" alt="" width="96" height="54"><span><b>${esc(t('Poster'))}</b><small>${r.poster.at != null ? esc(t('Standbild bei {at}', { at: clock(r.poster.at, false) })) : esc(t('Standbild'))} · ${esc(t('wird von Video-Blöcken ohne eigenes Vorschaubild verwendet'))}</small></span>${f.ro || can.edit === false ? '' : `<button type="button" class="adm-link" data-vt-posterclear>${esc(t('Entfernen'))}</button>`}</div>` : ''}
       ${rel.source ? `<p class="vt-rel">${ico('film-strip')} ${esc(rel.source.kind === 'clip' ? t('Ausschnitt von') : t('Version von'))} <button type="button" class="adm-link" data-vt-goto="${rel.source.id}">${esc(rel.source.display)}</button></p>` : ''}
       ${rel.derived?.length ? `<div class="vt-rel"><b>${esc(t('Versionen & Ausschnitte'))}</b><ul>${rel.derived.map(x => `<li><button type="button" class="adm-link" data-vt-goto="${x.id}">${esc(x.display)}</button> <small>${esc(x.size)}${x.bytes < r.bytes ? ' · −' + Math.round((1 - x.bytes / r.bytes) * 100) + ' %' : ''}</small></li>`).join('')}</ul></div>` : ''}
       <ul class="vt-jobs" data-vt-joblist aria-live="polite">${jobRows([...openJobs, ...recent], can.admin)}</ul>
@@ -233,11 +237,11 @@
     $('[data-vt-poster]', sec)?.addEventListener('click', () => posterDialog(m, r, f));
     $('[data-vt-posterclear]', sec)?.addEventListener('click', async () => {
       if (!(await ask({ title: t('Poster entfernen?'), body: t('Das Bild wird gelöscht, sofern es nirgends sonst verwendet wird.'), ok: t('Entfernen') }))) return;
-      await post(`${API}/media/${m.id}/poster/clear`); info.delete(m.id); f.load(m.id);
+      await post(`${API}/media/${R(m.id)}/poster/clear`); info.delete(m.id); f.load(m.id);
     });
     $('[data-vt-loud]', sec)?.addEventListener('click', async e => {
       const b = e.currentTarget; b.disabled = true; b.setAttribute('aria-busy', 'true'); b.lastChild.textContent = ' ' + t('Misst …');
-      try { const nr = await post(`${API}/media/${m.id}/loudness`); info.set(m.id, nr); if (sec.isConnected) drawPanel(sec, m, nr, f); live(t('Lautheit gemessen')); }
+      try { const nr = await post(`${API}/media/${R(m.id)}/loudness`); info.set(m.id, nr); if (sec.isConnected) drawPanel(sec, m, nr, f); live(t('Lautheit gemessen')); }
       catch (ex) { toast(ex.message); b.disabled = false; }
     });
     $$('[data-vt-goto]', sec).forEach(b => b.addEventListener('click', () => f.load(+b.dataset.vtGoto)));
@@ -305,7 +309,7 @@
         } else {
           if (form.mode.value === 'replace' && !(await ask({ title: t('Original „{name}“ ersetzen?', { name: m.display }), body: t('Die bisherige Datei wird nach erfolgreicher Umwandlung überschrieben. Verwendungen, Alt-Text und Untertitel bleiben erhalten.'), ok: t('Ersetzen'), danger: false }))) { btn.disabled = false; return; }
           if (form.delete_original.checked && !(await ask({ title: t('Original danach löschen?'), body: t('Nur wenn es nirgends verwendet wird – sonst bleibt es erhalten.'), ok: t('Ja, löschen') }))) { btn.disabled = false; return; }
-          await post(`${API}/media/${m.id}/optimize`, { preset: form.preset.value, mode: form.mode.value, delete_original: form.delete_original.checked ? 1 : 0 });
+          await post(`${API}/media/${R(m.id)}/optimize`, { preset: form.preset.value, mode: form.mode.value, delete_original: form.delete_original.checked ? 1 : 0 });
           toast(t('Optimierung gestartet – läuft im Hintergrund'));
         }
         live(t('Auftrag gestartet'));
@@ -436,7 +440,7 @@
       kfT = setTimeout(async () => {
         if (!inMs) { kfHint.textContent = ''; P.keyframe(null); return; }
         try {
-          const k = await http(`${API}/media/${m.id}/keyframe?at=${inMs}`);
+          const k = await http(`${API}/media/${R(m.id)}/keyframe?at=${inMs}`);
           if (k.keyframe == null) { kfHint.textContent = ''; P.keyframe(null); return; }
           P.keyframe(k.keyframe);
           const diff = inMs - k.keyframe;
@@ -482,7 +486,7 @@
       go.disabled = true; err.hidden = true;
       try {
         const precise = $('[name=vt-precise]:checked', dlg).value === '1';
-        const res = await post(`${API}/media/${m.id}/trim`, { clips, precise: precise ? 1 : 0 });
+        const res = await post(`${API}/media/${R(m.id)}/trim`, { clips, precise: precise ? 1 : 0 });
         toast(t('{n} Ausschnitt(e) werden erstellt – im Hintergrund', { n: res.jobs.length }) + (res.error ? ' · ' + res.error : ''));
         live(t('Auftrag gestartet'));
         dlg.close(); info.delete(m.id); poll(true); f.load(f.active);
@@ -523,7 +527,7 @@
       const at = Math.round(P.v.currentTime * 1000);
       try {
         if (r.can.process) {
-          await post(`${API}/media/${m.id}/poster`, { at });
+          await post(`${API}/media/${R(m.id)}/poster`, { at });
           toast(t('Poster wird erzeugt …'));
         } else {
           P.v.pause();
@@ -534,7 +538,7 @@
           if (!blob) throw new Error(t('Standbild konnte nicht aufgenommen werden.'));
           const fd = new FormData();
           fd.append('image', blob, 'poster.jpg'); fd.append('at', at); fd.append('_csrf', $('#adm-csrf')?.value || '');
-          await http(`${API}/media/${m.id}/poster`, { method: 'POST', body: fd });
+          await http(`${API}/media/${R(m.id)}/poster`, { method: 'POST', body: fd });
           toast(t('Poster gesetzt'));
         }
         live(t('Poster gesetzt'));
@@ -603,7 +607,7 @@
       if (!(await ask({ title: t('{n} Videos mit „{preset}“ optimieren?', { n: videos.length, preset: $('#vt-bulkp', box).selectedOptions[0].text }), body: t('Die Aufträge laufen nacheinander im Hintergrund.'), ok: t('Starten'), danger: false }))) return;
       e.target.disabled = true;
       try {
-        const r = await post(`${API}/bulk`, { preset, ids: videos.map(m => m.id) });
+        const r = await post(`${API}/bulk`, { preset, ids: videos.map(m => R(m.id)) });
         toast(t('{n} Aufträge eingereiht', { n: r.queued }) + (r.skipped?.length ? ' · ' + t('{n} übersprungen', { n: r.skipped.length }) : ''));
         live(t('{n} Aufträge eingereiht', { n: r.queued })); poll(true); f.load();
       } catch (ex) { toast(ex.message); e.target.disabled = false; }
@@ -612,7 +616,7 @@
       e.target.disabled = true;
       let n = 0;
       for (const m of videos) {
-        try { const r = info.get(m.id) || await loadInfo(m.id); await post(`${API}/media/${m.id}/poster`, { at: Math.round((r.info.duration || 0) * 100) }); n++; } catch {}
+        try { const r = info.get(m.id) || await loadInfo(m.id); await post(`${API}/media/${R(m.id)}/poster`, { at: Math.round((r.info.duration || 0) * 100) }); n++; } catch {}
       }
       toast(t('{n} Aufträge eingereiht', { n })); poll(true); f.load();
     });
@@ -636,7 +640,7 @@
 
   function menu(f, ids, one) {
     if (f.ro) return [];
-    if (one?.kind === 'video' && one.ext?.video_tools) {
+    if (one?.kind === 'video' && one.ext?.video_tools && one.ext.video_tools.can_edit !== false) {
       const withInfo = fn => async () => { try { fn(info.get(one.id) || await loadInfo(one.id)); } catch (ex) { toast(ex.message); } };
       return [
         [t('Für Web optimieren …'), withInfo(r => r.can.process ? optimizeDialog(one, r, f) : toast(t('ffmpeg ist auf diesem Server nicht verfügbar.')))],
@@ -644,7 +648,7 @@
         [t('Poster wählen …'), withInfo(r => posterDialog(one, r, f))],
       ];
     }
-    const vids = ids.map(id => f.byId(id)).filter(m => m?.kind === 'video' && m.ext?.video_tools);
+    const vids = ids.map(id => f.byId(id)).filter(m => m?.kind === 'video' && m.ext?.video_tools && m.ext.video_tools.can_edit !== false);
     if (vids.length > 1) return [[t('{n} Videos optimieren …', { n: vids.length }), async () => { const r = await loadInfo(vids[0].id); optimizeDialog(null, { ...r, assess: {}, bytes: 0 }, f, null, vids.map(m => m.id)); }]];
     return [];
   }
@@ -696,7 +700,7 @@
     if (open.length) poll(); else tick();
     // Animierte Vorschau bei Bedarf erzeugen (je Seitenaufruf höchstens einmal je Datei)
     const need = vids.filter(m => !m.ext.video_tools.preview && !m.ext.video_tools.job && !previewAsked.has(m.id)).slice(0, 6).map(m => m.id);
-    if (need.length) { need.forEach(id => previewAsked.add(id)); post(`${API}/previews`, { ids: need }).then(r => { if (r.queued) poll(true); }).catch(() => {}); }
+    if (need.length) { need.forEach(id => previewAsked.add(id)); post(`${API}/previews`, { ids: need.map(R) }).then(r => { if (r.queued) poll(true); }).catch(() => {}); }
   }
 
   M.extend({ name: 'video_tools', loaded, badge, panel: (f, m) => panel(f, m), multi, summary, menu, quickLook });
