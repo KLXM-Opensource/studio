@@ -271,7 +271,8 @@ function frameworks_demo_pages(array $img, array $tables, callable $log): void
     $page(['slug' => 'technik', 'title' => 'Technik', 'parent_id' => $l, 'sort' => 1, 'meta_description' => 'Technik hinter der Demo.'], [
         $hero('Leistungen', 'Technik', 'Wie die beiden Frameworks neben dem CMS arbeiten.'),
         $B('text', ['eyebrow' => '', 'title' => 'Ebenen und Schatten', 'text' => '<p>Tailwind CSS v4 legt Preflight, Komponenten und Hilfsklassen in Kaskaden-Layer. CSS ohne Layer – das des CMS – gewinnt immer. Die Werkzeugleiste und alle Dialoge der Redaktion liegen im Shadow DOM.</p><h3>UIkit</h3><p>UIkit bringt keine Layer mit; seine Grundstile treffen nur Elemente der Seite. Die Content-Security-Policy erlaubt keine Inline-Stile für Besucher – deshalb nutzt das Kit Symbole aus dem Symbolsatz statt der animierten SVG-Symbole mit eingebettetem Stil.</p>']),
-        $B('video', ['eyebrow' => 'Video', 'title' => 'Zwei-Klick-Video', 'video_url' => 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', 'video_file' => null, 'poster' => $I(5)], ['background' => 'tint']),
+        $B('video', ['eyebrow' => 'Video', 'title' => 'Zwei-Klick-Video', 'video_url' => 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', 'video_file' => null, 'poster' => $I(5),
+            'caption' => 'Big Buck Bunny – © 2008 Blender Foundation / www.bigbuckbunny.org (CC BY 3.0)'], ['background' => 'tint']),
     ]);
 
     // ---------------------------------------------------------------- Projekte (Datenliste) + Detailseite

@@ -1,7 +1,7 @@
 # Third-party notices
 
 **KLXM Studio** – Copyright (c) 2026 KLXM Crossmedia GmbH and contributors – is licensed under the **MIT License**
-(`MIT`, see `LICENSE` and `COPYRIGHT`). The bundled kits (`themes/*`) and extensions (`extensions/*`) are part of
+(`MIT`, see `LICENSE` and `COPYRIGHT`). The bundled kits (`kits/*`) and extensions (`extensions/*`) are part of
 the project and licensed the same way, except for the third-party assets listed below. Third-party kits and
 extensions may use any license; the licenses of the third-party components bundled with KLXM Studio still apply to
 those components.
@@ -9,8 +9,8 @@ those components.
 This file lists every third-party component that KLXM Studio ships, builds with or can optionally use, with the
 license each one is distributed under. Licenses were taken from the packages' own metadata and license files
 (`composer.lock`, `package.json`, `LICENSE*`, model cards) as of the versions pinned in `composer.lock`,
-`tools/pnpm-lock.yaml` and `themes/*/pnpm-lock.yaml`. No bundled component is under a copyleft license that would
-extend to KLXM Studio's own code: everything shipped is permissive (MIT, BSD, Apache-2.0, ISC, CC0, OFL fonts), with
+`tools/pnpm-lock.yaml` and `kits/*/pnpm-lock.yaml`. No bundled component is under a copyleft license that would
+extend to KLXM Studio's own code: everything shipped is permissive (MIT, BSD, Apache-2.0, ISC, 0BSD, CC0, OFL fonts), with
 the single exception of the Liberation fonts inside PDF.js (GPL-2.0 with font exception, separate font files, see
 1.3). Copyleft tools (Piper TTS, ffmpeg) are build-only and not distributed. `joomla/string`
 (GPL-2.0-or-later) is no longer installed (see section 3). `node tools/licenses.mjs` re-checks the Composer and npm
@@ -24,16 +24,19 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper), Apache ECharts | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, ZRender (ECharts), pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
 | BSD-2-Clause | OpenJPEG (PDF.js), @mapbox/tiny-sdf, @mapbox/unitbezier | Bundled |
-| ISC | earcut, kdbush, potpack, quickselect, tinyqueue, geojson-vt, point-geometry, maplibre-gl-style-spec | Bundled |
+| ISC | earcut, kdbush, potpack, quickselect, tinyqueue, geojson-vt, point-geometry, maplibre-gl-style-spec, Lucide icons | Bundled |
+| 0BSD | tslib (helper of Apache ECharts) | Bundled |
 | CC0-1.0 | ICC colour profile in PDF.js | Bundled |
 | GPL-2.0 with font exception (Red Hat Liberation font license) | Liberation Sans fonts inside PDF.js (`standard_fonts/`) – separate font files, see 1.3 | Bundled |
 | SIL Open Font License 1.1 | Lato (admin, PDF), JetBrains Mono (admin code) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
-| CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube in kit demo content | Service / demo |
+| CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube (two-click) in the demo content of eight kits, credited in the caption | Service / demo |
+| Pixabay Content License | one demo photo of the praxis kit (section 8) | Bundled (demo) |
+| MPL-2.0 | lightningcss 1.32.0 (via Tailwind CSS CLI, building `kits/frameworks`) | Build-only |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
 | GPL-3.0-or-later | Piper TTS (`piper-tts` 1.8, optional tutorial narration tooling – videos currently silent) | Build-only |
@@ -66,9 +69,9 @@ are written next to the files by the build.
 | Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.3.289 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
 | Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI), `resources/fonts/pdf/lato-*.ttf` (PDF) | `public/assets/fonts/OFL-Lato.txt` |
 | JetBrains Mono (`@fontsource/jetbrains-mono`), © 2020 The JetBrains Mono Project Authors | 5.3.0 | OFL-1.1 | `public/assets/fonts/jetbrains-mono-*.woff2` (admin code) | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
-| Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (Symbolstil der Website) | `public/assets/icons/LICENSE.txt` |
-| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
-| Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
+| Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (website icon style) | `public/assets/icons/LICENSE.txt` |
+| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
+| Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
 | Phosphor Icons, duotone (`@phosphor-icons/core`), © 2023 Phosphor Icons | 2.1.1 | MIT | `public/assets/icons/*.svg` (core, one sprite per topic, `icons.svg`), `sites/*.svg` (generated per website), `icons-map.json`, `catalog.json` | `public/assets/icons/LICENSE.txt` |
 
 Phosphor: the sprites are built by `tools/icons.mjs` from the curated list in `resources/icons/icons.json`; path data
@@ -127,7 +130,7 @@ Copyright lines as in the fonts' own license files or name tables:
 | Admin (core) | JetBrains Mono | `@fontsource/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
 | basis, essenz, fluid, foto, galerie, immobilien, praxis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `kits/{kit}/fonts/OFL.txt` |
 | editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `kits/editorial/fonts/OFL.txt` |
-| nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2020 The Fraunces Project Authors | `kits/nature/fonts/OFL.txt` |
+| nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2018 The Fraunces Project Authors | `kits/nature/fonts/OFL.txt` |
 | modern | Space Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/space-grotesk` 0.4.1 | © 2020 The Space Grotesk Project Authors | `kits/modern/fonts/OFL.txt` |
 | glas | Outfit TTF (server-side, app icons – not public) | `@expo-google-fonts/outfit` 0.4.3 | © 2021 The Outfit Project Authors | `kits/glas/fonts/OFL.txt` |
 
@@ -161,17 +164,17 @@ All packages from `composer.lock` (there are no dev packages). “via” names t
 | chillerlan/php-settings-container | 3.3.0 | MIT | via chillerlan/php-qrcode | https://github.com/chillerlan/php-settings-container |
 | doctrine/dbal | 4.5.0 | MIT | direct | https://www.doctrine-project.org/projects/dbal.html |
 | doctrine/deprecations | 1.1.6 | MIT | via doctrine/dbal, phpdocumentor/reflection-docblock | https://www.doctrine-project.org/ |
-| doctrine/lexer | 3.0.2 | MIT | via egulias/email-validator, loupe/loupe | https://www.doctrine-project.org/projects/lexer.html |
+| doctrine/lexer | 3.0.3 | MIT | via egulias/email-validator, loupe/loupe | https://www.doctrine-project.org/projects/lexer.html |
 | egulias/email-validator | 4.0.4 | MIT | via symfony/mailer | https://github.com/egulias/EmailValidator |
 | lbuchs/webauthn | 2.2.0 | MIT | direct | https://github.com/lbuchs/webauthn |
-| loupe/loupe | 1.1.0 | MIT | direct | https://github.com/loupe-php/loupe |
+| loupe/loupe | 1.1.1 | MIT | direct | https://github.com/loupe-php/loupe |
 | loupe/matcher | 0.4.0 | MIT | via loupe/loupe | https://github.com/loupe-php/matcher |
 | mjaschen/phpgeo | 6.0.4 | MIT | via loupe/loupe | https://phpgeo.marcusjaschen.de/ |
 | oskarstark/enum-helper | 1.8.4 | MIT | via symfony/ai-platform | https://github.com/OskarStark/enum-helper |
-| phpdocumentor/reflection-common | 2.2.0 | MIT | via phpdocumentor/reflection-docblock, phpdocumentor/type-resolver | http://www.phpdoc.org |
+| phpdocumentor/reflection-common | 2.2.1 | MIT | via phpdocumentor/reflection-docblock, phpdocumentor/type-resolver | http://www.phpdoc.org |
 | phpdocumentor/reflection-docblock | 6.0.3 | MIT | via symfony/ai-platform | https://github.com/phpDocumentor/ReflectionDocBlock |
-| phpdocumentor/type-resolver | 2.0.0 | MIT | via phpdocumentor/reflection-docblock | https://github.com/phpDocumentor/TypeResolver |
-| phpstan/phpdoc-parser | 2.3.5 | MIT | via phpdocumentor/reflection-docblock, phpdocumentor/type-resolver | https://github.com/phpstan/phpdoc-parser |
+| phpdocumentor/type-resolver | 2.1.0 | MIT | via phpdocumentor/reflection-docblock | https://github.com/phpDocumentor/TypeResolver |
+| phpstan/phpdoc-parser | 2.3.6 | MIT | via phpdocumentor/reflection-docblock, phpdocumentor/type-resolver | https://github.com/phpstan/phpdoc-parser |
 | psr/cache | 3.0.0 | MIT | via doctrine/dbal, loupe/loupe | https://github.com/php-fig/cache |
 | psr/clock | 1.0.0 | MIT | via symfony/clock | https://github.com/php-fig/clock |
 | psr/container | 2.0.2 | MIT | via symfony/service-contracts, symfony/type-info | https://github.com/php-fig/container |
@@ -189,34 +192,34 @@ All packages from `composer.lock` (there are no dev packages). “via” names t
 | symfony/ai-ollama-platform | 0.14.0 | MIT | direct | https://github.com/symfony/ai-ollama-platform |
 | symfony/ai-open-ai-platform | 0.14.0 | MIT | direct | https://github.com/symfony/ai-open-ai-platform |
 | symfony/ai-open-responses-platform | 0.14.0 | MIT | via symfony/ai-open-ai-platform | https://github.com/symfony/ai-open-responses-platform |
-| symfony/ai-platform | 0.14.0 | MIT | direct | https://github.com/symfony/ai-platform |
+| symfony/ai-platform | 0.14.1 | MIT | direct | https://github.com/symfony/ai-platform |
 | symfony/ai-store | 0.14.0 | MIT | direct | https://github.com/symfony/ai-store |
 | symfony/clock | 8.1.0 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
 | symfony/deprecation-contracts | 3.7.1 | MIT | via symfony/service-contracts | https://symfony.com |
 | symfony/event-dispatcher | 8.1.5 | MIT | via symfony/ai-platform, symfony/mailer | https://symfony.com |
 | symfony/event-dispatcher-contracts | 3.7.1 | MIT | via symfony/ai-store, symfony/event-dispatcher | https://symfony.com |
-| symfony/http-client | 8.1.7 | MIT | direct | https://symfony.com |
+| symfony/http-client | 8.1.8 | MIT | direct | https://symfony.com |
 | symfony/http-client-contracts | 3.7.3 | MIT | via symfony/http-client | https://symfony.com |
 | symfony/mailer | 8.1.7 | MIT | direct | https://symfony.com |
 | symfony/mime | 8.1.7 | MIT | via symfony/mailer | https://symfony.com |
 | symfony/polyfill-ctype | 1.37.0 | MIT | via symfony/serializer, symfony/string | https://symfony.com |
-| symfony/polyfill-intl-grapheme | 1.41.0 | MIT | via symfony/string | https://symfony.com |
+| symfony/polyfill-intl-grapheme | 1.43.0 | MIT | via symfony/string | https://symfony.com |
 | symfony/polyfill-intl-idn | 1.42.0 | MIT | via egulias/email-validator, symfony/mime | https://symfony.com |
-| symfony/polyfill-intl-normalizer | 1.42.0 | MIT | via symfony/polyfill-intl-idn, symfony/string | https://symfony.com |
-| symfony/polyfill-mbstring | 1.38.2 | MIT | via symfony/mime | https://symfony.com |
-| symfony/polyfill-php83 | 1.41.0 | MIT | via symfony/ai-store | https://symfony.com |
-| symfony/polyfill-uuid | 1.37.0 | MIT | via symfony/uid | https://symfony.com |
+| symfony/polyfill-intl-normalizer | 1.43.0 | MIT | via symfony/polyfill-intl-idn, symfony/string | https://symfony.com |
+| symfony/polyfill-mbstring | 1.43.0 | MIT | via symfony/mime | https://symfony.com |
+| symfony/polyfill-php83 | 1.43.0 | MIT | via symfony/ai-store | https://symfony.com |
+| symfony/polyfill-uuid | 1.43.0 | MIT | via symfony/uid | https://symfony.com |
 | symfony/property-access | 8.1.4 | MIT | via symfony/ai-platform | https://symfony.com |
-| symfony/property-info | 8.1.7 | MIT | via symfony/ai-platform, symfony/property-access | https://symfony.com |
-| symfony/serializer | 8.1.7 | MIT | via symfony/ai-platform | https://symfony.com |
+| symfony/property-info | 8.1.8 | MIT | via symfony/ai-platform, symfony/property-access | https://symfony.com |
+| symfony/serializer | 8.1.8 | MIT | via symfony/ai-platform | https://symfony.com |
 | symfony/service-contracts | 3.7.3 | MIT | via symfony/ai-store, symfony/http-client | https://symfony.com |
 | symfony/string | 8.1.7 | MIT | via symfony/property-info | https://symfony.com |
-| symfony/type-info | 8.1.5 | MIT | via symfony/ai-platform, symfony/property-info | https://symfony.com |
-| symfony/uid | 8.1.5 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
+| symfony/type-info | 8.1.8 | MIT | via symfony/ai-platform, symfony/property-info | https://symfony.com |
+| symfony/uid | 8.1.8 | MIT | via symfony/ai-platform, symfony/ai-store | https://symfony.com |
 | toflar/fast-set | 1.0.1 | MIT | via loupe/matcher | https://github.com/Toflar/FastSet |
 | toflar/state-set-index | 3.3.0 | MIT | via loupe/loupe | https://github.com/Toflar/state-set-index |
 | wamania/php-stemmer | 4.0.0 | MIT | via loupe/loupe | https://github.com/wamania/php-stemmer |
-| webmozart/assert | 2.4.1 | MIT | via phpdocumentor/reflection-docblock | https://github.com/webmozarts/assert |
+| webmozart/assert | 2.5.0 | MIT | via phpdocumentor/reflection-docblock | https://github.com/webmozarts/assert |
 
 Notes:
 
@@ -238,7 +241,7 @@ Notes:
 | Tool | Version | License | Purpose |
 |---|---|---|---|
 | esbuild | 0.25.12 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
-| `@tailwindcss/cli` (with `@tailwindcss/oxide`, lightningcss), © Tailwind Labs, Inc. / Devon Govett (MPL-2.0 for lightningcss) | 4.3.3 | MIT (lightningcss: MPL-2.0) | Building `kits/frameworks` Tailwind CSS (`kits/frameworks/build.mjs`) |
+| `@tailwindcss/cli` (with `@tailwindcss/oxide`, lightningcss), © Tailwind Labs, Inc. / Devon Govett (MPL-2.0 for lightningcss 1.32.0) | 4.3.3 | MIT (lightningcss: MPL-2.0) | Building `kits/frameworks` Tailwind CSS (`kits/frameworks/build.mjs`) |
 | Playwright / playwright-core, © Microsoft Corporation | 1.62.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
 | @napi-rs/canvas | 1.0.9 | MIT | Optional dependency of pdfjs-dist, not used at runtime |
 | Piper TTS (`piper-tts`, OHF-Voice/piper1-gpl), incl. espeak-ng phonemizer | 1.8.0 | GPL-3.0-or-later | Tutorial narration (section 5), run locally via pipx |
@@ -269,9 +272,10 @@ with these voice models, downloaded by `tools/tutorials/fetch-voices.sh` from ht
 |---|---|---|---|---|
 | `de_DE-eva_k-x_low` | German | MIT (rhasspy/piper-voices) | M-AILABS Speech Dataset, https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/ | Copyright (c) 2017-2019 by the original creators @ M-AILABS; redistribution and use, including commercial use, permitted with copyright notice and disclaimer retained (BSD-style) |
 | `en_US-ljspeech-high` | English (US) | MIT (rhasspy/piper-voices) | LJ Speech Dataset, https://keithito.com/LJ-Speech-Dataset/ | Public domain |
+| `en_GB-cori-high` | English (UK) | MIT (rhasspy/piper-voices) | LibriVox recordings, trained from scratch (https://brycebeattie.com/files/tts/) – also the reference voice of the trailer tooling (`tools/trailer/voice.json`) | Public domain |
 
 Credit to show if voiced videos are published again: “Narration: Piper TTS – voices ‘eva_k’ (M-AILABS Speech Dataset,
-© 2017-2019 M-AILABS) and ‘ljspeech’ (LJ Speech Dataset, public domain).”
+© 2017-2019 M-AILABS) ‘ljspeech’ (LJ Speech Dataset, public domain) and ‘cori’ (LibriVox, public domain).”
 
 M-AILABS license notice (reproduced in full, relevant only for voiced output):
 
@@ -337,8 +341,8 @@ KLXM AI features are off unless the operator configures a provider. Nothing belo
 | Whisper model weights, e.g. `ggml-large-v3-turbo-q5_0.bin` (OpenAI Whisper large-v3-turbo, ggml conversion by ggerganov/whisper.cpp) | MIT (“Whisper's code and model weights are released under the MIT License”, © 2022 OpenAI) | Downloaded by the operator to `storage/ai/models/` |
 | Ollama | MIT | Local LLM server run by the operator |
 | Ollama models (e.g. gemma3, bge-m3, nomic-embed-text) | per model (e.g. Gemma Terms of Use, MIT, Apache-2.0) | Chosen and downloaded by the operator; check each model's license |
-| Mistral, OpenAI or other OpenAI-compatible APIs | provider terms | External services configured by the operator |
-| ffmpeg | LGPL-2.1+/GPL-2.0+ depending on build | Audio extraction for transcription |
+| Mistral, OpenAI, Anthropic (Claude) or other OpenAI-compatible APIs | provider terms | External services configured by the operator |
+| ffmpeg / ffprobe | LGPL-2.1+/GPL-2.0+ depending on build | Called as external programs installed by the operator: audio extraction for transcription, video thumbnails, PDF/video tooling of the extension `video_tools` – never bundled |
 
 ## 7. Online services and data (Service)
 
@@ -354,23 +358,34 @@ KLXM AI features are off unless the operator configures a provider. Nothing belo
   explicit searches. The Nominatim Usage Policy applies (https://operations.osmfoundation.org/policies/nominatim/:
   max. 1 request per second, no bulk or systematic geocoding). Results are © OpenStreetMap contributors (ODbL).
 - **YouTube / Vimeo**: preview images are fetched server-side; players load only after the visitor clicks.
+- **Web Push services** (feature “push”, off by default): notifications are delivered through the push service of the
+  subscriber's browser (`fcm.googleapis.com`, `push.services.mozilla.com`, `push.apple.com`, `notify.windows.com`, …), using
+  the open Web Push standards with the installation's own VAPID key – no provider account. The browser vendors' terms apply.
+- **Fontsource / jsDelivr** (`api.fontsource.org`, `cdn.jsdelivr.net`): server-side download of fonts the administrator
+  installs or a kit declares (section 2.1) and of further PDF fonts; visitors never contact these hosts.
 
 ## 8. Media in demo content
 
 - **“Big Buck Bunny”** – © 2008 Blender Foundation / www.bigbuckbunny.org, licensed under Creative Commons
   Attribution 3.0 (https://creativecommons.org/licenses/by/3.0/). Used as the example YouTube video
-  (`aqz-KE-bpKQ`) in the demo content of the basis, editorial, fluid and frameworks kits (`themes/*/tools/demo-content.php`);
+  (`aqz-KE-bpKQ`) in the demo content of the basis, editorial, essenz, fluid, frameworks, glas, modern and nature kits
+  (`kits/*/tools/demo-content.php`);
   the video itself is not bundled – only a cached preview frame is stored at runtime in `public/media/embeds/`. The
   attribution is part of the demo block text and caption: “Big Buck Bunny” © 2008 Blender Foundation /
   www.bigbuckbunny.org – CC BY 3.0.
 - Demo and placeholder images, the demo PDF, app icons and the screenshots in `public/assets/docs/` are generated
-  by KLXM Studio (GD, `themes/*/tools/demo-content.php`) or recorded from it and are project-owned
-  (MIT). All names in the demo content are fictitious.
+  by KLXM Studio (GD, `kits/*/tools/demo-content.php`) or recorded from it and are project-owned
+  (MIT), with the one exception below. The sample media of the tutorial tooling (`tools/tutorials/samples/`) and the
+  fixture images (`tools/fixtures/`) are generated as well. All names in the demo content are fictitious.
+- **Photo “Beratung”** by erwinbosman (Pixabay, https://pixabay.com/users/erwinbosman/) – Pixabay Content License
+  (https://pixabay.com/service/license-summary/): free for commercial and non-commercial use, no attribution required
+  (credited anyway), not to be sold or redistributed unaltered as a stock image. Used as a demo photo of the praxis kit
+  (`kits/praxis/demo/beratung.jpg`, `kits/praxis/tools/demo-photo.php`).
 
 ## 9. Checking licenses
 
 `node tools/licenses.mjs` (or `pnpm --dir tools licenses`) reads `composer.lock` and the installed npm packages of
-`tools/` and every `themes/*` package. It separates **bundled** packages (Composer `require`, npm packages built
+`tools/` and every `kits/*` package. It separates **bundled** packages (Composer `require`, npm packages built
 into `public/`) from **build-only** tools (`esbuild`, `playwright` and their dependencies) and
 fails on bundled strong copyleft (GPL, AGPL, LGPL, EUPL, OSL, CC-BY-SA – incompatible with shipping the project under
 MIT), on non-free licenses anywhere (SSPL, `*-NC`, `*-ND`, proprietary/UNLICENSED or missing license) and on missing

@@ -1,6 +1,6 @@
 {
     "name": "klxm/studio",
-    "description": "KLXM Studio – schlankes Block-CMS mit Theme-System, REST-API und MCP-Server",
+    "description": "KLXM Studio – schlankes Block-CMS mit Kits, REST-API und MCP-Server",
     "type": "project",
     "license": "MIT",
     "homepage": "https://studio.klxm.de",
