@@ -120,7 +120,7 @@ const icon = k => `<svg class="ie-ico" viewBox="0 0 24 24" aria-hidden="true" fo
 const toolLabels = () => ({ crop: t('Zuschneiden'), rotate: t('Drehen'), flip: t('Spiegeln'), straighten: t('Ausrichten'), perspective: t('Entzerren') });
 /** Werkzeugleiste im Detail-Dialog der Mediathek (Buttons mit data-ie-tool) */
 export function editToolbar(m, ro = false) {
-  if (ro) return '';
+  if (ro || (m.kind && m.kind !== 'image')) return '';   // Videos, Audio, PDF: keine (ausgegrauten) Bildwerkzeuge
   const L = toolLabels(), why = m.editable;
   return `<div class="ie-bar" role="toolbar" aria-label="${esc(t('Bild bearbeiten'))}">
       ${EDIT_TOOLS.map(k => `<button type="button" class="ie-bar__btn" data-ie-tool="${k}"${why ? ' disabled' : ''}>${icon(k)}<span>${esc(L[k])}</span></button>`).join('')}
