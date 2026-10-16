@@ -341,7 +341,7 @@ switch ($cmd) {
         $loc = $pos[0] ?? 'en';
         $theme = app()->theme;
         $extName = '';
-        foreach ($args as $a) if (str_starts_with($a, '--extension=')) $extName = substr($a, 12);
+        $extName = Core\Cli::opt($args, 'extension') ?? $extName;
         $extDir = $extName !== '' ? (Core\Extensions::available()[$extName]['dir'] ?? null) : null;
         if ($extName !== '' && !$extDir) { fwrite(STDERR, "Erweiterung „{$extName}“ ist nicht installiert.\n"); exit(1); }
         $files = $siteTexts ? [ROOT . "/lang/site/$loc.php", $theme->path . "/lang/site/$loc.php"] : [ROOT . "/lang/$loc.php", $theme->path . "/lang/$loc.php"];
@@ -390,12 +390,7 @@ switch ($cmd) {
         break;
 
     case 'cache:clear':
-        if (in_array('--all', $args, true)) {
-            foreach (array_keys(Core\Sites::all()) as $k) {
-                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' cache:clear --site=' . escapeshellarg($k));
-            }
-            break;
-        }
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('cache:clear', [], false));
         Core\PageCache::clear();
         echo "Seiten-Cache geleert (" . site()->key . ").\n";
         break;
@@ -415,7 +410,7 @@ switch ($cmd) {
         try {
             // --content=ask|full|empty (Core\Onboarding): ohne Angabe mit Kit wie bisher sofort mit Startinhalten, ohne Kit im Willkommen-Bildschirm
             $content = '';
-            foreach ($args as $a) if (str_starts_with($a, '--content=')) $content = substr($a, 10);
+            $content = Core\Cli::opt($args, 'content') ?? $content;
             if ($content !== '' && !in_array($content, ['ask', 'full', 'empty'], true)) { fwrite(STDERR, "--content=ask|full|empty\n"); exit(1); }
             $r = Core\Sites::create($key, explode(',', $hosts), $theme, $content !== '' ? ['seed' => $content] : []);
         } catch (InvalidArgumentException $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
@@ -624,7 +619,7 @@ switch ($cmd) {
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         $name = strtolower(preg_replace('~[^a-z0-9_\-]~i', '', $pos[0] ?? ''));
         $from = $pos[1] ?? 'starter';
-        foreach ($args as $a) if (str_starts_with($a, '--from=')) $from = substr($a, 7);
+        $from = Core\Cli::opt($args, 'from') ?? $from;
         if ($name === '' || Core\Kit::exists($name) || is_dir(Core\Kit::dir($name))) { fwrite(STDERR, "Aufruf: kit:create <name> [--from=starter]. Name fehlt oder Kit existiert bereits.\n"); exit(1); }
         if (!isset(Core\Theme::available()[$from])) { fwrite(STDERR, "Vorlage „{$from}“ nicht gefunden. Installiert: " . implode(', ', array_keys(Core\Theme::available())) . "\n"); exit(1); }
         $copy = function (string $src, string $dst) use (&$copy) {
@@ -726,13 +721,7 @@ switch ($cmd) {
     case 'ai:jobs':
     case 'ai:transcribe':
         // Untertitel: KI-Transkription und Übersetzung im Hintergrund (Core\AI\MediaJobs) – eine Sperre für die ganze Installation
-        if ($cmd === 'ai:jobs' && in_array('--all', $args, true)) {
-            foreach (array_keys(Core\Sites::all()) as $k) {
-                echo "── $k\n";
-                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' ai:jobs --site=' . escapeshellarg($k));
-            }
-            break;
-        }
+        if ($cmd === 'ai:jobs' && Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('ai:jobs'));
         exit(Core\AI\MediaJobs::console($cmd, $args));
 
     case 'chat:purge':
@@ -752,7 +741,7 @@ switch ($cmd) {
     case 'docs:api':
         // PHP-API-Referenz (Core\ApiReference) als Markdown – für GitHub; in der Verwaltung live im Entwicklerhandbuch
         $out = ROOT . '/docs/php-api.md';
-        foreach ($args as $a) if (str_starts_with($a, '--out=')) $out = substr($a, 6);
+        $out = Core\Cli::opt($args, 'out') ?? $out;
         @mkdir(dirname($out), 0775, true);
         file_put_contents($out, Core\ApiReference::markdown());
         echo "PHP-API-Referenz geschrieben: " . str_replace(ROOT . '/', '', $out) . " (" . count(Core\ApiReference::classes()) . " Klassen)\n";
@@ -813,16 +802,7 @@ switch ($cmd) {
     case 'inbox:migrate':
     case 'inbox:purge':
         // --all: Befehl für jede Website der Installation ausführen
-        if (in_array('--all', $args, true)) {
-            $rest = array_values(array_filter($args, fn($a) => $a !== '--all'));
-            $fail = 0;
-            foreach (array_keys(Core\Sites::all()) as $k) {
-                echo "── $k\n";
-                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' ' . $cmd . ' ' . implode(' ', array_map('escapeshellarg', $rest)) . ' --site=' . escapeshellarg($k), $code);
-                $fail = $fail ?: $code;
-            }
-            exit($fail);
-        }
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
         if ($cmd === 'migrate') {
             // Schema-Anpassungen laufen beim Start (Database::migrate, Erweiterungen) – hier bewusst und mit Ausgabe
             $app->db->migrate();
@@ -913,7 +893,7 @@ switch ($cmd) {
         }
         // site:backup – Datenbank + Medien + Website-Konfiguration als .tar.gz unter storage/backups
         $outDir = ROOT . '/storage/backups';
-        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        $outDir = Core\Cli::opt($args, 'out') ?? $outDir;
         @mkdir($outDir, 0770, true);
         $name = site()->key . '-' . date('Ymd-His');
         $tmp = sys_get_temp_dir() . "/$name";
@@ -942,7 +922,7 @@ switch ($cmd) {
         $keys = in_array('--all', $args, true) || !array_filter($args, fn($a) => !str_starts_with($a, '--'))
             ? array_keys(Core\MediaPools::all()) : array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         $outDir = ROOT . '/storage/backups';
-        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        $outDir = Core\Cli::opt($args, 'out') ?? $outDir;
         @mkdir($outDir, 0770, true);
         foreach ($keys as $pk) {
             if (!isset(Core\MediaPools::all()[$pk])) { fwrite(STDERR, "Unbekannter Pool: $pk\n"); exit(1); }
@@ -1000,7 +980,7 @@ switch ($cmd) {
             exit($code);
         }
         $xo = ['archive' => in_array('--archive', $args, true), 'all_kits' => in_array('--all-kits', $args, true)];
-        foreach ($args as $a) if (str_starts_with($a, '--out=')) $xo['out'] = substr($a, 6);
+        if (($o = Core\Cli::opt($args, 'out')) !== null) $xo['out'] = $o;
         try {
             $r = (new Core\SiteExtract(fn(string $l) => print($l . "\n")))->run($xo);
         } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
@@ -1155,7 +1135,7 @@ switch ($cmd) {
         $keys = in_array('--all', $args, true) || !array_filter($args, fn($a) => !str_starts_with($a, '--'))
             ? array_keys(Core\Data\Shared::all()) : array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         $outDir = ROOT . '/storage/backups';
-        foreach ($args as $a) if (str_starts_with($a, '--out=')) $outDir = substr($a, 6);
+        $outDir = Core\Cli::opt($args, 'out') ?? $outDir;
         @mkdir($outDir, 0770, true);
         foreach ($keys as $sk) {
             if (!Core\Data\Shared::meta($sk)) { fwrite(STDERR, "Unbekannte geteilte Tabelle: $sk\n"); exit(1); }
@@ -1190,15 +1170,7 @@ switch ($cmd) {
 
     case 'fonts:sync':
         // Kit-Schriften (design.php → fonts → 'fontsource') installieren – je Website; --all: alle Websites der Installation
-        if (in_array('--all', $args, true)) {
-            $rest = array_values(array_filter($args, fn($a) => $a !== '--all'));
-            $fail = 0;
-            foreach (array_keys(Core\Sites::all()) as $k) {
-                passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' fonts:sync ' . implode(' ', array_map('escapeshellarg', $rest)) . ' --site=' . escapeshellarg($k), $code);
-                $fail = $fail ?: $code;
-            }
-            exit($fail);
-        }
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('fonts:sync', $args, false));
         exit(Core\Fonts::console($cmd, $args));
 
     case 'fonts:search':
@@ -1235,7 +1207,7 @@ switch ($cmd) {
     case 'svg:selftest':
         // SVG-Uploads (Core\Svg): Schadcode-Proben müssen sauber enden oder abgelehnt werden, Exporte bleiben erhalten
         $dump = null;
-        foreach ($args as $a) if (str_starts_with($a, '--dump=')) $dump = substr($a, 7);
+        $dump = Core\Cli::opt($args, 'dump') ?? $dump;
         $res = Core\Svg::selftest($dump);
         if (in_array('-v', $args, true)) echo implode("\n", $res['log']) . "\n";
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
@@ -1380,7 +1352,7 @@ switch ($cmd) {
             exit($fail);
         }
         $kitName = '';
-        foreach ($args as $a) if (str_starts_with($a, '--kit=')) $kitName = substr($a, 6);
+        $kitName = Core\Cli::opt($args, 'kit') ?? $kitName;
         $kitName = $kitName !== '' ? Core\Kit::clean($kitName) : app()->theme->name;
         if (!Core\Kit::exists($kitName)) { fwrite(STDERR, "Kit „{$kitName}“ nicht gefunden.\n"); exit(1); }
         $kit = $kitName === app()->theme->name ? app()->theme : new Core\Theme($kitName);

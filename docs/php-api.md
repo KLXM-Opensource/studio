@@ -1,6 +1,6 @@
 # PHP-API-Referenz – KLXM Studio 1.0.0
 
-Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 359 Klassen.
+Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 361 Klassen.
 Schnittstellen für Erweiterungen und Kits sind mit **API** markiert; alles andere ist intern und kann sich ändern.
 Weitere Schnittstellen: REST-API (OpenAPI unter `/api/v1/openapi.json`), MCP-Server, Kommandozeile – Entwicklerhandbuch in der Verwaltung.
 
@@ -278,6 +278,15 @@ Konstanten: `TYPES`, `FORMATS`
 php bin/console charts:selftest – Core\Charts: Prüfen der Beschreibung (Typ, Zahlen, Grenzen), Zahlen aus Eingaben, Ausgabe ohne style-Attribute und ohne ausführbares Skript (CSP), Tabelle, Quellen und Engines.
 
 - `static run(): array`
+
+### `Cli` (class, `app/Cli.php`)
+
+Kleine Helfer für die Kommandozeile (bin/console, Befehle von Kern, Kits und Erweiterungen).
+
+- `static eachSite(string $cmd, array $args = [], bool $header = true): int` – Befehl für jede Website als eigenen Prozess ausführen (bin/console {cmd} {args} --site={key}).
+- `static flag(array $args, string $name): bool` – Schalter --name gesetzt?
+- `static opt(array $args, string $name): ?string` – Wert einer Option --name=wert (letzte Angabe gilt) oder null
+- `static positional(array $args): array` – Argumente ohne „-“ am Anfang, in Reihenfolge
 
 ### `Combo` (class, `app/Combo.php`)
 
@@ -5817,4 +5826,13 @@ Kleine Bausteine für die Support-Ansichten (app/Admin/views/support/*)
 - `static status(string $s): string`
 - `static tags(string $stored, string $base = '/admin/support/wissen'): string`
 - `static when(?string $at): string` – Relatives Datum mit maschinenlesbarem <time>
+
+## Core\Testing
+
+### `Check` (class, `app/Testing/Check.php`)
+
+Vergleich für die Selbsttests (*:selftest): zählt Treffer in $ok und sammelt Abweichungen in $fails.
+
+- `static eq(int &$ok, array &$fails, string $prefix = '', bool $verbose = false): Closure`
+- `static show(mixed $v): string` – Wert lesbar für Meldungen
 

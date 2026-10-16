@@ -23,7 +23,7 @@ final class FeatureRelease
     {
         $dry = in_array('--dry-run', $args, true);
         $only = '';
-        foreach ($args as $a) if (str_starts_with($a, '--only=')) $only = substr($a, 7);
+        $only = Cli::opt($args, 'only') ?? $only;
         if (!in_array($only, ['', 'features', 'extensions'], true)) {
             $out('Aufruf: features:release [--site=key] [--dry-run] [--only=features|extensions]');
             return 1;

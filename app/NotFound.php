@@ -270,7 +270,7 @@ final class NotFound
             return $res['fails'] ? 1 : 0;
         }
         $lang = Lang::default();
-        foreach ($args as $a) if (str_starts_with($a, '--lang=')) $lang = substr($a, 7);
+        $lang = Cli::opt($args, 'lang') ?? $lang;
         if (!Lang::valid($lang)) { fwrite(STDERR, "Unbekannte Sprache: $lang\n"); return 1; }
         $had = self::exact($lang) !== null;
         $p = self::create($lang);

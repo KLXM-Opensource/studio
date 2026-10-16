@@ -340,7 +340,7 @@ final class VideoThumbs
         if (!$video && !$pdf) return 0;
         $force = in_array('--all', $args, true);
         $pool = null;
-        foreach ($args as $a) if (str_starts_with($a, '--pool=')) $pool = substr($a, 7);
+        $pool = Cli::opt($args, 'pool') ?? $pool;
         if ($pool !== null) {
             if (!isset(MediaPools::all()[$pool])) { fwrite(STDERR, "Unbekannter Pool: $pool\n"); return 1; }
             Media::usePool($pool);
