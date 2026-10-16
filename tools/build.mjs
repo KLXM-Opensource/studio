@@ -79,9 +79,9 @@ async function vendors() {
   copy(nm('editorjs-drag-drop/LICENSE'), path.join(ed, 'LICENSE-drag-drop.txt'));
   bundledLicenses('@editorjs/editorjs', path.join(ed, 'THIRD-PARTY-LICENSES.txt'));
 
-  // Lato – Schrift der Verwaltung (Core; Themes bringen ihre eigene Schrift mit)
+  // Lato – Schrift der Verwaltung (Core; Kits bringen ihre eigene Schrift mit): Light, Regular, Bold, Black – je normal und kursiv
   const lato = path.join(PUB, 'assets/fonts');
-  for (const w of [400, 700]) {
+  for (const w of [300, 400, 700, 900]) {
     for (const f of [`lato-latin-${w}-normal.woff2`, `lato-latin-ext-${w}-normal.woff2`, `lato-latin-${w}-italic.woff2`]) {
       copy(nm('@fontsource/lato/files', f), path.join(lato, f));
     }

@@ -1347,6 +1347,12 @@ body.adm:has(.adm-env){padding-bottom:26px}
 @font-face{font-family:Lato;font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:Lato;font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:Lato;font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/lato-latin-700-italic.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:300;font-display:swap;src:url(../fonts/lato-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:300;font-display:swap;src:url(../fonts/lato-latin-ext-300-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Lato;font-style:italic;font-weight:300;font-display:swap;src:url(../fonts/lato-latin-300-italic.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:900;font-display:swap;src:url(../fonts/lato-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:Lato;font-style:normal;font-weight:900;font-display:swap;src:url(../fonts/lato-latin-ext-900-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Lato;font-style:italic;font-weight:900;font-display:swap;src:url(../fonts/lato-latin-900-italic.woff2) format("woff2")}
 :root{--klxm-navy:#314164;--klxm-mist:#E5E7EF;--klxm-sand:#EDE9E3;--klxm-gray:#6F6F6E;
   --adm-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
   --adm-a:#314164;--adm-a-d:#243150;--adm-a-ink:#314164;--adm-accent-bg:#E3E8F2;

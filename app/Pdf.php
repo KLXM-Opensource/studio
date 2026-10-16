@@ -16,14 +16,29 @@ namespace Core;
  * Wahl per Konfiguration 'pdf' => ['engine' => 'name']. Ohne Engine: Pdf::available() === false (Aufrufer zeigen dann z. B. „Drucken“).
  *
  * Sicherheit (dompdf): keine Dateien aus dem Netz (isRemoteEnabled aus), kein PHP im HTML, Zugriff nur auf den eigenen Ordner
- * (chroot) – Bilder als data:-URL einbetten. Schriften: DejaVu Sans (in dompdf) oder eine freie Schrift von Fontsource (OFL),
- * einmal je Installation als TTF unter storage/pdf-fonts/ geladen (Pdf::font('lato')), danach ohne Netz.
+ * (chroot) – Bilder als data:-URL einbetten. Schriften: Standard Lato (OFL, im Kern unter resources/fonts/pdf – Light, Regular, Bold,
+ * Black, je kursiv; ohne Netz), sonst eine freie Schrift von Fontsource, einmal je Installation als TTF unter storage/pdf-fonts/
+ * geladen (Pdf::font('inter')), danach ohne Netz. 'font' => '' = DejaVu Sans (in dompdf).
  */
 final class Pdf
 {
     /** @var array<string, callable> */
     private static array $engines = [];
     private const FACES = [['400', 'normal'], ['700', 'normal'], ['400', 'italic'], ['700', 'italic']];
+    /** Im Kern mitgeliefert (resources/fonts/pdf/{id}-{stärke}-{stil}.ttf) – Lato in allen Stärken */
+    public const BUNDLED = ['lato' => [300, 900]];
+
+    /** Schnitte: Standard Normal/Fett (+ kursiv); weitere Stärken z. B. [300, 900] → je normal und kursiv */
+    private static function faces(array $weights = []): array
+    {
+        $out = self::FACES;
+        foreach ($weights as $w) {
+            $w = (string) (int) $w;
+            if ((int) $w < 100 || (int) $w > 900 || in_array($w, ['400', '700'], true)) continue;
+            $out[] = [$w, 'normal']; $out[] = [$w, 'italic'];
+        }
+        return $out;
+    }
 
     public static function registerEngine(string $name, callable $fn): void
     {
@@ -46,8 +61,10 @@ final class Pdf
     }
 
     /**
-     * HTML → PDF-Bytes. $opt: paper (A4), orientation (portrait|landscape), font (Fontsource-Kennung, z. B. 'lato'; leer = DejaVu Sans),
-     * display (zweite Schrift für Überschriften, CSS-Familie „PdfDisplay“, z. B. 'source-serif-4'), font_height_ratio (dompdf),
+     * HTML → PDF-Bytes. $opt: paper (A4), orientation (portrait|landscape), font (Standard 'lato' aus dem Kern mit 300/400/700/900;
+     * andere Fontsource-Kennung, z. B. 'inter'; '' = DejaVu Sans),
+     * weights (weitere Stärken der Schrift, z. B. [300, 900] für Light und Black), display (zweite Schrift für Überschriften, CSS-Familie
+     * „PdfDisplay“, z. B. 'source-serif-4'), font_height_ratio (dompdf),
      * title, dir (Ordner für Hilfsdateien/chroot, Standard storage/pdf), footer (Text unten links), pages (true = „Seite x von y“ unten rechts).
      */
     public static function render(string $html, array $opt = []): string
@@ -62,12 +79,13 @@ final class Pdf
         $o->set('defaultFont', 'DejaVu Sans');
         $o->set('tempDir', sys_get_temp_dir());
         $o->set('fontCache', $dir);
-        $o->setChroot([$dir, self::fontDir()]);
-        $fontCss = (!empty($opt['font']) ? self::fontCss((string) $opt['font']) : '')
+        $o->setChroot([$dir, self::fontDir(), ROOT . '/resources/fonts/pdf']);
+        $font = (string) ($opt['font'] ?? 'lato');
+        $fontCss = ($font !== '' ? self::fontCss($font, 'PdfFont', array_merge(self::BUNDLED[$font] ?? [], (array) ($opt['weights'] ?? []))) : '')
             . (!empty($opt['display']) ? self::fontCss((string) $opt['display'], 'PdfDisplay') : '');
         // Fontsource-Dateien tragen eine große Bounding Box (alle Akzente); dompdf nimmt sie als Mindesthöhe der Zeile – so gilt die
         // Zeilenhöhe aus dem CSS (Grundwert 1.3 im body, unten). Überschreibbar mit font_height_ratio.
-        $o->set('fontHeightRatio', (float) ($opt['font_height_ratio'] ?? ($fontCss !== '' ? 0.6 : 1.1)));
+        $o->set('fontHeightRatio', (float) ($opt['font_height_ratio'] ?? ($fontCss !== '' ? 0.85 : 1.1)));
         $pdf = new \Dompdf\Dompdf($o);
         // Schriften vor dem eigenen CSS des Aufrufers (das Grundwerte wie die Zeilenhöhe überschreiben darf)
         if ($fontCss !== '') $html = preg_match('~<head\b[^>]*>~i', $html) ? (string) preg_replace('~<head\b[^>]*>~i', '$0<style>' . str_replace(['\\', '$'], ['\\\\', '\\$'], $fontCss) . '</style>', $html, 1) : '<style>' . $fontCss . '</style>' . $html;
@@ -116,14 +134,15 @@ final class Pdf
 
     private static function fontFile(string $id, string $w, string $st): string
     {
-        return self::fontDir() . "/$id-$w-$st.ttf";
+        $bundled = ROOT . "/resources/fonts/pdf/$id-$w-$st.ttf";
+        return is_file($bundled) ? $bundled : self::fontDir() . "/$id-$w-$st.ttf";
     }
 
     /** Schrift laden (falls nötig): Normal, Fett, Kursiv, Fett kursiv als TTF → Fehlertext oder null */
-    public static function font(string $id): ?string
+    public static function font(string $id, array $weights = []): ?string
     {
         if (!preg_match('~^[a-z0-9][a-z0-9-]{0,63}$~', $id)) return __('Ungültige Schrift.');
-        foreach (self::FACES as [$w, $st]) {
+        foreach (self::faces($weights) as [$w, $st]) {
             $f = self::fontFile($id, $w, $st);
             if (is_file($f)) continue;
             $bin = self::download("https://cdn.jsdelivr.net/fontsource/fonts/$id@latest/latin-$w-$st.ttf");
@@ -152,12 +171,14 @@ final class Pdf
      * @font-face für dompdf; Familie „PdfFont“ (auch body-Schrift) bzw. eine eigene, z. B. „PdfDisplay“ für Überschriften.
      * Leer, wenn die Schrift fehlt und nicht geladen werden kann (dann gilt die nächste Schrift der Liste bzw. DejaVu Sans).
      */
-    public static function fontCss(string $id, string $family = 'PdfFont'): string
+    public static function fontCss(string $id, string $family = 'PdfFont', array $weights = []): string
     {
         if (!preg_match('~^[A-Za-z][A-Za-z0-9]{0,30}$~', $family)) return '';
-        if (!is_file(self::fontFile($id, '400', 'normal')) && self::font($id) !== null) return '';
+        $faces = self::faces($weights);
+        $missing = array_filter($faces, fn($f) => !is_file(self::fontFile($id, $f[0], $f[1])));
+        if ($missing && self::font($id, $weights) !== null) return '';
         $out = '';
-        foreach (self::FACES as [$w, $st]) {
+        foreach ($faces as [$w, $st]) {
             $f = self::fontFile($id, $w, $st);
             if (is_file($f)) $out .= '@font-face{font-family:"' . $family . '";font-weight:' . $w . ';font-style:' . $st . ';src:url("' . $f . '") format("truetype")}';
         }
