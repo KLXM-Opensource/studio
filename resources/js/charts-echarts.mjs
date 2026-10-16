@@ -1,7 +1,7 @@
 /**
  * Engine „echarts“ für Core\Charts – die einzige Datei, die ECharts kennt (Apache ECharts, Apache-2.0, gebündelt und selbst
  * gehostet, nur Linie/Balken/Torte, Canvas). Vertrag jeder Engine:
- *   export function render(el, spec, theme) → { update(theme), resize(), dispose(), image()? }
+ *   export function render(el, spec, theme) → { update(theme, {animation, print}?), resize(), dispose(), image()? }
  * spec = Core\Charts::normalize() (type, labels, series[{name, data}], title, description, format, unit, stacked, height, locale)
  * theme = { colors[], ink, muted, grid, bg, font, dark } aus CSS-Variablen (resources/js/charts.mjs).
  * Tooltip: eigenes HTML nur mit Klassen (keine style-Attribute – strenge CSP der Website), Farbpunkt über .cms-chart-c{0…7}.
@@ -29,7 +29,7 @@ function formatter(spec) {
   };
 }
 
-function option(spec, t) {
+function option(spec, t, o = {}) {
   const fmt = formatter(spec);
   const pie = spec.type === 'pie' || spec.type === 'donut';
   const horizontal = spec.type === 'hbar';
@@ -51,7 +51,10 @@ function option(spec, t) {
     legend: many ? { show: true, type: 'scroll', top: 0, left: 0, right: 0, pageIconColor: t.muted, pageIconInactiveColor: t.grid, pageTextStyle: text, icon: 'roundRect', itemWidth: 10, itemHeight: 10, itemGap: 16, textStyle: { ...text, color: t.ink } } : { show: false } };
 
   if (pie) {
-    return { ...base, series: [{ type: 'pie', radius: spec.type === 'donut' ? ['50%', '78%'] : ['0%', '78%'], center: ['50%', '57%'],
+    // Bild für Druck/PDF (o.print): Legende vollständig daneben statt blätternd darüber
+    const side = o.print && many;
+    return { ...base, legend: side ? { ...base.legend, type: 'plain', orient: 'vertical', left: 0, top: 'middle', right: 'auto' } : base.legend,
+      series: [{ type: 'pie', radius: spec.type === 'donut' ? (side ? ['42%', '72%'] : ['50%', '78%']) : ['0%', side ? '72%' : '78%'], center: side ? ['72%', '50%'] : ['50%', '57%'],
       itemStyle: { borderColor: t.bg, borderWidth: 2, borderRadius: 4 }, label: { show: false }, labelLine: { show: false },   // Zuordnung über Legende + Tooltip (keine abgeschnittenen Beschriftungen)
       data: spec.labels.map((l, i) => ({ name: l, value: spec.series[0]?.data[i] ?? 0 })) }] };
   }
@@ -79,7 +82,7 @@ export function render(el, spec, t) {
   const chart = init(el, null, { renderer: 'canvas' });
   chart.setOption(option(spec, t));
   return {
-    update: (nt) => chart.setOption(option(spec, nt), true),
+    update: (nt, o = {}) => chart.setOption(o.animation === false ? { ...option(spec, nt, o), animation: false } : option(spec, nt, o), true),
     resize: () => chart.resize(),
     image: () => chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: 'transparent' }),   // Druck (Papier statt Kartenfarbe)
     dispose: () => chart.dispose(),

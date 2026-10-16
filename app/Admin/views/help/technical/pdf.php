@@ -8,7 +8,7 @@
   <table class="doc-table">
     <tr><th>Option</th><th>Bedeutung</th></tr>
     <tr><td><code>paper</code>, <code>orientation</code></td><td>Papierformat (Standard <code>A4</code>) und <code>portrait</code> | <code>landscape</code></td></tr>
-    <tr><td><code>font</code></td><td>Kennung einer freien Schrift bei Fontsource (OFL), z. B. <code>lato</code>, <code>inter</code>, <code>source-serif-4</code>. Einmal je Installation als TTF nach <code>storage/pdf-fonts/</code> geladen (Normal, Fett, Kursiv), danach ohne Netz; im CSS als Familie <code>PdfFont</code>. Leer: DejaVu Sans.</td></tr>
+    <tr><td><code>font</code></td><td>Kennung einer freien Schrift bei Fontsource (OFL), z. B. <code>lato</code>, <code>inter</code>, <code>source-serif-4</code>. Einmal je Installation als TTF nach <code>storage/pdf-fonts/</code> geladen (Normal, Fett, Kursiv), danach ohne Netz; im CSS als Familie <code>PdfFont</code>. Leer: DejaVu Sans. <code>display</code>: zweite Schrift für Überschriften (Familie <code>PdfDisplay</code>), z. B. <code>source-serif-4</code>.</td></tr>
     <tr><td><code>title</code></td><td>Titel in den Dokumenteigenschaften</td></tr>
     <tr><td><code>pages</code>, <code>footer</code></td><td>„Seite x von y“ unten rechts bzw. Text unten links auf jeder Seite</td></tr>
     <tr><td><code>dir</code></td><td>Ordner für Hilfsdateien (Standard <code>{storage}/pdf</code>); nur dieser und der Schriftordner sind lesbar (chroot)</td></tr>
@@ -17,5 +17,6 @@
     <li><b>Sicherheit:</b> keine Dateien aus dem Netz (<code>isRemoteEnabled</code> aus), kein PHP im HTML. Bilder und Diagramme als <code>data:</code>-URL einbetten (Diagramme: PNG aus <code>cmsCharts</code> bzw. <code>image()</code> der Engine).</li>
     <li><b>Installation:</b> <code>composer require klxm/studio-pdf</code> im Kern oder den Ordner nach <code>extensions/pdf</code> und dort <code>composer install --no-dev</code>. Prüfen: Erweiterung einschalten und <code>php bin/console pdf:selftest</code>.</li>
     <li><b>Eigene Engine</b> (z. B. ein Druckdienst oder Chromium): <code>Pdf::registerEngine('name', fn(string $html, array $opt): string =&gt; …)</code> und Konfiguration <code>'pdf' =&gt; ['engine' =&gt; 'name']</code>. Aufrufer ändern sich nicht.</li>
+    <li><b>Zeilenhöhe:</b> Mit einer Fontsource-Schrift gilt die Zeilenhöhe aus dem CSS (Grundwert <code>1.3</code>; eigene Werte am besten in <code>pt</code>). Hintergrund: Die Schriftdateien tragen eine große Bounding Box, die dompdf sonst als Mindesthöhe nimmt – der Kern setzt deshalb <code>fontHeightRatio</code> 0,6 (Option <code>font_height_ratio</code>).</li>
     <li>dompdf versteht CSS 2.1 mit Teilen von CSS 3 – kein Flexbox/Grid. Für Spalten Tabellen oder <code>float</code> verwenden; Seitenumbrüche mit <code>page-break-before</code>/<code>-inside</code>.</li>
   </ul>

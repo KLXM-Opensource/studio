@@ -47,6 +47,7 @@ final class Pdf
 
     /**
      * HTML → PDF-Bytes. $opt: paper (A4), orientation (portrait|landscape), font (Fontsource-Kennung, z. B. 'lato'; leer = DejaVu Sans),
+     * display (zweite Schrift für Überschriften, CSS-Familie „PdfDisplay“, z. B. 'source-serif-4'), font_height_ratio (dompdf),
      * title, dir (Ordner für Hilfsdateien/chroot, Standard storage/pdf), footer (Text unten links), pages (true = „Seite x von y“ unten rechts).
      */
     public static function render(string $html, array $opt = []): string
@@ -62,10 +63,14 @@ final class Pdf
         $o->set('tempDir', sys_get_temp_dir());
         $o->set('fontCache', $dir);
         $o->setChroot([$dir, self::fontDir()]);
+        $fontCss = (!empty($opt['font']) ? self::fontCss((string) $opt['font']) : '')
+            . (!empty($opt['display']) ? self::fontCss((string) $opt['display'], 'PdfDisplay') : '');
+        // Fontsource-Dateien tragen eine große Bounding Box (alle Akzente); dompdf nimmt sie als Mindesthöhe der Zeile – so gilt die
+        // Zeilenhöhe aus dem CSS (Grundwert 1.3 im body, unten). Überschreibbar mit font_height_ratio.
+        $o->set('fontHeightRatio', (float) ($opt['font_height_ratio'] ?? ($fontCss !== '' ? 0.6 : 1.1)));
         $pdf = new \Dompdf\Dompdf($o);
-        $fontCss = !empty($opt['font']) ? self::fontCss((string) $opt['font']) : '';
-        if ($fontCss !== '' && str_contains($html, '</head>')) $html = str_replace('</head>', '<style>' . $fontCss . '</style></head>', $html);
-        elseif ($fontCss !== '') $html = '<style>' . $fontCss . '</style>' . $html;
+        // Schriften vor dem eigenen CSS des Aufrufers (das Grundwerte wie die Zeilenhöhe überschreiben darf)
+        if ($fontCss !== '') $html = preg_match('~<head\b[^>]*>~i', $html) ? (string) preg_replace('~<head\b[^>]*>~i', '$0<style>' . str_replace(['\\', '$'], ['\\\\', '\\$'], $fontCss) . '</style>', $html, 1) : '<style>' . $fontCss . '</style>' . $html;
         $pdf->loadHtml($html, 'UTF-8');
         $pdf->setPaper((string) ($opt['paper'] ?? 'A4'), (string) ($opt['orientation'] ?? 'portrait'));
         if (!empty($opt['title'])) $pdf->addInfo('Title', (string) $opt['title']);
@@ -143,15 +148,19 @@ final class Pdf
         return in_array(substr($bin, 0, 4), ["\x00\x01\x00\x00", 'true', 'OTTO'], true) ? $bin : null;
     }
 
-    /** @font-face für dompdf (Familie „PdfFont“) und body-Schrift; leer, wenn die Schrift fehlt und nicht geladen werden kann */
-    public static function fontCss(string $id): string
+    /**
+     * @font-face für dompdf; Familie „PdfFont“ (auch body-Schrift) bzw. eine eigene, z. B. „PdfDisplay“ für Überschriften.
+     * Leer, wenn die Schrift fehlt und nicht geladen werden kann (dann gilt die nächste Schrift der Liste bzw. DejaVu Sans).
+     */
+    public static function fontCss(string $id, string $family = 'PdfFont'): string
     {
+        if (!preg_match('~^[A-Za-z][A-Za-z0-9]{0,30}$~', $family)) return '';
         if (!is_file(self::fontFile($id, '400', 'normal')) && self::font($id) !== null) return '';
         $out = '';
         foreach (self::FACES as [$w, $st]) {
             $f = self::fontFile($id, $w, $st);
-            if (is_file($f)) $out .= '@font-face{font-family:"PdfFont";font-weight:' . $w . ';font-style:' . $st . ';src:url("' . $f . '") format("truetype")}';
+            if (is_file($f)) $out .= '@font-face{font-family:"' . $family . '";font-weight:' . $w . ';font-style:' . $st . ';src:url("' . $f . '") format("truetype")}';
         }
-        return $out . 'body{font-family:"PdfFont","DejaVu Sans",sans-serif}';
+        return $out . ($family === 'PdfFont' ? 'body{font-family:"PdfFont","DejaVu Sans",sans-serif;line-height:1.3}' : '');
     }
 }

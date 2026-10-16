@@ -8,6 +8,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### PDF erzeugen (`Core\Pdf`)
 - HTML → PDF für Kern und Erweiterungen (`Pdf::render()`, `Pdf::response()`), mit austauschbarer Engine wie bei den Diagrammen. Freie Schriften von Fontsource werden einmal je Installation geladen, Seitenzahlen und Fußzeile auf Wunsch; keine Dateien aus dem Netz, kein PHP im HTML.
+- Zweite Schrift für Überschriften (`display`, Familie `PdfDisplay`); die Zeilenhöhe aus dem CSS gilt auch mit Fontsource-Schriften. Diagramme fürs PDF: `cmsCharts.snapshot()` liefert ein helles PNG (auch im Dunkelmodus, ohne Animation, Legende vollständig).
 - dompdf (LGPL-2.1) bleibt außerhalb des MIT-Kerns: Paket `klxm/studio-pdf` (Erweiterung „pdf“) – installiert genügt. Ohne Engine meldet `Pdf::available()` `false`.
 
 ### Geplante Aufgaben – ein Cronjob für die Installation (`Core\Cron`)
