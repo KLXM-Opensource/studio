@@ -52,7 +52,7 @@ $action = url(($mode === 'cancel' ? '/admin/konto/email-abbrechen/' : '/admin/ko
     <form method="post" action="<?= e($action) ?>"><?= csrf_field() ?>
       <button class="adm-btn adm-btn--primary adm-btn--block" type="submit"><?= e(__('Adresse bestätigen')) ?></button>
     </form>
-    <?php if ($expires): ?><p class="inv-note"><?= e(__('Der Link gilt bis {date} und nur einmal. Danach melden Sie sich mit der neuen Adresse an; andere Sitzungen enden.', ['date' => date('d.m.Y, H:i', $expires)])) ?></p><?php endif; ?>
+    <?php if ($expires): ?><p class="inv-note"><?= e(__('Der Link gilt bis {date} und nur einmal. Danach melden Sie sich mit der neuen Adresse an; andere Sitzungen enden.', ['date' => \Core\Format::admin()->datetime($expires)])) ?></p><?php endif; ?>
 
     <?php else: ?>
     <h1 id="acc-link-h"><?= e(__('Das war ich nicht')) ?></h1>

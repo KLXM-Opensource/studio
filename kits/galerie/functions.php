@@ -651,7 +651,7 @@ function galerie_dates(array $e, ?string $style = null): string
     }
     if (!$en || date('Y-m-d', $en) === date('Y-m-d', $s)) return $f->date($s, $style === 'numeric' ? 'short' : 'long');
     if ($style === 'numeric') {
-        $first = date('Y', $s) === date('Y', $en) && $de ? date('d.m.', $s) : $f->date($s);
+        $first = date('Y', $s) === date('Y', $en) && $de ? fmt()->date($s, 'dm') : $f->date($s);
         return $first . ' – ' . $f->date($en);
     }
     if (date('Y-m', $s) === date('Y-m', $en)) return date('j', $s) . ($de ? '.' : '') . ' – ' . $f->date($en, 'long');

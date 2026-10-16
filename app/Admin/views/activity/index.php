@@ -89,7 +89,7 @@ $lastDay = null;
         $view = Activity::viewUrl($r);
         $kind = $r['type'] === 'entry' ? $tableName($r['tbl']) : Activity::typeLabel($r['type']); ?>
       <tr>
-        <td class="al-time"><time datetime="<?= e(date('c', (int) strtotime($r['created_at']))) ?>" title="<?= e(\Core\Format::admin()->datetime((int) strtotime($r['created_at']))) ?>"><?= e($byDay ? date('H:i', (int) strtotime($r['created_at'])) : \Core\Format::admin()->datetime((int) strtotime($r['created_at']))) ?></time></td>
+        <td class="al-time"><time datetime="<?= e(date('c', (int) strtotime($r['created_at']))) ?>" title="<?= e(\Core\Format::admin()->datetime((int) strtotime($r['created_at']))) ?>"><?= e($byDay ? \Core\Format::admin()->time((int) strtotime($r['created_at'])) : \Core\Format::admin()->datetime((int) strtotime($r['created_at']))) ?></time></td>
         <td class="al-user"><?php if ($u): ?><?= \Core\Avatar::html($u, 'adm-ava al-ava') ?> <span><?= e((string) ($r['user_name'] ?: $u['name'] ?: $u['email'])) ?></span><?php else: ?><span class="adm-muted"><?= e((string) ($r['user_name'] ?: __('System'))) ?></span><?php endif; ?></td>
         <td><span class="al-act al-act--<?= e($tone($r['action'])) ?>"><?= e(Activity::actionLabel($r['action'])) ?></span><?php if ((int) $r['n'] > 1): ?> <small class="adm-muted" title="<?= e(__('Mehrfach gespeichert innerhalb von 15 Minuten')) ?>">×<?= (int) $r['n'] ?></small><?php endif; ?></td>
         <td class="al-kind"><?= icon($typeIcon[$r['type']] ?? 'file') ?> <span><?= e($kind) ?></span></td>

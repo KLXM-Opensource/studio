@@ -298,7 +298,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
     <ol class="src-log">
       <?php foreach ($logs as $l): $det = json_decode((string) $l['details'], true) ?: []; ?>
       <li class="<?= $l['ok'] ? ($l['failed'] ? 'is-warn' : 'is-ok') : 'is-err' ?>">
-        <span class="src-log__head"><?= icon($l['ok'] ? ($l['failed'] ? 'warning' : 'check-circle') : 'warning') ?> <b><?= e(date('d.m. H:i', strtotime((string) $l['started_at']))) ?></b>
+        <span class="src-log__head"><?= icon($l['ok'] ? ($l['failed'] ? 'warning' : 'check-circle') : 'warning') ?> <b><?= e(\Core\Format::admin()->datetime(strtotime((string) $l['started_at']), 'dm')) ?></b>
           <small class="adm-muted"><?= e(match ($l['via']) { 'manual' => __('von Hand'), 'cron' => __('Cron'), 'auto' => __('Zeitplan'), 'upload' => __('Upload'), default => (string) $l['via'] }) ?> · <?= (int) $l['ms'] ?> ms</small></span>
         <span class="src-log__msg"><?= e((string) $l['message']) ?></span>
         <?php if ($det): ?><details><summary><?= e(__('Hinweise ({n})', ['n' => count($det)])) ?></summary><ul><?php foreach ($det as $d): ?><li><?= e((string) $d) ?></li><?php endforeach; ?></ul></details><?php endif; ?>

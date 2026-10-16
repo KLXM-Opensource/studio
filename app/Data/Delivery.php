@@ -172,8 +172,8 @@ final class Delivery
             $c = "-----BEGIN CERTIFICATE-----\n" . chunk_split(base64_encode($der), 64, "\n") . '-----END CERTIFICATE-----';
             $i = self::certInfo($c);
             if (!$i) return ['', __('Das Zertifikat lässt sich nicht lesen (kein gültiges X.509-Zertifikat).')];
-            if ($i['expired']) return ['', __('Das Zertifikat „{name}“ ist am {date} abgelaufen.', ['name' => $i['name'], 'date' => date('d.m.Y', $i['valid_to'])])];
-            if ($i['not_yet']) return ['', __('Das Zertifikat „{name}“ gilt erst ab {date}.', ['name' => $i['name'], 'date' => date('d.m.Y', $i['valid_from'])])];
+            if ($i['expired']) return ['', __('Das Zertifikat „{name}“ ist am {date} abgelaufen.', ['name' => $i['name'], 'date' => \Core\Format::admin()->date($i['valid_to'])])];
+            if ($i['not_yet']) return ['', __('Das Zertifikat „{name}“ gilt erst ab {date}.', ['name' => $i['name'], 'date' => \Core\Format::admin()->date($i['valid_from'])])];
             if (!$i['usable']) return ['', __('Das Zertifikat „{name}“ eignet sich nicht zum Verschlüsseln ({why}).', ['name' => $i['name'], 'why' => $i['why']])];
             $out[] = $c;
         }
@@ -279,7 +279,7 @@ final class Delivery
         } else {
             foreach (self::certs($c['smime']) as $i) {
                 if (!$i || $i['expired']) $out[] = ['level' => 'error', 'text' => __('S/MIME-Zertifikat ungültig oder abgelaufen – es werden keine Inhalte per E-Mail versendet.')];
-                elseif ($i['days_left'] < 30) $out[] = ['level' => 'warn', 'text' => __('S/MIME-Zertifikat „{name}“ läuft am {date} ab – bitte rechtzeitig ein neues hinterlegen.', ['name' => $i['name'], 'date' => date('d.m.Y', $i['valid_to'])])];
+                elseif ($i['days_left'] < 30) $out[] = ['level' => 'warn', 'text' => __('S/MIME-Zertifikat „{name}“ läuft am {date} ab – bitte rechtzeitig ein neues hinterlegen.', ['name' => $i['name'], 'date' => \Core\Format::admin()->date($i['valid_to'])])];
             }
         }
         if (!FormCrypto::ready()) {
@@ -368,7 +368,7 @@ final class Delivery
         $form = Inbox::text($t, 'title', $lang) ?: (string) $t['name'];
         $ts = strtotime($at) ?: time();
         $vars = [
-            '{form}' => $form, '{table}' => (string) $t['name'], '{ref}' => $ref, '{date}' => date('d.m.Y', $ts), '{time}' => date('H:i', $ts),
+            '{form}' => $form, '{table}' => (string) $t['name'], '{ref}' => $ref, '{date}' => \Core\Format::admin()->date($ts), '{time}' => \Core\Format::admin()->time($ts),
         ];
         foreach ($rows as $r) {
             if (!isset($r['table'])) $vars['{' . $r['name'] . '}'] = mb_substr(trim((string) preg_replace('~\s+~', ' ', (string) $r['value'])), 0, 60);
@@ -385,7 +385,7 @@ final class Delivery
         $meta = [
             __('Formular') => $form,
             __('Vorgangsnummer') => $ref,
-            __('Eingegangen') => date('d.m.Y H:i', $ts) . ' ' . __('Uhr'),
+            __('Eingegangen') => \Core\Format::admin()->datetime($ts) . ' ' . __('Uhr'),
             __('Website') => site_url(),
             __('Zustellung') => self::modeLabel($mode) . ($c['smime'] !== '' ? ' · ' . __('S/MIME-verschlüsselt') : ''),
         ];

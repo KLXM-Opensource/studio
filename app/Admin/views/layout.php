@@ -264,7 +264,7 @@ if ($user && ($req = app()->request)) {
   <div class="adm-imp" role="status">
     <span class="adm-imp__ico" aria-hidden="true"><?= icon('user-circle') ?></span>
     <span class="adm-imp__t"><?= e($imp['mode'] === 'role' ? __('Sie sehen die Verwaltung mit den Rechten der Rolle „{name}“.', ['name' => $imp['label']]) : __('Sie arbeiten als {name} – Änderungen werden unter diesem Namen gespeichert.', ['name' => $imp['label']])) ?>
-      <small><?= e(__('Bis {time} · Konto, Benutzer und Grundeinstellungen sind gesperrt.', ['time' => date('H:i', (int) $imp['until'])])) ?></small></span>
+      <small><?= e(__('Bis {time} · Konto, Benutzer und Grundeinstellungen sind gesperrt.', ['time' => \Core\Format::admin()->time((int) $imp['until'])])) ?></small></span>
     <form method="post" action="<?= e(url('/admin/impersonate/stop')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small"><?= e(__('Zurück zu meinem Konto')) ?></button></form>
   </div>
   <?php endif; ?>

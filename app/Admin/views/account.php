@@ -48,7 +48,7 @@ ob_start();
   $acTotp = (int) ($acRow['totp_enabled'] ?? 0);
   $acRecent = \Core\Mfa::recentAuth();
   $acNeedPk = !$acHasPw && !$acRecent;   // Konto ohne Passwort: vorher mit Passkey bestätigen
-  $acDate = fn(int $ts) => date('d.m.Y, H:i', $ts); ?>
+  $acDate = fn(int $ts) => \Core\Format::admin()->datetime($ts); ?>
 <section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
   <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?></h2>
   <div class="set-list acc-box">

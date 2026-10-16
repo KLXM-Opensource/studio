@@ -591,7 +591,7 @@ final class DataForms
         $name = (string) (setting((string) project('name_setting', 'org_name')) ?: site()->label());
         $subject = $r['subject'] !== '' ? lt($r['subject']) : lt('Eingangsbestätigung: {name}', ['name' => (string) ($t['singular'] ?? $t['name'])]);
         $body = lt('Guten Tag,') . "\n\n" . ($r['text'] !== '' ? lt($r['text']) : lt('wir bestätigen den Eingang Ihrer Angaben.')) . "\n\n"
-            . lt('Eingegangen am {date} um {time} Uhr.', ['date' => date_local(time(), 'short'), 'time' => date('H:i')]) . "\n";
+            . lt('Eingegangen am {date} um {time} Uhr.', ['date' => date_local(time(), 'short'), 'time' => fmt()->time(time())]) . "\n";
         if ($r['include']) {
             $lines = [];
             foreach ($fields as $f) {

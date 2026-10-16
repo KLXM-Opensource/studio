@@ -78,7 +78,7 @@ final class FormFieldsController extends AdminController
             'ok' => !$errors, 'saved' => $saved, 'html' => $html,
             'error' => $errors ? __('Bitte prüfen Sie die markierten Angaben – es wurde nichts gespeichert.') : null,
             'title' => __('Felder bearbeiten'), 'table' => $t['name'], 'handle' => $t['handle'], 'icon' => $t['icon'], 'ico' => \Core\Icons::resolve((string) $t['icon']),
-            'saved_at' => date('H:i'),
+            'saved_at' => \Core\Format::admin()->time(time()),
             'shadowCss' => [asset('css/admin.shadow.css'), asset('css/entry-panel.css')],
             'uiCss' => ['admin' => asset('css/admin.shadow.css'), 'ui' => asset('css/editor.shadow.css')],
             'appearance' => in_array(app()->auth->user()['appearance'] ?? '', ['light', 'dark'], true) ? app()->auth->user()['appearance'] : '',

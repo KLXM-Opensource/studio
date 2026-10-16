@@ -44,7 +44,7 @@ $fmt = \Core\Sources\Sources::FORMATS;
           <br><span class="adm-muted"><?= e($fmt[$s['format']] ?? $s['format']) ?> · <?= e(\Core\Sources\Sources::schedules()[$s['options']['schedule']] ?? '') ?><?php if ($s['url'] !== ''): ?> · <?= e(mb_strimwidth((string) preg_replace('~^https?://~', '', $s['url']), 0, 48, '…')) ?><?php endif; ?></span></td>
         <td><?php if ($s['table']): ?><a href="<?= e(url('/admin/data/' . $s['table']['handle'])) ?>"><span aria-hidden="true"><?= icon($s['table']['icon']) ?></span> <?= e($s['table']['name']) ?></a><?php else: ?><span class="adm-badge adm-badge--adm-warn"><?= e(__('keine Tabelle')) ?></span><?php endif; ?></td>
         <td><?php if ($s['last_error']): ?><span class="adm-badge adm-badge--adm-warn"><?= icon('warning') ?> <?= e(__('Fehler')) ?></span><br><span class="adm-muted src-err"><?= e(mb_strimwidth((string) $s['last_error'], 0, 90, '…')) ?></span>
-          <?php elseif ($s['last_ok_at']): ?><span class="adm-badge"><?= icon('check-circle') ?> <?= e(__('OK')) ?></span> <span class="adm-muted"><?= e(date_local((string) $s['last_ok_at'], 'short')) ?>, <?= e(date('H:i', strtotime((string) $s['last_ok_at']))) ?></span>
+          <?php elseif ($s['last_ok_at']): ?><span class="adm-badge"><?= icon('check-circle') ?> <?= e(__('OK')) ?></span> <span class="adm-muted"><?= e(date_local((string) $s['last_ok_at'], 'short')) ?>, <?= e(\Core\Format::admin()->time(strtotime((string) $s['last_ok_at']))) ?></span>
           <?php else: ?><span class="adm-muted"><?= e(__('noch nie')) ?></span><?php endif; ?></td>
         <td><?= (int) $s['items'] ?></td>
         <td class="adm-actions">

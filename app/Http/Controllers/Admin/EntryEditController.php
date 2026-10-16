@@ -87,7 +87,7 @@ final class EntryEditController extends AdminController
         $this->changed();
         $saved = Entries::find($t, (int) $newId);
         return Response::json(['ok' => true, 'id' => (int) $newId, 'status' => $saved['status'] ?? '', 'url' => $saved ? Entries::url($t, $saved) : null,
-            'title' => $saved ? Entries::title($t, $saved) : '', 'saved_at' => date('H:i')]);
+            'title' => $saved ? Entries::title($t, $saved) : '', 'saved_at' => \Core\Format::admin()->time(time())]);
     }
 
     /**
@@ -105,7 +105,7 @@ final class EntryEditController extends AdminController
         [$newId, $errors] = Entries::save($t, (int) $e['id'], [$field => $blocks, 'status' => $e['status']]);
         if ($errors) return Response::json(['ok' => false, 'error' => implode(' ', $errors), 'errors' => $errors], 422);
         $this->changed();
-        return Response::json(['ok' => true, 'saved_at' => date('H:i'), 'count' => count(Entries::find($t, (int) $newId)[$field] ?? [])]);
+        return Response::json(['ok' => true, 'saved_at' => \Core\Format::admin()->time(time()), 'count' => count(Entries::find($t, (int) $newId)[$field] ?? [])]);
     }
 
     /** Formular + Kopfdaten für die Seitenleiste */

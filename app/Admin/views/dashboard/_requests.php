@@ -10,7 +10,7 @@ $last = (int) end($data);
 <?php if ($total > 0): ?>
 <?= Charts::render([
     'type' => 'bar', 'height' => 160,
-    'labels' => array_map(fn($d) => date('d.m.', (int) strtotime($d)), array_keys($data)),
+    'labels' => array_map(fn($d) => \Core\Format::admin()->date((int) strtotime($d), 'dm'), array_keys($data)),
     'series' => [['name' => __('Anfragen'), 'data' => array_map('intval', array_values($data))]],
     'title' => __('Woche ab'),
     'description' => __('Anfragen je Woche, letzte 12 Wochen: insgesamt {n}', ['n' => $total]),

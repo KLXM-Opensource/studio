@@ -101,7 +101,7 @@ $ts = function (array $e) use ($dateField): ?int {
 };
 $dateHtml = function (array $e, string $style = 'long') use ($ts, $dateField, $type): string {
     if (!($s = $ts($e))) return '';
-    $label = date_local($s, $style) . ($type($dateField) === 'datetime' ? ', ' . lt('{time} Uhr', ['time' => date('H:i', $s)]) : '');
+    $label = date_local($s, $style) . ($type($dateField) === 'datetime' ? ', ' . lt('{time} Uhr', ['time' => fmt()->time($s)]) : '');
     return '<time datetime="' . e(date($type($dateField) === 'datetime' ? 'Y-m-d\TH:i' : 'Y-m-d', $s)) . '">' . e($label) . '</time>';
 };
 $origin = fn(array $e) => $showOrigin && Shared::isForeign($t, $e) && ($n = Entries::html($t, $e, '_origin')) !== ''

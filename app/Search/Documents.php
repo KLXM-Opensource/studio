@@ -316,7 +316,7 @@ final class Documents
         foreach ($t['fields'] as $f) {
             if (($cfg['date'] ?? '') !== '' && $f['name'] !== $cfg['date']) continue;
             if (in_array($f['type'], ['date', 'datetime'], true) && !empty($e[$f['name']]) && ($ts = strtotime((string) $e[$f['name']]))) {
-                return [date('Y-m-d H:i', $ts), date_local($ts, 'short') . ($f['type'] === 'datetime' ? ', ' . lt('{time} Uhr', ['time' => date('H:i', $ts)]) : '')];
+                return [date('Y-m-d H:i', $ts), date_local($ts, 'short') . ($f['type'] === 'datetime' ? ', ' . lt('{time} Uhr', ['time' => fmt()->time($ts)]) : '')];
             }
         }
         return ['', ''];   // Veröffentlichungsdatum allein ist kein Inhaltsdatum (z. B. Schlagwörter)

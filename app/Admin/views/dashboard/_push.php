@@ -12,7 +12,7 @@ $out = array_sum(array_column($days, 'lost'));
 <?php if ($in + $out > 0): ?>
 <?= Charts::render([
     'type' => 'bar', 'height' => 160,
-    'labels' => array_map(fn($k) => date('d.m.', (int) strtotime($k)), array_keys($days)),
+    'labels' => array_map(fn($k) => \Core\Format::admin()->date((int) strtotime($k), 'dm'), array_keys($days)),
     'series' => [['name' => __('neue Abos'), 'data' => array_map(fn($v) => (int) $v['sub'], array_values($days))],
         ['name' => __('abgemeldet'), 'data' => array_map(fn($v) => (int) $v['lost'], array_values($days))]],
     'title' => __('Tag'),

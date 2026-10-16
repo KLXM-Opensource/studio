@@ -33,7 +33,7 @@ final class EditorController extends AdminController
             }
         }
         $this->changed();
-        return Response::json(['ok' => true, 'published' => $publish, 'saved_at' => date('H:i')]);
+        return Response::json(['ok' => true, 'published' => $publish, 'saved_at' => \Core\Format::admin()->time(time())]);
     }
 
     /** Entwurf verwerfen (zurück zur veröffentlichten Fassung). */

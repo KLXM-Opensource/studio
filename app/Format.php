@@ -64,7 +64,7 @@ final class Format
     // ------------------------------------------------------------------ Datum und Zeit
 
     /** ICU-Skelette je Stil (die Sprache bestimmt Reihenfolge, Trenner und Monatsnamen) */
-    private const SKELETONS = ['short' => 'ddMMyyyy', 'long' => 'dMMMMy', 'weekday' => 'EEEE', 'day_month' => 'dMMMM', 'time' => 'jjmm'];
+    private const SKELETONS = ['short' => 'ddMMyyyy', 'long' => 'dMMMMy', 'weekday' => 'EEEE', 'day_month' => 'dMMMM', 'dm' => 'ddMM', 'time' => 'jjmm'];
     /** Sprache → Gebietsschema für ICU: Englisch nach britischen Regeln (24/09/2026, 14:05) */
     private const LOCALES = ['en' => 'en_GB'];
 
@@ -92,7 +92,7 @@ final class Format
         return is_string($out) ? $out : null;
     }
 
-    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September) – über ICU */
+    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September), dm (24.09. / 24/09) – über ICU */
     public function date(int|string|\DateTimeInterface|null $when, string $style = 'short'): string
     {
         $ts = self::ts($when);
@@ -107,6 +107,7 @@ final class Format
             'long' => date('j', $ts) . ($de ? '. ' : ' ') . $m . ' ' . date('Y', $ts),
             'weekday' => isset($days[$this->lang]) ? $days[$this->lang][(int) date('w', $ts)] : date('l', $ts),
             'day_month' => date('j', $ts) . ($de ? '. ' : ' ') . $m,
+            'dm' => date($de ? 'd.m.' : 'd/m', $ts),
             default => date($de ? 'd.m.Y' : 'd/m/Y', $ts),
         };
     }

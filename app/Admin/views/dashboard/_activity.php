@@ -11,7 +11,7 @@ $col = fn(string $k) => array_map(fn($v) => (int) $v[$k], array_values($data));
 <?php if ($total > 0): ?>
 <?= Charts::render([
     'type' => 'bar', 'stacked' => true, 'height' => 200,
-    'labels' => array_map(fn($d) => date('d.m.', (int) strtotime($d)), array_keys($data)),
+    'labels' => array_map(fn($d) => \Core\Format::admin()->date((int) strtotime($d), 'dm'), array_keys($data)),
     'series' => [
         ['name' => __('Seiten gespeichert'), 'data' => $col('pages')],
         ['name' => __('neue Einträge'), 'data' => $col('entries')],

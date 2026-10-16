@@ -26,7 +26,7 @@ final class ImpersonateController extends AdminController
         if ($err) return $this->back('/admin/users', 'error', $err);
         app()->auth->reset();
         $now = app()->auth->user();
-        app()->session->flash('success', __('Sie arbeiten jetzt als „{name}“ – bis {time} oder bis Sie zurückwechseln.', ['name' => $now['_imp']['label'] ?? '', 'time' => date('H:i', (int) ($now['_imp']['until'] ?? time()))]));
+        app()->session->flash('success', __('Sie arbeiten jetzt als „{name}“ – bis {time} oder bis Sie zurückwechseln.', ['name' => $now['_imp']['label'] ?? '', 'time' => \Core\Format::admin()->time((int) ($now['_imp']['until'] ?? time()))]));
         return Response::redirect(url('/admin'), 303);
     }
 

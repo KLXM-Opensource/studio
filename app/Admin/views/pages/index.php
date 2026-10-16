@@ -28,9 +28,9 @@ $statusCell = function (array $p) use ($canPub): string {
 $short = function (string $t): string {
     $ts = (int) strtotime($t);
     return match (date('Y-m-d', $ts)) {
-        date('Y-m-d') => __('heute') . ' ' . date('H:i', $ts),
+        date('Y-m-d') => __('heute') . ' ' . \Core\Format::admin()->time($ts),
         date('Y-m-d', time() - 86400) => __('gestern'),
-        default => date('Y', $ts) === date('Y') ? date('j.n.', $ts) : date('j.n.Y', $ts),
+        default => \Core\Format::admin()->date($ts, date('Y', $ts) === date('Y') ? 'dm' : 'short'),
     };
 };
 $row = function (array $n) use (&$row, &$count, $multi, $statusCell, $short): string {

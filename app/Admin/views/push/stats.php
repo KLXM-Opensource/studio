@@ -14,7 +14,7 @@ $visitors = (int) app()->db->fetchValue("SELECT COUNT(*) FROM push_subscriptions
 $staffDevices = (int) app()->db->fetchValue('SELECT COUNT(*) FROM push_subscriptions WHERE user_id IS NOT NULL AND key_fp = ?', [\Core\Push\Keys::fingerprint()]);
 $rows = $days === 90 ? Stats::weekly($topic === '' ? null : $topic, 13) : Stats::daily($topic === '' ? null : $topic, $days);
 $labelled = [];
-foreach ($rows as $k => $v) $labelled[($days === 90 ? __('Woche ab {date}', ['date' => date('d.m.', strtotime($k))]) : date('d.m.', strtotime($k)))] = $v;
+foreach ($rows as $k => $v) $labelled[($days === 90 ? __('Woche ab {date}', ['date' => \Core\Format::admin()->date(strtotime($k), 'dm')]) : \Core\Format::admin()->date(strtotime($k), 'dm'))] = $v;
 $sc = Stats::scale($rows);
 $sumIn = array_sum(array_column($rows, 'sub'));
 $sumOut = array_sum(array_column($rows, 'lost'));
@@ -92,7 +92,7 @@ $log = Stats::log(60);
       <div class="set-list pm-chartbox">
         <?= \Core\Charts::render([
             'type' => 'bar', 'stacked' => true, 'height' => 200,
-            'labels' => array_map(fn($k) => date('d.m.', strtotime($k)), array_keys($deliv)),
+            'labels' => array_map(fn($k) => \Core\Format::admin()->date(strtotime($k), 'dm'), array_keys($deliv)),
             'series' => [['name' => __('zugestellt'), 'data' => array_map(fn($w) => (int) $w['sent'], array_values($deliv))],
                 ['name' => __('nicht zugestellt'), 'data' => array_map(fn($w) => (int) $w['lost'], array_values($deliv))]],
             'description' => __('Zugestellte Mitteilungen je Woche, letzte 12 Wochen'),

@@ -295,7 +295,7 @@ final class Messages
             foreach ($unread as $r) {
                 $room = $rooms[(int) $r['room_id']] ?? null;
                 $where = $room && $room['kind'] === 'channel' ? '#' . $room['slug'] : __('Direktnachricht');
-                $lines[] = '• ' . $r['author_name'] . ' (' . $where . ', ' . date('d.m. H:i', strtotime((string) $r['created_at'])) . '): ' . Markdown::plain((string) $r['body'], 160);
+                $lines[] = '• ' . $r['author_name'] . ' (' . $where . ', ' . \Core\Format::admin()->datetime(strtotime((string) $r['created_at']), 'dm') . '): ' . Markdown::plain((string) $r['body'], 160);
             }
             $link = Support::urlOn((string) $p['psite'], '/admin/chat');
             $text = __('Hallo {name},', ['name' => (string) ($p['pname'] ?: $p['email'])]) . "\n\n"
