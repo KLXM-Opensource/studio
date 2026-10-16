@@ -207,7 +207,7 @@ html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
 
 /* Größe der Menüpunkte (design: nav_size) – „Kompakt“ für viele Menüpunkte */
 .nz-compact .hnav__link{font-size:.8125rem;padding-inline:.5rem}
-.nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{min-width:1.3rem;padding-inline:.15rem .3rem}
+.nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{min-width:1.5rem;padding-inline:.15rem .3rem}   /* ≥ 24 px Zielgröße (WCAG 2.5.8) */
 .nz-compact.nl-caps .hnav__link{letter-spacing:.06em}
 
 /* Markierung des aktiven Menüpunkts (design: nav_mark) – Linie, Punkt und Strich im Aufklappmenü */
