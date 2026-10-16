@@ -58,6 +58,9 @@ final class Passkeys
             transports VARCHAR(120) NULL, aaguid VARCHAR(36) NULL, name VARCHAR(191) NOT NULL, uv INT NOT NULL DEFAULT 0,
             backup INT NOT NULL DEFAULT 0, created_at VARCHAR(25) NULL, last_used_at VARCHAR(25) NULL)$tail");
         if (!$my) $db->pdo->exec("CREATE INDEX IF NOT EXISTS {$table}_user ON $table (user_id, rp_id)");
+        // Benutzerkennung, mit der der Passkey angelegt wurde – nur gesetzt, wenn sie sich seitdem geändert hat
+        // (Umzug der Netzwerk-Website: andere Konto-ID und anderer Schlüssel, Core\Network\Move); leer = aus Konto berechnet
+        $db->ensureColumns($table, ['user_handle' => 'VARCHAR(64) NULL']);
     }
 
     // ================================================================= Adresse, Kennungen
@@ -329,6 +332,7 @@ final class Passkeys
         $sig = self::unb64($resp['signature'] ?? null);
         if (($in['type'] ?? '') !== 'public-key' || $cdj === null || $authData === null || $sig === null) return __('Die Antwort des Geräts ist unvollständig.');
         $uh = ($resp['userHandle'] ?? null) ? self::unb64($resp['userHandle']) : null;
+        if (($row['user_handle'] ?? '') !== '' && ($kept = base64_decode((string) $row['user_handle'], true)) !== false) $handle = $kept;
         if (($requireHandle && $uh === null) || ($uh !== null && !hash_equals($handle, $uh))) return __('Dieser Passkey gehört zu einem anderen Konto.');
         if ($err = self::checkClientData($cdj, 'webauthn.get', (string) $p['c'])) return $err;
         try {

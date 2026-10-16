@@ -33,6 +33,8 @@
  *   network:user <email> [--invite|--create|--disable|--enable|--reset-2fa|--password] [--name="…"] [--lang=de|en]
  *                                                     Netzwerk-Konto einladen (E-Mail mit Link, 7 Tage, 2FA beim Annehmen) bzw.
  *                                                     anlegen/sperren/2FA zurücksetzen (Passwort wird abgefragt)
+ *   network:move <website> [--dry-run]                Netzwerk-Website wechseln: Konten, Passkeys, 2FA und Schatten-Konten umziehen,
+ *                                                     sichert vorher alle Datenbanken (storage/backups/) und config.local.php
  *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   cron:run [-v]                                     Geplante Aufgaben: der einzige Cronjob (jede Minute) – startet fällige Aufgaben und die Warteschlange
@@ -448,6 +450,12 @@ switch ($cmd) {
         echo "Domains:\n" . ($list ? implode("\n", array_map(fn($h) => "  $h", $list)) . "\n" : "  (keine – Website „{$key}“ gilt für alle übrigen Domains)\n");
         if ($lh = array_values((array) ($cfgK['landing_hosts'] ?? []))) echo "Landing-Domains:\n" . implode("\n", array_map(fn($h) => "  $h", $lh)) . "\n";
         break;
+
+    case 'network:move':
+        // Netzwerk-Website wechseln (Konten, Passkeys, 2FA, Schatten-Konten, config.local.php) – Core\Network\Move
+        $to = (string) ($args[0] ?? '');
+        if ($to === '' || str_starts_with($to, '--')) { fwrite(STDERR, "Aufruf: network:move <website> [--dry-run]\n"); exit(1); }
+        exit((new Core\Network\Move($to, in_array('--dry-run', $args, true)))->run());
 
     case 'network:list':
         // Netzwerk-Konten (Tabelle users der Netzwerk-Website, Rolle network) und Websites

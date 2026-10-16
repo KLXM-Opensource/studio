@@ -95,9 +95,31 @@ final class Accounts
     // ------------------------------------------------------------------ Netzwerk-Konto (Installation)
 
     /** Schlüssel für Geheimnisse des Netzwerk-Kontos (aus dem app_key der Netzwerk-Website – gleich auf allen Websites) */
-    private static function netKey(): string
+    private static function netKey(?string $appKey = null): string
     {
-        return sodium_crypto_generichash('network-mail|' . Network::appKey(), '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+        return sodium_crypto_generichash('network-mail|' . ($appKey ?? Network::appKey()), '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+    }
+
+    /**
+     * Netzwerk-Konto (gespeichertes JSON) für einen anderen app_key neu verschlüsseln – Umzug der Netzwerk-Website (Core\Network\Move).
+     * null = Geheimnis mit dem alten Schlüssel nicht lesbar.
+     */
+    public static function resealNetwork(string $json, string $fromKey, string $toKey): ?string
+    {
+        $a = json_decode($json, true);
+        if (!is_array($a)) return null;
+        foreach (self::SECRET_KEYS as $k) {
+            $v = (string) ($a[$k] ?? '');
+            if (!str_starts_with($v, 'nm1:')) continue;
+            $raw = base64_decode(substr($v, 4), true);
+            $n = $raw !== false ? substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES) : '';
+            $plain = $raw !== false && strlen($raw) > SODIUM_CRYPTO_SECRETBOX_NONCEBYTES
+                ? sodium_crypto_secretbox_open(substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES), $n, self::netKey($fromKey)) : false;
+            if ($plain === false) return null;
+            $n = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+            $a[$k] = 'nm1:' . base64_encode($n . sodium_crypto_secretbox($plain, $n, self::netKey($toKey)));
+        }
+        return json_encode($a, JSON_UNESCAPED_UNICODE);
     }
 
     private static function netSeal(string $v): string

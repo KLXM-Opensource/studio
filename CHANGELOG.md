@@ -14,6 +14,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Netzwerk-Website wechseln
+- **`php bin/console network:move <website> [--dry-run]`:** macht eine andere Website zur Netzwerk-Website. Sichert vorher alle Datenbanken und `config/config.local.php` (`storage/backups/`), zieht Netzwerk-Konten, 2FA (neu verschlüsselt), Passkeys, Anmelde-Richtlinie, Netzwerk-E-Mail-Konto und Protokoll um, macht auf der alten Website Schatten-Konten daraus und setzt `'network_site'`. `--dry-run` probiert alles in zurückgerollten Transaktionen.
+- Passkeys merken sich ihre Benutzerkennung (`user_passkeys.user_handle`), wenn sie sich ändert – vorhandene Passkeys gelten nach dem Umzug weiter auf ihrer Domain.
+
 ### Kit „foto“
 - Demo-Inhalte entstehen wieder auf allen Servern (das Hochskalieren mit `imagescale(…, IMG_BICUBIC)` scheiterte mit manchen GD-Versionen).
 - Startseite der Demo beginnt mit einer Bühne (Bildfolge mit Name und Haltung als H1), Porträt-Platzhalter als natürliche Schattenrisse (frontal und im Profil, Randlicht, weiche Kanten), Landschaften ohne Treppenstufen.
