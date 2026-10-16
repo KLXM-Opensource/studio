@@ -269,7 +269,7 @@ final class Fonts
 
     /**
      * Katalog der Google-Fonts-Familien mit erlaubter Lizenz (1 Tag zwischengespeichert).
-     * @return array<string, array{id: string, family: string, category: string, subsets: list<string>, weights: list<int>, styles: list<string>, variable: bool, license: string}>
+     * @return array<string, array{id: string, family: string, category: string, subsets: list<string>, weights: list<int>, styles: list<string>, variable: bool, license: string, defSubset: string}>
      */
     public static function catalog(bool $refresh = false): array
     {
@@ -476,7 +476,7 @@ final class Fonts
         return ['ok' => true, 'message' => __('„{family}“ installiert ({size}).', ['family' => $d['family'], 'size' => Media::humanSize($total)]), 'font' => $meta];
     }
 
-    /** @font-face-Regeln (relative Adressen – unabhängig vom Basis-Pfad) */
+    /** Regeln für @font-face (relative Adressen – unabhängig vom Basis-Pfad) */
     private static function css(array $meta, array $files, array $ranges): string
     {
         $fam = self::cleanFamily((string) $meta['family']);

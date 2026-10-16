@@ -130,7 +130,7 @@ final class StructuredData
             'startDate' => $allDay ? $start->format('Y-m-d') : $start->format('c'),
             'eventStatus' => 'https://schema.org/EventScheduled', 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
             'organizer' => self::orgOf($table, $e)];
-        if ($end) $n['endDate'] = $allDay ? $end->modify('-1 day')->format('Y-m-d') : $end->format('c');
+        if ($end) $n['endDate'] = $allDay ? \DateTimeImmutable::createFromInterface($end)->modify('-1 day')->format('Y-m-d') : $end->format('c');
         $loc = ($c['location'] ?? '') !== '' ? trim(Entries::text($table, $e, $c['location'])) : '';
         $foreign = Data\Shared::isForeign($table, $e);
         $n['location'] = $foreign ? ['@type' => 'Place', 'name' => $loc !== '' ? $loc : $n['organizer']['name']]

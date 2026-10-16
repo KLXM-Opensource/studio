@@ -71,7 +71,7 @@ final class Generator
             $fields[] = $row;
             $names[] = $name;
         }
-        if ($fields && !array_filter($fields, fn($f) => $f['in_list'])) foreach (array_slice(array_keys($fields), 0, 3) as $k) $fields[$k]['in_list'] = 1;
+        if ($fields && !array_filter($fields, fn($f) => (bool) $f['in_list'])) foreach (array_slice(array_keys($fields), 0, 3) as $k) $fields[$k]['in_list'] = 1;
         $pick = fn($k) => in_array((string) ($d[$k] ?? ''), $names, true) ? (string) $d[$k] : '';
         $uc = fn(string $x) => mb_strtoupper(mb_substr($x, 0, 1)) . mb_substr($x, 1);
         $cal = (array) ($d['calendar'] ?? []);

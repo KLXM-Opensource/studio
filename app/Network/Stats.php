@@ -186,7 +186,7 @@ final class Stats
         }
         $d['backup'] = self::lastBackup($key);
         // Offene Support-Meldungen (Core\Support, falls vorhanden) – nur Anzahl
-        if (class_exists(\Core\Support\Tickets::class) && method_exists(\Core\Support\Tickets::class, 'stats')) {
+        if (class_exists(\Core\Support\Tickets::class)) {
             try {
                 $d['support_open'] = (int) (\Core\Support\Tickets::stats($key)['open'] ?? 0);
             } catch (\Throwable) {

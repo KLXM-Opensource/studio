@@ -45,6 +45,7 @@ Entwicklerhandbuch (`/admin/hilfe/technik`).
 ## Prüfen vor dem Commit
 
 - `php -l` auf geänderte PHP-Dateien.
+- Statische Analyse: `php tools/phpstan/vendor/bin/phpstan analyse` (einmalig `cd tools/phpstan && composer install`) – Stufe 5, keine neuen Funde; die Baseline (`phpstan-baseline.neon`) nur für belegte Fehlalarme erweitern.
 - Alle Selbsttests: `php bin/console` listet sie (`*:selftest`, u. a. `extensions:selftest`, `db:selftest`,
   `format:selftest`, `blocks:selftest`, `data:selftest`) – alle grün.
 - `php bin/console i18n:missing en` → 0.

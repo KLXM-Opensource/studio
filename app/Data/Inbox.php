@@ -414,7 +414,7 @@ final class Inbox
         $lang = Lang::default();
         $rows = array_values(array_filter($rows, 'is_array'));
         $cells = array_map(fn($r) => array_map(fn($c) => Entries::groupCell($c[2], $r[$c[0]] ?? null, $lang), $cols), $rows);
-        $keep = array_keys(array_filter($cols, fn($c, $i) => array_filter(array_column($cells, $i), fn($s) => $s !== ''), ARRAY_FILTER_USE_BOTH));
+        $keep = array_keys(array_filter($cols, fn($c, $i) => (bool) array_filter(array_column($cells, $i), fn($s) => $s !== ''), ARRAY_FILTER_USE_BOTH));
         $cols = array_values(array_intersect_key($cols, array_flip($keep)));
         $cells = array_map(fn($r) => array_values(array_intersect_key($r, array_flip($keep))), $cells);
         $text = [];

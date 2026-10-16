@@ -69,3 +69,5 @@ deploy/targets/*.env
 !/storage/database/
 !/storage/logs/
 !/storage/sessions/
+# PHPStan (tools/phpstan, nur Entwicklung)
+/tools/phpstan/vendor/

@@ -1258,7 +1258,7 @@ final class Media
 
     public static function tagList(?string $stored): array
     {
-        return array_values(array_filter(explode(',', (string) $stored), 'strlen'));
+        return array_values(array_filter(explode(',', (string) $stored), fn($v) => $v !== ''));
     }
 
     /** Alle Tags mit Anzahl */

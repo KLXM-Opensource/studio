@@ -1,0 +1,535 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Anonymous function has an unused use \$ctx\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Anonymous function has an unused use \$from\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Anonymous function has an unused use \$out\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Anonymous function has an unused use \$size\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Anonymous function has an unused use \$to\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Static method Core\\AI\\Assist\:\:finishTranslation\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/AI/Assist.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/AI/Assistant.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/AI/Assistant.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>textContent" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/AI/HelpIndex.php
+
+		-
+			message: '#^Offset ''fallback'' on array\{\}\|array\{profile\?\: string, fallback\?\: string, model\?\: string, fallback_model\?\: string, language\?\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/AI/Profiles.php
+
+		-
+			message: '#^Offset 0 on array\{\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/AI/SelfTest.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Activity.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/AdminPath.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 2
+			path: app/Api/CmsService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Api/CmsService.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: app/AssetDocs.php
+
+		-
+			message: '#^Method Core\\AssetDocs\:\:varUses\(\) never assigns null to &\$nested so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: app/AssetDocs.php
+
+		-
+			message: '#^Offset ''nested'' does not exist on array\{defs\: list\<array\{name\: string, value\: string, selector\: string, at\: string, line\: int\}\>, uses\: array\<string, string\|null\>\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/AssetDocs.php
+
+		-
+			message: '#^Offset ''nested'' does not exist on array\{defs\: list\<array\{name\: string, value\: string, selector\: string, at\: string, line\: int\}\>, uses\: non\-empty\-array\<string, string\|null\>\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/AssetDocs.php
+
+		-
+			message: '#^Parameter \#1 \$array \(array\{\}\) to function array_values is empty, call has no effect\.$#'
+			identifier: arrayValues.empty
+			count: 1
+			path: app/Chat/Messages.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Data/DataForms.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Data/DataForms.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Data/Entries.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Data/Inbox.php
+
+		-
+			message: '#^Anonymous function has an unused use \$owner\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: app/Data/Shared.php
+
+		-
+			message: '#^Method Core\\Data\\Shared\:\:shareLocal\(\) never assigns null to &\$map so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: app/Data/Shared.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-string, ''''\|''\<''\|''\<\=''\|''\=''\|''\=\=''\|''\>''\|''\>\='', non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Extensions.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-string, ''''\|''\>''\|''\>\='', non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Extensions.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''sqlite'' and ''mysql'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/ExtensionsSelfTest.php
+
+		-
+			message: '#^Anonymous function has an unused use \$html\.$#'
+			identifier: closure.unusedUse
+			count: 2
+			path: app/Fields.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed~\(''blocks''\|''bool''\|''collection''\|''color''\|''datafield''\|''datafields''\|''datatable''\|''datetime''\|''file''\|''geo''\|''group''\|''heading''\|''iban''\|''icon''\|''inline''\|''link''\|''media''\|''mediatext''\|''multiselect''\|''page''\|''pages''\|''recurrence''\|''repeater''\|''richtext''\|''secret''\|''select''\|''textarea''\|null\) and ''link'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Fields.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 2
+			path: app/Fields.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 2
+			path: app/Fields.php
+
+		-
+			message: '#^Ternary operator condition is always false\.$#'
+			identifier: ternary.alwaysFalse
+			count: 1
+			path: app/Glossary/Annotator.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>path" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Glossary/Glossary.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>path" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Glossary/QuickTool.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: app/Guide.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Admin/DomainController.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/Admin/HelpController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/Admin/SystemController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Http/Controllers/ApiController.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/McpController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Core\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/SiteController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/ImageEdit.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\{''exif'', ''perspective'', ''flip'', ''rotate90'', ''rotate'', ''crop'', ''sizes'', ''fx''\} and array\{''exif'', ''perspective'', ''flip'', ''rotate90'', ''rotate'', ''crop'', ''sizes'', ''fx''\} will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/ImageEdit.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<4, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/ImageFit.php
+
+		-
+			message: '#^Variable \$n might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/ImageFx.php
+
+		-
+			message: '#^Anonymous function never returns string so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Invites.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-string, ''''\|''\<''\|''\<\=''\|''\=''\|''\=\=''\|''\>''\|''\>\='', non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Kit.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 2
+			path: app/Links.php
+
+		-
+			message: '#^Instanceof between Symfony\\Component\\Mailer\\Transport\\TransportInterface and Symfony\\Component\\Mailer\\Transport\\TransportInterface will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Mail/SelfTest.php
+
+		-
+			message: '#^Offset ''check'' does not exist on array\{\}\|array\{q\?\: string, kind\?\: string, tag\?\: string, collection\?\: int, noalt\?\: bool, unused\?\: bool, missing_lang\?\: string, notitle\?\: bool, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Media.php
+
+		-
+			message: '#^Offset ''dupes'' on array\{\}\|array\{q\?\: string, kind\?\: string, tag\?\: string, collection\?\: 0, noalt\?\: bool, unused\?\: bool, missing_lang\?\: string, notitle\?\: bool, \.\.\.\} in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 1
+			path: app/Media.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/Media.php
+
+		-
+			message: '#^Offset ''theme'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Network/Stats.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-string, ''''\|''\<''\|''\<\=''\|''\=''\|''\=\=''\|''\>''\|''\>\='', non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Network/Stats.php
+
+		-
+			message: '#^Method Core\\Pages\:\:sanitizeBlocks\(\) never assigns null to &\$seen so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: app/Pages.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>server" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Proxy.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Push/Channels.php
+
+		-
+			message: '#^Method Core\\Push\\Push\:\:removeTopics\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Push/Push.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 3
+			path: app/Push/Visitor.php
+
+		-
+			message: '#^Variable \$http_response_header on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Push/WebPush.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between false and false will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/Redirects/Redirects.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between '''' and '''' will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 2
+			path: app/Review/Diff.php
+
+		-
+			message: '#^Method Core\\Review\\Drafts\:\:filter\(\) never assigns null to &\$counts so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: app/Review/Drafts.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Review/Queue.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>search" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Search/Search.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Search/TableSearch.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Search/TableSearch.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>noindex" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Seo.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 2
+			path: app/Sites.php
+
+		-
+			message: '#^Instanceof between DOMNameSpaceNode\|DOMNode and DOMCdataSection will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Sources/Parser.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Sources/Sync.php
+
+		-
+			message: '#^Parameter \#1 \$array \(non\-empty\-list\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: app/StructuredData.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 2
+			path: app/Support/Markdown.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-string, ''''\|''\<''\|''\<\=''\|''\=''\|''\=\=''\|''\>''\|''\>\='', non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Theme.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>query" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Toolbar.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/VideoThumbs.php
+
+		-
+			message: '#^Parameter \#1 \$log of class Core\\SiteExtract constructor expects callable\(string\)\: void, Closure\(string\)\: 1 given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/console
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 5
+			path: bin/console
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: extensions/consent_kit/src/Compiler.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: extensions/consent_kit/src/Compiler.php
+
+		-
+			message: '#^Access to an undefined property Sabre\\VObject\\Component\\VCard\:\:\$N\.$#'
+			identifier: property.notFound
+			count: 1
+			path: extensions/dav/src/CardBackend.php
+
+		-
+			message: '#^Access to an undefined property Sabre\\VObject\\Component\\VCard\:\:\$VERSION\.$#'
+			identifier: property.notFound
+			count: 1
+			path: extensions/dav/src/CardBackend.php
+
+		-
+			message: '#^Offset ''loud'' does not exist on array\{info\: array, assess\: array, row\: array\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: extensions/video_tools/src/AdminController.php
+
+		-
+			message: '#^Offset ''loud'' does not exist on array\{info\: array, assess\: array, row\: array\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: extensions/video_tools/src/Console.php

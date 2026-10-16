@@ -88,10 +88,7 @@ final class Console
         if (self::opt($args, 'all')) {
             $fail = 0;
             foreach (\Core\Sites::all() as $k => $c) {
-                // eingeschaltet per Konfiguration oder in der Verwaltung (Funktionen & Erweiterungen)
-                $on = method_exists(\Core\Extensions::class, 'enabledForSite') ? \Core\Extensions::enabledForSite((string) $k, 'video_tools')
-                    : in_array('video_tools', (array) (\Core\Network\Network::config($k)->get('extensions', [])), true);
-                if (!$on) continue;
+                if (!\Core\Extensions::enabledForSite((string) $k, 'video_tools')) continue;   // Konfiguration oder Verwaltung
                 passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(ROOT . '/bin/console') . ' video:work --site=' . escapeshellarg((string) $k), $code);
                 $fail = $fail ?: $code;
             }

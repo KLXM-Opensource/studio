@@ -241,6 +241,7 @@ Notes:
 | Tool | Version | License | Purpose |
 |---|---|---|---|
 | esbuild | 0.25.12 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
+| PHPStan (`phpstan/phpstan`, `tools/phpstan/`), © Ondřej Mirtes | 2.3.1 | MIT | Static analysis during development; installed into `tools/phpstan/vendor` (with `dompdf/dompdf` for type information only), never deployed |
 | `@tailwindcss/cli` (with `@tailwindcss/oxide`, lightningcss), © Tailwind Labs, Inc. / Devon Govett (MPL-2.0 for lightningcss 1.32.0) | 4.3.3 | MIT (lightningcss: MPL-2.0) | Building `kits/frameworks` Tailwind CSS (`kits/frameworks/build.mjs`) |
 | Playwright / playwright-core, © Microsoft Corporation | 1.62.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
 | @napi-rs/canvas | 1.0.9 | MIT | Optional dependency of pdfjs-dist, not used at runtime |

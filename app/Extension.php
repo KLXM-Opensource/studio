@@ -72,7 +72,7 @@ final class Extension
     public array $cspProviders = [];
     /** @var list<callable(): list<array{label: string, href: string}>> */
     public array $footerLinkProviders = [];
-    /** @var list<array{restricted: callable(array): bool, allow: callable(array, Http\Request): (bool|Http\Response)}> Zugriffsschutz (pageAccess) */
+    /** @var list<array{restricted: callable(array): bool, allow: callable(array, Http\Request, ?array=): (bool|Http\Response)}> Zugriffsschutz (pageAccess; 3. Argument: Datentabelle bei Detailseiten) */
     public array $pageGuards = [];
     /** @var list<callable(string): list<string>> */
     public array $adminAssetProviders = [];

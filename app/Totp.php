@@ -86,7 +86,7 @@ final class Totp
         $qr = new QRCode(new QROptions(['eccLevel' => EccLevel::M, 'addQuietzone' => true, 'quietzoneSize' => 2]));
         $qr->addByteSegment($text);
         $mx = $qr->getQRMatrix();
-        $m = method_exists($mx, 'getBooleanMatrix') ? $mx->getBooleanMatrix() : $mx->getMatrix(true);   // php-qrcode 6: getBooleanMatrix(), 5: getMatrix(true)
+        $m = $mx->getBooleanMatrix();   // chillerlan/php-qrcode 6
         $n = count($m);
         $d = '';
         foreach ($m as $y => $row) {

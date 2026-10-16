@@ -237,7 +237,7 @@ final class EntryBlocks
                 $open = preg_match_all('~<' . $tag . '[\s>]~i', $html);
                 $close = substr_count(strtolower($html), '</' . $tag . '>');
                 if ($open === $close) $ok++;
-                else $fails[] = "Designer-Feldvorlage ($type): <$tag> $open× geöffnet, $close× geschlossen";
+                else $fails[] = "Designer-Feldvorlage ($type): <$tag> {$open}× geöffnet, {$close}× geschlossen";
             }
         }
         return ['ok' => $ok, 'fails' => $fails];

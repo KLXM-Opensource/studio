@@ -24,6 +24,7 @@ final class Output
             'trim' => self::clip($m, $file, $p, $uid),
             'poster' => self::poster($m, $file, (int) ($p['at'] ?? 0)),
             'preview' => self::preview($m, $file),
+            default => throw new \InvalidArgumentException('Unbekannte Auftragsart: ' . $j['type']),
         };
     }
 

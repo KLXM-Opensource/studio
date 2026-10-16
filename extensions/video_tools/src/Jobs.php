@@ -360,7 +360,7 @@ final class Jobs
             };
             $tmp[] = $out;
             $logText = '$ ' . Runner::display($args, [$in => '<eingabe>', $out => '<ausgabe>']) . "\n";
-            $res = Runner::run($args, $duration, fn(int $pct) => self::db()->query('UPDATE video_jobs SET progress = ? WHERE id = ?', [$pct, $id]),
+            $res = Runner::run($args, $duration, function (int $pct) use ($id): void { self::db()->query('UPDATE video_jobs SET progress = ? WHERE id = ?', [$pct, $id]); },
                 fn() => (int) self::db()->fetchValue('SELECT cancel FROM video_jobs WHERE id = ?', [$id]) === 1, $cfg['timeout']);
             $logText .= ($res['stderr'] !== '' ? $res['stderr'] . "\n" : '') . sprintf("exit %d · %.1f s\n", $res['code'], $res['seconds']);
             if ($res['canceled']) throw new JobException(__('Abgebrochen.'));

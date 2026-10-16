@@ -30,7 +30,6 @@ final class TableSearch
     public const OPT_IN = ['email', 'tel', 'url', 'link', 'number'];
     public const FACET_TYPES = ['select', 'multiselect', 'relation', 'relations'];
     /** Unterfelder wiederholbarer Gruppen, die nie in die Suche gehen */
-    private const GROUP_SKIP = ['iban', 'email', 'tel'];
 
     public static function eligible(array $f): bool
     {

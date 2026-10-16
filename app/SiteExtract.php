@@ -43,7 +43,7 @@ final class SiteExtract
 
     /**
      * @param array{out?: string, all_kits?: bool, archive?: bool} $o
-     * @return array{out: string, archive: ?string, files: int, bytes: int, notes: list<string>, health: string}
+     * @return array{out: string, archive: ?string, files: int, bytes: int, notes: list<string>, health: string, report: string}
      */
     public function run(array $o = []): array
     {

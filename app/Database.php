@@ -67,7 +67,8 @@ final class Database
         return (int) $this->pdo->lastInsertId();
     }
 
-    public function update(string $table, array $data, string $where, array $params = []): void
+    /** UPDATE mit Platzhaltern; Rückgabe: Zahl der geänderten Zeilen */
+    public function update(string $table, array $data, string $where, array $params = []): int
     {
         // Positionale Platzhalter („id = ?“) in benannte umschreiben: PDO mischt beide Arten nicht – SQLite änderte
         // sonst stillschweigend keine Zeile (z. B. consent_kit „id = ?“)
@@ -82,7 +83,7 @@ final class Database
             $params = $named;
         }
         $set = implode(',', array_map(fn($c) => "$c = :$c", array_keys($data)));
-        $this->query("UPDATE $table SET $set WHERE $where", array_merge($data, $params));
+        return $this->query("UPDATE $table SET $set WHERE $where", array_merge($data, $params))->rowCount();
     }
 
     public function transaction(callable $fn): mixed

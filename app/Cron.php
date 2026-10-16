@@ -29,7 +29,7 @@ final class Cron
     /** Höchstdauer je Lauf (Sekunden), danach wird der Prozess beendet */
     public const TIMEOUT = 3300;
 
-    /** @var array<string, array{key: string, label: string, command: string, schedule: string, group: string, owner: string, timeout: int, help: string}> */
+    /** @var array<string, array{key: string, label: string, command: string, schedule: string, group: string, owner: string, timeout: int, help: string, scope: string}> */
     private static array $tasks = [];
     private static ?Database $db = null;
     private static bool $booted = false;

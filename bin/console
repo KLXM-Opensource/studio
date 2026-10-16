@@ -1520,7 +1520,9 @@ switch ($cmd) {
             $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
             foreach ($it as $f) {
                 $target = $dst . '/' . substr($f->getPathname(), strlen($src) + 1);
-                $f->isDir() ? @mkdir($target, 0775, true) : (@mkdir(dirname($target), 0775, true) && false) || copy($f->getPathname(), $target);
+                if ($f->isDir()) { @mkdir($target, 0775, true); continue; }
+                @mkdir(dirname($target), 0775, true);
+                copy($f->getPathname(), $target);
             }
             echo Core\Kit::relative($dst) . " aktualisiert.\n";
         }

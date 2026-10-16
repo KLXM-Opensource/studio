@@ -409,7 +409,7 @@ final class Queue
             || self::publishFlag((string) $row['action'], array_values((array) ($row['payload']['args'] ?? [])))) return ['current' => $current, 'diff' => $since];
         // Nur Überschneidungen zählen: Felder bzw. Blöcke, die sowohl die Einreichung als auch jemand anderes geändert hat
         $overlap = array_intersect(self::touched($since), self::touched((array) $row['diff']));
-        return $overlap ? ['current' => $current, 'diff' => array_values(array_filter($since, fn($d) => array_intersect(self::touched([$d]), $overlap)))] : null;
+        return $overlap ? ['current' => $current, 'diff' => array_values(array_filter($since, fn($d) => (bool) array_intersect(self::touched([$d]), $overlap)))] : null;
     }
 
     /** Geänderte Stellen eines Diffs: Feldpfade bzw. „blocks.{id}“ */

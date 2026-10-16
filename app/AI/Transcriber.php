@@ -124,7 +124,7 @@ final class Transcriber
     /**
      * Tonspur einer Datei transkribieren. $lang: Sprachkürzel oder 'auto'.
      * $progress(int $prozent) wird gelegentlich aufgerufen; $cancelled() → true bricht ab.
-     * @return array{cues: list<array>, seconds: int, model: string, provider: string, ms: int, note: string}
+     * @return array{cues: list<array>, seconds: int, model: string, provider: string, ms: int, note: string, language?: string}
      * @throws AiException
      */
     public static function transcribe(array $cfg, string $file, string $lang, ?callable $progress = null, ?callable $cancelled = null, string $prompt = ''): array

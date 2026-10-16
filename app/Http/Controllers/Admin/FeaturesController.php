@@ -81,7 +81,7 @@ final class FeaturesController extends AdminController
         }
         if ($on && FeatureInfo::risky($key) && ($err = $this->confirm($r, $user))) return $this->back($back, 'error', $err);
         Features::setUi($key, $on);
-        if ($key === 'chat' && $on && method_exists(\Core\Chat\Chat::class, 'ensureDefaultChannel')) \Core\Chat\Chat::ensureDefaultChannel();
+        if ($key === 'chat' && $on) \Core\Chat\Chat::ensureDefaultChannel();
         // Push-Benachrichtigungen: VAPID-Schlüssel der Installation anlegen (config/config.local.php), falls sie fehlen
         $pushWarn = $key === 'push' && $on && !\Core\Push\Keys::ensure();
         \Core\Push\Push::flush();

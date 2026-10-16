@@ -94,7 +94,7 @@ final class Tables
             if (!in_array($t, $types, true)) continue;
             $groups[in_array($t, self::LAYOUT, true) ? 2 : (in_array($t, $form, true) ? 0 : 1)]['types'][] = $t;
         }
-        return array_values(array_filter($groups, fn($g) => $g['types']));
+        return array_values(array_filter($groups, fn($g) => (bool) $g['types']));
     }
 
     /** Alle Tabellen: eigene (data_tables) und geteilte, an denen die Website teilnimmt (Core\Data\Shared) */
@@ -821,7 +821,7 @@ final class Tables
             }
         }
         foreach ($sm->introspectTableNames() as $tn) {
-            $n = method_exists($tn, 'getUnqualifiedName') ? $tn->getUnqualifiedName()->getValue() : (string) $tn;
+            $n = $tn->getUnqualifiedName()->getValue();   // doctrine/dbal 4.x
             if (str_starts_with($n, $name . '__') && !in_array($n, $keep, true)) {
                 $sm->dropTable($n);
             }

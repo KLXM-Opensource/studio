@@ -112,6 +112,7 @@ final class Presets
             'mute' => ['-map', '0:v', '-c:v', 'copy', '-an', '-map_metadata', '-1', '-movflags', '+faststart'],
             'loudnorm' => ['-map', '0:v:0', '-map', '0:a:0', '-c:v', 'copy', '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11', '-c:a', 'aac', '-b:a', '160k', '-ar', '48000',
                 '-map_metadata', '-1', '-movflags', '+faststart'],
+            default => throw new \InvalidArgumentException('Unbekannte Voreinstellung: ' . $key),
         };
         return [...$a, ...$args, $out];
     }

@@ -204,6 +204,7 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
         } catch (\Throwable) {
             return $fresh;
         }
+        if (!$raw instanceof \Sabre\VObject\Component\VCalendar || !$new instanceof \Sabre\VObject\Component\VCalendar) return $fresh;
         $master = self::master($raw);
         $src = self::master($new);
         if (!$master || !$src) return $fresh;

@@ -30,6 +30,7 @@ cd tools && pnpm run build                 # alle CSS/JS (Kern, Kits, Erweiterun
 php -S 127.0.0.1:8099 -t public public/index.php   # lokaler Server; Websites über *.localhost:8099 (Hosts in config/sites/)
 php bin/console migrate --all && php bin/console cache:clear --all && php bin/console health --all
 php bin/console i18n:missing en            # muss 0 melden; Website-Texte: --site-texts
+php tools/phpstan/vendor/bin/phpstan analyse   # Stufe 5, muss „No errors“ melden (Werkzeug: cd tools/phpstan && composer install)
 php bin/console list | grep selftest       # Selbsttests (data, blocks, push, inbox, ai, account, …) – alle grün halten
 php bin/console search:index --all         # Suchindex; search:query "…" testet wie Besucher
 ```

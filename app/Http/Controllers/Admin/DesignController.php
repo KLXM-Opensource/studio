@@ -213,7 +213,7 @@ final class DesignController extends AdminController
     private static function previewPages(): array
     {
         $out = [];
-        $sample = array_values(array_filter(array_map('strval', (array) (Design::def()['sample'] ?? '')), 'strlen'));
+        $sample = array_values(array_filter(array_map('strval', (array) (Design::def()['sample'] ?? '')), fn($v) => $v !== ''));
         foreach (Pages::flat() as $p) {
             if (($p['type'] ?? 'page') !== 'page') continue;
             $isSample = $sample ? (bool) array_intersect($sample, [(string) ($p['path'] ?? ''), (string) ($p['slug'] ?? '')])

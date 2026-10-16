@@ -44,8 +44,8 @@ final class PagePicker
     /** Werte als Liste (beide Formate) */
     public static function values(mixed $value): array
     {
-        if (is_array($value)) return array_values(array_filter(array_map(fn($v) => trim((string) $v), $value), 'strlen'));
-        return array_values(array_filter(array_map('trim', preg_split('~\R~', (string) $value) ?: []), 'strlen'));
+        if (is_array($value)) return array_values(array_filter(array_map(fn($v) => trim((string) $v), $value), fn($v) => $v !== ''));
+        return array_values(array_filter(array_map('trim', preg_split('~\R~', (string) $value) ?: []), fn($v) => $v !== ''));
     }
 
     /** Pfad einer Seite relativ zur Website (ohne Basis-Pfad), z. B. /en/kontakt; Startseite: / bzw. /en */

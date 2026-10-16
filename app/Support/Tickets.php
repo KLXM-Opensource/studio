@@ -357,7 +357,7 @@ final class Tickets
         if (!$im) return false;
         $ok = match ($type) {
             IMAGETYPE_JPEG => imagejpeg($im, $dest, 88),
-            IMAGETYPE_PNG => (imagesavealpha($im, true) || true) && imagepng($im, $dest, 6),
+            IMAGETYPE_PNG => imagesavealpha($im, true) && imagepng($im, $dest, 6),
             IMAGETYPE_WEBP => function_exists('imagewebp') && imagewebp($im, $dest, 88),
             default => false,
         };

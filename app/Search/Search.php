@@ -357,7 +357,7 @@ final class Search
             }
             foreach ($out['facets'] as &$fc) arsort($fc['values']);
             unset($fc);
-            $out['facets'] = array_filter($out['facets'], fn($fc) => $fc['values']);
+            $out['facets'] = array_filter($out['facets'], fn($fc) => (bool) $fc['values']);
             if ($facetIn) {
                 $ranked = array_values(array_filter($ranked, function ($id) use ($docs, $facetIn) {
                     $have = (array) json_decode((string) ($docs[$id]['facets'] ?? ''), true);

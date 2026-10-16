@@ -1,0 +1,10 @@
+{
+    "name": "klxm/studio-phpstan",
+    "description": "Statische Analyse für KLXM Studio (nur Entwicklung, wird nicht ausgeliefert)",
+    "license": "MIT",
+    "require": {
+        "dompdf/dompdf": "^3.1",
+        "phpstan/phpstan": "^2.1"
+    },
+    "config": { "sort-packages": true }
+}

@@ -97,7 +97,7 @@ final class FrontendTools
      */
     public static function shortcut(string $s): ?array
     {
-        $parts = array_values(array_filter(array_map('trim', explode('+', $s)), 'strlen'));
+        $parts = array_values(array_filter(array_map('trim', explode('+', $s)), fn($v) => $v !== ''));
         if (!$parts) return null;
         $key = strtoupper((string) array_pop($parts));
         $mods = array_map('strtolower', $parts);
@@ -204,7 +204,7 @@ final class FrontendTools
                     continue;
                 }
             }
-            $out[] = ['id' => $t['id'], 'label' => $t['label'], 'icon' => $t['icon'], 'module' => $t['module'], 'placement' => $t['placement'], 'scope' => $t['scope'] ?? 'page', 'scope' => $t['scope'] ?? 'page',
+            $out[] = ['id' => $t['id'], 'label' => $t['label'], 'icon' => $t['icon'], 'module' => $t['module'], 'placement' => $t['placement'], 'scope' => $t['scope'] ?? 'page',
                 'shortcut' => $t['shortcut'], 'hint' => $t['hint'], 'panel' => $t['panel'], 'when' => $when, 'chip' => $t['chip'], 'texts' => $t['texts'], 'source' => $t['source'],
                 'endpoints' => array_map(fn($p) => url($p), $t['endpoints']), 'data' => is_array($data) ? $data : []];
         }

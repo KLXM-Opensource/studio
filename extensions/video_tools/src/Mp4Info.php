@@ -12,7 +12,6 @@ namespace Klxm\VideoTools;
 final class Mp4Info
 {
     private const MAX_MOOV = 64 * 1024 * 1024;
-    private const CONTAINERS = ['moov', 'trak', 'mdia', 'minf', 'stbl', 'edts', 'udta'];
 
     /** @return array{ok: bool, faststart: ?bool, duration: ?float, size: int, bitrate: ?int, streams: list<array>, container: string, error?: string} */
     public static function read(string $file): array

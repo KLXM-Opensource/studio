@@ -1,0 +1,24 @@
+includes:
+    - phpstan-baseline.neon   # bekannte Fehlalarme (Closures mit &-Variablen, magische Eigenschaften von sabre/vobject) – neue Funde fallen sofort auf
+
+# Statische Analyse: php tools/phpstan/vendor/bin/phpstan analyse  (Werkzeug: cd tools/phpstan && composer install)
+parameters:
+    level: 5
+    phpVersion: 80401
+    paths:
+        - app
+        - bin/console
+        - extensions/consent_kit
+        - extensions/dav
+        - extensions/video_tools
+    excludePaths:
+        - app/Admin/views/*
+        - app/Views/*
+        - app/Blocks/*.php   # Block-Vorlagen (Variablen aus dem Einbinden)
+        - extensions/*/views/*
+        - extensions/*/docs/*
+        - extensions/*/vendor/*
+    bootstrapFiles:
+        - tools/phpstan/bootstrap.php
+    tmpDir: storage/cache/phpstan
+    treatPhpDocTypesAsCertain: false

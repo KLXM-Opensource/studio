@@ -69,7 +69,7 @@ final class Compiler
 
     /**
      * Auslieferung für Domain + Sprache.
-     * @return array{services: array<string, array>, groups: list<array>, hash: string, gcm: list<string>, default: string, embeds: array<string,string>}
+     * @return array{services: array<string, array>, groups: list<array>, hash: string, gcm: list<string>, default: string, embeds: array<string,string>, domain: string, lang: string}
      */
     public static function build(?string $domain = null, ?string $lang = null): array
     {
