@@ -37,7 +37,8 @@ $today = (new DateTimeImmutable('today', Calendar::tz()))->format('Y-m-d');
   <?php else: ?>
   <ol class="cal-uplist" role="list">
     <?php foreach ($occ as $o): $e = $o['entry']; $url = !empty($d['link_detail']) ? Entries::href($t, $e) : null; $title = Entries::title($t, $e);
-      $loc = !empty($d['show_location']) && $c['location'] !== '' ? Entries::html($t, $e, $c['location'], ['plain' => true]) : ''; ?>
+      $loc = !empty($d['show_location']) && $c['location'] !== '' ? Entries::html($t, $e, $c['location'], ['plain' => true]) : '';
+      $desc = !empty($d['show_description']) && $c['description'] !== '' ? trim(strip_tags((string) Entries::html($t, $e, $c['description'], ['plain' => true]))) : ''; ?>
     <li class="cal-upitem<?= $o['start']->format('Y-m-d') === $today ? ' is-today' : '' ?>"><?= $b->targetEdit('entry:' . $t['handle'] . ':' . (int) $e['id'], $title) ?>
       <?php if ($layout === 'list'): ?>
       <span class="cal-upcal" aria-hidden="true"><span class="cal-upday"><?= e($o['start']->format('j')) ?></span><span class="cal-upmon"><?= e(Calendar::fmt($o['start'], 'LLL')) ?></span></span>
@@ -45,6 +46,7 @@ $today = (new DateTimeImmutable('today', Calendar::tz()))->format('Y-m-d');
       <div class="cal-upbody">
         <<?= $hTag ?> class="cal-upname"><?= $url ? '<a class="cal-link" href="' . e($url) . '">' . e($title) . '</a>' : e($title) ?></<?= $hTag ?>>
         <p class="cal-upmeta"><time datetime="<?= e($o['all_day'] ? $o['start']->format('Y-m-d') : $o['start']->format('Y-m-d\TH:iP')) ?>"><?= e(Calendar::when($o)) ?></time><?php if ($loc !== ''): ?><span aria-hidden="true"> · </span><span class="cal-loc"><?= $loc ?></span><?php endif; ?></p>
+        <?php if ($desc !== ''): ?><p class="cal-updesc"><?= e($desc) ?></p><?php endif; ?>
       </div>
     </li>
     <?php endforeach; ?>

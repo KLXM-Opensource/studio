@@ -34,3 +34,6 @@
 /* Dunkle Abschnitte: Raster in Abschnittsfarbe statt Papier – sonst helle Schrift auf hellem Grund */
 :is(.bg-accent,.bg-dark,.sec--ov-dark) .cal-grid{--e-bg:var(--e-sec-bg)}
 .cal-day.is-other{background:color-mix(in srgb,var(--e-ink) 5%,var(--e-bg))}
+
+/* Nächste Termine: Kurzbeschreibung (show_description), höchstens zwei Zeilen */
+.cal-updesc{margin:.3rem 0 0;font-size:.875em;line-height:1.5;opacity:.82;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}

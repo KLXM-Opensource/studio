@@ -267,6 +267,11 @@ return [
                     'help' => 'Kurz und klein (< 8 MB). Startet nur ohne „Bewegung reduzieren“ und hat eine Pause-Schaltfläche. Das Bild dient als Standbild.'],
                 ['name' => 'overlay', 'label' => 'Abdunkelung (nur „Vollflächig“)', 'type' => 'select', 'required' => true, 'default' => 'strong', 'width' => 'half', 'variants' => ['fullbleed'],
                     'options' => ['strong' => 'Stark (empfohlen)', 'medium' => 'Mittel', 'gradient' => 'Verlauf von unten']],
+                ['name' => 'bleed_height', 'label' => 'Höhe (nur „Vollflächig“)', 'type' => 'select', 'required' => true, 'default' => 'tall', 'width' => 'half', 'variants' => ['fullbleed'],
+                    'options' => ['tall' => 'Hoch (fast bildschirmfüllend)', 'medium' => 'Mittel', 'low' => 'Niedrig (Seitenkopf)']],
+                ['name' => 'bleed_motion', 'label' => 'Bewegung des Bildes (nur „Vollflächig“)', 'type' => 'select', 'required' => true, 'default' => 'none', 'width' => 'half', 'variants' => ['fullbleed'],
+                    'options' => ['none' => 'Keine', 'parallax' => 'Parallax – Bild läuft beim Scrollen langsamer', 'zoom' => 'Langsamer Zoom'],
+                    'help' => 'Nur mit „Animationen“ und nie bei „Bewegung reduzieren“. Mit weiteren Bildern (Bilderfolge) blenden die Bilder nacheinander über.'],
                 ['name' => 'cards', 'label' => 'Karten (nur „Mit gestapelten Karten“)', 'type' => 'repeater', 'item_label' => 'Karte', 'title_field' => 'title', 'max_items' => 3, 'variants' => ['cards'], 'fields' => [
                     ['name' => 'icon', 'label' => 'Symbol', 'type' => 'icon', 'width' => 'half'],
                     ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'max' => 50, 'width' => 'half'],
@@ -275,7 +280,7 @@ return [
                 // Neue Varianten: Felder erscheinen nur dort (Core\Fields 'variants')
                 ['name' => 'scale_items', 'label' => 'Stufenleiste: Kennzahlen oder Schlagworte (eine pro Zeile, bis zu 4)', 'type' => 'textarea', 'rows' => 4, 'variants' => ['scale'],
                     'help' => '„Wert: Bezeichnung“ ergibt eine Kennzahl, z. B. „24 h: Rückmeldung“; eine Zeile ohne Doppelpunkt ein Schlagwort. Jede Stufe ist eine Schriftstufe kleiner – wie die Typo-Skala. Nur belegbare Zahlen.'],
-                ...\Core\Blocks\Hero::fields('gallery', ['collage']),
+                ...\Core\Blocks\Hero::fields('gallery', ['collage', 'fullbleed']),   // „Vollflächig“: Bilderfolge (Überblendung)
                 ...\Core\Blocks\Hero::fields('compare', ['compare']),
             ],
         ],
@@ -475,19 +480,22 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt', 'background' => 'accent',
-            'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box', 'split' => 'Mit Bild', 'big' => 'Großer Schriftzug'],
+            'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box', 'split' => 'Mit Bild', 'big' => 'Großer Schriftzug', 'photo' => 'Foto mit Textkarte (Bild über die volle Breite)'],
             'fields' => [
                 ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60],
                 ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'required' => true, 'max' => 110],
                 ['name' => 'text', 'label' => 'Text (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 300],
                 ...$buttons,
-                ['name' => 'image', 'label' => 'Bild (bei „Mit Bild“)', 'type' => 'media'],
+                ['name' => 'image', 'label' => 'Bild (bei „Mit Bild“ und „Foto mit Textkarte“)', 'type' => 'media'],
+                ['name' => 'card_pos', 'label' => 'Textkarte', 'type' => 'select', 'required' => true, 'default' => 'left', 'width' => 'half', 'variants' => ['photo'],
+                    'options' => ['left' => 'Links', 'right' => 'Rechts'],
+                    'help' => 'Das Bild bewegt sich beim Scrollen leicht (Parallax), die Karte gleitet herein – nur mit „Animationen“.'],
             ],
         ],
         'tabs' => [
             'label' => 'Reiter (Tabs)', 'icon' => 'list-bullets', 'group' => 'Inhalt',
             'help' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter. „Reiter links“ stellt sich bei wenig Platz automatisch oben an. Ohne JavaScript stehen alle Inhalte untereinander.',
-            'variants' => ['top' => 'Reiter oben', 'side' => 'Reiter links'],
+            'variants' => ['top' => 'Reiter oben', 'side' => 'Reiter links', 'stage' => 'Bühne – nummerierte Liste links, großes Bild mit Text (animiert)'],
             'fields' => [
                 ...$head(),
                 ['name' => 'items', 'label' => 'Reiter', 'type' => 'repeater', 'item_label' => 'Reiter', 'title_field' => 'label', 'max_items' => 8, 'fields' => [
@@ -545,6 +553,7 @@ return [
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
+            'variants' => ['cards' => 'Karten – Typ-Etikett, „Ansehen“ und Herunterladen', 'list' => 'Liste – die ganze Zeile öffnet die Datei, Symbol statt Etikett'],
             'fields' => [
                 ...$head(),
                 ['name' => 'source', 'label' => 'Quelle', 'type' => 'select', 'required' => true, 'default' => 'manual', 'width' => 'half',

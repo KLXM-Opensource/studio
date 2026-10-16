@@ -61,8 +61,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
   --f-btn-bg:var(--f-fg);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-sec-bg))
 }
 .sec--ov-dark{--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 88%,transparent);--f-btn-ink:var(--f-dark)}
-/* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
-.bg-white:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-muted:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}
+/* Gleiche Hintergründe hintereinander: ein Abstand statt zwei – nicht nach/vor Abschnitten mit Bild (Hintergrundbild, Einstieg „vollflächig“) */
+.bg-white:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split,.sec--hero.v-fullbleed)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split,.sec--hero.v-fullbleed),.bg-muted:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split,.sec--hero.v-fullbleed)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split,.sec--hero.v-fullbleed),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}
 .pt-small{padding-top:calc(var(--f-sec) * .45)}.pt-none{padding-top:0}
 .pt-large{padding-top:calc(var(--f-sec) * 1.6)}.pb-large{padding-bottom:calc(var(--f-sec) * 1.6)}
 .pb-small{padding-bottom:calc(var(--f-sec) * .45)}.pb-none{padding-bottom:0}

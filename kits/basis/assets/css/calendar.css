@@ -12,3 +12,6 @@
 .cal-up--compact .cal-upitem{border-width:0 0 1px;box-shadow:none}
 .cal-navlink,.cal-chip{border-radius:var(--b-btn-r);border-color:var(--b-line-strong)}
 .cal-sublink{color:var(--b-link)}
+
+/* Nächste Termine: Kurzbeschreibung (show_description), höchstens zwei Zeilen */
+.cal-updesc{margin:.3rem 0 0;font-size:.875em;line-height:1.5;opacity:.82;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}

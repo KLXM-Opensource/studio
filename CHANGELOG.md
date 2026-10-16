@@ -26,7 +26,15 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Fließende Seitenwechsel wie im Kit „foto“:** Werk aus dem Raster wird zum Werk auf der Detailseite, Ausstellungsbild zur Ausstellung, Text (Menü, Künstlerliste, Buttons) gleitet zur Überschrift, zurück in umgekehrter Richtung (`js/vt.js` im Kopf, `js/site.js`).
 - **Werke filtern mit fließender Neuordnung:** bleibende Werke gleiten an ihren neuen Platz, andere blenden aus bzw. ein (`document.startViewTransition`).
 
+### Kit fluid: Vereine und Verbände
+- **Kopf:** „Logo ragt unten aus dem Kopfbereich“ (quadratische Logos, Siegel), „Größe der Menüpunkte: Kompakt“ (die Platzschätzung `fluid_nav_fit()` berücksichtigt jetzt auch Versalien), „Markierung des aktiven Menüpunkts“ in Hervorhebungs- oder zweiter Markenfarbe. Im farbigen Kopf sind geöffnete/aktive Menüpunkte und der Handlungsaufruf wieder lesbar (vorher helle Fläche bzw. Akzent auf Akzent).
+- **Seitenwechsel „Fließend“** (View Transitions): Kartenbild gleitet zum Bild der Detailseite und zurück (`js/vt.js`, Option, Standard aus).
+- **Zurück zur Ausgangsseite** (Option): Detailseiten nennen die Seite, von der man kam („← Zurück zur Startseite“), gehen im Verlauf zurück (Scrollposition bleibt), zeigen den Listen-Link der Vorlage ohne Pfeil und unten noch einmal „Zurück“ (`js/backnav.js`).
+- **Einstieg „Vollflächig“:** Höhe (hoch, mittel, niedrig), Bewegung (Parallax, langsamer Zoom) und Bilderfolge mit Überblendung – nur CSS, nur mit Animationen. Nach dem Einstieg fehlte dem folgenden weißen Abschnitt der Abstand oben (behoben).
+- **Neue Varianten:** Reiter „Bühne“ (nummerierte Liste, großes Bild mit Textkarte, animierter Wechsel), Handlungsaufruf „Foto mit Textkarte“ (Parallax, Karte gleitet herein), Downloads „Liste“ (Symbol je Dateityp, ganze Zeile klickbar).
+
 ### Kern
+- **Nächste Termine:** Option „Kurzbeschreibung anzeigen“ (zwei Zeilen aus dem Beschreibungsfeld des Kalenders, alle Kits). **Datensatz-Felder „Profil“:** Option „Fläche füllen“ für Porträtfotos (`image_fit`).
 - **Termine nach aufgerufenem Eintrag filtern:** Die Blöcke „Kalender“ und „Nächste Termine“ haben wie die Datenliste die Bedingung „verknüpft mit dem aufgerufenen Eintrag“ bzw. „gleich wie beim aufgerufenen Eintrag“ – z. B. auf der Detailseite einer Gruppe oder eines Ortes nur deren Termine (`filter_op` `current`/`same`, `Calendar::blockWhere()`).
 - **Lightbox der Kern-Galerie** (Blöcke „Bildergalerie“, Ansichten in galerie u. a.): bei Kits mit „Animationen“ Zoom aus dem Vorschaubild und zurück, Gleiten mit Überblendung beim Blättern, Wischen folgt dem Finger. Ohne „Animationen“ bzw. mit „Bewegung reduzieren“ unverändert.
 - **Größte Datei beim Hochladen einstellbar:** Grundeinstellungen → Mediathek („Größte Datei beim Hochladen (MB)“, Standard 50) statt nur per `config.php`; gilt für Mediathek, Bildauswahl und Erweiterungen (`Media::maxMb()`). Hoster begrenzen mit `media.max_upload_cap_mb`. Importe aus Code können die Grenze mit `Media::import(…, ['max_bytes' => 0])` aufheben (Migrationen).

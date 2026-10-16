@@ -46,6 +46,11 @@
     <li><b>Menüpunkte mit Unterseiten:</b> „Link + Pfeil“ (Standard) – der Menüpunkt führt zu seiner Seite, der kleine Pfeil daneben öffnet die Unterseiten; „Link + Pfeil, öffnet auch beim Überfahren“ – zusätzlich mit der Maus; „Klick öffnet die Unterseiten“ – das frühere Verhalten mit dem Eintrag „Übersicht: …“. Gilt auch für das Menü auf dem Telefon.</li>
     <li><b>Dritte Menüebene:</b> „Eingerückt“ (Standard) – Unterseiten von Unterseiten stehen eingerückt mit Linie und etwas kleiner; „Gruppiert“ – die zweite Ebene wird zur kleinen Zwischenüberschrift, die dritte steht darunter.</li>
     <li><b>Höhe des Kopfbereichs:</b> normal, hoch oder sehr hoch – für große Logos. Beim Scrollen und auf schmalen Bildschirmen wird der Kopf mit weichem Übergang wieder normal hoch (nicht bei den Seitenleisten).</li>
+    <li><b>Logo ragt unten aus dem Kopfbereich:</b> für quadratische Logos, Siegel und Wappen – das Logo hängt über die schmale Leiste hinaus; beim Scrollen und auf dem Telefon passt es wieder hinein.</li>
+    <li><b>Größe der Menüpunkte:</b> „Kompakt“ (kleinere Schrift, engere Abstände) – bei vielen Menüpunkten bleibt das Menü so öfter in der Leiste, statt hinter „Menü“ zu verschwinden.</li>
+    <li><b>Markierung des aktiven Menüpunkts:</b> automatisch, in der Hervorhebungsfarbe oder in der zweiten Markenfarbe – z. B. Orange aus dem Logo auf grünem Kopf.</li>
+    <li><b>Seitenwechsel „Fließend“:</b> Das Bild einer angeklickten Karte gleitet zum Bild der Detailseite, die Überschrift zur Überschrift; zurück in umgekehrter Richtung (Chrome, Edge, Safari; nur mit „Animationen“).</li>
+    <li><b>Zurück-Link auf Detailseiten „Zurück zur Ausgangsseite“:</b> oben „← Zurück zu …“ mit dem Namen der Seite, von der man kam (zurück an die alte Scrollposition), daneben der Link der Vorlage (z. B. „Alle News“) ohne Pfeil, am Ende der Seite noch einmal „Zurück“.</li>
     <li><b>Linie über dem Fußbereich:</b> wie Farbwirkung, keine, Linie, Linie mit Schatten nach unten, geprägt oder Farbband – mit <b>Farbe</b> (Linienfarbe, Akzent, zweite Markenfarbe, Schriftfarbe, Weiß) und <b>Dicke</b> (1–10 px).</li>
   </ul>
 
@@ -57,6 +62,10 @@
     <li><b>Fließtext „Artikel mit Inhaltsverzeichnis“:</b> Feld <b>Beim Scrollen mitlaufen</b> – „Aktuellen Abschnitt markieren“ lässt eine Markierung im Inhaltsverzeichnis weich zum Abschnitt gleiten, der gerade gelesen wird; „Markieren mit Lesefortschritt“ zeigt zusätzlich links eine Linie, die mit dem Lesen wächst. Standard: aus.</li>
     <li><b>Fließtext:</b> Feld <b>Textbreite</b> (schmal, Lesebreite, breit, volle Breite) – auch direkt auf der Seite am rechten Rand des Textes ziehbar.</li>
     <li><b>Text + Bild:</b> Feld <b>Aufteilung Bild/Text</b> (Text breiter, ausgewogen, Bild breiter, Bild deutlich breiter) – auch auf der Seite am inneren Bildrand ziehbar.</li>
+    <li><b>Einstieg „Vollflächig“:</b> Felder <b>Höhe</b> (hoch, mittel, niedrig als Seitenkopf), <b>Bewegung des Bildes</b> (Parallax oder langsamer Zoom) und <b>Bilderfolge</b> – weitere Bilder blenden nacheinander über. Ein lokales Video (MP4, stumm) läuft wie bisher als Hintergrund.</li>
+    <li><b>Reiter „Bühne“:</b> nummerierte Liste links, rechts ein großes Bild mit dem Text als Karte; beim Wechsel blendet das Bild mit leichtem Zoom über und die Karte gleitet herein – z. B. für Angebote, Kurse, Leistungen.</li>
+    <li><b>Handlungsaufruf „Foto mit Textkarte“:</b> Foto über die volle Breite, darauf eine Karte (links oder rechts) mit Titel, Text und Button; das Bild bewegt sich beim Scrollen leicht.</li>
+    <li><b>Downloads „Liste“:</b> ruhige Liste mit Symbol je Dateityp – die ganze Zeile öffnet die Datei (PDF im Betrachter, der selbst „Herunterladen“ anbietet), daneben ein kleiner Download-Knopf.</li>
     <li><b>Abstand oben/unten</b> jedes Abschnitts gibt es in Fluid zusätzlich als „Groß“ – in der Seitenleiste oder per Ziehen am Abschnittsrand (siehe <a href="<?= e(url('/admin/hilfe#ziehen')) ?>">Mit der Maus ziehen</a>).</li>
   </ul>
 

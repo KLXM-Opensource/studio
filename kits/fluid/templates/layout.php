@@ -12,7 +12,7 @@ $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
 // Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten, Farbenfroh) – nur das Gewählte
 $optCss = [];
-foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette', 'sections'] as $opt) {
+foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette', 'sections', 'transitions'] as $opt) {
     $file = 'css/opt-' . $opt . '-' . preg_replace('~[^a-z]~', '', (string) design($opt)) . '.css';
     if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
 }
@@ -55,7 +55,10 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?php endif; ?>
 <?php if ($toolbar): ?><link rel="stylesheet" href="<?= e(asset('css/editor.css')) ?>">
 <?php endif; ?>
+<?php if (!$editor && !is_editing() && design('transitions') === 'morph'): ?><script src="<?= e(theme_asset('js/vt.js')) ?>"></script><?php /* Seitenwechsel: pagereveal vor dem ersten Bild */ ?>
+<?php endif; ?>
 <?php if (!$editor): ?><script src="<?= e(theme_asset('js/site.js')) ?>" defer></script>
+<?php if (!is_editing() && design('back_nav') === 'smart'): ?><script src="<?= e(theme_asset('js/backnav.js')) ?>" defer></script><?php endif; ?>
 <?php endif; ?>
 <?php if (isset(app()->request->query['pwa']) && setting('sys.pwa', true) && setting('sys.pwa_offline', true)): ?><script src="<?= e(asset('js/pwa.js')) ?>" data-sw="<?= e(base_path()) ?>/sw.js" data-scope="<?= e(base_path()) ?>/" defer></script>
 <?php endif; ?>

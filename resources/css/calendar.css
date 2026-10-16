@@ -101,3 +101,6 @@
 .cal-subalt a{color:inherit}
 .cal-more{margin-top:clamp(20px,3vw,32px)}
 @media (forced-colors:active){.cal-ev,.cal-upcal,.cal-day.is-today .cal-num{border:1px solid CanvasText}}
+
+/* Nächste Termine: Kurzbeschreibung (show_description), höchstens zwei Zeilen */
+.cal-updesc{margin:.3rem 0 0;font-size:.875em;line-height:1.5;opacity:.82;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}

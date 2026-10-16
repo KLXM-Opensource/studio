@@ -64,7 +64,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
   } ?>
   <header class="df-profile<?= $img ? ' df-profile--img' : '' ?>">
     <?php if ($img && ($pic = Entries::html($t, $e, $img, ['ratio' => $ratio, 'sizes' => '(min-width: 1080px) 320px, 50vw']))): ?>
-    <div class="df-img df-img--contain df-profile__img ratio-<?= e(str_replace(':', '-', $ratio)) ?>"<?= entry_edit_attr($t, $e, $img) ?>><?= $pic ?></div>
+    <div class="df-img<?= ($d['image_fit'] ?? '') === 'cover' ? '' : ' df-img--contain' ?> df-profile__img ratio-<?= e(str_replace(':', '-', $ratio)) ?>"<?= entry_edit_attr($t, $e, $img) ?>><?= $pic ?></div>
     <?php endif; ?>
     <div class="df-profile__body">
       <?php if ($chips): ?><p class="dl-chips df-profile__chips"><?= implode(' ', $chips) ?></p><?php endif; ?>

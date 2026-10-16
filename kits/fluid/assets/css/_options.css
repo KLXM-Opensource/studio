@@ -93,13 +93,16 @@ html.ln-marker main a:not([class]):hover{background-size:100% 100%}
   --f-ink:var(--f-fg);--f-text:var(--f-fg);--f-muted:color-mix(in srgb,var(--f-fg) 82%,var(--f-zone));--f-bg:var(--f-zone);
   --f-line:color-mix(in srgb,var(--f-fg) 20%,transparent);--f-line-strong:color-mix(in srgb,var(--f-fg) 48%,transparent);
   --f-surface:color-mix(in srgb,var(--f-fg) 12%,transparent);--f-surface-2:color-mix(in srgb,var(--f-fg) 16%,transparent);
-  --f-card:color-mix(in srgb,var(--f-fg) 7%,transparent);--f-link:var(--f-fg);--f-focus:var(--f-fg);
+  --f-card:color-mix(in srgb,var(--f-fg) 7%,transparent);--f-a-soft:color-mix(in srgb,var(--f-fg) 18%,transparent);--f-link:var(--f-fg);--f-focus:var(--f-fg);
   --f-btn-bg:var(--f-fg);--f-btn-ink:var(--f-zone);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-zone))}
 .hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta{--f-zone:var(--f-a);--f-fg:var(--f-a-on)}
 .hbg-secondary .hdr,.fbg-secondary .ftr,.meta-secondary .hdr__meta{--f-zone:var(--f-b);--f-fg:var(--f-b-on)}
 .hbg-dark .hdr,.fbg-dark .ftr,.meta-dark .hdr__meta{--f-zone:var(--f-dark);--f-fg:var(--f-on-dark)}
 :is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr{--f-hdr-bg:var(--f-zone);border-bottom-color:transparent}
 :is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[aria-current=page],:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[data-active]{text-decoration-color:currentColor}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__sublink[aria-current=page]::before{background:currentColor}
+/* Aktionen im farbigen Kopf (Handlungsaufruf, Menüpunkt-Link): Schriftfarbe der Fläche statt Akzentfarbe – sonst Grün auf Grün */
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below){--ha-accent:var(--f-fg);--ha-on:var(--f-zone)}
 :is(.hbg-accent,.hbg-secondary,.hbg-dark) .brand__mark{box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--f-zone) 60%,var(--f-fg))}
 .fbg-page .ftr{background:var(--f-bg)}
 :is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr{background:var(--f-zone);border-top-color:transparent;color:var(--f-muted)}
@@ -189,3 +192,36 @@ html.hdr-sticky.is-scrolled:is(.hh-tall,.hh-xtall){--hdr-h:4.25rem;--hdr-logo:2.
 .totop:hover{border-color:var(--f-a);color:var(--f-a-strong,var(--f-ink))}
 .totop .ico{font-size:1.25rem}
 @media (prefers-reduced-motion:reduce){.totop{transition:none}}
+
+/* Logo ragt unten aus dem Kopfbereich (design: logo_over) – quadratische Logos, Siegel, Wappen. Die Leiste bleibt schmal,
+   das Logo hängt darüber hinaus; beim Scrollen (html.is-scrolled, site.js) und in schmalen Leisten passt es wieder hinein. */
+html.logo-over{--lo-h:5.5rem}
+html.logo-over.logo-large{--lo-h:6.5rem}
+html.logo-over.logo-xl{--lo-h:7.5rem}
+html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
+.logo-over .hdr:not(.hdr--rail) .hdr__brand:has(.brand__logo){position:relative;align-self:stretch;flex:none;width:calc(var(--lo-h) * var(--lo-ratio,1));min-height:0}
+.logo-over .hdr:not(.hdr--rail) .hdr__brand .brand__logo{position:absolute;inset-block-start:.5rem;inset-inline-start:0;z-index:2}
+.logo-over .hdr:not(.hdr--rail) .hdr__brand .brand__logo img{width:auto;height:var(--lo-h);max-width:none;object-position:left top;filter:drop-shadow(0 8px 16px rgb(0 0 0 / .22));transition:height .35s cubic-bezier(.2,.7,.2,1)}
+@container hdr (max-width:48rem){.logo-over .hdr .hdr__brand{--lo-h:3.25rem}}
+@media (prefers-reduced-motion:reduce){.logo-over .hdr .brand__logo img{transition:none}}
+
+/* Größe der Menüpunkte (design: nav_size) – „Kompakt“ für viele Menüpunkte */
+.nz-compact .hnav__link{font-size:.8125rem;padding-inline:.5rem}
+.nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{min-width:1.3rem;padding-inline:.15rem .3rem}
+.nz-compact.nl-caps .hnav__link{letter-spacing:.06em}
+
+/* Markierung des aktiven Menüpunkts (design: nav_mark) – Linie, Punkt und Strich im Aufklappmenü */
+.nm-highlight .hdr{--f-nav-mark:var(--f-a2)}
+.nm-secondary .hdr{--f-nav-mark:var(--f-b)}
+:is(.nm-highlight,.nm-secondary) :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){text-decoration-color:var(--f-nav-mark)}
+:is(.nm-highlight,.nm-secondary).nl-dot :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link)::after,
+:is(.nm-highlight,.nm-secondary) .hnav__sublink[aria-current=page]::before{background:var(--f-nav-mark)}
+
+/* Zurück zur Ausgangsseite (design: back_nav = smart, js/backnav.js): oben „← Zurück zu …“ und der Link der Vorlage ohne Pfeil,
+   am Seitenende noch einmal „Zurück“ */
+.df-backbar{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1.5rem}
+.df-back .df-back__list{color:var(--f-muted);font-weight:500;text-decoration:underline;text-decoration-color:var(--f-line-strong);text-underline-offset:.3em}
+.df-back .df-back__list:hover{color:var(--f-ink)}
+.backnav-end{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;padding-block:var(--f-s-l) var(--f-s-xl);border-top:1px solid var(--f-line)}
+.backnav-end a{color:var(--f-link);font-weight:600;text-decoration:none}
+.backnav-end a:hover{text-decoration:underline}

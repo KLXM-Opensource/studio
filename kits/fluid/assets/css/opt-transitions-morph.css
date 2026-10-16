@@ -1,0 +1,15 @@
+/* Fließende Seitenwechsel (design: transitions = morph; View Transitions in Chrome, Edge, Safari ≥ 18.2 – andere wechseln wie gewohnt).
+   Kopf bleibt stehen, der Inhalt blendet weich über, das Bild der angeklickten Karte gleitet zum Bild der Detailseite (js/vt.js). */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  .hdr{view-transition-name:f-hdr}
+  ::view-transition-old(root){animation:f-vt-out .3s cubic-bezier(.4,0,1,1) both}
+  ::view-transition-new(root){animation:f-vt-in .55s cubic-bezier(.2,.7,.2,1) .06s both}
+  ::view-transition-group(f-morph){animation-duration:.6s;animation-timing-function:cubic-bezier(.2,.75,.15,1)}
+  ::view-transition-old(f-morph),::view-transition-new(f-morph){height:100%;object-fit:cover;overflow:clip}
+  ::view-transition-group(f-title){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.75,.15,1)}
+  ::view-transition-old(f-title),::view-transition-new(f-title){height:100%;width:auto;object-fit:none;object-position:left center}
+  :root:not(.has-motion)::view-transition-group(*),:root:not(.has-motion)::view-transition-old(*),:root:not(.has-motion)::view-transition-new(*){animation:none}
+}
+@keyframes f-vt-out{to{opacity:0;translate:0 -.75rem;scale:.99}}
+@keyframes f-vt-in{from{opacity:0;translate:0 1.5rem}}

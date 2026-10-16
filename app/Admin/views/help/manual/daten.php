@@ -57,6 +57,8 @@
     <li>Wird ein Eintrag gelöscht, verschwinden die Verknüpfungen automatisch – es bleiben keine toten Verweise.</li>
     <li><b>Auch im öffentlichen Formular:</b> Besucher wählen aus zentral gepflegten Einträgen – z. B. Ort, Kategorie oder Thema. „Ein Eintrag“ erscheint als Auswahlliste, „mehrere“ als Ankreuzfelder; angeboten werden nur <b>veröffentlichte</b> Einträge der verknüpften Tabelle. Neue Orte oder Themen legen Sie einfach in dieser Tabelle an – sie stehen sofort im Formular. (Nicht in verschlüsselten Eingängen.)</li>
     <li>In der <b>Datenliste</b> filtern Sie nach Verknüpfungen: „Kategorie ist gleich Neuigkeiten“ – oder auf Detailseiten mit <b>verknüpft mit dem aufgerufenen Eintrag</b> (Beiträge dieser Person / dieser Kategorie) bzw. <b>gleich wie beim aufgerufenen Eintrag</b> plus „Aufgerufenen Eintrag ausblenden“ (= „Weitere Beiträge aus dieser Kategorie“). Dieselben Bedingungen gibt es in den Blöcken <b>Kalender</b> und <b>Nächste Termine</b> – z. B. auf der Detailseite einer Gruppe nur deren Termine.</li>
+    <li><b>Nächste Termine:</b> „Kurzbeschreibung anzeigen“ zeigt unter jedem Termin zwei Zeilen aus dem Beschreibungsfeld des Kalenders.</li>
+    <li><b>Datensatz-Felder, Darstellung „Profil“:</b> „Bild bei Profil“ – ganz zeigen auf heller Fläche (Logos, Standard) oder <b>Fläche füllen</b> (Fotos, Porträts).</li>
   </ul>
 
   <h3>2. Einträge pflegen</h3>

@@ -10,3 +10,21 @@
 .download__view:hover{border-color:var(--f-ink)}
 .download__dl{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:var(--f-btn-r);background:var(--f-btn-bg);color:var(--f-btn-ink);font-size:1.2rem}
 .download__dl:hover{background:var(--f-btn-hover)}
+
+/* Variante „Liste“: Zeilen mit Trennlinie, Symbol je Dateityp in getönter Fläche, die ganze Zeile ist der Link (::after), rechts
+   ein Hinweis (Auge = ansehen) und – bei PDFs – Herunterladen als eigene kleine Schaltfläche */
+.downloads--list{gap:0;border-top:1px solid var(--f-line)}
+.dlrow{position:relative;display:flex;align-items:center;gap:1rem;padding:1rem .75rem;border-bottom:1px solid var(--f-line);border-radius:0;transition:background-color .2s}
+.dlrow:hover,.dlrow:focus-within{background:color-mix(in srgb,var(--f-surface) 70%,transparent)}
+.dlrow__icon{display:grid;place-items:center;flex:none;width:2.75rem;height:2.75rem;border-radius:50%;background:var(--f-a-soft);color:var(--f-a);font-size:1.3rem;transition:scale .25s cubic-bezier(.2,.7,.2,1)}
+.dlrow:hover .dlrow__icon{scale:1.08}
+.dlrow__main{flex:1 1 auto;display:grid;gap:.15rem;min-width:0}
+.dlrow__name{color:var(--f-ink);font-weight:650;text-decoration:none;overflow-wrap:anywhere}
+.dlrow__name::after{content:"";position:absolute;inset:0}
+.dlrow__name:focus-visible{outline:none}.dlrow:has(.dlrow__name:focus-visible){outline:2px solid var(--f-focus);outline-offset:2px}
+.dlrow__meta{color:var(--f-muted);font-size:var(--f-t-1)}
+.dlrow__hint{flex:none;color:var(--f-muted);font-size:1.15rem;transition:color .2s,translate .25s}
+.dlrow:hover .dlrow__hint{color:var(--f-a);translate:2px 0}
+.dlrow__dl{position:relative;z-index:1;display:grid;place-items:center;flex:none;width:2.5rem;height:2.5rem;border-radius:50%;color:var(--f-muted);font-size:1.15rem;transition:background-color .2s,color .2s}
+.dlrow__dl:hover{background:var(--f-a);color:var(--f-a-on)}
+@media (prefers-reduced-motion:reduce){.dlrow,.dlrow__icon,.dlrow__hint{transition:none}}

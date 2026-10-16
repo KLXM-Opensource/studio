@@ -240,11 +240,18 @@ function fluid_nav_fit(array $menu, ?array $cta, array $langs, bool $search, str
     $em = fn(string $s, float $size) => mb_strlen($s) * 0.57 * $size;          // mittlere Zeichenbreite
     $nav = 0.0;
     $split = fluid_nav_parent() !== 'overview';
-    foreach ($menu as $m) $nav += $em((string) $m['label'], .9375) + 1.5 + ($m['children'] ? ($split ? 1.75 : 1.05) : 0) + .25;
+    // Menüpunkte: Größe (Design „Größe der Menüpunkte“) und Versalien (Stil „caps“: breitere Zeichen, gesperrt)
+    $compact = design('nav_size') === 'compact';
+    $caps = design('nav_style') === 'caps';
+    $size = $caps ? .8125 * 1.3 : ($compact ? .8125 : .9375);
+    $pad = $compact ? 1.0 : 1.5;
+    foreach ($menu as $m) $nav += $em((string) $m['label'], $size) + $pad + ($m['children'] ? ($split ? ($compact ? 1.4 : 1.75) : 1.05) : 0) + .25;
     $logo = (int) setting('logo');
     $brand = $logo ? 11.5 : 2.5 + .7 + $em(fluid_name(true), 1.125);
     // Größeres Logo bzw. größere Wortmarke (Design → „Größe von Logo bzw. Wortmarke“)
     $brand *= ['large' => 1.25, 'xl' => 1.5][(string) design('logo_size')] ?? 1;
+    // Überstehendes Logo (quadratisch, hängt aus der Leiste): Breite ≈ Höhe
+    if ($logo && design('logo_over')) $brand = ['large' => 6.5, 'xl' => 7.5][(string) design('logo_size')] ?? 5.5;
     // Aktionen rechts (Suche, Handlungsaufruf, Kontakt-Chip …) schätzt Core\HeaderActions je nach Einstellung
     $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0);
     $gut = 2 * 2.4;                                                           // Seitenabstand bei ~60–80 rem
