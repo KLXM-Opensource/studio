@@ -880,6 +880,7 @@ img.media-vthumb{object-fit:cover}
 .pt-node[aria-selected=true] > .pt-row .pt-stbtn:hover{background:rgba(255,255,255,.18)}
 .pt-node[aria-selected=true] > .pt-row .pt-stbtn:focus-visible{outline-color:#fff}
 .dt-foot{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;background:var(--adm-fill);color:var(--adm-t3);font-size:12px}
+.dt-pager{display:inline-block}
 .dt-pager a{margin:0 6px}
 .dt-empty{display:grid;justify-items:center;gap:12px;padding:60px 20px;color:var(--adm-t3);text-align:center}
 .dt-entry{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}

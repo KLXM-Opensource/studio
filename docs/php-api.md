@@ -95,6 +95,7 @@ Baukasten der Verwaltung (Vorbild: macOS-Systemeinstellungen) – für Kernseite
 - `static link(string $label, string $href, string $sub = '', string $value = ''): string` – Ganze Zeile als Link (öffnet eine Unterseite)
 - `static nav(array $items, string $current, string $label = ''): string` – Bereichsliste (Links): $items key => [href, label, icon, badge?, warn?] oder '-' für eine Trennlinie
 - `static open(array $items, string $current, string $label = '', bool $title = true): string` – Rahmen öffnen: Bereichsliste links, Inhalt rechts (mit Überschrift des Bereichs)
+- `static pager(int $page, int $pages, callable $url): string` – Seitenumschalter unter Listen: „← Zurück · Seite 2 / 5 · Weiter →“. $url(int $page): Adresse der Seite. Bei einer Seite: ''.
 - `static row(string $label, string $control = '', string $sub = '', array $opt = []): string` – Eine Zeile: Beschriftung und Erklärung links, Bedienung rechts ($control = fertiges HTML, z. B. Schalter, Knopf, Wert).
 - `static savebar(string $note = '', string $label = ''): string` – Feste Speichern-Leiste (innerhalb eines Formulars)
 - `static tabs(array $sections, array $form = [], string $label = ''): string` – Bereiche auf derselben Seite (Wechsel ohne Neuladen, Adresse #bereich): $sections id => [label, icon, html, badge?, warn?, error?] oder '-' (Trennlinie).
@@ -829,7 +830,7 @@ Werte für die Anzeige formatieren – eine Stelle für Datum, Zahl, Größe, Da
 - `static admin(): self` – Formatierer für die Verwaltung (Sprache der angemeldeten Person, I18n::locale())
 - `bytes(int|float|null $bytes): string` – Dateigröße: unter 1 MB ganze KB (mindestens 1 KB), dann MB bzw. GB mit einer Nachkommastelle
 - `currency(string|int|float|null $v, string $currency = 'EUR', ?int $decimals = 2): string` – Betrag: 19,90 € (de) bzw. €19.90; $decimals null = 2, bei ganzen Beträgen 0
-- `date(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September) – über ICU
+- `date(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September), dm (24.09. / 24/09) – über ICU
 - `datetime(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum und Uhrzeit („24.09.2026, 14:05“; Stil des Datums wie date()) – über ICU
 - `decimal(string|int|float|null $v, int $max = 2): string` – Zahl mit höchstens $max Nachkommastellen, ohne Nullen am Ende: 2,5 · 3 · 1.234,57
 - `duration(int|float|null $seconds, bool $unit = true): string` – Dauer: 3:05 min bzw. 1:02:03 h; ohne Einheit 3:05 / 1:02:03 (z. B. für Player)

@@ -87,11 +87,7 @@ $n404 = $count404;
       </div>
     </form>
     <?php if ($list['pages'] > 1): ?>
-    <nav class="dt-pager" aria-label="<?= e(__('Seiten')) ?>">
-      <?php if ($list['page'] > 1): ?><a href="<?= e($qs(['page' => $list['page'] - 1])) ?>">← <?= e(__('Zurück')) ?></a><?php endif; ?>
-      <?= e(__('Seite {page} / {pages}', ['page' => $list['page'], 'pages' => $list['pages']])) ?>
-      <?php if ($list['page'] < $list['pages']): ?><a href="<?= e($qs(['page' => $list['page'] + 1])) ?>"><?= e(__('Weiter')) ?> →</a><?php endif; ?>
-    </nav>
+    <?= \Core\AdminUi::pager($list['page'], $list['pages'], fn(int $p) => $qs(['page' => $p])) ?>
     <?php endif; ?>
     <?php endif; ?>
   </div>

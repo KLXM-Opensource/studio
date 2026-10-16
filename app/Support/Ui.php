@@ -73,11 +73,6 @@ final class Ui
 
     public static function pager(int $page, int $pages, callable $qs): string
     {
-        if ($pages <= 1) return '';
-        $out = '<nav class="dt-pager" aria-label="' . e(__('Seiten')) . '">';
-        if ($page > 1) $out .= '<a href="' . e($qs(['seite' => $page - 1])) . '">← ' . e(__('Zurück')) . '</a> ';
-        $out .= e(__('Seite {page} / {pages}', ['page' => $page, 'pages' => $pages]));
-        if ($page < $pages) $out .= ' <a href="' . e($qs(['seite' => $page + 1])) . '">' . e(__('Weiter')) . ' →</a>';
-        return $out . '</nav>';
+        return \Core\AdminUi::pager($page, $pages, fn(int $p) => $qs(['seite' => $p]));
     }
 }

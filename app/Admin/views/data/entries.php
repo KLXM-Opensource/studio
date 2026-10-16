@@ -128,11 +128,7 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
   <footer class="dt-foot">
     <span><?= $total ?> <?= $total === 1 ? 'Eintrag' : 'Einträge' ?><?= $manual ? ' · Reihenfolge per Ziehen ändern' : '' ?></span>
     <span data-entries-msg aria-live="polite"></span>
-    <?php if ($pages > 1): ?><span class="dt-pager">
-      <?php if ($page > 1): ?><a href="<?= e($qs(['seite' => $page - 1])) ?>">← Zurück</a><?php endif; ?>
-      Seite <?= $page ?> / <?= $pages ?>
-      <?php if ($page < $pages): ?><a href="<?= e($qs(['seite' => $page + 1])) ?>">Weiter →</a><?php endif; ?>
-    </span><?php endif; ?>
+    <?= \Core\AdminUi::pager($page, $pages, fn(int $p) => $qs(['seite' => $p])) ?>
   </footer>
   <?php endif; ?>
 </div>

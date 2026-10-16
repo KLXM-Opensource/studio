@@ -142,4 +142,17 @@ final class AdminUi
         return '<div class="adm-savebar"><button class="adm-btn adm-btn--primary" type="submit">' . e($label !== '' ? $label : __('Speichern')) . '</button>'
             . ($note !== '' ? '<span class="adm-muted">' . e($note) . '</span>' : '') . '</div>';
     }
+
+    /**
+     * Seitenumschalter unter Listen: „← Zurück · Seite 2 / 5 · Weiter →“. $url(int $page): Adresse der Seite. Bei einer Seite: ''.
+     */
+    public static function pager(int $page, int $pages, callable $url): string
+    {
+        if ($pages <= 1) return '';
+        $out = '<nav class="dt-pager" aria-label="' . e(__('Seiten')) . '">';
+        if ($page > 1) $out .= '<a href="' . e($url($page - 1)) . '">← ' . e(__('Zurück')) . '</a> ';
+        $out .= e(__('Seite {page} / {pages}', ['page' => $page, 'pages' => $pages]));
+        if ($page < $pages) $out .= ' <a href="' . e($url($page + 1)) . '">' . e(__('Weiter')) . ' →</a>';
+        return $out . '</nav>';
+    }
 }
