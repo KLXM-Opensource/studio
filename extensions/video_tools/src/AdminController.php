@@ -129,11 +129,11 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
     {
         $this->guard($r);
         $m = $this->video($id);
-        if (!Ffmpeg::available()) return Response::json(['ok' => false, 'error' => __('ffmpeg ist auf diesem Server nicht verfügbar.')], 422);
-        if (!Analyzer::audio(Repo::meta($m)['info'])) return Response::json(['ok' => false, 'error' => __('Das Video hat keine Tonspur.')], 422);
+        if (!Ffmpeg::available()) return Response::fail(__('ffmpeg ist auf diesem Server nicht verfügbar.'));
+        if (!Analyzer::audio(Repo::meta($m)['info'])) return Response::fail(__('Das Video hat keine Tonspur.'));
         @set_time_limit(360);
         $l = Ffmpeg::loudness(Repo::path($m), 300);
-        if (!$l) return Response::json(['ok' => false, 'error' => __('Lautheit konnte nicht gemessen werden.')], 422);
+        if (!$l) return Response::fail(__('Lautheit konnte nicht gemessen werden.'));
         Repo::setLoudness($m, $l);
         return $this->info($r, $id);
     }
@@ -153,7 +153,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $mode = (string) ($r->post['mode'] ?? 'new');
         $del = !empty($r->post['delete_original']);
         if (($mode === 'replace' || $del) && !VideoTools::canReplace()) {
-            return Response::json(['ok' => false, 'error' => __('Original ersetzen oder löschen braucht das Recht „Medien löschen“.')], 403);
+            return Response::fail(__('Original ersetzen oder löschen braucht das Recht „Medien löschen“.'), 403);
         }
         try {
             $j = Jobs::create('optimize', $m, ['delete_original' => $del], (string) ($r->post['preset'] ?? ''), $mode);
@@ -169,7 +169,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $this->guard($r);
         $m = $this->video($id);
         $clips = array_slice(array_values(array_filter((array) ($r->post['clips'] ?? []), 'is_array')), 0, 20);
-        if (!$clips) return Response::json(['ok' => false, 'error' => __('Bitte mindestens einen Ausschnitt festlegen.')], 422);
+        if (!$clips) return Response::fail(__('Bitte mindestens einen Ausschnitt festlegen.'));
         $batch = 'trim-' . bin2hex(random_bytes(4));
         $jobs = [];
         try {
@@ -192,11 +192,11 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $file = $r->files['image'] ?? null;
         if ($file) {
             if (($file['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $file['tmp_name']) || (int) $file['size'] > 12 * 1048576) {
-                return Response::json(['ok' => false, 'error' => __('Standbild konnte nicht übertragen werden.')], 422);
+                return Response::fail(__('Standbild konnte nicht übertragen werden.'));
             }
             $mime = (new \finfo(FILEINFO_MIME_TYPE))->file((string) $file['tmp_name']) ?: '';
             if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true) || !@getimagesize((string) $file['tmp_name'])) {
-                return Response::json(['ok' => false, 'error' => __('Das Standbild ist ungültig.')], 422);
+                return Response::fail(__('Das Standbild ist ungültig.'));
             }
             try {
                 [$pid, $msg] = Output::storePoster($m, (string) $file['tmp_name'], $r->str('at') !== '' ? max(0, (int) $r->str('at')) : null);
@@ -254,7 +254,7 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
             $ids = array_map(fn($m) => (int) $m['id'], Media::all(['check' => (string) $r->post['check']]));
         }
         $ids = array_slice(array_values(array_unique(array_filter($ids))), 0, 200);
-        if (!$ids) return Response::json(['ok' => false, 'error' => __('Keine Videos ausgewählt.')], 422);
+        if (!$ids) return Response::fail(__('Keine Videos ausgewählt.'));
         $batch = 'bulk-' . bin2hex(random_bytes(4));
         $jobs = [];
         $skipped = [];
@@ -298,14 +298,14 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
         $this->guard($r);
         $j = Jobs::raw((int) $jid);
         if ($j && ($j['mode'] === 'replace' || str_contains((string) $j['params'], '"delete_original":true')) && !VideoTools::canReplace()) {
-            return Response::json(['ok' => false, 'error' => __('Original ersetzen oder löschen braucht das Recht „Medien löschen“.')], 403);
+            return Response::fail(__('Original ersetzen oder löschen braucht das Recht „Medien löschen“.'), 403);
         }
         try {
             $j = Jobs::retry((int) $jid);
         } catch (JobException $e) {
             return self::fail($e);
         }
-        return $j ? Response::json(['ok' => true, 'job' => $j]) : Response::json(['ok' => false, 'error' => __('Nur fehlgeschlagene oder abgebrochene Aufträge lassen sich wiederholen.')], 422);
+        return $j ? Response::json(['ok' => true, 'job' => $j]) : Response::fail(__('Nur fehlgeschlagene oder abgebrochene Aufträge lassen sich wiederholen.'));
     }
 
     /** Protokoll (Befehl mit Platzhaltern, Ausgabe von ffmpeg) – nur Administration */

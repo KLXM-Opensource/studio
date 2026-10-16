@@ -169,7 +169,7 @@ final class MediaPools
     /** Darf die angemeldete Person Pools verwalten? (Hauptwebsite mit Grundeinstellungen-Recht oder Integrator) */
     public static function canManage(): bool
     {
-        return Features::integrator() || (can('system.manage') && \Core\Network\Network::isNetworkSite());
+        return Permissions::installationAdmin();
     }
 
     /**

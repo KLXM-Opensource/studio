@@ -28,6 +28,12 @@ final class Response
             ['Content-Type' => 'application/json; charset=utf-8', 'Cache-Control' => 'no-store']);
     }
 
+    /** Fehler als JSON in einheitlicher Form {ok: false, error: …} (+ weitere Felder) */
+    public static function fail(string $error, int $status = 422, array $extra = []): self
+    {
+        return self::json(['ok' => false, 'error' => $error] + $extra, $status);
+    }
+
     public static function redirect(string $to, int $status = 303): self
     {
         return new self('', $status, ['Location' => $to]);

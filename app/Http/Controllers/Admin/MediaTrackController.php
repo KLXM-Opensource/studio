@@ -45,7 +45,7 @@ final class MediaTrackController extends AdminController
         try {
             return self::secure(Response::json(['ok' => true] + $fn()));
         } catch (\InvalidArgumentException | AiException $e) {
-            return self::secure(Response::json(['ok' => false, 'error' => $e->getMessage()], 422));
+            return self::secure(Response::fail($e->getMessage()));
         } catch (HttpException $e) {
             return self::secure(Response::json(['ok' => false, 'error' => $e->getMessage() ?: __('Keine Berechtigung.')], $e->getCode() ?: 400));
         }

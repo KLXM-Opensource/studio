@@ -368,7 +368,7 @@ final class Cron
     /** Wer darf die geplanten Aufgaben verwalten? (installationsweit: Netzwerk-Website bzw. Einzel-Installation) */
     public static function canManage(): bool
     {
-        return Features::integrator() || (can('system.manage') && Network\Network::isNetworkSite());
+        return Permissions::installationAdmin();
     }
 
     /** Zeile für den einzigen Cronjob */

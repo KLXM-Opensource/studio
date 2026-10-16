@@ -35,15 +35,15 @@ final class PublicController
         $site = (string) ($r->server['HTTP_SEC_FETCH_SITE'] ?? '');
         $origin = (string) ($r->server['HTTP_ORIGIN'] ?? '');
         if ($site !== '' ? $site !== 'same-origin' : ($origin === '' || strtolower((string) parse_url($origin, PHP_URL_HOST) . (parse_url($origin, PHP_URL_PORT) ? ':' . parse_url($origin, PHP_URL_PORT) : '')) !== strtolower($r->host()))) {
-            return Response::json(['ok' => false, 'error' => 'forbidden'], 403);
+            return Response::fail('forbidden', 403);
         }
         $limiter = new \Core\RateLimiter(app()->db);
         $rk = 'consent:' . substr(hash_hmac('sha256', $r->ip(), app()->key()), 0, 24);
-        if ($limiter->tooMany($rk, 60, 600)) return Response::json(['ok' => false, 'error' => 'rate'], 429);
+        if ($limiter->tooMany($rk, 60, 600)) return Response::fail('rate', 429);
         $limiter->hit($rk);
 
         $action = (string) ($r->post['action'] ?? '');
-        if (!isset(Log::ACTIONS[$action])) return Response::json(['ok' => false, 'error' => 'action'], 422);
+        if (!isset(Log::ACTIONS[$action])) return Response::fail('action');
         $id = (string) ($r->post['id'] ?? '');
         if (!preg_match('~^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$~', $id)) $id = self::uuid();
         $lang = self::lang(is_string($r->post['lang'] ?? null) ? $r->post['lang'] : null);

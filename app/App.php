@@ -201,7 +201,7 @@ final class App
             return $router->dispatch($request);
         } catch (Http\Controllers\Admin\RedirectException $e) {
             return $request->wantsJson()
-                ? Http\Response::json(['ok' => false, 'error' => 'Nicht angemeldet.'], 401)
+                ? Http\Response::fail('Nicht angemeldet.', 401)
                 : Http\Response::redirect($e->to);
         } catch (Http\HttpException $e) {
             // Bearbeitungssperre (Core\EditLock) bei JSON-Aufrufen (Editor, Seitenleisten): Meldung statt Fehlerseite

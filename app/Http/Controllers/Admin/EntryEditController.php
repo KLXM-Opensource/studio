@@ -43,7 +43,7 @@ final class EntryEditController extends AdminController
         $t = $this->table($r, $handle);
         $e = $id === 'new' ? null : (Entries::find($t, (int) $id) ?? throw new HttpException(404));
         if ($e && ($why = EntryEdit::reason($t, $e)) !== null) {
-            return Response::json(['ok' => false, 'error' => $why], 403);
+            return Response::fail($why, 403);
         }
         $in = (array) ($r->post['f'] ?? []);
         $partial = !empty($r->post['partial']);                 // einzelne Felder aus dem Text: übrige behalten ihren Wert
@@ -66,7 +66,7 @@ final class EntryEditController extends AdminController
         $status = $r->str('status');
         if (in_array($status, ['draft', 'published'], true)) {
             if ($status === 'published' && !can('data.publish', $handle)) {
-                return Response::json(['ok' => false, 'error' => __('Veröffentlichen ist Ihrer Rolle nicht erlaubt.')], 403);
+                return Response::fail(__('Veröffentlichen ist Ihrer Rolle nicht erlaubt.'), 403);
             }
             $in['status'] = $status;
         } elseif ($e) {
@@ -98,7 +98,7 @@ final class EntryEditController extends AdminController
     {
         $t = $this->table($r, $handle);
         $e = Entries::find($t, (int) $id) ?? throw new HttpException(404);
-        if (($why = EntryEdit::reason($t, $e)) !== null) return Response::json(['ok' => false, 'error' => $why], 403);
+        if (($why = EntryEdit::reason($t, $e)) !== null) return Response::fail($why, 403);
         $f = \Core\Data\Tables::field($t, $field);
         if (!$f || $f['type'] !== \Core\Data\EntryBlocks::TYPE) throw new HttpException(404);
         $blocks = is_array($r->post['blocks'] ?? null) ? $r->post['blocks'] : [];

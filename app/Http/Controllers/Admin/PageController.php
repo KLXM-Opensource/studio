@@ -379,7 +379,7 @@ final class PageController extends AdminController
         try {
             Pages::publish((int) $id, (int) $user['id']);
         } catch (\RuntimeException $e) {   // offene Platzhalter „[bitte ergänzen: …]“
-            if ($r->wantsJson()) return Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+            if ($r->wantsJson()) return Response::fail($e->getMessage());
             return $this->back('/admin/pages', 'error', $e->getMessage());
         }
         $p = Pages::find((int) $id);
@@ -401,7 +401,7 @@ final class PageController extends AdminController
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
         if (!Pages::unpublish((int) $id)) {
             $err = __('Die Startseite ist immer online.');
-            if ($r->wantsJson()) return Response::json(['ok' => false, 'error' => $err], 422);
+            if ($r->wantsJson()) return Response::fail($err);
             return $this->back('/admin/pages', 'error', $err);
         }
         $msg = __('„{title}“ ist offline. Besucher sehen die Seite nicht mehr.', ['title' => $page['title']]);
@@ -448,7 +448,7 @@ final class PageController extends AdminController
         $parent = isset($r->post['parent_id']) && $r->post['parent_id'] !== null && $r->post['parent_id'] !== '' ? (int) $r->post['parent_id'] : null;
         $ref = fn(string $k) => isset($r->post[$k]) && (int) $r->post[$k] > 0 ? (int) $r->post[$k] : null;
         $err = Pages::move((int) $id, $parent, (int) ($r->post['index'] ?? 0), $ref('before_id'), $ref('after_id'));
-        return $err ? Response::json(['ok' => false, 'error' => $err], 422) : Response::json(['ok' => true, 'url' => Pages::url(Pages::find((int) $id))]);
+        return $err ? Response::fail($err) : Response::json(['ok' => true, 'url' => Pages::url(Pages::find((int) $id))]);
     }
 
     /** Schnelländerungen: menu (bool), status */
@@ -485,7 +485,7 @@ final class PageController extends AdminController
     {
         $this->auth($r, 'pages.manage');
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
-        if ($page['is_home'] || ($page['type'] ?? 'page') !== 'page') return Response::json(['ok' => false, 'error' => __('Für diese Seite nicht möglich.')], 422);
+        if ($page['is_home'] || ($page['type'] ?? 'page') !== 'page') return Response::fail(__('Für diese Seite nicht möglich.'));
         $on = empty($page['noindex']);
         app()->db->update('pages', ['noindex' => $on ? 1 : 0, 'updated_at' => now()], 'id = :id', ['id' => (int) $id]);
         $this->changed();
@@ -513,7 +513,7 @@ final class PageController extends AdminController
         try {
             $p = Pages::translate((int) $id, (string) ($r->post['lang'] ?? ''));
         } catch (\RuntimeException $e) {
-            return Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+            return Response::fail($e->getMessage());
         }
         $this->changed();
         return Response::json(['ok' => true, 'id' => (int) $p['id'], 'url' => Pages::url($p) . '?edit=1']);

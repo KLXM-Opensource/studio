@@ -22,16 +22,16 @@ final class PushController extends AdminController
     public function subscribe(Request $r): Response
     {
         $user = $this->auth($r);
-        if (!Push::enabled()) return Response::json(['ok' => false, 'error' => __('Push-Benachrichtigungen sind auf dieser Website nicht eingeschaltet.')], 404);
+        if (!Push::enabled()) return Response::fail(__('Push-Benachrichtigungen sind auf dieser Website nicht eingeschaltet.'), 404);
         $s = Push::parse($r->post['subscription'] ?? null);
-        if (!$s) return Response::json(['ok' => false, 'error' => __('Dieser Browser bzw. sein Push-Dienst wird nicht unterstützt.')], 422);
+        if (!$s) return Response::fail(__('Dieser Browser bzw. sein Push-Dienst wird nicht unterstützt.'));
         // Tägliches Auffrischen (_push.js): nur, solange das Gerät noch zu dieser Person gehört – ein entferntes Gerät meldet sich nicht still wieder an
         if (!empty($r->post['refresh'])) {
             $row = Push::find($s['endpoint']);
             if (!$row || (int) $row['user_id'] !== (int) $user['id']) return Response::json(['ok' => false, 'state' => 'removed']);
         }
         [$id, $err] = Push::store($s, (int) $user['id'], [], null, (string) ($r->server['HTTP_USER_AGENT'] ?? ''));
-        if ($err === 'conflict') return Response::json(['ok' => false, 'error' => 'conflict'], 409);
+        if ($err === 'conflict') return Response::fail('conflict', 409);
         return Response::json(['ok' => true, 'id' => $id, 'devices' => count(Push::devices((int) $user['id']))]);
     }
 
@@ -73,7 +73,7 @@ final class PushController extends AdminController
         $key = 'push-test:' . (int) $user['id'];
         if ($limiter->tooMany($key, 5, 600)) {
             $msg = __('Zu viele Testnachrichten. Bitte warten Sie ein paar Minuten.');
-            return $r->wantsJson() ? Response::json(['ok' => false, 'error' => $msg], 429) : $this->back($this->origin($r), 'error', $msg);
+            return $r->wantsJson() ? Response::fail($msg, 429) : $this->back($this->origin($r), 'error', $msg);
         }
         $limiter->hit($key);
         $res = Push::test((int) $user['id']);

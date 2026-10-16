@@ -274,7 +274,7 @@ final class BlockController extends AdminController
         $data = array_replace(Fields::defaults($def['fields']), $def['sample']);
         $tunes = $theme->sanitizeTunes(['background' => $r->str('_bg')], $tdef);
         $home = Pages::home();
-        if (!$home) return self::secure(Response::json(['ok' => false, 'error' => __('Keine Startseite gefunden.')], 404));
+        if (!$home) return self::secure(Response::fail(__('Keine Startseite gefunden.'), 404));
         app()->currentPage = $home;
         \Core\StructuredData::reset();
         $block = new Block('vorschau', $type, $data, $tunes, $tdef);
@@ -324,7 +324,7 @@ final class BlockController extends AdminController
     {
         try {
             $this->guard($r);
-            if (!Assist::available('text')) return self::secure(Response::json(['ok' => false, 'error' => __('Der KI-Assistent ist für Sie auf dieser Website nicht verfügbar.')], 403));
+            if (!Assist::available('text')) return self::secure(Response::fail(__('Der KI-Assistent ist für Sie auf dieser Website nicht verfügbar.'), 403));
             $res = \Core\AI\Generator::proposeBlock($r->str('description'));
             Assist::log('blockgen', 'propose', mb_substr($r->str('description'), 0, 80), 'suggested', (string) ($res['model'] ?? ''), (int) ($res['ms'] ?? 0));
             $def = $res['def'];
@@ -332,7 +332,7 @@ final class BlockController extends AdminController
             return self::secure(Response::json(['ok' => true, 'def' => $def, 'errors' => $res['errors'], 'warnings' => $res['warnings'], 'quota' => Assist::quota()['left']]));
         } catch (AiException $e) {
             Assist::log('blockgen', 'propose', '', 'failed');
-            return self::secure(Response::json(['ok' => false, 'error' => $e->getMessage()], 422));
+            return self::secure(Response::fail($e->getMessage()));
         }
     }
 }

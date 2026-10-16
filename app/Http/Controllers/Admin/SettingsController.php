@@ -87,7 +87,7 @@ final class SettingsController extends AdminController
         if ($lang !== '') app()->lang = $lang;
         $page = ctype_digit((string) ($r->post['_page'] ?? '')) ? \Core\Pages::find((int) $r->post['_page']) : \Core\Pages::home($lang !== '' ? $lang : null);
         if (!$page) {
-            return Response::json(['ok' => false, 'error' => __('Keine Startseite gefunden.')], 404);
+            return Response::fail(__('Keine Startseite gefunden.'), 404);
         }
         return Response::json(['ok' => true, 'html' => (new \Core\Http\Controllers\SiteController())->previewHtml($page)]);
     }

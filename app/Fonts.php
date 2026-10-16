@@ -78,7 +78,7 @@ final class Fonts
      */
     public static function canManage(): bool
     {
-        return Features::on('fonts') && (Features::integrator() || (can('system.manage') && \Core\Network\Network::isNetworkSite()));
+        return Features::on('fonts') && Permissions::installationAdmin();
     }
 
     // ------------------------------------------------------------------ Ablage

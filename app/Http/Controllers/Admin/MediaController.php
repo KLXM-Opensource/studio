@@ -28,7 +28,7 @@ final class MediaController extends AdminController
         $pool = $r->str('pool');
         if ($pool === '') return null;
         if (!\Core\MediaPools::available($pool)) {
-            return Response::json(['ok' => false, 'error' => 'Diesen Medien-Pool nutzt die Website nicht.'], 404);
+            return Response::fail('Diesen Medien-Pool nutzt die Website nicht.', 404);
         }
         if ($write && !\Core\MediaPools::canEdit($pool)) return $this->poolDenied();
         Media::usePool($pool);
@@ -37,7 +37,7 @@ final class MediaController extends AdminController
 
     private function poolDenied(): Response
     {
-        return Response::json(['ok' => false, 'error' => __('Diesen geteilten Pool darf diese Website nur verwenden. Ändern können Personen mit dem Recht „Geteilte Medien pflegen“ auf Websites, die zum Pflegen freigegeben sind.')], 403);
+        return Response::fail(__('Diesen geteilten Pool darf diese Website nur verwenden. Ändern können Personen mit dem Recht „Geteilte Medien pflegen“ auf Websites, die zum Pflegen freigegeben sind.'), 403);
     }
 
     /** Verweis auf eine Pool-Datei → Änderungen gehen an die Pool-Datei (nur mit „media.shared“) */
@@ -75,12 +75,12 @@ final class MediaController extends AdminController
         $this->auth($r, 'media.upload');   // übernimmt Dateien in die Mediathek der Website
         $pool = $r->str('pool');
         if (!\Core\MediaPools::available($pool)) {
-            return Response::json(['ok' => false, 'error' => 'Unbekannter Medien-Pool.'], 404);
+            return Response::fail('Unbekannter Medien-Pool.', 404);
         }
         try {
             $id = \Core\MediaPools::mirror($pool, (int) $r->str('id'));
         } catch (\RuntimeException $e) {
-            return Response::json(['ok' => false, 'error' => $e->getMessage()], 404);
+            return Response::fail($e->getMessage(), 404);
         }
         return Response::json(['ok' => true, 'item' => Media::toJson(Media::find($id))]);
     }
@@ -191,7 +191,7 @@ final class MediaController extends AdminController
         $decorative = !empty($p['decorative']);
         $alt = mb_substr(trim(strip_tags((string) ($p['alt'] ?? $m['alt']))), 0, 250);
         if (str_starts_with($m['mime'], 'image/') && !$decorative && mb_strlen($alt) < 3) {
-            return Response::json(['ok' => false, 'error' => 'Bitte einen Alt-Text angeben oder das Bild als „dekorativ“ markieren.'], 422);
+            return Response::fail('Bitte einen Alt-Text angeben oder das Bild als „dekorativ“ markieren.');
         }
         $upd = [
             'alt' => $alt, 'decorative' => $decorative ? 1 : 0,
@@ -206,7 +206,7 @@ final class MediaController extends AdminController
         // Bildrechte (nur wenn mitgeschickt); „Pflicht“: Lizenz/Quelle und Einwilligung (Fotos) nötig
         if (Media::rightsMode() !== 'off' && (array_key_exists('license', $p) || array_key_exists('consent', $p) || array_key_exists('rights_until', $p))) {
             $upd += Media::rightsFields($p);
-            if ($why = Media::rightsMissing($upd + $m)) return Response::json(['ok' => false, 'error' => $why], 422);
+            if ($why = Media::rightsMissing($upd + $m)) return Response::fail($why);
         }
         if (isset($p['focus']['x'], $p['focus']['y'])) {
             $upd['focus_x'] = max(0, min(100, (int) $p['focus']['x']));
@@ -216,7 +216,7 @@ final class MediaController extends AdminController
         if (array_key_exists('adjust', $p) && str_starts_with((string) $m['mime'], 'image/')) {
             $adj = \Core\ImageFx::normalize($p['adjust']);
             if ($adj === null || $adj === \Core\ImageFx::NONE) {
-                return Response::json(['ok' => false, 'error' => __('Ungültige Bildanpassung.')], 422);
+                return Response::fail(__('Ungültige Bildanpassung.'));
             }
             $upd['adjust'] = $adj !== '' ? $adj : null;
         }
@@ -238,11 +238,11 @@ final class MediaController extends AdminController
         if ($t instanceof Response) return $t;
         $m = Media::find((int) $t) ?? throw new HttpException(404);
         if (!str_starts_with((string) $m['mime'], 'image/')) {
-            return Response::json(['ok' => false, 'error' => __('Nur Bilder lassen sich anpassen.')], 422);
+            return Response::fail(__('Nur Bilder lassen sich anpassen.'));
         }
         $adj = \Core\ImageFx::normalize($r->post['adjust'] ?? '');
         if ($adj === null || $adj === \Core\ImageFx::NONE) {
-            return Response::json(['ok' => false, 'error' => __('Ungültige Bildanpassung.')], 422);
+            return Response::fail(__('Ungültige Bildanpassung.'));
         }
         Media::db()->update('media', ['adjust' => $adj !== '' ? $adj : null, 'updated_at' => now()], 'id = :id', ['id' => (int) $t]);
         Media::forget((int) $t);
@@ -259,11 +259,11 @@ final class MediaController extends AdminController
         if ($t instanceof Response) return $t;
         $m = Media::find((int) $t) ?? throw new HttpException(404);
         if (!str_starts_with((string) $m['mime'], 'image/')) {
-            return Response::json(['ok' => false, 'error' => __('Nur für Bilder.')], 422);
+            return Response::fail(__('Nur für Bilder.'));
         }
         $fit = \Core\ImageFit::normalize($r->post['fit'] ?? '');
         if ($fit === null) {
-            return Response::json(['ok' => false, 'error' => __('Ungültige Einstellung für „Darstellung im Rahmen“.')], 422);
+            return Response::fail(__('Ungültige Einstellung für „Darstellung im Rahmen“.'));
         }
         Media::db()->update('media', ['fit' => $fit !== '' ? $fit : null, 'updated_at' => now()], 'id = :id', ['id' => (int) $t]);
         Media::forget((int) $t);
@@ -290,7 +290,7 @@ final class MediaController extends AdminController
         $rect = is_array($r->post['rect'] ?? null) ? $r->post['rect'] : null;
         [$m, $err] = Media::setCrop((int) $id, $ratio, $rect);
         if (!$m) {
-            return Response::json(['ok' => false, 'error' => $err], 422);
+            return Response::fail($err);
         }
         $this->changed();
         $src = Media::sources($m, $ratio);
@@ -309,7 +309,7 @@ final class MediaController extends AdminController
         if ($t instanceof Response) return $t;
         [$m, $err] = Media::setEdit((int) $t, $r->post['edit'] ?? null);
         if (!$m) {
-            return Response::json(['ok' => false, 'error' => $err], 422);
+            return Response::fail($err);
         }
         $this->changed();
         if ((int) $t !== (int) $id) {
@@ -345,10 +345,10 @@ final class MediaController extends AdminController
         $ids = array_values(array_filter(array_map('intval', (array) ($r->post['ids'] ?? []))));
         $action = (string) ($r->post['action'] ?? '');
         if (!can(in_array($action, ['delete', 'purge', 'restore'], true) ? 'media.delete' : 'media.upload')) {
-            return Response::json(['ok' => false, 'error' => __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.')], 403);
+            return Response::fail(__('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'), 403);
         }
         if (!$ids) {
-            return Response::json(['ok' => false, 'error' => 'Keine Dateien ausgewählt.'], 422);
+            return Response::fail('Keine Dateien ausgewählt.');
         }
         $kept = [];
         $shrunk = [];
@@ -425,7 +425,7 @@ final class MediaController extends AdminController
         if ($e = $this->scope($r, true)) return $e;
         $name = trim((string) ($r->post['name'] ?? ''));
         if ($name === '') {
-            return Response::json(['ok' => false, 'error' => 'Bitte einen Namen angeben.'], 422);
+            return Response::fail('Bitte einen Namen angeben.');
         }
         $id = Media::createCollection($name, (string) ($r->post['description'] ?? ''));
         return Response::json(['ok' => true, 'id' => $id]);
@@ -489,10 +489,10 @@ final class MediaController extends AdminController
         $size = (int) $r->str('size');
         $file = $r->files['chunk'] ?? null;
         if (!$file || ($file['error'] ?? 1) !== UPLOAD_ERR_OK || $file['size'] > self::CHUNK_MAX) {
-            return Response::json(['ok' => false, 'error' => 'Teil-Upload fehlgeschlagen.'], 422);
+            return Response::fail('Teil-Upload fehlgeschlagen.');
         }
         if ($size > Media::maxBytes() || $total < 1 || $total > 1000) {
-            return Response::json(['ok' => false, 'error' => 'Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).'], 413);
+            return Response::fail('Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).', 413);
         }
         $meta = is_file("$path.json") ? (json_decode((string) file_get_contents("$path.json"), true) ?: []) : ['next' => 0];
         if ($index !== (int) $meta['next']) {
@@ -502,7 +502,7 @@ final class MediaController extends AdminController
         if (filesize("$path.part") > Media::maxBytes()) {
             @unlink("$path.part");
             @unlink("$path.json");
-            return Response::json(['ok' => false, 'error' => 'Datei ist zu groß.'], 413);
+            return Response::fail('Datei ist zu groß.', 413);
         }
         $meta = ['next' => $index + 1, 'total' => $total, 'size' => $size];
         file_put_contents("$path.json", json_encode($meta));
@@ -518,12 +518,12 @@ final class MediaController extends AdminController
         $path = $this->uploadPath($user, (string) ($p['upload_id'] ?? ''));
         $meta = is_file("$path.json") ? (json_decode((string) file_get_contents("$path.json"), true) ?: []) : [];
         if (!is_file("$path.part") || ($meta['next'] ?? 0) !== ($meta['total'] ?? -1)) {
-            return Response::json(['ok' => false, 'error' => 'Upload unvollständig.'], 422);
+            return Response::fail('Upload unvollständig.');
         }
         if (filesize("$path.part") !== (int) ($meta['size'] ?? -1)) {
             @unlink("$path.part");
             @unlink("$path.json");
-            return Response::json(['ok' => false, 'error' => 'Datei beschädigt übertragen – bitte erneut hochladen.'], 422);
+            return Response::fail('Datei beschädigt übertragen – bitte erneut hochladen.');
         }
         $name = (string) ($p['name'] ?? 'datei');
         $alt = mb_substr(trim(strip_tags((string) ($p['alt'] ?? ''))), 0, 250);
@@ -535,7 +535,7 @@ final class MediaController extends AdminController
         // „Bildrechte: Pflicht“ – neue Dateien nur mit Lizenz/Quelle und (Fotos) Angabe zur Einwilligung
         if (empty($p['replace_id']) && Media::pool() === null
             && ($why = Media::rightsMissing($opt + ['mime' => (new \finfo(FILEINFO_MIME_TYPE))->file("$path.part") ?: '']))) {
-            return Response::json(['ok' => false, 'error' => $why], 422);
+            return Response::fail($why);
         }
         // Doppelt hochgeladen (zweiter Klick, Wiederholung nach Zeitüberschreitung)? Dieselbe Datei aus den letzten 30 Minuten
         // zurückgeben statt neu anzulegen – unter Sperre, damit gleichzeitige Anfragen nicht beide anlegen.
@@ -572,7 +572,7 @@ final class MediaController extends AdminController
             if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
         }
         if (!$m) {
-            return Response::json(['ok' => false, 'error' => $err], 422);
+            return Response::fail($err);
         }
         $this->changed();
         // Editor.js-kompatibel: {success, file}

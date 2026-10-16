@@ -681,12 +681,12 @@ final class DataController extends AdminController
     public function quick(Request $r, string $handle): Response
     {
         $this->auth($r);
-        if (!can('data.edit', $handle)) return Response::json(['ok' => false, 'error' => __('Für diese Tabelle fehlt Ihrer Rolle die Berechtigung.')], 403);
+        if (!can('data.edit', $handle)) return Response::fail(__('Für diese Tabelle fehlt Ihrer Rolle die Berechtigung.'), 403);
         $t = $this->table($handle);
-        if (Tables::isInbox($t)) return Response::json(['ok' => false, 'error' => __('Eingangs-Tabelle: Einträge entstehen nur über das öffentliche Formular (verschlüsselt).')], 403);
+        if (Tables::isInbox($t)) return Response::fail(__('Eingangs-Tabelle: Einträge entstehen nur über das öffentliche Formular (verschlüsselt).'), 403);
         [$id, $err] = Entries::quickCreate($t, (string) ($r->post['title'] ?? ''));
         return $id ? Response::json(['ok' => true, 'id' => $id, 'title' => Entries::title($t, Entries::find($t, $id))])
-            : Response::json(['ok' => false, 'error' => $err], 422);
+            : Response::fail($err);
     }
 
     /** Sammelaktionen und Sortierung (JSON) */
@@ -694,9 +694,9 @@ final class DataController extends AdminController
     {
         $this->auth($r);
         $need = match ($r->post['action'] ?? '') { 'publish', 'draft' => 'data.publish', 'delete' => 'data.delete', default => 'data.edit' };
-        if (!can($need, $handle)) return Response::json(['ok' => false, 'error' => __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.')], 403);
+        if (!can($need, $handle)) return Response::fail(__('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'), 403);
         $t = $this->table($handle);
-        if (Tables::isInbox($t)) return Response::json(['ok' => false, 'error' => __('Eingangs-Tabelle: Anfragen unter „Anfragen“ bearbeiten.')], 403);
+        if (Tables::isInbox($t)) return Response::fail(__('Eingangs-Tabelle: Anfragen unter „Anfragen“ bearbeiten.'), 403);
         $ids = array_map('intval', (array) ($r->post['ids'] ?? []));
         // „Online ab“ in der Zukunft (Core\Schedule): bleiben offline – Hinweis statt „ist online“
         $waiting = ($r->post['action'] ?? '') === 'publish' ? array_values(array_filter(array_map(fn($id) => Entries::find($t, $id), $ids), fn($e) => $e && \Core\Schedule::pending($e))) : [];
@@ -761,7 +761,7 @@ final class DataController extends AdminController
         try {
             $n = Shared::setPick($t, $ids, $state === 'reset' ? null : $state, (string) (app()->auth->user()['email'] ?? ''));
         } catch (\InvalidArgumentException $ex) {
-            return $r->wantsJson() ? Response::json(['ok' => false, 'error' => $ex->getMessage()], 422) : $this->back($back, 'error', $ex->getMessage());
+            return $r->wantsJson() ? Response::fail($ex->getMessage()) : $this->back($back, 'error', $ex->getMessage());
         }
         $msg = match ($state) {
             'visible' => __('Übernommen – erscheint jetzt auf dieser Website.'), 'rejected' => __('Vorschlag abgelehnt.'),

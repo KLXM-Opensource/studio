@@ -40,7 +40,7 @@ final class KitPackages
      */
     public static function canManage(): bool
     {
-        return Features::integrator() || (can('system.manage') && Network::isNetworkSite());
+        return Permissions::installationAdmin();
     }
 
     /** ZIP-Upload in der Verwaltung erlaubt? (config 'kit_upload' => false schaltet ihn ab; kit:install geht weiter) */

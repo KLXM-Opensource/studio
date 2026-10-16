@@ -21,7 +21,7 @@ final class EditorController extends AdminController
         $blocks = Pages::sanitizeBlocks((array) ($r->post['blocks'] ?? []));
         $publish = !empty($r->post['publish']);
         if ($publish && !can('pages.publish')) {
-            return Response::json(['ok' => false, 'error' => __('Veröffentlichen ist Ihrer Rolle nicht erlaubt – der Entwurf wurde nicht gespeichert.')], 403);
+            return Response::fail(__('Veröffentlichen ist Ihrer Rolle nicht erlaubt – der Entwurf wurde nicht gespeichert.'), 403);
         }
         Pages::saveDraft((int) $page['id'], $blocks, (int) $user['id'], $publish ? 'Veröffentlicht' : 'Gespeichert');
         if ($publish) {
@@ -29,7 +29,7 @@ final class EditorController extends AdminController
                 Pages::publish((int) $page['id'], (int) $user['id']);
             } catch (\RuntimeException $e) {   // offene Platzhalter „[bitte ergänzen: …]“ – Entwurf ist gespeichert
                 $this->changed();
-                return Response::json(['ok' => false, 'error' => __('Entwurf gespeichert.') . ' ' . $e->getMessage()], 422);
+                return Response::fail(__('Entwurf gespeichert.') . ' ' . $e->getMessage());
             }
         }
         $this->changed();
@@ -43,7 +43,7 @@ final class EditorController extends AdminController
         $page = Pages::find((int) $id) ?? throw new HttpException(404);
         if (\Core\PageTemplates::isTemplatePage($page) && !can('system.manage')) throw new HttpException(403, __('Seitenvorlagen bearbeitet nur die Administration.'));
         if (!Pages::discardDraft((int) $id, (int) $user['id'])) {
-            return Response::json(['ok' => false, 'error' => 'Seite wurde noch nie veröffentlicht.'], 422);
+            return Response::fail('Seite wurde noch nie veröffentlicht.');
         }
         $this->changed();
         return Response::json(['ok' => true]);
@@ -79,7 +79,7 @@ final class EditorController extends AdminController
         $raw = (array) ($r->post['block'] ?? []);
         $blocks = Pages::sanitizeBlocks([$raw]);
         if (!$blocks) {
-            return Response::json(['ok' => false, 'error' => 'Unbekannter Blocktyp'], 422);
+            return Response::fail('Unbekannter Blocktyp');
         }
         // Erweiterungen lösen den Block auf (z. B. Ableger eines gemeinsamen Bausteins → Original), siehe Theme::previewBlock
         $html = app()->theme->previewBlock($blocks[0]) ?? '';

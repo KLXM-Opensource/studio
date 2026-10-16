@@ -119,7 +119,7 @@ final class NetworkController extends AdminController
         $key = $r->str('pool'); $ids = $r->str('ids'); $exp = (int) $r->str('exp');
         $ok = preg_match('~^[a-z0-9_\-]{1,40}$~', $key) && preg_match('~^\d+(,\d+){0,199}$~', $ids) && $exp >= time() && $exp <= time() + 120
             && strlen(Network::key()) >= 32 && hash_equals(\Core\MediaPools::usageSig($key, $ids, $exp), $r->str('sig'));
-        if (!$ok) return Response::json(['ok' => false, 'error' => 'Ungültige Anfrage.'], 403);
+        if (!$ok) return Response::fail('Ungültige Anfrage.', 403);
         $out = [];
         foreach (explode(',', $ids) as $pid) {
             $local = app()->db->fetchValue('SELECT id FROM media WHERE pool_ref = ?', [$key . ':' . (int) $pid]);

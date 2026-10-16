@@ -139,6 +139,15 @@ final class Permissions
     }
 
     /** Darf die Rolle das? Optional für eine bestimmte Datentabelle. */
+    /**
+     * Darf die angemeldete Person Einstellungen ändern, die für die ganze Installation gelten (Kits, Schriften, geteilte Medien,
+     * geplante Aufgaben)? Integratoren bzw. Netzwerk-Konten sowie die Administration (system.manage) der Netzwerk-Website.
+     */
+    public static function installationAdmin(): bool
+    {
+        return Features::integrator() || (can('system.manage') && Network\Network::isNetworkSite());
+    }
+
     public static function allows(?array $role, string $perm, ?string $table = null): bool
     {
         if (!$role) return false;

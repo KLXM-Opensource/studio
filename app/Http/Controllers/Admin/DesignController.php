@@ -105,7 +105,7 @@ final class DesignController extends AdminController
         $id = (string) ($r->post['_page'] ?? '');
         $page = ctype_digit($id) ? Pages::find((int) $id) : Pages::home();
         if (!$page) {
-            return Response::json(['ok' => false, 'error' => __('Keine Startseite gefunden.')], 404);
+            return Response::fail(__('Keine Startseite gefunden.'), 404);
         }
         $html = (new \Core\Http\Controllers\SiteController())->previewHtml($page);
         if (!empty($r->post['_dark'])) $html = self::forceDark($html, $values);
@@ -119,7 +119,7 @@ final class DesignController extends AdminController
     public function live(Request $r): Response
     {
         $this->guard($r);
-        if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
+        if (!Design::enabled()) return Response::fail(__('Dieses Kit hat keine Design-Einstellungen.'), 404);
         $values = Design::values();
         // Persönliche Vorschau (Kopf-/Fußvariante): die Seite ist damit gerendert – Werkzeug zeigt diese Werte als ungespeichert
         $pending = app()->session->get(Design::PREVIEW_KEY);
@@ -137,7 +137,7 @@ final class DesignController extends AdminController
     public function liveApply(Request $r): Response
     {
         $this->guard($r);
-        if (!Design::enabled()) return Response::json(['ok' => false, 'error' => __('Dieses Kit hat keine Design-Einstellungen.')], 404);
+        if (!Design::enabled()) return Response::fail(__('Dieses Kit hat keine Design-Einstellungen.'), 404);
         // Persönliche Vorschau verwerfen („Abbrechen“, Schließen)
         if (!empty($r->post['clear'])) {
             app()->session->forget(Design::PREVIEW_KEY);
@@ -196,14 +196,14 @@ final class DesignController extends AdminController
         $this->guard($r);
         $in = json_decode((string) ($r->post['json'] ?? ''), true);
         if (!is_array($in)) {
-            return Response::json(['ok' => false, 'error' => __('Kein gültiges JSON.')], 422);
+            return Response::fail(__('Kein gültiges JSON.'));
         }
         $theme = isset($in['values']) && is_string($in['theme'] ?? null) ? $in['theme'] : null;
         $raw = isset($in['values']) && is_array($in['values']) ? $in['values'] : $in;
         $known = array_keys(Design::defaults());
         $ignored = array_values(array_diff(array_keys($raw), $known));
         if (!array_intersect(array_keys($raw), $known)) {
-            return Response::json(['ok' => false, 'error' => __('Die Daten enthalten keine bekannten Design-Werte dieses Kits.')], 422);
+            return Response::fail(__('Die Daten enthalten keine bekannten Design-Werte dieses Kits.'));
         }
         return Response::json(['ok' => true, 'values' => Design::normalize($raw), 'ignored' => $ignored,
             'other_theme' => $theme !== null && $theme !== app()->theme->name ? $theme : null]);
