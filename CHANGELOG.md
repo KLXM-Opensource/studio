@@ -18,6 +18,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Demo-Inhalte entstehen wieder auf allen Servern (das Hochskalieren mit `imagescale(…, IMG_BICUBIC)` scheiterte mit manchen GD-Versionen).
 - Startseite der Demo beginnt mit einer Bühne (Bildfolge mit Name und Haltung als H1), Porträt-Platzhalter als natürliche Schattenrisse (frontal und im Profil, Randlicht, weiche Kanten), Landschaften ohne Treppenstufen.
 - Bühne: Abdunkelung hinter dem Text als weicher, höherer Verlauf ohne sichtbare Kante (alle Stufen, auch „Mitte“).
+- **Echte Fotos in der Demo:** 22 Fotos von Pexels (Landschaft, Porträt, Reportage, „Über mich“), geladen beim Anlegen, mit Titel, Alt-Text und Bildnachweis; zwei stumme Videos als Kamerafahrt über Fotos. Ohne Internet bzw. mit `FOTO_DEMO_OFFLINE=1` weiter erzeugte Platzhalter. Bildunterschriften aus den Bildtiteln, keine doppelten Bilder auf einer Seite.
+- Mit der neuen Erweiterung **Bildauswahl** (`klxm/studio-auswahl`: Kunden wählen Fotos und Videos aus einem Shooting aus) legt die Demo ein Beispiel-Shooting an.
+
+### Kern
+- `trusted_site_url()`: lokale Hosts mit Port (z. B. `x.localhost:8099`) gelten als lokal (http statt https).
 
 ### Aufräumen vor dem Start: eine Stelle je Aufgabe
 - **Neue Kern-Schnittstellen** statt verstreuter Kopien: `Core\Http\Fetch` (HTTP mit SSRF-Schutz – Quellen, Domain- und Landingpage-Prüfung, PDF-Schriften), `Core\Cli` (Optionen, `--all` je Website), `Core\Testing\Check` (Selbsttests), `Permissions::installationAdmin()`, `Response::fail()`/`download()`/`csv()`, `AdminUi::pager()`, `b64u_encode()`/`b64u_decode()`/`random_token()`/`trusted_site_url()`, `resources/js/_html.js` (`esc`, `csrf`), `resources/css/_toast.css`.

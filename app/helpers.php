@@ -173,7 +173,8 @@ function trusted_site_url(): ?string
     if ($r && $host !== '' && in_array($host, $hosts, true)) return ($r->isSecure() ? 'https://' : 'http://') . $r->host();
     if ($hosts) {
         $h = $hosts[0];
-        $local = $h === 'localhost' || str_ends_with($h, '.localhost') || str_starts_with($h, '127.');
+        $hn = (string) preg_replace('~:\d+$~', '', $h);   // Host ohne Port (z. B. „x.localhost:8099“)
+        $local = $hn === 'localhost' || str_ends_with($hn, '.localhost') || str_starts_with($hn, '127.');
         return ($local ? 'http://' : 'https://') . $h;
     }
     $admin = (string) app()->settings->get('sys.admin_url', '');   // zuletzt gesehene Adresse der Verwaltung (Network::rememberUrl)

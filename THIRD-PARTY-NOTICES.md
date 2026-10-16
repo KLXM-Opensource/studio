@@ -36,6 +36,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 | SIL Open Font License 1.1 | Lato (admin, PDF), JetBrains Mono (admin code) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
 | CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube (two-click) in the demo content of eight kits, credited in the caption | Service / demo |
 | Pixabay Content License | one demo photo of the praxis kit (section 8) | Bundled (demo) |
+| Pexels License | 22 demo photos of the foto kit – only URLs and credits in the repository, downloaded when the demo is created (section 8) | Service / demo |
 | MPL-2.0 | lightningcss 1.32.0 (via Tailwind CSS CLI, building `kits/frameworks`) | Build-only |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
@@ -382,6 +383,12 @@ KLXM AI features are off unless the operator configures a provider. Nothing belo
   (https://pixabay.com/service/license-summary/): free for commercial and non-commercial use, no attribution required
   (credited anyway), not to be sold or redistributed unaltered as a stock image. Used as a demo photo of the praxis kit
   (`kits/praxis/demo/beratung.jpg`, `kits/praxis/tools/demo-photo.php`).
+- **Demo photos of the foto kit** – 22 photos from Pexels (https://www.pexels.com) under the Pexels License
+  (https://www.pexels.com/license/): free for commercial and non-commercial use, no attribution required (credited anyway),
+  not to be sold unaltered or redistributed as a stock collection. Only the image addresses, titles, alt texts and credits are part
+  of the repository (`kits/foto/tools/demo-photos.php`); the files are downloaded when the demo content is created, each with
+  “Foto: {author} / Pexels – {page}” as credit in the media library. Two demo videos are camera moves generated from two of these
+  photos. Without internet access the demo falls back to generated placeholders.
 
 ## 9. Checking licenses
 

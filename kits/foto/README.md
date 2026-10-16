@@ -26,7 +26,7 @@ kits/foto/
 │                    b-photo-text, lightbox (je Block) · opt-*.css (gewählte Design-Optionen) · editing.css (Bearbeiten-Modus,
 │                    Ablagefläche) · editor-photos.css (Upload-Dialog im Editor) · übernommene Block-Stylesheets aus fluid
 ├── assets/js/       site.js · lightbox.js · photo-hero.js · series.js · reel.js (Band) · scrolly.js · editor-photos.js (nur Editor)
-├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Demo mit erzeugten Platzhaltern)
+├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php + demo-photos.php (Demo mit Fotos von Pexels, offline Platzhalter)
 ├── docs/            manual.php + manual/*.php (Handbuch), css-js.md (Kit-Seite „CSS & JS“)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── package.json     Schriften (Fontsource): Inter, Manrope, DM Sans, Instrument Sans, Space Grotesk, Roboto Condensed, Fraunces,
@@ -121,10 +121,12 @@ gewählt werden müssen. Der Editor setzt Knöpfe in der Vorschau auf `tabIndex 
 `seed.php` → `foto_demo_install()`: „Mara Beispiel Fotografie (Demo)“, Startseite (Bühne mit Bildfolge, Serien-Übersicht,
 Bild & Text, Handlungsaufruf), „Arbeiten“ (Liste) mit „Porträt“ (Raster 4:5), „Reportage“ (Band, Zitat, Mosaik aus Sammlung),
 „Landschaft“ (große Einzelbilder, bündige Zeilen auf dunklem Grund), „Über mich“, „Kontakt“ (Kontakt, Pakete, FAQ).
-Bilder: **Platzhalter**, mit PHP GD erzeugt (Hügel im Nebel, Dünen, Meer, Silhouetten statt Porträts, Schwarzweiß-Geometrie,
-Filmkorn) – Titel „… (Platzhalter)“, Alt-Text „Platzhalter: …“, Bildnachweis „Platzhalter, automatisch erzeugt (Kit „foto“) –
-frei verwendbar“, Schlagwort `foto-demo`, Sammlungen „Landschaft/Porträt/Reportage (Demo)“. Mit ffmpeg zusätzlich zwei
-Platzhalter-Videos (Kamerafahrt über ein erzeugtes Motiv). Keine fremden Bildrechte, keine Personen.
+Bilder: **22 Fotos von Pexels** (Pexels-Lizenz) – im Repository liegen nur Adressen und Bildnachweise (`tools/demo-photos.php`),
+geladen beim Anlegen über `Core\Http\Fetch` (2000 px), mit Titel, Alt-Text und Bildnachweis „Foto: Name / Pexels – Seite“,
+Schlagwort `foto-demo`, Sammlungen „Landschaft/Porträt/Reportage (Demo)“, dazu ein Bild für „Über mich“. Mit ffmpeg zwei stumme
+Videos (Kamerafahrt über ein Foto). Ohne Internet oder mit `FOTO_DEMO_OFFLINE=1`: **Platzhalter**, mit PHP GD erzeugt (Hügel,
+Dünen, Meer, Schattenrisse statt Porträts, Schwarzweiß-Geometrie, Filmkorn), gekennzeichnet als „Platzhalter“.
+Mit der Erweiterung **Bildauswahl** (`auswahl`) legt die Demo zusätzlich ein Beispiel-Shooting aus der Porträt-Sammlung an.
 
 ```
 CMS_SITE=<site> php kits/foto/tools/demo.php [--force|--remove] [--preset=dunkelkammer]

@@ -3,10 +3,11 @@
  * Demo-Inhalte des Kits „foto“: die fiktive Fotografin „Mara Beispiel (Demo)“ mit Startseite, Seitenbaum „Arbeiten“
  * (drei Serien: Porträt, Reportage, Landschaft), „Über mich“ und „Kontakt“.
  *
- * Bilder: Platzhalter, die hier mit PHP GD erzeugt werden (Verläufe, Hügel, Dünen, Meer, Fassaden, Silhouetten mit Filmkorn) –
- * keine Fotos von Personen, keine fremden Bildrechte. In der Mediathek als „Platzhalter“ gekennzeichnet (Titel, Alt-Text,
- * Bildnachweis „Platzhalter, automatisch erzeugt“), Schlagwort „foto-demo“, Sammlungen je Serie. Ersetzen Sie sie durch
- * eigene Fotos (Mediathek → Datei ersetzen: Verwendungen bleiben erhalten).
+ * Bilder: echte Fotos von Pexels (tools/demo-photos.php – nur Adressen und Bildnachweise im Repository, geladen beim Anlegen
+ * über Core\Http\Fetch, Urheber und Seite als Bildnachweis in der Mediathek). Ohne Internet bzw. mit FOTO_DEMO_OFFLINE=1:
+ * Platzhalter, hier mit PHP GD erzeugt (Verläufe, Hügel, Dünen, Meer, Fassaden, Schattenrisse mit Filmkorn), gekennzeichnet als
+ * „Platzhalter“. Schlagwort „foto-demo“, Sammlungen je Serie. Ersetzen Sie die Bilder durch eigene Fotos (Mediathek → Datei
+ * ersetzen: Verwendungen bleiben erhalten). Videos: langsame Kamerafahrt (ffmpeg) über ein Bild der Serie, stumm.
  *
  * Neue Websites: seed.php → 'after'. Bestehende Websites: CMS_SITE=… php kits/foto/tools/demo.php [--force|--remove]
  */
@@ -31,9 +32,28 @@ function foto_demo_install(bool $force = false, ?callable $log = null): bool
     foto_demo_remove($log);
     $img = foto_demo_images($log);
     foto_demo_pages($img, $log);
+    foto_demo_selection($img, $log);
+    // Fußzeile der Demo: Herkunft der Bilder (nur den Text des Seeders ersetzen, nie eigene Texte)
+    $st = app()->settings;
+    $foot = (string) $st->get('footer_text', '');
+    if (str_starts_with($foot, 'Demo-Inhalte des Kits „foto“')) {
+        $st->set('footer_text', 'Demo-Inhalte des Kits „foto“: Person, Texte und Preise sind frei erfunden. '
+            . (!empty($img['real']) ? 'Fotos: Pexels (Pexels-Lizenz), Urheber im Bildnachweis der Mediathek.' : 'Alle Bilder sind automatisch erzeugte Platzhalter.'));
+    }
     \Core\PageCache::clear();
-    $log('Fertig: Startseite, „Arbeiten“ mit drei Serien, „Über mich“ und „Kontakt“ mit ' . count($img['all']) . ' Platzhalterbildern.');
+    $log('Fertig: Startseite, „Arbeiten“ mit drei Serien, „Über mich“ und „Kontakt“ mit ' . count($img['all']) . (!empty($img['real']) ? ' Fotos von Pexels.' : ' Platzhalterbildern.'));
     return true;
+}
+
+/** Mit der Erweiterung „auswahl“ (Bildauswahl): ein Beispiel-Shooting aus der Porträt-Sammlung, ohne PIN, zum Ausprobieren */
+function foto_demo_selection(array $img, callable $log): void
+{
+    if (!class_exists(\Klxm\Auswahl\Repo::class) || !\Core\Extensions::isActive('auswahl') || empty($img['col']['portrait'])) return;
+    $id = \Klxm\Auswahl\Repo::create(['title' => 'Porträts Lena (Demo)', 'client' => 'Lena Beispiel', 'email' => '', 'collection_id' => (int) $img['col']['portrait'],
+        'intro' => 'Schön war’s! Hier sind alle Bilder aus unserem Shooting im Fensterlicht. Wählen Sie bitte Ihre fünf Favoriten – gern mit einer Notiz, wenn ich etwas anpassen soll.',
+        'shoot_date' => date('Y-m-d', strtotime('-5 days')), 'max_picks' => 5, 'deadline' => date('Y-m-d', strtotime('+30 days')), 'allow_comments' => 1]);
+    $s = \Klxm\Auswahl\Repo::find($id);
+    if ($s) $log('Beispiel-Shooting für die Bildauswahl: ' . \Klxm\Auswahl\Auswahl::link($s, '', true));
 }
 
 /** Demo-Seiten (außer Impressum/Datenschutz) und Demo-Medien entfernen */
@@ -49,6 +69,9 @@ function foto_demo_remove(?callable $log = null): void
     }
     Demo::deletePages($ids);
     Demo::deleteMedia(FOTO_DEMO_TAG);
+    if (class_exists(\Klxm\Auswahl\Repo::class) && \Core\Extensions::isActive('auswahl')) {
+        foreach (Demo::ids("SELECT id FROM auswahl_shoots WHERE title LIKE '% (Demo)'") as $sid) \Klxm\Auswahl\Repo::delete($sid);
+    }
     $db->query("DELETE FROM media_collections WHERE name LIKE '% (Demo)' AND description LIKE '%„foto“%'");
     if ($ids) $log('Vorhandene Demo entfernt (' . count($ids) . ' Seiten).');
 }
@@ -60,18 +83,18 @@ function foto_demo_remove(?callable $log = null): void
  */
 function foto_demo_images(callable $log): array
 {
-    $out = ['all' => [], 'land' => [], 'portrait' => [], 'report' => [], 'col' => []];
+    $out = ['all' => [], 'land' => [], 'portrait' => [], 'report' => [], 'col' => [], 'titles' => [], 'real' => false];
+    $cols = [
+        'land' => Media::createCollection('Landschaft (Demo)', 'Demo-Bilder des Kits „foto“. Durch eigene Fotos ersetzen.'),
+        'portrait' => Media::createCollection('Porträt (Demo)', 'Demo-Bilder des Kits „foto“. Durch eigene Fotos ersetzen.'),
+        'report' => Media::createCollection('Reportage (Demo)', 'Demo-Bilder des Kits „foto“. Durch eigene Fotos ersetzen.'),
+    ];
+    $out['col'] = $cols;
+    if (getenv('FOTO_DEMO_OFFLINE') !== '1' && ($real = foto_demo_photos($cols, $log))) return $real + $out;
     if (!function_exists('imagecreatetruecolor')) {
         $log('GD fehlt – Demo ohne Bilder.');
         return $out;
     }
-    $desc = 'Platzhalterbilder des Kits „foto“ – automatisch erzeugt, frei verwendbar, ohne Personen. Durch eigene Fotos ersetzen.';
-    $cols = [
-        'land' => Media::createCollection('Landschaft (Demo)', $desc),
-        'portrait' => Media::createCollection('Porträt (Demo)', $desc),
-        'report' => Media::createCollection('Reportage (Demo)', $desc),
-    ];
-    $out['col'] = $cols;
     // [Gruppe, Motiv, Breite, Höhe, Titel, Alt-Text, Farbvariante]
     $plan = [
         ['land', 'hills', 2000, 1333, 'Nebel über Hügeln', 'Hügelketten im Morgennebel, die nach hinten heller werden', 0],
@@ -103,6 +126,7 @@ function foto_demo_images(callable $log): array
         $id = (int) $m['id'];
         $out['all'][] = $id;
         $out[$group][] = $id;
+        $out['titles'][$id] = $title;
     }
     // Platzhalter-Videos (nur mit ffmpeg): langsame Kamerafahrt über ein erzeugtes Motiv, stumm, 6 Sekunden
     $out['video'] = [];
@@ -123,10 +147,83 @@ function foto_demo_images(callable $log): array
             if ($err || !$m) { $log($title . ': ' . $err); continue; }
             try { \Core\VideoThumbs::generate($m, true); } catch (\Throwable) {}   // Vorschaubild sofort (sonst nach der Antwort)
             $out['video'][$group] = (int) $m['id'];
+            $out['titles'][(int) $m['id']] = $title;
             $out['all'][] = (int) $m['id'];
         }
     }
     $log(count($out['all']) . ' Platzhalterbilder und -videos erzeugt.');
+    return $out;
+}
+
+/**
+ * Echte Fotos (tools/demo-photos.php) laden und importieren. Gelingt das nicht für mindestens drei Bilder je Serie
+ * (z. B. ohne Internet), werden die geladenen wieder entfernt und die Demo nutzt erzeugte Platzhalter (Rückgabe null).
+ * Videos: Kamerafahrt über je ein Foto (Landschaft, Reportage), nur mit ffmpeg.
+ */
+function foto_demo_photos(array $cols, callable $log): ?array
+{
+    $list = require __DIR__ . '/demo-photos.php';
+    $out = ['all' => [], 'land' => [], 'portrait' => [], 'report' => [], 'titles' => [], 'about' => null, 'video' => [], 'real' => true];
+    $keep = [];   // für die Videos: [Gruppe => Datei]
+    $log('Lade ' . count($list) . ' Fotos von Pexels …');
+    foreach ($list as $k => $p) {
+        $url = 'https://images.pexels.com/photos/' . (int) $p['id'] . '/pexels-photo-' . (int) $p['id'] . '.jpeg?auto=compress&cs=tinysrgb&w=2000';
+        try {
+            $r = \Core\Http\Fetch::get($url, ['kind' => 'image', 'max' => 12 * 1024 * 1024, 'timeout' => 25]);
+        } catch (\Throwable $e) {
+            $log($p['title'] . ': ' . $e->getMessage());
+            if ($k === 0) break;   // schon das erste scheitert → offline, gleich Platzhalter
+            continue;
+        }
+        if ($r['status'] !== 200 || !str_starts_with($r['type'], 'image/jpeg') || strlen($r['body']) < 10000) { $log($p['title'] . ': nicht geladen (HTTP ' . $r['status'] . ')'); continue; }
+        $file = tempnam(sys_get_temp_dir(), 'fp') . '.jpg';
+        file_put_contents($file, $r['body']);
+        $group = (string) $p['group'];
+        if (in_array($group, ['land', 'report'], true) && !isset($keep[$group]) && in_array($p['title'], ['Erste Stunde', 'Gegenlicht'], true)) {
+            $keep[$group] = $file . '.v.jpg';
+            copy($file, $keep[$group]);
+        }
+        [$m, $err] = Media::import($file, sprintf('foto-demo-%s-%02d.jpg', $group, $k + 1), (string) $p['alt'], [
+            'title' => (string) $p['title'], 'tags' => FOTO_DEMO_TAG, 'collection' => $cols[$group] ?? null,
+            'credit' => 'Foto: ' . $p['author'] . ' / Pexels – ' . $p['page'],
+        ]);
+        @unlink($file);
+        if ($err || !$m) { $log($p['title'] . ': ' . $err); continue; }
+        $id = (int) $m['id'];
+        $out['all'][] = $id;
+        $out['titles'][$id] = (string) $p['title'];
+        if ($group === 'about') $out['about'] = $id;
+        else $out[$group][] = $id;
+    }
+    if (count($out['land']) < 3 || count($out['portrait']) < 3 || count($out['report']) < 3) {
+        if ($out['all']) Demo::deleteMedia(FOTO_DEMO_TAG);
+        foreach ($keep as $f) @unlink($f);
+        $log('Fotos nicht erreichbar – die Demo nutzt erzeugte Platzhalter.');
+        return null;
+    }
+    // Stumme Videos: langsame Kamerafahrt über ein Foto (6 Sekunden, 1280×720)
+    if (\Core\Ffmpeg::available()) {
+        foreach (['land' => ['Erste Stunde, bewegt', 'Kamerafahrt über Hügelketten im Morgennebel'], 'report' => ['Gegenlicht, bewegt', 'Schwarzweiß: Passanten im Gegenlicht auf einer Gasse, langsame Fahrt']] as $group => [$title, $alt]) {
+            if (empty($keep[$group])) continue;
+            $mp4 = tempnam(sys_get_temp_dir(), 'fd') . '.mp4';
+            $cmd = escapeshellarg(\Core\Ffmpeg::bin('ffmpeg')) . ' -y -loglevel error -loop 1 -i ' . escapeshellarg($keep[$group])
+                . ' -vf ' . escapeshellarg("scale=2400:-2,crop=2400:1350,zoompan=z='min(zoom+0.0008,1.12)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=150:s=1280x720:fps=25,format=yuv420p")
+                . ' -t 6 -c:v libx264 -crf 26 -preset veryfast -movflags +faststart -an ' . escapeshellarg($mp4) . ' 2>&1';
+            exec($cmd, $o, $rc);
+            if ($rc !== 0 || !is_file($mp4) || filesize($mp4) < 1000) { $log('Video ' . $title . ': ffmpeg fehlgeschlagen.'); @unlink($mp4); continue; }
+            $src = array_values(array_filter($list, fn($p) => $p['group'] === $group && str_starts_with($title, $p['title'])))[0] ?? null;
+            [$m, $err] = Media::import($mp4, 'foto-demo-video-' . $group . '.mp4', $alt, ['title' => $title, 'tags' => FOTO_DEMO_TAG, 'collection' => $cols[$group],
+                'credit' => $src ? 'Foto: ' . $src['author'] . ' / Pexels – ' . $src['page'] . ' (als Kamerafahrt)' : '']);
+            @unlink($mp4);
+            if ($err || !$m) continue;
+            try { \Core\VideoThumbs::generate($m, true); } catch (\Throwable) {}
+            $out['video'][$group] = (int) $m['id'];
+            $out['titles'][(int) $m['id']] = $title;
+            $out['all'][] = (int) $m['id'];
+        }
+    }
+    foreach ($keep as $f) @unlink($f);
+    $log(count($out['all']) . ' Fotos und Videos von Pexels übernommen.');
     return $out;
 }
 
@@ -377,7 +474,10 @@ function foto_demo_pages(array $img, callable $log): void
 {
     $L = $img['land']; $P = $img['portrait']; $R = $img['report'];
     $at = fn(array $list, int $i) => $list[$i % max(1, count($list))] ?? null;
-    $items = fn(array $ids, array $captions = []) => array_map(fn($id, $k) => ['image' => $id, 'caption' => $captions[$k] ?? ''], $ids, array_keys($ids));
+    $T = fn(?int $id): string => $id ? (string) ($img['titles'][$id] ?? '') : '';   // Bildunterschrift = Titel des Bildes
+    $items = fn(array $ids) => array_map(fn($id) => ['image' => $id, 'caption' => $T($id)], $ids);
+    $real = !empty($img['real']);
+    $demoNote = $real ? '' : ' (Demo mit Platzhaltern)';
     $page = fn(array $f, array $blocks): int => Demo::page($f, array_map(fn($b) => Demo::block($b['type'], $b['data'] ?? [], $b['tunes'] ?? []), $blocks));
     $cta = ['type' => 'cta', 'tunes' => ['background' => 'muted'], 'data' => [
         'variant' => 'box', 'eyebrow' => '', 'title' => 'Ein Auftrag, eine Idee, eine Frage?',
@@ -396,8 +496,8 @@ function foto_demo_pages(array $img, callable $log): void
         ['type' => 'photo_hero', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'slideshow', 'title' => 'Mara Beispiel. *Licht*, Menschen, Orte.',
             'text' => 'Fotografie aus Musterstadt – Porträt, Reportage, Landschaft.', 'show_title' => true, 'position' => 'bottom-left', 'height' => 'screen',
             'overlay' => 'soft', 'autoplay' => true, 'interval' => '6', 'scroll_hint' => true, 'full_width' => true, 'slides' => array_values(array_filter([
-                ['image' => $at($L, 0), 'caption' => 'Nebel über Hügeln'], ['image' => $at($P, 2), 'caption' => 'Studie III'],
-                ['image' => $at($R, 3), 'caption' => 'Arkaden'], ['image' => $at($L, 2), 'caption' => 'Horizont'],
+                ['image' => $at($L, 0), 'caption' => $T($at($L, 0))], ['image' => $at($P, 0), 'caption' => $T($at($P, 0))],
+                ['image' => $at($R, 0), 'caption' => $T($at($R, 0))], ['image' => $at($L, 1), 'caption' => $T($at($L, 1))],
             ], fn($x) => $x['image']))]],
         ['type' => 'moments', 'tunes' => ['spaceTop' => 'medium'], 'data' => ['variant' => 'stream', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual',
             'motion' => 'reveal', 'row_height' => 'm', 'labels' => 'hover', 'more' => 'all', 'batch' => 12, 'spy' => false, 'width' => 'full', 'tiles' => [
@@ -442,34 +542,34 @@ function foto_demo_pages(array $img, callable $log): void
         ['type' => 'series_index', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'list', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'children', 'parent' => null,
             'limit' => 0, 'ratio' => '4:5', 'columns' => '3', 'width' => '', 'show_meta' => true, 'items' => []]],
     ]);
-    $page(['slug' => 'portraet', 'title' => 'Porträt', 'parent_id' => $root, 'sort' => 0, 'meta_description' => 'Serie „Stille Gesichter“ (Demo mit Platzhaltern).'], [
+    $page(['slug' => 'portraet', 'title' => 'Porträt', 'parent_id' => $root, 'sort' => 0, 'meta_description' => 'Serie „Stille Gesichter“' . $demoNote . '.'], [
         ['type' => 'series_head', 'data' => ['variant' => 'side', 'eyebrow' => 'Serie', 'title' => 'Stille Gesichter', 'year' => '2025', 'category' => 'Porträt', 'place' => 'Musterstadt', 'client' => '',
-            'statement' => '<p>Sechs Begegnungen, jeweils eine Stunde, ein Licht. Keine Anweisungen – nur Warten, bis das Gesicht zur Ruhe kommt. [Platzhalterbilder: Schattenrisse statt Porträts.]</p>',
+            'statement' => '<p>Sechs Begegnungen, jeweils eine Stunde, ein Licht. Keine Anweisungen – nur Warten, bis das Gesicht zur Ruhe kommt.' . ($real ? '' : ' [Platzhalterbilder: Schattenrisse statt Porträts.]') . '</p>',
             'cover' => $at($P, 1), 'ratio' => '4:5', 'back_label' => 'Alle Arbeiten', 'back_link' => '']],
         ['type' => 'photo_grid', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'grid', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual', 'collection' => null,
-            'images' => $items($P, ['Studie I', 'Studie II', 'Studie III', 'Studie IV', 'Studie V', 'Studie VI']), 'columns' => '3', 'ratio' => '4:5', 'row_height' => 'm', 'width' => '', 'captions' => true, 'lightbox' => true]],
+            'images' => $items(array_slice($P, 0, 6)), 'columns' => '3', 'ratio' => '4:5', 'row_height' => 'm', 'width' => '', 'captions' => true, 'lightbox' => true]],
         ['type' => 'photo_text', 'tunes' => ['background' => 'muted'], 'data' => ['variant' => 'right', 'eyebrow' => '', 'title' => 'Über die Serie',
             'text' => '<p>Porträts entstehen im Gespräch. Das Licht kommt von einem Fenster, der Hintergrund ist eine graue Wand. Was bleibt, ist der Blick. [Eigenen Text einsetzen.]</p>',
             'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '',
-            'image' => $at($P, 3), 'caption' => 'Studie IV · Fensterlicht', 'ratio' => '4:5', 'size' => 'half', 'align' => 'center', 'lightbox' => true]],
+            'image' => $at($P, 6), 'caption' => $T($at($P, 6)), 'ratio' => '4:5', 'size' => 'half', 'align' => 'center', 'lightbox' => true]],
     ]);
-    $page(['slug' => 'reportage', 'title' => 'Reportage', 'parent_id' => $root, 'sort' => 1, 'meta_description' => 'Serie „Stadt am Mittag“ (Demo mit Platzhaltern).'], [
+    $page(['slug' => 'reportage', 'title' => 'Reportage', 'parent_id' => $root, 'sort' => 1, 'meta_description' => 'Serie „Stadt am Mittag“' . $demoNote . '.'], [
         ['type' => 'series_head', 'data' => ['variant' => 'text', 'eyebrow' => 'Serie', 'title' => 'Stadt am *Mittag*', 'year' => '2024', 'category' => 'Reportage', 'place' => 'Musterstadt', 'client' => '',
             'statement' => '<p>Wenn die Sonne am höchsten steht, wird die Stadt zu Geometrie: Fassaden, Treppen, Übergänge. Eine Woche, jeden Tag zwischen zwölf und eins.</p>',
             'cover' => $at($R, 0), 'ratio' => '3:2', 'back_label' => 'Alle Arbeiten', 'back_link' => '']],
         ['type' => 'photo_grid', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'strip', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual', 'collection' => null,
-            'images' => $items($R, ['Fassade, Mittag', 'Treppe', 'Übergang', 'Arkaden', 'Hof', 'Lichtschacht']), 'columns' => 'auto', 'ratio' => '', 'row_height' => 'm', 'width' => 'full', 'captions' => true, 'lightbox' => true]],
+            'images' => $items(array_slice($R, 0, 6)), 'columns' => 'auto', 'ratio' => '', 'row_height' => 'm', 'width' => 'full', 'captions' => true, 'lightbox' => true]],
         ['type' => 'quote', 'data' => ['variant' => 'single', 'eyebrow' => '', 'title' => '', 'items' => [
             ['text' => 'Der Schatten ist genauso Motiv wie das, was ihn wirft.', 'name' => 'Mara Beispiel', 'role' => 'Notizbuch, 2024 (Demo)', 'image' => null]]]],
         ['type' => 'photo_grid', 'data' => ['variant' => 'masonry', 'eyebrow' => 'Kontaktbogen', 'title' => 'Alle Bilder der Woche', 'intro' => '', 'source' => 'collection', 'collection' => $img['col']['report'] ?? null,
             'images' => [], 'columns' => '3', 'ratio' => '', 'row_height' => 'm', 'width' => '', 'captions' => true, 'lightbox' => true]],
     ]);
-    $page(['slug' => 'landschaft', 'title' => 'Landschaft', 'parent_id' => $root, 'sort' => 2, 'meta_description' => 'Serie „Weite“ (Demo mit Platzhaltern).'], [
+    $page(['slug' => 'landschaft', 'title' => 'Landschaft', 'parent_id' => $root, 'sort' => 2, 'meta_description' => 'Serie „Weite“' . $demoNote . '.'], [
         ['type' => 'series_head', 'data' => ['variant' => 'cover', 'eyebrow' => 'Serie', 'title' => 'Weite', 'year' => '2023–2025', 'category' => 'Landschaft', 'place' => 'Küste und Mittelgebirge', 'client' => '',
             'statement' => '<p>Orte, an denen der Horizont das Wichtigste ist. Fotografiert im ersten und im letzten Licht, meist allein, meist zu Fuß.</p>',
             'cover' => $at($L, 4), 'ratio' => '', 'back_label' => 'Alle Arbeiten', 'back_link' => '']],
         ['type' => 'photo_grid', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'single', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual', 'collection' => null,
-            'images' => $items(array_values(array_filter([$at($L, 0), $img['video']['land'] ?? null, $at($L, 3), $at($L, 2)])), isset($img['video']['land']) ? ['Nebel über Hügeln', 'Nebel, bewegt (Video)', 'Tal im Blau', 'Horizont'] : ['Nebel über Hügeln', 'Tal im Blau', 'Horizont']), 'columns' => 'auto', 'ratio' => '', 'row_height' => 'm', 'width' => 'contained', 'captions' => true, 'lightbox' => true]],
+            'images' => $items(array_values(array_filter([$at($L, 0), $img['video']['land'] ?? null, $at($L, 3), $at($L, 2)]))), 'columns' => 'auto', 'ratio' => '', 'row_height' => 'm', 'width' => 'contained', 'captions' => true, 'lightbox' => true]],
         ['type' => 'photo_grid', 'tunes' => ['background' => 'dark'], 'data' => ['variant' => 'justified', 'eyebrow' => '', 'title' => 'Weitere Bilder', 'intro' => '', 'source' => 'collection', 'collection' => $img['col']['land'] ?? null,
             'images' => [], 'columns' => 'auto', 'ratio' => '', 'row_height' => 'm', 'width' => 'wide', 'captions' => false, 'lightbox' => true]],
     ]);
@@ -479,7 +579,7 @@ function foto_demo_pages(array $img, callable $log): void
         ['type' => 'photo_text', 'data' => ['variant' => 'left', 'eyebrow' => 'Über mich', 'title' => 'Mara Beispiel',
             'text' => '<p>Fotografin in Musterstadt (fiktive Person). Ich arbeite für Magazine, Kulturhäuser und Menschen, die ein Porträt brauchen, das nach ihnen aussieht – und an freien Serien über Licht und Orte.</p><p>[Eigene Geschichte, Ausbildung und Haltung hier ergänzen.]</p>',
             'button_label' => 'Arbeiten ansehen', 'button_link' => '/arbeiten', 'button2_label' => '', 'button2_link' => '',
-            'image' => $at($P, 4), 'caption' => '', 'ratio' => '4:5', 'size' => 'half', 'align' => 'center', 'lightbox' => false]],
+            'image' => $img['about'] ?? $at($P, 4), 'caption' => '', 'ratio' => '4:5', 'size' => 'half', 'align' => 'center', 'lightbox' => false]],
         ['type' => 'features', 'tunes' => ['background' => 'muted'], 'data' => ['variant' => 'list', 'eyebrow' => '', 'title' => 'Was ich anbiete', 'intro' => '', 'size' => 'm', 'items' => [
             ['icon' => 'user-circle', 'image' => null, 'title' => 'Porträt', 'text' => 'Für Menschen, Teams und Bühnen – im Studio oder vor Ort.', 'link_label' => '', 'link' => ''],
             ['icon' => 'newspaper', 'image' => null, 'title' => 'Reportage', 'text' => 'Begleitung über Stunden oder Tage, ruhig und unaufdringlich.', 'link_label' => '', 'link' => ''],
@@ -505,7 +605,8 @@ function foto_demo_pages(array $img, callable $log): void
         ]]],
         ['type' => 'faq', 'data' => ['variant' => 'split', 'eyebrow' => '', 'title' => 'Häufige Fragen', 'intro' => '', 'items' => [
             ['q' => 'Wie lange dauert es bis zu den Bildern?', 'a' => '<p>In der Regel zwei Wochen nach dem Termin. [Bitte an Ihre Abläufe anpassen.]</p>'],
-            ['q' => 'Sind die Bilder dieser Demo echt?', 'a' => '<p>Nein. Alle Bilder sind automatisch erzeugte Platzhalter, die Person ist erfunden.</p>'],
+            ['q' => 'Woher stammen die Bilder dieser Demo?', 'a' => $real ? '<p>Die Fotos sind von Pexels (Pexels-Lizenz), die Urheber stehen im Bildnachweis der Mediathek. Die Fotografin Mara Beispiel ist erfunden.</p>'
+                : '<p>Alle Bilder sind automatisch erzeugte Platzhalter, die Person ist erfunden.</p>'],
         ]]],
     ]);
     // Startseite: Unterseiten von „Arbeiten“ als Serien-Übersicht → Feld „parent“ setzen
