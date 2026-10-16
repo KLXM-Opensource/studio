@@ -173,10 +173,51 @@ final class Repo
         }
     }
 
+    // ------------------------------------------------------------------ Poster von Pool-Videos (für alle Websites des Pools)
+
+    /** Vermerk im Pool: Pool-Video-ID → Pool-Bild-ID (storage/pools/{key}/video-posters.json) */
+    private static function poolPosters(string $pool, ?array $set = null): array
+    {
+        $f = \Core\MediaPools::dir($pool) . '/video-posters.json';
+        if ($set !== null) { file_put_contents($f, json_encode($set), LOCK_EX); return $set; }
+        $d = is_file($f) ? json_decode((string) file_get_contents($f), true) : [];
+        return is_array($d) ? $d : [];
+    }
+
+    /** Poster eines Pool-Videos aus dem Vermerk des Pools → Verweis dieser Website (legt ihn bei Bedarf an) oder null */
+    public static function poolPosterId(array $m): ?int
+    {
+        $pool = self::pool($m);
+        if ($pool === null) return null;
+        $pid = (int) (self::poolPosters($pool)[(string) (int) $m['_pool_id']] ?? 0);
+        if (!$pid || !\Core\MediaPools::row($pool, $pid)) return null;
+        return \Core\MediaPools::mirror($pool, $pid);
+    }
+
+    /** Poster eines Pool-Videos im Pool vermerken; altes, von den Video-Werkzeugen erzeugtes Pool-Bild löschen */
+    private static function notePoolPoster(array $m, ?int $imageId): void
+    {
+        $pool = self::pool($m);
+        if ($pool === null) return;   // Recht prüfen Aufruf (AdminController) bzw. Auftrag (Jobs::create) – hier auch im Arbeiter ohne Anmeldung
+        $img = $imageId ? Media::find($imageId) : null;
+        $newPid = $img && ($img['_pool'] ?? null) === $pool ? (int) $img['_pool_id'] : 0;
+        $map = self::poolPosters($pool);
+        $key = (string) (int) $m['_pool_id'];
+        $oldPid = (int) ($map[$key] ?? 0);
+        if ($newPid) $map[$key] = $newPid; else unset($map[$key]);
+        self::poolPosters($pool, $map);
+        if ($oldPid && $oldPid !== $newPid && !in_array($oldPid, array_map('intval', $map), true)) {
+            $prev = Media::pool();
+            Media::usePool($pool);
+            try { Media::delete($oldPid, true); } catch (\Throwable $e) { error_log('[video_tools] altes Pool-Poster: ' . $e->getMessage()); } finally { Media::usePool($prev); }
+        }
+    }
+
     public static function setPoster(int $videoId, ?int $imageId, ?int $atMs = null): void
     {
         $m = self::video($videoId);
         if (!$m) return;
+        self::notePoolPoster($m, $imageId);
         self::meta($m);
         $old = app()->db->fetch('SELECT poster_id FROM video_meta WHERE media_id = ?', [$videoId]);
         app()->db->update('video_meta', ['poster_id' => $imageId, 'poster_at' => $atMs], 'media_id = :id', ['id' => $videoId]);
@@ -196,7 +237,8 @@ final class Repo
     {
         $row = self::allMeta()[(int) $m['id']] ?? null;
         $id = (int) ($row['poster_id'] ?? 0);
-        return $id > 0 ? $id : null;
+        if ($id > 0 && Media::find($id)) return $id;
+        return self::poolPosterId($m);   // Pool-Video: Poster, das eine andere Website des Pools gesetzt hat
     }
 
     public static function link(int $mediaId, int $sourceId, string $kind, ?string $preset, ?string $label): void
