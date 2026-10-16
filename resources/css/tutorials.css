@@ -61,7 +61,7 @@
 .tut-credit{margin:6px 0 0 24px;font-size:12.5px;color:var(--t3)}
 .tut-mobile__grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;align-items:start}
 .tut-video--phone{aspect-ratio:390/844;max-width:300px}
-.tut-code{margin:10px 0 0;padding:14px 16px;border-radius:12px;background:#16201E;color:#E9EEF2;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+.tut-code{margin:10px 0 0;padding:14px 16px;border-radius:12px;background:#16201E;color:#E9EEF2;font:13px/1.55 var(--adm-mono,ui-monospace,Menlo,monospace);overflow-x:auto;white-space:pre}
 .tut-code code{background:none!important;color:inherit!important;font:inherit;padding:0}
 
 /* Weiter zu … */

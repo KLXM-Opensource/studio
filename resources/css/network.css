@@ -56,7 +56,7 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-pill--off{background:var(--adm-fill);color:var(--adm-t2)}
 
 .net-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 0}
-.net-key{padding:1px 7px;border-radius:5px;background:var(--adm-fill);color:var(--adm-t2);font:500 12px/20px ui-monospace,SFMono-Regular,Menlo,monospace}
+.net-key{padding:1px 7px;border-radius:5px;background:var(--adm-fill);color:var(--adm-t2);font:500 12px/20px var(--adm-mono,ui-monospace,Menlo,monospace)}
 .net-tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:5px;background:var(--adm-fill);color:var(--adm-t2);font-size:12px;font-weight:700}
 .net-tag--net{background:var(--adm-accent-bg);color:var(--adm-a-ink)}
 .net-tag--live{background:var(--adm-ok-bg);color:var(--adm-ok)}

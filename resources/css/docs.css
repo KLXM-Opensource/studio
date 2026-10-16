@@ -94,11 +94,11 @@ a.doc-card:hover .doc-card__sub{color:#F3E3E6}
 /* Lizenzen & Danksagungen (help/licenses.php): lange Paketnamen umbrechen, Lizenztexte */
 .doc-licenses .doc-table--wrap{min-width:640px}
 .doc-licenses .doc-table--wrap td,.doc-licenses .doc-table--wrap code{white-space:normal;overflow-wrap:break-word}
-.doc-ch pre.doc-license{max-height:28em;overflow:auto;margin:10px 0 0;padding:14px 16px;border-radius:12px;font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+.doc-ch pre.doc-license{max-height:28em;overflow:auto;margin:10px 0 0;padding:14px 16px;border-radius:12px;font:12.5px/1.5 var(--adm-mono);white-space:pre-wrap;overflow-wrap:break-word}
 .doc-licenses details summary{cursor:pointer;font-weight:700;margin-top:12px}
 
 /* Badges */
-.m{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:3px 8px;border-radius:6px;font:700 11px ui-monospace,Menlo,monospace;letter-spacing:.04em;color:#fff}
+.m{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:3px 8px;border-radius:6px;font:700 11px var(--adm-mono);letter-spacing:.04em;color:#fff}
 .m--get{background:#2F5A50}.m--post{background:#314164}.m--put{background:#9A5B00}.m--patch{background:#5B4AA0}.m--delete{background:#B3261E}
 .tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--g);color:var(--t2)}
 .tag--write{background:#FDF0DC;color:#9A5B00}.tag--danger{background:#FBEAEA;color:#B3261E}.tag--read{background:#E7F2EE;color:#2F5A50}

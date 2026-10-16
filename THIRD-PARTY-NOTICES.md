@@ -32,7 +32,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 | ISC | earcut, kdbush, potpack, quickselect, tinyqueue, geojson-vt, point-geometry, maplibre-gl-style-spec | Bundled |
 | CC0-1.0 | ICC colour profile in PDF.js | Bundled |
 | GPL-2.0 with font exception (Red Hat Liberation font license) | Liberation Sans fonts inside PDF.js (`standard_fonts/`) – separate font files, see 1.3 | Bundled |
-| SIL Open Font License 1.1 | Lato (admin) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
+| SIL Open Font License 1.1 | Lato (admin, PDF), JetBrains Mono (admin code) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
 | CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube in kit demo content | Service / demo |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
@@ -64,7 +64,8 @@ are written next to the files by the build.
 | Apache ECharts (`echarts`), © The Apache Software Foundation – diagrams (`Core\Charts`, engine `echarts`), tree-shaken: line, bar, pie, canvas | 6.1.0 | Apache-2.0 | `public/assets/js/charts-echarts.mjs` | `public/assets/vendor/echarts/LICENSE.txt`, `NOTICE.txt` |
 | – bundled: `zrender` 6.1.0 (BSD-3-Clause), `tslib` 2.3.0 (0BSD) | | see left | inside `charts-echarts.mjs` | `public/assets/vendor/echarts/THIRD-PARTY-LICENSES.txt` (generated) |
 | Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.3.289 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
-| Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI) | `public/assets/fonts/OFL-Lato.txt` |
+| Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI), `resources/fonts/pdf/lato-*.ttf` (PDF) | `public/assets/fonts/OFL-Lato.txt` |
+| JetBrains Mono (`@fontsource/jetbrains-mono`), © 2020 The JetBrains Mono Project Authors | 5.3.0 | OFL-1.1 | `public/assets/fonts/jetbrains-mono-*.woff2` (admin code) | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
 | Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (Symbolstil der Website) | `public/assets/icons/LICENSE.txt` |
 | Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
 | Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (Symbolstil der Website, Zuordnung `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
@@ -123,6 +124,7 @@ Copyright lines as in the fonts' own license files or name tables:
 | Kit | Font | Package (version) | Copyright | License text |
 |---|---|---|---|---|
 | Admin (core) | Lato | `@fontsource/lato` 5.3.0 | © 2010-2011 tyPoland Łukasz Dziedzic, RFN “Lato” | `public/assets/fonts/OFL-Lato.txt` |
+| Admin (core) | JetBrains Mono | `@fontsource/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
 | basis, essenz, fluid, foto, galerie, immobilien, praxis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `kits/{kit}/fonts/OFL.txt` |
 | editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `kits/editorial/fonts/OFL.txt` |
 | nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2020 The Fraunces Project Authors | `kits/nature/fonts/OFL.txt` |

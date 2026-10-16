@@ -7,7 +7,7 @@
 .mdi__in{display:grid;gap:12px;min-width:0}
 .mdi__in .f{margin:0}
 .mdi__in .f>label,.mdi__split legend{display:block;margin-bottom:6px;font-weight:700;font-size:14px}
-.mdi__in textarea{font:400 13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:180px}
+.mdi__in textarea{font:400 13.5px/1.5 var(--adm-mono);min-height:180px}
 .mdi__split{display:grid;gap:6px;margin:0;padding:0;border:0;min-width:0}
 .mdi__split .f-check{display:flex;margin:0;font-weight:500!important;font-size:14px}
 .mdi__split input[type=radio]{width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;accent-color:var(--adm-a);flex:none}

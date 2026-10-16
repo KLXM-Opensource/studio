@@ -87,6 +87,9 @@ async function vendors() {
     }
   }
   copy(nm('@fontsource/lato/LICENSE'), path.join(lato, 'OFL-Lato.txt'));
+  // JetBrains Mono – Code und Kennungen in der Verwaltung (OFL)
+  for (const w of [400, 700]) for (const sub of ['latin', 'latin-ext']) copy(nm('@fontsource/jetbrains-mono/files', `jetbrains-mono-${sub}-${w}-normal.woff2`), path.join(lato, `jetbrains-mono-${sub}-${w}-normal.woff2`));
+  copy(nm('@fontsource/jetbrains-mono/LICENSE'), path.join(lato, 'OFL-JetBrains-Mono.txt'));
 
   // Apache ECharts (Diagramme, Core\Charts): gebündelt in resources/js/charts-echarts.mjs – hier nur Lizenz, NOTICE und eingebettete Pakete
   const ec = path.join(PUB, 'assets/vendor/echarts');

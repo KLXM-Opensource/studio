@@ -14,7 +14,7 @@
 .cb-demo__name{display:flex;align-items:center;gap:8px;margin:0;font-size:16px}
 .cb-demo__teaches{margin:0;font-size:13.5px;line-height:1.5}
 .cb-demo__tags{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
-.cb-demo__tags li{padding:2px 8px;border-radius:999px;background:var(--adm-fill,#F1F1F4);color:var(--adm-ink);font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb-demo__tags li{padding:2px 8px;border-radius:999px;background:var(--adm-fill,#F1F1F4);color:var(--adm-ink);font:12px/1.6 var(--adm-mono,ui-monospace,Menlo,monospace)}
 .cb-demo__act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:auto;padding-top:6px}
 /* Block-Designer: „Was zeigt dieses Beispiel?“ und Hinweise je Reiter */
 .cb-demohint{border-left:3px solid var(--adm-a)}
