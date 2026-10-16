@@ -14,6 +14,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Aufräumen vor dem Start: eine Stelle je Aufgabe
+- **Neue Kern-Schnittstellen** statt verstreuter Kopien: `Core\Http\Fetch` (HTTP mit SSRF-Schutz – Quellen, Domain- und Landingpage-Prüfung, PDF-Schriften), `Core\Cli` (Optionen, `--all` je Website), `Core\Testing\Check` (Selbsttests), `Permissions::installationAdmin()`, `Response::fail()`/`download()`/`csv()`, `AdminUi::pager()`, `b64u_encode()`/`b64u_decode()`/`random_token()`/`trusted_site_url()`, `resources/js/_html.js` (`esc`, `csrf`), `resources/css/_toast.css`.
+- **Datum und Uhrzeit grundsätzlich über ICU** (intl): Muster je Sprache aus Skeletten, Englisch nach britischen Regeln; rund 100 feste `date('d.m.Y')`/`H:i`-Formate in Verwaltung, Mails und Kits über `Core\Format` (neuer Stil `dm`).
+- Toter Code und nie veröffentlichte Altlasten entfernt (u. a. `mycms`-Kennungen, ungenutzte Methoden).
+
 ### PHP-API-Referenz und statische Analyse
 - **PHP-API-Referenz** live aus dem Code (`Core\ApiReference`): Entwicklerhandbuch → PHP-API-Referenz (stabile Schnittstellen für Erweiterungen und Kits), alle Klassen unter Hilfe → PHP-API-Referenz, als Markdown mit `php bin/console docs:api` (`docs/php-api.md`).
 - **PHPStan** Stufe 5 ohne Funde (`tools/phpstan`, Baseline nur für belegte Fehlalarme). Behoben u. a.: Wiederherstellen aus dem Papierkorb der Mediathek meldete immer einen Fehler (`Database::update()` liefert jetzt die Zahl der geänderten Zeilen).
