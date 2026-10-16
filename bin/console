@@ -35,6 +35,11 @@
  *                                                     anlegen/sperren/2FA zurücksetzen (Passwort wird abgefragt)
  *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
+ *   cron:run [-v]                                     Geplante Aufgaben: der einzige Cronjob (jede Minute) – startet fällige Aufgaben und die Warteschlange
+ *   cron:list                                         Geplante Aufgaben mit Zeitplan, nächstem Lauf, Ergebnis und der Zeile für die crontab
+ *   cron:exec <aufgabe>                               Eine Aufgabe sofort ausführen (mit Sperre und Protokoll)
+ *   cron:queue [<aufgabe>]                            Warteschlange anzeigen bzw. eine Aufgabe für den nächsten cron:run einreihen
+ *   cron:selftest                                     Selbsttest: Zeitausdrücke, Fälligkeit, nächster Lauf, Warteschlange
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
  *   push:send [--all] [--limit=N]                     Push-Benachrichtigungen: fällige Zustellungen senden (Cron: jede Minute bis alle 5 min)
  *   push:status [--all]                               Push: Funktion, Schlüssel, Abos, Warteschlange, letzter Versand
@@ -743,6 +748,40 @@ switch ($cmd) {
         echo "Chat: $n Nachricht(en) gelöscht (Aufbewahrung: " . ($d > 0 ? "$d Tage" : 'unbegrenzt') . ").\n";
         break;
 
+    case 'cron:run':
+    case 'cron:exec':
+    case 'cron:list':
+    case 'cron:queue':
+    case 'cron:selftest':
+        // Geplante Aufgaben (Core\Cron): ein einziger Cronjob „* * * * * php bin/console cron:run“ für die ganze Installation
+        if ($cmd === 'cron:selftest') exit(Core\CronSelfTest::run());
+        if ($cmd === 'cron:run') {
+            $started = Core\Cron::run();
+            if (in_array('-v', $args, true)) echo $started ? 'Gestartet: ' . implode(', ', $started) . "\n" : "Nichts fällig.\n";
+            break;
+        }
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '-')));
+        if ($cmd === 'cron:exec') {
+            if (($pos[0] ?? '') === '') { fwrite(STDERR, "Aufruf: cron:exec <aufgabe>\n"); exit(1); }
+            $code = Core\Cron::exec($pos[0], $pos[1] ?? 'manual');
+            if (($pos[1] ?? 'manual') === 'manual') echo (string) Core\Cron::db()->fetchValue('SELECT last_output FROM cron_tasks WHERE k = ?', [$pos[0]]), "\n";
+            exit($code);
+        }
+        if ($cmd === 'cron:queue') {
+            if (($pos[0] ?? '') !== '') { echo 'Eingereiht: #' . Core\Cron::enqueue($pos[0], 'console') . " ({$pos[0]})\n"; break; }
+            foreach (Core\Cron::db()->fetchAll('SELECT * FROM cron_queue ORDER BY id DESC LIMIT 30') as $q)
+                printf("#%-5d %-28s %-8s %s %s\n", $q['id'], $q['k'], $q['status'], date('d.m. H:i', (int) $q['created']), $q['by']);
+            break;
+        }
+        $hb = Core\Cron::heartbeat();
+        echo 'Cron: ' . ($hb ? (Core\Cron::running() ? 'läuft' : 'steht') . ' (letzter Aufruf ' . date('d.m.Y H:i', $hb) . ')' : 'noch nie aufgerufen') . "\n";
+        echo 'Cronjob: ' . Core\Cron::line() . "\n\n";
+        foreach (Core\Cron::tasks() as $k => $t) {
+            printf("%-3s %-26s %-16s %-16s %-8s %s\n", $t['enabled'] ? 'an' : 'aus', $k, $t['schedule'], $t['next'] ? date('d.m. H:i', $t['next']) : '–',
+                $t['last_status'] ?? '–', $t['owner'] === 'core' ? $t['command'] : $t['command'] . ' (' . ($t['scope'] === 'site' ? implode(', ', Core\Cron::sitesFor($k)) ?: 'keine Website' : 'einmal') . ')');
+        }
+        break;
+
     case 'push:send':
     case 'push:status':
     case 'push:keys':
@@ -851,6 +890,7 @@ switch ($cmd) {
                 + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
                 + Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
+                + Core\Cron::health()          // Geplante Aufgaben: Cronjob läuft, fehlgeschlagene Aufgaben (nur Hinweise)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
                 + Core\Fonts::health()         // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)

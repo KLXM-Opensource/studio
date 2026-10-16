@@ -64,14 +64,9 @@ Je Website aktivieren (`config/sites/{key}.php`, Hauptwebsite `config/config.loc
 Dann `php bin/console migrate --site=…` und Rollen das Recht **„Videos optimieren, schneiden und Poster setzen“**
 (`video.tools`) geben. Original ersetzen/löschen braucht zusätzlich `media.delete`.
 
-Cron (empfohlen, Rückfall für den losgelösten Start):
-
-```
-* * * * * php /pfad/zu/bin/console video:work --site=kunde --all
-```
-
-`--site=` muss eine Website nennen, auf der die Erweiterung aktiv ist (Befehle von Erweiterungen gibt es nur dort);
-`--all` arbeitet dann die Aufträge aller Websites mit `video_tools` ab.
+Rückfall für den losgelösten Start: die geplante Aufgabe `video_tools.work` (Manifest `schedule`) läuft jede Minute über
+den einen Cronjob der Installation (`* * * * * php bin/console cron:run`, System → Geplante Aufgaben) – auf jeder Website,
+auf der die Erweiterung aktiv ist. Kein eigener Cronjob nötig.
 
 ### ffmpeg auf Plesk
 

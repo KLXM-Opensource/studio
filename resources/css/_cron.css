@@ -1,0 +1,31 @@
+/* Grundeinstellungen → Geplante Aufgaben (Core\Cron, app/Admin/views/system/aufgaben.php) */
+.cr-state h2{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:17px}
+.cr-state h2 svg{width:20px;height:20px;color:var(--adm-ok)}
+.cr-state--off{border-color:var(--adm-warn)}
+.cr-state--off h2 svg{color:var(--adm-warn)}
+.cr-line{margin:4px 0 10px;padding:10px 12px;border-radius:8px;background:var(--adm-fill);font-size:12.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cr-group{margin:0;padding:14px 18px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--adm-t3);border-bottom:1px solid var(--adm-line)}
+.cr-group small{text-transform:none;letter-spacing:0;font-weight:400}
+.cr-list{list-style:none;margin:0;padding:0}
+.cr-task{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px 24px;padding:14px 18px;border-bottom:1px solid var(--adm-line)}
+.cr-task:last-child{border-bottom:0}
+.cr-task.is-off .cr-task__main strong{color:var(--adm-t3)}
+.cr-task__main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cr-cmd{align-self:flex-start;font-size:12px;overflow-wrap:anywhere}
+.cr-task__meta{display:grid;gap:4px;margin:0;font-size:13px}
+.cr-task__meta div{display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:8px}
+.cr-task__meta dt{color:var(--adm-t3)}
+.cr-task__meta dd{margin:0}
+.cr-out{grid-column:1 / -1;font-size:13px}
+.cr-out summary{cursor:pointer;color:var(--adm-t2)}
+.cr-out pre{max-height:16em;overflow:auto;margin:6px 0 0;padding:10px 12px;border-radius:8px;background:var(--adm-fill);font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cr-task__actions{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cr-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0}
+.cr-form select{min-height:32px;max-width:100%}
+.cr-custom{display:none;width:11em;min-height:32px;font-family:var(--adm-mono,ui-monospace,monospace);font-size:13px}
+.cr-form:has(option[value="custom"]:checked) .cr-custom{display:block}
+.cr-task__actions form{margin:0}
+.cr-scroll{overflow-x:auto}
+@media (max-width:760px){
+  .cr-task{grid-template-columns:1fr}
+}

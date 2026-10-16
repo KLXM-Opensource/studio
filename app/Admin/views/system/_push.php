@@ -69,8 +69,8 @@ $psCan = \Core\Features::canView();
           <span class="set-row__sub"><?= e(__('Wird bei jedem Lauf von push:send aktualisiert – auch wenn nichts zu senden ist.')) ?></span></div>
           <div class="set-row__ctl"><?= $cronAt === '' ? '<span class="adm-badge adm-badge--warn">' . e(__('noch nie')) . '</span>' : ($cronOk ? '<span class="adm-badge">' . e(fmt()->relative($cronAt)) . '</span>' : '<span class="adm-badge adm-badge--warn">' . e(fmt()->relative($cronAt)) . '</span>') ?></div></div>
         <div class="set-row set-row--stack"><div class="set-row__main"><span class="set-row__label"><?= e(__('Cronjob (empfohlen)')) ?></span>
-          <span class="set-row__sub"><?= e(__('Ohne Cron sendet die Website kleine Mengen nebenbei nach Aufrufen. Mit Cron kommen Mitteilungen pünktlich, auch für viele Abos:')) ?></span></div>
-          <?php $cronCmd = 'cd ' . ROOT . ' && ' . \Core\Network\Stats::phpBinary() . ' bin/console push:send --all'; ?>
+          <span class="set-row__sub"><?= e(__('Ohne Cron sendet die Website kleine Mengen nebenbei nach Aufrufen. Mit Cron kommen Mitteilungen pünktlich, auch für viele Abos. Push läuft über die geplanten Aufgaben – ein Cronjob für alles:')) ?></span></div>
+          <?php $cronCmd = 'cd ' . ROOT . ' && ' . \Core\Network\Stats::phpBinary() . ' bin/console cron:run'; ?>
           <div class="set-row__body">
             <div class="adm-secret"><code id="push-cron"><?= e($cronCmd) ?></code><button type="button" class="adm-btn adm-btn--small" data-copy="#push-cron"><?= e(__('Kopieren')) ?></button></div>
             <ol class="f-help push-cron-steps">
@@ -78,7 +78,8 @@ $psCan = \Core\Features::canView();
               <li><?= e(__('Aufgabentyp „Befehl ausführen“, den Befehl oben einfügen, Ausführung „Cron-Stil“ mit * * * * * (jede Minute; alle 5 Minuten reicht auch: */5 * * * *).')) ?></li>
               <li><?= e(__('Benachrichtigungen per E-Mail: „Nicht senden“ bzw. nur bei Fehlern. Speichern.')) ?></li>
               <li><?= e(__('Ohne Plesk: denselben Befehl mit crontab -e für den Benutzer der Website eintragen, davor * * * * *.')) ?></li>
-              <li><?= e(__('Prüfen: Nach ein, zwei Minuten steht oben bei „Cronjob zuletzt aktiv“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation (--all).')) ?></li>
+              <li><?= e(__('Prüfen: Nach ein, zwei Minuten steht oben bei „Cronjob zuletzt aktiv“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation.')) ?></li>
+              <li><a href="<?= e(url('/admin/system/aufgaben')) ?>"><?= e(__('Geplante Aufgaben')) ?></a></li>
             </ol>
           </div></div>
       </div>

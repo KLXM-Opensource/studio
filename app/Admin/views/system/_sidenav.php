@@ -20,6 +20,7 @@ $sub = [];
 if (\Core\Domains::available()) $sub['domain'] = [url('/admin/system/domain'), __('Domain'), 'globe', ''];
 if (\Core\Branding::canEdit()) $sub['branding'] = [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush', ''];
 if (\Core\Fonts::canManage()) $sub['fonts'] = [url('/admin/system/fonts'), __('Schriften'), 'text-t', ''];
+if (\Core\Cron::canManage()) $sub['aufgaben'] = [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown', \Core\Cron::running() ? '' : __('Cronjob läuft nicht')];
 if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
 ?>
   <nav class="adm-tabs adm-secnav" aria-label="<?= e(__('Bereiche')) ?>">
@@ -27,7 +28,7 @@ if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), _
     <a href="<?= e($href) ?>"<?= $warn !== '' ? ' class="is-warn" title="' . e($warn) . '"' : '' ?><?= ($gid ?? '') !== '' && $current === $gid ? ' aria-current="page"' : '' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span><?= $warn !== '' ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e($warn) . '</span>' : '' ?></a>
     <?php endforeach; ?>
     <?php if ($sub): ?><span class="adm-tabs__sep" role="separator"></span><?php endif; ?>
-    <?php foreach ($sub as $k => [$href, $label, $i]): ?>
-    <a href="<?= e($href) ?>"<?= $current === $k ? ' aria-current="page"' : '' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a>
+    <?php foreach ($sub as $k => $it): [$href, $label, $i] = $it; $warn = $it[3] ?? ''; ?>
+    <a href="<?= e($href) ?>"<?= $current === $k ? ' aria-current="page"' : '' ?><?= $warn !== '' ? ' class="is-warn" title="' . e($warn) . '"' : '' ?>><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span><?= $warn !== '' ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e($warn) . '</span>' : '' ?></a>
     <?php endforeach; ?>
   </nav>

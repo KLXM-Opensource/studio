@@ -268,6 +268,10 @@ return function (Router $r): void {
     $r->post('/admin/system/fonts/{id}/remove', [Admin\FontsController::class, 'remove']);
     $r->post('/admin/system/fonts/{id}/preload', [Admin\FontsController::class, 'preload']);
     // Kits: installierte Kits, Kit-Paket (ZIP) hochladen, hochgeladene entfernen (Core\KitPackages)
+    // Geplante Aufgaben (Core\Cron): ein Cronjob für die Installation, Zeitpläne, Warteschlange, Protokoll
+    $r->get('/admin/system/aufgaben', [Admin\CronController::class, 'index']);
+    $r->post('/admin/system/aufgaben/{key}', [Admin\CronController::class, 'save']);
+    $r->post('/admin/system/aufgaben/{key}/run', [Admin\CronController::class, 'run']);
     $r->get('/admin/system/kits', [Admin\KitsController::class, 'index']);
     $r->post('/admin/system/kits/install', [Admin\KitsController::class, 'install']);
     $r->post('/admin/system/kits/{name}/remove', [Admin\KitsController::class, 'remove']);

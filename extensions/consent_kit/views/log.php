@@ -70,6 +70,6 @@ $pages = max(1, (int) ceil($total / 50));
 
 <section class="adm-card">
   <h2><?= e(__('Aufbewahrung')) ?></h2>
-  <p class="adm-muted"><?= e(__('Gespeichert werden Einwilligungs-ID, Zeitpunkt, Domain, Stand, Entscheidung, Dienste, GPC-Signal und Sprache – keine IP-Adresse, kein User-Agent, keine aufgerufene Seite. Aufbewahrung: {days}. Bereinigt wird täglich nebenbei in der Verwaltung und per Cron: php bin/console consent:purge --site={site}.', ['days' => (int) $settings['retention'] ? __('{n} Tage', ['n' => (int) $settings['retention']]) : __('unbegrenzt'), 'site' => site()->key])) ?></p>
+  <p class="adm-muted"><?= e(__('Gespeichert werden Einwilligungs-ID, Zeitpunkt, Domain, Stand, Entscheidung, Dienste, GPC-Signal und Sprache – keine IP-Adresse, kein User-Agent, keine aufgerufene Seite. Aufbewahrung: {days}. Bereinigt wird täglich nebenbei in der Verwaltung und als geplante Aufgabe (System → Geplante Aufgaben).', ['days' => (int) $settings['retention'] ? __('{n} Tage', ['n' => (int) $settings['retention']]) : __('unbegrenzt'), 'site' => site()->key])) ?></p>
   <form method="post" action="<?= e(url('/admin/consent/log/purge')) ?>" data-confirm="<?= e(__('Einträge älter als die Aufbewahrungsfrist jetzt löschen?')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--small"><?= e(__('Jetzt bereinigen')) ?></button></form>
 </section>

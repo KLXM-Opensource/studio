@@ -21,6 +21,7 @@
 @import "./_pushadmin.css";   /* Verwaltung → Mitteilungen (Core\Push, app/Admin/views/push/*) */
 @import "./_requests.css";   /* Anfragen als Posteingang (app/Admin/views/requests/*, resources/js/_requests.js) */
 @import "./_datawizard.css";   /* Daten: Assistent „Neue Tabelle“, Einsetzen, Felder & Einstellungen (Core\Data\Wizard, Core\Data\Placement) */
+@import "./_cron.css";   /* Grundeinstellungen → Geplante Aufgaben (Core\Cron) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 /* ==========================================================================
    Admin-Oberfläche (Core). Nutzt dieselbe Schrift und Farbwelt wie das Theme.

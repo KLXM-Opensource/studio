@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Geplante Aufgaben – ein Cronjob für die Installation (`Core\Cron`)
+- Statt einzelner Cronjobs genügt einer: `* * * * * php bin/console cron:run`. Kern und Erweiterungen melden ihre Aufgaben an (Suchindex, Push, KI-Aufträge, Quellen, Chat-Hinweise, Aufbewahrungsfristen, Sicherungen); jede fällige Aufgabe läuft als eigener Prozess mit Sperre gegen Doppelläufe, Zeitlimit und Protokoll (`storage/cron/cron.sqlite`).
+- Grundeinstellungen → **Geplante Aufgaben**: Zustand des Cronjobs mit der fertigen Zeile zum Kopieren, Zeitplan je Aufgabe (Auswahl oder eigener Ausdruck, Standard bleibt sichtbar), An/Aus, „Jetzt ausführen“ über eine Warteschlange mit Wiederholung, Ausgabe des letzten Laufs, letzte Läufe. Installationsweit, Recht wie bei Kits.
+- Erweiterungen melden Aufgaben im Manifest an (`'schedule'`); sie laufen auf jeder Website, auf der die Erweiterung aktiv ist (oder einmal je Installation). Umgestellt: Report (Verdichten täglich, GeoIP monatlich), Consent-Kit (Protokoll bereinigen), Video-Werkzeuge (Aufträge abarbeiten).
+- `health` und Dashboard melden einen stehenden Cronjob und fehlgeschlagene Aufgaben; Kommandozeile `cron:list`, `cron:exec`, `cron:queue`, Selbsttest `cron:selftest`.
+
 ### Diagramme mit austauschbarer Engine (`Core\Charts`)
 - Einheitliche Diagramme für Verwaltung und Website: Balken (auch waagerecht), Linie, Fläche, Ring, Torte – in einem eigenen, schlichten Format (`Charts::render([...])`), gezeichnet von einer austauschbaren Engine. Standard: Apache ECharts (Apache-2.0), gebündelt und selbst gehostet, lädt erst, wenn ein Diagramm sichtbar wird.
 - Engine tauschen über `Charts::registerEngine()` und `'charts' => ['engine' => …]` (Kit: `chart_engine`) – Aufrufer ändern sich nicht. Farben aus CSS-Variablen `--chart-1 … --chart-8` (geprüfte Palette, hell/dunkel), Tooltip ohne Inline-Stile (strenge CSP der Website), „Als Tabelle anzeigen“ unter jedem Diagramm und ohne JavaScript.

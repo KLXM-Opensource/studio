@@ -9,7 +9,7 @@
  * Aktivieren je Website:  Administration → Funktionen & Erweiterungen (Haupt-Admin) oder per Konfiguration
  *                         'extensions' => ['video_tools'], 'features' => ['video.tools' => true]
  *                         (Funktion ist Standard AUS). Optionen: 'video_tools' => ['ffmpeg' => '/usr/bin/ffmpeg', …] – siehe README.md.
- * Cron (empfohlen):        * * * * * php bin/console video:work --site={key} --all   (--site = eine Website mit video_tools)
+ * Hintergrund:             geplante Aufgabe video_tools.work (Manifest 'schedule', jede Minute über cron:run – System → Geplante Aufgaben)
  * Doku: extensions/video_tools/README.md, Verwaltung → Hilfe (Handbuch „Video-Werkzeuge“, Technik „Video-Werkzeuge“).
  */
 declare(strict_types=1);
@@ -38,7 +38,7 @@ return [
     'author' => 'KLXM Crossmedia GmbH and contributors',
     'license' => 'MIT',
     'risk' => 'Startet ffmpeg/ffprobe als Prozesse auf dem Server (proc_open) und verarbeitet hochgeladene Dateien. Nur aktivieren, wenn Videos wirklich hier bearbeitet werden; Speicherplatz und CPU-Last im Blick behalten.',
-    'provides' => ['Menüpunkt „Video-Werkzeuge“ und Werkzeuge in der Mediathek', 'Recht „Videos optimieren, schneiden und Poster setzen“', 'Hintergrund-Aufträge (Cron video:work, jede Minute empfohlen)', 'Dateityp WebM in der Mediathek'],
+    'provides' => ['Menüpunkt „Video-Werkzeuge“ und Werkzeuge in der Mediathek', 'Recht „Videos optimieren, schneiden und Poster setzen“', 'Hintergrund-Aufträge (geplante Aufgabe video:work, jede Minute)', 'Dateityp WebM in der Mediathek'],
     'commands' => ['video:work', 'video:jobs', 'video:info', 'video:optimize'],
     'docs' => ['Handbuch: Video-Werkzeuge' => '/admin/hilfe#video-tools', 'Technik: Video-Werkzeuge' => '/admin/hilfe/technik#video-tools'],
     // Voraussetzungen – auch ohne Aktivierung prüfbar (Administration → Funktionen & Erweiterungen)
@@ -56,6 +56,10 @@ return [
         $n = (int) app()->db->fetchValue('SELECT COUNT(*) FROM video_jobs');
         return $n ? __('{n} Video-Aufträge', ['n' => $n]) : null;
     },
+    // Geplante Aufgaben (Core\Cron, System → Geplante Aufgaben): Rückfall, falls der losgelöste Start nach einem Auftrag ausbleibt
+    'schedule' => [
+        'work' => ['label' => 'Wartende Video-Aufträge abarbeiten', 'command' => 'video:work', 'cron' => '* * * * *', 'timeout' => 3300],
+    ],
     'boot' => function (Core\Extension $x): void {
         $x->feature(VideoTools::FEATURE, 'Video-Werkzeuge: Videos optimieren, schneiden, Poster (ffmpeg)', [VideoTools::PERM], false);
         $x->permissions('Medien', [VideoTools::PERM => 'Videos optimieren, schneiden und Poster setzen (Original ersetzen/löschen zusätzlich mit „Medien löschen“)']);
@@ -104,7 +108,7 @@ return [
 
         $x->command('video:info', 'Video analysieren: video:info <id> [--loudness] [--json]', fn(array $a) => Console::info($a));
         $x->command('video:optimize', 'Video optimieren: video:optimize <id> --preset=web1080|web720|mobile540|archive|webm|faststart|mute|loudnorm [--replace] [--wait]', fn(array $a) => Console::optimize($a));
-        $x->command('video:work', 'Wartende Video-Aufträge abarbeiten [--all] [--job=ID] (Cron: jede Minute)', fn(array $a) => Console::work($a));
+        $x->command('video:work', 'Wartende Video-Aufträge abarbeiten [--all] [--job=ID] (geplante Aufgabe, jede Minute)', fn(array $a) => Console::work($a));
         $x->command('video:jobs', 'Video-Aufträge: [--open] [--cancel=ID] [--retry=ID] [--log=ID]', fn(array $a) => Console::jobs($a));
     },
 ];

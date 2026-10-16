@@ -58,6 +58,10 @@ return [
     'license' => 'MIT',
     'provides' => ['Seite „Cookie-Einwilligung“ unter Administration → Einstellungen → Einstellungen der Funktionen', 'Hinweis und Skript auf der Website, sobald ein einwilligungspflichtiger Dienst aktiv ist', 'Block „Externer Inhalt (mit Einwilligung)“', 'Link „Datenschutz-Einstellungen“ im Fußbereich'],
     'docs' => ['Technik: Consent-Kit' => '/admin/hilfe/technik#consent'],
+    // Geplante Aufgaben (Core\Cron, System → Geplante Aufgaben): laufen über den einen Cronjob der Installation
+    'schedule' => [
+        'purge' => ['label' => 'Protokoll nach Aufbewahrungsfrist bereinigen', 'command' => 'consent:purge', 'cron' => '50 3 * * *', 'timeout' => 600],
+    ],
     'boot' => function (Core\Extension $x): void {
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
         $x->permissions('Cookie-Einwilligung', ['consent.manage' => 'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten']);

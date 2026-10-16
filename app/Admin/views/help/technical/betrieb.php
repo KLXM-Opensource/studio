@@ -1,22 +1,28 @@
-<?php /** Entwicklerhandbuch · Betrieb: Cronjobs, Sicherungen, Updates, Logs */ ?>
-  <h3>Cronjobs</h3>
-  <p>Das CMS läuft ohne Cron, einige Aufgaben erledigt es dann aber nur „nebenbei“ bei Aufrufen. Für den Produktivbetrieb empfohlen (Pfade an die Installation anpassen, Plesk: <b>Geplante Aufgaben</b>, PHP-CLI der richtigen Version):</p>
-  <pre><code># Suchindex abgleichen (nur geänderte Dokumente) und nachts vollständig neu aufbauen
-*/15 * * * *  cd /pfad/zur/installation &amp;&amp; php bin/console search:index --all
-30 3 * * *    cd /pfad/zur/installation &amp;&amp; php bin/console search:index --all --full
-
-# Aufbewahrungsfristen: erledigte Anfragen und alte Protokolleinträge löschen
-15 4 * * *    cd /pfad/zur/installation &amp;&amp; php bin/console inbox:purge --all
-
-# Push-Benachrichtigungen (Funktion „push“): Warteschlange senden – ohne Cron nur nebenbei nach Aufrufen
-* * * * *     cd /pfad/zur/installation &amp;&amp; php bin/console push:send --all
-
-# KI-Aufträge (Transkription, Untertitel-Übersetzung) – Rückfall, falls die Verwaltung keine Hintergrundprozesse starten darf
-*/5 * * * *   cd /pfad/zur/installation &amp;&amp; php bin/console ai:jobs --all
-
-# Sicherungen – danach nur die neuesten 14 je Website/Pool/Tabelle behalten (--keep=N, Standard config 'backup_keep')
-0 2 * * *     cd /pfad/zur/installation &amp;&amp; php bin/console site:backup --all --keep=14 &amp;&amp; php bin/console pool:backup --all --keep=14 &amp;&amp; php bin/console shared:backup --all --keep=14</code></pre>
-  <p>Ohne Cron: Der Suchindex gleicht nach jeder Änderung und bei der ersten Suche selbst ab; <code>inbox:purge</code> läuft bei etwa 1 % der Verwaltungsaufrufe (höchstens alle 6 Stunden) – auf Websites, in die sich niemand einloggt, also gar nicht. Rate-Limit-Einträge räumen sich selbst auf.</p>
+<?php /** Entwicklerhandbuch · Betrieb: Geplante Aufgaben (ein Cronjob), Sicherungen, Updates, Logs */ ?>
+  <h3 id="cron">Geplante Aufgaben – ein Cronjob für alles</h3>
+  <p>Wiederkehrende Arbeiten (Suchindex, Push, KI-Aufträge, Aufbewahrungsfristen, Sicherungen und die Aufgaben der Erweiterungen) startet ein einziger Cronjob der Installation (<code>Core\Cron</code>). Einmal im Hosting anlegen (Plesk: <b>Geplante Aufgaben</b>, PHP-CLI der richtigen Version), jede Minute:</p>
+  <pre><code>* * * * *  cd /pfad/zur/installation &amp;&amp; php bin/console cron:run &gt; /dev/null 2&gt;&amp;1</code></pre>
+  <p>Die genaue Zeile mit Pfad und PHP-Binärdatei zeigt <b>Grundeinstellungen → Geplante Aufgaben</b> (<code>/admin/system/aufgaben</code>) bzw. <code>php bin/console cron:list</code>. Bisherige einzelne Cronjobs danach entfernen – sonst laufen Arbeiten doppelt.</p>
+  <table class="doc-table">
+    <thead><tr><th>Aufgabe</th><th>Befehl</th><th>Standard</th></tr></thead>
+    <tbody>
+      <tr><td>Suchindex abgleichen / neu aufbauen</td><td><code>search:index --all</code> / <code>--full</code></td><td>alle 15 Minuten / täglich 03:30</td></tr>
+      <tr><td>Aufbewahrungsfristen</td><td><code>inbox:purge --all</code></td><td>täglich 04:15</td></tr>
+      <tr><td>Push-Benachrichtigungen</td><td><code>push:send --all</code></td><td>jede Minute</td></tr>
+      <tr><td>KI-Aufträge (Transkription, Untertitel)</td><td><code>ai:jobs --all</code></td><td>alle 5 Minuten</td></tr>
+      <tr><td>Externe Quellen</td><td><code>sources:sync --all</code></td><td>alle 15 Minuten</td></tr>
+      <tr><td>Chat: Hinweise zu Erwähnungen</td><td><code>chat:digest</code></td><td>alle 15 Minuten</td></tr>
+      <tr><td>Sicherungen (Websites, Pools, geteilte Tabellen)</td><td><code>site:backup</code>, <code>pool:backup</code>, <code>shared:backup</code> mit <code>--all --keep=14</code></td><td>täglich 02:00 / 02:20 / 02:40</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><b>Ablauf:</b> <code>cron:run</code> schreibt einen Herzschlag, prüft die Zeitpläne (Cron-Format „Minute Stunde Tag Monat Wochentag“) und die Warteschlange und startet jede fällige Aufgabe als eigenen Prozess (<code>cron:exec</code>) – mit Sperre je Aufgabe (nie doppelt), Zeitlimit und Protokoll der Ausgabe. Zustand und Protokoll: <code>storage/cron/cron.sqlite</code>.</li>
+    <li><b>Verwaltung:</b> Zeitplan ändern (Auswahl oder eigener Ausdruck; der Code-Standard bleibt sichtbar), Aufgabe abschalten, „Jetzt ausführen“ (Warteschlange, bis zu 3 Versuche bei Fehlern), Ausgabe des letzten Laufs, letzte Läufe. Recht wie bei Kits und Schriften (Integratoren, Netzwerk-Administration bzw. Administration der Netzwerk-Website) – die Aufgaben gelten für die ganze Installation.</li>
+    <li><b>Prüfung:</b> <code>health</code> und das Dashboard melden einen fehlenden Cronjob (kein Aufruf seit 10 Minuten) und fehlgeschlagene Aufgaben als Hinweis.</li>
+    <li><b>Kommandozeile:</b> <code>cron:list</code> (Zeitpläne, nächster Lauf, Ergebnis), <code>cron:exec &lt;aufgabe&gt;</code> (sofort, mit Ausgabe), <code>cron:queue [&lt;aufgabe&gt;]</code>, <code>cron:selftest</code>.</li>
+    <li><b>Kern-Aufgaben</b> meldet <code>Cron::core()</code> an, <b>Erweiterungen</b> im Manifest (<code>'schedule'</code>, siehe Erweiterungen) – deren Aufgaben laufen mit <code>--site=…</code> auf jeder Website, auf der die Erweiterung aktiv ist, oder einmal je Installation.</li>
+  </ul>
+  <p>Ohne Cronjob: Der Suchindex gleicht nach jeder Änderung und bei der ersten Suche selbst ab; <code>inbox:purge</code> läuft bei etwa 1 % der Verwaltungsaufrufe (höchstens alle 6 Stunden) – auf Websites, in die sich niemand einloggt, also gar nicht. Rate-Limit-Einträge räumen sich selbst auf.</p>
   <h3 id="sicherung">Sicherungen</h3>
   <ul>
     <li><code>site:backup [--all] [--out=dir]</code> packt Datenbank (SQLite per <code>VACUUM INTO</code>, MySQL per <code>mysqldump</code>), Medien und bei weiteren Websites <code>config/sites/{key}.php</code> nach <code>storage/backups/{site}-JJJJMMTT-HHMMSS.tar.gz</code>; <code>pool:backup</code> und <code>shared:backup</code> sichern geteilte Medien und Datentabellen (<code>pool-…</code>, <code>shared-…</code>). Einspielen mit <code>site:restore</code>, <code>pool:restore</code>, <code>shared:restore</code> (jeweils <code>&lt;datei&gt; --force</code>).</li>

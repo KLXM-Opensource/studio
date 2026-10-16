@@ -93,7 +93,7 @@ zusätzlich `consentkit_ready`/`consentkit_change` im `dataLayer`.
 Einwilligungs-ID, Zeitpunkt, Domain (`main` bzw. `landing:{id}`), Stand (Schnappschuss der angebotenen Dienste mit
 Cookies), Entscheidung, akzeptierte/abgelehnte Dienste, GPC-Signal, Sprache – **keine IP-Adresse, kein User-Agent,
 keine aufgerufene Seite**. Kennzahlen (30 Tage, je ID die letzte Entscheidung), Filter, CSV (Semikolon, UTF-8 mit BOM).
-Aufbewahrung: Einstellung (Standard 1095 Tage), bereinigt täglich nebenbei in der Verwaltung und per Cron:
+Aufbewahrung: Einstellung (Standard 1095 Tage), bereinigt täglich nebenbei in der Verwaltung und als geplante Aufgabe `consent_kit.purge` (Manifest `schedule`, System → Geplante Aufgaben):
 
 ```bash
 php bin/console consent:purge --site=<key> [--days=90]

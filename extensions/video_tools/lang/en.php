@@ -308,7 +308,7 @@ return [
     'Zustand von ffmpeg, Aufträge und Voreinstellungen' => 'ffmpeg status, jobs and presets',
     'Menüpunkt „Video-Werkzeuge“ und Werkzeuge in der Mediathek' => '“Video tools” menu item and tools in the media library',
     'Recht „Videos optimieren, schneiden und Poster setzen“' => 'Permission “Optimise, trim and set posters for videos”',
-    'Hintergrund-Aufträge (Cron video:work, jede Minute empfohlen)' => 'Background jobs (cron video:work, every minute recommended)',
+    'Hintergrund-Aufträge (geplante Aufgabe video:work, jede Minute)' => 'Background jobs (scheduled task video:work, every minute)',
     'Dateityp WebM in der Mediathek' => 'WebM file type in the media library',
     'Handbuch: Video-Werkzeuge' => 'Manual: video tools',
     'Technik: Video-Werkzeuge' => 'Technical: video tools',
@@ -320,4 +320,5 @@ return [
     'Cron „video:work“ bzw. php_cli prüfen (Verwaltung → Video-Werkzeuge).' => 'Check the “video:work” cron job or php_cli (Administration → Video tools).',
     'Erkennung per Aufruf – /usr/bin muss nicht enthalten sein' => 'detected by running it – /usr/bin does not need to be included',
     'wartet auf Hintergrunddienst' => 'waiting for the background service',
+    'Wartende Video-Aufträge abarbeiten' => 'Process waiting video jobs',
 ];

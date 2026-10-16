@@ -135,7 +135,7 @@ return [
     'Funktional' => 'Functional',
     'Für 2-Klick-Platzhalter (Block „Externer Inhalt“, Video-Block bei YouTube/Vimeo). Diese Hosts stehen in der CSP (frame-src), solange der Dienst aktiv ist – geladen wird erst nach Klick bzw. Einwilligung.' => 'For two-click placeholders (“External content” block, video block for YouTube/Vimeo). These hosts are in the CSP (frame-src) while the service is active – content only loads after a click or consent.',
     'Für Templates: data-consent="…", consent_has(\'…\'). Nur a–z, 0–9, _.' => 'For templates: data-consent="…", consent_has(\'…\'). Only a–z, 0–9, _.',
-    'Gespeichert werden Einwilligungs-ID, Zeitpunkt, Domain, Stand, Entscheidung, Dienste, GPC-Signal und Sprache – keine IP-Adresse, kein User-Agent, keine aufgerufene Seite. Aufbewahrung: {days}. Bereinigt wird täglich nebenbei in der Verwaltung und per Cron: php bin/console consent:purge --site={site}.' => 'Stored: consent ID, time, domain, revision, decision, services, GPC signal and language – no IP address, no user agent, no visited page. Retention: {days}. Cleaned up daily in the background of the admin area and via cron: php bin/console consent:purge --site={site}.',
+    'Gespeichert werden Einwilligungs-ID, Zeitpunkt, Domain, Stand, Entscheidung, Dienste, GPC-Signal und Sprache – keine IP-Adresse, kein User-Agent, keine aufgerufene Seite. Aufbewahrung: {days}. Bereinigt wird täglich nebenbei in der Verwaltung und als geplante Aufgabe (System → Geplante Aufgaben).' => 'Stored: consent ID, time, domain, revision, decision, services, GPC signal and language – no IP address, no user agent, no visited page. Retention: {days}. Cleaned up daily in the background of the admin area and as a scheduled task (System → Scheduled tasks).',
     'Gespeichert – {n} Kombinationen erreichen den Mindestkontrast (WCAG AA) nicht.' => 'Saved – {n} combinations do not reach the minimum contrast (WCAG AA).',
     'Gilt für Domain' => 'Applies to domain',
     'Gilt für Sprache' => 'Applies to language',
@@ -343,4 +343,5 @@ return [
     '„Datenschutz-Einstellungen“ im Fußbereich der Website (Rechtliches)' => '“Privacy settings” in the website footer (legal)',
     '„Datenschutz-Einstellungen“ im Fußbereich: automatisch in den mitgelieferten Kits (footer_links()); in eigenen Kits' => '“Privacy settings” in the footer: automatic in the bundled kits (footer_links()); in your own kits',
     'Was der Dienst im Browser ablegt. Erscheint in den Datenschutz-Einstellungen; beim Widerruf werden diese Einträge gelöscht, soweit der Browser das zulässt. Änderungen hier fragen Besucher zu diesem Dienst erneut.' => 'What the service stores in the browser. Appears in the privacy settings; on withdrawal these entries are deleted as far as the browser allows. Changes here ask visitors about this service again.',
+    'Protokoll nach Aufbewahrungsfrist bereinigen' => 'Clean up log after retention period',
 ];
