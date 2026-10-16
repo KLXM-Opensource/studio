@@ -16,3 +16,18 @@
 @import "_options.css";
 @import "_photo.css";
 @media print{[data-reveal]{opacity:1!important;translate:none!important}.hdr,.mnav,.ftr__statement,.skip,.menu-btn,.hsearch__btn,.reel-ctrl{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}}
+
+/* Fließende Seitenwechsel (View Transitions; Chrome, Edge, Safari ≥ 18.2 – andere wechseln wie gewohnt). Kopf bleibt stehen,
+   der Inhalt blendet weich über, das angeklickte Bild wird zum Titelbild der Serie (js/site.js, Name „f-morph“). */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  .hdr{view-transition-name:f-hdr}
+  .sh__cover:not(.vt-off){view-transition-name:f-morph}
+  ::view-transition-old(root){animation:f-vt-out .3s cubic-bezier(.4,0,1,1) both}
+  ::view-transition-new(root){animation:f-vt-in .55s cubic-bezier(.2,.7,.2,1) .05s both}
+  ::view-transition-group(f-morph){animation-duration:.6s;animation-timing-function:cubic-bezier(.2,.75,.15,1)}
+  ::view-transition-old(f-morph),::view-transition-new(f-morph){height:100%;object-fit:cover;overflow:clip}
+  :root:not(.has-motion)::view-transition-group(*),:root:not(.has-motion)::view-transition-old(*),:root:not(.has-motion)::view-transition-new(*){animation:none}
+}
+@keyframes f-vt-out{to{opacity:0;translate:0 -.75rem}}
+@keyframes f-vt-in{from{opacity:0;translate:0 1.25rem}}

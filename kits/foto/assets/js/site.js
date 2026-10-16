@@ -164,3 +164,27 @@ d.querySelectorAll('[data-bg-video]').forEach(v => {
 // ------------------------------------------------------------ Website-Suche: Vorschläge beim ersten Fokus laden (≈ 2 KB)
 let suggestJs;
 d.addEventListener('focusin', e => { const s = e.target.dataset?.suggestJs; s && !suggestJs && (suggestJs = d.head.append(Object.assign(d.createElement('script'), { src: s })) || 1); });
+
+// ------------------------------------------------------------ Fließende Seitenwechsel (View Transitions, CSS @view-transition)
+// Das angeklickte Bild (Serien-Übersicht, Bildstrom, Karten) und das Titelbild der Serie (.sh__cover, Name im CSS) gehen
+// ineinander über; zurück findet die Übersicht das Bild der vorigen Seite. Ohne „Animationen“ oder mit „Bewegung reduzieren“: keiner.
+let vtLink = null;
+d.addEventListener('click', e => { vtLink = e.target.closest?.('a[href]') || null; }, true);
+const vtImg = a => a?.querySelector('img') || a?.closest('li,article,figure,.tile,.mo__t')?.querySelector('img');
+const vtName = (el, on) => { if (el) el.style.viewTransitionName = on ? 'f-morph' : ''; };
+addEventListener('pageswap', e => {
+  if (!e.viewTransition) return;
+  const to = e.activation?.entry?.url;
+  const a = vtLink && vtLink.href === to ? vtLink : [...d.querySelectorAll('a[href]')].find(x => x.href === to && vtImg(x));
+  const img = vtImg(a);
+  if (img && !img.closest('.sh__cover')) { d.querySelectorAll('.sh__cover').forEach(c => c.classList.add('vt-off')); vtName(img, true); }
+});
+addEventListener('pagereveal', e => {
+  if (!e.viewTransition) return;
+  e.viewTransition.ready.catch(() => {});   // abgebrochener Übergang (z. B. schneller Klick) ist kein Fehler
+  if (!html.classList.contains('has-motion') || reduce.matches) { e.viewTransition.skipTransition(); return; }
+  const from = navigation?.activation?.from?.url;
+  const a = from && [...d.querySelectorAll('a[href]')].find(x => x.href === from && vtImg(x));
+  const img = vtImg(a);
+  if (img) { vtName(img, true); e.viewTransition.finished.finally(() => vtName(img, false)); }
+});

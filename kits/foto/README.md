@@ -116,6 +116,14 @@ auffrischen + `loadPreview()`). Fehlt sie, lädt die Ablagefläche trotzdem hoch
 gewählt werden müssen. Der Editor setzt Knöpfe in der Vorschau auf `tabIndex = -1`; das Skript stellt die eigenen nach jedem
 `cms:block-preview` wieder auf 0.
 
+## Bewegung
+
+Mit „Animationen“ (Design → Bewegung) und ohne „Bewegung reduzieren“:
+- **Seitenwechsel** über View Transitions (`@view-transition { navigation: auto }` in `site.css`; Chrome, Edge, Safari ≥ 18.2 – sonst normaler
+  Wechsel): Kopf (`f-hdr`) bleibt stehen, Inhalt blendet über; das angeklickte Bild (Ereignis `pageswap`, `js/site.js`) und das Titelbild der
+  Serie (`.sh__cover`) tragen den Namen `f-morph` und gehen ineinander über, zurück findet `pagereveal` das Bild der vorigen Seite.
+- **Lightbox** (`js/lightbox.js`, Web Animations): Zoom aus dem Vorschaubild und zurück, Blättern mit gleitender Überblendung, Wischen folgt dem Finger.
+
 ## Demo
 
 `seed.php` → `foto_demo_install()`: „Mara Beispiel Fotografie (Demo)“, Startseite (Bühne mit Bildfolge, Serien-Übersicht,

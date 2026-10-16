@@ -19,6 +19,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Startseite der Demo beginnt mit einer Bühne (Bildfolge mit Name und Haltung als H1), Porträt-Platzhalter als natürliche Schattenrisse (frontal und im Profil, Randlicht, weiche Kanten), Landschaften ohne Treppenstufen.
 - Bühne: Abdunkelung hinter dem Text als weicher, höherer Verlauf ohne sichtbare Kante (alle Stufen, auch „Mitte“).
 - **Echte Fotos in der Demo:** 22 Fotos von Pexels (Landschaft, Porträt, Reportage, „Über mich“), geladen beim Anlegen, mit Titel, Alt-Text und Bildnachweis; zwei stumme Videos als Kamerafahrt über Fotos. Ohne Internet bzw. mit `FOTO_DEMO_OFFLINE=1` weiter erzeugte Platzhalter. Bildunterschriften aus den Bildtiteln, keine doppelten Bilder auf einer Seite.
+- **Fließende Seitenwechsel** (View Transitions, ohne Bibliothek): Kopf bleibt stehen, Inhalt blendet weich über, das angeklickte Bild der Serien-Übersicht bzw. des Bildstroms wird zum Titelbild der Serie (und zurück). **Lightbox** mit Zoom aus dem Vorschaubild, Gleiten mit Überblendung beim Blättern und Wischen, das dem Finger folgt. Nur mit „Animationen“, nie bei „Bewegung reduzieren“.
 - Mit der neuen Erweiterung **Bildauswahl** (`klxm/studio-auswahl`: Kunden wählen Fotos und Videos aus einem Shooting aus) legt die Demo ein Beispiel-Shooting an.
 
 ### Kern

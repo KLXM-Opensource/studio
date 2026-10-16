@@ -20,8 +20,9 @@ html:has(.flb[open]){overflow:hidden}
 .flb__prev,.flb__next{top:50%;translate:0 -50%}
 .flb__prev{left:clamp(.25rem,1.5vw,1.5rem)}.flb__next{right:clamp(.25rem,1.5vw,1.5rem)}
 .flb.is-single :is(.flb__prev,.flb__next){display:none}
-@media (prefers-reduced-motion:no-preference){.has-motion .flb[open] .flb__img{animation:f-lb .35s ease}}
-@keyframes f-lb{from{opacity:0}}
+/* Bewegung: js/lightbox.js (Zoom aus dem Vorschaubild, Gleiten beim Blättern); hier nur die Kopie des alten Bildes */
+.flb__ghost{position:fixed;z-index:1;object-fit:contain;pointer-events:none;border-radius:calc(var(--f-img-r) * .5)}
+.flb__img{touch-action:pan-y;will-change:transform}
 @media (forced-colors:active){.flb{background:Canvas;color:CanvasText}.flb__btn{border:1px solid ButtonText}}
 /* Lightbox der Kern-Galerie (Block „Bildergalerie“) folgt derselben Einstellung */
 .lb-light .cms-lb{background:var(--f-bg);color:var(--f-ink)}
