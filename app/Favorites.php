@@ -161,11 +161,6 @@ final class Favorites
         return $i !== '' && mb_strlen($i) <= 4 && !preg_match('~[<>&"\'\s]~u', $i) ? $i : '';
     }
 
-    public static function isGlyph(string $icon): bool
-    {
-        return $icon !== '' && !preg_match('~^[a-z][a-z0-9_-]*$~', $icon);
-    }
-
     private static function defaultTitle(string $url): string
     {
         return self::title(rawurldecode((string) parse_url($url, PHP_URL_PATH))) ?: __('Favorit');

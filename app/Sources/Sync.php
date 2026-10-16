@@ -36,13 +36,6 @@ final class Sync
         @rmdir($d);
     }
 
-    /** Zuletzt gefundene Pfade (Vorschau) für die Auswahlliste der Zuordnung */
-    public static function knownPaths(int $id): array
-    {
-        $f = site()->storage() . '/sources/' . $id . '/paths.json';
-        return $id > 0 && is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
-    }
-
     /**
      * Beispiel-Einträge der letzten Vorschau bzw. des letzten Abrufs (erste 5, gelesen) – für „Felder in der Quelle“, „Beispiel: …“
      * und den Probeabruf ohne erneuten Abruf. Schlüssel: Format + Adresse + Pfad/XPath (bei Uploads die Quelle).

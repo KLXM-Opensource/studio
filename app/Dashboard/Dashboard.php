@@ -263,27 +263,6 @@ final class Dashboard
         return $out . '</svg>';
     }
 
-    /**
-     * Säulen (eine Reihe) als SVG: $rows = [[Beschriftung für Tooltip/Tabelle, Wert], …]. Höhe per CSS, Breite 100 %.
-     * Jede Säule trägt ein <title> (Tooltip); die Tabelle daneben ist die zugängliche Alternative.
-     */
-    public static function bars(array $rows, string $label): string
-    {
-        $n = max(1, count($rows));
-        $max = max(1, ...array_map(fn($r) => (int) $r[1], $rows ?: [[0, 0]]));
-        $w = 10;
-        $h = 100;
-        $out = '<svg class="dash-bars" viewBox="0 0 ' . ($n * $w) . ' ' . $h . '" preserveAspectRatio="none" role="img" aria-label="' . e($label) . '" focusable="false">';
-        $out .= '<line class="dash-bars__grid" x1="0" x2="' . ($n * $w) . '" y1="0.5" y2="0.5" vector-effect="non-scaling-stroke"/>';
-        foreach (array_values($rows) as $i => [$lab, $v]) {
-            $bh = (int) $v > 0 ? max(2, $v / $max * ($h - 4)) : 0;
-            $out .= '<g><title>' . e($lab . ': ' . $v) . '</title><rect class="dash-bars__hit" x="' . ($i * $w) . '" y="0" width="' . $w . '" height="' . $h . '"/>';
-            if ($bh > 0) $out .= '<rect class="dash-bars__bar" x="' . self::n($i * $w + 1.5) . '" y="' . self::n($h - $bh) . '" width="7" height="' . self::n($bh) . '"/>';
-            $out .= '</g>';
-        }
-        return $out . '<line class="dash-bars__base" x1="0" x2="' . ($n * $w) . '" y1="' . ($h - 0.5) . '" y2="' . ($h - 0.5) . '" vector-effect="non-scaling-stroke"/></svg>';
-    }
-
     /** Relative Zeitangabe: „vor 5 Min.“, „gestern“, „12.09.“ */
     public static function ago(string $at): string
     {

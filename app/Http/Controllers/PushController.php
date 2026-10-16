@@ -114,7 +114,7 @@ final class PushController
         $s = Push::parse($r->post['subscription'] ?? null);
         if (!$row || !$s) return self::json(['ok' => false], 422);
         app()->db->update('push_subscriptions', ['endpoint' => $s['endpoint'], 'endpoint_hash' => hash('sha256', $s['endpoint']),
-            'p256dh' => WebPush::b64u($s['p256dh']), 'auth' => WebPush::b64u($s['auth']), 'key_fp' => Keys::fingerprint(), 'last_seen' => now(), 'failures' => 0],
+            'p256dh' => b64u_encode($s['p256dh']), 'auth' => b64u_encode($s['auth']), 'key_fp' => Keys::fingerprint(), 'last_seen' => now(), 'failures' => 0],
             'id = :id', ['id' => (int) $row['id']]);
         return self::json(['ok' => true]);
     }
@@ -125,7 +125,7 @@ final class PushController
     private function own(array $in): ?array
     {
         $ep = (string) ($in['endpoint'] ?? '');
-        $auth = WebPush::unb64u((string) ($in['auth'] ?? ''));
+        $auth = b64u_decode((string) ($in['auth'] ?? ''));
         if ($ep === '' || $auth === false) return null;
         $row = Push::find($ep);
         return $row && Push::owns($row, $auth) ? $row : null;

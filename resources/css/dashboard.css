@@ -38,7 +38,7 @@
 .dash-grid.is-packed{grid-auto-rows:4px;row-gap:0;grid-auto-flow:row dense}
 /* Kein Text ragt aus einer Karte: lange Wörter trennen (lang der Seite), notfalls an beliebiger Stelle umbrechen */
 .dash-card__body,.dash-card__toggle{overflow-wrap:anywhere;hyphens:auto;hyphenate-limit-chars:10 4 4}
-.dash-card__body :is(.adm-btn,.dash-tile__value,.dash-todo__count,.dash-bars,.dash-axis){hyphens:manual}
+.dash-card__body :is(.adm-btn,.dash-tile__value,.dash-todo__count){hyphens:manual}
 
 /* Kartenkopf: Titel = Auf-/Zuklappen, Werkzeuge nur im Anpassen-Modus */
 .dash-card__head{display:flex;align-items:center;gap:6px;padding:10px 12px 0 10px}
@@ -157,15 +157,6 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-big{margin-bottom:10px!important;font-size:14px;color:var(--adm-t2)}
 .dash-big strong{font-size:28px;letter-spacing:-.03em;color:var(--adm-ink);font-variant-numeric:tabular-nums;margin-right:4px}
 .dash-chart{margin:0}
-.dash-bars{display:block;width:100%;height:130px;overflow:visible}
-.dash-chart--small .dash-bars{height:96px}
-.dash-bars__bar{fill:var(--adm-a)}
-.dash-bars__hit{fill:transparent}
-.dash-bars g:hover .dash-bars__bar{fill:var(--adm-a-d)}
-.dash-bars g:hover .dash-bars__hit{fill:var(--adm-fill)}
-.dash-bars__grid{stroke:var(--adm-line);stroke-width:1;stroke-dasharray:3 3}
-.dash-bars__base{stroke:var(--adm-in);stroke-width:1}
-.dash-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:11.5px;color:var(--adm-t3);font-variant-numeric:tabular-nums}
 .dash-legend{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--adm-t2)}
 .dash-table{margin-top:8px}
 .dash-table .adm-table{font-size:13px}
@@ -196,7 +187,7 @@ a.dash-tile__in:hover{box-shadow:inset 0 0 0 1.5px var(--adm-a);color:var(--adm-
 .dash-checks .is-err svg{color:var(--adm-err)}
 
 @media (prefers-reduced-motion:reduce){.dash-skel span{animation:none}.dash-card__chev::before{transition:none}}
-@media (forced-colors:active){.dash-bars__bar,.dash-rank__bar span{fill:CanvasText;background:CanvasText}.dash-gauge__arc{stroke:CanvasText}.dash-todo__item{border:1px solid CanvasText}}
+@media (forced-colors:active){.dash-rank__bar span{fill:CanvasText;background:CanvasText}.dash-gauge__arc{stroke:CanvasText}.dash-todo__item{border:1px solid CanvasText}}
 .dash-tool__on,.dash-tool__off{display:grid}
 .dash-tool[aria-pressed=true] .dash-tool__on,.dash-tool[aria-pressed=false] .dash-tool__off{display:none}
 .dash-up{transform:rotate(180deg)}

@@ -27,22 +27,6 @@ final class WebPush
     /** Höchstlänge des Klartexts: 4096 − 86 Kopf − 16 Tag − 1 Trenner, mit Reserve für Dienste mit kleinerer Grenze */
     public const MAX_PAYLOAD = 3000;
 
-    // ================================================================= Base64url
-
-    public static function b64u(string $bin): string
-    {
-        return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
-    }
-
-    /** Base64url (auch mit „=“ bzw. Standard-Alphabet) → Bytes, false bei ungültiger Eingabe */
-    public static function unb64u(string $s): string|false
-    {
-        $s = strtr(trim($s), '-_', '+/');
-        if ($s === '' || !preg_match('~^[A-Za-z0-9+/]+=*$~', $s)) return false;
-        $s = rtrim($s, '=');
-        return base64_decode($s . str_repeat('=', (4 - strlen($s) % 4) % 4), true);
-    }
-
     // ================================================================= Schlüssel
 
     /** Neues P-256-Schlüsselpaar: ['public' => 65 Byte, 'private' => 32 Byte] */
@@ -110,12 +94,12 @@ final class WebPush
     /** JWT (ES256) mit den Angaben $claims, signiert mit dem VAPID-Schlüsselpaar */
     public static function jwt(array $claims, array $keys): string
     {
-        $input = self::b64u(json_encode(['typ' => 'JWT', 'alg' => 'ES256'], JSON_UNESCAPED_SLASHES))
-            . '.' . self::b64u(json_encode($claims, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $input = b64u_encode(json_encode(['typ' => 'JWT', 'alg' => 'ES256'], JSON_UNESCAPED_SLASHES))
+            . '.' . b64u_encode(json_encode($claims, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         if (!openssl_sign($input, $der, self::privateKey($keys['private'], $keys['public']), OPENSSL_ALGO_SHA256)) {
             throw new \RuntimeException('openssl: Signatur fehlgeschlagen.');
         }
-        return $input . '.' . self::b64u(self::derToRaw($der));
+        return $input . '.' . b64u_encode(self::derToRaw($der));
     }
 
     /** JWT prüfen (Signatur ES256 mit dem öffentlichen Schlüssel) → Angaben oder null */
@@ -123,12 +107,12 @@ final class WebPush
     {
         $parts = explode('.', $jwt);
         if (count($parts) !== 3) return null;
-        $head = json_decode((string) self::unb64u($parts[0]), true);
-        $sig = self::unb64u($parts[2]);
+        $head = json_decode((string) b64u_decode($parts[0]), true);
+        $sig = b64u_decode($parts[2]);
         if (($head['alg'] ?? '') !== 'ES256' || $sig === false || strlen($sig) !== 64) return null;
         $ok = openssl_verify($parts[0] . '.' . $parts[1], self::rawToDer($sig), self::publicKey($public), OPENSSL_ALGO_SHA256);
         if ($ok !== 1) return null;
-        $claims = json_decode((string) self::unb64u($parts[1]), true);
+        $claims = json_decode((string) b64u_decode($parts[1]), true);
         return is_array($claims) ? $claims : null;
     }
 
@@ -138,7 +122,7 @@ final class WebPush
         $u = parse_url($endpoint);
         $aud = ($u['scheme'] ?? 'https') . '://' . ($u['host'] ?? '') . (isset($u['port']) ? ':' . $u['port'] : '');
         $jwt = self::jwt(['aud' => $aud, 'exp' => $exp ?? time() + 12 * 3600, 'sub' => $subject], $keys);
-        return 'vapid t=' . $jwt . ', k=' . self::b64u($keys['public']);
+        return 'vapid t=' . $jwt . ', k=' . b64u_encode($keys['public']);
     }
 
     /** DER-kodierte ECDSA-Signatur (SEQUENCE { INTEGER r, INTEGER s }) → 64 Byte r || s */

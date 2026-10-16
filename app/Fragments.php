@@ -94,12 +94,6 @@ final class Fragments
         return self::find($name, $kit) !== null;
     }
 
-    /** Kommt das Fragment aus dem Kern (keine Fassung von Projekt oder Kit)? */
-    public static function fromCore(string $name, ?string $kit = null): bool
-    {
-        return str_starts_with((string) (self::find($name, $kit)['layer'] ?? ''), 'core');
-    }
-
     /** Kit-Dateien für Nur-Kern-Fragmente (werden ignoriert): [name => datei] */
     public static function ignored(?string $kit = null): array
     {

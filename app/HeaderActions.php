@@ -450,12 +450,6 @@ final class HeaderActions
         return ['css' => $css, 'js' => array_values(array_unique($js)), 'late' => $late];
     }
 
-    /** Braucht die Einstellung JavaScript? (Tastenkürzel der Suche, Öffnungsstatus, Aufklappliste der Sprachen) */
-    public static function needsJs(): bool
-    {
-        return (bool) self::parts()['js'];
-    }
-
     /**
      * <link>/<script> für <head> – VOR dem CSS des Kits einbinden. Nur die benötigten Teile, gebündelt zu je EINER Datei
      * public/assets/ha/{hash}.css|js (für alle Websites mit derselben Auswahl gleich; entsteht beim ersten Aufruf, wie das

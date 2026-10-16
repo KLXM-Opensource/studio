@@ -220,13 +220,6 @@ final class Stats
         return $out . '<line class="pst-chart__zero" x1="0" x2="' . ($n * $w) . '" y1="' . $hUp . '" y2="' . $hUp . '" vector-effect="non-scaling-stroke"/></svg>';
     }
 
-    /** Lage der Null-Linie in Prozent der Höhe (wie chart()) – für die Achsenbeschriftung */
-    public static function zero(array $rows): float
-    {
-        $sc = self::scale($rows);
-        return round((($sc['up'] * (98 / ($sc['up'] + $sc['down']))) + 1), 2);
-    }
-
     /** Größte Werte nach oben/unten (Achsenbeschriftung) */
     public static function scale(array $rows): array
     {

@@ -345,16 +345,6 @@ final class Network
 
     public const TOKEN_TTL = 60;
 
-    private static function b64(string $s): string
-    {
-        return rtrim(strtr(base64_encode($s), '+/', '-_'), '=');
-    }
-
-    private static function unb64(string $s): string|false
-    {
-        return base64_decode(strtr($s, '-_', '+/'), true);
-    }
-
     public static function uaHash(string $ua): string
     {
         return substr(hash('sha256', 'ua|' . $ua), 0, 24);
@@ -369,8 +359,8 @@ final class Network
         $db = self::db();
         $db->query('DELETE FROM network_sso WHERE expires_at < ?', [time() - 300]);
         $db->insert('network_sso', ['nonce' => $nonce, 'uid' => $uid, 'site' => $site, 'expires_at' => $exp]);
-        $payload = self::b64(json_encode(['v' => 1, 's' => $site, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::uaHash($ua), 'p' => $path]));
-        return $payload . '.' . self::b64(hash_hmac('sha256', 'sso|' . $payload, self::key(), true));
+        $payload = b64u_encode(json_encode(['v' => 1, 's' => $site, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::uaHash($ua), 'p' => $path]));
+        return $payload . '.' . b64u_encode(hash_hmac('sha256', 'sso|' . $payload, self::key(), true));
     }
 
     /**
@@ -382,9 +372,9 @@ final class Network
         $parts = explode('.', $token);
         if (count($parts) !== 2 || strlen($token) > 2000) return $bad;
         [$payload, $sig] = $parts;
-        $mac = self::unb64($sig);
+        $mac = b64u_decode($sig);
         if ($mac === false || !hash_equals(hash_hmac('sha256', 'sso|' . $payload, self::key(), true), $mac)) return $bad;
-        $d = json_decode((string) self::unb64($payload), true);
+        $d = json_decode((string) b64u_decode($payload), true);
         if (!is_array($d) || ($d['v'] ?? 0) !== 1) return $bad;
         if (($d['s'] ?? '') !== site()->key || (int) ($d['e'] ?? 0) < time()) return $bad;
         if (!hash_equals((string) ($d['a'] ?? ''), self::uaHash($ua))) return $bad;

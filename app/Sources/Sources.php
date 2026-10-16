@@ -280,16 +280,6 @@ final class Sources
         return [$id, [], $vals];
     }
 
-    /** Beispiel-Kennzeichnung (Demo-Inhalte) setzen */
-    public static function markExample(int $id, bool $on): void
-    {
-        $s = self::find($id);
-        if (!$s) return;
-        $o = $s['options'];
-        $o['example'] = $on;
-        app()->db->update('ext_sources', ['options_json' => json_encode($o, JSON_UNESCAPED_UNICODE)], 'id = :id', ['id' => $id]);
-    }
-
     /** Quelle löschen; $entries: auch die übernommenen Einträge löschen (sonst werden sie normale, bearbeitbare Einträge) */
     public static function delete(array $src, bool $entries): int
     {

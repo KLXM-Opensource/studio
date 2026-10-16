@@ -24,7 +24,7 @@ final class SpamGuard
 
     private static function sign(string $data): string
     {
-        return rtrim(strtr(base64_encode(hash_hmac('sha256', $data, app()->key(), true)), '+/', '-_'), '=');
+        return b64u_encode(hash_hmac('sha256', $data, app()->key(), true));
     }
 
     public static function difficulty(): int

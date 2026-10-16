@@ -61,17 +61,17 @@ final class SelfTest
     private static function crypto(): void
     {
         $bin = random_bytes(37);
-        self::eq('Base64url Rundlauf', WebPush::unb64u(WebPush::b64u($bin)), $bin);
-        self::eq('Base64url ungültig', WebPush::unb64u('ab$c'), false);
+        self::eq('Base64url Rundlauf', b64u_decode(b64u_encode($bin)), $bin);
+        self::eq('Base64url ungültig', b64u_decode('ab$c'), false);
 
         // RFC 8291, Anhang A
-        $u = fn(string $s) => (string) WebPush::unb64u($s);
+        $u = fn(string $s) => (string) b64u_decode($s);
         $as = ['private' => $u('yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw'), 'public' => $u('BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8')];
         $uaPriv = $u('q1dXpw3UpT5VOmu_cf_v6ih07Aems3njxI-JWgLcM94');
         $uaPub = $u('BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4');
         $auth = $u('BTBZMqHH6r4Tts7J_aSIgg');
         $msg = WebPush::encrypt('When I grow up, I want to be a watermelon', $uaPub, $auth, $as, $u('DGv6ra1nlYgDCS1FRnbzlw'));
-        self::eq('RFC 8291 Testvektor (Nachricht Byte für Byte)', WebPush::b64u($msg),
+        self::eq('RFC 8291 Testvektor (Nachricht Byte für Byte)', b64u_encode($msg),
             'DGv6ra1nlYgDCS1FRnbzlwAAEABBBP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A_yl95bQpu6cVPTpK4Mqgkf1CXztLVBSt2Ks3oZwbuwXPXLWyouBWLVWGNWQexSgSxsj_Qulcy4a-fN');
         self::eq('RFC 8291 Testvektor entschlüsseln', WebPush::decrypt($msg, $uaPriv, $uaPub, $auth), 'When I grow up, I want to be a watermelon');
         self::eq('RFC 8291: Schlüsselpaare passen', [WebPush::keysMatch($as['private'], $as['public']), WebPush::keysMatch($uaPriv, $uaPub)], [true, true]);
@@ -114,17 +114,17 @@ final class SelfTest
         $keys = WebPush::generateKeys();
         $h = WebPush::vapidHeader('https://fcm.googleapis.com/fcm/send/abc:def', 'mailto:redaktion@example.org', $keys, time() + 3600);
         self::eq('Kopfzeile „vapid t=…, k=…“', (bool) preg_match('~^vapid t=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+), k=([A-Za-z0-9_-]+)$~', $h, $m), true);
-        self::eq('k = öffentlicher Schlüssel', WebPush::unb64u($m[2] ?? ''), $keys['public']);
+        self::eq('k = öffentlicher Schlüssel', b64u_decode($m[2] ?? ''), $keys['public']);
         $jwt = (string) ($m[1] ?? '');
-        $head = json_decode((string) WebPush::unb64u(explode('.', $jwt)[0]), true);
+        $head = json_decode((string) b64u_decode(explode('.', $jwt)[0]), true);
         self::eq('JWT-Kopf', $head, ['typ' => 'JWT', 'alg' => 'ES256']);
         $claims = WebPush::verifyJwt($jwt, $keys['public']);
         self::eq('JWT: Signatur gültig, aud = Ursprung des Dienstes', $claims['aud'] ?? null, 'https://fcm.googleapis.com');
         self::eq('JWT: sub', $claims['sub'] ?? null, 'mailto:redaktion@example.org');
         self::eq('JWT: exp in der Zukunft, ≤ 24 h', isset($claims['exp']) && $claims['exp'] > time() && $claims['exp'] <= time() + 86400, true);
-        self::eq('JWT: Signatur 64 Byte (r||s)', strlen((string) WebPush::unb64u(explode('.', $jwt)[2])), 64);
+        self::eq('JWT: Signatur 64 Byte (r||s)', strlen((string) b64u_decode(explode('.', $jwt)[2])), 64);
         [$a, $b, $c] = explode('.', $jwt);
-        $forged = $a . '.' . WebPush::b64u((string) json_encode(['aud' => 'https://fcm.googleapis.com', 'exp' => time() + 99999, 'sub' => 'mailto:x@example.org'])) . '.' . $c;
+        $forged = $a . '.' . b64u_encode((string) json_encode(['aud' => 'https://fcm.googleapis.com', 'exp' => time() + 99999, 'sub' => 'mailto:x@example.org'])) . '.' . $c;
         self::eq('JWT: geänderte Angaben erkannt', WebPush::verifyJwt($forged, $keys['public']), null);
         self::eq('JWT: fremder Schlüssel erkannt', WebPush::verifyJwt($jwt, WebPush::generateKeys()['public']), null);
         // DER ↔ roh mit echten openssl-Signaturen (auch mit führenden Null-Bytes in r/s)
@@ -155,10 +155,10 @@ final class SelfTest
             self::eq('Endpunkt abgelehnt: ' . mb_substr($bad, 0, 60), Push::endpointAllowed($bad), false);
         }
         $ua = WebPush::generateKeys();
-        $sub = ['endpoint' => 'https://fcm.googleapis.com/fcm/send/selbsttest', 'keys' => ['p256dh' => WebPush::b64u($ua['public']), 'auth' => WebPush::b64u(random_bytes(16))]];
+        $sub = ['endpoint' => 'https://fcm.googleapis.com/fcm/send/selbsttest', 'keys' => ['p256dh' => b64u_encode($ua['public']), 'auth' => b64u_encode(random_bytes(16))]];
         self::eq('Abo gültig', is_array(Push::parse($sub)), true);
-        self::eq('Abo: Auth zu kurz', Push::parse(['keys' => ['auth' => WebPush::b64u(random_bytes(8))] + $sub['keys']] + $sub), null);
-        self::eq('Abo: p256dh kein Punkt', Push::parse(['keys' => ['p256dh' => WebPush::b64u(random_bytes(65))] + $sub['keys']] + $sub), null);
+        self::eq('Abo: Auth zu kurz', Push::parse(['keys' => ['auth' => b64u_encode(random_bytes(8))] + $sub['keys']] + $sub), null);
+        self::eq('Abo: p256dh kein Punkt', Push::parse(['keys' => ['p256dh' => b64u_encode(random_bytes(65))] + $sub['keys']] + $sub), null);
         self::eq('Abo: fremder Endpunkt', Push::parse(['endpoint' => 'https://evil.example/x'] + $sub), null);
         self::eq('Abo: kein Array', Push::parse('x'), null);
         self::eq('Gerät aus User-Agent', [Push::deviceLabel('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'),

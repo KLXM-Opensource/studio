@@ -92,7 +92,7 @@ final class Live
     /** Signiertes Abo für Kanäle (URL-sicher) */
     public static function token(array $channels): string
     {
-        $p = rtrim(strtr(base64_encode(implode("\n", array_values(array_unique(array_map('strval', $channels))))), '+/', '-_'), '=');
+        $p = b64u_encode(implode("\n", array_values(array_unique(array_map('strval', $channels)))));
         return $p . '.' . self::sign($p);
     }
 
@@ -100,7 +100,7 @@ final class Live
     public static function channels(string $token): ?array
     {
         if (!preg_match('~^([A-Za-z0-9_-]{1,800})\.([a-f0-9]{20})$~', $token, $m) || !hash_equals(self::sign($m[1]), $m[2])) return null;
-        $raw = base64_decode(strtr($m[1], '-_', '+/'), true);
+        $raw = b64u_decode($m[1]);
         return $raw === false ? null : array_values(array_filter(explode("\n", $raw), fn($c) => $c !== ''));
     }
 
@@ -267,7 +267,7 @@ final class Live
         $eq('Abo liefert die Kanäle zurück', self::channels($tok), [$c, 'data:test']);
         [$p, $sig] = explode('.', $tok);
         $eq('gefälschte Signatur wird abgewiesen', self::channels($p . '.' . str_repeat('0', 20)), null);
-        $other = rtrim(strtr(base64_encode('data:geheim'), '+/', '-_'), '=');
+        $other = b64u_encode('data:geheim');
         $eq('fremde Kanäle mit alter Signatur abgewiesen', self::channels($other . '.' . $sig), null);
         $eq('Unsinn wird abgewiesen', self::channels('kein-abo'), null);
         $eq('höchste Version mehrerer Kanäle', self::versionOf([$c, 'data:gibt-es-nicht']), self::version($c));

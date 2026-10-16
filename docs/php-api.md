@@ -637,7 +637,6 @@ Konstanten: `MAX`, `TITLE_MAX`
 - `static add(int $uid, string $url, string $title, string $icon): ?string`
 - `static all(int $uid): array`
 - `static icon(string $i): string` – Symbol: Schlüssel eines Menüpunkts (data-ico, z. B. „data“) oder ein kurzes Zeichen (Symbol einer Datentabelle)
-- `static isGlyph(string $icon): bool`
 - `static migrateBasisAnchors(): int` – Einmalige Migration (migrate): Im Handbuch des Themes „basis“ stehen die Grundeinstellungen jetzt unter #einstellungen,
 - `static move(int $uid, string $url, int $dir): void` – Einen Favoriten um eine Position verschieben (-1 hoch, 1 runter) – Formular ohne JavaScript
 - `static normalize(string $url): ?string` – Lokale Verwaltungsadresse „/admin…?query#hash“ oder null.
@@ -866,7 +865,6 @@ Konstanten: `CORE_ONLY`, `CORE_VIEWS`, `LAYERS`
 - `static devMode(): bool`
 - `static exists(string $name, ?string $kit = null): bool` – Gibt es das Fragment (in irgendeiner Ebene)?
 - `static find(string $name, ?string $kit = null): ?array` – Erste vorhandene Datei: ['name', 'file', 'layer'] oder null
-- `static fromCore(string $name, ?string $kit = null): bool` – Kommt das Fragment aus dem Kern (keine Fassung von Projekt oder Kit)?
 - `static health(): array` – Prüfungen für health und die Übersicht (Technik & Betrieb): null = Hinweis (blockiert keinen Deploy).
 - `static ignored(?string $kit = null): array` – Kit-Dateien für Nur-Kern-Fragmente (werden ignoriert): [name => datei]
 - `static isCoreOnly(string $name): bool`
@@ -941,7 +939,6 @@ Konstanten: `DEFAULTS`, `LANG_MENU_FROM`
 - `static late(): string` – Späte Teile am Ende von <body> (Kit-Layout: <?= header_actions_late() ?>, theme.php 'header_actions' => ['late' => true]):
 - `static menu(array $menu): array` – Stil „Menüpunkt“: steht der Handlungsaufruf schon als Punkt im Hauptmenü (gleiches Ziel, ohne Unterseiten), wird er dort
 - `static model(): array` – Alles, was das Markup braucht (einmal je Anfrage und Sprache berechnet)
-- `static needsJs(): bool` – Braucht die Einstellung JavaScript? (Tastenkürzel der Suche, Öffnungsstatus, Aufklappliste der Sprachen)
 - `static parts(): array` – Benötigte Teile für die aktuelle Einstellung: ['css' => [teil, …], 'js' => [teil, …]] – Teil '' = Grundlage
 - `static ranges(): array` – Öffnungszeiten (Website → Stammdaten „hours“) als [Wochentag 0–6, von, bis] – Pausen teilen den Tag
 - `static render(string $slot = 'bar', array $opt = []): string` – Markup einer Stelle im Kopf: bar (Leiste) | center (Suche mittig) | below (Suchleiste unter dem Kopf).
@@ -1181,7 +1178,6 @@ Konstanten: `ROOTS`, `UPLOADS`, `PACKAGE_TYPE`, `DEFINITIONS`
 - `static shadowed(): array` – Verdeckte Kits (gleicher Name an mehreren Orten): [name => [[dir, source], …]] – es gilt kits/ vor storage/kits/ vor Composer
 - `static source(string $name): ?string` – Herkunft eines Kits: 'local' (kits/), 'upload' (storage/kits/), 'composer' – null, wenn es das Kit nicht gibt
 - `static url(string $name, string $path = ''): string` – Öffentliche Adresse (ohne Versions-Parameter) einer Datei des Kits, z. B. für Schriften, die exakt der URL im CSS entsprechen müssen
-- `static useInstalledJson(?string $file): void` – Prüf-Naht: Composer-Pakete aus einer anderen installed.json lesen (null = vendor/composer/installed.json)
 
 ### `KitCheck` (class, `app/KitCheck.php`)
 
@@ -1777,7 +1773,6 @@ Passkeys (WebAuthn Level 2): Registrierung und Anmeldung mit Touch ID, Face ID, 
 Konstanten: `TTL`, `MAX_PER_USER`, `NAME_MAX`, `TABLE`
 
 - `static available(): bool` – Passkeys sind nur unter einem Domainnamen in einem sicheren Kontext möglich (HTTPS oder localhost)
-- `static b64(string $bin): string`
 - `static cleanName(string $name): string`
 - `static count(Database $db, int $uid, ?string $rpId = null, string $table = self::TABLE): int`
 - `static counts(Database $db, string $table = self::TABLE): array`
@@ -1796,7 +1791,7 @@ Konstanten: `TTL`, `MAX_PER_USER`, `NAME_MAX`, `TABLE`
 - `static rename(Database $db, int $uid, int $id, string $name, string $table = self::TABLE): bool`
 - `static requestOptions(string $purpose, array $creds = [], bool $uv = false): array` – Optionen für navigator.credentials.get(). Ohne $creds: auffindbare Anmeldedaten (Anmeldung ohne Passwort, Autofill).
 - `static rpId(): string` – RP-ID: Host der aktuellen Anfrage ohne Port (kleingeschrieben)
-- `static unb64(mixed $s): ?string`
+- `static unb64(mixed $s): ?string` – Base64url aus dem Browser (WebAuthn) prüfen und dekodieren – null bei fremdem Typ, zu lang oder ungültig
 - `static userHandle(string $scope, int $uid, string $key): string` – Benutzerkennung für den Authenticator (keine E-Mail, keine fortlaufende ID) – 32 Byte
 - `static verify(Database $db, string $purpose, array $in, ?array $row, string $handle, bool $requireHandle = false, string $table = self::TABLE): ?string` – Antwort von navigator.credentials.get() für eine gespeicherte Zeile prüfen; Zähler und „zuletzt verwendet“ aktualisieren.
 
@@ -2965,7 +2960,6 @@ Konstanten: `TTL`, `SIZES`
 
 - `static ago(string $at): string` – Relative Zeitangabe: „vor 5 Min.“, „gestern“, „12.09.“
 - `static apply(array $user, string $do, string $card, array $visible, array $order = []): void` – Eine Änderung anwenden: up | down | hide | show | open | close | order (Liste) | reset.
-- `static bars(array $rows, string $label): string` – Säulen (eine Reihe) als SVG: $rows = [[Beschriftung für Tooltip/Tabelle, Wert], …]. Höhe per CSS, Breite 100 %.
 - `static cached(string $key, int $ttl, callable $fn): mixed`
 - `static cards(array $user): array` – Alle sichtbaren Karten in der Reihenfolge des Benutzers.
 - `static data(string $key, array $user): mixed` – Daten einer nachgeladenen Karte (zwischengespeichert je Website + Rolle); HTML-Ausgabe über die Ansicht dashboard/_{karte}.php
@@ -3220,7 +3214,6 @@ iCalendar (RFC 5545) aus Kalender-Tabellen: Feed einer Tabelle und einzelne Term
 - `static plain(string $s): string` – Text aus HTML/Mehrzeilern: Tags weg, Entities auflösen, Zeilen bereinigen
 - `static prodId(): string`
 - `static text(string $s): string` – TEXT-Wert maskieren (RFC 5545 §3.3.11)
-- `static utc(DateTimeInterface $d): string` – Hilfsfunktion für Tests/Clients: Zeitpunkt als UTC-Stempel
 - `static vevent(array $table, array $e, array $o = []): array` – VEVENT-Zeilen eines Eintrags (ungefaltet). $o['uid'] überschreibt die UID (z. B. aus CalDAV),
 - `static vtimezone(DateTimeZone $tz, int $fromYear): array` – VTIMEZONE aus den Übergängen der Zeitzone: Sommer-/Normalzeit mit jährlicher Regel (z. B. letzter Sonntag im März),
 
@@ -5146,7 +5139,6 @@ Konstanten: `STAFF`, `KINDS`
 - `static scale(array $rows): array` – Größte Werte nach oben/unten (Achsenbeschriftung)
 - `static staff(): array` – Geräte der Redaktion je Ereignis (Schalter an + Recht) – ohne Namen: [Ereignis => ['label' => …, 'devices' => n, 'people' => n]]
 - `static weekly(?string $topic, int $weeks = 12): array` – Wöchentlich zusammengefasst (Montag als Schlüssel, $weeks Wochen, älteste zuerst)
-- `static zero(array $rows): float` – Lage der Null-Linie in Prozent der Höhe (wie chart()) – für die Achsenbeschriftung
 
 ### `Topics` (class, `app/Push/Topics.php`)
 
@@ -5181,7 +5173,6 @@ Web Push ohne Zusatzbibliothek – nur PHP openssl, hash und curl (Rückfall: St
 
 Konstanten: `RECORD_SIZE`, `MAX_PAYLOAD`
 
-- `static b64u(string $bin): string`
 - `static decrypt(string $body, string $uaPrivate, string $uaPublic, string $auth): ?string` – Gegenstück zu encrypt() aus Sicht des Browsers (für den Selbsttest): Nachricht mit dem privaten Schlüssel des Empfängers
 - `static derToRaw(string $der): string` – DER-kodierte ECDSA-Signatur (SEQUENCE { INTEGER r, INTEGER s }) → 64 Byte r || s
 - `static encrypt(string $plain, string $uaPublic, string $auth, ?array $as = null, ?string $salt = null, int $pad = 0): string` – Klartext für einen Browser verschlüsseln. $uaPublic = p256dh (65 Byte), $auth = Auth-Geheimnis (16 Byte).
@@ -5192,7 +5183,6 @@ Konstanten: `RECORD_SIZE`, `MAX_PAYLOAD`
 - `static publicKey(string $raw, bool $throw = true): ?OpenSSLAsymmetricKey` – Öffentlicher Schlüssel (roh) → openssl-Schlüssel
 - `static rawToDer(string $raw): string` – 64 Byte r || s → DER (für openssl_verify)
 - `static sendAll(array $jobs, array $keys, string $subject, int $parallel = 8, int $timeout = 10): array` – Mehrere Nachrichten senden (curl_multi, gleichzeitig $parallel). Jede Aufgabe:
-- `static unb64u(string $s): string|false` – Base64url (auch mit „=“ bzw. Standard-Alphabet) → Bytes, false bei ungültiger Eingabe
 - `static validPublic(string $raw): bool` – Ist das ein gültiger öffentlicher P-256-Punkt (65 Byte, 0x04, auf der Kurve)?
 - `static vapidHeader(string $endpoint, string $subject, array $keys, ?int $exp = null): string` – Kopfzeile Authorization für einen Endpunkt (aud = Ursprung des Push-Dienstes, exp ≤ 24 h, sub = Kontakt)
 - `static verifyJwt(string $jwt, string $public): ?array` – JWT prüfen (Signatur ES256 mit dem öffentlichen Schlüssel) → Angaben oder null
@@ -5618,7 +5608,6 @@ Konstanten: `FORMATS`, `AUTH`, `LOG_KEEP`, `DEFAULTS`
 - `static hydrate(array $r): array`
 - `static isExternal(array $table, int $entryId): bool` – Stammt der Eintrag aus einer Quelle? (Schreibschutz in Entries::save)
 - `static logs(int $sourceId, int $n = self::LOG_KEEP): array`
-- `static markExample(int $id, bool $on): void` – Beispiel-Kennzeichnung (Demo-Inhalte) setzen
 - `static maybeRun(): void` – Nebenbei abrufen (Verwaltungsaufrufe): fällige Quellen nach der Antwort abarbeiten – Cron ist zuverlässiger
 - `static missingModes(): array`
 - `static navVisible(): bool` – Menüpunkt sichtbar (Integratoren sehen ihn auch bei ausgeschalteter Funktion – zum Einschalten)
@@ -5638,7 +5627,6 @@ Abruf und Abgleich einer Quelle: laden (mit Zwischenspeicher), lesen, zuordnen, 
 
 - `static clearFiles(int $id): void`
 - `static dir(?int $id = null): string`
-- `static knownPaths(int $id): array` – Zuletzt gefundene Pfade (Vorschau) für die Auswahlliste der Zuordnung
 - `static load(array $src, bool $force = false, ?string $upload = null): array` – Rohdaten holen: Upload (OpenImmo) bzw. Adresse – mit Zwischenspeicher (Cache-Dauer der Quelle).
 - `static preview(array $src, ?array $table, int $n = 5, bool $force = false): array` – Vorschau ohne Schreiben: Rohdaten laden, lesen, erste $n zuordnen.
 - `static run(array $src, string $via = 'manual', array $o = []): array` – Quelle abgleichen. $via: manual | cron | auto | upload. $o: force (Zwischenspeicher umgehen), upload (Pfad einer Datei)

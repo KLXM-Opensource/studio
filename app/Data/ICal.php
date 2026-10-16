@@ -182,9 +182,4 @@ final class ICal
         return $out;
     }
 
-    /** Hilfsfunktion für Tests/Clients: Zeitpunkt als UTC-Stempel */
-    public static function utc(DateTimeInterface $d): string
-    {
-        return DateTimeImmutable::createFromInterface($d)->setTimezone(new DateTimeZone('UTC'))->format('Ymd\THis\Z');
-    }
 }

@@ -36,8 +36,8 @@ final class Keys
     {
         if (self::$cache !== null) return self::$cache ?: null;
         $l = self::local();
-        $pub = WebPush::unb64u((string) ($l[self::PUBLIC] ?? ''));
-        $priv = WebPush::unb64u((string) ($l[self::PRIVATE] ?? ''));
+        $pub = b64u_decode((string) ($l[self::PUBLIC] ?? ''));
+        $priv = b64u_decode((string) ($l[self::PRIVATE] ?? ''));
         if ($pub === false || $priv === false || strlen($pub) !== 65 || strlen($priv) !== 32) {
             self::$cache = [];
             return null;
@@ -55,7 +55,7 @@ final class Keys
     public static function publicB64(): string
     {
         $k = self::get();
-        return $k ? WebPush::b64u($k['public']) : '';
+        return $k ? b64u_encode($k['public']) : '';
     }
 
     /** Kurzer Fingerabdruck des öffentlichen Schlüssels (je Abo gespeichert; wechselt mit neuen Schlüsseln) */
@@ -89,8 +89,8 @@ final class Keys
         if (!is_file($file) || !is_writable($file) || !is_writable(dirname($file))) return false;
         $src = (string) file_get_contents($file);
         $src = (string) preg_replace("~^[ \t]*'push_vapid_(public|private|created)'\s*=>[^\n]*\n~m", '', $src);
-        $lines = "  '" . self::PUBLIC . "' => '" . WebPush::b64u($keys['public']) . "',   // Web Push (VAPID, öffentlich) – gilt für alle Websites dieser Installation\n"
-            . "  '" . self::PRIVATE . "' => '" . WebPush::b64u($keys['private']) . "',   // Web Push (VAPID, geheim) – neu nur mit push:keys --regenerate (Abos werden ungültig)\n"
+        $lines = "  '" . self::PUBLIC . "' => '" . b64u_encode($keys['public']) . "',   // Web Push (VAPID, öffentlich) – gilt für alle Websites dieser Installation\n"
+            . "  '" . self::PRIVATE . "' => '" . b64u_encode($keys['private']) . "',   // Web Push (VAPID, geheim) – neu nur mit push:keys --regenerate (Abos werden ungültig)\n"
             . "  '" . self::CREATED . "' => '" . date('Y-m-d H:i') . "',\n";
         $new = preg_replace('~(\n\s*)(\)|\]);\s*$~', "\n" . $lines . '$2;' . "\n", $src, 1, $n);
         if (!$n || !is_string($new)) return false;
@@ -101,7 +101,7 @@ final class Keys
         } catch (\Throwable) {
             $check = null;
         }
-        if (!is_array($check) || ($check[self::PUBLIC] ?? '') !== WebPush::b64u($keys['public']) || ($check[self::PRIVATE] ?? '') !== WebPush::b64u($keys['private'])) {
+        if (!is_array($check) || ($check[self::PUBLIC] ?? '') !== b64u_encode($keys['public']) || ($check[self::PRIVATE] ?? '') !== b64u_encode($keys['private'])) {
             @unlink($tmp);
             return false;
         }

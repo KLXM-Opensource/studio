@@ -51,7 +51,7 @@ final class Invites
 
     public static function newToken(): string
     {
-        return rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        return random_token();
     }
 
     /** Hash des Tokens – an die Website gebunden (ein Token einer anderen Website passt nie) */

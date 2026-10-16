@@ -39,8 +39,6 @@ final class Kit
     private static ?array $index = null;
     /** @var array<string, list<array{dir: string, source: string}>> verdeckte Kits gleichen Namens */
     private static array $shadowed = [];
-    /** Prüf-Naht: anderes installed.json (Tests); null = vendor/composer/installed.json */
-    private static ?string $installedJson = null;
 
     /** Gültiger Kit-Name (Ordnername) */
     public static function clean(string $name): string
@@ -112,13 +110,6 @@ final class Kit
         self::$shadowed = [];
     }
 
-    /** Prüf-Naht: Composer-Pakete aus einer anderen installed.json lesen (null = vendor/composer/installed.json) */
-    public static function useInstalledJson(?string $file): void
-    {
-        self::$installedJson = $file;
-        self::reset();
-    }
-
     /**
      * Einfache Angaben der Definitionsdatei, ohne sie auszuführen (Kits können gleichnamige Helfer definieren):
      * label, description, version, requires – nur Zeilen mit vier Leerzeichen Einzug wie in den mitgelieferten Kits.
@@ -176,7 +167,7 @@ final class Kit
     /** Composer-Pakete vom Typ klxm-studio-kit: [kit-name => [dir, package, public]] */
     private static function packages(): array
     {
-        $file = self::$installedJson ?? ROOT . '/vendor/composer/installed.json';
+        $file = ROOT . '/vendor/composer/installed.json';
         if (!is_file($file)) return [];
         $data = json_decode((string) file_get_contents($file), true);
         $out = [];

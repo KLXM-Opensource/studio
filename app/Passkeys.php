@@ -92,15 +92,11 @@ final class Passkeys
         return hash_hmac('sha256', 'passkey-user|' . $scope . '|' . $uid, $key, true);
     }
 
-    public static function b64(string $bin): string
-    {
-        return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
-    }
-
+    /** Base64url aus dem Browser (WebAuthn) prüfen und dekodieren – null bei fremdem Typ, zu lang oder ungültig */
     public static function unb64(mixed $s): ?string
     {
-        if (!is_string($s) || $s === '' || strlen($s) > 20000 || !preg_match('~^[A-Za-z0-9_\-+/=]+$~', $s)) return null;
-        $bin = base64_decode(strtr($s, '-_', '+/'), true);
+        if (!is_string($s) || strlen($s) > 20000) return null;
+        $bin = b64u_decode($s);
         return $bin === false ? null : $bin;
     }
 
@@ -207,12 +203,12 @@ final class Passkeys
     public static function creationOptions(string $handle, string $userName, string $displayName, array $exclude, array $pending = [], string $slot = 'reg'): array
     {
         $challenge = random_bytes(32);
-        app()->session->set('_pk_' . self::slot($slot), ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'h' => self::b64($handle)] + $pending);
+        app()->session->set('_pk_' . self::slot($slot), ['c' => b64u_encode($challenge), 'at' => time(), 'rp' => self::rpId(), 'h' => b64u_encode($handle)] + $pending);
         $rpName = trim(site_name()) ?: CMS_NAME;
         return [
             'rp' => ['name' => mb_substr($rpName, 0, 64), 'id' => self::rpId()],
-            'user' => ['id' => self::b64($handle), 'name' => $userName, 'displayName' => $displayName ?: $userName],
-            'challenge' => self::b64($challenge),
+            'user' => ['id' => b64u_encode($handle), 'name' => $userName, 'displayName' => $displayName ?: $userName],
+            'challenge' => b64u_encode($challenge),
             // EdDSA, ES256, RS256
             'pubKeyCredParams' => [['type' => 'public-key', 'alg' => -8], ['type' => 'public-key', 'alg' => -7], ['type' => 'public-key', 'alg' => -257]],
             'timeout' => 180000,
@@ -270,7 +266,7 @@ final class Passkeys
         if ($db->fetchValue("SELECT COUNT(*) FROM $t WHERE cred_hash = ?", [$hash])) return __('Dieser Passkey ist bereits eingerichtet.');
         $transports = array_values(array_intersect((array) ($resp['transports'] ?? []), ['usb', 'nfc', 'ble', 'hybrid', 'internal', 'smart-card']));
         $name = self::cleanName($name) ?: (self::providerName($aaguid) ?? __('Passkey'));
-        $id = $db->insert($t, ['user_id' => $uid, 'rp_id' => self::rpId(), 'cred_hash' => $hash, 'credential_id' => self::b64($credId),
+        $id = $db->insert($t, ['user_id' => $uid, 'rp_id' => self::rpId(), 'cred_hash' => $hash, 'credential_id' => b64u_encode($credId),
             'public_key' => $pem, 'sign_count' => $count, 'transports' => implode(',', $transports) ?: null, 'aaguid' => $aaguid,
             'name' => $name, 'uv' => $uv ? 1 : 0, 'backup' => $backup ? 1 : 0, 'created_at' => now()]);
         return ['id' => $id, 'name' => $name, 'aaguid' => $aaguid];
@@ -285,8 +281,8 @@ final class Passkeys
     public static function requestOptions(string $purpose, array $creds = [], bool $uv = false): array
     {
         $challenge = random_bytes(32);
-        app()->session->set('_pk_' . self::slot($purpose), ['c' => self::b64($challenge), 'at' => time(), 'rp' => self::rpId(), 'uv' => $uv]);
-        $o = ['challenge' => self::b64($challenge), 'rpId' => self::rpId(), 'timeout' => 180000, 'userVerification' => $uv ? 'required' : 'preferred'];
+        app()->session->set('_pk_' . self::slot($purpose), ['c' => b64u_encode($challenge), 'at' => time(), 'rp' => self::rpId(), 'uv' => $uv]);
+        $o = ['challenge' => b64u_encode($challenge), 'rpId' => self::rpId(), 'timeout' => 180000, 'userVerification' => $uv ? 'required' : 'preferred'];
         if ($creds) {
             $o['allowCredentials'] = array_map(fn($c) => array_filter(['type' => 'public-key', 'id' => $c['credential_id'],
                 'transports' => $c['transports'] ? explode(',', (string) $c['transports']) : null]), $creds);

@@ -715,3 +715,24 @@ function push_subscribe(?string $table = null, array $o = []): string
 {
     return \Core\Push\Visitor::render($table, $o);
 }
+
+/** Base64url (RFC 4648 §5) ohne „=“ – Tokens, Signaturen, WebAuthn, Web Push */
+function b64u_encode(string $bin): string
+{
+    return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
+}
+
+/** Base64url (auch mit „=“ bzw. Standard-Alphabet) → Bytes; false bei ungültiger Eingabe */
+function b64u_decode(string $s): string|false
+{
+    $s = strtr(trim($s), '-_', '+/');
+    if ($s === '' || !preg_match('~^[A-Za-z0-9+/]+=*$~', $s)) return false;
+    $s = rtrim($s, '=');
+    return base64_decode($s . str_repeat('=', (4 - strlen($s) % 4) % 4), true);
+}
+
+/** Zufälliges Einmal-Token (Base64url, Standard 32 Byte = 256 Bit) – Passwort-Links, Einladungen, Adressänderungen */
+function random_token(int $bytes = 32): string
+{
+    return b64u_encode(random_bytes(max(16, $bytes)));
+}

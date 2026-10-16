@@ -51,8 +51,8 @@ final class HostHandover
         $nonce = bin2hex(random_bytes(16));
         $exp = time() + self::TTL;
         $db->insert('host_handover', ['nonce' => $nonce, 'uid' => $uid, 'host' => $host, 'expires_at' => $exp]);
-        $payload = self::b64(json_encode(['v' => 1, 'h' => $host, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::ua($ua)]));
-        return $payload . '.' . self::b64(hash_hmac('sha256', 'handover|' . $payload, app()->key(), true));
+        $payload = b64u_encode(json_encode(['v' => 1, 'h' => $host, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::ua($ua)]));
+        return $payload . '.' . b64u_encode(hash_hmac('sha256', 'handover|' . $payload, app()->key(), true));
     }
 
     /** @return int|string users.id oder Fehlertext */
@@ -62,9 +62,9 @@ final class HostHandover
         $parts = explode('.', $token);
         if (count($parts) !== 2 || strlen($token) > 1000) return $bad;
         [$payload, $sig] = $parts;
-        $mac = self::unb64($sig);
+        $mac = b64u_decode($sig);
         if ($mac === false || !hash_equals(hash_hmac('sha256', 'handover|' . $payload, app()->key(), true), $mac)) return $bad;
-        $d = json_decode((string) self::unb64($payload), true);
+        $d = json_decode((string) b64u_decode($payload), true);
         if (!is_array($d) || ($d['v'] ?? 0) !== 1 || (int) ($d['e'] ?? 0) < time()) return $bad;
         if (($d['h'] ?? '') !== $host || !hash_equals((string) ($d['a'] ?? ''), self::ua($ua))) return $bad;
         self::ensure(app()->db);
@@ -122,13 +122,4 @@ final class HostHandover
         return substr(hash('sha256', 'ua|' . $ua), 0, 24);
     }
 
-    private static function b64(string $s): string
-    {
-        return rtrim(strtr(base64_encode($s), '+/', '-_'), '=');
-    }
-
-    private static function unb64(string $s): string|false
-    {
-        return base64_decode(strtr($s, '-_', '+/'), true);
-    }
 }

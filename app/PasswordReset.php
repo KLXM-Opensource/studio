@@ -60,7 +60,7 @@ final class PasswordReset
 
     public static function newToken(): string
     {
-        return rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        return random_token();
     }
 
     /** Hash des Tokens – an Zweck und Website gebunden */

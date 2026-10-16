@@ -165,8 +165,8 @@ final class Push
         if (!is_array($sub)) return null;
         $ep = trim((string) ($sub['endpoint'] ?? ''));
         $keys = is_array($sub['keys'] ?? null) ? $sub['keys'] : [];
-        $p = WebPush::unb64u((string) ($keys['p256dh'] ?? ''));
-        $a = WebPush::unb64u((string) ($keys['auth'] ?? ''));
+        $p = b64u_decode((string) ($keys['p256dh'] ?? ''));
+        $a = b64u_decode((string) ($keys['auth'] ?? ''));
         if (!self::endpointAllowed($ep) || $p === false || $a === false || strlen($a) !== 16 || !WebPush::validPublic($p)) return null;
         return ['endpoint' => $ep, 'p256dh' => $p, 'auth' => $a];
     }
@@ -180,7 +180,7 @@ final class Push
     /** Gehört das Auth-Geheimnis zum gespeicherten Abo? (Besucher weisen sich so aus – nur ihr Browser kennt es) */
     public static function owns(array $row, string $authRaw): bool
     {
-        return hash_equals((string) $row['auth'], WebPush::b64u($authRaw));
+        return hash_equals((string) $row['auth'], b64u_encode($authRaw));
     }
 
     /**
@@ -191,7 +191,7 @@ final class Push
     {
         $db ??= app()->db;
         $row = self::find($s['endpoint'], $db);
-        $data = ['p256dh' => WebPush::b64u($s['p256dh']), 'auth' => WebPush::b64u($s['auth']), 'key_fp' => Keys::fingerprint(),
+        $data = ['p256dh' => b64u_encode($s['p256dh']), 'auth' => b64u_encode($s['auth']), 'key_fp' => Keys::fingerprint(),
             'last_seen' => now(), 'failures' => 0, 'last_error' => null];
         if ($ua !== '') $data['label'] = self::deviceLabel($ua);
         if ($lang !== null) $data['lang'] = Lang::norm($lang);
@@ -645,8 +645,8 @@ final class Push
                         continue;
                     }
                     $byId[(int) $r['id']] = $r;
-                    $jobs[] = ['id' => (int) $r['id'], 'endpoint' => (string) $r['endpoint'], 'p256dh' => (string) WebPush::unb64u((string) $r['p256dh']),
-                        'auth' => (string) WebPush::unb64u((string) $r['auth']), 'payload' => (string) $r['payload_json'],
+                    $jobs[] = ['id' => (int) $r['id'], 'endpoint' => (string) $r['endpoint'], 'p256dh' => (string) b64u_decode((string) $r['p256dh']),
+                        'auth' => (string) b64u_decode((string) $r['auth']), 'payload' => (string) $r['payload_json'],
                         'ttl' => max(0, (int) $r['ttl'] - $age), 'urgency' => (string) $r['urgency'], 'topic' => $r['collapse']];
                 }
                 if (!$jobs) continue;
