@@ -22,7 +22,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Fließende Seitenwechsel** (View Transitions, ohne Bibliothek) auf allen Seiten: Kopf bleibt stehen, Inhalt blendet weich über; ein angeklicktes Bild wird zum großen Bild der Zielseite, ein angeklickter Text (Menü, Button, Link) gleitet zur Überschrift; zurück gleiten Überschrift und Bild an ihren Platz. Funktioniert in Chrome, Edge und Safari (ohne Navigation-API, `js/vt.js` im Kopf); andere Browser blenden beim Verlassen kurz aus. **Lightbox** mit Zoom aus dem Vorschaubild, Gleiten mit Überblendung beim Blättern und Wischen, das dem Finger folgt. Nur mit „Animationen“, nie bei „Bewegung reduzieren“.
 - Mit der neuen Erweiterung **Bildauswahl** (`klxm/studio-auswahl`: Kunden wählen Fotos und Videos aus einem Shooting aus) legt die Demo ein Beispiel-Shooting an.
 
+### Kit „galerie“
+- **Fließende Seitenwechsel wie im Kit „foto“:** Werk aus dem Raster wird zum Werk auf der Detailseite, Ausstellungsbild zur Ausstellung, Text (Menü, Künstlerliste, Buttons) gleitet zur Überschrift, zurück in umgekehrter Richtung (`js/vt.js` im Kopf, `js/site.js`).
+- **Werke filtern mit fließender Neuordnung:** bleibende Werke gleiten an ihren neuen Platz, andere blenden aus bzw. ein (`document.startViewTransition`).
+
 ### Kern
+- **Lightbox der Kern-Galerie** (Blöcke „Bildergalerie“, Ansichten in galerie u. a.): bei Kits mit „Animationen“ Zoom aus dem Vorschaubild und zurück, Gleiten mit Überblendung beim Blättern, Wischen folgt dem Finger. Ohne „Animationen“ bzw. mit „Bewegung reduzieren“ unverändert.
 - **Größte Datei beim Hochladen einstellbar:** Grundeinstellungen → Mediathek („Größte Datei beim Hochladen (MB)“, Standard 50) statt nur per `config.php`; gilt für Mediathek, Bildauswahl und Erweiterungen (`Media::maxMb()`). Hoster begrenzen mit `media.max_upload_cap_mb`. Importe aus Code können die Grenze mit `Media::import(…, ['max_bytes' => 0])` aufheben (Migrationen).
 - `trusted_site_url()`: lokale Hosts mit Port (z. B. `x.localhost:8099`) gelten als lokal (http statt https).
 

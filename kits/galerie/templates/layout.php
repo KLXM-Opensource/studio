@@ -46,6 +46,7 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?= \Core\AppIcons::headTags() ?><?= galerie_font_preloads() ?>
 <?= header_actions_head() /* Kopfbereich-Aktionen: CSS-Teile nach Bedarf (vor dem Kit-CSS), JavaScript nur bei interaktiven Optionen */ ?>
 <link rel="stylesheet" href="<?= e(theme_asset('css/site.css')) ?>">
+<?php if (!$editor && !is_editing()): ?><script src="<?= e(theme_asset('js/vt.js')) ?>"></script><?php endif; /* Seitenwechsel: pagereveal vor dem ersten Bild */ ?>
 <?php foreach ($optCss as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
 <?php endforeach; ?>
 <?php foreach ($extraCss as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">

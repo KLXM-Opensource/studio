@@ -1,4 +1,5 @@
-/* Werke: Filter nach Künstler und Verfügbarkeit (nur auf Seiten mit dem Block „Werke“ und eingeschalteten Filtern).
+/* Werke: Filter nach Künstler und Verfügbarkeit (nur auf Seiten mit dem Block „Werke“ und eingeschalteten Filtern), mit fließender
+   Neuordnung (document.startViewTransition, Name je Werk nur während des Wechsels).
    Ohne JavaScript bleibt die Filterleiste verborgen und alle Werke sichtbar. Schaltflächen mit aria-pressed, Anzahl per aria-live. */
 document.querySelectorAll('[data-aw-filter]').forEach(bar => {
   const list = document.getElementById(bar.dataset.awFilter + '-works');
@@ -15,12 +16,19 @@ document.querySelectorAll('[data-aw-filter]').forEach(bar => {
     });
     if (count) count.textContent = (n === 1 ? count.dataset.one : count.dataset.many).replace('{n}', n);
   };
+  // Fließend neu ordnen (View Transitions im Dokument): bleibende Werke gleiten an ihren Platz, andere blenden aus bzw. ein.
+  // Nur mit „Animationen“ und ohne „Bewegung reduzieren“; sonst sofort.
+  const motion = () => document.documentElement.classList.contains('has-motion') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const name = on => items.forEach((li, k) => { li.style.viewTransitionName = on ? 'aw-' + k : ''; });
   bar.addEventListener('click', e => {
     const btn = e.target.closest('button[data-f]');
     if (!btn) return;
     state[btn.dataset.f] = btn.dataset.v;
     bar.querySelectorAll(`button[data-f="${btn.dataset.f}"]`).forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
-    apply();
+    if (!document.startViewTransition || !motion()) { apply(); return; }
+    name(true);
+    const t = document.startViewTransition(apply);
+    t.finished.finally(() => name(false));
   });
   bar.hidden = false;
 });

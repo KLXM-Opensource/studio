@@ -30,6 +30,13 @@ kits/galerie/
 
 Build: `cd tools && pnpm run build` → `public/assets/kits/galerie/{css,js}`.
 
+## Bewegung
+
+Mit „Animationen“ und ohne „Bewegung reduzieren“ (wie Kit „foto“): **Seitenwechsel** über View Transitions – Kopf bleibt stehen,
+angeklicktes Bild → großes Bild der Zielseite (`f-morph`), angeklickter Text → erste sichtbare Überschrift (`f-title`), zurück umgekehrt
+(`js/vt.js` im `<head>` für `pagereveal`, `js/site.js` für Klick/`pageswap`). **Werke-Filter** (`js/gallery.js`) ordnet mit
+`document.startViewTransition` fließend um. Lightbox: Kern (`js/media.mjs`) mit Zoom, Gleiten und Wischen.
+
 ## Datenmodell
 
 Drei Datentabellen mit festen Feldnamen (Kurznamen wählbar unter Website → Galerie → Datentabellen; Standard unten).

@@ -2,6 +2,8 @@
  * Kern-Blöcke „Bildergalerie“ (Lightbox) und „Slider“ – kleines ES-Modul, nur auf Seiten mit diesen Blöcken.
  * Ohne JavaScript: Galerie-Bilder sind Links auf die große Fassung, der Slider ist ein wischbarer Scroll-Snap-Streifen.
  *  Lightbox: <dialog> (modal), Fokus bleibt im Dialog, Esc schließt, ←/→ und Wischen blättern, Bildunterschrift + Zähler.
+ *            Bewegung nur bei Kits mit „Animationen“ (html.has-motion) und ohne „Bewegung reduzieren“: Zoom aus dem Vorschaubild
+ *            und zurück, Gleiten mit Überblendung beim Blättern, Wischen folgt dem Finger (Web Animations, keine Inline-Stile im HTML).
  *  Slider:  WAI-ARIA-„Carousel“; Autoplay nur mit Pause-Schaltfläche, stoppt bei Maus/Fokus, nie bei „Bewegung reduzieren“.
  */
 const d = document;
@@ -14,6 +16,40 @@ const swipe = (el, fn) => {
 };
 
 // ------------------------------------------------------------------ Lightbox
+const motion = () => d.documentElement.classList.contains('has-motion') && !rm.matches;
+const EASE = 'cubic-bezier(.2,.75,.15,1)';
+const thumbOf = a => a?.querySelector('img');
+let dx = 0, x0 = null;
+// Zwischen Vorschaubild und Großansicht zoomen (Verschiebung + Skalierung der beiden Rechtecke)
+function zoom(a, back) {
+  const t = thumbOf(a);
+  if (!motion() || !t) return null;
+  const from = t.getBoundingClientRect(), to = img.getBoundingClientRect();
+  if (!from.width || !to.width) return null;
+  const tf = `translate(${from.left + from.width / 2 - (to.left + to.width / 2)}px, ${from.top + from.height / 2 - (to.top + to.height / 2)}px) scale(${from.width / to.width})`;
+  const frames = [{ transform: tf, opacity: .6 }, { transform: 'none', opacity: 1 }];
+  dlg.animate([{ backgroundColor: 'transparent' }, {}], { duration: back ? 280 : 420, easing: 'ease', direction: back ? 'reverse' : 'normal', fill: 'both' });
+  return img.animate(back ? frames.reverse() : frames, { duration: back ? 300 : 460, easing: EASE, fill: back ? 'forwards' : 'none' });
+}
+// Blättern: Kopie des alten Bildes gleitet hinaus, das neue herein
+function slideOut(dir) {
+  if (!motion() || !img.currentSrc) return;
+  const r = img.getBoundingClientRect(), g = img.cloneNode();
+  g.className = 'cms-lb__ghost';
+  Object.assign(g.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  dlg.append(g);
+  g.animate([{ transform: `translateX(${dx}px)`, opacity: 1 }, { transform: `translateX(${-dir * 18}%) scale(.96)`, opacity: 0 }], { duration: 420, easing: EASE, fill: 'forwards' }).finished.finally(() => g.remove());
+}
+function slideIn(dir) {
+  if (!motion()) return;
+  img.animate([{ transform: `translateX(${dir * 14}%) scale(1.02)`, opacity: 0, filter: 'blur(6px)' }, { transform: 'none', opacity: 1, filter: 'none' }], { duration: 520, easing: EASE });
+}
+function close() {
+  const a = items[idx], r = thumbOf(a)?.getBoundingClientRect();
+  const anim = r && r.bottom > 0 && r.top < innerHeight ? zoom(a, true) : null;
+  if (anim) anim.finished.then(() => { dlg.close(); anim.cancel(); }, () => dlg.close()); else dlg.close();
+  if (a) opener = a;
+}
 // Dialog bei Bedarf suchen: nach einem Austausch des Inhalts (Bearbeiten, Ereignis cms:content-replaced) ist es ein neues Element
 let dlg = null, img, txt, cnt;
 let items = [], idx = 0, opener;
@@ -23,24 +59,36 @@ function lb() {
     dlg = el; img = dlg.querySelector('img'); [txt, cnt] = dlg.querySelectorAll('figcaption span');
     dlg.addEventListener('click', e => {
       const b = e.target.closest('button');
-      if (b) b.dataset.d ? show(idx + +b.dataset.d) : dlg.close();
-      else if (e.target === dlg || e.target.classList.contains('cms-lb__fig')) dlg.close();
+      if (b) b.dataset.d ? show(idx + +b.dataset.d, +b.dataset.d) : close();
+      else if (e.target === dlg || e.target.classList.contains('cms-lb__fig')) close();
     });
     dlg.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); if (items.length > 1) show(idx + (e.key === 'ArrowLeft' ? -1 : 1)); }
+      if (e.key === 'Escape' && motion()) { e.preventDefault(); close(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); const s = e.key === 'ArrowLeft' ? -1 : 1; if (items.length > 1) show(idx + s, s); }
       else if (e.key === 'Tab') { // Fokus im Dialog halten
         const f = $$('button:not([hidden])', dlg), first = f[0], last = f[f.length - 1];
         if (e.shiftKey && d.activeElement === first) { e.preventDefault(); last.focus(); }
         else if (!e.shiftKey && d.activeElement === last) { e.preventDefault(); first.focus(); }
       }
     });
-    swipe(dlg, dir => items.length > 1 && show(idx + dir));
+    // Wischen: Bild folgt dem Finger (mit Bewegung), ab 50 px wird geblättert, sonst federt es zurück
+    dlg.addEventListener('pointerdown', e => { x0 = e.isPrimary && e.pointerType !== 'mouse' ? e.clientX : null; dx = 0; });
+    dlg.addEventListener('pointermove', e => { if (x0 === null || items.length < 2) return; dx = e.clientX - x0; if (motion()) img.style.transform = `translateX(${dx}px)`; });
+    dlg.addEventListener('pointerup', () => {
+      if (x0 === null) return;
+      x0 = null;
+      img.style.transform = '';
+      if (Math.abs(dx) > 50 && items.length > 1) show(idx + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      else if (dx && motion()) img.animate([{ transform: `translateX(${dx}px)` }, { transform: 'none' }], { duration: 300, easing: EASE });
+      dx = 0;
+    });
     dlg.addEventListener('close', () => opener?.focus());
   }
   $$('[data-cms-lightbox] a').forEach(a => a.setAttribute('aria-haspopup', 'dialog'));
   return dlg;
 }
-function show(i) {
+function show(i, dir = 0) {
+  if (dir) slideOut(dir);
   idx = (i + items.length) % items.length;
   const a = items[idx];
   img.removeAttribute('srcset');
@@ -49,6 +97,8 @@ function show(i) {
   img.alt = a.querySelector('img')?.alt || '';
   txt.textContent = a.dataset.caption || '';
   cnt.textContent = ' ' + dlg.dataset.count.replace('{n}', idx + 1).replace('{total}', items.length);
+  if (dir) slideIn(dir);
+  dx = 0;
 }
 lb();
 d.addEventListener('click', e => {
@@ -60,6 +110,7 @@ d.addEventListener('click', e => {
   $$('[data-d]', dlg).forEach(b => { b.hidden = items.length < 2; });
   show(items.indexOf(a));
   dlg.showModal();
+  if (motion()) (img.complete ? Promise.resolve() : img.decode().catch(() => {})).then(() => zoom(a));
 });
 
 // ------------------------------------------------------------------ Slider
