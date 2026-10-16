@@ -107,7 +107,7 @@ $optHelp = __('Datum: Formate wie d.m.Y|Y-m-d H:i (leer = automatisch) · Zahl: 
       <div class="f f--half"><span class="f-label"><?= e(__('Bilder')) ?></span>
         <input type="hidden" name="options[images]" value="0"><label class="f-check"><input type="checkbox" name="options[images]" value="1"<?= $o['images'] ? ' checked' : '' ?>> <span><?= e(__('in die Mediathek übernehmen (neu kodiert, ohne EXIF)')) ?></span></label></div>
       <div class="f"><label for="src-ua"><?= e(__('User-Agent')) ?></label>
-        <input id="src-ua" name="options[ua]" value="<?= e($o['ua']) ?>" placeholder="<?= e(\Core\Sources\Fetcher::userAgent()) ?>" spellcheck="false"></div>
+        <input id="src-ua" name="options[ua]" value="<?= e($o['ua']) ?>" placeholder="<?= e(\Core\Http\Fetch::userAgent()) ?>" spellcheck="false"></div>
     </div>
   </section>
 

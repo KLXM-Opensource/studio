@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Core\Sources;
 
-/** Fehler beim Abruf, Entpacken oder Lesen einer externen Quelle – Meldung ist für die Oberfläche geeignet (übersetzt). */
-final class SourceException extends \RuntimeException
+/** Fehler beim Entpacken oder Lesen einer externen Quelle (Abruf: Core\Http\FetchException) – Meldung ist für die Oberfläche geeignet (übersetzt). */
+class SourceException extends \Core\Http\FetchException
 {
 }

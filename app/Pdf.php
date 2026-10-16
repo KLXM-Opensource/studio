@@ -157,13 +157,13 @@ final class Pdf
 
     private static function download(string $url): ?string
     {
-        if (!function_exists('curl_init')) return null;
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 15, CURLOPT_CONNECTTIMEOUT => 4,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, CURLOPT_USERAGENT => 'KLXM-Studio-PDF']);
-        $bin = curl_exec($ch);
-        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        if (!is_string($bin) || $status !== 200 || strlen($bin) > 2_000_000 || strlen($bin) < 1000) return null;
+        try {
+            $r = Http\Fetch::get($url, ['timeout' => 15, 'max' => 2_000_000]);
+        } catch (Http\FetchException) {
+            return null;
+        }
+        $bin = $r['body'];
+        if ($r['status'] !== 200 || strlen($bin) < 1000) return null;
         return in_array(substr($bin, 0, 4), ["\x00\x01\x00\x00", 'true', 'OTTO'], true) ? $bin : null;
     }
 

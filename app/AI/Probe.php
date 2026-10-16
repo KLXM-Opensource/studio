@@ -254,7 +254,7 @@ final class Probe
     }
 
     /**
-     * Adresse prüfen und Client bauen. Regeln wie bei den übrigen ausgehenden Abrufen des Kerns (Core\Sources\Fetcher):
+     * Adresse prüfen und Client bauen. Regeln wie bei den übrigen ausgehenden Abrufen des Kerns (Core\Http\Fetch):
      * keine Zugangsdaten in der Adresse, keine Weiterleitungen, Metadaten-Adressen der Cloud nie; eigenes Netz nur für
      * Ollama/OpenAI-kompatibel (dort ausdrücklich eingetragen), http nur im eigenen Netz.
      * @return array{0: HttpClientInterface, 1: string}
@@ -275,11 +275,11 @@ final class Probe
             if (str_starts_with($ip, '169.254.') || str_starts_with(strtolower($ip), 'fe80:') || $host === 'metadata.google.internal') {
                 throw new AiException(__('Diese Adresse ist aus Sicherheitsgründen gesperrt.'));
             }
-            if (!$local && !\Core\Sources\Fetcher::isPublicIp($ip)) {
+            if (!$local && !\Core\Http\Fetch::isPublicIp($ip)) {
                 throw new AiException(__('Adressen im eigenen Netz sind nur für Ollama und OpenAI-kompatible Dienste erlaubt.'));
             }
         }
-        $private = Ai::isLocalHost($host) || ($ips && !array_filter($ips, [\Core\Sources\Fetcher::class, 'isPublicIp']));
+        $private = Ai::isLocalHost($host) || ($ips && !array_filter($ips, [\Core\Http\Fetch::class, 'isPublicIp']));
         if ($scheme === 'http' && !$private) throw new AiException(__('Externe Anbieter nur über https://.'));
         $opts = ['timeout' => self::TIMEOUT, 'max_duration' => self::TIMEOUT + 2, 'max_redirects' => 0,
             'headers' => ['User-Agent' => CMS_NAME . '/' . CMS_VERSION]];

@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Core\Sources;
+namespace Core\Http;
 
 /**
- * Serverseitiger HTTP-Abruf für externe Quellen (Feeds, APIs, OpenImmo, Bilder) – mit SSRF-Schutz.
+ * Serverseitiger HTTP-Abruf frei einstellbarer Adressen – mit SSRF-Schutz. Einziger Weg des Kerns für solche Abrufe:
+ * externe Quellen (Feeds, APIs, OpenImmo, Bilder), Prüfung eigener Domains und Landingpages, Schriften für PDFs.
  *
  * Anders als Core\Proxy::http (nur fest registrierte Anbieter) sind die Adressen hier frei einstellbar. Daher:
  *   - nur http/https, keine Zugangsdaten in der Adresse, Ports 80/443/8080/8443
@@ -16,7 +17,7 @@ namespace Core\Sources;
  * Ausnahme nur für die Entwicklung: config 'sources_allow_private' => ['127.0.0.1:8099', …] wirkt ausschließlich,
  * wenn 'environment' => 'development' gesetzt ist.
  */
-final class Fetcher
+final class Fetch
 {
     public const PORTS = [80, 443, 8080, 8443];
 
@@ -34,11 +35,11 @@ final class Fetcher
      * $o: headers (list<string>), timeout (s, 2–60), max (Bytes), kind (Schlüssel aus TYPES oder null = alles), ua (User-Agent),
      *     basic ([user, pass]) – Zugangsdaten nur für den ersten Host (bei Weiterleitung auf andere Hosts nicht mitsenden)
      * @return array{status: int, body: string, type: string, url: string, bytes: int, ms: int}
-     * @throws SourceException
+     * @throws FetchException
      */
     public static function get(string $url, array $o = []): array
     {
-        if (!function_exists('curl_init')) throw new SourceException(__('Auf dem Server fehlt die PHP-Erweiterung curl.'));
+        if (!function_exists('curl_init')) throw new FetchException(__('Auf dem Server fehlt die PHP-Erweiterung curl.'));
         $timeout = max(2, min(60, (int) ($o['timeout'] ?? 15)));
         $max = max(1024, (int) ($o['max'] ?? 5 * 1024 * 1024));
         $ua = trim((string) ($o['ua'] ?? '')) ?: self::userAgent();
@@ -84,10 +85,10 @@ final class Fetcher
             $err = curl_error($ch);
             $errno = curl_errno($ch);
             if ($tooBig) {
-                throw new SourceException(__('Antwort zu groß (mehr als {mb} MB) – Abruf abgebrochen.', ['mb' => self::mb($max)]));
+                throw new FetchException(__('Antwort zu groß (mehr als {mb} MB) – Abruf abgebrochen.', ['mb' => fmt()->number($max / 1048576, 1)]));
             }
             if ($ok === false) {
-                throw new SourceException($errno === CURLE_OPERATION_TIMEDOUT
+                throw new FetchException($errno === CURLE_OPERATION_TIMEDOUT
                     ? __('Zeitüberschreitung nach {s} Sekunden.', ['s' => $timeout])
                     : __('Abruf fehlgeschlagen: {error}', ['error' => $err !== '' ? $err : 'curl ' . $errno]));
             }
@@ -96,15 +97,33 @@ final class Fetcher
                 continue;
             }
             if ($status !== 200) {
-                throw new SourceException(__('Der Server antwortete mit HTTP {status}.', ['status' => $status ?: '–']));
+                throw new FetchException(__('Der Server antwortete mit HTTP {status}.', ['status' => $status ?: '–']));
             }
             $kind = $o['kind'] ?? null;
             if ($kind !== null && $type !== '' && !self::typeAllowed($type, (string) $kind)) {
-                throw new SourceException(__('Unerwarteter Inhaltstyp „{type}“ – erwartet: {expected}.', ['type' => $type, 'expected' => implode(', ', array_slice(self::TYPES[$kind] ?? [], 0, 3))]));
+                throw new FetchException(__('Unerwarteter Inhaltstyp „{type}“ – erwartet: {expected}.', ['type' => $type, 'expected' => implode(', ', array_slice(self::TYPES[$kind] ?? [], 0, 3))]));
             }
             return ['status' => $status, 'body' => $body, 'type' => $type, 'url' => $url, 'bytes' => strlen($body), 'ms' => (int) round((microtime(true) - $started) * 1000)];
         }
-        throw new SourceException(__('Zu viele Weiterleitungen.'));
+        throw new FetchException(__('Zu viele Weiterleitungen.'));
+    }
+
+    /**
+     * Erreicht eine eigene Domain diese Installation? Ruft {scheme}://{host}{base}/health?{query} ab (zuerst https, dann http) –
+     * für Domains und Landingpages. @return array{scheme: string, json: ?array}|null  null = nicht erreichbar (oder gesperrt)
+     */
+    public static function selfCheck(string $host, string $query): ?array
+    {
+        foreach (['https', 'http'] as $scheme) {
+            try {
+                $r = self::get($scheme . '://' . $host . base_path() . '/health?' . $query, ['timeout' => 5, 'max' => 65536, 'kind' => 'json', 'headers' => ['Accept: application/json']]);
+            } catch (FetchException) {
+                continue;
+            }
+            $j = json_decode($r['body'], true);
+            return ['scheme' => $scheme, 'json' => is_array($j) ? $j : null];
+        }
+        return null;
     }
 
     public static function typeAllowed(string $type, string $kind): bool
@@ -118,7 +137,7 @@ final class Fetcher
 
     /**
      * Adresse prüfen und auflösen. @return array{0: string, 1: string, 2: int, 3: string} [scheme, host, port, ip]
-     * @throws SourceException
+     * @throws FetchException
      */
     public static function check(string $url): array
     {
@@ -126,25 +145,25 @@ final class Fetcher
         $scheme = strtolower((string) ($p['scheme'] ?? ''));
         $host = strtolower(trim((string) ($p['host'] ?? ''), '[]'));
         if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
-            throw new SourceException(__('Bitte eine vollständige Adresse mit http:// oder https:// angeben.'));
+            throw new FetchException(__('Bitte eine vollständige Adresse mit http:// oder https:// angeben.'));
         }
         if (isset($p['user']) || isset($p['pass'])) {
-            throw new SourceException(__('Zugangsdaten gehören nicht in die Adresse – bitte unter „Anmeldung“ eintragen.'));
+            throw new FetchException(__('Zugangsdaten gehören nicht in die Adresse – bitte unter „Anmeldung“ eintragen.'));
         }
         $port = (int) ($p['port'] ?? ($scheme === 'https' ? 443 : 80));
         $dev = self::allowPrivate($host, $port);
         if (!$dev && !in_array($port, self::PORTS, true)) {
-            throw new SourceException(__('Port {port} ist nicht erlaubt (nur 80, 443, 8080, 8443).', ['port' => $port]));
+            throw new FetchException(__('Port {port} ist nicht erlaubt (nur 80, 443, 8080, 8443).', ['port' => $port]));
         }
         $ips = filter_var($host, FILTER_VALIDATE_IP) ? [$host] : self::resolve($host);
-        if (!$ips) throw new SourceException(__('Der Name „{host}“ lässt sich nicht auflösen.', ['host' => $host]));
+        if (!$ips) throw new FetchException(__('Der Name „{host}“ lässt sich nicht auflösen.', ['host' => $host]));
         if (!$dev) {
             if ($host === 'localhost' || str_ends_with($host, '.localhost') || str_ends_with($host, '.local') || str_ends_with($host, '.internal')) {
-                throw new SourceException(__('Adressen im eigenen Netz (z. B. localhost, private IP-Adressen) sind aus Sicherheitsgründen gesperrt.'));
+                throw new FetchException(__('Adressen im eigenen Netz (z. B. localhost, private IP-Adressen) sind aus Sicherheitsgründen gesperrt.'));
             }
             foreach ($ips as $ip) {
                 if (!self::isPublicIp($ip)) {
-                    throw new SourceException(__('Adressen im eigenen Netz (z. B. localhost, private IP-Adressen) sind aus Sicherheitsgründen gesperrt.'));
+                    throw new FetchException(__('Adressen im eigenen Netz (z. B. localhost, private IP-Adressen) sind aus Sicherheitsgründen gesperrt.'));
                 }
             }
         }
@@ -196,8 +215,4 @@ final class Fetcher
         return CMS_NAME . '/' . CMS_VERSION . ' (+' . (setting('sys.site_url') ?: site_url()) . ')';
     }
 
-    public static function mb(int $bytes): string
-    {
-        return rtrim(rtrim(number_format($bytes / 1048576, 1, ',', ''), '0'), ',');
-    }
 }

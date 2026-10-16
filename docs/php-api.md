@@ -1,6 +1,6 @@
 # PHP-API-Referenz – KLXM Studio 1.0.0
 
-Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 358 Klassen.
+Automatisch erzeugt aus dem Code (`php bin/console docs:api`) – nicht von Hand bearbeiten. 359 Klassen.
 Schnittstellen für Erweiterungen und Kits sind mit **API** markiert; alles andere ist intern und kann sich ändern.
 Weitere Schnittstellen: REST-API (OpenAPI unter `/api/v1/openapi.json`), MCP-Server, Kommandozeile – Entwicklerhandbuch in der Verwaltung.
 
@@ -1845,9 +1845,10 @@ PDF-Links auf der Website: Klick öffnet eine kleine Auswahl „Ansehen“ (PDF-
 Rollen und Berechtigungen.
 
 - `static all(): array`
-- `static allows(?array $role, string $perm, ?string $table = null): bool` – Darf die Rolle das? Optional für eine bestimmte Datentabelle.
+- `static allows(?array $role, string $perm, ?string $table = null): bool`
 - `static catalog(): array` – Alle Rechte, gruppiert (Bezeichnungen übersetzbar)
 - `static defaults(): array` – Vorgaben beim ersten Start: Standardrollen – Rechte danach frei änderbar (außer admin/network), aber nie löschbar (builtin)
+- `static installationAdmin(): bool` – Darf die angemeldete Person Einstellungen ändern, die für die ganze Installation gelten (Kits, Schriften, geteilte Medien,
 - `static role(string $key): ?array`
 - `static roles(): array`
 - `static seed(Database $db): void` – Fehlende Standardrollen anlegen und als Standardrolle markieren (idempotent). Ältere Installationen hatten nur admin und
@@ -3864,6 +3865,25 @@ Konstanten: `KEY`, `CHOICES`
 
 ## Core\Http
 
+### `Fetch` (class, `app/Http/Fetch.php`)
+
+Serverseitiger HTTP-Abruf frei einstellbarer Adressen – mit SSRF-Schutz. Einziger Weg des Kerns für solche Abrufe: externe Quellen (Feeds, APIs, OpenImmo, Bilder), Prüfung eigener Domains und Landingpages, Schriften für PDFs.
+
+Konstanten: `PORTS`, `TYPES`
+
+- `static allowPrivate(string $host, int $port): bool` – Nur Entwicklung: Host:Port aus config 'sources_allow_private' (bei 'environment' => 'development')
+- `static check(string $url): array` – Adresse prüfen und auflösen. @return array{0: string, 1: string, 2: int, 3: string} [scheme, host, port, ip]
+- `static get(string $url, array $o = []): array` – GET mit Schutzmaßnahmen.
+- `static isPublicIp(string $ip): bool` – Öffentlich routbare Adresse? (IPv4 und IPv6, inkl. CGNAT, Benchmark-Netz, IPv4-gemappte IPv6-Adressen)
+- `static selfCheck(string $host, string $query): ?array` – Erreicht eine eigene Domain diese Installation? Ruft {scheme}://{host}{base}/health?{query} ab (zuerst https, dann http) –
+- `static typeAllowed(string $type, string $kind): bool`
+- `static userAgent(): string`
+
+### `FetchException` (class, `app/Http/FetchException.php`)
+
+Fehler beim Abruf (Core\Http\Fetch) – Meldung ist für die Oberfläche geeignet (übersetzt).
+
+
 ### `HttpException` (class, `app/Http/HttpException.php`)
 
 - `__construct(int $code, string $message = '')`
@@ -3890,6 +3910,7 @@ Konstanten: `PACKED`
 
 - `__construct(string $body = '', int $status = 200, array $headers = [])`
 - `static alreadySent(): self`
+- `static fail(string $error, int $status = 422, array $extra = []): self` – Fehler als JSON in einheitlicher Form {ok: false, error: …} (+ weitere Felder)
 - `header(string $name, string $value): self`
 - `static json(mixed $data, int $status = 200): self`
 - `static redirect(string $to, int $status = 303): self`
@@ -5506,20 +5527,6 @@ Kommandozeile der externen Quellen (bin/console): sources:sync [--all] [--source
 
 - `static run(string $cmd, array $args, string $script): int`
 
-### `Fetcher` (class, `app/Sources/Fetcher.php`)
-
-Serverseitiger HTTP-Abruf für externe Quellen (Feeds, APIs, OpenImmo, Bilder) – mit SSRF-Schutz.
-
-Konstanten: `PORTS`, `TYPES`
-
-- `static allowPrivate(string $host, int $port): bool` – Nur Entwicklung: Host:Port aus config 'sources_allow_private' (bei 'environment' => 'development')
-- `static check(string $url): array` – Adresse prüfen und auflösen. @return array{0: string, 1: string, 2: int, 3: string} [scheme, host, port, ip]
-- `static get(string $url, array $o = []): array` – GET mit Schutzmaßnahmen.
-- `static isPublicIp(string $ip): bool` – Öffentlich routbare Adresse? (IPv4 und IPv6, inkl. CGNAT, Benchmark-Netz, IPv4-gemappte IPv6-Adressen)
-- `static mb(int $bytes): string`
-- `static typeAllowed(string $type, string $kind): bool`
-- `static userAgent(): string`
-
 ### `Mapper` (class, `app/Sources/Mapper.php`)
 
 Zuordnung Quelle → Felder einer Datentabelle.
@@ -5584,7 +5591,7 @@ Konstanten: `MAX_ITEMS`
 
 ### `SourceException` (class, `app/Sources/SourceException.php`)
 
-Fehler beim Abruf, Entpacken oder Lesen einer externen Quelle – Meldung ist für die Oberfläche geeignet (übersetzt).
+Fehler beim Entpacken oder Lesen einer externen Quelle (Abruf: Core\Http\FetchException) – Meldung ist für die Oberfläche geeignet (übersetzt).
 
 
 ### `Sources` (class, `app/Sources/Sources.php`)

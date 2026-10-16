@@ -56,15 +56,11 @@ final class Domains
         $s->set(self::CHECK_KEY, ['q' => $q, 'a' => $answer, 'exp' => time() + self::CHECK_TTL]);
         $out = ['ok' => false, 'scheme' => '', 'reachable' => false];
         try {
-            foreach (['https', 'http'] as $scheme) {
-                $ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'follow_location' => 0, 'header' => "Accept: application/json\r\n"],
-                    'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
-                $body = @file_get_contents($scheme . '://' . $host . base_path() . '/health?domain_check=' . $q, false, $ctx);
-                if ($body === false) continue;
+            if ($res = Http\Fetch::selfCheck($host, 'domain_check=' . $q)) {
                 $out['reachable'] = true;
-                $j = json_decode($body, true);
+                $j = $res['json'];
                 if (is_array($j) && is_string($j['domain_check'] ?? null) && hash_equals($answer, $j['domain_check'])) {
-                    return ['ok' => true, 'scheme' => $scheme, 'reachable' => true];
+                    return ['ok' => true, 'scheme' => $res['scheme'], 'reachable' => true];
                 }
             }
         } finally {

@@ -98,7 +98,7 @@ final class Sync
             $res = ['body' => $body, 'cached' => true, 'bytes' => strlen($body), 'ms' => 0, 'files' => [], 'tmp' => null, 'url' => $src['url']];
         } else {
             $kind = match ($src['format']) { 'json' => 'json', 'openimmo' => null, default => 'xml' };
-            $r = Fetcher::get($src['url'], ['timeout' => (int) $o['timeout'], 'max' => $maxBytes, 'kind' => $kind, 'ua' => $o['ua'],
+            $r = \Core\Http\Fetch::get($src['url'], ['timeout' => (int) $o['timeout'], 'max' => $maxBytes, 'kind' => $kind, 'ua' => $o['ua'],
                 'headers' => array_merge([self::accept($src['format'])], Sources::authOptions($src)['headers'] ?? [])] + array_intersect_key(Sources::authOptions($src), ['basic' => 1]));
             if ($src['format'] === 'openimmo' && !str_starts_with($r['body'], 'PK') && !preg_match('~^\s*<~', $r['body'])) {
                 throw new SourceException(__('Unerwarteter Inhalt – erwartet wird OpenImmo-XML oder eine ZIP-Datei.'));
@@ -187,7 +187,7 @@ final class Sync
                 $out['mapped'] = Mapper::preview($table, $mapping, $parsed['items'], $n);
             }
             $out['ok'] = true;
-        } catch (SourceException $e) {
+        } catch (\Core\Http\FetchException $e) {
             $out['error'] = $e->getMessage();
         } catch (\Throwable $e) {
             error_log('[sources] preview: ' . $e->getMessage());
@@ -237,7 +237,7 @@ final class Sync
                 'n' => $stats['fetched'], 'c' => $stats['created'], 'u' => $stats['updated'], 's' => $stats['unchanged'],
                 'h' => $stats['hidden'], 'd' => $stats['deleted'], 'f' => $stats['failed']]);
             if (!empty($parsed['meta']['partial'])) $stats['message'] .= ' ' . __('(Teilabgleich – fehlende Objekte bleiben unverändert)');
-        } catch (SourceException $e) {
+        } catch (\Core\Http\FetchException $e) {
             $stats['message'] = $e->getMessage();
         } catch (\Throwable $e) {
             error_log('[sources] sync ' . $src['id'] . ': ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
@@ -379,7 +379,7 @@ final class Sync
         $name = basename((string) (parse_url($ref, PHP_URL_PATH) ?: $ref));
         try {
             if (preg_match('~^https?://~i', $ref)) {
-                $r = Fetcher::get($ref, ['timeout' => (int) $src['options']['timeout'], 'max' => min(Media::maxBytes(), 15 * 1024 * 1024), 'kind' => 'image', 'ua' => $src['options']['ua']]);
+                $r = \Core\Http\Fetch::get($ref, ['timeout' => (int) $src['options']['timeout'], 'max' => min(Media::maxBytes(), 15 * 1024 * 1024), 'kind' => 'image', 'ua' => $src['options']['ua']]);
                 $tmp = tempnam(sys_get_temp_dir(), 'src');
                 file_put_contents($tmp, $r['body']);
                 $path = $tmp;

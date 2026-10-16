@@ -376,16 +376,10 @@ final class Landings
         $ips = @gethostbynamel($bare) ?: [];
         $token = self::healthToken($l);
         $out = ['dns' => $ips, 'reachable' => false, 'same' => false, 'message' => ''];
-        foreach (['https://', 'http://'] as $scheme) {
-            $ctx = stream_context_create(['http' => ['timeout' => 4, 'ignore_errors' => true, 'follow_location' => 0, 'header' => "Accept: application/json\r\n"],
-                'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
-            $body = @file_get_contents($scheme . $host . base_path() . '/health?landing=' . $token, false, $ctx);
-            if ($body === false) continue;
+        if ($res = Http\Fetch::selfCheck($host, 'landing=' . $token)) {
             $out['reachable'] = true;
-            $j = json_decode($body, true);
-            $out['same'] = is_array($j) && ($j['landing'] ?? null) === $l->id;
-            $out['message'] = $scheme;
-            break;
+            $out['same'] = ($res['json']['landing'] ?? null) === $l->id;
+            $out['message'] = $res['scheme'] . '://';
         }
         return $out;
     }
