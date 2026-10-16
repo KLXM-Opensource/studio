@@ -45,7 +45,7 @@ import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Lin
 import { initPagesFields, openPagesPicker } from './_pages.js';   // Seitenauswahl (Feldtyp „pages“, Core\PagePicker)
 import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles)
 import { initAssistant } from './_assistant.js';
-import { esc } from './_html.js';
+import { esc, csrf } from './_html.js';
 import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
 import { initPushAdmin } from './_pushadmin.js';   // Mitteilungen → Verfassen: Vorschau, erreichbare Geräte (Core\Push\Compose)
 import { initPack } from './_pack.js';   // Große Formulare gebündelt senden (max_input_vars, Core\Http\Request::unpack)
@@ -55,7 +55,6 @@ import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der A
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const csrf = () => $('#adm-csrf')?.value || window.CMS_CSRF || '';
 
 // ------------------------------------------------------------ Website: Werkzeugleiste im Shadow DOM (_shadow.js, Verhalten: _bar.js)
 initBar();

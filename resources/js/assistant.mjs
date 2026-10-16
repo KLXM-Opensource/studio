@@ -12,6 +12,7 @@
 import { sseFetch } from './_sse.js';
 import { renderMd, esc } from './_chatmd.js';
 import { t } from './_i18n.js';
+import { csrf } from './_html.js';
 
 const d = document;
 let cfg = null, ui = null, busy = null, opener = null, page = false;
@@ -24,7 +25,6 @@ const ss = {
   set(k, v) { try { v === null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch { /* aus */ } },
 };
 const save = () => ss.set(KEY(), JSON.stringify({ ...st, msgs: st.msgs.filter(m => !m.pending).slice(-40) }));
-const csrf = () => d.getElementById('adm-csrf')?.value || '';
 const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`;
 const I = {
   logo: '<svg class="kas__logo" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M10.002,18.997C5.031,18.998 1.001,14.971 1,10.002C0.999,5.033 5.028,1.003 9.998,1.003C14.969,1.001 18.999,5.029 19,9.998C19.001,14.967 14.972,18.996 10.002,18.997ZM10.005,7.175L7.183,4.353L4.361,7.175L7.183,9.997L4.361,12.819L7.183,15.641L10.005,12.819L12.827,15.641L15.649,12.819L12.827,9.997L15.649,7.175L12.827,4.353L10.005,7.175Z"/></svg>',

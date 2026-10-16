@@ -11,7 +11,7 @@
  */
 import { t } from './_i18n.js';
 import ICON_MAP from '../../public/assets/icons/icons-map.json';
-import { esc } from './_html.js';
+import { esc, csrf } from './_html.js';
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
@@ -32,7 +32,6 @@ try { cfg = JSON.parse($('#uc-config')?.textContent || 'null'); } catch { cfg = 
 if (cfg) init();
 
 function init() {
-  const csrf = () => $('#adm-csrf')?.value || '';
   const live = $('#adm-live');
   const announce = msg => { if (!live) return; live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60); };
   const pageHost = $('[data-chat-page]');

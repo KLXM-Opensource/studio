@@ -3,7 +3,7 @@ import { toast as sharedToast } from './_toast.js';
 import { drill } from './_drill.js';
 import { layerBox, inPath, topInset } from './_shadow.js';
 import { ico } from './_icons.js';
-import { esc } from './_html.js';
+import { esc, csrf } from './_html.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
@@ -39,7 +39,6 @@ const readTrans = form => {
   form.querySelectorAll('[name^="i18n."]').forEach(el => { const [, l, k] = el.name.split('.'); (o[l] ||= {})[k] = el.value; });
   return o;
 };
-const csrf = () => $('#adm-csrf')?.value || '';
 const BASE = ($('[data-media-base]')?.dataset.mediaBase || '') + '/admin';
 const CHUNK = 1024 * 1024;
 const MAX_MB = +($('[data-media-max]')?.dataset.mediaMax || 50);

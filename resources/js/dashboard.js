@@ -7,6 +7,7 @@
  *  - „Fragen Sie KLXM AI“: öffnet das Assistent-Fenster mit der Frage (window.cmsAssistant), sonst die Assistent-Seite.
  */
 import { t } from './_i18n.js';
+import { csrf } from './_html.js';
 
 (() => {
   const d = document;
@@ -14,7 +15,6 @@ import { t } from './_i18n.js';
   if (!grid) return;
   const base = grid.dataset.endpoint;
   const live = d.querySelector('[data-dash-live]');
-  const csrf = () => d.getElementById('adm-csrf')?.value || '';
   const cards = () => [...grid.querySelectorAll(':scope > .dash-card')];
   const title = card => card.querySelector('.dash-card__toggle')?.textContent.trim() || '';
   const say = msg => { if (!live) return; live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60); };

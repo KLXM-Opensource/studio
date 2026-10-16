@@ -15,13 +15,12 @@
  */
 import { layerBox, IN_ADMIN } from './_shadow.js';
 import { t } from './_i18n.js';
-import { esc } from './_html.js';
+import { esc, csrf } from './_html.js';
 import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm()
 
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
-const csrf = () => $('#adm-csrf')?.value || '';
 const SPARK = '<span class="kia-spark" aria-hidden="true">✦</span>';
 
 let CFG;
