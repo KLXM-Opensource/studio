@@ -40,6 +40,7 @@
  *   cron:exec <aufgabe>                               Eine Aufgabe sofort ausführen (mit Sperre und Protokoll)
  *   cron:queue [<aufgabe>]                            Warteschlange anzeigen bzw. eine Aufgabe für den nächsten cron:run einreihen
  *   cron:selftest                                     Selbsttest: Zeitausdrücke, Fälligkeit, nächster Lauf, Warteschlange
+ *   docs:api [--out=datei.md]                         PHP-API-Referenz aus dem Code als Markdown (Standard: docs/php-api.md)
  *   chat:digest                                       Chat: E-Mail-Hinweise zu ungelesenen Erwähnungen senden (Cron, z. B. alle 15 min)
  *   push:send [--all] [--limit=N]                     Push-Benachrichtigungen: fällige Zustellungen senden (Cron: jede Minute bis alle 5 min)
  *   push:status [--all]                               Push: Funktion, Schlüssel, Abos, Warteschlange, letzter Versand
@@ -746,6 +747,15 @@ switch ($cmd) {
         $n = Core\Chat\Chat::purge($days);
         $d = $days ?? Core\Chat\Chat::retentionDays();
         echo "Chat: $n Nachricht(en) gelöscht (Aufbewahrung: " . ($d > 0 ? "$d Tage" : 'unbegrenzt') . ").\n";
+        break;
+
+    case 'docs:api':
+        // PHP-API-Referenz (Core\ApiReference) als Markdown – für GitHub; in der Verwaltung live im Entwicklerhandbuch
+        $out = ROOT . '/docs/php-api.md';
+        foreach ($args as $a) if (str_starts_with($a, '--out=')) $out = substr($a, 6);
+        @mkdir(dirname($out), 0775, true);
+        file_put_contents($out, Core\ApiReference::markdown());
+        echo "PHP-API-Referenz geschrieben: " . str_replace(ROOT . '/', '', $out) . " (" . count(Core\ApiReference::classes()) . " Klassen)\n";
         break;
 
     case 'cron:run':

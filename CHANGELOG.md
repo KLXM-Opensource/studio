@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PHP-API-Referenz und statische Analyse
+- **PHP-API-Referenz** live aus dem Code (`Core\ApiReference`): Entwicklerhandbuch → PHP-API-Referenz (stabile Schnittstellen für Erweiterungen und Kits), alle Klassen unter Hilfe → PHP-API-Referenz, als Markdown mit `php bin/console docs:api` (`docs/php-api.md`).
+- **PHPStan** Stufe 5 ohne Funde (`tools/phpstan`, Baseline nur für belegte Fehlalarme). Behoben u. a.: Wiederherstellen aus dem Papierkorb der Mediathek meldete immer einen Fehler (`Database::update()` liefert jetzt die Zahl der geänderten Zeilen).
+
 ### PDF erzeugen (`Core\Pdf`)
 - HTML → PDF für Kern und Erweiterungen (`Pdf::render()`, `Pdf::response()`), mit austauschbarer Engine wie bei den Diagrammen. Freie Schriften von Fontsource werden einmal je Installation geladen, Seitenzahlen und Fußzeile auf Wunsch; keine Dateien aus dem Netz, kein PHP im HTML.
 - **Lato immer dabei** und **Schrift der Verwaltung** (statt der Systemschrift), dazu **JetBrains Mono** für Code und Kennungen: Verwaltung und PDFs bringen Lato in Light, Regular, Bold und Black (je kursiv) mit – PDFs ohne Download, Standardschrift von `Core\Pdf`. Zweite Schrift für Überschriften möglich (`display`, Familie `PdfDisplay`); die Zeilenhöhe aus dem CSS gilt auch mit Fontsource-Schriften. Diagramme fürs PDF: `cmsCharts.snapshot()` liefert ein helles PNG (auch im Dunkelmodus, ohne Animation, Legende vollständig).

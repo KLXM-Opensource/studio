@@ -7784,4 +7784,9 @@ return [
     '„{name}“ gespeichert.' => '“{name}” saved.',
     'Ohne Cron sendet die Website kleine Mengen nebenbei nach Aufrufen. Mit Cron kommen Mitteilungen pünktlich, auch für viele Abos. Push läuft über die geplanten Aufgaben – ein Cronjob für alles:' => 'Without cron, the website sends small amounts in the background after requests. With cron, notifications arrive on time, even for many subscriptions. Push runs via the scheduled tasks – one cron job for everything:',
     'Prüfen: Nach ein, zwei Minuten steht oben bei „Cronjob zuletzt aktiv“ eine aktuelle Zeit. Eine Aufgabe genügt für alle Websites dieser Installation.' => 'Check: after a minute or two, “Cron job last active” above shows a current time. One task is enough for all websites of this installation.',
+    'Konstanten' => 'Constants',
+    'Methoden' => 'methods',
+    'Namespaces' => 'Namespaces',
+    'PHP-API-Referenz' => 'PHP API reference',
+    '{n} Klassen des Kerns mit ihren öffentlichen Methoden – live aus dem Code. Mit „API“ markiert: stabile Schnittstellen für Erweiterungen und Kits; alles andere ist intern.' => '{n} core classes with their public methods – live from the code. Marked “API”: stable interfaces for extensions and kits; everything else is internal.',
 ];

@@ -47,6 +47,13 @@ final class HelpController extends AdminController
         return $this->view('help/ui', ['title' => __('Oberfläche'), 'css' => ['css/docs.css'], 'part' => $part]);
     }
 
+    /** PHP-API-Referenz: alle Klassen und öffentlichen Methoden des Kerns, live aus dem Code (Core\ApiReference) */
+    public function phpApi(Request $r): Response
+    {
+        $this->auth($r);
+        return $this->view('help/php-api', ['title' => __('PHP-API-Referenz'), 'css' => ['css/docs.css'], 'ref' => \Core\ApiReference::build()]);
+    }
+
     /** Lizenzen & Danksagungen: Projektlizenz (LICENSE, COPYRIGHT) und THIRD-PARTY-NOTICES.md (Drittsoftware, Schriften, Daten, Medien) */
     public function licenses(Request $r): Response
     {
