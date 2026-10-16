@@ -3,7 +3,7 @@
 
   <h3>Hochladen</h3>
   <ol class="doc-steps">
-    <li>Dateien vom Computer <b>in die Mediathek ziehen</b> (auch mehrere auf einmal) – oder <b>Hochladen</b> klicken. Große Dateien bis <?= (int) app()->config->get('media.max_upload_mb', 50) ?> MB werden in Stücken übertragen; der Balken zeigt den Fortschritt.</li>
+    <li>Dateien vom Computer <b>in die Mediathek ziehen</b> (auch mehrere auf einmal) – oder <b>Hochladen</b> klicken. Große Dateien bis <?= \Core\Media::maxMb() ?> MB werden in Stücken übertragen; der Balken zeigt den Fortschritt. Die Grenze stellen Sie unter Grundeinstellungen → Mediathek ein.</li>
     <li>Für jedes Bild einen <b>Alt-Text</b> eintragen – ohne ihn startet der Upload nicht. Beschreiben Sie in einem Satz, was zu sehen ist („Zwei Personen im Gespräch am Empfang“). Rein schmückende Bilder markieren Sie als <b>dekorativ</b>.</li>
     <li>Ist links eine <b>Sammlung</b> oder ein <b>Tag</b> gewählt, landen neue Dateien direkt dort.</li>
     <li>Ein kopiertes Bild oder eine Datei fügen Sie auch mit <kbd>⌘</kbd>/<kbd>Strg</kbd>+<kbd>V</kbd> direkt in die Mediathek ein.</li>
@@ -123,7 +123,7 @@
     <?php foreach ($__sizes as [$__u, $__f, $__m]): ?><tr><td><?= e($__u) ?></td><td><?= e($__f) ?></td><td><?= e($__m) ?></td></tr><?php endforeach; ?>
   </table>
   <?php else: ?>
-  <p>Laden Sie Fotos möglichst groß hoch – mindestens 1600 px breit, für breite Bilder 2400 px. Eigene Zuschnitte sind in diesen Formaten möglich: <?= e(implode(', ', array_values((array) (app()->theme->def['image_ratios'] ?? ['16:9' => '16:9', '4:3' => '4:3', '1:1' => '1:1', '3:4' => '3:4'])))) ?>. Dateien dürfen höchstens <?= (int) app()->config->get('media.max_upload_mb', 50) ?> MB groß sein.</p>
+  <p>Laden Sie Fotos möglichst groß hoch – mindestens 1600 px breit, für breite Bilder 2400 px. Eigene Zuschnitte sind in diesen Formaten möglich: <?= e(implode(', ', array_values((array) (app()->theme->def['image_ratios'] ?? ['16:9' => '16:9', '4:3' => '4:3', '1:1' => '1:1', '3:4' => '3:4'])))) ?>. Dateien dürfen höchstens <?= \Core\Media::maxMb() ?> MB groß sein.</p>
   <?php endif; ?>
   <div class="doc-note doc-note--warn"><strong>Bildrechte und Einwilligungen</strong><p>Nur Fotos verwenden, für die Nutzungsrechte bestehen. Bei erkennbaren Personen (Team, Kundinnen und Kunden) ist eine schriftliche Einwilligung nötig.</p></div>
   <h3 id="pools">Geteilte Medien</h3>

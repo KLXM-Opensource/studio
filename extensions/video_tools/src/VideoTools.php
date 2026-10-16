@@ -123,7 +123,7 @@ final class VideoTools
             'ffmpeg_cfg' => Ffmpeg::configuredPath('ffmpeg'), 'ffprobe_cfg' => Ffmpeg::configuredPath('ffprobe'),
             'version' => Ffmpeg::version(), 'webm' => Presets::all()['webm']['available'], 'x264' => Ffmpeg::hasEncoder('libx264'),
             'config' => $cfg, 'free_mb' => $free !== false ? (int) ($free / 1048576) : null,
-            'max_upload_mb' => (int) app()->config->get('media.max_upload_mb', 50),
+            'max_upload_mb' => \Core\Media::maxMb(),
             'nice' => \Core\Ffmpeg::hasNice(),
             'hint' => Ffmpeg::available() ? '' : \Core\Ffmpeg::hint(), 'open_basedir' => \Core\Ffmpeg::openBasedir(),
             'php' => \Core\Network\Stats::phpBinary(),

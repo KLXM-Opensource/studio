@@ -15,7 +15,7 @@
     <tr><td><code>db</code></td><td><code>driver</code> <code>sqlite</code> (Standard, <code>path</code>) oder <code>mysql</code> mit host/port/name/user/pass/charset.</td></tr>
     <tr><td><code>session</code></td><td>Cookie-Name (<code>cms_sess</code>, weitere Websites <code>cms_sess_{key}</code>) und Leerlauf-Lebensdauer (8 h).</td></tr>
     <tr><td><code>page_cache</code>, <code>revisions</code></td><td>Seiten-Cache an/aus; Anzahl gespeicherter Versionen je Seite (20).</td></tr>
-    <tr><td><code>media</code></td><td><code>max_upload_mb</code> (50), <code>sizes</code> (480, 800, 1200, 1600, 2400 px), <code>quality</code> (80).</td></tr>
+    <tr><td><code>media</code></td><td><code>max_upload_mb</code> (50, Vorgabe – überschreibbar unter Grundeinstellungen → Mediathek, <code>sys.media_max_mb</code>), <code>max_upload_cap_mb</code> (Obergrenze für die Einstellung, z. B. vom Hoster), <code>sizes</code> (480, 800, 1200, 1600, 2400 px), <code>quality</code> (80).</td></tr>
   </table>
   <table class="doc-table">
     <tr><th>Weitere Schlüssel (config.local.php bzw. config/sites/{key}.php)</th><th>Bedeutung</th></tr>

@@ -91,7 +91,7 @@ final class MediaController extends AdminController
         Media::purgeTrash();   // abgelaufene Dateien im Papierkorb endgültig löschen (höchstens einmal am Tag)
         return $this->view('media', [
             'css' => [],
-            'maxMb' => (int) app()->config->get('media.max_upload_mb', 50),
+            'maxMb' => Media::maxMb(),
         ]);
     }
 
@@ -492,7 +492,7 @@ final class MediaController extends AdminController
             return Response::fail('Teil-Upload fehlgeschlagen.');
         }
         if ($size > Media::maxBytes() || $total < 1 || $total > 1000) {
-            return Response::fail('Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).', 413);
+            return Response::fail('Datei ist zu groß (max. ' . Media::maxMb() . ' MB).', 413);
         }
         $meta = is_file("$path.json") ? (json_decode((string) file_get_contents("$path.json"), true) ?: []) : ['next' => 0];
         if ($index !== (int) $meta['next']) {

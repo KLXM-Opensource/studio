@@ -23,6 +23,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Mit der neuen Erweiterung **Bildauswahl** (`klxm/studio-auswahl`: Kunden wählen Fotos und Videos aus einem Shooting aus) legt die Demo ein Beispiel-Shooting an.
 
 ### Kern
+- **Größte Datei beim Hochladen einstellbar:** Grundeinstellungen → Mediathek („Größte Datei beim Hochladen (MB)“, Standard 50) statt nur per `config.php`; gilt für Mediathek, Bildauswahl und Erweiterungen (`Media::maxMb()`). Hoster begrenzen mit `media.max_upload_cap_mb`. Importe aus Code können die Grenze mit `Media::import(…, ['max_bytes' => 0])` aufheben (Migrationen).
 - `trusted_site_url()`: lokale Hosts mit Port (z. B. `x.localhost:8099`) gelten als lokal (http statt https).
 
 ### Aufräumen vor dem Start: eine Stelle je Aufgabe

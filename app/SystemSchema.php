@@ -137,6 +137,8 @@ final class SystemSchema
                     'help' => 'Lizenz bzw. Quelle, „Nutzungsrecht bis“ und ob abgebildete Personen eingewilligt haben. Fehlende oder ablaufende Angaben zeigt die Mediathek unter „Prüfen“.'],
                 ['name' => 'sys.media_office', 'label' => 'Office-Dokumente erlauben (Word, Excel, PowerPoint, OpenDocument)', 'type' => 'bool', 'default' => false,
                     'help' => 'Nur moderne Formate: DOCX, XLSX, PPTX, ODT, ODS, ODP. Alte Formate (DOC, XLS, PPT) und Dateien mit Makros werden immer abgelehnt. Empfehlung: Dokumente als PDF hochladen – sicher und auf jedem Gerät lesbar.'],
+                ['name' => 'sys.media_max_mb', 'label' => 'Größte Datei beim Hochladen (MB)', 'type' => 'number', 'width' => 'half', 'default' => 50,
+                    'help' => 'Gilt für Mediathek, Bildauswahl und Erweiterungen. Hochgeladen wird in Stücken – das PHP-Limit des Servers spielt keine Rolle, wohl aber der freie Speicherplatz. Für Videos z. B. 500 oder 2000.'],
                 ['name' => 'sys.media_large_mb', 'label' => 'Als „zu groß“ gilt eine Datei ab (MB)', 'type' => 'number', 'width' => 'half', 'default' => 8],
                 ['name' => 'sys.media_large_px', 'label' => '… bzw. ein Bild ab (Pixel, längere Seite)', 'type' => 'number', 'width' => 'half', 'default' => 6000,
                     'help' => 'Solche Dateien zeigt „Prüfen → Zu große Dateien“; Bilder lassen sich dort auf 4000 px verkleinern.'],

@@ -300,14 +300,25 @@ final class Media
             return [null, 'Upload fehlgeschlagen (Code ' . ($file['error'] ?? '?') . ').'];
         }
         if ($file['size'] > self::maxBytes()) {
-            return [null, 'Datei ist größer als ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB.'];
+            return [null, 'Datei ist größer als ' . self::maxMb() . ' MB.'];
         }
         return self::import($file['tmp_name'], (string) ($file['name'] ?? 'datei'), $alt, $opt);
     }
 
+    /**
+     * Größte Datei beim Hochladen in MB: Grundeinstellung „Mediathek“ (sys.media_max_mb), sonst config media.max_upload_mb (50).
+     * Hoster können mit config media.max_upload_cap_mb eine Obergrenze setzen. Unabhängig vom PHP-Limit (Upload in Stücken).
+     */
+    public static function maxMb(): int
+    {
+        $mb = (int) setting('sys.media_max_mb', 0) ?: (int) app()->config->get('media.max_upload_mb', 50);
+        $cap = (int) app()->config->get('media.max_upload_cap_mb', 0);
+        return max(1, $cap > 0 ? min($mb, $cap) : $mb);
+    }
+
     public static function maxBytes(): int
     {
-        return (int) app()->config->get('media.max_upload_mb', 50) * 1024 * 1024;
+        return self::maxMb() * 1024 * 1024;
     }
 
     /**
@@ -408,8 +419,10 @@ final class Media
             if (!$om) return [null, __('Dieses Office-Dokument wird nicht angenommen: nur DOCX, XLSX, PPTX, ODT, ODS, ODP ohne Makros.')];
             $mime = $om;
         }
-        if (filesize($path) > self::maxBytes()) {
-            return [null, 'Datei ist zu groß (max. ' . (int) app()->config->get('media.max_upload_mb', 50) . ' MB).'];
+        // $opt['max_bytes']: eigene Grenze für Importe aus Code (z. B. Migration per Kommandozeile); 0 = keine
+        $maxBytes = array_key_exists('max_bytes', $opt) ? (int) $opt['max_bytes'] : self::maxBytes();
+        if ($maxBytes > 0 && filesize($path) > $maxBytes) {
+            return [null, 'Datei ist zu groß (max. ' . (int) ceil($maxBytes / 1048576) . ' MB).'];
         }
         $svg = Svg::detect($path, $mime, $originalName);
         if ($svg && !Features::on('media.svg', false)) {
