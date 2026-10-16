@@ -147,6 +147,10 @@ style editor, `php bin/console fonts:sync`). They are downloaded once by the ser
 the distribution and therefore not listed here; the in-product page “Lizenzen & Danksagungen” lists them
 automatically in the section “Installierte Schriften”.
 
+**PDF fonts.** `Core\Pdf` uses the bundled Lato TTF files (`resources/fonts/pdf/`, OFL-1.1, license text next to them). A caller may
+request another free font by its Fontsource id; the server then downloads its TTF files once into `storage/pdf-fonts/` (OFL-1.1 fonts
+from `cdn.jsdelivr.net/fontsource`) and embeds subsets into the generated PDFs. These files are not part of the distribution.
+
 ## 3. PHP packages in `vendor/` (Bundled, Composer)
 
 All packages from `composer.lock` (there are no dev packages). “via” names the package that requires it.
@@ -292,6 +296,7 @@ Voices deliberately **not** used: models whose training data or base checkpoint 
 research only – `lessac` (Blizzard 2013 research license), `ryan` (CC BY-NC-SA 4.0), `pavoque` (CC BY-NC-SA 4.0) and
 every voice fine-tuned from them, including `de_DE-thorsten-medium/-high` (Thorsten-Voice data is CC0, but these
 models are fine-tuned from the `lessac` checkpoint) and `de_DE-kerstin-low`/`karlsson-low` (fine-tuned from `ryan`).
+
 
 ### 5.1 Candidate: Chatterbox Multilingual (evaluation only, not in use)
 
