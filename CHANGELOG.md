@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### PDF erzeugen (`Core\Pdf`)
+- HTML → PDF für Kern und Erweiterungen (`Pdf::render()`, `Pdf::response()`), mit austauschbarer Engine wie bei den Diagrammen. Freie Schriften von Fontsource werden einmal je Installation geladen, Seitenzahlen und Fußzeile auf Wunsch; keine Dateien aus dem Netz, kein PHP im HTML.
+- dompdf (LGPL-2.1) bleibt außerhalb des MIT-Kerns: Paket `klxm/studio-pdf` (Erweiterung „pdf“) – installiert genügt. Ohne Engine meldet `Pdf::available()` `false`.
+
 ### Geplante Aufgaben – ein Cronjob für die Installation (`Core\Cron`)
 - Statt einzelner Cronjobs genügt einer: `* * * * * php bin/console cron:run`. Kern und Erweiterungen melden ihre Aufgaben an (Suchindex, Push, KI-Aufträge, Quellen, Chat-Hinweise, Aufbewahrungsfristen, Sicherungen); jede fällige Aufgabe läuft als eigener Prozess mit Sperre gegen Doppelläufe, Zeitlimit und Protokoll (`storage/cron/cron.sqlite`).
 - Grundeinstellungen → **Geplante Aufgaben**: Zustand des Cronjobs mit der fertigen Zeile zum Kopieren, Zeitplan je Aufgabe (Auswahl oder eigener Ausdruck, Standard bleibt sichtbar), An/Aus, „Jetzt ausführen“ über eine Warteschlange mit Wiederholung, Ausgabe des letzten Laufs, letzte Läufe. Installationsweit, Recht wie bei Kits.

@@ -7739,7 +7739,7 @@ return [
     'Geplante Aufgaben: Cronjob läuft nicht – System → Geplante Aufgaben' => 'Scheduled tasks: cron job is not running – System → Scheduled tasks',
     'Jetzt ausführen' => 'Run now',
     'KI-Aufträge abarbeiten' => 'Process AI jobs',
-    'Keine PDF-Engine installiert (dompdf: composer require dompdf/dompdf).' => 'No PDF engine installed (dompdf: composer require dompdf/dompdf).',
+    'Keine PDF-Engine installiert – Paket klxm/studio-pdf (Erweiterung „pdf“) installieren.' => 'No PDF engine installed – install the package klxm/studio-pdf (extension “pdf”).',
     'Kern' => 'Core',
     'Letzte Läufe' => 'Recent runs',
     'Letzter Aufruf: {time}' => 'Last call: {time}',
