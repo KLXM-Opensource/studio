@@ -34,6 +34,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Neue Varianten:** Reiter „Bühne“ (nummerierte Liste, großes Bild mit Textkarte, animierter Wechsel), Handlungsaufruf „Foto mit Textkarte“ (Parallax, Karte gleitet herein), Downloads „Liste“ (Symbol je Dateityp, ganze Zeile klickbar).
 
 ### Kern
+- **Video-Werkzeuge 1.2.0:** Videos aus geteilten Pools lassen sich jetzt prüfen und bearbeiten (Optimieren, Schneiden, Poster) – für alle, die den Pool pflegen; Ergebnisse entstehen im Pool. Mediathek: Detaildialog zeigt bei Videos, Audio und PDF keine ausgegrauten Bildwerkzeuge mehr.
 - **Nächste Termine:** Option „Kurzbeschreibung anzeigen“ (zwei Zeilen aus dem Beschreibungsfeld des Kalenders, alle Kits). **Datensatz-Felder „Profil“:** Option „Fläche füllen“ für Porträtfotos (`image_fit`).
 - **Termine nach aufgerufenem Eintrag filtern:** Die Blöcke „Kalender“ und „Nächste Termine“ haben wie die Datenliste die Bedingung „verknüpft mit dem aufgerufenen Eintrag“ bzw. „gleich wie beim aufgerufenen Eintrag“ – z. B. auf der Detailseite einer Gruppe oder eines Ortes nur deren Termine (`filter_op` `current`/`same`, `Calendar::blockWhere()`).
 - **Lightbox der Kern-Galerie** (Blöcke „Bildergalerie“, Ansichten in galerie u. a.): bei Kits mit „Animationen“ Zoom aus dem Vorschaubild und zurück, Gleiten mit Überblendung beim Blättern, Wischen folgt dem Finger. Ohne „Animationen“ bzw. mit „Bewegung reduzieren“ unverändert.
