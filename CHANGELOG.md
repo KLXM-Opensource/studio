@@ -27,6 +27,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Werke filtern mit fließender Neuordnung:** bleibende Werke gleiten an ihren neuen Platz, andere blenden aus bzw. ein (`document.startViewTransition`).
 
 ### Kern
+- **Termine nach aufgerufenem Eintrag filtern:** Die Blöcke „Kalender“ und „Nächste Termine“ haben wie die Datenliste die Bedingung „verknüpft mit dem aufgerufenen Eintrag“ bzw. „gleich wie beim aufgerufenen Eintrag“ – z. B. auf der Detailseite einer Gruppe oder eines Ortes nur deren Termine (`filter_op` `current`/`same`, `Calendar::blockWhere()`).
 - **Lightbox der Kern-Galerie** (Blöcke „Bildergalerie“, Ansichten in galerie u. a.): bei Kits mit „Animationen“ Zoom aus dem Vorschaubild und zurück, Gleiten mit Überblendung beim Blättern, Wischen folgt dem Finger. Ohne „Animationen“ bzw. mit „Bewegung reduzieren“ unverändert.
 - **Größte Datei beim Hochladen einstellbar:** Grundeinstellungen → Mediathek („Größte Datei beim Hochladen (MB)“, Standard 50) statt nur per `config.php`; gilt für Mediathek, Bildauswahl und Erweiterungen (`Media::maxMb()`). Hoster begrenzen mit `media.max_upload_cap_mb`. Importe aus Code können die Grenze mit `Media::import(…, ['max_bytes' => 0])` aufheben (Migrationen).
 - `trusted_site_url()`: lokale Hosts mit Port (z. B. `x.localhost:8099`) gelten als lokal (http statt https).

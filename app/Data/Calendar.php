@@ -307,15 +307,24 @@ final class Calendar
     }
 
     /**
-     * Filter der Blöcke „calendar“/„upcoming“: fester Filter (filter_field „tabelle.feld“ + filter_value)
-     * und – beim Kalender – die vom Besucher gewählte Kategorie (?kategorie=kurzname).
+     * Filter der Blöcke „calendar“/„upcoming“: fester Filter (filter_field „tabelle.feld“ + filter_value), auf Detailseiten
+     * auch filter_op „current“ (verknüpft mit dem aufgerufenen Eintrag) bzw. „same“ (gleicher Wert wie dort) – und – beim Kalender – die vom Besucher gewählte Kategorie (?kategorie=kurzname).
      * @return array{0: array, 1: ?string} [where, gewählte Kategorie]
      */
     public static function blockWhere(array $table, array $d, array $query = []): array
     {
         $where = [];
         $pfx = $table['handle'] . '.';
-        if (str_starts_with((string) ($d['filter_field'] ?? ''), $pfx) && trim((string) ($d['filter_value'] ?? '')) !== '') {
+        $op = (string) ($d['filter_op'] ?? '=');
+        if (str_starts_with((string) ($d['filter_field'] ?? ''), $pfx) && ($op === 'current' || $op === 'same')) {
+            // Kontext-Filter auf Detailseiten (wie im Block „Datenliste“): verknüpft mit / gleich wie der aufgerufene Eintrag;
+            // ohne aufgerufenen Eintrag keine Termine
+            $ff = substr((string) $d['filter_field'], strlen($pfx));
+            $ctx = app()->entry;
+            $val = !$ctx ? null : ($op === 'current' ? $ctx['entry']['id'] : ($ctx['entry'][$ff] ?? null));
+            if (is_array($val)) $val = $val[0] ?? null;
+            $where[] = [$ff, '=', $val === null || $val === '' ? '-1' : (string) $val];
+        } elseif (str_starts_with((string) ($d['filter_field'] ?? ''), $pfx) && trim((string) ($d['filter_value'] ?? '')) !== '') {
             $where[] = [substr((string) $d['filter_field'], strlen($pfx)), '=', trim((string) $d['filter_value'])];
         }
         $cat = null;
