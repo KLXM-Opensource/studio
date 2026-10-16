@@ -21,14 +21,14 @@
 }
 
 /* Text auf dem Bild: Zeile über die ganze Breite, Verlauf dahinter */
-.stage__text{grid-area:1/1;z-index:2;align-self:end;display:flex;flex-direction:column;gap:.5rem;padding:5.5rem var(--pad) var(--pad);background:linear-gradient(to top,rgb(0 0 0/var(--ov,.6)),rgb(0 0 0/var(--ov2,.55)) calc(100% - 4.5rem),transparent)}
-.stage--ov-medium{--ov:.7;--ov2:.66}
-.stage--ov-strong{--ov:.8;--ov2:.78}
+.stage__text{grid-area:1/1;z-index:2;align-self:end;display:flex;flex-direction:column;gap:.5rem;padding:clamp(6rem,18vh,11rem) var(--pad) var(--pad);background:linear-gradient(to top,rgb(0 0 0/var(--ov,.6)),rgb(0 0 0/calc(var(--ov,.6)*.9)) 35%,rgb(0 0 0/calc(var(--ov,.6)*.66)) 58%,rgb(0 0 0/calc(var(--ov,.6)*.34)) 78%,rgb(0 0 0/calc(var(--ov,.6)*.1)) 92%,transparent)}
+.stage--ov-medium{--ov:.7}
+.stage--ov-strong{--ov:.8}
 .stage--ov-medium .stage__media::after,.stage--ov-strong .stage__media::after{content:"";position:absolute;inset:0;z-index:1;background:rgb(0 0 0/.18)}
 .stage--ov-strong .stage__media::after{background:rgb(0 0 0/.32)}
 .stage--bottom-right .stage__text{align-items:flex-end;text-align:right}
-.stage--top-left .stage__text{align-self:start;padding:var(--pad) var(--pad) 5.5rem;background:linear-gradient(to bottom,rgb(0 0 0/var(--ov,.6)),rgb(0 0 0/var(--ov2,.55)) calc(100% - 4.5rem),transparent)}
-.stage--center .stage__text{align-self:stretch;justify-content:center;align-items:center;text-align:center;background:rgb(0 0 0/var(--ov2,.55))}
+.stage--top-left .stage__text{align-self:start;padding:var(--pad) var(--pad) clamp(6rem,18vh,11rem);background:linear-gradient(to bottom,rgb(0 0 0/var(--ov,.6)),rgb(0 0 0/calc(var(--ov,.6)*.9)) 35%,rgb(0 0 0/calc(var(--ov,.6)*.66)) 58%,rgb(0 0 0/calc(var(--ov,.6)*.34)) 78%,rgb(0 0 0/calc(var(--ov,.6)*.1)) 92%,transparent)}
+.stage--center .stage__text{align-self:stretch;justify-content:center;align-items:center;text-align:center;background:rgb(0 0 0/calc(var(--ov,.6)*.9))}
 .stage--multi:not(.stage--top-left,.stage--center) .stage__text{padding-bottom:calc(var(--pad) + 3.75rem)}
 .stage__title{max-width:22ch;margin:0;color:#FFF;font:var(--f-hw) max(var(--f-t3),min(var(--f-t6),8.5cqi))/1.02 var(--f-font-head);letter-spacing:calc(var(--f-track) * .01em);text-wrap:balance}
 .stage__title .hl{color:inherit}

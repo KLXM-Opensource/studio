@@ -14,6 +14,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Kit „foto“
+- Demo-Inhalte entstehen wieder auf allen Servern (das Hochskalieren mit `imagescale(…, IMG_BICUBIC)` scheiterte mit manchen GD-Versionen).
+- Startseite der Demo beginnt mit einer Bühne (Bildfolge mit Name und Haltung als H1), Porträt-Platzhalter als natürliche Schattenrisse (frontal und im Profil, Randlicht, weiche Kanten), Landschaften ohne Treppenstufen.
+- Bühne: Abdunkelung hinter dem Text als weicher, höherer Verlauf ohne sichtbare Kante (alle Stufen, auch „Mitte“).
+
 ### Aufräumen vor dem Start: eine Stelle je Aufgabe
 - **Neue Kern-Schnittstellen** statt verstreuter Kopien: `Core\Http\Fetch` (HTTP mit SSRF-Schutz – Quellen, Domain- und Landingpage-Prüfung, PDF-Schriften), `Core\Cli` (Optionen, `--all` je Website), `Core\Testing\Check` (Selbsttests), `Permissions::installationAdmin()`, `Response::fail()`/`download()`/`csv()`, `AdminUi::pager()`, `b64u_encode()`/`b64u_decode()`/`random_token()`/`trusted_site_url()`, `resources/js/_html.js` (`esc`, `csrf`), `resources/css/_toast.css`.
 - **Datum und Uhrzeit grundsätzlich über ICU** (intl): Muster je Sprache aus Skeletten, Englisch nach britischen Regeln; rund 100 feste `date('d.m.Y')`/`H:i`-Formate in Verwaltung, Mails und Kits über `Core\Format` (neuer Stil `dm`).

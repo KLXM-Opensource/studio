@@ -137,6 +137,80 @@ function foto_demo_mix(array $a, array $b, float $t): array
     return [(int) round($a[0] + ($b[0] - $a[0]) * $t), (int) round($a[1] + ($b[1] - $a[1]) * $t), (int) round($a[2] + ($b[2] - $a[2]) * $t)];
 }
 
+/** Polygon um dx/dy verschieben */
+function foto_demo_shift(array $p, float $dx, float $dy): array
+{
+    foreach ($p as $i => $v) $p[$i] = (int) round($v + ($i % 2 ? $dy : $dx));
+    return $p;
+}
+
+/** Polygon um (cx, cy) skalieren */
+function foto_demo_scale(array $p, float $cx, float $cy, float $f): array
+{
+    foreach ($p as $i => $v) $p[$i] = (int) round($i % 2 ? $cy + ($v - $cy) * $f : $cx + ($v - $cx) * $f);
+    return $p;
+}
+
+/** Ellipse als Polygon (Winkel in Grad), optional gedreht */
+function foto_demo_oval(float $cx, float $cy, float $rx, float $ry, float $rot = 0, int $n = 48): array
+{
+    $p = [];
+    $r = deg2rad($rot);
+    for ($k = 0; $k < $n; $k++) {
+        $t = $k / $n * 2 * M_PI;
+        $x = cos($t) * $rx; $y = sin($t) * $ry;
+        $p[] = (int) round($cx + $x * cos($r) - $y * sin($r));
+        $p[] = (int) round($cy + $x * sin($r) + $y * cos($r));
+    }
+    return $p;
+}
+
+/**
+ * Schattenriss Kopf und Schultern (frontal oder im Profil nach rechts) als Liste von Polygonen.
+ * Proportionen nach einem Brustbild: Kopf ≈ 1/3 der Bildbreite, kurzer Hals, abfallende Schultern bis an den Rand.
+ */
+function foto_demo_figure(int $w, int $h, float $cx, int $variant, bool $profile): array
+{
+    $u = $w;   // Maßeinheit: Bildbreite
+    $headY = $h * .42;
+    $shapes = [];
+    // Schultern + Hals: Kurve vom Hals zum Bildrand (beide Seiten symmetrisch, im Profil leicht schräg)
+    $tilt = $profile ? $u * .03 : 0;
+    $half = [[.06, .47], [.066, .6], [.1, .628], [.2, .652], [.32, .69], [.42, .77], [.49, .9], [.52, 1.02]];
+    $poly = [];
+    foreach ($half as [$x, $y]) { $poly[] = (int) ($cx + $tilt * (1 - $y) + $x * $u); $poly[] = (int) ($y * $h); }
+    foreach (array_reverse($half) as [$x, $y]) { $poly[] = (int) ($cx + $tilt * (1 - $y) - $x * $u * ($profile ? .9 : 1)); $poly[] = (int) ($y * $h); }
+    $shapes[] = $poly;
+    if (!$profile) {
+        $shapes[] = foto_demo_oval($cx, $headY, $u * .125, $h * .125, $variant % 2 ? 4 : -3);   // Kopf
+        // Haare: 0 Kurzhaar, 2 Lockenkopf, 3 Bob, 5 Zopf/Dutt
+        $hair = match ($variant) {
+            2 => [foto_demo_oval($cx, $headY - $h * .03, $u * .155, $h * .13, 0), foto_demo_oval($cx - $u * .1, $headY + $h * .02, $u * .07, $h * .09), foto_demo_oval($cx + $u * .1, $headY + $h * .02, $u * .07, $h * .09)],
+            3 => [foto_demo_oval($cx, $headY - $h * .015, $u * .145, $h * .135, 0), foto_demo_oval($cx, $headY + $h * .04, $u * .15, $h * .08)],
+            5 => [foto_demo_oval($cx, $headY - $h * .02, $u * .13, $h * .12, 0), foto_demo_oval($cx + $u * .02, $headY - $h * .15, $u * .065, $h * .05)],
+            default => [foto_demo_oval($cx, $headY - $h * .025, $u * .13, $h * .11, -4)],
+        };
+        array_push($shapes, ...$hair);
+        // Ohren
+        $shapes[] = foto_demo_oval($cx - $u * .125, $headY + $h * .01, $u * .02, $h * .03);
+        $shapes[] = foto_demo_oval($cx + $u * .125, $headY + $h * .01, $u * .02, $h * .03);
+    } else {
+        // Profil nach rechts: Hinterkopf, Stirn, Nase, Lippen, Kinn
+        $shapes[] = foto_demo_oval($cx - $u * .01, $headY - $h * .01, $u * .13, $h * .125, -8);
+        $f = $cx + $u * .095;   // Gesichtslinie
+        $pts = [[-.03, -.11], [.0, -.09], [.015, -.05], [.02, -.025], [.022, -.012], [.05, .022], [.024, .032], [.03, .046], [.021, .056], [.027, .066], [.014, .08], [.02, .1], [-.03, .118], [-.09, .11], [-.12, 0], [-.08, -.1]];
+        $face = [];
+        foreach ($pts as [$x, $y]) { $face[] = (int) ($f + $x * $u); $face[] = (int) ($headY + $y * $h); }
+        $shapes[] = $face;
+        // Hals schräg
+        $shapes[] = [(int) ($cx - $u * .06), (int) ($headY + $h * .05), (int) ($cx + $u * .05), (int) ($headY + $h * .09), (int) ($cx + $u * .08), (int) ($h * .63), (int) ($cx - $u * .08), (int) ($h * .63)];
+        // Haare: 1 Dutt hinten, 4 kurz
+        $shapes[] = foto_demo_oval($cx - $u * .035, $headY - $h * .035, $u * .125, $h * .1, -14);
+        if ($variant === 1) $shapes[] = foto_demo_oval($cx - $u * .14, $headY - $h * .05, $u * .06, $h * .055);
+    }
+    return $shapes;
+}
+
 /**
  * Ein Platzhalterbild: Motiv in kleiner Auflösung zeichnen (weiche Kanten nach dem Hochskalieren, wie Unschärfe),
  * dann Vignette und Filmkorn in voller Größe.
@@ -216,19 +290,23 @@ function foto_demo_draw(string $file, string $motif, int $W, int $H, int $varian
             $dark = $variant === 2;
             $vgrad(foto_demo_mix($bg, [255, 255, 255], .15), foto_demo_mix($bg, [0, 0, 0], .18));
             $glow($w * ($variant === 3 ? .3 : .55), $h * .35, $w * .55, foto_demo_mix($bg, [255, 255, 255], .45), 30, 70);
-            $fig = $dark ? [18, 26, 22] : foto_demo_mix($bg, [20, 20, 22], .78);
-            $cx = $w * (.5 + ($variant % 2 ? .04 : -.03));
-            // Schultern und Kopf als weiche Formen (mehrere Ellipsen mit Alpha für weiche Kanten)
-            for ($k = 6; $k >= 0; $k--) {
-                $a = $k === 0 ? 0 : 70 + $k * 7;
-                $g = $k * $w * .006;
-                imagefilledellipse($im, (int) $cx, (int) ($h * 1.06), (int) ($w * 1.02 + $g * 2), (int) ($h * .56 + $g * 2), $col($fig, $a));
-                imagefilledrectangle($im, (int) ($cx - $w * .065 - $g), (int) ($h * .5), (int) ($cx + $w * .065 + $g), (int) ($h * .8), $col($fig, $a));
-                imagefilledellipse($im, (int) $cx, (int) ($h * .4), (int) ($w * .3 + $g * 2), (int) ($h * .3 + $g * 2), $col($fig, $a));
+            $fig = $dark ? [16, 22, 19] : foto_demo_mix($bg, [18, 18, 20], .82);
+            $rim = foto_demo_mix($bg, [255, 255, 255], $dark ? .35 : .75);
+            $light = $variant === 3 ? -1 : 1;   // Seite des Lichts (−1 links, 1 rechts)
+            $profile = in_array($variant, [1, 4], true);   // Profil statt frontal
+            $cx = $w * (.5 + ($profile ? -.04 : ($variant % 2 ? .03 : -.02)));
+            $shapes = foto_demo_figure($w, $h, $cx, $variant, $profile);
+            // Licht von der Seite auf dem Hintergrund
+            $glow($w * ($light > 0 ? .85 : .15), $h * .3, $w * .35, foto_demo_mix($bg, [255, 255, 255], .3), 20, 100);
+            // Randlicht: Figur in heller Farbe zur Lichtseite versetzt, darüber die Figur
+            foreach ([[$rim, $light * $w * .007, 40], [$rim, $light * $w * .0035, 0]] as [$c, $dx, $a]) {
+                foreach ($shapes as $poly) imagefilledpolygon($im, foto_demo_shift($poly, $dx, -$h * .002), $col($c, $a));
             }
-            // Streiflicht am Rand
-            imagesetthickness($im, max(1, (int) ($w * .006)));
-            imagearc($im, (int) $cx, (int) ($h * .4), (int) ($w * .3), (int) ($h * .3), $variant === 3 ? 140 : 250, $variant === 3 ? 230 : 330, $col(foto_demo_mix($bg, [255, 255, 255], .6), 50));
+            // weiche Kante: zwei leicht vergrößerte Lagen mit Alpha, dann die Figur
+            foreach ([[1.012, 96], [1.005, 60], [1.0, 0]] as [$sc, $a]) {
+                foreach ($shapes as $poly) imagefilledpolygon($im, foto_demo_scale($poly, $cx, $h * .7, $sc), $col($fig, $a));
+            }
+            for ($k = 0; $k < 3; $k++) imagefilter($im, IMG_FILTER_GAUSSIAN_BLUR);   // weiche Kanten wie bei offener Blende
             break;
         case 'facade':
         case 'stairs':
@@ -280,7 +358,10 @@ function foto_demo_draw(string $file, string $motif, int $W, int $H, int $varian
             break;
     }
     // Hochskalieren (weiche Kanten), Filmkorn
-    $big = imagescale($im, $W, $H, IMG_BICUBIC);
+    if (!$mono && $motif !== 'portrait') for ($k = 0; $k < 2; $k++) imagefilter($im, IMG_FILTER_GAUSSIAN_BLUR);   // weiche Verläufe ohne Treppen
+    // imagecopyresampled statt imagescale(IMG_BICUBIC): Letzteres liefert mit manchen GD-Builds (2.3.3) false
+    $big = imagecreatetruecolor($W, $H);
+    imagecopyresampled($big, $im, 0, 0, 0, 0, $W, $H, imagesx($im), imagesy($im));
     unset($im);
     imagealphablending($big, true);
     $tile = imagecreatetruecolor(256, 256);
@@ -311,9 +392,16 @@ function foto_demo_pages(array $img, callable $log): void
     $t = fn(?int $id, array $o = []) => $o + ['image' => $id, 'size' => 'auto', 'open' => 'zoom', 'collection' => null, 'link' => '', 'tone' => 'none', 'title' => '', 'text' => '', 'place' => 'auto'];
     $home = $page(['slug' => 'start', 'title' => 'Start', 'is_home' => 1, 'menu' => 0, 'sort' => 0,
         'meta_description' => 'Demo-Website der fiktiven Fotografin Mara Beispiel: Porträt, Reportage und Landschaft.'], [
-        ['type' => 'moments', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'stream', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual',
+        // Auftakt: ruhige Bildfolge mit Name und Haltung (H1), dann der Strom
+        ['type' => 'photo_hero', 'tunes' => ['spaceTop' => 'none'], 'data' => ['variant' => 'slideshow', 'title' => 'Mara Beispiel. *Licht*, Menschen, Orte.',
+            'text' => 'Fotografie aus Musterstadt – Porträt, Reportage, Landschaft.', 'show_title' => true, 'position' => 'bottom-left', 'height' => 'screen',
+            'overlay' => 'soft', 'autoplay' => true, 'interval' => '6', 'scroll_hint' => true, 'full_width' => true, 'slides' => array_values(array_filter([
+                ['image' => $at($L, 0), 'caption' => 'Nebel über Hügeln'], ['image' => $at($P, 2), 'caption' => 'Studie III'],
+                ['image' => $at($R, 3), 'caption' => 'Arkaden'], ['image' => $at($L, 2), 'caption' => 'Horizont'],
+            ], fn($x) => $x['image']))]],
+        ['type' => 'moments', 'tunes' => ['spaceTop' => 'medium'], 'data' => ['variant' => 'stream', 'eyebrow' => '', 'title' => '', 'intro' => '', 'source' => 'manual',
             'motion' => 'reveal', 'row_height' => 'm', 'labels' => 'hover', 'more' => 'all', 'batch' => 12, 'spy' => false, 'width' => 'full', 'tiles' => [
-            $t($at($L, 0), ['size' => 'full', 'open' => 'gallery', 'collection' => $C['land'] ?? null, 'title' => 'Weite.', 'text' => 'Landschaften, 2023–2025']),
+            $t($at($L, 5), ['size' => 'full', 'open' => 'gallery', 'collection' => $C['land'] ?? null, 'title' => 'Weite.', 'text' => 'Landschaften, 2023–2025']),
             $t($at($P, 1), ['size' => 'm', 'open' => 'page', 'link' => '@portraet']),
             $t($at($P, 4), ['size' => 's', 'open' => 'zoom']),
             $t(null, ['size' => 's', 'open' => 'page', 'link' => '@portraet', 'title' => 'Stille Gesichter.', 'text' => 'Sechs Begegnungen, eine Stunde, ein Licht.']),
