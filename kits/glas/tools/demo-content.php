@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -32,9 +33,7 @@ function glas_demo_install(bool $force = false, ?callable $log = null): bool
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist (Kopf, Kontakt-Block, Karte).
     // Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese, keine Adresse von Personen oder Firmen).
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477']);
 
     @set_time_limit(120);
     $img = glas_demo_images($log);
@@ -51,15 +50,11 @@ function glas_demo_install(bool $force = false, ?callable $log = null): bool
 function glas_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
-    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path = 'labor' OR path LIKE 'labor/%' OR slug = '_vorlage-labor-projekte'"), 'id'));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'labor_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . GLAS_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query('DELETE FROM media_collections WHERE name = ?', [GLAS_DEMO_COLLECTION]);
+    $ids = Demo::ids("SELECT id FROM pages WHERE path = 'labor' OR path LIKE 'labor/%' OR slug = '_vorlage-labor-projekte'");
+    Demo::deletePages($ids);
+    Demo::deleteTablesByPrefix('labor_');
+    Demo::deleteMedia(GLAS_DEMO_TAG);
+    Demo::deleteCollections(GLAS_DEMO_COLLECTION);
     $log('Vorhandene Musterseiten entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -103,15 +98,6 @@ function glas_demo_field(int $W, int $H, array $base, array $blobs): \GdImage
     return $im;
 }
 
-/** Gefülltes Rechteck mit runden Ecken auf einer Ebene ohne Mischen (Überlappungen verdoppeln die Deckkraft nicht) */
-function glas_demo_rrect(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $r, int $col): void
-{
-    $r = max(0, min($r, (int) (($x2 - $x1) / 2), (int) (($y2 - $y1) / 2)));
-    imagefilledrectangle($im, $x1 + $r, $y1, $x2 - $r, $y2, $col);
-    imagefilledrectangle($im, $x1, $y1 + $r, $x2, $y2 - $r, $col);
-    foreach ([[$x1 + $r, $y1 + $r], [$x2 - $r, $y1 + $r], [$x1 + $r, $y2 - $r], [$x2 - $r, $y2 - $r]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $col);
-}
-
 /** Transparente Ebene */
 function glas_demo_layer(int $w, int $h): \GdImage
 {
@@ -142,7 +128,7 @@ function glas_demo_glass(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $
     $sw = (int) (($w + 2 * $pad) / $sc);
     $sh = (int) (($h + 2 * $pad) / $sc);
     $small = glas_demo_layer($sw, $sh);
-    glas_demo_rrect($small, (int) ($pad / $sc), (int) (($pad + $h * .06) / $sc), (int) (($pad + $w) / $sc), (int) (($pad + $h * 1.04) / $sc), (int) ($r / $sc), imagecolorallocatealpha($small, 20, 12, 60, glas_demo_a($dark ? .5 : .22)));
+    Demo::rrect($small, (int) ($pad / $sc), (int) (($pad + $h * .06) / $sc), (int) (($pad + $w) / $sc), (int) (($pad + $h * 1.04) / $sc), (int) ($r / $sc), imagecolorallocatealpha($small, 20, 12, 60, glas_demo_a($dark ? .5 : .22)));
     for ($k = 0; $k < 8; $k++) imagefilter($small, IMG_FILTER_GAUSSIAN_BLUR);
     $shadow = imagescale($small, $w + 2 * $pad, $h + 2 * $pad, IMG_BILINEAR_FIXED);
     imagesavealpha($shadow, true);
@@ -153,9 +139,9 @@ function glas_demo_glass(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $
     // Tönung + Kante auf einer eigenen Ebene
     $l = glas_demo_layer($w + 1, $h + 1);
     $edge = max(2, (int) round(min($w, $h) / 160));
-    glas_demo_rrect($l, 0, 0, $w, $h, $r, imagecolorallocatealpha($l, 255, 255, 255, glas_demo_a($dark ? .22 : .85)));
-    glas_demo_rrect($l, $edge, $edge * 2, $w - $edge, $h - $edge, max(0, $r - $edge), imagecolorallocatealpha($l, 255, 255, 255, glas_demo_a($dark ? .12 : .5)));
-    glas_demo_rrect($l, $edge, $edge * 3, $w - $edge, $h - $edge, max(0, $r - $edge), imagecolorallocatealpha($l, $tint[0], $tint[1], $tint[2], glas_demo_a($op)));
+    Demo::rrect($l, 0, 0, $w, $h, $r, imagecolorallocatealpha($l, 255, 255, 255, glas_demo_a($dark ? .22 : .85)));
+    Demo::rrect($l, $edge, $edge * 2, $w - $edge, $h - $edge, max(0, $r - $edge), imagecolorallocatealpha($l, 255, 255, 255, glas_demo_a($dark ? .12 : .5)));
+    Demo::rrect($l, $edge, $edge * 3, $w - $edge, $h - $edge, max(0, $r - $edge), imagecolorallocatealpha($l, $tint[0], $tint[1], $tint[2], glas_demo_a($op)));
     // Lichtschimmer oben: auf die Tönung gemischt (nicht ersetzt)
     imagealphablending($l, true);
     $sheen = intdiv($h, 3);
@@ -184,7 +170,7 @@ function glas_demo_orb(\GdImage $im, int $cx, int $cy, int $d, array $c1, array 
 function glas_demo_bar(\GdImage $im, int $x, int $y, int $w, int $h, array $rgb, float $op): void
 {
     $l = glas_demo_layer($w + 1, $h + 1);
-    glas_demo_rrect($l, 0, 0, $w, $h, (int) ($h / 2), imagecolorallocatealpha($l, $rgb[0], $rgb[1], $rgb[2], glas_demo_a($op)));
+    Demo::rrect($l, 0, 0, $w, $h, (int) ($h / 2), imagecolorallocatealpha($l, $rgb[0], $rgb[1], $rgb[2], glas_demo_a($op)));
     imagealphablending($im, true);
     imagecopy($im, $l, $x, $y, 0, 0, $w + 1, $h + 1);
    
@@ -290,7 +276,7 @@ function glas_demo_phone(string $file, string $pal, int $seed): void
     glas_demo_glass($im, $px - 30, $py - 30, $px + $pw + 30, $py + $ph + 30, 150, [20, 22, 40], .92, true);
     $scr = glas_demo_field($pw, $ph, $dark ? [22, 24, 48] : [248, 246, 255], [[.2, .15, .35, $P['f'][0], .9], [.85, .4, .3, $P['f'][1], .85], [.4, .9, .35, $P['f'][2], .85]]);
     $mask = glas_demo_layer($pw, $ph);
-    glas_demo_rrect($mask, 0, 0, $pw - 1, $ph - 1, 120, imagecolorallocatealpha($mask, 0, 0, 0, 0));
+    Demo::rrect($mask, 0, 0, $pw - 1, $ph - 1, 120, imagecolorallocatealpha($mask, 0, 0, 0, 0));
     // Bildschirm mit runden Ecken: Pixel außerhalb der Maske transparent übernehmen
     $screen = glas_demo_layer($pw, $ph);
     imagecopy($screen, $scr, 0, 0, 0, 0, $pw, $ph);
@@ -339,13 +325,8 @@ function glas_demo_save(\GdImage $im, string $file, int $w, int $h, bool $png): 
 function glas_demo_images(callable $log): array
 {
     $col = Media::createCollection(GLAS_DEMO_COLLECTION, 'Beispielbilder des Kits „Glas“ – Farbfelder mit Glasflächen und erfundene App-Oberflächen, automatisch erzeugt, frei verwendbar, ohne Personen oder Marken.');
-    $import = function (string $file, string $name, string $title, string $alt, bool $inCollection) use ($col, $log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => GLAS_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt']
-            + ($inCollection ? ['collection' => $col] : []));
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $import = fn(string $file, string $name, string $title, string $alt, bool $inCollection): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => GLAS_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt'] + ($inCollection ? ['collection' => $col] : []), $log);
     $all = $wide = $tall = $apps = [];
     $comps = [
         ['Aurora mit Glaskarte', 'aurora'], ['Gestaffelte Scheiben', 'lagune'], ['Perlen hinter Glas', 'daemmerung'], ['Glaskacheln', 'aurora'],
@@ -373,41 +354,10 @@ function glas_demo_images(callable $log): array
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function glas_demo_pdf(callable $log): ?int
 {
-    $text = 'Lumen Labs - Projektsteckbrief (Demo). Frei erfundener Inhalt.';
-    $stream = "BT /F1 18 Tf 72 760 Td ($text) Tj ET";
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'gl') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'labor-steckbrief.pdf', '', ['title' => 'Projektsteckbrief (Beispiel)', 'tags' => GLAS_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Lumen Labs - Projektsteckbrief (Demo). Frei erfundener Inhalt.', 18), 'labor-steckbrief.pdf', ['title' => 'Projektsteckbrief (Beispiel)', 'tags' => GLAS_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function glas_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function glas_demo_tables(array $img, callable $log): array
 {
@@ -415,7 +365,7 @@ function glas_demo_tables(array $img, callable $log): array
     $A = fn(int $n) => $img['apps'][$n % max(1, count($img['apps']))] ?? null;
 
     // Projekte: Karten, Liste, kompakt, Tabelle, Detailseite
-    $t = glas_demo_table([
+    $t = Demo::table([
         'handle' => 'labor_projekte', 'name' => 'Projekte (Labor)', 'singular' => 'Projekt', 'icon' => 'device-mobile',
         'description' => 'Beispiel-Tabelle der Musterseiten – frei erfundene App-Projekte.',
         'fields' => [
@@ -452,7 +402,7 @@ function glas_demo_tables(array $img, callable $log): array
     }
 
     // Termine: Kalender mit Wiederholung, ganztägigem Termin und Kategorien
-    $t = glas_demo_table([
+    $t = Demo::table([
         'handle' => 'labor_termine', 'name' => 'Termine (Labor)', 'singular' => 'Termin', 'icon' => 'calendar-dots',
         'description' => 'Beispiel-Kalender der Musterseiten – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -489,7 +439,7 @@ function glas_demo_tables(array $img, callable $log): array
     }
 
     // Öffentliches Formular: Anfrage mit Bedingung (Budget nur bei „Neues Projekt“)
-    $t = glas_demo_table([
+    $t = Demo::table([
         'handle' => 'labor_anfragen', 'name' => 'Anfragen (Labor)', 'singular' => 'Anfrage', 'icon' => 'envelope-simple',
         'description' => 'Öffentliches Beispiel-Formular der Musterseiten.',
         'fields' => [
@@ -518,7 +468,7 @@ function glas_demo_pages(array $img, ?int $pdf, array $tables, callable $log): v
     $W = fn(int $n) => $img['wide'][$n % max(1, count($img['wide']))] ?? null;
     $T = fn(int $n) => $img['tall'][$n % max(1, count($img['tall']))] ?? null;
     $A = fn(int $n) => $img['apps'][$n % max(1, count($img['apps']))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text]);
     $cta = $B('cta', ['variant' => 'band', 'eyebrow' => 'Nächster Schritt', 'title' => 'Alles gesehen? Dann *los*.', 'text' => 'Farbfeld, Glasdichte, Schriften, Kopf und Fuß stellen Sie unter Verwaltung → Design ein.',
         'button_label' => 'Kontakt', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/labor'], ['background' => 'dark']);
@@ -530,7 +480,7 @@ function glas_demo_pages(array $img, ?int $pdf, array $tables, callable $log): v
         'button_label' => $btn[0] ?? '', 'button_link' => $btn[1] ?? '', 'button2_label' => $btn[2] ?? '', 'button2_link' => $btn[3] ?? ''];
 
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
 
     // ---------------------------------------------------------------- Übersicht (Musterseite des Style-Editors)
     $root = $page(['slug' => 'labor', 'title' => 'Labor', 'sort' => $sort, 'og_image' => $W(0),
@@ -747,9 +697,8 @@ function glas_demo_heroes(?callable $log = null): bool
         if (str_starts_with((string) $m['original_name'], 'labor-telefon-')) $tall[] = (int) $m['id'];
     }
     $vid = glas_demo_hero_video($log);
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''],
-        'tunes' => ['section' => $tunes]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes,
+        ['eyebrow' => '', 'text' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Labor · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein* Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat im Kit „Glas“ sieben Varianten. Die drei neuen stehen hier untereinander: Befehlssuche, Video im Hintergrund und Karten-Stapel – dazu die „Aurora“ zum Vergleich. Auf echten Seiten steht nur ein Einstieg ganz oben.']),

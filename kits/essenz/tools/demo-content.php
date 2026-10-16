@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -32,9 +33,7 @@ function essenz_demo_install(bool $force = false, ?callable $log = null): bool
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist (Kopf, Kontakt-Block, Karte).
     // Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese, keine Adresse von Personen oder Firmen).
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477']);
 
     $img = essenz_demo_images($log);
     $pdf = essenz_demo_pdf($log);
@@ -50,15 +49,11 @@ function essenz_demo_install(bool $force = false, ?callable $log = null): bool
 function essenz_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
-    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path = 'werkstatt' OR path LIKE 'werkstatt/%' OR slug = '_vorlage-werkstatt-produkte'"), 'id'));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'werkstatt_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . ESSENZ_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query('DELETE FROM media_collections WHERE name = ?', [ESSENZ_DEMO_COLLECTION]);
+    $ids = Demo::ids("SELECT id FROM pages WHERE path = 'werkstatt' OR path LIKE 'werkstatt/%' OR slug = '_vorlage-werkstatt-produkte'");
+    Demo::deletePages($ids);
+    Demo::deleteTablesByPrefix('werkstatt_');
+    Demo::deleteMedia(ESSENZ_DEMO_TAG);
+    Demo::deleteCollections(ESSENZ_DEMO_COLLECTION);
     $log('Vorhandene Musterseiten entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -68,13 +63,8 @@ function essenz_demo_remove(?callable $log = null): void
 function essenz_demo_images(callable $log): array
 {
     $col = Media::createCollection(ESSENZ_DEMO_COLLECTION, 'Geometrische Beispielbilder des Kits „Essenz“ – automatisch erzeugt, frei verwendbar, ohne Personen oder Marken.');
-    $import = function (string $file, string $name, string $title, string $alt, bool $inCollection) use ($col, $log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => ESSENZ_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt']
-            + ($inCollection ? ['collection' => $col] : []));
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $import = fn(string $file, string $name, string $title, string $alt, bool $inCollection): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => ESSENZ_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt'] + ($inCollection ? ['collection' => $col] : []), $log);
     $all = $wide = $tall = $objects = [];
     // Kompositionen (Querformat 3:2)
     $comps = [
@@ -152,7 +142,7 @@ function essenz_demo_comp(string $file, int $w, int $h, string $kind, int $seed)
                 $k = $y * $n + $x;
                 $col = $k === $sig ? $P['signal'] : ($k % 5 === 0 ? $ink : $soft);
                 $pad = (int) ($s * .08);
-                essenz_rrect($im, (int) ($ox + $x * $s) + $pad, (int) ($oy + $y * $s) + $pad, (int) ($ox + ($x + 1) * $s) - $pad, (int) ($oy + ($y + 1) * $s) - $pad, (int) ($s * .12), $c($col));
+                Demo::rrect($im, (int) ($ox + $x * $s) + $pad, (int) ($oy + $y * $s) + $pad, (int) ($ox + ($x + 1) * $s) - $pad, (int) ($oy + ($y + 1) * $s) - $pad, (int) ($s * .12), $c($col));
             }
             break;
         case 'horizon':
@@ -163,9 +153,9 @@ function essenz_demo_comp(string $file, int $w, int $h, string $kind, int $seed)
         case 'sliders':
             for ($k = 0; $k < 5; $k++) {
                 $y = (int) ($H * (.2 + $k * .15));
-                essenz_rrect($im, (int) ($W * .12), $y - (int) ($u * .25), (int) ($W * .88), $y + (int) ($u * .25), (int) ($u * .25), $c($soft));
+                Demo::rrect($im, (int) ($W * .12), $y - (int) ($u * .25), (int) ($W * .88), $y + (int) ($u * .25), (int) ($u * .25), $c($soft));
                 $x = (int) ($W * (.2 + mt_rand(0, 60) / 100));
-                essenz_rrect($im, (int) ($W * .12), $y - (int) ($u * .25), $x, $y + (int) ($u * .25), (int) ($u * .25), $c($k === 2 ? $P['signal'] : $ink));
+                Demo::rrect($im, (int) ($W * .12), $y - (int) ($u * .25), $x, $y + (int) ($u * .25), (int) ($u * .25), $c($k === 2 ? $P['signal'] : $ink));
                 imagefilledellipse($im, $x, $y, (int) ($u * 2), (int) ($u * 2), $c($dark ? $P['light'] : $P['white']));
                 imageellipse($im, $x, $y, (int) ($u * 2), (int) ($u * 2), $c($ink));
             }
@@ -176,7 +166,7 @@ function essenz_demo_comp(string $file, int $w, int $h, string $kind, int $seed)
             break;
         case 'circle':
             $s = (int) (min($W, $H) * .62);
-            essenz_rrect($im, (int) (($W - $s) / 2), (int) (($H - $s) / 2), (int) (($W + $s) / 2), (int) (($H + $s) / 2), (int) ($s * .08), $c($dark ? [48, 49, 53] : $P['white']));
+            Demo::rrect($im, (int) (($W - $s) / 2), (int) (($H - $s) / 2), (int) (($W + $s) / 2), (int) (($H + $s) / 2), (int) ($s * .08), $c($dark ? [48, 49, 53] : $P['white']));
             imagefilledellipse($im, (int) ($W / 2), (int) ($H / 2), (int) ($s * .7), (int) ($s * .7), $c($ink));
             imagefilledellipse($im, (int) ($W / 2 + $s * .18), (int) ($H / 2 - $s * .18), (int) ($s * .12), (int) ($s * .12), $c($P['signal']));
             break;
@@ -186,15 +176,6 @@ function essenz_demo_comp(string $file, int $w, int $h, string $kind, int $seed)
     imagejpeg($out, $file, 86);
     unset($im);
     unset($out);
-}
-
-/** Abgerundetes Rechteck (gefüllt) */
-function essenz_rrect(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $r, int $col): void
-{
-    $r = max(0, min($r, (int) (($x2 - $x1) / 2), (int) (($y2 - $y1) / 2)));
-    imagefilledrectangle($im, $x1 + $r, $y1, $x2 - $r, $y2, $col);
-    imagefilledrectangle($im, $x1, $y1 + $r, $x2, $y2 - $r, $col);
-    foreach ([[$x1 + $r, $y1 + $r], [$x2 - $r, $y1 + $r], [$x1 + $r, $y2 - $r], [$x2 - $r, $y2 - $r]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $col);
 }
 
 /** Erfundenes Gerät als Zeichnung auf transparentem Grund (1200 × 900, doppelt gerendert) */
@@ -211,19 +192,19 @@ function essenz_demo_object(string $file, string $kind): void
     for ($k = 0; $k < 14; $k++) imagefilledellipse($im, 1200, 1560, 1300 - $k * 40, 110 - $k * 4, $c([0, 0, 0], 122 - $k));
     switch ($kind) {
         case 'radio':
-            essenz_rrect($im, 520, 560, 1880, 1520, 90, $c($P['white']));
-            essenz_rrect($im, 520, 1400, 1880, 1520, 60, $c($P['light']));
+            Demo::rrect($im, 520, 560, 1880, 1520, 90, $c($P['white']));
+            Demo::rrect($im, 520, 1400, 1880, 1520, 60, $c($P['light']));
             for ($y = 0; $y < 7; $y++) for ($x = 0; $x < 9; $x++) imagefilledellipse($im, 640 + $x * 64, 700 + $y * 88, 26, 26, $c($P['graphite']));
             imagefilledellipse($im, 1520, 900, 440, 440, $c($P['light']));
             imagefilledellipse($im, 1520, 900, 300, 300, $c($P['white']));
             imagesetthickness($im, 18);
             imageline($im, 1520, 900, 1600, 800, $c($P['signal']));
-            essenz_rrect($im, 1300, 1230, 1740, 1262, 16, $c($P['mid']));
+            Demo::rrect($im, 1300, 1230, 1740, 1262, 16, $c($P['mid']));
             imagefilledellipse($im, 1620, 1246, 72, 72, $c($P['graphite']));
             imagefilledellipse($im, 1300, 1340, 30, 30, $c($P['signal']));
             break;
         case 'clock':
-            essenz_rrect($im, 900, 1380, 1500, 1500, 50, $c($P['mid']));
+            Demo::rrect($im, 900, 1380, 1500, 1500, 50, $c($P['mid']));
             imagefilledellipse($im, 1200, 860, 1100, 1100, $c($P['graphite']));
             imagefilledellipse($im, 1200, 860, 980, 980, $c($P['white']));
             imagesetthickness($im, 14);
@@ -237,7 +218,7 @@ function essenz_demo_object(string $file, string $kind): void
             imagefilledellipse($im, 1200, 860, 60, 60, $c($P['signal']));
             break;
         case 'speaker':
-            essenz_rrect($im, 850, 300, 1550, 1520, 70, $c($P['graphite']));
+            Demo::rrect($im, 850, 300, 1550, 1520, 70, $c($P['graphite']));
             imagefilledellipse($im, 1200, 1060, 560, 560, $c([58, 59, 63]));
             for ($y = -5; $y <= 5; $y++) for ($x = -5; $x <= 5; $x++) if ($x * $x + $y * $y <= 26) imagefilledellipse($im, 1200 + $x * 46, 1060 + $y * 46, 18, 18, $c([24, 25, 27]));
             imagefilledellipse($im, 1200, 560, 220, 220, $c([58, 59, 63]));
@@ -245,16 +226,16 @@ function essenz_demo_object(string $file, string $kind): void
             imagefilledellipse($im, 1200, 1440, 26, 26, $c($P['signal']));
             break;
         case 'calc':
-            essenz_rrect($im, 820, 240, 1580, 1520, 60, $c($P['graphite']));
-            essenz_rrect($im, 900, 330, 1500, 520, 20, $c([176, 184, 170]));
+            Demo::rrect($im, 820, 240, 1580, 1520, 60, $c($P['graphite']));
+            Demo::rrect($im, 900, 330, 1500, 520, 20, $c([176, 184, 170]));
             for ($y = 0; $y < 5; $y++) for ($x = 0; $x < 4; $x++) {
                 $sig = $x === 3 && $y === 4;
                 imagefilledellipse($im, 960 + $x * 160, 680 + $y * 170, 118, 118, $c($sig ? $P['signal'] : ($x === 3 ? $P['mid'] : [72, 73, 77])));
             }
             break;
         case 'fan':
-            essenz_rrect($im, 1110, 1260, 1290, 1470, 20, $c($P['mid']));
-            essenz_rrect($im, 880, 1440, 1520, 1520, 40, $c($P['white']));
+            Demo::rrect($im, 1110, 1260, 1290, 1470, 20, $c($P['mid']));
+            Demo::rrect($im, 880, 1440, 1520, 1520, 40, $c($P['white']));
             imagefilledellipse($im, 1200, 760, 1000, 1000, $c($P['white']));
             imagefilledellipse($im, 1200, 760, 880, 880, $c($P['light']));
             imagesetthickness($im, 10);
@@ -264,10 +245,10 @@ function essenz_demo_object(string $file, string $kind): void
             imagefilledellipse($im, 1200, 760, 50, 50, $c($P['signal']));
             break;
         case 'lamp':
-            essenz_rrect($im, 900, 1440, 1500, 1520, 40, $c($P['graphite']));
-            essenz_rrect($im, 1184, 640, 1216, 1450, 16, $c($P['mid']));
+            Demo::rrect($im, 900, 1440, 1500, 1520, 40, $c($P['graphite']));
+            Demo::rrect($im, 1184, 640, 1216, 1450, 16, $c($P['mid']));
             imagefilledarc($im, 1200, 700, 820, 820, 180, 360, $c($P['white']), IMG_ARC_PIE);
-            essenz_rrect($im, 790, 690, 1610, 730, 20, $c($P['light']));
+            Demo::rrect($im, 790, 690, 1610, 730, 20, $c($P['light']));
             imagefilledellipse($im, 1200, 760, 180, 60, $c([255, 214, 150], 40));
             imagefilledellipse($im, 1420, 1480, 34, 34, $c($P['signal']));
             break;
@@ -285,41 +266,10 @@ function essenz_demo_object(string $file, string $kind): void
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function essenz_demo_pdf(callable $log): ?int
 {
-    $text = 'Werkstatt Beispiel - Datenblatt (Demo). Frei erfundener Inhalt.';
-    $stream = "BT /F1 18 Tf 72 760 Td ($text) Tj ET";
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'ez') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'werkstatt-datenblatt.pdf', '', ['title' => 'Datenblatt (Beispiel)', 'tags' => ESSENZ_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Werkstatt Beispiel - Datenblatt (Demo). Frei erfundener Inhalt.', 18), 'werkstatt-datenblatt.pdf', ['title' => 'Datenblatt (Beispiel)', 'tags' => ESSENZ_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function essenz_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function essenz_demo_tables(array $img, callable $log): array
 {
@@ -327,7 +277,7 @@ function essenz_demo_tables(array $img, callable $log): array
     $O = fn(int $n) => $img['objects'][$n % max(1, count($img['objects']))] ?? null;
 
     // Produkte: Karten, Liste, kompakt, Tabelle, Detailseite
-    $t = essenz_demo_table([
+    $t = Demo::table([
         'handle' => 'werkstatt_produkte', 'name' => 'Produkte (Werkstatt)', 'singular' => 'Produkt', 'icon' => 'package',
         'description' => 'Beispiel-Tabelle der Musterseiten – frei erfundene Geräte-Entwürfe.',
         'fields' => [
@@ -365,7 +315,7 @@ function essenz_demo_tables(array $img, callable $log): array
     }
 
     // Termine: Kalender mit Wiederholung, ganztägigem Termin und Kategorien
-    $t = essenz_demo_table([
+    $t = Demo::table([
         'handle' => 'werkstatt_termine', 'name' => 'Termine (Werkstatt)', 'singular' => 'Termin', 'icon' => 'calendar-dots',
         'description' => 'Beispiel-Kalender der Musterseiten – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -402,7 +352,7 @@ function essenz_demo_tables(array $img, callable $log): array
     }
 
     // Öffentliches Formular: Anfrage mit Bedingung (Budget nur bei „Projekt“)
-    $t = essenz_demo_table([
+    $t = Demo::table([
         'handle' => 'werkstatt_anfragen', 'name' => 'Anfragen (Werkstatt)', 'singular' => 'Anfrage', 'icon' => 'envelope-simple',
         'description' => 'Öffentliches Beispiel-Formular der Musterseiten.',
         'fields' => [
@@ -431,7 +381,7 @@ function essenz_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
     $W = fn(int $n) => $img['wide'][$n % max(1, count($img['wide']))] ?? null;
     $T = fn(int $n) => $img['tall'][$n % max(1, count($img['tall']))] ?? null;
     $O = fn(int $n) => $img['objects'][$n % max(1, count($img['objects']))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text]);
     $cta = $B('cta', ['variant' => 'band', 'eyebrow' => 'Nächster Schritt', 'title' => 'Alles gesehen? Dann *legen Sie los*.', 'text' => 'Signalfarbe, Schriften, Kopf und Fuß stellen Sie unter Verwaltung → Design ein.',
         'button_label' => 'Kontakt', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/werkstatt'], ['background' => 'dark']);
@@ -443,7 +393,7 @@ function essenz_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
         'button_label' => $btn[0] ?? '', 'button_link' => $btn[1] ?? '', 'button2_label' => $btn[2] ?? '', 'button2_link' => $btn[3] ?? ''];
 
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
 
     // ---------------------------------------------------------------- Übersicht (Musterseite des Style-Editors)
     $root = $page(['slug' => 'werkstatt', 'title' => 'Werkstatt', 'sort' => $sort, 'og_image' => $W(0),
@@ -614,9 +564,8 @@ function essenz_demo_heroes(?callable $log = null): bool
     $W = fn(int $n) => $wide ? $wide[$n % count($wide)] : null;
     [$video, $still] = essenz_demo_video($media, $log);
 
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''],
-        'tunes' => ['section' => $tunes]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes,
+        ['eyebrow' => '', 'text' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Werkstatt · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein* Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sieben Varianten. Die drei neuen sehen aus wie Geräte: ein Bedienfeld mit Anzeige, ein Paneel mit Rundinstrumenten und ein Monitor mit stummem Video. Alle Werte hier sind frei erfunden – auf echten Seiten steht nur ein Einstieg ganz oben.'],

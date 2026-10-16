@@ -5,6 +5,7 @@
  *
  *   CMS_SITE=<website> php kits/frameworks/tools/demo.php            anlegen (nur wenn noch nicht vorhanden)
  *   CMS_SITE=<website> php kits/frameworks/tools/demo.php --force    Demo-Seiten, -Tabellen, -Bilder und -Begriffe ersetzen
+ * Ablauf und Schalter: Core\Kit\Demo::cli().
  */
 declare(strict_types=1);
 
@@ -13,8 +14,8 @@ $root = dirname(__DIR__, 3);
 chdir($root);
 $app = require $root . '/app/bootstrap.php';
 require_once __DIR__ . '/demo-content.php';
-if (app()->theme->name !== 'frameworks') {
-    fwrite(STDERR, 'Die Website nutzt nicht das Kit „frameworks“ (aktiv: ' . app()->theme->name . ").\n");
-    exit(1);
-}
-exit(frameworks_demo_install(in_array('--force', array_slice($argv, 1), true), fn(string $m) => print($m . "\n")) ? 0 : 1);
+exit(\Core\Kit\Demo::cli($argv, [
+    'kit' => 'frameworks',
+    'accept' => fn(string $active) => $active === 'frameworks',
+    'install' => fn(bool $force, callable $log) => frameworks_demo_install($force, $log) ? 0 : 1,
+]));

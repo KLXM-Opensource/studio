@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -30,9 +31,7 @@ function fluid_demo_install(bool $force = false, ?callable $log = null): bool
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist (Kopf, Kontakt-Block, Karte).
     // Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese, keine Adresse von Personen oder Firmen).
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477']);
 
     $img = fluid_demo_images($log);
     $pdf = fluid_demo_pdf($log);
@@ -48,15 +47,11 @@ function fluid_demo_install(bool $force = false, ?callable $log = null): bool
 function fluid_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
-    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path = 'showcase' OR path LIKE 'showcase/%' OR slug = '_vorlage-showcase-projekte'"), 'id'));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'showcase_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . FLUID_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query("DELETE FROM media_collections WHERE name = 'Showcase (Demo)'");
+    $ids = Demo::ids("SELECT id FROM pages WHERE path = 'showcase' OR path LIKE 'showcase/%' OR slug = '_vorlage-showcase-projekte'");
+    Demo::deletePages($ids);
+    Demo::deleteTablesByPrefix('showcase_');
+    Demo::deleteMedia(FLUID_DEMO_TAG);
+    Demo::deleteCollections('Showcase (Demo)');
     $log('Vorhandenen Showcase entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -80,19 +75,11 @@ function fluid_demo_images(callable $log): array
         ['Kreise in Salbei und Creme', [33, 83, 71], [251, 246, 238], [213, 236, 221], 'blobs'],
     ];
     $all = $wide = $tall = $avatars = [];
-    $import = function (string $file, string $name, string $title, string $alt) use ($col, $log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'collection' => $col, 'credit' => 'Beispielbild, automatisch erzeugt']);
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $import = fn(string $file, string $name, string $title, string $alt): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'collection' => $col, 'credit' => 'Beispielbild, automatisch erzeugt'], $log);
     // Monogramme nicht in der Sammlung (die Galerie „aus Sammlung“ zeigt nur die Grafiken)
-    $importPlain = function (string $file, string $name, string $title, string $alt) use ($log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt']);
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $importPlain = fn(string $file, string $name, string $title, string $alt): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt'], $log);
     foreach ($motifs as $i => [$title, $dark, $light, $acc, $kind]) {
         $file = tempnam(sys_get_temp_dir(), 'fx') . '.jpg';
         fluid_demo_draw($file, 1800, 1200, $dark, $light, $acc, $kind, $i);
@@ -225,41 +212,10 @@ function fluid_demo_avatar(string $file, string $initials, array $rgb, string $f
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function fluid_demo_pdf(callable $log): ?int
 {
-    $text = 'Showcase - Beispiel-PDF (Demo). Frei erfundener Inhalt.';
-    $stream = "BT /F1 20 Tf 72 760 Td ($text) Tj ET";
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'fx') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'showcase-leistungsuebersicht.pdf', '', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => FLUID_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Showcase - Beispiel-PDF (Demo). Frei erfundener Inhalt.', 20), 'showcase-leistungsuebersicht.pdf', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => FLUID_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function fluid_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function fluid_demo_tables(array $img, callable $log): array
 {
@@ -267,7 +223,7 @@ function fluid_demo_tables(array $img, callable $log): array
     $W = fn(int $n) => $img['wide'][$n % max(1, count($img['wide']))] ?? null;
 
     // Projekte: Karten, Liste, kompakt, Tabelle, Detailseite
-    $t = fluid_demo_table([
+    $t = Demo::table([
         'handle' => 'showcase_projekte', 'name' => 'Projekte (Showcase)', 'singular' => 'Projekt', 'icon' => 'briefcase',
         'description' => 'Beispiel-Tabelle des Showcase – frei erfundene Projekte.',
         'fields' => [
@@ -302,7 +258,7 @@ function fluid_demo_tables(array $img, callable $log): array
     }
 
     // Veranstaltungen: Kalender mit Wiederholung, ganztägigem Termin und Kategorien
-    $t = fluid_demo_table([
+    $t = Demo::table([
         'handle' => 'showcase_termine', 'name' => 'Veranstaltungen (Showcase)', 'singular' => 'Veranstaltung', 'icon' => 'calendar-dots',
         'description' => 'Beispiel-Kalender des Showcase – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -340,7 +296,7 @@ function fluid_demo_tables(array $img, callable $log): array
     }
 
     // Team: Monogramme statt Fotos (keine echten Personen)
-    $t = fluid_demo_table([
+    $t = Demo::table([
         'handle' => 'showcase_team', 'name' => 'Team (Showcase)', 'singular' => 'Person', 'icon' => 'users',
         'description' => 'Beispiel-Team des Showcase – erfundene Namen, Monogramme statt Fotos.',
         'fields' => [
@@ -367,7 +323,7 @@ function fluid_demo_tables(array $img, callable $log): array
     }
 
     // Formular 1: Rückrufwunsch
-    $t = fluid_demo_table([
+    $t = Demo::table([
         'handle' => 'showcase_rueckruf', 'name' => 'Rückrufwünsche (Showcase)', 'singular' => 'Rückrufwunsch', 'icon' => 'phone',
         'description' => 'Öffentliches Beispiel-Formular des Showcase.',
         'fields' => [
@@ -383,7 +339,7 @@ function fluid_demo_tables(array $img, callable $log): array
     if ($t) $out['rueckruf'] = $t;
 
     // Formular 2: Bedingungen, IBAN, wiederholbare Gruppe
-    $t = fluid_demo_table([
+    $t = Demo::table([
         'handle' => 'showcase_antrag', 'name' => 'Mitgliedsanträge (Showcase)', 'singular' => 'Mitgliedsantrag', 'icon' => 'clipboard-text',
         'description' => 'Beispiel für Bedingungen, IBAN-Prüfung und wiederholbare Gruppen.',
         'fields' => [
@@ -415,7 +371,7 @@ function fluid_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
 {
     $W = fn(int $n) => $img['wide'][$n % max(1, count($img['wide']))] ?? null;
     $T = fn(int $n) => $img['tall'][$n % max(1, count($img['tall']))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text], ['background' => 'muted']);
     $cta = $B('cta', ['variant' => 'band', 'eyebrow' => 'Nächster Schritt', 'title' => 'Genug gesehen? Dann legen Sie los.', 'text' => 'Alle Bausteine lassen sich frei kombinieren – Farben, Schriften, Kopf und Fuß stellen Sie unter Verwaltung → Design ein.',
         'button_label' => 'Kontakt aufnehmen', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/showcase'], ['background' => 'accent']);
@@ -427,7 +383,7 @@ function fluid_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
         'button_label' => $btn[0] ?? '', 'button_link' => $btn[1] ?? '', 'button2_label' => $btn[2] ?? '', 'button2_link' => $btn[3] ?? ''];
 
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
 
     // ---------------------------------------------------------------- Übersicht (Musterseite des Style-Editors)
     $root = $page(['slug' => 'showcase', 'title' => 'Showcase', 'sort' => $sort, 'og_image' => $W(0),
@@ -716,8 +672,7 @@ function fluid_demo_heroes(?callable $log = null): bool
     $T = fn(int $n) => $tall ? $tall[$n % count($tall)] : $W($n);
 
     $none = ['button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '', 'points' => '', 'image' => null, 'ratio' => '4:5', 'video' => null, 'overlay' => 'strong', 'cards' => []];
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + $none + ['eyebrow' => '', 'text' => ''], 'tunes' => ['section' => $tunes + ['divider' => true]]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes + ['divider' => true], $none + ['eyebrow' => '', 'text' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Showcase · Hero-Varianten', 'title' => 'Neun Einstiege, ein Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat neun Varianten. Die drei neuen stehen hier untereinander – Fließende Skala, Collage und Vorher/Nachher –, darunter zwei bekannte zum Vergleich. Auf echten Seiten steht nur ein Einstieg ganz oben.'],
@@ -795,10 +750,7 @@ function fluid_demo_compare_pair(callable $log): array
     foreach ([[$before, 'showcase-vergleich-vorher.jpg', 'Vergleich (Beispiel): Wand vorher', 'Abstrakte Grafik: graue, fleckige Mauer mit Rissen – Zustand vorher (Beispielbild)'],
               [$after, 'showcase-vergleich-nachher.jpg', 'Vergleich (Beispiel): Wand nachher', 'Abstrakte Grafik: Bögen in Terrakotta und Sand – Zustand nachher (Beispielbild)']] as $k => [$file, $name, $title, $alt]) {
         if (!is_file($file) || !filesize($file)) continue;
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt']);
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        $ids[$k] = $m ? (int) $m['id'] : null;
+        $ids[$k] = Demo::import($file, $name, $alt, ['title' => $title, 'tags' => FLUID_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt'], $log);
     }
     return $ids;
 }

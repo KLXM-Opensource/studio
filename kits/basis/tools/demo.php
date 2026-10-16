@@ -9,6 +9,7 @@
  *   CMS_SITE=demo php kits/basis/tools/demo.php --heroes   nur die Musterseite „Hero-Varianten“ (neu) anlegen
  *
  * Neue Websites erhalten die Musterseiten automatisch (seed.php → 'after').
+ * Ablauf und Schalter: Core\Kit\Demo::cli().
  */
 declare(strict_types=1);
 
@@ -18,27 +19,14 @@ chdir($root);
 $app = require $root . '/app/bootstrap.php';
 require_once __DIR__ . '/demo-content.php';
 
-$args = array_slice($argv, 1);
-$log = function (string $m): void { echo $m, "\n"; };
-if (!function_exists('basis_demo_pages') || empty(\Core\Design::def()['presets'])) {
-    fwrite(STDERR, "Die Website nutzt kein Kit mit Musterseiten (aktiv: " . app()->theme->name . ").\n");
-    exit(1);
-}
-if (in_array('--heroes', $args, true)) {   // nur die Musterseite „Hero-Varianten“ (neu) anlegen
-    exit(basis_demo_heroes($log) ? 0 : 1);
-}
-if (in_array('--remove', $args, true)) {
-    basis_demo_remove($log);
-    \Core\PageCache::clear();
-    exit(0);
-}
-basis_demo_install(in_array('--force', $args, true), $log);
-foreach ($args as $a) {
-    if (str_starts_with($a, '--preset=')) {
-        $key = substr($a, 9);
-        $preset = \Core\Design::def()['presets'][$key] ?? null;
-        if (!$preset) { fwrite(STDERR, "Voreinstellung „{$key}“ gibt es nicht.\n"); exit(1); }
-        \Core\Design::save($preset['values'], 'Voreinstellung ' . $preset['label'] . ' (tools/demo.php)', 'cli');
-        $log('Design-Voreinstellung „' . $preset['label'] . '“ übernommen.');
-    }
-}
+exit(\Core\Kit\Demo::cli($argv, [
+    'accept' => fn() => function_exists('basis_demo_pages') && !empty(\Core\Design::def()['presets']),
+    'reject' => "Die Website nutzt kein Kit mit Musterseiten (aktiv: %s).\n",
+    'actions' => [
+        '--heroes' => fn(callable $log) => basis_demo_heroes($log),   // nur die Musterseite „Hero-Varianten“ (neu) anlegen
+        '--remove' => fn(callable $log) => basis_demo_remove($log),
+    ],
+    'install' => fn(bool $force, callable $log) => basis_demo_install($force, $log),
+    'preset' => 'Voreinstellung',
+    'missing' => "%1\$s „%2\$s“ gibt es nicht.\n",
+]));

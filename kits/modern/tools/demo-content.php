@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -34,9 +35,7 @@ function modern_demo_install(bool $force = false, ?callable $log = null): bool
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist.
     // Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese, keine Adresse von Personen oder Firmen).
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterweg 7', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477']);
 
     $img = modern_demo_images($log);
     $pdf = modern_demo_pdf($log);
@@ -53,16 +52,12 @@ function modern_demo_install(bool $force = false, ?callable $log = null): bool
 function modern_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
     $ids = array_map('intval', (array) json_decode((string) setting('modern.demo_pages', '[]'), true));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
+    Demo::deletePages($ids);
     app()->settings->set('modern.demo_pages', '[]');
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'nordlicht_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . MODERN_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query('DELETE FROM media_collections WHERE name = ?', [MODERN_DEMO_COLLECTION]);
+    Demo::deleteTablesByPrefix('nordlicht_');
+    Demo::deleteMedia(MODERN_DEMO_TAG);
+    Demo::deleteCollections(MODERN_DEMO_COLLECTION);
     if ($ids) $log('Vorhandene Demo-Seiten entfernt (' . count($ids) . ').');
 }
 
@@ -80,12 +75,8 @@ function modern_demo_palette(): array
 function modern_demo_images(callable $log): array
 {
     $col = Media::createCollection(MODERN_DEMO_COLLECTION, 'Erzeugte Beispielbilder des Kits „modern“ – Polarlicht-Verläufe, gezeichnete Entwürfe, Formkompositionen. Frei verwendbar, ohne Personen oder Marken.');
-    $import = function (string $file, string $name, string $title, string $alt) use ($col, $log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => MODERN_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt', 'collection' => $col]);
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $import = fn(string $file, string $name, string $title, string $alt): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => MODERN_DEMO_TAG, 'credit' => 'Beispielbild, automatisch erzeugt', 'collection' => $col], $log);
     $tmp = fn(string $ext) => tempnam(sys_get_temp_dir(), 'mo') . '.' . $ext;
     $all = $wide = $tall = $objects = $square = [];
     // Polarlicht-Verläufe (3:2 und 4:5)
@@ -164,15 +155,6 @@ function modern_demo_aurora(string $file, int $w, int $h, int $seed): void
     imagejpeg($im, $file, 84);
 }
 
-/** Abgerundetes Rechteck (gefüllt) */
-function modern_rrect(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $r, int $col): void
-{
-    $r = max(0, min($r, (int) (($x2 - $x1) / 2), (int) (($y2 - $y1) / 2)));
-    imagefilledrectangle($im, $x1 + $r, $y1, $x2 - $r, $y2, $col);
-    imagefilledrectangle($im, $x1, $y1 + $r, $x2, $y2 - $r, $col);
-    foreach ([[$x1 + $r, $y1 + $r], [$x2 - $r, $y1 + $r], [$x1 + $r, $y2 - $r], [$x2 - $r, $y2 - $r]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $col);
-}
-
 /** Gezeichnetes Produkt auf Studiofläche (doppelt gerendert und verkleinert = glatte Kanten) */
 function modern_demo_object(string $file, int $w, int $h, string $kind, string $bgKey, int $seed): void
 {
@@ -197,32 +179,32 @@ function modern_demo_object(string $file, int $w, int $h, string $kind, string $
     $mid = [196, 202, 210]; $dark2 = [34, 40, 50];
     switch ($kind) {
         case 'lamp':
-            modern_rrect($im, (int) ($cx - $u * 16), (int) ($base - $u * 4), (int) ($cx + $u * 16), $base, (int) ($u * 2), $c($ink));
-            modern_rrect($im, (int) ($cx - $u * 1.2), (int) ($base - $u * 46), (int) ($cx + $u * 1.2), (int) ($base - $u * 3), (int) $u, $c($dark2));
+            Demo::rrect($im, (int) ($cx - $u * 16), (int) ($base - $u * 4), (int) ($cx + $u * 16), $base, (int) ($u * 2), $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 1.2), (int) ($base - $u * 46), (int) ($cx + $u * 1.2), (int) ($base - $u * 3), (int) $u, $c($dark2));
             imagefilledarc($im, $cx, (int) ($base - $u * 44), (int) ($u * 40), (int) ($u * 40), 180, 360, $c($green), IMG_ARC_PIE);
-            modern_rrect($im, (int) ($cx - $u * 20), (int) ($base - $u * 45), (int) ($cx + $u * 20), (int) ($base - $u * 43), (int) $u, $c($dark2));
+            Demo::rrect($im, (int) ($cx - $u * 20), (int) ($base - $u * 45), (int) ($cx + $u * 20), (int) ($base - $u * 43), (int) $u, $c($dark2));
             imagefilledellipse($im, $cx, (int) ($base - $u * 42), (int) ($u * 12), (int) ($u * 4), $c([255, 240, 190], 20));
             for ($k = 0; $k < 10; $k++) imagefilledellipse($im, $cx, (int) ($base - $u * 30), (int) ($u * (30 - $k * 2)), (int) ($u * (24 - $k * 2)), $c([255, 244, 200], 122 - $k));
             imagefilledellipse($im, (int) ($cx + $u * 11), (int) ($base - $u * 2), (int) ($u * 2), (int) ($u * 2), $c($lime));
             break;
         case 'speaker':
-            modern_rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 56), (int) ($cx + $u * 17), $base, (int) ($u * 6), $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 56), (int) ($cx + $u * 17), $base, (int) ($u * 6), $c($ink));
             imagefilledellipse($im, $cx, (int) ($base - $u * 20), (int) ($u * 24), (int) ($u * 24), $c($dark2));
             imagefilledellipse($im, $cx, (int) ($base - $u * 20), (int) ($u * 10), (int) ($u * 10), $c([22, 26, 33]));
             imagefilledellipse($im, $cx, (int) ($base - $u * 43), (int) ($u * 11), (int) ($u * 11), $c($dark2));
             imagefilledellipse($im, $cx, (int) ($base - $u * 43), (int) ($u * 4), (int) ($u * 4), $c([22, 26, 33]));
-            modern_rrect($im, (int) ($cx - $u * 8), (int) ($base - $u * 5), (int) ($cx + $u * 8), (int) ($base - $u * 4), (int) ($u * .5), $c($lime));
+            Demo::rrect($im, (int) ($cx - $u * 8), (int) ($base - $u * 5), (int) ($cx + $u * 8), (int) ($base - $u * 4), (int) ($u * .5), $c($lime));
             break;
         case 'kettle':
             imagefilledellipse($im, $cx, (int) ($base - $u * 20), (int) ($u * 40), (int) ($u * 40), $c($white));
-            modern_rrect($im, (int) ($cx - $u * 20), (int) ($base - $u * 20), (int) ($cx + $u * 20), $base, (int) ($u * 3), $c($white));
-            modern_rrect($im, (int) ($cx - $u * 21), (int) ($base - $u * 4), (int) ($cx + $u * 21), $base, (int) ($u * 2), $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 20), (int) ($base - $u * 20), (int) ($cx + $u * 20), $base, (int) ($u * 3), $c($white));
+            Demo::rrect($im, (int) ($cx - $u * 21), (int) ($base - $u * 4), (int) ($cx + $u * 21), $base, (int) ($u * 2), $c($ink));
             imagesetthickness($im, (int) ($u * 3));
             imagearc($im, (int) ($cx + $u * 20), (int) ($base - $u * 22), (int) ($u * 18), (int) ($u * 22), 270, 90, $c($ink));
             imagesetthickness($im, 1);
             $pts = [(int) ($cx - $u * 18), (int) ($base - $u * 26), (int) ($cx - $u * 30), (int) ($base - $u * 34), (int) ($cx - $u * 28), (int) ($base - $u * 30), (int) ($cx - $u * 17), (int) ($base - $u * 18)];
             imagefilledpolygon($im, $pts, $c($white));
-            modern_rrect($im, (int) ($cx - $u * 4), (int) ($base - $u * 42), (int) ($cx + $u * 4), (int) ($base - $u * 39), (int) $u, $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 4), (int) ($base - $u * 42), (int) ($cx + $u * 4), (int) ($base - $u * 39), (int) $u, $c($ink));
             imagefilledellipse($im, (int) ($cx + $u * 12), (int) ($base - $u * 8), (int) ($u * 2.2), (int) ($u * 2.2), $c($green));
             break;
         case 'chair':
@@ -233,8 +215,8 @@ function modern_demo_object(string $file, int $w, int $h, string $kind, string $
             imageline($im, (int) ($cx - $u * 8), (int) ($base - $u * 22), (int) ($cx - $u * 10), (int) ($base - $u * 3), $leg);
             imageline($im, (int) ($cx + $u * 8), (int) ($base - $u * 22), (int) ($cx + $u * 10), (int) ($base - $u * 3), $leg);
             imagesetthickness($im, 1);
-            modern_rrect($im, (int) ($cx - $u * 19), (int) ($base - $u * 27), (int) ($cx + $u * 19), (int) ($base - $u * 21), (int) ($u * 3), $c($green));
-            modern_rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 56), (int) ($cx + $u * 17), (int) ($base - $u * 34), (int) ($u * 10), $c($green));
+            Demo::rrect($im, (int) ($cx - $u * 19), (int) ($base - $u * 27), (int) ($cx + $u * 19), (int) ($base - $u * 21), (int) ($u * 3), $c($green));
+            Demo::rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 56), (int) ($cx + $u * 17), (int) ($base - $u * 34), (int) ($u * 10), $c($green));
             imagesetthickness($im, (int) ($u * 1.6));
             imageline($im, (int) ($cx - $u * 12), (int) ($base - $u * 36), (int) ($cx - $u * 14), (int) ($base - $u * 25), $leg);
             imageline($im, (int) ($cx + $u * 12), (int) ($base - $u * 36), (int) ($cx + $u * 14), (int) ($base - $u * 25), $leg);
@@ -244,16 +226,16 @@ function modern_demo_object(string $file, int $w, int $h, string $kind, string $
             imagesetthickness($im, (int) ($u * 4));
             imagearc($im, $cx, (int) ($base - $u * 24), (int) ($u * 44), (int) ($u * 50), 180, 360, $c($ink));
             imagesetthickness($im, 1);
-            modern_rrect($im, (int) ($cx - $u * 27), (int) ($base - $u * 30), (int) ($cx - $u * 15), (int) ($base - $u * 8), (int) ($u * 5), $c($ink));
-            modern_rrect($im, (int) ($cx + $u * 15), (int) ($base - $u * 30), (int) ($cx + $u * 27), (int) ($base - $u * 8), (int) ($u * 5), $c($ink));
-            modern_rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 28), (int) ($cx - $u * 13), (int) ($base - $u * 10), (int) ($u * 2), $c($mid));
-            modern_rrect($im, (int) ($cx + $u * 13), (int) ($base - $u * 28), (int) ($cx + $u * 17), (int) ($base - $u * 10), (int) ($u * 2), $c($mid));
+            Demo::rrect($im, (int) ($cx - $u * 27), (int) ($base - $u * 30), (int) ($cx - $u * 15), (int) ($base - $u * 8), (int) ($u * 5), $c($ink));
+            Demo::rrect($im, (int) ($cx + $u * 15), (int) ($base - $u * 30), (int) ($cx + $u * 27), (int) ($base - $u * 8), (int) ($u * 5), $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 17), (int) ($base - $u * 28), (int) ($cx - $u * 13), (int) ($base - $u * 10), (int) ($u * 2), $c($mid));
+            Demo::rrect($im, (int) ($cx + $u * 13), (int) ($base - $u * 28), (int) ($cx + $u * 17), (int) ($base - $u * 10), (int) ($u * 2), $c($mid));
             imagefilledellipse($im, (int) ($cx - $u * 21), (int) ($base - $u * 19), (int) ($u * 3), (int) ($u * 3), $c($lime));
             break;
         case 'bottle':
-            modern_rrect($im, (int) ($cx - $u * 10), (int) ($base - $u * 52), (int) ($cx + $u * 10), $base, (int) ($u * 5), $c($ink));
-            modern_rrect($im, (int) ($cx - $u * 7), (int) ($base - $u * 62), (int) ($cx + $u * 7), (int) ($base - $u * 50), (int) ($u * 2), $c($green));
-            modern_rrect($im, (int) ($cx - $u * 10), (int) ($base - $u * 30), (int) ($cx + $u * 10), (int) ($base - $u * 22), 0, $c($fog));
+            Demo::rrect($im, (int) ($cx - $u * 10), (int) ($base - $u * 52), (int) ($cx + $u * 10), $base, (int) ($u * 5), $c($ink));
+            Demo::rrect($im, (int) ($cx - $u * 7), (int) ($base - $u * 62), (int) ($cx + $u * 7), (int) ($base - $u * 50), (int) ($u * 2), $c($green));
+            Demo::rrect($im, (int) ($cx - $u * 10), (int) ($base - $u * 30), (int) ($cx + $u * 10), (int) ($base - $u * 22), 0, $c($fog));
             imagefilledellipse($im, (int) ($cx - $u * 5), (int) ($base - $u * 40), (int) ($u * 2), (int) ($u * 14), $c($white, 90));
             break;
     }
@@ -282,16 +264,16 @@ function modern_demo_shapes(string $file, int $w, int $h, int $seed): void
         case 0:
             imagefilledellipse($im, (int) ($W * .32), (int) ($H * .55), (int) ($u * 7), (int) ($u * 7), $c($a));
             imagefilledarc($im, (int) ($W * .7), (int) ($H * .95), (int) ($u * 8), (int) ($u * 8), 180, 360, $c($b), IMG_ARC_PIE);
-            modern_rrect($im, (int) ($W * .62), (int) ($H * .12), (int) ($W * .9), (int) ($H * .4), (int) ($u * .4), $c($d));
+            Demo::rrect($im, (int) ($W * .62), (int) ($H * .12), (int) ($W * .9), (int) ($H * .4), (int) ($u * .4), $c($d));
             break;
         case 1:
             for ($k = 5; $k >= 1; $k--) imagefilledellipse($im, (int) ($W * .5), (int) ($H * .5), (int) ($k * $u * 1.8), (int) ($k * $u * 1.8), $c($k % 2 ? $a : $bg));
             imagefilledellipse($im, (int) ($W * .5), (int) ($H * .5), (int) ($u * 1.2), (int) ($u * 1.2), $c($b));
             break;
         case 2:
-            modern_rrect($im, (int) ($W * .08), (int) ($H * .12), (int) ($W * .46), (int) ($H * .88), (int) ($u * .6), $c($a));
+            Demo::rrect($im, (int) ($W * .08), (int) ($H * .12), (int) ($W * .46), (int) ($H * .88), (int) ($u * .6), $c($a));
             imagefilledellipse($im, (int) ($W * .7), (int) ($H * .38), (int) ($u * 5), (int) ($u * 5), $c($b));
-            modern_rrect($im, (int) ($W * .54), (int) ($H * .7), (int) ($W * .92), (int) ($H * .88), (int) ($u * .3), $c($d));
+            Demo::rrect($im, (int) ($W * .54), (int) ($H * .7), (int) ($W * .92), (int) ($H * .88), (int) ($u * .3), $c($d));
             break;
         case 3:
             for ($k = 0; $k < 4; $k++) imagefilledarc($im, (int) ($W * (.2 + $k * .2)), $H, (int) ($u * 3.4), (int) ($u * 3.4), 180, 360, $c($k % 2 ? $a : $b), IMG_ARC_PIE);
@@ -308,39 +290,10 @@ function modern_demo_pdf(callable $log): ?int
 {
     $lines = ['Studio Nordlicht - Leistungsuebersicht (Demo)', 'Frei erfundener Inhalt eines Beispiel-Studios.', 'Strategie - Produktdesign - Prototypen - Begleitung'];
     $stream = 'BT /F1 20 Tf 72 760 Td (' . $lines[0] . ') Tj /F1 12 Tf 0 -30 Td (' . $lines[1] . ') Tj 0 -18 Td (' . $lines[2] . ') Tj ET';
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'mo') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'nordlicht-leistungen.pdf', '', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => MODERN_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf($stream, 'nordlicht-leistungen.pdf', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => MODERN_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function modern_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function modern_demo_tables(array $img, callable $log): array
 {
@@ -348,7 +301,7 @@ function modern_demo_tables(array $img, callable $log): array
     $O = fn(int $n) => $img['objects'][$n % max(1, count($img['objects']))] ?? null;
 
     // Projekte: Karten, Liste, Tabelle, Detailseite
-    $t = modern_demo_table([
+    $t = Demo::table([
         'handle' => 'nordlicht_projekte', 'name' => 'Projekte (Nordlicht)', 'singular' => 'Projekt', 'icon' => 'cube',
         'description' => 'Beispiel-Tabelle des Kits „modern“ – frei erfundene Produkt-Entwürfe für erfundene Auftraggeber.',
         'fields' => [
@@ -387,7 +340,7 @@ function modern_demo_tables(array $img, callable $log): array
     }
 
     // Öffentliches Formular: Anfrage mit Bedingung (Budget nur bei „Projekt“)
-    $t = modern_demo_table([
+    $t = Demo::table([
         'handle' => 'nordlicht_anfragen', 'name' => 'Anfragen (Nordlicht)', 'singular' => 'Anfrage', 'icon' => 'envelope-simple',
         'description' => 'Öffentliches Beispiel-Formular des Kits „modern“.',
         'fields' => [
@@ -417,7 +370,7 @@ function modern_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
     $T = fn(int $n) => $img['tall'][$n % max(1, count($img['tall']))] ?? null;
     $O = fn(int $n) => $img['objects'][$n % max(1, count($img['objects']))] ?? null;
     $S = fn(int $n) => $img['square'][$n % max(1, count($img['square']))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $compact = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text]);
     $proj = $tables['projekte']['handle'] ?? '';
     $form = $tables['anfragen']['handle'] ?? '';
@@ -698,15 +651,14 @@ function modern_demo_heroes(?callable $log = null): bool
     }
     Pages::rebuildPaths();
     // Demo-Bilder über den Dateinamen (modern_demo_images); Rückfall: irgendein Demo-Bild
-    $any = array_map('intval', array_column($db->fetchAll("SELECT id FROM media WHERE tags LIKE ? AND mime LIKE 'image/%' ORDER BY id", ['%' . MODERN_DEMO_TAG . '%']), 'id'));
+    $any = Demo::ids("SELECT id FROM media WHERE tags LIKE ? AND mime LIKE 'image/%' ORDER BY id", ['%' . MODERN_DEMO_TAG . '%']);
     $I = function (string $name, int $n = 0) use ($db, $any): ?int {
         $id = $db->fetchValue('SELECT id FROM media WHERE tags LIKE ? AND original_name = ? ORDER BY id DESC LIMIT 1', ['%' . MODERN_DEMO_TAG . '%', $name]);
         return $id ? (int) $id : ($any ? $any[$n % count($any)] : null);
     };
     $link = fn(string $p) => rtrim('/' . trim(dirname('/' . $root['path']), '/.'), '/') . $p;
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => '', 'points' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''],
-        'tunes' => ['section' => $tunes + ['divider' => true]]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes + ['divider' => true],
+        ['eyebrow' => '', 'text' => '', 'points' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Musterseiten · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein* Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sieben Varianten. Neu sind Produkt, Typo und Kennzahlen – darunter zum Vergleich Mosaik und Große Aussage. Auf echten Seiten steht nur ein Einstieg ganz oben.'],

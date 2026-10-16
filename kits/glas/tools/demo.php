@@ -9,6 +9,7 @@
  *   CMS_SITE=demo php kits/glas/tools/demo.php --heroes   nur die Musterseite „Hero-Varianten“ (neu) anlegen
  *
  * Neue Websites erhalten die Musterseiten automatisch (seed.php → 'after').
+ * Ablauf und Schalter: Core\Kit\Demo::cli().
  */
 declare(strict_types=1);
 
@@ -18,27 +19,11 @@ chdir($root);
 $app = require $root . '/app/bootstrap.php';
 require_once __DIR__ . '/demo-content.php';
 
-$args = array_slice($argv, 1);
-$log = function (string $m): void { echo $m, "\n"; };
-if (app()->theme->name !== 'glas' && !function_exists(app()->theme->name . '_demo_install')) {
-    fwrite(STDERR, "Die Website nutzt nicht das Kit „glas“ (aktiv: " . app()->theme->name . ").\n");
-    exit(1);
-}
-if (in_array('--heroes', $args, true)) {   // nur die Musterseite „Hero-Varianten“ (neu) anlegen
-    exit(glas_demo_heroes($log) ? 0 : 1);
-}
-if (in_array('--remove', $args, true)) {
-    glas_demo_remove($log);
-    \Core\PageCache::clear();
-    exit(0);
-}
-glas_demo_install(in_array('--force', $args, true), $log);
-foreach ($args as $a) {
-    if (str_starts_with($a, '--preset=')) {
-        $key = substr($a, 9);
-        $preset = \Core\Design::def()['presets'][$key] ?? null;
-        if (!$preset) { fwrite(STDERR, "Vorlage „{$key}“ gibt es nicht. Verfügbar: " . implode(', ', array_keys(\Core\Design::def()['presets'])) . "\n"); exit(1); }
-        \Core\Design::save($preset['values'], 'Vorlage ' . $preset['label'] . ' (tools/demo.php)', 'cli');
-        $log('Design-Vorlage „' . $preset['label'] . '“ übernommen.');
-    }
-}
+exit(\Core\Kit\Demo::cli($argv, [
+    'kit' => 'glas',
+    'actions' => [
+        '--heroes' => fn(callable $log) => glas_demo_heroes($log),   // nur die Musterseite „Hero-Varianten“ (neu) anlegen
+        '--remove' => fn(callable $log) => glas_demo_remove($log),
+    ],
+    'install' => fn(bool $force, callable $log) => glas_demo_install($force, $log),
+]));

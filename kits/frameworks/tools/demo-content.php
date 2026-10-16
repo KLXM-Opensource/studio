@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -31,9 +32,7 @@ function frameworks_demo_install(bool $force = false, ?callable $log = null): bo
     }
     frameworks_demo_remove($log);
     // Fiktive Kontaktdaten; Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese – keine Adresse von Personen/Firmen)
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'geo' => '51.1634,10.4477']);
     $img = frameworks_demo_images($log);
     $tables = frameworks_demo_tables($img, $log);
     frameworks_demo_glossary($log);
@@ -50,16 +49,12 @@ function frameworks_demo_install(bool $force = false, ?callable $log = null): bo
 function frameworks_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
     $paths = ['start', 'leistungen', 'projekte', 'kontakt', 'impressum', 'datenschutz'];
-    $ids = array_map('intval', array_column($db->fetchAll(
-        "SELECT id FROM pages WHERE path IN ('" . implode("','", $paths) . "') OR path LIKE 'leistungen/%' OR slug = '_vorlage-projekte' OR (is_home = 1 AND slug = 'start')"), 'id'));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (['projekte', 'anfragen'] as $h) {
-        if ($t = Tables::find($h)) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . frameworks_demo_tag() . '%']) as $m) Media::delete((int) $m['id']);
+    $ids = Demo::ids(
+        "SELECT id FROM pages WHERE path IN ('" . implode("','", $paths) . "') OR path LIKE 'leistungen/%' OR slug = '_vorlage-projekte' OR (is_home = 1 AND slug = 'start')");
+    Demo::deletePages($ids);
+    Demo::deleteTables('projekte', 'anfragen');
+    Demo::deleteMedia(frameworks_demo_tag());
     if ($g = Tables::findContent(\Core\Glossary\Glossary::HANDLE)) {
         foreach (Entries::query($g, ['status' => 'all', 'limit' => 3000]) as $e) {
             if (in_array($e['begriff'] ?? '', array_column(frameworks_demo_terms(), 0), true)) Entries::delete($g, (int) $e['id']);
@@ -117,21 +112,11 @@ function frameworks_demo_draw(string $file, int $w, int $h, array $dark, array $
 
 // ------------------------------------------------------------------ Datentabellen
 
-function frameworks_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
-
 /** @return array{projekte: ?array, anfragen: ?array} */
 function frameworks_demo_tables(array $img, callable $log): array
 {
     $out = ['projekte' => null, 'anfragen' => null];
-    $t = frameworks_demo_table([
+    $t = Demo::table([
         'handle' => 'projekte', 'name' => 'Projekte', 'singular' => 'Projekt', 'icon' => 'briefcase',
         'description' => 'Fiktive Referenzprojekte der Demo – erscheinen als Datenliste und mit Detailseite.',
         'fields' => [
@@ -162,7 +147,7 @@ function frameworks_demo_tables(array $img, callable $log): array
         }
         $out['projekte'] = Tables::find('projekte');
     }
-    $t = frameworks_demo_table([
+    $t = Demo::table([
         'handle' => 'anfragen', 'name' => 'Anfragen', 'singular' => 'Anfrage', 'icon' => 'envelope-simple',
         'description' => 'Öffentliches Formular der Demo (Kern-Block „Formular“). Einträge kommen als Entwurf an.',
         'fields' => [
@@ -212,8 +197,8 @@ function frameworks_demo_glossary(callable $log): void
 function frameworks_demo_pages(array $img, array $tables, callable $log): void
 {
     $I = fn(int $n) => $img[$n % max(1, count($img))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $B = Demo::block(...);
+    $page = Demo::page(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'center', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text,
         'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '', 'image' => null], ['background' => 'tint']);
     $proj = $tables['projekte']['handle'] ?? '';

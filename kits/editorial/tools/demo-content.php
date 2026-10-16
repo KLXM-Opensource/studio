@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -28,9 +29,7 @@ function editorial_demo_install(bool $force = false, ?callable $log = null): boo
     }
     if ($force) editorial_demo_remove($log);
 
-    foreach (['phone' => '0123 4567-0', 'street' => 'Musterweg 12', 'zip' => '12345', 'city' => 'Musterstadt'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 4567-0', 'street' => 'Musterweg 12', 'zip' => '12345', 'city' => 'Musterstadt']);
     if (!setting('social')) {
         app()->settings->set('social', [['label' => 'Mastodon', 'url' => 'https://example.org/@kulturnetz'], ['label' => 'Newsletter-Archiv', 'url' => 'https://example.org/newsletter']]);
     }
@@ -48,29 +47,20 @@ function editorial_demo_install(bool $force = false, ?callable $log = null): boo
 function editorial_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
     $ids = [];
     foreach (EDITORIAL_DEMO_PAGES as $slug) {
-        foreach ($db->fetchAll("SELECT id FROM pages WHERE path = ? OR path LIKE ?", [$slug, $slug . '/%']) as $r) $ids[] = (int) $r['id'];
+        $ids = array_merge($ids, Demo::ids("SELECT id FROM pages WHERE path = ? OR path LIKE ?", [$slug, $slug . '/%']));
     }
-    foreach ($db->fetchAll("SELECT id FROM pages WHERE slug LIKE '_vorlage-ed-%' OR path = 'hero-varianten'") as $r) $ids[] = (int) $r['id'];
-    foreach (array_unique($ids) as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (['ed_news', 'ed_termine', 'ed_newsletter', 'ed_mitglied', 'ed_personen'] as $h) {
-        if ($t = Tables::find($h)) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . EDITORIAL_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query("DELETE FROM media_collections WHERE name = 'Editorial (Demo)'");
+    $ids = array_merge($ids, Demo::ids("SELECT id FROM pages WHERE slug LIKE '_vorlage-ed-%' OR path = 'hero-varianten'"));
+    Demo::deletePages($ids);
+    Demo::deleteTables('ed_news', 'ed_termine', 'ed_newsletter', 'ed_mitglied', 'ed_personen');
+    Demo::deleteMedia(EDITORIAL_DEMO_TAG);
+    Demo::deleteCollections('Editorial (Demo)');
     if ($home = Pages::home()) {
-        editorial_demo_set_blocks((int) $home['id'], [editorial_demo_block('hero', ['variant' => 'centered', 'eyebrow' => editorial_name(), 'title' => '[Schlagzeile der Startseite]',
+        editorial_demo_set_blocks((int) $home['id'], [Demo::block('hero', ['variant' => 'centered', 'eyebrow' => editorial_name(), 'title' => '[Schlagzeile der Startseite]',
             'text' => '[Kurzer Vorspann: Wer sind Sie, worüber berichten Sie?]', 'ratio' => '21:9'])]);
     }
     $log('Demo-Ausgabe entfernt (' . count($ids) . ' Seiten).');
-}
-
-function editorial_demo_block(string $type, array $data, array $tunes = []): array
-{
-    return ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
 }
 
 /** Blöcke einer vorhandenen Seite ersetzen (Entwurf + veröffentlicht) */
@@ -248,37 +238,10 @@ function editorial_demo_draw(string $file, string $kind, array $bg, array $fg, a
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function editorial_demo_pdf(callable $log): ?int
 {
-    $text = 'Jahresbericht 2025 - Beispiel-PDF (Demo). Frei erfundener Inhalt.';
-    $stream = "BT /F1 18 Tf 72 760 Td ($text) Tj ET";
-    $objs = ['<</Type/Catalog/Pages 2 0 R>>', '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream", '<</Type/Font/Subtype/Type1/BaseFont/Times-Roman>>'];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'ed') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'jahresbericht-2025-beispiel.pdf', '', ['title' => 'Jahresbericht 2025 (Beispiel)', 'tags' => EDITORIAL_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Jahresbericht 2025 - Beispiel-PDF (Demo). Frei erfundener Inhalt.', 18), 'jahresbericht-2025-beispiel.pdf', ['title' => 'Jahresbericht 2025 (Beispiel)', 'tags' => EDITORIAL_DEMO_TAG], $log, 'Times-Roman');
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function editorial_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 /** Veröffentlichungsdatum setzen (Beispiel: „vor n Tagen“) */
 function editorial_demo_published(array $t, int $id, int $daysAgo, string $time = '09:30'): void
@@ -293,7 +256,7 @@ function editorial_demo_tables(array $img, callable $log): array
     $I = fn(int $n) => $img['all'][$n % max(1, count($img['all']))] ?? null;
 
     // ---------------------------------------------------------------- Personen (Redaktion, Vorstand, Geschäftsstelle)
-    $t = editorial_demo_table([
+    $t = Demo::table([
         'handle' => 'ed_personen', 'name' => 'Menschen (Demo)', 'singular' => 'Person', 'icon' => 'users',
         'description' => 'Beispiel-Tabelle der Demo-Ausgabe – frei erfundene Personen mit Monogrammen statt Fotos.',
         'fields' => [
@@ -331,7 +294,7 @@ function editorial_demo_tables(array $img, callable $log): array
     }
 
     // ---------------------------------------------------------------- Nachrichten (Rubriken, Autor = Person, Detailseite)
-    $t = editorial_demo_table([
+    $t = Demo::table([
         'handle' => 'ed_news', 'name' => 'Nachrichten (Demo)', 'singular' => 'Nachricht', 'icon' => 'newspaper',
         'description' => 'Beispiel-Tabelle der Demo-Ausgabe – frei erfundene Meldungen mit Rubriken.',
         'fields' => [
@@ -381,7 +344,7 @@ function editorial_demo_tables(array $img, callable $log): array
     }
 
     // ---------------------------------------------------------------- Termine (Kalender mit Wiederholung, mehrtägig, Kategorien)
-    $t = editorial_demo_table([
+    $t = Demo::table([
         'handle' => 'ed_termine', 'name' => 'Termine (Demo)', 'singular' => 'Termin', 'icon' => 'calendar-dots',
         'description' => 'Beispiel-Kalender der Demo-Ausgabe – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -427,7 +390,7 @@ function editorial_demo_tables(array $img, callable $log): array
     }
 
     // ---------------------------------------------------------------- Formular 1: Newsletter
-    $t = editorial_demo_table([
+    $t = Demo::table([
         'handle' => 'ed_newsletter', 'name' => 'Newsletter-Anmeldungen (Demo)', 'singular' => 'Anmeldung', 'icon' => 'envelope-simple',
         'description' => 'Öffentliches Beispiel-Formular der Demo-Ausgabe (Band „Newsletter“).',
         'fields' => [
@@ -441,7 +404,7 @@ function editorial_demo_tables(array $img, callable $log): array
     if ($t) $out['newsletter'] = $t;
 
     // ---------------------------------------------------------------- Formular 2: Mitgliedschaft (Bedingungen, IBAN, wiederholbare Gruppe)
-    $t = editorial_demo_table([
+    $t = Demo::table([
         'handle' => 'ed_mitglied', 'name' => 'Mitgliedsanträge (Demo)', 'singular' => 'Mitgliedsantrag', 'icon' => 'clipboard-text',
         'description' => 'Beispiel für Bedingungen, IBAN-Prüfung und wiederholbare Gruppen.',
         'fields' => [
@@ -474,12 +437,12 @@ function editorial_demo_tables(array $img, callable $log): array
 function editorial_demo_pages(array $img, ?int $pdf, array $tables, callable $log): void
 {
     $I = fn(int $n) => $img['all'][$n % max(1, count($img['all']))] ?? null;
-    $B = 'editorial_demo_block';
+    $B = Demo::block(...);
     $news = $tables['news']['handle'] ?? '';
     $term = $tables['termine']['handle'] ?? '';
     $pers = $tables['personen']['handle'] ?? '';
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
     $head = fn(string $kicker, string $title, string $text, bool $subnav = true) => $B('hero', ['variant' => 'compact', 'eyebrow' => $kicker, 'title' => $title, 'text' => $text, 'subnav' => $subnav]);
     $dl = fn(array $d) => $d + ['eyebrow' => '', 'title' => '', 'intro' => '', 'columns' => '3', 'ratio' => '3:2', 'limit' => 6, 'filter_field' => '', 'filter_op' => '=', 'filter_value' => '',
         'sort_field' => '', 'sort_dir' => '', 'paginate' => false, 'link_detail' => true, 'more_label' => '', 'more_link' => '', 'show_origin' => true, 'skip' => 0, 'filter_nav' => '', 'exclude_current' => false];
@@ -707,12 +670,12 @@ function editorial_demo_heroes(?callable $log = null): bool
     if (!$home) { $log('Keine Startseite vorhanden – zuerst tools/demo.php ausführen.'); return false; }
     foreach ($db->fetchAll("SELECT id FROM pages WHERE slug = 'hero-varianten' AND parent_id = ?", [(int) $home['id']]) as $old) $db->query('DELETE FROM pages WHERE id = ?', [(int) $old['id']]);
     Pages::rebuildPaths();
-    $img = array_map('intval', array_column($db->fetchAll("SELECT id FROM media WHERE tags LIKE ? AND mime LIKE 'image/%' AND title NOT LIKE 'Monogramm%' ORDER BY id", ['%' . EDITORIAL_DEMO_TAG . '%']), 'id'));
+    $img = Demo::ids("SELECT id FROM media WHERE tags LIKE ? AND mime LIKE 'image/%' AND title NOT LIKE 'Monogramm%' ORDER BY id", ['%' . EDITORIAL_DEMO_TAG . '%']);
     $I = fn(int $n) => $img ? $img[$n % count($img)] : null;
     $news = Tables::find('ed_news') ? 'ed_news' : '';
     $term = Tables::find('ed_termine') ? 'ed_termine' : '';
-    $B = fn(string $variant, array $data, array $tunes = []) => editorial_demo_block('hero', ['variant' => $variant] + $data
-        + ['eyebrow' => '', 'byline' => '', 'text' => '', 'caption' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''], $tunes + ['divider' => true]);
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes + ['divider' => true],
+        ['eyebrow' => '', 'byline' => '', 'text' => '', 'caption' => '', 'button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Musterseite', 'title' => 'Hero-Varianten', 'subnav' => false,
             'text' => 'Der Block „Aufmacher / Seitenkopf“ hat sieben Varianten. Neu sind Titelgeschichte, Aktuell und Stimme. Jede erscheint hier einmal – auf echten Seiten steht nur ein Aufmacher ganz oben.'],

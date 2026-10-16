@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -40,9 +41,7 @@ function galerie_demo_install(bool $force = false, ?callable $log = null, bool $
     }
     galerie_demo_remove($log, $pages);
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'email' => 'galerie@example.com'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt', 'email' => 'galerie@example.com']);
     $img = galerie_demo_images($log);
     $pdf = galerie_demo_pdf($log);
     $t = galerie_demo_tables($img, $pdf, $log);
@@ -57,19 +56,16 @@ function galerie_demo_install(bool $force = false, ?callable $log = null, bool $
 function galerie_demo_remove(?callable $log = null, bool $pages = false): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
     $slugs = ['_vorlage-kuenstler', '_vorlage-ausstellungen', '_vorlage-werke'];
     if ($pages) $slugs = array_merge($slugs, ['start', 'ausstellungen', 'kuenstler', 'werke', 'viewing-room', 'die-galerie', 'kabinett', 'besuch']);
-    $n = 0;
-    foreach ($slugs as $s) {
-        foreach ($db->fetchAll('SELECT id FROM pages WHERE slug = ? AND parent_id IS NULL', [$s]) as $p) { $db->query('DELETE FROM pages WHERE id = ?', [(int) $p['id']]); $n++; }
-    }
-    if ($n) Pages::rebuildPaths();
-    foreach (galerie_demo_handles() as $h) if ($t = Tables::find($h)) Tables::delete($t);
+    $ids = [];
+    foreach ($slugs as $s) $ids = array_merge($ids, Demo::ids('SELECT id FROM pages WHERE slug = ? AND parent_id IS NULL', [$s]));
+    Demo::deletePages($ids);
+    Demo::deleteTables(...galerie_demo_handles());
     Tables::flush();
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . galerie_demo_tag() . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query("DELETE FROM media_collections WHERE name = 'Galerie (Demo)'");
-    $log('Vorhandene Demo entfernt (' . $n . ' Seiten).');
+    Demo::deleteMedia(galerie_demo_tag());
+    Demo::deleteCollections('Galerie (Demo)');
+    $log('Vorhandene Demo entfernt (' . count($ids) . ' Seiten).');
 }
 
 // ------------------------------------------------------------------ Platzhalter-Bilder (GD)
@@ -253,10 +249,9 @@ function galerie_demo_images(callable $log): array
     $credit = 'Platzhalter, automatisch erzeugt (GD) – kein echtes Werk';
     $all = [];
     $import = function (string $file, string $name, string $title, string $alt, bool $inCol = true) use ($col, $log, $credit, &$all): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => galerie_demo_tag(), 'credit' => $credit] + ($inCol ? ['collection' => $col] : []));
-        if ($err) $log($name . ': ' . $err);
-        if ($m) $all[] = (int) $m['id'];
-        return $m ? (int) $m['id'] : null;
+        $id = Demo::import($file, $name, $alt, ['title' => $title, 'tags' => galerie_demo_tag(), 'credit' => $credit] + ($inCol ? ['collection' => $col] : []), $log, false);
+        if ($id) $all[] = $id;
+        return $id;
     };
     $P = galerie_demo_palettes();
     // Werke: Schlüssel => [Stil, Palette, Breite, Höhe, Beschreibung für den Alt-Text]
@@ -319,24 +314,7 @@ function galerie_demo_images(callable $log): array
 /** Kleiner Pressetext als PDF (eine Seite) */
 function galerie_demo_pdf(callable $log): ?int
 {
-    $text = 'Pressetext (Demo) - Farbe als Ort - frei erfundener Inhalt.';
-    $stream = "BT /F1 18 Tf 72 760 Td ($text) Tj ET";
-    $objs = ['<</Type/Catalog/Pages 2 0 R>>', '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream", '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>'];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'gx') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'pressetext-farbe-als-ort-demo.pdf', '', ['title' => 'Pressetext „Farbe als Ort“ (Demo)', 'tags' => galerie_demo_tag()]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Pressetext (Demo) - Farbe als Ort - frei erfundener Inhalt.', 18), 'pressetext-farbe-als-ort-demo.pdf', ['title' => 'Pressetext „Farbe als Ort“ (Demo)', 'tags' => galerie_demo_tag()], $log);
 }
 
 // ------------------------------------------------------------------ Inhalte (alles frei erfunden)
@@ -392,22 +370,12 @@ function galerie_demo_work_defs(): array
     ];
 }
 
-function galerie_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
-
 /** Tabellen anlegen und füllen. @return array<string, array> Tabellen nach Kurzname */
 function galerie_demo_tables(array $img, ?int $pdf, callable $log): array
 {
     $out = [];
     // ---------------------------------------------------------------- Künstler
-    $t = galerie_demo_table([
+    $t = Demo::table([
         'handle' => 'kuenstler', 'name' => 'Künstler', 'singular' => 'Künstlerin / Künstler', 'icon' => 'users-three',
         'description' => 'Das Programm der Galerie – Namen, Porträt, Biografie. Detailseite unter /kuenstler/…',
         'fields' => [
@@ -442,7 +410,7 @@ function galerie_demo_tables(array $img, ?int $pdf, callable $log): array
         $out['kuenstler'] = $t;
     }
     // ---------------------------------------------------------------- Werke
-    $t = galerie_demo_table([
+    $t = Demo::table([
         'handle' => 'werke', 'name' => 'Werke', 'singular' => 'Werk', 'icon' => 'paint-brush',
         'description' => 'Werke mit Angaben, Verfügbarkeit und Preis. Detailseite unter /werke/…',
         'fields' => [
@@ -481,7 +449,7 @@ function galerie_demo_tables(array $img, ?int $pdf, callable $log): array
         $out['werke'] = $t;
     }
     // ---------------------------------------------------------------- Ausstellungen (Daten relativ zu heute)
-    $t = galerie_demo_table([
+    $t = Demo::table([
         'handle' => 'ausstellungen', 'name' => 'Ausstellungen', 'singular' => 'Ausstellung', 'icon' => 'calendar-dots',
         'description' => 'Ausstellungen, Messen und Präsentationen. Der Status (jetzt, demnächst, Archiv) ergibt sich aus Beginn und Ende. Detailseite unter /ausstellungen/…',
         'fields' => [
@@ -536,7 +504,7 @@ function galerie_demo_tables(array $img, ?int $pdf, callable $log): array
         $out['ausstellungen'] = $t;
     }
     // ---------------------------------------------------------------- Anfragen (öffentliches Formular, Feld „werk“ wird vorausgefüllt)
-    $t = galerie_demo_table([
+    $t = Demo::table([
         'handle' => 'anfragen', 'name' => 'Anfragen', 'singular' => 'Anfrage', 'icon' => 'envelope-simple',
         'description' => 'Anfragen zu Werken und an die Galerie (öffentliches Formular auf der Seite „Besuch“).',
         'fields' => [
@@ -578,9 +546,9 @@ function galerie_demo_settings(): void
 
 function galerie_demo_pages(array $img, array $tables, callable $log): void
 {
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $title, string $text, string $eyebrow = '') => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text], ['spaceBottom' => 'small']);
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
     $R = fn(int $i) => $img['rooms'][$i] ?? null;
     $db = app()->db;
     $sort = (int) $db->fetchValue('SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL');

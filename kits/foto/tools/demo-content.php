@@ -12,6 +12,7 @@
  */
 declare(strict_types=1);
 
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -42,13 +43,12 @@ function foto_demo_remove(?callable $log = null): void
     $db = app()->db;
     $slugs = ['start', 'arbeiten', 'ueber-mich', 'kontakt'];
     $ids = [];
-    foreach ($db->fetchAll("SELECT id FROM pages WHERE parent_id IS NULL AND type = 'page' AND slug IN ('" . implode("','", $slugs) . "')") as $r) {
-        $ids[] = (int) $r['id'];
-        foreach (Pages::descendantIds((int) $r['id']) as $c) $ids[] = (int) $c;
+    foreach (Demo::ids("SELECT id FROM pages WHERE parent_id IS NULL AND type = 'page' AND slug IN ('" . implode("','", $slugs) . "')") as $id) {
+        $ids[] = $id;
+        foreach (Pages::descendantIds($id) as $c) $ids[] = (int) $c;
     }
-    foreach (array_unique($ids) as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . FOTO_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
+    Demo::deletePages($ids);
+    Demo::deleteMedia(FOTO_DEMO_TAG);
     $db->query("DELETE FROM media_collections WHERE name LIKE '% (Demo)' AND description LIKE '%„foto“%'");
     if ($ids) $log('Vorhandene Demo entfernt (' . count($ids) . ' Seiten).');
 }
@@ -297,10 +297,7 @@ function foto_demo_pages(array $img, callable $log): void
     $L = $img['land']; $P = $img['portrait']; $R = $img['report'];
     $at = fn(array $list, int $i) => $list[$i % max(1, count($list))] ?? null;
     $items = fn(array $ids, array $captions = []) => array_map(fn($id, $k) => ['image' => $id, 'caption' => $captions[$k] ?? ''], $ids, array_keys($ids));
-    $page = function (array $f, array $blocks): int {
-        $blocks = array_map(fn($b) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $b['type'], 'data' => $b['data'] ?? [], 'tunes' => ['section' => $b['tunes'] ?? []]], $blocks);
-        return Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
-    };
+    $page = fn(array $f, array $blocks): int => Demo::page($f, array_map(fn($b) => Demo::block($b['type'], $b['data'] ?? [], $b['tunes'] ?? []), $blocks));
     $cta = ['type' => 'cta', 'tunes' => ['background' => 'muted'], 'data' => [
         'variant' => 'box', 'eyebrow' => '', 'title' => 'Ein Auftrag, eine Idee, eine Frage?',
         'text' => 'Schreiben Sie mir – ich melde mich innerhalb von zwei Werktagen.',

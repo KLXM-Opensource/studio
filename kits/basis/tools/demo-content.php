@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -35,9 +36,7 @@ function basis_demo_install(bool $force = false, ?callable $log = null): bool
     if ($force) basis_demo_remove($log);
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist (für Kopf-Infoleiste, Kontakt-Block, Karte)
-    foreach (['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Musterstraße 1', 'zip' => '12345', 'city' => 'Musterstadt']);
 
     $img = basis_demo_images($log);
     $pdf = basis_demo_pdf($log);
@@ -53,16 +52,12 @@ function basis_demo_install(bool $force = false, ?callable $log = null): bool
 function basis_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
-    $ids = array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE path IN (?, ?) OR path LIKE ? OR path LIKE ? OR slug = '_vorlage-demo-projekte'",
-        [BASIS_DEMO_PATH, BASIS_DEMO_OLD_PATH, BASIS_DEMO_PATH . '/%', BASIS_DEMO_OLD_PATH . '/%']), 'id'));
-    foreach ($ids as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'demo_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ? OR tags LIKE ?', ['%' . BASIS_DEMO_TAG . '%', '%' . BASIS_DEMO_OLD_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query('DELETE FROM media_collections WHERE name IN (?, ?)', [BASIS_DEMO_COLLECTION, BASIS_DEMO_OLD_COLLECTION]);
+    $ids = Demo::ids("SELECT id FROM pages WHERE path IN (?, ?) OR path LIKE ? OR path LIKE ? OR slug = '_vorlage-demo-projekte'",
+        [BASIS_DEMO_PATH, BASIS_DEMO_OLD_PATH, BASIS_DEMO_PATH . '/%', BASIS_DEMO_OLD_PATH . '/%']);
+    Demo::deletePages($ids);
+    Demo::deleteTablesByPrefix('demo_');
+    Demo::deleteMedia(BASIS_DEMO_TAG, BASIS_DEMO_OLD_TAG);
+    Demo::deleteCollections(BASIS_DEMO_COLLECTION, BASIS_DEMO_OLD_COLLECTION);
     $log('Vorhandene Musterseiten entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -153,47 +148,17 @@ function basis_demo_draw(string $file, array $dark, array $light, string $kind, 
 /** Kleine Beispiel-PDF (eine Seite) für den Download-Block */
 function basis_demo_pdf(callable $log): ?int
 {
-    $text = 'Musterseiten - Beispiel-PDF (Demo). Frei erfundener Inhalt.';
-    $stream = "BT /F1 20 Tf 72 760 Td ($text) Tj ET";
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'bk') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'musterseiten-leistungsuebersicht.pdf', '', ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => BASIS_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf(Demo::pdfText('Musterseiten - Beispiel-PDF (Demo). Frei erfundener Inhalt.', 20), 'musterseiten-leistungsuebersicht.pdf',
+        ['title' => 'Leistungsübersicht (Beispiel)', 'tags' => BASIS_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function basis_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function basis_demo_tables(array $img, callable $log): array
 {
     $out = [];
     // Projekte: Karten, Liste, Tabelle, Detailseite
-    $t = basis_demo_table([
+    $t = Demo::table([
         'handle' => 'demo_projekte', 'name' => 'Projekte (Demo)', 'singular' => 'Projekt', 'icon' => '▦',
         'description' => 'Beispiel-Tabelle der Musterseiten – frei erfundene Projekte.',
         'fields' => [
@@ -224,7 +189,7 @@ function basis_demo_tables(array $img, callable $log): array
     }
 
     // Veranstaltungen: Kalender mit Wiederholung, ganztägigem Termin und Kategorien
-    $t = basis_demo_table([
+    $t = Demo::table([
         'handle' => 'demo_termine', 'name' => 'Veranstaltungen (Demo)', 'singular' => 'Veranstaltung', 'icon' => '▦',
         'description' => 'Beispiel-Kalender der Musterseiten – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -262,7 +227,7 @@ function basis_demo_tables(array $img, callable $log): array
     }
 
     // Formular 1: Rückrufwunsch (einfach)
-    $t = basis_demo_table([
+    $t = Demo::table([
         'handle' => 'demo_rueckruf', 'name' => 'Rückrufwünsche (Demo)', 'singular' => 'Rückrufwunsch', 'icon' => '☏',
         'description' => 'Öffentliches Beispiel-Formular der Musterseiten.',
         'fields' => [
@@ -278,7 +243,7 @@ function basis_demo_tables(array $img, callable $log): array
     if ($t) $out['rueckruf'] = $t;
 
     // Formular 2: Bedingungen, IBAN, wiederholbare Gruppe
-    $t = basis_demo_table([
+    $t = Demo::table([
         'handle' => 'demo_antrag', 'name' => 'Mitgliedsanträge (Demo)', 'singular' => 'Mitgliedsantrag', 'icon' => '✎',
         'description' => 'Beispiel für Bedingungen, IBAN-Prüfung und wiederholbare Gruppen.',
         'fields' => [
@@ -309,7 +274,7 @@ function basis_demo_tables(array $img, callable $log): array
 function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): void
 {
     $I = fn(int $n) => $img['all'][$n % max(1, count($img['all']))] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text], ['background' => 'muted']);
     $cta = $B('cta', ['variant' => 'band', 'title' => 'Genug gesehen? Dann legen Sie los.', 'text' => 'Alle Bausteine lassen sich frei kombinieren – Farben, Schriften und Navigation stellen Sie unter Verwaltung → Design ein.',
         'button_label' => 'Kontakt aufnehmen', 'button_link' => '/kontakt', 'button2_label' => 'Zur Übersicht', 'button2_link' => '/musterseiten'], ['background' => 'accent']);
@@ -317,9 +282,7 @@ function basis_demo_pages(array $img, ?int $pdf, array $tables, callable $log): 
     $term = $tables['termine']['handle'] ?? '';
 
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
-    $page = function (array $f, array $blocks) {
-        return Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
-    };
+    $page = Demo::page(...);
 
     // ---------------------------------------------------------------- Übersicht (Musterseite für den Style-Editor)
     $root = $page(['slug' => BASIS_DEMO_PATH, 'title' => 'Musterseiten', 'sort' => $sort, 'og_image' => $I(0),
@@ -525,12 +488,11 @@ function basis_demo_heroes(?callable $log = null): bool
     $base = '/' . $root['path'];
     foreach ($db->fetchAll('SELECT id FROM pages WHERE path = ?', [$root['path'] . '/hero-varianten']) as $old) $db->query('DELETE FROM pages WHERE id = ?', [(int) $old['id']]);
     Pages::rebuildPaths();
-    $img = array_map('intval', array_column($db->fetchAll('SELECT id FROM media WHERE tags LIKE ? OR tags LIKE ? ORDER BY id', ['%' . BASIS_DEMO_TAG . '%', '%' . BASIS_DEMO_OLD_TAG . '%']), 'id'));
+    $img = Demo::ids('SELECT id FROM media WHERE tags LIKE ? OR tags LIKE ? ORDER BY id', ['%' . BASIS_DEMO_TAG . '%', '%' . BASIS_DEMO_OLD_TAG . '%']);
     $img = array_values(array_filter($img, fn($id) => str_starts_with((string) (Media::find($id)['mime'] ?? ''), 'image/')));
     $I = fn(int $n) => $img ? $img[$n % count($img)] : null;
     $form = Tables::find('demo_rueckruf') ? 'demo_rueckruf' : '';
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => ''], 'tunes' => ['section' => $tunes + ['divider' => true]]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes + ['divider' => true], ['eyebrow' => '', 'text' => '']);
     $blocks = [
         $B('compact', ['eyebrow' => 'Musterseiten · Hero-Varianten', 'title' => 'Sechs Einstiege, ein Block.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sechs Varianten. Die drei neuen bringen ein Werkzeug direkt nach oben: Suche, Formular und Standort. Jede Variante erscheint hier einmal – auf echten Seiten steht nur ein Einstieg ganz oben.'],

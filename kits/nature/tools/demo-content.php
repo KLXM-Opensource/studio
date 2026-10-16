@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 use Core\Data\Entries;
 use Core\Data\Tables;
+use Core\Kit\Demo;
 use Core\Media;
 use Core\Pages;
 
@@ -36,9 +37,7 @@ function nature_demo_install(bool $force = false, ?callable $log = null): bool
 
     // Fiktive Kontaktdaten nur ergänzen, wo nichts eingetragen ist (Kopf, Kontakt-Block, Karte).
     // Kartenpunkt: geografischer Mittelpunkt Deutschlands (Wiese, keine Adresse von Personen oder Firmen).
-    foreach (['phone' => '0123 456789-0', 'street' => 'Am Wiesengrund 1', 'zip' => '12345', 'city' => 'Musterfeld', 'geo' => '51.1634,10.4477'] as $k => $v) {
-        if (trim((string) setting($k)) === '') app()->settings->set($k, $v);
-    }
+    Demo::fill(['phone' => '0123 456789-0', 'street' => 'Am Wiesengrund 1', 'zip' => '12345', 'city' => 'Musterfeld', 'geo' => '51.1634,10.4477']);
 
     $img = nature_demo_images($log);
     $pdf = nature_demo_pdf($log);
@@ -54,19 +53,15 @@ function nature_demo_install(bool $force = false, ?callable $log = null): bool
 function nature_demo_remove(?callable $log = null): void
 {
     $log ??= static fn(string $m) => null;
-    $db = app()->db;
     $ids = [];
     foreach (NATURE_DEMO_PAGES as $p) {
-        $ids = array_merge($ids, array_map('intval', array_column($db->fetchAll('SELECT id FROM pages WHERE path = ? OR path LIKE ?', [$p, $p . '/%']), 'id')));
+        $ids = array_merge($ids, Demo::ids('SELECT id FROM pages WHERE path = ? OR path LIKE ?', [$p, $p . '/%']));
     }
-    $ids = array_merge($ids, array_map('intval', array_column($db->fetchAll("SELECT id FROM pages WHERE slug = '_vorlage-hofladen'"), 'id')));
-    foreach (array_unique($ids) as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
-    if ($ids) Pages::rebuildPaths();
-    foreach (Tables::all() as $t) {
-        if (str_starts_with($t['handle'], 'hof_')) Tables::delete($t);
-    }
-    foreach ($db->fetchAll('SELECT id FROM media WHERE tags LIKE ?', ['%' . NATURE_DEMO_TAG . '%']) as $m) Media::delete((int) $m['id']);
-    $db->query('DELETE FROM media_collections WHERE name = ?', [NATURE_DEMO_COLLECTION]);
+    $ids = array_merge($ids, Demo::ids("SELECT id FROM pages WHERE slug = '_vorlage-hofladen'"));
+    Demo::deletePages($ids);
+    Demo::deleteTablesByPrefix('hof_');
+    Demo::deleteMedia(NATURE_DEMO_TAG);
+    Demo::deleteCollections(NATURE_DEMO_COLLECTION);
     $log('Vorhandene Demo-Inhalte entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -87,13 +82,8 @@ function nature_demo_palette(): array
 function nature_demo_images(callable $log): array
 {
     $col = Media::createCollection(NATURE_DEMO_COLLECTION, 'Illustrationen des Kits „nature“ – automatisch erzeugt, frei verwendbar, ohne Personen oder Marken.');
-    $import = function (string $file, string $name, string $title, string $alt, bool $inCollection) use ($col, $log): ?int {
-        [$m, $err] = Media::import($file, $name, $alt, ['title' => $title, 'tags' => NATURE_DEMO_TAG, 'credit' => 'Illustration, automatisch erzeugt']
-            + ($inCollection ? ['collection' => $col] : []));
-        @unlink($file);
-        if ($err) $log($name . ': ' . $err);
-        return $m ? (int) $m['id'] : null;
-    };
+    $import = fn(string $file, string $name, string $title, string $alt, bool $inCollection): ?int => Demo::import($file, $name, $alt,
+        ['title' => $title, 'tags' => NATURE_DEMO_TAG, 'credit' => 'Illustration, automatisch erzeugt'] + ($inCollection ? ['collection' => $col] : []), $log);
     $all = $wide = $tall = $objects = [];
     $scenes = [
         'acker' => ['Acker im Frühsommer', 'Illustration: Ackerreihen, die zu sanften Hügeln führen, darüber Himmel und Sonne'],
@@ -282,11 +272,11 @@ function nature_demo_object(string $file, string $kind): void
     for ($k = 0; $k < 14; $k++) imagefilledellipse($im, 1200, 1560, 1300 - $k * 40, 110 - $k * 4, $c([40, 30, 10], 122 - $k));
     switch ($kind) {
         case 'honig':
-            nature_rrect($im, 820, 700, 1580, 1540, 110, $c([214, 150, 48]));
-            nature_rrect($im, 860, 760, 1000, 1480, 60, $c([236, 190, 96], 40));
-            nature_rrect($im, 880, 520, 1520, 720, 50, $c($P['bark']));
+            Demo::rrect($im, 820, 700, 1580, 1540, 110, $c([214, 150, 48]));
+            Demo::rrect($im, 860, 760, 1000, 1480, 60, $c([236, 190, 96], 40));
+            Demo::rrect($im, 880, 520, 1520, 720, 50, $c($P['bark']));
             for ($k = 0; $k < 7; $k++) imagefilledrectangle($im, 900 + $k * 90, 540, 930 + $k * 90, 700, $c([72, 55, 40]));
-            nature_rrect($im, 900, 980, 1500, 1320, 30, $c($P['cream']));
+            Demo::rrect($im, 900, 980, 1500, 1320, 30, $c($P['cream']));
             imagefilledpolygon($im, [1200, 1030, 1270, 1150, 1200, 1270, 1130, 1150], $c($P['moss']));
             imagesetthickness($im, 10);
             imageline($im, 1200, 1060, 1200, 1250, $c($P['cream']));
@@ -322,7 +312,7 @@ function nature_demo_object(string $file, string $kind): void
                 foreach ([-120, -40, 40, 120] as $fx) imageline($im, $x, $y, $x + $fx, $y - 380 + abs($fx), $c($j % 2 ? $P['moss'] : $P['fern']));
             }
             imagesetthickness($im, 1);
-            nature_rrect($im, 1050, 780, 1350, 850, 30, $c($P['clay']));
+            Demo::rrect($im, 1050, 780, 1350, 850, 30, $c($P['clay']));
             break;
         case 'brot':
             imagefilledellipse($im, 1200, 1180, 1300, 760, $c([176, 118, 64]));
@@ -335,7 +325,7 @@ function nature_demo_object(string $file, string $kind): void
             foreach ([[-300, 700, 760], [300, 700, 760], [-150, 800, 820], [150, 800, 820], [0, 820, 860]] as $j => [$dx, $w2, $h2]) {
                 imagefilledellipse($im, 1200 + $dx, 1150, $w2, $h2, $c($j < 2 ? [196, 98, 36] : ($j < 4 ? [214, 112, 42] : [228, 128, 52])));
             }
-            nature_rrect($im, 1160, 640, 1250, 800, 30, $c($P['bark']));
+            Demo::rrect($im, 1160, 640, 1250, 800, 30, $c($P['bark']));
             imagefilledellipse($im, 1330, 720, 260, 120, $c($P['moss']));
             break;
     }
@@ -346,15 +336,6 @@ function nature_demo_object(string $file, string $kind): void
     imagepng($out, $file, 9);
 }
 
-/** Abgerundetes Rechteck (gefüllt) */
-function nature_rrect(\GdImage $im, int $x1, int $y1, int $x2, int $y2, int $r, int $col): void
-{
-    $r = max(0, min($r, (int) (($x2 - $x1) / 2), (int) (($y2 - $y1) / 2)));
-    imagefilledrectangle($im, $x1 + $r, $y1, $x2 - $r, $y2, $col);
-    imagefilledrectangle($im, $x1, $y1 + $r, $x2, $y2 - $r, $col);
-    foreach ([[$x1 + $r, $y1 + $r], [$x2 - $r, $y1 + $r], [$x1 + $r, $y2 - $r], [$x2 - $r, $y2 - $r]] as [$cx, $cy]) imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $col);
-}
-
 /** Beispiel-PDF (eine Seite, reines PDF ohne Bibliothek) */
 function nature_demo_pdf(callable $log): ?int
 {
@@ -362,39 +343,10 @@ function nature_demo_pdf(callable $log): ?int
     $stream = 'BT /F1 20 Tf 72 760 Td (' . $lines[0] . ') Tj /F1 13 Tf';
     foreach (array_slice($lines, 1) as $l) $stream .= ' 0 -28 Td (' . $l . ') Tj';
     $stream .= ' ET';
-    $objs = [
-        '<</Type/Catalog/Pages 2 0 R>>',
-        '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-        '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-        '<</Length ' . strlen($stream) . ">>stream\n$stream\nendstream",
-        '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
-    ];
-    $pdf = "%PDF-1.4\n";
-    $off = [];
-    foreach ($objs as $i => $o) { $off[] = strlen($pdf); $pdf .= ($i + 1) . " 0 obj\n$o\nendobj\n"; }
-    $xref = strlen($pdf);
-    $pdf .= "xref\n0 " . (count($objs) + 1) . "\n0000000000 65535 f \n";
-    foreach ($off as $o) $pdf .= sprintf("%010d 00000 n \n", $o);
-    $pdf .= 'trailer<</Size ' . (count($objs) + 1) . "/Root 1 0 R>>\nstartxref\n$xref\n%%EOF\n";
-    $file = tempnam(sys_get_temp_dir(), 'nt') . '.pdf';
-    file_put_contents($file, $pdf);
-    [$m, $err] = Media::import($file, 'wiesengrund-saisonkalender.pdf', '', ['title' => 'Saisonkalender (Beispiel)', 'tags' => NATURE_DEMO_TAG]);
-    @unlink($file);
-    if ($err) $log('PDF: ' . $err);
-    return $m ? (int) $m['id'] : null;
+    return Demo::pdf($stream, 'wiesengrund-saisonkalender.pdf', ['title' => 'Saisonkalender (Beispiel)', 'tags' => NATURE_DEMO_TAG], $log);
 }
 
 // ------------------------------------------------------------------ Datentabellen
-
-function nature_demo_table(array $def, callable $log): ?array
-{
-    [$clean, $errors] = Tables::validate($def);
-    if ($errors) {
-        $log('Tabelle ' . $def['handle'] . ': ' . implode(' ', $errors));
-        return null;
-    }
-    return Tables::find(Tables::create($clean));
-}
 
 function nature_demo_tables(array $img, callable $log): array
 {
@@ -402,7 +354,7 @@ function nature_demo_tables(array $img, callable $log): array
     $O = fn(string $k) => $img['objects'][$k] ?? null;
 
     // Hofladen: Karten, Liste, Tabelle (Preisliste), Detailseite
-    $t = nature_demo_table([
+    $t = Demo::table([
         'handle' => 'hof_produkte', 'name' => 'Hofladen (Demo)', 'singular' => 'Produkt', 'icon' => 'storefront',
         'description' => 'Beispiel-Sortiment des fiktiven Hofguts Wiesengrund – Preise frei erfunden.',
         'fields' => [
@@ -439,7 +391,7 @@ function nature_demo_tables(array $img, callable $log): array
     }
 
     // Termine: Führungen, Markttage, Kurse – Wiederholung, ganztägig, Kategorien, Abonnieren
-    $t = nature_demo_table([
+    $t = Demo::table([
         'handle' => 'hof_termine', 'name' => 'Termine (Demo)', 'singular' => 'Termin', 'icon' => 'calendar-dots',
         'description' => 'Beispiel-Kalender des fiktiven Hofguts – Termine relativ zum Tag der Anlage.',
         'fields' => [
@@ -481,7 +433,7 @@ function nature_demo_tables(array $img, callable $log): array
     }
 
     // Öffentliches Formular: Führung für Gruppen anfragen (Klassenstufe nur bei „Schulklasse“)
-    $t = nature_demo_table([
+    $t = Demo::table([
         'handle' => 'hof_gruppen', 'name' => 'Gruppenanfragen (Demo)', 'singular' => 'Anfrage', 'icon' => 'users-three',
         'description' => 'Öffentliches Beispiel-Formular: Führungen für Schulklassen, Kitas, Vereine und Firmen.',
         'fields' => [
@@ -513,7 +465,7 @@ function nature_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
     $W = fn(string $k) => $img['wide'][$k] ?? null;
     $T = fn(int $n) => $img['tall'][$n % max(1, count($img['tall']))] ?? null;
     $O = fn(string $k) => $img['objects'][$k] ?? null;
-    $B = fn(string $type, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'data' => $data, 'tunes' => ['section' => $tunes]];
+    $B = Demo::block(...);
     $hero = fn(string $eyebrow, string $title, string $text) => $B('hero', ['variant' => 'compact', 'eyebrow' => $eyebrow, 'title' => $title, 'text' => $text]);
     $cta = $B('cta', ['variant' => 'band', 'eyebrow' => 'Besuch planen', 'title' => 'Wir freuen uns auf *Ihren Besuch*.', 'text' => 'Farben, Jahreszeit, Schriften, Kopf und Fuß stellen Sie unter Verwaltung → Design ein.',
         'button_label' => 'Termine', 'button_link' => '/termine', 'button2_label' => 'Anfahrt', 'button2_link' => '/kontakt'], ['background' => 'dark']);
@@ -525,7 +477,7 @@ function nature_demo_pages(array $img, ?int $pdf, array $tables, callable $log):
         'button_label' => $btn[0] ?? '', 'button_link' => $btn[1] ?? '', 'button2_label' => $btn[2] ?? '', 'button2_link' => $btn[3] ?? ''];
     $dl = fn(string $table, string $layout, array $extra) => $extra + ['eyebrow' => '', 'intro' => '', 'table' => $table, 'layout' => $layout, 'columns' => '3', 'ratio' => '4:3', 'limit' => 0,
         'filter_field' => '', 'filter_op' => '=', 'filter_value' => '', 'sort_field' => '', 'sort_dir' => '', 'paginate' => false, 'link_detail' => true, 'more_label' => '', 'more_link' => ''];
-    $page = fn(array $f, array $blocks) => Pages::create($f + ['status' => 'published', 'menu' => 1], Pages::sanitizeBlocks($blocks));
+    $page = Demo::page(...);
     $db = app()->db;
 
     // Reihenfolge im Menü: Der Hof · Hofladen · Termine · Erleben · Kontakt
@@ -746,8 +698,7 @@ function nature_demo_heroes(?callable $log = null): bool
     $form = Tables::find('hof_gruppen') ? 'hof_gruppen' : '';
     $teich = $db->fetch("SELECT id FROM media WHERE tags LIKE ? AND original_name LIKE ? ORDER BY id LIMIT 1", ['%' . NATURE_DEMO_TAG . '%', '%teich%']);
     $none = ['button_label' => '', 'button_link' => '', 'button2_label' => '', 'button2_link' => ''];
-    $B = fn(string $variant, array $data, array $tunes = []) => ['id' => substr(bin2hex(random_bytes(6)), 0, 10), 'type' => 'hero',
-        'data' => ['variant' => $variant] + $data + ['eyebrow' => '', 'text' => ''] + $none, 'tunes' => ['section' => $tunes + ['divider' => true]]];
+    $B = fn(string $variant, array $data, array $tunes = []) => Demo::hero($variant, $data, $tunes + ['divider' => true], ['eyebrow' => '', 'text' => ''] + $none);
     $blocks = [
         $B('compact', ['eyebrow' => 'Erleben · Hero-Varianten', 'title' => 'Sieben Einstiege, *ein Block*.',
             'text' => 'Der Block „Einstieg (Hero)“ hat sieben Varianten. Die drei neuen bringen das Wichtigste nach oben: ob der Hofladen geöffnet hat, die nächsten Markttage und ein Anfrageformular. Jede erscheint hier einmal – auf echten Seiten steht nur ein Einstieg ganz oben.'],
