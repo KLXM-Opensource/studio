@@ -119,9 +119,11 @@ gewählt werden müssen. Der Editor setzt Knöpfe in der Vorschau auf `tabIndex 
 ## Bewegung
 
 Mit „Animationen“ (Design → Bewegung) und ohne „Bewegung reduzieren“:
-- **Seitenwechsel** über View Transitions (`@view-transition { navigation: auto }` in `site.css`; Chrome, Edge, Safari ≥ 18.2 – sonst normaler
-  Wechsel): Kopf (`f-hdr`) bleibt stehen, Inhalt blendet über; das angeklickte Bild (Ereignis `pageswap`, `js/site.js`) und das Titelbild der
-  Serie (`.sh__cover`) tragen den Namen `f-morph` und gehen ineinander über, zurück findet `pagereveal` das Bild der vorigen Seite.
+- **Seitenwechsel** über View Transitions (`@view-transition { navigation: auto }` in `site.css`; Chrome, Edge, Safari ≥ 18.2 – sonst kurzes
+  Ausblenden): Kopf (`f-hdr`) bleibt stehen, Inhalt blendet über. Jeder Wechsel morpht: angeklicktes Bild → großes Bild der Zielseite
+  (`f-morph`, Titelbild der Serie `.sh__cover` per CSS), angeklickter Text → erste sichtbare Überschrift (`f-title`). Alte Seite: Klick bzw.
+  `pageswap` (`js/site.js`); neue Seite: `pagereveal` in `js/vt.js` (≈ 1 KB, im `<head>`, sonst zu spät), Herkunft über `sessionStorage`
+  (ohne Navigation-API, auch Safari).
 - **Lightbox** (`js/lightbox.js`, Web Animations): Zoom aus dem Vorschaubild und zurück, Blättern mit gleitender Überblendung, Wischen folgt dem Finger.
 
 ## Demo

@@ -166,25 +166,44 @@ let suggestJs;
 d.addEventListener('focusin', e => { const s = e.target.dataset?.suggestJs; s && !suggestJs && (suggestJs = d.head.append(Object.assign(d.createElement('script'), { src: s })) || 1); });
 
 // ------------------------------------------------------------ Fließende Seitenwechsel (View Transitions, CSS @view-transition)
-// Das angeklickte Bild (Serien-Übersicht, Bildstrom, Karten) und das Titelbild der Serie (.sh__cover, Name im CSS) gehen
-// ineinander über; zurück findet die Übersicht das Bild der vorigen Seite. Ohne „Animationen“ oder mit „Bewegung reduzieren“: keiner.
-let vtLink = null;
-d.addEventListener('click', e => { vtLink = e.target.closest?.('a[href]') || null; }, true);
+// Jeder Wechsel morpht: angeklicktes Bild → großes Bild der Zielseite („f-morph“), angeklickter Text → Überschrift („f-title“).
+// Zurück: Überschrift und großes Bild der Seite gleiten an ihren Platz bzw. in das Bild, das zur vorigen Seite führt.
+// Ohne „Animationen“ oder mit „Bewegung reduzieren“: keiner. Browser ohne Seitenübergänge: kurzes Ausblenden.
 const vtImg = a => a?.querySelector('img') || a?.closest('li,article,figure,.tile,.mo__t')?.querySelector('img');
-const vtName = (el, on) => { if (el) el.style.viewTransitionName = on ? 'f-morph' : ''; };
+const vtSet = (el, name) => { if (el) el.style.viewTransitionName = name; };
+const vtClear = () => { d.querySelectorAll('[style*="view-transition-name"]').forEach(el => el.style.viewTransitionName = ''); d.querySelectorAll('.vt-off').forEach(c => c.classList.remove('vt-off')); };
+const vtOn = () => html.classList.contains('has-motion') && !reduce.matches && 'onpagereveal' in window;
+const vtKey = 'f-vt-from';
+const inView = el => { const r = el?.getBoundingClientRect(); return !!r && r.width > 0 && r.bottom > 0 && r.top < innerHeight; };
+// Großes Bild der Seite: Titelbild der Serie, sonst das erste sichtbare Bild im Inhalt mit mindestens 30 % der Breite
+const bigImg = () => d.querySelector('.sh__cover img') || [...d.querySelectorAll('main img')].find(i => inView(i) && i.getBoundingClientRect().width > innerWidth * .3);
+const title = () => [...d.querySelectorAll('main h1, main h2')].find(h => inView(h) && h.getBoundingClientRect().width > 8) || null;
+const own = (img, name) => { if (!img) return; if (!img.closest('.sh__cover')) d.querySelectorAll('.sh__cover').forEach(c => c.classList.add('vt-off')); vtSet(img.closest('.sh__cover') ? null : img, name); };
+let vtClicked = false;
+d.addEventListener('click', e => {
+  const a = e.target.closest?.('a[href]');
+  if (!vtOn() || !a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank' || a.origin !== location.origin
+    || a.hasAttribute('data-lb') || a.hasAttribute('download') || (a.hash && a.pathname === location.pathname)) return;
+  vtClear();
+  const img = vtImg(a);
+  if (img && img.getBoundingClientRect().width > 8) own(img, 'f-morph');   // unsichtbare Vorschau (Serienliste): Text morphen
+  else if (a.textContent.trim().length < 60) vtSet(a, 'f-title');
+  vtClicked = true;
+});
+// Wechsel ohne Klick auf einen Link (Zurück, Vor, Adresse): Überschrift und großes Bild dieser Seite benennen
 addEventListener('pageswap', e => {
-  if (!e.viewTransition) return;
-  const to = e.activation?.entry?.url;
-  const a = vtLink && vtLink.href === to ? vtLink : [...d.querySelectorAll('a[href]')].find(x => x.href === to && vtImg(x));
-  const img = vtImg(a);
-  if (img && !img.closest('.sh__cover')) { d.querySelectorAll('.sh__cover').forEach(c => c.classList.add('vt-off')); vtName(img, true); }
+  if (!e.viewTransition || !vtOn()) return;
+  if (!vtClicked) { vtClear(); own(bigImg(), 'f-morph'); vtSet(title(), 'f-title'); }
+  vtClicked = false;
 });
-addEventListener('pagereveal', e => {
-  if (!e.viewTransition) return;
-  e.viewTransition.ready.catch(() => {});   // abgebrochener Übergang (z. B. schneller Klick) ist kein Fehler
-  if (!html.classList.contains('has-motion') || reduce.matches) { e.viewTransition.skipTransition(); return; }
-  const from = navigation?.activation?.from?.url;
-  const a = from && [...d.querySelectorAll('a[href]')].find(x => x.href === from && vtImg(x));
-  const img = vtImg(a);
-  if (img) { vtName(img, true); e.viewTransition.finished.finally(() => vtName(img, false)); }
+// Ohne Seitenübergänge im Browser: Inhalt kurz ausblenden, dann wechseln (zurück aus dem Verlauf zeigt die Seite sofort)
+if (!('onpagereveal' in window)) d.addEventListener('click', e => {
+  const a = e.target.closest?.('a[href]');
+  if (!html.classList.contains('has-motion') || reduce.matches || !a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey
+    || a.target === '_blank' || a.origin !== location.origin || a.hasAttribute('data-lb') || a.hasAttribute('download') || (a.hash && a.pathname === location.pathname)) return;
+  e.preventDefault();
+  html.classList.add('is-leaving');
+  setTimeout(() => { location.href = a.href; }, 220);
 });
+addEventListener('pageshow', e => { html.classList.remove('is-leaving'); if (e.persisted) vtClear(); });
+// Neue Seite (pagereveal): js/vt.js im <head> – muss vor dem ersten Bild laufen

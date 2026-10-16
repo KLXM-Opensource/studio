@@ -23,11 +23,15 @@
   @view-transition{navigation:auto}
   .hdr{view-transition-name:f-hdr}
   .sh__cover:not(.vt-off){view-transition-name:f-morph}
-  ::view-transition-old(root){animation:f-vt-out .3s cubic-bezier(.4,0,1,1) both}
-  ::view-transition-new(root){animation:f-vt-in .55s cubic-bezier(.2,.7,.2,1) .05s both}
+  ::view-transition-old(root){animation:f-vt-out .34s cubic-bezier(.4,0,1,1) both}
+  ::view-transition-new(root){animation:f-vt-in .6s cubic-bezier(.2,.7,.2,1) .08s both}
+  /* Ohne Seitenübergänge im Browser (Firefox, ältere Safari): sanft ausblenden beim Verlassen (js/site.js) */
+  .has-motion.is-leaving main{opacity:0;translate:0 -.75rem;scale:.99;transition:opacity .22s ease,translate .22s ease,scale .22s ease}
   ::view-transition-group(f-morph){animation-duration:.6s;animation-timing-function:cubic-bezier(.2,.75,.15,1)}
   ::view-transition-old(f-morph),::view-transition-new(f-morph){height:100%;object-fit:cover;overflow:clip}
+  ::view-transition-group(f-title){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.75,.15,1)}
+  ::view-transition-old(f-title),::view-transition-new(f-title){height:100%;width:auto;object-fit:none;object-position:left center}
   :root:not(.has-motion)::view-transition-group(*),:root:not(.has-motion)::view-transition-old(*),:root:not(.has-motion)::view-transition-new(*){animation:none}
 }
-@keyframes f-vt-out{to{opacity:0;translate:0 -.75rem}}
-@keyframes f-vt-in{from{opacity:0;translate:0 1.25rem}}
+@keyframes f-vt-out{to{opacity:0;translate:0 -1rem;scale:.985}}
+@keyframes f-vt-in{from{opacity:0;translate:0 2rem}}
