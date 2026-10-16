@@ -695,13 +695,8 @@ final class Redirects
 
     public static function exportCsv(): string
     {
-        $fh = fopen('php://temp', 'r+');
-        fputcsv($fh, ['source', 'target', 'code', 'note', 'active', 'hits', 'last_hit'], ';', '"', '');
-        foreach (self::all() as $r) {
-            fputcsv($fh, [$r['source'], $r['target'], $r['code'], (string) $r['note'], $r['active'], $r['hits'], (string) $r['last_hit']], ';', '"', '');
-        }
-        rewind($fh);
-        return "\xEF\xBB\xBF" . stream_get_contents($fh);
+        return \Core\Http\Response::csvText(['source', 'target', 'code', 'note', 'active', 'hits', 'last_hit'],
+            array_map(fn($r) => [$r['source'], $r['target'], $r['code'], (string) $r['note'], $r['active'], $r['hits'], (string) $r['last_hit']], self::all()));
     }
 
     public static function exportJson(): string

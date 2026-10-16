@@ -27,6 +27,11 @@ final class FormatSelfTest
         $eq('date weekday, day_month', [$de->date($ts, 'weekday'), $en->date($ts, 'weekday'), $de->date($ts, 'day_month')], ['Donnerstag', 'Thursday', '24. September']);
         $eq('date leer/ungültig/DateTime', [$de->date(null), $de->date(''), $de->date('kein Datum'), $de->date(new \DateTimeImmutable('2026-01-02'))], ['', '', '', '02.01.2026']);
         $eq('time, datetime', [$de->time($ts), $de->datetime($ts), $en->datetime($ts), $de->time('')], ['14:05', '24.09.2026, 14:05', '24/09/2026, 14:05', '']);
+        if (class_exists(\IntlDatePatternGenerator::class)) {
+            // ICU: Reihenfolge, Trenner und Monatsnamen kommen aus der Sprache (weitere Website-Sprachen ohne eigenen Code)
+            $eq('ICU weitere Sprachen', [Format::for('fr')->date($ts, 'long'), Format::for('sl')->date($ts), Format::for('it')->date($ts, 'day_month')],
+                ['24 septembre 2026', '24. 09. 2026', '24 settembre']);
+        }
 
         // Relative Angaben (fester Zeitpunkt)
         $now = strtotime('2026-09-30 12:00:00');

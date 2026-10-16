@@ -829,8 +829,8 @@ Werte für die Anzeige formatieren – eine Stelle für Datum, Zahl, Größe, Da
 - `static admin(): self` – Formatierer für die Verwaltung (Sprache der angemeldeten Person, I18n::locale())
 - `bytes(int|float|null $bytes): string` – Dateigröße: unter 1 MB ganze KB (mindestens 1 KB), dann MB bzw. GB mit einer Nachkommastelle
 - `currency(string|int|float|null $v, string $currency = 'EUR', ?int $decimals = 2): string` – Betrag: 19,90 € (de) bzw. €19.90; $decimals null = 2, bei ganzen Beträgen 0
-- `date(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September)
-- `datetime(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum und Uhrzeit „24.09.2026, 14:05“ (Stil des Datums wie date())
+- `date(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September) – über ICU
+- `datetime(DateTimeInterface|string|int|null $when, string $style = 'short'): string` – Datum und Uhrzeit („24.09.2026, 14:05“; Stil des Datums wie date()) – über ICU
 - `decimal(string|int|float|null $v, int $max = 2): string` – Zahl mit höchstens $max Nachkommastellen, ohne Nullen am Ende: 2,5 · 3 · 1.234,57
 - `duration(int|float|null $seconds, bool $unit = true): string` – Dauer: 3:05 min bzw. 1:02:03 h; ohne Einheit 3:05 / 1:02:03 (z. B. für Player)
 - `excerpt(?string $text, int $max = 160, bool $html = true): string` – Auszug als reiner Text: Tags entfernen (Rich-Text → Text, Entities aufgelöst), *Betonung*-Sternchen entfernen, Leerraum zusammenfassen, an einer Wortgrenze
@@ -839,7 +839,7 @@ Werte für die Anzeige formatieren – eine Stelle für Datum, Zahl, Größe, Da
 - `number(string|int|float|null $v, int $decimals = 0): string` – Zahl mit festen Nachkommastellen: 1.234,5 (de) bzw. 1,234.5
 - `phone(?string $number): string` – Telefonnummer für die Anzeige (Standardsprache wie eingegeben, sonst international – phone_display())
 - `relative(DateTimeInterface|string|int|null $when, ?int $now = null, string $unit = 'minute'): string` – Relative Angabe. $unit 'minute' (Standard): „gerade eben“, „vor 5 Min.“, „heute, 14:05“, „gestern, 09:12“, „vor 3 Tagen“
-- `time(DateTimeInterface|string|int|null $when): string` – Uhrzeit 24-Stunden „14:05“
+- `time(DateTimeInterface|string|int|null $when): string` – Uhrzeit in der Form der Sprache („14:05“) – über ICU
 
 ### `FormatSelfTest` (class, `app/FormatSelfTest.php`)
 
@@ -3919,6 +3919,9 @@ Konstanten: `PACKED`
 
 - `__construct(string $body = '', int $status = 200, array $headers = [])`
 - `static alreadySent(): self`
+- `static csv(string $filename, array $header, iterable $rows): self` – CSV zum Herunterladen (Response::csvText + download)
+- `static csvText(array $header, iterable $rows): string` – CSV wie Excel sie erwartet: Semikolon, UTF-8 mit BOM, eine Kopfzeile. $rows: Listen von Werten
+- `static download(string $body, string $filename, string $type = 'application/octet-stream'): self` – Datei zum Herunterladen (Dateiname wird bereinigt; nie zwischengespeichert)
 - `static fail(string $error, int $status = 422, array $extra = []): self` – Fehler als JSON in einheitlicher Form {ok: false, error: …} (+ weitere Felder)
 - `header(string $name, string $value): self`
 - `static json(mixed $data, int $status = 200): self`

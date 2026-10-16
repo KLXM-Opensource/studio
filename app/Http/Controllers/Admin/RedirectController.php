@@ -131,10 +131,7 @@ final class RedirectController extends AdminController
         $this->gate($r);
         $json = ($r->query['format'] ?? 'csv') === 'json';
         $file = 'weiterleitungen-' . site()->key . '-' . date('Y-m-d') . ($json ? '.json' : '.csv');
-        return self::secure(new Response($json ? Redirects::exportJson() : Redirects::exportCsv(), 200, [
-            'Content-Type' => $json ? 'application/json; charset=utf-8' : 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $file . '"',
-        ]));
+        return self::secure(Response::download($json ? Redirects::exportJson() : Redirects::exportCsv(), $file, $json ? 'application/json; charset=utf-8' : 'text/csv; charset=utf-8'));
     }
 
     public function settings(Request $r): Response

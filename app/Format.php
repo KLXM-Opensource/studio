@@ -12,6 +12,8 @@ namespace Core;
  *   fmt()->date($e['beginn'])                 24.09.2026 | 24/09/2026      Stile: short, long, weekday, day_month
  *   fmt()->time('2026-09-24 14:05')           14:05
  *   fmt()->datetime($ts)                      24.09.2026, 14:05
+ *   Datum und Zeit kommen aus ICU (intl, IntlDatePatternGenerator): Reihenfolge, Trenner und Monatsnamen je Sprache, Englisch nach
+ *   britischen Regeln; ohne intl gilt ein deutsch/englischer Rückfall.
  *   fmt()->relative($ts)                      gerade eben · vor 5 Min. · heute, 14:05 · gestern, 09:12 · vor 3 Tagen · 12.09.2026
  *   fmt()->number(1234.5, 1)                  1.234,5 | 1,234.5
  *   fmt()->decimal(2.50)                      2,5 (höchstens 2 Nachkommastellen, ohne Nullen am Ende)
@@ -61,23 +63,43 @@ final class Format
 
     // ------------------------------------------------------------------ Datum und Zeit
 
-    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September) */
+    /** ICU-Skelette je Stil (die Sprache bestimmt Reihenfolge, Trenner und Monatsnamen) */
+    private const SKELETONS = ['short' => 'ddMMyyyy', 'long' => 'dMMMMy', 'weekday' => 'EEEE', 'day_month' => 'dMMMM', 'time' => 'jjmm'];
+    /** Sprache → Gebietsschema für ICU: Englisch nach britischen Regeln (24/09/2026, 14:05) */
+    private const LOCALES = ['en' => 'en_GB'];
+
+    /** @var array<string, \IntlDateFormatter> */
+    private array $intl = [];
+
+    /** Datumsformatierer für ein Skelett (z. B. „ddMMyyyy“ + „jjmm“) über IntlDatePatternGenerator – null ohne intl */
+    private function intlDate(string $skeleton): ?\IntlDateFormatter
+    {
+        if (!class_exists(\IntlDateFormatter::class) || !class_exists(\IntlDatePatternGenerator::class)) return null;
+        if (!isset($this->intl[$skeleton])) {
+            $loc = self::LOCALES[$this->lang] ?? $this->lang;
+            $pattern = (new \IntlDatePatternGenerator($loc))->getBestPattern($skeleton);
+            $f = $pattern !== false ? new \IntlDateFormatter($loc, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, date_default_timezone_get(), null, $pattern) : null;
+            if (!$f) return null;
+            $this->intl[$skeleton] = $f;
+        }
+        return $this->intl[$skeleton];
+    }
+
+    /** Mit ICU formatieren, sonst null (dann gilt der Rückfall ohne intl) */
+    private function intlFormat(string $skeleton, int $ts): ?string
+    {
+        $out = $this->intlDate($skeleton)?->format($ts);
+        return is_string($out) ? $out : null;
+    }
+
+    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September) – über ICU */
     public function date(int|string|\DateTimeInterface|null $when, string $style = 'short'): string
     {
         $ts = self::ts($when);
         if ($ts === null) return '';
+        if (($out = $this->intlFormat(self::SKELETONS[$style] ?? self::SKELETONS['short'], $ts)) !== null) return $out;
+        // Rückfall ohne intl
         $de = $this->lang === 'de';
-        if (class_exists(\IntlDateFormatter::class)) {
-            $pattern = match ($style) {
-                'long' => $de ? 'd. MMMM y' : 'd MMMM y',
-                'weekday' => 'EEEE',
-                'day_month' => $de ? 'd. MMMM' : 'd MMMM',
-                default => $de ? 'dd.MM.y' : 'dd/MM/y',
-            };
-            $f = new \IntlDateFormatter($this->lang, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, date_default_timezone_get(), null, $pattern);
-            $out = $f->format($ts);
-            if (is_string($out)) return $out;
-        }
         $months = ['de' => ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']];
         $days = ['de' => ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']];
         $m = isset($months[$this->lang]) ? $months[$this->lang][(int) date('n', $ts) - 1] : date('F', $ts);
@@ -89,18 +111,20 @@ final class Format
         };
     }
 
-    /** Uhrzeit 24-Stunden „14:05“ */
+    /** Uhrzeit in der Form der Sprache („14:05“) – über ICU */
     public function time(int|string|\DateTimeInterface|null $when): string
     {
         $ts = self::ts($when);
-        return $ts === null ? '' : date('H:i', $ts);
+        if ($ts === null) return '';
+        return $this->intlFormat(self::SKELETONS['time'], $ts) ?? date('H:i', $ts);
     }
 
-    /** Datum und Uhrzeit „24.09.2026, 14:05“ (Stil des Datums wie date()) */
+    /** Datum und Uhrzeit („24.09.2026, 14:05“; Stil des Datums wie date()) – über ICU */
     public function datetime(int|string|\DateTimeInterface|null $when, string $style = 'short'): string
     {
         $ts = self::ts($when);
-        return $ts === null ? '' : $this->date($ts, $style) . ', ' . date('H:i', $ts);
+        if ($ts === null) return '';
+        return $this->intlFormat((self::SKELETONS[$style] ?? self::SKELETONS['short']) . self::SKELETONS['time'], $ts) ?? $this->date($ts, $style) . ', ' . date('H:i', $ts);
     }
 
     /**
@@ -115,7 +139,7 @@ final class Format
         if ($unit === 'day') {
             $days = (int) floor((strtotime('today', $now) - strtotime('today', $t)) / 86400);
             return match (true) {
-                $days <= 0 => $this->word('heute, {time}', ['time' => date('H:i', $t)]),
+                $days <= 0 => $this->word('heute, {time}', ['time' => $this->time($t)]),
                 $days === 1 => $this->word('gestern'),
                 $days < 7 => $this->word('vor {n} Tagen', ['n' => $days]),
                 default => $this->date($t),
@@ -125,8 +149,8 @@ final class Format
         return match (true) {
             $d < 90 => $this->word('gerade eben'),
             $d < 3600 => $this->word('vor {n} Min.', ['n' => (int) round($d / 60)]),
-            $d < 86400 && date('Y-m-d', $t) === date('Y-m-d', $now) => $this->word('heute, {time}', ['time' => date('H:i', $t)]),
-            date('Y-m-d', $t) === date('Y-m-d', $now - 86400) => $this->word('gestern, {time}', ['time' => date('H:i', $t)]),
+            $d < 86400 && date('Y-m-d', $t) === date('Y-m-d', $now) => $this->word('heute, {time}', ['time' => $this->time($t)]),
+            date('Y-m-d', $t) === date('Y-m-d', $now - 86400) => $this->word('gestern, {time}', ['time' => $this->time($t)]),
             $d < 7 * 86400 => $this->word('vor {n} Tagen', ['n' => (int) ceil($d / 86400)]),
             default => $this->date($t),
         };

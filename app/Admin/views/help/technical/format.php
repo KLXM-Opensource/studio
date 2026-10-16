@@ -4,6 +4,7 @@
 &lt;?= e(fmt()-&gt;currency($e['preis'])) ?&gt;            // 19,90 € (de) · €19.90 (en)
 &lt;?= e(fmt()-&gt;excerpt($e['text'], 160)) ?&gt;          // Rich-Text → Text, an einer Wortgrenze gekürzt
 &lt;?= e(fmt('en')-&gt;relative($m['created_at'])) ?&gt;    // ausdrücklich englisch</code></pre>
+  <p><b>Datum und Uhrzeit über ICU (intl):</b> <code>date()</code>, <code>time()</code>, <code>datetime()</code> und die Uhrzeit in <code>relative()</code> bilden ihr Muster mit <code>IntlDatePatternGenerator</code> aus einem Skelett (z. B. <code>ddMMyyyy</code>, <code>dMMMMy</code>, <code>jjmm</code>) – Reihenfolge, Trenner, Monatsnamen und 12/24-Stunden kommen aus der Sprache, auch für weitere Website-Sprachen ohne eigenen Code (fr: „24 septembre 2026“, sl: „24. 09. 2026“). Englisch folgt britischen Regeln (24/09/2026, 14:05). Ohne die PHP-Erweiterung intl gilt ein deutsch/englischer Rückfall. Feste Formate wie <code>date('d.m.Y')</code> gehören nicht mehr in Ansichten.</p>
   <table class="doc-table">
     <tr><th>Methode</th><th>Beispiel (de · en)</th><th>Hinweise</th></tr>
     <tr><td><code>date($v, $stil = 'short')</code></td><td>24.09.2026 · 24/09/2026</td><td>Stile <code>short</code>, <code>long</code> (24. September 2026), <code>weekday</code> (Donnerstag), <code>day_month</code> (24. September); Intl, sonst eigener Rückfall</td></tr>

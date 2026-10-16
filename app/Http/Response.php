@@ -34,6 +34,29 @@ final class Response
         return self::json(['ok' => false, 'error' => $error] + $extra, $status);
     }
 
+    /** Datei zum Herunterladen (Dateiname wird bereinigt; nie zwischengespeichert) */
+    public static function download(string $body, string $filename, string $type = 'application/octet-stream'): self
+    {
+        $name = (string) preg_replace('~[^A-Za-z0-9._-]+~', '-', $filename) ?: 'download';
+        return new self($body, 200, ['Content-Type' => $type, 'Content-Disposition' => 'attachment; filename="' . $name . '"', 'Cache-Control' => 'private, no-store']);
+    }
+
+    /** CSV wie Excel sie erwartet: Semikolon, UTF-8 mit BOM, eine Kopfzeile. $rows: Listen von Werten */
+    public static function csvText(array $header, iterable $rows): string
+    {
+        $fh = fopen('php://temp', 'w+');
+        fputcsv($fh, $header, ';', '"', '');
+        foreach ($rows as $row) fputcsv($fh, array_map(fn($v) => is_scalar($v) || $v === null ? (string) $v : json_encode($v, JSON_UNESCAPED_UNICODE), (array) $row), ';', '"', '');
+        rewind($fh);
+        return "\xEF\xBB\xBF" . stream_get_contents($fh);
+    }
+
+    /** CSV zum Herunterladen (Response::csvText + download) */
+    public static function csv(string $filename, array $header, iterable $rows): self
+    {
+        return self::download(self::csvText($header, $rows), $filename, 'text/csv; charset=utf-8');
+    }
+
     public static function redirect(string $to, int $status = 303): self
     {
         return new self('', $status, ['Location' => $to]);

@@ -220,9 +220,6 @@ final class GlossaryController extends AdminController
     public function export(Request $r): Response
     {
         $this->gate($r);
-        return self::secure(new Response(Glossary::exportCsv(), 200, [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="glossar-' . site()->key . '-' . date('Y-m-d') . '.csv"',
-        ]));
+        return self::secure(Response::download(Glossary::exportCsv(), 'glossar-' . site()->key . '-' . date('Y-m-d') . '.csv', 'text/csv; charset=utf-8'));
     }
 }

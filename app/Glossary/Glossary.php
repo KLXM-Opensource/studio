@@ -492,15 +492,10 @@ final class Glossary
     public static function exportCsv(): string
     {
         $t = self::table();
-        $fh = fopen('php://temp', 'w+');
-        fwrite($fh, "\xEF\xBB\xBF");
-        fputcsv($fh, self::CSV_COLUMNS, ';', '"', '');
-        foreach ($t ? Entries::query($t, ['status' => 'all', 'limit' => 5000, 'lang' => 'all']) : [] as $e) {
-            fputcsv($fh, [(string) $e['begriff'], implode(', ', self::splitVariants((string) ($e['varianten'] ?? ''))), (string) $e['kurz'],
-                (string) ($e['erklaerung'] ?? ''), (string) ($e['kategorie'] ?? ''), (string) ($e['link'] ?? ''), (string) $e['status'], Lang::norm($e['lang'] ?? null)], ';', '"', '');
-        }
-        rewind($fh);
-        return (string) stream_get_contents($fh);
+        $rows = array_map(fn($e) => [(string) $e['begriff'], implode(', ', self::splitVariants((string) ($e['varianten'] ?? ''))), (string) $e['kurz'],
+            (string) ($e['erklaerung'] ?? ''), (string) ($e['kategorie'] ?? ''), (string) ($e['link'] ?? ''), (string) $e['status'], Lang::norm($e['lang'] ?? null)],
+            $t ? Entries::query($t, ['status' => 'all', 'limit' => 5000, 'lang' => 'all']) : []);
+        return \Core\Http\Response::csvText(self::CSV_COLUMNS, $rows);
     }
 
     /**
