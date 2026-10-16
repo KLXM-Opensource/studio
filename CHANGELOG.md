@@ -17,6 +17,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Aufräumen vor dem Start: eine Stelle je Aufgabe
 - **Neue Kern-Schnittstellen** statt verstreuter Kopien: `Core\Http\Fetch` (HTTP mit SSRF-Schutz – Quellen, Domain- und Landingpage-Prüfung, PDF-Schriften), `Core\Cli` (Optionen, `--all` je Website), `Core\Testing\Check` (Selbsttests), `Permissions::installationAdmin()`, `Response::fail()`/`download()`/`csv()`, `AdminUi::pager()`, `b64u_encode()`/`b64u_decode()`/`random_token()`/`trusted_site_url()`, `resources/js/_html.js` (`esc`, `csrf`), `resources/css/_toast.css`.
 - **Datum und Uhrzeit grundsätzlich über ICU** (intl): Muster je Sprache aus Skeletten, Englisch nach britischen Regeln; rund 100 feste `date('d.m.Y')`/`H:i`-Formate in Verwaltung, Mails und Kits über `Core\Format` (neuer Stil `dm`).
+- **Kit-Werkzeuge:** `Core\Contrast` (WCAG-Kontrast für `tools/contrast.php`, `Design::contrast()`, Website-Symbol und die Kit-Funktionen) und `Core\Kit\Demo` (Bausteine für `tools/demo-content.php`: Blöcke, Seiten, Datentabellen, Medien-Import, Demo-PDF, Entfernen; `Demo::cli()` für `tools/demo.php`) – rund 500 Zeilen Kopien weniger, Ausgaben unverändert. Die Kontrast-Werkzeuge laufen jetzt auch ohne fremdes Autoload.
 - Toter Code und nie veröffentlichte Altlasten entfernt (u. a. `mycms`-Kennungen, ungenutzte Methoden).
 
 ### PHP-API-Referenz und statische Analyse

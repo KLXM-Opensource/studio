@@ -302,7 +302,8 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
   <ul>
     <li><code>php bin/console health --site=meinkit</code> – u. a. „Kit kompatibel“ (<code>requires</code>)</li>
     <li>Budgets: Ausgabe von <code>pnpm run build</code> – CSS der Startseite &lt; 30 KB, JS &lt; 8 KB (Start-Kit: ≈ 15,7 KB / 0,4 KB)</li>
-    <li>Kontrast: <code>php kits/meinkit/tools/contrast.php</code> (alle Voreinstellungen, hell + dunkel) und die Abzeichen im Style-Editor</li>
+    <li>Kontrast: <code>php kits/meinkit/tools/contrast.php</code> (alle Voreinstellungen, hell + dunkel) und die Abzeichen im Style-Editor – Rechnung über <code>Core\Contrast</code> (<code>ratio()</code>, <code>mix()</code>, <code>run()</code>)</li>
+    <li>Demo-Inhalte: <code>tools/demo-content.php</code> mit <code>Core\Kit\Demo</code> (<code>block()</code>, <code>page()</code>, <code>table()</code>, <code>import()</code>, <code>pdf()</code>, <code>deletePages()</code> …), <code>tools/demo.php</code> als <code>Demo::cli()</code></li>
     <li>Übersetzungen: <code>php bin/console i18n:missing en --site-texts --site=meinkit</code> sowie ohne <code>--site-texts</code></li>
     <li>Lizenzen: <code>node tools/licenses.mjs</code> (z. B. nach Hinzufügen von Schriftpaketen)</li>
     <li>Im Browser: keine Konsolenfehler, keine externen Anfragen, keine Cookies; Tastatur, 200 % Zoom, Kontrastmodus, hell/dunkel, 320 px Breite; eine Testseite mit Datenliste + Detailseite, Formular, Kennzahlen, Karte, Video, Downloads und Suche</li>
