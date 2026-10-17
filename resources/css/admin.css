@@ -356,7 +356,7 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 
 /* Hauptbereich */
 .fx-main{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0}
-.fx-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--fx-line);background:linear-gradient(var(--adm-fill),var(--adm-fill))}
+.fx-bar{display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--fx-line);background:linear-gradient(var(--adm-fill),var(--adm-fill))}
 .fx-title{display:flex;flex-direction:column;min-width:110px;flex:1;line-height:1.2}
 .fx-title strong{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fx-title small{color:var(--adm-t3)}

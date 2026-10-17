@@ -913,7 +913,7 @@ class Finder {
   // ---------------------------------------------------------- Dateien
   title() {
     const s = this.src, m = this.meta;
-    if (s.type === 'kind') return { image: 'Bilder', pdf: 'PDF-Dokumente', video: 'Videos', audio: t('Audio') }[s.value];
+    if (s.type === 'kind') return { image: 'Bilder', pdf: 'PDF-Dokumente', video: 'Videos', audio: t('Audio'), visual: t('Bilder und Videos') }[s.value] || t('Mediathek');
     if (s.type === 'noalt') return 'Ohne Alt-Text';
     if (s.type === 'check') {
       const [k, l] = s.value.split(':');
