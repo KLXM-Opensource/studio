@@ -15,6 +15,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
 ### Blockauswahl sortiert
+- Fix: Beim Bearbeiten direkt auf der Detailseite eines Eintrags markiert das Glossar keine Begriffe mehr; Glossar-Erklärungen gelangen so nicht mehr beim Speichern in den Text.
 - „+ Block einfügen“ zeigt oben **Häufig verwendet** (die meistgenutzten Blöcke dieser Website, `Theme::blockUsage()`), darunter alle Blöcke **nach Kategorie** mit Überschriften. Die Suche filtert über alle.
 
 ### Datentabellen: Bild oder Video

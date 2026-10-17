@@ -324,10 +324,12 @@ const Inline = (() => {
   let dirty = false, bar = null, barTarget = null, barTimer;
 
   // Redaktionsnotizen: Hinweise „Notiz: …“ (Core\EditorNotes::decorate, .cms-note) wieder als „[# … #]“ auslesen
+  // Glossar (Core\Glossary): markierte Begriffe samt Erklärung (.gl) nie mitspeichern – nur der Begriff selbst bleibt
   const unnote = n => {
-    if (!n.querySelector('[data-cms-note]')) return n;
+    if (!n.querySelector('[data-cms-note], .gl')) return n;
     const c = n.cloneNode(true);
     c.querySelectorAll('[data-cms-note]').forEach(x => x.replaceWith(document.createTextNode(`[# ${x.dataset.cmsNote} #]`)));
+    c.querySelectorAll('.gl').forEach(x => x.replaceWith(document.createTextNode((x.querySelector('.gl-term') || x).textContent)));
     return c;
   };
   const read = n => n.dataset.entryMode === 'media' ? (n.dataset.entryValue && n.dataset.entryValue !== '0' ? n.dataset.entryValue : '')

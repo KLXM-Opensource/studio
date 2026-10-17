@@ -201,7 +201,7 @@ final class Glossary
         if (self::$done) return $html;
         self::$done = true;
         try {
-            if ($status !== 200 || app()->editing || !str_contains($html, '</body>') || !self::enabled()) return $html;
+            if ($status !== 200 || app()->editing || app()->entryEdit || !str_contains($html, '</body>') || !self::enabled()) return $html;   // Bearbeiten (Seite oder Eintrag): nie markieren – sonst landet die Erklärung beim Speichern im Text
             $s = self::settings();
             $path = (string) (app()->request?->path ?? '/');
             if ($s['mode'] === 'off' || self::excluded($path, $s['exclude'])) return $html;
