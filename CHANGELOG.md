@@ -15,6 +15,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
 ### Blockauswahl sortiert
+- Fix: robots.txt, sitemap.xml und llms.txt senden `Cache-Control: max-age=0, must-revalidate` – Proxy-Caches (z. B. nginx in Plesk) hielten sonst nach „Suchmaschinen aussperren“ oder Staging-Wechsel die alte Fassung fest. Staging ein/aus leert den Seiten-Cache der Website.
 - Fix: Live-Websites mit „Suchmaschinen aussperren“ erlauben in der robots.txt die **Linkvorschau-Bots** (Facebook, LinkedIn, X, Slack, WhatsApp …) – geteilte Links zeigen wieder Bild und Text, Suchmaschinen bleiben draußen.
 - Fix: **og:image** ist jetzt ein JPEG (`Media::shareUrl()`, einmal erzeugt im Cache) statt WebP – LinkedIn zeigt WebP-Vorschaubilder nicht an.
 - Fix: Beim Bearbeiten direkt auf der Detailseite eines Eintrags markiert das Glossar keine Begriffe mehr; Glossar-Erklärungen gelangen so nicht mehr beim Speichern in den Text.

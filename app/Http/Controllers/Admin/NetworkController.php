@@ -200,6 +200,7 @@ final class NetworkController extends AdminController
                     if ($env !== $old) {
                         Sites::setOption($key, 'environment', $env);
                         Stats::forget($key);
+                        \Core\PageCache::clearSite($key);   // Seiten tragen noindex bzw. nicht mehr
                         Network::log('site.environment', $key, (string) $user['email'], $old . ' → ' . $env);
                     }
                     $msg = $env === 'staging' ? __('{site} ist jetzt Testumgebung (staging): Suchmaschinen ausgesperrt, E-Mails nicht an echte Empfänger.', ['site' => $key])

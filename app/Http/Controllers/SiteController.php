@@ -405,18 +405,18 @@ final class SiteController
             $m = (string) ($u['lastmod'] ?? '');
             $xml .= '  <url><loc>' . e((string) $u['loc']) . '</loc>' . ($m !== '' ? '<lastmod>' . e($m) . '</lastmod>' : '') . "</url>\n";
         }
-        return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8', 'Cache-Control' => 'public, max-age=0, must-revalidate']);
     }
 
     public function robots(Request $r): Response
     {
-        return new Response(\Core\Indexing::robotsTxt(), 200, ['Content-Type' => 'text/plain; charset=utf-8']);   // Core\Indexing
+        return new Response(\Core\Indexing::robotsTxt(), 200, ['Content-Type' => 'text/plain; charset=utf-8', 'Cache-Control' => 'public, max-age=0, must-revalidate']);   // nie in Proxy-Caches festhalten: hängt an Einstellungen (Aussperren, Staging, KI-Crawler)   // Core\Indexing
     }
 
     /** /llms.txt – Übersicht für KI-Assistenten (Grundeinstellungen → Indexierung & Crawler) */
     public function llms(Request $r): Response
     {
         if (!\Core\Indexing::llmsEnabled()) throw new HttpException(404);
-        return new Response(\Core\Indexing::llmsTxt(), 200, ['Content-Type' => 'text/markdown; charset=utf-8', 'X-Robots-Tag' => 'noindex']);
+        return new Response(\Core\Indexing::llmsTxt(), 200, ['Content-Type' => 'text/markdown; charset=utf-8', 'X-Robots-Tag' => 'noindex', 'Cache-Control' => 'public, max-age=0, must-revalidate']);
     }
 }
