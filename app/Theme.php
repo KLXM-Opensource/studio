@@ -745,6 +745,31 @@ final class Theme
         return ['none' => __('Kein'), 'small' => __('Klein'), 'normal' => __('Normal')] + (!empty($this->def['space_large']) ? ['large' => __('Groß')] : []);
     }
 
+    /**
+     * Wie oft jeder Blocktyp auf dieser Website vorkommt (veröffentlichte Fassung, sonst Entwurf; auch in Spalten des Layouts) –
+     * für „Häufig verwendet“ in der Blockauswahl. [typ => Anzahl], absteigend.
+     */
+    public static function blockUsage(): array
+    {
+        $count = [];
+        $walk = function (array $blocks) use (&$walk, &$count): void {
+            foreach ($blocks as $b) {
+                if (!is_array($b) || !is_string($b['type'] ?? null)) continue;
+                $count[$b['type']] = ($count[$b['type']] ?? 0) + 1;
+                foreach ((array) ($b['data']['columns'] ?? []) as $col) if (is_array($col)) $walk((array) ($col['blocks'] ?? []));
+            }
+        };
+        try {
+            foreach (app()->db->fetchAll("SELECT COALESCE(NULLIF(content_published, ''), content_draft) AS c FROM pages") as $r) {
+                $j = json_decode((string) $r['c'], true);
+                if (is_array($j)) $walk((array) ($j['blocks'] ?? $j));
+            }
+        } catch (\Throwable) {
+        }
+        arsort($count);
+        return $count;
+    }
+
     public function editorConfig(): array
     {
         $blocks = [];
@@ -772,7 +797,7 @@ final class Theme
             ];
         }
         // rows: nur noch Darstellung alter Reihen (Tune row) – die Option ist im Editor abgeschafft (Block „Layout“)
-        return ['blocks' => $blocks, 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false, 'spacing' => $this->spacing(),
+        return ['blocks' => $blocks, 'usage' => self::blockUsage(), 'backgrounds' => $this->backgrounds(), 'rows' => ($this->def['rows'] ?? true) !== false, 'spacing' => $this->spacing(),
             // Vorlagen der Erweiterungen (Extension::blockPresets) – vorbelegte Blöcke in der Blockauswahl
             'presets' => Extensions::blockPresets(array_keys(array_filter($blocks, fn($b) => !empty($b['insertable'])))),
             'layout' => isset($this->blocks[Layout::TYPE]) ? ['presets' => Layout::PRESETS] : null,

@@ -9,7 +9,7 @@ $__sample = $vars['blocks_page'] ?? null;
   <ol class="doc-steps">
     <li>Seite aufrufen (z. B. die Startseite) und in der Leiste oben auf <b>Bearbeiten</b> klicken (oder im Umschalter <b>Ansehen · Bearbeiten</b> auf „Bearbeiten“).</li>
     <li>Fahren Sie mit der Maus über die Seite: Jeder <b>Block</b> (Abschnitt) bekommt einen Rahmen, oben rechts seinen Namen und den Knopf <b>Bearbeiten</b>. Kleine Hinweise zeigen Besonderheiten wie „ausgeblendet“, die Sprungmarke oder „Navigation“.</li>
-    <li>Links im Block erscheinen <b>+</b> (Block einfügen) und <b>⋮⋮</b> (Menü und Verschieben), unten mittig auf der Kante zum nächsten Block <b>+ Block einfügen</b>.</li>
+    <li>Links im Block erscheinen <b>+</b> (Block einfügen) und <b>⋮⋮</b> (Menü und Verschieben), unten mittig auf der Kante zum nächsten Block <b>+ Block einfügen</b>. Die Auswahl zeigt oben die auf dieser Website <b>häufig verwendeten</b> Blöcke, darunter alle nach Kategorie (Kopf, Inhalt, Medien, Layout, Daten …); Tippen sucht in allen.</li>
     <li>Ein <b>Klick in den Block</b> wählt ihn nur aus – Texte schreiben Sie direkt an Ort und Stelle. Die <b>Seitenleiste</b> mit allen Feldern öffnet sich erst mit <b>Bearbeiten</b>. Auf Handy und Tablet zeigt ein Tipp auf den Block seine Knöpfe.</li>
   </ol>
   <?= $img('editor.webp', 'Editor mit geöffneter Seitenleiste', '<b>Editor:</b> links die Live-Vorschau, rechts die Seitenleiste mit allen Feldern des gewählten Blocks.') ?>

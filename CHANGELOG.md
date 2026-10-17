@@ -14,6 +14,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Blockauswahl sortiert
+- „+ Block einfügen“ zeigt oben **Häufig verwendet** (die meistgenutzten Blöcke dieser Website, `Theme::blockUsage()`), darunter alle Blöcke **nach Kategorie** mit Überschriften. Die Suche filtert über alle.
+
 ### Datentabellen: Bild oder Video
 - Medienfelder der Datentabellen heißen jetzt **„Bild oder Video“**: In Verwaltung, Bearbeiten auf der Seite und Auswahldialog lassen sich auch Videos wählen. Videos laufen in Listen, Karten und Detailseiten als stumme Schleife mit Posterbild (`Media::visual()`).
 - Ist das Titelmedium eines Eintrags ein Video, nutzen **og:image**, schema.org (`image`) und Stellenanzeigen dessen **Posterbild** (`Media::stillOf()`) statt der Videodatei.

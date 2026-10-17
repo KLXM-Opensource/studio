@@ -496,7 +496,16 @@ const BlockPicker = (() => {
   const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false && def.listed !== false);   // listed: false → nur über Vorlagen
   // Vorlagen der Erweiterungen (Extension::blockPresets): vorbelegte Blöcke, nach Gruppe – unter den Blocktypen
   const presets = (cfg.presets || []).filter((p) => cfg.blocks[p.type]);
-  list.innerHTML = types.map(([type, def]) => `<button type="button" class="cms-addpop__item" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`).join('');
+  // Reihenfolge: „Häufig verwendet“ (meiste Vorkommen auf dieser Website, sonst übliche Grundblöcke), dann nach Kategorie
+  const itemHtml = (type, def, fav = false) => `<button type="button" class="cms-addpop__item${fav ? ' cms-addpop__item--fav' : ''}" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`;
+  const ok = new Set(types.map(([t]) => t));
+  const used = Object.keys(cfg.usage || {}).filter(t => ok.has(t));
+  const favs = (used.length >= 3 ? used : [...used, ...['richtext', 'text', 'heading', 'media_text', 'cards', 'image', 'hero'].filter(t => ok.has(t) && !used.includes(t))]).slice(0, 6);
+  const ORDER = ['Kopf', 'Inhalt', 'Medien', 'Layout', 'Daten', 'Navigation', 'Website'];
+  const groups = [...new Set(types.map(([, d]) => d.group || 'Inhalt'))].sort((x, y) => ((ORDER.indexOf(x) + 1) || 99) - ((ORDER.indexOf(y) + 1) || 99));
+  const head = (label, cls = '') => `<p class="cms-addpop__group${cls}" role="presentation">${CMSAdmin.esc(label)}</p>`;
+  list.innerHTML = (favs.length ? head(T('Häufig verwendet'), ' cms-addpop__group--fav') + favs.map(t => itemHtml(t, cfg.blocks[t], true)).join('') : '')
+    + groups.map(g => head(T(g)) + types.filter(([, d]) => (d.group || 'Inhalt') === g).map(([t, d]) => itemHtml(t, d)).join('')).join('');
   if (presets.length) {
     let grp = null, h = '';
     presets.forEach((p, n) => {
@@ -527,7 +536,7 @@ const BlockPicker = (() => {
   const mark = btn => items().forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
   const filter = () => {
     const v = q.value.trim().toLowerCase();
-    $$('.cms-addpop__item', list).forEach(b => { b.hidden = b.dataset.off === '1' || (b === pasteBtn ? !!v : (only && !only.has(b.dataset.type)) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v))); });
+    $$('.cms-addpop__item', list).forEach(b => { b.hidden = b.dataset.off === '1' || (b === pasteBtn ? !!v : (only && !only.has(b.dataset.type)) || ((!!v || !!only) && b.classList.contains('cms-addpop__item--fav')) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v))); });
     // Gruppen-Überschriften der Vorlagen nur mit sichtbaren Einträgen darunter
     $$('.cms-addpop__group', list).forEach(g => { let n = g.nextElementSibling, any = false; while (n && !n.matches('.cms-addpop__group')) { if (!n.hidden) any = true; n = n.nextElementSibling; } g.hidden = !any; });
     none.hidden = items().length > 0;

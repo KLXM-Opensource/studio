@@ -7799,4 +7799,6 @@ return [
     'Klicken, um ein anderes Bild oder Video zu wählen: {label}' => 'Click to choose another image or video: {label}',
     'Medium entfernen' => 'Remove media',
     'Bild oder Video' => 'Image or video',
+    'Häufig verwendet' => 'Frequently used',
+    'Kopf' => 'Header',
 ];
