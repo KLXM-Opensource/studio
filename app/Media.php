@@ -637,6 +637,44 @@ final class Media
 
     // ================================================================= Ausgabe
 
+    /**
+     * Vorschaubild für soziale Netzwerke (og:image): JPEG, höchstens 1200 px breit – LinkedIn (und manche Messenger) zeigen
+     * kein WebP. Einmal erzeugt im Cache des Mediums (cache/{base}-og.jpg) und danach nur noch ausgeliefert. Quelle: größte
+     * vorhandene Fassung (WebP, sonst Original). null = kein Bild oder GD fehlt.
+     */
+    public static function shareUrl(array $m): ?string
+    {
+        if (!str_starts_with((string) ($m['mime'] ?? ''), 'image/') || ($m['mime'] ?? '') === Svg::MIME) return null;
+        $v = json_decode((string) ($m['variants_json'] ?? ''), true) ?: [];
+        $base = (string) ($v['base'] ?? '') ?: substr(sha1((string) $m['file']), 0, 16);
+        $rel = 'cache/' . $base . '-og.jpg';
+        $root = ($m['_pool'] ?? self::$pool) !== null ? MediaPools::mediaDir((string) ($m['_pool'] ?? self::$pool)) : site()->mediaDir();
+        $out = $root . '/' . $rel;
+        if (!is_file($out)) {
+            if (!function_exists('imagejpeg')) return null;
+            $src = self::localFile($m, 1200);
+            if (!is_file($src)) $src = self::localFile($m);
+            $type = is_file($src) ? (string) ((new \finfo(FILEINFO_MIME_TYPE))->file($src) ?: '') : '';
+            $im = match ($type) {
+                'image/webp' => @imagecreatefromwebp($src), 'image/jpeg' => @imagecreatefromjpeg($src),
+                'image/png' => @imagecreatefrompng($src), 'image/gif' => @imagecreatefromgif($src),
+                'image/avif' => function_exists('imagecreatefromavif') ? @imagecreatefromavif($src) : false, default => false,
+            };
+            if (!$im) return null;
+            $w = imagesx($im); $h = imagesy($im);
+            $k = min(1, 1200 / max(1, $w));
+            $nw = max(1, (int) round($w * $k)); $nh = max(1, (int) round($h * $k));
+            $jpg = imagecreatetruecolor($nw, $nh);
+            imagefill($jpg, 0, 0, imagecolorallocate($jpg, 255, 255, 255));   // Transparenz auf Weiß
+            imagecopyresampled($jpg, $im, 0, 0, 0, 0, $nw, $nh, $w, $h);
+            if (!is_dir(dirname($out))) @mkdir(dirname($out), 0775, true);
+            $tmp = $out . '.' . bin2hex(random_bytes(4));
+            if (!@imagejpeg($jpg, $tmp, 85)) return null;
+            @rename($tmp, $out);
+        }
+        return self::publicUrl($m, $rel);
+    }
+
     public static function url(array $m, ?int $width = null, string $format = 'webp'): string
     {
         return self::publicUrl($m, self::rel($m, $width, $format));

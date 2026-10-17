@@ -51,7 +51,7 @@ final class Seo
             'description' => strip_emphasis($desc),
             'canonical' => $canonical,
             // SVG zeigen soziale Netzwerke nicht als Vorschaubild
-            'og_image' => $og && $og['mime'] !== Svg::MIME && !MediaPools::mediaProtected($og) ? site_url() . Media::url($og, 1200) : null,
+            'og_image' => $og && ($still = Media::stillOf($og)) && !MediaPools::mediaProtected($og) && ($u = Media::shareUrl($still)) ? site_url() . $u : null,   // JPEG (LinkedIn zeigt kein WebP)
             'noindex' => !empty($page['noindex']) || $page['status'] !== 'published' || noindex_site() || ($lp?->noindex ?? false),
         ];
         // schema.org-Graph: Organisation (Theme), WebSite, WebPage, Brotkrumen + Daten der Blöcke (Spiegel: wie auf der Hauptdomain)
@@ -74,7 +74,7 @@ final class Seo
         $imgField = \Core\Data\Tables::imageField($table);
         $img = $imgField !== '' ? ($entry[$imgField] ?? null) : null;
         if ($img && ($m = Media::find((int) $img)) && !MediaPools::mediaProtected($m) && ($still = Media::stillOf($m))) {
-            $seo['og_image'] = site_url() . Media::url($still, 1200);   // Video: Posterbild
+            if ($u = Media::shareUrl($still)) $seo['og_image'] = site_url() . $u;   // Video: Posterbild; JPEG (LinkedIn zeigt kein WebP)
         }
         // Fremde Einträge geteilter Tabellen: Canonical auf die Ursprungs-Website (falls sie Detailseiten hat)
         $seo['canonical'] = Data\Entries::absUrl($table, $entry);
