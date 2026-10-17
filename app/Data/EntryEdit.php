@@ -195,13 +195,13 @@ final class EntryEdit
             'saveExit' => __('Speichern & beenden'),
             'panel' => __('Eintrag bearbeiten'),
             'format' => __('Formatierung'),
-            'mediaPick' => __('Bild wählen …'),
+            'mediaPick' => __('Bild oder Video wählen …'),
             'mediaFx' => __('Anpassen'), 'mediaFit' => __('Rahmen'), 'mediaCrop' => __('Zuschneiden'),
             'mediaFxHint' => __('Effekte, Helligkeit, Kontrast – gilt für alle Verwendungen des Bildes'),
             'mediaFitHint' => __('Darstellung im Rahmen – gilt für alle Verwendungen des Bildes'),
-            'mediaRemove' => __('Bild entfernen'),
-            'mediaNone' => __('Kein Bild – „Bild wählen …“'),
-            'mediaHint' => __('Klicken, um ein anderes Bild zu wählen: {label}'),
+            'mediaRemove' => __('Medium entfernen'),
+            'mediaNone' => __('Kein Bild oder Video – „Bild oder Video wählen …“'),
+            'mediaHint' => __('Klicken, um ein anderes Bild oder Video zu wählen: {label}'),
             'mtEditSection' => __('Bilder & Buttons'), 'mtEdit' => __('Bilder & Buttons'), 'comboEdit' => __('Bearbeiten'),   // Text bearbeitet man direkt im Text
         ];
     }

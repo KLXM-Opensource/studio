@@ -7794,4 +7794,9 @@ return [
     'Diese Rolle können Sie nicht vergeben – sie hat Rechte, die Ihre eigene Rolle nicht hat.' => 'You cannot assign this role – it has permissions your own role does not have.',
     'Dieses Konto hat Rechte, die Ihre eigene Rolle nicht hat – nur die Administration kann es ändern.' => 'This account has permissions your own role does not have – only the administration can change it.',
     'Sie können nur Rechte vergeben, die Ihre eigene Rolle hat.' => 'You can only grant permissions your own role has.',
+    'Bild oder Video wählen …' => 'Choose image or video …',
+    'Kein Bild oder Video – „Bild oder Video wählen …“' => 'No image or video – “Choose image or video …”',
+    'Klicken, um ein anderes Bild oder Video zu wählen: {label}' => 'Click to choose another image or video: {label}',
+    'Medium entfernen' => 'Remove media',
+    'Bild oder Video' => 'Image or video',
 ];

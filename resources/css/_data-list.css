@@ -9,7 +9,7 @@
 .dl--cards .dl-cols-4{--cols:4}
 .dl-item{position:relative;display:flex;flex-direction:column;border-radius:var(--dl-radius);background:var(--dl-surface);overflow:hidden}
 .dl-img{position:relative;overflow:hidden;background:rgba(0,0,0,.06)}
-.dl-img img{width:100%;height:100%;object-fit:cover;display:block}
+.dl-img img,.dl-img video{width:100%;height:100%;object-fit:cover;display:block}
 .dl-img picture{display:contents}
 .dl-img.ratio-16-9{aspect-ratio:16/9}.dl-img.ratio-16-10{aspect-ratio:16/10}.dl-img.ratio-4-3{aspect-ratio:4/3}.dl-img.ratio-1-1{aspect-ratio:1}.dl-img.ratio-3-4{aspect-ratio:3/4}
 .dl-ph{position:absolute;inset:0}

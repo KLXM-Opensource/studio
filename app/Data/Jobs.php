@@ -402,7 +402,7 @@ final class Jobs
         if (($start = self::s($t, $e, 'start')) !== '') $n['jobStartDate'] = $start;
         $n['url'] = $url;
         $img = self::v($t, $e, 'image') ?: (($f = Tables::imageField($t)) !== '' ? ($e[$f] ?? null) : null);
-        if ($img && ($m = Media::find((int) $img))) $n['image'] = site_url() . Media::url($m, 1200);
+        if ($img && ($m = Media::stillOf(Media::find((int) $img)))) $n['image'] = site_url() . Media::url($m, 1200);
         return $n;
     }
 

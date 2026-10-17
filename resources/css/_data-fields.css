@@ -5,7 +5,7 @@
 .df-title{margin:0}
 .df-meta{font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dl-accent)}
 .df-img{overflow:hidden;border-radius:var(--dl-radius);background:rgba(0,0,0,.06)}
-.df-img img{width:100%;height:100%;object-fit:cover;display:block}
+.df-img img,.df-img video{width:100%;height:100%;object-fit:cover;display:block}
 .df-img picture{display:contents}
 .df-img.ratio-16-9{aspect-ratio:16/9}.df-img.ratio-21-9{aspect-ratio:21/9}.df-img.ratio-4-3{aspect-ratio:4/3}.df-img.ratio-1-1{aspect-ratio:1}.df-img.ratio-3-4{aspect-ratio:3/4}
 .df-prose{display:grid;gap:18px;max-width:46em}

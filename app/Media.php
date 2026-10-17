@@ -169,6 +169,39 @@ final class Media
         return $p && str_starts_with((string) $p['mime'], 'image/') ? $p : self::autoPoster($m);
     }
 
+    /**
+     * Standbild eines Mediums: Bild selbst, bei Videos das Posterbild (Media::posterFor), sonst null.
+     * Für Vorschaubilder in sozialen Netzwerken (og:image), schema.org und vCards – dort sind nur Bilder sinnvoll.
+     */
+    public static function stillOf(?array $m): ?array
+    {
+        if (!$m) return null;
+        $mime = (string) ($m['mime'] ?? '');
+        if (str_starts_with($mime, 'video/')) return self::posterFor($m);
+        return str_starts_with($mime, 'image/') && $mime !== Svg::MIME ? $m : null;
+    }
+
+    /**
+     * Bild oder Video (Felder mit 'accept' => 'visual', z. B. Medienfelder der Datentabellen): Bilder wie picture(),
+     * Videos als stummes, wiederholtes <video> mit Posterbild (ohne Ton, keine Steuerung – wie ein bewegtes Bild).
+     * $opt wie picture(); zusätzlich 'controls' => true für ein Video mit Steuerung statt Endlosschleife.
+     */
+    public static function visual(?int $id, string $sizes = '100vw', array $opt = []): string
+    {
+        $m = $id ? self::find($id) : null;
+        if (!$m) return '';
+        if (!str_starts_with((string) $m['mime'], 'video/')) return self::pictureOf($m, $sizes, $opt);
+        $poster = self::posterFor($m);
+        $w = (int) ($m['width'] ?: ($poster['width'] ?? 0)); $h = (int) ($m['height'] ?: ($poster['height'] ?? 0));
+        $alt = (string) ($opt['alt'] ?? self::alt($m));
+        $cls = trim('cms-video ' . ($opt['class'] ?? ''));
+        $attrs = !empty($opt['controls']) ? ' controls preload="metadata"' : ' muted loop autoplay playsinline preload="metadata" disablepictureinpicture';
+        $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"' : '';
+        return '<video class="' . e($cls) . '"' . $attrs . ($w && $h ? ' width="' . $w . '" height="' . $h . '"' : '')
+            . ($poster ? ' poster="' . e(self::url($poster, 1200)) . '"' : '') . ($alt !== '' ? ' aria-label="' . e($alt) . '"' : ' aria-hidden="true"')
+            . $edit . '><source src="' . e(self::url($m)) . '" type="' . e((string) $m['mime']) . '"></video>';
+    }
+
     /** Automatisches Vorschaubild eines Videos als Bild-Datensatz (null = noch keins) */
     public static function autoPoster(?array $m): ?array
     {

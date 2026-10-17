@@ -361,7 +361,7 @@ final class StructuredData
     private static function image(array $table, array $e): ?string
     {
         $f = Tables::imageField($table);
-        return $f !== '' && !empty($e[$f]) && ($m = Media::find((int) $e[$f])) ? site_url() . Media::url($m, 1200) : null;
+        return $f !== '' && !empty($e[$f]) && ($m = Media::stillOf(Media::find((int) $e[$f]))) ? site_url() . Media::url($m, 1200) : null;
     }
 
     private static function plain(string $html): string

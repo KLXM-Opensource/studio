@@ -302,6 +302,7 @@ final class Entries
             if ($f['type'] === 'group') {
                 $def = self::groupSchema($f) + $def;
             }
+            if ($f['type'] === 'media') $def['accept'] = 'visual';   // Medienfelder: Bild oder Video (Media::visual)
             if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
             if (\Core\Combo::is($f['type'])) $def = \Core\Combo::schema($f) + $def;
             if ($f['type'] === EntryBlocks::TYPE) $def['blocks'] = (array) ($f['blocks'] ?? []);   // erlaubte Blocktypen   // Kombifeld: Eingabe als Wiederholer mit festen Unterfeldern
@@ -769,7 +770,7 @@ final class Entries
             'recurrence' => e(Calendar::describe((string) $v)),
             'select' => e(Tables::optionLabel($f, (string) $v)),
             'multiselect' => e(implode(', ', array_map(fn($k) => Tables::optionLabel($f, (string) $k), (array) $v))),
-            'media' => Media::picture((int) $v, $o['sizes'] ?? '(min-width: 1080px) 800px, 100vw', array_filter(['ratio' => $o['ratio'] ?? null])),
+            'media' => Media::visual((int) $v, $o['sizes'] ?? '(min-width: 1080px) 800px, 100vw', array_filter(['ratio' => $o['ratio'] ?? null])),
             // Video/Audio: Player mit Untertiteln und Transkript (Core\MediaTracks), sonst Download-Link
             'file' => ($m = Media::find((int) $v)) && empty($o['plain']) && \Core\MediaTracks::supports($m) ? \Core\MediaTracks::player($m, ['class' => 'dt-media'])
                 : (($m = Media::find((int) $v)) ? '<a href="' . e(Media::viewerUrl($m) ?? Media::url($m)) . '"' . (Media::viewerUrl($m) ? '' : ' download') . '>' . e(Media::displayName($m)) . ' (' . e(Media::typeLabel($m['mime'])) . ', ' . e(Media::humanSize((int) $m['size'])) . ')</a>' : ''),

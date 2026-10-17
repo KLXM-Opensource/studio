@@ -28,7 +28,7 @@ final class Tables
         'time' => ['Uhrzeit', 'string10', 'clock'],
         'select' => ['Auswahl', 'string', 'caret-down'],
         'multiselect' => ['Mehrfachauswahl', 'text', 'list-checks'],
-        'media' => ['Bild', 'integer', 'image'],
+        'media' => ['Bild oder Video', 'integer', 'image'],
         'file' => ['Datei', 'integer', 'paperclip'],
         // Medien + Text: formatierter Text und mehrere Bilder/Videos daneben bzw. darüber (Anordnung je Eintrag) – JSON (Core\Fields::mediaText)
         'mediatext' => ['Medien + Text', 'text', 'images'],

@@ -73,8 +73,8 @@ final class Seo
         }
         $imgField = \Core\Data\Tables::imageField($table);
         $img = $imgField !== '' ? ($entry[$imgField] ?? null) : null;
-        if ($img && ($m = Media::find((int) $img)) && $m['mime'] !== Svg::MIME && !MediaPools::mediaProtected($m)) {
-            $seo['og_image'] = site_url() . Media::url($m, 1200);
+        if ($img && ($m = Media::find((int) $img)) && !MediaPools::mediaProtected($m) && ($still = Media::stillOf($m))) {
+            $seo['og_image'] = site_url() . Media::url($still, 1200);   // Video: Posterbild
         }
         // Fremde Einträge geteilter Tabellen: Canonical auf die Ursprungs-Website (falls sie Detailseiten hat)
         $seo['canonical'] = Data\Entries::absUrl($table, $entry);

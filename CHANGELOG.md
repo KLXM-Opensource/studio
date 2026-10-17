@@ -14,6 +14,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Datentabellen: Bild oder Video
+- Medienfelder der Datentabellen heißen jetzt **„Bild oder Video“**: In Verwaltung, Bearbeiten auf der Seite und Auswahldialog lassen sich auch Videos wählen. Videos laufen in Listen, Karten und Detailseiten als stumme Schleife mit Posterbild (`Media::visual()`).
+- Ist das Titelmedium eines Eintrags ein Video, nutzen **og:image**, schema.org (`image`) und Stellenanzeigen dessen **Posterbild** (`Media::stillOf()`) statt der Videodatei.
+
 ### Netzwerk-Website wechseln
 - **`php bin/console network:move <website> [--dry-run]`:** macht eine andere Website zur Netzwerk-Website. Sichert vorher alle Datenbanken und `config/config.local.php` (`storage/backups/`), zieht Netzwerk-Konten, 2FA (neu verschlüsselt), Passkeys, Anmelde-Richtlinie, Netzwerk-E-Mail-Konto und Protokoll um, macht auf der alten Website Schatten-Konten daraus und setzt `'network_site'`. `--dry-run` probiert alles in zurückgerollten Transaktionen.
 - Passkeys merken sich ihre Benutzerkennung (`user_passkeys.user_handle`), wenn sie sich ändert – vorhandene Passkeys gelten nach dem Umzug weiter auf ihrer Domain.
