@@ -25,6 +25,10 @@ final class Indexing
     /** Bots, die für Antworten/Suche in KI-Assistenten abrufen (Quellenangaben, Links) */
     public const ANSWER_BOTS = ['OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'DuckAssistBot', 'MistralAI-User'];
 
+    /** Linkvorschau beim Teilen (Bild, Titel, Text) – lesen nur, was jemand teilt; keine Suchmaschinen */
+    public const PREVIEW_BOTS = ['facebookexternalhit', 'Facebot', 'LinkedInBot', 'Twitterbot', 'Slackbot-LinkExpanding', 'Slackbot', 'WhatsApp',
+        'TelegramBot', 'Discordbot', 'Mastodon', 'Pinterestbot', 'SkypeUriPreview'];
+
     public static function aiMode(): string
     {
         $m = (string) app()->settings->get('sys.ai_crawlers', 'allow');
@@ -61,7 +65,17 @@ final class Indexing
     /** Inhalt der robots.txt */
     public static function robotsTxt(): string
     {
-        if (noindex_site() || Landings::current()?->noindex) return "User-agent: *\nDisallow: /\n";
+        if (noindex_site() || Landings::current()?->noindex) {
+            // Live-Website vor dem Start („Suchmaschinen aussperren“): Suchmaschinen draußen, Linkvorschauen beim Teilen erlaubt
+            // (Facebook, LinkedIn & Co. halten sich an die robots.txt – sonst graues Bild ohne Text). Staging bleibt ganz gesperrt.
+            $txt = "User-agent: *\nDisallow: /\n";
+            if (environment() === 'production') {
+                $txt .= "\n# Linkvorschau beim Teilen (keine Suchmaschinen)\n";
+                foreach (self::PREVIEW_BOTS as $b) $txt .= 'User-agent: ' . $b . "\n";
+                $txt .= "Disallow: /admin\nDisallow: /api/\nAllow: /\n";
+            }
+            return $txt;
+        }
         $txt = "User-agent: *\nDisallow: /admin\nDisallow: /anfrage/\nDisallow: /api/\nDisallow: /mcp\n";
         $mode = self::aiMode();
         $bots = match ($mode) { 'training' => self::TRAINING_BOTS, 'all' => array_merge(self::TRAINING_BOTS, self::ANSWER_BOTS), default => [] };
