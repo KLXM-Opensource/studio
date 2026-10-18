@@ -6,7 +6,7 @@
     <li><b>Gruppen:</b> Inhalte, Daten, Medien, KI, Schnittstellen, Kommunikation, Sicherheit &amp; Betrieb. Jede Zeile hat einen Schalter, eine Kurzbeschreibung und den Status <i>an</i>, <i>aus</i> oder <i>per Konfiguration festgelegt</i>.</li>
     <li><b>„Was passiert beim Einschalten“</b> zeigt neue Menüpunkte und Rechte, Anfragen an fremde Dienste (z. B. an einen KI-Anbieter), Hintergrund-Aufgaben (Cron), Auswirkungen auf der Website (Skripte, Cookies) und welche Daten gespeichert werden.</li>
     <li><b>Abhängigkeiten:</b> Manche Funktionen bauen aufeinander auf – z. B. brauchen Kalender und Formulare die Datentabellen, der KI-Assistent und der Besucher-Chat die KI-Funktionen. Fehlt die Voraussetzung, „ruht“ die Funktion und der Schalter bleibt gesperrt.</li>
-    <li><b>Sicherheitsrelevant</b> (REST-API, MCP, KI, Besucher-Chat, Externe Quellen, Erweiterungen mit Server-Prozessen wie die Video-Werkzeuge): Beim Einschalten erscheint der konkrete Risiko-Hinweis; Sie bestätigen ihn und geben Ihr Passwort ein.</li>
+    <li><b>Sicherheitsrelevant</b> (REST-API, MCP, KI, Besucher-Chat, Externe Quellen, Erweiterungen mit Server-Prozessen wie die Video-Werkzeuge): Beim Einschalten erscheint der konkrete Risiko-Hinweis; Sie bestätigen ihn und dazu Ihre Identität – mit Passwort oder Passkey. Haben Sie sich in den letzten 15 Minuten angemeldet oder bestätigt, genügt der Hinweis; Konten ohne Passwort bestätigen mit dem Passkey.</li>
     <li><b>Vorsicht bei „Benutzer und Rollen“ und „Grundeinstellungen“:</b> Aus bedeutet gesperrt für alle – bis Sie den Schalter hier wieder einschalten.</li>
   </ul>
   <h3>Erweiterungen</h3>

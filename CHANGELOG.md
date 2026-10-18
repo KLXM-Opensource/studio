@@ -7,6 +7,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Sicherheit vor dem Start
+- **Funktionen & Erweiterungen einschalten mit Passkey:** Die Sicherheitsbestätigung (z. B. PDF-Engine, API, KI) nimmt jetzt auch den Passkey an; nach einer Anmeldung oder Bestätigung in den letzten 15 Minuten genügt der Hinweis. Vorher konnten Konten ohne Passwort (nur Passkey) sicherheitsrelevante Schalter gar nicht einschalten.
 - **Rechte:** Wer Benutzer verwalten darf, vergibt nur noch Rollen mit eigenen Rechten und ändert nur solche Konten (vorher war die Selbst-Beförderung zur Administration möglich). Rollen-Editor: nur eigene Rechte vergeben.
 - **Integratoren** gelten in Installationen mit mehreren Websites nur noch auf der Netzwerk-Website; Konten mit Integrator-Adresse legt nur ein Integrator direkt an.
 - **API-Tokens** gelten nur, solange ihr Konto besteht, nicht gesperrt ist und die API verwalten darf; schreibende Tokens verlangen ein Konto mit allen Rechten. Gelöschte Konten verlieren Tokens und (Erweiterung dav) App-Passwörter; gesperrte Konten – auch Netzwerk-Konten – erhalten keinen DAV-Zugang mehr. Neues Ereignis `user.deleted`.

@@ -69,4 +69,10 @@
 .ft-dialog .ft-confirm__risk{margin-bottom:12px}
 .ft-dialog .f-check{margin:4px 0 16px}
 .ft-dialog__btns{display:flex;justify-content:flex-end;gap:8px}
+/* Bestätigung im Dialog: Passwort und/oder Passkey (wie Konto → account.css .acc-reauth) */
+.ft-dialog__auth{display:grid;gap:4px;margin-bottom:8px}
+.ft-dialog .acc-reauth__pk{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ft-dialog .acc-reauth__pk .adm-btn svg{width:16px;height:16px}
+.ft-dialog .acc-reauth__pk .pk-msg{flex-basis:100%;margin:4px 0 0}
+.ft-dialog .acc-reauth__or{font-size:13px;color:var(--adm-t2)}
 @media (max-width:640px){.ft-row,.ft-ext{grid-template-columns:minmax(0,1fr)}.ft-row__act{justify-content:flex-start}.ft-form{justify-items:start}}

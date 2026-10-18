@@ -104,7 +104,7 @@ $sw = function (bool $on, bool $disabled, string $label) {
           <p class="ft-confirm__risk"><?= icon('warning') ?> <?= e($risk) ?></p>
           <label class="f-check"><input type="checkbox" name="confirm" value="1" required> <span><?= e(__('Ich habe den Hinweis gelesen und brauche diese Funktion.')) ?></span></label>
           <label class="adm-sr" for="<?= e($id) ?>-pw"><?= e(__('Passwort zur Bestätigung')) ?></label>
-          <input id="<?= e($id) ?>-pw" name="password" type="password" autocomplete="current-password" required placeholder="<?= e(__('Passwort zur Bestätigung')) ?>">
+          <input id="<?= e($id) ?>-pw" name="password" type="password" autocomplete="current-password"<?= empty($reauth['recent']) ? ' required' : '' ?> placeholder="<?= e(__('Passwort zur Bestätigung')) ?>">
         </div>
         <?php endif; ?>
         <button class="ft-toggle" type="submit" role="switch" aria-checked="<?= $row['on'] ? 'true' : 'false' ?>" aria-label="<?= e($row['label'] . ': ' . ($row['on'] ? __('ausschalten') : __('einschalten'))) ?>"><?= $sw($row['on'], false, '') ?></button>
@@ -179,7 +179,7 @@ $sw = function (bool $on, bool $disabled, string $label) {
           <p class="ft-confirm__risk"><?= icon('warning') ?> <?= e($x['risk']) ?></p>
           <label class="f-check"><input type="checkbox" name="confirm" value="1" required> <span><?= e(__('Ich habe den Hinweis gelesen und brauche diese Erweiterung.')) ?></span></label>
           <label class="adm-sr" for="<?= e($id) ?>-pw"><?= e(__('Passwort zur Bestätigung')) ?></label>
-          <input id="<?= e($id) ?>-pw" name="password" type="password" autocomplete="current-password" required placeholder="<?= e(__('Passwort zur Bestätigung')) ?>">
+          <input id="<?= e($id) ?>-pw" name="password" type="password" autocomplete="current-password"<?= empty($reauth['recent']) ? ' required' : '' ?> placeholder="<?= e(__('Passwort zur Bestätigung')) ?>">
         </div>
         <?php endif; ?>
         <button class="adm-btn adm-btn--small<?= $x['enabled'] ? '' : ' adm-btn--primary' ?>" type="submit"><?= e($x['enabled'] ? __('Deaktivieren') : __('Aktivieren')) ?></button>
@@ -209,12 +209,30 @@ $sw = function (bool $on, bool $disabled, string $label) {
 <?php $secs['protokoll'] = ['label' => __('Letzte Änderungen'), 'icon' => 'clock', 'html' => ob_get_clean()]; ?>
 <?= \Core\AdminUi::tabs($secs, [], __('Gruppen')) ?>
 
-<dialog class="adm-dialog adm-dialog--small ft-dialog" id="ft-dialog" aria-labelledby="ft-dialog-h">
+<dialog class="adm-dialog adm-dialog--small ft-dialog" id="ft-dialog" aria-labelledby="ft-dialog-h"<?= !empty($reauth['recent']) ? ' data-ft-recent' : '' ?>>
   <form method="dialog" class="ft-dialog__form">
     <h2 id="ft-dialog-h" data-ft-dtitle></h2>
     <p class="ft-confirm__risk"><?= icon('warning') ?> <span data-ft-drisk></span></p>
-    <p class="adm-muted"><?= e(__('Aktivieren Sie nur, was diese Website wirklich braucht. Zur Sicherheit bestätigen Sie bitte mit Ihrem Passwort.')) ?></p>
-    <div class="f"><label for="ft-dialog-pw"><?= e(__('Passwort')) ?></label><input id="ft-dialog-pw" type="password" autocomplete="current-password" data-ft-dpw></div>
+    <?php $ra = $reauth ?? ['recent' => false, 'hasPw' => true, 'passkey' => false]; /* FeaturesController::reauthInfo */ ?>
+    <?php if ($ra['recent']): ?>
+    <p class="adm-muted"><?= e(__('Aktivieren Sie nur, was diese Website wirklich braucht. Sie haben sich in den letzten 15 Minuten angemeldet bzw. bestätigt – ein Passwort ist nicht nötig.')) ?></p>
+    <?php else: ?>
+    <p class="adm-muted"><?= e($ra['hasPw'] ? __('Aktivieren Sie nur, was diese Website wirklich braucht. Zur Sicherheit bestätigen Sie bitte mit Ihrem Passwort oder Passkey.') : __('Aktivieren Sie nur, was diese Website wirklich braucht. Zur Sicherheit bestätigen Sie bitte mit Ihrem Passkey.')) ?></p>
+    <div class="ft-dialog__auth" data-ft-auth>
+      <?php if ($ra['hasPw']): ?><div class="f"><label for="ft-dialog-pw"><?= e(__('Passwort')) ?></label><input id="ft-dialog-pw" type="password" autocomplete="current-password" data-ft-dpw></div><?php endif; ?>
+      <?php if ($ra['passkey']): ?>
+      <div class="acc-reauth__pk" data-pk-reauth="<?= e(url('/admin/account/reauth/passkey')) ?>" data-back="stay" data-stay hidden>
+        <?= csrf_field() ?>
+        <?php if ($ra['hasPw']): ?><span class="acc-reauth__or"><?= e(__('oder')) ?></span><?php endif; ?>
+        <button class="adm-btn adm-btn--small" type="button" data-pk-reauth-btn><?= icon('fingerprint') ?> <?= e(__('Mit Passkey bestätigen')) ?></button>
+        <p class="adm-flash pk-msg" data-pk-msg aria-live="polite" hidden></p>
+      </div>
+      <script src="<?= e(asset('js/passkey.js')) ?>" defer></script>
+      <?php elseif (!$ra['hasPw']): ?>
+      <p class="adm-flash adm-flash--info"><?= e(__('Für Ihr Konto ist kein Passwort festgelegt und auf dieser Adresse kein Passkey eingerichtet. Melden Sie sich bitte ab und wieder an – danach gilt die Anmeldung 15 Minuten als Bestätigung.')) ?></p>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
     <label class="f-check"><input type="checkbox" data-ft-dok> <span><?= e(__('Ich habe den Hinweis gelesen und brauche das wirklich.')) ?></span></label>
     <div class="ft-dialog__btns">
       <button class="adm-btn" value="cancel" type="submit" formnovalidate><?= e(__('Abbrechen')) ?></button>

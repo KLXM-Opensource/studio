@@ -241,7 +241,7 @@ final class PasskeyController extends AdminController
         $limiter->clear($key);
         Mfa::remember($o['db'], $o['uid'], 'passkey');
         app()->session->set('reauth_at', time());
-        app()->session->flash('success', __('Mit Passkey bestätigt – für 15 Minuten.'));
+        if ($r->str('back') !== 'stay') app()->session->flash('success', __('Mit Passkey bestätigt – für 15 Minuten.'));   // stay: Dialog meldet selbst
         return Response::json(['ok' => true, 'redirect' => url(self::reauthBack($r->str('back')))]);
     }
 

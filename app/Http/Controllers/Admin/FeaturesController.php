@@ -11,6 +11,7 @@ use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Mfa;
+use Core\Passkeys;
 use Core\Permissions;
 use Core\RateLimiter;
 
@@ -59,7 +60,7 @@ final class FeaturesController extends AdminController
         }
         return $this->view('features', ['title' => __('Funktionen & Erweiterungen'), 'rows' => $rows, 'exts' => $exts,
             'canManage' => Features::canManage(), 'networked' => Features::networked(), 'delegated' => Features::delegated(),
-            'integrator' => Features::integrator(), 'log' => FeatureLog::recent(10), 'css' => []]);
+            'integrator' => Features::integrator(), 'log' => FeatureLog::recent(10), 'reauth' => self::reauthInfo($user), 'css' => []]);
     }
 
     /** Funktion ein- oder ausschalten */
@@ -146,12 +147,19 @@ final class FeaturesController extends AdminController
             : __('Freigabe zurückgenommen – Funktionen und Erweiterungen schaltet wieder nur die Agentur.'));
     }
 
-    /** Bestätigung des Risikos + Passwort (Netzwerk-Konten: Passwort des Netzwerk-Kontos). null = in Ordnung, sonst Fehlertext */
+    /**
+     * Bestätigung des Risikos + Identität: Passwort (Netzwerk-Konten: Passwort des Netzwerk-Kontos) – oder kürzlich bestätigt
+     * (Anmeldung, Passwort oder Passkey in den letzten 15 Minuten, Mfa::recentAuth; Passkey im Dialog über
+     * PasskeyController::reauthPasskey). Konten ohne Passwort (nur Passkey) bestätigen so mit dem Passkey.
+     * null = in Ordnung, sonst Fehlertext.
+     */
     private function confirm(Request $r, array $user): ?string
     {
         if ($r->str('confirm') !== '1') return __('Bitte bestätigen Sie den Sicherheitshinweis.');
+        if (Mfa::recentAuth()) return null;
         $row = Mfa::row($user);
         if (!$row) return __('Konto nicht gefunden.');
+        if ((string) ($row['password_hash'] ?? '') === '') return __('Ihr Konto hat kein Passwort – bitte bestätigen Sie mit Ihrem Passkey.');
         [, $uid] = Mfa::store($user);
         $limiter = new RateLimiter(app()->db);
         $key = 'reauth:' . $uid . ':' . (Mfa::isNet($user) ? 'n' : 'l');
@@ -163,6 +171,15 @@ final class FeaturesController extends AdminController
         $limiter->clear($key);
         app()->session->set('reauth_at', time());
         return null;
+    }
+
+    /** Für den Bestätigungsdialog: kürzlich bestätigt? Passwort vorhanden? Passkey für diese Domain? */
+    private static function reauthInfo(?array $user): array
+    {
+        $row = $user ? Mfa::row($user) : null;
+        $pk = false;
+        if ($row && Passkeys::available()) { [$db, $uid] = Mfa::store($user); $pk = Passkeys::count($db, $uid, Passkeys::rpId()) > 0; }
+        return ['recent' => Mfa::recentAuth(), 'hasPw' => $row && (string) ($row['password_hash'] ?? '') !== '', 'passkey' => $pk];
     }
 
     /** Erweiterung, die eine Funktion angemeldet hat (für die Anzeige) */

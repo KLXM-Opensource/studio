@@ -3,7 +3,8 @@
  *   [data-pk-login]   Anmeldeseite: „Mit Passkey anmelden“ + Autofill (conditional UI, autocomplete="username webauthn")
  *   [data-pk-2fa]     Zweiter Schritt nach dem Passwort: Passkey bestätigen
  *   [data-pk-add]     Konto/Einrichtung: Passkey hinzufügen (Name → navigator.credentials.create)
- *   [data-pk-reauth]  Konto: mit Passkey bestätigen statt mit dem Passwort (gilt 15 Minuten; z. B. Konten ohne Passwort)
+ *   [data-pk-reauth]  Konto: mit Passkey bestätigen statt mit dem Passwort (gilt 15 Minuten; z. B. Konten ohne Passwort).
+ *                     Mit data-stay (z. B. Dialog in Funktionen & Erweiterungen) kein Seitenwechsel: Ereignis „pk:reauthed“.
  * Binärwerte als base64url; Server-Antworten JSON ({publicKey} bzw. {ok, redirect} oder {error}). CSRF: Header X-CSRF-Token.
  */
 import { t } from './_i18n.js';
@@ -128,6 +129,11 @@ function initReauth(box) {
       const o = await post(url + '/options', csrf);
       const cred = await navigator.credentials.get({ publicKey: getOptions(o.publicKey) });
       const res = await post(url, csrf, { credential: serialize(cred), back: box.dataset.back || '' });
+      if ('stay' in box.dataset) {
+        say(msg, t('Mit Passkey bestätigt – für 15 Minuten.'), true);
+        box.dispatchEvent(new CustomEvent('pk:reauthed', { bubbles: true }));
+        return;
+      }
       location.assign(res.redirect);
     } catch (e) {
       btn.disabled = false;
