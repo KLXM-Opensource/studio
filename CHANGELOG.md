@@ -27,6 +27,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Mehrsprachige Websites: Datensätze aller aktiven Sprachen stehen in der Sitemap (vorher nur die Standardsprache, z. B. fehlten die englischen Glossar-Begriffe).
 - Detailseiten von Datensätzen übernehmen „nicht in Suchmaschinen“ bzw. den Entwurfsstatus ihrer Detailvorlage (`noindex`) – passend zur Sitemap, die sie dann weglässt.
 - Geteilte Tabellen merken sich als Adresse einer Website deren Hauptadresse (eingestellte Adresse bzw. erste Domain), nicht die gerade aufgerufene – sonst zeigte das Canonical fremder Einträge z. B. auf eine weitere Domain.
+- JSON-LD: Organisation ohne Logo-Bild bekommt das App-Icon (512 px) als `logo`; Namen von Datenlisten (`ItemList`) ohne *Betonung*.
+
+### Sicherheits-Header
+- HSTS abschaltbar bzw. mit eigenem Wert: Konfiguration `'hsts' => false` (setzt schon der Webserver, z. B. Plesk – sonst doppelt) oder `'hsts' => 'max-age=…'`. `X-Powered-By` (PHP-Version) wird nicht mehr gesendet.
 
 ### Editor: Notizen und weicher Umbruch
 - Klick auf eine Redaktionsnotiz („Notiz: …“) im Bearbeiten-Modus: **Als Text übernehmen** oder **Notiz löschen** – vorher ließ sie sich dort weder entfernen noch umwandeln.

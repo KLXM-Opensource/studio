@@ -110,9 +110,10 @@ final class StructuredData
         $items = [];
         foreach (array_values($rows) as $i => $e) {
             if (!($u = Entries::absUrl($table, $e))) continue;
-            $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'url' => $u, 'name' => Entries::title($table, $e)];
+            $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'url' => $u, 'name' => strip_emphasis(Entries::title($table, $e))];
         }
-        if ($items) self::add(['@type' => 'ItemList', 'name' => $name ?: (string) $table['name'], 'itemListElement' => $items]);
+        // *Betonung* aus Blocktiteln gehört nicht ins JSON-LD (Kits geben den Titel teils roh weiter)
+        if ($items) self::add(['@type' => 'ItemList', 'name' => strip_emphasis($name ?: (string) $table['name']), 'itemListElement' => $items]);
     }
 
     /** Kalender/Nächste Termine: Termine als Event */
@@ -216,6 +217,10 @@ final class StructuredData
         if (Landings::current()) $org['url'] = main_url() . url('/');
         if (empty($org['geo']) && ($p = Maps::siteLocation())) {
             $org['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => $p[0], 'longitude' => $p[1]];
+        }
+        // Ohne Logo-Bild (z. B. Logo als Inline-SVG im Kit): App-Icon 512 px der Website (Core\AppIcons) – Google zeigt es im Wissensbereich
+        if (empty($org['logo']) && AppIcons::ensure() && is_file(AppIcons::dir() . '/icon-512.png')) {
+            $org['logo'] = site_url() . AppIcons::url('icon-512.png');
         }
         return $org;
     }

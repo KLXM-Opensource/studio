@@ -7,6 +7,7 @@
     <tr><td><code>debug</code></td><td>Fehlerausgabe, Seiten-Cache aus. Nur lokal.</td></tr>
     <tr><td><code>timezone</code></td><td>Zeitzone der Website (Standard <code>Europe/Berlin</code>) – Kalender, „jetzt geöffnet“, Zeitstempel.</td></tr>
     <tr><td><code>base_url</code></td><td>Feste Basis-URL (alternativ Grundeinstellungen → Website → Kanonische Adresse).</td></tr>
+    <tr><td><code>hsts</code></td><td>HSTS-Header über HTTPS im Produktivbetrieb: <code>true</code> (Standard, <code>max-age=31536000</code>), eigener Wert als Text (z. B. <code>'max-age=63072000; includeSubDomains'</code>) oder <code>false</code>, wenn der Webserver ihn schon setzt (Plesk).</td></tr>
     <tr><td><code>url_rewrite</code></td><td><code>true</code> = <code>/impressum</code>, <code>false</code> = <code>/index.php/impressum</code>.</td></tr>
     <tr><td><code>theme</code></td><td>Kit-Vorgabe, falls keines gewählt ist. Der Core enthält keine Kit-Namen.</td></tr>
     <tr><td><code>fallback_site</code></td><td>Website für Domains ohne eigenen Eintrag (Standard <code>default</code>; <code>null</code> = unbekannte Domains abweisen). Nur in config.php/config.local.php.</td></tr>
