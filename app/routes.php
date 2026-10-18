@@ -652,6 +652,7 @@ return function (Router $r): void {
     // Geschützte Medien-Pools (Core\MediaPools::isProtected): nur mit Zugriff
     $r->get(\Core\MediaPools::PROTECTED_PATH . '/{pool}/{path*}', [\Core\Http\Controllers\ProtectedMediaController::class, 'serve']);
     $r->get('/sitemap.xml', [SiteController::class, 'sitemap']);
+    $r->get('/sitemap.xsl', [SiteController::class, 'sitemapXsl']);
     // Rechtstexte im Dialog (Datenschutzhinweise an Formularen, Core\LegalDialog)
     $r->get('/_legal/{kind}', fn(\Core\Http\Request $req, string $kind) => \Core\LegalDialog::handle($req, $kind));
     // Glossar: Begriffe für Inhalte, die erst im Browser entstehen (resources/js/glossary-live.mjs) – nur veröffentlichte

@@ -18,6 +18,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Videos: Web-Fassung automatisch
 - Große Videos (über 2 MB oder höher als 1080 px) bekommen automatisch eine **Web-Fassung** (H.264, max. 1080p, faststart – startet sofort). Sie liegt im Zwischenspeicher der Mediathek (wie Bildgrößen), erscheint nicht als eigene Datei und wird auf der Website statt des Originals ausgespielt; Verwaltung und Download behalten das Original. Erzeugt nach dem Hochladen, per Cron „Web-Fassung für Videos“ (alle 10 min) und beim ersten Aufruf eingereiht. `media:web`, Abschalten mit `media.video_web = false` (`Core\VideoWeb`).
 
+### Sitemap
+- `sitemap.xml` mit Bildern (`image:image`: Vorschaubild und Bilder der Blöcke bzw. Medienfelder der Einträge, nie geschützte Medien), `lastmod` mit Uhrzeit und lesbarer Ansicht im Browser (`/sitemap.xsl`). Filter `sitemap.urls` nimmt `images` an.
+
 ### Sichtbarkeit von Blöcken
 - Schalter **„Auf der Website sichtbar“** ganz oben in der Seitenleiste eines Blocks (vorher ein Häkchen unter „Abschnitt & Navigation“) und **Ausblenden/Einblenden** im Block-Menü ⋯. Ausgeblendet: deutlicher Hinweis in der Seitenleiste, Block im Editor gedimmt.
 

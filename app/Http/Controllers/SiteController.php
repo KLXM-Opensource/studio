@@ -364,13 +364,14 @@ final class SiteController
 
     public function sitemap(Request $r): Response
     {
-        $urls = [];   // [{loc, lastmod?}] – Erweiterungen ändern sie über den Filter „sitemap.urls“
-        $mod = fn(?string $d) => substr((string) $d, 0, 10);
+        $urls = [];   // [{loc, lastmod?, images?: [url, …]}] – Erweiterungen ändern sie über den Filter „sitemap.urls“
+        // Datum mit Uhrzeit (W3C) wie andere Systeme; nur gültige Werte
+        $mod = fn(?string $d) => ($t = strtotime((string) $d)) ? date('c', $t) : '';
         // Landing-Domain: nur ihre Seiten (Modus „Eigene Domain“; Spiegel und „nicht in Suchmaschinen“ → leer)
         if ($l = Landings::current()) {
             foreach ($l->mode === 'own' && !$l->noindex ? $l->pages() : [] as $p) {
                 if ($p['noindex'] || \Core\PageAccess::restricted($p)) continue;
-                $urls[] = ['loc' => (string) $l->absUrl($p), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at'])];
+                $urls[] = ['loc' => (string) $l->absUrl($p), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at']), 'images' => self::sitemapImages(self::pageMediaIds($p))];
             }
             return $this->sitemapXml($urls);
         }
@@ -379,33 +380,127 @@ final class SiteController
             if ($p['noindex'] || Landings::owner($p) || \Core\PageAccess::restricted($p)) {
                 continue;
             }
-            $urls[] = ['loc' => abs_url(Pages::url($p)), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at'])];
+            $urls[] = ['loc' => abs_url(Pages::url($p)), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at']), 'images' => self::sitemapImages(self::pageMediaIds($p))];
         }
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
             if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])
                 || \Core\PageAccess::tableRestricted($t)) continue;
             // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
             // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
+            $mediaFields = array_column(array_filter($t['fields'], fn($f) => ($f['type'] ?? '') === 'media'), 'name');
             foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
                 $loc = site_url() . Entries::url($t, $e);
                 if (Tables::isShared($t) && Entries::absUrl($t, $e) !== $loc) continue;
-                $urls[] = ['loc' => $loc, 'lastmod' => $mod($e['updated_at'] ?? $e['published_at'])];
+                $urls[] = ['loc' => $loc, 'lastmod' => $mod($e['updated_at'] ?? $e['published_at']),
+                    'images' => self::sitemapImages(array_map(fn($f) => (int) ($e[$f] ?? 0), $mediaFields))];
             }
         }
         return $this->sitemapXml($urls);
     }
 
-    /** sitemap.xml aus Adressen – vorher Filter „sitemap.urls“ (Extension::filter) */
+    /** Medien einer Seite: Vorschaubild (Seiteneinstellungen), dann Medienfelder der Blöcke in Reihenfolge (auch in Gruppen/Listen) */
+    private static function pageMediaIds(array $page): array
+    {
+        static $byType = null;
+        if ($byType === null) {
+            $byType = [];
+            $walk = function (array $fields) use (&$walk): array {
+                $n = [];
+                foreach ($fields as $f) {
+                    if (($f['type'] ?? '') === 'media') $n[] = (string) $f['name'];
+                    if (!empty($f['fields']) && is_array($f['fields'])) $n = array_merge($n, $walk($f['fields']));
+                }
+                return $n;
+            };
+            foreach (app()->theme->blocks() as $type => $def) $byType[$type] = array_flip($walk((array) ($def['fields'] ?? [])));
+        }
+        $ids = [(int) ($page['og_image'] ?? 0)];
+        $collect = function ($data, array $names) use (&$collect, &$ids): void {
+            if (!is_array($data) || count($ids) > 12) return;
+            foreach ($data as $k => $v) {
+                if (is_string($k) && isset($names[$k]) && is_numeric($v)) $ids[] = (int) $v;
+                elseif (is_array($v)) $collect($v, $names);
+            }
+        };
+        try {
+            foreach (Pages::blocks($page) as $b) if (!empty($byType[$b['type'] ?? ''])) $collect($b['data'] ?? [], $byType[$b['type']]);
+        } catch (\Throwable) {}
+        return $ids;
+    }
+
+    /** Bild-Adressen für die Sitemap (Bilder bzw. Standbild eines Videos; geschützte Medien nie) – höchstens 5 je Adresse */
+    private static function sitemapImages(array $ids): array
+    {
+        $out = [];
+        foreach (array_unique(array_filter($ids)) as $id) {
+            $m = \Core\Media::find((int) $id);
+            if (!$m || \Core\MediaPools::mediaProtected($m) || !($still = \Core\Media::stillOf($m))) continue;
+            $out[] = site_url() . \Core\Media::url($still, 1600);
+            if (count($out) >= 5) break;
+        }
+        return $out;
+    }
+
+    /**
+     * sitemap.xml aus Adressen – vorher Filter „sitemap.urls“ (Extension::filter). Mit Bildern (image:image, Google-Erweiterung)
+     * und Stylesheet /sitemap.xsl für eine lesbare Ansicht im Browser (Suchmaschinen ignorieren es).
+     */
     private function sitemapXml(array $urls): Response
     {
         $urls = \Core\Extensions::filter('sitemap.urls', $urls, ['host' => (string) (app()->request?->host() ?? '')]);
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<?xml-stylesheet type="text/xsl" href="' . e(url('/sitemap.xsl')) . '"?>' . "\n"
+            . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
         foreach (is_array($urls) ? $urls : [] as $u) {
             if (!is_array($u) || trim((string) ($u['loc'] ?? '')) === '') continue;
             $m = (string) ($u['lastmod'] ?? '');
-            $xml .= '  <url><loc>' . e((string) $u['loc']) . '</loc>' . ($m !== '' ? '<lastmod>' . e($m) . '</lastmod>' : '') . "</url>\n";
+            $img = '';
+            foreach ((array) ($u['images'] ?? []) as $i) if (is_string($i) && $i !== '') $img .= '<image:image><image:loc>' . e($i) . '</image:loc></image:image>';
+            $xml .= '  <url><loc>' . e((string) $u['loc']) . '</loc>' . ($m !== '' ? '<lastmod>' . e($m) . '</lastmod>' : '') . $img . "</url>\n";
         }
         return new Response($xml . '</urlset>' . "\n", 200, ['Content-Type' => 'application/xml; charset=utf-8', 'Cache-Control' => 'public, max-age=0, must-revalidate']);
+    }
+
+    /** /sitemap.xsl – lesbare Ansicht der Sitemap im Browser (Tabelle: Adresse, Bilder, zuletzt geändert); Suchmaschinen ignorieren es */
+    public function sitemapXsl(Request $r): Response
+    {
+        $t = fn(string $s, array $a = []) => htmlspecialchars(lt($s, $a), ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $name = htmlspecialchars(site_name(), ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $lang = htmlspecialchars(Lang::current(), ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $xsl = <<<XSL
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" exclude-result-prefixes="s image">
+<xsl:output method="html" encoding="UTF-8" indent="yes"/>
+<xsl:template match="/">
+<html lang="{$lang}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex"/>
+<title>{$t('Sitemap')} · {$name}</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f5f2;--card:#fff;--ink:#1f1f1e;--muted:#6b6862;--line:#e3e0da;--ac:#314164}
+@media (prefers-color-scheme:dark){:root{--bg:#16191f;--card:#1f232b;--ink:#f1eee8;--muted:#a9a49b;--line:#343a46;--ac:#9fb3dd}}
+body{margin:0;padding:clamp(16px,4vw,48px);background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{margin:0 0 4px;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.02em}
+p{margin:0 0 20px;color:var(--muted)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{position:sticky;top:0;background:var(--card);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.n{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+a{color:var(--ac);text-decoration:none;word-break:break-all}a:hover{text-decoration:underline}
+</style></head><body>
+<h1>{$t('Sitemap')} · {$name}</h1>
+<p><xsl:value-of select="count(s:urlset/s:url)"/> {$t('Adressen')} · <xsl:value-of select="count(s:urlset/s:url/image:image)"/> {$t('Bilder')} · {$t('Diese Seite ist für Suchmaschinen gedacht.')}</p>
+<div class="wrap"><table><thead><tr><th>{$t('Adresse')}</th><th>{$t('Bilder')}</th><th>{$t('Zuletzt geändert')}</th></tr></thead><tbody>
+<xsl:for-each select="s:urlset/s:url"><tr>
+<td><a href="{loc}"><xsl:value-of select="s:loc"/></a></td>
+<td class="n"><xsl:value-of select="count(image:image)"/></td>
+<td class="n"><xsl:value-of select="concat(substring(s:lastmod,9,2),'.',substring(s:lastmod,6,2),'.',substring(s:lastmod,1,4),' ',substring(s:lastmod,12,5))"/></td>
+</tr></xsl:for-each>
+</tbody></table></div></body></html>
+</xsl:template>
+</xsl:stylesheet>
+XSL;
+        $xsl = str_replace('href="{loc}"', 'href="{s:loc}"', $xsl);
+        return new Response($xsl, 200, ['Content-Type' => 'text/xsl; charset=utf-8', 'X-Robots-Tag' => 'noindex', 'Cache-Control' => 'public, max-age=3600']);
     }
 
     public function robots(Request $r): Response

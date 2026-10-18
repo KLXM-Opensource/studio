@@ -405,4 +405,8 @@ return [
     'Als Tabelle anzeigen' => 'Show as table',
     'Keine Daten für dieses Diagramm.' => 'No data for this chart.',
     'Reihe {n}' => 'Series {n}',
+    'Sitemap' => 'Sitemap',
+    'Adressen' => 'addresses',
+    'Zuletzt geändert' => 'Last modified',
+    'Diese Seite ist für Suchmaschinen gedacht.' => 'This page is meant for search engines.',
 ];

@@ -7809,4 +7809,6 @@ return [
     'Kopf' => 'Header',
     'Web-Fassung für Videos' => 'Web version of videos',
     'Große Videos der Mediathek bekommen eine kleinere Fassung, die auf der Website sofort startet. Ohne ffmpeg wirkungslos.' => 'Large videos in the media library get a smaller version that starts instantly on the website. Has no effect without ffmpeg.',
+    'Diese Seite ist für Suchmaschinen gedacht.' => 'This page is meant for search engines.',
+    'Sitemap' => 'Sitemap',
 ];
