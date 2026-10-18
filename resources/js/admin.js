@@ -154,7 +154,9 @@ $$('[data-secnav]').forEach(box => {
 
 // ------------------------------------------------------------ Reiter (mit #hash)
 $$('[data-tabs]').forEach(form => {
-  const tabs = $$('[role=tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)
+  // Nur Reiter der Verwaltung (mit data-tab) – auf der Website (angemeldet) gehören [data-tabs] und role=tab dem Kit
+  const tabs = $$('[role=tab][data-tab]', form), hidden = form.elements?._tab;   // auch ohne Formular (z. B. Seiten: Seitenbaum | Sonderseiten)
+  if (!tabs.length) return;
   const list = $('[role=tablist]', form);
   // Senkrechte Reiter-Navigation (.adm-tabs-form--side, breite Bildschirme): aria-orientation folgt dem Layout
   const side = form.classList.contains('adm-tabs-form--side') ? matchMedia('(min-width: 1000px)') : null;

@@ -28,6 +28,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Editor: Notizen und weicher Umbruch
 - Klick auf eine Redaktionsnotiz („Notiz: …“) im Bearbeiten-Modus: **Als Text übernehmen** oder **Notiz löschen** – vorher ließ sie sich dort weder entfernen noch umwandeln.
 - Umschalt+Enter fügt im Rich-Text einen weichen Umbruch ein – auch in Safari (legte vorher einen neuen Absatz an).
+- Reiter eines Kits auf der Website (z. B. Screenshots) schalten auch angemeldet wieder einzeln um – das Reiter-Skript der Verwaltung griff mit zu und markierte alle als gewählt.
 
 ### Sichtbarkeit von Blöcken
 - Schalter **„Auf der Website sichtbar“** ganz oben in der Seitenleiste eines Blocks (vorher ein Häkchen unter „Abschnitt & Navigation“) und **Ausblenden/Einblenden** im Block-Menü ⋯. Ausgeblendet: deutlicher Hinweis in der Seitenleiste, Block im Editor gedimmt.
