@@ -174,6 +174,18 @@ final class NetworkController extends AdminController
                     break;
                 case 'hosts':
                     // Domains der Website (config/sites/{key}.php → 'hosts'), z. B. für Landingpages mit eigenen Domains (Core\Landings)
+                    if ($r->str('op') === 'primary') {
+                        // Hauptadresse festlegen (Installation mit mehreren Websites – die Seite „Domain“ gibt es dort nicht).
+                        // Netzwerk-Website: nur, wenn der eigene Passkey dort gilt (sonst sperrt man sich aus)
+                        $h = (string) Sites::normalizeHost($r->str('host'));
+                        if ($h === '' || \Core\Domains::isLocal($h)) throw new \InvalidArgumentException(__('Eine lokale Adresse kann nicht Hauptadresse werden.'));
+                        if ($key === Network::siteKey() && \Core\HostHandover::missing($user, $h))
+                            throw new \InvalidArgumentException(__('Ihr Passkey gilt auf {host} noch nicht. Bitte dort zuerst anmelden und einen Passkey anlegen.', ['host' => $h]));
+                        Sites::setPrimary($key, $h);
+                        Network::log('hosts.primary', $key, (string) $user['email'], $h);
+                        $msg = __('{host} ist jetzt die Hauptadresse von {site}.', ['host' => $h, 'site' => $key]);
+                        break;
+                    }
                     $op = $r->str('op') === 'remove' ? 'remove' : 'add';
                     Sites::setHosts($key, $op, $r->str('host'), $r->str('landing') === '1');
                     $h = (string) Sites::normalizeHost($r->str('host'));
