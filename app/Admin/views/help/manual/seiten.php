@@ -62,7 +62,7 @@
     <tr><td>Im Hauptmenü zeigen, Beschriftung</td><td>Menüeintrag an/aus und ein kürzerer Menütext.</td></tr>
     <tr><td>Titel für Suchmaschinen</td><td>Optional ein eigener Titel für Google &amp; Co., wenn der Seitentitel dafür zu kurz oder zu lang ist.</td></tr>
     <tr><td>Beschreibung für Suchmaschinen</td><td>Der kurze Text unter dem Link bei Google (120–160 Zeichen). Der <b>SEO-Check</b> prüft Titel, Beschreibung, Überschriften und Alt-Texte.</td></tr>
-    <tr><td>Vorschaubild</td><td>Bild, das soziale Netzwerke und Messenger beim Teilen der Seite zeigen.</td></tr>
+    <tr><td>Vorschaubild</td><td>Bild, das soziale Netzwerke und Messenger beim Teilen der Seite zeigen. Es wird automatisch im Format 1200 × 630 (1,91 : 1) zugeschnitten, wie Facebook, LinkedIn und Co. es erwarten – um den Fokuspunkt des Bilds (Mediathek → Fokuspunkt), damit z. B. ein Gesicht im Ausschnitt bleibt.</td></tr>
     <tr><td>Nicht in Suchmaschinen</td><td>Für Seiten, die nur per Link erreichbar sein sollen (z. B. eine Beispielseite mit allen Blöcken).</td></tr>
     <tr><td>Versionen</td><td>Die letzten <?= (int) app()->config->get('revisions', 20) ?> gespeicherten Stände – „Wiederherstellen“ legt einen Entwurf an.</td></tr>
   </table>

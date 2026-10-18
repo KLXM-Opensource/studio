@@ -640,21 +640,23 @@ final class Media
     // ================================================================= Ausgabe
 
     /**
-     * Vorschaubild für soziale Netzwerke (og:image): JPEG, höchstens 1200 px breit – LinkedIn (und manche Messenger) zeigen
-     * kein WebP. Einmal erzeugt im Cache des Mediums (cache/{base}-og.jpg) und danach nur noch ausgeliefert. Quelle: größte
-     * vorhandene Fassung (WebP, sonst Original). null = kein Bild oder GD fehlt.
+     * Vorschaubild für soziale Netzwerke (og:image): JPEG im Format 1,91:1 (1200 × 630, kleinere Bilder in Originalgröße) –
+     * Facebook, LinkedIn, X und Messenger beschneiden andere Formate selbst. Zuschnitt um den Fokuspunkt; LinkedIn (und manche
+     * Messenger) zeigen kein WebP. Einmal erzeugt im Cache des Mediums (cache/{base}-og-{fx}-{fy}.jpg – neuer Fokuspunkt = neue
+     * Datei) und danach nur noch ausgeliefert. Quelle: größte vorhandene Fassung (WebP, sonst Original). null = kein Bild oder GD fehlt.
      */
     public static function shareUrl(array $m): ?string
     {
         if (!str_starts_with((string) ($m['mime'] ?? ''), 'image/') || ($m['mime'] ?? '') === Svg::MIME) return null;
         $v = json_decode((string) ($m['variants_json'] ?? ''), true) ?: [];
         $base = (string) ($v['base'] ?? '') ?: substr(sha1((string) $m['file']), 0, 16);
-        $rel = 'cache/' . $base . '-og.jpg';
+        $fx = max(0, min(100, (int) ($m['focus_x'] ?? 50))); $fy = max(0, min(100, (int) ($m['focus_y'] ?? 50)));
+        $rel = 'cache/' . $base . '-og-' . $fx . '-' . $fy . '.jpg';
         $root = ($m['_pool'] ?? self::$pool) !== null ? MediaPools::mediaDir((string) ($m['_pool'] ?? self::$pool)) : site()->mediaDir();
         $out = $root . '/' . $rel;
         if (!is_file($out)) {
             if (!function_exists('imagejpeg')) return null;
-            $src = self::localFile($m, 1200);
+            $src = self::localFile($m, 2400);   // größte Fassung: auch sehr breite Bilder füllen nach dem Zuschnitt 1200 px
             if (!is_file($src)) $src = self::localFile($m);
             $type = is_file($src) ? (string) ((new \finfo(FILEINFO_MIME_TYPE))->file($src) ?: '') : '';
             $im = match ($type) {
@@ -663,12 +665,16 @@ final class Media
                 'image/avif' => function_exists('imagecreatefromavif') ? @imagecreatefromavif($src) : false, default => false,
             };
             if (!$im) return null;
-            $w = imagesx($im); $h = imagesy($im);
-            $k = min(1, 1200 / max(1, $w));
-            $nw = max(1, (int) round($w * $k)); $nh = max(1, (int) round($h * $k));
+            $w = max(1, imagesx($im)); $h = max(1, imagesy($im));
+            // Ausschnitt 1,91:1 (1200 × 630) um den Fokuspunkt, dann höchstens 1200 px breit
+            $ratio = 1200 / 630;
+            [$cw, $ch] = $w / $h > $ratio ? [(int) round($h * $ratio), $h] : [$w, (int) round($w / $ratio)];
+            $cx = (int) round(max(0, min($w - $cw, $w * $fx / 100 - $cw / 2)));
+            $cy = (int) round(max(0, min($h - $ch, $h * $fy / 100 - $ch / 2)));
+            $nw = max(1, min(1200, $cw)); $nh = max(1, (int) round($nw / $ratio));
             $jpg = imagecreatetruecolor($nw, $nh);
             imagefill($jpg, 0, 0, imagecolorallocate($jpg, 255, 255, 255));   // Transparenz auf Weiß
-            imagecopyresampled($jpg, $im, 0, 0, 0, 0, $nw, $nh, $w, $h);
+            imagecopyresampled($jpg, $im, 0, 0, $cx, $cy, $nw, $nh, $cw, $ch);
             if (!is_dir(dirname($out))) @mkdir(dirname($out), 0775, true);
             $tmp = $out . '.' . bin2hex(random_bytes(4));
             if (!@imagejpeg($jpg, $tmp, 85)) return null;
@@ -1127,6 +1133,9 @@ final class Media
         foreach (self::crops($m) as $c) {
             self::deleteVariantFiles($c);
         }
+        // Vorschaubilder für soziale Netzwerke (shareUrl: -og-{fx}-{fy}.jpg, ältere -og.jpg)
+        $base = (string) ($v['base'] ?? '') ?: substr(sha1((string) $m['file']), 0, 16);
+        foreach (glob(self::dir() . '/cache/' . $base . '-og*.jpg') ?: [] as $f) @unlink($f);
         foreach ([...VideoThumbs::files($m), ...VideoWeb::files($m)] as $rel) {
             @unlink(self::dir() . '/' . $rel);
         }

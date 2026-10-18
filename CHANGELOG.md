@@ -37,6 +37,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **`kit:check`:** meldet Hintergrundvideos mit `poster` neben einem Standbild und Einstiege mit fest `loading="lazy"`.
 - **Server-Vorlagen** (Entwicklerhandbuch → Installation): nginx mit `location ^~` – greift auch bei Plesk „Statische Dateien direkt durch nginx bedienen“ –, 1 Jahr Cache für Assets, Bildvarianten und Design-CSS, 30 Tage für Medien, fehlende Varianten an Studio; Apache mit `mod_headers`.
 
+### Vorschaubild für soziale Netzwerke im richtigen Format
+- `og:image` hat jetzt 1200 × 630 (1,91 : 1) statt des Originalformats – Facebook, LinkedIn, X und Messenger beschnitten es sonst selbst bzw. meldeten ein falsches Seitenverhältnis. Zuschnitt um den Fokuspunkt (neuer Fokuspunkt = neues Bild, `cache/{base}-og-{x}-{y}.jpg`); beim Löschen eines Mediums wird es mit entfernt.
+
 ### Website: Abmelden ohne Umweg
 - Abmelden über die Leiste der Website bleibt auf der Seite: Leiste weg, kurze Meldung „Sie sind abgemeldet.“ – statt zur Anmeldung. In der Verwaltung wie bisher.
 
