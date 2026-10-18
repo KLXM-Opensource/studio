@@ -19,6 +19,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Große Videos (über 2 MB oder höher als 1080 px) bekommen automatisch eine **Web-Fassung** (H.264, max. 1080p, faststart – startet sofort). Sie liegt im Zwischenspeicher der Mediathek (wie Bildgrößen), erscheint nicht als eigene Datei und wird auf der Website statt des Originals ausgespielt; Verwaltung und Download behalten das Original. Erzeugt nach dem Hochladen, per Cron „Web-Fassung für Videos“ (alle 10 min) und beim ersten Aufruf eingereiht. `media:web`, Abschalten mit `media.video_web = false` (`Core\VideoWeb`).
 
 ### Sitemap
+- Nur, was jetzt veröffentlicht und erreichbar ist: Zeitfenster („Online ab“/„Offline ab“) sofort beachtet, Einträge nur mit veröffentlichter, indexierbarer Detailseite, für Suchmaschinen gesperrte Websites (Staging) mit leerer Sitemap.
 - `sitemap.xml` mit Bildern (`image:image`: Vorschaubild und Bilder der Blöcke bzw. Medienfelder der Einträge, nie geschützte Medien), `lastmod` mit Uhrzeit und lesbarer Ansicht im Browser (`/sitemap.xsl`). Filter `sitemap.urls` nimmt `images` an.
 
 ### Sichtbarkeit von Blöcken

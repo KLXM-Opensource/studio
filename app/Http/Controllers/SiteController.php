@@ -367,17 +367,22 @@ final class SiteController
         $urls = [];   // [{loc, lastmod?, images?: [url, …]}] – Erweiterungen ändern sie über den Filter „sitemap.urls“
         // Datum mit Uhrzeit (W3C) wie andere Systeme; nur gültige Werte
         $mod = fn(?string $d) => ($t = strtotime((string) $d)) ? date('c', $t) : '';
+        // Nur, was jetzt veröffentlicht und erreichbar ist: Zeitfenster („Online ab“/„Offline ab“) sofort beachten – nicht erst nach
+        // dem nächsten Lauf von Core\Schedule; für Suchmaschinen gesperrte Websites (Staging, „nicht in Suchmaschinen“): leer
+        $now = now();
+        $live = fn(array $r) => (empty($r['online_from']) || (string) $r['online_from'] <= $now) && (empty($r['online_until']) || (string) $r['online_until'] > $now);
+        if (noindex_site()) return $this->sitemapXml([]);
         // Landing-Domain: nur ihre Seiten (Modus „Eigene Domain“; Spiegel und „nicht in Suchmaschinen“ → leer)
         if ($l = Landings::current()) {
             foreach ($l->mode === 'own' && !$l->noindex ? $l->pages() : [] as $p) {
-                if ($p['noindex'] || \Core\PageAccess::restricted($p)) continue;
+                if ($p['noindex'] || !$live($p) || \Core\PageAccess::restricted($p)) continue;
                 $urls[] = ['loc' => (string) $l->absUrl($p), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at']), 'images' => self::sitemapImages(self::pageMediaIds($p))];
             }
             return $this->sitemapXml($urls);
         }
         foreach (Pages::published() as $p) {
             // Seiten einer Landingpage mit eigener Domain stehen in deren Sitemap
-            if ($p['noindex'] || Landings::owner($p) || \Core\PageAccess::restricted($p)) {
+            if ($p['noindex'] || !$live($p) || Landings::owner($p) || \Core\PageAccess::restricted($p)) {
                 continue;
             }
             $urls[] = ['loc' => abs_url(Pages::url($p)), 'lastmod' => $mod($p['published_at'] ?? $p['updated_at']), 'images' => self::sitemapImages(self::pageMediaIds($p))];
@@ -385,12 +390,16 @@ final class SiteController
         foreach (Tables::content() as $t) {                 // Eingangs-Tabellen haben nie Detailseiten
             if ($t['settings']['route'] === '' || empty($t['settings']['detail_page_id']) || !empty($t['settings']['noindex'])
                 || \Core\PageAccess::tableRestricted($t)) continue;
+            // Detailseite selbst muss veröffentlicht, im Zeitfenster und indexierbar sein – sonst führen die Adressen ins Leere
+            $dp = Pages::find((int) $t['settings']['detail_page_id']);
+            if (!$dp || $dp['status'] !== 'published' || !empty($dp['noindex']) || !$live($dp)) continue;
             // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
             // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
             $mediaFields = array_column(array_filter($t['fields'], fn($f) => ($f['type'] ?? '') === 'media'), 'name');
             foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
                 $loc = site_url() . Entries::url($t, $e);
                 if (Tables::isShared($t) && Entries::absUrl($t, $e) !== $loc) continue;
+                if (!$live($e)) continue;
                 $urls[] = ['loc' => $loc, 'lastmod' => $mod($e['updated_at'] ?? $e['published_at']),
                     'images' => self::sitemapImages(array_map(fn($f) => (int) ($e[$f] ?? 0), $mediaFields))];
             }
