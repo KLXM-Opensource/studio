@@ -14,6 +14,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Weiterleitungen mit Platzhalter führen nie auf fremde Websites; lokale Links ohne `\`; Eingangsbestätigung höchstens dreimal je Empfänger und Stunde; Anmeldung zusätzlich je Konto begrenzt; HSTS über HTTPS im Produktivbetrieb; Übernahme geteilter Medien nur mit Recht „Dateien hochladen“.
 - Eine gemeinsame HTML-Maskierung für alle Skripte (`resources/js/_html.js`) – einige Kopien maskierten `'` nicht.
 
+### Videos: Web-Fassung automatisch
+- Große Videos (über 2 MB oder höher als 1080 px) bekommen automatisch eine **Web-Fassung** (H.264, max. 1080p, faststart – startet sofort). Sie liegt im Zwischenspeicher der Mediathek (wie Bildgrößen), erscheint nicht als eigene Datei und wird auf der Website statt des Originals ausgespielt; Verwaltung und Download behalten das Original. Erzeugt nach dem Hochladen, per Cron „Web-Fassung für Videos“ (alle 10 min) und beim ersten Aufruf eingereiht. `media:web`, Abschalten mit `media.video_web = false` (`Core\VideoWeb`).
+
 ### Blockauswahl sortiert
 - Fix: robots.txt, sitemap.xml und llms.txt senden `Cache-Control: max-age=0, must-revalidate` – Proxy-Caches (z. B. nginx in Plesk) hielten sonst nach „Suchmaschinen aussperren“ oder Staging-Wechsel die alte Fassung fest. Staging ein/aus leert den Seiten-Cache der Website.
 - Fix: Live-Websites mit „Suchmaschinen aussperren“ erlauben in der robots.txt die **Linkvorschau-Bots** (Facebook, LinkedIn, X, Slack, WhatsApp …) – geteilte Links zeigen wieder Bild und Text, Suchmaschinen bleiben draußen.

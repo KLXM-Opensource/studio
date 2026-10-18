@@ -32,7 +32,7 @@
   <h3 id="aufraeumen">Doppelte und zu große Dateien</h3>
   <ul>
     <li><b>Prüfen → Doppelte Dateien</b> zeigt Dateien, die mehrfach hochgeladen wurden (gleicher Inhalt, auch unter anderem Namen). Rechts steht bei jeder Datei, wo die Kopie liegt. Nicht verwendete Kopien einfach löschen; ist eine Kopie irgendwo eingebunden, dort zuerst die andere Datei auswählen.</li>
-    <li><b>Prüfen → Zu große Dateien</b> listet Dateien über der Grenze aus den Grundeinstellungen (Standard 8 MB). Fotos lassen sich mit <b>Verkleinern</b> sparsamer speichern (PNG-Fotos ohne Transparenz werden zu JPG) – Aussehen, ID und Verwendungen bleiben. Große PDFs oder Videos bitte vorher verkleinern und mit <b>Datei ersetzen</b> austauschen.</li>
+    <li><b>Prüfen → Zu große Dateien</b> listet Dateien über der Grenze aus den Grundeinstellungen (Standard 8 MB). Fotos lassen sich mit <b>Verkleinern</b> sparsamer speichern (PNG-Fotos ohne Transparenz werden zu JPG) – Aussehen, ID und Verwendungen bleiben. Große PDFs bitte vorher verkleinern und mit <b>Datei ersetzen</b> austauschen. <b>Große Videos</b> verkleinert die Website selbst: Sie erzeugt im Hintergrund eine Web-Fassung, die beim Besuch sofort startet; das Original bleibt in der Mediathek, eine zweite Datei erscheint dort nicht.</li>
   </ul>
 
   <h3 id="rechte">Bildrechte und Einwilligungen</h3>

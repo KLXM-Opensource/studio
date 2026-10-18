@@ -89,6 +89,8 @@ final class Cron
         self::register('search.sync', __('Suchindex abgleichen'), 'search:index --all', '*/15 * * * *', ['group' => $g, 'help' => __('Nur geänderte Seiten und Einträge.')]);
         self::register('search.full', __('Suchindex neu aufbauen'), 'search:index --all --full', '30 3 * * *', ['group' => $g]);
         self::register('inbox.purge', __('Aufbewahrungsfristen anwenden'), 'inbox:purge --all', '15 4 * * *', ['group' => $g, 'help' => __('Erledigte Anfragen und alte Protokolleinträge löschen.')]);
+        self::register('media.video_web', __('Web-Fassung für Videos'), 'media:web --all', '*/10 * * * *', ['group' => $g, 'timeout' => 900,
+            'help' => __('Große Videos der Mediathek bekommen eine kleinere Fassung, die auf der Website sofort startet. Ohne ffmpeg wirkungslos.')]);
         self::register('push.send', __('Push-Benachrichtigungen senden'), 'push:send --all', '* * * * *', ['group' => $g, 'timeout' => 300]);
         self::register('ai.jobs', __('KI-Aufträge abarbeiten'), 'ai:jobs --all', '*/5 * * * *', ['group' => $g, 'help' => __('Transkription und Übersetzung von Untertiteln.')]);
         self::register('sources.sync', __('Externe Quellen abgleichen'), 'sources:sync --all', '*/15 * * * *', ['group' => $g]);

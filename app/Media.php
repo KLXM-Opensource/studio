@@ -378,6 +378,7 @@ final class Media
         PageCache::clear();
         Extensions::emit('media.imported', self::find($id));
         VideoThumbs::queue(self::find($id));   // Video/PDF: Vorschaubild nach der Antwort (nur mit ffmpeg bzw. pdftoppm)
+        VideoWeb::queue(self::find($id));      // großes Video: Web-Fassung nach der Antwort
         return [self::find($id), null];
     }
 
@@ -416,6 +417,7 @@ final class Media
         PageCache::clear();
         Extensions::emit('media.replaced', self::find($id), $old);
         VideoThumbs::queue(self::find($id));   // neues Video/PDF → neues Vorschaubild
+        VideoWeb::queue(self::find($id));      // neues Video → neue Web-Fassung
         return [self::find($id), null];
     }
 
@@ -677,6 +679,11 @@ final class Media
 
     public static function url(array $m, ?int $width = null, string $format = 'webp'): string
     {
+        // Videos auf der Website: Web-Fassung statt Original, sobald erzeugt (Core\VideoWeb) – Verwaltung und CLI: Original
+        if ($width === null && str_starts_with((string) ($m['mime'] ?? ''), 'video/') && ($req = app()->request) && !$req->isAdminPath()) {
+            $pool = $m['_pool'] ?? self::$pool;
+            if ($rel = VideoWeb::fileFor($m, $pool !== null ? MediaPools::mediaDir((string) $pool) : site()->mediaDir())) return self::publicUrl($m, $rel);
+        }
         return self::publicUrl($m, self::rel($m, $width, $format));
     }
 
@@ -1062,6 +1069,7 @@ final class Media
             }
         }
         array_push($out, ...VideoThumbs::files($m));   // automatisches Vorschaubild eines Videos
+        array_push($out, ...VideoWeb::files($m));      // Web-Fassung eines Videos
         return array_values(array_unique($out));
     }
 
@@ -1109,7 +1117,7 @@ final class Media
         foreach (self::crops($m) as $c) {
             self::deleteVariantFiles($c);
         }
-        foreach (VideoThumbs::files($m) as $rel) {
+        foreach ([...VideoThumbs::files($m), ...VideoWeb::files($m)] as $rel) {
             @unlink(self::dir() . '/' . $rel);
         }
     }

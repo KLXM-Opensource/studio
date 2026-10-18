@@ -162,6 +162,7 @@
  *   glossary:sharetest --sandbox                      Ende-zu-Ende-Test des geteilten Glossars (zwei Websites) – nur in einer Wegwerf-Kopie
  *   notfound:create [--lang=en] [--publish]           Seite „Nicht gefunden (404)“ anlegen (Startinhalte des Kits, sonst Entwurf)
  *   notfound:selftest                                 Selbsttest der 404-Seite (Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge)
+ *   media:web [--all] [--force] [--pool=key]          Web-Fassung großer Videos erzeugen (kleiner, startet sofort; nur mit ffmpeg)
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
  *                                                     --all: alle neu)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
@@ -721,6 +722,11 @@ switch ($cmd) {
     case 'ai:test':
         // Website-Suche und KI (Core\Search\Console)
         exit(Core\Search\Console::run($cmd, $args, __FILE__));
+
+    case 'media:web':
+        // Web-Fassung großer Videos (Core\VideoWeb, nur mit ffmpeg); --all: jede Website, --force: neu erzeugen, --pool=key
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
+        exit(Core\VideoWeb::console($args));
 
     case 'media:thumbs':
         // Vorschaubilder für Videos nachträglich erzeugen (Core\VideoThumbs, nur mit ffmpeg); --all: alle neu, --pool=key: Pool

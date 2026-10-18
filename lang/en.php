@@ -7801,4 +7801,6 @@ return [
     'Bild oder Video' => 'Image or video',
     'Häufig verwendet' => 'Frequently used',
     'Kopf' => 'Header',
+    'Web-Fassung für Videos' => 'Web version of videos',
+    'Große Videos der Mediathek bekommen eine kleinere Fassung, die auf der Website sofort startet. Ohne ffmpeg wirkungslos.' => 'Large videos in the media library get a smaller version that starts instantly on the website. Has no effect without ffmpeg.',
 ];
