@@ -4108,6 +4108,8 @@ return [
     'Aktivieren Sie nur, was diese Website wirklich braucht. Zur Sicherheit bestätigen Sie bitte mit Ihrem Passkey.' => 'Only enable what this website really needs. For security, please confirm with your passkey.',
     'Aktivieren Sie nur, was diese Website wirklich braucht. Zur Sicherheit bestätigen Sie bitte mit Ihrem Passwort oder Passkey.' => 'Only enable what this website really needs. For security, please confirm with your password or passkey.',
     'Ihr Konto hat kein Passwort – bitte bestätigen Sie mit Ihrem Passkey.' => 'Your account has no password – please confirm with your passkey.',
+    'Block ausgeblendet – Besucher sehen ihn nicht mehr (noch nicht gespeichert).' => 'Block hidden – visitors no longer see it (not saved yet).',
+    'Block ist wieder sichtbar – noch nicht gespeichert.' => 'Block is visible again – not saved yet.',
     'Anfrage-Formulare (/anfrage/…, /api/form/…)' => 'Request forms (/anfrage/…, /api/form/…)',
     'Anfragen verschlüsselt (libsodium) – lesbar nur mit dem geheimen Schlüssel' => 'Requests encrypted (libsodium) – readable only with the secret key',
     'App-Icon und installierbare Web-App (Manifest, Service-Worker).' => 'App icon and installable web app (manifest, service worker).',

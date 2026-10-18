@@ -103,7 +103,7 @@ $__sample = $vars['blocks_page'] ?? null;
     <tr><td>Hintergrund</td><td><?= e(implode(', ', array_values($__bgs))) ?>. Tipp: Helle und getönte Abschnitte abwechseln lässt Seiten ruhig wirken.</td></tr>
     <tr><td>Sprungmarke (Anker)</td><td>Kurzer Name ohne Leerzeichen, z. B. <code>leistungen</code>. Damit lässt sich der Abschnitt verlinken (<code>#leistungen</code>).</td></tr>
     <tr><td>In Hauptnavigation anzeigen</td><td>Zeigt den Abschnitt im Menü oben – mit der Beschriftung aus „Beschriftung in der Navigation“ (Sprungmarke erforderlich).</td></tr>
-    <tr><td>Sichtbar</td><td>Ausblenden, ohne zu löschen – praktisch für saisonale Inhalte. Ausgeblendete Blöcke sehen Sie im Editor blass.</td></tr>
+    <tr><td>Sichtbar</td><td>Ausblenden, ohne zu löschen – praktisch für saisonale Inhalte: Schalter <b>„Auf der Website sichtbar“</b> ganz oben in der Seitenleiste des Blocks oder im Menü <b>⋯ → Ausblenden / Einblenden</b>. Ausgeblendete Blöcke sehen Sie im Editor blass mit dem Hinweis „ausgeblendet“; Besucher sehen sie nach dem Speichern nicht mehr.</td></tr>
     <tr><td>Abstand oben/unten, Trennlinie oben</td><td>Feinabstimmung, wenn zwei Blöcke optisch zusammengehören.</td></tr>
     <tr><td>Höhe, Inhalt vertikal</td><td>„Vollbild“ macht den Abschnitt so hoch wie den Bildschirm; der Inhalt steht dann oben, mittig oder unten.</td></tr>
     <tr><td>Hintergrundbild, abdunkeln/aufhellen</td><td>Ein Bild aus der Mediathek hinter dem Abschnitt; „Abdunkeln“ sorgt für helle, „Aufhellen“ für dunkle, gut lesbare Schrift.</td></tr>

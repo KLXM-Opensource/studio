@@ -18,6 +18,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Videos: Web-Fassung automatisch
 - Große Videos (über 2 MB oder höher als 1080 px) bekommen automatisch eine **Web-Fassung** (H.264, max. 1080p, faststart – startet sofort). Sie liegt im Zwischenspeicher der Mediathek (wie Bildgrößen), erscheint nicht als eigene Datei und wird auf der Website statt des Originals ausgespielt; Verwaltung und Download behalten das Original. Erzeugt nach dem Hochladen, per Cron „Web-Fassung für Videos“ (alle 10 min) und beim ersten Aufruf eingereiht. `media:web`, Abschalten mit `media.video_web = false` (`Core\VideoWeb`).
 
+### Sichtbarkeit von Blöcken
+- Schalter **„Auf der Website sichtbar“** ganz oben in der Seitenleiste eines Blocks (vorher ein Häkchen unter „Abschnitt & Navigation“) und **Ausblenden/Einblenden** im Block-Menü ⋯. Ausgeblendet: deutlicher Hinweis in der Seitenleiste, Block im Editor gedimmt.
+
 ### Blockauswahl sortiert
 - Fix: robots.txt, sitemap.xml und llms.txt senden `Cache-Control: max-age=0, must-revalidate` – Proxy-Caches (z. B. nginx in Plesk) hielten sonst nach „Suchmaschinen aussperren“ oder Staging-Wechsel die alte Fassung fest. Staging ein/aus leert den Seiten-Cache der Website.
 - Fix: Live-Websites mit „Suchmaschinen aussperren“ erlauben in der robots.txt die **Linkvorschau-Bots** (Facebook, LinkedIn, X, Slack, WhatsApp …) – geteilte Links zeigen wieder Bild und Text, Suchmaschinen bleiben draußen.

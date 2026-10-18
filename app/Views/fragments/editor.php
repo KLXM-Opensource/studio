@@ -51,6 +51,7 @@ if ($content) {
     <h2 id="cms-drawer-title"><?= e(__('Block')) ?></h2>
     <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-drawer-close><?= e(__('Schließen')) ?></button>
   </div>
+  <div class="cms-drawer__vis" data-drawer-vis></div>
   <p class="cms-drawer__central" data-drawer-central hidden></p>
   <form class="cms-drawer__form adm-fields" data-drawer-form novalidate></form>
   <details class="cms-drawer__section" open>

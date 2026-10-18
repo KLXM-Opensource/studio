@@ -7,7 +7,7 @@
  *  - Seitenleiste: alle Felder (Formular vom Server, gleicher Renderer wie im Admin) – nur über „Bearbeiten“ (Klick in den
  *    Block wählt ihn bloß aus, .is-selected), „Inhalte eingeben“, Block-Tune oder Sprung zum Block.
  *  - „+ Block einfügen“ unten mittig an jedem Block (BlockPicker): fügt nach diesem Block ein.
- *  - Block-Tune „Abschnitt“: Hintergrund, Anker, Sichtbarkeit, Navigation, Abstände.
+ *  - Block-Tune „Abschnitt“: Hintergrund, Anker, Navigation, Abstände; Sichtbarkeit als Schalter oben in der Seitenleiste und im Menü ⠿.
  *  - Drag & Drop über editorjs-drag-drop.
  *  - Bild anpassen je Einbindung (Core\ImageFx): data._fx = {feldpfad: anpassung}; Knopf am Bild (_media.js) und je Bild-Feld
  *    in der Seitenleiste. Gespeichert wird mit dem normalen Entwurf.
@@ -674,6 +674,7 @@ const BlockMenu = (() => {
       + (c ? item('paste', '↧', T('Einfügen darunter: {label}', { label: cfg.blocks[c.type].label })) : '')
       + '<hr>'
       + item('fold', folded ? '▸' : '▾', folded ? T('Ausklappen') : T('Einklappen'))
+      + item('vis', tool.tuneData.visible !== false ? '◌' : '●', tool.tuneData.visible !== false ? T('Ausblenden') : T('Einblenden'))
       + item('section', '▭', T('Abschnitt & Navigation …'))
       + extItems()
       + '<hr>'
@@ -701,6 +702,7 @@ const BlockMenu = (() => {
     else if (act === 'copy') t.copy();
     else if (act === 'paste') { const c = clipboard(); if (c && insertCopy(c, i + 1)) editorStatus(T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[c.type].label })); }
     else if (act === 'fold') t.toggleCollapse();
+    else if (act === 'vis') setVisible(t, t.tuneData.visible === false);
     else if (act === 'section') t.openDrawer(true);
   };
   el.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled) run(b.dataset.act); });
@@ -1470,6 +1472,7 @@ async function openDrawer(tool, focusSection = false) {
   $$('.cms-block.is-active').forEach(b => b.classList.remove('is-active'));
   tool.el.classList.add('is-active');
   selectBlock(tool.el);
+  renderVis(tool);
   renderTuneForm(tool);
   if (focusSection) { const s = $('.cms-drawer__section', drawer); s.open = true; s.scrollIntoView(); }
   const res = await api(cfg.endpoints.form, { type: tool.type, data: tool.data, entry: cfg.entry, nested: !!tool.isChild });
@@ -1702,6 +1705,26 @@ function fxFieldButtons(form, tool) {
   });
 }
 
+// ------------------------------------------------------------------ Sichtbarkeit (Schalter oben in der Seitenleiste, Block-Menü ⠿)
+// Ausgeblendete Blöcke bleiben in der Bearbeitung sichtbar (gedimmt, Hinweis „ausgeblendet“), Besucher sehen sie nicht.
+function setVisible(tool, on) {
+  if (tool.isChild) tool.setTunes({ ...tool.tuneData, visible: on });
+  else { const tune = tunes.get(tool.blockId); if (!tune) return; tune.data = { ...tune.data, visible: on }; }
+  markDirty(); tool.refresh();
+  if (!drawer.hidden && drawerFor && drawerFor.blockId === tool.blockId) { drawerTouched(); renderVis(drawerFor); }
+  editorStatus(on ? CMSAdmin.t('Block ist wieder sichtbar – noch nicht gespeichert.') : CMSAdmin.t('Block ausgeblendet – Besucher sehen ihn nicht mehr (noch nicht gespeichert).'));
+}
+function renderVis(tool) {
+  const box = $('[data-drawer-vis]', drawer), T = CMSAdmin.t, E = CMSAdmin.esc;
+  if (!box) return;
+  const on = tool.tuneData.visible !== false;
+  box.innerHTML = `<button type="button" class="cms-vis${on ? '' : ' is-off'}" role="switch" aria-checked="${on}" aria-describedby="cms-vis-h">
+      <span class="cms-vis__track" aria-hidden="true"><span class="cms-vis__thumb"></span></span>
+      <span class="cms-vis__label">${E(T('Auf der Website sichtbar'))}</span></button>
+    <p class="cms-vis__help" id="cms-vis-h">${E(on ? T('Besucher sehen diesen Block.') : T('Ausgeblendet: Besucher sehen diesen Block nicht – nur hier in der Bearbeitung.'))}</p>`;
+  $('.cms-vis', box).addEventListener('click', () => setVisible(tool, !on));
+}
+
 // ------------------------------------------------------------------ Abschnitt-Formular in der Seitenleiste
 function renderTuneForm(tool) {
   const f = $('[data-drawer-tunes]', drawer);
@@ -1715,11 +1738,10 @@ function renderTuneForm(tool) {
     f.innerHTML = `
       <p class="f-help">${E(T('Hintergrund, Abstände, Navigation und Hintergrundbild gelten für das ganze Layout – dort einstellen.'))}</p>
       <div class="f f--half"><label for="t-cbg">${E(T('Eigene Fläche (Karte)'))}</label><select id="t-cbg" name="background">${opt({ '': T('Keine – wie das Layout'), ...bgs }, t.background || '')}</select></div>
-      <div class="f f--half"><label for="t-anchor">Sprungmarke (Anker)</label><input id="t-anchor" name="anchor" value="${E(t.anchor || '')}" placeholder="z. B. termine"></div>
-      <div class="f"><label class="f-check"><input type="checkbox" name="visible"${t.visible !== false ? ' checked' : ''}> <span>Sichtbar</span></label></div>`;
+      <div class="f f--half"><label for="t-anchor">Sprungmarke (Anker)</label><input id="t-anchor" name="anchor" value="${E(t.anchor || '')}" placeholder="z. B. termine"></div>`;
     f.classList.add('adm-fields');
     CMSAdmin.init(f);
-    f.oninput = f.onchange = () => { tool.setTunes({ background: f.background.value, anchor: slug(f.anchor.value), visible: f.visible.checked }); markDirty(); drawerTouched(); tool.refresh(); };
+    f.oninput = f.onchange = () => { tool.setTunes({ background: f.background.value, anchor: slug(f.anchor.value), visible: tool.tuneData.visible !== false }); markDirty(); drawerTouched(); tool.refresh(); };   // Sichtbarkeit: Schalter oben (renderVis)
     return;
   }
   const bgImg = tool.el?.querySelector('.sec__bg img'), bgThumb = bgImg && (bgImg.currentSrc || bgImg.src);
@@ -1728,7 +1750,6 @@ function renderTuneForm(tool) {
     <div class="f f--half"><label for="t-anchor">Sprungmarke (Anker)</label><input id="t-anchor" name="anchor" value="${E(t.anchor)}" placeholder="z. B. ueber-uns"></div>
     <div class="f f--half"><label for="t-st">Abstand oben</label><select id="t-st" name="spaceTop">${opt(sp, t.spaceTop)}</select></div>
     <div class="f f--half"><label for="t-sb">Abstand unten</label><select id="t-sb" name="spaceBottom">${opt(sp, t.spaceBottom)}</select></div>
-    <div class="f"><label class="f-check"><input type="checkbox" name="visible"${t.visible ? ' checked' : ''}> <span>Sichtbar</span></label></div>
     <div class="f"><label class="f-check"><input type="checkbox" name="divider"${t.divider ? ' checked' : ''}> <span>Trennlinie oben</span></label></div>
     <div class="f"><label class="f-check"><input type="checkbox" name="showInNav"${t.showInNav ? ' checked' : ''}> <span>In Hauptnavigation anzeigen (Anker erforderlich)</span></label></div>
     <div class="f"><label for="t-nav">Beschriftung in der Navigation</label><input id="t-nav" name="navLabel" value="${E(t.navLabel)}" maxlength="40"></div>
@@ -1751,7 +1772,7 @@ function renderTuneForm(tool) {
     const tune = tunes.get(tool.blockId);
     const data = {
       background: f.background.value, anchor: f.anchor.value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-'),
-      visible: f.visible.checked, divider: f.divider.checked, showInNav: f.showInNav.checked,
+      visible: tune?.data?.visible !== false, divider: f.divider.checked,   // Sichtbarkeit: Schalter oben (renderVis) showInNav: f.showInNav.checked,
       navLabel: f.navLabel.value, spaceTop: f.spaceTop.value, spaceBottom: f.spaceBottom.value,
       height: f.height.value, align: f.align.value, bgImage: +f.bgImage.value || null, overlay: f.overlay.value,
       row: f.row ? f.row.value : '',
