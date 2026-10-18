@@ -435,10 +435,10 @@ final class SiteController
         foreach (array_unique(array_filter($ids)) as $id) {
             $m = \Core\Media::find((int) $id);
             if (!$m || \Core\MediaPools::mediaProtected($m) || !($still = \Core\Media::stillOf($m))) continue;
-            $out[] = site_url() . \Core\Media::url($still, 1600);
+            $out[site_url() . \Core\Media::url($still, 1600)] = true;   // gleiche Datei (z. B. Bild und Videoposter) nur einmal
             if (count($out) >= 5) break;
         }
-        return $out;
+        return array_keys($out);
     }
 
     /**
