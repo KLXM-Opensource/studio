@@ -40,10 +40,38 @@ final class SelfTest
             $t->rows();
             $t->layout();
             $t->dataClamp();
+            $t->firstBlock();
         } finally {
             app()->editing = $prev;
         }
         return ['ok' => $t->ok, 'fails' => $t->fails];
+    }
+
+    /** Erster Block (Bild mit Vorrang), Seitenüberschrift (Core\Headings), Leistungs-Hinweise von kit:check */
+    private function firstBlock(): void
+    {
+        $m = ['id' => 0, 'mime' => 'image/jpeg', 'file' => 'x.jpg', 'width' => 800, 'height' => 600, 'variants_json' => null, 'alt' => '', 'focus_x' => 50, 'focus_y' => 50];
+        $prev = \Core\Media::$autoEager;
+        try {
+            \Core\Media::$autoEager = 1;
+            $a = \Core\Media::pictureOf($m); $b = \Core\Media::pictureOf($m);
+            $this->assert(str_contains($a, 'fetchpriority="high"') && !str_contains($a, 'loading="lazy"'), 'Erster Block: erstes Bild ohne Angabe mit Vorrang');
+            $this->assert(str_contains($b, 'loading="lazy"'), 'Erster Block: zweites Bild verzögert (Kontingent verbraucht)');
+            \Core\Media::$autoEager = 1;
+            $c = \Core\Media::pictureOf($m, '100vw', ['eager' => false]); $d = \Core\Media::pictureOf($m);
+            $this->assert(str_contains($c, 'loading="lazy"') && str_contains($d, 'fetchpriority="high"'), "Erster Block: 'eager' => false bleibt verzögert und verbraucht nichts");
+            \Core\Media::$autoEager = 0;
+            $this->assert(str_contains(\Core\Media::pictureOf($m), 'loading="lazy"'), 'Außerhalb des ersten Blocks: verzögert');
+        } finally {
+            \Core\Media::$autoEager = $prev;
+        }
+        $h = \Core\Headings::ensureH1('<header><h2 class="h2">K</h2></header><main><section><h2 id="t" class="h2 h2--m"><span>Glossar</span></h2><h2 class="h2">B</h2></section></main>');
+        $this->assert(str_contains($h, '<h1 id="t" class="h2 h2--m"><span>Glossar</span></h1>') && substr_count($h, '<h1') === 1 && str_contains($h, '<h2 class="h2">K</h2>'), 'Seitenüberschrift: erste h2 in <main> wird h1');
+        $this->assert(\Core\Headings::ensureH1('<main><h1>A</h1><h2 class="h2">B</h2></main>') === '<main><h1>A</h1><h2 class="h2">B</h2></main>', 'Seitenüberschrift: vorhandene h1 bleibt');
+        $this->assert(\Core\Headings::ensureH1('<main><h2>A</h2><h2 class="h2">B</h2></main>') === '<main><h2>A</h2><h2 class="h2">B</h2></main>', 'Seitenüberschrift: erste h2 ohne Klasse h2 – nichts ändern');
+        $this->assert(\Core\KitCheck::performance('hero', "<?= img(1) ?><video preload=\"none\" poster=\"x.jpg\"></video>") !== [], 'kit:check: poster neben Standbild erkannt');
+        $this->assert(\Core\KitCheck::performance('hero', "<?= img(1) ?><video preload=\"none\"></video>") === [], 'kit:check: Video ohne poster in Ordnung');
+        $this->assert(\Core\KitCheck::performance('stage', '<img loading="lazy">') !== [], 'kit:check: Einstieg mit loading="lazy" erkannt');
     }
 
     /** Blöcke nebeneinander: Theme::rowSpans, sanitizeTunes('row'), renderBlocks gruppiert (mit dem aktiven Kit) */

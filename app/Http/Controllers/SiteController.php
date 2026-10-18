@@ -235,6 +235,11 @@ final class SiteController
             'toolbar' => $loggedIn ? ['page' => $page, 'editing' => $app->editing, 'dirty' => Pages::hasUnpublished($page), 'live' => $live] : null,
         ]);
 
+        // Gerade über die Leiste abgemeldet (AuthController::logout → ?abgemeldet): kurze Meldung, Skript entfernt den Zusatz aus der Adresse
+        if (!$loggedIn && !$error && array_key_exists('abgemeldet', $r->query)) {
+            $html = str_replace('</body>', '<link rel="stylesheet" href="' . e(asset('css/signed-out.css')) . '"><div class="cms-signedout" role="status" data-signed-out>'
+                . e(lt('Sie sind abgemeldet.')) . '</div><script src="' . e(asset('js/signed-out.js')) . '" defer></script></body>', $html);
+        }
         // Besucher: ein Sprite der Website mit nur den verwendeten Symbolen statt mehrerer Themen-Sprites (Core\Icons)
         if (!$loggedIn) {
             $html = \Core\Icons::siteSprite($html);
@@ -247,6 +252,8 @@ final class SiteController
         if (!$app->editing) $html = \Core\PdfLinks::inject($html);
         // RSS-Feed der Tabelle (Detailseite bzw. Seite unter der URL-Basis) im Kopf verlinken (Core\Data\Feed)
         if (!$app->editing && !$error) $html = \Core\Data\Feed::inject($html, $page, $ctx['table'] ?? null);
+        // Seite ohne <h1> (beginnt z. B. mit Glossar oder Datenliste): erste Abschnitts-Überschrift wird zur <h1> (Core\Headings)
+        if (!$app->editing && !$error) $html = \Core\Headings::ensureH1($html);
         // Erweiterungen (z. B. consent_kit): Ausgabe ergänzen – vor dem Seiten-Cache, also nie besucherspezifisch
         $html = \Core\Extensions::filterHtml($html, ['page' => $page, 'editing' => $app->editing, 'loggedIn' => $loggedIn, 'status' => $status]);
         // Redaktionsnotizen: für Besucher aus der ganzen Seite entfernen (auch Einträge, Meta-Angaben, JSON-LD, Daten-Skripte);

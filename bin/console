@@ -95,6 +95,8 @@
  *                                                     (--all: alle Kits), überschriebene mit geändertem Original;
  *                                                     --accept: geänderte Originale als geprüft markieren
  *   health [--all]                                    Prüfung für Deploys (Exit-Code 1 bei Fehlern)
+ *   seo:check [--all]                                 SEO-Hinweise je Seite/Detailseite: Titel > 60, Beschreibung > 160 Zeichen bzw. fehlend,
+ *                                                     doppelte Titel, Canonical auf fremde Domain, gelöschtes Vorschaubild (Core\SeoCheck)
  *   maintenance on|off [--all]                        Wartungsmodus
  *   cache:clear [--all]                               Seiten-Cache leeren (--all: aller Websites)
  *   i18n:missing en [--site-texts] [--extension=name] Fehlende Übersetzungen (Verwaltung bzw. feste Website-Texte lt(); einer Erweiterung)
@@ -895,6 +897,7 @@ switch ($cmd) {
                 + Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\Cron::health()          // Geplante Aufgaben: Cronjob läuft, fehlgeschlagene Aufgaben (nur Hinweise)
+                + Core\SeoCheck::health()      // Suchmaschinen gesperrt (Fehler), Domains, Titel/Beschreibungen (Hinweise, Core\SeoCheck)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
                 + Core\Fonts::health()         // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)
@@ -1353,6 +1356,17 @@ switch ($cmd) {
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'seo:check':
+        // SEO-Hinweise ohne Crawl (Core\SeoCheck): Website (Domains, Sperre) und je Seite/Detailseite
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
+        $rows = Core\SeoCheck::health();
+        foreach (Core\SeoCheck::site() as $t) echo "  ! $t\n";
+        if (environment() === 'production' && (bool) $app->settings->get('sys.noindex')) echo "  ✗ Live-Website für Suchmaschinen gesperrt (Grundeinstellungen → „Suchmaschinen aussperren“)\n";
+        $hits = Core\SeoCheck::pages();
+        foreach ($hits as $h) echo '  ' . str_pad($h['url'], 48) . ' ' . $h['text'] . "\n";
+        echo 'SEO (' . site()->key . '): ' . count($hits) . ' Hinweis(e)' . (noindex_site() ? ' – Website ist nicht für Suchmaschinen freigegeben (Staging oder gesperrt)' : '') . ".\n";
+        break;
 
     case 'kit:check':
         // Überschreibungen eines Kits: verwaiste Block-Vorlagen, Kern-Blöcke mit geändertem Vertrag, Kern-Fragmente mit neuem Original

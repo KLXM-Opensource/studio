@@ -244,7 +244,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php if ($b['me']): // Konto: Avatar + Name → Konto, darunter Abmelden (wie die Seitenleiste der Verwaltung) ?>
         <?= $sep ?>
         <a role="menuitem" class="cms-menu__item cms-menu__me" tabindex="-1" href="<?= e(url('/admin/account')) ?>"><?= \Core\Avatar::html($b['me'], 'adm-ava adm-ava--s') ?><span class="cms-menu__label"><?= e($b['me']['name'] ?: $b['me']['email']) ?><small><?= e(($b['meRole'] !== '' ? $b['meRole'] . ' · ' : '') . __('Konto')) ?></small></span></a>
-        <form method="post" action="<?= e(url('/admin/logout')) ?>" class="cms-bar__form"><?= csrf_field() ?><button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1"><span class="cms-menu__ico" aria-hidden="true"><?= icon('sign-out') ?></span><span class="cms-menu__label"><?= e(__('Abmelden')) ?></span></button></form>
+        <form method="post" action="<?= e(url('/admin/logout')) ?>" class="cms-bar__form"><?= csrf_field() ?><input type="hidden" name="back" value="<?= e((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH)) ?>"><button type="submit" role="menuitem" class="cms-menu__item" tabindex="-1"><span class="cms-menu__ico" aria-hidden="true"><?= icon('sign-out') ?></span><span class="cms-menu__label"><?= e(__('Abmelden')) ?></span></button></form>
         <?php endif; ?>
         </span>
       </span>

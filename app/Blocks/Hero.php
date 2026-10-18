@@ -210,7 +210,7 @@ final class Hero
         $poster = !empty($d['image']) ? Media::find((int) $d['image']) : Media::posterFor($vid);
         $media = ($poster ? Media::pictureOf($poster, (string) ($o['sizes'] ?? '100vw'), ['eager' => true, 'alt' => '', 'class' => $c . '__still']) : '')
             . '<video class="' . e($c) . '__el" data-hero-video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true" tabindex="-1"'
-            . ($poster ? ' poster="' . e(Media::url($poster, 1600)) . '"' : '') . '>'
+            . '>'   // kein poster: das Standbild liegt darunter, ein Poster lüde dasselbe Bild ein zweites Mal
             . '<source src="' . e(Media::url($vid)) . '" type="' . e((string) $vid['mime']) . '"></video>';
         $toggle = '<button type="button" class="' . e($c) . '__toggle hx-toggle" data-hero-video-toggle hidden>' . self::pauseIcons()
             . '<span data-l-pause="' . e(lt('Hintergrundvideo anhalten')) . '" data-l-play="' . e(lt('Hintergrundvideo abspielen')) . '">'

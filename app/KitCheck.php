@@ -62,11 +62,44 @@ final class KitCheck
         foreach (Fragments::overrides($kit->name, false) as $o) {
             if (!empty($o['changed'])) $out[] = ['level' => 'warn', 'file' => Kit::relative((string) ($o['file'] ?? $o['name'])), 'text' => "Kern-Fragment „{$o['name']}“ überschrieben – Original geändert seit {$o['since']} (fragments:list --accept nach Prüfung)"];
         }
+        // Leistung: Hintergrundvideo mit poster neben einem Standbild (lädt dasselbe Bild doppelt) und Einstieg mit fest verzögertem Bild
+        foreach (array_merge(glob($kit->path . '/blocks/*.php') ?: [], [$kit->path . '/functions.php']) as $src) {
+            if (!is_file($src)) continue;
+            foreach (self::performance(basename($src, '.php'), (string) file_get_contents($src)) as $text) $out[] = ['level' => 'warn', 'file' => Kit::relative($src), 'text' => $text];
+        }
         // Kit-Vertrag: Kern-Bausteine und Erweiterungen lesen nur --kit-* – fehlt eine Rolle, fallen sie auf neutrale Vorgaben zurück
         $missing = self::missingContract($kit);
         if ($missing) {
             $out[] = ['level' => 'warn', 'file' => Kit::relative($kit->path . '/assets/css'), 'text' => 'Kit-Vertrag unvollständig – nicht gesetzt: ' . implode(', ', $missing)
                 . ' (Buchung, Check, Mitglieder, Suche, Glossar … nutzen dann neutrale Farben; Entwicklerhandbuch → CSS & JS → „Kit-Vertrag“)'];
+        }
+        return $out;
+    }
+
+    /**
+     * Leistungs-Hinweise aus dem Quelltext einer Block-Vorlage (bzw. functions.php):
+     *  - <video … preload="none" … poster=…> mit einem Bild (img(), picture(), pictureOf()) kurz davor: Das Standbild liegt schon
+     *    darunter – das Poster lädt dasselbe Bild ein zweites Mal (Videos mit preload="metadata"/controls bleiben unberührt);
+     *  - Einstieg (Datei hero*, stage*, *-hero): fest loading="lazy" – das größte Element beim Aufruf käme spät (der Kern lädt das
+     *    erste Bild des ersten Blocks sonst selbst mit Vorrang, Media::$autoEager).
+     * @return list<string>
+     */
+    public static function performance(string $name, string $src): array
+    {
+        $out = [];
+        if (preg_match_all('~<video\b[^>]*preload="none"[^>]*~i', $src, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[0] as [$tag, $pos]) {
+                $after = substr($src, (int) $pos, 600);
+                if (!preg_match('~poster~i', $after) || !preg_match('~^[^>]*?poster|<\?=[^?]*poster~is', substr($after, 0, (int) (strpos($after, '>', strlen($tag)) ?: 600) + 1))) continue;
+                $before = substr($src, max(0, (int) $pos - 600), min(600, (int) $pos));
+                if (preg_match('~\b(?:img|picture|pictureOf)\s*\(~', $before)) {
+                    $out[] = 'Hintergrundvideo mit poster neben einem Standbild – lädt dasselbe Bild doppelt; poster weglassen (das Standbild liegt darunter)';
+                    break;
+                }
+            }
+        }
+        if (preg_match('~^(hero|stage)|-hero$~', $name) && str_contains($src, 'loading="lazy"')) {
+            $out[] = 'Einstieg mit fest loading="lazy" – das größte Bild beim Aufruf lädt spät; img()/picture() ohne eager-Angabe verwenden (Vorrang setzt der Kern)';
         }
         return $out;
     }

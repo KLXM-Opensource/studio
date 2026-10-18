@@ -19,17 +19,52 @@
     <li><b>Saubere URLs</b> (Apache &amp; nginx Settings → zusätzliche Apache-Anweisungen, HTTP und HTTPS):
       <pre><code>FallbackResource /index.php
 # Authorization-Header an PHP-FPM durchreichen (für API/MCP):
-SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1</code></pre>
-      <b>Nur nginx</b> (Plesk ohne Apache): unter „Zusätzliche nginx-Anweisungen“ – ein leeres Apache-Feld genügt dann:<pre><code># Saubere Adressen
+SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+# Versionierte Dateien und Bildvarianten 1 Jahr cachen (neue Datei = neuer Name bzw. neues ?v=…), übrige Medien 30 Tage
+&lt;IfModule mod_headers.c&gt;
+  &lt;LocationMatch "^/(media|sites/[^/]+/media|pools)/"&gt;
+    Header set Cache-Control "public, max-age=2592000"
+  &lt;/LocationMatch&gt;
+  &lt;LocationMatch "^/(assets/|media/(cache|design|fit)/|sites/[^/]+/media/(cache|design|fit)/|pools/[^/]+/cache/)"&gt;
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  &lt;/LocationMatch&gt;
+&lt;/IfModule&gt;</code></pre>
+      <b>Nur nginx</b> (Plesk ohne Apache): unter „Zusätzliche nginx-Anweisungen“ – ein leeres Apache-Feld genügt dann. Die Ordner stehen als <code>location ^~</code>: Diese Regeln haben Vorrang vor den Regex-Regeln, die Plesk für „Statische Dateien direkt durch nginx bedienen“ selbst anlegt – mit <code>location ~*</code> griffen die Cache-Regeln dort nicht. Fehlt eine Datei (z. B. eine Bildvariante, die erst beim ersten Aufruf entsteht), antwortet Studio.<pre><code># Saubere Adressen
 location / { try_files $uri $uri/ /index.php$is_args$args; }
+location = /robots.txt { try_files $uri /index.php$is_args$args; }
 # JavaScript-Module und Untertitel: viele nginx-Installationen kennen .mjs/.vtt nicht (sonst application/octet-stream → Karte, PDF-Viewer und Untertitel gehen nicht)
-location ~* \.mjs$ { types { } default_type "text/javascript; charset=utf-8"; expires 1y; add_header Cache-Control "public, immutable"; }
+location ~* \.mjs$ { types { } default_type "text/javascript; charset=utf-8"; add_header Cache-Control "public, max-age=31536000, immutable"; }
 location ~* \.vtt$ { types { } default_type "text/vtt; charset=utf-8"; }
-# Versionierte statische Dateien lange cachen (Kern, Kits, Erweiterungen, Schriften – alles unter /assets/)
-location ~* ^/assets/.+\.(css|js|woff2|svg|png|webp|avif|jpg)$ { expires 1y; add_header Cache-Control "public, immutable"; }
-location ^~ /media/cache/ { expires 1y; add_header Cache-Control "public, immutable"; }
-# SVG der Mediathek direkt aufgerufen: abschotten (Apache: .htaccess legt Core\Svg::guard() selbst an)
-location ~* ^/(media|sites/[^/]+/media|pools)/.+\.svg$ { add_header Content-Security-Policy "<?= e(\Core\Svg::CSP) ?>" always; add_header X-Content-Type-Options "nosniff" always; }</code></pre>      Mit Apache hinter nginx stattdessen die Apache-Zeilen oben plus <code>AddType text/javascript .mjs</code> und <code>AddType text/vtt .vtt</code>. HSTS in Plesk unter SSL/TLS einschalten (eigene <code>add_header</code> in den Blöcken überdecken sonst dort gesetzte Kopfzeilen). Ohne Server-Konfiguration: <code>'url_rewrite' =&gt; false</code> (Adressen dann <code>/index.php/…</code>). Kits liegen unter <code>kits/</code>, ihre gebauten Assets unter <code>public/assets/kits/</code> (siehe <a href="#deploy">Staging &amp; Deploy</a> → Ablage in <code>public/</code>).</li>
+
+# Cache-Dauer: versionierte Dateien (?v=…), Bildvarianten (cache/) und Design-CSS (design/, fit/ – Prüfwert im Namen) 1 Jahr,
+# übrige Medien 30 Tage (Ersetzen = neuer Dateiname). SVG der Mediathek direkt aufgerufen: abgeschottet
+# (Apache: .htaccess legt Core\Svg::guard() selbst an)
+location ^~ /assets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    try_files $uri /index.php$is_args$args;
+    location ~* \.mjs$ { types { } default_type "text/javascript; charset=utf-8"; add_header Cache-Control "public, max-age=31536000, immutable"; }
+}
+location ^~ /media/ {
+    add_header Cache-Control "public, max-age=2592000";
+    try_files $uri /index.php$is_args$args;
+    location ~* \.svg$ { add_header Content-Security-Policy "<?= e(\Core\Svg::CSP) ?>" always; add_header X-Content-Type-Options "nosniff" always; }
+    location ~* \.vtt$ { types { } default_type "text/vtt; charset=utf-8"; }
+    location ~* ^/media/(cache|design|fit)/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri /index.php$is_args$args; }
+}
+location ^~ /sites/ {
+    add_header Cache-Control "public, max-age=2592000";
+    try_files $uri /index.php$is_args$args;
+    location ~* ^/sites/[^/]+/media/.+\.svg$ { add_header Content-Security-Policy "<?= e(\Core\Svg::CSP) ?>" always; add_header X-Content-Type-Options "nosniff" always; }
+    location ~* \.vtt$ { types { } default_type "text/vtt; charset=utf-8"; }
+    location ~* ^/sites/[^/]+/media/(cache|design|fit)/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri /index.php$is_args$args; }
+}
+location ^~ /pools/ {
+    add_header Cache-Control "public, max-age=2592000";
+    try_files $uri /index.php$is_args$args;
+    location ~* \.svg$ { add_header Content-Security-Policy "<?= e(\Core\Svg::CSP) ?>" always; add_header X-Content-Type-Options "nosniff" always; }
+    location ~* \.vtt$ { types { } default_type "text/vtt; charset=utf-8"; }
+    location ~* ^/pools/[^/]+/cache/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri /index.php$is_args$args; }
+}</code></pre>      Mit Apache hinter nginx stattdessen die Apache-Zeilen oben plus <code>AddType text/javascript .mjs</code> und <code>AddType text/vtt .vtt</code>. <b>HSTS</b> sendet Studio selbst (über HTTPS im Produktivbetrieb). Schaltet man es zusätzlich in Plesk unter SSL/TLS ein, kommt der Header doppelt – dann in <code>config/config.local.php</code> <code>'hsts' =&gt; false</code> setzen (siehe <a href="#konfiguration">Konfiguration</a>). Ohne Server-Konfiguration: <code>'url_rewrite' =&gt; false</code> (Adressen dann <code>/index.php/…</code>). Kits liegen unter <code>kits/</code>, ihre gebauten Assets unter <code>public/assets/kits/</code> (siehe <a href="#deploy">Staging &amp; Deploy</a> → Ablage in <code>public/</code>).</li>
     <li><b>HTTPS</b> mit Let’s Encrypt + 301-Weiterleitung aktivieren.</li>
     <li><b>Schreibrechte</b> für den PHP-Benutzer: <code>config/</code> (beim ersten Start), <code>storage/</code>, <code>public/media</code>, <code>public/sites</code>, <code>public/pools</code>, <code>public/assets/ext</code>, <code>public/assets/fonts/installed</code>.</li>
     <li><b>Erster Aufruf</b> erzeugt Datenbank und <code>config/config.local.php</code> (mit zufälligem <code>app_key</code> und <code>setup_token</code>). Ist noch kein Kit festgelegt, spielt er <em>nichts</em> ein – Besucher sehen „Hier entsteht eine neue Website“ (503, <code>noindex</code>). Dann <code>/admin/setup</code> mit dem <code>setup_token</code> öffnen (<code>php bin/console setup:token</code> zeigt Token und Adresse) und das erste Konto anlegen – oder per SSH <code>php bin/console user:create name@example.org admin</code>.</li>

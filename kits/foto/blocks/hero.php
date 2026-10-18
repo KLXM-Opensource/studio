@@ -29,12 +29,11 @@ if ($v === 'fullbleed'):
     $vid = !empty($d['video']) ? media((int) $d['video']) : null;
     $vid = $vid && str_starts_with((string) $vid['mime'], 'video/') ? $vid : null;
     $overlay = in_array($d['overlay'] ?? '', ['strong', 'medium', 'gradient'], true) ? $d['overlay'] : 'strong';
-    $poster = !empty($d['image']) ? media((int) $d['image']) : null;
 ?>
 <div class="hero-bleed hero-bleed--<?= e($overlay) ?>">
   <div class="hero-bleed__media" aria-hidden="true">
     <?= !empty($d['image']) ? img((int) $d['image'], '100vw', ['eager' => true, 'alt' => '']) : '' ?>
-    <?php if ($vid): ?><video class="hero-bleed__video" data-bg-video muted loop playsinline preload="none"<?= $poster ? ' poster="' . e(\Core\Media::url($poster, 1600)) . '"' : '' ?>><source src="<?= e(\Core\Media::url($vid)) ?>" type="<?= e((string) $vid['mime']) ?>"></video><?php endif; ?>
+    <?php if ($vid): ?><video class="hero-bleed__video" data-bg-video muted loop playsinline preload="none"><source src="<?= e(\Core\Media::url($vid)) ?>" type="<?= e((string) $vid['mime']) ?>"></video><?php endif; ?>
   </div>
   <div class="wrap hero-bleed__inner">
     <?= $textHtml() ?>

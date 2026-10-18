@@ -1,0 +1,1 @@
+(()=>{(()=>{try{let e=new URL(location.href);e.searchParams.has("abgemeldet")&&(e.searchParams.delete("abgemeldet"),history.replaceState(history.state,"",e.pathname+e.search+e.hash))}catch{}let a=document.querySelector("[data-signed-out]");a&&a.addEventListener("animationend",()=>a.remove())})();})();

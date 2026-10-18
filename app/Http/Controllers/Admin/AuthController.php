@@ -54,6 +54,14 @@ final class AuthController extends AdminController
     {
         if (Csrf::valid($r)) {
             app()->auth->logout();
+            // Abmelden aus der Leiste der Website: auf derselben Seite bleiben – ohne Leiste, mit kurzer Meldung (?abgemeldet,
+            // SiteController::render). Nur eigene Pfade, nie die Verwaltung (sonst wie bisher zur Anmeldung)
+            $back = $r->str('back');
+            $rel = substr($back, strlen(base_path()));
+            if ($back !== '' && str_starts_with($back, base_path() . '/') && preg_match('~^/(?!/)[\w\-/%.]*$~', $rel)
+                && !\Core\AdminPath::isInternal($rel) && \Core\AdminPath::toInternal($rel) === null) {
+                return Response::redirect($back . '?abgemeldet');
+            }
         }
         return Response::redirect(url('/admin/login'));
     }

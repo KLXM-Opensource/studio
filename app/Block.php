@@ -20,6 +20,9 @@ final class Block
     /** Erster Block einer Reihe (Theme::renderRow): Abschnitt bekommt die Klasse sec--row */
     public bool $rowLead = false;
 
+    /** Erster sichtbarer Block der Seite (Theme::renderBlocks) – siehe isFirst() */
+    public bool $first = false;
+
     /** Layout-Block, in dessen Spalte dieser Block steht (Core\Layout) – null = eigener Abschnitt */
     public ?Block $parent = null;
 
@@ -38,6 +41,15 @@ final class Block
     public function inRow(): bool
     {
         return $this->parent !== null || ($this->tunes['row'] ?? '') !== '';
+    }
+
+    /**
+     * Erster sichtbarer Block der Seite (für Besucher; im Bearbeiten-Modus nie). Sein erstes Bild ohne eigene 'eager'-Angabe
+     * lädt der Kern ohnehin sofort (Media::$autoEager) – Kits nutzen isFirst() z. B. für weitere Bilder mit Vorrang.
+     */
+    public function isFirst(): bool
+    {
+        return $this->first;
     }
 
     /** Steht der Block in einer Spalte eines Layouts? */

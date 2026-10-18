@@ -47,7 +47,7 @@ $cls = 'stage stage--' . $height . ' stage--' . $pos . ' stage--ov-' . $overlay 
           // Video als stimmungsvoller Hintergrund: stumm, Schleife, startet nur ohne „Bewegung reduzieren“ (js/photo-hero.js), Vorschaubild als Rückfall
           $poster = \Core\Media::posterFor($s['m']); ?>
       <?= $poster ? \Core\Media::pictureOf($poster, '100vw', ['eager' => $k === 0, 'alt' => '']) : '' ?>
-      <video class="stage__video" data-stage-video muted loop playsinline preload="none" aria-hidden="true"<?= $poster ? ' poster="' . e(\Core\Media::url($poster, 1600)) . '"' : '' ?>><source src="<?= e(\Core\Media::url($s['m'])) ?>" type="<?= e((string) $s['m']['mime']) ?>"></video>
+      <video class="stage__video" data-stage-video muted loop playsinline preload="none" aria-hidden="true"><source src="<?= e(\Core\Media::url($s['m'])) ?>" type="<?= e((string) $s['m']['mime']) ?>"></video>
       <?php else: ?>
       <?= img((int) $s['m']['id'], '100vw', ['eager' => $k === 0] + ($s['path'] !== '' ? ['path' => $s['path'] . '.image'] : ['path' => 'image'])) ?>
       <?php endif; ?>

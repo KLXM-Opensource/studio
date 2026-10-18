@@ -46,6 +46,9 @@ final class Theme
     /** Wurde beim Rendern ein Abschnitt mit Vollbild-Höhe oder Hintergrundbild ausgegeben? (→ css/sections.css) */
     private bool $sectionCss = false;
 
+    /** Erster sichtbarer Block der Seite schon vergeben (Block::isFirst) – einmal je Anfrage */
+    private bool $firstSeen = false;
+
     public function __construct(string $name)
     {
         $name = Kit::clean($name) ?: (string) array_key_first(self::available());
@@ -326,12 +329,29 @@ final class Theme
                 // Erster Block der Seite (bzw. nach einem Block mit eigener Hülle): Option wird ignoriert
                 $block = $block->withTunes(['row' => '']);
             }
-            $html .= $this->renderRow($row);
+            $html .= $this->emitRow($row);
+            // Erster sichtbarer Block der Seite (Block::isFirst): sein erstes Bild lädt sofort und mit Vorrang (Media::$autoEager)
+            if (!$this->firstSeen && !app()->editing) {
+                $block->first = true;
+                $this->firstSeen = true;
+            }
             $row = [$block];
             StructuredData::collect($block);   // schema.org-Daten des Blocks (theme.php → 'jsonld')
             $prev = $block;
         }
-        return $html . $this->renderRow($row);
+        return $html . $this->emitRow($row);
+    }
+
+    /** Reihe ausgeben – beim ersten Block der Seite mit Vorrang für sein erstes Bild (Media::$autoEager) */
+    private function emitRow(array $row): string
+    {
+        $lead = !empty($row[0]) && $row[0]->first;
+        if ($lead) Media::$autoEager = 1;
+        try {
+            return $this->renderRow($row);
+        } finally {
+            if ($lead) Media::$autoEager = 0;
+        }
     }
 
     /** Unterstützt das Kit Reihen (theme.php → 'rows' => false schaltet sie ab) – und rendert der Block keine eigene Hülle? */

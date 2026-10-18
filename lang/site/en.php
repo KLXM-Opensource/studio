@@ -409,4 +409,5 @@ return [
     'Adressen' => 'addresses',
     'Zuletzt geändert' => 'Last modified',
     'Diese Seite ist für Suchmaschinen gedacht.' => 'This page is meant for search engines.',
+    'Sie sind abgemeldet.' => 'You are signed out.',
 ];

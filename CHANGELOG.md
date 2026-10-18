@@ -29,6 +29,17 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Geteilte Tabellen merken sich als Adresse einer Website deren Hauptadresse (eingestellte Adresse bzw. erste Domain), nicht die gerade aufgerufene – sonst zeigte das Canonical fremder Einträge z. B. auf eine weitere Domain.
 - JSON-LD: Organisation ohne Logo-Bild bekommt das App-Icon (512 px) als `logo`; Namen von Datenlisten (`ItemList`) ohne *Betonung*.
 
+### Schneller und besser gefunden – von Anfang an
+- **Erstes Bild mit Vorrang:** Das erste Bild im ersten Block der Seite (meist das große Einstiegsbild) lädt ohne Zutun des Kits sofort mit `fetchpriority="high"`, alle weiteren verzögert (`Media::$autoEager`, `Block::isFirst()`). `'eager' => true|false` im Kit gewinnt.
+- **Seitenüberschrift:** Hat eine Seite keine `<h1>` (beginnt z. B. mit Glossar oder Datenliste), wird die erste Abschnitts-Überschrift mit Klasse `h2` zur `<h1>` – optisch unverändert (`Core\Headings`).
+- **Hintergrundvideos ohne doppeltes Standbild:** Hero-Block des Kerns und die Kits fluid, foto (auch Bühne) und galerie setzen kein `poster` mehr neben das Standbild – es wurde zweimal geladen.
+- **SEO-Prüfung:** `php bin/console seo:check [--all]` und Systemprüfung (health, Übersicht): Live-Website gesperrt (Fehler), weitere Domains ohne Weiterleitung, Titel über 60 bzw. Beschreibung über 160 Zeichen oder fehlend, doppelte Titel, Canonical auf fremde Domain, gelöschtes Vorschaubild (`Core\SeoCheck`).
+- **`kit:check`:** meldet Hintergrundvideos mit `poster` neben einem Standbild und Einstiege mit fest `loading="lazy"`.
+- **Server-Vorlagen** (Entwicklerhandbuch → Installation): nginx mit `location ^~` – greift auch bei Plesk „Statische Dateien direkt durch nginx bedienen“ –, 1 Jahr Cache für Assets, Bildvarianten und Design-CSS, 30 Tage für Medien, fehlende Varianten an Studio; Apache mit `mod_headers`.
+
+### Website: Abmelden ohne Umweg
+- Abmelden über die Leiste der Website bleibt auf der Seite: Leiste weg, kurze Meldung „Sie sind abgemeldet.“ – statt zur Anmeldung. In der Verwaltung wie bisher.
+
 ### Sicherheits-Header
 - HSTS abschaltbar bzw. mit eigenem Wert: Konfiguration `'hsts' => false` (setzt schon der Webserver, z. B. Plesk – sonst doppelt) oder `'hsts' => 'max-age=…'`. `X-Powered-By` (PHP-Version) wird nicht mehr gesendet.
 

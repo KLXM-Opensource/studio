@@ -776,6 +776,12 @@ final class Media
     }
 
     /**
+     * Bilder, die ohne eigene 'eager'-Angabe sofort und mit Vorrang laden (fetchpriority="high"): Theme::renderBlocks setzt 1,
+     * solange der erste Block der Seite gerendert wird – dessen erstes Bild ist meist das größte Element beim Aufruf (LCP).
+     */
+    public static int $autoEager = 0;
+
+    /**
      * <picture> mit AVIF/WebP-srcset, width/height gegen CLS, lazy außer $eager.
      * Alt-Text aus der Mediathek (dekorative Bilder: alt="").
      */
@@ -799,7 +805,11 @@ final class Media
         // Bild anpassen (Core\ImageFx): Einbindung im Block vor globaler Einstellung – als Klassen (CSP, keine Inline-Styles)
         $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] || $fit ? '' : self::focusClass($m)) . ' ' . ImageFx::classFor($m));
         $class = $classes !== '' ? ' class="' . e($classes) . '"' : '';
-        $loading = !empty($opt['eager']) ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
+        // Sofort laden: ausdrücklich ('eager') oder – ohne Angabe – das erste Bild im ersten Block der Seite (Theme::renderBlocks,
+        // self::$autoEager); ein Bild mit Vorrang verbraucht das Kontingent, 'eager' => false lädt immer verzögert
+        $eager = array_key_exists('eager', $opt) ? !empty($opt['eager']) : self::$autoEager > 0;
+        if ($eager) self::$autoEager = 0;
+        $loading = $eager ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
         // Im Bearbeiten-Modus: Kennung für „Anpassen“/„Rahmen“ und (mit Bildformat, beim Füllen) den Inline-Zuschnitt
         $edit = app()->editing && !empty($m['id']) ? ' data-media-id="' . (int) $m['id'] . '"'
             . (isset($opt['path']) ? ' data-media-path="' . e((string) $opt['path']) . '"' : '')
