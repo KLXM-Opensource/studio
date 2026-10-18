@@ -25,6 +25,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Nur, was jetzt veröffentlicht und erreichbar ist: Zeitfenster („Online ab“/„Offline ab“) sofort beachtet, Einträge nur mit veröffentlichter, indexierbarer Detailseite, für Suchmaschinen gesperrte Websites (Staging) mit leerer Sitemap.
 - `sitemap.xml` mit Bildern (`image:image`: Vorschaubild und Bilder der Blöcke bzw. Medienfelder der Einträge, nie geschützte Medien), `lastmod` mit Uhrzeit und lesbarer Ansicht im Browser (`/sitemap.xsl`). Filter `sitemap.urls` nimmt `images` an.
 
+### Editor: Notizen und weicher Umbruch
+- Klick auf eine Redaktionsnotiz („Notiz: …“) im Bearbeiten-Modus: **Als Text übernehmen** oder **Notiz löschen** – vorher ließ sie sich dort weder entfernen noch umwandeln.
+- Umschalt+Enter fügt im Rich-Text einen weichen Umbruch ein – auch in Safari (legte vorher einen neuen Absatz an).
+
 ### Sichtbarkeit von Blöcken
 - Schalter **„Auf der Website sichtbar“** ganz oben in der Seitenleiste eines Blocks (vorher ein Häkchen unter „Abschnitt & Navigation“) und **Ausblenden/Einblenden** im Block-Menü ⋯. Ausgeblendet: deutlicher Hinweis in der Seitenleiste, Block im Editor gedimmt.
 

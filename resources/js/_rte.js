@@ -597,6 +597,8 @@ const Rich = {
       else if (e.altKey && e.key === 'F10' && area._rteBar) { e.preventDefault(); keepSel(area); area._rteBar.querySelector('button')?.focus(); }
       else if (e.key === 'Tab' && Rich.closestList(area)) { e.preventDefault(); e.stopPropagation(); Rich.exec(area, e.shiftKey ? 'outdent' : 'indent'); }
       else if (e.key === 'Enter' && mode === 'inline') { e.preventDefault(); d.execCommand('insertLineBreak'); }
+      // Umschalt+Enter = weicher Umbruch (<br>) – Safari legt sonst einen neuen Absatz an
+      else if (e.key === 'Enter' && e.shiftKey && !e.isComposing) { e.preventDefault(); d.execCommand('insertLineBreak'); }
       else if (e.key === 'Enter' && !e.shiftKey) {
         // „Hervorgehoben“ ist ein Einstieg: der nächste Absatz ist wieder normal
         setTimeout(() => { const p = up(area, n => n.tagName === 'P'); if (p && p.classList.contains('t-lead') && !p.textContent.trim()) { p.removeAttribute('class'); area.dispatchEvent(new Event('input', { bubbles: true })); } }, 0);

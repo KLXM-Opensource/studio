@@ -7816,4 +7816,8 @@ return [
     'Ihr Passkey gilt auf {host} noch nicht. Bitte dort zuerst anmelden und einen Passkey anlegen.' => 'Your passkey does not work on {host} yet. Please sign in there first and create a passkey.',
     '{host} als Hauptadresse von {site} festlegen? Links, Canonical und Sitemap zeigen danach auf diese Domain.' => 'Make {host} the primary address of {site}? Links, canonical and sitemap will then point to this domain.',
     '{host} ist jetzt die Hauptadresse von {site}.' => '{host} is now the primary address of {site}.',
+    'Als Text übernehmen' => 'Keep as text',
+    'Notiz löschen' => 'Delete note',
+    'Notizen sieht nur die Redaktion. Als Text übernehmen macht daraus normalen, sichtbaren Text.' => 'Only editors see notes. “Keep as text” turns it into normal, visible text.',
+    'Redaktionsnotiz' => 'Editorial note',
 ];

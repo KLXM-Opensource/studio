@@ -5,6 +5,7 @@
  */
 import { initBar, layer, layerBox, listen, pathTarget, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathClosest, inPath, IN_ADMIN, topInset } from './_shadow.js';
 import './_media.js';
+import './_notes.js';   // Redaktionsnotizen im Bearbeiten-Modus: als Text übernehmen oder löschen
 import { toast, toastNext, flushToast } from './_toast.js';   // Meldungen (Verwaltung + Website)
 import { openSpotlight } from './_spotlight.js';
 import { t } from './_i18n.js';
