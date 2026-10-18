@@ -528,7 +528,10 @@ final class Shared
         if ($name !== '' && $name !== CMS_NAME) $info['name'] = $name;
         // Adresse: im Browser die aufgerufene (bzw. eingestellte); auf der Kommandozeile (Teilen per CLI/MCP) nur eine eingestellte
         // Adresse (sys.site_url, base_url) – nie ein geratener Host
-        $url = rtrim(PHP_SAPI !== 'cli' ? site_url() : ((string) app()->settings->get('sys.site_url', '') ?: (string) app()->config->get('base_url', '')), '/');
+        // Im Browser: die Hauptadresse (eingestellt bzw. erste Domain), nicht die gerade aufgerufene – sonst landet z. B. eine weitere
+        // Domain der Website als Canonical in den anderen Websites
+        $set = (string) app()->settings->get('sys.site_url', '') ?: (string) app()->config->get('base_url', '');
+        $url = rtrim($set !== '' ? $set : (PHP_SAPI !== 'cli' ? (self::primaryUrl(site()->key) ?: site_url()) : ''), '/');
         if ($url !== '') $info['url'] = $url;
         $tpl = self::localConfig($t['shared']['key'])['detail_page_id'];
         $info['detail'] = $tpl && ($t['settings']['route'] ?? '') !== '' && Pages::find((int) $tpl) !== null;
@@ -547,13 +550,21 @@ final class Shared
         }
         $cfg = Sites::all()[$site] ?? [];
         $h = (string) (((array) ($cfg['hosts'] ?? []))[0] ?? '');
-        $bare = preg_replace('~:\d+$~', '', $h);
-        $fallback = (string) ($cfg['base_url'] ?? '') ?: ($h !== '' ? (str_contains($h, ':') || $bare === 'localhost' || str_ends_with($bare, '.localhost') ? 'http://' : 'https://') . $h : '');
+        $fallback = self::primaryUrl($site);
         return [
             'name' => (string) (($info['name'] ?? '') ?: ($cfg['label'] ?? '') ?: ($h ?: $site)),
             'url' => rtrim((string) (($info['url'] ?? '') ?: $fallback), '/'),
             'detail' => (bool) ($info['detail'] ?? false),
         ];
+    }
+
+    /** Hauptadresse einer Website aus der Konfiguration: base_url, sonst erste Domain (lokale Adressen mit http) */
+    public static function primaryUrl(string $site): string
+    {
+        $cfg = Sites::all()[$site] ?? [];
+        $h = (string) (((array) ($cfg['hosts'] ?? []))[0] ?? '');
+        $bare = preg_replace('~:\d+$~', '', $h);
+        return rtrim((string) ($cfg['base_url'] ?? '') ?: ($h !== '' ? (str_contains($h, ':') || $bare === 'localhost' || str_ends_with($bare, '.localhost') ? 'http://' : 'https://') . $h : ''), '/');
     }
 
     /** Adresse des Eintrags auf seiner Ursprungs-Website (nur fremde Einträge, wenn dort Detailseiten existieren) */

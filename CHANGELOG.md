@@ -24,6 +24,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Sitemap
 - Nur, was jetzt veröffentlicht und erreichbar ist: Zeitfenster („Online ab“/„Offline ab“) sofort beachtet, Einträge nur mit veröffentlichter, indexierbarer Detailseite, für Suchmaschinen gesperrte Websites (Staging) mit leerer Sitemap.
 - `sitemap.xml` mit Bildern (`image:image`: Vorschaubild und Bilder der Blöcke bzw. Medienfelder der Einträge, nie geschützte Medien), `lastmod` mit Uhrzeit und lesbarer Ansicht im Browser (`/sitemap.xsl`). Filter `sitemap.urls` nimmt `images` an.
+- Mehrsprachige Websites: Datensätze aller aktiven Sprachen stehen in der Sitemap (vorher nur die Standardsprache, z. B. fehlten die englischen Glossar-Begriffe).
+- Detailseiten von Datensätzen übernehmen „nicht in Suchmaschinen“ bzw. den Entwurfsstatus ihrer Detailvorlage (`noindex`) – passend zur Sitemap, die sie dann weglässt.
+- Geteilte Tabellen merken sich als Adresse einer Website deren Hauptadresse (eingestellte Adresse bzw. erste Domain), nicht die gerade aufgerufene – sonst zeigte das Canonical fremder Einträge z. B. auf eine weitere Domain.
 
 ### Editor: Notizen und weicher Umbruch
 - Klick auf eine Redaktionsnotiz („Notiz: …“) im Bearbeiten-Modus: **Als Text übernehmen** oder **Notiz löschen** – vorher ließ sie sich dort weder entfernen noch umwandeln.

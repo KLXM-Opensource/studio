@@ -396,7 +396,10 @@ final class SiteController
             // Geteilte Tabellen: nur Einträge, deren Canonical hier liegt – eigene, fremde nur bei „Canonical: eigene Adresse“
             // bzw. wenn die Ursprungs-Website keine Detailseiten hat (sonst steht der Eintrag in deren Sitemap)
             $mediaFields = array_column(array_filter($t['fields'], fn($f) => ($f['type'] ?? '') === 'media'), 'name');
-            foreach (Entries::query($t, ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own']) as $e) {
+            // Mehrsprachig: Einträge aller aktiven Sprachen (/en/… usw.) – die Abfrage liefert sonst nur die aktuelle Sprache
+            $q = ['status' => 'published', 'limit' => 5000, 'source' => Tables::isShared($t) ? 'site' : 'own'] + (Lang::multi() ? ['lang' => 'all'] : []);
+            foreach (Entries::query($t, $q) as $e) {
+                if (Lang::multi() && !Lang::valid(Lang::norm($e['lang'] ?? null))) continue;
                 $loc = site_url() . Entries::url($t, $e);
                 if (Tables::isShared($t) && Entries::absUrl($t, $e) !== $loc) continue;
                 if (!$live($e)) continue;

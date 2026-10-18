@@ -79,7 +79,9 @@ final class Seo
         // Fremde Einträge geteilter Tabellen: Canonical auf die Ursprungs-Website (falls sie Detailseiten hat)
         $seo['canonical'] = Data\Entries::absUrl($table, $entry);
         // Abgelaufene Stellenangebote (Core\Data\Jobs): nicht mehr in Suchmaschinen
+        // Detailvorlage „nicht in Suchmaschinen“ oder nicht veröffentlicht: Einträge ebenso (wie die Sitemap, die sie dann weglässt)
         $seo['noindex'] = $entry['status'] !== 'published' || noindex_site() || !empty($table['settings']['noindex'])   // Tabelle „Nicht indexieren“ (Core\Indexing)
+            || !empty($template['noindex']) || ($template['status'] ?? 'published') !== 'published'
             || (Data\Jobs::is($table) && Data\Jobs::expired($table, $entry));
         $seo['alternates'] = [];
         if (Lang::multi()) {
