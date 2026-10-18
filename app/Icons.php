@@ -274,7 +274,9 @@ final class Icons
 
     /**
      * Symbol ausgeben – für gespeicherte Werte: Symbolname/Menü-Schlüssel/altes Zeichen → SVG,
-     * unbekanntes Zeichen → <span class="ico ico--glyph">, leer → $opt['fallback'] (Symbolname) oder ''.
+     * unbekanntes Zeichen (★, ✓, Emoji – höchstens 3 Zeichen) → <span class="ico ico--glyph">, leer → $opt['fallback'] (Symbolname)
+     * oder ''. Ein unbekannter Symbolname (z. B. „arrows-left-right“, nicht im Symbolsatz) erscheint nie als Text: Ersatzsymbol
+     * ($opt['fallback']) oder nichts.
      */
     public static function render(?string $value, array $opt = []): string
     {
@@ -282,6 +284,7 @@ final class Icons
         if ($name !== null) return self::svg($name, $opt);
         $v = trim((string) $value);
         if ($v === '') return '';
+        if (mb_strlen($v) > 3) return !empty($opt['fallback']) && ($fb = self::resolve($opt['fallback'])) !== null ? self::svg($fb, $opt) : '';
         $label = trim((string) ($opt['label'] ?? ''));
         return '<span class="' . e(trim('ico ico--glyph ' . ($opt['class'] ?? ''))) . '"'
             . ($label !== '' ? ' role="img" aria-label="' . e($label) . '"' : ' aria-hidden="true"') . '>' . e($v) . '</span>';

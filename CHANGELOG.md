@@ -42,6 +42,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Website: Abmelden ohne Umweg
 - Abmelden über die Leiste der Website bleibt auf der Seite: Leiste weg, kurze Meldung „Sie sind abgemeldet.“ – statt zur Anmeldung. In der Verwaltung wie bisher.
+- Unbekannte Symbolnamen (z. B. ein Symbol, das es im Symbolsatz nicht gibt) erscheinen nicht mehr als Text im Inhalt – stattdessen das Ersatzsymbol bzw. nichts. Einzelne Zeichen (★, ✓, Emoji) bleiben wie bisher.
 
 ### Sicherheits-Header
 - HSTS abschaltbar bzw. mit eigenem Wert: Konfiguration `'hsts' => false` (setzt schon der Webserver, z. B. Plesk – sonst doppelt) oder `'hsts' => 'max-age=…'`. `X-Powered-By` (PHP-Version) wird nicht mehr gesendet.
