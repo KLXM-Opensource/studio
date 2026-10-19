@@ -51,6 +51,57 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
     <?php endif; ?>
   </header>
 
+  <?php elseif ($layout === 'portrait'):
+      // Porträt-Seite: ein zusammenhängendes Profil – Bild links (bleibt beim Scrollen stehen), rechts Etiketten, Titel, erste
+      // Textzeile als Funktion/Untertitel, Kontakt-Knöpfe (E-Mail, Telefon, Web, „Kontakt speichern“), Fakten (Beschriftung: Wert)
+      // und Fließtext. Feldtypen bestimmen den Platz – nichts muss eingestellt werden.
+      $img = null; $chips = $facts = $body = $acts = []; $role = null;
+      $toneP = fn(array $fd, string $k) => 'dl-tone-' . ((int) array_search($k, array_keys((array) ($fd['options'] ?? [])), true) % 5 + 1);
+      foreach ($fields as $f) {
+          $tp = $type($f);
+          if ($f === '_title') continue;
+          if ($tp === 'media') { $img ??= $f; continue; }
+          if (in_array($tp, ['select', 'multiselect'], true)) {
+              $fd = Tables::field($t, $f);
+              foreach (array_filter((array) ($e[$f] ?? []), fn($v) => $v !== '' && $v !== null) as $k) $chips[] = '<span class="dl-chip ' . $toneP($fd, (string) $k) . '">' . e(Tables::optionLabel($fd, (string) $k)) . '</span>';
+              continue;
+          }
+          if (in_array($tp, ['email', 'tel', 'url'], true)) {
+              $v = trim((string) ($e[$f] ?? ''));
+              if ($v === '') continue;
+              $href = match ($tp) { 'email' => 'mailto:' . $v, 'tel' => (string) tel_href($v), default => $v };
+              if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
+              continue;
+          }
+          $h = Entries::html($t, $e, $f);
+          if ($h === '') continue;
+          if (in_array($tp, ['richtext', 'textarea', 'mediatext'], true)) { $body[] = [$f, $tp, $h]; continue; }
+          if ($role === null && $tp === 'text') { $role = [$f, $h]; continue; }
+          $facts[] = [$f, $h];
+      }
+      $vcf = ($d['vcard'] ?? true) !== false ? vcard_entry_url($t, $e) : null;
+      $pic = $img ? Entries::html($t, $e, $img, ['ratio' => $ratio, 'sizes' => '(min-width: 1080px) 440px, 90vw']) : ''; ?>
+  <article class="df-portrait<?= $pic !== '' ? ' df-portrait--img' : '' ?>">
+    <?php if ($pic !== ''): ?><div class="df-portrait__media"><div class="df-img df-portrait__img ratio-<?= e(str_replace(':', '-', $ratio)) ?>"<?= entry_edit_attr($t, $e, (string) $img) ?>><?= $pic ?></div></div><?php endif; ?>
+    <div class="df-portrait__main">
+      <?php if ($chips): ?><p class="dl-chips df-portrait__chips"><?= implode(' ', $chips) ?></p><?php endif; ?>
+      <?php if (in_array('_title', $fields, true)): $ea = entry_edit_attr($t, $e, '_title'); ?><h1 class="h2 df-title df-portrait__title"><?= $ea !== '' ? '<span' . $ea . '>' . e(Entries::title($t, $e)) . '</span>' : e(Entries::title($t, $e)) ?></h1><?php endif; ?>
+      <?php if ($role): ?><p class="df-portrait__role"<?= entry_edit_attr($t, $e, $role[0]) ?>><?= $role[1] ?></p><?php endif; ?>
+      <?php if ($acts || $vcf): ?>
+      <ul class="df-profile__acts df-portrait__acts" role="list">
+        <?php foreach ($acts as [$href, $ico, $lbl]): ?><li><a class="df-act" href="<?= e($href) ?>"<?= str_starts_with($href, 'http') ? ' target="_blank" rel="noopener"' : '' ?>><?= icon($ico) ?><span><?= e($lbl) ?></span></a></li><?php endforeach; ?>
+        <?php if ($vcf): ?><li><a class="df-act df-act--vcard" href="<?= e($vcf) ?>" download><?= icon('address-book') ?><span><?= e(lt('Kontakt speichern')) ?></span></a></li><?php endif; ?>
+      </ul>
+      <?php endif; ?>
+      <?php if ($facts): ?>
+      <dl class="df-portrait__facts">
+        <?php foreach ($facts as [$f, $h]): ?><div><dt><?= e($label($f)) ?></dt><dd<?= entry_edit_attr($t, $e, $f) ?>><?= $h ?></dd></div><?php endforeach; ?>
+      </dl>
+      <?php endif; ?>
+      <?php foreach ($body as [$f, $tp, $h]): ?><div class="prose df-portrait__text"<?= entry_edit_attr($t, $e, $f) ?>><?= $tp === 'textarea' ? '<p>' . $h . '</p>' : $h ?></div><?php endforeach; ?>
+    </div>
+  </article>
+
   <?php elseif ($layout === 'profile'): $img = null; $chips = $lead = $acts = []; $tone = fn(array $fd, string $k) => 'dl-tone-' . ((int) array_search($k, array_keys((array) ($fd['options'] ?? [])), true) % 5 + 1); ?>
   <?php foreach ($fields as $f) {
       $tp = $type($f);

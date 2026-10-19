@@ -40,3 +40,16 @@
 .df-act svg{flex:none;width:18px;height:18px}
 .df-act--vcard{border-color:transparent;background:var(--kit-accent,#0b6b3a);color:var(--kit-on-accent,#fff)}
 .df-act--vcard:hover{background:color-mix(in srgb,var(--kit-accent,#0b6b3a) 85%,#000)}
+/* Porträt-Seite (layout portrait): Bild links (bleibt stehen), rechts Etiketten, Titel, Funktion, Kontakt, Fakten, Text */
+.df-portrait{display:grid;grid-template-columns:minmax(0,1fr);gap:24px 48px;container:dfp/inline-size}
+@container (min-width:46rem){.df-portrait--img{grid-template-columns:minmax(14rem,5fr) 7fr;align-items:start}.df-portrait__media{position:sticky;top:96px}}
+.df-portrait__media{max-width:28rem}
+.df-portrait__img{border-radius:14px;overflow:hidden}
+.df-portrait__img img{width:100%;height:100%;object-fit:cover}
+.df-portrait__main{display:grid;gap:14px;align-content:start;min-width:0}
+.df-portrait__title{margin:0}
+.df-portrait__role{margin:-4px 0 0;font-size:1.15em;opacity:.85}
+.df-portrait__facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(12rem,1fr));gap:12px 24px;margin:6px 0 0;padding:16px 0;border-block:1px solid color-mix(in srgb,currentColor 15%,transparent)}
+.df-portrait__facts dt{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+.df-portrait__facts dd{margin:2px 0 0}
+.df-portrait__text{max-width:42rem}

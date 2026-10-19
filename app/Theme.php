@@ -499,6 +499,8 @@ final class Theme
         if ($inner === null) {
             return app()->editing ? '<p>Renderer für „' . e($block->type) . '“ fehlt.</p>' : '';
         }
+        // Block ohne Ausgabe (z. B. leere Liste mit „ausblenden, wenn leer“): kein leerer Abschnitt mit Hintergrund
+        if (trim($inner) === '' && !app()->editing) return '';
         if (app()->editing && $block->parent === null && $block->inRow() && $this->rowable($block)) {
             // Editor (Vorschau je Block): Block „neben dem vorigen“ schon als Zelle einer Reihe – Hintergrund/Abstände der Reihe
             // und „Karte ja/nein“ setzt editor.js (layoutRows) nach dem ersten Block der Reihe

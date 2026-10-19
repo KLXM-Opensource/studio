@@ -169,7 +169,7 @@
   <ul>
     <li><b>Block „Personen“</b> auf einer Seite oder in den Inhaltsblöcken eines Eintrags (z. B. je Regionalgruppe): Personen über den Link-Auswähler wählen. Foto, Name, E-Mail und Telefon kommen aus der Tabelle – <b>Funktion, Text und Foto lassen sich an dieser Stelle überschreiben</b> (z. B. „Ansprechperson Regionalgruppe Münsterland“). Darstellung als Karten, Liste oder groß; ohne Foto erscheinen die Initialen.</li>
     <li><b>Kontakt speichern:</b> Jede Person hat eine Visitenkarte (vCard mit Foto, Funktion, Telefon, E-Mail und Anschrift) – im Block und auf der Profilseite.</li>
-    <li><b>Profilseite:</b> Block „Datensatz-Felder“ in der Darstellung „Profil“ mit „Bild: Fläche füllen“ – E-Mail, Telefon und Website erscheinen dort als Knöpfe, dazu „Kontakt speichern“.</li>
+    <li><b>Profilseite:</b> Block „Datensatz-Felder“ in der Darstellung <b>„Porträt-Seite“</b> – großes Bild links (bleibt beim Scrollen stehen), rechts Etiketten, Name, Funktion, Kontakt-Knöpfe (E-Mail, Telefon, Website, „Kontakt speichern“), Fakten wie Ort oder Gruppe und der Profiltext. Welches Feld wohin kommt, ergibt sich aus dem Feldtyp. Passt auch für Gruppen, Standorte oder Projekte.</li>
   </ul>
   <p>Ändert sich etwas (neue Telefonnummer, anderes Foto), pflegen Sie es einmal in der Tabelle – alle Stellen zeigen es sofort.</p>
 

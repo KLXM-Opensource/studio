@@ -169,3 +169,24 @@ html.is-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}
 .df-contact__list .ico{flex:none;display:grid;place-items:center;width:2.25rem;height:2.25rem;padding:.5rem;border-radius:50%;background:var(--f-a-soft);color:var(--f-link)}
 .df-contact__list a{color:var(--f-link);font-weight:600}
 .df-contact__map{overflow:hidden;border-radius:var(--f-r-s)}
+
+/* Porträt-Seite (data_fields layout portrait): eine zusammenhängende Profilfläche – Porträt groß links und stehend beim Scrollen,
+   rechts Etiketten, Name, Funktion (Akzent), Kontakt-Knöpfe, Faktenleiste und Text in Lesebreite */
+.df--portrait{container:dfp/inline-size}
+.df-portrait{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--f-s-xl) clamp(2rem,5cqi,4.5rem)}
+@container dfp (min-width:46rem){.df-portrait--img{grid-template-columns:minmax(15rem,5fr) 7fr;align-items:start}.df-portrait__media{position:sticky;top:calc(var(--hdr-h,4.25rem) + 1.5rem)}}
+.df-portrait__media{max-width:30rem}
+.df-portrait__img{position:relative;border-radius:var(--f-img-r,var(--f-r-l));overflow:hidden;box-shadow:0 30px 60px -32px var(--f-sh2),0 0 0 1px var(--f-line)}
+.df-portrait__img img{width:100%;height:100%;object-fit:cover}
+.df-portrait__img::after{content:"";position:absolute;inset:auto 0 0;height:.35rem;background:linear-gradient(90deg,var(--f-a),var(--f-b))}
+.df-portrait__main{display:grid;gap:var(--f-s-m);align-content:start;min-width:0;padding-top:clamp(0rem,2cqi,1.5rem)}
+.df-portrait__chips{margin:0}
+.df-portrait__title{margin:0;font-size:max(var(--f-t4),min(var(--f-t6),8cqi));line-height:1.02;text-wrap:balance}
+.df-portrait__role{margin:-.25rem 0 0;color:var(--f-a);font:600 var(--f-t1)/1.35 var(--f-font-head)}
+.df-portrait__acts{margin:.25rem 0 0}
+.df-portrait__facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(12rem,1fr));gap:var(--f-s-m) var(--f-s-l);margin:var(--f-s-s) 0 0;padding:var(--f-s-l) 0;border-block:1px solid var(--f-line)}
+.df-portrait__facts dt{color:var(--f-muted);font:700 .72rem/1.2 var(--f-font-label,var(--f-font));letter-spacing:.08em;text-transform:uppercase}
+.df-portrait__facts dd{margin:.3rem 0 0;color:var(--f-ink);font-weight:500}
+.df-portrait__facts a{color:var(--f-link)}
+.df-portrait__text{max-width:42rem;margin-top:var(--f-s-s);color:var(--f-text)}
+.df-portrait__text>:first-child{margin-top:0}
