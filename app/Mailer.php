@@ -66,6 +66,7 @@ final class Mailer
      *        reply_to: Antwortadresse; message_id: eigene Message-ID (ohne < >), z. B. für das Zustellprotokoll
      *        return_path: Rücklaufadresse (Return-Path/Envelope-From) – Newsletter-Erweiterungen mit eigener Bounce-Adresse (VERP)
      *        keep_alive: Verbindung des Kontos für weitere Mails offen halten (Stapelversand im Cron, closeTransports() am Ende)
+     *        via: ID eines E-Mail-Kontos statt der Zuordnung über den Zweck (nur wenn versandbereit, sonst gilt der Zweck)
      *        smime: Zertifikat(e) der Empfänger (PEM) – die ganze Nachricht (Text, HTML, Anhänge) wird mit S/MIME verschlüsselt
      *               (openssl_pkcs7_encrypt über Symfony SMimeEncrypter, AES-256-CBC); unverschlüsselt bleiben nur Kopfzeilen wie der Betreff
      *        require_tls: SMTP nur mit TLS (siehe dsn())
@@ -88,6 +89,8 @@ final class Mailer
         // (network: true) nur über das Netzwerk-Konto – nie über das Konto einer Website.
         $purpose = (string) ($o['purpose'] ?? (!empty($o['account']) ? 'account' : 'notify'));
         $acc = Mail\Accounts::route($purpose, !empty($o['network']));
+        // Bestimmtes Konto (z. B. eigener Absender eines Newsletter-Verteilers) – nur versandbereit, nie für Netzwerk- oder Kontomails
+        if (!empty($o['via']) && empty($o['network']) && empty($o['account']) && ($via = Mail\Accounts::find((string) $o['via'])) && Mail\Accounts::ready($via)) $acc = $via;
         self::$account = ['id' => $acc['id'], 'scope' => $acc['scope'], 'purpose' => $purpose];
         $from = $acc['from'];
         if (!$to) {

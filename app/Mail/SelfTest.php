@@ -41,6 +41,13 @@ final class SelfTest
             $s->set('sys.mail_routes', ['newsletter' => 'news', 'visitor' => 'fehlt']);
             $eq('Zweck → Konto', Accounts::route('newsletter')['id'], 'news');
             $eq('fehlendes Konto → Standard', Accounts::route('visitor')['id'], 'standard');
+            Mailer::$testDump = $dump;
+            Mailer::send('QA via', 'x', ['a@example.org'], ['purpose' => 'notify', 'via' => 'news']);
+            $eq('via: bestimmtes Konto statt Zweck', Mailer::$account['id'] ?? null, 'news');
+            Mailer::send('QA via', 'x', ['a@example.org'], ['purpose' => 'notify', 'via' => 'leer']);
+            $eq('via: nicht versandbereites Konto → Zweck', Mailer::$account['id'] ?? null, 'standard');
+            Mailer::$testDump = null;
+            foreach (glob($dump . '/*') ?: [] as $f) @unlink($f);
             $eq('SMTP-DSN', Accounts::dsn(Accounts::standard()), 'smtp://smtp.example.org:587');
             $eq('SSL-Port', Accounts::dsn(['encryption' => 'ssl', 'port' => 0] + Accounts::normalize(['transport' => 'smtp', 'host' => 'h', 'encryption' => 'ssl'])), 'smtps://h:465');
             $eq('sendmail/PHP-mail nicht mehr möglich (→ SMTP)', Accounts::normalize(['transport' => 'sendmail'])['transport'], 'smtp');
