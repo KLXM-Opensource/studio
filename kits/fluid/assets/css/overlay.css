@@ -103,3 +103,22 @@ html:has(.mnav:popover-open){overflow:hidden}
 /* Slide: Zurück-Zeile ringsum gerundet wie die Einträge; die Trennlinie gehört zur Liste darunter (biegt sich nicht in die Rundung) */
 .nv-slide .hnav__det[open]>.hnav__nested{padding-top:.3rem;border-top:1px solid var(--f-line)}
 .nv-slide .hnav__det[open]>.hnav__more:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}
+/* Aufklappmenü öffnen „Elastisch“ (nd-elastic, nur has-motion, nie bei „Bewegung reduzieren“): Leiste, nicht Seitenleiste/Rail.
+   Öffnen: @starting-style beim Wechsel zu [open], Feder-Kurve vom Menüpunkt aus, Einträge gestaffelt.
+   Schließen: ::details-content bleibt kurz sichtbar (content-visibility allow-discrete), Rückweg kurz ohne Nachfedern –
+   Browser ohne ::details-content schließen sofort wie bisher. */
+@media (prefers-reduced-motion:no-preference){
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub::details-content{transition:content-visibility .14s allow-discrete}
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub>.hnav__panel{transform-origin:top left;transition:opacity .12s ease-in,scale .14s ease-in,translate .14s ease-in}
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__item:is(:last-child,:nth-last-child(2)) .hnav__sub>.hnav__panel{transform-origin:top right}
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub:not([open])>.hnav__panel{opacity:0;scale:.94 .82;translate:0 -.35rem}
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub[open]>.hnav__panel{transition:opacity .18s ease-out,scale .45s cubic-bezier(.34,1.56,.64,1),translate .45s cubic-bezier(.34,1.56,.64,1)}
+  @starting-style{.has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub[open]>.hnav__panel{opacity:0;scale:.94 .82;translate:0 -.35rem}}
+  .has-motion.nd-elastic .hdr:not(.hdr--rail,.hdr--sidebar) .hnav__sub[open]>.hnav__panel>li{animation:fl-nd-in .38s cubic-bezier(.34,1.56,.64,1) both}
+  .has-motion.nd-elastic .hdr .hnav__sub[open]>.hnav__panel>li:nth-child(2){animation-delay:.03s}
+  .has-motion.nd-elastic .hdr .hnav__sub[open]>.hnav__panel>li:nth-child(3){animation-delay:.06s}
+  .has-motion.nd-elastic .hdr .hnav__sub[open]>.hnav__panel>li:nth-child(4){animation-delay:.09s}
+  .has-motion.nd-elastic .hdr .hnav__sub[open]>.hnav__panel>li:nth-child(5){animation-delay:.12s}
+  .has-motion.nd-elastic .hdr .hnav__sub[open]>.hnav__panel>li:nth-child(n+6){animation-delay:.15s}
+  @keyframes fl-nd-in{from{opacity:0;translate:0 -.3rem}}
+}

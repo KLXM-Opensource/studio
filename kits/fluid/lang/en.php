@@ -588,4 +588,8 @@ return [
     'Pfeil im Menü' => 'Arrow in the menu',
     'Dreht sich beim Öffnen' => 'Rotates when opening',
     'Zoomt leicht beim Zeigen und Öffnen (dreht sich nicht)' => 'Zooms slightly on hover and open (does not rotate)',
+    'Aufklappmenü öffnen' => 'Opening the dropdown menu',
+    'Wie bisher' => 'As before',
+    'Elastisch – zieht weich mit leichtem Nachfedern auf' => 'Elastic – opens smoothly with a slight spring',
+    'Nur mit „Dezente Animationen“ und nie bei „Bewegung reduzieren“ auf dem Gerät. Schließen bleibt kurz und ohne Nachfedern.' => 'Only with “Subtle animations” and never when the device asks for reduced motion. Closing stays short and without spring.',
 ];
