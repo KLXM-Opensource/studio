@@ -699,6 +699,13 @@ final class Fields
         $title = $f['title_field'] ?? ($sub[0]['name'] ?? null);
         $renderItem = function (array $item, string $idx) use ($f, $sub, $errors, $inputName, $p, $itemLabel, $title) {
             $head = $title && isset($item[$title]) && is_scalar($item[$title]) && $item[$title] !== '' ? strip_tags((string) $item[$title]) : $itemLabel;
+            // Titelfeld ist ein Verweis (page:/entry:/media:) → Name des Ziels statt der Kennung, z. B. Name der gewählten Person
+            if ($title && \Core\Links::isRef((string) ($item[$title] ?? ''))) {
+                $ref = \Core\Links::describe((string) $item[$title]);
+                $head = !$ref['missing'] && $ref['label'] !== '' ? $ref['label'] : $itemLabel;
+                // Zweite Angabe der Zeile (z. B. Funktion an dieser Stelle) dahinter
+                foreach ($sub as $sf) if (($sf['name'] ?? '') !== $title && in_array($sf['type'] ?? '', ['text', 'inline'], true) && trim((string) ($item[$sf['name']] ?? '')) !== '') { $head .= ' – ' . strip_tags((string) $item[$sf['name']]); break; }
+            }
             if (isset($item['tag']) && $title === 'tag') {
                 $head = [1 => 'Montag', 2 => 'Dienstag', 3 => 'Mittwoch', 4 => 'Donnerstag', 5 => 'Freitag', 6 => 'Samstag', 0 => 'Sonntag'][(int) $item['tag']] ?? $head;
             }

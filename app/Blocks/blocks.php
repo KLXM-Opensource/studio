@@ -393,7 +393,7 @@ return [
             ...\Core\MediaBlocks::headFields(),
             ['type' => 'heading', 'label' => 'Personen'],
             ['name' => 'table', 'label' => 'Personen-Tabelle', 'type' => 'datatable', 'required' => true, 'help' => 'Die Tabelle, in der die Personen zentral gepflegt werden.'],
-            ['name' => 'items', 'label' => 'Personen', 'type' => 'repeater', 'item_label' => 'Person', 'title_field' => 'role', 'max_items' => 30, 'fields' => [
+            ['name' => 'items', 'label' => 'Personen', 'type' => 'repeater', 'item_label' => 'Person', 'title_field' => 'person', 'max_items' => 30, 'fields' => [
                 ['name' => 'person', 'label' => 'Person', 'type' => 'link', 'required' => true,
                     'help' => 'Eintrag der Personen-Tabelle wählen (Struktur-Browser → Datentabellen).'],
                 ['name' => 'role', 'label' => 'Funktion an dieser Stelle (optional)', 'type' => 'text', 'max' => 120, 'width' => 'half',
