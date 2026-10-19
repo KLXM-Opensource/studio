@@ -18,6 +18,7 @@ namespace Core;
  *     'fonts'   => ['inter' => ['label' => 'Inter', 'stack' => 'Inter, system-ui, sans-serif', 'css' => 'css/font-inter.css'], …],
  *     'presets' => ['petrol' => ['label' => 'Petrol', 'values' => ['accent' => '#0F766E', …]], …],
  *     'dark'    => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark'],   // wo dunkle Werte gelten
+ *                  optional 'manual' => ['dark' => 'scheme-dark', 'light' => 'scheme-light']: Klassen eines Hell/Dunkel-Schalters
  *   ]
  *
  * Typen: color (#RRGGBB, optional eigener Dunkel-Wert), range (Zahl + unit, min/max/step), choice (options; Ausgabe über
@@ -212,8 +213,13 @@ final class Design
         $out = ':root{' . implode(';', $light) . '}';
         $d = (array) (self::def()['dark'] ?? []);
         if ($dark && !empty($d['scope'])) {
-            $rule = $d['scope'] . '{' . implode(';', $dark) . '}';
+            // Hell/Dunkel-Schalter des Kits ('manual' => ['dark' => Klasse, 'light' => Klasse]): Klasse am <html> überstimmt das Gerät
+            $m = (array) ($d['manual'] ?? []);
+            $light = preg_replace('~[^a-z0-9_-]~i', '', (string) ($m['light'] ?? ''));
+            $forced = preg_replace('~[^a-z0-9_-]~i', '', (string) ($m['dark'] ?? ''));
+            $rule = $d['scope'] . ($light !== '' ? ':not(.' . $light . ')' : '') . '{' . implode(';', $dark) . '}';
             $out .= "\n" . (!empty($d['media']) ? '@media ' . $d['media'] . '{' . $rule . '}' : $rule);
+            if ($forced !== '') $out .= "\n" . $d['scope'] . '.' . $forced . '{' . implode(';', $dark) . '}';
         }
         return $out . "\n";
     }

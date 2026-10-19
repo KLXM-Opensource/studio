@@ -38,7 +38,7 @@ $base = [
     'images' => 'radius', 'image_fx' => 'none', 'hover' => 'lift', 'icons' => 'soft', 'icon_pos' => 'top', 'dividers' => 'none', 'motion_style' => 'rise',
     'eyebrow' => 'line', 'eyebrow_case' => 'auto', 'header' => 'inline', 'header_sticky' => true, 'header_bg' => 'page', 'nav_style' => 'plain', 'topbar' => 'off',
     'footer' => 'columns', 'footer_bg' => 'surface', 'sections' => 'flush', 'progress' => false, 'totop' => false, 'footer_line' => 'auto', 'footer_line_color' => 'auto', 'footer_line_width' => 'auto', 'header_height' => 'auto', 'nav_parent' => 'split', 'nav_levels' => 'accordion', 'pagebg' => 'plain',
-    'logo_size' => 'normal', 'logo_over' => false, 'nav_size' => 'normal', 'nav_mark' => 'auto', 'transitions' => 'off', 'back_nav' => 'link', 'side_width' => 'normal', 'side_tree' => 'branch', 'side_banner' => 'off', 'side_banner_height' => 'normal', 'side_banner_overlay' => 'none', 'palette' => 'brand',
+    'logo_size' => 'normal', 'logo_over' => false, 'nav_size' => 'normal', 'nav_mark' => 'auto', 'transitions' => 'off', 'back_nav' => 'link', 'dark_toggle' => false, 'side_width' => 'normal', 'side_tree' => 'branch', 'side_banner' => 'off', 'side_banner_height' => 'normal', 'side_banner_overlay' => 'none', 'palette' => 'brand',
     'motion' => true, 'dark' => true,
 ];
 
@@ -241,6 +241,8 @@ return [
             ['name' => 'motion_style', 'label' => 'Art des Einblendens', 'type' => 'choice', 'class' => 'mo-{value}', 'default' => 'rise',
                 'options' => ['rise' => 'Aufsteigen', 'fade' => 'Nur Blende', 'scale' => 'Leicht wachsen', 'blur' => 'Aus der Unschärfe', 'clip' => 'Aufdecken von unten', 'slide' => 'Seitlich hereingleiten']],
             ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
+            ['name' => 'dark_toggle', 'markup' => true, 'label' => 'Hell/Dunkel-Schalter im Kopfbereich', 'type' => 'bool', 'class' => 'has-scheme-toggle', 'default' => false,
+                'help' => 'Besucher wechseln selbst zwischen heller und dunkler Darstellung (überstimmt die Geräte-Einstellung, merkt sich der Browser). Nur mit „Dunkles Farbschema“.'],
         ]],
     ],
 
@@ -397,7 +399,7 @@ return [
     ],
 
     // Dunkle Werte bei „Dunkles Farbschema“ (Klasse has-dark) und Geräte-Einstellung; Vorschau im Editor setzt is-dark
-    'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark'],
+    'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark', 'manual' => ['dark' => 'scheme-dark', 'light' => 'scheme-light']],
 
     // Musterseite für die Vorschau im Editor (Showcase, siehe tools/demo.php)
     'sample' => 'showcase',

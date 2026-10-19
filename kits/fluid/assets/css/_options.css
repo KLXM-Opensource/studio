@@ -157,7 +157,10 @@ html.fl-none .ftr{border-top:0;background-image:none;box-shadow:none}
 html:is(.fl-line,.fl-shadow) .ftr{border-top:var(--fl-w) solid var(--fl-c);background-image:none}
 html.fl-shadow .ftr{box-shadow:inset 0 14px 14px -14px rgb(0 0 0/.28)}
 html.fl-emboss .ftr{border-top:var(--fl-w) solid color-mix(in srgb,var(--f-ink) 30%,transparent);background-image:none;box-shadow:inset 0 1px 0 rgb(255 255 255/.95),inset 0 2px 0 rgb(255 255 255/.35),0 -1px 0 rgb(255 255 255/.7)}
-@media (prefers-color-scheme:dark){html.has-dark.fl-emboss .ftr{border-top-color:rgb(0 0 0/.6);box-shadow:inset 0 1px 0 rgb(255 255 255/.12),0 -1px 0 rgb(255 255 255/.05)}}
+@media (prefers-color-scheme:dark){html.has-dark:not(.scheme-light).fl-emboss .ftr{border-top-color:rgb(0 0 0/.6);box-shadow:inset 0 1px 0 rgb(255 255 255/.12),0 -1px 0 rgb(255 255 255/.05)}}
+/* Hell/Dunkel-Schalter (design: dark_toggle): „Dunkel“ gewählt */
+html.has-dark.scheme-dark.fl-emboss .ftr{border-top-color:rgb(0 0 0/.6);box-shadow:inset 0 1px 0 rgb(255 255 255/.12),0 -1px 0 rgb(255 255 255/.05)}
+
 html.fl-band .ftr{border-top:0;background-image:linear-gradient(90deg,var(--f-a) 0 20%,var(--f-b) 20% 40%,var(--f-c3) 40% 60%,var(--f-c4) 60% 80%,var(--f-c5) 80%);background-size:100% var(--fl-bw);background-repeat:no-repeat}
 html.pal-colorful.flw-w1 .ftr,html.pal-colorful.flw-w2 .ftr,html.pal-colorful.flw-w4 .ftr,html.pal-colorful.flw-w6 .ftr,html.pal-colorful.flw-w10 .ftr{background-size:100% var(--fl-bw)}
 html.fl-auto:not(.pal-colorful):is(.flw-w2,.flw-w4,.flw-w6,.flw-w10) .ftr{border-top-width:var(--fl-w)}
@@ -207,6 +210,7 @@ html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
 
 /* Größe der Menüpunkte (design: nav_size) – „Kompakt“ für viele Menüpunkte */
 .nz-compact .hnav__link{font-size:.8125rem;padding-inline:.5rem}
+.nz-compact .hdr__bar{column-gap:var(--f-s-m)}
 .nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{min-width:1.5rem;padding-inline:.15rem .3rem}   /* ≥ 24 px Zielgröße (WCAG 2.5.8) */
 .nz-compact.nl-caps .hnav__link{letter-spacing:.06em}
 

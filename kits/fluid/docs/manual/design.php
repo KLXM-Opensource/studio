@@ -50,6 +50,7 @@
     <li><b>Größe der Menüpunkte:</b> „Kompakt“ (kleinere Schrift, engere Abstände) – bei vielen Menüpunkten bleibt das Menü so öfter in der Leiste, statt hinter „Menü“ zu verschwinden.</li>
     <li><b>Markierung des aktiven Menüpunkts:</b> automatisch, in der Hervorhebungsfarbe oder in der zweiten Markenfarbe – z. B. Orange aus dem Logo auf grünem Kopf.</li>
     <li><b>Seitenwechsel „Fließend“:</b> Das Bild einer angeklickten Karte gleitet zum Bild der Detailseite, die Überschrift zur Überschrift; zurück in umgekehrter Richtung (Chrome, Edge, Safari; nur mit „Animationen“).</li>
+    <li><b>Hell/Dunkel-Schalter im Kopfbereich:</b> Besucher wechseln mit einem Knopf (Mond/Sonne) selbst zwischen heller und dunkler Darstellung; das überstimmt die Einstellung ihres Geräts und bleibt im Browser gemerkt. Voraussetzung: „Dunkles Farbschema“ ist an.</li>
     <li><b>Zurück-Link auf Detailseiten „Zurück zur Ausgangsseite“:</b> oben „← Zurück zu …“ mit dem Namen der Seite, von der man kam (zurück an die alte Scrollposition), daneben der Link der Vorlage (z. B. „Alle News“) ohne Pfeil, am Ende der Seite noch einmal „Zurück“.</li>
     <li><b>Linie über dem Fußbereich:</b> wie Farbwirkung, keine, Linie, Linie mit Schatten nach unten, geprägt oder Farbband – mit <b>Farbe</b> (Linienfarbe, Akzent, zweite Markenfarbe, Schriftfarbe, Weiß) und <b>Dicke</b> (1–10 px).</li>
   </ul>

@@ -114,7 +114,10 @@ a.dl-chip:hover{background:var(--f-a2);color:var(--f0-ink)}
 .dl-img--contain{margin:.5rem .5rem 0;border-radius:calc(var(--f-r-l) - .3rem)}
 .dl-img--contain img,.df-img--contain img{box-sizing:border-box;object-fit:contain;padding:12%}
 .dl-item:hover .dl-img--contain img{scale:1.03}
-@media (prefers-color-scheme:dark){html.has-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}}
+@media (prefers-color-scheme:dark){html.has-dark:not(.scheme-light) :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}}
+/* Hell/Dunkel-Schalter (design: dark_toggle): „Dunkel“ gewählt */
+html.has-dark.scheme-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}
+
 html.is-dark :is(.dl-img--contain,.df-img--contain){--tile:#F3F2EF}
 .dl-tools{display:grid;gap:var(--f-s-s);margin-bottom:var(--f-s-xl)}
 .dl-search__label{display:block;margin-bottom:.4rem;color:var(--f-ink);font-weight:650}

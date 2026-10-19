@@ -2291,6 +2291,11 @@
           "Sun",
           "sommer wetter hell"
         ],
+        "moon": [
+          "Mond",
+          "Moon",
+          "nacht dunkel abend dunkelmodus"
+        ],
         "cloud-sun": [
           "Wetter",
           "Weather",

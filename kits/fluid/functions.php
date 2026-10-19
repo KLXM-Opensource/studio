@@ -253,7 +253,7 @@ function fluid_nav_fit(array $menu, ?array $cta, array $langs, bool $search, str
     // Überstehendes Logo (quadratisch, hängt aus der Leiste): Breite ≈ Höhe
     if ($logo && design('logo_over')) $brand = ['large' => 6.5, 'xl' => 7.5][(string) design('logo_size')] ?? 5.5;
     // Aktionen rechts (Suche, Handlungsaufruf, Kontakt-Chip …) schätzt Core\HeaderActions je nach Einstellung
-    $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0);
+    $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0) + (fluid_scheme_toggle() ? 3.25 : 0);
     $gut = 2 * 2.4;                                                           // Seitenabstand bei ~60–80 rem
     $total = match ($variant) {
         'centered' => max($brand, $nav + $tools + 1.5) + $gut,
@@ -575,4 +575,10 @@ function fluid_title(string $text): string
 {
     // *Wort* → <em class="hl"> (Kern: emphasis_hl – ein Muster für alle Kits; Bearbeiten: Sternchen dezent sichtbar)
     return emphasis_hl($text);
+}
+
+/** Hell/Dunkel-Schalter im Kopf (Design „Hell/Dunkel-Schalter“, nur mit „Dunkles Farbschema“) – js/scheme.js im <head> */
+function fluid_scheme_toggle(): bool
+{
+    return (bool) design('dark_toggle') && (bool) design('dark');
 }

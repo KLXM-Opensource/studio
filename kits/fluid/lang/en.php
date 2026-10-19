@@ -579,4 +579,6 @@ return [
     'Parallax – Bild läuft beim Scrollen langsamer' => 'Parallax – image scrolls more slowly',
     'Langsamer Zoom' => 'Slow zoom',
     'Nur mit „Animationen“ und nie bei „Bewegung reduzieren“. Mit weiteren Bildern (Bilderfolge) blenden die Bilder nacheinander über.' => 'Only with “Animations” and never with “Reduce motion”. With more images (image sequence) the images cross-fade one after another.',
+    'Hell/Dunkel-Schalter im Kopfbereich' => 'Light/dark switch in the header',
+    'Besucher wechseln selbst zwischen heller und dunkler Darstellung (überstimmt die Geräte-Einstellung, merkt sich der Browser). Nur mit „Dunkles Farbschema“.' => 'Visitors switch between light and dark display themselves (overrides the device setting, remembered by the browser). Only with “Dark colour scheme”.',
 ];

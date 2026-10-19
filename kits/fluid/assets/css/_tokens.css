@@ -64,11 +64,17 @@
 .is-darkbase{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
 /* Dunkles Farbschema: nur Farbwerte wechseln (Standardwerte hier, eigene in der Design-Datei); Vorschau: css/preview.css */
 @media (prefers-color-scheme:dark){
-  html.has-dark{--f-b:#5EEAD4;--f-b-on:#062B27;--f-a:#A5B4FC;--f-a-strong:#C7D2FE;--f-a-on:#14123A;--f-a2:#3A3470;--f-ink:#F3F4F8;--f-text:#D2D5DE;--f-muted:#9EA3B2;--f-bg:#0B0C14;--f-surface:#141621;--f-line:#272B3A;--f-dark:#1A1D33;--f-c3:#FCD34D;--f-c4:#F9A8D4;--f-c5:#7DD3FC}
-  html.has-dark{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
-  html.has-dark .brand__logo--light{display:none}
-  html.has-dark .brand__logo--dark{display:block}
+  html.has-dark:not(.scheme-light){--f-b:#5EEAD4;--f-b-on:#062B27;--f-a:#A5B4FC;--f-a-strong:#C7D2FE;--f-a-on:#14123A;--f-a2:#3A3470;--f-ink:#F3F4F8;--f-text:#D2D5DE;--f-muted:#9EA3B2;--f-bg:#0B0C14;--f-surface:#141621;--f-line:#272B3A;--f-dark:#1A1D33;--f-c3:#FCD34D;--f-c4:#F9A8D4;--f-c5:#7DD3FC}
+  html.has-dark:not(.scheme-light){color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
+  html.has-dark:not(.scheme-light) .brand__logo--light{display:none}
+  html.has-dark:not(.scheme-light) .brand__logo--dark{display:block}
 }
+/* Hell/Dunkel-Schalter (design: dark_toggle): „Dunkel“ gewählt */
+html.has-dark.scheme-dark{--f-b:#5EEAD4;--f-b-on:#062B27;--f-a:#A5B4FC;--f-a-strong:#C7D2FE;--f-a-on:#14123A;--f-a2:#3A3470;--f-ink:#F3F4F8;--f-text:#D2D5DE;--f-muted:#9EA3B2;--f-bg:#0B0C14;--f-surface:#141621;--f-line:#272B3A;--f-dark:#1A1D33;--f-c3:#FCD34D;--f-c4:#F9A8D4;--f-c5:#7DD3FC}
+  html.has-dark.scheme-dark{color-scheme:dark;--f-sh1:rgb(0 0 0/.3);--f-sh2:rgb(0 0 0/.55)}
+  html.has-dark.scheme-dark .brand__logo--light{display:none}
+  html.has-dark.scheme-dark .brand__logo--dark{display:block}
+
 
 /* Kit-Vertrag (KLXM Studio 1.0): Grundwerte unter festen Namen – Kern-Bausteine und Erweiterungen lesen nur --kit-*,
    nie die Tokens des Kits. Jedes Element leitet sie aus seinen eigenen Tokens ab (:where(*) ohne Spezifität), damit sie

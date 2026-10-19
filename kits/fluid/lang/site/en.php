@@ -68,4 +68,6 @@ return [
     'Zurück' => 'Previous',
     'Unterseiten von {name}' => 'Subpages of {name}',
     'Nach oben' => 'Back to top',
+    'Dunkle Darstellung' => 'Dark display',
+    'Helle Darstellung' => 'Light display',
 ];

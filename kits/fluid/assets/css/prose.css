@@ -12,7 +12,10 @@
 :root{--rt-success:#1A7240;--rt-warning:#8A4B00;--rt-danger:#B42318}
 .bg-dark,.on-media,.sec--ov-dark,html.is-darkbase{--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
 .bg-accent{--rt-success:#D5F5E0;--rt-warning:#FFF1C2;--rt-danger:#FFE0DC}
-@media (prefers-color-scheme:dark){html.has-dark,html.has-dark :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}html.has-dark .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}}
+@media (prefers-color-scheme:dark){html.has-dark:not(.scheme-light),html.has-dark:not(.scheme-light) :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}html.has-dark:not(.scheme-light) .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}}
+/* Hell/Dunkel-Schalter (design: dark_toggle): „Dunkel“ gewählt */
+html.has-dark.scheme-dark,html.has-dark.scheme-dark :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}html.has-dark.scheme-dark .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}
+
 html.is-dark,html.is-dark :is(.bg-dark,.bg-tint){--rt-success:#6FD69A;--rt-warning:#F2C063;--rt-danger:#FF9A8F}
 :is(html.is-dark,html.is-darkbase) .bg-accent{--rt-success:currentColor;--rt-warning:currentColor;--rt-danger:currentColor}
 .t-lead{font-size:var(--f-t1);line-height:1.45;color:var(--f-ink)}

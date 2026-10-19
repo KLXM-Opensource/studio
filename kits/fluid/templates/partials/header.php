@@ -54,6 +54,7 @@ $hasSheet = $menu || $langs || $cta || $searchMenu !== '';
     <?php endif; ?>
     <div class="hdr__tools">
       <?= $actions ?>
+      <?php if (fluid_scheme_toggle()): ?><button type="button" class="scheme-btn" data-scheme-toggle aria-pressed="false" data-label-dark="<?= e(lt('Dunkle Darstellung')) ?>" data-label-light="<?= e(lt('Helle Darstellung')) ?>" aria-label="<?= e(lt('Dunkle Darstellung')) ?>"><?= icon('moon', ['class' => 'scheme-btn__moon']) ?><?= icon('sun', ['class' => 'scheme-btn__sun']) ?></button><?php endif; ?>
       <?php if ($hasSheet): ?>
       <button type="button" class="menu-btn" popovertarget="mnav" aria-controls="mnav" aria-haspopup="dialog">
         <span class="menu-btn__bars" aria-hidden="true"></span><span class="menu-btn__label"><?= e(lt('Menü')) ?></span>

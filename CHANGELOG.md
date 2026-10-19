@@ -82,6 +82,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Fließende Seitenwechsel wie im Kit „foto“:** Werk aus dem Raster wird zum Werk auf der Detailseite, Ausstellungsbild zur Ausstellung, Text (Menü, Künstlerliste, Buttons) gleitet zur Überschrift, zurück in umgekehrter Richtung (`js/vt.js` im Kopf, `js/site.js`).
 - **Werke filtern mit fließender Neuordnung:** bleibende Werke gleiten an ihren neuen Platz, andere blenden aus bzw. ein (`document.startViewTransition`).
 
+### Kit fluid: Hell/Dunkel-Schalter
+- Option **„Hell/Dunkel-Schalter im Kopfbereich“** (Standard aus, nur mit „Dunkles Farbschema“): Knopf mit Mond/Sonne, überstimmt die Geräte-Einstellung, gemerkt im Browser, ohne Aufblitzen beim Laden (`js/scheme.js` im `<head>`), weicher Farbwechsel beim Umschalten.
+- Kern: `Design::css()` kennt `dark.manual` (Klassen eines Schalters) und gibt die dunklen Werte zusätzlich darunter aus. Neues Symbol **„Mond“** (`moon`).
+- Menügröße „Kompakt“: kleinerer Abstand zwischen Logo, Menü und Werkzeugen.
+
 ### Kit fluid: Vereine und Verbände
 - **Kopf:** „Logo ragt unten aus dem Kopfbereich“ (quadratische Logos, Siegel), „Größe der Menüpunkte: Kompakt“ (die Platzschätzung `fluid_nav_fit()` berücksichtigt jetzt auch Versalien), „Markierung des aktiven Menüpunkts“ in Hervorhebungs- oder zweiter Markenfarbe. Im farbigen Kopf sind geöffnete/aktive Menüpunkte und der Handlungsaufruf wieder lesbar (vorher helle Fläche bzw. Akzent auf Akzent).
 - **Seitenwechsel „Fließend“** (View Transitions): Kartenbild gleitet zum Bild der Detailseite und zurück (`js/vt.js`, Option, Standard aus).

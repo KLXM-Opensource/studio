@@ -88,3 +88,14 @@
 .hdr .ha-center{margin-inline:auto}
 .hdr__below{width:min(100% - 2 * var(--f-gutter),var(--f-wrap));margin-inline:auto}
 @container hdr (max-width:48rem){.hdr .ha-search--inline,.hdr .ha-search--expand,.hdr .ha-center{display:none}.hdr .ha-search--fallback{display:flex}}
+
+/* Hell/Dunkel-Schalter (design: dark_toggle, js/scheme.js): Mond in heller, Sonne in dunkler Darstellung */
+.scheme-btn{display:inline-grid;place-items:center;flex:none;width:2.75rem;height:2.75rem;padding:0;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:none;color:var(--f-ink);cursor:pointer}
+.scheme-btn:hover{background:var(--f-surface)}
+.scheme-btn svg{width:1.2rem;height:1.2rem}
+.scheme-btn__sun{display:none}
+html.scheme-dark .scheme-btn__moon{display:none}html.scheme-dark .scheme-btn__sun{display:block}
+@media (prefers-color-scheme:dark){html.has-dark:not(.scheme-light) .scheme-btn__moon{display:none}html.has-dark:not(.scheme-light) .scheme-btn__sun{display:block}}
+html.scheme-light{color-scheme:light}
+/* Weicher Wechsel der Farben beim Umschalten (nur dann, nicht beim Laden) */
+@media (prefers-reduced-motion:no-preference){html.scheme-switching,html.scheme-switching *{transition:background-color .3s ease,color .3s ease,border-color .3s ease!important}}

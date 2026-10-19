@@ -55,6 +55,8 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?php endif; ?>
 <?php if ($toolbar): ?><link rel="stylesheet" href="<?= e(asset('css/editor.css')) ?>">
 <?php endif; ?>
+<?php if (!$editor && fluid_scheme_toggle()): ?><script src="<?= e(theme_asset('js/scheme.js')) ?>"></script><?php /* Hell/Dunkel vor dem ersten Zeichnen */ ?>
+<?php endif; ?>
 <?php if (!$editor && !is_editing() && design('transitions') === 'morph'): ?><script src="<?= e(theme_asset('js/vt.js')) ?>"></script><?php /* Seitenwechsel: pagereveal vor dem ersten Bild */ ?>
 <?php endif; ?>
 <?php if (!$editor): ?><script src="<?= e(theme_asset('js/site.js')) ?>" defer></script>
