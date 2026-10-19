@@ -229,3 +229,17 @@ html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
 .backnav-end{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;padding-block:var(--f-s-l) var(--f-s-xl);border-top:1px solid var(--f-line)}
 .backnav-end a{color:var(--f-link);font-weight:600;text-decoration:none}
 .backnav-end a:hover{text-decoration:underline}
+
+/* Link und Pfeil (nav_split = apart): Menüpunkt und Pfeil sichtbar als zwei Schaltflächen – feine Trennlinie, eigene
+   Hover-/Offen-Fläche je Teil, eigene Rundung; Pfeilfläche mind. 28 px breit (≥ 24 px Zielgröße, WCAG 2.5.8). Nur Leiste, nicht Menübaum */
+.ns-apart .hnav .hnav__item--split{gap:3px}
+.ns-apart .hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.6rem;border-radius:var(--f-r-s)}
+.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{position:relative;min-width:1.75rem;padding:0 .4rem;border-radius:var(--f-r-s)}
+.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle::before{content:"";position:absolute;inset-inline-start:-2px;top:50%;width:1px;height:1.15em;translate:0 -50%;background:currentColor;opacity:.35;pointer-events:none}
+.ns-apart.nl-pill .hnav .hnav__item--split>.hnav__link--top,.ns-apart.nl-pill .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{border-radius:999px}
+.ns-apart .hnav .hnav__item--split:hover>.hnav__link--top,.ns-apart .hnav .hnav__item--split:hover>.hnav__sub>.hnav__toggle,
+.ns-apart .hnav .hnav__item--split:has(>.hnav__sub[open])>.hnav__link--top{background:none}
+.ns-apart .hnav .hnav__item--split>.hnav__link.hnav__link--top:is(:hover,:focus-visible),.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__link.hnav__toggle:is(:hover,:focus-visible){background:var(--f-surface);color:var(--f-ink)}
+.ns-apart .hnav .hnav__item--split>.hnav__sub[open]>.hnav__toggle{background:var(--f-a-soft);color:var(--f-ink)}
+.ns-apart.nl-underline .hnav .hnav__item--split>.hnav__link.hnav__link--top:is(:hover,:focus-visible),.ns-apart.nl-underline .hnav .hnav__item--split>.hnav__sub>.hnav__link.hnav__toggle:is(:hover,:focus-visible),.ns-apart.nl-underline .hnav .hnav__item--split>.hnav__sub[open]>.hnav__toggle{background:none}
+.ns-apart .hdr--rail .hnav__item--split>.hnav__sub>.hnav__toggle::before{display:none}

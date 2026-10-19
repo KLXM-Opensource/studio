@@ -581,4 +581,8 @@ return [
     'Nur mit „Animationen“ und nie bei „Bewegung reduzieren“. Mit weiteren Bildern (Bilderfolge) blenden die Bilder nacheinander über.' => 'Only with “Animations” and never with “Reduce motion”. With more images (image sequence) the images cross-fade one after another.',
     'Hell/Dunkel-Schalter im Kopfbereich' => 'Light/dark switch in the header',
     'Besucher wechseln selbst zwischen heller und dunkler Darstellung (überstimmt die Geräte-Einstellung, merkt sich der Browser). Nur mit „Dunkles Farbschema“.' => 'Visitors switch between light and dark display themselves (overrides the device setting, remembered by the browser). Only with “Dark colour scheme”.',
+    'Link und Pfeil' => 'Link and arrow',
+    'Zusammen – eine gemeinsame Fläche' => 'Together – one shared area',
+    'Pfeil abgesetzt – Trennlinie, eigene Fläche für den Pfeil' => 'Separate arrow – divider line, own area for the arrow',
+    'Nur bei „Link + Pfeil“: zeigt, dass Menüpunkt und Pfeil zwei Schaltflächen sind (der Menüpunkt öffnet die Seite, der Pfeil die Unterseiten) – hilfreich vor allem im farbigen Kopf.' => 'Only with “Link + arrow”: shows that the menu item and the arrow are two separate buttons (the item opens the page, the arrow the subpages) – especially helpful in a coloured header.',
 ];
