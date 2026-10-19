@@ -231,11 +231,16 @@ html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
 .backnav-end a:hover{text-decoration:underline}
 
 /* Link und Pfeil (nav_split = apart): Menüpunkt und Pfeil sichtbar als zwei Schaltflächen – feine Trennlinie, eigene
-   Hover-/Offen-Fläche je Teil, eigene Rundung; Pfeilfläche mind. 28 px breit (≥ 24 px Zielgröße, WCAG 2.5.8). Nur Leiste, nicht Menübaum */
-.ns-apart .hnav .hnav__item--split{gap:3px}
-.ns-apart .hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.6rem;border-radius:var(--f-r-s)}
-.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{position:relative;min-width:1.75rem;padding:0 .4rem;border-radius:var(--f-r-s)}
-.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle::before{content:"";position:absolute;inset-inline-start:-2px;top:50%;width:1px;height:1.15em;translate:0 -50%;background:currentColor;opacity:.35;pointer-events:none}
+   Hover-/Offen-Fläche je Teil, eigene Rundung; Pfeilfläche mind. 24 px breit (Zielgröße, WCAG 2.5.8). Nur Leiste, nicht Menübaum.
+   Platz: kaum breiter als „Zusammen“ (Linie ohne eigene Lücke) – fluid_nav_fit() rechnet den Zuschlag ein */
+.ns-apart .hnav .hnav__item--split{gap:2px}
+.ns-apart .hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.35rem;border-radius:var(--f-r-s)}
+.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{position:relative;min-width:1.6rem;padding:0 .3rem;border-radius:var(--f-r-s)}
+.ns-apart .hnav .hnav__item--split>.hnav__sub>.hnav__toggle::before{content:"";position:absolute;inset-inline-start:-1px;top:50%;width:1px;height:1.15em;translate:0 -50%;background:currentColor;opacity:.35;pointer-events:none}
+.ns-apart.nz-compact .hnav .hnav__item--split{gap:0}
+.ns-apart.nz-compact .hnav .hnav__item--split>.hnav__link--top{padding-inline-end:.25rem}
+.ns-apart.nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{min-width:1.5rem;padding-inline:.15rem}
+.ns-apart.nz-compact .hnav .hnav__item--split>.hnav__sub>.hnav__toggle::before{inset-inline-start:0}
 .ns-apart.nl-pill .hnav .hnav__item--split>.hnav__link--top,.ns-apart.nl-pill .hnav .hnav__item--split>.hnav__sub>.hnav__toggle{border-radius:999px}
 .ns-apart .hnav .hnav__item--split:hover>.hnav__link--top,.ns-apart .hnav .hnav__item--split:hover>.hnav__sub>.hnav__toggle,
 .ns-apart .hnav .hnav__item--split:has(>.hnav__sub[open])>.hnav__link--top{background:none}

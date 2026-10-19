@@ -245,7 +245,9 @@ function fluid_nav_fit(array $menu, ?array $cta, array $langs, bool $search, str
     $caps = design('nav_style') === 'caps';
     $size = $caps ? .8125 * 1.3 : ($compact ? .8125 : .9375);
     $pad = $compact ? 1.0 : 1.5;
-    foreach ($menu as $m) $nav += $em((string) $m['label'], $size) + $pad + ($m['children'] ? ($split ? ($compact ? 1.4 : 1.75) : 1.05) : 0) + .25;
+    // „Pfeil abgesetzt“ (Design „Link und Pfeil“): etwas mehr Innenabstand am Menüpunkt und Lücke vor der Linie je Punkt mit Unterseiten
+    $apart = $split && design('nav_split') === 'apart' ? ($compact ? .1 : .35) : 0;
+    foreach ($menu as $m) $nav += $em((string) $m['label'], $size) + $pad + ($m['children'] ? ($split ? ($compact ? 1.4 : 1.75) + $apart : 1.05) : 0) + .25;
     $logo = (int) setting('logo');
     $brand = $logo ? 11.5 : 2.5 + .7 + $em(fluid_name(true), 1.125);
     // Größeres Logo bzw. größere Wortmarke (Design → „Größe von Logo bzw. Wortmarke“)
