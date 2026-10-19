@@ -6,7 +6,7 @@
   <table class="doc-table">
     <thead><tr><th>Aufgabe</th><th>Befehl</th><th>Standard</th></tr></thead>
     <tbody>
-      <tr><td>Suchindex abgleichen / neu aufbauen</td><td><code>search:index --all</code> / <code>--full</code></td><td>alle 15 Minuten / täglich 03:30</td></tr>
+      <tr><td>Suchindex abgleichen / neu aufbauen</td><td><code>search:index --all</code> / <code>--full</code></td><td>alle 15 Minuten / täglich 03:40 (wartet auf einen laufenden Abgleich)</td></tr>
       <tr><td>Aufbewahrungsfristen</td><td><code>inbox:purge --all</code></td><td>täglich 04:15</td></tr>
       <tr><td>Push-Benachrichtigungen</td><td><code>push:send --all</code></td><td>jede Minute</td></tr>
       <tr><td>KI-Aufträge (Transkription, Untertitel)</td><td><code>ai:jobs --all</code></td><td>alle 5 Minuten</td></tr>

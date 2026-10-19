@@ -241,14 +241,21 @@ final class Search
 
     /**
      * Abgleich ausführen, falls vorgemerkt (bzw. $force). Nur ein Prozess gleichzeitig (Sperrdatei).
+     * $wait: so viele Sekunden auf einen laufenden Abgleich warten (Konsole/Cron – z. B. „neu aufbauen“ trifft um
+     * Viertel nach auf „abgleichen“), sonst sofort aufgeben.
      * @return ?array Statistik oder null (gesperrt / nichts zu tun)
      */
-    public static function process(bool $force = false, bool $full = false, bool $vectors = true, float $budget = 0.0, ?\Closure $log = null): ?array
+    public static function process(bool $force = false, bool $full = false, bool $vectors = true, float $budget = 0.0, ?\Closure $log = null, int $wait = 0): ?array
     {
         $dir = self::dir();
         if (!is_dir($dir)) @mkdir($dir, 0775, true);
         $lock = @fopen($dir . '/.lock', 'c');
-        if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) return null;
+        if (!$lock) return null;
+        $until = time() + $wait;
+        while (!flock($lock, LOCK_EX | LOCK_NB)) {
+            if (time() >= $until) { fclose($lock); return null; }
+            usleep(500000);
+        }
         try {
             $dirty = self::isDirty();
             if ($dirty) @unlink($dir . '/dirty');

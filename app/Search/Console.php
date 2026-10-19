@@ -102,7 +102,7 @@ final class Console
             return 0;
         }
         if (!Search::enabled()) { echo "Suche ist auf dieser Website abgeschaltet (features: search).\n"; return 0; }
-        $s = Search::process(force: true, full: $full, vectors: $vectors, log: fn($m) => print($m . "\n"));
+        $s = Search::process(force: true, full: $full, vectors: $vectors, log: fn($m) => print($m . "\n"), wait: 300);
         if ($s === null) { fwrite(STDERR, "Abgleich läuft bereits (Sperre " . Search::dir() . "/.lock).\n"); return 1; }
         printf("Suchindex aktuell (%s): %d Dokumente, %d neu, %d geändert, %d entfernt%s – %.2f s\n", site()->key, $s['docs'], $s['added'], $s['updated'], $s['removed'],
             $vectors && Search::semanticActive() ? sprintf(', Vektoren: %d Dokumente/%d Abschnitte%s', $s['vectors'], $s['chunks'], $s['pending'] ? ", {$s['pending']} ausstehend" : '') : '', $s['seconds']);
