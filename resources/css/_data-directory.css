@@ -33,3 +33,10 @@
 .df-contact__addr{font-style:normal;line-height:1.6}
 .df-contact__list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
 .df-contact__list li{display:flex;align-items:center;gap:10px;overflow-wrap:anywhere}
+/* Profil: Kontakt-Knöpfe (E-Mail, Telefon, Website) und „Kontakt speichern“ (vCard) */
+.df-profile__acts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0;padding:0;list-style:none}
+.df-act{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid color-mix(in srgb,currentColor 22%,transparent);border-radius:999px;color:inherit;font-weight:600;font-size:.9rem;text-decoration:none;overflow-wrap:anywhere}
+.df-act:hover{background:color-mix(in srgb,currentColor 7%,transparent)}
+.df-act svg{flex:none;width:18px;height:18px}
+.df-act--vcard{border-color:transparent;background:var(--kit-accent,#0b6b3a);color:var(--kit-on-accent,#fff)}
+.df-act--vcard:hover{background:color-mix(in srgb,var(--kit-accent,#0b6b3a) 85%,#000)}

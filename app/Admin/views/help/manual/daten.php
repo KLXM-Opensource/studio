@@ -164,6 +164,15 @@
   </ol>
   <p><b>Direkt auf der Seite:</b> Auf der Detailseite wählen Sie in der Werkzeugleiste <b>Inhalt</b>. Dann arbeiten Sie mit den Blöcken des Eintrags wie im Seiten-Editor – „+ Block einfügen“, Text direkt tippen, Bilder tauschen, Blöcke verschieben; die Vorlage darüber und darunter ist nur Vorschau. <b>Speichern</b> schreibt in den Eintrag (bei veröffentlichten Einträgen sofort sichtbar, Versionen halten jeden Stand fest). Alternativ öffnet <b>Bearbeiten</b> an den Blöcken die Seitenleiste – nach dem Speichern zeigt die Seite die Änderung sofort. Inhalte der Blöcke sind in der Suche auffindbar, verwendete Bilder und Dateien zählen in der Mediathek. Blöcke gehören zum Kit: Nach einem Kit-Wechsel erscheinen nur Blöcke, die das neue Kit kennt.</p>
 
+  <h3 id="personen">Personen zentral pflegen und überall zeigen</h3>
+  <p>Legen Sie eine Tabelle für Personen an (Name, Foto, Funktion, E-Mail, Telefon, Profiltext …) und stellen Sie unter Einstellungen den <b>Schema-Typ „Person“</b> ein. Dann:</p>
+  <ul>
+    <li><b>Block „Personen“</b> auf einer Seite oder in den Inhaltsblöcken eines Eintrags (z. B. je Regionalgruppe): Personen über den Link-Auswähler wählen. Foto, Name, E-Mail und Telefon kommen aus der Tabelle – <b>Funktion, Text und Foto lassen sich an dieser Stelle überschreiben</b> (z. B. „Ansprechperson Regionalgruppe Münsterland“). Darstellung als Karten, Liste oder groß; ohne Foto erscheinen die Initialen.</li>
+    <li><b>Kontakt speichern:</b> Jede Person hat eine Visitenkarte (vCard mit Foto, Funktion, Telefon, E-Mail und Anschrift) – im Block und auf der Profilseite.</li>
+    <li><b>Profilseite:</b> Block „Datensatz-Felder“ in der Darstellung „Profil“ mit „Bild: Fläche füllen“ – E-Mail, Telefon und Website erscheinen dort als Knöpfe, dazu „Kontakt speichern“.</li>
+  </ul>
+  <p>Ändert sich etwas (neue Telefonnummer, anderes Foto), pflegen Sie es einmal in der Tabelle – alle Stellen zeigen es sofort.</p>
+
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>
 

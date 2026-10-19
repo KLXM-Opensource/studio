@@ -51,7 +51,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
     <?php endif; ?>
   </header>
 
-  <?php elseif ($layout === 'profile'): $img = null; $chips = $lead = []; $tone = fn(array $fd, string $k) => 'dl-tone-' . ((int) array_search($k, array_keys((array) ($fd['options'] ?? [])), true) % 5 + 1); ?>
+  <?php elseif ($layout === 'profile'): $img = null; $chips = $lead = $acts = []; $tone = fn(array $fd, string $k) => 'dl-tone-' . ((int) array_search($k, array_keys((array) ($fd['options'] ?? [])), true) % 5 + 1); ?>
   <?php foreach ($fields as $f) {
       $tp = $type($f);
       if ($tp === 'media') { $img ??= $f; continue; }
@@ -60,8 +60,18 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
           foreach (array_filter((array) ($e[$f] ?? []), fn($v) => $v !== '' && $v !== null) as $k) $chips[] = '<span class="dl-chip ' . $tone($fd, (string) $k) . '">' . e(Tables::optionLabel($fd, (string) $k)) . '</span>';
           continue;
       }
+      // Kontaktfelder als Knöpfe (E-Mail, Telefon, Website) statt als Fließtext
+      if (in_array($tp, ['email', 'tel', 'url'], true)) {
+          $v = trim((string) ($e[$f] ?? ''));
+          if ($v === '') continue;
+          $href = match ($tp) { 'email' => 'mailto:' . $v, 'tel' => (string) tel_href($v), default => $v };
+          if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
+          continue;
+      }
       if ($f !== '_title' && ($h = Entries::html($t, $e, $f)) !== '') $lead[] = [$f, $tp, $h];
-  } ?>
+  }
+  // Visitenkarte (Schema-Typ „Person“): „Kontakt speichern“ als vCard mit Foto
+  $vcf = ($d['vcard'] ?? true) !== false ? vcard_entry_url($t, $e) : null; ?>
   <header class="df-profile<?= $img ? ' df-profile--img' : '' ?>">
     <?php if ($img && ($pic = Entries::html($t, $e, $img, ['ratio' => $ratio, 'sizes' => '(min-width: 1080px) 320px, 50vw']))): ?>
     <div class="df-img<?= ($d['image_fit'] ?? '') === 'cover' ? '' : ' df-img--contain' ?> df-profile__img ratio-<?= e(str_replace(':', '-', $ratio)) ?>"<?= entry_edit_attr($t, $e, $img) ?>><?= $pic ?></div>
@@ -70,6 +80,12 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
       <?php if ($chips): ?><p class="dl-chips df-profile__chips"><?= implode(' ', $chips) ?></p><?php endif; ?>
       <?php if (in_array('_title', $fields, true)): $ea = entry_edit_attr($t, $e, '_title'); ?><h1 class="h2 df-title"><?= $ea !== '' ? '<span' . $ea . '>' . e(Entries::title($t, $e)) . '</span>' : e(Entries::title($t, $e)) ?></h1><?php endif; ?>
       <?php foreach ($lead as [$f, $tp, $h]): ?><?= $tp === 'richtext' ? '<div class="prose df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</div>' : '<p class="df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</p>' ?><?php endforeach; ?>
+      <?php if ($acts || $vcf): ?>
+      <ul class="df-profile__acts" role="list">
+        <?php foreach ($acts as [$href, $ico, $label]): ?><li><a class="df-act" href="<?= e($href) ?>"<?= str_starts_with($href, 'http') ? ' target="_blank" rel="noopener"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span></a></li><?php endforeach; ?>
+        <?php if ($vcf): ?><li><a class="df-act df-act--vcard" href="<?= e($vcf) ?>" download><?= icon('address-book') ?><span><?= e(lt('Kontakt speichern')) ?></span></a></li><?php endif; ?>
+      </ul>
+      <?php endif; ?>
     </div>
   </header>
 
@@ -86,6 +102,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
           if ($lines && preg_match('~^\d{4,5}$~', $lines[count($lines) - 1][1])) { $lines[count($lines) - 1][0] .= ' ' . $h; $lines[count($lines) - 1][1] = $plain . 'x'; continue; }
           $lines[] = [$h, $plain];
       } ?>
+  <?php if ($lines || $rows || $map !== '' || is_editing()): /* leere Kontaktkarte nicht zeigen */ ?>
   <div class="df-contact">
     <?php if ($lines): ?><address class="df-contact__addr"><?= implode('<br>', array_column($lines, 0)) ?></address><?php endif; ?>
     <?php if ($rows): ?><ul class="df-contact__list" role="list">
@@ -93,6 +110,7 @@ $ratio = (string) ($d['ratio'] ?? '16:9');
     </ul><?php endif; ?>
     <?php if ($map !== ''): ?><div class="df-contact__map"><?= $map ?></div><?php endif; ?>
   </div>
+  <?php endif; ?>
 
   <?php elseif ($layout === 'image'): foreach ($fields as $f): if ($type($f) !== 'media') continue; $pic = Entries::html($t, $e, $f, ['ratio' => $ratio, 'sizes' => '(min-width: 1280px) 1200px, 100vw']); ?>
     <?php if ($pic): ?><div class="df-img ratio-<?= e(str_replace(':', '-', $ratio)) ?>"><?= $pic ?></div><?php endif; break; endforeach; ?>

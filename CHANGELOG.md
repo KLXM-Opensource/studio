@@ -82,6 +82,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Fließende Seitenwechsel wie im Kit „foto“:** Werk aus dem Raster wird zum Werk auf der Detailseite, Ausstellungsbild zur Ausstellung, Text (Menü, Künstlerliste, Buttons) gleitet zur Überschrift, zurück in umgekehrter Richtung (`js/vt.js` im Kopf, `js/site.js`).
 - **Werke filtern mit fließender Neuordnung:** bleibende Werke gleiten an ihren neuen Platz, andere blenden aus bzw. ein (`document.startViewTransition`).
 
+### Personen zentral pflegen
+- Neuer Block **„Personen“**: ausgewählte Einträge einer Personen-Tabelle (Link-Auswähler), Funktion, Text und Foto je Stelle überschreibbar; Karten, Liste oder groß, Initialen ohne Foto, E-Mail, Telefon und „Kontakt speichern“. Auch in Inhaltsblöcken von Einträgen nutzbar.
+- **Profil** (Datensatz-Felder): E-Mail, Telefon und Website als Knöpfe, „Kontakt speichern“ (vCard); leere Kontaktkarten werden nicht mehr gezeigt.
+- **vCard** einer Person enthält jetzt auch die Anschrift (Straße, PLZ, Ort).
+
 ### Kit fluid: Hell/Dunkel-Schalter
 - Option **„Hell/Dunkel-Schalter im Kopfbereich“** (Standard aus, nur mit „Dunkles Farbschema“): Knopf mit Mond/Sonne, überstimmt die Geräte-Einstellung, gemerkt im Browser, ohne Aufblitzen beim Laden (`js/scheme.js` im `<head>`), weicher Farbwechsel beim Umschalten.
 - Kern: `Design::css()` kennt `dark.manual` (Klassen eines Schalters) und gibt die dunklen Werte zusätzlich darunter aus. Neues Symbol **„Mond“** (`moon`).

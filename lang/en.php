@@ -7831,4 +7831,5 @@ return [
     'Titel hat {n} Zeichen (Google zeigt etwa {max})' => 'Title has {n} characters (Google shows about {max})',
     'Titel hat {n} Zeichen (Google zeigt etwa {max}) – „Titel für Suchmaschinen“ in den Seiteneinstellungen setzen' => 'Title has {n} characters (Google shows about {max}) – set “Title for search engines” in the page settings',
     'Vorschaubild für Social Media ist gelöscht – in den Seiteneinstellungen neu wählen' => 'The social media preview image was deleted – choose a new one in the page settings',
+    'Noch keine Personen – Tabelle wählen und Personen hinzufügen.' => 'No people yet – choose a table and add people.',
 ];

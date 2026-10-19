@@ -160,6 +160,9 @@ final class VCard
             'tel' => $tel !== null ? (substr((string) tel_href((string) $tel), 4) ?: (string) $tel) : null,
             'email' => $find(['email']),
             'url' => Entries::absUrl($table, $e),
+            // Anschrift, wenn der Eintrag Felder dafür hat (Straße, PLZ, Ort)
+            'adr' => ($street = $find(['text'], ['strasse', 'straße', 'street', 'adresse'])) || $find(['text'], ['ort', 'city', 'stadt'])
+                ? [$street, $find(['text'], ['plz', 'zip', 'postleitzahl']), $find(['text'], ['ort', 'city', 'stadt']), null] : null,
             'photo' => $img !== '' && !empty($e[$img]) ? self::imageOf((int) $e[$img]) : null,
         ]);
     }
