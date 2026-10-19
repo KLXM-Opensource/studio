@@ -74,13 +74,17 @@ final class SelfTest
 
             // Fertige Mail (Ablage): Absender, Name, Antwortadresse, Kopfzeile vom Konto
             Mailer::$testDump = $dump;
-            $err = Mailer::send('QA Newsletter', 'Hallo', ['empfaenger@example.org'], ['purpose' => 'newsletter', 'headers' => ['List-Unsubscribe' => '<https://example.org/ab>', 'Bcc' => 'boese@example.org']]);
+            $err = Mailer::send('QA Newsletter', 'Hallo', ['empfaenger@example.org'], ['purpose' => 'newsletter', 'headers' => ['List-Unsubscribe' => '<https://example.org/ab>', 'Bcc' => 'boese@example.org'], 'return_path' => 'bounce+1.2.abc@example.org']);
             $eml = (string) @file_get_contents((glob($dump . '/*.eml') ?: [''])[0]);
             $eq('Versand über Konto „news“ ohne Fehler', [$err, Mailer::$account['id'] ?? null], [null, 'news']);
             $eq('Absender des Kontos', str_contains($eml, 'news@example.org') && str_contains($eml, 'Newsletter'), true);
             $eq('Antwortadresse des Kontos', str_contains($eml, 'Reply-To: antwort@example.org'), true);
             $eq('Kopfzeile List-Unsubscribe übernommen', str_contains($eml, 'List-Unsubscribe:'), true);
             $eq('Adressfelder über headers abgewiesen', str_contains($eml, 'boese@example.org'), false);
+            $eq('Hinweis bei abgelehnter Anmeldung', str_starts_with((string) Accounts::hint('Failed to authenticate on SMTP server with username "x": Expected response code "235" but got code "535"'), 'Anmeldung abgelehnt'), true);
+            $eq('Hinweis Microsoft 365 vor allgemeiner Anmeldung', str_starts_with((string) Accounts::hint('535 5.7.139 Authentication unsuccessful, SmtpClientAuthentication is disabled for the Tenant'), 'Microsoft 365'), true);
+            $eq('kein Hinweis bei unbekanntem Fehler', Accounts::hint('Irgendwas'), null);
+            $eq('Rücklaufadresse (return_path) gesetzt', str_contains($eml, 'Return-Path: <bounce+1.2.abc@example.org>'), true);
         } finally {
             Mailer::$testDump = null;
             foreach ($prev as $k => $v) $v === null ? $s->delete($k) : $s->set($k, $v);

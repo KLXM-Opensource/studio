@@ -266,6 +266,32 @@ final class Accounts
         }
     }
 
+    /**
+     * Verständlicher Hinweis zu einer Fehlermeldung des Versands (SMTP/Symfony Mailer) – Ursache und was zu tun ist.
+     * Nach dem Vorbild des REDAXO-AddOns FriendsOfREDAXO/symfony_mailer. null = kein bekanntes Muster.
+     */
+    public static function hint(string $error): ?string
+    {
+        $e = strtolower($error);
+        return match (true) {
+            str_contains($e, 'smtpclientauthentication') || str_contains($e, '5.7.139') || str_contains($e, 'basic authentication is disabled')
+                => __('Microsoft 365: Die SMTP-Anmeldung ist für dieses Postfach abgeschaltet. Im Microsoft-365-Admin-Center „Authentifiziertes SMTP“ für das Postfach einschalten oder einen Versanddienst nutzen.'),
+            str_contains($e, 'authentication failed') || str_contains($e, 'expected response code "235"') || str_contains($e, '535') || str_contains($e, 'username and password not accepted') || str_contains($e, 'invalid credentials')
+                => __('Anmeldung abgelehnt: Benutzername oder Passwort prüfen (oft die vollständige E-Mail-Adresse). Bei Google/Microsoft ggf. ein App-Passwort verwenden.'),
+            str_contains($e, 'starttls')
+                => __('Verschlüsselung passt nicht: bei Port 587 „TLS (STARTTLS)“, bei Port 465 „SSL“ wählen.'),
+            str_contains($e, 'certificate') || str_contains($e, 'ssl operation failed') || str_contains($e, 'peer') && str_contains($e, 'ssl')
+                => __('Zertifikat des Servers wird nicht anerkannt: Servernamen genau wie im Zertifikat eintragen (z. B. mail.anbieter.de statt der IP-Adresse).'),
+            str_contains($e, 'connection could not be established') || str_contains($e, 'connection refused') || str_contains($e, 'timed out') || str_contains($e, 'network is unreachable')
+                => __('Server nicht erreichbar: Servername und Port prüfen. Manche Hoster sperren ausgehende Verbindungen auf Port 25/465/587 – dann den Hoster fragen.'),
+            str_contains($e, 'relay access denied') || str_contains($e, 'relay not permitted') || str_contains($e, 'relaying denied')
+                => __('Weiterleitung verweigert: Der Server versendet nur nach Anmeldung oder nur für eigene Domains – Benutzer/Passwort eintragen bzw. Absender der eigenen Domain verwenden.'),
+            str_contains($e, 'sender address rejected') || str_contains($e, 'not owned by user') || str_contains($e, 'sender not allowed') || str_contains($e, 'send as')
+                => __('Absender abgelehnt: Der Server erlaubt nur die Adresse, mit der angemeldet wird (oder freigegebene Aliasse). Absender im Konto anpassen.'),
+            default => null,
+        };
+    }
+
     /** Anzeige ohne Geheimnisse (Verwaltung, Health) */
     public static function describe(array $a): string
     {

@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### E-Mail-Versand: Hinweise bei Fehlern, Rücklaufadresse, Stapelversand
+- Fehlgeschlagener Versand nennt die wahrscheinliche Ursache mit Abhilfe (Anmeldung, Microsoft 365 ohne SMTP-Anmeldung, STARTTLS/SSL, Zertifikat, Server nicht erreichbar, Relay, Absender) – auch beim Testversand der E-Mail-Konten (`Core\Mail\Accounts::hint`).
+- `Mailer::send`: Option `return_path` (Rücklaufadresse/Envelope-From, z. B. VERP einer Newsletter-Erweiterung) und `keep_alive` (eine Verbindung für einen ganzen Stapel, `Mailer::closeTransports()`).
+
 ### Geplante Aufgaben: Suchindex neu aufbauen
 - „Suchindex neu aufbauen“ scheiterte nachts mit „Abgleich läuft bereits“, weil er zur Viertelstunde gleichzeitig mit „Suchindex abgleichen“ startete. `search:index` wartet jetzt bis zu 5 Minuten auf einen laufenden Abgleich; der Neuaufbau läuft standardmäßig um 03:40.
 

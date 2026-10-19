@@ -37,6 +37,18 @@ final class Mailer
      */
     public static bool $delivered = false;
 
+    /** @var array<string, \Symfony\Component\Mailer\Transport\TransportInterface> offene Verbindungen (keep_alive) je Konto */
+    private static array $keep = [];
+
+    /** Offene Verbindungen (keep_alive) schließen – am Ende eines Stapels */
+    public static function closeTransports(): void
+    {
+        foreach (self::$keep as $t) {
+            if ($t instanceof \Symfony\Component\Mailer\Transport\Smtp\SmtpTransport) { try { $t->stop(); } catch (\Throwable) {} }
+        }
+        self::$keep = [];
+    }
+
     /** Nur Selbsttests (z. B. Core\Data\Delivery::selftest): wie config 'mail_dump', Ablage in diesen Ordner statt Versand */
     public static ?string $testDump = null;
 
@@ -52,6 +64,8 @@ final class Mailer
      *        inline: eingebettete Bilder, im HTML als „cid:{name}“ (z. B. App-Icon als Logo)
      *        attach: Anhänge aus dem Speicher (z. B. Termin als .ics, type text/calendar) – klein halten
      *        reply_to: Antwortadresse; message_id: eigene Message-ID (ohne < >), z. B. für das Zustellprotokoll
+     *        return_path: Rücklaufadresse (Return-Path/Envelope-From) – Newsletter-Erweiterungen mit eigener Bounce-Adresse (VERP)
+     *        keep_alive: Verbindung des Kontos für weitere Mails offen halten (Stapelversand im Cron, closeTransports() am Ende)
      *        smime: Zertifikat(e) der Empfänger (PEM) – die ganze Nachricht (Text, HTML, Anhänge) wird mit S/MIME verschlüsselt
      *               (openssl_pkcs7_encrypt über Symfony SMimeEncrypter, AES-256-CBC); unverschlüsselt bleiben nur Kopfzeilen wie der Betreff
      *        require_tls: SMTP nur mit TLS (siehe dsn())
@@ -128,7 +142,10 @@ final class Mailer
                 filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'website@example.com', $o + ['_account' => $acc]);
         }
         try {
-            $mailer = new SymfonyMailer(Mail\Accounts::transport($acc, !empty($o['require_tls'])));
+            $tk = $acc['id'] . '|' . (empty($o['require_tls']) ? 0 : 1);
+            $transport = !empty($o['keep_alive']) ? (self::$keep[$tk] ??= Mail\Accounts::transport($acc, !empty($o['require_tls'])))
+                : Mail\Accounts::transport($acc, !empty($o['require_tls']));
+            $mailer = new SymfonyMailer($transport);
             $mailer->send(self::build($from, $subject, $text, $to, $o + ['_account' => $acc]));
             $null = $acc['transport'] === 'null';
             self::$delivered = !$redirected && !$null;
@@ -136,7 +153,8 @@ final class Mailer
             return null;
         } catch (\Throwable $e) {
             error_log('[Mailer] ' . $e->getMessage());
-            return 'Versand fehlgeschlagen: ' . $e->getMessage();
+            $hint = Mail\Accounts::hint($e->getMessage());
+            return 'Versand fehlgeschlagen: ' . $e->getMessage() . ($hint !== null ? ' – ' . $hint : '');
         }
     }
 
@@ -167,6 +185,8 @@ final class Mailer
             if (is_string($hn) && preg_match('~^(List-[A-Za-z-]+|X-[A-Za-z0-9-]+|Precedence)$~', $hn) && is_scalar($hv)) $email->getHeaders()->addTextHeader($hn, (string) $hv);
         }
         if (!empty($o['message_id'])) $email->getHeaders()->addIdHeader('Message-ID', (string) $o['message_id']);
+        // Rücklaufadresse (VERP der Newsletter-Erweiterung): Symfony nimmt Return-Path als Envelope-From
+        if (!empty($o['return_path']) && filter_var((string) $o['return_path'], FILTER_VALIDATE_EMAIL)) $email->returnPath((string) $o['return_path']);
         if (!empty($o['smime'])) return self::encrypt($email, (string) $o['smime']);
         return $email;
     }
