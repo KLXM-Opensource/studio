@@ -585,4 +585,7 @@ return [
     'Zusammen – eine gemeinsame Fläche' => 'Together – one shared area',
     'Pfeil abgesetzt – Trennlinie, eigene Fläche für den Pfeil' => 'Separate arrow – divider line, own area for the arrow',
     'Nur bei „Link + Pfeil“: zeigt, dass Menüpunkt und Pfeil zwei Schaltflächen sind (der Menüpunkt öffnet die Seite, der Pfeil die Unterseiten) – hilfreich vor allem im farbigen Kopf.' => 'Only with “Link + arrow”: shows that the menu item and the arrow are two separate buttons (the item opens the page, the arrow the subpages) – especially helpful in a coloured header.',
+    'Pfeil im Menü' => 'Arrow in the menu',
+    'Dreht sich beim Öffnen' => 'Rotates when opening',
+    'Zoomt leicht beim Zeigen und Öffnen (dreht sich nicht)' => 'Zooms slightly on hover and open (does not rotate)',
 ];

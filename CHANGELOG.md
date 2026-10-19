@@ -7,7 +7,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Kit fluid: Pfeil im Menü abgesetzt
-- Neue Design-Option „Link und Pfeil“: „Pfeil abgesetzt“ trennt bei „Link + Pfeil“ den Menüpunkt und den Pfeil sichtbar – feine Trennlinie, eigene Fläche beim Zeigen und für offene Unterseiten, Pfeilfläche mindestens 28 px (Zielgröße ≥ 24 px). Auch im farbigen Kopf, im Dunkelmodus, mit Pillen- und Unterstrich-Stil. Standard „Zusammen“ wie bisher. Der Pfeil dreht sich dabei nicht, sondern zoomt leicht beim Zeigen und im offenen Zustand.
+- Neue Design-Option „Link und Pfeil“: „Pfeil abgesetzt“ trennt bei „Link + Pfeil“ den Menüpunkt und den Pfeil sichtbar – feine Trennlinie, eigene Fläche beim Zeigen und für offene Unterseiten, Pfeilfläche mindestens 28 px (Zielgröße ≥ 24 px). Auch im farbigen Kopf, im Dunkelmodus, mit Pillen- und Unterstrich-Stil. Standard „Zusammen“ wie bisher. Dazu Option „Pfeil im Menü“: dreht sich (Standard) oder zoomt leicht beim Zeigen und Öffnen.
 
 ### Sicherheit vor dem Start
 - **Funktionen & Erweiterungen einschalten mit Passkey:** Die Sicherheitsbestätigung (z. B. PDF-Engine, API, KI) nimmt jetzt auch den Passkey an; nach einer Anmeldung oder Bestätigung in den letzten 15 Minuten genügt der Hinweis. Vorher konnten Konten ohne Passwort (nur Passkey) sicherheitsrelevante Schalter gar nicht einschalten.
