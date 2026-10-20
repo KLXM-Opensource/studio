@@ -9,8 +9,9 @@
 @media (min-width:960px){
   .site-header--masthead .brand--mini{display:none}
   .site-header--masthead .site-header__inner{min-height:52px}
-  .site-header--masthead .site-nav{flex:1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
-  .site-header--masthead .nav{grid-column:2;flex-wrap:wrap;justify-content:center}
+  /* Rechts (Suche, Knopf) mindestens so breit wie der Inhalt – sonst lief das Suchfeld über die Rubriken; die Rubriken brechen um */
+  .site-header--masthead .site-nav{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto) minmax(max-content,1fr);column-gap:16px}
+  .site-header--masthead .nav{grid-column:2;flex-wrap:wrap;justify-content:center;min-width:0}
   .site-header--masthead .site-nav__end{grid-column:3;justify-self:end}
   .site-header--masthead .nav__link{padding:0 14px;font-size:.8125rem;letter-spacing:.09em;text-transform:uppercase}
 }

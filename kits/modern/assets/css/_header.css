@@ -21,12 +21,14 @@
 @supports (animation-timeline:scroll()){.nav-sticky .hdr:not(.hdr--modern){animation:m-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}.nav-sticky .hdr--modern .hdr__bar{animation:m-hdr linear both;animation-timeline:scroll();animation-range:0 6rem}}
 @keyframes m-hdr{to{box-shadow:0 12px 32px -20px var(--m-sh2)}}
 
-/* Marke: Monogramm-Quadrat mit Blockfarben-Ecke */
+/* Marke: Monogramm-Quadrat mit Blockfarben-Ecke – darf schrumpfen, damit die Knöpfe rechts sichtbar bleiben */
+.hdr__brand,.brand{min-width:0}
 .brand{display:inline-flex;align-items:center;gap:.65rem;min-height:2.75rem;color:var(--m-ink);text-decoration:none}
 .brand__mark{position:relative;display:grid;place-items:center;flex:none;width:2.25rem;height:2.25rem;border-radius:8px;background:var(--m-ink);color:var(--m-bg);font:700 1.1rem/1 var(--m-font-head);letter-spacing:-.04em;overflow:hidden}
 .brand__mark::after{content:"";position:absolute;right:0;bottom:0;width:.7rem;height:.7rem;border-top-left-radius:4px;background:var(--m-a2)}
 .brand__name{font:700 1.125rem/1.1 var(--m-font-head);letter-spacing:-.03em;white-space:nowrap}
-.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+.brand__logo{display:block;min-width:0;max-width:100%}   /* breite Logos schrumpfen statt über Knöpfe zu ragen (wie fluid) */
+.brand__logo img{width:auto;max-width:min(100%,13rem);height:2.5rem;object-fit:contain;object-position:left center}
 .brand__logo--dark{display:none}
 @media (max-width:22em){.brand__name{font-size:1rem}}
 

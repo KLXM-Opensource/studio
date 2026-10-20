@@ -38,7 +38,8 @@
 .brand__mark{position:relative;display:block;flex:none;width:1.875rem;height:1.875rem;border-radius:0 72% 0 72%;background:var(--n-a);rotate:-6deg}
 .brand__mark::after{content:"";position:absolute;left:18%;top:50%;width:82%;height:1.5px;border-radius:1px;background:color-mix(in srgb,var(--n-bg) 75%,transparent);rotate:-45deg;transform-origin:0 50%;translate:0 .45rem}
 .brand__name{font:var(--n-hw) 1.1875rem/1.1 var(--n-font-head);font-variation-settings:"SOFT" var(--n-soft),"WONK" 0;letter-spacing:-.01em;white-space:nowrap}
-.brand__logo img{width:auto;max-width:13rem;height:2.5rem;object-fit:contain;object-position:left center}
+.brand__logo{display:block;min-width:0;max-width:100%}   /* breite Logos schrumpfen statt über Knöpfe zu ragen (wie fluid) */
+.brand__logo img{width:auto;max-width:min(100%,13rem);height:2.5rem;object-fit:contain;object-position:left center}
 .brand__logo--dark{display:none}
 
 /* Menü in der Leiste (Aufklappmenüs mit <details>) */

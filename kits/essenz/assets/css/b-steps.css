@@ -8,7 +8,7 @@
 .st__item:first-child .st__n{color:var(--e-a-on)}
 .bg-accent .st__item:first-child .st__n{color:var(--e-a)}
 /* Schritte: Schiene hinter den Knoten */
-.st--steps{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:var(--e-s-l) var(--e-s-m)}
+.st--steps{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:var(--e-s-l) var(--e-s-m);overflow-x:clip}   /* Verbindungslinie reicht in den Abstand – am Blockrand abschneiden (Handy: eine Spalte) */
 .st--steps .st__item{position:relative;display:grid;align-content:start;gap:var(--e-s-s)}
 .st--steps .st__item::before{content:"";position:absolute;top:calc(1.375rem - 2px);left:0;right:calc(-1 * var(--e-s-m));height:4px;border-radius:2px;background:var(--e-surface-2);box-shadow:var(--e-well)}
 .st--steps .st__item:last-child::before{right:0}
