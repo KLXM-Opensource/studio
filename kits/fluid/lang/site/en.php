@@ -70,4 +70,13 @@ return [
     'Nach oben' => 'Back to top',
     'Dunkle Darstellung' => 'Dark display',
     'Helle Darstellung' => 'Light display',
+    // Downloads (Variante „Liste“): Suche, Liste/Kacheln, Schlagworte
+    'Darstellung' => 'View',
+    'Downloads durchsuchen' => 'Search downloads',
+    'Downloads durchsuchen …' => 'Search downloads …',
+    'Kacheln' => 'Tiles',
+    'Liste' => 'List',
+    'Keine Datei gefunden.' => 'No file found.',
+    'Nach Schlagwort filtern' => 'Filter by tag',
+    '{n} von {total} Dateien' => '{n} of {total} files',
 ];

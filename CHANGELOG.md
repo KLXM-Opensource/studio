@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Downloads mit Vorschau, Suche, Kacheln und Schlagworten
+- Variante „Liste“: kleines Vorschaubild je Datei (Bild, erste PDF-Seite, Videobild – sonst Symbol je Dateityp), Werkzeugleiste ab drei Dateien mit Suche (alle Wörter, ohne Akzente, Escape leert) und Umschalter Liste/Kacheln (Wahl bleibt im Browser, weicher Wechsel ohne reduzierte Bewegung), Trefferzahl für Screenreader. Neue Felder: Darstellung zu Beginn, Werkzeugleiste an/aus.
+- Optional **Filter nach Schlagworten** der Mediathek (mehrere wählbar, kombiniert mit der Suche; nur ab zwei verschiedenen, wahlweise nur bestimmte Schlagworte) und **„Nur Dateien mit Schlagworten“** für beide Varianten.
+
 ### Kits: Vererbung
 - **Kind-Kits:** `theme.php` → `'extends' => 'fluid'` – fehlende Blöcke, Vorlagen, Fragmente, Sprachtexte und Assets kommen vom Eltern-Kit, die Definition wird zusammengeführt (`null` nimmt einen geerbten Block heraus), Kit-Funktionen (`{kit}_html_class`, `_title`, `_link`) und Kit-Klassen der Kern-Blöcke gelten für die ganze Kette, `'design_defaults'` ändert Standardwerte des geerbten Designs. Neues Kind-Kit: `kit:create meinkit --extends=fluid`. Unabhängig vom CSS: ein Kind-Kit kann eigenes CSS oder ein Framework (Tailwind, UIkit, Bootstrap) mitbringen. `kit:check` meldet fehlende Eltern und Schleifen; Selbsttest `kits:selftest`.
 - **`kit:test`:** prüft ein Kit im Browser – jeder Block der Website in jeder Variante und auf jedem Hintergrund, hell/dunkel, Desktop/Telefon: Kontraste (4,5:1 bzw. 3:1), Überlauf, Konsolenfehler; Bericht mit Bildern in `storage/kit-test/{kit}/`.

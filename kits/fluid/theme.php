@@ -133,6 +133,7 @@ return [
         'css/b-contact.css' => ['contact', 'map'],
         'css/b-video.css' => ['video'],
         'css/b-downloads.css' => ['downloads'],
+        'js/downloads.js' => ['downloads'],   // Suche, Kacheln, Schlagworte (Variante „Liste“)
         'css/dataform.css' => ['contact'],
         'js/tabs.js' => ['tabs'],
         'js/reel.js' => ['quote', 'cards'],
@@ -553,7 +554,7 @@ return [
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
-            'variants' => ['cards' => 'Karten – Typ-Etikett, „Ansehen“ und Herunterladen', 'list' => 'Liste – die ganze Zeile öffnet die Datei, Symbol statt Etikett'],
+            'variants' => ['cards' => 'Karten – Typ-Etikett, „Ansehen“ und Herunterladen', 'list' => 'Liste – die ganze Zeile öffnet die Datei, Vorschaubild, umschaltbar auf Kacheln, mit Suche'],
             'fields' => [
                 ...$head(),
                 ['name' => 'source', 'label' => 'Quelle', 'type' => 'select', 'required' => true, 'default' => 'manual', 'width' => 'half',
@@ -564,6 +565,16 @@ return [
                     ['name' => 'file', 'label' => 'Datei', 'type' => 'file', 'width' => 'half'],
                     ['name' => 'note', 'label' => 'Hinweis (optional)', 'type' => 'text'],
                 ]],
+                ['name' => 'tags', 'label' => 'Nur Dateien mit Schlagworten (optional)', 'type' => 'text', 'max' => 200, 'placeholder' => 'z. B. satzung, protokoll',
+                    'help' => 'Schlagworte der Mediathek, mit Komma getrennt – gezeigt werden Dateien mit mindestens einem davon. Leer = alle.'],
+                ['name' => 'view', 'label' => 'Darstellung zu Beginn', 'type' => 'select', 'default' => 'list', 'width' => 'half', 'variants' => ['list'],
+                    'options' => ['list' => 'Liste mit Vorschaubildern', 'tiles' => 'Kacheln mit großer Vorschau']],
+                ['name' => 'tools', 'label' => 'Suche und Umschalter Liste/Kacheln (ab drei Dateien)', 'type' => 'bool', 'default' => true, 'width' => 'half', 'variants' => ['list'],
+                    'help' => 'Besucher filtern beim Tippen und wählen die Darstellung selbst; die Wahl merkt sich der Browser.'],
+                ['name' => 'tag_filter', 'label' => 'Filter nach Schlagworten anbieten', 'type' => 'bool', 'default' => false, 'variants' => ['list'],
+                    'help' => 'Schaltflächen aus den Schlagworten der gezeigten Dateien (Mediathek) – erscheinen ab zwei verschiedenen; mehrere wählbar, kombiniert mit der Suche.'],
+                ['name' => 'filter_tags', 'label' => 'Nur diese Schlagworte als Filter (optional)', 'type' => 'text', 'max' => 200, 'variants' => ['list'], 'placeholder' => 'z. B. satzung, protokoll, formular',
+                    'help' => 'Mit Komma getrennt, in dieser Reihenfolge. Leer = alle Schlagworte der gezeigten Dateien – auch interne der Mediathek.'],
             ],
         ],
         'map' => [
