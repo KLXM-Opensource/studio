@@ -7960,4 +7960,5 @@ return [
     'je {n} behalten' => 'keep {n} each',
     'z. B. Nextcloud Büro' => 'e.g. Office Nextcloud',
     'Ältere Sicherungen löscht die Sicherung am Ziel selbst – andere Dateien im Ordner nie.' => 'Older backups are deleted at the target by the backup itself – never other files in the folder.',
+    'oder mit E-Mail und Passwort' => 'or with email and password',
 ];

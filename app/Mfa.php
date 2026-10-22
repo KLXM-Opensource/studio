@@ -170,8 +170,7 @@ final class Mfa
         $have = array_keys(array_filter(['passkey' => $f['here'] > 0, 'totp' => $f['totp']]));
         $ok = array_values(array_filter($have, fn($m) => $pol[$m]));
         $list = $ok ?: $have;
-        if (($row['mfa_last'] ?? '') === 'totp' && count($list) === 2) $list = ['totp', 'passkey'];
-        return $list;
+        return $list;   // Passkey immer zuerst (App-Code darunter als „Stattdessen …“)
     }
 
     public static function remember(Database $db, int $uid, string $method): void

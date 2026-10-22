@@ -102,9 +102,10 @@ body.auth-screen:has(.adm-env) .adm-main{min-height:calc(100vh - 26px);min-heigh
 .auth-forgot{font-size:13px;font-weight:600;color:var(--adm-a-ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .auth-screen .pk-or{margin:20px 0;color:var(--adm-ink)}
 .auth-screen .pk-or::before,.auth-screen .pk-or::after{background:color-mix(in srgb,var(--adm-ink) 18%,transparent)}
-/* Passkey: leiser Umriss – „Anmelden“ bleibt der Hauptknopf */
-.auth-screen [data-pk-login-btn]{background:transparent;border:1px solid color-mix(in srgb,var(--adm-ink) 22%,transparent);box-shadow:none}
-.auth-screen [data-pk-login-btn]:hover{border-color:color-mix(in srgb,var(--adm-ink) 45%,transparent)}
+/* Passkey zuerst: „Mit Passkey anmelden“ ist der Hauptknopf; sobald er sichtbar ist (passkey.js), tritt „Anmelden“ als Umriss zurück */
+.auth-screen .pk-login--first{margin:0 0 4px}
+.auth-screen form:has(.pk-login--first:not([hidden])) button[type=submit]{background:transparent;color:var(--adm-ink);border:1px solid color-mix(in srgb,var(--adm-ink) 22%,transparent);box-shadow:none}
+.auth-screen form:has(.pk-login--first:not([hidden])) button[type=submit]:hover{border-color:color-mix(in srgb,var(--adm-ink) 45%,transparent)}
 .auth-screen .adm-auth input{min-height:48px;font-size:16px}
 .auth-screen .adm-auth input:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
 

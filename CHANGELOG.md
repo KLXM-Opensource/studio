@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Anmeldung: Passkey zuerst
+- Auf dem Anmeldeschirm steht **„Mit Passkey anmelden“** jetzt oben als Hauptknopf, darunter „oder mit E-Mail und Passwort“ (nur wenn die Anmeldung mit Passkey eingeschaltet ist und der Browser sie unterstützt – sonst wie bisher). Beim zweiten Faktor wird der Passkey immer zuerst angeboten, der App-Code darunter.
+
 ### Sicherung außer Haus
 - **Optional, standardmäßig aus:** Grundeinstellungen → Sicherung außer Haus (nur wer die Installation verwaltet) bzw. `backup:offsite`. Die neuesten Sicherungen je Website, Pool und Tabelle und eine neue **Sicherung der Installation** gehen jede Nacht (03:30) verschlüsselt zu einem oder mehreren Zielen: **WebDAV** (Nextcloud, ownCloud, Storage-Box), **SFTP**, **FTPS**/FTP oder ein eingehängter Ordner. Am Ziel bleiben je Präfix die neuesten N; Verbindungstest beim Speichern, Stand und Warnung in `health` und der Übersicht.
 - **Sicherung der Installation** (`backup:install`, `Core\Backup\Installation`): Konfiguration (`config.local.php`, `config/sites`), Daten unter `storage/` ohne Caches/Logs/Sitzungen/Suchindex, eigene Kits und Erweiterungen (nicht aus dem Kern), `composer.json`/`.lock`, Manifest – **ohne den Kern**. Erweiterungen nehmen Abgeleitetes mit `Extension::backupSkip()` heraus.

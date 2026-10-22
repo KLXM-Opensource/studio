@@ -1,6 +1,6 @@
 <?php /** Handbuch · Kapitel „Anmelden & Konto“ (Variablen: siehe help/manual.php) */ ?>
   <ol class="doc-steps">
-    <li>Öffnen Sie <code><?= e(absolute_url('/admin')) ?></code> und melden Sie sich mit E-Mail-Adresse und Passwort an – bei eingerichteter Zwei-Faktor-Anmeldung danach mit dem 6-stelligen Code aus Ihrer App oder Ihrem Passkey. Mit Passkey geht es auch ohne Passwort („Mit Passkey anmelden“).</li>
+    <li>Öffnen Sie <code><?= e(absolute_url('/admin')) ?></code> und melden Sie sich an: Ist die Anmeldung mit Passkey eingeschaltet und Ihr Browser unterstützt sie, steht <b>Mit Passkey anmelden</b> oben – ganz ohne Passwort. Darunter geht es mit E-Mail-Adresse und Passwort, bei eingerichteter Zwei-Faktor-Anmeldung danach mit Ihrem Passkey (zuerst angeboten) oder dem 6-stelligen Code aus Ihrer App.</li>
     <li>Oben auf der Website erscheint nun eine dunkle <b>Redaktionsleiste</b> – nur für Sie sichtbar, nicht für Besucher.</li>
     <li>Unter <b>Konto</b> (links unten) ändern Sie Ihre <a href="#anmeldedaten">Anmeldedaten</a> (E-Mail-Adresse und Passwort – mindestens 12 Zeichen, am besten aus einem Passwortmanager), Ihren Namen, die Sprache der Verwaltung, Ihre Favoriten und die Zwei-Faktor-Anmeldung. Die Bereiche stehen links als Liste (<b>Profil</b>, <b>Anmeldung &amp; Sicherheit</b>, <b>Darstellung</b>, <b>Mitteilungen</b>, <b>Favoriten</b>), auf dem Handy als Auswahlfeld oben.</li>
   </ol>
