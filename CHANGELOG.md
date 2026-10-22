@@ -11,6 +11,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - „Inhaltsblöcke des Eintrags“ (`entry_blocks`) darf in einer Layout-Spalte stehen: die Blöcke des Eintrags erscheinen dort untereinander – z. B. Detailseite mit Seitenleiste.
 - Bedingtes CSS/JS zählt die Inhaltsblöcke des Eintrags mit (z. B. fehlte das CSS von „Bild + Text“ auf Detailseiten, wenn der Block nur im Eintrag vorkam).
 - „Kommende Termine“: Beschreibung nicht mehr doppelt maskiert („&amp;amp;“).
+- „Felder des Eintrags“ als Steckbrief ohne einen einzigen Wert gibt auf der Website nichts aus (vorher leerer Kasten, z. B. in einer Seitenleiste); im Editor bleibt der Block sichtbar.
 
 ### Sicherheit: Integritätsprüfung und Befunde der Sicherheitsprüfung
 - **Integrität** (`Core\Integrity`, Grundeinstellungen → Integrität, Aufgabe `integrity.check` stündlich): meldet unerwartete Dateien – geänderter Code, `.htaccess`/`.user.ini`/Konfiguration, ausführbare Dateien in `public/` und `storage/`, PHP-Code in Mediendateien – und Daten – Trigger/Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel, Skript-Code in Seiten und Einstellungen. Vergleich mit einem signierten, bestätigten Stand; neue Fehler per E-Mail; Health-Eintrag. Befehle `integrity:check`, `integrity:accept`, `integrity:selftest`.

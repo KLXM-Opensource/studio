@@ -34,6 +34,8 @@ if (!$fields) {
 $label = fn(string $f) => $f === '_title' ? lt('Titel') : ($f === '_when' ? lt('Termin') : ($f === 'published_at' ? lt('Veröffentlicht') : Tables::label(Tables::field($t, $f) ?? ['label' => $f])));
 $type = fn(string $f) => Tables::field($t, $f)['type'] ?? ($f === '_title' ? 'title' : 'date');
 $ratio = (string) ($d['ratio'] ?? '16:9');
+// Steckbrief ohne einen einzigen Wert: auf der Website nichts ausgeben – der Abschnitt entfällt (Theme/Layout überspringen leere Ausgabe)
+if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f === '_title' || Entries::html($t, $e, $f) !== '')) return;
 ?>
 <div class="<?= e($wrap) ?> df df--<?= e($layout) ?>">
   <?php if (!empty($d['back_label']) && !empty($d['back_link'])): ?><p class="df-back"><a href="<?= e(link_href((string) $d['back_link'])) ?>">← <?= e($d['back_label']) ?></a></p><?php endif; ?>
