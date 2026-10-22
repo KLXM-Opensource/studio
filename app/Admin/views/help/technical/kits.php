@@ -38,6 +38,14 @@
     <li><b>Kern-Fragmente</b> mit geändertem Original (wie <code>fragments:list</code>);</li>
     <li><b>Leistung</b> (<code>KitCheck::performance</code>): Hintergrundvideo (<code>preload="none"</code>) mit <code>poster</code>, obwohl kurz davor schon ein Standbild (<code>img()</code>, <code>picture()</code>, <code>pictureOf()</code>) steht – das Poster lädt dasselbe Bild ein zweites Mal; Einstieg (<code>blocks/hero*</code>, <code>stage*</code>, <code>*-hero</code>) mit fest <code>loading="lazy"</code>.</li>
   </ul>
+  <h3 id="kit-test">Im Browser prüfen – <code>kit:test</code></h3>
+  <p><code>php bin/console kit:test --site=key [--kit=name] [--types=hero,tabs] [--bg=accent,dark]</code> baut eine Testseite aus echten Blöcken der Website (je Blocktyp die erste Instanz auf einer veröffentlichten Seite) – jeder Block in jeder Variante des Kits und auf jedem Hintergrund (<code>backgrounds</code>) als eigener Abschnitt – und öffnet sie mit Playwright hell und dunkel, auf Desktop (1280 px) und Telefon (390 px), mit reduzierter Bewegung. Gemeldet werden:</p>
+  <ul>
+    <li><b>Kontrast</b> von sichtbarem Text auf einfarbigem Grund unter 4,5:1 (große Schrift unter 3:1); Text auf Bild oder Verlauf wird gezählt, aber nicht gemessen;</li>
+    <li><b>Überlauf</b>: Elemente ragen rechts aus dem Fenster (eigene Scroll-Bereiche wie Tabellen ausgenommen);</li>
+    <li>Fehler in der Konsole und fehlgeschlagene Anfragen.</li>
+  </ul>
+  <p>Bericht: <code>storage/kit-test/{kit}/report.html</code> (+ <code>report.json</code>) mit Bildern der betroffenen Abschnitte, Fund rot umrandet. Exit-Code 1 bei Funden – geeignet vor jedem Deploy eines Kits. Blocktypen des Kits ohne Beispiel auf der Website nennt der Befehl („nicht geprüft“). Geprüft wird nur das gerenderte Ergebnis, daher für jedes CSS gleich (eigenes, Tailwind, UIkit, Bootstrap). Der lokale Server muss laufen (<code>Core\KitTest</code>, <code>tools/kit-test.mjs</code>).</p>
   <h3 id="erster-block">Erster Block, Bild mit Vorrang und Seitenüberschrift</h3>
   <ul>
     <li><b><code>$b-&gt;isFirst()</code></b> – erster sichtbarer Block der Seite (für Besucher; im Bearbeiten-Modus nie). Sein erstes Bild ohne eigene <code>eager</code>-Angabe lädt der Kern sofort mit <code>fetchpriority="high"</code> (<code>Media::$autoEager</code>, gesetzt von <code>Theme::renderBlocks</code>). <code>'eager' =&gt; true</code> bzw. <code>false</code> in <code>img()</code>/<code>picture()</code>/<code>pictureOf()</code> gewinnt immer – z. B. mehrere Fassungen eines Einstiegs, von denen nur eine sichtbar ist: die sichtbare <code>true</code>, die übrigen ausdrücklich <code>false</code>.</li>

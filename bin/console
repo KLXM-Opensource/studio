@@ -65,6 +65,8 @@
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
  *   kit:create <name> --extends=fluid                 Kind-Kit anlegen: erbt alles, enthält nur theme.php (Vererbung)
+ *   kit:test [--kit=name] [--types=a,b] [--bg=a,b]    Kit im Browser prüfen: jeder Block der Website je Variante und Hintergrund,
+ *                                                     hell/dunkel, Desktop/Telefon – Kontrast, Überlauf, Konsole (Bericht in storage/kit-test/)
  *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung);
  *                                                     Verwaltungsrouten: Altform ohne Recht, Ausnahmen csrf/public
  *   extensions:selftest                               Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten nach Art, Werkzeuge
@@ -630,6 +632,26 @@ switch ($cmd) {
         exit($fail ? 1 : 0);
 
     case 'theme:create':
+    case 'kit:test':
+        // Testseite aus Beispielblöcken der Website (Core\KitTest) → tools/kit-test.mjs (Playwright) prüft im Browser; Server muss laufen
+        $kitName = Core\Cli::opt($args, 'kit') ?? app()->theme->name;
+        if (!Core\Kit::exists($kitName)) { fwrite(STDERR, "Kit „{$kitName}“ nicht gefunden.\n"); exit(1); }
+        app()->theme = new Core\Theme($kitName);
+        // Wie eine Anfrage an die Website rendern (absolute Adressen, z. B. Kartenstil, brauchen den Host)
+        $_SERVER['HTTP_HOST'] = (string) parse_url(absolute_url('/'), PHP_URL_HOST) . (($port = parse_url(absolute_url('/'), PHP_URL_PORT)) ? ':' . $port : '');
+        $_SERVER['HTTPS'] = str_starts_with(absolute_url('/'), 'https:') ? 'on' : '';
+        $split = fn(?string $v) => array_values(array_filter(array_map('trim', explode(',', (string) $v))));
+        $set = Core\KitTest::blocks(app()->theme, ['types' => $split(Core\Cli::opt($args, 'types')), 'bg' => $split(Core\Cli::opt($args, 'bg'))]);
+        if (!$set['blocks']) { fwrite(STDERR, "Keine Beispielblöcke: Die Website hat keine veröffentlichten Seiten mit Blöcken dieses Kits.\n"); exit(1); }
+        $dir = ROOT . '/storage/kit-test/' . $kitName;
+        @mkdir($dir, 0775, true);
+        file_put_contents("$dir/page.html", Core\KitTest::page($set['blocks']));
+        echo "Kit „{$kitName}“: " . count($set['blocks']) . " Abschnitte (Blöcke × Varianten × Hintergründe), Website " . absolute_url('/') . "\n";
+        if ($set['untested']) echo "  Ohne Beispiel auf der Website (nicht geprüft): " . implode(', ', $set['untested']) . "\n";
+        passthru('node ' . escapeshellarg(ROOT . '/tools/kit-test.mjs') . ' --page=' . escapeshellarg("$dir/page.html") . ' --base=' . escapeshellarg(absolute_url('/'))
+            . ' --out=' . escapeshellarg($dir) . ' --kit=' . escapeshellarg($kitName), $code);
+        exit($code);
+
     case 'kit:create':
         // kit:create <name> [--from=vorlage | --extends=eltern] – Standard: Kopie des Start-Kits „starter“; --extends legt ein Kind-Kit an
         // (alte Form theme:create <name> <vorlage> geht weiter)

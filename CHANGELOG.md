@@ -8,6 +8,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Kits: Vererbung
 - **Kind-Kits:** `theme.php` → `'extends' => 'fluid'` – fehlende Blöcke, Vorlagen, Fragmente, Sprachtexte und Assets kommen vom Eltern-Kit, die Definition wird zusammengeführt (`null` nimmt einen geerbten Block heraus), `'design_defaults'` ändert Standardwerte des geerbten Designs. Neues Kind-Kit: `kit:create meinkit --extends=fluid`. Unabhängig vom CSS: ein Kind-Kit kann eigenes CSS oder ein Framework (Tailwind, UIkit, Bootstrap) mitbringen. `kit:check` meldet fehlende Eltern und Schleifen; Selbsttest `kits:selftest`.
+- **`kit:test`:** prüft ein Kit im Browser – jeder Block der Website in jeder Variante und auf jedem Hintergrund, hell/dunkel, Desktop/Telefon: Kontraste (4,5:1 bzw. 3:1), Überlauf, Konsolenfehler; Bericht mit Bildern in `storage/kit-test/{kit}/`.
 
 ### Layout und Detailseiten
 - **Kits fluid, foto, galerie: farbige Abschnitte im Dunkelmodus** – neue Design-Option „Farbige Abschnitte im dunklen Farbschema“: „Dunkel getönt, helle Schrift“ (Standard; Akzent- bzw. Zweitfarbe zu 22 % auf der dunklen Seitenfläche, blendet nicht) oder „Kräftig wie im hellen Farbschema“ (bisherige Darstellung).
