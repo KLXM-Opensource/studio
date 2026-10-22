@@ -4,14 +4,14 @@
 
 /* Zweitfarbe (zweite Markenfarbe): Abschnitt „Zweitfarbe“ immer; dazu wahlweise Details (Symbole, Dachzeilen-Marke) und Buttons */
 .bg-secondary{--f-sec-bg:var(--f-b);--f-fg:var(--f-b-on);--f-muted:var(--f-b-on);--f-btn-ink:var(--f-b)}
-/* Dunkles Farbschema, Option „dark_sections“ = toned: Akzent-/Zweitfarben-Abschnitte als dunkel getönte Fläche mit heller Schrift
+/* Dunkles Farbschema (auch Editor-Vorschau is-dark), Option „dark_sections“ = toned (Standard bright = bisher): Akzent-/Zweitfarben-Abschnitte als dunkel getönte Fläche mit heller Schrift
    (blendet nicht); Schrift, Linien, Karten und Knöpfe folgen über --f-fg (_base.css) */
 @media (prefers-color-scheme:dark){
   html.has-dark.dsec-toned:not(.scheme-light) .bg-accent{--f-sec-bg:color-mix(in srgb,var(--f-a) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
   html.has-dark.dsec-toned:not(.scheme-light) .bg-secondary{--f-sec-bg:color-mix(in srgb,var(--f-b) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
 }
-html.has-dark.dsec-toned.scheme-dark .bg-accent{--f-sec-bg:color-mix(in srgb,var(--f-a) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
-html.has-dark.dsec-toned.scheme-dark html.has-dark.dsec-toned.scheme-dark .bg-secondary{--f-sec-bg:color-mix(in srgb,var(--f-b) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+html.has-dark.dsec-toned.scheme-dark .bg-accent,html.is-dark.dsec-toned .bg-accent{--f-sec-bg:color-mix(in srgb,var(--f-a) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+html.has-dark.dsec-toned.scheme-dark html.has-dark.dsec-toned.scheme-dark .bg-secondary,html.is-dark.dsec-toned .bg-secondary{--f-sec-bg:color-mix(in srgb,var(--f-b) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
 html:is(.sec2-details,.sec2-all){--f-ico-bg:color-mix(in srgb,var(--f-b) 16%,var(--f-bg));--f-ico:var(--f-b)}
 :is(.sec2-details,.sec2-all) .eyebrow::before{background:var(--f-b)}
 :is(.sec2-buttons,.sec2-all) .btn--secondary{background:var(--f-b);color:var(--f-b-on);border-color:var(--f-b)}
