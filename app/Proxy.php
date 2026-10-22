@@ -78,7 +78,7 @@ final class Proxy
     private static function origin(): string
     {
         $s = app()->request?->server ?? $_SERVER;
-        $https = ($s['HTTPS'] ?? '') === 'on' || ($s['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' || ($s['SERVER_PORT'] ?? '') === '443';
+        $https = (new Http\Request('GET', '/', [], [], [], $s))->isSecure();   // X-Forwarded-Proto nur von einem Proxy (Request::fromProxy)
         $host = (string) ($s['HTTP_HOST'] ?? '');
         if (!preg_match('~^[a-z0-9.-]+(:\d+)?$~i', $host)) {
             $host = (string) parse_url((string) setting('sys.site_url'), PHP_URL_HOST);

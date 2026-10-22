@@ -28,6 +28,11 @@ final class ApiTokenController extends AdminController
         if ($expires !== '' && !preg_match('~^\d{4}-\d{2}-\d{2}$~', $expires)) {
             $errors['expires'] = 'Ungültiges Datum.';
         }
+        // Die API kennt keine feineren Rollenrechte (Tabellen, Eingänge) – Tokens nur für Konten mit allen Rechten (Tokens::checkOwner)
+        $role = app()->auth->role();
+        if ($role !== null && !in_array('*', (array) $role['permissions'], true)) {
+            $errors['name'] = __('API-Tokens können nur Konten mit allen Rechten anlegen – die API prüft keine Einschränkungen auf einzelne Tabellen.');
+        }
         if ($errors) {
             return $this->index($r, null, $errors);
         }

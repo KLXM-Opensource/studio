@@ -7,7 +7,7 @@
 $f = \Core\Format::admin();
 $section = function (string $id, string $title, string $help, ?array $res, string $accept) use ($f): void {
     $err = $res ? count(array_filter($res['findings'], fn($x) => $x['level'] === 'error')) : 0;
-    $warn = $res ? count($res['findings']) - $err : 0;
+    $warn = $res ? count(array_filter($res['findings'], fn($x) => $x['level'] === 'warning')) : 0;
     ?>
 <section class="adm-card" aria-labelledby="ig-<?= e($id) ?>">
   <h2 id="ig-<?= e($id) ?>"><?= icon($err ? 'warning' : 'shield-check') ?> <?= e($title) ?>
@@ -20,7 +20,7 @@ $section = function (string $id, string $title, string $help, ?array $res, strin
   <?php if ($res['findings']): ?>
   <ul class="ig-list" role="list">
     <?php foreach (array_slice($res['findings'], 0, 200) as $x): ?>
-    <li class="ig-item ig-item--<?= e($x['level']) ?>"><span class="adm-badge<?= $x['level'] === 'error' ? ' adm-badge--warn' : ' adm-badge--muted' ?>"><?= e($x['level'] === 'error' ? __('Fehler') : __('Hinweis')) ?></span> <?= e($x['text']) ?></li>
+    <li class="ig-item ig-item--<?= e($x['level']) ?>"><span class="adm-badge<?= $x['level'] === 'error' ? ' adm-badge--warn' : ' adm-badge--muted' ?>"><?= e(['error' => __('Fehler'), 'warning' => __('Hinweis')][$x['level']] ?? __('Info')) ?></span> <?= e($x['text']) ?></li>
     <?php endforeach; ?>
   </ul>
   <?php if (count($res['findings']) > 200): ?><p class="adm-muted"><?= e(__('… und {n} weitere (Kommandozeile: integrity:check).', ['n' => count($res['findings']) - 200])) ?></p><?php endif; ?>

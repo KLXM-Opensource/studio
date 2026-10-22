@@ -149,7 +149,24 @@ final class Request
     {
         return ($this->server['HTTPS'] ?? '') === 'on'
             || ($this->server['SERVER_PORT'] ?? '') == 443
-            || ($this->server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+            || (($this->server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' && $this->fromProxy());
+    }
+
+    /**
+     * Kommt die Anfrage von einem vorgeschalteten Proxy? Nur dann zählt X-Forwarded-Proto – sonst könnte jeder Aufrufer „https“
+     * behaupten (Cookie-Flag Secure, erwarteter Ursprung bei Passkeys). Vertraut werden Proxys im eigenen Netz (Loopback, private
+     * Adressen) und die Adressen aus der Konfiguration 'trusted_proxies' => ['203.0.113.10', …].
+     */
+    public function fromProxy(): bool
+    {
+        $ip = (string) ($this->server['REMOTE_ADDR'] ?? '');
+        if ($ip === '') return false;
+        if (filter_var($ip, FILTER_VALIDATE_IP) && !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return true;
+        try {
+            return in_array($ip, array_map('strval', (array) (app()->config->get('trusted_proxies', []) ?? [])), true);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function isAdminPath(): bool

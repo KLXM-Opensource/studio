@@ -13,6 +13,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - API-Tokens: Freigabe-Modus ändern und Widerrufen nur für eigene Tokens (oder mit allen Rechten).
 - Zwei-Faktor: Fehlversuche zusätzlich je Konto begrenzt (lokale Konten); Passwortabfrage beim Abschalten und für neue Wiederherstellungscodes mit Begrenzung.
 - „Als Person arbeiten“: Funktionen und Chat gesperrt.
+- Formular-Uploads (Datentabellen) liegen nicht mehr öffentlich: geschützter Pool „Formular-Uploads“ je Website (`DataForms::uploadPool`), nur für die angemeldete Redaktion.
+- API-Tokens (lesend und schreibend) nur für Konten mit allen Rechten – die API kennt keine Einschränkung auf einzelne Tabellen.
+- `X-Forwarded-Proto` zählt nur von einem Proxy im eigenen Netz bzw. aus `trusted_proxies`.
+- Integrität: Erweiterungen, Kits und Composer-Abhängigkeiten mit neuer Version werden übernommen (nur Info), geänderter Code bei gleicher Version bleibt ein Fehler; Tabellen mit dem Namen einer aktiven Erweiterung als Präfix sind erwartet.
 - PDF-Ansicht `/pdf/{id}`: Uploads aus öffentlichen Formularen nur für die angemeldete Redaktion.
 - Proxy-Antworten mit abschottender CSP (`sandbox`); Erweiterungen können keine ausführbaren Endungen für Medientypen anmelden; CSV-Exporte entschärfen Formeln (`Response::csvCell`).
 

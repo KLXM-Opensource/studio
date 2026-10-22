@@ -8,6 +8,7 @@ use Core\Fields;
 use Core\Lang;
 use Core\Mailer;
 use Core\Media;
+use Core\MediaPools;
 use Core\Pages;
 use Core\SpamGuard;
 
@@ -742,12 +743,23 @@ final class DataForms
         if (self::full($t)) {
             return ['ok' => false, 'message' => lt('Die Anmeldung ist leider ausgebucht – es sind keine Plätze mehr frei.')];
         }
+        // Uploads von Besuchern nie in den öffentlichen Medienordner: geschützter Pool der Website (außerhalb von public/,
+        // nur für die angemeldete Redaktion, Core\Http\Controllers\ProtectedMediaController) – der Eintrag verweist auf die Medien-ID
+        $pool = $uploads ? self::uploadPool() : null;
         foreach ($uploads as $n => $file) {
-            [$m, $err] = Media::import($file['tmp_name'], (string) ($file['name'] ?? 'datei'), '', [
-                'require_alt' => false, 'tags' => 'formular', 'title' => mb_substr($t['singular'] . ': ' . basename((string) ($file['name'] ?? '')), 0, 180),
-            ]);
+            $m = null;
+            if ($pool !== null) {
+                Media::usePool($pool);
+                try {
+                    [$m] = Media::import($file['tmp_name'], (string) ($file['name'] ?? 'datei'), '', [
+                        'require_alt' => false, 'tags' => 'formular', 'title' => mb_substr($t['singular'] . ': ' . basename((string) ($file['name'] ?? '')), 0, 180),
+                    ]);
+                } finally {
+                    Media::usePool(null);
+                }
+            }
             if (!$m) return ['ok' => false, 'errors' => [$n => lt('Die Datei konnte nicht gespeichert werden.')], 'message' => lt('Bitte prüfen Sie die markierten Felder.')];
-            $values[$n] = (int) $m['id'];
+            $values[$n] = MediaPools::mirror($pool, (int) ($m['_pool_id'] ?? $m['id']));
         }
         $values['status'] = $s['status'] === 'published' ? 'published' : 'draft';
         if (Lang::multi()) $values['lang'] = Lang::current();
@@ -842,5 +854,24 @@ final class DataForms
         } finally {
             $z->close();
         }
+    }
+
+    /**
+     * Geschützter Pool für Uploads aus Formularen dieser Website („formular-{website}“) – beim ersten Upload angelegt.
+     * null, wenn er sich nicht anlegen lässt oder (Namensgleichheit) nicht geschützt ist: dann wird nichts gespeichert.
+     */
+    public static function uploadPool(): ?string
+    {
+        $key = substr('formular-' . trim((string) preg_replace('~[^a-z0-9-]+~', '-', strtolower(site()->key)), '-'), 0, 32);
+        try {
+            if (!is_file(MediaPools::dir($key) . '/pool.json')) {
+                MediaPools::create($key, 'Formular-Uploads (' . site()->key . ')', [site()->key], ['protected' => true, 'form_uploads' => true]);
+                MediaPools::forget();
+            }
+        } catch (\Throwable $e) {
+            error_log('[Formular] Pool für Uploads: ' . $e->getMessage());
+            return null;
+        }
+        return MediaPools::isProtected($key) && MediaPools::available($key) ? $key : null;
     }
 }

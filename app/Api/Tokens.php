@@ -103,8 +103,9 @@ final class Tokens
     }
 
     /**
-     * Das Konto hinter dem Token muss noch bestehen, darf nicht gesperrt sein und muss „API verwalten“ dürfen. Schreibende Tokens
-     * verlangen ein Konto mit allen Rechten: die API prüft keine feineren Rollenrechte (Tabellen, Einstellungen, Löschen).
+     * Das Konto hinter dem Token muss noch bestehen, darf nicht gesperrt sein und muss „API verwalten“ dürfen. Lesende wie
+     * schreibende Tokens verlangen ein Konto mit allen Rechten: die API prüft keine feineren Rollenrechte (Tabellen, Eingänge,
+     * Einstellungen) – ein auf einzelne Tabellen beschränktes Konto dürfte sonst über die API alles lesen.
      * Tokens ohne Konto (Kommandozeile) bleiben gültig.
      */
     private static function checkOwner(array $row): void
@@ -114,8 +115,8 @@ final class Tokens
         if (!$u || (int) ($u['disabled'] ?? 0)) throw new ApiError(401, 'API-Token ist ungültig: das Konto wurde gelöscht oder gesperrt.');
         $role = \Core\Permissions::role((string) $u['role']);
         if (!\Core\Permissions::allows($role, 'api.manage')) throw new ApiError(401, 'API-Token ist ungültig: das Konto darf die API nicht mehr verwalten.');
-        if ($row['scope'] === 'write' && !in_array('*', (array) ($role['permissions'] ?? []), true)) {
-            throw new ApiError(403, 'Schreibende API-Tokens setzen ein Konto mit allen Rechten (Administration) voraus.');
+        if (!in_array('*', (array) ($role['permissions'] ?? []), true)) {
+            throw new ApiError(403, 'API-Tokens setzen ein Konto mit allen Rechten (Administration) voraus.');
         }
     }
 

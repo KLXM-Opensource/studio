@@ -7889,4 +7889,11 @@ return [
     '{n} Dateien als bekannt übernommen.' => '{n} files accepted as known.',
     'Überwacht, was Angreifer typischerweise verändern: Code, .htaccess und Konfiguration, ausführbare Dateien in Medien- und Datenordnern, Trigger in der Datenbank, neue Administrator-Konten und Skript-Code in Inhalten. Die Prüfung läuft stündlich (Geplante Aufgaben).' => 'Watches what attackers typically change: code, .htaccess and configuration, executable files in media and data folders, triggers in the database, new administrator accounts and script code in content. The check runs hourly (Scheduled tasks).',
     '… und {n} weitere (Kommandozeile: integrity:check).' => '… and {n} more (command line: integrity:check).',
+    'API-Tokens können nur Konten mit allen Rechten anlegen – die API prüft keine Einschränkungen auf einzelne Tabellen.' => 'Only accounts with full rights can create API tokens – the API does not check restrictions to individual tables.',
+    'Abhängigkeiten (Composer)' => 'Dependencies (Composer)',
+    'Erweiterung „{name}“' => 'Extension “{name}”',
+    'Kit „{name}“' => 'Kit “{name}”',
+    '{name} entfernt – übernommen' => '{name} removed – accepted',
+    '{name} {new} neu – übernommen' => '{name} {new} new – accepted',
+    '{name}: {old} → {new} – übernommen' => '{name}: {old} → {new} – accepted',
 ];

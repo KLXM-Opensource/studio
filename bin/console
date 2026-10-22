@@ -781,7 +781,7 @@ switch ($cmd) {
         $quiet = Core\Cli::flag($args, 'quiet');
         $show = function (string $title, array $res) use ($quiet): int {
             $err = 0;
-            foreach ($res['findings'] as $f) { $err += $f['level'] === 'error' ? 1 : 0; if (!$quiet) echo ($f['level'] === 'error' ? '  ✗ ' : '  ! ') . $f['text'] . "\n"; }
+            foreach ($res['findings'] as $f) { $err += $f['level'] === 'error' ? 1 : 0; if (!$quiet) echo ($f['level'] === 'error' ? '  ✗ ' : ($f['level'] === 'info' ? '  · ' : '  ! ')) . $f['text'] . "\n"; }
             echo $title . ': ' . ($res['findings'] ? count($res['findings']) . ' Funde (' . $err . ' Fehler)' : 'nichts Unerwartetes') . "\n";
             return $err;
         };

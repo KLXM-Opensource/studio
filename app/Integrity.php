@@ -115,6 +115,40 @@ final class Integrity
         return $out;
     }
 
+    /**
+     * Pakete mit Version: Erweiterungen (extension.php), Kits (theme.php, auch hochgeladene unter storage/kits) und die
+     * Composer-Abhängigkeiten (Prüfsumme von composer.lock). Ändert sich die Version, ist die Änderung der Dateien gewollt
+     * (Update) und wird übernommen; geänderter Code bei gleicher Version bleibt ein Fehler.
+     * Version nur per Textsuche gelesen – fremder Code wird dafür nicht ausgeführt.
+     * @return array<string, string> Pfad-Präfix → Version
+     */
+    public static function packages(): array
+    {
+        $out = [];
+        $ver = function (string $file): ?string {
+            $head = (string) @file_get_contents($file, false, null, 0, 8192);
+            return preg_match("~['\"]version['\"]\s*=>\s*['\"]([^'\"]{1,40})['\"]~", $head, $m) ? $m[1] : null;
+        };
+        foreach (glob(ROOT . '/extensions/*/extension.php') ?: [] as $f) $out[self::rel(dirname($f)) . '/'] = $ver($f) ?? 'ohne Version';
+        foreach (array_merge(glob(ROOT . '/kits/*/theme.php') ?: [], glob(ROOT . '/storage/kits/*/theme.php') ?: []) as $f) $out[self::rel(dirname($f)) . '/'] = $ver($f) ?? 'ohne Version';
+        if (is_file(ROOT . '/composer.lock')) $out['vendor/'] = substr(hash_file('sha256', ROOT . '/composer.lock'), 0, 16);
+        ksort($out);
+        return $out;
+    }
+
+    /** Gehört der Pfad zum Paket? (vendor/ umfasst composer.json und composer.lock) */
+    private static function inPackage(string $path, string $prefix): bool
+    {
+        return str_starts_with($path, $prefix) || ($prefix === 'vendor/' && in_array($path, ['composer.json', 'composer.lock'], true));
+    }
+
+    private static function packageLabel(string $prefix): string
+    {
+        if ($prefix === 'vendor/') return __('Abhängigkeiten (Composer)');
+        $name = basename(rtrim($prefix, '/'));
+        return str_starts_with($prefix, 'extensions/') ? __('Erweiterung „{name}“', ['name' => $name]) : __('Kit „{name}“', ['name' => $name]);
+    }
+
     /** Rekursiv alle Dateien (Symlinks auf Ordner werden verfolgt, z. B. per Symlink eingebundene Erweiterungen) */
     private static function walk(string $dir, callable $fn): void
     {
@@ -191,6 +225,26 @@ final class Integrity
             $findings[] = ['level' => 'error', 'kind' => 'baseline', 'path' => '', 'text' => __('Der gespeicherte Vergleichsstand der Dateien wurde verändert (Signatur passt nicht).')];
         } else {
             $old = (array) ($base['files'] ?? []);
+            // Pakete mit neuer Version (Update, Installation, Entfernen): deren Dateien übernehmen – nur ein Info-Eintrag
+            $pkNow = self::packages();
+            $pkOld = isset($base['packages']) ? (array) $base['packages'] : null;
+            $changed = [];
+            if ($pkOld !== null) {
+                foreach (array_unique(array_merge(array_keys($pkNow), array_keys($pkOld))) as $pre) {
+                    if (($pkNow[$pre] ?? null) === ($pkOld[$pre] ?? null)) continue;
+                    $changed[] = $pre;
+                    $findings[] = ['level' => 'info', 'kind' => 'package', 'path' => $pre, 'text' => isset($pkOld[$pre], $pkNow[$pre])
+                        ? __('{name}: {old} → {new} – übernommen', ['name' => self::packageLabel($pre), 'old' => $pkOld[$pre], 'new' => $pkNow[$pre]])
+                        : (isset($pkNow[$pre]) ? __('{name} {new} neu – übernommen', ['name' => self::packageLabel($pre), 'new' => $pkNow[$pre]]) : __('{name} entfernt – übernommen', ['name' => self::packageLabel($pre)]))];
+                }
+            }
+            if ($changed || $pkOld === null) {
+                $in = fn(string $p) => (bool) array_filter($changed, fn($x) => self::inPackage($p, $x));
+                $old = array_filter($old, fn($p) => !$in((string) $p), ARRAY_FILTER_USE_KEY);
+                foreach ($now as $p => $h) if ($in($p)) $old[$p] = $h;
+                ksort($old);
+                self::saveBaseline($file, ['files' => $old, 'packages' => $pkNow] + $base, true);
+            }
             foreach ($now as $p => $h) {
                 if (!isset($old[$p])) $findings[] = self::fileFinding($p, 'added');
                 elseif ($old[$p] !== $h) $findings[] = self::fileFinding($p, 'changed');
@@ -218,7 +272,7 @@ final class Integrity
     public static function acceptFiles(string $by = ''): int
     {
         $files = self::scanFiles();
-        self::saveBaseline(self::dir() . '/files.json', ['time' => time(), 'by' => $by, 'core' => CMS_VERSION, 'files' => $files], true);
+        self::saveBaseline(self::dir() . '/files.json', ['time' => time(), 'by' => $by, 'core' => CMS_VERSION, 'files' => $files, 'packages' => self::packages()], true);
         self::checkFiles();
         return count($files);
     }
@@ -238,7 +292,7 @@ final class Integrity
             $files = array_filter((array) $base['files'], fn($p) => !$in((string) $p), ARRAY_FILTER_USE_KEY);
             foreach (self::scanFiles() as $p => $h) if ($in($p)) $files[$p] = $h;
             ksort($files);
-            self::saveBaseline($file, ['files' => $files, 'by' => $by ?: (string) ($base['by'] ?? '')] + $base, true);
+            self::saveBaseline($file, ['files' => $files, 'packages' => self::packages(), 'by' => $by ?: (string) ($base['by'] ?? '')] + $base, true);
         } catch (\Throwable $e) {
             error_log('[integrity] acceptPaths: ' . $e->getMessage());
         }
@@ -272,7 +326,12 @@ final class Integrity
     {
         $out = [];
         try { foreach (app()->db->fetchAll('SELECT handle FROM data_tables') as $t) $out[] = 'data_' . $t['handle']; } catch (\Throwable) { /* ohne Daten */ }
-        try { foreach (Extensions::active() as $x) foreach ($x->tableNames() as $n) $out[] = $n; } catch (\Throwable) { /* egal */ }
+        try {
+            foreach (Extensions::active() as $x) {
+                foreach ($x->tableNames() as $n) $out[] = $n;
+                $out[] = str_replace('-', '_', $x->name) . '_*';   // Konvention: Tabellen einer Erweiterung tragen ihren Namen als Präfix
+            }
+        } catch (\Throwable) { /* egal */ }
         return $out;
     }
 
@@ -309,7 +368,8 @@ final class Integrity
         } else {
             $known = array_merge((array) $base['tables'], self::expectedTables());
             foreach ($now['tables'] as $t) {
-                if (in_array($t, $known, true) || (str_starts_with($t, 'data_') && array_filter($known, fn($k) => str_starts_with($t, $k . '__')))) continue;
+                if (in_array($t, $known, true) || array_filter($known, fn($k) => (str_ends_with($k, '_*') && str_starts_with($t, substr($k, 0, -1)))
+                    || (str_starts_with($t, 'data_') && str_starts_with($t, $k . '__')))) continue;
                 $f[] = ['level' => 'warning', 'kind' => 'table', 'path' => 'table:' . $t, 'text' => __('Neue Tabelle: {name} (z. B. durch eine neue Erweiterung – sonst prüfen)', ['name' => $t])];
             }
             foreach ($now['objects'] as $k => $h) {
@@ -372,7 +432,7 @@ final class Integrity
             if ($r === null) { $out[$label . ': ' . __('noch nicht geprüft – System → Integrität')] = null; continue; }
             if ((int) $r['time'] < time() - 3 * 86400) { $out[$label . ': ' . __('letzte Prüfung älter als drei Tage')] = null; continue; }
             $err = count(array_filter($r['findings'], fn($x) => $x['level'] === 'error'));
-            $warn = count($r['findings']) - $err;
+            $warn = count(array_filter($r['findings'], fn($x) => $x['level'] === 'warning'));   // Info (übernommene Updates) zählt nicht
             $out[$label . ($err || $warn ? ': ' . __('{e} Fehler, {w} Hinweise – System → Integrität', ['e' => $err, 'w' => $warn]) : '')] = $err ? false : ($warn ? null : true);
         }
         return $out;
