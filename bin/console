@@ -137,6 +137,8 @@
  *   backup:fetch <datei> (--target=id|--url=…) [--key=] Sicherung vom Ziel holen und entschlüsseln (--list: Dateien am Ziel)
  *   backup:decrypt <datei.kbk> --key=kbk1.… [--out=]  Verschlüsselte Sicherung entschlüsseln (auch auf einer frischen Installation)
  *   backup:restore-install <datei> --force [--no-code]  Installations-Sicherung einspielen (Konfiguration, storage/, eigene Kits/Erweiterungen)
+ *   backup:restore-all (--target=id|--url=…) --key=kbk1.… --force [--date=JJJJMMTT] [--dry-run] [--no-code] [--no-index]
+ *                                                     Ernstfall: neueste Sicherungen vom Ziel holen, entschlüsseln und alles einspielen
  *   backup:key                                        Schlüssel der Sicherungen anzeigen (an einem anderen Ort aufbewahren!)
  *   backup:selftest                                   Selbsttest (Verschlüsselung, Auswahl der Dateien, Ziel „Ordner“)
  *
@@ -1173,6 +1175,25 @@ switch ($cmd) {
         echo "Eingespielt: {$r['files']} Dateien (Sicherung vom " . ($r['manifest']['created'] ?? '?') . ", Kern " . ($r['manifest']['core'] ?? '?') . ").\n"
            . "Weiter: je Website site:restore, pool:restore, shared:restore; Erweiterungen/Kits aus Composer laut manifest; dann migrate --all, search:index --all --full, integrity:accept --all.\n";
         break;
+
+    case 'backup:restore-all':
+        // Ernstfall: alles vom Ziel wiederherstellen (Core\Backup\Restore) – Installation, Websites, Pools, Tabellen, Abschluss
+        $t = ($id = Core\Cli::opt($args, 'target')) !== null ? (Core\Backup\Offsite::targets()[$id] ?? null) : null;
+        $tr = $t ? Core\Backup\Offsite::transport($t) : (Core\Cli::opt($args, 'url') !== null ? new Core\Backup\Transport(['url' => (string) Core\Cli::opt($args, 'url'),
+            'user' => (string) Core\Cli::opt($args, 'user'), 'pass' => (string) (Core\Cli::opt($args, 'pass') ?? getenv('KBK_PASS')), 'insecure' => in_array('--insecure', $args, true),
+            'key_file' => (string) Core\Cli::opt($args, 'key-file')]) : null);
+        $key = Core\Backup\Vault::import((string) (Core\Cli::opt($args, 'key') ?? (Core\Backup\Vault::hasKey() ? Core\Backup\Vault::export(Core\Backup\Vault::key()) : '')));
+        $dry = in_array('--dry-run', $args, true);
+        $until = (string) Core\Cli::opt($args, 'date');
+        if (!$tr || $key === null || (!$dry && !in_array('--force', $args, true)) || ($until !== '' && !preg_match('~^\d{8}$~', $until))) {
+            fwrite(STDERR, "Aufruf: backup:restore-all (--target=id | --url=… --user=… [--pass=…|KBK_PASS]) --key=kbk1.… --force [--date=JJJJMMTT] [--dry-run] [--no-code] [--no-index]\n"
+                . "  ÜBERSCHREIBT Konfiguration, Daten und Medien dieser Installation – für einen neuen, leeren Server gedacht.\n"); exit(1);
+        }
+        try {
+            $fails = Core\Backup\Restore::run($tr, $key, ['until' => $until, 'dry' => $dry, 'code' => !in_array('--no-code', $args, true), 'index' => !in_array('--no-index', $args, true)],
+                fn(string $s) => print("$s\n"));
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        exit($fails ? 1 : 0);
 
     case 'backup:key':
         if (!Core\Backup\Vault::hasKey()) { echo "Noch kein Schlüssel – er entsteht mit der ersten Sicherung außer Haus.\n"; break; }

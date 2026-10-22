@@ -88,6 +88,14 @@ final class SelfTest
             foreach (['default-20260101-020000.tar.gz', 'default-20260102-020000.tar.gz', 'pool-marke-20260101-022000.tar.gz', 'notiz.txt', 'install-20260102-033000.tar.gz'] as $f) touch("$tmp/b/$f");
             $eq('Neueste je Präfix', array_map('basename', Offsite::latestLocal("$tmp/b")),
                 ['default' => 'default-20260102-020000.tar.gz', 'install' => 'install-20260102-033000.tar.gz', 'pool-marke' => 'pool-marke-20260101-022000.tar.gz']);
+
+            // Ernstfall: Auswahl am Ziel (neueste je Präfix, bis zu einem Datum; fremde Dateien ignoriert)
+            $remote = ['default-20261020-020000.tar.gz.kbk', 'default-20261022-020000.tar.gz.kbk', 'install-20261021-033000.tar.gz.kbk',
+                'install-20261022-033000.tar.gz.kbk', 'pool-marke-20261022-022000.tar.gz.kbk', 'notizen.txt', 'default-20261022-020000.tar.gz'];
+            $eq('Wiederherstellen: neueste je Präfix', Restore::pick($remote),
+                ['default' => 'default-20261022-020000.tar.gz.kbk', 'install' => 'install-20261022-033000.tar.gz.kbk', 'pool-marke' => 'pool-marke-20261022-022000.tar.gz.kbk']);
+            $eq('Wiederherstellen: Stand bis zu einem Datum', Restore::pick($remote, '20261021'),
+                ['default' => 'default-20261020-020000.tar.gz.kbk', 'install' => 'install-20261021-033000.tar.gz.kbk']);
         } catch (\Throwable $e) {
             $fails[] = 'Ausnahme: ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine();
         } finally {

@@ -72,7 +72,8 @@ final class App
 
         // Erststart: Inhalte des Kits einspielen – sobald Kit und Startinhalte entschieden sind (Core\Onboarding;
         // sonst wählt die Administration beides im Willkommen-Bildschirm)
-        if (!$app->db->fetchValue('SELECT COUNT(*) FROM pages') && ($seedMode = Onboarding::mode($app)) !== null) {
+        // KLXM_NO_SEED: keine Startinhalte (z. B. backup:restore-all spielt gleich die gesicherte Datenbank ein)
+        if (!getenv('KLXM_NO_SEED') && !$app->db->fetchValue('SELECT COUNT(*) FROM pages') && ($seedMode = Onboarding::mode($app)) !== null) {
             (new Seeder($app))->run($seedMode);
         }
         // Datentabellen: neue Systemspalten (Mehrsprachigkeit) einmalig nachtragen
