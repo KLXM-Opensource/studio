@@ -7897,4 +7897,6 @@ return [
     '{name} {new} neu – übernommen' => '{name} {new} new – accepted',
     '{name}: {old} → {new} – übernommen' => '{name}: {old} → {new} – accepted',
     '„{file}“ wird auf der Website „{site}“ verwendet, die den Zielpool nicht nutzt – dort würde sie fehlen. Zuerst den Pool für diese Website freigeben.' => '“{file}” is used on the website “{site}”, which does not use the target pool – it would be missing there. Allow the pool for that website first.',
+    'Ausführbare Datei im Web-Ordner: {path}' => 'Executable file in the web folder: {path}',
+    'Programm „{name}“' => 'Application “{name}”',
 ];

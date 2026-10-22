@@ -12,8 +12,9 @@ namespace Core;
  *   - Prüfsummen der Dateien, die Angreifer bevorzugt verändern: public/index.php, PHP-Code von Kern, Kits und Erweiterungen,
  *     Autoloader (vendor/autoload.php, vendor/composer/), config/*.php, composer.json/.lock sowie jede .htaccess, .user.ini,
  *     php.ini, web.config und .env im Installations- und Web-Ordner. Neu oder geändert = Fehler (PHP, Serverkonfiguration) bzw. Hinweis.
- *   - Sperrzonen ohne Vergleichsstand: ausführbarer Code (.php, .phtml, .phar …) oder Serverkonfiguration in public/ (außer
- *     index.php und der SVG-Schutzdatei aus Svg::guard) und in storage/ (außer hochgeladenen Kits) ist immer ein Fehler.
+ *   - Sperrzonen ohne Vergleichsstand: ausführbarer Code (.php, .phtml, .phar …) in public/ (außer index.php und eigenständigen
+ *     Programmen wie Matomo, siehe apps()) und in storage/ (außer hochgeladenen Kits) ist immer ein Fehler. Serverkonfiguration
+ *     (.htaccess …) überwachen die Prüfsummen; die SVG-Schutzdatei aus Svg::guard ist bekannt.
  *   - Neue Dateien in den Medienordnern: PHP-Code im Inhalt (z. B. als Bild getarnt) ist ein Fehler.
  * Datenbank (je Website): Trigger und Views (beliebtes Versteck), unbekannte Tabellen, neue Administrator-Konten, neue
  * API-Schlüssel, Skript-Code in Seiteninhalten (der Editor speichert nie <script>, javascript: oder on…-Attribute).
@@ -108,9 +109,17 @@ final class Integrity
         }
         // Serverkonfiguration im Installationsordner (oberste Ebene) und im ganzen Web-Ordner
         foreach (self::CONFIG_NAMES as $n) if (is_file(ROOT . '/' . $n)) $out[$n] = hash_file('sha256', ROOT . '/' . $n);
-        self::walk(ROOT . '/public', function (string $f) use (&$out) {
-            if (in_array(basename($f), self::CONFIG_NAMES, true)) $out[self::rel($f)] = hash_file('sha256', $f);
+        $guard = Svg::guardContent();   // SVG-Schutz, den der Kern selbst in Medienordnern anlegt – bekannt, nie ein Fund
+        self::walk(ROOT . '/public', function (string $f) use (&$out, $guard) {
+            if (in_array(basename($f), self::CONFIG_NAMES, true) && @file_get_contents($f) !== $guard) $out[self::rel($f)] = hash_file('sha256', $f);
         });
+        // Eigenständige Programme im Web-Ordner (Matomo …): ihr Code, ohne Cache
+        foreach (array_keys(self::apps()) as $pre) {
+            self::walk(ROOT . '/' . rtrim($pre, '/'), function (string $f) use (&$out) {
+                $rel = self::rel($f);
+                if (!self::ignored($rel) && preg_match('~\.(php\d?|phtml|phar|inc)$~i', $f)) $out[$rel] = hash_file('sha256', $f);
+            });
+        }
         ksort($out);
         return $out;
     }
@@ -132,6 +141,7 @@ final class Integrity
         foreach (glob(ROOT . '/extensions/*/extension.php') ?: [] as $f) $out[self::rel(dirname($f)) . '/'] = $ver($f) ?? 'ohne Version';
         foreach (array_merge(glob(ROOT . '/kits/*/theme.php') ?: [], glob(ROOT . '/storage/kits/*/theme.php') ?: []) as $f) $out[self::rel(dirname($f)) . '/'] = $ver($f) ?? 'ohne Version';
         if (is_file(ROOT . '/composer.lock')) $out['vendor/'] = substr(hash_file('sha256', ROOT . '/composer.lock'), 0, 16);
+        foreach (self::apps() as $pre => $a) $out[$pre] = $a['version'];
         ksort($out);
         return $out;
     }
@@ -146,7 +156,43 @@ final class Integrity
     {
         if ($prefix === 'vendor/') return __('Abhängigkeiten (Composer)');
         $name = basename(rtrim($prefix, '/'));
+        if (str_starts_with($prefix, 'public/')) return __('Programm „{name}“', ['name' => $name]);
         return str_starts_with($prefix, 'extensions/') ? __('Erweiterung „{name}“', ['name' => $name]) : __('Kit „{name}“', ['name' => $name]);
+    }
+
+    /**
+     * Eigenständige Programme im Web-Ordner (z. B. Matomo unter public/piwik): Code wird wie ein Paket überwacht (Prüfsummen,
+     * neue Version = Update übernommen), Cache-Ordner ausgenommen – nicht als „ausführbare Datei im Web-Ordner“ gemeldet.
+     * Matomo/Piwik wird erkannt (core/Version.php); weitere in der Konfiguration der Installation:
+     *   'integrity' => ['apps' => ['public/forum/' => ['ignore' => ['cache/']]]]
+     * @return array<string, array{version: string, ignore: list<string>}> Präfix → Version, ausgenommene Pfade (absolut relativ zu ROOT)
+     */
+    public static function apps(): array
+    {
+        static $memo = null;
+        if ($memo !== null) return $memo;
+        $out = [];
+        foreach (glob(ROOT . '/public/*/core/Version.php') ?: [] as $f) {
+            $head = (string) @file_get_contents($f, false, null, 0, 4096);
+            if (!preg_match('~namespace\s+(Piwik|Matomo)~', $head)) continue;
+            $pre = self::rel(dirname($f, 2)) . '/';
+            $out[$pre] = ['version' => preg_match("~VERSION\s*=\s*'([^']{1,30})'~", $head, $m) ? $m[1] : 'ohne Version', 'ignore' => [$pre . 'tmp/']];
+        }
+        try { $cfg = (array) ((Network\Network::install()['integrity']['apps'] ?? []) ?: []); } catch (\Throwable) { $cfg = []; }
+        foreach ($cfg as $pre => $o) {
+            $pre = trim((string) $pre, '/') . '/';
+            if (!str_starts_with($pre, 'public/') || str_contains($pre, '..')) continue;
+            $out[$pre] = ['version' => (string) ($o['version'] ?? ($out[$pre]['version'] ?? 'ohne Version')),
+                'ignore' => array_values(array_unique(array_merge($out[$pre]['ignore'] ?? [], array_map(fn($x) => $pre . trim((string) $x, '/') . '/', (array) ($o['ignore'] ?? [])))))];
+        }
+        return $memo = $out;
+    }
+
+    /** Liegt der Pfad im Cache eines eigenständigen Programms (ausgenommen)? */
+    private static function ignored(string $rel): bool
+    {
+        foreach (self::apps() as $a) foreach ($a['ignore'] as $x) if (str_starts_with($rel, $x)) return true;
+        return false;
     }
 
     /** Rekursiv alle Dateien (Symlinks auf Ordner werden verfolgt, z. B. per Symlink eingebundene Erweiterungen) */
@@ -164,16 +210,18 @@ final class Integrity
     public static function forbidden(): array
     {
         $out = [];
-        $guard = Svg::guardContent();
-        self::walk(ROOT . '/public', function (string $f) use (&$out, $guard) {
+        self::walk(ROOT . '/public', function (string $f) use (&$out) {
             $rel = self::rel($f);
             $name = basename($f);
             if ($rel === 'public/index.php' || str_starts_with($rel, 'public/assets/')) {
                 if ($rel === 'public/index.php' || !preg_match(self::SCRIPT, $name)) return;   // Assets: nur Code melden
             }
-            if ($name === '.htaccess' && @file_get_contents($f) === $guard) return;            // SVG-Schutz (Svg::guard)
-            if (preg_match(self::SCRIPT, $name) || in_array($name, self::CONFIG_NAMES, true)) {
-                $out[] = ['level' => 'error', 'kind' => 'forbidden', 'path' => $rel, 'text' => __('Ausführbare Datei bzw. Serverkonfiguration im Web-Ordner: {path}', ['path' => $rel])];
+            // Serverkonfiguration (.htaccess …) überwachen die Prüfsummen (neu/geändert = Fehler) – z. B. der Front-Controller
+            // unter Apache; eigenständige Programme (Matomo …) samt Cache ebenso
+            if (in_array($name, self::CONFIG_NAMES, true) || self::ignored($rel)) return;
+            foreach (array_keys(self::apps()) as $pre) if (str_starts_with($rel, $pre)) return;
+            if (preg_match(self::SCRIPT, $name)) {
+                $out[] = ['level' => 'error', 'kind' => 'forbidden', 'path' => $rel, 'text' => __('Ausführbare Datei im Web-Ordner: {path}', ['path' => $rel])];
             }
         });
         self::walk(ROOT . '/storage', function (string $f) use (&$out) {
@@ -300,7 +348,7 @@ final class Integrity
 
     // ============================================================ Datenbank (aktuelle Website)
 
-    /** @return array{tables: list<string>, objects: array<string, string>, admins: array<int, string>, tokens: list<int>} */
+    /** @return array{tables: list<string>, objects: array<string, string>, admins: array<int, string>, tokens: list<int>, scripts: list<string>} */
     public static function scanDb(): array
     {
         $db = app()->db;
@@ -318,7 +366,9 @@ final class Integrity
         ksort($admins);
         $tokens = [];
         try { $tokens = array_map('intval', array_column($db->fetchAll('SELECT id FROM api_tokens ORDER BY id'), 'id')); } catch (\Throwable) { /* ohne API */ }
-        return ['tables' => $tables, 'objects' => $objects, 'admins' => $admins, 'tokens' => $tokens];
+        $scripts = array_values(array_map(fn($x) => (string) $x['path'], self::scriptContent()));
+        sort($scripts);
+        return ['tables' => $tables, 'objects' => $objects, 'admins' => $admins, 'tokens' => $tokens, 'scripts' => $scripts];
     }
 
     /** Tabellen, die erwartet sind, auch wenn sie neu sind: Datentabellen und deklarierte Tabellen aktiver Erweiterungen */
@@ -343,12 +393,18 @@ final class Integrity
             OR content_published LIKE '%javascript:%' OR content_draft LIKE '%javascript:%' OR content_published LIKE '%onerror=%' OR content_draft LIKE '%onerror=%'
             OR content_published LIKE '%onload=%' OR content_draft LIKE '%onload=%' OR title LIKE '%<script%' OR meta_description LIKE '%<script%' LIMIT 50");
         foreach ($rows as $p) {
-            $out[] = ['level' => 'error', 'kind' => 'script', 'path' => 'page:' . (int) $p['id'],
+            // Schlüssel = Seite + Prüfsumme der gefundenen Stellen: ein bestätigtes Beispiel (z. B. Anleitung zum SVG-Filter) bleibt
+            // bekannt, jede neue oder geänderte Stelle meldet wieder
+            $raw = (string) app()->db->fetchValue("SELECT coalesce(content_published, '') || coalesce(content_draft, '') || coalesce(title, '') || coalesce(meta_description, '') FROM pages WHERE id = ?", [(int) $p['id']]);
+            preg_match_all('~<script[^>]*>[^<]{0,200}|javascript:[^\s"]{0,120}|\bon(?:error|load)\s*=\s*[^ >]{0,120}~i', $raw, $mm);
+            $sig = substr(hash('sha256', implode('|', array_unique($mm[0]))), 0, 12);
+            $out[] = ['level' => 'error', 'kind' => 'script', 'path' => 'page:' . (int) $p['id'] . ':' . $sig,
                 'text' => __('Skript-Code im Inhalt der Seite „{title}“ (#{id}) – so speichert der Editor nie.', ['title' => (string) $p['title'], 'id' => (int) $p['id']])];
         }
         try {
             foreach (app()->db->fetchAll("SELECT skey FROM settings WHERE value_json LIKE '%<script%' OR value_json LIKE '%javascript:%'") as $s) {
-                $out[] = ['level' => 'error', 'kind' => 'script', 'path' => 'setting:' . $s['skey'], 'text' => __('Skript-Code in der Einstellung {key}', ['key' => (string) $s['skey']])];
+                $v = (string) app()->db->fetchValue('SELECT value_json FROM settings WHERE skey = ?', [$s['skey']]);
+                $out[] = ['level' => 'error', 'kind' => 'script', 'path' => 'setting:' . $s['skey'] . ':' . substr(hash('sha256', $v), 0, 12), 'text' => __('Skript-Code in der Einstellung {key}', ['key' => (string) $s['skey']])];
             }
         } catch (\Throwable) { /* ohne Einstellungen */ }
         return $out;
@@ -386,7 +442,9 @@ final class Integrity
                 $f[] = ['level' => 'warning', 'kind' => 'token', 'path' => 'token:' . $id, 'text' => __('Neuer API-Schlüssel #{id} (Benutzer → API & MCP)', ['id' => $id])];
             }
         }
-        $f = array_merge($f, self::scriptContent());
+        // Skript-Code: nur, was nicht im bestätigten Stand steht (bekannte Beispiele lassen sich übernehmen)
+        $known = $base !== null && empty($base['_bad']) ? (array) ($base['scripts'] ?? []) : [];
+        $f = array_merge($f, array_values(array_filter(self::scriptContent(), fn($x) => !in_array($x['path'], $known, true))));
         $res = ['time' => time(), 'findings' => self::dedupe($f), 'baseline' => isset($base['time']) ? (int) $base['time'] : null];
         self::write(site()->storage('integrity-db-result.json'), $res);
         return $res;
@@ -457,7 +515,8 @@ final class Integrity
         $lines = array_map(fn($x) => '- ' . $x['text'], array_slice($new, 0, 30));
         $text = __('Die Integritätsprüfung von {host} hat Unerwartetes gefunden:', ['host' => $host]) . "\n\n" . implode("\n", $lines)
             . (count($new) > 30 ? "\n" . __('… und {n} weitere.', ['n' => count($new) - 30]) : '')
-            . "\n\n" . __('Bitte prüfen: Verwaltung → Grundeinstellungen → Integrität. War es eine gewollte Änderung (Update, neue Erweiterung, neues Konto), dort „Als bekannt übernehmen“.');
+            . "\n\n" . __('Bitte prüfen: Verwaltung → Grundeinstellungen → Integrität. War es eine gewollte Änderung (Update, neue Erweiterung, neues Konto), dort „Als bekannt übernehmen“.')
+            . "\n\n" . absolute_url('/admin/system/integritaet');
         Mailer::send(__('Sicherheitshinweis: unerwartete Änderungen auf {host}', ['host' => $host]), $text, $to);
         return count($new);
     }

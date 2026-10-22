@@ -24,6 +24,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - Formular-Uploads (Datentabellen) liegen nicht mehr öffentlich: geschützter Pool „Formular-Uploads“ je Website (`DataForms::uploadPool`), nur für die angemeldete Redaktion.
 - API-Tokens (lesend und schreibend) nur für Konten mit allen Rechten – die API kennt keine Einschränkung auf einzelne Tabellen.
 - `X-Forwarded-Proto` zählt nur von einem Proxy im eigenen Netz bzw. aus `trusted_proxies`.
+- Integrität: eigenständige Programme im Web-Ordner (Matomo erkannt, weitere per Konfiguration `integrity.apps`) werden wie Pakete überwacht, ihr Cache ausgenommen; `.htaccess` u. Ä. zählen über die Prüfsummen statt pauschal als Fehler (z. B. Front-Controller unter Apache); Skript-Code in Inhalten lässt sich als bekannt übernehmen (z. B. Beispiele in einer Anleitung).
 - Integrität: Erweiterungen, Kits und Composer-Abhängigkeiten mit neuer Version werden übernommen (nur Info), geänderter Code bei gleicher Version bleibt ein Fehler; Tabellen mit dem Namen einer aktiven Erweiterung als Präfix sind erwartet.
 - PDF-Ansicht `/pdf/{id}`: Uploads aus öffentlichen Formularen nur für die angemeldete Redaktion.
 - Proxy-Antworten mit abschottender CSP (`sandbox`); Erweiterungen können keine ausführbaren Endungen für Medientypen anmelden; CSV-Exporte entschärfen Formeln (`Response::csvCell`).
