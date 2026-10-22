@@ -11,6 +11,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - „Inhaltsblöcke des Eintrags“ (`entry_blocks`) darf in einer Layout-Spalte stehen: die Blöcke des Eintrags erscheinen dort untereinander – z. B. Detailseite mit Seitenleiste.
 - Bedingtes CSS/JS zählt die Inhaltsblöcke des Eintrags mit (z. B. fehlte das CSS von „Bild + Text“ auf Detailseiten, wenn der Block nur im Eintrag vorkam).
 - **Video außerhalb des Blocks „Video“:** Gibt ein Feld, ein Inhaltsblock des Eintrags, ein eigener Block oder eine Erweiterung das Fragment `video-embed` aus, laden die Video-Stile des Kits mit (vorher fehlten sie, Hinweis und Schaltfläche standen ungestaltet). Kits ohne eigene Stile für `.vembed` bekommen die neutrale Grundlage `css/embed.css` des Kerns.
+- **Diagramm aus einer Datentabelle:** Im Block „Diagramm“ gibt es die Quelle „Aus einer Datentabelle“ – Beschriftung aus einem Feld (sonst Titel), Zahlenfelder als Reihen, Filter wie die Datenliste und „Zeilen weglassen“ (z. B. „Gesamt“). Zahlen werden nur einmal gepflegt; Diagramm und Datenliste bleiben gleich.
+- **Diagramm: Tabelle darunter wählbar** – anbieten (aufklappbar), aufgeklappt zeigen oder nicht anbieten (wenn dieselben Zahlen schon als Tabelle auf der Seite stehen).
+- **Datenliste „Tabelle“:** Zahlenfelder rechtsbündig; Zeilen mit gesetztem Ja/Nein-Feld lassen sich hervorheben (fett, z. B. Summenzeilen). Neues Teil-Stylesheet `_data-table.css`.
 - „Kommende Termine“: Beschreibung nicht mehr doppelt maskiert („&amp;amp;“).
 - „Felder des Eintrags“ als Steckbrief ohne einen einzigen Wert gibt auf der Website nichts aus (vorher leerer Kasten, z. B. in einer Seitenleiste); im Editor bleibt der Block sichtbar.
 

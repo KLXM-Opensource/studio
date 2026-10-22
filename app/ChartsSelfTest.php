@@ -38,6 +38,11 @@ final class ChartsSelfTest
         $eq('Quelle liefert Daten für den Block', [$b['type'], $b['labels'], $b['series'][0]['data']], ['donut', ['x', 'y'], [4, 5]]);
         $m = Charts::fromBlock(['labels' => "Jan\nFeb", 'series' => [['name' => 'A', 'values' => "1,5; 2\n"]]]);
         $eq('Block von Hand', [$m['labels'], $m['series'][0]['data']], [['Jan', 'Feb'], [1.5, 2.0]]);
+        $eq('Tabelle unter dem Diagramm: Option des Blocks', array_map(fn($v) => Charts::tableOption(['table_view' => $v]), ['', 'open', 'none', 'x']), [false, true, 'none', false]);
+        $eq('ohne Tabelle: kein „Als Tabelle anzeigen“', str_contains(Charts::render(['labels' => ['a'], 'series' => [['data' => [1]]]], ['table' => 'none']), 'cms-chart__table'), false);
+        $eq('Datentabelle: unbekannte Tabelle → keine Daten', Charts::fromTable(['table' => 'gibt-es-nicht', 'value_fields' => ['gibt-es-nicht.x']]), []);
+        $dt = \Core\Data\Tables::content()[0] ?? null;
+        if ($dt) $eq('Datentabelle: nur Zahlenfelder als Reihen', Charts::fromTable(['table' => $dt['handle'], 'value_fields' => [$dt['handle'] . '._title', 'andere.zahl']]), []);
         $eq('Engine echarts vorhanden', isset(Charts::engines()['echarts']), true);
         $eq('Engine-Datei gebaut', is_file(ROOT . '/public/assets/js/charts-echarts.mjs') && is_file(ROOT . '/public/assets/js/charts.mjs'), true);
         $eq('Format bytes/percent', [Charts::format(1536, 'bytes'), Charts::format(12, 'percent')], [fmt()->bytes(1536), fmt()->number(12) . ' %']);

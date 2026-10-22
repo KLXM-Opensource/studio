@@ -10,5 +10,5 @@ if (trim((string) ($spec['description'] ?? '')) === '') $spec['description'] = t
 ?>
 <div class="<?= e($wrap) ?>">
   <?= \Core\MediaBlocks::head($b) ?>
-  <?= \Core\Charts::render($spec) ?>
+  <?= \Core\Charts::render($spec, ['table' => \Core\Charts::tableOption($d)]) ?>
 </div>

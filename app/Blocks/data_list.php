@@ -170,13 +170,16 @@ $reload = ($pages > 1 || $vfilters || !empty($d['visitor_search'])) ? \Core\Live
   <p class="dl-empty"><?= e(lt('Keine Einträge für diese Auswahl.')) ?> <a href="<?= e($here . '#' . $b->domId()) ?>"><?= e(lt('Alle anzeigen')) ?></a></p>
   <?php elseif (!$rows): ?>
   <p class="dl-empty"><?= e($d['empty_text'] ?: lt('Zurzeit gibt es hier keine Einträge.')) ?><?= is_editing() ? ' <small>(nur veröffentlichte Einträge erscheinen)</small>' : '' ?></p>
-  <?php elseif ($layout === 'table'): ?>
+  <?php elseif ($layout === 'table'):
+    // Zahlenfelder rechtsbündig (dl-num), Zeilen mit gesetztem Ja/Nein-Feld „highlight_field“ hervorgehoben (dl-row--hl, z. B. Summen)
+    $num = fn(string $f) => (Tables::field($t, $f)['type'] ?? '') === 'number' ? ' class="dl-num"' : '';
+    $hl = str_starts_with((string) ($d['highlight_field'] ?? ''), $pfx) ? substr($d['highlight_field'], strlen($pfx)) : null; ?>
   <div class="dl-tablewrap"><table class="dl-table">
-    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"><?= e($colLabel($f)) ?></th><?php endforeach; ?></tr></thead>
+    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"<?= $num($f) ?>><?= e($colLabel($f)) ?></th><?php endforeach; ?></tr></thead>
     <tbody>
     <?php foreach ($rows as $e): $url = $link($e); ?>
-      <tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?>
-        <td><?php if ($f === '_title'): ?><?= $url ? '<a href="' . e($url) . '">' . e(Entries::title($t, $e)) . '</a>' : e(Entries::title($t, $e)) ?><?= \Core\Data\EntryEdit::button($t, $e) ?><?php else: ?><?= Entries::html($t, $e, $f) ?><?php endif; ?></td>
+      <tr<?= $hl !== null && !empty($e[$hl]) ? ' class="dl-row--hl"' : '' ?>><?php foreach ($fields as $f): if ($f === $imageField) continue; ?>
+        <td<?= $num($f) ?>><?php if ($f === '_title'): ?><?= $url ? '<a href="' . e($url) . '">' . e(Entries::title($t, $e)) . '</a>' : e(Entries::title($t, $e)) ?><?= \Core\Data\EntryEdit::button($t, $e) ?><?php else: ?><?= Entries::html($t, $e, $f) ?><?php endif; ?></td>
       <?php endforeach; ?></tr>
     <?php endforeach; ?>
     </tbody>

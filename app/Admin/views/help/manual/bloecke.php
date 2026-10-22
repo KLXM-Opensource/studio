@@ -42,9 +42,11 @@
   <ul>
     <li><b>Beschriftungen:</b> eine je Zeile, z. B. die Monate.</li>
     <li><b>Reihen:</b> je Reihe ein Name und die Werte in derselben Reihenfolge, getrennt mit Semikolon oder Zeilenumbruch (z. B. <code>12; 19; 15</code>). Zahlen dürfen wie gewohnt geschrieben werden: „1.250“ oder „12,5“. Bis zu acht Reihen.</li>
-    <li><b>Daten:</b> statt von Hand auch aus einer Quelle der Website, sofern eine Funktion oder Erweiterung eine anbietet – dann bleiben die Werte aktuell.</li>
+    <li><b>Daten:</b> statt von Hand auch <b>aus einer Datentabelle</b> oder aus einer Quelle der Website, sofern eine Funktion oder Erweiterung eine anbietet – dann bleiben die Werte aktuell.</li>
+    <li><b>Aus einer Datentabelle:</b> Tabelle wählen, ein oder mehrere <b>Zahlenfelder</b> ankreuzen (je Feld eine Reihe) und das Feld für die <b>Beschriftung</b> (sonst der Titel des Eintrags). Jeder veröffentlichte Eintrag ist ein Wert, in der Reihenfolge der Tabelle. Optional nur Einträge mit einem bestimmten Wert (z. B. Jahr „2023“) und <b>Zeilen weglassen</b> – etwa eine Summenzeile „Gesamt“, die in der Tabelle steht, aber nicht ins Diagramm gehört. So pflegen Sie die Zahlen nur einmal; Diagramm und Datenliste zeigen immer dasselbe.</li>
+    <li><b>Tabelle unter dem Diagramm:</b> anbieten (aufklappbar, Standard), aufgeklappt zeigen oder nicht anbieten – „nicht anbieten“ nur, wenn dieselben Zahlen schon als Tabelle auf der Seite stehen (z. B. Datenliste in der Darstellung „Tabelle“).</li>
     <li><b>Zahlen:</b> als Zahl, Prozent, Dateigröße oder Dauer; dazu eine Einheit wie „€“.</li>
-    <li><b>Beschreibung für Screenreader:</b> ein Satz, was das Diagramm zeigt. Unter jedem Diagramm steht „Als Tabelle anzeigen“ mit allen Werten – auch ohne JavaScript.</li>
+    <li><b>Beschreibung für Screenreader:</b> ein Satz, was das Diagramm zeigt. Unter dem Diagramm steht „Als Tabelle anzeigen“ mit allen Werten – auch ohne JavaScript.</li>
   </ul>
   <?php endif; ?>
   <?php if (isset($blocks['partners'])): ?>

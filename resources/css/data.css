@@ -1,5 +1,6 @@
 /* Kern-Blöcke „Datenliste“ und „Datensatz-Felder“ – neutral; Themes überschreiben über Variablen oder eigene data.css.
    Teile: _data-list.css (Liste, Chips) und _data-fields.css (Detailseiten) – ein Kit kann sie einzeln importieren. */
 @import "./_data-list.css";
+@import "./_data-table.css";   /* Tabelle: Zahlen rechtsbündig, hervorgehobene Zeilen */
 @import "./_data-fields.css";
 @import "./_data-directory.css";   /* Verzeichnis, Besucher-Filter, A–Z, Profil, Kontaktkarte */

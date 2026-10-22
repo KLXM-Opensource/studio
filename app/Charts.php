@@ -32,6 +32,8 @@ final class Charts
     public const FORMATS = ['number', 'percent', 'bytes', 'duration'];
     private const MAX_LABELS = 1000;
     private const MAX_SERIES = 12;
+    /** Quelle „Aus einer Datentabelle“ im Block „Diagramm“ (fromTable) */
+    public const TABLE = '@table';
 
     /** @var array<string, array{label: string, fn: callable}> Datenquellen für den Block „Diagramm“ (Erweiterungen, z. B. Statistik) */
     private static array $sources = [];
@@ -90,13 +92,25 @@ final class Charts
     /** Felder des Blocks „Diagramm“ (app/Blocks/blocks.php) */
     public static function blockFields(): array
     {
-        $src = ['' => 'Werte von Hand eingeben'] + self::sources();
+        $src = ['' => 'Werte von Hand eingeben', self::TABLE => 'Aus einer Datentabelle'] + self::sources();
+        $tbl = ['source' => [self::TABLE]];
         return [
             ['type' => 'heading', 'label' => 'Diagramm'],
             ['name' => 'chart_type', 'label' => 'Art', 'type' => 'select', 'required' => true, 'default' => 'bar', 'width' => 'half',
                 'options' => ['bar' => 'Balken', 'hbar' => 'Balken waagerecht', 'line' => 'Linie', 'area' => 'Fläche', 'donut' => 'Ring', 'pie' => 'Torte']],
             ['name' => 'source', 'label' => 'Daten', 'type' => 'select', 'default' => '', 'width' => 'half', 'options' => $src,
-                'help' => count($src) > 1 ? 'Von Hand oder aus einer Quelle der Website (z. B. Statistik) – dann werden die Werte laufend aktualisiert.' : ''],
+                'help' => 'Von Hand, aus einer Datentabelle oder aus einer Quelle der Website (z. B. Statistik) – dann werden die Werte laufend aktualisiert.'],
+            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'show_if' => $tbl,
+                'help' => 'Die Zahlen werden einmal in der Datentabelle gepflegt – Diagramm und Datenliste zeigen immer dieselben Werte. Je veröffentlichtem Eintrag ein Wert, in der Reihenfolge der Tabelle.'],
+            ['name' => 'label_field', 'label' => 'Beschriftung aus Feld', 'type' => 'datafield', 'types' => ['text', 'select', 'date', 'datetime', 'number'],
+                'empty_label' => '– Titel des Eintrags –', 'width' => 'half', 'show_if' => $tbl],
+            ['name' => 'value_fields', 'label' => 'Zahlenfelder (je Feld eine Reihe)', 'type' => 'datafields', 'types' => ['number'], 'show_if' => $tbl],
+            ['name' => 'filter_field', 'label' => 'Nur Einträge, bei denen …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– kein Filter –', 'show_if' => $tbl],
+            ['name' => 'filter_op', 'label' => 'Bedingung', 'type' => 'select', 'default' => '=', 'width' => 'half', 'show_if' => $tbl,
+                'options' => ['=' => 'ist gleich', '!=' => 'ist nicht', 'contains' => 'enthält', '>=' => 'ab / größer gleich', '<=' => 'bis / kleiner gleich']],
+            ['name' => 'filter_value', 'label' => 'Wert', 'type' => 'text', 'max' => 120, 'show_if' => $tbl, 'help' => 'Auswahl: Kurzname der Option. Datum: JJJJ-MM-TT.'],
+            ['name' => 'exclude', 'label' => 'Zeilen weglassen (Beschriftung, eine je Zeile)', 'type' => 'textarea', 'rows' => 2, 'max' => 1000, 'show_if' => $tbl,
+                'placeholder' => 'Gesamt', 'help' => 'Z. B. Summenzeilen, die in der Tabelle stehen, aber nicht ins Diagramm gehören.'],
             ['name' => 'labels', 'label' => 'Beschriftungen (eine je Zeile)', 'type' => 'textarea', 'rows' => 5, 'max' => 4000,
                 'placeholder' => "Januar\nFebruar\nMärz", 'show_if' => ['source' => ['']]],
             ['name' => 'series', 'label' => 'Reihen', 'type' => 'repeater', 'item_label' => 'Reihe', 'title_field' => 'name', 'max_items' => 8, 'show_if' => ['source' => ['']],
@@ -110,16 +124,21 @@ final class Charts
             ['name' => 'unit', 'label' => 'Einheit (optional)', 'type' => 'text', 'max' => 12, 'width' => 'half', 'placeholder' => 'z. B. €, kg'],
             ['name' => 'stacked', 'label' => 'Reihen stapeln (Balken, Fläche)', 'type' => 'bool', 'default' => false, 'width' => 'half'],
             ['name' => 'height', 'label' => 'Höhe', 'type' => 'select', 'default' => '320', 'width' => 'half', 'options' => ['240' => 'Niedrig', '320' => 'Mittel', '440' => 'Hoch']],
+            ['name' => 'table_view', 'label' => 'Tabelle unter dem Diagramm', 'type' => 'select', 'default' => '', 'width' => 'half',
+                'options' => ['' => 'Anbieten (aufklappbar)', 'open' => 'Aufgeklappt zeigen', 'none' => 'Nicht anbieten'],
+                'help' => '„Nicht anbieten“ nur, wenn dieselben Zahlen schon als Tabelle auf der Seite stehen (z. B. Datenliste in der Darstellung „Tabelle“).'],
             ['name' => 'description', 'label' => 'Beschreibung für Screenreader', 'type' => 'text', 'max' => 300,
                 'help' => 'Ein Satz, was das Diagramm zeigt (z. B. „Anfragen je Monat, höchster Wert im Mai“). Die Werte stehen zusätzlich als Tabelle bereit.'],
         ];
     }
 
-    /** Beschreibung aus den Feldern des Blocks (von Hand oder aus einer angemeldeten Quelle) */
+    /** Beschreibung aus den Feldern des Blocks (von Hand, aus einer Datentabelle oder aus einer angemeldeten Quelle) */
     public static function fromBlock(array $d): array
     {
         $key = (string) ($d['source'] ?? '');
-        if ($key !== '' && isset(self::$sources[$key])) {
+        if ($key === self::TABLE) {
+            $spec = self::fromTable($d);
+        } elseif ($key !== '' && isset(self::$sources[$key])) {
             try { $spec = (array) (self::$sources[$key]['fn'])($d); } catch (\Throwable $e) { error_log('[charts] Quelle ' . $key . ': ' . $e->getMessage()); $spec = []; }
         } else {
             $spec = ['labels' => self::lines((string) ($d['labels'] ?? '')), 'series' => array_map(fn($r) => ['name' => (string) ($r['name'] ?? ''),
@@ -128,6 +147,49 @@ final class Charts
         return ['type' => (string) ($d['chart_type'] ?? ($spec['type'] ?? 'bar')), 'format' => (string) ($d['format'] ?? ($spec['format'] ?? 'number')),
             'unit' => (string) ($d['unit'] ?? ''), 'stacked' => !empty($d['stacked']), 'height' => (int) ($d['height'] ?? 320),
             'description' => (string) ($d['description'] ?? '') ?: (string) ($spec['description'] ?? '')] + $spec;
+    }
+
+    /** Option „Tabelle unter dem Diagramm“ des Blocks → $opt['table'] von render(): '' (aufklappbar) | 'open' | 'none' */
+    public static function tableOption(array $d): bool|string
+    {
+        return match ((string) ($d['table_view'] ?? '')) { 'open' => true, 'none' => 'none', default => false };
+    }
+
+    /**
+     * Werte aus einer Datentabelle (Quelle „Aus einer Datentabelle“): je veröffentlichtem Eintrag eine Beschriftung (Feld
+     * label_field, sonst Titel) und je Zahlenfeld (value_fields) eine Reihe; optional Filter (filter_field/op/value wie die
+     * Datenliste) und Zeilen weglassen (exclude: Beschriftungen, z. B. „Gesamt“). Reihenfolge wie in der Tabelle eingestellt.
+     */
+    public static function fromTable(array $d): array
+    {
+        $t = Data\Tables::findContent((string) ($d['table'] ?? ''));
+        if (!$t) return [];
+        $pfx = $t['handle'] . '.';
+        $own = fn(mixed $v): ?string => is_string($v) && str_starts_with($v, $pfx) ? substr($v, strlen($pfx)) : null;
+        $nums = [];
+        foreach ((array) ($d['value_fields'] ?? []) as $v) {
+            $n = $own($v);
+            if ($n !== null && (Data\Tables::field($t, $n)['type'] ?? '') === 'number') $nums[] = $n;
+        }
+        if (!$nums) return [];
+        $lf = $own($d['label_field'] ?? null);
+        if ($lf !== null && !Data\Tables::field($t, $lf)) $lf = null;
+        $o = ['status' => 'published', 'limit' => self::MAX_LABELS];
+        $ff = $own($d['filter_field'] ?? null);
+        if ($ff !== null && trim((string) ($d['filter_value'] ?? '')) !== '') {
+            $op = in_array($d['filter_op'] ?? '=', ['=', '!=', 'contains', '>=', '<='], true) ? (string) $d['filter_op'] : '=';
+            $o['where'] = [[$ff, $op, trim((string) $d['filter_value'])]];
+        }
+        $skip = array_map('mb_strtolower', self::lines((string) ($d['exclude'] ?? '')));
+        $labels = [];
+        $data = array_fill_keys($nums, []);
+        foreach (Data\Entries::query($t, $o) as $e) {
+            $label = $lf !== null ? Data\Entries::text($t, $e, $lf) : Data\Entries::title($t, $e);
+            if (in_array(mb_strtolower(trim($label)), $skip, true)) continue;
+            $labels[] = $label;
+            foreach ($nums as $n) $data[$n][] = is_numeric($e[$n] ?? null) ? $e[$n] + 0 : null;
+        }
+        return ['labels' => $labels, 'series' => array_map(fn($n) => ['name' => Data\Tables::label((array) Data\Tables::field($t, $n)), 'data' => $data[$n]], $nums)];
     }
 
     private static function lines(string $s): array

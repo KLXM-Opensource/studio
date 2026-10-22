@@ -489,13 +489,19 @@ final class Fields
             $sel = array_map('strval', is_array($value) ? $value : []);
             $h = '<fieldset class="f f--multi f--datafields' . $width . '" data-datafields><legend>' . $label . '</legend>'
                 . '<input type="hidden" name="' . $inputName . '[]" value=""><div class="f-multi">';
+            // 'types' => ['number', …]: nur Felder dieser Typen (z. B. Zahlenfelder als Reihen im Block „Diagramm“)
+            $types = isset($f['types']) ? (array) $f['types'] : null;
             foreach (\Core\Data\Tables::content() as $t) {
-                $opts = ['_title' => (\Core\Data\Tables::field($t, $t['settings']['title_field'])['label'] ?? 'Titel') . ' (Titel, verlinkt)'];
-                if (\Core\Data\Calendar::enabled($t)) $opts['_when'] = __('Termin (Datum, Uhrzeit, Wiederholung)');
-                foreach ($t['fields'] as $tf) {
-                    if ($tf['name'] !== $t['settings']['title_field']) $opts[$tf['name']] = $tf['label'];
+                if ($types !== null) {
+                    $opts = array_column(array_filter($t['fields'], fn($tf) => in_array($tf['type'], $types, true)), 'label', 'name');
+                } else {
+                    $opts = ['_title' => (\Core\Data\Tables::field($t, $t['settings']['title_field'])['label'] ?? 'Titel') . ' (Titel, verlinkt)'];
+                    if (\Core\Data\Calendar::enabled($t)) $opts['_when'] = __('Termin (Datum, Uhrzeit, Wiederholung)');
+                    foreach ($t['fields'] as $tf) {
+                        if ($tf['name'] !== $t['settings']['title_field']) $opts[$tf['name']] = $tf['label'];
+                    }
+                    $opts['published_at'] = 'Veröffentlicht am';
                 }
-                $opts['published_at'] = 'Veröffentlicht am';
                 foreach ($opts as $k => $l) {
                     $v = $t['handle'] . '.' . $k;
                     $h .= '<label class="f-check" data-table="' . e($t['handle']) . '"><input type="checkbox" name="' . $inputName . '[]" value="' . e($v) . '"'

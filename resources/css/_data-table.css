@@ -1,0 +1,4 @@
+/* Datenliste, Darstellung „Tabelle“: Zahlenfelder rechtsbündig, hervorgehobene Zeilen (Ja/Nein-Feld „highlight_field“, z. B. Summen).
+   Teil von data.css; Kits mit eigener data.css importieren es einzeln. */
+.dl-table .dl-num{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dl-table .dl-row--hl :is(th,td){font-weight:700}
