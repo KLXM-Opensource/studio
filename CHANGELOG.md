@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Layout und Detailseiten
+- **Fehlerbehebung:** Ein Block einer Erweiterung mit eigener Angabe `'nestable'` (z. B. „Gemeinsamer Baustein“) schaltete die Standardliste der verschachtelbaren Blöcke ab – Fließtext, Zitat und Downloads durften in keiner Layout-Spalte mehr stehen, bestehende Spalten blieben auf der Website leer. Blöcke von Erweiterungen zählen jetzt nicht mehr als Markierung des Kits (`Theme::nestableVariants`).
+- „Inhaltsblöcke des Eintrags“ (`entry_blocks`) darf in einer Layout-Spalte stehen: die Blöcke des Eintrags erscheinen dort untereinander – z. B. Detailseite mit Seitenleiste.
+- Bedingtes CSS/JS zählt die Inhaltsblöcke des Eintrags mit (z. B. fehlte das CSS von „Bild + Text“ auf Detailseiten, wenn der Block nur im Eintrag vorkam).
+- „Kommende Termine“: Beschreibung nicht mehr doppelt maskiert („&amp;amp;“).
+
 ### Sicherheit: Integritätsprüfung und Befunde der Sicherheitsprüfung
 - **Integrität** (`Core\Integrity`, Grundeinstellungen → Integrität, Aufgabe `integrity.check` stündlich): meldet unerwartete Dateien – geänderter Code, `.htaccess`/`.user.ini`/Konfiguration, ausführbare Dateien in `public/` und `storage/`, PHP-Code in Mediendateien – und Daten – Trigger/Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel, Skript-Code in Seiten und Einstellungen. Vergleich mit einem signierten, bestätigten Stand; neue Fehler per E-Mail; Health-Eintrag. Befehle `integrity:check`, `integrity:accept`, `integrity:selftest`.
 - Öffentliche Endpunkte unter `/api/` (z. B. `/api/live/block`) liefern Einträge geschützter Datentabellen nicht mehr ungefiltert – nur `/api/v1` und `/mcp` (mit Schlüssel) sehen alles. Der Staging-Passwortschutz lässt nur noch diese beiden ohne Passwort durch.

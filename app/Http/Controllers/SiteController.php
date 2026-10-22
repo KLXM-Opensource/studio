@@ -104,7 +104,17 @@ final class SiteController
         // Wie ausgegeben: Erweiterungen lösen Blöcke auf (Extension::blocksResolve, z. B. gemeinsame Bausteine → Typ des Originals),
         // sonst fehlte das bedingte CSS/JS des tatsächlich gerenderten Blocktyps
         $blocks = \Core\Extensions::resolveBlocks($blocks, ['page' => app()->currentPage, 'draft' => false, 'purpose' => 'render']);
+        // Detailseite: Inhaltsblöcke des Eintrags (entry_blocks) wie in Theme::renderBlocks mitzählen – sonst fehlt z. B. das CSS
+        // von „Bild + Text“, wenn der Block nur im Eintrag vorkommt
         $blocks = \Core\Layout::flatten($blocks);   // auch Blöcke in Spalten (Stylesheets/Skripte je Typ)
+        if (!app()->editing) {
+            $all = [];
+            foreach ($blocks as $b) {
+                $all[] = $b;
+                if (($b['type'] ?? '') === 'entry_blocks') array_push($all, ...\Core\Layout::flatten(\Core\Data\EntryBlocks::forContext((array) ($b['data'] ?? []))));
+            }
+            $blocks = $all;
+        }
         return array_merge(array_column($blocks, 'type'), array_map(fn($b) => $b['type'] . ':' . ($b['data']['variant'] ?? ''), $blocks));
     }
 

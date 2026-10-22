@@ -167,7 +167,9 @@ final class Theme
         $def = $this->blocks[$type] ?? null;
         if (!$def || $type === Layout::TYPE || !empty($def['raw'])) return false;
         static $marked = [];
-        $marked[$this->name] ??= (bool) array_filter($this->blocks, fn($b) => array_key_exists('nestable', $b) && empty($b['core']) && empty($b['custom']));
+        // Nur Blöcke des Kits zählen – ein Erweiterungs-Block mit eigener Angabe (z. B. 'nestable' => false) darf die
+        // Standardliste des Kits nicht abschalten
+        $marked[$this->name] ??= (bool) array_filter($this->blocks, fn($b) => array_key_exists('nestable', $b) && empty($b['core']) && empty($b['custom']) && empty($b['extension']));
         $n = $def['nestable'] ?? (!$marked[$this->name] && empty($def['core']) && in_array($type, Layout::DEFAULT_NESTABLE, true));
         if (is_array($n)) {
             $n = array_values(array_filter(array_map('strval', $n), fn($v) => isset($def['variants'][$v])));

@@ -166,6 +166,11 @@ final class Layout
         foreach ($cols as $ci => $col) {
             $items = '';
             foreach ($col['blocks'] as $bi => $c) {
+                // Detailseite: „Inhaltsblöcke des Eintrags“ in einer Spalte → die Blöcke des Eintrags untereinander in dieser Spalte
+                if (!$editing && ($c['type'] ?? '') === 'entry_blocks') {
+                    foreach (self::entryChildren((array) ($c['data'] ?? [])) as $ei => $eb) $items .= self::renderChild($theme, $layout, $eb, $ci, $bi * 1000 + $ei, $parentBg, true);
+                    continue;
+                }
                 $items .= self::renderChild($theme, $layout, $c, $ci, $bi, $parentBg);
             }
             if (!$editing && trim($items) === '') $items = '';
@@ -175,11 +180,26 @@ final class Layout
         return $html . '</div>';
     }
 
-    private static function renderChild(Theme $theme, Block $layout, array $c, int $ci, int $bi, string $parentBg): string
+    /**
+     * Blöcke des aufgerufenen Eintrags für eine Spalte (Core\Data\EntryBlocks): ein Layout im Eintrag wird zu seinen Blöcken
+     * (Spalte für Spalte), damit nichts verschachtelt wird.
+     */
+    private static function entryChildren(array $data): array
+    {
+        $out = [];
+        foreach (\Core\Data\EntryBlocks::forContext($data) as $b) {
+            if (!self::isLayout($b)) { $out[] = $b; continue; }
+            foreach ((array) ($b['data']['columns'] ?? []) as $col) foreach ((array) ($col['blocks'] ?? []) as $c) if (is_array($c)) $out[] = ['id' => $b['id'] . '-' . ($c['id'] ?? count($out))] + $c;
+        }
+        return $out;
+    }
+
+    /** $entry: Block aus dem Eintrag (Inhaltsblöcke in einer Spalte) – jeder Blocktyp des Kits erlaubt, nicht nur verschachtelbare */
+    private static function renderChild(Theme $theme, Block $layout, array $c, int $ci, int $bi, string $parentBg, bool $entry = false): string
     {
         $editing = app()->editing;
         $def = $theme->block((string) ($c['type'] ?? ''));
-        if (!$def || !$theme->nestable((string) $c['type'], (string) ($c['data']['variant'] ?? ''))) {
+        if (!$def || (!$entry && !$theme->nestable((string) $c['type'], (string) ($c['data']['variant'] ?? ''))) || ($entry && !empty($def['raw']))) {
             return $editing ? '<div class="lay-item lay-item--invalid" data-lay-item="' . $ci . '.' . $bi . '"><p class="cms-error">'
                 . e(__('Block „{type}“ kann nicht in einer Spalte stehen.', ['type' => (string) ($def['label'] ?? $c['type'] ?? '?')])) . '</p></div>' : '';
         }

@@ -110,6 +110,10 @@ final class SelfTest
             if (!$flat && !$th->nestable($type) && empty($def['raw'])) $flat = $type;
         }
         $this->assert(!$th->nestable($L::TYPE), 'Layout: kein Layout im Layout');
+        // Markiert das Kit selbst keinen Block, gilt die Standardliste – auch wenn ein Block einer Erweiterung eigene Angaben macht
+        $kitMarks = (bool) array_filter($th->blocks(), fn($b) => array_key_exists('nestable', $b) && empty($b['core']) && empty($b['custom']) && empty($b['extension']));
+        if (!$kitMarks && $th->block('richtext')) $this->assert($th->nestable('richtext'), 'Layout: Standardliste gilt trotz Erweiterungs-Block mit eigener Angabe');
+        if ($th->block('entry_blocks')) $this->assert($th->nestable('entry_blocks'), 'Layout: Inhaltsblöcke des Eintrags in einer Spalte erlaubt');
         foreach ($th->blocks() as $type => $def) if (!empty($def['raw'])) { $this->assert(!$th->nestable($type), "Layout: Block mit eigener Hülle ($type) nicht verschachtelbar"); break; }
         foreach ($th->blocks() as $type => $def) {
             if (is_array($v = $th->nestableVariants($type))) {
