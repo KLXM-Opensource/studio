@@ -37,6 +37,7 @@
 use Core\Embeds;
 use Core\Media;
 
+app()->theme->needEmbedCss();   // neutrale Grundlage css/embed.css (Theme::conditionalCss) – auch ohne Block „Video“
 $o = ($options ?? []) + ['ratio_class' => 'r-', 'notice' => 'short', 'title' => false, 'empty' => 'box',
     'play_class' => '', 'play_icon' => '', 'icon_size' => 22, 'poster_crop' => false];
 $ratio = in_array($ratio ?? '', ['16-9', '4-3', '21-9'], true) ? $ratio : '16-9';

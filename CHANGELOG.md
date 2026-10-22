@@ -10,6 +10,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - **Fehlerbehebung:** Ein Block einer Erweiterung mit eigener Angabe `'nestable'` (z. B. „Gemeinsamer Baustein“) schaltete die Standardliste der verschachtelbaren Blöcke ab – Fließtext, Zitat und Downloads durften in keiner Layout-Spalte mehr stehen, bestehende Spalten blieben auf der Website leer. Blöcke von Erweiterungen zählen jetzt nicht mehr als Markierung des Kits (`Theme::nestableVariants`).
 - „Inhaltsblöcke des Eintrags“ (`entry_blocks`) darf in einer Layout-Spalte stehen: die Blöcke des Eintrags erscheinen dort untereinander – z. B. Detailseite mit Seitenleiste.
 - Bedingtes CSS/JS zählt die Inhaltsblöcke des Eintrags mit (z. B. fehlte das CSS von „Bild + Text“ auf Detailseiten, wenn der Block nur im Eintrag vorkam).
+- **Video außerhalb des Blocks „Video“:** Gibt ein Feld, ein Inhaltsblock des Eintrags, ein eigener Block oder eine Erweiterung das Fragment `video-embed` aus, laden die Video-Stile des Kits mit (vorher fehlten sie, Hinweis und Schaltfläche standen ungestaltet). Kits ohne eigene Stile für `.vembed` bekommen die neutrale Grundlage `css/embed.css` des Kerns.
 - „Kommende Termine“: Beschreibung nicht mehr doppelt maskiert („&amp;amp;“).
 - „Felder des Eintrags“ als Steckbrief ohne einen einzigen Wert gibt auf der Website nichts aus (vorher leerer Kasten, z. B. in einer Seitenleiste); im Editor bleibt der Block sichtbar.
 

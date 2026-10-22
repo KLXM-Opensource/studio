@@ -45,6 +45,8 @@ final class Theme
 
     /** Wurde beim Rendern ein Abschnitt mit Vollbild-Höhe oder Hintergrundbild ausgegeben? (→ css/sections.css) */
     private bool $sectionCss = false;
+    /** Kern-Fragment „video-embed“ wurde gerendert → neutrale Grundlage css/embed.css (needEmbedCss) */
+    private bool $embedCss = false;
 
     /** Erster sichtbarer Block der Seite schon vergeben (Block::isFirst) – einmal je Anfrage */
     private bool $firstSeen = false;
@@ -599,6 +601,28 @@ final class Theme
     }
 
     /**
+     * Das Fragment „video-embed“ meldet sich beim Rendern: die Seite zählt dann als „hat Video“ – die Video-Stile des Kits laden
+     * (conditional_css mit 'video') auch ohne Block „Video“ (Felder, Inhaltsblöcke des Eintrags, Erweiterungen).
+     */
+    public function needEmbedCss(): void
+    {
+        $this->embedCss = true;
+    }
+
+    /** Gestaltet irgendein Stylesheet des Kits das Video-Fragment (.vembed)? Dann bleibt die Kern-Grundlage css/embed.css weg. */
+    private function stylesEmbed(): bool
+    {
+        static $memo = [];
+        if (!isset($memo[$this->name])) {
+            $memo[$this->name] = false;
+            foreach (glob(Kit::publicDir($this->name) . '/css/*.css') ?: [] as $f) {
+                if (basename($f) !== 'embed.css' && str_contains((string) file_get_contents($f), '.vembed')) { $memo[$this->name] = true; break; }
+            }
+        }
+        return $memo[$this->name];
+    }
+
+    /**
      * Stylesheets, die für die übergebenen Blocktypen zusätzlich nötig sind (null = alle).
      * Pseudo-Typ „@rich“ in conditional_css: Datei lädt, sobald die Seite Rich-Text-Stile ausgibt (Überschriften, Zitat,
      * t-lead/t-small/t-note, Textfarben c-*, mark, sup/sub – Core\Sanitizer::styled(); Inhalt vorher rendern).
@@ -611,6 +635,7 @@ final class Theme
         if ($types !== null && in_array('job_apply', $types, true)) $types[] = 'data_form';
         // Live-Galerie nutzt das Markup der Bildergalerie (cms-gallery) – gleiche Stile (Kern und Kit)
         if ($types !== null && in_array('live_gallery', $types, true)) $types[] = 'gallery';
+        if ($types !== null && $this->embedCss) $types[] = 'video';
         $out = [];
         // Kern-Blöcke: Theme-Stylesheet css/data.css bevorzugt, sonst das neutrale aus dem Kern
         if ($types === null || array_intersect(['data_list', 'data_fields'], $types)) {
@@ -662,6 +687,10 @@ final class Theme
         }
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
+        }
+        // Video (Zwei-Klick-Lösung): neutrale Grundlage nur für Kits ohne eigene Stile für .vembed – eigene css/embed.css ersetzt sie
+        if (($types === null || in_array('video', $types, true)) && ($this->hasAsset('css/embed.css') || !$this->stylesEmbed())) {
+            $out[] = $this->coreCss('embed.css');
         }
         // Blöcke nebeneinander (Tune „row“) – Variablen --row-gap, --row-stack, --row-align, --row-card-pad, --row-card-radius
         // oder eigene css/rows.css des Kits

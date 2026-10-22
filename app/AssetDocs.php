@@ -40,6 +40,7 @@ final class AssetDocs
         'partners.css' => ['Partner & Logos', 'cms-partners, pl-', 'Theme::conditionalCss (partners)', ['--partners-']],
         'notfound.css' => ['Seite „Nicht gefunden“', 'cms-404', 'Theme::conditionalCss (not_found)', ['--nf-']],
         'sections.css' => ['Abschnitte: Vollbild, Hintergrundbild', 'sec-, sec__', 'Theme::conditionalCss (Abschnitts-Optionen)', ['--cms-overlay-']],
+        'embed.css' => ['Video (Zwei-Klick-Lösung): neutrale Grundlage', 'vembed', 'Theme::conditionalCss (video, Fragment video-embed) – nur ohne eigene Kit-Stile für .vembed; Kit-Datei ersetzt sie', []],
         'layout.css' => ['Block „Layout“ (Spalten)', 'lay-', 'Theme::conditionalCss (layout)', ['--lay-']],
         'rows.css' => ['Alte Reihen (Tune row)', 'sec-', 'Theme::conditionalCss (nur alte Inhalte)', ['--row-']],
         'search.css' => ['Website-Suche, Vorschläge', 'srch, sf, ssug', 'Suchseite und Suchfeld im Kopf', ['--se-']],
