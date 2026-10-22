@@ -27,6 +27,19 @@ final class KitCheck
             $why = !Kit::exists($p) ? 'gibt es nicht' : (isset($kit->chain[$p]) ? 'ergibt eine Schleife' : 'liegt tiefer als ' . Kit::MAX_DEPTH . ' Ebenen');
             $out[] = ['level' => 'warn', 'file' => Kit::relative((string) Kit::definitionFile(Kit::dir($last))), 'text' => "Eltern-Kit '$p' (extends) $why – es gilt nur, was bis hier geerbt wird."];
         }
+        // Kind-Kit: gebaute Dateien ohne Quelle im Kit (z. B. aus der Zeit als Kopie) verdecken die des Eltern-Kits
+        if (count($kit->chain) > 1) {
+            $pub = Kit::publicDir($kit->name);
+            foreach (['css', 'js'] as $sub) foreach (glob("$pub/$sub/*") ?: [] as $f) {
+                if (is_file($kit->path . "/assets/$sub/" . basename($f))) continue;
+                foreach (array_slice(array_keys($kit->chain), 1) as $p) {
+                    if (is_file(Kit::publicDir($p) . "/$sub/" . basename($f))) {
+                        $out[] = ['level' => 'warn', 'file' => Kit::relative($f), 'text' => "Gebaute Datei ohne Quelle in assets/$sub/ verdeckt die von „{$p}“ – löschen, wenn sie nicht mehr gebraucht wird."];
+                        break;
+                    }
+                }
+            }
+        }
         $blocks = $kit->blocks();
         // Blöcke aktiver Erweiterungen hängen am aktiven Kit (Extension::blocks)
         if (isset(app()->theme)) {
@@ -120,7 +133,9 @@ final class KitCheck
     {
         $css = '';
         foreach (glob($kit->path . '/assets/css/*.css') ?: [] as $f) $css .= (string) file_get_contents($f);
-        if ($css === '') return [];   // Kit ohne eigene Stylesheets (z. B. reine Vorlagen) – nichts zu prüfen
+        if ($css === '' && count($kit->chain) < 2) return [];   // Kit ohne eigene Stylesheets (z. B. reine Vorlagen) – nichts zu prüfen
+        // Gebaute Stylesheets der ganzen Kette: @import ist dort aufgelöst, Geerbtes zählt mit
+        foreach (array_keys($kit->chain) as $k) foreach (glob(Kit::publicDir($k) . '/css/*.css') ?: [] as $f) $css .= (string) file_get_contents($f);
         return array_values(array_map(fn($r) => "--kit-$r", array_filter(self::CONTRACT, fn($r) => !preg_match('~--kit-' . preg_quote($r, '~') . '\s*:~', $css))));
     }
 

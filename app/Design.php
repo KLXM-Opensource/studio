@@ -353,11 +353,11 @@ final class Design
      */
     public static function htmlClasses(array $values): string
     {
-        $fn = preg_replace('~[^a-z0-9_]~', '_', strtolower(app()->theme->name)) . '_html_class';
+        $fn = app()->theme->kitFunction('html_class');   // auch aus dem Eltern-Kit
         $saved = self::$override;
         self::override($values);
         try {
-            $cls = function_exists($fn) ? (string) $fn() : self::classes();
+            $cls = $fn !== null ? (string) $fn() : self::classes();
         } finally {
             self::$override = $saved;
         }

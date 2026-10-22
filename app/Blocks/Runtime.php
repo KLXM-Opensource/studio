@@ -197,8 +197,8 @@ final class Runtime
     {
         $link = trim($link);
         if ($link === '') return '#';
-        $fn = preg_replace('~[^a-z0-9_]~', '', app()->theme->name) . '_link';
-        $h = function_exists($fn) ? (string) $fn($link) : link_href($link);
+        $fn = app()->theme->kitFunction('link');   // auch aus dem Eltern-Kit
+        $h = $fn !== null ? (string) $fn($link) : link_href($link);
         // Letzte Prüfung: nur interne Pfade, Anker und erlaubte Schemata
         if (preg_match('~^(#|/(?!/)|https?://|mailto:|tel:)~i', $h) !== 1) return '#';
         return $h;

@@ -392,7 +392,7 @@ function emphasis(string $text): string
     if (is_editing()) return emphasis_editing($text);
     static $fn = [];
     $kit = app()->theme->name;
-    $fn[$kit] ??= function_exists($f = str_replace('-', '_', $kit) . '_title') ? $f : '';
+    $fn[$kit] ??= (string) app()->theme->kitFunction('title');   // auch aus dem Eltern-Kit
     if ($fn[$kit] !== '') return (string) ($fn[$kit])($text);
     return emphasis_hl($text);
 }

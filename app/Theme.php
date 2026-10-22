@@ -95,8 +95,8 @@ final class Theme
     }
 
     /**
-     * Definition eines Kind-Kits auf die des Eltern-Kits legen: Werte des Kinds ersetzen die der Eltern; blocks, conditional_css,
-     * conditional_js, backgrounds und fragments werden je Schlüssel zusammengeführt (null entfernt einen Eintrag der Eltern).
+     * Definition eines Kind-Kits auf die des Eltern-Kits legen: Werte des Kinds ersetzen die der Eltern; blocks, conditional_css
+     * (Stylesheets und Skripte), backgrounds und fragments werden je Schlüssel zusammengeführt (null entfernt einen Eintrag der Eltern).
      * 'design_defaults' => ['accent' => '#0F766E', 'background' => ['default' => '#fff', 'dark' => '#111']] setzt Standardwerte
      * des geerbten Designs (design.php), ohne es zu kopieren.
      */
@@ -105,7 +105,7 @@ final class Theme
         if (!$parent) return self::applyDesignDefaults($child);
         $out = array_replace($parent, $child);
         if (isset($child['description']) && !isset($child['description_en'])) unset($out['description_en']);   // nicht die Beschreibung der Eltern
-        foreach (['blocks', 'conditional_css', 'conditional_js', 'backgrounds', 'fragments'] as $k) {
+        foreach (['blocks', 'conditional_css', 'backgrounds', 'fragments'] as $k) {
             if (isset($parent[$k]) || isset($child[$k])) {
                 $out[$k] = array_filter(array_replace((array) ($parent[$k] ?? []), (array) ($child[$k] ?? [])), fn($v) => $v !== null);
             }
@@ -128,6 +128,24 @@ final class Theme
         unset($g, $def['design_defaults']);
         $def['design']['emit_defaults'] = true;   // Standardwerte weichen vom CSS des Eltern-Kits ab → Design-Datei immer ausgeben (Design::head)
         return $def;
+    }
+
+    /**
+     * Funktion eines Kits nach Namenskonvention {kit}_{suffix} (z. B. fluid_html_class, fluid_title, fluid_link) – zuerst die des
+     * Kits, dann die der Eltern-Kits; null = keine. Ein Kind-Kit braucht so keine eigene functions.php mit Weiterleitungen.
+     */
+    public function kitFunction(string $suffix): ?string
+    {
+        foreach (array_keys($this->chain) as $k) {
+            if (function_exists($fn = preg_replace('~[^a-z0-9_]~', '_', strtolower($k)) . '_' . $suffix)) return $fn;
+        }
+        return null;
+    }
+
+    /** Klassen je Kit der Kette, z. B. prefixClasses('cms-partners--t-') → 'cms-partners--t-meinkit cms-partners--t-fluid' */
+    public function prefixClasses(string $prefix): string
+    {
+        return implode(' ', array_map(fn($k) => $prefix . $k, array_keys($this->chain)));
     }
 
     /** Erste vorhandene Datei im Kit oder seinen Eltern-Kits (relativ zum Kit-Ordner, z. B. 'templates/search.php'); null = keine */

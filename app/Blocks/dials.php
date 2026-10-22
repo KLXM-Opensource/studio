@@ -55,7 +55,7 @@ $hasJs = false;
 <div class="<?= e(trim($wrap . ' cms-dials-wrap')) ?>">
   <?= $bare ? '' : \Core\MediaBlocks::head($b) ?>
   <?php if ($items): ?>
-  <ul class="cms-dials cms-dials--<?= e($size) ?> cms-dials--<?= e($style) ?> cms-dials--t-<?= e(app()->theme->name) ?>" role="list"<?= $title !== '' && !$bare ? ' aria-labelledby="' . e($b->titleId()) . '"' : ' aria-label="' . e(lt('Kennzahlen')) . '"' ?><?= $animate ? ' data-dials' : '' ?>>
+  <ul class="cms-dials cms-dials--<?= e($size) ?> cms-dials--<?= e($style) ?> <?= e(app()->theme->prefixClasses('cms-dials--t-')) ?>" role="list"<?= $title !== '' && !$bare ? ' aria-labelledby="' . e($b->titleId()) . '"' : ' aria-label="' . e(lt('Kennzahlen')) . '"' ?><?= $animate ? ' data-dials' : '' ?>>
     <?php foreach ($items as $i => $it):
         $value = trim((string) ($it['value'] ?? ''));
         $unit = trim((string) ($it['unit'] ?? ''));

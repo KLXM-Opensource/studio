@@ -34,7 +34,7 @@ $withDetails = fn(array $it): bool => $mode !== 'off' && ($it['info'] !== '' || 
 $anyDetails = (bool) array_filter($items, $withDetails);
 $js = !$editing && $items && ($anyDetails || $sort === 'random' || $canInvert || $tile === 'light');   // helle Kachel: auf dunklem Grund dämpfen (partners.mjs misst)
 
-$cls = ['cms-partners', 'cms-partners--t-' . app()->theme->name, 'cms-partners--r-' . str_replace(':', '-', $ratio), 'cms-partners--c' . $cols,
+$cls = ['cms-partners', app()->theme->prefixClasses('cms-partners--t-'), 'cms-partners--r-' . str_replace(':', '-', $ratio), 'cms-partners--c' . $cols,
     'cms-partners--tile-' . $tile];
 if (!empty($d['gray'])) $cls[] = 'cms-partners--gray';
 if ($onDark) $cls[] = 'cms-partners--on-dark';
