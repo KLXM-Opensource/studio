@@ -84,6 +84,7 @@ final class Tokens
         }
         $row = app()->db->fetch('SELECT * FROM api_tokens WHERE token_hash = ?', [hash('sha256', $plain)]);
         if (!$row) {
+            \Core\SecurityLog::write('api-key-invalid');
             throw new ApiError(401, 'API-Token ist ungültig oder wurde widerrufen.');
         }
         if ($row['expires_at'] && $row['expires_at'] < date('Y-m-d')) {

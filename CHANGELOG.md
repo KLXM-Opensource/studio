@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Sicherheits-Log für fail2ban
+- Optional (`'security_log' => true`): `storage/logs/security.log` mit einer Zeile je Vorfall – fehlgeschlagene Anmeldung, Rate-Limit, zweiter Faktor, Passkey, „Passwort vergessen“ zu oft, ungültiger API-Schlüssel und Abfragen typischer Angriffsadressen (`/wp-login.php`, `/.env`, `/.git/` …, nur ohne Weiterleitung). Hinter vertrauenswürdigen Proxys die echte Besucher-IP. Fertige Filter und Jails für fail2ban bzw. Plesk unter `deploy/fail2ban/`, Anleitung im Entwicklerhandbuch → Sicherheit; Selbsttest `security-log:selftest`.
+
 ### Anmeldung: Passkey zuerst
 - Auf dem Anmeldeschirm steht **„Mit Passkey anmelden“** jetzt oben als Hauptknopf, darunter „oder mit E-Mail und Passwort“ (nur wenn die Anmeldung mit Passkey eingeschaltet ist und der Browser sie unterstützt – sonst wie bisher). Beim zweiten Faktor wird der Passkey immer zuerst angeboten, der App-Code darunter.
 

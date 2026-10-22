@@ -37,3 +37,18 @@
     <tr><td>CalDAV/CardDAV</td><td>20 Fehlversuche/15 min je IP</td></tr>
   </table></div>
   <p>IP-Adressen werden für Rate-Limits nur als HMAC mit dem <code>app_key</code> gespeichert (Tabelle <code>hits</code>, Einträge älter als ein Tag werden aufgeräumt).</p>
+  <h3 id="fail2ban">fail2ban – Angreifer am Server sperren (<code>Core\SecurityLog</code>)</h3>
+  <p>Die Rate-Limits oben gelten je Website und erreichen PHP. fail2ban sperrt wiederholte Angreifer zusätzlich an der Firewall – für alle Websites und Dienste des Servers. Dafür schreibt KLXM Studio auf Wunsch ein Sicherheits-Log:</p>
+  <ul>
+    <li><b>Einschalten:</b> <code>'security_log' =&gt; true</code> in <code>config/config.local.php</code> (Standard aus – die Datei enthält IP-Adressen). Datei <code>storage/logs/security.log</code>, über 5 MB wird sie zu <code>security.log.1</code> (eine Vorgängerdatei).</li>
+    <li><b>Zeile:</b> <code>2026-10-23T01:30:00+02:00 klxm-studio auth-failed ip=203.0.113.7 site=default path=/admin/login</code> – keine E-Mail-Adressen, keine Passwörter. Hinter einem vertrauenswürdigen Proxy (<code>trusted_proxies</code>, private Adressen) steht die letzte Adresse aus <code>X-Forwarded-For</code>, damit nicht der Proxy gesperrt wird.</li>
+    <li><b>Ereignisse:</b> <code>auth-failed</code> (falsches Passwort, unbekanntes Konto), <code>auth-limited</code> (Rate-Limit erreicht), <code>2fa-failed</code>, <code>passkey-failed</code>, <code>reset-limited</code> („Passwort vergessen“ zu oft je IP), <code>api-key-invalid</code>, <code>probe</code> – Abfragen typischer Angriffsadressen, die es in KLXM Studio nicht gibt (<code>/wp-login.php</code>, <code>/xmlrpc.php</code>, <code>/.env</code>, <code>/.git/</code>, phpMyAdmin, PHPUnit, <code>.sql</code>/<code>.bak</code>/<code>.asp</code> …), nur wenn keine Weiterleitung greift (alte Links einer umgezogenen Website zählen nicht; <code>/wp-content/uploads/…</code> ebenfalls nicht).</li>
+  </ul>
+  <p><b>Filter und Jails</b> liegen im Repository unter <code>deploy/fail2ban/</code>: <code>klxm-studio-auth.conf</code> (Anmeldung, zweiter Faktor, Passwort vergessen, API-Schlüssel), <code>klxm-studio-probe.conf</code> (Angriffsadressen), <code>jail.local.example</code> (Vorschlag: Anmeldung 10 Treffer in 15 Minuten → 1 Stunde gesperrt, Angriffsadressen 3 in 1 Stunde → 24 Stunden).</p>
+  <ol>
+    <li><b>Plesk</b> (nur mit Administratorzugang): <b>Tools &amp; Einstellungen → IP-Adressen sperren (Fail2Ban)</b> → Reiter <b>Filter</b> → <b>Filter hinzufügen</b>: Name <code>klxm-studio-auth</code>, Inhalt der gleichnamigen Datei; ebenso <code>klxm-studio-probe</code>.</li>
+    <li>Reiter <b>Jails</b> → <b>Jail hinzufügen</b>: Name, Filter wählen, Aktion <code>iptables-multiport[name=klxm-studio-auth, port="http,https"]</code>, Logpfad <code>/var/www/vhosts/&lt;domain&gt;/httpdocs/storage/logs/security.log</code> (je Installation eine Zeile), Werte aus <code>jail.local.example</code>; einschalten.</li>
+    <li>Reiter <b>Vertrauenswürdige IP-Adressen</b>: eigene Adressen (Büro, Monitoring) eintragen, damit sich niemand nach Tippfehlern aussperrt.</li>
+    <li>Prüfen auf dem Server: <code>fail2ban-regex /var/www/vhosts/&lt;domain&gt;/httpdocs/storage/logs/security.log /etc/fail2ban/filter.d/klxm-studio-auth.conf</code>; gesperrte Adressen im Reiter <b>Gesperrte IP-Adressen</b> (dort auch wieder freigeben).</li>
+  </ol>
+  <p>Ohne Plesk: Filter nach <code>/etc/fail2ban/filter.d/</code>, <code>jail.local.example</code> angepasst nach <code>/etc/fail2ban/jail.d/klxm-studio.local</code>, <code>systemctl reload fail2ban</code>. Selbsttest (Angriffsadressen, Format, Filter): <code>security-log:selftest</code>.</p>

@@ -102,7 +102,7 @@ final class PasswordReset
         $db = app()->db;
         $limiter = new RateLimiter($db);
         $ipKey = 'pwreset-ip:' . hash_hmac('sha256', $ip, app()->key());
-        if ($limiter->tooMany($ipKey, self::PER_IP, self::IP_WINDOW)) return 'limited-ip';
+        if ($limiter->tooMany($ipKey, self::PER_IP, self::IP_WINDOW)) { SecurityLog::write('reset-limited'); return 'limited-ip'; }
         $limiter->hit($ipKey);
         $mailKey = 'pwreset-mail:' . hash_hmac('sha256', $email, app()->key());
         if ($limiter->tooMany($mailKey, self::PER_ADDRESS, 3600)) {

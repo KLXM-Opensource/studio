@@ -1,0 +1,24 @@
+# KLXM Studio – Jails für fail2ban (Beispiel). Plesk: Tools & Einstellungen → IP-Adressen sperren (Fail2Ban) → Jails → Jail hinzufügen;
+# ohne Plesk: nach /etc/fail2ban/jail.d/klxm-studio.local kopieren, Filter nach /etc/fail2ban/filter.d/.
+# logpath: je Installation die eigene Datei (Plesk: /var/www/vhosts/<domain>/httpdocs/storage/logs/security.log); mehrere Zeilen erlaubt.
+# Eigene Adressen (Büro, Monitoring) unter ignoreip eintragen bzw. in Plesk auf die Liste vertrauenswürdiger IP-Adressen setzen.
+
+[klxm-studio-auth]
+enabled  = true
+filter   = klxm-studio-auth
+logpath  = /var/www/vhosts/example.org/httpdocs/storage/logs/security.log
+port     = http,https
+action   = iptables-multiport[name=klxm-studio-auth, port="http,https"]
+maxretry = 10
+findtime = 900
+bantime  = 3600
+
+[klxm-studio-probe]
+enabled  = true
+filter   = klxm-studio-probe
+logpath  = /var/www/vhosts/example.org/httpdocs/storage/logs/security.log
+port     = http,https
+action   = iptables-multiport[name=klxm-studio-probe, port="http,https"]
+maxretry = 3
+findtime = 3600
+bantime  = 86400

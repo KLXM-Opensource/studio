@@ -141,6 +141,7 @@
  *                                                     Ernstfall: neueste Sicherungen vom Ziel holen, entschlüsseln und alles einspielen
  *   backup:key                                        Schlüssel der Sicherungen anzeigen (an einem anderen Ort aufbewahren!)
  *   backup:selftest                                   Selbsttest (Verschlüsselung, Auswahl der Dateien, Ziel „Ordner“)
+ *   security-log:selftest                             Selbsttest Sicherheits-Log für fail2ban (Angriffsadressen, Format, Filter)
  *
  * Medien & Daten
  *   pool:create <key> "Name"                          Geteilten Medien-Pool anlegen (Websites: 'media_pools' => [...])
@@ -1199,6 +1200,12 @@ switch ($cmd) {
         if (!Core\Backup\Vault::hasKey()) { echo "Noch kein Schlüssel – er entsteht mit der ersten Sicherung außer Haus.\n"; break; }
         echo Core\Backup\Vault::export(Core\Backup\Vault::key()) . "\n  Fingerabdruck: " . Core\Backup\Vault::fingerprint() . " – an einem anderen Ort aufbewahren, ohne ihn lässt sich nichts entschlüsseln.\n";
         break;
+
+    case 'security-log:selftest':
+        $res = Core\SecurityLog::selftest();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'backup:selftest':
         $res = Core\Backup\SelfTest::run();

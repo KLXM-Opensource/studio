@@ -75,6 +75,7 @@ final class TwoFactorController extends AdminController
                 : Totp::verifyRecovery($db, $row, $code);
         }
         if (!$ok) {
+            \Core\SecurityLog::write('2fa-failed');
             $nl->hit($nKey);
             (new RateLimiter(app()->db))->hit($this->ipKey($r));
             return $this->challengeForm($r, in_array('totp', $methods, true) ? __('Der Code stimmt nicht. Bitte den aktuellen Code aus der App eingeben.')
@@ -115,6 +116,7 @@ final class TwoFactorController extends AdminController
         $err = $nl && $nl->tooMany($nKey, 10, 900) ? __('Zu viele Fehlversuche. Bitte warten Sie 15 Minuten.')
             : Passkeys::verify($db, '2fa', $in, $hash ? Passkeys::find($db, $hash, (int) $row['id']) : null, Mfa::handle($row));
         if ($err !== null) {
+            \Core\SecurityLog::write('passkey-failed');
             $nl?->hit($nKey);
             (new RateLimiter(app()->db))->hit($this->ipKey($r));
             return Response::json(['error' => $err], 422);

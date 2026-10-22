@@ -218,6 +218,8 @@ final class App
             if ($e->getCode() === 404 && ($to = Redirects\Redirects::handle404($request))) {
                 return $to;
             }
+            // Typische Angriffsadresse (/wp-login.php, /.env …) ohne Weiterleitung → Sicherheits-Log für fail2ban
+            if ($e->getCode() === 404 && SecurityLog::isProbe($request->path)) SecurityLog::write('probe');
             return (new Http\Controllers\SiteController())->error($e->getCode(), $e->getMessage());
         } catch (\Throwable $e) {
             error_log((string) $e);

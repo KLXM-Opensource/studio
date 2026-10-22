@@ -107,6 +107,7 @@ final class Auth
     /** Abgelehnte Anmeldung an Erweiterungen melden (Extension::on 'user.login_failed') */
     private function failed(string $email, string $ip, string $reason): void
     {
+        SecurityLog::write($reason === 'limited' ? 'auth-limited' : 'auth-failed');   // fail2ban (nur mit 'security_log' => true)
         if (Extensions::listens('user.login_failed')) Extensions::emit(new Events\LoginFailed(mb_substr(trim($email), 0, 191), $ip, $reason));
     }
 
