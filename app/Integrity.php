@@ -12,9 +12,9 @@ namespace Core;
  *   - Prüfsummen der Dateien, die Angreifer bevorzugt verändern: public/index.php, PHP-Code von Kern, Kits und Erweiterungen,
  *     Autoloader (vendor/autoload.php, vendor/composer/), config/*.php, composer.json/.lock sowie jede .htaccess, .user.ini,
  *     php.ini, web.config und .env im Installations- und Web-Ordner. Neu oder geändert = Fehler (PHP, Serverkonfiguration) bzw. Hinweis.
- *   - Sperrzonen ohne Vergleichsstand: ausführbarer Code (.php, .phtml, .phar …) in public/ (außer index.php und eigenständigen
- *     Programmen wie Matomo, siehe apps()) und in storage/ (außer hochgeladenen Kits) ist immer ein Fehler. Serverkonfiguration
- *     (.htaccess …) überwachen die Prüfsummen; die SVG-Schutzdatei aus Svg::guard ist bekannt.
+ *   - Sperrzone ohne Vergleichsstand: ausführbarer Code (.php, .phtml, .phar …) in public/ (außer index.php und eigenständigen
+ *     Programmen wie Matomo, siehe apps()) ist immer ein Fehler. Serverkonfiguration (.htaccess …) und ausführbare Dateien im
+ *     Datenordner storage/ (außerhalb des Web-Ordners) überwachen die Prüfsummen; die SVG-Schutzdatei aus Svg::guard ist bekannt.
  *   - Neue Dateien in den Medienordnern: PHP-Code im Inhalt (z. B. als Bild getarnt) ist ein Fehler.
  * Datenbank (je Website): Trigger und Views (beliebtes Versteck), unbekannte Tabellen, neue Administrator-Konten, neue
  * API-Schlüssel, Skript-Code in Seiteninhalten (der Editor speichert nie <script>, javascript: oder on…-Attribute).
@@ -112,6 +112,13 @@ final class Integrity
         $guard = Svg::guardContent();   // SVG-Schutz, den der Kern selbst in Medienordnern anlegt – bekannt, nie ein Fund
         self::walk(ROOT . '/public', function (string $f) use (&$out, $guard) {
             if (in_array(basename($f), self::CONFIG_NAMES, true) && @file_get_contents($f) !== $guard) $out[self::rel($f)] = hash_file('sha256', $f);
+        });
+        // Datenordner (außerhalb des Web-Ordners): ausführbare Dateien und Serverkonfiguration über Prüfsummen – vorhandene
+        // (z. B. Sicherungskopien, Schutzdatei einer Erweiterung) lassen sich übernehmen, jede neue ist ein Fehler
+        self::walk(ROOT . '/storage', function (string $f) use (&$out) {
+            $rel = self::rel($f);
+            if (str_starts_with($rel, 'storage/kits/') || str_starts_with($rel, 'storage/cache/phpstan/')) return;
+            if (preg_match(self::SCRIPT, basename($f)) || in_array(basename($f), self::CONFIG_NAMES, true)) $out[$rel] = hash_file('sha256', $f);
         });
         // Eigenständige Programme im Web-Ordner (Matomo …): ihr Code, ohne Cache
         foreach (array_keys(self::apps()) as $pre) {
@@ -222,13 +229,6 @@ final class Integrity
             foreach (array_keys(self::apps()) as $pre) if (str_starts_with($rel, $pre)) return;
             if (preg_match(self::SCRIPT, $name)) {
                 $out[] = ['level' => 'error', 'kind' => 'forbidden', 'path' => $rel, 'text' => __('Ausführbare Datei im Web-Ordner: {path}', ['path' => $rel])];
-            }
-        });
-        self::walk(ROOT . '/storage', function (string $f) use (&$out) {
-            $rel = self::rel($f);
-            if (str_starts_with($rel, 'storage/kits/') || str_starts_with($rel, 'storage/cache/phpstan/')) return;
-            if (preg_match(self::SCRIPT, basename($f)) || in_array(basename($f), ['.htaccess', '.user.ini', 'php.ini'], true)) {
-                $out[] = ['level' => 'error', 'kind' => 'forbidden', 'path' => $rel, 'text' => __('Ausführbare Datei im Datenordner: {path}', ['path' => $rel])];
             }
         });
         return $out;
