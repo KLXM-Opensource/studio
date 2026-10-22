@@ -13,6 +13,7 @@ namespace Core;
  *       ['id' => 'farben', 'label' => 'Farben', 'tokens' => [
  *         ['name' => 'accent', 'label' => 'Akzent', 'type' => 'color', 'var' => '--b-a', 'default' => '#0F766E', 'dark' => '#2DD4BF',
  *          'contrast' => ['with' => '#FFFFFF', 'min' => 4.5]],          // Prüfung im Editor (with: Farbe oder anderer Token-Name)
+ *          // 'dark_var' => '--x-dark': dunkler Wert zusätzlich immer unter diesem Namen (auch im hellen Farbschema)
  *         …]],
  *       …],
  *     'fonts'   => ['inter' => ['label' => 'Inter', 'stack' => 'Inter, system-ui, sans-serif', 'css' => 'css/font-inter.css'], …],
@@ -208,6 +209,9 @@ final class Design
                 default => null,
             };
             if ($var !== '' && $css !== null && $css !== '') $light[] = $var . ':' . $css;
+            // 'dark_var': dunkler Wert zusätzlich immer unter eigenem Namen – für Bausteine, die selbst zwischen hell und dunkel wählen
+            // (z. B. Diagramme in dunklen Abschnitten einer hellen Seite: --chart-cd1)
+            if (!empty($t['dark_var']) && isset($values[$n . '@dark'])) $light[] = $t['dark_var'] . ':' . $values[$n . '@dark'];
             if ($var !== '' && isset($values[$n . '@dark'])) $dark[] = $var . ':' . $values[$n . '@dark'];
         }
         $out = ':root{' . implode(';', $light) . '}';

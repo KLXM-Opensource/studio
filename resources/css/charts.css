@@ -1,9 +1,10 @@
 /* Diagramme (Core\Charts) – Website und Verwaltung (admin.css importiert diese Datei).
    Farben als Variablen, die Kits überschreiben können: --chart-1 … --chart-8 (Reihen in fester Reihenfolge), --chart-ink (Text),
    --chart-muted (Achsen, Beschriftung), --chart-grid (Raster, Linien), --chart-bg (Fläche hinter dem Diagramm, Tooltip),
-   --chart-dark (1 = dunkle Stufen). Standard: geprüfte Palette (Farbfehlsichtigkeit, Kontrast), hell und dunkel eigens gestuft. */
-.cms-chart{--chart-1:#2A78D6;--chart-2:#EB6834;--chart-3:#1BAF7A;--chart-4:#EDA100;--chart-5:#E87BA4;--chart-6:#008300;--chart-7:#6250D6;--chart-8:#E34948;
-  --chart-d1:#3987E5;--chart-d2:#D95926;--chart-d3:#199E70;--chart-d4:#C98500;--chart-d5:#D55181;--chart-d6:#008300;--chart-d7:#9085E9;--chart-d8:#E66767;
+   --chart-dark (1 = dunkle Stufen). Standard: geprüfte Palette (Farbfehlsichtigkeit, Kontrast), hell und dunkel eigens gestuft.
+   Reihen 1–6 aus dem Design-Editor (Core\Charts::designGroup → --chart-c1 … c6, dunkle Stufen --chart-cd1 … cd6), sonst Palette. */
+.cms-chart{--chart-1:var(--chart-c1,#2A78D6);--chart-2:var(--chart-c2,#EB6834);--chart-3:var(--chart-c3,#1BAF7A);--chart-4:var(--chart-c4,#EDA100);--chart-5:var(--chart-c5,#E87BA4);--chart-6:var(--chart-c6,#008300);--chart-7:#6250D6;--chart-8:#E34948;
+  --chart-d1:var(--chart-cd1,#3987E5);--chart-d2:var(--chart-cd2,#D95926);--chart-d3:var(--chart-cd3,#199E70);--chart-d4:var(--chart-cd4,#C98500);--chart-d5:var(--chart-cd5,#D55181);--chart-d6:var(--chart-cd6,#008300);--chart-d7:#9085E9;--chart-d8:#E66767;
   margin:0;display:grid;gap:8px;min-width:0}
 /* Text, Linien und Fläche leitet der Lader aus Schriftfarbe und Hintergrund ab (hell/dunkel automatisch). Kits können sie festlegen:
    --chart-ink, --chart-muted, --chart-grid, --chart-bg, --chart-dark (1/0) sowie --chart-1 … 8 (hell) und --chart-d1 … d8 (dunkel). */

@@ -41,6 +41,31 @@ final class Charts
     private static array $engines = [];
     private static bool $loader = false;
 
+    /** Standard-Reihenfarben (geprüfte Palette) hell und dunkel – Rückfallwerte in resources/css/charts.css, Standard im Design-Editor */
+    public const PALETTE = ['#2A78D6', '#EB6834', '#1BAF7A', '#EDA100', '#E87BA4', '#008300'];
+    public const PALETTE_DARK = ['#3987E5', '#D95926', '#199E70', '#C98500', '#D55181', '#008300'];
+
+    /**
+     * Gruppe „Diagramme“ für den Style-Editor (design.php → groups): die ersten sechs Reihenfarben, je hell und dunkel, als CSS-Variablen
+     * --chart-c1 … c6 (hell, im Dunkelmodus dunkel) und --chart-cd1 … cd6 (immer dunkel – für dunkle Abschnitte); charts.css nutzt sie
+     * vor der Standardpalette. $defaults: ['chart_1' => '#A8541C' bzw.
+     * ['default' => …, 'dark' => …]] – Standard des Kits; $opt['label'] = Gruppenname.
+     */
+    public static function designGroup(array $defaults = [], array $opt = []): array
+    {
+        $t = fn(string $s): string => $s;   // Markierung für i18n:missing (Übersetzung im Style-Editor über __())
+        $tokens = [];
+        foreach (self::PALETTE as $i => $light) {
+            $n = $i + 1;
+            $d = $defaults['chart_' . $n] ?? null;
+            $tokens[] = ['name' => 'chart_' . $n, 'label' => $t('Reihe') . ' ' . $n, 'type' => 'color', 'var' => '--chart-c' . $n, 'dark_var' => '--chart-cd' . $n,
+                'default' => is_array($d) ? (string) ($d['default'] ?? $light) : (string) ($d ?? $light),
+                'dark' => is_array($d) ? (string) ($d['dark'] ?? self::PALETTE_DARK[$i]) : (string) ($d ?? self::PALETTE_DARK[$i])]
+                + ($n === 1 ? ['help' => $t('Farben der Reihen in Diagrammen – in dieser Reihenfolge. Gut unterscheidbare Töne wählen (auch bei Farbsehschwäche); die Werte stehen zusätzlich als Tabelle bereit.')] : []);
+        }
+        return ['id' => 'diagramme', 'label' => (string) ($opt['label'] ?? $t('Diagramme')), 'tokens' => $tokens];
+    }
+
     /** Text in der Sprache des Ortes: Verwaltung __(), Website lt() */
     private static function t(string $s, array $r = []): string
     {

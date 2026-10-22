@@ -113,6 +113,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Befehlsfeld „Suchen … ⌘K“ + Newsletter als Textlink (zur Datumszeile)
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'link', 'ha_search' => 'command']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Farbschema', 'tokens' => [
             ['name' => 'dark', 'label' => 'Nachtausgabe (dunkles Farbschema), wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
         ]],

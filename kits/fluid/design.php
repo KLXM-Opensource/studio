@@ -243,6 +243,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Suchfeld in der Leiste + Textlink
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'link', 'ha_search' => 'inline']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Dezente Animationen beim Scrollen (Einblenden, Laufband)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],

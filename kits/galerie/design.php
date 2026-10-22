@@ -198,6 +198,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Suche als Symbol + Textlink („Besuch planen“)
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'link', 'ha_search' => 'icon']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Dezente Animationen beim Scrollen (Einblenden)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],

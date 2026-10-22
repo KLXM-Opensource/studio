@@ -98,6 +98,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions): Standard des Kits = abgesetzter Menüpunkt „Kontakt“ + Lupe
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'navitem', 'ha_cta' => 'contact', 'ha_search' => 'popover']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Farbschema', 'tokens' => [
             ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
         ]],

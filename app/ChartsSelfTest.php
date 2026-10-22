@@ -43,6 +43,11 @@ final class ChartsSelfTest
         $eq('Datentabelle: unbekannte Tabelle → keine Daten', Charts::fromTable(['table' => 'gibt-es-nicht', 'value_fields' => ['gibt-es-nicht.x']]), []);
         $dt = \Core\Data\Tables::content()[0] ?? null;
         if ($dt) $eq('Datentabelle: nur Zahlenfelder als Reihen', Charts::fromTable(['table' => $dt['handle'], 'value_fields' => [$dt['handle'] . '._title', 'andere.zahl']]), []);
+        $g = Charts::designGroup(['chart_1' => '#A8541C', 'chart_2' => ['default' => '#111111', 'dark' => '#EEEEEE']]);
+        $eq('Design-Gruppe: sechs Reihenfarben mit hellem und dunklem Namen', [count($g['tokens']), $g['tokens'][0]['var'], $g['tokens'][0]['dark_var']], [6, '--chart-c1', '--chart-cd1']);
+        $eq('Design-Gruppe: Standard des Kits (einfach / hell+dunkel), sonst Palette', [$g['tokens'][0]['default'], $g['tokens'][0]['dark'], $g['tokens'][1]['dark'], $g['tokens'][2]['default']], ['#A8541C', '#A8541C', '#EEEEEE', Charts::PALETTE[2]]);
+        $css = (string) file_get_contents(ROOT . '/public/assets/css/charts.css');
+        $eq('charts.css: Reihen 1–6 aus dem Design, sonst Palette', [str_contains($css, '--chart-1:var(--chart-c1,' . Charts::PALETTE[0]), str_contains($css, '--chart-d1:var(--chart-cd1,' . Charts::PALETTE_DARK[0])], [true, true]);
         $eq('Engine echarts vorhanden', isset(Charts::engines()['echarts']), true);
         $eq('Engine-Datei gebaut', is_file(ROOT . '/public/assets/js/charts-echarts.mjs') && is_file(ROOT . '/public/assets/js/charts.mjs'), true);
         $eq('Format bytes/percent', [Charts::format(1536, 'bytes'), Charts::format(12, 'percent')], [fmt()->bytes(1536), fmt()->number(12) . ' %']);

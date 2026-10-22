@@ -123,6 +123,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Befehlsfeld „Suchen … ⌘K“ aus Glas im Dock + Kontakt-Menü als Glastaste mit Glaspaneel
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'menu', 'ha_menu_icon' => 'chats', 'ha_search' => 'command']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Sanfte Bewegung (Aurora, Einblenden)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung. Außer Sicht pausiert die Aurora.'],

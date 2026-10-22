@@ -204,6 +204,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: ruhig – Handlungsaufruf als letzter Menüpunkt, Suche als Lupe
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'navitem', 'ha_search' => 'popover']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Dezente Animationen (Einblenden, Überblenden der Bühne)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],

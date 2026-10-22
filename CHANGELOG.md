@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Diagrammfarben im Design-Editor
+- Neue Gruppe **„Diagramme“** im Design-Editor aller Kits mit Design-Editor: die ersten sechs Reihenfarben, je hell und dunkel (`Core\Charts::designGroup()`, Variablen `--chart-c1 … c6` / `--chart-cd1 … cd6`). Ohne Einstellung bleibt die geprüfte Standardpalette. `Core\Design` kennt dafür `'dark_var'` (dunkler Wert zusätzlich unter eigenem Namen).
+
 ### Kit fluid: Downloads mit Vorschau, Suche, Kacheln und Schlagworten
 - Variante „Liste“: kleines Vorschaubild je Datei (Bild, erste PDF-Seite, Videobild – sonst Symbol je Dateityp), Werkzeugleiste ab drei Dateien mit Suche (alle Wörter, ohne Akzente, Escape leert) und Umschalter Liste/Kacheln (Wahl bleibt im Browser, weicher Wechsel ohne reduzierte Bewegung), Trefferzahl für Screenreader. Neue Felder: Darstellung zu Beginn, Werkzeugleiste an/aus.
 - Optional **Filter nach Schlagworten** der Mediathek (mehrere wählbar, kombiniert mit der Suche; nur ab zwei verschiedenen, wahlweise nur bestimmte Schlagworte) und **„Nur Dateien mit Schlagworten“** für beide Varianten.

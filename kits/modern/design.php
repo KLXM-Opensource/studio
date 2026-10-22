@@ -109,6 +109,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: geteilte Aktion (Anfrage + Anruf) + aufziehende Suche
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'split', 'ha_search' => 'expand']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Dezente Übergänge (Einblenden beim Scrollen, Hover)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],

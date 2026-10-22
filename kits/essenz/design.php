@@ -126,6 +126,7 @@ return [
         ]],
         // Kopfbereich-Aktionen (Core\HeaderActions) – Standard des Kits: Kontakt-Menü (Symbol + Geräte-Paneel) + Telefon-Chip mit Statuspunkt (Rams-Anzeige)
         \Core\HeaderActions::designGroup(['ha_cta_style' => 'menu', 'ha_menu_icon' => 'address-book', 'ha_search' => 'popover', 'ha_contact' => 'phone']),
+        \Core\Charts::designGroup(),   // Reihenfarben der Diagramme (Core\Charts)
         ['id' => 'modus', 'label' => 'Bewegung & Farbschema', 'tokens' => [
             ['name' => 'motion', 'label' => 'Dezente Bewegung (Einblenden, Skalen füllen sich)', 'type' => 'bool', 'class' => 'has-motion', 'default' => true,
                 'help' => 'Besucher mit „Bewegung reduzieren“ sehen nie Animationen – unabhängig von dieser Einstellung.'],
