@@ -865,8 +865,12 @@ final class DataForms
         $key = substr('formular-' . trim((string) preg_replace('~[^a-z0-9-]+~', '-', strtolower(site()->key)), '-'), 0, 32);
         try {
             if (!is_file(MediaPools::dir($key) . '/pool.json')) {
-                MediaPools::create($key, 'Formular-Uploads (' . site()->key . ')', [site()->key], ['protected' => true, 'form_uploads' => true]);
+                // Die Website pflegt ihren Pool selbst (sichten, verschieben, löschen – Recht „Geteilte Medien pflegen“)
+                MediaPools::create($key, 'Formular-Uploads (' . site()->key . ')', [site()->key], ['protected' => true, 'form_uploads' => true, 'editors' => [site()->key]]);
                 MediaPools::forget();
+            } elseif (!in_array(site()->key, (array) (MediaPools::meta($key)['editors'] ?? []), true) && !empty(MediaPools::meta($key)['form_uploads'])) {
+                $meta = MediaPools::meta($key);
+                MediaPools::update($key, (string) $meta['label'], (array) $meta['sites'], array_values(array_unique(array_merge((array) ($meta['editors'] ?? []), [site()->key]))));
             }
         } catch (\Throwable $e) {
             error_log('[Formular] Pool für Uploads: ' . $e->getMessage());

@@ -1120,6 +1120,62 @@ final class Media
         return $pid;
     }
 
+    /**
+     * Datei von einem Pool in einen anderen verschieben – ohne Auswirkung auf die Auslieferung: alle Verweise auf allen Websites
+     * der Installation (media.pool_ref) zeigen danach auf die neue Stelle, IDs und Verwendungen bleiben. Abbruch vorher, wenn eine
+     * Website die Datei verwendet, den Zielpool aber nicht nutzt (dort verschwände sie sonst). Sammlungen sind je Pool – die
+     * Datei verlässt die Sammlungen des alten Pools. Wechsel geschützt ↔ öffentlich ändert bewusst, wer die Datei sehen darf.
+     * @return array{id: int, sites: list<string>} neue ID im Zielpool, Websites mit umgestellten Verweisen
+     */
+    public static function movePoolFile(string $from, int $poolId, string $to): array
+    {
+        if ($from === $to) throw new \RuntimeException('Die Datei liegt schon in diesem Pool.');
+        foreach ([$from, $to] as $k) if (!is_file(MediaPools::dir($k) . '/pool.json')) throw new \RuntimeException('Unbekannter Medien-Pool.');
+        $m = MediaPools::row($from, $poolId) ?? throw new \RuntimeException('Datei im Pool nicht gefunden.');
+        $ref = "$from:$poolId";
+        // 1. Wer verweist auf die Datei? Jede dieser Websites muss den Zielpool nutzen
+        $using = [];
+        $targetSites = MediaPools::sitesUsing($to);
+        foreach (array_keys(Sites::all()) as $k) {
+            try { $db = Network\Stats::db((string) $k); } catch (\Throwable) { continue; }
+            if (!$db->fetchValue('SELECT 1 FROM media WHERE pool_ref = ? LIMIT 1', [$ref])) continue;
+            if (!in_array((string) $k, $targetSites, true)) {
+                throw new \RuntimeException(__('„{file}“ wird auf der Website „{site}“ verwendet, die den Zielpool nicht nutzt – dort würde sie fehlen. Zuerst den Pool für diese Website freigeben.',
+                    ['file' => (string) ($m['title'] ?: $m['original_name'] ?: $m['file']), 'site' => (new Site((string) $k, Sites::all()[$k]))->label()]));
+            }
+            $using[(string) $k] = $db;
+        }
+        // 2. Dateien (Original, Größen, Zuschnitte, Bearbeitungen, Video-Fassungen) kopieren, Eintrag im Zielpool anlegen
+        $prev = self::$pool;
+        self::usePool($from);
+        try { $files = self::files($m); } finally { self::usePool($prev); }
+        $src = MediaPools::mediaDir($from);
+        $dst = MediaPools::mediaDir($to);
+        foreach ($files as $rel) {
+            if (!is_file("$src/$rel")) continue;
+            @mkdir(dirname("$dst/$rel"), 0775, true);
+            if (!copy("$src/$rel", "$dst/$rel")) throw new \RuntimeException('Datei konnte nicht kopiert werden.');
+        }
+        if ($m['mime'] === Svg::MIME && !MediaPools::isProtected($to)) Svg::guard($dst);
+        $row = array_filter($m, fn($k) => is_string($k) && $k !== 'id' && $k[0] !== '_' && $k !== 'pool_ref', ARRAY_FILTER_USE_KEY);
+        $pid = (int) MediaPools::db($to)->insert('media', $row + ['updated_at' => now()]);
+        MediaTracks::movePool($from, $poolId, $to, $pid);   // Untertitel wandern mit
+        // 3. Verweise auf allen Websites umstellen, Zwischenspeicher leeren
+        foreach ($using as $k => $db) {
+            $db->update('media', ['pool_ref' => "$to:$pid", 'updated_at' => now()], 'pool_ref = :r', ['r' => $ref]);
+            PageCache::clearSite($k);
+        }
+        // 4. Erst jetzt die Quelle entfernen (Dateien + Eintrag im alten Pool, auch aus dessen Sammlungen)
+        foreach ($files as $rel) @unlink("$src/$rel");
+        $old = MediaPools::db($from);
+        try { $old->query('DELETE FROM media_collection_items WHERE media_id = ?', [$poolId]); } catch (\Throwable) { /* ohne Sammlungen */ }
+        $old->query('DELETE FROM media WHERE id = ?', [$poolId]);
+        self::$cache = [];
+        MediaPools::forget();
+        PageCache::clear();
+        return ['id' => $pid, 'sites' => array_keys($using)];
+    }
+
     private static function deleteFiles(array $m): void
     {
         @unlink(self::dir() . '/' . $m['file']);

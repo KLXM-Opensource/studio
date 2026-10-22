@@ -103,6 +103,7 @@ const api = {
   deleteCollection: id => http(`${BASE}/api/collections/${id}/delete`, { method: 'POST', json: {} }),
   use: id => http(BASE + '/api/media-use', { method: 'POST', json: { id } }),
   share: (ids, target) => http(BASE + '/api/media-share', { method: 'POST', json: { ids, target } }),
+  movePool: (ids, target) => http(BASE + '/api/media-move-pool', { method: 'POST', json: { ids, target } }),   // Quelle: aktueller Pool (POOL)
 };
 
 // Dialoge, Menüs und Meldungen: auf der Website in der Shadow-DOM-Ebene (_shadow.js), in der Verwaltung im body
@@ -1092,6 +1093,18 @@ class Finder {
           ? 'Die Dateien sind danach nur noch für angemeldete Personen abrufbar (z. B. Mitglieder) – nicht mehr öffentlich und nicht in der Suche. Bisherige Verwendungen auf öffentlichen Seiten zeigen sie Besuchern dann nicht mehr.'
           : 'Die Dateien stehen dann allen Websites zur Verfügung, die diesen Pool nutzen. Bisherige Verwendungen auf dieser Website bleiben erhalten; ändern dürfen sie danach nur Personen mit dem Recht „Geteilte Medien pflegen“.') }))) return;
         try { const r = await api.share(ids, p.key); toast(`${r.shared} ${r.shared === 1 ? 'Datei' : 'Dateien'} geteilt`); this.sel.clear(); this.load(); }
+        catch (ex) { toast(ex.message); }
+      }]);
+    }
+    // Zwischen Pools verschieben: Verweise aller Websites wandern mit – auf den Seiten ändert sich nichts
+    const here = (this.meta.pools || []).find(p => p.key === this.pool);
+    if (this.pool && here?.edit && ids.length) for (const p of (this.meta.pools || []).filter(p => p.edit && p.key !== this.pool)) {
+      e.push([`In „${p.label}“ verschieben (${p.protected ? 'geschützt' : 'geteilt'}) …`, async () => {
+        const vis = p.protected === here.protected ? ''
+          : (p.protected ? '\n\nDer Zielpool ist geschützt: Die Dateien sind danach nur noch für angemeldete Personen abrufbar – Besucher öffentlicher Seiten sehen sie nicht mehr.'
+            : '\n\nDer Zielpool ist öffentlich: Die Dateien sind danach für alle abrufbar.');
+        if (!(await ask({ ok: 'Verschieben', danger: p.protected !== here.protected, title: `${ids.length > 1 ? ids.length + ' Dateien' : '„' + (one?.display || '') + '“'} von „${here.label}“ nach „${p.label}“ verschieben?\n\nAlle Verwendungen auf allen Websites bleiben erhalten und zeigen auf die neue Stelle.` + vis }))) return;
+        try { const r = await api.movePool(ids, p.key); toast(`${r.moved} ${r.moved === 1 ? 'Datei' : 'Dateien'} verschoben` + (r.errors?.length ? ' – ' + r.errors[0] : '')); this.sel.clear(); this.load(); }
         catch (ex) { toast(ex.message); }
       }]);
     }

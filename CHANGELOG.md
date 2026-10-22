@@ -19,6 +19,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - API-Tokens: Freigabe-Modus ändern und Widerrufen nur für eigene Tokens (oder mit allen Rechten).
 - Zwei-Faktor: Fehlversuche zusätzlich je Konto begrenzt (lokale Konten); Passwortabfrage beim Abschalten und für neue Wiederherstellungscodes mit Begrenzung.
 - „Als Person arbeiten“: Funktionen und Chat gesperrt.
+- Medien zwischen geteilten Pools verschieben (`Media::movePoolFile`, Rechtsklick in der geteilten Mediathek): alle Verweise aller Websites wandern mit, die Auslieferung bleibt unverändert; Abbruch, wenn eine verwendende Website den Zielpool nicht nutzt. Der Pool „Formular-Uploads“ wird von seiner Website selbst gepflegt.
 - Formular-Uploads (Datentabellen) liegen nicht mehr öffentlich: geschützter Pool „Formular-Uploads“ je Website (`DataForms::uploadPool`), nur für die angemeldete Redaktion.
 - API-Tokens (lesend und schreibend) nur für Konten mit allen Rechten – die API kennt keine Einschränkung auf einzelne Tabellen.
 - `X-Forwarded-Proto` zählt nur von einem Proxy im eigenen Netz bzw. aus `trusted_proxies`.

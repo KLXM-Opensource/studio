@@ -69,6 +69,23 @@ final class MediaController extends AdminController
             'error' => $done === 0 && $errors ? $errors[0] : null]);
     }
 
+    /** Dateien von einem Pool in einen anderen verschieben (Verweise aller Websites wandern mit, Auslieferung unverändert) */
+    public function movePool(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $from = (string) ($r->post['pool'] ?? '');
+        $to = (string) ($r->post['target'] ?? '');
+        if (!\Core\MediaPools::canEdit($from) || !\Core\MediaPools::canEdit($to)) return $this->poolDenied();
+        $done = 0;
+        $errors = [];
+        foreach (array_filter(array_map('intval', (array) ($r->post['ids'] ?? []))) as $id) {
+            try { Media::movePoolFile($from, $id, $to); $done++; } catch (\RuntimeException $e) { $errors[] = $e->getMessage(); }
+        }
+        $this->changed();
+        return Response::json(['ok' => $done > 0 || !$errors, 'moved' => $done, 'errors' => array_values(array_unique($errors)),
+            'error' => $done === 0 && $errors ? $errors[0] : null]);
+    }
+
     /** Pool-Datei auf dieser Website verwenden → Verweis-Eintrag (lokale ID) */
     public function useShared(Request $r): Response
     {

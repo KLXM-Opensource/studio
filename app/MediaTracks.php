@@ -214,6 +214,31 @@ final class MediaTracks
         app()->db->query('DELETE FROM media_tracks WHERE media_id = ?', [$siteId]);
     }
 
+    /** Spuren beim Verschieben zwischen zwei Pools mitnehmen (Media::movePoolFile) */
+    public static function movePool(string $from, int $fromId, string $to, int $toId): void
+    {
+        try {
+            $src = MediaPools::db($from);
+            $rows = $src->fetchAll('SELECT * FROM media_tracks WHERE media_id = ?', [$fromId]);
+        } catch (\Throwable) {
+            return;
+        }
+        $dst = MediaPools::db($to);
+        foreach ($rows as $t) {
+            $old = $t['file'] ?? null;
+            unset($t['id']);
+            $t['media_id'] = $toId;
+            $t['file'] = null;
+            $nid = (int) $dst->insert('media_tracks', $t);
+            if ($old) @unlink(MediaPools::mediaDir($from) . '/' . $old);
+            if (($t['status'] ?? '') === 'published') {
+                $row = $dst->fetch('SELECT * FROM media_tracks WHERE id = ?', [$nid]);
+                self::sync(['_pool' => $to, '_pool_id' => $toId, 'id' => $toId, 'mime' => 'video/mp4'], $row, null);
+            }
+        }
+        $src->query('DELETE FROM media_tracks WHERE media_id = ?', [$fromId]);
+    }
+
     /**
      * Datei einer Spur schreiben bzw. entfernen: nur veröffentlichte Spuren liegen öffentlich im Medienordner.
      * Eine andere veröffentlichte Spur gleicher Art und Sprache wird dabei ersetzt.
