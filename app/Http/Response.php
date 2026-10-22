@@ -46,9 +46,16 @@ final class Response
     {
         $fh = fopen('php://temp', 'w+');
         fputcsv($fh, $header, ';', '"', '');
-        foreach ($rows as $row) fputcsv($fh, array_map(fn($v) => is_scalar($v) || $v === null ? (string) $v : json_encode($v, JSON_UNESCAPED_UNICODE), (array) $row), ';', '"', '');
+        foreach ($rows as $row) fputcsv($fh, array_map(fn($v) => self::csvCell(is_scalar($v) || $v === null ? (string) $v : (string) json_encode($v, JSON_UNESCAPED_UNICODE)), (array) $row), ';', '"', '');
         rewind($fh);
         return "\xEF\xBB\xBF" . stream_get_contents($fh);
+    }
+
+    /** Zelle gegen Formel-Ausführung in Tabellenprogrammen schützen (=, +, -, @, Tab, CR am Anfang) – Zahlen bleiben Zahlen */
+    public static function csvCell(string $v): string
+    {
+        if ($v === '' || !in_array($v[0], ['=', '+', '-', '@', "\t", "\r"], true) || is_numeric($v)) return $v;
+        return "'" . $v;
     }
 
     /** CSV zum Herunterladen (Response::csvText + download) */

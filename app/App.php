@@ -130,7 +130,8 @@ final class App
     {
         $auth = (array) $this->config->get('staging_auth', []);
         if (environment() === 'production' || empty($auth['user']) || empty($auth['pass'])
-            || str_starts_with($request->path, '/api/') || $request->path === '/mcp' || $request->path === '/health'
+            // Ohne Staging-Passwort nur die per Schlüssel angemeldeten Schnittstellen (öffentliche /api/live, /api/chat … bleiben geschützt)
+            || str_starts_with($request->path, '/api/v1/') || $request->path === '/mcp' || $request->path === '/health'
             // WebDAV-Erweiterungen (CalDAV/CardDAV) melden sich selbst per HTTP Basic an
             || $request->path === '/dav' || str_starts_with($request->path, '/dav/') || str_starts_with($request->path, '/.well-known/')) {
             return null;

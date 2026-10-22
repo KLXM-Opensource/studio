@@ -52,5 +52,13 @@
     <li>Solange die Testumgebung aktiv ist, <b>pulsiert ein oranger Punkt</b> an „Grundeinstellungen“ und an der Gruppe „System“ im Menü – damit niemand vergisst, sie vor dem Start aufzuheben.</li>
   </ul>
 
+  <h3 id="integritaet">Integrität: unerwartete Dateien und Daten</h3>
+  <p>Unter <b>Grundeinstellungen → Integrität</b> sehen Sie, ob seit dem letzten bestätigten Stand etwas verändert wurde, das typischerweise auf einen Einbruch hinweist. Die Prüfung läuft stündlich als geplante Aufgabe; mit <b>Jetzt prüfen</b> sofort.</p>
+  <ul>
+    <li><b>Dateien</b> (nur, wer die ganze Installation verwaltet): geänderter oder neuer Programmcode, geänderte <code>.htaccess</code> oder Konfiguration, ausführbare Dateien in Medien- oder Datenordnern und als Bild getarnter PHP-Code.</li>
+    <li><b>Datenbank dieser Website</b>: Trigger und Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel und Skript-Code in Seiten oder Einstellungen.</li>
+  </ul>
+  <p><b>Fehler</b> sollten Sie immer prüfen; <b>Hinweise</b> sind oft gewollt (z. B. eine neue Erweiterung legt Tabellen an). War alles gewollt – ein Update, eine neue Erweiterung, ein neues Administrator-Konto –, übernehmen Sie den Stand mit <b>Als bekannt übernehmen</b>. Neue Fehler meldet die Prüfung einmal per E-Mail an alle Konten mit allen Rechten; das lässt sich auf der Seite abschalten. Die Health-Prüfung (Übersicht) zeigt das Ergebnis ebenfalls.</p>
+
   <h3 id="warnungen">Warnpunkte im Menü</h3>
   <p>Ein oranger Punkt an einem Menüpunkt der Einrichtung weist auf etwas Wichtiges hin – derzeit die <b>aktive Testumgebung</b> oder einen <b>fehlenden Schlüssel</b> für verschlüsselte Anfragen. Ist die Gruppe zugeklappt, zeigt sie den Punkt mit; beim Darüberfahren steht der Grund daneben. Erledigt man die Sache, verschwindet der Punkt.</p>

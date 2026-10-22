@@ -31,6 +31,11 @@ final class PdfController
         if (!$m || $m['mime'] !== 'application/pdf') {
             throw new HttpException(404);
         }
+        // Uploads aus öffentlichen Formularen (Schlagwort „formular“, Data\DataForms) nur für die angemeldete Redaktion –
+        // sonst ließen sich eingereichte Unterlagen über fortlaufende Nummern finden
+        if (!app()->auth->check() && preg_match('~(^|,)\s*formular\s*(,|$)~i', (string) ($m['tags'] ?? ''))) {
+            throw new HttpException(404);
+        }
         // Geschützter Pool: Ansicht nur mit Zugriff wie die Datei selbst (Core\Http\Controllers\ProtectedMediaController)
         $private = \Core\MediaPools::mediaProtected($m);
         if ($private && !app()->auth->check()) {

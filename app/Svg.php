@@ -143,11 +143,17 @@ final class Svg
     {
         $file = rtrim($dir, '/') . '/.htaccess';
         if (is_file($file) || !is_dir($dir) || !is_writable($dir)) return;
-        @file_put_contents($file, "# KLXM Studio (Core\\Svg::guard): SVG-Dateien der Mediathek abschotten\n"
+        @file_put_contents($file, self::guardContent());
+    }
+
+    /** Inhalt der Schutzdatei – Core\Integrity erkennt sie daran als erwartet */
+    public static function guardContent(): string
+    {
+        return "# KLXM Studio (Core\\Svg::guard): SVG-Dateien der Mediathek abschotten\n"
             . "<IfModule mod_headers.c>\n  <FilesMatch \"\\.svg$\">\n"
             . "    Header set Content-Security-Policy \"" . self::CSP . "\"\n"
             . "    Header set X-Content-Type-Options \"nosniff\"\n  </FilesMatch>\n</IfModule>\n"
-            . "<IfModule mod_mime.c>\n  AddType image/svg+xml .svg\n</IfModule>\n");
+            . "<IfModule mod_mime.c>\n  AddType image/svg+xml .svg\n</IfModule>\n";
     }
 
     // ================================================================= Rastern (App-Icons)

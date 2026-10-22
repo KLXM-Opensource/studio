@@ -44,6 +44,11 @@ final class RoleController extends AdminController
         $tables = $r->str('tables_mode') === 'some'
             ? json_encode(array_values(array_intersect((array) ($r->post['tables'] ?? []), array_column(Tables::all(), 'handle'))))
             : null;
+        // Rolle nach dem Speichern prüfen wie beim Zuweisen – eine auf Tabellen beschränkte Rolle darf sich nicht selbst erweitern
+        if ($mine !== null && !in_array('*', $mine['permissions'], true)
+            && !\Core\Invites::assignable(['key' => $role['key'] ?? 'neu', 'permissions' => $perms, 'tables' => $tables === null ? null : json_decode($tables, true)], $mine)) {
+            return $this->back('/admin/users/rollen', 'error', __('Sie können nur Rechte und Tabellen vergeben, die Ihre eigene Rolle hat.'));
+        }
         $data = ['name' => $name, 'description' => mb_substr(trim(strip_tags($r->str('description'))), 0, 200),
             'permissions_json' => json_encode($perms), 'tables_json' => $tables];
         if ($role) {

@@ -217,6 +217,12 @@ final class Extension
         return $this;
     }
 
+    /** @return list<string> Namen der deklarierten Tabellen (Core\Integrity: erwartete Tabellen) */
+    public function tableNames(): array
+    {
+        return array_keys($this->tables);
+    }
+
     /** Tabellen (table()) angleichen – nur bei geändertem Fingerabdruck bzw. $force (migrate). @return array<string, string> Name → created|altered|unchanged */
     public function ensureTables(bool $force = false): array
     {
@@ -424,7 +430,10 @@ final class Extension
     public function mediaTypes(array $defs): self
     {
         foreach ($defs as $mime => $d) {
-            if (preg_match('~^(video|audio)/[a-z0-9.+-]{2,40}$~', (string) $mime) && preg_match('~^[a-z0-9]{2,5}$~', (string) ($d['ext'] ?? ''))) {
+            // Endung landet im öffentlichen Medienordner – nie eine, die der Server ausführt oder als Seite ausliefert
+            $ext = strtolower((string) ($d['ext'] ?? ''));
+            if (preg_match('~^(php\d?|phtml|phar|pht|phps|shtml?|html?|xhtml|svgz?|xml|js|mjs|htaccess|cgi|pl|py|sh|asp|aspx|jsp)$~', $ext)) continue;
+            if (preg_match('~^(video|audio)/[a-z0-9.+-]{2,40}$~', (string) $mime) && preg_match('~^[a-z0-9]{2,5}$~', $ext)) {
                 $this->mediaTypeDefs[(string) $mime] = $d;
             }
         }

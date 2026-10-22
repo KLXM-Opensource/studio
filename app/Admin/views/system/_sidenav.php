@@ -21,6 +21,10 @@ if (\Core\Domains::available()) $sub['domain'] = [url('/admin/system/domain'), _
 if (\Core\Branding::canEdit()) $sub['branding'] = [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush', ''];
 if (\Core\Fonts::canManage()) $sub['fonts'] = [url('/admin/system/fonts'), __('Schriften'), 'text-t', ''];
 if (\Core\Cron::canManage()) $sub['aufgaben'] = [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown', \Core\Cron::running() ? '' : __('Cronjob läuft nicht')];
+if (can('system.manage')) {
+    $ig = \Core\Integrity::health();
+    $sub['integritaet'] = [url('/admin/system/integritaet'), __('Integrität'), 'shield-check', in_array(false, $ig, true) ? __('Unerwartete Änderungen gefunden') : ''];
+}
 if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
 ?>
   <nav class="adm-tabs adm-secnav" aria-label="<?= e(__('Bereiche')) ?>">

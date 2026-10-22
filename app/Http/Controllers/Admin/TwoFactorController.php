@@ -65,16 +65,17 @@ final class TwoFactorController extends AdminController
         $code = $r->str('code');
         $methods = $row ? Mfa::loginMethods($row, $db) : [];
         $net = isset($p['net']);
-        $nl = $net ? Network::limiter() : null;
-        $nKey = 'net2fa:' . (int) ($p['net'] ?? 0);
+        // Fehlversuche je Konto (auch lokale Konten – sonst ließen sich Codes über viele IPs und neue Anmeldungen durchprobieren)
+        $nl = $net ? Network::limiter() : new RateLimiter(app()->db);
+        $nKey = $net ? 'net2fa:' . (int) ($p['net'] ?? 0) : 'loc2fa:' . (int) ($p['uid'] ?? 0);
         $ok = null;
-        if ($row && (!$nl || !$nl->tooMany($nKey, 10, 900))) {
+        if ($row && !$nl->tooMany($nKey, 10, 900)) {
             // App-Code nur, wenn TOTP angeboten wird; Wiederherstellungscodes immer (auch für Konten nur mit Passkeys)
             $ok = in_array('totp', $methods, true) ? Totp::verifyUser($db, $row, $code, $net ? Network::appKey() : app()->key())
                 : Totp::verifyRecovery($db, $row, $code);
         }
         if (!$ok) {
-            $nl?->hit($nKey);
+            $nl->hit($nKey);
             (new RateLimiter(app()->db))->hit($this->ipKey($r));
             return $this->challengeForm($r, in_array('totp', $methods, true) ? __('Der Code stimmt nicht. Bitte den aktuellen Code aus der App eingeben.')
                 : __('Der Wiederherstellungscode stimmt nicht.'));
@@ -233,9 +234,7 @@ final class TwoFactorController extends AdminController
         if ($req !== null && !Mfa::satisfied(['totp_enabled' => 0] + $row, $req, app()->db)) {
             return $this->back('/admin/account#zwei-faktor', 'error', __('Für Ihre Rolle ist die Zwei-Faktor-Anmeldung vorgeschrieben.'));
         }
-        if (!password_verify((string) ($r->post['password'] ?? ''), (string) $row['password_hash'])) {
-            return $this->back('/admin/account#zwei-faktor', 'error', __('Das Passwort ist falsch.'));
-        }
+        if ($err = $this->checkPassword($r, $row)) return $this->back('/admin/account#zwei-faktor', 'error', $err);
         // Wiederherstellungscodes bleiben, solange Passkeys eingerichtet sind
         $keep = Passkeys::count(app()->db, (int) $user['id']) > 0;
         app()->db->query('UPDATE users SET totp_secret = NULL, ' . ($keep ? '' : 'totp_recovery = NULL, ') . 'totp_last = NULL, totp_enabled = 0, auth_ver = auth_ver + 1 WHERE id = ?', [$user['id']]);
@@ -248,12 +247,24 @@ final class TwoFactorController extends AdminController
         $user = $this->own($r);
         $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]);
         if (!(int) $row['totp_enabled'] && !Passkeys::count(app()->db, (int) $user['id'])) return $this->back('/admin/account#zwei-faktor');
-        if (!password_verify((string) ($r->post['password'] ?? ''), (string) $row['password_hash'])) {
-            return $this->back('/admin/account#zwei-faktor', 'error', __('Das Passwort ist falsch.'));
-        }
+        if ($err = $this->checkPassword($r, $row)) return $this->back('/admin/account#zwei-faktor', 'error', $err);
         [$codes, $hashes] = Totp::recoveryCodes();
         app()->db->update('users', ['totp_recovery' => $hashes], 'id = :id', ['id' => $user['id']]);
         return $this->view('twofactor/codes', ['codes' => $codes, 'fresh' => false]);
+    }
+
+    /** Passwort bestätigen – mit derselben Begrenzung wie andere Bestätigungen (reauth, 5 Versuche je 15 Minuten) */
+    private function checkPassword(Request $r, array $row): ?string
+    {
+        $limiter = new RateLimiter(app()->db);
+        $key = 'reauth:' . (int) $row['id'] . ':l';
+        if ($limiter->tooMany($key, 5, 900)) return __('Zu viele Versuche. Bitte warten Sie 15 Minuten.');
+        if (!password_verify((string) ($r->post['password'] ?? ''), (string) $row['password_hash'])) {
+            $limiter->hit($key);
+            return __('Das Passwort ist falsch.');
+        }
+        $limiter->clear($key);
+        return null;
     }
 
     /** Eigene Sitzung nach auth_ver-Erhöhung behalten (alle anderen Sitzungen des Kontos enden) */

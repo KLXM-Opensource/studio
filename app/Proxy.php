@@ -171,6 +171,9 @@ final class Proxy
             'Access-Control-Allow-Origin' => '*',
             'Cross-Origin-Resource-Policy' => 'same-site',
             'X-Robots-Tag' => 'noindex',
+            // Antworten fremder Anbieter auf der eigenen Domain: direkt aufgerufen nie ausführbar (z. B. SVG mit Skript)
+            'Content-Security-Policy' => "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox",
+            'X-Content-Type-Options' => 'nosniff',
         ]));
     }
 

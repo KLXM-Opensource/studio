@@ -38,6 +38,9 @@
  *   support:stats [site]                              Support-Meldungen: offen, neu, dringend (alle Websites oder eine)
  *   chat:purge [--days=N]                             Chat: Nachrichten nach Aufbewahrungsfrist löschen (Standard: Einstellung, 180 Tage; 0 = nie)
  *   cron:run [-v]                                     Geplante Aufgaben: der einzige Cronjob (jede Minute) – startet fällige Aufgaben und die Warteschlange
+ *   integrity:check [--all] [--quiet]                 Integrität: unerwartete Dateien (Installation) und Daten (je Website) – meldet neue Fehler per E-Mail
+ *   integrity:accept [--files|--db] [--all]           Integrität: aktuellen Stand als bekannt übernehmen (nach Update/Deploy, neuer Erweiterung, neuem Konto)
+ *   integrity:selftest                                Integrität: Selbsttest
  *   cron:list                                         Geplante Aufgaben mit Zeitplan, nächstem Lauf, Ergebnis und der Zeile für die crontab
  *   cron:exec <aufgabe>                               Eine Aufgabe sofort ausführen (mit Sperre und Protokoll)
  *   cron:queue [<aufgabe>]                            Warteschlange anzeigen bzw. eine Aufgabe für den nächsten cron:run einreihen
@@ -763,6 +766,49 @@ switch ($cmd) {
         echo "PHP-API-Referenz geschrieben: " . str_replace(ROOT . '/', '', $out) . " (" . count(Core\ApiReference::classes()) . " Klassen)\n";
         break;
 
+    case 'integrity:check':
+    case 'integrity:accept':
+    case 'integrity:selftest':
+        // Integritätsprüfung (Core\Integrity): Dateien einmal für die Installation, Datenbank je Website
+        if ($cmd === 'integrity:selftest') {
+            $bad = 0;
+            foreach (Core\Integrity::selftest() as [$name, $ok, $info]) { echo ($ok ? '  ✓ ' : '  ✗ ') . $name . ($info !== '' ? " – $info" : '') . "\n"; $bad += $ok ? 0 : 1; }
+            echo $bad ? "FEHLER ($bad)\n" : "OK\n";
+            exit($bad ? 1 : 0);
+        }
+        $dbOnly = Core\Cli::flag($args, 'db');
+        $filesOnly = Core\Cli::flag($args, 'files');
+        $quiet = Core\Cli::flag($args, 'quiet');
+        $show = function (string $title, array $res) use ($quiet): int {
+            $err = 0;
+            foreach ($res['findings'] as $f) { $err += $f['level'] === 'error' ? 1 : 0; if (!$quiet) echo ($f['level'] === 'error' ? '  ✗ ' : '  ! ') . $f['text'] . "\n"; }
+            echo $title . ': ' . ($res['findings'] ? count($res['findings']) . ' Funde (' . $err . ' Fehler)' : 'nichts Unerwartetes') . "\n";
+            return $err;
+        };
+        $by = 'console';
+        if ($cmd === 'integrity:accept') {
+            if (!$dbOnly) echo 'Dateien: ' . Core\Integrity::acceptFiles($by) . " Dateien als bekannt übernommen.\n";
+            if (!$filesOnly) {
+                if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('integrity:accept', ['--db']));
+                Core\Integrity::acceptDb($by);
+                echo 'Datenbank (' . site()->key . ") als bekannt übernommen.\n";
+            }
+            break;
+        }
+        $errors = 0;
+        if (!$dbOnly) {
+            $r = Core\Integrity::checkFiles();
+            $errors += $show('Dateien', $r);
+            if ($n = Core\Integrity::notify($r, 'files')) echo "  E-Mail: $n neue Fehler gemeldet\n";
+        }
+        if (!$filesOnly) {
+            if (Core\Cli::flag($args, 'all')) exit(max($errors ? 1 : 0, Core\Cli::eachSite('integrity:check', array_merge(['--db'], $quiet ? ['--quiet'] : []))));
+            $r = Core\Integrity::checkDb();
+            $errors += $show('Datenbank (' . site()->key . ')', $r);
+            if ($n = Core\Integrity::notify($r, 'db')) echo "  E-Mail: $n neue Fehler gemeldet\n";
+        }
+        exit($errors ? 1 : 0);
+
     case 'cron:run':
     case 'cron:exec':
     case 'cron:list':
@@ -897,6 +943,7 @@ switch ($cmd) {
                 + Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\Cron::health()          // Geplante Aufgaben: Cronjob läuft, fehlgeschlagene Aufgaben (nur Hinweise)
+                + Core\Integrity::health()     // Integrität: unerwartete Dateien/Daten (letzte Prüfung, Core\Integrity)
                 + Core\SeoCheck::health()      // Suchmaschinen gesperrt (Fehler), Domains, Titel/Beschreibungen (Hinweise, Core\SeoCheck)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)

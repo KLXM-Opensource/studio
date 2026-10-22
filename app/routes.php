@@ -270,6 +270,10 @@ return function (Router $r): void {
     // Kits: installierte Kits, Kit-Paket (ZIP) hochladen, hochgeladene entfernen (Core\KitPackages)
     // Geplante Aufgaben (Core\Cron): ein Cronjob für die Installation, Zeitpläne, Warteschlange, Protokoll
     $r->get('/admin/system/aufgaben', [Admin\CronController::class, 'index']);
+    $r->get('/admin/system/integritaet', [Admin\IntegrityController::class, 'index']);
+    $r->post('/admin/system/integritaet/check', [Admin\IntegrityController::class, 'check']);
+    $r->post('/admin/system/integritaet/settings', [Admin\IntegrityController::class, 'settings']);
+    $r->post('/admin/system/integritaet/accept/{what}', [Admin\IntegrityController::class, 'accept']);
     $r->post('/admin/system/aufgaben/{key}', [Admin\CronController::class, 'save']);
     $r->post('/admin/system/aufgaben/{key}/run', [Admin\CronController::class, 'run']);
     $r->get('/admin/system/kits', [Admin\KitsController::class, 'index']);

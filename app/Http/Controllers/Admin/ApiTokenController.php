@@ -40,7 +40,7 @@ final class ApiTokenController extends AdminController
     /** Änderungen dieses Tokens: direkt übernehmen | zur Freigabe (Core\Review) */
     public function mode(Request $r, string $id): Response
     {
-        $this->auth($r, 'api.manage');
+        $this->own($this->auth($r, 'api.manage'), (int) $id);
         $mode = $r->str('review_mode') === 'review' ? 'review' : 'direct';
         Tokens::setMode((int) $id, $mode);
         return $this->back('/admin/api-tokens', 'success', $mode === 'review'
@@ -49,8 +49,17 @@ final class ApiTokenController extends AdminController
 
     public function delete(Request $r, string $id): Response
     {
-        $this->auth($r, 'api.manage');
+        $this->own($this->auth($r, 'api.manage'), (int) $id);
         Tokens::revoke((int) $id);
         return $this->back('/admin/api-tokens', 'success', 'Token widerrufen. Zugriffe damit sind ab sofort gesperrt.');
+    }
+
+    /** Fremde Tokens ändern oder widerrufen nur Konten mit allen Rechten (sonst z. B. Freigabe-Pflicht eines Admin-Tokens abschaltbar) */
+    private function own(array $user, int $id): void
+    {
+        $role = app()->auth->role();
+        if ($role !== null && in_array('*', $role['permissions'], true)) return;
+        $owner = app()->db->fetchValue('SELECT user_id FROM api_tokens WHERE id = ?', [$id]);
+        if ($owner === null || (int) $owner !== (int) ($user['id'] ?? 0)) throw new \Core\Http\HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
     }
 }

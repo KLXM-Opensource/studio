@@ -97,6 +97,8 @@ final class Cron
         self::register('chat.digest', __('Chat: Hinweise auf ungelesene Erwähnungen'), 'chat:digest', '*/15 * * * *', ['group' => $g]);
         self::register('backup.sites', __('Sicherungen der Websites'), 'site:backup --all --keep=14', '0 2 * * *', ['group' => $g, 'timeout' => 3300, 'help' => __('Die neuesten 14 je Website bleiben.')]);
         self::register('backup.pools', __('Sicherungen der geteilten Medien'), 'pool:backup --all --keep=14', '20 2 * * *', ['group' => $g, 'timeout' => 3300]);
+        self::register('integrity.check', __('Integrität prüfen'), 'integrity:check --all --quiet', '7 * * * *', ['group' => $g, 'timeout' => 900,
+            'help' => __('Unerwartete Dateien (Code, .htaccess, PHP in Medien) und Daten (Trigger, neue Administrator-Konten, Skript-Code) – neue Fehler per E-Mail.')]);
         self::register('backup.shared', __('Sicherungen der geteilten Tabellen'), 'shared:backup --all --keep=14', '40 2 * * *', ['group' => $g]);
     }
 

@@ -29,3 +29,8 @@
 @media (max-width:760px){
   .cr-task{grid-template-columns:1fr}
 }
+
+/* Grundeinstellungen → Integrität (Core\Integrity) */
+.ig-list{display:grid;gap:6px;margin:12px 0;padding:0;list-style:none}
+.ig-item{display:flex;gap:8px;align-items:baseline;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,currentColor 4%,transparent);overflow-wrap:anywhere}
+.ig-item--error{background:color-mix(in srgb,#c2410c 10%,transparent)}

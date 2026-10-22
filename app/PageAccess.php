@@ -119,7 +119,8 @@ final class PageAccess
     {
         $r = app()->request;
         if (!$r || PHP_SAPI === 'cli' || !self::active() || app()->auth->check()) return 'all';
-        if ($r->isAdminPath() || preg_match('~^/(api|mcp)(/|$)~', $r->path)) return 'all';
+        // Nur die per Schlüssel angemeldeten Schnittstellen sehen alles – öffentliche Endpunkte (/api/live/block, /api/form …) wie Besucher
+        if ($r->isAdminPath() || preg_match('~^/(api/v1|mcp)(/|$)~', $r->path)) return 'all';
         if (!self::tableRestricted($table)) return 'all';
         $cur = app()->currentPage;
         if ($cur && !empty($cur['id']) && self::restricted($cur)) return 'members';

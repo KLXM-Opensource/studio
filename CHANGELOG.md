@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Sicherheit: Integritätsprüfung und Befunde der Sicherheitsprüfung
+- **Integrität** (`Core\Integrity`, Grundeinstellungen → Integrität, Aufgabe `integrity.check` stündlich): meldet unerwartete Dateien – geänderter Code, `.htaccess`/`.user.ini`/Konfiguration, ausführbare Dateien in `public/` und `storage/`, PHP-Code in Mediendateien – und Daten – Trigger/Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel, Skript-Code in Seiten und Einstellungen. Vergleich mit einem signierten, bestätigten Stand; neue Fehler per E-Mail; Health-Eintrag. Befehle `integrity:check`, `integrity:accept`, `integrity:selftest`.
+- Öffentliche Endpunkte unter `/api/` (z. B. `/api/live/block`) liefern Einträge geschützter Datentabellen nicht mehr ungefiltert – nur `/api/v1` und `/mcp` (mit Schlüssel) sehen alles. Der Staging-Passwortschutz lässt nur noch diese beiden ohne Passwort durch.
+- Rollen: Wer nur einzelne Tabellen bearbeiten darf, kann die eigene Rolle nicht mehr auf alle Tabellen erweitern.
+- API-Tokens: Freigabe-Modus ändern und Widerrufen nur für eigene Tokens (oder mit allen Rechten).
+- Zwei-Faktor: Fehlversuche zusätzlich je Konto begrenzt (lokale Konten); Passwortabfrage beim Abschalten und für neue Wiederherstellungscodes mit Begrenzung.
+- „Als Person arbeiten“: Funktionen und Chat gesperrt.
+- PDF-Ansicht `/pdf/{id}`: Uploads aus öffentlichen Formularen nur für die angemeldete Redaktion.
+- Proxy-Antworten mit abschottender CSP (`sandbox`); Erweiterungen können keine ausführbaren Endungen für Medientypen anmelden; CSV-Exporte entschärfen Formeln (`Response::csvCell`).
+
 ### E-Mail-Versand: Hinweise bei Fehlern, Rücklaufadresse, Stapelversand
 - Fehlgeschlagener Versand nennt die wahrscheinliche Ursache mit Abhilfe (Anmeldung, Microsoft 365 ohne SMTP-Anmeldung, STARTTLS/SSL, Zertifikat, Server nicht erreichbar, Relay, Absender) – auch beim Testversand der E-Mail-Konten (`Core\Mail\Accounts::hint`).
 - `Mailer::send`: Option `return_path` (Rücklaufadresse/Envelope-From, z. B. VERP einer Newsletter-Erweiterung) und `keep_alive` (eine Verbindung für einen ganzen Stapel, `Mailer::closeTransports()`).

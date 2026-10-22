@@ -235,6 +235,7 @@ final class KitPackages
             $warn = $check['warnings'];
             if (!is_dir(Kit::publicDir($name))) $warn[] = __('Keine fertigen Assets (Ordner public/) – das Kit hat auf der Website kein CSS/JS.');
             foreach (array_keys(Sites::all()) as $k) PageCache::clearSite((string) $k);
+            Integrity::acceptPaths(['storage/kits/' . $name . '/', 'public/assets/kits/' . $name . '/'], $by);   // gewollte Änderung – kein Alarm
             $verb = $old ? __('ersetzt') : __('installiert');
             return ['ok' => true, 'name' => $name, 'warnings' => $warn,
                 'message' => __('Kit „{label}“ ({name} {version}) {verb}.', ['label' => $check['meta']['label'], 'name' => $name, 'version' => $check['meta']['version'], 'verb' => $verb]) . ($pub !== '' ? ' ' . $pub . '.' : '')];
@@ -386,6 +387,7 @@ final class KitPackages
         self::rmdir($trash);
         if (is_dir(Kit::publicDir($name))) self::rmdir(Kit::publicDir($name));
         Kit::reset();
+        Integrity::acceptPaths(['storage/kits/' . $name . '/', 'public/assets/kits/' . $name . '/']);
         return ['ok' => true, 'message' => __('Kit „{name}“ entfernt.', ['name' => $name])];
     }
 

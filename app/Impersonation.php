@@ -13,13 +13,13 @@ namespace Core;
  *
  * Die Sitzung bleibt die der echten Person (uid, auth_ver, zweiter Faktor). Sitzungs-Schlüssel „imp“: {mode, value, by, since,
  * until}. Endet nach TTL, beim Abmelden oder mit stop(). Während der Ansicht sind Konto-Sicherheit, Benutzer & Rollen,
- * API-Tokens, Grundeinstellungen und Netzwerk gesperrt (blocked()). Beginn/Ende im Sicherheitsprotokoll (Network::log).
+ * API-Tokens, Grundeinstellungen, Funktionen, Chat und Netzwerk gesperrt (blocked()). Beginn/Ende im Sicherheitsprotokoll (Network::log).
  * Nie: Netzwerk-Konten als Ziel; Administration nicht in andere Administrationskonten (Netzwerk-Administration schon).
  */
 final class Impersonation
 {
     public const TTL = 3600;
-    public const BLOCKED = ['/admin/account', '/admin/users', '/admin/roles', '/admin/api-tokens', '/admin/system', '/admin/network', '/admin/features'];
+    public const BLOCKED = ['/admin/account', '/admin/users', '/admin/roles', '/admin/api-tokens', '/admin/system', '/admin/network', '/admin/features', '/admin/funktionen', '/admin/chat', '/admin/api/chat'];
     public const ALLOWED = ['/admin/impersonate/stop', '/admin/logout'];
 
     /** Sitzungsdaten der laufenden Ansicht oder null */
