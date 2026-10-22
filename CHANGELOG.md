@@ -7,7 +7,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ## 1.0.0
 
 ### Layout und Detailseiten
-- **Kits fluid, foto, galerie: farbige Abschnitte im Dunkelmodus** – neue Design-Option „Farbige Abschnitte im dunklen Farbschema“: „Kräftig wie im hellen Farbschema“ (Standard, bisherige Darstellung) oder „Dunkel getönt, helle Schrift“ (Akzent- bzw. Zweitfarbe zu 22 % auf der dunklen Seitenfläche, blendet nicht).
+- **Kits fluid, foto, galerie: farbige Abschnitte im Dunkelmodus** – neue Design-Option „Farbige Abschnitte im dunklen Farbschema“: „Dunkel getönt, helle Schrift“ (Standard; Akzent- bzw. Zweitfarbe zu 22 % auf der dunklen Seitenfläche, blendet nicht) oder „Kräftig wie im hellen Farbschema“ (bisherige Darstellung).
 - **Kits fluid, foto, galerie, farbige Abschnitte:** Karten in Seitenfarbe auf Akzent-, Zweitfarben- und dunklen Flächen (Reiter „Bühne“, Medien + Text „Text-Karte über großem Bild“, Slider-Box, Vergleichsbild-Etikett, Aktionsknöpfe, Suchfeld der Datenliste) nutzen Schrift und Knöpfe der Seite – vorher dunkel auf dunkel (Dunkelmodus) bzw. hell auf hell. Aktive Nummer und Linie der „Bühne“ dort in der Schrift der Fläche.
 - **Fehlerbehebung:** Ein Block einer Erweiterung mit eigener Angabe `'nestable'` (z. B. „Gemeinsamer Baustein“) schaltete die Standardliste der verschachtelbaren Blöcke ab – Fließtext, Zitat und Downloads durften in keiner Layout-Spalte mehr stehen, bestehende Spalten blieben auf der Website leer. Blöcke von Erweiterungen zählen jetzt nicht mehr als Markierung des Kits (`Theme::nestableVariants`).
 - „Inhaltsblöcke des Eintrags“ (`entry_blocks`) darf in einer Layout-Spalte stehen: die Blöcke des Eintrags erscheinen dort untereinander – z. B. Detailseite mit Seitenleiste.
