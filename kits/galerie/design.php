@@ -42,7 +42,7 @@ $base = [
     'eyebrow' => 'plain', 'header' => 'inline', 'header_sticky' => true, 'header_bg' => 'page', 'nav_style' => 'underline', 'nav_parent' => 'split', 'nav_levels' => 'indent', 'topbar' => 'off',
     'footer' => 'columns', 'footer_bg' => 'page', 'pagebg' => 'plain',
     'artframe' => 'flat', 'caption' => 'museum', 'dots' => true, 'price_mode' => 'per_work', 'date_style' => 'long', 'label_style' => 'text', 'list_density' => 'normal',
-    'motion' => true, 'dark' => true,
+    'motion' => true, 'dark' => true, 'dark_sections' => 'toned',
 ];
 
 return [
@@ -204,6 +204,9 @@ return [
             ['name' => 'motion_style', 'label' => 'Art des Einblendens', 'type' => 'choice', 'class' => 'mo-{value}', 'default' => 'fade',
                 'options' => ['fade' => 'Nur Blende', 'rise' => 'Aufsteigen', 'scale' => 'Leicht wachsen', 'blur' => 'Aus der Unschärfe']],
             ['name' => 'dark', 'label' => 'Dunkles Farbschema, wenn im Gerät der Besucher eingestellt', 'type' => 'bool', 'class' => 'has-dark', 'default' => true],
+            ['name' => 'dark_sections', 'label' => 'Farbige Abschnitte im dunklen Farbschema', 'type' => 'choice', 'class' => 'dsec-{value}', 'default' => 'toned',
+                'options' => ['toned' => 'Dunkel getönt, helle Schrift', 'bright' => 'Kräftig wie im hellen Farbschema'],
+                'help' => 'Abschnitte in Akzent- oder zweiter Markenfarbe: im Dunkelmodus als dunkle, farbig getönte Fläche (blendet nicht) oder in der vollen Farbe. Nur mit „Dunkles Farbschema“.'],
         ]],
     ],
 

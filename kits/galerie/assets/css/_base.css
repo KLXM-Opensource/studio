@@ -60,6 +60,10 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
   --f-link:var(--f-fg);--f-focus:var(--f-fg);--f-ico-bg:color-mix(in srgb,var(--f-fg) 14%,transparent);--f-ico:var(--f-fg);--f-a-soft:color-mix(in srgb,var(--f-fg) 12%,transparent);
   --f-btn-bg:var(--f-fg);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-sec-bg))
 }
+/* Karten/Etiketten in Seitenfarbe (--f-bg) innerhalb farbiger Abschnitte: Schrift und Knöpfe der Seite (--f0-*, am :root berechnet)
+   statt der Fläche – sonst hell auf hell (bg-dark im Hellmodus) bzw. dunkel auf dunkel (bg-accent im Dunkelmodus). */
+:is(.mt-over__card,.cms-slide--ov-box .cms-slide__box,.df-act,.dl-search__row){
+  --f-ink:var(--f0-ink);--f-text:var(--f0-text);--f-muted:var(--f0-muted);--f-link:var(--f0-link);--f-fg:var(--f0-ink);--f-btn-bg:var(--f-a);--f-btn-ink:var(--f-a-on);--f-btn-hover:var(--f-a-strong)}
 .sec--ov-dark{--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 88%,transparent);--f-btn-ink:var(--f-dark)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
 .bg-white:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-white:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-muted:not(.sec--has-bg,.sec--screen,.sec--media-text.v-split)+.bg-muted:not(.sec--divider,.sec--has-bg,.sec--screen,.sec--media-text.v-split),.bg-tint+.bg-tint:not(.sec--divider){padding-top:0}
