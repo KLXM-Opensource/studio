@@ -20,6 +20,8 @@ final class Theme
     public readonly string $name;
     public readonly string $path;
     public readonly array $def;
+    /** @var array<string, string> Kit und Eltern-Kits (theme.php → 'extends'), nächstes zuerst: [name => Ordner] – Core\Kit::chain() */
+    public readonly array $chain;
     private array $blocks = [];
 
     /** Universelle Block-Tunes (Abschnitts-Optionen) */
@@ -63,7 +65,11 @@ final class Theme
         $this->path = $path;
         // Kit-Paket (Upload/Composer) ohne veröffentlichte Assets (z. B. nach composer install ohne kits:publish): einmal nachholen
         if (!is_dir(Kit::publicDir($name)) && in_array(Kit::source($name), ['upload', 'composer'], true)) KitPackages::publish($name);
-        $this->def = require $def;
+        $this->chain = Kit::chain($name);
+        // Vererbung: Definitionen von den Eltern her zusammenführen (Kind gewinnt)
+        $merged = [];
+        foreach (array_reverse($this->chain, true) as $dir) $merged = self::mergeDefinition($merged, (array) require (string) Kit::definitionFile($dir));
+        $this->def = $merged;
 
         foreach ($this->def['blocks'] ?? [] as $type => $b) {
             $this->blocks[$type] = $b + ['type' => $type, 'fields' => [], 'label' => $type];
@@ -86,6 +92,59 @@ final class Theme
         }
         // Standardwerte der Theme-Einstellungen registrieren
         app()->settings->registerDefaults(Fields::defaults($this->settingsFields()));
+    }
+
+    /**
+     * Definition eines Kind-Kits auf die des Eltern-Kits legen: Werte des Kinds ersetzen die der Eltern; blocks, conditional_css,
+     * conditional_js, backgrounds und fragments werden je Schlüssel zusammengeführt (null entfernt einen Eintrag der Eltern).
+     * 'design_defaults' => ['accent' => '#0F766E', 'background' => ['default' => '#fff', 'dark' => '#111']] setzt Standardwerte
+     * des geerbten Designs (design.php), ohne es zu kopieren.
+     */
+    public static function mergeDefinition(array $parent, array $child): array
+    {
+        if (!$parent) return self::applyDesignDefaults($child);
+        $out = array_replace($parent, $child);
+        if (isset($child['description']) && !isset($child['description_en'])) unset($out['description_en']);   // nicht die Beschreibung der Eltern
+        foreach (['blocks', 'conditional_css', 'conditional_js', 'backgrounds', 'fragments'] as $k) {
+            if (isset($parent[$k]) || isset($child[$k])) {
+                $out[$k] = array_filter(array_replace((array) ($parent[$k] ?? []), (array) ($child[$k] ?? [])), fn($v) => $v !== null);
+            }
+        }
+        return self::applyDesignDefaults($out);
+    }
+
+    private static function applyDesignDefaults(array $def): array
+    {
+        $set = (array) ($def['design_defaults'] ?? []);
+        if (!$set || !is_array($def['design']['groups'] ?? null)) return $def;
+        foreach ($def['design']['groups'] as &$g) {
+            foreach ((array) ($g['tokens'] ?? []) as $i => $t) {
+                if (!array_key_exists($t['name'] ?? '', $set)) continue;
+                $v = $set[$t['name']];
+                if (is_array($v)) $g['tokens'][$i] = array_replace($t, array_intersect_key($v, ['default' => 1, 'dark' => 1]));
+                else $g['tokens'][$i]['default'] = $v;
+            }
+        }
+        unset($g, $def['design_defaults']);
+        $def['design']['emit_defaults'] = true;   // Standardwerte weichen vom CSS des Eltern-Kits ab → Design-Datei immer ausgeben (Design::head)
+        return $def;
+    }
+
+    /** Erste vorhandene Datei im Kit oder seinen Eltern-Kits (relativ zum Kit-Ordner, z. B. 'templates/search.php'); null = keine */
+    public function file(string $rel): ?string
+    {
+        $rel = ltrim(str_replace('..', '', $rel), '/');
+        foreach ($this->chain as $dir) {
+            if (is_file($dir . '/' . $rel)) return $dir . '/' . $rel;
+        }
+        return null;
+    }
+
+    /** Alle vorhandenen Fassungen einer Datei, Eltern zuerst (z. B. Sprachdateien, die sich ergänzen) */
+    public function files(string $rel): array
+    {
+        $rel = ltrim(str_replace('..', '', $rel), '/');
+        return array_values(array_filter(array_map(fn($d) => $d . '/' . $rel, array_reverse(array_values($this->chain))), 'is_file'));
     }
 
     /** Passt das Theme zur Core-Version? (theme.php → 'requires' => '>=1.0') */
@@ -244,8 +303,8 @@ final class Theme
 
     public function render(string $template, array $vars = []): string
     {
-        $file = $this->path . '/templates/' . $template . '.php';
-        if (!is_file($file)) {
+        $file = (string) $this->file('templates/' . $template . '.php');
+        if ($file === '') {
             throw new \RuntimeException("Template '$template' fehlt im Kit '{$this->name}'");
         }
         $html = self::capture($file, $vars);
@@ -531,7 +590,7 @@ final class Theme
     /** Inhalt eines Blocks ohne Abschnitts-Hülle (Block-Vorlage des Kits, Kern-Block, Erweiterung, eigener Block); null = kein Renderer */
     public function renderInner(Block $block): ?string
     {
-        $file = $this->path . '/blocks/' . $block->type . '.php';
+        $file = (string) $this->file('blocks/' . $block->type . '.php');
         if (!is_file($file) && !empty($block->def['core'])) {
             $file = ROOT . '/app/Blocks/' . $block->type . '.php';
         }
@@ -579,8 +638,7 @@ final class Theme
     public function iconFont(): ?string
     {
         $f = (string) ($this->def['fonts']['icon'] ?? '');
-        $path = $f !== '' ? $this->path . '/' . ltrim($f, '/') : '';
-        return $path !== '' && is_file($path) ? $path : null;
+        return $f !== '' ? $this->file($f) : null;
     }
 
     public function asset(string $path): string
@@ -588,16 +646,26 @@ final class Theme
         // Darstellungs-Varianten eines Kits (theme.php → 'asset_variant' => callable(string $pfad): string), z. B. eigener Satz
         // Stylesheets für „Klassisch“ – nur wenn die Ersatzdatei existiert
         if (is_callable($cb = $this->def['asset_variant'] ?? null) && ($alt = (string) $cb($path)) !== '' && $alt !== $path
-            && is_file(Kit::publicDir($this->name) . '/' . ltrim($alt, '/'))) $path = $alt;
-        $file = Kit::publicDir($this->name) . '/' . ltrim($path, '/');
+            && $this->assetKit($alt) !== null) $path = $alt;
+        $kit = $this->assetKit($path) ?? $this->name;   // Vererbung: Datei des nächsten Kits, das sie mitbringt
+        $file = Kit::publicDir($kit) . '/' . ltrim($path, '/');
         $v = is_file($file) ? substr(md5((string) filemtime($file)), 0, 8) : CMS_VERSION;
-        return Kit::url($this->name, $path) . '?v=' . $v;
+        return Kit::url($kit, $path) . '?v=' . $v;
     }
 
-    /** Bringt das Kit die öffentliche Datei mit (public/assets/kits/{name}/…)? */
+    /** Bringt das Kit (oder ein Eltern-Kit) die öffentliche Datei mit (public/assets/kits/{name}/…)? */
     public function hasAsset(string $path): bool
     {
-        return is_file(Kit::publicDir($this->name) . '/' . ltrim($path, '/'));
+        return $this->assetKit($path) !== null;
+    }
+
+    /** Name des nächsten Kits in der Kette mit dieser öffentlichen Datei */
+    private function assetKit(string $path): ?string
+    {
+        foreach (array_keys($this->chain) as $k) {
+            if (is_file(Kit::publicDir($k) . '/' . ltrim($path, '/'))) return $k;
+        }
+        return null;
     }
 
     /**
@@ -615,7 +683,7 @@ final class Theme
         static $memo = [];
         if (!isset($memo[$this->name])) {
             $memo[$this->name] = false;
-            foreach (glob(Kit::publicDir($this->name) . '/css/*.css') ?: [] as $f) {
+            foreach (array_merge(...array_map(fn($k) => glob(Kit::publicDir($k) . '/css/*.css') ?: [], array_keys($this->chain))) as $f) {
                 if (basename($f) !== 'embed.css' && str_contains((string) file_get_contents($f), '.vembed')) { $memo[$this->name] = true; break; }
             }
         }

@@ -57,8 +57,9 @@ final class Guide
     {
         $c = self::config();
         if (!empty($c['off'])) return null;
-        $dir = app()->theme->path . '/' . trim(str_replace('..', '', (string) ($c['dir'] ?? 'guide')), '/');
-        return is_dir($dir) ? $dir : null;
+        $rel = trim(str_replace('..', '', (string) ($c['dir'] ?? 'guide')), '/');
+        foreach (app()->theme->chain as $kitDir) if (is_dir($kitDir . '/' . $rel)) return $kitDir . '/' . $rel;   // auch aus dem Eltern-Kit
+        return null;
     }
 
     /** Ordner der Website (muss nicht existieren) */

@@ -417,7 +417,7 @@ final class Invites
     /** Vorlage: Kit (kits/{kit}/templates/mail/…) vor Core (app/Admin/views/mail/…) */
     public static function template(string $file): string
     {
-        $kit = app()->theme->path . '/templates/mail/' . $file;
+        $kit = (string) app()->theme->file('templates/mail/' . $file);
         return is_file($kit) ? $kit : ROOT . '/app/Admin/views/mail/' . $file;
     }
 

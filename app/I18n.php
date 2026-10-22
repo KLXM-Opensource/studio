@@ -39,7 +39,7 @@ final class I18n
         }
         $files = [ROOT . '/lang/' . $locale . '.php'];
         foreach (Extensions::active() as $x) $files[] = $x->dir . '/lang/' . $locale . '.php';
-        $files[] = app()->theme->path . '/lang/' . $locale . '.php';
+        array_push($files, ...app()->theme->files('lang/' . $locale . '.php'));   // Eltern-Kits zuerst, das Kit ergänzt
         foreach ($files as $f) {
             if (is_file($f)) {
                 self::$dict = array_merge(self::$dict, (array) require $f);
@@ -80,7 +80,7 @@ final class I18n
                 self::$siteDict[$lang] = [];
                 $files = [ROOT . '/lang/site/' . $lang . '.php'];
                 foreach (Extensions::active() as $x) $files[] = $x->dir . '/lang/site/' . $lang . '.php';
-                $files[] = app()->theme->path . '/lang/site/' . $lang . '.php';
+                array_push($files, ...app()->theme->files('lang/site/' . $lang . '.php'));
                 foreach ($files as $f) {
                     if (is_file($f)) self::$siteDict[$lang] = array_merge(self::$siteDict[$lang], (array) require $f);
                 }

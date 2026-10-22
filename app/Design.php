@@ -298,7 +298,7 @@ final class Design
         // Landing-Domain: Überschreibungen als eigene kleine Datei nach den Design-Variablen der Website
         $landing = ($lu = $lp?->designUrl()) ? "\n" . '<link rel="stylesheet" href="' . e($lu) . '">' : '';
         // Unverändert gegenüber dem Theme: keine zusätzliche Datei (spart eine Anfrage)
-        if (self::values() == self::defaults()) return $h . ltrim($landing);
+        if (self::values() == self::defaults() && empty(self::def()['emit_defaults'])) return $h . ltrim($landing);   // Kind-Kit mit design_defaults: immer
         $url = self::fileUrl();
         return $h . ($url ? '<link rel="stylesheet" href="' . e($url) . '">' : '') . $landing;
     }

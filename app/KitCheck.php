@@ -12,7 +12,8 @@ namespace Core;
  *    weder als Feld kennt noch selbst liest (Vertrag geändert bzw. Tippfehler), und neue Felder des Kerns, die die Kit-Fassung nicht
  *    liest (nur mit -v; viele werden über Kern-Helfer verarbeitet);
  *  - Kern-Fragmente mit geändertem Original (Core\Fragments::overrides, wie fragments:list);
- *  - Kit-Vertrag: Pflicht-Rollen --kit-* (accent, on-accent, link, muted, radius) in den Stylesheets des Kits.
+ *  - Kit-Vertrag: Pflicht-Rollen --kit-* (accent, on-accent, link, muted, radius) in den Stylesheets des Kits;
+ *  - Vererbung (theme.php → 'extends'): Eltern-Kit fehlt, Schleife oder zu tief.
  */
 final class KitCheck
 {
@@ -20,6 +21,12 @@ final class KitCheck
     public static function run(Theme $kit, bool $verbose = false): array
     {
         $out = [];
+        // Vererbung: Kette bricht ab (Eltern-Kit fehlt, Schleife, mehr als Kit::MAX_DEPTH Ebenen)
+        $last = (string) array_key_last($kit->chain);
+        if (($p = Kit::parent($last)) !== '') {
+            $why = !Kit::exists($p) ? 'gibt es nicht' : (isset($kit->chain[$p]) ? 'ergibt eine Schleife' : 'liegt tiefer als ' . Kit::MAX_DEPTH . ' Ebenen');
+            $out[] = ['level' => 'warn', 'file' => Kit::relative((string) Kit::definitionFile(Kit::dir($last))), 'text' => "Eltern-Kit '$p' (extends) $why – es gilt nur, was bis hier geerbt wird."];
+        }
         $blocks = $kit->blocks();
         // Blöcke aktiver Erweiterungen hängen am aktiven Kit (Extension::blocks)
         if (isset(app()->theme)) {

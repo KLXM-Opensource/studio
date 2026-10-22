@@ -70,7 +70,7 @@ final class Tutorials
         $core = require ROOT . '/app/Admin/tutorials.php';
         $theme = [];
         if (isset(app()->theme)) {
-            $themeFile = app()->theme->path . '/docs/tutorials.php';
+            $themeFile = (string) app()->theme->file('docs/tutorials.php');
             $theme = is_file($themeFile) ? (array) require $themeFile : [];
         }
         $tracks = $core['tracks'];

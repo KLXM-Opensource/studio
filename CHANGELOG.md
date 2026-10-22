@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kits: Vererbung
+- **Kind-Kits:** `theme.php` → `'extends' => 'fluid'` – fehlende Blöcke, Vorlagen, Fragmente, Sprachtexte und Assets kommen vom Eltern-Kit, die Definition wird zusammengeführt (`null` nimmt einen geerbten Block heraus), `'design_defaults'` ändert Standardwerte des geerbten Designs. Neues Kind-Kit: `kit:create meinkit --extends=fluid`. Unabhängig vom CSS: ein Kind-Kit kann eigenes CSS oder ein Framework (Tailwind, UIkit, Bootstrap) mitbringen. `kit:check` meldet fehlende Eltern und Schleifen; Selbsttest `kits:selftest`.
+
 ### Layout und Detailseiten
 - **Kits fluid, foto, galerie: farbige Abschnitte im Dunkelmodus** – neue Design-Option „Farbige Abschnitte im dunklen Farbschema“: „Dunkel getönt, helle Schrift“ (Standard; Akzent- bzw. Zweitfarbe zu 22 % auf der dunklen Seitenfläche, blendet nicht) oder „Kräftig wie im hellen Farbschema“ (bisherige Darstellung).
 - **Kits fluid, foto, galerie, farbige Abschnitte:** Karten in Seitenfarbe auf Akzent-, Zweitfarben- und dunklen Flächen (Reiter „Bühne“, Medien + Text „Text-Karte über großem Bild“, Slider-Box, Vergleichsbild-Etikett, Aktionsknöpfe, Suchfeld der Datenliste) nutzen Schrift und Knöpfe der Seite – vorher dunkel auf dunkel (Dunkelmodus) bzw. hell auf hell. Aktive Nummer und Linie der „Bühne“ dort in der Schrift der Fläche.

@@ -52,7 +52,7 @@ final class SearchPageController
         $theme = $app->theme;
         $vars = ['result' => $result, 'q' => $q, 'limited' => $limited, 'form' => Search::form('page', $q),
             'url' => fn(array $extra = []) => Search::url($q, null, $extra)];
-        $content = is_file($theme->path . '/templates/search.php')
+        $content = $theme->file('templates/search.php') !== null
             ? $theme->render('search', $vars)
             : \Core\Theme::capture(ROOT . '/app/Views/search.php', $vars);
 

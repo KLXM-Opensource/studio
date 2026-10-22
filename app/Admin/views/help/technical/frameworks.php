@@ -74,7 +74,7 @@
 
   <h3 id="fw-eigenes">Eigenes Framework-Kit beginnen</h3>
   <ol>
-    <li><code>php bin/console kit:create meinkit --from=frameworks</code> – kopiert das Kit, benennt das Präfix <code>frameworks_</code> → <code>meinkit_</code> um.</li>
+    <li><code>php bin/console kit:create meinkit --from=frameworks</code> – kopiert das Kit, benennt das Präfix <code>frameworks_</code> → <code>meinkit_</code> um. Alternative: <code>--extends=…</code> legt ein Kind-Kit an, das nur ersetzt, was anders ist (<a href="#vererbung">Vererbung</a>) – z. B. die Blöcke eines bestehenden Kits mit Tailwind neu schreiben und Felder, Design-Werte und Startinhalte erben.</li>
     <li>Framework wählen: einen Ordner unter <code>views/</code> behalten, <code>meinkit_fw()</code> fest darauf stellen bzw. das Token <code>framework</code> aus <code>theme.php</code> entfernen; bei Tailwind <code>tailwind/</code>, bei UIkit <code>assets/css/uikit.css</code> und die UIkit-Zeilen in <code>build.mjs</code> behalten, nicht benötigte Pakete aus <code>package.json</code> streichen.</li>
     <li>Bauen: <code>cd tools &amp;&amp; pnpm run build</code> (nur Tailwind: <code>node kits/meinkit/build.mjs</code>). Gebautes CSS und Vendoren einchecken, Lizenzen in <code>THIRD-PARTY-NOTICES.md</code>.</li>
     <li>Testwebsite anlegen (<code>site:create</code>, <code>user:create</code>), Startinhalte aus <code>tools/demo-content.php</code> anpassen, prüfen wie oben (Konsole, CSP, axe, Bearbeiten-Modus).</li>

@@ -222,7 +222,7 @@ final class Landings
     public static function template(): string
     {
         $l = self::current();
-        return $l && $l->layout === 'landing' && is_file(app()->theme->path . '/templates/landing.php') ? 'landing' : 'layout';
+        return $l && $l->layout === 'landing' && app()->theme->file('templates/landing.php') !== null ? 'landing' : 'layout';
     }
 
     // ------------------------------------------------------------------ Verwaltung

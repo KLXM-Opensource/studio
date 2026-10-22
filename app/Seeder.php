@@ -17,7 +17,7 @@ final class Seeder
     public function run(string $mode = 'full'): void
     {
         $empty = $mode === 'empty';
-        $file = $this->app->theme->path . '/seed.php';
+        $file = (string) $this->app->theme->file('seed.php');
         if (!is_file($file)) {
             return;
         }

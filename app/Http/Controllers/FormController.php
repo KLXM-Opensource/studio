@@ -67,7 +67,7 @@ final class FormController
         $t = Forms::table($form) ?? throw new HttpException(404);
         $theme = app()->theme;
         // Theme ohne eigene Formularseite: neutrale Seite mit dem Block „Formular (Datentabelle)“
-        if (!is_file($theme->path . '/templates/form-page.php')) {
+        if ($theme->file('templates/form-page.php') === null) {
             DataForms::$state[$t['handle']] = ['values' => $values, 'errors' => $errors, 'message' => $sent ? null : $message, 'sent' => $sent];
             return (new DataFormController())->show($r, $t['handle'], $status);
         }

@@ -69,10 +69,12 @@ final class Fragments
         $kit = self::kitName($kit);
         $out = [];
         if (!self::isCoreOnly($name) && $kit !== '') {
-            $dir = Kit::dir($kit);
             $out['project'] = ROOT . '/project/overrides/kits/' . $kit . '/fragments/' . $name . '.php';
-            $out['kit'] = $dir . '/fragments/' . $name . '.php';
-            $out['kit-partial'] = $dir . '/templates/partials/' . $name . '.php';
+            foreach (Kit::chain($kit) as $k => $dir) {   // Kit, dann Eltern-Kits (theme.php → 'extends')
+                $sfx = $k === $kit ? '' : ':' . $k;
+                $out['kit' . $sfx] = $dir . '/fragments/' . $name . '.php';
+                $out['kit-partial' . $sfx] = $dir . '/templates/partials/' . $name . '.php';
+            }
         }
         $out['core'] = self::coreDir() . '/' . $name . '.php';
         if (in_array($name, self::CORE_VIEWS, true)) $out['core-view'] = ROOT . '/app/Views/' . $name . '.php';

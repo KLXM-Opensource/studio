@@ -64,12 +64,14 @@
  *                                                     (nach composer install bzw. jedem Deploy)
  *   kit:create <name> [--from=starter|basis|…]        Neues Kit als Kopie anlegen (Standard: Start-Kit „starter“),
  *                                                     Präfix/Namen umbenennen; alt: theme:create <name> <vorlage>
+ *   kit:create <name> --extends=fluid                 Kind-Kit anlegen: erbt alles, enthält nur theme.php (Vererbung)
  *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung);
  *                                                     Verwaltungsrouten: Altform ohne Recht, Ausnahmen csrf/public
  *   extensions:selftest                               Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten nach Art, Werkzeuge
  *                                                     der Website, Ereignisse, Verwaltungsrouten, Tabellen, Slots)
  *   db:selftest                                       Selbsttest Core\Db\Table (anlegen, idempotent, umbenennen, Indizes, Fremdschlüssel)
  *   charts:selftest                                   Selbsttest Core\Charts (Beschreibung, Zahlen, CSP-sichere Ausgabe, Tabelle, Quellen)
+ *   kits:selftest                                     Selbsttest Vererbung von Kits (extends, Zusammenführen, design_defaults)
  *   format:selftest                                   Selbsttest Core\Format (Datum, relativ, Zahl, Betrag, Größe, Dauer, Auszug; DE/EN)
  *   features:list                                     Funktionen dieser Website: an/aus, Quelle (Konfiguration, Verwaltung, Standard)
  *   features:release [--dry-run] [--only=features|extensions]
@@ -629,13 +631,28 @@ switch ($cmd) {
 
     case 'theme:create':
     case 'kit:create':
-        // kit:create <name> [--from=vorlage] – Standard: Start-Kit „starter“; alte Form theme:create <name> <vorlage> geht weiter
+        // kit:create <name> [--from=vorlage | --extends=eltern] – Standard: Kopie des Start-Kits „starter“; --extends legt ein Kind-Kit an
+        // (alte Form theme:create <name> <vorlage> geht weiter)
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         $name = strtolower(preg_replace('~[^a-z0-9_\-]~i', '', $pos[0] ?? ''));
         $from = $pos[1] ?? 'starter';
         $from = Core\Cli::opt($args, 'from') ?? $from;
         if ($name === '' || Core\Kit::exists($name) || is_dir(Core\Kit::dir($name))) { fwrite(STDERR, "Aufruf: kit:create <name> [--from=starter]. Name fehlt oder Kit existiert bereits.\n"); exit(1); }
         if (!isset(Core\Theme::available()[$from])) { fwrite(STDERR, "Vorlage „{$from}“ nicht gefunden. Installiert: " . implode(', ', array_keys(Core\Theme::available())) . "\n"); exit(1); }
+        // --extends=fluid: schlankes Kind-Kit statt Kopie – erbt Blöcke, Vorlagen, Assets, Design (theme.php → 'extends')
+        if (($parent = Core\Cli::opt($args, 'extends')) !== null) {
+            if (!isset(Core\Theme::available()[$parent])) { fwrite(STDERR, "Eltern-Kit „{$parent}“ nicht gefunden.\n"); exit(1); }
+            @mkdir(ROOT . "/kits/$name/blocks", 0775, true);
+            @mkdir(ROOT . "/kits/$name/assets/css", 0775, true);
+            file_put_contents(ROOT . "/kits/$name/theme.php", "<?php\n// Kit „{$name}“ – erbt alles von „{$parent}“; hier nur, was anders ist (Entwicklerhandbuch → Kits → Vererbung)\nreturn [\n"
+                . "    'label' => '" . ucfirst($name) . "',\n    'description' => 'Eigenes Kit „{$name}“ (erbt von {$parent}).',\n    'version' => '0.1.0',\n"
+                . "    'extends' => '{$parent}',\n"
+                . "    // Standardwerte des geerbten Designs, z. B. Markenfarbe hell/dunkel:\n    // 'design_defaults' => ['accent' => ['default' => '#0F766E', 'dark' => '#5EEAD4']],\n"
+                . "    // Blöcke: eigene Datei blocks/{typ}.php ersetzt die geerbte; 'blocks' => ['typ' => null] nimmt einen Block heraus\n"
+                . "    // Zusätzliches CSS: assets/css/x.css + 'conditional_css' => ['css/x.css' => ['typ']]\n];\n");
+            echo "Kind-Kit „{$name}“ angelegt – erbt von „{$parent}“ (kits/$name/theme.php). Nur Dateien anlegen, die anders sein sollen; danach cd tools && pnpm run build.\n";
+            exit(0);
+        }
         $copy = function (string $src, string $dst) use (&$copy) {
             if (!is_dir($src)) return;
             @mkdir($dst, 0775, true);
@@ -1499,6 +1516,13 @@ switch ($cmd) {
             printf("  %-28s %-12s v%-3d %s\n", 'cblk_' . $b['key'], $b['status'] . ($b['changed'] ? '*' : ''), $b['version'], $b['label']);
         }
         break;
+
+    case 'kits:selftest':
+        // Vererbung von Kits: Definition zusammenführen, design_defaults, Kette
+        $res = Core\KitSelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'charts:selftest':
         // Core\Charts: Beschreibung prüfen, Zahlen aus Eingaben, Ausgabe ohne style-Attribute, Tabelle, Quellen, Engine-Dateien

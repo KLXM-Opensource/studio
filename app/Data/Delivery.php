@@ -418,7 +418,7 @@ final class Delivery
     /** Vorlage: Kit (kits/{kit}/templates/mail/request.php) vor Core (app/Admin/views/mail/request.php) */
     private static function template(): string
     {
-        $kit = app()->theme->path . '/templates/mail/request.php';
+        $kit = (string) app()->theme->file('templates/mail/request.php');
         return is_file($kit) ? $kit : ROOT . '/app/Admin/views/mail/request.php';
     }
 

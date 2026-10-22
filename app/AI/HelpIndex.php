@@ -67,8 +67,8 @@ final class HelpIndex
     {
         $files = [...(glob(ROOT . '/app/Admin/views/help/manual/*.php') ?: []), ...(glob(ROOT . '/app/Admin/views/help/technical/*.php') ?: []),
             ROOT . '/app/Admin/views/help/manual.php', ROOT . '/app/Admin/views/help/technical.php', ROOT . '/app/Admin/tutorials.php'];
-        $theme = app()->theme->path . '/docs';
-        if (is_dir($theme)) {
+        foreach (app()->theme->chain as $kitDir) {   // Kit und Eltern-Kits
+            if (!is_dir($theme = $kitDir . '/docs')) continue;
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($theme, \FilesystemIterator::SKIP_DOTS)) as $f) if ($f->isFile()) $files[] = $f->getPathname();
         }
         $files = [...$files, ...\Core\Guide::files()];   // Hinweise zu diesem Projekt (Kit + Website)
@@ -192,7 +192,7 @@ final class HelpIndex
     private static function tutorials(): array
     {
         $core = require ROOT . '/app/Admin/tutorials.php';
-        $file = app()->theme->path . '/docs/tutorials.php';
+        $file = (string) app()->theme->file('docs/tutorials.php');
         $theme = is_file($file) ? (array) require $file : [];
         $tracks = array_merge((array) $core['tracks'], (array) ($theme['tracks'] ?? []));
         return array_filter(array_merge((array) $core['tutorials'], (array) ($theme['tutorials'] ?? [])),
@@ -208,7 +208,7 @@ final class HelpIndex
         try {
             $vars = ['css' => ['css/docs.css'], 'blocks' => app()->theme->blocks(), 'themeDoc' => []];
             if ($which === 'manual') {
-                $file = app()->theme->path . '/docs/manual.php';
+                $file = (string) app()->theme->file('docs/manual.php');
                 if (is_file($file)) {
                     ob_start();
                     $def = (static fn(string $__file) => include $__file)($file);

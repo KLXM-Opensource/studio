@@ -23,6 +23,11 @@ namespace Core;
  *   Kit::url('praxis', 'css/x')   → /assets/kits/praxis/css/x (ohne Versions-Parameter; Theme::asset() hängt ?v= an)
  *   Kit::fragment('brand')        → Datei des Fragments nach der Suchreihenfolge (Core\Fragments)
  *   Kit::source('immobilien')     → 'local' | 'upload' | 'composer' (Kit::info(): Ordner, Paket, Ordner der fertigen Assets)
+ *   Kit::chain('mein-kit')        → ['mein-kit' => Ordner, 'fluid' => Ordner] – Kit und Eltern-Kits (theme.php → 'extends')
+ *
+ * Vererbung: theme.php → 'extends' => 'fluid'. Fehlt eine Datei im Kit (Block, Vorlage, Fragment, Sprachdatei, öffentliches
+ * Asset …), gilt die des Eltern-Kits; die Definition wird zusammengeführt (Theme::mergeDefinition). Nur Dateien – kein
+ * bestimmtes CSS vorausgesetzt: ein Kind-Kit kann eigenes CSS, Tailwind, UIkit oder Bootstrap mitbringen.
  */
 final class Kit
 {
@@ -67,6 +72,31 @@ final class Kit
     public static function exists(string $name): bool
     {
         return self::clean($name) !== '' && self::definitionFile(self::dir($name)) !== null;
+    }
+
+    /** Höchstens so viele Ebenen Vererbung (Kind → Eltern → Großeltern …) */
+    public const MAX_DEPTH = 4;
+
+    /** Eltern-Kit laut Definition ('extends' => 'name') – gelesen ohne die Datei auszuführen; '' = keins */
+    public static function parent(string $name): string
+    {
+        $f = self::definitionFile(self::dir($name));
+        if ($f === null || !preg_match("~^\s*'extends'\s*=>\s*'([a-z0-9][a-z0-9_-]*)'~m", (string) file_get_contents($f), $m)) return '';
+        return self::clean($m[1]);
+    }
+
+    /**
+     * Kit und seine Eltern-Kits, nächstes zuerst: [name => Ordner]. Endet bei fehlendem Eltern-Kit, Schleife oder MAX_DEPTH
+     * (kit:check meldet das).
+     * @return array<string, string>
+     */
+    public static function chain(string $name): array
+    {
+        $out = [];
+        for ($n = self::clean($name); $n !== '' && !isset($out[$n]) && count($out) < self::MAX_DEPTH && self::exists($n); $n = self::parent($n)) {
+            $out[$n] = self::dir($n);
+        }
+        return $out;
     }
 
     /** Definitionsdatei im Kit-Ordner: theme.php, sonst kit.php, sonst null */
@@ -209,9 +239,9 @@ final class Kit
     public static function commands(): array
     {
         static $cache = [];
-        $file = app()->theme->path . '/console.php';
+        $file = (string) app()->theme->file('console.php');
         if (!isset($cache[$file])) {
-            $cmds = is_file($file) ? require $file : [];
+            $cmds = $file !== '' ? require $file : [];
             $cache[$file] = is_array($cmds) ? array_filter($cmds, fn($c, $k) => is_string($k) && is_array($c) && is_callable($c[1] ?? null), ARRAY_FILTER_USE_BOTH) : [];
         }
         return $cache[$file];

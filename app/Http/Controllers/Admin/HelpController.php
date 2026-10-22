@@ -18,7 +18,7 @@ final class HelpController extends AdminController
         // Ein Theme ergänzt das Handbuch über docs/manual.php: Die Datei gibt ein Array zurück (eigene Kapitel,
         // Kern-Kapitel ersetzen oder ergänzen – siehe help/manual.php). Ältere Themes liefern dort eine vollständige
         // Ansicht (kein Array) – die wird wie bisher statt des Kern-Handbuchs gezeigt.
-        $file = app()->theme->path . '/docs/manual.php';
+        $file = (string) app()->theme->file('docs/manual.php');
         if (is_file($file)) {
             ob_start();
             $def = (static fn(string $__file) => include $__file)($file);
