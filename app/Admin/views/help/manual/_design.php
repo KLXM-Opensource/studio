@@ -10,6 +10,8 @@
   <?php endif; ?>
   <?php endif; ?>
   <?php if (\Core\Design::enabled() && \Core\Features::on('design') && isset(\Core\Design::tokens()['ha_cta_style'])): ?>
+  <h3 id="diagrammfarben">Farben der Diagramme</h3>
+  <p>Unter <b>Design › Diagramme</b> wählen Sie die Farben der ersten sechs Reihen in Diagrammen (Block „Diagramm“) – je eine Farbe für das helle und das dunkle Farbschema. Die erste Farbe gilt für die erste Reihe, die zweite für die zweite und so weiter. Wählen Sie gut unterscheidbare Töne, auch für Menschen mit Farbsehschwäche; die Werte stehen unter jedem Diagramm zusätzlich als Tabelle bereit. Ohne eigene Wahl nutzt die Website eine geprüfte Standardpalette.</p>
   <h3 id="kopfbereich">Kopfbereich: Suche, Aktionen, Kontakt</h3>
   <p>Unter <b>Design › Kopfbereich: Suche &amp; Aktionen</b> legen Sie fest, was rechts im Kopf der Website steht – jedes Kit bringt dafür eigene Voreinstellungen mit, sodass keine zwei Kits gleich aussehen. Die Vorschau rechts zeigt jede Änderung sofort; online geht sie erst mit <b>Speichern</b>.</p>
   <?= $img('header-actions.webp', 'Kopfbereiche mehrerer Kits nebeneinander: Suchfeld mit Textlink, Befehlsfeld mit Newsletter-Link, Status-Chip mit Kontakt-Menü, geteilte Aktion, Glas-Befehlsfeld mit Kontakt-Menü, Kontakt-Chip mit Öffnungsstatus', 'Standards der Kits: Suchfeld + Textlink (fluid), Befehlsfeld „Suchen … ⌘K“ + Newsletter (editorial), Status-Chip + Kontakt-Menü (essenz), geteilte Aktion „Beratung buchen“ (modern), Glas-Befehlsfeld + Kontakt-Menü (glas), „Hofladen geöffnet“ + Textlink (nature); basis setzt „Kontakt“ als Menüpunkt ab.') ?>
