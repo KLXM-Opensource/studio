@@ -131,6 +131,14 @@
  *   pool:restore <datei> --force                      Pool-Sicherung einspielen
  *   shared:backup [key|--all] [--keep=N]              Geteilte Tabellen sichern (Bilder: pool:backup data-…)
  *   shared:restore <datei> --force                    Sicherung einer geteilten Tabelle einspielen
+ *   backup:offsite [--target=id] [--test] [--list]    Sicherung außer Haus: neueste Sicherungen + Installation verschlüsselt zu den
+ *                                                     Zielen (WebDAV, SFTP, FTPS, Ordner); --test prüft die Verbindung, --list zeigt das Ziel
+ *   backup:install [--out=dir] [--no-code]            Sicherung der Installation (Konfiguration, storage/ ohne Caches, eigene Kits/Erweiterungen)
+ *   backup:fetch <datei> (--target=id|--url=…) [--key=] Sicherung vom Ziel holen und entschlüsseln (--list: Dateien am Ziel)
+ *   backup:decrypt <datei.kbk> --key=kbk1.… [--out=]  Verschlüsselte Sicherung entschlüsseln (auch auf einer frischen Installation)
+ *   backup:restore-install <datei> --force [--no-code]  Installations-Sicherung einspielen (Konfiguration, storage/, eigene Kits/Erweiterungen)
+ *   backup:key                                        Schlüssel der Sicherungen anzeigen (an einem anderen Ort aufbewahren!)
+ *   backup:selftest                                   Selbsttest (Verschlüsselung, Auswahl der Dateien, Ziel „Ordner“)
  *
  * Medien & Daten
  *   pool:create <key> "Name"                          Geteilten Medien-Pool anlegen (Websites: 'media_pools' => [...])
@@ -983,6 +991,7 @@ switch ($cmd) {
                 + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
                 + Core\Cron::health()          // Geplante Aufgaben: Cronjob läuft, fehlgeschlagene Aufgaben (nur Hinweise)
                 + Core\Integrity::health()     // Integrität: unerwartete Dateien/Daten (letzte Prüfung, Core\Integrity)
+                + (site()->isDefault() ? Core\Backup\Offsite::health() : [])   // Sicherung außer Haus: je Ziel (gehört zur Installation, einmal)
                 + Core\SeoCheck::health()      // Suchmaschinen gesperrt (Fehler), Domains, Titel/Beschreibungen (Hinweise, Core\SeoCheck)
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
@@ -1094,6 +1103,88 @@ switch ($cmd) {
         foreach ($r['notes'] as $n) echo "  ! $n\n";
         break;
 
+    case 'backup:offsite':
+        // Sicherung außer Haus (Core\Backup\Offsite) – ohne eingeschaltetes Ziel nichts zu tun
+        $only = Core\Cli::opt($args, 'target');
+        if (in_array('--test', $args, true) || in_array('--list', $args, true)) {
+            $ts = $only !== null ? array_intersect_key(Core\Backup\Offsite::targets(), [$only => 1]) : Core\Backup\Offsite::targets();
+            if (!$ts) { fwrite(STDERR, "Kein Sicherungsziel" . ($only ? " „{$only}“" : '') . " eingerichtet.\n"); exit(1); }
+            $fail = 0;
+            foreach ($ts as $id => $t) {
+                $tr = Core\Backup\Offsite::transport($t);
+                if (in_array('--test', $args, true)) {
+                    $err = $tr->test();
+                    echo ($err === null ? '  ✓ ' : '  ✗ ') . "$id {$t['label']} ({$t['url']})" . ($err !== null ? " – $err" : '') . "\n";
+                    if ($err !== null) $fail++;
+                } else {
+                    echo "== $id {$t['label']} ({$t['url']})\n";
+                    try { foreach ($tr->list() as $f) echo "  $f\n"; } catch (Throwable $e) { echo "  FEHLER: " . $e->getMessage() . "\n"; $fail++; }
+                }
+            }
+            exit($fail ? 1 : 0);
+        }
+        $rep = Core\Backup\Offsite::run($only, fn(string $s) => print("$s\n"));
+        exit(array_filter($rep, fn($r) => !$r['ok']) ? 1 : 0);
+
+    case 'backup:install':
+        $out = Core\Backup\Installation::create(Core\Cli::opt($args, 'out') ?? ROOT . '/storage/backups', !in_array('--no-code', $args, true));
+        echo $out . "\n";
+        break;
+
+    case 'backup:fetch':
+        // Vom Ziel holen – eingerichtetes Ziel (--target=id) oder direkt (--url=… --user=… --pass=…, z. B. nach Verlust des Servers);
+        // --list zeigt die Dateien; mit --key=kbk1.… (sonst Schlüssel dieser Installation, falls vorhanden) gleich entschlüsseln
+        $name = (string) (array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')))[0] ?? '');
+        $t = ($id = Core\Cli::opt($args, 'target')) !== null ? (Core\Backup\Offsite::targets()[$id] ?? null) : null;
+        $tr = $t ? Core\Backup\Offsite::transport($t) : (Core\Cli::opt($args, 'url') !== null ? new Core\Backup\Transport(['url' => (string) Core\Cli::opt($args, 'url'),
+            'user' => (string) Core\Cli::opt($args, 'user'), 'pass' => (string) (Core\Cli::opt($args, 'pass') ?? getenv('KBK_PASS')), 'insecure' => in_array('--insecure', $args, true),
+            'key_file' => (string) Core\Cli::opt($args, 'key-file')]) : null);
+        if (!$tr || ($name === '' && !in_array('--list', $args, true))) {
+            fwrite(STDERR, "Aufruf: backup:fetch <datei.kbk> (--target=id | --url=… --user=… [--pass=…|KBK_PASS]) [--key=kbk1.…] [--out=dir]   ·   --list zeigt die Dateien am Ziel\n"); exit(1);
+        }
+        if (in_array('--list', $args, true)) { foreach ($tr->list() as $f) if (str_ends_with($f, Core\Backup\Vault::EXT)) echo "$f\n"; break; }
+        $dir = Core\Cli::opt($args, 'out') ?? ROOT . '/storage/backups';
+        @mkdir($dir, 0770, true);
+        $enc = "$dir/" . basename($name);
+        try { $tr->get(basename($name), $enc); } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        $key = Core\Backup\Vault::import((string) (Core\Cli::opt($args, 'key') ?? (Core\Backup\Vault::hasKey() ? Core\Backup\Vault::export(Core\Backup\Vault::key()) : '')));
+        if ($key !== null && str_ends_with($enc, Core\Backup\Vault::EXT)) {
+            $plain = substr($enc, 0, -strlen(Core\Backup\Vault::EXT));
+            try { Core\Backup\Vault::decryptFile($enc, $plain, $key); } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+            unlink($enc);
+            $enc = $plain;
+        }
+        echo $enc . "\n";
+        break;
+
+    case 'backup:decrypt':
+        $file = (string) ($args[0] ?? '');
+        $key = Core\Backup\Vault::import((string) (Core\Cli::opt($args, 'key') ?? (Core\Backup\Vault::hasKey() ? Core\Backup\Vault::export(Core\Backup\Vault::key()) : '')));
+        if (!is_file($file) || $key === null) { fwrite(STDERR, "Aufruf: backup:decrypt <datei.kbk> --key=kbk1.… [--out=datei]  (ohne --key: Schlüssel dieser Installation)\n"); exit(1); }
+        $out = Core\Cli::opt($args, 'out') ?? (str_ends_with($file, Core\Backup\Vault::EXT) ? substr($file, 0, -strlen(Core\Backup\Vault::EXT)) : "$file.tar.gz");
+        try { Core\Backup\Vault::decryptFile($file, $out, $key); } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        echo $out . "\n";
+        break;
+
+    case 'backup:restore-install':
+        $file = (string) ($args[0] ?? '');
+        if (!is_file($file) || !in_array('--force', $args, true)) { fwrite(STDERR, "Aufruf: backup:restore-install <install-….tar.gz> --force [--no-code]  (ÜBERSCHREIBT Konfiguration und Daten in storage/)\n"); exit(1); }
+        try { $r = Core\Backup\Installation::restore($file, !in_array('--no-code', $args, true)); } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        echo "Eingespielt: {$r['files']} Dateien (Sicherung vom " . ($r['manifest']['created'] ?? '?') . ", Kern " . ($r['manifest']['core'] ?? '?') . ").\n"
+           . "Weiter: je Website site:restore, pool:restore, shared:restore; Erweiterungen/Kits aus Composer laut manifest; dann migrate --all, search:index --all --full, integrity:accept --all.\n";
+        break;
+
+    case 'backup:key':
+        if (!Core\Backup\Vault::hasKey()) { echo "Noch kein Schlüssel – er entsteht mit der ersten Sicherung außer Haus.\n"; break; }
+        echo Core\Backup\Vault::export(Core\Backup\Vault::key()) . "\n  Fingerabdruck: " . Core\Backup\Vault::fingerprint() . " – an einem anderen Ort aufbewahren, ohne ihn lässt sich nichts entschlüsseln.\n";
+        break;
+
+    case 'backup:selftest':
+        $res = Core\Backup\SelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
     case 'site:restore':
         // Sicherung einspielen: Datenbank + Medien (z. B. Live-Inhalte auf Staging). Website-Konfiguration bleibt unangetastet.
         $file = $args[0] ?? '';
@@ -1105,9 +1196,16 @@ switch ($cmd) {
         if (is_file("$tmp/database.sqlite") && ($cfg['driver'] ?? 'sqlite') === 'sqlite') {
             // Offene Verbindung dieses Aufrufs: WAL zurückschreiben und abschalten – sonst schreibt SQLite beim Beenden
             // den alten Stand (z. B. frisch angelegte Startinhalte) über die eingespielte Datei
-            $app->db->query('PRAGMA wal_checkpoint(TRUNCATE)');
-            $app->db->query('PRAGMA journal_mode = DELETE');
-            copy("$tmp/database.sqlite", $cfg['path']);
+            try {
+                $app->db->query('PRAGMA wal_checkpoint(TRUNCATE)');
+                $app->db->query('PRAGMA journal_mode = DELETE');
+                copy("$tmp/database.sqlite", $cfg['path']);
+            } catch (PDOException $e) {
+                // Frisch angelegte Website (z. B. Wiederherstellung auf einem leeren Server): der Prozess hält die neue Datenbank noch
+                // gesperrt. Dann die Datei per rename ersetzen – die alte Verbindung behält die alte Datei (anderer Inode) und kann
+                // beim Beenden nichts mehr über die eingespielte schreiben. Ohne Besucherverkehr (frische Website) unbedenklich.
+                if (!copy("$tmp/database.sqlite", $cfg['path'] . '.restore') || !rename($cfg['path'] . '.restore', $cfg['path'])) throw $e;
+            }
             foreach (['-wal', '-shm'] as $x) @unlink($cfg['path'] . $x);
         } elseif (is_file("$tmp/database.sql") && ($cfg['driver'] ?? '') === 'mysql') {
             putenv('MYSQL_PWD=' . $cfg['pass']);

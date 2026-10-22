@@ -274,6 +274,12 @@ return function (Router $r): void {
     $r->post('/admin/system/integritaet/check', [Admin\IntegrityController::class, 'check']);
     $r->post('/admin/system/integritaet/settings', [Admin\IntegrityController::class, 'settings']);
     $r->post('/admin/system/integritaet/accept/{what}', [Admin\IntegrityController::class, 'accept']);
+    $r->get('/admin/system/sicherung', [Admin\OffsiteBackupController::class, 'index']);
+    $r->post('/admin/system/sicherung/save', [Admin\OffsiteBackupController::class, 'save']);
+    $r->post('/admin/system/sicherung/run', [Admin\OffsiteBackupController::class, 'run']);
+    $r->post('/admin/system/sicherung/key', [Admin\OffsiteBackupController::class, 'key']);
+    $r->post('/admin/system/sicherung/test/{id}', [Admin\OffsiteBackupController::class, 'test']);
+    $r->post('/admin/system/sicherung/delete/{id}', [Admin\OffsiteBackupController::class, 'delete']);
     $r->post('/admin/system/aufgaben/{key}', [Admin\CronController::class, 'save']);
     $r->post('/admin/system/aufgaben/{key}/run', [Admin\CronController::class, 'run']);
     $r->get('/admin/system/kits', [Admin\KitsController::class, 'index']);

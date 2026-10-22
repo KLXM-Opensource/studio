@@ -40,12 +40,13 @@ use Core\Fields;
     <?= $tab('umgebung', __('Umgebung')) ?>
     <?= $tab('adminpath', __('Adresse der Verwaltung')) ?>
     <?= $tab('info', 'Systeminfo') ?>
-    <?php // Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Geplante Aufgaben, Integrität, Kits): Links unten in derselben Leiste (dort: system/_sidenav.php)
+    <?php // Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Geplante Aufgaben, Integrität, Sicherung außer Haus, Kits): Links unten in derselben Leiste (dort: system/_sidenav.php)
     $subLinks = array_filter(['domain' => \Core\Domains::available() ? [url('/admin/system/domain'), __('Domain'), 'globe'] : null,
         'branding' => \Core\Branding::canEdit() ? [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush'] : null,
         'fonts' => \Core\Fonts::canManage() ? [url('/admin/system/fonts'), __('Schriften'), 'text-t'] : null,
         'aufgaben' => \Core\Cron::canManage() ? [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown'] : null,
         'integritaet' => can('system.manage') ? [url('/admin/system/integritaet'), __('Integrität'), 'shield-check'] : null,
+        'sicherung' => can('system.manage') && \Core\Permissions::installationAdmin() ? [url('/admin/system/sicherung'), __('Sicherung außer Haus'), 'cloud-arrow-up'] : null,
         'kits' => \Core\KitPackages::canManage() ? [url('/admin/system/kits'), __('Kits'), 'package'] : null]);
     if ($subLinks): ?><span class="adm-tabs__sep" role="separator"></span><?php endif;
     foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>

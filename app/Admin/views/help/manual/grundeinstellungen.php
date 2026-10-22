@@ -52,6 +52,14 @@
     <li>Solange die Testumgebung aktiv ist, <b>pulsiert ein oranger Punkt</b> an „Grundeinstellungen“ und an der Gruppe „System“ im Menü – damit niemand vergisst, sie vor dem Start aufzuheben.</li>
   </ul>
 
+  <h3 id="sicherung-ausser-haus">Sicherung außer Haus</h3>
+  <p>Unter <b>Grundeinstellungen → Sicherung außer Haus</b> (nur wer die Installation verwaltet) legen Sie fest, wohin die nächtlichen Sicherungen zusätzlich kopiert werden – z. B. in eine Nextcloud, eine Storage-Box oder auf ein NAS. Kopiert werden alle Websites, geteilten Medien und Tabellen sowie die Installation selbst (Einstellungen, Daten der Erweiterungen, eigene Kits und Erweiterungen); das Programm KLXM Studio selbst nicht, es lässt sich jederzeit neu laden.</p>
+  <ul>
+    <li><b>Ziel hinzufügen:</b> Adresse des Zielordners (<code>https://…</code> für WebDAV/Nextcloud, <code>sftp://…</code>, <code>ftps://…</code> oder ein Ordner), Benutzername und Passwort. Beim Speichern prüft das System die Verbindung.</li>
+    <li><b>Verschlüsselt:</b> Alles, was den Server verlässt, ist verschlüsselt. Der <b>Schlüssel</b> bleibt auf dem Server – lassen Sie ihn sich einmal anzeigen und bewahren Sie ihn an einem anderen Ort auf (Passwort-Manager, Tresor). Ohne ihn lässt sich keine Sicherung lesen.</li>
+    <li><b>Aufräumen:</b> Am Ziel bleiben je Website die neuesten Sicherungen (Standard 14); ältere löscht das System selbst, andere Dateien im Ordner nie.</li>
+    <li><b>Jetzt sichern</b> startet sofort; sonst läuft es jede Nacht um 03:30. Klappt eine Übertragung nicht, zeigt die Seite den Fehler und die Übersicht warnt.</li>
+  </ul>
   <h3 id="integritaet">Integrität: unerwartete Dateien und Daten</h3>
   <p>Unter <b>Grundeinstellungen → Integrität</b> sehen Sie, ob seit dem letzten bestätigten Stand etwas verändert wurde, das typischerweise auf einen Einbruch hinweist. Die Prüfung läuft stündlich als geplante Aufgabe; mit <b>Jetzt prüfen</b> sofort.</p>
   <ul>

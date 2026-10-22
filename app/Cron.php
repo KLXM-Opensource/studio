@@ -100,6 +100,8 @@ final class Cron
         self::register('integrity.check', __('Integrität prüfen'), 'integrity:check --all --quiet', '7 * * * *', ['group' => $g, 'timeout' => 900,
             'help' => __('Unerwartete Dateien (Code, .htaccess, PHP in Medien) und Daten (Trigger, neue Administrator-Konten, Skript-Code) – neue Fehler per E-Mail.')]);
         self::register('backup.shared', __('Sicherungen der geteilten Tabellen'), 'shared:backup --all --keep=14', '40 2 * * *', ['group' => $g]);
+        self::register('backup.offsite', __('Sicherung außer Haus'), 'backup:offsite', '30 3 * * *', ['group' => $g, 'timeout' => 3300,
+            'help' => __('Neueste Sicherungen und die Installation verschlüsselt zu den Zielen unter Grundeinstellungen → Sicherung außer Haus – ohne Ziel wirkungslos.')]);
     }
 
     /** @return array<string, array> alle angemeldeten Aufgaben mit Zustand (enabled, schedule, default, last, next) */

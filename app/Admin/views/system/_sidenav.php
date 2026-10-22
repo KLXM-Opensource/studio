@@ -25,6 +25,10 @@ if (can('system.manage')) {
     $ig = \Core\Integrity::health();
     $sub['integritaet'] = [url('/admin/system/integritaet'), __('Integrität'), 'shield-check', in_array(false, $ig, true) ? __('Unerwartete Änderungen gefunden') : ''];
 }
+if (can('system.manage') && \Core\Permissions::installationAdmin()) {
+    $bkState = \Core\Backup\Offsite::state();
+    $sub['sicherung'] = [url('/admin/system/sicherung'), __('Sicherung außer Haus'), 'cloud-arrow-up', array_filter($bkState, fn($s) => !empty($s['error'])) ? __('Letzte Sicherung fehlgeschlagen') : ''];
+}
 if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
 ?>
   <nav class="adm-tabs adm-secnav" aria-label="<?= e(__('Bereiche')) ?>">

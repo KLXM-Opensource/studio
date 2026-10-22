@@ -34,3 +34,10 @@
 .ig-list{display:grid;gap:6px;margin:12px 0;padding:0;list-style:none}
 .ig-item{display:flex;gap:8px;align-items:baseline;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,currentColor 4%,transparent);overflow-wrap:anywhere}
 .ig-item--error{background:color-mix(in srgb,#c2410c 10%,transparent)}
+/* Grundeinstellungen → Sicherung außer Haus (system/sicherung.php) */
+.bk-list,.bk-local{display:grid;gap:8px;margin:12px 0;padding:0;list-style:none}
+.bk-item{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,currentColor 4%,transparent)}
+.bk-item__main{flex:1 1 22rem;min-width:0;display:grid;gap:3px}
+.bk-item__title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.bk-url{overflow-wrap:anywhere;font-family:var(--adm-mono,monospace);font-size:.85em}
+.bk-key{display:block;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,currentColor 6%,transparent);font-size:.95em;overflow-wrap:anywhere;user-select:all}

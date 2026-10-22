@@ -78,6 +78,8 @@ final class Extension
     public array $adminAssetProviders = [];
     /** @var list<callable(): array<string, ?bool>> */
     public array $healthProviders = [];
+    /** @var list<string> Pfade unter storage/, die nicht in die Sicherung der Installation gehören (Core\Backup\Installation) */
+    public array $backupSkip = [];
     /** @var list<callable(): ?callable> */
     public array $afterAdmin = [];
     /** @var array<string, list<callable>> */
@@ -333,6 +335,18 @@ final class Extension
     public function adminAssets(callable $fn): self
     {
         $this->adminAssetProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Daten unter storage/, die NICHT in die Sicherung der Installation gehören, weil sie abgeleitet sind oder sich neu laden lassen
+     * (Cache, heruntergeladene Datenbanken, Vorschaubilder) – Pfade relativ zu storage/, z. B. backupSkip('report-geo', 'meine/thumbs').
+     * Alles andere unter storage/{eigener Ordner} wird gesichert (Core\Backup\Installation); Tabellen in der Website-Datenbank
+     * sichert site:backup ohnehin.
+     */
+    public function backupSkip(string ...$paths): self
+    {
+        foreach ($paths as $p) if (($p = trim(str_replace('..', '', $p), '/')) !== '') $this->backupSkip[] = $p;
         return $this;
     }
 
