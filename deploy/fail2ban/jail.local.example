@@ -22,3 +22,16 @@ action   = iptables-multiport[name=klxm-studio-probe, port="http,https"]
 maxretry = 3
 findtime = 3600
 bantime  = 86400
+
+# Zugriffslog des Webservers: nicht vorhandene .php-Dateien anderer Systeme (/wp-login.php, /xmlrpc.php …) – erreichen KLXM Studio nie.
+# Plesk: /var/www/vhosts/<domain>/logs/proxy_access_ssl_log (nginx vor Apache) bzw. access_ssl_log.
+# Websites hinter Cloudflare o. Ä. auf demselben Server: deren Adressbereiche unter ignoreip, sonst wird der Proxy gesperrt.
+[klxm-studio-probe-access]
+enabled  = true
+filter   = klxm-studio-probe-access
+logpath  = /var/www/vhosts/example.org/logs/proxy_access_ssl_log
+port     = http,https
+action   = iptables-multiport[name=klxm-studio-probe-access, port="http,https"]
+maxretry = 3
+findtime = 3600
+bantime  = 86400
