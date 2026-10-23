@@ -1203,6 +1203,8 @@ switch ($cmd) {
 
     case 'security-log:selftest':
         $res = Core\SecurityLog::selftest();
+        $fw = Core\Http\Forwarded::selftest();
+        $res = ['ok' => $res['ok'] + $fw['ok'], 'fails' => array_merge($res['fails'], $fw['fails'])];
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);

@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Website aus einem anderen Abonnement (Proxy)
+- Eine Domain kann im eigenen Webspace bleiben (z. B. Plesk-Abonnement des Kunden mit E-Mail, DNS, Zertifikat) und trotzdem eine Website dieser Installation zeigen: Der Webserver dort leitet weiter und schickt `X-Forwarded-Host` mit. `Core\Http\Forwarded` übernimmt Domain, https und Besucher-IP – nur von vertrauenswürdigen Proxys und nur für Domains der Installation; die Besucher-IP auch über mehrere Proxy-Stufen. Vorlage für Plesk: `deploy/proxy/plesk-nginx.conf`, Anleitung im Entwicklerhandbuch → Websites; Abschalten mit `'forwarded_host' => false`.
+
 ### MySQL/MariaDB geprüft
 - Komplette Installation mit MariaDB durchgespielt (Einrichtung, Startinhalte, Verwaltung, Selbsttests, `site:backup`/`site:restore`, Sicherung außer Haus mit `backup:restore-all`). Behoben: `Database::transaction()` scheiterte nach DDL (MySQL beendet die Transaktion dabei selbst – Startinhalte blieben unvollständig); fehlender `app_key` wird in einer vorhandenen `config.local.php` ergänzt; Integritätsprüfung und Chat-Nutzerliste lasen die Tabellenstruktur nur SQLite-artig – neu `Database::columns()` und `Database::objects()` für beide Treiber; `extensions:selftest` räumt auch unter MySQL auf.
 - **Mehrere Websites mit MySQL/MariaDB:** Eine weitere Website erbte bisher den MySQL-Zugang der Hauptwebsite und schrieb damit in **dieselbe** Datenbank. Jetzt bekommt jede weitere Website ihre eigene SQLite-Datenbank – oder die in `config/sites/{key}.php` unter `'db'` angegebene.

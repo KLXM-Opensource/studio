@@ -1,6 +1,12 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 2
+			path: app/Database.php
+
+		-
 			message: '#^Anonymous function has an unused use \$ctx\.$#'
 			identifier: closure.unusedUse
 			count: 1
