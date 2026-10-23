@@ -14,8 +14,8 @@ define('CMS_INPUT_OVERFLOW', (bool) preg_match('~Input variables exceeded|body p
 
 // PHP-Entwicklungsserver: statische Dateien direkt ausliefern
 if (PHP_SAPI === 'cli-server') {
-    $file = __DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    if ($file !== __FILE__ && is_file($file)) {
+    $file = ($_SERVER['DOCUMENT_ROOT'] ?: __DIR__) . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);   // Dokumentstamm des Servers (auch Projekt-Installation)
+    if (!in_array(realpath($file), [__FILE__, realpath(get_included_files()[0])], true) && is_file($file)) {
         return false;
     }
 }

@@ -8,7 +8,9 @@ declare(strict_types=1);
  * Alles außer /public liegt außerhalb des Webroots (kein .htaccess nötig).
  */
 
-define('ROOT', dirname(__DIR__));
+// Projekt-Installation mit verknüpftem Kern (Umgebungsvariable KLXM_ROOT, z. B. aus public/index.php bzw. bin/console des Projekts):
+// eigene config/, storage/, Medien, Kits und Erweiterungen, Kern-Code per Verknüpfung – __DIR__ zeigt dabei immer auf den Kern
+define('ROOT', (($r = getenv('KLXM_ROOT')) && is_dir($r . '/config')) ? rtrim($r, '/') : dirname(__DIR__));
 define('CMS_NAME', 'KLXM Studio');
 define('CMS_SLUG', 'klxm-studio');   // MCP-Serverkennung, Bearer-Realms
 define('CMS_VERSION', '1.0.0');

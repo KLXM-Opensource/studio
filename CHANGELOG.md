@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Projekt-Installation mit verknüpftem Kern
+- Umgebungsvariable `KLXM_ROOT`: eine Installation mit eigenen `config/`, `storage/`, Medien, Kits und Erweiterungen nutzt den Kern-Code einer anderen per Verknüpfung (lokale Entwicklung mehrerer Projekte, Kern-Änderungen wirken sofort). Der Entwicklungsserver liefert statische Dateien jetzt aus seinem Dokumentstamm. Entwicklerhandbuch → Installation.
+
 ### Website aus einem anderen Abonnement (Proxy)
 - Eine Domain kann im eigenen Webspace bleiben (z. B. Plesk-Abonnement des Kunden mit E-Mail, DNS, Zertifikat) und trotzdem eine Website dieser Installation zeigen: Der Webserver dort leitet weiter und schickt `X-Forwarded-Host` mit. `Core\Http\Forwarded` übernimmt Domain, https und Besucher-IP – nur von vertrauenswürdigen Proxys und nur für Domains der Installation; die Besucher-IP auch über mehrere Proxy-Stufen. Vorlage für Plesk: `deploy/proxy/plesk-nginx.conf`, Anleitung im Entwicklerhandbuch → Websites; Abschalten mit `'forwarded_host' => false`.
 
