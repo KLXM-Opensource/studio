@@ -465,7 +465,7 @@ final class McpController
         }
         $args = is_array($p['arguments'] ?? null) ? $p['arguments'] : [];
         foreach ($tools[$name]['inputSchema']['required'] ?? [] as $req) {
-            if (!array_key_exists($req, $args)) {
+            if (($args[$req] ?? null) === null) {
                 return self::toolError("Parameter „{$req}“ fehlt.");
             }
         }
