@@ -105,22 +105,44 @@ final class Database
         $this->pdo->beginTransaction();
         try {
             $r = $fn($this);
-            $this->pdo->commit();
+            // MySQL/MariaDB: DDL (CREATE/ALTER TABLE) beendet die Transaktion stillschweigend – dann gibt es nichts mehr zu bestätigen
+            if ($this->pdo->inTransaction()) $this->pdo->commit();
             return $r;
         } catch (\Throwable $e) {
-            $this->pdo->rollBack();
+            if ($this->pdo->inTransaction()) $this->pdo->rollBack();   // sonst verdeckt „no active transaction“ den eigentlichen Fehler
             throw $e;
         }
+    }
+
+    /** Spaltennamen einer Tabelle (SQLite und MySQL) @return list<string> */
+    public function columns(string $table): array
+    {
+        return $this->driver === 'mysql'
+            ? array_column($this->fetchAll("SHOW COLUMNS FROM $table"), 'Field')
+            : array_column($this->fetchAll("PRAGMA table_info($table)"), 'name');
+    }
+
+    /** Tabellen, Trigger und Ansichten mit ihrer Definition (SQLite und MySQL) @return list<array{type: string, name: string, sql: string}> */
+    public function objects(): array
+    {
+        if ($this->driver !== 'mysql') return $this->fetchAll("SELECT type, name, COALESCE(sql, '') AS sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'");
+        $out = [];
+        foreach ($this->fetchAll("SELECT TABLE_NAME AS name, TABLE_TYPE AS t FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()") as $r) {
+            if ($r['t'] !== 'VIEW') $out[] = ['type' => 'table', 'name' => (string) $r['name'], 'sql' => ''];
+        }
+        foreach ($this->fetchAll("SELECT TABLE_NAME AS name, VIEW_DEFINITION AS d FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE()") as $r) {
+            $out[] = ['type' => 'view', 'name' => (string) $r['name'], 'sql' => (string) $r['d']];
+        }
+        foreach ($this->fetchAll("SELECT TRIGGER_NAME AS name, CONCAT(EVENT_OBJECT_TABLE, ' ', ACTION_TIMING, ' ', EVENT_MANIPULATION, ' ', ACTION_STATEMENT) AS d FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = DATABASE()") as $r) {
+            $out[] = ['type' => 'trigger', 'name' => (string) $r['name'], 'sql' => (string) $r['d']];
+        }
+        return $out;
     }
 
     /** Fügt fehlende Spalten hinzu (idempotent, SQLite und MySQL). */
     public function ensureColumns(string $table, array $columns): void
     {
-        if ($this->driver === 'mysql') {
-            $have = array_column($this->fetchAll("SHOW COLUMNS FROM $table"), 'Field');
-        } else {
-            $have = array_column($this->fetchAll("PRAGMA table_info($table)"), 'name');
-        }
+        $have = $this->columns($table);
         foreach ($columns as $name => $ddl) {
             if (!in_array($name, $have, true)) {
                 $this->pdo->exec("ALTER TABLE $table ADD COLUMN $name $ddl");

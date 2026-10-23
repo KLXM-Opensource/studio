@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### MySQL/MariaDB geprüft
+- Komplette Installation mit MariaDB durchgespielt (Einrichtung, Startinhalte, Verwaltung, Selbsttests, `site:backup`/`site:restore`, Sicherung außer Haus mit `backup:restore-all`). Behoben: `Database::transaction()` scheiterte nach DDL (MySQL beendet die Transaktion dabei selbst – Startinhalte blieben unvollständig); fehlender `app_key` wird in einer vorhandenen `config.local.php` ergänzt; Integritätsprüfung und Chat-Nutzerliste lasen die Tabellenstruktur nur SQLite-artig – neu `Database::columns()` und `Database::objects()` für beide Treiber; `extensions:selftest` räumt auch unter MySQL auf.
+
 ### Sicherheits-Log für fail2ban
 - Optional (`'security_log' => true`): `storage/logs/security.log` mit einer Zeile je Vorfall – fehlgeschlagene Anmeldung, Rate-Limit, zweiter Faktor, Passkey, „Passwort vergessen“ zu oft, ungültiger API-Schlüssel und Abfragen typischer Angriffsadressen (`/wp-login.php`, `/.env`, `/.git/` …, nur ohne Weiterleitung). Hinter vertrauenswürdigen Proxys die echte Besucher-IP. Fertige Filter und Jails für fail2ban bzw. Plesk unter `deploy/fail2ban/` (dazu ein Filter für das Zugriffslog des Webservers: nicht vorhandene `.php`-Dateien wie `/wp-login.php` erreichen KLXM Studio nie), Anleitung im Entwicklerhandbuch → Sicherheit; Selbsttest `security-log:selftest`.
 

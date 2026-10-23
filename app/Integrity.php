@@ -353,7 +353,7 @@ final class Integrity
     {
         $db = app()->db;
         $tables = $objects = [];
-        foreach ($db->fetchAll("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'") as $r) {
+        foreach ($db->objects() as $r) {
             if ($r['type'] === 'table') $tables[] = (string) $r['name'];
             elseif (in_array($r['type'], ['trigger', 'view'], true)) $objects[$r['type'] . ':' . $r['name']] = hash('sha256', (string) $r['sql']);
         }

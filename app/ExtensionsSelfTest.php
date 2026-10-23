@@ -135,6 +135,8 @@ final class ExtensionsSelfTest
         self::eq('Filters::ALL – Namen bekannt', Filters::known('form.validate') && Filters::known('ext:abc.def') && !Filters::known('abc'), true);
         self::eq('menu.items: Eintrag ergänzt', array_column(Pages::menu(), 'label')[count(Pages::menu()) - 1] ?? null, 'QA-Menü');
         $pdo = app()->db->pdo;
+        // Reste eines abgebrochenen Laufs entfernen (MySQL/MariaDB: DDL im Test beendet die Transaktion, das Zurückrollen greift dann nicht)
+        app()->db->query("DELETE FROM pages WHERE slug = 'ext-filter-qa'");
         $pdo->beginTransaction();
         try {
             $id = Pages::create(['slug' => 'ext-filter-qa', 'title' => 'Filter QA', 'lang' => Lang::default(), 'sort' => 9999, 'status' => 'published']);
@@ -152,7 +154,8 @@ final class ExtensionsSelfTest
             self::eq('mail.message: false unterdrückt', [Mailer::send('QA-unterdrücken', 'x', ['qa@example.org']), Mailer::$outcome], [null, 'logged']);
         } finally {
             Mailer::$testDump = null;
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            else app()->db->query("DELETE FROM pages WHERE slug = 'ext-filter-qa'");   // Transaktion schon beendet (MySQL-DDL): Testseite gezielt löschen
             self::activate(null);
         }
         foreach (\Core\Events\Event::ALL as $name => $class) {

@@ -315,7 +315,7 @@ final class Chat
         if ($cache !== null) return $cache;
         $out = [];
         $roles = Permissions::roles();
-        $cols = array_column(app()->db->fetchAll('PRAGMA table_info(users)'), 'name');
+        $cols = app()->db->columns('users');
         $sel = 'id, email, name, role' . (in_array('network_uid', $cols, true) ? ', network_uid' : '') . (in_array('disabled', $cols, true) ? ', disabled' : '');
         foreach (app()->db->fetchAll("SELECT $sel FROM users ORDER BY name, email") as $u) {
             if ((int) ($u['disabled'] ?? 0)) continue;

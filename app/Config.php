@@ -25,6 +25,12 @@ final class Config
             self::writeLocal($localFile);
         }
         $local = is_file($localFile) ? require $localFile : [];
+        // Vorab angelegte config.local.php (z. B. nur mit 'db' für MySQL/MariaDB): App-Key und Setup-Token beim ersten Start ergänzen,
+        // eigene Angaben bleiben erhalten – sonst ließe sich weder verschlüsseln noch das erste Konto anlegen
+        if (is_array($local) && empty($local['app_key']) && $site === Site::DEFAULT && is_writable($localFile)) {
+            $keys = ['app_key' => bin2hex(random_bytes(32)), 'setup_token' => (string) (($local['setup_token'] ?? '') ?: bin2hex(random_bytes(12)))];
+            if (self::writeLocal($localFile, array_replace($local, $keys))) $local = array_replace($local, $keys);   // nicht neu einlesen (OPcache)
+        }
         if (is_array($local) && isset($local['kit']) && !isset($local['theme'])) $local['theme'] = $local['kit'];   // 'kit' = Alias von 'theme'
         $data = array_replace_recursive($base, is_array($local) ? $local : []);
 

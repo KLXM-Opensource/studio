@@ -89,6 +89,7 @@ final class Offsite
     {
         $dir = $dir ?: ROOT . '/storage/backups';
         $out = [];
+        if (!is_dir($dir)) return $out;
         foreach (scandir($dir) ?: [] as $f) {
             if (!preg_match(self::PATTERN, $f, $m)) continue;
             if (!isset($out[$m['prefix']]) || strcmp(basename($out[$m['prefix']]), $f) < 0) $out[$m['prefix']] = "$dir/$f";
