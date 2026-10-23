@@ -623,13 +623,14 @@ final class Shared
      * Pool „data-{key}“ bei Bedarf anlegen bzw. alle Beteiligten eintragen. Angelegt wird er nur, wenn die Tabelle Bild-/Dateifelder hat
      * oder $force (die erste Datei kommt hinzu, toPool) – eine Tabelle ohne Medien (z. B. das Glossar) bekommt keinen leeren Pool.
      * Ein vorhandener Pool bekommt neue Beteiligte dazu (ausgetretene behalten ihn: ihre Verweise zeigen weiter in den Pool).
+     * $also: weitere Websites (die beitretende Website während shareLocal(…, merge: true)).
      * @return string|null Pool-Kurzname oder null (kein Pool nötig)
      */
-    public static function ensurePool(string $key, bool $force = false): ?string
+    public static function ensurePool(string $key, bool $force = false, array $also = []): ?string
     {
         $pk = self::poolKey($key);
         $meta = self::meta($key);
-        $sites = $meta ? self::participants($meta) : [site()->key];
+        $sites = array_values(array_unique(array_merge($meta ? self::participants($meta) : [site()->key], $also)));
         if (!is_file(MediaPools::dir($pk) . '/pool.json')) {
             if (!$force && !self::hasMediaFields($key)) return null;
             MediaPools::create($pk, __('Daten: {name}', ['name' => $meta['label'] ?? $key]), $sites, ['shared_table' => $key]);
@@ -803,7 +804,8 @@ final class Shared
             Tables::sync($shared);
             $log[] = __('Geteilte Tabelle „{key}“ angelegt (Eigentümer: {site}).', ['key' => $handle, 'site' => site()->key]);
         }
-        self::ensurePool($handle);
+        // Beitretende Website schon jetzt in den Pool (Mitglied wird sie erst am Ende) – sonst scheitert das Übernehmen ihrer Bilder
+        self::ensurePool($handle, false, !empty($joining) ? [site()->key] : []);
         $sdb = self::db($handle);
         $have = array_column($sdb->fetchAll("PRAGMA table_info({$shared['table']})"), 'name');
         $skip = $merge ? array_map('intval', $skip) : [];

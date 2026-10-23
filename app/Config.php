@@ -36,7 +36,9 @@ final class Config
 
         $siteCfg = Sites::all()[$site] ?? [];
         if ($site !== Site::DEFAULT) {
-            $data['db']['path'] = ROOT . '/storage/sites/' . $site . '/database/site.sqlite';
+            // Eigene Datenbank je Website: nie den MySQL-Zugang der Hauptwebsite erben (sonst teilten sich beide eine Datenbank) –
+            // Standard SQLite, eigener Zugang über 'db' in config/sites/{key}.php
+            $data['db'] = ['driver' => 'sqlite', 'path' => ROOT . '/storage/sites/' . $site . '/database/site.sqlite'] + (array) ($base['db'] ?? []);
             // Schlüssel der Hauptinstallation nie erben
             $data['app_key'] = '';
             $data['setup_token'] = '';

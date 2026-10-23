@@ -8,6 +8,8 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### MySQL/MariaDB geprüft
 - Komplette Installation mit MariaDB durchgespielt (Einrichtung, Startinhalte, Verwaltung, Selbsttests, `site:backup`/`site:restore`, Sicherung außer Haus mit `backup:restore-all`). Behoben: `Database::transaction()` scheiterte nach DDL (MySQL beendet die Transaktion dabei selbst – Startinhalte blieben unvollständig); fehlender `app_key` wird in einer vorhandenen `config.local.php` ergänzt; Integritätsprüfung und Chat-Nutzerliste lasen die Tabellenstruktur nur SQLite-artig – neu `Database::columns()` und `Database::objects()` für beide Treiber; `extensions:selftest` räumt auch unter MySQL auf.
+- **Mehrere Websites mit MySQL/MariaDB:** Eine weitere Website erbte bisher den MySQL-Zugang der Hauptwebsite und schrieb damit in **dieselbe** Datenbank. Jetzt bekommt jede weitere Website ihre eigene SQLite-Datenbank – oder die in `config/sites/{key}.php` unter `'db'` angegebene.
+- Geteilte Tabellen mit MariaDB durchgespielt (teilen, beitreten mit eigenen Einträgen, Einträge per MCP, austreten, Teilen beenden). Behoben: Beim Beitreten mit eigenen Bildern scheiterte das Übernehmen („Diesen Pool nutzt die Website nicht.“) – die beitretende Website kommt jetzt schon vorher in den Pool; `data:share --merge` nennt den richtigen Eigentümer.
 - MCP-Server komplett durchgespielt (Protokoll, alle Werkzeuge mit Schreib-, Lese- und Freigabe-Token). Behoben: ein Pflichtparameter mit Wert `null` führte zu „Interner Fehler“ statt „Parameter … fehlt“.
 
 ### Sicherheits-Log für fail2ban

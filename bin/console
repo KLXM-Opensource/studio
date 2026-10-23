@@ -1291,7 +1291,7 @@ switch ($cmd) {
         try {
             foreach (Core\Data\Shared::shareLocal($handle, $members, in_array('--merge', $args, true), ['members_see_members' => in_array('--see-members', $args, true)]) as $line) echo "  $line\n";
         } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
-        echo "Geteilt: {$handle} (Eigentümer " . site()->key . ", Mitglieder: " . (implode(', ', Core\Data\Shared::meta($handle)['members'] ?? []) ?: '–') . ").\n";
+        echo "Geteilt: {$handle} (Eigentümer " . (Core\Data\Shared::meta($handle)['owner'] ?? site()->key) . ", Mitglieder: " . (implode(', ', Core\Data\Shared::meta($handle)['members'] ?? []) ?: '–') . ").\n";
         break;
 
     case 'data:selftest':
