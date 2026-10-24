@@ -515,16 +515,16 @@
         },
         {
             "name": "loupe/loupe",
-            "version": "1.1.1",
+            "version": "1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/loupe-php/loupe.git",
-                "reference": "259f759b63ac45051f4806ddee5e7211c1223d9e"
+                "reference": "0b190145eaa1a7e01d0295b572f13100711de329"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/loupe-php/loupe/zipball/259f759b63ac45051f4806ddee5e7211c1223d9e",
-                "reference": "259f759b63ac45051f4806ddee5e7211c1223d9e",
+                "url": "https://api.github.com/repos/loupe-php/loupe/zipball/0b190145eaa1a7e01d0295b572f13100711de329",
+                "reference": "0b190145eaa1a7e01d0295b572f13100711de329",
                 "shasum": ""
             },
             "require": {
@@ -570,7 +570,7 @@
             "description": "A full text search engine with tokenization, stemming, typo tolerance, filters and geo support based on only PHP and SQLite",
             "support": {
                 "issues": "https://github.com/loupe-php/loupe/issues",
-                "source": "https://github.com/loupe-php/loupe/tree/1.1.1"
+                "source": "https://github.com/loupe-php/loupe/tree/1.1.6"
             },
             "funding": [
                 {
@@ -578,20 +578,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-27T12:47:32+00:00"
+            "time": "2026-10-17T06:57:04+00:00"
         },
         {
             "name": "loupe/matcher",
-            "version": "0.4.0",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/loupe-php/matcher.git",
-                "reference": "a91100806ff3e4386c20dc4f1440e54236111ef5"
+                "reference": "68a2e6b7b3667a601f50bd0185bb00e1bdef7b04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/loupe-php/matcher/zipball/a91100806ff3e4386c20dc4f1440e54236111ef5",
-                "reference": "a91100806ff3e4386c20dc4f1440e54236111ef5",
+                "url": "https://api.github.com/repos/loupe-php/matcher/zipball/68a2e6b7b3667a601f50bd0185bb00e1bdef7b04",
+                "reference": "68a2e6b7b3667a601f50bd0185bb00e1bdef7b04",
                 "shasum": ""
             },
             "require": {
@@ -642,7 +642,7 @@
             ],
             "support": {
                 "issues": "https://github.com/loupe-php/matcher/issues",
-                "source": "https://github.com/loupe-php/matcher/tree/0.4.0"
+                "source": "https://github.com/loupe-php/matcher/tree/0.4.1"
             },
             "funding": [
                 {
@@ -650,7 +650,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T15:06:35+00:00"
+            "time": "2026-10-12T08:34:55+00:00"
         },
         {
             "name": "mjaschen/phpgeo",
@@ -2763,16 +2763,16 @@
         },
         {
             "name": "symfony/http-client",
-            "version": "v8.1.8",
+            "version": "v8.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "e20aca4ceaa888197de5c792ffc551d99e43d98a"
+                "reference": "f892301df77ac25613b19fc2450139c950d1368a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/e20aca4ceaa888197de5c792ffc551d99e43d98a",
-                "reference": "e20aca4ceaa888197de5c792ffc551d99e43d98a",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/f892301df77ac25613b19fc2450139c950d1368a",
+                "reference": "f892301df77ac25613b19fc2450139c950d1368a",
                 "shasum": ""
             },
             "require": {
@@ -2836,7 +2836,7 @@
                 "http"
             ],
             "support": {
-                "source": "https://github.com/symfony/http-client/tree/v8.1.8"
+                "source": "https://github.com/symfony/http-client/tree/v8.1.9"
             },
             "funding": [
                 {
@@ -2856,7 +2856,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-24T11:09:32+00:00"
+            "time": "2026-10-13T15:31:40+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
