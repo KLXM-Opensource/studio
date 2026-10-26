@@ -9,7 +9,7 @@ $ico = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-m
     'pools' => 'images', 'shared' => 'share-network', 'medien' => 'images', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info'];
 $items = [];
 foreach (\Core\SystemSchema::groups() as $g) $items[] = [url('/admin/system#' . $g['id']), $g['label'], $ico[$g['id']] ?? 'gear-six', '', $g['id']];
-$items[] = [url('/admin/system#keys'), 'Verschlüsselung', 'lock-key', ''];
+$items[] = [url('/admin/system#keys'), 'Verschlüsselung', 'lock-key', !\Core\FormCrypto::ready() && \Core\Data\Inbox::anyNeedsKey() ? __('Kein Schlüssel für verschlüsselte Anfragen') : ''];
 $items[] = [url('/admin/system#pools'), __('Geteilte Medien'), 'images', ''];
 if (\Core\Data\Shared::canManage() || \Core\Data\Shared::forSite()) $items[] = [url('/admin/system#shared'), __('Geteilte Daten'), 'share-network', ''];
 $items[] = [url('/admin/system#push'), __('Push-Benachrichtigungen'), 'bell-ringing', ''];

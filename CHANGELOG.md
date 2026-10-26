@@ -8,6 +8,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Formulare: Wer wird über neue Einträge informiert?
 - Das Feld „Benachrichtigung an (E-Mail)“ nennt im Platzhalter jetzt die tatsächlichen Empfänger aus den Grundeinstellungen (E-Mail-Versand) statt nur „leer = Empfänger aus den Grundeinstellungen“. Ist auch dort niemand eingetragen, warnt die Tabelle: „Niemand wird über neue Einträge informiert“ – vorher ging die Benachrichtigung dann stillschweigend an niemanden. Auch im Assistenten für neue Tabellen.
+- Grundeinstellungen: Fehlt der Schlüssel für verschlüsselte Anfragen, trägt jetzt auch der Bereich „Verschlüsselung“ den Warnpunkt – bisher zeigte nur der Menüpunkt „Grundeinstellungen“ ihn, ohne zu verraten, wo.
 
 ### Projekt-Installation mit verknüpftem Kern
 - Umgebungsvariable `KLXM_ROOT`: eine Installation mit eigenen `config/`, `storage/`, Medien, Kits und Erweiterungen nutzt den Kern-Code einer anderen per Verknüpfung (lokale Entwicklung mehrerer Projekte, Kern-Änderungen wirken sofort). Der Entwicklungsserver liefert statische Dateien jetzt aus seinem Dokumentstamm. Entwicklerhandbuch → Installation.

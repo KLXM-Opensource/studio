@@ -25,11 +25,13 @@ use Core\Fields;
       'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
       'pools' => 'images', 'shared' => 'share-network', 'medien' => 'images', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info', 'push' => 'bell-ringing'];
   // Testumgebung (staging/development): „Umgebung“ orange mit sanft pulsierendem Punkt, Hinweis auch für Screenreader und im Auswahlfeld (schmal)
-  $envWarn = environment() !== 'production' ? __('Testumgebung aktiv') : '';
+  // Fehlender Schlüssel für verschlüsselte Anfragen: Punkt an „Verschlüsselung“ (derselbe Grund wie der Punkt an „Grundeinstellungen“ im Menü)
+  $tabWarn = array_filter(['umgebung' => environment() !== 'production' ? __('Testumgebung aktiv') : '',
+      'keys' => !\Core\FormCrypto::ready() && \Core\Data\Inbox::anyNeedsKey() ? __('Kein Schlüssel für verschlüsselte Anfragen') : '']);
   $tab = fn(string $id, string $label, bool $on = false) => '<button type="button" role="tab" id="tab-' . e($id) . '" aria-controls="panel-' . e($id) . '" data-tab="' . e($id) . '" aria-selected="' . ($on ? 'true' : 'false') . '"' . ($on ? '' : ' tabindex="-1"')
-      . ($id === 'umgebung' && $envWarn !== '' ? ' class="is-warn" title="' . e($envWarn) . '" data-tab-note="' . e($envWarn) . '"' : '') . '>'
+      . (isset($tabWarn[$id]) ? ' class="is-warn" title="' . e($tabWarn[$id]) . '" data-tab-note="' . e($tabWarn[$id]) . '"' : '') . '>'
       . '<span class="adm-tabs__ico" aria-hidden="true">' . icon($tabIco[$id] ?? 'gear-six') . '</span><span class="adm-tabs__label">' . e($label) . '</span>'
-      . ($id === 'umgebung' && $envWarn !== '' ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e($envWarn) . '</span>' : '') . '</button>';
+      . (isset($tabWarn[$id]) ? '<span class="adm-tabs__dot" aria-hidden="true"></span><span class="adm-sr"> – ' . e($tabWarn[$id]) . '</span>' : '') . '</button>';
   ?>
   <div class="adm-tabs" role="tablist" aria-label="Bereiche">
     <?php foreach ($groups as $i => $g): ?><?= $tab($g['id'], $g['label'], $i === 0) ?><?php endforeach; ?>
