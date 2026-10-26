@@ -68,6 +68,19 @@ final class DataForms
         return Features::on('forms.data', false) && Features::on('data', false);
     }
 
+    /** Empfänger, wenn die Tabelle keine eigenen hat: Grundeinstellungen → E-Mail-Versand (sys.mail_to), '' = niemand */
+    public static function notifyFallback(): string
+    {
+        return implode(', ', array_filter(array_map('trim', explode(',', (string) setting('sys.mail_to', '')))));
+    }
+
+    /** Platzhalter des Felds „Benachrichtigung an“: nennt die tatsächlichen Empfänger statt nur „Grundeinstellungen“ */
+    public static function notifyPlaceholder(): string
+    {
+        $to = self::notifyFallback();
+        return $to !== '' ? __('leer = {mails} (Grundeinstellungen)', ['mails' => $to]) : __('leer = niemand – bitte Adresse eintragen');
+    }
+
     /**
      * Nimmt die Tabelle Einsendungen an? $direct = true: über /formular/{handle} bzw. den Block „data_form“ – Eingänge einer Erweiterung
      * mit 'direct_form' => false (z. B. Buchungen) nur über deren eigenes Formular (submit mit 'store').

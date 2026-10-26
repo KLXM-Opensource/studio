@@ -351,7 +351,8 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
       <div class="set-list">
         <div class="f f--inline"><label for="t-form-notify"><?= e(__('Benachrichtigung an (E-Mail)')) ?></label>
           <p class="f-help"><?= e(__('Mehrere Adressen mit Komma trennen. Die E-Mail enthält keine Inhalte – nur einen Link zum neuen Eintrag.')) ?></p>
-          <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(__('leer = Empfänger aus den Grundeinstellungen')) ?>" autocomplete="off"></div>
+          <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(\Core\Data\DataForms::notifyPlaceholder()) ?>" autocomplete="off"></div>
+        <?php if ($fm['notify'] === '' && \Core\Data\DataForms::notifyFallback() === ''): ?><p class="adm-flash adm-flash--warning"><?= icon('warning') ?> <?= e(__('Niemand wird über neue Einträge informiert: Hier oder unter Grundeinstellungen → E-Mail-Versand eine Adresse eintragen.')) ?></p><?php endif; ?>
       </div>
     </section>
     <?= Core\Theme::capture(ROOT . '/app/Admin/views/data/_receipt.php', ['fm' => $fm, 'fields' => $defData]) ?>

@@ -88,7 +88,8 @@ $langs = array_diff_key(Lang::all(), [Lang::default() => 1]);
           <p class="f-help"><?= e(Delivery::mode($table ?? ['settings' => $s]) === 'system' || !$table
               ? __('Die E-Mail enthält keine Inhalte – nur den Hinweis auf eine neue Anfrage und einen Link.')
               : __('Bei Zustellung per E-Mail geht der Inhalt an die Empfänger unter „Formular & Eingang → Zustellung“ – eine zusätzliche Benachrichtigung entfällt.')) ?></p>
-          <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(__('leer = Empfänger aus den Grundeinstellungen')) ?>" autocomplete="off"></div>
+          <input id="t-form-notify" name="settings[form][notify]" value="<?= e($fm['notify']) ?>" placeholder="<?= e(DataForms::notifyPlaceholder()) ?>" autocomplete="off"></div>
+        <?php if ($fm['notify'] === '' && DataForms::notifyFallback() === '' && (Delivery::mode($table ?? ['settings' => $s]) === 'system' || !$table)): ?><p class="adm-flash adm-flash--warning"><?= icon('warning') ?> <?= e(__('Niemand wird über neue Einträge informiert: Hier oder unter Grundeinstellungen → E-Mail-Versand eine Adresse eintragen.')) ?></p><?php endif; ?>
       </div>
     </section>
 

@@ -198,7 +198,7 @@ $heads = [
         <?php if ($mode === 'system' || $kind === 'content'): ?>
         <div class="f f--inline"><label for="wz-notify"><?= e(__('Benachrichtigung an')) ?></label>
           <p class="f-help"><?= e(__('Hinweis auf eine neue Einsendung – ohne Inhalte, nur mit Link. Leer = Empfänger aus den Grundeinstellungen.')) ?></p>
-          <input id="wz-notify" type="text" inputmode="email" name="notify" value="<?= e((string) $st['notify']) ?>" placeholder="<?= e(__('leer = Standard')) ?>" autocomplete="off" spellcheck="false"></div>
+          <input id="wz-notify" type="text" inputmode="email" name="notify" value="<?= e((string) $st['notify']) ?>" placeholder="<?= e(\Core\Data\DataForms::notifyPlaceholder()) ?>" autocomplete="off" spellcheck="false"></div>
         <?php endif; ?>
         <?= $sw('receipt', !empty($st['receipt']), __('Bestätigung per E-Mail an die Absender'), $hasMail ? __('Kurze Eingangsbestätigung ohne die eingegebenen Angaben (Text später anpassbar).') : __('Braucht ein Feld vom Typ „E-Mail“ im Formular.')) ?>
         <?= $err('receipt') ?>
