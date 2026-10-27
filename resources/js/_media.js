@@ -1283,7 +1283,8 @@ class Finder {
     const out = [];
     if (m.duplicates?.length) out.push(`<section class="fx-i-sec fx-i-dupe"><h3>${ico('copy')} ${esc(t('Gleiche Datei mehrfach'))}</h3>
       <p class="fx-i-hint">${esc(t('Diese Datei gibt es noch {n}×. Nicht verwendete Kopien können weg; verwendete zuerst durch diese ersetzen.', { n: m.duplicates.length }))}</p>
-      <ul class="fx-usage">${m.duplicates.map(x => `<li><button type="button" class="adm-link" data-goto="${x.id}">${esc(x.name)} <small>#${x.id}</small></button></li>`).join('')}</ul></section>`);
+      <ul class="fx-dupes">${m.duplicates.map(x => `<li><button type="button" class="fx-dupe" data-goto="${x.id}"><span class="fx-dupe__name">${esc(x.name)}</span>
+        <span class="fx-dupe__meta">#${x.id} · ${x.used ? `<b>${esc(x.used === 1 ? t('1× verwendet') : t('{n}× verwendet', { n: x.used }))}</b>` : esc(t('nicht verwendet'))}</span></button></li>`).join('')}</ul></section>`);
     if (m.oversize) out.push(`<section class="fx-i-sec fx-i-large"><h3>${ico('warning')} ${esc(t('Große Datei ({size})', { size: m.size }))}</h3>
       <p class="fx-i-hint">${esc(m.shrinkable ? t('Bilder lassen sich sparsamer speichern – Aussehen und Verwendungen bleiben.') : t('Bitte vor dem Hochladen verkleinern (z. B. PDF komprimieren, Video kürzer bzw. niedriger auflösen) und mit „Datei ersetzen“ austauschen.'))}</p>
       ${m.shrinkable && !this.ro ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-shrink>${esc(t('Verkleinern'))}</button>` : ''}</section>`);

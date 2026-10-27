@@ -3433,6 +3433,14 @@ html.adm-ui[data-theme=dark] :is(.us-tile,.us-role-card){box-shadow:0 0 0 .5px r
 /* Mediathek: Papierkorb, doppelte/große Dateien, Bildrechte (resources/js/_media.js singleExtras), ZIP, Upload mit Pflichtangaben */
 .fx-i-trash{padding:10px 12px;border-radius:10px;background:var(--adm-warn-bg);color:var(--adm-ink)}
 .fx-i-trash h3,.fx-i-dupe h3,.fx-i-large h3{display:flex;align-items:center;gap:6px}
+/* Gleiche Datei mehrfach: je Kopie eine Zeile – Name, #ID, verwendet/nicht verwendet; Klick springt zur Kopie */
+.fx-dupes{display:grid;gap:6px;margin:8px 0 4px;padding:0;list-style:none}
+.fx-dupe{display:grid;gap:2px;width:100%;padding:7px 10px;border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface);color:var(--adm-ink);font:inherit;text-align:left;cursor:pointer}
+.fx-dupe:hover{border-color:var(--adm-a);background:var(--adm-hover)}
+.fx-dupe:focus-visible{outline:2px solid var(--adm-a);outline-offset:1px}
+.fx-dupe__name{font-size:13px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.fx-dupe__meta{font-size:12px;color:var(--adm-t2)}
+.fx-dupe__meta b{color:var(--adm-ink);font-weight:600}
 .fx-i-trash h3 svg,.fx-i-dupe h3 svg,.fx-i-large h3 svg,.fx-i-rights h3 svg{width:15px;height:15px}
 .fx-i-trash .fx-i-actions,.fx-i-actions{display:flex;flex-wrap:wrap;gap:6px}
 .fx-i-large h3{color:var(--adm-warn)}

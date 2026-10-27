@@ -1334,6 +1334,7 @@ return [
     'leer = niemand – bitte Adresse eintragen' => 'empty = nobody – please enter an address',
     'Dateiname in der Adresse' => 'File name in the address',
     'Link kopieren' => 'Copy link',
+    '1× verwendet' => 'used once',
     'Link kopiert' => 'Link copied',
     'Link zum Kopieren:' => 'Link to copy:',
     'Öffentliche Adresse der Datei kopieren – z. B. für Newsletter oder E-Mails' => 'Copy the public address of the file – e.g. for newsletters or emails',

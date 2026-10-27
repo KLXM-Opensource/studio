@@ -1468,7 +1468,8 @@ final class Media
     public static function duplicatesOf(array $m): array
     {
         if (empty($m['hash']) || $m['hash'] === '-') return [];
-        return array_map(fn($r) => ['id' => (int) $r['id'], 'name' => self::displayName($r)],
+        // used: Zahl der Verwendungen – zeigt, welche Kopie gefahrlos weg kann
+        return array_map(fn($r) => ['id' => (int) $r['id'], 'name' => self::displayName($r), 'used' => count(self::usages((int) $r['id']))],
             self::db()->fetchAll('SELECT * FROM media WHERE hash = ? AND id != ? AND deleted_at IS NULL' . (self::$pool === null ? ' AND pool_ref IS NULL' : ''), [$m['hash'], (int) $m['id']]));
     }
 
