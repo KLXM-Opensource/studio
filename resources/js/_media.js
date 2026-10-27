@@ -1449,6 +1449,7 @@ class Finder {
             <button type="submit" class="adm-btn adm-btn--primary">Speichern</button>
             <button type="button" class="adm-btn adm-btn--ghost" data-replace>Datei ersetzen …</button>
             <a class="adm-btn adm-btn--ghost" href="${esc(m.kind === 'pdf' ? m.viewer : m.url)}" target="_blank" rel="noopener">Öffnen ↗</a>
+            ${this.mode === 'library' && !this.pool ? `<button type="button" class="adm-btn adm-btn--ghost" data-copylink title="${esc(t('Link zu diesem Fenster kopieren – öffnet die Datei in der Mediathek (nur mit Anmeldung)'))}">${esc(t('Link kopieren'))}</button>` : ''}
             ${this.mode === 'library' ? '<button type="button" class="adm-btn adm-btn--ghost adm-btn--danger-text" data-del>Löschen</button>' : ''}
           </div>
           <div class="fx-i-progress" hidden><span></span></div>
@@ -1534,6 +1535,12 @@ class Finder {
       try { await api.save(m.id, body); dirty = false; dlg.close(); toast('Gespeichert'); this.load(m.id); }
       catch (ex) { err.textContent = ex.message; err.hidden = false; form.alt?.focus(); }
     };
+    // Link zu diesem Fenster (Verwaltung): /admin/media#m{id} öffnet die Mediathek mit dieser Datei
+    $('[data-copylink]', dlg)?.addEventListener('click', async () => {
+      const link = location.origin + location.pathname + '#m' + m.id;
+      try { await navigator.clipboard.writeText(link); toast(t('Link kopiert')); }
+      catch { prompt(t('Link zum Kopieren:'), link); }
+    });
     $('[data-replace]', dlg).onclick = async () => { if (await this.replace(m, $('.fx-i-progress', dlg))) { dirty = false; dlg.close(); this.edit(m.id); } };
     $('[data-del]', dlg)?.addEventListener('click', async () => {
       if (m.usages.length) { await ask({ title: usedMsg(m.display, m.usages), ok: t('Verstanden'), danger: false, cancel: false }); return; }

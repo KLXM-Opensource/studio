@@ -97,6 +97,8 @@
     wird wie immer mit dem Entwurf. Bilder von Einträgen (z. B. Referenzen) tauschen Sie auf deren Detailseite: <b>Bearbeiten</b>, dann
     <b>Bild wählen …</b> am Bild oder ein Klick aufs Bild.</p>
 
+  <p id="link-kopieren"><b>Link kopieren:</b> Im Bearbeitungsfenster kopiert <b>Link kopieren</b> einen Link auf genau dieses Fenster – praktisch, um Kolleginnen und Kollegen auf eine Datei hinzuweisen („bitte Titel ergänzen“). Der Link öffnet die Mediathek mit der Datei und funktioniert nur mit Anmeldung. Für die öffentliche Adresse der Datei: <b>Öffnen</b> und die Adresse aus dem Browser nehmen.</p>
+
   <h3 id="ersetzen">Datei ersetzen (z. B. neues Mitarbeiterfoto)</h3>
   <p>Datei auswählen → <b>Datei ersetzen …</b> (rechts in der Seitenleiste, im Bearbeitungsfenster oder per Rechtsklick). Daneben öffnet <b>⋯</b> alle weiteren Aktionen – dasselbe Menü wie der Rechtsklick → neue Datei wählen. Die neue Datei (gleiche Art, also Bild durch Bild) übernimmt den Platz der alten: <b>überall, wo sie verwendet wird, erscheint automatisch das neue Bild</b>. Alt-Text, Tags und Sammlungen bleiben; Fokuspunkt und eigene Zuschnitte werden zurückgesetzt – bitte kurz prüfen.</p>
 

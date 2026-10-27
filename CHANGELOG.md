@@ -10,6 +10,7 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 - PDFs, Office-Dokumente, Videos und Audio behalten beim Hochladen ihren Namen in der Adresse (`/media/2026/10/sommerfest-2026.pdf` statt `1075e42d1b045051.pdf`), bei gleichem Namen mit Zähler (`-2`). Gut für Suchmaschinen und Downloads. Bilder und Dateien in geschützten Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen.
 - Mediathek: Feld „Dateiname in der Adresse“ im Bearbeitungsfenster. Die alte Adresse leitet per 301 weiter (Spalte `media.file_history`, unabhängig von der Funktion „Weiterleitungen“). Beim Ersetzen bleibt der Name gleich.
 - `php bin/console media:rename [--dry-run] [--all]` stellt vorhandene Dateien um.
+- Mediathek: Knopf „Link kopieren“ im Bearbeitungsfenster – Link auf genau dieses Fenster (`/admin/media#m{id}`, nur mit Anmeldung).
 - Entwicklungsserver: `base_path()` ignoriert einen Ordner als `SCRIPT_NAME` (fehlende Dateien in vorhandenen Ordnern) – wie `Request::fromGlobals`.
 
 ### Formulare: Wer wird über neue Einträge informiert?
