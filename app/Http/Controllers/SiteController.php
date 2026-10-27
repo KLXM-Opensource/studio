@@ -260,6 +260,8 @@ final class SiteController
         if (!$app->editing) $html = \Core\Push\Visitor::inject($html);
         // PDF-Links: Auswahl „Anzeigen | Herunterladen“ (Core\PdfLinks) – Skript nur, wenn die Seite solche Links hat
         if (!$app->editing) $html = \Core\PdfLinks::inject($html);
+        // Herunterladen unter dem Originalnamen: Links auf Medien der Website mit „download“ ohne Wert (Kits, Rich-Text)
+        if (!$app->editing) $html = \Core\Media::downloadNames($html);
         // RSS-Feed der Tabelle (Detailseite bzw. Seite unter der URL-Basis) im Kopf verlinken (Core\Data\Feed)
         if (!$app->editing && !$error) $html = \Core\Data\Feed::inject($html, $page, $ctx['table'] ?? null);
         // Seite ohne <h1> (beginnt z. B. mit Glossar oder Datenliste): erste Abschnitts-Überschrift wird zur <h1> (Core\Headings)

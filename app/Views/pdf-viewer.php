@@ -8,11 +8,13 @@ if (!empty($file)) {
     $name = (string) $file['name'];
     $pages = isset($file['pages']) ? (int) $file['pages'] : null;
     $fileUrl = (string) $file['url'];
+    $dlName = '';
     $m = ['size' => (int) ($file['size'] ?? 0)];
 } else {
     $name = Media::displayName($m);
     $pages = Media::pages($m);
     $fileUrl = Media::url($m);
+    $dlName = Media::downloadName($m);   // Herunterladen unter dem Originalnamen
 }
 ?><!doctype html>
 <html lang="de">
@@ -38,7 +40,7 @@ if (!empty($file)) {
     <button type="button" class="pv-btn pv-zoom" data-fit aria-label="An Breite anpassen" title="An Breite anpassen"><span data-zoom>100 %</span></button>
     <button type="button" class="pv-btn" data-zoom-in aria-label="Vergrößern">+</button>
   </div>
-  <a class="pv-dl" href="<?= e($fileUrl) ?>" download>Herunterladen <span aria-hidden="true">↓</span></a>
+  <a class="pv-dl" href="<?= e($fileUrl) ?>" download<?= $dlName !== '' ? '="' . e($dlName) . '"' : '' ?>>Herunterladen <span aria-hidden="true">↓</span></a>
   <?php if (!empty($modal)): ?><a class="pv-btn pv-newtab" href="<?= e((string) Media::viewerUrl($m)) ?>" target="_blank" rel="noopener" aria-label="<?= e(lt('In neuem Tab öffnen')) ?>" title="<?= e(lt('In neuem Tab öffnen')) ?>">↗</a><button type="button" class="pv-btn pv-close" data-close aria-label="<?= e(lt('Schließen')) ?>" title="<?= e(lt('Schließen')) ?>">×</button><?php endif; ?>
 </header>
 <main class="pv-doc" data-pdf="<?= e($fileUrl) ?>" tabindex="0" aria-label="Dokument: <?= e($name) ?>">

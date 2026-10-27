@@ -22,6 +22,7 @@ final class PdfLinks
         $thumb = self::thumb($m);
         return ' data-pdf-view="' . e($view) . '" data-pdf-file="' . e(Media::url($m)) . '"'
             . ' data-pdf-title="' . e(Media::displayName($m)) . '" data-pdf-size="' . e(Media::humanSize((int) $m['size'])) . '"'
+            . ' data-pdf-name="' . e(Media::downloadName($m)) . '"'
             . ($thumb !== null ? ' data-pdf-thumb="' . e($thumb) . '"' : '');
     }
 

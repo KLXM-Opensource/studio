@@ -399,17 +399,19 @@ final class Media
             return [null, 'Bitte eine Datei der gleichen Art hochladen (' . self::typeLabel($old['mime']) . ').'];
         }
         $alt = array_key_exists('alt', $opt) ? (string) $opt['alt'] : (string) $old['alt'];
-        [$data, $err] = self::process($path, $originalName, $alt, ['decorative' => $old['decorative']] + $opt);
+        // Sprechender Name der alten Fassung auch für die neuen Bildgrößen
+        $hint = self::isRandomName((string) $old['file']) ? [] : ['name' => pathinfo((string) $old['file'], PATHINFO_FILENAME)];
+        [$data, $err] = self::process($path, $originalName, $alt, ['decorative' => $old['decorative']] + $hint + $opt);
         if ($err) {
             return [null, $err];
         }
         self::deleteFiles($old);
-        // Datei (keine Bilder): sprechender Name bleibt beim Ersetzen – gleiche Adresse für Links und Suchmaschinen;
-        // sonst (Zufallsname, andere Endung) leitet die alte Adresse auf die neue weiter
-        if (self::kind($old['mime']) !== 'image') {
-            $same = !self::isRandomName((string) $old['file']) && pathinfo((string) $old['file'], PATHINFO_EXTENSION) === pathinfo((string) $data['file'], PATHINFO_EXTENSION);
-            if ($same && @rename(self::dir() . '/' . $data['file'], self::dir() . '/' . $old['file'])) $data['file'] = $old['file'];
-            elseif ($data['file'] !== $old['file'] && self::$pool === null) $data['file_history'] = self::history($old, (string) $data['file']);
+        // Sprechender Name bleibt beim Ersetzen – gleiche Adresse für Links und Suchmaschinen; sonst (Zufallsname, andere
+        // Endung) leitet die alte Adresse auf die neue weiter. Bildgrößen haben neue Namen (Cache) – die alten leiten weiter.
+        $same = !self::isRandomName((string) $old['file']) && pathinfo((string) $old['file'], PATHINFO_EXTENSION) === pathinfo((string) $data['file'], PATHINFO_EXTENSION);
+        if ($same && @rename(self::dir() . '/' . $data['file'], self::dir() . '/' . $old['file'])) $data['file'] = $old['file'];
+        if (self::$pool === null) {
+            $data['file_history'] = self::history($old, (string) $data['file'], $data['file'] !== $old['file'], self::cacheBases($old));
         }
         $data['updated_at'] = now();
         $data['crops'] = null;          // neues Motiv → Zuschnitte neu festlegen
@@ -429,8 +431,8 @@ final class Media
     }
 
     /**
-     * Sprechende Dateinamen für öffentliche Dateien (PDF, Office, Video, Audio – keine Bilder, deren Größen im gemeinsamen cache/
-     * liegen): „sommerfest_2026.pdf“ statt Zufallsname, bei gleichem Namen im Monatsordner mit Zähler (-2, -3 …).
+     * Sprechende Dateinamen für öffentliche Dateien und Bilder: „sommerfest_2026.pdf“ statt Zufallsname, bei gleichem Namen im
+     * Monatsordner mit Zähler (-2, -3 …); Bildgrößen in cache/ mit variantBase() („sommerfest-3fa9c1-800.webp“).
      * Geschützte Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen – dort sind die Adressen der Schutz.
      */
     public static function readableNames(): bool
@@ -477,22 +479,60 @@ final class Media
         return (string) json_encode($rel, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-    /** Frühere Namen (file_history) um $m['file'] ergänzt – ohne den neuen Namen, höchstens 20 */
-    private static function history(array $m, string $new): string
+    /**
+     * Frühere Namen (file_history) um $m['file'] und alte Grundnamen der Bildgrößen („cache:{base}“) ergänzt – ohne den neuen
+     * Namen, höchstens 60 Einträge
+     */
+    private static function history(array $m, string $new, bool $file = true, array $bases = []): string
     {
         $h = array_values(array_diff((array) json_decode((string) ($m['file_history'] ?? ''), true), [$new]));
-        $h[] = (string) $m['file'];
-        return (string) json_encode(array_slice(array_values(array_unique($h)), -20), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($file) $h[] = (string) $m['file'];
+        foreach ($bases as $b) $h[] = 'cache:' . $b;
+        return (string) json_encode(array_slice(array_values(array_unique($h)), -60), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-    /** Kann die Datei umbenannt werden? Keine Bilder, nur Dateien der Website (nicht aus einem Pool) */
-    public static function renamable(array $m): bool
+    /** Spalte file_history für ein Update – nur Medien der Website (Pools haben keine Weiterleitung) */
+    private static function historyFor(array $m, bool $file, array $bases = []): array
     {
-        return self::kind((string) $m['mime']) !== 'image' && self::$pool === null && empty($m['_pool']) && empty($m['pool_ref']);
+        return self::$pool === null && empty($m['_pool']) ? ['file_history' => self::history($m, '', $file, $bases)] : [];
     }
 
     /**
-     * Datei umbenennen: neuer sprechender Name im selben Ordner, die alte Adresse leitet weiter (legacyRedirect).
+     * Grundname der Bildgrößen in cache/: sprechend + 6 Hex-Zeichen, z. B. „hygienetipps-3fa9c1“ (→ „hygienetipps-3fa9c1-800.webp“).
+     * Neu je Erzeugung – die Adressen in cache/ bleiben unveränderlich (Cache-Control immutable). Geschützte Pools: Zufallsname.
+     */
+    public static function variantBase(string $name): string
+    {
+        $slug = self::readableNames() ? self::fileSlug($name) : 'datei';
+        if (strlen($slug) > 60) $slug = preg_match('~^(.{20,60})[-_]~', substr($slug, 0, 61), $c) ? $c[1] : substr($slug, 0, 60);
+        return $slug !== 'datei' ? trim($slug, '-_') . '-' . bin2hex(random_bytes(3)) : bin2hex(random_bytes(8));
+    }
+
+    /** Name für Ableitungen eines vorhandenen Mediums: sprechender Dateiname, bei Zufallsnamen Titel bzw. Originalname */
+    private static function nameOf(array $m): string
+    {
+        $f = (string) $m['file'];
+        return self::isRandomName($f) ? (string) (($m['title'] ?? '') ?: ($m['original_name'] ?? '')) : pathinfo($f, PATHINFO_FILENAME);
+    }
+
+    /** Grundnamen aller Bildgrößen eines Mediums in cache/: Größen, Zuschnitte, bearbeitete Fassung (ohne „-e“) */
+    private static function cacheBases(array $m): array
+    {
+        $v = json_decode((string) ($m['variants_json'] ?? ''), true) ?: [];
+        $out = [(string) ($v['base'] ?? '')];
+        foreach (self::crops($m) as $c) $out[] = (string) ($c['base'] ?? '');
+        if ($master = ImageEdit::stored($m)['master'] ?? null) $out[] = (string) preg_replace('~^cache/|-e\.[a-z]+$~', '', (string) $master);
+        return array_values(array_unique(array_filter($out)));
+    }
+
+    /** Kann die Datei umbenannt werden? Nur Dateien der Website (nicht aus einem Pool) */
+    public static function renamable(array $m): bool
+    {
+        return self::$pool === null && empty($m['_pool']) && empty($m['pool_ref']);
+    }
+
+    /**
+     * Datei umbenennen: neuer sprechender Name im selben Ordner, bei Bildern samt aller Größen; alte Adressen leiten weiter (legacyRedirect).
      * @param array<string, true> $taken in diesem Durchlauf schon vergebene Namen (media:rename --dry-run)
      * @return array{0: ?array, 1: ?string, 2?: string} [Medium, Fehler, neuer Name]
      */
@@ -510,28 +550,103 @@ final class Media
         if (!is_file(self::dir() . '/' . $cur) || !@rename(self::dir() . '/' . $cur, self::dir() . '/' . $rel)) {
             return [null, __('Die Datei konnte nicht umbenannt werden.')];
         }
-        self::db()->update('media', ['file' => $rel, 'file_history' => self::history($m, $rel), 'updated_at' => now()], 'id = :id', ['id' => $id]);
+        $upd = ['file' => $rel, 'file_history' => self::history($m, $rel, true, self::cacheBases($m)), 'updated_at' => now()];
+        if (self::kind((string) $m['mime']) === 'image') $upd += self::renameVariants($m, self::variantBase($slug));
+        self::db()->update('media', $upd, 'id = :id', ['id' => $id]);
         self::forget($id);
         PageCache::clear();
         return [self::find($id), null, $rel];
     }
 
     /**
-     * Vorhandene Dateien mit Zufallsnamen umbenennen (media:rename): Name aus Originalname bzw. Titel, alte Adressen leiten weiter.
+     * Vorhandene Dateien und Bilder mit Zufallsnamen umbenennen (media:rename): Name aus Originalname bzw. Titel (Bilder: Titel zuerst),
+     * alte Adressen leiten weiter.
      * @return list<array{id: int, from: string, to: string, error: ?string}>
      */
     public static function renameAll(bool $dry): array
     {
         $out = [];
         $taken = [];
-        foreach (self::db()->fetchAll("SELECT id, file, original_name, title FROM media WHERE mime NOT LIKE 'image/%' AND pool_ref IS NULL ORDER BY id") as $r) {
+        foreach (self::db()->fetchAll('SELECT id, file, mime, original_name, title FROM media WHERE pool_ref IS NULL ORDER BY id') as $r) {
             if (!self::isRandomName((string) $r['file'])) continue;
-            $src = trim((string) ($r['original_name'] ?: $r['title']));
+            // Bilder: Titel zuerst (Kameranamen wie „IMG_1234“ sagen nichts), Dateien: Originalname
+            $img = str_starts_with((string) $r['mime'], 'image/');
+            $src = trim((string) ($img ? ($r['title'] ?: $r['original_name']) : ($r['original_name'] ?: $r['title'])));
             if ($src === '' || self::isRandomName($src) && !str_contains($src, ' ')) $src = (string) ($r['title'] ?: 'datei');
             $res = self::rename((int) $r['id'], $src, $dry, $taken);
             $out[] = ['id' => (int) $r['id'], 'from' => (string) $r['file'], 'to' => (string) ($res[2] ?? ''), 'error' => $res[1]];
         }
         return $out;
+    }
+
+    /**
+     * Bildgrößen eines Bildes auf einen neuen Grundnamen umbenennen (ohne neu zu rechnen): Größen, Zuschnitte („…-c16x9“),
+     * bearbeitete Fassung, Vorschaubilder für soziale Netzwerke. Liefert die geänderten Spalten (variants_json, crops, edit_json).
+     */
+    private static function renameVariants(array $m, string $root): array
+    {
+        $cache = self::dir() . '/cache';
+        $move = function (string $old, string $new) use ($cache): void {
+            foreach (glob($cache . '/' . $old . '-*') ?: [] as $f) {
+                $rest = substr(basename($f), strlen($old));
+                if (!is_file($cache . '/' . $new . $rest)) @rename($f, $cache . '/' . $new . $rest);
+            }
+        };
+        $out = [];
+        $v = json_decode((string) ($m['variants_json'] ?? ''), true) ?: [];
+        if (!empty($v['base'])) {
+            $move((string) $v['base'], $root);
+            $v['base'] = $root;
+            $out['variants_json'] = json_encode($v);
+        }
+        $crops = self::crops($m);
+        foreach ($crops as $r => $c) {
+            if (empty($c['base'])) continue;
+            $new = $root . (preg_match('~-c\d+x\d+$~', (string) $c['base'], $x) ? $x[0] : '-c' . str_replace(':', 'x', (string) $r));
+            $move((string) $c['base'], $new);
+            $crops[$r]['base'] = $new;
+        }
+        if ($crops) $out['crops'] = json_encode($crops);
+        $e = ImageEdit::stored($m);
+        if (!empty($e['master']) && is_file(self::dir() . '/' . $e['master'])) {
+            $new = 'cache/' . $root . '-e.' . pathinfo((string) $e['master'], PATHINFO_EXTENSION);
+            if (@rename(self::dir() . '/' . $e['master'], self::dir() . '/' . $new)) {
+                $e['master'] = $new;
+                $out['edit_json'] = json_encode($e);
+            }
+        }
+        return $out;
+    }
+
+    /** Name beim Herunterladen: Originalname beim Hochladen (Endung der gespeicherten Datei), sonst Titel bzw. Dateiname */
+    public static function downloadName(array $m): string
+    {
+        $ext = strtolower(pathinfo((string) $m['file'], PATHINFO_EXTENSION));
+        $stem = pathinfo((string) (($m['original_name'] ?? '') ?: ($m['title'] ?? '') ?: $m['file']), PATHINFO_FILENAME);
+        $stem = trim((string) preg_replace('~[\\\\/:*?"<>|\x00-\x1f]+~', '', $stem)) ?: pathinfo((string) $m['file'], PATHINFO_FILENAME);
+        return mb_substr($stem, 0, 150) . ($ext !== '' ? '.' . $ext : '');
+    }
+
+    /**
+     * Ausgabe der Website: Links auf Dateien der Website mit „download“ ohne Wert bekommen den Originalnamen
+     * (download="Originalname.pdf") – die Adresse bleibt sprechend für Suchmaschinen, die gespeicherte Datei heißt wie hochgeladen.
+     */
+    public static function downloadNames(string $html): string
+    {
+        if (!str_contains($html, ' download')) return $html;
+        $prefix = rtrim(site()->mediaUrl(), '/') . '/';
+        $re = '~<a\s[^>]*?\bhref="' . preg_quote($prefix, '~') . '(\d{4}/\d{2}/[^"?#]+)"[^>]*>~i';
+        if (!preg_match_all($re, $html, $all)) return $html;
+        $rels = array_values(array_unique($all[1]));
+        $rows = [];
+        foreach (array_chunk($rels, 200) as $chunk) {
+            foreach (app()->db->fetchAll('SELECT * FROM media WHERE file IN (' . implode(',', array_fill(0, count($chunk), '?')) . ')', $chunk) as $r) $rows[$r['file']] = $r;
+        }
+        return (string) preg_replace_callback($re, function (array $x) use ($rows): string {
+            $m = $rows[$x[1]] ?? null;
+            if (!$m || !preg_match('~\sdownload(?=[\s>/])~', $x[0])) return $x[0];
+            return (string) preg_replace('~\sdownload(?=[\s>/])~', ' download="' . e(self::downloadName($m)) . '"', $x[0], 1);
+        }, $html);
     }
 
     /** Alte Adresse einer umbenannten Datei der Website (Pfad ohne Basis, z. B. /media/2026/10/…) → aktuelle Adresse, sonst null */
@@ -540,6 +655,19 @@ final class Media
         $prefix = substr(site()->mediaUrl(), strlen(base_path())) . '/';
         if (!str_starts_with($path, $prefix)) return null;
         $rel = substr($path, strlen($prefix));
+        // Bildgröße mit altem Grundnamen (cache/{base}-800.webp, -og-…, -c16x9-…, -e.jpg) → passende Größe des Bildes
+        if (preg_match('~^cache/([\w\-.]+)$~', $rel, $cm)) {
+            $name = $cm[1];
+            for ($p = strpos($name, '-'); $p !== false; $p = strpos($name, '-', $p + 1)) {
+                $key = 'cache:' . substr($name, 0, $p);
+                $row = app()->db->fetch('SELECT * FROM media WHERE file_history LIKE ? AND deleted_at IS NULL ORDER BY id DESC LIMIT 1', ['%' . self::jsonName($key) . '%']);
+                if (!$row || !in_array($key, (array) json_decode((string) $row['file_history'], true), true)) continue;
+                $rest = substr($name, $p + 1);
+                if (preg_match('~^(\d+)\.(webp|avif|jpg|png)$~', $rest, $sm)) return self::url($row, (int) $sm[1], $sm[2] === 'png' ? 'webp' : $sm[2]);
+                return str_starts_with($rest, 'og') ? (self::shareUrl($row) ?? self::url($row)) : self::url($row, 1200);
+            }
+            return null;
+        }
         if (!preg_match('~^\d{4}/\d{2}/[\w\-.]+$~', $rel)) return null;
         $row = app()->db->fetch('SELECT * FROM media WHERE file_history LIKE ? AND deleted_at IS NULL ORDER BY id DESC LIMIT 1', ['%' . self::jsonName($rel) . '%']);
         if (!$row || !in_array($rel, (array) json_decode((string) $row['file_history'], true), true)) return null;
@@ -592,6 +720,7 @@ final class Media
             return [null, 'Bitte einen Alt-Text (Bildbeschreibung) angeben oder das Bild als „dekorativ“ markieren.'];
         }
         $sub = date('Y/m');
+        $nm = (string) ($opt['name'] ?? $originalName);   // Grundlage der sprechenden Namen (Ersetzen: Name der alten Fassung)
         $dir = self::dir() . '/' . $sub;
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
@@ -607,7 +736,7 @@ final class Media
             } catch (\RuntimeException $e) {
                 return [null, $e->getMessage()];
             }
-            $rel = "$sub/$base.svg";
+            $rel = self::readableNames() ? self::freeName($sub, self::fileSlug($nm), 'svg') : "$sub/$base.svg";
             if (file_put_contents(self::dir() . "/$rel", $r['svg']) === false) {
                 return [null, 'Datei konnte nicht gespeichert werden.'];
             }
@@ -631,9 +760,10 @@ final class Media
             $height = imagesy($img);
             $ext = $mime === 'image/png' || $mime === 'image/gif' ? 'png' : 'jpg';
             $orig = self::resize($img, min($width, 3200));
-            $rel = "$sub/$base.$ext";
+            // Sprechende Namen auch für Bilder (Suchmaschinen): Original „hygienetipps.png“, Größen „hygienetipps-3fa9c1-800.webp“
+            $rel = self::readableNames() ? self::freeName($sub, self::fileSlug($nm), $ext) : "$sub/$base.$ext";
             $ext === 'png' ? imagepng($orig, self::dir() . "/$rel", 8) : imagejpeg($orig, self::dir() . "/$rel", 88);
-            $variants = self::makeVariants($img, $base, $width);
+            $variants = self::makeVariants($img, self::variantBase($nm), $width);
             // Transparenter Rand (Logos, Freisteller): Standard „Einpassen“ im Rahmen (Core\ImageFit)
             if ($ext === 'png') $variants['alpha'] = ImageFit::edgeAlpha($img);
             $mime = $ext === 'png' ? 'image/png' : 'image/jpeg';
@@ -660,7 +790,7 @@ final class Media
             if ($mime === 'audio/x-m4a') $mime = 'audio/mp4';
             // Öffentliche Dateien: sprechender Name aus dem Originalnamen (Suchmaschinen, Download); geschützte Pools: Zufallsname
             $fx = self::fileMimes()[$mime];
-            $rel = self::readableNames() ? self::freeName($sub, self::fileSlug($originalName), $fx) : "$sub/$base.$fx";
+            $rel = self::readableNames() ? self::freeName($sub, self::fileSlug($nm), $fx) : "$sub/$base.$fx";
             if (!copy($path, self::dir() . "/$rel")) {
                 return [null, 'Datei konnte nicht gespeichert werden.'];
             }
@@ -1100,14 +1230,16 @@ final class Media
             if (!$part) {
                 return [null, 'Zuschnitt fehlgeschlagen.'];
             }
-            $v = self::makeVariants($part, bin2hex(random_bytes(8)) . '-c' . str_replace(':', 'x', $ratio), $pw);
+            $v = self::makeVariants($part, self::variantBase(self::nameOf($m)) . '-c' . str_replace(':', 'x', $ratio), $pw);
             $crops[$ratio] = [
                 'x' => round($px / $fw, 5), 'y' => round($py / $fh, 5), 'w' => round($pw / $fw, 5), 'h' => round($ph / $fh, 5),
                 // Größe im Verhältnis zum Original (gespeicherte Datei ist evtl. verkleinert)
                 'W' => (int) round($pw / $fw * (int) $m['width']), 'H' => (int) round($ph / $fh * (int) $m['height']),
             ] + $v;
         }
-        self::db()->update('media', ['crops' => $crops ? json_encode($crops) : null, 'updated_at' => now()], 'id = :id', ['id' => $id]);
+        $oldCrop = (string) (self::crops($m)[$ratio]['base'] ?? '');
+        self::db()->update('media', ['crops' => $crops ? json_encode($crops) : null, 'updated_at' => now()]
+            + ($oldCrop !== '' ? self::historyFor($m, false, [$oldCrop]) : []), 'id = :id', ['id' => $id]);   // alter Zuschnitt leitet weiter
         self::forget($id);
         PageCache::clear();
         return [self::find($id), null];
@@ -1163,12 +1295,12 @@ final class Media
             if ($ops) {
                 $img = ImageEdit::apply($img, $ops);
                 $ext = str_ends_with((string) $m['file'], '.png') ? 'png' : 'jpg';
-                $master = 'cache/' . bin2hex(random_bytes(8)) . '-e.' . $ext;
+                $master = 'cache/' . self::variantBase(self::nameOf($m)) . '-e.' . $ext;
                 @mkdir(self::dir() . '/cache', 0775, true);
                 $ok = $ext === 'png' ? imagepng($img, self::dir() . '/' . $master, 8) : imagejpeg($img, self::dir() . '/' . $master, 90);
                 if (!$ok) throw new \RuntimeException(__('Bearbeitetes Bild konnte nicht gespeichert werden.'));
             }
-            $variants = self::makeVariants($img, bin2hex(random_bytes(8)), imagesx($img));
+            $variants = self::makeVariants($img, self::variantBase(self::nameOf($m)), imagesx($img));
         } catch (\RuntimeException $e) {
             if ($master) @unlink(self::dir() . '/' . $master);
             return [null, $e->getMessage()];
@@ -1184,7 +1316,7 @@ final class Media
             'variants_json' => json_encode($variants), 'width' => $w, 'height' => $h, 'crops' => null,
             'edit_json' => $ops ? json_encode(['ops' => $ops, 'orig' => $orig, 'master' => $master], JSON_UNESCAPED_SLASHES) : null,
             'updated_at' => now(),
-        ], 'id = :id', ['id' => $id]);
+        ] + self::historyFor($m, false, self::cacheBases($m)), 'id = :id', ['id' => $id]);   // alte Größen leiten weiter
         self::forget($id);
         MediaPools::forget();
         PageCache::clear();
@@ -1505,7 +1637,7 @@ final class Media
         rename($tmp, self::dir() . '/' . $file);
         if ($file !== $m['file']) @unlink($path);
         self::db()->update('media', ['file' => $file, 'mime' => str_ends_with($file, '.jpg') ? 'image/jpeg' : $m['mime'], 'size' => $after,
-            'hash' => sha1_file(self::dir() . '/' . $file), 'updated_at' => now()], 'id = :id', ['id' => $id]);
+            'hash' => sha1_file(self::dir() . '/' . $file), 'updated_at' => now()] + ($file !== $m['file'] ? self::historyFor($m, true) : []), 'id = :id', ['id' => $id]);
         self::forget($id);
         PageCache::clear();
         return [true, __('{a} → {b}', ['a' => self::humanSize($before), 'b' => self::humanSize($after)])];

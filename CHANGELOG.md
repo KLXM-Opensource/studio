@@ -6,9 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
-### Lesbare Dateinamen für PDFs und andere Dateien
-- PDFs, Office-Dokumente, Videos und Audio behalten beim Hochladen ihren Namen in der Adresse (`/media/2026/10/sommerfest-2026.pdf` statt `1075e42d1b045051.pdf`), bei gleichem Namen mit Zähler (`-2`). Gut für Suchmaschinen und Downloads. Bilder und Dateien in geschützten Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen.
-- Mediathek: Feld „Dateiname in der Adresse“ im Bearbeitungsfenster. Die alte Adresse leitet per 301 weiter (Spalte `media.file_history`, unabhängig von der Funktion „Weiterleitungen“). Beim Ersetzen bleibt der Name gleich.
+### Lesbare Dateinamen für Dateien und Bilder
+- Dateien und Bilder behalten beim Hochladen ihren Namen in der Adresse (`/media/2026/10/sommerfest-2026.pdf` statt `1075e42d1b045051.pdf`), bei gleichem Namen mit Zähler (`-2`). Bildgrößen heißen `{name}-{6 Hex}-{breite}.webp` (weiter unveränderlich zwischenspeicherbar). Gut für Suchmaschinen und die Bildersuche. Dateien in geschützten Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen.
+- Mediathek: Feld „Dateiname in der Adresse“ im Bearbeitungsfenster, bei Bildern samt aller Größen und Zuschnitte. Alte Adressen leiten per 301 weiter (Spalte `media.file_history`, unabhängig von der Funktion „Weiterleitungen“). Beim Ersetzen bleibt der Name gleich. „Datei“ zeigt den echten Dateinamen, „Hochgeladen als“ den Originalnamen.
+- Herunterladen unter dem Originalnamen: `download="…"` an Links auf Dateien der Website (alle Kits, Rich-Text, PDF-Karte, PDF-Betrachter).
 - `php bin/console media:rename [--dry-run] [--all]` stellt vorhandene Dateien um.
 - Mediathek: Knopf „Link kopieren“ im Bearbeitungsfenster – kopiert die öffentliche Adresse der Datei (z. B. für Newsletter).
 - Website: In der PDF-Karte („Ansehen | Herunterladen“) kopiert „Link kopieren“ die Seitenadresse mit `#datei=…` – der Link öffnet die Karte zu genau dieser Datei.

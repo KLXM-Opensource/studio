@@ -557,6 +557,12 @@ const SVG = {
   up: ico('upload-simple'), side: ico('sidebar-simple'), info: ico('info'),
 };
 
+/** Zeilen „Datei“ (Name in der Adresse) und – falls anders – „Hochgeladen als“ (Originalname, so heißt der Download) */
+const fileRows = m => {
+  const file = m.filename ? `${m.filename}${m.file_ext ? '.' + m.file_ext : ''}` : m.name;
+  return `<dt>${esc(t('Datei'))}</dt><dd>${esc(file)}</dd>${m.name && m.name !== file ? `<dt>${esc(t('Hochgeladen als'))}</dt><dd>${esc(m.name)}</dd>` : ''}`;
+};
+
 class Finder {
   /** opts: { mode: 'library'|'pick', kind: 'image'|null, onPick(media) } */
   constructor(root, opts = {}) {
@@ -1251,7 +1257,7 @@ class Finder {
       ${m.collections.length ? `<section class="fx-i-sec"><h3>Sammlungen</h3><p>${this.meta.collections.filter(c => m.collections.includes(c.id)).map(c => esc(c.name)).join(', ')}</p></section>` : ''}
       ${this.singleExtras(m)}
       <section class="fx-i-sec"><h3>Verwendet auf</h3>${m.usages.length ? '<ul class="fx-usage">' + m.usages.map(u => `<li>${u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.label)}</a>` : esc(u.label)}</li>`).join('') + '</ul>' : '<p class="fx-i-hint">Noch nirgends.</p>'}</section>
-      <dl class="fx-i-dl"><dt>Datei</dt><dd>${esc(m.name)}</dd><dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}</dd>${m.updated_at && m.updated_at !== m.created_at ? `<dt>Geändert</dt><dd>${fmtDate(m.updated_at)}</dd>` : ''}</dl>`;
+      <dl class="fx-i-dl">${fileRows(m)}<dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}</dd>${m.updated_at && m.updated_at !== m.created_at ? `<dt>Geändert</dt><dd>${fmtDate(m.updated_at)}</dd>` : ''}</dl>`;
     $('[data-edit]', this.$info).onclick = () => this.edit(m.id);
     // Datei ersetzen und weitere Aktionen auch ohne Rechtsklick (gleiches Menü wie das Kontextmenü)
     $('[data-replace]', this.$info)?.addEventListener('click', () => this.replace(m));
@@ -1455,7 +1461,7 @@ class Finder {
           </div>
           <div class="fx-i-progress" hidden><span></span></div>
           <dl class="md-info">
-            <dt>Datei</dt><dd>${esc(m.name)}</dd>
+            ${fileRows(m)}
             <dt>Hinzugefügt</dt><dd>${fmtDate(m.created_at)}${m.updated_at && m.updated_at !== m.created_at ? ` · geändert ${fmtDate(m.updated_at)}` : ''}</dd>
             <dt>Verwendet</dt><dd>${m.usages.length ? '<ul class="fx-usage">' + m.usages.map(u => `<li>${u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.label)}</a>` : esc(u.label)}</li>`).join('') + '</ul>' : 'noch nirgends'}</dd>
           </dl>

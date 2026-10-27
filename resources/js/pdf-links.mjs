@@ -71,7 +71,7 @@ function open(a) {
     + `<div class="cms-pdfpop__body"><p class="cms-pdfpop__title">${esc(x.pdfTitle || a.textContent.trim())}</p>`
     + `<p class="cms-pdfpop__meta"><span class="cms-pdfpop__badge">PDF</span> ${esc(cfg.type || '')}${x.pdfSize ? ' · ' + esc(x.pdfSize) : ''}</p>`
     + `<p class="cms-pdfpop__act"><a class="${esc(cfg.btn || 'btn btn--primary')}" href="${esc(x.pdfView)}"${blank}>${esc(cfg.view || 'Ansehen')}</a>`
-    + `<a class="${esc(cfg.btn2 || 'btn btn--secondary')}" href="${esc(x.pdfFile)}" download>${esc(cfg.download || 'Herunterladen')}</a></p>`
+    + `<a class="${esc(cfg.btn2 || 'btn btn--secondary')}" href="${esc(x.pdfFile)}" download="${esc(x.pdfName || '')}">${esc(cfg.download || 'Herunterladen')}</a></p>`
     + (key(a) ? `<p class="cms-pdfpop__share"><button type="button" class="cms-pdfpop__copy">${esc(cfg.copy || 'Link kopieren')}</button></p>` : '') + '</div>'
     + `<button type="button" class="cms-pdfpop__x" aria-label="${esc(cfg.close || 'Schließen')}">×</button>`;
   d.body.append(pop);
