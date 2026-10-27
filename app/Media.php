@@ -438,13 +438,15 @@ final class Media
         return self::$pool === null || !MediaPools::isProtected(self::$pool);
     }
 
-    /** Dateiname ohne Endung: Kleinbuchstaben, Ziffern, „-“ und „_“ (ä → ae, é → e), höchstens 80 Zeichen */
+    /** Dateiname ohne Endung: Kleinbuchstaben, Ziffern, „-“ und „_“ (ä → ae, é → e), höchstens 100 Zeichen (gekürzt am letzten Trenner) */
     public static function fileSlug(string $name): string
     {
         $n = strtr(mb_strtolower(trim(pathinfo($name, PATHINFO_FILENAME))), ['ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss']);
         if (function_exists('transliterator_transliterate')) $n = (string) transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $n);
         $n = trim((string) preg_replace(['~[^a-z0-9_]+~', '~([-_])[-_]+~'], ['-', '$1'], $n), '-_');
-        return trim(substr($n, 0, 80), '-_') ?: 'datei';
+        // Zu lang: am letzten Trenner vor der Grenze kürzen, nicht mitten im Wort
+        if (strlen($n) > 100) $n = preg_match('~^(.{40,100})[-_]~', substr($n, 0, 101), $c) ? $c[1] : substr($n, 0, 100);
+        return trim($n, '-_') ?: 'datei';
     }
 
     /** Alter Zufallsname (16 Hex-Zeichen) – Kandidat für media:rename */
