@@ -1938,6 +1938,8 @@ final class Media
             // Dateiname in der Adresse (ohne Endung) – änderbar nur bei Dateien der Website (Media::rename)
             'filename' => pathinfo((string) $m['file'], PATHINFO_FILENAME), 'file_ext' => pathinfo((string) $m['file'], PATHINFO_EXTENSION),
             'renamable' => self::renamable($m),
+            // Öffentliche, vollständige Adresse der Datei („Link kopieren“, z. B. für Newsletter) – Videos: Original
+            'public_url' => abs_url(self::url($m)),
             'width' => (int) $m['width'], 'height' => (int) $m['height'],
             'size' => self::humanSize((int) $m['size']), 'bytes' => (int) $m['size'], 'type' => self::typeLabel($m['mime']),
             'pages' => self::pages($m), 'viewer' => self::viewerUrl($m),

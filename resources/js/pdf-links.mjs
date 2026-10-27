@@ -5,6 +5,7 @@
  * In Slidern ([data-cms-slider]) und Bereichen mit [data-pdf-direct] öffnet der Klick gleich das Modal – ohne Karte.
  * Ohne Skript, mit Strg/⌘/Umschalt oder mittlerer Maustaste gilt das href des Links (Wahl im Linkdialog).
  * Tastatur: Fokus auf „Ansehen“, Tab bleibt in der Karte, Esc schließt und kehrt zum Link zurück.
+ * „Link kopieren“: Adresse der Seite + #datei={Dateiname ohne Endung} – beim Aufruf öffnet sich genau diese Karte wieder.
  */
 import { esc } from './_html.js';
 const d = document;
@@ -44,6 +45,12 @@ function close(back) {
   opener = null;
 }
 
+/** Kennung eines PDF-Links für #datei=…: Dateiname ohne Endung (sprechend, z. B. sommerfest-2026) */
+function key(a) {
+  const f = (a.dataset.pdfFile || '').split(/[?#]/)[0].split('/').pop() || '';
+  return decodeURIComponent(f.replace(/\.pdf$/i, ''));
+}
+
 function place(a) {
   const r = a.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
   const below = r.bottom + 10 + h <= innerHeight || r.top - 10 - h < 0;
@@ -64,7 +71,8 @@ function open(a) {
     + `<div class="cms-pdfpop__body"><p class="cms-pdfpop__title">${esc(x.pdfTitle || a.textContent.trim())}</p>`
     + `<p class="cms-pdfpop__meta"><span class="cms-pdfpop__badge">PDF</span> ${esc(cfg.type || '')}${x.pdfSize ? ' · ' + esc(x.pdfSize) : ''}</p>`
     + `<p class="cms-pdfpop__act"><a class="${esc(cfg.btn || 'btn btn--primary')}" href="${esc(x.pdfView)}"${blank}>${esc(cfg.view || 'Ansehen')}</a>`
-    + `<a class="${esc(cfg.btn2 || 'btn btn--secondary')}" href="${esc(x.pdfFile)}" download>${esc(cfg.download || 'Herunterladen')}</a></p></div>`
+    + `<a class="${esc(cfg.btn2 || 'btn btn--secondary')}" href="${esc(x.pdfFile)}" download>${esc(cfg.download || 'Herunterladen')}</a></p>`
+    + (key(a) ? `<p class="cms-pdfpop__share"><button type="button" class="cms-pdfpop__copy">${esc(cfg.copy || 'Link kopieren')}</button></p>` : '') + '</div>'
     + `<button type="button" class="cms-pdfpop__x" aria-label="${esc(cfg.close || 'Schließen')}">×</button>`;
   d.body.append(pop);
   a.setAttribute('aria-expanded', 'true');
@@ -73,6 +81,12 @@ function open(a) {
   pop.querySelector('a')?.focus({ preventScroll: true });
   pop.querySelector('.cms-pdfpop__x').addEventListener('click', () => close(true));
   pop.querySelector('a[download]').addEventListener('click', () => setTimeout(() => close(false), 0));
+  pop.querySelector('.cms-pdfpop__copy')?.addEventListener('click', async e => {
+    const b = e.currentTarget, link = location.origin + location.pathname + location.search + '#datei=' + encodeURIComponent(key(a));
+    try { await navigator.clipboard.writeText(link); } catch { prompt(cfg.copy || 'Link kopieren', link); return; }
+    b.textContent = cfg.copied || 'Link kopiert';
+    setTimeout(() => { if (b.isConnected) b.textContent = cfg.copy || 'Link kopieren'; }, 2000);
+  });
   const view = pop.querySelector('a:not([download])');
   view.addEventListener('click', e => { if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return; e.preventDefault(); viewer(a); });
   pop.addEventListener('keydown', e => {
@@ -96,5 +110,11 @@ d.addEventListener('click', e => {
   open(a);
 });
 addEventListener('resize', () => close(false));
+// Geteilter Link (#datei=…): Karte zu dieser Datei öffnen – erster passender Link auf der Seite
+const want = decodeURIComponent((location.hash.match(/^#datei=(.+)$/) || [])[1] || '');
+if (want) {
+  const a = [...d.querySelectorAll('a[data-pdf-view]')].find(l => key(l) === want);
+  if (a) { a.scrollIntoView({ block: 'center', behavior: 'instant' }); a.closest(DIRECT) ? viewer(a) : open(a); }
+}
 // Inhalt ausgetauscht (Bearbeiten auf der Website, Live-Ansicht): neue Links kennzeichnen
 d.addEventListener('cms:content-replaced', () => d.querySelectorAll('a[data-pdf-view]').forEach(a => a.setAttribute('aria-haspopup', 'dialog')));

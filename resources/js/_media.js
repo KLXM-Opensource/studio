@@ -1449,7 +1449,7 @@ class Finder {
             <button type="submit" class="adm-btn adm-btn--primary">Speichern</button>
             <button type="button" class="adm-btn adm-btn--ghost" data-replace>Datei ersetzen …</button>
             <a class="adm-btn adm-btn--ghost" href="${esc(m.kind === 'pdf' ? m.viewer : m.url)}" target="_blank" rel="noopener">Öffnen ↗</a>
-            ${this.mode === 'library' && !this.pool ? `<button type="button" class="adm-btn adm-btn--ghost" data-copylink title="${esc(t('Link zu diesem Fenster kopieren – öffnet die Datei in der Mediathek (nur mit Anmeldung)'))}">${esc(t('Link kopieren'))}</button>` : ''}
+            ${m.public_url ? `<button type="button" class="adm-btn adm-btn--ghost" data-copylink title="${esc(t('Öffentliche Adresse der Datei kopieren – z. B. für Newsletter oder E-Mails'))}">${esc(t('Link kopieren'))}</button>` : ''}
             ${this.mode === 'library' ? '<button type="button" class="adm-btn adm-btn--ghost adm-btn--danger-text" data-del>Löschen</button>' : ''}
           </div>
           <div class="fx-i-progress" hidden><span></span></div>
@@ -1535,9 +1535,9 @@ class Finder {
       try { await api.save(m.id, body); dirty = false; dlg.close(); toast('Gespeichert'); this.load(m.id); }
       catch (ex) { err.textContent = ex.message; err.hidden = false; form.alt?.focus(); }
     };
-    // Link zu diesem Fenster (Verwaltung): /admin/media#m{id} öffnet die Mediathek mit dieser Datei
+    // Öffentliche Adresse der Datei kopieren (z. B. für Newsletter) – ohne Umweg über die Website
     $('[data-copylink]', dlg)?.addEventListener('click', async () => {
-      const link = location.origin + location.pathname + '#m' + m.id;
+      const link = m.public_url;
       try { await navigator.clipboard.writeText(link); toast(t('Link kopiert')); }
       catch { prompt(t('Link zum Kopieren:'), link); }
     });

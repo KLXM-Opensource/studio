@@ -73,7 +73,7 @@ final class PdfLinks
         if (!str_contains($html, 'data-pdf-view=') || str_contains($html, 'data-cms-pdf-links')) return $html;
         $tag = '<script type="module" src="' . e(asset('js/pdf-links.mjs')) . '" data-cms-pdf-links data-css="' . e(asset('css/pdf-links.css')) . '"'
             . ' data-view="' . e(lt('Ansehen')) . '" data-download="' . e(lt('Herunterladen')) . '" data-type="' . e(lt('Dokument')) . '" data-close="' . e(lt('Schließen')) . '"'
-            . ' data-newtab="' . e(lt('In neuem Tab öffnen')) . '"'
+            . ' data-newtab="' . e(lt('In neuem Tab öffnen')) . '" data-copy="' . e(lt('Link kopieren')) . '" data-copied="' . e(lt('Link kopiert')) . '"'
             // Knöpfe im Stil des Kits (theme.php button_class / button_class_secondary)
             . ' data-btn="' . e((string) (app()->theme->def['button_class'] ?? 'btn btn--primary')) . '"'
             . ' data-btn2="' . e((string) (app()->theme->def['button_class_secondary'] ?? str_replace('btn--primary', 'btn--secondary', (string) (app()->theme->def['button_class'] ?? 'btn btn--primary')))) . '"></script>';

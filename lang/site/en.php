@@ -396,6 +396,8 @@ return [
     'Auf der Karte ansehen' => 'View on map',
     'Herunterladen' => 'Download',
     'In neuem Tab öffnen' => 'Open in new tab',
+    'Link kopieren' => 'Copy link',
+    'Link kopiert' => 'Link copied',
     // Block „Vor / Zurück“ (Detailseiten)
     'Nächster Eintrag' => 'Next entry',
     'Vorheriger Eintrag' => 'Previous entry',

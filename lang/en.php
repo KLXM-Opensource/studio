@@ -1336,7 +1336,7 @@ return [
     'Link kopieren' => 'Copy link',
     'Link kopiert' => 'Link copied',
     'Link zum Kopieren:' => 'Link to copy:',
-    'Link zu diesem Fenster kopieren – öffnet die Datei in der Mediathek (nur mit Anmeldung)' => 'Copy a link to this window – opens the file in the media library (login required)',
+    'Öffentliche Adresse der Datei kopieren – z. B. für Newsletter oder E-Mails' => 'Copy the public address of the file – e.g. for newsletters or emails',
     'Die Datei konnte nicht umbenannt werden.' => 'The file could not be renamed.',
     'Diese Datei kann nicht umbenannt werden.' => 'This file cannot be renamed.',
     'Kleinbuchstaben, Ziffern, - und _ (Umlaute werden umgeschrieben). Gibt es den Namen schon, kommt eine Zahl dazu. Die bisherige Adresse leitet auf die neue weiter.' => 'Lowercase letters, digits, - and _ (umlauts are transliterated). If the name already exists, a number is added. The previous address redirects to the new one.',
