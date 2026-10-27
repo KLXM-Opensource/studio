@@ -404,6 +404,13 @@ final class Media
             return [null, $err];
         }
         self::deleteFiles($old);
+        // Datei (keine Bilder): sprechender Name bleibt beim Ersetzen – gleiche Adresse für Links und Suchmaschinen;
+        // sonst (Zufallsname, andere Endung) leitet die alte Adresse auf die neue weiter
+        if (self::kind($old['mime']) !== 'image') {
+            $same = !self::isRandomName((string) $old['file']) && pathinfo((string) $old['file'], PATHINFO_EXTENSION) === pathinfo((string) $data['file'], PATHINFO_EXTENSION);
+            if ($same && @rename(self::dir() . '/' . $data['file'], self::dir() . '/' . $old['file'])) $data['file'] = $old['file'];
+            elseif ($data['file'] !== $old['file'] && self::$pool === null) $data['file_history'] = self::history($old, (string) $data['file']);
+        }
         $data['updated_at'] = now();
         $data['crops'] = null;          // neues Motiv → Zuschnitte neu festlegen
         $data['edit_json'] = null;      // … und nicht bearbeitet (Core\ImageEdit)
@@ -419,6 +426,122 @@ final class Media
         VideoThumbs::queue(self::find($id));   // neues Video/PDF → neues Vorschaubild
         VideoWeb::queue(self::find($id));      // neues Video → neue Web-Fassung
         return [self::find($id), null];
+    }
+
+    /**
+     * Sprechende Dateinamen für öffentliche Dateien (PDF, Office, Video, Audio – keine Bilder, deren Größen im gemeinsamen cache/
+     * liegen): „sommerfest_2026.pdf“ statt Zufallsname, bei gleichem Namen im Monatsordner mit Zähler (-2, -3 …).
+     * Geschützte Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen – dort sind die Adressen der Schutz.
+     */
+    public static function readableNames(): bool
+    {
+        return self::$pool === null || !MediaPools::isProtected(self::$pool);
+    }
+
+    /** Dateiname ohne Endung: Kleinbuchstaben, Ziffern, „-“ und „_“ (ä → ae, é → e), höchstens 80 Zeichen */
+    public static function fileSlug(string $name): string
+    {
+        $n = strtr(mb_strtolower(trim(pathinfo($name, PATHINFO_FILENAME))), ['ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss']);
+        if (function_exists('transliterator_transliterate')) $n = (string) transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $n);
+        $n = trim((string) preg_replace(['~[^a-z0-9_]+~', '~([-_])[-_]+~'], ['-', '$1'], $n), '-_');
+        return trim(substr($n, 0, 80), '-_') ?: 'datei';
+    }
+
+    /** Alter Zufallsname (16 Hex-Zeichen) – Kandidat für media:rename */
+    public static function isRandomName(string $rel): bool
+    {
+        return (bool) preg_match('~(^|/)[0-9a-f]{16}\.[a-z0-9]+$~', $rel);
+    }
+
+    /** Freier Name im Ordner $sub: weder als Datei vorhanden noch von einem anderen Medium belegt (auch frühere Namen) */
+    private static function freeName(string $sub, string $slug, string $ext, int $exceptId = 0, array $taken = []): string
+    {
+        for ($i = 1; ; $i++) {
+            $rel = $sub . '/' . $slug . ($i > 1 ? '-' . $i : '') . '.' . $ext;
+            if (!isset($taken[$rel]) && !file_exists(self::dir() . '/' . $rel) && !self::nameUsed($rel, $exceptId)) return $rel;
+        }
+    }
+
+    private static function nameUsed(string $rel, int $exceptId): bool
+    {
+        foreach (self::db()->fetchAll('SELECT id, file, file_history FROM media WHERE (file = ? OR file_history LIKE ?) AND id <> ?', [$rel, '%' . self::jsonName($rel) . '%', $exceptId]) as $r) {
+            if ($r['file'] === $rel || in_array($rel, (array) json_decode((string) $r['file_history'], true), true)) return true;
+        }
+        return false;
+    }
+
+    private static function jsonName(string $rel): string
+    {
+        return (string) json_encode($rel, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /** Frühere Namen (file_history) um $m['file'] ergänzt – ohne den neuen Namen, höchstens 20 */
+    private static function history(array $m, string $new): string
+    {
+        $h = array_values(array_diff((array) json_decode((string) ($m['file_history'] ?? ''), true), [$new]));
+        $h[] = (string) $m['file'];
+        return (string) json_encode(array_slice(array_values(array_unique($h)), -20), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /** Kann die Datei umbenannt werden? Keine Bilder, nur Dateien der Website (nicht aus einem Pool) */
+    public static function renamable(array $m): bool
+    {
+        return self::kind((string) $m['mime']) !== 'image' && self::$pool === null && empty($m['_pool']) && empty($m['pool_ref']);
+    }
+
+    /**
+     * Datei umbenennen: neuer sprechender Name im selben Ordner, die alte Adresse leitet weiter (legacyRedirect).
+     * @param array<string, true> $taken in diesem Durchlauf schon vergebene Namen (media:rename --dry-run)
+     * @return array{0: ?array, 1: ?string, 2?: string} [Medium, Fehler, neuer Name]
+     */
+    public static function rename(int $id, string $name, bool $dry = false, array &$taken = []): array
+    {
+        $m = self::find($id);
+        if (!$m) return [null, __('Medium nicht gefunden.')];
+        if (!self::renamable($m)) return [null, __('Diese Datei kann nicht umbenannt werden.')];
+        $cur = (string) $m['file'];
+        $slug = self::fileSlug($name);
+        if (pathinfo($cur, PATHINFO_FILENAME) === $slug) return [$m, null, $cur];
+        $rel = self::freeName(dirname($cur), $slug, strtolower(pathinfo($cur, PATHINFO_EXTENSION)), $id, $taken);
+        $taken[$rel] = true;
+        if ($dry) return [$m, null, $rel];
+        if (!is_file(self::dir() . '/' . $cur) || !@rename(self::dir() . '/' . $cur, self::dir() . '/' . $rel)) {
+            return [null, __('Die Datei konnte nicht umbenannt werden.')];
+        }
+        self::db()->update('media', ['file' => $rel, 'file_history' => self::history($m, $rel), 'updated_at' => now()], 'id = :id', ['id' => $id]);
+        self::forget($id);
+        PageCache::clear();
+        return [self::find($id), null, $rel];
+    }
+
+    /**
+     * Vorhandene Dateien mit Zufallsnamen umbenennen (media:rename): Name aus Originalname bzw. Titel, alte Adressen leiten weiter.
+     * @return list<array{id: int, from: string, to: string, error: ?string}>
+     */
+    public static function renameAll(bool $dry): array
+    {
+        $out = [];
+        $taken = [];
+        foreach (self::db()->fetchAll("SELECT id, file, original_name, title FROM media WHERE mime NOT LIKE 'image/%' AND pool_ref IS NULL ORDER BY id") as $r) {
+            if (!self::isRandomName((string) $r['file'])) continue;
+            $src = trim((string) ($r['original_name'] ?: $r['title']));
+            if ($src === '' || self::isRandomName($src) && !str_contains($src, ' ')) $src = (string) ($r['title'] ?: 'datei');
+            $res = self::rename((int) $r['id'], $src, $dry, $taken);
+            $out[] = ['id' => (int) $r['id'], 'from' => (string) $r['file'], 'to' => (string) ($res[2] ?? ''), 'error' => $res[1]];
+        }
+        return $out;
+    }
+
+    /** Alte Adresse einer umbenannten Datei der Website (Pfad ohne Basis, z. B. /media/2026/10/…) → aktuelle Adresse, sonst null */
+    public static function legacyRedirect(string $path): ?string
+    {
+        $prefix = substr(site()->mediaUrl(), strlen(base_path())) . '/';
+        if (!str_starts_with($path, $prefix)) return null;
+        $rel = substr($path, strlen($prefix));
+        if (!preg_match('~^\d{4}/\d{2}/[\w\-.]+$~', $rel)) return null;
+        $row = app()->db->fetch('SELECT * FROM media WHERE file_history LIKE ? AND deleted_at IS NULL ORDER BY id DESC LIMIT 1', ['%' . self::jsonName($rel) . '%']);
+        if (!$row || !in_array($rel, (array) json_decode((string) $row['file_history'], true), true)) return null;
+        return self::url($row);
     }
 
     /** Rechte-Angaben aus Eingaben: license, rights_until (Y-m-d), consent (yes|none|no) – nur übergebene Schlüssel */
@@ -533,7 +656,9 @@ final class Media
                 return [null, 'Ungültige M4A-Datei.'];
             }
             if ($mime === 'audio/x-m4a') $mime = 'audio/mp4';
-            $rel = "$sub/$base." . self::fileMimes()[$mime];
+            // Öffentliche Dateien: sprechender Name aus dem Originalnamen (Suchmaschinen, Download); geschützte Pools: Zufallsname
+            $fx = self::fileMimes()[$mime];
+            $rel = self::readableNames() ? self::freeName($sub, self::fileSlug($originalName), $fx) : "$sub/$base.$fx";
             if (!copy($path, self::dir() . "/$rel")) {
                 return [null, 'Datei konnte nicht gespeichert werden.'];
             }
@@ -1808,6 +1933,9 @@ final class Media
             'alt' => (string) $m['alt'], 'decorative' => (bool) ($m['decorative'] ?? false),
             'title' => (string) ($m['title'] ?? ''), 'display' => self::displayName($m),
             'name' => $m['original_name'], 'mime' => $m['mime'], 'kind' => self::kind($m['mime']),
+            // Dateiname in der Adresse (ohne Endung) – änderbar nur bei Dateien der Website (Media::rename)
+            'filename' => pathinfo((string) $m['file'], PATHINFO_FILENAME), 'file_ext' => pathinfo((string) $m['file'], PATHINFO_EXTENSION),
+            'renamable' => self::renamable($m),
             'width' => (int) $m['width'], 'height' => (int) $m['height'],
             'size' => self::humanSize((int) $m['size']), 'bytes' => (int) $m['size'], 'type' => self::typeLabel($m['mime']),
             'pages' => self::pages($m), 'viewer' => self::viewerUrl($m),

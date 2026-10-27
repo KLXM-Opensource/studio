@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Lesbare Dateinamen für PDFs und andere Dateien
+- PDFs, Office-Dokumente, Videos und Audio behalten beim Hochladen ihren Namen in der Adresse (`/media/2026/10/sommerfest-2026.pdf` statt `1075e42d1b045051.pdf`), bei gleichem Namen mit Zähler (`-2`). Gut für Suchmaschinen und Downloads. Bilder und Dateien in geschützten Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen.
+- Mediathek: Feld „Dateiname in der Adresse“ im Bearbeitungsfenster. Die alte Adresse leitet per 301 weiter (Spalte `media.file_history`, unabhängig von der Funktion „Weiterleitungen“). Beim Ersetzen bleibt der Name gleich.
+- `php bin/console media:rename [--dry-run] [--all]` stellt vorhandene Dateien um.
+- Entwicklungsserver: `base_path()` ignoriert einen Ordner als `SCRIPT_NAME` (fehlende Dateien in vorhandenen Ordnern) – wie `Request::fromGlobals`.
+
 ### Formulare: Wer wird über neue Einträge informiert?
 - Das Feld „Benachrichtigung an (E-Mail)“ nennt im Platzhalter jetzt die tatsächlichen Empfänger aus den Grundeinstellungen (E-Mail-Versand) statt nur „leer = Empfänger aus den Grundeinstellungen“. Ist auch dort niemand eingetragen, warnt die Tabelle: „Niemand wird über neue Einträge informiert“ – vorher ging die Benachrichtigung dann stillschweigend an niemanden. Auch im Assistenten für neue Tabellen.
 - Grundeinstellungen: Fehlt der Schlüssel für verschlüsselte Anfragen, trägt jetzt auch der Bereich „Verschlüsselung“ den Warnpunkt – bisher zeigte nur der Menüpunkt „Grundeinstellungen“ ihn, ohne zu verraten, wo.

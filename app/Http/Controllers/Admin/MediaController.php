@@ -237,6 +237,12 @@ final class MediaController extends AdminController
             }
             $upd['adjust'] = $adj !== '' ? $adj : null;
         }
+        // Dateiname in der Adresse (nur Dateien der Website, keine Bilder): umbenennen, alte Adresse leitet weiter
+        if (isset($p['filename']) && trim((string) $p['filename']) !== '' && Media::renamable($m)
+            && Media::fileSlug((string) $p['filename']) !== pathinfo((string) $m['file'], PATHINFO_FILENAME)) {
+            [, $err] = Media::rename((int) $id, (string) $p['filename']);
+            if ($err) return Response::fail($err);
+        }
         Media::db()->update('media', $upd, 'id = :id', ['id' => (int) $id]);
         if (isset($p['collections']) && is_array($p['collections'])) {
             Media::setCollections((int) $id, $p['collections']);

@@ -185,6 +185,8 @@
  *   media:web [--all] [--force] [--pool=key]          Web-Fassung großer Videos erzeugen (kleiner, startet sofort; nur mit ffmpeg)
  *   media:thumbs [--missing|--all] [--pool=key]       Vorschaubilder für Videos erzeugen (nur mit ffmpeg; Standard/--missing: fehlende,
  *                                                     --all: alle neu)
+ *   media:rename [--dry-run] [--all]                  Dateien mit Zufallsnamen (keine Bilder) sprechend benennen – aus Originalname
+ *                                                     bzw. Titel; alte Adressen leiten weiter (301)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
  *   live:selftest                                     Selbsttest der Live-Aktualisierung (Versionen, signierte Abos, Live-Blöcke)
@@ -782,6 +784,16 @@ switch ($cmd) {
         // Web-Fassung großer Videos (Core\VideoWeb, nur mit ffmpeg); --all: jede Website, --force: neu erzeugen, --pool=key
         if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
         exit(Core\VideoWeb::console($args));
+
+    case 'media:rename':
+        // Sprechende Dateinamen für vorhandene Dateien (Core\Media::renameAll) – --dry-run zeigt nur an, --all: jede Website
+        if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
+        $dry = Core\Cli::flag($args, 'dry-run');
+        $res = Core\Media::renameAll($dry);
+        foreach ($res as $r) echo '  #' . $r['id'] . ' ' . $r['from'] . ' → ' . ($r['error'] ?? $r['to']) . "\n";
+        $fail = count(array_filter($res, fn($r) => $r['error'] !== null));
+        echo '  ' . (count($res) - $fail) . ' Datei(en) ' . ($dry ? 'würden umbenannt (Probelauf)' : 'umbenannt') . ($fail ? ", $fail Fehler" : '') . "\n";
+        exit($fail ? 1 : 0);
 
     case 'media:thumbs':
         // Vorschaubilder für Videos nachträglich erzeugen (Core\VideoThumbs, nur mit ffmpeg); --all: alle neu, --pool=key: Pool

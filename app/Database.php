@@ -236,6 +236,7 @@ final class Database
             'rights_until' => 'VARCHAR(10) NULL', // Nutzungsrecht bis (Y-m-d), leer = unbefristet
             'consent' => 'VARCHAR(10) NULL',      // Einwilligung abgebildeter Personen: yes | none (keine Personen) | no | NULL = nicht angegeben
             'hash' => 'VARCHAR(40) NULL',         // SHA-1 der gespeicherten Datei – doppelte Dateien finden
+            'file_history' => 'TEXT NULL',        // frühere Dateinamen (JSON-Liste) – alte Adressen leiten weiter (Media::rename, legacyRedirect)
         ]);
 
         // Seitenbaum: Eltern, Pfad, Menü, Seitentyp (page | template für Detailseiten von Datentabellen)

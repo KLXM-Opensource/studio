@@ -214,6 +214,10 @@ final class App
                 return Http\Controllers\ApiController::fail(new Api\ApiError($e->getCode() ?: 404,
                     $e->getCode() === 405 ? 'Methode nicht erlaubt.' : 'Unbekannter API-Endpunkt. Übersicht: ' . absolute_url('/api/v1/openapi.json')));
             }
+            // Umbenannte Mediendatei (Media::rename): alte Adresse → aktuelle (301) – unabhängig von der Funktion „Weiterleitungen“
+            if ($e->getCode() === 404 && in_array($request->method, ['GET', 'HEAD'], true) && ($to = Media::legacyRedirect($request->path))) {
+                return Response::redirect($to, 301)->header('Cache-Control', 'public, max-age=3600');
+            }
             // Keine Seite, keine Route: Weiterleitungen (Core\Redirects) – echte Seiten gehen damit immer vor
             if ($e->getCode() === 404 && ($to = Redirects\Redirects::handle404($request))) {
                 return $to;

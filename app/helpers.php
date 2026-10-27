@@ -128,7 +128,10 @@ function base_path(): string
 {
     static $base = null;
     if ($base === null) {
-        $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+        // Nur ein echter Skriptname zählt – der PHP-Entwicklungsserver meldet bei fehlenden Dateien in vorhandenen Ordnern
+        // (z. B. /media/2026/10/alt.pdf) den Ordner als SCRIPT_NAME (wie in Request::fromGlobals)
+        $script = (string) ($_SERVER['SCRIPT_NAME'] ?? '/');
+        $dir = str_ends_with($script, '.php') ? str_replace('\\', '/', dirname($script)) : '/';
         $base = PHP_SAPI === 'cli' || $dir === '/' || $dir === '.' ? '' : rtrim($dir, '/');
     }
     return $base;

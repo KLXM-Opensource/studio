@@ -1427,6 +1427,9 @@ class Finder {
         </div>
         <form class="md-form" novalidate>
           <div class="f"><label for="md-t">Titel / Anzeigename</label><input id="md-t" name="title" value="${esc(m.title)}" placeholder="${esc(m.display)}" maxlength="180"></div>
+          ${m.renamable && !this.ro ? `<div class="f"><label for="md-fn">${esc(t('Dateiname in der Adresse'))}</label>
+            <div class="fx-inline"><input id="md-fn" name="filename" value="${esc(m.filename)}" maxlength="80" spellcheck="false" autocomplete="off" aria-describedby="md-fn-h"><span class="adm-muted">.${esc(m.file_ext)}</span></div>
+            <p class="f-help" id="md-fn-h">${esc(t('Kleinbuchstaben, Ziffern, - und _ (Umlaute werden umgeschrieben). Gibt es den Namen schon, kommt eine Zahl dazu. Die bisherige Adresse leitet auf die neue weiter.'))}</p></div>` : ''}
           ${isImg ? `
           <div class="f"><label for="md-alt">Alt-Text <span class="req">*</span></label><textarea id="md-alt" name="alt" rows="3" maxlength="250" ${m.decorative ? 'disabled' : ''} placeholder="Was ist zu sehen? z. B. „Zwei Personen im Gespräch an einem Infostand“">${esc(m.alt)}</textarea>
             <p class="f-help">Wird vorgelesen, wenn jemand das Bild nicht sehen kann. Kurz und konkret, ohne „Bild von …“.</p></div>
@@ -1527,7 +1530,7 @@ class Finder {
     if (isImg) fxPreview();
     form.onsubmit = async e => {
       e.preventDefault(); err.hidden = true;
-      const body = { title: form.title.value, alt: form.alt?.value || '', decorative: form.decorative?.checked ? 1 : 0, credit: form.credit.value, tags: tags.join(','), focus, collections: $$('input[name=collections]:checked', form).map(c => +c.value), i18n: readTrans(form) };
+      const body = { title: form.title.value, ...(form.filename ? { filename: form.filename.value } : {}), alt: form.alt?.value || '', decorative: form.decorative?.checked ? 1 : 0, credit: form.credit.value, tags: tags.join(','), focus, collections: $$('input[name=collections]:checked', form).map(c => +c.value), i18n: readTrans(form) };
       try { await api.save(m.id, body); dirty = false; dlg.close(); toast('Gespeichert'); this.load(m.id); }
       catch (ex) { err.textContent = ex.message; err.hidden = false; form.alt?.focus(); }
     };
