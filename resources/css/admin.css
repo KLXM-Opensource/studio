@@ -3823,3 +3823,7 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 @media (min-width:901px) and (max-width:1399px){.adm-brand-tools .adm-site-open--site{flex:none;width:40px;padding:0}.adm-brand-tools .adm-site-open--site>span{display:none}.adm-brand-tools .adm-site-open--site svg{width:22px;height:22px}}
 @media (max-width:900px){.adm-site-open__more{display:inline}}
 @media (min-width:1800px){body.adm{grid-template-columns:288px minmax(0,1fr)}}
+/* Volle Zeile (Suche, Assistent, Favoriten-Stern): „Website ansehen“ nur als Symbol, damit alles in die Seitenleiste passt */
+.adm-brand-tools:has(.adm-drill-peek:not([hidden])) .adm-site-open--site{flex:none;width:40px;padding:0}
+.adm-brand-tools:has(.adm-drill-peek:not([hidden])) .adm-site-open--site>span{display:none}
+.adm-brand-tools{flex-wrap:nowrap;min-width:0}
