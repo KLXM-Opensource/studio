@@ -3807,3 +3807,16 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rte-mi__i .rte-icon{width:16px;height:16px}
 .rte-mi__h{color:var(--rte-muted)}
 .rte-menu__sep{margin:4px;background:var(--rte-border-soft)}
+
+/* Seitenleiste: Suchen und Website ansehen – groß und beschriftet (layout.php .adm-quick) */
+.adm-quick{display:grid;gap:6px}
+.adm-quick__search,.adm-quick__site{display:flex;align-items:center;gap:9px;width:100%;min-height:40px;margin:0;padding:0 12px;border-radius:10px;font:500 14px/1.2 var(--adm-font);text-align:left;text-decoration:none;cursor:pointer}
+.adm-quick__search{border:1px solid var(--adm-line);background:var(--adm-hover);color:var(--adm-t2);cursor:text}
+.adm-quick__search:hover{background:var(--adm-press);color:var(--adm-ink)}
+.adm-quick__search span{flex:1}
+.adm-quick__search kbd{border:0;background:var(--adm-press);color:var(--adm-t2);font:600 11px var(--adm-font)}
+.adm-quick__site{border:1px solid transparent;background:var(--adm-surface);color:var(--adm-ink);font-weight:700}
+.adm-quick__site:hover{background:var(--adm-press)}
+.adm-quick__search:focus-visible,.adm-quick__site:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
+.adm-quick svg{width:18px;height:18px;flex:none}
+@media (pointer:coarse){.adm-quick__search kbd{display:none}.adm-quick__search,.adm-quick__site{min-height:44px}}

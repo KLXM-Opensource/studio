@@ -145,17 +145,20 @@ if ($user && ($req = app()->request)) {
   <a class="adm-brand" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></a>
   <?php endif; ?>
     <div class="adm-brand-tools">
-      <button type="button" class="adm-site-open adm-site-open--search" data-spotlight aria-keyshortcuts="Meta+K Control+K" title="<?= e(__('Suchen')) ?> (⌘K)" aria-label="<?= e(__('Suchen')) ?>"><?= icon('magnifying-glass') ?></button>
       <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
       <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
       <?php endif; ?>
-      <a class="adm-site-open" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?>" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?></a>
       <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
       <button type="button" class="adm-site-open adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
       <?php // Konto (Profilbild oder Initialen, Core\Avatar) und Abmelden – rechts in der Werkzeugzeile ?>
       <a class="adm-me-ava" href="<?= e(url('/admin/account')) ?>" title="<?= e(($user['name'] ?: $user['email']) . ' · ' . __('Konto')) ?>" aria-label="<?= e(__('Mein Konto')) ?>"><?= \Core\Avatar::html($user, 'adm-ava adm-ava--s') ?></a>
       <form class="adm-brand-tools__out" method="post" action="<?= e(url('/admin/logout')) ?>"><?= csrf_field() ?><button type="submit" class="adm-site-open" title="<?= e(__('Abmelden')) ?>" aria-label="<?= e(__('Abmelden')) ?>"><?= icon('sign-out') ?></button></form>
     </div>
+  </div>
+  <?php // Suchen und Website ansehen: groß und beschriftet (als kleine Symbole wurden sie übersehen) ?>
+  <div class="adm-quick">
+    <button type="button" class="adm-quick__search" data-spotlight aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?><span><?= e(__('Suchen …')) ?></span><kbd aria-hidden="true">⌘K</kbd></button>
+    <a class="adm-quick__site" href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('arrow-square-out') ?><span><?= e(__('Website ansehen')) ?></span><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a>
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">

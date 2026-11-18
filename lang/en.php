@@ -7986,4 +7986,5 @@ return [
     'Diesen Eintrag bearbeiten – Titel, Felder und Inhalt direkt auf der Seite' => 'Edit this entry – title, fields and content right on the page',
     '{field} – Blöcke dieses Eintrags' => '{field} – blocks of this entry',
     'Bild aus der Mediathek wählen' => 'Choose an image from the media library',
+    'Suchen …' => 'Search …',
 ];
