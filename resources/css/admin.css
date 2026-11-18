@@ -2404,7 +2404,6 @@ textarea.cb-code:not(.cb-editor textarea){min-height:120px;border:1px solid var(
 .rte-bar .rte-mbtn{display:inline-flex;align-items:center;gap:4px}
 .rte-caret{font-size:10px;opacity:.7}
 .rte-style-l{display:inline-block;min-width:4.6em;text-align:left}
-.rte-ico-mark{padding:0 3px;border-radius:3px;background:#FFE58A;color:#16201E;font-weight:700}
 .rte-ico-a{position:relative;display:inline-block;padding-bottom:3px;font-weight:700}
 .rte-cbar{position:absolute;left:-2px;right:-2px;bottom:0;height:3px;border-radius:2px;background:currentColor;opacity:.35}
 .rte-cbar[style*=background]{opacity:1}
@@ -2442,7 +2441,6 @@ textarea.cb-code:not(.cb-editor textarea){min-height:120px;border:1px solid var(
 @media (max-width:560px){
   .rte-wide{display:none!important}
   .rte-narrow{display:contents}
-  .rte-bar .rte-lbl{display:none}
   .rte-style-l{min-width:0;max-width:5.2em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 /* Rich-Text-Stile im Formularfeld (Farben: Palette des Themes aus <script id="cms-rich">, per JS als Variablen) */
@@ -3773,3 +3771,39 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .su-site[open] > summary{background:var(--adm-hover)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--su-11:#6B7280;--su-13:#9C8A74}}
 :root[data-theme=dark]{--su-11:#6B7280;--su-13:#9C8A74}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * Formatierungsleiste wie in den REDAXO-Editoren fluid/tiptap (gleiche Maße, Zustände, Menüs, Lucide-Symbole aus
+ * _icons.js) – nur Darstellung, Befehle und Klassen bleiben. Werte aus den Studio-Tokens (hell/dunkel/Akzent).
+ * Gilt auch im Schatten (admin.shadow.css); die schwebende Leiste auf der Website: editor.shadow.css.
+ * --------------------------------------------------------------------------------------------------------------- */
+:root{--rte-bg:var(--adm-surface);--rte-surface:var(--adm-fill);--rte-raised:var(--adm-card);--rte-text:var(--adm-ink);--rte-muted:var(--adm-t3);
+  --rte-border:var(--adm-in);--rte-border-soft:var(--adm-line);--rte-accent:var(--adm-a-ink);--rte-accent-subtle:var(--adm-accent-bg);
+  --rte-hover:var(--adm-hover);--rte-focus:var(--adm-a-ink);--rte-radius:6px;--rte-shadow:0 6px 24px rgb(0 0 0/.12)}
+.rte{border:1px solid var(--rte-border);border-radius:var(--rte-radius);background:var(--rte-bg)}
+.rte:focus-within{border-color:var(--rte-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--rte-accent) 18%,transparent)}
+.rte-area:focus{border:0;box-shadow:none}
+.rte-bar{gap:4px;padding:6px;border-bottom:1px solid var(--rte-border-soft);border-radius:var(--rte-radius) var(--rte-radius) 0 0;background:var(--rte-surface)}
+.rte-group,.cms-inline-bar .rte-group{gap:2px;padding-right:4px;margin-right:0;border-right:1px solid var(--rte-border-soft)}
+.rte-group:last-child,.cms-inline-bar .rte-group:last-child{border-right:0;padding-right:0}
+.rte-bar button,.cms-inline-bar button{display:inline-flex;align-items:center;justify-content:center;gap:2px;min-width:32px;min-height:32px;height:32px;padding:0 6px;border:1px solid transparent;border-radius:calc(var(--rte-radius) - 2px);background:transparent;color:var(--rte-text);font:500 13px/1 var(--adm-font);cursor:pointer}
+.rte-bar button:hover,.cms-inline-bar button:hover{background:var(--rte-hover)}
+.rte-bar button:focus-visible,.cms-inline-bar button:focus-visible{outline:2px solid var(--rte-focus);outline-offset:1px}
+.rte-bar button[aria-pressed=true],.cms-inline-bar button[aria-pressed=true],
+.rte-bar button[aria-expanded=true],.cms-inline-bar button[aria-expanded=true]{border-color:color-mix(in srgb,var(--rte-accent) 30%,transparent);background:var(--rte-accent-subtle);color:var(--rte-accent)}
+.rte-icon{display:block;flex:none;width:18px;height:18px}
+.rte-caret{width:14px;height:14px;opacity:.7}
+.rte-ico-a{display:inline-flex;padding-bottom:0}
+.rte-ico-a .rte-icon{position:relative}
+.rte-cbar{left:3px;right:3px;bottom:1px;height:3px}
+.rte-style-l{min-width:5.5em;font-weight:500;text-align:start}
+.rte-menu{gap:0;min-width:200px;padding:4px;border:1px solid var(--rte-border-soft);border-radius:var(--rte-radius);background:var(--rte-raised);color:var(--rte-text);box-shadow:var(--rte-shadow);font:400 14px/1.3 var(--adm-font)}
+.rte-bar .rte-menu button,.cms-inline-bar .rte-menu button{display:grid;justify-content:stretch;height:auto;min-height:32px;padding:4px 8px;column-gap:8px;border:0;border-radius:calc(var(--rte-radius) - 2px);color:var(--rte-text);font:400 14px/1.3 var(--adm-font)}
+.rte-bar .rte-menu button:hover,.rte-bar .rte-menu button:focus-visible,.cms-inline-bar .rte-menu button:hover,.cms-inline-bar .rte-menu button:focus-visible{background:var(--rte-hover);box-shadow:none}
+.rte-bar .rte-menu button:focus-visible,.cms-inline-bar .rte-menu button:focus-visible{outline:2px solid var(--rte-focus);outline-offset:-2px}
+.rte-menu [aria-checked=true]{font-weight:600}
+.rte-menu [aria-checked=true]::after{color:var(--rte-accent)}
+.rte-mi__i{display:inline-flex;min-width:18px;color:var(--rte-muted)}
+.rte-mi__i .rte-icon{width:16px;height:16px}
+.rte-mi__h{color:var(--rte-muted)}
+.rte-menu__sep{margin:4px;background:var(--rte-border-soft)}

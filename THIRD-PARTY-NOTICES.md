@@ -71,7 +71,7 @@ are written next to the files by the build.
 | Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI), `resources/fonts/pdf/lato-*.ttf` (PDF) | `public/assets/fonts/OFL-Lato.txt` |
 | JetBrains Mono (`@fontsource/jetbrains-mono`), © 2020 The JetBrains Mono Project Authors | 5.3.0 | OFL-1.1 | `public/assets/fonts/jetbrains-mono-*.woff2` (admin code) | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
 | Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (website icon style) | `public/assets/icons/LICENSE.txt` |
-| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
+| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (website icon style, mapping `resources/icons/sets.json`; formatting toolbar `resources/js/_rte_icons.js`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
 | Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
 | Phosphor Icons, duotone (`@phosphor-icons/core`), © 2023 Phosphor Icons | 2.1.1 | MIT | `public/assets/icons/*.svg` (core, one sprite per topic, `icons.svg`), `sites/*.svg` (generated per website), `icons-map.json`, `catalog.json` | `public/assets/icons/LICENSE.txt` |
 

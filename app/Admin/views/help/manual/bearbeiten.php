@@ -42,7 +42,7 @@ $__sample = $vars['blocks_page'] ?? null;
         <li>In Seitentitel, Suchmaschinen-Angaben, Suchergebnissen, Bildbeschreibungen und Vorlesetexten erscheinen die Sternchen nicht – dort steht nur das Wort. Beschriftungen von Buttons, Menüpunkten und Formularfeldern werden nicht betont.</li>
       </ul>
     </li>
-    <li><b>Fließtexte direkt formatieren:</b> In längeren Texten erscheint beim Hineinklicken eine dunkle <b>Formatierungsleiste</b> über dem Text. Einfach Text markieren und Knopf drücken.</li>
+    <li><b>Fließtexte direkt formatieren:</b> In längeren Texten erscheint beim Hineinklicken eine helle <b>Formatierungsleiste</b> über dem Text (Symbole für Fett, Kursiv, Textmarker, Farbe, Link, Listen; „Weitere“ öffnet den Rest). Einfach Text markieren und Knopf drücken.</li>
     <li><b>In der Seitenleiste:</b> <b>Bearbeiten</b> oben rechts im Block öffnet alle Felder – auch Links, Bilder, Listen und Varianten. Ein Klick auf Inhalte, die sich nicht direkt im Text ändern lassen (Symbole, Bilder, Listen), öffnet nichts, sondern weist kurz auf <b>Bearbeiten</b> hin. Leere Blöcke haben dafür den Knopf <b>Inhalte eingeben</b>. Mit der Tastatur: <kbd>Tab</kbd> bis <b>Bearbeiten</b>, dann <kbd>Enter</kbd>. Die Vorschau aktualisiert sich automatisch; <kbd>Esc</kbd> schließt die Seitenleiste.</li>
     <li><b>Formatierung:</b> Die Leiste hat von links nach rechts: <b>Stil ▾</b> (Absatzart), <b>B</b> Fett, <i>I</i> Kursiv, <b>ab</b> Textmarker, <b>A ▾</b> Textfarbe, <b>Link</b>, drei Listenarten (<b>– Liste</b>, <b>1. Liste</b>, <b>✓ Liste</b>) und <b>⋯</b> für Seltenes. Ist die KI eingeschaltet, steht dort zusätzlich <b>✦ KI</b>. Gedrückte Knöpfe und Häkchen im Menü zeigen, was an der Schreibmarke gilt; erneut wählen hebt ein Format auf. Details im Abschnitt <a href="#formatieren">Text formatieren</a>.</li>
     <li><b>Listen</b> (z. B. Leistungen, Fragen, Personen) bestehen aus Einträgen: mit <b>+ … hinzufügen</b> erweitern, mit ↑ ↓ sortieren, mit ✕ entfernen.</li>
@@ -110,14 +110,14 @@ $__sample = $vars['blocks_page'] ?? null;
   </table>
 
   <h3 id="ziehen">Mit der Maus ziehen</h3>
-  <p>Einige Einstellungen lassen sich direkt auf der Seite ziehen – zeigen Sie mit der Maus auf einen Abschnitt, dann erscheinen kleine Griffe:</p>
+  <p>Einige Einstellungen lassen sich direkt auf der Seite ziehen – im Bearbeiten-Modus zeigen kleine farbige Griffe, wo das geht (beim Zeigen werden sie kräftiger):</p>
   <ul>
     <li><b>Abstand oben/unten:</b> waagrechter Griff links am oberen bzw. unteren Rand des Abschnitts. Nach unten ziehen = mehr Abstand (Kein, Klein, Normal, Groß – „Groß“ je nach Design).</li>
     <li><b>Textbreite</b> (Fließtext, je nach Design): senkrechter Griff am rechten Rand des Textes – schmal, Lesebreite, breit, volle Breite.</li>
     <li><b>Aufteilung Bild/Text</b> (Text + Bild, je nach Design): Griff am inneren Rand des Bildes.</li>
     <li><b>Spaltenbreiten</b> im Block „Layout (Spalten)“: Griff zwischen zwei Spalten (siehe unten).</li>
   </ul>
-  <p>Jede Funktion hat ihre eigene Farbe: <b>violett ↕</b> = Abstand, <b>bernstein ↔</b> = Textbreite, <b>pink ↔</b> = Aufteilung Bild/Text, <b>grün ↔</b> = Spaltenbreiten. Beim Zeigen nennt der Griff, was er ändert, und den aktuellen Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Griffe erscheinen nur dort, wo die Einstellung auch wirkt – Kopfbereiche haben z. B. eigene Abstände, dort gibt es keinen Abstand-Griff. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
+  <p>Jede Funktion hat ihre eigene Farbe: <b>violett ↕</b> = Abstand, <b>bernstein ↔</b> = Textbreite, <b>pink ↔</b> = Aufteilung Bild/Text, <b>grün ↔</b> = Spaltenbreiten. Beim Zeigen nennt der Griff, was er ändert, und den aktuellen Wert; mit der Tastatur: Griff mit Tab ansteuern, Pfeiltasten. Griffe erscheinen nur dort, wo die Einstellung auch wirkt – Kopfbereiche haben z. B. eigene Abstände, dort gibt es keinen Abstand-Griff; auf dem Telefon (Bild und Text untereinander) fehlen die Griffe für Textbreite und Aufteilung. Alles gilt erst nach <b>Speichern</b> – die gleichen Einstellungen stehen auch in der Seitenleiste.</p>
   <p><b>Leere Felder und Abstände:</b> Im Bearbeiten-Modus zeigen leere Felder ein „…“, damit man schnell hineinschreiben kann – sie nehmen dabei Platz ein. Um die echten Abstände zu sehen: Menü <b>⋯ → Leere Felder ausblenden</b> (zum Eintippen wieder einschalten; der Browser merkt sich die Wahl). Ganz ohne Bearbeitungsleisten zeigt <b>⋯ → Vorschau</b> die Seite wie für Besucher.</p>
 
   <h3 id="layout">Layout: Blöcke in Spalten</h3>

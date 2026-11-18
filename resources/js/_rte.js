@@ -19,6 +19,7 @@ import { openLinkPicker, normalizeTel } from './_links.js';
 import { layerBox } from './_shadow.js';
 import { looksLike, htmlIsPlain, toHtml, openImport, pasteTip, hideTip } from './_markdown.js';
 import { esc } from './_html.js';
+import { icon } from './_rte_icons.js';
 
 const d = document;
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
@@ -209,35 +210,35 @@ const btn = (cmd, label, title, o = {}) => `<button type="button" data-cmd="${cm
   + `${o.pressed ? ' aria-pressed="false"' : ''}${o.aria ? ` aria-keyshortcuts="${o.aria}"` : ''}${o.cls ? ` class="${o.cls}"` : ''}>${label}</button>`;
 const item = (cmd, label, o = {}) => `<button type="button" role="${o.radio ? 'menuitemradio' : 'menuitem'}" tabindex="-1" data-cmd="${cmd}"${o.radio ? ' aria-checked="false"' : ''}${o.cls ? ` class="${o.cls}"` : ''}>`
   + `${o.pre || ''}<span class="rte-mi__t">${esc(t(label))}</span>${o.hint ? `<small class="rte-mi__h">${esc(t(o.hint))}</small>` : ''}${o.post || ''}</button>`;
-const menuBtn = (name, label, title, extra = '') => `<button type="button" class="rte-mbtn rte-mbtn--${name}" data-menu="${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="" aria-label="${esc(t(title))}" title="${esc(t(title))}">${label}<span class="rte-caret" aria-hidden="true">▾</span></button>${extra}`;
+const menuBtn = (name, label, title, extra = '') => `<button type="button" class="rte-mbtn rte-mbtn--${name}" data-menu="${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="" aria-label="${esc(t(title))}" title="${esc(t(title))}">${label}${icon('chevron', 'rte-icon rte-caret')}</button>${extra}`;
 
 let uid = 0;
 function barHtml(mode) {
   const n = ++uid;
   const menu = (name, label, body) => `<div class="rte-menu rte-menu--${name}" role="menu" id="rte-m${n}-${name}" aria-label="${esc(t(label))}" hidden>${body}</div>`;
-  const lists = [['insertUnorderedList', '– ' + t('Liste'), 'Aufzählung'], ['insertOrderedList', '1. ' + t('Liste'), 'Nummerierte Liste'], ['checklist', '✓ ' + t('Liste'), 'Häkchen-Liste']];
-  const inl = `<span class="rte-group">${btn('bold', '<b>B</b>', 'Fett', { pressed: 1, keys: kbd('B'), aria: ariaKeys('B') })}${btn('italic', '<i>I</i>', 'Kursiv', { pressed: 1, keys: kbd('I'), aria: ariaKeys('I') })}`
-    + btn('mark', '<span class="rte-ico-mark" aria-hidden="true">ab</span>', 'Markieren (Textmarker)', { pressed: 1, keys: kbd('H', 1), aria: ariaKeys('H', 1) })
-    + `<span class="rte-mwrap">${menuBtn('color', '<span class="rte-ico-a" aria-hidden="true">A<span class="rte-cbar"></span></span>', 'Textfarbe')}`
+  const lists = [['insertUnorderedList', icon('bullet'), 'Aufzählung'], ['insertOrderedList', icon('ordered'), 'Nummerierte Liste'], ['checklist', icon('check'), 'Häkchen-Liste']];
+  const inl = `<span class="rte-group">${btn('bold', icon('bold'), 'Fett', { pressed: 1, keys: kbd('B'), aria: ariaKeys('B') })}${btn('italic', icon('italic'), 'Kursiv', { pressed: 1, keys: kbd('I'), aria: ariaKeys('I') })}`
+    + btn('mark', icon('mark'), 'Markieren (Textmarker)', { pressed: 1, keys: kbd('H', 1), aria: ariaKeys('H', 1) })
+    + `<span class="rte-mwrap">${menuBtn('color', `<span class="rte-ico-a" aria-hidden="true">${icon('color')}<span class="rte-cbar"></span></span>`, 'Textfarbe')}`
     + menu('color', 'Textfarbe', COLORS.map(c => item('color:' + c, colorLabel(c), { radio: 1, pre: `<span class="rte-sw" data-sw="${c}" aria-hidden="true"></span>`, post: '<small class="rte-mi__warn" hidden></small>', cls: 'rte-mi rte-mi--c-' + c })).join('')
       + '<span class="rte-menu__sep" role="separator"></span>' + item('color:none', 'Keine Farbe', { pre: '<span class="rte-sw rte-sw--none" aria-hidden="true"></span>' })
       + `<p class="rte-menu__note" data-contrast-note hidden></p>`) + '</span></span>'
-    + `<span class="rte-group">${btn('link', '<span aria-hidden="true">🔗</span><span class="rte-lbl"> ' + esc(t('Link')) + '</span>', 'Link einfügen oder bearbeiten', { pressed: 1, keys: kbd('K'), aria: ariaKeys('K') })}</span>`;
-  const more = (extra) => `<span class="rte-group"><span class="rte-mwrap">${menuBtn('more', '<span aria-hidden="true">⋯</span>', 'Weitere Formatierungen')}`
+    + `<span class="rte-group">${btn('link', icon('link'), 'Link einfügen oder bearbeiten', { pressed: 1, keys: kbd('K'), aria: ariaKeys('K') })}</span>`;
+  const more = (extra) => `<span class="rte-group"><span class="rte-mwrap">${menuBtn('more', icon('more'), 'Weitere Formatierungen')}`
     + menu('more', 'Weitere Formatierungen', extra
-      + item('superscript', 'Hochgestellt', { radio: 1, pre: '<span class="rte-mi__i" aria-hidden="true">x²</span>' })
-      + item('subscript', 'Tiefgestellt', { radio: 1, pre: '<span class="rte-mi__i" aria-hidden="true">x₂</span>' })
-      + item('unlink', 'Link entfernen', { pre: '<span class="rte-mi__i" aria-hidden="true">⌫</span>' })
-      + item('paragraph', 'Formatierung entfernen', { pre: '<span class="rte-mi__i" aria-hidden="true">¶</span>', hint: mode === 'inline' ? '' : 'Normaler Text ohne Überschrift, Liste, Farbe' })
+      + item('superscript', 'Hochgestellt', { radio: 1, pre: `<span class="rte-mi__i">${icon('superscript')}</span>` })
+      + item('subscript', 'Tiefgestellt', { radio: 1, pre: `<span class="rte-mi__i">${icon('subscript')}</span>` })
+      + item('unlink', 'Link entfernen', { pre: `<span class="rte-mi__i">${icon('unlink')}</span>` })
+      + item('paragraph', 'Formatierung entfernen', { pre: `<span class="rte-mi__i">${icon('clear')}</span>`, hint: mode === 'inline' ? '' : 'Normaler Text ohne Überschrift, Liste, Farbe' })
       + '<span class="rte-menu__sep" role="separator"></span>'
-      + item('markdown', 'Markdown einfügen …', { pre: '<span class="rte-mi__i" aria-hidden="true">M↓</span>', hint: 'Text mit # Überschriften, - Listen, **fett** umwandeln' }))
+      + item('markdown', 'Markdown einfügen …', { pre: `<span class="rte-mi__i">${icon('markdown')}</span>`, hint: 'Text mit # Überschriften, - Listen, **fett** umwandeln' }))
     + '</span></span>';
   if (mode === 'inline') return inl + more('') + aiBarHtml();
   const style = `<span class="rte-group"><span class="rte-mwrap">${menuBtn('style', `<span class="rte-style-l">${esc(t('Normal'))}</span>`, 'Absatzstil')}`
     + menu('style', 'Absatzstil', STYLES.map(([v, label, , hint]) => item('style:' + v, label, { radio: 1, hint, cls: 'rte-mi rte-mi--' + v })).join('')) + '</span></span>';
-  const listGroup = `<span class="rte-group rte-wide">${lists.map(([c, l, ti]) => btn(c, esc(l), ti, { pressed: 1 })).join('')}</span>`;
-  const listItems = `<span class="rte-narrow">${lists.map(([c, , ti]) => item(c, ti, { radio: 1, pre: `<span class="rte-mi__i" aria-hidden="true">${c === 'checklist' ? '✓' : c === 'insertOrderedList' ? '1.' : '–'}</span>` })).join('')}</span>`
-    + item('indent', 'Einrücken (Tab)', { pre: '<span class="rte-mi__i" aria-hidden="true">⇥</span>' }) + item('outdent', 'Ausrücken (Umschalt+Tab)', { pre: '<span class="rte-mi__i" aria-hidden="true">⇤</span>' })
+  const listGroup = `<span class="rte-group rte-wide">${lists.map(([c, l, ti]) => btn(c, l, ti, { pressed: 1 })).join('')}</span>`;
+  const listItems = `<span class="rte-narrow">${lists.map(([c, , ti]) => item(c, ti, { radio: 1, pre: `<span class="rte-mi__i">${icon(c === 'checklist' ? 'check' : c === 'insertOrderedList' ? 'ordered' : 'bullet')}</span>` })).join('')}</span>`
+    + item('indent', 'Einrücken (Tab)', { pre: `<span class="rte-mi__i">${icon('indent')}</span>` }) + item('outdent', 'Ausrücken (Umschalt+Tab)', { pre: `<span class="rte-mi__i">${icon('outdent')}</span>` })
     + '<span class="rte-menu__sep" role="separator"></span>';
   return style + inl + listGroup + more(listItems) + aiBarHtml();
 }

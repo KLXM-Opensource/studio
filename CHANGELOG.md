@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Formatierungsleiste und Griffe wie in den REDAXO-Editoren fluid/tiptap
+- Formatierungsleiste (Formularfelder und schwebend auf der Website): Lucide-Symbole statt Zeichen („B“, „ab“, 🔗, ⋯, „– Liste“), 32-px-Knöpfe mit Trennstrichen, aktive Knöpfe hell in der Akzentfarbe statt schwarz, Menüs mit Symbolen. Die schwebende Leiste ist jetzt hell (wie die Bubble von tiptap). Werte als Tokens `--rte-*` aus den Verwaltungs-Tokens – hell, dunkel und persönliche Akzentfarbe passen von selbst. Nur Darstellung: Befehle, Klassen und Tastatur bleiben.
+- Griffe für Abstand, Textbreite, Aufteilung und Spalten sind im Bearbeiten-Modus immer sichtbar (vorher erst beim Zeigen auf den Abschnitt); Führungslinie endet im Fenster; auf dem Telefon keine Griffe für Textbreite/Aufteilung.
+
 ### Lesbare Dateinamen für Dateien und Bilder
 - Dateien und Bilder behalten beim Hochladen ihren Namen in der Adresse (`/media/2026/10/sommerfest-2026.pdf` statt `1075e42d1b045051.pdf`), bei gleichem Namen mit Zähler (`-2`). Bildgrößen heißen `{name}-{6 Hex}-{breite}.webp` (weiter unveränderlich zwischenspeicherbar). Gut für Suchmaschinen und die Bildersuche. Dateien in geschützten Pools (Formular-Uploads, Mitgliederbereich) behalten Zufallsnamen.
 - Mediathek: Feld „Dateiname in der Adresse“ im Bearbeitungsfenster, bei Bildern samt aller Größen und Zuschnitte. Alte Adressen leiten per 301 weiter (Spalte `media.file_history`, unabhängig von der Funktion „Weiterleitungen“). Beim Ersetzen bleibt der Name gleich. „Datei“ zeigt den echten Dateinamen, „Hochgeladen als“ den Originalnamen.

@@ -14,8 +14,6 @@ html.adm-ui[data-theme=dark]{--kia:#B7AAFF;--kia-bg:#2A2542;--kia-line:#463E70;-
 /* Knopf in der Formatierungsleiste */
 .rte-bar .kia-rtebtn,.kia-rtebtn{display:inline-flex;align-items:center;gap:4px;color:var(--kia)}
 .rte-bar .kia-rtebtn:hover{background:var(--kia-bg)}
-.cms-inline-bar .kia-rtebtn{color:#D9D2FF}
-.cms-inline-bar .kia-rtebtn .kia-spark{color:#D9D2FF}
 
 /* Knopf an Textfeldern */
 .kia-hasbtn{position:relative}
