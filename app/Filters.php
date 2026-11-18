@@ -25,6 +25,9 @@ final class Filters
         'seo.meta' => ['array{title, description, canonical, og_image, noindex, jsonld}', 'page | entry + table', 'Angaben für den Kopf der Seite (Seo::forPage/forEntry) ändern.'],
         'form.validate' => ['array<string, string> $errors (Feld → Meldung, \'_form\' = allgemein)', 'table, values, ip', 'Eigene Prüfung von Formularen der Website vor dem Speichern – Fehler ergänzen bricht das Absenden ab.'],
         'mail.message' => ['array{subject, text, to, options}', 'account: false', 'Ausgehende E-Mail ändern (z. B. Fußzeile) oder mit false unterdrücken. Mails zur Kontosicherheit (Passwort, Einladung) laufen nie durch den Filter; Test-Umleitung gilt danach weiter.'],
+        'admin.nav' => ['array{main: list<array{0: href, 1: label, 2: key, 3?: bool}>, groups: list<array{key, label, icon, items}>}', 'user, view', 'Seitenleiste der Verwaltung ändern – Punkte ausblenden, umsortieren, ergänzen (z. B. vereinfachte Verwaltung). Nur Darstellung: Rechte prüft weiter jede Seite.'],
+        'admin.home' => ['?string Adresse (null = Übersicht /admin)', 'user', 'Startseite der Verwaltung nach der Anmeldung bzw. bei /admin (z. B. vereinfachte Startseite); /admin?uebersicht=1 zeigt immer die Übersicht.'],
+        'admin.brand' => ['array{0: string, 1: string} Zeile 1 und 2', 'site', 'Marke oben in der Seitenleiste der Verwaltung (Standard: project.brand bzw. Website-Name), z. B. „ÖJV CMS“ für einen Verbund.'],
         'data_list.query' => ['array $options für Entries::query (where, order, limit, q …)', 'table, block (Daten des Blocks)', 'Abfrage des Blocks „Datenliste“ ändern (z. B. zusätzliche Bedingung).'],
     ];
 

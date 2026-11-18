@@ -32,6 +32,14 @@ $nav = array_values(array_filter([
 // Abschnitt „Administration“: nur aufklappbare Gruppen „Einstellungen“ und „Werkzeuge“ (Core\AdminPages::groups) – leere entfallen,
 // eine Gruppe mit nur einem Punkt erscheint als einfacher Link (z. B. Redaktion, die nur das Glossar einstellen darf)
 $adminGroups = $user ? \Core\AdminPages::groups() : [];
+// Erweiterungen (Filter admin.nav): Seitenleiste vereinfachen/umsortieren – nur Darstellung, Rechte prüft jede Seite selbst
+if ($user && \Core\Extensions::filters('admin.nav')) {
+    $nf = \Core\Extensions::filter('admin.nav', ['main' => $nav, 'groups' => $adminGroups], ['user' => $user, 'view' => $view]);
+    if (is_array($nf)) {
+        $nav = array_values(array_filter((array) ($nf['main'] ?? $nav), fn($n) => is_array($n) && isset($n[0], $n[1], $n[2]) && ($n[3] ?? true)));
+        $adminGroups = array_values((array) ($nf['groups'] ?? $adminGroups));
+    }
+}
 $adminNav = array_merge([], ...array_column($adminGroups, 'items'));
 $section = explode('/', $view)[0];
 // Seite einer Sammelseite (Einstellungen/Statistiken, Core\AdminPages)? Dann ist deren Menüpunkt der aktuelle

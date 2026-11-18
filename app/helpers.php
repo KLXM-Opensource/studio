@@ -679,7 +679,10 @@ function admin_brand(): array
     $b = (array) project('brand', []);
     $one = isset($b[0]) ? trim((string) setting($b[0])) : '';
     $two = isset($b[1]) ? trim((string) setting($b[1])) : '';
-    return [$one !== '' ? $one : site_name(), $two];
+    $brand = [$one !== '' ? $one : site_name(), $two];
+    // Erweiterungen (Filter admin.brand): z. B. Marke eines Verbunds
+    $f = class_exists(\Core\Extensions::class) ? \Core\Extensions::filter('admin.brand', $brand, ['site' => site()->key]) : $brand;
+    return is_array($f) && isset($f[0]) ? [(string) $f[0], (string) ($f[1] ?? '')] : $brand;
 }
 
 /**

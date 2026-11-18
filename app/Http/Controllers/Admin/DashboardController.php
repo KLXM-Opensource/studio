@@ -22,6 +22,10 @@ final class DashboardController extends AdminController
         $user = $this->auth($r);
         // Erststart noch offen: zuerst Kit und Startinhalte wählen (Core\Onboarding)
         if (\Core\Onboarding::pending()) return Response::redirect(url('/admin/willkommen'));
+        // Eigene Startseite (Filter admin.home, z. B. vereinfachte Verwaltung) – ?uebersicht=1 zeigt immer die Übersicht
+        if ($r->str('uebersicht') !== '1' && is_string($home = \Core\Extensions::filter('admin.home', null, ['user' => $user])) && str_starts_with($home, '/admin/')) {
+            return Response::redirect(url($home));
+        }
         $cards = Dashboard::cards($user);
         $checks = Metrics::setupChecks();
         $ext = Dashboard::extensions($user);
