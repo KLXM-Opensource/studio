@@ -57,7 +57,7 @@
     <li><b>Doppelklick</b> (oder <b>Alle Details, Fokus &amp; Zuschnitt …</b>) öffnet das große Bearbeitungsfenster mit Fokuspunkt, Zuschnitten, Sammlungen und Fotonachweis. Hier speichern Sie mit <b>Speichern</b>.</li>
     <li><b>Fokuspunkt:</b> Ins Bild klicken, z. B. auf das Gesicht. Wird das Bild in einem anderen Format angezeigt, bleibt dieser Bereich sichtbar.</li>
     <li><b>Zuschneiden:</b> Unter „Zuschnitte je Format“ ein Format anklicken, dann mit Mausrad/Trackpad zoomen und das Bild verschieben. Jedes Format (16:9, 4:3, 1:1 …) kann einen eigenen Ausschnitt haben. <b>Automatisch (Fokuspunkt)</b> entfernt den eigenen Ausschnitt wieder.</li>
-    <li><b>Direkt auf der Seite:</b> Im Bearbeitungsmodus erscheint beim Überfahren eines Bildes oben rechts ein runder Knopf mit Bild-Symbol; sein Menü enthält <b>Zuschneiden</b> – das Format der Stelle ist schon gewählt, das Ergebnis sehen Sie sofort.</li>
+    <li><b>Direkt auf der Seite:</b> Im Bearbeitungsmodus erscheint beim Überfahren eines Bildes oben links ein runder Knopf mit Bild-Symbol; sein Menü enthält <b>Zuschneiden</b> – das Format der Stelle ist schon gewählt, das Ergebnis sehen Sie sofort.</li>
   </ul>
 
   <h3 id="bild-bearbeiten">Bild bearbeiten: Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren</h3>
