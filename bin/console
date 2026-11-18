@@ -23,6 +23,13 @@
  *   adminpath:selftest                                Selbsttest der eigenen Verwaltungsadresse (Abbildung, Prüfung, Links)
  *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
  *
+ * Grundeinstellungen (sys.*, je Website; Geheimnisse werden nie ausgegeben)
+ *   settings:list [<präfix>]                          Einstellungen mit aktuellem Wert (z. B. settings:list sys.mail)
+ *   settings:get <schlüssel>                          Einen Wert anzeigen (JSON)
+ *   settings:set <schlüssel> <wert> [--force]         Wert setzen – Typ aus den Grundeinstellungen (Ja/Nein: true/false/an/aus,
+ *                                                     Mehrfachauswahl: a,b,c, JSON mit [ oder {); unbekannte Schlüssel nur mit
+ *                                                     --force; leert danach den Seiten-Cache (z. B. settings:set sys.noindex false)
+ *
  * Websites & Netzwerk
  *   site:list                                         Websites dieser Installation
  *   site:create <key> <domain,…> [kit] [--content=ask|full|empty]
@@ -418,6 +425,58 @@ switch ($cmd) {
         if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('cache:clear', [], false));
         Core\PageCache::clear();
         echo "Seiten-Cache geleert (" . site()->key . ").\n";
+        break;
+
+    case 'settings:list':
+    case 'settings:get':
+    case 'settings:set':
+        // Grundeinstellungen von der Kommandozeile (Core\Settings, Felder aus Core\SystemSchema) – Geheimnisse nie im Klartext
+        $fields = [];
+        foreach (Core\SystemSchema::fields() as $f) if (!empty($f['name'])) $fields[$f['name']] = $f;
+        $isSecret = fn(string $k) => in_array($k, Core\Settings::SECRETS, true) || (($fields[$k]['type'] ?? '') === 'secret');
+        $none = new stdClass();
+        $show = function (string $k) use ($app, $isSecret, $none): string {
+            $v = $app->settings->get($k, $none);
+            if ($v === $none) return '(nicht gesetzt)';
+            if ($isSecret($k)) return $v === '' || $v === null ? '(leer)' : '(gesetzt – wird nicht angezeigt)';
+            return json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        };
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        if ($cmd === 'settings:list') {
+            $pre = (string) ($pos[0] ?? '');
+            foreach ($fields as $k => $f) {
+                if ($pre !== '' && !str_starts_with($k, $pre)) continue;
+                printf("%-34s %s  · %s\n", $k, $show($k), strip_tags((string) ($f['label'] ?? '')));
+            }
+            break;
+        }
+        $key = (string) ($pos[0] ?? '');
+        if ($key === '') { fwrite(STDERR, "Aufruf: $cmd <schlüssel>" . ($cmd === 'settings:set' ? ' <wert> [--force]' : '') . " [--site=key]\n"); exit(1); }
+        if ($cmd === 'settings:get') { echo $show($key), "\n"; break; }
+        if (!array_key_exists(1, $pos)) { fwrite(STDERR, "Aufruf: settings:set <schlüssel> <wert> [--force] [--site=key]\n"); exit(1); }
+        $f = $fields[$key] ?? null;
+        if (!$f && !Core\Cli::flag($args, 'force')) { fwrite(STDERR, "Unbekannter Schlüssel $key (nicht in den Grundeinstellungen) – Tippfehler? Bewusst setzen mit --force.\n"); exit(1); }
+        $raw = (string) $pos[1];
+        $type = (string) ($f['type'] ?? '');
+        if ($type === 'bool') {
+            $b = filter_var(strtr(strtolower($raw), ['ja' => 'true', 'an' => 'true', 'nein' => 'false', 'aus' => 'false']), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+            if ($b === null) { fwrite(STDERR, "$key erwartet Ja/Nein (true/false, an/aus, 1/0).\n"); exit(1); }
+            $val = $b;
+        } elseif ($type === 'number' || $type === 'int') {
+            if (!is_numeric($raw)) { fwrite(STDERR, "$key erwartet eine Zahl.\n"); exit(1); }
+            $val = $raw + 0;
+        } elseif ($type === 'multiselect') {
+            $val = $raw === '' ? [] : array_values(array_filter(array_map('trim', explode(',', $raw)), fn($x) => $x !== ''));
+        } elseif ($raw !== '' && ($raw[0] === '[' || $raw[0] === '{')) {
+            $val = json_decode($raw, true);
+            if ($val === null) { fwrite(STDERR, "Ungültiges JSON für $key.\n"); exit(1); }
+        } else {
+            $val = $raw;
+        }
+        $before = $show($key);
+        $app->settings->set($key, $val);
+        Core\PageCache::clear();
+        echo "$key (" . site()->key . "): $before → " . $show($key) . " · Seiten-Cache geleert.\n";
         break;
 
     case 'site:list':
