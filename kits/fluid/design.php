@@ -167,7 +167,7 @@ return [
                 'options' => ['normal' => 'Normal', 'large' => 'Groß', 'xl' => 'Sehr groß'],
                 'help' => 'Gilt für alle Kopfbereiche. In der „Seitenleiste mit Menübaum“ steht das Logo groß oben – auch quadratische oder hohe Logos passen.'],
             ['name' => 'logo_over', 'label' => 'Logo ragt unten aus dem Kopfbereich', 'type' => 'bool', 'class' => 'logo-over', 'default' => false,
-                'help' => 'Für quadratische Logos, Siegel und Wappen: Das Logo hängt über die Leiste hinaus und überdeckt den Anfang der Seite. Die Leiste bleibt schmal; beim Scrollen und auf schmalen Bildschirmen passt sich das Logo wieder in die Leiste ein. Nicht bei den Seitenleisten.'],
+                'help' => 'Für quadratische Logos, Siegel und Wappen: Das Logo hängt über die Leiste hinaus und überdeckt den Anfang der Seite. Nicht bei „Zentriert“ (dort steht das Logo über dem Menü). Die Leiste bleibt schmal; beim Scrollen und auf schmalen Bildschirmen passt sich das Logo wieder in die Leiste ein. Nicht bei den Seitenleisten.'],
             ['name' => 'nav_size', 'label' => 'Größe der Menüpunkte', 'type' => 'choice', 'class' => 'nz-{value}', 'default' => 'normal',
                 'options' => ['normal' => 'Normal', 'compact' => 'Kompakt – kleinere Schrift, engere Abstände'],
                 'help' => 'Für viele Menüpunkte: Mit „Kompakt“ passt das Menü öfter in die Leiste, statt hinter der Schaltfläche „Menü“ zu verschwinden.'],
