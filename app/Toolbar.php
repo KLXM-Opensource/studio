@@ -146,19 +146,21 @@ final class Toolbar
         // Zeitplan (Core\Schedule): „Online ab …“ / „Offline ab …“ im Status-Hinweis
         $b['plan'] = $kind === 'entry' ? Schedule::label((array) ($e ?? [])) : ($hasPage ? Schedule::label((array) $page) : '');
 
-        // Umschalter: [key, Beschriftung, Symbol, Adresse|null (= ohne Neuladen), aktiv]
+        // Umschalter: [key, Beschriftung, Symbol, Adresse|null (= ohne Neuladen), aktiv, Erklärung (Tooltip + aria-description)]
+        // Detailseiten: „Felder“ (dieser Eintrag) · „Inhalt“ (seine Inhaltsblöcke) · „Vorlage“ (alle Detailseiten der Tabelle, abgesetzt)
         $modes = [];
         if ($kind === 'page') {
             if ($hasPage) {
-                $modes[] = ['view', __('Ansehen'), 'eye', $pageUrl . $qs(false), !$editing];
-                if ($b['canEditPages']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $pageUrl . $qs(true), $editing];
+                $modes[] = ['view', __('Ansehen'), 'eye', $pageUrl . $qs(false), !$editing, __('Seite so ansehen, wie Besucher sie sehen')];
+                if ($b['canEditPages']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $pageUrl . $qs(true), $editing, __('Texte, Bilder und Blöcke dieser Seite bearbeiten')];
             }
         } else {
-            $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry'];
-            if ($b['entryEditable']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten', false];
+            $tbl = (string) ($b['table']['name'] ?? '');
+            $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry', __('Detailseite so ansehen, wie Besucher sie sehen')];
+            if ($b['entryEditable']) $modes[] = ['edit', __('Felder'), 'pencil-simple', $kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten', false, __('Felder dieses Eintrags ändern – Titel, Text, Bilder, Datum …')];
             // Inhalt: Inhaltsblöcke des Eintrags direkt auf der Seite (nur mit Feld „Inhaltsblöcke“ und Recht am Eintrag)
-            if (!$live && $b['entryEditable'] && \Core\Data\EntryBlocks::fieldsOf($t)) $modes[] = ['content', __('Inhalt'), 'article', $viewUrl . '?edit=inhalt', $kind === 'content'];
-            if ($b['canEditPages'] && !$live) $modes[] = ['template', __('Vorlage'), 'squares-four', $viewUrl . '?edit=1', $kind === 'template'];
+            if (!$live && $b['entryEditable'] && \Core\Data\EntryBlocks::fieldsOf($t)) $modes[] = ['content', __('Inhalt'), 'article', $viewUrl . '?edit=inhalt', $kind === 'content', __('Inhaltsblöcke nur dieses Eintrags gestalten (freier Bereich mit Text, Bildern …)')];
+            if ($b['canEditPages'] && !$live) $modes[] = ['template', __('Vorlage'), 'squares-four', $viewUrl . '?edit=1', $kind === 'template', $tbl !== '' ? __('Aussehen aller Detailseiten von „{table}“ gestalten – gilt für jeden Eintrag', ['table' => $tbl]) : __('Aussehen aller Detailseiten dieser Tabelle gestalten – gilt für jeden Eintrag')];
         }
         $b['modes'] = count($modes) > 1 ? $modes : [];
 

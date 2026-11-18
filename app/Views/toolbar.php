@@ -92,9 +92,9 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
 
   <?php if ($b['modes']): ?>
   <div class="cms-seg" role="group" aria-label="<?= e(__('Modus')) ?>">
-    <?php foreach ($b['modes'] as [$key, $label, $ico, $href, $on]): ?>
-      <?php if ($href !== null): ?><a class="cms-seg__i" href="<?= e($href) ?>" title="<?= e($label) ?>" data-bar-mode="<?= e($key) ?>"<?= $on ? ' aria-current="true"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span></a>
-      <?php else: ?><button type="button" class="cms-seg__i" title="<?= e($label) ?>" data-bar-mode="<?= e($key) ?>"<?= $on ? ' aria-current="true"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span></button><?php endif; ?>
+    <?php foreach ($b['modes'] as [$key, $label, $ico, $href, $on, $hint]): $tip = $label . ': ' . $hint; ?>
+      <?php if ($href !== null): ?><a class="cms-seg__i" href="<?= e($href) ?>" title="<?= e($tip) ?>" aria-description="<?= e($hint) ?>" data-bar-mode="<?= e($key) ?>"<?= $on ? ' aria-current="true"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span></a>
+      <?php else: ?><button type="button" class="cms-seg__i" title="<?= e($tip) ?>" aria-description="<?= e($hint) ?>" data-bar-mode="<?= e($key) ?>"<?= $on ? ' aria-current="true"' : '' ?>><?= icon($ico) ?><span><?= e($label) ?></span></button><?php endif; ?>
     <?php endforeach; ?>
   </div>
   <?php endif; ?>
@@ -173,9 +173,9 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php if ($b['modes']): ?>
         <span class="cms-menu__grp cms-menu--narrow" role="group" aria-label="<?= e(__('Modus')) ?>">
           <span class="cms-menu__head" aria-hidden="true"><?= e(__('Modus')) ?></span>
-          <?php foreach ($b['modes'] as [$key, $label, $ico, $href, $on]): ?>
-            <?php if ($href !== null): ?><a role="menuitemradio" class="cms-menu__item" tabindex="-1" href="<?= e($href) ?>" data-bar-mode="<?= e($key) ?>" aria-checked="<?= $on ? 'true' : 'false' ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ico) ?></span><span class="cms-menu__label"><?= e($label) ?></span></a>
-            <?php else: ?><button type="button" role="menuitemradio" class="cms-menu__item" tabindex="-1" data-bar-mode="<?= e($key) ?>" aria-checked="<?= $on ? 'true' : 'false' ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ico) ?></span><span class="cms-menu__label"><?= e($label) ?></span></button><?php endif; ?>
+          <?php foreach ($b['modes'] as [$key, $label, $ico, $href, $on, $hint]): ?>
+            <?php if ($href !== null): ?><a role="menuitemradio" class="cms-menu__item" tabindex="-1" href="<?= e($href) ?>" data-bar-mode="<?= e($key) ?>" aria-checked="<?= $on ? 'true' : 'false' ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ico) ?></span><span class="cms-menu__label"><?= e($label) ?><small><?= e($hint) ?></small></span></a>
+            <?php else: ?><button type="button" role="menuitemradio" class="cms-menu__item" tabindex="-1" data-bar-mode="<?= e($key) ?>" aria-checked="<?= $on ? 'true' : 'false' ?>"><span class="cms-menu__ico" aria-hidden="true"><?= icon($ico) ?></span><span class="cms-menu__label"><?= e($label) ?><small><?= e($hint) ?></small></span></button><?php endif; ?>
           <?php endforeach; ?>
         </span>
         <span class="cms-menu__sep cms-menu--narrow" role="separator"></span>

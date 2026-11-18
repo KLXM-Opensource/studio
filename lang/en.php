@@ -7975,4 +7975,11 @@ return [
     'z. B. Nextcloud Büro' => 'e.g. Office Nextcloud',
     'Ältere Sicherungen löscht die Sicherung am Ziel selbst – andere Dateien im Ordner nie.' => 'Older backups are deleted at the target by the backup itself – never other files in the folder.',
     'oder mit E-Mail und Passwort' => 'or with email and password',
+    'Seite so ansehen, wie Besucher sie sehen' => 'View the page as visitors see it',
+    'Texte, Bilder und Blöcke dieser Seite bearbeiten' => 'Edit texts, images and blocks of this page',
+    'Detailseite so ansehen, wie Besucher sie sehen' => 'View the detail page as visitors see it',
+    'Felder dieses Eintrags ändern – Titel, Text, Bilder, Datum …' => 'Change the fields of this entry – title, text, images, date …',
+    'Inhaltsblöcke nur dieses Eintrags gestalten (freier Bereich mit Text, Bildern …)' => 'Design the content blocks of this entry only (free area with text, images …)',
+    'Aussehen aller Detailseiten von „{table}“ gestalten – gilt für jeden Eintrag' => 'Design all detail pages of “{table}” – applies to every entry',
+    'Aussehen aller Detailseiten dieser Tabelle gestalten – gilt für jeden Eintrag' => 'Design all detail pages of this table – applies to every entry',
 ];

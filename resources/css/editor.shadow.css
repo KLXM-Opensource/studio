@@ -128,6 +128,9 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-seg__i .ico{width:16px;height:16px}
 .cms-seg__i:hover{color:var(--b-ink);background:var(--b-fill)}
 .cms-seg__i[aria-current]{background:var(--b-pri);color:var(--b-pri-ink);cursor:default}
+/* „Vorlage“ wirkt auf alle Detailseiten der Tabelle – abgesetzt von Ansehen/Felder/Inhalt (nur dieser Eintrag) */
+.cms-seg__i[data-bar-mode=template]{position:relative;margin-left:9px}
+.cms-seg__i[data-bar-mode=template]::before{content:"";position:absolute;left:-6px;top:7px;bottom:7px;width:1px;background:var(--b-line);pointer-events:none}
 
 /* Aktionen */
 .cms-bar__act{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
