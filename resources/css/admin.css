@@ -3808,22 +3808,20 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rte-mi__h{color:var(--rte-muted)}
 .rte-menu__sep{margin:4px;background:var(--rte-border-soft)}
 
-/* Seitenleiste oben: eine Zeile – Suchen und Assistent als große Symbole, „Website ansehen“ mit Text (Konto/Abmelden stehen unten) */
-.adm-brand-tools .adm-site-open{width:40px;height:40px;border-radius:9px;background:var(--adm-surface);color:var(--adm-ink)}
-.adm-brand-tools .adm-site-open:hover{background:var(--adm-press);color:var(--adm-ink)}
-.adm-brand-tools .adm-site-open svg{width:22px;height:22px}
-.adm-brand-tools .adm-site-open--site{flex:1 1 auto;width:auto;min-width:0;padding:0 12px 0 10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;overflow:hidden;background:var(--adm-surface);color:var(--adm-ink);font:700 13.5px/1 var(--adm-font);white-space:nowrap}
-.adm-brand-tools .adm-site-open--site svg{width:18px;height:18px}
-.adm-brand-tools .adm-site-open:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
-
 /* Breitere Seitenleiste auf großen Bildschirmen (lange Menüs, Beschriftungen) – darunter bleibt es bei 232px bzw. dem Handy-Layout */
-.adm-site-open__more{display:none}
-@media (min-width:1400px){body.adm{grid-template-columns:264px minmax(0,1fr)}.adm-site-open__more{display:inline}}
-/* Schmale Seitenleiste (232px, 901–1399px): „Website“ nur als Symbol wie Suche und Assistent; Handy-Seitenleiste (320px) mit Text */
-@media (min-width:901px) and (max-width:1399px){.adm-brand-tools .adm-site-open--site{flex:none;width:40px;padding:0}.adm-brand-tools .adm-site-open--site>span{display:none}.adm-brand-tools .adm-site-open--site svg{width:22px;height:22px}}
-@media (max-width:900px){.adm-site-open__more{display:inline}}
+@media (min-width:1400px){body.adm{grid-template-columns:264px minmax(0,1fr)}}
 @media (min-width:1800px){body.adm{grid-template-columns:288px minmax(0,1fr)}}
-/* Volle Zeile (Suche, Assistent, Favoriten-Stern): „Website ansehen“ nur als Symbol, damit alles in die Seitenleiste passt */
-.adm-brand-tools:has(.adm-drill-peek:not([hidden])) .adm-site-open--site{flex:none;width:40px;padding:0}
-.adm-brand-tools:has(.adm-drill-peek:not([hidden])) .adm-site-open--site>span{display:none}
-.adm-brand-tools{flex-wrap:nowrap;min-width:0}
+
+/* Seitenleiste: Suchzeile unter der Marke (wie eine Zeile der Liste) und „Website ansehen“ als Menüpunkt */
+.adm-find{display:flex;align-items:center;gap:4px}
+.adm-find__search{flex:1;display:flex;align-items:center;gap:9px;min-width:0;height:34px;margin:0;padding:0 8px 0 10px;border:0;border-radius:8px;background:var(--adm-hover);color:var(--adm-t2);font:500 13.5px/1 var(--adm-font);text-align:left;cursor:text}
+.adm-find__search:hover{background:var(--adm-press);color:var(--adm-ink)}
+.adm-find__search span{flex:1}
+.adm-find__search svg,.adm-find__ai svg{width:18px;height:18px;flex:none}
+.adm-find__search kbd{border:0;background:var(--adm-press);color:var(--adm-t3);font:600 11px var(--adm-font)}
+.adm-find__ai{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:var(--adm-t2)}
+.adm-find__ai:hover{background:var(--adm-hover);color:var(--adm-ink)}
+.adm-find__search:focus-visible,.adm-find__ai:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
+@media (pointer:coarse){.adm-find__search kbd{display:none}.adm-find__search,.adm-find__ai{height:42px}.adm-find__ai{width:42px}}
+.adm-nav-site a{display:flex}
+.adm-nav-site__ext{width:14px;height:14px;margin-left:auto;color:var(--adm-t3)}

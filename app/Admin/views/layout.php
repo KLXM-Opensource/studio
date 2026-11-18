@@ -145,15 +145,16 @@ if ($user && ($req = app()->request)) {
   <a class="adm-brand" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></a>
   <?php endif; ?>
     <div class="adm-brand-tools">
-      <?php // Eine Zeile: Suchen (Symbol), Assistent (Symbol), Website ansehen (Symbol + Text) – Konto und Abmelden stehen unten ?>
-      <button type="button" class="adm-site-open adm-site-open--search" data-spotlight aria-keyshortcuts="Meta+K Control+K" title="<?= e(__('Suchen')) ?> (⌘K)" aria-label="<?= e(__('Suchen')) ?>"><?= icon('magnifying-glass') ?></button>
-      <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
-      <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
-      <?php endif; ?>
-      <a class="adm-site-open adm-site-open--site" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>" title="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?><span><?= e(__('Website')) ?><span class="adm-site-open__more"> <?= e(__('ansehen')) ?></span></span></a>
       <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
       <button type="button" class="adm-site-open adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
     </div>
+  </div>
+  <?php // Suchen als Zeile im Stil der Seitenleiste (Lupe, Text, ⌘K) – daneben der Assistent, wenn KI aktiv ist ?>
+  <div class="adm-find">
+    <button type="button" class="adm-find__search" data-spotlight aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?><span><?= e(__('Suchen')) ?></span><kbd aria-hidden="true">⌘K</kbd></button>
+    <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
+    <a class="adm-find__ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
+    <?php endif; ?>
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
@@ -210,6 +211,8 @@ if ($user && ($req = app()->request)) {
       <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $isCur($key) ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts'): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>" data-drafts-badge<?= $draftsN ? '' : ' hidden' ?>><span data-n><?= $draftsN ?></span><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
       </li>
       <?php endforeach; ?>
+      <?php // Website ansehen: Menüpunkt wie die anderen, öffnet einen neuen Tab (Pfeil rechts) ?>
+      <li class="adm-nav-site"><a href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('globe', ['class' => 'adm-nav__ico']) ?><span><?= e(__('Website ansehen')) ?></span><?= icon('arrow-square-out', ['class' => 'adm-nav-site__ext']) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a></li>
     </ul>
     <?php if ($adminGroups): // Administration: aufklappbare Gruppen – Zustand je Browser (resources/js/_navgroups.js), offen auf ihren Seiten ?>
     <p class="adm-side__label" id="adm-admin-h"><?= e(__('Einrichtung')) ?></p>
