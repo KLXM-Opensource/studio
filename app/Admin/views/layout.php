@@ -150,7 +150,7 @@ if ($user && ($req = app()->request)) {
       <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
       <a class="adm-site-open adm-site-open--ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
       <?php endif; ?>
-      <a class="adm-site-open adm-site-open--site" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" title="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?><span><?= e(__('Website')) ?><span class="adm-site-open__more"> <?= e(__('ansehen')) ?></span></span></a>
+      <a class="adm-site-open adm-site-open--site" href="<?= e(url('/')) ?>" target="_blank" rel="noopener" aria-label="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>" title="<?= e(__('Website ansehen')) ?> <?= e(__('(öffnet in neuem Tab)')) ?>"><?= icon('arrow-square-out') ?><span><?= e(__('Website')) ?><span class="adm-site-open__more"> <?= e(__('ansehen')) ?></span></span></a>
       <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
       <button type="button" class="adm-site-open adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
     </div>
