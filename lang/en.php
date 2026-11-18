@@ -7983,4 +7983,6 @@ return [
     'Aussehen aller Detailseiten von „{table}“ gestalten – gilt für jeden Eintrag' => 'Design all detail pages of “{table}” – applies to every entry',
     'Aussehen aller Detailseiten dieser Tabelle gestalten – gilt für jeden Eintrag' => 'Design all detail pages of this table – applies to every entry',
     'Inhaltsblöcke des Eintrags – nur Vorschau ({n} Blöcke). Ändern lassen sie sich je Eintrag im Modus „Inhalt“.' => 'Content blocks of the entry – preview only ({n} blocks). Change them per entry in “Content” mode.',
+    'Diesen Eintrag bearbeiten – Titel, Felder und Inhalt direkt auf der Seite' => 'Edit this entry – title, fields and content right on the page',
+    '{field} – Blöcke dieses Eintrags' => '{field} – blocks of this entry',
 ];

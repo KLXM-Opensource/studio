@@ -1874,6 +1874,11 @@ holder()?.addEventListener('drop', e => {
 const toolsCfg = { section: SectionTune };
 for (const [type, def] of Object.entries(cfg.blocks)) toolsCfg[type] = { class: makeTool(type, def) };
 
+// Modus „Bearbeiten“ einer Detailseite: Editor dorthin, wo die Inhaltsblöcke stehen (Platzhalter aus Core\Data\EntryBlocks::SLOT)
+{
+  const slot = d.querySelector('[data-cms-content-slot]'), wrap = d.querySelector('[data-cms-content-editor]');
+  if (slot && wrap) slot.replaceWith(wrap);
+}
 editor = new EditorJS({
   holder: 'cms-editor',
   data: { blocks: initial.blocks || [] },
@@ -2060,9 +2065,13 @@ async function save(publish = false) {
       if (gate.reason) alert(gate.reason);
       return false;
     }
-    const res = await api(cfg.endpoints.save, { blocks, publish });
+    // Modus „Bearbeiten“ einer Detailseite: nur Felder geändert → Blöcke nicht neu speichern
+    const fields = CMSAdmin.entryInline;
+    const res = dirty || !fields?.dirty() ? await api(cfg.endpoints.save, { blocks, publish }) : { saved_at: '' };
     dirty = false;
     Bar?.state(publish ? 'published' : 'saved', (publish ? BT('published') : BT('saved')).replace('{time}', res.saved_at));
+    // … danach die Felder des Eintrags im Text (eigener Endpunkt; lädt neu, wenn sich die Adresse ändert)
+    if (fields?.dirty() && !(await fields.save())) return false;
     const ev = { kind: 'page', page: cfg.page, publish, savedAt: res.saved_at || '' };
     CMSAdmin.events?.emit('cms:saved', ev);
     if (publish) { CMSAdmin.events?.emit('cms:published', ev); CMSAdmin.events?.emit('cms:status-changed', { kind: 'page', page: cfg.page, status: 'published' }); }
@@ -2222,13 +2231,13 @@ S.uiAll('[data-editor-publish]').forEach(b => b.addEventListener('click', async 
 }));
 // ⌘/Strg+S: Erfassungsphase – Textfelder im Block halten Tasten sonst von Editor.js (und damit auch von hier) fern
 d.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === 's' && !d.body.classList.contains('has-epanel')) { e.preventDefault(); save(false); } }, true);
-addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+addEventListener('beforeunload', e => { if (dirty || CMSAdmin.entryInline?.dirty()) { e.preventDefault(); e.returnValue = ''; } });
 // „Abbrechen“ (Werkzeugleiste, Esc, Modus „Ansehen“): Seite ohne Editor laden – der zuletzt gespeicherte Entwurf bleibt,
 // ungespeicherte Änderungen gibt es nur im Browser und sie verschwinden damit
 Bar?.use({
-  dirty: () => dirty,
+  dirty: () => dirty || !!CMSAdmin.entryInline?.dirty(),
   save: () => save(false),
   publish: () => save(true),   // „Noch nicht veröffentlicht“ beim Verlassen (_bar.js cancel)
-  discard: () => { dirty = false; },
+  discard: () => { dirty = false; CMSAdmin.entryInline?.discard(); },
   exit: href => { dirty = false; location.href = href || Bar.viewUrl || location.pathname; },
 });

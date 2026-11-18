@@ -214,6 +214,9 @@ final class EntryEdit
             'endpoint' => self::endpoint($t, $e), 'workflow' => (bool) $t['settings']['workflow'],
             'publish' => can('data.publish', $t['handle']), 'csrf' => \Core\Csrf::token(), 'texts' => self::texts(),
             'lang' => Lang::multi() ? Lang::norm($e['lang'] ?? null) : null,
+            // Tabelle mit Inhaltsblöcken: „Bearbeiten“ lädt die Seite mit Block-Editor (Felder + Blöcke zusammen, _entry_edit.js)
+            'editUrl' => EntryBlocks::fieldsOf($t) ? strtok((string) ($_SERVER['REQUEST_URI'] ?? ''), '?') . '?edit=inhalt' : null,
+            'combined' => app()->contentEdit !== null,
         ];
     }
 }

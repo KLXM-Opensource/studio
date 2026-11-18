@@ -208,18 +208,22 @@ final class SiteController
 
         $editor = null;
         if ($app->contentEdit) {
-            // Vorlage davor/danach als feste Vorschau (wie für Besucher), dazwischen der Editor mit den Blöcken des Eintrags
+            // Modus „Bearbeiten“: Vorlage wie für Besucher, Felder des Eintrags direkt im Text bearbeitbar (EntryEdit), an der Stelle
+            // der Inhaltsblöcke – auch in einer Layout-Spalte – ein Platzhalter, in den editor.js den Block-Editor setzt
             $ce = $app->contentEdit;
             $app->editing = false;
-            $before = $theme->renderBlocks(array_slice($blocks, 0, $ce['at']));
-            $after = $ce['at'] < count($blocks) ? $theme->renderBlocks(array_slice($blocks, $ce['at'] + 1)) : '';
+            $app->contentSlot = true;
+            $app->entryEdit = true;
+            $full = $theme->renderBlocks($blocks);
+            $app->contentSlot = false;
+            $app->entryEdit = false;
             $app->editing = true;
             $own = \Core\Data\EntryBlocks::items($ctx['entry'][$ce['field']] ?? null);
             $previews = [];
             foreach ($own as $b) {
                 if (($html = $theme->previewBlock($b)) !== null) $previews[$b['id']] = $html;
             }
-            $editor = ['page' => $page, 'blocks' => $own, 'previews' => $previews, 'content' => $ce + ['before' => $before, 'after' => $after]];
+            $editor = ['page' => $page, 'blocks' => $own, 'previews' => $previews, 'content' => $ce + ['page' => $full]];
             $content = '';
         } elseif ($app->editing) {
             $previews = [];

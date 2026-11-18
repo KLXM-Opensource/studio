@@ -352,10 +352,11 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .eb-preview__blocks [data-edit]{outline:0!important;background:none!important}
 .eb-entry{position:relative}
 /* Modus „Inhalt“ (?edit=inhalt): Vorlage davor/danach nur als Vorschau, Hinweis über den bearbeitbaren Blöcken */
-.eb-static{opacity:.5;filter:saturate(.6)}
-.eb-static,.eb-static *{cursor:default}
 .eb-edit-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 16px;background:#1E2840;color:#fff;font:500 14px/1.4 system-ui,sans-serif;text-align:center}
 .eb-edit-note svg{width:18px;height:18px;flex:none}
+/* Modus „Bearbeiten“ einer Detailseite: Block-Editor an der Stelle der Inhaltsblöcke (auch in einer Layout-Spalte) */
+.eb-slotwrap{min-width:0;border-radius:10px;box-shadow:0 0 0 2px color-mix(in srgb,#314164 35%,transparent)}
+.eb-slotwrap .eb-edit-note{border-radius:10px 10px 0 0}
 /* Ansicht als Rolle/Person (Core\Impersonation): Hinweis unter der Leiste */
 .cms-entry-note.cms-imp-note.cms-imp-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#3B2A6E;color:#fff;border-bottom-color:#2A1D52}
 .cms-imp-note form{display:inline}

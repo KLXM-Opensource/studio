@@ -23,6 +23,8 @@ final class EntryBlocks
     public const MAX = 40;
     /** Nie in Tabellen: Daten-Blöcke, Layout, der Platzhalter selbst */
     private const NEVER = ['entry_blocks', 'layout', 'not_found'];
+    /** Platzhalter für den Block-Editor im Modus „Bearbeiten“ (editor.js setzt dort #cms-editor ein – auch in einer Layout-Spalte) */
+    public const SLOT = '<div class="eb-slot" data-cms-content-slot></div>';
 
     /** Wählbare Blöcke [typ => Bezeichnung] – einfügbar, ohne Daten-Blöcke */
     public static function choices(): array

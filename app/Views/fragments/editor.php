@@ -36,10 +36,10 @@ if ($content) {
     unset($bd);
 }
 ?>
-<?php if ($content): ?><div class="eb-static" inert><?= $content['before'] ?></div>
-<p class="eb-edit-note" role="note"><?= icon('article') ?> <?= e(__('Inhaltsblöcke von „{entry}“ – „{field}“. Vorlage darüber und darunter: nur Vorschau.', ['entry' => \Core\Data\Entries::title(app()->entry['table'], app()->entry['entry']), 'field' => $content['label']])) ?></p><?php endif; ?>
+<?php if ($content): /* Modus „Bearbeiten“ einer Detailseite: Seite wie für Besucher (Felder im Text bearbeitbar), Block-Editor an der Stelle der Inhaltsblöcke (editor.js) */ ?><div class="eb-page"><?= $content['page'] ?></div>
+<div class="eb-slotwrap" data-cms-content-editor><p class="eb-edit-note" role="note"><?= icon('article') ?> <?= e(__('{field} – Blöcke dieses Eintrags', ['field' => $content['label']])) ?></p><?php endif; ?>
 <div id="cms-editor" class="cms-editor"></div>
-<?php if ($content): ?><div class="eb-static" inert><?= $content['after'] ?></div><?php endif; ?>
+<?php if ($content): ?></div><?php endif; ?>
 <script type="application/json" id="cms-editor-config"><?= json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script type="application/json" id="cms-editor-data"><?= json_encode(['blocks' => $blocks, 'previews' => $previews], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script src="<?= e(asset('vendor/editorjs/editorjs.umd.js')) ?>" defer></script>

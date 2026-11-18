@@ -168,6 +168,7 @@ final class Layout
             foreach ($col['blocks'] as $bi => $c) {
                 // Detailseite: „Inhaltsblöcke des Eintrags“ in einer Spalte → die Blöcke des Eintrags untereinander in dieser Spalte
                 if (!$editing && ($c['type'] ?? '') === 'entry_blocks') {
+                    if (app()->contentSlot) { $items .= \Core\Data\EntryBlocks::SLOT; continue; }   // Modus „Bearbeiten“: Editor kommt hierher
                     foreach (self::entryChildren((array) ($c['data'] ?? [])) as $ei => $eb) $items .= self::renderChild($theme, $layout, $eb, $ci, $bi * 1000 + $ei, $parentBg, true);
                     continue;
                 }

@@ -387,6 +387,7 @@ final class Theme
             foreach ($blocks as $i => $b) {
                 if (($b['type'] ?? '') !== 'entry_blocks') continue;
                 $eb = ($b['tunes']['section']['visible'] ?? true) === false ? [] : \Core\Data\EntryBlocks::forContext((array) ($b['data'] ?? []));
+                if (app()->contentSlot) return $this->renderBlocks(array_slice($blocks, 0, $i)) . \Core\Data\EntryBlocks::SLOT . $this->renderBlocks(array_slice($blocks, $i + 1));
                 $mid = $eb ? $this->renderBlocks($eb) : '';
                 if ($mid !== '' && ($attr = \Core\Data\EntryBlocks::editAttr((array) ($b['data'] ?? []))) !== '') $mid = '<div class="eb-entry"' . $attr . '>' . $mid . '</div>';
                 return $this->renderBlocks(array_slice($blocks, 0, $i)) . $mid . $this->renderBlocks(array_slice($blocks, $i + 1));

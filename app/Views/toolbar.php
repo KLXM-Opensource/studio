@@ -266,6 +266,9 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
 <?php endif; ?>
 <?php foreach ($b['ext']['scripts'] ?? [] as $xs): // Skripte der Erweiterungen (Extension::toolbar) – nur 'self' ?><script src="<?= e($xs['src']) ?>"<?= $xs['module'] ? ' type="module"' : ' defer' ?>></script>
 <?php endforeach; ?>
+<?php if ($kind === 'content' && $b['entryEditable']): // Modus „Bearbeiten“ mit Inhaltsblöcken: Felder im Text speichert der Seiten-Editor mit (_entry_edit.js combined) ?>
+<script type="application/json" id="cms-entry-config"><?= json_encode(EntryEdit::config($b['table'], $b['entry']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+<?php endif; ?>
 <?php if ($kind === 'entry'): $reason = $b['canTable'] && !$b['foreign'] ? EntryEdit::reason($b['table'], $b['entry']) : null; ?>
 <?php $other = ($b['foreign'] ? ' ' . __('Dieser Eintrag stammt von „{site}“ und ist hier nur lesbar. Ändern kann ihn nur diese Website.', ['site' => $b['site']]) : '') . ($reason && !$b['live'] ? ' ' . $reason : '');
 // Mit Online/Offline-Umschalter (Status-Chip) steht der Hinweis immer im Markup – _bar.js blendet den Entwurfs-Teil ohne Neuladen ein/aus

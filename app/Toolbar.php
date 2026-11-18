@@ -128,7 +128,7 @@ final class Toolbar
         $b['canDiscard'] = $hasPage && ($page['content_published'] ?? null) !== null;
 
         // Modus und EIN Status
-        $b['mode'] = $kind === 'template' ? 'template' : ($kind === 'content' ? 'content' : ($editing ? 'edit' : 'view'));
+        $b['mode'] = $kind === 'template' ? 'template' : ($editing ? 'edit' : 'view');   // „content“ (Felder + Inhaltsblöcke) ist für die Leiste „Bearbeiten“
         if ($live) {
             $status = 'live';
         } elseif ($kind === 'entry' || $kind === 'content') {
@@ -156,10 +156,11 @@ final class Toolbar
             }
         } else {
             $tbl = (string) ($b['table']['name'] ?? '');
+            // Bearbeiten: alles dieses Eintrags – Felder im Text und (falls die Tabelle sie hat) die Inhaltsblöcke an ihrem Platz
+            // (?edit=inhalt, Seite mit Block-Editor); ohne Inhaltsblöcke ohne Neuladen (_entry_edit.js)
+            $withBlocks = !$live && $b['entryEditable'] && \Core\Data\EntryBlocks::fieldsOf($t);
             $modes[] = ['view', __('Ansehen'), 'eye', $kind === 'entry' ? null : $viewUrl, $kind === 'entry', __('Detailseite so ansehen, wie Besucher sie sehen')];
-            if ($b['entryEditable']) $modes[] = ['edit', __('Felder'), 'pencil-simple', $kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten', false, __('Felder dieses Eintrags ändern – Titel, Text, Bilder, Datum …')];
-            // Inhalt: Inhaltsblöcke des Eintrags direkt auf der Seite (nur mit Feld „Inhaltsblöcke“ und Recht am Eintrag)
-            if (!$live && $b['entryEditable'] && \Core\Data\EntryBlocks::fieldsOf($t)) $modes[] = ['content', __('Inhalt'), 'article', $viewUrl . '?edit=inhalt', $kind === 'content', __('Inhaltsblöcke nur dieses Eintrags gestalten (freier Bereich mit Text, Bildern …)')];
+            if ($b['entryEditable']) $modes[] = ['edit', __('Bearbeiten'), 'pencil-simple', $withBlocks ? $viewUrl . '?edit=inhalt' : ($kind === 'entry' ? null : $viewUrl . '#cms-bearbeiten'), $kind === 'content', __('Diesen Eintrag bearbeiten – Titel, Felder und Inhalt direkt auf der Seite')];
             if ($b['canEditPages'] && !$live) $modes[] = ['template', __('Vorlage'), 'squares-four', $viewUrl . '?edit=1', $kind === 'template', $tbl !== '' ? __('Aussehen aller Detailseiten von „{table}“ gestalten – gilt für jeden Eintrag', ['table' => $tbl]) : __('Aussehen aller Detailseiten dieser Tabelle gestalten – gilt für jeden Eintrag')];
         }
         $b['modes'] = count($modes) > 1 ? $modes : [];

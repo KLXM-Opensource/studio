@@ -33,6 +33,8 @@ final class App
     public ?array $entry = null;
     /** Detailseite: Felder des Eintrags direkt auf der Website bearbeiten (Core\Data\EntryEdit) */
     public bool $entryEdit = false;
+    /** Modus „Bearbeiten“ einer Detailseite: Inhaltsblöcke des Eintrags als Platzhalter [data-cms-content-slot] (Editor kommt dorthin) */
+    public bool $contentSlot = false;
     /** Detailseite im Modus „Inhalt“ (?edit=inhalt): Editor für die Inhaltsblöcke des Eintrags {table, entry, field, def, at} – Core\Data\EntryBlocks */
     public ?array $contentEdit = null;
     /** Angemeldete Redaktion (nicht Live-Ansicht): Stift je Eintrag in Datenlisten, „+ Neuer Eintrag“ */

@@ -447,11 +447,12 @@ const Inline = (() => {
     }
   }
   const inView = n => { const r = n.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
-  function start() {
+  function start(quiet = false) {
     if (editing) return;
     editing = true;
     nodes.forEach(n => editable(n, true));
     d.documentElement.classList.add('cms-entry-editing');
+    if (quiet) return;   // Modus „Bearbeiten“ mit Inhaltsblöcken: Leiste und Fokus gehören dem Seiten-Editor
     Bar.setMode('edit');
     emit('cms:editor-ready', { kind: 'entry', entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: nodes.map(n => n.dataset.entryField) });
     // Fokus: erstes sichtbares Feld, sonst „Abbrechen“ (der Knopf „Bearbeiten“ ist jetzt ausgeblendet)
@@ -582,9 +583,9 @@ const Inline = (() => {
 
   async function save(status = '') {
     const list = changed();
-    if (!list.length && !status) return;
-    if (status === 'published' && !(await askPublish())) return;
-    if (status === 'draft' && !(await askDraft())) return;
+    if (!list.length && !status) return true;
+    if (status === 'published' && !(await askPublish())) return false;
+    if (status === 'draft' && !(await askDraft())) return false;
     const f = {}, mt = {};
     list.forEach(n => {
       if (n.dataset.entrySection !== undefined) (mt[n.dataset.entryField] ||= {})[n.dataset.entrySection] = read(n);   // Medien + Text
@@ -592,7 +593,7 @@ const Inline = (() => {
     });
     // cms:before-save: Werkzeuge/Erweiterungen dürfen prüfen und abbrechen (auch asynchron, detail.waitUntil)
     const gate = await beforeSave({ kind: 'entry', status, entry: cfg ? { table: cfg.table, id: cfg.id } : null, fields: f });
-    if (!gate.ok) { setStatus(gate.reason || T.dirty, 'is-dirty'); if (gate.reason) alert(gate.reason); return; }
+    if (!gate.ok) { setStatus(gate.reason || T.dirty, 'is-dirty'); if (gate.reason) alert(gate.reason); return false; }
     setStatus(T.saving, 'is-busy');
     let res;
     try { res = await request(cfg.endpoint, { method: 'POST', json: { f, ...(Object.keys(mt).length ? { mt } : {}), partial: 1, ...(status ? { status } : {}) } }); }
@@ -607,14 +608,17 @@ const Inline = (() => {
       const firstBad = nodes.find(n => n.getAttribute('aria-invalid') === 'true');
       firstBad?.focus();
       if (rest.length || !Object.keys(errs).length) alert((res.error || T.error) + (rest.length ? '\n\n' + rest.join('\n') : ''));
-      return;
+      return false;
     }
     entryEvents(status, res, false);
     const msg = tx(status === 'published' ? 'published' : status === 'draft' ? 'drafted' : 'saved', { time: res.saved_at || now() });
-    if (status || (res.url && new URL(res.url, location.href).pathname !== location.pathname)) { dirty = false; reloadKeepScroll(msg, res.url && new URL(res.url, location.href).pathname !== location.pathname ? res.url : null); return; }
+    // Neue Adresse (Titel geändert): im kombinierten Modus dort weiter bearbeiten
+    const moved = res.url && new URL(res.url, location.href).pathname !== location.pathname ? res.url + (cfg.combined ? '?edit=inhalt' : '') : null;
+    if (status || moved) { dirty = false; reloadKeepScroll(msg, moved); return true; }
     nodes.forEach(n => { n._orig = read(n); n._html = n.innerHTML; clearError(n); });
     refresh();
     setStatus(msg, 'is-ok');
+    return true;
   }
 
   /** Ungespeicherte Änderungen im Text zurücksetzen (Abbrechen → Verwerfen) */
@@ -626,6 +630,13 @@ const Inline = (() => {
   return {
     init() {
       $$('[data-entry-field][data-entry-mode]').forEach(bind);
+      // Modus „Bearbeiten“ mit Inhaltsblöcken (?edit=inhalt): Felder sofort bearbeitbar, Speichern/Verwerfen/⌘S über den
+      // Seiten-Editor (editor.js fragt CMSAdmin.entryInline) – eine Leiste, ein „Speichern“ für Felder und Blöcke
+      if (cfg.combined) {
+        (window.CMSAdmin ||= {}).entryInline = { dirty: () => dirty, save: () => save(), discard: restore };
+        start(true);
+        return;
+      }
       ui('[data-entry-save]')?.addEventListener('click', () => save());
       ui('[data-entry-publish]')?.addEventListener('click', () => save('published'));
       ui('[data-entry-draft]')?.addEventListener('click', () => save('draft'));
@@ -639,12 +650,12 @@ const Inline = (() => {
         save: async () => { await save(); return !dirty; },
         discard: restore,
         exit: href => { stop(); if (href) location.href = href; },
-        start: () => (nodes.length ? start() : Panel.open(cfg.endpoint, editBtn())),
+        start: () => (cfg.editUrl ? (location.href = cfg.editUrl) : nodes.length ? start() : Panel.open(cfg.endpoint, editBtn())),
       });
       // Aus dem Vorlagen-Editor „Bearbeiten“ gewählt: …#cms-bearbeiten
       if (location.hash === '#cms-bearbeiten') {
         history.replaceState(null, '', location.pathname + location.search);
-        if (nodes.length) start(); else Panel.open(cfg.endpoint, null);
+        if (cfg.editUrl) location.href = cfg.editUrl; else if (nodes.length) start(); else Panel.open(cfg.endpoint, null);
       }
     },
     pending: () => changed().map(n => [n.dataset.entryField, read(n), n.dataset.entryMode]),
