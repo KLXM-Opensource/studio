@@ -1702,9 +1702,32 @@ function initInlineCrop() {
   // Bilder auf der Seite: Dateien dieser Website (local(), nie im zuletzt gewählten Pool – sonst 404: …/api/media/192?pool=…)
   const bar = d.createElement('div');
   bar.className = 'cms-imgtools'; bar.hidden = true;
-  bar.innerHTML = `<button type="button" class="cms-cropbtn" data-fx>${ico('sliders-horizontal')} ${esc(t('Anpassen'))}</button><button type="button" class="cms-cropbtn" data-fit>${ico('image')} ${esc(t('Rahmen'))}</button><button type="button" class="cms-cropbtn" data-crop>${ico('crop')} ${esc(t('Zuschneiden'))}</button><button type="button" class="cms-cropbtn" data-swap>${ico('arrows-clockwise')} ${esc(t('Tauschen'))}</button><button type="button" class="cms-cropbtn" data-swap-up>${ico('upload-simple')} ${esc(t('Hochladen'))}</button>`;
+  // Ein runder Knopf am Bild, die Aktionen im Menü – deckt das Bild nicht mit fünf Knöpfen zu
+  const item = (attr, icon, label) => `<button type="button" role="menuitem" tabindex="-1" class="cms-imgtools__item" ${attr}>${ico(icon)}<span>${esc(t(label))}</span></button>`;
+  bar.innerHTML = `<button type="button" class="cms-cropbtn cms-imgtools__btn" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(t('Bild bearbeiten'))}" title="${esc(t('Bild bearbeiten'))}">${ico('image')}${ico('caret-down')}</button>`
+    + `<div class="cms-imgtools__menu" role="menu" aria-label="${esc(t('Bild bearbeiten'))}" hidden>`
+    + item('data-fx', 'sliders-horizontal', 'Anpassen') + item('data-fit', 'image', 'Rahmen') + item('data-crop', 'crop', 'Zuschneiden')
+    + item('data-swap', 'arrows-clockwise', 'Tauschen') + item('data-swap-up', 'upload-simple', 'Hochladen') + '</div>';
   box().append(bar);   // Shadow-DOM-Ebene: Kit-Regeln für button wirken nicht
   const fxBtn = $('[data-fx]', bar), cropBtn = $('[data-crop]', bar), fitBtn = $('[data-fit]', bar), swapBtn = $('[data-swap]', bar), upBtn = $('[data-swap-up]', bar);
+  const menuBtn = $('.cms-imgtools__btn', bar), menu = $('.cms-imgtools__menu', bar);
+  const items = () => $$('.cms-imgtools__item', menu).filter(b => !b.hidden);
+  const closeMenu = (focus = false) => { if (menu.hidden) return; menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); if (focus) menuBtn.focus(); };
+  const openMenu = (first = false) => { menu.hidden = false; menuBtn.setAttribute('aria-expanded', 'true'); if (first) items()[0]?.focus(); };
+  menuBtn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); if (menu.hidden) openMenu(e.detail === 0); else closeMenu(); });
+  menuBtn.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); openMenu(true); } });
+  menu.addEventListener('keydown', e => {
+    const list = items(), i = list.indexOf(e.target);
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeMenu(true); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); list[(i + (e.key === 'ArrowDown' ? 1 : -1) + list.length) % list.length]?.focus(); }
+    else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); list[e.key === 'Home' ? 0 : list.length - 1]?.focus(); }
+    else if (e.key === 'Tab') closeMenu();
+  });
+  // Nach einer Aktion (die Handler unten blenden die Leiste aus) und bei Klick daneben: Menü zu
+  menu.addEventListener('click', () => closeMenu());
+  d.addEventListener('pointerdown', e => { if (!menu.hidden && !inPath(e, bar)) closeMenu(); });
+  // Esc schließt zuerst das Menü – nicht den Bearbeiten-Modus (Werkzeugleiste: Esc = Abbrechen)
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { e.preventDefault(); e.stopImmediatePropagation(); closeMenu(true); } }, true);
   let target = null, hideT, leaving = false;
   const place = () => {
     const r = target.getBoundingClientRect();
@@ -1735,6 +1758,7 @@ function initInlineCrop() {
   const show = im => {
     clearTimeout(hideT); leaving = false;
     if (target !== im) { if (target) ro.unobserve(target); ro.observe(im); }
+    if (target !== im) closeMenu();
     target = im;
     cropBtn.hidden = !im.dataset.ratio;
     fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
@@ -1749,7 +1773,7 @@ function initInlineCrop() {
     fxBtn.setAttribute('aria-label', t('Bild anpassen (Effekte, Sättigung, Helligkeit, Kontrast, Schärfe)'));
     bar.hidden = false; place();
   };
-  const hide = () => { bar.hidden = true; target = null; };
+  const hide = () => { closeMenu(); bar.hidden = true; target = null; };
   // Bild unter dem Zeiger – auch wenn eine Ebene des Kits darüber liegt (ganze Karte klickbar: Link mit ::after über
   // dem Porträt, Verläufe, Beschriftungen). Dann trifft mouseover nie das <img>, „Rahmen“/„Anpassen“ blieben unerreichbar.
   const imgAt = e => {

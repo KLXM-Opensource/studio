@@ -57,7 +57,7 @@
     <li><b>Doppelklick</b> (oder <b>Alle Details, Fokus &amp; Zuschnitt …</b>) öffnet das große Bearbeitungsfenster mit Fokuspunkt, Zuschnitten, Sammlungen und Fotonachweis. Hier speichern Sie mit <b>Speichern</b>.</li>
     <li><b>Fokuspunkt:</b> Ins Bild klicken, z. B. auf das Gesicht. Wird das Bild in einem anderen Format angezeigt, bleibt dieser Bereich sichtbar.</li>
     <li><b>Zuschneiden:</b> Unter „Zuschnitte je Format“ ein Format anklicken, dann mit Mausrad/Trackpad zoomen und das Bild verschieben. Jedes Format (16:9, 4:3, 1:1 …) kann einen eigenen Ausschnitt haben. <b>Automatisch (Fokuspunkt)</b> entfernt den eigenen Ausschnitt wieder.</li>
-    <li><b>Direkt auf der Seite:</b> Im Bearbeitungsmodus erscheint beim Überfahren eines Bildes der Knopf <b>Zuschneiden</b> – das Format der Stelle ist schon gewählt, das Ergebnis sehen Sie sofort.</li>
+    <li><b>Direkt auf der Seite:</b> Im Bearbeitungsmodus erscheint beim Überfahren eines Bildes oben rechts ein runder Knopf mit Bild-Symbol; sein Menü enthält <b>Zuschneiden</b> – das Format der Stelle ist schon gewählt, das Ergebnis sehen Sie sofort.</li>
   </ul>
 
   <h3 id="bild-bearbeiten">Bild bearbeiten: Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren</h3>
@@ -91,7 +91,7 @@
   <p><b>Standard des Bildes:</b> Im großen Bearbeitungsfenster der Mediathek legen Sie unter <b>Darstellung im Rahmen</b> fest, wie das Bild überall dort erscheint, wo keine eigene Einstellung gewählt ist. Ohne Angabe gilt <b>Automatisch</b>: Fotos füllen den Rahmen, <b>SVG-Grafiken und PNG-Logos mit transparentem Rand</b> werden eingepasst (transparent) – so werden Logos in Galerien und Karten nicht mehr abgeschnitten. Ist für das Format ein eigener Zuschnitt gesetzt, bleibt es beim Füllen. Der Alt-Text bleibt unverändert; der unscharfe Hintergrund ist reine Dekoration und wird nicht vorgelesen.</p>
 
   <h3 id="bild-tauschen">Bild auf der Seite tauschen oder neu hochladen</h3>
-  <p>Im Bearbeitungsmodus erscheinen am Bild eines Blocks neben <b>Anpassen</b>, <b>Rahmen</b> und <b>Zuschneiden</b> auch
+  <p>Im Bearbeitungsmodus öffnet der runde Knopf am Bild eines Blocks ein Menü (auch per Tastatur: Tab, Pfeil nach unten, Esc schließt): neben <b>Anpassen</b>, <b>Rahmen</b> und <b>Zuschneiden</b> stehen dort
     <b>Tauschen</b> (Auswahl aus der Mediathek) und <b>Hochladen</b> (öffnet gleich die Dateiauswahl – die neue Datei landet in der
     Mediathek und steht sofort an dieser Stelle). Anpassung und Rahmen der Stelle beginnen beim neuen Bild von vorn. Gespeichert
     wird wie immer mit dem Entwurf. Bilder von Einträgen (z. B. Referenzen) tauschen Sie auf deren Detailseite: <b>Bearbeiten</b>, dann
