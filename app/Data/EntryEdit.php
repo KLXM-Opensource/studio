@@ -123,14 +123,15 @@ final class EntryEdit
         return $mode === '' ? '' : self::attr($t, $ctx['entry'], $field, $mode);
     }
 
-    /** Stift „Eintrag bearbeiten“ in Listen (Link zur Verwaltung als Rückfall ohne Skript) */
+    /** Weiße Bubble „Datensatz“ (mit Stift) – „Eintrag bearbeiten“ in Listen (Link zur Verwaltung als Rückfall ohne Skript) */
     public static function button(array $t, array $e, string $title = ''): string
     {
         if (!app()->dataEdit || !self::canEdit($t, $e)) return '';
         $label = __('„{title}“ bearbeiten', ['title' => $title !== '' ? $title : Entries::title($t, $e)]);
         return '<a class="cms-entry-pencil" href="' . e(self::adminUrl($t, $e)) . '" data-entry-edit="' . e(self::endpoint($t, $e)) . '"'
             . ' aria-label="' . e($label) . '" title="' . e($label) . '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">'
-            . '<path d="M11.1 2.2a1.6 1.6 0 0 1 2.3 0l.4.4a1.6 1.6 0 0 1 0 2.3L6 12.7l-3.3.8.8-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></a>';
+            . '<path d="M11.1 2.2a1.6 1.6 0 0 1 2.3 0l.4.4a1.6 1.6 0 0 1 0 2.3L6 12.7l-3.3.8.8-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
+            . '<span class="cms-entry-pencil__t" aria-hidden="true">' . e(__('Datensatz')) . '</span></a>';
     }
 
     /** „+ Neuer Eintrag“ für Datenlisten */

@@ -1731,8 +1731,18 @@ function initInlineCrop() {
   let target = null, hideT, leaving = false;
   // Fest oben links im Bild – dort liegt nie die Leiste des Blocks (oben rechts) oder ein Stift; kein Ausweichen, kein Springen.
   // Nur unter Werkzeugleiste/klebendem Kit-Kopf rückt er nach unten (bzw. verschwindet, wenn das Bild dort zu Ende ist).
+  // Bezugsrahmen: das Element, das das Bild beschneidet (Kits zoomen Bilder beim Hover per transform – das Rechteck des Bildes
+  // wächst dann mit, der Rahmen nicht); ohne beschneidenden Rahmen das Bild selbst
+  const frameOf = el => {
+    for (let p = el.parentElement, i = 0; p && i < 4; p = p.parentElement, i++) {
+      if (p.classList?.contains('cms-block__preview')) break;
+      const cs = getComputedStyle(p);
+      if (cs.overflow !== 'visible' || cs.overflowX !== 'visible') return p;
+    }
+    return el;
+  };
   const place = () => {
-    const r = target.getBoundingClientRect();
+    const r = frameOf(target).getBoundingClientRect();
     const top = Math.max(r.top + 12, topInset() + 8);
     bar.style.visibility = top + bar.offsetHeight > r.bottom - 8 ? 'hidden' : '';
     bar.style.left = (r.left + 12 + scrollX) + 'px';

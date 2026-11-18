@@ -224,14 +224,15 @@ body.has-tdrawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):
 /* Datenlisten: Stift je Eintrag, „+ Neuer Eintrag“ – eigene Wurzeln mit Reset (all: unset) und doppelter Klasse,
    damit Theme-Regeln für Links (Farbe, Unterstreichung, ::after-Flächen) nicht hineinwirken */
 .dl-item:has(>.cms-entry-pencil){position:relative}
-.cms-entry-pencil.cms-entry-pencil{all:unset;box-sizing:border-box;position:absolute;top:10px;right:10px;z-index:2147482990;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;background:#1E2840;color:#fff;box-shadow:0 0 0 2px #fff,0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .15s;cursor:pointer}
+.cms-entry-pencil.cms-entry-pencil{all:unset;box-sizing:border-box;position:absolute;top:10px;right:10px;z-index:2147482990;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 10px;border:1px solid #D5D8E2;border-radius:999px;background:#fff;color:#314164;font:600 12px/1 Lato,"Segoe UI",system-ui,sans-serif;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.16);opacity:0;transition:opacity .15s;cursor:pointer}
 .cms-entry-pencil.cms-entry-pencil::before,.cms-entry-pencil.cms-entry-pencil::after{content:none}
 .cms-entry-pencil.cms-entry-pencil svg{all:unset;display:block;width:14px;height:14px}
 .dl-item:hover>.cms-entry-pencil.cms-entry-pencil,.dl-item:focus-within>.cms-entry-pencil.cms-entry-pencil,.cms-entry-pencil.cms-entry-pencil:focus-visible,.is-editing .cms-entry-pencil.cms-entry-pencil{opacity:1}
-.cms-entry-pencil.cms-entry-pencil:hover{background:#314164}
-.cms-entry-pencil.cms-entry-pencil:focus-visible{outline:3px solid #EDE9E3;outline-offset:2px}
+.cms-entry-pencil.cms-entry-pencil:hover{background:#EEF1F7;border-color:#B6BAC6}
+.cms-entry-pencil.cms-entry-pencil:focus-visible{outline:2px solid #314164;outline-offset:2px}
 @media (hover:none){.cms-entry-pencil.cms-entry-pencil{opacity:1}}
-td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;width:28px;height:28px;margin-left:8px;vertical-align:middle;opacity:1}
+td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;width:28px;height:28px;padding:0;justify-content:center;margin-left:8px;vertical-align:middle;opacity:1}
+td>.cms-entry-pencil .cms-entry-pencil__t{display:none}
 .cms-entry-new.cms-entry-new{all:unset;display:block;margin:18px 0 0}
 .cms-entry-newbtn.cms-entry-newbtn{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 16px;border-radius:999px;border:1.5px dashed #314164;background:#fff;color:#314164;font:700 14px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;letter-spacing:0;text-transform:none;cursor:pointer}
 .cms-entry-newbtn.cms-entry-newbtn::before,.cms-entry-newbtn.cms-entry-newbtn::after{content:none}
