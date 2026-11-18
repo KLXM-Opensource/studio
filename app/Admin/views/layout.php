@@ -151,7 +151,7 @@ if ($user && ($req = app()->request)) {
   </div>
   <?php // Suchen als Zeile im Stil der Seitenleiste (Lupe, Text, ⌘K) – daneben der Assistent, wenn KI aktiv ist ?>
   <div class="adm-find">
-    <button type="button" class="adm-find__search" data-spotlight aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?><span><?= e(__('Suchen')) ?></span><kbd aria-hidden="true">⌘K</kbd></button>
+    <button type="button" class="adm-find__search" data-spotlight aria-keyshortcuts="Meta+K Control+K"><?= icon('magnifying-glass') ?><span><?= e(__('Suchen')) ?></span><kbd aria-hidden="true" data-kbd>⌘K</kbd></button>
     <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
     <a class="adm-find__ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
     <?php endif; ?>
