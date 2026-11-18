@@ -3808,15 +3808,15 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rte-mi__h{color:var(--rte-muted)}
 .rte-menu__sep{margin:4px;background:var(--rte-border-soft)}
 
-/* Seitenleiste: Suchen und Website ansehen – groß und beschriftet (layout.php .adm-quick) */
-.adm-quick{display:grid;gap:6px}
-.adm-quick__search,.adm-quick__site{display:flex;align-items:center;gap:9px;width:100%;min-height:40px;margin:0;padding:0 12px;border-radius:10px;font:500 14px/1.2 var(--adm-font);text-align:left;text-decoration:none;cursor:pointer}
-.adm-quick__search{border:1px solid var(--adm-line);background:var(--adm-hover);color:var(--adm-t2);cursor:text}
-.adm-quick__search:hover{background:var(--adm-press);color:var(--adm-ink)}
-.adm-quick__search span{flex:1}
-.adm-quick__search kbd{border:0;background:var(--adm-press);color:var(--adm-t2);font:600 11px var(--adm-font)}
-.adm-quick__site{border:1px solid transparent;background:var(--adm-surface);color:var(--adm-ink);font-weight:700}
-.adm-quick__site:hover{background:var(--adm-press)}
-.adm-quick__search:focus-visible,.adm-quick__site:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
-.adm-quick svg{width:18px;height:18px;flex:none}
-@media (pointer:coarse){.adm-quick__search kbd{display:none}.adm-quick__search,.adm-quick__site{min-height:44px}}
+/* Seitenleiste oben: eine Zeile – Suchen und Assistent als große Symbole, „Website ansehen“ mit Text (Konto/Abmelden stehen unten) */
+.adm-brand-tools .adm-site-open{width:40px;height:40px;border-radius:9px}
+.adm-brand-tools .adm-site-open svg{width:22px;height:22px}
+.adm-brand-tools .adm-site-open--site{flex:1 1 auto;width:auto;min-width:0;padding:0 12px 0 10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;overflow:hidden;background:var(--adm-surface);color:var(--adm-ink);font:700 13.5px/1 var(--adm-font);white-space:nowrap}
+.adm-brand-tools .adm-site-open--site:hover{background:var(--adm-press)}
+.adm-brand-tools .adm-site-open--site svg{width:18px;height:18px}
+.adm-brand-tools .adm-site-open:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
+
+/* Breitere Seitenleiste auf großen Bildschirmen (lange Menüs, Beschriftungen) – darunter bleibt es bei 232px bzw. dem Handy-Layout */
+.adm-site-open__more{display:none}
+@media (min-width:1400px){body.adm{grid-template-columns:264px minmax(0,1fr)}.adm-site-open__more{display:inline}}
+@media (min-width:1800px){body.adm{grid-template-columns:288px minmax(0,1fr)}}

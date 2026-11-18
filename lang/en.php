@@ -7987,4 +7987,5 @@ return [
     '{field} – Blöcke dieses Eintrags' => '{field} – blocks of this entry',
     'Bild aus der Mediathek wählen' => 'Choose an image from the media library',
     'Suchen …' => 'Search …',
+    'ansehen' => 'view',
 ];
