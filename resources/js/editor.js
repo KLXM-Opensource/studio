@@ -344,89 +344,42 @@ d.addEventListener('focusin', e => { const b = e.target.closest?.('.cms-block');
  */
 const BarPlace = (() => {
   const LIVE = '.cms-block:is(:hover,.is-selected,.is-active,:focus-within)';
-  const HARD = '[data-edit],input,select,textarea,button,.btn,[role=button],.cms-lay-bar,.cms-lay-add';
-  const SOFT = 'img,video,iframe,canvas,picture,svg:not(button svg):not(a svg)';
   let raf = 0;
-  const R = r => ({ l: r.left, t: r.top, r: r.right, b: r.bottom });
-  const area = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
-  const less = (a, b) => { const i = a.findIndex((v, k) => v !== b[k]); return i >= 0 && a[i] < b[i]; };
   const off = el => !el || el.closest('.is-collapsed') || (el.closest('.is-compact') && !el.closest('.cms-block.is-expanded')) || !el.isConnected;
-  const visibleEl = el => { if (!el) return false; const s = getComputedStyle(el); return s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0; };
 
-  /** Hindernisse im Band [top, bottom] (Viewport) – Text zeilenweise, Felder/Knöpfe als Kasten, Bilder weich */
-  function obstacles(blk, band) {
-    const hard = [], soft = [];
-    const inBand = r => r.bottom > band.t && r.top < band.b && r.width > 0 && r.height > 0;
-    const ce = blk.closest('.ce-block');
-    const scopes = [ce?.previousElementSibling, ce, ce?.nextElementSibling].map(c => c?.querySelector('.cms-block__preview')).filter(Boolean);
-    for (const pv of scopes) {
-      const tw = d.createTreeWalker(pv, NodeFilter.SHOW_TEXT);
-      const rg = d.createRange();
-      for (let n; (n = tw.nextNode());) {
-        if (!n.data.trim()) continue;
-        const pe = n.parentElement;
-        if (!pe || !inBand(pe.getBoundingClientRect())) continue;
-        rg.selectNodeContents(n);
-        for (const r of rg.getClientRects()) if (inBand(r)) hard.push(R(r));
-      }
-      for (const x of pv.querySelectorAll(HARD)) { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
-      for (const x of pv.querySelectorAll(SOFT)) { const r = x.getBoundingClientRect(); if (inBand(r) && r.width * r.height > 900) soft.push(R(r)); }
-      for (const x of pv.querySelectorAll('.cms-entry-pencil,.cms-target-edit')) hard.push(R(x.getBoundingClientRect()));
-    }
-    // Bedienelemente: Formatierungsleiste (Vorrang), „+ Block einfügen“ dieses und des vorigen Blocks, Knöpfe am Bild,
-    // Leisten der Nachbarblöcke, Griff von Editor.js, Kopf des Kits
-    const layer = S.layerBox();
-    const extra = [layer.querySelector('.cms-inline-bar:not([hidden])'), layer.querySelector('.cms-imgtools:not([hidden])'),
-      ...[ce?.previousElementSibling, ce].map(c => c?.querySelector('.cms-block__add')?.shadowRoot?.querySelector('button')),
-      ...[ce?.previousElementSibling, ce?.nextElementSibling].map(c => c?.querySelector(':scope .cms-block:is(:hover,.is-selected,.is-active,:focus-within)>.cms-block__bar')),
-      holder().querySelector('.ce-toolbar--opened .ce-toolbar__actions'),
-      ...d.querySelectorAll('[data-cms-header]'), d.querySelector('.eb-edit-note__b')];   // Bubble „Blöcke dieses Eintrags“ (Modus „Bearbeiten“)
-    for (const x of extra) if (x && visibleEl(x) && getComputedStyle(x).visibility !== 'hidden') { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
-    return { hard, soft };
-  }
-
+  /*
+   * Ruhige Lage: immer oben rechts im Block, immer gleicher Inhalt – kein Springen nach links/außen, kein Wechsel zwischen
+   * Text und Symbol je nach Inhalt darunter. Nur zwei Ausnahmen: (1) liegt die Oberkante des Blocks beim Scrollen
+   * unter der Werkzeugleiste, wandert die Leiste an den sichtbaren oberen Rand; (2) passt die volle Leiste nicht in die
+   * Blockbreite, wird sie dauerhaft schmal (abhängig nur von der Breite). Beim Schreiben direkt darunter blendet sie sich aus.
+   */
   function place(blk) {
     const host = blk.querySelector(':scope>.cms-block__bar');
     if (!host) return;
     if (off(blk)) { host.removeAttribute('style'); host.classList.remove('is-slim', 'is-mini', 'is-yield', 'is-crowded'); return; }
     const br = blk.getBoundingClientRect();
     const inset = CMSAdmin.shadow.topInset ? CMSAdmin.shadow.topInset() : 0;
-    const vw = d.documentElement.clientWidth;
-    const levels = [[], ['is-slim'], ['is-slim', 'is-mini']];
-    const sizes = levels.map(cls => {
-      host.classList.remove('is-slim', 'is-mini'); host.classList.add(...cls);
-      return [host.offsetWidth, host.offsetHeight];
-    });
-    const hMax = Math.max(...sizes.map(s => s[1]));
-    const band = { t: Math.min(br.top - hMax - 12, inset), b: Math.max(br.top + hMax + 16, inset + hMax + 16) };
-    const { hard, soft } = obstacles(blk, band);
-    const typing = blk.contains(d.activeElement) && !!d.activeElement.closest?.('[data-edit]');
-    let best = null;
-    levels.forEach((cls, li) => {
-      const [w, h] = sizes[li];
-      const tops = [8, -h / 2, -h - 6];
-      if (br.top + 8 < inset + 4 && br.bottom > inset + h + 24) tops.push(inset + 8 - br.top);   // Block oben aus dem Bild
-      const sides = [['right', br.right - 10 - w], ['left', br.left + 10]];
-      sides.forEach(([side, x], si) => tops.forEach((top, ti) => {
-        const c = { l: x, r: x + w, t: br.top + top, b: br.top + top + h };
-        if (c.l < 4 || c.r > vw - 4 || c.t < inset + 2) return;
-        const hit = hard.reduce((s, o) => s + area(c, o), 0);
-        const img = soft.reduce((s, o) => s + area(c, o), 0);
-        // Rangfolge: frei vor verdeckt, Stufe (voll → schmal → knapp), keine Bildfläche, Lage
-        const score = [hit > 0 ? 1 : 0, hit, li, img > 0 ? 1 : 0, si * 10 + ti];
-        if (!best || less(score, best.score)) best = { score, cls, side, top };
-      }));
-    });
-    host.classList.remove('is-slim', 'is-mini');
-    if (!best) { host.removeAttribute('style'); return; }
-    host.classList.add(...best.cls);
-    host.style.top = best.top + 'px';
-    if (best.side === 'right') { host.style.right = '10px'; host.style.left = 'auto'; }
-    else { host.style.left = '10px'; host.style.right = 'auto'; }
-    const crowded = best.score[0] === 1;
+    // Breite entscheidet die Stufe – nur wenn sie sich ändert, neu messen (kein Flackern beim Zeigen)
+    const key = Math.round(br.width);
+    if (host.dataset.fitW !== String(key)) {
+      host.dataset.fitW = String(key);
+      host.classList.remove('is-slim', 'is-mini');
+      const room = br.width - 20;
+      if (host.offsetWidth > room) { host.classList.add('is-slim'); if (host.offsetWidth > room) host.classList.add('is-mini'); }
+    }
+    const h = host.offsetHeight;
+    let top = 8;
+    if (br.top + 8 < inset + 4 && br.bottom > inset + h + 24) top = Math.min(inset + 8 - br.top, br.height - h - 8);
+    host.style.top = top + 'px'; host.style.right = '10px'; host.style.left = 'auto';
+    // Schreiben unter der Leiste: ausblenden (Mausbewegung holt sie zurück)
+    const a = d.activeElement, typing = blk.contains(a) && !!a?.closest?.('[data-edit]');
+    let crowded = false;
+    if (typing) {
+      const r = host.getBoundingClientRect(), t = a.getBoundingClientRect();
+      crowded = r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top;
+    }
     host.classList.toggle('is-crowded', crowded);
-    // Kein freier Platz: beim Schreiben ausweichen, sonst (Maus) die am wenigsten störende Lage
-    if (!crowded || !typing) host.classList.remove('is-yield');
+    if (!crowded) host.classList.remove('is-yield');
     else if (!host.dataset.peek) host.classList.add('is-yield');
   }
 

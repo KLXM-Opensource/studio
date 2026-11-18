@@ -69,7 +69,7 @@
 .lay-item.is-hidden-block{opacity:.45}
 .lay-item--invalid{outline:2px dashed #B3261E}
 /* Block-Leiste: Host in der Seite (Lage, Sichtbarkeit), Knöpfe im Shadow DOM (editor.shadow.css) */
-.cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
+.cms-block__bar.cms-block__bar{position:absolute;top:8px;right:10px;width:max-content;z-index:2147483000;display:flex;align-items:center;gap:2px;padding:3px;border:1px solid #D5D8E2;border-radius:10px;background:#fff;box-shadow:0 6px 20px rgb(0 0 0/.14);opacity:0;transition:opacity .15s;user-select:none;-webkit-user-select:none}
 .cms-block:hover>.cms-block__bar,.cms-block.is-active>.cms-block__bar,.cms-block.is-selected>.cms-block__bar,.cms-block:focus-within>.cms-block__bar{opacity:1}
 /* Lage (top/left/right) setzt editor.js (BarPlace) so, dass die Leiste keine Inhalte verdeckt – Breite = Inhalt der Leiste.
    Ohne freien Platz weicht sie beim Schreiben ganz aus (.is-yield) und kommt bei Mausbewegung zurück. */
@@ -132,7 +132,7 @@ body.has-tdrawer>:not(.cms-bar-host):not(#cms-layer-host):not(#cms-epanel-host):
 
 /* Verschieben ohne Drag & Drop, Einklappen, Kompaktansicht */
 .cms-block.is-collapsed .cms-block__preview,.is-compact .cms-block__preview{display:none}
-.cms-block.is-collapsed>.cms-block__bar.cms-block__bar,.is-compact .cms-block__bar.cms-block__bar{position:static;width:auto;opacity:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:58px;padding:10px 14px 10px 92px;background:#FAFAFA;border-bottom:1px solid #E6E6E9;--cms-bb-row:block}
+.cms-block.is-collapsed>.cms-block__bar.cms-block__bar,.is-compact .cms-block__bar.cms-block__bar{position:static;width:auto;opacity:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:58px;padding:10px 14px 10px 92px;background:#FAFAFA;border:0;border-bottom:1px solid #E6E6E9;border-radius:0;box-shadow:none;--cms-bb-row:block}
 .is-compact .cms-block__bar.cms-block__bar{--cms-bb-collapse:none}
 .is-compact{max-width:1100px;margin:24px auto;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #E6E6E9}
 .is-compact .cms-block{outline:0}

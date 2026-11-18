@@ -253,12 +253,12 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 
 /* ------------------------------------------------------------------ Block-Leiste (Host .cms-block__bar liegt in der Seite, Lage: editor.css) */
 :host(.cms-block__bar){font:600 12px/1.2 Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;color:#16201E;-webkit-font-smoothing:antialiased}
-.cms-block__label{padding:4px 9px;border-radius:6px;background:#16201E;color:#fff;white-space:nowrap}
+.cms-block__label{padding:4px 8px 4px 6px;border-radius:6px;background:none;color:#4A5672;white-space:nowrap}
 .cms-block__label>span[aria-hidden]{opacity:.8;margin-right:2px}
 /* Wenig Platz (editor.js BarPlace): schmal = nur Symbol, Markierungen weg; knapp = zusätzlich ohne ↑ ↓ ▾ (Alt+↑/↓ bleibt) */
 :host(.is-slim) .cms-block__name,:host(.is-slim) .cms-block__flags,:host(.is-mini) .cms-block__tools{display:none}
 :host(.is-slim) .cms-block__label>span[aria-hidden]{margin-right:0}
-.cms-block__edit{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#314164;color:#fff;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
+.cms-block__edit{min-height:28px;margin:0 2px;padding:0 12px;border-radius:7px;border:0;background:#314164;color:#fff;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;cursor:pointer}
 .cms-block__edit:hover{background:#243150}
 /* „Felder bearbeiten“ bei Formular-Blöcken (editor.js → resources/js/_form_fields.js); schmal nur „Felder“ */
 .cms-block__fields{min-height:28px;margin:0;padding:0 12px;border-radius:999px;border:0;background:#fff;color:#1E2840;box-shadow:inset 0 0 0 1.5px #314164;font:700 12px Lato,"Segoe UI",Tahoma,Geneva,Verdana,system-ui,sans-serif;white-space:nowrap;cursor:pointer}
@@ -302,6 +302,11 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-iconbtn:disabled{opacity:.35;cursor:default}
 .cms-iconbtn[data-collapse]{display:var(--cms-bb-collapse,inline-flex)}
 :host(.cms-block__bar) :focus-visible{outline:2px solid #314164;outline-offset:2px}
+/* Weiße, geschlossene Leiste (wie im REDAXO-Editor fluid): Knöpfe flach, ↑ ↓ als Gruppe mit Trennstrichen */
+:host(.cms-block__bar) .cms-iconbtn{border-radius:6px;background:transparent;box-shadow:none;color:#1F2430}
+:host(.cms-block__bar) .cms-iconbtn:hover{background:#EEF0F5}
+:host(.cms-block__bar) .cms-block__tools{gap:0;padding:0 3px;border-left:1px solid #E6E8EE;border-right:1px solid #E6E8EE}
+:host(.cms-block__bar) .cms-block__label:hover{background:#F4F5F8}
 /* Eingeklappt / Kompaktansicht: Werte kommen als Variablen vom Host (editor.css) */
 .cms-block__summary{display:var(--cms-bb-row,none);flex:1 1 200px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;color:#16201E;cursor:pointer}
 .cms-block__swatch{display:var(--cms-bb-row,none);flex:none;width:16px;height:16px;border-radius:5px;box-shadow:0 0 0 1px #D4D4D8}
