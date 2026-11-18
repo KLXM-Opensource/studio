@@ -1199,7 +1199,7 @@ function makeTool(type, def) {
         host.className = 'cms-lay-resize'; host.contentEditable = 'false';
         host.style.cssText = `position:absolute;top:0;bottom:0;right:${-(gap / 2) - 11}px;width:22px;z-index:6`;
         col.append(host);
-        const sr = S.shadowFor(host, `<button type="button" class="cms-lay-resize__h" role="separator" aria-orientation="vertical"><span class="cms-drag__grip cms-drag__grip--cols" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg></span><span class="cms-lay-resize__tip"></span></button>`);
+        const sr = S.shadowFor(host, `<button type="button" class="cms-lay-resize__h" role="separator" aria-orientation="vertical"><span class="cms-drag__stick"><span class="cms-drag__grip cms-drag__grip--cols" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg></span><span class="cms-lay-resize__tip"></span></span></button>`);
         const h = sr.querySelector('.cms-lay-resize__h'), tip = sr.querySelector('.cms-lay-resize__tip');
         const label = w => w.map(frac).join(' · ');
         const aria = w => {
@@ -1312,7 +1312,7 @@ function makeTool(type, def) {
       }
       o.host.append(host);
       requestAnimationFrame(() => place());
-      const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" data-kind="${o.kind || 'width'}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__grip" aria-hidden="true">${o.axis === 'y' ? '<svg viewBox="0 0 24 24"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg>'}</span><span class="cms-drag__tip"></span></button>`);
+      const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" data-kind="${o.kind || 'width'}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__stick"><span class="cms-drag__grip" aria-hidden="true">${o.axis === 'y' ? '<svg viewBox="0 0 24 24"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg>'}</span><span class="cms-drag__tip"></span></span></button>`);
       const h = sr.querySelector('.cms-drag__h'), tip = sr.querySelector('.cms-drag__tip');
       const cur = () => Math.max(0, values.indexOf(o.get()));
       const show = i => {

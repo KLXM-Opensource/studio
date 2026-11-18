@@ -713,6 +713,10 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-drag__h--x .cms-drag__tip,.cms-lay-resize__h .cms-lay-resize__tip{top:50%;left:50%;translate:-50% calc(-50% - 44px)}
 .cms-drag__h:is(:hover,:focus-visible,.is-drag) .cms-drag__tip,.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag) .cms-lay-resize__tip{opacity:1}
 @media (prefers-reduced-motion:reduce){.cms-drag__grip,.cms-drag__tip,.cms-lay-resize__tip{transition:none}}
+/* Senkrechte Griffe (Spalten, Textbreite, Aufteilung) an hohen Elementen: Griff + Hinweis laufen beim Scrollen mit und bleiben
+   im mittleren Bereich des Fensters (30–70 %), immer innerhalb ihrer Spalte; kurze Elemente: wie bisher mittig. Abstand: unverändert. */
+.cms-drag__stick{display:contents}
+.cms-drag__h--x .cms-drag__stick,.cms-lay-resize__h .cms-drag__stick{position:sticky;top:max(72px,30vh);bottom:30vh;display:grid;place-items:center}
 /* Handy: Bild und Text stehen untereinander – Aufteilung/Textbreite ohne Wirkung */
 @media (max-width:760px){.cms-drag__h[data-kind=width],.cms-drag__h[data-kind=split]{display:none}}
 
