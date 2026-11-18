@@ -380,7 +380,7 @@ const BarPlace = (() => {
       ...[ce?.previousElementSibling, ce].map(c => c?.querySelector('.cms-block__add')?.shadowRoot?.querySelector('button')),
       ...[ce?.previousElementSibling, ce?.nextElementSibling].map(c => c?.querySelector(':scope .cms-block:is(:hover,.is-selected,.is-active,:focus-within)>.cms-block__bar')),
       holder().querySelector('.ce-toolbar--opened .ce-toolbar__actions'),
-      ...d.querySelectorAll('[data-cms-header]')];
+      ...d.querySelectorAll('[data-cms-header]'), d.querySelector('.eb-edit-note__b')];   // Bubble „Blöcke dieses Eintrags“ (Modus „Bearbeiten“)
     for (const x of extra) if (x && visibleEl(x) && getComputedStyle(x).visibility !== 'hidden') { const r = x.getBoundingClientRect(); if (inBand(r)) hard.push(R(r)); }
     return { hard, soft };
   }
@@ -1212,7 +1212,7 @@ function makeTool(type, def) {
         let drag = null;
         h.addEventListener('pointerdown', e => {
           e.preventDefault(); e.stopPropagation();
-          h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+          h.setPointerCapture(e.pointerId); h.classList.add('is-drag'); host.classList.add('is-drag');
           const total = grid.getBoundingClientRect().width - gap * (cols.length - 1);
           drag = { w: [...units], left: col.getBoundingClientRect().left, unit: total / U, pair: units[i] + units[i + 1], before: units.slice(0, i).reduce((a, b) => a + b, 0) };
           apply(drag.w);
@@ -1227,7 +1227,7 @@ function makeTool(type, def) {
         });
         const end = async e => {
           if (!drag) return;
-          const w = drag.w; drag = null; h.classList.remove('is-drag');
+          const w = drag.w; drag = null; h.classList.remove('is-drag'); host.classList.remove('is-drag');
           if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
           if (w.join() !== units.join()) await commit(w, T('Spaltenbreiten: {w} – noch nicht gespeichert.', { w: label(w) }));
         };
@@ -1296,7 +1296,9 @@ function makeTool(type, def) {
       if (getComputedStyle(o.host).position === 'static') o.host.style.position = 'relative';
       let dir = 1, drag = null, place = () => {};
       if (o.axis === 'y') {
-        host.style.cssText = `position:absolute;left:${o.side === 'top' ? 116 : 28}px;${o.side}:-12px;width:72px;height:24px;z-index:8`;   // links, gegeneinander versetzt (Grenze zweier Abschnitte); Mitte unten gehört „+ Block einfügen“
+        // Abschnitt schneidet Überstehendes ab (z. B. Hintergrundbild mit overflow:clip) → Griff ganz nach innen
+        const inside = getComputedStyle(o.host).overflowY !== 'visible';
+        host.style.cssText = `position:absolute;left:${o.side === 'top' ? 116 : 28}px;${o.side}:${inside ? 8 : -12}px;width:72px;height:24px;z-index:8`;   // links, gegeneinander versetzt (Grenze zweier Abschnitte); Mitte unten gehört „+ Block einfügen“
       } else {
         // Griff hängt am Abschnitt (nie im bearbeitbaren Text) und sitzt an der Kante des Zielelements – auch während des Ziehens
         // Lage erst messen, wenn die Vorschau steht (nächster Bildaufbau, Zeigen auf den Abschnitt, Fenstergröße)
@@ -1312,6 +1314,13 @@ function makeTool(type, def) {
       }
       o.host.append(host);
       requestAnimationFrame(() => place());
+      // Abstand-Griff liegt am Rand halb außerhalb – überdeckt ihn dort etwas anderes (z. B. der feste Kopf des Kits), rückt er nach innen
+      if (o.axis === 'y') o.host.addEventListener('pointerenter', () => {
+        const r = host.getBoundingClientRect();
+        if (!r.width || r.top < 0 || r.bottom > innerHeight) return;
+        const t = d.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        if (t && t !== host && !host.contains(t) && !o.host.contains(t)) host.style[o.side] = '8px';
+      });
       const sr = S.shadowFor(host, `<button type="button" class="cms-drag__h cms-drag__h--${o.axis}" data-kind="${o.kind || 'width'}" role="slider" aria-orientation="${o.axis === 'y' ? 'vertical' : 'horizontal'}"><span class="cms-drag__stick"><span class="cms-drag__grip" aria-hidden="true">${o.axis === 'y' ? '<svg viewBox="0 0 24 24"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg>'}</span><span class="cms-drag__tip"></span></span></button>`);
       const h = sr.querySelector('.cms-drag__h'), tip = sr.querySelector('.cms-drag__tip');
       const cur = () => Math.max(0, values.indexOf(o.get()));
@@ -1326,7 +1335,7 @@ function makeTool(type, def) {
       h.title = T('Ziehen: {label} ändern', { label: o.label });
       h.addEventListener('pointerdown', e => {
         e.preventDefault(); e.stopPropagation();
-        h.setPointerCapture(e.pointerId); h.classList.add('is-drag');
+        h.setPointerCapture(e.pointerId); h.classList.add('is-drag'); host.classList.add('is-drag');
         drag = { x: e.clientX, y: e.clientY, i0: cur(), i: cur() };
       });
       h.addEventListener('pointermove', e => {
@@ -1337,7 +1346,7 @@ function makeTool(type, def) {
       });
       const end = e => {
         if (!drag) return;
-        const { i, i0 } = drag; drag = null; h.classList.remove('is-drag');
+        const { i, i0 } = drag; drag = null; h.classList.remove('is-drag'); host.classList.remove('is-drag');
         if (h.hasPointerCapture?.(e.pointerId)) h.releasePointerCapture(e.pointerId);
         if (i !== i0) {
           const st = S.ui('[data-editor-status]');

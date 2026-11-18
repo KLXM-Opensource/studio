@@ -326,8 +326,11 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-editor .ce-block.is-drop-after{box-shadow:0 3px 0 #314164}
 
 /* Zieh-Griffe (editor.js dragHandle): nur beim Zeigen auf den Abschnitt bzw. mit Tastaturfokus sichtbar */
-/* Greifer immer sichtbar (Pille in Ruhe halb deckend, editor.shadow.css) – wie im REDAXO-Editor fluid */
-.cms-drag{opacity:1}
+/* Greifer nur beim Zeigen auf den Abschnitt – mit Tastatur, beim Ziehen und auf Touch-Geräten immer */
+.cms-drag,.cms-lay-resize{opacity:0;transition:opacity .15s}
+:hover>.cms-drag,.sec:hover .cms-lay-resize,.cms-drag:focus-within,.cms-lay-resize:focus-within,.cms-drag.is-drag,.cms-lay-resize.is-drag{opacity:1}
+@media (hover:none){.cms-drag,.cms-lay-resize{opacity:1}}
+@media (prefers-reduced-motion:reduce){.cms-drag,.cms-lay-resize{transition:none}}
 
 /* Leere Felder ausblenden (Menü ⋯ → „Leere Felder ausblenden“): Platzhalter „…“ nehmen keinen Platz ein, die Seite zeigt echte
    Abstände. Ein Feld mit Fokus bleibt sichtbar. */
@@ -355,8 +358,13 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .eb-edit-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 16px;background:#1E2840;color:#fff;font:500 14px/1.4 system-ui,sans-serif;text-align:center}
 .eb-edit-note svg{width:18px;height:18px;flex:none}
 /* Modus „Bearbeiten“ einer Detailseite: Block-Editor an der Stelle der Inhaltsblöcke (auch in einer Layout-Spalte) */
-.eb-slotwrap{min-width:0;border-radius:10px;box-shadow:0 0 0 2px color-mix(in srgb,#314164 35%,transparent)}
-.eb-slotwrap .eb-edit-note{border-radius:10px 10px 0 0}
+.eb-slotwrap{position:relative;min-width:0;padding-top:36px}
+/* Eigene schmale Kopfzeile: dünne Linie mit Bubble – trennt die Blöcke des Eintrags vom Feld darüber, damit Blockleiste,
+   Greifer und Rahmen der Felder nicht an derselben Kante übereinanderliegen */
+.eb-slotwrap .eb-edit-note{position:absolute;left:0;right:0;top:6px;display:flex;align-items:center;gap:10px;margin:0;padding:0;background:none;color:#4A5672;font:600 12px/1.3 Lato,system-ui,sans-serif;pointer-events:none}
+.eb-slotwrap .eb-edit-note::before,.eb-slotwrap .eb-edit-note::after{content:"";flex:1;height:1px;background:color-mix(in srgb,#314164 25%,transparent)}
+.eb-edit-note__b{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border:1px solid color-mix(in srgb,#314164 22%,transparent);border-radius:999px;background:#fff;white-space:nowrap}
+.eb-slotwrap .eb-edit-note svg{width:14px;height:14px}
 /* Ansicht als Rolle/Person (Core\Impersonation): Hinweis unter der Leiste */
 .cms-entry-note.cms-imp-note.cms-imp-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#3B2A6E;color:#fff;border-bottom-color:#2A1D52}
 .cms-imp-note form{display:inline}

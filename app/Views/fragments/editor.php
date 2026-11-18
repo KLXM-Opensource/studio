@@ -37,7 +37,7 @@ if ($content) {
 }
 ?>
 <?php if ($content): /* Modus „Bearbeiten“ einer Detailseite: Seite wie für Besucher (Felder im Text bearbeitbar), Block-Editor an der Stelle der Inhaltsblöcke (editor.js) */ ?><div class="eb-page"><?= $content['page'] ?></div>
-<div class="eb-slotwrap" data-cms-content-editor><p class="eb-edit-note" role="note"><?= icon('article') ?> <?= e(__('{field} – Blöcke dieses Eintrags', ['field' => $content['label']])) ?></p><?php endif; ?>
+<div class="eb-slotwrap" data-cms-content-editor><p class="eb-edit-note" role="note"><span class="eb-edit-note__b"><?= icon('article') ?> <?= e(__('{field} – Blöcke dieses Eintrags', ['field' => $content['label']])) ?></span></p><?php endif; ?>
 <div id="cms-editor" class="cms-editor"></div>
 <?php if ($content): ?></div><?php endif; ?>
 <script type="application/json" id="cms-editor-config"><?= json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
