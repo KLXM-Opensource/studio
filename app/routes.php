@@ -242,6 +242,7 @@ return function (Router $r): void {
     $r->get('/admin/data/{handle}/new', [Admin\DataController::class, 'entryNew']);
     $r->post('/admin/data/{handle}/new', [Admin\DataController::class, 'entrySave']);
     $r->post('/admin/data/{handle}/{id}/delete', [Admin\DataController::class, 'entryDelete']);
+    $r->post('/admin/data/{handle}/{id}/duplicate', [Admin\DataController::class, 'entryDuplicate']);
     $r->post('/admin/data/{handle}/{id}/translate', [Admin\DataController::class, 'translate']);
     $r->get('/admin/data/{handle}/{id}', [Admin\DataController::class, 'entryEdit']);
     $r->post('/admin/data/{handle}/{id}', [Admin\DataController::class, 'entrySave']);

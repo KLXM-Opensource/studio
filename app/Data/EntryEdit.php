@@ -170,6 +170,7 @@ final class EntryEdit
     {
         return [
             'dirty' => __('Ungespeicherte Änderungen'),
+            'dupDirty' => __('Ungespeicherte Änderungen gehen dabei verloren. Trotzdem duplizieren?'), 'dupOk' => __('Duplizieren'),
             'recordTag' => __('Datensatz'),
             'saving' => __('Speichere …'),
             'saved' => __('Gespeichert {time}'),

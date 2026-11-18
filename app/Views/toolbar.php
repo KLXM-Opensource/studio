@@ -123,6 +123,9 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
     <?php /* ---------- Bearbeiten: Abbrechen · Speichern · Veröffentlichen (auf Telefonen als Leiste unten) ---------- */ ?>
     <?php if ($kind === 'entry' && $b['entryEditable']): ?>
     <span class="cms-bar__grp cms-bar__edit" data-bar-group="edit"<?= $edit ? '' : ' hidden' ?>>
+      <?php if (!empty($b['panel']) && in_array($kind, ['entry', 'content'], true)): // „Alle Felder“ sichtbar beim Bearbeiten (vorher nur im Menü ⋯ – wurde übersehen) ?>
+      <button type="button" class="cms-btn cms-btn--ghost cms-btn--fields" data-entry-edit="<?= e($b['panel']) ?>" aria-haspopup="dialog" title="<?= e(__('Seitenleiste mit allen Feldern des Eintrags')) ?>"><?= icon('sidebar-simple') ?><span><?= e(__('Alle Felder')) ?></span></button>
+      <?php endif; ?>
       <button type="button" class="cms-btn cms-btn--ghost" data-bar-cancel aria-keyshortcuts="Escape"><?= e(__('Abbrechen')) ?></button>
       <?php if ($b['entryPub']): /* Freigabe-Ablauf: Entwurf = Speichern + Veröffentlichen; veröffentlicht = Speichern (sofort online), „Als Entwurf“ im Menü „⋯“.
         Beide Varianten stehen im Markup – _bar.js (Status-Chip: Online/Offline) schaltet ohne Neuladen um (data-entry-when) */ ?>
@@ -138,6 +141,9 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <button type="button" class="cms-btn cms-btn--ghost cms-btn--sq" data-editor-undo aria-disabled="true" aria-keyshortcuts="Meta+Z Control+Z" aria-label="<?= e(__('Rückgängig')) ?>" title="<?= e(__('Rückgängig')) ?> (⌘/Strg+Z)"><?= icon('arrow-counter-clockwise') ?></button>
         <button type="button" class="cms-btn cms-btn--ghost cms-btn--sq cms-redo" data-editor-redo aria-disabled="true" aria-keyshortcuts="Meta+Shift+Z Control+Y" aria-label="<?= e(__('Wiederholen')) ?>" title="<?= e(__('Wiederholen')) ?> (⇧⌘Z / Strg+Y)"><?= icon('arrow-counter-clockwise') ?></button>
       </span>
+      <?php if (!empty($b['panel']) && in_array($kind, ['entry', 'content'], true)): // „Alle Felder“ sichtbar beim Bearbeiten (vorher nur im Menü ⋯ – wurde übersehen) ?>
+      <button type="button" class="cms-btn cms-btn--ghost cms-btn--fields" data-entry-edit="<?= e($b['panel']) ?>" aria-haspopup="dialog" title="<?= e(__('Seitenleiste mit allen Feldern des Eintrags')) ?>"><?= icon('sidebar-simple') ?><span><?= e(__('Alle Felder')) ?></span></button>
+      <?php endif; ?>
       <button type="button" class="cms-btn cms-btn--ghost" data-bar-cancel aria-keyshortcuts="Escape"><?= e(__('Abbrechen')) ?></button>
       <?php if ($b['canPublish'] && $kind !== 'content'): /* Modus „Inhalt“: Einträge haben keinen Entwurf – nur Speichern */ ?>
         <button type="button" class="cms-btn" data-editor-save data-bar-save aria-disabled="true" aria-keyshortcuts="Meta+S Control+S"><?= e(__('Speichern')) ?></button>
@@ -193,6 +199,7 @@ $toolWhen = function (array $tl) use ($kind, $edit): string {
         <?php endif; ?>
         <?php if ($kind !== 'page' && $b['panel'] && !$b['live']): ?>
           <?= $item(e(__('Alle Felder bearbeiten')) . '<small>' . e(__('Seitenleiste mit allen Feldern des Eintrags')) . '</small>', 'sidebar-simple', null, ' data-entry-edit="' . e($b['panel']) . '" aria-haspopup="dialog"') ?>
+          <?= $item(e(__('Duplizieren')) . '<small>' . e(__('Kopie als Entwurf – z. B. für den nächsten Termin')) . '</small>', 'copy', null, ' data-entry-duplicate="' . e(url('/admin/data/' . $b['table']['handle'] . '/' . (int) $b['entry']['id'] . '/duplicate')) . '"') ?>
         <?php endif; ?>
         <?php if ($kind === 'page' && !$edit && $b['canDiscard']): ?>
           <?= $b['live'] ? $item(e(__('Arbeitsstand ansehen')), 'pencil-simple', $b['viewUrl']) : $item(e(__('Live-Fassung ansehen')) . '<small>' . e(__('so sehen Besucher die Seite gerade')) . '</small>', 'globe', $b['viewUrl'] . '?live=1') ?>

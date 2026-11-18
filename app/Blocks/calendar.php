@@ -131,4 +131,5 @@ $event = function (array $o, bool $withLoc) use ($t, $c, $link) {
   <p class="cal-sub"><a class="cal-sublink" href="<?= e($feed['webcal']) ?>"><?= e(lt('Kalender abonnieren')) ?></a>
     <span class="cal-subalt"><?= e(lt('oder als Datei')) ?>: <a href="<?= e($feed['https']) ?>" type="text/calendar" download>.ics</a></span></p>
   <?php endif; ?>
+<?= /* Redaktion: „+ Neuer Eintrag“ (Seitenleiste mit allen Feldern) – Besucher sehen nichts */ \Core\Data\EntryEdit::newButton($t) ?>
 </div>

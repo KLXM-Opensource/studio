@@ -106,6 +106,9 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
     </section>
     <?php endif; ?>
     <?= /* KI-Assistent: Teaser, SEO, Übersetzen (Core\AI) */ \Core\Theme::capture(ROOT . '/app/Admin/views/ai/_entry.php', ['t' => $t, 'e' => $e]) ?>
+    <?php if (!$isNew): ?>
+    <button class="adm-btn adm-btn--small adm-btn--ghost" form="dup" type="submit" title="<?= e(__('Kopie als Entwurf anlegen – z. B. für den nächsten Termin')) ?>"><?= icon('copy') ?> <?= e(__('Duplizieren')) ?></button>
+    <?php endif; ?>
     <?php if (!$isNew && can('data.delete', $t['handle'])): ?>
     <button class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text" form="del" type="submit">Eintrag löschen</button>
     <?php endif; ?>
@@ -115,5 +118,6 @@ $status = $values['status'] ?? ($e['status'] ?? 'published');
 <form id="tr-<?= e($code) ?>" method="post" action="<?= e(url($base . '/' . $e['id'] . '/translate')) ?>"><?= csrf_field() ?><input type="hidden" name="lang" value="<?= e($code) ?>"></form>
 <?php endforeach; endif; ?>
 <?php if (!$isNew): ?>
+<?php if (!$isNew): ?><form id="dup" method="post" action="<?= e(url($base . '/' . $e['id'] . '/duplicate')) ?>"><?= csrf_field() ?></form><?php endif; ?>
 <form id="del" method="post" action="<?= e(url($base . '/' . $e['id'] . '/delete')) ?>" data-confirm="„<?= e(Entries::title($t, $e)) ?>“ endgültig löschen?"><?= csrf_field() ?></form>
 <?php endif; ?>

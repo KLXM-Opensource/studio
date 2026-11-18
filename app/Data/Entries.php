@@ -623,6 +623,47 @@ final class Entries
     }
 
     /** Schnell einen Eintrag nur mit Titel anlegen (z. B. neues Schlagwort im Formular) */
+    /**
+     * Eintrag duplizieren: alle Felder (auch Inhaltsblöcke, Verweise auf Bilder/Dateien – die Dateien selbst nicht), Titel mit
+     * „(Kopie)“, eigene Adresse, als Entwurf (Tabellen ohne Freigabe-Ablauf: sofort online). Nicht übernommen: Zeitplan,
+     * Übersetzungs-Verknüpfung. Fremde Einträge geteilter Tabellen und Einträge externer Quellen lassen sich nicht duplizieren.
+     * Optionale Felder mit Werten, die heute nicht mehr gültig sind (z. B. eine entfernte Auswahl), bleiben in der Kopie leer.
+     * @return array{0: ?int, 1: array<string, string>, 2: list<string>} [neue ID, Fehler, Bezeichnungen leer gelassener Felder]
+     */
+    public static function duplicate(array $table, int $id): array
+    {
+        self::guard($table);
+        $src = self::find($table, $id);
+        if (!$src) return [null, ['_' => __('Eintrag nicht gefunden.')], []];
+        if (Tables::isShared($table) && Shared::isForeign($table, $src)) return [null, ['_' => __('Dieser Eintrag gehört zu einer anderen Website und lässt sich hier nicht duplizieren.')], []];
+        if (\Core\Sources\Sources::isExternal($table, $id)) return [null, ['_' => __('Einträge aus einer externen Quelle lassen sich nicht duplizieren.')], []];
+        $in = [];
+        foreach ($table['fields'] as $f) if (array_key_exists($f['name'], $src)) $in[$f['name']] = $src[$f['name']];
+        $tf = (string) ($table['settings']['title_field'] ?? '');
+        if ($tf !== '' && isset($in[$tf]) && is_string($in[$tf]) && trim($in[$tf]) !== '') $in[$tf] = trim($in[$tf]) . ' ' . __('(Kopie)');
+        $in['status'] = 'draft';
+        $in['slug'] = '';
+        if (!empty($src['lang'])) $in['lang'] = $src['lang'];
+        [$newId, $errors] = self::save($table, null, $in, __('Kopie von #{id}', ['id' => $id]));
+        // Titel mit „(Kopie)“ zu lang (Höchstlänge des Feldes) → mit dem Originaltitel anlegen
+        if (!$newId && $tf !== '' && isset($errors[$tf]) && isset($src[$tf])) {
+            $in[$tf] = $src[$tf];
+            [$newId, $errors] = self::save($table, null, $in, __('Kopie von #{id}', ['id' => $id]));
+        }
+        // Heute ungültige Werte optionaler Felder (Altdaten, entfernte Auswahl) leer lassen statt die Kopie zu verweigern
+        $dropped = [];
+        if (!$newId && $errors) {
+            foreach ($table['fields'] as $f) {
+                $hit = array_filter(array_keys($errors), fn($k) => $k === $f['name'] || str_starts_with((string) $k, $f['name'] . '.'));
+                if (!$hit || !empty($f['required'])) continue;
+                $in[$f['name']] = null;
+                $dropped[] = (string) ($f['label'] ?? $f['name']);
+            }
+            if ($dropped) [$newId, $errors] = self::save($table, null, $in, __('Kopie von #{id}', ['id' => $id]));
+        }
+        return [$newId, $errors, $newId ? $dropped : []];
+    }
+
     public static function quickCreate(array $table, string $title): array
     {
         $title = trim(strip_tags($title));

@@ -66,6 +66,7 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
   </div>
 </header>
 
+<form id="dt-dup" method="post" action="<?= e(url($base)) ?>" hidden><?= csrf_field() ?></form>
 <div class="dt-list" data-entries="<?= e(url($base . '/bulk')) ?>"<?= ($pl = \Core\Http\Controllers\Admin\PresenceController::listAttrs('entry', $t['handle'] . ':')) ? ' data-presence-list' . $pl : '' ?>>
   <div class="dt-bar">
     <?php if ($multi): ?><nav class="fx-seg dt-seg" aria-label="Sprache"><?php foreach (\Core\Lang::all() as $code => $label): ?><a href="<?= e(url($base) . '?lang=' . $code) ?>"<?= $code === $lang ? ' aria-current="true"' : '' ?>><?= e($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
@@ -116,6 +117,7 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
           <?php if (!empty($shared) && !empty($e['suggest'])): $sp = $ownerPicks[$e['id']] ?? null; ?><small class="sh-pick sh-pick--<?= e($sp ?? 'suggested') ?>"><?= e(match ($sp) { 'visible' => __('übernommen'), 'featured' => __('hervorgehoben'), 'rejected' => __('abgelehnt'), 'hidden' => __('ausgeblendet'), default => __('vorgeschlagen') }) ?></small><?php endif; ?>
           <?php if (isset($extOrigin[$e['id']])): ?><small class="src-badge" title="<?= e(__('Aus der externen Quelle „{name}“ – nur lesbar', ['name' => $extOrigin[$e['id']]['name']])) ?>"><?= icon('plugs-connected') ?> <?= e(__('aus Quelle')) ?></small><?php endif; ?>
           <?php if ($url): ?><a class="dt-view" href="<?= e($url) ?>" target="_blank" rel="noopener" aria-label="Auf der Website ansehen">↗</a><?php endif; ?>
+          <?php if (!(!empty($shared) && \Core\Data\Shared::isForeign($t, $e)) && !isset($extOrigin[$e['id']])): // Duplizieren (Kopie als Entwurf) ?><button type="submit" form="dt-dup" class="dt-rowact dt-rowact--dup" formaction="<?= e(url($base . '/' . $e['id'] . '/duplicate')) ?>" aria-label="<?= e(__('Duplizieren') . ': ' . Entries::title($t, $e)) ?>" title="<?= e(__('Kopie als Entwurf anlegen')) ?>"><?= e(__('Duplizieren')) ?></button><?php endif; ?>
           <?php if ($extTbl['row']): foreach (\Core\Extensions::rowActions($extTbl['row'], (int) $e['id']) as $xa): ?><a class="dt-rowact" href="<?= e(url($xa['href'])) ?>" aria-label="<?= e($xa['label'] . ': ' . Entries::title($t, $e)) ?>"><?= e($xa['label']) ?></a><?php endforeach; endif; ?>
         </div></td>
         <?php foreach ($cols as $c): ?><td data-label="<?= e($c['label']) ?>"><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>

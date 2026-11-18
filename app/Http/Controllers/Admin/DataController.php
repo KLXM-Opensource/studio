@@ -649,6 +649,36 @@ final class DataController extends AdminController
         return $this->back($to, 'success', $t['singular'] . ' gespeichert.' . $plan);
     }
 
+    /**
+     * Eintrag duplizieren (Entries::duplicate) – Kopie als Entwurf. Weiter: then=site → Detailseite der Kopie zum Bearbeiten
+     * (#cms-bearbeiten), sonst das Formular der Kopie. JSON (Accept: application/json, Werkzeugleiste der Website): {ok, url, admin}
+     */
+    public function entryDuplicate(Request $r, string $handle, string $id): Response
+    {
+        $this->auth($r);
+        $t = $this->table($handle);
+        $this->noInbox($t, $r);
+        if (!can('data.edit', $handle)) throw new HttpException(403, __('Für diese Tabelle fehlt Ihrer Rolle die Berechtigung.'));
+        [$newId, $errors, $dropped] = Entries::duplicate($t, (int) $id);
+        $json = str_contains((string) ($r->server['HTTP_ACCEPT'] ?? ''), 'application/json');
+        if (!$newId) {
+            $msg = implode(' ', $errors) ?: __('Duplizieren fehlgeschlagen.');
+            if ($json) return Response::json(['ok' => false, 'error' => $msg], 422);
+            return $this->back("/admin/data/$handle/$id", 'error', $msg);
+        }
+        $this->changed();
+        $copy = Entries::find($t, (int) $newId);
+        $view = $copy ? Entries::url($t, $copy) : null;
+        $admin = url("/admin/data/$handle/$newId");
+        $msg = $copy && $copy['status'] === 'draft'
+            ? __('Kopie angelegt – als Entwurf, noch nicht auf der Website.')
+            : __('Kopie angelegt – diese Tabelle hat keinen Entwurfsstand, die Kopie ist sofort auf der Website.');
+        if ($dropped) $msg .= ' ' . __('Nicht übernommen, weil nicht mehr gültig – bitte prüfen: {fields}.', ['fields' => implode(', ', $dropped)]);
+        app()->session->flash('success', $msg);
+        if ($json) return Response::json(['ok' => true, 'url' => $view ? $view . '#cms-bearbeiten' : $admin, 'admin' => $admin]);
+        return Response::redirect($r->str('then') === 'site' && $view ? $view . '#cms-bearbeiten' : $admin);
+    }
+
     public function entryDelete(Request $r, string $handle, string $id): Response
     {
         $this->auth($r);

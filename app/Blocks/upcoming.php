@@ -60,4 +60,5 @@ $today = (new DateTimeImmutable('today', Calendar::tz()))->format('Y-m-d');
   <?php if (!empty($d['more_label']) && !empty($d['more_link'])): ?>
   <p class="cal-more"><a class="<?= e($btn) ?>" href="<?= e(link_href((string) $d['more_link'])) ?>"<?= $b->edit('more_label') ?>><?= e($d['more_label']) ?></a></p>
   <?php endif; ?>
+<?= /* Redaktion: „+ Neuer Eintrag“ (Seitenleiste mit allen Feldern) – Besucher sehen nichts */ \Core\Data\EntryEdit::newButton($t) ?>
 </div>

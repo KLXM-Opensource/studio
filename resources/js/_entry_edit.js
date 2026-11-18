@@ -713,6 +713,19 @@ export function initEntryEdit() {
     e.preventDefault(); e.stopPropagation();
     Panel.open(a.dataset.entryEdit, a);
   }, true);
+  // „Duplizieren“ (Menü ⋯ der Detailseite): Kopie als Entwurf anlegen und gleich zum Bearbeiten öffnen
+  d.addEventListener('click', async e => {
+    const b = pathClosest(e, '[data-entry-duplicate]');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    if (Bar.dirty && !(await ask({ title: T.dupDirty || 'Ungespeicherte Änderungen gehen dabei verloren. Trotzdem duplizieren?', ok: T.dupOk || 'Duplizieren', cancel: T.cancel, danger: true }))) return;
+    b.setAttribute('aria-busy', 'true');
+    const res = await request(b.dataset.entryDuplicate, { method: 'POST', form: new FormData() }).catch(err => ({ ok: false, error: err.message }));
+    b.removeAttribute('aria-busy');
+    if (!res.ok) { alert(res.error || T.error); return; }
+    Inline.reset();
+    location.href = res.url;
+  }, true);
   if (cfg) Inline.init();
   // Status-Chip der Werkzeugleiste hat online/offline umgeschaltet (_bar.js entryStatus)
   d.addEventListener('cms:entry-status', e => { if (cfg) cfg.status = e.detail.status; });
