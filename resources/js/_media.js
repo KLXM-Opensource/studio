@@ -1760,13 +1760,16 @@ function initInlineCrop() {
     if (target !== im) { if (target) ro.unobserve(target); ro.observe(im); }
     if (target !== im) closeMenu();
     target = im;
-    cropBtn.hidden = !im.dataset.ratio;
-    fxBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
+    // Platzhalter ohne Bild: nur „Bild wählen“ / „Hochladen“ (Zuordnung zum leeren Bildfeld: CMSEditor.swap.empty)
+    const ph = !im.matches('img');
+    cropBtn.hidden = ph || !im.dataset.ratio;
+    fxBtn.hidden = ph || !im.closest('.cms-block__preview') || !window.CMSEditor?.fx;
     fitBtn.hidden = fxBtn.hidden || !window.CMSEditor?.fit;
     // Tauschen/Hochladen: nur Bilder, die einem Bildfeld des Blocks gehören (nicht aus Datentabellen oder zentral gepflegt)
-    swapBtn.hidden = upBtn.hidden = !im.closest('.cms-block__preview') || !window.CMSEditor?.swap?.target(im);
+    swapBtn.hidden = upBtn.hidden = !im.closest('.cms-block__preview') || !swapFor(im);
     if (cropBtn.hidden && fxBtn.hidden && swapBtn.hidden) { bar.hidden = true; return; }
-    swapBtn.setAttribute('aria-label', t('Bild tauschen (Mediathek)'));
+    $('span', swapBtn).textContent = ph ? t('Bild wählen …') : t('Tauschen');
+    swapBtn.setAttribute('aria-label', ph ? t('Bild aus der Mediathek wählen') : t('Bild tauschen (Mediathek)'));
     upBtn.setAttribute('aria-label', t('Neues Bild hochladen und hier verwenden'));
     fitBtn.setAttribute('aria-label', t('Darstellung im Rahmen: füllen, einpassen oder Originalformat'));
     cropBtn.setAttribute('aria-label', t('Bild zuschneiden ({ratio})', { ratio: im.dataset.ratio || '' }));
@@ -1774,10 +1777,22 @@ function initInlineCrop() {
     bar.hidden = false; place();
   };
   const hide = () => { closeMenu(); bar.hidden = true; target = null; };
+  // Ziel für Tauschen/Wählen: Bild → swap.target, Platzhalter → swap.empty (ohne eindeutiges Feld: { open } → Seitenleiste)
+  const swapFor = el => el.matches('img') ? window.CMSEditor?.swap?.target(el) : window.CMSEditor?.swap?.empty?.(el);
+  const EMPTY = '[data-media-empty], [class*="media--empty"], [class*="frame--empty"]';
+  // Klick auf einen Platzhalter: Menü mit „Bild wählen“ / „Hochladen“ (bzw. Seitenleiste, wenn das Feld nicht eindeutig ist)
+  d.addEventListener('click', e => {
+    const ph = e.target.closest?.(EMPTY);
+    if (!ph || !ph.closest('.cms-block__preview') || !window.CMSEditor?.swap?.empty) return;
+    e.preventDefault(); e.stopPropagation();
+    const s = window.CMSEditor.swap.empty(ph);
+    if (!s?.set) { s?.open?.(); return; }
+    show(ph); if (!bar.hidden) openMenu(e.detail === 0);
+  }, true);
   // Bild unter dem Zeiger – auch wenn eine Ebene des Kits darüber liegt (ganze Karte klickbar: Link mit ::after über
   // dem Porträt, Verläufe, Beschriftungen). Dann trifft mouseover nie das <img>, „Rahmen“/„Anpassen“ blieben unerreichbar.
   const imgAt = e => {
-    const own = e.target.closest?.('img[data-media-id]');
+    const own = e.target.closest?.('img[data-media-id]') || (e.target.closest?.('.cms-block__preview') && e.target.closest?.(EMPTY));
     if (own) return own;
     if (!e.target.closest?.('.cms-block__preview')) return null;
     return d.elementsFromPoint(e.clientX, e.clientY).find(x => x.matches?.('img[data-media-id]') && x.closest('.cms-block__preview')) || null;
@@ -1822,8 +1837,8 @@ function initInlineCrop() {
   // Tauschen: Mediathek-Auswahl (dort auch Hochladen); Hochladen: gleich die Dateiauswahl – neue Datei wird direkt übernommen
   const swap = upload => e => {
     e.preventDefault(); e.stopPropagation();
-    const s = target && window.CMSEditor?.swap?.target(target);
-    if (!s) return;
+    const s = target && swapFor(target);
+    if (!s?.set) return;
     bar.hidden = true;
     pick(s.kind, { upload }).then(m => { if (m) s.set(m); });
   };

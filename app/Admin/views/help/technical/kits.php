@@ -416,6 +416,7 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <tr><th>Helfer</th><th>Zweck</th></tr>
     <tr><td><code>e($v)</code></td><td>HTML-Escaping – für jede Ausgabe</td></tr>
     <tr><td><code>rich($html)</code>, <code>inline($html)</code></td><td>Rich-Text über Whitelist ausgeben</td></tr>
+    <tr><td>Platzhalter für fehlende Bilder</td><td>Im Bearbeiten-Modus einen Platzhalter mit <code>data-media-empty</code> (oder Klasse <code>…media--empty</code>/<code>…frame--empty</code>) ausgeben – der Editor macht ihn klickbar („Bild wählen …“ / „Hochladen“) und ordnet ihn dem leeren Bildfeld des Blocks zu (gleiche Reihenfolge wie die Felder).</td></tr>
     <tr><td><code>setting('key')</code>, <code>filled($v)</code></td><td>Einstellung lesen; „befüllt und kein [Platzhalter]“</td></tr>
     <tr><td><code>url('/pfad')</code>, <code>link_href($link)</code>, <code>tel_href($nr)</code></td><td>URLs (Rewrite-sicher), Link-Felder, Telefon-Links</td></tr>
     <tr><td><code>fmt()-&gt;date($v)</code>, <code>-&gt;relative()</code>, <code>-&gt;number()</code>, <code>-&gt;bytes()</code> …</td><td>Werte formatieren in der Sprache der Seite (<code>Core\Format</code>) – Datum, Zahl, Betrag, Größe, Dauer, Telefon, Host, Auszug; siehe <a href="#format">Format</a>. <code>date_local($v, $stil)</code> und <code>phone_display()</code> bleiben als Kurzformen</td></tr>

@@ -1595,7 +1595,42 @@ function mediaFields(fields, data, id, prefix = '') {
   }
   return out;
 }
+/** Leere Bildfelder eines Blocks in Reihenfolge (auch in Wiederholungen) – für Platzhalter ohne Bild */
+function emptyMediaFields(fields, data, prefix = '') {
+  const out = [];
+  for (const f of fields || []) {
+    const v = data?.[f.name], p = prefix + f.name;
+    if (f.type === 'media' && !f.multiple && (v == null || v === '' || +v === 0)) out.push({ path: p, field: f });
+    if ((f.type === 'repeater' || f.type === 'group') && Array.isArray(v)) v.forEach((item, i) => out.push(...emptyMediaFields(f.fields, item, `${p}.${i}.`)));
+  }
+  return out;
+}
+/** Platzhalter der Kits für fehlende Bilder (media--empty, fw-media--empty …) */
+const EMPTY_MEDIA = '[data-media-empty], [class*="media--empty"], [class*="frame--empty"]';
 window.CMSEditor.swap = {
+  /**
+   * Platzhalter ohne Bild → { kind, set(media) } (gleiche Zahl leerer Bildfelder und Platzhalter: der Reihe nach; genau ein
+   * leeres Feld: dieses) oder { open() } – nicht eindeutig: Seitenleiste des Blocks öffnen.
+   */
+  empty(ph) {
+    const tool = toolFor(ph);
+    if (!tool) return null;
+    const free = emptyMediaFields(tool.def.fields, tool.data);
+    const scope = ph.closest('[data-lay-id]') || ph.closest('.cms-block') || tool.el;
+    const all = [...scope.querySelectorAll(EMPTY_MEDIA)];
+    const hit = free.length === all.length ? free[all.indexOf(ph)] : free.length === 1 ? free[0] : null;
+    if (!hit) return { open: () => openDrawer(tool) };
+    return {
+      kind: hit.field.accept === 'visual' ? 'visual' : 'image',
+      set(m) {
+        if (!m?.id) return;
+        setPath(tool.data, hit.path, m.id);
+        markDirty();
+        tool.loadPreview();
+        if (drawerFor === tool) openDrawer(tool);
+      },
+    };
+  },
   /** Bild im Block → { kind ('image'|'visual'), set(media) } oder null (nicht zuordenbar, z. B. aus einer Datentabelle) */
   target(img) {
     const tool = toolFor(img);

@@ -370,3 +370,7 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 .cms-imp-note form{display:inline}
 .cms-imp-note .cms-lock-note__btn{all:unset;box-sizing:border-box;padding:3px 12px;border-radius:999px;background:#fff;color:#3B2A6E;font-weight:700;font-size:13px;cursor:pointer}
 .cms-imp-note .cms-lock-note__btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* Platzhalter ohne Bild (Kits: media--empty) im Editor: Klick → „Bild wählen“ / „Hochladen“ (_media.js) */
+.cms-block__preview :is([data-media-empty],[class*="media--empty"],[class*="frame--empty"]){cursor:pointer}
+.cms-block__preview :is([data-media-empty],[class*="media--empty"],[class*="frame--empty"]):hover{outline:2px solid color-mix(in srgb,#314164 45%,transparent);outline-offset:-2px}

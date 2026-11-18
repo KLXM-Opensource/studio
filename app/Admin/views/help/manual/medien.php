@@ -91,7 +91,7 @@
   <p><b>Standard des Bildes:</b> Im großen Bearbeitungsfenster der Mediathek legen Sie unter <b>Darstellung im Rahmen</b> fest, wie das Bild überall dort erscheint, wo keine eigene Einstellung gewählt ist. Ohne Angabe gilt <b>Automatisch</b>: Fotos füllen den Rahmen, <b>SVG-Grafiken und PNG-Logos mit transparentem Rand</b> werden eingepasst (transparent) – so werden Logos in Galerien und Karten nicht mehr abgeschnitten. Ist für das Format ein eigener Zuschnitt gesetzt, bleibt es beim Füllen. Der Alt-Text bleibt unverändert; der unscharfe Hintergrund ist reine Dekoration und wird nicht vorgelesen.</p>
 
   <h3 id="bild-tauschen">Bild auf der Seite tauschen oder neu hochladen</h3>
-  <p>Im Bearbeitungsmodus öffnet der runde Knopf am Bild eines Blocks ein Menü (auch per Tastatur: Tab, Pfeil nach unten, Esc schließt): neben <b>Anpassen</b>, <b>Rahmen</b> und <b>Zuschneiden</b> stehen dort
+  <p><b>Leerer Bildplatz:</b> Ein Klick auf den grauen Platzhalter („Bild · 4:3“) bietet gleich <b>Bild wählen …</b> und <b>Hochladen</b> an. <p>Im Bearbeitungsmodus öffnet der runde Knopf am Bild eines Blocks ein Menü (auch per Tastatur: Tab, Pfeil nach unten, Esc schließt): neben <b>Anpassen</b>, <b>Rahmen</b> und <b>Zuschneiden</b> stehen dort
     <b>Tauschen</b> (Auswahl aus der Mediathek) und <b>Hochladen</b> (öffnet gleich die Dateiauswahl – die neue Datei landet in der
     Mediathek und steht sofort an dieser Stelle). Anpassung und Rahmen der Stelle beginnen beim neuen Bild von vorn. Gespeichert
     wird wie immer mit dem Entwurf. Bilder von Einträgen (z. B. Referenzen) tauschen Sie auf deren Detailseite: <b>Bearbeiten</b>, dann
