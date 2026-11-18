@@ -11,6 +11,7 @@ $blocks = EntryBlocks::forContext($d);
 ?>
 <div class="<?= e($wrap) ?> eb-preview">
   <?php if (!is_editing()): return; endif; ?>
-  <p class="eb-preview__note"><?= icon('squares-four') ?> <?= e($blocks ? __('Inhaltsblöcke des Eintrags – Vorschau ({n} Blöcke). Bearbeitet werden sie im Eintrag.', ['n' => count($blocks)]) : __('Hier erscheinen die Inhaltsblöcke des jeweiligen Eintrags. Der Vorschau-Eintrag hat noch keine.')) ?></p>
+  <p class="eb-preview__note"><?= icon('squares-four') ?> <?= e($blocks ? __('Inhaltsblöcke des Eintrags – nur Vorschau ({n} Blöcke). Ändern lassen sie sich je Eintrag im Modus „Inhalt“.', ['n' => count($blocks)]) : __('Hier erscheinen die Inhaltsblöcke des jeweiligen Eintrags. Der Vorschau-Eintrag hat noch keine.')) ?></p>
 </div>
-<?php if ($blocks && is_editing()) echo EntryBlocks::render($blocks); ?>
+<?php // Nur Vorschau: inert + data-cms-readonly – die Vorlage darf Inhalte des Eintrags nicht ändern (editor.js bindet hier kein [data-edit]) ?>
+<?php if ($blocks && is_editing()): ?><div class="eb-preview__blocks" data-cms-readonly inert><?= EntryBlocks::render($blocks) ?></div><?php endif; ?>

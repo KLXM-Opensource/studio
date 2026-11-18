@@ -957,6 +957,7 @@ function makeTool(type, def) {
       fire();
       // Direkt editierbare Texte: plain = nur Text, rich/inline = mit schwebender Formatierungsleiste
       $$('[data-edit]', pv).forEach(n => {
+        if (n.closest('[data-cms-readonly]')) return;   // Vorschau fremder Inhalte (z. B. Inhaltsblöcke des Eintrags in der Vorlage)
         const mode = n.dataset.editMode || 'plain';
         n.spellcheck = true;
         // Editor.js soll Tasten in unseren Feldern nicht abfangen (Enter, Backspace, Tab …) – und auch kein Einfügen:
@@ -1038,7 +1039,7 @@ function makeTool(type, def) {
         if (this.isNew) {
           // Neuer Block: direkt in den ersten Text schreiben; ohne direkt bearbeitbaren Text (Bild, Liste …) die Seitenleiste
           this.isNew = false; markDirty(); selectBlock(this.el);
-          const first = $('[data-edit]', pv);
+          const first = $$('[data-edit]', pv).find(n => !n.closest('[data-cms-readonly]'));
           if (first) {
             this.el.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
             first.focus({ preventScroll: true });
