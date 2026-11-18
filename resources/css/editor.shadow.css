@@ -307,6 +307,8 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 :host(.cms-block__bar) .cms-iconbtn:hover{background:#EEF0F5}
 :host(.cms-block__bar) .cms-block__tools{gap:0;padding:0 3px;border-left:1px solid #E6E8EE;border-right:1px solid #E6E8EE}
 :host(.cms-block__bar) .cms-block__label:hover{background:#F4F5F8}
+/* Typ-Symbol nur, wenn der Name fehlt (schmale Leiste) – Name allein reicht */
+:host(.cms-block__bar:not(.is-slim)) .cms-block__label>span[aria-hidden]:not(.cms-block__grip){display:none}
 /* Eingeklappt / Kompaktansicht: Werte kommen als Variablen vom Host (editor.css) */
 .cms-block__summary{display:var(--cms-bb-row,none);flex:1 1 200px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;color:#16201E;cursor:pointer}
 .cms-block__swatch{display:var(--cms-bb-row,none);flex:none;width:16px;height:16px;border-radius:5px;box-shadow:0 0 0 1px #D4D4D8}
