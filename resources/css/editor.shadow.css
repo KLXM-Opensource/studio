@@ -372,11 +372,11 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 /* Leiste mit „Anpassen“ (Core\ImageFx) und „Zuschneiden“ – die Leiste liegt absolut, die Knöpfe darin nebeneinander */
 .cms-imgtools{position:absolute;display:flex;gap:6px}
 .cms-imgtools .cms-cropbtn{position:static}
-/* Ein runder Knopf (Bild + Pfeil), Aktionen im Menü darunter (rechtsbündig) */
+/* Ein runder Knopf (Bild + Pfeil) oben links im Bild, Aktionen im Menü darunter */
 .cms-imgtools__btn{gap:2px;min-width:34px;padding:0 9px}
 .cms-imgtools__btn svg:last-child{width:11px;height:11px;opacity:.8}
 .cms-imgtools__btn[aria-expanded=true]{background:#314164}
-.cms-imgtools__menu{position:absolute;top:calc(100% + 6px);right:0;display:grid;min-width:190px;padding:4px;border:1px solid #D5D8E2;border-radius:8px;background:#fff;box-shadow:0 6px 24px rgb(0 0 0/.18)}
+.cms-imgtools__menu{position:absolute;top:calc(100% + 6px);left:0;display:grid;min-width:190px;padding:4px;border:1px solid #D5D8E2;border-radius:8px;background:#fff;box-shadow:0 6px 24px rgb(0 0 0/.18)}
 .cms-imgtools__menu[hidden]{display:none}
 .cms-imgtools__item{display:flex;align-items:center;gap:10px;min-height:34px;margin:0;padding:4px 10px;border:0;border-radius:6px;background:none;color:#1F2430;font:500 14px/1.2 Lato,"Segoe UI",system-ui,sans-serif;text-align:left;cursor:pointer}
 .cms-imgtools__item[hidden]{display:none}
@@ -840,3 +840,7 @@ button.pp-fold:focus-visible{outline:2px solid var(--adm-a,#314164);outline-offs
 .cms-flag--ext{background:#EDE9FE;color:#4C1D95}
 .cms-addpop__group{margin:8px 10px 2px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--m-mute,#5A6461)}
 .cms-addpop__item--preset small{display:block;font-size:11.5px;font-weight:400;opacity:.75}
+
+/* Felder des Eintrags beim Bearbeiten: weiße Bubble „Datensatz · Feld“ über dem Feld (_entry_edit.js) */
+.cms-entry-tag{position:absolute;z-index:30;padding:3px 10px;border:1px solid #D5D8E2;border-radius:999px;background:#fff;color:#314164;font:600 12px/1.3 Lato,"Segoe UI",system-ui,sans-serif;white-space:nowrap;box-shadow:0 4px 14px rgb(0 0 0/.12);pointer-events:none}
+.cms-entry-tag[hidden]{display:none}

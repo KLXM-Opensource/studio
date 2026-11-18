@@ -169,6 +169,7 @@ final class EntryEdit
     {
         return [
             'dirty' => __('Ungespeicherte Änderungen'),
+            'recordTag' => __('Datensatz'),
             'saving' => __('Speichere …'),
             'saved' => __('Gespeichert {time}'),
             'published' => __('Veröffentlicht {time}'),

@@ -1729,30 +1729,13 @@ function initInlineCrop() {
   // Esc schließt zuerst das Menü – nicht den Bearbeiten-Modus (Werkzeugleiste: Esc = Abbrechen)
   addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { e.preventDefault(); e.stopImmediatePropagation(); closeMenu(true); } }, true);
   let target = null, hideT, leaving = false;
+  // Fest oben links im Bild – dort liegt nie die Leiste des Blocks (oben rechts) oder ein Stift; kein Ausweichen, kein Springen.
+  // Nur unter Werkzeugleiste/klebendem Kit-Kopf rückt er nach unten (bzw. verschwindet, wenn das Bild dort zu Ende ist).
   const place = () => {
     const r = target.getBoundingClientRect();
-    // Nicht über Werkzeugleiste oder klebenden Kit-Kopf legen: unter deren Unterkante rücken, sonst ausblenden
-    let top = Math.max(r.top + 12, topInset() + 8), right = r.right - 12;
-    // Stift „Eintrag bearbeiten“ (Datenlisten, oben rechts auf der Karte) und die Leiste des Blocks (editor.js BarPlace)
-    // freilassen: links daneben, bei Platzmangel darunter
-    const blockBar = target.closest('.cms-block')?.querySelector(':scope>.cms-block__bar');
-    // Leiste des Blocks: nur die sichtbaren Knöpfe zählen (das Element selbst ist so breit wie der Block)
-    const barRect = el => {
-      const parts = [...(el.shadowRoot?.children || el.children)].map(c => c.getBoundingClientRect()).filter(r => r.width && r.height);
-      if (!parts.length) return el.getBoundingClientRect();
-      const l = Math.min(...parts.map(r => r.left)), t = Math.min(...parts.map(r => r.top)), rr = Math.max(...parts.map(r => r.right)), b = Math.max(...parts.map(r => r.bottom));
-      return { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t };
-    };
-    const busy = [...[...d.querySelectorAll('.cms-entry-pencil, .cms-target-edit')].map(p => p.getBoundingClientRect()),   // auch „✎ Bearbeiten“ an Karten/Kacheln (Core\TargetEdit)
-       // Platz der Blockleiste immer freihalten – auch wenn sie gerade unsichtbar ist (erscheint bei Hover/Auswahl), sonst springt die Bildleiste
-       ...(blockBar && !blockBar.classList.contains('is-yield') ? [barRect(blockBar)] : [])];
-    for (let i = 0; i < 3; i++) {
-      const pen = busy.find(p => p.width && p.left < right && p.right > right - bar.offsetWidth && p.top < top + bar.offsetHeight && p.bottom > top);
-      if (!pen) break;
-      top = pen.bottom + 8;   // nur nach unten ausweichen (seitliches Ausweichen ließ die Leiste hin- und herspringen)
-    }
+    const top = Math.max(r.top + 12, topInset() + 8);
     bar.style.visibility = top + bar.offsetHeight > r.bottom - 8 ? 'hidden' : '';
-    bar.style.left = (right + scrollX - bar.offsetWidth) + 'px';
+    bar.style.left = (r.left + 12 + scrollX) + 'px';
     bar.style.top = (top + scrollY) + 'px';
   };
   const show = im => {

@@ -418,10 +418,31 @@ const Inline = (() => {
     else if (!dirty && was) barState('clean');
   }
 
+  // Bubble „Datensatz · Feld“ über dem Feld unter der Maus bzw. mit Fokus – zeigt, dass hier der Eintrag geändert wird, nicht die Seite
+  let tag = null;
+  const showTag = n => {
+    if (!editing || !n.isConnected) return;
+    if (!tag) { tag = d.createElement('div'); tag.className = 'cms-entry-tag'; tag.setAttribute('aria-hidden', 'true'); layerBox().append(tag); }
+    tag.textContent = (T.recordTag || 'Datensatz') + (n.dataset.entryLabel ? ' · ' + n.dataset.entryLabel : '');
+    const r = n.getBoundingClientRect();
+    tag.hidden = false;
+    tag.style.left = (r.left + scrollX) + 'px';
+    tag.style.top = (r.top + scrollY - tag.offsetHeight - 6) + 'px';
+  };
+  const hideTag = () => { if (tag) tag.hidden = true; };
+
   // Bearbeiten ein/aus (Modus der Werkzeugleiste): nur im Modus „Bearbeiten“ sind die Felder editierbar
   let editing = false;
   function editable(n, on) {
     const mode = n.dataset.entryMode;
+    if (!n._tagged) {   // einmal je Feld: Bubble beim Zeigen und mit Fokus
+      n._tagged = true;
+      n.addEventListener('pointerenter', () => showTag(n));
+      n.addEventListener('pointerleave', () => { if (!n.contains(d.activeElement)) hideTag(); });
+      n.addEventListener('focusin', () => showTag(n));
+      n.addEventListener('focusout', hideTag);
+    }
+    if (!on) hideTag();
     if (mode === 'media') {
       mediaUi(n, on);
       if (on) { n._titleM = n.getAttribute('title'); n.title = tx('mediaHint', { label: n.dataset.entryLabel || '' }); }
