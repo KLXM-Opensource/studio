@@ -374,3 +374,11 @@ td>.cms-entry-pencil.cms-entry-pencil{position:relative;top:auto;right:auto;widt
 /* Platzhalter ohne Bild (Kits: media--empty) im Editor: Klick → „Bild wählen“ / „Hochladen“ (_media.js) */
 .cms-block__preview :is([data-media-empty],[class*="media--empty"],[class*="frame--empty"]){cursor:pointer}
 .cms-block__preview :is([data-media-empty],[class*="media--empty"],[class*="frame--empty"]):hover{outline:2px solid color-mix(in srgb,#314164 45%,transparent);outline-offset:-2px}
+
+/* Abstand ziehen: zugehöriger Abschnitt leuchtet auf, der Abstand (padding oben/unten) ist schraffiert – editor.js dragHandle */
+.cms-drag-band{position:absolute;left:0;right:0;z-index:7;pointer-events:none;opacity:0;transition:opacity .15s,height .15s;background:repeating-linear-gradient(-45deg,rgba(124,58,237,.16) 0 6px,rgba(124,58,237,.06) 6px 12px)}
+.cms-drag-band--top{top:0;border-bottom:1px dashed rgba(124,58,237,.6)}
+.cms-drag-band--bottom{bottom:0;border-top:1px dashed rgba(124,58,237,.6)}
+.cms-drag-band.is-on{opacity:1}
+.cms-drag-owner{box-shadow:inset 0 0 0 2px rgba(124,58,237,.7),0 0 0 4px rgba(124,58,237,.14)!important}
+@media (prefers-reduced-motion:reduce){.cms-drag-band{transition:none}}

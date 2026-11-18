@@ -724,8 +724,9 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 /* senkrechte Führungslinie bei Breiten-Griffen: zeigt, welche Kante bewegt wird */
 .cms-drag__h--x::before,.cms-lay-resize__h::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:var(--k);opacity:0;transition:opacity .15s}
 .cms-drag__h--x:is(:hover,:focus-visible,.is-drag)::before,.cms-lay-resize__h:is(:hover,:focus-visible,.is-drag)::before{opacity:.55}
-.cms-drag__h--y::before{content:"";position:absolute;left:-28px;right:calc(-1 * min(600px, 100vw - 220px));top:50%;height:2px;margin-top:-1px;background:var(--k);opacity:0;transition:opacity .15s;pointer-events:none}
-.cms-drag__h--y:is(:hover,:focus-visible,.is-drag)::before{opacity:.45}
+/* Abstand: keine Führungslinie mehr – der Abstand selbst wird im Abschnitt schraffiert (editor.css .cms-drag-band) */
+/* Hinweis beim Griff oben: unterhalb (bleibt im eigenen Abschnitt, nicht über dem Abschnitt davor) */
+.cms-drag__h[data-side=top] .cms-drag__tip{top:30px}
 .cms-drag__h:focus-visible,.cms-lay-resize__h:focus-visible{outline:2px solid var(--k);outline-offset:3px;border-radius:8px}
 .cms-drag__tip,.cms-lay-resize__tip{position:absolute;left:0;top:-32px;padding:4px 9px;border-radius:999px;background:var(--k);color:#fff;font:600 12px/1.2 Lato,"Segoe UI",system-ui,-apple-system,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 12px rgb(0 0 0/.2)}
 .cms-drag__h--x .cms-drag__tip,.cms-lay-resize__h .cms-lay-resize__tip{top:50%;left:50%;translate:-50% calc(-50% - 44px)}

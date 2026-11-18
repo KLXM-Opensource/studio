@@ -112,7 +112,7 @@ $__sample = $vars['blocks_page'] ?? null;
   <h3 id="ziehen">Mit der Maus ziehen</h3>
   <p>Einige Einstellungen lassen sich direkt auf der Seite ziehen – zeigen Sie mit der Maus auf einen Abschnitt, dann erscheinen kleine farbige Griffe (an hohen Spalten wandern sie beim Scrollen mit):</p>
   <ul>
-    <li><b>Abstand oben/unten:</b> waagrechter Griff links am oberen bzw. unteren Rand des Abschnitts. Nach unten ziehen = mehr Abstand (Kein, Klein, Normal, Groß – „Groß“ je nach Design).</li>
+    <li><b>Abstand oben/unten:</b> waagrechter Griff links, knapp innerhalb des oberen bzw. unteren Rands des Abschnitts. Beim Zeigen leuchtet der zugehörige Abschnitt auf und der Abstand selbst ist schraffiert – so ist klar, welcher Abschnitt sich ändert. Nach unten ziehen = mehr Abstand (Kein, Klein, Normal, Groß – „Groß“ je nach Design).</li>
     <li><b>Textbreite</b> (Fließtext, je nach Design): senkrechter Griff am rechten Rand des Textes – schmal, Lesebreite, breit, volle Breite.</li>
     <li><b>Aufteilung Bild/Text</b> (Text + Bild, je nach Design): Griff am inneren Rand des Bildes.</li>
     <li><b>Spaltenbreiten</b> im Block „Layout (Spalten)“: Griff zwischen zwei Spalten (siehe unten).</li>
