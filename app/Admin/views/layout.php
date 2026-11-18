@@ -207,12 +207,12 @@ if ($user && ($req = app()->request)) {
   <?php endif; ?>
   <nav id="adm-mainnav" aria-label="<?= e(__('Verwaltung')) ?>">
     <ul>
+      <?php // Website ansehen: erster Menüpunkt, öffnet einen neuen Tab (Pfeil rechts) ?>
+      <li class="adm-nav-site"><a href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('globe', ['class' => 'adm-nav__ico']) ?><span><?= e(__('Website ansehen')) ?></span><?= icon('arrow-square-out', ['class' => 'adm-nav-site__ext']) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a></li>
       <?php foreach ($nav as [$href, $label, $key]): $navSvg = \Core\Icons::nav($key, 'adm-nav__ico'); // Symbol aus dem Sprite; ohne (KLXM AI) → CSS-Maske über data-ico ?>
       <li><a href="<?= e(url($href)) ?>"<?= $navSvg ? ' data-nav="' . e($key) . '"' : ' data-ico="' . e($key) . '"' ?><?= $isCur($key) ? ' aria-current="page"' : '' ?>><?= $navSvg ?><span><?= e($label) ?></span><?php if ($key === 'requests' && $newReq): ?> <span class="adm-count"><?= $newReq ?></span><?php endif; ?><?php if ($key === 'chat' && $href === '/admin/chat'): ?> <span class="adm-count uc-count<?= $chatAt ? ' uc-count--at' : '' ?>" data-chat-badge<?= $chatN ? '' : ' hidden' ?>><?= $chatAt ? '@ ' : '' ?><?= $chatN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'support' && $supportN): ?> <span class="adm-count"><?= $supportN ?><span class="sr-only"> <?= e(__('ungelesen')) ?></span></span><?php endif; ?><?php if ($key === 'drafts'): ?> <span class="adm-count" title="<?= e(__('Offene Entwürfe')) ?>" data-drafts-badge<?= $draftsN ? '' : ' hidden' ?>><span data-n><?= $draftsN ?></span><span class="sr-only"> <?= e(__('offene Entwürfe')) ?></span></span><?php endif; ?><?php if (in_array($key, ['ai', 'review'], true) && $reviewN): ?> <span class="adm-count" title="<?= e(__('Eingereicht: zur Freigabe')) ?>"><?= $reviewN ?><span class="sr-only"> <?= e(__('zur Freigabe eingereicht')) ?></span></span><?php endif; ?></a>
       </li>
       <?php endforeach; ?>
-      <?php // Website ansehen: Menüpunkt wie die anderen, öffnet einen neuen Tab (Pfeil rechts) ?>
-      <li class="adm-nav-site"><a href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('globe', ['class' => 'adm-nav__ico']) ?><span><?= e(__('Website ansehen')) ?></span><?= icon('arrow-square-out', ['class' => 'adm-nav-site__ext']) ?><span class="adm-sr"> <?= e(__('(öffnet in neuem Tab)')) ?></span></a></li>
     </ul>
     <?php if ($adminGroups): // Administration: aufklappbare Gruppen – Zustand je Browser (resources/js/_navgroups.js), offen auf ihren Seiten ?>
     <p class="adm-side__label" id="adm-admin-h"><?= e(__('Einrichtung')) ?></p>
