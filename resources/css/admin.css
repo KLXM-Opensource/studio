@@ -1623,7 +1623,7 @@ a.adm-drill__back{text-decoration:none}
 .is-drill.is-drill-nav .adm-side > nav{display:block}
 /* Bereichsmenü hat Vorrang: Favoriten und Netzwerk-Umschalter ausgeblendet, Stern (data-drill-peek) oder „‹ Hauptmenü“ holen sie zurück */
 .is-drill:not(.is-drill-peek):not(.is-drill-nav) .adm-side > :is(.adm-fav,.adm-netswitch,.adm-netlink){display:none}
-.adm-brand-tools .adm-drill-peek[aria-expanded=true]{background:var(--adm-hover);color:var(--drill-mark,var(--adm-ink))}
+.adm-find .adm-drill-peek[aria-expanded=true]{background:var(--adm-hover);color:var(--drill-mark,var(--adm-ink))}
 .is-drill-nav .adm-drill-peek{display:none}
 .is-drill.is-drill-nav .adm-drill > :not(.adm-drill__back){display:none}
 .is-drill .fx--library{grid-template-columns:minmax(0,1fr) 320px;height:calc(100vh - 52px)}   /* nur die Mediathek selbst – nicht der Auswahldialog (fx--pick) */
@@ -2632,25 +2632,15 @@ html.adm-ui[data-theme=dark] .is-drill .adm-side{--drill-dim:rgba(0,0,0,.32)}
 .is-drill.is-drill-nav .adm-drill__back span{order:2;color:#3DD9A0}
 @media (forced-colors:active){.is-drill .adm-drill__back{border-bottom-color:ButtonText}}
 
-/* Titelzeile der Seitenleiste: Suchen · Assistent · Website ansehen als Symbole nebeneinander */
-.adm-brand-tools{flex:none;display:flex;align-items:center;gap:2px;margin-top:-2px}
-.adm-brand-tools .adm-site-open{margin:0;border:0;background:none;cursor:pointer;padding:0}
-.adm-brand-tools .adm-site-open + .adm-site-open{margin-left:0}
-/* Name oben in voller Breite, darunter die Symbole (Suchen · Assistent · Website ansehen) */
-.adm-brand-row{flex-wrap:wrap}
+/* Titelzeile der Seitenleiste: Name in voller Breite (Suchen, Assistent, Favoriten-Stern stehen in der Suchzeile .adm-find) */
 .adm-brand-row .adm-brand{flex:1 1 100%}
-.adm-brand-tools{margin:4px 0 0 4px;gap:6px}
 @media (max-width:900px){.adm-brand-row{padding-right:48px}}   /* Schublade: Platz für × oben rechts */
 .adm-brand-row .adm-brand{overflow:hidden}
 .adm-brand-row .adm-brand span{overflow-wrap:break-word;hyphens:auto}   /* lange Namen umbrechen statt unter die Symbole laufen */
-/* Werkzeugzeile: Suche, Assistent, Website links – Konto (Avatar) und Abmelden rechts */
-.adm-brand-row .adm-brand-tools{flex:1 1 100%;margin:8px 0 0;padding:0 2px 0 4px;gap:2px}
-.adm-brand-tools__out{display:contents}
 .adm-me-ava{margin-left:auto;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;text-decoration:none}
 .adm-me-ava:hover .adm-ava,.adm-me-ava:focus-visible .adm-ava{box-shadow:0 0 0 2px var(--adm-side-bg,#24314B),0 0 0 4px var(--adm-mint,#3DD9A0)}
 /* Netzwerk-Konten: der Umschalter ist der Titel – kein zusätzliches „Verwaltung“, Werkzeuge oben */
 .adm-brand--net{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.adm-brand-row:has(.adm-brand--net) .adm-brand-tools{margin-top:0}
 .adm-netswitch summary{padding:7px 10px}
 /* Profilbild bzw. Initialen (Core\Avatar) – Farbe fest je Person, weiße Schrift ≥ 4,5:1 */
 .adm-ava{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;object-fit:cover;color:#fff;font:700 12px/1 var(--adm-font);letter-spacing:.03em;user-select:none;transition:box-shadow .15s}
@@ -3819,7 +3809,8 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .adm-find__search span{flex:1}
 .adm-find__search svg,.adm-find__ai svg{width:18px;height:18px;flex:none}
 .adm-find__search kbd{border:0;background:var(--adm-press);color:var(--adm-t3);font:600 11px var(--adm-font)}
-.adm-find__ai{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:var(--adm-t2)}
+.adm-find__ai[hidden]{display:none}
+.adm-find__ai{flex:none;display:grid;place-items:center;width:34px;height:34px;margin:0;padding:0;border:0;border-radius:8px;background:none;color:var(--adm-t2);cursor:pointer}
 .adm-find__ai:hover{background:var(--adm-hover);color:var(--adm-ink)}
 .adm-find__search:focus-visible,.adm-find__ai:focus-visible{outline:2px solid var(--adm-a-ink);outline-offset:2px}
 @media (pointer:coarse){.adm-find__search kbd{display:none}.adm-find__search,.adm-find__ai{height:42px}.adm-find__ai{width:42px}}

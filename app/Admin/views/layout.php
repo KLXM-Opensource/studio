@@ -144,10 +144,6 @@ if ($user && ($req = app()->request)) {
   <?php else: ?>
   <a class="adm-brand" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></a>
   <?php endif; ?>
-    <div class="adm-brand-tools">
-      <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
-      <button type="button" class="adm-site-open adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
-    </div>
   </div>
   <?php // Suchen als Zeile im Stil der Seitenleiste (Lupe, Text, ⌘K) – daneben der Assistent, wenn KI aktiv ist ?>
   <div class="adm-find">
@@ -155,6 +151,8 @@ if ($user && ($req = app()->request)) {
     <?php if (\Core\AI\Assistant::available()): // Assistent (KLXM AI) – nur wenn KI aktiv; öffnet das Chat-Fenster (resources/js/_assistant.js) ?>
     <a class="adm-find__ai" href="<?= e(url('/admin/ai/assistent')) ?>" data-assistant aria-keyshortcuts="Alt+Shift+K" title="<?= e(__('Assistent fragen')) ?> (⌥⇧K)" aria-label="<?= e(__('Assistent fragen')) ?>"><?= icon('chat-teardrop-dots') ?></a>
     <?php endif; ?>
+    <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
+    <button type="button" class="adm-find__ai adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
   </div>
   <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
