@@ -147,6 +147,7 @@ export function mount(api) {
         this.dialog.showModal();
         d.documentElement.style.setProperty('overflow', 'hidden');
         this.dialog.querySelector('h2').focus();
+        this.ensureVisible();
       } else {
         // Nicht-modal ohne Fokus-Sprung; als Popover in der obersten Ebene (über schwebenden Elementen der Seite wie dem Chat)
         if (this.dialog.showPopover && !this.hasAttribute('preview')) {
@@ -164,7 +165,35 @@ export function mount(api) {
       if (view === 'settings' || this.withGroups) this.sync();
     }
 
+    /* Absicherung gegen Layoutfehler einzelner Browser (ältere WebKit auf iPhone/iPad, consent_kit 1.2.1): fällt der modale
+       Dialog trotz Inhalt zusammen, bekommt er seine Inhaltshöhe ausdrücklich; hilft das nicht, öffnet er nicht-modal –
+       ein unsichtbarer Dialog darf die Seite nie sperren */
+    ensureVisible() {
+      const dlg = this.dialog;
+      requestAnimationFrame(() => {
+        if (!dlg.open || dlg.getBoundingClientRect().height >= 40) return;
+        const max = innerHeight - 32;
+        dlg.style.setProperty('height', max + 'px');
+        const inner = dlg.querySelector('.inner'), body = dlg.querySelector('.body');
+        if (inner && body) {
+          let need = dlg.offsetHeight - dlg.clientHeight + body.scrollHeight - body.clientHeight;
+          for (const c of inner.children) need += c.offsetHeight;
+          dlg.style.setProperty('height', Math.min(max, need) + 'px');
+        }
+        requestAnimationFrame(() => {
+          if (!dlg.open || dlg.getBoundingClientRect().height >= 40) return;
+          dlg.style.removeProperty('height');
+          dlg.close();
+          dlg.setAttribute('aria-modal', 'false');
+          dlg.show();
+          d.documentElement.style.removeProperty('overflow');
+        });
+      });
+    }
+
     hide() {
+      this.dialog.style.removeProperty('height');
+      this.dialog.removeAttribute('aria-modal');
       if (this.dialog.open) this.dialog.close();
       this.dialog.removeAttribute('open');
       try { if (this.dialog.matches(':popover-open')) this.dialog.hidePopover(); } catch { /* ohne Popover-API */ }

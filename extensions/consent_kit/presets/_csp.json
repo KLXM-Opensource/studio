@@ -93,5 +93,15 @@
     "script": ["https://embed.tawk.to", "https://*.tawk.to"],
     "connect": ["https://*.tawk.to"],
     "frame": ["https://*.tawk.to"]
+  },
+  "openai_pixel_ads": {
+    "script": ["https://bzrcdn.openai.com"],
+    "connect": ["https://*.openai.com"],
+    "img": ["https://*.openai.com"]
+  },
+  "leadfeeder": {
+    "script": ["https://sc.lfeeder.com"],
+    "connect": ["https://tr.lfeeder.com"],
+    "img": ["https://tr.lfeeder.com"]
   }
 }

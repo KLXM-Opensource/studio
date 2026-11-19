@@ -1,5 +1,21 @@
 # Changelog – Erweiterung „consent_kit“
 
+## 1.3.0 (2026-11-19)
+
+Abgleich mit FriendsOfREDAXO/consent_kit 1.5.0:
+
+- **Behoben: Hinweis auf iPhone und iPad unsichtbar, Seite gesperrt** (1.2.1). Ältere WebKit-Versionen ließen den mittigen
+  Dialog (Layout „modal“ und die Einstellungen) auf 0 px zusammenfallen. Der Dialog erhält jetzt seine Inhaltshöhe, das
+  Höchstmaß des Inhalts richtet sich nach dem Viewport (mit `vh`-Rückfall für Safari ohne `dvh`). Zusätzlich prüft er nach
+  dem Öffnen seine Höhe und öffnet im Notfall nicht-modal – ein Darstellungsfehler sperrt die Seite nicht mehr.
+- **Neue Vorlagen:** Microsoft Forms (Externe Medien), OpenAI Measurement Pixel nur für Besucher aus ChatGPT-Anzeigen,
+  Leadfeeder (Dealfront) Website-Tracker (beide Marketing) – mit CSP-Hosts in `presets/_csp.json`. Jetzt 41 Vorlagen.
+- **Französisch und Spanisch** für alle Texte auf der Website (`lang/site/fr.php`, `es.php`) und in den Vorlagen (gilt für
+  neu angelegte Dienste). Texte der Studio-eigenen Gruppen und Hinweise sind ergänzt.
+- Aktualisierte Texte und Prüfdaten der bestehenden Vorlagen.
+- Nicht übernommen (in Studio anders gelöst oder nicht nötig): Nonce-CSP, eigene Hover-Farben und Gestaltung der
+  Keks-Schaltfläche, Reparatur fehlender Gruppen, Übernahme aus consent_manager, Dunkelmodus des REDAXO-Backends.
+
 ## 1.2.0 (2026-10-04)
 
 Abgleich mit FriendsOfREDAXO/consent_kit 1.1.0:

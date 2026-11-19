@@ -119,8 +119,8 @@ GPC und „für diese Sitzung geschlossen“ haben Vorrang; die Vorschau im Desi
 
 ## Sprachen
 
-Texte auf der Website: Deutsch, Englisch, Niederländisch, Italienisch (`lang/site/*.php`, im Kit überschreibbar).
-Dienst-Vorlagen enthalten Beschreibungen und Hinweise in allen vier Sprachen; fehlt eine Sprache, gilt Englisch vor Deutsch.
+Texte auf der Website: Deutsch, Englisch, Niederländisch, Italienisch, Französisch, Spanisch (`lang/site/*.php`, im Kit
+überschreibbar). Dienst-Vorlagen enthalten Beschreibungen und Hinweise in allen sechs Sprachen; fehlt eine Sprache, gilt Englisch vor Deutsch.
 
 ## Vorlagen
 
@@ -130,13 +130,15 @@ Dienst-Vorlagen enthalten Beschreibungen und Hinweise in allen vier Sprachen; fe
 
 ## Übernommen / nicht übernommen
 
-Übernommen (Stand FriendsOfREDAXO/consent_kit 1.1.0): Dienste/Gruppen, 38 Vorlagen (DE/EN/NL/IT), „Hinweis beim Seitenaufruf“, Varianten, Domain-Matrix, Fingerabdrücke + Stände, Consent Mode v2, GPC,
+Übernommen (Stand FriendsOfREDAXO/consent_kit 1.5.0): Dienste/Gruppen, 41 Vorlagen (DE/EN/NL/IT/FR/ES), iOS-Fix für den mittigen Dialog, „Hinweis beim Seitenaufruf“, Varianten, Domain-Matrix, Fingerabdrücke + Stände, Consent Mode v2, GPC,
 Anbieter-Aufrufe (UET, Clarity, Meta …), Conversions ohne Code, 2-Klick-Platzhalter, Protokoll/CSV/Aufbewahrung,
 Design-Editor mit Kontrastprüfung, Import/Export.
 
 Nicht übernommen: Cookie-Scanner, Open-Cookie-Database-Katalog, Übernahme aus consent_manager, Texte je Sprache im
 Backend (Texte kommen aus `lang/site/*.php`), WriteAssist-Übersetzung, `<oembed>`-Umwandlung (der Rich-Text des Kerns
-lässt keine Einbettungen zu), automatisches Sperren fremder iframes, Inline-`text/plain`-Skripte (CSP).
+lässt keine Einbettungen zu), automatisches Sperren fremder iframes, Inline-`text/plain`-Skripte (CSP), Nonce-Unterstützung
+(Studio lädt Stile und Skripte als Dateien), eigene Hover-Farben und Gestaltung der Keks-Schaltfläche (Studio übernimmt
+Farben und Form aus dem Kit), Gruppen-Reparatur aus 1.4.0 (Gruppen sind in Studio fest).
 
 ## Lizenz
 

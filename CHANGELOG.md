@@ -1203,6 +1203,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
   abhängig von der Variante (`'/variant'`); Alternativen als Liste. Werte bleiben beim Umschalten erhalten.
 - Auswahlfelder mit eigener Leer-Option („Automatisch“) zeigen kein zusätzliches „– keine Auswahl –“ mehr.
 
+### Consent Kit 1.3.0 (Abgleich mit FriendsOfREDAXO/consent_kit 1.5.0)
+- Behoben: mittiger Dialog auf älteren iPhones/iPads unsichtbar bei gesperrter Seite; Absicherung öffnet im Notfall nicht-modal.
+- Neue Vorlagen Microsoft Forms, OpenAI Pixel nur für Anzeigen-Besucher, Leadfeeder; Website-Texte und Vorlagen auch
+  französisch und spanisch.
+
 ### Consent Kit 1.2.0 (Abgleich mit FriendsOfREDAXO/consent_kit 1.1.0)
 - „Hinweis beim Seitenaufruf“: immer, nur bei Bedarf (gesperrter Inhalt auf der Seite) oder nie; Dienste mit eigenem Code
   erzwingen die Abfrage, Warnung in den Einstellungen. Website-Texte und Vorlagen zusätzlich niederländisch und italienisch.

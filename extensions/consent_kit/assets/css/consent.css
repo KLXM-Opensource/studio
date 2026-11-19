@@ -52,14 +52,16 @@ a { color: var(--_accent); text-underline-offset: .15em; }
 
 dialog {
   position: fixed; inset: auto; margin: 0; padding: 0; border: var(--_bw) solid var(--_border);
-  width: min(var(--_width), calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); overflow: hidden;
+  width: min(var(--_width), calc(100vw - 2rem)); max-width: none; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow: hidden;
   color: var(--_text); background: var(--_bg); border-radius: var(--_radius); box-shadow: var(--_shadow);
   z-index: var(--ck-z, 2147483000);
 }
 dialog[open] { display: flex; flex-direction: column; }
 dialog:popover-open { display: flex; flex-direction: column; }
 dialog::backdrop { background: var(--_backdrop); backdrop-filter: var(--ck-backdrop-filter, none); }
-dialog.modal, dialog.settings { inset: 0; margin: auto; }
+/* Inhaltshöhe ausdrücklich: ältere WebKit-Versionen (iOS/iPadOS) lassen den fixierten Flex-Dialog mit inset: 0 sonst auf 0 px
+   zusammenfallen – nur ein Strich, die Seite gesperrt (consent_kit 1.2.1) */
+dialog.modal, dialog.settings { inset: 0; margin: auto; height: -webkit-fit-content; height: fit-content; }
 dialog.settings { width: min(var(--ck-settings-width, 44rem), calc(100vw - 2rem)); }
 dialog.settings.offcanvas { inset: auto; margin: 0; width: min(var(--ck-offcanvas-width, 26rem), 100vw); }
 /* Abstand nach unten: --cms-consent-lift, sonst --cms-chat-lift der Kits (z. B. Tab-Leiste in „glas“) */
@@ -70,14 +72,16 @@ dialog.box.top-right { right: 1rem; top: 1rem; }
 dialog.bar { left: 0; right: 0; width: 100%; border-radius: 0; border-width: var(--_bw) 0 0; }
 dialog.bar.bottom-left, dialog.bar.bottom-right { bottom: var(--cms-consent-lift, var(--cms-chat-lift, 0px)); }
 dialog.bar.top-left, dialog.bar.top-right { top: 0; border-width: 0 0 var(--_bw); }
-dialog.offcanvas { top: 0; bottom: 0; height: 100dvh; max-height: 100dvh; width: min(var(--ck-offcanvas-width, 26rem), 100vw); border-radius: 0; border-width: 0; }
+dialog.offcanvas { top: 0; bottom: 0; height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; width: min(var(--ck-offcanvas-width, 26rem), 100vw); border-radius: 0; border-width: 0; }
 dialog.offcanvas.bottom-left, dialog.offcanvas.top-left { left: 0; border-right-width: var(--_bw); }
 dialog.offcanvas.bottom-right, dialog.offcanvas.top-right { right: 0; border-left-width: var(--_bw); }
-dialog.offcanvas .inner { height: 100%; }
+dialog.offcanvas .inner { height: 100%; max-height: 100%; }
 dialog.offcanvas .body { flex: 1; }
 dialog.bar .inner { width: min(72rem, 100%); margin: 0 auto; }
 @media (min-width: 60rem) {
   dialog.bar:not(.settings) .inner { display: grid; grid-template-columns: 1fr auto; column-gap: 2rem; align-items: center; }
+  /* Im Raster begrenzt die Textspalte selbst, sonst wächst die Zeile über das Höchstmaß hinaus */
+  dialog.bar:not(.settings) .text { max-height: inherit; }
   dialog.bar:not(.settings) .foot { min-width: 38rem; }
 }
 /* Vorschau im Design-Editor der Verwaltung: im Fluss statt fest positioniert */
@@ -87,7 +91,8 @@ dialog.bar .inner { width: min(72rem, 100%); margin: 0 auto; }
 :host([preview]) dialog.bar { width: 100%; }
 :host([preview]) dialog.offcanvas { height: auto; max-height: none; }
 
-.inner { display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
+/* Höchstmaß am Viewport statt 100 %: gegen die unbestimmte Höhe des Dialogs löst älteres WebKit Prozent zu 0 auf (Off-Canvas s. o.) */
+.inner { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 2rem - 2 * var(--_bw)); max-height: calc(100dvh - 2rem - 2 * var(--_bw)); }
 .text { display: flex; flex-direction: column; min-height: 0; }
 .head, .foot { padding: var(--_space) var(--_space) 0; }
 .head { display: flex; align-items: flex-start; gap: .75rem; }
