@@ -1,6 +1,7 @@
 <?php
 /**
- * Kopfleiste „NativeCSS“ (.ncss-topbar): Marke, Hauptmenü (.ncss-nav) und Werkzeuge. Schmal öffnet die Menü-Schaltfläche
+ * Kopfleiste „NativeCSS“ (.ncss-topbar): Marke, Hauptmenü (.ncss-nav) und Werkzeuge in EINER Zeile. Passt das Menü nicht
+ * hinein, öffnet die Menü-Schaltfläche (NativeCSS js/nav.js misst – kein fester Breakpoint, ohne Skript 64rem)
  * dasselbe Markup als Off-Canvas-<dialog> (command="show-modal" – ohne Skript in aktuellen Browsern, js/native.js ergänzt den
  * Ersatz, „Klick daneben schließt“ und das Schließen nach einem Link); Untermenüs als <details> mit „Übersicht“ als erstem
  * Eintrag (Muster von NativeCSS). Escape schließt den Dialog, der Fokus kehrt zur Schaltfläche zurück (Browser).

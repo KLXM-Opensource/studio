@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2026 Thomas Skerbis (https://github.com/skerbis) and KLXM Crossmedia GmbH (https://klxm.de)
+Copyright (c) 2026 Thomas Skerbis (https://github.com/skerbis)
+Contributors: KLXM Crossmedia GmbH (https://klxm.de)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,6 @@ This project bundles third-party assets under their own licenses:
 - vendor/fontawesome/ - Font Awesome Free (see vendor/fontawesome/LICENSE.txt)
 - vendor/webawesome/ - Web Awesome (see vendor/webawesome/LICENSE.md)
 
-NativeCSS 1.1.0 8bb3e3f (2026-11-20) – https://github.com/skerbis/nativecss
-Übernommen mit kits/native/tools/ncss-update.php am 2026-11-20 aus /Users/thomas/Documents/nativecss @ 8bb3e3f
+NativeCSS 1.2.2 (2026-11-20) – https://github.com/skerbis/nativecss
+Übernommen mit kits/native/tools/ncss-update.php am 2026-11-20 aus https://github.com/skerbis/nativecss (v1.2.2)
 Nur die Dateien, die das Kit verwendet (NCSS_FILES in tools/ncss-update.php), unverändert.

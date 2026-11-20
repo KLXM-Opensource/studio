@@ -70,18 +70,32 @@
   .nv-nav .nv-sub--deep a { padding-inline-start: 1.6rem; }
   .nv-nav__langs, .nv-nav__prefs, .nv-nav__quick { display: none; }
   .nv-tools { display: flex; align-items: center; gap: var(--f-s-s); }
-  /* breite Fenster: eine Zeile – Menü rechts neben der Marke, Werkzeuge daneben */
-  @media (min-width: 64rem) {
-    .nv-topbar .ncss-topbar-inner { flex-wrap: nowrap; }
+  /* Suchfeld in der Kopfleiste schmal – mehr Platz für das Menü in derselben Zeile (Vorschläge klappen breiter auf) */
+  .nv-tools .ha-field--inline { --ha-field-w: 9rem; }
+  /* Zeile oder Menü-Schaltfläche: entscheidet NativeCSS (js/nav.js misst, ob Marke, Menü und Werkzeuge in EINE Zeile passen,
+     und setzt data-ncss-nav-auto="inline|compact" – kein fester Breakpoint, das Menü bricht nie um). Ohne Skript gilt die
+     Schwelle 64rem. Deshalb jede Regel zweimal: Zustand von nav.js und Media Query (identisch halten). */
+  /* Zeile – Menü rechts neben der Marke, Werkzeuge daneben */
+  .nv-topbar:has(.nv-nav[data-ncss-nav-auto="inline"]) {
+    .ncss-topbar-inner { flex-wrap: nowrap; }
     .nv-nav { flex: 1 1 auto; display: flex; justify-content: flex-end; }
-    .nv-nav .ncss-nav-list { flex-wrap: wrap; justify-content: flex-end; row-gap: 0; column-gap: 0; }
-    .nv-nav .ncss-nav-item > a, .nv-nav .ncss-nav-item summary { padding-inline: .55rem; }
+    .nv-nav .ncss-nav-list { justify-content: flex-end; column-gap: 0; }
+    .nv-nav .ncss-nav-item > a, .nv-nav .ncss-nav-item summary { padding-inline: .45rem; }
     .nv-tools { flex: 0 0 auto; }
   }
-  /* Off-Canvas (schmale Fenster): Sprachen und Kontakt unten im Panel statt in der Leiste */
-  @media (max-width: 63.99rem) {
+  @media (min-width: 64rem) {
+    .nv-topbar:not(:has(.nv-nav[data-ncss-nav-auto])) {
+      .ncss-topbar-inner { flex-wrap: nowrap; }
+      .nv-nav { flex: 1 1 auto; display: flex; justify-content: flex-end; }
+      .nv-nav .ncss-nav-list { justify-content: flex-end; column-gap: 0; }
+      .nv-nav .ncss-nav-item > a, .nv-nav .ncss-nav-item summary { padding-inline: .45rem; }
+      .nv-tools { flex: 0 0 auto; }
+    }
+  }
+  /* Menü-Schaltfläche (Off-Canvas): Sprachen, Kontakt und Darstellung unten im Panel statt in der Leiste */
+  .nv-topbar:has(.nv-nav[data-ncss-nav-auto="compact"]) {
     /* eine Zeile auch bei 360 px: Marke darf schrumpfen (Logo eingepasst, Name gekürzt), Werkzeuge und Menü bleiben */
-    .nv-topbar .ncss-topbar-inner { flex-wrap: nowrap; }
+    .ncss-topbar-inner { flex-wrap: nowrap; }
     .nv-brand { flex: 0 1 auto; min-inline-size: 0; }
     .nv-brand .brand__logo { min-inline-size: 0; }
     .nv-brand .brand__img { max-inline-size: 100%; }
@@ -91,9 +105,27 @@
     .nv-langs { display: none; }
     .nv-nav__langs { display: flex; margin-block-start: var(--f-s-l); }
     .nv-nav__quick { display: flex; flex-direction: column; gap: var(--f-s-xs); margin-block-start: var(--f-s-l); }
-    /* Darstellung: schmal im Menü (die Kopfleiste bleibt einzeilig), breit in der Leiste */
+    /* Darstellung: im Menü (die Kopfleiste bleibt einzeilig), in der Leiste nur in der Zeilen-Ansicht */
     .nv-prefs:not(.nv-prefs--always) { display: none; }
     .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }
+  }
+  @media (max-width: 63.99rem) {
+    .nv-topbar:not(:has(.nv-nav[data-ncss-nav-auto="inline"])) {
+      /* eine Zeile auch bei 360 px: Marke darf schrumpfen (Logo eingepasst, Name gekürzt), Werkzeuge und Menü bleiben */
+      .ncss-topbar-inner { flex-wrap: nowrap; }
+      .nv-brand { flex: 0 1 auto; min-inline-size: 0; }
+      .nv-brand .brand__logo { min-inline-size: 0; }
+      .nv-brand .brand__img { max-inline-size: 100%; }
+      .nv-brand .brand__name { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .nv-tools { margin-inline-start: auto; }
+      .nv-nav { order: 3; flex: 0 0 auto; margin-inline-start: 0; }
+      .nv-langs { display: none; }
+      .nv-nav__langs { display: flex; margin-block-start: var(--f-s-l); }
+      .nv-nav__quick { display: flex; flex-direction: column; gap: var(--f-s-xs); margin-block-start: var(--f-s-l); }
+      /* Darstellung: im Menü (die Kopfleiste bleibt einzeilig), in der Leiste nur in der Zeilen-Ansicht */
+      .nv-prefs:not(.nv-prefs--always) { display: none; }
+      .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }
+    }
   }
   .ncss-nav-panel .ha-lang__list { position: static; box-shadow: none; }
   .nv-nav__quick { margin: 0; padding: 0; list-style: none; }
