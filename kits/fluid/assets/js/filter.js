@@ -18,6 +18,8 @@ document.querySelectorAll('ncss-filter').forEach(box => {
       const hit = !v || (it.getAttribute('data-category') || '').split(/\s+/).includes(v);
       it.toggleAttribute('data-ncss-filter-out', !hit);
       if (hit) n++;
+      // Nach einer Wahl sofort zeigen – nicht erst auf das Einblenden beim Scrollen (data-reveal, site.js) warten
+      if (hit && announce) it.classList.add('is-in');
     });
     // Erste Ansage erst nach einer Wahl – beim Laden bleibt der Live-Bereich still
     if (announce) status.textContent = n === 0 ? text('status-none', 0) : n === 1 ? text('status-one', 1) : text('status', n);

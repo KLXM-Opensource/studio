@@ -19,8 +19,10 @@
   };
   const num = s => {
     let x = s.replace(/[\s €$£%]|CHF|EUR/gi, '');
-    x = comma ? x.replace(/\./g, '').replace(',', '.') : x.replace(/,/g, '');
-    return /^[-+−]?\d+(\.\d+)?$/.test(x) ? parseFloat(x.replace('−', '-')) : null;
+    // Tausender nur in Dreiergruppen („1.234,5“ bzw. „1,234.5“) – sonst wäre „12.01.2026“ eine Zahl
+    const re = comma ? /^[-+−]?(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$/ : /^[-+−]?(\d{1,3}(,\d{3})+|\d+)(\.\d+)?$/;
+    if (!re.test(x)) return null;
+    return parseFloat((comma ? x.replace(/\./g, '').replace(',', '.') : x.replace(/,/g, '')).replace('−', '-'));
   };
   const date = s => {
     let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -40,7 +42,7 @@
     const sort = (i, dir) => {
       const vals = [...table.tBodies].flatMap(tb => [...tb.rows].map(r => valueOf(r.cells[i])));
       const filled = vals.filter(v => v !== '');
-      const type = filled.length && filled.every(v => num(v) !== null) ? 'number' : filled.length && filled.every(v => date(v) !== null) ? 'date' : 'text';
+      const type = filled.length && filled.every(v => date(v) !== null) ? 'date' : filled.length && filled.every(v => num(v) !== null) ? 'number' : 'text';
       const key = v => type === 'number' ? num(v) : type === 'date' ? date(v) : v;
       [...table.tBodies].forEach(tb => {
         const rows = [...tb.rows].map((r, n) => ({ r, n, v: valueOf(r.cells[i]) }));
