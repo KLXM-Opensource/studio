@@ -79,4 +79,10 @@ return [
     'Keine Datei gefunden.' => 'No file found.',
     'Nach Schlagwort filtern' => 'Filter by tag',
     '{n} von {total} Dateien' => '{n} of {total} files',
+    // Karten: Hervorheben, Filter nach Kategorie
+    'Filtern nach Kategorie' => 'Filter by category',
+    'Empfohlen' => 'Recommended',
+    '{n} Einträge' => '{n} entries',
+    '1 Eintrag' => '1 entry',
+    'Keine Einträge' => 'No entries',
 ];

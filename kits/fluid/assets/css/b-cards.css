@@ -30,3 +30,7 @@
 /* Band */
 .cards--reel{--min:19rem}
 .cards--reel .tcard{height:100%}
+/* Hervorheben (Karte → „Hervorheben“): Rahmen in der Akzentfarbe, Hinweis an der Ecke (über Bild und Text) */
+.tcard--featured{outline:2px solid var(--f-a);outline-offset:-2px}
+.tcard__badge{position:absolute;z-index:3;inset-block-start:.6rem;inset-inline-end:.6rem;padding:.15em .7em;border-radius:999px;background:var(--f-a);color:var(--f-a-on);font:600 var(--f-t-2)/1.4 var(--f-font-label)}
+@media (forced-colors:active){.tcard--featured{outline-color:CanvasText}.tcard__badge{border:1px solid CanvasText}}

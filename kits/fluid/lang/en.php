@@ -613,4 +613,13 @@ return [
     'Preisliste' => 'Price list',
     'Beschreibung (optional)' => 'Description (optional)',
     'z. B. 12,50 €' => 'e.g. €12.50',
+    // Karten: Hervorheben, Kategorie, Filter
+    'Hervorheben' => 'Highlight',
+    'Rahmen in der Akzentfarbe und ein Hinweis an der Ecke.' => 'Frame in the accent colour and a note in the corner.',
+    'Hinweis an der Ecke (bei „Hervorheben“)' => 'Note in the corner (with “Highlight”)',
+    'Kategorie (für den Filter, optional)' => 'Category (for the filter, optional)',
+    'z. B. Kurse, Beratung' => 'e.g. Courses, Advice',
+    'Mehrere mit Komma trennen. Wirkt nur mit „Filter nach Kategorie“ am Block.' => 'Separate several with commas. Only takes effect with “Filter by category” on the block.',
+    'Filter nach Kategorie' => 'Filter by category',
+    'Schaltflächen über den Karten aus den Kategorien der Karten (ab zwei verschiedenen, bis zu zwölf). Besucher sehen dann nur die Karten der gewählten Kategorie.' => 'Buttons above the cards from the cards\' categories (from two different ones, up to twelve). Visitors then only see the cards of the chosen category.',
 ];

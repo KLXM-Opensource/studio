@@ -584,3 +584,39 @@ function fluid_scheme_toggle(): bool
 {
     return (bool) design('dark_toggle') && (bool) design('dark');
 }
+
+/**
+ * Filter für Besucher („Filter nach Kategorie“ bei Karten): aus den Kategorien je Eintrag (Komma trennt mehrere) eine Leiste
+ * mit Optionsfeldern. Gefiltert wird per CSS (:has(), Kategorien als Nummern 1–12, css/filter.css), js/filter.js sagt die
+ * Trefferzahl an. Markup wie die Komponente filter von NativeCSS (<ncss-filter>, .ncss-filter-bar, .ncss-filter-item,
+ * data-category) – ein Kind-Kit kann deren Skript als js/filter.js mitbringen. Leer bei weniger als zwei Kategorien und
+ * beim Bearbeiten; sonst meldet die Seite '@filter' (Theme::markUsed) für Stylesheet und Skript.
+ * @param list<string> $cats Kategorien je Eintrag (Index wie die Einträge)
+ * @return array{open: string, bar: string, item: array<int, string>} Anfang des Filters (<ncss-filter> mit Texten der Ansage),
+ *   Leiste und data-category je Eintrag – Aufrufer schließt mit </ncss-filter>
+ */
+function fluid_filter(\Core\Block $b, array $cats): array
+{
+    $names = [];
+    $item = [];
+    foreach ($cats as $i => $raw) {
+        $nums = [];
+        foreach (array_filter(array_map('trim', explode(',', (string) $raw))) as $c) {
+            $key = mb_strtolower($c);
+            if (!isset($names[$key]) && count($names) < 12) $names[$key] = ['n' => count($names) + 1, 'label' => $c];
+            if (isset($names[$key])) $nums[] = $names[$key]['n'];
+        }
+        $item[$i] = implode(' ', array_unique($nums));
+    }
+    if (count($names) < 2 || is_editing()) return ['open' => '', 'bar' => '', 'item' => []];
+    app()->theme->markUsed('@filter');
+    $id = $b->domId() . '-f';
+    $bar = '<fieldset class="ncss-filter-bar"><legend>' . e(lt('Filtern nach Kategorie')) . '</legend>'
+        . '<input type="radio" name="' . e($id) . '" id="' . e($id) . '-0" value="" checked><label for="' . e($id) . '-0">' . e(lt('Alle')) . '</label>';
+    foreach ($names as $c) {
+        $bar .= '<input type="radio" name="' . e($id) . '" id="' . e($id) . '-' . $c['n'] . '" value="' . $c['n'] . '"><label for="' . e($id) . '-' . $c['n'] . '">' . e($c['label']) . '</label>';
+    }
+    $open = '<ncss-filter class="ncss-filter" data-label-status="' . e(lt('{n} Einträge')) . '" data-label-status-one="' . e(lt('1 Eintrag'))
+        . '" data-label-status-none="' . e(lt('Keine Einträge')) . '">';
+    return ['open' => $open, 'bar' => $bar . '</fieldset>', 'item' => $item];
+}
