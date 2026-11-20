@@ -40,7 +40,7 @@ $button = function (array $it, int $i, string $class = '') use ($b): string {
     <?php endforeach; ?>
   </dl>
   <?php elseif (is_editing()): ?><p class="empty-hint">Noch keine Einträge – in der Seitenleiste unter „Preisliste“ hinzufügen.</p><?php endif; ?>
-  <?php elseif ($items && $v === 'table'): ?>
+  <?php elseif ($items && $v === 'table'): app()->theme->markUsed('@table');   // Merkmal für Kind-Kits (z. B. Schatten an der Kante) ?>
   <div class="cmp-wrap" role="region" tabindex="0" aria-labelledby="<?= e($b->titleId()) ?>">
     <table class="cmp">
       <thead>

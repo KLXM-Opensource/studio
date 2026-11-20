@@ -843,6 +843,8 @@ final class Theme
         if ($types === null || $this->sectionCss) {
             $out[] = $this->coreCss('sections.css');
         }
+        // Sortierbare Tabellen (Datenliste → „Spalten sortierbar“, Merkmal '@tablesort'; nicht im Editor) – eigene css/table-sort.css des Kits ersetzt sie
+        if ($types !== null && in_array('@tablesort', $types, true)) $out[] = $this->coreCss('table-sort.css');
         // Video (Zwei-Klick-Lösung): neutrale Grundlage nur für Kits ohne eigene Stile für .vembed – eigene css/embed.css ersetzt sie
         if (($types === null || in_array('video', $types, true)) && ($this->hasAsset('css/embed.css') || !$this->stylesEmbed())) {
             $out[] = $this->coreCss('embed.css');
@@ -897,6 +899,8 @@ final class Theme
     {
         $types = $this->withUses($types);
         $out = [];
+        // Kern-Skript für sortierbare Tabellen (Datenliste → „Spalten sortierbar“) – für jedes Kit, nur mit Merkmal '@tablesort'
+        if (in_array('@tablesort', $types, true)) $out[] = asset('js/table-sort.js');
         foreach ($this->def['conditional_css'] ?? [] as $file => $needs) {
             if (str_ends_with($file, '.js') && array_intersect($needs, $types)) {
                 $out[] = $this->asset($file);
