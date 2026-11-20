@@ -376,13 +376,14 @@ switch ($cmd) {
         $extName = Core\Cli::opt($args, 'extension') ?? $extName;
         $extDir = $extName !== '' ? (Core\Extensions::available()[$extName]['dir'] ?? null) : null;
         if ($extName !== '' && !$extDir) { fwrite(STDERR, "Erweiterung „{$extName}“ ist nicht installiert.\n"); exit(1); }
-        $files = $siteTexts ? [ROOT . "/lang/site/$loc.php", $theme->path . "/lang/site/$loc.php"] : [ROOT . "/lang/$loc.php", $theme->path . "/lang/$loc.php"];
+        // Kind-Kits (theme.php → 'extends'): Sprachdateien und Texte der ganzen Kette (Theme::files, Eltern zuerst)
+        $files = $siteTexts ? [ROOT . "/lang/site/$loc.php", ...$theme->files("lang/site/$loc.php")] : [ROOT . "/lang/$loc.php", ...$theme->files("lang/$loc.php")];
         if ($extDir) $files = $siteTexts ? ["$extDir/lang/site/$loc.php"] : ["$extDir/lang/$loc.php"];
         $have = [];
         foreach ($files as $file) if (is_file($file)) $have += (array) require $file;
         $found = [];
-        // Kits: nur das aktive Kit (seine lang-Datei wird verglichen) – Texte anderer Kits prüft man auf deren Website (--site=…)
-        $kitRe = 'kits/' . preg_quote($theme->name, '~');
+        // Kits: nur das aktive Kit und seine Eltern-Kits – Texte anderer Kits prüft man auf deren Website (--site=…)
+        $kitRe = 'kits/(?:' . implode('|', array_map(fn($k) => preg_quote((string) $k, '~'), array_keys($theme->chain))) . ')';
         $scan = $siteTexts ? '~/(app|' . $kitRe . ')/.*\.php$~' : '~/(app|' . $kitRe . '|resources/js)/.*\.(php|js|mjs)$~';
         $pattern = $siteTexts ? "~\\blt\\('((?:[^'\\\\]|\\\\.)*)'~" : "~(?:__|\\bt)\\('((?:[^'\\\\]|\\\\.)*)'~";
         if ($extDir) $scan = $siteTexts ? '~/(src|views|blocks)/.*\.php$|/extension\.php$~' : '~/(src|views|assets/js)/.*\.(php|js|mjs)$|/extension\.php$~';
