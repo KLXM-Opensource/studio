@@ -470,6 +470,7 @@ return function (Router $r): void {
     $r->post('/admin/api/pages/{id}/discard', [Admin\EditorController::class, 'discard']);
     $r->post('/admin/api/preview', [Admin\EditorController::class, 'preview']);
     $r->post('/admin/api/block-form', [Admin\EditorController::class, 'form']);
+    $r->post('/admin/api/block-picker', [Admin\EditorController::class, 'pickerPrefs']);   // Blockauswahl: Ansicht, Favoriten, zuletzt verwendet
     $r->get('/admin/api/links', [Admin\EditorController::class, 'links']);
     // Einträge auf der Website bearbeiten (Seitenleiste + direkt im Text, Core\Data\EntryEdit)
     $r->get('/admin/api/entries/{handle}/{id}', [Admin\EntryEditController::class, 'form']);

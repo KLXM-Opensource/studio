@@ -8001,4 +8001,12 @@ return [
     'Kopie von #{id}' => 'Copy of #{id}',
     'Ungespeicherte Änderungen gehen dabei verloren. Trotzdem duplizieren?' => 'Unsaved changes will be lost. Duplicate anyway?',
     'Nicht übernommen, weil nicht mehr gültig – bitte prüfen: {fields}.' => 'Not copied because no longer valid – please check: {fields}.',
+    // Blockauswahl „+ Block einfügen“ (resources/js/_blockpicker.js, Core\Blocks\Picker)
+    'Als Favorit oben anzeigen' => 'Show at the top as a favourite',
+    'Blocktyp wählen, um eine Vorschau zu sehen.' => 'Choose a block type to see a preview.',
+    'Kacheln mit Vorschau' => 'Tiles with preview',
+    'Liste mit großer Vorschau' => 'List with large preview',
+    'Merken' => 'Remember',
+    'Zwischenablage' => 'Clipboard',
+    'Formulare' => 'Forms',
 ];

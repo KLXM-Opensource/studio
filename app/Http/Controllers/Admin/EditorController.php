@@ -49,6 +49,17 @@ final class EditorController extends AdminController
         return Response::json(['ok' => true]);
     }
 
+    /**
+     * Persönliche Einstellungen der Blockauswahl speichern (POST /admin/api/block-picker, JSON: view, fav, recent – je optional).
+     * Nur das eigene Konto; Werte prüft Core\Blocks\Picker::savePrefs.
+     */
+    public function pickerPrefs(Request $r): Response
+    {
+        $this->editorAuth($r);
+        $user = app()->auth->user() ?? throw new HttpException(401);
+        return Response::json(['ok' => true, 'picker' => \Core\Blocks\Picker::savePrefs($user, $r->post)]);
+    }
+
     /** Rendert einen einzelnen Block (Live-Vorschau im Editor). */
     /**
      * Seiten-Editor: Recht pages.edit – oder im Modus „Inhalt“ (Inhaltsblöcke eines Eintrags, Core\Data\EntryBlocks) das Recht,

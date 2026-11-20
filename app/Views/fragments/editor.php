@@ -18,7 +18,10 @@ $config['endpoints'] = [
     'upload' => url('/admin/media/upload'),
     'settings' => url('/admin/settings'),
     'formfields' => url('/admin/api/formfields/'),
+    'picker' => url('/admin/api/block-picker'),
 ];
+// Blockauswahl: persönliche Ansicht, Favoriten, zuletzt verwendet (Core\Blocks\Picker, UiPrefs)
+$config['picker'] = \Core\Blocks\Picker::prefs(app()->auth->user());
 // „Felder bearbeiten“ bei Formular-Blöcken: nur mit Recht data.schema, geteilte Tabellen nur auf der Eigentümer-Website
 $config['formFields'] = can('data.schema')
     ? array_values(array_map(fn($t) => $t['handle'], array_filter(\Core\Data\Tables::all(), [\Core\Data\Shared::class, 'canSchema'])))
