@@ -1,0 +1,7 @@
+/* NativeCSS components/pricing.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/pricing.css" layer(components);
+@layer native {
+  .nv-plans .ncss-pricing-plans { margin: 0; padding: 0; }
+  .nv-plans .ncss-pricing-name { margin: 0; color: var(--f-ink); }
+}

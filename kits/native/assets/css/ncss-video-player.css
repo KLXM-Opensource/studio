@@ -1,0 +1,5 @@
+/* NativeCSS components/video-player.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/video-player.css" layer(components);
+/* Video: Player in voller Breite des Inhalts */
+@layer native { .nv-vplayer ncss-video-player { display: block; margin: 0; } }

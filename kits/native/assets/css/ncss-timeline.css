@@ -1,0 +1,17 @@
+/* NativeCSS components/timeline.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/timeline.css" layer(components);
+/* Ablauf „Zeitleiste“ (.ncss-timeline): Optionen „Kreise“ und „Farben“ des Blocks */
+@layer native {
+  .nv-timeline .ncss-timeline { --nv-tl-c: var(--f-a); --nv-tl-on: var(--f-a-on); margin: 0; padding: 0; }
+  .nv-tl--c-neutral { --nv-tl-c: var(--f-ink) !important; --nv-tl-on: var(--f-bg) !important; }
+  .nv-tl--c-alternate > .ncss-timeline-item:nth-child(even) { --nv-tl-c: var(--f-b); --nv-tl-on: var(--f-b-on); }
+  .nv-timeline .ncss-timeline:not(.nv-tl--m-dot) .ncss-timeline-marker {
+    border: 2px solid var(--nv-tl-c);
+    background: color-mix(in oklab, var(--nv-tl-c) 14%, var(--f-bg)); color: var(--nv-tl-c); font: 700 .875rem/1 var(--f-font); }
+  .nv-tl--m-filled .ncss-timeline-marker { background: var(--nv-tl-c) !important; color: var(--nv-tl-on) !important; }
+  .nv-tl--m-ring .ncss-timeline-marker { background: var(--f-bg) !important; }
+  .nv-tl--m-dot .ncss-timeline-marker { --ncss-timeline-marker-color: var(--nv-tl-c); }
+  .nv-timeline .ncss-timeline-marker .ico { inline-size: 1rem; block-size: 1rem; }
+  .nv-timeline .ncss-timeline-title { margin: 0; color: var(--f-ink); }
+}

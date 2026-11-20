@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Kit „NativeCSS“ – Seitenrahmen und Grund-CSS (ersetzt css/site.css von fluid).
+   Cascade Layers statt <style> im Kopf (die Website-CSP erlaubt keine Inline-Stile): Reihenfolge hier einmal festgelegt,
+   spätere Dateien (css/nv-*.css, css/ncss-*.css) hängen sich in dieselben Layer.
+     tokens < reset < base   NativeCSS (Farben, Tokens; reset/base bleiben leer – Reset und Grundstile liefert fluid)
+     fluid                   Grund-CSS von fluid für alle Blöcke (ohne Kopf und Fuß – eigener Rahmen)
+     helpers < components    NativeCSS (Kopfleiste, Navigation, Off-Canvas, Fußbereich; Komponenten der Blöcke bei Bedarf)
+     native                  Brücke Design-Leiste → NativeCSS, Gestaltung von Rahmen und Blöcken (css/_native.css)
+   Ohne Layer und damit darüber: Design-Werte der Website, CSS je Block von fluid, Design-Optionen (opt-*.css).
+   NativeCSS: vendor/ncss/ (MIT, unverändert) – nur, was der Rahmen braucht. reset.css und base.css von NativeCSS fehlen
+   bewusst: fluid bringt beides mit, und die Blöcke von fluid sollen genau so aussehen wie dort (spart gut 5 KB).
+   ========================================================================== */
+@layer tokens, reset, base, fluid, helpers, components, native;
+
+@import "../../vendor/ncss/colors.css" layer(tokens);
+@import "../../vendor/ncss/tokens.css" layer(tokens);
+
+@import "../../../fluid/assets/css/_tokens.css" layer(fluid);
+@import "../../../fluid/assets/css/_base.css" layer(fluid);
+@import "../../../fluid/assets/css/_hero.css" layer(fluid);
+@import "../../../fluid/assets/css/_options.css" layer(fluid);
+
+@import "../../vendor/ncss/components/topbar.css" layer(components);
+@import "../../vendor/ncss/components/nav.css" layer(components);
+@import "../../vendor/ncss/components/off-canvas.css" layer(components);
+@import "../../vendor/ncss/components/dialog-close.css" layer(components);
+@import "../../vendor/ncss/components/footer.css" layer(components);
+
+@import "_native.css";
+
+@media print{[data-reveal]{opacity:1!important;translate:none!important}.nv-topbar,.skip,.reel-ctrl{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}}

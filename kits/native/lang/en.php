@@ -1,0 +1,28 @@
+<?php
+/** Englische Oberflächenbegriffe des Kits „NativeCSS“ (Varianten, Einblend-Effekte, Design) – ergänzt kits/fluid/lang/en.php und lang/en.php. */
+return [
+    'Morphing beim Scrollen' => 'Morph on scroll',
+    'Video mit Morphing beim Scrollen' => 'Video with morph on scroll',
+    'Das Bild startet groß und rückt beim Scrollen zur Seite, der Text erscheint daneben. Bei „Bewegung reduzieren“ stehen Bild und Text einfach nebeneinander. Beim Bearbeiten wie „Bild rechts“.' => 'The image starts large and moves aside while scrolling; the text appears next to it. With “reduce motion”, image and text simply sit side by side. While editing it looks like “Image right”.',
+    'Eigene Videodatei, stumm in Schleife (wie ein Hintergrundvideo, mit Pause-Schalter): startet groß und rückt beim Scrollen zur Seite, der Text daneben erscheint. Bei „Bewegung reduzieren“ nur das Standbild neben dem Text. Beim Bearbeiten wie „Mit Text daneben“.' => 'Your own video file, muted and looping (like a background video, with a pause button): starts large and moves aside while scrolling; the text appears next to it. With “reduce motion”, only the still image next to the text. While editing it looks like “With text beside”.',
+    'Sanft einblenden' => 'Fade in',
+    'Von unten' => 'Rise from below',
+    'Kreis' => 'Circle',
+    'Vorhang' => 'Curtain',
+    'Seite' => 'Page',
+    'Darstellungs-Knopf für Besucher' => 'Display settings button for visitors',
+    'Ein Knopf im Kopfbereich: Besucher stellen selbst Farbschema, Kontrast, Bewegung, Schriftgröße, Lese-Schrift, Textabstände, Links und Fokus ein (merkt sich der Browser, ohne Cookie).' => 'A button in the header: visitors choose colour scheme, contrast, motion, text size, reading font, text spacing, links and focus themselves (remembered by the browser, no cookie).',
+    'Lese-Schriften im Darstellungs-Knopf anbieten' => 'Offer reading fonts in the display settings',
+    'Atkinson Hyperlegible, Lexend und OpenDyslexic (SIL Open Font License) – laden erst, wenn Besucher sie wählen.' => 'Atkinson Hyperlegible, Lexend and OpenDyslexic (SIL Open Font License) – only loaded when visitors choose them.',
+    'NativeCSS · Graphit' => 'NativeCSS · Graphite',
+    'Tiefes Blau, Navy, blaugetönte Flächen und die Systemschrift des Geräts – wie die NativeCSS-Website.' => 'Deep blue, navy, blue-tinted surfaces and the device’s system font – like the NativeCSS website.',
+    'Gedämpftes Grau als Marke, Navy als Zweitfarbe, Inter – sachlich und ruhig.' => 'Muted grey as brand colour, navy as second colour, Inter – matter-of-fact and calm.',
+    'Vorher/Nachher' => 'Before/after',
+    'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.' => 'Two images on top of each other; a slider reveals more of one or the other – for conversions, renovation, restoration, image editing. Take both images with the same framing. Without JavaScript they sit side by side.',
+    'Bild vorher' => 'Image before',
+    'Bild nachher' => 'Image after',
+    'Beschriftung vorher' => 'Label before',
+    'Beschriftung nachher' => 'Label after',
+    'Alternativtext in der Mediathek beschreibt den Zustand, z. B. „Küche vor dem Umbau: alte Fliesen, dunkle Schränke“.' => 'The alt text in the media library describes the state, e.g. “Kitchen before the conversion: old tiles, dark cupboards”.',
+    'Bildunterschrift (optional)' => 'Caption (optional)',
+];

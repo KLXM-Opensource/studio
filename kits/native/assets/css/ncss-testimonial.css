@@ -1,0 +1,7 @@
+/* NativeCSS components/testimonial.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/testimonial.css" layer(components);
+@layer native {
+  .nv-quotes .ncss-testimonial-grid { margin: 0; padding: 0; list-style: none; }
+  .nv-quotes .nv-quote__avatar { inline-size: 3rem; block-size: 3rem; border-radius: 50%; object-fit: cover; }
+}

@@ -1,0 +1,65 @@
+/* Einstieg in der Darstellung von NativeCSS (blocks/hero.php: split, centered, compact, type, fullbleed) – Merkmal '@nv-hero' */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/split.css" layer(components);
+@import "../../vendor/ncss/components/badge.css" layer(components);
+@import "../../vendor/ncss/components/hero.css" layer(components);
+
+@layer native {
+  .nv-hero__title { text-wrap: balance; }
+  .nv-hero__lead { max-inline-size: 40em; margin: 0; color: var(--f-muted); font-size: var(--f-t1); text-wrap: pretty; }
+  .nv-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--f-s-m); }
+  .nv-hero__text > * { margin: 0; }
+  .nv-hero__actions { margin-block-start: var(--f-s-xs); }
+  .nv-hero .hl { font-style: normal; }
+  .nv-hero__badge { font-size: var(--f-t-1); font-weight: 600; letter-spacing: .02em; }
+
+  /* „type“: großer Schriftzug, Betonung im Markenverlauf */
+  .nv-hero--type { display: flex; flex-direction: column; gap: var(--f-s-2xl); container-type: inline-size; }
+  .nv-hero__display { margin: 0; color: var(--f-ink); font: var(--f-hw) clamp(2.75rem, 1rem + 9cqi, 8.5rem)/.98 var(--f-font-head); letter-spacing: -.035em; text-wrap: balance; }
+  .nv-hero__display .hl {
+    background: linear-gradient(100deg, var(--f-a), var(--f-b));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .nv-hero--type .nv-hero__lead { font-size: var(--f-t1); }
+
+  /* „compact“: Seitenkopf der Unterseiten als getönte Kachel */
+  .nv-hero--compact .nv-hero__text {
+    padding: clamp(1.5rem, 1rem + 4vw, 3.5rem);
+    border: 1px solid var(--f-line); border-radius: var(--ncss-radius-lg);
+    background:
+      radial-gradient(120% 140% at 100% 0%, color-mix(in oklab, var(--f-a) 14%, transparent), transparent 55%),
+      var(--f-surface);
+  }
+  .nv-hero--compact .nv-hero__title { margin: 0; color: var(--f-ink); }
+
+  /* „centered“ */
+  .nv-hero--centered { display: flex; flex-direction: column; align-items: center; gap: var(--f-s-2xl); text-align: center; }
+  .nv-hero--centered .nv-hero__text { align-items: center; }
+  .nv-hero--centered .nv-hero__lead { margin-inline: auto; }
+  .nv-hero--centered .hero__points { justify-content: center; }
+
+  /* „split“ */
+  .nv-hero--split { align-items: center; }
+  .nv-hero__media img { border-radius: var(--ncss-radius-lg); }
+
+  /* „fullbleed“: .ncss-hero über die volle Breite, Bild per <img>/<video> */
+  .sec--hero:has(.nv-hero--bleed) { padding-block: 0; }
+  .nv-hero--bleed { min-block-size: min(88svh, 52rem); }
+  .nv-hero--h-medium { min-block-size: min(64svh, 38rem); }
+  .nv-hero--h-low { min-block-size: min(44svh, 26rem); }
+  .nv-hero--bleed .ncss-hero-media img, .nv-hero--bleed .ncss-hero-media picture, .nv-hero__video {
+    display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border-radius: 0;
+  }
+  .nv-hero--bleed .ncss-hero-media picture, .nv-hero--bleed .ncss-hero-media > img, .nv-hero__video { position: absolute; inset: 0; }
+  .nv-hero--bleed .ncss-hero-content { margin-inline: max(var(--f-gutter), calc((100% - var(--f-wrap)) / 2)); margin-block: auto var(--f-s-2xl); max-inline-size: 36rem; }
+  /* Text direkt auf Bild/Video („Verlauf von unten“): Verlauf über die ganze Höhe, helle Schrift, Betonung in der
+     Hervorhebungsfarbe, zweiter Button als helle Kontur – lesbar auf hellen wie dunklen Motiven */
+  .nv-hero--gradient .ncss-hero-media::after { background: linear-gradient(to top, rgb(0 0 0 / 72%), rgb(0 0 0 / 38%) 70%, rgb(0 0 0 / 22%)); }
+  .nv-hero--bleed .ncss-hero-content--transparent { color: #fff; --f-ink: #fff; --f-text: #fff; --f-muted: rgb(255 255 255 / 88%); }
+  .nv-hero--bleed .ncss-hero-content--transparent :is(.nv-hero__title, .nv-hero__lead, .eyebrow) { color: #fff; }
+  .nv-hero--bleed .ncss-hero-content--transparent .hl { color: color-mix(in oklab, var(--f-a) 30%, white); }
+  .nv-hero--bleed .ncss-hero-content--transparent .btn--secondary { border-color: rgb(255 255 255 / 75%); background: transparent; color: #fff; }
+  .nv-hero--bleed .ncss-hero-content--transparent .checks__ico { color: #fff; }
+  .nv-hero--bleed .ncss-hero-content--filled .nv-hero__title { color: var(--f-ink); }
+  .nv-hero--medium .ncss-hero-media::after { background: linear-gradient(to top, rgb(0 0 0 / 45%), rgb(0 0 0 / 0%) 70%); }
+}
