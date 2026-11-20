@@ -417,4 +417,5 @@ return [
     'Sortiert nach {column}, {direction}' => 'Sorted by {column}, {direction}',
     'aufsteigend' => 'ascending',
     'absteigend' => 'descending',
+    'Diese Mitgliedsnummer kennen wir nicht.' => 'We do not know this membership number.',
 ];
