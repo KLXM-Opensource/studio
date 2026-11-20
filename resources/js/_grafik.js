@@ -43,7 +43,8 @@ export function initGrafik() {
     e.preventDefault();
     const d = b.dataset;
     // Übersicht „Grafiken“: nach dem Speichern neu laden, damit die Liste stimmt
-    openGraphicEditor({ format: d.format, id: d.id, mediaId: d.media, block: d.block })
+    const block = d.blockFrom ? document.querySelector(d.blockFrom)?.value : d.block;
+    openGraphicEditor({ format: d.format, id: d.id, mediaId: d.media, block, returnFocus: b })
       .then(r => { if (r.saved && b.closest('.ge-store, .adm-head')) location.reload(); });
   });
 }

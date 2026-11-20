@@ -59,7 +59,8 @@ export async function open(opts = {}) {
       ed.destroy();
       dlg.close(); dlg.remove();
       document.documentElement.classList.remove('ge-open');
-      if (back && back.isConnected) back.focus?.();
+      const ret = opts.returnFocus?.isConnected ? opts.returnFocus : back;
+      if (ret && ret.isConnected) ret.focus?.();
       opts.onClose?.({ saved, svg });
       resolve({ saved, svg });
     };

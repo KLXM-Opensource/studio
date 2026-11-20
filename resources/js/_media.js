@@ -8,7 +8,8 @@ import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
 import { fitDialog, fitLabel } from './_imagefit.js';   // Bild im Rahmen: füllen, einpassen, Originalformat (Core\ImageFit)
-import { editImage, editToolbar } from './_imageedit.js';   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
+import { editImage, editToolbar } from './_imageedit.js';
+import { openGraphicEditor } from './_grafik.js';   // Grafik-Editor (Core\Graphics): Neu → Grafik, SVG bearbeiten   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
  *  - Seitenleiste: Mediathek, Sammlungen (Dateien per Drag & Drop hineinziehen), Tags
@@ -623,6 +624,7 @@ class Finder {
           <label class="fx-search">${SVG.search}<input type="search" placeholder="Suchen" aria-label="Medien durchsuchen" data-q></label>
           <button type="button" class="fx-tbtn fx-infotoggle" data-infotoggle data-fav-before aria-label="Informationen ein-/ausblenden">${SVG.info}</button>
           <span class="fx-sources" data-sources hidden></span>
+          <button type="button" class="adm-btn adm-btn--small fx-newbtn" data-newmenu aria-haspopup="menu" hidden>${ico('plus')}<span>${esc(t('Neu'))}</span></button>
           <button type="button" class="adm-btn adm-btn--primary adm-btn--small fx-upbtn" data-upload>${SVG.up}<span>Hochladen</span></button>
         </header>
         <div class="fx-listhead" aria-hidden="true"></div>
@@ -647,6 +649,18 @@ class Finder {
     this.applyView();
   }
 
+  /** Grafik-Editor: neue Grafik; Infografiken erscheinen danach ausgewählt in der Mediathek (im Auswahldialog direkt wählbar) */
+  async newGraphic(opts) {
+    const r = await openGraphicEditor({ returnFocus: $('[data-newmenu]', this.root), ...opts });
+    if (r.saved?.target === 'media') this.load(r.saved.item.id);
+  }
+
+  /** SVG der Mediathek im Grafik-Editor bearbeiten (neue Fassung derselben Datei – ID und Verwendungen bleiben) */
+  async editGraphic(m) {
+    const r = await openGraphicEditor({ mediaId: m.id });
+    if (r.saved) this.load(r.saved.item?.id || m.id);
+  }
+
   /** Knopf „Importieren aus …“: Quellen der Erweiterungen (Hook sources) – nur mit Schreibrecht im aktuellen Ort */
   renderSources() {
     const el = $('[data-sources]', this.root);
@@ -668,6 +682,19 @@ class Finder {
   bind() {
     const r = this.root;
     $('[data-upload]', r).addEventListener('click', () => this.uploader.choose());
+    // Neu → Grafik (Grafik-Editor als Overlay): Infografik in die Mediathek, Symbol/Blockvorschau in die eigene Ablage
+    $('[data-newmenu]', r).addEventListener('click', e => {
+      const rc = e.currentTarget.getBoundingClientRect();
+      const info = (w, h) => () => this.newGraphic({ format: 'info', w, h });
+      this.menu(rc.left, rc.bottom + 4, [
+        [t('Infografik 16:9 (1600 × 900)'), info(1600, 900)],
+        [t('Infografik quadratisch (1080 × 1080)'), info(1080, 1080)],
+        [t('Infografik frei (800 × 500)'), info(800, 500)],
+        [t('Symbol 24 × 24 (eigene Ablage)'), () => this.newGraphic({ format: 'icon' })],
+        [t('Blockvorschau 160 × 100 (eigene Ablage)'), () => this.newGraphic({ format: 'preview' })],
+        [t('Grafiken verwalten …'), () => { location.href = BASE + '/grafik'; }],
+      ]);
+    });
     // Importieren aus externen Quellen (Erweiterungen, Hook sources): Menü unter dem Knopf, Fokus danach zurück
     $('[data-sources]', r).addEventListener('click', e => {
       const b = e.target.closest('[data-srcmenu]');
@@ -705,8 +732,8 @@ class Finder {
       const [key, dir] = e.target.value.split(':');
       this.sort = { key, dir: +dir }; store.set('sort', this.sort); this.items = this.sorted(this.items); this.render();
     });
-    let t;
-    $('[data-q]', r).addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { this.q = e.target.value; this.load(); }, 200); });
+    let qTimer;
+    $('[data-q]', r).addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { this.q = e.target.value; this.load(); }, 200); });
 
     // Seitenleiste – Sammlungen und Tags lassen sich zuklappen (Zustand je Browser)
     this.$side.addEventListener('toggle', e => { const f = e.target.closest?.('[data-fold]'); if (f) store.set('fold-' + f.dataset.fold, f.open); }, true);
@@ -830,6 +857,8 @@ class Finder {
     this.opts.onLoad?.(this);   // z. B. Sammlungswahl: Knopf „übernehmen“ nachführen
     this.ro = data.can_edit === false;   // z. B. Pool ohne Recht „Geteilte Medien pflegen“: nur ansehen und verwenden
     this.root.classList.toggle('is-ro', this.ro);
+    const nb = $('[data-newmenu]', this.root);
+    if (nb) nb.hidden = this.ro || !!this.pool || !document.documentElement.dataset.grafikJs || this.opts.kind === 'pdf' || this.opts.kind === 'video' || this.opts.kind === 'audio';
     RIGHTS = data.rights || 'optional';
     // Office-Dokumente (Grundeinstellungen → Mediathek): erlaubte Typen kommen mit der Liste
     for (const t of data.office || []) if (!ALL_TYPES.includes(t)) ALL_TYPES.push(t);
@@ -1088,6 +1117,7 @@ class Finder {
     if (one) e.push(['Bearbeiten …', () => this.edit(one.id)], ['Quick Look', () => this.quickLook(one.id)]);
     if (one?.kind === 'image' && !one.svg) e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
     if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
+    if (one?.svg && !this.pool && !one.pool && document.documentElement.dataset.grafikJs) e.push([t('Im Grafik-Editor bearbeiten …'), () => this.editGraphic(one)]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
     if (ids.length > 1 && this.meta.zip) e.push([t('Als ZIP herunterladen'), () => { location.href = this.zipUrl(ids); }]);
     if (this.src.type === 'trash') e.push([t('Wiederherstellen'), async () => { await api.bulk({ ids, action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); }]);
@@ -1416,7 +1446,7 @@ class Finder {
       <div class="md-grid">
         <div class="md-preview">
           ${isImg && m.svg ? `<div class="md-focus md-focus--svg"><img src="${esc(m.url)}" alt="" draggable="false"></div>
-            <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
+            <div class="md-iebar" data-iebar>${!this.ro && !this.pool && !m.pool && document.documentElement.dataset.grafikJs ? `<button type="button" class="adm-btn adm-btn--small" data-ge-edit>${ico('bezier-curve')} ${esc(t('Im Grafik-Editor bearbeiten'))}</button>` : editToolbar(m, this.ro)}</div>
             <p class="f-help">${esc(t('SVG-Grafik: wird immer vollständig und in jeder Größe scharf gezeigt – Fokuspunkt und Zuschnitte entfallen.'))}${m.note ? ` ${esc(m.note)}.` : ''}</p>
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast, Schärfe'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
@@ -1507,6 +1537,11 @@ class Finder {
     $('[data-crops]', dlg)?.addEventListener('click', e => {
       const b = e.target.closest('[data-crop]'); if (!b) return;
       crop({ ...m, focus }, b.dataset.crop, (r, res) => { m.crops = res.item.crops; $('[data-crops]', dlg).innerHTML = cropTiles(); fxPreview(); this.load(m.id); });
+    });
+    // SVG: im Grafik-Editor bearbeiten (Overlay über dem Dialog; danach Dialog schließen, die Liste zeigt die neue Fassung)
+    $('[data-ge-edit]', dlg)?.addEventListener('click', async () => {
+      const r = await openGraphicEditor({ mediaId: m.id });
+      if (r.saved) { $('[data-close]', dlg)?.click(); this.load(m.id); }
     });
     // Bild bearbeiten (speichert sofort; neue Größen, eigene Zuschnitte je Format werden zurückgesetzt)
     $('[data-iebar]', dlg)?.addEventListener('click', async e => {

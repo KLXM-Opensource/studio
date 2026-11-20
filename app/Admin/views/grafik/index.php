@@ -16,9 +16,14 @@ $help = [
   <div class="adm-row">
     <a class="adm-btn" href="<?= e(url('/admin/media')) ?>"><?= e(__('Zur Mediathek')) ?></a>
     <button type="button" class="adm-btn" data-ge-open data-format="icon"><?= icon('plus') ?> <?= e(__('Neues Symbol')) ?></button>
-    <button type="button" class="adm-btn adm-btn--primary" data-ge-open data-format="preview"><?= icon('plus') ?> <?= e(__('Neue Blockvorschau')) ?></button>
   </div>
 </header>
+<div class="adm-card ge-newpv">
+  <label class="f"><span><?= e(__('Blockvorschau gestalten für')) ?></span>
+    <select id="ge-block"><?php foreach ($blocks as $k => $label): ?><option value="<?= e($k) ?>"><?= e($label) ?> (<?= e($k) ?>)</option><?php endforeach; ?></select></label>
+  <button type="button" class="adm-btn adm-btn--primary" data-ge-open data-format="preview" data-block-from="#ge-block"><?= icon('plus') ?> <?= e(__('Neue Blockvorschau')) ?></button>
+  <p class="f-help"><?= e(__('Startet mit der Vorschau des Kits für diesen Block – ändern, speichern, fertig. Die Blockauswahl zeigt danach Ihre Fassung.')) ?></p>
+</div>
 <p class="adm-muted ge-intro"><?= e(__('Diese Grafiken liegen in einer eigenen Ablage und erscheinen nicht in der Mediathek oder in Bildfeldern. Infografiken für Seiten legen Sie in der Mediathek an (Neu → Grafik).')) ?></p>
 
 <?php foreach ($groups as $kind => $items): ?>

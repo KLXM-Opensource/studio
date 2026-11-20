@@ -203,6 +203,8 @@ final class Graphics
                 $old = Media::find($mediaId);
                 if (!$old || ($old['mime'] ?? '') !== Svg::MIME) return [null, __('Nur SVG-Grafiken lassen sich im Grafik-Editor bearbeiten.')];
                 if (!empty($old['pool_ref'])) return [null, __('Geteilte Medien (Pools) lassen sich hier nicht überschreiben.')];
+                // ohne neuen Namen bleibt der bisherige (Anzeigename und sprechende Adresse)
+                if (trim((string) ($meta['name'] ?? '')) === '') $name = (string) ($old['original_name'] ?: basename((string) $old['file']));
                 $prev = @file_get_contents(Media::path($old));
                 $opt = ['graphic' => true];
                 if (array_key_exists('alt', $meta)) $opt['alt'] = (string) $meta['alt'];

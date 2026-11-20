@@ -280,3 +280,6 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-store__empty { color: var(--adm-t3) }
 .ge-lbl output { min-width: 40px; text-align: right; white-space: nowrap; font: 600 11px var(--adm-mono, ui-monospace, monospace); color: var(--adm-t3) }
 .ge-lbl .ge-range { flex: 1; width: auto }
+.ge-newpv { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 16px; margin-bottom: 16px }
+.ge-newpv .f { margin: 0; min-width: 260px }
+.ge-newpv .f-help { flex-basis: 100%; margin: 0 }
