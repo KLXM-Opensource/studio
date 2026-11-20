@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit NativeCSS
+- **Neues Kit „NativeCSS“** (`kits/native`, Kind von fluid): Seitenrahmen und Blöcke mit [NativeCSS](https://github.com/skerbis/nativecss) (MIT) – Kopfleiste mit Menü als `<dialog>` (ohne Skript in aktuellen Browsern, Klick daneben und Escape schließen, Fokus zurück zur Schaltfläche), Untermenüs als `<details>` mit „Übersicht“, Fußbereich im Raster. Kopfbereich-Aktionen, Sprachen (ab drei als Aufklappmenü), Hell/Dunkel-Schalter, Hinweis, Chat und Werkzeugleiste wie in fluid. Design-Vorlagen „NativeCSS“ (Standard) und „NativeCSS · Graphit“; die Gruppe „Kopf & Fuß“ heißt hier „Seite“.
+- **Einblend-Effekte je Abschnitt** (Abschnitt → „Einblend-Effekt“): Sanft einblenden, Von unten, Kreis, Vorhang – einmal beim Hereinscrollen, nie beim ersten Block, nicht bei „Bewegung reduzieren“.
+- **Eigene Darstellungen:** Einstieg (Text + Bild, zentriert, Seitenkopf, großer Schriftzug mit Verlauf, vollflächig mit Hintergrundvideo und Pause-Schalter), Karten (ganze Karte klickbar, Hervorheben, Filter), Text + Bild und Video **„Morphing beim Scrollen“** (`block_extend`), Handlungsaufruf, FAQ, Kennzahlen, die **hochzählen**, Logos-**Laufband mit „Laufband anhalten“**, Scrollytelling, **Zeitleiste** (Linie wächst), Kundenstimmen, **Preistabelle** und Preisliste, **Vorher/Nachher** mit echtem Regler, **Video-Player** mit Kapiteln und Untertiteln (eigene Datei) sowie Audio-Player. Andere Varianten kommen von fluid.
+- **Darstellungs-Knopf für Besucher** (Design → Bewegung & Farbschema, Standard aus): Farbschema, Kontrast, Bewegung, Schriftgröße, Lese-Schrift (Atkinson Hyperlegible, Lexend, OpenDyslexic – abschaltbar), Textabstände, Links, Fokus; ohne Cookie.
+- Nur laden, was die Seite zeigt: Rahmen in `css/site.css` (Cascade Layers ohne Inline-Stil), jede Komponente über `conditional_css` und `Theme::markUsed()`; Player-Skripte nur bei eigener Video- bzw. Audiodatei.
+- NativeCSS aktualisieren: `php kits/native/tools/ncss-update.php --from=… [--ref=…] [--dry-run]` bzw. `--tag=…` (nur verwendete Dateien, unverändert in `kits/native/vendor/ncss/`).
+- Startinhalte (`--content=full`): die von fluid plus Seite **„Bausteine“** mit jeder Funktion des Kits; Medien aus der Demo von NativeCSS (MIT, Videos ohne Ton) und ein Foto von Pexels. Bestehende Websites: `php kits/native/tools/demo.php`.
+- `i18n:missing` prüft bei Kind-Kits Texte und Sprachdateien der ganzen Kette.
+
 ### Formatierungsleiste und Griffe wie in den REDAXO-Editoren fluid/tiptap
 - Formatierungsleiste (Formularfelder und schwebend auf der Website): Lucide-Symbole statt Zeichen („B“, „ab“, 🔗, ⋯, „– Liste“), 32-px-Knöpfe mit Trennstrichen, aktive Knöpfe hell in der Akzentfarbe statt schwarz, Menüs mit Symbolen. Die schwebende Leiste ist jetzt hell (wie die Bubble von tiptap). Werte als Tokens `--rte-*` aus den Verwaltungs-Tokens – hell, dunkel und persönliche Akzentfarbe passen von selbst. Nur Darstellung: Befehle, Klassen und Tastatur bleiben.
 - Griffe: Führungslinie endet im Fenster; auf dem Telefon keine Griffe für Textbreite/Aufteilung.
