@@ -592,4 +592,6 @@ return [
     'Wie bisher' => 'As before',
     'Elastisch – zieht weich mit leichtem Nachfedern auf' => 'Elastic – opens smoothly with a slight spring',
     'Nur mit „Dezente Animationen“ und nie bei „Bewegung reduzieren“ auf dem Gerät. Schließen bleibt kurz und ohne Nachfedern.' => 'Only with “Subtle animations” and never when the device asks for reduced motion. Closing stays short and without spring.',
+    // Block „Vorher/Nachher“
+    'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.' => 'Two images on top of each other, a slider reveals more of one or the other – for conversions, renovation, restoration, image editing. Take both photos with the same framing. Without JavaScript they appear side by side.',
 ];

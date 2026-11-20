@@ -41,3 +41,7 @@
   .hx-cmp.is-ready::after{background:CanvasText}
   .hx-cmp.is-ready .hx-cmp__pane--before::after{background:CanvasText}
 }
+
+/* Block „Vorher/Nachher“ (blocks/compare.php): derselbe Vergleich ohne Textspalte, Bildunterschrift darunter */
+.cmp-block__fig{margin:0}
+.cmp-block__cap{margin-top:var(--f-s-s);color:var(--f-muted);font-size:var(--f-t-1)}

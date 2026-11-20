@@ -25,7 +25,7 @@ use Core\Search\Search;
  *   Hero::search($d)               Suchfeld (Core\Search, Vorschläge beim Tippen); '' ohne Website-Suche
  *   Hero::chips($d)                Vorschläge unter dem Suchfeld: [['label', 'href']]
  *   Hero::video($d)                ['media' => Standbild + <video>, 'toggle' => Pause-Schaltfläche] oder null
- *   Hero::compare($d, $sizes)      Vorher/Nachher mit Schieberegler (input range) oder ''
+ *   Hero::compare($d, $sizes)      Vorher/Nachher mit Schieberegler (input range) oder '' (auch Block „Vorher/Nachher“ der Kits)
  *   Hero::marquee($text, $class)   Laufzeile mit Pause-Schaltfläche (läuft nur mit Skript, nie bei „Bewegung reduzieren“)
  *   Hero::dials($b, $d)            Kern-Kennzahlen (app/Blocks/dials.php) ohne eigenen Container
  *   Hero::dates($d)                nächste Termine (Kalender-Tabelle) bzw. neueste Einträge (andere Tabelle)
@@ -224,7 +224,7 @@ final class Hero
      * Vergleich zweier Bilder: ohne Skript nebeneinander (beschriftet), mit Skript übereinander mit Schieberegler.
      * Der Regler ist ein natives <input type="range"> (Pfeiltasten, Pos1/Ende, Bildlauf-Gesten) mit sichtbarem Fokus im Kit.
      */
-    public static function compare(array $d, string $sizes = '100vw', string $ratio = '', string $class = 'hx-compare'): string
+    public static function compare(array $d, string $sizes = '100vw', string $ratio = '', string $class = 'hx-compare', ?bool $eager = true): string
     {
         $a = (int) ($d['image_before'] ?? 0);
         $bId = (int) ($d['image_after'] ?? 0) ?: (int) ($d['image'] ?? 0);
@@ -233,7 +233,9 @@ final class Hero
         }
         $la = trim((string) ($d['before_label'] ?? '')) ?: lt('Vorher');
         $lb = trim((string) ($d['after_label'] ?? '')) ?: lt('Nachher');
-        $pic = fn(int $id) => $ratio !== '' ? Media::picture($id, $sizes, ['ratio' => $ratio, 'eager' => true]) : img($id, $sizes, ['eager' => true]);
+        // $eager = null: wie andere Bilder (sofort nur im ersten Block der Seite) – z. B. Block „Vorher/Nachher“ der Kits
+        $lazy = $eager === null ? [] : ['eager' => $eager];
+        $pic = fn(int $id) => $ratio !== '' ? Media::picture($id, $sizes, ['ratio' => $ratio] + $lazy) : img($id, $sizes, $lazy);
         $id = 'hxc-' . substr(md5($a . '-' . $bId), 0, 6);
         return '<div class="' . e($class) . '" data-hero-compare>'
             . '<figure class="' . e($class) . '__pane ' . e($class) . '__pane--before">' . $pic($a) . '<figcaption class="' . e($class) . '__tag">' . e($la) . '</figcaption></figure>'

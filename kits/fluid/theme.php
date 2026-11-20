@@ -113,7 +113,7 @@ return [
     // Optionen je Fragment: 'fragments' => ['brand' => ['mark' => 'dot'], 'video-embed' => ['ratio_class' => 'ratio-']]
     'conditional_css' => [
         'css/hero-x.css' => ['hero:fullbleed', 'hero:cards', 'hero:type'],
-        'css/hx-scale.css' => ['hero:scale'], 'css/hx-collage.css' => ['hero:collage'], 'css/hx-compare.css' => ['hero:compare'],   // neue Einstiege
+        'css/hx-scale.css' => ['hero:scale'], 'css/hx-collage.css' => ['hero:collage'], 'css/hx-compare.css' => ['hero:compare', 'compare'],   // neue Einstiege; Block „Vorher/Nachher“
         'css/prose.css' => ['richtext', 'tabs', 'faq', 'media_text', '@rich'],   // @rich: Rich-Text-Stile in anderen Blöcken (Core\Sanitizer::styled)
         'css/b-article.css' => ['richtext:article', 'richtext:columns'],
         'css/b-features.css' => ['features'],
@@ -581,6 +581,17 @@ return [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
+        ],
+        // Vorher/Nachher als eigener Block (wie der Einstieg „Vorher/Nachher“: Core\Blocks\Hero::compare, gleiche Feldnamen)
+        'compare' => [
+            'label' => 'Vorher/Nachher', 'icon' => 'square-half', 'group' => 'Medien',
+            'help' => 'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.',
+            'fields' => [
+                ...$head(false),
+                ...\Core\Blocks\Hero::fields('compare', []),
+                ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '16:9', 'width' => 'half', 'options' => $ratios],
+                ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'max' => 200, 'width' => 'half'],
+            ],
         ],
     ],
 ];
