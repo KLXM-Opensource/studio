@@ -5,6 +5,7 @@ return [
     'Enthalten:' => 'Included:',
     'Laufband anhalten' => 'Pause ticker',
     'Nicht enthalten:' => 'Not included:',
+    'Passen Sie die Darstellung an Ihre Bedürfnisse an. Solange Sie nichts ändern, gelten die Einstellungen Ihres Geräts.' => 'Adapt the display to your needs. As long as you change nothing, your device settings apply.',
     'Text zum Audio' => 'Audio transcript',
     'Trennlinie verschieben: links {a}, rechts {b}' => 'Move the divider: left {a}, right {b}',
 ];

@@ -46,7 +46,9 @@ function native_prefs_element(string $class): string
 {
     $settings = array_filter(['theme' => design('dark') ? 'theme' : '', 'contrast', 'motion', 'text',
         'font' => design('visitor_prefs_fonts') !== false ? 'font' : '', 'spacing', 'links', 'focus']);
-    return '<ncss-preferences class="' . e($class) . '" settings="' . e(implode(' ', $settings)) . '"></ncss-preferences>';
+    // Einleitung in der Anrede der Website (NativeCSS duzt) – übrige Texte wie in NativeCSS (de/en nach <html lang>)
+    $intro = lt('Passen Sie die Darstellung an Ihre Bedürfnisse an. Solange Sie nichts ändern, gelten die Einstellungen Ihres Geräts.');
+    return '<ncss-preferences class="' . e($class) . '" settings="' . e(implode(' ', $settings)) . '" data-label-intro="' . e($intro) . '"></ncss-preferences>';
 }
 
 /**
