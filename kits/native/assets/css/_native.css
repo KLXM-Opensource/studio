@@ -97,7 +97,6 @@
     /* Darstellung: schmal im Menü (die Kopfleiste bleibt einzeilig), breit in der Leiste */
     .nv-prefs:not(.nv-prefs--always) { display: none; }
     .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }
-    .nv-tools .ha-cta { display: none; }
   }
   .ncss-nav-panel .ha-lang__list { position: static; box-shadow: none; }
   .nv-nav__quick { margin: 0; padding: 0; list-style: none; }

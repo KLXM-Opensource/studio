@@ -1,0 +1,28 @@
+/*
+ * Kit „NativeCSS“ – Kopfbereich-Aktionen (Core\HeaderActions), Such-Schaltfläche und Hell/Dunkel-Schalter in der Kopfleiste.
+ * Bewusst OHNE Layer: Die Kern-Stylesheets der Kopfbereich-Aktionen (/assets/ha/…) sind ebenfalls ohne Layer und laden davor –
+ * wie bei fluid (_header.css) gewinnt so die Gestaltung des Kits. Werte aus der Design-Leiste (--f-…).
+ */
+.nv-topbar .ha, .nv-topbar .ha-below { --ha-accent: var(--f-a); --ha-on: var(--f-a-on); --ha-ink: var(--f-ink); --ha-muted: var(--f-muted); --ha-line: var(--f-line-strong);
+  --ha-bg: var(--f-bg); --ha-surface: var(--f-surface); --ha-open: var(--f-link); --ha-h: 2.75rem; --ha-gap: .5rem; }
+.nv-topbar .ha-cta--link { color: var(--f-ink); font-weight: 600; text-decoration-color: var(--f-a); text-decoration-thickness: 2px; text-underline-offset: .45em; }
+.nv-topbar .ha-cta--link .ha-arrow { color: var(--f-link); }
+.nv-topbar .ha-field__in { border-color: transparent; }
+.nv-topbar .ha-field__in:hover { border-color: var(--f-line-strong); }
+.hsearch__btn, .scheme-btn { display: inline-grid; place-items: center; flex: none; inline-size: 2.75rem; block-size: 2.75rem; padding: 0;
+  border: 1px solid var(--f-line); border-radius: var(--ncss-radius-full, 999px); background: transparent; color: var(--f-ink); cursor: pointer; }
+.hsearch__btn:hover, .scheme-btn:hover { background: var(--f-surface); }
+.scheme-btn svg, .hsearch__btn svg { inline-size: 1.2rem; block-size: 1.2rem; }
+.scheme-btn__sun { display: none; }
+html.scheme-dark .scheme-btn__moon { display: none; }
+html.scheme-dark .scheme-btn__sun { display: block; }
+@media (prefers-color-scheme: dark) {
+  html.has-dark:not(.scheme-light) .scheme-btn__moon { display: none; }
+  html.has-dark:not(.scheme-light) .scheme-btn__sun { display: block; }
+}
+/* schmal: Suchfeld als Lupe (Rückfall des Kerns), Handlungsaufruf im Menü statt in der Leiste */
+@media (max-width: 63.99rem) {
+  .nv-topbar .ha-search--inline, .nv-topbar .ha-search--expand, .nv-topbar .ha-center { display: none; }
+  .nv-topbar .ha-search--fallback { display: flex; }
+  .nv-topbar .ha .ha-cta { display: none; }
+}

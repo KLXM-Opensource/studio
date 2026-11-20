@@ -27,5 +27,6 @@
 @import "../../vendor/ncss/components/footer.css" layer(components);
 
 @import "_native.css";
+@import "_frame.css";   /* ohne Layer: Kopfbereich-Aktionen des Kerns gestalten (siehe Datei) */
 
 @media print{[data-reveal]{opacity:1!important;translate:none!important}.nv-topbar,.skip,.reel-ctrl{display:none!important}.sec{padding-block:1.5rem}a{color:inherit}}

@@ -55,7 +55,7 @@
   /* Text direkt auf Bild/Video („Verlauf von unten“): Verlauf über die ganze Höhe, helle Schrift, Betonung in der
      Hervorhebungsfarbe, zweiter Button als helle Kontur – lesbar auf hellen wie dunklen Motiven */
   .nv-hero--gradient .ncss-hero-media::after { background: linear-gradient(to top, rgb(0 0 0 / 72%), rgb(0 0 0 / 38%) 70%, rgb(0 0 0 / 22%)); }
-  .nv-hero--bleed .ncss-hero-content--transparent { color: #fff; --f-ink: #fff; --f-text: #fff; --f-muted: rgb(255 255 255 / 88%); }
+  .nv-hero--bleed .ncss-hero-content--transparent { padding-inline: 0; color: #fff; --f-ink: #fff; --f-text: #fff; --f-muted: rgb(255 255 255 / 88%); }
   .nv-hero--bleed .ncss-hero-content--transparent :is(.nv-hero__title, .nv-hero__lead, .eyebrow) { color: #fff; }
   .nv-hero--bleed .ncss-hero-content--transparent .hl { color: color-mix(in oklab, var(--f-a) 30%, white); }
   .nv-hero--bleed .ncss-hero-content--transparent .btn--secondary { border-color: rgb(255 255 255 / 75%); background: transparent; color: #fff; }
