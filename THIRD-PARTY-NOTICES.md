@@ -24,7 +24,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), NativeCSS (parts in `kits/fluid`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper), Apache ECharts | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, ZRender (ECharts), pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
@@ -52,6 +52,10 @@ not part of the distribution. **Service**: an online service contacted at runtim
   license text and the list of ported parts are in `extensions/consent_kit/LICENSE` and
   `extensions/consent_kit/THIRD-PARTY-NOTICES.md`. The optional Open Cookie Database (Apache-2.0) of the add-on is not
   used and not bundled.
+- **NativeCSS** (https://github.com/skerbis/nativecss, 1.1.0 @ 8bb3e3f) – MIT, © 2026 Thomas Skerbis and KLXM Crossmedia
+  GmbH. The visitor display settings `<ncss-preferences>` (`js/preferences.js`, `js/preferences-early.js`,
+  `css/preferences.css`) are copied unchanged into `kits/fluid/assets` (built to `public/assets/kits/fluid`); the
+  markup of its filter component is reused by `kits/fluid` (own script and stylesheet).
 
 ## 1. Browser assets in `public/assets` (Bundled)
 

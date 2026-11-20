@@ -6,6 +6,16 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Neues aus dem REDAXO-Port (1.0.0-beta.2)
+Alles zusätzlich – bestehende Seiten sehen unverändert aus, neue Stylesheets und Skripte laden nur, wo sie gebraucht werden.
+- **Vorher/Nachher** als eigener Block (Gruppe Medien, Typ `compare`): zwei Bilder mit Regler (natives `input range`, Tastatur, ohne JavaScript nebeneinander), Bildformat, Bildunterschrift – derselbe Vergleich wie beim Einstieg (`Core\Blocks\Hero::compare`, Felder `image_before`, `image_after`, `before_label`, `after_label`). Fehlende Alt-Texte meldet das Bildfeld.
+- **Video & Audio** (Typ bleibt `video`): Darstellung „Audio (Podcast, Musik)“ (`audio`) mit Audiodateien (Wiederholgruppe `audio`: `file`, `title`, `artist`; ab zwei Dateien Playlist), Cover über „Vorschaubild“, Player des Browsers; Kapitel, Untertitel und Transkript je Datei aus der Mediathek. Video-Felder fehlen bei Audio, „Text daneben“ erscheint nur bei „Mit Text daneben“.
+- **Pakete „Preisliste (Speisekarte)“** (`list`, Wiederholgruppe `entries`: `name`, `price`, `text`, bis 80): Name, Führungspunkte, Preis, Beschreibung.
+- **Karten**: je Karte „Hervorheben“ (`featured`, Hinweis `badge`, Standard „Empfohlen“) und „Kategorie“ (`category`); am Block „Filter nach Kategorie“ (`filter`) – Schaltflächen als Optionsfelder, Filtern per CSS, Trefferzahl per Skript (Merkmal `@filter`).
+- **Datenliste „Spalten sortierbar“** (Kern, jedes Kit, Feld `table_sort`, nur bei „Tabelle“): Klick oder Tastatur auf den Spaltenkopf sortiert nach Zahl, Datum oder Text (`aria-sort`, Ansage), Schatten an der Kante beim waagerechten Scrollen; `js/table-sort.js` und `css/table-sort.css` laden nur über `@tablesort`. Tabellen melden `@table`.
+- **Darstellungs-Knopf für Besucher** (Design → Bewegung & Farbschema, Standard aus): `<ncss-preferences>` von NativeCSS mit Farbschema, Kontrast, Bewegung, Schriftgröße, Textabständen, Links und Fokus – gespeichert im Browser, Wahl wirkt über `scheme-dark`/`scheme-light`/`has-motion` auf das Kit; ohne Farbschema, wenn der Hell/Dunkel-Schalter an ist.
+- Unbekannte Varianten aus Kind-Kits (z. B. `morph`) erscheinen nach einem Kit-Wechsel wie „Bild rechts“ bzw. „Mit Text daneben“.
+
 ### Formatierungsleiste und Griffe wie in den REDAXO-Editoren fluid/tiptap
 - Formatierungsleiste (Formularfelder und schwebend auf der Website): Lucide-Symbole statt Zeichen („B“, „ab“, 🔗, ⋯, „– Liste“), 32-px-Knöpfe mit Trennstrichen, aktive Knöpfe hell in der Akzentfarbe statt schwarz, Menüs mit Symbolen. Die schwebende Leiste ist jetzt hell (wie die Bubble von tiptap). Werte als Tokens `--rte-*` aus den Verwaltungs-Tokens – hell, dunkel und persönliche Akzentfarbe passen von selbst. Nur Darstellung: Befehle, Klassen und Tastatur bleiben.
 - Griffe: Führungslinie endet im Fenster; auf dem Telefon keine Griffe für Textbreite/Aufteilung.
