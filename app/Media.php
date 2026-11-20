@@ -713,7 +713,9 @@ final class Media
             return [null, 'Datei ist zu groß (max. ' . (int) ceil($maxBytes / 1048576) . ' MB).'];
         }
         $svg = Svg::detect($path, $mime, $originalName);
-        if ($svg && !Features::on('media.svg', false)) {
+        // Grafiken aus dem Grafik-Editor des Kerns (Core\Graphics, $opt['graphic']) gelten nicht als fremder Upload – bereinigt
+        // wird trotzdem; ids bleiben (Ebenen, spätere Animationen)
+        if ($svg && empty($opt['graphic']) && !Features::on('media.svg', false)) {
             return [null, __('SVG-Uploads sind auf dieser Website ausgeschaltet (Funktionen & Erweiterungen → „SVG-Grafiken hochladen“).')];
         }
         if ((isset(self::IMAGE_MIMES[$mime]) || $svg) && ($opt['require_alt'] ?? true) && empty($opt['decorative']) && mb_strlen(trim($alt)) < 3) {
@@ -732,7 +734,7 @@ final class Media
         if ($svg) {
             // Nur die bereinigte Fassung wird gespeichert, nie das Original (Core\Svg)
             try {
-                $r = Svg::clean((string) file_get_contents($path));
+                $r = Svg::clean((string) file_get_contents($path), ['keep_ids' => !empty($opt['graphic'])]);
             } catch (\RuntimeException $e) {
                 return [null, $e->getMessage()];
             }

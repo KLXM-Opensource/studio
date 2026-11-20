@@ -105,15 +105,21 @@ final class Svg
     private int $dec = 3;
     /** Klassen/ids, die in <style> vorkommen (Selektoren) */
     private array $cssIds = [];
+    /** ids auch ohne Verweis behalten (Grafik-Editor: stabile ids für Ebenen und spätere Animationen) */
+    private bool $keepIds = false;
 
     /**
      * Bereinigt und optimiert eine SVG-Datei.
+     * $opt['keep_ids']: ids ohne Verweis nicht entfernen (Grafik-Editor, Core\Graphics – Ebenen und Animationen brauchen sie).
+     * @param array{keep_ids?: bool} $opt
      * @return array{svg: string, width: int, height: int, in: int, out: int, unsafe: int, other: int}
      * @throws \RuntimeException mit verständlicher Meldung (Upload ablehnen)
      */
-    public static function clean(string $raw): array
+    public static function clean(string $raw, array $opt = []): array
     {
-        return (new self())->run($raw);
+        $s = new self();
+        $s->keepIds = !empty($opt['keep_ids']);
+        return $s->run($raw);
     }
 
     /** Ist das (laut finfo, Name und Dateianfang) eine SVG-Datei? */
@@ -416,6 +422,12 @@ final class Svg
                 if ($css !== '') $dst->setAttribute('style', $css);
                 continue;
             }
+            // data-name: Ebenenname (Grafik-Editor, Adobe XD) – nur Text, gekürzt
+            if ($name === 'data-name') {
+                $v = mb_substr(trim((string) preg_replace('~[\x00-\x1f<>]+~', ' ', $v)), 0, 120);
+                if ($v !== '') $dst->setAttribute('data-name', $v);
+                continue;
+            }
             $ok = in_array($name, self::ATTRIBUTES, true) || in_array($name, self::PRESENTATION, true)
                 || preg_match('~^aria-[a-z]+$~', $name);
             if (!$ok) { $this->other++; continue; }
@@ -533,7 +545,7 @@ final class Svg
         }
         $refs = $this->references($doc);
         foreach ($this->all($root) as $el) {
-            if ($el->hasAttribute('id') && !isset($refs[$el->getAttribute('id')])) $el->removeAttribute('id');
+            if (!$this->keepIds && $el->hasAttribute('id') && !isset($refs[$el->getAttribute('id')])) $el->removeAttribute('id');
             $this->roundAttributes($el);
         }
         // Leere Gruppen/defs entfernen, Gruppen ohne Attribute auflösen (von innen nach außen)
