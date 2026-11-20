@@ -226,6 +226,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Aufmacher / Seitenkopf', 'icon' => 'newspaper', 'group' => 'Kopf',
+            'description' => 'Große Schlagzeile (H1) – als Aufmacher, Plakat, Titelbild oder Ressortkopf.',
             'help' => 'Große Schlagzeile der Seite (H1). Pro Seite genau einmal – „Ressortkopf“ für Rubrikseiten (zeigt Unterseiten als Reiter).',
             'variants' => ['split' => 'Aufmacher – Text und Bild (Raster aus dem Design)', 'centered' => 'Plakat – Schlagzeile zentriert, Bild breit darunter',
                 'cover' => 'Titelbild – Bild vollflächig, Text darauf', 'compact' => 'Ressortkopf – ohne Bild, Unterseiten als Reiter',
@@ -275,6 +276,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Text (Artikel)', 'icon' => 'article', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Lesetext mit Zwischenüberschriften, Listen, Zitaten und Links – in Lesebreite, optional mit Initiale, Inhaltsverzeichnis und Randnotiz.',
             'fields' => [
                 ...$head(false, false),
@@ -290,6 +292,7 @@ return [
         ],
         'text_image' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'variants' => ['right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
                 ...$head(true, false),
@@ -304,6 +307,7 @@ return [
         ],
         'figure' => [
             'label' => 'Bild (mit Unterschrift)', 'icon' => 'image', 'group' => 'Medien',
+            'description' => 'Einzelnes Bild in Text-, Inhalts- oder voller Breite – mit Bildunterschrift.',
             'help' => 'Einzelnes Bild in Textbreite, breit oder randlos über die ganze Seite – mit Bildunterschrift und Nachweis.',
             'variants' => ['wide' => 'Breit (Inhaltsbreite)', 'text' => 'Textbreite', 'bleed' => 'Randlos (volle Breite)', 'margin' => 'Mit Unterschrift in der Randspalte'],
             'fields' => [
@@ -315,6 +319,7 @@ return [
         ],
         'features' => [
             'label' => 'Rubriken / Themen', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Rubriken, Themen oder Angebote mit Symbol oder Bild, Titel und kurzem Text.',
             'help' => 'Übersicht mit Symbol oder Bild, Titel und kurzem Text – für Rubriken, Angebote, Arbeitsbereiche oder ein nummeriertes Register.',
             'fields' => [
                 ...$head(),
@@ -333,6 +338,7 @@ return [
         ],
         'teasers' => [
             'label' => 'Anreißer (von Hand)', 'icon' => 'list-bullets', 'group' => 'Inhalt',
+            'description' => 'Von Hand zusammengestellte Verweise auf Seiten und Artikel – als Raster oder Liste.',
             'help' => 'Verweise auf Seiten, Artikel oder externe Beiträge – von Hand zusammengestellt. Für Einträge aus Datentabellen: Block „Datenliste“.',
             'variants' => ['grid' => 'Raster', 'lead' => 'Erster groß, Rest im Raster', 'list' => 'Nummerierte Liste (z. B. „Meistgelesen“)', 'brief' => 'Kurz notiert'],
             'fields' => [
@@ -353,6 +359,7 @@ return [
         ],
         'stats' => [
             'label' => 'Zahlen & Fakten', 'icon' => 'hash', 'group' => 'Inhalt',
+            'description' => 'Bis zu vier große Zahlen mit Beschriftung.',
             'help' => 'Bis zu vier große Zahlen mit Beschriftung. Nur belegbare Zahlen verwenden.',
             'fields' => [
                 ...$head(),
@@ -365,6 +372,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => 'Ein Eintrag = großes Zitat (Randzitat im Magazinstil). Zwei oder drei Einträge = Stimmen nebeneinander. Nur echte, freigegebene Zitate.',
             'fields' => [
                 ...$head(false, false),
@@ -378,6 +386,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],   // schema.org FAQPage
             'fields' => [
                 ...$head(true),
@@ -389,6 +398,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf / Newsletter', 'icon' => 'megaphone', 'group' => 'Inhalt', 'background' => 'accent',
+            'description' => 'Band oder Kasten mit Botschaft und Button – oder ein Newsletter-Formular.',
             'help' => '„Newsletter“ zeigt das öffentliche Formular einer Datentabelle direkt im Band (z. B. Anmeldung mit E-Mail) – ohne Dienste Dritter.',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobener Kasten', 'newsletter' => 'Newsletter / Formular im Band'],
             'fields' => [
@@ -404,6 +414,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, Player erst nach Klick). Eigene MP4-Dateien laufen direkt – mit Untertiteln und Transkript aus der Mediathek.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title', 'description' => 'caption'],
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben'],
@@ -419,6 +430,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -434,6 +446,7 @@ return [
         ],
         'logos' => [
             'label' => 'Partner & Förderer', 'icon' => 'handshake', 'group' => 'Medien',
+            'description' => 'Logos von Partnern, Kunden oder Förderern in einer Reihe.',
             'help' => 'Logos von Partnern, Förderern oder Mitgliedern; ohne Bild erscheint der Name als Schriftzug. Nur Logos mit Freigabe verwenden.',
             'fields' => [
                 ...$head(false, false),
@@ -446,6 +459,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt', 'icon' => 'envelope-simple', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Geschäftszeiten und Karte kommen aus „Website“.',
             'fields' => [
                 ...$head(),
@@ -456,11 +470,13 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],
         'article' => [
             'label' => 'Artikel (Detailseite)', 'icon' => 'file-text', 'group' => 'Daten',
+            'description' => 'Setzt den aufgerufenen Eintrag als Artikel – für Detailseiten-Vorlagen.',
             'help' => 'Für Detailseiten-Vorlagen: setzt den aufgerufenen Eintrag als Artikel – Dachzeile, Schlagzeile, Vorspann, Autor, Datum, Herkunft, Aufmacherbild, Text mit Inhaltsverzeichnis, Lesefortschritt und Teilen-Links. Termine erhalten einen Termin-Kasten mit iCal.',
             'fields' => [
                 ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true],

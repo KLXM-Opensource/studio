@@ -191,6 +191,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => '★', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten. Such-Einstieg, Formular und Standort bringen ein Werkzeug direkt in den Einstieg.',
             'variants' => ['split' => 'Text und Bild nebeneinander', 'centered' => 'Zentriert, Bild darunter', 'compact' => 'Seitenkopf (ohne Bild)',
                 'search' => 'Such-Einstieg (Suchfeld mit Vorschlägen)', 'form' => 'Mit Formular (z. B. Rückruf)', 'map' => 'Standort (Karte, Kontakt, Öffnungszeiten)'],
@@ -225,11 +226,13 @@ return [
         'richtext' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fließtext', 'icon' => '¶', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen und Links – z. B. für Rechtstexte.',
             'fields' => [...$head(false, false), ['name' => 'text', 'label' => 'Text', 'type' => 'richtext']],
         ],
         'text_image' => [
             'label' => 'Text + Bild', 'icon' => '◧', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'variants' => ['right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
                 ...$head(true, false),
@@ -243,6 +246,7 @@ return [
         ],
         'features' => [
             'label' => 'Merkmale / Leistungen', 'icon' => '▦', 'group' => 'Inhalt',
+            'description' => 'Leistungen oder Vorteile im Raster – mit Symbol oder Bild, Titel und kurzem Text.',
             'help' => 'Karten mit Symbol oder Bild, Titel und kurzem Text – für Leistungen, Vorteile oder Angebote.',
             'fields' => [
                 ...$head(),
@@ -261,6 +265,7 @@ return [
         ],
         'stats' => [
             'label' => 'Kennzahlen', 'icon' => '#', 'group' => 'Inhalt',
+            'description' => 'Wenige große Zahlen mit Beschriftung, z. B. Jahre, Mitglieder, Projekte.',
             'fields' => [
                 ...$head(),
                 ['name' => 'items', 'label' => 'Kennzahlen', 'type' => 'repeater', 'item_label' => 'Kennzahl', 'title_field' => 'value', 'max_items' => 4, 'fields' => [
@@ -273,6 +278,7 @@ return [
         'quote' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Zitat / Stimmen', 'icon' => '❝', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => 'Ein Eintrag = großes Zitat. Zwei oder drei Einträge = Karten nebeneinander. Nur echte, freigegebene Stimmen verwenden.',
             'fields' => [
                 ...$head(false, false),
@@ -287,6 +293,7 @@ return [
         'faq' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fragen & Antworten', 'icon' => '?', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],   // schema.org FAQPage
             'fields' => [
                 ...$head(true),
@@ -299,6 +306,7 @@ return [
         'cta' => [
             'nestable' => ['box'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Handlungsaufruf', 'icon' => '➜', 'group' => 'Inhalt', 'background' => 'accent',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box'],
             'fields' => [
                 ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'required' => true, 'max' => 90],
@@ -308,6 +316,7 @@ return [
         ],
         'pricing' => [
             'label' => 'Leistungspakete / Preise', 'icon' => '€', 'group' => 'Inhalt',
+            'description' => 'Pakete oder Preise nebeneinander zum Vergleichen.',
             'help' => 'Zwei bis vier Pakete nebeneinander – mit Preis, Leistungsliste und Button. Ein Paket lässt sich als „Empfohlen“ hervorheben. Nur verbindliche, aktuelle Preise angeben.',
             'fields' => [
                 ...$head(),
@@ -327,6 +336,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => '⋯', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Schritte eines Ablaufs (nummeriert nebeneinander) oder eine Zeitleiste mit Datum/Phase untereinander.',
             'variants' => ['numbers' => 'Nummerierte Schritte', 'timeline' => 'Zeitleiste'],
             'fields' => [
@@ -340,6 +350,7 @@ return [
         ],
         'tabs' => [
             'label' => 'Reiter (Tabs)', 'icon' => '⊟', 'group' => 'Inhalt',
+            'description' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter.',
             'help' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter. Ohne JavaScript stehen alle Inhalte untereinander.',
             'variants' => ['top' => 'Reiter oben', 'side' => 'Reiter links'],
             'fields' => [
@@ -354,6 +365,7 @@ return [
         'video' => [
             'nestable' => ['wide'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video', 'icon' => '▶', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung: Vorschaubild vom eigenen Server, Player erst nach Klick (ohne Cookies bis dahin). Eigene MP4-Dateien laufen direkt.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben'],
             'fields' => [
@@ -369,6 +381,7 @@ return [
         // Bildergalerie, Slider, Stapelkarten: Kern-Blöcke (app/Blocks) – Aussehen in css/extra.css
         'logos' => [
             'label' => 'Logos (Partner, Kunden)', 'icon' => '◎', 'group' => 'Medien',
+            'description' => 'Logos von Partnern, Kunden oder Förderern in einer Reihe.',
             'help' => 'Ohne Bild erscheint der Name als Schriftzug. Nur Logos verwenden, für die eine Freigabe vorliegt.',
             'fields' => [
                 ...$head(false, false),
@@ -381,6 +394,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt', 'icon' => '✉', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'fields' => [
                 ...$head(),
@@ -392,6 +406,7 @@ return [
         'downloads' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads', 'icon' => '↓', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -408,6 +423,7 @@ return [
         'map' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Karte', 'icon' => '⌖', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

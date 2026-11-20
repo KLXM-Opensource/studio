@@ -772,4 +772,13 @@ and by appointment',
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Die laufende oder nächste Ausstellung groß – Daten aus der Tabelle „Ausstellungen“.' => 'The current or next exhibition, large – data from the “Exhibitions” table.',
+    'Laufende, kommende und vergangene Ausstellungen – als Liste, Karten oder Zeitleiste.' => 'Current, upcoming and past exhibitions – as list, cards or timeline.',
+    'Detailseite einer Ausstellung mit Daten, Text, Ansichten und Werken.' => 'Detail page of an exhibition with dates, text, views and works.',
+    'Künstlerinnen und Künstler als Liste, Raster oder A–Z-Register.' => 'Artists as a list, grid or A–Z index.',
+    'Detailseite einer Künstlerin bzw. eines Künstlers mit Porträt und Biografie.' => 'Detail page of an artist with portrait and biography.',
+    'Werke mit Angaben, Verfügbarkeit und Preis – Raster, Mauerwerk, Salon oder Viewing Room.' => 'Works with details, availability and price – grid, masonry, salon or viewing room.',
+    'Detailseite eines Werks mit großem Bild, Werkangaben und Anfrage.' => 'Detail page of a work with large image, details and enquiry.',
+    'Öffnungszeiten, Orte mit Adresse, Eintritt und Termine nach Vereinbarung.' => 'Opening hours, locations with address, admission and appointments.',
 ];

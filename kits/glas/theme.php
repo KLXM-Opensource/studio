@@ -218,6 +218,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten.',
             'variants' => [
                 'aurora' => 'Aurora (Glaspaneel über bewegtem Farbfeld)',
@@ -259,6 +260,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: Lesebreite mit automatischem Inhaltsverzeichnis im Glaspaneel.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis', 'glass' => 'Auf einer Glasfläche'],
             'fields' => [
@@ -270,6 +272,7 @@ return [
         ],
         'text_image' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'help' => 'Bild im Glasrahmen neben dem Text. „Abwechselnd“: mehrere Blöcke nacheinander wechseln automatisch die Seite.',
             'variants' => ['auto' => 'Abwechselnd (automatisch)', 'right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
@@ -283,6 +286,7 @@ return [
         ],
         'features' => [
             'label' => 'Merkmale / Vorteile', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Merkmale oder Vorteile mit Symbol – als Glaskarten, ein Paneel oder Liste.',
             'help' => 'Leistungen oder Vorteile mit Symbol in einer Glasperle. „Glaskarten“: je Eintrag eine Karte; „Ein Glaspaneel“: alle Einträge auf einer Fläche.',
             'variants' => ['cards' => 'Glaskarten', 'panel' => 'Ein Glaspaneel', 'list' => 'Liste mit Symbol'],
             'fields' => [
@@ -299,6 +303,7 @@ return [
         ],
         'cards' => [
             'label' => 'Produkte / Leistungen (Karten)', 'icon' => 'copy', 'group' => 'Inhalt',
+            'description' => 'Produkte oder Leistungen als Glaskarten – mit Bild oder Symbol.',
             'help' => '„Glaskarte“: Bild oben, darunter Text auf Glas. „Leistung“: ohne Bild, mit Symbol. „Bild mit Glasleiste“: Text schwebt auf einer Glasleiste über dem Bild.',
             'variants' => ['glass' => 'Glaskarte (Bild oben)', 'service' => 'Leistung (Symbol, ohne Bild)', 'overlay' => 'Bild mit Glasleiste'],
             'fields' => [
@@ -320,6 +325,7 @@ return [
         ],
         'stats' => [
             'label' => 'Kennzahlen', 'icon' => 'chart-bar', 'group' => 'Inhalt',
+            'description' => 'Wenige große Zahlen mit Beschriftung, z. B. Jahre, Mitglieder, Projekte.',
             'help' => 'Nur belegbare Zahlen verwenden. „Glasringe“: ein Ring je Zahl; der Füllstand (0–100) ist optional. Für Skalen mit Einheit und Höchstwert: Kern-Block „Kennzahlen mit Skala“.',
             'variants' => ['rings' => 'Glasringe', 'row' => 'Große Zahlen auf Glas'],
             'fields' => [
@@ -335,6 +341,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => 'path', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Nummerierte Schritte auf Glas mit leuchtender Verbindungslinie oder eine senkrechte Zeitleiste mit Datum/Phase.',
             'variants' => ['steps' => 'Schritte (nebeneinander)', 'timeline' => 'Zeitleiste (untereinander)'],
             'fields' => [
@@ -348,6 +355,7 @@ return [
         ],
         'team' => [
             'label' => 'Team / Personen', 'icon' => 'users-three', 'group' => 'Inhalt',
+            'description' => 'Personen mit Foto, Name und Funktion.',
             'help' => 'Personen mit Rolle und kurzer Beschreibung. Ohne Foto erscheinen die Initialen in einer Glasperle – kein Bild nötig.',
             'variants' => ['cards' => 'Glaskarten', 'compact' => 'Kompakte Liste'],
             'fields' => [
@@ -365,6 +373,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat / Stimmen', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => 'Ein Zitat auf einer großen Glasfläche oder mehrere Stimmen im Raster. Nur echte, freigegebene Stimmen verwenden.',
             'variants' => ['single' => 'Groß (ein Zitat)', 'grid' => 'Raster'],
             'fields' => [
@@ -379,6 +388,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen auf Glas (ohne JavaScript). Suchmaschinen erhalten die Fragen als strukturierte Daten (FAQPage).',
             'variants' => ['split' => 'Überschrift links, Fragen rechts', 'stacked' => 'Untereinander'],
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -392,6 +402,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'help' => '„Glas über Aurora“: Text und Buttons auf Glas vor einem kleinen Farbfeld. „Band“ wirkt am stärksten mit dem Abschnitts-Hintergrund „Akzentfarbe“ oder „Nacht“.',
             'variants' => ['aurora' => 'Glas über Aurora', 'band' => 'Band über die volle Breite', 'minimal' => 'Zurückhaltend (zentriert)'],
             'fields' => [
@@ -403,6 +414,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt (Zeiten, Karte, Formular)', 'icon' => 'address-book', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'help' => 'Kontaktangaben und Öffnungszeiten auf Glas (mit Anzeige „Jetzt geöffnet“), Karte und optional ein öffentliches Formular.',
             'fields' => [
@@ -418,6 +430,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -433,6 +446,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick; mit Cookie-Hinweis: dessen Einwilligung) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben'],
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'poster' => 'poster', 'name' => 'title'],
@@ -449,6 +463,7 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte im Glasrahmen (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

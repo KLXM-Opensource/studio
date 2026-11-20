@@ -16,6 +16,7 @@
  *    „+ Block in diese Spalte“ (nur verschachtelbare Blöcke), Direktbearbeitung über Pfade columns.{s}.blocks.{n}.data.{feld}.
  */
 import { responsiveEditing } from './_cq.js';
+import { createBlockPicker } from './_blockpicker.js';
 const d = document;
 const $ = (s, c = d) => c.querySelector(s);
 const $$ = (s, c = d) => [...c.querySelectorAll(s)];
@@ -432,84 +433,28 @@ const editorStatus = msg => { const st = S.ui('[data-editor-status]'); if (st) s
 
 // ------------------------------------------------------------------ „+ Block einfügen“ unter einem Block: Auswahl der Blocktypen
 /**
- * Gleiche Blocktypen wie das „+“ von Editor.js (einfügbare Typen des Kits, gleiche Reihenfolge), eingefügt über
- * editor.blocks.insert() direkt nach dem Block. Tastatur: Tippen filtert, ↑/↓ wählen, Enter fügt ein, Esc schließt.
+ * Oberfläche (Gruppen, Ansichten Liste/Kacheln/Vorschau, Suche, Tastatur, Favoriten): resources/js/_blockpicker.js.
+ * Hier nur das Einfügen über editor.blocks.insert() direkt nach dem Block bzw. in die Spalte eines Layouts.
  */
 const BlockPicker = (() => {
   const T = CMSAdmin.t;
-  const el = d.createElement('div');
-  el.className = 'cms-addpop'; el.hidden = true;
-  el.setAttribute('role', 'dialog');
-  el.setAttribute('aria-label', T('Block einfügen'));
-  el.innerHTML = `<input type="search" class="cms-addpop__q" placeholder="${CMSAdmin.esc(T('Blocktyp suchen …'))}" aria-label="${CMSAdmin.esc(T('Blocktyp suchen'))}" autocomplete="off">
-    <div class="cms-addpop__list" role="listbox" aria-label="${CMSAdmin.esc(T('Blocktypen'))}"></div>
-    <p class="cms-addpop__none" hidden>${CMSAdmin.esc(T('Nichts gefunden.'))}</p>`;
-  layerBox().append(el);
-  const q = $('.cms-addpop__q', el), list = $('.cms-addpop__list', el), none = $('.cms-addpop__none', el);
-  const types = Object.entries(cfg.blocks).filter(([, def]) => def.insertable !== false && def.listed !== false);   // listed: false → nur über Vorlagen
-  // Vorlagen der Erweiterungen (Extension::blockPresets): vorbelegte Blöcke, nach Gruppe – unter den Blocktypen
-  const presets = (cfg.presets || []).filter((p) => cfg.blocks[p.type]);
-  // Reihenfolge: „Häufig verwendet“ (meiste Vorkommen auf dieser Website, sonst übliche Grundblöcke), dann nach Kategorie
-  const itemHtml = (type, def, fav = false) => `<button type="button" class="cms-addpop__item${fav ? ' cms-addpop__item--fav' : ''}" role="option" data-type="${CMSAdmin.esc(type)}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${blockIcon(def)}</span><span>${CMSAdmin.esc(def.label)}</span></button>`;
-  const ok = new Set(types.map(([t]) => t));
-  const used = Object.keys(cfg.usage || {}).filter(t => ok.has(t));
-  const favs = (used.length >= 3 ? used : [...used, ...['richtext', 'text', 'heading', 'media_text', 'cards', 'image', 'hero'].filter(t => ok.has(t) && !used.includes(t))]).slice(0, 6);
-  const ORDER = ['Kopf', 'Inhalt', 'Medien', 'Layout', 'Daten', 'Navigation', 'Website'];
-  const groups = [...new Set(types.map(([, d]) => d.group || 'Inhalt'))].sort((x, y) => ((ORDER.indexOf(x) + 1) || 99) - ((ORDER.indexOf(y) + 1) || 99));
-  const head = (label, cls = '') => `<p class="cms-addpop__group${cls}" role="presentation">${CMSAdmin.esc(label)}</p>`;
-  list.innerHTML = (favs.length ? head(T('Häufig verwendet'), ' cms-addpop__group--fav') + favs.map(t => itemHtml(t, cfg.blocks[t], true)).join('') : '')
-    + groups.map(g => head(T(g)) + types.filter(([, d]) => (d.group || 'Inhalt') === g).map(([t, d]) => itemHtml(t, d)).join('')).join('');
-  if (presets.length) {
-    let grp = null, h = '';
-    presets.forEach((p, n) => {
-      if (p.group !== grp) { grp = p.group; h += `<p class="cms-addpop__group" role="presentation">${CMSAdmin.esc(grp || T('Vorlagen'))}</p>`; }
-      h += `<button type="button" class="cms-addpop__item cms-addpop__item--preset" role="option" data-type="${CMSAdmin.esc(p.type)}" data-preset="${n}" tabindex="-1"><span class="cms-addpop__ico" aria-hidden="true">${p.icon ? CMSAdmin.icon?.(p.icon) || blockIcon(cfg.blocks[p.type]) : blockIcon(cfg.blocks[p.type])}</span><span>${CMSAdmin.esc(p.label)}${p.hint ? `<small>${CMSAdmin.esc(p.hint)}</small>` : ''}</span></button>`;
-    });
-    list.insertAdjacentHTML('beforeend', h);
-  }
-  // Kopierter Block (oben, nur außerhalb von Spalten)
-  const pasteBtn = d.createElement('button');
-  pasteBtn.type = 'button'; pasteBtn.className = 'cms-addpop__item cms-addpop__item--paste'; pasteBtn.setAttribute('role', 'option');
-  pasteBtn.tabIndex = -1; pasteBtn.dataset.type = '__paste'; pasteBtn.hidden = true;
-  list.prepend(pasteBtn);
-  const syncPaste = () => {
-    const c = column == null ? clipboard() : null;
-    pasteBtn.dataset.off = c ? '' : '1';
-    if (c) pasteBtn.innerHTML = `<span class="cms-addpop__ico" aria-hidden="true">${blockIcon(cfg.blocks[c.type])}</span><span>${CMSAdmin.esc(T('Kopierten Block einfügen: {label}', { label: cfg.blocks[c.type].label }))}</span>`;
+  // Persönliche Einstellungen (Ansicht, Favoriten, zuletzt verwendet): gesammelt, kurz verzögert gespeichert
+  let pending = {};
+  const flush = debounce(() => {
+    const body = pending; pending = {};
+    if (cfg.endpoints.picker) api(cfg.endpoints.picker, { ...body, entry: cfg.content ? { table: cfg.content.table } : cfg.entry }).catch(() => {});
+  }, 600);
+  const done = type => {
+    markDirty();
+    requestAnimationFrame(refreshMoveButtons);
+    editorStatus(T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type }));
   };
-  const items = () => $$('.cms-addpop__item:not([hidden])', list);
-  let tool = null, opener = null, only = null, column = null;   // only/column: „+ Block in diese Spalte“ (Layout)
-  const place = () => {
-    if (el.hidden || !opener) return;
-    const r = opener.getBoundingClientRect(), h = el.offsetHeight, w = el.offsetWidth;
-    const top = r.bottom + 8 + h <= innerHeight - 8 ? r.bottom + 8 : Math.max(8, r.top - 8 - h);
-    el.style.top = top + 'px';
-    el.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8)) + 'px';
-  };
-  const mark = btn => items().forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
-  const filter = () => {
-    const v = q.value.trim().toLowerCase();
-    $$('.cms-addpop__item', list).forEach(b => { b.hidden = b.dataset.off === '1' || (b === pasteBtn ? !!v : (only && !only.has(b.dataset.type)) || ((!!v || !!only) && b.classList.contains('cms-addpop__item--fav')) || (!!v && !b.textContent.toLowerCase().includes(v) && !b.dataset.type.includes(v))); });
-    // Gruppen-Überschriften der Vorlagen nur mit sichtbaren Einträgen darunter
-    $$('.cms-addpop__group', list).forEach(g => { let n = g.nextElementSibling, any = false; while (n && !n.matches('.cms-addpop__group')) { if (!n.hidden) any = true; n = n.nextElementSibling; } g.hidden = !any; });
-    none.hidden = items().length > 0;
-    mark(items()[0]);
-    place();
-  };
-  const close = (back = true) => {
-    if (el.hidden) return;
-    el.hidden = true;
-    if (back) opener?.focus({ preventScroll: true });
-    opener = null; tool = null; only = null; column = null;
-  };
-  const insert = (type, preset = null) => {
-    const t = tool, col = column;
-    close(false);
+  const onInsert = ({ type, paste, preset, variant }, t, col) => {
     if (col != null && type && t?.addChild) { t.addChild(col, type); return; }
     const idx = blockEls().indexOf(t?.el.closest('.ce-block'));
     if (!type || idx < 0) return;
     const wasBlank = blankState();
-    if (type === '__paste') {
+    if (paste) {
       const c = clipboard();
       if (!c || !insertCopy(c, idx + 1)) return;
       if (wasBlank) editor.blocks.delete(idx);
@@ -518,57 +463,22 @@ const BlockPicker = (() => {
     }
     // Leere Seite und Fließtext gewählt: den Platzhalter selbst übernehmen – ein neuer leerer Fließtext sähe wieder wie
     // „Leere Seite“ aus, es schiene nichts zu passieren
-    if (wasBlank && type === DEFAULT_TYPE) {
+    if (wasBlank && type === DEFAULT_TYPE && !variant) {
       const only = tools.get(editor.blocks.getBlockByIndex(0)?.id);
       if (only) {
         only.chosen = true;
-        markDirty();
+        done(type);
         blankState();
         requestAnimationFrame(() => (only.el.querySelector('[contenteditable="true"]') || only.el).focus?.());
-        const st = S.ui('[data-editor-status]');
-        if (st) st.textContent = T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type });
         return;
       }
     }
-    editor.blocks.insert(type, preset ? structuredClone(preset.data || {}) : {}, undefined, idx + 1, false);
+    const data = preset ? structuredClone(preset.data || {}) : variant ? { variant } : {};
+    editor.blocks.insert(type, data, undefined, idx + 1, false);
     if (wasBlank) editor.blocks.delete(idx);   // Platzhalter „Leere Seite“ ersetzen
-    markDirty();
-    requestAnimationFrame(refreshMoveButtons);
-    const st = S.ui('[data-editor-status]');
-    if (st) st.textContent = T('Block „{label}“ eingefügt – noch nicht gespeichert.', { label: cfg.blocks[type]?.label || type });
+    done(type);
   };
-  const presetOf = b => b?.dataset.preset != null ? presets[+b.dataset.preset] : null;
-  list.addEventListener('click', e => { const b = e.target.closest('.cms-addpop__item'); if (b) insert(b.dataset.type, presetOf(b)); });
-  q.addEventListener('input', filter);
-  el.addEventListener('keydown', e => {
-    e.stopPropagation();
-    const all = items(), cur = all.findIndex(b => b.getAttribute('aria-selected') === 'true');
-    if (e.key === 'Escape') { e.preventDefault(); close(); }
-    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      const n = all[(cur + (e.key === 'ArrowDown' ? 1 : -1) + all.length) % all.length];
-      if (n) { mark(n); n.scrollIntoView({ block: 'nearest' }); }
-    } else if (e.key === 'Enter') { e.preventDefault(); const b = all[Math.max(0, cur)]; insert(b?.dataset.type, presetOf(b)); }
-    else if (e.key === 'Tab') close(false);
-  });
-  // Klick außerhalb schließt
-  d.addEventListener('pointerdown', e => { if (!el.hidden && !e.composedPath().includes(el) && !e.composedPath().includes(opener)) close(false); }, true);
-  addEventListener('resize', place);
-  addEventListener('scroll', place, { passive: true });
-  return {
-    /** opts.column: Spalte eines Layouts – nur verschachtelbare Blöcke (cfg.blocks[typ].nestable) */
-    open(btn, t, opts = {}) {
-      if (!el.hidden && opener === btn) { close(); return; }
-      opener = btn; tool = t;
-      column = opts.column ?? null;
-      only = column != null ? new Set(types.filter(([, def]) => def.nestable).map(([type]) => type)) : null;
-      el.setAttribute('aria-label', column != null ? T('Block in diese Spalte einfügen') : T('Block einfügen'));
-      q.value = ''; syncPaste(); filter();
-      el.hidden = false; place();
-      q.focus({ preventScroll: true });
-    },
-    close,
-  };
+  return createBlockPicker({ cfg, host: layerBox(), blockIcon, clipboard, onInsert, savePrefs: part => { Object.assign(pending, part); flush(); } });
 })();
 
 // ------------------------------------------------------------------ Block-Tune „Abschnitt“

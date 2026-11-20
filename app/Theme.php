@@ -985,6 +985,7 @@ final class Theme
     public function editorConfig(): array
     {
         $blocks = [];
+        $previews = Blocks\Picker::previews($this, $this->blocks);   // Blockauswahl: Vorschaugrafiken (optional, Core\Blocks\Picker)
         foreach ($this->blocks as $type => $b) {
             // Formular einer Datentabelle im Block (Knopf „Felder bearbeiten“, resources/js/_form_fields.js): 'formfields' => Feldname,
             // sonst das erste Tabellen-Feld, das Formular-Tabellen anbietet ('type' => 'datatable', 'inbox' => true – z. B. data_form, contact)
@@ -999,6 +1000,7 @@ final class Theme
                 'fields' => $b['fields'], 'variants' => $b['variants'] ?? null,
                 'central' => $b['central'] ?? null, 'background' => $b['background'] ?? 'white',
                 'help' => $b['help'] ?? null,
+                'description' => Blocks\Picker::description($b), 'preview' => $previews[$type] ?? null,   // Blockauswahl (beides optional)
                 'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
                 'listed' => ($b['listed'] ?? true) !== false,   // false: nicht in der Blockauswahl, nur über Vorlagen (Extension::blockPresets)
                 'formfields' => $ff ?: null,

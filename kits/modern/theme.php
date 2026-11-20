@@ -220,6 +220,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten.',
             'variants' => [
                 'split' => 'Geteilt – Text und Bild auf Farbfläche',
@@ -278,6 +279,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: angenehme Lesebreite mit automatischem Inhaltsverzeichnis.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis', 'columns' => 'Mehrspaltig'],
             'fields' => [
@@ -290,6 +292,7 @@ return [
         ],
         'media_text' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – links, rechts oder automatisch abwechselnd.',
             'help' => '„Abwechselnd“: mehrere Blöcke nacheinander wechseln automatisch die Seite. „Geteilt“: Bild und Text je halb, randlos.',
             'variants' => ['auto' => 'Abwechselnd (automatisch)', 'right' => 'Bild rechts', 'left' => 'Bild links', 'split' => 'Geteilt, randlos', 'overlap' => 'Text-Karte über großem Bild'],
             'fields' => [
@@ -303,6 +306,7 @@ return [
         ],
         'features' => [
             'label' => 'Merkmale / Leistungen', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Leistungen oder Vorteile im Raster – mit Symbol oder Bild, Titel und kurzem Text.',
             'help' => 'Leistungen, Vorteile oder Angebote mit Symbol oder Bild.',
             'variants' => ['cards' => 'Karten', 'icons' => 'Große Symbole, ohne Rahmen', 'list' => 'Liste mit Symbol links', 'numbered' => 'Nummeriert'],
             'fields' => [
@@ -319,6 +323,7 @@ return [
         ],
         'bento' => [
             'label' => 'Bento-Raster', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Kacheln unterschiedlicher Größe in einem dichten Raster.',
             'help' => 'Kacheln unterschiedlicher Größe in einem dichten Raster (12 Spalten) – für Leistungen, Zahlen und Bilder. Auf dem Handy stehen die Kacheln untereinander.',
             'fields' => [
                 ...$head(),
@@ -339,6 +344,7 @@ return [
         ],
         'cards' => [
             'label' => 'Karten', 'icon' => 'copy', 'group' => 'Inhalt',
+            'description' => 'Teaser-Karten mit Bild, Titel, Text und Link.',
             'help' => 'Teaser mit Bild – klassisch, Text auf dem Bild oder quer. Ohne Linktext ist die ganze Karte klickbar.',
             'variants' => ['image' => 'Bild oben', 'overlay' => 'Text auf dem Bild', 'horizontal' => 'Quer (Bild links)'],
             'fields' => [
@@ -358,6 +364,7 @@ return [
         ],
         'logos' => [
             'label' => 'Logos (Partner, Kunden)', 'icon' => 'handshake', 'group' => 'Medien',
+            'description' => 'Logos von Partnern, Kunden oder Förderern in einer Reihe.',
             'help' => 'Als ruhiges Raster oder Laufband (ohne JavaScript; steht bei „Bewegung reduzieren“ still und hält bei Maus/Fokus an). Ohne Bild erscheint der Name als Schriftzug. Nur Logos mit Freigabe verwenden.',
             'variants' => ['grid' => 'Raster', 'marquee' => 'Laufband'],
             'fields' => [
@@ -371,6 +378,7 @@ return [
         ],
         'stats' => [
             'label' => 'Kennzahlen', 'icon' => 'chart-bar', 'group' => 'Inhalt',
+            'description' => 'Wenige große Zahlen mit Beschriftung, z. B. Jahre, Mitglieder, Projekte.',
             'help' => 'Nur belegbare Zahlen verwenden. Rundinstrumente mit Skala: Kern-Block „Kennzahlen mit Skala“.',
             'variants' => ['row' => 'Große Zahlen in einer Reihe', 'cards' => 'Karten', 'split' => 'Überschrift links, Zahlen rechts'],
             'fields' => [
@@ -384,6 +392,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat / Stimmen', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => '„Groß“: ein Zitat als Blickfang. „Raster“ für mehrere Stimmen. Nur echte, freigegebene Stimmen verwenden.',
             'variants' => ['single' => 'Groß (ein Zitat)', 'grid' => 'Raster'],
             'fields' => [
@@ -398,6 +407,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => 'path', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Nummerierte Schritte, eine Zeitleiste mit Datum/Phase oder ein Prozess mit Pfeilen.',
             'variants' => ['numbers' => 'Nummerierte Schritte', 'timeline' => 'Zeitleiste', 'process' => 'Prozess mit Pfeilen'],
             'fields' => [
@@ -412,6 +422,7 @@ return [
         ],
         'team' => [
             'label' => 'Team', 'icon' => 'users-three', 'group' => 'Inhalt',
+            'description' => 'Personen mit Foto, Name und Funktion.',
             'help' => 'Personen mit Porträt, Funktion und Kontakt. Ohne Foto erscheinen die Initialen auf einer Farbfläche. Nur mit Einverständnis der Personen veröffentlichen.',
             'variants' => ['grid' => 'Raster mit Porträts', 'list' => 'Liste (kompakt)'],
             'fields' => [
@@ -429,6 +440,7 @@ return [
         ],
         'pricing' => [
             'label' => 'Angebote / Pakete', 'icon' => 'currency-eur', 'group' => 'Inhalt',
+            'description' => 'Pakete oder Preise nebeneinander zum Vergleichen.',
             'help' => 'Angebote als Karten oder als Vergleichstabelle. Ein Angebot lässt sich hervorheben. Nur verbindliche, aktuelle Preise angeben.',
             'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle'],
             'fields' => [
@@ -454,6 +466,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten die Fragen als strukturierte Daten (FAQPage).',
             'variants' => ['split' => 'Überschrift links, Fragen rechts', 'stacked' => 'Untereinander, zentriert'],
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -467,6 +480,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt', 'background' => 'dark',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'help' => '„Band“ wirkt am stärksten mit dem Abschnitts-Hintergrund „Dunkel“, „Akzentfarbe“ oder „Blockfarbe“.',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Farbfläche (Box)', 'split' => 'Mit Bild', 'big' => 'Großer Schriftzug'],
             'fields' => [
@@ -479,6 +493,7 @@ return [
         ],
         'tabs' => [
             'label' => 'Reiter (Tabs)', 'icon' => 'list-bullets', 'group' => 'Inhalt',
+            'description' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter.',
             'help' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter. Ohne JavaScript stehen alle Inhalte untereinander.',
             'variants' => ['top' => 'Reiter oben', 'side' => 'Reiter links'],
             'fields' => [
@@ -492,6 +507,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick; mit Einwilligungs-Verwaltung abgestimmt) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)'],
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'poster' => 'poster', 'name' => 'title'],
@@ -508,6 +524,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt (Karte, Formular, Zeiten)', 'icon' => 'address-book', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'help' => 'Kontaktangaben, Öffnungszeiten (mit Anzeige „Jetzt geöffnet“), Karte und optional ein öffentliches Formular (Datentabelle) in einem Abschnitt.',
             'fields' => [
@@ -523,6 +540,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -538,6 +556,7 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

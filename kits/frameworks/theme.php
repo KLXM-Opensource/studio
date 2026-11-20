@@ -178,6 +178,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf', 'background' => 'plain',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1) – pro Seite genau einmal, als erster Block.',
             'variants' => ['center' => 'Zentriert', 'split' => 'Text und Bild nebeneinander'],
             'fields' => [
@@ -190,6 +191,7 @@ return [
         ],
         'cards' => [
             'label' => 'Karten', 'icon' => 'squares-four', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Teaser-Karten mit Bild, Titel, Text und Link.',
             'help' => 'Raster aus Karten mit Symbol oder Bild; verlinkte Karten zeigen der Redaktion „Bearbeiten“ für das Ziel.',
             'fields' => [
                 ...$head(),
@@ -205,6 +207,7 @@ return [
         'text_image' => [
             'nestable' => true,
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'variants' => ['right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
                 ...$head(true, false),
@@ -218,6 +221,7 @@ return [
         'text' => [
             'nestable' => true,
             'label' => 'Text', 'icon' => 'paragraph', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Überschrift und Text mit Absätzen, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen und Links (Tailwind: Typography-Plugin „prose“).',
             'fields' => [
                 ...$head(false, false),
@@ -227,6 +231,7 @@ return [
         'accordion' => [
             'nestable' => true,
             'label' => 'Aufklappliste (FAQ)', 'icon' => 'question', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Aufklappbare Abschnitte, z. B. für häufige Fragen.',
             'help' => 'Tailwind: <details> ohne Skript · UIkit: uk-accordion. Im Bearbeiten-Modus sind alle Einträge offen.',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
             'fields' => [
@@ -239,6 +244,7 @@ return [
         ],
         'tabs' => [
             'label' => 'Reiter', 'icon' => 'folders', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter.',
             'help' => 'Inhalte in Reitern – UIkit: uk-tab + uk-switcher, Tailwind: kleines Skript (ohne Skript stehen alle untereinander).',
             'fields' => [
                 ...$head(false),
@@ -250,6 +256,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'background' => 'band',
             'help' => 'Optional mit Dialog („Mehr erfahren“): UIkit uk-modal, Tailwind <dialog>.',
             'fields' => [
@@ -265,6 +272,7 @@ return [
         'contact' => [
             'nestable' => true,
             'label' => 'Kontakt (aus „Website“)', 'icon' => 'address-book', 'group' => 'Inhalt', 'background' => 'plain',
+            'description' => 'Adresse, Telefon und E-Mail aus „Website“.',
             'central' => 'Adresse, Telefon und E-Mail kommen aus „Website“.',
             'help' => 'Adresse, Telefon und E-Mail kommen zentral aus „Website“ – im Editor als „zentral gepflegt“ markiert.',
             'fields' => [
@@ -274,6 +282,7 @@ return [
         'video' => [
             'nestable' => true,
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien', 'background' => 'plain',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Kern-Fragment) oder eigene MP4-Datei.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title'],
             'fields' => [

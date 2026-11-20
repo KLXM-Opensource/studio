@@ -131,4 +131,12 @@ return [
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Große Schlagzeile (H1) – als Aufmacher, Plakat, Titelbild oder Ressortkopf.' => 'Large headline (H1) – as lead story, poster, cover image or section header.',
+    'Einzelnes Bild in Text-, Inhalts- oder voller Breite – mit Bildunterschrift.' => 'Single image at text, content or full width – with caption.',
+    'Rubriken, Themen oder Angebote mit Symbol oder Bild, Titel und kurzem Text.' => 'Sections, topics or offers with icon or image, title and short text.',
+    'Von Hand zusammengestellte Verweise auf Seiten und Artikel – als Raster oder Liste.' => 'Hand-picked links to pages and articles – as a grid or list.',
+    'Bis zu vier große Zahlen mit Beschriftung.' => 'Up to four large figures with labels.',
+    'Band oder Kasten mit Botschaft und Button – oder ein Newsletter-Formular.' => 'Band or box with message and button – or a newsletter form.',
+    'Setzt den aufgerufenen Eintrag als Artikel – für Detailseiten-Vorlagen.' => 'Sets the current entry as an article – for detail page templates.',
 ];

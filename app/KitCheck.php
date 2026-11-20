@@ -93,6 +93,14 @@ final class KitCheck
             $out[] = ['level' => 'warn', 'file' => Kit::relative($kit->path . '/assets/css'), 'text' => 'Kit-Vertrag unvollständig – nicht gesetzt: ' . implode(', ', $missing)
                 . ' (Buchung, Check, Mitglieder, Suche, Glossar … nutzen dann neutrale Farben; Entwicklerhandbuch → CSS & JS → „Kit-Vertrag“)'];
         }
+        // Blockauswahl (nur mit -v, reiner Hinweis): eigene Blöcke ohne Vorschaugrafik bzw. Kurzbeschreibung – beides ist optional
+        if ($verbose && $own) {
+            $pv = Blocks\Picker::previews($kit, array_intersect_key($blocks, $own));
+            $noPv = array_keys(array_diff_key(array_filter($own, fn($b) => ($b['insertable'] ?? true) !== false && ($b['listed'] ?? true) !== false), $pv));
+            $noDesc = array_keys(array_filter($own, fn($b) => is_array($b) && trim((string) ($b['description'] ?? '')) === ''));
+            if ($noPv) $out[] = ['level' => 'info', 'file' => Kit::relative($kit->path . '/assets/img/previews'), 'text' => 'Blockauswahl: ohne Vorschau (optional, Symbol erscheint): ' . implode(', ', $noPv)];
+            if ($noDesc) $out[] = ['level' => 'info', 'file' => Kit::relative((string) Kit::definitionFile($kit->path)), 'text' => 'Blockauswahl: ohne Kurzbeschreibung (optional, sonst erster Satz von help): ' . implode(', ', $noDesc)];
+        }
         return $out;
     }
 

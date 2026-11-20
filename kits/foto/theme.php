@@ -257,6 +257,7 @@ return [
         // ---------------------------------------------------------------- Foto-Blöcke
         'photo_hero' => [
             'label' => 'Bühne (Vollbild)', 'icon' => 'image', 'group' => 'Kopf',
+            'description' => 'Großes Bild, stummes Video oder Bildfolge mit Überblendung – der Auftakt einer Seite.',
             'help' => 'Ein großes Bild, ein stummes Video oder eine ruhige Folge aus Bildern und Videos mit Überblendung – der Auftakt der Startseite oder einer Serie. Die Überschrift ist die Hauptüberschrift (H1) der Seite: pro Seite nur eine Bühne oder einen Einstieg verwenden.',
             'variants' => ['single' => 'Ein Bild', 'slideshow' => 'Bildfolge mit Überblendung'],
             'variant_help' => [
@@ -292,6 +293,7 @@ return [
         ],
         'photo_grid' => [
             'label' => 'Fotostrecke', 'icon' => 'images', 'group' => 'Medien',
+            'description' => 'Bilder einer Serie als Mosaik, Zeilen, Raster oder Band – mit Lightbox.',
             'help' => 'Bilder und Videos einer Serie als Mosaik, bündige Zeilen, gleichmäßiges Raster, große Einzelbilder oder waagerechtes Band – mit Lightbox (Tastatur, Wischen, Escape). Bildabstand, Ecken, Bildunterschriften und Schwarzweiß stellen Sie zentral unter Design → Bilder & Galerien ein.',
             'variants' => ['masonry' => 'Mosaik (Originalformate)', 'justified' => 'Bündige Zeilen', 'grid' => 'Gleichmäßiges Raster', 'single' => 'Große Einzelbilder untereinander', 'strip' => 'Waagerechtes Band (wischen)'],
             'variant_help' => [
@@ -317,6 +319,7 @@ return [
         ],
         'moments' => [
             'label' => 'Bildstrom (Bento)', 'icon' => 'squares-four', 'group' => 'Medien',
+            'description' => 'Bilder und Videos als lebendiges Mosaik oder großer Strom mit wenig Text.',
             'help' => 'Bilder und Videos als lebendiges Mosaik mit wenig Text – hinter jeder Kachel kann das Bild groß, eine ganze Galerie oder eine Seite stecken. Kacheln erscheinen beim Scrollen nacheinander, stumme Videos laufen nur, solange sie zu sehen sind. Fotos und Videos einfach auf den Block in der Seite ziehen.',
             'variants' => ['bento' => 'Bento – Kacheln verschiedener Größe', 'stream' => 'Strom – große Momente untereinander'],
             'variant_help' => [
@@ -366,6 +369,7 @@ return [
         ],
         'series_index' => [
             'label' => 'Serien-Übersicht', 'icon' => 'squares-four', 'group' => 'Medien',
+            'description' => 'Übersicht der Serien bzw. Projekte – Raster, Liste oder abwechselnde Reihen.',
             'help' => 'Übersicht Ihrer Serien bzw. Projekte – automatisch aus den Unterseiten (Titelbild, Jahr und Kategorie aus „Serie (Kopf)“) oder von Hand. Als Raster der Titelbilder, als große typografische Liste mit Bildvorschau oder als abwechselnde Reihen.',
             'variants' => ['grid' => 'Raster der Titelbilder', 'list' => 'Große Liste mit Bildvorschau', 'rows' => 'Abwechselnd Bild und Text'],
             'variant_help' => [
@@ -396,6 +400,7 @@ return [
         ],
         'series_head' => [
             'label' => 'Serie (Kopf)', 'icon' => 'article', 'group' => 'Kopf',
+            'description' => 'Kopf einer Serien-Seite: Titel (H1), Jahr, Ort und Statement, optional mit Titelbild.',
             'help' => 'Kopf einer Serien-Seite: Titel (H1), Jahr, Ort, Auftrag und ein kurzes Statement – optional mit Titelbild. Jahr, Kategorie und Titelbild erscheinen automatisch in der Serien-Übersicht.',
             'variants' => ['text' => 'Nur Text', 'cover' => 'Titelbild darüber (breit)', 'side' => 'Text und Titelbild nebeneinander'],
             'fields' => [
@@ -415,6 +420,7 @@ return [
         ],
         'photo_text' => [
             'label' => 'Bild & Text', 'icon' => 'square-half', 'group' => 'Medien',
+            'description' => 'Ein Bild mit Statement daneben – z. B. für „Über mich“.',
             'help' => 'Ein Bild mit Statement daneben – für „Über mich“, Haltung oder die Geschichte hinter einer Serie. Bild und Text stehen nebeneinander, solange beide Platz haben.',
             'variants' => ['left' => 'Bild links', 'right' => 'Bild rechts'],
             'fields' => [
@@ -434,6 +440,7 @@ return [
         // ---------------------------------------------------------------- Weitere Blöcke
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten. Alle Varianten ordnen sich nach verfügbarem Platz an.',
             'variants' => [
                 'split' => 'Text und Bild nebeneinander',
@@ -487,6 +494,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: angenehme Lesebreite mit automatischem Inhaltsverzeichnis.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis', 'columns' => 'Mehrspaltig (Zeitungssatz)'],
             'fields' => [
@@ -499,6 +507,7 @@ return [
         ],
         'media_text' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – links, rechts oder automatisch abwechselnd.',
             'help' => '„Abwechselnd“: mehrere Blöcke nacheinander wechseln automatisch die Seite. „Geteilt“: Bild und Text je halb, randlos und auf Wunsch bildschirmhoch.',
             'variants' => ['auto' => 'Abwechselnd (automatisch)', 'right' => 'Bild rechts', 'left' => 'Bild links', 'split' => 'Geteilt, randlos (Split-Screen)', 'overlap' => 'Text-Karte über großem Bild'],
             'fields' => [
@@ -512,6 +521,7 @@ return [
         ],
         'features' => [
             'label' => 'Leistungen', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Leistungen oder Vorteile im Raster – mit Symbol oder Bild, Titel und kurzem Text.',
             'help' => 'Leistungen, Vorteile oder Angebote mit Symbol oder Bild. Anzahl nebeneinander ergibt sich aus dem Platz.',
             'variants' => ['cards' => 'Karten', 'icons' => 'Große Symbole, ohne Rahmen', 'list' => 'Liste mit Symbol links', 'numbered' => 'Nummeriert'],
             'fields' => [
@@ -528,6 +538,7 @@ return [
         ],
         'cards' => [
             'label' => 'Karten', 'icon' => 'copy', 'group' => 'Inhalt',
+            'description' => 'Teaser-Karten mit Bild, Titel, Text und Link.',
             'help' => 'Teaser mit Bild – klassisch, Text auf dem Bild, quer oder als wischbares Band (Reel). Karten stellen sich auf ihre eigene Breite ein.',
             'variants' => ['image' => 'Bild oben', 'overlay' => 'Text auf dem Bild', 'horizontal' => 'Quer (Bild links)', 'reel' => 'Wischbares Band (Reel)'],
             'fields' => [
@@ -547,6 +558,7 @@ return [
         ],
         'logos' => [
             'label' => 'Logos (Kunden, Publikationen)', 'icon' => 'handshake', 'group' => 'Medien',
+            'description' => 'Logos von Partnern, Kunden oder Förderern in einer Reihe.',
             'help' => 'Als ruhiges Raster oder Laufband (ohne JavaScript; steht bei „Bewegung reduzieren“ still und hält bei Maus/Fokus an). Ohne Bild erscheint der Name als Schriftzug. Nur Logos mit Freigabe verwenden.',
             'variants' => ['grid' => 'Raster', 'marquee' => 'Laufband'],
             'fields' => [
@@ -560,6 +572,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat / Stimmen', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => '„Groß“: ein Zitat als Blickfang (Pull-Quote). „Raster“ und „Band“ für mehrere Stimmen. Nur echte, freigegebene Stimmen verwenden.',
             'variants' => ['single' => 'Groß (ein Zitat)', 'grid' => 'Raster (Mauerwerk)', 'reel' => 'Wischbares Band'],
             'fields' => [
@@ -574,6 +587,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => 'path', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Nummerierte Schritte, eine Zeitleiste mit Datum/Phase oder ein Prozess mit Verbindungslinien.',
             'variants' => ['numbers' => 'Nummerierte Schritte', 'timeline' => 'Zeitleiste', 'process' => 'Prozess mit Pfeilen'],
             'fields' => [
@@ -588,6 +602,7 @@ return [
         ],
         'pricing' => [
             'label' => 'Pakete / Preise', 'icon' => 'currency-eur', 'group' => 'Inhalt',
+            'description' => 'Pakete oder Preise nebeneinander zum Vergleichen.',
             'help' => 'Pakete als Karten oder als Vergleichstabelle. Ein Paket lässt sich hervorheben. Nur verbindliche, aktuelle Preise angeben.',
             'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle'],
             'fields' => [
@@ -613,6 +628,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten die Fragen als strukturierte Daten (FAQPage).',
             'variants' => ['split' => 'Überschrift links, Fragen rechts', 'stacked' => 'Untereinander, zentriert'],
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -626,6 +642,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt', 'background' => 'accent',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box', 'split' => 'Mit Bild', 'big' => 'Großer Schriftzug'],
             'fields' => [
                 ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60],
@@ -637,6 +654,7 @@ return [
         ],
         'scrolly' => [
             'label' => 'Scrollytelling', 'icon' => 'article', 'group' => 'Inhalt',
+            'description' => 'Ein Bild bleibt stehen, während die Texte daneben vorbeiziehen.',
             'help' => 'Ein Bild bleibt stehen, während die Texte daneben vorbeiziehen; das Bild wechselt passend zum Abschnitt. Bei wenig Platz stehen Bild und Text jeweils untereinander.',
             'variants' => ['left' => 'Bild links', 'right' => 'Bild rechts'],
             'fields' => [
@@ -652,6 +670,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)'],
             'fields' => [
@@ -667,6 +686,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt (Karte, Formular, Zeiten)', 'icon' => 'address-book', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'help' => 'Kontaktangaben, Öffnungszeiten, Karte und optional ein öffentliches Formular (Datentabelle) in einem Abschnitt.',
             'fields' => [
@@ -682,6 +702,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -697,6 +718,7 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

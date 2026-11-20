@@ -269,6 +269,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten. Alle Varianten ordnen sich nach verfügbarem Platz an.',
             'variants' => [
                 'split' => 'Text und Bild nebeneinander',
@@ -316,6 +317,7 @@ return [
         // ------------------------------------------------------------ Galerie (Daten aus den Tabellen Künstler, Ausstellungen, Werke)
         'exhibition_feature' => [
             'label' => 'Aktuelle Ausstellung', 'icon' => 'image', 'group' => 'Galerie',
+            'description' => 'Die laufende oder nächste Ausstellung groß – Daten aus der Tabelle „Ausstellungen“.',
             'help' => 'Die laufende Ausstellung groß – oder, wenn gerade keine läuft, die nächste. „Jetzt“ bzw. „Demnächst“ erscheint automatisch; Daten, Eröffnung, Ort und Künstler kommen aus der Tabelle „Ausstellungen“.',
             'variants' => ['bleed' => 'Vollbild – Titel auf dem Bild', 'split' => 'Bild und Text nebeneinander', 'type' => 'Typografisch – großer Titel, Bild daneben'],
             'variant_help' => [
@@ -343,6 +345,7 @@ return [
         ],
         'exhibitions_list' => [
             'label' => 'Ausstellungen', 'icon' => 'calendar-dots', 'group' => 'Galerie',
+            'description' => 'Laufende, kommende und vergangene Ausstellungen – als Liste, Karten oder Zeitleiste.',
             'help' => 'Laufende, kommende und vergangene Ausstellungen – der Status ergibt sich jeden Tag neu aus Beginn und Ende. Archiv nach Jahren. Auf der Detailseite einer Künstlerin bzw. eines Künstlers automatisch nur deren Ausstellungen.',
             'variants' => ['list' => 'Liste (Titel, Daten, Künstler)', 'cards' => 'Karten mit Bild', 'timeline' => 'Zeitleiste nach Jahren', 'fairs' => 'Messen & Termine (kompakt)'],
             'variant_help' => [
@@ -371,6 +374,7 @@ return [
         ],
         'exhibition_detail' => [
             'label' => 'Ausstellung (Detailseite)', 'icon' => 'images', 'group' => 'Galerie',
+            'description' => 'Detailseite einer Ausstellung mit Daten, Text, Ansichten und Werken.',
             'help' => 'Für die Detailseite der Tabelle „Ausstellungen“: Titel, Status, Daten, Eröffnung, Ort, Künstler, Text, Ausstellungsansichten (vergrößerbar), Pressetext und die gezeigten Werke.',
             'variants' => ['bleed' => 'Vollbild-Kopf', 'split' => 'Bild und Angaben nebeneinander', 'text' => 'Typografisch (ohne großes Bild)'],
             'fields' => [
@@ -384,6 +388,7 @@ return [
         ],
         'artists_index' => [
             'label' => 'Künstlerinnen und Künstler', 'icon' => 'users-three', 'group' => 'Galerie',
+            'description' => 'Künstlerinnen und Künstler als Liste, Raster oder A–Z-Register.',
             'help' => 'Das Programm der Galerie aus der Tabelle „Künstler“: als typografische Liste (beim Zeigen erscheint ein Bild), als Raster mit Porträt oder Werk, oder als A–Z-Register.',
             'variants' => ['list' => 'Typografische Liste mit Bild beim Zeigen', 'grid' => 'Raster mit Porträts', 'works' => 'Raster mit einem Werk je Künstler', 'az' => 'A–Z-Register'],
             'variant_help' => [
@@ -405,6 +410,7 @@ return [
         ],
         'artist_profile' => [
             'label' => 'Künstler (Detailseite)', 'icon' => 'user-circle', 'group' => 'Galerie',
+            'description' => 'Detailseite einer Künstlerin bzw. eines Künstlers mit Porträt und Biografie.',
             'help' => 'Für die Detailseite der Tabelle „Künstler“: Name, Porträt, Geburtsjahr und Wohnort, Biografie, Website und Anfrage. Darunter passen „Werke“ und „Ausstellungen“ – sie zeigen dort automatisch nur diese Person.',
             'variants' => ['split' => 'Porträt und Text nebeneinander', 'name' => 'Großer Name, Text darunter'],
             'fields' => [
@@ -417,6 +423,7 @@ return [
         ],
         'artworks' => [
             'label' => 'Werke', 'icon' => 'paint-brush', 'group' => 'Galerie',
+            'description' => 'Werke mit Angaben, Verfügbarkeit und Preis – Raster, Mauerwerk, Salon oder Viewing Room.',
             'help' => 'Werke aus der Tabelle „Werke“ mit Werkangaben, Verfügbarkeit (Punkt + Wort) und Preis bzw. „Preis auf Anfrage“. Raster, Mauerwerk, Salonhängung oder Viewing Room (ein Werk je Bildschirm). Auf Detailseiten automatisch nur die Werke der Künstlerin bzw. der Ausstellung.',
             'variants' => ['grid' => 'Raster (gleiche Breite)', 'masonry' => 'Mauerwerk (Originalformate)', 'salon' => 'Salonhängung (verschiedene Größen)', 'room' => 'Viewing Room (ein Werk je Bildschirm)'],
             'variant_help' => [
@@ -444,6 +451,7 @@ return [
         ],
         'artwork_detail' => [
             'label' => 'Werk (Detailseite)', 'icon' => 'palette', 'group' => 'Galerie',
+            'description' => 'Detailseite eines Werks mit großem Bild, Werkangaben und Anfrage.',
             'help' => 'Für die Detailseite der Tabelle „Werke“: großes Bild (vergrößerbar, weitere Ansichten), vollständige Werkangaben, Verfügbarkeit, Preis, Anfrage und weitere Werke derselben Künstlerin bzw. desselben Künstlers.',
             'fields' => [
                 ['name' => 'back_label', 'label' => 'Link zurück – Beschriftung', 'type' => 'text', 'max' => 40, 'width' => 'half', 'placeholder' => 'Alle Werke'],
@@ -454,6 +462,7 @@ return [
         ],
         'visit' => [
             'label' => 'Besuch', 'icon' => 'door-open', 'group' => 'Galerie', 'central' => 'Öffnungszeiten, Adresse und weitere Orte kommen aus „Website“ (Stammdaten und Galerie).',
+            'description' => 'Öffnungszeiten, Orte mit Adresse, Eintritt und Termine nach Vereinbarung.',
             'help' => 'Öffnungszeiten (heute geöffnet/geschlossen), abweichende Zeiten zu Feiertagen, alle Orte mit Adresse und Kartenlink, Eintritt und Termine nach Vereinbarung.',
             'variants' => ['columns' => 'Orte nebeneinander', 'split' => 'Überschrift links, Angaben rechts'],
             'fields' => [
@@ -468,6 +477,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: angenehme Lesebreite mit automatischem Inhaltsverzeichnis.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis', 'columns' => 'Mehrspaltig (Zeitungssatz)'],
             'fields' => [
@@ -480,6 +490,7 @@ return [
         ],
         'media_text' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – links, rechts oder automatisch abwechselnd.',
             'help' => '„Abwechselnd“: mehrere Blöcke nacheinander wechseln automatisch die Seite. „Geteilt“: Bild und Text je halb, randlos und auf Wunsch bildschirmhoch.',
             'variants' => ['auto' => 'Abwechselnd (automatisch)', 'right' => 'Bild rechts', 'left' => 'Bild links', 'split' => 'Geteilt, randlos (Split-Screen)', 'overlap' => 'Text-Karte über großem Bild'],
             'fields' => [
@@ -493,6 +504,7 @@ return [
         ],
         'features' => [
             'label' => 'Merkmale / Leistungen', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Leistungen oder Vorteile im Raster – mit Symbol oder Bild, Titel und kurzem Text.',
             'help' => 'Leistungen, Vorteile oder Angebote mit Symbol oder Bild. Anzahl nebeneinander ergibt sich aus dem Platz.',
             'variants' => ['cards' => 'Karten', 'icons' => 'Große Symbole, ohne Rahmen', 'list' => 'Liste mit Symbol links', 'numbered' => 'Nummeriert'],
             'fields' => [
@@ -509,6 +521,7 @@ return [
         ],
         'cards' => [
             'label' => 'Karten', 'icon' => 'copy', 'group' => 'Inhalt',
+            'description' => 'Teaser-Karten mit Bild, Titel, Text und Link.',
             'help' => 'Teaser mit Bild – klassisch, Text auf dem Bild, quer oder als wischbares Band (Reel). Karten stellen sich auf ihre eigene Breite ein.',
             'variants' => ['image' => 'Bild oben', 'overlay' => 'Text auf dem Bild', 'horizontal' => 'Quer (Bild links)', 'reel' => 'Wischbares Band (Reel)'],
             'fields' => [
@@ -528,6 +541,7 @@ return [
         ],
         'logos' => [
             'label' => 'Logos (Partner, Kunden)', 'icon' => 'handshake', 'group' => 'Medien',
+            'description' => 'Logos von Partnern, Kunden oder Förderern in einer Reihe.',
             'help' => 'Als ruhiges Raster oder Laufband (ohne JavaScript; steht bei „Bewegung reduzieren“ still und hält bei Maus/Fokus an). Ohne Bild erscheint der Name als Schriftzug. Nur Logos mit Freigabe verwenden.',
             'variants' => ['grid' => 'Raster', 'marquee' => 'Laufband'],
             'fields' => [
@@ -541,6 +555,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat / Stimmen', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => '„Groß“: ein Zitat als Blickfang (Pull-Quote). „Raster“ und „Band“ für mehrere Stimmen. Nur echte, freigegebene Stimmen verwenden.',
             'variants' => ['single' => 'Groß (ein Zitat)', 'grid' => 'Raster (Mauerwerk)', 'reel' => 'Wischbares Band'],
             'fields' => [
@@ -555,6 +570,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => 'path', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Nummerierte Schritte, eine Zeitleiste mit Datum/Phase oder ein Prozess mit Verbindungslinien.',
             'variants' => ['numbers' => 'Nummerierte Schritte', 'timeline' => 'Zeitleiste', 'process' => 'Prozess mit Pfeilen'],
             'fields' => [
@@ -569,6 +585,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten die Fragen als strukturierte Daten (FAQPage).',
             'variants' => ['split' => 'Überschrift links, Fragen rechts', 'stacked' => 'Untereinander, zentriert'],
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -582,6 +599,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt', 'background' => 'accent',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'variants' => ['band' => 'Band über die volle Breite', 'box' => 'Hervorgehobene Box', 'split' => 'Mit Bild', 'big' => 'Großer Schriftzug'],
             'fields' => [
                 ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60],
@@ -593,6 +611,7 @@ return [
         ],
         'tabs' => [
             'label' => 'Reiter (Tabs)', 'icon' => 'list-bullets', 'group' => 'Inhalt',
+            'description' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter.',
             'help' => 'Mehrere Inhalte auf engem Raum, umschaltbar über Reiter. „Reiter links“ stellt sich bei wenig Platz automatisch oben an. Ohne JavaScript stehen alle Inhalte untereinander.',
             'variants' => ['top' => 'Reiter oben', 'side' => 'Reiter links'],
             'fields' => [
@@ -606,6 +625,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)'],
             'fields' => [
@@ -621,6 +641,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt (Karte, Formular, Zeiten)', 'icon' => 'address-book', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'help' => 'Kontaktangaben, Öffnungszeiten, Karte und optional ein öffentliches Formular (Datentabelle) in einem Abschnitt.',
             'fields' => [
@@ -636,6 +657,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -651,6 +673,7 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

@@ -215,6 +215,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1). Pro Seite genau einmal verwenden – „Seitenkopf“ für Unterseiten.',
             'variants' => [
                 'panel' => 'Mit Geräte-Paneel (Bild oder Punktraster, Kennwerte)',
@@ -263,6 +264,7 @@ return [
         ],
         'richtext' => [
             'label' => 'Fließtext / Artikel', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links. „Artikel“: Lesebreite mit automatischem Inhaltsverzeichnis.',
             'variants' => ['standard' => 'Standard', 'article' => 'Artikel mit Inhaltsverzeichnis'],
             'fields' => [
@@ -274,6 +276,7 @@ return [
         ],
         'media_text' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – links, rechts oder automatisch abwechselnd.',
             'help' => '„Abwechselnd“: mehrere Blöcke nacheinander wechseln automatisch die Seite.',
             'variants' => ['auto' => 'Abwechselnd (automatisch)', 'right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
@@ -287,6 +290,7 @@ return [
         ],
         'features' => [
             'label' => 'Merkmale / Bedienfeld', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Leistungen oder Vorteile mit Symbol – als Bedienfeld, Karten oder Liste.',
             'help' => 'Leistungen oder Vorteile mit Symbol. „Bedienfeld“: alle Einträge in einem Paneel, getrennt durch feine Linien – wie Tasten auf einem Gerät.',
             'variants' => ['panel' => 'Bedienfeld (ein Paneel)', 'cards' => 'Einzelne Karten', 'list' => 'Liste mit Symbol'],
             'fields' => [
@@ -303,6 +307,7 @@ return [
         ],
         'principles' => [
             'label' => 'Grundsätze / Thesen', 'icon' => 'list-checks', 'group' => 'Inhalt',
+            'description' => 'Nummerierte Grundsätze oder Versprechen – als Liste, Raster oder aufklappbar.',
             'help' => 'Nummerierte Grundsätze, Werte oder Versprechen – als ruhige Liste mit großen Nummern oder als Raster.',
             'variants' => ['list' => 'Liste (Nummer, Titel, Text)', 'grid' => 'Raster aus Paneelen', 'accordion' => 'Aufklappbar (kompakt)'],
             'fields' => [
@@ -315,6 +320,7 @@ return [
         ],
         'specs' => [
             'label' => 'Datenblatt (technische Daten)', 'icon' => 'table', 'group' => 'Inhalt',
+            'description' => 'Eckdaten als ruhige Tabelle, optional mit Bild daneben.',
             'help' => 'Kennwerte als ruhige Tabelle – für Produkte, Räume, Leistungen oder Konditionen. Optional mit Bild daneben.',
             'variants' => ['table' => 'Tabelle', 'image' => 'Mit Bild daneben'],
             'fields' => [
@@ -332,6 +338,7 @@ return [
         ],
         'stats' => [
             'label' => 'Kennzahlen', 'icon' => 'chart-bar', 'group' => 'Inhalt',
+            'description' => 'Wenige große Zahlen mit Beschriftung, z. B. Jahre, Mitglieder, Projekte.',
             'help' => 'Nur belegbare Zahlen verwenden. „Skalen“: ein Rundinstrument je Zahl; der Füllstand (0–100) ist optional.',
             'variants' => ['dials' => 'Skalen (Rundinstrumente)', 'row' => 'Große Zahlen in einer Reihe'],
             'fields' => [
@@ -347,6 +354,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf / Zeitleiste', 'icon' => 'path', 'group' => 'Inhalt',
+            'description' => 'Ein Ablauf in nummerierten Schritten oder als Zeitleiste.',
             'help' => 'Nummerierte Schritte mit Verbindungslinie oder eine senkrechte Zeitleiste mit Datum/Phase.',
             'variants' => ['steps' => 'Schritte (nebeneinander)', 'timeline' => 'Zeitleiste (untereinander)'],
             'fields' => [
@@ -360,6 +368,7 @@ return [
         ],
         'cards' => [
             'label' => 'Produkte / Leistungen (Karten)', 'icon' => 'copy', 'group' => 'Inhalt',
+            'description' => 'Produkte oder Leistungen als Karten – mit Bild auf einer Fläche oder mit Symbol.',
             'help' => '„Produkt“: Bild auf ruhiger Fläche wie ein Gerät im Katalog, darunter Kennwert und Pfeil. „Leistung“: ohne Bild, mit Symbol.',
             'variants' => ['product' => 'Produkt (Bild auf Fläche)', 'service' => 'Leistung (Symbol, ohne Bild)', 'image' => 'Bild randlos oben'],
             'fields' => [
@@ -381,6 +390,7 @@ return [
         ],
         'quote' => [
             'label' => 'Zitat / Stimmen', 'icon' => 'quotes', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'help' => 'Ein Zitat als ruhiger Blickfang oder mehrere Stimmen im Raster. Nur echte, freigegebene Stimmen verwenden.',
             'variants' => ['single' => 'Groß (ein Zitat)', 'grid' => 'Raster'],
             'fields' => [
@@ -395,6 +405,7 @@ return [
         ],
         'faq' => [
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten die Fragen als strukturierte Daten (FAQPage).',
             'variants' => ['split' => 'Überschrift links, Fragen rechts', 'stacked' => 'Untereinander'],
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -408,6 +419,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'help' => '„Paneel“: Text und Tasten in einem ruhigen Gehäuse. „Band“ wirkt am stärksten mit dem Abschnitts-Hintergrund „Signalfarbe“ oder „Nachtpaneel“.',
             'variants' => ['panel' => 'Paneel', 'band' => 'Band über die volle Breite', 'minimal' => 'Zurückhaltend (zentriert)'],
             'fields' => [
@@ -419,6 +431,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt (Zeiten, Karte, Formular)', 'icon' => 'address-book', 'group' => 'Website',
+            'description' => 'Kontaktangaben aus „Website“ mit Öffnungszeiten, Karte und optional einem Formular.',
             'central' => 'Adresse, Telefon, E-Mail, Öffnungszeiten und Karte kommen aus „Website“.',
             'help' => 'Kontaktangaben, Öffnungszeiten als Paneel (mit Anzeige „Jetzt geöffnet“), Karte und optional ein öffentliches Formular.',
             'fields' => [
@@ -434,6 +447,7 @@ return [
         ],
         'downloads' => [
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$head(),
@@ -449,6 +463,7 @@ return [
         ],
         'video' => [
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
             'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben'],
             'fields' => [
@@ -464,6 +479,7 @@ return [
         ],
         'map' => [
             'label' => 'Karte', 'icon' => 'map-trifold', 'group' => 'Website',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
         ],

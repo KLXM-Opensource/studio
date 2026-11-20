@@ -356,4 +356,7 @@ return [
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Leistungen oder Vorteile mit Symbol – als Bedienfeld, Karten oder Liste.' => 'Services or benefits with icons – as control panel, cards or list.',
+    'Produkte oder Leistungen als Karten – mit Bild auf einer Fläche oder mit Symbol.' => 'Products or services as cards – with an image on a surface or with an icon.',
 ];
