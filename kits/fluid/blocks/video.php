@@ -4,7 +4,8 @@
  * wide · text (Text daneben, Switcher) · cinema (randlos auf dunkler Fläche).
  * @var \Core\Block $b  @var array $d
  */
-$v = in_array($b->variant(), ['wide', 'text', 'cinema'], true) ? $b->variant() : 'wide';
+// „morph“ (Kind-Kit, z. B. Morphing beim Scrollen) nach einem Kit-Wechsel: wie „Mit Text daneben“; sonst Unbekanntes wie „Breit“
+$v = $b->variant() === 'morph' ? 'text' : (in_array($b->variant(), ['wide', 'text', 'cinema'], true) ? $b->variant() : 'wide');
 $embed = app()->theme->partial('video-embed', ['url' => $d['video_url'], 'file' => $d['video_file'], 'poster' => $d['poster'],
     'ratio' => $d['ratio'] ?: '16-9', 'label' => strip_emphasis(trim((string) $d['title']))]);
 $fig = '<figure class="video">' . $embed
