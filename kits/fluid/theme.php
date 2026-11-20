@@ -127,6 +127,7 @@ return [
         'css/b-quote.css' => ['quote'],
         'css/b-steps.css' => ['steps'],
         'css/b-pricing.css' => ['pricing'],
+        'css/b-pricelist.css' => ['pricing:list'],   // Pakete → „Preisliste (Speisekarte)“
         'css/b-faq.css' => ['faq'],
         'css/b-tabs.css' => ['tabs'],
         'css/b-scrolly.css' => ['scrolly'],
@@ -445,10 +446,11 @@ return [
         'pricing' => [
             'label' => 'Pakete / Vergleich', 'icon' => 'currency-eur', 'group' => 'Inhalt',
             'help' => 'Pakete als Karten oder als Vergleichstabelle. Ein Paket lässt sich hervorheben. Nur verbindliche, aktuelle Preise angeben.',
-            'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle'],
+            'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle', 'list' => 'Preisliste (Speisekarte)'],
+            'variant_help' => ['list' => 'Viele Positionen mit Preis untereinander – Speisekarte, Preisliste, Gebühren: Name, Führungspunkte, Preis, kurze Beschreibung.'],
             'fields' => [
                 ...$head(),
-                ['name' => 'items', 'label' => 'Pakete', 'type' => 'repeater', 'item_label' => 'Paket', 'title_field' => 'name', 'max_items' => 4, 'fields' => [
+                ['name' => 'items', 'label' => 'Pakete', 'type' => 'repeater', 'item_label' => 'Paket', 'title_field' => 'name', 'max_items' => 4, 'variants' => ['cards', 'table'], 'fields' => [
                     ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'max' => 40, 'width' => 'half'],
                     ['name' => 'badge', 'label' => 'Etikett (optional)', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. Empfohlen'],
                     ['name' => 'price', 'label' => 'Preis', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. ab 490 €'],
@@ -459,10 +461,15 @@ return [
                     ['name' => 'button_label', 'label' => 'Button – Beschriftung', 'type' => 'text', 'max' => 32, 'width' => 'half'],
                     ['name' => 'button_link', 'label' => 'Button – Link', 'type' => 'link', 'width' => 'half'],
                 ]],
-                ['name' => 'rows', 'label' => 'Vergleichszeilen (bei „Vergleichstabelle“)', 'type' => 'repeater', 'item_label' => 'Zeile', 'title_field' => 'label', 'max_items' => 20, 'fields' => [
+                ['name' => 'rows', 'label' => 'Vergleichszeilen (bei „Vergleichstabelle“)', 'type' => 'repeater', 'item_label' => 'Zeile', 'title_field' => 'label', 'max_items' => 20, 'variants' => ['table'], 'fields' => [
                     ['name' => 'label', 'label' => 'Merkmal', 'type' => 'text', 'required' => true, 'max' => 80],
                     ['name' => 'values', 'label' => 'Werte je Paket (eine Zeile pro Paket, in Reihenfolge)', 'type' => 'textarea', 'rows' => 3,
                         'help' => '„ja“ oder „✓“ = enthalten, „nein“ oder „–“ = nicht enthalten, sonst freier Text (z. B. „3 Termine“).'],
+                ]],
+                ['name' => 'entries', 'label' => 'Preisliste', 'type' => 'repeater', 'item_label' => 'Eintrag', 'title_field' => 'name', 'max_items' => 80, 'variants' => ['list'], 'fields' => [
+                    ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'max' => 80, 'width' => 'half'],
+                    ['name' => 'price', 'label' => 'Preis', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. 12,50 €'],
+                    ['name' => 'text', 'label' => 'Beschreibung (optional)', 'type' => 'text', 'max' => 200],
                 ]],
                 ['name' => 'note', 'label' => 'Hinweis unter den Paketen (optional)', 'type' => 'text', 'max' => 200, 'placeholder' => 'z. B. Alle Preise inkl. MwSt.'],
             ],

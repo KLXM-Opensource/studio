@@ -607,4 +607,10 @@ return [
     'Audiodatei (MP3, M4A)' => 'Audio file (MP3, M4A)',
     'sonst der Titel in der Mediathek' => 'otherwise the title in the media library',
     'Sprecher oder Interpret (optional)' => 'Speaker or artist (optional)',
+    // Pakete → Preisliste
+    'Preisliste (Speisekarte)' => 'Price list (menu)',
+    'Viele Positionen mit Preis untereinander – Speisekarte, Preisliste, Gebühren: Name, Führungspunkte, Preis, kurze Beschreibung.' => 'Many items with a price below each other – menu, price list, fees: name, leader dots, price, short description.',
+    'Preisliste' => 'Price list',
+    'Beschreibung (optional)' => 'Description (optional)',
+    'z. B. 12,50 €' => 'e.g. €12.50',
 ];
