@@ -38,6 +38,16 @@ final class KitSelfTest
         $s = Theme::mergeDefinition($parent, ['design_defaults' => ['accent' => '#222222']]);
         $eq('design_defaults als einfacher Wert', $s['design']['groups'][0]['tokens'][0]['default'], '#222222');
         $eq('Kit ohne Eltern: unverändert', Theme::mergeDefinition([], $parent), $parent);
+        // block_extend: geerbte Blöcke ergänzen statt ersetzen (zusätzliche Varianten, Felder)
+        $base = ['blocks' => ['media_text' => ['label' => 'Text + Bild', 'variants' => ['right' => 'Rechts'], 'fields' => [['name' => 'text', 'type' => 'richtext'], ['name' => 'image', 'type' => 'media']]]]];
+        $x = Theme::mergeDefinition($base, ['block_extend' => [
+            'media_text' => ['variants' => ['morph' => 'Morphing'], 'variant_help' => ['morph' => 'Hilfe'], 'fields' => [['name' => 'image', 'type' => 'media', 'label' => 'Neu'], ['name' => 'extra', 'type' => 'text']]],
+            'gibt_es_nicht' => ['label' => 'x'],
+        ]]);
+        $mt = $x['blocks']['media_text'];
+        $eq('block_extend: Varianten ergänzt, Label bleibt', [array_keys($mt['variants']), $mt['label'], $mt['variant_help']['morph']], [['right', 'morph'], 'Text + Bild', 'Hilfe']);
+        $eq('block_extend: Felder angehängt, gleicher Name ersetzt', [array_column($mt['fields'], 'name'), $mt['fields'][1]['label'] ?? null], [['text', 'image', 'extra'], 'Neu']);
+        $eq('block_extend: unbekannter Typ ignoriert, Schlüssel entfernt', [isset($x['blocks']['gibt_es_nicht']), isset($x['block_extend'])], [false, false]);
         $any = (string) array_key_first(Kit::all());
         if ($any !== '' && Kit::parent($any) === '') $eq('Kette eines Kits ohne Eltern: nur das Kit', array_keys(Kit::chain($any)), [$any]);
         $eq('Kette eines unbekannten Kits: leer', Kit::chain('gibt-es-nicht'), []);

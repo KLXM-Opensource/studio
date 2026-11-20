@@ -8001,4 +8001,6 @@ return [
     'Kopie von #{id}' => 'Copy of #{id}',
     'Ungespeicherte Änderungen gehen dabei verloren. Trotzdem duplizieren?' => 'Unsaved changes will be lost. Duplicate anyway?',
     'Nicht übernommen, weil nicht mehr gültig – bitte prüfen: {fields}.' => 'Not copied because no longer valid – please check: {fields}.',
+    'Einblend-Effekt' => 'Reveal effect',
+    'Einmal beim Hereinscrollen, nur für Besucher – nicht beim ersten Block der Seite, nicht bei „Bewegung reduzieren“ und nicht, wenn im Design die Animationen aus sind.' => 'Once when scrolled into view, for visitors only – not on the first block of the page, not with “reduce motion” and not when animations are switched off in the design.',
 ];

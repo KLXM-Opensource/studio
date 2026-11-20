@@ -64,7 +64,7 @@ const previews = initial.previews || {};
 const tools = new Map();      // blockId → Tool-Instanz
 const tunes = new Map();      // blockId → Tune-Instanz
 const initialTunes = Object.fromEntries((initial.blocks || []).map(b => [b.id, b.tunes?.section || {}]));
-const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false, noSearch: false };
+const TUNE_DEFAULTS = { background: 'white', anchor: '', visible: true, showInNav: false, navLabel: '', spaceTop: 'normal', spaceBottom: 'normal', divider: false, height: 'auto', bgImage: null, overlay: 'none', align: 'center', row: '', noGlossary: false, noSearch: false, reveal: '' };
 let editor, dirty = false, drawerFor = null, drawerSnap = null;
 let History = null;   // Rückgängig/Wiederholen (unten)
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
@@ -1769,6 +1769,8 @@ function renderTuneForm(tool) {
       <button type="button" class="btn btn--small" data-row-clear aria-describedby="t-row-h">${E(T('Aus der Reihe lösen (eigener Abschnitt)'))}</button></div>` : ''}
     ${cfg.glossary ? `<div class="f"><label class="f-check"><input type="checkbox" name="noGlossary"${t.noGlossary ? ' checked' : ''} aria-describedby="t-gl-h"> <span>${E(CMSAdmin.t('Glossar-Begriffe hier nicht markieren'))}</span></label>
       <p class="f-help" id="t-gl-h">${E(CMSAdmin.t('Begriffe aus dem Glossar bekommen in diesem Abschnitt keine Erklärung zum Aufklappen (z. B. in Zitaten oder Werbetexten).'))}</p></div>` : ''}
+    ${cfg.reveal ? `<div class="f"><label for="t-rv">${E(T('Einblend-Effekt'))}</label><select id="t-rv" name="reveal" aria-describedby="t-rv-h">${opt({ '': T('Keiner'), ...cfg.reveal }, t.reveal || '')}</select>
+      <p class="f-help" id="t-rv-h">${E(T('Einmal beim Hereinscrollen, nur für Besucher – nicht beim ersten Block der Seite, nicht bei „Bewegung reduzieren“ und nicht, wenn im Design die Animationen aus sind.'))}</p></div>` : ''}
     <div class="f"><label class="f-check"><input type="checkbox" name="noSearch"${t.noSearch ? ' checked' : ''} aria-describedby="t-ns-h"> <span>${E(CMSAdmin.t('Nicht in der Website-Suche'))}</span></label>
       <p class="f-help" id="t-ns-h">${E(CMSAdmin.t('Der Abschnitt bleibt sichtbar, sein Text wird aber nicht durchsucht (z. B. wiederkehrende Hinweise, Werbetexte). Gilt auch für Spalten eines Layouts.'))}</p></div>`;
   f.classList.add('adm-fields');
@@ -1783,6 +1785,7 @@ function renderTuneForm(tool) {
       row: f.row ? f.row.value : '',
       noGlossary: f.noGlossary ? f.noGlossary.checked : !!tune?.data?.noGlossary,
       noSearch: f.noSearch ? f.noSearch.checked : !!tune?.data?.noSearch,
+      reveal: f.reveal ? f.reveal.value : (tune?.data?.reveal || ''),
     };
     f.align.disabled = data.height !== 'screen';
     if (tune) tune.data = data;

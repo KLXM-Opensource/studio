@@ -155,7 +155,32 @@ final class Block
             $c[] = 'sec--has-bg';
             if (($this->tunes['overlay'] ?? 'none') !== 'none') $c[] = 'sec--ov-' . $this->tunes['overlay'];
         }
+        if (($r = $this->revealOption()) !== null) $c[] = $r['class'];
         return implode(' ', $c);
+    }
+
+    /** Zusätzliches Attribut des Abschnitts für den Einblend-Effekt (z. B. data-ncss-reveal für das Skript des Kits), sonst leer */
+    public function revealAttrs(): string
+    {
+        $attr = (string) ($this->revealOption()['attr'] ?? '');
+        return $attr !== '' ? ' ' . $attr : '';
+    }
+
+    /**
+     * Einblend-Effekt (Abschnitt → „Einblend-Effekt“, Optionen aus theme.php → 'reveal') – nur für Besucher: nicht beim Bearbeiten,
+     * nicht beim ersten Block der Seite (erster Eindruck, LCP), nicht in einer Spalte und nicht, wenn im Design „Dezente Animationen“
+     * aus ist. „Bewegung reduzieren“ beachtet das CSS des Kits. Meldet '@reveal' (Theme::markUsed) für Stylesheet und Skript.
+     * @return array{label: string, class: string, attr?: string}|null
+     */
+    private function revealOption(): ?array
+    {
+        $key = (string) ($this->tunes['reveal'] ?? '');
+        if ($key === '' || app()->editing || $this->first || $this->parent !== null) return null;
+        $theme = app()->theme;
+        $opt = $theme->revealOptions()[$key] ?? null;
+        if ($opt === null || in_array(Design::get('motion'), [false, 0, '0'], true)) return null;
+        $theme->markUsed('@reveal');
+        return $opt;
     }
 
     private ?string $bgHtml = null;

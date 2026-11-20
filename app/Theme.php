@@ -33,6 +33,8 @@ final class Theme
         'noGlossary' => false,
         // Website-Suche (Core\Search\Documents): Abschnitt nicht durchsuchen – auch alle Blöcke in seinen Spalten
         'noSearch' => false,
+        // Einblend-Effekt beim Hereinscrollen – Schlüssel aus theme.php → 'reveal' (nur wenn das Kit Effekte anbietet), '' = keiner
+        'reveal' => '',
     ];
 
     /**
@@ -49,6 +51,9 @@ final class Theme
     private bool $sectionCss = false;
     /** Kern-Fragment „video-embed“ wurde gerendert → neutrale Grundlage css/embed.css (needEmbedCss) */
     private bool $embedCss = false;
+
+    /** Beim Rendern gemeldete Merkmale (markUsed), z. B. '@table' oder 'video:@player' – laden Dateien aus conditional_css */
+    private array $marks = [];
 
     /** Erster sichtbarer Block der Seite schon vergeben (Block::isFirst) – einmal je Anfrage */
     private bool $firstSeen = false;
@@ -110,7 +115,37 @@ final class Theme
                 $out[$k] = array_filter(array_replace((array) ($parent[$k] ?? []), (array) ($child[$k] ?? [])), fn($v) => $v !== null);
             }
         }
-        return self::applyDesignDefaults($out);
+        return self::applyDesignDefaults(self::extendBlocks($out, (array) ($child['block_extend'] ?? [])));
+    }
+
+    /**
+     * Geerbte Blöcke ergänzen statt ersetzen (theme.php → 'block_extend' => ['media_text' => ['variants' => ['morph' => '…'],
+     * 'variant_help' => [...], 'fields' => [ … ]]]): variants, variant_help, uses und assets werden je Schlüssel zusammengeführt,
+     * fields angehängt (gleicher Name ersetzt das Feld der Eltern), alles andere ersetzt. Unbekannte Typen werden ignoriert.
+     */
+    private static function extendBlocks(array $def, array $ext): array
+    {
+        unset($def['block_extend']);
+        foreach ($ext as $type => $add) {
+            if (!is_array($add) || !isset($def['blocks'][$type]) || !is_array($def['blocks'][$type])) continue;
+            $b = $def['blocks'][$type];
+            foreach ($add as $k => $v) {
+                if (in_array($k, ['variants', 'variant_help', 'uses', 'assets'], true)) {
+                    $b[$k] = array_replace((array) ($b[$k] ?? []), (array) $v);
+                } elseif ($k === 'fields') {
+                    $fields = (array) ($b['fields'] ?? []);
+                    foreach ((array) $v as $f) {
+                        $i = array_search($f['name'] ?? null, array_column($fields, 'name'), true);
+                        if ($i === false) $fields[] = $f; else $fields[$i] = $f;
+                    }
+                    $b['fields'] = $fields;
+                } else {
+                    $b[$k] = $v;
+                }
+            }
+            $def['blocks'][$type] = $b;
+        }
+        return $def;
     }
 
     private static function applyDesignDefaults(array $def): array
@@ -290,6 +325,38 @@ final class Theme
         return $this->def['backgrounds'] ?? ['white' => 'Weiß'];
     }
 
+    /**
+     * Einblend-Effekte, die das Kit für Abschnitte anbietet (theme.php → 'reveal' => ['fade' => ['label' => 'Sanft einblenden',
+     * 'class' => '…', 'attr' => 'data-…']]). Ohne Angabe gibt es die Abschnitts-Option nicht.
+     * @return array<string, array{label: string, class: string, attr?: string}>
+     */
+    public function revealOptions(): array
+    {
+        $out = [];
+        foreach ((array) ($this->def['reveal'] ?? []) as $k => $o) {
+            if (is_array($o) && isset($o['label'], $o['class']) && preg_match('/^[a-z0-9_-]+$/', (string) $k)) {
+                $out[(string) $k] = ['label' => (string) $o['label'], 'class' => (string) $o['class']] + (isset($o['attr']) && preg_match('/^data-[a-z0-9-]+$/', (string) $o['attr']) ? ['attr' => (string) $o['attr']] : []);
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Beim Rendern melden, dass die Seite etwas braucht, das sich nicht am Blocktyp ablesen lässt – z. B. '@table' (eine Tabelle),
+     * '@reveal' (ein Einblend-Effekt) oder 'video:@player' (eigene Videodatei statt YouTube). Dateien in conditional_css mit
+     * diesem Schlüssel laden dann mit (Inhalt wird vor den Stylesheets und Skripten gerendert).
+     */
+    public function markUsed(string ...$keys): void
+    {
+        foreach ($keys as $k) if ($k !== '') $this->marks[$k] = true;
+    }
+
+    /** Gemeldete Merkmale (markUsed) */
+    public function marks(): array
+    {
+        return array_keys($this->marks);
+    }
+
     public function sanitizeTunes(array $t, array $def = []): array
     {
         $out = self::TUNES;
@@ -314,6 +381,7 @@ final class Theme
         $out['row'] = array_key_exists($row, self::ROW_WIDTHS) ? $row : '';
         $out['noGlossary'] = filter_var($t['noGlossary'] ?? false, FILTER_VALIDATE_BOOL);
         $out['noSearch'] = filter_var($t['noSearch'] ?? false, FILTER_VALIDATE_BOOL);
+        $out['reveal'] = isset($this->revealOptions()[(string) ($t['reveal'] ?? '')]) ? (string) $t['reveal'] : '';
         return $out;
     }
 
@@ -809,6 +877,7 @@ final class Theme
      */
     private function withUses(array $types): array
     {
+        $types = [...$types, ...array_keys($this->marks)];
         foreach ($types as $t) {
             if (!is_string($t) || !str_contains($t, ':')) continue;
             [$type, $variant] = explode(':', $t, 2);
@@ -944,6 +1013,8 @@ final class Theme
             // Vorlagen der Erweiterungen (Extension::blockPresets) – vorbelegte Blöcke in der Blockauswahl
             'presets' => Extensions::blockPresets(array_keys(array_filter($blocks, fn($b) => !empty($b['insertable'])))),
             'layout' => isset($this->blocks[Layout::TYPE]) ? ['presets' => Layout::PRESETS] : null,
-            'glossary' => Features::on('glossary', false)];   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
+            'glossary' => Features::on('glossary', false),   // Abschnitts-Option „Glossar-Begriffe hier nicht markieren“
+            // Abschnitts-Option „Einblend-Effekt“ – nur wenn das Kit Effekte anbietet (theme.php → 'reveal')
+            'reveal' => array_map(fn($o) => $o['label'], $this->revealOptions()) ?: null];
     }
 }
