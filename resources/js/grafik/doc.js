@@ -91,9 +91,15 @@ export function eachShape(el, fn) {
 
 /** Füllung/Kontur hängen am Benutzerraum (userSpaceOnUse-Verlauf, Muster) oder Effekte am Element → nicht einrechnen */
 function simplePaint(el, root) {
-  for (const p of ['clip-path', 'mask', 'filter']) {
+  for (const p of ['clip-path', 'mask']) {
     const v = getProp(el, p, false);
     if (v && v !== 'none') return false;
+  }
+  // Filter (z. B. Schatten) nur, wenn sein Bereich am Objekt hängt (filterUnits objectBoundingBox, der Standard)
+  const fv = getProp(el, 'filter', false);
+  if (fv && fv !== 'none') {
+    const f = refOf(root, fv);
+    if (!f || f.getAttribute('filterUnits') === 'userSpaceOnUse') return false;
   }
   for (const p of ['fill', 'stroke']) {
     const v = getProp(el, p);
