@@ -32,6 +32,15 @@ Alles zusätzlich – bestehende Seiten sehen unverändert aus, neue Stylesheets
 - Startinhalte (`--content=full`): die von fluid plus Seite **„Bausteine“** mit jeder Funktion des Kits; Medien aus der Demo von NativeCSS (MIT, Videos ohne Ton) und ein Foto von Pexels. Bestehende Websites: `php kits/native/tools/demo.php`.
 - `i18n:missing` prüft bei Kind-Kits Texte und Sprachdateien der ganzen Kette.
 
+### Kit fluid lädt schlanker (modular)
+Gleiches Aussehen, weniger CSS und JavaScript je Seite – geprüft pixel- und stilgleich für alle Vorlagen des Kits.
+- **Design-Optionen nur mit dem gewählten Wert:** Die Regeln aller Optionen lagen in `css/site.css` (≈ 47 KB); jetzt bleibt dort nur der immer gültige Teil (`_options-base.css`, `site.css` ≈ 28 KB), jede Option liegt in `css/opt-{option}.css` bzw. `css/opt-{option}-{wert}.css` und lädt nur, wenn gewählt. Hell/Dunkel-Schalter, Infoleiste, „Nach oben“, Lesefortschritt, Zurück-Link, Kopfhöhe, Menü-Varianten u. a. kosten nichts mehr, solange sie aus sind.
+- **Reihenfolge in einer Liste:** `theme.php → design → option_css` nennt die Dateien in Ladereihenfolge mit Bedingung (`['nav_style' => ['pill', 'dot']]`, `['progress' => true]`, `'css/opt-header-{value}.css' => 'header'`) – neu in `Core\Design::optionCss()` (bisher nur Funktion oder Namenskonvention). Layout und Live-Vorschau des Werkzeugs „Design“ nutzen dieselbe Liste; die Vorschau fügt neue Dateien in dieser Reihenfolge ein.
+- `_options.css` sammelt weiter alle Optionen für Kind-Kits mit Cascade Layers (NativeCSS: unveränderte Regeln).
+- Dritte Menüebene „Slide“/„Gruppiert“ in eigenen Dateien hinter `overlay.css` (≈ 2 KB weniger am Seitenende).
+- `site.js` (7,7 → 5,9 KB) lädt Hintergrundvideo (`js/bgvideo.js`), Scrollspy des Inhaltsverzeichnisses (`js/toc.js`) und „Menü öffnet beim Überfahren“ (`js/nav-hover.js`) nur nach, wenn die Seite sie braucht.
+- **Messen:** `node tools/css-budget.mjs <url>` listet jede geladene CSS- und JS-Datei mit Größe (minifiziert, gzip), blockierend oder nicht, Summen und Budget (`--check` für Skripte). Entwicklerhandbuch: Kits → „CSS je Design-Option und Funktion“, Build → Budgets.
+
 ### Formatierungsleiste und Griffe wie in den REDAXO-Editoren fluid/tiptap
 - Formatierungsleiste (Formularfelder und schwebend auf der Website): Lucide-Symbole statt Zeichen („B“, „ab“, 🔗, ⋯, „– Liste“), 32-px-Knöpfe mit Trennstrichen, aktive Knöpfe hell in der Akzentfarbe statt schwarz, Menüs mit Symbolen. Die schwebende Leiste ist jetzt hell (wie die Bubble von tiptap). Werte als Tokens `--rte-*` aus den Verwaltungs-Tokens – hell, dunkel und persönliche Akzentfarbe passen von selbst. Nur Darstellung: Befehle, Klassen und Tastatur bleiben.
 - Griffe: Führungslinie endet im Fenster; auf dem Telefon keine Griffe für Textbreite/Aufteilung.

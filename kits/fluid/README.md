@@ -62,11 +62,11 @@ kits/fluid/
 ├── blocks/          Renderer je Block
 ├── templates/       layout, error, maintenance, offline; partials/: header, sheet (Seitenblatt), brand, footer, langswitch,
 │                    section (Öffnungszeiten, Video, Editor, Werkzeugleiste: Kern-Fragmente, app/Views/fragments)
-├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero) · overlay.css (Aufklappmenüs, Such-Popover, Seitenblatt –
-│                    am Ende von <body>, nicht renderblockierend) · opt-{token}-{wert}.css (nur gewählte Design-Optionen) ·
+├── assets/css/      site.css (_tokens, _base, _header, _footer, _hero, _options-base) · overlay.css (Aufklappmenüs, Such-Popover, Seitenblatt –
+│                    am Ende von <body>, nicht renderblockierend) · opt-{token}.css / opt-{token}-{wert}.css (nur gewählte Design-Optionen, Liste theme.php → design → option_css) ·
 │                    b-*.css / hero-x.css / prose.css / reel.css (je Block bzw. Variante) · data, media, calendar, dataform,
 │                    sections, search (ersetzen die Kern-Stylesheets – intrinsisch, ohne Breiten-Queries) · pages.css · editing.css · preview.css
-├── assets/js/       site.js (≈ 4,1 KB) · tabs.js, reel.js, scrolly.js (je Block, < 1,2 KB; Video-Skript kommt aus dem Kern)
+├── assets/js/       site.js (≈ 5,9 KB; lädt bgvideo.js, toc.js, nav-hover.js nur bei Bedarf) · tabs.js, reel.js, scrolly.js (je Block, < 1,2 KB; Video-Skript kommt aus dem Kern)
 ├── tools/           contrast.php (WCAG-Prüfung aller Vorlagen) · demo.php + demo-content.php (Showcase)
 ├── lang/            en.php (Verwaltung) · site/en.php (feste Website-Texte lt())
 ├── docs/manual.php  Handbuch (Kapitel: Breakpointlos, Design/Kopf/Fuß, Seiten-Tipps, Beschreibung aller Blöcke)
@@ -76,17 +76,21 @@ kits/fluid/
 
 Build: `cd tools && pnpm run build` → `public/assets/kits/fluid/{css,js}`.
 
-## Budgets (minifiziert, gemessen)
+## Budgets (minifiziert, gemessen mit `node tools/css-budget.mjs <url>`)
 
-| | Standard | Agentur | Kultur (Seitenleiste) |
+Immer: `site.css` ≈ 28 KB (Grundlage + immer gültiger Teil der Design-Optionen, `_options-base.css`), `overlay.css` ≈ 8,7 KB
+am Ende von `<body>`, `site.js` ≈ 5,9 KB. Jede gewählte Design-Option lädt ihre eigene Datei (`css/opt-{option}.css` bzw.
+`css/opt-{option}-{wert}.css`, 0,1–2 KB; Kopf „Seitenleiste“ 9,5 KB, „Farbenfroh“ 4,8 KB) – Reihenfolge und Bedingungen in
+`theme.php → design → option_css`. Standardwerte kosten nichts.
+
+| Startseite der Showcase-Website (viele Blöcke) | CSS gesamt | davon im `<head>` | Kit-JS |
 |---|---|---|---|
-| site.css | 21,7 KB | 21,7 KB | 21,7 KB |
-| Design-Optionen (opt-*) | – | 1,8 KB | 2,8 KB |
-| Schrift-CSS | 0,9 KB | 3,0 KB | 3,7 KB |
-| Design-Datei | – (Standard) | 1,0 KB | 0,9 KB |
-| **Grundlage (renderblockierend)** | **≈ 22,6 KB** | **≈ 27,5 KB** | **≈ 29,1 KB** |
-| overlay.css (am Seitenende) | 4,6 KB | 4,6 KB | 4,6 KB |
-| JS Startseite | site.js 4,1 + reel.js 0,8 KB | gleich | gleich |
+| Fluid Standard | 71,1 KB (vorher 92,3) | 62,5 KB | 6,7 KB (vorher 8,5) |
+| Agentur | 75,8 KB (vorher 96,9) | 67,1 KB | 6,7 KB |
+| Kultur (Rail) | 78,2 KB (vorher 99,3) | 69,5 KB | 6,7 KB |
+| Netzwerk (Seitenleiste, Farbenfroh) | 91,1 KB (vorher 108,6) | 82,5 KB | 6,7 KB |
+
+Dazu kommen je Seite Schrift-CSS und Design-Datei der Website.
 
 Blöcke laden ihr CSS nur, wo sie stehen (Startseite der Demo zusätzlich ≈ 18 KB für 10 Blocktypen).
 Einstiegs-Varianten (nur bei Verwendung): hero-x.css 4,1 KB · hx-scale.css 2,3 KB · hx-collage.css 3,1 KB · hx-compare.css 3,2 KB
