@@ -51,6 +51,60 @@
     <li>Prüfen: <code>curl -I https://example.org/media/2026/09/….svg</code> muss beide Kopfzeilen zeigen.</li>
   </ul>
 
+  <h3 id="grafik-editor">Grafik-Editor (<code>Core\Graphics</code>, <code>resources/js/grafik/</code>)</h3>
+  <p>Vektoreditor im Kern: Infografiken für die Mediathek, Symbole und Blockvorschauen in einer eigenen Ablage. Eine Komponente,
+    zwei Hüllen: eigene Seite <code>/admin/grafik/editor</code> und Overlay (<code>CMSAdmin.graphic.open()</code>, lädt
+    <code>public/assets/js/grafik.js</code> und <code>css/grafik.css</code> erst beim ersten Öffnen).</p>
+  <ul>
+    <li><b>Engine:</b> eigener Code direkt auf dem SVG-DOM (keine Fremdbibliothek). Das Dokument ist das SVG selbst, eingehängt in
+      einen Shadow Root (ein <code>&lt;style&gt;</code> der Grafik wirkt nur dort). Unveränderte Elemente bleiben Zeichen für Zeichen
+      erhalten – geöffnet und gespeichert ohne Änderung ergibt dieselbe Datei. Transformationen werden, wo es ohne Verlust geht, in die
+      Geometrie eingerechnet (Rechteck, Ellipse, Linie, Vieleck, Pfad, Textposition; nicht bei Verläufen in Benutzerkoordinaten,
+      Masken, Filtern), sonst als <code>transform</code> gesetzt. Geprüft wurde <code>@svgedit/svgcanvas</code> 7.4 (MIT, 65 KB gzip
+      ohne PDF-Export): beim Import verlustbehaftet (viewBox und Einheiten weg, Verläufe umgerechnet, Filter- und Wurzelattribute
+      verworfen, Pfade relativ und auf 2 Nachkommastellen) – deshalb nicht verwendet.</li>
+    <li><b>Module:</b> <code>geom.js</code> (Matrizen, Pfaddaten lesen/schreiben, Bögen → Kurven, Knotenmodell, Glätten),
+      <code>doc.js</code> (Eigenschaften setzen – Attribut oder, wenn eine Klassenregel gewinnt, Stil; Transformation anwenden; ids
+      eindeutig machen samt Verweisen), <code>color.js</code> (Farbwähler), <code>panels.js</code> (Bereiche), <code>editor.js</code>
+      (Werkzeuge, Auswahl, Griffe, Einrasten, Protokoll, Tastatur, Speichern), <code>shell.js</code> (Overlay und Seite).</li>
+    <li><b>Protokoll:</b> jede Änderung speichert das SVG als Text (höchstens 200 Schritte bzw. ca. 40 MB); Rückgängig ersetzt das Dokument.</li>
+    <li><b>Speichern:</b> <code>POST /admin/api/grafik/save</code> – das SVG aus dem Browser läuft immer durch
+      <code>Core\Svg::clean($svg, ['keep_ids' => true])</code> (ids für Ebenen und spätere Animationen bleiben, <code>data-name</code> =
+      Ebenenname). Infografik: <code>Graphics::saveMedia()</code> → <code>Media::import</code> bzw. <code>Media::replace</code> (Option
+      <code>graphic</code>: gilt nicht als fremder Upload, „SVG-Grafiken hochladen“ muss nicht an sein). Ablage:
+      <code>Graphics::store()</code> → Tabelle <code>graphics</code> (<code>kind</code> icon | preview | part), Datei
+      <code>{Medienordner}/grafik/{kind}-{id}-{hash}.svg</code> (neuer Name je Fassung). Beim Überschreiben bleibt die vorige Fassung in
+      <code>graphic_versions</code> (<code>ref</code> <code>media:{id}</code> bzw. <code>graphic:{id}</code>, höchstens 20).</li>
+    <li><b>Blockvorschauen:</b> <code>Graphics::assignPreview($typ, $id)</code> schreibt die Website-Einstellung <code>block_previews</code> –
+      dieselbe Andockstelle wie in <code>Core\Blocks\Picker::overrides()</code> (Kits und Erweiterungen: Filter <code>blocks.previews</code>).</li>
+    <li><b>Routen</b> (alle mit Anmeldung und Recht <code>media.upload</code>, POST mit CSRF; Löschen <code>media.delete</code>):
+      <code>GET /admin/grafik</code> (Übersicht der Ablage), <code>GET /admin/grafik/editor?format=info|icon|preview&amp;w&amp;h&amp;block</code>
+      bzw. <code>?media={id}</code> / <code>?id={id}</code>, <code>GET /admin/api/grafik/boot</code> (gleiche Parameter, JSON für das Overlay),
+      <code>POST …/save</code>, <code>…/part</code> (eigener Baustein), <code>…/clean</code> (nur bereinigen), <code>…/assign</code>,
+      <code>…/{id}/delete</code>, <code>GET …/version?ref&amp;id</code>.</li>
+    <li><b>Einbetten (z. B. Motion):</b>
+      <pre><code>const r = await CMSAdmin.graphic.open({
+  format: 'info',              // 'info' | 'icon' | 'preview'
+  mediaId: 12,                 // oder id (Ablage) oder svg: '&lt;svg …&gt;' (wird vorher bereinigt)
+  target: 'none',              // nichts ablegen – onSave bekommt das bereinigte SVG
+  onSave: ({ svg, item }) => { … },
+});                            // → { saved, svg } beim Schließen
+
+// Ohne Overlay in eine eigene Fläche (nach dem Laden von grafik.js):
+const ed = CMSGraphicEditor.mount(el, boot, { onSave });   // boot = JSON von /admin/api/grafik/boot
+ed.on('change', e => …); ed.on('selection', list => …); ed.getSvg(); ed.setSvg(svg); ed.root  // das SVG
+ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed, area) { … }, unmount() { … } });</code></pre>
+      Personas teilen das Dokument; eine Persona bekommt unter der Zeichenfläche eine eigene Fläche (<code>area</code>, z. B. Zeitleiste).
+      Animationen sollten sich an <code>id</code>s der Elemente hängen – die bleiben beim Speichern erhalten.</li>
+    <li><b>Bibliothek:</b> <code>Core\Graphics\Library</code> (Bausteine aus Motion), eigene Bausteine (<code>kind = part</code>, nur in der
+      Datenbank), Symbole aus <code>public/assets/icons/icons.svg</code>. Farbfelder: Tokens vom Typ <code>color</code> aus
+      <code>Core\Design</code>; Schriften: die Schriften des Designs plus allgemeine Familien.</li>
+    <li><b>Grenzen heute:</b> keine Bilder in Grafiken (die Bereinigung entfernt <code>&lt;image&gt;</code>), keine booleschen Pfadoperationen,
+      kein Text in Pfade, Lineale fehlen; Motion-Persona ist nur vorbereitet.</li>
+    <li><b>Selbsttest:</b> <code>php bin/console grafik:selftest --site=key</code> – Editor-Ausgabe übersteht die Bereinigung (idempotent),
+      Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl, Fassungen, Rechte.</li>
+  </ul>
+
   <h3 id="video-vorschau">Vorschaubilder für Videos (<code>Core\VideoThumbs</code>, <code>Core\Ffmpeg</code>)</h3>
   <p>Optional: nur mit ffmpeg + ffprobe auf dem Server. Ohne ffmpeg bleibt alles wie bisher (Platzhalter, kein Poster).</p>
   <table class="doc-table">

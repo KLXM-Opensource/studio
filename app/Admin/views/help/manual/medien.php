@@ -115,6 +115,60 @@
     <li>Wer keine SVGs möchte, schaltet sie unter <b>Funktionen &amp; Erweiterungen → „SVG-Grafiken hochladen“</b> ab.</li>
   </ul>
 
+  <h3 id="grafik-editor">Grafiken zeichnen und bearbeiten (Grafik-Editor)</h3>
+  <p>Infografiken, einfache Schaubilder, Symbole und Skizzen für die Blockauswahl entstehen direkt in der Verwaltung – ohne
+    Grafikprogramm. Der Editor ist aufgebaut wie Affinity Designer, Illustrator oder Fireworks: oben die <b>Personas</b>
+    (<b>Vektor</b>; <b>Motion</b> für Animationen folgt), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
+    Auswahl, links die <b>Werkzeuge</b>, rechts die Bereiche <b>Farbe · Farbfelder · Kontur · Darstellung</b>,
+    <b>Ebenen · Bibliothek · Symbole</b> und <b>Transformieren · Protokoll</b>, unten eine Statuszeile mit Tipps zum Werkzeug.</p>
+  <ol class="doc-steps">
+    <li><b>Neue Grafik:</b> Mediathek → <b>Neu</b> → Infografik (16:9, quadratisch oder frei – die Größe lässt sich unter
+      <b>Dokument …</b> ändern). Der Editor öffnet sich über der Mediathek; <b>Vollbild</b> oben rechts (oder <kbd>⇧</kbd><kbd>⌘</kbd><kbd>F</kbd>)
+      nutzt den ganzen Bildschirm und bleibt beim nächsten Mal so.</li>
+    <li><b>Vorhandene SVG bearbeiten:</b> in der Mediathek per Rechtsklick → <b>Im Grafik-Editor bearbeiten …</b> oder im großen
+      Bearbeitungsfenster. Auch Logos und Exporte aus Illustrator, Inkscape oder Figma lassen sich öffnen – was Sie nicht anfassen,
+      bleibt genau so, wie es war.</li>
+    <li><b>Speichern</b> (<kbd>⌘</kbd>/<kbd>Strg</kbd>+<kbd>S</kbd>): Beim ersten Speichern fragt der Editor nach Dateiname, Titel und
+      Alt-Text. Danach ersetzt jedes Speichern die Datei – Adresse, Alt-Text und alle Verwendungen bleiben, die vorige Fassung
+      steht unter <b>Dokument … → Frühere Fassungen</b>. „Speichern unter …“ (im Menü Exportieren) legt eine neue Datei an.</li>
+  </ol>
+  <table class="doc-table">
+    <tr><th>Werkzeug</th><th>Taste</th><th>So geht es</th></tr>
+    <tr><td>Verschieben</td><td><kbd>V</kbd></td><td>Klick wählt, Ziehen verschiebt, Rahmen ziehen wählt mehrere; Griffe ändern die Größe (<kbd>⇧</kbd> = Seitenverhältnis, <kbd>⌥</kbd> = von der Mitte), der runde Griff dreht (<kbd>⇧</kbd> = 15°-Schritte). <kbd>⌥</kbd>+Ziehen zieht eine Kopie. Doppelklick betritt eine Gruppe bzw. bearbeitet Text.</td></tr>
+    <tr><td>Knoten</td><td><kbd>A</kbd></td><td>Zeigt die Punkte einer Kurve; Punkte und Griffe ziehen, Doppelklick auf einen Punkt = Ecke/glatt, <kbd>⌫</kbd> löscht Punkte. Rechtecke, Kreise und Linien werden dabei zu Kurven.</td></tr>
+    <tr><td>Zeichenstift</td><td><kbd>P</kbd></td><td>Klick = Eckpunkt, Ziehen = glatter Punkt; Klick auf den ersten Punkt schließt die Form, <kbd>↵</kbd>/<kbd>Esc</kbd> beendet.</td></tr>
+    <tr><td>Bleistift</td><td><kbd>N</kbd></td><td>Freihand zeichnen – die Linie wird geglättet (Stärke in der Kontextleiste).</td></tr>
+    <tr><td>Rechteck, Ellipse, Vieleck/Stern</td><td><kbd>R</kbd> <kbd>E</kbd> <kbd>G</kbd></td><td>Ziehen; <kbd>⇧</kbd> = gleichmäßig, <kbd>⌥</kbd> = von der Mitte. Eckenradius, Zahl der Ecken und Stern in der Kontextleiste.</td></tr>
+    <tr><td>Linie und Pfeil</td><td><kbd>L</kbd></td><td>Ziehen, <kbd>⇧</kbd> = 45°-Schritte; Pfeilspitzen am Anfang/Ende in der Kontextleiste.</td></tr>
+    <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken und tippen, <kbd>↵</kbd> = neue Zeile, <kbd>Esc</kbd> beendet. Text bleibt Text (Suchmaschinen, Screenreader).</td></tr>
+    <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
+  </table>
+  <ul>
+    <li><b>Farbe:</b> Füllung oder Kontur wählen (Kreise unten in der Werkzeugleiste, <kbd>X</kbd> wechselt, <kbd>⇧</kbd><kbd>X</kbd> tauscht), dann
+      Keine, Farbe, linearer oder radialer Verlauf. Verläufe: Farbstopps anklicken, ziehen, mit Klick auf den Balken ergänzen.
+      <b>Farbfelder</b> zeigt die Farben aus dem Design der Website, zuletzt verwendete Farben und die Farben der Grafik.
+      „Schriftfarbe“ (A) übernimmt die Textfarbe der Umgebung – ideal für Symbole.</li>
+    <li><b>Ebenen:</b> oben liegt, was vorn ist. Ziehen sortiert um (auch in Gruppen hinein), Doppelklick oder <kbd>F2</kbd> benennt um,
+      Auge blendet aus, Schloss sperrt. Deckkraft und Mischmodus gelten für die Auswahl.</li>
+    <li><b>Bibliothek:</b> fertige Bausteine (Browserfenster, Smartphone, Karte, Diagramm, Zeichen, Pfeile …) anklicken oder auf die
+      Fläche ziehen. Eine Auswahl lässt sich unter Ebenen <b>als Baustein speichern</b> und steht dann allen auf dieser Website zur
+      Verfügung. <b>Symbole</b> fügt Symbole aus dem Symbolsatz von KLXM Studio als bearbeitbare Pfade ein.</li>
+    <li><b>Ausrichten und Verteilen</b> in der Kontextleiste: bei mehreren Objekten aneinander, bei einem an der Zeichenfläche.
+      Beim Verschieben rasten Objekte an Kanten und Mitten ein (rote Hilfslinien); <kbd>⌘</kbd> beim Ziehen schaltet das ab.</li>
+    <li><b>Transformieren:</b> Position, Breite, Höhe und Drehung als Zahl, Bezugspunkt im Raster, Kette = Seitenverhältnis sperren.
+      <b>Protokoll</b> zeigt alle Schritte – ein Klick springt zurück.</li>
+    <li>Alle Tastaturkürzel zeigt <kbd>?</kbd>. Wichtig: <kbd>⌘</kbd><kbd>Z</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd> Rückgängig/Wiederholen,
+      <kbd>⌘</kbd><kbd>D</kbd> duplizieren, <kbd>⌘</kbd><kbd>G</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>G</kbd> gruppieren/aufheben, <kbd>⌘</kbd><kbd>[</kbd> / <kbd>]</kbd> nach hinten/vorn,
+      Pfeiltasten verschieben (<kbd>⇧</kbd> = 10), <kbd>Tab</kbd> wählt das nächste Objekt, <kbd>⌘</kbd><kbd>0</kbd> einpassen.</li>
+    <li><b>Barrierefreiheit:</b> Unter <b>Dokument …</b> erhalten Infografiken einen <b>Titel</b> und eine ausführliche <b>Beschreibung</b>;
+      der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
+      Gerät vorhanden sind – für Logos besser allgemeine Schriften wählen.</li>
+  </ul>
+  <p id="grafiken"><b>Symbole und Blockvorschauen</b> liegen nicht in der Mediathek, sondern unter <a href="<?= e(url('/admin/grafik')) ?>">Grafiken</a>
+    (Mediathek → Neu → Grafiken verwalten). Eine <b>Blockvorschau</b> startet mit der Skizze des Kits für den gewählten Block; nach dem
+    Speichern zeigt die Blockauswahl („+ Block einfügen“) auf dieser Website Ihre Fassung. „Vorschau des Kits zeigen“ stellt das
+    Original wieder her.</p>
+
   <h3>PDFs und Downloads</h3>
   <p>PDFs öffnen sich auf der Website <b>immer</b> in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten, egal ob über einen Link im Text, einen Button, ein Datei-Feld oder den Block Downloads; dort steht zusätzlich der Knopf zum Herunterladen. In der Karte auf der Website kopiert <b>„Link kopieren“</b> einen Link auf die Seite, der beim Öffnen genau diese Karte wieder zeigt – zum Weitergeben an Interessierte. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Mit <b>„Nur Dateien mit Schlagworten“</b> zeigt er nur Dateien, die eines der Schlagworte der Mediathek tragen (z. B. „satzung, protokoll“). Im Kit fluid zeigt die Variante <b>„Liste“</b> ein kleines Vorschaubild je Datei, ab drei Dateien eine <b>Suche</b> und den Umschalter <b>Liste/Kacheln</b>; auf Wunsch kommen <b>Filter-Schaltflächen nach Schlagworten</b> dazu („Filter nach Schlagworten anbieten“, mit „Nur diese Schlagworte als Filter“ lassen sich interne Schlagworte ausblenden). Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
   <p id="dateiname"><b>Lesbare Dateinamen:</b> Dateien und Bilder behalten beim Hochladen ihren Namen – aus „Sommerfest 2026.pdf“ wird die Adresse <code>…/media/2026/10/sommerfest-2026.pdf</code> (Kleinbuchstaben, Umlaute umgeschrieben). Gibt es den Namen im selben Monat schon, kommt eine Zahl dazu (<code>-2</code>). Auch die Bildgrößen, die die Website zeigt, tragen den Namen, z. B. <code>hygienetipps-3fa9c1-800.webp</code> – der kurze Zusatz ändert sich bei jeder Bearbeitung, damit niemand eine alte Fassung aus dem Zwischenspeicher sieht. Das hilft Suchmaschinen (auch der Bildersuche); den Inhalt eines Bildes beschreibt aber vor allem der <b>Alt-Text</b>.</p>
