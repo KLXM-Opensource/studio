@@ -68,7 +68,7 @@
   .nv-nav__close .ico { inline-size: 1.1rem; block-size: 1.1rem; }
   .nv-nav .ncss-nav-list a[aria-current="page"], .nv-nav [data-active] > summary, .nv-nav a[data-active] { color: var(--f-link, var(--f-a)); }
   .nv-nav .nv-sub--deep a { padding-inline-start: 1.6rem; }
-  .nv-nav__langs, .nv-nav__prefs, .nv-nav__quick { display: none; }
+  .nv-nav__langs, .nv-nav__prefs, .nv-nav__quick, .nv-nav__cta { display: none; }
   .nv-tools { display: flex; align-items: center; gap: var(--f-s-s); }
   /* Suchfeld in der Kopfleiste schmal – mehr Platz für das Menü in derselben Zeile (Vorschläge klappen breiter auf) */
   .nv-tools .ha-field--inline { --ha-field-w: 9rem; }
@@ -105,6 +105,7 @@
     .nv-langs { display: none; }
     .nv-nav__langs { display: flex; margin-block-start: var(--f-s-l); }
     .nv-nav__quick { display: flex; flex-direction: column; gap: var(--f-s-xs); margin-block-start: var(--f-s-l); }
+    .nv-nav__cta { display: flex; justify-content: center; margin-block-start: var(--f-s-l); }
     /* Darstellung: im Menü (die Kopfleiste bleibt einzeilig), in der Leiste nur in der Zeilen-Ansicht */
     .nv-prefs:not(.nv-prefs--always) { display: none; }
     .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }
@@ -122,6 +123,7 @@
       .nv-langs { display: none; }
       .nv-nav__langs { display: flex; margin-block-start: var(--f-s-l); }
       .nv-nav__quick { display: flex; flex-direction: column; gap: var(--f-s-xs); margin-block-start: var(--f-s-l); }
+      .nv-nav__cta { display: flex; justify-content: center; margin-block-start: var(--f-s-l); }
       /* Darstellung: im Menü (die Kopfleiste bleibt einzeilig), in der Leiste nur in der Zeilen-Ansicht */
       .nv-prefs:not(.nv-prefs--always) { display: none; }
       .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }

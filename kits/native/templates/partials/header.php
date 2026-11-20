@@ -44,6 +44,7 @@ $item = static function (array $m) use ($cur, $sub): string {
         <button type="button" class="ncss-dialog-close nv-nav__close" command="close" commandfor="nv-menu"><?= icon('x') ?><span class="sr-only"><?= e(lt('Menü schließen')) ?></span></button>
         <ul class="ncss-nav-list" role="list"><?= implode('', array_map($item, $menu)) ?></ul>
         <?php if ($langs): ?><?= header_actions_lang($langs, 'nv-nav__langs') ?><?php endif; ?>
+        <?php if ($cta = fluid_header_cta()): // Handlungsaufruf: in der Leiste nur breit, im Menü wie bei fluid (mnav__cta) ?><a class="btn btn--primary nv-nav__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?></a><?php endif; ?>
         <?php if (($quick = fluid_quick_contact('nv-nav__quick')) !== ''): ?><?= $quick ?><?php endif; ?>
         <?= $prefs ? native_prefs_element('nv-nav__prefs') : '' ?>
       </dialog>
