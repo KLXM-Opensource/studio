@@ -1,0 +1,95 @@
+/**
+ * ncss - Badge/Tag-Komponente (Layer "components"). Zeigt exemplarisch, wie die
+ * abgestuften Farbskalen aus tokens.css genutzt werden (100 als Hintergrund, -on-soft als
+ * Text - klassisches "soft badge"-Muster, bleibt in BEIDEN Themes kontrastreich: -on-soft
+ * ist selbst light-dark()-gewrappt, siehe colors.css - eine feste Stufe wie -700 allein
+ * würde im Dark Mode auf der dort ebenfalls dunklen -100-Fläche zu dunkel/kaum lesbar).
+ */
+
+.ncss-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ncss-space-3xs);
+  padding: 0.15em 0.65em;
+  border-radius: var(--ncss-radius-full);
+  font-size: var(--ncss-font-size-sm);
+  font-weight: 600;
+  background-color: var(--ncss-color-brand-100);
+  color: var(--ncss-color-brand-on-soft);
+}
+.ncss-badge--brand-2 {
+  background-color: var(--ncss-color-brand-2-100);
+  color: var(--ncss-color-brand-2-on-soft);
+}
+.ncss-badge--neutral {
+  background-color: var(--ncss-color-neutral-100);
+  color: var(--ncss-color-neutral-on-soft);
+}
+.ncss-badge--success {
+  background-color: var(--ncss-color-success-100);
+  color: var(--ncss-color-success-on-soft);
+}
+.ncss-badge--warning {
+  background-color: var(--ncss-color-warning-100);
+  color: var(--ncss-color-warning-on-soft);
+}
+.ncss-badge--danger {
+  background-color: var(--ncss-color-danger-100);
+  color: var(--ncss-color-danger-on-soft);
+}
+
+/* --- Icon-Badge ------------------------------------------------------------------------
+ * Dieselbe "100-Fläche + -on-soft-Text"-Logik wie .ncss-badge oben, nur als Kreis/Quadrat
+ * um ein einzelnes Icon statt als Text-Pille - klassisches "Icon in einer farbigen
+ * Kachel"-Muster für Feature-Listen/Karten (siehe demo/docs.html, index.html). Erwartet
+ * ein Icon-Kind (<i class="fa-solid ...">, .ncss-icon-* oder <svg>) - selbst kein Icon-
+ * System, nur der Rahmen darum.
+ * Markup: <span class="ncss-badge-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+ * Farbvarianten identisch zu .ncss-badge (--brand-2/--neutral/--success/--warning/--danger),
+ * dieselben Klassen wiederverwendet statt einer zweiten Farb-Matrix. */
+.ncss-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--ncss-radius-md);
+  background-color: var(--ncss-color-brand-100);
+  color: var(--ncss-color-brand-on-soft);
+  font-size: 1.1rem;
+}
+.ncss-badge-icon--lg {
+  inline-size: 5rem;
+  block-size: 5rem;
+  border-radius: var(--ncss-radius-full);
+  font-size: 2rem;
+}
+
+/* --- Punkt-Badge -----------------------------------------------------------------------
+ * Kleiner Status-/"Neu"-Punkt neben einem Text (Nav-Punkt, Kartentitel, Listeneintrag).
+ * Standardfarbe Erfolg/Grün; pro Instanz per --ncss-badge-dot-color umfärbbar.
+ * Farbe allein ist keine Information (WCAG 1.4.1) - der Punkt trägt IMMER einen
+ * .ncss-visually-hidden-Text als Kind, den Screenreader vorlesen:
+ *   Scroll-Effekte <span class="ncss-badge-dot"><span class="ncss-visually-hidden">(neu)</span></span>
+ * Größe in em: wächst mit der Schrift des umgebenden Textes mit. Der helle Ring
+ * (--ncss-color-surface) trennt den Punkt von farbigen Flächen; in Forced Colors bleibt
+ * er als Systemfarbe sichtbar (sonst würde background-color dort entfernt). */
+.ncss-badge-dot {
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 0.55em;
+  block-size: 0.55em;
+  margin-inline-start: 0.2em;
+  vertical-align: 0.1em;
+  border-radius: var(--ncss-radius-full);
+  background-color: var(--ncss-badge-dot-color, var(--ncss-color-success));
+  box-shadow: 0 0 0 0.12em var(--ncss-badge-dot-ring, var(--ncss-color-surface));
+}
+@media (forced-colors: active) {
+  .ncss-badge-dot {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    box-shadow: 0 0 0 0.12em Canvas;
+  }
+}

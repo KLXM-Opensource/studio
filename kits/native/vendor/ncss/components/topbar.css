@@ -1,0 +1,92 @@
+/**
+ * ncss - Topbar-Komponente (Layer "components"): sticky Kopfleiste mit Brand-/Nav-/
+ * Actions-Bereich. Reines Layout - eine eingebettete .ncss-nav (components/nav.css)
+ * übernimmt die eigentliche Navigation.
+ *
+ * Markup:
+ * <header class="ncss-topbar">
+ *   <div class="ncss-topbar-inner">
+ *     <a class="ncss-topbar-brand" href="/">Marke</a>
+ *     <!-- optional: <nav class="ncss-nav">...</nav> -->
+ *     <div class="ncss-topbar-actions">...</div>
+ *   </div>
+ * </header>
+ */
+
+.ncss-topbar {
+  position: sticky;
+  inset-block-start: 0;
+  background-color: var(--ncss-color-surface);
+  border-block-end: var(--ncss-border-width) solid var(--ncss-color-border);
+  /* Deutlich höher als der .ncss-sticky-Default (10, siehe helpers/scroll.css) - die
+     Topbar ist page-weites Chrome und soll über allen weiter unten "klebenden" Elementen
+     liegen. Pro Instanz überschreibbar via style="--ncss-topbar-z: 30". */
+  z-index: var(--ncss-topbar-z);
+}
+
+/* Modifier für eine Topbar über einem Hero/farbigen Hintergrund statt der normalen
+   Seitenfläche (siehe index.html) - typischerweise mit .ncss-glass (components/
+   effects.css) als eigenem, separatem Hintergrund-Element kombiniert (NICHT .ncss-glass
+   direkt auf .ncss-topbar-inner setzen, siehe Fallstrick 21 im Skill-Dokument: bricht bei
+   einer enthaltenen Floating-UI-Komponente wie dem Off-Canvas-Nav-Panel).
+   .ncss-topbar bringt sonst ein UNDURCHSICHTIGES background-color mit - ein Glass-/
+   Blur-Element dahinter bleibt dadurch wirkungslos, selbst wenn die z-index-Reihenfolge
+   selbst korrekt sitzt (die Eigenfläche der Topbar malt darunter, siehe Fallstrick 18).
+   Textfarbe bleibt bewusst NICHT Teil dieses Modifiers - die hängt vom tatsächlichen
+   Hintergrund/der Marke der jeweiligen Seite ab, dafür direkt am Seiten-Markup/-CSS
+   überschreiben (siehe index.html: eigene helle Textfarbe NUR oberhalb der nav.css-
+   Umschalt-Schwelle, damit das Off-Canvas-Panel darunter seine normale Optik behält). */
+.ncss-topbar--transparent {
+  background-color: transparent;
+  border-block-end: none;
+}
+
+.ncss-topbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ncss-space-md);
+  max-width: var(--ncss-container-max);
+  margin-inline: auto;
+  padding-inline: var(--ncss-space-sm);
+  /* min-block-size statt fester block-size: wenn .ncss-nav-list bei vielen Punkten in eine
+     zweite Zeile umbricht (siehe nav.css), muss die Topbar mitwachsen können, statt den
+     Inhalt auf die feste Höhe zusammenzuquetschen. Im Normalfall (eine Zeile) identisch
+     zum bisherigen Verhalten. */
+  min-block-size: var(--ncss-topbar-height);
+  padding-block: var(--ncss-space-2xs);
+}
+
+.ncss-topbar-brand {
+  font-weight: 700;
+  color: var(--ncss-color-text);
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+/* Aktuelle Seite ist die Startseite (product.html) - derselbe Unterstreichungs-
+   Wortsinn wie components/nav.css' [aria-current="page"] auf normalen Nav-Punkten, hier
+   separat, weil die Marke keine .ncss-nav-item ist und ohnehin schon fett ist (font-
+   weight allein wäre also kein sichtbarer Unterschied). */
+.ncss-topbar-brand[aria-current="page"] {
+  text-decoration: underline;
+}
+
+/* Zwischen Brand und Actions - füllt den Platz, damit .ncss-nav (falls eingebettet) und
+   .ncss-topbar-actions an den Rändern bleiben. min-width:0 hebt Flexbox' Default
+   (min-width:auto = "nie kleiner als der Inhalt") auf - sonst kann die Nav trotz
+   flex-shrink NICHT unter ihre Inhaltsbreite schrumpfen und sprengt die Topbar/den
+   Viewport, statt dass die eigene overflow-x:auto-Scrollbarkeit greift (klassische
+   Flexbox-Falle, per echtem Test gefunden: Topbar lief bei vielen Nav-Punkten über den
+   Bildschirmrand hinaus). */
+.ncss-topbar-inner > nav {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ncss-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ncss-space-xs);
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
