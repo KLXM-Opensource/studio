@@ -1,0 +1,8 @@
+/* NativeCSS components/audio-player.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/audio-player.css" layer(components);
+/* Audio: Player mit Bildunterschrift darunter */
+@layer native {
+  .nv-audio__fig { display: block; max-inline-size: 52rem; margin: 0; }
+  .nv-audio__fig .video__cap { margin-block-start: var(--f-s-s); color: var(--f-muted); font-size: var(--f-t-1); }
+}

@@ -1,0 +1,3 @@
+/* NativeCSS helpers/scroll-shadow.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/helpers/scroll-shadow.css" layer(helpers);

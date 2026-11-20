@@ -1,0 +1,13 @@
+/* NativeCSS components/morph.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/morph.css" layer(components);
+/* Text + Bild bzw. Video „Morphing beim Scrollen“ (.ncss-morph): unter der festen Kopfleiste kleben */
+@layer native {
+  .nv-morph .ncss-morph { --ncss-morph-top: 4.5rem; }
+  /* Bilder kommen als <picture> (AVIF/WebP): das <picture> morpht (erstes Kind), das Bild darin füllt es */
+  .nv-morph .ncss-morph-media > picture { display: block; overflow: clip; }
+  .nv-morph .ncss-morph-media > picture > img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border-radius: 0; }
+  .nv-morph .ncss-morph-media > video { display: block; object-fit: cover; }
+  .nv-morph .ncss-morph-content > * { margin: 0; }
+  .nv-morph .ncss-morph-content > * + * { margin-block-start: var(--f-s-m); }
+}

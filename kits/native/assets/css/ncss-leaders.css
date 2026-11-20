@@ -1,0 +1,4 @@
+/* NativeCSS components/leaders.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/leaders.css" layer(components);
+@layer native { .nv-pricelist .ncss-leaders { max-inline-size: 48rem; margin-inline: auto; } }

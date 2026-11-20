@@ -1,0 +1,14 @@
+/* Fragen & Antworten in der Darstellung von NativeCSS (blocks/faq.php: split, stacked) – Merkmal '@nv-faq' */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/disclosure.css" layer(components);
+
+@layer native {
+  .nv-faq--split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--f-s-2xl); align-items: start; container-type: inline-size; }
+  .nv-faq--split .nv-faq__list { grid-column: span 2; }
+  .nv-faq--stacked .nv-faq__list { max-inline-size: 52rem; margin-inline: auto; }
+  .nv-faq__list { display: flex; flex-direction: column; gap: var(--f-s-s); }
+  .nv-faq__item { background: var(--f-bg); border-color: var(--f-line); border-radius: var(--ncss-radius-md); }
+  .nv-faq__item summary { color: var(--f-ink); }
+  .nv-faq__a { padding-block-start: var(--f-s-xs); }
+  @container (max-width: 44rem) { .nv-faq--split .nv-faq__list { grid-column: auto; } }
+}

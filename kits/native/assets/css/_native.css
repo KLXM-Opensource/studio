@@ -1,0 +1,132 @@
+/*
+ * Kit „NativeCSS“ – Brücke und Rahmen (Layer „native“, liegt über allen Layern von NativeCSS und dem Grund-CSS von fluid;
+ * Reihenfolge siehe css/site.css). Werte kommen aus der Design-Leiste von fluid (--f-…) und speisen die Tokens von NativeCSS
+ * (--ncss-…): Vorlagen, Farben, Schriften und Radien gelten so für Rahmen und Blöcke gleichermaßen.
+ * Gestaltung der Blöcke dieses Kits: css/nv-*.css (nur auf Seiten, die sie zeigen).
+ */
+@layer native {
+  /* ------------------------------------------------------------------ Brücke: Design-Leiste → NativeCSS */
+  :root {
+    --ncss-color-brand: var(--f-a);
+    --ncss-color-brand-contrast: var(--f-a-on);
+    --ncss-color-brand-2: var(--f-b);
+    --ncss-color-brand-2-contrast: var(--f-b-on);
+    --ncss-color-bg: var(--f-bg);
+    --ncss-color-bg-subtle: var(--f-surface);
+    --ncss-color-surface: var(--f-bg);
+    --ncss-color-text: var(--f-text);
+    --ncss-color-text-muted: var(--f-muted);
+    --ncss-color-border: var(--f-line);
+    --ncss-color-focus-ring: var(--f-a);
+    --ncss-font-family-base: var(--f-font);
+    --ncss-font-family-heading: var(--f-font-head);
+    --ncss-font-family-mono: var(--f-font-mono);
+    --ncss-font-weight-heading: var(--f-hw);
+    --ncss-radius-sm: calc(var(--f-radius) * .5);
+    --ncss-radius-md: var(--f-radius);
+    --ncss-radius-lg: calc(var(--f-radius) * 1.5);
+    --ncss-container-max: calc(var(--f-wrap) + 2 * var(--f-gutter));
+    color-scheme: light;
+  }
+  /* Dunkles Schema nur, wenn das Design es erlaubt (wie die --f-Werte) – light-dark() in NativeCSS folgt */
+  html.has-dark { color-scheme: light dark; }
+  html.is-dark, html.scheme-dark { color-scheme: dark; }
+  html.scheme-light { color-scheme: light; }
+  /* Darstellungs-Einstellungen der Besucher (<ncss-preferences>, Attribute am <html>): Farbschema-Wahl schlägt das Gerät,
+     Kontrast und Lese-Schrift auch für die Blöcke von fluid (--f-…). !important: gewinnt gegen die Design-Werte ohne Layer. */
+  html[data-theme="light"] { color-scheme: light; }
+  html.has-dark[data-theme="dark"] { color-scheme: dark; }
+  :root[data-contrast="more"] {
+    --f-text: light-dark(#000000, #ffffff) !important; --f-ink: light-dark(#000000, #ffffff) !important;
+    --f-muted: light-dark(#2b2f36, #dcdfe5) !important; --f-line: light-dark(#5c6370, #a3a9b4) !important;
+  }
+  :root[data-ncss-font] { --f-font: var(--ncss-font-family-base) !important; --f-font-head: var(--ncss-font-family-heading) !important; }
+
+  body { background: var(--f-bg); color: var(--f-text); font-family: var(--f-font); }
+  /* Auf-/Zuklappen (details, .ncss-disclosure) sanft – sonst aus reset.css von NativeCSS, das dieses Kit nicht lädt */
+  @media (prefers-reduced-motion: no-preference) { :root { interpolate-size: allow-keywords; } }
+  .plans__note { margin-block-start: var(--f-s-l); color: var(--f-muted); font-size: var(--f-t-1); text-align: center; }
+
+  /* ------------------------------------------------------------------ Kopfleiste */
+  .nv-topbar { background: color-mix(in oklab, var(--f-bg) 88%, transparent); backdrop-filter: saturate(1.4) blur(12px); }
+  .nv-topbar .ncss-topbar-inner { padding-inline: var(--f-gutter); gap: var(--f-s-m); }
+  .nv-brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .6rem; min-block-size: 2.75rem; color: var(--f-ink);
+    font: 700 1.125rem/1.1 var(--f-font-head); text-decoration: none; letter-spacing: -.01em; }
+  .nv-brand .brand__mark { display: grid; place-items: center; inline-size: 2.1rem; block-size: 2.1rem; border-radius: var(--ncss-radius-md);
+    background: linear-gradient(135deg, var(--f-a), var(--f-b)); color: var(--f-a-on); font-size: 1rem; }
+  .nv-brand .brand__name { font: inherit; }
+  .nv-brand .brand__logo { display: block; }
+  /* SVG-Logos ohne eigene Breite: Höhe fest, Breite aus dem Seitenverhältnis */
+  .nv-brand .brand__img { display: block; block-size: 2.1rem; inline-size: auto; max-inline-size: 14rem; object-fit: contain; }
+  .nv-brand--footer .brand__img { block-size: 2rem; }
+  .nv-brand .brand__logo--dark { display: none; }
+  @media (prefers-color-scheme: dark) {
+    html.has-dark:not(.scheme-light) .nv-brand .brand__logo--light { display: none; }
+    html.has-dark:not(.scheme-light) .nv-brand .brand__logo--dark { display: block; }
+  }
+  html:is(.is-dark, .scheme-dark) .nv-brand .brand__logo--light { display: none; }
+  html:is(.is-dark, .scheme-dark) .nv-brand .brand__logo--dark { display: block; }
+  .nv-nav { margin-inline-start: auto; min-inline-size: 0; }
+  .nv-nav__toggle .ico, .nv-nav__close .ico { inline-size: 1.4rem; block-size: 1.4rem; }
+  .nv-nav__close .ico { inline-size: 1.1rem; block-size: 1.1rem; }
+  .nv-nav .ncss-nav-list a[aria-current="page"], .nv-nav [data-active] > summary, .nv-nav a[data-active] { color: var(--f-link, var(--f-a)); }
+  .nv-nav .nv-sub--deep a { padding-inline-start: 1.6rem; }
+  .nv-nav__langs, .nv-nav__prefs, .nv-nav__quick { display: none; }
+  .nv-tools { display: flex; align-items: center; gap: var(--f-s-s); }
+  /* breite Fenster: eine Zeile – Menü rechts neben der Marke, Werkzeuge daneben */
+  @media (min-width: 64rem) {
+    .nv-topbar .ncss-topbar-inner { flex-wrap: nowrap; }
+    .nv-nav { flex: 1 1 auto; display: flex; justify-content: flex-end; }
+    .nv-nav .ncss-nav-list { flex-wrap: wrap; justify-content: flex-end; row-gap: 0; column-gap: 0; }
+    .nv-nav .ncss-nav-item > a, .nv-nav .ncss-nav-item summary { padding-inline: .55rem; }
+    .nv-tools { flex: 0 0 auto; }
+  }
+  /* Off-Canvas (schmale Fenster): Sprachen und Kontakt unten im Panel statt in der Leiste */
+  @media (max-width: 63.99rem) {
+    /* eine Zeile auch bei 360 px: Marke darf schrumpfen (Logo eingepasst, Name gekürzt), Werkzeuge und Menü bleiben */
+    .nv-topbar .ncss-topbar-inner { flex-wrap: nowrap; }
+    .nv-brand { flex: 0 1 auto; min-inline-size: 0; }
+    .nv-brand .brand__logo { min-inline-size: 0; }
+    .nv-brand .brand__img { max-inline-size: 100%; }
+    .nv-brand .brand__name { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nv-tools { margin-inline-start: auto; }
+    .nv-nav { order: 3; flex: 0 0 auto; margin-inline-start: 0; }
+    .nv-langs { display: none; }
+    .nv-nav__langs { display: flex; margin-block-start: var(--f-s-l); }
+    .nv-nav__quick { display: flex; flex-direction: column; gap: var(--f-s-xs); margin-block-start: var(--f-s-l); }
+    /* Darstellung: schmal im Menü (die Kopfleiste bleibt einzeilig), breit in der Leiste */
+    .nv-prefs:not(.nv-prefs--always) { display: none; }
+    .nv-nav__prefs:defined { display: inline-block; margin-block-start: var(--f-s-m); }
+  }
+  .ncss-nav-panel .ha-lang__list { position: static; box-shadow: none; }
+  .nv-nav__quick { margin: 0; padding: 0; list-style: none; }
+  .nv-nav__quick a { display: inline-flex; align-items: center; gap: .55em; color: var(--f-text); text-decoration: none; }
+  .nv-nav__quick .ico { inline-size: 1.1em; block-size: 1.1em; color: var(--f-a); }
+
+  /* ------------------------------------------------------------------ Fußbereich */
+  .nv-footer { margin-block-start: 0; padding-block: var(--f-s-2xl) var(--f-s-l); background: var(--f-surface); color: var(--f-muted); }
+  .nv-footer__grid { --min: 13rem; padding-inline: var(--f-gutter); }
+  .nv-footer .ncss-footer-bottom { padding-inline: var(--f-gutter); }
+  .nv-footer a { color: var(--f-text); }
+  .nv-footer__h { margin: 0 0 var(--f-s-xs); color: var(--f-ink); font: 650 var(--f-t-1)/1.3 var(--f-font-head); letter-spacing: .06em; text-transform: uppercase; }
+  .nv-footer__about, .nv-footer__col { display: flex; flex-direction: column; gap: var(--f-s-s); }
+  .nv-footer__about > *, .nv-footer__col > * { margin: 0; }
+  .nv-footer__tagline { color: var(--f-text); font-weight: 600; }
+  .nv-footer__text { font-size: var(--f-t-1); }
+  .nv-footer__address { font-style: normal; }
+  .nv-footer__list, .nv-footer__legal { list-style: none; margin: 0; padding: 0; }
+  .nv-footer__list { display: flex; flex-direction: column; gap: .35rem; }
+  .nv-footer__list a { display: inline-flex; align-items: center; gap: .45em; }
+  .nv-footer__list .ico { inline-size: 1em; block-size: 1em; }
+  .nv-footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--f-s-s); }
+  .nv-footer__bottom p { margin: 0; }
+  .nv-footer__legal { --gap: var(--f-s-m); }
+  .nv-brand--footer .brand__mark { inline-size: 1.8rem; block-size: 1.8rem; font-size: .875rem; }
+
+  /* ------------------------------------------------------------------ Blöcke von fluid im Stil von NativeCSS */
+  .feat.card, .card { border-radius: var(--ncss-radius-lg); }
+  .eyebrow { letter-spacing: .06em; }
+  .more-row { margin-block-start: var(--f-s-xl); }
+  /* Einblend-Effekt aus, wenn im Design „Dezente Animationen“ ausgeschaltet ist (Vorschau im Style-Editor) */
+  html:not(.has-motion) .ncss-reveal { animation: none; clip-path: none; opacity: 1; translate: none; scale: none; }
+}

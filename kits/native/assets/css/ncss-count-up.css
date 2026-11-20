@@ -1,0 +1,5 @@
+/* NativeCSS components/count-up.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/count-up.css" layer(components);
+/* Kennzahlen: Zahl beim Hochzählen ohne Springen der Breite */
+@layer native { .stat__value .ncss-count-up { font-variant-numeric: tabular-nums; } }

@@ -24,7 +24,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), NativeCSS (parts in `kits/fluid`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), NativeCSS (parts in `kits/fluid`, kit `native`, also its demo media), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper), Apache ECharts | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, ZRender (ECharts), pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
@@ -33,10 +33,11 @@ not part of the distribution. **Service**: an online service contacted at runtim
 | 0BSD | tslib (helper of Apache ECharts) | Bundled |
 | CC0-1.0 | ICC colour profile in PDF.js | Bundled |
 | GPL-2.0 with font exception (Red Hat Liberation font license) | Liberation Sans fonts inside PDF.js (`standard_fonts/`) – separate font files, see 1.3 | Bundled |
-| SIL Open Font License 1.1 | Lato (admin, PDF), JetBrains Mono (admin code) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
+| SIL Open Font License 1.1 | Lato (admin, PDF), JetBrains Mono (admin code), the reading fonts of the native kit’s display settings (Atkinson Hyperlegible Next, Lexend, OpenDyslexic) and the TTF files of the kits’ app-icon generator; kit web fonts are installed at runtime (2.1) | Bundled |
 | CC BY 3.0 | “Big Buck Bunny” (Blender Foundation), embedded from YouTube (two-click) in the demo content of eight kits, credited in the caption | Service / demo |
 | Pixabay Content License | one demo photo of the praxis kit (section 8) | Bundled (demo) |
 | Pexels License | 22 demo photos of the foto kit – only URLs and credits in the repository, downloaded when the demo is created (section 8) | Service / demo |
+| Pexels License | one demo photo of the native kit (before/after pair, section 8) | Bundled (demo) |
 | MPL-2.0 | lightningcss 1.32.0 (via Tailwind CSS CLI, building `kits/frameworks`) | Build-only |
 | ODbL 1.0 (data), OpenMapTiles attribution | OpenStreetMap data via OpenFreeMap | Service |
 | Apache-2.0 | Playwright (tutorial recordings) | Build-only |
@@ -115,6 +116,16 @@ The Liberation fonts are separate font files that PDF.js loads to render PDFs wi
 linked into KLXM Studio code (mere aggregation); the license text ships next to them. The TTF files are their own
 source form. Their GPL-2.0 license (with font exception) applies only to these font files and does not affect the
 MIT license of KLXM Studio's code; whoever redistributes them keeps `LICENSE_LIBERATION` next to them.
+
+### 1.2b NativeCSS in the kit `native` (`kits/native/vendor/ncss/`, `public/assets/kits/native/`)
+
+Copied unchanged by `kits/native/tools/ncss-update.php` (only the files the kit uses, version in `VERSION.txt`) and
+bundled by `tools/build.mjs` into the kit's stylesheets and scripts (`css/site.css`, `css/ncss-*.css`, `js/*.js`).
+
+| Component | Version | License | Shipped as | License text |
+|---|---|---|---|---|
+| NativeCSS, © 2026 Thomas Skerbis and KLXM Crossmedia GmbH – https://github.com/skerbis/nativecss | 1.1.0 (8bb3e3f) | MIT | `kits/native/vendor/ncss/`, bundled into `public/assets/kits/native/{css,js}/` | `kits/native/vendor/ncss/LICENSE.txt`, `public/assets/kits/native/LICENSE-nativecss.txt` |
+| Reading fonts of `<ncss-preferences>` (shipped with NativeCSS): Atkinson Hyperlegible Next (© 2020-2024 The Atkinson Hyperlegible Next Project Authors), Lexend (© 2018 The Lexend Project Authors, RFN “RevReading Lexend”), OpenDyslexic (© Abbie Gonzalez, RFN “OpenDyslexic”) | as in NativeCSS 1.1.0 | OFL-1.1 | `public/assets/kits/native/fonts/*/*.woff2` (loaded only when a visitor picks them) | `public/assets/kits/native/fonts/*/OFL.txt` |
 
 ## 2. Fonts (Bundled)
 
@@ -393,6 +404,13 @@ KLXM AI features are off unless the operator configures a provider. Nothing belo
   of the repository (`kits/foto/tools/demo-photos.php`); the files are downloaded when the demo content is created, each with
   “Foto: {author} / Pexels – {page}” as credit in the media library. Two demo videos are camera moves generated from two of these
   photos. Without internet access the demo falls back to generated placeholders.
+
+- **Demo media of the native kit** (`kits/native/demo/media/`, page “Bausteine”): the short film (audio track removed),
+  its subtitles and chapters, the loops and preview images (`ncss-*`) come from the demo of NativeCSS – generated for
+  NativeCSS (rendered scenes, own subtitles), MIT, © Thomas Skerbis / KLXM Crossmedia (origin: `demo/assets/media/README.md`
+  in the NativeCSS repository). The living-room photo (`pexels-wohnzimmer-*`) is by Curtis Adams on Pexels
+  (https://www.pexels.com/photo/empty-living-room-6835103/), Pexels License; the “before” version is the same photo,
+  made dull for the example. Credits are stored in the media library and shown in the captions.
 
 ## 9. Checking licenses
 

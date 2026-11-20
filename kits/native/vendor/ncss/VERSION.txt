@@ -1,0 +1,3 @@
+NativeCSS 1.1.0 8bb3e3f (2026-11-20) – https://github.com/skerbis/nativecss
+Übernommen mit kits/native/tools/ncss-update.php am 2026-11-20 aus /Users/thomas/Documents/nativecss @ 8bb3e3f
+Nur die Dateien, die das Kit verwendet (NCSS_FILES in tools/ncss-update.php), unverändert.

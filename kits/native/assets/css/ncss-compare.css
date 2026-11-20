@@ -1,0 +1,14 @@
+/* NativeCSS components/compare.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/compare.css" layer(components);
+/* Vorher/Nachher: Vergleich in voller Breite des Inhalts, Bildunterschrift darunter; Seitenverhältnis per Klasse (keine style-Attribute) */
+@layer native {
+  .nv-compare__fig { display: block; margin: 0; }
+  .nv-compare__fig ncss-compare { border-radius: var(--ncss-radius-lg); }
+  /* Bilder kommen als <picture> (AVIF/WebP): das <picture> trägt die Klasse, das Bild darin füllt es */
+  .nv-compare__fig ncss-compare > picture { display: block; }
+  .nv-compare__fig ncss-compare > picture > img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border-radius: 0; }
+  .nv-compare__fig .video__cap { margin-block-start: var(--f-s-s); color: var(--f-muted); font-size: var(--f-t-1); }
+  .nv-ar-16-9 { --ncss-compare-ratio: 16 / 9; } .nv-ar-3-2 { --ncss-compare-ratio: 3 / 2; } .nv-ar-4-3 { --ncss-compare-ratio: 4 / 3; }
+  .nv-ar-1-1 { --ncss-compare-ratio: 1 / 1; } .nv-ar-4-5 { --ncss-compare-ratio: 4 / 5; } .nv-ar-3-4 { --ncss-compare-ratio: 3 / 4; }
+}

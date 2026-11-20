@@ -1,0 +1,21 @@
+/* Handlungsaufruf in der Darstellung von NativeCSS (blocks/cta.php: band, box) – Merkmal '@nv-cta' */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/tile.css" layer(components);
+
+@layer native {
+  .nv-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--f-s-l) var(--f-s-2xl);
+    --ncss-tile-padding-block: clamp(2rem, 1.2rem + 4vw, 4.5rem); --ncss-tile-padding-inline: clamp(1.5rem, 1rem + 4vw, 4.5rem); }
+  .nv-cta__text { flex: 1 1 28rem; display: flex; flex-direction: column; gap: var(--f-s-s); }
+  .nv-cta__text > * { margin: 0; }
+  .nv-cta__eyebrow { font-size: var(--f-t-1); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+  .nv-cta--band { background: linear-gradient(120deg, var(--f-a), color-mix(in oklab, var(--f-a) 55%, var(--f-b))); color: var(--f-a-on); }
+  .nv-cta--band :is(.nv-cta__title, .nv-cta__lead) { color: var(--f-a-on); }
+  .nv-cta--band .btn--primary { background: var(--f-a-on); border-color: var(--f-a-on); color: var(--f-a); }
+  .nv-cta--band .btn--secondary { border-color: currentColor; color: var(--f-a-on); background: transparent; }
+  /* Band auf einem schon farbigen Abschnitt (Akzent, zweite Farbe, dunkel): keine zweite Farbfläche */
+  :is(.bg-accent, .bg-secondary, .bg-dark) .nv-cta--band { background: transparent; color: inherit; --ncss-tile-padding-inline: 0; }
+  :is(.bg-accent, .bg-secondary, .bg-dark) .nv-cta--band :is(.nv-cta__title, .nv-cta__lead) { color: inherit; }
+  .nv-cta--box { background: var(--f-surface); }
+  .nv-cta--box .nv-cta__title { color: var(--f-ink); }
+  .nv-cta__lead { max-inline-size: 42em; }
+}

@@ -1,0 +1,11 @@
+/* NativeCSS components/marquee.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/marquee.css" layer(components);
+/* Logos „Laufband“ (.ncss-marquee): Pause-Schaltfläche klein und mittig */
+@layer native {
+  .nv-logos__marquee { --ncss-marquee-gap: var(--f-s-2xl); }
+  .nv-logos__marquee .logos__item { list-style: none; }
+  .nv-logos__pause { margin: var(--f-s-s) 0 0; text-align: center; }
+  .nv-logos__toggle { font-size: var(--f-t-1); padding: .35em .9em; }
+  .nv-logos__toggle[aria-pressed="true"] { background: var(--f-surface); }
+}

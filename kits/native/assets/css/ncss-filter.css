@@ -1,0 +1,3 @@
+/* NativeCSS components/filter.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/filter.css" layer(components);

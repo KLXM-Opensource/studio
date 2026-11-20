@@ -1,0 +1,10 @@
+/* NativeCSS components/scrolly.css – nur auf Seiten, die es brauchen (theme.php → conditional_css). Datei unverändert in vendor/ncss/. */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/scrolly.css" layer(components);
+/* Scrollytelling (<ncss-scrolly>): Bühne unter der festen Kopfleiste, Abschnitte als Karten im Design von fluid */
+@layer native {
+  .nv-scrolly ncss-scrolly { --ncss-scrolly-top: 4.5rem; margin-block-start: var(--f-s-l); }
+  .nv-scrolly .ncss-scrolly-steps { margin: 0; padding-inline: 0; list-style: none; }
+  .nv-scrolly .ncss-scrolly-step > * { background: var(--f-bg); }
+  .nv-scrolly__title { margin: 0 0 var(--f-s-xs); color: var(--f-ink); font-size: var(--f-t1); }
+}

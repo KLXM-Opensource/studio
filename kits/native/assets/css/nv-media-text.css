@@ -1,0 +1,14 @@
+/* Text + Bild in der Darstellung von NativeCSS (blocks/media_text.php: auto, right, left) – Merkmal '@nv-media_text' */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../vendor/ncss/components/split.css" layer(components);
+
+@layer native {
+  .nv-mt { align-items: center; gap: clamp(1.5rem, 1rem + 4vw, 4.5rem); }
+  .nv-mt .ncss-split-content { display: flex; flex-direction: column; gap: var(--f-s-m); }
+  .nv-mt .ncss-split-content > * { margin: 0; }
+  .nv-mt__head { margin-block-end: 0; }
+  .nv-mt .ncss-split-media img { border-radius: var(--ncss-radius-lg); }
+  .nv-mt--s-text .ncss-split-content { flex-grow: 1.4; }
+  .nv-mt--s-media .ncss-split-media { flex-grow: 1.4; }
+  .nv-mt--s-mediaxl .ncss-split-media { flex-grow: 2; }
+}
