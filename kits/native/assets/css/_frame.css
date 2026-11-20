@@ -20,9 +20,15 @@ html.scheme-dark .scheme-btn__sun { display: block; }
   html.has-dark:not(.scheme-light) .scheme-btn__moon { display: none; }
   html.has-dark:not(.scheme-light) .scheme-btn__sun { display: block; }
 }
-/* schmal: Suchfeld als Lupe (Rückfall des Kerns), Handlungsaufruf im Menü statt in der Leiste */
+/* schmal: Suchfeld als Lupe (Rückfall des Kerns), Handlungsaufruf ausgeblendet – NUR wenn das Menü schon kompakt ist.
+   Sonst würde das Schrumpfen der Werkzeuge Platz schaffen, das Menü passte wieder in die Zeile, und je nach Breite und
+   Ladezeitpunkt wechselten volle Leiste und Menü-Schaltfläche hin und her. Reihenfolge von breit nach schmal:
+   Zeile → Menü-Schaltfläche (Darstellung im Menü) → zusätzlich Lupe statt Suchfeld, ohne Handlungsaufruf.
+   Ohne Skript (kein data-ncss-nav-auto) gilt die Schwelle allein. */
 @media (max-width: 63.99rem) {
-  .nv-topbar .ha-search--inline, .nv-topbar .ha-search--expand, .nv-topbar .ha-center { display: none; }
-  .nv-topbar .ha-search--fallback { display: flex; }
-  .nv-topbar .ha .ha-cta { display: none; }
+  .nv-topbar:is(:has(.nv-nav[data-ncss-nav-auto="compact"]), :not(:has(.nv-nav[data-ncss-nav-auto]))) {
+    .ha-search--inline, .ha-search--expand, .ha-center { display: none; }
+    .ha-search--fallback { display: flex; }
+    .ha .ha-cta { display: none; }
+  }
 }
