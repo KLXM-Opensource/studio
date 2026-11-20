@@ -41,6 +41,7 @@ final class SelfTest
             $t->layout();
             $t->dataClamp();
             $t->firstBlock();
+            $t->picker();
         } finally {
             app()->editing = $prev;
         }
@@ -633,5 +634,24 @@ Zeilen*", '*Wort *', '***'];
             if ($editing) $this->assert(str_contains($a, 'data-edit="items.1.name"') && str_contains($a, 'data-edit="text" data-edit-mode="rich"'), 'Direktes Bearbeiten: data-edit mit Pfad');
         }
         app()->editing = false;
+    }
+
+    /** Blockauswahl (Core\Blocks\Picker): Beschreibung mit Rückfall, Vorschauen mit Rückfall und Aliasen, optional für Kits */
+    private function picker(): void
+    {
+        $this->assert(Picker::description(['description' => 'Kurz.', 'help' => 'Lang. Mehr.']) === 'Kurz.', 'Beschreibung: description vor help');
+        $this->assert(Picker::description(['help' => 'Erster Satz mit genug Zeichen. Zweiter Satz.']) === 'Erster Satz mit genug Zeichen.', 'Beschreibung: erster Satz von help');
+        $this->assert(Picker::description(['label' => 'X']) === null, 'Beschreibung: ohne beides null (Kits ohne Angaben)');
+        $pv = Picker::previews(app()->theme, [
+            'richtext' => ['label' => 'A'], 'text' => ['label' => 'B'], 'unbekannt_xyz' => ['label' => 'C'], 'faq' => ['label' => 'D', 'preview' => false],
+            'eigen' => ['label' => 'E', 'preview' => 'cta'],
+        ]);
+        $core = is_file(ROOT . '/public/assets/img/previews/richtext.svg');
+        $this->assert(!$core || str_contains($pv['richtext']['url'] ?? '', '/img/previews/richtext.svg'), 'Vorschau: Kern-Datei');
+        $this->assert(!$core || str_contains($pv['text']['url'] ?? '', '/img/previews/richtext.svg'), 'Vorschau: Alias text → richtext');
+        $this->assert(!isset($pv['unbekannt_xyz']) && !isset($pv['faq']), 'Vorschau: fehlt bzw. false → keine (Symbol)');
+        $this->assert(!$core || str_contains($pv['eigen']['url'] ?? '', '/cta.svg'), "Vorschau: 'preview' => anderer Name");
+        $p = Picker::prefs(['ui_prefs' => json_encode(['blockpicker' => ['view' => 'x', 'fav' => ['hero', 'hero', '<b>', 3], 'recent' => array_fill(0, 9, 'faq')]])]);
+        $this->assert($p['view'] === 'list' && $p['fav'] === ['hero'] && $p['recent'] === ['faq'], 'Einstellungen: geprüft, ohne Doppelte, nur Blocknamen');
     }
 }

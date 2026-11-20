@@ -6,6 +6,12 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Blockauswahl mit Gruppen, Vorschau und Favoriten
+- „+ Block einfügen“ ordnet die Blöcke nach Gruppen und bietet drei Ansichten: kompakte **Liste**, **Kacheln mit Vorschau** (Skizze des Aufbaus, Kurzbeschreibung, Sprungleiste der Gruppen) und **Liste mit großer Vorschau** (Beschreibung, Varianten zum Auswählen, „Einfügen“, Stern für Favoriten). Die gewählte Ansicht, **Favoriten** und die **zuletzt verwendeten** fünf Blöcke merkt sich das Konto (`Core\UiPrefs`, Schlüssel `blockpicker`). Suche über Name, Beschreibung, Typ und Gruppe (Treffer im Namen zuerst); Tastatur mit Pfeilen (in Kacheln auch ←/→), Enter, Esc; Combobox mit `aria-activedescendant`. Kopierter Block, „Häufig verwendet“, Vorlagen der Erweiterungen und die Auswahl in Layout-Spalten bleiben.
+- Blockdefinition: neu `'description'` (ein Satz, übersetzbar; ohne Angabe der erste Satz von `'help'`) und optional `'preview'` (anderer Name oder `false`). Vorschaugrafiken als SVG in `kits/{kit}/assets/img/previews/{typ}.svg` (auch `{typ}--{variante}.svg`), Suche über Kit, Eltern-Kits, Erweiterung und Kern (`resources/img/previews/`) – `Core\Blocks\Picker`. Alles optional: Kits ohne Beschreibung und Vorschau zeigen Symbol und Name wie bisher; `kit:check -v` nennt Fehlendes nur als Hinweis.
+- Mitgeliefert: Kurzbeschreibungen (DE/EN) für alle Kern-Blöcke und alle Blöcke der mitgelieferten Kits, 69 neutrale Skizzen (16:10, hell und dunkel lesbar) – 44 im Kern, 25 für kit-eigene Blöcke von editorial, foto, galerie und praxis; erzeugt mit `node tools/block-previews.mjs`. Website-Ausgabe unverändert.
+- Andockstelle für Vorschauen je Website (ohne Oberfläche): Einstellung `block_previews` und Filter `blocks.previews` für Erweiterungen; Vorschauen liegen nicht in der Mediathek.
+
 ### Formatierungsleiste und Griffe wie in den REDAXO-Editoren fluid/tiptap
 - Formatierungsleiste (Formularfelder und schwebend auf der Website): Lucide-Symbole statt Zeichen („B“, „ab“, 🔗, ⋯, „– Liste“), 32-px-Knöpfe mit Trennstrichen, aktive Knöpfe hell in der Akzentfarbe statt schwarz, Menüs mit Symbolen. Die schwebende Leiste ist jetzt hell (wie die Bubble von tiptap). Werte als Tokens `--rte-*` aus den Verwaltungs-Tokens – hell, dunkel und persönliche Akzentfarbe passen von selbst. Nur Darstellung: Befehle, Klassen und Tastatur bleiben.
 - Griffe: Führungslinie endet im Fenster; auf dem Telefon keine Griffe für Textbreite/Aufteilung.

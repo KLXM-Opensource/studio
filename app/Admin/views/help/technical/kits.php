@@ -397,6 +397,48 @@ php bin/console site:create kanzlei www.kanzlei.de kanzlei   # als eigene Websit
     <code>'*'</code> = ausgefüllt, <code>''</code> = leer), <code>'/variant'</code> = Feld des Blocks statt der eigenen Zeile, eine Liste
     <code>[['kind' =&gt; ['image']], ['/variant' =&gt; ['grid']]]</code> = eine Bedingung genügt. Nur Anzeige: ausgeblendete Werte bleiben
     erhalten und werden gespeichert (Datentabellen nutzen <code>visible_if</code>, siehe Daten).</p>
+  <h3 id="blockauswahl">Blockauswahl: Kurzbeschreibung und Vorschaugrafik – <code>Core\Blocks\Picker</code></h3>
+  <p>„+ Block einfügen“ zeigt die Blöcke nach <code>'group'</code> (Reihenfolge Kopf, Inhalt, Medien, Layout, eigene Gruppen, Daten,
+    Formulare, Navigation, Website) als Liste, Kacheln oder Liste mit großer Vorschau (<code>resources/js/_blockpicker.js</code>). Zwei
+    Angaben je Block machen die Auswahl verständlicher – <b>beide sind freiwillig</b>. Kits ohne sie (auch fremde, private und
+    Kind-Kits mit <code>'extends'</code>) funktionieren unverändert: Die Auswahl zeigt dann Symbol und Name, als Beschreibung den ersten
+    Satz von <code>'help'</code> (sonst nichts). Es gibt keine Warnung und kein Pflichtfeld; <code>kit:check -v</code> nennt fehlende
+    Angaben nur als Hinweis.</p>
+  <pre><code>'faq_short' => [
+    'label' => 'Kurz-FAQ', 'icon' => 'question', 'group' => 'Inhalt',
+    'description' => 'Wenige Fragen mit aufklappbaren Antworten.',   // ein Satz, übersetzbar (lang/en.php des Kits)
+    'preview' => 'faq',   // optional: Vorschau eines anderen Namens mitbenutzen; false = keine Vorschau
+    …
+],</code></pre>
+  <ul>
+    <li><b><code>'description'</code></b>: ein Satz (bis ca. 110 Zeichen), was der Block zeigt – nicht, wie man ihn ausfüllt (das steht in
+      <code>'help'</code>). Er erscheint in den Kacheln, in der großen Vorschau und als Tooltip; die Suche durchsucht ihn. Übersetzung wie
+      <code>'label'</code> über <code>kits/{kit}/lang/en.php</code> (Schlüssel = deutscher Text).</li>
+    <li><b>Vorschau</b>: SVG-Datei <code>kits/{kit}/assets/img/previews/{typ}.svg</code> – der Build kopiert <code>assets/img/</code>
+      unverändert nach <code>public/assets/kits/{kit}/img/</code> (Kit-Pakete: im fertigen Asset-Ordner unter <code>img/previews/</code>).
+      Optional je Variante <code>{typ}--{variante}.svg</code> (z. B. <code>hero--compact.svg</code>) – die große Vorschau wechselt beim
+      Wählen der Variante.</li>
+    <li><b>Suchreihenfolge</b> (erster Treffer gilt): Kit, dann die Eltern-Kits (<code>'extends'</code>), dann die Erweiterung des Blocks
+      (<code>extensions/{name}/assets/img/previews/</code>), dann der Kern (<code>resources/img/previews/</code>). Der Kern bringt Skizzen
+      für seine Blöcke und die gängigen Blocknamen der Kits mit (<code>hero</code>, <code>richtext</code>, <code>text_image</code>,
+      <code>features</code>, <code>cards</code>, <code>faq</code>, <code>cta</code>, <code>steps</code>, <code>pricing</code>, <code>team</code>,
+      <code>contact</code>, <code>map</code> …); gleichbedeutende Namen teilen sie (<code>text</code> → <code>richtext</code>,
+      <code>accordion</code> → <code>faq</code>, <code>media_text</code>/<code>photo_text</code> → <code>text_image</code>). Ein Kit-Block mit
+      gängigem Namen, aber ganz anderem Aufbau bringt eine eigene Datei mit oder setzt <code>'preview' =&gt; false</code>.</li>
+    <li><b>Je Website</b> übersteuerbar (Andockstelle, noch ohne Oberfläche): Einstellung <code>block_previews</code>
+      (<code>[typ =&gt; '/pfad/datei.svg']</code>, nur Adressen der Installation) und der Filter <code>blocks.previews</code> für
+      Erweiterungen (bekommt und liefert <code>[typ =&gt; ['url' =&gt; …, 'variants' =&gt; [variante =&gt; url]]]</code>). Vorschauen
+      gehören nicht in die Mediathek.</li>
+  </ul>
+  <p><b>Stil der Skizzen</b> – damit alle Vorschauen zusammenpassen: <code>viewBox="0 0 160 100"</code> (16:10), transparenter Hintergrund
+    (die Kachel liefert die Fläche), nur zwei Farben: Grau <code>#8A94A6</code> in Deckkräften (Text 0.3–0.8, Flächen und Bilder 0.12–0.2,
+    Linien 0.4) und Akzent <code>#5B7FE1</code> für Knöpfe und Hervorhebungen. Beide sind mittelhell und lesbar im hellen und dunklen
+    Aussehen der Verwaltung (Vorschauen laden als <code>&lt;img&gt;</code>, <code>currentColor</code> wirkt dort nicht). Schematisch statt
+    realistisch: Balken für Text, Platzhalter mit Bergen für Bilder, keine Schrift, keine Fotos, keine Skripte; wenige KB je Datei. Die
+    Kern- und Kit-Vorschauen entstehen mit <code>node tools/block-previews.mjs [name …]</code> – dort stehen die Bausteine (Zeile,
+    Überschrift, Bild, Knopf, Karte) zum Nachbauen.</p>
+  <p><b>Persönliche Einstellungen</b> der Auswahl (Ansicht, Favoriten, zuletzt verwendet) liegen je Konto in <code>users.ui_prefs</code>
+    unter <code>blockpicker</code> (<code>Core\UiPrefs</code>, POST <code>/admin/api/block-picker</code>).</p>
   <h3 id="vcard">Visitenkarte (vCard) – <code>vcard_url()</code>, <code>Core\VCard</code></h3>
   <p>Besucher speichern die Organisation mit einem Klick im Adressbuch (iOS, Android, Outlook, Thunderbird). Immer an, sobald Telefon, E-Mail oder Adresse eingetragen sind – keine eigene Funktion, keine eigene Ablage.</p>
   <table class="doc-table">
