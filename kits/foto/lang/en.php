@@ -744,4 +744,11 @@ return [
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Großes Bild, stummes Video oder Bildfolge mit Überblendung – der Auftakt einer Seite.' => 'Large image, silent video or cross-fading sequence – the opening of a page.',
+    'Bilder einer Serie als Mosaik, Zeilen, Raster oder Band – mit Lightbox.' => 'Images of a series as mosaic, rows, grid or strip – with lightbox.',
+    'Bilder und Videos als lebendiges Mosaik oder großer Strom mit wenig Text.' => 'Images and videos as a lively mosaic or large stream with little text.',
+    'Übersicht der Serien bzw. Projekte – Raster, Liste oder abwechselnde Reihen.' => 'Overview of series or projects – grid, list or alternating rows.',
+    'Kopf einer Serien-Seite: Titel (H1), Jahr, Ort und Statement, optional mit Titelbild.' => 'Header of a series page: title (H1), year, place and statement, optionally with cover image.',
+    'Ein Bild mit Statement daneben – z. B. für „Über mich“.' => 'An image with a statement beside it – e.g. for “About me”.',
 ];

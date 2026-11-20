@@ -6,6 +6,7 @@
 return [
     'data_list' => [
         'label' => 'Datenliste', 'icon' => 'list-bullets', 'group' => 'Daten',
+        'description' => 'Einträge einer Datentabelle als Karten, Liste oder Tabelle – mit Filter und Sortierung.',
         'reload' => true,   // Filtern, Suche, Blättern ohne Seitenwechsel (Core\Live::region, live.js)
         'help' => 'Gibt Einträge einer Datentabelle aus (z. B. Aktuelles, Team, Produkte) – mit Feldauswahl, Filter, Sortierung und Link zur Detailseite.',
         'fields' => [
@@ -62,6 +63,7 @@ return [
     ],
     'entry_nav' => [
         'label' => 'Vor / Zurück', 'icon' => 'arrow-right', 'group' => 'Daten',
+        'description' => 'Links zum vorigen und nächsten Eintrag – für Detailseiten-Vorlagen.',
         'nestable' => true,
         'help' => 'Für Detailseiten-Vorlagen: Links zum vorherigen und nächsten Eintrag derselben Tabelle – in der Reihenfolge der Tabelle (z. B. älterer / neuerer Beitrag).',
         'fields' => [
@@ -72,6 +74,7 @@ return [
     ],
     'data_fields' => [
         'label' => 'Datensatz-Felder', 'icon' => 'table', 'group' => 'Daten',
+        'description' => 'Felder des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für Detailseiten-Vorlagen: zeigt Felder des aufgerufenen Eintrags. In allen anderen Blöcken der Vorlage funktionieren zusätzlich Platzhalter wie {{titel}}.',
         'fields' => [
@@ -93,6 +96,7 @@ return [
     ],
     'entry_blocks' => [
         'label' => 'Inhaltsblöcke des Eintrags', 'icon' => 'squares-four', 'group' => 'Daten',
+        'description' => 'Platz für die Inhaltsblöcke des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte (Layout): Blöcke des Eintrags untereinander in der Spalte, z. B. neben einer Seitenleiste
         'help' => 'Für Detailseiten-Vorlagen: An dieser Stelle erscheinen die Blöcke aus dem Feld „Inhaltsblöcke“ des aufgerufenen Eintrags – als eigene Abschnitte der Seite, in einer Layout-Spalte untereinander in der Spalte.',
         'fields' => [
@@ -102,6 +106,7 @@ return [
     ],
     'data_form' => [
         'label' => 'Formular (Datentabelle)', 'icon' => 'clipboard-text', 'group' => 'Daten',
+        'description' => 'Formular, das einen Eintrag in einer Datentabelle anlegt, z. B. Anmeldungen.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Besucher legen über ein Formular einen Eintrag in einer Datentabelle an (z. B. Anmeldungen). Welche Felder, Status und Benachrichtigung stellen Sie bei der Tabelle ein (Felder → Öffentliches Formular). Mehrstufiger Spamschutz, ohne Cookies. Mit einer Eingangs-Tabelle (Anfragen) werden die Angaben Ende-zu-Ende verschlüsselt.',
         'fields' => [
@@ -126,6 +131,7 @@ return [
     // Stellenangebote (Core\Data\Jobs): nur auf der Detailseiten-Vorlage einer Tabelle mit schema.org-Typ „JobPosting“
     'job_facts' => [
         'label' => 'Stelle: Eckdaten', 'icon' => 'briefcase', 'group' => 'Daten',
+        'description' => 'Eckdaten eines Stellenangebots mit Button „Jetzt bewerben“.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: Beschäftigungsart, Arbeitsort, Beginn, Gehalt, Bewerbungsfrist und Ansprechperson auf einen Blick – mit Button „Jetzt bewerben“ zum Formular. Ist die Stelle abgelaufen, steht hier „Diese Stelle ist nicht mehr ausgeschrieben“.',
         'fields' => [
@@ -136,6 +142,7 @@ return [
     ],
     'job_apply' => [
         'label' => 'Stelle: Bewerbung', 'icon' => 'envelope-simple', 'group' => 'Daten',
+        'description' => 'Bewerbungsformular für die Detailseite eines Stellenangebots.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: das Bewerbungsformular der Tabelle (Felder & Einstellungen → „Bewerbungsformular“). Das Feld „Stelle“ ist ausgefüllt und gesperrt, der Betreff der E-Mail nennt die Stelle. Bei abgelaufenen Stellen erscheint kein Formular.',
         'fields' => [
@@ -152,6 +159,7 @@ return [
     ],
     'calendar' => [
         'label' => 'Kalender', 'icon' => 'calendar', 'group' => 'Daten',
+        'description' => 'Termine als Monatsübersicht oder Terminliste – mit Blättern und Abo-Link.',
         'help' => 'Termine einer Kalender-Tabelle als Monatsübersicht oder Terminliste – mit Blättern (auch ohne JavaScript), Wiederholungen und Link zum Abonnieren (iCal).',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],
@@ -177,6 +185,7 @@ return [
     ],
     'upcoming' => [
         'label' => 'Nächste Termine', 'icon' => 'calendar-dots', 'group' => 'Daten',
+        'description' => 'Die nächsten Termine ab heute als kurze Liste.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Die nächsten Termine einer Kalender-Tabelle ab heute – Wiederholungen werden einzeln aufgeführt.',
         'fields' => [
@@ -207,6 +216,7 @@ return [
     ],
     'push_subscribe' => [
         'label' => 'Benachrichtigungen abonnieren', 'icon' => 'bell-ringing', 'group' => 'Daten',
+        'description' => 'Besucher abonnieren Push-Mitteilungen zu neuen Einträgen.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Besucher abonnieren Push-Mitteilungen – zu neuen Einträgen einer Datentabelle (z. B. Aktuelles) oder zu mehreren Kanälen zur Auswahl. Erst erklären, dann fragt der Browser nach der Erlaubnis – nur nach Klick. Voraussetzung: Funktion „Push-Benachrichtigungen“; Kanäle unter Mitteilungen → Kanäle.',
         'fields' => [
@@ -224,6 +234,7 @@ return [
     ],
     'not_found' => [
         'label' => '404-Vorschläge', 'icon' => 'signpost', 'group' => 'Navigation',
+        'description' => 'Vorschläge, Suchfeld und Link zur Startseite für die Seite „Nicht gefunden (404)“.',
         'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift und Text, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite. Die Vorschläge erscheinen nur, wenn Besucher eine Adresse aufrufen, die es nicht gibt.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'width' => 'half', 'placeholder' => 'z. B. Fehler 404'],
@@ -236,6 +247,7 @@ return [
     // Diagramm (Core\Charts): Balken, Linie, Fläche, Ring, Torte – Werte von Hand oder aus einer angemeldeten Quelle; Engine austauschbar
     'chart' => [
         'label' => 'Diagramm', 'icon' => 'chart-bar', 'group' => 'Inhalt',
+        'description' => 'Zahlen als Balken-, Linien-, Ring- oder Tortendiagramm.',
         'nestable' => true,
         'help' => 'Zahlen als Balken, Linie, Fläche, Ring oder Torte – Farben aus dem Design, mit Tabelle für Screenreader und ohne JavaScript.',
         'fields' => [
@@ -255,6 +267,7 @@ return [
     ],
     'gallery' => [
         'label' => 'Bildergalerie', 'icon' => 'images', 'group' => 'Medien',
+        'description' => 'Bilder als Raster, Mosaik oder in Zeilen – per Klick groß ansehen.',
         'help' => 'Bilder als Raster, Mosaik oder in Zeilen – einzeln ausgewählt oder automatisch aus einer Sammlung. Ein Klick öffnet das Bild groß (Lightbox). Alt-Texte kommen aus der Mediathek.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -282,6 +295,7 @@ return [
     ],
     'live_gallery' => [
         'label' => 'Live-Galerie', 'icon' => 'broadcast', 'group' => 'Medien', 'live' => true,
+        'description' => 'Bilder, die bei Besuchern ohne Neuladen erscheinen, z. B. von einer Veranstaltung.',
         'help' => 'Bilder, die sich bei Besuchern ohne Neuladen aktualisieren – z. B. Fotos von einer Veranstaltung. Aus einer Sammlung: in der Mediathek in die Sammlung hochladen, und sie erscheinen nach wenigen Sekunden. Einzeln ausgewählt: neue Bilder erscheinen, sobald Sie die Seite veröffentlichen. Besucher können die Aktualisierung anhalten.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -313,6 +327,7 @@ return [
     ],
     'live_text' => [
         'label' => 'Live-Text (Ticker)', 'icon' => 'broadcast', 'group' => 'Daten', 'live' => true,
+        'description' => 'Meldungen, die sich ohne Neuladen aktualisieren – als Ticker oder aktuelle Meldung.',
         'help' => 'Meldungen, die sich bei Besuchern ohne Neuladen aktualisieren – als Ticker (neueste oben) oder nur die aktuelle Meldung, z. B. Spielstand, Wartezeit, Ablauf einer Veranstaltung. Direkt hier geschrieben (erscheinen beim Veröffentlichen der Seite) oder aus einer Datentabelle (erscheinen sofort, auch per API/MCP).',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -338,6 +353,7 @@ return [
     ],
     'slideshow' => [
         'label' => 'Slider', 'icon' => 'slideshow', 'group' => 'Medien',
+        'description' => 'Bilder oder Folien mit Text nacheinander – per Pfeil, Punkt oder Wischen.',
         'help' => 'Bilder oder Folien mit Text nacheinander – per Pfeil, Punkt, Tastatur oder Wischen. Automatisches Weiterblättern nur mit Pause-Schaltfläche und nie bei „Bewegung reduzieren“.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -373,6 +389,7 @@ return [
     ],
     'stack_cards' => [
         'label' => 'Stapelkarten', 'icon' => 'copy', 'group' => 'Inhalt',
+        'description' => 'Karten, die sich beim Scrollen übereinanderschieben.',
         'help' => 'Karten, die sich beim Scrollen übereinanderschieben. Auf kleinen Bildschirmen und bei „Bewegung reduzieren“ als einfache Liste.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -392,6 +409,7 @@ return [
     ],
     'people' => [
         'label' => 'Personen', 'icon' => 'users', 'group' => 'Inhalt',
+        'description' => 'Ausgewählte Personen aus der zentralen Personen-Tabelle mit Foto und Kontakt.',
         'help' => 'Ausgewählte Personen aus einer zentral gepflegten Personen-Tabelle – Foto, Name, E-Mail und Telefon kommen aus dem Eintrag, Funktion, Text und Foto lassen sich hier für diese Stelle überschreiben (z. B. „Ansprechperson Regionalgruppe“). Mit Visitenkarte zum Speichern (vCard), wenn die Tabelle den Schema-Typ „Person“ hat.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -416,6 +434,7 @@ return [
     ],
     'partners' => [
         'label' => 'Partner & Logos', 'icon' => 'handshake', 'group' => 'Medien',
+        'description' => 'Logos von Partnern oder Förderern, gleich groß, mit Kurzinfo per Klick.',
         'help' => 'Logos von Partnern, Kunden oder Förderern – optisch gleich groß, egal ob breiter Schriftzug oder quadratisches Zeichen. Ein Klick auf ein Logo zeigt Kurzinfo und Link. Einzeln gepflegt oder aus einer Datentabelle. Nur Logos verwenden, für die eine Freigabe vorliegt.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -478,6 +497,7 @@ return [
     ],
     'dials' => [
         'label' => 'Kennzahlen mit Skala', 'icon' => 'gauge', 'group' => 'Inhalt',
+        'description' => 'Bis zu sechs Kennzahlen als Rundinstrument mit Skala.',
         'help' => 'Bis zu sechs Kennzahlen als Rundinstrument: große Zahl, Bezeichnung und Zusatz. Der farbige Bogen zeigt einen Füllstand, „Zahl von Höchstwert“ oder einen Prozentwert – sonst bleibt die Skala neutral. Nur belegbare Zahlen verwenden.',
         'fields' => [
             ...\Core\MediaBlocks::headFields(),
@@ -505,6 +525,7 @@ return [
     // Glossar (Funktion „glossary“, Core\Glossary): Übersicht A–Z bzw. aufgerufener Begriff auf der Detailseiten-Vorlage
     'glossary' => [
         'label' => 'Glossar', 'icon' => 'book-open-text', 'group' => 'Daten',
+        'description' => 'Fachbegriffe von A bis Z mit Buchstaben und Suchfeld.',
         'help' => 'Fachbegriffe von A bis Z mit Buchstaben und Suchfeld – auf der Detailseiten-Vorlage des Glossars der aufgerufene Begriff. Die Begriffe pflegen Sie unter Glossar bzw. Daten → Glossar.',
         'fields' => [
             ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'width' => 'half'],

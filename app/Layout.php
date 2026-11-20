@@ -39,6 +39,7 @@ final class Layout
     {
         return [
             'label' => 'Layout (Spalten)', 'icon' => '▥', 'group' => 'Layout', 'core' => true, 'nestable' => false,
+            'description' => 'Blöcke in Spalten nebeneinander – Raster wählen, dann Blöcke in die Spalten setzen.',
             'help' => 'Blöcke in Spalten nebeneinander: Raster wählen, dann in jede Spalte Blöcke einfügen („+ Block in diese Spalte“). Auf schmalen Bildschirmen stehen die Spalten untereinander. Hintergrund, Abstände und Sprungmarke gelten für den ganzen Abschnitt.',
             'fields' => [
                 ['name' => 'preset', 'label' => 'Raster', 'type' => 'select', 'required' => true, 'default' => '1-1', 'options' => self::PRESET_LABELS, 'tiles' => self::PRESETS,

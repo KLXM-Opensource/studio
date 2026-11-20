@@ -163,4 +163,6 @@ return [
     'Adresse, Telefon und E-Mail kommen zentral aus „Website“ – im Editor als „zentral gepflegt“ markiert.' => 'Address, phone and e-mail come centrally from “Website” – marked as “centrally maintained” in the editor.',
     'YouTube/Vimeo mit Zwei-Klick-Lösung (Kern-Fragment) oder eigene MP4-Datei.' => 'YouTube/Vimeo with two-click consent (core fragment) or your own MP4 file.',
     'Für den Block „Karte“. Leer = keine Karte.' => 'For the “Map” block. Empty = no map.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Adresse, Telefon und E-Mail aus „Website“.' => 'Address, phone and email from “Website”.',
 ];

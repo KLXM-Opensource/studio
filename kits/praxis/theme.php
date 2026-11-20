@@ -388,6 +388,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Hero mit Themen', 'icon' => '★', 'group' => 'Kopf', 'raw' => true, 'background' => 'bordeaux',
+            'description' => 'Großer Einstieg mit wechselnden Themen und Kontaktkarte – Verlauf, Farbe, Bild oder Video.',
             'central' => 'Themen, Sprechzeiten und Kontaktkarte kommen aus den Praxisdaten.',
             'variants' => ['silk' => 'Animierter Verlauf (Standard)', 'color' => 'Ruhige Farbfläche', 'image' => 'Hintergrundbild', 'video' => 'Hintergrundvideo'],
             'fields' => [
@@ -404,11 +405,13 @@ return [
         ],
         'quick_contact' => [
             'label' => 'Schnellkontakt-Karte', 'icon' => '☎', 'group' => 'Praxisdaten', 'background' => 'bordeaux',
+            'description' => 'Überschrift mit der Kontaktkarte (Termin, Rezept, Überweisung) aus den Praxisdaten.',
             'central' => 'Inhalte aus den Praxisdaten.',
             'fields' => [...$headingOptional, ['name' => 'intro', 'label' => 'Einleitung', 'type' => 'textarea', 'rows' => 2]],
         ],
         'teaser_tiles' => [
             'label' => 'Teaser-Kacheln', 'icon' => '▦', 'group' => 'Navigation',
+            'description' => 'Bis zu vier Kacheln mit Titel und Link – schlicht oder mit Bild.',
             'variants' => ['plain' => 'Kacheln (Hero-Stil)', 'image' => 'Karten mit Bild (B06)'],
             'fields' => [
                 ['name' => 'intro', 'label' => 'Einleitung', 'type' => 'textarea', 'rows' => 3, 'max' => 400],
@@ -422,6 +425,7 @@ return [
         ],
         'text_image' => [
             'label' => 'Text + Bild', 'icon' => '◧', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'variants' => ['right' => 'Bild rechts (B01)', 'left' => 'Bild links (B02)'],
             'fields' => [
                 ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '4-3', 'width' => 'half',
@@ -442,6 +446,7 @@ return [
         ],
         'text_video' => [
             'label' => 'Text + Video', 'icon' => '▶', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Video – Video links oder rechts.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title_strong', 'description' => 'text'],
             'variants' => ['left' => 'Video links (B03)', 'right' => 'Video rechts'],
             'fields' => [
@@ -455,6 +460,7 @@ return [
         'video' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video (breit)', 'icon' => '▶', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title_strong', 'description' => 'caption'],
             'variants' => ['16-9' => 'Querformat 16:9', '4-3' => 'Format 4:3'],
             'help' => 'YouTube- und Vimeo-Videos werden blockiert, bis Besucher zustimmen. Das Vorschaubild wird datenschutzfreundlich vom Server geladen.',
@@ -468,6 +474,7 @@ return [
         'quote' => [
             'nestable' => ['inset'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Zitat', 'icon' => '❝', 'group' => 'Inhalt',
+            'description' => 'Zitat oder Stimmen von Kunden, Gästen oder Mitgliedern – mit Name und Funktion.',
             'variants' => ['inset' => 'Eingerückte Fläche (Praxis)', 'full' => 'Vollfläche (B04)'],
             'fields' => [
                 ['name' => 'text', 'label' => 'Zitat', 'type' => 'text', 'required' => true, 'max' => 120],
@@ -478,6 +485,7 @@ return [
         'text_columns' => [
             'nestable' => ['compact'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Überschrift + Text', 'icon' => '☰', 'group' => 'Inhalt',
+            'description' => 'Überschrift mit Text daneben oder darunter, auch in Spalten.',
             'variants' => ['stacked' => 'Überschrift links, Text rechts', 'columns' => 'Überschrift + Spalten (B05)', 'compact' => 'Kleine Überschrift (H3) + Text'],
             'fields' => [
                 ...$heading,
@@ -489,6 +497,7 @@ return [
         'richtext' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fließtext', 'icon' => '¶', 'group' => 'Inhalt',
+            'description' => 'Freier Text mit Zwischenüberschriften, Listen und Links.',
             'help' => 'Für normalen Fließtext mit Editor – z. B. Stellenanzeigen, Erläuterungen, Rechtstexte. Zwischenüberschriften (H2–H4), Listen, Links und Hinweis-Box über „Stil“ in der Formatierungsleiste. Die Überschrift oben ist optional.',
             'fields' => [
                 ...$headingOptional,
@@ -499,6 +508,7 @@ return [
         ],
         'services' => [
             'label' => 'Leistungen (nummeriert)', 'icon' => '№', 'group' => 'Inhalt',
+            'description' => 'Nummerierte Leistungen mit Titel und kurzem Text.',
             'fields' => [
                 ...$heading,
                 ['name' => 'intro', 'label' => 'Einleitung', 'type' => 'textarea', 'rows' => 3, 'max' => 400],
@@ -510,6 +520,7 @@ return [
         ],
         'doctors' => [
             'label' => 'Ärztinnen und Ärzte', 'icon' => '⚕', 'group' => 'Personen', 'background' => 'gray',
+            'description' => 'Ärztinnen und Ärzte mit Foto, Fachbezeichnung, Vorstellung und Sprechzeiten.',
             'fields' => [
                 ...$heading,
                 ['name' => 'intro', 'label' => 'Einleitung', 'type' => 'textarea', 'rows' => 3, 'max' => 400],
@@ -531,6 +542,7 @@ return [
         // Umstellen: php bin/console praxis:migrate-team [--dry-run]
         'team_photo' => [
             'label' => 'Teamfoto + Text (veraltet)', 'icon' => '◉', 'group' => 'Personen', 'insertable' => false,
+            'description' => 'Veraltet: Teamfoto mit Text – nicht mehr einfügbar.',
             'fields' => [
                 ['name' => 'image', 'label' => 'Teamfoto 2:1 (min. 2400 px)', 'type' => 'media'],
                 ...$heading,
@@ -545,6 +557,7 @@ return [
         ],
         'people' => [
             'label' => 'Personen kompakt (B13)', 'icon' => '☺', 'group' => 'Personen', 'background' => 'gray',
+            'description' => 'Kompakte Personenliste mit Foto, Name und Rolle.',
             'fields' => [
                 ...$headingOptional,
                 ['name' => 'items', 'label' => 'Personen', 'type' => 'repeater', 'item_label' => 'Person', 'title_field' => 'name', 'fields' => [
@@ -556,6 +569,7 @@ return [
         ],
         'image_wide' => [
             'label' => 'Bild breit (B07)', 'icon' => '▭', 'group' => 'Medien',
+            'description' => 'Ein Bild in voller Breite mit Bildunterschrift.',
             'variants' => ['21-9' => '21:9', '16-9' => '16:9'],
             'fields' => [
                 ['name' => 'image', 'label' => 'Bild (min. 2400 px)', 'type' => 'media'],
@@ -565,6 +579,7 @@ return [
         ],
         'steps' => [
             'label' => 'Ablauf in Schritten (B08)', 'icon' => '⇢', 'group' => 'Inhalt', 'background' => 'gray',
+            'description' => 'Ablauf in bis zu fünf nummerierten Schritten.',
             'fields' => [
                 ...$heading,
                 ['name' => 'items', 'label' => 'Schritte', 'type' => 'repeater', 'item_label' => 'Schritt', 'max_items' => 5, 'fields' => [
@@ -576,6 +591,7 @@ return [
         'accordion' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Akkordeon / FAQ (B09)', 'icon' => '≡', 'group' => 'Inhalt',
+            'description' => 'Aufklappbare Fragen und Antworten, optional mit Notfall-Box.',
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],   // schema.org FAQPage
             'fields' => [
                 ...$heading,
@@ -593,6 +609,7 @@ return [
         'notice' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Hinweisbox (B10)', 'icon' => '!', 'group' => 'Inhalt',
+            'description' => 'Bis zu drei Hinweise als „Info“ oder „Wichtig“.',
             'fields' => [
                 ['name' => 'items', 'label' => 'Hinweise', 'type' => 'repeater', 'item_label' => 'Hinweis', 'max_items' => 3, 'fields' => [
                     ['name' => 'style', 'label' => 'Stil', 'type' => 'select', 'required' => true, 'options' => ['info' => 'Info', 'important' => 'Wichtig']],
@@ -604,6 +621,7 @@ return [
         'cta' => [
             'nestable' => ['box'],   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Handlungsaufruf (B11)', 'icon' => '➜', 'group' => 'Inhalt', 'background' => 'dark',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             // Box: kompakt (kleine Überschrift, Text, Button) – z. B. im Block „Layout“ (⅓) neben einem Text; in einer Spalte nur als Box.
             // Mit eigener Fläche (In der Spalte → Eigene Fläche) bzw. Feld „surface“ farbige Karte, sonst hell mit Rahmen
             'variants' => ['band' => 'Band (ganze Breite)', 'box' => 'Box / Karte (z. B. neben einem Text)'],
@@ -624,6 +642,7 @@ return [
         'downloads' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads (B12)', 'icon' => '↓', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'PDFs lassen sich im Browser ansehen (Mozilla PDF.js) oder herunterladen. Größe, Typ und Seitenzahl erscheinen automatisch.',
             'fields' => [
                 ...$heading,
@@ -643,6 +662,7 @@ return [
         'job' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Stellenangebot (B14)', 'icon' => '✦', 'group' => 'Personen',
+            'description' => 'Stellenangebot mit Schlagworten, Beschreibung und Button zur Bewerbung.',
             'fields' => [
                 ['name' => 'tags', 'label' => 'Schlagworte (mit Komma getrennt)', 'type' => 'text', 'help' => 'Das erste Schlagwort wird farbig hervorgehoben.'],
                 ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'max' => 60],
@@ -653,6 +673,7 @@ return [
         ],
         'contact' => [
             'label' => 'Kontakt', 'icon' => '✉', 'group' => 'Praxisdaten',
+            'description' => 'Telefon, Sprechzeiten und Anfahrt aus den Praxisdaten, optional mit Karte.',
             'central' => 'Telefon, Sprechzeiten und Anfahrt kommen aus den Praxisdaten.',
             'fields' => [
                 ...$heading,
@@ -664,12 +685,14 @@ return [
         'map' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Karte', 'icon' => '⌖', 'group' => 'Praxisdaten',
+            'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$headingOptional, ...\Core\Maps::blockFields()],
         ],
         // Kern-Block „404-Vorschläge“ mit Überschrift im Praxis-Stil und Telefonzeile aus den Praxisdaten (blocks/not_found.php)
         'not_found' => [
             'label' => '404-Vorschläge', 'icon' => '?', 'group' => 'Navigation',
+            'description' => 'Vorschläge, Suchfeld und Link zur Startseite für die Seite „Nicht gefunden (404)“.',
             'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift, Telefonzeile aus den Praxisdaten, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite.',
             'fields' => [
                 ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'placeholder' => 'z. B. Fehler 404'],

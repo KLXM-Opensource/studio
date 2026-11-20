@@ -512,4 +512,8 @@ return [
     'Eingerückt – mit Linie, etwas kleiner' => 'Indented – with a line, slightly smaller',
     'Gruppiert – zweite Ebene als Zwischenüberschrift, dritte darunter' => 'Grouped – second level as subheading, third below',
     'Wie Unterseiten von Unterseiten im Aufklappmenü der Leiste erscheinen.' => 'How subpages of subpages appear in the dropdown of the bar.',
+    // Kurzbeschreibungen der Blöcke (Blockauswahl)
+    'Angebote oder Vorteile mit Symbol – auf einer Fläche, als Karten oder Liste.' => 'Offers or benefits with icons – on one surface, as cards or list.',
+    'Produkte oder Angebote als Karten – mit Bild auf einer Fläche oder mit Symbol.' => 'Products or offers as cards – with an image on a surface or with an icon.',
+    'Kontaktangaben mit Anfahrt, Öffnungs- und Saisonzeiten, Karte und optional einem Formular.' => 'Contact details with directions, opening and seasonal hours, map and an optional form.',
 ];

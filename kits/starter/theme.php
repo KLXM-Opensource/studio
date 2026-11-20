@@ -308,6 +308,7 @@ return [
     'blocks' => [
         'hero' => [
             'label' => 'Einstieg (Hero)', 'icon' => 'star', 'group' => 'Kopf',
+            'description' => 'Großer Seitenanfang mit Überschrift (H1), Text, Buttons und Bild – einmal pro Seite.',
             'help' => 'Große Überschrift der Seite (H1) – pro Seite genau einmal, als erster Block.',
             // Beispiel: eine Variante hinzufügen (hier „search“) – vier Stellen:
             //   1. Schlüssel + Bezeichnung in 'variants' (erscheint als Auswahl „Variante“ in der Seitenleiste)
@@ -336,6 +337,7 @@ return [
         'text' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Text', 'icon' => 'paragraph', 'group' => 'Inhalt',
+            'description' => 'Überschrift und Text mit Absätzen, Listen und Links.',
             'help' => 'Freier Text mit Zwischenüberschriften, Listen, Zitaten und Links.',
             'fields' => [
                 ...$head(false, false),
@@ -344,6 +346,7 @@ return [
         ],
         'text_image' => [
             'label' => 'Text + Bild', 'icon' => 'square-half', 'group' => 'Inhalt',
+            'description' => 'Text neben einem Bild – Bild links oder rechts.',
             'variants' => ['right' => 'Bild rechts', 'left' => 'Bild links'],
             'fields' => [
                 ...$head(true, false),
@@ -356,6 +359,7 @@ return [
         ],
         'cards' => [
             'label' => 'Karten', 'icon' => 'squares-four', 'group' => 'Inhalt',
+            'description' => 'Teaser-Karten mit Bild, Titel, Text und Link.',
             'help' => 'Leistungen, Angebote oder Themen als Raster – so viele Spalten, wie Platz ist.',
             'fields' => [
                 ...$head(),
@@ -370,6 +374,7 @@ return [
         ],
         'cta' => [
             'label' => 'Handlungsaufruf', 'icon' => 'megaphone', 'group' => 'Inhalt',
+            'description' => 'Auffälliger Abschnitt mit kurzer Botschaft und Button.',
             'background' => 'accent',   // Standard-Hintergrund beim Einfügen
             'fields' => [
                 ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'required' => true, 'max' => 110],
@@ -380,6 +385,7 @@ return [
         'faq' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Fragen & Antworten', 'icon' => 'question', 'group' => 'Inhalt',
+            'description' => 'Fragen mit aufklappbaren Antworten.',
             'help' => 'Aufklappbare Fragen (ohne JavaScript). Suchmaschinen erhalten sie als strukturierte Daten (FAQPage).',
             // JSON-LD je Block: Der Core (Core\StructuredData) baut daraus FAQPage – ohne eigenen Code
             'jsonld' => ['type' => 'faq', 'items' => 'items', 'question' => 'q', 'answer' => 'a'],
@@ -395,6 +401,7 @@ return [
         'video' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
             'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, keine Daten an Dritte bis zum Klick) oder eigene MP4-Datei mit Untertiteln.',
             'jsonld' => ['type' => 'video', 'url' => 'video_url', 'file' => 'video_file', 'poster' => 'poster', 'name' => 'title'],   // VideoObject (nur mit Vorschaubild)
             'fields' => [
@@ -408,6 +415,7 @@ return [
         'downloads' => [
             'nestable' => true,   // Block „Layout“: in einer Spalte erlaubt
             'label' => 'Downloads', 'icon' => 'download-simple', 'group' => 'Medien',
+            'description' => 'Dateien zum Ansehen und Herunterladen, z. B. PDFs – mit Größe und Typ.',
             'help' => 'Dateien zum Herunterladen; PDFs lassen sich zusätzlich im Browser ansehen (PDF.js vom eigenen Server).',
             'fields' => [
                 ...$head(false, false),
