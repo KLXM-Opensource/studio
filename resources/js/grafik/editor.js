@@ -114,13 +114,13 @@ export class GraphicEditor {
         <button type="button" class="adm-btn adm-btn--primary adm-btn--small" data-act="save" aria-keyshortcuts="${isMac ? 'Meta+S' : 'Control+S'}">${ico('floppy-disk')} ${esc(t('Speichern'))}</button>
       </header>
       <div class="ge-ctx" role="toolbar" aria-label="${esc(t('Kontextleiste'))}"></div>
-      <nav class="ge-tools" role="toolbar" aria-orientation="vertical" aria-label="${esc(t('Werkzeuge'))}"></nav>
-      <main class="ge-stage" tabindex="0" role="application" aria-roledescription="${esc(t('Zeichenfläche'))}" aria-label="${esc(t('Zeichenfläche'))}" aria-describedby="${this.uid}-hint">
+      <div class="ge-tools" role="toolbar" aria-orientation="vertical" aria-label="${esc(t('Werkzeuge'))}"></div>
+      <div class="ge-stage" tabindex="0" role="application" aria-roledescription="${esc(t('Zeichenfläche'))}" aria-label="${esc(t('Zeichenfläche'))}" aria-describedby="${this.uid}-hint">
         <div class="ge-paper"></div>
         <svg class="ge-ov" aria-hidden="true"></svg>
         <textarea class="ge-textedit is-bare" hidden aria-label="${esc(t('Text bearbeiten'))}" spellcheck="true"></textarea>
         <div class="ge-persona-area" hidden></div>
-      </main>
+      </div>
       <aside class="ge-side" aria-label="${esc(t('Bereiche'))}"></aside>
       <footer class="ge-status"><span class="ge-status__hint" id="${this.uid}-hint" aria-live="polite"></span><span class="ge-status__pos" data-pos></span><span class="ge-status__size" data-size></span></footer>
     </div>`);
@@ -860,6 +860,7 @@ export class GraphicEditor {
 
   // ---------------------------------------------------------------- Text
   textDown(e, p) {
+    e.preventDefault();   // kein mousedown-Fokus auf die Zeichenfläche – die Eingabe bekommt ihn
     const hit = this.hitAt(e)?.el;
     if (hit && hit.localName === 'text') return this.beginText(hit);
     const q = this.local(p);
@@ -887,7 +888,8 @@ export class GraphicEditor {
     place();
     ta.oninput = () => { setText(el, ta.value); place(); this.draw(); };
     ta.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Escape') { ev.preventDefault(); this.endText(); this.stage.focus(); } };
-    requestAnimationFrame(() => { ta.focus(); ta.select(); });
+    ta.focus(); ta.select();
+    requestAnimationFrame(() => { if (document.activeElement !== ta && this.textEl === el) { ta.focus(); ta.select(); } });
     this.draw();
   }
 

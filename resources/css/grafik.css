@@ -96,7 +96,7 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 
 /* Zeichenfläche */
 .ge-stage { grid-row: 3; position: relative; overflow: hidden; background: color-mix(in srgb, var(--adm-bg) 78%, var(--adm-ink) 8%); outline: none; touch-action: none; cursor: default }
-.ge-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--adm-a) }
+.ge-stage:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--adm-a) }
 .ge-paper { position: absolute; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 30px rgba(0, 0, 0, .14) }
 .ge[data-format=icon] .ge-paper { background: #fff repeating-conic-gradient(#F3F4F7 0 25%, #fff 0 50%) 0 0 / 16px 16px }
 .ge-ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible }
@@ -134,9 +134,11 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 /* Bereiche rechts */
 .ge-side { min-width: 0; grid-row: 3; grid-column: 3; display: flex; flex-direction: column; min-height: 0; background: var(--adm-card); border-left: 1px solid var(--adm-line); overflow: hidden }
 .ge-pg { display: flex; flex-direction: column; min-height: 0; border-bottom: 1px solid var(--adm-line) }
-.ge-pg--color { flex: 0 1 auto; max-height: 46% }
-.ge-pg--layers { flex: 1 1 0 }
-.ge-pg--transform { flex: 0 1 auto; max-height: 34% }
+.ge-pg--color { flex: 0 1 auto; max-height: 44% }
+.ge-pg--layers { flex: 1 1 0; min-height: 260px }
+.ge-pg--layers .ge-pg__panel:not([hidden]) { display: flex; flex-direction: column; flex: 1 }
+.ge-pg--layers .ge-layers { flex: 1; min-height: 80px; overflow-y: auto }
+.ge-pg--transform { flex: 0 1 auto; max-height: 28% }
 .ge-pg.is-folded { flex: 0 0 auto }
 .ge-pg.is-folded .ge-pg__panel { display: none }
 .ge-pg__tabs { display: flex; align-items: center; gap: 2px; padding: 6px 6px 0 8px; border-bottom: 1px solid var(--adm-line); background: var(--adm-fill) }
@@ -283,3 +285,4 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-newpv { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 16px; margin-bottom: 16px }
 .ge-newpv .f { margin: 0; min-width: 260px }
 .ge-newpv .f-help { flex-basis: 100%; margin: 0 }
+.ge-pg__list { display: flex; gap: 2px; min-width: 0; overflow-x: auto }

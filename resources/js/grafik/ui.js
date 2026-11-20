@@ -65,7 +65,7 @@ export function closeMenus() {
  */
 export function tabGroup(uid, tabs, onSelect) {
   const el = h(`<section class="ge-pg">
-    <div class="ge-pg__tabs" role="tablist">${tabs.map((tb, i) => `<button type="button" role="tab" id="${uid}-t-${tb.id}" aria-controls="${uid}-p-${tb.id}" aria-selected="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}">${esc(tb.label)}</button>`).join('')}
+    <div class="ge-pg__tabs"><div class="ge-pg__list" role="tablist">${tabs.map((tb, i) => `<button type="button" role="tab" id="${uid}-t-${tb.id}" aria-controls="${uid}-p-${tb.id}" aria-selected="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}">${esc(tb.label)}</button>`).join('')}</div>
       <button type="button" class="ge-pg__fold" aria-expanded="true" aria-label="${esc(t('Bereich ein-/ausklappen'))}" title="${esc(t('Bereich ein-/ausklappen'))}">${ico('caret-down')}</button></div>
     ${tabs.map((tb, i) => `<div class="ge-pg__panel" role="tabpanel" id="${uid}-p-${tb.id}" aria-labelledby="${uid}-t-${tb.id}" tabindex="0"${i ? ' hidden' : ''}></div>`).join('')}
   </section>`);
