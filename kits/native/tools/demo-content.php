@@ -2,12 +2,14 @@
 /**
  * Seite „Bausteine“ des Kits „NativeCSS“: jede Funktion dieses Kits mit frei erfundenen Inhalten – Einblend-Effekte (alle vier),
  * Hintergrundvideo im Einstieg, Morphing (Text + Bild und Video), Kennzahlen hochzählen, Logos-Laufband, Scrollytelling,
- * Zeitleiste, Kundenstimmen, Preistabelle, Vorher/Nachher, Video-Player mit Untertiteln und Kapiteln.
+ * Zeitleiste, Kundenstimmen, Preistabelle und Preisliste, Vorher/Nachher, Video-Player mit Untertiteln und Kapiteln, Audio-Playlist
+ * mit Kapiteln und Transkript, Karten mit Hervorhebung und Filter, Datenliste mit sortierbaren Spalten (Tabelle native_demo_kurse).
  *
  * Neue Websites: seed.php → 'after'. Bestehende Websites: CMS_SITE=… php kits/native/tools/demo.php [--force|--remove]
  * Medien (kits/native/demo/media, Schlagwort „native-demo“): Kurzfilm, Schleifen und Vorschaubilder aus der Demo von NativeCSS
  * (für NativeCSS erzeugt, MIT, © Thomas Skerbis / KLXM Crossmedia), Foto Wohnzimmer von Curtis Adams (Pexels-Lizenz,
  * https://www.pexels.com/photo/empty-living-room-6835103/; „Vorher“ dasselbe Foto, flau bearbeitet). Videos ohne Ton.
+ * Audio: zwei synthetische Klangproben (mit ffmpeg erzeugt, Akkord und Rauschen, ohne Sprache – frei, MIT wie das Kit).
  */
 declare(strict_types=1);
 
@@ -16,6 +18,7 @@ use Core\Media;
 use Core\MediaTracks;
 
 const NATIVE_DEMO_TAG = 'native-demo';
+const NATIVE_DEMO_TABLE = 'native_demo_kurse';
 
 /** Seite „Bausteine“ anlegen. $force: vorhandene Seite und Demo-Medien vorher entfernen. */
 function native_demo_install(bool $force = false, ?callable $log = null): bool
@@ -28,7 +31,7 @@ function native_demo_install(bool $force = false, ?callable $log = null): bool
     }
     native_demo_remove($log);
     $m = native_demo_media($log);
-    native_demo_page($m);
+    native_demo_page($m, native_demo_table($log));
     \Core\PageCache::clear();
     $log('Fertig: Seite „Bausteine“ mit ' . count(array_filter($m)) . ' Medien.');
     return true;
@@ -41,6 +44,7 @@ function native_demo_remove(?callable $log = null): void
     $ids = Demo::ids("SELECT id FROM pages WHERE path = 'bausteine' OR path LIKE 'bausteine/%'");
     Demo::deletePages($ids);
     Demo::deleteMedia(NATIVE_DEMO_TAG);
+    Demo::deleteTables(NATIVE_DEMO_TABLE);
     $log('Vorhandene Seite „Bausteine“ entfernt (' . count($ids) . ' Seiten).');
 }
 
@@ -53,6 +57,7 @@ function native_demo_media(callable $log): array
     $dir = dirname(__DIR__) . '/demo/media';
     $ncss = 'NativeCSS-Demo (MIT), © Thomas Skerbis / KLXM Crossmedia';
     $pexels = 'Foto: Curtis Adams, Pexels (Pexels-Lizenz), https://www.pexels.com/photo/empty-living-room-6835103/';
+    $synth = 'Synthetische Klangprobe (ffmpeg), ohne Sprache – für das Kit NativeCSS erzeugt (MIT)';
     $files = [
         'film' => ['ncss-film.mp4', 'Kurzfilm: Vier Stimmungen (ohne Ton)', '', $ncss, false],
         'film_poster' => ['ncss-film-poster.jpg', 'Kurzfilm: Vorschaubild', 'Gezeichnete Hügellandschaft im Morgenlicht mit Wolken und Nadelbäumen', $ncss, false],
@@ -63,6 +68,8 @@ function native_demo_media(callable $log): array
         'shapes' => ['ncss-formen-poster.jpg', 'Weiche Formen', 'Weiche, ineinanderfließende Farbflächen', $ncss, false],
         'before' => ['pexels-wohnzimmer-vorher.jpg', 'Wohnzimmer vorher (Foto: Curtis Adams, Pexels)', 'Leeres Wohnzimmer mit Deckenventilator und Holzboden, flau und gelbstichig', $pexels . ' – für das Beispiel flau bearbeitet', false],
         'after' => ['pexels-wohnzimmer-nachher.jpg', 'Wohnzimmer nachher (Foto: Curtis Adams, Pexels)', 'Helles, leeres Wohnzimmer mit Deckenventilator, Holzboden und großen Fenstern', $pexels, false],
+        'chord' => ['ncss-klang-akkord.mp3', 'Klangprobe: Akkord', '', $synth, false],
+        'surf' => ['ncss-klang-brandung.mp3', 'Klangprobe: Brandung', '', $synth, false],
     ];
     $out = [];
     foreach ($files as $key => [$file, $title, $alt, $credit, $decorative]) {
@@ -81,11 +88,60 @@ function native_demo_media(callable $log): array
             }
         }
     }
+    // Audiodateien: Kapitel (deutsch, englisch) und Transkript je Datei – der Audio-Player liest sie aus der Mediathek
+    $audio = [
+        'chord' => ['ncss-klang-akkord', 'Ohne Sprache. Ein ruhiger Dreiklang schwillt an, schwingt leise und klingt nach etwa 24 Sekunden aus.'],
+        'surf' => ['ncss-klang-brandung', 'Ohne Sprache. Weiches Rauschen, das wie Brandung an- und abschwillt – zwei Wellen, etwa 24 Sekunden.'],
+    ];
+    foreach ($audio as $key => [$base, $text]) {
+        $a = $out[$key] ? Media::find($out[$key]) : null;
+        if (!$a || !MediaTracks::supports($a)) continue;
+        try {
+            foreach (['de', 'en'] as $lang) {
+                MediaTracks::save($a, ['kind' => 'chapters', 'lang' => $lang, 'vtt' => (string) file_get_contents($dir . '/' . $base . '-kapitel.' . $lang . '.vtt'), 'status' => 'published', 'source' => 'upload']);
+            }
+            MediaTracks::setTranscript($a, 'de', $text, 'published', 'upload');
+        } catch (\Throwable $e) {
+            $log($base . ': ' . $e->getMessage());
+        }
+    }
     return $out;
 }
 
+/**
+ * Datentabelle „Kurse (Demo)“ für die Datenliste mit sortierbaren Spalten (Zahl, Datum, Text). Liefert den Handle oder ''.
+ */
+function native_demo_table(callable $log): string
+{
+    $t = Demo::table([
+        'handle' => NATIVE_DEMO_TABLE, 'name' => 'Kurse (Demo)', 'singular' => 'Kurs', 'icon' => 'calendar',
+        'description' => 'Beispiel-Tabelle der Seite „Bausteine“ (Kit NativeCSS) – frei erfundene Kurse für die sortierbare Tabelle.',
+        'fields' => [
+            ['name' => 'name', 'label' => 'Kurs', 'type' => 'text', 'required' => true, 'in_list' => true],
+            ['name' => 'start', 'label' => 'Beginn', 'type' => 'date', 'in_list' => true, 'width' => 'half'],
+            ['name' => 'plaetze', 'label' => 'Freie Plätze', 'type' => 'number', 'in_list' => true, 'width' => 'half'],
+            ['name' => 'preis', 'label' => 'Preis (€)', 'type' => 'number', 'in_list' => true, 'width' => 'half'],
+            ['name' => 'ort', 'label' => 'Ort', 'type' => 'text', 'in_list' => true, 'width' => 'half'],
+        ],
+        'settings' => ['title_field' => 'name', 'sort_field' => 'start', 'sort_dir' => 'asc', 'workflow' => 0],
+    ], $log);
+    if (!$t) return '';
+    $rows = [
+        ['Grundlagen Fotografie', '2027-01-14', 6, 120, 'Raum 2'],
+        ['Webseiten selbst pflegen', '2026-12-03', 2, 89, 'Raum 10'],
+        ['Barrierefreie Texte', '2027-02-09', 11, 65, 'Online'],
+        ['Videos fürs Handy', '2026-12-17', 0, 145, 'Studio'],
+        ['Newsletter, die gelesen werden', '2027-03-02', 8, 75, 'Raum 2'],
+    ];
+    foreach ($rows as [$name, $start, $free, $price, $place]) {
+        [, $err] = \Core\Data\Entries::save($t, null, ['name' => $name, 'start' => $start, 'plaetze' => $free, 'preis' => $price, 'ort' => $place, 'status' => 'published']);
+        if ($err) $log('Kurs ' . $name . ': ' . (is_array($err) ? implode(' ', $err) : (string) $err));
+    }
+    return (string) $t['handle'];
+}
+
 /** Seite „Bausteine“ (oberste Ebene, im Menü nach dem Showcase) */
-function native_demo_page(array $m): int
+function native_demo_page(array $m, string $table = ''): int
 {
     $B = Demo::block(...);
     $sort = (int) app()->db->fetchValue("SELECT COALESCE(MAX(sort), 0) + 1 FROM pages WHERE parent_id IS NULL");
@@ -115,7 +171,7 @@ function native_demo_page(array $m): int
             ['value' => '24/7', 'label' => 'erreichbar', 'text' => 'zählt nicht'],
         ]], ['reveal' => 'rise', 'background' => 'muted']),
         $B('compare', ['eyebrow' => 'Vorhang', 'title' => 'Vorher/Nachher mit Regler', 'intro' => 'Den Griff ziehen – oder mit Tab hinspringen und die Pfeiltasten nutzen. Der Abschnitt öffnet sich beim Hereinscrollen wie ein Vorhang.',
-            'before' => $m['before'], 'after' => $m['after'], 'label_before' => 'Vorher', 'label_after' => 'Nachher', 'ratio' => '3:2', 'caption' => $pexels], ['reveal' => 'curtain']),
+            'image_before' => $m['before'], 'image_after' => $m['after'], 'before_label' => 'Vorher', 'after_label' => 'Nachher', 'ratio' => '3:2', 'caption' => $pexels], ['reveal' => 'curtain']),
         $B('quote', ['variant' => 'grid', 'eyebrow' => 'Kreis', 'title' => 'Kundenstimmen', 'items' => [
             ['text' => 'Beispielzitat: Wir ändern Texte in Minuten – genau dort, wo Besucher sie lesen.', 'name' => 'Erika Musterfrau', 'role' => 'Online-Redaktion (fiktiv)', 'image' => null],
             ['text' => 'Beispielzitat: Das Menü fühlt sich auf dem Handy an wie eine App.', 'name' => 'Max Beispiel', 'role' => 'Agentur Muster (fiktiv)', 'image' => null],
@@ -151,12 +207,39 @@ function native_demo_page(array $m): int
         $B('video', ['variant' => 'wide', 'eyebrow' => 'Video-Player', 'title' => 'Eigenes Video mit Kapiteln und Untertiteln', 'intro' => '',
             'video_url' => '', 'video_file' => $m['film'], 'poster' => $m['film_poster'], 'ratio' => '16-9', 'text' => '',
             'caption' => $ncss . ' Untertitel (deutsch, englisch) und Kapitel pflegen Sie in der Mediathek an der Datei.'], ['anchor' => 'video', 'background' => 'muted']),
+        // Audio: Playlist mit Cover, Kapiteln und Transkript aus der Mediathek
+        $B('video', ['variant' => 'audio', 'eyebrow' => 'Audio-Player', 'title' => 'Playlist mit Kapiteln', 'intro' => 'Zwei Klangproben ohne Sprache: Kapitel und Transkript kommen je Datei aus der Mediathek.',
+            'video_url' => '', 'video_file' => null, 'poster' => $m['waves_poster'], 'ratio' => '16-9', 'text' => '', 'caption' => 'Synthetische Klangproben, für die Demo erzeugt.',
+            'audio' => [
+                ['file' => $m['chord'], 'title' => 'Akkord', 'artist' => 'Klangprobe (Demo)'],
+                ['file' => $m['surf'], 'title' => 'Brandung', 'artist' => 'Klangprobe (Demo)'],
+            ]], ['anchor' => 'audio']),
+        // Karten: Hervorheben und Filter nach Kategorie
+        $B('cards', ['variant' => 'image', 'eyebrow' => 'Filter', 'title' => 'Karten nach Kategorie filtern', 'intro' => 'Die Schaltflächen sind Optionsfelder: gefiltert wird per CSS, die Trefferzahl sagt ein kleines Skript an.',
+            'size' => 's', 'ratio' => '3:2', 'filter' => true, 'more_label' => '', 'more_link' => '', 'items' => [
+                ['image' => $m['film_poster'], 'eyebrow' => 'Medien', 'title' => 'Video-Player', 'text' => 'Kapitel und Untertitel aus der Mediathek.', 'link_label' => '', 'link' => '#video', 'featured' => true, 'badge' => '', 'category' => 'Medien'],
+                ['image' => $m['waves_poster'], 'eyebrow' => 'Medien', 'title' => 'Audio-Player', 'text' => 'Playlist mit Cover und Kapiteln.', 'link_label' => '', 'link' => '#audio', 'featured' => false, 'badge' => '', 'category' => 'Medien'],
+                ['image' => $m['aurora_poster'], 'eyebrow' => 'Bewegung', 'title' => 'Einblend-Effekte', 'text' => 'Vier Arten je Abschnitt.', 'link_label' => '', 'link' => '#effekte', 'featured' => false, 'badge' => '', 'category' => 'Bewegung'],
+                ['image' => $m['shapes'], 'eyebrow' => 'Bewegung', 'title' => 'Morphing', 'text' => 'Bild und Video rücken beim Scrollen zur Seite.', 'link_label' => '', 'link' => '', 'featured' => false, 'badge' => '', 'category' => 'Bewegung'],
+                ['image' => $m['after'], 'eyebrow' => 'Inhalt', 'title' => 'Preisliste', 'text' => 'Name, Führungspunkte, Preis.', 'link_label' => '', 'link' => '#preise', 'featured' => false, 'badge' => '', 'category' => 'Inhalt'],
+                ['image' => $m['before'], 'eyebrow' => 'Inhalt', 'title' => 'Sortierbare Tabelle', 'text' => 'Spaltenkopf anklicken – Zahl, Datum oder Text.', 'link_label' => '', 'link' => '#tabelle', 'featured' => true, 'badge' => 'Neu', 'category' => 'Inhalt, Medien'],
+            ]]),
         // Preistabelle
         $B('pricing', ['variant' => 'cards', 'eyebrow' => 'Pakete', 'title' => 'Preistabelle', 'intro' => 'Gleich hohe Karten, Zeilen bündig – eine Zeile mit „–“ gilt als nicht enthalten.', 'note' => 'Alle Preise sind Beispielwerte (Demo).', 'rows' => [], 'items' => [
             ['name' => 'Start', 'badge' => '', 'price' => '490 €', 'period' => 'einmalig', 'text' => 'Für kleine Auftritte.', 'features' => "Bis 5 Seiten\nKit NativeCSS\n– Mehrsprachigkeit", 'highlight' => false, 'button_label' => 'Anfragen', 'button_link' => '/kontakt'],
             ['name' => 'Plus', 'badge' => 'Empfohlen', 'price' => '1.290 €', 'period' => 'einmalig', 'text' => 'Für Betriebe und Vereine.', 'features' => "Bis 20 Seiten\nKit NativeCSS\nMehrsprachigkeit", 'highlight' => true, 'button_label' => 'Anfragen', 'button_link' => '/kontakt'],
             ['name' => 'Pflege', 'badge' => '', 'price' => '49 €', 'period' => 'pro Monat', 'text' => 'Wir halten alles aktuell.', 'features' => "Updates\nSicherung\nHilfe per E-Mail", 'highlight' => false, 'button_label' => 'Anfragen', 'button_link' => '/kontakt'],
         ]]),
+        // Preisliste (Speisekarte)
+        $B('pricing', ['variant' => 'list', 'eyebrow' => 'Preisliste', 'title' => 'Kurse und Preise', 'intro' => 'Name, Führungspunkte, Preis – und eine Zeile Beschreibung.', 'note' => 'Alle Preise sind Beispielwerte (Demo).', 'rows' => [], 'items' => [], 'entries' => [
+            ['name' => 'Schnupperstunde', 'price' => '15 €', 'text' => 'Einmal reinschauen, ohne Anmeldung.'],
+            ['name' => 'Kurs, vier Abende', 'price' => '89 €', 'text' => 'Mit Unterlagen zum Mitnehmen.'],
+            ['name' => 'Einzelberatung (60 Minuten)', 'price' => '60 €', 'text' => ''],
+            ['name' => 'Gruppe bis acht Personen', 'price' => 'ab 240 €', 'text' => 'Termin nach Absprache.'],
+        ]], ['anchor' => 'preise', 'background' => 'muted']),
+        ...($table !== '' ? [$B('data_list', ['eyebrow' => 'Datenliste', 'title' => 'Kurse – Spalten sortierbar', 'intro' => 'Einen Spaltenkopf anklicken oder mit der Tastatur auslösen: sortiert nach Zahl, Datum oder Text. Das Skript kommt aus dem Kern.',
+            'table' => $table, 'fields' => ["$table._title", "$table.start", "$table.plaetze", "$table.preis", "$table.ort"], 'layout' => 'table', 'table_sort' => true,
+            'limit' => 20, 'sort_field' => "$table.start", 'sort_dir' => 'asc', 'link_detail' => false], ['anchor' => 'tabelle'])] : []),
         $B('faq', ['variant' => 'stacked', 'eyebrow' => 'FAQ', 'title' => 'Fragen zum Kit', 'intro' => '', 'items' => [
             ['q' => 'Brauche ich JavaScript?', 'a' => '<p>Menü, Aufklappen, Morphing und Einblenden funktionieren mit nativem HTML und CSS. Kleine Skripte ergänzen nur – etwa das Hochzählen oder den Video-Player – und laden nur auf Seiten, die sie brauchen.</p>'],
             ['q' => 'Kann ich Farben und Schriften ändern?', 'a' => '<p>Ja – unter Verwaltung → Design, mit den Vorlagen „NativeCSS“ und „NativeCSS · Graphit“ und allen Vorlagen von Fluid.</p>'],
