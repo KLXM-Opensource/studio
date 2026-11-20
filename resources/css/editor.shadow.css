@@ -396,11 +396,17 @@ button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 .cms-addpop[data-view=tiles] .cms-addpop__txt{padding:0 4px}
 .cms-addpop[data-view=tiles] .cms-addpop__label{font-weight:700;font-size:13.5px}
 .cms-addpop[data-view=tiles] .cms-addpop__desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Kacheln: Favoriten, zuletzt und häufig verwendet als kompakte Reihe (die Gruppen mit Vorschau bleiben sichtbar) */
+.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__grid{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px}
+.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__item{flex-direction:row;align-items:center;gap:6px;min-height:32px;padding:0 10px 0 6px;border-radius:999px}
+.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__item>.cms-addpop__ico{display:inline-flex}
+.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__pv,.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__desc{display:none}
+.cms-addpop[data-view=tiles] .cms-addpop__sec--pin .cms-addpop__label{font-weight:600;font-size:13px}
 /* Liste mit großer Vorschau */
 .cms-addpop__detail{display:none}
 .cms-addpop[data-view=split] .cms-addpop__list{flex:0 0 min(270px,45%)}
 .cms-addpop[data-view=split] .cms-addpop__detail{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;overflow:auto;padding:2px 2px 4px 12px;border-left:1px solid var(--adm-line,#E6E6E9)}
-.cms-addpop__big{display:grid;place-items:center;aspect-ratio:16/10;border-radius:10px;background:var(--pv-bg);overflow:hidden}
+.cms-addpop__big{flex:none;display:grid;place-items:center;aspect-ratio:16/10;max-height:200px;border-radius:10px;background:var(--pv-bg);overflow:hidden}
 .cms-addpop__big img{display:block;width:100%;height:100%;object-fit:contain}
 .cms-addpop__big>svg,.cms-addpop__big>.ico--glyph{width:52px;height:52px;font-size:44px;opacity:.7}
 .cms-addpop__dgroup{margin:6px 0 0;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--adm-t3,#5A6461)}

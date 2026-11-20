@@ -24,6 +24,7 @@ use Core\UiPrefs;
  *   3. Kern:                                    resources/img/previews/{name}.svg → public/assets/img/previews/
  * {name} ist der Blocktyp (bzw. 'preview'); gleichbedeutende Namen teilen sich die Kern-Vorschau (ALIASES).
  * Optional je Variante: {name}--{variante}.svg (z. B. hero--compact.svg) – fehlt sie, gilt die des Blocks.
+ * Je Website übersteuerbar (Einstellung 'block_previews', Filter 'blocks.previews') – siehe overrides().
  */
 final class Picker
 {
@@ -82,7 +83,27 @@ final class Picker
                 }
             }
         }
-        return $out;
+        return self::overrides($out, $theme);
+    }
+
+    /**
+     * Andockstelle: Vorschauen je Website übersteuern die des Kits bzw. Kerns. Heute zwei Quellen, beide optional:
+     *   - Website-Einstellung 'block_previews' => [typ => adresse] (z. B. später ein Mediathek-Bild oder eine Grafik aus einem
+     *     SVG-Editor; eine Oberfläche dafür gibt es noch nicht),
+     *   - Filter 'blocks.previews' für Erweiterungen (Extension::filter): bekommt und liefert die ganze Liste.
+     * Adressen müssen relativ zur Installation sein („/…“, kein „//“), damit keine fremden Quellen nachgeladen werden.
+     * @param array<string, array{url: string, variants: array<string, string>}> $out
+     * @return array<string, array{url: string, variants: array<string, string>}>
+     */
+    private static function overrides(array $out, Theme $theme): array
+    {
+        $site = app()->settings->get('block_previews', []);
+        foreach (is_array($site) ? $site : [] as $type => $url) {
+            if (is_string($url) && str_starts_with($url, '/') && !str_starts_with($url, '//')) $out[(string) $type] = ['url' => $url, 'variants' => []];
+        }
+        $f = \Core\Extensions::filter('blocks.previews', $out, ['kit' => $theme->name]);
+        if (!is_array($f)) return $out;
+        return array_filter($f, fn($p) => is_array($p) && is_string($p['url'] ?? null) && str_starts_with($p['url'], '/') && !str_starts_with($p['url'], '//'));
     }
 
     private static function url(string $dir, string $base, string $name): string

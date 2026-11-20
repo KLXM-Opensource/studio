@@ -153,8 +153,12 @@ export function createBlockPicker({ cfg, host, blockIcon, clipboard, onInsert, s
   };
   const place = () => {
     if (el.hidden || !opener) return;
+    // Nicht unter die feste Werkzeugleiste oben (.cms-bar-host); passt die Auswahl weder unter noch über den Knopf, wird sie niedriger
+    const bar = document.querySelector('body>.cms-bar-host')?.getBoundingClientRect(), min = Math.max(8, bar && bar.top < 40 ? bar.bottom + 8 : 8);
+    el.style.maxHeight = '';
+    el.style.maxHeight = Math.min(el.offsetHeight, innerHeight - min - 8) + 'px';
     const r = opener.getBoundingClientRect(), h = el.offsetHeight, w = el.offsetWidth;
-    const top = r.bottom + 8 + h <= innerHeight - 8 ? r.bottom + 8 : Math.max(8, r.top - 8 - h);
+    const top = r.bottom + 8 + h <= innerHeight - 8 ? r.bottom + 8 : r.top - 8 - h >= min ? r.top - 8 - h : Math.max(min, Math.min(r.bottom + 8, innerHeight - 8 - h));
     el.style.top = top + 'px';
     el.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8)) + 'px';
   };
