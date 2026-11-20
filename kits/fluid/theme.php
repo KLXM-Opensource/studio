@@ -113,7 +113,7 @@ return [
     // Optionen je Fragment: 'fragments' => ['brand' => ['mark' => 'dot'], 'video-embed' => ['ratio_class' => 'ratio-']]
     'conditional_css' => [
         'css/hero-x.css' => ['hero:fullbleed', 'hero:cards', 'hero:type'],
-        'css/hx-scale.css' => ['hero:scale'], 'css/hx-collage.css' => ['hero:collage'], 'css/hx-compare.css' => ['hero:compare'],   // neue Einstiege
+        'css/hx-scale.css' => ['hero:scale'], 'css/hx-collage.css' => ['hero:collage'], 'css/hx-compare.css' => ['hero:compare', 'compare'],   // neue Einstiege; Block „Vorher/Nachher“
         'css/prose.css' => ['richtext', 'tabs', 'faq', 'media_text', '@rich'],   // @rich: Rich-Text-Stile in anderen Blöcken (Core\Sanitizer::styled)
         'css/b-article.css' => ['richtext:article', 'richtext:columns'],
         'css/b-features.css' => ['features'],
@@ -122,16 +122,20 @@ return [
         'css/reel.css' => ['cards:reel', 'quote:reel'],
         'css/b-bento.css' => ['bento'],
         'css/b-cards.css' => ['cards'],
+        // „Filter nach Kategorie“ (Karten): Leiste aus Optionsfeldern, Filtern per CSS, Trefferzahl per Skript – meldet fluid_filter()
+        'css/filter.css' => ['@filter'], 'js/filter.js' => ['@filter'],
         'css/b-logos.css' => ['logos'],
         'css/b-stats.css' => ['stats'],
         'css/b-quote.css' => ['quote'],
         'css/b-steps.css' => ['steps'],
         'css/b-pricing.css' => ['pricing'],
+        'css/b-pricelist.css' => ['pricing:list'],   // Pakete → „Preisliste (Speisekarte)“
         'css/b-faq.css' => ['faq'],
         'css/b-tabs.css' => ['tabs'],
         'css/b-scrolly.css' => ['scrolly'],
         'css/b-contact.css' => ['contact', 'map'],
         'css/b-video.css' => ['video'],
+        'css/b-audio.css' => ['video:audio'],   // Video & Audio → „Audio (Podcast, Musik)“
         'css/b-downloads.css' => ['downloads'],
         'js/downloads.js' => ['downloads'],   // Suche, Kacheln, Schlagworte (Variante „Liste“)
         'css/dataform.css' => ['contact'],
@@ -380,7 +384,14 @@ return [
                     ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'required' => true, 'max' => 90, 'width' => 'half'],
                     ['name' => 'text', 'label' => 'Text', 'type' => 'textarea', 'rows' => 2, 'max' => 240],
                     ...$link(),
+                    ['name' => 'featured', 'label' => 'Hervorheben', 'type' => 'bool', 'default' => false, 'width' => 'half',
+                        'help' => 'Rahmen in der Akzentfarbe und ein Hinweis an der Ecke.'],
+                    ['name' => 'badge', 'label' => 'Hinweis an der Ecke (bei „Hervorheben“)', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'Empfohlen'],
+                    ['name' => 'category', 'label' => 'Kategorie (für den Filter, optional)', 'type' => 'text', 'max' => 80,
+                        'placeholder' => 'z. B. Kurse, Beratung', 'help' => 'Mehrere mit Komma trennen. Wirkt nur mit „Filter nach Kategorie“ am Block.'],
                 ]],
+                ['name' => 'filter', 'label' => 'Filter nach Kategorie', 'type' => 'bool', 'default' => false, 'variants' => ['image', 'overlay', 'horizontal'],
+                    'help' => 'Schaltflächen über den Karten aus den Kategorien der Karten (ab zwei verschiedenen, bis zu zwölf). Besucher sehen dann nur die Karten der gewählten Kategorie.'],
                 ['name' => 'more_label', 'label' => 'Button unter den Karten (optional)', 'type' => 'text', 'max' => 32, 'width' => 'half'],
                 ['name' => 'more_link', 'label' => 'Button-Link', 'type' => 'link', 'width' => 'half'],
             ],
@@ -455,10 +466,11 @@ return [
             'label' => 'Pakete / Vergleich', 'icon' => 'currency-eur', 'group' => 'Inhalt',
             'description' => 'Pakete oder Preise nebeneinander zum Vergleichen.',
             'help' => 'Pakete als Karten oder als Vergleichstabelle. Ein Paket lässt sich hervorheben. Nur verbindliche, aktuelle Preise angeben.',
-            'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle'],
+            'variants' => ['cards' => 'Karten', 'table' => 'Vergleichstabelle', 'list' => 'Preisliste (Speisekarte)'],
+            'variant_help' => ['list' => 'Viele Positionen mit Preis untereinander – Speisekarte, Preisliste, Gebühren: Name, Führungspunkte, Preis, kurze Beschreibung.'],
             'fields' => [
                 ...$head(),
-                ['name' => 'items', 'label' => 'Pakete', 'type' => 'repeater', 'item_label' => 'Paket', 'title_field' => 'name', 'max_items' => 4, 'fields' => [
+                ['name' => 'items', 'label' => 'Pakete', 'type' => 'repeater', 'item_label' => 'Paket', 'title_field' => 'name', 'max_items' => 4, 'variants' => ['cards', 'table'], 'fields' => [
                     ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'max' => 40, 'width' => 'half'],
                     ['name' => 'badge', 'label' => 'Etikett (optional)', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. Empfohlen'],
                     ['name' => 'price', 'label' => 'Preis', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. ab 490 €'],
@@ -469,10 +481,15 @@ return [
                     ['name' => 'button_label', 'label' => 'Button – Beschriftung', 'type' => 'text', 'max' => 32, 'width' => 'half'],
                     ['name' => 'button_link', 'label' => 'Button – Link', 'type' => 'link', 'width' => 'half'],
                 ]],
-                ['name' => 'rows', 'label' => 'Vergleichszeilen (bei „Vergleichstabelle“)', 'type' => 'repeater', 'item_label' => 'Zeile', 'title_field' => 'label', 'max_items' => 20, 'fields' => [
+                ['name' => 'rows', 'label' => 'Vergleichszeilen (bei „Vergleichstabelle“)', 'type' => 'repeater', 'item_label' => 'Zeile', 'title_field' => 'label', 'max_items' => 20, 'variants' => ['table'], 'fields' => [
                     ['name' => 'label', 'label' => 'Merkmal', 'type' => 'text', 'required' => true, 'max' => 80],
                     ['name' => 'values', 'label' => 'Werte je Paket (eine Zeile pro Paket, in Reihenfolge)', 'type' => 'textarea', 'rows' => 3,
                         'help' => '„ja“ oder „✓“ = enthalten, „nein“ oder „–“ = nicht enthalten, sonst freier Text (z. B. „3 Termine“).'],
+                ]],
+                ['name' => 'entries', 'label' => 'Preisliste', 'type' => 'repeater', 'item_label' => 'Eintrag', 'title_field' => 'name', 'max_items' => 80, 'variants' => ['list'], 'fields' => [
+                    ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'max' => 80, 'width' => 'half'],
+                    ['name' => 'price', 'label' => 'Preis', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'z. B. 12,50 €'],
+                    ['name' => 'text', 'label' => 'Beschreibung (optional)', 'type' => 'text', 'max' => 200],
                 ]],
                 ['name' => 'note', 'label' => 'Hinweis unter den Paketen (optional)', 'type' => 'text', 'max' => 200, 'placeholder' => 'z. B. Alle Preise inkl. MwSt.'],
             ],
@@ -537,19 +554,31 @@ return [
             ],
         ],
         'video' => [
-            'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
-            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek – externe Videos laden erst nach Klick.',
-            'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
-            'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)'],
+            'label' => 'Video & Audio', 'icon' => 'play-circle', 'group' => 'Medien',
+            'description' => 'Video von YouTube, Vimeo oder aus der Mediathek, oder Audio als Podcast oder Playlist – externe Videos laden erst nach Klick.',
+            'help' => 'Video: YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek. Audio: Podcast, Interview oder Musik aus der Mediathek, mehrere Dateien als Playlist.',
+            'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)', 'audio' => 'Audio (Podcast, Musik)'],
+            'variant_help' => [
+                'audio' => 'Eine oder mehrere Audiodateien (MP3, M4A) mit dem Player des Browsers. Ab zwei Dateien entsteht eine Playlist. Kapitel, Untertitel und Transkript pflegen Sie in der Mediathek an der Datei.',
+            ],
+            // Felder für Video fehlen bei „Audio“; „morph“ ergänzt ggf. ein Kind-Kit (block_extend) und nutzt die Videodatei
             'fields' => [
                 ...$head(false),
-                ['name' => 'video_url', 'label' => 'YouTube- oder Vimeo-Link', 'type' => 'url', 'width' => 'half'],
-                ['name' => 'video_file', 'label' => 'oder eigene MP4-Datei', 'type' => 'file', 'width' => 'half',
+                ['name' => 'video_url', 'label' => 'YouTube- oder Vimeo-Link', 'type' => 'url', 'width' => 'half', 'variants' => ['wide', 'text', 'cinema']],
+                ['name' => 'video_file', 'label' => 'oder eigene MP4-Datei', 'type' => 'file', 'width' => 'half', 'variants' => ['wide', 'text', 'cinema', 'morph'],
                     'help' => 'Untertitel und Transkript pflegen Sie in der Mediathek an der Datei.'],
-                ['name' => 'poster', 'label' => 'Eigenes Vorschaubild (optional)', 'type' => 'media', 'width' => 'half'],
-                ['name' => 'ratio', 'label' => 'Format', 'type' => 'select', 'required' => true, 'default' => '16-9', 'width' => 'half', 'options' => ['16-9' => '16:9', '4-3' => '4:3', '21-9' => '21:9']],
+                ['name' => 'poster', 'label' => 'Eigenes Vorschaubild bzw. Cover (optional)', 'type' => 'media', 'width' => 'half',
+                    'help' => 'Bei Audio: quadratisches Cover neben dem Player.'],
+                ['name' => 'ratio', 'label' => 'Format', 'type' => 'select', 'required' => true, 'default' => '16-9', 'width' => 'half', 'options' => ['16-9' => '16:9', '4-3' => '4:3', '21-9' => '21:9'], 'variants' => ['wide', 'text', 'cinema', 'morph']],
+                ['name' => 'audio', 'label' => 'Audiodateien', 'type' => 'repeater', 'item_label' => 'Audiodatei', 'title_field' => 'title', 'max_items' => 20, 'pick_many' => 'file', 'variants' => ['audio'],
+                    'help' => 'Die erste spielt zuerst; ab zwei Dateien entsteht eine Playlist. Jede Datei braucht einen verständlichen Titel. Kapitel, Untertitel und Transkript („Transkript anzeigen“) kommen aus der Mediathek.',
+                    'fields' => [
+                        ['name' => 'file', 'label' => 'Audiodatei (MP3, M4A)', 'type' => 'file', 'required' => true],
+                        ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'max' => 90, 'width' => 'half', 'placeholder' => 'sonst der Titel in der Mediathek'],
+                        ['name' => 'artist', 'label' => 'Sprecher oder Interpret (optional)', 'type' => 'text', 'max' => 90, 'width' => 'half'],
+                    ]],
                 ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'max' => 200],
-                ['name' => 'text', 'label' => 'Text daneben (bei „Mit Text daneben“)', 'type' => 'richtext'],
+                ['name' => 'text', 'label' => 'Text daneben (bei „Mit Text daneben“)', 'type' => 'richtext', 'variants' => ['text', 'morph']],
             ],
         ],
         'contact' => [
@@ -600,6 +629,18 @@ return [
             'description' => 'Interaktive Karte mit dem Standort – ohne Cookies.',
             'help' => 'Interaktive Karte (OpenStreetMap-Daten über den eigenen Server – ohne Einwilligung, ohne Cookies).',
             'fields' => [...$head(false, false), ...\Core\Maps::blockFields()],
+        ],
+        // Vorher/Nachher als eigener Block (wie der Einstieg „Vorher/Nachher“: Core\Blocks\Hero::compare, gleiche Feldnamen)
+        'compare' => [
+            'label' => 'Vorher/Nachher', 'icon' => 'square-half', 'group' => 'Medien',
+            'description' => 'Zwei Bilder mit Regler – zeigt Umbau, Renovierung oder Bildbearbeitung im direkten Vergleich.',
+            'help' => 'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.',
+            'fields' => [
+                ...$head(false),
+                ...\Core\Blocks\Hero::fields('compare', []),
+                ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '16:9', 'width' => 'half', 'options' => $ratios],
+                ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'max' => 200, 'width' => 'half'],
+            ],
         ],
     ],
 ];

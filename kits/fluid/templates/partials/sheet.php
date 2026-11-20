@@ -21,5 +21,7 @@ $hasSheet = $menu || $langs || $cta || $searchMenu !== '';
   <?php if ($cta): ?><a class="btn btn--primary mnav__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?></a><?php endif; ?>
   <?php if (($quick = fluid_quick_contact('quick mnav__quick')) !== ''): ?><div class="mnav__block"><p class="mnav__label"><?= e(lt('Direkter Kontakt')) ?></p><?= $quick ?></div><?php endif; ?>
   <?php if ($langs): ?><div class="mnav__block"><p class="mnav__label" id="mnav-lang"><?= e(lt('Sprache')) ?></p><?= app()->theme->partial('langswitch', ['langs' => $langs, 'class' => 'langswitch--wide', 'full' => true]) ?></div><?php endif; ?>
+  <?php // Darstellungs-Knopf für Besucher: bei „Seitenleiste“ (ohne Banner) steht er schmal nur hier – sonst immer im Kopf
+  if (design('header') === 'sidebar' && !in_array((string) design('side_banner'), ['band', 'image'], true) && ($prefs = fluid_prefs('mnav__prefs')) !== ''): ?><div class="mnav__block"><?= $prefs ?></div><?php endif; ?>
 </div>
 <?php endif; ?>

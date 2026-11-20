@@ -412,4 +412,9 @@ return [
     'Zuletzt geändert' => 'Last modified',
     'Diese Seite ist für Suchmaschinen gedacht.' => 'This page is meant for search engines.',
     'Sie sind abgemeldet.' => 'You are signed out.',
+    // Datenliste: Spalten sortierbar (resources/js/table-sort.js)
+    'Tabelle' => 'Table',
+    'Sortiert nach {column}, {direction}' => 'Sorted by {column}, {direction}',
+    'aufsteigend' => 'ascending',
+    'absteigend' => 'descending',
 ];

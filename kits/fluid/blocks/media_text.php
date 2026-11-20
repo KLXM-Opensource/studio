@@ -5,6 +5,8 @@
  * @var \Core\Block $b  @var array $d
  */
 $v = $b->variant() ?: 'auto';
+// Unbekannte Variante (z. B. „morph“ aus einem Kind-Kit, gespeichert vor einem Kit-Wechsel): wie „Bild rechts“
+if (!in_array($v, ['auto', 'right', 'left', 'split', 'overlap'], true)) $v = 'right';
 $ratio = (string) ($d['ratio'] ?? '') ?: '4:3';
 $side = $v;
 // Abwechselnd („auto“, ebenso „split“): Position in einer Folge gleichartiger Blöcke zählen

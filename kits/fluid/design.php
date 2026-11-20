@@ -255,6 +255,8 @@ return [
                 'help' => 'Abschnitte in Akzent- oder zweiter Markenfarbe: im Dunkelmodus als dunkle, farbig getönte Fläche (blendet nicht) oder in der vollen Farbe. Nur mit „Dunkles Farbschema“.'],
             ['name' => 'dark_toggle', 'markup' => true, 'label' => 'Hell/Dunkel-Schalter im Kopfbereich', 'type' => 'bool', 'class' => 'has-scheme-toggle', 'default' => false,
                 'help' => 'Besucher wechseln selbst zwischen heller und dunkler Darstellung (überstimmt die Geräte-Einstellung, merkt sich der Browser). Nur mit „Dunkles Farbschema“.'],
+            ['name' => 'visitor_prefs', 'markup' => true, 'label' => 'Darstellungs-Knopf für Besucher', 'type' => 'bool', 'default' => false,
+                'help' => 'Ein Knopf „Darstellung“ im Kopf: Besucher wählen Farbschema, Kontrast, Bewegung, Schriftgröße, Textabstände, unterstrichene Links und einen deutlicheren Fokus-Rahmen – gespeichert nur in ihrem Browser. Ohne Wahl gelten die Einstellungen ihres Geräts. Ersetzt keine barrierefreie Gestaltung, ergänzt sie. Mit Hell/Dunkel-Schalter entfällt dort das Farbschema.'],
         ]],
     ],
 

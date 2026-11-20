@@ -2,6 +2,8 @@
 /**
  * Karten: image (Bild oben) · overlay (Text auf dem Bild) · horizontal (quer – jede Karte ist ein Container und stellt sich
  * erst ab ~30 rem Kartenbreite quer) · reel (wischbares Band mit scroll-snap, ohne Bibliothek; js/reel.js ergänzt Pfeile).
+ * Je Karte „Hervorheben“ (featured, Hinweis badge an der Ecke) und „Kategorie“ (category) für „Filter nach Kategorie“ (filter,
+ * nicht beim Band): fluid_filter() – Filtern per CSS (css/filter.css), Trefferzahl per js/filter.js.
  * @var \Core\Block $b  @var array $d
  */
 $v = $b->variant() ?: 'image';
@@ -20,14 +22,19 @@ $id = $b->domId() . '-reel';
     </div>
   </div>
   <?php else: ?><?= fluid_head($b) ?><?php endif; ?>
-  <?php if ($items): ?>
+  <?php if ($items):
+  $flt = !empty($d['filter']) && $v !== 'reel' ? fluid_filter($b, array_map(fn($it) => (string) ($it['category'] ?? ''), $items)) : ['open' => '', 'bar' => '', 'item' => []];
+  if ($flt['bar'] !== ''): ?><?= $flt['open'] . $flt['bar'] ?><?php endif; ?>
   <ul class="<?= $v === 'reel' ? 'reel ' : 'grid ' ?><?= e(fluid_min($d)) ?> cards cards--<?= e($v) ?>" role="list"<?= $v === 'reel' ? ' id="' . e($id) . '" tabindex="0" aria-label="' . e(strip_emphasis(trim((string) $d['title'])) ?: lt('Karten')) . '"' : '' ?>>
     <?php foreach ($items as $i => $it):
         $link = trim((string) ($it['link'] ?? ''));
         $label = trim((string) ($it['link_label'] ?? ''));
+        $featured = !empty($it['featured']);
+        $badge = $featured ? (trim((string) ($it['badge'] ?? '')) ?: lt('Empfohlen')) : '';
         $pic = fluid_image(!empty($it['image']) ? (int) $it['image'] : null, $v === 'horizontal' ? '(min-width: 1080px) 320px, 100vw' : '(min-width: 1080px) 420px, (min-width: 640px) 50vw, 90vw', $ratio, 'tcard__media');
     ?>
-    <li class="tcard tcard--<?= e($v) ?><?= $v === 'overlay' ? '' : ' card' ?><?= $link !== '' ? ' tcard--link' : '' ?>" data-reveal><?= $b->targetEdit($link, (string) ($it['title'] ?? '')) ?>
+    <li class="tcard tcard--<?= e($v) ?><?= $v === 'overlay' ? '' : ' card' ?><?= $link !== '' ? ' tcard--link' : '' ?><?= $featured ? ' tcard--featured' : '' ?><?= isset($flt['item'][$i]) ? ' ncss-filter-item' : '' ?>"<?= isset($flt['item'][$i]) ? ' data-category="' . e($flt['item'][$i]) . '"' : '' ?> data-reveal><?= $b->targetEdit($link, (string) ($it['title'] ?? '')) ?>
+      <?php if ($badge !== ''): ?><span class="tcard__badge"<?= $b->edit("items.$i.badge") ?>><?= e($badge) ?></span><?php endif; ?>
       <div class="tcard__in">
         <?= $pic ?>
         <div class="tcard__body">
@@ -40,6 +47,7 @@ $id = $b->domId() . '-reel';
     </li>
     <?php endforeach; ?>
   </ul>
+  <?php if ($flt['bar'] !== ''): ?></ncss-filter><?php endif; ?>
   <?php if (trim((string) ($d['more_label'] ?? '')) !== '' && trim((string) ($d['more_link'] ?? '')) !== ''): ?>
   <p class="more-row"><a class="btn btn--secondary" <?= fluid_link_attrs($d['more_link']) ?>><span<?= $b->edit('more_label') ?>><?= e($d['more_label']) ?></span></a></p>
   <?php endif; ?>

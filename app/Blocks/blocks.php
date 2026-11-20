@@ -22,6 +22,8 @@ return [
                 'help' => '„Verzeichnis“: für Mitglieder, Partner, Anbieter – das Bild (Logo) steht eingepasst auf einer Kachel, Auswahlfelder erscheinen als farbige Etiketten.'],
             ['name' => 'highlight_field', 'label' => 'Zeilen hervorheben, wenn …', 'type' => 'datafield', 'types' => ['bool'], 'width' => 'half', 'empty_label' => '– keine –',
                 'show_if' => ['layout' => ['table']], 'help' => 'Ein Ja/Nein-Feld der Tabelle, z. B. „Summenzeile“ – diese Zeilen erscheinen fett. Zahlenfelder stehen in der Tabelle rechtsbündig.'],
+            ['name' => 'table_sort', 'label' => 'Spalten sortierbar', 'type' => 'bool', 'default' => false, 'width' => 'half', 'show_if' => ['layout' => ['table']],
+                'help' => 'Besucher sortieren per Klick auf den Spaltenkopf (auch mit der Tastatur), im Browser ohne Neuladen – sortiert wird, was die Seite gerade zeigt.'],
             ['name' => 'columns', 'label' => 'Spalten (Karten)', 'type' => 'select', 'default' => '3', 'width' => 'half', 'required' => true,
                 'options' => ['2' => '2', '3' => '3', '4' => '4']],
             ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'default' => '16:10', 'width' => 'half', 'required' => true,
