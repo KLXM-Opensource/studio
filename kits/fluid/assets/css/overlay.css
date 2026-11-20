@@ -19,13 +19,6 @@ ul.hnav__panel{padding:.4rem}   /* ul.: schlägt ul[role=list]{padding:0} aus si
 .hnav__nested .hnav__sublink{padding-block:.45rem;padding-inline-start:1.75rem;color:var(--f-muted);font-size:.875rem}
 .hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:2.75rem}
 .hnav__nested .hnav__sublink:hover,.hnav__nested .hnav__sublink[aria-current=page]{color:var(--f-ink)}
-/* „Gruppiert“ (nv-groups): zweite Ebene als Zwischenüberschrift */
-.nv-groups .hnav__panel>li.has-nested{margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--f-line)}
-.nv-groups .hnav__panel>li.has-nested:first-child{margin-top:0;padding-top:0;border-top:0}
-.nv-groups .hnav__panel>li.has-nested+li:not(.has-nested){margin-top:.3rem;padding-top:.35rem;border-top:1px solid var(--f-line)}
-.nv-groups .hnav__panel>li.has-nested>.hnav__sublink{padding-block:.45rem .2rem;color:var(--f-muted);font:600 var(--f-t-2)/1.3 var(--f-font-label);letter-spacing:.08em;text-transform:uppercase}
-.nv-groups .hnav__panel>li.has-nested>.hnav__sublink:hover{background:none;color:var(--f-link)}
-.nv-groups .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
 /* „Akkordeon“ (nv-accordion) und „Slide“ (nv-slide): Pfeil rechts neben dem Link (<summary>), Unterseiten in <details> */
 .hnav__nested li,.hnav__panel>li{position:relative}
 .hnav__det>summary{list-style:none}
@@ -42,22 +35,7 @@ li:has(>.hnav__det)>.hnav__sublink{padding-inline-end:3.25rem}
 .nv-accordion .hnav__det[open]>.hnav__more .hnav__morechev{rotate:180deg}
 .nv-accordion .hnav__det[open]>.hnav__more{color:var(--f-ink)}
 .nv-accordion .hnav__det>.hnav__nested{background:color-mix(in srgb,var(--f-surface) 70%,transparent);border-block:1px solid var(--f-line)}
-/* Slide: der Pfeil zeigt nach rechts; offen ersetzt die Unterebene die Liste, der Pfeil wird zur Zeile „‹ Elternseite“ */
-.nv-slide .hnav__morechev{rotate:-90deg}
-.nv-slide ul:has(>li>.hnav__det[open])>li:not(:has(>.hnav__det[open])),
-.nv-slide li:has(>.hnav__det[open])>.hnav__sublink,
-.nv-slide .hnav__det[open]:has(.hnav__det[open])>.hnav__more{display:none}
-.nv-slide .hnav__det[open]>.hnav__more{position:static;display:flex;justify-content:flex-start;align-items:center;gap:.4rem;width:auto;height:auto;margin-bottom:.3rem;padding:.45rem .85rem;border:0;border-radius:max(3px,calc(var(--f-r-l) - .4rem));color:var(--f-muted,var(--f-text));font:500 .875rem/1.3 var(--f-font-label)}
-.nv-slide .hnav__det[open]>.hnav__more .hnav__morechev{rotate:90deg}
-.nv-slide .hnav__det[open]>.hnav__more .hnav__more-t{display:inline}
 .hnav__slidehead{display:none}
-.nv-slide .hnav__nested>.hnav__slidehead{display:block}
-.nv-slide .hnav__nested>.hnav__slidehead>.hnav__sublink{color:var(--f-ink);font-weight:700;font-size:1rem}
-.nv-slide .hnav__nested .hnav__sublink,.nv-slide .hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
-.nv-slide .hnav__nested li:has(>.hnav__det)>.hnav__sublink{padding-block:.6rem}
-.nv-slide .hnav__nested .hnav__more{height:2.55rem}
-@media (prefers-reduced-motion:no-preference){.nv-slide .hnav__det[open]>.hnav__nested{animation:nv-slide .22s ease-out}}
-@keyframes nv-slide{from{opacity:0;translate:1.25rem 0}}
 .hsearch__panel{position:fixed;inset:5rem var(--f-gutter) auto auto;width:min(32rem,100vw - 2 * var(--f-gutter));margin:0;padding:.9rem 3.5rem .9rem .9rem;border:1px solid var(--f-line);border-radius:var(--f-r-l);background:var(--f-bg);color:var(--f-text);box-shadow:0 24px 48px -20px var(--f-sh2);overflow:visible}
 .hsearch__close{position:absolute;inset:.9rem .5rem auto auto;width:2.5rem;height:3rem;border:0;background:none;color:inherit;font-size:1.75rem;cursor:pointer}
 @supports (anchor-name:--a){.hsearch__btn{anchor-name:--hs}.hsearch__panel{position-anchor:--hs;position-area:bottom span-left;position-try-fallbacks:flip-inline;inset:auto;margin:.75rem -.5rem 0 0}}
@@ -100,9 +78,6 @@ html:has(.mnav:popover-open){overflow:hidden}
 .hnav__panel :is(.hnav__sublink,.hnav__more):focus-visible{outline:2px solid var(--f-focus);outline-offset:-2px}
 .hnav__panel .hnav__sublink:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}   /* _base.css setzt beim Fokus 2px */
 .hnav__panel .hnav__more:focus-visible{border-radius:0 max(3px,calc(var(--f-r-l) - .4rem)) max(3px,calc(var(--f-r-l) - .4rem)) 0}
-/* Slide: Zurück-Zeile ringsum gerundet wie die Einträge; die Trennlinie gehört zur Liste darunter (biegt sich nicht in die Rundung) */
-.nv-slide .hnav__det[open]>.hnav__nested{padding-top:.3rem;border-top:1px solid var(--f-line)}
-.nv-slide .hnav__det[open]>.hnav__more:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}
 /* Aufklappmenü öffnen „Elastisch“ (nd-elastic, nur has-motion, nie bei „Bewegung reduzieren“): Leiste, nicht Seitenleiste/Rail.
    Öffnen: @starting-style beim Wechsel zu [open], Feder-Kurve vom Menüpunkt aus, Einträge gestaffelt.
    Schließen: ::details-content bleibt kurz sichtbar (content-visibility allow-discrete), Rückweg kurz ohne Nachfedern –

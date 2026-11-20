@@ -1,0 +1,18 @@
+/* Design-Option „Kopf, Fuß bzw. Infoleiste in Farbe“ – lädt nur, wenn gewählt: header_bg, footer_bg oder topbar = accent, secondary, dark (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta{
+  --f-ink:var(--f-fg);--f-text:var(--f-fg);--f-muted:color-mix(in srgb,var(--f-fg) 82%,var(--f-zone));--f-bg:var(--f-zone);
+  --f-line:color-mix(in srgb,var(--f-fg) 20%,transparent);--f-line-strong:color-mix(in srgb,var(--f-fg) 48%,transparent);
+  --f-surface:color-mix(in srgb,var(--f-fg) 12%,transparent);--f-surface-2:color-mix(in srgb,var(--f-fg) 16%,transparent);
+  --f-card:color-mix(in srgb,var(--f-fg) 7%,transparent);--f-a-soft:color-mix(in srgb,var(--f-fg) 18%,transparent);--f-link:var(--f-fg);--f-focus:var(--f-fg);
+  --f-btn-bg:var(--f-fg);--f-btn-ink:var(--f-zone);--f-btn-hover:color-mix(in srgb,var(--f-fg) 86%,var(--f-zone))}
+.hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta{--f-zone:var(--f-a);--f-fg:var(--f-a-on)}
+.hbg-secondary .hdr,.fbg-secondary .ftr,.meta-secondary .hdr__meta{--f-zone:var(--f-b);--f-fg:var(--f-b-on)}
+.hbg-dark .hdr,.fbg-dark .ftr,.meta-dark .hdr__meta{--f-zone:var(--f-dark);--f-fg:var(--f-on-dark)}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr{--f-hdr-bg:var(--f-zone);border-bottom-color:transparent}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[aria-current=page],:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__link[data-active]{text-decoration-color:currentColor}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hnav__sublink[aria-current=page]::before{background:currentColor}
+/* Aktionen im farbigen Kopf (Handlungsaufruf, Menüpunkt-Link): Schriftfarbe der Fläche statt Akzentfarbe – sonst Grün auf Grün */
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below){--ha-accent:var(--f-fg);--ha-on:var(--f-zone)}
+:is(.hbg-accent,.hbg-secondary,.hbg-dark) .brand__mark{box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--f-zone) 60%,var(--f-fg))}
+:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr{background:var(--f-zone);border-top-color:transparent;color:var(--f-muted)}

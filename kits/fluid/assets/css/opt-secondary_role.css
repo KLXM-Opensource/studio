@@ -1,0 +1,7 @@
+/* Design-Option „Zweite Markenfarbe einsetzen für“ – lädt nur, wenn gewählt: secondary_role = details, buttons, all (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+html:is(.sec2-details,.sec2-all){--f-ico-bg:color-mix(in srgb,var(--f-b) 16%,var(--f-bg));--f-ico:var(--f-b)}
+:is(.sec2-details,.sec2-all) .eyebrow::before{background:var(--f-b)}
+:is(.sec2-buttons,.sec2-all) .btn--secondary{background:var(--f-b);color:var(--f-b-on);border-color:var(--f-b)}
+:is(.sec2-buttons,.sec2-all) .btn--secondary:hover{background:color-mix(in srgb,var(--f-b) 84%,var(--f-ink));border-color:transparent;color:var(--f-b-on)}
+:is(.sec2-buttons,.sec2-all) :is(.bg-accent,.bg-dark,.bg-secondary,.on-media,.sec--ov-dark) .btn--secondary{background:transparent;color:var(--f-fg);border-color:currentColor}

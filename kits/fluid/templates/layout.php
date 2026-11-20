@@ -10,12 +10,9 @@ $lang = \Core\Lang::current();
 $ogLocale = ['de' => 'de_DE', 'en' => 'en_GB', 'fr' => 'fr_FR', 'it' => 'it_IT', 'es' => 'es_ES', 'nl' => 'nl_NL'][$lang] ?? str_replace('-', '_', $lang);
 $notice = notice_on(); // Core\Notice: Schalter, Zeitraum, Darstellung
 $extraCss = array_values(array_unique($extraCss ?? []));
-// Design-Optionen mit eigenem Stylesheet (Kopf-/Fußvariante, Seitenhintergrund, Buttons, Dachzeilen, Glas-Karten, Farbenfroh) – nur das Gewählte
-$optCss = [];
-foreach (['header', 'footer', 'pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette', 'sections', 'transitions'] as $opt) {
-    $file = 'css/opt-' . $opt . '-' . preg_replace('~[^a-z]~', '', (string) design($opt)) . '.css';
-    if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
-}
+// Design-Optionen mit eigenem Stylesheet – nur die gewählten Werte, Reihenfolge laut theme.php → design → option_css
+// (dieselbe Liste nutzt die Live-Vorschau des Werkzeugs „Design“)
+$optCss = \Core\Design::optionCss();
 if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 ?><!doctype html>
 <html lang="<?= e($lang) ?>" class="<?= e(fluid_html_class()) ?><?= $editor ? ' is-editing' : '' ?>">
@@ -100,6 +97,8 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?= $theme->partial('sheet') ?>
 <?php /* Aufklappmenüs, Such-Popover, Seitenblatt: bis zur Bedienung verborgen → nicht renderblockierend am Ende */ ?>
 <link rel="stylesheet" href="<?= e(theme_asset('css/overlay.css')) ?>">
+<?php if ($theme->hasAsset($navLevels = 'css/overlay-nav_levels-' . preg_replace('~[^a-z]~', '', (string) design('nav_levels')) . '.css')): /* Dritte Menüebene „Slide“ bzw. „Gruppiert“ */ ?><link rel="stylesheet" href="<?= e(theme_asset($navLevels)) ?>">
+<?php endif; ?>
 <?= cms_chat_launcher($page ?? null, (bool) ($editor ?? false)) /* Besucher-Chat (Core\AI\VisitorChat) – leer, solange aus */ ?>
 <?= header_actions_late() /* Kopfbereich-Aktionen: Paneel des Kontakt-Menüs – nicht renderblockierend */ ?>
 <?= notice_late('topnote') /* Hinweis als Bubble bzw. mit Zeitraum */ ?>

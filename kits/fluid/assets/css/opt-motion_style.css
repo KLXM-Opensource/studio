@@ -1,0 +1,14 @@
+/* Design-Option „Art des Einblendens“ – lädt nur, wenn gewählt: motion_style ≠ rise (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Einblenden beim Scrollen: Aufsteigen (Standard), nur Blende, Wachsen, Unschärfe */
+@media (prefers-reduced-motion:no-preference){
+  .has-motion.js.mo-fade [data-reveal]:not(.is-in){translate:none}
+  .has-motion.js.mo-scale [data-reveal]:not(.is-in){translate:none;scale:.96}
+  .has-motion.js.mo-scale [data-reveal]{transition:opacity .6s cubic-bezier(.2,.7,.2,1),scale .6s cubic-bezier(.2,.7,.2,1)}
+  .has-motion.js.mo-blur [data-reveal]:not(.is-in){translate:none;filter:blur(8px)}
+  .has-motion.js.mo-blur [data-reveal]{transition:opacity .7s ease,filter .7s ease}
+  .has-motion.js.mo-clip [data-reveal]:not(.is-in){translate:none;opacity:1;clip-path:inset(0 0 100% 0)}
+  .has-motion.js.mo-clip [data-reveal]{transition:clip-path .8s cubic-bezier(.2,.7,.2,1),opacity .6s}
+  .has-motion.js.mo-clip [data-reveal].is-in{clip-path:inset(0 0 0 0)}
+  .has-motion.js.mo-slide [data-reveal]:not(.is-in){translate:-2rem 0}
+}

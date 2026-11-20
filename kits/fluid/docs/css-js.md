@@ -8,6 +8,8 @@ Kern-Regeln (Ebenen, CSP, Präfixe, Z-Skala, Bewegung): Entwicklerhandbuch › C
 
 - Von den Vorlagen eingebunden (Layout, Wartung, offline): `css/editing.css`, `css/overlay.css`, `css/pages.css`, `css/preview.css`, `css/site.css`, `js/site.js`.
 - Block-Dateien nur, wo der Block steht (`theme.php → conditional_css`, 27 Einträge).
+- Design-Optionen nur mit dem gewählten Wert: `css/opt-{option}.css` bzw. `css/opt-{option}-{wert}.css` nach `css/site.css`, Reihenfolge laut `theme.php → design → option_css` (`Core\Design::optionCss()`); immer geladen nur `_options-base.css` (in `site.css`). `_options.css` sammelt alle Option-Dateien für Kind-Kits mit Cascade Layers. Dritte Menüebene „Slide“/„Gruppiert“: `css/overlay-nav_levels-{wert}.css` nach `overlay.css`.
+- Skripte nach Bedarf aus `site.js`: `js/bgvideo.js` (`[data-bg-video]`), `js/toc.js` (`[data-scrollspy]`), `js/nav-hover.js` (`html.np-hover`).
 - Build: `cd tools && pnpm run build` (Quelle `assets/` → `/assets/kits/fluid/`).
 
 ## 2. Tokens & Farben
@@ -179,45 +181,19 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--ha-open` | `var(--f-link)` | `.ha,.ha-below` | – |
 | `--ha-surface` | `var(--f-surface)` | `.ha,.ha-below` | – |
 
-**css/_options.css** (35)
+**css/_options-base.css** (9)
 
 | Variable | erster Wert | an | weitere Werte |
 |---|---|---|---|
-| `--f-a-soft` | `color-mix(in srgb,var(--f-fg) 18%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-bg` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-btn-bg` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-btn-hover` | `color-mix(in srgb,var(--f-fg) 86%,var(--f-zone))` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-btn-ink` | `var(--f-b)` | `.bg-secondary` | 5 |
-| `--f-card` | `color-mix(in srgb,var(--f-fg) 7%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-fg` | `var(--f-b-on)` | `.bg-secondary` | 6 |
-| `--f-focus` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-hdr-bg` | `var(--f-surface)` | `.hbg-surface .hdr` | 2 |
-| `--f-ico` | `var(--f-b)` | `html:is(.sec2-details,.sec2-all)` | – |
-| `--f-ico-bg` | `color-mix(in srgb,var(--f-b) 16%,var(--f-bg))` | `html:is(.sec2-details,.sec2-all)` | – |
+| `--f-btn-ink` | `var(--f-b)` | `.bg-secondary` | 4 |
+| `--f-fg` | `var(--f-b-on)` | `.bg-secondary` | 4 |
+| `--f-hdr-bg` | `var(--f-surface)` | `.hbg-surface .hdr` | 1 |
 | `--f-img-r` | `0` | `.img-sharp` | 1 |
-| `--f-ink` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-line` | `color-mix(in srgb,var(--f-fg) 20%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-line-strong` | `color-mix(in srgb,var(--f-fg) 48%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-link` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-mark` | `color-mix(in srgb,var(--f-a2) 62%,var(--f-a))` | `html.em-marker .bg-tint` | – |
-| `--f-muted` | `var(--f-b-on)` | `.bg-secondary` | 5 |
-| `--f-nav-mark` | `var(--f-a2)` | `.nm-highlight .hdr` | 1 |
+| `--f-muted` | `var(--f-b-on)` | `.bg-secondary` | 4 |
 | `--f-sec-bg` | `var(--f-b)` | `.bg-secondary` | 4 |
-| `--f-surface` | `color-mix(in srgb,var(--f-fg) 12%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-surface-2` | `color-mix(in srgb,var(--f-fg) 16%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-text` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
-| `--f-zone` | `var(--f-a)` | `.hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta` | 2 |
-| `--fl-bw` | `5px` | `html` | 5 |
-| `--fl-c` | `var(--f-line)` | `html` | 4 |
-| `--fl-w` | `1px` | `html` | 4 |
-| `--ha-accent` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below)` | – |
-| `--ha-on` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below)` | – |
-| `--hdr-h` | `6rem` | `html.hh-tall` | 2 |
-| `--hdr-logo` | `4rem` | `html.hh-tall` | 2 |
-| `--hdr-mark` | `3.2rem` | `html.hh-tall` | 2 |
-| `--hdr-name` | `1.45rem` | `html.hh-tall` | 2 |
-| `--ico-2-opacity` | `0` | `.ic-outline .feat__ico` | – |
-| `--lo-h` | `5.5rem` | `html.logo-over` | 4 |
+| `--fl-bw` | `5px` | `html` | – |
+| `--fl-c` | `var(--f-line)` | `html` | – |
+| `--fl-w` | `1px` | `html` | – |
 
 **css/_tokens.css** (113)
 
@@ -571,6 +547,12 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 |---|---|---|---|
 | `--div-h` | `clamp(1.25rem,.6rem + 3vw,3.25rem)` | `.div-zigzag :is(main,.page__main) :is(.sec.bg-white+.sec:not(.bg-white,.pt-none),.sec.bg-muted+.sec:not(.bg-muted,.pt-none),.sec.bg-tint+.sec:not(.bg-tint,.pt-none),.sec.bg-accent+.sec:not(.bg-accent,.pt-none),.sec.bg-secondary+.sec:not(.bg-secondary,.pt-none),.sec.bg-dark+.sec:not(.bg-dark,.pt-none),.sec+.sec.sec--has-bg:not(.pt-none))` | – |
 
+**css/opt-emphasis.css** (1)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--f-mark` | `color-mix(in srgb,var(--f-a2) 62%,var(--f-a))` | `html.em-marker .bg-tint` | – |
+
 **css/opt-footer-statement.css** (14)
 
 | Variable | erster Wert | an | weitere Werte |
@@ -590,6 +572,14 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--f-surface-2` | `color-mix(in srgb,var(--f-fg) 12%,transparent)` | `.ftr--statement` | – |
 | `--f-text` | `color-mix(in srgb,var(--f-fg) 88%,var(--f-dark))` | `.ftr--statement` | – |
 
+**css/opt-footer_line.css** (3)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--fl-bw` | `1px` | `html.flw-w1` | 4 |
+| `--fl-c` | `var(--f-a)` | `html.flc-accent` | 3 |
+| `--fl-w` | `1px` | `html.flw-w1` | 4 |
+
 **css/opt-header-sidebar.css** (5)
 
 | Variable | erster Wert | an | weitere Werte |
@@ -599,6 +589,33 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--f0-bg` | `var(--f-bg)` | `:root` | – |
 | `--side-logo` | `3.75rem` | `.hdr-sidebar` | 2 |
 | `--side-w` | `18.5rem` | `.hdr-sidebar` | 2 |
+
+**css/opt-header_height.css** (4)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--hdr-h` | `6rem` | `html.hh-tall` | 2 |
+| `--hdr-logo` | `4rem` | `html.hh-tall` | 2 |
+| `--hdr-mark` | `3.2rem` | `html.hh-tall` | 2 |
+| `--hdr-name` | `1.45rem` | `html.hh-tall` | 2 |
+
+**css/opt-icons.css** (1)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--ico-2-opacity` | `0` | `.ic-outline .feat__ico` | – |
+
+**css/opt-logo_over.css** (1)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--lo-h` | `5.5rem` | `html.logo-over` | 4 |
+
+**css/opt-nav_mark.css** (1)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--f-nav-mark` | `var(--f-a2)` | `.nm-highlight .hdr` | 1 |
 
 **css/opt-palette-colorful.css** (12)
 
@@ -616,6 +633,38 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `--f-sec-bg` | `var(--f-tone-soft)` | `.pal-colorful main>.sec.bg-tint` | – |
 | `--f-tone` | `var(--f-p1)` | `html.pal-colorful` | 8 |
 | `--f-tone-soft` | `color-mix(in srgb,var(--f-tone) 14%,var(--f-bg))` | `.pal-colorful :is(main>.sec,.feat,.card,.tile,.stat,.step,.dl-item,.dl-chip,.dl-fchip,.snav__item)` | – |
+
+**css/opt-secondary_role.css** (2)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--f-ico` | `var(--f-b)` | `html:is(.sec2-details,.sec2-all)` | – |
+| `--f-ico-bg` | `color-mix(in srgb,var(--f-b) 16%,var(--f-bg))` | `html:is(.sec2-details,.sec2-all)` | – |
+
+**css/opt-zone.css** (20)
+
+| Variable | erster Wert | an | weitere Werte |
+|---|---|---|---|
+| `--f-a-soft` | `color-mix(in srgb,var(--f-fg) 18%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-bg` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-btn-bg` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-btn-hover` | `color-mix(in srgb,var(--f-fg) 86%,var(--f-zone))` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-btn-ink` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-card` | `color-mix(in srgb,var(--f-fg) 7%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-fg` | `var(--f-a-on)` | `.hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta` | 2 |
+| `--f-focus` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-hdr-bg` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr` | – |
+| `--f-ink` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-line` | `color-mix(in srgb,var(--f-fg) 20%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-line-strong` | `color-mix(in srgb,var(--f-fg) 48%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-link` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-muted` | `color-mix(in srgb,var(--f-fg) 82%,var(--f-zone))` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-surface` | `color-mix(in srgb,var(--f-fg) 12%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-surface-2` | `color-mix(in srgb,var(--f-fg) 16%,transparent)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-text` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr,:is(.fbg-accent,.fbg-secondary,.fbg-dark) .ftr,:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta` | – |
+| `--f-zone` | `var(--f-a)` | `.hbg-accent .hdr,.fbg-accent .ftr,.meta-accent .hdr__meta` | 2 |
+| `--ha-accent` | `var(--f-fg)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below)` | – |
+| `--ha-on` | `var(--f-zone)` | `:is(.hbg-accent,.hbg-secondary,.hbg-dark) .hdr :is(.ha,.ha-below)` | – |
 
 **css/pages.css** (1)
 
@@ -707,7 +756,6 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 |---|---|---|---|---|---|
 | `css/_base.css` | – | ja | ja | – | ja |
 | `css/_header.css` | f-hdr | ja | ja | – | – |
-| `css/_options.css` | f-progress | ja | ja | ja | ja |
 | `css/b-article.css` | – | ja | ja | – | – |
 | `css/b-bento.css` | – | ja | – | – | – |
 | `css/b-cards.css` | – | ja | – | ja | – |
@@ -731,26 +779,40 @@ Feste Namen; zusammengesetzte (z. B. `css/nav-{stil}.css`) erkennt der Generator
 | `css/opt-buttons-gradient.css` | – | – | – | ja | – |
 | `css/opt-buttons-sharp.css` | – | ja | – | – | – |
 | `css/opt-cards-gradient.css` | – | – | – | ja | – |
+| `css/opt-emphasis.css` | – | – | – | ja | – |
 | `css/opt-header-sidebar.css` | – | ja | ja | – | – |
+| `css/opt-header_height.css` | – | ja | ja | – | – |
+| `css/opt-hover.css` | – | ja | ja | – | – |
+| `css/opt-image_fx.css` | – | ja | – | ja | – |
+| `css/opt-links.css` | – | ja | – | – | – |
+| `css/opt-logo_over.css` | – | ja | ja | – | – |
+| `css/opt-motion_style.css` | – | ja | ja | – | – |
+| `css/opt-nav_chev.css` | – | ja | ja | – | ja |
 | `css/opt-palette-colorful.css` | – | – | – | ja | – |
+| `css/opt-progress.css` | f-progress | ja | – ⚠ | – | – |
+| `css/opt-totop.css` | – | ja | ja | – | – |
 | `css/opt-transitions-morph.css` | f-vt-out, f-vt-in | ja | ja | – | – |
-| `css/overlay.css` | nv-slide, f-sheet, fl-nd-in | ja | ja | – | ja |
+| `css/overlay-nav_levels-slide.css` | nv-slide | ja | ja | – | ja |
+| `css/overlay.css` | f-sheet, fl-nd-in | ja | ja | – | ja |
 | `css/preferences.css` | – | ja | – | ja | ja |
 | `css/search.css` | – | – | – | ja | ja |
 
 | Skript | reduced-motion | IntersectionObserver | requestAnimationFrame | Modul/Nachladen | Größe |
 |---|---|---|---|---|---|
 | `js/backnav.js` | – | – | – | – | 2,8 KB (Quelle) |
+| `js/bgvideo.js` | ja | – | – | – | 0,9 KB (Quelle) |
 | `js/downloads.js` | ja | – | – | – | 3,1 KB (Quelle) |
 | `js/filter.js` | – | – | – | – | 1,7 KB (Quelle) |
+| `js/nav-hover.js` | – | – | – | – | 0,9 KB (Quelle) |
 | `js/preferences-early.js` | – | – | – | – | 3,0 KB (Quelle) |
 | `js/preferences.js` | ja | – | – | – | 16,1 KB (Quelle) |
 | `js/prefs-theme.js` | – | – | – | – | 1,4 KB (Quelle) |
 | `js/reel.js` | ja | – | ja | – | 1,3 KB (Quelle) |
 | `js/scheme.js` | – | – | – | – | 1,6 KB (Quelle) |
 | `js/scrolly.js` | – | ja | – | – | 1,0 KB (Quelle) |
-| `js/site.js` | ja | ja | ja | – | 14,2 KB (Quelle) |
+| `js/site.js` | ja | ja | ja | – | 11,1 KB (Quelle) |
 | `js/tabs.js` | – | – | – | – | 1,3 KB (Quelle) |
+| `js/toc.js` | ja | – | ja | – | 2,4 KB (Quelle) |
 | `js/vt.js` | ja | – | – | – | 2,2 KB (Quelle) |
 
 ⚠ = Keyframes/Scroll-Animation bzw. requestAnimationFrame ohne eigene `prefers-reduced-motion`-Abfrage in derselben Datei (kann trotzdem korrekt sein, wenn eine andere Datei die Regel setzt – prüfen).
@@ -764,8 +826,8 @@ _Keine Namensraum-Ereignisse._
 | Attribut | Fundstellen |
 |---|---|
 | `data-active` | functions.php |
-| `data-bg-video` | blocks/hero.php, assets/js/site.js |
-| `data-bg-video-toggle` | blocks/hero.php, assets/js/site.js |
+| `data-bg-video` | blocks/hero.php, assets/js/bgvideo.js, assets/js/site.js |
+| `data-bg-video-toggle` | blocks/hero.php, assets/js/bgvideo.js |
 | `data-category` | blocks/cards.php, assets/js/filter.js, functions.php |
 | `data-cms-edit` | blocks/quote.php |
 | `data-contrast` | assets/js/preferences-early.js, assets/js/preferences.js |
@@ -781,8 +843,8 @@ _Keine Namensraum-Ereignisse._
 | `data-key` | assets/js/preferences.js |
 | `data-label-dark` | templates/partials/header.php, assets/js/scheme.js |
 | `data-label-light` | templates/partials/header.php, assets/js/scheme.js |
-| `data-label-pause` | blocks/hero.php, assets/js/site.js |
-| `data-label-play` | blocks/hero.php, assets/js/site.js |
+| `data-label-pause` | blocks/hero.php, assets/js/bgvideo.js |
+| `data-label-play` | blocks/hero.php, assets/js/bgvideo.js |
 | `data-label-status` | functions.php |
 | `data-label-status-none` | functions.php |
 | `data-label-status-one` | functions.php |
@@ -804,7 +866,7 @@ _Keine Namensraum-Ereignisse._
 | `data-scheme` | templates/layout.php, assets/js/prefs-theme.js |
 | `data-scheme-toggle` | templates/partials/header.php, assets/js/scheme.js |
 | `data-scope` | templates/layout.php |
-| `data-scrollspy` | blocks/richtext.php, assets/js/site.js |
+| `data-scrollspy` | blocks/richtext.php, assets/js/site.js, assets/js/toc.js |
 | `data-scrolly` | blocks/scrolly.php, assets/js/scrolly.js |
 | `data-side` | templates/partials/header-sidebar.php |
 | `data-step` | blocks/scrolly.php, assets/js/scrolly.js |

@@ -145,7 +145,50 @@ return [
     ],
 
     // ------------------------------------------------------------ Design (Style-Editor: Verwaltung → Design)
-    'design' => require __DIR__ . '/design.php',
+    // Stylesheets je Design-Option (Core\Design::optionCss): nur die Dateien der gewählten Werte laden, in dieser Reihenfolge
+    // direkt nach css/site.css – templates/layout.php und die Live-Vorschau des Werkzeugs „Design“ nutzen dieselbe Liste.
+    // Die Reihenfolge entspricht der früheren einen Datei (_options.css, heute Sammeldatei für Kits mit Cascade Layers):
+    // erst die Optionen aus _options.css, dann die Varianten-Dateien opt-{option}-{wert}.css. Neue Option mit eigenem CSS:
+    // Datei css/opt-{token}.css anlegen, hier mit den Werten eintragen, die sie brauchen – an der Stelle, an der ihre Regeln
+    // gegenüber den anderen gelten sollen.
+    'design' => ['option_css' => [
+        'css/opt-dark_toggle.css' => ['dark_toggle' => true],
+        'css/opt-secondary_role.css' => ['secondary_role' => ['details', 'buttons', 'all']],
+        'css/opt-heading_case.css' => ['heading_case' => ['upper', 'smallcaps']],
+        'css/opt-emphasis.css' => ['emphasis' => ['italic', 'bold', 'marker', 'underline', 'outline', 'gradient']],
+        'css/opt-links.css' => ['links' => ['accent', 'marker']],
+        'css/opt-image_fx.css' => ['image_fx' => ['mono', 'tint', 'frame']],
+        'css/opt-hover.css' => ['hover' => ['glow', 'zoom', 'none']],
+        'css/opt-icons.css' => ['icons' => ['circle', 'outline', 'plain'], 'icon_pos' => ['inline', 'side']],
+        'css/opt-motion_style.css' => ['motion_style' => ['fade', 'scale', 'blur', 'clip', 'slide']],
+        'css/opt-zone.css' => ['header_bg' => ['accent', 'secondary', 'dark'], 'footer_bg' => ['accent', 'secondary', 'dark'], 'topbar' => ['accent', 'secondary', 'dark']],
+        'css/opt-nav_style.css' => ['nav_style' => ['dot', 'underline', 'pill', 'caps']],
+        'css/opt-topbar.css' => ['topbar' => ['surface', 'accent', 'secondary', 'dark']],
+        'css/opt-footer-centered.css' => ['footer' => ['centered']],
+        'css/opt-logo_size.css' => ['logo_size' => ['large', 'xl']],
+        'css/opt-footer_line.css' => ['footer_line' => ['none', 'line', 'shadow', 'emboss', 'band'], 'footer_line_color' => ['accent', 'secondary', 'ink', 'white'],
+            'footer_line_width' => ['w1', 'w2', 'w4', 'w6', 'w10']],
+        'css/opt-header_height.css' => ['header_height' => ['tall', 'xtall']],
+        'css/opt-progress.css' => ['progress' => true],
+        'css/opt-totop.css' => ['totop' => true],
+        'css/opt-logo_over.css' => ['logo_over' => true],
+        'css/opt-nav_size.css' => ['nav_size' => ['compact']],
+        'css/opt-nav_mark.css' => ['nav_mark' => ['highlight', 'secondary']],
+        'css/opt-back_nav.css' => ['back_nav' => ['smart']],
+        'css/opt-nav_split.css' => ['nav_split' => ['apart']],
+        'css/opt-nav_chev.css' => ['nav_chev' => ['zoom']],
+        // Varianten mit eigenem Markup bzw. größeren Regelsätzen: eine Datei je Wert (nur, wenn es sie gibt)
+        'css/opt-header-{value}.css' => 'header',
+        'css/opt-footer-{value}.css' => 'footer',   // „Zentriert“ steht schon oben (Reihenfolge wie früher)
+        'css/opt-pagebg-{value}.css' => 'pagebg',
+        'css/opt-buttons-{value}.css' => 'buttons',
+        'css/opt-eyebrow-{value}.css' => 'eyebrow',
+        'css/opt-cards-{value}.css' => 'cards',
+        'css/opt-dividers-{value}.css' => 'dividers',
+        'css/opt-palette-{value}.css' => 'palette',
+        'css/opt-sections-{value}.css' => 'sections',
+        'css/opt-transitions-{value}.css' => 'transitions',
+    ]] + (require __DIR__ . '/design.php'),
 
     // Kopfbereich-Aktionen (header_actions()): Button-Klassen des Kits für die Stile „Gefüllt“, „Kontur“ und „Geteilt“
     'header_actions' => ['late' => true, 'classes' => ['solid' => 'btn btn--primary btn--small', 'outline' => 'btn btn--secondary btn--small', 'split' => 'btn btn--primary btn--small']],

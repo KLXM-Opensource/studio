@@ -1,0 +1,7 @@
+/* Design-Option „Lesefortschritt“ – lädt nur, wenn gewählt: progress an (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* ---------------------------------------------------------------- Lesefortschritt (design: progress) – scroll-getrieben, ohne Skript */
+@supports (animation-timeline:scroll()){
+  html.has-progress body::before{content:"";position:fixed;inset:0 0 auto 0;z-index:200;height:3px;background:linear-gradient(90deg,var(--f-a),var(--f-b));transform-origin:0 50%;scale:0 1;animation:f-progress linear both;animation-timeline:scroll(root);pointer-events:none}
+}
+@keyframes f-progress{to{scale:1 1}}

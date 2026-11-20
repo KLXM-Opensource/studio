@@ -1,0 +1,14 @@
+/* Design-Option „Logo ragt aus dem Kopfbereich“ – lädt nur, wenn gewählt: logo_over an (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Logo ragt unten aus dem Kopfbereich (design: logo_over) – quadratische Logos, Siegel, Wappen. Die Leiste bleibt schmal,
+   das Logo hängt darüber hinaus; beim Scrollen (html.is-scrolled, site.js) und in schmalen Leisten passt es wieder hinein. */
+/* Logo ragt aus dem Kopf: nur bei Leisten mit Logo neben dem Menü – zentriert steht es über dem Menü und würde es verdecken */
+html.logo-over{--lo-h:5.5rem}
+html.logo-over.logo-large{--lo-h:6.5rem}
+html.logo-over.logo-xl{--lo-h:7.5rem}
+html.logo-over.hdr-sticky.is-scrolled{--lo-h:3.25rem}
+.logo-over .hdr:not(.hdr--rail,.hdr--sidebar,.hdr--centered) .hdr__brand:has(.brand__logo){position:relative;align-self:stretch;flex:none;width:calc(var(--lo-h) * var(--lo-ratio,1));min-height:0}
+.logo-over .hdr:not(.hdr--rail,.hdr--sidebar,.hdr--centered) .hdr__brand .brand__logo{position:absolute;inset-block-start:.5rem;inset-inline-start:0;z-index:2}
+.logo-over .hdr:not(.hdr--rail,.hdr--sidebar,.hdr--centered) .hdr__brand .brand__logo img{width:auto;height:var(--lo-h);max-width:none;object-position:left top;filter:drop-shadow(0 8px 16px rgb(0 0 0 / .22));transition:height .35s cubic-bezier(.2,.7,.2,1)}
+@container hdr (max-width:48rem){.logo-over .hdr .hdr__brand{--lo-h:3.25rem}}
+@media (prefers-reduced-motion:reduce){.logo-over .hdr .brand__logo img{transition:none}}
