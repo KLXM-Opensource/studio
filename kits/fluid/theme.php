@@ -132,6 +132,7 @@ return [
         'css/b-scrolly.css' => ['scrolly'],
         'css/b-contact.css' => ['contact', 'map'],
         'css/b-video.css' => ['video'],
+        'css/b-audio.css' => ['video:audio'],   // Video & Audio → „Audio (Podcast, Musik)“
         'css/b-downloads.css' => ['downloads'],
         'js/downloads.js' => ['downloads'],   // Suche, Kacheln, Schlagworte (Variante „Liste“)
         'css/dataform.css' => ['contact'],
@@ -522,18 +523,30 @@ return [
             ],
         ],
         'video' => [
-            'label' => 'Video', 'icon' => 'play-circle', 'group' => 'Medien',
-            'help' => 'YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek.',
-            'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)'],
+            'label' => 'Video & Audio', 'icon' => 'play-circle', 'group' => 'Medien',
+            'help' => 'Video: YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek. Audio: Podcast, Interview oder Musik aus der Mediathek, mehrere Dateien als Playlist.',
+            'variants' => ['wide' => 'Breit', 'text' => 'Mit Text daneben', 'cinema' => 'Kino (randlos, dunkel)', 'audio' => 'Audio (Podcast, Musik)'],
+            'variant_help' => [
+                'audio' => 'Eine oder mehrere Audiodateien (MP3, M4A) mit dem Player des Browsers. Ab zwei Dateien entsteht eine Playlist. Kapitel, Untertitel und Transkript pflegen Sie in der Mediathek an der Datei.',
+            ],
+            // Felder für Video fehlen bei „Audio“; „morph“ ergänzt ggf. ein Kind-Kit (block_extend) und nutzt die Videodatei
             'fields' => [
                 ...$head(false),
-                ['name' => 'video_url', 'label' => 'YouTube- oder Vimeo-Link', 'type' => 'url', 'width' => 'half'],
-                ['name' => 'video_file', 'label' => 'oder eigene MP4-Datei', 'type' => 'file', 'width' => 'half',
+                ['name' => 'video_url', 'label' => 'YouTube- oder Vimeo-Link', 'type' => 'url', 'width' => 'half', 'variants' => ['wide', 'text', 'cinema']],
+                ['name' => 'video_file', 'label' => 'oder eigene MP4-Datei', 'type' => 'file', 'width' => 'half', 'variants' => ['wide', 'text', 'cinema', 'morph'],
                     'help' => 'Untertitel und Transkript pflegen Sie in der Mediathek an der Datei.'],
-                ['name' => 'poster', 'label' => 'Eigenes Vorschaubild (optional)', 'type' => 'media', 'width' => 'half'],
-                ['name' => 'ratio', 'label' => 'Format', 'type' => 'select', 'required' => true, 'default' => '16-9', 'width' => 'half', 'options' => ['16-9' => '16:9', '4-3' => '4:3', '21-9' => '21:9']],
+                ['name' => 'poster', 'label' => 'Eigenes Vorschaubild bzw. Cover (optional)', 'type' => 'media', 'width' => 'half',
+                    'help' => 'Bei Audio: quadratisches Cover neben dem Player.'],
+                ['name' => 'ratio', 'label' => 'Format', 'type' => 'select', 'required' => true, 'default' => '16-9', 'width' => 'half', 'options' => ['16-9' => '16:9', '4-3' => '4:3', '21-9' => '21:9'], 'variants' => ['wide', 'text', 'cinema', 'morph']],
+                ['name' => 'audio', 'label' => 'Audiodateien', 'type' => 'repeater', 'item_label' => 'Audiodatei', 'title_field' => 'title', 'max_items' => 20, 'pick_many' => 'file', 'variants' => ['audio'],
+                    'help' => 'Die erste spielt zuerst; ab zwei Dateien entsteht eine Playlist. Jede Datei braucht einen verständlichen Titel. Kapitel, Untertitel und Transkript („Transkript anzeigen“) kommen aus der Mediathek.',
+                    'fields' => [
+                        ['name' => 'file', 'label' => 'Audiodatei (MP3, M4A)', 'type' => 'file', 'required' => true],
+                        ['name' => 'title', 'label' => 'Titel', 'type' => 'text', 'max' => 90, 'width' => 'half', 'placeholder' => 'sonst der Titel in der Mediathek'],
+                        ['name' => 'artist', 'label' => 'Sprecher oder Interpret (optional)', 'type' => 'text', 'max' => 90, 'width' => 'half'],
+                    ]],
                 ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'max' => 200],
-                ['name' => 'text', 'label' => 'Text daneben (bei „Mit Text daneben“)', 'type' => 'richtext'],
+                ['name' => 'text', 'label' => 'Text daneben (bei „Mit Text daneben“)', 'type' => 'richtext', 'variants' => ['text', 'morph']],
             ],
         ],
         'contact' => [

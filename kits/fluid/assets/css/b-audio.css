@@ -1,0 +1,11 @@
+/* Kit „fluid“ – Video & Audio, Darstellung „Audio (Podcast, Musik)“ (nur wenn verwendet: conditional_css 'video:audio').
+   Cover und Liste brechen per Flex-Umbruch um; jede Datei hat den Player des Browsers (<audio controls>) in voller Breite.
+   Transkript (Core\MediaTracks, .media-transcript) gestaltet b-video.css. */
+.audio-card{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--f-s-m);margin:0;padding:var(--f-s-m);border:1px solid var(--f-card-bd,var(--f-line));border-radius:var(--f-r-l);background:var(--f-card)}
+.audio-card__cover{flex:0 0 8rem}
+.audio-card__cover img{display:block;width:8rem;height:8rem;object-fit:cover;border-radius:var(--f-radius)}
+.audio-card__list{flex:1 1 18rem;display:grid;gap:var(--f-s-m);margin:0;padding:0;list-style:none}
+.audio-card__title{margin:0 0 .35rem;color:var(--f-ink);font-weight:600}
+.audio-card__artist{color:var(--f-muted);font-weight:400}
+.audio-card audio{display:block;width:100%}
+.audio-card .video__cap{flex-basis:100%;margin:0}

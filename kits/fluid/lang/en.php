@@ -594,4 +594,17 @@ return [
     'Nur mit „Dezente Animationen“ und nie bei „Bewegung reduzieren“ auf dem Gerät. Schließen bleibt kurz und ohne Nachfedern.' => 'Only with “Subtle animations” and never when the device asks for reduced motion. Closing stays short and without spring.',
     // Block „Vorher/Nachher“
     'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.' => 'Two images on top of each other, a slider reveals more of one or the other – for conversions, renovation, restoration, image editing. Take both photos with the same framing. Without JavaScript they appear side by side.',
+    // Block „Video & Audio“
+    'Video & Audio' => 'Video & audio',
+    'Video: YouTube/Vimeo mit Zwei-Klick-Lösung (Vorschaubild vom eigenen Server, ohne Cookies bis zum Klick) oder eigene MP4-Datei mit Untertiteln und Transkript aus der Mediathek. Audio: Podcast, Interview oder Musik aus der Mediathek, mehrere Dateien als Playlist.' => 'Video: YouTube/Vimeo with two-click solution (preview image from your own server, no cookies until the click) or your own MP4 file with subtitles and transcript from the media library. Audio: podcast, interview or music from the media library, several files as a playlist.',
+    'Audio (Podcast, Musik)' => 'Audio (podcast, music)',
+    'Eine oder mehrere Audiodateien (MP3, M4A) mit dem Player des Browsers. Ab zwei Dateien entsteht eine Playlist. Kapitel, Untertitel und Transkript pflegen Sie in der Mediathek an der Datei.' => 'One or more audio files (MP3, M4A) with the browser\'s player. Two or more files make a playlist. Chapters, subtitles and transcript are maintained on the file in the media library.',
+    'Eigenes Vorschaubild bzw. Cover (optional)' => 'Own preview image or cover (optional)',
+    'Bei Audio: quadratisches Cover neben dem Player.' => 'For audio: square cover next to the player.',
+    'Audiodateien' => 'Audio files',
+    'Audiodatei' => 'Audio file',
+    'Die erste spielt zuerst; ab zwei Dateien entsteht eine Playlist. Jede Datei braucht einen verständlichen Titel. Kapitel, Untertitel und Transkript („Transkript anzeigen“) kommen aus der Mediathek.' => 'The first one plays first; two or more files make a playlist. Every file needs a clear title. Chapters, subtitles and transcript (“Show transcript”) come from the media library.',
+    'Audiodatei (MP3, M4A)' => 'Audio file (MP3, M4A)',
+    'sonst der Titel in der Mediathek' => 'otherwise the title in the media library',
+    'Sprecher oder Interpret (optional)' => 'Speaker or artist (optional)',
 ];
