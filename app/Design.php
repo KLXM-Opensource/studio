@@ -372,7 +372,12 @@ final class Design
     /**
      * Stylesheets der gewählten Varianten (Kit-Konvention css/opt-{token}-{wert}.css, z. B. opt-header-sidebar.css) – nur
      * Auswahl-Tokens, deren Datei im Kit liegt; Kits ohne solche Dateien: []. Eigene Regel: theme.php → 'design' =>
-     * ['option_css' => fn(array $values): array] (Liste von Asset-Pfaden des Kits).
+     * ['option_css' => …], entweder eine Funktion fn(array $values): array (Liste von Asset-Pfaden des Kits) oder eine Liste
+     * in Ladereihenfolge (optionCssRules()):
+     *   'css/opt-header-{value}.css' => 'header'                    eine Datei je Wert (nur, wenn es sie gibt)
+     *   'css/opt-nav_style.css' => ['nav_style' => ['pill', 'dot']]  bei einem dieser Werte (mehrere Tokens: einer genügt)
+     *   'css/opt-progress.css' => ['progress' => true]              Schalter an
+     * Die Reihenfolge der Liste ist die Reihenfolge der <link> – wichtig, wenn Regeln verschiedener Dateien zusammentreffen.
      * @return list<string> Adressen wie theme_asset()
      */
     public static function optionCss(?array $values = null): array
@@ -380,14 +385,42 @@ final class Design
         $values = self::normalize($values ?? self::values());
         $theme = app()->theme;
         $cb = self::def()['option_css'] ?? null;
+        if (is_array($cb) && !is_callable($cb)) $cb = fn(array $v): array => self::optionCssRules($cb, $v);
         if (is_callable($cb)) {
-            return array_values(array_map(fn($f) => $theme->asset((string) $f), array_filter((array) $cb($values), fn($f) => is_string($f) && $theme->hasAsset($f))));
+            return array_values(array_unique(array_map(fn($f) => $theme->asset((string) $f), array_filter((array) $cb($values), fn($f) => is_string($f) && $theme->hasAsset($f)))));
         }
         $out = [];
         foreach (self::tokens() as $n => $t) {
             if (($t['type'] ?? '') !== 'choice' || !preg_match('~^[a-z0-9_]+$~', (string) $n)) continue;
             $file = 'css/opt-' . $n . '-' . preg_replace('~[^a-z]~', '', (string) ($values[$n] ?? '')) . '.css';
             if ($theme->hasAsset($file)) $out[] = $theme->asset($file);
+        }
+        return $out;
+    }
+
+    /**
+     * Liste 'option_css' (siehe optionCss) auswerten: Asset-Pfade in Listenreihenfolge, deren Bedingung für $values gilt
+     * (ungeprüft, ob die Datei existiert). Platzhalter {value} im Pfad: Wert des Tokens, nur Kleinbuchstaben.
+     * @param array<string, string|array<string, bool|list<string>>> $rules
+     * @return list<string>
+     */
+    public static function optionCssRules(array $rules, array $values): array
+    {
+        $out = [];
+        foreach ($rules as $file => $cond) {
+            if (!is_string($file)) continue;
+            if (is_string($cond)) {
+                $v = preg_replace('~[^a-z]~', '', (string) ($values[$cond] ?? ''));
+                if ($v !== '') $out[] = str_replace('{value}', $v, $file);
+                continue;
+            }
+            foreach ((array) $cond as $token => $want) {
+                $v = $values[$token] ?? null;
+                if (is_bool($want) ? (bool) $v === $want : in_array((string) $v, array_map('strval', (array) $want), true)) {
+                    $out[] = $file;
+                    break;
+                }
+            }
         }
         return $out;
     }

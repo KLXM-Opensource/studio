@@ -51,6 +51,27 @@ final class KitSelfTest
         $any = (string) array_key_first(Kit::all());
         if ($any !== '' && Kit::parent($any) === '') $eq('Kette eines Kits ohne Eltern: nur das Kit', array_keys(Kit::chain($any)), [$any]);
         $eq('Kette eines unbekannten Kits: leer', Kit::chain('gibt-es-nicht'), []);
+        // Stylesheets je Design-Option (Liste 'option_css', Design::optionCssRules): Reihenfolge der Liste, Werte, Schalter, {value}
+        $rules = [
+            'css/opt-a.css' => ['nav' => ['pill', 'dot']],
+            'css/opt-b.css' => ['progress' => true],
+            'css/opt-c.css' => ['x' => ['eins'], 'nav' => ['dot']],
+            'css/opt-header-{value}.css' => 'header',
+        ];
+        $eq('option_css: Wert, Schalter an, Platzhalter', Design::optionCssRules($rules, ['nav' => 'pill', 'progress' => true, 'header' => 'side-bar']),
+            ['css/opt-a.css', 'css/opt-b.css', 'css/opt-header-sidebar.css']);
+        $eq('option_css: einer von mehreren Tokens genügt, Schalter aus', Design::optionCssRules($rules, ['nav' => 'dot', 'progress' => false]),
+            ['css/opt-a.css', 'css/opt-c.css']);
+        $eq('option_css: unbekannte Tokens laden nichts', Design::optionCssRules($rules, []), []);
+        // Kit fluid: jede Datei der Liste gibt es als Quelle (sonst lädt still nichts)
+        if (is_dir($fluid = Kit::dir('fluid'))) {
+            $def = require $fluid . '/theme.php';
+            $missing = [];
+            foreach (array_keys((array) ($def['design']['option_css'] ?? [])) as $f) {
+                if (!str_contains($f, '{value}') && !is_file($fluid . '/assets/' . $f)) $missing[] = $f;
+            }
+            $eq('fluid: Dateien der Liste option_css vorhanden', $missing, []);
+        }
         return ['ok' => $ok, 'fails' => $fails];
     }
 }
