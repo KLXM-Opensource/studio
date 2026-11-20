@@ -403,6 +403,216 @@
           "Pfeil links",
           "Arrow left",
           "zurück vorher"
+        ],
+        "cursor": [
+          "Mauszeiger",
+          "Cursor",
+          "auswählen zeiger pfeil"
+        ],
+        "bezier-curve": [
+          "Kurve",
+          "Bezier curve",
+          "vektor pfad zeichnen"
+        ],
+        "pencil-simple-line": [
+          "Bleistift",
+          "Pencil",
+          "zeichnen freihand"
+        ],
+        "rectangle": [
+          "Rechteck",
+          "Rectangle",
+          "form viereck"
+        ],
+        "circle": [
+          "Kreis",
+          "Circle",
+          "form ellipse rund"
+        ],
+        "line-segment": [
+          "Linie",
+          "Line",
+          "strecke form"
+        ],
+        "polygon": [
+          "Vieleck",
+          "Polygon",
+          "form stern ecken"
+        ],
+        "hand": [
+          "Hand",
+          "Hand",
+          "verschieben greifen"
+        ],
+        "magnifying-glass-plus": [
+          "Vergrößern",
+          "Zoom in",
+          "zoom lupe größer"
+        ],
+        "magnifying-glass-minus": [
+          "Verkleinern",
+          "Zoom out",
+          "zoom lupe kleiner"
+        ],
+        "lock-open": [
+          "Entsperrt",
+          "Unlocked",
+          "schloss offen"
+        ],
+        "stack": [
+          "Stapel",
+          "Stack",
+          "ebenen schichten"
+        ],
+        "align-left": [
+          "Links ausrichten",
+          "Align left",
+          "ausrichten"
+        ],
+        "align-center-horizontal": [
+          "Horizontal zentrieren",
+          "Align center",
+          "ausrichten mitte"
+        ],
+        "align-right": [
+          "Rechts ausrichten",
+          "Align right",
+          "ausrichten"
+        ],
+        "align-top": [
+          "Oben ausrichten",
+          "Align top",
+          "ausrichten"
+        ],
+        "align-center-vertical": [
+          "Vertikal zentrieren",
+          "Align middle",
+          "ausrichten mitte"
+        ],
+        "align-bottom": [
+          "Unten ausrichten",
+          "Align bottom",
+          "ausrichten"
+        ],
+        "arrows-left-right": [
+          "Links und rechts",
+          "Left and right",
+          "verteilen breite"
+        ],
+        "arrows-down-up": [
+          "Oben und unten",
+          "Up and down",
+          "verteilen höhe sortieren"
+        ],
+        "floppy-disk": [
+          "Speichern",
+          "Save",
+          "diskette sichern"
+        ],
+        "arrow-u-up-left": [
+          "Rückgängig",
+          "Undo",
+          "zurück"
+        ],
+        "arrow-u-up-right": [
+          "Wiederholen",
+          "Redo",
+          "vor"
+        ],
+        "flip-horizontal": [
+          "Horizontal spiegeln",
+          "Flip horizontal",
+          "spiegeln"
+        ],
+        "flip-vertical": [
+          "Vertikal spiegeln",
+          "Flip vertical",
+          "spiegeln"
+        ],
+        "swap": [
+          "Tauschen",
+          "Swap",
+          "wechseln"
+        ],
+        "bounding-box": [
+          "Rahmen",
+          "Bounding box",
+          "auswahl begrenzung"
+        ],
+        "arrow-line-up": [
+          "Ganz nach oben",
+          "To top",
+          "nach vorn anordnen"
+        ],
+        "arrow-line-down": [
+          "Ganz nach unten",
+          "To bottom",
+          "nach hinten anordnen"
+        ],
+        "link-simple": [
+          "Verknüpft",
+          "Linked",
+          "kette verbinden"
+        ],
+        "link-break": [
+          "Verknüpfung lösen",
+          "Unlink",
+          "kette trennen"
+        ],
+        "shapes": [
+          "Formen",
+          "Shapes",
+          "grafik geometrie"
+        ],
+        "film-strip": [
+          "Filmstreifen",
+          "Film strip",
+          "video animation"
+        ],
+        "vector-two": [
+          "Vektor",
+          "Vector",
+          "knoten pfad"
+        ],
+        "selection-plus": [
+          "Gruppieren",
+          "Group",
+          "auswahl hinzufügen"
+        ],
+        "corners-out": [
+          "Vollbild",
+          "Fullscreen",
+          "vergrößern maximieren"
+        ],
+        "corners-in": [
+          "Vollbild beenden",
+          "Exit fullscreen",
+          "verkleinern"
+        ],
+        "export": [
+          "Exportieren",
+          "Export",
+          "teilen ausgeben"
+        ],
+        "caret-right": [
+          "Pfeil rechts",
+          "Caret right",
+          "aufklappen"
+        ],
+        "selection-all": [
+          "Alles auswählen",
+          "Select all",
+          "auswahl"
+        ],
+        "grid-four": [
+          "Raster",
+          "Grid",
+          "gitter"
+        ],
+        "frame-corners": [
+          "Rahmenecken",
+          "Frame corners",
+          "zuschneiden ausschnitt"
         ]
       }
     },

@@ -51,6 +51,7 @@ import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → B
 import { initPushAdmin } from './_pushadmin.js';   // Mitteilungen → Verfassen: Vorschau, erreichbare Geräte (Core\Push\Compose)
 import { initPack } from './_pack.js';   // Große Formulare gebündelt senden (max_input_vars, Core\Http\Request::unpack)
 import { initRequests } from './_requests.js';   // Anfragen als Posteingang (Liste + Lesebereich)
+import { openGraphicEditor, initGrafik } from './_grafik.js';   // Grafik-Editor (Core\Graphics): lädt grafik.js erst beim Öffnen
 import { initDelivery } from './_delivery.js';   // Eingang → Zustellung der Anfragen (Core\Data\Delivery)   // Assistent-Chat der Redaktion (Core\AI\Assistant) – lädt assistant.mjs erst beim Öffnen
 
 const d = document;
@@ -1278,9 +1279,12 @@ d.addEventListener('click', e => {
 initSettingsPreview();
 initDesign();
 initBlockBuilder();
+initGrafik();
 window.CMSAdmin = { init, toast, toastNext, openMediaPicker, pickLink, openLinkPicker, openPagesPicker, esc, Rich, Markdown, openSpotlight, t, ico, bar: bar_, formFields,
   // Werkzeuge beim Bearbeiten und Ereignisse (stabile Schnittstelle, Technik → Erweiterungen): CMSAdmin.tools.register(id, { mount, unmount })
   tools: tools_, events: { emit, beforeSave },
+  // Grafik-Editor als Overlay (Mediathek, Blockauswahl, Erweiterungen): CMSAdmin.graphic.open({ format, mediaId, id, block, svg, target, onSave })
+  graphic: { open: openGraphicEditor },
   // Shadow-DOM-Helfer für editor.js (eigenes Bündel) – eine gemeinsame Ebene
   shadow: { layer, layerBox, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathTarget, pathClosest, inPath, listen, IN_ADMIN, topInset } };
 // Einträge auf der Website bearbeiten (Stift in Datenlisten, Seitenleiste, Felder direkt im Text – _entry_edit.js)
