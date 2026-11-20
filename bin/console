@@ -196,6 +196,7 @@
  *                                                     bzw. Titel; alte Adressen leiten weiter (301)
  *   media:selftest                                    Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Reihenfolge)
  *   svg:selftest [--dump=ordner] [-v]                 Selbsttest der SVG-Bereinigung (Schadcode-Proben, Exporte aus Illustrator/Inkscape/Figma)
+ *   grafik:selftest                                   Selbsttest des Grafik-Editors (Bereinigung der Editor-Ausgabe, Ablage außerhalb der Mediathek, Blockvorschau, Rechte)
  *   live:selftest                                     Selbsttest der Live-Aktualisierung (Versionen, signierte Abos, Live-Blöcke)
  *   presence:selftest                                 Selbsttest der Präsenz (melden, auflisten, ablaufen, abmelden; sicherer Netzwerk-Zielpfad)
  *   mail:selftest                                     Selbsttest der E-Mail-Konten (Zwecke, Netzwerk-Konto, Versandwege, Absender)
@@ -1506,6 +1507,13 @@ switch ($cmd) {
         $res = Core\ImageEdit::selftest();
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen (Entzerren: " . Core\ImageEdit::engine() . ")\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'grafik:selftest':
+        // Grafik-Editor (Core\Graphics): Editor-Ausgabe übersteht die Bereinigung, Ablage nicht in der Mediathek, Rechte
+        $res = Core\Graphics\SelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
     case 'svg:selftest':

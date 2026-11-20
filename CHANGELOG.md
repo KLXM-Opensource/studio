@@ -9,6 +9,25 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
+
+### Grafik-Editor: Infografiken, Symbole und Blockvorschauen zeichnen
+- Vektoreditor in der Verwaltung, aufgebaut wie Affinity Designer/Illustrator: Personas (**Vektor**; **Motion** vorbereitet),
+  Kontextleiste, Werkzeugleiste (Verschieben, Knoten, Zeichenstift mit Bézier-Griffen, Bleistift mit Glättung, Rechteck mit
+  Eckenradius, Ellipse, Vieleck/Stern, Linie/Pfeil, Text, Pipette, Hand, Zoom), Bereiche mit Reitern (Farbe mit Verläufen,
+  Farbfelder aus dem Design der Website, Kontur, Darstellung mit Mischmodus und Schatten, Ebenen mit Vorschaubild, Umbenennen,
+  Sperren, Ausblenden und Umsortieren per Ziehen, Bibliothek, Symbole, Transformieren mit Bezugspunkt, Protokoll), Einrasten mit
+  Hilfslinien, Ausrichten/Verteilen, Gruppieren, Spiegeln, In Kurven umwandeln, Tastaturkürzel wie in Grafikprogrammen, hell und dunkel.
+- **Vorhandene SVGs bearbeiten** (Mediathek → Rechtsklick bzw. Bearbeitungsfenster): eigene Engine auf dem SVG-DOM – Unverändertes
+  bleibt Zeichen für Zeichen erhalten (Rundlauf mit Exporten aus Illustrator, Inkscape, Figma, Phosphor und den Kern-Vorschauen
+  bytegleich). Speichern ersetzt die Datei (ID, Alt-Text, Verwendungen bleiben), die vorige Fassung bleibt abrufbar.
+- **Mediathek → Neu → Grafik** (Infografik 16:9, quadratisch, frei) als Overlay mit Vollbild (⇧⌘F, gemerkt); Symbole (24 × 24) und
+  **Blockvorschauen** (160 × 100) in einer eigenen Ablage unter Medien → Grafiken – nicht in der Mediathek. Blockvorschauen starten
+  mit der Skizze des Kits und gelten nach dem Speichern in der Blockauswahl der Website (Einstellung `block_previews`).
+- Jedes Speichern läuft durch `Core\Svg::clean` (neu: Option `keep_ids`, Ebenennamen `data-name`); Tabellen `graphics`,
+  `graphic_versions`; Einbettung für Erweiterungen über `CMSAdmin.graphic.open({ format, mediaId, svg, target, onSave })` bzw.
+  `CMSGraphicEditor.mount()` mit `registerPersona()` (Grundlage für Motion). Bibliothek mit den Bausteinen aus Motion.
+  Selbsttest `grafik:selftest`. Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Blockauswahl mit Gruppen, Vorschau und Favoriten
 - „+ Block einfügen“ ordnet die Blöcke nach Gruppen und bietet drei Ansichten: kompakte **Liste**, **Kacheln mit Vorschau** (Skizze des Aufbaus, Kurzbeschreibung, Sprungleiste der Gruppen) und **Liste mit großer Vorschau** (Beschreibung, Varianten zum Auswählen, „Einfügen“, Stern für Favoriten). Die gewählte Ansicht, **Favoriten** und die **zuletzt verwendeten** fünf Blöcke merkt sich das Konto (`Core\UiPrefs`, Schlüssel `blockpicker`). Suche über Name, Beschreibung, Typ und Gruppe (Treffer im Namen zuerst); Tastatur mit Pfeilen (in Kacheln auch ←/→), Enter, Esc; Combobox mit `aria-activedescendant`. Kopierter Block, „Häufig verwendet“, Vorlagen der Erweiterungen und die Auswahl in Layout-Spalten bleiben.
 - Blockdefinition: neu `'description'` (ein Satz, übersetzbar; ohne Angabe der erste Satz von `'help'`) und optional `'preview'` (anderer Name oder `false`). Vorschaugrafiken als SVG in `kits/{kit}/assets/img/previews/{typ}.svg` (auch `{typ}--{variante}.svg`), Suche über Kit, Eltern-Kits, Erweiterung und Kern (`resources/img/previews/`) – `Core\Blocks\Picker`. Alles optional: Kits ohne Beschreibung und Vorschau zeigen Symbol und Name wie bisher; `kit:check -v` nennt Fehlendes nur als Hinweis.

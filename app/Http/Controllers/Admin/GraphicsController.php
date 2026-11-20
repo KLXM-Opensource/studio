@@ -1,0 +1,211 @@
+<?php
+// SPDX-License-Identifier: MIT
+// KLXM Studio – Copyright (C) 2026 KLXM and contributors (see LICENSE, COPYRIGHT)
+declare(strict_types=1);
+
+namespace Core\Http\Controllers\Admin;
+
+use Core\Graphics\Graphics;
+use Core\Graphics\Library;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Media;
+use Core\Svg;
+
+/**
+ * Grafik-Editor (Core\Graphics, resources/js/grafik.js): eigene Seite /admin/grafik/editor und JSON-API für das Overlay
+ * (CMSGraphicEditor.open aus Mediathek, Blockauswahl, Erweiterungen). Alle Routen: Anmeldung + Recht „media.upload“,
+ * POST zusätzlich CSRF (AdminController::auth). Jedes gespeicherte SVG läuft durch Core\Svg::clean().
+ */
+final class GraphicsController extends AdminController
+{
+    /** Übersicht der eigenen Ablage: Symbole, Blockvorschauen, Bausteine (nicht in der Mediathek) */
+    public function index(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        return $this->view('grafik/index', [
+            'css' => ['css/grafik.css'],
+            'groups' => ['preview' => Graphics::all('preview'), 'icon' => Graphics::all('icon'), 'part' => Graphics::all('part')],
+            'blocks' => Graphics::blockTypes(),
+        ]);
+    }
+
+    /** Editor als eigene Seite (Vollbild) – gleiche Daten wie boot() für das Overlay */
+    public function editor(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $boot = $this->bootData($r);
+        if (isset($boot['error'])) {
+            return $this->back('/admin/media', 'error', (string) $boot['error']);
+        }
+        return $this->view('grafik/editor', ['css' => ['css/grafik.css'], 'boot' => $boot, 'title' => __('Grafik-Editor')]);
+    }
+
+    /** Daten zum Öffnen im Overlay: GET /admin/api/grafik/boot?format=…|media=…|id=…|block=… */
+    public function boot(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $boot = $this->bootData($r);
+        return isset($boot['error']) ? Response::fail((string) $boot['error'], 404) : Response::json(['ok' => true] + $boot);
+    }
+
+    /**
+     * Dokument + Umgebung für den Editor. Quellen (eine davon):
+     *   media={id}   SVG aus der Mediathek (Ziel: Mediathek, neue Fassung derselben Datei)
+     *   id={id}      Grafik der eigenen Ablage
+     *   format=info|icon|preview (+ w, h bei Infografik, block bei Blockvorschau) → leere Fläche bzw. Vorschau des Kits als Vorlage
+     */
+    private function bootData(Request $r): array
+    {
+        $doc = ['format' => 'info', 'target' => 'media', 'svg' => '', 'name' => '', 'alt' => '', 'title' => '', 'mediaId' => null,
+            'id' => null, 'block' => null, 'ref' => null];
+        $mediaId = (int) $r->str('media');
+        $id = (int) $r->str('id');
+        if ($mediaId > 0) {
+            $m = Media::find($mediaId);
+            if (!$m || ($m['mime'] ?? '') !== Svg::MIME) return ['error' => __('Nur SVG-Grafiken lassen sich im Grafik-Editor bearbeiten.')];
+            $raw = @file_get_contents(Media::path($m));
+            if (!is_string($raw) || $raw === '') return ['error' => __('Datei nicht gefunden.')];
+            try {
+                $svg = Svg::clean($raw, ['keep_ids' => true])['svg'];
+            } catch (\RuntimeException $e) {
+                return ['error' => $e->getMessage()];
+            }
+            $doc = ['svg' => $svg, 'mediaId' => $mediaId, 'name' => pathinfo((string) $m['file'], PATHINFO_FILENAME), 'alt' => (string) ($m['alt'] ?? ''),
+                'title' => (string) ($m['title'] ?? ''), 'shared' => !empty($m['pool_ref']), 'ref' => 'media:' . $mediaId] + $doc;
+        } elseif ($id > 0) {
+            $g = Graphics::find($id);
+            if (!$g) return ['error' => __('Grafik nicht gefunden.')];
+            $fmt = $g['kind'] === 'part' ? 'info' : (string) $g['kind'];
+            $doc = ['format' => $fmt, 'target' => 'graphics', 'kind' => (string) $g['kind'], 'svg' => (string) $g['svg'], 'id' => (int) $g['id'],
+                'name' => (string) $g['name'], 'block' => $g['block'] ? (string) $g['block'] : null, 'ref' => 'graphic:' . (int) $g['id']] + $doc;
+        } else {
+            $fmt = isset(Graphics::FORMATS[$r->str('format')]) ? $r->str('format') : 'info';
+            $block = preg_match('~^[a-z0-9_-]{1,80}$~', $r->str('block')) ? $r->str('block') : null;
+            $svg = $fmt === 'preview' && $block ? Graphics::previewTemplate($block) : null;
+            $blocks = $block ? Graphics::blockTypes() : [];
+            $doc = ['format' => $fmt, 'target' => Graphics::FORMATS[$fmt]['store'], 'kind' => $fmt === 'info' ? null : $fmt,
+                'svg' => $svg ?? Graphics::blank($fmt, (int) $r->str('w'), (int) $r->str('h')), 'block' => $block,
+                'name' => $block ? (string) ($blocks[$block] ?? $block) : ''] + $doc;
+        }
+        $doc['versions'] = $doc['ref'] ? Graphics::versions((string) $doc['ref']) : [];
+        return [
+            'doc' => $doc,
+            'formats' => Graphics::FORMATS,
+            'formatLabels' => Graphics::formatLabels(),
+            'library' => Library::forEditor(),
+            'libraryGroups' => Library::groups(),
+            'parts' => array_map(fn($p) => $p + ['svg' => (string) (Graphics::find((int) $p['id'])['svg'] ?? '')], Graphics::all('part')),
+            'swatches' => Graphics::swatches(),
+            'fonts' => Graphics::fonts(),
+            'blocks' => Graphics::blockTypes(),
+            'icons' => url('/assets/icons/catalog.json'),
+            'urls' => [
+                'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
+                'clean' => url('/admin/api/grafik/clean'),
+                'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
+                'page' => url('/admin/grafik/editor'),
+            ],
+            'canMediaSvg' => \Core\Features::on('media.svg', false),
+        ];
+    }
+
+    /**
+     * Speichern: POST {svg, target: media|graphics, mediaId?, id?, kind?, name, alt, title, decorative, block, assign}
+     * Antwort: {ok, item, url} bzw. {ok: false, error}
+     */
+    public function save(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $svg = (string) ($r->post['svg'] ?? '');
+        if ($svg === '') return Response::fail(__('Keine Grafik übermittelt.'));
+        $target = (string) ($r->post['target'] ?? 'media');
+        try {
+            if ($target === 'graphics') {
+                $kind = (string) ($r->post['kind'] ?? 'icon');
+                $block = isset($r->post['block']) && is_string($r->post['block']) && $r->post['block'] !== '' ? $r->post['block'] : null;
+                $item = Graphics::store($kind, (string) ($r->post['name'] ?? ''), $svg, (int) ($r->post['id'] ?? 0) ?: null, $block);
+                if ($kind === 'preview' && $block !== null && !empty($r->post['assign'])) {
+                    Graphics::assignPreview($block, $item['id']);
+                    $item = Graphics::toJson((array) Graphics::find($item['id']));
+                }
+                return Response::json(['ok' => true, 'item' => $item, 'versions' => Graphics::versions('graphic:' . $item['id'])]);
+            }
+            $mediaId = (int) ($r->post['mediaId'] ?? 0) ?: null;
+            // Überschreiben ohne Angaben: Alt-Text und Titel der Datei bleiben (nur mitgeschickte Felder ändern sich)
+            $meta = ['name' => (string) ($r->post['name'] ?? ''), 'decorative' => !empty($r->post['decorative'])];
+            foreach (['title', 'alt'] as $k) if (isset($r->post[$k]) && is_string($r->post[$k])) $meta[$k] = $r->post[$k];
+            [$m, $err] = Graphics::saveMedia($svg, $meta, $mediaId);
+            if ($err || !$m) return Response::fail((string) ($err ?: __('Speichern fehlgeschlagen.')));
+            $this->changed();
+            return Response::json(['ok' => true, 'item' => ['id' => (int) $m['id'], 'url' => Media::originalUrl($m), 'name' => Media::displayName($m)],
+                'versions' => Graphics::versions('media:' . (int) $m['id'])]);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+    }
+
+    /** SVG nur bereinigen (Einbettungen ohne Ablage, fremdes SVG vor dem Laden): POST {svg} → {svg} */
+    public function clean(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        try {
+            return Response::json(['ok' => true, 'svg' => Svg::clean((string) ($r->post['svg'] ?? ''), ['keep_ids' => true])['svg']]);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+    }
+
+    /** Eigenen Baustein speichern: POST {svg, name} */
+    public function part(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        try {
+            $item = Graphics::store('part', (string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+        return Response::json(['ok' => true, 'item' => $item + ['svg' => (string) (Graphics::find($item['id'])['svg'] ?? '')]]);
+    }
+
+    /** Grafik der eigenen Ablage löschen (Recht „Dateien löschen“) */
+    public function delete(Request $r, string $id): Response
+    {
+        $this->auth($r, 'media.delete');
+        $ok = Graphics::delete((int) $id);
+        if (!$r->wantsJson()) return $this->back('/admin/grafik', $ok ? 'success' : 'error', $ok ? __('Grafik gelöscht.') : __('Grafik nicht gefunden.'));
+        return $ok ? Response::json(['ok' => true]) : Response::fail(__('Grafik nicht gefunden.'), 404);
+    }
+
+    /** Blockvorschau zuordnen oder aufheben: POST {block, id|''} */
+    public function assign(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $block = (string) ($r->post['block'] ?? '');
+        $id = (int) ($r->post['id'] ?? 0);
+        try {
+            Graphics::assignPreview($block, $id ?: null);
+        } catch (\RuntimeException $e) {
+            if (!$r->wantsJson()) return $this->back('/admin/grafik', 'error', $e->getMessage());
+            return Response::fail($e->getMessage());
+        }
+        if (!$r->wantsJson()) return $this->back('/admin/grafik', 'success', $id ? __('Blockvorschau gilt jetzt in der Blockauswahl.') : __('Blockvorschau aufgehoben.'));
+        return Response::json(['ok' => true]);
+    }
+
+    /** Frühere Fassung laden: GET ?ref=media:{id}|graphic:{id}&id={version} */
+    public function version(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $ref = $r->str('ref');
+        if (!preg_match('~^(media|graphic):\d+$~', $ref)) return Response::fail(__('Unbekannte Grafik.'), 404);
+        $svg = Graphics::version($ref, (int) $r->str('id'));
+        if ($svg === null) return Response::fail(__('Fassung nicht gefunden.'), 404);
+        try {
+            $svg = Svg::clean($svg, ['keep_ids' => true])['svg'];   // vor dem Laden in die Verwaltung erneut bereinigen
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+        return Response::json(['ok' => true, 'svg' => $svg]);
+    }
+}

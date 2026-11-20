@@ -642,10 +642,14 @@ Zeilen*", '*Wort *', '***'];
         $this->assert(Picker::description(['description' => 'Kurz.', 'help' => 'Lang. Mehr.']) === 'Kurz.', 'Beschreibung: description vor help');
         $this->assert(Picker::description(['help' => 'Erster Satz mit genug Zeichen. Zweiter Satz.']) === 'Erster Satz mit genug Zeichen.', 'Beschreibung: erster Satz von help');
         $this->assert(Picker::description(['label' => 'X']) === null, 'Beschreibung: ohne beides null (Kits ohne Angaben)');
+        // ohne Vorschauen dieser Website (Grafik-Editor → Blockvorschauen, Einstellung block_previews) – geprüft wird die Suche im Kit/Kern
+        $sitePv = app()->settings->get('block_previews', null);
+        app()->settings->override(['block_previews' => []]);
         $pv = Picker::previews(app()->theme, [
             'richtext' => ['label' => 'A'], 'text' => ['label' => 'B'], 'unbekannt_xyz' => ['label' => 'C'], 'faq' => ['label' => 'D', 'preview' => false],
             'eigen' => ['label' => 'E', 'preview' => 'cta'],
         ]);
+        app()->settings->override(['block_previews' => $sitePv]);
         $core = is_file(ROOT . '/public/assets/img/previews/richtext.svg');
         $this->assert(!$core || str_contains($pv['richtext']['url'] ?? '', '/img/previews/richtext.svg'), 'Vorschau: Kern-Datei');
         $this->assert(!$core || str_contains($pv['text']['url'] ?? '', '/img/previews/richtext.svg'), 'Vorschau: Alias text → richtext');

@@ -353,6 +353,18 @@ return function (Router $r): void {
     $r->post('/admin/api/ai/kb-polish', [$ai, 'kbPolish']);
     $r->post('/admin/api/ai/schema', [$ai, 'schema']);
 
+    // Grafik-Editor (Core\Graphics): Seite, Overlay-Daten, Speichern; eigene Ablage für Symbole, Blockvorschauen, Bausteine
+    $gr = Admin\GraphicsController::class;
+    $r->get('/admin/grafik', [$gr, 'index']);
+    $r->get('/admin/grafik/editor', [$gr, 'editor']);
+    $r->get('/admin/api/grafik/boot', [$gr, 'boot']);
+    $r->get('/admin/api/grafik/version', [$gr, 'version']);
+    $r->post('/admin/api/grafik/save', [$gr, 'save']);
+    $r->post('/admin/api/grafik/part', [$gr, 'part']);
+    $r->post('/admin/api/grafik/clean', [$gr, 'clean']);
+    $r->post('/admin/api/grafik/assign', [$gr, 'assign']);
+    $r->post('/admin/api/grafik/{id}/delete', [$gr, 'delete']);
+
     $r->get('/admin/media', [Admin\MediaController::class, 'index']);
     $r->post('/admin/media/upload', [Admin\MediaController::class, 'upload']);
     $r->post('/admin/media/chunk', [Admin\MediaController::class, 'chunk']);

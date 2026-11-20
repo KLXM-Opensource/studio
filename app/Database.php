@@ -208,6 +208,11 @@ final class Database
             // Landingpages mit eigenen Domains (Core\Landings): Domain(s) → Seite bzw. Seitenzweig, Optionen/Marke als JSON
             'landings' => "id $pk, label $str NULL, hosts TEXT NOT NULL, page_id INT NOT NULL, include_subpages INT NOT NULL DEFAULT 1,
                 mode VARCHAR(10) NOT NULL DEFAULT 'own', options_json TEXT, active INT NOT NULL DEFAULT 1, created_at VARCHAR(25), updated_at VARCHAR(25)",
+            // Grafik-Editor (Core\Graphics): Symbole, Blockvorschauen und eigene Bausteine – eigene Ablage, nicht in der Mediathek
+            'graphics' => "id $pk, kind VARCHAR(12) NOT NULL, name $str NOT NULL, block VARCHAR(80) NULL, file $str NULL, svg $long,
+                width INT NULL, height INT NULL, user_id INT NULL, created_at VARCHAR(25), updated_at VARCHAR(25)",
+            // Frühere Fassungen beim Überschreiben (Mediathek-Grafik „media:{id}“ bzw. Ablage „graphic:{id}“), je Grafik begrenzt
+            'graphic_versions' => "id $pk, ref VARCHAR(40) NOT NULL, svg $long, user_id INT NULL, created_at VARCHAR(25)",
         ];
 
         foreach ($tables as $name => $cols) {
@@ -308,6 +313,7 @@ final class Database
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS activity_entity ON activity_log (type, tbl, entity_id)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_tracks_media ON media_tracks (media_id, status)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_jobs_status ON media_jobs (status, id)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS graphic_versions_ref ON graphic_versions (ref, id)');
         }
     }
 
