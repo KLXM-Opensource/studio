@@ -1,0 +1,8 @@
+/* Design-Option „Markierung des aktiven Menüpunkts“ – lädt nur, wenn gewählt: nav_mark = highlight, secondary (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Markierung des aktiven Menüpunkts (design: nav_mark) – Linie, Punkt und Strich im Aufklappmenü */
+.nm-highlight .hdr{--f-nav-mark:var(--f-a2)}
+.nm-secondary .hdr{--f-nav-mark:var(--f-b)}
+:is(.nm-highlight,.nm-secondary) :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link){text-decoration-color:var(--f-nav-mark)}
+:is(.nm-highlight,.nm-secondary).nl-dot :is(.hnav__link[aria-current=page],.hnav__link[data-active],.hnav__sub[data-active]>.hnav__link)::after,
+:is(.nm-highlight,.nm-secondary) .hnav__sublink[aria-current=page]::before{background:var(--f-nav-mark)}

@@ -1,0 +1,9 @@
+/* Design-Option „Hell/Dunkel-Schalter im Kopfbereich“ – lädt nur, wenn eingeschaltet: dark_toggle an (theme.php → design → option_css).
+   Früher Teil von _header.css; html.scheme-light und der weiche Wechsel bleiben dort (auch für den Darstellungs-Knopf). */
+/* Hell/Dunkel-Schalter (design: dark_toggle, js/scheme.js): Mond in heller, Sonne in dunkler Darstellung */
+.scheme-btn{display:inline-grid;place-items:center;flex:none;width:2.75rem;height:2.75rem;padding:0;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:none;color:var(--f-ink);cursor:pointer}
+.scheme-btn:hover{background:var(--f-surface)}
+.scheme-btn svg{width:1.2rem;height:1.2rem}
+.scheme-btn__sun{display:none}
+html.scheme-dark .scheme-btn__moon{display:none}html.scheme-dark .scheme-btn__sun{display:block}
+@media (prefers-color-scheme:dark){html.has-dark:not(.scheme-light) .scheme-btn__moon{display:none}html.has-dark:not(.scheme-light) .scheme-btn__sun{display:block}}

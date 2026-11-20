@@ -1,0 +1,1 @@
+.hcase-upper :is(h1,h2,h3,h4){text-transform:uppercase;letter-spacing:max(.02em,calc(var(--f-track)*.01em + .04em))}.hcase-smallcaps :is(h1,h2,h3,h4){font-variant-caps:all-small-caps;letter-spacing:.03em}

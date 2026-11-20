@@ -1,0 +1,32 @@
+/* ---------------------------------------------------------------- Design-Optionen: immer geladener Teil (site.css)
+   Was nur bei einem bestimmten Wert gilt, liegt in css/opt-{option}.css bzw. css/opt-{option}-{wert}.css und lädt nur dann
+   (theme.php → design → option_css, Core\Design::optionCss). Reihenfolge der Dateien = Reihenfolge der Regeln wie früher in
+   einer Datei. Hier bleiben: Zweitfarbe der Abschnitte, dunkle Farbabschnitte, Ecken der Bilder, Kopf „Getönt“/„Verlauf“,
+   Fuß „Seitenfarbe“ – zusammen nur wenige hundert Byte. */
+/* Zweitfarbe (zweite Markenfarbe): Abschnitt „Zweitfarbe“ immer; dazu wahlweise Details (Symbole, Dachzeilen-Marke) und Buttons */
+.bg-secondary{--f-sec-bg:var(--f-b);--f-fg:var(--f-b-on);--f-muted:var(--f-b-on);--f-btn-ink:var(--f-b)}
+/* Dunkles Farbschema (auch Editor-Vorschau is-dark), Option „dark_sections“ = toned (Standard; bright = volle Farbe): Akzent-/Zweitfarben-Abschnitte als dunkel getönte Fläche mit heller Schrift
+   (blendet nicht); Schrift, Linien, Karten und Knöpfe folgen über --f-fg (_base.css) */
+@media (prefers-color-scheme:dark){
+  html.has-dark.dsec-toned:not(.scheme-light) .bg-accent{--f-sec-bg:color-mix(in srgb,var(--f-a) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+  html.has-dark.dsec-toned:not(.scheme-light) .bg-secondary{--f-sec-bg:color-mix(in srgb,var(--f-b) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+}
+html.has-dark.dsec-toned.scheme-dark .bg-accent,html.is-dark.dsec-toned .bg-accent{--f-sec-bg:color-mix(in srgb,var(--f-a) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+html.has-dark.dsec-toned.scheme-dark .bg-secondary,html.is-dark.dsec-toned .bg-secondary{--f-sec-bg:color-mix(in srgb,var(--f-b) 22%,var(--f-bg));--f-fg:var(--f0-ink);--f-muted:var(--f0-text);--f-btn-ink:var(--f-bg)}
+
+/* Bilder: Ecken und Wirkung (Rahmen .frame) */
+/* Ecken der Bilder – gilt auch für Videos (Video-Block, Medien + Text, Datenfelder) über --f-img-r */
+.img-sharp{--f-img-r:0}
+.img-round{--f-img-r:calc(var(--f-radius) * 2.4 + 8px)}
+.img-arch .frame{border-radius:999px 999px var(--f-r-l) var(--f-r-l)}
+
+/* ---------------------------------------------------------------- Kopf & Fuß
+   Hintergrund des Kopfs (hbg-*) und des Fußes (fbg-*): auf Farbflächen dieselben Rollen wie in farbigen Abschnitten. */
+.hbg-surface .hdr{--f-hdr-bg:var(--f-surface)}
+.fbg-page .ftr{background:var(--f-bg)}
+
+/* Zarter Farbverlauf als Hintergrund des Kopfbereichs (hbg-gradient): beide Markenfarben leicht in den Hintergrund
+   gemischt – Schrift bleibt in Überschriften-/Textfarbe (Kontrast wie auf „Getönt“) */
+.hbg-gradient .hdr{--f-hdr-bg:linear-gradient(160deg,color-mix(in srgb,var(--f-a) 15%,var(--f-bg)),color-mix(in srgb,var(--f-b) 12%,var(--f-bg)));border-bottom-color:transparent}
+/* Linie über dem Fußbereich: Grundwerte (Regeln in opt-footer_line.css) – bleiben hier, damit --fl-* überall gleich gesetzt sind */
+html{--fl-c:var(--f-line);--fl-w:1px;--fl-bw:5px}

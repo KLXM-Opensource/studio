@@ -1,0 +1,1 @@
+.ftr--centered{text-align:center}.ftr--centered .ftr__row{flex-direction:column;justify-content:center}.ftr--centered :is(.ftr__inline .cluster,.ftr__bottom,.ftr__legal){justify-content:center}.ftr--centered .ftr__copy{margin-inline:0}.ftr--centered .ftr__text{margin-inline:auto;margin-block-start:1.25rem;max-width:40rem}

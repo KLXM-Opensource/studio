@@ -66,18 +66,20 @@ function apply(res) {
     l.rel = 'stylesheet'; l.href = href; l.dataset.designFont = '';
     d.head.append(l);
   }
-  // Varianten-Stylesheets austauschen (Reihenfolge: nach dem letzten vorhandenen bzw. an der gemerkten Stelle)
+  // Varianten-Stylesheets austauschen – in der Reihenfolge der Liste (Core\Design::optionCss, wie beim Laden der Seite):
+  // vor dem ersten vorhandenen, das in der Liste später kommt, sonst nach dem letzten bzw. an der gemerkten Stelle
   const want = res.opt || [];
   d.querySelectorAll('link[data-design-opt]').forEach(l => { if (!want.includes(l.getAttribute('href'))) dropSheet(l); });
-  for (const href of want) {
+  want.forEach((href, i) => {
     const have = [...d.querySelectorAll('link[data-design-opt]')];
-    if (have.some(l => l.getAttribute('href') === href)) continue;
+    if (have.some(l => l.getAttribute('href') === href)) return;
     const l = d.createElement('link');
     l.rel = 'stylesheet'; l.href = href; l.dataset.designOpt = '';
+    const before = have.find(x => want.indexOf(x.getAttribute('href')) > i);
     const after = have.at(-1) || (optAnchor?.isConnected ? optAnchor : null);
-    if (after) after.after(l); else d.head.append(l);
+    if (before) before.before(l); else if (after) after.after(l); else d.head.append(l);
     convertSheet(l);
-  }
+  });
   checks(res.checks || []);
 }
 

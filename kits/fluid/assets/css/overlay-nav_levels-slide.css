@@ -1,0 +1,20 @@
+/* Dritte Menüebene „Slide“ (design: nav_levels = slide) – lädt nur dann, nach overlay.css am Ende von <body> (templates/layout.php).
+   Früher Teil von overlay.css; Reihenfolge der Regeln wie dort. */
+/* Slide: der Pfeil zeigt nach rechts; offen ersetzt die Unterebene die Liste, der Pfeil wird zur Zeile „‹ Elternseite“ */
+.nv-slide .hnav__morechev{rotate:-90deg}
+.nv-slide ul:has(>li>.hnav__det[open])>li:not(:has(>.hnav__det[open])),
+.nv-slide li:has(>.hnav__det[open])>.hnav__sublink,
+.nv-slide .hnav__det[open]:has(.hnav__det[open])>.hnav__more{display:none}
+.nv-slide .hnav__det[open]>.hnav__more{position:static;display:flex;justify-content:flex-start;align-items:center;gap:.4rem;width:auto;height:auto;margin-bottom:.3rem;padding:.45rem .85rem;border:0;border-radius:max(3px,calc(var(--f-r-l) - .4rem));color:var(--f-muted,var(--f-text));font:500 .875rem/1.3 var(--f-font-label)}
+.nv-slide .hnav__det[open]>.hnav__more .hnav__morechev{rotate:90deg}
+.nv-slide .hnav__det[open]>.hnav__more .hnav__more-t{display:inline}
+.nv-slide .hnav__nested>.hnav__slidehead{display:block}
+.nv-slide .hnav__nested>.hnav__slidehead>.hnav__sublink{color:var(--f-ink);font-weight:700;font-size:1rem}
+.nv-slide .hnav__nested .hnav__sublink,.nv-slide .hnav__nested .hnav__nested .hnav__sublink{padding-inline-start:.85rem;color:var(--f-text);font-size:.9375rem}
+.nv-slide .hnav__nested li:has(>.hnav__det)>.hnav__sublink{padding-block:.6rem}
+.nv-slide .hnav__nested .hnav__more{height:2.55rem}
+@media (prefers-reduced-motion:no-preference){.nv-slide .hnav__det[open]>.hnav__nested{animation:nv-slide .22s ease-out}}
+@keyframes nv-slide{from{opacity:0;translate:1.25rem 0}}
+/* Slide: Zurück-Zeile ringsum gerundet wie die Einträge; die Trennlinie gehört zur Liste darunter (biegt sich nicht in die Rundung) */
+.nv-slide .hnav__det[open]>.hnav__nested{padding-top:.3rem;border-top:1px solid var(--f-line)}
+.nv-slide .hnav__det[open]>.hnav__more:focus-visible{border-radius:max(3px,calc(var(--f-r-l) - .4rem))}

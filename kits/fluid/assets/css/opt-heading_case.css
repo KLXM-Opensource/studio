@@ -1,0 +1,5 @@
+/* Design-Option „Schreibweise der Überschriften“ – lädt nur, wenn gewählt: heading_case = upper, smallcaps (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Überschriften: Versalien bzw. Kapitälchen */
+.hcase-upper :is(h1,h2,h3,h4){text-transform:uppercase;letter-spacing:max(.02em,calc(var(--f-track)*.01em + .04em))}
+.hcase-smallcaps :is(h1,h2,h3,h4){font-variant-caps:all-small-caps;letter-spacing:.03em}

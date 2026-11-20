@@ -1,0 +1,12 @@
+/* Design-Option „Verlinkte Karten beim Zeigen“ – lädt nur, wenn gewählt: hover = glow, zoom, none (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Hover der Karten: Anheben (Standard, has-motion), Leuchten oder ruhig */
+.has-motion.hov-glow :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-glow :is(.feat--link,.tcard--link.card,.tile):hover{border-color:var(--f-a);box-shadow:0 0 0 3px var(--f-a-soft),var(--f-card-sh)}
+.has-motion.hov-none :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-none .tcard--link:hover .frame img{scale:1}
+
+.hov-zoom :is(.tcard--link,.tile,.feat--link) .frame img{transition:scale .8s cubic-bezier(.2,.7,.2,1)}
+.has-motion.hov-zoom :is(.feat--link,.tcard--link,.tile):hover{translate:none}
+.hov-zoom :is(.tcard--link,.tile,.feat--link):hover .frame img{scale:1.06}
+@media (prefers-reduced-motion:reduce){.hov-zoom :is(.tcard--link,.tile,.feat--link):hover .frame img{scale:1}}

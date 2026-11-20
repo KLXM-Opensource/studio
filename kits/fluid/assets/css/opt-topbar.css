@@ -1,0 +1,12 @@
+/* Design-Option „Infoleiste über dem Kopfbereich“ – lädt nur, wenn gewählt: topbar ≠ off (theme.php → design → option_css).
+   Teil von _options.css (alle Optionen in einem, z. B. für Kits, die alles in einen Layer legen). */
+/* Infoleiste über dem Kopf (meta-*) */
+.hdr__meta{background:var(--f-surface);color:var(--f-text);font-size:var(--f-t-2)}
+:is(.meta-accent,.meta-secondary,.meta-dark) .hdr__meta{background:var(--f-zone)}
+.hdr__meta-in{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--f-s-l);width:min(100% - 2 * var(--f-gutter),var(--f-wrap));min-height:2.25rem;margin-inline:auto}
+.hdr__meta-text{margin:0;color:var(--f-ink);font-weight:600}
+.hdr__meta-list{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--f-s-m);margin:0 0 0 auto;padding:0;list-style:none}
+.hdr__meta a{display:inline-flex;align-items:center;gap:.4em;min-height:2.25rem;color:inherit;text-decoration:none}
+.hdr__meta a:hover{color:var(--f-ink);text-decoration:underline}
+.hdr__meta .ico{font-size:1.05em}
+@container hdr (max-width:40rem){.hdr__meta-social,.hdr__meta-mail span{display:none}.hdr__meta-text{flex-basis:100%;padding-top:.35rem}.hdr__meta-list{margin-inline-start:0}}
