@@ -7,22 +7,35 @@
  *   morph             „Video mit Morphing beim Scrollen“ (nur dieses Kit, theme.php → block_extend): eigene Datei stumm in
  *                     Schleife in .ncss-morph, Pause-Schalter und Laden wie beim Hintergrundvideo (js/video-bg.js: nie bei
  *                     „Bewegung reduzieren“/„Daten sparen“). Beim Bearbeiten und ohne eigene Datei wie „Mit Text daneben“.
- *   audio             <ncss-audio-player layout="card"> mit Cover, Kapiteln und Playlist (ab zwei Dateien) – sobald der Block
- *                     die Variante hat (Felder audio: file, title, artist, chapters; audio_transcript).
+ *   audio             <ncss-audio-player layout="card"> mit Cover („Vorschaubild“ poster), Kapiteln und Playlist (ab zwei
+ *                     Dateien). Felder wie in fluid: Wiederholgruppe audio (file, title, artist). Kapitel und Transkript je Datei
+ *                     aus der Mediathek (Core\MediaTracks): Kapitelspur der Seitensprache (sonst die erste), „Transkript anzeigen“
+ *                     je Datei unter dem Player.
  * Beide Player erweitern nur ein natives <video controls>/<audio controls>: ohne JavaScript (und beim Bearbeiten) bleibt der
  * Player des Browsers. CSS/JS nur auf Seiten damit (Merkmale 'video:@player', 'video:@audio', '@morph', '@videobg').
  * @var \Core\Block $b  @var array $d
  */
 use Core\Media;
+use Core\MediaTracks;
 
 if ($b->variant() === 'audio'):
+    // Kapitel einer Audiodatei aus der Mediathek: veröffentlichte Spur in der Sprache der Seite, sonst die erste
+    $chapters = static function (array $m): array {
+        $cur = \Core\Lang::current();
+        $found = null;
+        foreach (MediaTracks::forMedia($m, true) as $t) {
+            if ($t['kind'] !== 'chapters' || !($url = MediaTracks::url($m, $t))) continue;
+            if ($found === null || ($t['lang'] === $cur && $found['lang'] !== $cur)) $found = ['url' => $url, 'lang' => (string) $t['lang']];
+        }
+        return $found ?? ['url' => '', 'lang' => ''];
+    };
     $tracks = [];
     foreach ((array) ($d['audio'] ?? []) as $it) {
         $m = !empty($it['file']) ? media((int) $it['file']) : null;
         if (!$m || !str_starts_with((string) $m['mime'], 'audio/')) continue;
-        $ch = !empty($it['chapters']) ? media((int) $it['chapters']) : null;
-        $tracks[] = ['url' => Media::url($m), 'title' => trim((string) ($it['title'] ?? '')) ?: (string) ($m['title'] ?? ''),
-            'artist' => trim((string) ($it['artist'] ?? '')), 'chapters' => $ch ? Media::url($ch) : ''];
+        $ch = MediaTracks::enabled() ? $chapters($m) : ['url' => '', 'lang' => ''];
+        $tracks[] = ['m' => $m, 'url' => Media::url($m), 'title' => trim((string) ($it['title'] ?? '')) ?: Media::displayName($m),
+            'artist' => trim((string) ($it['artist'] ?? '')), 'chapters' => $ch['url'], 'chapters_lang' => $ch['lang']];
     }
     $cover = !empty($d['poster']) ? media((int) $d['poster']) : null;
     $coverUrl = $cover ? Media::url($cover, 600) : '';
@@ -37,7 +50,7 @@ if ($b->variant() === 'audio'):
       <?php if ($coverUrl !== ''): ?><img class="ncss-audio-player-cover" src="<?= e($coverUrl) ?>" alt=""><?php endif; ?>
       <p class="ncss-audio-player-title"><?= e($first['title']) ?></p>
       <?php if ($first['artist'] !== '' || count($tracks) > 1): ?><p class="ncss-audio-player-artist"><?= e($first['artist']) ?></p><?php endif; ?>
-      <audio controls preload="metadata" src="<?= e($first['url']) ?>"><?= $first['chapters'] !== '' ? '<track kind="chapters" src="' . e($first['chapters']) . '" srclang="' . e(\Core\Lang::current()) . '">' : '' ?></audio>
+      <audio controls preload="metadata" src="<?= e($first['url']) ?>"><?= $first['chapters'] !== '' ? '<track kind="chapters" src="' . e($first['chapters']) . '" srclang="' . e($first['chapters_lang']) . '">' : '' ?></audio>
       <?php if (count($tracks) > 1): ?>
       <ol class="ncss-audio-player-playlist">
         <?php foreach ($tracks as $t): ?>
@@ -46,12 +59,10 @@ if ($b->variant() === 'audio'):
       </ol>
       <?php endif; ?>
     </ncss-audio-player>
-    <?php if (trim(strip_tags((string) ($d['audio_transcript'] ?? ''))) !== ''): ?>
-    <details class="media-transcript"><summary><?= e(lt('Text zum Audio')) ?></summary><div class="prose"><?= rich((string) $d['audio_transcript']) ?></div></details>
-    <?php endif; ?>
+    <?php foreach ($tracks as $t): ?><?= MediaTracks::transcriptHtml($t['m']) ?><?php endforeach; /* Transkript je Datei (Mediathek) */ ?>
     <?php if (trim((string) $d['caption']) !== '' || is_editing()): ?><figcaption class="video__cap"<?= $b->edit('caption') ?>><?= fluid_title((string) $d['caption']) ?></figcaption><?php endif; ?>
   </figure>
-  <?php elseif (is_editing()): ?><p class="empty-hint">Noch keine Audiodatei – in der Seitenleiste hinzufügen.</p><?php endif; ?>
+  <?php elseif (is_editing()): ?><p class="empty-hint">Noch keine Audiodatei – in der Seitenleiste unter „Audiodateien“ hinzufügen.</p><?php endif; ?>
 </div>
 <?php return; endif;
 

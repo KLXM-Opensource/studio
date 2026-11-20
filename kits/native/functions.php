@@ -35,20 +35,26 @@ function native_motion(): bool
     return !is_editing() && !in_array(design('motion'), [false, 0, '0'], true);
 }
 
-/** Darstellungs-Knopf für Besucher (<ncss-preferences>, Design → „Bewegung & Farbschema“) – Standard aus */
-function native_prefs(): bool
+/** Lese-Schriften im Darstellungs-Knopf (Design → „Lese-Schriften im Darstellungs-Knopf anbieten“, nur dieses Kit) */
+function native_prefs_fonts(): bool
 {
-    return (bool) design('visitor_prefs') || (bool) setting('visitor_prefs', false);
+    return fluid_prefs_on() && design('visitor_prefs_fonts') !== false;
 }
 
-/** <ncss-preferences> mit den angebotenen Einstellungen (Farbschema nur mit „Dunkles Farbschema“, Lese-Schrift abschaltbar) */
+/**
+ * Darstellungs-Knopf für Besucher: <ncss-preferences> aus fluid_prefs() (Kit fluid – Schalter, Texte in Sie-Form, Farbschema
+ * nur ohne Hell/Dunkel-Schalter), hier um die Lese-Schrift ergänzt (nach „Schriftgröße“). '' wenn aus.
+ */
 function native_prefs_element(string $class): string
 {
-    $settings = array_filter(['theme' => design('dark') ? 'theme' : '', 'contrast', 'motion', 'text',
-        'font' => design('visitor_prefs_fonts') !== false ? 'font' : '', 'spacing', 'links', 'focus']);
-    // Einleitung in der Anrede der Website (NativeCSS duzt) – übrige Texte wie in NativeCSS (de/en nach <html lang>)
-    $intro = lt('Passen Sie die Darstellung an Ihre Bedürfnisse an. Solange Sie nichts ändern, gelten die Einstellungen Ihres Geräts.');
-    return '<ncss-preferences class="' . e($class) . '" settings="' . e(implode(' ', $settings)) . '" data-label-intro="' . e($intro) . '"></ncss-preferences>';
+    $html = fluid_prefs($class);
+    if ($html === '' || !native_prefs_fonts()) return $html;
+    return (string) preg_replace_callback('~ settings="([^"]*)"~', static function (array $m): string {
+        $list = explode(' ', html_entity_decode($m[1]));
+        $at = array_search('text', $list, true);
+        array_splice($list, $at === false ? count($list) : (int) $at + 1, 0, ['font']);
+        return ' settings="' . e(implode(' ', $list)) . '" data-label-font="' . e(lt('Schrift')) . '" data-label-fontdefault="' . e(lt('Standard')) . '"';
+    }, $html, 1);
 }
 
 /**

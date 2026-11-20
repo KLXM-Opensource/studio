@@ -21,8 +21,8 @@ foreach (['pagebg', 'buttons', 'eyebrow', 'cards', 'dividers', 'palette', 'secti
     if ($theme->hasAsset($file)) $optCss[] = theme_asset($file);
 }
 if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
-// Darstellungs-Knopf für Besucher (<ncss-preferences>): Stylesheets und Skripte nur, wenn eingeschaltet
-$prefs = native_prefs() && !$editor;
+// Darstellungs-Knopf für Besucher (<ncss-preferences>, Schalter und Dateien von fluid): nur, wenn eingeschaltet
+$prefs = fluid_prefs_on() && !$editor;
 ?><!doctype html>
 <html lang="<?= e($lang) ?>" class="<?= e(fluid_html_class()) ?> kit-native<?= $editor ? ' is-editing' : '' ?>">
 <head>
@@ -50,12 +50,14 @@ $prefs = native_prefs() && !$editor;
 <?php endif; ?>
 <meta name="color-scheme" content="<?= design('dark') ? 'light dark' : 'light' ?>">
 <?= \Core\AppIcons::headTags() ?><?= fluid_font_preloads() ?>
-<?php if ($prefs): /* gespeicherte Wahl der Besucher vor dem ersten Zeichnen (Attribute am <html>, Klassen von fluid) */ ?><script src="<?= e(theme_asset('js/ncss-prefs-early.js')) ?>"></script>
+<?php if ($prefs): /* gespeicherte Wahl der Besucher vor dem ersten Zeichnen (Attribute + Klassen, Dateien von fluid) */ ?><script src="<?= e(theme_asset('js/preferences-early.js')) ?>"></script>
+<script src="<?= e(theme_asset('js/prefs-theme.js')) ?>"<?= design('dark') && !fluid_scheme_toggle() ? ' data-scheme' : '' ?>></script>
 <?php endif; ?>
 <?= header_actions_head() /* Kopfbereich-Aktionen: CSS-Teile nach Bedarf (vor dem Kit-CSS), JavaScript nur bei interaktiven Optionen */ ?>
 <link rel="stylesheet" href="<?= e(theme_asset('css/site.css')) ?>">
-<?php if ($prefs): ?><link rel="stylesheet" href="<?= e(theme_asset('css/ncss-preferences.css')) ?>">
-<?php if (design('visitor_prefs_fonts') !== false): ?><link rel="stylesheet" href="<?= e(theme_asset('css/ncss-preferences-fonts.css')) ?>">
+<?php if ($prefs): ?><link rel="stylesheet" href="<?= e(theme_asset('css/preferences.css')) ?>">
+<link rel="stylesheet" href="<?= e(theme_asset('css/prefs.css')) ?>">
+<?php if (native_prefs_fonts()): /* nur dieses Kit: Lese-Schriften (laden erst bei Wahl) */ ?><link rel="stylesheet" href="<?= e(theme_asset('css/ncss-preferences-fonts.css')) ?>">
 <?php endif; endif; ?>
 <?php foreach ($optCss as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
 <?php endforeach; ?>
@@ -71,7 +73,7 @@ $prefs = native_prefs() && !$editor;
 <?php if (!$editor && !is_editing() && design('transitions') === 'morph'): ?><script src="<?= e(theme_asset('js/vt.js')) ?>"></script><?php /* Seitenwechsel: pagereveal vor dem ersten Bild */ ?>
 <?php endif; ?>
 <script src="<?= e(theme_asset('js/native.js')) ?>" defer></script>
-<?php if ($prefs): ?><script src="<?= e(theme_asset('js/ncss-preferences.js')) ?>" defer></script>
+<?php if ($prefs): ?><script src="<?= e(theme_asset('js/preferences.js')) ?>" defer></script>
 <?php endif; ?>
 <?php if (!$editor): ?><script src="<?= e(theme_asset('js/site.js')) ?>" defer></script>
 <?php if (!is_editing() && design('back_nav') === 'smart'): ?><script src="<?= e(theme_asset('js/backnav.js')) ?>" defer></script><?php endif; ?>

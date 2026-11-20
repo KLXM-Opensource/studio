@@ -32,14 +32,11 @@
   html.has-dark { color-scheme: light dark; }
   html.is-dark, html.scheme-dark { color-scheme: dark; }
   html.scheme-light { color-scheme: light; }
-  /* Darstellungs-Einstellungen der Besucher (<ncss-preferences>, Attribute am <html>): Farbschema-Wahl schlägt das Gerät,
-     Kontrast und Lese-Schrift auch für die Blöcke von fluid (--f-…). !important: gewinnt gegen die Design-Werte ohne Layer. */
+  /* Darstellungs-Knopf für Besucher (<ncss-preferences>, Dateien von fluid: css/prefs.css, js/prefs-theme.js → scheme-dark/-light,
+     Kontrast, Bewegung …). Hier nur color-scheme für light-dark() von NativeCSS und die Lese-Schrift (nur dieses Kit) für die
+     Blöcke von fluid (--f-…). !important: gewinnt gegen die Design-Werte ohne Layer. */
   html[data-theme="light"] { color-scheme: light; }
   html.has-dark[data-theme="dark"] { color-scheme: dark; }
-  :root[data-contrast="more"] {
-    --f-text: light-dark(#000000, #ffffff) !important; --f-ink: light-dark(#000000, #ffffff) !important;
-    --f-muted: light-dark(#2b2f36, #dcdfe5) !important; --f-line: light-dark(#5c6370, #a3a9b4) !important;
-  }
   :root[data-ncss-font] { --f-font: var(--ncss-font-family-base) !important; --f-font-head: var(--ncss-font-family-heading) !important; }
 
   body { background: var(--f-bg); color: var(--f-text); font-family: var(--f-font); }

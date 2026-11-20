@@ -20,8 +20,9 @@ Schatten aus Verwaltung → Design. Gegenstück zum Kit „NativeCSS“ von flui
 | Logos | Laufband `.ncss-marquee` mit Schaltfläche „Laufband anhalten“ |
 | Scrollytelling, Zeitleiste, Zitat, Pakete | `<ncss-scrolly>`, `.ncss-timeline` (Linie wächst), `.ncss-testimonial`, `.ncss-pricing` und Preisliste `.ncss-leaders` |
 | Vorher/Nachher | `<ncss-compare>` mit echtem Regler (Tastatur: Pfeile, Pos1/Ende) |
-| Video & Audio | eigene Videodatei im `<ncss-video-player>` (Kapitel, Untertitel aus der Mediathek), Audio im `<ncss-audio-player>` (sobald fluid die Variante hat) |
-| Darstellungs-Knopf | `<ncss-preferences>` (Design → Bewegung & Farbschema, Standard aus): Farbschema, Kontrast, Bewegung, Schriftgröße, Lese-Schrift, Abstände, Links, Fokus |
+| Video & Audio | eigene Videodatei im `<ncss-video-player>` (Kapitel, Untertitel aus der Mediathek), Audio im `<ncss-audio-player>` (Variante `audio` von fluid: Cover, Playlist, Kapitel und Transkript je Datei aus der Mediathek) |
+| Darstellungs-Knopf | `fluid_prefs()` von fluid (Design → Bewegung & Farbschema, Standard aus), hier zusätzlich Lese-Schrift (`visitor_prefs_fonts`) |
+| Filter, Tabellen | Karten-Filter mit `css/filter.css`/`js/filter.js` aus NativeCSS (ersetzen die von fluid); sortierbare Tabellen mit Skript und CSS des Kerns |
 
 Übrige Varianten (Einstieg Collage/Skala/Vergleich/Karten, Karten „Band“, Text + Bild „Geteilt“/„Überlappend“,
 Handlungsaufruf „Mit Bild“/„Großer Schriftzug“/„Foto“, Ablauf „Nummeriert“/„Prozess“, Zitat „Band“/„Laufband“,

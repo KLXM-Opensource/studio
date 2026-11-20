@@ -34,11 +34,10 @@ const NCSS_FILES = [
     'components/audio-player.css', 'js/audio-player.js',
     'components/video-bg.css', 'js/video-bg.js',
     'components/morph.css',
-    'helpers/scroll-shadow.css', 'components/table-sort.css', 'js/table-sort.js',
     'components/filter.css', 'js/filter.js',
     'components/timeline.css', 'components/testimonial.css', 'components/pricing.css', 'components/leaders.css',
-    // Darstellungs-Knopf für Besucher (Design → „Darstellungs-Knopf für Besucher“)
-    'components/preferences.css', 'components/preferences-fonts.css', 'js/preferences.js', 'js/preferences-early.js',
+    // Lese-Schriften im Darstellungs-Knopf (Bedienfeld selbst: Kit fluid, kits/fluid/assets/js/preferences*.js, css/preferences.css)
+    'components/preferences-fonts.css',
 ];
 
 /** Schriften der Darstellungs-Einstellungen (Lese-Schriften) samt Lizenz */

@@ -47,12 +47,13 @@ foreach ($design['groups'] as &$group) {
         if (array_key_exists($name, $darkDefaults) && ($token['type'] ?? '') === 'color') $token['dark'] = $darkDefaults[$name];
     }
     unset($token);
-    // Darstellungs-Knopf für Besucher (<ncss-preferences>): Farbschema, Kontrast, Bewegung, Schriftgröße, Lese-Schrift, Abstände
+    // Darstellungs-Knopf für Besucher: Schalter „visitor_prefs“ kommt von fluid (fluid_prefs()); dieses Kit bietet zusätzlich
+    // Lese-Schriften an (components/preferences-fonts.css von NativeCSS) – direkt hinter dem Schalter von fluid
     if (($group['id'] ?? '') === 'modus') {
-        $group['tokens'][] = ['name' => 'visitor_prefs', 'markup' => true, 'label' => 'Darstellungs-Knopf für Besucher', 'type' => 'bool', 'default' => false,
-            'help' => 'Ein Knopf im Kopfbereich: Besucher stellen selbst Farbschema, Kontrast, Bewegung, Schriftgröße, Lese-Schrift, Textabstände, Links und Fokus ein (merkt sich der Browser, ohne Cookie).'];
-        $group['tokens'][] = ['name' => 'visitor_prefs_fonts', 'markup' => true, 'label' => 'Lese-Schriften im Darstellungs-Knopf anbieten', 'type' => 'bool', 'default' => true,
-            'help' => 'Atkinson Hyperlegible, Lexend und OpenDyslexic (SIL Open Font License) – laden erst, wenn Besucher sie wählen.'];
+        $at = array_search('visitor_prefs', array_column($group['tokens'], 'name'), true);
+        array_splice($group['tokens'], $at === false ? count($group['tokens']) : (int) $at + 1, 0, [[
+            'name' => 'visitor_prefs_fonts', 'markup' => true, 'label' => 'Lese-Schriften im Darstellungs-Knopf anbieten', 'type' => 'bool', 'default' => true,
+            'help' => 'Nur mit „Darstellungs-Knopf für Besucher“: Besucher wählen zusätzlich Atkinson Hyperlegible, Lexend oder OpenDyslexic (SIL Open Font License). Die Schriften laden erst, wenn jemand sie wählt.']]);
     }
 }
 unset($group);
@@ -77,26 +78,6 @@ $design['emit_defaults'] = true;
 
 // Morphing beim Scrollen: zusätzliche Darstellung nur in diesem Kit (im Kit fluid erscheint der Block dann wie „Bild rechts“
 // bzw. „Mit Text daneben“)
-// Block „Vorher/Nachher“: kommt aus dem Kit fluid; solange es ihn dort (noch) nicht gibt, bringt dieses Kit ihn selbst mit –
-// gleiche Feldnamen (before, after, label_before, label_after, ratio, caption). Mit Block in fluid gilt dessen Definition.
-$ownBlocks = is_file(\Core\Kit::dir('fluid') . '/blocks/compare.php') ? [] : ['compare' => [
-    'label' => 'Vorher/Nachher', 'icon' => 'square-half', 'group' => 'Medien',
-    'help' => 'Zwei Bilder übereinander, ein Regler zeigt mehr vom einen oder anderen – für Umbau, Renovierung, Restaurierung, Bildbearbeitung. Beide Bilder im selben Ausschnitt aufnehmen. Ohne JavaScript stehen sie nebeneinander.',
-    'fields' => [
-        ['name' => 'eyebrow', 'label' => 'Dachzeile (optional)', 'type' => 'text', 'max' => 60, 'width' => 'half'],
-        ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'max' => 110, 'width' => 'half'],
-        ['name' => 'intro', 'label' => 'Einleitung (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
-        ['name' => 'before', 'label' => 'Bild vorher', 'type' => 'media', 'required' => true, 'width' => 'half',
-            'help' => 'Alternativtext in der Mediathek beschreibt den Zustand, z. B. „Küche vor dem Umbau: alte Fliesen, dunkle Schränke“.'],
-        ['name' => 'after', 'label' => 'Bild nachher', 'type' => 'media', 'required' => true, 'width' => 'half'],
-        ['name' => 'label_before', 'label' => 'Beschriftung vorher', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'Vorher'],
-        ['name' => 'label_after', 'label' => 'Beschriftung nachher', 'type' => 'text', 'max' => 24, 'width' => 'half', 'placeholder' => 'Nachher'],
-        ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'required' => true, 'default' => '16:9', 'width' => 'half',
-            'options' => ['16:9' => 'Breitbild 16:9', '3:2' => 'Querformat 3:2', '4:3' => 'Querformat 4:3', '1:1' => 'Quadrat 1:1', '4:5' => 'Hochformat 4:5', '3:4' => 'Hochformat 3:4']],
-        ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'max' => 200],
-    ],
-]];
-
 $morphHelp = 'Das Bild startet groß und rückt beim Scrollen zur Seite, der Text erscheint daneben. Bei „Bewegung reduzieren“ stehen Bild und Text einfach nebeneinander. Beim Bearbeiten wie „Bild rechts“.';
 
 return [
@@ -120,8 +101,6 @@ return [
         'curtain' => ['label' => 'Vorhang', 'class' => 'ncss-reveal ncss-reveal--split ncss-reveal--once', 'attr' => 'data-ncss-reveal'],
     ],
 
-    'blocks' => $ownBlocks,
-
     'block_extend' => [
         'media_text' => [
             'variants' => ['morph' => 'Morphing beim Scrollen'],
@@ -139,6 +118,7 @@ return [
     'conditional_css' => [
         // Blöcke und Varianten von fluid, die hier eine eigene Darstellung haben: CSS von fluid nur für dessen Ausgabe
         'css/hero-x.css' => ['@fluid-hero'],
+        'css/hx-compare.css' => ['hero:compare'],   // Block „Vorher/Nachher“: eigene Darstellung (ncss-compare), Einstieg „Vorher/Nachher“ von fluid
         'css/b-media-text.css' => ['@fluid-media_text'],
         'css/b-cta.css' => ['@fluid-cta'],
         'css/b-faq.css' => null,
@@ -148,6 +128,7 @@ return [
         'css/b-quote.css' => ['@fluid-quote'],
         'css/b-steps.css' => ['@fluid-steps'],
         'css/b-pricing.css' => ['@fluid-pricing'],
+        'css/b-pricelist.css' => null, 'css/b-audio.css' => null,   // Preisliste und Audio: eigene Darstellung (ncss-leaders, ncss-audio-player)
         'css/b-scrolly.css' => ['@fluid-scrolly'],
         'js/scrolly.js' => ['@fluid-scrolly'],
         // Darstellungen dieses Kits
@@ -170,8 +151,8 @@ return [
         'css/ncss-testimonial.css' => ['quote:@testimonial'],
         'css/ncss-pricing.css' => ['pricing:@plans'],
         'css/ncss-leaders.css' => ['pricing:@leaders'],
-        'css/ncss-scroll-shadow.css' => ['@table'],
-        'css/ncss-table-sort.css' => ['@tablesort'], 'js/ncss-table-sort.js' => ['@tablesort'],
-        'css/ncss-filter.css' => ['@filter'], 'js/ncss-filter.js' => ['@filter'],
+        // „Filter nach Kategorie“ (Karten): css/filter.css und js/filter.js dieses Kits (Komponente filter von NativeCSS) ersetzen die
+        // gleichnamigen Dateien von fluid – Merkmal '@filter' aus fluid_filter(), nichts doppelt.
+        // Sortierbare Tabellen ('@tablesort'): Skript und Stylesheet des Kerns (js/table-sort.js, css/table-sort.css) – kein eigenes.
     ],
 ];

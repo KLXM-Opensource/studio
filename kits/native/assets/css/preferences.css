@@ -1,0 +1,5 @@
+/* Darstellungs-Knopf für Besucher: Bedienfeld von fluid (NativeCSS components/preferences.css, unverändert in
+   kits/fluid/assets/css/preferences.css) – hier im Layer „components“, damit die Regeln des Rahmens (Layer „native“, z. B.
+   „im Menü nur schmal“) gewinnen. Ersetzt css/preferences.css von fluid (Theme::asset, Vererbung). */
+@layer tokens, reset, base, fluid, helpers, components, native;
+@import "../../../fluid/assets/css/preferences.css" layer(components);
