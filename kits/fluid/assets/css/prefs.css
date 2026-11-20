@@ -1,0 +1,58 @@
+/*
+ * Kit „fluid“ – Darstellungs-Knopf für Besucher (Design → Bewegung & Farbschema → „Darstellungs-Knopf für Besucher“, nur dann
+ * geladen). Das Bedienfeld ist <ncss-preferences> von NativeCSS (js/preferences.js, css/preferences.css); hier die Tokens, die es
+ * braucht (aus den Design-Werten --f-…), der Knopf im Kopf und die Wirkung der Attribute am <html> auf fluid. Farbschema und
+ * Bewegung übersetzt js/prefs-theme.js in die Klassen scheme-dark/scheme-light/has-motion. !important wie bei NativeCSS:
+ * eine Wahl der Besucher schlägt das Design. Aus dem REDAXO-Port des Kits übernommen.
+ */
+:root{
+  --ncss-border-width:1px;--ncss-focus-ring-width:2px;
+  --ncss-font-size-sm:.875rem;--ncss-font-size-md:1.125rem;--ncss-font-weight-medium:500;--ncss-font-weight-semibold:600;
+  --ncss-space-3xs:.25rem;--ncss-space-2xs:.5rem;--ncss-space-xs:.75rem;--ncss-space-sm:1rem;
+  --ncss-radius-sm:calc(var(--f-radius) * .5);--ncss-radius-lg:calc(var(--f-radius) * 1.5);--ncss-radius-full:999px;
+  --ncss-shadow-lg:0 18px 48px -16px var(--f-sh2),0 2px 6px var(--f-sh1);
+  --ncss-motion-duration-fast:100ms;--ncss-motion-easing:cubic-bezier(.4,0,.2,1);
+  /* Farben der Seite – nicht des (ggf. farbigen) Kopfs, der --f-… für sich neu setzt: die Kopien werden hier aufgelöst und erben */
+  --fp-bg:var(--f-bg);--fp-surface:var(--f-surface);--fp-text:var(--f-text);--fp-muted:var(--f-muted);--fp-line:var(--f-line);--fp-a:var(--f-a);--fp-a-on:var(--f-a-on);--fp-focus:var(--f-focus)
+}
+html .ncss-preferences-panel{
+  --ncss-color-surface:var(--fp-bg);--ncss-color-bg:var(--fp-bg);--ncss-color-bg-subtle:var(--fp-surface);
+  --ncss-color-text:var(--fp-text);--ncss-color-text-muted:var(--fp-muted);--ncss-color-border:var(--fp-line);
+  --ncss-color-brand:var(--fp-a);--ncss-color-brand-contrast:var(--fp-a-on);--ncss-color-focus-ring:var(--fp-focus);
+  color:var(--fp-text);background-color:var(--fp-bg);font-family:var(--f-font);text-align:start
+}
+.ncss-preferences-panel button{background-color:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer}
+.ncss-preferences-panel :is(h2,p,fieldset){margin-top:0}
+
+/* Knopf im Kopf bzw. in der Seitenleiste: wie der Hell/Dunkel-Schalter, in der Schriftfarbe des Kopfs (auch farbig) */
+.f-prefs{flex:none;font-family:var(--f-font)}
+.f-prefs .ncss-preferences-toggle{min-height:2.75rem;padding-inline:.8rem;border:1px solid var(--f-line-strong);border-radius:var(--f-btn-r);background:none;color:var(--f-ink);font:600 var(--f-t-1)/1 var(--f-font);cursor:pointer}
+.f-prefs .ncss-preferences-toggle:hover{background:color-mix(in srgb,currentColor 8%,transparent)}
+.f-prefs .ncss-preferences-toggle:focus-visible{outline:2px solid var(--f-focus);outline-offset:2px}
+/* Auf dem Kopfbanner (Bild): eigene Fläche wie die Menü-Schaltfläche, damit die Schrift auf jedem Bild lesbar bleibt */
+.side-banner .f-prefs .ncss-preferences-toggle{background:var(--f-bg);border-color:var(--f-line)}
+.side-banner .f-prefs .ncss-preferences-toggle:hover{background:color-mix(in srgb,var(--f-ink) 8%,var(--f-bg))}
+/* Schmaler Kopf: nur das Symbol (Name bleibt für Screenreader) */
+@container hdr (max-width:36rem){
+  .hdr .f-prefs .ncss-preferences-toggle{justify-content:center;width:2.75rem;padding:0}
+  .hdr .f-prefs .ncss-preferences-toggle>span:not(.ncss-preferences-icon){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
+.mnav__prefs,.side__prefs{display:block}
+.mnav__prefs:not(:defined),.side__prefs:not(:defined){display:none}
+
+/* Kontrast */
+:root[data-contrast="more"]{
+  --f-text:light-dark(#000,#fff)!important;--f-ink:light-dark(#000,#fff)!important;
+  --f-muted:light-dark(#2b2f36,#dcdfe5)!important;--f-line:light-dark(#5c6370,#a3a9b4)!important
+}
+/* Bewegung (zusätzlich nimmt js/prefs-theme.js has-motion zurück) */
+:root[data-motion="reduce"] *,:root[data-motion="reduce"] *::before,:root[data-motion="reduce"] *::after{
+  animation-duration:.01ms!important;animation-iteration-count:1!important;animation-timeline:auto!important;transition-duration:.01ms!important;scroll-behavior:auto!important
+}
+/* Schriftgröße, Textabstände (WCAG 1.4.12), Links, Fokus – wie reset.css von NativeCSS */
+:root[data-text-scale="115"]{font-size:115%!important}
+:root[data-text-scale="130"]{font-size:130%!important}
+:root[data-text-spacing] *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}
+:root[data-text-spacing] :is(p,li,dd,blockquote){margin-block-end:2em!important}
+:root[data-links="underline"] a[href]:not(.btn,[role="tab"],[role="button"]){text-decoration-line:underline!important;text-decoration-thickness:max(1px,.08em)!important;text-underline-offset:.18em!important}
+:root[data-focus="strong"] :focus-visible{outline:4px solid var(--f-focus)!important;outline-offset:3px!important;box-shadow:0 0 0 7px var(--f-bg)!important}

@@ -45,11 +45,17 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <meta name="color-scheme" content="<?= design('dark') ? 'light dark' : 'light' ?>">
 <?= \Core\AppIcons::headTags() ?><?= fluid_font_preloads() ?>
 <?= header_actions_head() /* Kopfbereich-Aktionen: CSS-Teile nach Bedarf (vor dem Kit-CSS), JavaScript nur bei interaktiven Optionen */ ?>
+<?php if (!$editor && fluid_prefs_on()): /* Darstellungs-Knopf für Besucher: gespeicherte Wahl vor dem ersten Zeichnen (Attribute + Klassen) */ ?><script src="<?= e(theme_asset('js/preferences-early.js')) ?>"></script>
+<script src="<?= e(theme_asset('js/prefs-theme.js')) ?>"<?= design('dark') && !fluid_scheme_toggle() ? ' data-scheme' : '' ?>></script>
+<?php endif; ?>
 <link rel="stylesheet" href="<?= e(theme_asset('css/site.css')) ?>">
 <?php foreach ($optCss as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
 <?php endforeach; ?>
 <?php foreach ($extraCss as $css): ?><link rel="stylesheet" href="<?= e($css) ?>">
 <?php endforeach; ?>
+<?php if (!$editor && fluid_prefs_on()): ?><link rel="stylesheet" href="<?= e(theme_asset('css/preferences.css')) ?>">
+<link rel="stylesheet" href="<?= e(theme_asset('css/prefs.css')) ?>">
+<?php endif; ?>
 <?php $designHead = design_head(); ?><?= $designHead ?>
 <?php if (str_contains($designHead, 'data-design-preview')): /* Vorschau im Style-Editor: Dunkel-Regeln auch über html.is-dark */ ?><link rel="stylesheet" href="<?= e(theme_asset('css/preview.css')) ?>">
 <?php endif; ?>
@@ -60,6 +66,7 @@ if ($editor || is_editing()) $optCss[] = theme_asset('css/editing.css');
 <?php if (!$editor && !is_editing() && design('transitions') === 'morph'): ?><script src="<?= e(theme_asset('js/vt.js')) ?>"></script><?php /* Seitenwechsel: pagereveal vor dem ersten Bild */ ?>
 <?php endif; ?>
 <?php if (!$editor): ?><script src="<?= e(theme_asset('js/site.js')) ?>" defer></script>
+<?php if (fluid_prefs_on()): ?><script src="<?= e(theme_asset('js/preferences.js')) ?>" defer></script><?php endif; ?>
 <?php if (!is_editing() && design('back_nav') === 'smart'): ?><script src="<?= e(theme_asset('js/backnav.js')) ?>" defer></script><?php endif; ?>
 <?php endif; ?>
 <?php if (isset(app()->request->query['pwa']) && setting('sys.pwa', true) && setting('sys.pwa_offline', true)): ?><script src="<?= e(asset('js/pwa.js')) ?>" data-sw="<?= e(base_path()) ?>/sw.js" data-scope="<?= e(base_path()) ?>/" defer></script>

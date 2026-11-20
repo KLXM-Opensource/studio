@@ -255,7 +255,7 @@ function fluid_nav_fit(array $menu, ?array $cta, array $langs, bool $search, str
     // Überstehendes Logo (quadratisch, hängt aus der Leiste): Breite ≈ Höhe
     if ($logo && design('logo_over')) $brand = ['large' => 6.5, 'xl' => 7.5][(string) design('logo_size')] ?? 5.5;
     // Aktionen rechts (Suche, Handlungsaufruf, Kontakt-Chip …) schätzt Core\HeaderActions je nach Einstellung
-    $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0) + (fluid_scheme_toggle() ? 3.25 : 0);
+    $tools = \Core\HeaderActions::widthRem() + ($langs ? count($langs) * 2.4 + .6 : 0) + (fluid_scheme_toggle() ? 3.25 : 0) + (fluid_prefs_on() ? 9 : 0);
     $gut = 2 * 2.4;                                                           // Seitenabstand bei ~60–80 rem
     $total = match ($variant) {
         'centered' => max($brand, $nav + $tools + 1.5) + $gut,
@@ -583,6 +583,33 @@ function fluid_title(string $text): string
 function fluid_scheme_toggle(): bool
 {
     return (bool) design('dark_toggle') && (bool) design('dark');
+}
+
+/** Darstellungs-Knopf für Besucher (Design → „Darstellungs-Knopf für Besucher“) – nie im Seiten-Editor */
+function fluid_prefs_on(): bool
+{
+    return (bool) design('visitor_prefs') && !is_editing();
+}
+
+/**
+ * Darstellungs-Knopf für Besucher: <ncss-preferences> von NativeCSS (js/preferences.js baut Knopf und Bedienfeld) mit den Texten
+ * der Website (lt(), Sie-Form) – Farbschema nur mit „Dunkles Farbschema“ und ohne Hell/Dunkel-Schalter. '' wenn aus.
+ */
+function fluid_prefs(string $class = ''): string
+{
+    if (!fluid_prefs_on()) return '';
+    $settings = array_filter([design('dark') && !fluid_scheme_toggle() ? 'theme' : '', 'contrast', 'motion', 'text', 'spacing', 'links', 'focus']);
+    $labels = ['button' => lt('Darstellung'), 'title' => lt('Darstellung anpassen'),
+        'intro' => lt('Passen Sie die Darstellung an Ihre Bedürfnisse an. Solange Sie nichts ändern, gelten die Einstellungen Ihres Geräts.'),
+        'system' => lt('System'), 'theme' => lt('Farbschema'), 'light' => lt('Hell'), 'dark' => lt('Dunkel'), 'contrast' => lt('Kontrast'),
+        'normal' => lt('Normal'), 'more' => lt('Erhöht'), 'motion' => lt('Bewegung'), 'reduce' => lt('Reduziert'), 'full' => lt('Voll'),
+        'motionhint' => lt('Ihr Gerät wünscht reduzierte Bewegung – „Voll“ hebt das nur für diese Website auf.'), 'text' => lt('Schriftgröße'),
+        'spacing' => lt('Größere Text- und Zeilenabstände'), 'links' => lt('Links immer unterstreichen'), 'focus' => lt('Fokus-Rahmen verstärken'),
+        'reset' => lt('Zurücksetzen'), 'resetdone' => lt('Alle Einstellungen zurückgesetzt, es gilt Ihr Gerät.'), 'on' => lt('an'), 'off' => lt('aus'),
+        'close' => lt('Schließen')];
+    $attrs = '';
+    foreach ($labels as $k => $v) $attrs .= ' data-label-' . $k . '="' . e($v) . '"';
+    return '<ncss-preferences class="f-prefs' . ($class !== '' ? ' ' . e($class) : '') . '" settings="' . e(implode(' ', $settings)) . '"' . $attrs . '></ncss-preferences>';
 }
 
 /**

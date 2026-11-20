@@ -33,6 +33,7 @@ if ($banner === 'band' || $banner === 'image'):
       <?php if ($claim !== ''): ?><p class="side-banner__claim"><?= fluid_title($claim) ?></p><?php endif; ?>
     </div>
     <div class="side-banner__tools">
+      <?= fluid_prefs() /* Darstellungs-Knopf für Besucher (Design, Standard aus) */ ?>
       <?php if ($cta): ?><a class="btn btn--primary side-banner__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?></a><?php endif; ?>
       <?php if ($hasSheet): ?>
       <button type="button" class="menu-btn side__menu" popovertarget="mnav" aria-controls="mnav" aria-haspopup="dialog">
@@ -74,7 +75,7 @@ if ($banner === 'band' || $banner === 'image'):
     </div>
     <?php if ($search !== ''): ?><div class="side__search"><?= $search ?></div><?php endif; ?>
     <?php if ($menu): ?><nav class="side__nav snav" aria-label="<?= e(lt('Hauptnavigation')) ?>"><?= fluid_nav_tree($menu) ?></nav><?php endif; ?>
-    <?php if ($cta || $quick !== '' || $social || $langs): ?>
+    <?php if ($cta || $quick !== '' || $social || $langs || fluid_prefs_on()): ?>
     <div class="side__foot">
       <?php if ($cta): ?><a class="btn btn--primary side__cta" <?= fluid_link_attrs($cta['link']) ?>><?= e($cta['label']) ?></a><?php endif; ?>
       <?= $quick ?>
@@ -84,6 +85,7 @@ if ($banner === 'band' || $banner === 'image'):
       </ul>
       <?php endif; ?>
       <?php if ($langs): ?><?= header_actions_lang($langs, 'side__lang') ?><?php endif; ?>
+      <?= fluid_prefs('side__prefs') /* Darstellungs-Knopf für Besucher (Design, Standard aus); schmal: im Seitenblatt */ ?>
     </div>
     <?php endif; ?>
   </div>

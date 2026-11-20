@@ -622,4 +622,7 @@ return [
     'Mehrere mit Komma trennen. Wirkt nur mit „Filter nach Kategorie“ am Block.' => 'Separate several with commas. Only takes effect with “Filter by category” on the block.',
     'Filter nach Kategorie' => 'Filter by category',
     'Schaltflächen über den Karten aus den Kategorien der Karten (ab zwei verschiedenen, bis zu zwölf). Besucher sehen dann nur die Karten der gewählten Kategorie.' => 'Buttons above the cards from the cards\' categories (from two different ones, up to twelve). Visitors then only see the cards of the chosen category.',
+    // Design: Darstellungs-Knopf für Besucher
+    'Darstellungs-Knopf für Besucher' => 'Display button for visitors',
+    'Ein Knopf „Darstellung“ im Kopf: Besucher wählen Farbschema, Kontrast, Bewegung, Schriftgröße, Textabstände, unterstrichene Links und einen deutlicheren Fokus-Rahmen – gespeichert nur in ihrem Browser. Ohne Wahl gelten die Einstellungen ihres Geräts. Ersetzt keine barrierefreie Gestaltung, ergänzt sie. Mit Hell/Dunkel-Schalter entfällt dort das Farbschema.' => 'A “Display” button in the header: visitors choose colour scheme, contrast, motion, text size, text spacing, underlined links and a stronger focus outline – stored only in their browser. Without a choice their device settings apply. It does not replace accessible design, it complements it. With the light/dark switch, the colour scheme is left out there.',
 ];
