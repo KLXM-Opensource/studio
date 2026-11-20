@@ -29,6 +29,8 @@ $defaults = array_combine($colorKeys, $light) + [
     'secondary' => '#314164', 'on_secondary' => '#FFFFFF',
     'font_body' => 'system', 'font_head' => 'system', 'heading_weight' => 700, 'heading_tracking' => -1,
     'radius' => 12, 'buttons' => 'solid', 'cards' => 'outlined', 'shadow' => 'soft', 'eyebrow' => 'plain',
+    // Kopfleiste ruhig: nur die Lupe (öffnet das Suchfeld), kein Handlungsaufruf – beides im Design änderbar
+    'ha_search' => 'popover', 'ha_cta_style' => 'none',
 ];
 $darkDefaults = array_combine($colorKeys, $dark) + ['secondary' => '#9DB0D8', 'on_secondary' => '#0A1628'];
 
