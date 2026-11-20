@@ -6,6 +6,9 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+
+### Karte folgt der Wahl Hell/Dunkel der Website
+- Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
 ### Blockauswahl mit Gruppen, Vorschau und Favoriten
 - „+ Block einfügen“ ordnet die Blöcke nach Gruppen und bietet drei Ansichten: kompakte **Liste**, **Kacheln mit Vorschau** (Skizze des Aufbaus, Kurzbeschreibung, Sprungleiste der Gruppen) und **Liste mit großer Vorschau** (Beschreibung, Varianten zum Auswählen, „Einfügen“, Stern für Favoriten). Die gewählte Ansicht, **Favoriten** und die **zuletzt verwendeten** fünf Blöcke merkt sich das Konto (`Core\UiPrefs`, Schlüssel `blockpicker`). Suche über Name, Beschreibung, Typ und Gruppe (Treffer im Namen zuerst); Tastatur mit Pfeilen (in Kacheln auch ←/→), Enter, Esc; Combobox mit `aria-activedescendant`. Kopierter Block, „Häufig verwendet“, Vorlagen der Erweiterungen und die Auswahl in Layout-Spalten bleiben.
 - Blockdefinition: neu `'description'` (ein Satz, übersetzbar; ohne Angabe der erste Satz von `'help'`) und optional `'preview'` (anderer Name oder `false`). Vorschaugrafiken als SVG in `kits/{kit}/assets/img/previews/{typ}.svg` (auch `{typ}--{variante}.svg`), Suche über Kit, Eltern-Kits, Erweiterung und Kern (`resources/img/previews/`) – `Core\Blocks\Picker`. Alles optional: Kits ohne Beschreibung und Vorschau zeigen Symbol und Name wie bisher; `kit:check -v` nennt Fehlendes nur als Hinweis.

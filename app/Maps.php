@@ -193,7 +193,7 @@ final class Maps
 
         $cfg = [
             'style' => self::styleUrl($o['style'] ?? null),
-            // Dunkler Kartenstil – nur genutzt, wenn das Theme Dunkelmodus erklärt (<meta name="color-scheme" content="light dark">)
+            // Dunkler Kartenstil – genutzt, wenn die Website an der Stelle der Karte dunkel ist (helle Schrift; map.mjs)
             'styleDark' => self::styleUrl((string) setting('sys.map_style_dark', 'dark')),
             'center' => [$p[1], $p[0]],
             'zoom' => $zoom,

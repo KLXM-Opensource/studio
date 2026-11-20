@@ -32,10 +32,17 @@ async function init(el) {
   try {
     const ml = await loadLib(cfg);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // Dunkler Stil nur, wenn das Theme Dunkelmodus unterstützt und das Gerät ihn verlangt
-    const themeDark = /dark/.test(document.querySelector('meta[name="color-scheme"]')?.content || '');
+    // Dunkler Stil, wenn die Website an dieser Stelle tatsächlich dunkel ist – nicht nur das Gerät: Hell/Dunkel-Schalter,
+    // Darstellungs-Knopf (scheme-dark/scheme-light, data-theme) und dunkle Abschnitte zählen mit. Wie bei den Diagrammen
+    // (charts.mjs): helle Schrift = dunkler Grund. Kits ohne Dunkelmodus haben dunkle Schrift → heller Stil.
     const mq = matchMedia('(prefers-color-scheme: dark)');
-    const styleFor = () => (themeDark && mq.matches && cfg.styleDark ? cfg.styleDark : cfg.style);
+    const isDark = () => {
+      const m = getComputedStyle(el).color.match(/[\d.]+/g) || [];
+      const [r, g, b] = m.slice(0, 3).map(n => +n / 255).map(c => (c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4));
+      return m.length >= 3 && .2126 * r + .7152 * g + .0722 * b > .4;
+    };
+    let dark = isDark();
+    const styleFor = () => (dark && cfg.styleDark ? cfg.styleDark : cfg.style);
     const map = new ml.Map({
       container: canvas,
       style: styleFor(),
@@ -57,7 +64,11 @@ async function init(el) {
     pin.setAttribute('aria-label', cfg.label || 'Standort');
     new ml.Marker({ element: pin, anchor: 'bottom' }).setLngLat(cfg.center).addTo(map);
     map.once('load', () => el.classList.replace('is-loading', 'is-ready'));
-    if (themeDark) mq.addEventListener('change', () => map.setStyle(styleFor()));
+    if (cfg.styleDark) {
+      const sync = () => requestAnimationFrame(() => { const now = isDark(); if (now !== dark) { dark = now; map.setStyle(styleFor()); } });
+      mq.addEventListener('change', sync);
+      new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-scheme'] });
+    }
     map.on('error', e => console.warn('Karte:', e?.error?.message || e));
   } catch (e) {
     el.classList.remove('is-loading');
