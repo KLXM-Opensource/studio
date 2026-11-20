@@ -27,7 +27,7 @@ use Core\Kit;
 final class Installation
 {
     /** Kits und Erweiterungen, die das Kern-Repository mitbringt (backup:selftest gleicht mit git ls-files ab) */
-    public const BUNDLED_KITS = ['basis', 'editorial', 'essenz', 'fluid', 'foto', 'frameworks', 'galerie', 'glas', 'modern', 'nature', 'praxis', 'starter'];
+    public const BUNDLED_KITS = ['basis', 'editorial', 'essenz', 'fluid', 'foto', 'frameworks', 'galerie', 'glas', 'modern', 'native', 'nature', 'praxis', 'starter'];
     public const BUNDLED_EXTENSIONS = ['consent_kit', 'dav', 'video_tools'];
 
     /**
