@@ -14,7 +14,9 @@
 import { NS, num } from './geom.js';
 
 /** Stil-Eigenschaften eines Laufs (Formatierung einzelner Wörter) */
-export const RUN_PROPS = ['font-weight', 'font-style', 'fill', 'text-decoration', 'font-family', 'font-size', 'letter-spacing'];
+export const RUN_PROPS = ['font-weight', 'font-style', 'fill', 'text-decoration', 'font-family', 'font-size', 'letter-spacing', 'font-variation-settings'];
+/** nur als CSS (style) gültig – siehe doc.js CSS_ONLY */
+const CSS_RUN = ['font-variation-settings', 'font-feature-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps', 'font-variant-position', 'font-kerning'];
 const sameStyle = (a, b) => RUN_PROPS.every(k => (a[k] || '') === (b[k] || ''));
 const styleOf = el => { const s = {}; for (const k of RUN_PROPS) { const v = el.getAttribute(k) || el.style?.getPropertyValue(k); if (v) s[k] = v.trim(); } return s; };
 
@@ -158,7 +160,7 @@ function measurer(el) {
 function runNode(r) {
   if (!Object.keys(r.s).length) return document.createTextNode(r.t);
   const ts = document.createElementNS(NS, 'tspan');
-  for (const [k, v] of Object.entries(r.s)) ts.setAttribute(k, v);
+  for (const [k, v] of Object.entries(r.s)) { if (CSS_RUN.includes(k)) ts.style.setProperty(k, v); else ts.setAttribute(k, v); }
   ts.textContent = r.t;
   return ts;
 }

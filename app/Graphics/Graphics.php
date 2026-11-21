@@ -357,7 +357,8 @@ final class Graphics
      * Schriftdateien für „Text in Kurven umwandeln“ (fontkit liest WOFF2 und variable Schriften): installierte Schriften des
      * Schriften-Managers (Core\Fonts) und Lato der Verwaltung. [Familie => ['files' => [[url, subset, style, weight|null]],
      * 'css' => font.css oder null]] – weight null = variable Schrift (Achse wght).
-     * @return array<string, array{files: list<array{url: string, subset: string, style: string, weight: ?int}>, css: ?string}>
+     * Dazu axes (variable Schriften: Tag => min/max/default) und category (serif, sans-serif, …) für die Schriftauswahl.
+     * @return array<string, array{files: list<array{url: string, subset: string, style: string, weight: ?int}>, css: ?string, axes?: ?array<string, array{min: float, max: float, default: float}>, category?: ?string}>
      */
     public static function fontFiles(): array
     {
@@ -375,7 +376,13 @@ final class Graphics
                     $info = $parse((string) ($file['file'] ?? ''));
                     if ($info) $files[] = ['url' => \Core\Fonts::url($id . '/' . $file['file'])] + $info;
                 }
-                if ($files) $out[$family] = ['files' => $files, 'css' => \Core\Fonts::cssUrl((string) $id)];
+                // Achsen (variable Schriften) und Art (Serife, serifenlos …) für die Schriftauswahl
+                $axes = [];
+                foreach ((array) ($f['axes'] ?? []) as $tag => $a) {
+                    if (is_string($tag) && preg_match('~^[A-Za-z]{4}$~', $tag) && is_array($a)) $axes[$tag] = ['min' => (float) ($a['min'] ?? 0), 'max' => (float) ($a['max'] ?? 0), 'default' => (float) ($a['default'] ?? 0)];
+                }
+                if ($files) $out[$family] = ['files' => $files, 'css' => \Core\Fonts::cssUrl((string) $id), 'axes' => $axes ?: null,
+                    'category' => preg_match('~^[a-z-]{1,20}$~', (string) ($f['category'] ?? '')) ? (string) $f['category'] : null];
             }
         } catch (\Throwable) {
             // ohne Schriften-Manager: nur die Schrift der Verwaltung
@@ -389,6 +396,52 @@ final class Graphics
             if ($files) $out['Lato'] = ['files' => $files, 'css' => null];
         }
         return $out;
+    }
+
+    // ================================================================= Persönliche Einstellungen (Core\UiPrefs, Schlüssel „grafik“)
+
+    /** Farbmodi des Bereichs „Farbe“ */
+    public const COLOR_MODES = ['hex', 'rgb', 'hsl', 'hsb', 'oklch'];
+
+    /**
+     * Einstellungen des Editors je Konto: Favoriten und zuletzt verwendete Schriften (Stapel bzw. Familien), Farbmodus.
+     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string}
+     */
+    public static function prefs(?array $user): array
+    {
+        $p = \Core\UiPrefs::get($user, 'grafik', []);
+        return self::cleanPrefs(is_array($p) ? $p : []);
+    }
+
+    /** Ein Wert setzen (fontFav, fontRecent, colorMode) – unbekannte Schlüssel und Werte werden verworfen */
+    public static function setPref(int $userId, string $key, mixed $value): array
+    {
+        $raw = app()->db->fetchValue('SELECT ui_prefs FROM users WHERE id = ?', [$userId]);
+        $all = json_decode((string) $raw, true);
+        $cur = is_array($all) && is_array($all['grafik'] ?? null) ? $all['grafik'] : [];
+        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
+        $cur[$key] = $value;
+        $clean = self::cleanPrefs($cur);
+        \Core\UiPrefs::set($userId, 'grafik', $clean);
+        return $clean;
+    }
+
+    /** Nur Text ohne Markup, begrenzte Längen (Schriftnamen bzw. -stapel) */
+    private static function cleanPrefs(array $p): array
+    {
+        $list = function (mixed $v, int $max): array {
+            $out = [];
+            foreach (is_array($v) ? $v : [] as $s) {
+                if (!is_string($s)) continue;
+                $s = trim($s);
+                if ($s === '' || mb_strlen($s) > 120 || !preg_match('~^[\p{L}\p{N} ,\'"_.-]+$~u', $s)) continue;
+                if (!in_array($s, $out, true)) $out[] = $s;
+                if (count($out) >= $max) break;
+            }
+            return $out;
+        };
+        $mode = is_string($p['colorMode'] ?? null) && in_array($p['colorMode'], self::COLOR_MODES, true) ? $p['colorMode'] : 'hex';
+        return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode];
     }
 
     /** Schriften für Text: Kit-Schriften (Core\Design::fonts) und allgemeine Familien */

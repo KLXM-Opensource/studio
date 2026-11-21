@@ -128,9 +128,11 @@ final class GraphicsController extends AdminController
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
                 'clean' => url('/admin/api/grafik/clean'),
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
-                'page' => url('/admin/grafik/editor'),
+                'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'),
             ],
             'canMediaSvg' => \Core\Features::on('media.svg', false),
+            // persönlich (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
+            'prefs' => Graphics::prefs(app()->auth->user()),
         ];
     }
 
@@ -180,6 +182,22 @@ final class GraphicsController extends AdminController
             // editor: Arbeitsfassung (Editor-Daten bleiben); images: entfernte Pixelbilder (der Editor meldet sie)
             $c = Svg::clean((string) ($r->post['svg'] ?? ''), !empty($r->post['editor']) ? ['editor' => true] : ['keep_ids' => true]);
             return Response::json(['ok' => true, 'svg' => $c['svg'], 'images' => $c['images'], 'bytes' => $c['out']]);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+    }
+
+    /** Persönliche Einstellung des Editors (Schrift-Favoriten, zuletzt verwendet, Farbmodus): POST {key, value(JSON)} */
+    public function prefs(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $user = app()->auth->user();
+        if (!$user) return Response::fail(__('Nicht angemeldet.'), 403);
+        // JSON-Anfrage: Liste bzw. Text direkt; Formular: JSON-Text
+        $value = $r->post['value'] ?? null;
+        if (is_string($value) && ($value[0] ?? '') === '[') $value = json_decode($value, true);
+        try {
+            return Response::json(['ok' => true, 'prefs' => Graphics::setPref((int) $user['id'], (string) ($r->post['key'] ?? ''), $value)]);
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }

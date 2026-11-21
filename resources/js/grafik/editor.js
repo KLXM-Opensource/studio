@@ -27,7 +27,8 @@ import { parseColor, hex } from './color.js';
 import { h, iconBtn, menu, closeMenus, modal, MOD, ALT, SHIFT, isMac } from './ui.js';
 import { buildPanels } from './panels.js';
 import { TextEditor } from './textedit.js';
-import { readText, layoutText, transformCase } from './text.js';
+import { readText, layoutText, transformCase, styleRange } from './text.js';
+import { fontPicker, fontItems, itemFor, WEIGHTS } from './fontpicker.js';
 import { booleanOp, simplifyD, outlineStroke, offsetArea, pathLike, makeCompound, recomputeCompound, isCompound } from './bool.js';
 import { makeClip, releaseClip, clipOf } from './clip.js';
 import { outlineAll } from './outline.js';
@@ -100,6 +101,8 @@ export class GraphicEditor {
       fontWeight: '400', anchor: 'start', snap: true, grid: this.format === 'icon',
     };
     this.recent = [];
+    // persönliche Einstellungen (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
+    this.prefs = { fontFav: [], fontRecent: [], colorMode: 'hex', ...(boot.prefs || {}) };
     this.loadFonts();
     this.nodeSel = new Set();   // ausgewählte Knoten (Direktauswahl): "s:i"
     this.build();
@@ -1572,6 +1575,79 @@ export class GraphicEditor {
     this.commit(t('Vom Pfad gelöst'));
   }
 
+  /**
+   * Vorschau einer Schrift (Schriftauswahl: Zeiger oder Pfeile auf einer Schrift) – wirkt sofort auf die markierten Zeichen
+   * bzw. die ausgewählten Texte, ohne Schritt im Protokoll. null = zurücknehmen. Übernehmen geht danach über textProp().
+   */
+  textPreview(props) {
+    const te = this.textEd;
+    const texts = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (!this._preview) {
+      if (!props) return;
+      this._preview = te && te.range[0] !== te.range[1]
+        ? { te, model: te.model, range: te.range }
+        : { els: texts.map(el => ({ el, attrs: [...el.attributes].map(a => [a.name, a.value, a.namespaceURI]), kids: [...el.childNodes].map(n => n.cloneNode(true)) })) };
+    }
+    const pv = this._preview;
+    // erst zurück auf den Stand vor der Vorschau
+    if (pv.te) { pv.te.model = pv.model; }
+    else for (const s of pv.els) {
+      const el = s.el;
+      for (const a of [...el.attributes]) el.removeAttributeNS(a.namespaceURI, a.localName);
+      for (const [n, v, ns] of s.attrs) ns ? el.setAttributeNS(ns, n, v) : el.setAttribute(n, v);
+      while (el.firstChild) el.firstChild.remove();
+      for (const k of s.kids) el.append(k.cloneNode(true));
+    }
+    if (!props) {
+      if (pv.te) pv.te.relayout(); else this.textEd?.relayout();
+      this._preview = null;
+      this.draw();
+      return;
+    }
+    if (pv.te) { pv.te.model = styleRange(pv.model, pv.range[0], pv.range[1], props); pv.te.relayout(); }
+    else for (const s of pv.els) {
+      for (const [k, v] of Object.entries(props)) {
+        setProp(s.el, k, v);
+        for (const r of s.el.querySelectorAll('tspan')) { r.removeAttribute(k); r.style?.removeProperty(k); }
+      }
+      if (s.el.hasAttribute('data-ge-frame') || s.el.querySelector('tspan[dy]')) this.retext(s.el);
+    }
+    this.draw();
+  }
+
+  /** Mehrere Zeichen-Eigenschaften als ein Schritt (Schriftauswahl: Familie + Schnitt) */
+  textProps(props) {
+    if (this._preview) this.textPreview(null);
+    const te = this.textEd;
+    if (te && te.range[0] !== te.range[1]) { te.format(props); this.panels.refresh(); return; }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (props['font-family']) this.opt.fontFamily = props['font-family'];
+    if ('font-weight' in props) this.opt.fontWeight = props['font-weight'] || '400';
+    if (!list.length) { this.renderCtx(true); this.panels.refresh(); return; }
+    for (const el of list) {
+      for (const [k, v] of Object.entries(props)) {
+        setProp(el, k, v);
+        for (const r of el.querySelectorAll('tspan')) { r.removeAttribute(k); r.style?.removeProperty(k); if (r.getAttribute('style') === '') r.removeAttribute('style'); }
+      }
+      if (el.hasAttribute('data-ge-frame') || el.querySelector('tspan[dy]')) this.retext(el);
+    }
+    if (te) { te.dirty = true; te.before = null; this.draw(); this.panels.refresh(); this.renderCtx(true); return; }
+    this.commit(t('Schrift geändert'));
+  }
+
+  /** Persönliche Einstellung merken (Core\UiPrefs) – sofort im Editor, gespeichert gebündelt */
+  setPref(key, value) {
+    this.prefs[key] = value;
+    if (!this.boot.urls?.prefs) return;
+    clearTimeout(this._prefT?.[key]);
+    (this._prefT ||= {})[key] = setTimeout(() => {
+      fetch(this.boot.urls.prefs, { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-Token': csrf() }, body: JSON.stringify({ key, value }) }).catch(() => {});
+    }, 300);
+  }
+
+  /** Kurze Meldung für Bildschirmleser (Statuszeile, aria-live) */
+  announce(msg) { this.hint(msg); clearTimeout(this._annT); this._annT = setTimeout(() => this.hint(), 4000); }
+
   /** Raster ein/aus (zeigen und einrasten) */
   toggleGrid() { this.opt.grid = !this.opt.grid; this.snapCache = null; this.renderCtx(true); this.draw(); }
 
@@ -1921,12 +1997,17 @@ export class GraphicEditor {
     if (this.tool === 'pencil') html += `<label class="ge-ctx__f">${esc(t('Glättung'))} <input type="range" data-opt="smooth" min="0" max="1" step="0.05" value="${o.smooth}"></label>`;
     if (this.tool === 'text' || (n === 1 && this.sel[0].localName === 'text')) {
       const el = n === 1 && this.sel[0].localName === 'text' ? this.sel[0] : null;
-      const ff = el ? getProp(el, 'font-family').replace(/["']/g, '') : o.fontFamily, fs = el ? parseFloat(getProp(el, 'font-size')) : o.fontSize;
+      const fs = el ? parseFloat(getProp(el, 'font-size')) : o.fontSize;
       const fw = el ? getProp(el, 'font-weight') : o.fontWeight, an = el ? (getProp(el, 'text-anchor') || 'start') : o.anchor;
-      const fonts = [...new Set([ff, ...(this.boot.fonts || [])])].filter(Boolean);
-      html += `<label class="ge-ctx__f">${esc(t('Schrift'))} <select class="ge-in" data-text="font-family">${fonts.map(f => `<option${f === ff ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select></label>`
+      html += `<span class="ge-ctx__f"><span aria-hidden="true">${esc(t('Schrift'))}</span><span data-fpslot></span></span>`
         + `<label class="ge-ctx__f">${esc(t('Größe'))} <input type="number" class="ge-in ge-in--s" data-text="font-size" value="${esc(num(fs || 16, 2))}" min="1" max="2000" step="1"></label>`
-        + `<label class="ge-ctx__f">${esc(t('Stärke'))} <select class="ge-in" data-text="font-weight">${[['300', t('Leicht')], ['400', t('Normal')], ['700', t('Fett')], ['900', t('Schwarz')]].map(([v, l]) => `<option value="${v}"${String(fw) === v || (fw === 'bold' && v === '700') || (fw === 'normal' && v === '400') ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`
+        + (() => {
+          // Stärken, die die Schrift hat (variable Schriften: Bereich der Achse), dazu die aktuelle
+          const it = itemFor(this.fontItems ||= fontItems(this.boot), el ? getProp(el, 'font-family') : o.fontFamily);
+          const cur = fw === 'bold' ? 700 : fw === 'normal' || !fw ? 400 : parseInt(fw, 10) || 400;
+          const ws = [...new Set([...(it ? it.styles.map(s => s.w) : [300, 400, 700, 900]), cur])].sort((a, b) => a - b);
+          return `<label class="ge-ctx__f">${esc(t('Stärke'))} <select class="ge-in" data-text="font-weight">${ws.map(w => `<option value="${w}"${w === cur ? ' selected' : ''}>${esc(WEIGHTS[w]?.() || String(w))}</option>`).join('')}</select></label>`;
+        })()
         + `<span class="ge-seg" role="group" aria-label="${esc(t('Ausrichtung'))}">${[['start', 'align-left', t('Links')], ['middle', 'align-center-horizontal', t('Mitte')], ['end', 'align-right', t('Rechts')]].map(([v, i, l]) => `<button type="button" class="ge-ib" data-text-anchor="${v}" aria-pressed="${an === v}" aria-label="${esc(l)}" title="${esc(l)}">${ico(i)}</button>`).join('')}</span>`;
     }
     if (n && this.tool === 'select') {
@@ -1972,9 +2053,19 @@ export class GraphicEditor {
     }
     html += `<span class="ge-ctx__grow"></span>${chk('snap', t('Einrasten'))}${chk('grid', t('Raster'))}
       <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-act="docset">${ico('sliders-horizontal')} ${esc(t('Dokument …'))}</button>`;
+    // Schriftauswahl (eigene Komponente, bleibt über Neuaufbauten erhalten)
+    const fpVal = this.tool === 'text' || (n === 1 && this.sel[0].localName === 'text') ? (n === 1 && this.sel[0].localName === 'text' ? getProp(this.sel[0], 'font-family') : o.fontFamily) : null;
+    if (fpVal !== null) {
+      this.ctxFp ||= fontPicker(this, { compact: true, label: t('Schrift'), prefs: () => this.prefs, setPref: (k, v) => this.setPref(k, v),
+        onPreview: p => this.textPreview(p), onPick: p => this.textProps(p) });
+      this.ctxFp.set(fpVal);
+    }
     if (ctx._html === html) return;   // unverändert: nicht neu aufbauen (Symbole flackern sonst)
     ctx._html = html;
+    this.ctxFp?.close(true);
     ctx.innerHTML = html;
+    const slot = ctx.querySelector('[data-fpslot]');
+    if (slot && this.ctxFp) slot.replaceWith(this.ctxFp.el);
     function chk2(k, label, on) { return `<label class="ge-ctx__f ge-ctx__chk"><input type="checkbox" data-arrow="${k}"${on ? ' checked' : ''}> ${esc(label)}</label>`; }
     ctx.querySelectorAll('[data-opt]').forEach(i => i.addEventListener('change', () => {
       const k = i.dataset.opt;
@@ -1983,9 +2074,10 @@ export class GraphicEditor {
     }));
     ctx.querySelectorAll('[data-text]').forEach(i => i.addEventListener('change', () => {
       const a = i.dataset.text, v = i.value;
-      if (a === 'font-family') o.fontFamily = v; if (a === 'font-size') o.fontSize = +v; if (a === 'font-weight') o.fontWeight = v;
-      const el = this.sel.length === 1 && this.sel[0].localName === 'text' ? this.sel[0] : null;
-      if (el) { setProp(el, a, a === 'font-size' ? num(+v) : v); this.commit(t('Schrift geändert')); }
+      if (a === 'font-size') o.fontSize = +v; if (a === 'font-weight') o.fontWeight = v;
+      // wie im Bereich Zeichen: während der Bearbeitung nur für die markierten Zeichen
+      if (a === 'font-size') this.textProp('font-size', num(Math.max(1, +v), 2));
+      else this.textProp('font-weight', v === '400' ? null : v);
     }));
     ctx.querySelectorAll('[data-text-anchor]').forEach(b => b.addEventListener('click', () => {
       o.anchor = b.dataset.textAnchor;

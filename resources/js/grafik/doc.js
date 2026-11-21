@@ -66,6 +66,10 @@ const norm = (name, v) => {
  * Eigenschaft setzen: als Attribut; steht sie schon im style-Attribut oder gewinnt eine Klassenregel, als Stil.
  * value null/'' = entfernen (erbt wieder).
  */
+/** CSS-Eigenschaften ohne Darstellungsattribut (nur im style-Attribut gültig – Core\Svg erlaubt sie dort) */
+export const CSS_ONLY = ['font-variation-settings', 'font-feature-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps',
+  'font-variant-position', 'font-kerning', 'font-optical-sizing'];
+
 export function setProp(el, name, value) {
   if (value === null || value === undefined || value === '') {
     el.removeAttribute(name);
@@ -74,6 +78,7 @@ export function setProp(el, name, value) {
     return;
   }
   value = String(value);
+  if (CSS_ONLY.includes(name)) { el.removeAttribute(name); el.style.setProperty(name, value); return; }
   if (el.style?.getPropertyValue(name)) { el.style.setProperty(name, value); return; }
   el.setAttribute(name, value);
   let comp = '';
