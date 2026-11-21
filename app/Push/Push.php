@@ -781,12 +781,14 @@ final class Push
         return __('Push-Benachrichtigungen: Wenn Sie auf unserer Website Benachrichtigungen abonnieren, speichern wir nur die von Ihrem Browser erzeugte Zustelladresse (Endpunkt beim Push-Dienst Ihres Browser-Herstellers, z. B. Google, Mozilla, Apple oder Microsoft) mit den zugehörigen Schlüsseln, die gewählten Themen und die Sprache – keine IP-Adresse, keine Cookies, kein Tracking. Die Mitteilungen werden Ende-zu-Ende-verschlüsselt über diesen Push-Dienst zugestellt; er erfährt dabei nur Zeitpunkt und Größe. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit über „Abbestellen“ auf unserer Website oder in den Einstellungen Ihres Browsers widerrufen können. Ungültig gewordene Abos löschen wir automatisch.');
     }
 
-    /** Zeilen für `php bin/console health` (nur Hinweise) */
-    public static function health(): array
+    /** Zeilen für `php bin/console health` (nur Hinweise)
+     * @param bool $categorized Zeilen mit Kategorie (Core\Health::rows)
+     */
+    public static function health(bool $categorized = false): array
     {
         if (!self::on()) return [];
         $s = self::status();
-        $out = ['Push: VAPID-Schlüssel vorhanden (config.local.php)' => $s['keys'] ? true : null];
+        $out = ['Push: VAPID-Schlüssel vorhanden (config.local.php)' => \Core\Health::cat($s['keys'] ? true : null, 'setup', $categorized)];
         $last = (string) ($s['last_run']['at'] ?? '');
         if ($s['queued'] > 0) $out['Push: Versand läuft (' . $s['queued'] . ' wartend, zuletzt ' . ($last ?: 'nie') . ') – Cron push:send --all'] = $last !== '' && strtotime($last) > time() - 3600 ? true : null;
         return $out;

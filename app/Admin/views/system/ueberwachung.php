@@ -9,7 +9,7 @@ $dis = $mon['from_config'] ? ' disabled' : '';
 ?>
 <header class="adm-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Überwachung')) ?></h1>
-    <p class="adm-muted"><?= e(__('Ein Überwachungsdienst (z. B. der Hub Ihrer Agentur) darf den technischen Zustand dieser Website abfragen: Versionen, Kit, Erweiterungen, Ampel der Prüfungen, letzte Sicherung und Integrität. Inhalte, Konten und Personendaten gibt die Abfrage nie heraus. Nur Anfragen, die mit einem hier eingetragenen Schlüssel signiert sind, erhalten eine Antwort.')) ?></p></div>
+    <p class="adm-muted"><?= e(__('Ein Überwachungsdienst (z. B. der Hub Ihrer Agentur) darf den technischen Zustand dieser Website abfragen: Versionen, Kit, Erweiterungen, Ampel der Prüfungen (getrennt nach Technik, Einrichtung und Redaktion), Zahl der Einträge im Fehlerprotokoll, letzte Sicherung und Integrität. Inhalte, Konten und Personendaten gibt die Abfrage nie heraus. Nur Anfragen, die mit einem hier eingetragenen Schlüssel signiert sind, erhalten eine Antwort.')) ?></p></div>
 </header>
 <div class="adm-tabs-form--side us-shell" data-secnav>
 <?php $current = 'ueberwachung'; include __DIR__ . '/_sidenav.php'; ?>

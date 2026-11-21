@@ -31,7 +31,8 @@ namespace Core;
  *   $x->adminData(fn(string $view) => ['boot' => url('/admin/api/x/boot')])   Angaben für diese Skripte (JSON, CMSAdmin.extData(name))
  *   $x->previewEditor(fn() => can('design.edit') ? ['url' => url('/admin/x/editor'), 'label' => 'Vorschau gestalten'] : null)
  *                                                                      Blockauswahl: „Vorschau gestalten“ öffnet diese Seite eingebettet
- *   $x->health(fn() => ['ffmpeg gefunden' => true])                    Zeilen für `php bin/console health` (true/false/null = Warnung)
+ *   $x->health(fn() => ['ffmpeg gefunden' => true], 'setup')           Zeilen für `php bin/console health` (true/false/null = Warnung);
+ *                                                                      Kategorie technical (Standard, alarmiert) | setup | editorial
  *   $x->afterAdminResponse(fn() => $queued ? fn() => work() : null)    billige Prüfung je Verwaltungsaufruf; Rückgabe läuft NACH der Antwort
  *   $x->on('media.deleted', fn(array $m) => …)                         Ereignisse des Cores (media.imported, media.replaced, media.deleted)
  *   $x->mediaChecks(fn() => ['key' => ['label' => …, 'icon' => …, 'where' => "SQL auf m.*", 'kind' => 'video']])   Filter unter „Prüfen“
@@ -85,6 +86,8 @@ final class Extension
     public array $previewEditorProviders = [];
     /** @var list<callable(): array<string, ?bool>> */
     public array $healthProviders = [];
+    /** @var array<int, string> Kategorie je Eintrag in $healthProviders (Core\Health::CATEGORIES) */
+    public array $healthCategories = [];
     /** @var list<string> Pfade unter storage/, die nicht in die Sicherung der Installation gehören (Core\Backup\Installation) */
     public array $backupSkip = [];
     /** @var list<callable(): ?callable> */
@@ -383,10 +386,15 @@ final class Extension
         return $this;
     }
 
-    /** Prüfungen für `php bin/console health`: fn(): ['Bezeichnung' => true|false|null] (null = Warnung, kein Deploy-Fehler) */
-    public function health(callable $fn): self
+    /**
+     * Prüfungen für `php bin/console health` und die Überwachung: fn(): ['Bezeichnung' => true|false|null] (null = Warnung,
+     * kein Deploy-Fehler). Kategorie (Core\Health): 'technical' (Standard – alarmiert die Überwachung), 'setup' (Einrichtung)
+     * oder 'editorial' (Redaktion) – beide nur angezeigt. Je Zeile abweichend: ['Bezeichnung' => ['ok' => false, 'category' => 'setup']].
+     */
+    public function health(callable $fn, string $category = 'technical'): self
     {
         $this->healthProviders[] = $fn;
+        $this->healthCategories[array_key_last($this->healthProviders)] = \Core\Health::category($category);
         return $this;
     }
 

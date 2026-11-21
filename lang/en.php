@@ -8077,6 +8077,7 @@ return [
     'Impressum für E-Mails nicht prüfbar ({msg})' => 'Legal notice for emails could not be checked ({msg})',
     'Versand gesperrt: E-Mails dieser Website hätten kein Impressum. Bitte unter Grundeinstellungen → E-Mail-Versand das „Impressum für E-Mails“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen.' => 'Sending blocked: emails from this website would have no legal notice. Please fill in “Legal notice for emails” under Basic settings → Email sending or select a legal notice page under Settings → Legal.',
     // Anmeldung per OpenID Connect (Core\Oidc) und Überwachung (Core\Monitoring)
+    '{label} über {provider} angelegt: {email}' => '{label} created via {provider}: {email}',
     'Adresse für den Dienst' => 'Address for the service',
     'Agentur-Konto' => 'Agency account',
     'Anmeldung über den Anbieter anbieten' => 'Offer sign-in via the provider',
@@ -8115,7 +8116,7 @@ return [
     'Diese E-Mail-Adresse ist für die Anmeldung über den Anbieter nicht zugelassen.' => 'This email address is not permitted for sign-in via the provider.',
     'Dieses Konto wird hier lokal verwaltet und kann sich nicht über den Anbieter anmelden.' => 'This account is managed locally and cannot sign in via the provider.',
     'Durch Komma getrennt. Leer = der Claim muss nur vorhanden sein.' => 'Separated by commas. Empty = the claim only has to be present.',
-    'Ein Überwachungsdienst (z. B. der Hub Ihrer Agentur) darf den technischen Zustand dieser Website abfragen: Versionen, Kit, Erweiterungen, Ampel der Prüfungen, letzte Sicherung und Integrität. Inhalte, Konten und Personendaten gibt die Abfrage nie heraus. Nur Anfragen, die mit einem hier eingetragenen Schlüssel signiert sind, erhalten eine Antwort.' => 'A monitoring service (e.g. your agency’s hub) may query the technical state of this website: versions, Kit, extensions, traffic light of the checks, last backup and integrity. The query never returns content, accounts or personal data. Only requests signed with a key entered here receive an answer.',
+    'Ein Überwachungsdienst (z. B. der Hub Ihrer Agentur) darf den technischen Zustand dieser Website abfragen: Versionen, Kit, Erweiterungen, Ampel der Prüfungen (getrennt nach Technik, Einrichtung und Redaktion), Zahl der Einträge im Fehlerprotokoll, letzte Sicherung und Integrität. Inhalte, Konten und Personendaten gibt die Abfrage nie heraus. Nur Anfragen, die mit einem hier eingetragenen Schlüssel signiert sind, erhalten eine Antwort.' => 'A monitoring service (e.g. your agency’s hub) may query the technical state of this website: versions, Kit, extensions, traffic light of the checks (separated into technical, setup and editorial), number of entries in the error log, last backup and integrity. The query never returns content, accounts or personal data. Only requests signed with a key entered here receive an answer.',
     'Einstieg für die Anmeldung (initiate_login_uri)' => 'Sign-in entry point (initiate_login_uri)',
     'Erlaubte E-Mail-Domains (optional)' => 'Allowed email domains (optional)',
     'Erlaubte Werte des Claims' => 'Allowed claim values',

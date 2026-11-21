@@ -436,6 +436,12 @@ final class Integrity
                     : __('View in der Datenbank: {name}', ['name' => $name])];
             }
             foreach (array_diff_key($now['admins'], (array) $base['admins']) as $id => $mail) {
+                // Konto aus der Anmeldung über einen eingeschalteten OpenID-Connect-Anbieter (z. B. Hub einer Agentur): nur Info, keine Mail
+                if ($p = self::oidcAccount((int) $id)) {
+                    $f[] = ['level' => 'info', 'kind' => 'admin-oidc', 'path' => 'user:' . $id, 'text' => __('{label} über {provider} angelegt: {email}',
+                        ['label' => Oidc\Providers::accountLabel($p), 'provider' => trim((string) $p['name']) ?: (string) parse_url((string) $p['issuer'], PHP_URL_HOST), 'email' => $mail])];
+                    continue;
+                }
                 $f[] = ['level' => 'error', 'kind' => 'admin', 'path' => 'user:' . $id, 'text' => __('Neues Konto mit allen Rechten: {email}', ['email' => $mail])];
             }
             foreach (array_diff($now['tokens'], (array) $base['tokens']) as $id) {
@@ -448,6 +454,29 @@ final class Integrity
         $res = ['time' => time(), 'findings' => self::dedupe($f), 'baseline' => isset($base['time']) ? (int) $base['time'] : null];
         self::write(site()->storage('integrity-db-result.json'), $res);
         return $res;
+    }
+
+    /**
+     * Neues Konto mit allen Rechten aus einer Anmeldung per OpenID Connect? Nur wenn ALLES passt, sonst null (= Fehler wie bisher):
+     * users.idp nennt einen eingeschalteten, vollständig eingerichteten Anbieter dieser Website, das Konto hat kein lokales Passwort
+     * ('!oidc' – Anmeldung nur über den Anbieter), eine Verknüpfung in user_identities mit genau diesem Anbieter und seinem Issuer,
+     * und seine Rolle ist die, die der Anbieter vergibt. Eine später lokal erhöhte Rolle, ein gesetztes Passwort oder ein
+     * abgeschalteter Anbieter melden also wieder einen Fehler. $providers nur für den Selbsttest. @return ?array Anbieter
+     */
+    public static function oidcAccount(int $uid, ?\Core\Database $db = null, ?array $providers = null): ?array
+    {
+        $db ??= app()->db;
+        try {
+            $u = $db->fetch('SELECT id, role, idp, password_hash, disabled FROM users WHERE id = ?', [$uid]);
+            $idp = trim((string) ($u['idp'] ?? ''));
+            if (!$u || $idp === '' || (int) $u['disabled'] || (string) $u['password_hash'] !== Oidc\Accounts::NO_PASSWORD) return null;
+            $p = ($providers ?? Oidc\Providers::all())[$idp] ?? null;
+            if (!$p || !Oidc\Providers::ready($p) || (string) $u['role'] !== (string) $p['role']) return null;
+            $n = (int) $db->fetchValue('SELECT COUNT(*) FROM ' . Oidc\Accounts::TABLE . ' WHERE user_id = ? AND provider = ? AND issuer = ?', [$uid, $idp, $p['issuer']]);
+            return $n > 0 ? $p : null;
+        } catch (\Throwable) {
+            return null;   // ohne Tabelle/Spalte: nie stiller als bisher
+        }
     }
 
     public static function acceptDb(string $by = ''): void
@@ -538,6 +567,29 @@ final class Integrity
         $eq('Kein Fehlalarm bei „<?=“ in Binärdaten', (bool) preg_match('~<\?php\s~i', "\x89PNG<?=\x00<?php\x00"), false);
         $eq('PHP in Bild erkannt', (bool) preg_match('~<\?php\s~i', "GIF89a<?php system(\$_GET[1]); ?>"), true);
         $eq('SVG-Schutz erkannt', str_contains(Svg::guardContent(), 'Svg::guard'), true);
+        // Neues Konto mit allen Rechten über einen OpenID-Connect-Anbieter: nur Info, wenn Anbieter, Issuer, Rolle und „kein Passwort“ passen
+        $db = app()->db;
+        Oidc\Accounts::ensureTable($db);
+        $db->pdo->beginTransaction();
+        try {
+            $iss = 'https://hub.example.org/hub';
+            $prov = ['main' => array_replace(Oidc\Providers::DEFAULTS, ['id' => 'main', 'enabled' => true, 'issuer' => $iss, 'client_id' => 'c-1', 'role' => 'admin', 'name' => 'Musterstadt-Hub'])];
+            $mail = 'integrity-oidc-' . bin2hex(random_bytes(3)) . '@example.org';
+            $uid = $db->insert('users', ['email' => $mail, 'name' => 'Erika Musterfrau', 'password_hash' => Oidc\Accounts::NO_PASSWORD, 'role' => 'admin', 'idp' => 'main', 'created_at' => now()]);
+            $eq('OIDC-Konto ohne Verknüpfung = Fehler', self::oidcAccount($uid, $db, $prov), null);
+            $db->insert(Oidc\Accounts::TABLE, ['user_id' => $uid, 'provider' => 'main', 'issuer' => 'https://boese.example.net', 'subject' => 's-1', 'email' => $mail, 'created_at' => now()]);
+            $eq('OIDC-Konto mit fremdem Issuer = Fehler', self::oidcAccount($uid, $db, $prov), null);
+            $db->insert(Oidc\Accounts::TABLE, ['user_id' => $uid, 'provider' => 'main', 'issuer' => $iss, 'subject' => 's-2', 'email' => $mail, 'created_at' => now()]);
+            $eq('OIDC-Konto des Anbieters = Info', (self::oidcAccount($uid, $db, $prov)['name'] ?? null), 'Musterstadt-Hub');
+            $eq('Anbieter ausgeschaltet = Fehler', self::oidcAccount($uid, $db, ['main' => ['enabled' => false] + $prov['main']]), null);
+            $eq('Anbieter vergibt andere Rolle (lokal erhöht) = Fehler', self::oidcAccount($uid, $db, ['main' => ['role' => 'editor'] + $prov['main']]), null);
+            $db->update('users', ['password_hash' => password_hash('x' . random_int(1, 9), PASSWORD_DEFAULT)], 'id = :id', ['id' => $uid]);
+            $eq('OIDC-Konto mit lokalem Passwort = Fehler', self::oidcAccount($uid, $db, $prov), null);
+            $local = $db->insert('users', ['email' => 'lokal-' . $mail, 'name' => '', 'password_hash' => Oidc\Accounts::NO_PASSWORD, 'role' => 'admin', 'created_at' => now()]);
+            $eq('Konto ohne Anbieter = Fehler', self::oidcAccount($local, $db, $prov), null);
+        } finally {
+            $db->pdo->rollBack();
+        }
         return $r;
     }
 }
