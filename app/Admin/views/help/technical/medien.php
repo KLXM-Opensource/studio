@@ -66,7 +66,54 @@
     <li><b>Module:</b> <code>geom.js</code> (Matrizen, Pfaddaten lesen/schreiben, Bögen → Kurven, Knotenmodell, Glätten),
       <code>doc.js</code> (Eigenschaften setzen – Attribut oder, wenn eine Klassenregel gewinnt, Stil; Transformation anwenden; ids
       eindeutig machen samt Verweisen), <code>color.js</code> (Farbwähler), <code>panels.js</code> (Bereiche), <code>editor.js</code>
-      (Werkzeuge, Auswahl, Griffe, Einrasten, Protokoll, Tastatur, Speichern), <code>shell.js</code> (Overlay und Seite).</li>
+      (Werkzeuge, Auswahl, Griffe, Einrasten, Protokoll, Tastatur, Speichern), <code>shell.js</code> (Overlay und Seite).
+      Phase 2: <code>pathops.js</code> (Knoten einfügen per de Casteljau, auftrennen, verbinden, umkehren, Knotenarten – eigener Code),
+      <code>bool.js</code> (boolesche Operationen, zusammengesetzte Form, Kontur in Fläche, Versatz, Vereinfachen),
+      <code>text.js</code>/<code>textedit.js</code>/<code>textpanel.js</code> (Textmodell mit Läufen, Satz/Umbruch, Bearbeitung auf der Fläche,
+      Bereich Zeichen/Absatz), <code>outline.js</code> (Text in Kurven), <code>guides.js</code> (Lineale, Hilfslinien, Raster),
+      <code>clip.js</code> (Beschneiden, Masken, Ausstanzen per Maske), <code>gradhandles.js</code> (Verlaufswerkzeug),
+      <code>export.js</code> (Web-Optimierung, Desktop-SVG, PDF).</li>
+    <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
+      <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
+      <table class="doc-table">
+        <tr><th>Modul</th><th>Inhalt</th><th>Lizenz</th><th>Größe (min./gzip)</th><th>Warum</th></tr>
+        <tr><td><code>js/grafik-paper.mjs</code></td><td>Paper.js 0.12 (nur paper-core) + paperjs-offset 2.2</td><td>MIT</td><td>≈ 228 KB / 80 KB</td>
+          <td>Boolesche Operationen direkt auf Bézierkurven (Schnittpunkte der Kurven, kein Umweg über Vielecke – Kreise bleiben Bögen).
+          Geprüft und verworfen: polybooljs, martinez, clipper-lib (nur Vielecke, Kurven müssten zerlegt und neu angepasst werden).</td></tr>
+        <tr><td><code>js/grafik-fonts.mjs</code></td><td>fontkit 2.0</td><td>MIT</td><td>≈ 357 KB / 150 KB</td>
+          <td>liest WOFF2 (Brotli) und variable Schriften – die Dateien des Schriften-Managers reichen, keine TTF-Kopien. opentype.js kann
+          kein WOFF2. Zwei Lücken von fontkit bei WOFF2 werden in <code>outline.js</code> umgangen (Varianten über eine eigene Instanz je
+          Gewicht, <code>gvar</code> für einfache Glyphen nachgerüstet).</td></tr>
+        <tr><td><code>js/grafik-pdf.mjs</code></td><td>jsPDF 4.2 + svg2pdf.js 2.8 (ohne html2canvas/DOMPurify/canvg)</td><td>MIT</td><td>≈ 488 KB / 160 KB</td>
+          <td>PDF als Vektor; Texte vorher in Kurven, Filter und Mischmodi fehlen im PDF (Hinweis).</td></tr>
+      </table></li>
+    <li><b>Arbeitsfassung und Web-Fassung:</b> <code>POST …/save</code> nimmt <code>svg</code> (Arbeitsfassung des Editors) und <code>web</code>
+      (im Browser optimiert). Ausgeliefert wird die Web-Fassung (nach <code>Svg::clean</code>); die Arbeitsfassung mit Ebenennamen,
+      <code>data-locked</code> und Editor-Daten <code>data-ge-*</code> (Hilfslinien <code>data-ge-guides="v:120 h:40"</code>, Raster
+      <code>data-ge-grid</code>, Textrahmen <code>data-ge-frame</code>, Zeilenabstand <code>data-ge-lh</code>, umbrochene Zeilen
+      <code>data-ge-soft</code>, zusammengesetzte Form <code>data-ge-bool</code>/<code>-src</code>/<code>-result</code>, Maskenfarbe
+      <code>data-ge-fill</code>) läuft durch <code>Svg::clean($svg, ['editor' => true])</code> (nur Text, kein Markup, keine
+      <code>url()</code>) und liegt in <code>graphic_sources</code> (<code>ref</code>, <code>svg</code>, <code>hash</code> = sha1 der Web-Datei).
+      Beim Öffnen gilt sie nur, wenn die Datei noch dieselbe ist (<code>Graphics::source()</code>); Symbole/Vorschauen: Spalte
+      <code>graphics.svg</code> = Arbeitsfassung, Datei = Web-Fassung.</li>
+    <li><b>Regeln der Web-Optimierung</b> (<code>export.js → optimizeSvg</code>): Editor-Daten und ausgeblendete Ebenen weg (außer mit
+      Verweis); Standardwerte weg (<code>fill-opacity="1"</code>, <code>stroke-miterlimit="4"</code> … – vererbbare nur, wenn kein
+      Vorfahr einen Wert setzt, nichts, sobald ein <code>&lt;style&gt;</code> mitspielt); Zahlen auf N Nachkommastellen (automatisch:
+      Fehler ≤ längere Seite / 20 000, Verläufe in Objektkoordinaten mindestens 4); Pfade je Befehl relativ/absolut, H/V, minimale
+      Trenner, gegen die gerundete Lage gerechnet; reine <code>translate</code> in die Geometrie (exakt), Drehen/Skalieren bleibt;
+      ungenutzte Definitionen, leere Gruppen, Leerraum; kurze Farben. Danach werden vorher/nachher gerendert und verglichen
+      (<code>checkSame</code>, Abweichung ≤ 0,15 % der Pixel) – sonst gilt die sichere Stufe (nur Editor-Daten entfernt).
+      Texte mit Webschriften auf Wunsch in Kurven (SVG als <code>&lt;img&gt;</code> lädt keine Webschriften).</li>
+    <li><b>Desktop-Export</b> (<code>desktopSvg</code>): eingerückt, nicht verkleinert, oberste Gruppen als Inkscape-Ebenen
+      (<code>inkscape:groupmode="layer"</code>, <code>inkscape:label</code>), Namen auch als <code>id</code> (Illustrator, Figma) und
+      <code>data-name</code>, Sperren als <code>sodipodi:insensitive</code>, <code>textPath</code> zusätzlich mit <code>xlink:href</code>.</li>
+    <li><b>Nur Vektoren:</b> <code>Svg::clean</code> zählt entfernte <code>&lt;image&gt;</code>/<code>&lt;feImage&gt;</code> (<code>images</code>,
+      auch in der Antwort von <code>…/clean</code>); Import, Ziehen und Einfügen melden Pixelbilder. Kein PNG-Export.</li>
+    <li><b>Text:</b> Modell aus Absätzen mit Läufen (<code>text.js</code>); geschrieben wird nur, was bearbeitet wird. Zeilen als
+      <code>&lt;tspan x dy="1.2em"&gt;</code>, Läufe als <code>&lt;tspan font-weight=…&gt;</code>, Textrahmen bricht mit vom Browser
+      gemessenen Breiten um (kein <code>foreignObject</code>), Text auf Pfad als <code>&lt;textPath href&gt;</code>. In Kurven: Positionen je
+      Zeichen vom Browser (<code>getStartPositionOfChar</code>, Drehung auf Pfaden), Glyphen von fontkit (Ligaturen per Layout je Lauf).
+      Schriftdateien: <code>boot.fontFiles</code> aus <code>Graphics::fontFiles()</code> (Schriften-Manager + Lato der Verwaltung).</li>
     <li><b>Protokoll:</b> jede Änderung speichert das SVG als Text (höchstens 200 Schritte bzw. ca. 40 MB); Rückgängig ersetzt das Dokument.</li>
     <li><b>Speichern:</b> <code>POST /admin/api/grafik/save</code> – das SVG aus dem Browser läuft immer durch
       <code>Core\Svg::clean($svg, ['keep_ids' => true])</code> (ids für Ebenen und spätere Animationen bleiben, <code>data-name</code> =
@@ -76,8 +123,16 @@
       <code>{Medienordner}/grafik/{kind}-{id}-{hash}.svg</code> (neuer Name je Fassung). Beim Überschreiben bleibt die vorige Fassung in
       <code>graphic_versions</code> (<code>ref</code> <code>media:{id}</code> bzw. <code>graphic:{id}</code>, höchstens 20).</li>
     <li><b>Blockvorschauen:</b> <code>Graphics::assignPreview($typ, $id)</code> schreibt die Website-Einstellung <code>block_previews</code> –
-      dieselbe Andockstelle wie in <code>Core\Blocks\Picker::overrides()</code> (Kits und Erweiterungen: Filter <code>blocks.previews</code>).</li>
-    <li><b>Routen</b> (alle mit Anmeldung und Recht <code>media.upload</code>, POST mit CSRF; Löschen <code>media.delete</code>):
+      dieselbe Andockstelle wie in <code>Core\Blocks\Picker::overrides()</code> (Kits und Erweiterungen: Filter <code>blocks.previews</code>).
+      Schlüssel <code>typ--variante</code> gilt für eine Variante. In der Blockauswahl der Website öffnet „Vorschau gestalten“
+      <code>/admin/grafik/editor?format=preview&amp;block=…&amp;variant=…&amp;embed=1</code> in einem <code>&lt;iframe&gt;</code> (eigene
+      Verwaltungs-CSP); nach dem Speichern meldet der Editor per <code>postMessage</code> (<code>source: 'klxm-grafik'</code>, gleiche
+      Herkunft) die neue Adresse.</li>
+    <li><b>Rechte</b> (<code>Graphics::RIGHTS</code>, <code>Graphics::canKind()</code>): Infografiken <code>media.upload</code>;
+      Blockvorschauen zusätzlich <code>design.edit</code> (gelten für die ganze Website – Knopf „Vorschau gestalten“, Speichern,
+      Zuordnen, Löschen, Öffnen); Symbole und eigene Bausteine zusätzlich <code>blocks.build</code>. Fehlt das Recht: kein Knopf,
+      Anfrage → 403.</li>
+    <li><b>Routen</b> (alle mit Anmeldung und Recht <code>media.upload</code>, POST mit CSRF; Löschen <code>media.delete</code>; je Art zusätzlich siehe Rechte):
       <code>GET /admin/grafik</code> (Übersicht der Ablage), <code>GET /admin/grafik/editor?format=info|icon|preview&amp;w&amp;h&amp;block</code>
       bzw. <code>?media={id}</code> / <code>?id={id}</code>, <code>GET /admin/api/grafik/boot</code> (gleiche Parameter, JSON für das Overlay),
       <code>POST …/save</code>, <code>…/part</code> (eigener Baustein), <code>…/clean</code> (nur bereinigen), <code>…/assign</code>,
@@ -99,10 +154,11 @@ ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed
     <li><b>Bibliothek:</b> <code>Core\Graphics\Library</code> (Bausteine aus Motion), eigene Bausteine (<code>kind = part</code>, nur in der
       Datenbank), Symbole aus <code>public/assets/icons/icons.svg</code>. Farbfelder: Tokens vom Typ <code>color</code> aus
       <code>Core\Design</code>; Schriften: die Schriften des Designs plus allgemeine Familien.</li>
-    <li><b>Grenzen heute:</b> keine Bilder in Grafiken (die Bereinigung entfernt <code>&lt;image&gt;</code>), keine booleschen Pfadoperationen,
-      kein Text in Pfade, Lineale fehlen; Motion-Persona ist nur vorbereitet.</li>
+    <li><b>Grenzen heute:</b> keine Bilder in Grafiken (gewollt); Strichmuster und Pfeilspitzen werden bei „Kontur in Fläche“ nicht
+      mitgewandelt; Blocksatz und Silbentrennung fehlen im Textrahmen; Motion-Persona ist nur vorbereitet.</li>
     <li><b>Selbsttest:</b> <code>php bin/console grafik:selftest --site=key</code> – Editor-Ausgabe übersteht die Bereinigung (idempotent),
-      Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl, Fassungen, Rechte.</li>
+      Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl (auch je Variante),
+      Fassungen, Arbeitsfassung/Web-Fassung, Editor-Daten nur mit <code>editor</code>, Pixelbilder gezählt, Rechte je Art (403).</li>
   </ul>
 
   <h3 id="video-vorschau">Vorschaubilder für Videos (<code>Core\VideoThumbs</code>, <code>Core\Ffmpeg</code>)</h3>

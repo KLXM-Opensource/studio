@@ -21,7 +21,7 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge svg.ico { width: 18px; height: 18px; flex: none }
 
 /* Kopfzeile: Personas, Titel, Rückgängig, Zoom, Export, Speichern */
-.ge-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; background: var(--adm-card); border-bottom: 1px solid var(--adm-line) }
+.ge-top { position: relative; grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; background: var(--adm-card); border-bottom: 1px solid var(--adm-line) }
 .ge-top__grow { flex: 1 }
 .ge-top__group { display: flex; gap: 2px }
 .ge-personas { display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--adm-fill) }
@@ -43,11 +43,12 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-ib:disabled { opacity: .4; cursor: default }
 
 /* Kontextleiste */
-.ge-ctx { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; min-height: 42px; padding: 4px 12px; background: var(--adm-card);
+.ge-ctx { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; gap: 6px 10px; min-height: 42px; padding: 4px 12px; background: var(--adm-card);
   border-bottom: 1px solid var(--adm-line); font-size: 12px }
 .ge-ctx__status { font-weight: 700; min-width: 90px; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis }
 .ge-ctx__sep { width: 1px; height: 22px; background: var(--adm-line) }
-.ge-ctx__grow { flex: 1 }
+.ge-ctx > * { flex: none }
+.ge-ctx > .ge-ctx__grow { flex: 1 1 0 }
 .ge-ctx__f { display: inline-flex; align-items: center; gap: 6px; color: var(--adm-t2); white-space: nowrap }
 .ge-ctx__chk input { margin: 0 }
 .ge-ctx__info { color: var(--adm-t3) }
@@ -63,7 +64,7 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-in { min-width: 0; font-family: var(--adm-font) }
 .ge-in[type=number] { font-family: var(--adm-mono, ui-monospace, monospace); font-size: 12px }
 .ge-in--s { width: 66px }
-.ge-range { width: 100%; accent-color: var(--adm-a) }
+.ge-range { width: 100%; height: 24px; accent-color: var(--adm-a) }
 .ge-lbl { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--adm-t2); font-size: 12px }
 .ge-lbl .ge-in:not(.ge-in--s) { flex: 0 1 60% }
 .ge-chk { justify-content: flex-start }
@@ -83,15 +84,16 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-tool:hover { background: var(--adm-hover) }
 .ge-tool[aria-pressed=true] { background: var(--adm-a); color: #fff }
 .ge-tools__sep { width: 26px; height: 1px; margin: 6px 0; background: var(--adm-line) }
-.ge-fs { position: relative; width: 40px; height: 48px; margin-top: 4px }
+/* Füllung oben links, Kontur unten rechts (versetzt wie in Affinity, ohne Überdeckung – je 24 × 24 bedienbar) */
+.ge-fs { position: relative; width: 48px; height: 48px; margin-top: 4px }
 .ge-fs__fill, .ge-fs__stroke { position: absolute; width: 24px; height: 24px; padding: 0; border-radius: 50%; cursor: pointer; background: var(--c, transparent) }
-.ge-fs__fill { left: 2px; top: 2px; z-index: 2; border: 2px solid var(--adm-card); box-shadow: 0 0 0 1px var(--adm-in) }
-.ge-fs__stroke { left: 14px; top: 14px; z-index: 1; border: 6px solid var(--c, transparent); background: var(--adm-card); box-shadow: 0 0 0 1px var(--adm-in), inset 0 0 0 1px var(--adm-in) }
+.ge-fs__fill { left: 0; top: 0; z-index: 2; border: 2px solid var(--adm-card); box-shadow: 0 0 0 1px var(--adm-in) }
+.ge-fs__stroke { left: 24px; top: 24px; z-index: 1; border: 6px solid var(--c, transparent); background: var(--adm-card); box-shadow: 0 0 0 1px var(--adm-in), inset 0 0 0 1px var(--adm-in) }
 .ge-fs__fill.is-active, .ge-fs__stroke.is-active { z-index: 3; box-shadow: 0 0 0 2px var(--adm-a) }
 .ge-fs__fill.is-none { background: linear-gradient(135deg, transparent 45%, #E5484D 45% 55%, transparent 55%), var(--adm-card) }
 .ge-fs__stroke.is-none { border-color: var(--adm-card); background: linear-gradient(135deg, transparent 45%, #E5484D 45% 55%, transparent 55%), var(--adm-card) }
 .ge-fs__fill.is-grad { background: linear-gradient(135deg, var(--adm-a), #fff) }
-.ge-fs__swap { position: absolute; right: -6px; top: -4px; width: 18px; height: 18px; padding: 0; border: 0; background: none; color: var(--adm-t3); cursor: pointer }
+.ge-fs__swap { position: absolute; left: 24px; top: 0; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: none; color: var(--adm-t3); cursor: pointer }
 .ge-fs__swap svg.ico { width: 14px; height: 14px }
 
 /* Zeichenfläche */
@@ -113,7 +115,35 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-ov__rotline { stroke: var(--adm-a); stroke-width: 1 }
 .ge-ov__guide { stroke: #E5484D; stroke-width: 1 }
 .ge-ov__marquee { fill: color-mix(in srgb, var(--adm-a) 10%, transparent); stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 4 3 }
-.ge-ov__grid { fill: none; stroke: rgba(91, 115, 173, .28); stroke-width: 1 }
+.ge-ov__grid { fill: none; stroke: rgba(91, 115, 173, .32); stroke-width: 1 }
+.ge-ov__grid--minor { stroke: rgba(91, 115, 173, .14) }
+/* Lineale und Hilfslinien (guides.js) */
+.ge-ruler { position: absolute; z-index: 4; left: 0; top: 0; display: block; cursor: default }
+.ge-ruler--h { cursor: row-resize }
+.ge-ruler--v { cursor: col-resize }
+.ge-ruler__corner { position: absolute; z-index: 5; left: 0; top: 0; width: 20px; height: 20px; background: var(--adm-card); border-right: 1px solid var(--adm-line); border-bottom: 1px solid var(--adm-line) }
+.ge-ov__gline { stroke: #fff; stroke-width: 3; opacity: .9 }
+.ge-ov__ghitline { stroke: var(--adm-a); stroke-width: 1.5; pointer-events: stroke; cursor: copy }
+.ge-ov__gring { fill: none; stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 4 3; opacity: .7 }
+.ge-ov__gend { fill: #fff; stroke: var(--adm-a); stroke-width: 2; pointer-events: all; cursor: move }
+.ge-ov__gend--b { fill: var(--adm-a) }
+.ge-ov__gstop { stroke: #fff; stroke-width: 2; pointer-events: all; cursor: ew-resize; filter: drop-shadow(0 0 1px rgba(0, 0, 0, .7)) }
+.ge-ov__gstop.is-on { stroke: var(--adm-a); stroke-width: 3 }
+.ge[data-tool=gradient] .ge-stage { cursor: crosshair }
+.ge-ov__uguide { stroke: #0EA5C6; stroke-width: 1; shape-rendering: crispEdges }
+.ge-ov__ghit { stroke: transparent; stroke-width: 7; pointer-events: stroke }
+.ge-ov__ghit--h { cursor: row-resize }
+.ge-ov__ghit--v { cursor: col-resize }
+.ge-webopt { margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--adm-line); border-radius: 8px }
+.ge-webopt legend { padding: 0 4px; font-weight: 700; font-size: 12px; color: var(--adm-t2) }
+.ge-webopt .f-check { margin-top: 10px; min-height: 28px; align-items: center }
+.ge-webopt__size { margin: 0 0 8px; font: 600 12.5px var(--adm-mono, ui-monospace, monospace) }
+.ge-guide-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px }
+.ge-guide-row { display: grid; grid-template-columns: 1fr 110px auto; gap: 6px; align-items: center }
+.ge-menu__it--chk { padding-left: 6px; justify-content: flex-start; gap: 6px }
+.ge-menu__it--chk kbd { margin-left: auto }
+.ge-menu__tick { display: inline-grid; place-items: center; width: 18px; flex: none }
+.ge-menu__tick svg.ico { width: 14px; height: 14px }
 .ge-ov__pen { fill: none; stroke: var(--adm-a); stroke-width: 1.5 }
 .ge-ov__node { fill: #fff; stroke: var(--adm-a); stroke-width: 1.5; cursor: move }
 .ge-ov__node.is-on { fill: var(--adm-a) }
@@ -127,18 +157,37 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge.is-panning .ge-stage { cursor: grabbing }
 .ge[data-tool=zoom] .ge-stage { cursor: zoom-in }
 .ge[data-tool=eyedropper] .ge-stage { cursor: copy }
-.ge-textedit { position: absolute; z-index: 5; padding: 2px 4px; border: 1px dashed var(--adm-a); border-radius: 3px; background: rgba(255, 255, 255, .92); color: #1F2430;
-  resize: none; overflow: hidden; white-space: pre; box-shadow: 0 2px 10px rgba(0, 0, 0, .15) }
+/* Text: getippt wird in ein unsichtbares Feld an der Schreibmarke; Marke und Auswahl zeichnet die Überlagerung */
+.ge-textedit { position: absolute; z-index: 5; width: 2px; height: 1em; padding: 0; border: 0; margin: 0; opacity: 0; resize: none; overflow: hidden;
+  white-space: pre; font-size: 16px; pointer-events: none; caret-color: transparent }
+.ge-ov__caret { stroke: var(--adm-a); stroke-width: 2; animation: ge-blink 1.05s steps(1) infinite }
+.ge-ov__tsel { fill: color-mix(in srgb, var(--adm-a) 30%, transparent); stroke: none }
+.ge-ov__tframe { fill: none; stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 5 4; opacity: .8 }
+.ge-ov__tfh { cursor: ew-resize }
+@keyframes ge-blink { 50% { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .ge-ov__caret { animation: none } }
+.ge.is-busy .ge-stage { cursor: progress }
+.ge.is-busy .ge-top::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--adm-a); animation: ge-busy 1s ease-in-out infinite alternate }
+@keyframes ge-busy { from { opacity: .3 } to { opacity: 1 } }
 .ge-persona-area { position: absolute; left: 0; right: 0; bottom: 0; min-height: 180px; background: var(--adm-card); border-top: 1px solid var(--adm-line) }
 
-/* Bereiche rechts */
-.ge-side { min-width: 0; grid-row: 3; grid-column: 3; display: flex; flex-direction: column; min-height: 0; background: var(--adm-card); border-left: 1px solid var(--adm-line); overflow: hidden }
+/* Bereiche rechts: jede Gruppe in voller Höhe, die Spalte rollt (Farbe, Text, Ebenen, Transformieren) */
+.ge-side { min-width: 0; grid-row: 3; grid-column: 3; display: flex; flex-direction: column; min-height: 0; background: var(--adm-card); border-left: 1px solid var(--adm-line); overflow-x: hidden; overflow-y: auto }
 .ge-pg { display: flex; flex-direction: column; min-height: 0; border-bottom: 1px solid var(--adm-line) }
-.ge-pg--color { flex: 0 1 auto; max-height: 44% }
-.ge-pg--layers { flex: 1 1 0; min-height: 260px }
+.ge-pg--color { flex: 0 0 auto }
+.ge-pg--layers { flex: 1 0 auto; min-height: 240px }
 .ge-pg--layers .ge-pg__panel:not([hidden]) { display: flex; flex-direction: column; flex: 1 }
 .ge-pg--layers .ge-layers { flex: 1; min-height: 80px; overflow-y: auto }
-.ge-pg--transform { flex: 0 1 auto; max-height: 28% }
+.ge-pg--transform { flex: 0 0 auto }
+.ge-pg--transform .ge-pg__panel:not([hidden]) { min-height: 96px }
+.ge-pg--text { flex: 0 0 auto }
+.ge-pg--text .ge-pg__panel:not([hidden]) { min-height: 96px }
+.ge-pg--text .ge-pg__panel:not([hidden]) { overflow-y: auto }
+.ge-ib--txt { font: 700 12px var(--adm-font); min-width: 34px }
+.ge-lay__badge { display: inline-grid; place-items: center; color: var(--adm-t3) }
+.ge-lay__badge svg.ico { width: 14px; height: 14px }
+.ge-lay.is-clipshape .ge-lay__name { font-style: italic; color: var(--adm-t2) }
+.ge-help { margin: 0 0 6px; font-size: 11.5px }
 .ge-pg.is-folded { flex: 0 0 auto }
 .ge-pg.is-folded .ge-pg__panel { display: none }
 .ge-pg__tabs { display: flex; align-items: center; gap: 2px; padding: 6px 6px 0 8px; border-bottom: 1px solid var(--adm-line); background: var(--adm-fill) }
@@ -214,10 +263,12 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-icon svg.ico { width: 20px; height: 20px }
 
 /* Transformieren */
-.ge-tr { display: grid; grid-template-columns: 54px 1fr; gap: 12px; align-items: start }
-.ge-anchor { display: grid; grid-template-columns: repeat(3, 16px); gap: 3px; padding: 4px; border-radius: 6px; background: var(--adm-fill) }
-.ge-anchor button { width: 16px; height: 16px; padding: 0; border: 1px solid var(--adm-in); border-radius: 3px; background: var(--adm-card); cursor: pointer }
-.ge-anchor button[aria-checked=true] { background: var(--adm-a); border-color: var(--adm-a) }
+.ge-tr { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: start }
+/* Bezugspunkt: Trefferfläche 24 × 24, sichtbares Kästchen 14 px */
+.ge-anchor { display: grid; grid-template-columns: repeat(3, 24px); gap: 0; padding: 2px; border-radius: 6px; background: var(--adm-fill) }
+.ge-anchor button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer }
+.ge-anchor button::before { content: ''; width: 14px; height: 14px; border: 1px solid var(--adm-in); border-radius: 3px; background: var(--adm-card); box-sizing: border-box }
+.ge-anchor button[aria-checked=true]::before { background: var(--adm-a); border-color: var(--adm-a) }
 .ge-trf { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; align-items: center }
 .ge-trf label { display: flex; align-items: center; gap: 6px; color: var(--adm-t2); font: 700 12px var(--adm-font) }
 .ge-trf .ge-in { width: 100% }

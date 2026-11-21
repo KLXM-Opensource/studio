@@ -100,6 +100,8 @@ final class Svg
     private const ROUND_ATTRS = ['x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'fx', 'fy', 'width', 'height'];
 
     private int $unsafe = 0;
+    /** entfernte Pixelbilder (<image>, <feImage> mit Adresse) – der Grafik-Editor meldet sie */
+    private int $images = 0;
     private int $other = 0;
     private bool $noNs = false;
     private int $dec = 3;
@@ -107,18 +109,23 @@ final class Svg
     private array $cssIds = [];
     /** ids auch ohne Verweis behalten (Grafik-Editor: stabile ids für Ebenen und spätere Animationen) */
     private bool $keepIds = false;
+    /** Arbeitsfassung des Grafik-Editors: Editor-Daten (data-locked, data-ge-*) bleiben – nur als reiner Text */
+    private bool $editor = false;
 
     /**
      * Bereinigt und optimiert eine SVG-Datei.
      * $opt['keep_ids']: ids ohne Verweis nicht entfernen (Grafik-Editor, Core\Graphics – Ebenen und Animationen brauchen sie).
-     * @param array{keep_ids?: bool} $opt
-     * @return array{svg: string, width: int, height: int, in: int, out: int, unsafe: int, other: int}
+     * $opt['editor']: Arbeitsfassung des Grafik-Editors – zusätzlich data-locked und data-ge-* (Hilfslinien, Raster, Textrahmen,
+     * Zeilenabstand, Maskenfarbe) als reiner Text; schließt keep_ids ein. Ausgeliefert wird nie diese Fassung.
+     * @param array{keep_ids?: bool, editor?: bool} $opt
+     * @return array{svg: string, width: int, height: int, in: int, out: int, unsafe: int, other: int, images: int}
      * @throws \RuntimeException mit verständlicher Meldung (Upload ablehnen)
      */
     public static function clean(string $raw, array $opt = []): array
     {
         $s = new self();
-        $s->keepIds = !empty($opt['keep_ids']);
+        $s->keepIds = !empty($opt['keep_ids']) || !empty($opt['editor']);
+        $s->editor = !empty($opt['editor']);
         return $s->run($raw);
     }
 
@@ -256,7 +263,7 @@ final class Svg
         $svg = (string) $doc->saveXML($out);
         return [
             'svg' => $svg, 'width' => max(1, (int) round($vb[2])), 'height' => max(1, (int) round($vb[3])),
-            'in' => $in, 'out' => strlen($svg), 'unsafe' => $this->unsafe, 'other' => $this->other,
+            'in' => $in, 'out' => strlen($svg), 'unsafe' => $this->unsafe, 'other' => $this->other, 'images' => $this->images,
         ];
     }
 
@@ -368,7 +375,7 @@ final class Svg
                 continue;
             }
             if (in_array($name, self::UNSAFE_ELEMENTS, true)) {
-                if ($name === 'image' || $name === 'feImage') self::embedded($c->getAttribute('href') . ' ' . $c->getAttributeNS(self::XLINK, 'href'));
+                if ($name === 'image' || $name === 'feImage') { self::embedded($c->getAttribute('href') . ' ' . $c->getAttributeNS(self::XLINK, 'href')); $this->images++; }
                 $this->unsafe++;
                 continue;
             }
@@ -420,6 +427,12 @@ final class Svg
             if ($name === 'style') {
                 $css = $this->decls($v);
                 if ($css !== '') $dst->setAttribute('style', $css);
+                continue;
+            }
+            // Editor-Daten der Arbeitsfassung (nur mit 'editor'): kurze Werte ohne Markup und ohne url(…)
+            if ($this->editor && ($name === 'data-locked' || preg_match('~^data-ge-[a-z]{1,20}$~', $name))) {
+                $v = mb_substr(trim((string) preg_replace('~[\x00-\x1f<>"]+~', ' ', $v)), 0, 4000);
+                if ($v !== '' && !$this->dangerous($v) && !str_contains($v, 'url(')) $dst->setAttribute($name, $v);
                 continue;
             }
             // data-name: Ebenenname (Grafik-Editor, Adobe XD) – nur Text, gekürzt

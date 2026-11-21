@@ -232,7 +232,9 @@ export function toNodes(segs) {
 /** Teilpfade → Befehle (gerade Strecken als L, sonst C) */
 export function fromNodes(subs) {
   const out = [];
-  const seg = (a, b) => (a.o || b.i)
+  // Griff auf dem eigenen Knoten = kein Griff (gerade Strecke bleibt L)
+  const same = (h, n) => !h || (Math.abs(h.x - n.x) < 1e-9 && Math.abs(h.y - n.y) < 1e-9);
+  const seg = (a, b) => !(same(a.o, a) && same(b.i, b))
     ? { c: 'C', p: [(a.o || a).x, (a.o || a).y, (b.i || b).x, (b.i || b).y, b.x, b.y] }
     : { c: 'L', p: [b.x, b.y] };
   for (const s of subs) {

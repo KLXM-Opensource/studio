@@ -18,7 +18,11 @@ use Core\Svg;
  *  - Ablage: Symbole/Vorschauen liegen nicht in der Mediathek (Media::all, Zähler), Blockvorschau wirkt in der Blockauswahl
  *    (Picker::previews über block_previews), Löschen räumt Datei und Zuordnung ab; Infografik → Mediathek, Ersetzen hält
  *    die vorige Fassung
- *  - Rechte: alle Routen verlangen Anmeldung und „media.upload“ (Löschen „media.delete“)
+ *  - Rechte: alle Routen verlangen Anmeldung und „media.upload“ (Löschen „media.delete“); Blockvorschauen zusätzlich
+ *    „design.edit“, Symbole und Bausteine „blocks.build“ (Graphics::RIGHTS) – Redaktion ohne Recht: kein Knopf, POST → 403
+ *  - Arbeitsfassung (Phase 2): Svg::clean mit 'editor' behält Editor-Daten (Hilfslinien, Sperren) nur als Text; die Web-Datei
+ *    enthält sie nicht, beim erneuten Öffnen gilt die Arbeitsfassung, solange die Datei dieselbe ist; Pixelbilder werden
+ *    gezählt (Meldung im Editor); Blockvorschau je Variante („typ--variante“) in der Blockauswahl
  * Datenbank-Änderungen laufen in einer Transaktion und werden zurückgerollt; angelegte Dateien werden gelöscht.
  */
 final class SelfTest
@@ -44,6 +48,7 @@ final class SelfTest
         self::$ok = 0;
         self::$fails = [];
         self::sanitize();
+        self::editorData();
         self::permissions();
         $db = app()->db;
         $db->pdo->beginTransaction();
@@ -51,6 +56,8 @@ final class SelfTest
         try {
             self::store($files);
             self::media($files);
+            self::sources($files);
+            self::rights();
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -90,6 +97,102 @@ final class SelfTest
         } catch (\RuntimeException $e) {
             self::t(true, 'Schadcode abgelehnt: ' . $e->getMessage());
         }
+    }
+
+    /** Editor-Daten der Arbeitsfassung: nur mit 'editor', nur als Text, nie in der Web-Fassung */
+    private static function editorData(): void
+    {
+        $src = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-ge-guides="v:50 h:20" data-ge-grid="10 2">'
+            . '<rect width="10" height="10" data-locked="1" data-ge-fill="#5B73AD" data-ge-evil="javascript:alert(1)" data-ge-x="url(https://example.org/a)"/>'
+            . '<text x="1" y="9" data-ge-frame="80">A</text><image href="https://example.org/a.png" width="5" height="5"/></svg>';
+        $e = Svg::clean($src, ['editor' => true]);
+        self::t(str_contains($e['svg'], 'data-ge-guides="v:50 h:20"') && str_contains($e['svg'], 'data-locked="1"') && str_contains($e['svg'], 'data-ge-frame="80"'), 'Arbeitsfassung behält Hilfslinien, Sperren, Textrahmen');
+        self::t(!str_contains($e['svg'], 'javascript:') && !str_contains($e['svg'], 'example.org'), 'Editor-Daten ohne Skript-Schemata und fremde Adressen');
+        $w = Svg::clean($src, ['keep_ids' => true]);
+        self::t(!str_contains($w['svg'], 'data-ge-') && !str_contains($w['svg'], 'data-locked'), 'ohne editor: keine Editor-Daten');
+        self::t(($w['images'] ?? 0) === 1 && !str_contains($w['svg'], '<image'), 'Pixelbild entfernt und gezählt (Meldung im Editor)');
+    }
+
+    /** Rolle vorübergehend setzen (wie ExtensionsSelfTest::actAs) */
+    private static function actAs(array $perms): void
+    {
+        $a = app()->auth;
+        foreach (['loaded' => true, 'user' => ['id' => 0, 'email' => 'selbsttest@example.test', 'name' => 'Selbsttest', 'role' => 'qa', 'appearance' => null, 'locale' => null],
+            'role' => ['key' => 'qa', 'name' => 'QA', 'description' => '', 'permissions' => $perms, 'tables' => null, 'builtin' => false]] as $prop => $v) {
+            (new \ReflectionProperty($a, $prop))->setValue($a, $v);
+        }
+    }
+
+    /** Redaktion ohne Design-Recht: kein „Vorschau gestalten“, Speichern/Zuordnen einer Blockvorschau → 403 */
+    private static function rights(): void
+    {
+        $a = app()->auth;
+        $saved = [];
+        foreach (['loaded', 'user', 'role'] as $prop) $saved[$prop] = (new \ReflectionProperty($a, $prop))->getValue($a);
+        $c = new GraphicsController();
+        // Konsole: Sitzung nur für die CSRF-Prüfung vorübergehend „gestartet“
+        $sess = app()->session;
+        $started = new \ReflectionProperty($sess, 'started');
+        $wasStarted = $started->getValue($sess);
+        $started->setValue($sess, true);
+        $tok = bin2hex(random_bytes(16));
+        $_SESSION['_csrf'] = $tok;
+        $post = fn(array $data) => new Request('POST', '/admin/api/grafik/save', [], $data + ['_csrf' => $tok], [], ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json']);
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#5B73AD"/></svg>';
+        try {
+            self::actAs(['media.upload', 'pages.edit']);
+            self::t(!Graphics::canKind('preview') && !Graphics::canKind('icon') && !Graphics::canKind('part') && Graphics::canKind('info'), 'Redaktion (nur media.upload): Infografiken ja, Vorschauen/Symbole/Bausteine nein');
+            $cfgOk = Graphics::canKind('preview');   // fragments/editor.php: $config['grafik'] nur damit
+            self::t(!$cfgOk, 'Blockauswahl ohne „Vorschau gestalten“ (Editor-Konfiguration grafik = null)');
+            $res = $c->save($post(['svg' => $svg, 'target' => 'graphics', 'kind' => 'preview', 'name' => 'x', 'block' => 'faq', 'assign' => '1']));
+            self::t($res->status === 403, 'Blockvorschau speichern ohne „design.edit“ → 403');
+            $res = $c->assign(new Request('POST', '/admin/api/grafik/assign', [], ['block' => 'faq', 'id' => '1', '_csrf' => $tok], [], ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json']));
+            self::t($res->status === 403, 'Blockvorschau zuordnen ohne „design.edit“ → 403');
+            $res = $c->part(new Request('POST', '/admin/api/grafik/part', [], ['name' => 'x', 'svg' => $svg, '_csrf' => $tok], [], ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json']));
+            self::t($res->status === 403, 'Baustein speichern ohne „blocks.build“ → 403');
+            $res = $c->boot(new Request('GET', '/admin/api/grafik/boot', ['format' => 'preview', 'block' => 'faq'], [], [], ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json']));
+            self::t($res->status === 403, 'Editor für Blockvorschau öffnen ohne Recht → 403');
+            self::actAs(['media.upload', 'design.edit']);
+            self::t(Graphics::canKind('preview') && !Graphics::canKind('part'), 'mit „design.edit“: Blockvorschauen ja, Bausteine weiter nein');
+            $res = $c->boot(new Request('GET', '/admin/api/grafik/boot', ['format' => 'preview', 'block' => 'faq'], [], [], ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json']));
+            self::t($res->status === 200, 'mit „design.edit“: Editor für Blockvorschau öffnet');
+            self::actAs(['design.edit']);
+            self::t(!Graphics::canKind('preview'), 'ohne „media.upload“ auch mit Design-Recht nicht');
+        } catch (\Throwable $e) {
+            self::t(false, 'Rechte-Prüfung: ' . $e->getMessage());
+        } finally {
+            foreach ($saved as $prop => $v) (new \ReflectionProperty($a, $prop))->setValue($a, $v);
+            $started->setValue($sess, $wasStarted);
+            unset($_SESSION['_csrf']);
+        }
+    }
+
+    /** Arbeitsfassung zur Web-Datei: gilt, solange die Datei gleich ist; Blockvorschau je Variante */
+    private static function sources(array &$files): void
+    {
+        $work = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" data-ge-guides="v:400"><rect data-name="Balken" x="10" y="10" width="100" height="50" fill="#5B73AD"/></svg>';
+        $web = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500"><rect x="10" y="10" width="100" height="50" fill="#5B73AD"/></svg>';
+        [$m, $err] = Graphics::saveMedia($web, ['name' => 'selbsttest-arbeitsfassung', 'alt' => 'Selbsttest'], null, $work);
+        self::t($m !== null, 'Mediathek: Web-Fassung mit Arbeitsfassung gespeichert' . ($err ? " ($err)" : ''));
+        if (!$m) return;
+        $files[] = Media::path($m);
+        $file = (string) file_get_contents(Media::path($m));
+        self::t(!str_contains($file, 'data-name') && !str_contains($file, 'data-ge-'), 'ausgelieferte Datei ohne Editor-Daten');
+        $s = Graphics::source('media:' . $m['id'], $file);
+        self::t($s !== null && str_contains($s, 'data-ge-guides="v:400"') && str_contains($s, 'data-name="Balken"'), 'Arbeitsfassung gehört zur Datei (Hilfslinien, Ebenennamen)');
+        self::t(Graphics::source('media:' . $m['id'], $file . ' ') === null, 'andere Datei (z. B. ersetzt) → Arbeitsfassung gilt nicht');
+        // Vorschau je Variante
+        $theme = app()->theme;
+        $blocks = (array) $theme->blocks();
+        $type = null;
+        foreach ($blocks as $k => $b) if (is_array($b) && is_array($b['variants'] ?? null) && count($b['variants']) > 1) { $type = (string) $k; break; }
+        if ($type === null) { self::t(true, 'kein Block mit Varianten im Kit'); return; }
+        $variant = (string) array_keys($blocks[$type]['variants'])[1];
+        $g = Graphics::store('preview', 'Selbsttest-Variante', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#5B73AD"/></svg>', null, $type . '--' . $variant);
+        $files[] = Graphics::dir() . '/' . basename((string) parse_url((string) $g['url'], PHP_URL_PATH));
+        Graphics::assignPreview($type . '--' . $variant, $g['id']);
+        $p = \Core\Blocks\Picker::previews($theme, [$type => (array) $blocks[$type]]);
+        self::t(($p[$type]['variants'][$variant] ?? '') === $g['url'], 'Blockauswahl zeigt die Vorschau der Variante');
     }
 
     private static function permissions(): void

@@ -613,6 +613,126 @@
           "Rahmenecken",
           "Frame corners",
           "zuschneiden ausschnitt"
+        ],
+        "unite": [
+          "Vereinen",
+          "Unite",
+          "boolesch zusammenfügen form"
+        ],
+        "subtract": [
+          "Abziehen",
+          "Subtract",
+          "boolesch minus ausstanzen"
+        ],
+        "intersect": [
+          "Schnittmenge",
+          "Intersect",
+          "boolesch überschneidung"
+        ],
+        "exclude": [
+          "Ausschluss",
+          "Exclude",
+          "boolesch xor"
+        ],
+        "scissors": [
+          "Schere",
+          "Scissors",
+          "schneiden auftrennen"
+        ],
+        "arrows-counter-clockwise": [
+          "Umkehren",
+          "Reverse",
+          "richtung gegen uhrzeigersinn"
+        ],
+        "text-aa": [
+          "Text in Kurven",
+          "Text to curves",
+          "schrift kontur"
+        ],
+        "file-svg": [
+          "SVG-Datei",
+          "SVG file",
+          "vektor export"
+        ],
+        "selection-background": [
+          "Maske",
+          "Mask",
+          "maskieren auswahl"
+        ],
+        "selection": [
+          "Auswahl",
+          "Selection",
+          "rahmen gruppierung aufheben"
+        ],
+        "circle-half": [
+          "Halbkreis",
+          "Half circle",
+          "schließen"
+        ],
+        "line-vertical": [
+          "Hilfslinie",
+          "Guide",
+          "linie senkrecht"
+        ],
+        "gradient": [
+          "Verlauf",
+          "Gradient",
+          "farbverlauf"
+        ],
+        "crosshair": [
+          "Fadenkreuz",
+          "Crosshair",
+          "ziel mitte"
+        ],
+        "square": [
+          "Quadrat",
+          "Square",
+          "ecke form"
+        ],
+        "text-italic": [
+          "Kursiv",
+          "Italic",
+          "schrift schräg"
+        ],
+        "text-underline": [
+          "Unterstrichen",
+          "Underline",
+          "schrift linie"
+        ],
+        "text-strikethrough": [
+          "Durchgestrichen",
+          "Strikethrough",
+          "schrift linie"
+        ],
+        "text-align-left": [
+          "Linksbündig",
+          "Align left",
+          "text ausrichtung"
+        ],
+        "text-align-center": [
+          "Zentriert",
+          "Align center",
+          "text ausrichtung mitte"
+        ],
+        "text-align-right": [
+          "Rechtsbündig",
+          "Align right",
+          "text ausrichtung"
+        ],
+        "selection-inverse": [
+          "Ausstanzen",
+          "Knockout",
+          "maske umgekehrt loch"
+        ],
+        "arrow-up": [
+          "Pfeil hoch",
+          "Arrow up",
+          "nach oben vorn"
+        ],
+        "arrow-down": [
+          "Pfeil runter",
+          "Arrow down",
+          "nach unten hinten"
         ]
       }
     },

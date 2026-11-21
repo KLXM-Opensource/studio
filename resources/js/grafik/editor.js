@@ -15,9 +15,10 @@ import { esc, csrf } from '../_html.js';
 import { ico, spriteUrl } from '../_icons.js';
 import { toast } from '../_toast.js';
 import {
-  NS, num, docMatrix, parentMatrix, pt, boundsOf, union, corners, docBounds, decompose,
-  parsePath, pathToString, toNodes, fromNodes, shapeToPath, simplify, smoothNodes, polygonPoints,
+  NS, num, docMatrix, parentMatrix, pt, fmtMatrix, boundsOf, union, corners, docBounds, decompose,
+  parsePath, pathToString, toNodes, fromNodes, shapeToPath, simplify, smoothNodes, polygonPoints, transformPath,
 } from './geom.js';
+import { nearestSeg, insertNode, splitAt, joinEnds, nearestEnds, closeSub, reverseSub, nodeKind, setNodeKind } from './pathops.js';
 import {
   isDrawn, drawnChildren, nameOf, typeLabel, isLocked, isHidden, getProp, setProp, eachShape, snapshot, restore,
   applyTransform, defs, uid, getText, setText, remapIds, paintEl,
@@ -25,6 +26,20 @@ import {
 import { parseColor, hex } from './color.js';
 import { h, iconBtn, menu, closeMenus, modal, MOD, ALT, SHIFT, isMac } from './ui.js';
 import { buildPanels } from './panels.js';
+import { TextEditor } from './textedit.js';
+import { readText, layoutText, transformCase } from './text.js';
+import { booleanOp, simplifyD, outlineStroke, offsetArea, pathLike, makeCompound, recomputeCompound, isCompound } from './bool.js';
+import { makeClip, releaseClip, clipOf } from './clip.js';
+import { outlineAll } from './outline.js';
+import { Guides, readGrid } from './guides.js';
+import { GradientHandles } from './gradhandles.js';
+import { optimizeSvg, checkSame, desktopSvg, pdfBlob } from './export.js';
+
+/** Größe lesbar (Byte → KB) */
+const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
+
+/** Formen mit Knoten (Knoten-Werkzeug, Pfad-Befehle) */
+const NODE_SHAPES = ['path', 'rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'];
 
 const TOOLS = [
   { id: 'select', icon: 'cursor', key: 'V', label: () => t('Verschieben') },
@@ -36,6 +51,7 @@ const TOOLS = [
   { id: 'polygon', icon: 'polygon', key: 'G', label: () => t('Vieleck und Stern') },
   { id: 'line', icon: 'line-segment', key: 'L', label: () => t('Linie und Pfeil') },
   { id: 'text', icon: 'text-t', key: 'T', label: () => t('Text') },
+  { id: 'gradient', icon: 'gradient', key: 'F', label: () => t('Verlauf') },
   { id: 'eyedropper', icon: 'eyedropper', key: 'I', label: () => t('Pipette') },
   { id: 'hand', icon: 'hand', key: 'H', label: () => t('Hand') },
   { id: 'zoom', icon: 'magnifying-glass-plus', key: 'Z', label: () => t('Zoom') },
@@ -52,6 +68,7 @@ const HINTS = {
   line: () => t('Ziehen = Linie, ⇧ = in 45°-Schritten. Pfeilspitzen in der Kontextleiste.'),
   text: () => t('Klick = Text an dieser Stelle. Esc oder Klick daneben beendet die Eingabe.'),
   eyedropper: () => t('Klick auf ein Objekt übernimmt seine Füllung und Kontur für die Auswahl.'),
+  gradient: () => t('Ziehen auf einem Objekt = Verlauf anlegen bzw. neu ausrichten. Griffe ziehen, Doppelklick auf die Linie = Farbstopp, ⌫ = Stopp löschen. X = Füllung/Kontur.'),
   hand: () => t('Ziehen = Ansicht verschieben (auch mit gedrückter Leertaste in jedem Werkzeug).'),
   zoom: () => t('Klick = vergrößern, ⌥-Klick = verkleinern. ⌘0 = einpassen, ⌘1 = 100 %.'),
 };
@@ -83,6 +100,7 @@ export class GraphicEditor {
       fontWeight: '400', anchor: 'start', snap: true, grid: this.format === 'icon',
     };
     this.recent = [];
+    this.loadFonts();
     this.nodeSel = new Set();   // ausgewählte Knoten (Direktauswahl): "s:i"
     this.build();
     this.load(this.doc.svg || '', t('Geöffnet'));
@@ -108,6 +126,7 @@ export class GraphicEditor {
         <div class="ge-doctitle"><strong data-name></strong><span class="ge-fmt">${esc(fmtLabel)}</span><span class="ge-dirty" data-dirty hidden>${esc(t('Ungespeichert'))}</span></div>
         <div class="ge-top__grow"></div>
         <div class="ge-top__group">${iconBtn('arrow-u-up-left', t('Rückgängig'), 'data-act="undo"', MOD + 'Z')}${iconBtn('arrow-u-up-right', t('Wiederholen'), 'data-act="redo"', SHIFT + MOD + 'Z')}</div>
+        <button type="button" class="ge-zoombtn" data-act="objmenu" aria-haspopup="menu" aria-expanded="false">${esc(t('Objekt'))}${ico('caret-down')}</button>
         <button type="button" class="ge-zoombtn" data-act="zoommenu" aria-haspopup="menu" aria-expanded="false" title="${esc(t('Zoom'))}"><span data-zoom>100 %</span>${ico('caret-down')}</button>
         <button type="button" class="adm-btn adm-btn--small" data-act="export" aria-haspopup="menu" aria-expanded="false">${ico('export')} ${esc(t('Exportieren'))}</button>
         <span data-shellbtns></span>
@@ -133,6 +152,8 @@ export class GraphicEditor {
     this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible}</style>';
     this.renderPersonas();
     this.renderTools();
+    this.rulers = new Guides(this);
+    this.grad = new GradientHandles(this);
     this.panels = buildPanels(this);
     this.$('.ge-side').append(...this.panels.groups);
     this.bindTop();
@@ -293,6 +314,8 @@ export class GraphicEditor {
   /** Nach jeder Änderung: Bereiche, Überlagerung, Titel */
   changed(emit = true) {
     this.sel = this.sel.filter(el => el.isConnected && this.root.contains(el));
+    // Originale einer zusammengesetzten Form verlassen (Esc, Klick daneben): neu berechnen
+    if (this.compoundEdit && !this.compoundBusy && !this.compoundEdit.contains(this.scope)) queueMicrotask(() => this.endCompound());
     if (this.scope !== this.root && !this.scope.isConnected) this.scope = this.root;
     const nm = this.doc.name || this.doc.title || t('Neue Grafik');
     this.$('[data-name]').textContent = nm;
@@ -401,14 +424,9 @@ export class GraphicEditor {
     const ov = this.ov, out = [];
     const r = this.stage.getBoundingClientRect();
     ov.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
-    // Pixelraster (Symbole, ab 600 %)
-    if (this.opt.grid && this.zoom >= 6) {
-      const vb = this.vb, a = this.toOv({ x: vb.x, y: vb.y }), b = this.toOv({ x: vb.x + vb.w, y: vb.y + vb.h });
-      let d = '';
-      for (let x = Math.ceil(vb.x); x <= vb.x + vb.w; x++) { const p = this.toOv({ x, y: vb.y }); d += `M${p.x} ${a.y}V${b.y}`; }
-      for (let y = Math.ceil(vb.y); y <= vb.y + vb.h; y++) { const p = this.toOv({ x: vb.x, y }); d += `M${a.x} ${p.y}H${b.x}`; }
-      out.push(`<path class="ge-ov__grid" d="${d}"/>`);
-    }
+    // Raster und Hilfslinien (guides.js), Lineale
+    out.push(this.rulers.overlay());
+    this.rulers.draw();
     // Rahmen der betretenen Gruppe
     if (this.scope !== this.root) {
       const c = corners(this.scope, this.root);
@@ -418,7 +436,8 @@ export class GraphicEditor {
       const c = corners(this.hover, this.root);
       if (c) out.push(`<polygon class="ge-ov__hover" points="${c.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`);
     }
-    if (this.tool === 'node') out.push(this.drawNodes());
+    if (this.tool === 'gradient') out.push(this.grad.overlay());
+    else if (this.tool === 'node') out.push(this.drawNodes());
     else if (this.sel.length && !this.textEl) out.push(this.drawSelection());
     if (this.guides?.length) for (const g of this.guides) {
       const a = this.toOv(g.a), b = this.toOv(g.b);
@@ -429,10 +448,30 @@ export class GraphicEditor {
       out.push(`<rect class="ge-ov__marquee" x="${Math.min(m.x0, m.x1)}" y="${Math.min(m.y0, m.y1)}" width="${Math.abs(m.x1 - m.x0)}" height="${Math.abs(m.y1 - m.y0)}"/>`);
     }
     if (this.pen) out.push(this.drawPen());
+    if (this.textEd) out.push(this.textEd.draw());
+    // Textrahmen: Breite gestrichelt, Griff rechts zum Ändern der Breite
+    const tf = this.textEl || (this.sel.length === 1 && this.sel[0].localName === 'text' && this.tool === 'select' ? this.sel[0] : null);
+    if (tf && tf.hasAttribute('data-ge-frame')) out.push(this.drawTextFrame(tf));
     ov.innerHTML = out.join('');
     for (const el of ov.querySelectorAll('[data-h]')) el.addEventListener('pointerdown', e => this.handleDown(e, el.dataset.h));
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.nodeDown(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('dblclick', e => this.nodeToggle(e, el.dataset.node));
+    for (const el of ov.querySelectorAll('[data-gh]')) el.addEventListener('pointerdown', e => this.grad.down(e, el.dataset.gh));
+    for (const el of ov.querySelectorAll('[data-guide]')) {
+      el.addEventListener('pointerdown', e => { if (e.button !== 0 || this.tool === 'hand' || this.space) return; e.stopPropagation(); e.preventDefault(); this.rulers.dragGuide(e, +el.dataset.guide); });
+      el.addEventListener('dblclick', e => { e.stopPropagation(); this.rulers.dialog(+el.dataset.guide); });
+    }
+  }
+
+  /** Rahmen eines Textrahmens (Breite data-ge-frame) mit Griff rechts */
+  drawTextFrame(el) {
+    let b; try { b = el.getBBox(); } catch { return ''; }
+    const w = parseFloat(el.getAttribute('data-ge-frame')) || 0, x = parseFloat((el.getAttribute('x') || '0').split(/[\s,]+/)[0]) || 0;
+    const M = docMatrix(el, this.root), S = (px, py) => this.toOv(pt(M, px, py));
+    const y0 = b.y, y1 = b.y + Math.max(b.height, 1);
+    const c = [S(x, y0), S(x + w, y0), S(x + w, y1), S(x, y1)];
+    const hp = S(x + w, (y0 + y1) / 2);
+    return `<polygon class="ge-ov__tframe" points="${c.map(p => p.x + ',' + p.y).join(' ')}"/><rect class="ge-ov__h ge-ov__tfh" data-h="tfw" x="${hp.x - 4}" y="${hp.y - 8}" width="8" height="16" rx="2"/>`;
   }
 
   drawSelection() {
@@ -485,7 +524,16 @@ export class GraphicEditor {
     }, { passive: false });
     // Bausteine aus der Bibliothek hereinziehen
     st.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('application/x-ge-item')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
+    st.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
     st.addEventListener('drop', e => {
+      // Dateien: SVG wird importiert, Pixelbilder abgelehnt (nur Vektoren)
+      const f = e.dataTransfer.files?.[0];
+      if (f) {
+        e.preventDefault();
+        if (/svg/i.test(f.type) || /[.]svg$/i.test(f.name)) f.text().then(tx => this.importSvg(tx, f.name.replace(/[.]svg$/i, '')));
+        else toast(t('Der Grafik-Editor arbeitet nur mit Vektoren – Pixelbilder (PNG, JPG …) lassen sich nicht einfügen.'), 'warn');
+        return;
+      }
       const v = e.dataTransfer.getData('application/x-ge-item');
       if (!v) return;
       e.preventDefault();
@@ -511,7 +559,12 @@ export class GraphicEditor {
     if (e.button === 1 || this.space || this.tool === 'hand') return this.panDrag(e);
     if (e.button !== 0) return;
     if (e.target.closest?.('.ge-textedit')) return;
-    if (this.textEl) { this.endText(); if (this.tool === 'text') return; }
+    if (this.textEd) {
+      // Klick in den bearbeiteten Text: Schreibmarke/Auswahl; daneben: Bearbeitung beenden
+      if (this.textEd.contains(e.clientX, e.clientY)) { this.textEd.pointerDown(e); return; }
+      this.endText();
+      if (this.tool === 'text') return;
+    }
     this.stage.focus({ preventScroll: true });
     const p = this.toDoc(e.clientX, e.clientY);
     switch (this.tool) {
@@ -522,6 +575,7 @@ export class GraphicEditor {
       case 'rect': case 'ellipse': case 'polygon': case 'line': return this.shapeDown(e, p);
       case 'text': return this.textDown(e, p);
       case 'eyedropper': return this.eyedrop(e);
+      case 'gradient': return this.grad.stageDown(e, p);
       case 'zoom': { const r = this.stage.getBoundingClientRect(); return this.setZoom(this.zoom * (e.altKey ? 0.5 : 2), e.clientX - r.left, e.clientY - r.top); }
     }
   }
@@ -597,6 +651,7 @@ export class GraphicEditor {
   /** Griffe: Größe (8) und Drehen */
   handleDown(e, k) {
     e.stopPropagation(); e.preventDefault();
+    if (k === 'tfw') return this.frameWidthDrag(e);
     const f = this.frame();
     if (!f) return;
     const { F, b } = f, Fi = F.inverse();
@@ -636,10 +691,38 @@ export class GraphicEditor {
     }, () => { this.hint(); this.commit(t('Größe geändert')); });
   }
 
+  /** Breite eines Textrahmens ziehen – die Zeilen brechen sofort neu um */
+  frameWidthDrag(e) {
+    const el = this.textEl || this.sel[0];
+    if (!el || el.localName !== 'text') return;
+    const Mi = docMatrix(el, this.root).inverse();
+    const x = parseFloat((el.getAttribute('x') || '0').split(/[\s,]+/)[0]) || 0;
+    const fs = parseFloat(getProp(el, 'font-size')) || 16;
+    this.track(e, p => {
+      const q = pt(Mi, p.x, p.y);
+      this.setTextFrame(el, Math.max(fs, q.x - x), false);
+      this.draw();
+    }, () => this.commit(t('Textrahmen geändert')));
+  }
+
+  /** Textrahmen setzen (Breite in Einheiten des Textes; 0 = Punkttext ohne Umbruch) und neu setzen */
+  setTextFrame(el, w, commit = true) {
+    if (w > 0) el.setAttribute('data-ge-frame', num(w, 2)); else el.removeAttribute('data-ge-frame');
+    this.retext(el);
+    if (commit) this.commit(w > 0 ? t('Textrahmen geändert') : t('Textrahmen entfernt'));
+  }
+
+  /** Text nach Änderung von Schrift, Größe, Rahmen neu setzen (Umbruch, Zeilenabstand) */
+  retext(el) {
+    if (this.textEd && this.textEd.el === el) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.relayout(); this.textEd.place(); return; }
+    layoutText(el, readText(el));
+  }
+
   dbl(e) {
     if (this.tool !== 'select') return;
     const hit = this.hitAt(e);
     if (!hit) return;
+    if (isCompound(hit.el)) { this.editCompound(hit.el); return; }
     if (['g', 'switch'].includes(hit.el.localName)) {
       // Gruppe betreten (wie in Vektorprogrammen): danach wählt ein Klick die Teile
       this.scope = hit.el;
@@ -648,7 +731,7 @@ export class GraphicEditor {
       this.hint(t('In der Gruppe – Esc oder Klick daneben verlässt sie.'));
       return;
     }
-    if (hit.el.localName === 'text') return this.beginText(hit.el);
+    if (hit.el.localName === 'text') return this.beginText(hit.el, false, { clientX: e.clientX, clientY: e.clientY });
     if (['path', 'rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'].includes(hit.el.localName)) { this.select([hit.el]); this.setTool('node'); }
   }
 
@@ -657,6 +740,8 @@ export class GraphicEditor {
     const xs = [], ys = [];
     const vb = this.vb;
     xs.push(vb.x, vb.x + vb.w / 2, vb.x + vb.w); ys.push(vb.y, vb.y + vb.h / 2, vb.y + vb.h);
+    const g = this.rulers.targets();
+    xs.unshift(...g.xs); ys.unshift(...g.ys);
     const ex = new Set(exclude);
     const pool = drawnChildren(this.scope).filter(el => !ex.has(el) && !isHidden(el)).slice(0, 400);
     for (const el of pool) {
@@ -674,7 +759,7 @@ export class GraphicEditor {
       for (const v of vals) for (const c of list) { const d = c - v; if (Math.abs(d) <= tol && (!r || Math.abs(d) < Math.abs(r.d))) r = { d, at: c }; }
       return r;
     };
-    if (this.opt.grid) { dx = Math.round(b0.x + dx) - b0.x; dy = Math.round(b0.y + dy) - b0.y; }
+    if (this.opt.grid) { dx = this.rulers.snapGrid(b0.x + dx) - b0.x; dy = this.rulers.snapGrid(b0.y + dy) - b0.y; }
     const x = b0.x + dx, y = b0.y + dy;
     const sx = best([x, x + b0.w / 2, x + b0.w], cand.xs), sy = best([y, y + b0.h / 2, y + b0.h], cand.ys);
     this.guides = [];
@@ -690,7 +775,7 @@ export class GraphicEditor {
       const a = Math.round(Math.atan2(p.y - from.y, p.x - from.x) / (Math.PI / 4)) * Math.PI / 4, l = Math.hypot(p.x - from.x, p.y - from.y);
       q = { x: from.x + Math.cos(a) * l, y: from.y + Math.sin(a) * l };
     }
-    if (this.opt.grid) { q.x = Math.round(q.x * 2) / 2; q.y = Math.round(q.y * 2) / 2; }
+    if (this.opt.grid) { q.x = this.rulers.snapGrid(q.x); q.y = this.rulers.snapGrid(q.y); }
     else if (this.opt.snap) {
       const tol = 6 / this.zoom, c = this.snapCache ||= this.snapTargets([]);
       for (const x of c.xs) if (Math.abs(x - q.x) <= tol) { q.x = x; break; }
@@ -859,48 +944,49 @@ export class GraphicEditor {
   }
 
   // ---------------------------------------------------------------- Text
-  textDown(e, p) {
+  /** Text-Werkzeug: Klick = Punkttext, Ziehen = Textrahmen (Zeilen brechen auf die Breite um), Klick in Text = bearbeiten */
+  textDown(e, p0) {
     e.preventDefault();   // kein mousedown-Fokus auf die Zeichenfläche – die Eingabe bekommt ihn
     const hit = this.hitAt(e)?.el;
-    if (hit && hit.localName === 'text') return this.beginText(hit);
-    const q = this.local(p);
-    const el = this.create('text', { x: num(q.x), y: num(q.y + this.opt.fontSize * 0.8), 'font-size': num(this.opt.fontSize), 'font-family': this.opt.fontFamily, 'font-weight': this.opt.fontWeight !== '400' ? this.opt.fontWeight : null, 'text-anchor': this.opt.anchor !== 'start' ? this.opt.anchor : null }, false);
-    el.setAttribute('fill', this.style.fill !== 'none' ? this.style.fill : (this.format === 'icon' ? 'currentColor' : '#1F2430'));
-    el.textContent = '';
-    this.beginText(el, true);
+    if (hit && hit.localName === 'text') return this.beginText(hit, false, { clientX: e.clientX, clientY: e.clientY });
+    const r = this.stage.getBoundingClientRect();
+    let box = null;
+    this.track(e, (p, ev) => {
+      if (Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 6) { this.marquee = null; box = null; this.draw(); return; }
+      this.marquee = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: ev.clientX - r.left, y1: ev.clientY - r.top };
+      box = { x: Math.min(p0.x, p.x), y: Math.min(p0.y, p.y), w: Math.abs(p.x - p0.x) };
+      this.draw();
+    }, () => {
+      this.marquee = null;
+      const at = box ? { x: box.x, y: box.y } : p0;
+      const q = this.local(at), fs = this.opt.fontSize;
+      const el = this.create('text', { x: num(q.x), y: num(q.y + fs * 0.8), 'font-size': num(fs), 'font-family': this.opt.fontFamily,
+        'font-weight': this.opt.fontWeight !== '400' ? this.opt.fontWeight : null, 'text-anchor': this.opt.anchor !== 'start' && !box ? this.opt.anchor : null }, false);
+      if (box) el.setAttribute('data-ge-frame', num(Math.max(fs, box.w / (decompose(docMatrix(this.target, this.root)).sx || 1)), 2));
+      el.setAttribute('fill', this.style.fill !== 'none' ? this.style.fill : (this.format === 'icon' ? 'currentColor' : '#1F2430'));
+      el.textContent = '';
+      this.beginText(el, true);
+    });
   }
 
-  beginText(el, fresh = false) {
-    this.textEl = el; this.textFresh = fresh; this.textBefore = getText(el);
+  /** Text bearbeiten (textedit.js): at = Bildschirmpunkt für die Schreibmarke, sonst alles auswählen */
+  beginText(el, fresh = false, at = null) {
+    if (this.textEd) this.endText();
     this.sel = [el];
-    const ta = this.$('.ge-textedit');
-    ta.hidden = false;
-    ta.value = getText(el);
-    const place = () => {
-      const fs = parseFloat(getProp(el, 'font-size')) || 16, m = decompose(docMatrix(el, this.root));
-      const bb = docBounds(el, this.root) || { x: 0, y: 0, w: 0, h: 0 };
-      const empty = !el.textContent;
-      const a = empty ? this.toOv(pt(docMatrix(el.parentNode, this.root), parseFloat(el.getAttribute('x')) || 0, (parseFloat(el.getAttribute('y')) || 0) - fs * 0.8)) : this.toOv({ x: bb.x, y: bb.y });
-      const size = fs * this.zoom * m.sx;
-      Object.assign(ta.style, { left: a.x - 4 + 'px', top: a.y - 4 + 'px', fontSize: size + 'px', fontFamily: getProp(el, 'font-family'), fontWeight: getProp(el, 'font-weight'),
-        minWidth: Math.max(60, bb.w * this.zoom + 24) + 'px', height: Math.max(size * 1.4, bb.h * this.zoom) + 16 + 'px', lineHeight: '1.2' });
-    };
-    place();
-    ta.oninput = () => { setText(el, ta.value); place(); this.draw(); };
-    ta.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Escape') { ev.preventDefault(); this.endText(); this.stage.focus(); } };
-    ta.focus(); ta.select();
-    requestAnimationFrame(() => { if (document.activeElement !== ta && this.textEl === el) { ta.focus(); ta.select(); } });
-    this.draw();
+    this.textEl = el;
+    this.textEd = new TextEditor(this, el, { at, fresh });
+    this.hint(t('Text bearbeiten: Tippen, Ziehen = auswählen, {mod}B/I/U = fett/kursiv/unterstrichen, Farbe wirkt auf die Auswahl. Esc beendet.', { mod: MOD }));
+    this.changed(false);
   }
 
   endText() {
-    const el = this.textEl;
-    if (!el) return;
-    this.textEl = null;
-    const ta = this.$('.ge-textedit');
-    ta.hidden = true; ta.oninput = ta.onkeydown = null;
+    const te = this.textEd, el = this.textEl;
+    if (!te || !el) { this.textEl = null; return; }
+    this.textEd = null; this.textEl = null;
+    const changed = te.end();
+    this.hint();
     if (!el.textContent.trim()) { el.remove(); this.sel = []; this.changed(false); return; }
-    if (this.textFresh || getText(el) !== this.textBefore) { this.sel = [el]; this.commit(this.textFresh ? t('Text') : t('Text geändert')); }
+    if (te.fresh || changed) { this.sel = [el]; this.commit(te.fresh ? t('Text') : t('Text geändert')); }
     else this.changed(false);
   }
 
@@ -917,9 +1003,23 @@ export class GraphicEditor {
 
   // ================================================================= Direktauswahl (Knoten)
   nodeStageDown(e, p) {
+    // Klick auf ein Segment der gewählten Kurve: Knoten einfügen (Form bleibt exakt) und gleich ziehbar
+    const cur = this.sel[0];
+    if (cur && !isLocked(cur) && NODE_SHAPES.includes(cur.localName) && !e.shiftKey) {
+      const nm = this.nodeModel();
+      const near = nm && nearestSeg(nm.subs, p, nm.M);
+      if (near && near.d * this.zoom <= 5) {
+        const el = this.toPath(cur);
+        const subs = toNodes(parsePath(el.getAttribute('d')));
+        const ni = insertNode(subs[near.si], near.k, near.t);
+        el.setAttribute('d', pathToString(fromNodes(subs)));
+        this.nodeSel = new Set([near.si + ':' + ni]);
+        return this.nodeDown(e, near.si + ':' + ni, t('Knoten eingefügt'));
+      }
+    }
     const hit = this.hitAt(e);
     const raw = hit?.raw;
-    if (raw && ['path', 'rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'].includes(raw.localName) && !isLocked(hit.el)) {
+    if (raw && NODE_SHAPES.includes(raw.localName) && !isLocked(hit.el)) {
       if (this.sel[0] !== raw) { this.sel = [raw]; this.nodeSel.clear(); this.changed(false); }
       return;
     }
@@ -968,19 +1068,23 @@ export class GraphicEditor {
     return s;
   }
 
-  nodeDown(e, key) {
+  /** Knoten bzw. Griff ziehen. label: Schritt im Protokoll auch ohne Bewegung (z. B. „Knoten eingefügt“) */
+  nodeDown(e, key, label = '') {
     e.stopPropagation(); e.preventDefault();
     const [si, ni, hk] = key.split(':');
     const k = si + ':' + ni;
     if (!hk) {
       if (e.shiftKey) { this.nodeSel.has(k) ? this.nodeSel.delete(k) : this.nodeSel.add(k); }
       else if (!this.nodeSel.has(k)) { this.nodeSel.clear(); this.nodeSel.add(k); }
+      this.renderCtx();
     }
     const el = this.toPath(this.sel[0]);
     const base = el.getAttribute('d');
     const Mi = docMatrix(el, this.root).inverse();
     const p0 = pt(Mi, this.toDoc(e.clientX, e.clientY).x, this.toDoc(e.clientX, e.clientY).y);
     let moved = false;
+    // Art des Knotens beim Start: glatt/symmetrisch → Gegengriff folgt; Ecke mit Griffen → Griffe bleiben getrennt
+    const kind0 = hk ? nodeKind(toNodes(parsePath(base))[si]?.nodes[ni] || {}) : '';
     this.track(e, (p, ev) => {
       const q = pt(Mi, p.x, p.y);
       let dx = q.x - p0.x, dy = q.y - p0.y;
@@ -991,10 +1095,10 @@ export class GraphicEditor {
         const n = subs[si].nodes[ni], hd = n[hk];
         if (!hd) return;
         hd.x += dx; hd.y += dy;
-        // glatter Knoten: Gegengriff spiegeln (⌥ = Ecke, Griffe getrennt)
+        // glatter Knoten: Gegengriff in einer Linie (symmetrisch: gleich lang); ⌥ = Griffe trennen (Ecke)
         const other = n[hk === 'i' ? 'o' : 'i'];
-        if (other && !ev.altKey) {
-          const l = Math.hypot(other.x - n.x, other.y - n.y), a = Math.atan2(n.y - hd.y, n.x - hd.x);
+        if (other && !ev.altKey && (kind0 === 'smooth' || kind0 === 'symmetric')) {
+          const l = kind0 === 'symmetric' ? Math.hypot(hd.x - n.x, hd.y - n.y) : Math.hypot(other.x - n.x, other.y - n.y), a = Math.atan2(n.y - hd.y, n.x - hd.x);
           other.x = n.x + Math.cos(a) * l; other.y = n.y + Math.sin(a) * l;
         }
       } else {
@@ -1008,7 +1112,7 @@ export class GraphicEditor {
       }
       el.setAttribute('d', pathToString(fromNodes(subs)));
       this.draw();
-    }, () => { if (moved) this.commit(t('Knoten bearbeitet')); else this.draw(); });
+    }, () => { if (moved || label) this.commit(moved ? t('Knoten bearbeitet') : label); else this.draw(); });
     this.draw();
   }
 
@@ -1040,6 +1144,464 @@ export class GraphicEditor {
     if (!left.length) { el.remove(); this.sel = []; }
     else el.setAttribute('d', pathToString(fromNodes(left)));
     this.commit(t('Knoten gelöscht'));
+  }
+
+  /**
+   * Pfad-Befehle (Kontextleiste des Knoten-Werkzeugs, Menü „Objekt“) auf der ersten Auswahl:
+   * kind:corner|smooth|symmetric, split (an Knoten auftrennen), join (Endpunkte verbinden), close, reverse, separate (Teilpfade trennen)
+   */
+  pathCmd(cmd) {
+    const el0 = this.sel[0];
+    if (!el0 || !NODE_SHAPES.includes(el0.localName) || isLocked(el0)) return;
+    const el = this.toPath(el0);
+    let subs = toNodes(parsePath(el.getAttribute('d')));
+    const keys = [...this.nodeSel].map(k => k.split(':').map(Number)).filter(([a, b]) => subs[a]?.nodes[b]);
+    let label = '';
+    if (cmd.startsWith('kind:')) {
+      if (!keys.length) return;
+      for (const [a, b] of keys) setNodeKind(subs[a], b, cmd.slice(5));
+      label = t('Knotenart geändert');
+    } else if (cmd === 'split') {
+      if (!keys.length) { toast(t('Bitte zuerst einen Knoten auswählen.'), 'info'); return; }
+      const bySub = new Map();
+      for (const [a, b] of keys) bySub.set(a, [...(bySub.get(a) || []), b]);
+      for (const si of [...bySub.keys()].sort((x, y) => y - x)) {
+        let sub = subs[si], idx = [...new Set(bySub.get(si))].sort((x, y) => x - y);
+        const n = sub.nodes.length;
+        if (sub.closed) {
+          // erst am ersten Knoten öffnen (Anfang = dieser Knoten), die übrigen Indizes verschieben sich mit
+          const k0 = idx.shift();
+          sub = splitAt(sub, k0)[0];
+          idx = idx.map(i => (i - k0 + n) % n);
+        }
+        let parts = [sub];
+        for (const ni of idx.sort((x, y) => y - x)) parts = [...splitAt(parts[0], ni), ...parts.slice(1)];
+        subs.splice(si, 1, ...parts);
+      }
+      this.nodeSel.clear();
+      label = t('Pfad aufgetrennt');
+    } else if (cmd === 'join') {
+      if (keys.length === 2) {
+        if (!joinEnds(subs, keys[0], keys[1])) { toast(t('Verbinden geht nur mit zwei Endpunkten offener Pfade.'), 'info'); return; }
+      } else {
+        const open = subs.filter(s => !s.closed);
+        if (!open.length) { toast(t('Der Pfad ist schon geschlossen.'), 'info'); return; }
+        if (open.length === 1) closeSub(open[0]);
+        else { const b = nearestEnds(subs); if (b) joinEnds(subs, b.a, b.b); }
+      }
+      this.nodeSel.clear();
+      label = t('Verbunden');
+    } else if (cmd === 'close') {
+      const only = new Set(keys.map(k => subs[k[0]]));
+      subs.forEach(sub => { if (!only.size || only.has(sub)) closeSub(sub); });
+      label = t('Pfad geschlossen');
+    } else if (cmd === 'reverse') {
+      subs.forEach(reverseSub);
+      this.nodeSel.clear();
+      label = t('Richtung umgekehrt');
+    } else if (cmd === 'separate') {
+      if (subs.length < 2) return;
+      const out = [el];
+      let after = el;
+      subs.slice(1).forEach((sub, i) => {
+        const c = el.cloneNode(false);
+        c.removeAttribute('id');
+        if (c.getAttribute('data-name')) c.setAttribute('data-name', c.getAttribute('data-name') + ' ' + (i + 2));
+        c.setAttribute('d', pathToString(fromNodes([sub])));
+        after.after(c); after = c; out.push(c);
+      });
+      subs = subs.slice(0, 1);
+      el.setAttribute('d', pathToString(fromNodes(subs)));
+      this.nodeSel.clear();
+      this.sel = out;
+      this.commit(t('Teilpfade getrennt'));
+      return;
+    } else return;
+    el.setAttribute('d', pathToString(fromNodes(subs)));
+    this.commit(label);
+  }
+
+  /** Mehrere Kurven zu einer verbinden (Auswahl-Werkzeug): Teilpfade in die unterste, offene Enden der Reihe nach verbunden */
+  joinPaths() {
+    const list = this.ordered(this.sel.filter(el => NODE_SHAPES.includes(el.localName) && !isLocked(el)));
+    if (list.length < 2) return;
+    const base = this.toPath(list[0]);
+    const Bi = docMatrix(base, this.root).inverse();
+    const subs = toNodes(parsePath(base.getAttribute('d')));
+    for (const el of list.slice(1)) {
+      const d = el.localName === 'path' ? el.getAttribute('d') : shapeToPath(el);
+      if (!d) continue;
+      subs.push(...toNodes(transformPath(parsePath(d), Bi.multiply(docMatrix(el, this.root)))));
+      el.remove();
+    }
+    for (let guard = 0; guard < 200 && subs.filter(s => !s.closed).length > 1; guard++) {
+      const b = nearestEnds(subs);
+      if (!b || !joinEnds(subs, b.a, b.b)) break;
+    }
+    base.setAttribute('d', pathToString(fromNodes(subs)));
+    this.sel = [base];
+    this.commit(t('Pfade verbunden'));
+  }
+
+  /** Boolesche Operationen: unite | subtract | intersect | exclude | divide (bool.js, Paper.js nachgeladen) */
+  async bool(op) {
+    let list = this.ordered(this.sel.filter(el => !isLocked(el)));
+    if (list.length < 2) { toast(t('Für diese Funktion bitte mindestens zwei Formen auswählen (Rechtecke, Ellipsen, Kurven oder Gruppen davon).'), 'info'); return; }
+    if (list.some(el => el.localName === 'text' || el.querySelector?.('text'))) {
+      list = await this.outlineTexts(list);
+      if (!list) return;
+    }
+    this.busy(true);
+    try {
+      const r = await booleanOp(this, op, list);
+      if (r.error) { toast(r.error, 'warn'); return; }
+      this.sel = r.els;
+      this.commit({ unite: t('Vereint'), subtract: t('Abgezogen'), intersect: t('Schnittmenge'), exclude: t('Ausschluss'), divide: t('Geteilt') }[op]);
+    } catch (e) {
+      console.error(e);
+      toast(t('Die Geometrie-Funktionen konnten nicht geladen werden.'), 'error');
+    } finally { this.busy(false); }
+  }
+
+  /** Zusammengesetzte Form (zerstörungsfrei): Originale bleiben als verborgene Gruppe, das Ergebnis wird berechnet */
+  async compound(op) {
+    const list = this.ordered(this.sel.filter(el => !isLocked(el)));
+    if (list.length < 2) { toast(t('Für diese Funktion bitte mindestens zwei Formen auswählen (Rechtecke, Ellipsen, Kurven oder Gruppen davon).'), 'info'); return; }
+    this.busy(true);
+    try {
+      const r = await makeCompound(this, op, list);
+      if (r.error) { toast(r.error, 'warn'); return; }
+      this.sel = [r.el];
+      this.commit(t('Zusammengesetzte Form'));
+    } catch (e) { console.error(e); toast(t('Die Geometrie-Funktionen konnten nicht geladen werden.'), 'error'); } finally { this.busy(false); }
+  }
+
+  /** Originale einer zusammengesetzten Form bearbeiten (Doppelklick): Originale sichtbar, Ergebnis ausgeblendet */
+  editCompound(g) {
+    const src = [...g.children].find(c => c.getAttribute('data-ge-src') === '1'), res = [...g.children].find(c => c.getAttribute('data-ge-result') === '1');
+    if (!src) return;
+    src.removeAttribute('display'); res?.setAttribute('display', 'none');
+    this.compoundEdit = g;
+    this.scope = src;
+    this.select(drawnChildren(src).slice(-1));
+    this.hint(t('Originale bearbeiten – Esc oder Klick daneben berechnet die zusammengesetzte Form neu.'));
+  }
+
+  /** Bearbeitung der Originale beenden: neu berechnen, Originale wieder verborgen */
+  async endCompound() {
+    const g = this.compoundEdit;
+    if (!g || this.compoundBusy) return;
+    this.compoundEdit = null;
+    this.compoundBusy = true;
+    try {
+      const src = [...g.children].find(c => c.getAttribute('data-ge-src') === '1');
+      if (this.scope === src || src?.contains(this.scope)) this.scope = this.root;
+      src?.setAttribute('display', 'none');
+      const r = g.isConnected ? await recomputeCompound(this, g) : null;
+      [...g.children].filter(c => c.getAttribute('data-ge-result') === '1').forEach(c => c.removeAttribute('display'));
+      if (r?.error) toast(r.error, 'warn');
+      this.sel = g.isConnected ? [g] : [];
+      this.hint();
+      this.commit(t('Zusammengesetzte Form geändert'));
+    } finally { this.compoundBusy = false; }
+  }
+
+  /** Operation einer zusammengesetzten Form wechseln bzw. in einen fertigen Pfad umwandeln */
+  async compoundSet(g, op) {
+    if (op === 'flatten') {
+      const res = [...g.children].find(c => c.getAttribute('data-ge-result') === '1');
+      if (!res) return;
+      res.removeAttribute('data-ge-result');
+      if (g.getAttribute('data-name') && !res.getAttribute('data-name')) res.setAttribute('data-name', g.getAttribute('data-name'));
+      g.replaceWith(res);
+      this.sel = [res];
+      this.commit(t('In Pfad umgewandelt'));
+      return;
+    }
+    g.setAttribute('data-ge-bool', op);
+    this.busy(true);
+    try { const r = await recomputeCompound(this, g); if (r.error) toast(r.error, 'warn'); } finally { this.busy(false); }
+    this.commit(t('Zusammengesetzte Form geändert'));
+  }
+
+  /** Kontur in Fläche umwandeln (für Stanz-/Schneide-Optik und Logos) */
+  async strokeToFill() {
+    const list = this.sel.filter(el => NODE_SHAPES.includes(el.localName) && !isLocked(el));
+    if (!list.length) { toast(t('Bitte eine Form mit Kontur auswählen.'), 'info'); return; }
+    this.busy(true);
+    const out = [];
+    try {
+      for (const el of list) {
+        const r = await outlineStroke(this, el);
+        if (r.error) { toast(r.error, 'info'); out.push(el); continue; }
+        if (r.dashed) toast(t('Strichmuster werden als durchgehende Kontur umgewandelt.'), 'info');
+        out.push(r.el);
+      }
+    } catch (e) { console.error(e); toast(t('Die Geometrie-Funktionen konnten nicht geladen werden.'), 'error'); return; } finally { this.busy(false); }
+    this.sel = out.filter(el => el.isConnected);
+    this.commit(t('Kontur in Fläche umgewandelt'));
+  }
+
+  /** Pfad versetzen: Abstand (+ außen / − innen), Ecken, Original behalten – mit Vorschau */
+  async offsetPath() {
+    const el = this.sel.find(x => !isLocked(x));
+    if (!el || ['text', 'line', 'polyline'].includes(el.localName)) { toast(t('Bitte eine geschlossene Form auswählen.'), 'info'); return; }
+    let prev = null, seq = 0;
+    const show = async (dist, join, keep) => {
+      const my = ++seq;
+      try {
+        const d = await offsetArea(this, el, dist, join);
+        if (my !== seq) return;
+        prev?.remove();
+        prev = d ? pathLike(el, this.root, d) : null;
+        if (prev) { prev.removeAttribute('id'); prev.setAttribute('data-name', t('Versatz')); if (keep && dist > 0) el.before(prev); else el.after(prev); el.style.visibility = keep ? '' : 'hidden'; }
+        this.draw();
+      } catch (e) { console.error(e); toast(t('Die Geometrie-Funktionen konnten nicht geladen werden.'), 'error'); }
+    };
+    const r = await modal(this.el, {
+      title: t('Pfad versetzen'), ok: t('Übernehmen'),
+      body: `<label class="f">${esc(t('Abstand (px, negativ = nach innen)'))}<input type="number" name="dist" step="0.5" value="4"></label>
+        <label class="f">${esc(t('Ecken'))}<select name="join"><option value="round">${esc(t('Rund'))}</option><option value="miter">${esc(t('Spitz'))}</option><option value="bevel">${esc(t('Abgeschrägt'))}</option></select></label>
+        <label class="f-check"><input type="checkbox" name="keep" checked> ${esc(t('Original behalten (Versatz als neue Form)'))}</label>`,
+      onOpen: d => {
+        const f = () => show(+d.querySelector('[name=dist]').value || 0, d.querySelector('[name=join]').value, d.querySelector('[name=keep]').checked);
+        d.querySelectorAll('input,select').forEach(i => i.addEventListener(i.type === 'number' ? 'input' : 'change', f));
+        f();
+      },
+    });
+    seq++;
+    el.style.visibility = '';
+    if (el.getAttribute('style') === '') el.removeAttribute('style');
+    if (!r || !prev) { prev?.remove(); this.draw(); return; }
+    if (!r.keep) { if (el.id) prev.id = el.id; el.remove(); }
+    this.sel = [prev];
+    this.commit(t('Pfad versetzt'));
+  }
+
+  /** Vereinfachen (weniger Knoten, Form innerhalb der Toleranz) mit Vorschau */
+  async simplifyPath() {
+    const el0 = this.sel[0];
+    if (!el0 || !NODE_SHAPES.includes(el0.localName) || isLocked(el0)) return;
+    const el = this.toPath(el0), d0 = el.getAttribute('d');
+    const n0 = toNodes(parsePath(d0)).reduce((a, x) => a + x.nodes.length, 0);
+    const m = decompose(docMatrix(el, this.root)), unit = 1 / (Math.abs(m.sx) || 1);
+    const vb = this.vb, def = Math.max(vb.w, vb.h) / 400;
+    let seq = 0;
+    const apply = async (tol, out) => {
+      const my = ++seq;
+      try {
+        const r = await simplifyD(this, d0, tol * unit);
+        if (my !== seq) return;
+        el.setAttribute('d', r.d);
+        if (out) out.textContent = t('{a} → {b} Knoten', { a: n0, b: r.nodes });
+        this.draw();
+      } catch (e) { console.error(e); toast(t('Die Geometrie-Funktionen konnten nicht geladen werden.'), 'error'); }
+    };
+    const r = await modal(this.el, {
+      title: t('Vereinfachen'), ok: t('Übernehmen'),
+      body: `<label class="f">${esc(t('Toleranz'))}<input type="range" name="tol" min="${num(def / 10, 4)}" max="${num(def * 10, 4)}" step="${num(def / 10, 4)}" value="${num(def, 4)}"></label>
+        <p class="f-help" data-out aria-live="polite">${esc(t('{a} Knoten', { a: n0 }))}</p>
+        <p class="f-help">${esc(t('Die Kurve wird neu angepasst – größere Toleranz = weniger Knoten, mehr Abweichung.'))}</p>`,
+      onOpen: d => {
+        const inp = d.querySelector('[name=tol]'), out = d.querySelector('[data-out]');
+        inp.addEventListener('input', () => apply(+inp.value, out));
+        apply(+inp.value, out);
+      },
+    });
+    seq++;
+    if (!r) { el.setAttribute('d', d0); this.draw(); return; }
+    await apply(+r.tol, null);
+    this.nodeSel.clear();
+    this.commit(t('Vereinfacht'));
+  }
+
+  /** Beschneiden (kind 'clip') bzw. Maske (kind 'mask'): oberstes Objekt der Auswahl wirkt auf die übrigen */
+  clip(kind) {
+    const list = this.ordered(this.sel.filter(el => !isLocked(el) && !el.closest('clipPath,mask')));
+    const r = makeClip(this.root, list, kind);
+    if (r.error) { toast(r.error, 'info'); return; }
+    this.sel = [r.el];
+    this.commit(kind === 'clip' ? t('Beschnitten') : kind === 'knockout' ? t('Ausgestanzt') : t('Maske erstellt'));
+  }
+
+  /** Beschneidung bzw. Maske der Auswahl freigeben */
+  unclip() {
+    const list = this.sel.map(el => el.closest('clipPath,mask') ? el.closest('clipPath,mask').parentNode : el).filter(el => el && clipOf(el, this.root));
+    if (!list.length) { toast(t('Die Auswahl ist weder beschnitten noch maskiert.'), 'info'); return; }
+    const out = [];
+    for (const g of [...new Set(list)]) out.push(...(releaseClip(this.root, g) || []));
+    this.sel = out.filter(isDrawn);
+    this.commit(t('Maske freigegeben'));
+  }
+
+  /** Menü „Objekt“ (Kopfzeile): alle Befehle mit Kürzeln – auch per Tastatur erreichbar */
+  objectMenu(btn) {
+    const sel = this.sel, n = sel.length;
+    const shapes = sel.filter(el => NODE_SHAPES.includes(el.localName));
+    const curvable = sel.some(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line', 'text'].includes(el.localName) || el.querySelector?.('text'));
+    const clipped = sel.some(el => clipOf(el.closest('clipPath,mask')?.parentNode || el, this.root));
+    const subs = shapes[0] ? toNodes(parsePath(shapes[0].localName === 'path' ? shapes[0].getAttribute('d') : shapeToPath(shapes[0]) || '')) : [];
+    menu(btn, [
+      { label: t('Gruppieren'), key: MOD + 'G', disabled: !n, run: () => this.group() },
+      { label: t('Gruppierung aufheben'), key: SHIFT + MOD + 'G', disabled: !sel.some(el => el.localName === 'g'), run: () => this.ungroup() },
+      { sep: true },
+      { label: t('Vereinen'), disabled: n < 2, run: () => this.bool('unite') },
+      { label: t('Abziehen'), disabled: n < 2, run: () => this.bool('subtract') },
+      { label: t('Schnittmenge'), disabled: n < 2, run: () => this.bool('intersect') },
+      { label: t('Ausschluss'), disabled: n < 2, run: () => this.bool('exclude') },
+      { label: t('Teilen'), disabled: n < 2, run: () => this.bool('divide') },
+      { label: t('Zusammengesetzt: Abziehen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('subtract') },
+      { label: t('Zusammengesetzt: Vereinen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('unite') },
+      { sep: true },
+      { label: t('Kontur in Fläche umwandeln'), disabled: !shapes.some(el => (getProp(el, 'stroke') || 'none') !== 'none'), run: () => this.strokeToFill() },
+      { label: t('Pfad versetzen …'), disabled: !n, run: () => this.offsetPath() },
+      { sep: true },
+      { label: t('Beschneiden'), key: MOD + '7', disabled: n < 2, run: () => this.clip('clip') },
+      { label: t('Als Maske verwenden'), disabled: n < 2, run: () => this.clip('mask') },
+      { label: t('Ausstanzen per Maske (umgekehrt)'), disabled: n < 2, run: () => this.clip('knockout') },
+      { label: t('Maske freigeben'), key: ALT + MOD + '7', disabled: !clipped, run: () => this.unclip() },
+      { sep: true },
+      { label: t('In Kurven umwandeln'), key: MOD + '↵', disabled: !curvable, run: () => this.toCurves() },
+      { label: t('Pfade verbinden'), key: MOD + 'J', disabled: !(shapes.length > 1 || subs.some(x => !x.closed)), run: () => shapes.length > 1 ? this.joinPaths() : this.pathCmd('join') },
+      { label: t('Richtung umkehren'), disabled: !shapes.length, run: () => this.pathCmd('reverse') },
+      { label: t('Teilpfade trennen'), disabled: subs.length < 2, run: () => this.pathCmd('separate') },
+      { label: t('Vereinfachen …'), disabled: shapes.length !== 1, run: () => this.simplifyPath() },
+    ]);
+  }
+
+  // ================================================================= Text: Zeichen und Absatz (textpanel.js)
+  /**
+   * Zeichen-Eigenschaft setzen: während der Bearbeitung mit markiertem Bereich nur für diese Zeichen (Lauf-tspans),
+   * sonst für die ganzen Texte der Auswahl (Läufe verlieren dieselbe Eigenschaft, damit sie überall gilt).
+   */
+  textProp(prop, value) {
+    const runProp = ['font-weight', 'font-style', 'fill', 'text-decoration', 'letter-spacing', 'font-family', 'font-size'].includes(prop);
+    if (this.textEd && runProp && this.textEd.range[0] !== this.textEd.range[1]) { this.textEd.format({ [prop]: value }); this.panels.refresh(); return; }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (!list.length) { this.renderCtx(); this.panels.refresh(); return; }
+    for (const el of list) {
+      setProp(el, prop, value);
+      for (const r of el.querySelectorAll('tspan')) { r.removeAttribute(prop); r.style?.removeProperty(prop); if (r.getAttribute('style') === '') r.removeAttribute('style'); }
+      if (prop === 'font-kerning' && value === null) el.style?.removeProperty('font-kerning');
+      if (prop === 'font-kerning' && value) { el.removeAttribute('font-kerning'); el.style.setProperty('font-kerning', value); }
+      if (el.hasAttribute('data-ge-frame') || el.querySelector('tspan[dy]')) this.retext(el);
+    }
+    if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.draw(); this.panels.refresh(); return; }
+    this.commit(t('Schrift geändert'));
+  }
+
+  /** Absatz: anchor (Ausrichtung), lh (Zeilenabstand), frame (Rahmenbreite), offset (Startversatz auf dem Pfad, %) */
+  textPara(k, v) {
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    for (const el of list) {
+      if (k === 'anchor') {
+        const w = parseFloat(el.getAttribute('data-ge-frame')) || 0, tp = el.querySelector('textPath');
+        if (w && !tp) {
+          // Textrahmen: linke Kante bleibt, x wandert mit der Ausrichtung
+          const off = a => a === 'middle' ? w / 2 : a === 'end' ? w : 0;
+          const x = parseFloat((el.getAttribute('x') || '0').split(/[\s,]+/)[0]) || 0, left = x - off(getProp(el, 'text-anchor') || 'start');
+          el.setAttribute('x', num(left + off(v)));
+          setProp(el, 'text-anchor', v === 'start' ? null : v);
+          this.retext(el);
+        } else if (tp) {
+          setProp(el, 'text-anchor', v === 'start' ? null : v);
+          tp.setAttribute('startOffset', v === 'middle' ? '50%' : v === 'end' ? '100%' : '0%');
+        } else {
+          // Punkttext: sichtbare Lage bleibt (wie in Affinity springt der Text nicht)
+          const before = docBounds(el, this.root);
+          setProp(el, 'text-anchor', v === 'start' ? null : v);
+          const after = docBounds(el, this.root);
+          if (before && after) applyTransform(el, new DOMMatrix().translate(before.x - after.x, 0), this.root);
+        }
+      } else if (k === 'lh') { el.setAttribute('data-ge-lh', num(v, 3)); this.retext(el); }
+      else if (k === 'frame') { this.setTextFrame(el, v, false); }
+      else if (k === 'offset') { const tp = el.querySelector('textPath'); if (tp) tp.setAttribute('startOffset', num(v, 2) + '%'); }
+    }
+    if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.place(); this.draw(); this.panels.refresh(); return; }
+    this.commit({ anchor: t('Ausrichtung geändert'), lh: t('Zeilenabstand geändert'), frame: t('Textrahmen geändert'), offset: t('Startversatz geändert') }[k]);
+  }
+
+  /** Groß-/Kleinschreibung als echte Zeichen (während der Bearbeitung: Auswahl, sonst ganze Texte) */
+  textCase(mode) {
+    if (this.textEd) { this.textEd.setCase(mode); this.panels.refresh(); return; }
+    const list = this.sel.filter(el => el.localName === 'text');
+    if (!list.length) return;
+    for (const el of list) layoutText(el, transformCase(readText(el), mode));
+    this.commit(t('Schreibung geändert'));
+  }
+
+  /** Text auf Pfad: Auswahl aus einem Text und einer Kurve → textPath; die Kurve wird unsichtbare Grundlinie */
+  textOnPath() {
+    const text = this.sel.find(el => el.localName === 'text'), shape = this.sel.find(el => NODE_SHAPES.includes(el.localName));
+    if (!text || !shape) { toast(t('Bitte einen Text und eine Kurve auswählen.'), 'info'); return; }
+    this.endText();
+    const path = this.toPath(shape);
+    if (!path.id) path.id = uid(this.root, 'textpfad-');
+    // Text im Raum der Kurve (textPath nimmt die Kurve im Raum des Textes)
+    const T = parentMatrix(text, this.root).inverse().multiply(parentMatrix(path, this.root));
+    const m = readText(text);
+    const runs = m.paras.flatMap((p, i) => i ? [{ t: ' ', s: {} }, ...p] : p);
+    const tp = document.createElementNS(NS, 'textPath');
+    tp.setAttribute('href', '#' + path.id);
+    const an = getProp(text, 'text-anchor') || 'start';
+    tp.setAttribute('startOffset', an === 'middle' ? '50%' : an === 'end' ? '100%' : '0%');
+    for (const a of ['x', 'y', 'dx', 'dy', 'data-ge-frame', 'data-ge-lh']) text.removeAttribute(a);
+    const f = fmtMatrix(T);
+    if (f) text.setAttribute('transform', f); else text.removeAttribute('transform');
+    layoutText(text, { paras: [runs], path: tp });
+    if (!path.getAttribute('data-name')) path.setAttribute('data-name', t('Textpfad'));
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'none');
+    path.style?.removeProperty('fill'); path.style?.removeProperty('stroke');
+    this.sel = [text];
+    this.commit(t('Text auf Pfad'));
+  }
+
+  /** Text vom Pfad lösen: wieder Punkttext am Anfang der Kurve */
+  textOffPath() {
+    const text = this.textEl || this.sel.find(el => el.localName === 'text' && el.querySelector('textPath'));
+    const tp = text?.querySelector('textPath');
+    if (!tp) return;
+    this.endText();
+    let start = { x: 0, y: 0 };
+    try { start = text.getStartPositionOfChar(0); } catch { /* leer */ }
+    const m = readText(text);
+    tp.remove();
+    text.setAttribute('x', num(start.x)); text.setAttribute('y', num(start.y));
+    layoutText(text, { paras: m.paras, path: null });
+    this.sel = [text];
+    this.commit(t('Vom Pfad gelöst'));
+  }
+
+  /** Raster ein/aus (zeigen und einrasten) */
+  toggleGrid() { this.opt.grid = !this.opt.grid; this.snapCache = null; this.renderCtx(true); this.draw(); }
+
+  /** Laufende Arbeit anzeigen (Bibliothek lädt, Rechnung läuft) */
+  busy(on) { this.el.classList.toggle('is-busy', on); this.el.setAttribute('aria-busy', on ? 'true' : 'false'); }
+
+  /** Texte in der Liste (auch in Gruppen) in Kurven umwandeln – Rückgabe: neue Liste oder null (Meldung kam schon) */
+  async outlineTexts(list) {
+    this.endText();
+    this.busy(true);
+    try {
+      const r = await outlineAll(this, list);
+      // Texte ohne Schriftdatei bleiben Text (Meldung), die übrigen sind umgewandelt
+      if (r.errors.length) toast(r.errors[0], 'warn');
+      return r.els;
+    } catch (e) {
+      console.error(e);
+      toast(t('Die Schriftdatei konnte nicht gelesen werden.'), 'error');
+      return null;
+    } finally { this.busy(false); }
+  }
+
+  /** Schriften der Website in der Verwaltung laden (font.css des Schriften-Managers), damit Texte wie auf der Website aussehen */
+  loadFonts() {
+    for (const [, f] of Object.entries(this.boot.fontFiles || {})) {
+      if (!f.css || document.querySelector(`link[data-ge-font="${CSS.escape(f.css)}"]`)) continue;
+      const l = document.createElement('link');
+      l.rel = 'stylesheet'; l.href = f.css; l.dataset.geFont = f.css;
+      document.head.append(l);
+    }
   }
 
   // ================================================================= Befehle
@@ -1169,10 +1731,16 @@ export class GraphicEditor {
     this.nudgeT = setTimeout(() => this.commit(t('Verschoben')), 400);
   }
 
-  toCurves() {
+  async toCurves() {
     const list = this.sel.filter(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'].includes(el.localName));
-    if (!list.length) return;
+    const texts = this.sel.filter(el => el.localName === 'text' || el.querySelector?.('text'));
+    if (!list.length && !texts.length) return;
     list.forEach(el => this.toPath(el));
+    if (texts.length) {
+      const out = await this.outlineTexts(this.sel);
+      if (!out) { if (list.length) this.commit(t('In Kurven umgewandelt')); return; }
+      this.sel = out;
+    }
     this.commit(t('In Kurven umgewandelt'));
   }
 
@@ -1198,6 +1766,9 @@ export class GraphicEditor {
       return new XMLSerializer().serializeToString(c);
     });
     if (cut) { this.sel.forEach(el => el.remove()); this.sel = []; this.commit(t('Ausgeschnitten')); }
+    // auch als SVG-Text in die Zwischenablage des Systems (für Desktop-Programme und andere Grafiken)
+    this.clipText = `<svg xmlns="${NS}" viewBox="${[this.vb.x, this.vb.y, this.vb.w, this.vb.h].map(v => num(v)).join(' ')}">${this.clip.join('')}</svg>`;
+    navigator.clipboard?.writeText?.(this.clipText).catch(() => { /* ohne Berechtigung: nur intern */ });
     toast(cut ? t('Ausgeschnitten') : t('Kopiert'));
   }
 
@@ -1233,7 +1804,7 @@ export class GraphicEditor {
       if (mod && k === 'a') { e.preventDefault(); this.selectAll(); return; }
       if (mod && k === 'c') { e.preventDefault(); this.copy(); return; }
       if (mod && k === 'x') { e.preventDefault(); this.copy(true); return; }
-      if (mod && k === 'v') { e.preventDefault(); this.paste(); return; }
+      if (mod && k === 'v') return;   // Einfügen über das paste-Ereignis (Zwischenablage des Systems: SVG-Text, Pixelbild → Meldung)
       if (mod && (k === '0')) { e.preventDefault(); this.fit(); return; }
       if (mod && (k === '1')) { e.preventDefault(); this.setZoom(1); return; }
       if (mod && (k === '+' || k === '=')) { e.preventDefault(); this.setZoom(this.zoom * 1.25); return; }
@@ -1241,6 +1812,12 @@ export class GraphicEditor {
       if (mod && e.key === ']') { e.preventDefault(); this.arrange(e.shiftKey ? 'front' : 'forward'); return; }
       if (mod && e.key === '[') { e.preventDefault(); this.arrange(e.shiftKey ? 'back' : 'backward'); return; }
       if (mod && e.shiftKey && k === 'f') { e.preventDefault(); this.opts.shell?.toggleMax?.(); return; }
+      if (mod && k === 'r' && !e.shiftKey) { e.preventDefault(); this.rulers.toggleRulers(); return; }
+      if (mod && (e.key === ';' || e.code === 'Semicolon' || e.code === 'Comma' && e.shiftKey)) { e.preventDefault(); this.rulers.toggleGuides(); return; }
+      if (mod && (e.key === "'" || e.code === 'Quote' || e.code === 'Backslash')) { e.preventDefault(); this.toggleGrid(); return; }
+      if (mod && e.code === 'Digit7') { e.preventDefault(); e.altKey ? this.unclip() : this.clip('clip'); return; }
+      if (mod && e.key === 'Enter') { e.preventDefault(); this.toCurves(); return; }
+      if (mod && k === 'j') { e.preventDefault(); this.sel.filter(el => NODE_SHAPES.includes(el.localName)).length > 1 ? this.joinPaths() : this.pathCmd('join'); return; }
       if (mod) return;
       if (e.key === ' ' && !this.space) { if (e.target.closest?.('button,[role=tab],[role=slider]')) return; e.preventDefault(); this.space = true; this.el.classList.add('is-space'); return; }
       if (e.key === 'Escape') {
@@ -1258,6 +1835,7 @@ export class GraphicEditor {
       }
       if ((e.key === 'Backspace' || e.key === 'Delete') && (e.target.closest?.('.ge-stage') || e.target === document.body || e.target.closest?.('.ge-layers'))) {
         if (this.pen) { e.preventDefault(); this.pen.nodes.pop(); if (!this.pen.nodes.length) this.pen = null; this.draw(); return; }
+        if (this.tool === 'gradient' && this.grad.current()) { e.preventDefault(); this.grad.deleteStop(); return; }
         e.preventDefault(); this.remove(); return;
       }
       if (e.key.startsWith('Arrow') && e.target.closest?.('.ge-stage')) {
@@ -1279,6 +1857,22 @@ export class GraphicEditor {
     };
     this.keyUp = e => { if (e.key === ' ') { this.space = false; this.el.classList.remove('is-space'); } };
     document.addEventListener('keydown', this.keyHandler);
+    // Einfügen: eigene Kopie an Ort und Stelle; SVG-Text aus anderen Programmen über den Server bereinigt; Pixelbilder → Meldung
+    this.pasteHandler = e => {
+      if (!this.el.isConnected || this.el.closest('[inert]') || e.target.closest?.('dialog.ge-modal')) return;
+      if (e.target.matches?.('input,textarea,select,[contenteditable]') && !e.target.closest('.ge-stage')) return;
+      if (e.target.closest?.('.ge-textedit')) return;
+      if (!this.el.contains(document.activeElement) && document.activeElement !== document.body) return;
+      const dt = e.clipboardData;
+      const text = dt?.getData('text/plain') || '';
+      const raster = [...(dt?.items || [])].some(it => it.kind === 'file' && /^image\/(?!svg)/.test(it.type));
+      e.preventDefault();
+      if (text && this.clipText && text.trim() === this.clipText.trim() && this.clip?.length) { this.paste(); return; }
+      if (/<svg[\s>]/i.test(text)) { this.importSvg(text); return; }
+      if (raster) { toast(t('Der Grafik-Editor arbeitet nur mit Vektoren – Pixelbilder (PNG, JPG …) lassen sich nicht einfügen.'), 'warn'); return; }
+      if (this.clip?.length) this.paste();
+    };
+    document.addEventListener('paste', this.pasteHandler);
     document.addEventListener('keyup', this.keyUp);
   }
 
@@ -1311,9 +1905,10 @@ export class GraphicEditor {
   }
 
   // ================================================================= Kontextleiste
-  renderCtx() {
+  renderCtx(force = false) {
     const ctx = this.$('.ge-ctx');
     if (!ctx || ctx.contains(document.activeElement) && document.activeElement.matches('input,select')) return;
+    if (force) ctx._html = '';
     const n = this.sel.length;
     const status = n === 0 ? t('Keine Auswahl') : n === 1 ? nameOf(this.sel[0]) + (this.scope !== this.root ? ' · ' + t('in Gruppe') : '') : t('{n} Objekte', { n });
     let html = `<span class="ge-ctx__status">${esc(status)}</span><span class="ge-ctx__sep"></span>`;
@@ -1343,17 +1938,39 @@ export class GraphicEditor {
       if (n > 2) html += `<span class="ge-seg" role="group" aria-label="${esc(t('Verteilen'))}">${iconBtn('arrows-left-right', t('Horizontal verteilen'), 'data-dist="h"')}${iconBtn('arrows-down-up', t('Vertikal verteilen'), 'data-dist="v"')}</span>`;
       html += `<span class="ge-seg" role="group" aria-label="${esc(t('Anordnen'))}">${iconBtn('arrow-line-up', t('Ganz nach vorn'), 'data-arr="front"', SHIFT + MOD + ']')}${iconBtn('arrow-up', t('Eine Ebene nach vorn'), 'data-arr="forward"', MOD + ']')}${iconBtn('arrow-down', t('Eine Ebene nach hinten'), 'data-arr="backward"', MOD + '[')}${iconBtn('arrow-line-down', t('Ganz nach hinten'), 'data-arr="back"', SHIFT + MOD + '[')}</span>`
         + `<span class="ge-seg" role="group" aria-label="${esc(t('Spiegeln'))}">${iconBtn('flip-horizontal', t('Horizontal spiegeln'), 'data-flip="h"')}${iconBtn('flip-vertical', t('Vertikal spiegeln'), 'data-flip="v"')}</span>`
-        + `<span class="ge-seg" role="group" aria-label="${esc(t('Gruppe'))}">${iconBtn('selection-plus', t('Gruppieren'), 'data-cmd="group"', MOD + 'G')}${this.sel.some(el => el.localName === 'g') ? iconBtn('selection', t('Gruppierung aufheben'), 'data-cmd="ungroup"', SHIFT + MOD + 'G') : ''}${this.sel.some(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'].includes(el.localName)) ? iconBtn('bezier-curve', t('In Kurven umwandeln'), 'data-cmd="curves"') : ''}</span>`;
+        + `<span class="ge-seg" role="group" aria-label="${esc(t('Gruppe'))}">${iconBtn('selection-plus', t('Gruppieren'), 'data-cmd="group"', MOD + 'G')}${this.sel.some(el => el.localName === 'g') ? iconBtn('selection', t('Gruppierung aufheben'), 'data-cmd="ungroup"', SHIFT + MOD + 'G') : ''}${this.sel.some(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line', 'text'].includes(el.localName)) ? iconBtn(this.sel.some(el => el.localName === 'text') ? 'text-aa' : 'bezier-curve', t('In Kurven umwandeln'), 'data-cmd="curves"', MOD + '↵') : ''}</span>`;
+      if (n > 1) html += `<span class="ge-seg" role="group" aria-label="${esc(t('Geometrie'))}">${[['unite', 'unite', t('Vereinen')], ['subtract', 'subtract', t('Abziehen')], ['intersect', 'intersect', t('Schnittmenge')], ['exclude', 'exclude', t('Ausschluss')], ['divide', 'squares-four', t('Teilen')]]
+        .map(([op, i, l]) => iconBtn(i, l, `data-bool="${op}"`)).join('')}</span>`
+        + `<span class="ge-seg" role="group" aria-label="${esc(t('Beschneiden'))}">${iconBtn('crop', t('Beschneiden'), 'data-cmd="clip"', MOD + '7')}${iconBtn('selection-background', t('Als Maske verwenden'), 'data-cmd="mask"')}${iconBtn('selection-inverse', t('Ausstanzen per Maske (umgekehrt)'), 'data-cmd="knockout"')}</span>`;
+      if (n === 1 && isCompound(this.sel[0])) {
+        const op = this.sel[0].getAttribute('data-ge-bool');
+        html += `<span class="ge-ctx__sep"></span><label class="ge-ctx__f">${esc(t('Zusammengesetzt'))} <select class="ge-in" data-compop>${[['unite', t('Vereinen')], ['subtract', t('Abziehen')], ['intersect', t('Schnittmenge')], ['exclude', t('Ausschluss')]].map(([v, l]) => `<option value="${v}"${v === op ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`
+          + `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cmd="compedit">${esc(t('Originale bearbeiten'))}</button><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cmd="compflat">${esc(t('In Pfad umwandeln'))}</button>`;
+      }
+      if (this.sel.some(el => NODE_SHAPES.includes(el.localName) && (getProp(el, 'stroke') || 'none') !== 'none')) html += `<span class="ge-seg" role="group" aria-label="${esc(t('Kontur'))}">${iconBtn('pen-nib', t('Kontur in Fläche umwandeln'), 'data-cmd="strokefill"')}</span>`;
+      else if (this.sel.some(el => clipOf(el, this.root))) html += `<span class="ge-seg" role="group" aria-label="${esc(t('Beschneiden'))}">${iconBtn('selection', t('Maske freigeben'), 'data-cmd="unclip"', ALT + MOD + '7')}</span>`;
       if (this.sel.some(el => ['line', 'path', 'polyline'].includes(el.localName))) {
         const el = this.sel[0];
         html += chk2('arrowStart', t('Pfeil am Anfang'), !!getProp(el, 'marker-start', false)) + chk2('arrowEnd', t('Pfeil am Ende'), !!getProp(el, 'marker-end', false));
       }
     }
-    if (this.tool === 'node' && n === 1) {
-      html += `<span class="ge-ctx__info">${esc(this.nodeSel.size ? t('{n} Knoten ausgewählt', { n: this.nodeSel.size }) : t('Knoten anklicken oder ziehen'))}</span>`;
-      if (this.nodeSel.size) html += `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cmd="delnodes">${ico('trash')} ${esc(t('Knoten löschen'))}</button>`;
+    if (this.tool === 'node' && n === 1 && NODE_SHAPES.includes(this.sel[0].localName)) {
+      const nm = this.nodeModel(), subs = nm?.subs || [], ns = this.nodeSel.size;
+      const kinds = new Set([...this.nodeSel].map(k => { const [a, b] = k.split(':').map(Number); const nd = subs[a]?.nodes[b]; return nd ? nodeKind(nd) : ''; }));
+      const kindOn = k => kinds.size === 1 && (kinds.has(k) || (k === 'corner' && (kinds.has('cusp') || kinds.has('half'))));
+      html += `<span class="ge-ctx__info">${esc(ns ? t('{n} Knoten ausgewählt', { n: ns }) : t('Knoten anklicken oder ziehen – Klick auf die Kurve fügt einen Knoten ein'))}</span>`;
+      if (ns) html += `<span class="ge-seg" role="group" aria-label="${esc(t('Knotenart'))}">${[['corner', 'square', t('Ecke')], ['smooth', 'circle', t('Glatt')], ['symmetric', 'diamond', t('Symmetrisch')]]
+        .map(([k, i, l]) => `<button type="button" class="ge-ib" data-path="kind:${k}" aria-pressed="${kindOn(k)}" aria-label="${esc(l)}" title="${esc(l)}">${ico(i)}</button>`).join('')}</span>`;
+      html += `<span class="ge-seg" role="group" aria-label="${esc(t('Pfad'))}">`
+        + (ns ? iconBtn('scissors', t('An Knoten auftrennen'), 'data-path="split"') : '')
+        + (subs.some(x => !x.closed) ? iconBtn('link-simple', t('Endpunkte verbinden'), 'data-path="join"') + iconBtn('circle-half', t('Pfad schließen'), 'data-path="close"') : '')
+        + iconBtn('arrows-counter-clockwise', t('Richtung umkehren'), 'data-path="reverse"')
+        + (subs.length > 1 ? iconBtn('link-break', t('Teilpfade trennen'), 'data-path="separate"') : '')
+        + (subs.reduce((a, x) => a + x.nodes.length, 0) > 8 ? iconBtn('path', t('Vereinfachen …'), 'data-cmd="simplify"') : '')
+        + `</span>`;
+      if (ns) html += `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cmd="delnodes">${ico('trash')} ${esc(t('Knoten löschen'))}</button>`;
     }
-    html += `<span class="ge-ctx__grow"></span>${chk('snap', t('Einrasten'))}${this.format !== 'info' || o.grid ? chk('grid', t('Raster')) : ''}
+    html += `<span class="ge-ctx__grow"></span>${chk('snap', t('Einrasten'))}${chk('grid', t('Raster'))}
       <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-act="docset">${ico('sliders-horizontal')} ${esc(t('Dokument …'))}</button>`;
     if (ctx._html === html) return;   // unverändert: nicht neu aufbauen (Symbole flackern sonst)
     ctx._html = html;
@@ -1395,6 +2012,17 @@ export class GraphicEditor {
     ctx.querySelector('[data-cmd=ungroup]')?.addEventListener('click', () => this.ungroup());
     ctx.querySelector('[data-cmd=curves]')?.addEventListener('click', () => this.toCurves());
     ctx.querySelector('[data-cmd=delnodes]')?.addEventListener('click', () => this.deleteNodes());
+    ctx.querySelectorAll('[data-path]').forEach(b => b.addEventListener('click', () => this.pathCmd(b.dataset.path)));
+    ctx.querySelector('[data-cmd=simplify]')?.addEventListener('click', () => this.simplifyPath());
+    ctx.querySelectorAll('[data-bool]').forEach(b => b.addEventListener('click', () => this.bool(b.dataset.bool)));
+    ctx.querySelector('[data-cmd=clip]')?.addEventListener('click', () => this.clip('clip'));
+    ctx.querySelector('[data-cmd=mask]')?.addEventListener('click', () => this.clip('mask'));
+    ctx.querySelector('[data-cmd=unclip]')?.addEventListener('click', () => this.unclip());
+    ctx.querySelector('[data-cmd=knockout]')?.addEventListener('click', () => this.clip('knockout'));
+    ctx.querySelector('[data-cmd=strokefill]')?.addEventListener('click', () => this.strokeToFill());
+    ctx.querySelector('[data-compop]')?.addEventListener('change', e => this.compoundSet(this.sel[0], e.target.value));
+    ctx.querySelector('[data-cmd=compedit]')?.addEventListener('click', () => this.editCompound(this.sel[0]));
+    ctx.querySelector('[data-cmd=compflat]')?.addEventListener('click', () => this.compoundSet(this.sel[0], 'flatten'));
     ctx.querySelector('[data-act=docset]').addEventListener('click', () => this.docSettings());
   }
 
@@ -1404,8 +2032,16 @@ export class GraphicEditor {
     this.el.querySelector('[data-act=redo]').addEventListener('click', () => this.redo());
     this.el.querySelector('[data-act=save]').addEventListener('click', () => this.save());
     this.el.querySelector('[data-act=swapfs]')?.addEventListener('click', () => this.swapFs());
+    const ob = this.el.querySelector('[data-act=objmenu]');
+    ob.addEventListener('click', () => this.objectMenu(ob));
     const zb = this.el.querySelector('[data-act=zoommenu]');
     zb.addEventListener('click', () => menu(zb, [
+      { label: t('Lineale'), key: MOD + 'R', checked: this.rulers.showRulers, run: () => this.rulers.toggleRulers() },
+      { label: t('Hilfslinien'), key: MOD + ';', checked: this.rulers.showGuides, run: () => this.rulers.toggleGuides() },
+      { label: t('Raster'), key: MOD + "'", checked: !!this.opt.grid, run: () => this.toggleGrid() },
+      { label: t('Einrasten'), checked: !!this.opt.snap, run: () => { this.opt.snap = !this.opt.snap; this.snapCache = null; this.renderCtx(true); } },
+      { label: t('Hilfslinien …'), run: () => this.rulers.dialog() },
+      { sep: true },
       { label: t('Einpassen'), key: MOD + '0', run: () => this.fit() },
       { label: '100 %', key: MOD + '1', run: () => this.setZoom(1) },
       { label: '200 %', run: () => this.setZoom(2) },
@@ -1418,8 +2054,11 @@ export class GraphicEditor {
     ]));
     const ex = this.el.querySelector('[data-act=export]');
     ex.addEventListener('click', () => menu(ex, [
-      { label: t('Als SVG herunterladen'), run: () => this.download('svg') },
-      { label: t('Als PNG herunterladen (2-fach)'), run: () => this.download('png') },
+      { label: t('SVG für das Web (optimiert)'), run: () => this.download('web') },
+      { label: t('SVG für Desktop-Programme (Affinity, Illustrator, Inkscape, Figma)'), run: () => this.download('desktop') },
+      { label: t('PDF (Vektor)'), run: () => this.download('pdf') },
+      { sep: true },
+      { label: t('SVG-Datei importieren …'), run: () => this.importFile() },
       { sep: true },
       { label: t('Speichern unter …'), key: SHIFT + MOD + 'S', run: () => this.save(true) },
       { label: t('Tastaturkürzel'), key: '?', run: () => this.shortcuts() },
@@ -1428,23 +2067,122 @@ export class GraphicEditor {
 
   fileBase() { return (this.doc.name || this.doc.title || 'grafik').toLowerCase().replace(/[^a-z0-9äöüß_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'grafik'; }
 
+  /**
+   * Herunterladen: web (optimiert wie gespeichert), desktop (Ebenen, eingerückt), pdf (Vektor, Texte möglichst in Kurven).
+   * Kein Pixelformat – der Editor arbeitet nur mit Vektoren.
+   */
   async download(kind) {
-    const svg = this.getSvg();
-    let blob;
-    if (kind === 'svg') blob = new Blob([svg], { type: 'image/svg+xml' });
-    else {
-      const vb = this.vb, s = Math.max(1, Math.min(8, 2 * (this.format === 'icon' ? 8 : 1)));
-      const img = new Image();
-      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace(/<svg\b/, `<svg width="${vb.w * s}" height="${vb.h * s}"`).replace(/(<svg[^>]*?)\swidth="[^"]*"([^>]*?)\swidth=/, '$1$2 width='));
-      try { await img.decode(); } catch { toast(t('Das Bild konnte nicht erzeugt werden.'), 'error'); return; }
-      const c = document.createElement('canvas'); c.width = Math.round(vb.w * s); c.height = Math.round(vb.h * s);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      blob = await new Promise(r => c.toBlob(r, 'image/png'));
-    }
+    this.finishPen(); this.endText();
+    let blob, ext = 'svg';
+    this.busy(true);
+    try {
+      if (kind === 'web') {
+        const w = await this.webSvg();
+        blob = new Blob([w.svg], { type: 'image/svg+xml' });
+        toast(t('Für das Web optimiert: {a} → {b}', { a: kb(w.before), b: kb(w.after) }));
+      } else if (kind === 'desktop') {
+        blob = new Blob([desktopSvg(this.getSvg())], { type: 'image/svg+xml' });
+      } else {
+        ext = 'pdf';
+        const svg = await this.outlinedCopy(this.getSvg(), true);
+        blob = await pdfBlob(this.boot.modules?.pdf, svg, m => toast(m, 'info'));
+      }
+    } catch (e) {
+      console.error(e);
+      toast(t('Der Export ist fehlgeschlagen.'), 'error');
+      return;
+    } finally { this.busy(false); }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = this.fileBase() + '.' + kind;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    a.href = URL.createObjectURL(blob);
+    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : '') + '.' + ext;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  /** Einstellungen der Web-Ausgabe (je Browser gemerkt): Nachkommastellen, Texte in Kurven */
+  get webPrefs() {
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem('klxm-studio-grafik-web') || '{}') || {}; } catch { /* privat */ }
+    return { decimals: p.decimals || 'auto', outline: p.outline !== false };
+  }
+  set webPrefs(v) { try { localStorage.setItem('klxm-studio-grafik-web', JSON.stringify(v)); } catch { /* privat */ } }
+
+  /** Texte mit Webschriften (selbst gehostet): im Bild auf der Website fehlt die Schrift → Kurven empfohlen */
+  webFontTexts() {
+    const files = this.boot.fontFiles || {};
+    return [...this.root.querySelectorAll('text')].filter(tx => {
+      const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
+      return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());
+    });
+  }
+
+  /**
+   * Kopie der Grafik mit Texten in Kurven (für Web/PDF) – gerendert in einer unsichtbaren Kopie im Editor, damit die
+   * Positionen des Browsers gelten. Die Arbeitsfassung behält ihre Texte. all = auch Texte ohne Webschrift versuchen.
+   */
+  async outlinedCopy(svg, all = false) {
+    const files = this.boot.fontFiles || {};
+    const host = document.createElement('div');
+    host.style.cssText = 'position:absolute;left:-20000px;top:0;width:800px;height:500px;visibility:hidden';
+    const c = document.importNode(new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement, true);
+    host.append(c);
+    this.shadow.append(host);
+    try {
+      const texts = [...c.querySelectorAll('text')].filter(tx => {
+        if (all) return true;
+        const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
+        return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());
+      });
+      if (texts.length) { try { await document.fonts.ready; } catch { /* egal */ } await outlineAll(this, texts); }
+      c.removeAttribute('style');
+      return new XMLSerializer().serializeToString(c);
+    } finally { host.remove(); }
+  }
+
+  /**
+   * Web-Fassung: (Texte in Kurven) → optimieren → Sicherheitsvergleich der Darstellung. Rückgabe { svg, before, after, safe }.
+   * opts überschreibt die gemerkten Einstellungen (Speichern-Dialog).
+   */
+  async webSvg(opts = this.webPrefs) {
+    const src = this.getSvg();
+    let base = src;
+    if (opts.outline && this.webFontTexts().length) base = await this.outlinedCopy(src);
+    let out = optimizeSvg(base, { decimals: opts.decimals });
+    let safe = false;
+    // Sicherheitsnetz: Optimierung darf die Darstellung nicht ändern – sonst nur Editor-Daten entfernen
+    if (!(await checkSame(optimizeSvg(base, { safe: true }), out))) { out = optimizeSvg(base, { safe: true }); safe = true; }
+    return { svg: out, before: new Blob([src]).size, after: new Blob([out]).size, safe };
+  }
+
+  /** SVG-Datei importieren (als Gruppe in die Grafik) – Pixelbilder werden nicht übernommen (Meldung) */
+  importFile() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.svg,image/svg+xml';
+    inp.addEventListener('change', async () => {
+      const f = inp.files?.[0];
+      if (!f) return;
+      if (!/svg/i.test(f.type) && !/\.svg$/i.test(f.name)) { toast(t('Der Grafik-Editor arbeitet nur mit Vektoren – Pixelbilder (PNG, JPG …) lassen sich nicht einfügen.'), 'warn'); return; }
+      this.importSvg(await f.text(), f.name.replace(/\.svg$/i, ''));
+    });
+    inp.click();
+  }
+
+  /** SVG-Text einfügen: erst über den Server bereinigen, dann als Gruppe in die Mitte */
+  async importSvg(text, name = '') {
+    const res = await this.api('POST', this.boot.urls.clean, { svg: text });
+    if (!res) return;
+    if (res.images) toast(t('Pixelbilder in der SVG wurden nicht übernommen – der Grafik-Editor arbeitet nur mit Vektoren.'), 'warn');
+    const doc = new DOMParser().parseFromString(res.svg, 'image/svg+xml').documentElement;
+    const vb = (doc.getAttribute('viewBox') || '0 0 100 100').split(/[\s,]+/).map(Number);
+    const g = document.createElementNS(NS, 'g');
+    if (name) g.setAttribute('data-name', name);
+    for (const c of [...doc.children]) if (!['title', 'desc', 'metadata'].includes(c.localName)) g.append(document.importNode(c, true));
+    this.freshIds(g);
+    const tvb = this.vb, sc = Math.min(1, tvb.w * 0.8 / (vb[2] || 1), tvb.h * 0.8 / (vb[3] || 1));
+    g.setAttribute('transform', `translate(${num(tvb.x + (tvb.w - vb[2] * sc) / 2 - vb[0] * sc)} ${num(tvb.y + (tvb.h - vb[3] * sc) / 2 - vb[1] * sc)})${sc !== 1 ? ` scale(${num(sc, 5)})` : ''}`);
+    this.target.append(g);
+    this.sel = [g];
+    this.commit(t('Importiert'));
   }
 
   /** Titel und Beschreibung als <title>/<desc> in der Grafik (Barrierefreiheit) */
@@ -1470,6 +2208,8 @@ export class GraphicEditor {
           <label class="f">${esc(t('Höhe'))}<input type="number" name="h" min="1" max="10000" step="1" value="${esc(num(vb.h, 2))}" required></label></div>
           <label class="f-check"><input type="checkbox" name="scale"> ${esc(t('Inhalt mit skalieren'))}</label>`
         : `<p class="f-help">${esc(t('Feste Größe: {w} × {h}', { w: num(vb.w), h: num(vb.h) }))}</p>`}
+        <div class="ge-row2"><label class="f">${esc(t('Raster: Abstand'))}<input type="number" name="gs" min="0.1" max="1000" step="0.1" value="${esc(num(readGrid(this.root, f).size, 2))}"></label>
+          <label class="f">${esc(t('Unterteilungen'))}<input type="number" name="gsub" min="1" max="20" step="1" value="${esc(readGrid(this.root, f).sub)}"></label></div>
         <label class="f">${esc(t('Titel in der Grafik'))}<input name="title" maxlength="180" value="${esc(title)}"><span class="f-help">${esc(t('Wird als <title> gespeichert – Screenreader lesen ihn, wenn die Grafik direkt eingebunden ist.'))}</span></label>
         <label class="f">${esc(t('Beschreibung in der Grafik'))}<textarea name="desc" rows="3" maxlength="1000">${esc(desc)}</textarea><span class="f-help">${esc(t('Ausführlicher Text für Infografiken (<desc>). Texte in der Grafik bleiben Text.'))}</span></label>
         ${vers.length ? `<h3 class="ge-modal__h3">${esc(t('Frühere Fassungen'))}</h3><ul class="ge-versions">${vers.map(v => `<li><span>${esc(new Date(v.created_at.replace(' ', 'T')).toLocaleString())}</span><button type="button" class="adm-btn adm-btn--small" data-ver="${v.id}">${esc(t('Laden'))}</button></li>`).join('')}</ul>` : ''}`,
@@ -1491,6 +2231,9 @@ export class GraphicEditor {
       }
     }
     this.setA11y(r.title.trim(), r.desc.trim());
+    const gs = Math.max(0.1, Math.min(1000, +r.gs || 10)), gsub = Math.max(1, Math.min(20, Math.round(+r.gsub || 1)));
+    const def = readGrid(document.createElementNS(NS, 'svg'), f);
+    if (gs !== def.size || gsub !== def.sub) this.root.setAttribute('data-ge-grid', num(gs, 2) + ' ' + gsub); else this.root.removeAttribute('data-ge-grid');
     this.commit(t('Dokument geändert'));
   }
 
@@ -1503,6 +2246,8 @@ export class GraphicEditor {
       ['Tab', t('Nächstes Objekt auswählen')], ['↵ / Esc', t('Gruppe betreten bzw. Text bearbeiten / verlassen')], [t('Leertaste + Ziehen'), t('Ansicht verschieben')],
       [MOD + '0 / ' + MOD + '1 / ' + MOD + '+ / ' + MOD + '−', t('Einpassen / 100 % / Zoom')], ['X / ' + SHIFT + 'X', t('Füllung oder Kontur bearbeiten / tauschen')],
       [ALT + t('Ziehen'), t('Kopie ziehen')], [SHIFT + MOD + 'F', t('Vollbild ein/aus (Overlay)')],
+      [MOD + 'R / ' + MOD + '; / ' + MOD + "'", t('Lineale / Hilfslinien / Raster')], [MOD + '7 / ' + ALT + MOD + '7', t('Beschneiden / Maske freigeben')],
+      [MOD + '↵', t('In Kurven umwandeln')], [MOD + 'J', t('Pfade verbinden')], [MOD + 'B / I / U', t('Text: fett / kursiv / unterstrichen')],
     ];
     modal(this.el, { title: t('Tastaturkürzel'), ok: '', wide: true, body: `<dl class="ge-keys">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` });
   }
@@ -1522,18 +2267,50 @@ export class GraphicEditor {
 
   async save(asNew = false) {
     this.finishPen(); this.endText();
+    if (this.compoundEdit) { this.scope = this.root; await this.endCompound(); }
     const d = this.doc;
     if (d.target === 'none') {
       // Einbettung ohne Ablage (z. B. Motion): bereinigtes SVG an den Aufrufer, der es selbst speichert
       const res = await this.api('POST', this.boot.urls.clean, { svg: this.getSvg() });
       if (!res) return null;
+      let w = null;
+      try { w = await this.webSvg(); } catch { /* ohne Web-Fassung */ }
       this.savedAt = this.hi; this.changed(false);
-      const result = { target: 'none', item: null, svg: res.svg, format: this.format };
+      // svg = bereinigte Arbeitsfassung (ids, Ebenen), web = optimierte Fassung für die Website
+      const result = { target: 'none', item: null, svg: res.svg, web: w?.svg || res.svg, format: this.format };
       this.opts.onSave?.(result); this.emit('save', result);
       return result;
     }
     if (d.shared && !asNew) asNew = true;
     let meta = {};
+    let prefs = this.webPrefs, web = null;
+    const hasWebFont = this.webFontTexts().length > 0;
+    // Abschnitt „Für das Web“ im Speichern-Dialog: Größe vorher/nachher, Nachkommastellen, Texte in Kurven
+    const webBox = `<fieldset class="ge-webopt"><legend>${esc(t('Für das Web'))}</legend>
+        <p class="ge-webopt__size" data-websize aria-live="polite">${esc(t('Wird berechnet …'))}</p>
+        <label class="f">${esc(t('Genauigkeit (Nachkommastellen)'))}<select name="decimals" data-dec>${[['auto', t('Automatisch')], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']].map(([v, l]) => `<option value="${v}"${String(prefs.decimals) === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+        ${hasWebFont ? `<label class="f-check"><input type="checkbox" name="outline" data-outl${prefs.outline ? ' checked' : ''}> ${esc(t('Texte in Kurven umwandeln (empfohlen)'))}</label>
+        <p class="f-help">${esc(t('Die Schriften der Website wirken in SVG-Bildern nicht – Besucher sähen eine Ersatzschrift. Im Editor bleiben die Texte bearbeitbar.'))}</p>` : ''}
+      </fieldset>`;
+    const bindWeb = dlg => {
+      const out = dlg.querySelector('[data-websize]'), dec = dlg.querySelector('[data-dec]'), ol = dlg.querySelector('[data-outl]');
+      let seq = 0;
+      const calc = async () => {
+        const my = ++seq;
+        prefs = { decimals: dec.value, outline: ol ? ol.checked : prefs.outline };
+        out.textContent = t('Wird berechnet …');
+        try {
+          const w = await this.webSvg(prefs);
+          if (my !== seq) return;
+          web = w;
+          const pc = Math.round((1 - w.after / Math.max(1, w.before)) * 100);
+          out.textContent = (pc >= 0 ? t('Größe: {a} → {b} ({p} % kleiner)', { a: kb(w.before), b: kb(w.after), p: pc })
+            : t('Größe: {a} → {b} (größer: Texte als Kurven)', { a: kb(w.before), b: kb(w.after) })) + (w.safe ? ' · ' + t('sichere Stufe') : '');
+        } catch (e) { console.error(e); out.textContent = t('Optimierung nicht möglich – es wird unverändert gespeichert.'); web = null; }
+      };
+      dec.addEventListener('change', calc); ol?.addEventListener('change', calc);
+      calc();
+    };
     const isMedia = d.target !== 'graphics';
     const first = isMedia ? (!d.mediaId || asNew) : (!d.id || asNew);
     if (first) {
@@ -1544,17 +2321,19 @@ export class GraphicEditor {
            <label class="f">${esc(t('Alt-Text (Bildbeschreibung)'))}<textarea name="alt" rows="2" maxlength="250" data-alt>${esc(d.alt || '')}</textarea><span class="f-help">${esc(t('Pflicht für Grafiken mit Inhalt: Was zeigt die Grafik? Bei Infografiken die Kernaussage.'))}</span></label>
            <label class="f-check"><input type="checkbox" name="decorative" data-deco> ${esc(t('Rein dekorativ (kein Alt-Text nötig)'))}</label>`
         : `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" value="${esc(d.name || '')}" required></label>
-           ${d.kind === 'preview' || this.format === 'preview' ? `<label class="f">${esc(t('Block'))}<select name="block"><option value="">${esc(t('– keinem Block zuordnen –'))}</option>${Object.entries(this.boot.blocks || {}).map(([k, v]) => `<option value="${esc(k)}"${k === d.block ? ' selected' : ''}>${esc(v)} (${esc(k)})</option>`).join('')}</select></label>
+           ${d.kind === 'preview' || this.format === 'preview' ? `<label class="f">${esc(t('Block'))}<select name="block"><option value="">${esc(t('– keinem Block zuordnen –'))}</option>${Object.entries({ ...(d.block && !(this.boot.blocks || {})[d.block] ? { [d.block]: d.name || d.block } : {}), ...(this.boot.blocks || {}) }).map(([k, v]) => `<option value="${esc(k)}"${k === d.block ? ' selected' : ''}>${esc(v)} (${esc(k)})</option>`).join('')}</select></label>
              <label class="f-check"><input type="checkbox" name="assign" checked> ${esc(t('In der Blockauswahl dieser Website verwenden'))}</label>` : ''}`;
       const r = await modal(this.el, {
-        title: asNew ? t('Speichern unter') : isMedia ? t('In der Mediathek speichern') : t('Grafik speichern'), ok: t('Speichern'), body,
-        onOpen: dlg => { const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]'); if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); } },
+        title: asNew ? t('Speichern unter') : isMedia ? t('In der Mediathek speichern') : t('Grafik speichern'), ok: t('Speichern'), body: body + webBox,
+        onOpen: dlg => { const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]'); if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); } bindWeb(dlg); },
       });
       if (!r) return null;
       meta = r;
       if (isMedia && r.title) this.setA11y(r.title, [...this.root.children].find(c => c.localName === 'desc')?.textContent || '');
     }
-    const body = { svg: this.getSvg(), target: isMedia ? 'media' : 'graphics' };
+    this.webPrefs = prefs;
+    try { if (!web) web = await this.webSvg(prefs); } catch (e) { console.error(e); web = null; }
+    const body = { svg: this.getSvg(), web: web?.svg || '', target: isMedia ? 'media' : 'graphics' };
     if (isMedia) Object.assign(body, first ? meta : {}, { mediaId: first ? null : d.mediaId });
     else Object.assign(body, { kind: d.kind || this.format, id: first ? null : d.id, name: meta.name ?? d.name, block: meta.block ?? d.block, assign: meta.assign ?? false });
     const btn = this.el.querySelector('[data-act=save]');
@@ -1567,7 +2346,7 @@ export class GraphicEditor {
     d.versions = res.versions || [];
     this.savedAt = this.hi;
     this.changed(false);
-    toast(isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert'));
+    toast((isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert')) + (web ? ' · ' + t('Web-Fassung {a} → {b}', { a: kb(web.before), b: kb(web.after) }) : ''));
     const result = { target: body.target, item: res.item, svg: body.svg, format: this.format };
     this.opts.onSave?.(result);
     this.emit('save', result);
@@ -1576,6 +2355,7 @@ export class GraphicEditor {
 
   destroy() {
     document.removeEventListener('keydown', this.keyHandler);
+    document.removeEventListener('paste', this.pasteHandler);
     document.removeEventListener('keyup', this.keyUp);
     this.ro?.disconnect();
     closeMenus();

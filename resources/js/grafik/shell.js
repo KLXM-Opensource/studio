@@ -92,8 +92,12 @@ export function mountPage() {
   const boot = JSON.parse(data.textContent);
   host.innerHTML = '';
   document.documentElement.classList.add('ge-full');
+  // Eingebettet (Blockauswahl der Website → „Vorschau gestalten“): Nachrichten an das Fenster darüber, gleiche Herkunft
+  const embed = new URLSearchParams(location.search).get('embed') === '1' && window.parent !== window;
+  const tell = msg => { try { window.parent.postMessage({ source: 'klxm-grafik', ...msg }, location.origin); } catch { /* ohne Eltern */ } };
   const ed = new GraphicEditor(host, boot, {
     onSave: r => {
+      if (embed) tell({ type: 'saved', block: r.item?.block || boot.doc.block, url: r.item?.url || null, active: !!r.item?.active });
       // neue Datei: Adresse anpassen, damit „Neu laden“ dieselbe Grafik öffnet
       const u = new URL(location.href);
       if (r.target === 'media') { u.search = '?media=' + r.item.id; } else { u.search = '?id=' + r.item.id; }
@@ -103,12 +107,21 @@ export function mountPage() {
   const back = boot.doc.target === 'graphics' ? boot.urls.store : boot.urls.media;
   ed.el.querySelector('[data-shellbtns]').innerHTML = `<a class="adm-btn adm-btn--small adm-btn--ghost" href="${esc(back)}" data-back>${ico('x')} ${esc(t('Schließen'))}</a>`;
   ed.el.querySelector('[data-back]').addEventListener('click', async e => {
+    if (embed) {
+      e.preventDefault();
+      if (ed.dirty && !(await modal(ed.el, { title: t('Ungespeicherte Änderungen verwerfen?'), ok: t('Verwerfen'), body: `<p>${esc(t('Die Grafik wurde seit dem letzten Speichern geändert.'))}</p>` }))) return;
+      tell({ type: 'close' });
+      return;
+    }
     if (!ed.dirty) return;
     e.preventDefault();
     const ok = await modal(ed.el, { title: t('Ungespeicherte Änderungen verwerfen?'), ok: t('Verwerfen'), body: `<p>${esc(t('Die Grafik wurde seit dem letzten Speichern geändert.'))}</p>` });
     if (ok) { ed.savedAt = ed.hi; location.href = back; }
   });
-  window.addEventListener('beforeunload', e => { if (ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  if (embed) {
+    // Esc ohne offene Dialoge/Bearbeitung: schließen wie der Knopf
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !e.defaultPrevented && !ed.sel.length && !ed.textEd && !document.querySelector('dialog[open]')) ed.el.querySelector('[data-back]').click(); });
+  } else window.addEventListener('beforeunload', e => { if (ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
   ed.stage.focus({ preventScroll: true });
   window.CMSGraphicEditor.current = ed;
 }

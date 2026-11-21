@@ -213,6 +213,9 @@ final class Database
                 width INT NULL, height INT NULL, user_id INT NULL, created_at VARCHAR(25), updated_at VARCHAR(25)",
             // Frühere Fassungen beim Überschreiben (Mediathek-Grafik „media:{id}“ bzw. Ablage „graphic:{id}“), je Grafik begrenzt
             'graphic_versions' => "id $pk, ref VARCHAR(40) NOT NULL, svg $long, user_id INT NULL, created_at VARCHAR(25)",
+            // Arbeitsfassung des Editors je Grafik (Ebenennamen, Sperren, Hilfslinien, Textrahmen); ausgeliefert wird die optimierte
+            // Web-Fassung – hash = sha1 der Web-Datei, für die diese Arbeitsfassung gilt (sonst wurde die Datei anderswo ersetzt)
+            'graphic_sources' => "ref VARCHAR(40) NOT NULL PRIMARY KEY, svg $long, hash VARCHAR(40) NOT NULL, updated_at VARCHAR(25)",
         ];
 
         foreach ($tables as $name => $cols) {

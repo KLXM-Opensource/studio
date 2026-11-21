@@ -31,7 +31,8 @@ export function menu(btn, items) {
   const m = h(`<div class="ge-menu" role="menu"></div>`);
   for (const it of items) {
     if (it.sep) { m.append(h('<div class="ge-menu__sep" role="separator"></div>')); continue; }
-    const b = h(`<button type="button" role="menuitem" class="ge-menu__it"${it.disabled ? ' disabled' : ''}><span>${esc(it.label)}</span>${it.key ? `<kbd>${esc(it.key)}</kbd>` : ''}</button>`);
+    const chk = typeof it.checked === 'boolean';
+    const b = h(`<button type="button" role="${chk ? 'menuitemcheckbox' : 'menuitem'}" class="ge-menu__it${chk ? ' ge-menu__it--chk' : ''}"${chk ? ` aria-checked="${it.checked}"` : ''}${it.disabled ? ' disabled' : ''}>${chk ? `<span class="ge-menu__tick" aria-hidden="true">${it.checked ? ico('check') : ''}</span>` : ''}<span>${esc(it.label)}</span>${it.key ? `<kbd>${esc(it.key)}</kbd>` : ''}</button>`);
     b.addEventListener('click', () => { closeMenus(); btn.focus(); it.run?.(); });
     m.append(b);
   }
@@ -41,7 +42,7 @@ export function menu(btn, items) {
   m.style.left = Math.max(4, Math.min(r.left - rr.left, rr.width - 240)) + 'px';
   m.style.top = (r.bottom - rr.top + 4) + 'px';
   btn.setAttribute('aria-expanded', 'true');
-  const all = () => [...m.querySelectorAll('[role=menuitem]:not(:disabled)')];
+  const all = () => [...m.querySelectorAll('[role^=menuitem]:not(:disabled)')];
   all()[0]?.focus();
   m.addEventListener('keydown', e => {
     const list = all(), i = list.indexOf(document.activeElement);
@@ -61,13 +62,14 @@ export function closeMenus() {
 }
 
 /**
- * Reiter-Gruppe: tabs [{id, label}] → { el, panel(id), select(id) }; Pfeiltasten wechseln (WAI-ARIA Tabs)
+ * Reiter-Gruppe: tabs [{id, label}] → { el, panel(id), select(id) }; Pfeiltasten wechseln (WAI-ARIA Tabs). Bereiche ohne
+ * tabindex: sie enthalten selbst bedienbare Elemente (sonst verdecken diese den Bereich als Ziel, WCAG 2.5.8)
  */
 export function tabGroup(uid, tabs, onSelect) {
   const el = h(`<section class="ge-pg">
     <div class="ge-pg__tabs"><div class="ge-pg__list" role="tablist">${tabs.map((tb, i) => `<button type="button" role="tab" id="${uid}-t-${tb.id}" aria-controls="${uid}-p-${tb.id}" aria-selected="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}">${esc(tb.label)}</button>`).join('')}</div>
       <button type="button" class="ge-pg__fold" aria-expanded="true" aria-label="${esc(t('Bereich ein-/ausklappen'))}" title="${esc(t('Bereich ein-/ausklappen'))}">${ico('caret-down')}</button></div>
-    ${tabs.map((tb, i) => `<div class="ge-pg__panel" role="tabpanel" id="${uid}-p-${tb.id}" aria-labelledby="${uid}-t-${tb.id}" tabindex="0"${i ? ' hidden' : ''}></div>`).join('')}
+    ${tabs.map((tb, i) => `<div class="ge-pg__panel" role="tabpanel" id="${uid}-p-${tb.id}" aria-labelledby="${uid}-t-${tb.id}"${i ? ' hidden' : ''}></div>`).join('')}
   </section>`);
   const btns = [...el.querySelectorAll('[role=tab]')];
   const select = (id, focus = false) => {

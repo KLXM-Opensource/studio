@@ -9,7 +9,7 @@
  *           extensions/{name}/assets/…  → public/assets/ext/{name}/…      (je Erweiterung)
  *           Alles liegt unter public/assets/ – ganz oben in public/ würde jeder Ordner die gleichnamige Seitenadresse
  *           sperren (Core\PublicPaths)
- * Vendoren: node_modules                → public/assets/vendor              (Core: Editor.js, PDF.js, MapLibre)
+ * Vendoren: node_modules                → public/assets/vendor              (Core: Editor.js, PDF.js, MapLibre; Lizenzen des Grafik-Editors)
  * Symbole:  resources/icons/icons.json    → public/assets/icons/{core,thema}.svg, icons.svg, icons-map.json, catalog.json (Phosphor duotone, tools/icons.mjs)
  * Kits:     kits/{name}/build.mjs       → eigene Vendoren des Kits (z. B. Schriften), Pakete aus
  *           kits/{name}/package.json    (wird bei Bedarf automatisch installiert)
@@ -106,6 +106,18 @@ async function vendors() {
   }
   copy(nm('maplibre-gl/LICENSE.txt'), path.join(ml, 'LICENSE.txt'));
   bundledLicenses('maplibre-gl', path.join(ml, 'THIRD-PARTY-LICENSES.txt'));
+
+  // Grafik-Editor (Core\Graphics): Paper.js (Geometrie), fontkit (Text in Kurven), jsPDF + svg2pdf.js (PDF-Export) – gebündelt in
+  // resources/js/grafik-{paper,fonts,pdf}.mjs, nur auf Abruf geladen; hier Lizenzen und eingebettete Pakete
+  const gv = path.join(PUB, 'assets/vendor/grafik');
+  copy(nm('paper/LICENSE.txt'), path.join(gv, 'LICENSE-paper.txt'));
+  copy(nm('paperjs-offset/LICENSE'), path.join(gv, 'LICENSE-paperjs-offset.txt'));
+  copy(path.join(ROOT, 'resources/licenses/LICENSE_FONTKIT.txt'), path.join(gv, 'LICENSE-fontkit.txt'));   // Paket ohne Lizenzdatei
+  bundledLicenses('fontkit', path.join(gv, 'THIRD-PARTY-LICENSES-fontkit.txt'));
+  copy(nm('jspdf/LICENSE'), path.join(gv, 'LICENSE-jspdf.txt'));
+  copy(nm('svg2pdf.js/LICENSE'), path.join(gv, 'LICENSE-svg2pdf.txt'));
+  bundledLicenses('jspdf', path.join(gv, 'THIRD-PARTY-LICENSES-jspdf.txt'));
+  bundledLicenses('svg2pdf.js', path.join(gv, 'THIRD-PARTY-LICENSES-svg2pdf.txt'));
 
   // Mozilla PDF.js (Viewer für PDF-Dateien)
   const pdf = path.join(PUB, 'assets/vendor/pdfjs');
@@ -207,8 +219,11 @@ const options = ([src, outdir]) => ({
   minify: true,
   sourcemap: false,
   target: ['es2020', 'safari15'],
-  external: ['/assets/*', '../vendor/*', '../fonts/*'],
+  // grafik-pdf.mjs (jsPDF): optionale HTML-Ausgabe von jsPDF (html2canvas, DOMPurify, canvg) wird nie aufgerufen – nicht mitbündeln
+  external: ['/assets/*', '../vendor/*', '../fonts/*', ...(path.basename(src) === 'grafik-pdf.mjs' ? ['html2canvas', 'dompurify', 'canvg', 'core-js'] : [])],
   loader: { '.woff2': 'file' },
+  // paperjs-offset importiert „paper“ (paper-full mit PaperScript/Acorn) – der Grafik-Editor braucht nur paper-core
+  alias: { paper: 'paper/dist/paper-core.js' },
   legalComments: 'none',
   logLevel: 'warning',
 });

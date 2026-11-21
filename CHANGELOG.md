@@ -10,6 +10,33 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
 
+### Grafik-Editor: Formen kombinieren, Text-Werkzeuge, Lineale, Masken, Export (Ausbaustufe 2)
+- **Formen kombinieren** direkt auf den Bézierkurven (Paper.js, MIT, nachgeladen): Vereinen, **Abziehen/Ausstanzen** – auch mit
+  Text als Stanze (Löcher zeigen den Hintergrund) –, Schnittmenge, Ausschluss, Teilen; **zusammengesetzte Form** (Originale bleiben
+  bearbeitbar, die Website bekommt den fertigen Pfad); **Kontur in Fläche**, **Pfad versetzen** (+/− px, Ecken rund/spitz/abgeschrägt,
+  paperjs-offset, MIT), **Vereinfachen** mit Vorschau. Menü **Objekt** mit allen Befehlen und Kürzeln.
+- **Pfade bearbeiten:** Klick auf die Kurve fügt einen Knoten ein (Form bleibt exakt), an Knoten auftrennen, Endpunkte bzw. Pfade
+  verbinden (⌘J), schließen, umkehren, Teilpfade trennen, Knotenart Ecke/glatt/symmetrisch, ⌥ trennt Griffe.
+- **Text:** Bearbeiten direkt auf der Fläche mit Schreibmarke und Auswahl, ⌘B/⌘I/⌘U und Farbe für einzelne Wörter; Bereich
+  **Zeichen | Absatz** (Schriften der Website und Systemschriften, Schnitt, Kursiv, Größe, Laufweite, Unterschneidung,
+  Unterstrichen/Durchgestrichen, Groß-/Kleinschreibung als echte Zeichen, Ausrichtung, Zeilenabstand); **Textrahmen** mit
+  automatischem Umbruch (Rahmen ziehen, Breite am Griff ändern); **Text auf Pfad** mit Startversatz; **In Kurven umwandeln** (⌘↵)
+  mit fontkit (MIT) aus den selbst gehosteten WOFF2-Schriften, auch variable Schriften.
+- **Lineale, Hilfslinien, Raster** (⌘R, ⌘;, ⌘'): Hilfslinien aus dem Lineal ziehen, einrasten, zurück aufs Lineal löschen, Liste
+  zum Bearbeiten per Tastatur; Raster mit Abstand und Unterteilung. Menü **Ansicht**.
+- **Beschneiden** (⌘7), **Als Maske verwenden**, **Ausstanzen per Maske**, Freigeben (⌥⌘7); die Formen stehen in den Ebenen.
+- **Verlaufswerkzeug** (F): Verlauf auf dem Objekt aufziehen, Anfang/Ende bzw. Mitte/Radius und Farbstopps auf der Fläche.
+- **Speichern fürs Web:** optimierte Fassung (Größe vorher/nachher, Genauigkeit, Texte in Kurven empfohlen) mit Pixelvergleich als
+  Sicherheitsnetz; Ebenennamen, Sperren, Hilfslinien und Textrahmen bleiben als Arbeitsfassung (Tabelle `graphic_sources`,
+  `Core\Svg::clean(…, ['editor' => true])`). **Exportieren:** SVG fürs Web, SVG für Desktop-Programme (Affinity, Illustrator,
+  Inkscape, Figma – mit Ebenen), PDF als Vektor (jsPDF + svg2pdf.js, MIT); SVG importieren, Ziehen und Einfügen. Nur Vektoren:
+  Pixelbilder werden gemeldet und nicht übernommen, kein PNG-Export mehr.
+- **Blockauswahl → „Vorschau gestalten“** (Liste mit großer Vorschau): Editor im Fenster, die neue Vorschau gilt sofort – auch je
+  Variante (`block_previews` mit `typ--variante`). Rechte: Blockvorschauen brauchen zusätzlich **Design** (`design.edit`), Symbole
+  und eigene Bausteine **Eigene Blöcke bauen** (`blocks.build`) – ohne Recht kein Knopf, Anfragen → 403 (`Graphics::RIGHTS`).
+- Bibliotheken laden nur bei Bedarf (`grafik-paper.mjs`, `grafik-fonts.mjs`, `grafik-pdf.mjs`); `grafik:selftest` um Arbeitsfassung,
+  Varianten-Vorschau, Pixelbilder und Rechte erweitert. Handbuch und Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Grafik-Editor: Infografiken, Symbole und Blockvorschauen zeichnen
 - Vektoreditor in der Verwaltung, aufgebaut wie Affinity Designer/Illustrator: Personas (**Vektor**; **Motion** vorbereitet),
   Kontextleiste, Werkzeugleiste (Verschieben, Knoten, Zeichenstift mit Bézier-Griffen, Bleistift mit Glättung, Rechteck mit

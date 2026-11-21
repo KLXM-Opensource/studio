@@ -72,6 +72,12 @@ const REQUIRED_FILES = [
   'public/assets/vendor/pdfjs/wasm/LICENSE_QCMS',
   'public/assets/vendor/pdfjs/wasm/LICENSE_QUICKJS',
   'public/assets/fonts/OFL-Lato.txt',
+  'public/assets/vendor/grafik/LICENSE-paper.txt',
+  'public/assets/vendor/grafik/LICENSE-paperjs-offset.txt',
+  'public/assets/vendor/grafik/LICENSE-fontkit.txt',
+  'public/assets/vendor/grafik/THIRD-PARTY-LICENSES-fontkit.txt',
+  'public/assets/vendor/grafik/LICENSE-jspdf.txt',
+  'public/assets/vendor/grafik/LICENSE-svg2pdf.txt',
   'public/assets/icons/LICENSE.txt',
 ];
 

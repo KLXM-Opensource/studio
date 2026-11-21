@@ -27,6 +27,9 @@ $config['formFields'] = can('data.schema')
     ? array_values(array_map(fn($t) => $t['handle'], array_filter(\Core\Data\Tables::all(), [\Core\Data\Shared::class, 'canSchema'])))
     : [];
 $config['csrf'] = \Core\Csrf::token();
+// Blockauswahl „Vorschau gestalten“ (Grafik-Editor im eingebetteten Fenster): Vorschauen gelten für die ganze Website –
+// nur mit „media.upload“ und „design.edit“ (Core\Graphics\Graphics::RIGHTS)
+$config['grafik'] = \Core\Graphics\Graphics::canKind('preview') ? ['page' => url('/admin/grafik/editor')] : null;
 $config['settingsTitle'] = app()->theme->settingsTitle();
 // Detailseiten-Vorlage: Vorschau mit dem aufgerufenen Eintrag
 $config['entry'] = app()->entry ? ['table' => app()->entry['table']['handle'], 'id' => (int) app()->entry['entry']['id']] : null;

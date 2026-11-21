@@ -391,8 +391,10 @@ switch ($cmd) {
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extDir ?: ROOT, FilesystemIterator::SKIP_DOTS));
         foreach ($it as $f) {
             $path = $f->getPathname();
-            // node_modules und Arbeitskopien unter .claude/ (git worktree) nicht mitzählen
-            if (str_contains($path, '/node_modules/') || str_contains($path, '/.claude/') || !preg_match($scan, $path)) continue;
+            // node_modules und Arbeitskopien unter .claude/ (git worktree) nicht mitzählen – relativ zur Wurzel geprüft,
+            // damit der Befehl auch in einer solchen Arbeitskopie selbst zählt
+            $rel = substr($path, strlen($extDir ?: ROOT));
+            if (str_contains($rel, '/node_modules/') || str_contains($rel, '/.claude/') || !preg_match($scan, $rel)) continue;
             preg_match_all($pattern, (string) file_get_contents($path), $m);
             foreach ($m[1] as $str) $found[stripslashes($str)] = true;
         }
