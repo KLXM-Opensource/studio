@@ -8178,6 +8178,8 @@ return [
     'Gruppiert' => 'Grouped',
     'Gruppierung aufgehoben' => 'Ungrouped',
     'Gruppierung aufheben' => 'Ungroup',
+    'Animationen' => 'Animations',
+    'Grafiken (SVG)' => 'Graphics (SVG)',
     'Alles auswählen' => 'Select all',
     'Als Baustein speichern …' => 'Save as component …',
     'Ausschneiden' => 'Cut',

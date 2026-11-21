@@ -239,7 +239,7 @@ final class McpController
             });
         $add('list_revisions', 'Versionen einer Seite', 'Letzte gespeicherte Versionen einer Seite.', $schema(['page' => $page], ['page']), $ro, false, fn($a) => ['revisions' => $s->revisions($a['page'])]);
         $add('list_media', 'Mediathek', 'Bilder und Dateien der Mediathek (ID für Bild-/Datei-Felder in Blöcken) plus Sammlungen, Tags und Bildformate für Zuschnitte. Filter kombinierbar.',
-            $schema(['kind' => $str('Dateiart', ['enum' => ['image', 'pdf', 'video', 'audio', 'all']]), 'q' => $str('Suchbegriff (Name, Titel, Alt-Text, Tag)'),
+            $schema(['kind' => $str('Dateiart', ['enum' => ['image', 'svg', 'anim', 'pdf', 'video', 'audio', 'all']]), 'q' => $str('Suchbegriff (Name, Titel, Alt-Text, Tag)'),
                 'tag' => $str('nur mit diesem Tag'), 'collection' => $int('nur aus dieser Sammlung (ID)'), 'noalt' => ['type' => 'boolean', 'description' => 'nur Bilder ohne Alt-Text'],
                 'missing_lang' => $str('nur Bilder ohne Alt-Text in dieser weiteren Sprache (Kürzel, z. B. en)'), 'notitle' => ['type' => 'boolean', 'description' => 'nur Dateien ohne Titel'],
                 'nocaptions' => ['type' => 'boolean', 'description' => 'nur Videos ohne veröffentlichte Untertitel'], 'notranscript' => ['type' => 'boolean', 'description' => 'nur Audio ohne veröffentlichtes Transkript'],

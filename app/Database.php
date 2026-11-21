@@ -223,6 +223,7 @@ final class Database
         }
         // Neue Spalten in bestehenden Installationen ergänzen
         $this->ensureColumns('media', [
+            'svg_anim' => 'VARCHAR(44) NULL',   // SVG mit Bewegung? „{hash}:1“ bzw. „{hash}:0“ – neu bestimmt, wenn sich die Datei ändert (Media::ensureSvgAnim)
             'upload_hash' => 'VARCHAR(40) NULL',   // Prüfsumme der hochgeladenen Datei (vor dem Verkleinern) – gegen doppeltes Hochladen
             'text_content' => 'TEXT NULL',          // Volltext von PDFs (pdftotext) für Suche und Listensuche (Media::pdfText)
             'text_at' => 'VARCHAR(25) NULL',

@@ -248,6 +248,7 @@ final class Media
             $sql .= ' JOIN media_collection_items ci ON ci.media_id = m.id AND ci.collection_id = ?';
             $params[] = (int) $f['collection'];
         }
+        if (($f['kind'] ?? '') === 'anim') self::ensureSvgAnim();
         if (!empty($f['kind'])) {
             $where[] = match ($f['kind']) {
                 'image' => "m.mime LIKE 'image/%'",
@@ -255,6 +256,8 @@ final class Media
                 'pdf' => "m.mime = 'application/pdf'",
                 'video' => "m.mime LIKE 'video/%'",
                 'audio' => "m.mime LIKE 'audio/%'",
+                'svg' => "m.mime = 'image/svg+xml'",                                   // Grafiken (SVG), auch aus dem Grafik-Editor
+                'anim' => "m.mime = 'image/svg+xml' AND m.svg_anim LIKE '%:1'",        // bewegte Grafiken (Persona Motion)
                 'none' => '0 = 1',
                 default => '1=1',
             };
@@ -1146,7 +1149,10 @@ final class Media
     /** Anzahl je Art für die Seitenleiste der Mediathek */
     public static function counts(): array
     {
+        self::ensureSvgAnim();
         $r = self::db()->fetch("SELECT COUNT(*) AS alle,
+            SUM(CASE WHEN mime = 'image/svg+xml' THEN 1 ELSE 0 END) AS svg,
+            SUM(CASE WHEN mime = 'image/svg+xml' AND svg_anim LIKE '%:1' THEN 1 ELSE 0 END) AS anim,
             SUM(CASE WHEN mime LIKE 'image/%' THEN 1 ELSE 0 END) AS image,
             SUM(CASE WHEN mime = 'application/pdf' THEN 1 ELSE 0 END) AS pdf,
             SUM(CASE WHEN mime LIKE 'video/%' THEN 1 ELSE 0 END) AS video,
@@ -1573,6 +1579,27 @@ final class Media
             }
         } catch (\Throwable $e) {
             error_log('[media] hash: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bewegte SVG-Grafiken erkennen (Filter „Animationen“): media.svg_anim = „{hash}:1|0“. Neu bestimmt, wenn die Prüfsumme
+     * nicht mehr passt (neue Fassung über Media::replace, Grafik-Editor) – ohne eigene Stelle beim Speichern.
+     */
+    public static function ensureSvgAnim(int $limit = 400): void
+    {
+        try {
+            self::ensureHashes($limit);
+            $rows = self::db()->fetchAll("SELECT id, file, hash FROM media WHERE mime = 'image/svg+xml' AND pool_ref IS NULL AND hash IS NOT NULL AND hash <> '-'
+                AND (svg_anim IS NULL OR substr(svg_anim, 1, 40) <> hash) LIMIT " . $limit);
+            foreach ($rows as $r) {
+                $f = self::dir() . '/' . $r['file'];
+                $head = is_file($f) ? (string) @file_get_contents($f, false, null, 0, 4000) : '';
+                $anim = $head !== '' && Graphics\Motion::isAnimated($head);
+                self::db()->update('media', ['svg_anim' => $r['hash'] . ':' . ($anim ? '1' : '0')], 'id = :id', ['id' => (int) $r['id']]);
+            }
+        } catch (\Throwable $e) {
+            error_log('[media] svg_anim: ' . $e->getMessage());
         }
     }
 

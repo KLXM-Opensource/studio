@@ -895,7 +895,10 @@ class Finder {
       <h3>${cur ? esc(cur.label) : 'Mediathek'}</h3>
       <ul>
         ${this.opts.kind === 'visual' ? row('kind', 'visual', SVG.all, t('Bilder und Videos'), (counts.image || 0) + (counts.video || 0)) + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'video', SVG.video || SVG.all, 'Videos', counts.video) : img ? row('kind', 'image', SVG.image, 'Bilder', counts.image) : row('all', '', SVG.all, 'Alle Medien', counts.alle)
-          + row('kind', 'image', SVG.image, 'Bilder', counts.image) + row('kind', 'pdf', SVG.pdf, 'PDF-Dokumente', counts.pdf)
+          + row('kind', 'image', SVG.image, 'Bilder', counts.image)
+          + (counts.svg ? row('kind', 'svg', ico('bezier-curve'), t('Grafiken (SVG)'), counts.svg) : '')
+          + (counts.anim ? row('kind', 'anim', ico('play-circle'), t('Animationen'), counts.anim) : '')
+          + row('kind', 'pdf', SVG.pdf, 'PDF-Dokumente', counts.pdf)
           + (counts.video ? row('kind', 'video', SVG.video, 'Videos', counts.video) : '')
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')
           + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')
@@ -951,7 +954,7 @@ class Finder {
   // ---------------------------------------------------------- Dateien
   title() {
     const s = this.src, m = this.meta;
-    if (s.type === 'kind') return { image: 'Bilder', pdf: 'PDF-Dokumente', video: 'Videos', audio: t('Audio'), visual: t('Bilder und Videos') }[s.value] || t('Mediathek');
+    if (s.type === 'kind') return { image: 'Bilder', pdf: 'PDF-Dokumente', video: 'Videos', audio: t('Audio'), svg: t('Grafiken (SVG)'), anim: t('Animationen'), visual: t('Bilder und Videos') }[s.value] || t('Mediathek');
     if (s.type === 'noalt') return 'Ohne Alt-Text';
     if (s.type === 'check') {
       const [k, l] = s.value.split(':');

@@ -12,6 +12,8 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 
 
 ### Grafik-Editor: Personas Daten und Export, Anhalten von Bewegung (Ausbaustufe 5)
+- **Mediathek: Filter „Grafiken (SVG)“ und „Animationen“** (Seitenleiste, `Media::all(['kind' => 'svg'|'anim'])`, MCP `media_list`): bewegte Grafiken
+  erkennt `Media::ensureSvgAnim()` an der Web-Fassung (`Motion::isAnimated`), gemerkt in `media.svg_anim` mit der Prüfsumme – neue Fassungen werden neu geprüft.
 - **Kontextmenü auf der Zeichenfläche:** Rechtsklick (oder Menü-Taste, Umschalt+F10) mit den üblichen Befehlen – Zwischenablage, Gruppieren/aufheben,
   Anordnen, Ausrichten, Spiegeln, In Kurven, Sperren, Ausblenden, Als Baustein speichern, „Weitere Objektbefehle …“; wählt das Objekt unter dem Zeiger.
 - **Animation anhalten (WCAG 2.2.2):** Läuft Bewegung von selbst (beim Laden, sobald sichtbar, nach Klick) länger als 5 Sekunden oder endlos, zeigt die
