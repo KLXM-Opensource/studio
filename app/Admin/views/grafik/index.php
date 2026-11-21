@@ -15,15 +15,18 @@ $help = [
   <h1><?= e(__('Grafiken')) ?></h1>
   <div class="adm-row">
     <a class="adm-btn" href="<?= e(url('/admin/media')) ?>"><?= e(__('Zur Mediathek')) ?></a>
-    <button type="button" class="adm-btn" data-ge-open data-format="icon"><?= icon('plus') ?> <?= e(__('Neues Symbol')) ?></button>
+    <?php if (isset($groups['icon'])): ?><button type="button" class="adm-btn" data-ge-open data-format="icon"><?= icon('plus') ?> <?= e(__('Neues Symbol')) ?></button><?php endif; ?>
   </div>
 </header>
+<?php if (isset($groups['preview'])): /* Blockvorschauen gelten für die ganze Website: Recht design.edit */ ?>
 <div class="adm-card ge-newpv">
   <label class="f"><span><?= e(__('Blockvorschau gestalten für')) ?></span>
     <select id="ge-block"><?php foreach ($blocks as $k => $label): ?><option value="<?= e($k) ?>"><?= e($label) ?> (<?= e($k) ?>)</option><?php endforeach; ?></select></label>
   <button type="button" class="adm-btn adm-btn--primary" data-ge-open data-format="preview" data-block-from="#ge-block"><?= icon('plus') ?> <?= e(__('Neue Blockvorschau')) ?></button>
   <p class="f-help"><?= e(__('Startet mit der Vorschau des Kits für diesen Block – ändern, speichern, fertig. Die Blockauswahl zeigt danach Ihre Fassung.')) ?></p>
 </div>
+<?php endif; ?>
+<?php if (!$groups): ?><p class="adm-muted"><?= e(__('Symbole, Blockvorschauen und eigene Bausteine verwalten Rollen mit dem Recht „Design“ bzw. „Eigene Blöcke bauen“.')) ?></p><?php endif; ?>
 <p class="adm-muted ge-intro"><?= e(__('Diese Grafiken liegen in einer eigenen Ablage und erscheinen nicht in der Mediathek oder in Bildfeldern. Infografiken für Seiten legen Sie in der Mediathek an (Neu → Grafik).')) ?></p>
 
 <?php foreach ($groups as $kind => $items): ?>

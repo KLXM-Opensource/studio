@@ -8543,4 +8543,9 @@ return [
     'sichere Stufe' => 'safe level',
     '{a} Knoten' => '{a} nodes',
     '{a} → {b} Knoten' => '{a} → {b} nodes',
+    'Für diese Grafik fehlt Ihrer Rolle die Berechtigung.' => 'Your role lacks the permission for this graphic.',
+    'Symbole, Blockvorschauen und eigene Bausteine verwalten Rollen mit dem Recht „Design“ bzw. „Eigene Blöcke bauen“.' => 'Icons, block previews and custom building blocks are managed by roles with the “Design” or “Build custom blocks” permission.',
+    'Beschneiden / Maske freigeben' => 'Clip / release mask',
+    'Lineale / Hilfslinien / Raster' => 'Rulers / guides / grid',
+    'Text: fett / kursiv / unterstrichen' => 'Text: bold / italic / underline',
 ];

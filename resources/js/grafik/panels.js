@@ -395,6 +395,8 @@ export function buildPanels(ed) {
   layPanel.querySelector('[data-la=dup]').addEventListener('click', () => ed.duplicate());
   layPanel.querySelector('[data-la=del]').addEventListener('click', () => ed.remove());
   layPanel.querySelector('[data-la=part]').addEventListener('click', () => savePart());
+  // eigene Bausteine (Bibliothek der Website) nur mit Recht „blocks.build“
+  if (ed.boot.canParts === false) layPanel.querySelector('[data-la=part]').hidden = true;
 
   const thumbCache = new Map();
   function thumb(el) {

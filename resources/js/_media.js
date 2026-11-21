@@ -686,12 +686,14 @@ class Finder {
     $('[data-newmenu]', r).addEventListener('click', e => {
       const rc = e.currentTarget.getBoundingClientRect();
       const info = (w, h) => () => this.newGraphic({ format: 'info', w, h });
+      const kinds = (document.documentElement.dataset.grafikKinds || '').split(' ');
       this.menu(rc.left, rc.bottom + 4, [
         [t('Infografik 16:9 (1600 × 900)'), info(1600, 900)],
         [t('Infografik quadratisch (1080 × 1080)'), info(1080, 1080)],
         [t('Infografik frei (800 × 500)'), info(800, 500)],
-        [t('Symbol 24 × 24 (eigene Ablage)'), () => this.newGraphic({ format: 'icon' })],
-        [t('Blockvorschau 160 × 100 (eigene Ablage)'), () => this.newGraphic({ format: 'preview' })],
+        // Symbole/Blockvorschauen nur mit dem Recht der Art (Core\Graphics\Graphics::RIGHTS, data-grafik-kinds am <html>)
+        ...(kinds.includes('icon') ? [[t('Symbol 24 × 24 (eigene Ablage)'), () => this.newGraphic({ format: 'icon' })]] : []),
+        ...(kinds.includes('preview') ? [[t('Blockvorschau 160 × 100 (eigene Ablage)'), () => this.newGraphic({ format: 'preview' })]] : []),
         [t('Grafiken verwalten …'), () => { location.href = BASE + '/grafik'; }],
       ]);
     });

@@ -31,6 +31,19 @@ final class Graphics
     ];
     /** Arten in der eigenen Ablage */
     public const KINDS = ['icon', 'preview', 'part'];
+    /**
+     * Rechte je Art der Ablage (zusätzlich zu „media.upload“): Blockvorschauen gelten für die ganze Website (Einstellung
+     * block_previews, Darstellung des Kits) → „design.edit“; Symbole und eigene Bausteine sind Bausteine für eigene Blöcke
+     * und den Editor der Website → „blocks.build“. Infografiken (Mediathek) brauchen nur „media.upload“.
+     */
+    public const RIGHTS = ['preview' => 'design.edit', 'icon' => 'blocks.build', 'part' => 'blocks.build'];
+
+    /** Darf der angemeldete Benutzer Grafiken dieser Art anlegen, ändern, zuordnen, löschen? */
+    public static function canKind(string $kind): bool
+    {
+        if (!isset(self::RIGHTS[$kind])) return $kind === 'info' || $kind === 'media';
+        return can('media.upload') && can(self::RIGHTS[$kind]);
+    }
     public const VERSIONS = 20;
     /** Größte Zeichenfläche einer Infografik (Seitenlänge) */
     public const MAX_SIZE = 10000;

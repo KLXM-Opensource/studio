@@ -23,11 +23,23 @@ final class GraphicsController extends AdminController
     public function index(Request $r): Response
     {
         $this->auth($r, 'media.upload');
+        // nur die Arten, die die Rolle bearbeiten darf (Graphics::RIGHTS)
+        $groups = [];
+        foreach (['preview', 'icon', 'part'] as $k) if (Graphics::canKind($k)) $groups[$k] = Graphics::all($k);
         return $this->view('grafik/index', [
             'css' => ['css/grafik.css'],
-            'groups' => ['preview' => Graphics::all('preview'), 'icon' => Graphics::all('icon'), 'part' => Graphics::all('part')],
-            'blocks' => Graphics::blockTypes(),
+            'groups' => $groups,
+            'blocks' => Graphics::canKind('preview') ? Graphics::blockTypes() : [],
         ]);
+    }
+
+    /** Recht für eine Art der Ablage (Graphics::RIGHTS) – sonst 403 */
+    private function needKind(Request $r, string $kind): ?Response
+    {
+        if (Graphics::canKind($kind)) return null;
+        $msg = __('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.');
+        if (!$r->wantsJson() && $r->method === 'POST') return $this->back('/admin/grafik', 'error', $msg);
+        return Response::fail($msg, 403);
     }
 
     /** Editor als eigene Seite (Vollbild) – gleiche Daten wie boot() für das Overlay */
@@ -35,8 +47,8 @@ final class GraphicsController extends AdminController
     {
         $this->auth($r, 'media.upload');
         $boot = $this->bootData($r);
-        if (isset($boot['error'])) {
-            return $this->back('/admin/media', 'error', (string) $boot['error']);
+        if (isset($boot['error']) || isset($boot['denied'])) {
+            return $this->back('/admin/media', 'error', (string) ($boot['denied'] ?? $boot['error']));
         }
         return $this->view('grafik/editor', ['css' => ['css/grafik.css'], 'boot' => $boot, 'title' => __('Grafik-Editor')]);
     }
@@ -46,6 +58,7 @@ final class GraphicsController extends AdminController
     {
         $this->auth($r, 'media.upload');
         $boot = $this->bootData($r);
+        if (isset($boot['denied'])) return Response::fail((string) $boot['denied'], 403);
         return isset($boot['error']) ? Response::fail((string) $boot['error'], 404) : Response::json(['ok' => true] + $boot);
     }
 
@@ -78,11 +91,13 @@ final class GraphicsController extends AdminController
         } elseif ($id > 0) {
             $g = Graphics::find($id);
             if (!$g) return ['error' => __('Grafik nicht gefunden.')];
+            if (!Graphics::canKind((string) $g['kind'])) return ['denied' => __('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.')];
             $fmt = $g['kind'] === 'part' ? 'info' : (string) $g['kind'];
             $doc = ['format' => $fmt, 'target' => 'graphics', 'kind' => (string) $g['kind'], 'svg' => (string) $g['svg'], 'id' => (int) $g['id'],
                 'name' => (string) $g['name'], 'block' => $g['block'] ? (string) $g['block'] : null, 'ref' => 'graphic:' . (int) $g['id']] + $doc;
         } else {
             $fmt = isset(Graphics::FORMATS[$r->str('format')]) ? $r->str('format') : 'info';
+            if ($fmt !== 'info' && !Graphics::canKind($fmt)) return ['denied' => __('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.')];
             $block = preg_match('~^[a-z0-9_-]{1,80}$~', $r->str('block')) ? $r->str('block') : null;
             // Blockauswahl „Vorschau gestalten“: Variante als „typ--variante“
             if ($block !== null && preg_match('~^[a-z0-9_-]{1,40}$~', $r->str('variant')) && !str_contains($block, '--')) $block .= '--' . $r->str('variant');
@@ -100,6 +115,8 @@ final class GraphicsController extends AdminController
             'library' => Library::forEditor(),
             'libraryGroups' => Library::groups(),
             'parts' => array_map(fn($p) => $p + ['svg' => (string) (Graphics::find((int) $p['id'])['svg'] ?? '')], Graphics::all('part')),
+            // eigene Bausteine speichern (Bibliothek der Website) nur mit Recht „blocks.build“
+            'canParts' => Graphics::canKind('part'),
             'swatches' => Graphics::swatches(),
             'fonts' => Graphics::fonts(),
             'fontFiles' => Graphics::fontFiles(),
@@ -132,6 +149,7 @@ final class GraphicsController extends AdminController
         try {
             if ($target === 'graphics') {
                 $kind = (string) ($r->post['kind'] ?? 'icon');
+                if ($deny = $this->needKind($r, $kind)) return $deny;
                 $block = isset($r->post['block']) && is_string($r->post['block']) && $r->post['block'] !== '' ? $r->post['block'] : null;
                 $item = Graphics::store($kind, (string) ($r->post['name'] ?? ''), $svg, (int) ($r->post['id'] ?? 0) ?: null, $block, $source);
                 if ($kind === 'preview' && $block !== null && !empty($r->post['assign'])) {
@@ -171,6 +189,7 @@ final class GraphicsController extends AdminController
     public function part(Request $r): Response
     {
         $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'part')) return $deny;
         try {
             $item = Graphics::store('part', (string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''));
         } catch (\RuntimeException $e) {
@@ -183,6 +202,8 @@ final class GraphicsController extends AdminController
     public function delete(Request $r, string $id): Response
     {
         $this->auth($r, 'media.delete');
+        $g = Graphics::find((int) $id);
+        if ($g && ($deny = $this->needKind($r, (string) $g['kind']))) return $deny;
         $ok = Graphics::delete((int) $id);
         if (!$r->wantsJson()) return $this->back('/admin/grafik', $ok ? 'success' : 'error', $ok ? __('Grafik gelöscht.') : __('Grafik nicht gefunden.'));
         return $ok ? Response::json(['ok' => true]) : Response::fail(__('Grafik nicht gefunden.'), 404);
@@ -192,6 +213,7 @@ final class GraphicsController extends AdminController
     public function assign(Request $r): Response
     {
         $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'preview')) return $deny;   // gilt für die ganze Website (block_previews)
         $block = (string) ($r->post['block'] ?? '');
         $id = (int) ($r->post['id'] ?? 0);
         try {
@@ -210,6 +232,7 @@ final class GraphicsController extends AdminController
         $this->auth($r, 'media.upload');
         $ref = $r->str('ref');
         if (!preg_match('~^(media|graphic):\d+$~', $ref)) return Response::fail(__('Unbekannte Grafik.'), 404);
+        if (str_starts_with($ref, 'graphic:') && ($g = Graphics::find((int) substr($ref, 8))) && ($deny = $this->needKind($r, (string) $g['kind']))) return $deny;
         $svg = Graphics::version($ref, (int) $r->str('id'));
         if ($svg === null) return Response::fail(__('Fassung nicht gefunden.'), 404);
         try {
