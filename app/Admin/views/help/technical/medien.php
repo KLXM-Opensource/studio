@@ -343,6 +343,43 @@
       <code>-apple-touch-icon-180.png</code>, <code>-icon-192/512.png</code>, <code>-icon-maskable-512.png</code>, <code>-social-1200x630.png/.jpg</code>.
       <code>POST /admin/api/grafik/app-icon {png}</code> (zusätzlich <code>system.manage</code>): quadratisches PNG → <code>Media::import</code>,
       <code>sys.icon_mode = image</code>, <code>sys.icon_image</code>, <code>AppIcons::generate()</code> – dieselbe Mechanik wie die Grundeinstellungen.</li>
+    <li id="grafik-bild-technik"><b>Persona Bild</b> (Ausbaustufe 6, <code>photo.js</code>, <code>bild.js</code>, <code>host.js</code>, <code>Core\Graphics\Compose</code>):
+      Fotos sind in der Arbeitsfassung <b>Platzhalter-Rechtecke</b> <code>&lt;rect data-ge-photo="Base64(JSON)"&gt;</code> mit <code>m</code> (Mediathek-ID), <code>z</code>
+      (Zoom, 1 = füllt), <code>fx</code>/<code>fy</code> (Lage wie <code>object-position</code> in %, fehlt = Fokuspunkt der Mediathek), <code>b</code>/<code>c</code>/<code>s</code>
+      (Helligkeit/Kontrast/Sättigung in %, wie <code>Core\ImageFx</code>), <code>bl</code> (Weichzeichnen) – nie ein <code>&lt;image&gt;</code>, nie Pixel.
+      <code>Core\Svg::clean</code> lässt <code>data-ge-photo</code> und <code>data-ge-field</code> nur im Modus <code>editor</code> und nur als Base64 zu; eingebettete
+      Bilder lehnt es weiter ab, <code>&lt;image&gt;</code> mit Adresse entfernt es (Website-SVGs bleiben reine Vektoren). Im Editor macht <code>Photos.adopt()</code>
+      daraus ein <code>&lt;image&gt;</code> mit einem im Browser zugeschnittenen und korrigierten Bild in Rahmengröße (Object-URL, zwischengespeichert je
+      Zustand); <code>getSvg()</code> → <code>toWork()</code> macht wieder den Platzhalter (Protokoll und Speichern bleiben Text). <code>applyTransform</code> rechnet
+      Größenänderungen bei <code>image</code> wie bei <code>rect</code> in x/y/width/height ein – der Ausschnitt folgt dem neuen Rahmen.
+      Pixel-Ausgabe: <code>renderImage(svg, box, scale, env, {type})</code> – Texte mit Webschriften in Kurven (<code>outlineAll</code>), Fotos in Ausgabegröße
+      aus dem Original zugeschnitten (<code>drawCrop</code>, Korrektur als Pixel-Operation wie die CSS-Filter, Weichzeichnen als dreifacher Kastenfilter mit
+      fortgesetzten Rändern), SVG → <code>&lt;img&gt;</code> → <code>&lt;canvas&gt;</code>, Faktor 2 (<code>outScale</code>, höchstens <code>Compose::MAX_PX</code> = 4000 px),
+      JPEG (weiß) bzw. PNG (<code>data-ge-out="png"</code>). Upload über die Mechanik der Mediathek (<code>POST /admin/media/chunk</code>,
+      <code>MediaController::completedUpload()</code>), dann <code>POST /admin/api/grafik/compose {svg, id?, name, title, alt, decorative, outputs: [{board, upload, name}], tpl?, vals?}</code>
+      → <code>Compose::save()</code>: Arbeitsfassung in <code>graphics</code> (kind <code>photo</code>, nicht in der Mediathek und nicht in /admin/grafik, Fassungen in
+      <code>graphic_versions</code> „graphic:{id}“), je Zeichenfläche ein Medium (<code>Media::import</code> bzw. <code>Media::replace</code> – ID und Verwendungen bleiben),
+      Tabelle <code>graphic_media</code> (<code>role</code> out = Ausgabe je <code>board</code>, src = verwendete Fotos, <code>hash</code> der Ausgabe).
+      <code>Media::toJson</code> liefert <code>compose</code> (ID der Arbeitsfassung) und <code>compose_tpl</code>; <code>boot?media={id}</code> öffnet bei einer Ausgabe die
+      Arbeitsfassung; <code>Media::usages</code>/<code>usedIds</code> zählen die Quellfotos (<code>Compose::usagesOf</code>). <code>GET /admin/api/grafik/photos?ids=</code>
+      liefert Anzeige-Adresse (WebP 1600), Original, Maße und Fokuspunkt.
+      <b>Host-Anbindung:</b> alles, was die Persona vom CMS braucht, läuft über <code>ed.cms</code> (<code>host.js</code>: <code>can()</code>, <code>tokens()</code>,
+      <code>media.pick()</code>, <code>media.info()</code>, <code>upload()</code>, <code>saveImage()</code>, <code>templates.list/save/remove()</code>); eine Einbettung kann
+      mit <code>mount(el, boot, { cms })</code> ein eigenes Objekt mitgeben.</li>
+    <li id="grafik-formate-technik"><b>Formate</b> (<code>formats.js</code>): Anker am Element <code>data-ge-anchor="h v größe"</code> (h: l|c|r|s, v: t|m|b|s,
+      größe: k = skaliert | f = fest; ohne Angabe <code>anchorFor()</code>-Vorschlag aus der Lage, ≥ 90 % der Fläche = wächst mit). <code>addFormat(root, {id, w, h})</code>
+      legt <code>data-ge-base</code> (Hauptformat) an, hängt einen Bereich <code>{k: 'board', fmt}</code> an <code>data-ge-slices</code>, kopiert die Ebenen des
+      Hauptformats in <code>&lt;g data-ge-board="{id}"&gt;</code> und legt sie mit <code>layout()</code> (Faktor u = min(B/B₀, H/H₀); Texte, Gruppen, Verweise nur
+      gleichmäßig) – danach normale Ebenen. Speichern: je Zeichenfläche (<code>boards()</code>) ein Bild, <code>board</code> = „main“ bzw. id des Bereichs.</li>
+    <li id="grafik-vorlagen-technik"><b>Vorlagen</b> (<code>fields.js</code>, <code>fill.js</code>, <code>Core\Graphics\Templates</code>): Feld am Element
+      <code>data-ge-field</code> = Base64 <code>{k, n, t: image|text|color|toggle, ml, max, lines, min, w, fs, on}</code> (gleicher Schlüssel in Kopien = dasselbe Feld).
+      Ablage: diese Website <code>graphics</code> (kind <code>template</code>), alle Websites <code>graphic_shared</code> (Spalte <code>kind</code> = template;
+      <code>Shared::all()</code> liefert nur Bausteine); Verweis <code>site:{id}</code> | <code>net:{id}</code>. Recht <code>graphics.templates</code> („Vorlagen für Bilder
+      gestalten“, Standard nur Administration) für <code>POST /admin/api/grafik/template</code>, <code>…/template/delete</code> und <code>boot?template=</code>;
+      <code>GET /admin/api/grafik/templates</code> (Vorlagen mit SVG, Design-Farben, Fotos, Schriften) mit <code>media.upload</code>. Formular:
+      <code>CMSGraphicEditor.fill({ id?, template? })</code> – baut je Änderung die Vorschau neu (Vorlage → <code>applyValues()</code> → Formate), Text einpassen mit
+      <code>fitText()</code> (4-%-Schritte bis <code>min</code>, Hinweis, wenn auch dann zu lang). <code>Templates::validate()</code> prüft serverseitig (Text ohne Markup,
+      Höchstlänge, einzeilig; Bild = Pixelbild der Mediathek; Farbe = Name eines Design-Tokens); gespeichert in <code>graphics.tpl</code>/<code>vals</code>.</li>
     <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
       <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
       und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +

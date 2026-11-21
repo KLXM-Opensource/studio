@@ -28,6 +28,8 @@ final class Permissions
                 'media.upload' => __('Dateien hochladen und bearbeiten'),
                 'media.delete' => __('Dateien löschen'),
                 'media.shared' => __('Geteilte Medien (Pools) pflegen – hochladen, Alt-Texte, Zuschnitte, Sammlungen'),
+                // Grafik-Editor, Persona Bild: Vorlagen zum Ausfüllen anlegen, ändern, teilen, löschen (Core\Graphics\Templates) – Standard: nur Administration
+                'graphics.templates' => __('Vorlagen für Bilder gestalten (Grafik-Editor)'),
             ],
             __('Daten') => [
                 'data.edit' => __('Einträge anlegen und bearbeiten'),

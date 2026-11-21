@@ -216,6 +216,9 @@ final class Database
             // Arbeitsfassung des Editors je Grafik (Ebenennamen, Sperren, Hilfslinien, Textrahmen); ausgeliefert wird die optimierte
             // Web-Fassung – hash = sha1 der Web-Datei, für die diese Arbeitsfassung gilt (sonst wurde die Datei anderswo ersetzt)
             'graphic_sources' => "ref VARCHAR(40) NOT NULL PRIMARY KEY, svg $long, hash VARCHAR(40) NOT NULL, updated_at VARCHAR(25)",
+            // Bildkompositionen (Persona Bild, Core\Graphics\Compose): Ausgaben je Format (role out, board = Zeichenfläche) und
+            // verwendete Fotos der Mediathek (role src) – für „Bearbeiten“ aus der Mediathek und „Verwendet auf“ der Quellfotos
+            'graphic_media' => "graphic_id INT NOT NULL, media_id INT NOT NULL, role VARCHAR(8) NOT NULL, board VARCHAR(40) NULL, hash VARCHAR(40) NULL",
         ];
 
         foreach ($tables as $name => $cols) {
@@ -278,6 +281,8 @@ final class Database
         $this->ensureColumns('users', ['ui_prefs' => 'TEXT NULL']);   // persönliche Oberfläche: Akzentfarbe u. a. (JSON, Core\Accent)
         // Grafik-Editor: Ordner der eigenen Bausteine (Bibliothek)
         $this->ensureColumns('graphics', ['folder' => "$str NULL"]);
+        // Persona Bild: Komposition aus einer Vorlage (tpl = site:{id} | net:{id}) mit den ausgefüllten Feldern (vals, JSON)
+        $this->ensureColumns('graphics', ['tpl' => 'VARCHAR(40) NULL', 'vals' => 'TEXT NULL']);
         // Sperre, Sitzungs-Version, Netzwerk-Schatten-Konten, Zwei-Faktor-Anmeldung (Core\Network, Core\Totp)
         $this->ensureColumns('users', Network\Network::USER_COLUMNS);
         // Passkeys (WebAuthn) je Konto und Domain (Core\Passkeys)
@@ -320,6 +325,8 @@ final class Database
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_tracks_media ON media_tracks (media_id, status)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS media_jobs_status ON media_jobs (status, id)');
             $this->pdo->exec('CREATE INDEX IF NOT EXISTS graphic_versions_ref ON graphic_versions (ref, id)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS graphic_media_media ON graphic_media (media_id, role)');
+            $this->pdo->exec('CREATE INDEX IF NOT EXISTS graphic_media_graphic ON graphic_media (graphic_id)');
         }
     }
 

@@ -41,7 +41,9 @@ final class Graphics
     /** Darf der angemeldete Benutzer Grafiken dieser Art anlegen, ändern, zuordnen, löschen? */
     public static function canKind(string $kind): bool
     {
-        if (!isset(self::RIGHTS[$kind])) return $kind === 'info' || $kind === 'media';
+        // Bilder der Persona Bild (Compose) wie Infografiken; Vorlagen nur mit „graphics.templates“ (Templates)
+        if ($kind === Templates::KIND) return Templates::can();
+        if (!isset(self::RIGHTS[$kind])) return in_array($kind, ['info', 'media', Compose::KIND], true) && can('media.upload');
         return can('media.upload') && can(self::RIGHTS[$kind]);
     }
     public const VERSIONS = 20;
