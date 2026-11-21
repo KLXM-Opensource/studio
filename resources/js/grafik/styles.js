@@ -181,7 +181,7 @@ export function buildStylesPanel(ed, panel) {
     };
     const block = (kind, title) => {
       const own = s[kind], lib = w[kind].filter(x => !own.some(o => o.n === x.n));
-      return `<div class="ge-sty__head"><h3 class="ge-h3">${esc(title)}</h3><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-new="${kind}"${el ? '' : ' disabled'}>${ico('plus')} ${esc(t('Aus Auswahl'))}</button></div>`
+      return `<div class="ge-sty__head"><p class="ge-h3">${esc(title)}</p><button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-new="${kind}"${el ? '' : ' disabled'}>${ico('plus')} ${esc(t('Aus Auswahl'))}</button></div>`
         + (own.length ? `<ul class="ge-stys">${own.map(x => row(kind, x, 'doc')).join('')}</ul>` : `<p class="ge-note">${esc(t('Noch keine in dieser Grafik.'))}</p>`)
         + (lib.length ? `<p class="ge-note">${esc(t('Bibliothek der Website'))}</p><ul class="ge-stys">${lib.map(x => row(kind, x, 'site')).join('')}</ul>` : '');
     };

@@ -41,6 +41,9 @@ export function menu(btn, items) {
   const r = btn.getBoundingClientRect(), rr = root.getBoundingClientRect();
   m.style.left = Math.max(4, Math.min(r.left - rr.left, rr.width - 240)) + 'px';
   m.style.top = (r.bottom - rr.top + 4) + 'px';
+  // unten kein Platz (z. B. Baustein am unteren Rand der Bibliothek): über dem Knopf öffnen
+  const mh = m.offsetHeight;
+  if (r.bottom + 4 + mh > Math.min(rr.bottom, window.innerHeight) && r.top - rr.top - 4 - mh >= 0) m.style.top = (r.top - rr.top - 4 - mh) + 'px';
   btn.setAttribute('aria-expanded', 'true');
   const all = () => [...m.querySelectorAll('[role^=menuitem]:not(:disabled)')];
   all()[0]?.focus();

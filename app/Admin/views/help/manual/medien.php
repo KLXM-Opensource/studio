@@ -140,6 +140,7 @@
     <tr><td>Bleistift</td><td><kbd>N</kbd></td><td>Freihand zeichnen – die Linie wird geglättet (Stärke in der Kontextleiste).</td></tr>
     <tr><td>Rechteck, Ellipse, Vieleck/Stern</td><td><kbd>R</kbd> <kbd>E</kbd> <kbd>G</kbd></td><td>Ziehen; <kbd>⇧</kbd> = gleichmäßig, <kbd>⌥</kbd> = von der Mitte. Eckenradius, Zahl der Ecken und Stern in der Kontextleiste.</td></tr>
     <tr><td>Linie und Pfeil</td><td><kbd>L</kbd></td><td>Ziehen, <kbd>⇧</kbd> = 45°-Schritte; Pfeilspitzen am Anfang/Ende in der Kontextleiste.</td></tr>
+    <tr><td>Verbinder</td><td><kbd>C</kbd></td><td>Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten und folgen, wenn Formen sich bewegen (siehe <a href="#grafik-diagramme">Diagramme</a>).</td></tr>
     <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet.</td></tr>
     <tr><td>Verlauf</td><td><kbd>F</kbd></td><td>Auf einem Objekt ziehen = linearen Verlauf anlegen bzw. neu ausrichten. Anfang/Ende (radial: Mitte/Radius) und Farbstopps auf der Fläche ziehen, Doppelklick auf die Linie = neuer Stopp, <kbd>⌫</kbd> löscht den gewählten.</td></tr>
     <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
@@ -147,13 +148,24 @@
   <ul>
     <li><b>Farbe:</b> Füllung oder Kontur wählen (Kreise unten in der Werkzeugleiste, <kbd>X</kbd> wechselt, <kbd>⇧</kbd><kbd>X</kbd> tauscht), dann
       Keine, Farbe, linearer oder radialer Verlauf. Verläufe: Farbstopps anklicken, ziehen, mit Klick auf den Balken ergänzen.
+      <b>Farbmodell</b> umschalten wie in Affinity: <b>Hex, RGB, HSL, HSB</b> oder <b>OKLCH</b> – je Kanal ein Regler und ein Zahlenfeld,
+      Deckkraft in Prozent; der gewählte Modus bleibt für Ihr Konto gemerkt. Ins Feld <b>Farbe</b> dürfen Sie jede CSS-Angabe schreiben
+      (<code>#f80</code>, <code>rgb(10 20 30)</code>, <code>hsl(240 100% 50%)</code>, <code>oklch(0.7 0.1 200)</code>, Farbnamen, <code>#RRGGBBAA</code>) –
+      sie wird umgerechnet. Gespeichert wird immer eine Hex-Farbe (Deckkraft getrennt), damit Desktop-Programme sie verstehen.
+      Bei Text zeigt der Bereich den <b>Kontrast zum Hintergrund</b> nach WCAG (AA/AAA; großer Text ab 24 px bzw. 18,7 px fett).
       <b>Farbfelder</b> zeigt die Farben aus dem Design der Website, zuletzt verwendete Farben und die Farben der Grafik.
       „Schriftfarbe“ (A) übernimmt die Textfarbe der Umgebung – ideal für Symbole.</li>
     <li><b>Ebenen:</b> oben liegt, was vorn ist. Ziehen sortiert um (auch in Gruppen hinein), Doppelklick oder <kbd>F2</kbd> benennt um,
       Auge blendet aus, Schloss sperrt. Deckkraft und Mischmodus gelten für die Auswahl.</li>
-    <li><b>Bibliothek:</b> fertige Bausteine (Browserfenster, Smartphone, Karte, Diagramm, Zeichen, Pfeile …) anklicken oder auf die
-      Fläche ziehen. Eine Auswahl lässt sich unter Ebenen <b>als Baustein speichern</b> und steht dann allen auf dieser Website zur
-      Verfügung. <b>Symbole</b> fügt Symbole aus dem Symbolsatz von KLXM Studio als bearbeitbare Pfade ein.</li>
+    <li><b>Bibliothek:</b> fertige Bausteine (Flussdiagramm, Organigramm, Hinweise und Pfeile, Browserfenster, Smartphone, Karte,
+      Diagramm, Zeichen …) anklicken oder auf die Fläche ziehen – sie landen dort, wo Sie loslassen. Eine Auswahl lässt sich unter Ebenen
+      <b>als Baustein speichern</b>: mit Ordner und wahlweise für <b>diese Website</b> oder <b>alle Websites der Installation</b>.
+      Das Menü am Baustein (Knopf <b>…</b>, Rechtsklick oder <kbd>⇧</kbd><kbd>F10</kbd>) merkt ihn als <b>Favorit</b> (oben in der Liste, je Konto),
+      benennt um, legt in einen Ordner, ersetzt ihn durch die aktuelle Auswahl, gibt ihn für alle Websites frei, exportiert oder löscht ihn.
+      <b>Austausch zwischen Installationen:</b> Pfeil nach unten = eigene Bausteine als Datei sichern, Pfeil nach oben = Datei einlesen
+      (jede Grafik wird dabei geprüft und bereinigt). Bausteine mit Design-Farben (<code>var(--accent)</code>) bekommen beim Einfügen die
+      Farbe der Website; „Farben der Website“ setzt bei den mitgelieferten Bausteinen die Akzentfarbe ein.
+      <b>Symbole</b> fügt Symbole aus dem Symbolsatz von KLXM Studio als bearbeitbare Pfade ein.</li>
     <li><b>Ausrichten und Verteilen</b> in der Kontextleiste: bei mehreren Objekten aneinander, bei einem an der Zeichenfläche.
       Beim Verschieben rasten Objekte an Kanten und Mitten ein (rote Hilfslinien); <kbd>⌘</kbd> beim Ziehen schaltet das ab.</li>
     <li><b>Transformieren:</b> Position, Breite, Höhe und Drehung als Zahl, Bezugspunkt im Raster, Kette = Seitenverhältnis sperren.
@@ -180,13 +192,50 @@
     <tr><td>Kontur in Fläche</td><td>die Kontur wird eine gefüllte Form</td><td>Schneide-/Plotter-Daten, Logos, bevor man die Kontur weiter kombiniert</td></tr>
     <tr><td>Pfad versetzen …</td><td>Umriss nach außen (+) oder innen (−), Ecken rund/spitz/abgeschrägt</td><td>Rand um ein Logo, Aufkleber-Kontur, Abstand für Ausstanzungen</td></tr>
   </table>
-  <h4 id="grafik-text">Text: Zeichen und Absatz</h4>
-  <p>Ist ein Text gewählt, erscheint rechts der Bereich <b>Zeichen | Absatz</b>: Schrift (die selbst gehosteten Schriften der Website
-    und Systemschriften), Schnitt, Kursiv, Größe, Laufweite, Unterschneidung, Unterstrichen/Durchgestrichen, Groß-/Kleinschreibung
-    (wird als echte Zeichen geschrieben); Ausrichtung, Zeilenabstand, Breite des Textrahmens. Während Sie tippen, gelten
-    Zeichen-Einstellungen nur für die markierten Zeichen. <b>Text auf Pfad:</b> Text und Kurve wählen → „Text auf Pfad“, mit
-    Startversatz verschieben, „Vom Pfad lösen“ macht wieder normalen Text. <b>In Kurven umwandeln</b> (<kbd>⌘</kbd><kbd>↵</kbd>)
-    macht aus Text Pfade – nur mit einer Schrift, deren Datei auf der Website liegt.</p>
+  <h4 id="grafik-text">Text: Schrift, Zeichen, Absatz, OpenType, Vorlagen</h4>
+  <p>Ist ein Text gewählt, erscheint rechts der Bereich <b>Zeichen | Absatz | OpenType | Vorlagen</b>. Während Sie tippen, gelten
+    Zeichen-Einstellungen nur für die markierten Zeichen, sonst für den ganzen Text.</p>
+  <ul>
+    <li><b>Schriftauswahl</b> (im Bereich Zeichen und in der Kontextleiste): jede Schrift erscheint in ihrem eigenen Schriftbild. Tippen filtert,
+      <kbd>↑</kbd>/<kbd>↓</kbd> gehen durch die Liste, <kbd>→</kbd> zeigt rechts die <b>Schnitte</b> (Gewicht, kursiv) mit Vorschau, <kbd>↵</kbd> übernimmt,
+      <kbd>Esc</kbd> verwirft. Schon beim Zeigen oder Durchblättern sehen Sie die Schrift am Text – erst <kbd>↵</kbd> bzw. ein Klick macht einen Schritt
+      im Protokoll. Abschnitte: <b>Zuletzt verwendet</b>, <b>Favoriten</b> (Stern bzw. <kbd>⌘</kbd><kbd>D</kbd>, je Konto gemerkt), <b>Schriften der
+      Website</b> (Schriften-Manager), <b>Systemschriften</b>. Bei <b>variablen Schriften</b> stehen darunter Regler für ihre Achsen
+      (Gewicht, Breite, Neigung, optische Größe …).</li>
+    <li><b>Zeichen:</b> Schnitt, Größe, Laufweite, Unterschneidung, Unterstrichen/Durchgestrichen, Groß-/Kleinschreibung (als echte Zeichen),
+      <b>Grundlinienversatz</b>, <b>Breite/Höhe</b> in Prozent (horizontal/vertikal skalieren).</li>
+    <li><b>Absatz:</b> Ausrichtung links, Mitte, rechts und <b>Blocksatz</b> (im Textrahmen; die letzte Zeile eines Absatzes bleibt links),
+      Zeilen- und Wortabstand, <b>Abstand vor/nach Absätzen</b>, <b>Einzüge</b> links, rechts und für die erste Zeile, <b>Silbentrennung</b>
+      Deutsch oder Englisch (im Textrahmen; die Trennstriche entstehen beim Umbruch, Ihr Text bleibt unverändert). Breite des Textrahmens.
+      <kbd>↑</kbd>/<kbd>↓</kbd> springen beim Tippen in die Zeile darüber bzw. darunter – auch über automatisch umbrochene Zeilen.</li>
+    <li><b>OpenType:</b> Ligaturen (Standard, bedingt, kontextbedingt), Kapitälchen, Ziffern (Versal-/Mediävalziffern, proportional/tabellarisch),
+      Brüche, Null mit Schrägstrich, Ordinalzeichen, Hoch-/Tiefstellen, <b>Stilsätze</b> und <b>Zeichenvarianten</b> – angezeigt wird nur, was
+      die gewählte Schrift kann, mit den Namen aus der Schrift. Kann eine Schrift kein echtes Hochstellen, wird es nachgebildet (kleiner, versetzt).
+      „In Kurven umwandeln“ übernimmt alle Merkmale in die Umrisse.</li>
+    <li><b>Vorlagen:</b> <b>Absatzvorlagen</b> (Schrift, Größe, Farbe, OpenType, Absatz-Einstellungen eines ganzen Textes) und
+      <b>Zeichenvorlagen</b> (für markierte Zeichen) „Aus Auswahl“ anlegen, per Klick anwenden. „Aus Auswahl aktualisieren“ ändert alle
+      Texte bzw. Zeichen mit dieser Vorlage auf einmal. Vorlagen gehören zur Grafik; über das Menü kommen sie in die <b>Bibliothek der
+      Website</b> und stehen dann in jeder Grafik bereit.</li>
+    <li><b>Text auf Pfad:</b> Text und Kurve wählen → „Text auf Pfad“, mit Startversatz verschieben, „Vom Pfad lösen“ macht wieder normalen Text.
+      <b>In Kurven umwandeln</b> (<kbd>⌘</kbd><kbd>↵</kbd>) macht aus Text Pfade – nur mit einer Schrift, deren Datei auf der Website liegt.</li>
+  </ul>
+  <h4 id="grafik-diagramme">Diagramme: Verbinder, Flussdiagramm, Organigramm</h4>
+  <ul>
+    <li><b>Verbinder</b> (<kbd>C</kbd>): Zeigen Sie auf eine Form – ihre Ankerpunkte erscheinen (Seitenmitten; der Punkt in der Mitte bedeutet
+      „automatisch“, die Seite richtet sich dann nach dem Gegenüber; bei Pfaden zusätzlich die Knoten als Magnetpunkte). Von dort zur nächsten Form
+      ziehen. Verbinder bleiben angeheftet, wenn Sie Formen verschieben oder skalieren.</li>
+    <li>In der Kontextleiste: <b>gerade</b>, <b>rechtwinklig</b> oder <b>gebogen</b>, Spitzen am Anfang/Ende (Pfeil, Dreieck, offenes Dreieck, Kreis,
+      Raute, Strich) und ihre Größe. Mit dem Auswahlwerkzeug lassen sich die Enden an eine andere Form ziehen und beim rechtwinkligen Verbinder
+      der mittlere Abschnitt verschieben. <b>Doppelklick</b> auf einen Verbinder = Beschriftung (bleibt in der Mitte).</li>
+    <li>Wird eine verbundene Form gelöscht, bleibt der Verbinder an seiner Stelle stehen (das Ende ist dann frei); Rückgängig hängt ihn wieder an.</li>
+    <li><b>Text in Formen:</b> mit dem Text-Werkzeug in eine gefüllte Form klicken – der Text steht mittig und bricht auf die Breite der Form um,
+      auch wenn Sie die Form später verschieben oder größer ziehen. Die Formen des Flussdiagramms und die Karten des Organigramms bringen ihn mit;
+      Doppelklick bearbeitet ihn.</li>
+    <li><b>Organigramm:</b> Karten aus der Bibliothek ziehen, von der obersten Karte zu den übrigen verbinden, oberste Karte wählen und
+      <b>Baum anordnen</b> (von oben nach unten bzw. von links nach rechts) – gleiche Abstände, Kinder mittig unter der Karte darüber.</li>
+    <li><b>Barrierefreiheit:</b> Unter <b>Dokument …</b> fügt „Ablauf des Diagramms als Beschreibung einfügen“ die Reihenfolge der Verbinder als
+      Text in die Beschreibung ein („1. Start → Prozess …“) – für alle, die die Grafik nicht sehen.</li>
+  </ul>
   <h4 id="grafik-ansicht">Lineale, Hilfslinien, Raster</h4>
   <p>Menü <b>Ansicht</b> (Zoom-Knopf): Lineale (<kbd>⌘</kbd><kbd>R</kbd>), Hilfslinien (<kbd>⌘</kbd><kbd>;</kbd>), Raster (<kbd>⌘</kbd><kbd>'</kbd>),
     Einrasten. Hilfslinien aus dem Lineal ziehen, zum Verschieben anfassen, zurück aufs Lineal = löschen, Doppelklick = genaue

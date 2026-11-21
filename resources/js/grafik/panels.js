@@ -304,7 +304,7 @@ export function buildPanels(ed) {
       if (docColors.size > 40) break;
     }
     const sw = (c, name, token = '') => `<button type="button" class="ge-sw" data-c="${esc(c)}"${token ? ` data-token="${esc(token)}"` : ''} style="--c:${esc(c === 'currentColor' ? '#1F2430' : c)};--on:${onColor(c === 'currentColor' ? '#1F2430' : c)}" aria-label="${esc((name ? name + ': ' : '') + c)}" title="${esc((name ? name + ' – ' : '') + c)}">${c === 'currentColor' ? 'A' : ''}</button>`;
-    const block = (title, items) => items.length ? `<h3 class="ge-h3">${esc(title)}</h3><div class="ge-sws">${items.join('')}</div>` : '';
+    const block = (title, items) => items.length ? `<h2 class="ge-h3">${esc(title)}</h2><div class="ge-sws">${items.join('')}</div>` : '';
     swPanel.innerHTML = `<p class="ge-note">${esc(t('Klick = für {w} übernehmen', { w: target() === 'fill' ? t('Füllung') : t('Kontur') }))}</p>`
       + block(t('Design der Website'), (ed.boot.swatches || []).map(s => sw(s.color, s.name, s.token || '')))
       + block(t('Grundfarben'), [sw('currentColor', t('Schriftfarbe')), sw('#FFFFFF', t('Weiß')), sw('#000000', t('Schwarz')), sw('#1F2430', t('Tinte')), sw('#8A94A6', t('Grau'))].concat(`<button type="button" class="ge-sw ge-sw--none" data-c="none" aria-label="${esc(t('Keine'))}" title="${esc(t('Keine'))}"></button>`))
@@ -606,7 +606,7 @@ export function buildPanels(ed) {
     for (const it of list) { const f = it.folder || ''; if (!m.has(f)) m.set(f, []); m.get(f).push(it); }
     return [...m].sort((x, y) => (x[0] ? 1 : 0) - (y[0] ? 1 : 0) || x[0].localeCompare(y[0]));
   };
-  const folderBlock = (list, kind) => byFolder(list).map(([f, items]) => (f ? `<h4 class="ge-h4">${ico('folder')} ${esc(f)}</h4>` : '') + `<ul class="ge-tiles">${items.map(it => tile(it, kind)).join('')}</ul>`).join('');
+  const folderBlock = (list, kind) => byFolder(list).map(([f, items]) => (f ? `<h3 class="ge-h4">${ico('folder')} ${esc(f)}</h3>` : '') + `<ul class="ge-tiles">${items.map(it => tile(it, kind)).join('')}</ul>`).join('');
   function buildLib() {
     libBuilt = true;
     const groups = ed.boot.libraryGroups || {};
@@ -617,10 +617,10 @@ export function buildPanels(ed) {
       <div class="ge-libbar"><label class="ge-lbl ge-chk"><input type="checkbox" data-sitecolors${ed.prefs.libSiteColors ? ' checked' : ''}> ${esc(t('Farben der Website'))}</label>
         ${ed.boot.canParts ? `<span class="ge-seg" role="group" aria-label="${esc(t('Austausch'))}">${iconBtn('download-simple', t('Eigene Bausteine exportieren (Datei)'), 'data-libexport')}${iconBtn('upload-simple', t('Bausteine importieren (Datei)'), 'data-libimport')}</span>` : ''}</div>
       <p class="ge-note">${esc(t('Anklicken fügt in der Mitte ein, Ziehen legt den Baustein an die Stelle. Menü am Baustein: Favorit, Umbenennen, Ordner, Teilen, Löschen.'))}</p>
-      ${fav.length ? `<h3 class="ge-h3">${esc(t('Favoriten'))}</h3><ul class="ge-tiles">${fav.map(([it, kind]) => tile(it, kind)).join('')}</ul>` : ''}
-      <h3 class="ge-h3">${esc(t('Eigene Bausteine'))}</h3>${parts.length ? folderBlock(parts, 'part') : `<p class="ge-note" data-noparts>${esc(t('Noch keine – Auswahl unter Ebenen als Baustein speichern.'))}</p>`}
-      ${shared.length ? `<h3 class="ge-h3">${esc(t('Alle Websites'))}</h3>${folderBlock(shared, 'net')}` : ''}
-      ${Object.entries(groups).map(([g, label]) => `<h3 class="ge-h3">${esc(label)}</h3><ul class="ge-tiles">${(ed.boot.library || []).filter(it => it.group === g).map(it => tile(it, 'lib')).join('')}</ul>`).join('')}`;
+      ${fav.length ? `<h2 class="ge-h3">${esc(t('Favoriten'))}</h2><ul class="ge-tiles">${fav.map(([it, kind]) => tile(it, kind)).join('')}</ul>` : ''}
+      <h2 class="ge-h3">${esc(t('Eigene Bausteine'))}</h2>${parts.length ? folderBlock(parts, 'part') : `<p class="ge-note" data-noparts>${esc(t('Noch keine – Auswahl unter Ebenen als Baustein speichern.'))}</p>`}
+      ${shared.length ? `<h2 class="ge-h3">${esc(t('Alle Websites'))}</h2>${folderBlock(shared, 'net')}` : ''}
+      ${Object.entries(groups).map(([g, label]) => `<h2 class="ge-h3">${esc(label)}</h2><ul class="ge-tiles">${(ed.boot.library || []).filter(it => it.group === g).map(it => tile(it, 'lib')).join('')}</ul>`).join('')}`;
     const qi = libPanel.querySelector('[data-q]');
     const filter = () => {
       const q = qi.value.trim().toLowerCase();
@@ -797,7 +797,7 @@ export function buildPanels(ed) {
     const de = (document.documentElement.lang || 'de').startsWith('de');
     icoPanel.innerHTML = `<label class="ge-search">${ico('magnifying-glass')}<input type="search" class="ge-in" data-q placeholder="${esc(t('Symbole suchen'))}" aria-label="${esc(t('Symbole suchen'))}"></label>
       <p class="ge-note">${esc(t('Symbole aus dem Symbolsatz von KLXM Studio (Phosphor, MIT) – werden als Vektorpfade eingefügt.'))}</p>
-      ${(cat.topics || []).map(tp => `<h3 class="ge-h3">${esc(de ? tp.de : tp.en)}</h3><ul class="ge-icons">${(tp.icons || []).map(n => `<li><button type="button" class="ge-icon" draggable="true" data-ico="${esc(n)}" title="${esc(n)}" aria-label="${esc(t('Symbol einfügen: {name}', { name: n }))}">${ico(n)}</button></li>`).join('')}</ul>`).join('')}`;
+      ${(cat.topics || []).map(tp => `<h2 class="ge-h3">${esc(de ? tp.de : tp.en)}</h2><ul class="ge-icons">${(tp.icons || []).map(n => `<li><button type="button" class="ge-icon" draggable="true" data-ico="${esc(n)}" title="${esc(n)}" aria-label="${esc(t('Symbol einfügen: {name}', { name: n }))}">${ico(n)}</button></li>`).join('')}</ul>`).join('')}`;
     icoPanel.querySelector('[data-q]').addEventListener('input', e => {
       const q = e.target.value.trim().toLowerCase();
       icoPanel.querySelectorAll('.ge-icon').forEach(b => { b.parentNode.hidden = !!q && !b.dataset.ico.includes(q); });
