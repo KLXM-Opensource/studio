@@ -625,6 +625,9 @@ export class GraphicEditor {
     });
     st.addEventListener('pointerleave', () => { if (this.hover) { this.hover = null; this.draw(); } });
     st.addEventListener('dblclick', e => this.dbl(e));
+    // Kontextmenü (rechte Maustaste); Tastatur: Menü-Taste bzw. Umschalt+F10 auf der Zeichenfläche
+    st.addEventListener('contextmenu', e => { if (e.target.closest?.('.ge-textedit')) return; e.preventDefault(); this.contextMenu(e); });
+    st.addEventListener('keydown', e => { if (e.key === 'F10' && e.shiftKey) { e.preventDefault(); this.contextMenu({ clientX: 0, clientY: 0 }); } });
     st.addEventListener('wheel', e => {
       e.preventDefault();
       const r = st.getBoundingClientRect();
@@ -1724,7 +1727,7 @@ export class GraphicEditor {
   }
 
   /** Menü „Objekt“ (Kopfzeile): alle Befehle mit Kürzeln – auch per Tastatur erreichbar */
-  objectMenu(btn) {
+  objectMenu(btn, at = null) {
     const sel = this.sel, n = sel.length;
     const shapes = sel.filter(el => NODE_SHAPES.includes(el.localName));
     const curvable = sel.some(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line', 'text'].includes(el.localName) || el.querySelector?.('text'));
@@ -1760,7 +1763,93 @@ export class GraphicEditor {
       { label: t('Richtung umkehren'), disabled: !shapes.length, run: () => this.pathCmd('reverse') },
       { label: t('Teilpfade trennen'), disabled: subs.length < 2, run: () => this.pathCmd('separate') },
       { label: t('Vereinfachen …'), disabled: shapes.length !== 1, run: () => this.simplifyPath() },
-    ]);
+    ], at);
+  }
+
+  /**
+   * Kontextmenü auf der Zeichenfläche (rechte Maustaste, Menü-Taste, Umschalt+F10): die üblichen Befehle für das Objekt unter
+   * dem Zeiger – ist es nicht ausgewählt, wird es zuerst ausgewählt (wie in Vektorprogrammen). „Weitere Objektbefehle …“
+   * öffnet das vollständige Menü „Objekt“ an derselben Stelle.
+   */
+  contextMenu(e) {
+    if (this.textEd || this.warp?.active || this.pen) return;
+    const kb = (!e.clientX && !e.clientY) || e.pointerType === '';
+    if (!kb && this.tool === 'select') {
+      const hit = this.hitAt(e)?.el || null;
+      if (hit && !this.sel.includes(hit)) this.select([hit]);
+      else if (!hit && this.sel.length) this.select([]);
+    }
+    const sel = this.sel, n = sel.length, at = kb && n ? (() => {
+      const b = this.selBounds(), r = this.stage.getBoundingClientRect();
+      if (!b) return { x: r.left + 20, y: r.top + 20 };
+      const m = this.root.getScreenCTM();
+      return m ? pt(DOMMatrix.fromMatrix(m), b.x + b.w / 2, b.y + b.h / 2) : { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    })() : kb ? (() => { const r = this.stage.getBoundingClientRect(); return { x: r.left + 20, y: r.top + 20 }; })() : { x: e.clientX, y: e.clientY };
+    const groups = sel.filter(el => el.localName === 'g' && !isCompound(el));
+    const curvable = sel.some(el => ['rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line', 'text'].includes(el.localName) || el.querySelector?.('text'));
+    const clipped = sel.some(el => clipOf(el.closest('clipPath,mask')?.parentNode || el, this.root));
+    const allLocked = n && sel.every(isLocked);
+    const items = !n ? [
+      { label: t('Einfügen'), key: MOD + 'V', disabled: !this.clip?.length, run: () => this.paste() },
+      { label: t('Alles auswählen'), key: MOD + 'A', run: () => this.selectAll() },
+      { sep: true },
+      { label: t('Ganze Grafik zeigen'), run: () => this.fit() },
+    ] : [
+      { label: t('Ausschneiden'), key: MOD + 'X', run: () => this.copy(true) },
+      { label: t('Kopieren'), key: MOD + 'C', run: () => this.copy() },
+      { label: t('Einfügen'), key: MOD + 'V', disabled: !this.clip?.length, run: () => this.paste() },
+      { label: t('Duplizieren'), key: MOD + 'D', run: () => this.duplicate() },
+      { label: t('Löschen'), key: '⌫', run: () => this.remove() },
+      { sep: true },
+      { label: t('Gruppieren'), key: MOD + 'G', disabled: n < 2, run: () => this.group() },
+      { label: t('Gruppierung aufheben'), key: SHIFT + MOD + 'G', disabled: !groups.length, run: () => this.ungroup() },
+      ...(groups.length === 1 && n === 1 ? [{ label: t('Gruppe bearbeiten'), run: () => { this.scope = groups[0]; this.select([]); this.draw(); } }] : []),
+      { sep: true },
+      { label: t('Ganz nach vorn'), key: SHIFT + MOD + ']', run: () => this.arrange('front') },
+      { label: t('Eine Ebene nach vorn'), key: MOD + ']', run: () => this.arrange('forward') },
+      { label: t('Eine Ebene nach hinten'), key: MOD + '[', run: () => this.arrange('backward') },
+      { label: t('Ganz nach hinten'), key: SHIFT + MOD + '[', run: () => this.arrange('back') },
+      { sep: true },
+      ...(n > 1 ? [
+        { label: t('Links ausrichten'), run: () => this.align('left') },
+        { label: t('Horizontal zentrieren'), run: () => this.align('hcenter') },
+        { label: t('Rechts ausrichten'), run: () => this.align('right') },
+        { label: t('Oben ausrichten'), run: () => this.align('top') },
+        { label: t('Vertikal zentrieren'), run: () => this.align('vcenter') },
+        { label: t('Unten ausrichten'), run: () => this.align('bottom') },
+        { sep: true },
+      ] : []),
+      { label: t('Horizontal spiegeln'), run: () => this.flip('h') },
+      { label: t('Vertikal spiegeln'), run: () => this.flip('v') },
+      { sep: true },
+      ...(curvable ? [{ label: t('In Kurven umwandeln'), key: MOD + '↵', run: () => this.toCurves() }] : []),
+      ...(n > 1 ? [{ label: t('Beschneiden'), key: MOD + '7', run: () => this.clip('clip') }] : []),
+      ...(clipped ? [{ label: t('Maske freigeben'), key: ALT + MOD + '7', run: () => this.unclip() }] : []),
+      { label: allLocked ? t('Entsperren') : t('Sperren'), run: () => this.lockSel(!allLocked) },
+      { label: t('Ausblenden'), run: () => this.hideSel() },
+      { label: t('Als Baustein speichern …'), run: () => this.panels.savePart?.() },
+      { sep: true },
+      { label: t('Weitere Objektbefehle …'), run: () => setTimeout(() => this.objectMenu(this.stage, at)) },
+    ];
+    // keine doppelten oder hängenden Trennlinien
+    const clean = items.filter((it, i, a) => !it.sep || (i > 0 && !a[i - 1].sep && i < a.length - 1));
+    menu(this.stage, clean, at);
+  }
+
+  /** Auswahl sperren bzw. entsperren (wie das Schloss im Ebenen-Panel) */
+  lockSel(on) {
+    if (!this.sel.length) return;
+    for (const el of this.sel) on ? el.setAttribute('data-locked', '1') : el.removeAttribute('data-locked');
+    if (on) this.sel = [];
+    this.commit(on ? t('Gesperrt') : t('Entsperrt'));
+  }
+
+  /** Auswahl ausblenden (Einblenden über das Auge im Ebenen-Panel) */
+  hideSel() {
+    if (!this.sel.length) return;
+    for (const el of this.sel) setProp(el, 'display', 'none');
+    this.sel = [];
+    this.commit(t('Ausgeblendet'));
   }
 
   // ================================================================= Text: Zeichen und Absatz (textpanel.js)

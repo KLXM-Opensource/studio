@@ -26,7 +26,8 @@ export function iconBtn(name, label, attrs = '', key = '') {
 /**
  * Menü an einem Knopf: items [{label, run, disabled, key, sep}] – Pfeiltasten, Enter, Esc; schließt bei Klick daneben.
  */
-export function menu(btn, items) {
+/** Menü an einem Knopf; at = {x, y} (Bildschirm) öffnet es an dieser Stelle (Kontextmenü), btn erhält danach den Fokus */
+export function menu(btn, items, at = null) {
   closeMenus();
   const m = h(`<div class="ge-menu" role="menu"></div>`);
   for (const it of items) {
@@ -38,13 +39,17 @@ export function menu(btn, items) {
   }
   const root = btn.closest('.ge') || document.body;
   root.append(m);
-  const r = btn.getBoundingClientRect(), rr = root.getBoundingClientRect();
+  const r = at ? { left: at.x, right: at.x, top: at.y, bottom: at.y } : btn.getBoundingClientRect(), rr = root.getBoundingClientRect();
   m.style.left = Math.max(4, Math.min(r.left - rr.left, rr.width - 240)) + 'px';
   m.style.top = (r.bottom - rr.top + 4) + 'px';
   // unten kein Platz (z. B. Baustein am unteren Rand der Bibliothek): über dem Knopf öffnen
   const mh = m.offsetHeight;
   if (r.bottom + 4 + mh > Math.min(rr.bottom, window.innerHeight) && r.top - rr.top - 4 - mh >= 0) m.style.top = (r.top - rr.top - 4 - mh) + 'px';
-  btn.setAttribute('aria-expanded', 'true');
+  // Kontextmenü: nie über den Rand hinaus (lange Menüs rollen)
+  if (at && m.offsetTop + mh > rr.height - 4) m.style.top = Math.max(4, rr.height - mh - 4) + 'px';
+  if (at && m.offsetHeight > rr.height - 8) { m.style.maxHeight = (rr.height - 8) + 'px'; m.style.overflowY = 'auto'; }
+  if (at && r.left - rr.left + m.offsetWidth > rr.width - 4) m.style.left = Math.max(4, r.left - rr.left - m.offsetWidth) + 'px';
+  if (!at) btn.setAttribute('aria-expanded', 'true');
   const all = () => [...m.querySelectorAll('[role^=menuitem]:not(:disabled)')];
   all()[0]?.focus();
   m.addEventListener('keydown', e => {
@@ -57,7 +62,7 @@ export function menu(btn, items) {
   });
   setTimeout(() => document.addEventListener('pointerdown', outside, true));
   function outside(e) { if (!m.contains(e.target) && e.target !== btn) closeMenus(); }
-  m._close = () => { document.removeEventListener('pointerdown', outside, true); btn.setAttribute('aria-expanded', 'false'); };
+  m._close = () => { document.removeEventListener('pointerdown', outside, true); if (!at) btn.setAttribute('aria-expanded', 'false'); };
   return m;
 }
 export function closeMenus() {

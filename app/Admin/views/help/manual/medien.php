@@ -157,6 +157,10 @@
       Bei Text zeigt der Bereich den <b>Kontrast zum Hintergrund</b> nach WCAG (AA/AAA; großer Text ab 24 px bzw. 18,7 px fett).
       <b>Farbfelder</b> zeigt die Farben aus dem Design der Website, zuletzt verwendete Farben und die Farben der Grafik.
       „Schriftfarbe“ (A) übernimmt die Textfarbe der Umgebung – ideal für Symbole.</li>
+    <li><b>Kontextmenü:</b> Rechtsklick auf ein Objekt (Tastatur: Menü-Taste oder <kbd>Umschalt</kbd>+<kbd>F10</kbd>) zeigt die üblichen Befehle –
+      Ausschneiden, Kopieren, Einfügen, Duplizieren, Löschen, Gruppieren und Gruppierung aufheben, Anordnen (nach vorn/hinten), bei mehreren Objekten
+      Ausrichten, Spiegeln, In Kurven umwandeln, Sperren, Ausblenden und Als Baustein speichern. Ist das Objekt noch nicht ausgewählt, wird es zuerst
+      ausgewählt. „Weitere Objektbefehle …“ öffnet das vollständige Menü „Objekt“; Rechtsklick auf eine leere Stelle bietet Einfügen und Alles auswählen.</li>
     <li><b>Ebenen:</b> oben liegt, was vorn ist. Ziehen sortiert um (auch in Gruppen hinein), Doppelklick oder <kbd>F2</kbd> benennt um,
       Auge blendet aus, Schloss sperrt. Gesperrte Ebenen lassen sich hier trotzdem wählen, um Farbe, Effekte oder Namen zu ändern – auf der
       Fläche bleiben sie unverrückbar. Der Auswahlrahmen wählt alles, was er berührt; unter dem Zoom-Menü lässt er sich auf „Objekte vollständig

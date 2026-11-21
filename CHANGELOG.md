@@ -12,6 +12,8 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 
 
 ### Grafik-Editor: Personas Daten und Export, Anhalten von Bewegung (Ausbaustufe 5)
+- **Kontextmenü auf der Zeichenfläche:** Rechtsklick (oder Menü-Taste, Umschalt+F10) mit den üblichen Befehlen – Zwischenablage, Gruppieren/aufheben,
+  Anordnen, Ausrichten, Spiegeln, In Kurven, Sperren, Ausblenden, Als Baustein speichern, „Weitere Objektbefehle …“; wählt das Objekt unter dem Zeiger.
 - **Animation anhalten (WCAG 2.2.2):** Läuft Bewegung von selbst (beim Laden, sobald sichtbar, nach Klick) länger als 5 Sekunden oder endlos, zeigt die
   Website in der Ecke der Grafik einen echten Knopf „Animation anhalten/fortsetzen“ (Tastatur, Statusmeldung für Screenreader, Farben aus dem Kit,
   `forced-colors`); angehalten bleibt angehalten, auch nach Scrollen. Ohne Skript und bei „Bewegung reduzieren“ steht das Endbild – auch beim Auslöser

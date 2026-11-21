@@ -1013,6 +1013,8 @@ export function buildPanels(ed) {
     groups: [A.el, TP.el, B.el, C.el],
     text: TP,
     check,
+    /** Auswahl als Baustein speichern (Ebenen, Kontextmenü) */
+    savePart: o => savePart(o),
     /** Bereich „Prüfen“ zeigen und neu prüfen (focus: Fokus auf den Reiter) */
     showCheck(focus = false) {
       C.el.classList.remove('is-folded');
