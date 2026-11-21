@@ -1067,6 +1067,13 @@ final class Media
         $fit = ($opt['fit'] ?? true) !== false ? ImageFit::resolve($m, $ratio, isset($opt['path']) ? (string) $opt['path'] : null) : null;
         $src = self::sources($m, $fit ? null : $ratio);
         $alt = $opt['alt'] ?? self::alt($m);
+        // Infografik mit Daten und Zuständen (Grafik-Editor, Persona Daten): Fassung mit den aktuellen Werten (Core\Graphics\Bind) –
+        // danach wie jede Infografik (Design-Farben, Bewegung); Alt-Text nennt die Werte
+        if ($m['mime'] === Svg::MIME && ($bound = Graphics\Bind::forMedia($m)) !== null) {
+            $m = $bound['media'];
+            $src = self::sources($m, null);
+            $alt = Graphics\Bind::alt((string) $alt, $bound['model'], $bound['values']);
+        }
         // Infografik mit Bewegung oder Links (Grafik-Editor, Persona Motion): inline mit erzeugter CSS-Datei (Core\Graphics\Motion) –
         // Grafiken ohne Bewegung bleiben ein <img>; 'static' => true erzwingt das Bild
         if ($m['mime'] === Svg::MIME && ($inline = Graphics\Motion::inline($m, (string) $alt, $opt)) !== null) return $inline;

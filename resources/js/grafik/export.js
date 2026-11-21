@@ -218,6 +218,10 @@ export function optimizeSvg(svg, opts = {}) {
   if (root.hasAttribute('data-ge-motion') || root.querySelector('[data-ge-anim],[data-ge-link],[data-ge-tip],[data-ge-hot]')) {
     root.setAttribute('class', [...(root.getAttribute('class') || '').split(/\s+/).filter(c => c && c !== 'ge-anim'), 'ge-anim'].join(' '));
   }
+  // Daten und Zustände (Persona Daten): Kennzeichen an der Wurzel – die Website setzt die Werte serverseitig ein (Core\Graphics\Bind)
+  if (root.querySelector('[data-ge-bind]')) {
+    root.setAttribute('class', [...(root.getAttribute('class') || '').split(/\s+/).filter(c => c && c !== 'ge-bound'), 'ge-bound'].join(' '));
+  }
   for (const el of all(root)) for (const a of [...el.attributes]) if (a.name === 'data-name' || a.name === 'data-locked' || a.name.startsWith('data-ge-')) el.removeAttribute(a.name);
   if (opts.safe) return ser(root);
   const refs = references(root);

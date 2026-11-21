@@ -61,6 +61,7 @@ final class SelfTest
             self::library();
             self::themed($files);
             self::motion($files);
+            self::bind($files);
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -194,6 +195,108 @@ final class SelfTest
         self::t(str_contains(Media::pictureOf($m, '100vw', ['static' => true]), '<img'), '„static“ erzwingt das Bild');
         [$m2] = Graphics::saveMedia(self::SAMPLE, ['name' => 'selbsttest-still', 'alt' => 'Still']);
         if ($m2) { $files[] = Media::path($m2); self::t(str_contains(Media::pictureOf($m2), '<img'), 'Grafik ohne Bewegung bleibt ein Bild'); }
+    }
+
+    /**
+     * Ausbaustufe 5 – Daten und Zustände (Core\Graphics\Bind): Modell nur Base64 und bereinigt, Zustände zu fester Zeit (geöffnet nach
+     * den Öffnungszeiten, Tag/Nacht, Wochentag), nächster Wechsel für den Seiten-Cache, Werte aus einer Datentabelle wie per Hand
+     * gezählt, Anwenden (Länge, Drehung, Farbe, Sichtbarkeit, Text bleibt Text, <desc> mit Werten), Mediathek: Datei je Zustand,
+     * Alt-Text mit Werten, Frist des Seiten-Caches; Seiten-Cache mit abgelaufener Frist wird neu erzeugt.
+     */
+    private static function bind(array &$files): void
+    {
+        $b = fn(mixed $o) => base64_encode((string) json_encode($o));
+        $table = null;
+        foreach (\Core\Data\Tables::content() as $t) {
+            if (\Core\Data\Tables::isInbox($t)) continue;
+            foreach ($t['fields'] as $f) if (($f['type'] ?? '') === 'number') { $table = [$t, (string) $f['name']]; break 2; }
+        }
+        $defs = ['plaetze' => ['t' => 'table', 'tb' => $table ? $table[0]['handle'] : 'gibt_es_nicht', 'a' => 'sum', 'f' => $table ? $table[1] : 'x', 'l' => 'Plätze'],
+            'anzahl' => ['t' => 'table', 'tb' => $table ? $table[0]['handle'] : 'gibt_es_nicht', 'a' => 'count', 'l' => 'Kurse'],
+            'Böse' => ['t' => 'table', 'tb' => 'x; DROP', 'a' => 'sum']];
+        $work = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200" data-ge-data="' . $b(['v' => $defs]) . '"><title>Kurse</title>'
+            . '<rect id="balken" x="20" y="20" width="200" height="30" fill="#5b73ad" class="ge-tf-accent" data-ge-bind="' . $b([['p' => 'w', 'v' => 'plaetze', 'a' => [0, 100], 'o' => [20, 35]], ['p' => 'fill', 'v' => 'plaetze', 'm' => 'steps', 'b' => '#cccccc', 's' => [[10, '#00aa00'], [50, '#aa0000']]], ['p' => 'evil', 'v' => 'plaetze']]) . '"/>'
+            . '<text id="zahl" x="20" y="90" font-size="20">Noch <tspan>12</tspan> Plätze<tspan x="20" dy="1.2em">zweite Zeile</tspan></text>'
+            . '<circle id="sonne" cx="300" cy="50" r="20" fill="#f5b400" data-ge-bind="' . $b([['p' => 'show', 'v' => '@tag', 'op' => '=', 'x' => 1]]) . '"/>'
+            . '<circle id="mond" cx="300" cy="50" r="20" fill="#334" data-ge-bind="' . $b([['p' => 'show', 'v' => '@tag', 'op' => '=', 'x' => 0]]) . '"/>'
+            . '<g id="offen" data-ge-bind="' . $b([['p' => 'show', 'v' => '@offen', 'op' => '=', 'x' => 1]]) . '"><text x="20" y="180">Geöffnet</text></g>'
+            . '<g id="zu" data-ge-bind="' . $b([['p' => 'show', 'v' => '@offen', 'op' => '=', 'x' => 0]]) . '"><text x="20" y="180">Geschlossen</text></g>'
+            . '<path id="zeiger" d="M200 150h40" stroke="#000" data-ge-bind="' . $b([['p' => 'r', 'v' => '@uhrzeit', 'a' => [0, 24], 'g' => [0, 360], 'o' => [200, 150]]]) . '"/>'
+            . '<rect id="x" width="1" height="1" data-ge-bind="!!kein-base64"/></svg>';
+        // Text-Bindung nachträglich (zahl), damit der Text oben lesbar bleibt
+        $work = str_replace('<text id="zahl"', '<text id="zahl" data-ge-bind="' . $b([['p' => 'text', 'v' => 'plaetze', 'tpl' => '{v} Plätze frei', 'fmt' => 'num', 'd' => 0]]) . '"', $work);
+        $w = Svg::clean($work, ['editor' => true])['svg'];
+        self::t(str_contains($w, 'data-ge-data="') && str_contains($w, 'data-ge-bind="') && !str_contains($w, '!!kein-base64'), 'Daten: Bindungen bleiben in der Arbeitsfassung, nur Base64');
+        $model = Bind::model($w);
+        self::t($model !== null && isset($model['values']['plaetze']) && !isset($model['values']['Böse']) && count($model['items']['balken'] ?? []) === 2, 'Daten: Modell bereinigt (Namen, unbekannte Eigenschaft entfällt)');
+        if (!$model) return;
+        // Zustände zu fester Zeit: Mittwoch 10:00 bzw. 23:00 (Zeitzone der Website), Öffnungszeiten Mi 9–17 Uhr
+        app()->settings->set('hours', [['tag' => '3', 'von' => '09:00', 'bis' => '17:00', 'pause_von' => '', 'pause_bis' => '']]);
+        app()->settings->forget();
+        $tz = new \DateTimeZone(date_default_timezone_get());
+        // ein Mittwoch in der Zukunft (die Frist des Seiten-Caches gilt nur für künftige Zeitpunkte)
+        $wed = (new \DateTimeImmutable('now', $tz))->modify('next wednesday');
+        $wed10 = $wed->setTime(10, 0)->getTimestamp();
+        $wed23 = $wed->setTime(23, 0)->getTimestamp();
+        self::t(Bind::state('@offen', $wed10) === 1.0 && Bind::state('@offen', $wed23) === 0.0 && Bind::state('@wochentag', $wed10) === 3.0, 'Daten: geöffnet nach den Öffnungszeiten, Wochentag');
+        self::t(Bind::state('@tag', (new \DateTimeImmutable('2026-06-18 12:00', $tz))->getTimestamp()) === 1.0 && Bind::state('@tag', (new \DateTimeImmutable('2026-06-18 02:00', $tz))->getTimestamp()) === 0.0, 'Daten: Tag und Nacht');
+        self::t(Bind::state('@uhrzeit', $wed->setTime(14, 37)->getTimestamp()) === round(14 + 35 / 60, 4) && Bind::state('@datum', $wed10) === (float) $wed->format('md'), 'Daten: Uhrzeit in 5-Minuten-Schritten, Datum MMTT');
+        self::t(Bind::nextChange('@offen', $wed10) === $wed->setTime(17, 0)->getTimestamp() && Bind::nextChange('@uhrzeit', $wed10 + 61) === $wed10 + 300, 'Daten: nächster Wechsel (Schließen, nächste 5 Minuten)');
+        $sunNext = Bind::nextChange('@tag', $wed10);
+        self::t($sunNext !== null && $sunNext > $wed10 && $sunNext <= $wed10 + 86400, 'Daten: nächster Wechsel Tag/Nacht innerhalb eines Tages');
+        // Werte aus der Datentabelle wie per Hand gerechnet
+        if ($table) {
+            $sum = 0.0; $n = 0;
+            foreach (\Core\Data\Entries::query($table[0], ['status' => 'published']) as $e) { $n++; if (is_numeric($e[$table[1]] ?? null)) $sum += (float) $e[$table[1]]; }
+            Bind::forget();
+            self::t(Bind::tableValue($model['values']['plaetze']) === $sum && Bind::tableValue($model['values']['anzahl']) === (float) $n, 'Daten: Summe und Anzahl aus der Datentabelle');
+        } else {
+            self::t(Bind::tableValue($model['values']['plaetze']) === null, 'Daten: fehlende Tabelle liefert keinen Wert');
+        }
+        // Anwenden
+        $web = (string) preg_replace('~ data-(ge|name)[\w-]*="[^"]*"~', '', str_replace('<svg ', '<svg class="ge-bound" ', $work));
+        $web = Svg::clean($web, ['keep_ids' => true])['svg'];
+        self::t(Bind::isBound($web) && !Bind::isBound(self::SAMPLE), 'Daten: Kennzeichen ge-bound an der Web-Fassung');
+        $vals = ['plaetze' => 60.0, '@tag' => 1.0, '@offen' => 0.0, '@uhrzeit' => 6.0];
+        $out = Bind::apply($web, $model, $vals);
+        self::t(str_contains($out, 'transform="translate(20 35) scale(0.6 1) translate(-20 -35)"') && str_contains($out, 'fill="#aa0000"') && !str_contains($out, 'ge-tf-accent'), 'Daten: Länge (Anker), Farbe nach Schwellen, Design-Farbe weicht');
+        self::t(str_contains($out, '>60 Plätze frei<') && !str_contains($out, 'zweite Zeile') && str_contains($out, '<text id="zahl"'), 'Daten: Text bleibt Text, Vorlage mit Wert');
+        self::t(str_contains($out, 'id="sonne"') && !str_contains($out, 'id="mond"') && !str_contains($out, 'id="offen"') && str_contains($out, 'id="zu"'), 'Daten: Sichtbarkeit (Tag, geschlossen)');
+        self::t(str_contains($out, 'rotate(90 200 150)') && preg_match('~<desc>[^<]*Plätze: 60[^<]*geschlossen~u', $out) === 1, 'Daten: Drehung nach Uhrzeit, Beschreibung nennt die Werte');
+        self::t(Bind::alt('Belegung: {plaetze} Plätze', $model, $vals) === 'Belegung: 60 Plätze' && str_starts_with(Bind::alt('Kursbelegung', $model, $vals), 'Kursbelegung (Plätze: 60'), 'Daten: Alt-Text mit Platzhalter bzw. angehängten Werten');
+        self::t(!preg_match('~\sstyle="|<script|on\w+="~i', Svg::clean($out, ['keep_ids' => true])['svg']), 'Daten: Ausgabe ohne style/Skript (CSP)');
+        // Mediathek: Datei je Zustand, Frist des Seiten-Caches
+        [$m, $err] = Graphics::saveMedia($web, ['name' => 'selbsttest-daten', 'alt' => 'Kurse: {anzahl}'], null, $w);
+        self::t($m !== null, 'Daten: Grafik gespeichert' . ($err ? " ($err)" : ''));
+        if (!$m) return;
+        $files[] = Media::path($m);
+        Bind::$now = $wed10;
+        \Core\PageCache::resetUntil();
+        Motion::forget();
+        $h1 = Media::pictureOf($m);
+        $until = \Core\PageCache::pendingUntil();
+        Bind::$now = $wed23;
+        Bind::forget();
+        $h2 = Media::pictureOf($m);
+        foreach (glob(Graphics::dir() . '/b/gb-' . (int) $m['id'] . '-*.svg') ?: [] as $f) $files[] = $f;
+        preg_match('~src="([^"]+)"~', $h1, $s1);
+        preg_match('~src="([^"]+)"~', $h2, $s2);
+        self::t(str_contains($h1, '/grafik/b/gb-' . (int) $m['id'] . '-') && ($s1[1] ?? '') !== ($s2[1] ?? ''), 'Daten: Datei je Zustand (geöffnet / geschlossen)');
+        $f1 = site()->mediaDir() . '/' . preg_replace('~^.*?/(grafik/b/[^"?]+)$~', '$1', $s1[1] ?? '');
+        self::t(is_file($f1) && str_contains((string) file_get_contents($f1), 'id="offen"') && !str_contains((string) file_get_contents($f1), 'id="zu"'), 'Daten: um 10 Uhr „geöffnet“ in der Datei');
+        self::t($until !== null && $until <= $wed10 + 300, 'Daten: Seiten-Cache gilt nur bis zum nächsten Wechsel');
+        self::t(str_contains($h1, 'alt="Kurse: ') && !str_contains($h1, '{anzahl}'), 'Daten: Alt-Text mit Wert');
+        Bind::$now = null;
+        \Core\PageCache::resetUntil();
+        // Seiten-Cache: abgelaufene Frist → neu erzeugen
+        if (\Core\PageCache::enabled()) {
+            \Core\PageCache::put('selbsttest:bind', '<p>alt</p>');
+            $c = glob(site()->storage('cache/pages') . '/*.html') ?: [];
+            usort($c, fn($a, $z) => filemtime($z) <=> filemtime($a));
+            $hit = \Core\PageCache::get('selbsttest:bind') === '<p>alt</p>';
+            foreach ($c as $f) if ((string) @file_get_contents($f) === '<p>alt</p>') { file_put_contents($f . '.until', (string) (time() - 5)); $files[] = $f; $files[] = $f . '.until'; }
+            self::t($hit && \Core\PageCache::get('selbsttest:bind') === null, 'Daten: Seiten-Cache mit abgelaufener Frist wird neu erzeugt');
+        }
     }
 
     private static function sanitize(): void

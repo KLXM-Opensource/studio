@@ -267,7 +267,8 @@ final class Motion
         $path = Media::path($m);
         $web = is_file($path) ? (string) @file_get_contents($path, false, null, 0, Svg::MAX_BYTES + 1) : '';
         if ($web === '' || !self::isAnimated($web)) return self::$memo[$mk] = null;
-        $work = ($m['_pool'] ?? '') === '' ? Graphics::source('media:' . (int) $m['id'], $web) : null;
+        // gebundene Fassung (Core\Graphics\Bind): Datei = Fassung mit Werten, Arbeitsfassung kommt vom Original
+        $work = isset($m['_work']) ? (string) $m['_work'] : (($m['_pool'] ?? '') === '' ? Graphics::source('media:' . (int) $m['id'], $web) : null);
         $model = $work !== null ? self::model($work) : null;
         if (!$model) return self::$memo[$mk] = null;
         $pal = Themed::isThemed($web) ? Themed::palette() : [];

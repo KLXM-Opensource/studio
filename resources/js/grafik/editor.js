@@ -1,6 +1,6 @@
 /*
  * Grafik-Editor des Kerns (KLXM Studio) – Komponente. Zwei Hüllen nutzen sie: eigene Seite (/admin/grafik/editor) und Overlay
- * (CMSGraphicEditor.open, shell.js). Aufbau wie in Vektorprogrammen: Personas oben links (Vektor | Motion), Kontextleiste,
+ * (CMSGraphicEditor.open, shell.js). Aufbau wie in Vektorprogrammen: Personas oben links (Vektor | Motion | Daten | Export), Kontextleiste,
  * Werkzeugleiste links, Zeichenfläche, Bereiche mit Reitern rechts, Statuszeile unten.
  *
  * Modell: das SVG selbst (in einem Shadow Root – <style> der Grafik wirkt nur dort). Auswahl, Griffe, Hilfslinien liegen in
@@ -43,6 +43,8 @@ import { ShapeBuilder } from './builder.js';
 import { duplicateAgain, repeatDialog } from './repeat.js';
 import { Warp } from './warp.js';
 import { MotionPersona, isCountText, hasMotion } from './motion.js';
+import { DataPersona } from './data.js';
+import { isBoundText } from './bind.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -129,6 +131,9 @@ export class GraphicEditor {
     // Persona Motion (Zeitleiste, Bewegung, Interaktion) – hängt sich vor dem ersten Protokollschritt an getSvg() (abgeleitete Angaben)
     this.motion = new MotionPersona(this);
     this.registerPersona(this.motion.persona);
+    // Persona Daten (Bindung an Datentabellen und Zustände der Website, data.js)
+    this.dataP = new DataPersona(this);
+    this.registerPersona(this.dataP.persona);
     this.load(this.doc.svg || '', t('Geöffnet'));
   }
 
@@ -2711,7 +2716,7 @@ export class GraphicEditor {
   webFontTexts() {
     const files = this.boot.fontFiles || {};
     return [...this.root.querySelectorAll('text')].filter(tx => {
-      if (isCountText(tx)) return false;   // Zählen braucht echten Text
+      if (isCountText(tx) || isBoundText(tx)) return false;   // Zählen und gebundener Text brauchen echten Text
       const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
       return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());
     });
@@ -2730,7 +2735,7 @@ export class GraphicEditor {
     this.shadow.append(host);
     try {
       const texts = [...c.querySelectorAll('text')].filter(tx => {
-        if (isCountText(tx) && !all) return false;
+        if ((isCountText(tx) || isBoundText(tx)) && !all) return false;
         if (all) return true;
         const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
         return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());

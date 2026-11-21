@@ -134,7 +134,7 @@ final class GraphicsController extends AdminController
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
-                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'),
+                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'), 'dataValues' => url('/admin/api/grafik/data-values'),
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
                 'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'), 'partUpdate' => url('/admin/api/grafik/part/update'), 'partsImport' => url('/admin/api/grafik/parts/import'),
             ],
@@ -143,6 +143,8 @@ final class GraphicsController extends AdminController
             'prefs' => Graphics::prefs(app()->auth->user()),
             // Formatvorlagen für Text aus der Bibliothek der Website
             'textStyles' => Graphics::textStyles(),
+            // Persona Daten: Datentabellen mit Feldern, Öffnungszeiten, Sonnenzeiten, aktuelle Zustände (Core\Graphics\Bind)
+            'data' => \Core\Graphics\Bind::forEditor(),
         ];
     }
 
@@ -198,6 +200,19 @@ final class GraphicsController extends AdminController
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }
+    }
+
+    /**
+     * Aktuelle Werte für die Vorschau der Persona Daten: POST {defs: {name: {t: table, tb, a, f, w, l}}} → {values: {name: Wert}, states}.
+     * Nur veröffentlichte Einträge, wie auf der Website (geschützte Tabellen und Eingangs-Tabellen liefern nichts).
+     */
+    public function dataValues(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $defs = is_array($r->post['defs'] ?? null) ? $r->post['defs'] : [];
+        $states = [];
+        foreach (\Core\Graphics\Bind::STATES as $s) $states[$s] = \Core\Graphics\Bind::state($s);
+        return Response::json(['ok' => true, 'values' => \Core\Graphics\Bind::preview($defs), 'states' => $states]);
     }
 
     /** SVG nur bereinigen (Einbettungen ohne Ablage, fremdes SVG vor dem Laden): POST {svg} → {svg} */
