@@ -19,6 +19,12 @@ Danke für Ihr Interesse! Fehlerberichte, Verbesserungsvorschläge und Pull Requ
    - `php bin/console i18n:missing en` meldet „0 von … Texten fehlen“ – neue Texte der Verwaltung in `lang/en.php` übersetzen,
    - `node tools/licenses.mjs` besteht – neue Abhängigkeiten nur mit permissiver Lizenz (keine GPL/AGPL/LGPL in
      ausgelieferten Paketen), Eintrag in `THIRD-PARTY-NOTICES.md`.
+   - Sicherheit (CI-Workflow „Sicherheit“, Details im Entwicklerhandbuch → Sicherheit & Datenschutz → Sicherheitswerkzeuge):
+     `composer audit --locked`, `cd tools && pnpm audit --audit-level high`, `gitleaks git --redact -v .`,
+     Taint-Analyse `php -d memory_limit=4G tools/psalm/vendor/bin/psalm -c tools/psalm/psalm.xml --taint-analysis`
+     (einmalig `cd tools/psalm && composer install`) und die Projektregeln
+     `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.184.0 semgrep scan --config tools/semgrep/ --metrics=off` –
+     alle ohne Fund; Fehlalarme nur mit Begründung ausnehmen (`.gitleaks.toml`, `tools/psalm/baseline.xml`, `// nosemgrep: regel – Grund`).
 4. Schema-Änderungen an Datenbanken nur **additiv** (neue Tabellen/Spalten) – Rollbacks müssen möglich bleiben.
 5. Keine echten Kundendaten, Zugangsdaten oder Schlüssel in Code, Tests, Beispielen oder Screenshots – nur erfundene
    Beispiele („Musterstadt“, „Erika Musterfrau“, `example.org`).
@@ -36,6 +42,6 @@ Ein Contributor License Agreement oder ein DCO-Sign-off (`Signed-off-by`) ist ni
 
 **English:** Contributions are welcome – issues and pull requests in English are fine. Please run `composer install`,
 rebuild `public/` via `cd tools && pnpm run build` only if you touch CSS/JS sources (commit the built files), keep
-`php bin/console i18n:missing en` at 0 and `node tools/licenses.mjs` green. By submitting a pull request you agree
+`php bin/console i18n:missing en` at 0 and `node tools/licenses.mjs` green. Security checks (workflow “Sicherheit”): `composer audit`, `pnpm audit --audit-level high`, gitleaks, Psalm taint analysis (`tools/psalm`) and the project's Semgrep rules (`tools/semgrep`) must report no findings; false positives are excluded only with a stated reason. By submitting a pull request you agree
 that your contribution is licensed under the project's MIT License; no CLA or DCO sign-off is required. Report
 security issues privately as described in [SECURITY.md](SECURITY.md).

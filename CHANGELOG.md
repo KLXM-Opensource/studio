@@ -10,6 +10,16 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Sicherheitswerkzeuge in der Entwicklung (CI „Sicherheit“)
+- **Neuer Workflow `.github/workflows/security.yml`** (Pushes, Pull Requests, wöchentlich): `composer audit --locked`
+  (Projekt, `tools/phpstan`, `tools/psalm`), `pnpm audit --audit-level high` in `tools/` und `kits/*` (alle Pakete – die
+  Frontend-Bibliotheken werden nach `public/` kopiert), **gitleaks** 8.30.1 über die ganze Historie (Binary mit fester Prüfsumme,
+  `.gitleaks.toml` mit begründeten Ausnahmen), **Psalm-Taint-Analyse** (`tools/psalm`: eigenes `vendor/`, Quellen/Escape in Stub
+  und Plugin statt im Code, geprüfte Fehlalarme in der Baseline) und **Semgrep**-Projektregeln (`tools/semgrep`: Mailer, Fetch, CSP
+  der Website, `eval`/`extract`/`unserialize`, schwache Passwort-Hashes, Token-Vergleiche ohne `hash_equals`). Dependabot
+  prüft zusätzlich npm in `tools/`. Alles lokal ausführbar, ohne Konten; die Werkzeuge selbst (Pakete, Binaries, Images) sind nur Entwicklung und nicht im Installations-ZIP.
+  Befehle: Entwicklerhandbuch → Sicherheit & Datenschutz → Sicherheitswerkzeuge, `CONTRIBUTING.md`.
+
 ### Erweiterungen: optionale Abhängigkeiten prüfen, Startfehler mit Namen
 - **`php bin/console extensions:check`** (`Core\DependencyCheck`) prüft Erweiterungen und Kits statisch, ohne sie zu laden:
   Klassen, die von Klassen/Interfaces/Traits eines Pakets außerhalb von `require` erben (nur `suggest`, `require-dev` oder gar nicht
