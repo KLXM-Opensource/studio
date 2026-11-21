@@ -1398,7 +1398,7 @@ Gleiches Aussehen, weniger CSS und JavaScript je Seite – geprüft pixel- und s
   keine Unschärfe-Kopien, nicht im Suchindex, kein OG-Bild, PDF-Ansicht nur mit Zugriff. Anlegen: Grundeinstellungen → Geteilte
   Medien → „Geschützt“.
 - `Core\Passkeys` mit eigener Tabelle und eigenem Sitzungsplatz (für Konten von Erweiterungen, z. B. Mitglieder).
-- Erweiterung „members“ (eigenes Paket, KLXM-Opensource/studio-members): Mitgliederbereich mit Anmeldung per Passwort, Passkey oder
+- Erweiterung „members“ (eigenes Paket, KLXM-Studio/studio-members): Mitgliederbereich mit Anmeldung per Passwort, Passkey oder
   Anmelde-Link, Einladungen und Anträgen, Gruppen, Profilen als Datentabelle (Mitglieder wählen je Feld die Sichtbarkeit),
   Profilfoto, Bestätigung vor Änderungen an den Zugangsdaten.
 

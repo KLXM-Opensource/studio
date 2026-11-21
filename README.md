@@ -1,11 +1,11 @@
 # KLXM Studio
 
-[![CI](https://github.com/KLXM-Opensource/studio/actions/workflows/ci.yml/badge.svg)](https://github.com/KLXM-Opensource/studio/actions/workflows/ci.yml)
+[![CI](https://github.com/KLXM-Studio/studio/actions/workflows/ci.yml/badge.svg)](https://github.com/KLXM-Studio/studio/actions/workflows/ci.yml)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
 
 **Schlankes Multi-Site-CMS ohne Framework – PHP 8.4, Kits, Datentabellen, KLXM AI, REST-API und MCP-Server.**
 
-Quellcode: [github.com/KLXM-Opensource/studio](https://github.com/KLXM-Opensource/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Tutorials: [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) · Downloads: [Releases](https://github.com/KLXM-Opensource/studio/releases) · Fehler und Wünsche: [Issues](https://github.com/KLXM-Opensource/studio/issues)
+Quellcode: [github.com/KLXM-Studio/studio](https://github.com/KLXM-Studio/studio) · Website: [studio.klxm.de](https://studio.klxm.de) · Tutorials: [studio.klxm.de/tutorials](https://studio.klxm.de/tutorials) · Downloads: [Releases](https://github.com/KLXM-Studio/studio/releases) · Fehler und Wünsche: [Issues](https://github.com/KLXM-Studio/studio/issues)
 
 KLXM Studio betreibt eine oder viele Websites aus einer Installation. Redaktionen
 bearbeiten direkt auf der Website (Blockeditor, Inline-Editing), pflegen zentrale Angaben, eigene Datentabellen,
@@ -65,7 +65,7 @@ Startinhalte wählen.
 Aus dem Git-Repository (zum Mitentwickeln):
 
 ```bash
-git clone https://github.com/KLXM-Opensource/studio.git klxm-studio && cd klxm-studio
+git clone https://github.com/KLXM-Studio/studio.git klxm-studio && cd klxm-studio
 composer install
 php -S localhost:8000 -t public public/index.php
 ```
@@ -75,7 +75,7 @@ CSS/JS-Quellen ändern** (`resources/`, `kits/*/assets`, `extensions/*/assets`):
 `cd tools && pnpm install && pnpm run build` (danach `public/` mit einchecken; die CI prüft das).
 
 **Installation auf einem Server ohne Git/Composer:** das fertige Paket `klxm-studio-<version>.zip` (mit `vendor/` und
-gebauten Assets, Prüfsumme `.sha256`) von [GitHub Releases](https://github.com/KLXM-Opensource/studio/releases) laden, entpacken,
+gebauten Assets, Prüfsumme `.sha256`) von [GitHub Releases](https://github.com/KLXM-Studio/studio/releases) laden, entpacken,
 Dokumentstamm auf `public/` setzen.
 
 Beim ersten Aufruf entstehen Datenbank und `config/config.local.php` (mit `app_key` und `setup_token`) und das Kit
@@ -150,7 +150,7 @@ php -S localhost:8000 -t public public/index.php   # then open /admin/setup with
 
 Requirements: PHP ≥ 8.4.1 with `pdo_sqlite` (SQLite ≥ 3.35), `sodium`, `gd`, `mbstring`, `dom`, `fileinfo`, `intl`, `phar`,
 `zlib`; Composer 2; a web server with the document root set to `public/` (production). Optional: ffmpeg, poppler-utils,
-whisper.cpp, Ollama. A ready-made ZIP including `vendor/` is attached to each [release](https://github.com/KLXM-Opensource/studio/releases).
+whisper.cpp, Ollama. A ready-made ZIP including `vendor/` is attached to each [release](https://github.com/KLXM-Studio/studio/releases).
 Developer documentation ships with the product (`/admin/hilfe/technik`). License: MIT.
 
 ## Lizenz
@@ -158,7 +158,7 @@ Developer documentation ships with the product (`/admin/hilfe/technik`). License
 KLXM Studio – Copyright (c) 2026 KLXM Crossmedia GmbH and contributors – **MIT-Lizenz**
 (`MIT`, Volltext: [LICENSE](LICENSE), Hinweis: [COPYRIGHT](COPYRIGHT)). Das gilt für den Kern, die mitgelieferten
 Kits (`kits/*`) und Erweiterungen (`extensions/*`), soweit dort nichts anderes steht.
-Quelltext: <https://github.com/KLXM-Opensource/studio>.
+Quelltext: <https://github.com/KLXM-Studio/studio>.
 
 Was das für Agenturen und Betreiber bedeutet (Kurzfassung, keine Rechtsberatung):
 

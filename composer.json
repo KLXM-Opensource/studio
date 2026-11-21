@@ -26,14 +26,14 @@
         },
         {
             "name": "Contributors",
-            "homepage": "https://github.com/KLXM-Opensource/studio/graphs/contributors"
+            "homepage": "https://github.com/KLXM-Studio/studio/graphs/contributors"
         }
     ],
     "support": {
-        "issues": "https://github.com/KLXM-Opensource/studio/issues",
-        "source": "https://github.com/KLXM-Opensource/studio",
+        "issues": "https://github.com/KLXM-Studio/studio/issues",
+        "source": "https://github.com/KLXM-Studio/studio",
         "docs": "https://studio.klxm.de",
-        "security": "https://github.com/KLXM-Opensource/studio/security/policy"
+        "security": "https://github.com/KLXM-Studio/studio/security/policy"
     },
     "require": {
         "php": ">=8.4.1",
