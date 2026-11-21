@@ -68,6 +68,7 @@ return [
     ],
     'entry_nav' => [
         'label' => 'Vor / Zurück', 'icon' => 'arrow-right', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Links zum vorigen und nächsten Eintrag – für Detailseiten-Vorlagen.',
         'nestable' => true,
         'help' => 'Für Detailseiten-Vorlagen: Links zum vorherigen und nächsten Eintrag derselben Tabelle – in der Reihenfolge der Tabelle (z. B. älterer / neuerer Beitrag).',
@@ -79,6 +80,7 @@ return [
     ],
     'data_fields' => [
         'label' => 'Datensatz-Felder', 'icon' => 'table', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Felder des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für Detailseiten-Vorlagen: zeigt Felder des aufgerufenen Eintrags. In allen anderen Blöcken der Vorlage funktionieren zusätzlich Platzhalter wie {{titel}}.',
@@ -101,6 +103,7 @@ return [
     ],
     'entry_blocks' => [
         'label' => 'Inhaltsblöcke des Eintrags', 'icon' => 'squares-four', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Platz für die Inhaltsblöcke des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte (Layout): Blöcke des Eintrags untereinander in der Spalte, z. B. neben einer Seitenleiste
         'help' => 'Für Detailseiten-Vorlagen: An dieser Stelle erscheinen die Blöcke aus dem Feld „Inhaltsblöcke“ des aufgerufenen Eintrags – als eigene Abschnitte der Seite, in einer Layout-Spalte untereinander in der Spalte.',
@@ -136,6 +139,7 @@ return [
     // Stellenangebote (Core\Data\Jobs): nur auf der Detailseiten-Vorlage einer Tabelle mit schema.org-Typ „JobPosting“
     'job_facts' => [
         'label' => 'Stelle: Eckdaten', 'icon' => 'briefcase', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Eckdaten eines Stellenangebots mit Button „Jetzt bewerben“.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: Beschäftigungsart, Arbeitsort, Beginn, Gehalt, Bewerbungsfrist und Ansprechperson auf einen Blick – mit Button „Jetzt bewerben“ zum Formular. Ist die Stelle abgelaufen, steht hier „Diese Stelle ist nicht mehr ausgeschrieben“.',
@@ -147,6 +151,7 @@ return [
     ],
     'job_apply' => [
         'label' => 'Stelle: Bewerbung', 'icon' => 'envelope-simple', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Bewerbungsformular für die Detailseite eines Stellenangebots.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: das Bewerbungsformular der Tabelle (Felder & Einstellungen → „Bewerbungsformular“). Das Feld „Stelle“ ist ausgefüllt und gesperrt, der Betreff der E-Mail nennt die Stelle. Bei abgelaufenen Stellen erscheint kein Formular.',
@@ -243,6 +248,7 @@ return [
     ],
     'not_found' => [
         'label' => '404-Vorschläge', 'icon' => 'signpost', 'group' => 'Navigation',
+        'context' => '404',      // Blockauswahl: nur auf der Seite „Nicht gefunden (404)“
         'description' => 'Vorschläge, Suchfeld und Link zur Startseite für die Seite „Nicht gefunden (404)“.',
         'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift und Text, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite. Die Vorschläge erscheinen nur, wenn Besucher eine Adresse aufrufen, die es nicht gibt.',
         'fields' => [

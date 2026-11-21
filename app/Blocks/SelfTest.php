@@ -842,5 +842,21 @@ Zeilen*", '*Wort *', '***'];
         $this->assert(!$core || str_contains($pv['eigen']['url'] ?? '', '/cta.svg'), "Vorschau: 'preview' => anderer Name");
         $p = Picker::prefs(['ui_prefs' => json_encode(['blockpicker' => ['view' => 'x', 'fav' => ['hero', 'hero', '<b>', 3], 'recent' => array_fill(0, 9, 'faq')]])]);
         $this->assert($p['view'] === 'list' && $p['fav'] === ['hero'] && $p['recent'] === ['faq'], 'Einstellungen: geprüft, ohne Doppelte, nur Blocknamen');
+        // Kontext: Detailseiten-Blöcke nur in Vorlagen, 404-Vorschläge nur auf der 404-Seite – vorhandene Blöcke bleiben bearbeitbar
+        $page = ['type' => 'page', 'template_for' => null];
+        $tpl = ['type' => 'template', 'template_for' => 'beispiel'];
+        $nf = ['type' => 'template', 'template_for' => \Core\NotFound::MARK];
+        $this->assert([Picker::context($page), Picker::context($tpl), Picker::context($nf), Picker::context(null)] === ['page', 'detail', '404', 'page'], 'Kontext: Seite, Vorlage, 404');
+        $this->assert(Picker::fits(['label' => 'X'], 'detail') && Picker::fits(['context' => ['detail', '404']], '404') && !Picker::fits(['context' => 'detail'], 'page'), 'Kontext: ohne Angabe überall, Liste, passt nicht');
+        $ins = fn(?array $pg, string $type) => app()->theme->editorConfig($pg)['blocks'][$type]['insertable'] ?? null;
+        if (app()->theme->block('data_fields') && \Core\Features::allowsBlock('data_fields')) {
+            $this->assert([$ins($page, 'data_fields'), $ins($tpl, 'data_fields'), $ins(null, 'data_fields')] === [false, true, true], 'Kontext: Datensatz-Felder nur in Vorlagen einfügbar');
+        }
+        if (app()->theme->block('not_found') && \Core\Features::allowsBlock('not_found')) {
+            $this->assert([$ins($page, 'not_found'), $ins($tpl, 'not_found'), $ins($nf, 'not_found')] === [false, false, true], 'Kontext: 404-Vorschläge nur auf der 404-Seite');
+        }
+        if (app()->theme->block('data_list') && \Core\Features::allowsBlock('data_list')) {
+            $this->assert([$ins($page, 'data_list'), $ins($tpl, 'data_list')] === [true, true], 'Kontext: Datenliste überall');
+        }
     }
 }
