@@ -287,6 +287,8 @@ final class Database
         $this->ensureColumns('users', Network\Network::USER_COLUMNS);
         // Passkeys (WebAuthn) je Konto und Domain (Core\Passkeys)
         Passkeys::ensureTable($this);
+        // Anmeldung per OpenID Connect (Core\Oidc): Verknüpfung Konto ↔ Issuer + sub
+        Oidc\Accounts::ensureTable($this);
         // Einladungen neuer Konten (Core\Invites): Token nur als Hash, einmal verwendbar
         Invites::ensureTable($this);
         // Anmeldedaten selbst ändern (Core\EmailChange): offene Änderungen der E-Mail-Adresse, Tokens nur als Hash

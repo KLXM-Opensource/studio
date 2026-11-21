@@ -145,6 +145,7 @@ final class Network
         $db->ensureColumns('graphic_shared', ['kind' => 'VARCHAR(12) NULL']);
         $db->ensureColumns('users', self::USER_COLUMNS);
         \Core\Passkeys::ensureTable($db);   // Passkeys der Netzwerk-Konten (eine Zeile je Domain)
+        \Core\Oidc\Accounts::ensureTable($db);   // Verknüpfungen mit einem Anbieter (OpenID Connect) der Netzwerk-Konten
     }
 
     /** Neue Spalten der Tabelle users (auch in Database::migrate für jede Website) */
@@ -157,6 +158,7 @@ final class Network
         'totp_last' => 'INT NULL',                       // zuletzt verwendeter Zeitschritt
         'totp_enabled' => 'INT NOT NULL DEFAULT 0',
         'mfa_last' => 'VARCHAR(10) NULL',                // zuletzt verwendeter zweiter Faktor (totp|passkey, Core\Mfa)
+        'idp' => 'VARCHAR(40) NULL',                     // Konto eines Anbieters (OpenID Connect, Core\Oidc): ohne lokales Passwort
     ];
 
     // ================================================================= Konten
@@ -197,7 +199,7 @@ final class Network
     /** @return list<array> alle Netzwerk-Konten */
     public static function accounts(): array
     {
-        $rows = self::db()->fetchAll("SELECT id, email, name, disabled, totp_enabled, last_login, created_at FROM users WHERE role = 'network' ORDER BY email");
+        $rows = self::db()->fetchAll("SELECT id, email, name, disabled, totp_enabled, last_login, created_at, idp FROM users WHERE role = 'network' ORDER BY email");
         $pk = \Core\Passkeys::counts(self::db());
         foreach ($rows as &$r) $r['passkeys'] = $pk[(int) $r['id']] ?? 0;
         return $rows;
@@ -405,7 +407,7 @@ final class Network
      * Netzwerk-Konto auf dieser Website anmelden: Schatten-Konto anlegen bzw. aktualisieren und Sitzung starten.
      * @return string|null Fehlertext
      */
-    public static function loginShadow(array $n, string $via): ?string
+    public static function loginShadow(array $n, string $via, array $amr = ['mfa']): ?string
     {
         if (($n['role'] ?? '') !== 'network' || (int) $n['disabled']) return __('Dieses Konto ist gesperrt.');
         // Starke Anmeldung Pflicht: TOTP oder Passkey (Richtlinie „nur Passkey“: Passkey) – Core\Mfa
@@ -413,7 +415,7 @@ final class Network
             ? __('Bitte richten Sie zuerst in der Netzwerk-Verwaltung einen Passkey ein.')
             : __('Bitte richten Sie zuerst in der Netzwerk-Verwaltung die Zwei-Faktor-Anmeldung ein.');
         if (self::isNetworkSite()) {
-            app()->auth->login((int) $n['id']);
+            app()->auth->login((int) $n['id'], ['amr' => $amr]);
             self::log($via, site()->key, (string) $n['email']);
             return null;
         }
@@ -423,7 +425,8 @@ final class Network
             ?? $db->fetch('SELECT id FROM users WHERE LOWER(email) = ?', [$email]);
         // Schatten-Konto: kein eigenes Passwort ('!network' ist kein gültiger Hash), keine eigene 2FA
         $data = ['email' => $email, 'name' => (string) $n['name'], 'role' => 'network', 'network_uid' => (int) $n['id'],
-            'password_hash' => '!network', 'disabled' => 0, 'totp_secret' => null, 'totp_recovery' => null, 'totp_enabled' => 0];
+            'password_hash' => '!network', 'disabled' => 0, 'totp_secret' => null, 'totp_recovery' => null, 'totp_enabled' => 0,
+            'idp' => ($n['idp'] ?? null) ?: null];   // Kennzeichnung (z. B. „Agentur-Konto“) auch auf den anderen Websites
         if ($local) {
             // Anderes lokales Konto mit derselben E-Mail blockiert die Umbenennung? Dann bleibt die alte Adresse stehen.
             $clash = $db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ? AND id != ?', [$email, $local['id']]);
@@ -433,7 +436,7 @@ final class Network
         } else {
             $id = $db->insert('users', $data + ['created_at' => now()]);
         }
-        app()->auth->login($id, ['net_ver' => (int) $n['auth_ver']]);
+        app()->auth->login($id, ['net_ver' => (int) $n['auth_ver'], 'amr' => $amr]);
         self::log($via, site()->key, $email);
         return null;
     }

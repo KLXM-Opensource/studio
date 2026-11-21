@@ -39,6 +39,23 @@ final class Fetch
      */
     public static function get(string $url, array $o = []): array
     {
+        return self::request('GET', $url, $o);
+    }
+
+    /**
+     * POST (z. B. Token-Endpunkt bei OpenID Connect): wie get(), Rumpf $body (Content-Type über 'headers'). Weiterleitungen werden
+     * nicht verfolgt (Fehler). $o['any_status'] = true: auch Antworten ≠ 200 zurückgeben statt Fehler (z. B. JSON-Fehler 400).
+     * @return array{status: int, body: string, type: string, url: string, bytes: int, ms: int}
+     * @throws FetchException
+     */
+    public static function post(string $url, string $body, array $o = []): array
+    {
+        return self::request('POST', $url, ['body' => $body] + $o);
+    }
+
+    /** @return array{status: int, body: string, type: string, url: string, bytes: int, ms: int, cert_expires?: int} */
+    private static function request(string $method, string $url, array $o): array
+    {
         if (!function_exists('curl_init')) throw new FetchException(__('Auf dem Server fehlt die PHP-Erweiterung curl.'));
         $timeout = max(2, min(60, (int) ($o['timeout'] ?? 15)));
         $max = max(1024, (int) ($o['max'] ?? 5 * 1024 * 1024));
@@ -74,6 +91,12 @@ final class Fetch
                     return strlen($chunk);
                 },
             ]);
+            if ($method === 'POST') {
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, (string) ($o['body'] ?? ''));
+            }
+            // Ablauf des TLS-Zertifikats (Überwachung): nur auf Wunsch
+            if (!empty($o['certinfo']) && $scheme === 'https') curl_setopt($ch, CURLOPT_CERTINFO, true);
             if (!empty($o['basic']) && $host === $firstHost) {
                 curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
                 curl_setopt($ch, CURLOPT_USERPWD, $o['basic'][0] . ':' . $o['basic'][1]);
@@ -93,17 +116,25 @@ final class Fetch
                     : __('Abruf fehlgeschlagen: {error}', ['error' => $err !== '' ? $err : 'curl ' . $errno]));
             }
             if (in_array($status, [301, 302, 303, 307, 308], true) && $location !== '') {
+                if ($method !== 'GET') throw new FetchException(__('Weiterleitung bei {method} nicht erlaubt.', ['method' => $method]));
                 $url = $location;
                 continue;
             }
-            if ($status !== 200) {
+            $certExp = null;
+            if (!empty($o['certinfo']) && $scheme === 'https') {
+                foreach ((array) (curl_getinfo($ch, CURLINFO_CERTINFO) ?: []) as $c) {
+                    if (!empty($c['Expire date']) && ($t = strtotime((string) $c['Expire date']))) { $certExp = $t; break; }
+                }
+            }
+            if ($status !== 200 && empty($o['any_status'])) {
                 throw new FetchException(__('Der Server antwortete mit HTTP {status}.', ['status' => $status ?: '–']));
             }
             $kind = $o['kind'] ?? null;
             if ($kind !== null && $type !== '' && !self::typeAllowed($type, (string) $kind)) {
                 throw new FetchException(__('Unerwarteter Inhaltstyp „{type}“ – erwartet: {expected}.', ['type' => $type, 'expected' => implode(', ', array_slice(self::TYPES[$kind] ?? [], 0, 3))]));
             }
-            return ['status' => $status, 'body' => $body, 'type' => $type, 'url' => $url, 'bytes' => strlen($body), 'ms' => (int) round((microtime(true) - $started) * 1000)];
+            return ['status' => $status, 'body' => $body, 'type' => $type, 'url' => $url, 'bytes' => strlen($body), 'ms' => (int) round((microtime(true) - $started) * 1000)]
+                + ($certExp !== null ? ['cert_expires' => $certExp] : []);
         }
         throw new FetchException(__('Zu viele Weiterleitungen.'));
     }

@@ -21,6 +21,14 @@ return function (Router $r): void {
     $r->get('/admin/login', [Admin\AuthController::class, 'loginForm']);
     $r->post('/admin/login', [Admin\AuthController::class, 'login']);
     $r->post('/admin/logout', [Admin\AuthController::class, 'logout']);
+    // Anmeldung per OpenID Connect (Core\Oidc, Standard aus): Beginn (auch vom Anbieter ausgelöst), Rückkehr, Einstellungen
+    $r->get('/admin/login/oidc', [Admin\OidcController::class, 'start']);
+    $r->get('/admin/login/oidc/callback', [Admin\OidcController::class, 'callback']);
+    $r->post('/admin/users/oidc', [Admin\OidcController::class, 'save']);
+    // Überwachung (Core\Monitoring, Standard aus): Status nur lesend, nur mit signierter Anfrage
+    $r->get('/api/monitoring/status', [Admin\MonitoringController::class, 'status']);
+    $r->get('/admin/system/ueberwachung', [Admin\MonitoringController::class, 'index']);
+    $r->post('/admin/system/ueberwachung', [Admin\MonitoringController::class, 'save']);
     // „Passwort vergessen“ (Core\PasswordReset): Anfrage mit immer gleicher Antwort; Link aus der E-Mail (GET = Formular, POST = setzen)
     $r->get('/admin/passwort-vergessen', [Admin\PasswordController::class, 'forgotForm']);
     $r->post('/admin/passwort-vergessen', [Admin\PasswordController::class, 'forgot']);

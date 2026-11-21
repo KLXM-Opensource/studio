@@ -12,13 +12,14 @@ namespace Core;
  *   2026-10-23T01:30:00+02:00 klxm-studio auth-failed ip=203.0.113.7 site=default path=/admin/login
  *
  * Ereignisse: auth-failed (falsches Passwort/unbekanntes Konto), auth-limited (zu viele Versuche), 2fa-failed, passkey-failed,
- * reset-limited (Passwort vergessen zu oft), api-key-invalid, probe (typische Angriffsadresse wie /wp-login.php, /.env – nur
+ * reset-limited (Passwort vergessen zu oft), api-key-invalid, oidc-failed (Anmeldung per OpenID Connect abgewiesen: state, Token,
+ * Konto), monitor-denied (Status-Abfrage mit ungültiger Signatur, Core\Monitoring), probe (typische Angriffsadresse wie /wp-login.php, /.env – nur
  * wenn keine Weiterleitung greift). Keine E-Mail-Adressen, keine Passwörter. Größer als 5 MB → security.log.1 (eine Vorgängerdatei).
  * Filter und Jails für fail2ban: deploy/fail2ban/ (Entwicklerhandbuch → Sicherheit → fail2ban).
  */
 final class SecurityLog
 {
-    public const EVENTS = ['auth-failed', 'auth-limited', '2fa-failed', 'passkey-failed', 'reset-limited', 'api-key-invalid', 'probe'];
+    public const EVENTS = ['auth-failed', 'auth-limited', '2fa-failed', 'passkey-failed', 'reset-limited', 'api-key-invalid', 'oidc-failed', 'monitor-denied', 'probe'];
     private const MAX_BYTES = 5_000_000;
     /** Adressen, die eine Website mit KLXM Studio nie hat – wer sie abfragt, sucht Lücken anderer Systeme */
     private const PROBE = '~^/(?:wp-login\.php|wp-admin(?:/|$)|wp-config|xmlrpc\.php|\.env|\.git/|\.svn/|\.aws/|\.ssh/|\.htpasswd|phpmyadmin|pma(?:/|$)|myadmin|'

@@ -8,7 +8,7 @@
     <?php if ($u['role'] === 'network' || !empty($u['network_uid'])): // Netzwerk-Administration: nur lesen (zentral verwaltet) ?>
     <div class="set-row us-row us-netrow">
       <?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?>
-      <div class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?> <span class="adm-badge us-net" title="<?= e(__('Zentral verwaltetes Konto der Netzwerk-Administration')) ?>"><?= e(__('Netzwerk')) ?></span></span>
+      <div class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?> <span class="adm-badge us-net" title="<?= e(__('Zentral verwaltetes Konto der Netzwerk-Administration')) ?>"><?= e(__('Netzwerk')) ?></span><?php if (!empty($u['idp'])): ?> <span class="adm-badge us-idp" title="<?= e(__('Meldet sich über einen Identitätsanbieter an (OpenID Connect)')) ?>"><?= e(\Core\Oidc\Providers::labelFor((string) $u['idp'])) ?></span><?php endif; ?></span>
         <span class="set-row__sub"><?= e($u['email']) ?> · <?= e($lastLogin($u)) ?></span></div>
       <div class="set-row__ctl"><span class="adm-badge adm-badge--muted"><?= e($roles['network']['name'] ?? __('Netzwerk-Administration')) ?></span>
         <?= $self ? '<span class="adm-badge">' . e(__('Sie')) . '</span>' : '<span class="adm-muted us-readonly">' . e(__('zentral verwaltet')) . '</span>' ?></div>
@@ -18,7 +18,7 @@
     <details class="us-item">
       <summary class="set-row us-row">
         <?= \Core\Avatar::html($u, 'set-avatar adm-ava') ?>
-        <span class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?><?php if ($self): ?> <span class="adm-badge"><?= e(__('Sie')) ?></span><?php endif; ?>
+        <span class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?><?php if ($self): ?> <span class="adm-badge"><?= e(__('Sie')) ?></span><?php endif; ?><?php if (!empty($u['idp'])): ?> <span class="adm-badge us-idp" title="<?= e(__('Meldet sich über einen Identitätsanbieter an (OpenID Connect)')) ?>"><?= e(\Core\Oidc\Providers::labelFor((string) $u['idp'])) ?></span><?php endif; ?><?php if ((int) ($u['disabled'] ?? 0)): ?> <span class="adm-badge adm-badge--adm-warn"><?= e(__('gesperrt')) ?></span><?php endif; ?>
           <?php if ((int) ($u['totp_enabled'] ?? 0)): ?> <span class="adm-badge adm-badge--muted" title="<?= e(__('Zwei-Faktor-Anmeldung aktiv')) ?>">2FA</span><?php endif; ?><?php if ($uPk): ?> <span class="adm-badge adm-badge--muted" title="<?= e(__('{n} Passkey(s) eingerichtet', ['n' => $uPk])) ?>"><?= e(__('Passkey')) ?><?= $uPk > 1 ? ' ×' . $uPk : '' ?></span><?php endif; ?></span>
           <span class="set-row__sub"><?= e($u['email']) ?> · <?= e($lastLogin($u)) ?></span></span>
         <span class="set-row__ctl"><span class="adm-badge us-rolebadge"><?= e($roleName) ?></span></span>

@@ -23,7 +23,7 @@ final class UserController extends AdminController
     public function index(Request $r, array $errors = [], array $old = [], string $section = ''): Response
     {
         $this->auth($r, 'users.manage');
-        $users = app()->db->fetchAll('SELECT id, email, name, role, created_at, last_login, network_uid, totp_enabled, disabled FROM users ORDER BY email');
+        $users = app()->db->fetchAll('SELECT id, email, name, role, created_at, last_login, network_uid, totp_enabled, disabled, idp FROM users ORDER BY email');
         // Eingerichtete Verfahren je Konto (Abzeichen „2FA“, „Passkey ×n“) und Anmelde-Richtlinie (Core\Mfa)
         $pk = \Core\Passkeys::counts(app()->db);
         foreach ($users as &$u) $u['passkeys'] = $pk[(int) $u['id']] ?? 0;
@@ -205,6 +205,7 @@ final class UserController extends AdminController
         if (!empty($user['network_uid'])) {
             return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwalten Sie in der Netzwerk-Verwaltung.'));
         }
+        if (\Core\Oidc\Accounts::managed($user)) return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwaltet der Identitätsanbieter.'));
         $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]);
         $first = !\Core\EmailChange::hasPassword($row);
         $errors = [];

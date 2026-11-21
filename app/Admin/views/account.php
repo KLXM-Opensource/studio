@@ -5,6 +5,7 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error" id="acc-err-' . e($k) 
 $old ??= [];
 $pendingEmail ??= null;
 $isShadow = !empty($user['network_uid']);
+$isIdp = \Core\Oidc\Accounts::managed($user);   // Konto eines Anbieters (OpenID Connect): Anmeldedaten nur dort
 ?>
 <header class="adm-head"><div><p class="adm-eyebrow"><?= e(__('Konto')) ?></p><h1><?= e(__('Mein Konto')) ?></h1><p class="adm-muted"><?= e($user['email']) ?> · <?= e(app()->auth->role()['name'] ?? '') ?></p></div></header>
 <?php
@@ -30,7 +31,15 @@ ob_start();
   </div></div>
 </form>
 <?php $sw('sicherheit'); ?>
-<?php if ($isShadow): // Schatten-Konto der Netzwerk-Administration: Anmeldedaten zentral ?>
+<?php if ($isIdp): // Anmeldung über einen Anbieter (Core\Oidc): kein Passwort, keine Passkeys hier ?>
+<section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
+  <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-idp"><?= e(\Core\Oidc\Providers::labelFor((string) $user['idp'])) ?></span></h2>
+  <div class="set-list acc-box">
+  <p><?= e(__('Sie melden sich über einen Identitätsanbieter an. E-Mail-Adresse, Name, Passkeys und Zwei-Faktor-Anmeldung verwalten Sie dort.')) ?></p>
+  <dl class="acc-facts"><div><dt><?= e(__('E-Mail-Adresse')) ?></dt><dd><?= e($user['email']) ?></dd></div></dl>
+  </div>
+</section>
+<?php elseif ($isShadow): // Schatten-Konto der Netzwerk-Administration: Anmeldedaten zentral ?>
 <section class="set-group acc-group acc-cred" id="anmeldedaten" aria-labelledby="cred-h">
   <h2 class="set-group__title" id="cred-h"><?= e(__('Anmeldedaten')) ?> <span class="adm-badge us-net"><?= e(__('Netzwerk')) ?></span></h2>
   <div class="set-list acc-box">
@@ -142,7 +151,8 @@ ob_start();
 <?php $sw('mitteilungen'); ?>
 <?php include __DIR__ . '/account/_push.php'; // Push-Benachrichtigungen (Core\Push): Gerät, Ereignisse, Geräteliste ?>
 <?php $sw('sicherheit'); ?>
-<?php if ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>
+<?php if ($isIdp): // Anbieter-Konto: zweiter Faktor beim Anbieter ?>
+<?php elseif ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>
 <?php else: $tfRow = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$user['id']]); $tfOn = (int) ($tfRow['totp_enabled'] ?? 0);
   // Pflicht (Core\Mfa): App nicht abschaltbar, wenn die Pflicht sonst nicht erfüllt wäre (z. B. kein Passkey)
   $tfNeed = \Core\Mfa::requirement($tfRow); $tfReq = $tfNeed !== null && !\Core\Mfa::satisfied(['totp_enabled' => 0] + $tfRow, $tfNeed, app()->db);

@@ -152,12 +152,12 @@ final class TwoFactorController extends AdminController
         $next = (string) $s->get('_2fa_next', '/admin');
         if (isset($p['net'])) {
             // Netzwerk-Konto auf einer anderen Website: Schatten-Konto anmelden
-            if ($err = Network::loginShadow($row, 'login')) {
+            if ($err = Network::loginShadow($row, 'login', ['pwd', $via === 'passkey' ? 'hwk' : 'otp', 'mfa'])) {
                 $s->forget('_2fa');
                 return [$err];
             }
         } else {
-            app()->auth->login((int) $row['id']);
+            app()->auth->login((int) $row['id'], ['amr' => ['pwd', $via === 'passkey' ? 'hwk' : 'otp', 'mfa']]);
             if (Network::isNetworkUser()) {
                 Network::log('login', site()->key, (string) $row['email'], $via);
             }
@@ -174,7 +174,7 @@ final class TwoFactorController extends AdminController
     private function own(Request $r): array
     {
         $user = $this->auth($r);
-        if (!empty($user['network_uid'])) {
+        if (!empty($user['network_uid']) || \Core\Oidc\Accounts::managed($user)) {
             throw new RedirectException(url('/admin/account'));
         }
         return $user;

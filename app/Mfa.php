@@ -155,6 +155,9 @@ final class Mfa
     /** Netzwerk-Konto darf sich auf Websites anmelden (SSO, direkt): immer TOTP oder Passkey – bzw. nur Passkey */
     public static function networkStrong(array $n): bool
     {
+        // Konten eines Anbieters (OpenID Connect): melden sich nur dort an – der zweite Faktor wird bei jeder Anmeldung geprüft
+        // (Token mit amr bzw. Anbieter mit eigener Pflicht, Core\Oidc\Accounts::admissible); kein Passwort, keine Passkeys hier
+        if (Oidc\Accounts::managed($n)) return true;
         return self::satisfied($n, self::netPolicy()['passkey_only'] ? 'passkey' : 'any', Network::db());
     }
 
@@ -202,6 +205,8 @@ final class Mfa
         $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [$uid]);
         // Schatten-Konten: Regeln der Netzwerk-Konten gelten bereits bei der Anmeldung (Network::loginShadow)
         if (!$row || (!empty($row['network_uid']) && !Network::isNetworkSite())) return;
+        // Konten eines Anbieters (OpenID Connect): zweiter Faktor beim Anbieter, hier nichts einzurichten
+        if (Oidc\Accounts::managed($row)) return;
         $req = self::requirement($row);
         if ($req !== null && !self::satisfied($row, $req, app()->db)) {
             $s->set('2fa_setup', ['req' => $req, 'until' => self::deadline($row)]);

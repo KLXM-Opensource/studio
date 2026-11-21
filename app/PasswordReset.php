@@ -112,6 +112,11 @@ final class PasswordReset
         $limiter->hit($mailKey);
 
         $user = $db->fetch('SELECT * FROM users WHERE LOWER(email) = ?', [$email]);
+        // Konto eines Anbieters (OpenID Connect): kein lokales Passwort – auch nicht per Link
+        if (\Core\Oidc\Accounts::managed($user) || (!Network::isNetworkSite() && ($n0 = Network::account($email)) && \Core\Oidc\Accounts::managed($n0))) {
+            self::log('user.password-reset-request', $email, 'Konto eines Anbieters – keine E-Mail');
+            return 'disabled';
+        }
         // Netzwerk-Konto auf einer anderen Website: Schatten-Konto oder nur im Netzwerk → Weg zur Netzwerk-Website
         if (!Network::isNetworkSite() && (!$user || !empty($user['network_uid']) || ($user['role'] ?? '') === 'network')) {
             $n = Network::account($email);
@@ -198,8 +203,8 @@ final class PasswordReset
     public static function usable(array $row): bool
     {
         if ($row['used_at'] || (int) $row['expires_at'] <= time()) return false;
-        $u = app()->db->fetch('SELECT email, role, disabled, network_uid FROM users WHERE id = ?', [(int) $row['user_id']]);
-        if (!$u || (int) $u['disabled'] || !empty($u['network_uid'])) return false;
+        $u = app()->db->fetch('SELECT email, role, disabled, network_uid, idp FROM users WHERE id = ?', [(int) $row['user_id']]);
+        if (!$u || (int) $u['disabled'] || !empty($u['network_uid']) || \Core\Oidc\Accounts::managed($u)) return false;
         if ($u['role'] === 'network' && !Network::isNetworkSite()) return false;
         return strtolower((string) $u['email']) === strtolower((string) $row['email']);
     }

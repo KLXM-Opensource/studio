@@ -8,6 +8,10 @@
     <input type="hidden" name="next" value="<?= e($next) ?>">
     <?php $errAttr = $error ? ' aria-describedby="login-err" aria-invalid="true"' : ''; // Fehler an beide Felder koppeln ?>
     <?php if ($error): ?><p class="adm-flash adm-flash--error" id="login-err" role="alert"><?= e($error) ?></p><?php endif; ?>
+    <?php if ($oidc = \Core\Oidc\Providers::forLogin()): // Anmeldung über einen Anbieter (OpenID Connect, Core\Oidc) – lokale Anmeldung bleibt darunter ?>
+    <a class="adm-btn adm-btn--primary adm-btn--block auth-oidc" href="<?= e(url('/admin/login/oidc') . ($next !== '' ? '?next=' . rawurlencode($next) : '')) ?>" rel="nofollow"><?= icon('shield-check') ?> <?= e(\Core\Oidc\Providers::buttonLabel($oidc)) ?></a>
+    <p class="pk-or"><span><?= e(__('oder')) ?></span></p>
+    <?php endif; ?>
     <?php if ($pkLogin): // Anmeldung mit Passkey zuerst (Core\Passkeys) – erscheint nur mit JavaScript und Passkey-fähigem Browser, sonst nur das Formular ?>
     <div class="pk-login pk-login--first" data-pk-login="<?= e(url('/admin/login/passkey')) ?>" data-next="<?= e($next) ?>" hidden>
       <button class="adm-btn adm-btn--primary adm-btn--block" type="button" data-pk-login-btn><?= icon('fingerprint') ?> <?= e(__('Mit Passkey anmelden')) ?></button>
