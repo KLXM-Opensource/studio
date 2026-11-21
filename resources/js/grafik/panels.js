@@ -14,7 +14,7 @@ import {
   drawnChildren, isDrawn, nameOf, typeLabel, isLocked, isHidden, getProp, setProp, eachShape, defs, uid, refOf, useCount,
   gradientStops, writeStops, setAngle, getAngle, applyTransform, remapIds, paintEl,
 } from './doc.js';
-import { colorPicker, parseColor, toHex, hex, onColor } from './color.js';
+import { colorPicker, parseColor, toHex, hex, onColor, contrast, over, paintValue } from './color.js';
 import { h, tabGroup, iconBtn, modal } from './ui.js';
 import { clipOf } from './clip.js';
 import { buildTextPanel } from './textpanel.js';
@@ -44,11 +44,17 @@ export function buildPanels(ed) {
   const rememberColor = c => { if (!c || c === 'none' || /^url/.test(c)) return; ed.recent = [c, ...ed.recent.filter(x => x !== c)].slice(0, 14); };
 
   /** Füllung/Kontur der Auswahl setzen (bei Gruppen auf die Formen darin); ohne Auswahl: Vorgabe für neue Formen */
-  function setPaint(which, value, alpha = 1) {
-    if (!sel().length) { ed.style[which] = value; ed.paintFs(); return; }
+  /**
+   * Design-Farbe merken (Andockstelle für Farben als Variablen, Ausbaustufe 3b): data-ge-ftoken / data-ge-stoken am Element –
+   * nur in der Arbeitsfassung (graphic_sources), die Web-Fassung enthält weiter die Hex-Farbe. Jede andere Farbe löscht es.
+   */
+  const tokenAttr = which => which === 'fill' ? 'data-ge-ftoken' : 'data-ge-stoken';
+  function setPaint(which, value, alpha = 1, token = null) {
+    if (!sel().length) { ed.style[which] = value; ed.style[which + 'Token'] = token; ed.paintFs(); return; }
     // Text wird bearbeitet und ein Bereich ist markiert: Farbe nur für diese Zeichen
     if (which === 'fill' && ed.textEd && alpha >= 1 && !/^url/.test(value) && ed.textEd.format({ fill: value })) return;
     for (const el of sel()) eachShape(el, s => {
+      if (token && !/^url/.test(value)) s.setAttribute(tokenAttr(which), token); else s.removeAttribute(tokenAttr(which));
       setProp(s, which, value);
       setProp(s, which + '-opacity', alpha < 1 ? num(alpha, 3) : null);
       if (which === 'stroke' && value !== 'none' && !getProp(s, 'stroke-width', false) && getProp(s, 'stroke-width') === '1' && ed.format !== 'icon') setProp(s, 'stroke-width', num(ed.style.strokeWidth));
@@ -69,7 +75,41 @@ export function buildPanels(ed) {
     if (v === 'currentColor' || v === 'currentcolor') return { mode: 'solid', color: 'currentColor', alpha: 1 };
     const c = parseColor(v);
     const op = el ? parseFloat(getProp(el, which + '-opacity') || '1') : 1;
-    return c ? { mode: 'solid', color: toHex(c), alpha: (Number.isFinite(op) ? op : 1) * c.a } : { mode: 'none' };
+    const token = el ? el.getAttribute(tokenAttr(which)) : ed.style[which + 'Token'] || null;
+    return c ? { mode: 'solid', color: toHex(c), alpha: (Number.isFinite(op) ? op : 1) * c.a, token } : { mode: 'none' };
+  }
+
+  /**
+   * Hintergrund hinter einem Element (für den Kontrast): Flächen davor in der Zeichenreihenfolge, die die Mitte des Elements
+   * bedecken, mit ihrer Deckkraft über Weiß (das Blatt). Verläufe und Muster zählen nicht (Mittelwert wäre geraten).
+   */
+  function backgroundOf(el) {
+    const b = docBounds(el, ed.root);
+    let bg = { r: 255, g: 255, b: 255 };
+    if (!b) return bg;
+    const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    for (const s of ed.root.querySelectorAll('rect,circle,ellipse,path,polygon')) {
+      if (s === el || el.contains(s)) break;
+      if (!(s.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) break;
+      if (s.closest('defs,clipPath,mask,marker,symbol,pattern') || isHidden(s)) continue;
+      const sb = docBounds(s, ed.root);
+      if (!sb || cx < sb.x || cx > sb.x + sb.w || cy < sb.y || cy > sb.y + sb.h) continue;
+      const c = parseColor(getProp(s, 'fill'));
+      if (!c) continue;
+      const a = c.a * (parseFloat(getProp(s, 'fill-opacity') || '1') || 1) * (parseFloat(getProp(s, 'opacity') || '1') || 1);
+      bg = over(c, Math.max(0, Math.min(1, a)), bg);
+    }
+    return bg;
+  }
+  /** Kontrast der Textfarbe zum Hintergrund (nur bei Text und Füllung) */
+  function updateContrast() {
+    const el = sel().find(x => x.localName === 'text') || (ed.textEl || null);
+    const p = target() === 'fill' && el ? paintOf('fill') : null;
+    if (!p || p.mode !== 'solid' || p.color === 'currentColor') { cp.contrast(null); return; }
+    const fg = parseColor(p.color), bg = backgroundOf(el);
+    const fs = parseFloat(getProp(el, 'font-size')) || 16, fw = parseInt(getProp(el, 'font-weight'), 10) || (getProp(el, 'font-weight') === 'bold' ? 700 : 400);
+    // Größe im Bild (Transformation der Grafik bleibt außen vor: gemessen wird in Einheiten der Zeichenfläche)
+    cp.contrast({ ratio: contrast(over(fg, p.alpha, bg), bg), bg: toHex(bg), large: fs >= 24 || (fs >= 18.66 && fw >= 700) });
   }
 
   /** Verlauf der Auswahl nur für die Auswahl (andere Verwendungen bekommen ihn nicht mit geändert) */
@@ -115,7 +155,9 @@ export function buildPanels(ed) {
       <p class="ge-note" data-cnote hidden></p>
     </div>`;
   const cp = colorPicker(colorPanel.querySelector('[data-cp]'), {
-    onInput: (c, a) => live(() => applyColor(c, a)),
+    mode: ed.prefs?.colorMode || 'hex',
+    onMode: m => ed.setPref('colorMode', m),
+    onInput: (c, a) => { live(() => applyColor(c, a)); updateContrast(); },
     onChange: (c, a) => { applyColor(c, a); rememberColor(c); commit(target() === 'fill' ? t('Füllung') : t('Kontur')); },
   });
   function applyColor(c, a) {
@@ -235,6 +277,11 @@ export function buildPanels(ed) {
     if (p.mode === 'solid') cp.set(p.color === 'currentColor' ? '#1F2430' : p.color, p.alpha);
     if (p.mode === 'solid' && p.color === 'currentColor') { note.hidden = false; note.textContent = t('Schriftfarbe (currentColor): Die Grafik übernimmt die Textfarbe der Umgebung.'); }
     if (p.mode === 'other') { note.hidden = false; note.textContent = t('Muster oder unbekannte Füllung – bitte Farbe oder Verlauf wählen, um sie zu ersetzen.'); }
+    if (p.mode === 'solid' && p.token) {
+      const sw = (ed.boot.swatches || []).find(s => s.token === p.token);
+      note.hidden = false; note.textContent = t('Farbe des Designs: {name}', { name: sw?.name || p.token });
+    }
+    updateContrast();
     if (p.grad) {
       const stops = gradientStops(ed.root, p.grad);
       if (stopIdx >= stops.length) stopIdx = 0;
@@ -255,10 +302,10 @@ export function buildPanels(ed) {
       for (const a of ['fill', 'stroke', 'stop-color']) { const v = hex(getProp(el, a, false)); if (v) docColors.add(v); }
       if (docColors.size > 40) break;
     }
-    const sw = (c, name) => `<button type="button" class="ge-sw" data-c="${esc(c)}" style="--c:${esc(c === 'currentColor' ? '#1F2430' : c)};--on:${onColor(c === 'currentColor' ? '#1F2430' : c)}" aria-label="${esc((name ? name + ': ' : '') + c)}" title="${esc((name ? name + ' – ' : '') + c)}">${c === 'currentColor' ? 'A' : ''}</button>`;
+    const sw = (c, name, token = '') => `<button type="button" class="ge-sw" data-c="${esc(c)}"${token ? ` data-token="${esc(token)}"` : ''} style="--c:${esc(c === 'currentColor' ? '#1F2430' : c)};--on:${onColor(c === 'currentColor' ? '#1F2430' : c)}" aria-label="${esc((name ? name + ': ' : '') + c)}" title="${esc((name ? name + ' – ' : '') + c)}">${c === 'currentColor' ? 'A' : ''}</button>`;
     const block = (title, items) => items.length ? `<h3 class="ge-h3">${esc(title)}</h3><div class="ge-sws">${items.join('')}</div>` : '';
     swPanel.innerHTML = `<p class="ge-note">${esc(t('Klick = für {w} übernehmen', { w: target() === 'fill' ? t('Füllung') : t('Kontur') }))}</p>`
-      + block(t('Design der Website'), (ed.boot.swatches || []).map(s => sw(s.color, s.name)))
+      + block(t('Design der Website'), (ed.boot.swatches || []).map(s => sw(s.color, s.name, s.token || '')))
       + block(t('Grundfarben'), [sw('currentColor', t('Schriftfarbe')), sw('#FFFFFF', t('Weiß')), sw('#000000', t('Schwarz')), sw('#1F2430', t('Tinte')), sw('#8A94A6', t('Grau'))].concat(`<button type="button" class="ge-sw ge-sw--none" data-c="none" aria-label="${esc(t('Keine'))}" title="${esc(t('Keine'))}"></button>`))
       + block(t('Zuletzt verwendet'), ed.recent.map(c => sw(c)))
       + block(t('In dieser Grafik'), [...docColors].slice(0, 32).map(c => sw(c)));
@@ -266,7 +313,7 @@ export function buildPanels(ed) {
       const c = b.dataset.c;
       const p = paintOf(target());
       if ((p.mode === 'linear' || p.mode === 'radial') && c !== 'none') { applyColor(c, 1); }
-      else setPaint(target(), c);
+      else setPaint(target(), c, 1, b.dataset.token || null);
       rememberColor(c);
       if (sel().length) commit(t('Farbe aus Farbfeld')); else api.refresh();
     }));
@@ -699,6 +746,10 @@ export function buildPanels(ed) {
     groups: [A.el, TP.el, B.el, C.el],
     text: TP,
     aspectLocked: () => lock,
+    /** Farbe der Auswahl als Objekt { kind: 'value'|'token', value, token, alpha } (null = keine/Verlauf) – Andockstelle 3b */
+    paintValue(which = target()) { const p = paintOf(which); return p.mode === 'solid' ? paintValue(p.color, p.alpha, p.token || null) : null; },
+    /** Farbe als Objekt setzen (ein Schritt im Protokoll) */
+    setPaintValue(which, v) { if (!v) return; setPaint(which, v.value, v.alpha ?? 1, v.kind === 'token' ? v.token : null); commit(which === 'fill' ? t('Füllung') : t('Kontur')); },
     showColor() { A.select('color'); refreshColor(); },
     refresh() {
       thumbCache.clear();

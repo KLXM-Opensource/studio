@@ -212,7 +212,22 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-cp__ao { font: 600 11px var(--adm-mono, monospace); color: var(--adm-t3); min-width: 40px; text-align: right; white-space: nowrap }
 .ge-cp__hex { width: 100% }
 .ge-cp__hex { font-family: var(--adm-mono, monospace); text-transform: uppercase }
-.ge-cp__prev { width: 28px; height: 22px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15) }
+.ge-cp__prev { width: 28px; height: 22px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15);
+  background: linear-gradient(color-mix(in srgb, var(--c, #000) calc(var(--a, 1) * 100%), transparent), color-mix(in srgb, var(--c, #000) calc(var(--a, 1) * 100%), transparent)), repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 8px 8px }
+.ge-cp__hex { text-transform: none }
+.ge-cp__modes [role=radio] { min-height: 26px; padding: 0 4px; font-size: 11px }
+.ge-cp__chans { display: grid; gap: 4px }
+.ge-cp__ch { grid-template-columns: 18px 1fr auto }
+.ge-cp__ch label { font: 700 11px var(--adm-mono, monospace); color: var(--adm-t3) }
+.ge-cp__chr { height: 20px; margin: 0 }
+.ge-cp__num { display: inline-flex; align-items: center; gap: 3px; width: 72px; justify-content: flex-start; color: var(--adm-t3); font-size: 11px }
+.ge-in--xs { width: 54px }
+.ge-cp__contrast { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0; padding: 6px 8px; border-radius: 8px; background: var(--adm-fill); color: var(--adm-t2); font-size: 12px }
+.ge-cp__contrast b { color: var(--adm-ink); font-family: var(--adm-mono, monospace) }
+.ge-cp__bg { width: 14px; height: 14px; border-radius: 4px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) }
+.ge-cp__lvl { margin-left: auto; padding: 1px 7px; border-radius: 999px; font-weight: 800; font-size: 11px }
+.ge-cp__contrast.is-ok .ge-cp__lvl { background: var(--adm-ok-bg); color: var(--adm-ok) }
+.ge-cp__contrast.is-low .ge-cp__lvl { background: var(--adm-err-bg); color: var(--adm-err) }
 .ge-grad { display: grid; gap: 8px }
 .ge-grad__bar { position: relative; height: 22px; margin: 0 7px; border-radius: 6px; cursor: copy; background: var(--g, #ccc), repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 10px 10px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) }

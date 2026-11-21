@@ -345,7 +345,8 @@ final class Graphics
             foreach (\Core\Design::tokens() as $name => $t) {
                 if (($t['type'] ?? '') !== 'color') continue;
                 $c = \Core\Design::color($values[$name] ?? ($t['default'] ?? null));
-                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c];
+                // token = Name des Design-Tokens (Andockstelle für Farben als Variablen: der Editor merkt ihn am Element)
+                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c, 'token' => (string) $name];
             }
         } catch (\Throwable) {
             // Kit ohne Design-Tokens: keine Farbfelder des Designs

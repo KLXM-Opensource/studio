@@ -1000,7 +1000,11 @@ export class GraphicEditor {
     if (!src) return;
     const fill = getProp(src, 'fill'), stroke = getProp(src, 'stroke'), sw = getProp(src, 'stroke-width');
     if (!this.sel.length) { this.style.fill = fill; this.style.stroke = stroke; this.paintFs(); this.panels.refresh(); return; }
-    for (const el of this.sel) eachShape(el, s => { setProp(s, 'fill', fill); setProp(s, 'stroke', stroke); if (stroke && stroke !== 'none') setProp(s, 'stroke-width', sw); });
+    for (const el of this.sel) eachShape(el, s => {
+      setProp(s, 'fill', fill); setProp(s, 'stroke', stroke); if (stroke && stroke !== 'none') setProp(s, 'stroke-width', sw);
+      // Farbe des Designs (Token) wandert mit
+      for (const a of ['data-ge-ftoken', 'data-ge-stoken']) { const v = src.getAttribute(a); if (v) s.setAttribute(a, v); else s.removeAttribute(a); }
+    });
     this.commit(t('Farbe übernommen'));
   }
 
