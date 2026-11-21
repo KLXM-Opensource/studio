@@ -82,6 +82,10 @@
  *                                                     hell/dunkel, Desktop/Telefon – Kontrast, Überlauf, Konsole (Bericht in storage/kit-test/)
  *   extensions:list                                   Installierte Erweiterungen (aktiv je Website: config 'extensions' bzw. Verwaltung);
  *                                                     Verwaltungsrouten: Altform ohne Recht, Ausnahmen csrf/public
+ *   extensions:check [--path=ordner] [--only=extensions|kits] [-v]
+ *                                                     Optionale Abhängigkeiten statisch prüfen (Core\DependencyCheck): Klassen, die von
+ *                                                     Paketen außerhalb von "require" erben, ohne class_exists-Absicherung; Zugriffe im
+ *                                                     Manifest/Kit ohne Prüfung. Startet keine Erweiterung; Exit 1 bei Fehlern (CI)
  *   extensions:selftest                               Selbsttest der Schnittstellen für Erweiterungen (Verwaltungsseiten nach Art, Werkzeuge
  *                                                     der Website, Ereignisse, Verwaltungsrouten, Tabellen, Slots)
  *   db:selftest                                       Selbsttest Core\Db\Table (anlegen, idempotent, umbenennen, Indizes, Fremdschlüssel)
@@ -242,6 +246,8 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli') {
     exit(1);
 }
+// Statische Prüfung der Erweiterungen/Kits: ohne sie zu starten – läuft so auch, wenn eine Erweiterung beim Start scheitert
+if (($argv[1] ?? '') === 'extensions:check') putenv('KLXM_NO_EXTENSIONS=1');
 $app = require dirname(__DIR__) . '/app/bootstrap.php';
 [$_, $cmd] = $argv + [null, 'help'];
 $args = array_slice($argv, 2);
@@ -1750,7 +1756,12 @@ switch ($cmd) {
         foreach ($found as $f) echo '  ' . ($f['level'] === 'warn' ? '! ' : '· ') . $f['file'] . ': ' . $f['text'] . "\n";
         $warn = count(array_filter($found, fn($f) => $f['level'] === 'warn'));
         echo $warn ? "  $warn Hinweis(e).\n" : "  Keine verwaisten oder veralteten Überschreibungen.\n";
-        exit($warn && in_array('--strict', $args, true) ? 1 : 0);
+        // Optionale Abhängigkeiten (Core\DependencyCheck, wie extensions:check): ungesicherte Klassen aus Paketen außerhalb von require
+        $deps = Core\DependencyCheck::run($kit->path);
+        foreach ($deps as $f) echo '  ' . ($f['level'] === 'error' ? '✗ ' : '! ') . $f['file'] . ':' . $f['line'] . ': ' . $f['text'] . "\n    → " . $f['fix'] . "\n";
+        $depErr = count(array_filter($deps, fn($f) => $f['level'] === 'error'));
+        if ($depErr) echo "  $depErr ungesicherte optionale Abhängigkeit(en).\n";
+        exit($depErr || ($warn && in_array('--strict', $args, true)) ? 1 : 0);
 
     case 'fragments:list':
         // Kern-Fragmente (Core\Fragments): woher kommt welches Fragment, wo hat sich das Original seit dem Überschreiben geändert?
@@ -1849,11 +1860,41 @@ switch ($cmd) {
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
+    case 'extensions:check':
+        // Optionale Abhängigkeiten statisch prüfen (Core\DependencyCheck) – ohne Erweiterungen zu starten (siehe oben: KLXM_NO_EXTENSIONS)
+        $only = Core\Cli::opt($args, 'only');
+        $targets = [];
+        if (($path = Core\Cli::opt($args, 'path')) !== null) {
+            $dir = realpath($path) ?: $path;
+            if (!is_dir($dir)) { fwrite(STDERR, "Ordner „{$path}“ nicht gefunden.\n"); exit(1); }
+            $targets[basename($dir)] = ['kind' => is_file("$dir/extension.php") ? 'extension' : 'kit', 'dir' => $dir, 'findings' => Core\DependencyCheck::run($dir)];
+        } else {
+            $targets = array_filter(Core\DependencyCheck::all(), fn($t) => $only === null || $t['kind'] . 's' === $only);
+        }
+        $errors = $warns = 0;
+        foreach ($targets as $key => $t) {
+            if (!$t['findings'] && !in_array('-v', $args, true)) continue;
+            echo "── $key (" . Core\Kit::relative($t['dir']) . ")\n";
+            if (!$t['findings']) echo "  ✓ keine ungesicherten optionalen Abhängigkeiten\n";
+            foreach ($t['findings'] as $f) {
+                $f['level'] === 'error' ? $errors++ : $warns++;
+                echo '  ' . ($f['level'] === 'error' ? '✗ ' : '! ') . Core\Kit::relative($f['file']) . ':' . $f['line'] . "\n    " . $f['text'] . "\n    → " . $f['fix'] . "\n";
+            }
+        }
+        echo count($targets) . " Paket(e) geprüft: $errors Fehler, $warns Hinweis(e).\n";
+        exit($errors ? 1 : 0);
+
     case 'extensions:list':
         $active = Core\Extensions::enabled();
+        $failures = Core\Extensions::failures();
         foreach (Core\Extensions::available() as $n => $m) {
             $src = Core\Extensions::lock($n) ? 'config' : (array_key_exists($n, Core\Extensions::ui()) ? 'verwaltung' : '');
             printf("%-16s %-8s %-9s %-11s %-24s %s\n", $n, $m['version'] ?: '–', in_array($n, $active, true) ? 'aktiv' : '–', $src, $m['source'], $m['label']);
+        }
+        // Letzter Fehler je Erweiterung (Start oder Laufzeit, Core\ExtensionError) – 14 Tage
+        if ($failures) echo "\nLetzte Fehler:\n";
+        foreach ($failures as $n => $f) {
+            printf("  %-16s %s %-8s %s\n    Datei: %s\n", $n, substr((string) $f['at'], 0, 16), $f['phase'], $f['message'], $f['file']);
         }
         if (!Core\Extensions::available()) echo "Keine Erweiterungen installiert (extensions/{name}/extension.php oder Composer-Pakete vom Typ klxm-studio-extension).\n";
         // Verwaltungsrouten der aktiven Erweiterungen (Core\Http\Router): Rechte, Altform, benannte Ausnahmen

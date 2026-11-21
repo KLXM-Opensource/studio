@@ -260,10 +260,24 @@ final class App
             return (new Http\Controllers\SiteController())->error($e->getCode(), $e->getMessage());
         } catch (\Throwable $e) {
             error_log((string) $e);
-            if ($this->config->get('debug')) {
-                return new Response('<pre>' . e((string) $e) . '</pre>', 500);
+            // Fehler aus dem Code einer Erweiterung (Route, Block, Vorlage): Erweiterung und Datei nennen und für die Verwaltung merken
+            $ext = null;
+            try {
+                if ($owner = ExtensionError::owner($e)) $ext = Extensions::failed($owner[0], $owner[1], 'runtime', $e);
+            } catch (\Throwable) {
             }
-            return (new Http\Controllers\SiteController())->error(500);
+            if ($this->config->get('debug')) {
+                return new Response('<pre>' . e(($ext ? $ext->getMessage() . "\n\n" : '') . (string) $e) . '</pre>', 500);
+            }
+            // Angemeldete Redaktion bzw. Entwicklungsumgebung: Meldung mit Erweiterung und Datei statt einer anonymen 500
+            // (Kits zeigen $message nicht – die Zeile kommt direkt hinter <body>, ohne style-Attribut wegen CSP)
+            $show = $ext && (environment() === 'development' || $this->auth->check());
+            $res = (new Http\Controllers\SiteController())->error(500, $show ? $ext->getMessage() : '');
+            if ($show && str_contains($res->body, '<body')) {
+                $note = '<p class="cms-ext-error" role="alert"><strong>' . e(__('Fehler in einer Erweiterung')) . ':</strong> ' . e($ext->getMessage()) . '</p>';
+                $res->body = (string) preg_replace('~(<body\b[^>]*>)~i', '$1' . str_replace(['\\', '$'], ['\\\\', '\\$'], $note), $res->body, 1);
+            }
+            return $res;
         }
     }
 }

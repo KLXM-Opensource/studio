@@ -17,7 +17,11 @@ namespace Core;
  *  - Tabellen von Erweiterungen (Extension::table, Fingerabdruck) in einer Transaktion, die zurückgerollt wird;
  *  - Slots der Verwaltung (Core\Slots): Methoden, Escapen, nur eigene Pfade, Platzhalter, Rechte, Altform-HTML, Fehler isoliert;
  *  - Verwaltungs-Skripte und Mediathek (adminAssets/adminData, previewEditor, Filter media.usages und presence.object, Haken der
- *    Mediathek create/edit/side in resources/js/_media.js) – Stellen, an denen z. B. ein Grafik-Editor andockt.
+ *    Mediathek create/edit/side in resources/js/_media.js) – Stellen, an denen z. B. ein Grafik-Editor andockt;
+ *  - optionale Abhängigkeiten (Core\DependencyCheck, extensions:check) an einem Testpaket im temporären Ordner, dazu alle
+ *    mitgelieferten Erweiterungen und Kits ohne Fehler;
+ *  - Startfehler (Core\ExtensionError): Syntaxfehler im Manifest, fehlende Elternklasse und Ausnahme im boot → Fehler mit
+ *    Erweiterung, Phase und Datei, nicht aktiv, andere starten, letzter Fehler gemerkt (eigenes Fehlerprotokoll im Testordner).
  * Rollen werden für die Prüfung vorübergehend gesetzt (Auth per Reflection) und danach zurückgestellt.
  */
 final class ExtensionsSelfTest
@@ -72,6 +76,8 @@ final class ExtensionsSelfTest
             self::filtersAndEvents();
             self::editorHooks();
             self::healthCategories();
+            self::dependencyCheck();
+            self::startErrors();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -660,5 +666,132 @@ final class ExtensionsSelfTest
         self::activate(null);
         self::eq('Erweiterung aus → keine Slots', [Extensions::pagePanels($page), Extensions::mediaPanels(['id' => 1, 'name' => 'a']), Extensions::tableActions(['handle' => 'x'])], ['', [], ['actions' => [], 'row' => []]]);
         self::actAs(null);
+    }
+
+    // ================================================================= Optionale Abhängigkeiten (Core\DependencyCheck) und Startfehler
+
+    /** Testpaket in einem eigenen temporären Ordner anlegen: [relativer Pfad => Inhalt] */
+    private static function fixture(array $files): string
+    {
+        $dir = sys_get_temp_dir() . '/klxm-ext-selftest-' . bin2hex(random_bytes(4));
+        foreach ($files as $rel => $code) {
+            @mkdir(dirname("$dir/$rel"), 0775, true);
+            file_put_contents("$dir/$rel", $code);
+        }
+        return $dir;
+    }
+
+    private static function removeFixture(string $dir): void
+    {
+        if (!str_contains($dir, '/klxm-ext-selftest-') || !is_dir($dir)) return;
+        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST);
+        foreach ($it as $f) $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+        @rmdir($dir);
+    }
+
+    private static function dependencyCheck(): void
+    {
+        $dir = self::fixture([
+            'composer.json' => '{"name":"qa/optional","require":{"php":">=8.4"},"suggest":{"qa-vendor/forms":"optional"}}',
+            // erbt ohne Absicherung von einer Klasse eines nicht installierten Pakets (Interface, Trait ebenso)
+            'src/Bad.php' => "<?php\nnamespace Qa\\Opt;\nuse QaVendor\\Forms\\Value\\Base as B;\nfinal class Bad extends B implements \\Countable\n{\n    use \\QaVendor\\Forms\\Helper;\n    public function count(): int { return 0; }\n}\n",
+            'src/BadIface.php' => "<?php\nnamespace Qa\\Opt;\nclass BadIface implements \\QaVendor\\Forms\\Field {}\n",
+            // richtig: Absicherung vor der Deklaration
+            'src/Good.php' => "<?php\nnamespace Qa\\Opt;\nif (!class_exists(\\QaVendor\\Forms\\Value\\Base::class)) return;\nclass Good extends \\QaVendor\\Forms\\Value\\Base {}\n",
+            // sicher vorhanden: PHP selbst, Core, Pakete, die der Kern verlangt (sabre/dav)
+            'src/Fine.php' => "<?php\nnamespace Qa\\Opt;\nclass Fine extends \\ArrayObject implements \\JsonSerializable { public function jsonSerialize(): mixed { return 1; } }\nclass Fine2 extends \\Core\\Http\\Response {}\nclass Fine3 extends \\Sabre\\DAV\\Server {}\nclass Fine4 extends Fine {}\n",
+            'src/Broken.php' => "<?php\nclass Broken {\n",
+            'extension.php' => "<?php\nuse QaVendor\\Forms\\Manager;\nreturn ['name' => 'qa_optional', 'boot' => function (Core\\Extension \$x): void {\n"
+                . "    \$m = new Manager();\n"                                                   // Zeile 4: ungeprüft
+                . "    Qa\\Opt\\Good::make();\n"                                                // Zeile 5: eigene, bedingt deklarierte Klasse
+                . "    \$c = Manager::class;\n"                                                 // lädt nichts
+                . "    if (class_exists(\\QaVendor\\Forms\\Value\\Base::class)) { new Qa\\Opt\\Good(); new \\QaVendor\\Forms\\Other(); }\n"
+                . "    new Qa\\Opt\\Fine(); Core\\Pdf::available();\n"
+                . "}];\n",
+        ]);
+        try {
+            $found = DependencyCheck::run($dir);
+            $short = array_map(fn($f) => $f['file'] . ':' . $f['line'] . ':' . $f['level'], $found);
+            self::eq('extensions:check: Funde (Datei:Zeile:Stufe)', $short, ['extension.php:4:error', 'extension.php:5:error', 'src/Bad.php:4:error', 'src/Bad.php:6:error', 'src/BadIface.php:3:error', 'src/Broken.php:3:error']);
+            $byFile = array_column(array_reverse($found), null, 'file');   // je Datei der erste Fund
+            $bad = $byFile['src/Bad.php'] ?? ['text' => '', 'fix' => ''];
+            self::eq('extensions:check: Meldung nennt Klasse, Paket und Abhilfe', [str_contains($bad['text'], 'QaVendor\\Forms\\Value\\Base'), str_contains($bad['text'], 'suggest: qa-vendor/forms'),
+                str_contains($bad['fix'], 'if (!class_exists(\\QaVendor\\Forms\\Value\\Base::class)) return;')], [true, true, true]);
+            self::eq('extensions:check: Syntaxfehler gemeldet', str_starts_with($byFile['src/Broken.php']['text'] ?? '', 'Syntaxfehler'), true);
+            // Paket unter require → sicher vorhanden: keine Funde mehr für diese Klassen
+            file_put_contents("$dir/composer.json", '{"name":"qa/optional","require":{"php":">=8.4","sabre/dav":"^4"}}');
+            self::eq('extensions:check: sabre/dav unter require → Sabre-Klassen sicher', array_filter(DependencyCheck::run($dir), fn($f) => str_contains($f['text'], 'Sabre')), []);
+            // Kern und mitgelieferte Erweiterungen/Kits: sauber
+            $all = DependencyCheck::all();
+            $bad = [];
+            foreach ($all as $k => $r) foreach ($r['findings'] as $f) if ($f['level'] === 'error') $bad[] = $k . ' ' . $f['file'] . ':' . $f['line'];
+            self::eq('extensions:check: mitgelieferte Erweiterungen und Kits ohne Fehler', $bad, []);
+            self::eq('extensions:check: findet Erweiterungen ohne ihre Manifeste zu laden', isset(DependencyCheck::extensionDirs()['dav']) || !is_dir(ROOT . '/extensions/dav'), true);
+        } finally {
+            self::removeFixture($dir);
+        }
+    }
+
+    /** Startfehler bleiben Fehler – mit Erweiterung, Phase und schuldiger Datei (Core\ExtensionError), nichts bleibt halb aktiv */
+    private static function startErrors(): void
+    {
+        $dir = self::fixture([
+            'parse/extension.php' => "<?php\nreturn ['name' => 'qa_parse', 'boot' => function (\$x) {\n",
+            'missing/extension.php' => "<?php\nreturn ['name' => 'qa_missing', 'boot' => function (Core\\Extension \$x): void {\n    require __DIR__ . '/src/Child.php';\n}];\n",
+            'missing/src/Child.php' => "<?php\nnamespace QaMissing;\nfinal class Child extends \\QaVendor\\Nowhere\\Base {}\n",
+            'throws/extension.php' => "<?php\nreturn ['name' => 'qa_throws', 'boot' => function (Core\\Extension \$x): void {\n    \$x->feature('qa_throws_feature', 'QA');\n    throw new \\RuntimeException('Schlüssel https://nutzer:geheim@example.org fehlt');\n}];\n",
+            'ok/extension.php' => "<?php\nreturn ['name' => 'qa_ok', 'boot' => function (Core\\Extension \$x): void {}];\n",
+        ]);
+        $foundProp = new \ReflectionProperty(Extensions::class, 'found');
+        $savedFound = $foundProp->getValue();
+        $activeProp = new \ReflectionProperty(Extensions::class, 'active');
+        $savedActive = $activeProp->getValue();
+        $log = ini_get('error_log');
+        ini_set('error_log', $dir . '/php-error.log');   // Selbsttest schreibt nicht ins echte Fehlerprotokoll
+        $start = new \ReflectionMethod(Extensions::class, 'start');
+        $add = new \ReflectionMethod(Extensions::class, 'add');
+        $catch = function (callable $fn): ?ExtensionError {
+            try {
+                $fn();
+            } catch (ExtensionError $e) {
+                return $e;
+            }
+            return null;
+        };
+        try {
+            // Manifest mit Syntaxfehler: ExtensionError (Phase manifest), Name aus der Datei gelesen
+            $list = [];
+            $e = $catch(fn() => $add->invokeArgs(null, [&$list, "$dir/parse/extension.php", 'lokal']));
+            self::eq('Start: Syntaxfehler im Manifest → Fehler mit Name, Phase, Datei', [$e?->extension, $e?->phase, str_contains((string) $e?->culprit, 'parse/extension.php'), $e?->getPrevious() instanceof \ParseError], ['qa_parse', 'manifest', true, true]);
+            // fehlende Elternklasse beim Start und Ausnahme im boot
+            $manifests = [];
+            foreach (['missing', 'throws', 'ok'] as $k) $add->invokeArgs(null, [&$manifests, "$dir/$k/extension.php", 'lokal']);
+            $foundProp->setValue(null, $manifests + (array) $savedFound);
+            $e = $catch(fn() => $start->invoke(null, 'qa_missing'));
+            self::eq('Start: fehlende Elternklasse → Fehler mit schuldiger Datei', [$e?->extension, $e?->phase, str_ends_with(explode(':', (string) $e?->culprit)[0], 'missing/src/Child.php'), str_contains((string) $e?->getMessage(), 'QaVendor\\Nowhere\\Base')],
+                ['qa_missing', 'boot', true, true]);
+            $e = $catch(fn() => $start->invoke(null, 'qa_throws'));
+            self::eq('Start: Ausnahme im boot → Fehler, Zugangsdaten in der Meldung unkenntlich', [$e?->phase, str_contains((string) $e?->getMessage(), 'geheim'), str_contains((string) $e?->getMessage(), 'nutzer:***@')], ['boot', false, true]);
+            self::eq('Start: gescheiterte Erweiterungen sind nicht aktiv', [Extensions::isActive('qa_missing'), Extensions::isActive('qa_throws')], [false, false]);
+            self::eq('Start: andere Erweiterungen starten weiter', $start->invoke(null, 'qa_ok') instanceof Extension && Extensions::isActive('qa_ok'), true);
+            $f = Extensions::failures();
+            self::eq('Start: letzter Fehler je Erweiterung für die Verwaltung gemerkt', [$f['qa_missing']['phase'] ?? null, $f['qa_throws']['phase'] ?? null, str_contains((string) ($f['qa_throws']['message'] ?? ''), 'geheim')], ['boot', 'boot', false]);
+            self::eq('Start: Fehlerprotokoll nennt die Erweiterung', str_contains((string) @file_get_contents("$dir/php-error.log"), '[Erweiterung] Erweiterung „qa_missing“'), true);
+            // Laufzeit: Fehler aus dem Ordner einer Erweiterung wird ihr zugeordnet
+            $err = null;
+            try {
+                (require "$dir/missing/extension.php")['boot'](new Extension('qa_missing', "$dir/missing", []));
+            } catch (\Throwable $t) {
+                $err = $t;
+            }
+            self::eq('Laufzeit: Fehler gehört zur Erweiterung (ExtensionError::owner)', $err ? (ExtensionError::owner($err)[0] ?? null) : null, 'qa_missing');
+        } finally {
+            foreach (['qa_parse', 'qa_missing', 'qa_throws', 'qa_ok'] as $n) Extensions::forgetFailure($n);
+            $foundProp->setValue(null, $savedFound);
+            $activeProp->setValue(null, $savedActive);
+            ini_set('error_log', (string) $log);
+            Features::flush();
+            self::removeFixture($dir);
+        }
     }
 }

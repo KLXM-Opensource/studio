@@ -412,6 +412,48 @@ $x-&gt;mailTransport('meinapi', 'Mein Dienst (API)', fn(array $konto) =&gt; new 
     <li><code>$x-&gt;mediaAccess(fn(array $ctx, Request $r): bool|Response)</code> – Dateien geschützter Medien-Pools (<code>$ctx</code>: <code>pool</code>, <code>path</code>), siehe Medien → Geschützte Pools.</li>
     <li>Passkeys für eigene Konten: <code>Core\Passkeys</code> mit eigener Tabelle (<code>ensureTable($db, 'x_passkeys')</code>, Parameter <code>$table</code> an allen Methoden) und eigenem Sitzungsplatz (<code>creationOptions(…, $slot)</code>, <code>requestOptions('x_login')</code>) – nie <code>user_passkeys</code>, nie Zeilen in <code>users</code> (jede Zeile dort darf in die Verwaltung).</li>
   </ul>
+  <h3 id="erweiterungen-optional">Optionale Abhängigkeiten richtig prüfen</h3>
+  <p>Eine Erweiterung (oder ein Kit) darf Pakete nutzen, die nicht immer installiert sind – etwa eine Bibliothek, die nur unter <code>suggest</code> steht. Dann muss <b>die Erweiterung selbst</b> prüfen, ob das Paket da ist. Der Core fängt solche Fehler bewusst nicht ab: Eine Erweiterung, die halb startet, ist schlimmer als ein klarer Fehler.</p>
+  <p>Das Risiko: Erbt eine Klasse von einer Klasse (oder implementiert ein Interface, nutzt einen Trait) aus einem fehlenden Paket, bricht PHP schon beim <b>Laden der Datei</b> mit <code>Class "…" not found</code> ab – nicht erst beim Aufruf. Lädt das Manifest diese Klasse im <code>boot</code>, steht die ganze Website.</p>
+  <p>Sicher vorhanden ist nur, was in der <code>composer.json</code> der Erweiterung unter <code>require</code> steht (samt deren Abhängigkeiten), was der Core selbst verlangt, PHP-eigene Klassen, <code>Core\…</code> und die eigenen Klassen. Für alles andere:</p>
+  <pre><code>// src/Formular/Wert.php – Klasse auf Basis eines optionalen Pakets
+namespace Anbieter\Erweiterung\Formular;
+
+if (!class_exists(\Anbieter\Formulare\Wert\Basis::class)) {
+    return;   // Paket fehlt: Datei deklariert nichts, Laden bricht nicht ab
+}
+
+final class Wert extends \Anbieter\Formulare\Wert\Basis { /* … */ }
+
+// extension.php – nur nutzen, wenn das Paket da ist
+'boot' =&gt; function (Core\Extension $x): void {
+    if (class_exists(\Anbieter\Formulare\Wert\Basis::class)) {
+        $x-&gt;feature('formulare', 'Formulare');
+        // … hier Klassen wie Formular\Wert verwenden
+    }
+},
+'requirements' =&gt; fn(): array =&gt; ['Formular-Paket installiert (optional)' =&gt; class_exists(\Anbieter\Formulare\Wert\Basis::class) ?: null],</code></pre>
+  <ul>
+    <li><b>Prüfen:</b> <code>php bin/console extensions:check</code> (<code>Core\DependencyCheck</code>) liest alle Erweiterungen und Kits als Tokens, ohne sie zu laden, und meldet mit Datei, Zeile und Abhilfe: Deklarationen mit <code>extends</code>/<code>implements</code>/<code>use</code> (Trait) auf eine optionale Klasse ohne <code>class_exists()</code>/<code>interface_exists()</code> davor; in <code>extension.php</code>, <code>theme.php</code>/<code>kit.php</code>, <code>console.php</code> und <code>functions.php</code> Zugriffe (<code>new X</code>, <code>X::methode()</code>, <code>X::KONSTANTE</code>) auf optionale oder bedingt deklarierte eigene Klassen außerhalb eines <code>if (class_exists(…)) { … }</code>; Syntaxfehler. <code>X::class</code> und <code>instanceof</code> laden nichts und sind immer erlaubt.</li>
+    <li><b>In der CI der Erweiterung:</b> <code>php bin/console extensions:check --path=/pfad/zur/erweiterung</code> – Exit 1 bei Fehlern. <code>kit:check</code> meldet dieselben Funde je Kit, <code>extensions:selftest</code> prüft die Prüfung selbst.</li>
+    <li><b>Grenzen:</b> Die Prüfung ist statisch. Pakete aus <code>require</code>, die nirgends installiert sind, kennt sie nicht – deren Klassen erscheinen als Hinweis („Herkunft unbekannt“) statt als Fehler. Dynamische Namen (<code>new $klasse</code>) sieht sie nicht.</li>
+  </ul>
+
+  <h3 id="erweiterungen-fehler">Was passiert bei Fehlern</h3>
+  <ul>
+    <li><b>Haken zur Laufzeit</b> (Slots, Filter, Ereignisse, <code>health()</code>, <code>htmlFilter()</code> …): Fehler werden protokolliert, die Anfrage läuft weiter.</li>
+    <li><b>Start der Erweiterung</b> (Manifest laden, <code>boot</code>, Tabellen und <code>migration()</code>, <code>install</code>): ein Fehler bleibt ein Fehler – die Erweiterung wird <b>nicht</b> still übersprungen. Der Core meldet ihn als <code>Core\ExtensionError</code> mit Erweiterung, Phase und schuldiger Datei, z. B. <code>Erweiterung „formulare“: Start (boot) fehlgeschlagen: Class "Anbieter\Formulare\Wert\Basis" not found – Datei: extensions/formulare/src/Formular/Wert.php:8</code>:
+      <ul>
+        <li>Fehlerprotokoll (<code>storage/logs/php-error.log</code>): eine Zeile <code>[Erweiterung] …</code>;</li>
+        <li>Kommandozeile: dieselbe Meldung plus Hinweis zum Abschalten, Exit 1;</li>
+        <li>Website: Fehlerseite 500 „Die Erweiterung „formulare“ konnte nicht starten“; Meldung und Datei nur mit <code>'debug' =&gt; true</code> oder <code>'environment' =&gt; 'development'</code>, sonst nur im Fehlerprotokoll.</li>
+      </ul>
+      Abschalten, bis der Fehler behoben ist: in der Konfiguration der Website <code>'extensions' =&gt; ['formulare' =&gt; false]</code>. Zur Fehlersuche startet <code>KLXM_NO_EXTENSIONS=1 php bin/console …</code> ausdrücklich keine Erweiterung (<code>extensions:check</code> tut das von selbst).</li>
+    <li><b>Einschalten in der Verwaltung</b> (Funktionen &amp; Erweiterungen): Scheitert der Start, bleibt die Erweiterung aus und die Meldung erscheint sofort.</li>
+    <li><b>Fehler zur Laufzeit aus dem Code einer Erweiterung</b> (Route, Block-Vorlage): Der Core ordnet ihn über den Aufrufstapel der Erweiterung zu, protokolliert Erweiterung und Datei und zeigt angemeldeter Redaktion bzw. in <code>development</code> die Meldung auf der Fehlerseite; Besucher sehen die normale Fehlerseite des Kits.</li>
+    <li><b>Verwaltung:</b> Der letzte Fehler je Erweiterung (14 Tage, je Website in <code>storage/…/logs/extension-errors.json</code>) steht unter Funktionen &amp; Erweiterungen bei der Erweiterung und in <code>extensions:list</code>; erfolgreiches Einschalten löscht ihn. Meldungen ohne Installationspfad, Zugangsdaten in Adressen unkenntlich.</li>
+  </ul>
+
   <h3 id="erweiterungen-sicherheit">Sicherheit</h3>
   <ul>
     <li><b>Server prüft immer:</b> Endpunkte unter <code>/admin</code> meldet die Erweiterung mit Recht an – der Router prüft Anmeldung, Recht und CSRF (<code>X-CSRF-Token</code>), bevor der Handler läuft (<a href="#erweiterungen-routen">Routen</a>). Die Angaben <code>perm</code>/<code>visible</code> an Werkzeugen und Slots steuern nur die Anzeige.</li>
