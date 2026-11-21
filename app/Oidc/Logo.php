@@ -143,6 +143,9 @@ final class Logo
         $svg = (string) preg_replace('~(\s(?:xlink:)?href)="#([^"]+)"~', '$1="#oidc-logo-$2"', $svg);
         $svg = trim($svg);
         if (!preg_match('~^<svg\b~i', $svg) || !preg_match('~<(path|rect|circle|ellipse|line|polyline|polygon|text|use)\b~i', $svg)) return '';
+        // Wurzel ohne style/overflow/x/y: sonst überschreibt ein Anbieter-Logo die Größe aus dem CSS (z. B. style="width:100vw;
+        // height:100vh") und überdeckt die Anmeldeseite mit eigenem Inhalt (Text). Der Rest bleibt in der 20-px-Fläche (overflow hidden).
+        $svg = (string) preg_replace_callback('~^<svg\b[^>]*>~i', fn($m) => (string) preg_replace('~\s(style|overflow|x|y|transform)="[^"]*"~i', '', $m[0]), $svg, 1);
         return (string) preg_replace('~^<svg\b~i', '<svg class="auth-alt__logo" aria-hidden="true" focusable="false"', $svg, 1);
     }
 

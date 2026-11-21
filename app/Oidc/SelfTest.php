@@ -285,6 +285,9 @@ final class SelfTest
         $eq('Logo: Skript, on…-Attribut, <style>, <image> und title entfernt', [str_contains($svg, 'script'), str_contains($svg, 'onload'), str_contains($svg, '<style'), str_contains($svg, '<image'), str_contains($svg, '<title')], [false, false, false, false, false]);
         $eq('Logo: dekorativ (aria-hidden), currentColor bleibt', [str_contains($svg, 'aria-hidden="true"'), str_contains($svg, 'role='), str_contains($svg, 'currentColor')], [true, false, true]);
         $eq('Logo: ids mit Präfix samt Verweis', [str_contains($svg, 'id="oidc-logo-g"'), str_contains($svg, 'url(#oidc-logo-g)')], [true, true]);
+        // Kein Überdecken der Anmeldeseite: Wurzel ohne style/overflow (Größe kommt nur aus dem CSS)
+        $big = (string) (Logo::prepare('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" overflow="visible" style="width:100vw;height:100vh"><path d="M0 0h10v10z"/><text x="0" y="5">Bitte anrufen</text></svg>')['data'] ?? '');
+        $eq('Logo: Wurzel ohne style/overflow', [(bool) preg_match('~^<svg[^>]*\sstyle=~', $big), (bool) preg_match('~^<svg[^>]*\soverflow=~', $big)], [false, false]);
         $html = Logo::html(['issuer' => $iss, 'site' => site()->key, 'logo_media' => 0]);
         $eq('Logo: Ausgabe lokal eingebettet, kein Verweis auf den Anbieter', [str_starts_with($html, '<svg'), str_contains($html, 'hub.example.org'), str_contains($html, 'tracker.example.net'), (bool) preg_match('~(href|src)="https?:~', $html)], [true, false, false, false]);
         Logo::sync($iss, ['logo_uri' => $src]);
