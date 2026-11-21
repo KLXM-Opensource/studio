@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MyCms\Dav;
+namespace Klxm\Dav;
 
 use Core\Data\Entries;
 use Core\Data\Tables;

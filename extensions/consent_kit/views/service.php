@@ -4,10 +4,10 @@
  * @var array $s  @var array $domains  @var array $errors  @var ?bool $complete
  */
 use Core\Fields;
-use MyCms\Consent\AdminController;
-use MyCms\Consent\Compiler;
-use MyCms\Consent\I18nLang;
-use MyCms\Consent\Repository;
+use Klxm\Consent\AdminController;
+use Klxm\Consent\Compiler;
+use Klxm\Consent\I18nLang;
+use Klxm\Consent\Repository;
 
 $id = (int) ($s['id'] ?? 0);
 $lang = I18nLang::admin();
@@ -22,7 +22,7 @@ $tabs = [
     'variants' => [__('Varianten'), ['variants']],
     'advanced' => [__('Erweitert'), ['csp_']],
 ];
-$p = $s['preset'] ? \MyCms\Consent\Presets::get($s['preset']) : null;
+$p = $s['preset'] ? \Klxm\Consent\Presets::get($s['preset']) : null;
 ?>
 <p><a class="adm-link" href="<?= e(url('/admin/consent')) ?>">← <?= e(__('Alle Dienste')) ?></a></p>
 <?php if ($errors): ?><div class="adm-flash adm-flash--error" role="alert"><?= e(__('Bitte die markierten Angaben prüfen.')) ?><?php if (isset($errors['params'])): ?> <?= e($errors['params']) ?><?php endif; ?></div><?php endif; ?>

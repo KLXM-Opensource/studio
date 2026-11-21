@@ -1,5 +1,11 @@
 # Changelog – Erweiterung „consent_kit“
 
+## 1.4.0 (2026-11-21)
+
+- **Namensraum umbenannt:** `MyCms\Consent\…` heißt jetzt `Klxm\Consent\…` (wie `Klxm\Members`, `Klxm\Motion`) – der Altname „MyCms“
+  verschwindet aus dem Code. Für Website und Verwaltung ändert sich nichts; eigener Code, der Klassen der Erweiterung direkt aufruft,
+  muss den neuen Namensraum verwenden.
+
 ## 1.3.0 (2026-11-19)
 
 Abgleich mit FriendsOfREDAXO/consent_kit 1.5.0:

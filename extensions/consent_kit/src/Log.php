@@ -3,7 +3,7 @@
 // Portions ported from FriendsOfREDAXO/consent_kit lib/Log.php (MIT, © KLXM Crossmedia GmbH)
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 /**
  * Protokoll als Nachweis (Art. 7 Abs. 1 DSGVO) – datensparsam: Einwilligungs-ID, Zeit, Domain, Stand, Entscheidung,

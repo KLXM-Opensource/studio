@@ -3,7 +3,7 @@
 // Portions ported from FriendsOfREDAXO/consent_kit lib/Api/Save.php (MIT, © KLXM Crossmedia GmbH)
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 use Core\Http\HttpException;
 use Core\Http\Request;

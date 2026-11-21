@@ -3,7 +3,7 @@
 // Portions ported from FriendsOfREDAXO/consent_kit (MIT, © KLXM Crossmedia GmbH): Cache::build/applyVariants/resolveParams/serviceHash, Events::build
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 use Core\Landings;
 use Core\Lang;

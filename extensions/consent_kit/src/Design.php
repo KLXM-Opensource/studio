@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 use Core\Design as SiteDesign;
 

@@ -7,8 +7,8 @@
 declare(strict_types=1);
 
 spl_autoload_register(function (string $class): void {
-    if (str_starts_with($class, 'MyCms\\Dav\\')) {
-        $file = __DIR__ . '/src/' . substr($class, strlen('MyCms\\Dav\\')) . '.php';
+    if (str_starts_with($class, 'Klxm\\Dav\\')) {
+        $file = __DIR__ . '/src/' . substr($class, strlen('Klxm\\Dav\\')) . '.php';
         if (is_file($file)) require $file;
     }
 });
@@ -16,7 +16,7 @@ spl_autoload_register(function (string $class): void {
 return [
     'name' => 'dav',
     'label' => 'CalDAV/CardDAV',
-    'version' => '1.1.0',
+    'version' => '1.2.0',
     'requires' => '>=1.0.0',
     'description' => 'Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵). Anmeldung mit App-Passwörtern.',
     'author' => 'KLXM Crossmedia GmbH and contributors',
@@ -28,22 +28,22 @@ return [
     'boot' => function (Core\Extension $x): void {
         $x->feature('dav', 'CalDAV/CardDAV (Kalender und Kontakte in Apps)', ['dav.use']);
         $x->permissions('CalDAV/CardDAV', ['dav.use' => 'Kalender und Kontakte mit Apps abgleichen (App-Passwörter)']);
-        $x->migration(1, fn(Core\Database $db) => MyCms\Dav\Dav::migrate($db));
+        $x->migration(1, fn(Core\Database $db) => Klxm\Dav\Dav::migrate($db));
         // Persönliche Einrichtung (App-Passwörter) über den Slot „Konto“; Einstellungen je Tabelle auf der Sammelseite „Einstellungen“
-        $x->account(fn(array $user) => MyCms\Dav\Dav::accountCard($user), 'dav.use');
+        $x->account(fn(array $user) => Klxm\Dav\Dav::accountCard($user), 'dav.use');
         // Konto gelöscht: seine App-Passwörter entfernen
         $x->on(Core\Events\UserDeleted::class, fn(Core\Events\UserDeleted $e) => app()->db->query('DELETE FROM dav_passwords WHERE user_id = ?', [$e->id]));
         $x->adminPage(['href' => '/admin/dav', 'label' => 'Kalender & Kontakte in Apps', 'kind' => 'settings', 'icon' => 'dav',
-            'perm' => 'data.schema', 'feature' => 'dav', 'visible' => fn(): bool => can('dav.use') && MyCms\Dav\Dav::enabled(),
+            'perm' => 'data.schema', 'feature' => 'dav', 'visible' => fn(): bool => can('dav.use') && Klxm\Dav\Dav::enabled(),
             'description' => 'Tabellen als Kalender bzw. Adressbuch für Apps bereitstellen, App-Passwörter']);
         $x->routes(function (Core\Http\Router $r): void {
             // WebDAV nutzt eigene Methoden (PROPFIND, REPORT, PUT, DELETE, MKCALENDAR, OPTIONS …) → any()
-            $r->any('/dav', [MyCms\Dav\Server::class, 'handle']);
-            $r->any('/dav/{path*}', fn(Core\Http\Request $req, string $path) => MyCms\Dav\Server::handle($req));
-            $r->any('/.well-known/caldav', [MyCms\Dav\Server::class, 'wellKnown']);
-            $r->any('/.well-known/carddav', [MyCms\Dav\Server::class, 'wellKnown']);
+            $r->any('/dav', [Klxm\Dav\Server::class, 'handle']);
+            $r->any('/dav/{path*}', fn(Core\Http\Request $req, string $path) => Klxm\Dav\Server::handle($req));
+            $r->any('/.well-known/caldav', [Klxm\Dav\Server::class, 'wellKnown']);
+            $r->any('/.well-known/carddav', [Klxm\Dav\Server::class, 'wellKnown']);
             // Verwaltung: Recht an jeder Route (Anmeldung, Recht und CSRF prüft der Router vor dem Controller)
-            $c = MyCms\Dav\AdminController::class;
+            $c = Klxm\Dav\AdminController::class;
             $r->get('/admin/dav', [$c, 'index'], 'dav.use');
             $r->post('/admin/dav/passwords', [$c, 'create'], 'dav.use');
             $r->post('/admin/dav/passwords/{id}/delete', [$c, 'delete'], 'dav.use');
@@ -52,7 +52,7 @@ return [
         $x->command('dav:password', 'App-Passwort anlegen: dav:password <e-mail> [name] [read|write]', function (array $args): int {
             $u = app()->db->fetch('SELECT id FROM users WHERE LOWER(email) = LOWER(?)', [(string) ($args[0] ?? '')]);
             if (!$u) { fwrite(STDERR, "Benutzer nicht gefunden.\n"); return 1; }
-            echo MyCms\Dav\Dav::createPassword((int) $u['id'], (string) ($args[1] ?? 'CLI'), (string) ($args[2] ?? 'write')), "\n";
+            echo Klxm\Dav\Dav::createPassword((int) $u['id'], (string) ($args[1] ?? 'CLI'), (string) ($args[2] ?? 'write')), "\n";
             return 0;
         });
     },

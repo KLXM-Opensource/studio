@@ -3,7 +3,7 @@
  * Protokoll: Kennzahlen (30 Tage, je ID nur die letzte Entscheidung), Filter, Tabelle, CSV-Export, Bereinigen.
  * @var array $filters  @var array $rows  @var int $total  @var int $pageNo  @var array $stats  @var array $domains  @var array $settings
  */
-use MyCms\Consent\Log;
+use Klxm\Consent\Log;
 
 $qs = http_build_query(array_filter($filters, fn($v) => $v !== ''));
 $pages = max(1, (int) ceil($total / 50));

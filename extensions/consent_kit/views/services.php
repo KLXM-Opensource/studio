@@ -3,8 +3,8 @@
  * Dienste: Status, Tabelle mit Gruppen als Zwischenzeilen, Schalter, Domain-Matrix (ab zwei Domains), Reihenfolge.
  * @var array $services  @var array $domains  @var array $status
  */
-use MyCms\Consent\Compiler;
-use MyCms\Consent\Repository;
+use Klxm\Consent\Compiler;
+use Klxm\Consent\Repository;
 
 $multi = count($domains) > 1;
 $byGroup = [];

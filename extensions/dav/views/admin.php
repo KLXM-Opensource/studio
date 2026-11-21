@@ -4,7 +4,7 @@
  * @var array $user  @var array $passwords  @var ?string $newPassword  @var array $tables  @var array $errors
  */
 use Core\Data\Calendar;
-use MyCms\Dav\Dav;
+use Klxm\Dav\Dav;
 
 $base = absolute_url('/dav/');
 $host = parse_url(site_url(), PHP_URL_HOST) ?: 'localhost';

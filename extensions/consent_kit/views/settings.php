@@ -1,7 +1,7 @@
 <?php
 /** Einstellungen: Darstellung, Rechtstexte (Linkauswahl), Einwilligung/Protokoll, GPC und Consent Mode. @var array $values  @var array $errors */
 use Core\Fields;
-use MyCms\Consent\AdminController;
+use Klxm\Consent\AdminController;
 ?>
 <?php if ($conf = AdminController::openModeConflicts()): ?>
 <p class="adm-flash adm-flash--error" role="status"><?= e(__('„Hinweis beim Seitenaufruf“ ist eingeschränkt, aber diese Dienste bringen eigenen Code mit, der erst nach der Einwilligung läuft: {names}. Bei „Nur bei Bedarf“ erscheint der Hinweis deshalb trotzdem; bei „Nie“ starten sie erst, wenn Besucher die Einstellungen selbst öffnen.', ['names' => implode(', ', $conf)])) ?></p>

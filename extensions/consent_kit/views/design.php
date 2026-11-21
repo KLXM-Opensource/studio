@@ -4,8 +4,8 @@
  * Live-Vorschau mit den echten Diensten (ohne Cookie/Protokoll), Kontrastprüfung nach WCAG 2.2 AA.
  * @var array $values  @var array $derived  @var array $overrides  @var array $checks  @var array $preview
  */
-use MyCms\Consent\Consent;
-use MyCms\Consent\Design;
+use Klxm\Consent\Consent;
+use Klxm\Consent\Design;
 
 $hasEmbed = false;
 foreach ($preview['groups'] as $g) foreach ($g['services'] as $sv) if (!empty($sv['embed']) && !$g['required']) { $hasEmbed = $sv['key']; break 2; }

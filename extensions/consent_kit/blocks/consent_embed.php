@@ -5,8 +5,8 @@
  * unter „Domains eingebetteter Inhalte“ stehen (die CSP erlaubt genau diese iframe-Hosts).
  * @var \Core\Block $b  @var array $d
  */
-use MyCms\Consent\Compiler;
-use MyCms\Consent\Consent;
+use Klxm\Consent\Compiler;
+use Klxm\Consent\Consent;
 
 $wrap = app()->theme->def['container_class'] ?? 'wrap';
 $svc = (string) ($d['service'] ?? '');

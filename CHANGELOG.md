@@ -11,6 +11,10 @@ oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
 
+### Erweiterungen consent_kit und dav: Namensraum `Klxm\…`
+- `MyCms\Consent` → `Klxm\Consent` (consent_kit 1.4.0), `MyCms\Dav` → `Klxm\Dav` (dav 1.2.0) – Altname aus dem Code entfernt; vCard-Felder
+  `X-MYCMS-*` bleiben (in CardDAV-Clients gespeichert).
+
 ### Grafik-Editor: Personas Daten und Export, Anhalten von Bewegung (Ausbaustufe 5)
 - **Mediathek-Vorschau nach dem Bearbeiten:** Vorschaubilder tragen die Prüfsumme der Datei (`?v=`) – SVGs behalten beim Ersetzen ihren Namen, die Mediathek
   zeigte deshalb nach dem Bearbeiten im Grafik-Editor weiter die alte Fassung aus dem Browser-Zwischenspeicher.

@@ -3,7 +3,7 @@
 // Portions ported from FriendsOfREDAXO/consent_kit (MIT, © KLXM Crossmedia GmbH): Backend/ServiceController, pages/*
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 use Core\Fields;
 use Core\Http\HttpException;

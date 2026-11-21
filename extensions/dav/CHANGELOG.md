@@ -1,5 +1,12 @@
 # Changelog – Erweiterung „dav“
 
+## 1.2.0 (2026-11-21)
+
+- **Namensraum umbenannt:** `MyCms\Dav\…` heißt jetzt `Klxm\Dav\…` (wie `Klxm\Members`, `Klxm\Motion`) – der Altname „MyCms“
+  verschwindet aus dem Code. Für Website und Verwaltung ändert sich nichts; eigener Code, der Klassen der Erweiterung direkt aufruft,
+  muss den neuen Namensraum verwenden.
+- Die vCard-Felder `X-MYCMS-*` bleiben unverändert, weil Kalender- und Adressbuch-Apps die Felder so gespeichert haben.
+
 ## 1.1.0 (2026-10-02)
 
 Angepasst an die Integrationspunkte von KLXM Studio 1.0 (Entwicklerhandbuch → Erweiterungen → „Integrationspunkte und Regeln“):

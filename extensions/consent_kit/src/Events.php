@@ -3,7 +3,7 @@
 // Ported from FriendsOfREDAXO/consent_kit lib/Events.php (MIT, © KLXM Crossmedia GmbH)
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 /**
  * Conversions ohne Code: „Wenn Klick auf … / Aufruf der Seite … / Formular gesendet … dann melde Anfrage“.

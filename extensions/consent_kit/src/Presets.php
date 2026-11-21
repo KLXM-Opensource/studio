@@ -3,7 +3,7 @@
 // Portions ported from FriendsOfREDAXO/consent_kit (MIT, © KLXM Crossmedia GmbH): PresetRepository, PresetIo
 declare(strict_types=1);
 
-namespace MyCms\Consent;
+namespace Klxm\Consent;
 
 /**
  * Vorlagen (Format: presets/FORMAT.md – kompatibel mit dem REDAXO-AddOn consent_kit, Export/Import in beide Richtungen).

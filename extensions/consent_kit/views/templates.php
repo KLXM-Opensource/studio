@@ -1,8 +1,8 @@
 <?php
 /** Vorlagen zur Auswahl (Suche + Gruppenfilter, ohne JavaScript: vollständige Liste). @var array $presets  @var array $existing */
-use MyCms\Consent\Compiler;
-use MyCms\Consent\I18nLang;
-use MyCms\Consent\Repository;
+use Klxm\Consent\Compiler;
+use Klxm\Consent\I18nLang;
+use Klxm\Consent\Repository;
 
 $lang = I18nLang::admin();
 ?>

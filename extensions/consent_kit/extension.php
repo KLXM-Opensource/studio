@@ -12,8 +12,8 @@
 declare(strict_types=1);
 
 spl_autoload_register(function (string $class): void {
-    if (str_starts_with($class, 'MyCms\\Consent\\')) {
-        $file = __DIR__ . '/src/' . substr($class, strlen('MyCms\\Consent\\')) . '.php';
+    if (str_starts_with($class, 'Klxm\\Consent\\')) {
+        $file = __DIR__ . '/src/' . substr($class, strlen('Klxm\\Consent\\')) . '.php';
         if (is_file($file)) require $file;
     }
 });
@@ -25,7 +25,7 @@ if (!function_exists('consent_settings_link')) {
      */
     function consent_settings_link(string $label = '', string $class = ''): string
     {
-        return class_exists(\MyCms\Consent\Consent::class) ? \MyCms\Consent\Consent::settingsLink($label, $class) : '';
+        return class_exists(\Klxm\Consent\Consent::class) ? \Klxm\Consent\Consent::settingsLink($label, $class) : '';
     }
 }
 
@@ -36,7 +36,7 @@ if (!function_exists('consent_embed')) {
      */
     function consent_embed(string $service, string $html, array $options = []): string
     {
-        return class_exists(\MyCms\Consent\Consent::class) ? \MyCms\Consent\Consent::embed($service, $html, $options) : '';
+        return class_exists(\Klxm\Consent\Consent::class) ? \Klxm\Consent\Consent::embed($service, $html, $options) : '';
     }
 }
 
@@ -44,14 +44,14 @@ if (!function_exists('consent_has')) {
     /** Serverseitig: Einwilligung in den Dienst liegt im Cookie dieser Anfrage vor (nicht hinter dem Seiten-Cache verwenden). */
     function consent_has(string $service): bool
     {
-        return class_exists(\MyCms\Consent\Consent::class) && \MyCms\Consent\Consent::has($service);
+        return class_exists(\Klxm\Consent\Consent::class) && \Klxm\Consent\Consent::has($service);
     }
 }
 
 return [
     'name' => 'consent_kit',
     'label' => 'Consent-Kit (Cookie-Einwilligung)',
-    'version' => '1.3.0',
+    'version' => '1.4.0',
     'requires' => '>=1.0.0',
     'description' => 'Einwilligungsverwaltung: Dienste aus geprüften Vorlagen, barrierefreier Hinweis im Design der Website, 2-Klick-Platzhalter, Google Consent Mode v2, GPC, Protokoll ohne IP-Adresse. Port des REDAXO-AddOns consent_kit (MIT).',
     'author' => 'KLXM Crossmedia GmbH and contributors',
@@ -65,28 +65,28 @@ return [
     'boot' => function (Core\Extension $x): void {
         $x->feature('consent', 'Cookie-Einwilligung (Consent-Kit): Dienste, Hinweis, Protokoll', ['consent.manage']);
         $x->permissions('Cookie-Einwilligung', ['consent.manage' => 'Dienste, Design, Einstellungen und Protokoll der Cookie-Einwilligung verwalten']);
-        $x->migration(1, fn(Core\Database $db) => MyCms\Consent\Repository::migrate($db));
+        $x->migration(1, fn(Core\Database $db) => Klxm\Consent\Repository::migrate($db));
         // Reine Konfiguration → Sammelseite Administration → Einstellungen → Einstellungen der Funktionen (Core\AdminPages)
         $x->adminPage(['href' => '/admin/consent', 'label' => 'Cookie-Einwilligung', 'kind' => 'settings', 'icon' => 'cookie',
             'perm' => 'consent.manage', 'feature' => 'consent', 'description' => 'Dienste, Texte und Darstellung des Cookie-Hinweises, Protokoll']);
 
         // Website: Konfiguration + Skript nur auf Websites mit aktivem, einwilligungspflichtigem Dienst
-        $x->htmlFilter(fn(string $html, array $ctx) => MyCms\Consent\Consent::filterHtml($html, $ctx));
+        $x->htmlFilter(fn(string $html, array $ctx) => Klxm\Consent\Consent::filterHtml($html, $ctx));
         // CSP: Hosts eines Dienstes erst nach Einwilligung (Cookie dieser Anfrage); iframe-Hosts aktiver Dienste für den Platzhalter
-        $x->csp(fn() => MyCms\Consent\Consent::cspSources());
+        $x->csp(fn() => Klxm\Consent\Consent::cspSources());
         // „Datenschutz-Einstellungen“ in der Rechtliches-Zeile der Fußbereiche der Kits (footer_links())
-        $x->footerLinks(fn() => MyCms\Consent\Consent::footerLinks());
+        $x->footerLinks(fn() => Klxm\Consent\Consent::footerLinks());
 
         // Block „Externer Inhalt (mit Einwilligung)“: Karten-, Social-Media- und Audio-Einbettungen als 2-Klick-Platzhalter
-        $x->blocks(['consent_embed' => MyCms\Consent\Consent::blockDefinition()]);
+        $x->blocks(['consent_embed' => Klxm\Consent\Consent::blockDefinition()]);
 
         $x->routes(function (Core\Http\Router $r): void {
             // Website (ohne Sitzung, ohne Cookies bis zur Entscheidung)
-            $r->post('/consent/save', [MyCms\Consent\PublicController::class, 'save']);
-            $r->get('/consent/js/{file}', [MyCms\Consent\PublicController::class, 'code']);
-            $r->get('/consent/style.css', [MyCms\Consent\PublicController::class, 'style']);
+            $r->post('/consent/save', [Klxm\Consent\PublicController::class, 'save']);
+            $r->get('/consent/js/{file}', [Klxm\Consent\PublicController::class, 'code']);
+            $r->get('/consent/style.css', [Klxm\Consent\PublicController::class, 'style']);
             // Verwaltung
-            $c = MyCms\Consent\AdminController::class;
+            $c = Klxm\Consent\AdminController::class;
             $p = 'consent.manage';   // Recht an jeder Route (Core\Http\Router prüft Anmeldung, Recht, CSRF)
             $r->get('/admin/consent', [$c, 'index'], $p);
             $r->post('/admin/consent/services/toggle', [$c, 'toggle'], $p);
@@ -118,12 +118,12 @@ return [
         $x->command('consent:purge', 'Consent-Kit: Protokoll nach Aufbewahrungsfrist bereinigen [--days=N] (Standard: Einstellung, 1095 Tage; 0 = nie)', function (array $args): int {
             $days = null;
             foreach ($args as $a) if (preg_match('~^--days=(\d+)$~', (string) $a, $m)) $days = (int) $m[1];
-            $n = MyCms\Consent\Log::purge($days);
+            $n = Klxm\Consent\Log::purge($days);
             echo 'Consent-Kit (' . site()->key . '): ' . $n . " Protokolleinträge gelöscht.\n";
             return 0;
         });
         $x->command('consent:status', 'Consent-Kit: aktive Dienste, Hosts in der CSP und Protokoll-Umfang dieser Website', function (array $args): int {
-            foreach (MyCms\Consent\Consent::statusLines() as $line) echo $line, "\n";
+            foreach (Klxm\Consent\Consent::statusLines() as $line) echo $line, "\n";
             return 0;
         });
     },
