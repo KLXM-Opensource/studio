@@ -1,0 +1,12 @@
+{
+    "name": "klxm/studio-psalm",
+    "description": "Taint-Analyse für KLXM Studio mit Psalm (nur Entwicklung, wird nicht ausgeliefert)",
+    "license": "MIT",
+    "require": {
+        "vimeo/psalm": "^6.20"
+    },
+    "autoload": {
+        "psr-4": { "Klxm\\Psalm\\": "plugin/" }
+    },
+    "config": { "sort-packages": true }
+}

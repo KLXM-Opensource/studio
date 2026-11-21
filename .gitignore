@@ -71,4 +71,6 @@ deploy/targets/*.env
 !/storage/sessions/
 # PHPStan (tools/phpstan, nur Entwicklung)
 /tools/phpstan/vendor/
+# Psalm (tools/psalm, nur Entwicklung: Taint-Analyse)
+/tools/psalm/vendor/
 /public/assets/vendor/pdfjs/cmaps/

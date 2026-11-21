@@ -1,0 +1,62 @@
+<?php
+// Taint-Annotationen für Psalm (nur Analyse), damit der Code frei von Psalm-Kommentaren bleibt.
+// Psalm übernimmt Stubs nur für Funktionen und fremde Klassen (vendor/). Regeln für Klassen des Projekts
+// (Quelle Core\Http\Request, Escape Core\Sanitizer, json_encode mit JSON_HEX_TAG) stehen in plugin/TaintPlugin.php.
+// Senken im Projekt (Datenbank, Core\Http\Fetch, Dateipfade) erkennt Psalm an den PHP-Funktionen darin
+// (PDO::prepare/exec/query, curl_*, file_put_contents, rename, include …).
+
+namespace {
+    /**
+     * HTML-Escaping (htmlspecialchars mit ENT_QUOTES) – sicher in Text und Attributen.
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     * @psalm-taint-specialize
+     */
+    function e(mixed $v): string {}
+
+    /**
+     * Rich-Text über Core\Sanitizer (Whitelist, Links geprüft).
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     * @psalm-taint-specialize
+     */
+    function rich(?string $html): string {}
+
+    /**
+     * Inline-Rich-Text über Core\Sanitizer (Whitelist, Links geprüft).
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     * @psalm-taint-specialize
+     */
+    function inline(?string $html): string {}
+
+    /**
+     * Übersetzung: Ergebnis trägt nur die Taints des jeweiligen Aufrufs (sonst vermischt Psalm alle Aufrufer).
+     * @psalm-taint-specialize
+     * @psalm-flow ($text, $params) -> return
+     */
+    function lt(string $text, array $params = []): string {}
+
+    /**
+     * @psalm-taint-specialize
+     * @psalm-flow ($text, $params) -> return
+     */
+    function __(string $text, array $params = []): string {}
+}
+
+namespace Symfony\Component\Mime {
+    class Email extends Message
+    {
+        /**
+         * Kopfzeile Subject (Core\Mailer). Symfony kodiert sie, CR/LF führen dort zu einer Ausnahme.
+         * @psalm-taint-sink header $subject
+         */
+        public function subject(string $subject): static {}
+
+        /** @psalm-taint-sink header $addresses */
+        public function replyTo(Address|string ...$addresses): static {}
+
+        /** @psalm-taint-sink header $addresses */
+        public function addReplyTo(Address|string ...$addresses): static {}
+    }
+}

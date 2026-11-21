@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="8"
+    phpVersion="8.4"
+    findUnusedCode="false"
+    findUnusedBaselineEntry="false"
+    autoloader="bootstrap.php"
+    cacheDirectory="../../storage/cache/psalm"
+    errorBaseline="baseline.xml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <!--
+      Taint-Analyse für KLXM Studio (nur Entwicklung, wird nicht ausgeliefert).
+      Einmalig: cd tools/psalm && composer install
+      Lauf (aus dem Projektordner): php tools/psalm/vendor/bin/psalm -c tools/psalm/psalm.xml (Option taint-analysis)
+      Nur Taint-Funde zählen; allgemeine Typfehler prüft phpstan. Quellen, Senken und Escape-Funktionen stehen in
+      stubs/taint.phpstub, nicht im Code. Belegte Fehlalarme: baseline.xml (Begründung im Entwicklerhandbuch → Sicherheit).
+    -->
+    <projectFiles>
+        <directory name="../../app"/>
+        <directory name="../../extensions/consent_kit"/>
+        <directory name="../../extensions/dav"/>
+        <directory name="../../extensions/video_tools"/>
+        <file name="../../bin/console"/>
+        <ignoreFiles allowMissingFiles="true">
+            <directory name="../../extensions/consent_kit/vendor"/>
+            <directory name="../../extensions/dav/vendor"/>
+            <directory name="../../extensions/video_tools/vendor"/>
+        </ignoreFiles>
+    </projectFiles>
+
+    <!--
+      Ausgabe auf die Kommandozeile bzw. als Ereignisstrom (text/event-stream, JSON je Zeile) ist kein HTML:
+      Fehlalarme TaintedHtml/TaintedTextWithQuotes dort ausblenden. Alle anderen Taint-Arten bleiben aktiv.
+    -->
+    <issueHandlers>
+        <TaintedHtml>
+            <errorLevel type="suppress">
+                <file name="../../bin/console"/>
+                <file name="../../app/Glossary/Console.php"/>
+                <file name="../../app/Push/Console.php"/>
+                <file name="../../app/Redirects/Console.php"/>
+                <file name="../../app/Search/Console.php"/>
+                <file name="../../app/Sources/Console.php"/>
+                <file name="../../extensions/video_tools/src/Console.php"/>
+                <file name="../../app/Http/Sse.php"/>
+            </errorLevel>
+        </TaintedHtml>
+        <TaintedTextWithQuotes>
+            <errorLevel type="suppress">
+                <file name="../../bin/console"/>
+                <file name="../../app/Glossary/Console.php"/>
+                <file name="../../app/Push/Console.php"/>
+                <file name="../../app/Redirects/Console.php"/>
+                <file name="../../app/Search/Console.php"/>
+                <file name="../../app/Sources/Console.php"/>
+                <file name="../../extensions/video_tools/src/Console.php"/>
+                <file name="../../app/Http/Sse.php"/>
+            </errorLevel>
+        </TaintedTextWithQuotes>
+    </issueHandlers>
+
+    <enableExtensions>
+        <extension name="pdo"/>
+    </enableExtensions>
+
+    <plugins>
+        <pluginClass class="Klxm\Psalm\TaintPlugin"/>
+    </plugins>
+
+    <stubs>
+        <file name="stubs/taint.phpstub"/>
+    </stubs>
+</psalm>
