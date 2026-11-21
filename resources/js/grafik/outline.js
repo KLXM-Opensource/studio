@@ -14,6 +14,7 @@ import { NS, num, pt, docMatrix, parentMatrix, fmtMatrix, pathToString, parsePat
 import { getProp } from './doc.js';
 import { t } from '../_i18n.js';
 import { firstFamily } from './fontpicker.js';
+import { fontkitFeatures } from './typo.js';
 
 let fkP = null;
 const fontCache = new Map();   // url → Promise<font>
@@ -194,12 +195,17 @@ export async function outlineText(ed, text) {
   for (const run of runs) {
     const { fonts, family } = await fontsFor(ed, run.el);
     if (!fonts) return { error: t('Für die Schrift „{font}“ liegt keine Schriftdatei vor – bitte eine installierte Schrift wählen (Bereich Zeichen) und erneut umwandeln.', { font: family }) };
-    const fs = parseFloat(getProp(run.el, 'font-size')) || 16;
+    // berechnete Größe (Läufe können relativ sein, z. B. 60 % beim nachgebildeten Hochstellen)
+    const fs = parseFloat(getComputedStyle(run.el).fontSize) || parseFloat(getProp(run.el, 'font-size')) || 16;
     let d = '';
     // Glyphen je Zeichensatz-Datei: erste Datei, die das Zeichen kennt (latin, latin-ext …)
     const str = run.chars.map(c => c.ch).join('');
     const main = fonts[0];
-    const layout = main.layout(str);
+    // dieselben OpenType-Merkmale wie im Browser (Ligaturen, Kapitälchen, Ziffern, Stilsätze …)
+    const feats = fontkitFeatures(getProp(run.el, 'font-feature-settings'));
+    // Brüche: fontkit wendet frac nur um den Bruchstrich U+2044 an (der Browser auf die ganze Ziffernfolge) – / zwischen
+    // Ziffern daher als Bruchstrich übergeben (gleiche Länge, die Zuordnung zu den Zeichen bleibt)
+    const layout = main.layout(feats.frac ? str.replace(/(?<=\d)\/(?=\d)/g, '\u2044') : str, feats);
     let ci = 0;
     for (const g of layout.glyphs) {
       const cps = g.codePoints?.length || 1;
@@ -242,8 +248,10 @@ export async function outlineText(ed, text) {
   if (!parts.length) return { error: t('Der Text enthält keine Zeichen.') };
   // Ergebnis im Raum des Textes (dessen transform bleibt)
   const KEEP_OUT = ['x', 'y', 'dx', 'dy', 'rotate', 'textLength', 'lengthAdjust', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor',
-    'letter-spacing', 'word-spacing', 'text-decoration', 'dominant-baseline', 'data-ge-frame', 'data-ge-lh', 'font-kerning', 'xml:space'];
-  const copyAttrs = (from, to) => { for (const a of from.attributes) if (!KEEP_OUT.includes(a.name) && a.name !== 'href') to.setAttribute(a.name, a.value); to.style?.removeProperty('font-kerning'); to.style?.removeProperty('font-family'); };
+    'letter-spacing', 'word-spacing', 'text-decoration', 'dominant-baseline', 'data-ge-frame', 'data-ge-lh', 'data-ge-para', 'data-ge-sx', 'data-ge-sy', 'data-ge-ps',
+    'font-kerning', 'xml:space', 'baseline-shift'];
+  const CSS_OUT = ['font-kerning', 'font-family', 'font-feature-settings', 'font-variation-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps', 'font-variant-position'];
+  const copyAttrs = (from, to) => { for (const a of from.attributes) if (!KEEP_OUT.includes(a.name) && a.name !== 'href') to.setAttribute(a.name, a.value); for (const p of CSS_OUT) to.style?.removeProperty(p); if (to.getAttribute('style') === '') to.removeAttribute('style'); };
   let out;
   if (parts.length === 1 && parts[0].el === text) {
     out = document.createElementNS(NS, 'path');

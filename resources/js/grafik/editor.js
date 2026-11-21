@@ -27,7 +27,8 @@ import { parseColor, hex } from './color.js';
 import { h, iconBtn, menu, closeMenus, modal, MOD, ALT, SHIFT, isMac } from './ui.js';
 import { buildPanels } from './panels.js';
 import { TextEditor } from './textedit.js';
-import { readText, layoutText, transformCase, styleRange } from './text.js';
+import { readText, layoutText, transformCase, styleRange, mapRange } from './text.js';
+import { parseFeatures, fmtFeatures, paraOf, setPara, loadHyphens, preloadHyphens, setHyphenModules } from './typo.js';
 import { fontPicker, fontItems, itemFor, WEIGHTS } from './fontpicker.js';
 import { booleanOp, simplifyD, outlineStroke, offsetArea, pathLike, makeCompound, recomputeCompound, isCompound } from './bool.js';
 import { makeClip, releaseClip, clipOf } from './clip.js';
@@ -103,6 +104,7 @@ export class GraphicEditor {
     this.recent = [];
     // persönliche Einstellungen (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
     this.prefs = { fontFav: [], fontRecent: [], colorMode: 'hex', ...(boot.prefs || {}) };
+    setHyphenModules(boot.modules?.hyphen);
     this.loadFonts();
     this.nodeSel = new Set();   // ausgewählte Knoten (Direktauswahl): "s:i"
     this.build();
@@ -262,6 +264,7 @@ export class GraphicEditor {
     if (label) { this.history = []; this.hi = -1; this.commit(label); this.savedAt = this.hi; }
     this.fitted = false;
     this.fit();
+    preloadHyphens(root);
     this.changed(false);
   }
 
@@ -1482,7 +1485,7 @@ export class GraphicEditor {
    * sonst für die ganzen Texte der Auswahl (Läufe verlieren dieselbe Eigenschaft, damit sie überall gilt).
    */
   textProp(prop, value) {
-    const runProp = ['font-weight', 'font-style', 'fill', 'text-decoration', 'letter-spacing', 'font-family', 'font-size'].includes(prop);
+    const runProp = ['font-weight', 'font-style', 'fill', 'text-decoration', 'letter-spacing', 'font-family', 'font-size', 'baseline-shift', 'font-feature-settings'].includes(prop);
     if (this.textEd && runProp && this.textEd.range[0] !== this.textEd.range[1]) { this.textEd.format({ [prop]: value }); this.panels.refresh(); return; }
     const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
     if (!list.length) { this.renderCtx(); this.panels.refresh(); return; }
@@ -1497,11 +1500,20 @@ export class GraphicEditor {
     this.commit(t('Schrift geändert'));
   }
 
-  /** Absatz: anchor (Ausrichtung), lh (Zeilenabstand), frame (Rahmenbreite), offset (Startversatz auf dem Pfad, %) */
-  textPara(k, v) {
+  /**
+   * Absatz: anchor (Ausrichtung start|middle|end|justify), lh (Zeilenabstand), frame (Rahmenbreite), offset (Startversatz
+   * auf dem Pfad, %), ws (Wortabstand), pb/pa (Abstand vor/nach Absätzen), li/ri/fi (Einzüge links/rechts/erste Zeile),
+   * hy (Silbentrennung: '', 'de', 'en' – Trennmuster werden vorher geladen)
+   */
+  async textPara(k, v) {
     const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (k === 'hy' && v) { this.busy(true); await loadHyphens(v); this.busy(false); }
     for (const el of list) {
       if (k === 'anchor') {
+        // Blocksatz = links ausgerichtet, Wortabstände füllen die Zeilen des Textrahmens
+        const just = v === 'justify';
+        if (just !== (paraOf(el).al === 'justify')) setPara(el, { al: just ? 'justify' : '' });
+        if (just) v = 'start';
         const w = parseFloat(el.getAttribute('data-ge-frame')) || 0, tp = el.querySelector('textPath');
         if (w && !tp) {
           // Textrahmen: linke Kante bleibt, x wandert mit der Ausrichtung
@@ -1523,9 +1535,99 @@ export class GraphicEditor {
       } else if (k === 'lh') { el.setAttribute('data-ge-lh', num(v, 3)); this.retext(el); }
       else if (k === 'frame') { this.setTextFrame(el, v, false); }
       else if (k === 'offset') { const tp = el.querySelector('textPath'); if (tp) tp.setAttribute('startOffset', num(v, 2) + '%'); }
+      else if (k === 'ws') { setProp(el, 'word-spacing', v ? num(v, 3) : null); this.retext(el); }
+      else if (['pb', 'pa', 'li', 'ri', 'fi', 'hy'].includes(k)) { setPara(el, { [k]: v }); this.retext(el); }
     }
     if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.place(); this.draw(); this.panels.refresh(); return; }
-    this.commit({ anchor: t('Ausrichtung geändert'), lh: t('Zeilenabstand geändert'), frame: t('Textrahmen geändert'), offset: t('Startversatz geändert') }[k]);
+    this.commit({ anchor: t('Ausrichtung geändert'), lh: t('Zeilenabstand geändert'), frame: t('Textrahmen geändert'), offset: t('Startversatz geändert'),
+      ws: t('Wortabstand geändert'), pb: t('Abstand vor Absatz'), pa: t('Abstand nach Absatz'), li: t('Einzug links'), ri: t('Einzug rechts'), fi: t('Einzug erste Zeile'),
+      hy: t('Silbentrennung') }[k]);
+  }
+
+  /**
+   * OpenType-Merkmale ändern (patch: { tag: 1|0|null }, null = Standard): während der Bearbeitung mit markiertem Bereich nur
+   * für diese Zeichen (jeder Lauf behält seine übrigen Merkmale), sonst für die ganzen Texte samt ihren Läufen.
+   */
+  textFeature(patch) {
+    const merge = cur => { const o = parseFeatures(cur); for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; } return fmtFeatures(o) || null; };
+    const te = this.textEd;
+    if (te && te.range[0] !== te.range[1]) {
+      const base = getProp(te.el, 'font-feature-settings', false);
+      te.model = mapRange(te.model, te.range[0], te.range[1], s => ({ ...s, 'font-feature-settings': merge(s['font-feature-settings'] ?? base) }));
+      te.dirty = true; te.relayout(); te.ta.setSelectionRange(...te.range); this.draw(); this.panels.refresh();
+      return;
+    }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (!list.length) return;
+    for (const el of list) {
+      setProp(el, 'font-feature-settings', merge(getProp(el, 'font-feature-settings', false)));
+      for (const r of el.querySelectorAll('tspan')) { const v = r.style.getPropertyValue('font-feature-settings'); if (v) setProp(r, 'font-feature-settings', merge(v)); }
+      if (el.hasAttribute('data-ge-frame') || el.querySelector('tspan[dy]')) this.retext(el);
+    }
+    if (te) { te.dirty = true; te.before = null; this.draw(); this.panels.refresh(); return; }
+    this.commit(t('OpenType geändert'));
+  }
+
+  /**
+   * Hoch-/Tiefstellen: mit den Merkmalen sups/subs der Schrift (has = Schrift kennt sie), sonst Ersatz mit Grundlinienversatz
+   * und 60 % Schriftgröße. pos: 'sups' | 'subs' | '' (normal)
+   */
+  textPosition(pos, has) {
+    const te = this.textEd, sel = te && te.range[0] !== te.range[1];
+    const patch = { sups: pos === 'sups' && has ? 1 : null, subs: pos === 'subs' && has ? 1 : null };
+    const fake = pos && !has ? { 'baseline-shift': pos === 'sups' ? 'super' : 'sub', 'font-size': '60%' } : { 'baseline-shift': null };
+    if (sel) {
+      const base = getProp(te.el, 'font-feature-settings', false);
+      te.model = mapRange(te.model, te.range[0], te.range[1], s => {
+        const o = parseFeatures(s['font-feature-settings'] ?? base);
+        for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; }
+        const n = { ...s, 'font-feature-settings': fmtFeatures(o) || null, ...fake };
+        if (!pos || has) { if (/%$/.test(n['font-size'] || '')) delete n['font-size']; delete n['baseline-shift']; }
+        for (const k of Object.keys(n)) if (n[k] === null) delete n[k];
+        return n;
+      });
+      te.dirty = true; te.relayout(); te.ta.setSelectionRange(...te.range); this.draw(); this.panels.refresh();
+      return;
+    }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    for (const el of list) {
+      const o = parseFeatures(getProp(el, 'font-feature-settings', false));
+      for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; }
+      setProp(el, 'font-feature-settings', fmtFeatures(o) || null);
+      // ganzer Text: Ersatz über die Läufe (ein Grundlinienversatz am Text selbst verschöbe nur alles)
+      const m = readText(el);
+      const all = mapRange(m, 0, Infinity, s => {
+        const n = { ...s, ...fake };
+        if (!pos || has) { if (/%$/.test(n['font-size'] || '')) delete n['font-size']; delete n['baseline-shift']; }
+        for (const k of Object.keys(n)) if (n[k] === null) delete n[k];
+        return n;
+      });
+      layoutText(el, all);
+    }
+    if (te) { te.model = readText(te.el); te.dirty = true; te.before = null; te.relayout(); this.draw(); this.panels.refresh(); return; }
+    this.commit(t('Position geändert'));
+  }
+
+  /** Horizontal/vertikal skalieren (Prozent) – als Skalierung des Textes um seinen Ankerpunkt (data-ge-sx/-sy merken den Wert) */
+  textScale(axis, pct) {
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    for (const el of list) {
+      const a = axis === 'x' ? 'data-ge-sx' : 'data-ge-sy';
+      const old = (parseFloat(el.getAttribute(a)) || 100) / 100, nw = Math.max(1, Math.min(1000, pct || 100)) / 100;
+      if (Math.abs(old - nw) < 1e-6) continue;
+      const x = parseFloat((el.getAttribute('x') || '0').split(/[\s,]+/)[0]) || 0, y = parseFloat((el.getAttribute('y') || '0').split(/[\s,]+/)[0]) || 0;
+      const k = nw / old;
+      const M = (el.transform?.baseVal?.consolidate()?.matrix ? DOMMatrix.fromMatrix(el.transform.baseVal.consolidate().matrix) : new DOMMatrix())
+        .multiply(new DOMMatrix().translate(x, y).scale(axis === 'x' ? k : 1, axis === 'y' ? k : 1).translate(-x, -y));
+      // SVGMatrix rechnet mit 32 Bit: auf 6 Stellen runden, damit 100 % wieder ohne Transformation endet
+      for (const k2 of ['a', 'b', 'c', 'd']) M[k2] = Math.round(M[k2] * 1e6) / 1e6;
+      for (const k2 of ['e', 'f']) M[k2] = Math.round(M[k2] * 1e3) / 1e3 || 0;
+      const f = fmtMatrix(M);
+      if (f) el.setAttribute('transform', f); else el.removeAttribute('transform');
+      if (Math.abs(nw - 1) < 1e-6) el.removeAttribute(a); else el.setAttribute(a, num(nw * 100, 2));
+    }
+    if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.place(); this.draw(); this.panels.refresh(); return; }
+    this.commit(axis === 'x' ? t('Horizontal skaliert') : t('Vertikal skaliert'));
   }
 
   /** Groß-/Kleinschreibung als echte Zeichen (während der Bearbeitung: Auswahl, sonst ganze Texte) */

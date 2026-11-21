@@ -121,7 +121,9 @@ final class GraphicsController extends AdminController
             'fonts' => Graphics::fonts(),
             'fontFiles' => Graphics::fontFiles(),
             // Bibliotheken auf Abruf (nur beim ersten Gebrauch): Geometrie, Text in Kurven, PDF-Export
-            'modules' => ['paper' => asset('js/grafik-paper.mjs'), 'fonts' => asset('js/grafik-fonts.mjs'), 'pdf' => asset('js/grafik-pdf.mjs')],
+            'modules' => ['paper' => asset('js/grafik-paper.mjs'), 'fonts' => asset('js/grafik-fonts.mjs'), 'pdf' => asset('js/grafik-pdf.mjs'),
+                // Silbentrennung in Textrahmen (Trennmuster je Sprache)
+                'hyphen' => ['de' => asset('js/grafik-hyph-de.mjs'), 'en' => asset('js/grafik-hyph-en.mjs')]],
             'blocks' => Graphics::blockTypes(),
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [

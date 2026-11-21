@@ -30,7 +30,12 @@ export function typeLabel(el) {
 export function nameOf(el) {
   const n = el.getAttribute('data-name');
   if (n) return n;
-  if (el.localName === 'text') { const s = el.textContent.trim().replace(/\s+/g, ' '); if (s) return s.slice(0, 40); }
+  if (el.localName === 'text') {
+    // Zeilen mit eingefügtem Trennstrich (Silbentrennung, data-ge-soft=h) wieder zusammensetzen
+    const s = !el.querySelector('tspan[data-ge-soft="h"]') ? el.textContent.trim().replace(/\s+/g, ' ') : [...el.childNodes].map(n => n.nodeType === 1 && n.getAttribute?.('data-ge-soft') === 'h' ? '\u0000' + n.textContent : n.textContent + ' ').join('')
+      .replace(/-\s*\u0000/g, '').replace(/\u0000/g, '').trim().replace(/\s+/g, ' ');
+    if (s) return s.slice(0, 40);
+  }
   const id = el.getAttribute('id');
   if (id && !/^(svg_|path|rect|g|ge-)\d*/i.test(id)) return id.replace(/_x([0-9A-F]{2})_/g, (m, c) => String.fromCharCode(parseInt(c, 16))).replace(/_/g, ' ');
   return typeLabel(el);

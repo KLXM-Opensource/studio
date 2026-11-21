@@ -288,8 +288,8 @@ export function colorPicker(host, opts = {}) {
       const r = info.ratio, need = info.large ? 3 : 4.5;
       const lvl = r >= (info.large ? 4.5 : 7) ? 'AAA' : r >= need ? 'AA' : '';
       p.className = 'ge-cp__contrast ' + (lvl ? 'is-ok' : 'is-low');
-      p.innerHTML = `<span class="ge-cp__bg" style="--c:${esc(info.bg)}" aria-hidden="true"></span><span>${esc(t('Kontrast zum Hintergrund'))}</span> <b>${esc(r.toFixed(2).replace('.', document.documentElement.lang === 'en' ? '.' : ','))} : 1</b> <span class="ge-cp__lvl">${esc(lvl || t('zu gering'))}</span>`;
-      p.title = info.large ? t('Großer Text: mindestens 3 : 1 (AA), 4,5 : 1 (AAA)') : t('Text: mindestens 4,5 : 1 (AA), 7 : 1 (AAA)');
+      p.innerHTML = `<span class="ge-cp__bg" style="--c:${esc(info.bg)};color:${esc(info.fg || '#000')}" aria-hidden="true">Aa</span><span>${esc(t('Kontrast'))}</span> <b>${esc(r.toFixed(2).replace('.', document.documentElement.lang === 'en' ? '.' : ','))} : 1</b> <span class="ge-cp__lvl">${esc(lvl || t('zu gering'))}</span>`;
+      p.title = t('Kontrast zum Hintergrund') + ' – ' + (info.large ? t('Großer Text: mindestens 3 : 1 (AA), 4,5 : 1 (AAA)') : t('Text: mindestens 4,5 : 1 (AA), 7 : 1 (AAA)'));
     },
   };
   paint();

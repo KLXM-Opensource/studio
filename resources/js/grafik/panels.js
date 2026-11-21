@@ -109,7 +109,7 @@ export function buildPanels(ed) {
     const fg = parseColor(p.color), bg = backgroundOf(el);
     const fs = parseFloat(getProp(el, 'font-size')) || 16, fw = parseInt(getProp(el, 'font-weight'), 10) || (getProp(el, 'font-weight') === 'bold' ? 700 : 400);
     // Größe im Bild (Transformation der Grafik bleibt außen vor: gemessen wird in Einheiten der Zeichenfläche)
-    cp.contrast({ ratio: contrast(over(fg, p.alpha, bg), bg), bg: toHex(bg), large: fs >= 24 || (fs >= 18.66 && fw >= 700) });
+    cp.contrast({ ratio: contrast(over(fg, p.alpha, bg), bg), bg: toHex(bg), fg: toHex(over(fg, p.alpha, bg)), large: fs >= 24 || (fs >= 18.66 && fw >= 700) });
   }
 
   /** Verlauf der Auswahl nur für die Auswahl (andere Verwendungen bekommen ihn nicht mit geändert) */
