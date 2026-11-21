@@ -156,7 +156,7 @@ final class Themed
         foreach ($mm as $c) if ($c[1] === 't' || $c[3] !== '') $used[$c[4]] = $pal[$c[4]] ?? null;
         ksort($used);
         $hash = substr(sha1($svg . "\n" . json_encode($used) . ($dark ? 'd' : '')), 0, 10);
-        $dir = Graphics::dir() . '/t';
+        $dir = Store::dir() . '/t';
         $id = ($m['_pool'] ?? '') !== '' ? preg_replace('~[^a-z0-9]~', '', (string) $m['_pool']) . '-' . (int) $m['id'] : (string) (int) $m['id'];
         $base = 'gt-' . $id . '-' . $hash;
         $out = ['light' => '', 'dark' => null];
@@ -164,7 +164,7 @@ final class Themed
             $file = $base . '-' . $mode[0] . '.svg';
             if (!is_file($dir . '/' . $file)) {
                 if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) return self::$memo[$key] = null;
-                Svg::guard(Graphics::dir());
+                Svg::guard(Store::dir());
                 // ältere Fassungen dieser Grafik entfernen (anderes Design oder neue Datei) – erst nach einem Tag, weil
                 // zwischengespeicherte Seiten noch auf sie verweisen können (wie die Design-Datei, Core\Design::fileUrl)
                 foreach (glob($dir . '/gt-' . $id . '-*-' . $mode[0] . '.svg') ?: [] as $old) {
@@ -172,7 +172,7 @@ final class Themed
                 }
                 if (@file_put_contents($dir . '/' . $file, self::render($svg, $mode, $pal), LOCK_EX) === false) return self::$memo[$key] = null;
             }
-            $out[$mode] = Graphics::url('t/' . $file);
+            $out[$mode] = Store::url('t/' . $file);
         }
         return self::$memo[$key] = $out;
     }

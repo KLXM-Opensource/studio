@@ -268,7 +268,7 @@ final class Motion
         $web = is_file($path) ? (string) @file_get_contents($path, false, null, 0, Svg::MAX_BYTES + 1) : '';
         if ($web === '' || !self::isAnimated($web)) return self::$memo[$mk] = null;
         // gebundene Fassung (Core\Graphics\Bind): Datei = Fassung mit Werten, Arbeitsfassung kommt vom Original
-        $work = isset($m['_work']) ? (string) $m['_work'] : (($m['_pool'] ?? '') === '' ? Graphics::source('media:' . (int) $m['id'], $web) : null);
+        $work = isset($m['_work']) ? (string) $m['_work'] : (($m['_pool'] ?? '') === '' ? Store::source('media:' . (int) $m['id'], $web) : null);
         $model = $work !== null ? self::model($work) : null;
         if (!$model) return self::$memo[$mk] = null;
         $pal = Themed::isThemed($web) ? Themed::palette() : [];
@@ -278,7 +278,7 @@ final class Motion
         $base = 'gm-' . $id . '-' . $hash;
         $cache = site()->storage('cache/grafik-motion');
         $meta = is_file("$cache/$base.json") ? json_decode((string) @file_get_contents("$cache/$base.json"), true) : null;
-        $dir = Graphics::dir() . '/m';
+        $dir = Store::dir() . '/m';
         if (!is_array($meta) || !is_file("$dir/$base.css")) {
             $light = $pal ? Themed::render($web, 'light', $pal) : $web;
             $dark = $darkOn ? ($pal ? Themed::render($web, 'dark', $pal) : $web) : null;
@@ -289,7 +289,7 @@ final class Motion
                 return self::$memo[$mk] = null;
             }
             foreach ([$dir, $cache] as $d) if (!is_dir($d) && !@mkdir($d, 0775, true) && !is_dir($d)) return self::$memo[$mk] = null;
-            Svg::guard(Graphics::dir());
+            Svg::guard(Store::dir());
             // ältere Fassungen dieser Grafik erst nach einem Tag löschen (zwischengespeicherte Seiten verweisen noch darauf)
             foreach (glob($dir . '/gm-' . $id . '-*.css') ?: [] as $old) if (filemtime($old) < time() - 86400) @unlink($old);
             foreach (glob($cache . '/gm-' . $id . '-*.json') ?: [] as $old) if (filemtime($old) < time() - 86400) @unlink($old);
@@ -298,7 +298,7 @@ final class Motion
             $meta = ['key' => $out['key'], 'svg' => $out['svg'], 'links' => $out['links'], 'interactive' => $out['interactive'], 'dark' => $out['dark'], 'js' => $out['js'], 'pause' => $out['pause']];
             @file_put_contents("$cache/$base.json", json_encode($meta), LOCK_EX);
         }
-        $meta['css'] = Graphics::url('m/' . $base . '.css');
+        $meta['css'] = Store::url('m/' . $base . '.css');
         return self::$memo[$mk] = $meta;
     }
 
