@@ -3655,7 +3655,7 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .net-presence form{margin:0}
 .net-presence__b{display:flex;align-items:center;gap:8px;width:100%;padding:4px 6px;border:0;border-radius:8px;background:color-mix(in srgb,#3DD9A0 14%,transparent);color:inherit;font:inherit;font-size:13px;text-align:left;cursor:pointer}
 .net-presence__b:hover,.net-presence__b:focus-visible{background:color-mix(in srgb,#3DD9A0 26%,transparent)}
-.net-presence__ava{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:#14917F;color:#fff;font:700 9.5px/1 var(--adm-font)}
+.net-presence__ava{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:#0F7566;color:#fff;font:700 9.5px/1 var(--adm-font)}
 .net-presence small{color:var(--adm-t3)}
 
 /* Grundeinstellungen → E-Mail-Konten (system/mail-accounts.php) */
