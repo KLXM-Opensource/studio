@@ -257,6 +257,24 @@
   <p><b>Neue Kontakte aus Apps:</b> Bei Adressbüchern mit Detailseite schlägt die Einstellung „Neue Einträge aus Apps“ <b>als Entwurf</b> vor – so erscheint ein Kontakt, den jemand am Telefon anlegt, nicht von selbst auf der Website. Wer das will, stellt „sofort online“ ein; einmal gespeicherte Einstellungen bleiben, wie sie sind. Felder mit „Nie öffentlich“ sind in den Apps sichtbar.</p>
   <?php endif; ?>
 
+  <h3 id="abonnieren">Kalender und Kontakte abonnieren</h3>
+  <p>Kalender- und Kontakte-Tabellen haben unter <b>Daten → Tabelle → Abonnieren</b> eine eigene Seite (Recht „Einträge bearbeiten“). Dort finden Sie:</p>
+  <ul>
+    <li><b>Öffentlich abonnieren:</b> beim Kalender die webcal-Adresse des öffentlichen Feeds (dieselbe wie „Kalender abonnieren“ auf der Website – nur veröffentlichte Termine und nur Angaben, die für „Kalender (ICS)“ freigegeben sind). Bei Kontakten eine <b>.vcf-Datei</b> mit allen Kontakten, die „Auf der Website zeigen“, und nur deren freigegebenen Angaben – nur bei Tabellen für die Website, nicht bei internen Listen oder geschützten Bereichen.</li>
+    <li><b>Abo-Tokens:</b> eine eigene, geheime Adresse je Gerät oder Person. Sie geben einen Namen (z. B. „iPhone Vorstand“), wählen den <b>Umfang</b> – <i>nur öffentlich</i> oder <i>inklusive interner Einträge und Angaben</i> (Entwürfe, nicht freigegebene Kontakte, private Telefonnummern) – und optional ein Ablaufdatum. Felder „Nur Website“ (z. B. Vita) gehen nie an Apps. Abos sind immer <b>nur lesend</b>: Änderungen in der App kommen nicht zurück.</li>
+    <li><b>Adresse, QR-Code und Anleitung</b> erscheinen nach dem Anlegen in einem Fenster – <b>nur dieses eine Mal</b>. Gespeichert wird nur ein Hash; ist die Adresse verloren, widerrufen Sie das Abo und legen ein neues an. In der Liste sehen Sie, wann ein Abo zuletzt genutzt wurde, und können es jederzeit <b>widerrufen</b>.</li>
+  </ul>
+  <p><b>So geht es in den Apps:</b></p>
+  <ul>
+    <li><b>iPhone/iPad:</b> QR-Code mit der Kamera scannen oder die webcal-Adresse antippen → „Abonnieren“. Von Hand: Einstellungen → Apps → Kalender → Accounts → Account hinzufügen → Andere → „Kalenderabo hinzufügen“. Kontakte mit CardDAV: Einstellungen → Apps → Kontakte → Accounts → Andere → „CardDAV-Account hinzufügen“.</li>
+    <li><b>macOS:</b> Kalender → Ablage → „Neues Kalenderabonnement …“; Kontakte → Einstellungen → Accounts → „Anderer Kontakte-Account …“ → CardDAV.</li>
+    <li><b>Android:</b> Kalender mit ICSx⁵, Kontakte mit DAVx⁵ („Mit URL und Benutzername anmelden“). Google Kalender („Per URL“) ruft die Adresse von Googles Servern ab – für Abos mit internen Einträgen besser ICSx⁵.</li>
+    <li><b>Outlook:</b> Kalender → „Kalender hinzufügen“ → „Aus dem Internet abonnieren“ (https-Adresse). Für Kontakte kennt Outlook kein Abo – die .vcf-Datei einmalig importieren.</li>
+    <li><b>Thunderbird:</b> „Neuer Kalender“ → „Im Netzwerk“ → https-Adresse; Adressbuch → „CardDAV-Adressbuch hinzufügen“.</li>
+  </ul>
+  <p>Ist die Erweiterung <b>CalDAV/CardDAV</b> aktiv, gleichen Adressbuch-Apps Kontakte mit dem Abo-Token laufend ab: Server-Adresse der Website mit <code>/dav/</code>, Benutzername <code>abo</code>, Passwort = Abo-Token. Ohne die Erweiterung gibt es die .vcf-Datei (ein Stand zum Importieren).</p>
+  <div class="doc-note"><p>Abos mit Token gehören zur Funktion <b>„Kalender und Kontakte per App abonnieren“</b> (Funktionen &amp; Erweiterungen), die standardmäßig aus ist. Ein Abo endet auch, wenn das Konto, das es angelegt hat, gelöscht oder gesperrt wird oder das Recht auf die Tabelle verliert. Wer eine Token-Adresse hat, kann mitlesen – bei „intern“ auch interne Angaben. Geben Sie solche Adressen nur an Berechtigte weiter.</p></div>
+
   <h3 id="geteilt">Geteilte Tabellen (mehrere Websites)</h3>
   <p>Manche Tabellen tragen in der Daten-Navigation den Hinweis <b>geteilt</b>. Sie gehören zu mehreren Websites derselben Installation – zum Beispiel Neuigkeiten oder Termine, die eine Dachorganisation und ihre Mitglieder gemeinsam nutzen. Die Felder legt die Website fest, der die Tabelle gehört; jede Website pflegt <b>nur ihre eigenen Einträge</b>.</p>
   <ul class="doc-list">
