@@ -41,6 +41,7 @@ import { SchemeView, suggestDark, paintedElements, bakeScheme } from './scheme.j
 import { checkOverlay, suggestAlt } from './check.js';
 import { ShapeBuilder } from './builder.js';
 import { duplicateAgain, repeatDialog } from './repeat.js';
+import { Warp } from './warp.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -183,6 +184,7 @@ export class GraphicEditor {
     this.sectionId = 'paper';
     this.sv = new SchemeView(this);
     this.builder = new ShapeBuilder(this);
+    this.warp = new Warp(this);
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -263,6 +265,7 @@ export class GraphicEditor {
 
   setTool(id) {
     if (!TOOLS.some(x => x.id === id)) return;
+    this.warp?.commit();
     this.finishPen();
     this.endText();
     this.tool = id;
@@ -362,7 +365,7 @@ export class GraphicEditor {
     this.layout();
     this.changed();
   }
-  undo() { this.flushNudge(); this.goto(this.hi - 1); }
+  undo() { this.flushNudge(); if (this.warp?.active) { this.warp.cancel(); return; } this.goto(this.hi - 1); }
   redo() { this.flushNudge(); this.goto(this.hi + 1); }
   get dirty() { return this.hi !== this.savedAt; }
 
@@ -514,10 +517,11 @@ export class GraphicEditor {
     // Hinweise der Prüfung (check.js) für die gezeigte Fassung
     out.push(checkOverlay(this));
     if (this.tool === 'builder') out.push(this.builder.overlay());
+    if (this.warp?.active) out.push(this.warp.overlay());
     if (this.tool === 'gradient') out.push(this.grad.overlay());
     else if (this.tool === 'node') out.push(this.drawNodes());
     else if (this.sel.length && !this.textEl && this.sel.every(isConn)) out.push(this.drawConnSel(this.tool === 'select'));
-    else if (this.sel.length && !this.textEl) out.push(this.drawSelection());
+    else if (this.sel.length && !this.textEl && !this.warp?.active) out.push(this.drawSelection());
     if (this.tool === 'connector' || this.connDrag) out.push(this.drawAnchors());
     if (this.guides?.length) for (const g of this.guides) {
       const a = this.toOv(g.a), b = this.toOv(g.b);
@@ -538,6 +542,7 @@ export class GraphicEditor {
     // nicht mehr an – deshalb zweiten Druck auf dasselbe Element erkennen
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.second('n' + el.dataset.node, e) ? this.nodeToggle(e, el.dataset.node) : this.nodeDown(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-gh]')) el.addEventListener('pointerdown', e => this.grad.down(e, el.dataset.gh));
+    for (const el of ov.querySelectorAll('[data-wh]')) el.addEventListener('pointerdown', e => this.warp.down(e, el.dataset.wh));
     for (const el of ov.querySelectorAll('[data-ch]')) el.addEventListener('pointerdown', e => this.connHandleDown(e, el.dataset.ch));
     for (const el of ov.querySelectorAll('[data-guide]')) {
       el.addEventListener('pointerdown', e => { if (e.button !== 0 || this.tool === 'hand' || this.space) return; e.stopPropagation(); e.preventDefault(); this.rulers.dragGuide(e, +el.dataset.guide); });
@@ -642,6 +647,8 @@ export class GraphicEditor {
 
   down(e) {
     this.flushNudge();
+    // Verzerren: Klick neben die Griffe übernimmt
+    if (this.warp?.active && e.button === 0 && !this.space) { this.warp.commit(); return; }
     if (e.button === 1 || this.space || this.tool === 'hand') return this.panDrag(e);
     if (e.button !== 0) return;
     if (e.target.closest?.('.ge-textedit')) return;
@@ -1718,6 +1725,8 @@ export class GraphicEditor {
       { sep: true },
       { label: t('Wiederholen …'), key: ALT + MOD + 'D', disabled: !n, run: () => repeatDialog(this) },
       { label: t('Auf Zeichenfläche einpassen'), disabled: !n, run: () => this.fitToArtboard() },
+      { label: t('Perspektivisch verzerren'), disabled: !n, run: () => this.warp.start('persp') },
+      { label: t('Hülle verzerren'), disabled: !n, run: () => this.warp.start('env') },
       { sep: true },
       { label: t('Kontur in Fläche umwandeln'), disabled: !shapes.some(el => (getProp(el, 'stroke') || 'none') !== 'none'), run: () => this.strokeToFill() },
       { label: t('Pfad versetzen …'), disabled: !n, run: () => this.offsetPath() },
@@ -2294,6 +2303,12 @@ export class GraphicEditor {
       if (e.target.closest?.('.ge-textedit')) return;
       // Pfeiltasten-Schritt abschließen, bevor ein anderer Befehl das Dokument ändert (sonst landete dessen Änderung im Schritt „Verschieben“)
       if (!/^Arrow|^(Shift|Alt|Meta|Control)$/.test(e.key)) this.flushNudge();
+      // Verzerren: ↵ übernimmt, Esc bricht ab, alles andere übernimmt zuerst
+      if (this.warp?.active) {
+        if (e.key === 'Enter') { e.preventDefault(); this.warp.commit(); return; }
+        if (e.key === 'Escape') { e.preventDefault(); this.warp.cancel(); return; }
+        if (!/^(Shift|Alt|Meta|Control| )$/.test(e.key)) this.warp.commit();
+      }
       if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? this.redo() : this.undo(); return; }
       if (mod && k === 'y') { e.preventDefault(); this.redo(); return; }
       if (mod && e.altKey && (k === 'd' || e.code === 'KeyD')) { e.preventDefault(); repeatDialog(this); return; }

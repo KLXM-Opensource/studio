@@ -78,7 +78,7 @@
       Ausbaustufe 3a: <code>fontpicker.js</code> (Schriftauswahl), <code>typo.js</code> (OpenType, Absatz-Einstellungen, Silbentrennung),
       <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).
       Ausbaustufe 3b: <code>scheme.js</code> (Design-Farben, Hell/Dunkel, Ansicht), <code>check.js</code> (Prüfen), <code>builder.js</code> (Formgitter),
-      <code>repeat.js</code> (Wiederholen), <code>fx.js</code> (Ebeneneffekte).</li>
+      <code>repeat.js</code> (Wiederholen), <code>fx.js</code> (Ebeneneffekte), <code>warp.js</code> (Perspektive, Hülle).</li>
     <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
       <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
       <table class="doc-table">
@@ -224,6 +224,12 @@
       Leuchten, <code>color-interpolation-filters="sRGB"</code>, Filterbereich ±50 %. Alles erlaubt <code>Core\Svg</code> schon – keine Änderung an der
       Bereinigung. Geteilte Filter werden beim Ändern kopiert, fremde Filter (aus Dateien) nicht angefasst. Verlaufsüberlagerung fehlt bewusst
       (bräuchte <code>feImage</code>, das als Pixelbild entfernt wird) – dafür Füllung mit Verlauf.</li>
+    <li id="grafik-warp-technik"><b>Verzerren</b> (<code>warp.js</code>): Pfade im Dokumentraum (<code>toNodes(transformPath(…, docMatrix))</code>),
+      Abbildung Einheitsquadrat → Viereck: Perspektive projektiv (Homographie nach Heckbert, Strecken bleiben <code>L</code>), Hülle als
+      Coons-Fläche aus vier quadratischen Kanten durch die Kantenmitten. Kurven (bei der Hülle auch Strecken) werden vor der Abbildung per
+      de Casteljau in 4 bzw. 6 Stücke geteilt, deren Kontrollpunkte abgebildet werden. Ergebnis im Raum des Elternelements ohne <code>transform</code>;
+      Rechtecke, Ellipsen … werden Pfade. Sitzung mit Schnappschuss (Esc stellt exakt her), ein Schritt im Protokoll. Neigen: <code>skewX</code> um den
+      Bezugspunkt in der Lage des Rahmens.</li>
     <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
       <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
       und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +

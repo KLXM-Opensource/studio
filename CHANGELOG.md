@@ -54,6 +54,9 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   (vorher landete z. B. ⌘D direkt nach Pfeiltasten im Schritt „Verschieben“).
 - **Ebeneneffekte** im Bereich Darstellung: Schlagschatten, innerer Schatten, äußeres/inneres Leuchten, Kontur außen, Farbüberlagerung,
   Weichzeichnen – mehrere je Ebene, an/aus, Einstellungen mit Vorschau; als SVG-Filter aus den Primitiven, die die Bereinigung schon erlaubt.
+- **Verzerren:** Objekt → Perspektivisch verzerren (4 Eckgriffe, projektive Abbildung; Strecken bleiben exakt, Kurven werden vorher
+  unterteilt) und Hülle verzerren (Ecken und Kantenmitten, gebogene Kanten); Texte werden nach Rückfrage in Kurven umgewandelt; ↵/Klick
+  daneben übernimmt, Esc bricht ab. Neigen (N) im Bereich Transformieren.
 - **Behoben:** Schriftauswahl – ein Klick auf eine Schrift wirkte nach dem Zeigen auf andere Schriften oft nicht (die Liste scrollte die
   ganze Seite mit und rutschte unter dem Zeiger weg; jetzt scrollt nur die Liste). Verlauf – ein auf der Fläche angeklickter Farbstopp ist auch
   im Bereich Farbe aktiv, Farbfelder färben genau ihn (auch Anfang/Ende, deren Griff über dem Stopp liegt).

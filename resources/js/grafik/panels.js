@@ -908,6 +908,7 @@ export function buildPanels(ed) {
       <label>X <input type="number" class="ge-in" data-tf="x" step="any"></label><label>${esc(t('B'))} <input type="number" class="ge-in" data-tf="w" step="any" min="0" aria-label="${esc(t('Breite'))}"></label>
       <label>Y <input type="number" class="ge-in" data-tf="y" step="any"></label><label>${esc(t('H'))} <input type="number" class="ge-in" data-tf="h" step="any" min="0" aria-label="${esc(t('Höhe'))}"></label>
       <label>R <input type="number" class="ge-in" data-tf="r" step="any" aria-label="${esc(t('Drehung in Grad'))}"></label>
+      <label title="${esc(t('Neigen (waagerecht) um den Bezugspunkt, in Grad – wirkt einmal, das Feld steht danach wieder auf 0'))}">${esc(t('N'))} <input type="number" class="ge-in" data-tf="k" step="1" min="-80" max="80" placeholder="0" aria-label="${esc(t('Neigen in Grad'))}"></label>
       ${iconBtn('link-simple', t('Seitenverhältnis sperren'), 'data-lockratio aria-pressed="false"')}
     </div></div>`;
   trPanel.querySelectorAll('[data-anchor]').forEach(b => b.addEventListener('click', () => { anchor = b.dataset.anchor; refreshTransform(); }));
@@ -928,6 +929,7 @@ export function buildPanels(ed) {
     trPanel.querySelectorAll('[data-tf]').forEach(i => { i.disabled = !s; if (!s) i.value = ''; });
     if (!s || trPanel.contains(document.activeElement) && document.activeElement.matches('input')) return;
     const set = (k, v) => { trPanel.querySelector(`[data-tf="${k}"]`).value = num(v, 2); };
+    trPanel.querySelector('[data-tf="k"]').value = '';
     set('x', s.A.x); set('y', s.A.y); set('w', s.w); set('h', s.h); set('r', ((s.r % 360) + 360) % 360 > 180 ? s.r : s.r);
     trPanel.querySelector('[data-tf="r"]').disabled = ed.sel.length !== 1;
   }
@@ -947,6 +949,8 @@ export function buildPanels(ed) {
       T = F.multiply(new DOMMatrix().translate(s.a.x, s.a.y).scale(sx, sy).translate(-s.a.x, -s.a.y)).multiply(Fi);
     }
     if (i.dataset.tf === 'r') T = new DOMMatrix().translate(s.A.x, s.A.y).rotate(v - s.r).translate(-s.A.x, -s.A.y);
+    // Neigen (affin): einmalig um den Bezugspunkt, in der Lage des Rahmens (gedrehte Objekte neigen in ihrer eigenen Richtung)
+    if (i.dataset.tf === 'k') { if (!v || Math.abs(v) > 80) { refreshTransform(); return; } T = F.multiply(new DOMMatrix().translate(s.a.x, s.a.y).skewX(v).translate(-s.a.x, -s.a.y)).multiply(Fi); }
     if (!T) return;
     ed.sel.forEach(el => applyTransform(el, T, ed.root));
     void b;

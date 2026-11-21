@@ -490,3 +490,6 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-fx__opts .ge-lbl { display: flex; align-items: center; justify-content: space-between; gap: 6px }
 .ge-fx__color { width: 44px; height: 26px; padding: 0; border: 1px solid var(--adm-line); border-radius: 6px; background: none }
 .ge-row3 { display: flex; flex-wrap: wrap; gap: 6px 16px }
+.ge-ov__warp { fill: none; stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 4 3 }
+.ge-ov__wh { pointer-events: all; cursor: move }
+.ge-ov [data-wh] { pointer-events: all }

@@ -237,6 +237,11 @@
       Die Fläche zeigt das Ergebnis sofort. Große Weichzeichner kosten Rechenzeit beim Anzeigen; im PDF fehlen Effekte, in SVG für
       Desktop-Programme bleiben sie erhalten.</li>
   </ul>
+  <h4 id="grafik-verzerren">Verzerren und Neigen</h4>
+  <p><b>Objekt → Perspektivisch verzerren</b> zeigt vier Eckgriffe: Ziehen Sie eine Ecke, entsteht eine Fluchtperspektive (gerade Linien
+    bleiben gerade). <b>Objekt → Hülle verzerren</b> hat zusätzlich Griffe in den Kantenmitten – damit wölben Sie Kanten, z. B. für ein
+    gebogenes Banner. <kbd>↵</kbd> oder ein Klick daneben übernimmt, <kbd>Esc</kbd> bricht ab. Texte werden dafür nach einer Rückfrage in
+    Kurven umgewandelt. <b>Neigen</b> steht im Bereich Transformieren (Feld N, Grad um den Bezugspunkt).</p>
   <h4 id="grafik-geometrie">Formen kombinieren, ausstanzen, umwandeln</h4>
   <p>Zwei oder mehr Objekte wählen, dann in der Kontextleiste bzw. im Menü <b>Objekt</b>. Gerechnet wird mit den echten Kurven
     (Kreise bleiben rund); Konturen zählen nicht zur Fläche.</p>
