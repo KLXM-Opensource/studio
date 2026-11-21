@@ -157,13 +157,13 @@ final class Providers
     /** Rückkehr-Adresse (redirect_uri) dieser Website – genau so beim Anbieter eintragen */
     public static function redirectUri(): string
     {
-        return absolute_url('/admin/login/oidc/callback');
+        return admin_url_abs('/admin/login/oidc/callback');
     }
 
     /** Einstieg für vom Anbieter ausgelöste Anmeldung (OIDC „initiate_login_uri“) */
     public static function initiateUri(): string
     {
-        return absolute_url('/admin/login/oidc');
+        return admin_url_abs('/admin/login/oidc');
     }
 
     /**

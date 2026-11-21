@@ -152,12 +152,13 @@ final class Passkeys
         }
     }
 
-    /** @return array<int,int> Anzahl je Konto (Benutzerliste) */
-    public static function counts(Database $db, string $table = self::TABLE): array
+    /** @return array<int,int> Anzahl je Konto (Benutzerliste); $rpId: nur Passkeys dieser Domain (z. B. der Netzwerk-Domain) */
+    public static function counts(Database $db, string $table = self::TABLE, ?string $rpId = null): array
     {
         try {
             $out = [];
-            foreach ($db->fetchAll('SELECT user_id, COUNT(*) AS n FROM ' . self::tbl($table) . ' GROUP BY user_id') as $r) $out[(int) $r['user_id']] = (int) $r['n'];
+            $sql = 'SELECT user_id, COUNT(*) AS n FROM ' . self::tbl($table) . ($rpId !== null ? ' WHERE rp_id = ?' : '') . ' GROUP BY user_id';
+            foreach ($db->fetchAll($sql, $rpId !== null ? [$rpId] : []) as $r) $out[(int) $r['user_id']] = (int) $r['n'];
             return $out;
         } catch (\Throwable) {
             return [];

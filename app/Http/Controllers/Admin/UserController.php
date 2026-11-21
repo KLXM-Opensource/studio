@@ -26,7 +26,12 @@ final class UserController extends AdminController
         $users = app()->db->fetchAll('SELECT id, email, name, role, created_at, last_login, network_uid, totp_enabled, disabled, idp FROM users ORDER BY email');
         // Eingerichtete Verfahren je Konto (Abzeichen „2FA“, „Passkey ×n“) und Anmelde-Richtlinie (Core\Mfa)
         $pk = \Core\Passkeys::counts(app()->db);
-        foreach ($users as &$u) $u['passkeys'] = $pk[(int) $u['id']] ?? 0;
+        // Netzwerk-Domain (Core\NetworkHost): Passkeys gelten je Domain – Hinweis an Konten ohne Passkey für die Netzwerk-Domain
+        $pkNet = \Core\NetworkHost::active() ? \Core\Passkeys::counts(app()->db, \Core\Passkeys::TABLE, \Core\HostHandover::rp((string) \Core\NetworkHost::get())) : null;
+        foreach ($users as &$u) {
+            $u['passkeys'] = $pk[(int) $u['id']] ?? 0;
+            if ($pkNet !== null) $u['passkeys_net'] = $pkNet[(int) $u['id']] ?? 0;
+        }
         unset($u);
         // Einladungen (Core\Invites): offene Einladungen, erlaubte Rollen, Link einmal anzeigen, wenn die E-Mail nicht zugestellt wurde
         // Übersicht: Konten, deren Rolle einen zweiten Faktor verlangt, die ihn aber noch nicht eingerichtet haben (Core\Mfa)

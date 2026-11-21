@@ -284,8 +284,43 @@ final class SystemController extends AdminController
         if (Sites::multi()) \Core\Network\Network::log('admin.path', null, (string) ($user['email'] ?? ''), AdminPath::prefix());
         $this->changed();
         return $this->back('/admin/system#adminpath', 'success', AdminPath::custom()
-            ? __('Die Verwaltung liegt jetzt unter {url} – bitte Lesezeichen und die App auf dem Homescreen neu anlegen. /admin zeigt ohne Anmeldung „Seite nicht gefunden“.', ['url' => absolute_url('/admin')])
+            ? __('Die Verwaltung liegt jetzt unter {url} – bitte Lesezeichen und die App auf dem Homescreen neu anlegen. /admin zeigt ohne Anmeldung „Seite nicht gefunden“.', ['url' => admin_url_abs('/admin')])
             : __('Die Verwaltung liegt wieder unter /admin.'));
+    }
+
+    /**
+     * Netzwerk-Domain speichern (Core\NetworkHost, config/config.local.php) – wie die Adresse der Verwaltung nur Netzwerk-Administration
+     * (bzw. Administration einer Einzel-Installation), nur auf der Netzwerk-Website, mit Passwort bzw. kürzlicher Anmeldung.
+     * Vorher: Domain führt zur Netzwerk-Website und zeigt per Abruf auf diese Installation (lokale Test-Domains ohne Abruf).
+     */
+    public function networkHost(Request $r): Response
+    {
+        $user = $this->auth($r, 'system.manage');
+        $back = $r->str('back') === 'network' ? '/admin/network/administratoren#net-host' : '/admin/system#adminpath';
+        if (!\Core\NetworkHost::canManage()) return $this->back($back, 'error', __('Die Netzwerk-Domain kann nur die Netzwerk-Administration auf der Netzwerk-Website ändern.'));
+        $row = Mfa::row($user);
+        $hash = (string) ($row['password_hash'] ?? '');
+        if (!Mfa::recentAuth() || $r->str('password') !== '') {
+            $limiter = new RateLimiter(app()->db);
+            $key = 'adminpath:' . (int) ($user['id'] ?? 0);
+            if ($limiter->tooMany($key, 5, 900)) return $this->back($back, 'error', __('Zu viele Versuche. Bitte warten Sie 15 Minuten.'));
+            if ($hash === '' || !password_verify((string) ($r->post['password'] ?? ''), $hash)) {
+                $limiter->hit($key);
+                return $this->back($back, 'error', $hash === '' ? __('Bitte melden Sie sich ab und wieder an – danach gilt die Anmeldung 15 Minuten als Bestätigung.') : __('Das Passwort ist falsch.'));
+            }
+            $limiter->clear($key);
+            app()->session->set('reauth_at', time());
+        }
+        $host = $r->str('reset') === '1' ? '' : $r->str('network_host');
+        if ($r->str('reset') !== '1' && trim($host) === '') return $this->back($back, 'error', __('Bitte eine Domain eintragen.'));
+        if ($err = \Core\NetworkHost::save($host)) return $this->back($back, 'error', $err);
+        \Core\Network\Network::log('network.host', null, (string) ($user['email'] ?? ''), (string) (\Core\NetworkHost::get() ?? '–'));
+        \Core\InstanceInfo::flush();
+        $this->changed();
+        $nh = \Core\NetworkHost::get();
+        return $this->back($back, 'success', $nh !== null
+            ? __('Netzwerk-Domain gespeichert: Verwaltung und Anmeldung laufen jetzt über {url}.', ['url' => admin_url_abs('/admin')])
+            : __('Netzwerk-Domain entfernt – die Verwaltung ist wieder unter jeder Domain der Website erreichbar.'));
     }
 
     public function clearProxy(Request $r): Response

@@ -8,7 +8,7 @@
     <li><b>Mediathek:</b> wie lange gelöschte Dateien im <b>Papierkorb</b> bleiben (oder „Aus“), ob <b>Bildrechte und Einwilligungen</b> ausgeblendet, optional oder Pflicht sind, und ab welcher Größe eine Datei als „zu groß“ gilt.</li>
     <li><b>Geteilte Medien</b> und <b>Geteilte Daten</b> – Bereiche, die mehrere Websites gemeinsam nutzen.</li>
     <li><b>Umgebung</b> – Livebetrieb oder Testumgebung (siehe unten).</li>
-    <li><b>Adresse der Verwaltung</b> – statt <code>/admin</code> eine eigene, schwer zu erratende Adresse.</li>
+    <li><b>Adresse der Verwaltung</b> – statt <code>/admin</code> eine eigene, schwer zu erratende Adresse; darunter optional die <b>Netzwerk-</b> bzw. <b>Verwaltungs-Domain</b>, eine zentrale Domain für Verwaltung und Anmeldung (siehe <a href="#netzwerk-domain">Netzwerk-Domain</a>).</li>
     <li><b>Systeminfo</b> – Version, PHP, Speicher, Cache leeren, Testmail.</li>
     <li>Eigene Unterseiten: <b>Schriften</b> (Schriften vom eigenen Server verwalten) und <b>Kits</b> (Designs installieren und aktualisieren).</li>
   </ul>

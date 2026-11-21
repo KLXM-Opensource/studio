@@ -25,6 +25,21 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Issuer, Rolle des Anbieters, kein lokales Passwort) ist nur noch eine Info („Agentur-Konto über … angelegt“) ohne Mail
   (`Integrity::oidcAccount`); andere neue Konten mit allen Rechten und später lokal erhöhte Rollen bleiben Fehler.
   `SecurityLog`-Ereignis `oidc-account` (ohne Sperre, `SecurityLog::INFO`).
+### Netzwerk-Domain: zentrale Adresse für Verwaltung und Anmeldung (Standard aus)
+- **Netzwerk-Domain** (`Core\NetworkHost`, config `network_host`, Netzwerk → Administratoren bzw. Grundeinstellungen → Adresse der
+  Verwaltung, `network:host <domain>|--reset`): Verwaltung und Anmeldung der Netzwerk-Website laufen über eine Domain, z. B. die
+  Adresse der Agentur, während die Website unter der Domain der Kundin bleibt. Gilt für Passwort, Passkey, TOTP, „Passwort vergessen“,
+  Einladungen, E-Mail-Änderung, OIDC (`redirect_uri`, `initiate_login_uri`, Abmelden), Einmal-Anmeldung und Verwaltungslinks in
+  E-Mails (neuer Helfer `admin_url_abs()`). Seitenaufrufe von `/admin…` auf anderen Domains der Netzwerk-Website leiten dorthin um –
+  angemeldet per Domainwechsel; Einmal-Anmeldung, öffentliche Routen von Erweiterungen und alles, was Werkzeugleiste, Bearbeiten auf
+  der Website, Vorschau und Live laden, bleiben auf ihrer Domain. Prüfung beim Speichern (führt zur Netzwerk-Website über `hosts` oder
+  `fallback_site`, zeigt auf die Installation, keine Landing-Domain), Hinweis in `health`; Canonical, Sitemap und Links bleiben bei der
+  Hauptadresse, `redirect_to_primary` lässt die Netzwerk-Domain aus. Passkeys: Hinweise in Konto und Benutzerlisten („kein Passkey
+  für …“), „Auf der Website bearbeiten“ meldet auf der Hauptadresse an. In einer Einzel-Installation als „Verwaltungs-Domain“.
+  Domainwechsel (`HostHandover`) mit Zielpfad und übernommenem Anmeldeverfahren. Selbsttest `network-host:selftest`.
+- **Selbstauskunft** `GET /.well-known/klxm-studio` (`Core\InstanceInfo`, Spezifikation `klxm-instance-v1`, `docs/klxm-instance-v1.md`):
+  ein Agentur-Hub ermittelt Name, Anmelde-Adressen (mit Netzwerk-Domain) und Status-Adressen der Websites mit Überwachung selbst;
+  404, solange weder OIDC noch Überwachung eingerichtet ist; keine Versionen, Personendaten oder Inhalte.
 
 ### Anmeldung per OpenID Connect und signierte Überwachung (Standard aus)
 - **OpenID Connect** (`Core\Oidc`): Anmeldung über einen Identitätsanbieter (z. B. den Hub einer Agentur) – Authorization Code Flow

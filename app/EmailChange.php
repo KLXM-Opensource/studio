@@ -73,7 +73,8 @@ final class EmailChange
 
     public static function url(string $kind, string $token): string
     {
-        return Invites::base() . url(($kind === 'cancel' ? '/admin/konto/email-abbrechen/' : '/admin/konto/email/') . $token);
+        $path = ($kind === 'cancel' ? '/admin/konto/email-abbrechen/' : '/admin/konto/email/') . $token;
+        return NetworkHost::active() ? admin_url_abs($path) : Invites::base() . url($path);   // Netzwerk-Domain (Core\NetworkHost)
     }
 
     /** Unbrauchbarer Platzhalter für Hash-Spalten (UNIQUE, nie ein gültiger SHA-256-Hex) */

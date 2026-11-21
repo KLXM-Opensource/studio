@@ -23,6 +23,10 @@
  *   admin:path [<adresse>|--random|--reset]           Adresse der Verwaltung anzeigen bzw. setzen (statt /admin, z. B. kontor-x4m9q;
  *                                                     alle Websites der Installation, config.local.php); --reset = wieder /admin
  *   adminpath:selftest                                Selbsttest der eigenen Verwaltungsadresse (Abbildung, Prüfung, Links)
+ *   network:host [<domain>|--reset] [--no-check]      Netzwerk-Domain anzeigen bzw. setzen: Verwaltung und Anmeldung der Netzwerk-Website
+ *                                                     zentral unter dieser Domain (config.local.php); --no-check = ohne Abruf
+ *   network-host:selftest                             Selbsttest Netzwerk-Domain (Adressen, Weiterleitung, Ausnahmen, Prüfung,
+ *                                                     Selbstauskunft /.well-known/klxm-studio)
  *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
  *
  * Grundeinstellungen (sys.*, je Website; Geheimnisse werden nie ausgegeben)
@@ -600,7 +604,7 @@ switch ($cmd) {
                 $pw = $ask('Passwort (mind. 12 Zeichen): ', true);
                 $id = $N::createAccount($email, $pw, $name);
                 $N::log('account.create', null, 'cli', $email);
-                echo "Netzwerk-Konto $email angelegt (ID $id). Bei der ersten Anmeldung auf " . $N::siteUrl($N::siteKey()) . "/admin wird die Zwei-Faktor-Anmeldung eingerichtet.\n";
+                echo "Netzwerk-Konto $email angelegt (ID $id). Bei der ersten Anmeldung auf " . $N::siteLink($N::siteKey(), "/admin") . " wird die Zwei-Faktor-Anmeldung eingerichtet.\n";
                 break;
             }
             $acc = $N::account($email);
@@ -698,7 +702,7 @@ switch ($cmd) {
 
     case 'setup:token':
         echo $app->config->get('setup_token') . "\n";
-        echo 'Einrichtung: ' . absolute_url('/admin/setup') . "\n";
+        echo 'Einrichtung: ' . admin_url_abs('/admin/setup') . "\n";
         break;
 
     case 'admin:path':
@@ -706,15 +710,43 @@ switch ($cmd) {
         $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
         $want = in_array('--reset', $args, true) ? '' : (in_array('--random', $args, true) ? Core\AdminPath::random() : ($pos[0] ?? null));
         if ($want === null) {
-            echo 'Verwaltung: ' . absolute_url('/admin') . (Core\AdminPath::custom() ? '' : '  (Standard)') . "\n";
+            echo 'Verwaltung: ' . admin_url_abs('/admin') . (Core\AdminPath::custom() ? '' : '  (Standard)') . "\n";
             if (getenv('KLXM_ADMIN_PATH')) echo "Hinweis: gesetzt über die Umgebungsvariable KLXM_ADMIN_PATH (hat Vorrang vor config.local.php).\n";
             break;
         }
         $slug = Core\AdminPath::normalize($want);
         if ($err = Core\AdminPath::save($slug)) { fwrite(STDERR, $err . "\n"); exit(1); }
-        echo 'Verwaltung jetzt unter: ' . absolute_url('/admin') . "\n";
+        echo 'Verwaltung jetzt unter: ' . admin_url_abs('/admin') . "\n";
         echo ($slug === '' ? 'Wieder die übliche Adresse /admin.' : '/admin zeigt ohne Anmeldung nur noch „Seite nicht gefunden“. Lesezeichen und App auf dem Homescreen bitte neu anlegen.') . "\n";
         break;
+
+    case 'network:host':
+        // Netzwerk-Domain (Core\NetworkHost) – gilt für die Netzwerk-Website, gespeichert in config.local.php
+        $pos = array_values(array_filter($args, fn($a) => !str_starts_with($a, '--')));
+        $want = in_array('--reset', $args, true) ? '' : ($pos[0] ?? null);
+        $N = Core\Network\Network::class;
+        if ($want === null) {
+            $nh = Core\NetworkHost::get();
+            echo $nh === null ? "Netzwerk-Domain: keine (Verwaltung unter jeder Domain der Website)\n"
+                : 'Netzwerk-Domain: ' . $nh . ' – Verwaltung ' . $N::siteLink($N::siteKey(), '/admin') . "\n";
+            if ($nh !== null && ($err = Core\NetworkHost::problem($nh))) echo "Problem: $err\n";
+            break;
+        }
+        if (!$N::isNetworkSite()) { fwrite(STDERR, 'Bitte mit --site=' . $N::siteKey() . " (Netzwerk-Website) aufrufen.\n"); exit(1); }
+        if ($err = Core\NetworkHost::save($want, !in_array('--no-check', $args, true))) { fwrite(STDERR, $err . "\n"); exit(1); }
+        Core\InstanceInfo::flush();
+        $N::log('network.host', null, 'cli', (string) (Core\NetworkHost::get() ?? '-'));
+        echo Core\NetworkHost::get() === null ? "Netzwerk-Domain entfernt.\n"
+            : 'Netzwerk-Domain gesetzt – Verwaltung und Anmeldung: ' . $N::siteLink($N::siteKey(), '/admin') . "\n"
+              . 'Beim Anbieter (OpenID Connect) eintragen: Redirect-URI ' . $N::siteLink($N::siteKey(), '/admin/login/oidc/callback')
+              . ', Einstieg ' . $N::siteLink($N::siteKey(), '/admin/login/oidc') . "\n";
+        break;
+
+    case 'network-host:selftest':
+        $res = Core\NetworkHostSelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'adminpath:selftest':
         $fail = 0;

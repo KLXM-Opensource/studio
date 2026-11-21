@@ -60,6 +60,7 @@ final class Health
             'Kit kompatibel' => app()->theme->compatible(),
             'Verwaltung unter ' . \Core\AdminPath::prefix() . (\Core\AdminPath::custom() ? ' (eigene Adresse)' : '') => true,
         ], $t);
+        $add(\Core\NetworkHost::health(), $t);             // Netzwerk-Domain: führt sie (noch) zur Netzwerk-Website?
         $add(\Core\Data\Shared::health() + \Core\Search\Search::health() + \Core\AI\Ai::health(), $t);
         $add(\Core\Sources\Sources::health(true), $t);       // Abruf-Fehler technisch, fehlende Zieltabelle Einrichtung
         $add(\Core\Push\Push::health(true), $t);             // Versand hängt technisch, VAPID-Schlüssel fehlt Einrichtung

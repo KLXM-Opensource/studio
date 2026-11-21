@@ -152,6 +152,31 @@ final class App
             'WWW-Authenticate' => 'Basic realm="Staging", charset="UTF-8"', 'X-Robots-Tag' => 'noindex, nofollow']);
     }
 
+    /** Weiterleitung auf die Netzwerk-Domain; mit Sitzung auf dieser Domain über den Domainwechsel (bleibt angemeldet) */
+    private function toNetworkHost(Request $request, string $to): Response
+    {
+        $noStore = fn(Response $res) => $res->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer');
+        if (!$this->session->hasCookie()) return $noStore(Response::redirect($to, 302));
+        try {
+            $this->session->start($request->isSecure());
+            $u = $this->auth->user();
+            $nh = (string) NetworkHost::get();
+            if (!$u || !in_array($nh, HostHandover::targets(), true)) return $noStore(Response::redirect($to, 302));
+            $limiter = new RateLimiter($this->db);
+            $lk = 'handover-auto:' . (int) $u['id'];
+            if ($limiter->tooMany($lk, 30, 600)) return $noStore(Response::redirect($to, 302));
+            $limiter->hit($lk);
+            $q = (string) parse_url((string) ($request->server['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
+            $path = HostHandover::safePath($request->path . ($q !== '' ? '?' . $q : '')) ?: HostHandover::safePath($request->path);
+            $token = HostHandover::issue((int) $u['id'], $nh, (string) ($request->server['HTTP_USER_AGENT'] ?? ''), $path ?: '/admin');
+            Network\Network::log('handover.issue', $this->site->key, (string) ($u['email'] ?? ''), strtolower($request->host()) . ' → ' . $nh . ' (Netzwerk-Domain)');
+            return $noStore(Response::redirect(NetworkHost::origin() . url(HostHandover::PATH) . '?t=' . rawurlencode($token), 302));
+        } catch (\Throwable $e) {
+            error_log('[network-host] ' . $e->getMessage());
+            return $noStore(Response::redirect($to, 302));
+        }
+    }
+
     public function handle(Request $request): Response
     {
         $router = new Router();
@@ -171,6 +196,12 @@ final class App
         if ($to = Domains::redirectTarget($this->site, $request->method, $request->host(), $request->path,
             (string) ($request->server['REQUEST_URI'] ?? '/'), $request->isSecure())) {
             return Http\Response::redirect($to, 301);
+        }
+
+        // Netzwerk-Domain (Core\NetworkHost): Seitenaufrufe der Verwaltung auf anderen Domains der Netzwerk-Website dorthin –
+        // angemeldet mit Einmal-Token (Core\HostHandover), damit die Sitzung mitkommt
+        if ($to = NetworkHost::redirectTarget($request, $router, $direct)) {
+            return $this->toNetworkHost($request, $to);
         }
 
         // Landing-Domains (Core\Landings): Verwaltung nur auf der Hauptdomain – dort gelten Sitzung, Cookies und Passkeys (RP-ID = Domain)

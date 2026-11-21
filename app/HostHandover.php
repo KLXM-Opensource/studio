@@ -32,7 +32,10 @@ final class HostHandover
     {
         // Gleiche RP-ID wie die aktuelle Domain (nur anderer Port) = derselbe Passkey → kein Ziel
         $cur = self::rp((string) (app()->request?->host() ?? ''));
-        return array_values(array_filter(site()->hosts(), fn($h) => self::rp($h) !== $cur));
+        $hosts = site()->hosts();
+        // Netzwerk-Domain (Core\NetworkHost) – gehört zur Website, auch wenn sie nur über fallback_site dorthin führt
+        if (NetworkHost::active() && ($nh = NetworkHost::get()) !== null && !in_array($nh, $hosts, true)) $hosts[] = $nh;
+        return array_values(array_filter($hosts, fn($h) => self::rp($h) !== $cur));
     }
 
     /** Adresse auf der Ziel-Domain (Schema wie die aktuelle Anfrage – lokal http, sonst https) */
@@ -42,7 +45,11 @@ final class HostHandover
         return ($secure ? 'https://' : 'http://') . $host . url($path);   // url(): eigene Verwaltungsadresse, Rewrite, Unterordner
     }
 
-    public static function issue(int $uid, string $host, string $ua): string
+    /**
+     * $path: Ziel nach der Anmeldung (leer = Standard, siehe HandoverController::land) – nur Verwaltungspfade oder Seiten der Website.
+     * Das Verfahren der Anmeldung (Auth::amr) wird übernommen.
+     */
+    public static function issue(int $uid, string $host, string $ua, string $path = ''): string
     {
         if (!in_array($host, self::targets(), true)) throw new \InvalidArgumentException(__('Diese Domain gehört nicht zu dieser Website.'));
         $db = app()->db;
@@ -51,12 +58,14 @@ final class HostHandover
         $nonce = bin2hex(random_bytes(16));
         $exp = time() + self::TTL;
         $db->insert('host_handover', ['nonce' => $nonce, 'uid' => $uid, 'host' => $host, 'expires_at' => $exp]);
-        $payload = b64u_encode(json_encode(['v' => 1, 'h' => $host, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::ua($ua)]));
+        $amr = isset(app()->auth) ? app()->auth->amr() : [];
+        $payload = b64u_encode(json_encode(['v' => 1, 'h' => $host, 'u' => $uid, 'n' => $nonce, 'e' => $exp, 'a' => self::ua($ua),
+            'p' => self::safePath($path), 'm' => array_slice($amr, 0, 8)]));
         return $payload . '.' . b64u_encode(hash_hmac('sha256', 'handover|' . $payload, app()->key(), true));
     }
 
-    /** @return int|string users.id oder Fehlertext */
-    public static function consume(string $token, string $host, string $ua): int|string
+    /** @return array{uid: int, path: string, amr: list<string>}|string Konto, Ziel und Verfahren der Anmeldung oder Fehlertext */
+    public static function consume(string $token, string $host, string $ua): array|string
     {
         $bad = __('Der Anmelde-Link ist ungültig oder abgelaufen. Bitte auf der bisherigen Domain erneut starten.');
         $parts = explode('.', $token);
@@ -73,7 +82,22 @@ final class HostHandover
         if ($st->rowCount() !== 1) return $bad;
         $u = app()->db->fetch('SELECT id, disabled FROM users WHERE id = ?', [(int) $d['u']]);
         if (!$u || (int) ($u['disabled'] ?? 0)) return __('Dieses Konto ist gesperrt.');
-        return (int) $u['id'];
+        $amr = array_values(array_filter(array_map('strval', (array) ($d['m'] ?? [])), fn($v) => preg_match('~^[a-z]{2,10}$~', $v)));
+        return ['uid' => (int) $u['id'], 'path' => self::safePath((string) ($d['p'] ?? '')), 'amr' => $amr];
+    }
+
+    /**
+     * Ziel nach dem Wechsel: Verwaltungspfad (mit einfacher Abfrage, ohne /admin/sso und /admin/login) oder Seite der Website;
+     * alles andere = '' (Standardziel). Keine fremden Hosts, kein „..“.
+     */
+    public static function safePath(string $p): string
+    {
+        if ($p === '' || strlen($p) > 500 || str_contains($p, '..') || str_starts_with($p, '//') || str_contains($p, '\\')) return '';
+        if (AdminPath::isInternal($p)) {
+            if (str_starts_with($p, '/admin/sso') || str_starts_with($p, '/admin/login')) return '';
+            return preg_match('~^/admin(/[\w\-/.%]*)?(\?[\w\-.%=&+,]*)?$~', $p) ? $p : '';
+        }
+        return preg_match('~^/[\p{L}\p{N}_\-/.]*(\?edit=1)?$~u', $p) ? $p : '';
     }
 
     /**

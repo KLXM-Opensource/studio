@@ -201,7 +201,12 @@ final class Network
     {
         $rows = self::db()->fetchAll("SELECT id, email, name, disabled, totp_enabled, last_login, created_at, idp FROM users WHERE role = 'network' ORDER BY email");
         $pk = \Core\Passkeys::counts(self::db());
-        foreach ($rows as &$r) $r['passkeys'] = $pk[(int) $r['id']] ?? 0;
+        $nh = \Core\NetworkHost::get();
+        $pkNet = $nh !== null ? \Core\Passkeys::counts(self::db(), \Core\Passkeys::TABLE, \Core\HostHandover::rp($nh)) : null;   // Netzwerk-Domain
+        foreach ($rows as &$r) {
+            $r['passkeys'] = $pk[(int) $r['id']] ?? 0;
+            if ($pkNet !== null) $r['passkeys_net'] = $pkNet[(int) $r['id']] ?? 0;
+        }
         return $rows;
     }
 
@@ -337,15 +342,18 @@ final class Network
         if (app()->settings->get('sys.admin_url') !== $u) app()->settings->set('sys.admin_url', $u);
     }
 
-    /** Adresse eines Pfads auf einer anderen Website (berücksichtigt url_rewrite der Ziel-Website) */
+    /** Adresse eines Pfads auf einer anderen Website (berücksichtigt url_rewrite der Ziel-Website; Verwaltung der Netzwerk-Website: Netzwerk-Domain) */
     public static function siteLink(string $key, string $path): string
     {
         $cfg = self::config($key);
         $rewrite = (bool) $cfg->get('url_rewrite', true);
         // Eigene Verwaltungsadresse der Ziel-Website (Core\AdminPath, config admin_path)
         $own = \Core\AdminPath::normalize((string) (getenv('KLXM_ADMIN_PATH') ?: $cfg->get('admin_path', '')));
-        if ($own !== '' && \Core\AdminPath::error($own) === null && \Core\AdminPath::isInternal($path)) $path = '/' . $own . substr($path, strlen(\Core\AdminPath::INTERNAL));
-        return self::siteUrl($key) . ($rewrite ? $path : '/index.php' . $path);
+        $admin = \Core\AdminPath::isInternal($path);
+        if ($own !== '' && \Core\AdminPath::error($own) === null && $admin) $path = '/' . $own . substr($path, strlen(\Core\AdminPath::INTERNAL));
+        // Verwaltung der Netzwerk-Website unter der Netzwerk-Domain (Core\NetworkHost): Einmal-Anmeldung, Anmeldung, Links in Mails
+        $base = $admin && \Core\NetworkHost::active($key) ? (string) \Core\NetworkHost::origin() : self::siteUrl($key);
+        return $base . ($rewrite ? $path : '/index.php' . $path);
     }
 
     // ================================================================= Einmal-Token (SSO)

@@ -68,7 +68,7 @@ final class Invites
 
     public static function url(string $token): string
     {
-        return self::base() . url('/admin/einladung/' . $token);
+        return \Core\NetworkHost::active() ? admin_url_abs('/admin/einladung/' . $token) : self::base() . url('/admin/einladung/' . $token);   // Netzwerk-Domain
     }
 
     /** Adresse der Website (sys.site_url bzw. aufgerufene Domain; Kommandozeile ohne sys.site_url: erste Domain der Website) */

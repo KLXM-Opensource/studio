@@ -128,7 +128,7 @@ final class OidcController extends AdminController
         $end = app()->session->get('oidc_end');
         if (!is_array($end) || empty($end['t'])) return null;
         $p = Providers::get((string) ($end['p'] ?? ''));
-        return $p && $p['logout'] ? Client::logoutUrl($p, (string) $end['t'], absolute_url('/admin/login')) : null;
+        return $p && $p['logout'] ? Client::logoutUrl($p, (string) $end['t'], admin_url_abs('/admin/login')) : null;
     }
 
     /** Einstellungen speichern (Benutzer & Rollen → Anmeldung & Sicherheit) */
@@ -140,6 +140,7 @@ final class OidcController extends AdminController
             return $this->back('/admin/users/sicherheit#oidc', 'error', __('Die Anmeldung über einen Anbieter ist in der Konfiguration der Website festgelegt.'));
         }
         $err = Providers::save((array) ($r->post['oidc'] ?? []));
+        \Core\InstanceInfo::flush();   // Selbstauskunft für den Hub (/.well-known/klxm-studio)
         if ($err) return $this->back('/admin/users/sicherheit#oidc', 'error', $err);
         // Verbindung gleich prüfen (Discovery), wenn eingeschaltet
         $p = Providers::all()['main'] ?? null;

@@ -14,7 +14,8 @@ namespace Core;
  *    https://{domain}/health?domain_check={frage} auf (danach http://). Nur diese Installation kennt die Antwort – stimmt sie,
  *    zeigt die Domain hierher. Erst dann darf sie Hauptadresse werden.
  *  - Weiterleitung: config 'redirect_to_primary' (config/sites/{key}.php) → GET/HEAD auf weitere Domains aus 'hosts' per 301
- *    auf die Hauptadresse (App::handle, redirect()). Nie für Landing-Domains, /health, lokale Adressen.
+ *    auf die Hauptadresse (App::handle, redirect()). Nie für Landing-Domains, die Netzwerk-Domain (Core\NetworkHost), /health,
+ *    lokale Adressen.
  */
 final class Domains
 {
@@ -93,6 +94,8 @@ final class Domains
         $hosts = $site->hosts();
         $host = strtolower(trim($host));
         if (count($hosts) < 2 || $host === $hosts[0] || !in_array($host, $hosts, true)) return null;
+        // Netzwerk-Domain (Core\NetworkHost): dort liegen Verwaltung und Anmeldung – nie auf die Hauptadresse umleiten
+        if (NetworkHost::active($site->key) && NetworkHost::is($host)) return null;
         if (self::isLocal($host) || self::isLocal($hosts[0])) return null;
         $uri = '/' . ltrim($uri, '/');
         return ($secure ? 'https' : 'http') . '://' . $hosts[0] . $uri;

@@ -211,6 +211,7 @@ return function (Router $r): void {
     $r->post('/admin/system/mail/test/{id}', [Admin\MailAccountsController::class, 'test']);
     $r->post('/admin/system/proxy-clear', [Admin\SystemController::class, 'clearProxy']);
     $r->post('/admin/system/admin-path', [Admin\SystemController::class, 'adminPath']);   // Adresse der Verwaltung (Core\AdminPath)
+    $r->post('/admin/system/network-host', [Admin\SystemController::class, 'networkHost']);   // Netzwerk-Domain (Core\NetworkHost)
     $r->post('/admin/system/pools', [Admin\SystemController::class, 'poolCreate']);
     $r->post('/admin/system/pools/{key}', [Admin\SystemController::class, 'poolUpdate']);
     $r->post('/admin/system/pools/{key}/delete', [Admin\SystemController::class, 'poolDelete']);
@@ -715,6 +716,12 @@ return function (Router $r): void {
     });
     $r->get('/kalender/{handle}/{slug}.ics', [\Core\Http\Controllers\CalendarController::class, 'event']);
     // Visitenkarten (Core\VCard, vCard 3.0): Organisation der Website und Personen aus Tabellen mit Schema-Typ „Person“
+    // Selbstauskunft für einen Agentur-Hub (Core\InstanceInfo, klxm-instance-v1): Adressen für OIDC und Überwachung; sonst 404
+    $r->get(\Core\InstanceInfo::PATH, function () {
+        $info = \Core\InstanceInfo::get() ?? throw new \Core\Http\HttpException(404);
+        return \Core\Http\Response::json($info)->header('Cache-Control', 'public, max-age=300')->header('X-Robots-Tag', 'noindex')
+            ->header('Access-Control-Allow-Origin', '*');
+    });
     $r->get(\Core\VCard::ORG_PATH, [\Core\Http\Controllers\VCardController::class, 'org']);
     $r->get('/vcard/{handle}/{slug}.vcf', [\Core\Http\Controllers\VCardController::class, 'person']);
     // Website-Suche (Funktion „search“, Core\Search): /suche, /en/search …, Vorschläge als JSON – Seiten mit gleichem Pfad haben Vorrang

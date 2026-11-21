@@ -33,7 +33,7 @@ if (PHP_SAPI === 'cli') {
     $fallback = array_key_exists('fallback_site', $local) ? $local['fallback_site'] : ($base['fallback_site'] ?? Site::DEFAULT);
     // Vorgeschalteter Proxy (z. B. nginx im Abonnement des Kunden): Domain, https und Besucher-IP übernehmen (Core\Http\Forwarded)
     Core\Http\Forwarded::apply($_SERVER, (array) ($local['trusted_proxies'] ?? $base['trusted_proxies'] ?? []),
-        fn(string $h) => Sites::resolve($h, null) !== null, (bool) ($local['forwarded_host'] ?? $base['forwarded_host'] ?? true));
+        fn(string $h) => Sites::resolve($h, null) !== null || ($nh = (string) ($local['network_host'] ?? $base['network_host'] ?? '')) !== '' && strtolower($h) === strtolower($nh), (bool) ($local['forwarded_host'] ?? $base['forwarded_host'] ?? true));
     $siteKey = Sites::resolve((string) ($_SERVER['HTTP_HOST'] ?? ''), $fallback);
     if ($siteKey === null) {
         http_response_code(404);

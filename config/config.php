@@ -32,6 +32,10 @@ return [
     'fallback_site' => 'default',
     // Website, deren Verwaltung die Übersicht aller Websites zeigt (Grundeinstellungen → Websites)
     'network_site' => 'default',
+    // Netzwerk-Domain (optional): Verwaltung und Anmeldung der Netzwerk-Website zentral unter dieser Domain, z. B.
+    // 'verwaltung.example.org' – muss zur Netzwerk-Website führen (hosts oder fallback_site). Leer = wie bisher.
+    // Setzen: Netzwerk → Administratoren, Grundeinstellungen → Adresse der Verwaltung oder php bin/console network:host
+    'network_host' => '',
 
     // Sicherungen (site:backup, pool:backup, shared:backup): nur die neuesten N je Website/Pool/Tabelle behalten (0 = alle); --keep=N
     'backup_keep' => 14,
