@@ -171,6 +171,19 @@ return function (Router $r): void {
     $r->post('/admin/entwuerfe/notiz', [$dr, 'note']);
     $r->post('/admin/entwuerfe/wiederherstellen/{id}', [$dr, 'restore']);
     $r->post('/admin/entwuerfe/{op}', [$dr, 'action']);
+    // Aufgaben der Redaktion (Core\Tasks): Liste, anlegen, Verlauf, abhaken, wieder öffnen, Erinnerung, E-Mail-Schalter im Konto
+    $tk = Admin\TaskController::class;
+    $r->get('/admin/aufgaben', [$tk, 'index']);
+    $r->get('/admin/aufgaben/neu', [$tk, 'create']);
+    $r->post('/admin/aufgaben/neu', [$tk, 'store']);
+    $r->post('/admin/aufgaben/einstellungen', [$tk, 'settings']);
+    $r->post('/admin/account/aufgaben', [$tk, 'prefs']);
+    $r->get('/admin/aufgaben/{id}', [$tk, 'show']);
+    $r->get('/admin/aufgaben/{id}/bearbeiten', [$tk, 'edit']);
+    $r->post('/admin/aufgaben/{id}', [$tk, 'update']);
+    $r->post('/admin/aufgaben/{id}/erledigt', [$tk, 'done']);
+    $r->post('/admin/aufgaben/{id}/oeffnen', [$tk, 'reopen']);
+    $r->post('/admin/aufgaben/{id}/loeschen', [$tk, 'delete']);
 
     $r->get('/admin/settings', [Admin\SettingsController::class, 'edit']);
     $r->post('/admin/settings', [Admin\SettingsController::class, 'save']);
@@ -652,6 +665,11 @@ return function (Router $r): void {
     // Prüf-Ebene (Core\Review): Stand eingereichter Änderungen dieses Tokens
     $r->get('/api/v1/changes', [Api::class, 'changes']);
     $r->get('/api/v1/changes/{id}', [Api::class, 'change']);
+    // Aufgaben der Redaktion (Core\Tasks\Api): im Namen des Token-Benutzers
+    $r->get('/api/v1/tasks', [Api::class, 'tasks']);
+    $r->post('/api/v1/tasks', [Api::class, 'taskCreate']);
+    $r->post('/api/v1/tasks/{id}/done', [Api::class, 'taskDone']);
+    $r->post('/api/v1/tasks/{id}/reopen', [Api::class, 'taskReopen']);
 
     // ---------------------------------------------------------------- MCP (Streamable HTTP)
     $r->post('/mcp', [McpController::class, 'handle']);

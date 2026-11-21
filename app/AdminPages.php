@@ -96,6 +96,9 @@ final class AdminPages
             self::normalize(['id' => 'chat-settings', 'href' => '/admin/chat/einstellungen', 'label' => __('Chat'), 'icon' => 'chatcfg', 'kind' => 'settings',
                 'description' => __('Chat ein- oder ausschalten, Kanäle anlegen und verwalten'),
                 'visible' => fn() => \Core\Chat\Chat::settingsVisible()], 'core', __('Funktionen')),
+            // Aufgaben der Redaktion (Core\Tasks): jede angemeldete Person sieht ihre Aufgaben – im Hauptmenü nach den Inhalten
+            self::normalize(['id' => 'tasks', 'href' => '/admin/aufgaben', 'label' => __('Aufgaben'), 'icon' => 'list-checks', 'kind' => 'content', 'place' => 'main',
+                'description' => __('Offene Fragen und To-dos der Redaktion mit Zuständigkeit, Fälligkeit und Verlauf')], 'core', __('Funktionen')),
             // Schnittstellen: Tokens für REST-API und MCP
             self::normalize(['id' => 'api', 'href' => '/admin/api-tokens', 'label' => __('API & MCP'), 'icon' => 'api', 'kind' => 'settings', 'perm' => 'api.manage',
                 'description' => __('Zugänge (Tokens) für Automatisierungen und KI-Assistenten')], 'core', __('Funktionen')),

@@ -67,6 +67,29 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Konto „Standard“. Selbsttest `network:selftest`. Handbuch → „Netzwerk-Verwaltung“, Entwicklerhandbuch → Netzwerk-Administration →
   „Netzwerk-Bereich“ und „Systemmeldungen“.
 
+### Aufgaben für die Redaktion
+- **Neu: Aufgaben** (`Core\Tasks`, Verwaltung → Aufgaben, `/admin/aufgaben`): Titel, Beschreibung (Markdown-lite), optionaler
+  Bezug über die Linkauswahl (`page:ID`, `page:ID#anker` für einen Block, `entry:tabelle:ID`, `media:ID`), zuständig eine Person,
+  eine Rolle oder alle, Fälligkeit, Priorität, Status offen/erledigt. Eine Aufgabe steht in **„Was ist zu tun?“**, bis jemand sie
+  abhakt – optional mit Kommentar; wieder öffnen ist möglich. Verlauf je Aufgabe (wer/wann/Kommentar), Reiter Offen, Meine,
+  Erledigt (Protokoll), Alle.
+- **Anlegen** im Dialog in „Was ist zu tun?“ und unter Aufgaben, kontextbezogen an Seiteneinstellungen und Eintrag (Bezug
+  vorbelegt, Liste der offenen Aufgaben dazu), per Konsole (`tasks:add|list|done|reopen`, `--site`), REST-API
+  (`GET|POST /api/v1/tasks`, `POST /api/v1/tasks/{id}/done|reopen`) und MCP (`task_list`, `task_create`, `task_done`) – z. B. für
+  offene Fragen beim Umzug einer Website. Aufgaben laufen nicht über die Prüf-Ebene, da sie keine Inhalte ändern.
+- **Entwurfs-Notizen mit zuständiger Person** (`draft_notes`) erscheinen als Aufgaben der Art „draft“ in derselben Liste – ohne
+  Datenmigration; erledigt mit Veröffentlichen/Verwerfen.
+- **Rechte:** neu `tasks.use` (für sich selbst anlegen; die Rolle „Redaktion“ bekommt es einmalig per Migration) und `tasks.manage`
+  (für andere anlegen, zuweisen, alle sehen, bearbeiten, löschen). Abhaken darf jede zuständige Person; Administration immer.
+- **Benachrichtigung:** E-Mail (über `Core\Mailer`, mit Impressum) und Push-Ereignis „Aufgaben für Sie“ an die zuständige Person bzw.
+  die Personen der Rolle; je Konto abschaltbar unter Konto → Mitteilungen → Aufgaben. Erinnerung an fällige Aufgaben über die
+  geplante Aufgabe `tasks.remind` (`tasks:remind --all`) – je Website einschaltbar, **Standard aus**.
+- Projekt-Hinweise mit `aufgabe: ja` lassen sich mit `tasks:import-guide [--dry-run]` einmalig als Aufgaben für alle übernehmen;
+  ohne Übernahme bleibt ihr Verhalten (je Person bis „Lesen“) unverändert.
+- Schema additiv: Tabellen `tasks` und `task_log`. Selbsttest `tasks:selftest`. Handbuch → „Aufgaben für die Redaktion“,
+  Entwicklerhandbuch → „Aufgaben der Redaktion“, REST-API, MCP, Kommandozeile.
+- Übersicht: „Übersicht anpassen“ mit `role="button"` (axe: `aria-pressed` an einem Link), Kürzel in „Gerade aktiv“ mit genug Kontrast.
+
 ### E-Mail: welche Adresse gilt wofür
 - **Neue Übersicht** Grundeinstellungen → E-Mail-Versand → „Übersicht: welche Adresse gilt wofür“ (`/admin/system/mail/uebersicht`,
   `Core\Mail\Overview`): je Mailart (Einladung/Passwort, Mails an Netzwerk-Konten, neue Anfrage, Zustellung per E-Mail,

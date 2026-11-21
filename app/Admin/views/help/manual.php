@@ -34,6 +34,7 @@ $core = [
     'einstellungen' => $settingsTitle,
     'seiten' => 'Seiten verwalten',
     'entwuerfe' => 'Entwürfe prüfen und aufräumen',
+    'aufgabenliste' => 'Aufgaben für die Redaktion',
     'medien' => 'Bilder & Dateien',
     'daten' => 'Eigene Daten (Aktuelles, Team …)',
     'stellen' => 'Stellenangebote & Google for Jobs',

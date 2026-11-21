@@ -1,6 +1,9 @@
 <?php /** Handbuch · Kapitel „Neuerungen“: was sich zuletzt geändert hat – in Alltagssprache, mit Link zur Anleitung. Neueste oben. @var callable $anchor */ ?>
   <p class="lead">Was sich zuletzt geändert hat – kurz erklärt, mit Link zur ausführlichen Anleitung. Die technische Liste aller Änderungen steht im Entwicklerhandbuch (CHANGELOG).</p>
 
+  <h3>Aufgaben für die Redaktion</h3>
+  <p>Offene Fragen und To-dos lassen sich jetzt als <b>Aufgabe</b> festhalten – mit Bezug zu Seite, Block, Eintrag oder Datei, zuständiger Person oder Rolle, Fälligkeit und Priorität. Sie stehen in „Was ist zu tun?“, bis jemand sie abhakt (mit Kommentar, im Verlauf nachlesbar). Anlegen auf der Übersicht, unter <b>Aufgaben</b> oder direkt an Seite und Eintrag. <a href="#<?= e($anchor('aufgabenliste')) ?>">Zur Anleitung</a></p>
+
   <h3>Neue Kombifelder: Ansprechperson, Fragen &amp; Antworten, Adresse, Downloads</h3>
   <p>Vier neue Feldtypen für Tabellen fassen zusammengehörige Angaben zusammen – mit fertiger Darstellung (Kontaktkarte, Aufklappliste, Anschrift mit Kartenlink, Dateiliste mit PDF-Viewer) und Auszeichnung für Suchmaschinen. <a href="#kombifelder">Zur Anleitung →</a></p>
 

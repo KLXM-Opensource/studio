@@ -150,6 +150,7 @@ ob_start();
 <?php include __DIR__ . '/account/_accent.php'; // Akzentfarbe der Verwaltung (Core\Accent) ?>
 <?php $sw('mitteilungen'); ?>
 <?php include __DIR__ . '/account/_push.php'; // Push-Benachrichtigungen (Core\Push): Gerät, Ereignisse, Geräteliste ?>
+<?php include __DIR__ . '/account/_tasks.php'; // Aufgaben (Core\Tasks): E-Mail bei Zuweisung und Erinnerung ?>
 <?php $sw('sicherheit'); ?>
 <?php if ($isIdp): // Anbieter-Konto: zweiter Faktor beim Anbieter ?>
 <?php elseif ($isShadow): include __DIR__ . '/twofactor/_passkeys.php'; // Passkeys des Netzwerk-Kontos für diese Domain ?>

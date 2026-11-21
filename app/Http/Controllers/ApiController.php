@@ -446,6 +446,47 @@ final class ApiController
         return $this->run($r, false, fn(CmsService $s) => $s->changeStatus((int) $id));
     }
 
+    // ------------------------------------------------------------------ Aufgaben (Core\Tasks\Api, im Namen des Token-Benutzers)
+
+    /** GET /api/v1/tasks?status=open|done|all&mine=1&link=page:12&limit=100 */
+    public function tasks(Request $r): Response
+    {
+        return $this->runTasks($r, false, fn(array $tk) => \Core\Tasks\Api::list($tk, $r->query));
+    }
+
+    /** POST /api/v1/tasks {title, body, link, assignee, due, priority} */
+    public function taskCreate(Request $r): Response
+    {
+        return $this->runTasks($r, true, fn(array $tk) => \Core\Tasks\Api::create($tk, $this->body($r)), 201);
+    }
+
+    /** POST /api/v1/tasks/{id}/done {comment} */
+    public function taskDone(Request $r, string $id): Response
+    {
+        return $this->runTasks($r, true, fn(array $tk) => \Core\Tasks\Api::done($tk, (int) $id, (string) ($this->body($r)['comment'] ?? '')));
+    }
+
+    /** POST /api/v1/tasks/{id}/reopen {comment} */
+    public function taskReopen(Request $r, string $id): Response
+    {
+        return $this->runTasks($r, true, fn(array $tk) => \Core\Tasks\Api::reopen($tk, (int) $id, (string) ($this->body($r)['comment'] ?? '')));
+    }
+
+    /** Wie run(), aber mit dem Token statt CmsService (Aufgaben laufen nicht über die Prüf-Ebene) */
+    private function runTasks(Request $r, bool $write, callable $fn, int $okStatus = 200): Response
+    {
+        try {
+            $token = Tokens::authenticate($r);
+            if ($write) Tokens::requireWrite($token);
+            return self::ok($fn($token), $okStatus);
+        } catch (ApiError $e) {
+            return self::fail($e);
+        } catch (\Throwable $e) {
+            error_log('[API] tasks: ' . $e);
+            return self::fail(new ApiError(500, 'Interner Fehler.'));
+        }
+    }
+
     public function notFound(Request $r): Response
     {
         return self::fail(new ApiError(404, 'Unbekannter API-Endpunkt. Übersicht: ' . absolute_url('/api/v1/openapi.json')));
