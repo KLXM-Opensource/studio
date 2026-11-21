@@ -347,12 +347,6 @@ final class Entries
             if ($f['type'] === 'group') {
                 $def = self::groupSchema($f) + $def;
             }
-            // Freigabe je Eintrag (Exposure, Modus „Redaktion entscheidet“): Schalter am Feld mit den Zielen dieser Tabelle
-            if (Exposure::isEditorChoice($f)) {
-                $tg = Exposure::targets($table);
-                $def['expose'] = ['targets' => $tg, 'defaults' => array_intersect_key(Exposure::rule($f), array_flip($tg)),
-                    'labels' => array_combine($tg, array_map([Exposure::class, 'targetLabel'], $tg))];
-            }
             if ($f['type'] === 'media') $def['accept'] = 'visual';   // Medienfelder: Bild oder Video (Media::visual)
             if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
             if (\Core\Combo::is($f['type'])) $def = \Core\Combo::schema($f) + $def;
@@ -390,6 +384,17 @@ final class Entries
     public static function formSchema(array $table): array
     {
         $data = array_column(self::schema($table), null, 'name');
+        // Merkmal „Öffentlich“/„Intern“ an jedem Datenfeld (Core\Fields::renderExpose, Regeln aus Exposure::fieldReach): fest bei
+        // „immer“/„nie“, umschaltbar bei „Redaktion entscheidet“. Nicht in Eingängen und nicht am Schalter „Auf der Website zeigen“.
+        if (!Tables::isInbox($table)) {
+            $tg = Exposure::targets($table);
+            $labels = array_combine($tg, array_map([Exposure::class, 'targetLabel'], $tg));
+            foreach ($table['fields'] as $f) {
+                $n = (string) ($f['name'] ?? '');
+                if (!isset($data[$n]) || Tables::isLayout($f) || (Exposure::perEntry($table) && $n === Kinds::PUBLIC_FIELD)) continue;
+                $data[$n]['expose'] = ['field' => $f, 'targets' => $tg, 'labels' => $labels];
+            }
+        }
         $out = [];
         // Kontakte (Core\Data\Kinds): Felder „Nur Website“ (Vita, Über mich …) gesammelt im Abschnitt „Für die Website“ am Ende
         $web = [];

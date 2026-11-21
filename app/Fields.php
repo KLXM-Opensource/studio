@@ -338,26 +338,73 @@ final class Fields
     // ---------------------------------------------------------------- Rendering (Admin)
 
     /**
-     * Feld mit Freigabe-Schalter ('expose' => ['targets' => [web, vcard, ics], 'defaults' => [ziel => bool], 'labels' => [ziel => Text]]):
-     * Weltkugel mit kleinem Menü (<details>, ohne Skript) und je Ziel ein Häkchen; gesendet als {prefix}[_exposure][feld][ziel].
-     * Stand aus $values['_exposure'][feld], sonst der Standard des Feldes (neuer Eintrag).
+     * Merkmal „Öffentlich“/„Intern“ am Feld ('expose' => ['field' => Felddefinition der Tabelle, 'targets' => Ziele der Tabelle,
+     * 'labels' => [ziel => Text]], gesetzt von Core\Data\Entries::formSchema): immer an derselben Stelle rechts im Feldkopf –
+     * Weltkugel „Öffentlich“ (bei mehreren Zielen „· Website, vCard“) bzw. Schloss „Intern“. Was gilt, sagt allein
+     * Exposure::fieldReach(). Feste Regeln (immer/nie, Tabellen-Designer) nur als Hinweis; „Redaktion entscheidet“ als Menü
+     * (<details>, ohne Skript bedienbar) mit einem Häkchen je Ziel, gesendet als {prefix}[_exposure][feld][ziel]. Interne
+     * Felder sind getönt (admin.css .f-exp); resources/js/_exposure.js hält Text und Zusammenfassung im Formularkopf aktuell.
      */
     private static function renderExpose(array $f, array $values, string $prefix, string $field): string
     {
+        $x = (array) $f['expose'];
         $n = (string) $f['name'];
-        $cur = (array) ($values[\Core\Data\Exposure::STATE][$n] ?? []);
-        $boxes = '';
-        foreach ((array) ($f['expose']['targets'] ?? ['web']) as $k) {
-            $checked = array_key_exists($k, $cur) ? (bool) $cur[$k] : !empty($f['expose']['defaults'][$k]);
-            $name = $prefix . '[' . \Core\Data\Exposure::STATE . '][' . e($n) . '][' . e((string) $k) . ']';
-            $boxes .= '<input type="hidden" name="' . $name . '" value="0"><label class="f-check"><input type="checkbox" name="' . $name . '" value="1"' . ($checked ? ' checked' : '')
-                . ' data-expose-target> <span>' . e((string) ($f['expose']['labels'][$k] ?? $k)) . '</span></label>';
+        $tg = array_values((array) ($x['targets'] ?? ['web']));
+        $label = (string) ($f['label'] ?? $n);
+        $r = \Core\Data\Exposure::fieldReach((array) ($x['field'] ?? $f), $values, $tg);
+        $on = $r['targets'] !== [];
+        $sr = '<span class="adm-sr">' . e(__('„{label}“:', ['label' => $label])) . ' </span>';
+        $cls = 'f-exp' . (($f['width'] ?? '') === 'half' ? ' f--half' : '');
+        $attrs = ' data-expose data-exp-label="' . e(\Core\Data\Tables::label((array) ($x['field'] ?? $f))) . '"'
+            . (\Core\Combo::isMulti((string) (($x['field'] ?? $f)['type'] ?? '')) ? ' data-exp-multi' : '');
+        // Platz für das Merkmal im Feldkopf (Beschriftung bricht vorher um): s = „Intern“/„Öffentlich“, m/l = mit Kurzform der Ziele
+        $w = !$r['fixed'] ? (count($tg) > 1 ? 'l' : 'm') : (mb_strlen(\Core\Data\Exposure::reachText($r, $tg)) > 12 ? (mb_strlen(\Core\Data\Exposure::reachText($r, $tg)) > 22 ? 'l' : 'm') : 's');
+        $attrs .= ' data-exp-w="' . $w . '"';
+        if ($r['fixed']) {
+            $why = $r['mode'] === 'never' ? __('Festgelegt in den Feldern der Tabelle: nie öffentlich.')
+                : ($on ? __('Festgelegt in den Feldern der Tabelle: immer öffentlich.') : __('Festgelegt in den Feldern der Tabelle: nicht auf der Website.'));
+            return '<div class="' . $cls . ' f-exp--fixed ' . ($on ? 'is-public' : 'is-internal') . '"' . $attrs . ' data-web="' . (in_array('web', $r['targets'], true) ? '1' : '0') . '">'
+                . '<span class="f-exp__mark"><span class="f-exp__tag" title="' . e($why) . '">' . icon($on ? 'globe' : 'lock') . $sr
+                . '<span>' . e(\Core\Data\Exposure::reachText($r, $tg)) . '</span><span class="adm-sr"> – ' . e($why) . '</span></span></span>' . $field . '</div>';
         }
-        // Zustand ohne Skript: CSS (:has) zeigt „Öffentlich“ bzw. „Intern“ je nach Häkchen
-        return '<div class="f-exp' . (($f['width'] ?? '') === 'half' ? ' f--half' : '') . '" data-expose>' . $field
-            . '<details class="f-exp__menu"><summary class="f-exp__btn" title="' . e(__('Freigabe dieses Feldes für diesen Eintrag')) . '">'
-            . icon('globe') . '<span class="f-exp__on">' . e(__('Öffentlich')) . '</span><span class="f-exp__off">' . e(__('Intern')) . '</span></summary>'
-            . '<fieldset class="f-exp__pop"><legend>' . e(__('„{label}“ erscheint in', ['label' => (string) ($f['label'] ?? $n)])) . '</legend>' . $boxes . '</fieldset></details></div>';
+        $boxes = '';
+        foreach ($tg as $k) {
+            $name = $prefix . '[' . \Core\Data\Exposure::STATE . '][' . e($n) . '][' . e((string) $k) . ']';
+            $boxes .= '<input type="hidden" name="' . $name . '" value="0"><label class="f-check"><input type="checkbox" name="' . $name . '" value="1"'
+                . (in_array($k, $r['targets'], true) ? ' checked' : '') . ' data-expose-target="' . e((string) $k) . '" data-short="' . e(\Core\Data\Exposure::targetShort((string) $k)) . '"> <span>'
+                . e((string) ($x['labels'][$k] ?? $k)) . '</span></label>';
+        }
+        // Zustand ohne Skript: CSS (:has) zeigt „Öffentlich“ bzw. „Intern“ je nach Häkchen; das Skript ergänzt die Kurzform der Ziele
+        $short = count($tg) > 1 && $on ? ' · ' . implode(', ', array_map([\Core\Data\Exposure::class, 'targetShort'], $r['targets'])) : '';
+        return '<div class="' . $cls . ' f-exp--editor"' . $attrs . (count($tg) > 1 ? ' data-exp-short' : '') . '>'
+            . '<details class="f-exp__mark f-exp__menu"><summary class="f-exp__btn" title="' . e(__('Freigabe dieses Feldes für diesen Eintrag ändern')) . '">'
+            . '<span class="f-exp__ico f-exp__ico--on">' . icon('globe') . '</span><span class="f-exp__ico f-exp__ico--off">' . icon('lock') . '</span>' . $sr
+            . '<span class="f-exp__on">' . e(__('Öffentlich')) . '<span data-exp-to>' . e($short) . '</span></span><span class="f-exp__off">' . e(__('Intern')) . '</span>'
+            . '<span class="f-exp__caret" aria-hidden="true">' . icon('caret-down') . '</span></summary>'
+            . '<fieldset class="f-exp__pop"><legend>' . e(__('„{label}“ erscheint in', ['label' => $label])) . '</legend>' . $boxes
+            . '<p class="f-help">' . e(__('Ohne Häkchen bleibt die Angabe intern.')) . '</p></fieldset></details>' . $field . '</div>';
+    }
+
+    /**
+     * Freigabe einer Angabe in einer Mehrfachzeile (Core\Combo, Unterfeld 'expose_item'): dasselbe Merkmal wie am Feld, als Menü
+     * mit Öffentlich / Nur Ort (Adressen) / Intern – Auswahlknöpfe, ohne Skript bedienbar; Zustand per CSS (:has).
+     */
+    private static function renderExposeItem(array $f, mixed $value, string $id, string $inputName): string
+    {
+        $opts = self::options($f);
+        $v = in_array($value, [true, 1, '1', 'on', 'true', 'full'], true) ? '1' : ((string) $value === 'city' && isset($opts['city']) ? 'city' : '0');
+        $radios = '';
+        foreach ($opts as $k => $l) {
+            $k = (string) $k;
+            $radios .= '<label class="f-check"><input type="radio" name="' . $inputName . '" value="' . e($k) . '"' . ($k === $v ? ' checked' : '') . ' data-expose-item> <span>' . e((string) $l) . '</span></label>';
+        }
+        $states = '';
+        foreach ($opts as $k => $l) $states .= '<span class="f-exp__st" data-st="' . e((string) $k) . '">' . e((string) $l) . '</span>';
+        return '<div class="f f--expitem"><details class="f-exp__menu f-exp--item" id="' . $id . '"><summary class="f-exp__btn" title="' . e(__('Freigabe dieser Angabe ändern')) . '">'
+            . '<span class="f-exp__ico f-exp__ico--on">' . icon('globe') . '</span><span class="f-exp__ico f-exp__ico--off">' . icon('lock') . '</span>'
+            . '<span class="adm-sr">' . e(__('Sichtbarkeit dieser Angabe:')) . ' </span>' . $states
+            . '<span class="f-exp__caret" aria-hidden="true">' . icon('caret-down') . '</span></summary>'
+            . '<fieldset class="f-exp__pop"><legend>' . e(__('Sichtbarkeit dieser Angabe')) . '</legend>' . $radios . '</fieldset></details></div>';
     }
 
     public static function renderForm(array $fields, array $values, array $errors = [], string $prefix = 'f', string $path = ''): string
@@ -531,6 +578,10 @@ final class Fields
         $errHtml = $err ? '<p class="f-error" id="' . $id . '-e">' . e($err) . '</p>' : '';
         $width = ($f['width'] ?? 'full') === 'half' ? ' f--half' : '';
         $ph = !empty($f['placeholder']) ? ' placeholder="' . e($f['placeholder']) . '"' : '';
+
+        if (!empty($f['expose_item'])) {
+            return self::renderExposeItem($f, $value, $id, $inputName);
+        }
 
         if ($type === 'blocks') {
             return \Core\Data\EntryBlocks::renderInput($f, $inputName, $value, $errors, $p, $label, $errHtml);

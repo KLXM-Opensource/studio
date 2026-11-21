@@ -13,7 +13,8 @@ import { openSpotlight } from './_spotlight.js';
 import { t } from './_i18n.js';
 import { initGeo } from './_geo.js';
 import { conditions } from './_conditions.js';
-import { initSecCount } from './_fsec.js';   // aufklappbare Abschnitte: „3 von 7 ausgefüllt“ (Core\Fields 'count')
+import { initSecCount } from './_fsec.js';
+import { initExposure } from './_exposure.js';   // Sichtbarkeit: Merkmal „Öffentlich/Intern“, Formularkopf „Auf der Website: …“ (Core\Data\Exposure)   // aufklappbare Abschnitte: „3 von 7 ausgefüllt“ (Core\Fields 'count')
 import { initDateOnly } from './_dateonly.js';   // Datum/Uhrzeit nur als Datum bei „ganztägig“ (Core\Fields 'date_only_if')
 import { initIban } from './_iban.js';
 import { initRuleBuilder } from './_schema_rules.js';
@@ -1237,7 +1238,7 @@ function initBlockFields(scope = d) {
 function initRRule(scope) {
   if (scope.querySelector?.('[data-rrule]:not([data-rrule-ready])')) lazy('admin-rrule').then(m => m.initRRule?.(scope));
 }
-function init(scope = d) { initBlockFields(scope); initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initSecCount(scope); initDateOnly(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
+function init(scope = d) { initBlockFields(scope); initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initSecCount(scope); initExposure(scope); initDateOnly(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
 

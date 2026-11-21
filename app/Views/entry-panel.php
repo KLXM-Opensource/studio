@@ -44,6 +44,7 @@ $readonly = $reason !== null;
   <?php if ($e && ($plan = \Core\Schedule::label($e)) !== ''): // Zeitplan (Core\Schedule) – geändert wird er in der Verwaltung ?>
   <p class="cms-epanel__hint"><?= icon('clock') ?> <?= e(__('Zeitplan') . ': ' . $plan) ?></p>
   <?php endif; ?>
+  <?= /* Sichtbarkeit: „Auf der Website: …“ (Core\Data\Exposure, wie in der Verwaltung) */ \Core\Theme::capture(ROOT . '/app/Admin/views/data/_visibility.php', ['t' => $t, 'values' => $values, 'status' => $isNew ? ($publish ? 'published' : ($workflow ? 'draft' : 'published')) : (string) $status]) ?>
   <fieldset class="adm-fields cms-epanel__fields"<?= $readonly ? ' disabled' : '' ?>><legend class="adm-sr"><?= e(__('Felder')) ?></legend><?= Fields::renderForm(Entries::formSchema($t), $values, $errors, 'f') ?></fieldset>
   <details class="cms-epanel__more"<?= isset($errors['slug']) ? ' open' : '' ?>>
     <summary><?= e(__('Adresse & Sprache')) ?></summary>

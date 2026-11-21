@@ -8,7 +8,27 @@ use Core\Data\Entries;
 use Core\Data\Tables;
 
 $cols = array_values(array_filter($t['fields'], fn($f) => !empty($f['in_list']) && $f['name'] !== $t['settings']['title_field']));
+// Adressbuch (Exposure::perEntry): „Auf der Website zeigen“ als eigene Spalte „Website“ mit Merkmal statt Ja/Nein
+$perEntry = \Core\Data\Exposure::perEntry($t);
+if ($perEntry) $cols = array_values(array_filter($cols, fn($f) => $f['name'] !== \Core\Data\Kinds::PUBLIC_FIELD));
 $cols = array_slice($cols, 0, 4);
+// Sichtbarkeit je Eintrag bzw. Angabe (Core\Data\Exposure::reach) – Symbol + Wort, nicht nur Farbe
+$visTag = function (array $e) use ($t): string {
+    $on = \Core\Data\Exposure::reach($t, null, $e)['targets'] !== [];
+    return '<span class="dt-vis' . ($on ? ' is-public' : '') . '">' . icon($on ? 'globe' : 'lock') . ' ' . e($on ? __('Öffentlich') : __('Intern')) . '</span>';
+};
+$multiCell = function (array $c, array $e) use ($t): string {
+    $items = \Core\Combo::items($e[$c['name']] ?? null);
+    $h = '';
+    foreach (array_slice($items, 0, 3) as $i) {
+        $r = \Core\Data\Exposure::reach($t, $c, $e, $i);
+        $on = $r['targets'] !== [];
+        $h .= '<li' . ($on ? ' class="is-public"' : '') . ' title="' . e(\Core\Data\Exposure::reachText($r, [])) . '">' . icon($on ? 'globe' : 'lock')
+            . '<span class="adm-sr">' . e(\Core\Data\Exposure::reachText($r, [])) . ': </span>' . e(mb_strimwidth(\Core\Combo::itemText($c['type'], $i), 0, 40, '…')) . '</li>';
+    }
+    if (count($items) > 3) $h .= '<li class="adm-muted">+' . (count($items) - 3) . '</li>';
+    return $h !== '' ? '<ul class="dt-items">' . $h . '</ul>' : '';
+};
 $listImg = $t['settings']['list_image'] ?? 'small';
 $img = $listImg === 'none' ? '' : Tables::imageField($t);
 // Kleines Vorschaubild für Bild-/Dateifelder in Spalten
@@ -102,6 +122,7 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
       <th class="dt-c-check"><input type="checkbox" data-checkall aria-label="Alle auswählen"></th>
       <?php if ($manual): ?><th class="dt-c-grip"><span class="sr-only">Reihenfolge</span></th><?php endif; ?>
       <th scope="col"><?= $sortLink($t['settings']['title_field'] ?: 'id', Tables::field($t, $t['settings']['title_field'])['label'] ?? 'Titel') ?></th>
+      <?php if ($perEntry): ?><th scope="col"><?= $sortLink(\Core\Data\Kinds::PUBLIC_FIELD, __('Website')) ?></th><?php endif; ?>
       <?php foreach ($cols as $c): ?><th scope="col"><?= $sortLink($c['name'], $c['label']) ?></th><?php endforeach; ?>
       <?php if ($t['settings']['workflow']): ?><th scope="col"><?= $sortLink('status', 'Status') ?></th><?php endif; ?>
       <th scope="col"><?= $sortLink('updated_at', 'Geändert') ?></th>
@@ -120,7 +141,8 @@ $extTbl = \Core\Extensions::tableActions($t);   // Erweiterungen: Knöpfe im Kop
           <?php if (!(!empty($shared) && \Core\Data\Shared::isForeign($t, $e)) && !isset($extOrigin[$e['id']])): // Duplizieren (Kopie als Entwurf) ?><button type="submit" form="dt-dup" class="dt-rowact dt-rowact--dup" formaction="<?= e(url($base . '/' . $e['id'] . '/duplicate')) ?>" aria-label="<?= e(__('Duplizieren') . ': ' . Entries::title($t, $e)) ?>" title="<?= e(__('Kopie als Entwurf anlegen')) ?>"><?= e(__('Duplizieren')) ?></button><?php endif; ?>
           <?php if ($extTbl['row']): foreach (\Core\Extensions::rowActions($extTbl['row'], (int) $e['id']) as $xa): ?><a class="dt-rowact" href="<?= e(url($xa['href'])) ?>" aria-label="<?= e($xa['label'] . ': ' . Entries::title($t, $e)) ?>"><?= e($xa['label']) ?></a><?php endforeach; endif; ?>
         </div></td>
-        <?php foreach ($cols as $c): ?><td data-label="<?= e($c['label']) ?>"><?= $c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>')) ?></td><?php endforeach; ?>
+        <?php if ($perEntry): ?><td class="dt-c-vis" data-label="<?= e(__('Website')) ?>"><?= $visTag($e) ?></td><?php endif; ?>
+        <?php foreach ($cols as $c): ?><td data-label="<?= e($c['label']) ?>"><?= \Core\Combo::isMulti($c['type']) ? $multiCell($c, $e) : ($c['type'] === 'group' ? e(Entries::groupSummary($c, $e[$c['name']] ?? [])) : (in_array($c['type'], ['media', 'file'], true) ?$thumb(isset($e[$c['name']]) && $e[$c['name']] !== '' ? (int) $e[$c['name']] : null) : strip_tags(Entries::html($t, $e, $c['name'], ['link' => false]), '<br>'))) ?></td><?php endforeach; ?>
         <?php if ($t['settings']['workflow']): ?><td class="dt-c-status" data-label="Status"><?= $statusCell($e) ?></td><?php endif; ?>
         <td class="adm-muted dt-c-date" data-label="Geändert"><?= e(\Core\Format::admin()->date(strtotime((string) ($e['updated_at'] ?: $e['created_at'])))) ?></td>
       </tr>

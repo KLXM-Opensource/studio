@@ -185,15 +185,24 @@ final class Combo
                 ['name' => 'zip', 'label' => __('PLZ'), 'type' => 'text', 'width' => 'half'],
                 ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'width' => 'half'],
                 ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text'],
-                ['name' => 'public', 'label' => __('Sichtbarkeit'), 'type' => 'select', 'options' => ['0' => __('Intern'), 'city' => __('Nur Ort öffentlich'), '1' => __('Öffentlich')], 'default' => '0'],
+                self::exposeField(['1' => __('Öffentlich'), 'city' => __('Nur Ort'), '0' => __('Intern')]),
                 $custom);
             return $fields;
         }
         $fields[] = ['name' => 'value', 'label' => match ($type) { 'phones' => __('Nummer'), 'emails' => __('E-Mail-Adresse'), default => __('Webadresse') },
             'type' => match ($type) { 'phones' => 'tel', 'emails' => 'email', default => 'url' }, 'required' => true];
-        $fields[] = ['name' => 'public', 'label' => __('Öffentlich'), 'type' => 'bool'];
+        $fields[] = self::exposeField(['1' => __('Öffentlich'), '0' => __('Intern')]);
         $fields[] = $custom;
         return $fields;
+    }
+
+    /**
+     * Freigabe je Angabe: Auswahl (1 = öffentlich, city = nur Ort, 0 = intern), im Formular als Merkmal rechts in der Zeile
+     * (Core\Fields 'expose_item' – dasselbe Bedienelement wie die Freigabe am Feld). Ältere Werte true/false bleiben lesbar.
+     */
+    private static function exposeField(array $opts): array
+    {
+        return ['name' => 'public', 'label' => __('Sichtbarkeit'), 'type' => 'select', 'options' => $opts, 'default' => '0', 'expose_item' => true];
     }
 
     /** Gespeicherter Wert (JSON oder Liste) → Liste der Einträge */
