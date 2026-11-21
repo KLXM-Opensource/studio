@@ -643,6 +643,11 @@ return function (Router $r): void {
     // Prüf-Ebene (Core\Review): Stand eingereichter Änderungen dieses Tokens
     $r->get('/api/v1/changes', [Api::class, 'changes']);
     $r->get('/api/v1/changes/{id}', [Api::class, 'change']);
+    // Aufgaben der Redaktion (Core\Tasks\Api): im Namen des Token-Benutzers
+    $r->get('/api/v1/tasks', [Api::class, 'tasks']);
+    $r->post('/api/v1/tasks', [Api::class, 'taskCreate']);
+    $r->post('/api/v1/tasks/{id}/done', [Api::class, 'taskDone']);
+    $r->post('/api/v1/tasks/{id}/reopen', [Api::class, 'taskReopen']);
 
     // ---------------------------------------------------------------- MCP (Streamable HTTP)
     $r->post('/mcp', [McpController::class, 'handle']);

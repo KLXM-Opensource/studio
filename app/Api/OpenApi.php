@@ -40,7 +40,7 @@ final class OpenApi
             ],
             'servers' => [['url' => absolute_url('/api/v1')]],
             'security' => [['bearer' => []]],
-            'tags' => array_map(fn($t) => ['name' => $t], ['Allgemein', 'Einstellungen', 'Design', 'Seiten', 'Blöcke', 'Daten', 'Medien', 'Karten', 'Anfragen', 'Freigabe', 'Suche', 'Support']),
+            'tags' => array_map(fn($t) => ['name' => $t], ['Allgemein', 'Einstellungen', 'Design', 'Seiten', 'Blöcke', 'Daten', 'Medien', 'Karten', 'Anfragen', 'Freigabe', 'Suche', 'Support', 'Aufgaben']),
             'paths' => [
                 '/public' => ['get' => $op('Allgemein', 'Öffentliche Basisdaten (ohne Token): Name, URL und die vom Kit freigegebenen Angaben',
                     ['security' => [], 'responses' => ['200' => $ok(['type' => 'object'])]])],
@@ -279,6 +279,19 @@ final class OpenApi
                 '/sources' => ['get' => $op('Quellen', 'Externe Quellen (ohne Zugangsdaten) mit Zieltabelle und letztem Abgleich; 403, wenn die Funktion aus ist', ['responses' => ['200' => $ok(['type' => 'array'])] + $err])],
                 '/sources/{id}/sync' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
                     'post' => $op('Quellen', 'Quelle jetzt abgleichen (höchstens 30 je Stunde, sonst 429); Ergebnis: Statistik des Abgleichs', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                // Aufgaben der Redaktion (Core\Tasks\Api) – im Namen des Token-Benutzers, mit dessen Rechten; nicht über die Prüf-Ebene
+                '/tasks' => ['get' => $op('Aufgaben', 'Aufgaben, die der Token-Benutzer sehen darf (?status=open|done|all, ?mine=1, ?link=page:12, ?limit=100). kind = draft: Entwurf mit Notiz und zuständiger Person (nicht abhakbar). Erledigte mit done {at, by, comment}', [
+                    'responses' => ['200' => $ok(['type' => 'object', 'properties' => ['tasks' => ['type' => 'array', 'items' => ['type' => 'object']], 'can_create' => ['type' => 'boolean'], 'can_assign_others' => ['type' => 'boolean']]])] + $err]),
+                    'post' => $op('Aufgaben', 'Aufgabe anlegen (Recht tasks.use für sich selbst, tasks.manage für andere). assignee: Benutzer-ID, E-Mail, role:{rolle} oder all; link: page:ID, page:ID#anker, entry:tabelle:ID, media:ID oder /pfad; body: markdown-lite', [
+                        'requestBody' => ['required' => true] + $json(['type' => 'object', 'required' => ['title'], 'properties' => ['title' => ['type' => 'string', 'maxLength' => 160], 'body' => ['type' => 'string'],
+                            'link' => ['type' => 'string'], 'assignee' => ['type' => ['string', 'integer']], 'due' => ['type' => 'string', 'format' => 'date'], 'priority' => ['type' => 'string', 'enum' => ['high', 'normal', 'low']]]]),
+                        'responses' => ['201' => $ok(['type' => 'object'])] + $err])],
+                '/tasks/{id}/done' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
+                    'post' => $op('Aufgaben', 'Abhaken mit optionalem Kommentar (zuständige Person, wer sie angelegt hat, tasks.manage)', [
+                        'requestBody' => ['required' => false] + $json(['type' => 'object', 'properties' => ['comment' => ['type' => 'string', 'maxLength' => 1000]]]),
+                        'responses' => ['200' => $ok(['type' => 'object'])] + $err])],
+                '/tasks/{id}/reopen' => ['parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
+                    'post' => $op('Aufgaben', 'Erledigte Aufgabe wieder öffnen', ['responses' => ['200' => $ok(['type' => 'object'])] + $err])],
                 // Prüf-Ebene (Core\Review\Queue)
                 '/changes' => ['get' => $op('Freigabe', 'Einreichungen und protokollierte Änderungen DIESES Tokens, neueste zuerst (?status=pending_review|applied|rejected); review_mode zeigt den Modus des Tokens', [
                     'parameters' => [['name' => 'status', 'in' => 'query', 'required' => false, 'schema' => ['type' => 'string', 'enum' => ['pending_review', 'applied', 'rejected']]]],

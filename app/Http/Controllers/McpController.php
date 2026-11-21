@@ -449,6 +449,22 @@ final class McpController
                 $rw, true, fn($a) => \Core\Support\Api::report($token, $a));
         }
 
+        // Aufgaben der Redaktion (Core\Tasks\Api) – im Namen des Token-Benutzers, mit dessen Rechten; nicht über die Prüf-Ebene
+        $tk = $this->token;
+        $add('task_list', 'Aufgaben lesen', 'Offene (Standard) oder erledigte Aufgaben der Redaktion („Was ist zu tun?“), die der Token-Benutzer sehen darf – mit Zuständigkeit, Fälligkeit, Priorität, Ziel (Seite/Eintrag/Datei) und bei erledigten wer/wann/Kommentar. kind = draft: Entwurf mit Notiz und zuständiger Person (erledigt mit Veröffentlichen/Verwerfen, nicht abhakbar). Vor task_create prüfen, ob es die Frage schon gibt.',
+            $schema(['status' => $str('open (Standard) | done | all', ['enum' => ['open', 'done', 'all']]), 'mine' => $bool('Nur Aufgaben, für die der Token-Benutzer persönlich oder über seine Rolle zuständig ist'),
+                'link' => $str('Nur Aufgaben zu diesem Ziel, z. B. page:12 oder entry:news:5'), 'limit' => $int('max. 200, Standard 100')]), $ro, false,
+            fn($a) => \Core\Tasks\Api::list($tk, $a));
+        $add('task_create', 'Aufgabe anlegen', 'Offene Frage oder To-do für die Redaktion hinterlegen (z. B. beim Umzug: „Öffnungszeiten im Sommer?“). Erscheint in der Verwaltung unter „Was ist zu tun?“, bis jemand sie abhakt; zuständige Personen bekommen eine E-Mail. Ziel mit stabilem Verweis verknüpfen (page:ID, page:ID#anker für einen Block, entry:tabelle:ID, media:ID – IDs aus list_pages/list_entries/list_media). Ohne tasks.manage nur für den Token-Benutzer selbst.',
+            $schema(['title' => $str('Kurze Frage bzw. Aufgabe (höchstens 160 Zeichen)'), 'body' => $str('Erläuterung, Markdown-lite (**fett**, Listen mit „- “, Links)'),
+                'link' => $str('Ziel: page:ID, page:ID#anker, entry:tabelle:ID, media:ID oder /pfad'), 'assignee' => $str('Zuständig: Benutzer-ID, E-Mail, role:{rolle} (z. B. role:editor) oder all (Standard mit tasks.manage: all, sonst der Token-Benutzer)'),
+                'due' => $str('Fällig am JJJJ-MM-TT (optional)'), 'priority' => $str('high | normal (Standard) | low', ['enum' => ['high', 'normal', 'low']])], ['title']),
+            $rw, true, fn($a) => \Core\Tasks\Api::create($tk, $a, 'mcp'));
+        $add('task_done', 'Aufgabe abhaken', 'Aufgabe als erledigt markieren, optional mit Kommentar (steht im Verlauf). Darf, wer zuständig ist, wer sie angelegt hat, oder tasks.manage. reopen = true öffnet sie wieder.',
+            $schema(['id' => $int('Aufgaben-ID aus task_list'), 'comment' => $str('Kommentar, z. B. was erledigt wurde (optional)'), 'reopen' => $bool('Wieder öffnen statt abhaken')], ['id']),
+            $rw + ['idempotentHint' => true], true,
+            fn($a) => !empty($a['reopen']) ? \Core\Tasks\Api::reopen($tk, (int) $a['id'], (string) ($a['comment'] ?? ''), 'mcp') : \Core\Tasks\Api::done($tk, (int) $a['id'], (string) ($a['comment'] ?? ''), 'mcp'));
+
         // Nur-Lese-Tokens sehen keine Schreib-Tools
         if ($this->token['scope'] !== 'write') {
             $t = array_filter($t, fn($x) => !$x['write']);
