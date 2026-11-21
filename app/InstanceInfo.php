@@ -18,7 +18,7 @@ use Core\Oidc\Providers;
  *
  * Inhalt: Name der Netzwerk-Website, Adressen für den Anbieter (redirect_uri, initiate_login_uri, post_logout_redirect_uri –
  * mit der Netzwerk-Domain, falls gesetzt, Core\NetworkHost) und je Website mit eingeschalteter Überwachung die Status-Adresse.
- * Keine Versionen, keine Personendaten, keine Inhalte, keine Schlüssel. Spezifikation: docs/klxm-instance-v1.md.
+ * Keine Versionen, keine Personendaten, keine Inhalte, keine Schlüssel. Spezifikation: docs/agentur-hub/instance-v1.md.
  */
 final class InstanceInfo
 {

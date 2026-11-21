@@ -10,6 +10,15 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Agentur Hub: offene Spezifikationen für andere Systeme
+- **`docs/agentur-hub/`** beschreibt, wie KLXM Studio, REDAXO 6 (AddOn `klxm_hub`), REDAXO 5 (AddOn in Arbeit) und eigene
+  Lösungen am Agentur Hub teilnehmen: `oidc-profil.md` (Discovery inkl. optionalem `logo_uri`, Code-Flow mit PKCE S256, `state`,
+  `nonce`, `iss` nach RFC 9207, Claims `sub`/`email`/`name`/`amr`/`roles`, Lebensdauer, RS256, Abmelden, Sicherheitsanforderungen
+  an Clients), `monitoring-status-v1.md` (Ed25519-Signatur, Zeitfenster, Nonce, Antwort mit Kategorien und `log`, Fehlercodes,
+  Bewertung im Hub), `instance-v1.md` (Selbstauskunft, bisher `docs/klxm-instance-v1.md`) und `eigene-loesung.md`
+  (Schritt für Schritt mit Beispielcode unter MIT und Prüfliste). Verweise im Entwicklerhandbuch (Sicherheit), im Handbuch
+  neu „Agentur-Zugang einrichten (Kurzfassung)“.
+
 ### Erweiterungen: optionale Abhängigkeiten prüfen, Startfehler mit Namen
 - **`php bin/console extensions:check`** (`Core\DependencyCheck`) prüft Erweiterungen und Kits statisch, ohne sie zu laden:
   Klassen, die von Klassen/Interfaces/Traits eines Pakets außerhalb von `require` erben (nur `suggest`, `require-dev` oder gar nicht
@@ -69,7 +78,7 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Hauptadresse, `redirect_to_primary` lässt die Netzwerk-Domain aus. Passkeys: Hinweise in Konto und Benutzerlisten („kein Passkey
   für …“), „Auf der Website bearbeiten“ meldet auf der Hauptadresse an. In einer Einzel-Installation als „Verwaltungs-Domain“.
   Domainwechsel (`HostHandover`) mit Zielpfad und übernommenem Anmeldeverfahren. Selbsttest `network-host:selftest`.
-- **Selbstauskunft** `GET /.well-known/klxm-studio` (`Core\InstanceInfo`, Spezifikation `klxm-instance-v1`, `docs/klxm-instance-v1.md`):
+- **Selbstauskunft** `GET /.well-known/klxm-studio` (`Core\InstanceInfo`, Spezifikation `klxm-instance-v1`, `docs/agentur-hub/instance-v1.md`):
   ein Agentur-Hub ermittelt Name, Anmelde-Adressen (mit Netzwerk-Domain) und Status-Adressen der Websites mit Überwachung selbst;
   404, solange weder OIDC noch Überwachung eingerichtet ist; keine Versionen, Personendaten oder Inhalte.
 ### Personen nach Filter, Block „Unterseiten“, fluid: Menü „Groß“ und Video-Knopf

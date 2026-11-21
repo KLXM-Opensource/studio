@@ -109,3 +109,11 @@
   <div class="doc-note doc-note--warn"><strong>Notfall</strong><p>Ist die Netzwerk-Domain einmal nicht erreichbar, entfernt die Agentur sie auf dem Server mit <code>php bin/console network:host --reset</code> – danach ist die Verwaltung wieder unter jeder Domain der Website erreichbar.</p></div>
   <h3 id="ueberwachung">Überwachung durch die Agentur</h3>
   <p>Unter <b>Grundeinstellungen › Überwachung</b> erlauben Sie einem Überwachungsdienst (z. B. dem Hub Ihrer Agentur), den technischen Zustand der Website abzufragen: Versionen, Kit, Erweiterungen, Ergebnis der Prüfungen, letzte Sicherung, Integrität. Inhalte, Konten oder Personendaten gibt die Abfrage nie heraus, und an der Website selbst ändert sich nichts. Tragen Sie dazu den öffentlichen Schlüssel des Dienstes ein (<code>ed25519:…</code>) und schalten Sie die Abfrage ein – Standard ist aus.</p>
+  <h3 id="agentur-zugang">Agentur-Zugang einrichten (Kurzfassung)</h3>
+  <p>Betreut Ihre Agentur die Website über einen Agentur Hub, richten Sie Anmeldung und Überwachung in vier Schritten ein. Beides bleibt aus, bis Sie es einschalten, und ändert nichts an der Website.</p>
+  <ol class="doc-steps">
+    <li>Die Agentur registriert die Website in ihrem Hub und gibt Ihnen <b>Issuer-Adresse</b>, <b>Client-ID</b>, <b>Client-Geheimnis</b> und den öffentlichen <b>Überwachungsschlüssel</b> (<code>ed25519:…</code>). Die Adressen dieser Website kann der Hub selbst ermitteln; sonst stehen sie unter <b>Benutzer &amp; Rollen › Anmeldung &amp; Sicherheit</b>.</li>
+    <li><b>Benutzer &amp; Rollen › Anmeldung &amp; Sicherheit</b> › <b>Anmeldung über einen Identitätsanbieter</b>: die Angaben eintragen, zweiten Faktor „muss im Token belegt sein“ lassen, einschalten und speichern (siehe <a href="#oidc">Identitätsanbieter</a>).</li>
+    <li><b>Grundeinstellungen › Überwachung</b>: den Schlüssel eintragen und einschalten (siehe <a href="#ueberwachung">Überwachung</a>).</li>
+    <li>Die Agentur prüft im Hub („Jetzt prüfen“, „Öffnen“). Behalten Sie Ihr eigenes Administrationskonto mit Passwort und Passkey als Notfall-Zugang.</li>
+  </ol>
