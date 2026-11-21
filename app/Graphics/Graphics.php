@@ -88,20 +88,22 @@ final class Graphics
      * @return array<string, mixed> Eintrag (toJson)
      * @throws \RuntimeException verständliche Meldung
      */
-    public static function store(string $kind, string $name, string $raw, ?int $id = null, ?string $block = null): array
+    public static function store(string $kind, string $name, string $raw, ?int $id = null, ?string $block = null, ?string $source = null): array
     {
         if (!in_array($kind, self::KINDS, true)) throw new \RuntimeException(__('Unbekannte Art.'));
         $name = mb_substr(trim(strip_tags($name)), 0, 120);
         if ($name === '') $name = self::formatLabels()[$kind];
         $block = $block !== null && preg_match('~^[a-z0-9_-]{1,80}$~', $block) ? $block : null;
         $r = Svg::clean($raw, ['keep_ids' => true]);
+        // Spalte svg = Arbeitsfassung des Editors (Ebenen, Hilfslinien …), Datei = Web-Fassung (optimiert)
+        $work = $source !== null && $source !== '' ? Svg::clean($source, ['editor' => true])['svg'] : $r['svg'];
         $old = $id ? self::find($id) : null;
         if ($id && (!$old || $old['kind'] !== $kind)) throw new \RuntimeException(__('Grafik nicht gefunden.'));
         $db = app()->db;
-        $row = ['kind' => $kind, 'name' => $name, 'block' => $kind === 'preview' ? $block : null, 'svg' => $r['svg'],
+        $row = ['kind' => $kind, 'name' => $name, 'block' => $kind === 'preview' ? $block : null, 'svg' => $kind === 'part' ? $r['svg'] : $work,
             'width' => $r['width'], 'height' => $r['height'], 'updated_at' => now()];
         if ($old) {
-            if ((string) $old['svg'] !== $r['svg']) self::addVersion('graphic:' . $old['id'], (string) $old['svg']);
+            if ((string) $old['svg'] !== $row['svg']) self::addVersion('graphic:' . $old['id'], (string) $old['svg']);
             $db->update('graphics', $row, 'id = :id', ['id' => (int) $old['id']]);
             $gid = (int) $old['id'];
         } else {
@@ -140,6 +142,7 @@ final class Graphics
         }
         app()->db->query('DELETE FROM graphics WHERE id = ?', [$id]);
         app()->db->query('DELETE FROM graphic_versions WHERE ref = ?', ['graphic:' . $id]);
+        app()->db->query('DELETE FROM graphic_sources WHERE ref = ?', ['graphic:' . $id]);
         \Core\PageCache::clear();
         return true;
     }
@@ -169,12 +172,17 @@ final class Graphics
         app()->settings->set('block_previews', $map);
     }
 
-    /** Blocktypen des aktiven Kits für die Zuordnung [typ => Bezeichnung] */
+    /** Blocktypen des aktiven Kits für die Zuordnung [typ => Bezeichnung], dazu Varianten als „typ--variante“ */
     public static function blockTypes(): array
     {
         $out = [];
         foreach ((array) app()->theme->blocks() as $type => $b) {
-            if (is_array($b)) $out[(string) $type] = __((string) ($b['label'] ?? $type));
+            if (!is_array($b)) continue;
+            $label = __((string) ($b['label'] ?? $type));
+            $out[(string) $type] = $label;
+            if (is_array($b['variants'] ?? null) && count($b['variants']) > 1) {
+                foreach ($b['variants'] as $v => $vl) if (preg_match('~^[a-z0-9_-]{1,40}$~', (string) $v)) $out[$type . '--' . $v] = $label . ' – ' . __((string) $vl);
+            }
         }
         asort($out, SORT_NATURAL | SORT_FLAG_CASE);
         return $out;
@@ -188,10 +196,11 @@ final class Graphics
      * $meta: alt, title, decorative, name (Dateiname ohne Endung)
      * @return array{0: ?array, 1: ?string} [Medium, Fehler]
      */
-    public static function saveMedia(string $raw, array $meta, ?int $mediaId = null): array
+    public static function saveMedia(string $raw, array $meta, ?int $mediaId = null, ?string $source = null): array
     {
         try {
             $r = Svg::clean($raw, ['keep_ids' => true]);
+            $work = $source !== null && $source !== '' ? Svg::clean($source, ['editor' => true])['svg'] : null;
         } catch (\RuntimeException $e) {
             return [null, $e->getMessage()];
         }
@@ -210,6 +219,7 @@ final class Graphics
                 if (array_key_exists('alt', $meta)) $opt['alt'] = (string) $meta['alt'];
                 [$m, $err] = Media::replace($mediaId, $tmp, $name, $opt);
                 if ($m && is_string($prev) && $prev !== '') self::addVersion('media:' . $mediaId, $prev);
+                if ($m) self::saveSource('media:' . $mediaId, $work, $r['svg']);
                 if ($m && array_key_exists('title', $meta)) {
                     app()->db->update('media', ['title' => mb_substr(strip_tags((string) $meta['title']), 0, 180)], 'id = :id', ['id' => $mediaId]);
                     Media::forget($mediaId);
@@ -217,13 +227,36 @@ final class Graphics
                 }
                 return [$m, $err];
             }
-            return Media::import($tmp, $name, (string) ($meta['alt'] ?? ''), [
+            $res = Media::import($tmp, $name, (string) ($meta['alt'] ?? ''), [
                 'graphic' => true, 'title' => (string) ($meta['title'] ?? ''), 'decorative' => !empty($meta['decorative']),
                 'tags' => (string) ($meta['tags'] ?? ''),
             ]);
+            if (!empty($res[0]['id'])) self::saveSource('media:' . (int) $res[0]['id'], $work, $r['svg']);
+            return $res;
         } finally {
             @unlink($tmp);
         }
+    }
+
+    // ================================================================= Arbeitsfassung (Editor) zur Web-Fassung
+
+    /**
+     * Arbeitsfassung merken (null = vergessen): gilt nur, solange die Web-Datei dieselbe ist (hash). So bleiben Ebenennamen,
+     * Sperren, Hilfslinien und Textrahmen beim nächsten Öffnen erhalten, obwohl die ausgelieferte Datei sie nicht enthält.
+     */
+    public static function saveSource(string $ref, ?string $work, string $web): void
+    {
+        $db = app()->db;
+        $db->query('DELETE FROM graphic_sources WHERE ref = ?', [$ref]);
+        if ($work === null || $work === '' || $work === $web) return;
+        $db->insert('graphic_sources', ['ref' => $ref, 'svg' => $work, 'hash' => sha1($web), 'updated_at' => now()]);
+    }
+
+    /** Arbeitsfassung zur Web-Datei $web (null, wenn keine oder die Datei inzwischen anders ist) */
+    public static function source(string $ref, string $web): ?string
+    {
+        $row = app()->db->fetch('SELECT svg, hash FROM graphic_sources WHERE ref = ?', [$ref]);
+        return $row && hash_equals((string) $row['hash'], sha1($web)) ? (string) $row['svg'] : null;
     }
 
     // ================================================================= Fassungen
@@ -267,14 +300,15 @@ final class Graphics
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $w . ' ' . $h . '" width="' . $w . '" height="' . $h . '"' . $attrs . '></svg>';
     }
 
-    /** Vorlage für eine Blockvorschau: die Vorschau des Kits bzw. Kerns für diesen Blocktyp (falls vorhanden) */
+    /** Vorlage für eine Blockvorschau: die Vorschau des Kits bzw. Kerns für diesen Blocktyp bzw. „typ--variante“ (falls vorhanden) */
     public static function previewTemplate(string $block): ?string
     {
         if (!preg_match('~^[a-z0-9_-]{1,80}$~', $block)) return null;
+        [$type, $variant] = array_pad(explode('--', $block, 2), 2, null);
         $theme = app()->theme;
         $blocks = (array) $theme->blocks();
-        $p = \Core\Blocks\Picker::previews($theme, [$block => (array) ($blocks[$block] ?? [])]);
-        $url = (string) ($p[$block]['url'] ?? '');
+        $p = \Core\Blocks\Picker::previews($theme, [$type => (array) ($blocks[$type] ?? [])]);
+        $url = (string) (($variant !== null ? ($p[$type]['variants'][$variant] ?? null) : null) ?? ($p[$type]['url'] ?? ''));
         if ($url === '') return null;
         $path = parse_url($url, PHP_URL_PATH);
         $base = base_path();
@@ -302,6 +336,44 @@ final class Graphics
             }
         } catch (\Throwable) {
             // Kit ohne Design-Tokens: keine Farbfelder des Designs
+        }
+        return $out;
+    }
+
+    /**
+     * Schriftdateien für „Text in Kurven umwandeln“ (fontkit liest WOFF2 und variable Schriften): installierte Schriften des
+     * Schriften-Managers (Core\Fonts) und Lato der Verwaltung. [Familie => ['files' => [[url, subset, style, weight|null]],
+     * 'css' => font.css oder null]] – weight null = variable Schrift (Achse wght).
+     * @return array<string, array{files: list<array{url: string, subset: string, style: string, weight: ?int}>, css: ?string}>
+     */
+    public static function fontFiles(): array
+    {
+        $out = [];
+        $parse = function (string $file): ?array {
+            if (!preg_match('~^([a-z0-9-]+?)-(wght|\d{3})-(normal|italic)\.woff2$~', $file, $m)) return null;
+            return ['subset' => $m[1], 'weight' => $m[2] === 'wght' ? null : (int) $m[2], 'style' => $m[3]];
+        };
+        try {
+            foreach (\Core\Fonts::installed() as $id => $f) {
+                $family = \Core\Fonts::cleanFamily((string) ($f['family'] ?? ''));
+                if ($family === '') continue;
+                $files = [];
+                foreach ((array) ($f['files'] ?? []) as $file) {
+                    $info = $parse((string) ($file['file'] ?? ''));
+                    if ($info) $files[] = ['url' => \Core\Fonts::url($id . '/' . $file['file'])] + $info;
+                }
+                if ($files) $out[$family] = ['files' => $files, 'css' => \Core\Fonts::cssUrl((string) $id)];
+            }
+        } catch (\Throwable) {
+            // ohne Schriften-Manager: nur die Schrift der Verwaltung
+        }
+        if (!isset($out['Lato'])) {
+            $files = [];
+            foreach (glob(ROOT . '/public/assets/fonts/lato-*.woff2') ?: [] as $path) {
+                $info = $parse(substr(basename($path), 5));
+                if ($info) $files[] = ['url' => asset('fonts/' . basename($path))] + $info;
+            }
+            if ($files) $out['Lato'] = ['files' => $files, 'css' => null];
         }
         return $out;
     }

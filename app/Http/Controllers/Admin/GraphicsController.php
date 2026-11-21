@@ -67,7 +67,9 @@ final class GraphicsController extends AdminController
             $raw = @file_get_contents(Media::path($m));
             if (!is_string($raw) || $raw === '') return ['error' => __('Datei nicht gefunden.')];
             try {
-                $svg = Svg::clean($raw, ['keep_ids' => true])['svg'];
+                // Arbeitsfassung des Editors, wenn sie zur Datei gehört (Ebenen, Hilfslinien), sonst die Datei selbst
+                $work = Graphics::source('media:' . $mediaId, $raw);
+                $svg = Svg::clean($work ?? $raw, $work !== null ? ['editor' => true] : ['keep_ids' => true])['svg'];
             } catch (\RuntimeException $e) {
                 return ['error' => $e->getMessage()];
             }
@@ -82,6 +84,8 @@ final class GraphicsController extends AdminController
         } else {
             $fmt = isset(Graphics::FORMATS[$r->str('format')]) ? $r->str('format') : 'info';
             $block = preg_match('~^[a-z0-9_-]{1,80}$~', $r->str('block')) ? $r->str('block') : null;
+            // Blockauswahl „Vorschau gestalten“: Variante als „typ--variante“
+            if ($block !== null && preg_match('~^[a-z0-9_-]{1,40}$~', $r->str('variant')) && !str_contains($block, '--')) $block .= '--' . $r->str('variant');
             $svg = $fmt === 'preview' && $block ? Graphics::previewTemplate($block) : null;
             $blocks = $block ? Graphics::blockTypes() : [];
             $doc = ['format' => $fmt, 'target' => Graphics::FORMATS[$fmt]['store'], 'kind' => $fmt === 'info' ? null : $fmt,
@@ -98,6 +102,9 @@ final class GraphicsController extends AdminController
             'parts' => array_map(fn($p) => $p + ['svg' => (string) (Graphics::find((int) $p['id'])['svg'] ?? '')], Graphics::all('part')),
             'swatches' => Graphics::swatches(),
             'fonts' => Graphics::fonts(),
+            'fontFiles' => Graphics::fontFiles(),
+            // Bibliotheken auf Abruf (nur beim ersten Gebrauch): Geometrie, Text in Kurven, PDF-Export
+            'modules' => ['paper' => asset('js/grafik-paper.mjs'), 'fonts' => asset('js/grafik-fonts.mjs'), 'pdf' => asset('js/grafik-pdf.mjs')],
             'blocks' => Graphics::blockTypes(),
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
@@ -117,14 +124,16 @@ final class GraphicsController extends AdminController
     public function save(Request $r): Response
     {
         $this->auth($r, 'media.upload');
-        $svg = (string) ($r->post['svg'] ?? '');
+        // svg = Arbeitsfassung des Editors, web = optimierte Fassung für die Website (fehlt sie, gilt svg auch fürs Web)
+        $source = (string) ($r->post['svg'] ?? '');
+        $svg = is_string($r->post['web'] ?? null) && $r->post['web'] !== '' ? (string) $r->post['web'] : $source;
         if ($svg === '') return Response::fail(__('Keine Grafik übermittelt.'));
         $target = (string) ($r->post['target'] ?? 'media');
         try {
             if ($target === 'graphics') {
                 $kind = (string) ($r->post['kind'] ?? 'icon');
                 $block = isset($r->post['block']) && is_string($r->post['block']) && $r->post['block'] !== '' ? $r->post['block'] : null;
-                $item = Graphics::store($kind, (string) ($r->post['name'] ?? ''), $svg, (int) ($r->post['id'] ?? 0) ?: null, $block);
+                $item = Graphics::store($kind, (string) ($r->post['name'] ?? ''), $svg, (int) ($r->post['id'] ?? 0) ?: null, $block, $source);
                 if ($kind === 'preview' && $block !== null && !empty($r->post['assign'])) {
                     Graphics::assignPreview($block, $item['id']);
                     $item = Graphics::toJson((array) Graphics::find($item['id']));
@@ -135,7 +144,7 @@ final class GraphicsController extends AdminController
             // Überschreiben ohne Angaben: Alt-Text und Titel der Datei bleiben (nur mitgeschickte Felder ändern sich)
             $meta = ['name' => (string) ($r->post['name'] ?? ''), 'decorative' => !empty($r->post['decorative'])];
             foreach (['title', 'alt'] as $k) if (isset($r->post[$k]) && is_string($r->post[$k])) $meta[$k] = $r->post[$k];
-            [$m, $err] = Graphics::saveMedia($svg, $meta, $mediaId);
+            [$m, $err] = Graphics::saveMedia($svg, $meta, $mediaId, $source);
             if ($err || !$m) return Response::fail((string) ($err ?: __('Speichern fehlgeschlagen.')));
             $this->changed();
             return Response::json(['ok' => true, 'item' => ['id' => (int) $m['id'], 'url' => Media::originalUrl($m), 'name' => Media::displayName($m)],
@@ -150,7 +159,9 @@ final class GraphicsController extends AdminController
     {
         $this->auth($r, 'media.upload');
         try {
-            return Response::json(['ok' => true, 'svg' => Svg::clean((string) ($r->post['svg'] ?? ''), ['keep_ids' => true])['svg']]);
+            // editor: Arbeitsfassung (Editor-Daten bleiben); images: entfernte Pixelbilder (der Editor meldet sie)
+            $c = Svg::clean((string) ($r->post['svg'] ?? ''), !empty($r->post['editor']) ? ['editor' => true] : ['keep_ids' => true]);
+            return Response::json(['ok' => true, 'svg' => $c['svg'], 'images' => $c['images'], 'bytes' => $c['out']]);
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }

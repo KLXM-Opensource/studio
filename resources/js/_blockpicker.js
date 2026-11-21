@@ -8,6 +8,9 @@
  * Tastatur: Tippen filtert (Name, Beschreibung, Typ, Gruppe), ↑/↓ (in Kacheln auch ←/→ bei leerem Suchfeld) wählen,
  * Enter fügt ein, Esc schließt. Fokus bleibt im Suchfeld (Combobox mit aria-activedescendant).
  * Vorschauen (cfg.blocks[typ].preview.url) sind Dateien (<img>), fehlt eine, erscheint das Symbol des Blocks.
+ * „Vorschau gestalten“ (nur mit Recht media.upload, cfg.grafik): Grafik-Editor im eingebetteten Fenster (Verwaltungsseite
+ * /admin/grafik/editor?format=preview&block=…&variant=…&embed=1, eigene CSP der Verwaltung); nach dem Speichern meldet er
+ * die neue Adresse per postMessage (gleiche Herkunft) – die Auswahl zeigt sie sofort.
  */
 const ORDER = ['Kopf', 'Inhalt', 'Medien', 'Layout', '*', 'Daten', 'Formulare', 'Navigation', 'Website'];
 const rank = g => { const i = ORDER.indexOf(g); return i < 0 ? ORDER.indexOf('*') : i; };
@@ -126,8 +129,42 @@ export function createBlockPicker({ cfg, host, blockIcon, clipboard, onInsert, s
       <div class="cms-addpop__dact">
         <button type="button" class="cms-addpop__ins">${esc(t('Einfügen'))}</button>
         ${paste ? '' : `<button type="button" class="cms-addpop__star" aria-pressed="${isFav}" title="${esc(t('Als Favorit oben anzeigen'))}">${ico('star')}<span>${esc(isFav ? t('Favorit') : t('Merken'))}</span></button>`}
+        ${cfg.grafik?.page && !paste && !preset ? `<button type="button" class="cms-addpop__design" title="${esc(t('Vorschaugrafik dieses Blocks für diese Website zeichnen'))}">${ico('pencil-simple')}<span>${esc(t('Vorschau gestalten'))}</span></button>` : ''}
       </div>`;
     if (keep) (detail.querySelector(keep) || q).focus({ preventScroll: true });
+  }
+
+  // ---------------------------------------------------------------- Vorschau gestalten (Grafik-Editor, eingebettet)
+  function design(type, v, btn) {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'cms-addpop__ge';
+    dlg.setAttribute('aria-label', t('Vorschau gestalten'));
+    const u = new URL(cfg.grafik.page, location.href);
+    u.searchParams.set('format', 'preview'); u.searchParams.set('block', type); u.searchParams.set('embed', '1');
+    if (v) u.searchParams.set('variant', v);
+    dlg.innerHTML = `<iframe title="${esc(t('Grafik-Editor'))}" src="${esc(u.pathname + u.search)}"></iframe>`;
+    el.append(dlg);
+    const done = () => { removeEventListener('message', onMsg); if (dlg.open) dlg.close(); dlg.remove(); (detail.querySelector('.cms-addpop__design') || btn)?.focus?.({ preventScroll: true }); };
+    const onMsg = ev => {
+      if (ev.origin !== location.origin || ev.source !== dlg.querySelector('iframe')?.contentWindow || ev.data?.source !== 'klxm-grafik') return;
+      if (ev.data.type === 'close') { done(); return; }
+      if (ev.data.type === 'saved' && ev.data.url && ev.data.active && ev.data.block) {
+        const [bt, bv] = String(ev.data.block).split('--');
+        const d = cfg.blocks[bt];
+        if (!d) return;
+        if (bv) d.preview = { url: d.preview?.url || ev.data.url, variants: { ...(d.preview?.variants || {}), [bv]: ev.data.url } };
+        else d.preview = { url: ev.data.url, variants: {} };
+        const keepType = sel?.dataset.type, keepVar = variant;
+        build(); filter();
+        if (prefs.view === 'tiles') loadImgs(list);
+        const again = $$('.cms-addpop__item').find(b => b.dataset.type === keepType && !b.dataset.paste && b.dataset.preset == null);
+        if (again) { mark(again, false); variant = keepVar; showDetail(); }
+      }
+    };
+    addEventListener('message', onMsg);
+    dlg.addEventListener('cancel', e => { e.preventDefault(); done(); });
+    dlg.showModal();
+    dlg.querySelector('iframe').focus();
   }
 
   // ---------------------------------------------------------------- Filtern, Platzieren
@@ -197,6 +234,7 @@ export function createBlockPicker({ cfg, host, blockIcon, clipboard, onInsert, s
   detail.addEventListener('click', e => {
     if (e.target.closest('.cms-addpop__ins')) choose(sel);
     else if (e.target.closest('.cms-addpop__star') && sel) toggleFav(sel.dataset.type);
+    else if (e.target.closest('.cms-addpop__design') && sel) design(sel.dataset.type, variant, e.target.closest('.cms-addpop__design'));
     else if (e.target.closest('.cms-addpop__var')) {
       const k = e.target.closest('.cms-addpop__var').dataset.variant;
       variant = k === Object.keys(cfg.blocks[sel.dataset.type]?.variants || {})[0] ? null : k;   // erste Variante = Standard des Blocks

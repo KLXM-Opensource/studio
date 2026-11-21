@@ -88,8 +88,9 @@ final class Picker
 
     /**
      * Andockstelle: Vorschauen je Website übersteuern die des Kits bzw. Kerns. Heute zwei Quellen, beide optional:
-     *   - Website-Einstellung 'block_previews' => [typ => adresse] (z. B. später ein Mediathek-Bild oder eine Grafik aus einem
-     *     SVG-Editor; eine Oberfläche dafür gibt es noch nicht),
+     *   - Website-Einstellung 'block_previews' => [typ => adresse, 'typ--variante' => adresse] (Grafik-Editor: Medien →
+     *     Grafiken bzw. „Vorschau gestalten“ in der Blockauswahl; eine Vorschau des Typs ersetzt die Varianten-Vorschauen des
+     *     Kits, eigene Varianten-Vorschauen der Website gelten danach),
      *   - Filter 'blocks.previews' für Erweiterungen (Extension::filter): bekommt und liefert die ganze Liste.
      * Adressen müssen relativ zur Installation sein („/…“, kein „//“), damit keine fremden Quellen nachgeladen werden.
      * @param array<string, array{url: string, variants: array<string, string>}> $out
@@ -98,8 +99,15 @@ final class Picker
     private static function overrides(array $out, Theme $theme): array
     {
         $site = app()->settings->get('block_previews', []);
-        foreach (is_array($site) ? $site : [] as $type => $url) {
-            if (is_string($url) && str_starts_with($url, '/') && !str_starts_with($url, '//')) $out[(string) $type] = ['url' => $url, 'variants' => []];
+        $site = is_array($site) ? array_filter($site, fn($url) => is_string($url) && str_starts_with($url, '/') && !str_starts_with($url, '//')) : [];
+        foreach ($site as $type => $url) {
+            if (!str_contains((string) $type, '--')) $out[(string) $type] = ['url' => $url, 'variants' => []];
+        }
+        foreach ($site as $key => $url) {
+            if (!str_contains((string) $key, '--')) continue;
+            [$type, $variant] = explode('--', (string) $key, 2);
+            $out[$type] ??= ['url' => $url, 'variants' => []];
+            $out[$type]['variants'][$variant] = $url;
         }
         $f = \Core\Extensions::filter('blocks.previews', $out, ['kit' => $theme->name]);
         if (!is_array($f)) return $out;

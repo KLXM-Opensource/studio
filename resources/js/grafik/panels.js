@@ -16,6 +16,8 @@ import {
 } from './doc.js';
 import { colorPicker, parseColor, toHex, hex, onColor } from './color.js';
 import { h, tabGroup, iconBtn, modal } from './ui.js';
+import { clipOf } from './clip.js';
+import { buildTextPanel } from './textpanel.js';
 
 const BLEND = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
 const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), screen: t('Negativ multiplizieren'), overlay: t('Ineinanderkopieren'), darken: t('Abdunkeln'), lighten: t('Aufhellen'),
@@ -26,6 +28,7 @@ export function buildPanels(ed) {
   const A = tabGroup(ed.uid + '-a', [{ id: 'color', label: t('Farbe') }, { id: 'swatches', label: t('Farbfelder') }, { id: 'stroke', label: t('Kontur') }, { id: 'look', label: t('Darstellung') }], () => api.refresh());
   const B = tabGroup(ed.uid + '-b', [{ id: 'layers', label: t('Ebenen') }, { id: 'lib', label: t('Bibliothek') }, { id: 'icons', label: t('Symbole') }], () => api.refresh());
   const C = tabGroup(ed.uid + '-c', [{ id: 'transform', label: t('Transformieren') }, { id: 'history', label: t('Protokoll') }], () => api.refresh());
+  const TP = buildTextPanel(ed);
   A.el.classList.add('ge-pg--color'); B.el.classList.add('ge-pg--layers'); C.el.classList.add('ge-pg--transform');
   let lock = false, anchor = 'c';
   const expanded = new Set();     // geöffnete Gruppen (Pfad als Text)
@@ -43,6 +46,8 @@ export function buildPanels(ed) {
   /** Füllung/Kontur der Auswahl setzen (bei Gruppen auf die Formen darin); ohne Auswahl: Vorgabe für neue Formen */
   function setPaint(which, value, alpha = 1) {
     if (!sel().length) { ed.style[which] = value; ed.paintFs(); return; }
+    // Text wird bearbeitet und ein Bereich ist markiert: Farbe nur für diese Zeichen
+    if (which === 'fill' && ed.textEd && alpha >= 1 && !/^url/.test(value) && ed.textEd.format({ fill: value })) return;
     for (const el of sel()) eachShape(el, s => {
       setProp(s, which, value);
       setProp(s, which + '-opacity', alpha < 1 ? num(alpha, 3) : null);
@@ -411,21 +416,26 @@ export function buildPanels(ed) {
   }
   const docMatrixOf = el => { const a = ed.root.getScreenCTM(), b = el.getScreenCTM(); return a && b ? DOMMatrix.fromMatrix(a).inverse().multiply(DOMMatrix.fromMatrix(b)) : new DOMMatrix(); };
 
-  function rowHtml(el, depth, many) {
+  function rowHtml(el, depth, many, role = '') {
     const kids = ['g', 'switch'].includes(el.localName) ? drawnChildren(el) : [];
+    // Beschneidung/Maske dieser Gruppe: Form(en) als eigene Zeilen oben in der Gruppe
+    const cl = clipOf(el, ed.root), clipKids = cl && el.contains(cl.def) ? drawnChildren(cl.def) : [];
+    const expandable = kids.length + clipKids.length > 0;
     const key = ed.pathOf(el).join('.');
     const open = expanded.has(key) || (ed.sel.some(s => el !== s && el.contains(s)));
     const on = ed.sel.includes(el);
     const lockd = isLocked(el), hid = isHidden(el);
-    let s = `<li role="treeitem" class="ge-lay${on ? ' is-on' : ''}${hid ? ' is-hidden' : ''}" data-path="${key}" aria-selected="${on}" aria-level="${depth + 1}"${kids.length ? ` aria-expanded="${open}"` : ''} tabindex="-1" draggable="true">
+    const prefix = role === 'clip' ? t('Beschneidungsform') + ': ' : role === 'mask' ? t('Maske') + ': ' : '';
+    const badge = cl ? `<span class="ge-lay__badge" title="${esc(cl.kind === 'clip' ? t('Beschnitten') : t('Maskiert'))}">${ico(cl.kind === 'clip' ? 'crop' : 'selection-background')}</span>` : '';
+    let s = `<li role="treeitem" class="ge-lay${on ? ' is-on' : ''}${hid ? ' is-hidden' : ''}${role ? ' is-clipshape' : ''}" data-path="${key}" aria-selected="${on}" aria-level="${depth + 1}"${expandable ? ` aria-expanded="${open}"` : ''} tabindex="-1" draggable="${role ? 'false' : 'true'}">
       <span class="ge-lay__row" style="--d:${depth}">
-        ${kids.length ? `<button type="button" class="ge-lay__exp" data-exp tabindex="-1" aria-label="${esc(open ? t('Zuklappen') : t('Aufklappen'))}">${ico(open ? 'caret-down' : 'caret-right')}</button>` : '<span class="ge-lay__exp"></span>'}
-        <span class="ge-lay__thumb" aria-hidden="true">${many ? ico(el.localName === 'text' ? 'text-t' : kids.length ? 'folder' : 'shapes') : thumb(el)}</span>
-        <span class="ge-lay__name" title="${esc(typeLabel(el))}">${esc(nameOf(el))}</span>
+        ${expandable ? `<button type="button" class="ge-lay__exp" data-exp tabindex="-1" aria-label="${esc(open ? t('Zuklappen') : t('Aufklappen'))}">${ico(open ? 'caret-down' : 'caret-right')}</button>` : '<span class="ge-lay__exp"></span>'}
+        <span class="ge-lay__thumb" aria-hidden="true">${many || role ? ico(role === 'clip' ? 'crop' : role === 'mask' ? 'selection-background' : el.localName === 'text' ? 'text-t' : kids.length ? 'folder' : 'shapes') : thumb(el)}</span>
+        <span class="ge-lay__name" title="${esc(typeLabel(el))}">${esc(prefix + nameOf(el))}${cl ? ' <span class="adm-sr">(' + esc(cl.kind === 'clip' ? t('Beschnitten') : t('Maskiert')) + ')</span>' : ''}</span>${badge}
         <button type="button" class="ge-lay__btn${lockd ? ' is-set' : ''}" data-lock tabindex="-1" aria-pressed="${lockd}" aria-label="${esc(lockd ? t('Entsperren') : t('Sperren'))}" title="${esc(lockd ? t('Entsperren') : t('Sperren'))}">${ico(lockd ? 'lock' : 'lock-open')}</button>
         <button type="button" class="ge-lay__btn${hid ? ' is-set' : ''}" data-eye tabindex="-1" aria-pressed="${hid}" aria-label="${esc(hid ? t('Einblenden') : t('Ausblenden'))}" title="${esc(hid ? t('Einblenden') : t('Ausblenden'))}">${ico(hid ? 'eye-slash' : 'eye')}</button>
       </span>`;
-    if (kids.length && open) s += `<ul role="group">${[...kids].reverse().map(c => rowHtml(c, depth + 1, many)).join('')}</ul>`;
+    if (expandable && open) s += `<ul role="group">${[...clipKids].reverse().map(c => rowHtml(c, depth + 1, many, cl.kind)).join('')}${[...kids].reverse().map(c => rowHtml(c, depth + 1, many)).join('')}</ul>`;
     return s + '</li>';
   }
 
@@ -451,6 +461,8 @@ export function buildPanels(ed) {
     if (e.target.closest('[data-lock]')) { el.getAttribute('data-locked') === '1' ? el.removeAttribute('data-locked') : el.setAttribute('data-locked', '1'); if (isLocked(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isLocked(el) ? t('Gesperrt') : t('Entsperrt')); return; }
     if (e.target.closest('[data-eye]')) { isHidden(el) ? (setProp(el, 'display', null)) : setProp(el, 'display', 'none'); if (isHidden(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isHidden(el) ? t('Ausgeblendet') : t('Eingeblendet')); return; }
     if (isLocked(el)) return;
+    // Form einer Beschneidung/Maske: bearbeiten über Pfeiltasten, Transformieren, Knoten
+    if (el.closest('clipPath,mask')) { ed.scope = ed.root; ed.select([el]); return; }
     if (el.parentNode !== ed.root && el.parentNode !== ed.scope) ed.scope = el.parentNode;
     else if (el.parentNode === ed.root) ed.scope = ed.root;
     if (e.shiftKey || e.metaKey || e.ctrlKey) ed.select(ed.sel.includes(el) ? ed.sel.filter(s => s !== el) : [...ed.sel, el]);
@@ -682,7 +694,8 @@ export function buildPanels(ed) {
 
   // ================================================================= Schnittstelle für den Editor
   const api = {
-    groups: [A.el, B.el, C.el],
+    groups: [A.el, TP.el, B.el, C.el],
+    text: TP,
     aspectLocked: () => lock,
     showColor() { A.select('color'); refreshColor(); },
     refresh() {
@@ -691,6 +704,7 @@ export function buildPanels(ed) {
       if (a === 'color') refreshColor(); else if (a === 'swatches') refreshSwatches(); else if (a === 'stroke') refreshStroke(); else refreshLook(lookPanel);
       if (b === 'layers') refreshLayers(); else if (b === 'lib' && !libBuilt) buildLib(); else if (b === 'icons' && !iconsBuilt) buildIcons();
       if (c === 'transform') refreshTransform(); else refreshHistory();
+      TP.refresh();
     },
     async insertItem(item, p) {
       if (item.kind === 'lib') {
