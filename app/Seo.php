@@ -10,21 +10,15 @@ final class Seo
     {
         $s = app()->settings;
         $theme = app()->theme->def;
-        $suffix = (string) setting($theme['seo']['title_suffix'] ?? 'site_title_suffix', '');
-        if ($suffix === '' && !empty($theme['seo']['title_suffix_fallback'])) {
-            $suffix = (string) setting($theme['seo']['title_suffix_fallback'], '');
-        }
+        $suffix = self::suffix();
         $homeTitle = (string) setting($theme['seo']['home_title'] ?? 'site_title', '');
-        // Landing-Domain (Core\Landings): eigener Name im Titel, eigenes Vorschaubild
+        // Landing-Domain (Core\Landings): eigener Name im Titel (suffix()), eigenes Vorschaubild
         $lp = Landings::current();
-        if ($lp && $lp->name !== null) $suffix = $lp->name;
 
         $title = $page['is_home'] && $homeTitle !== '' ? $homeTitle : $page['title'];
         // Eigener Titel für Suchmaschinen (Seiteneinstellungen → „Titel für Suchmaschinen“) hat Vorrang
         if (trim((string) ($page['meta_title'] ?? '')) !== '') $title = trim((string) $page['meta_title']);
-        if ($suffix !== '' && !str_contains($title, $suffix)) {
-            $title .= ' | ' . $suffix;
-        }
+        if (!str_contains($title, $suffix)) $title = self::withSuffix($title, $suffix);
         $desc = trim((string) ($page['meta_description'] ?: setting($theme['seo']['description'] ?? 'default_meta_description', '')));
         $ogId = $page['og_image'] ?: ($lp?->ogImage ?: setting($theme['seo']['og_image'] ?? 'og_default_image'));
         $og = $ogId ? Media::find((int) $ogId) : null;
@@ -60,15 +54,40 @@ final class Seo
         return $filter ? self::filtered($out, ['page' => $page]) : $out;
     }
 
+    /** Zusatz hinter dem Seitentitel: Einstellung des Kits (bzw. Rückfall), auf einer Landing-Domain deren Name */
+    public static function suffix(): string
+    {
+        $theme = app()->theme->def;
+        $suffix = (string) setting($theme['seo']['title_suffix'] ?? 'site_title_suffix', '');
+        if ($suffix === '' && !empty($theme['seo']['title_suffix_fallback'])) $suffix = (string) setting($theme['seo']['title_suffix_fallback'], '');
+        $lp = Landings::current();
+        return $lp && $lp->name !== null ? (string) $lp->name : $suffix;
+    }
+
+    /** Länge, ab der Suchmaschinen den Titel kürzen (Richtwert, wie seo:check) */
+    public const TITLE_MAX = 60;
+
+    /**
+     * Titel + „ | Website-Zusatz“ – den Zusatz nur, wenn beides zusammen höchstens TITLE_MAX Zeichen hat. Bei langen Titeln
+     * (z. B. Termine mit Datum) hat der eigentliche Titel Vorrang: Suchmaschinen kürzen hinten, und der Zusatz unterscheidet
+     * keine Seiten voneinander.
+     */
+    public static function withSuffix(string $title, string $suffix): string
+    {
+        if ($suffix === '') return $title;
+        $full = $title . ' | ' . $suffix;
+        return mb_strlen($full) <= self::TITLE_MAX ? $full : $title;
+    }
+
     /** Detailseite eines Datensatzes: Titel, Beschreibung, Bild und Canonical aus dem Eintrag */
     public static function forEntry(array $template, array $table, array $entry): array
     {
         $seo = self::forPage($template + ['is_home' => 0], false);
-        $suffix = explode(' | ', $seo['title'], 2)[1] ?? '';
+        $suffix = self::suffix();
         $title = strip_emphasis(Data\Entries::title($table, $entry));
         // Kalender-Tabellen: Datum im Titel („Schießtraining am 14.03.2027“), sonst haben Termine gleichen Namens denselben <title>
         $dated = Data\Calendar::titleWithDate($table, $entry, $title);
-        $seo['title'] = $dated . ($suffix !== '' ? ' | ' . $suffix : '');
+        $seo['title'] = self::withSuffix($dated, $suffix);
         if ($table['settings']['description_field'] !== '') {
             $d = Data\Entries::text($table, $entry, $table['settings']['description_field']);
             if ($d !== '') $seo['description'] = mb_strimwidth(preg_replace('~\s+~', ' ', strip_emphasis($d)), 0, 160, '…');
