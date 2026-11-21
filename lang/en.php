@@ -1207,6 +1207,8 @@ return [
     'und' => 'and',
     '{n}-mal' => '{n} times',
     'Öffentlicher iCal-Feed (Abonnieren)' => 'Public iCal feed (subscribe)',
+    'Datum im Seitentitel der Detailseite' => 'Date in the page title of the detail page',
+    'Für Suchmaschinen, z. B. „Training am 14.03.2027“ – Termine mit gleichem Namen haben so verschiedene Titel. Nicht bei Serienterminen.' => 'For search engines, e.g. “Training on 14 Mar 2027” – events with the same name get different titles. Not for recurring events.',
     '– keins –' => '– none –',
     '– wählen –' => '– choose –',
     'Heute' => 'Today',

@@ -209,6 +209,7 @@
   </ol>
   <p>In der Verwaltung schalten Sie über <b>Liste | Kalender</b> auf eine Monatsübersicht um: Serientermine stehen an jedem Tag, Entwürfe sind gestrichelt markiert. Ein Klick auf einen Termin öffnet ihn (bei Serien den ganzen Serientermin), ein Klick auf einen freien Tag legt dort einen neuen Termin an.</p>
   <p>Auf der Website zeigen die Blöcke <b>Kalender</b> (Monatsübersicht oder Terminliste) und <b>Nächste Termine</b> jeden Termin einzeln an. Besucher können den Kalender über <b>„Kalender abonnieren“</b> in ihre Kalender-App übernehmen; Änderungen erscheinen dort automatisch nach einigen Stunden. „Erweitert“ unter der Wiederholung ist für Sonderfälle gedacht und muss normalerweise nicht angefasst werden.</p>
+  <p><b>Datum im Seitentitel:</b> Hat die Tabelle Detailseiten, ergänzt KLXM Studio den Titel für Suchmaschinen und soziale Netzwerke um das Datum – aus mehreren Terminen „Schießtraining“ werden „Schießtraining am 14.03.2027“, „Schießtraining am 21.03.2027“ usw. (englische Seiten: „on 14 Mar 2027“). Mehrtägige Termine nennen den ersten Tag („Sommerfest ab 03.10.2027“), eine Uhrzeit steht nie im Titel. Unverändert bleiben Serientermine (eine Seite für alle Termine) und Titel, die das Jahr schon enthalten („Jahrestreffen 2027“). Auf der Seite selbst ändert sich nichts. Abschalten können Sie das in den Einstellungen der Tabelle unter <b>Kalender › Datum im Seitentitel der Detailseite</b>.</p>
 
   <?php if (\Core\Extensions::isActive('dav') && \Core\Features::on('dav')): ?>
   <h3 id="apps">Termine und Kontakte in Kalender-Apps</h3>

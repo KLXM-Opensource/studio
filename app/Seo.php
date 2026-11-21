@@ -65,12 +65,16 @@ final class Seo
     {
         $seo = self::forPage($template + ['is_home' => 0], false);
         $suffix = explode(' | ', $seo['title'], 2)[1] ?? '';
-        $title = Data\Entries::title($table, $entry);
-        $seo['title'] = strip_emphasis($title) . ($suffix !== '' ? ' | ' . $suffix : '');
+        $title = strip_emphasis(Data\Entries::title($table, $entry));
+        // Kalender-Tabellen: Datum im Titel („Schießtraining am 14.03.2027“), sonst haben Termine gleichen Namens denselben <title>
+        $dated = Data\Calendar::titleWithDate($table, $entry, $title);
+        $seo['title'] = $dated . ($suffix !== '' ? ' | ' . $suffix : '');
         if ($table['settings']['description_field'] !== '') {
             $d = Data\Entries::text($table, $entry, $table['settings']['description_field']);
             if ($d !== '') $seo['description'] = mb_strimwidth(preg_replace('~\s+~', ' ', strip_emphasis($d)), 0, 160, '…');
         }
+        // Beschreibung, die nur aus dem Titel besteht, bekommt das Datum ebenso
+        if ($dated !== $title && trim((string) $seo['description']) === $title) $seo['description'] = $dated;
         $imgField = \Core\Data\Tables::imageField($table);
         $img = $imgField !== '' ? ($entry[$imgField] ?? null) : null;
         if ($img && ($m = Media::find((int) $img)) && !MediaPools::mediaProtected($m) && ($still = Media::stillOf($m))) {
