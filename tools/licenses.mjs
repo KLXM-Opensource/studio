@@ -63,7 +63,6 @@ const REQUIRED_FILES = [
   'public/assets/vendor/maplibre/LICENSE.txt',
   'public/assets/vendor/maplibre/THIRD-PARTY-LICENSES.txt',
   'public/assets/vendor/pdfjs/LICENSE.txt',
-  'public/assets/vendor/pdfjs/cmaps/LICENSE',
   'public/assets/vendor/pdfjs/iccs/LICENSE',
   'public/assets/vendor/pdfjs/standard_fonts/LICENSE_FOXIT',
   'public/assets/vendor/pdfjs/standard_fonts/LICENSE_LIBERATION',
