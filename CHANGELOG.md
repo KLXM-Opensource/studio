@@ -81,6 +81,7 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 - **`Core\Http\Fetch`:** Optionen `hosts` (nur diese Hosts – auch Weiterleitungsziele werden vor dem Abruf geprüft) und `redirects`
   (0–3).
 - **SVG:** CSS-Bildfunktionen ohne `url(…)` (`image-set()`, `src()`, `cross-fade()` …) gelten als unsicher (kein Nachladen).
+- **Logo des Anbieters** (eingebettet auf der Anmeldeseite): Wurzel ohne `style`/`overflow` – ein Logo kann die Anmeldeseite nicht mehr überdecken.
 
 ### Überwachung: technische Meldungen getrennt von Einrichtung und Redaktion
 - **Kategorien der Prüfungen** (`Core\Health::rows()`): `technical` (alarmiert eine Überwachung), `setup` (Einrichtung) und
