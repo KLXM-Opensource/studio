@@ -74,7 +74,7 @@ $__cmds = [
         ['media:selftest', 'Selbsttest der Bildbearbeitung (Drehen, einbeschriebenes Rechteck, Entzerren, Format, Reihenfolge, GD)'],
         ['vcard:selftest', 'Selbsttest der Visitenkarten (Core\\VCard): Aufbau vCard 3.0, Maskierung, Faltung nach 75 Oktetts, CRLF, UTF-8, Bild (PNG/JPEG, kein SVG) – dazu die Karte der Website und je eine Personen-Karte (Exit-Code 1 bei Fehlern)'],
         ['svg:selftest [--dump=ordner] [-v]', 'Selbsttest der SVG-Bereinigung (Core\\Svg): Schadcode-Proben und Exporte aus Illustrator, Inkscape, Figma'],
-        ['grafik:selftest', 'Selbsttest des Grafik-Editors (Core\\Graphics): Editor-Ausgabe übersteht die Bereinigung, Ablage außerhalb der Mediathek, Blockvorschau, Fassungen, Rechte'],
+        ['graphics:selftest', 'Selbsttest der Anzeige von Grafiken (Core\\Graphics): Bereinigung der Editor-Ausgabe, Design-Farben, Bewegung, Daten und Zustände, Ablage-Daten – den Grafik-Editor prüft seine Erweiterung (grafik:selftest)'],
         ['data:share <handle> --members=a,b [--see-members] [--merge]', 'Tabelle dieser Website für weitere Websites freigeben (diese Website = Eigentümer, --site=…)'],
         ['data:unshare <handle> [--all-entries]', 'Freigabe beenden – wieder eigene Tabelle des Eigentümers'],
         ['data:template <vorlage> [--handle=…] [--slug=…] [--form=…] [--with-detail-page] [--with-list-page] [--dry-run]', 'Tabelle aus Vorlage anlegen bzw. ergänzen (wiederholbar), z. B. jobs = Stellenangebote mit Eingang „Bewerbungen“ (Kapitel „Stellenangebote & Google for Jobs“)'],

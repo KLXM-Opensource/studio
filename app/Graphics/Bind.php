@@ -537,7 +537,7 @@ final class Bind
         $path = Media::path($m);
         $web = is_file($path) ? (string) @file_get_contents($path, false, null, 0, Svg::MAX_BYTES + 1) : '';
         if ($web === '' || !self::isBound($web)) return null;
-        $work = Graphics::source('media:' . (int) $m['id'], $web);
+        $work = Store::source('media:' . (int) $m['id'], $web);
         $model = $work !== null ? self::model($work) : null;
         if (!$model) return null;
         $vals = self::current($model);
@@ -550,7 +550,7 @@ final class Bind
         if (!is_file($file)) {
             $dir = dirname($file);
             if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) return null;
-            Svg::guard(Graphics::dir());
+            Svg::guard(Store::dir());
             foreach (glob($dir . '/gb-' . $id . '-*.svg') ?: [] as $old) if (filemtime($old) < time() - 86400) @unlink($old);
             try {
                 $out = Svg::clean(self::apply($web, $model, $vals), ['keep_ids' => true])['svg'];

@@ -546,6 +546,16 @@ final class Extensions
     {
         $out = '';
         foreach (self::$active as $x) {
+            // Angaben für die Skripte (adminData) – JSON vor den Skripten, kein Inline-Skript
+            $data = [];
+            foreach ($x->adminDataProviders as $fn) {
+                $d = self::safe($x, 'adminData', fn() => $fn($view), null);
+                if (is_array($d)) $data = array_replace($data, $d);
+            }
+            if ($data) {
+                $out .= '<script type="application/json" id="cms-ext-' . e($x->name) . '">'
+                    . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . "</script>\n";
+            }
             foreach ($x->adminAssetProviders as $fn) {
                 foreach ((array) self::safe($x, 'adminAssets', fn() => $fn($view), []) as $path) {
                     $path = ltrim((string) $path, '/');
@@ -557,6 +567,23 @@ final class Extensions
             }
         }
         return $out;
+    }
+
+    /**
+     * Blockauswahl „Vorschau gestalten“ (Extension::previewEditor): erste gültige Angabe aktiver Erweiterungen oder null.
+     * @return array{url: string, label: string, title: string}|null
+     */
+    public static function previewEditor(): ?array
+    {
+        foreach (self::$active as $x) {
+            foreach ($x->previewEditorProviders as $fn) {
+                $d = self::safe($x, 'previewEditor', fn() => $fn(), null);
+                if (!is_array($d) || !is_string($d['url'] ?? null) || !str_starts_with($d['url'], '/') || str_starts_with($d['url'], '//')) continue;
+                $label = trim((string) ($d['label'] ?? ''));
+                return ['url' => $d['url'], 'label' => $label !== '' ? $label : __('Vorschau gestalten'), 'title' => trim((string) ($d['title'] ?? ''))];
+            }
+        }
+        return null;
     }
 
     /** Zeilen für `health`: ['Bezeichnung' => true|false|null] */

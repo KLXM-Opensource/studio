@@ -8,9 +8,9 @@
  * Tastatur: Tippen filtert (Name, Beschreibung, Typ, Gruppe), ↑/↓ (in Kacheln auch ←/→ bei leerem Suchfeld) wählen,
  * Enter fügt ein, Esc schließt. Fokus bleibt im Suchfeld (Combobox mit aria-activedescendant).
  * Vorschauen (cfg.blocks[typ].preview.url) sind Dateien (<img>), fehlt eine, erscheint das Symbol des Blocks.
- * „Vorschau gestalten“ (nur mit Recht media.upload, cfg.grafik): Grafik-Editor im eingebetteten Fenster (Verwaltungsseite
- * /admin/grafik/editor?format=preview&block=…&variant=…&embed=1, eigene CSP der Verwaltung); nach dem Speichern meldet er
- * die neue Adresse per postMessage (gleiche Herkunft) – die Auswahl zeigt sie sofort.
+ * „Vorschau gestalten“ (cfg.previewEditor = {url, label, title}, Extension::previewEditor – z. B. ein Grafik-Editor): Seite der
+ * Erweiterung im eingebetteten Fenster ({url}?format=preview&block=…&variant=…&embed=1, eigene CSP der Verwaltung); nach dem
+ * Speichern meldet sie die neue Adresse per postMessage (gleiche Herkunft, source „klxm-preview-editor“) – die Auswahl zeigt sie sofort.
  */
 const ORDER = ['Kopf', 'Inhalt', 'Medien', 'Layout', '*', 'Daten', 'Formulare', 'Navigation', 'Website'];
 const rank = g => { const i = ORDER.indexOf(g); return i < 0 ? ORDER.indexOf('*') : i; };
@@ -129,24 +129,24 @@ export function createBlockPicker({ cfg, host, blockIcon, clipboard, onInsert, s
       <div class="cms-addpop__dact">
         <button type="button" class="cms-addpop__ins">${esc(t('Einfügen'))}</button>
         ${paste ? '' : `<button type="button" class="cms-addpop__star" aria-pressed="${isFav}" title="${esc(t('Als Favorit oben anzeigen'))}">${ico('star')}<span>${esc(isFav ? t('Favorit') : t('Merken'))}</span></button>`}
-        ${cfg.grafik?.page && !paste && !preset ? `<button type="button" class="cms-addpop__design" title="${esc(t('Vorschaugrafik dieses Blocks für diese Website zeichnen'))}">${ico('pencil-simple')}<span>${esc(t('Vorschau gestalten'))}</span></button>` : ''}
+        ${cfg.previewEditor?.url && !paste && !preset ? `<button type="button" class="cms-addpop__design" title="${esc(cfg.previewEditor.title || t('Vorschaugrafik dieses Blocks für diese Website zeichnen'))}">${ico('pencil-simple')}<span>${esc(cfg.previewEditor.label || t('Vorschau gestalten'))}</span></button>` : ''}
       </div>`;
     if (keep) (detail.querySelector(keep) || q).focus({ preventScroll: true });
   }
 
-  // ---------------------------------------------------------------- Vorschau gestalten (Grafik-Editor, eingebettet)
+  // ---------------------------------------------------------------- Vorschau gestalten (Seite einer Erweiterung, eingebettet)
   function design(type, v, btn) {
     const dlg = document.createElement('dialog');
     dlg.className = 'cms-addpop__ge';
-    dlg.setAttribute('aria-label', t('Vorschau gestalten'));
-    const u = new URL(cfg.grafik.page, location.href);
+    dlg.setAttribute('aria-label', cfg.previewEditor.label || t('Vorschau gestalten'));
+    const u = new URL(cfg.previewEditor.url, location.href);
     u.searchParams.set('format', 'preview'); u.searchParams.set('block', type); u.searchParams.set('embed', '1');
     if (v) u.searchParams.set('variant', v);
-    dlg.innerHTML = `<iframe title="${esc(t('Grafik-Editor'))}" src="${esc(u.pathname + u.search)}"></iframe>`;
+    dlg.innerHTML = `<iframe title="${esc(cfg.previewEditor.label || t('Vorschau gestalten'))}" src="${esc(u.pathname + u.search)}"></iframe>`;
     el.append(dlg);
     const done = () => { removeEventListener('message', onMsg); if (dlg.open) dlg.close(); dlg.remove(); (detail.querySelector('.cms-addpop__design') || btn)?.focus?.({ preventScroll: true }); };
     const onMsg = ev => {
-      if (ev.origin !== location.origin || ev.source !== dlg.querySelector('iframe')?.contentWindow || ev.data?.source !== 'klxm-grafik') return;
+      if (ev.origin !== location.origin || ev.source !== dlg.querySelector('iframe')?.contentWindow || ev.data?.source !== 'klxm-preview-editor') return;
       if (ev.data.type === 'close') { done(); return; }
       if (ev.data.type === 'saved' && ev.data.url && ev.data.active && ev.data.block) {
         const [bt, bv] = String(ev.data.block).split('--');

@@ -28,6 +28,9 @@ namespace Core;
  * Verwaltung, Mediathek & Betrieb (siehe Technik → „Funktionsumfang & Erweiterungen“):
  *   $x->feature('kalender', 'Kalender', [...], false)                  Funktion Standard AUS (erst 'features' => ['kalender' => true])
  *   $x->adminAssets(fn(string $view) => $view === 'media' ? ['css/x.css', 'js/x.js'] : [])   Dateien aus {dir}/assets in der Verwaltung laden
+ *   $x->adminData(fn(string $view) => ['boot' => url('/admin/api/x/boot')])   Angaben für diese Skripte (JSON, CMSAdmin.extData(name))
+ *   $x->previewEditor(fn() => can('design.edit') ? ['url' => url('/admin/x/editor'), 'label' => 'Vorschau gestalten'] : null)
+ *                                                                      Blockauswahl: „Vorschau gestalten“ öffnet diese Seite eingebettet
  *   $x->health(fn() => ['ffmpeg gefunden' => true])                    Zeilen für `php bin/console health` (true/false/null = Warnung)
  *   $x->afterAdminResponse(fn() => $queued ? fn() => work() : null)    billige Prüfung je Verwaltungsaufruf; Rückgabe läuft NACH der Antwort
  *   $x->on('media.deleted', fn(array $m) => …)                         Ereignisse des Cores (media.imported, media.replaced, media.deleted)
@@ -76,6 +79,10 @@ final class Extension
     public array $pageGuards = [];
     /** @var list<callable(string): list<string>> */
     public array $adminAssetProviders = [];
+    /** @var list<callable(string): ?array> Angaben für die Skripte der Verwaltung (adminData) */
+    public array $adminDataProviders = [];
+    /** @var list<callable(): ?array> Blockauswahl: Vorschau gestalten (previewEditor) */
+    public array $previewEditorProviders = [];
     /** @var list<callable(): array<string, ?bool>> */
     public array $healthProviders = [];
     /** @var list<string> Pfade unter storage/, die nicht in die Sicherung der Installation gehören (Core\Backup\Installation) */
@@ -335,6 +342,32 @@ final class Extension
     public function adminAssets(callable $fn): self
     {
         $this->adminAssetProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Angaben für die Skripte aus adminAssets() (Adressen, Rechte, Einstellungen) – statt Inline-Skript (CSP der Verwaltung):
+     * fn(string $view): ?array. Der Core schreibt sie als <script type="application/json" id="cms-ext-{name}"> vor die Skripte
+     * der Erweiterung; lesen mit CMSAdmin.extData('{name}') (bzw. JSON.parse des Elements). Mehrere Aufrufe werden zusammengeführt.
+     * Nur Angaben für angemeldete Personen dieser Ansicht – keine Geheimnisse (Schlüssel, Tokens außer CSRF).
+     */
+    public function adminData(callable $fn): self
+    {
+        $this->adminDataProviders[] = $fn;
+        return $this;
+    }
+
+    /**
+     * Blockauswahl des Editors („+ Block einfügen“): Knopf „Vorschau gestalten“ in der großen Vorschau eines Blocks. fn(): ?array –
+     * ['url' => Verwaltungsseite (gleiche Herkunft, „/…“), 'label' => Knopf, 'title' => Tooltip (optional)] oder null (kein Recht).
+     * Die Seite öffnet eingebettet mit ?format=preview&block={typ}[&variant={variante}]&embed=1 und meldet sich per postMessage
+     * (gleiche Herkunft): {source: 'klxm-preview-editor', type: 'saved', block: 'typ' | 'typ--variante', url: Adresse der Vorschau,
+     * active: true} bzw. {source: 'klxm-preview-editor', type: 'close'}. Die Auswahl zeigt die neue Vorschau sofort; dauerhaft
+     * gilt sie über die Website-Einstellung block_previews oder den Filter blocks.previews (Core\Blocks\Picker). Erste Angabe gilt.
+     */
+    public function previewEditor(callable $fn): self
+    {
+        $this->previewEditorProviders[] = $fn;
         return $this;
     }
 

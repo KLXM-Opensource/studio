@@ -15,7 +15,9 @@ namespace Core;
  *    in einer Transaktion, die am Ende zurückgerollt wird; typisiert (Core\Events) und Altform;
  *  - Verwaltungsrouten von Erweiterungen (Core\Http\Router::scoped): Anmeldung, Recht, CSRF, Altform, benannte Ausnahmen;
  *  - Tabellen von Erweiterungen (Extension::table, Fingerabdruck) in einer Transaktion, die zurückgerollt wird;
- *  - Slots der Verwaltung (Core\Slots): Methoden, Escapen, nur eigene Pfade, Platzhalter, Rechte, Altform-HTML, Fehler isoliert.
+ *  - Slots der Verwaltung (Core\Slots): Methoden, Escapen, nur eigene Pfade, Platzhalter, Rechte, Altform-HTML, Fehler isoliert;
+ *  - Verwaltungs-Skripte und Mediathek (adminAssets/adminData, previewEditor, Filter media.usages und presence.object, Haken der
+ *    Mediathek create/edit/side in resources/js/_media.js) – Stellen, an denen z. B. ein Grafik-Editor andockt.
  * Rollen werden für die Prüfung vorübergehend gesetzt (Auth per Reflection) und danach zurückgestellt.
  */
 final class ExtensionsSelfTest
@@ -68,6 +70,7 @@ final class ExtensionsSelfTest
             self::push();
             self::blockHooks();
             self::filtersAndEvents();
+            self::editorHooks();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -165,6 +168,44 @@ final class ExtensionsSelfTest
     }
 
     private static int $qaPage = 0;
+
+    // ================================================================= Andockstellen für Editoren (adminData, previewEditor, Filter, Mediathek-Haken)
+
+    private static function editorHooks(): void
+    {
+        // ohne Erweiterung: nichts
+        self::eq('previewEditor: ohne Erweiterung kein Knopf', Extensions::previewEditor(), null);
+        self::eq('media.usages/presence.object: Namen bekannt', Filters::known('media.usages') && Filters::known('presence.object'), true);
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+        $x->adminAssets(fn(string $view) => $view === 'media' ? ['js/qa.js'] : []);
+        $x->adminData(fn(string $view) => $view === 'media' ? ['boot' => '/admin/api/qa', 'html' => '</script><b>'] : null);
+        $x->adminData(fn() => throw new \RuntimeException('kaputt'));   // Fehler einer Angabe: die anderen bleiben
+        $x->previewEditor(fn() => ['url' => '//fremd.example/x', 'label' => 'Fremd']);   // fremde Adresse → übersprungen
+        $x->previewEditor(fn() => ['url' => '/admin/qa/editor', 'label' => '']);
+        $x->filter('media.usages', fn(array $l, array $c) => [...$l, ['label' => 'QA-Verwendung', 'url' => '/admin/qa?m=' . $c['media']], ['url' => 'ohne Bezeichnung']]);
+        $x->filter('presence.object', fn(array $v, array $c) => $c['type'] === 'qa' ? ['allowed' => true, 'last' => ['user_id' => null, 'created_at' => '2026-01-01 00:00:00']] : null);
+        self::activate($x);
+        try {
+            $head = Extensions::adminHead('media');
+            preg_match('~<script type="application/json" id="cms-ext-qa_selftest">(.*?)</script>~s', $head, $m);
+            $d = json_decode((string) ($m[1] ?? ''), true);
+            self::eq('adminData: JSON vor dem Skript, ohne Markup-Ausbruch', [is_array($d) ? $d['boot'] : null, $d['html'] ?? null, str_contains((string) ($m[1] ?? ''), '</script>'),
+                strpos($head, 'cms-ext-qa_selftest') < strpos($head, 'js/qa.js')], ['/admin/api/qa', '</script><b>', false, true]);
+            self::eq('adminData: andere Ansicht ohne Angaben', str_contains(Extensions::adminHead('pages'), 'cms-ext-qa_selftest'), false);
+            self::eq('previewEditor: erste gültige Angabe, Standard-Beschriftung', Extensions::previewEditor(), ['url' => '/admin/qa/editor', 'label' => __('Vorschau gestalten'), 'title' => '']);
+            $u = Media::usages(999999995);
+            self::eq('media.usages: ergänzt, Einträge ohne label fallen weg', [count(array_filter($u, fn($r) => ($r['label'] ?? '') === 'QA-Verwendung')), count(array_filter($u, fn($r) => !isset($r['label'])))], [1, 0]);
+            $rp = new \ReflectionMethod(Http\Controllers\Admin\PresenceController::class, 'allowed');
+            self::eq('presence.object: eigene Art erlaubt, Kern-Arten unberührt, ungültige IDs abgelehnt', [$rp->invoke(null, 'qa', 'x:1'), $rp->invoke(null, 'gibtsnicht', 'x:1'), $rp->invoke(null, 'qa', '<b>')], [true, false, false]);
+        } finally {
+            self::activate(null);
+        }
+        // Mediathek: Haken der Erweiterungen im Quelltext (JS lässt sich hier nicht ausführen – Vertrag gegen Verlust absichern)
+        $js = (string) @file_get_contents(ROOT . '/resources/js/_media.js');
+        self::eq('Mediathek: Haken create/edit/side vorhanden', [str_contains($js, "hook('create', this)"), str_contains($js, "hook('edit', this, m)"), str_contains($js, "hook('side', this)")], [true, true, true]);
+        $bp = (string) @file_get_contents(ROOT . '/resources/js/_blockpicker.js');
+        self::eq('Blockauswahl: Nachrichten nur von „klxm-preview-editor“', str_contains($bp, "'klxm-preview-editor'") && str_contains($bp, 'cfg.previewEditor'), true);
+    }
 
     // ================================================================= Push-Ereignisse (Extension::pushEvent → Konto → Benachrichtigungen)
 

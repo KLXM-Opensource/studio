@@ -208,7 +208,7 @@ final class Database
             // Landingpages mit eigenen Domains (Core\Landings): Domain(s) → Seite bzw. Seitenzweig, Optionen/Marke als JSON
             'landings' => "id $pk, label $str NULL, hosts TEXT NOT NULL, page_id INT NOT NULL, include_subpages INT NOT NULL DEFAULT 1,
                 mode VARCHAR(10) NOT NULL DEFAULT 'own', options_json TEXT, active INT NOT NULL DEFAULT 1, created_at VARCHAR(25), updated_at VARCHAR(25)",
-            // Grafik-Editor (Core\Graphics): Symbole, Blockvorschauen und eigene Bausteine – eigene Ablage, nicht in der Mediathek
+            // Grafiken (Core\Graphics\Store, bearbeitet vom Grafik-Editor – eigene Erweiterung): Symbole, Blockvorschauen, Bausteine, Bilder, Vorlagen – eigene Ablage, nicht in der Mediathek; Schema bleibt im Core, damit nichts verloren geht
             'graphics' => "id $pk, kind VARCHAR(12) NOT NULL, name $str NOT NULL, block VARCHAR(80) NULL, file $str NULL, svg $long,
                 width INT NULL, height INT NULL, user_id INT NULL, created_at VARCHAR(25), updated_at VARCHAR(25)",
             // Frühere Fassungen beim Überschreiben (Mediathek-Grafik „media:{id}“ bzw. Ablage „graphic:{id}“), je Grafik begrenzt
@@ -216,7 +216,7 @@ final class Database
             // Arbeitsfassung des Editors je Grafik (Ebenennamen, Sperren, Hilfslinien, Textrahmen); ausgeliefert wird die optimierte
             // Web-Fassung – hash = sha1 der Web-Datei, für die diese Arbeitsfassung gilt (sonst wurde die Datei anderswo ersetzt)
             'graphic_sources' => "ref VARCHAR(40) NOT NULL PRIMARY KEY, svg $long, hash VARCHAR(40) NOT NULL, updated_at VARCHAR(25)",
-            // Bildkompositionen (Persona Bild, Core\Graphics\Compose): Ausgaben je Format (role out, board = Zeichenfläche) und
+            // Bildkompositionen (Grafik-Editor, Persona Bild; gelesen von Core\Graphics\Store): Ausgaben je Format (role out, board = Zeichenfläche) und
             // verwendete Fotos der Mediathek (role src) – für „Bearbeiten“ aus der Mediathek und „Verwendet auf“ der Quellfotos
             'graphic_media' => "graphic_id INT NOT NULL, media_id INT NOT NULL, role VARCHAR(8) NOT NULL, board VARCHAR(40) NULL, hash VARCHAR(40) NULL",
         ];
