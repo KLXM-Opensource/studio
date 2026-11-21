@@ -631,7 +631,7 @@ final class Fields
     private static function renderGeo(string $id, string $name, string $v, string $aria, array $f): string
     {
         $cfg = [
-            'style' => Maps::styleUrl(), 'vendor' => base_path() . '/assets/vendor/maplibre/', 'css' => asset('vendor/maplibre/maplibre-gl.css'),
+            'style' => Maps::styleUrl(), 'lib' => Maps::lib(), 'css' => asset('vendor/maplibre/maplibre-gl.css'),
             'geocode' => url('/admin/api/geocode'), 'address' => array_values((array) ($f['address_fields'] ?? [])),
         ];
         return '<div class="geo" data-geo="' . e(json_encode($cfg, JSON_UNESCAPED_SLASHES)) . '">'

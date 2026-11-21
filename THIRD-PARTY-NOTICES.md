@@ -73,7 +73,7 @@ extension package with its own `THIRD-PARTY-NOTICES.md`.
 | Editor.js (`@editorjs/editorjs`), © CodeX | 2.31.7 | Apache-2.0 | `public/assets/vendor/editorjs/editorjs.umd.js` | `LICENSE-editorjs.txt` |
 | – bundled: `@editorjs/caret` 1.1.0, `@editorjs/dom` 1.1.0, `@editorjs/helpers` 1.2.2, `codex-notifier` 1.1.2, `codex-tooltip` 1.0.6 | | MIT | inside `editorjs.umd.js` | `THIRD-PARTY-LICENSES.txt` |
 | editorjs-drag-drop, © 2021 kommitters Open Source | 1.1.16 | MIT | `public/assets/vendor/editorjs/drag-drop.js` | `LICENSE-drag-drop.txt` |
-| MapLibre GL JS (`maplibre-gl`), © 2023 MapLibre contributors; contains code © 2020 Mapbox (BSD-3-Clause), glfx.js © 2011 Evan Wallace (MIT), d3-color © 2010-2016 Mike Bostock (BSD-3-Clause) | 6.19.0 | BSD-3-Clause | `public/assets/vendor/maplibre/` | `LICENSE.txt` |
+| MapLibre GL JS (`maplibre-gl`), © 2023 MapLibre contributors; contains code © 2020 Mapbox (BSD-3-Clause), glfx.js © 2011 Evan Wallace (MIT), d3-color © 2010-2016 Mike Bostock (BSD-3-Clause) | 6.19.0 | BSD-3-Clause | `public/assets/vendor/maplibre/{version}/` (plus the frozen 6.11.2 files directly in `vendor/maplibre/` for pages cached before the switch) | `LICENSE.txt` |
 | – bundled: @mapbox/point-geometry, @maplibre/geojson-vt, @maplibre/maplibre-gl-style-spec, earcut, kdbush, potpack, quickselect, tinyqueue (ISC); @mapbox/tiny-sdf, @mapbox/unitbezier (BSD-2-Clause); @mapbox/vector-tile, pbf (BSD-3-Clause); @maplibre/mlt (MIT OR Apache-2.0); @maplibre/vt-pbf, bidi-js, gl-matrix, murmurhash-js, @mapbox/jsonlint-lines-primitives, json-stringify-pretty-compact and others (MIT) | | see left | inside the MapLibre bundle | `THIRD-PARTY-LICENSES.txt` (generated) |
 | Apache ECharts (`echarts`), © The Apache Software Foundation – diagrams (`Core\Charts`, engine `echarts`), tree-shaken: line, bar, pie, canvas | 6.1.0 | Apache-2.0 | `public/assets/js/charts-echarts.mjs` | `public/assets/vendor/echarts/LICENSE.txt`, `NOTICE.txt` |
 | – bundled: `zrender` 6.1.0 (BSD-3-Clause), `tslib` 2.3.0 (0BSD) | | see left | inside `charts-echarts.mjs` | `public/assets/vendor/echarts/THIRD-PARTY-LICENSES.txt` (generated) |
@@ -106,14 +106,16 @@ Installed from `kits/frameworks/package.json` and copied/built by `kits/framewor
 
 ### 1.3 Components bundled inside PDF.js (`public/assets/vendor/pdfjs/`)
 
+Code that must match the PDF.js version (`pdf.min.mjs`, `pdf.worker.min.mjs`, `wasm/`) lies in `{version}/` (e.g. `6.5.438/`); data files stay at the top level.
+
 | Component | License | License text |
 |---|---|---|
 | CMaps (`cmaps/*.bcmap`, not bundled – only after `php bin/console pdfjs:cmaps`), © 1990-2009 Adobe Systems Incorporated | BSD-3-Clause-style (Adobe) | `cmaps/LICENSE` |
 | Foxit standard fonts (`standard_fonts/Foxit*.pfb`), © 2014 PDFium Authors | BSD-3-Clause | `standard_fonts/LICENSE_FOXIT` |
 | Liberation Sans (`standard_fonts/LiberationSans-*.ttf`), © 2007-2011 Red Hat, Inc. | GNU GPL v2 with font embedding exception (Red Hat Liberation font license) | `standard_fonts/LICENSE_LIBERATION` |
-| JBIG2 decoder (`wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `wasm/LICENSE_JBIG2`, `wasm/LICENSE_PDFJS_JBIG2` |
-| OpenJPEG (`wasm/openjpeg*`); PDF.js wrapper © 2024 Mozilla Foundation | BSD-2-Clause; wrapper BSD | `wasm/LICENSE_OPENJPEG`, `wasm/LICENSE_PDFJS_OPENJPEG` |
-| qcms (`wasm/qcms_bg.wasm`), © 2009-2024 Mozilla Corporation, © 1998-2007 Marti Maria | MIT | `wasm/LICENSE_QCMS`, `wasm/LICENSE_PDFJS_QCMS` |
+| JBIG2 decoder (`{version}/wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `{version}/wasm/LICENSE_JBIG2`, `{version}/wasm/LICENSE_PDFJS_JBIG2` |
+| OpenJPEG (`{version}/wasm/openjpeg*`); PDF.js wrapper © 2024 Mozilla Foundation | BSD-2-Clause; wrapper BSD | `{version}/wasm/LICENSE_OPENJPEG`, `{version}/wasm/LICENSE_PDFJS_OPENJPEG` |
+| qcms (`{version}/wasm/qcms_bg.wasm`), © 2009-2024 Mozilla Corporation, © 1998-2007 Marti Maria | MIT | `{version}/wasm/LICENSE_QCMS`, `{version}/wasm/LICENSE_PDFJS_QCMS` |
 | ICC colour profile (`iccs/*.icc`) | CC0-1.0 | `iccs/LICENSE` |
 
 The Liberation fonts are separate font files that PDF.js loads to render PDFs without embedded fonts. They are not

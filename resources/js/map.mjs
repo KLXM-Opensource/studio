@@ -19,7 +19,7 @@ function loadLib(cfg) {
     l.dataset.maplibreCss = '';
     document.head.append(l);
   }
-  lib = import(cfg.vendor + 'maplibre-gl.mjs');
+  lib = import(cfg.lib);   // Version im Pfad (Core\Maps::lib()) – nie eine zwischengespeicherte ältere MapLibre-Datei
   return lib;
 }
 

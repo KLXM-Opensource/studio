@@ -3,10 +3,13 @@
  * Seiten werden erst gerendert, wenn sie in Sichtweite kommen (schnell auch bei langen PDFs).
  * Scharfe Darstellung auf Retina-Displays, markierbarer Text (Textebene), Zoom, Seitennavigation.
  */
+// tools/build.mjs setzt die Version in den Pfad (vendor/pdfjs/{version}/pdf.min.mjs) – neue pdf.js-Version = neue Adressen,
+// der Browser mischt nie eine zwischengespeicherte alte Hauptdatei mit neuem Worker/WASM
 import * as pdfjs from '../vendor/pdfjs/pdf.min.mjs';
 
 const base = new URL('../vendor/pdfjs/', import.meta.url).href;
-pdfjs.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.mjs';
+const code = base + pdfjs.version + '/';   // Worker und WASM gehören zur Version; Schriften, ICC, CMaps bleiben in base
+pdfjs.GlobalWorkerOptions.workerSrc = code + 'pdf.worker.min.mjs';
 
 const $ = s => document.querySelector(s);
 const doc = $('[data-pdf]'), status = $('[data-status]');
@@ -27,7 +30,7 @@ async function start() {
       url: doc.dataset.pdf,
       cMapUrl: base + 'cmaps/', cMapPacked: true,
       standardFontDataUrl: base + 'standard_fonts/',
-      wasmUrl: base + 'wasm/', iccUrl: base + 'iccs/',
+      wasmUrl: code + 'wasm/', iccUrl: base + 'iccs/',
       isEvalSupported: false,
     }).promise;
   } catch (e) {

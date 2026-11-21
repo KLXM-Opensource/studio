@@ -47,6 +47,38 @@ const copy = (from, to) => {
   fs.copyFileSync(from, to);
   console.log('  vendor  ' + path.relative(ROOT, to));
 };
+const pkgVersion = pkg => JSON.parse(fs.readFileSync(nm(pkg, 'package.json'), 'utf8')).version;
+/**
+ * Versionierte Vendor-Ordner (public/assets/vendor/{paket}/{version}/): Module, die der Browser zur Laufzeit nachlädt
+ * (MapLibre, PDF.js samt Worker und WASM), liegen unter der Paketversion. /assets/ wird ein Jahr „immutable“ zwischengespeichert –
+ * eine neue Version bekommt so neue Adressen statt alte Dateinamen wiederzuverwenden (sonst mischt der Browser alte
+ * Hauptdatei und neuen Worker). Ältere Versionsordner werden entfernt.
+ */
+function versionDir(base, ver) {
+  if (fs.existsSync(base)) {
+    for (const d of fs.readdirSync(base)) {
+      if (/^\d+\.\d+\.\d+/.test(d) && d !== ver) fs.rmSync(path.join(base, d), { recursive: true, force: true });
+    }
+  }
+  const dir = path.join(base, ver);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(base, 'VERSION'), ver + '\n');
+  return dir;
+}
+const VENDOR_VERSIONS = { maplibre: () => pkgVersion('maplibre-gl'), pdfjs: () => pkgVersion('pdfjs-dist') };
+
+/**
+ * import '../vendor/{maplibre|pdfjs}/datei.mjs' in resources/js → '../vendor/{paket}/{version}/datei.mjs' (extern, nicht gebündelt)
+ */
+const vendorVersioned = {
+  name: 'vendor-versioned',
+  setup(b) {
+    b.onResolve({ filter: /^\.\.\/vendor\/(maplibre|pdfjs)\/[^/]+\.mjs$/ }, args => {
+      const [, pkg, file] = args.path.match(/^\.\.\/vendor\/([^/]+)\/(.+)$/);
+      return { path: `../vendor/${pkg}/${VENDOR_VERSIONS[pkg]()}/${file}`, external: true };
+    });
+  },
+};
 
 /**
  * Lizenztexte der Abhängigkeiten, die ein Vendor-Bundle einbettet (z. B. earcut in MapLibre, codex-tooltip in Editor.js):
@@ -107,32 +139,41 @@ async function vendors() {
   copy(nm('echarts/NOTICE'), path.join(ec, 'NOTICE.txt'));
   bundledLicenses('echarts', path.join(ec, 'THIRD-PARTY-LICENSES.txt'));
   // MapLibre GL (Karten; lädt Kacheln über den eigenen Proxy /proxy/ofm)
+  // Module unter vendor/maplibre/{version}/ (Core\Maps::lib()); der Worker liegt daneben (MapLibre hängt ?v= an).
+  // Die Dateien direkt in vendor/maplibre/ (maplibre-gl.mjs, -shared.mjs, -worker.mjs) sind der eingefrorene Stand 6.11.2
+  // für Seiten, die vor der Umstellung geladen wurden (alte Hauptdatei im Browser-Zwischenspeicher) – der Build fasst sie
+  // nicht an; entfernen frühestens ein Jahr nach der Umstellung (Ende 2027).
   const ml = path.join(PUB, 'assets/vendor/maplibre');
+  const mlDir = versionDir(ml, VENDOR_VERSIONS.maplibre());
   for (const f of ['maplibre-gl.mjs', 'maplibre-gl-shared.mjs', 'maplibre-gl-worker.mjs', 'maplibre-gl.css']) {
-    copy(nm('maplibre-gl/dist', f), path.join(ml, f));
+    const src = nm('maplibre-gl/dist', f);
+    if (!fs.existsSync(src) || fs.statSync(src).size === 0) continue;   // shared ist seit 6.x leer
+    const out = path.join(f.endsWith('.css') ? ml : mlDir, f);          // CSS: asset() versioniert per ?v=
+    copy(src, out);
     // Verweise auf nicht mitgelieferte Source-Maps entfernen (vermeidet 404 in den Entwicklertools)
-    const out = path.join(ml, f);
     fs.writeFileSync(out, fs.readFileSync(out, 'utf8').replace(/\n?\/[/*]# sourceMappingURL=\S+(\s*\*\/)?\s*$/, '\n'));
   }
   copy(nm('maplibre-gl/LICENSE.txt'), path.join(ml, 'LICENSE.txt'));
   bundledLicenses('maplibre-gl', path.join(ml, 'THIRD-PARTY-LICENSES.txt'));
 
   // Mozilla PDF.js (Viewer für PDF-Dateien)
+  // Code (pdf.min.mjs, Worker, WASM – passen nur zusammen) unter vendor/pdfjs/{version}/ (VERSION daneben);
+  // Daten ohne Codebezug (standard_fonts, iccs, cmaps) bleiben in vendor/pdfjs/
   const pdf = path.join(PUB, 'assets/vendor/pdfjs');
-  copy(nm('pdfjs-dist/build/pdf.min.mjs'), path.join(pdf, 'pdf.min.mjs'));
-  copy(nm('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(pdf, 'pdf.worker.min.mjs'));
+  const pdfDir = versionDir(pdf, VENDOR_VERSIONS.pdfjs());
+  for (const f of ['pdf.min.mjs', 'pdf.worker.min.mjs', 'wasm']) fs.rmSync(path.join(pdf, f), { recursive: true, force: true });  // Ablage vor der Umstellung
+  copy(nm('pdfjs-dist/build/pdf.min.mjs'), path.join(pdfDir, 'pdf.min.mjs'));
+  copy(nm('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(pdfDir, 'pdf.worker.min.mjs'));
   copy(nm('pdfjs-dist/LICENSE'), path.join(pdf, 'LICENSE.txt'));
   // QuickJS (wasm/quickjs-eval.*) braucht nur pdf.sandbox.mjs (Skripte in PDF-Formularen, Viewer von pdf.js) – den liefern wir
   // nicht aus (resources/js/pdfviewer.mjs nutzt pdf.min.mjs ohne Skripte), daher weg: 475 KB weniger
   const skip = f => /quickjs/i.test(path.basename(f));
-  fs.rmSync(path.join(pdf, 'wasm'), { recursive: true, force: true });
   // cmaps (1,6 MB, nur für chinesische/japanische/koreanische PDFs ohne eingebettete Schrift) liefern wir nicht aus –
   // bei Bedarf: php bin/console pdfjs:cmaps (lädt sie einmal passend zur Version nach public/assets/vendor/pdfjs/cmaps)
-  fs.writeFileSync(path.join(pdf, 'VERSION'), JSON.parse(fs.readFileSync(nm('pdfjs-dist/package.json'), 'utf8')).version + '\n');
-  for (const dir of ['standard_fonts', 'wasm', 'iccs']) {
+  for (const [dir, to] of [['standard_fonts', pdf], ['wasm', pdfDir], ['iccs', pdf]]) {
     if (fs.existsSync(nm('pdfjs-dist', dir))) {
-      fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true, filter: f => !skip(f) });
-      console.log('  vendor  ' + path.relative(ROOT, path.join(pdf, dir)) + '/');
+      fs.cpSync(nm('pdfjs-dist', dir), path.join(to, dir), { recursive: true, filter: f => !skip(f) });
+      console.log('  vendor  ' + path.relative(ROOT, path.join(to, dir)) + '/');
     }
   }
 }
@@ -307,7 +348,7 @@ const options = ([src, outdir]) => {
   // Kern-Helfer für Erweiterungen: import … from 'klxm-studio/_i18n.js' → resources/js/_i18n.js (mitgebündelt)
   alias: { 'klxm-studio': path.join(ROOT, 'resources/js'), ...(extra.alias ?? {}) },
   // Teile von admin.js: gemeinsame Module aus admin.js statt Kopie (adminShared)
-  plugins: isAdminPart(src) ? [adminShared] : [],
+  plugins: isAdminPart(src) ? [vendorVersioned, adminShared] : [vendorVersioned],
   legalComments: 'none',
   logLevel: 'warning',
   };
